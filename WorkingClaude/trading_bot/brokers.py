@@ -83,6 +83,28 @@ def _fnum(x):
         return None
 
 
+# Mã sàn THẬT trong payload DNSE là `marketId`, không phải `exchange`/`market`/`floorcode`.
+# ĐO 43 mã ngày 2026-08-15 (mọi mã từng xuất hiện ở lệnh MUA trong 97 plan + đối chứng UPCOM):
+# payload KHÔNG chứa bất kỳ key nào trong ba key cũ ⇒ `qget(...)` luôn rơi về `default="HOSE"`
+# cho **43/43 mã**, kể cả SHS/MBS (HNX) và DRI/SCL/TV1 (UPCOM). Đó là fail-OPEN: đoán sai một
+# cách im lặng thay vì từ chối.
+#
+# Hệ quả đã cắn thật 2026-07-01 và ĐÃ được ghi nhận: SHS/MBS bị DNSE từ chối **1.494 lần**
+# ("Invalid price lot") vì `_limit_price` làm tròn theo bước giá HOSE. Lúc đó chữa ở ngọn bằng
+# `Executor._retry_tick_mismatch()` (thử-sai rồi học) với lý do ghi thẳng trong
+# `tick_retry_selfcheck.py`: *"no guessing the live JSON field name"*. Nay tên trường đã ĐO
+# được, nên sửa tận gốc; cơ chế retry GIỮ NGUYÊN làm lưới an toàn.
+#
+# Kiểm chéo bằng một tín hiệu TRỰC GIAO (không phải cùng một trường): biên độ giá thật đo từ
+# `q.ceiling/q.ref − 1` = 7% / 10% / 15% khớp ánh xạ này ở **43/43 mã**.
+MARKET_ID_TO_EXCHANGE = {"STO": "HOSE", "STX": "HNX", "UPX": "UPCOM"}
+
+# Biên độ dao động giá theo sàn (quy chế giao dịch HOSE/HNX/UPCOM). Dùng làm phép kiểm TRỰC
+# GIAO cho `marketId`: nếu `q.ceiling/q.ref − 1` không khớp biên độ của sàn vừa suy ra thì
+# snapshot không nhất quán ⇒ người gọi phải fail-closed, không được đoán.
+EXCHANGE_BAND_PCT = {"HOSE": 0.07, "HNX": 0.10, "UPCOM": 0.15}
+
+
 class Quote:
     """Snapshot giá chuẩn hóa từ payload instrument PHS (mọi giá VND)."""
 
@@ -90,7 +112,16 @@ class Quote:
         self.raw = raw
         p = lambda *n: normalize_price_vnd(_fnum(qget(raw, *n)))
         self.symbol = qget(raw, "symbol", "instrument", "code", "sym")
-        self.exchange = qget(raw, "exchange", "market", "floorcode", default="HOSE")
+        # `market_id` = mã sàn THÔ của feed (STO/STX/UPX). Giữ lại nguyên bản để người đọc log
+        # truy được kết luận về sàn đến từ đâu, thay vì chỉ thấy nhãn đã chuẩn hoá.
+        self.market_id = qget(raw, "marketid", "market_id")
+        _mapped = MARKET_ID_TO_EXCHANGE.get(str(self.market_id or "").strip().upper())
+        _explicit = qget(raw, "exchange", "market", "floorcode")
+        # `exchange_known` là thứ MỌI cổng fail-closed phải hỏi. `exchange` vẫn giữ mặc định
+        # "HOSE" để đường tính bước giá (`_limit_price` + retry học sàn) không đổi hành vi khi
+        # feed câm — đổi cái đó là một thay đổi khác, không thuộc phạm vi sửa lỗi này.
+        self.exchange = _mapped or _explicit or "HOSE"
+        self.exchange_known = bool(_mapped or _explicit)
         self.last = p("lastprice", "last", "matchprice", "closeprice", "close", "price")
         self.ref = p("refprice", "reference", "basicprice", "referenceprice",
                      "priorcloseprice", "ref")

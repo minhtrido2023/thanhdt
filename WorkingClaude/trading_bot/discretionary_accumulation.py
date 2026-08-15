@@ -19,7 +19,8 @@ KHÔNG chạm kế toán V2.4 (BAL/LAG/CAPIT/PARK). Book cố định = DISCRETI
 import datetime as dt
 import math
 
-from .no_chase_ceiling import RULE_A, rule_a_ceiling
+from .no_chase_ceiling import (ANCHOR_BASIS_OFFICIAL_REF, EXCHANGE_BAND_PCT,
+                               RULE_A, rule_a_ceiling)
 
 BOOK = "DISCRETIONARY_SPECIAL"
 
@@ -205,7 +206,8 @@ def _as_date(x):
 
 
 def resolve_price_band(state, anchor_prices=None, latest_price=None,
-                       anchor_dates=None, plan_date=None):
+                       anchor_dates=None, plan_date=None, anchor_basis=None,
+                       anchor_exchange=None):
     """→ (no_chase_ceiling, resting_limit, info) — band GIÁ dùng cho phiên này.
 
     MẶC ĐỊNH (không truyền `anchor_prices`, hoặc cờ tắt) trả về ĐÚNG band cố định trong
@@ -225,8 +227,9 @@ def resolve_price_band(state, anchor_prices=None, latest_price=None,
     Trần động có thể HẠ trần xuống khi anchor đi xuống — đó là ĐÚNG luật, không phải lỗi:
     luật đối xứng, và hạ trần chỉ làm mua rẻ hơn/ít hơn, không bao giờ mua đắt hơn.
 
-    **LUẬT A** (`dynamic_ceiling.ceiling_rule = "A"`, user chốt 2026-08-15): anchor = giá đóng
-    phiên ĐÃ HOÀN TẤT GẦN NHẤT (`anchor_prices[-1]`), `sessions` KHÔNG được dùng, trần =
+    **LUẬT A** (`dynamic_ceiling.ceiling_rule = "A"`, user chốt 2026-08-15): anchor =
+    **GIÁ THAM CHIẾU CHÍNH THỨC** của phiên `plan_date` (`anchor_prices[-1]`, và caller BẮT BUỘC
+    khai `anchor_basis="official_reference_price"`), `sessions` KHÔNG được dùng, trần =
     `min(rule_a_ceiling(anchor, τ), max_no_chase_ceiling)`. Bắt buộc có `anchor_dates` (cùng
     độ dài `anchor_prices`) và `plan_date`, để khoá bất biến "anchor phải là phiên ĐÃ ĐÓNG
     TRƯỚC ngày thực thi" — chính bất biến #4 của luật A. Thiếu ⇒ fail-safe về band cố định,
@@ -303,6 +306,23 @@ def resolve_price_band(state, anchor_prices=None, latest_price=None,
             return _failsafe(f"luật A: anchor_date {a_date} KHÔNG nằm trước plan_date {p_date} "
                              f"— trần chỉ được neo vào phiên ĐÃ ĐÓNG (bất biến #4)")
         anchor_date = a_date.isoformat()
+        # CƠ SỞ GIÁ — cưỡng chế bằng code, không bằng văn xuôi (§22 coding_guidelines).
+        # SỬA LỖI 2026-08-15 (job Taylor_20260815_034407): anchor của luật A phải là GIÁ THAM
+        # CHIẾU CHÍNH THỨC của phiên `plan_date`, KHÔNG phải giá đóng phiên trước. Hai thứ chỉ
+        # trùng nhau ở HOSE/HNX ngày thường; TV1 — mã DUY NHẤT dùng nhánh này — là **UPCOM**,
+        # nơi tham chiếu là bình quân gia quyền (đo 259 phiên TV1: median lệch 0,389%, p90
+        # 1,333%, max 7,041%). Người gọi PHẢI khai `anchor_basis`; thiếu ⇒ fail-safe về band
+        # cố định, vì không có cách nào nhìn con số mà biết nó thuộc cơ sở nào.
+        a_ex = str(anchor_exchange or "").strip().upper()
+        if a_ex not in EXCHANGE_BAND_PCT:
+            return _failsafe(f"luật A: anchor_exchange={anchor_exchange!r} không thuộc "
+                             f"{sorted(EXCHANGE_BAND_PCT)} — sàn quyết định công thức giá "
+                             f"tham chiếu, không được đoán")
+        if str(anchor_basis or "").strip() != ANCHOR_BASIS_OFFICIAL_REF:
+            return _failsafe(
+                f"luật A: anchor_basis={anchor_basis!r} ≠ {ANCHOR_BASIS_OFFICIAL_REF!r} — "
+                f"anchor PHẢI là giá tham chiếu chính thức của phiên plan_date (giá đóng cửa "
+                f"SAI trên UPCOM và ở mọi ngày GDKHQ)")
 
     anchor = sum(prices) / len(prices)          # luật A: n=1 ⇒ đúng giá phiên đã đóng gần nhất
     if is_rule_a:
@@ -343,13 +363,15 @@ def resolve_price_band(state, anchor_prices=None, latest_price=None,
         # fail-OPEN, đúng thứ nguy hiểm nhất có thể làm ở đây.
         info["rule_a_provenance"] = None if capped else {
             "ceiling_rule": RULE_A, "ceiling_anchor_price": float(anchor),
-            "ceiling_anchor_date": anchor_date, "ceiling_tau": float(tau)}
+            "ceiling_anchor_date": anchor_date, "ceiling_tau": float(tau),
+            "ceiling_anchor_basis": ANCHOR_BASIS_OFFICIAL_REF,
+            "ceiling_exchange": str(anchor_exchange).strip().upper()}
     return float(ceiling), float(resting), info
 
 
 def compute_session_order(state, filled_qty, prev_turnover_vnd, prev_price_vnd,
                           plan_date, now_iso, anchor_prices=None, active_nav_vnd=None,
-                          anchor_dates=None):
+                          anchor_dates=None, anchor_basis=None, anchor_exchange=None):
     """Tính lệnh gom cho MỘT phiên (plan_date).
 
     Inputs:
@@ -454,7 +476,8 @@ def compute_session_order(state, filled_qty, prev_turnover_vnd, prev_price_vnd,
     #    mọi trường hợp khác trả đúng band cố định (xem resolve_price_band).
     ceiling, limit_price, band_info = resolve_price_band(
         state, anchor_prices, prev_price_vnd,
-        anchor_dates=anchor_dates, plan_date=plan_date)
+        anchor_dates=anchor_dates, plan_date=plan_date, anchor_basis=anchor_basis,
+        anchor_exchange=anchor_exchange)
     lot = int(state["lot_size"])
     adv_ref = float(state["adv_ref_vnd"])
     cap_pct = float(state["per_session_cap_pct_adv"])

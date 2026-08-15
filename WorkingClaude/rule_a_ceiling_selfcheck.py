@@ -37,7 +37,9 @@ sys.path.insert(0, HERE)
 
 from trading_bot.no_chase_ceiling import (  # noqa: E402
     RULE_A, RULE_A_TAU_DEFAULT, RULE_A_TAU_MAX, BOOKS_WITH_OWN_CEILING_ENGINE,
-    apply_rule_a, resolve_buy_ceiling, rule_a_ceiling)
+    ANCHOR_BASIS_OFFICIAL_REF, EXCHANGE_BAND_PCT, apply_rule_a, check_reference_snapshot,
+    resolve_buy_ceiling, rule_a_ceiling)
+from trading_bot.brokers import EXCHANGE_BAND_PCT as BROKER_BANDS
 from trading_bot.plan import PlannedOrder, load_plan  # noqa: E402
 from trading_bot.config import PLAN_DIR  # noqa: E402
 
@@ -66,7 +68,8 @@ def buy(**over):
 def rule_a_order(anchor=13400.0, tau=RULE_A_TAU_DEFAULT, **over):
     c = math.floor(anchor * (1 + tau))
     o = buy(hard_no_chase_ceiling_vnd=float(c), ceiling_rule=RULE_A,
-            ceiling_anchor_price=anchor, ceiling_anchor_date=ANCHOR_DATE, ceiling_tau=tau)
+            ceiling_anchor_price=anchor, ceiling_anchor_date=ANCHOR_DATE, ceiling_tau=tau,
+            ceiling_anchor_basis=ANCHOR_BASIS_OFFICIAL_REF, ceiling_exchange="HOSE")
     o.update(over)
     return o
 
@@ -174,8 +177,8 @@ check("D17 plan_date rác ⇒ fail-closed về luật cũ", got == 13000.0, f"{g
 
 # ── E. apply_rule_a — PHẠM VI ────────────────────────────────────────────────────────────
 print("\nE. PHẠM VI — chỉ lệnh MUA có entry_anchor_price, book ≠ DISCRETIONARY_SPECIAL")
-ANCH = {"DRI": (13400.0, ANCHOR_DATE), "VNM": (60000.0, ANCHOR_DATE),
-        "TV1": (20100.0, ANCHOR_DATE), "SSI": (24500.0, ANCHOR_DATE)}
+ANCH = {"DRI": (13400.0, ANCHOR_DATE, "UPCOM"), "VNM": (60000.0, ANCHOR_DATE, "HOSE"),
+        "TV1": (20100.0, ANCHOR_DATE, "UPCOM"), "SSI": (24500.0, ANCHOR_DATE, "HOSE")}
 orders = [
     buy(),                                                             # LAG có anchor → ÁP
     buy(id="BUY-SSI-02", ticker="SSI", entry_anchor_price=24450.0, play_type="LAG_LO"),
@@ -204,9 +207,61 @@ check("E6 lệnh BÁN KHÔNG bị đụng", orders[5] == snapshot[5])
 check("E7 mã KHÔNG tra được anchor ⇒ bỏ qua, giữ nguyên luật cũ",
       apply_rule_a([buy(ticker="ZZZ")], {})[0] == 0)
 o_stale = buy()
-apply_rule_a([o_stale], {"DRI": (13400.0, ANCHOR_DATE)}, tau=0.5)
+apply_rule_a([o_stale], {"DRI": (13400.0, ANCHOR_DATE, "UPCOM")}, tau=0.5)
 check("E8 τ ngoài dải ⇒ apply_rule_a KHÔNG gắn nhãn (không sinh plan hỏng)",
       o_stale.get("ceiling_rule") is None, str(o_stale.get("ceiling_rule")))
+
+
+# ── G. CƠ SỞ GIÁ ANCHOR (sửa lỗi 2026-08-15) ─────────────────────────────────────────────
+print("\nG. Cơ sở giá anchor — giá tham chiếu CHÍNH THỨC, không phải giá đóng cửa")
+o = rule_a_order()
+o.pop("ceiling_anchor_basis")
+got, inf = resolve_buy_ceiling(o, plan_date=PLAN_DATE)
+check("G1 plan VINTAGE CŨ (không khai ceiling_anchor_basis) ⇒ FAIL-CLOSED về luật cũ",
+      got == 13000.0 and inf["mode"] == "rule_a_failsafe", f"{got} / {inf.get('mode')}")
+o = rule_a_order(ceiling_anchor_basis="prev_close")
+got, _ = resolve_buy_ceiling(o, plan_date=PLAN_DATE)
+check("G2 cơ sở giá SAI ('prev_close') ⇒ FAIL-CLOSED, không được hưởng trần rộng",
+      got == 13000.0, f"{got}")
+o = rule_a_order(ceiling_exchange="XXX")
+got, _ = resolve_buy_ceiling(o, plan_date=PLAN_DATE)
+check("G3 sàn không hợp lệ ⇒ FAIL-CLOSED (sàn quyết định công thức tham chiếu)",
+      got == 13000.0, f"{got}")
+check("G4 EXCHANGE_BAND_PCT khớp bản trong brokers.py (một chính sách, một số)",
+      EXCHANGE_BAND_PCT == BROKER_BANDS, f"{EXCHANGE_BAND_PCT} vs {BROKER_BANDS}")
+n2, _ = apply_rule_a([buy(ticker="DRI")], {"DRI": (13400.0, ANCHOR_DATE, "XXX")})
+check("G5 apply_rule_a KHÔNG gắn nhãn khi sàn không xác định", n2 == 0, f"n={n2}")
+o_ok = buy(ticker="DRI")
+apply_rule_a([o_ok], {"DRI": (13400.0, ANCHOR_DATE, "upcom")})
+check("G6 apply_rule_a ghi provenance cơ sở giá + sàn (chuẩn hoá hoa)",
+      o_ok["ceiling_anchor_basis"] == ANCHOR_BASIS_OFFICIAL_REF
+      and o_ok["ceiling_exchange"] == "UPCOM", str(o_ok.get("ceiling_exchange")))
+
+print("\nG'. check_reference_snapshot — 3 cổng G1/G2/G3, fail-closed mọi hướng")
+ok, i = check_reference_snapshot(20000.0, 23000.0, 17000.0, "UPCOM", True,
+                                 prev_low=19500.0, prev_high=20500.0)
+check("G'1 snapshot UPCOM hợp lệ (biên ±15%, ref ∈ biên phiên trước) ⇒ NHẬN", ok, i.get("reason"))
+ok, i = check_reference_snapshot(20000.0, 23000.0, 17000.0, "HOSE", True)
+check("G'2 biên ±15% nhưng khai sàn HOSE (±7%) ⇒ CHẶN — phép kiểm TRỰC GIAO bắt sai sàn",
+      not ok and i["gate"] == "G2", str(i.get("gate")))
+ok, i = check_reference_snapshot(20000.0, 23000.0, 17000.0, "HOSE", False)
+check("G'3 sàn KHÔNG xác định được (exchange_known=False) ⇒ CHẶN, không đoán 'HOSE'",
+      not ok and i["gate"] == "G1", str(i.get("gate")))
+ok, i = check_reference_snapshot(20000.0, 23000.0, 17000.0, "UPCOM", True,
+                                 prev_low=21000.0, prev_high=22000.0)
+check("G'4 tham chiếu NGOÀI biên giá phiên trước ⇒ CHẶN (bắt snapshot CŨ)",
+      not ok and i["gate"] == "G3", str(i.get("gate")))
+for bad in (None, 0, -1, "abc", float("nan")):
+    ok, _ = check_reference_snapshot(bad, 23000.0, 17000.0, "UPCOM", True)
+    check(f"G'5 ref rác ({bad!r}) ⇒ CHẶN", not ok)
+ok, i = check_reference_snapshot(20000.0, None, 17000.0, "UPCOM", True)
+check("G'6 thiếu giá trần sống ⇒ CHẶN (không kiểm chéo được biên độ)",
+      not ok and i["gate"] == "G2", str(i.get("gate")))
+ok, i = check_reference_snapshot(19600.0, 20972.0, 18228.0, "HOSE", True,
+                                 prev_low=24000.0, prev_high=25000.0)
+check("G'7 ca SSI ex-right 08-17: tham chiếu 19.600 điều chỉnh, ngoài biên phiên trước "
+      "[24.000; 25.000] ⇒ CHẶN — caller phải xử lý GDKHQ tường minh, không lặng lẽ nhận",
+      not ok and i["gate"] == "G3", str(i.get("gate")))
 
 # ── F. Vòng khép kín qua load_plan() — file plan THẬT trên đĩa ───────────────────────────
 print("\nF. load_plan() — vòng khép kín trên file plan thật (ghi tạm, xoá sau)")

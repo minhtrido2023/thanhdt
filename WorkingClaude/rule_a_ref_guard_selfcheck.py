@@ -21,8 +21,10 @@ from zoneinfo import ZoneInfo
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from trading_bot.no_chase_ceiling import (                  # noqa: E402
+    EXCHANGE_BAND_PCT as NC_BANDS,
     RULE_A_REF_TOL_DEFAULT, check_ref_vs_live, rule_a_ceiling, rule_a_in_force)
 from trading_bot.plan import PlannedOrder, TradePlan, load_plan  # noqa: E402
+from trading_bot.brokers import EXCHANGE_BAND_PCT as BROKER_BANDS, Quote
 from trading_bot.executor import Executor                   # noqa: E402
 from trading_bot.config import DEFAULTS                     # noqa: E402
 
@@ -65,7 +67,7 @@ check("A5 khai 'A' nhưng thiếu anchor → False", rule_a_in_force(mk(anchor=N
 check("A6 nhãn 'a' thường + khoảng trắng vẫn nhận", rule_a_in_force(mk(rule=" a ")) is True)
 
 # ══════════════════════════════════════════════════════════ B. C1 — anchor vs phiên sống
-print("\nB. C1 — anchor luật A phải khớp giá đóng phiên ĐÃ HOÀN TẤT trên feed sống")
+print("\nB. C1 — anchor luật A phải khớp GIÁ THAM CHIẾU phiên đang chạy trên feed sống")
 LIVE = 13000.0
 ok, info = check_ref_vs_live(mk(anchor=LIVE), LIVE, CHASE)
 check("B1 anchor == live → PASS", ok is True and info["check"] == "OK", info["reason"])
@@ -79,10 +81,15 @@ for dev in (0.0101, -0.0101, 0.05, -0.05):
     check(f"B3 lệch {dev:+.2%} (ngoài dung sai) → CHẶN", ok is False and info["check"] == "C1",
           info["reason"][:90])
 
-# Ca THẬT đo được 2026-08-15: SSI — BQ `Price` 24.500 vs DNSE `ohlc` 19.580 (−20%).
-ok, info = check_ref_vs_live(mk("SSI", anchor=24500.0), 19580.0, CHASE)
-check("B4 ca THẬT SSI (BQ 24.500 vs DNSE 19.580) → CHẶN", ok is False and info["check"] == "C1",
-      f"lệch {info['anchor_dev']:+.1%}")
+# Ca THẬT 2026-08-15: SSI **ex-right 2026-08-17** (thưởng CP 20% + cổ tức 1.000đ) ⇒ tham chiếu
+# chính thức (24.500−1.000)/1,2 → tick 50đ = 19.600đ, trong khi giá đóng phiên trước 24.500đ.
+# (Job trước gán nhãn ca này là "feed hỏng" — SAI; đối soát 3 nguồn ở
+# `mike/agents/Taylor/research/upcom_ref_anchor_20260815/README.md` §1.6.)
+# Anchor vintage CŨ (giá đóng) ⇒ trần 25.235đ, cao hơn cả GIÁ TRẦN phiên 20.972đ ⇒ luật A vô
+# hiệu. Cổng phải CHẶN, và bản vá tầng lập plan làm nó không còn sinh ra được anchor đó.
+ok, info = check_ref_vs_live(mk("SSI", anchor=24500.0), 19600.0, CHASE)
+check("B4 ca THẬT SSI ex-right (anchor giá đóng 24.500 vs tham chiếu 19.600) → CHẶN",
+      ok is False and info["check"] == "C1", f"lệch {info['anchor_dev']:+.1%}")
 
 # Sai đơn vị nghìn↔VND (lỗi đã cắn thật trong chính họ nghiên cứu này).
 ok, info = check_ref_vs_live(mk(anchor=13.0), LIVE, CHASE)
@@ -130,7 +137,7 @@ check("C6 cùng ref nhưng chase động 4% → PASS (cổng dùng chase THẬT,
 print("\nD. Thiếu dữ liệu ⇒ FAIL-CLOSED (không có đường nào fail-OPEN)")
 for bad in (None, 0, -1, "abc", float("nan")):
     ok, info = check_ref_vs_live(mk(), bad, CHASE)
-    check(f"D1 live_prev_close={bad!r} → CHẶN", ok is False and info["check"] == "live_unavailable")
+    check(f"D1 live_reference_price={bad!r} → CHẶN", ok is False and info["check"] == "live_unavailable")
 ok, info = check_ref_vs_live(mk(anchor=None), LIVE, CHASE)
 check("D2 thiếu anchor → CHẶN", ok is False)
 o = mk(); o.ref_price = None
@@ -139,50 +146,46 @@ check("D3 thiếu ref_price → CHẶN", ok is False and info["check"] == "C2")
 ok, info = check_ref_vs_live(mk(), LIVE, None)
 check("D4 thiếu chase_pct → CHẶN", ok is False and info["check"] == "C2")
 
-# ═══════════════════════════════════════════════ E. _fetch_prev_close — chọn ĐÚNG bar phiên trước
-print("\nE. Executor._fetch_prev_close — chỉ nhận bar phiên ĐÃ ĐÓNG, lấy từ DNSE (không BQ)")
+# ═══════════════════════════════════ E. Quote — sàn suy từ `marketId`, KHÔNG fail-OPEN nữa
+print("\nE. Quote.exchange / exchange_known — sàn suy từ marketId (bug fail-OPEN 2026-08-15)")
 TODAY = dt.datetime.now(ICT).date()
 
+for mid, want in (("STO", "HOSE"), ("STX", "HNX"), ("UPX", "UPCOM"),
+                  ("upx", "UPCOM"), (" UPX ", "UPCOM")):
+    q = Quote({"symbol": "X", "marketId": mid, "refPrice": 20.0})
+    check(f"E1 marketId={mid!r} → {want}", q.exchange == want and q.exchange_known,
+          f"{q.exchange}/{q.exchange_known}")
 
-def ts_of(d):
-    return int(dt.datetime.combine(d, dt.time(9, 0)).replace(tzinfo=ICT).timestamp())
+q = Quote({"symbol": "TV1", "marketId": "UPX", "refPrice": 20.0, "ceiling": 23.0,
+           "floor": 17.0})
+check("E2 mã UPCOM THẬT (payload đúng khuôn DNSE đo 2026-08-15) không còn bị gọi là HOSE",
+      q.exchange == "UPCOM" and q.ref == 20000.0, f"{q.exchange} ref={q.ref}")
+
+q = Quote({"symbol": "X", "refPrice": 20.0})          # payload KHÔNG có key sàn nào
+check("E3 feed câm → exchange vẫn 'HOSE' (đường tính bước giá không đổi hành vi) NHƯNG "
+      "exchange_known=False ⇒ mọi cổng fail-closed biết mà từ chối",
+      q.exchange == "HOSE" and q.exchange_known is False, f"{q.exchange}/{q.exchange_known}")
+
+q = Quote({"symbol": "X", "marketId": "ZZZ", "refPrice": 20.0})
+check("E4 marketId lạ → KHÔNG ánh xạ bừa; exchange_known=False", q.exchange_known is False)
+
+q = Quote({"symbol": "X", "exchange": "HNX", "refPrice": 20.0})
+check("E5 feed nào có sẵn key 'exchange' vẫn dùng được (tương thích ngược)",
+      q.exchange == "HNX" and q.exchange_known, f"{q.exchange}")
+
+check("E6 biên độ theo sàn khớp giữa brokers.py và no_chase_ceiling.py",
+      BROKER_BANDS == NC_BANDS, f"{BROKER_BANDS} vs {NC_BANDS}")
+
+# ══════════════════════════════════════════ F. Executor._rule_a_ref_guard — mốc sống = q.ref
+print("\nF. Executor._rule_a_ref_guard — mốc sống là GIÁ THAM CHIẾU (q.ref), không phải ohlc")
 
 
 class FakeClient:
-    def __init__(self, bars, boom=False):
-        self.bars, self.boom, self.calls = bars, boom, 0
+    """Chỉ cần TỒN TẠI thuộc tính `ohlc` — cổng dùng nó làm dấu hiệu 'feed sàn thật',
+    không còn gọi nó để lấy giá (đó chính là thay đổi của bản vá)."""
 
-    def ohlc(self, symbol, resolution="1D", **kw):
-        self.calls += 1
-        if self.boom:
-            raise RuntimeError("DNSE 503")
-        return {"t": [ts_of(d) for d, _ in self.bars], "c": [c for _, c in self.bars]}
-
-
-d1, d2 = TODAY - dt.timedelta(days=4), TODAY - dt.timedelta(days=1)
-px, why = Executor._fetch_prev_close(FakeClient([(d1, 12.9), (d2, 13.3), (TODAY, 13.9)]), "DRI")
-check("E1 BỎ nến HÔM NAY đang chạy, lấy phiên đã đóng", px == 13300.0, f"{px} ({why})")
-px, _ = Executor._fetch_prev_close(FakeClient([(d1, 12.9), (d2, 13.3)]), "DRI")
-check("E2 không có nến hôm nay → vẫn lấy phiên gần nhất", px == 13300.0)
-px, why = Executor._fetch_prev_close(FakeClient([(TODAY, 13.9)]), "DRI")
-check("E3 CHỈ có nến hôm nay → None (fail-closed, không lấy giá đang đuổi làm mốc)",
-      px is None, why)
-px, why = Executor._fetch_prev_close(FakeClient([], boom=True), "DRI")
-check("E4 ohlc ném lỗi → (None, lý do) chứ không nổ lên trên", px is None, why)
-
-
-class BadShape:
     def ohlc(self, *a, **k):
-        return {"t": [1, 2], "c": [1.0]}
-
-
-px, why = Executor._fetch_prev_close(BadShape(), "DRI")
-check("E5 mảng t↔c lệch độ dài → None", px is None, why)
-px, _ = Executor._fetch_prev_close(FakeClient([(d2, 13300.0)]), "DRI")
-check("E6 feed trả sẵn đơn vị VND → normalize_price_vnd giữ nguyên", px == 13300.0)
-
-# ══════════════════════════════════════════════════ F. Executor — cache + bỏ qua khi không có feed
-print("\nF. Executor._live_prev_close / _rule_a_ref_guard")
+        raise AssertionError("cổng KHÔNG được gọi ohlc nữa — mốc sống phải là q.ref")
 
 
 class FakeBroker:
@@ -193,6 +196,12 @@ class FakeBroker:
 
     def get_quote(self, t):
         return None
+
+
+def qref(px, ex="UPCOM"):
+    return Quote({"symbol": "DRI", "marketId": {"HOSE": "STO", "HNX": "STX",
+                                                "UPCOM": "UPX"}[ex],
+                  "refPrice": px, "ceiling": px * 1.15, "floor": px * 0.85})
 
 
 def mk_exec(orders, client=None, vol_scale=False):
@@ -207,42 +216,54 @@ def mk_exec(orders, client=None, vol_scale=False):
     return Executor(plan, FakeBroker(client), cfg)
 
 
-cl = FakeClient([(d2, 13.3)])
-ex = mk_exec([mk()], cl)
-check("F1 gọi 2 lần chỉ tốn 1 lời gọi ohlc (cache theo mã)",
-      ex._live_prev_close("DRI")[0] == 13300.0 and ex._live_prev_close("DRI")[0] == 13300.0
-      and cl.calls == 1, f"calls={cl.calls}")
-
 ex_nofeed = mk_exec([mk()], None)
-check("F2 broker KHÔNG có client ohlc (paper/sim) → cổng BỎ QUA, không chặn",
-      ex_nofeed._rule_a_ref_guard(mk()) is None)
+check("F1 broker KHÔNG có client ohlc (paper/sim) → cổng BỎ QUA, không chặn",
+      ex_nofeed._rule_a_ref_guard(mk(), qref(13000.0)) is None)
 
-ex2 = mk_exec([mk()], FakeClient([(d2, 13.0)]))   # 13.000đ = ĐÚNG anchor mặc định của mk()
-check("F3 anchor khớp phiên trước → cổng cho qua", ex2._rule_a_ref_guard(mk()) is None)
-bad = ex2._rule_a_ref_guard(mk(anchor=15000.0, ref=15000.0))
-check("F4 anchor lệch +15% → cổng CHẶN, trả (reason, info)",
+ex2 = mk_exec([mk()], FakeClient())
+check("F2 anchor khớp giá tham chiếu sống → cổng cho qua "
+      "(và KHÔNG gọi ohlc — FakeClient.ohlc nổ nếu bị gọi)",
+      ex2._rule_a_ref_guard(mk(), qref(13000.0)) is None)
+
+bad = ex2._rule_a_ref_guard(mk(anchor=15000.0, ref=15000.0), qref(13000.0))
+check("F3 anchor lệch +15% so tham chiếu sống → CHẶN, trả (reason, info)",
       bad is not None and bad[1]["check"] == "C1", bad[0][:80] if bad else "")
-check("F5 lệnh KHÔNG luật A đi qua cổng không đổi gì",
-      ex2._rule_a_ref_guard(mk(rule=None)) is None)
 
-ex3 = mk_exec([mk()], FakeClient([], boom=True))
-bad = ex3._rule_a_ref_guard(mk())
-check("F6 feed lỗi trên broker CÓ ohlc → CHẶN (fail-closed), không phải bỏ qua",
+check("F4 lệnh KHÔNG luật A đi qua cổng không đổi gì",
+      ex2._rule_a_ref_guard(mk(rule=None), qref(99999.0)) is None)
+
+bad = ex2._rule_a_ref_guard(mk(), None)
+check("F5 KHÔNG có quote → CHẶN (fail-closed), không phải bỏ qua",
       bad is not None and bad[1]["check"] == "live_unavailable", bad[0][:70] if bad else "")
 
+bad = ex2._rule_a_ref_guard(mk(), Quote({"symbol": "DRI", "marketId": "UPX"}))
+check("F6 quote có nhưng THIẾU ref → CHẶN", bad is not None
+      and bad[1]["check"] == "live_unavailable")
+
 # Cổng đọc dung sai từ cfg (không hardcode) — hạ về 0,1% thì ca 0,46% phải lật sang CHẶN.
-ex4 = mk_exec([mk()], FakeClient([(d2, 13.0)]))
+ex4 = mk_exec([mk()], FakeClient())
 ex4.cfg["rule_a_ref_tol_pct"] = 0.001
 check("F7 dung sai lấy từ cfg (hạ 0,1% ⇒ ca lệch 0,46% lật sang CHẶN)",
-      ex4._rule_a_ref_guard(mk(anchor=13060.0, ref=13060.0)) is not None)
+      ex4._rule_a_ref_guard(mk(anchor=13060.0, ref=13060.0), qref(13000.0)) is not None)
 
 # Đường vol-scale THẬT của production (`chase_cap_vol_scale_enabled=True`): chase = clamp(
 # 2×rvol_20d, 1,5%, 4%), đọc rvol từ cache BQ local. Không assert lên giá trị rvol (nó là
 # trạng thái SỐNG — §23 hệ luận 1), chỉ đòi cổng vẫn chạy được và vẫn cho lệnh ĐÚNG đi qua.
-ex5 = mk_exec([mk()], FakeClient([(d2, 13.0)]), vol_scale=True)
+ex5 = mk_exec([mk()], FakeClient(), vol_scale=True)
 check("F8 bật vol-scale như production → cổng vẫn cho lệnh anchor-đúng đi qua",
-      ex5._rule_a_ref_guard(mk()) is None,
+      ex5._rule_a_ref_guard(mk(), qref(13000.0)) is None,
       f"chase thật của DRI trên máy này = {ex5._buy_chase_pct('DRI'):.2%}")
+
+# CA CHỨNG MINH GIÁ TRỊ CỦA BẢN VÁ: cùng một mã UPCOM, giá tham chiếu (bình quân gia quyền)
+# lệch −3,376% so với giá đóng — đúng số đo SCL 2026-08-14. Anchor ĐÚNG cơ sở thì lọt; anchor
+# theo giá ĐÓNG (vintage cũ) thì bị chặn. Đây là lý do đổi mốc, phát biểu bằng test.
+SCL_REF, SCL_CLOSE = 22900.0, 23700.0
+check("F9 UPCOM: anchor = GIÁ THAM CHIẾU 22.900 ⇒ ĐI QUA",
+      ex2._rule_a_ref_guard(mk(ticker="SCL", anchor=SCL_REF, ref=SCL_REF),
+                            qref(SCL_REF)) is None)
+bad = ex2._rule_a_ref_guard(mk(ticker="SCL", anchor=SCL_CLOSE, ref=SCL_CLOSE), qref(SCL_REF))
+check("F10 UPCOM: anchor = giá ĐÓNG 23.700 (vintage cũ) ⇒ BỊ CHẶN — lệch 3,49% > 1%",
+      bad is not None and bad[1]["check"] == "C1", bad[0][:90] if bad else "")
 
 # ═════════════════════════════════════════════ G. §5b — selfcheck KHÔNG được bắn event bus thật
 print("\nG. §5b — không rò event lên bus production khi chạy selfcheck")
@@ -278,8 +299,8 @@ for path in sorted(glob.glob(os.path.join(PLAN_DIR, "plan_*.json"))):
         if rule_a_in_force(o):
             n_rule_a += 1
         # Cổng chỉ được ĐỘNG tới lệnh luật A: mọi lệnh khác phải trả None kể cả khi feed hỏng.
-        e = mk_exec([o], FakeClient([], boom=True))
-        if not rule_a_in_force(o) and e._rule_a_ref_guard(o) is not None:
+        e = mk_exec([o], FakeClient())
+        if not rule_a_in_force(o) and e._rule_a_ref_guard(o, qref(1000.0)) is not None:
             n_guard_ran += 1
 check(f"H1 nạp {n_plan} plan thật, {n_buy} lệnh mua — 0 lệnh NGOÀI luật A bị cổng động tới",
       n_guard_ran == 0, f"lệnh luật A trong kho plan hiện tại: {n_rule_a}")

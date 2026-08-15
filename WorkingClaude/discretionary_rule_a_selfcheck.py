@@ -28,6 +28,7 @@ os.environ.setdefault("MIKE_BOT_TEST_MODE", "1")
 
 from trading_bot.discretionary_accumulation import (          # noqa: E402
     compute_session_order, resolve_price_band, validate_state)
+from trading_bot.no_chase_ceiling import ANCHOR_BASIS_OFFICIAL_REF  # noqa: E402
 from trading_bot.no_chase_ceiling import (                    # noqa: E402
     check_ref_vs_live, resolve_buy_ceiling, rule_a_ceiling, rule_a_in_force)
 
@@ -74,8 +75,11 @@ def st(rule=None, **over):
     return s
 
 
-def band_a(state, anchors=ANCHORS, dates=DATES, plan_date=PLAN_DATE, latest=LATEST):
-    return resolve_price_band(state, anchors, latest, anchor_dates=dates, plan_date=plan_date)
+def band_a(state, anchors=ANCHORS, dates=DATES, plan_date=PLAN_DATE, latest=LATEST,
+           basis=ANCHOR_BASIS_OFFICIAL_REF, exchange="UPCOM"):
+    """TV1 = UPCOM (đo từ DNSE `marketId`=UPX, 2026-08-15) — mặc định của mọi ca ở đây."""
+    return resolve_price_band(state, anchors, latest, anchor_dates=dates, plan_date=plan_date,
+                              anchor_basis=basis, anchor_exchange=exchange)
 
 
 print(__doc__.splitlines()[0])
@@ -97,7 +101,9 @@ check("A2 truyền anchor_dates/plan_date vào state CHƯA khai luật A ⇒ TR�
 
 o_old, _ = compute_session_order(st(), 0, 1_500_000_000, LATEST, PLAN_DATE,
                                  f"{PLAN_DATE}T00:00:00", anchor_prices=ANCHORS,
-                                 anchor_dates=DATES, active_nav_vnd=973_647_205)
+                                 anchor_dates=DATES, active_nav_vnd=973_647_205,
+                                 anchor_basis=ANCHOR_BASIS_OFFICIAL_REF,
+                                 anchor_exchange="UPCOM")
 check("A3 lệnh sinh từ nhánh cũ KHÔNG mang nhãn luật A (không provenance rơi vãi)",
       isinstance(o_old, dict) and "ceiling_rule" not in o_old,
       f"khoá ceiling_*: {[k for k in o_old if k.startswith('ceiling_')] if isinstance(o_old, dict) else o_old}")
@@ -129,6 +135,8 @@ check("B5 TÍNH ADAPTIVE: giá tăng ⇒ trần luật A CAO hơn mean-5 (+412đ
 # ...và ĐỐI XỨNG khi giá đi xuống — luật A không phải "luôn nới trần".
 down = [20_500.0, 20_400.0, 20_300.0, 20_200.0, 19_800.0]
 c_dn_a, _, _ = resolve_price_band(st("A"), down, 19_800.0, anchor_dates=DATES,
+                                  anchor_basis=ANCHOR_BASIS_OFFICIAL_REF,
+                                  anchor_exchange="UPCOM",
                                   plan_date=PLAN_DATE)
 c_dn_o, _, _ = resolve_price_band(st(), down, 19_800.0)
 check("B6 ĐỐI XỨNG: giá giảm ⇒ trần luật A THẤP hơn mean-5 (không phải luật nới một chiều)",
@@ -153,6 +161,14 @@ CASES = [
     ("D3 anchor_date rác không parse được", dict(dates=DATES[:-1] + ["hôm-qua"])),
     ("D4 thiếu plan_date", dict(plan_date=None)),
     ("D5 plan_date rác", dict(plan_date="15/08/2026")),
+    # SỬA LỖI 2026-08-15 (job Taylor_20260815_034407): TV1 là mã **UPCOM**, nơi giá tham chiếu
+    # là bình quân gia quyền chứ không phải giá đóng cửa (đo 259 phiên TV1: median lệch 0,389%,
+    # p90 1,333%, max 7,041%). Người gọi phải KHAI cơ sở giá; không khai ⇒ fail-safe.
+    ("D6 KHÔNG khai anchor_basis (vintage cũ dùng giá đóng cửa)", dict(basis=None)),
+    ("D7 anchor_basis SAI ('prev_close')", dict(basis="prev_close")),
+    ("D8 KHÔNG xác định được sàn (feed câm ⇒ Quote.exchange fail-OPEN về 'HOSE')",
+     dict(exchange=None)),
+    ("D9 sàn không hợp lệ", dict(exchange="XXX")),
 ]
 for name, kw in CASES:
     c_f, r_f, i_f = band_a(st("A"), **kw)
@@ -172,7 +188,9 @@ check("D7 ceiling_rule='a' thường ⇒ vẫn nhận (chuẩn hoá hoa/thườn
 print("\nE. Provenance: trần phải TÁI LẬP được ở tầng nạp plan, và KHÔNG khai khi bị kẹp")
 o_a, dec_a = compute_session_order(st("A"), 0, 1_500_000_000, LATEST, PLAN_DATE,
                                    f"{PLAN_DATE}T00:00:00", anchor_prices=ANCHORS,
-                                   anchor_dates=DATES, active_nav_vnd=973_647_205)
+                                   anchor_dates=DATES, active_nav_vnd=973_647_205,
+                                   anchor_basis=ANCHOR_BASIS_OFFICIAL_REF,
+                                 anchor_exchange="UPCOM")
 check("E1 lệnh mang đủ 4 field provenance", isinstance(o_a, dict) and all(
     k in o_a for k in ("ceiling_rule", "ceiling_anchor_price", "ceiling_anchor_date",
                        "ceiling_tau")),
@@ -204,7 +222,9 @@ check("E6 ...và KHÔNG khai provenance (khai vào ⇒ load_plan fail-closed r�
       i_cap.get("rule_a_provenance") is None)
 o_cap, _ = compute_session_order(capped, 0, 1_500_000_000, LATEST, PLAN_DATE,
                                  f"{PLAN_DATE}T00:00:00", anchor_prices=ANCHORS,
-                                 anchor_dates=DATES, active_nav_vnd=973_647_205)
+                                 anchor_dates=DATES, active_nav_vnd=973_647_205,
+                                 anchor_basis=ANCHOR_BASIS_OFFICIAL_REF,
+                                 anchor_exchange="UPCOM")
 check("E7 lệnh khi bị kẹp KHÔNG mang ceiling_rule ⇒ đi nhánh luật cũ, trần vẫn còn nguyên",
       isinstance(o_cap, dict) and "ceiling_rule" not in o_cap
       and int(o_cap["hard_no_chase_ceiling_vnd"]) == 20_500,
@@ -219,12 +239,12 @@ print("\nF. Ghép với cổng fail-safe cơ sở giá (việc 1): TV1 giờ cũ
 # executor, KHÔNG phải dict thô. Truyền dict vào sẽ "CHẶN" ở mọi ca vì đọc ra None hết, tức
 # F2/F3 sẽ PASS vì SAI LÝ DO. F1 là ca duy nhất phân biệt được hai tình huống đó — giữ nó.
 o_guard = _O(dict(o_raw, ref_price=20_394))
-ok_g, i_g = check_ref_vs_live(o_guard, live_prev_close=20_300.0, chase_pct=0.03)
-check("F1 anchor khớp giá đóng phiên sống ⇒ CHO ĐI", ok_g is True, i_g.get("reason", "")[:80])
-ok_b, i_b2 = check_ref_vs_live(o_guard, live_prev_close=19_700.0, chase_pct=0.03)
+ok_g, i_g = check_ref_vs_live(o_guard, live_reference_price=20_300.0, chase_pct=0.03)
+check("F1 anchor khớp giá tham chiếu phiên sống ⇒ CHO ĐI", ok_g is True, i_g.get("reason", "")[:80])
+ok_b, i_b2 = check_ref_vs_live(o_guard, live_reference_price=19_700.0, chase_pct=0.03)
 check("F2 anchor lệch +3,05% so với giá đóng sống ⇒ CHẶN (plan trễ phiên/feed vỡ)",
       ok_b is False, i_b2.get("reason", "")[:80])
-ok_n, i_n = check_ref_vs_live(o_guard, live_prev_close=None, chase_pct=0.03)
+ok_n, i_n = check_ref_vs_live(o_guard, live_reference_price=None, chase_pct=0.03)
 check("F3 thiếu giá sống ⇒ CHẶN (fail-closed, không bỏ qua)", ok_n is False,
       i_n.get("reason", "")[:80])
 
