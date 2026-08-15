@@ -171,10 +171,9 @@ report (daily/weekly/monthly, or any client-facing artifact):
    Discord xong, chạy `python3 mike/bin/send_report_email.py <report.md>` cho ĐÚNG file vừa gửi.
    Script tự fail-closed nếu cổng tỉ suất §21 chưa PASS hoặc thiếu credential — đừng `--skip-
    return-gate` trừ khi đã hiểu rõ vì sao gate lệch. Backstop nếu agent quên bước này:
-   `check_report_cadence.sh` (cron 08:30 ICT) quét lại MỌI report `*_daily_report_*.md` /
-   `*_weekly_report_*.md` / `*_monthly_report_*.md` chưa từng gửi qua `state/report_emailed.json`
-   và tự gửi bù — nhưng đó là lưới AN TOÀN trễ tới hôm sau, không thay được việc gửi ngay lúc
-   soạn xong report.
+   `check_report_cadence.sh` quét lại MỌI report `*_daily_report_*.md` /
+   `*_weekly_report_*.md` / `*_monthly_report_*.md` chưa có proof và gọi delivery gate gửi bù
+   — nhưng đó là lưới AN TOÀN, không thay được việc gửi ngay lúc soạn xong report.
 6. **Delivery closure — file được tạo KHÔNG có nghĩa là báo cáo đã gửi.** Mọi báo cáo tự động
    phải kết thúc bằng `python3 mike/bin/report_delivery_gate.py <report.md> --topic
    trading_report`. Chỉ `COMPLETE` (artifact qua gate + Discord + email đều có bằng chứng
