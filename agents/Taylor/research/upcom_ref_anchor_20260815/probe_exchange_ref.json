@@ -1,0 +1,776 @@
+[
+ {
+  "ticker": "ACB",
+  "raw_keys_exch": {
+   "marketId": "STO",
+   "boardId": "G1",
+   "floorPrice": 20.6
+  },
+  "q_exchange": "HOSE",
+  "ref": 22150.0,
+  "ce": 23700.0,
+  "fl": 20600.0,
+  "last": 22150.0,
+  "band_up_pct": 6.998,
+  "band_dn_pct": -6.998,
+  "close": 22150.0,
+  "close_date": "2026-08-14",
+  "dev_pct": 0.0
+ },
+ {
+  "ticker": "BID",
+  "raw_keys_exch": {
+   "marketId": "STO",
+   "boardId": "G1",
+   "floorPrice": 33.3
+  },
+  "q_exchange": "HOSE",
+  "ref": 35800.0,
+  "ce": 38300.0,
+  "fl": 33300.0,
+  "last": 38250.0,
+  "band_up_pct": 6.983,
+  "band_dn_pct": -6.983,
+  "close": 35800.0,
+  "close_date": "2026-08-14",
+  "dev_pct": 0.0
+ },
+ {
+  "ticker": "CSV",
+  "raw_keys_exch": {
+   "marketId": "STO",
+   "boardId": "G1",
+   "floorPrice": 19.95
+  },
+  "q_exchange": "HOSE",
+  "ref": 21450.0,
+  "ce": 22950.0,
+  "fl": 19950.0,
+  "last": 21450.0,
+  "band_up_pct": 6.993,
+  "band_dn_pct": -6.993,
+  "close": 21450.0,
+  "close_date": "2026-08-14",
+  "dev_pct": 0.0
+ },
+ {
+  "ticker": "CTG",
+  "raw_keys_exch": {
+   "marketId": "STO",
+   "boardId": "G1",
+   "floorPrice": 29.25
+  },
+  "q_exchange": "HOSE",
+  "ref": 31450.0,
+  "ce": 33650.0,
+  "fl": 29250.0,
+  "last": 31450.0,
+  "band_up_pct": 6.995,
+  "band_dn_pct": -6.995,
+  "close": 31450.0,
+  "close_date": "2026-08-14",
+  "dev_pct": 0.0
+ },
+ {
+  "ticker": "DCM",
+  "raw_keys_exch": {
+   "marketId": "STO",
+   "boardId": "G1",
+   "floorPrice": 28.4
+  },
+  "q_exchange": "HOSE",
+  "ref": 30500.0,
+  "ce": 32600.0,
+  "fl": 28400.0,
+  "last": 30500.0,
+  "band_up_pct": 6.885,
+  "band_dn_pct": -6.885,
+  "close": 30500.0,
+  "close_date": "2026-08-14",
+  "dev_pct": 0.0
+ },
+ {
+  "ticker": "DRI",
+  "raw_keys_exch": {
+   "marketId": "UPX",
+   "boardId": "G1",
+   "floorPrice": 11.4
+  },
+  "q_exchange": "HOSE",
+  "ref": 13300.0,
+  "ce": 15200.0,
+  "fl": 11400.0,
+  "last": 13300.0,
+  "band_up_pct": 14.286,
+  "band_dn_pct": -14.286,
+  "close": 13300.0,
+  "close_date": "2026-08-14",
+  "dev_pct": 0.0
+ },
+ {
+  "ticker": "EVF",
+  "raw_keys_exch": {
+   "marketId": "STO",
+   "boardId": "G1",
+   "floorPrice": 11.75
+  },
+  "q_exchange": "HOSE",
+  "ref": 12600.0,
+  "ce": 13450.0,
+  "fl": 11750.0,
+  "last": 12600.0,
+  "band_up_pct": 6.746,
+  "band_dn_pct": -6.746,
+  "close": 12600.0,
+  "close_date": "2026-08-14",
+  "dev_pct": 0.0
+ },
+ {
+  "ticker": "FPT",
+  "raw_keys_exch": {
+   "marketId": "STO",
+   "boardId": "G1",
+   "floorPrice": 63.6
+  },
+  "q_exchange": "HOSE",
+  "ref": 68300.0,
+  "ce": 73000.0,
+  "fl": 63600.0,
+  "last": 68300.0,
+  "band_up_pct": 6.881,
+  "band_dn_pct": -6.881,
+  "close": 68300.0,
+  "close_date": "2026-08-14",
+  "dev_pct": 0.0
+ },
+ {
+  "ticker": "HAH",
+  "raw_keys_exch": {
+   "marketId": "STO",
+   "boardId": "G1",
+   "floorPrice": 42.7
+  },
+  "q_exchange": "HOSE",
+  "ref": 45900.0,
+  "ce": 49100.0,
+  "fl": 42700.0,
+  "last": 45900.0,
+  "band_up_pct": 6.972,
+  "band_dn_pct": -6.972,
+  "close": 45900.0,
+  "close_date": "2026-08-14",
+  "dev_pct": 0.0
+ },
+ {
+  "ticker": "HDB",
+  "raw_keys_exch": {
+   "marketId": "STO",
+   "boardId": "G1",
+   "floorPrice": 24.6
+  },
+  "q_exchange": "HOSE",
+  "ref": 26450.0,
+  "ce": 28300.0,
+  "fl": 24600.0,
+  "last": 26450.0,
+  "band_up_pct": 6.994,
+  "band_dn_pct": -6.994,
+  "close": 26450.0,
+  "close_date": "2026-08-14",
+  "dev_pct": 0.0
+ },
+ {
+  "ticker": "HPG",
+  "raw_keys_exch": {
+   "marketId": "STO",
+   "boardId": "G1",
+   "floorPrice": 19.8
+  },
+  "q_exchange": "HOSE",
+  "ref": 21250.0,
+  "ce": 22700.0,
+  "fl": 19800.0,
+  "last": 21250.0,
+  "band_up_pct": 6.824,
+  "band_dn_pct": -6.824,
+  "close": 21250.0,
+  "close_date": "2026-08-14",
+  "dev_pct": 0.0
+ },
+ {
+  "ticker": "LPB",
+  "raw_keys_exch": {
+   "marketId": "STO",
+   "boardId": "G1",
+   "floorPrice": 48.75
+  },
+  "q_exchange": "HOSE",
+  "ref": 52400.0,
+  "ce": 56000.0,
+  "fl": 48750.0,
+  "last": 52400.0,
+  "band_up_pct": 6.87,
+  "band_dn_pct": -6.966,
+  "close": 52400.0,
+  "close_date": "2026-08-14",
+  "dev_pct": 0.0
+ },
+ {
+  "ticker": "MBB",
+  "raw_keys_exch": {
+   "marketId": "STO",
+   "boardId": "G1",
+   "floorPrice": 18.6
+  },
+  "q_exchange": "HOSE",
+  "ref": 20000.0,
+  "ce": 21400.0,
+  "fl": 18600.0,
+  "last": 20000.0,
+  "band_up_pct": 7.0,
+  "band_dn_pct": -7.0,
+  "close": 20000.0,
+  "close_date": "2026-08-14",
+  "dev_pct": 0.0
+ },
+ {
+  "ticker": "MBS",
+  "raw_keys_exch": {
+   "marketId": "STX",
+   "boardId": "G1",
+   "floorPrice": 15.7
+  },
+  "q_exchange": "HOSE",
+  "ref": 17400.0,
+  "ce": 19100.0,
+  "fl": 15700.0,
+  "last": 18400.0,
+  "band_up_pct": 9.77,
+  "band_dn_pct": -9.77,
+  "close": 17400.0,
+  "close_date": "2026-08-14",
+  "dev_pct": 0.0
+ },
+ {
+  "ticker": "MSB",
+  "raw_keys_exch": {
+   "marketId": "STO",
+   "boardId": "G1",
+   "floorPrice": 15.05
+  },
+  "q_exchange": "HOSE",
+  "ref": 16149.999999999998,
+  "ce": 17250.0,
+  "fl": 15050.0,
+  "last": 16149.999999999998,
+  "band_up_pct": 6.811,
+  "band_dn_pct": -6.811,
+  "close": 16149.999999999998,
+  "close_date": "2026-08-14",
+  "dev_pct": 0.0
+ },
+ {
+  "ticker": "NCT",
+  "raw_keys_exch": {
+   "marketId": "STO",
+   "boardId": "G1",
+   "floorPrice": 76.9
+  },
+  "q_exchange": "HOSE",
+  "ref": 82600.0,
+  "ce": 88300.0,
+  "fl": 76900.0,
+  "last": 82600.0,
+  "band_up_pct": 6.901,
+  "band_dn_pct": -6.901,
+  "close": 82600.0,
+  "close_date": "2026-08-14",
+  "dev_pct": 0.0
+ },
+ {
+  "ticker": "POW",
+  "raw_keys_exch": {
+   "marketId": "STO",
+   "boardId": "G1",
+   "floorPrice": 12.35
+  },
+  "q_exchange": "HOSE",
+  "ref": 13250.0,
+  "ce": 14150.0,
+  "fl": 12350.0,
+  "last": 13250.0,
+  "band_up_pct": 6.792,
+  "band_dn_pct": -6.792,
+  "close": 13250.0,
+  "close_date": "2026-08-14",
+  "dev_pct": 0.0
+ },
+ {
+  "ticker": "PVT",
+  "raw_keys_exch": {
+   "marketId": "STO",
+   "boardId": "G1",
+   "floorPrice": 18.6
+  },
+  "q_exchange": "HOSE",
+  "ref": 19950.0,
+  "ce": 21300.0,
+  "fl": 18600.0,
+  "last": 19950.0,
+  "band_up_pct": 6.767,
+  "band_dn_pct": -6.767,
+  "close": 19950.0,
+  "close_date": "2026-08-14",
+  "dev_pct": 0.0
+ },
+ {
+  "ticker": "SAB",
+  "raw_keys_exch": {
+   "marketId": "STO",
+   "boardId": "G1",
+   "floorPrice": 42.15
+  },
+  "q_exchange": "HOSE",
+  "ref": 45300.0,
+  "ce": 48450.0,
+  "fl": 42150.0,
+  "last": 45300.0,
+  "band_up_pct": 6.954,
+  "band_dn_pct": -6.954,
+  "close": 45300.0,
+  "close_date": "2026-08-14",
+  "dev_pct": 0.0
+ },
+ {
+  "ticker": "SCL",
+  "raw_keys_exch": {
+   "marketId": "UPX",
+   "boardId": "G1",
+   "floorPrice": 19.5
+  },
+  "q_exchange": "HOSE",
+  "ref": 22900.0,
+  "ce": 26300.0,
+  "fl": 19500.0,
+  "last": 23700.0,
+  "band_up_pct": 14.847,
+  "band_dn_pct": -14.847,
+  "close": 23700.0,
+  "close_date": "2026-08-14",
+  "dev_pct": -3.3755
+ },
+ {
+  "ticker": "SHB",
+  "raw_keys_exch": {
+   "marketId": "STO",
+   "boardId": "G1",
+   "floorPrice": 10.95
+  },
+  "q_exchange": "HOSE",
+  "ref": 11750.0,
+  "ce": 12550.0,
+  "fl": 10950.0,
+  "last": 11750.0,
+  "band_up_pct": 6.809,
+  "band_dn_pct": -6.809,
+  "close": 11750.0,
+  "close_date": "2026-08-14",
+  "dev_pct": 0.0
+ },
+ {
+  "ticker": "SHS",
+  "raw_keys_exch": {
+   "marketId": "STX",
+   "boardId": "G1",
+   "floorPrice": 13.8
+  },
+  "q_exchange": "HOSE",
+  "ref": 15300.0,
+  "ce": 16800.0,
+  "fl": 13800.0,
+  "last": 15300.0,
+  "band_up_pct": 9.804,
+  "band_dn_pct": -9.804,
+  "close": 15300.0,
+  "close_date": "2026-08-14",
+  "dev_pct": 0.0
+ },
+ {
+  "ticker": "SIP",
+  "raw_keys_exch": {
+   "marketId": "STO",
+   "boardId": "G1",
+   "floorPrice": 46.5
+  },
+  "q_exchange": "HOSE",
+  "ref": 50000.0,
+  "ce": 53500.0,
+  "fl": 46500.0,
+  "last": 50000.0,
+  "band_up_pct": 7.0,
+  "band_dn_pct": -7.0,
+  "close": 50000.0,
+  "close_date": "2026-08-14",
+  "dev_pct": 0.0
+ },
+ {
+  "ticker": "SSI",
+  "raw_keys_exch": {
+   "marketId": "STO",
+   "boardId": "G1",
+   "floorPrice": 18.25
+  },
+  "q_exchange": "HOSE",
+  "ref": 19600.0,
+  "ce": 20950.0,
+  "fl": 18250.0,
+  "last": 24500.0,
+  "band_up_pct": 6.888,
+  "band_dn_pct": -6.888,
+  "close": 19580.0,
+  "close_date": "2026-08-14",
+  "dev_pct": 0.1021
+ },
+ {
+  "ticker": "TCB",
+  "raw_keys_exch": {
+   "marketId": "STO",
+   "boardId": "G1",
+   "floorPrice": 29.8
+  },
+  "q_exchange": "HOSE",
+  "ref": 32000.0,
+  "ce": 34200.0,
+  "fl": 29800.0,
+  "last": 32000.0,
+  "band_up_pct": 6.875,
+  "band_dn_pct": -6.875,
+  "close": 32000.0,
+  "close_date": "2026-08-14",
+  "dev_pct": 0.0
+ },
+ {
+  "ticker": "TPB",
+  "raw_keys_exch": {
+   "marketId": "STO",
+   "boardId": "G1",
+   "floorPrice": 13.4
+  },
+  "q_exchange": "HOSE",
+  "ref": 14400.0,
+  "ce": 15400.0,
+  "fl": 13400.0,
+  "last": 14400.0,
+  "band_up_pct": 6.944,
+  "band_dn_pct": -6.944,
+  "close": 14400.0,
+  "close_date": "2026-08-14",
+  "dev_pct": 0.0
+ },
+ {
+  "ticker": "TV1",
+  "raw_keys_exch": {
+   "marketId": "UPX",
+   "boardId": "G1",
+   "floorPrice": 17
+  },
+  "q_exchange": "HOSE",
+  "ref": 20000.0,
+  "ce": 23000.0,
+  "fl": 17000.0,
+  "last": 20100.0,
+  "band_up_pct": 15.0,
+  "band_dn_pct": -15.0,
+  "close": 20100.0,
+  "close_date": "2026-08-14",
+  "dev_pct": -0.4975
+ },
+ {
+  "ticker": "VCB",
+  "raw_keys_exch": {
+   "marketId": "STO",
+   "boardId": "G1",
+   "floorPrice": 54.5
+  },
+  "q_exchange": "HOSE",
+  "ref": 58500.0,
+  "ce": 62500.0,
+  "fl": 54500.0,
+  "last": 58500.0,
+  "band_up_pct": 6.838,
+  "band_dn_pct": -6.838,
+  "close": 58500.0,
+  "close_date": "2026-08-14",
+  "dev_pct": 0.0
+ },
+ {
+  "ticker": "VGC",
+  "raw_keys_exch": {
+   "marketId": "STO",
+   "boardId": "G1",
+   "floorPrice": 37.5
+  },
+  "q_exchange": "HOSE",
+  "ref": 40300.0,
+  "ce": 43100.0,
+  "fl": 37500.0,
+  "last": 40300.0,
+  "band_up_pct": 6.948,
+  "band_dn_pct": -6.948,
+  "close": 40300.0,
+  "close_date": "2026-08-14",
+  "dev_pct": 0.0
+ },
+ {
+  "ticker": "VHC",
+  "raw_keys_exch": {
+   "marketId": "STO",
+   "boardId": "G1",
+   "floorPrice": 50.6
+  },
+  "q_exchange": "HOSE",
+  "ref": 54400.0,
+  "ce": 58200.0,
+  "fl": 50600.0,
+  "last": 54400.0,
+  "band_up_pct": 6.985,
+  "band_dn_pct": -6.985,
+  "close": 54400.0,
+  "close_date": "2026-08-14",
+  "dev_pct": 0.0
+ },
+ {
+  "ticker": "VHM",
+  "raw_keys_exch": {
+   "marketId": "STO",
+   "boardId": "G1",
+   "floorPrice": 63.5
+  },
+  "q_exchange": "HOSE",
+  "ref": 68200.0,
+  "ce": 72900.0,
+  "fl": 63500.0,
+  "last": 68200.0,
+  "band_up_pct": 6.891,
+  "band_dn_pct": -6.891,
+  "close": 68200.0,
+  "close_date": "2026-08-14",
+  "dev_pct": 0.0
+ },
+ {
+  "ticker": "VIB",
+  "raw_keys_exch": {
+   "marketId": "STO",
+   "boardId": "G1",
+   "floorPrice": 13.4
+  },
+  "q_exchange": "HOSE",
+  "ref": 14400.0,
+  "ce": 15400.0,
+  "fl": 13400.0,
+  "last": 14400.0,
+  "band_up_pct": 6.944,
+  "band_dn_pct": -6.944,
+  "close": 14400.0,
+  "close_date": "2026-08-14",
+  "dev_pct": 0.0
+ },
+ {
+  "ticker": "VIX",
+  "raw_keys_exch": {
+   "marketId": "STO",
+   "boardId": "G1",
+   "floorPrice": 12.55
+  },
+  "q_exchange": "HOSE",
+  "ref": 13450.0,
+  "ce": 14350.0,
+  "fl": 12550.0,
+  "last": 13450.0,
+  "band_up_pct": 6.691,
+  "band_dn_pct": -6.691,
+  "close": 13450.0,
+  "close_date": "2026-08-14",
+  "dev_pct": 0.0
+ },
+ {
+  "ticker": "VND",
+  "raw_keys_exch": {
+   "marketId": "STO",
+   "boardId": "G1",
+   "floorPrice": 15.15
+  },
+  "q_exchange": "HOSE",
+  "ref": 16250.0,
+  "ce": 17350.0,
+  "fl": 15150.0,
+  "last": 16250.0,
+  "band_up_pct": 6.769,
+  "band_dn_pct": -6.769,
+  "close": 16250.0,
+  "close_date": "2026-08-14",
+  "dev_pct": 0.0
+ },
+ {
+  "ticker": "VNM",
+  "raw_keys_exch": {
+   "marketId": "STO",
+   "boardId": "G1",
+   "floorPrice": 57.3
+  },
+  "q_exchange": "HOSE",
+  "ref": 61600.0,
+  "ce": 65900.0,
+  "fl": 57300.0,
+  "last": 61600.0,
+  "band_up_pct": 6.981,
+  "band_dn_pct": -6.981,
+  "close": 61600.0,
+  "close_date": "2026-08-14",
+  "dev_pct": 0.0
+ },
+ {
+  "ticker": "VPB",
+  "raw_keys_exch": {
+   "marketId": "STO",
+   "boardId": "G1",
+   "floorPrice": 23.35
+  },
+  "q_exchange": "HOSE",
+  "ref": 25100.0,
+  "ce": 26850.0,
+  "fl": 23350.0,
+  "last": 25100.0,
+  "band_up_pct": 6.972,
+  "band_dn_pct": -6.972,
+  "close": 25100.0,
+  "close_date": "2026-08-14",
+  "dev_pct": 0.0
+ },
+ {
+  "ticker": "VRE",
+  "raw_keys_exch": {
+   "marketId": "STO",
+   "boardId": "G1",
+   "floorPrice": 22.3
+  },
+  "q_exchange": "HOSE",
+  "ref": 23950.0,
+  "ce": 25600.0,
+  "fl": 22300.0,
+  "last": 23950.0,
+  "band_up_pct": 6.889,
+  "band_dn_pct": -6.889,
+  "close": 23950.0,
+  "close_date": "2026-08-14",
+  "dev_pct": 0.0
+ },
+ {
+  "ticker": "DGC",
+  "raw_keys_exch": {
+   "marketId": "STO",
+   "boardId": "G1",
+   "floorPrice": 40.2
+  },
+  "q_exchange": "HOSE",
+  "ref": 43200.0,
+  "ce": 46200.0,
+  "fl": 40200.0,
+  "last": 43200.0,
+  "band_up_pct": 6.944,
+  "band_dn_pct": -6.944,
+  "close": 43200.0,
+  "close_date": "2026-08-14",
+  "dev_pct": 0.0
+ },
+ {
+  "ticker": "PNJ",
+  "raw_keys_exch": {
+   "marketId": "STO",
+   "boardId": "G1",
+   "floorPrice": 33.95
+  },
+  "q_exchange": "HOSE",
+  "ref": 36500.0,
+  "ce": 39050.0,
+  "fl": 33950.0,
+  "last": 36500.0,
+  "band_up_pct": 6.986,
+  "band_dn_pct": -6.986,
+  "close": 36500.0,
+  "close_date": "2026-08-14",
+  "dev_pct": 0.0
+ },
+ {
+  "ticker": "SGP",
+  "raw_keys_exch": {
+   "marketId": "UPX",
+   "boardId": "G1",
+   "floorPrice": 17.4
+  },
+  "q_exchange": "HOSE",
+  "ref": 20400.0,
+  "ce": 23400.0,
+  "fl": 17400.0,
+  "last": 20500.0,
+  "band_up_pct": 14.706,
+  "band_dn_pct": -14.706,
+  "close": 20500.0,
+  "close_date": "2026-08-14",
+  "dev_pct": -0.4878
+ },
+ {
+  "ticker": "ACV",
+  "raw_keys_exch": {
+   "marketId": "UPX",
+   "boardId": "G1",
+   "floorPrice": 34.6
+  },
+  "q_exchange": "HOSE",
+  "ref": 40600.0,
+  "ce": 46600.0,
+  "fl": 34600.0,
+  "last": 40500.0,
+  "band_up_pct": 14.778,
+  "band_dn_pct": -14.778,
+  "close": 40500.0,
+  "close_date": "2026-08-14",
+  "dev_pct": 0.2469
+ },
+ {
+  "ticker": "QNS",
+  "raw_keys_exch": {
+   "marketId": "UPX",
+   "boardId": "G1",
+   "floorPrice": 39.7
+  },
+  "q_exchange": "HOSE",
+  "ref": 46700.0,
+  "ce": 53700.0,
+  "fl": 39700.0,
+  "last": 46600.0,
+  "band_up_pct": 14.989,
+  "band_dn_pct": -14.989,
+  "close": 46600.0,
+  "close_date": "2026-08-14",
+  "dev_pct": 0.2146
+ },
+ {
+  "ticker": "TMG",
+  "raw_keys_exch": {
+   "marketId": "UPX",
+   "boardId": "G1",
+   "floorPrice": 54.3
+  },
+  "q_exchange": "HOSE",
+  "ref": 63800.0,
+  "ce": 73300.0,
+  "fl": 54300.0,
+  "last": 63200.0,
+  "band_up_pct": 14.89,
+  "band_dn_pct": -14.89,
+  "close": 63200.0,
+  "close_date": "2026-08-06",
+  "dev_pct": 0.9494
+ }
+]
