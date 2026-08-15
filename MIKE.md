@@ -83,17 +83,34 @@ cao sẽ tự chạy tiếp, nhưng nếu phiên tôi restart giữa chừng th�
 
 **8. Fast wake-on-completion sau `dispatch.sh ... --bg`**
 
+> **PUSH giờ là tín hiệu CHÍNH, ladder giờ là LƯỚI AN TOÀN (2026-08-15).** `_bg_wrapper` tự gọi
+> `bin/wake_thread.sh` khi job `from=Mike` xong (done/failed/timeout) → `POST /api/tasks` ccdb
+> (`run_immediately=true`, cùng nguyên lý ScheduleWakeup, gọi từ ngoài) → master loop 30s
+> (`claude_discord/cogs/scheduler.py`) resume Mike trong **~30s sau khi job THẬT SỰ xong**. Verify
+> thật (job `Taylor_20260815_005649`): task tạo đúng, nội dung đúng, và 1 lần TRÚNG timing khi
+> chưa kịp xoá test task — resume đúng thread/prompt trong cửa sổ 30s.
+> **Đổi cách đặt ladder**: vẫn `ScheduleWakeup` ngay sau `dispatch.sh --bg` như cũ (kỷ luật §8
+> gốc không đổi) — nhưng giờ CHỈ 1 lần, ở delay RỘNG (`wakeup_profile` hint hoặc trần 1200s),
+> không cần ladder sát 240→480→900 nữa vì push thường tới trước. Ladder tăng dần cũ CHỈ quay lại
+> khi tỉnh ở mốc rộng mà job VẪN chưa `done` (push đã trễ/fail) — lúc đó nó là lưới an toàn CỦA
+> lưới an toàn. Job không phải `from=Mike` (agent khác dispatch) → push không áp dụng, dùng
+> nguyên ladder gốc bên dưới.
+> ⚠️ Push fail-soft (lỗi ghi `logs/wake_thread_errors.log`, không gãy `_bg_wrapper`) — API
+> `127.0.0.1:8199` sập đúng lúc đó = mất push, không cảnh báo tức thời. **Luôn đặt CẢ HAI**
+> (push tự động + ScheduleWakeup lưới an toàn), đừng bỏ ScheduleWakeup vì "đã có push".
+
 > **§8 rút gọn — 3 dòng phải nhớ (thêm 2026-07-20, sau sự cố `missed-wakeup-after-bg-dispatch`,
 > xem `kb/incidents/2026-07/2026-07-20-missed-wakeup-after-bg-dispatch.md` + job `Wags_20260720_121120`):**
 > 1. `dispatch.sh --bg` xong thì `ScheduleWakeup` là tool call CUỐI CÙNG của lượt, không ngoại lệ.
 >    **Lần tỉnh ĐẦU: tra `state/wakeup_profile.json`** (sinh mỗi đêm bởi `bin/wakeup_profile.py`)
 >    theo khoá `"<to>|<model>|<effort>"` — có bucket → `median_s` kẹp trong [90s, 1200s]; không có
 >    → `global_fallback.median_s` kẹp tương tự; **file thiếu/hỏng → 240-270s như cũ, không bao giờ
->    chặn**. Fan-out nhiều job → `min(delay)` cả batch. Từ lần tỉnh thứ 2 mà job vẫn running thì
->    TĂNG DẦN (240→480→900→trần 1200s), không quay lại ngắn trừ khi có job MỚI trong batch.
->    *(Bỏ ladder cố định "3 lần tỉnh đầu 240-270s": đo trên 1192 job thật, ladder cố định tỉnh
->    thừa 21% và vẫn trễ hơn — job `Winston` đồng bộ median 16s vs `Wags|opus|high` median 751s
->    không thể dùng chung 1 con số. Wags 2026-08-01, job `Wags_20260801_153657`.)*
+>    chặn**. Fan-out nhiều job → `min(delay)` cả batch.
+>    **Sửa 2026-08-15**: từ lần tỉnh thứ 2 trở đi CHỈ áp dụng khi push (ở trên) đã trễ/fail —
+>    lúc đó mới TĂNG DẦN (240→480→900→trần 1200s), không quay lại ngắn trừ khi có job MỚI trong
+>    batch. *(Bỏ ladder cố định "3 lần tỉnh đầu 240-270s": đo trên 1192 job thật, ladder cố định
+>    tỉnh thừa 21% và vẫn trễ hơn — job `Winston` đồng bộ median 16s vs `Wags|opus|high` median
+>    751s không thể dùng chung 1 con số. Wags 2026-08-01, job `Wags_20260801_153657`.)*
 > 2. **Lượt nào bạn còn định viết một câu trả lời thực chất cho user là lúc nguy hiểm nhất** (đo từ
 >    147 lượt: QUÊN wakeup → trung vị 1.755 ký tự văn xuôi sau dispatch, NHỚ → 343 ký tự; rủi ro
 >    gấp ~25 lần). Đặt `ScheduleWakeup` NGAY sau dispatch, TRƯỚC KHI viết đoạn trả lời cho câu
@@ -110,6 +127,13 @@ dòng "Theo dõi:" — làm theo đúng bản in.
 
 (Lịch sử cơ chế `Agent(run_in_background)` wrapper, MOOT từ 2026-07-07:
 `kb/archive/wake_on_completion_wrapper_history_20260707.md`.)
+
+**Công cụ mới**: `bin/wake_thread.sh <thread_id> "<prompt>" [name_suffix]` — active-resume 1
+thread Discord qua `POST /api/tasks` của ccdb (`run_immediately=true, one_shot=true`), KHÁC
+`notify_thread.sh` (chỉ post tin nhắn thụ động, không ai đọc lại vì `on_message` của ccdb bỏ
+qua tin nhắn do chính bot viết). Dùng khi biết chắc có 1 session live đang thật sự chờ ở thread
+đó (hiện tại: chỉ `_bg_wrapper` gọi, gated `from=Mike`) — đừng gọi cho thread không có session
+sống, ccdb sẽ MỞ session MỚI ở đó (tốn phí, không phải bonus).
 
 ## Việc định kỳ
 - Cron 30' chạy `bin/consolidate.sh` (cơ khí): gộp event mới từ bus → `KNOWLEDGE.md`, bump version,
