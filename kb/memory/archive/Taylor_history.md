@@ -174,3 +174,6 @@
 | PHAT HIEN PHU CHUA XU LY, CHAM RO CAPIT DANG LIVE: anomaly_excluded() khong phan biet reason => CEIL2 (gia TANG manh) cung chan lenh mua, 44,8% so ca. Da de nghi JOB RIENG, cho user quyet.
 | VA CHAM DISPATCH LAN THU 2 TRONG NGAY: Wags_20260814_041611 cuon theo 8 file cua toi. Ket luan: dispatch cham cung file PHAI tach worktree hoac chay tuan tu.
 | Viec mo cu khong doi: active_nav_snapshot.md.proposed + TV1 context_planning_mini.md.proposed cho Mike duyet; bank_casa_ldr_*.csv con cot casa so bao chi sai; chi 1 ky CASA Q2/2026 (cho BCTC Q3 ~cuoi 10/2026); user quyet cong CASH_VENDOR.
+
+## Archived 2026-08-15 (keep=12 days=0 require_done=False)
+- [2026-08-14T05:41:39Z] Chuoi 'portfolio-wide badnews protection' DA DONG (job Taylor_20260814_050107, commit mike@0f642695): 3 diem quant-skeptic da va + verify. Bai hoc mang di: pct_change() PHAI khai fill_method=None tuong minh (pandas 2 pad vs 3 khong -> cung script cung data ra so khac tuy interpreter, hong AM THAM); moi phep do phai khai bien the loc thanh khoan (liq=none/adv/both) vi N khong don tri.
