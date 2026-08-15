@@ -182,6 +182,18 @@ gate with a curated code list (its own header explains why curated, not "any fin
 a Semgrep rule for §12 (tested on `bin/verify_account_snapshot.py`; needs dataflow-aware engineering
 to hit "fires twice at 100% accuracy"). → rationale §15.*
 
+⚠️ **Gap `bin/shellcheck_gate.sh` KHÔNG phủ tới: dispatch gõ trực tiếp trong phiên tương tác
+(Bash tool call của Mike, không phải file `.sh` được commit).** Hook chỉ chạy ở `pre-commit` —
+một lệnh `bin/dispatch.sh Taylor "... \`code_snippet\` ..."` gõ thẳng vào Bash tool KHÔNG BAO GIỜ
+đi qua git commit, nên ShellCheck không bao giờ thấy nó. Ca thật: 2026-08-15 00:41Z, job
+`Taylor_20260815_004105` — 2 đoạn code (`` `_limit_price` ``, `ref_price = anchor/1.04`) biến mất
+khỏi prompt vì backtick bị bash coi là command substitution NGAY TRONG lệnh Bash tool, trước khi
+`dispatch.sh` kịp nhận `$2`. Không có cách nào vá phía `dispatch.sh` — hư hại xảy ra ở shell của
+NGƯỜI GỌI. Rule + template cụ thể cho tình huống này (không lặp lại nội dung):
+**`~/.claude/skills/dispatch-prompt-heredoc/SKILL.md`** — đọc trước bất kỳ dispatch tương tác nào
+mang theo backtick/`"`/code snippet, và ngay khi thấy "command not found" xuất hiện sát một lệnh
+dispatch (đó là dấu hiệu, không phải lỗi không liên quan).
+
 ## 17. A Reader Reporting "Still Open" State Must Scan Every Retention Tier a Mover Can Reach
 
 **Rule:** before shipping/auditing a "is X still open" reader, check `kb/cron_registry.md` for every

@@ -36,7 +36,7 @@ TÌNH HUỐNG, không phải mỗi phiên. Gặp đúng tình huống thì `Read
 | **§11** Tra `kb/cron_registry.md` trước khi thêm/đổi lịch cron | Thêm/xoá/đổi giờ bất kỳ dòng crontab nào |
 | **§13** Sửa file `kb/` cần Mike duyệt → ghi ra `<file>.proposed` | Sửa file trong `kb/` mà chưa được duyệt live |
 | **§14** Cặp producer→consumer phải có freshness-check thật | Viết/sửa script đọc output của script khác chạy cron riêng |
-| **§15** Chuỗi bash kiêm prompt LLM: escape `"`/`` ` `` | Viết prompt dài trong `.sh` (đã có gate cơ học `bin/shellcheck_gate.sh`) |
+| **§15** Chuỗi bash kiêm prompt LLM: escape `"`/`` ` `` | Viết prompt dài trong `.sh` (đã có gate cơ học `bin/shellcheck_gate.sh`); dispatch **tương tác** (Bash tool, không qua commit) → gate không phủ tới, dùng skill `~/.claude/skills/dispatch-prompt-heredoc/` |
 | **§17** Reader báo "còn mở" phải quét mọi tầng retention | Viết/sửa reader trạng thái bus (`mike_json.py`, checker inbox) |
 | **§18b** `srcwalk` để ĐỌC, `grep` để TÌM — số đo benchmark | Cần lại số benchmark; **luật hành động đã có sẵn ở `WorkingClaude/CLAUDE.md` § Code navigation (auto-load mỗi phiên)** |
 | **§22** Luật văn xuôi LLM áp sai → chuyển thành code | Thấy 2 phiên áp cùng luật ra 2 kết quả khác nhau |
