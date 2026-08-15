@@ -96,7 +96,7 @@
    "boardId": "G1",
    "floorPrice": 11.4
   },
-  "q_exchange": "HOSE",
+  "q_exchange": "UPCOM",
   "ref": 13300.0,
   "ce": 15200.0,
   "fl": 11400.0,
@@ -240,7 +240,7 @@
    "boardId": "G1",
    "floorPrice": 15.7
   },
-  "q_exchange": "HOSE",
+  "q_exchange": "HNX",
   "ref": 17400.0,
   "ce": 19100.0,
   "fl": 15700.0,
@@ -348,7 +348,7 @@
    "boardId": "G1",
    "floorPrice": 19.5
   },
-  "q_exchange": "HOSE",
+  "q_exchange": "UPCOM",
   "ref": 22900.0,
   "ce": 26300.0,
   "fl": 19500.0,
@@ -384,7 +384,7 @@
    "boardId": "G1",
    "floorPrice": 13.8
   },
-  "q_exchange": "HOSE",
+  "q_exchange": "HNX",
   "ref": 15300.0,
   "ce": 16800.0,
   "fl": 13800.0,
@@ -474,7 +474,7 @@
    "boardId": "G1",
    "floorPrice": 17
   },
-  "q_exchange": "HOSE",
+  "q_exchange": "UPCOM",
   "ref": 20000.0,
   "ce": 23000.0,
   "fl": 17000.0,
@@ -708,7 +708,7 @@
    "boardId": "G1",
    "floorPrice": 17.4
   },
-  "q_exchange": "HOSE",
+  "q_exchange": "UPCOM",
   "ref": 20400.0,
   "ce": 23400.0,
   "fl": 17400.0,
@@ -726,7 +726,7 @@
    "boardId": "G1",
    "floorPrice": 34.6
   },
-  "q_exchange": "HOSE",
+  "q_exchange": "UPCOM",
   "ref": 40600.0,
   "ce": 46600.0,
   "fl": 34600.0,
@@ -744,7 +744,7 @@
    "boardId": "G1",
    "floorPrice": 39.7
   },
-  "q_exchange": "HOSE",
+  "q_exchange": "UPCOM",
   "ref": 46700.0,
   "ce": 53700.0,
   "fl": 39700.0,
@@ -762,7 +762,7 @@
    "boardId": "G1",
    "floorPrice": 54.3
   },
-  "q_exchange": "HOSE",
+  "q_exchange": "UPCOM",
   "ref": 63800.0,
   "ce": 73300.0,
   "fl": 54300.0,
