@@ -1,0 +1,8 @@
+event_code,n_rows,pct_null_category,pct_null_display_date1,pct_null_display_date2,pct_null_dividend_stage_vi,pct_null_dividend_year,pct_null_effective_date,pct_null_event_description_vi,pct_null_event_title_vi,pct_null_exercise_ratio,pct_null_exright_date,pct_null_icb_code_lv1,pct_null_issue_date,pct_null_issue_method_code,pct_null_issue_method_name_vi,pct_null_issue_status_vi,pct_null_issue_volumn,pct_null_listing_date,pct_null_organ_code,pct_null_payout_date,pct_null_public_date,pct_null_record_date,pct_null_ref_price,pct_null_shares_delta,pct_null_shares_total_after,pct_null_source_url,pct_null_total_value,pct_null_value_per_share
+DIV,17070,100.0,0.0,0.5,0.0,0.0,100.0,100.0,0.0,0.0,0.5,0.0,100.0,100.0,100.0,100.0,100.0,100.0,0.0,0.46,0.0,0.45,100.0,100.0,100.0,29.63,100.0,0.0
+ISS,11722,100.0,0.0,16.85,80.34,80.34,100.0,100.0,0.13,0.41,16.85,0.03,100.0,0.0,0.13,15.21,0.15,18.2,0.0,100.0,0.0,16.74,100.0,100.0,100.0,53.11,0.43,100.0
+AIS,4881,100.0,0.0,0.0,100.0,100.0,2.11,0.0,0.0,100.0,100.0,0.0,0.0,100.0,100.0,100.0,100.0,100.0,0.0,100.0,0.0,100.0,99.98,3.28,20.9,22.5,100.0,100.0
+NLIS,1368,100.0,0.0,0.0,100.0,100.0,10.01,7.09,0.0,100.0,98.9,0.15,0.0,100.0,100.0,100.0,100.0,100.0,0.0,100.0,0.0,98.9,19.01,99.63,10.31,33.99,100.0,100.0
+SUSP,681,100.0,0.0,0.0,100.0,100.0,5.58,0.0,0.0,100.0,99.56,0.0,0.0,100.0,100.0,100.0,100.0,100.0,0.0,100.0,0.0,94.57,100.0,10.57,98.24,13.8,100.0,100.0
+MOVE,431,100.0,0.0,0.0,100.0,100.0,7.19,0.23,0.0,100.0,100.0,0.0,0.0,100.0,100.0,100.0,100.0,100.0,0.0,100.0,0.0,100.0,12.53,100.0,8.12,14.39,100.0,100.0
+MA,17,100.0,0.0,0.0,100.0,100.0,94.12,0.0,0.0,100.0,100.0,0.0,0.0,100.0,100.0,100.0,100.0,100.0,0.0,100.0,0.0,100.0,100.0,100.0,100.0,52.94,100.0,100.0

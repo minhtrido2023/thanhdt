@@ -1,0 +1,18 @@
+{
+  "div_price_step_alignment": {
+    "n_rows": 1,
+    "csv": "out/div_price_step_alignment.csv"
+  },
+  "div_price_step_detail": {
+    "n_rows": 8819,
+    "csv": "out/div_price_step_detail.csv"
+  },
+  "div_value_sanity": {
+    "n_rows": 1,
+    "csv": "out/div_value_sanity.csv"
+  },
+  "div_coverage_investable": {
+    "n_rows": 13,
+    "csv": "out/div_coverage_investable.csv"
+  }
+}

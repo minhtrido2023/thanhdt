@@ -1,0 +1,11 @@
+issue_method_code,issue_method_name_vi,n_executed,n_ratio_null,n_ratio_pos,n_ratio_zero,n_rows,n_volumn_missing_or_zero
+PP,Phát hành riêng lẻ,2280,36,293,2767,3096,828
+DIV,Trả Cổ tức bằng Cổ phiếu,2343,0,2627,24,2651,308
+Rights,Quyền mua CP cho Cổ đông hiện hữu,1570,0,2096,94,2190,629
+EMPL,Phát hành cho CBCNV,1224,5,217,1469,1691,472
+Bonus,Cổ phiếu thưởng,1380,0,1504,30,1534,155
+TRANS,Chuyển từ trái phiếu chuyển đổi,243,5,4,238,247,7
+PUBL,Phát hành rộng rãi qua đấu giá,142,1,3,172,176,34
+MERGER,Phát hành để sáp nhập,99,1,17,95,113,14
+BBOD,<NULL>,10,0,0,15,15,5
+ICRE,Phát hành cho trái chủ,9,0,0,9,9,0
