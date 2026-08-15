@@ -13,6 +13,7 @@ import os
 import sys
 
 from .config import PLAN_DIR
+from .no_chase_ceiling import resolve_buy_ceiling
 
 
 @dataclasses.dataclass
@@ -67,6 +68,17 @@ class PlannedOrder:
     # cùng khái niệm "no-chase ceiling", không tạo tên thứ hai cho cùng một thứ.
     # Default None = mọi lệnh cũ giữ nguyên hành vi (chỉ có trần đuổi % như trước).
     hard_no_chase_ceiling_vnd: float = None
+    # ── PROVENANCE của trần trên — luật A (user chốt 2026-08-15) ───────────────────────────
+    # Rule A: trần = `ceiling_anchor_price × (1 + ceiling_tau)`, anchor = giá THÔ
+    # (`tav2_bq.ticker.Price`) của phiên ĐÃ ĐÓNG gần nhất TRƯỚC plan_date, τ = 3%. Ba field
+    # này KHÔNG phải trang trí: `load_plan()` TÁI LẬP lại trần từ chúng và chỉ chấp nhận
+    # `hard_no_chase_ceiling_vnd` nếu con số khớp — plan sửa tay không thể ghi một trần rộng
+    # rồi dán nhãn "rule A". Xem trading_bot/no_chase_ceiling.py (4 bất biến + vì sao đây là
+    # lựa chọn CHÍNH SÁCH chứ không phải edge). Default None = mọi lệnh cũ đi đúng luật cũ.
+    ceiling_rule: str = None
+    ceiling_anchor_price: float = None
+    ceiling_anchor_date: str = None
+    ceiling_tau: float = None
 
     @property
     def value(self):
@@ -221,28 +233,29 @@ def load_plan(plan_date, account="main"):
             if _cf in filtered:
                 filtered[_cf] = normalize_check_field(_cf, filtered[_cf],
                                                       filtered.get("id", ""))
-        # Luật entry-window LAG V2.4 (user duyệt 2026-08-09): lệnh mua có `entry_anchor_price`
-        # thì KHÔNG BAO GIỜ được khớp trên giá đó. Suy thẳng ra trần cứng ngay tại ranh giới
-        # nạp plan — cùng tinh thần filter_excluded_tickers(): enforce Ở MỘT CHỖ, không phụ
-        # thuộc việc plan generator (LLM/người sửa tay) có nhớ ghi thêm field thứ hai hay
-        # không. Generator ghi sẵn trần cứng thì tôn trọng giá trị CHẶT HƠN (min), không nới.
-        anchor = o.get("entry_anchor_price")
-        if filtered.get("side") == "buy" and anchor:
-            try:
-                anchor = float(anchor)
-            except (TypeError, ValueError):
-                anchor = None
-            if anchor and anchor > 0:
-                # `cur` chỉ được thu hẹp trần, không bao giờ vô hiệu hoá nó: giá trị rác
-                # (âm/0/không parse được) phải rơi về anchor, KHÔNG được giữ lại — giữ lại
-                # thì _hard_buy_ceiling() thấy v<=0 sẽ tắt hẳn trần (quant-skeptic
-                # 2026-08-09 bắt được; chưa mã nào sinh ra ca này nhưng đây là lỗi thật).
-                try:
-                    cur = float(filtered.get("hard_no_chase_ceiling_vnd") or 0)
-                except (TypeError, ValueError):
-                    cur = 0.0
-                filtered["hard_no_chase_ceiling_vnd"] = (
-                    min(cur, anchor) if cur > 0 else anchor)
+        # Trần giá mua — enforce Ở MỘT CHỖ, ngay tại ranh giới nạp plan, cùng tinh thần
+        # filter_excluded_tickers(): không phụ thuộc việc plan generator (LLM/người sửa tay)
+        # có nhớ ghi đúng field hay không. Hai luật, cùng một hàm (no_chase_ceiling.py):
+        #   · luật cũ (user duyệt 2026-08-09) — lệnh mua có `entry_anchor_price` thì KHÔNG
+        #     BAO GIỜ được khớp trên giá đó; generator ghi sẵn trần thì lấy giá trị CHẶT HƠN
+        #     (min), và giá trị rác chỉ được RƠI VỀ anchor chứ không vô hiệu hoá trần (nếu
+        #     giữ lại thì _hard_buy_ceiling() thấy v<=0 sẽ tắt hẳn trần — quant-skeptic
+        #     2026-08-09 bắt được).
+        #   · luật A (user chốt 2026-08-15) — order tự khai `ceiling_rule="A"` + provenance;
+        #     trần được TÁI LẬP lại từ provenance đó và chỉ dùng nếu khớp và anchor nằm
+        #     TRƯỚC plan_date. Hỏng bất cứ đâu ⇒ vứt số đã khai, quay về luật cũ.
+        # `plan_date` truyền vào là ngày THỰC THI của plan — đó là thứ khoá bất biến "trần
+        # neo vào phiên đã đóng, tái lập 1 lần/ngày, KHÔNG trượt trong phiên".
+        if filtered.get("side") == "buy":
+            merged = dict(o)
+            merged.update(filtered)
+            ceil, ceil_info = resolve_buy_ceiling(merged, plan_date=d.get("plan_date") or plan_date)
+            if ceil_info.get("mode") == "rule_a_failsafe":
+                print(f"  [CEILING FAIL-SAFE] {filtered.get('id')}: {ceil_info.get('reason')}")
+            if ceil and ceil > 0:
+                filtered["hard_no_chase_ceiling_vnd"] = ceil
+            elif ceil_info.get("mode") == "rule_a_failsafe":
+                filtered.pop("hard_no_chase_ceiling_vnd", None)
         orders.append(PlannedOrder(**filtered))
     d["orders"] = orders
     # preflight_check.sh chấp nhận cả tên field thay thế approved_by_user — gate phải
