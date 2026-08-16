@@ -128,12 +128,26 @@ def main():
                    ((r == q_topic or q_topic in r) or bool(refs & explicit))
                    for r, r_ts, explicit in resolvers)
 
+    def same_ref(a, b):
+        # Port nguyên `_same_ref` của check #5 (arch-review d65167a9): chấp nhận cặp trần ↔
+        # "Agent/topic", nhưng CHỈ bóc tiền tố ở bên có '/' khi bên kia không có — bóc cả
+        # hai thì "Mike/x" khớp "Taylor/x", tức false-CLOSED. Sửa một bên mà quên bên kia
+        # là để báo cáo TUẦN mâu thuẫn với gate hàng ngày.
+        if a == b:
+            return True
+        if "/" in a and "/" not in b:
+            return a.split("/", 1)[1] == b
+        if "/" in b and "/" not in a:
+            return b.split("/", 1)[1] == a
+        return False
+
     def resolved_exact(q_topic, q_ts):
         # Bản KHÔNG substring, dùng RIÊNG cho topic con của `rollup_of` — port nguyên
         # `_resolved_exact` ở ops_health_check.sh check #5 (arch-review coord-2026-08-14).
         if not q_topic:
             return False
-        return any(r_ts >= q_ts and (r == q_topic or q_topic in explicit)
+        return any(r_ts >= q_ts and
+                   (same_ref(q_topic, r) or any(same_ref(q_topic, e) for e in explicit))
                    for r, r_ts, explicit in resolvers)
 
     def rollup_resolved(rec, q_ts):
@@ -155,9 +169,10 @@ def main():
         subs = [str(s).strip() for s in raw if str(s).strip()]
         if not subs:
             return False
-        return all(resolved_exact(s, q_ts)
-                   or ("/" in s and resolved_exact(s.split("/", 1)[1], q_ts))
-                   for s in subs)
+        # Dạng "Agent/topic" xử lý DUY NHẤT trong `same_ref` (xem chú thích cùng tên ở
+        # ops_health_check.sh): bóc tiền tố ở CẢ hai chỗ là bóc hai lần ⇒ "Mike/con" khớp
+        # "Taylor/con", false-CLOSED. Hai bản phải giống nhau từng nhánh.
+        return all(resolved_exact(s, q_ts) for s in subs)
 
     seen = set()
     pending = []

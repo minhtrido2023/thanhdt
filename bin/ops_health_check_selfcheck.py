@@ -762,6 +762,67 @@ def case_rollup_of_substring_holes():
         shutil.rmtree(root, ignore_errors=True)
 
 
+# ── Ca 15e (2026-08-16, arch-review d65167a9): HAI kiểu đóng con hợp lệ mà bản exact đầu tiên
+#    KHÔNG phân biệt được. Mọi assertion 15b/15c đều dùng resolver TRÙNG KHÍT hoặc `resolves`
+#    dạng TRẦN, nên chiều "trần ↔ Agent/topic" hoàn toàn không được phủ.
+#    (a) PHẢI ĐÓNG: con đóng bằng decision gộp khai resolves=["Mike/con-B"] (đúng khuôn
+#        bin/close_bus_question.py) trong khi rollup_of viết dạng trần ["con-B"]. Trước
+#        `_same_ref`, `q_topic in explicit` so nguyên chuỗi ⇒ không khớp ⇒ tổng kẹt VĨNH VIỄN.
+#    (b) PHẢI PENDING (pin CÓ CHỦ ĐÍCH, không phải bug): con chỉ đóng bằng quy ước hậu-tố
+#        trạng thái ("<topic>-question-closed"). `_resolved` bản chính chấp nhận kiểu này qua
+#        nhánh substring, nhưng với rollup thì KHÔNG — vì chính nhánh substring đó là thứ cho
+#        MỘT resolver nuốt nhiều topic con (lỗ 1 của ca 15c). Đổi lại, tổng phải tự đăng
+#        `answer` giữ nguyên topic tổng — đã ghi vào MIKE.md § Escalation TỔNG.
+#        Hướng lỗi ở đây là false-PENDING (tốn 1 job wags_autofix), an toàn hơn hẳn
+#        false-CLOSED (nuốt quyết định của user) — đó là lý do chọn pin thay vì nới.
+#    RED CONTROL: bỏ `_same_ref` (quay lại `q_topic in explicit`) ⇒ assertion (a) đỏ.
+def case_rollup_of_ref_forms():
+    root, inbox = mkbus()
+    try:
+        q_ts = ago(0, 6)
+        def umbrella(topic, subs):
+            e = ev("Mike", "question", topic, q_ts)
+            e["payload"] = {"rollup_of": subs}
+            return e
+        # (a) rollup_of TRẦN, resolves QUALIFIED — hai dạng phải gặp được nhau.
+        gop = ev("Wags", "decision", "quyet-gop-qualified", ago(0, 1))
+        gop["payload"] = {"resolves": ["Mike/con-qual-1", "Mike/con-qual-2"]}
+        # Chiều ngược lại: rollup_of QUALIFIED, resolves TRẦN.
+        gop2 = ev("Wags", "decision", "quyet-gop-tran", ago(0, 1))
+        gop2["payload"] = {"resolves": ["con-nguoc-1"]}
+        # ĐỐI CHỨNG false-CLOSED: cùng tên con nhưng KHÁC agent ⇒ TUYỆT ĐỐI không được khớp.
+        gop3 = ev("Wags", "decision", "quyet-gop-khac-agent", ago(0, 1))
+        gop3["payload"] = {"resolves": ["Taylor/con-khac-agent"]}
+        write_events(os.path.join(inbox, "Mike.jsonl"), [
+            umbrella("tong-tran-vs-qualified", ["con-qual-1", "con-qual-2"]),
+            umbrella("tong-qualified-vs-tran", ["Mike/con-nguoc-1"]),
+            umbrella("tong-khac-agent-khong-duoc-khop", ["Mike/con-khac-agent"]),
+            # (b) con CHỈ đóng bằng hậu-tố trạng thái.
+            umbrella("tong-con-dong-kieu-hau-to", ["con-hau-to"]),
+            ev("Mike", "question", "con-hau-to", ago(1)),
+        ])
+        write_events(os.path.join(inbox, "Wags.jsonl"), [
+            gop, gop2, gop3,
+            ev("Wags", "decision", "con-hau-to-question-closed", ago(0, 1)),
+        ])
+        lines, _ = run_check5(root)
+        out = joined(lines)
+        pending = joined([ln for ln in lines if "trong 48h qua CHƯA thấy answer" in ln])
+        check("rollup_of TRẦN + resolves 'Agent/topic' ⇒ tổng PHẢI tự đóng",
+              "tong-tran-vs-qualified" not in out, out)
+        check("rollup_of 'Agent/topic' + resolves TRẦN ⇒ tổng PHẢI tự đóng (đối xứng 2 chiều)",
+              "tong-qualified-vs-tran" not in out, out)
+        check("ĐỐI CHỨNG false-CLOSED: 'Mike/con' KHÔNG được khớp 'Taylor/con' (khác agent)",
+              "tong-khac-agent-khong-duoc-khop" in pending, out)
+        check("PIN có chủ đích: con đóng kiểu hậu-tố trạng thái ⇒ tổng VẪN pending "
+              "(rollup không nhận substring; xem MIKE.md § Escalation TỔNG)",
+              "tong-con-dong-kieu-hau-to" in pending, out)
+        check("ĐỐI CHỨNG: chính câu hỏi CON đó vẫn tự đóng như cũ (không hồi quy _resolved)",
+              "con-hau-to" not in pending.replace("tong-con-dong-kieu-hau-to", ""), out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
 # ── Ca 15d (2026-08-16): wc_root SAI ⇒ bus/inbox không tồn tại. Trước fix, mọi danh sách rỗng
 #    ⇒ check in ✅ "không có câu hỏi" — im lặng hoá TOÀN BỘ kênh backlog. arch-reviewer vấp
 #    phải khi audit coord-2026-08-14 (check fail_silent, đề nghị mở ticket riêng).
@@ -1086,7 +1147,8 @@ def main():
                case_wagsfix_only_no_false_ok, case_wagsfix_prefix_list_in_sync,
                case_triaged_needs_human_ack, case_triaged_only_no_false_ok,
                case_ack_suppress_days_window, case_rollup_of_umbrella_question,
-               case_rollup_of_substring_holes, case_missing_inbox_dir_is_warn_not_green,
+               case_rollup_of_substring_holes, case_rollup_of_ref_forms,
+               case_missing_inbox_dir_is_warn_not_green,
                case_ack_suppress_days_capped,
                case_aged_wagsfix_never_truncated, case_aged_no_wagsfix_keeps_old_cut,
                case_aged_wagsfix_overflow_is_loud,

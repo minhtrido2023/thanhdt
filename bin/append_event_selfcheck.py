@@ -50,8 +50,14 @@ def run(sandbox, args, env_extra=None, cwd=None):
     env = dict(os.environ)
     env.pop("JOB_ID", None)          # nếu không, fallback $JOB_ID che mất ca "không trace_id"
     env.update(env_extra or {})
+    # errors="surrogateescape": ca byte-hỏng truyền argv chứa byte không hợp lệ, và
+    # append_event.sh in lại dòng event ra stdout ⇒ subprocess giải mã STRICT sẽ nổ
+    # UnicodeDecodeError ngay trong communicate(), TRƯỚC khi tới bất kỳ assertion nào —
+    # tức harness chết vì lý do không liên quan tới thứ đang đo. Không nới lỏng gì:
+    # assertion đọc lại BYTE của file bus, không đọc stdout này.
     p = subprocess.run([os.path.join(sandbox, "bin", "append_event.sh")] + args,
-                       capture_output=True, text=True, env=env, cwd=cwd)
+                       capture_output=True, text=True, errors="surrogateescape",
+                       env=env, cwd=cwd)
     return p.returncode, p.stdout, p.stderr
 
 
@@ -252,11 +258,70 @@ def case_quarantine_survives_discarded_stderr():
     shutil.rmtree(d, ignore_errors=True)
 
 
+def case_byte_hong_khong_dau_doc_duoc_bus():
+    """Khoá hồi quy cho mike_json.py::_utf8_safe (arch-review round 2, coord-2026-08-16).
+
+    bus/inbox/*.jsonl là APPEND-ONLY: một dòng byte hỏng nằm đó VĨNH VIỄN, và load_jsonl —
+    reader dùng chung của MỌI consumer (ops_health_check §5, wags_autofix bước 1.5,
+    consolidate, trace) — ném UnicodeDecodeError cho cả file, tức câm luôn kênh escalation.
+    Byte hỏng vào được vì caller cắt chuỗi bằng `cut -c`/`head -c` dưới LANG="C" (đếm BYTE)
+    giữa một ký tự tiếng Việt 3 byte; Python đọc argv bằng surrogateescape nên nó đi lọt tới
+    tận json.dumps và ghi ra rc=0. Chốt thật nằm ở CHOKEPOINT cmd_event, nên phải test qua
+    chính append_event.sh chứ không gọi hàm trực tiếp.
+
+    Ca này RED trên c528aa7e^ (tái lập: UnicodeDecodeError @142-143) và GREEN từ c528aa7e.
+    """
+    d = mksandbox()
+    # b"k\xe1\xba" = 'k' + 2/3 byte đầu của một ký tự tiếng Việt bị cắt cụt — đúng thứ
+    # `cut -c1-300` sinh ra. surrogateescape biến nó thành '\udce1\udcba' trong argv.
+    topic = "chu-de-" + b"k\xe1\xba".decode("utf-8", errors="surrogateescape")
+    payload = json.dumps({"err_tail": "loi " + b"th\xe1\xbb".decode("utf-8",
+                                                                   errors="surrogateescape")},
+                         ensure_ascii=False)
+    rc, _, err = run(d, ["W", "status", topic, payload, "W_20260101_000000"], cwd=d)
+    check("byte hỏng: append_event.sh vẫn exit 0 (không chặn — chốt là làm SẠCH, không từ chối)",
+          rc == 0, f"rc={rc} err={err[-200:]}")
+
+    bus = os.path.join(d, "bus", "inbox", "W.jsonl")
+    raw = open(bus, "rb").read() if os.path.exists(bus) else b""
+    try:
+        raw.decode("utf-8")
+        utf8_ok = True
+    except UnicodeDecodeError as e:
+        utf8_ok = False
+        err = str(e)
+    check("byte hỏng: dòng ghi ra bus là UTF-8 HỢP LỆ (đọc strict được)", utf8_ok,
+          err if not utf8_ok else "")
+
+    # Đọc lại bằng CHÍNH load_jsonl production — nếu nó chết thì mọi consumer cũng chết.
+    probe = (f"import sys; sys.path.insert(0, {os.path.join(ROOT, 'bin')!r}); "
+             f"import mike_json; print(len(mike_json.load_jsonl([{bus!r}])))")
+    p = subprocess.run([sys.executable, "-c", probe], capture_output=True, text=True)
+    check("byte hỏng: load_jsonl production đọc lại được (rc=0, không UnicodeDecodeError)",
+          p.returncode == 0 and p.stdout.strip() == "1",
+          f"rc={p.returncode} out={p.stdout.strip()} err={p.stderr.strip()[-250:]}")
+
+    # ĐỐI CHỨNG: tiếng Việt/emoji HỢP LỆ phải giữ NGUYÊN XI, không bị _utf8_safe làm hỏng.
+    d2 = mksandbox()
+    good = "kết thúc bất thường 🔴 — hết hạn"
+    rc2, _, _ = run(d2, ["W", "status", good, json.dumps({"n": [1, 2, {"k": "ế"}]},
+                                                         ensure_ascii=False),
+                         "W_20260101_000000"], cwd=d2)
+    ev = json.loads(open(os.path.join(d2, "bus", "inbox", "W.jsonl"),
+                         encoding="utf-8").readline())
+    check("ĐỐI CHỨNG: dữ liệu hợp lệ (tiếng Việt + emoji + payload lồng) giữ NGUYÊN XI",
+          rc2 == 0 and ev.get("topic") == good and ev.get("payload", {}).get("n", [])[2]
+          == {"k": "ế"}, f"rc={rc2} topic={ev.get('topic')!r} payload={ev.get('payload')!r}")
+    shutil.rmtree(d, ignore_errors=True)
+    shutil.rmtree(d2, ignore_errors=True)
+
+
 def main():
     for fn in (case_valid_paths, case_too_many_args, case_truncated_json_payload,
                case_trace_id_shape, case_job_id_fallback,
                case_verify_finding_sanitizes_inherited_trace_id,
-               case_quarantine_survives_discarded_stderr):
+               case_quarantine_survives_discarded_stderr,
+               case_byte_hong_khong_dau_doc_duoc_bus):
         print(f"\n{fn.__name__}")
         fn()
     print()

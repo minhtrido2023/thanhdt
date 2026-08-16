@@ -94,7 +94,13 @@ _post_q() {{ printf '%s\\n%s\\n' "$1" "$2" >> {qf}; }}
 echo "REACHED_END_OF_BLOCK"
 """
     p = subprocess.run(["bash", "-c", harness], capture_output=True, text=True)
-    rd = lambda f: open(f, encoding="utf-8").read() if os.path.exists(f) else ""
+    # errors="surrogateescape", KHÔNG phải strict (arch-review round 2, coord-2026-08-16):
+    # ca kiểm chính của file này CỐ TÌNH tạo byte hỏng. Đọc strict thì hàm này nổ
+    # UnicodeDecodeError TRƯỚC khi tới assertion ⇒ vẫn RED (rc≠0) nên không im lặng, nhưng
+    # thông điệp là traceback chứ không phải tên assertion, tức người đọc không biết chốt
+    # nào vừa gãy. Surrogate lọt qua đây sẽ bị chính assertion "không lọt \udcxx" tố cáo.
+    rd = lambda f: (open(f, encoding="utf-8", errors="surrogateescape").read()
+                    if os.path.exists(f) else "")
     return p, rd(nf), rd(qf)
 
 
@@ -162,9 +168,31 @@ def main():
     # ranh giới vào chỗ vỡ. KHÔNG được chỉ assert "payload là JSON hợp lệ": json.loads PASS
     # ca hỏng này (surrogate vẫn parse) — phải assert BYTE ghi ra là UTF-8 hợp lệ VÀ
     # load_jsonl đọc lại được, vì bus là append-only: một dòng hỏng làm câm cả file mãi mãi.
-    pad = "x" * 297          # đẩy ranh giới 300 byte vào GIỮA ký tự 3 byte ngay sau đó
+    # ĐỘ DÀI PAD PHẢI TÍNH, KHÔNG ĐƯỢC HARDCODE (arch-review round 2 bắt được: bản đầu
+    # hardcode pad=297 nhưng tiền tố "timeout " dài 8 byte nên phần ASCII thành 305 byte —
+    # `cut -c1-300` cắt giữa đám 'x', tiếng Việt KHÔNG HỀ lọt vào 300 byte đầu, và mutation
+    # test gỡ hẳn `| iconv` VẪN PASS 100%. Test xanh vì lý do chẳng liên quan gì tới thứ nó
+    # khai đang bảo vệ — đúng hình thái bug TZ 07-31). Tính pad từ CHÍNH chuỗi sẽ dùng, rồi
+    # ASSERT tiền đề: 300 byte đầu phải KHÔNG decode được. Nếu ai đó sửa câu tiếng Việt hay
+    # đổi tiền tố, tiền đề gãy và test kêu NGAY thay vì âm thầm hết kiểm gì.
+    _pfx, _tail_gap = "timeout ", 1   # 1 byte cho dấu cách `tr "\n" " "` phụ vào cuối
     viet = "dispatch Wags kết thúc bất thường (exit=1) — hết hạn xác thực, phiên đã cũ"
-    p4, _, postq4 = run_block(block, dispatch_rc=1, out=f"timeout {pad}{viet}\n")
+    pad = None
+    for _n in range(200, 300):
+        _raw = (_pfx + "x" * _n + viet).encode("utf-8")
+        if len(_raw) <= 300:
+            continue
+        try:
+            _raw[:300].decode("utf-8")
+        except UnicodeDecodeError:
+            pad = "x" * _n
+            break
+    check("TIỀN ĐỀ: dựng được chuỗi mà 300 byte đầu cắt ĐÚNG giữa ký tự đa byte "
+          "(không có nó thì mọi assertion dưới đây vô nghĩa)", pad is not None,
+          f"pad={pad if pad is None else len(pad)}")
+    if pad is None:
+        pad = "x" * 276
+    p4, _, postq4 = run_block(block, dispatch_rc=1, out=f"{_pfx}{pad}{viet}\n")
     line = postq4.strip().split("\n")[1] if len(postq4.strip().split("\n")) > 1 else ""
     try:
         line.encode("utf-8")

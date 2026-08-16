@@ -450,6 +450,28 @@ if os.path.isdir(inbox_dir):
         return any(r_ts >= q_ts and
                    ((r == q_topic or q_topic in r) or bool(refs & explicit))
                    for r, r_ts, explicit in resolvers)
+    def _same_ref(a, b):
+        """Hai chuỗi có trỏ CÙNG một câu hỏi không, chấp nhận cặp trần ↔ 'Agent/topic'.
+
+        Bất đối xứng do arch-review d65167a9 bắt: `_resolved` tự dựng refs={topic,
+        agent/topic} nên nó khớp cả 2 dạng, còn `_resolved_exact` so NGUYÊN CHUỖI với
+        `explicit` ⇒ con đóng bằng decision gộp khai resolves=["Mike/con-B"] (đúng khuôn
+        bin/close_bus_question.py) mà rollup_of viết dạng trần ["con-B"] thì KHÔNG khớp,
+        escalation TỔNG kẹt pending VĨNH VIỄN và đốt job wags_autofix mỗi ngày — đúng vòng
+        lãng phí mà rollup_of ra đời để diệt.
+
+        CHỈ bóc tiền tố ở bên NÀO CÓ '/' và chỉ khi bên kia KHÔNG có: nếu bóc cả hai thì
+        "Mike/x" sẽ khớp "Taylor/x" — hướng false-CLOSED, nguy hiểm hơn hẳn false-pending
+        đang sửa. Đây vẫn là exact-match, không phải nới về substring.
+        """
+        if a == b:
+            return True
+        if "/" in a and "/" not in b:
+            return a.split("/", 1)[1] == b
+        if "/" in b and "/" not in a:
+            return b.split("/", 1)[1] == a
+        return False
+
     def _resolved_exact(q_topic, q_ts):
         # Như _resolved nhưng BỎ nhánh substring (`q_topic in r`). Dùng RIÊNG cho topic con
         # của `rollup_of`. Lý do (arch-review coord-2026-08-14, killer_objection): danh sách
@@ -462,7 +484,8 @@ if os.path.isdir(inbox_dir):
         # hơn nhiều so với 1 job wags_autofix thừa. `resolves` (khai tường minh) vẫn tính.
         if not q_topic:
             return False
-        return any(r_ts >= q_ts and (r == q_topic or q_topic in explicit)
+        return any(r_ts >= q_ts and
+                   (_same_ref(q_topic, r) or any(_same_ref(q_topic, e) for e in explicit))
                    for r, r_ts, explicit in resolvers)
     def _rollup_resolved(rec, q_ts):
         # Câu hỏi TỔNG (escalation gom nhiều câu hỏi con đã mở sẵn) — ca thật
@@ -492,11 +515,13 @@ if os.path.isdir(inbox_dir):
         subs = [str(s).strip() for s in raw if str(s).strip()]
         if not subs:
             return False
-        # Chấp nhận cả dạng "Agent/topic" (đúng chuỗi checker in ra, người hay copy thẳng):
-        # thử cả nguyên chuỗi lẫn phần sau dấu "/" đầu tiên.
-        return all(_resolved_exact(s, q_ts)
-                   or ("/" in s and _resolved_exact(s.split("/", 1)[1], q_ts))
-                   for s in subs)
+        # Dạng "Agent/topic" (đúng chuỗi checker in ra, người hay copy thẳng) được xử lý
+        # DUY NHẤT một chỗ: `_same_ref` bên trong `_resolved_exact`. Trước đây chỗ này bóc
+        # tiền tố TRƯỚC rồi gọi _resolved_exact, nên khi _same_ref cũng bóc ở phía `explicit`
+        # là bóc HAI LẦN: rollup_of=["Mike/con"] khớp được resolves=["Taylor/con"] — đóng
+        # escalation của agent này bằng quyết định của agent KHÁC, tức false-CLOSED, hướng
+        # lỗi nguy hiểm nhất. Selfcheck ca 15e giữ đúng chốt đối chứng này.
+        return all(_resolved_exact(s, q_ts) for s in subs)
     def _acked(q_agent, q_topic, q_ts):
         # Khớp CHÍNH XÁC (không substring như _resolved): ack chỉ tắt auto-dispatch nên sai
         # sót về phía "vẫn dispatch" là an toàn; nới lỏng match ở đây thì 1 ack topic ngắn
@@ -688,12 +713,16 @@ if aged_q:
 #     ra để diệt. Dòng dưới là NGƯỜI ĐỌC đó; người DỌN là fleet_housekeeping.sh category
 #     `rotate`. Cố ý ĐỂ NGOÀI CHECK5_BEGIN/END: khối đó có hợp đồng namespace hạn chế với
 #     ops_health_check_selfcheck.py (chỉ glob/gzip/json/os/re + W/OK + wc_root).
+# 5b_BEGIN — marker ỔN ĐỊNH cho bin/ops_health_check_rejected_selfcheck.py. Khối chỉ được
+# dùng: os/json + wc_root + W()/OK() (selfcheck cung cấp đúng bấy nhiêu); mọi thứ khác PHẢI
+# tự import TẠI ĐÂY (xem sự cố defaultdict 2026-08-07 ghi ở đầu CHECK5).
 _qf = os.path.join(wc_root, "mike", "bus", "_rejected.jsonl")
 if os.path.exists(_qf):
     import datetime as _dt
     _q24, _qtot, _qbad = [], 0, 0
     _qcut = (_dt.datetime.now(_dt.timezone.utc) - _dt.timedelta(hours=24)
              ).strftime("%Y-%m-%dT%H:%M:%SZ")
+    _qerr = None
     try:
         # errors="replace": file này chứa arg ĐÃ BỊ CHẶN vì hỏng — đọc nó mà chết
         # UnicodeDecodeError thì check cảnh báo lại tự thành sự cố im lặng thứ hai.
@@ -703,27 +732,49 @@ if os.path.exists(_qf):
                 if not _ln:
                     continue
                 _qtot += 1
+                # try BỌC CẢ THÂN VÒNG LẶP, không chỉ json.loads (arch-review round 2):
+                # bản đầu để `_r.get(...)` NGOÀI try nên một dòng JSON không-phải-object
+                # (vd `12345`) ném AttributeError thoát thẳng ra `except` bao ngoài ⇒ vòng
+                # quét ĐỨT giữa chừng, mọi bản ghi PHÍA SAU vô hình. Reader sinh ra để diệt
+                # fail-silent mà tự fail-silent. Dòng hỏng giờ chỉ tăng _qbad rồi đi tiếp.
                 try:
                     _r = json.loads(_ln)
+                    if not isinstance(_r, dict):
+                        raise ValueError("dòng JSON không phải object")
+                    if str(_r.get("ts", "")) >= _qcut:
+                        _q24.append(_r)
                 except Exception:
                     _qbad += 1
                     continue
-                if _r.get("ts", "") >= _qcut:
-                    _q24.append(_r)
     except Exception as _e:
-        lines.append(f"ℹ️ Không đọc được bus/_rejected.jsonl: {_e}")
+        _qerr = _e
+    if _qerr is not None:
+        # W() chứ KHÔNG phải lines.append: lines.append in ra ℹ️ mà KHÔNG tăng biến `warn`
+        # ⇒ không escalate, đúng thứ hình thái im lặng mà cả khối này đi diệt.
+        W(f"Không đọc được bus/_rejected.jsonl ({_qerr}) — hàng đợi cách ly của "
+          f"append_event.sh đang KHÔNG được giám sát; event bị chặn sẽ mất dấu vết.")
     if _q24 or _qbad:
-        _who = sorted({(_r.get("argv") or [""])[0] or "?" for _r in _q24})
-        _why = sorted({(_r.get("reason") or "?").split("\n")[0][:70] for _r in _q24})
+        # Ép kiểu + đặt TRONG vùng an toàn: file này chứa dữ liệu HỎNG theo thiết kế, một
+        # bản ghi méo (reason là list, argv là dict) từng đủ sức ném ra ngoài heredoc và
+        # giết CẢ 11 check của ops_health_check, không riêng khối này (arch-review round 2).
+        def _q_who(_r):
+            _a = _r.get("argv")
+            return str(_a[0]) if isinstance(_a, list) and _a else "?"
+        _who = sorted({_q_who(_r) for _r in _q24})
+        _why = sorted({str(_r.get("reason") or "?").split("\n")[0][:70] for _r in _q24})
         W(f"append_event.sh đã CÁCH LY {len(_q24)} bản ghi trong 24h qua "
-          f"(tổng {_qtot} từ trước tới nay{f', {_qbad} dòng không parse được' if _qbad else ''}) "
+          f"({_qtot} bản ghi trong file hiện tại"
+          f"{f', {_qbad} dòng không parse được' if _qbad else ''}) "
           f"— đây là event KHÔNG BAO GIỜ lên bus: agent gọi bị shell word-split payload và "
           f"phần lớn call site nuốt stderr nên agent tưởng đã ghi thành công. "
           f"Agent: {_who}. Lý do: {_why}. "
           f"Xem `tail bus/_rejected.jsonl`; sửa cách quote ở call site rồi ghi LẠI event "
           f"(hàng đợi này là PHÁP Y, không ai tự phát lại — payload hỏng phát lại vẫn hỏng).")
     elif _qtot:
-        OK(f"Hàng đợi cách ly append_event.sh: {_qtot} bản ghi cũ, 24h qua không có ca mới.")
+        OK(f"Hàng đợi cách ly append_event.sh: {_qtot} bản ghi cũ trong file hiện tại, "
+           f"24h qua không có ca mới.")
+# 5b_END — bin/ops_health_check_rejected_selfcheck.py TRÍCH khối giữa 5b_BEGIN/5b_END rồi
+# chạy trên namespace stub. Đổi/xoá 2 marker này ⇒ selfcheck FAIL ngay, không im lặng.
 
 # 6. Corp-action backlog (data/corp_action_backlog.json, ghi bởi update_shares_live.py
 #    --scan mỗi ngày 18:40 ICT — đọc file local, KHÔNG query BQ trực tiếp ở đây để giữ

@@ -155,12 +155,29 @@ Khi thấy event_type `question` trong KB delta, Mike phải:
 có topic RIÊNG, nên đóng hết các câu hỏi con KHÔNG đóng được nó (`ops_health_check` check #5
 khớp theo topic-string) ⇒ nó ở lại pending và đốt 1 job `wags_autofix` mỗi ngày cho tới khi ai
 đó nhớ ra (ca thật `retro-escalation-2026-08-13-patternB-and-backlog`). Khai tường minh danh
-sách topic con trong payload thì check #5 tự đóng tổng khi MỌI con đã có `answer`/`decision`:
+sách topic con trong payload thì check #5 tự đóng tổng khi MỌI con đã đóng:
 ```bash
 bin/append_event.sh Mike question "retro-escalation-<ngày>-..." \
   '{"summary":"...", "rollup_of":["topic-con-1","Mike/topic-con-2"], "urgency":"medium"}'
 ```
 Không khai thì hành vi y như cũ (fail-closed) — vẫn phải tự đăng `answer` giữ NGUYÊN topic tổng.
+
+**Luật khớp topic con — ĐỌC TRƯỚC KHI VIẾT `rollup_of`** (siết ngày 2026-08-16, commit
+`d65167a9` + arch-review; trước đó khớp lỏng hơn nên tài liệu cũ nói sai):
+- Topic con phải viết **ĐÚNG NGUYÊN VĂN** topic câu hỏi con. Cắt cụt / thêm / bớt là KHÔNG
+  khớp. (Khớp substring đã bị bỏ: nó cho MỘT decision thoả nhiều topic con cùng lúc, đóng oan
+  cả escalation tổng trong khi con vẫn đang chờ user.)
+- Viết `"topic-con"` hay `"Mike/topic-con"` đều được, và khớp được với cả 2 dạng ở phía đóng —
+  nhưng **khác agent thì không khớp**: `"Mike/x"` không bao giờ đóng bằng `"Taylor/x"`.
+- Con được tính là đã đóng khi có `answer`/`decision` **trùng khít topic**, hoặc một event
+  khai `resolves` chứa topic đó (khuôn `bin/close_bus_question.py`) — đăng SAU câu hỏi tổng.
+- ⚠️ Đóng con theo **quy ước hậu-tố trạng thái** (`<topic>-question-closed`, `-CONFIRMED`…)
+  đóng được CHÍNH câu hỏi con, nhưng **KHÔNG tính cho rollup** — tổng sẽ vẫn pending. Muốn
+  đóng tổng thì tự đăng `answer` giữ nguyên topic tổng. Đây là lựa chọn có chủ đích: hướng
+  lỗi này chỉ tốn 1 job `wags_autofix` thừa, còn nới ra thì nuốt mất quyết định của user.
+- `rollup_of` tới nay **chưa có lần dùng thật nào trên bus**, nên lần escalation TỔNG đầu tiên
+  phải tự kiểm tận nơi (`bin/bus_question_audit.py` xem tổng có tự đóng không), đừng tin
+  cơ chế đã chạy đúng.
 
 ## Routing — khi user hỏi Mike
 1. Tra `kb/KNOWLEDGE.md` + `kb/context_pack.md` + `kb/fleet_status.md` trước.
