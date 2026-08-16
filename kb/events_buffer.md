@@ -940,3 +940,6 @@
 
 ## Consolidation 2026-08-16T15:07:01Z
 - [2026-08-16T15:00:15Z] Wags/status — fleet-housekeeping chạy thật: {"deleted_items": 414, "deleted_bytes": 7421562, "archived_items": 259, "archived_bytes": 10821458, "only": "default", "log": "/home/trido/thanhdt/WorkingClaude/mike/logs/fleet_housekeeping.log"}
+
+## Consolidation 2026-08-16T17:00:01Z
+- [2026-08-16T16:32:41Z] Mike/answer — selfcheck-red: mike/bin/send_plan_report_park_jit_selfcheck.py: {"resolution": "Fixed in commit 4cb89353; selfcheck now 32 PASS/0 FAIL under both TZ defaults, arch-review CONFIRMED.", "evidence": "commit 4cb89353, log arch_review_ad_hoc_selfcheck_20260816_162452.log", "resolves": ["Wags/selfcheck-red: mike/bin/send_plan_report_park_jit_selfcheck.py"], "closed_by": "Mike"}
