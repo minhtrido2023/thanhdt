@@ -732,3 +732,6 @@
 
 ## Consolidation 2026-08-16T08:15:33Z
 - [2026-08-16T08:15:28Z] Taylor/finding — canary-deepseek-codex-1-fleet-status: {"summary": "fleet_status.md 2026-08-16T08:07:01 UTC: chi co Mike dang working (heartbeat 14 phut truoc); DollarBill, Taylor, Winston, Wags va hau het child/external sessions deu dead/stale. Canary doc file xong, khong sua file, khong ghi BQ."}
+
+## Consolidation 2026-08-16T08:15:55Z
+- [2026-08-16T08:15:47Z] Wags/finding — canary-cli-providers-enabled: {"enabled_providers": ["claude", "opencode", "codex"], "default_model": {"opencode": "opencode/deepseek-v4-flash-free", "codex_field": null, "codex_config_effective": "gpt-5.6-terra"}, "source": "mike/kb/cli_providers.json"}
