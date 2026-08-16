@@ -915,6 +915,53 @@ else:
       f"— nghi cron 00:30 ICT đêm qua crash/không hoàn tất (đúng lớp lỗi 08-01: quoting bug làm "
       f"script chết trước khi kịp notify). Kiểm logs/daily_retro.log tìm lỗi bash gần nhất.")
 
+# 9b. Pending decisions trong working memory phải có bus question backing (thêm 2026-08-16,
+#     sau incident GDKHQ D1-D3 chỉ tracked trong memory — quyết định mất khi session restart).
+#     Protocol: mọi pending user decision PHẢI được mở bus question trước khi vào working memory.
+#     Pattern tìm: "## PENDING_DECISION: <topic>" trong kb/memory/Mike.md.
+#     [WARN-ONLY]: chỉ báo cáo, không dispatch — đây là lỗi quy trình Mike tự sửa khi đọc báo cáo.
+mike_mem_9b = os.path.join(wc_root, "mike", "kb", "memory", "Mike.md")
+if os.path.exists(mike_mem_9b):
+    try:
+        import re as _re9b
+        _mem9b = open(mike_mem_9b, encoding="utf-8").read()
+        _pending9b = _re9b.findall(r'##\s+PENDING_DECISION:\s*(.+)', _mem9b)
+        if _pending9b:
+            # Build set of open bus question topics (question posted, no answer/decision yet)
+            _open9b = set()
+            for _bd in [os.path.join(wc_root, "mike", "bus", "inbox"),
+                        os.path.join(wc_root, "mike", "bus", "archive")]:
+                if not os.path.isdir(_bd):
+                    continue
+                for _fn9b in sorted(os.listdir(_bd)):
+                    if not _fn9b.endswith(".jsonl"):
+                        continue
+                    try:
+                        for _ln9b in open(os.path.join(_bd, _fn9b), encoding="utf-8"):
+                            try:
+                                _ev9b = json.loads(_ln9b.strip())
+                                _et9b = _ev9b.get("event_type", "")
+                                _tp9b = _ev9b.get("topic", "")
+                                if _et9b == "question":
+                                    _open9b.add(_tp9b)
+                                elif _et9b in ("answer", "decision"):
+                                    _open9b.discard(_tp9b)
+                            except Exception:
+                                pass
+                    except Exception:
+                        pass
+            _unbacked9b = [t.strip() for t in _pending9b if t.strip() not in _open9b]
+            if _unbacked9b:
+                W(f"[WARN-ONLY] check 9b: {len(_unbacked9b)} PENDING_DECISION trong working memory "
+                  f"KHÔNG có bus question backing: {_unbacked9b}. "
+                  f"Protocol vi phạm — quyết định chỉ trong memory sẽ mất khi session restart. "
+                  f"Fix: bin/append_event.sh Mike question <topic> '{{...}}' TRƯỚC KHI viết vào memory.")
+            else:
+                OK(f"check 9b: {len(_pending9b)} PENDING_DECISION trong working memory, "
+                   f"tất cả có bus question backing.")
+    except Exception as _e9b:
+        lines.append(f"ℹ️ check 9b: không đọc được Mike.md ({_e9b})")
+
 # 10. notify_thread.sh không phân giải được topic ⇒ TIN NHẮN BỊ NUỐT (thêm 2026-08-02, saga
 #     discord-routing vòng 4). notify_thread.sh ghi 1 dòng vào logs/notify_thread_errors.log
 #     mỗi lần nó không gửi được; mọi caller đều bọc `2>/dev/null || true` nên KHÔNG ai thấy
