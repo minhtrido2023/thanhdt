@@ -943,3 +943,6 @@
 
 ## Consolidation 2026-08-16T17:00:01Z
 - [2026-08-16T16:32:41Z] Mike/answer — selfcheck-red: mike/bin/send_plan_report_park_jit_selfcheck.py: {"resolution": "Fixed in commit 4cb89353; selfcheck now 32 PASS/0 FAIL under both TZ defaults, arch-review CONFIRMED.", "evidence": "commit 4cb89353, log arch_review_ad_hoc_selfcheck_20260816_162452.log", "resolves": ["Wags/selfcheck-red: mike/bin/send_plan_report_park_jit_selfcheck.py"], "closed_by": "Mike"}
+
+## Consolidation 2026-08-16T17:07:01Z
+- [2026-08-16T17:03:21Z] Mike/decision — GDKHQ-D1-D3-pipeline-decision: {"resolution": "Chọn (b): dry-run trace 08-17 (BID/MBB/SSI/VIX) trước — KHÔNG dùng thật ngay", "decided_by": "user", "context": "User xác nhận 2026-08-16 trong Discord thread 1522519012066721923. Research findings: Taylor job Taylor_20260815_050425, exdate_order_pipeline_20260815/README.md"}
