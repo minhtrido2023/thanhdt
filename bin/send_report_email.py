@@ -43,23 +43,22 @@ sys.path.insert(0, ROOT)
 from render_report_html import render_html  # noqa: E402
 
 
-def _attach_inline_images(html_body, related):
-    """Replace data:image URIs with cid: links and attach the images inline."""
+def _collect_inline_images(html_body):
+    """Replace data:image URIs with cid: links and return the images to attach."""
     counter = {"n": 0}
+    images = []
 
     def _replace(match):
         mime, b64 = match.group(1), match.group(2)
         subtype = mime.split("/", 1)[1] if "/" in mime else "png"
         data = base64.b64decode(b64)
-        img = MIMEImage(data, _subtype=subtype)
         cid = f"report-image-{counter['n']}"
-        img.add_header("Content-ID", f"<{cid}>")
-        img.add_header("Content-Disposition", "inline", filename=f"{cid}.{subtype}")
-        related.attach(img)
+        images.append({"cid": cid, "subtype": subtype, "data": data})
         counter["n"] += 1
         return f'src="cid:{cid}"'
 
-    return re.sub(r'src="data:([^;]+);base64,([^"]+)"', _replace, html_body)
+    new_html = re.sub(r'src="data:([^;]+);base64,([^"]+)"', _replace, html_body)
+    return new_html, images
 
 
 def main():
@@ -118,8 +117,15 @@ def main():
     msg["From"] = from_email
     msg["To"] = to_email
     msg["Subject"] = subject
+    html_body, inline_images = _collect_inline_images(html_body)
     related = MIMEMultipart("related")
-    related.attach(MIMEText(_attach_inline_images(html_body, related), "html", "utf-8"))
+    related.attach(MIMEText(html_body, "html", "utf-8"))
+    for image in inline_images:
+        img = MIMEImage(image["data"], _subtype=image["subtype"])
+        img.add_header("Content-ID", f"<{image['cid']}>")
+        img.add_header("Content-Disposition", "inline",
+                       filename=f"{image['cid']}.{image['subtype']}")
+        related.attach(img)
     msg.attach(related)
 
     with open(args.report_path, "rb") as f:
