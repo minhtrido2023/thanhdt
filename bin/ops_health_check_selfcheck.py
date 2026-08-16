@@ -461,7 +461,49 @@ def case_c10_fresh_log_without_timestamp_line():
         lines, warn = run_check10(root)
         out = joined(lines)
         check("check10: log không có dòng timestamp ⇒ vẫn WARN, không ném exception",
-              len(warn) == 1 and "không đọc được nội dung" in out, out)
+              len(warn) == 1 and "KHÔNG đọc được bản ghi nào có timestamp" in out, out)
+        check("check10: không có dòng timestamp ⇒ KHÔNG khẳng định mất tin",
+              "TIN NHẮN ĐÃ BỊ NUỐT" not in out, out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+# ── Ca c10-swap (2026-08-16, arch-review coord-2026-08-12 required_change #3): file
+#    notify_thread_errors.log chứa HAI loại bản ghi có hệ quả NGƯỢC nhau. "DA TU SUA VA GUI"
+#    nghĩa là caller đảo thứ tự đối số nhưng tin ĐÃ ĐẾN nơi; gộp nó vào tiêu đề "TIN NHẮN ĐÃ
+#    BỊ NUỐT" là nói với người rằng một tin đã giao là bị mất. "Sửa cả người ĐỌC, không chỉ
+#    người GHI."
+SWAP_LINE = ('2026-08-16T09:00:00+07:00 notify_thread: DOI SO BI DAO (topic o vi tri 1, '
+             'message o vi tri 2) — DA TU SUA VA GUI toi topic "architecture". '
+             'SUA CALL SITE: dung `notify_thread.sh "<message>" <topic>`. caller=bin/foo.sh\n')
+HARD_LINE = "2026-08-16T09:05:00+07:00 notify_thread: KHONG phan giai duoc topic bar\n"
+
+
+def case_c10_swap_recovery_is_not_swallowed():
+    root = _mklog(SWAP_LINE)
+    try:
+        lines, warn = run_check10(root)
+        out = joined(lines)
+        check("check10: CHỈ có bản ghi tự-sửa ⇒ KHÔNG nói 'TIN NHẮN ĐÃ BỊ NUỐT'",
+              "TIN NHẮN ĐÃ BỊ NUỐT" not in out, out)
+        check("check10: bản ghi tự-sửa vẫn WARN (call site còn sai) và nói rõ tin ĐÃ GỬI",
+              len(warn) == 1 and "ĐÃ ĐƯỢC GỬI" in out, out)
+        check("check10: bản ghi tự-sửa vẫn mang marker [WARN-ONLY]",
+              "[WARN-ONLY]" in out, out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+def case_c10_hard_error_wins_over_swap():
+    # Lỗi THẬT lẫn với bản ghi tự-sửa: không được để bản ghi tự-sửa che mất lỗi thật.
+    root = _mklog(SWAP_LINE + HARD_LINE)
+    try:
+        lines, warn = run_check10(root)
+        out = joined(lines)
+        check("check10: có lỗi THẬT lẫn bản ghi tự-sửa ⇒ vẫn báo TIN NHẮN ĐÃ BỊ NUỐT",
+              "TIN NHẮN ĐÃ BỊ NUỐT" in out, out)
+        check("check10: trích đúng dòng lỗi THẬT, không phải dòng tự-sửa",
+              "KHONG phan giai duoc topic bar" in out and "DA TU SUA VA GUI" not in out, out)
     finally:
         shutil.rmtree(root, ignore_errors=True)
 
@@ -640,7 +682,13 @@ def case_rollup_of_umbrella_question():
             umbrella("tong-khong-khai", None),
             umbrella("tong-rollup-rong", []),
             umbrella("tong-rollup-sai-kieu", "con-a"),
-            umbrella("tong-dang-agent-slash", ["Winston/con-b"]),
+            # Dạng "Agent/topic" (người copy thẳng chuỗi checker in ra) vẫn phải khớp — NHƯNG
+            # phải là ĐÚNG agent sở hữu câu hỏi con. Bản đầu của ca này viết "Winston/con-b"
+            # cho câu hỏi `Mike/con-b` và assert nó KHỚP: tức chính là hành vi false-CLOSED
+            # chéo agent mà arch-review round 3 bắt được, bị đóng đinh thành assertion. Sửa
+            # về đúng agent, và thêm ca dưới để khoá chiều sai lại.
+            umbrella("tong-dang-agent-slash", ["Mike/con-b"]),
+            umbrella("tong-dang-agent-SAI", ["Winston/con-b"]),
             # Con đã đóng TRƯỚC khi escalation tổng được mở ⇒ không được tính là đã quyết
             # (giữ đúng ràng buộc thời gian của _resolved: escalation mở lại là chuyện mới).
             umbrella("tong-con-dong-truoc-khi-hoi", ["con-dong-som"]),
@@ -661,8 +709,11 @@ def case_rollup_of_umbrella_question():
               "tong-du-2-con" not in out, out)
         check("rollup_of RED CONTROL: thiếu 1 con chưa đóng ⇒ TỔNG vẫn pending (all, không any)",
               "tong-thieu-1-con" in pending, out)
-        check("rollup_of: dạng 'Agent/topic' vẫn khớp được con",
+        check("rollup_of: dạng 'Agent/topic' ĐÚNG agent vẫn khớp được con",
               "tong-dang-agent-slash" not in out, out)
+        check("rollup_of: dạng 'Agent/topic' SAI agent (Winston/con-b cho câu hỏi Mike/con-b) "
+              "⇒ KHÔNG khớp — lời khai agent phải được tôn trọng, không phải trang trí",
+              "tong-dang-agent-SAI" in pending, out)
         check("rollup_of: con đóng TRƯỚC khi tổng được hỏi ⇒ KHÔNG đóng tổng (giữ ràng buộc ts)",
               "tong-con-dong-truoc-khi-hoi" in pending, out)
         for t in ("tong-khong-khai", "tong-rollup-rong", "tong-rollup-sai-kieu"):
@@ -670,6 +721,208 @@ def case_rollup_of_umbrella_question():
                   t in pending, out)
         check("rollup_of: các câu hỏi CON vẫn tự đóng như cũ (không hồi quy)",
               "con-a" not in pending and "con-b" not in pending, out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+# ── Ca 15c (2026-08-16, job Wags_20260816_090511): HAI lỗ của `rollup_of` khi topic con khớp
+#    SUBSTRING. arch-review coord-2026-08-14 (killer_objection) tái lập được cả hai trong
+#    sandbox; 8 assertion của ca 15b PASS ở CẢ bản lỏng lẫn bản chặt nên đang mù chiều này.
+#    Lỗ 1 — MỘT resolver thoả NHIỀU topic con: `all()` không còn nghĩa là "mọi con đã quyết".
+#    Lỗ 2 — topic con viết CẮT CỤT/tiền tố: khớp bừa vào resolver của câu hỏi con KHÁC.
+#    Cả hai đều đóng oan escalation của USER, đúng thứ `_acked` đã chọn exact để tránh.
+#    RED CONTROL: đổi `_resolved_exact` → `_resolved` trong ops_health_check.sh làm 2
+#    assertion dưới đây đỏ (đã chạy thật), tức chúng khoá đúng chiều hồi quy.
+def case_rollup_of_substring_holes():
+    root, inbox = mkbus()
+    try:
+        q_ts = ago(0, 6)
+        def umbrella(topic, subs):
+            e = ev("Mike", "question", topic, q_ts)
+            e["payload"] = {"rollup_of": subs}
+            return e
+        resolves_ev = ev("Wags", "decision", "quyet-gop-2-viec", ago(0, 1))
+        resolves_ev["payload"] = {"resolves": ["con-x", "con-y"]}
+        write_events(os.path.join(inbox, "Mike.jsonl"), [
+            # Lỗ 1: 2 con, nhưng chỉ có ĐÚNG 1 decision với topic dài chứa cả 2 chuỗi con.
+            umbrella("tong-mot-resolver-nuot-hai-con", ["patternB", "backlog"]),
+            # Lỗ 2: topic con viết cắt cụt; resolver thật chỉ đóng câu hỏi con DÀI hơn.
+            umbrella("tong-topic-con-cat-cut", ["retro-pattern-recurring"]),
+            ev("Mike", "question", "retro-pattern-recurring-wakeup-miss", ago(1)),
+            # Đường ĐÓNG HỢP LỆ bằng 1 event: decision khai TƯỜNG MINH `resolves` từng con.
+            # Phải giữ được sau khi siết exact, nếu không cơ chế rollup thành vô dụng.
+            umbrella("tong-dong-bang-resolves-tuong-minh", ["con-x", "con-y"]),
+        ])
+        write_events(os.path.join(inbox, "Wags.jsonl"), [
+            ev("Wags", "decision", "retro-patternB-and-backlog-summary", ago(0, 1)),
+            ev("Wags", "decision", "retro-pattern-recurring-wakeup-miss", ago(0, 1)),
+            resolves_ev,
+        ])
+        lines, _ = run_check5(root)
+        out = joined(lines)
+        pending = joined([ln for ln in lines if "trong 48h qua CHƯA thấy answer" in ln])
+        check("rollup_of: MỘT resolver KHÔNG được thoả nhiều topic con (khớp exact, không substring)",
+              "tong-mot-resolver-nuot-hai-con" in pending, out)
+        check("rollup_of: topic con CẮT CỤT/tiền tố KHÔNG khớp resolver của câu hỏi con khác",
+              "tong-topic-con-cat-cut" in pending, out)
+        check("rollup_of: `resolves` khai tường minh vẫn đóng được tổng bằng 1 event (không thắt chết cơ chế)",
+              "tong-dong-bang-resolves-tuong-minh" not in out, out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+# ── Ca 15e (2026-08-16, arch-review d65167a9): HAI kiểu đóng con hợp lệ mà bản exact đầu tiên
+#    KHÔNG phân biệt được. Mọi assertion 15b/15c đều dùng resolver TRÙNG KHÍT hoặc `resolves`
+#    dạng TRẦN, nên chiều "trần ↔ Agent/topic" hoàn toàn không được phủ.
+#    (a) PHẢI ĐÓNG: con đóng bằng decision gộp khai resolves=["Mike/con-B"] (đúng khuôn
+#        bin/close_bus_question.py) trong khi rollup_of viết dạng trần ["con-B"]. Trước
+#        `_same_ref`, `q_topic in explicit` so nguyên chuỗi ⇒ không khớp ⇒ tổng kẹt VĨNH VIỄN.
+#    (b) PHẢI PENDING (pin CÓ CHỦ ĐÍCH, không phải bug): con chỉ đóng bằng quy ước hậu-tố
+#        trạng thái ("<topic>-question-closed"). `_resolved` bản chính chấp nhận kiểu này qua
+#        nhánh substring, nhưng với rollup thì KHÔNG — vì chính nhánh substring đó là thứ cho
+#        MỘT resolver nuốt nhiều topic con (lỗ 1 của ca 15c). Đổi lại, tổng phải tự đăng
+#        `answer` giữ nguyên topic tổng — đã ghi vào MIKE.md § Escalation TỔNG.
+#        Hướng lỗi ở đây là false-PENDING (tốn 1 job wags_autofix), an toàn hơn hẳn
+#        false-CLOSED (nuốt quyết định của user) — đó là lý do chọn pin thay vì nới.
+#    RED CONTROL: bỏ `_same_ref` (quay lại `q_topic in explicit`) ⇒ assertion (a) đỏ.
+def case_rollup_of_ref_forms():
+    root, inbox = mkbus()
+    try:
+        q_ts = ago(0, 6)
+        def umbrella(topic, subs):
+            e = ev("Mike", "question", topic, q_ts)
+            e["payload"] = {"rollup_of": subs}
+            return e
+        # (a) rollup_of TRẦN, resolves QUALIFIED — hai dạng phải gặp được nhau.
+        gop = ev("Wags", "decision", "quyet-gop-qualified", ago(0, 1))
+        gop["payload"] = {"resolves": ["Mike/con-qual-1", "Mike/con-qual-2"]}
+        # Chiều ngược lại: rollup_of QUALIFIED, resolves TRẦN.
+        gop2 = ev("Wags", "decision", "quyet-gop-tran", ago(0, 1))
+        gop2["payload"] = {"resolves": ["con-nguoc-1"]}
+        # ĐỐI CHỨNG false-CLOSED: cùng tên con nhưng KHÁC agent ⇒ TUYỆT ĐỐI không được khớp.
+        gop3 = ev("Wags", "decision", "quyet-gop-khac-agent", ago(0, 1))
+        gop3["payload"] = {"resolves": ["Taylor/con-khac-agent"]}
+        write_events(os.path.join(inbox, "Mike.jsonl"), [
+            umbrella("tong-tran-vs-qualified", ["con-qual-1", "con-qual-2"]),
+            umbrella("tong-qualified-vs-tran", ["Mike/con-nguoc-1"]),
+            umbrella("tong-khac-agent-khong-duoc-khop", ["Mike/con-khac-agent"]),
+            # (b) con CHỈ đóng bằng hậu-tố trạng thái.
+            umbrella("tong-con-dong-kieu-hau-to", ["con-hau-to"]),
+            ev("Mike", "question", "con-hau-to", ago(1)),
+        ])
+        write_events(os.path.join(inbox, "Wags.jsonl"), [
+            gop, gop2, gop3,
+            ev("Wags", "decision", "con-hau-to-question-closed", ago(0, 1)),
+        ])
+        lines, _ = run_check5(root)
+        out = joined(lines)
+        pending = joined([ln for ln in lines if "trong 48h qua CHƯA thấy answer" in ln])
+        check("rollup_of TRẦN + resolves 'Agent/topic' ⇒ tổng PHẢI tự đóng",
+              "tong-tran-vs-qualified" not in out, out)
+        check("rollup_of 'Agent/topic' + resolves TRẦN ⇒ tổng PHẢI tự đóng (đối xứng 2 chiều)",
+              "tong-qualified-vs-tran" not in out, out)
+        check("ĐỐI CHỨNG false-CLOSED: 'Mike/con' KHÔNG được khớp 'Taylor/con' (khác agent)",
+              "tong-khac-agent-khong-duoc-khop" in pending, out)
+        check("PIN có chủ đích: con đóng kiểu hậu-tố trạng thái ⇒ tổng VẪN pending "
+              "(rollup không nhận substring; xem MIKE.md § Escalation TỔNG)",
+              "tong-con-dong-kieu-hau-to" in pending, out)
+        check("ĐỐI CHỨNG: chính câu hỏi CON đó vẫn tự đóng như cũ (không hồi quy _resolved)",
+              "con-hau-to" not in pending.replace("tong-con-dong-kieu-hau-to", ""), out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+# ── Ca 15f (2026-08-16, arch-review round 3): tiêu chí "đã ở dạng Agent/topic" của `_same_ref`
+#    bản đầu là `"/" in s` — SAI CẢ HAI CHIỀU, reviewer tái lập được cả hai:
+#    (a) FALSE-PENDING: topic TỰ NÓ chứa '/' (`selfcheck-red: mike/bin/x.py` — lớp câu hỏi
+#        ĐÔNG NHẤT trong backlog thật) bị tưởng là đã qualified ⇒ không bao giờ ghép được với
+#        dạng còn lại ⇒ rollup kẹt vĩnh viễn, đốt 1 job wags_autofix/ngày.
+#    (b) FALSE-CLOSED chéo agent: sub TRẦN + resolves của agent KHÁC khớp nhau vì chỉ MỘT bên
+#        có '/'. Ca 15e cũ chỉ pin biến thể "cả hai bên qualified" nên mù hoàn toàn với ca này.
+#    Fix: `_split_ref` chỉ bóc tiền tố khi nó là agent-id CÓ THẬT (known_agents, lấy từ tên
+#    file inbox), bên còn lại lấy agent NGỮ CẢNH, rồi so CẢ CẶP (agent, topic).
+#    RED CONTROL: quay `_split_ref` về `if "/" in s: return s.split("/",1)` ⇒ (a) và (b) đỏ.
+def case_rollup_of_ref_forms_agent_aware():
+    root, inbox = mkbus()
+    try:
+        q_ts = ago(0, 6)
+        # Topic THẬT đang pending trên bus (không phải chuỗi bịa): chúng chứa '/' ở giữa.
+        # HAI topic khác nhau cho (a) và (a'): dùng CHUNG một chuỗi thì resolver của ca này
+        # đóng luôn ca kia, và mutation "quay về tiêu chí `\"/\" in s`" chỉ làm đỏ 1 trong 2
+        # (đã đo) — tức một assertion xanh nhờ đường không thuộc phạm vi nó đang đo.
+        real = "selfcheck-red: mike/bin/job_cancel_guard_selfcheck.py"
+        real_b = "selfcheck-red: mike/bin/plan_cash_commitment_selfcheck.py"
+
+        def umbrella(topic, subs):
+            e = ev("Mike", "question", topic, q_ts)
+            e["payload"] = {"rollup_of": subs}
+            return e
+
+        # LƯU Ý cách dựng: agent của một resolver lấy từ TÊN FILE (`_agent_of`), không phải
+        # field agent_id — nên quyết định của Taylor phải nằm trong Taylor.jsonl mới đúng ca.
+        # `known_agents` cũng lấy từ tên file inbox: {Mike, Taylor, Wags}.
+        write_events(os.path.join(inbox, "Mike.jsonl"), [
+            # (a) sub TRẦN, đóng bằng resolves QUALIFIED — trên topic tự chứa '/'.
+            umbrella("tong-topic-co-dau-gach", [real]),
+            # (b) sub TRẦN của Mike, chỉ có quyết định của TAYLOR ⇒ phải Ở LẠI pending.
+            umbrella("tong-cheo-agent-sub-tran", ["con-cheo"]),
+            # (c) con ĐÃ đóng thật, nhưng danh sách có phần tử rỗng ⇒ fail-closed cả tổng.
+            umbrella("tong-co-phan-tu-rong", ["con-that", ""]),
+            # (c') ĐỐI CHỨNG cho (c): y hệt nhưng KHÔNG có phần tử rỗng ⇒ phải đóng. Không
+            #      có dòng này thì (c) xanh cả khi `con-that` đơn giản là không khớp được.
+            umbrella("tong-khong-co-phan-tu-rong", ["con-that"]),
+            ev("Mike", "question", "con-that", ago(1)),
+            ev("Mike", "decision", "con-that", ago(0, 1)),
+        ])
+        write_events(os.path.join(inbox, "Wags.jsonl"), [
+            ev("Wags", "decision", "quyet-gop-1", ago(0, 1), {"resolves": [f"Mike/{real}"]}),
+            # (a') chiều ngược: sub QUALIFIED, đóng bằng resolver topic TRẦN cùng agent.
+            ev("Wags", "question", "tong-cua-wags-sub-tran", q_ts,
+               {"rollup_of": [f"Wags/{real_b}"]}),
+            ev("Wags", "decision", real_b, ago(0, 1)),
+        ])
+        write_events(os.path.join(inbox, "Taylor.jsonl"), [
+            ev("Taylor", "decision", "quyet-cua-taylor", ago(0, 1),
+               {"resolves": ["Taylor/con-cheo"]}),
+        ])
+        lines, _ = run_check5(root)
+        out = joined(lines)
+        pending = joined([ln for ln in lines if "trong 48h qua CHƯA thấy answer" in ln])
+        check("(a) topic con TỰ CHỨA '/' + resolves qualified ⇒ tổng PHẢI tự đóng "
+              "(trước fix: kẹt pending vĩnh viễn — lớp câu hỏi đông nhất trên bus thật)",
+              "tong-topic-co-dau-gach" not in pending, out)
+        check("(a') chiều ngược: sub có '/' + resolves TRẦN cùng agent ⇒ cũng PHẢI đóng",
+              "tong-cua-wags-sub-tran" not in pending, out)
+        check("(b) FALSE-CLOSED chéo agent: sub TRẦN của Mike KHÔNG được đóng bằng "
+              "resolves ['Taylor/con-cheo'] — hướng lỗi nguy hiểm nhất",
+              "tong-cheo-agent-sub-tran" in pending, out)
+        check("phần tử RỖNG trong rollup_of ⇒ fail-closed CẢ tổng, không lọc lặng rồi "
+              "all() trên ít con hơn số đã khai",
+              "tong-co-phan-tu-rong" in pending, out)
+        check("ĐỐI CHỨNG cho ca trên: cùng danh sách nhưng KHÔNG có phần tử rỗng ⇒ đóng "
+              "bình thường (chứng minh (c) đỏ vì phần tử rỗng, không phải vì con không khớp)",
+              "tong-khong-co-phan-tu-rong" not in pending, out)
+        check("DIAGNOSTIC: tổng không đóng được thì in ra CON NÀO chưa khớp (fail-closed "
+              "đúng nhưng câm thì người đăng không sửa được)",
+              "topic con CHƯA khớp" in out, out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+# ── Ca 15d (2026-08-16): wc_root SAI ⇒ bus/inbox không tồn tại. Trước fix, mọi danh sách rỗng
+#    ⇒ check in ✅ "không có câu hỏi" — im lặng hoá TOÀN BỘ kênh backlog. arch-reviewer vấp
+#    phải khi audit coord-2026-08-14 (check fail_silent, đề nghị mở ticket riêng).
+def case_missing_inbox_dir_is_warn_not_green():
+    root = tempfile.mkdtemp(prefix="ops_health_selfcheck_noinbox_")
+    try:
+        lines, warn = run_check5(root)   # KHÔNG tạo mike/bus/inbox
+        out = joined(lines)
+        check("inbox_dir không tồn tại ⇒ WARN, KHÔNG in ✅ '0 câu hỏi'",
+              "Không có câu hỏi (question) nào đang chờ xử lý" not in out, out)
+        check("inbox_dir không tồn tại ⇒ nói rõ KHÔNG kiểm tra được (khác hẳn 'không có')",
+              any("KHÔNG tìm thấy thư mục bus/inbox" in w for w in warn), out)
+        check("inbox_dir không tồn tại CONTROL: không dòng ✅ nào của check #5",
+              "✅" not in out, out)
     finally:
         shutil.rmtree(root, ignore_errors=True)
 
@@ -980,10 +1233,14 @@ def main():
                case_wagsfix_only_no_false_ok, case_wagsfix_prefix_list_in_sync,
                case_triaged_needs_human_ack, case_triaged_only_no_false_ok,
                case_ack_suppress_days_window, case_rollup_of_umbrella_question,
+               case_rollup_of_substring_holes, case_rollup_of_ref_forms,
+               case_rollup_of_ref_forms_agent_aware,
+               case_missing_inbox_dir_is_warn_not_green,
                case_ack_suppress_days_capped,
                case_aged_wagsfix_never_truncated, case_aged_no_wagsfix_keeps_old_cut,
                case_aged_wagsfix_overflow_is_loud,
                case_c10_no_file_is_ok, case_c10_fresh_log_warns,
+               case_c10_swap_recovery_is_not_swallowed, case_c10_hard_error_wins_over_swap,
                case_c10_fresh_log_without_timestamp_line, case_c10_old_log_is_ok,
                case_c11_fresh_all_green, case_c11_red_is_warn_only,
                case_c11_lists_every_red_no_truncation,

@@ -117,3 +117,12 @@ CAN NGUOI QUYET (da ghi trong finding): commit-collision lan 2 — 'chi git add 
 
 ## Archived 2026-08-14 (keep=12 days=0 require_done=False)
 - [2026-08-12T04:53:19Z] [2026-08-12T05:0xZ] commit-collision gate XONG (commit 79b4f258, job Wags_20260812_044047): pre-commit hook always_run tu hoi 'co job LIVE khac khong' moi lan commit, 2 tang BLOCK/WARN + self-exclusion bang chuoi pid to tien. Do that: 56% commit tay xay ra khi co job LIVE => BLOCK-mo-rong la bat kha thi, da chon bang chung-tro-vao-dung-path. CHO arch-reviewer round-1 (gate co the CHAN commit, blast radius rong - Mike quyet). BAI HOC: classifier XANH + wrapper XANH van khong bang E2E - chi khi chay `git commit` that qua hook moi lo ra ROOT=BASH_SOURCE thanh .git => gate chet IM LANG. Moi gate moi phai co 1 case E2E chay dung duong ma production chay, va MOI nhanh fail-open phai IN RA.
+
+## Archived 2026-08-16 (keep=12 days=0 require_done=False)
+- [2026-08-12T05:11:54Z] [2026-08-12] round-2 collision-gate XONG (0ffda43e): 3 caller tu dong khong con nuot exit BLOCK; selfcheck 32/32 + RED control. CHO arch-reviewer audit round-2. CON TREO ngoai pham vi: kb_nightly.sh:745 git commit KHONG pathspec => cuon ca index (do that trong sandbox), can 1 dong `-- $file` - doi Mike/arch-reviewer quyet.
+
+## Archived 2026-08-16 (keep=12 days=0 require_done=False)
+- [2026-08-12T05:30:24Z] gate-collision round3 (commit f5f20766) XONG, da bao bus — DANG CHO arch-review round 3. Con 1 viec ngoai pham vi CHUA sua (Mike/arch-reviewer quyet): kb_nightly.sh _ctxbloat_autofix_one goi 'git commit' KHONG co pathspec => commit CA INDEX (giong loi consolidate.sh da sua 2026-07-28 bang pathspec kb/).
+
+## Archived 2026-08-16 (keep=12 days=0 require_done=False)
+- [2026-08-12T05:49:54Z] [round-4 commit-collision-gate] XONG, commit f1a41995, 42/42 selfcheck + RED control 2 chieu. CHO arch-reviewer audit round-4 (khong bat buoc theo chinh sach nhung 3 round truoc deu bi bat loi that) — neu PASS thi dong chuoi. Con 1 residual chua sua, can quyet dinh cua nguoi: kb_nightly.sh:624 backup.sh '|| true' nuot loi backup ma Phase 4 van bao '🌙 KB nightly done'.

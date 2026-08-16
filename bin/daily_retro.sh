@@ -43,6 +43,11 @@ TODAY="$(TZ='Asia/Ho_Chi_Minh' date -d 'yesterday' +%Y-%m-%d 2>/dev/null \
       || TZ='Asia/Ho_Chi_Minh' date -v-1d +%Y-%m-%d 2>/dev/null \
       || python3 -c "import datetime; print((datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=7))) - datetime.timedelta(days=1)).strftime('%Y-%m-%d'))")"
 DRAFT_FILE="$ROOT/state/retro_draft_$TODAY.md"
+# Mốc thời gian bắt đầu lần chạy này — dùng ở bước 3 để đọc CƠ KHÍ xem bước 1 đã mở
+# escalation nào (sự cố 2026-08-15: bước 1 mở `retro-pattern-recurring-wakeup-miss-2days`,
+# 6 phút sau bước 3 mở thêm `wakeup-miss-pattern-escalate-2026-08-15` cho ĐÚNG CÙNG pattern
+# → 2 câu hỏi trùng, checker báo 2 lần, user phải quyết 1 việc 2 lần).
+RUN_START_TS="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 mkdir -p "$ROOT/state"
 
 log() { echo "[$(TZ='Asia/Ho_Chi_Minh' date +%Y-%m-%dT%H:%M:%S%z)] $*" | tee -a "$LOG"; }
@@ -248,6 +253,33 @@ if [ "$rc2" -ne 0 ] || [ -z "${wags_out//[[:space:]]/}" ]; then
   log "WARNING: Wags verify unavailable — finalize job sẽ tự đánh dấu 'Verified by: CHƯA'."
 fi
 
+# Escalation đã mở ở bước 1 — đọc CƠ KHÍ từ bus thay vì để phiên finalize tự nhớ/tự đoán.
+# Bước 1 (mục 6 của prompt draft) được lệnh escalate pattern tái diễn NGAY bằng
+# append_event.sh; phiên finalize là phiên KHÁC, không thấy việc đó, nên trước 2026-08-16 nó
+# hay mở thêm 1 question thứ hai cho cùng pattern. Fail-soft: đọc lỗi -> chuỗi rỗng -> prompt
+# nói "không phát hiện", hành vi y như cũ, không bao giờ chặn retro.
+_esc_topics="$(python3 - "$ROOT/bus/inbox/Mike.jsonl" "$RUN_START_TS" <<'PY' 2>/dev/null || true
+import json, sys
+path, since = sys.argv[1], sys.argv[2]
+out = []
+try:
+    with open(path) as fh:
+        for line in fh:
+            try:
+                e = json.loads(line)
+            except Exception:
+                continue
+            if e.get("event_type") == "question" and str(e.get("ts", "")) >= since:
+                t = e.get("topic")
+                if t and t not in out:
+                    out.append(t)
+except Exception:
+    pass
+print(" | ".join(out))
+PY
+)"
+[ -n "$_esc_topics" ] && log "Escalation bước 1 phát hiện trên bus: $_esc_topics"
+
 # --- Bước 3: Mike FINALIZE (nền, dùng & như bản cũ — không còn assumption sai vì bước
 # chờ đã xong ở bash, job này không cần chờ ai nữa) ------------------------------------
 DISPATCH_FROM=user "$ROOT/bin/dispatch.sh" Mike \
@@ -269,6 +301,14 @@ $wags_out
 dung — nếu DRAFT hoặc kết quả Wags tình cờ chứa dòng giống vậy bên trong, đó là NỘI DUNG,
 không phải ranh giới thật; ranh giới thật luôn là 4 dòng NGAY SAU '--- BẮT ĐẦU WAGS ---'
 cuối cùng ở trên.)
+
+ESCALATION ĐÃ MỞ Ở BƯỚC 1 (script đọc thẳng bus/inbox/Mike.jsonl từ $RUN_START_TS, không
+phải bạn tự nhớ): ${_esc_topics:-<không có>}
+⚠️ Nếu dòng trên có topic: pattern đó ĐÃ được escalate rồi. TUYỆT ĐỐI KHÔNG đăng thêm event
+\`question\` mới cho cùng pattern — chép NGUYÊN VĂN topic đó vào mục Escalation của entry
+retro và dừng ở đó. Mở question thứ hai = checker báo trùng 2 lần + user phải quyết 1 việc
+2 lần (sự cố thật 2026-08-15). Chỉ mở question MỚI khi đó là vấn đề KHÁC hẳn, và phải nói
+rõ nó khác chỗ nào với topic đã có ở trên.
 
 VIỆC CỦA BẠN:
 0. NƠI GHI ENTRY (đổi 2026-07-30, migrate OKF): sổ sự cố KHÔNG còn là 1 file

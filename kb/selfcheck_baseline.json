@@ -23,13 +23,13 @@
     }
   },
   "known_red": {
-    "mike/bin/job_cancel_guard_selfcheck.py": {
+    "mike/bin/send_plan_report_park_jit_selfcheck.py": {
       "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
-      "since": "2026-08-14T19:42:33Z",
+      "since": "2026-08-15T21:50:49Z",
       "status": "FAIL",
       "auto": true,
-      "topic": "selfcheck-red: mike/bin/job_cancel_guard_selfcheck.py",
-      "escalated_utc": "2026-08-14T19:42:33Z",
+      "topic": "selfcheck-red: mike/bin/send_plan_report_park_jit_selfcheck.py",
+      "escalated_utc": "2026-08-15T21:50:49Z",
       "ack_pending": false,
       "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
     }

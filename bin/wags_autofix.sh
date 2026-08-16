@@ -90,7 +90,18 @@ log/bus event), chạy đủ 7 hướng tấn công, rồi in ĐÚNG khối VERD
   # question `wags-arch-review-inconclusive` GIẢ. Phép vá chỉ THÊM dấu đóng vào cuối nên
   # không thể nâng verdict; hỏng nặng vẫn rơi về INCONCLUSIVE (xem docstring parser).
   verdict_json="$(python3 "$ROOT/bin/wags_verdict_parse.py" "$log" "$topic")"
-  # ghi verdict lên bus (deterministic, ngoài agent) — cùng trace với finding gốc
+  # ghi verdict lên bus (deterministic, ngoài agent) — cùng trace với finding gốc.
+  # SANITIZE trace_id kế thừa trước khi gọi (giống bin/verify_finding.sh — sửa 1 nơi thì
+  # sửa cả nơi kia): `$trace_id` đọc từ finding trên bus APPEND-ONLY, nơi còn tồn tại vĩnh
+  # viễn các giá trị nhiễm độc ('thêm', chuỗi 232 ký tự có khoảng trắng…). append_event.sh
+  # chặn FATAL các giá trị đó, mà lời gọi này bọc `|| true` ⇒ hậu quả là VERDICT arch-review
+  # BIẾN MẤT KHÔNG DẤU VẾT, rồi wags_bus_verdict.py không thấy gì và pipeline đẻ ra
+  # `wags-arch-review-inconclusive` GIẢ. Thà mất liên kết timeline còn hơn mất verdict.
+  if [ -n "$trace_id" ] && ! printf '%s' "$trace_id" \
+       | grep -qE '^[A-Za-z0-9_.:-]+_[0-9]{8}_[0-9]{6}$'; then
+    echo "wags_autofix.sh: trace_id kế thừa SAI HÌNH DẠNG ($(printf '%q' "$trace_id")) — BỎ trace_id, VẪN ghi verdict arch-review." >&2
+    trace_id=""
+  fi
   "$ROOT/bin/append_event.sh" arch-reviewer verification "ARCH-REVIEW: $topic" "$verdict_json" "$trace_id" >/dev/null 2>&1 || true
   printf '%s\n' "$verdict_json"
 }
@@ -180,8 +191,9 @@ CHI TIẾT: $DETAILS
 ${KNOWN_ISSUE:+
 $KNOWN_ISSUE
 }
-Quy trình: (1) chẩn đoán từ artifact thật (jobs.sh list cột HB_AGE, trace.sh, bus, log) — đọc kb/ops_runbook.md + working memory của bạn trước (nếu có mục \"khớp từ khoá\" ở trên, tự xác nhận có thực sự cùng root cause không trước khi áp lại cách sửa cũ); (2) SỬA trong ranh giới: được sửa tooling điều phối (dispatch.sh/jobs.sh/mike_json.py/ops_autofix/wags_autofix/checker) sau khi test, TUYỆT ĐỐI không đụng trading (plan/executor/cron thực thi/trading_rules); (3) verify artifact sau sửa (chạy lại lệnh lỗi, xác nhận hết); (3b) COMMIT AN TOÀN: chạy git status TRƯỚC git add — CHỈ git add đúng các file bạn thực sự sửa (liệt kê tường minh), TUYỆT ĐỐI không git add -A / git add . ; có thể có phiên Wags/Mike KHÁC đang sửa file khác CÙNG LÚC, add rộng sẽ cuốn thay đổi CHƯA XONG của người khác vào commit của bạn (sự cố thật 2026-08-02: 2 job Wags cùng sửa ops_health_check.sh); nếu git status cho thấy file đã modify mà KHÔNG phải do bạn sửa, đừng add file đó, ghi rõ trong finding; (4) ghi bus finding topic bắt đầu bằng '"'"'wags-fix: $LABEL'"'"' kèm root_cause/fix/verify/commit + field \"files_changed\": [danh sách ĐẦY ĐỦ đường dẫn tương đối bạn đã sửa, vd [\"bin/dispatch.sh\",\"MIKE.md\"]] — field này quyết định fix có cần arch-reviewer audit đầy đủ hay không, KHÔNG được bỏ trống hay báo thiếu file." --timeout 1500 --retries 0 --model opus 2>&1)" || true
+Quy trình: (1) chẩn đoán từ artifact thật (jobs.sh list cột HB_AGE, trace.sh, bus, log) — đọc kb/ops_runbook.md + working memory của bạn trước (nếu có mục \"khớp từ khoá\" ở trên, tự xác nhận có thực sự cùng root cause không trước khi áp lại cách sửa cũ); (2) SỬA trong ranh giới: được sửa tooling điều phối (dispatch.sh/jobs.sh/mike_json.py/ops_autofix/wags_autofix/checker) sau khi test, TUYỆT ĐỐI không đụng trading (plan/executor/cron thực thi/trading_rules); (3) verify artifact sau sửa (chạy lại lệnh lỗi, xác nhận hết); (3b) COMMIT AN TOÀN: chạy git status TRƯỚC git add — CHỈ git add đúng các file bạn thực sự sửa (liệt kê tường minh), TUYỆT ĐỐI không git add -A / git add . ; có thể có phiên Wags/Mike KHÁC đang sửa file khác CÙNG LÚC, add rộng sẽ cuốn thay đổi CHƯA XONG của người khác vào commit của bạn (sự cố thật 2026-08-02: 2 job Wags cùng sửa ops_health_check.sh); nếu git status cho thấy file đã modify mà KHÔNG phải do bạn sửa, đừng add file đó, ghi rõ trong finding; (4) ghi bus finding topic bắt đầu bằng '"'"'wags-fix: $LABEL'"'"' kèm root_cause/fix/verify/commit + field \"files_changed\": [danh sách ĐẦY ĐỦ đường dẫn tương đối bạn đã sửa, vd [\"bin/dispatch.sh\",\"MIKE.md\"]] — field này quyết định fix có cần arch-reviewer audit đầy đủ hay không, KHÔNG được bỏ trống hay báo thiếu file." --timeout 1500 --retries 0 --model opus 2>&1)" && dispatch_rc=0 || dispatch_rc=$?
   echo "$out" >> "'"$PIPELOG"'"
+  echo "[wags-autofix] dispatch Wags exit=$dispatch_rc" >> "'"$PIPELOG"'"
 
   # 1.5) Kiểm tường minh Wags có thật sự ghi finding "wags-fix: $LABEL" không (khảo sát vận
   #      hành 2026-08-01, xem mike/kb/dispatch_output_contract.md). wags_risk_tier.py bước 2
@@ -196,7 +208,41 @@ Quy trình: (1) chẩn đoán từ artifact thật (jobs.sh list cột HB_AGE, t
   #      trên bus (kb/coding_guidelines.md §26).
   if ! python3 "$ROOT/bin/mike_json.py" has-event-prefix "$ROOT/bus" Wags "$DISPATCH_START_ISO" \
        "finding:wags-fix: $LABEL" >>"'"$PIPELOG"'" 2>&1; then
-    _notify_arch "🟡 [wags-autofix] Wags KHÔNG ghi finding '"'"'wags-fix: $LABEL'"'"' sau dispatch — có thể đã lạc đề/chết im. Tiếp tục qua bước phân loại rủi ro (fail-safe mặc định high nếu không tìm thấy)."
+    # DỪNG HẲN khi dispatch CHẾT: không có finding + dispatch exit != 0 ⇒ agent sửa lỗi
+    # CHƯA TỪNG CHẠY, nên KHÔNG có gì để arch-review. Trước bản này pipeline vẫn đi tiếp,
+    # đốt một lượt arch-reviewer trên hư không, rồi kết quả rỗng rơi vào nhánh cuối và được
+    # đóng gói thành question `wags-arch-review-inconclusive` — một cái tên nói rằng
+    # ARCH-REVIEW không kết luận được, trong khi sự thật là DISPATCH chết.
+    # CA THẬT 2026-08-13T01:20Z: logs/wags_pipeline_20260813_012008.log ghi "Failed to
+    # authenticate: OAuth session expired" + "dispatch Wags kết thúc bất thường (exit=1)",
+    # thế mà question treo 3 ngày lại mang nhãn arch-review — không ai đi gia hạn OAuth vì
+    # không ai đọc được nguyên nhân từ cái nhãn. Đúng close-the-loop root-cause-B: MỘT LẦN
+    # TRA CỨU THẤT BẠI ĐỘI LỐT MỘT KẾT LUẬN. Hai sự việc khác nhau ⇒ hai topic khác nhau.
+    # dispatch_rc=0 mà vẫn không có finding thì GIỮ hành vi cũ (agent có chạy, chỉ lạc đề)
+    # — nhánh đó fail-safe sang tier=high và vẫn đáng được arch-review.
+    # WAGS_DISPATCH_DEAD_BEGIN  (marker cho bin/wags_dispatch_dead_selfcheck.py — nó TRÍCH
+    # đúng khối này chạy trên stub, KHÔNG chép lại logic. Đổi/xoá marker ⇒ selfcheck FAIL.)
+    if [ "$dispatch_rc" != 0 ]; then
+      # tr dùng ESCAPE BÁT PHÂN \042 \047 \134 (nháy kép, nháy đơn, backslash) — CỐ Ý.
+      # Khối này nằm trong chuỗi nháy đơn của setsid bash -c, nên MỘT dấu nháy đơn gõ
+      # thẳng vào đây (kể cả trong comment) đóng luôn chuỗi và làm hỏng cả script — đã
+      # cắn thật khi viết chính dòng này. Sạch quote là bắt buộc vì _err_tail được nội
+      # suy vào payload JSON của _post_q.
+      # `iconv -c` SAU `cut` là bắt buộc, không phải cho đẹp: locale máy là LANG="C"
+      # (/etc/default/locale) nên `cut -c` đếm theo BYTE. Dòng lỗi thật của ca 08-13 dài
+      # 383 byte (vuot 300) và có tiếng Việt — cắt ở byte 300 trúng giữa một ký tự 3 byte
+      # là 2/3 khả năng. Byte hỏng đi lọt qua gate JSON (surrogateescape) và nằm VĨNH VIỄN
+      # trong bus append-only, khiến load_jsonl chết cho mọi consumer của Wags.jsonl —
+      # gồm chính đường escalation này. `iconv -c` vứt phần ký tự dở. Tầng chặn thứ hai
+      # (cho caller chưa biết) nằm ở mike_json.py::_utf8_safe.
+      _err_tail="$(printf "%s" "$out" | grep -iE "authenticat|expired|credential|quota|rate.?limit|usage limit|timeout|exit=" | tail -3 | tr -d "\042\047\134" | tr "\n" " " | cut -c1-300 | iconv -f utf-8 -t utf-8 -c)"
+      _notify_arch "🔴 **[wags-autofix] DISPATCH CHẾT — chưa hề có bản vá nào cho '"'"'$LABEL'"'"'** (dispatch.sh exit=$dispatch_rc, Wags không ghi finding). Đây KHÔNG phải arch-review, KHÔNG phải fix bị bác: agent sửa lỗi chưa chạy được. Dấu vết: ${_err_tail:-（không trích được dòng lỗi, xem log）}. Bỏ qua arch-reviewer (không có gì để review). Log: '"$PIPELOG"'"
+      _post_q "wags-autofix-dispatch-failed: $LABEL" \
+        "{\"dispatch_exit\":\"$dispatch_rc\",\"wags_finding\":\"KHONG\",\"err_tail\":\"$_err_tail\",\"note\":\"agent sua loi CHUA CHAY - khong phai arch-review, khong phai fix bi bac\",\"pipelog\":\"'"$PIPELOG"'\"}"
+      exit 0
+    fi
+    # WAGS_DISPATCH_DEAD_END
+    _notify_arch "🟡 [wags-autofix] Wags KHÔNG ghi finding '"'"'wags-fix: $LABEL'"'"' sau dispatch (nhưng dispatch exit=0 — agent CÓ chạy, có thể lạc đề). Tiếp tục qua bước phân loại rủi ro (fail-safe mặc định high nếu không tìm thấy)."
   fi
 
   # 2) Phân loại rủi ro (cost-opt #2, 2026-07-17): fix chỉ đụng path an toàn tuyệt đối

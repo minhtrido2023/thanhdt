@@ -376,8 +376,12 @@ if os.path.isdir(inbox_dir):
     # Winston 2026-07-14, SpaceX mù từ vệ sinh coord-2026-07-30) → alert plan T+1 chưa
     # sẵn sàng của account tiền thật biến mất khỏi check #5. Fix: required_change #1 của
     # arch-reviewer, NEEDS_CHANGES coord-2026-07-30.
-    resolvers = []          # (topic, ts, explicit refs from payload.resolves)
+    resolvers = []          # (agent, topic, ts, explicit refs from payload.resolves)
     acks = []                # (topic_câu_hỏi_được_ack, hạn_ack) — xem ACK_PREFIX
+    # Tập agent-id CÓ THẬT trên bus. Dùng để quyết định một chuỗi dạng "X/y" là
+    # "Agent/topic" hay chỉ là topic tự nó có dấu '/'. Lấy từ tên file inbox chứ KHÔNG
+    # hardcode: fleet thêm agent thì tập này tự đúng. Xem `_split_ref`.
+    known_agents = {_agent_of(p) for p in files}
     # HINT-ONLY (Wags coord-2026-08-03): ngoài resolver ĐÚNG quy ước, gom thêm MỌI
     # finding/answer/decision (kèm agent + ts) để GỢI Ý "có thể đã đóng nhưng sai quy ước".
     # KHÔNG dùng để đóng câu hỏi — chỉ in thêm 1 dòng [WARN-ONLY] cho người/Wags triage
@@ -437,7 +441,7 @@ if os.path.isdir(inbox_dir):
                         _raw = [_raw]
                     _explicit = {str(x).strip() for x in _raw
                                  if isinstance(_raw, list) and str(x).strip()}
-                    resolvers.append((t, r_ts, _explicit))
+                    resolvers.append((agent_p, t, r_ts, _explicit))
     def _resolved(q_topic, q_ts, q_agent=""):
         # Exact-match, HOẶC resolver CHỨA nguyên topic câu hỏi (quy ước hậu-tố trạng thái) —
         # và resolver phải xuất hiện SAU câu hỏi. Chỉ 1 chiều (resolver ⊇ topic-hỏi) để 1
@@ -449,8 +453,68 @@ if os.path.isdir(inbox_dir):
             refs.add(f"{q_agent}/{q_topic}")
         return any(r_ts >= q_ts and
                    ((r == q_topic or q_topic in r) or bool(refs & explicit))
-                   for r, r_ts, explicit in resolvers)
-    def _rollup_resolved(rec, q_ts):
+                   for _ra, r, r_ts, explicit in resolvers)
+    def _split_ref(s):
+        """Chuẩn hoá một tham chiếu câu hỏi về cặp (agent, topic) rồi mới so sánh.
+
+        Vì sao KHÔNG dùng `"/" in s` làm tiêu chí "đã ở dạng Agent/topic" (bản 8e9affc3 làm
+        vậy, arch-review round 3 bắt được, tái lập cả 2 chiều):
+        - FALSE-PENDING trên topic TỰ NÓ chứa '/': `selfcheck-red: mike/bin/job_cancel_guard
+          _selfcheck.py` — lớp câu hỏi ĐÔNG NHẤT trong backlog thật — bị coi là "đã qualified"
+          nên không bao giờ ghép được với dạng còn lại ⇒ rollup kẹt vĩnh viễn, đốt 1 job
+          wags_autofix/ngày, đúng vòng lãng phí `rollup_of` ra đời để diệt.
+        - FALSE-CLOSED chéo agent: sub TRẦN ["con-B"] + resolves ["Taylor/con-B"] khớp nhau
+          vì chỉ MỘT bên có '/', trong khi câu hỏi thật là `Mike/con-B` ⇒ đóng escalation của
+          agent này bằng quyết định của agent KHÁC. MIKE.md hứa "khác agent thì không khớp"
+          nhưng lời hứa đó chỉ đúng khi CẢ HAI bên qualified.
+
+        Cách đúng: tiền tố chỉ được bóc khi nó là agent-id CÓ THẬT trên bus (`known_agents`)
+        — nên "selfcheck-red: mike/bin/x.py" là topic TRẦN, không phải "Agent/topic". Bên
+        không khai agent trả về None (khác hẳn "agent rỗng"); phần so agent nằm ở `_same_ref`.
+        Vẫn là exact-match trên phần topic, KHÔNG nới về substring.
+        """
+        if "/" in s:
+            pfx, rest = s.split("/", 1)
+            if pfx in known_agents and rest.strip():
+                return pfx, rest.strip()
+        return None, s      # None = chuỗi KHÔNG khai agent (khác với "khai agent rỗng")
+    def _same_ref(a, a_agent, b):
+        """`a` = topic con trong rollup_of (thuộc agent đăng escalation tổng = a_agent);
+        `b` = một tham chiếu phía đóng (topic của resolver, hoặc 1 phần tử `resolves`).
+
+        Ràng buộc agent chỉ áp khi bên đó THẬT SỰ khai agent. Lý do: quy ước đóng câu hỏi
+        trên bus KHÔNG yêu cầu cùng agent — `_resolved` (đường chính) so topic-string thuần,
+        và người đóng THƯỜNG là agent khác người hỏi. Bắt agent phải trùng ở CẢ topic của
+        resolver sẽ phá đúng ca đóng thông thường (4 assertion 15b/15c đỏ khi thử).
+        Nhưng khi một bên khai tường minh "Taylor/x" thì đó là lời khai VỀ CÂU HỎI NÀO, và
+        lời khai đó phải được tôn trọng — nếu không, sub trần ["con-B"] của Mike bị đóng
+        bằng resolves ["Taylor/con-B"] (false-CLOSED chéo agent, arch-review round 3).
+        """
+        a_ag, a_tp = _split_ref(a)
+        b_ag, b_tp = _split_ref(b)
+        if a_tp != b_tp:
+            return False
+        a_ag = a_ag or a_agent      # sub trần = câu hỏi của chính agent đăng tổng
+        return b_ag is None or not a_ag or b_ag == a_ag
+
+    def _resolved_exact(q_topic, q_ts, q_agent=""):
+        # Như _resolved nhưng BỎ nhánh substring (`q_topic in r`). Dùng RIÊNG cho topic con
+        # của `rollup_of`. Lý do (arch-review coord-2026-08-14, killer_objection): danh sách
+        # topic con do NGƯỜI viết tay ⇒ với substring, MỘT resolver duy nhất có thể thoả
+        # NHIỀU topic con cùng lúc và `all()` đóng luôn escalation TỔNG trong khi câu hỏi con
+        # vẫn đang pending. Tái lập được: rollup_of=["patternB","backlog"] + đúng 1 decision
+        # "retro-patternB-and-backlog-summary" ⇒ tổng tự đóng dù patternB chưa ai quyết; và
+        # topic con viết CẮT CỤT ("retro-pattern-recurring") khớp bừa vào resolver dài hơn.
+        # Cùng lý do `_acked` chọn exact: nới tay ở đây đóng oan escalation của USER — đắt
+        # hơn nhiều so với 1 job wags_autofix thừa. `resolves` (khai tường minh) vẫn tính.
+        if not q_topic:
+            return False
+        return any(r_ts >= q_ts and
+                   (_same_ref(q_topic, q_agent, r) or
+                    any(_same_ref(q_topic, q_agent, e) for e in explicit))
+                   for _r_a, r, r_ts, explicit in resolvers)
+    rollup_misses = {}      # (agent, topic, ts) → [topic con CHƯA khớp] — chỉ để in gợi ý
+    def _rollup_resolved(rec, q_ts, q_agent=""):
         # Câu hỏi TỔNG (escalation gom nhiều câu hỏi con đã mở sẵn) — ca thật
         # `Mike/retro-escalation-2026-08-13-patternB-and-backlog` (08-13T17:46): user quyết
         # 08-14T00:31, Mike đăng `decision` đóng CẢ 2 câu hỏi con trong cùng 1 giây, nhưng
@@ -458,8 +522,8 @@ if os.path.isdir(inbox_dir):
         # wags_autofix (coord-2026-08-14) chỉ để kết luận "đã quyết rồi". Resolver khớp theo
         # topic-string nên không có cách nào biết topic tổng ⊃ 2 topic con.
         # Cơ chế: câu hỏi tổng KHAI TƯỜNG MINH `"rollup_of": ["topic-con-1", ...]` trong
-        # payload; đóng khi MỌI topic con có resolver đăng SAU câu hỏi tổng (dùng lại
-        # _resolved, giữ nguyên ràng buộc thời gian — không pre-resolve lần escalate sau).
+        # payload; đóng khi MỌI topic con có resolver đăng SAU câu hỏi tổng (dùng
+        # _resolved_exact, giữ nguyên ràng buộc thời gian — không pre-resolve lần escalate sau).
         # OPT-IN + fail-closed ở MỌI đường lỗi (thiếu field / không phải list / rỗng / payload
         # không parse được ⇒ False = hành vi cũ). KHÔNG suy diễn topic con từ văn bản payload:
         # đó đúng thứ §28 coding_guidelines cấm (so chuỗi mô tả tự do) và đóng oan 1
@@ -473,15 +537,28 @@ if os.path.isdir(inbox_dir):
         if not isinstance(pl, dict):
             return False
         raw = pl.get("rollup_of")
-        if not isinstance(raw, list):
+        if not isinstance(raw, list) or not raw:
             return False
-        subs = [str(s).strip() for s in raw if str(s).strip()]
-        if not subs:
+        # Phần tử rỗng/sai kiểu ⇒ FAIL-CLOSED cả câu hỏi tổng, KHÔNG lọc lặng. Bản cũ lọc
+        # (`if str(s).strip()`) nên `["con-A", ""]` chạy `all()` trên ÍT con hơn số đã khai:
+        # người viết tưởng đang chốt 2 con, cơ chế chỉ kiểm 1 rồi đóng tổng — false-CLOSED
+        # do lỗi CHÍNH TẢ, không có một dòng cảnh báo nào (arch-review round 3 tái lập được).
+        subs = []
+        for s in raw:
+            if not isinstance(s, str) or not s.strip():
+                return False
+            subs.append(s.strip())
+        # Dạng "Agent/topic" được xử lý DUY NHẤT một chỗ: `_split_ref` bên trong `_same_ref`
+        # (xem docstring ở đó). Chỗ này TUYỆT ĐỐI không tự bóc tiền tố — bóc hai lần là ra
+        # đúng ca false-CLOSED chéo agent.
+        miss = [s for s in subs if not _resolved_exact(s, q_ts, q_agent)]
+        if miss:
+            # Fail-closed thì ĐÚNG nhưng IM LẶNG: người đăng escalation tổng không có cách
+            # nào biết con nào chưa khớp (sai chính tả? sai agent? con đóng bằng hậu-tố?),
+            # nên cứ để nó pending mãi. Ghi lại để in gợi ý một dòng bên dưới.
+            rollup_misses[(q_agent, rec.get("topic"), rec.get("ts"))] = miss
             return False
-        # Chấp nhận cả dạng "Agent/topic" (đúng chuỗi checker in ra, người hay copy thẳng):
-        # thử cả nguyên chuỗi lẫn phần sau dấu "/" đầu tiên.
-        return all(_resolved(s, q_ts) or ("/" in s and _resolved(s.split("/", 1)[1], q_ts))
-                   for s in subs)
+        return True
     def _acked(q_agent, q_topic, q_ts):
         # Khớp CHÍNH XÁC (không substring như _resolved): ack chỉ tắt auto-dispatch nên sai
         # sót về phía "vẫn dispatch" là an toàn; nới lỏng match ở đây thì 1 ack topic ngắn
@@ -503,7 +580,7 @@ if os.path.isdir(inbox_dir):
                 ts_dt = dt.datetime.fromisoformat(rec.get("ts", "").replace("Z", "+00:00"))
             except Exception:
                 continue
-            if _resolved(rec.get("topic"), ts_dt, agent) or _rollup_resolved(rec, ts_dt):
+            if _resolved(rec.get("topic"), ts_dt, agent) or _rollup_resolved(rec, ts_dt, agent):
                 continue
             # Chống đếm đôi nếu 1 event vừa còn ở hot inbox vừa đã sang archive (kb_nightly
             # bị kill giữa chừng): khoá theo (agent, topic, ts).
@@ -544,8 +621,31 @@ if os.path.isdir(inbox_dir):
         W(f"{len(read_errors)} file bus KHÔNG ĐỌC ĐƯỢC — backlog câu hỏi (question) có thể "
           f"THIẾU (bỏ sót toàn bộ event trong các file này): "
           f"{ {k: v for k, v in sorted(read_errors.items())} }")
+else:
+    # Sai wc_root ⇒ inbox_dir không tồn tại ⇒ MỌI danh sách rỗng ⇒ nhánh `elif` dưới in ✅
+    # "không có câu hỏi" — im lặng hoá TOÀN BỘ kênh backlog của fleet mà không một lời cảnh
+    # báo. Chính arch-reviewer vấp phải khi audit coord-2026-08-14 (check fail_silent, "nên
+    # mở ticket riêng"). Cùng họ với cliff-30-ngày ở trên: một lần TRA CỨU thất bại không
+    # được phép đội lốt một kết luận "sạch".
+    W(f"KHÔNG tìm thấy thư mục bus/inbox ({inbox_dir}) — backlog câu hỏi (question) KHÔNG "
+      f"kiểm tra được lượt này (KHÔNG phải '0 câu hỏi'). Nhiều khả năng wc_root sai.")
 if pending_q:
     W(f"Có {len(pending_q)} câu hỏi (question) trong 48h qua CHƯA thấy answer tương ứng: {pending_q}")
+    # Câu hỏi TỔNG khai `rollup_of` mà không đóng được: nói rõ CON NÀO chưa khớp. Không có
+    # dòng này thì fail-closed đúng nhưng câm — người đăng escalation không phân biệt được
+    # "con thật sự chưa ai quyết" với "gõ sai tên con / sai agent / con đóng bằng hậu-tố
+    # trạng thái (rollup cố ý không nhận, xem MIKE.md)", nên nó pending mãi và mỗi ngày đốt
+    # thêm 1 job wags_autofix. Chỉ GỢI Ý, không đổi routing dòng WARN ở trên.
+    for (_ra, _rt, _), _miss in sorted(rollup_misses.items(), key=lambda kv: str(kv[0])):
+        if _rt and any(_rt in str(_p) for _p in pending_q):
+            W(f"{WARN_ONLY} rollup_of của '{_ra}/{_rt}': {len(_miss)} topic con CHƯA khớp "
+              f"resolver nào — {_miss}. Kiểm 4 khả năng theo thứ tự: (1) con chưa ai quyết "
+              f"thật; (2) chuỗi con gõ khác topic thật (phải TRÙNG KHÍT, kể cả tiền tố "
+              f"'Agent/'); (3) con đóng bằng hậu-tố trạng thái ('<topic>-question-closed') "
+              f"— rollup CỐ Ý không nhận dạng này, phải tự đăng answer giữ nguyên topic tổng; "
+              f"(4) con THUỘC AGENT KHÁC '{_ra}' (người đăng tổng) mà lại viết TRẦN — dù chuỗi "
+              f"trùng khít 100%, resolver phải ghi đủ 'Agent/topic' cho con không phải của "
+              f"chính '{_ra}', xem MIKE.md § Escalation TỔNG.")
     # Dòng HINT: câu hỏi nào có sự kiện đăng SAU nó trông như đã xử lý xong nhưng ghi bus
     # sai quy ước (đăng `finding`/đổi topic thay vì `answer`/`decision` GIỮ NGUYÊN topic
     # gốc). Chỉ GỢI Ý: không đóng, không loại khỏi pending_q, không đổi routing dòng WARN.
@@ -602,7 +702,8 @@ if pending_q:
           f"nhưng ghi bus SAI QUY ƯỚC (có sự kiện đăng sau, cùng tiền tố topic HOẶC chung "
           f"từ hiếm trong {WIN_H}h — GỢI Ý thôi, phải tự kiểm chứng; quy ước đóng: "
           f"`answer`/`decision` GIỮ NGUYÊN topic câu hỏi): {hints}")
-elif not pending_q_wagsfix and not pending_q_needs_human:
+elif os.path.isdir(inbox_dir) and not pending_q_wagsfix and not pending_q_needs_human:
+    # Điều kiện isdir là BẮT BUỘC: không quét được ≠ quét xong và sạch (xem `else` ở trên).
     OK("Không có câu hỏi (question) nào đang chờ xử lý trong 48h qua.")
 if pending_q_needs_human:
     W(f"{WARN_ONLY} {len(pending_q_needs_human)} câu hỏi ĐÃ TRIAGE, chờ NGƯỜI quyết (không "
@@ -654,6 +755,78 @@ if aged_q:
           f"USER quyết; {len(oldest)} cũ nhất: {oldest} …và {more} mục giữa… "
           f"{len(newest)} mới nhất: {newest}. Danh sách ĐẦY ĐỦ: bin/bus_question_audit.py")
 # CHECK5_END
+
+# 5b. Hàng đợi CÁCH LY của append_event.sh (bus/_rejected.jsonl) — thêm 2026-08-16 theo
+#     arch-review coord-2026-08-16 required_change #3. append_event.sh chặn arg bị shell
+#     word-split và ghi nguyên văn vào đây thay vì để event hỏng lọt lên bus; nhưng 28/42
+#     call site gọi kèm `2>/dev/null || true` nên thông điệp fail-loud bị vứt VÀ exit code
+#     bị nuốt ⇒ với nhóm đó, event biến mất không dấu vết trừ file này. File không người
+#     đọc = đúng hình thái "lỗi chết trong log không ai đọc" mà chính cơ chế cách ly sinh
+#     ra để diệt. Dòng dưới là NGƯỜI ĐỌC đó; người DỌN là fleet_housekeeping.sh category
+#     `rotate`. Cố ý ĐỂ NGOÀI CHECK5_BEGIN/END: khối đó có hợp đồng namespace hạn chế với
+#     ops_health_check_selfcheck.py (chỉ glob/gzip/json/os/re + W/OK + wc_root).
+# 5b_BEGIN — marker ỔN ĐỊNH cho bin/ops_health_check_rejected_selfcheck.py. Khối chỉ được
+# dùng: os/json + wc_root + W()/OK() (selfcheck cung cấp đúng bấy nhiêu); mọi thứ khác PHẢI
+# tự import TẠI ĐÂY (xem sự cố defaultdict 2026-08-07 ghi ở đầu CHECK5).
+_qf = os.path.join(wc_root, "mike", "bus", "_rejected.jsonl")
+if os.path.exists(_qf):
+    import datetime as _dt
+    _q24, _qtot, _qbad = [], 0, 0
+    _qcut = (_dt.datetime.now(_dt.timezone.utc) - _dt.timedelta(hours=24)
+             ).strftime("%Y-%m-%dT%H:%M:%SZ")
+    _qerr = None
+    try:
+        # errors="replace": file này chứa arg ĐÃ BỊ CHẶN vì hỏng — đọc nó mà chết
+        # UnicodeDecodeError thì check cảnh báo lại tự thành sự cố im lặng thứ hai.
+        with open(_qf, encoding="utf-8", errors="replace") as _f:
+            for _ln in _f:
+                _ln = _ln.strip()
+                if not _ln:
+                    continue
+                _qtot += 1
+                # try BỌC CẢ THÂN VÒNG LẶP, không chỉ json.loads (arch-review round 2):
+                # bản đầu để `_r.get(...)` NGOÀI try nên một dòng JSON không-phải-object
+                # (vd `12345`) ném AttributeError thoát thẳng ra `except` bao ngoài ⇒ vòng
+                # quét ĐỨT giữa chừng, mọi bản ghi PHÍA SAU vô hình. Reader sinh ra để diệt
+                # fail-silent mà tự fail-silent. Dòng hỏng giờ chỉ tăng _qbad rồi đi tiếp.
+                try:
+                    _r = json.loads(_ln)
+                    if not isinstance(_r, dict):
+                        raise ValueError("dòng JSON không phải object")
+                    if str(_r.get("ts", "")) >= _qcut:
+                        _q24.append(_r)
+                except Exception:
+                    _qbad += 1
+                    continue
+    except Exception as _e:
+        _qerr = _e
+    if _qerr is not None:
+        # W() chứ KHÔNG phải lines.append: lines.append in ra ℹ️ mà KHÔNG tăng biến `warn`
+        # ⇒ không escalate, đúng thứ hình thái im lặng mà cả khối này đi diệt.
+        W(f"Không đọc được bus/_rejected.jsonl ({_qerr}) — hàng đợi cách ly của "
+          f"append_event.sh đang KHÔNG được giám sát; event bị chặn sẽ mất dấu vết.")
+    if _q24 or _qbad:
+        # Ép kiểu + đặt TRONG vùng an toàn: file này chứa dữ liệu HỎNG theo thiết kế, một
+        # bản ghi méo (reason là list, argv là dict) từng đủ sức ném ra ngoài heredoc và
+        # giết CẢ 11 check của ops_health_check, không riêng khối này (arch-review round 2).
+        def _q_who(_r):
+            _a = _r.get("argv")
+            return str(_a[0]) if isinstance(_a, list) and _a else "?"
+        _who = sorted({_q_who(_r) for _r in _q24})
+        _why = sorted({str(_r.get("reason") or "?").split("\n")[0][:70] for _r in _q24})
+        W(f"append_event.sh đã CÁCH LY {len(_q24)} bản ghi trong 24h qua "
+          f"({_qtot} bản ghi trong file hiện tại"
+          f"{f', {_qbad} dòng không parse được' if _qbad else ''}) "
+          f"— đây là event KHÔNG BAO GIỜ lên bus: agent gọi bị shell word-split payload và "
+          f"phần lớn call site nuốt stderr nên agent tưởng đã ghi thành công. "
+          f"Agent: {_who}. Lý do: {_why}. "
+          f"Xem `tail bus/_rejected.jsonl`; sửa cách quote ở call site rồi ghi LẠI event "
+          f"(hàng đợi này là PHÁP Y, không ai tự phát lại — payload hỏng phát lại vẫn hỏng).")
+    elif _qtot:
+        OK(f"Hàng đợi cách ly append_event.sh: {_qtot} bản ghi cũ trong file hiện tại, "
+           f"24h qua không có ca mới.")
+# 5b_END — bin/ops_health_check_rejected_selfcheck.py TRÍCH khối giữa 5b_BEGIN/5b_END rồi
+# chạy trên namespace stub. Đổi/xoá 2 marker này ⇒ selfcheck FAIL ngay, không im lặng.
 
 # 6. Corp-action backlog (data/corp_action_backlog.json, ghi bởi update_shares_live.py
 #    --scan mỗi ngày 18:40 ICT — đọc file local, KHÔNG query BQ trực tiếp ở đây để giữ
@@ -762,13 +935,31 @@ if os.path.exists(nte_file) and (_time.time() - os.path.getmtime(nte_file)) < 86
         # Chỉ lấy dòng MỞ ĐẦU BẢN GHI (có timestamp) — thông điệp lỗi có thể tràn nhiều dòng
         # (discord_channel.sh in thêm danh sách tên hợp lệ), lấy dòng cuối thô sẽ ra đúng cái
         # đuôi vô nghĩa đó.
-        _nte_last = [l for l in open(nte_file, encoding="utf-8", errors="replace").read().splitlines()
-                     if re.match(r"^\d{4}-\d{2}-\d{2}T", l)][-1]
+        _nte_lines = [l for l in open(nte_file, encoding="utf-8", errors="replace").read().splitlines()
+                      if re.match(r"^\d{4}-\d{2}-\d{2}T", l)]
     except Exception:
-        _nte_last = "(không đọc được nội dung)"
-    W(f"[WARN-ONLY] notify_thread.sh có lỗi gửi Discord trong 24h qua — TIN NHẮN ĐÃ BỊ NUỐT. "
-      f"Dòng cuối: {_nte_last[:300]} — kiểm tên topic trong mike/kb/discord_channels.json "
-      f"và quyền chạy bin/discord_channel.sh.")
+        _nte_lines = []
+    # notify_thread.sh ghi HAI loại bản ghi vào cùng file, và chúng có hệ quả NGƯỢC nhau:
+    # "DA TU SUA VA GUI" = phát hiện caller đảo thứ tự đối số, script TỰ SỬA và tin ĐÃ ĐẾN
+    # nơi; mọi bản ghi còn lại = tin KHÔNG gửi được. Trước 2026-08-16 check này gộp cả hai
+    # dưới một tiêu đề "TIN NHẮN ĐÃ BỊ NUỐT" ⇒ báo cho người rằng một tin đã giao là bị mất
+    # (arch-review coord-2026-08-12 required_change #3: "sửa cả người ĐỌC, không chỉ người
+    # GHI"). Một lần tra cứu/nhận dạng sai không được đội lốt một kết luận về sự cố thật.
+    _nte_swap = [l for l in _nte_lines if "DA TU SUA VA GUI" in l]
+    _nte_hard = [l for l in _nte_lines if "DA TU SUA VA GUI" not in l]
+    if _nte_hard:
+        W(f"[WARN-ONLY] notify_thread.sh có lỗi gửi Discord trong 24h qua — TIN NHẮN ĐÃ BỊ NUỐT. "
+          f"Dòng cuối: {_nte_hard[-1][:300]} — kiểm tên topic trong mike/kb/discord_channels.json "
+          f"và quyền chạy bin/discord_channel.sh.")
+    elif _nte_swap:
+        W(f"[WARN-ONLY] notify_thread.sh: {len(_nte_swap)} call site ĐẢO THỨ TỰ đối số trong 24h "
+          f"qua — tin ĐÃ ĐƯỢC GỬI (script tự sửa), KHÔNG mất tin. Sửa call site cho đúng "
+          f"`notify_thread.sh \"<message>\" <topic>`. Dòng cuối: {_nte_swap[-1][:300]}")
+    elif not _nte_lines:
+        W(f"[WARN-ONLY] notify_thread_errors.log vừa được ghi trong 24h qua nhưng KHÔNG đọc "
+          f"được bản ghi nào có timestamp — không kết luận được có mất tin hay không.")
+    else:
+        OK("notify_thread.sh: không có lỗi gửi Discord trong 24h qua.")
 else:
     OK("notify_thread.sh: không có lỗi gửi Discord trong 24h qua.")
 # CHECK10_END

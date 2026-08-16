@@ -21,6 +21,7 @@ Not a full cron-semantics parser — good enough for triage, not a scheduler sim
     is exactly the "silently running, silently failing" shape the user is worried about.
 """
 import glob
+import json
 import os
 import re
 import subprocess
@@ -40,6 +41,13 @@ ERROR_PATTERNS = [
     r"FATAL",
     r"Exception:",
     r"^\s*Error:",
+    # Python's own terminal exception line ("SyntaxError: invalid syntax",
+    # "ValueError: ...") — the OLD `^\s*Error:` pattern only matches a bare "Error:", missing
+    # every real `\w+Error:`/`\w+Exception:` class name. Without this, a traceback whose only
+    # match is the generic "Traceback (most recent call last):" header carries zero diagnostic
+    # text and can't be ack-matched precisely (caught 2026-08-16 triaging the config.py
+    # git-stash-conflict-marker false positive — see kb/coding_guidelines_ext.md).
+    r"^\s*\w+(Error|Exception):",
 ]
 ERROR_RE = re.compile("|".join(ERROR_PATTERNS), re.MULTILINE)
 
@@ -125,16 +133,26 @@ def scan_errors(path, since_ts):
     tail = content[-200_000:]
     lines = tail.splitlines()
     cutoff = time.strftime("%Y-%m-%d", time.gmtime(NOW - RECENT_DAYS * 86400))
-    last_date = None
+
+    # Nearest datestamp EITHER direction, not look-behind-only — a look-behind-only scan
+    # never ages out a hit whose only nearby datestamp appears a few lines AFTER it (e.g. a
+    # Traceback immediately followed by a "[<date>] FATAL ..." summary line one line down, or
+    # any hit that is the very first thing in the file). Real case: newdeals_daily_report.log
+    # carried a 2026-07-06 HTTPError 41 days past the 10-day window because its only nearby
+    # date sat 3 lines after the traceback, never before it (found 2026-08-16 while triaging
+    # "same warnings every day" — see kb/coding_guidelines_ext.md's cron-health-check entry).
+    date_positions = [(i, m.group(1)) for i, ln in enumerate(lines) if (m := DATE_RE.search(ln))]
+
+    def nearest_date(idx):
+        if not date_positions:
+            return None
+        return min(date_positions, key=lambda p: abs(p[0] - idx))[1]
+
     hits = []
-    for line in lines:
-        dm = DATE_RE.search(line)
-        if dm:
-            last_date = dm.group(1)
+    for i, line in enumerate(lines):
         if ERROR_RE.search(line) and not any(b in line for b in BENIGN_SUBSTR):
-            # skip if we have a nearby datestamp and it's older than the recency window —
-            # avoids resurfacing e.g. a 15-day-old transient timeout that self-retried OK
-            if last_date is not None and last_date < cutoff:
+            nd = nearest_date(i)
+            if nd is not None and nd < cutoff:
                 continue
             hits.append(line.strip()[:200])
     # dedup, keep last 5
@@ -147,8 +165,53 @@ def scan_errors(path, since_ts):
     return list(reversed(seen))
 
 
+ACK_PATH = os.path.join(ROOT, "state", "cron_health_ack.json")
+
+
+def load_acks():
+    """Signatures a human/Mike has already investigated and confirmed fixed — suppressed
+    from the daily alert (but still printed, under ACKED) until they expire. Prevents the
+    exact 'same warning every day' complaint for an error whose log just hasn't been
+    rotated/overwritten yet since the fix landed. Expiry is the safety valve: if the
+    signature is STILL appearing after expires_days, it resurfaces for real re-triage —
+    an ack is a snooze, not a permanent silence."""
+    try:
+        with open(ACK_PATH, encoding="utf-8") as f:
+            data = json.load(f)
+    except Exception:
+        return []
+    live = []
+    for a in data.get("signatures", []):
+        try:
+            acked_ts = time.mktime(time.strptime(a["acked_at"], "%Y-%m-%dT%H:%M:%SZ")) - time.timezone
+        except Exception:
+            continue
+        if NOW - acked_ts > a.get("expires_days", 14) * 86400:
+            continue  # expired -> treat as not-acked, let it resurface if still real
+        live.append(a)
+    return live
+
+
+def find_job_ack(script, errs, acks):
+    """One stack trace produces several distinct hit lines (the generic 'Traceback (most
+    recent call last):' header, file/line frames, the terminal exception message) — acking
+    only the exact line containing the distinctive text leaves the generic header line
+    unacked and still alarming (caught live 2026-08-16: discover.log kept showing the header
+    line even after acking its OSError message). Match at job granularity instead: if the
+    ack's script matches AND its match_substr appears ANYWHERE among this job's hits, treat
+    the whole batch as one already-triaged incident."""
+    for a in acks:
+        if a.get("script") and a["script"] not in script:
+            continue
+        sub = a.get("match_substr", "")
+        if sub and any(sub in e for e in errs):
+            return a
+    return None
+
+
 def main():
     jobs = parse_crontab()
+    acks = load_acks()
     rows = []
     for j in jobs:
         bucket, max_age = cadence_bucket(j["schedule"])
@@ -177,17 +240,26 @@ def main():
         age_s = NOW - os.path.getmtime(p)
         age_days = age_s / 86400
         errs = scan_errors(p, NOW - 7 * 86400)
+        job_ack = find_job_ack(script, errs, acks) if errs else None
         if age_s > max_age:
             rows.append({
                 "script": script, "schedule": j["schedule"], "bucket": bucket,
                 "status": "STALE",
                 "detail": f"Log {os.path.basename(p)} không đổi {age_days:.1f} ngày (ngưỡng {bucket}={max_age/86400:.1f}d).",
             })
-        elif errs:
+        elif errs and not job_ack:
             rows.append({
                 "script": script, "schedule": j["schedule"], "bucket": bucket,
                 "status": "ERRORS_FOUND",
                 "detail": f"{len(errs)} dòng lỗi gần nhất trong {os.path.basename(p)}: " + " | ".join(errs),
+            })
+        elif errs and job_ack:
+            rows.append({
+                "script": script, "schedule": j["schedule"], "bucket": bucket,
+                "status": "ACKED",
+                "detail": f"{len(errs)} dòng đã xác nhận-đã-sửa (ack {job_ack['acked_by']} "
+                          f"{job_ack['acked_at'][:10]}, hết hạn {job_ack.get('expires_days', 14)}d): "
+                          f"{job_ack['note'][:180]}",
             })
         else:
             rows.append({
@@ -196,9 +268,12 @@ def main():
                 "detail": f"{os.path.basename(p)} tươi ({age_days:.1f}d), 0 dấu hiệu lỗi trong tail.",
             })
 
-    bad = [r for r in rows if r["status"] != "OK"]
+    # ACKED = human-confirmed-already-fixed, not "cần chú ý" — that's the whole point of an
+    # ack (see load_acks docstring). Only ERRORS_FOUND/STALE/LOG_MISSING/NO_LOG_REDIRECT drive
+    # the daily Discord alert (cron_health_check_daily.sh's `RC != 0` branch).
+    bad = [r for r in rows if r["status"] not in ("OK", "ACKED")]
     print(f"cron_health_check — {len(rows)} job có log target, {len(bad)} cần chú ý\n")
-    for status in ("ERRORS_FOUND", "STALE", "LOG_MISSING", "NO_LOG_REDIRECT"):
+    for status in ("ERRORS_FOUND", "STALE", "LOG_MISSING", "NO_LOG_REDIRECT", "ACKED"):
         grp = [r for r in rows if r["status"] == status]
         if not grp:
             continue
@@ -216,8 +291,7 @@ def main():
         sys.path.insert(0, ROOT)
         summary = {"total": len(rows), "ok": len(ok), "bad": len(bad),
                    "by_status": {s: len([r for r in rows if r["status"] == s])
-                                 for s in ("ERRORS_FOUND", "STALE", "LOG_MISSING", "NO_LOG_REDIRECT")}}
-        import json
+                                 for s in ("ERRORS_FOUND", "STALE", "LOG_MISSING", "NO_LOG_REDIRECT", "ACKED")}}
         subprocess.run([os.path.join(ROOT, "bin", "append_event.sh"), "Mike", "finding",
                          "cron-health-check", json.dumps(summary, ensure_ascii=False)])
 
