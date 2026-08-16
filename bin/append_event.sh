@@ -14,6 +14,7 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BUS="$ROOT/bus"
 PY="$ROOT/bin/mike_json.py"
 
+_ORIG_ARGV=("$@")   # giữ NGUYÊN VĂN arg gốc cho hàng đợi cách ly ở die() bên dưới
 id="${1:?usage: append_event.sh <agent_id> <event_type> <topic> <payload> [trace_id]}"
 etype="${2:?event_type required (finding|status|question|answer|decision|error)}"
 topic="${3:?topic required}"
@@ -27,7 +28,38 @@ trace_id="${5:-${JOB_ID:-}}"
 # LẶNG LẼ, và mike_json.py fallback JSON-hỏng→chuỗi nên event vẫn "thành công". Câu hỏi
 # question của Mike 2026-08-12 mất nguyên phần đuôi kiểu này. Fail LOUD thay vì ghi rác:
 # mất 1 lần gọi (agent thấy lỗi, quote lại rồi gọi lại) rẻ hơn 1 event hỏng vĩnh viễn.
-die() { echo "append_event.sh: $*" >&2; exit 1; }
+# CÁCH LY, KHÔNG CHỈ KÊU (arch-review coord-2026-08-13 required_change #4): 28/42 call site
+# gọi kèm `2>/dev/null || true` (eod_trading_report.sh, ops_health_check.sh, dispatch.sh,
+# refresh_fa_ratings.sh…), nên với NHÓM ĐÓ thông điệp fail-loud bị vứt và exit code bị nuốt
+# ⇒ thay đổi ròng của các chốt dưới đây là event bị VỨT HẲN thay vì ghi bản degrade — đúng
+# hình thái lỗi mà chính chúng sinh ra để diệt. Ghi nguyên văn arg bị chặn vào một file cách
+# ly để bằng chứng KHÔNG mất, dù stderr có bị vứt hay không. Đây là hàng đợi pháp y, KHÔNG
+# phải hàng đợi retry: không ai tự động phát lại, vì payload đã hỏng thì phát lại vẫn hỏng.
+# Bản thân việc cách ly không bao giờ được che lỗi gốc ⇒ mọi thứ bọc `|| true`.
+_quarantine() {
+  # "$@" ở ĐÂY là lý do bị chặn; arg gốc của script lấy từ _ORIG_ARGV (bên trong die()
+  # thì "$@" là các TỪ của thông điệp lỗi, không phải arg gốc — đã suýt ghi nhầm).
+  # `python3 -c CODE a b` ⇒ sys.argv == ['-c', 'a', 'b'] — sys.argv[0] là '-c', KHÔNG phải
+  # tham số đầu. Bản đầu dùng sys.argv[0] làm đường dẫn nên ghi vào một file tên `-c` ở cwd
+  # và hàng đợi cách ly rỗng vĩnh viễn; `|| true` nuốt sạch. Đúng lớp lỗi đang đi sửa.
+  python3 -c '
+import json, os, sys, datetime
+qf, reason, args = sys.argv[1], sys.argv[2], sys.argv[3:]
+rec = {"ts": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+       "rejected_by": "append_event.sh", "reason": reason,
+       "argc": len(args), "argv": args,
+       "caller_pid": os.environ.get("_AE_PPID", ""), "job_id": os.environ.get("JOB_ID", "")}
+with open(qf, "a", encoding="utf-8") as f:
+    f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+' "$BUS/inbox/_rejected.jsonl" "$1" "${_ORIG_ARGV[@]}" 2>/dev/null || true
+}
+die() {
+  mkdir -p "$BUS/inbox" 2>/dev/null || true
+  _AE_PPID="$PPID" _quarantine "$*"
+  echo "append_event.sh: $*" >&2
+  echo "append_event.sh: arg bị chặn đã lưu vào $BUS/inbox/_rejected.jsonl (stderr có thể bị caller vứt)." >&2
+  exit 1
+}
 
 if [ "$#" -gt 5 ]; then
   die "nhận $# tham số (tối đa 5) — payload gần như chắc chắn bị shell word-split.
@@ -35,11 +67,24 @@ if [ "$#" -gt 5 ]; then
   Sửa: bọc payload trong nháy ĐƠN và escape mọi \"'\" bên trong, hoặc bỏ hẳn nháy đơn khỏi text."
 fi
 
+# Chốt trace_id: ENFORCE ĐÚNG HÌNH DẠNG mà thông điệp lỗi đã hứa, không chỉ whitelist ký tự.
+# Bản whitelist (2026-08-13) để lọt 7/8 giá trị rác trong chính danh sách sự cố của nó —
+# `hom`, `nguoi`, `du`, `capacity`, `khoan`, `lai`, `con` đều exit 0 (arch-review
+# coord-2026-08-13 required_change #2, tự replay). Kiểm kê bus thật 2026-08-16: 2875/2888
+# trace_id đã đúng hình dạng này; 13 cái còn lại CHÍNH LÀ các ca hỏng đang nói tới.
+# Vẫn FATAL (không drop im lặng): caller trực tiếp luôn quote lại được. Riêng đường
+# PROPAGATE từ dữ liệu bus cũ bất biến thì không quote lại được — nên nó được làm sạch tại
+# nguồn ở bin/verify_finding.sh, chứ không nới lỏng chốt này.
 case "$trace_id" in
   "" ) : ;;                       # không có trace_id là hợp lệ
   *[[:space:]]* ) die "trace_id chứa khoảng trắng: $(printf '%q' "$trace_id") — dấu hiệu word-split." ;;
-  *[!A-Za-z0-9_.:-]* ) die "trace_id có ký tự lạ: $(printf '%q' "$trace_id") — trace_id hợp lệ dạng <Agent>_<YYYYMMDD>_<HHMMSS>." ;;
 esac
+if [ -n "$trace_id" ] && ! printf '%s' "$trace_id" \
+     | grep -qE '^[A-Za-z0-9_.:-]+_[0-9]{8}_[0-9]{6}$'; then
+  die "trace_id SAI HÌNH DẠNG: $(printf '%q' "$trace_id") — phải là <Agent>_<YYYYMMDD>_<HHMMSS>
+  (vd Wags_20260816_090511). Giá trị 1 từ như 'nguoi'/'capacity' là dấu hiệu payload bị
+  shell word-split và mảnh đuôi rơi vào tham số 5."
+fi
 
 # Payload mở đầu bằng { hoặc [ mà không parse được = JSON cụt (bị cắt), KHÔNG phải chuỗi thường.
 case "$payload" in

@@ -461,7 +461,49 @@ def case_c10_fresh_log_without_timestamp_line():
         lines, warn = run_check10(root)
         out = joined(lines)
         check("check10: log không có dòng timestamp ⇒ vẫn WARN, không ném exception",
-              len(warn) == 1 and "không đọc được nội dung" in out, out)
+              len(warn) == 1 and "KHÔNG đọc được bản ghi nào có timestamp" in out, out)
+        check("check10: không có dòng timestamp ⇒ KHÔNG khẳng định mất tin",
+              "TIN NHẮN ĐÃ BỊ NUỐT" not in out, out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+# ── Ca c10-swap (2026-08-16, arch-review coord-2026-08-12 required_change #3): file
+#    notify_thread_errors.log chứa HAI loại bản ghi có hệ quả NGƯỢC nhau. "DA TU SUA VA GUI"
+#    nghĩa là caller đảo thứ tự đối số nhưng tin ĐÃ ĐẾN nơi; gộp nó vào tiêu đề "TIN NHẮN ĐÃ
+#    BỊ NUỐT" là nói với người rằng một tin đã giao là bị mất. "Sửa cả người ĐỌC, không chỉ
+#    người GHI."
+SWAP_LINE = ('2026-08-16T09:00:00+07:00 notify_thread: DOI SO BI DAO (topic o vi tri 1, '
+             'message o vi tri 2) — DA TU SUA VA GUI toi topic "architecture". '
+             'SUA CALL SITE: dung `notify_thread.sh "<message>" <topic>`. caller=bin/foo.sh\n')
+HARD_LINE = "2026-08-16T09:05:00+07:00 notify_thread: KHONG phan giai duoc topic bar\n"
+
+
+def case_c10_swap_recovery_is_not_swallowed():
+    root = _mklog(SWAP_LINE)
+    try:
+        lines, warn = run_check10(root)
+        out = joined(lines)
+        check("check10: CHỈ có bản ghi tự-sửa ⇒ KHÔNG nói 'TIN NHẮN ĐÃ BỊ NUỐT'",
+              "TIN NHẮN ĐÃ BỊ NUỐT" not in out, out)
+        check("check10: bản ghi tự-sửa vẫn WARN (call site còn sai) và nói rõ tin ĐÃ GỬI",
+              len(warn) == 1 and "ĐÃ ĐƯỢC GỬI" in out, out)
+        check("check10: bản ghi tự-sửa vẫn mang marker [WARN-ONLY]",
+              "[WARN-ONLY]" in out, out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+def case_c10_hard_error_wins_over_swap():
+    # Lỗi THẬT lẫn với bản ghi tự-sửa: không được để bản ghi tự-sửa che mất lỗi thật.
+    root = _mklog(SWAP_LINE + HARD_LINE)
+    try:
+        lines, warn = run_check10(root)
+        out = joined(lines)
+        check("check10: có lỗi THẬT lẫn bản ghi tự-sửa ⇒ vẫn báo TIN NHẮN ĐÃ BỊ NUỐT",
+              "TIN NHẮN ĐÃ BỊ NUỐT" in out, out)
+        check("check10: trích đúng dòng lỗi THẬT, không phải dòng tự-sửa",
+              "KHONG phan giai duoc topic bar" in out and "DA TU SUA VA GUI" not in out, out)
     finally:
         shutil.rmtree(root, ignore_errors=True)
 
@@ -1049,6 +1091,7 @@ def main():
                case_aged_wagsfix_never_truncated, case_aged_no_wagsfix_keeps_old_cut,
                case_aged_wagsfix_overflow_is_loud,
                case_c10_no_file_is_ok, case_c10_fresh_log_warns,
+               case_c10_swap_recovery_is_not_swallowed, case_c10_hard_error_wins_over_swap,
                case_c10_fresh_log_without_timestamp_line, case_c10_old_log_is_ok,
                case_c11_fresh_all_green, case_c11_red_is_warn_only,
                case_c11_lists_every_red_no_truncation,

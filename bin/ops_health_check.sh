@@ -786,13 +786,31 @@ if os.path.exists(nte_file) and (_time.time() - os.path.getmtime(nte_file)) < 86
         # Chỉ lấy dòng MỞ ĐẦU BẢN GHI (có timestamp) — thông điệp lỗi có thể tràn nhiều dòng
         # (discord_channel.sh in thêm danh sách tên hợp lệ), lấy dòng cuối thô sẽ ra đúng cái
         # đuôi vô nghĩa đó.
-        _nte_last = [l for l in open(nte_file, encoding="utf-8", errors="replace").read().splitlines()
-                     if re.match(r"^\d{4}-\d{2}-\d{2}T", l)][-1]
+        _nte_lines = [l for l in open(nte_file, encoding="utf-8", errors="replace").read().splitlines()
+                      if re.match(r"^\d{4}-\d{2}-\d{2}T", l)]
     except Exception:
-        _nte_last = "(không đọc được nội dung)"
-    W(f"[WARN-ONLY] notify_thread.sh có lỗi gửi Discord trong 24h qua — TIN NHẮN ĐÃ BỊ NUỐT. "
-      f"Dòng cuối: {_nte_last[:300]} — kiểm tên topic trong mike/kb/discord_channels.json "
-      f"và quyền chạy bin/discord_channel.sh.")
+        _nte_lines = []
+    # notify_thread.sh ghi HAI loại bản ghi vào cùng file, và chúng có hệ quả NGƯỢC nhau:
+    # "DA TU SUA VA GUI" = phát hiện caller đảo thứ tự đối số, script TỰ SỬA và tin ĐÃ ĐẾN
+    # nơi; mọi bản ghi còn lại = tin KHÔNG gửi được. Trước 2026-08-16 check này gộp cả hai
+    # dưới một tiêu đề "TIN NHẮN ĐÃ BỊ NUỐT" ⇒ báo cho người rằng một tin đã giao là bị mất
+    # (arch-review coord-2026-08-12 required_change #3: "sửa cả người ĐỌC, không chỉ người
+    # GHI"). Một lần tra cứu/nhận dạng sai không được đội lốt một kết luận về sự cố thật.
+    _nte_swap = [l for l in _nte_lines if "DA TU SUA VA GUI" in l]
+    _nte_hard = [l for l in _nte_lines if "DA TU SUA VA GUI" not in l]
+    if _nte_hard:
+        W(f"[WARN-ONLY] notify_thread.sh có lỗi gửi Discord trong 24h qua — TIN NHẮN ĐÃ BỊ NUỐT. "
+          f"Dòng cuối: {_nte_hard[-1][:300]} — kiểm tên topic trong mike/kb/discord_channels.json "
+          f"và quyền chạy bin/discord_channel.sh.")
+    elif _nte_swap:
+        W(f"[WARN-ONLY] notify_thread.sh: {len(_nte_swap)} call site ĐẢO THỨ TỰ đối số trong 24h "
+          f"qua — tin ĐÃ ĐƯỢC GỬI (script tự sửa), KHÔNG mất tin. Sửa call site cho đúng "
+          f"`notify_thread.sh \"<message>\" <topic>`. Dòng cuối: {_nte_swap[-1][:300]}")
+    elif not _nte_lines:
+        W(f"[WARN-ONLY] notify_thread_errors.log vừa được ghi trong 24h qua nhưng KHÔNG đọc "
+          f"được bản ghi nào có timestamp — không kết luận được có mất tin hay không.")
+    else:
+        OK("notify_thread.sh: không có lỗi gửi Discord trong 24h qua.")
 else:
     OK("notify_thread.sh: không có lỗi gửi Discord trong 24h qua.")
 # CHECK10_END
