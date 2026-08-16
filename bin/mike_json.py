@@ -182,6 +182,28 @@ def short(e):
     )
 
 
+def _utf8_safe(x):
+    """Bỏ mọi surrogate/byte hỏng — ĐỆM CUỐI trước khi ghi vào bus APPEND-ONLY.
+
+    Vì sao ở TẦNG NÀY chứ không chỉ ở caller (arch-review coord-2026-08-16): caller cắt
+    chuỗi bằng `cut -c`/`head -c`, mà locale máy này là LANG="C" (/etc/default/locale) nên
+    `cut -c` đếm theo BYTE — cắt trúng giữa một ký tự tiếng Việt 3 byte là vỡ chuỗi. Python
+    đọc argv bằng surrogateescape nên byte hỏng đi lọt tới tận đây, json.dumps vẫn ra rc=0,
+    và dòng hỏng nằm VĨNH VIỄN trong file append-only: từ đó load_jsonl ném
+    UnicodeDecodeError cho MỌI consumer của inbox đó (ops_health_check §5, wags_autofix
+    bước 1.5...). Một caller ẩu đủ sức làm câm cả kênh escalation của fleet.
+    Phép vá y hệt dòng 661 (cmd_job_set) đã dùng từ trước — chỗ đó vá đường job record,
+    chỗ này vá đường event; hai đường độc lập, sửa một chỗ KHÔNG che được chỗ kia.
+    """
+    if isinstance(x, str):
+        return x.encode("utf-8", errors="replace").decode("utf-8")
+    if isinstance(x, dict):
+        return {_utf8_safe(k): _utf8_safe(v) for k, v in x.items()}
+    if isinstance(x, list):
+        return [_utf8_safe(i) for i in x]
+    return x
+
+
 def cmd_event(a):
     aid, etype, topic, payload, kbver = a[:5]
     trace_id = a[5] if len(a) > 5 and a[5] else None
@@ -189,6 +211,9 @@ def cmd_event(a):
         p = json.loads(payload)
     except Exception:
         p = payload
+    aid, etype, topic = _utf8_safe(aid), _utf8_safe(etype), _utf8_safe(topic)
+    p = _utf8_safe(p)
+    trace_id = _utf8_safe(trace_id) if trace_id else trace_id
     try:
         v = int(kbver)
     except Exception:

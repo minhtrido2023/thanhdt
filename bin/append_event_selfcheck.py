@@ -56,7 +56,10 @@ def run(sandbox, args, env_extra=None, cwd=None):
 
 
 def rejected(sandbox):
-    path = os.path.join(sandbox, "bus", "inbox", "_rejected.jsonl")
+    # bus/, KHÔNG phải bus/inbox/ (đổi 2026-08-16): reader nào cũng glob inbox/*.jsonl mà
+    # không lọc tên ⇒ đặt trong inbox thì consolidate.sh nuốt bản ghi cách ly (cursor nhảy,
+    # bằng chứng mất) và render `?/? — : null` vào KB. Đã đo, không phải suy đoán.
+    path = os.path.join(sandbox, "bus", "_rejected.jsonl")
     if not os.path.exists(path):
         return []
     with open(path, encoding="utf-8") as f:
@@ -212,7 +215,13 @@ def case_quarantine_survives_discarded_stderr():
     rc, _, _ = run(d, ["W", "status", "chu-de", '{"a":1}', "nguoi"], cwd=d)
     check("cách ly: arg bị chặn vẫn exit != 0", rc != 0, f"rc={rc}")
     recs = rejected(d)
-    check("cách ly: có ĐÚNG 1 bản ghi trong bus/inbox/_rejected.jsonl", len(recs) == 1, recs)
+    check("cách ly: có ĐÚNG 1 bản ghi trong bus/_rejected.jsonl", len(recs) == 1, recs)
+    # Hàng đợi cách ly PHẢI đứng ngoài glob bus/inbox/*.jsonl — nếu ai đó dời nó về lại
+    # inbox/, consolidate.sh sẽ ăn bản ghi và chính bằng chứng biến mất (đo 2026-08-16).
+    check("cách ly: KHÔNG có file nào lọt vào bus/inbox/ (glob của mọi reader)",
+          not os.path.exists(os.path.join(d, "bus", "inbox", "_rejected.jsonl")),
+          sorted(os.listdir(os.path.join(d, "bus", "inbox")))
+          if os.path.isdir(os.path.join(d, "bus", "inbox")) else "<no inbox>")
     if recs:
         r = recs[0]
         check("cách ly: argv gốc được giữ NGUYÊN VĂN (đủ 5, không phải từ của thông điệp lỗi)",

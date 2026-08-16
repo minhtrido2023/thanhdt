@@ -679,6 +679,52 @@ if aged_q:
           f"{len(newest)} mới nhất: {newest}. Danh sách ĐẦY ĐỦ: bin/bus_question_audit.py")
 # CHECK5_END
 
+# 5b. Hàng đợi CÁCH LY của append_event.sh (bus/_rejected.jsonl) — thêm 2026-08-16 theo
+#     arch-review coord-2026-08-16 required_change #3. append_event.sh chặn arg bị shell
+#     word-split và ghi nguyên văn vào đây thay vì để event hỏng lọt lên bus; nhưng 28/42
+#     call site gọi kèm `2>/dev/null || true` nên thông điệp fail-loud bị vứt VÀ exit code
+#     bị nuốt ⇒ với nhóm đó, event biến mất không dấu vết trừ file này. File không người
+#     đọc = đúng hình thái "lỗi chết trong log không ai đọc" mà chính cơ chế cách ly sinh
+#     ra để diệt. Dòng dưới là NGƯỜI ĐỌC đó; người DỌN là fleet_housekeeping.sh category
+#     `rotate`. Cố ý ĐỂ NGOÀI CHECK5_BEGIN/END: khối đó có hợp đồng namespace hạn chế với
+#     ops_health_check_selfcheck.py (chỉ glob/gzip/json/os/re + W/OK + wc_root).
+_qf = os.path.join(wc_root, "mike", "bus", "_rejected.jsonl")
+if os.path.exists(_qf):
+    import datetime as _dt
+    _q24, _qtot, _qbad = [], 0, 0
+    _qcut = (_dt.datetime.now(_dt.timezone.utc) - _dt.timedelta(hours=24)
+             ).strftime("%Y-%m-%dT%H:%M:%SZ")
+    try:
+        # errors="replace": file này chứa arg ĐÃ BỊ CHẶN vì hỏng — đọc nó mà chết
+        # UnicodeDecodeError thì check cảnh báo lại tự thành sự cố im lặng thứ hai.
+        with open(_qf, encoding="utf-8", errors="replace") as _f:
+            for _ln in _f:
+                _ln = _ln.strip()
+                if not _ln:
+                    continue
+                _qtot += 1
+                try:
+                    _r = json.loads(_ln)
+                except Exception:
+                    _qbad += 1
+                    continue
+                if _r.get("ts", "") >= _qcut:
+                    _q24.append(_r)
+    except Exception as _e:
+        lines.append(f"ℹ️ Không đọc được bus/_rejected.jsonl: {_e}")
+    if _q24 or _qbad:
+        _who = sorted({(_r.get("argv") or [""])[0] or "?" for _r in _q24})
+        _why = sorted({(_r.get("reason") or "?").split("\n")[0][:70] for _r in _q24})
+        W(f"append_event.sh đã CÁCH LY {len(_q24)} bản ghi trong 24h qua "
+          f"(tổng {_qtot} từ trước tới nay{f', {_qbad} dòng không parse được' if _qbad else ''}) "
+          f"— đây là event KHÔNG BAO GIỜ lên bus: agent gọi bị shell word-split payload và "
+          f"phần lớn call site nuốt stderr nên agent tưởng đã ghi thành công. "
+          f"Agent: {_who}. Lý do: {_why}. "
+          f"Xem `tail bus/_rejected.jsonl`; sửa cách quote ở call site rồi ghi LẠI event "
+          f"(hàng đợi này là PHÁP Y, không ai tự phát lại — payload hỏng phát lại vẫn hỏng).")
+    elif _qtot:
+        OK(f"Hàng đợi cách ly append_event.sh: {_qtot} bản ghi cũ, 24h qua không có ca mới.")
+
 # 6. Corp-action backlog (data/corp_action_backlog.json, ghi bởi update_shares_live.py
 #    --scan mỗi ngày 18:40 ICT — đọc file local, KHÔNG query BQ trực tiếp ở đây để giữ
 #    check này nhẹ/nhanh). Sự cố 2026-07-10: scan trước đây chỉ lên tiếng khi có candidate

@@ -228,7 +228,14 @@ Quy trình: (1) chẩn đoán từ artifact thật (jobs.sh list cột HB_AGE, t
       # thẳng vào đây (kể cả trong comment) đóng luôn chuỗi và làm hỏng cả script — đã
       # cắn thật khi viết chính dòng này. Sạch quote là bắt buộc vì _err_tail được nội
       # suy vào payload JSON của _post_q.
-      _err_tail="$(printf "%s" "$out" | grep -iE "authenticat|expired|credential|quota|rate.?limit|usage limit|timeout|exit=" | tail -3 | tr -d "\042\047\134" | tr "\n" " " | cut -c1-300)"
+      # `iconv -c` SAU `cut` là bắt buộc, không phải cho đẹp: locale máy là LANG="C"
+      # (/etc/default/locale) nên `cut -c` đếm theo BYTE. Dòng lỗi thật của ca 08-13 dài
+      # 383 byte (vuot 300) và có tiếng Việt — cắt ở byte 300 trúng giữa một ký tự 3 byte
+      # là 2/3 khả năng. Byte hỏng đi lọt qua gate JSON (surrogateescape) và nằm VĨNH VIỄN
+      # trong bus append-only, khiến load_jsonl chết cho mọi consumer của Wags.jsonl —
+      # gồm chính đường escalation này. `iconv -c` vứt phần ký tự dở. Tầng chặn thứ hai
+      # (cho caller chưa biết) nằm ở mike_json.py::_utf8_safe.
+      _err_tail="$(printf "%s" "$out" | grep -iE "authenticat|expired|credential|quota|rate.?limit|usage limit|timeout|exit=" | tail -3 | tr -d "\042\047\134" | tr "\n" " " | cut -c1-300 | iconv -f utf-8 -t utf-8 -c)"
       _notify_arch "🔴 **[wags-autofix] DISPATCH CHẾT — chưa hề có bản vá nào cho '"'"'$LABEL'"'"'** (dispatch.sh exit=$dispatch_rc, Wags không ghi finding). Đây KHÔNG phải arch-review, KHÔNG phải fix bị bác: agent sửa lỗi chưa chạy được. Dấu vết: ${_err_tail:-（không trích được dòng lỗi, xem log）}. Bỏ qua arch-reviewer (không có gì để review). Log: '"$PIPELOG"'"
       _post_q "wags-autofix-dispatch-failed: $LABEL" \
         "{\"dispatch_exit\":\"$dispatch_rc\",\"wags_finding\":\"KHONG\",\"err_tail\":\"$_err_tail\",\"note\":\"agent sua loi CHUA CHAY - khong phai arch-review, khong phai fix bi bac\",\"pipelog\":\"'"$PIPELOG"'\"}"

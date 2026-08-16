@@ -36,6 +36,14 @@ trace_id="${5:-${JOB_ID:-}}"
 # ly để bằng chứng KHÔNG mất, dù stderr có bị vứt hay không. Đây là hàng đợi pháp y, KHÔNG
 # phải hàng đợi retry: không ai tự động phát lại, vì payload đã hỏng thì phát lại vẫn hỏng.
 # Bản thân việc cách ly không bao giờ được che lỗi gốc ⇒ mọi thứ bọc `|| true`.
+# ĐƯỜNG DẪN nằm ở bus/, KHÔNG phải bus/inbox/ (đổi 2026-08-16): mọi reader của bus glob
+# `bus/inbox/*.jsonl` KHÔNG lọc theo tên — consolidate.sh, staleness_watch.py, mike_json
+# load_jsonl/verify-coverage. Đã đo thật: cho một bản ghi cách ly vào inbox rồi chạy
+# `mike_json.py cursor-advance`, nó nuốt gọn rc=0 và short() render ra `- [ts] ?/? — : null`
+# ⇒ bằng chứng pháp y BIẾN MẤT khỏi file (cursor đã nhảy) và KB ăn một dòng rác, tức đúng
+# thứ hàng đợi này sinh ra để chống. Tên bắt đầu bằng `_` KHÔNG bảo vệ được gì vì không
+# reader nào lọc prefix. Không có bản ghi nào từng tồn tại ở đường cũ (file chưa hề được
+# tạo) nên đổi chỗ là zero-migration.
 _quarantine() {
   # "$@" ở ĐÂY là lý do bị chặn; arg gốc của script lấy từ _ORIG_ARGV (bên trong die()
   # thì "$@" là các TỪ của thông điệp lỗi, không phải arg gốc — đã suýt ghi nhầm).
@@ -51,13 +59,13 @@ rec = {"ts": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:
        "caller_pid": os.environ.get("_AE_PPID", ""), "job_id": os.environ.get("JOB_ID", "")}
 with open(qf, "a", encoding="utf-8") as f:
     f.write(json.dumps(rec, ensure_ascii=False) + "\n")
-' "$BUS/inbox/_rejected.jsonl" "$1" "${_ORIG_ARGV[@]}" 2>/dev/null || true
+' "$BUS/_rejected.jsonl" "$1" "${_ORIG_ARGV[@]}" 2>/dev/null || true
 }
 die() {
-  mkdir -p "$BUS/inbox" 2>/dev/null || true
+  mkdir -p "$BUS" 2>/dev/null || true
   _AE_PPID="$PPID" _quarantine "$*"
   echo "append_event.sh: $*" >&2
-  echo "append_event.sh: arg bị chặn đã lưu vào $BUS/inbox/_rejected.jsonl (stderr có thể bị caller vứt)." >&2
+  echo "append_event.sh: arg bị chặn đã lưu vào $BUS/_rejected.jsonl (stderr có thể bị caller vứt)." >&2
   exit 1
 }
 
