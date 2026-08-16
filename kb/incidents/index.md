@@ -4,7 +4,7 @@ title: Incidents — Mike fleet (sổ postmortem, cấu trúc OKF)
 owner: Mike fleet (mọi agent ghi; daily_retro.sh ghi entry RETRO hằng đêm)
 format: OKF (Open Knowledge Format) — markdown + YAML frontmatter, 1 sự cố = 1 file
 migrated_from: kb/INCIDENTS.md (single-file 408KB, migrate → OKF 2026-07-30 job Winston_20260730_144031)
-entries: 111 file (77 sự cố + 33 RETRO + 1 mục open-items chung)
+entries: 112 file (77 sự cố + 34 RETRO + 1 mục open-items chung)
 ---
 
 # Incidents — Mike fleet
@@ -180,6 +180,7 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 | 2026-06-22 | [2026-06-22 — Mafee ZOMBIE: systemd reports healthy, agent isn't actually serving](2026-06/2026-06-22-mafee-zombie-systemd-healthy.md) | logged |
 
 ## RETRO hằng ngày (mới nhất trước)
+| 2026-08-16 | [RETRO — 2026-08-16: 6 sự cố (marathon "1 ngày dọn 4 backlog NEEDS_CHANGES", +1 selfcheck-red fix bổ sung qua verify Wags), 2 pattern xuyên suốt (§28 tiếp tục sống; Pattern B rộng hơn §28 chưa có Prevention riêng)](retro/retro-2026-08-16.md) | logged |
 
 | Ngày | Tóm tắt (nguyên văn tiêu đề) | status |
 |---|---|---|
