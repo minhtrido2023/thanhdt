@@ -340,8 +340,14 @@ fi
 # ── 9. rotate — log cron append vô hạn, chưa ai rotate ───────────────────────
 # discover.log 1,6M / notify.log 880K / watchdog.log 452K… Rotate bằng `cp + truncate` (KHÔNG mv)
 # để process đang giữ fd ghi tiếp vào cùng inode không bị mất dòng.
+# Ngưỡng hạ 10M -> 300K (2026-08-16, xem kb/coding_guidelines_ext.md §29): 10M chưa từng chạm
+# tới cho CHÍNH 3 file comment trên nêu tên làm ví dụ (discover.log mới 1,7M sau nhiều tháng
+# cron 10'/lần) — nghĩa là category này trên thực tế KHÔNG BAO GIỜ rotate chúng, để lỗi CŨ ĐÃ SỬA
+# nằm mãi trong 200KB tail mà cron_health_check.py quét, gây báo động giả lặp lại mỗi ngày (ca
+# thật: discover_sessions.py ENAMETOOLONG đã fix từ 2026-08-15 vẫn báo hằng ngày). 300K ≈ cỡ tail
+# cron_health_check.py thực sự đọc, giữ "cửa sổ nóng" luôn đủ mới mà không rotate quá dày.
 if want rotate; then
-  hdr "rotate — logs/*.log >10MB (giữ 3 đời .1.gz .2.gz .3.gz)"
+  hdr "rotate — logs/*.log >300KB (giữ 3 đời .1.gz .2.gz .3.gz)"
   while IFS= read -r f; do
     if denied "$f"; then say "  DENY-LIST chặn: $f"; continue; fi
     sz=$(stat -c %s "$f")
@@ -361,7 +367,7 @@ if want rotate; then
       fi
     else say "  [dry] ROT  $f ($sz B) -> $f.1.gz, truncate bản hot"; fi
     N_ARC=$((N_ARC+1)); B_ARC=$((B_ARC+sz))
-  done < <(find "$ROOT/logs" -maxdepth 1 -type f -name '*.log' -size +10M 2>/dev/null)
+  done < <(find "$ROOT/logs" -maxdepth 1 -type f -name '*.log' -size +300k 2>/dev/null)
 fi
 
 # ── 10. (ĐÃ GỠ) datacold — arch-review 2026-07-30 bác bỏ ─────────────────────
