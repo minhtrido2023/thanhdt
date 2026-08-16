@@ -73,11 +73,20 @@ KHÔNG sửa `dispatch.sh`.
 tầng-Sonnet sang opencode để tiết kiệm quota claude.** Nay là kênh chia tải mặc định cho tầng rẻ,
 không còn là "chỉ dùng khi cần ý kiến trái chiều".
 
+**Chính sách user 2026-08-16: Codex CLI làm cổng router.** `ocgo/deepseek-v4-flash` là default cho
+implementation/execution; `gpt-5.6-sol` chỉ dùng cho planning khi user tự set `/model` hoặc dispatch
+có `--model gpt-5.6-sol` (ChatGPT đang usage-limit 08-16). Claude giữ cho production/trading/approval
+và những việc chưa rõ phạm vi.
+
 **Chọn provider theo 3 bước, hỏi ĐÚNG THỨ TỰ (dừng ở bước nào ra `claude` thì dừng luôn):**
 
 **Bước 1 — Task có GHI gì không?** (sửa file/code/KB, sinh plan, đặt lệnh, ghi BQ, đổi cron)
-→ **CÓ ⇒ `claude`. Hết.** Agent opencode **không có tool `write`/`edit`** (đã xác minh: chỉ có
-bash·glob·grep·read·webfetch·websearch·skill·task·todowrite) và `bash` bị deny-by-default.
+- Ghi production/approval/trading, `run_bot`, `trading_rules`, `secrets`, `crontab`, `BOT_STOP`,
+  `dispatch.sh`, hoặc agent Mafee/DollarBill/Mike ⇒ **`claude`**.
+- Ghi implementation rõ phạm vi repo WorkingClaude và user chọn codex ⇒ có thể dùng
+  **`--provider codex`** (default DeepSeek flash).
+- opencode vẫn **không có tool `write`/`edit`** (đã xác minh: chỉ có
+  bash·glob·grep·read·webfetch·websearch·skill·task·todowrite) và `bash` bị deny-by-default.
 
 **Bước 2 — Task có nằm trên ĐƯỜNG GĂNG vận hành không?** (plan T+1, EOD report, run_bot,
 alert chặn thực thi, bất cứ thứ gì có deadline trong ngày)
@@ -115,8 +124,19 @@ routing claude, tức Sonnet cho việc Q1 vốn được route sang opencode). 
 |---|---|
 | **claude** | ✅ mặc định |
 | **opencode** | ✅ dùng được ngay, 0 credentials |
-| **codex** | ❌ `enabled:false` — chỉ cần `codex login` + `enabled:true` (identity đã wire sẵn) |
+| **codex** | ✅ gateway: default `ocgo/deepseek-v4-flash`; `gpt-5.6-sol` optional manual plan (usage-limited 2026-08-16) |
 | **antigravity** (`agy`) | ❌ `enabled:false` — cần cài `agy` + login Gemini + điền `models` thật |
+
+### Codex gateway routing — Phase 1 (2026-08-16)
+
+`codex` đã enabled trong `kb/cli_providers.json`; `default_model = ocgo/deepseek-v4-flash`.
+
+- Implementation/research trong repo: `--provider codex` (omit `--model` → DeepSeek flash).
+- Task implement nặng hơn cần suy luận: `--provider codex --model ocgo/deepseek-v4-pro`.
+- Planning/spec: `--provider codex --model gpt-5.6-sol` nhưng chỉ khi Sol còn usage; chưa tự đặt
+  Sol làm default vì canary 08-16 hit usage limit.
+- Claude vẫn là default provider khi bỏ `--provider`, và bắt buộc cho Mafee/DollarBill/Mike,
+  production/trading/approval, run_bot, thay đổi `dispatch.sh`/core.
 
 ```bash
 # CÁCH DÙNG CHÍNH — công cụ chuyên dụng, tự lo prompt phản biện + ghi bus:
@@ -124,10 +144,15 @@ bin/second_opinion.sh <file-hoặc-kết-luận> [--agent Taylor] [--bg]
 
 # Hoặc dispatch thủ công (omit --model ⇒ default_model = deepseek free):
 bin/dispatch.sh Taylor "Phản biện kết luận X. Chỉ đọc, đừng sửa gì." --provider opencode
+bin/dispatch.sh Taylor "Implement feature Y trong repo. Ghi code, chay test." --provider codex
+bin/dispatch.sh Taylor "Lap spec/plan cho Z." --provider codex --model gpt-5.6-sol --effort high
 
 bin/cli_provider.sh list                 # provider đang bật
 bin/cli_provider.sh check opencode       # CLI có chạy được không (phân biệt 'provider hỏng' vs 'task lỗi')
 ```
+
+Agent được phép trên codex: `Taylor · Winston · Wendy · Spyros · Wags` (giống opencode).
+`DollarBill`/`Mafee`/`Mike` bị chặn — surface tiền thật + điều phối.
 
 **`bin/second_opinion.sh` — việc chính đang chạy trên opencode.** Phản biện độc lập về một kết
 luận/tài liệu, ghi lên bus dưới topic `second-opinion: <chủ đề>`. **ADVISORY, KHÔNG phải cổng
@@ -171,4 +196,3 @@ cụ thể để tự áp dụng mỗi lần dispatch tương tác:
 - Redispatch sau timeout/hết turn CHỈ giữ nguyên `--effort high` nếu job gốc đã ở high VÀ lý do
   hết giờ là "việc thật sự khó" (không phải overhead dispatch/context) — không phản xạ copy y
   nguyên flag cũ.
-
