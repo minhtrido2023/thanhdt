@@ -20,11 +20,14 @@ còn gửi markdown thô làm plain text (2026-08-01, user phản ánh format "k
 .md gốc vẫn đính kèm để có bản nguồn tham chiếu.
 """
 import argparse
+import base64
 import json
 import os
+import re
 import smtplib
 import sys
 from email.mime.application import MIMEApplication
+from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
@@ -38,6 +41,24 @@ SECRETS_PATH = (
 
 sys.path.insert(0, ROOT)
 from render_report_html import render_html  # noqa: E402
+
+
+def _collect_inline_images(html_body):
+    """Replace data:image URIs with cid: links and return the images to attach."""
+    counter = {"n": 0}
+    images = []
+
+    def _replace(match):
+        mime, b64 = match.group(1), match.group(2)
+        subtype = mime.split("/", 1)[1] if "/" in mime else "png"
+        data = base64.b64decode(b64)
+        cid = f"report-image-{counter['n']}"
+        images.append({"cid": cid, "subtype": subtype, "data": data})
+        counter["n"] += 1
+        return f'src="cid:{cid}"'
+
+    new_html = re.sub(r'src="data:([^;]+);base64,([^"]+)"', _replace, html_body)
+    return new_html, images
 
 
 def main():
@@ -89,15 +110,23 @@ def main():
     subject = args.subject or f"[Trading Report] {fname}"
 
     title_line = md_body.split("\n", 1)[0]
-    import re as _re
-    title = _re.sub(r"^#+\s*", "", title_line).strip() or fname
+    title = re.sub(r"^#+\s*", "", title_line).strip() or fname
     html_body = render_html(md_body, title, os.path.dirname(os.path.abspath(args.report_path)))
 
     msg = MIMEMultipart()
     msg["From"] = from_email
     msg["To"] = to_email
     msg["Subject"] = subject
-    msg.attach(MIMEText(html_body, "html", "utf-8"))
+    html_body, inline_images = _collect_inline_images(html_body)
+    related = MIMEMultipart("related")
+    related.attach(MIMEText(html_body, "html", "utf-8"))
+    for image in inline_images:
+        img = MIMEImage(image["data"], _subtype=image["subtype"])
+        img.add_header("Content-ID", f"<{image['cid']}>")
+        img.add_header("Content-Disposition", "inline",
+                       filename=f"{image['cid']}.{image['subtype']}")
+        related.attach(img)
+    msg.attach(related)
 
     with open(args.report_path, "rb") as f:
         part = MIMEApplication(f.read(), Name=fname)

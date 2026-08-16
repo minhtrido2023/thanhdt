@@ -374,15 +374,11 @@ def build_report(report_date, summary, previous, charts):
     lines.append("")
 
     lines += [
-        "## Biểu đồ",
+        "## Phân bổ compute / job theo nhóm",
         "",
         f"![Compute hours by category]({charts['hours']})",
         "",
         f"![Jobs by category]({charts['jobs']})",
-        "",
-        f"![Model/provider mix]({charts['models']})",
-        "",
-        f"![Commits by type]({charts['commits']})",
         "",
     ]
 
@@ -399,6 +395,16 @@ def build_report(report_date, summary, previous, charts):
             _model_mix_str(c["models"]),
         ])
     lines += _md_table(["Nhóm", "Jobs", "Compute h", "Log KB", "Model mix"], detail_rows)
+    lines.append("")
+
+    lines.append("## Model / provider mix")
+    lines.append("")
+    lines.append(f"![Model/provider mix]({charts['models']})")
+    lines.append("")
+
+    lines.append("## Commits by type")
+    lines.append("")
+    lines.append(f"![Commits by type]({charts['commits']})")
     lines.append("")
 
     lines.append("## Cảnh báo effort / model")
