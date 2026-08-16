@@ -1,0 +1,14 @@
+{
+  "rights_price_session": 548,
+  "rights_core_univ": 360,
+  "ais_price_session": 2044,
+  "ais_by_subtype": {
+    "RIGHTS": 661,
+    "ESOP": 568,
+    "PRIVATE_PLACEMENT": 815
+  },
+  "ais_conflicts": 596,
+  "ais_with_share_match": 877,
+  "match_candidate_rows": 4318,
+  "events_with_match": 1017
+}
