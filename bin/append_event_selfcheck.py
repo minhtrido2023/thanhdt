@@ -316,12 +316,51 @@ def case_byte_hong_khong_dau_doc_duoc_bus():
     shutil.rmtree(d2, ignore_errors=True)
 
 
+def case_quarantine_ghi_duoc_arg_byte_hong():
+    """Arch-review round 3, killer objection: hàng đợi PHÁP Y tự chết đúng ở lớp lỗi nó bắt.
+
+    `_quarantine()` ghi bằng open(encoding="utf-8") STRICT + json.dumps(ensure_ascii=False),
+    trong khi arg vào qua surrogateescape ⇒ UnicodeEncodeError "surrogates not allowed" ngay
+    tại f.write, bị `2>/dev/null || true` nuốt sạch. Kết quả: bus/_rejected.jsonl 0 BYTE,
+    stderr vẫn khẳng định "arg bị chặn đã lưu vào ...", và §5b (người đọc) im lặng tuyệt đối
+    vì không có bản ghi nào — BÁO YÊN GIẢ. 28/42 call site vứt stderr nên không còn dấu vết.
+
+    Đây đúng ca hàng đợi TỒN TẠI để bắt (payload bị cắt giữa ký tự dưới LANG=C), nên nó phải
+    là ca được test kỹ nhất, không phải ca duy nhất không được test.
+    RED trên bản ensure_ascii=False (đã tái lập: file 0 byte).
+    """
+    d = mksandbox()
+    # payload mở đầu bằng '{' nhưng cắt cụt giữa ký tự tiếng Việt 3 byte ⇒ die() gọi
+    # _quarantine với ĐÚNG loại arg gây lỗi.
+    bad = '{"a":"loi ' + b"th\xe1\xbb".decode("utf-8", errors="surrogateescape")
+    rc, _, _ = run(d, ["W", "status", "chu-de", bad, "W_20260101_000000"],
+                   env_extra={"LANG": "C", "LC_ALL": "C"}, cwd=d)
+    check("payload cắt cụt vẫn bị CHẶN (rc=1) — chốt cũ không được nới", rc == 1, f"rc={rc}")
+
+    qf = os.path.join(d, "bus", "_rejected.jsonl")
+    size = os.path.getsize(qf) if os.path.exists(qf) else 0
+    check("arg byte-hỏng PHẢI thật sự vào được hàng đợi cách ly (file khác 0 byte)",
+          size > 0, f"size={size} — stderr hứa đã lưu nhưng file rỗng = báo yên giả")
+
+    recs = [l for l in open(qf, encoding="utf-8").read().splitlines() if l.strip()] \
+        if size else []
+    check("đúng 1 bản ghi, và đọc lại được bằng json.loads (không surrogate lọt ra file)",
+          len(recs) == 1 and isinstance(json.loads(recs[0]), dict) if recs else False,
+          f"n={len(recs)}")
+    check("bản ghi giữ được arg gốc để làm pháp y (argv có mặt, argc đúng)",
+          bool(recs) and json.loads(recs[0]).get("argc") == 5
+          and len(json.loads(recs[0]).get("argv") or []) == 5,
+          recs[0][:200] if recs else "")
+    shutil.rmtree(d, ignore_errors=True)
+
+
 def main():
     for fn in (case_valid_paths, case_too_many_args, case_truncated_json_payload,
                case_trace_id_shape, case_job_id_fallback,
                case_verify_finding_sanitizes_inherited_trace_id,
                case_quarantine_survives_discarded_stderr,
-               case_byte_hong_khong_dau_doc_duoc_bus):
+               case_byte_hong_khong_dau_doc_duoc_bus,
+               case_quarantine_ghi_duoc_arg_byte_hong):
         print(f"\n{fn.__name__}")
         fn()
     print()

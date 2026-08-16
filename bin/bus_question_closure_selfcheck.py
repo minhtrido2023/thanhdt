@@ -104,4 +104,30 @@ with p.open('a',encoding='utf-8') as f:f.write(json.dumps(r,ensure_ascii=False)+
     assert "rollup-mot-event-nuot-hai" in left, left
     assert "rollup-thieu-1-con" in left, left
 
-print("bus_question_closure_selfcheck: 12/12 PASS")
+    # ── split_ref/same_ref (2026-08-16 round 4, arch-review round 3 required_change #3).
+    # Nhánh này được thêm vào bus_question_audit.py ở 8e9affc3 với ZERO coverage: reviewer
+    # gỡ hẳn `same_ref` khỏi bản copy mà selfcheck vẫn 12/12 PASS. Hai bản (gate hàng ngày
+    # ở check #5, báo cáo tuần ở đây) được phép trôi khỏi nhau trong im lặng — đúng thứ
+    # required_change #4 sinh ra để chống. Ba ca dưới đây phủ đúng 3 nhánh của same_ref.
+    write_event(root, "Mike", event("Mike", "question", "rollup-ref-qualified", q_ts,
+                                    {"rollup_of": ["r-con-qual"]}))
+    write_event(root, "Mike", event("Mike", "question", "rollup-ref-cheo-agent", q_ts,
+                                    {"rollup_of": ["r-con-cheo"]}))
+    # Topic TỰ NÓ chứa '/' — lớp câu hỏi đông nhất trên bus thật (`selfcheck-red: ...`).
+    slashy = "selfcheck-red: mike/bin/job_cancel_guard_selfcheck.py"
+    write_event(root, "Mike", event("Mike", "question", "rollup-topic-co-slash", q_ts,
+                                    {"rollup_of": [slashy]}))
+    # (1) sub TRẦN đóng bằng resolves QUALIFIED đúng agent ⇒ PHẢI đóng.
+    write_event(root, "Wags", event("Wags", "decision", "gop-qual", r_ts,
+                                    {"resolves": ["Mike/r-con-qual"]}))
+    # (2) sub TRẦN của Mike + resolves khai agent KHÁC ⇒ KHÔNG được đóng (false-CLOSED).
+    write_event(root, "Taylor", event("Taylor", "decision", "gop-cheo", r_ts,
+                                      {"resolves": ["Taylor/r-con-cheo"]}))
+    # (3) topic chứa '/' đóng bằng resolver topic trần ⇒ PHẢI đóng (trước fix: kẹt mãi).
+    write_event(root, "Wags", event("Wags", "decision", slashy, r_ts))
+    left = topics(root)
+    assert "rollup-ref-qualified" not in left, left
+    assert "rollup-ref-cheo-agent" in left, left
+    assert "rollup-topic-co-slash" not in left, left
+
+print("bus_question_closure_selfcheck: 15/15 PASS")

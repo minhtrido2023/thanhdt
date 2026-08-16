@@ -167,8 +167,19 @@ Không khai thì hành vi y như cũ (fail-closed) — vẫn phải tự đăng 
 - Topic con phải viết **ĐÚNG NGUYÊN VĂN** topic câu hỏi con. Cắt cụt / thêm / bớt là KHÔNG
   khớp. (Khớp substring đã bị bỏ: nó cho MỘT decision thoả nhiều topic con cùng lúc, đóng oan
   cả escalation tổng trong khi con vẫn đang chờ user.)
-- Viết `"topic-con"` hay `"Mike/topic-con"` đều được, và khớp được với cả 2 dạng ở phía đóng —
-  nhưng **khác agent thì không khớp**: `"Mike/x"` không bao giờ đóng bằng `"Taylor/x"`.
+- Viết `"topic-con"` hay `"Mike/topic-con"` đều được, và khớp được với cả 2 dạng ở phía đóng.
+  Ràng buộc agent chỉ áp khi phía đóng **khai tường minh** một agent: `resolves:["Taylor/x"]`
+  KHÔNG đóng được câu hỏi con `Mike/x`. Còn một `answer`/`decision` chỉ đơn giản dùng lại
+  topic `x` thì agent nào đăng cũng được — đó là quy ước đóng câu hỏi có sẵn của bus (người
+  đóng thường khác người hỏi), không siết ở đây.
+- Tiền tố chỉ được hiểu là agent khi nó là **agent-id CÓ THẬT** trên bus. Nên topic tự nó
+  chứa `/` — ví dụ `selfcheck-red: mike/bin/job_cancel_guard_selfcheck.py` — là topic TRẦN,
+  cứ chép nguyên văn, không phải escape gì.
+- Phần tử **rỗng hoặc không phải chuỗi** trong `rollup_of` ⇒ fail-closed CẢ câu hỏi tổng (nó
+  KHÔNG bị lọc bỏ im lặng rồi chốt trên số con ít hơn bạn khai). Gõ thừa dấu phẩy thì tổng ở
+  lại pending — an toàn, và dòng gợi ý bên dưới sẽ nói ra.
+- Tổng không tự đóng được thì `ops_health_check` in thêm một dòng `[WARN-ONLY]` liệt kê
+  **đúng topic con nào chưa khớp** — đọc dòng đó trước khi đi tìm nguyên nhân.
 - Con được tính là đã đóng khi có `answer`/`decision` **trùng khít topic**, hoặc một event
   khai `resolves` chứa topic đó (khuôn `bin/close_bus_question.py`) — đăng SAU câu hỏi tổng.
 - ⚠️ Đóng con theo **quy ước hậu-tố trạng thái** (`<topic>-question-closed`, `-CONFIRMED`…)

@@ -42,11 +42,18 @@ def extract_block():
     return m.group(1)
 
 
-def run(block, records, label=""):
-    """Chạy khối trên một wc_root giả. records=None ⇒ không tạo file."""
+def run(block, records, label="", unreadable=False):
+    """Chạy khối trên một wc_root giả.
+
+    records=None ⇒ không tạo file. unreadable=True ⇒ tạo _rejected.jsonl là THƯ MỤC, tức
+    os.path.exists() vẫn True nhưng open() ném IsADirectoryError — đường lỗi đọc file, thứ
+    duy nhất trong khối này còn có nhánh `except` bao ngoài.
+    """
     d = tempfile.mkdtemp(prefix="ophc_5b_")
     os.makedirs(os.path.join(d, "mike", "bus"))
-    if records is not None:
+    if unreadable:
+        os.makedirs(os.path.join(d, "mike", "bus", "_rejected.jsonl"))
+    elif records is not None:
         with open(os.path.join(d, "mike", "bus", "_rejected.jsonl"), "w",
                   encoding="utf-8") as f:
             for r in records:
@@ -120,6 +127,20 @@ def main():
     w, o, _l, e = run(block, ["{khong-phai-json", "", "  "])
     check("dòng rác + dòng rỗng ⇒ W (không lines.append im lặng), không nổ",
           e is None and len(w) == 1, f"exc={e!r} W={w} lines={_l}")
+
+    # ── Đường lỗi ĐỌC FILE (arch-review round 3 required_change #2). 8e9affc3 đổi nhánh này
+    #    từ `lines.append` sang `W()` vì lines.append in ra ℹ️ mà KHÔNG tăng biến `warn` ⇒
+    #    không escalate = đúng hình thái im lặng cả khối đi diệt. Nhưng KHÔNG có assertion
+    #    nào khoá lại: reviewer mutation `W()` → `lines.append` VẪN PASS rc=0. Fix không có
+    #    test thì lần refactor sau nó lặng lẽ quay về — chốt lại tại đây.
+    print("\ncase_duong_loi_doc_file")
+    w, o, _l, e = run(block, None, unreadable=True)
+    check("file cách ly KHÔNG đọc được ⇒ W() (escalate), KHÔNG phải lines.append im lặng",
+          e is None and len(w) == 1 and not _l, f"W={w} lines={_l} exc={e!r}")
+    check("thông điệp nói rõ hàng đợi đang KHÔNG được giám sát (không chỉ in tên lỗi)",
+          bool(w) and "KHÔNG được giám sát" in w[0], w)
+    check("đường lỗi đọc KHÔNG ném ra ngoài (không giết 11 check còn lại)", e is None,
+          f"exc={e!r}")
 
     print("\ncase_CONTROL_khong_duoc_keu_oan")
     w, o, _l, e = run(block, [])

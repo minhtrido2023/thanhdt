@@ -58,7 +58,15 @@ rec = {"ts": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:
        "argc": len(args), "argv": args,
        "caller_pid": os.environ.get("_AE_PPID", ""), "job_id": os.environ.get("JOB_ID", "")}
 with open(qf, "a", encoding="utf-8") as f:
-    f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+    # ensure_ascii=True, KHÔNG phải False (arch-review round 3, killer objection). Arg vào
+    # đây qua surrogateescape — chính lớp lỗi byte-vs-char mà hàng đợi này sinh ra để bắt.
+    # ensure_ascii=False + encoding="utf-8" STRICT ⇒ UnicodeEncodeError ("surrogates not
+    # allowed") NGAY tại f.write ⇒ `2>/dev/null || true` nuốt sạch ⇒ file cách ly 0 BYTE
+    # trong khi stderr vẫn khẳng định "arg bị chặn đã lưu vào ...", và §5b (người đọc mới)
+    # im lặng tuyệt đối vì không có bản ghi nào = BÁO YÊN GIẢ. 28/42 call site vứt stderr
+    # nên không còn dấu vết nào khác. ensure_ascii=True escape surrogate thành "\udcxx"
+    # thuần ASCII: ghi được, đọc lại được, và giữ nguyên byte gốc cho việc pháp y.
+    f.write(json.dumps(rec, ensure_ascii=True) + "\n")
 ' "$BUS/_rejected.jsonl" "$1" "${_ORIG_ARGV[@]}" 2>/dev/null || true
 }
 die() {

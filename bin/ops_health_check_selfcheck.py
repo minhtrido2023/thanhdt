@@ -682,7 +682,13 @@ def case_rollup_of_umbrella_question():
             umbrella("tong-khong-khai", None),
             umbrella("tong-rollup-rong", []),
             umbrella("tong-rollup-sai-kieu", "con-a"),
-            umbrella("tong-dang-agent-slash", ["Winston/con-b"]),
+            # Dạng "Agent/topic" (người copy thẳng chuỗi checker in ra) vẫn phải khớp — NHƯNG
+            # phải là ĐÚNG agent sở hữu câu hỏi con. Bản đầu của ca này viết "Winston/con-b"
+            # cho câu hỏi `Mike/con-b` và assert nó KHỚP: tức chính là hành vi false-CLOSED
+            # chéo agent mà arch-review round 3 bắt được, bị đóng đinh thành assertion. Sửa
+            # về đúng agent, và thêm ca dưới để khoá chiều sai lại.
+            umbrella("tong-dang-agent-slash", ["Mike/con-b"]),
+            umbrella("tong-dang-agent-SAI", ["Winston/con-b"]),
             # Con đã đóng TRƯỚC khi escalation tổng được mở ⇒ không được tính là đã quyết
             # (giữ đúng ràng buộc thời gian của _resolved: escalation mở lại là chuyện mới).
             umbrella("tong-con-dong-truoc-khi-hoi", ["con-dong-som"]),
@@ -703,8 +709,11 @@ def case_rollup_of_umbrella_question():
               "tong-du-2-con" not in out, out)
         check("rollup_of RED CONTROL: thiếu 1 con chưa đóng ⇒ TỔNG vẫn pending (all, không any)",
               "tong-thieu-1-con" in pending, out)
-        check("rollup_of: dạng 'Agent/topic' vẫn khớp được con",
+        check("rollup_of: dạng 'Agent/topic' ĐÚNG agent vẫn khớp được con",
               "tong-dang-agent-slash" not in out, out)
+        check("rollup_of: dạng 'Agent/topic' SAI agent (Winston/con-b cho câu hỏi Mike/con-b) "
+              "⇒ KHÔNG khớp — lời khai agent phải được tôn trọng, không phải trang trí",
+              "tong-dang-agent-SAI" in pending, out)
         check("rollup_of: con đóng TRƯỚC khi tổng được hỏi ⇒ KHÔNG đóng tổng (giữ ràng buộc ts)",
               "tong-con-dong-truoc-khi-hoi" in pending, out)
         for t in ("tong-khong-khai", "tong-rollup-rong", "tong-rollup-sai-kieu"):
@@ -819,6 +828,83 @@ def case_rollup_of_ref_forms():
               "tong-con-dong-kieu-hau-to" in pending, out)
         check("ĐỐI CHỨNG: chính câu hỏi CON đó vẫn tự đóng như cũ (không hồi quy _resolved)",
               "con-hau-to" not in pending.replace("tong-con-dong-kieu-hau-to", ""), out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+# ── Ca 15f (2026-08-16, arch-review round 3): tiêu chí "đã ở dạng Agent/topic" của `_same_ref`
+#    bản đầu là `"/" in s` — SAI CẢ HAI CHIỀU, reviewer tái lập được cả hai:
+#    (a) FALSE-PENDING: topic TỰ NÓ chứa '/' (`selfcheck-red: mike/bin/x.py` — lớp câu hỏi
+#        ĐÔNG NHẤT trong backlog thật) bị tưởng là đã qualified ⇒ không bao giờ ghép được với
+#        dạng còn lại ⇒ rollup kẹt vĩnh viễn, đốt 1 job wags_autofix/ngày.
+#    (b) FALSE-CLOSED chéo agent: sub TRẦN + resolves của agent KHÁC khớp nhau vì chỉ MỘT bên
+#        có '/'. Ca 15e cũ chỉ pin biến thể "cả hai bên qualified" nên mù hoàn toàn với ca này.
+#    Fix: `_split_ref` chỉ bóc tiền tố khi nó là agent-id CÓ THẬT (known_agents, lấy từ tên
+#    file inbox), bên còn lại lấy agent NGỮ CẢNH, rồi so CẢ CẶP (agent, topic).
+#    RED CONTROL: quay `_split_ref` về `if "/" in s: return s.split("/",1)` ⇒ (a) và (b) đỏ.
+def case_rollup_of_ref_forms_agent_aware():
+    root, inbox = mkbus()
+    try:
+        q_ts = ago(0, 6)
+        # Topic THẬT đang pending trên bus (không phải chuỗi bịa): chúng chứa '/' ở giữa.
+        # HAI topic khác nhau cho (a) và (a'): dùng CHUNG một chuỗi thì resolver của ca này
+        # đóng luôn ca kia, và mutation "quay về tiêu chí `\"/\" in s`" chỉ làm đỏ 1 trong 2
+        # (đã đo) — tức một assertion xanh nhờ đường không thuộc phạm vi nó đang đo.
+        real = "selfcheck-red: mike/bin/job_cancel_guard_selfcheck.py"
+        real_b = "selfcheck-red: mike/bin/plan_cash_commitment_selfcheck.py"
+
+        def umbrella(topic, subs):
+            e = ev("Mike", "question", topic, q_ts)
+            e["payload"] = {"rollup_of": subs}
+            return e
+
+        # LƯU Ý cách dựng: agent của một resolver lấy từ TÊN FILE (`_agent_of`), không phải
+        # field agent_id — nên quyết định của Taylor phải nằm trong Taylor.jsonl mới đúng ca.
+        # `known_agents` cũng lấy từ tên file inbox: {Mike, Taylor, Wags}.
+        write_events(os.path.join(inbox, "Mike.jsonl"), [
+            # (a) sub TRẦN, đóng bằng resolves QUALIFIED — trên topic tự chứa '/'.
+            umbrella("tong-topic-co-dau-gach", [real]),
+            # (b) sub TRẦN của Mike, chỉ có quyết định của TAYLOR ⇒ phải Ở LẠI pending.
+            umbrella("tong-cheo-agent-sub-tran", ["con-cheo"]),
+            # (c) con ĐÃ đóng thật, nhưng danh sách có phần tử rỗng ⇒ fail-closed cả tổng.
+            umbrella("tong-co-phan-tu-rong", ["con-that", ""]),
+            # (c') ĐỐI CHỨNG cho (c): y hệt nhưng KHÔNG có phần tử rỗng ⇒ phải đóng. Không
+            #      có dòng này thì (c) xanh cả khi `con-that` đơn giản là không khớp được.
+            umbrella("tong-khong-co-phan-tu-rong", ["con-that"]),
+            ev("Mike", "question", "con-that", ago(1)),
+            ev("Mike", "decision", "con-that", ago(0, 1)),
+        ])
+        write_events(os.path.join(inbox, "Wags.jsonl"), [
+            ev("Wags", "decision", "quyet-gop-1", ago(0, 1), {"resolves": [f"Mike/{real}"]}),
+            # (a') chiều ngược: sub QUALIFIED, đóng bằng resolver topic TRẦN cùng agent.
+            ev("Wags", "question", "tong-cua-wags-sub-tran", q_ts,
+               {"rollup_of": [f"Wags/{real_b}"]}),
+            ev("Wags", "decision", real_b, ago(0, 1)),
+        ])
+        write_events(os.path.join(inbox, "Taylor.jsonl"), [
+            ev("Taylor", "decision", "quyet-cua-taylor", ago(0, 1),
+               {"resolves": ["Taylor/con-cheo"]}),
+        ])
+        lines, _ = run_check5(root)
+        out = joined(lines)
+        pending = joined([ln for ln in lines if "trong 48h qua CHƯA thấy answer" in ln])
+        check("(a) topic con TỰ CHỨA '/' + resolves qualified ⇒ tổng PHẢI tự đóng "
+              "(trước fix: kẹt pending vĩnh viễn — lớp câu hỏi đông nhất trên bus thật)",
+              "tong-topic-co-dau-gach" not in pending, out)
+        check("(a') chiều ngược: sub có '/' + resolves TRẦN cùng agent ⇒ cũng PHẢI đóng",
+              "tong-cua-wags-sub-tran" not in pending, out)
+        check("(b) FALSE-CLOSED chéo agent: sub TRẦN của Mike KHÔNG được đóng bằng "
+              "resolves ['Taylor/con-cheo'] — hướng lỗi nguy hiểm nhất",
+              "tong-cheo-agent-sub-tran" in pending, out)
+        check("phần tử RỖNG trong rollup_of ⇒ fail-closed CẢ tổng, không lọc lặng rồi "
+              "all() trên ít con hơn số đã khai",
+              "tong-co-phan-tu-rong" in pending, out)
+        check("ĐỐI CHỨNG cho ca trên: cùng danh sách nhưng KHÔNG có phần tử rỗng ⇒ đóng "
+              "bình thường (chứng minh (c) đỏ vì phần tử rỗng, không phải vì con không khớp)",
+              "tong-khong-co-phan-tu-rong" not in pending, out)
+        check("DIAGNOSTIC: tổng không đóng được thì in ra CON NÀO chưa khớp (fail-closed "
+              "đúng nhưng câm thì người đăng không sửa được)",
+              "topic con CHƯA khớp" in out, out)
     finally:
         shutil.rmtree(root, ignore_errors=True)
 
@@ -1148,6 +1234,7 @@ def main():
                case_triaged_needs_human_ack, case_triaged_only_no_false_ok,
                case_ack_suppress_days_window, case_rollup_of_umbrella_question,
                case_rollup_of_substring_holes, case_rollup_of_ref_forms,
+               case_rollup_of_ref_forms_agent_aware,
                case_missing_inbox_dir_is_warn_not_green,
                case_ack_suppress_days_capped,
                case_aged_wagsfix_never_truncated, case_aged_no_wagsfix_keeps_old_cut,

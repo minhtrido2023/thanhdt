@@ -87,7 +87,10 @@ def main():
             if rec.get("event_type") == "question" and rec.get("topic"):
                 all_question_topics.add(rec.get("topic"))
 
-    resolvers = []          # (resolver_topic, ts, explicit question refs from payload.resolves)
+    resolvers = []          # (agent, resolver_topic, ts, explicit question refs from payload.resolves)
+    # Xem `_split_ref` trong ops_health_check.sh — tiền tố chỉ được bóc khi là agent-id CÓ
+    # THẬT, nếu không thì topic tự chứa '/' (vd "selfcheck-red: mike/bin/x.py") bị hiểu sai.
+    known_agents = {agent_of(p) for p in files}
     prov_cutoff = now - dt.timedelta(days=a.provenance_days)
     recent_closures = []   # (ts, agent_of_file, topic, decided_by_or_None)
     for p in files:
@@ -111,7 +114,7 @@ def main():
                     raw_resolves = [raw_resolves]
                 explicit = {str(x).strip() for x in raw_resolves
                             if isinstance(raw_resolves, list) and str(x).strip()}
-                resolvers.append((t, r_ts, explicit))
+                resolvers.append((agent_of(p), t, r_ts, explicit))
                 # chỉ đếm provenance nếu topic này THẬT SỰ đóng 1 question đã biết (exact hoặc
                 # chứa nguyên topic câu hỏi gốc, cùng quy ước hậu-tố trạng thái đã dùng ở resolved())
                 closes_real_question = any(t == qt or qt in t for qt in all_question_topics)
@@ -126,31 +129,43 @@ def main():
         refs = {q_topic, f"{q_agent}/{q_topic}"}
         return any(r_ts >= q_ts and
                    ((r == q_topic or q_topic in r) or bool(refs & explicit))
-                   for r, r_ts, explicit in resolvers)
+                   for _ra, r, r_ts, explicit in resolvers)
 
-    def same_ref(a, b):
-        # Port nguyên `_same_ref` của check #5 (arch-review d65167a9): chấp nhận cặp trần ↔
-        # "Agent/topic", nhưng CHỈ bóc tiền tố ở bên có '/' khi bên kia không có — bóc cả
-        # hai thì "Mike/x" khớp "Taylor/x", tức false-CLOSED. Sửa một bên mà quên bên kia
-        # là để báo cáo TUẦN mâu thuẫn với gate hàng ngày.
-        if a == b:
-            return True
-        if "/" in a and "/" not in b:
-            return a.split("/", 1)[1] == b
-        if "/" in b and "/" not in a:
-            return b.split("/", 1)[1] == a
-        return False
+    def split_ref(s):
+        # Port nguyên `_split_ref` của check #5 (arch-review round 3). Tiền tố chỉ được bóc
+        # khi là agent-id CÓ THẬT, nếu không thì topic tự chứa '/' ("selfcheck-red:
+        # mike/bin/x.py" — lớp câu hỏi đông nhất trên bus) bị hiểu sai thành "Agent/topic"
+        # và kẹt pending vĩnh viễn. None = chuỗi KHÔNG khai agent.
+        if "/" in s:
+            pfx, rest = s.split("/", 1)
+            if pfx in known_agents and rest.strip():
+                return pfx, rest.strip()
+        return None, s
 
-    def resolved_exact(q_topic, q_ts):
+    def same_ref(a, a_agent, b):
+        # Ràng buộc agent CHỈ áp khi bên đó thật sự khai agent — quy ước đóng câu hỏi trên
+        # bus không đòi cùng agent (người đóng thường khác người hỏi). Nhưng khai tường minh
+        # "Taylor/x" là lời khai VỀ CÂU HỎI NÀO và phải được tôn trọng, nếu không sub trần
+        # của Mike bị đóng bằng resolves của Taylor (false-CLOSED chéo agent).
+        # Sửa một bên mà quên bên kia là để báo cáo TUẦN mâu thuẫn với gate hàng ngày.
+        a_ag, a_tp = split_ref(a)
+        b_ag, b_tp = split_ref(b)
+        if a_tp != b_tp:
+            return False
+        a_ag = a_ag or a_agent
+        return b_ag is None or not a_ag or b_ag == a_ag
+
+    def resolved_exact(q_topic, q_ts, q_agent=""):
         # Bản KHÔNG substring, dùng RIÊNG cho topic con của `rollup_of` — port nguyên
         # `_resolved_exact` ở ops_health_check.sh check #5 (arch-review coord-2026-08-14).
         if not q_topic:
             return False
         return any(r_ts >= q_ts and
-                   (same_ref(q_topic, r) or any(same_ref(q_topic, e) for e in explicit))
-                   for r, r_ts, explicit in resolvers)
+                   (same_ref(q_topic, q_agent, r) or
+                    any(same_ref(q_topic, q_agent, e) for e in explicit))
+                   for _r_a, r, r_ts, explicit in resolvers)
 
-    def rollup_resolved(rec, q_ts):
+    def rollup_resolved(rec, q_ts, q_agent=""):
         # Port `_rollup_resolved` của check #5 (arch-review coord-2026-08-14 required_change
         # #4): trước đó script này KHÔNG hiểu `rollup_of`, nên "danh sách ĐẦY ĐỦ" của báo cáo
         # tuần lại MÂU THUẪN với gate hàng ngày — đúng thứ nó ra đời để tránh. OPT-IN +
@@ -164,15 +179,16 @@ def main():
         if not isinstance(pl, dict):
             return False
         raw = pl.get("rollup_of")
-        if not isinstance(raw, list):
+        if not isinstance(raw, list) or not raw:
             return False
-        subs = [str(s).strip() for s in raw if str(s).strip()]
-        if not subs:
-            return False
-        # Dạng "Agent/topic" xử lý DUY NHẤT trong `same_ref` (xem chú thích cùng tên ở
-        # ops_health_check.sh): bóc tiền tố ở CẢ hai chỗ là bóc hai lần ⇒ "Mike/con" khớp
-        # "Taylor/con", false-CLOSED. Hai bản phải giống nhau từng nhánh.
-        return all(resolved_exact(s, q_ts) for s in subs)
+        # Phần tử rỗng/sai kiểu ⇒ fail-closed CẢ tổng, không lọc lặng (xem ops_health_check.sh).
+        subs = []
+        for s in raw:
+            if not isinstance(s, str) or not s.strip():
+                return False
+            subs.append(s.strip())
+        # Dạng "Agent/topic" xử lý DUY NHẤT trong `split_ref`. Chỗ này KHÔNG tự bóc tiền tố.
+        return all(resolved_exact(s, q_ts, q_agent) for s in subs)
 
     seen = set()
     pending = []
@@ -190,7 +206,7 @@ def main():
             if key in seen:
                 continue
             seen.add(key)
-            if resolved(agent, topic, ts_dt) or rollup_resolved(rec, ts_dt):
+            if resolved(agent, topic, ts_dt) or rollup_resolved(rec, ts_dt, agent):
                 continue
             age_d = (now - ts_dt).days
             pending.append({"agent": agent, "topic": topic, "ts": rec.get("ts"), "age_days": age_d})
