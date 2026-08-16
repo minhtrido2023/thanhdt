@@ -26,6 +26,7 @@ Sửa CHÍNH của bản này so với plain-text markdown cũ:
      số liệu, không phải nhấn mạnh cảm xúc).
 """
 import argparse
+import base64
 import html
 import os
 import re
@@ -134,7 +135,24 @@ def is_block_start(stripped):
     return False
 
 
-def render_body(md_text):
+def image_html(m, base_dir=None):
+    alt = m.group(1)
+    src = m.group(2).strip()
+    if src.lower().startswith("data:"):
+        return f'<img src="{html.escape(src)}" alt="{html.escape(alt)}" ' \
+               f'style="max-width:100%;height:auto;margin:14px 0;">'
+    path = src if os.path.isabs(src) else os.path.join(base_dir or ".", src)
+    if not os.path.isfile(path):
+        return f'<p style="color:#8a2020;">[Ảnh thiếu: {html.escape(alt)} — {html.escape(path)}]</p>'
+    ext = os.path.splitext(path)[1].lower()
+    mime = "image/png" if ext == ".png" else "image/jpeg" if ext in (".jpg", ".jpeg") else "image/svg+xml"
+    with open(path, "rb") as f:
+        data = base64.b64encode(f.read()).decode("ascii")
+    return f'<img src="data:{mime};base64,{data}" alt="{html.escape(alt)}" ' \
+           f'style="max-width:100%;height:auto;margin:14px 0;border:1px solid #dfe3e8;">'
+
+
+def render_body(md_text, base_dir=None):
     lines = md_text.split("\n")
     out = []
     i = 0
@@ -152,6 +170,13 @@ def render_body(md_text):
 
         if stripped == "":
             close_list()
+            i += 1
+            continue
+
+        image_match = re.fullmatch(r"!\[([^\]]*)\]\(([^)]+)\)", stripped)
+        if image_match:
+            close_list()
+            out.append(image_html(image_match, base_dir))
             i += 1
             continue
 
@@ -244,8 +269,8 @@ DISCLAIMER = """
 """
 
 
-def render_html(md_text, title):
-    body = render_body(md_text)
+def render_html(md_text, title, base_dir=None):
+    body = render_body(md_text, base_dir)
     return f"""<!DOCTYPE html>
 <html><head><meta charset="utf-8"></head>
 <body style="margin:0;padding:0;background:#eef1f4;">
@@ -280,7 +305,7 @@ def main():
         first_line = md_text.split("\n", 1)[0]
         title = re.sub(r"^#+\s*", "", first_line).strip()
 
-    html_out = render_html(md_text, title)
+    html_out = render_html(md_text, title, os.path.dirname(os.path.abspath(args.report_path)))
 
     out_path = args.out or (os.path.splitext(args.report_path)[0] + ".html")
     with open(out_path, "w", encoding="utf-8") as f:

@@ -30,7 +30,11 @@ from email.mime.text import MIMEText
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 WC_ROOT = os.path.abspath(os.path.join(ROOT, "..", ".."))
-SECRETS_PATH = os.path.join(WC_ROOT, "secrets", "gmail_smtp_app_password.json")
+SECRETS_PATH = (
+    os.environ.get("SEND_REPORT_SMTP_SECRET")
+    or os.environ.get("REPORT_SMTP_SECRET_PATH")
+    or os.path.join(WC_ROOT, "secrets", "gmail_smtp_app_password.json")
+)
 
 sys.path.insert(0, ROOT)
 from render_report_html import render_html  # noqa: E402
@@ -87,7 +91,7 @@ def main():
     title_line = md_body.split("\n", 1)[0]
     import re as _re
     title = _re.sub(r"^#+\s*", "", title_line).strip() or fname
-    html_body = render_html(md_body, title)
+    html_body = render_html(md_body, title, os.path.dirname(os.path.abspath(args.report_path)))
 
     msg = MIMEMultipart()
     msg["From"] = from_email

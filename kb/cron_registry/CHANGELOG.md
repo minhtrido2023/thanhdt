@@ -21,6 +21,22 @@ preserve_verbatim: >
 
 # Log thay đổi Cron Registry
 
+- 2026-08-16 (Mike/Codex, user yêu cầu tự động hóa gửi báo cáo tuần sáng chủ nhật 09:00
+  không miss): **THÊM cron `0 2 * * 0` = Sun 09:00 ICT**
+  `/home/trido/thanhdt/WorkingClaude/mike/bin/spend_report_weekly.sh >> .../mike/logs/spend_report_weekly.log 2>&1`.
+  Script mới `mike/bin/spend_report_weekly.py` dùng lại logic `spend_report.py`, sinh report
+  Markdown có bảng so sánh WoW, 4 PNG charts (bar/pie), nhận xét kiểu manager, và gửi email
+  HTML + `.md` đính kèm qua `send_report_email.py`.
+  4 câu hỏi §11: (1) đọc `bus/jobs/*.json` + `git log` 7 ngày + `state/spend_history.csv`
+  tuần trước — đều local live, không gọi BQ/DNSE/web; (2) nguồn tươi sau khi tuần đã đóng,
+  chủ nhật 09:00 ICT đủ điều kiện; (3) cần T-1/tuần đã đóng, không cần same-day; (4) consumer
+  là CEO/user qua email, deadline chủ nhật 09:00 ICT theo yêu cầu user.
+  Chống xung đột: Sunday 09:00 không trùng job nặng; `fleet_housekeeping.sh --apply` chạy
+  22:00 CN sau đó, chỉ dọn log/registry archive cũ.
+  Verify trước khi cài: dry-run chạy trên root production (`--root /home/trido/thanhdt/WorkingClaude/mike
+  --dry-run`) sinh đủ report + 4 PNG; HTML render nhúng 4 ảnh base64 (không còn ảnh thiếu);
+  `py_compile` 3 file Python + `bash -n` wrapper đều OK.
+
 - 2026-08-14 (Taylor, job `Taylor_20260814_142151`; user duyệt §6 `agents/Taylor/research/
   park_merge_wire_20260811.md`): **THÊM 3 dòng** dựng chuỗi PARK-merge — `30 12` (19:30 ICT)
   `park_trim_daily.sh` (L1), `40 12` (19:40) `jit_unpark_daily.sh` (L2), `20 13` (20:20)
