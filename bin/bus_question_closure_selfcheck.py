@@ -78,4 +78,30 @@ with p.open('a',encoding='utf-8') as f:f.write(json.dumps(r,ensure_ascii=False)+
                             "--root", str(root)], capture_output=True, text=True)
     assert again.returncode == 0 and "ALREADY_CLOSED" in again.stdout
 
-print("bus_question_closure_selfcheck: 8/8 PASS")
+    # ── rollup_of (2026-08-16, arch-review coord-2026-08-14 required_change #1+#4).
+    # Trước fix: bus_question_audit.py KHÔNG hiểu `rollup_of` ⇒ báo cáo tuần "danh sách ĐẦY
+    # ĐỦ" mâu thuẫn với gate hàng ngày; và check #5 khớp topic con bằng SUBSTRING ⇒ MỘT event
+    # đóng được cả escalation TỔNG trong khi câu hỏi con chưa ai quyết.
+    def topics(r):
+        return {x["topic"] for x in audit(r)}
+
+    q_ts = "2026-08-16T01:00:00+00:00"
+    r_ts = "2026-08-16T02:00:00+00:00"
+    write_event(root, "Mike", event("Mike", "question", "rollup-du-con", q_ts,
+                                    {"rollup_of": ["r-con-1", "r-con-2"]}))
+    write_event(root, "Mike", event("Mike", "question", "rollup-mot-event-nuot-hai", q_ts,
+                                    {"rollup_of": ["z-alpha", "z-beta"]}))
+    write_event(root, "Mike", event("Mike", "question", "rollup-thieu-1-con", q_ts,
+                                    {"rollup_of": ["r-con-1", "r-con-chua-dong"]}))
+    assert {"rollup-du-con", "rollup-mot-event-nuot-hai", "rollup-thieu-1-con"} <= topics(root)
+
+    write_event(root, "Wags", event("Wags", "decision", "r-con-1", r_ts))
+    write_event(root, "Wags", event("Wags", "decision", "r-con-2", r_ts))
+    # MỘT decision duy nhất mà topic CHỨA cả 2 chuỗi con — đúng lỗ substring đã tái lập.
+    write_event(root, "Wags", event("Wags", "decision", "z-alpha-and-z-beta-summary", r_ts))
+    left = topics(root)
+    assert "rollup-du-con" not in left, left
+    assert "rollup-mot-event-nuot-hai" in left, left
+    assert "rollup-thieu-1-con" in left, left
+
+print("bus_question_closure_selfcheck: 12/12 PASS")

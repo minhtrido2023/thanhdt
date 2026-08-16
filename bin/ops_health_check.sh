@@ -450,6 +450,20 @@ if os.path.isdir(inbox_dir):
         return any(r_ts >= q_ts and
                    ((r == q_topic or q_topic in r) or bool(refs & explicit))
                    for r, r_ts, explicit in resolvers)
+    def _resolved_exact(q_topic, q_ts):
+        # Như _resolved nhưng BỎ nhánh substring (`q_topic in r`). Dùng RIÊNG cho topic con
+        # của `rollup_of`. Lý do (arch-review coord-2026-08-14, killer_objection): danh sách
+        # topic con do NGƯỜI viết tay ⇒ với substring, MỘT resolver duy nhất có thể thoả
+        # NHIỀU topic con cùng lúc và `all()` đóng luôn escalation TỔNG trong khi câu hỏi con
+        # vẫn đang pending. Tái lập được: rollup_of=["patternB","backlog"] + đúng 1 decision
+        # "retro-patternB-and-backlog-summary" ⇒ tổng tự đóng dù patternB chưa ai quyết; và
+        # topic con viết CẮT CỤT ("retro-pattern-recurring") khớp bừa vào resolver dài hơn.
+        # Cùng lý do `_acked` chọn exact: nới tay ở đây đóng oan escalation của USER — đắt
+        # hơn nhiều so với 1 job wags_autofix thừa. `resolves` (khai tường minh) vẫn tính.
+        if not q_topic:
+            return False
+        return any(r_ts >= q_ts and (r == q_topic or q_topic in explicit)
+                   for r, r_ts, explicit in resolvers)
     def _rollup_resolved(rec, q_ts):
         # Câu hỏi TỔNG (escalation gom nhiều câu hỏi con đã mở sẵn) — ca thật
         # `Mike/retro-escalation-2026-08-13-patternB-and-backlog` (08-13T17:46): user quyết
@@ -458,8 +472,8 @@ if os.path.isdir(inbox_dir):
         # wags_autofix (coord-2026-08-14) chỉ để kết luận "đã quyết rồi". Resolver khớp theo
         # topic-string nên không có cách nào biết topic tổng ⊃ 2 topic con.
         # Cơ chế: câu hỏi tổng KHAI TƯỜNG MINH `"rollup_of": ["topic-con-1", ...]` trong
-        # payload; đóng khi MỌI topic con có resolver đăng SAU câu hỏi tổng (dùng lại
-        # _resolved, giữ nguyên ràng buộc thời gian — không pre-resolve lần escalate sau).
+        # payload; đóng khi MỌI topic con có resolver đăng SAU câu hỏi tổng (dùng
+        # _resolved_exact, giữ nguyên ràng buộc thời gian — không pre-resolve lần escalate sau).
         # OPT-IN + fail-closed ở MỌI đường lỗi (thiếu field / không phải list / rỗng / payload
         # không parse được ⇒ False = hành vi cũ). KHÔNG suy diễn topic con từ văn bản payload:
         # đó đúng thứ §28 coding_guidelines cấm (so chuỗi mô tả tự do) và đóng oan 1
@@ -480,7 +494,8 @@ if os.path.isdir(inbox_dir):
             return False
         # Chấp nhận cả dạng "Agent/topic" (đúng chuỗi checker in ra, người hay copy thẳng):
         # thử cả nguyên chuỗi lẫn phần sau dấu "/" đầu tiên.
-        return all(_resolved(s, q_ts) or ("/" in s and _resolved(s.split("/", 1)[1], q_ts))
+        return all(_resolved_exact(s, q_ts)
+                   or ("/" in s and _resolved_exact(s.split("/", 1)[1], q_ts))
                    for s in subs)
     def _acked(q_agent, q_topic, q_ts):
         # Khớp CHÍNH XÁC (không substring như _resolved): ack chỉ tắt auto-dispatch nên sai
@@ -544,6 +559,14 @@ if os.path.isdir(inbox_dir):
         W(f"{len(read_errors)} file bus KHÔNG ĐỌC ĐƯỢC — backlog câu hỏi (question) có thể "
           f"THIẾU (bỏ sót toàn bộ event trong các file này): "
           f"{ {k: v for k, v in sorted(read_errors.items())} }")
+else:
+    # Sai wc_root ⇒ inbox_dir không tồn tại ⇒ MỌI danh sách rỗng ⇒ nhánh `elif` dưới in ✅
+    # "không có câu hỏi" — im lặng hoá TOÀN BỘ kênh backlog của fleet mà không một lời cảnh
+    # báo. Chính arch-reviewer vấp phải khi audit coord-2026-08-14 (check fail_silent, "nên
+    # mở ticket riêng"). Cùng họ với cliff-30-ngày ở trên: một lần TRA CỨU thất bại không
+    # được phép đội lốt một kết luận "sạch".
+    W(f"KHÔNG tìm thấy thư mục bus/inbox ({inbox_dir}) — backlog câu hỏi (question) KHÔNG "
+      f"kiểm tra được lượt này (KHÔNG phải '0 câu hỏi'). Nhiều khả năng wc_root sai.")
 if pending_q:
     W(f"Có {len(pending_q)} câu hỏi (question) trong 48h qua CHƯA thấy answer tương ứng: {pending_q}")
     # Dòng HINT: câu hỏi nào có sự kiện đăng SAU nó trông như đã xử lý xong nhưng ghi bus
@@ -602,7 +625,8 @@ if pending_q:
           f"nhưng ghi bus SAI QUY ƯỚC (có sự kiện đăng sau, cùng tiền tố topic HOẶC chung "
           f"từ hiếm trong {WIN_H}h — GỢI Ý thôi, phải tự kiểm chứng; quy ước đóng: "
           f"`answer`/`decision` GIỮ NGUYÊN topic câu hỏi): {hints}")
-elif not pending_q_wagsfix and not pending_q_needs_human:
+elif os.path.isdir(inbox_dir) and not pending_q_wagsfix and not pending_q_needs_human:
+    # Điều kiện isdir là BẮT BUỘC: không quét được ≠ quét xong và sạch (xem `else` ở trên).
     OK("Không có câu hỏi (question) nào đang chờ xử lý trong 48h qua.")
 if pending_q_needs_human:
     W(f"{WARN_ONLY} {len(pending_q_needs_human)} câu hỏi ĐÃ TRIAGE, chờ NGƯỜI quyết (không "

@@ -674,6 +674,70 @@ def case_rollup_of_umbrella_question():
         shutil.rmtree(root, ignore_errors=True)
 
 
+# ── Ca 15c (2026-08-16, job Wags_20260816_090511): HAI lỗ của `rollup_of` khi topic con khớp
+#    SUBSTRING. arch-review coord-2026-08-14 (killer_objection) tái lập được cả hai trong
+#    sandbox; 8 assertion của ca 15b PASS ở CẢ bản lỏng lẫn bản chặt nên đang mù chiều này.
+#    Lỗ 1 — MỘT resolver thoả NHIỀU topic con: `all()` không còn nghĩa là "mọi con đã quyết".
+#    Lỗ 2 — topic con viết CẮT CỤT/tiền tố: khớp bừa vào resolver của câu hỏi con KHÁC.
+#    Cả hai đều đóng oan escalation của USER, đúng thứ `_acked` đã chọn exact để tránh.
+#    RED CONTROL: đổi `_resolved_exact` → `_resolved` trong ops_health_check.sh làm 2
+#    assertion dưới đây đỏ (đã chạy thật), tức chúng khoá đúng chiều hồi quy.
+def case_rollup_of_substring_holes():
+    root, inbox = mkbus()
+    try:
+        q_ts = ago(0, 6)
+        def umbrella(topic, subs):
+            e = ev("Mike", "question", topic, q_ts)
+            e["payload"] = {"rollup_of": subs}
+            return e
+        resolves_ev = ev("Wags", "decision", "quyet-gop-2-viec", ago(0, 1))
+        resolves_ev["payload"] = {"resolves": ["con-x", "con-y"]}
+        write_events(os.path.join(inbox, "Mike.jsonl"), [
+            # Lỗ 1: 2 con, nhưng chỉ có ĐÚNG 1 decision với topic dài chứa cả 2 chuỗi con.
+            umbrella("tong-mot-resolver-nuot-hai-con", ["patternB", "backlog"]),
+            # Lỗ 2: topic con viết cắt cụt; resolver thật chỉ đóng câu hỏi con DÀI hơn.
+            umbrella("tong-topic-con-cat-cut", ["retro-pattern-recurring"]),
+            ev("Mike", "question", "retro-pattern-recurring-wakeup-miss", ago(1)),
+            # Đường ĐÓNG HỢP LỆ bằng 1 event: decision khai TƯỜNG MINH `resolves` từng con.
+            # Phải giữ được sau khi siết exact, nếu không cơ chế rollup thành vô dụng.
+            umbrella("tong-dong-bang-resolves-tuong-minh", ["con-x", "con-y"]),
+        ])
+        write_events(os.path.join(inbox, "Wags.jsonl"), [
+            ev("Wags", "decision", "retro-patternB-and-backlog-summary", ago(0, 1)),
+            ev("Wags", "decision", "retro-pattern-recurring-wakeup-miss", ago(0, 1)),
+            resolves_ev,
+        ])
+        lines, _ = run_check5(root)
+        out = joined(lines)
+        pending = joined([ln for ln in lines if "trong 48h qua CHƯA thấy answer" in ln])
+        check("rollup_of: MỘT resolver KHÔNG được thoả nhiều topic con (khớp exact, không substring)",
+              "tong-mot-resolver-nuot-hai-con" in pending, out)
+        check("rollup_of: topic con CẮT CỤT/tiền tố KHÔNG khớp resolver của câu hỏi con khác",
+              "tong-topic-con-cat-cut" in pending, out)
+        check("rollup_of: `resolves` khai tường minh vẫn đóng được tổng bằng 1 event (không thắt chết cơ chế)",
+              "tong-dong-bang-resolves-tuong-minh" not in out, out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+# ── Ca 15d (2026-08-16): wc_root SAI ⇒ bus/inbox không tồn tại. Trước fix, mọi danh sách rỗng
+#    ⇒ check in ✅ "không có câu hỏi" — im lặng hoá TOÀN BỘ kênh backlog. arch-reviewer vấp
+#    phải khi audit coord-2026-08-14 (check fail_silent, đề nghị mở ticket riêng).
+def case_missing_inbox_dir_is_warn_not_green():
+    root = tempfile.mkdtemp(prefix="ops_health_selfcheck_noinbox_")
+    try:
+        lines, warn = run_check5(root)   # KHÔNG tạo mike/bus/inbox
+        out = joined(lines)
+        check("inbox_dir không tồn tại ⇒ WARN, KHÔNG in ✅ '0 câu hỏi'",
+              "Không có câu hỏi (question) nào đang chờ xử lý" not in out, out)
+        check("inbox_dir không tồn tại ⇒ nói rõ KHÔNG kiểm tra được (khác hẳn 'không có')",
+              any("KHÔNG tìm thấy thư mục bus/inbox" in w for w in warn), out)
+        check("inbox_dir không tồn tại CONTROL: không dòng ✅ nào của check #5",
+              "✅" not in out, out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
 # ── Ca 15: trần ACK_MAX_SUPPRESS_DAYS — ack không được tắt dispatch quá hạn trần.
 def case_ack_suppress_days_capped():
     root, inbox = mkbus()
@@ -980,6 +1044,7 @@ def main():
                case_wagsfix_only_no_false_ok, case_wagsfix_prefix_list_in_sync,
                case_triaged_needs_human_ack, case_triaged_only_no_false_ok,
                case_ack_suppress_days_window, case_rollup_of_umbrella_question,
+               case_rollup_of_substring_holes, case_missing_inbox_dir_is_warn_not_green,
                case_ack_suppress_days_capped,
                case_aged_wagsfix_never_truncated, case_aged_no_wagsfix_keeps_old_cut,
                case_aged_wagsfix_overflow_is_loud,

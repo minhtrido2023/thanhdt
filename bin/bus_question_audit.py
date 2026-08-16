@@ -6,7 +6,10 @@ Dùng cho báo cáo TUẦN (Friday KB editorial review, kb_nightly.sh) — KHÔN
 bin/ops_health_check.sh check #5 (gate hàng ngày, đã hardening 4 vòng arch-review,
 KHÔNG đụng vào để tránh regression). Script này PORT lại đúng thuật toán match đã
 verify của check #5 (cross-agent answer, decision-là-resolver, substring+timestamp,
-dedup theo (agent,topic,ts), quét archive) — nếu sửa thuật toán match ở 1 nơi, sửa
+dedup theo (agent,topic,ts), quét archive, `rollup_of` khớp CHÍNH XÁC topic con —
+thêm 2026-08-16 theo arch-review coord-2026-08-14 required_change #4: trước đó
+grep rollup_of ở script này = 0, nên "danh sách ĐẦY ĐỦ" của báo cáo tuần lệch với
+gate hàng ngày đúng ở loại câu hỏi TỔNG) — nếu sửa thuật toán match ở 1 nơi, sửa
 luôn nơi kia (xem comment "resolvers"/"_resolved" ở bin/ops_health_check.sh check #5).
 
 Output: mỗi dòng PENDING = 1 câu hỏi, cũ nhất trước, KHÔNG cắt bớt (đây là điểm khác
@@ -125,6 +128,37 @@ def main():
                    ((r == q_topic or q_topic in r) or bool(refs & explicit))
                    for r, r_ts, explicit in resolvers)
 
+    def resolved_exact(q_topic, q_ts):
+        # Bản KHÔNG substring, dùng RIÊNG cho topic con của `rollup_of` — port nguyên
+        # `_resolved_exact` ở ops_health_check.sh check #5 (arch-review coord-2026-08-14).
+        if not q_topic:
+            return False
+        return any(r_ts >= q_ts and (r == q_topic or q_topic in explicit)
+                   for r, r_ts, explicit in resolvers)
+
+    def rollup_resolved(rec, q_ts):
+        # Port `_rollup_resolved` của check #5 (arch-review coord-2026-08-14 required_change
+        # #4): trước đó script này KHÔNG hiểu `rollup_of`, nên "danh sách ĐẦY ĐỦ" của báo cáo
+        # tuần lại MÂU THUẪN với gate hàng ngày — đúng thứ nó ra đời để tránh. OPT-IN +
+        # fail-closed ở mọi đường lỗi (giữ nguyên hành vi cũ khi payload không khai).
+        pl = rec.get("payload")
+        if isinstance(pl, str):
+            try:
+                pl = json.loads(pl)
+            except Exception:
+                return False
+        if not isinstance(pl, dict):
+            return False
+        raw = pl.get("rollup_of")
+        if not isinstance(raw, list):
+            return False
+        subs = [str(s).strip() for s in raw if str(s).strip()]
+        if not subs:
+            return False
+        return all(resolved_exact(s, q_ts)
+                   or ("/" in s and resolved_exact(s.split("/", 1)[1], q_ts))
+                   for s in subs)
+
     seen = set()
     pending = []
     for p in files:
@@ -141,7 +175,7 @@ def main():
             if key in seen:
                 continue
             seen.add(key)
-            if resolved(agent, topic, ts_dt):
+            if resolved(agent, topic, ts_dt) or rollup_resolved(rec, ts_dt):
                 continue
             age_d = (now - ts_dt).days
             pending.append({"agent": agent, "topic": topic, "ts": rec.get("ts"), "age_days": age_d})
