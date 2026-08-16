@@ -946,3 +946,10 @@
 
 ## Consolidation 2026-08-16T17:07:01Z
 - [2026-08-16T17:03:21Z] Mike/decision — GDKHQ-D1-D3-pipeline-decision: {"resolution": "Chọn (b): dry-run trace 08-17 (BID/MBB/SSI/VIX) trước — KHÔNG dùng thật ngay", "decided_by": "user", "context": "User xác nhận 2026-08-16 trong Discord thread 1522519012066721923. Research findings: Taylor job Taylor_20260815_050425, exdate_order_pipeline_20260815/README.md"}
+
+## Consolidation 2026-08-16T17:34:57Z
+- [2026-08-16T17:31:02Z] Mike/heartbeat — Mike_20260816_173001: {"status": "still_running", "elapsed_min": 1, "job_id": "Mike_20260816_173001", "source": "watcher"}
+- [2026-08-16T17:32:02Z] Mike/heartbeat — Mike_20260816_173001: {"status": "still_running", "elapsed_min": 2, "job_id": "Mike_20260816_173001", "source": "watcher"}
+- [2026-08-16T17:33:02Z] Mike/heartbeat — Mike_20260816_173001: {"status": "still_running", "elapsed_min": 3, "job_id": "Mike_20260816_173001", "source": "watcher"}
+- [2026-08-16T17:34:02Z] Mike/heartbeat — Mike_20260816_173001: {"status": "still_running", "elapsed_min": 4, "job_id": "Mike_20260816_173001", "source": "watcher"}
+- [2026-08-16T17:34:45Z] Mike/finding — daily-retro-2026-08-16-draft-done: {"summary": "Draft retro 2026-08-16 written to state/retro_draft_2026-08-16.md — 5 sự cố (2 bug trong wags_verdict_parse.py/rollup_of TÁI DIỄN cùng file khác hình dạng, 1 cron-ambient-env false-red, 1 forensic-queue blast-radius, 1 daily_retro.sh tự trùng escalation), 0 vi phạm ScheduleWakeup, 2 pattern (§28 sống bình thường; Pattern B fix-dập-từng-hình-dạng cần verify lại trạng thái escalation gốc 08-12), 0 escalation mới mở (điều kiện bước 6 chưa đạt)", "incidents_count": 5, "patterns_count": 2, "escalations_opened": 0, "open_gap": "chưa verify trạng thái thật của câu hỏi retro-pattern-recurring-patternB-checker-wrong-representation (mở 08-12) trong phạm vi phiên này", "draft_path": "state/retro_draft_2026-08-16.md"}
