@@ -183,7 +183,9 @@ cho cả `--bg` lẫn đồng bộ.
   **`--model opus --effort high`**; cực kỳ phức tạp → **`--model fable --effort high`** (fable trần
   high).
 
-**⚠️ Kỷ luật riêng cho dispatch TƯƠNG TÁC của chính Mike (chốt 2026-08-10, sau audit token-usage).**
+**⚠️ Kỷ luật riêng cho dispatch TƯƠNG TÁC của chính Mike (chốt 2026-08-10, sau audit token-usage;
+bổ sung 2026-08-16: góp ý bên thứ ba — giữ mặc định `medium` cho audit/fix thường, chỉ dùng `high`
+khi thực sự phức tạp).**
 `bin/spend_report.py`'s "Effort-tier mix by agent" bắt được Taylor 88-94% `effort=high` trong 14
 ngày, KHÔNG ai giám sát — và chính Mike cũng làm y hệt trong 1 saga cùng ngày (5 lần dispatch Wags
 liên tiếp, cả 5 đều `--model opus --effort high` không cân nhắc riêng từng lần, kể cả lần chỉ là
@@ -196,3 +198,22 @@ cụ thể để tự áp dụng mỗi lần dispatch tương tác:
 - Redispatch sau timeout/hết turn CHỈ giữ nguyên `--effort high` nếu job gốc đã ở high VÀ lý do
   hết giờ là "việc thật sự khó" (không phải overhead dispatch/context) — không phản xạ copy y
   nguyên flag cũ.
+
+**Bảng phân loại nhanh — audit/fix là nguồn drift chính (2026-08-16):**
+
+| Task type | Model | Effort | Lý do |
+|---|---|---|---|
+| Selfcheck sweep, verify artifact | Sonnet | medium | Rule-based, kết quả binary PASS/FAIL |
+| Ops autofix cơ học (rotate, trim, crontab check) | Sonnet | medium | Deterministic, không cần suy luận mới |
+| Bug fix với nguyên nhân đã xác định | Sonnet/Opus | **medium** | Thực thi theo spec đã rõ |
+| Audit freshness / health check | Sonnet | medium | Read + compare, không sinh giả thuyết |
+| Wags autofix theo verdict có sẵn | Sonnet | medium | Tiếp nối verdict của arch-reviewer |
+| **Redispatch "tiếp tục từ working memory"** | giữ model gốc | **medium** | Context đã load, không cần effort mới |
+| Code review / phản biện tinh vi | Opus | high | Cần suy luận đa chiều |
+| Backtest/giả thuyết mới chưa có template | Opus | high | Thiết kế từ đầu |
+| Fix bug MÀ nguyên nhân chưa rõ | Opus | high | Cần tự điều tra |
+| Thiết kế hệ thống/chiến lược mới | Fable | high | Cực kỳ phức tạp |
+
+Dấu hiệu đang cần medium, không phải high: "vá đúng chỗ đã xác định", "chạy lại selfcheck", "tiếp
+tục sau resume", "check xem đã xong chưa", "apply verdict có sẵn". Nếu không có từ nào như "thiết
+kế", "giả thuyết mới", "tại sao lại hỏng", "chưa hiểu rõ" → mặc định medium.
