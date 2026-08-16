@@ -639,10 +639,13 @@ if pending_q:
     for (_ra, _rt, _), _miss in sorted(rollup_misses.items(), key=lambda kv: str(kv[0])):
         if _rt and any(_rt in str(_p) for _p in pending_q):
             W(f"{WARN_ONLY} rollup_of của '{_ra}/{_rt}': {len(_miss)} topic con CHƯA khớp "
-              f"resolver nào — {_miss}. Kiểm 3 khả năng theo thứ tự: (1) con chưa ai quyết "
+              f"resolver nào — {_miss}. Kiểm 4 khả năng theo thứ tự: (1) con chưa ai quyết "
               f"thật; (2) chuỗi con gõ khác topic thật (phải TRÙNG KHÍT, kể cả tiền tố "
               f"'Agent/'); (3) con đóng bằng hậu-tố trạng thái ('<topic>-question-closed') "
-              f"— rollup CỐ Ý không nhận dạng này, phải tự đăng answer giữ nguyên topic tổng.")
+              f"— rollup CỐ Ý không nhận dạng này, phải tự đăng answer giữ nguyên topic tổng; "
+              f"(4) con THUỘC AGENT KHÁC '{_ra}' (người đăng tổng) mà lại viết TRẦN — dù chuỗi "
+              f"trùng khít 100%, resolver phải ghi đủ 'Agent/topic' cho con không phải của "
+              f"chính '{_ra}', xem MIKE.md § Escalation TỔNG.")
     # Dòng HINT: câu hỏi nào có sự kiện đăng SAU nó trông như đã xử lý xong nhưng ghi bus
     # sai quy ước (đăng `finding`/đổi topic thay vì `answer`/`decision` GIỮ NGUYÊN topic
     # gốc). Chỉ GỢI Ý: không đóng, không loại khỏi pending_q, không đổi routing dòng WARN.

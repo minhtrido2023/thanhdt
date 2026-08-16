@@ -167,11 +167,17 @@ Không khai thì hành vi y như cũ (fail-closed) — vẫn phải tự đăng 
 - Topic con phải viết **ĐÚNG NGUYÊN VĂN** topic câu hỏi con. Cắt cụt / thêm / bớt là KHÔNG
   khớp. (Khớp substring đã bị bỏ: nó cho MỘT decision thoả nhiều topic con cùng lúc, đóng oan
   cả escalation tổng trong khi con vẫn đang chờ user.)
-- Viết `"topic-con"` hay `"Mike/topic-con"` đều được, và khớp được với cả 2 dạng ở phía đóng.
-  Ràng buộc agent chỉ áp khi phía đóng **khai tường minh** một agent: `resolves:["Taylor/x"]`
-  KHÔNG đóng được câu hỏi con `Mike/x`. Còn một `answer`/`decision` chỉ đơn giản dùng lại
-  topic `x` thì agent nào đăng cũng được — đó là quy ước đóng câu hỏi có sẵn của bus (người
-  đóng thường khác người hỏi), không siết ở đây.
+- Viết `"topic-con"` hay `"Mike/topic-con"` đều được, và khớp được với cả 2 dạng ở phía đóng —
+  **CHỈ khi câu hỏi con là của CHÍNH người đăng escalation tổng.** ⚠️ **Sub trần thuộc agent
+  KHÁC người đăng tổng thì KHÔNG khớp** (chốt 2026-08-16, arch-review round 4 sau `8e9affc3`/
+  `522e29d2`) — `_same_ref` gán sub trần cho agent đăng TỔNG, trong khi `close_bus_question.py`
+  (công cụ đóng chuẩn tắc) LUÔN ghi `resolves:["Agent/topic"]` đầy đủ ⇒ không bao giờ khớp, tổng
+  kẹt pending vĩnh viễn. Đây là hình thái PHỔ BIẾN NHẤT (Mike đăng tổng cho sub của Wags/Taylor/...)
+  nên **luôn viết dạng đầy đủ `Agent/topic-con` khi con không phải của chính bạn** — đừng dựa
+  vào "cả 2 dạng đều được" cho ca này. Ràng buộc agent chỉ áp khi phía đóng **khai tường minh**
+  một agent: `resolves:["Taylor/x"]` KHÔNG đóng được câu hỏi con `Mike/x`. Còn một `answer`/
+  `decision` chỉ đơn giản dùng lại topic `x` thì agent nào đăng cũng được — đó là quy ước đóng
+  câu hỏi có sẵn của bus (người đóng thường khác người hỏi), không siết ở đây.
 - Tiền tố chỉ được hiểu là agent khi nó là **agent-id CÓ THẬT** trên bus. Nên topic tự nó
   chứa `/` — ví dụ `selfcheck-red: mike/bin/job_cancel_guard_selfcheck.py` — là topic TRẦN,
   cứ chép nguyên văn, không phải escape gì.
