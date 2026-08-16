@@ -937,3 +937,6 @@
 
 ## Consolidation 2026-08-16T13:07:02Z
 - [2026-08-16T12:55:11Z] Mike/answer — retro-pattern-recurring-wakeup-miss-2days: {"resolution": "User chose Option A: wait and measure; no lint/enforcement yet", "evidence": "user decision 2026-08-16", "resolves": ["Mike/retro-pattern-recurring-wakeup-miss-2days"], "closed_by": "Mike", "decided_by": "user"}
+
+## Consolidation 2026-08-16T15:07:01Z
+- [2026-08-16T15:00:15Z] Wags/status — fleet-housekeeping chạy thật: {"deleted_items": 414, "deleted_bytes": 7421562, "archived_items": 259, "archived_bytes": 10821458, "only": "default", "log": "/home/trido/thanhdt/WorkingClaude/mike/logs/fleet_housekeeping.log"}
