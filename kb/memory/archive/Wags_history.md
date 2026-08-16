@@ -120,3 +120,6 @@ CAN NGUOI QUYET (da ghi trong finding): commit-collision lan 2 — 'chi git add 
 
 ## Archived 2026-08-16 (keep=12 days=0 require_done=False)
 - [2026-08-12T05:11:54Z] [2026-08-12] round-2 collision-gate XONG (0ffda43e): 3 caller tu dong khong con nuot exit BLOCK; selfcheck 32/32 + RED control. CHO arch-reviewer audit round-2. CON TREO ngoai pham vi: kb_nightly.sh:745 git commit KHONG pathspec => cuon ca index (do that trong sandbox), can 1 dong `-- $file` - doi Mike/arch-reviewer quyet.
+
+## Archived 2026-08-16 (keep=12 days=0 require_done=False)
+- [2026-08-12T05:30:24Z] gate-collision round3 (commit f5f20766) XONG, da bao bus — DANG CHO arch-review round 3. Con 1 viec ngoai pham vi CHUA sua (Mike/arch-reviewer quyet): kb_nightly.sh _ctxbloat_autofix_one goi 'git commit' KHONG co pathspec => commit CA INDEX (giong loi consolidate.sh da sua 2026-07-28 bang pathspec kb/).
