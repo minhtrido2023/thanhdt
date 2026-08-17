@@ -4,47 +4,47 @@ scored 138 tickers | weights encode: cheapness + engine/runway + cash-machine + 
   # tkr  route      verdict             engine           score     5F   liqB  components
   1 HAH  COMPOUNDER CHEAP_QUALITY       COMPOUNDER◆      108.5            26  L1_cash+13 L1_value+36 L2_engine+22 L3_cash+10 L4_moat+10 L6_runway+8 dislocation+8 liq+6
   2 NNC  COMPOUNDER CHEAP_QUALITY       COMPOUNDER        95.5 NARROW      2  L1_cash+7 L1_value+40 L2_engine+22 L4_moat+10 L6_runway+8 dislocation+8 liq+2 liq_rising+2
-  3 NKG  CYCLICAL   TROUGH_BUY          nan               95.0            22  PB+10 cmdty_pctile+17 dislocation+15 liq+6 liq_rising+2 regime+45
+  3 NKG  CYCLICAL   TROUGH_BUY          nan               93.0            20  PB+10 cmdty_pctile+17 dislocation+15 liq+6 regime+45
   4 HSG  CYCLICAL   TROUGH_BUY          nan               93.0            25  PB+10 cmdty_pctile+17 dislocation+15 liq+6 regime+45
   5 CTG  BANK       CLEAN               nan               93.0             0  CAR+3 coverage+10 gate+40 npl+12 npl_trend+8 pb_vs_roe+10 roe+10
-  6 CTR  COMPOUNDER CHEAP_QUALITY       COMPOUNDER        91.5            24  L1_cash+4 L1_value+36 L2_engine+22 L4_moat+15 L6_runway+8 dislocation+5 liq+6
-  7 ACB  BANK       CLEAN               nan               91.0             0  CAR+5 coverage+8 gate+40 npl+15 npl_trend+8 pb_vs_roe+7 roe+8
-  8 NCT  COMPOUNDER CHEAP_QUALITY       COMPOUNDER        90.0 NARROW      2  L1_value+43 L2_engine+22 L4_moat+15 L6_runway+8 dislocation+2 liq+2 liq_rising+2
-  9 FPT  COMPOUNDER CHEAP_QUALITY       COMPOUNDER        90.0 NARROW    464  L1_cash+1 L1_value+40 L2_engine+22 L4_moat+10 L6_runway+5 dislocation+8 liq+8
- 10 SMC  CYCLICAL   TROUGH_BUY          nan               89.0             2  PB+10 cmdty_pctile+17 dislocation+15 liq+2 regime+45
+  6 ACB  BANK       CLEAN               nan               91.0             0  CAR+5 coverage+8 gate+40 npl+15 npl_trend+8 pb_vs_roe+7 roe+8
+  7 NCT  COMPOUNDER CHEAP_QUALITY       COMPOUNDER        90.0 NARROW      2  L1_value+43 L2_engine+22 L4_moat+15 L6_runway+8 dislocation+2 liq+2 liq_rising+2
+  8 FPT  COMPOUNDER CHEAP_QUALITY       COMPOUNDER        90.0 NARROW    456  L1_cash+1 L1_value+40 L2_engine+22 L4_moat+10 L6_runway+5 dislocation+8 liq+8
+  9 SMC  CYCLICAL   TROUGH_BUY          nan               89.0             2  PB+10 cmdty_pctile+17 dislocation+15 liq+2 regime+45
+ 10 CTR  COMPOUNDER CHEAP_QUALITY       COMPOUNDER        88.5            24  L1_cash+4 L1_value+36 L2_engine+22 L4_moat+15 L6_runway+8 dislocation+2 liq+6
  11 MBB  BANK       CLEAN               nan               87.0             0  CAR+5 coverage+5 gate+40 npl+12 npl_trend+8 pb_vs_roe+7 roe+10
- 12 PTB  COMPOUNDER CHEAP_QUALITY       COMPOUNDER◆       86.5             2  L1_cash+4 L1_value+40 L2_engine+22 L3_cash+10 L4_moat+5 L6_runway+1 dislocation+5 liq+2 liq_rising+2
- 13 SCS  COMPOUNDER CHEAP_QUALITY       COMPOUNDER        85.5 NARROW      6  L1_cash+7 L1_value+34 L2_engine+22 L4_moat+15 L6_runway+5 dislocation+2 liq+4
+ 12 SCS  COMPOUNDER CHEAP_QUALITY       COMPOUNDER        85.5 NARROW      6  L1_cash+7 L1_value+34 L2_engine+22 L4_moat+15 L6_runway+5 dislocation+2 liq+4
+ 13 PTB  COMPOUNDER CHEAP_QUALITY       COMPOUNDER◆       84.5             2  L1_cash+4 L1_value+40 L2_engine+22 L3_cash+10 L4_moat+5 L6_runway+1 dislocation+5 liq_rising+2
  14 VCB  BANK       CLEAN               nan               84.0             0  CAR+5 coverage+10 gate+40 npl+15 npl_trend+8 pb_vs_roe+1 roe+5
- 15 TCB  BANK       CLEAN               nan               80.0             0  CAR+6 coverage+8 gate+40 npl+12 npl_trend+5 pb_vs_roe+4 roe+5
- 16 FMC  COMPOUNDER CHEAP_QUALITY       LOWROIC_GROWTH◆   79.0             1  L1_cash+13 L1_value+42 L2_engine+3 L3_cash+10 L4_moat+5 L6_runway+8 dislocation+2
- 17 PVT  COMPOUNDER CHEAP_QUALITY       LOWROIC_GROWTH    76.5            83  L1_cash+10 L1_value+40 L2_engine+3 L4_moat+5 L6_runway+8 dislocation+5 liq+8 liq_rising+2
- 18 DHA  COMPOUNDER CHEAP_QUALITY       COMPOUNDER        72.0 NARROW      1  L1_value+38 L2_engine+22 L4_moat+10 L6_runway+1 dislocation+5
+ 15 FMC  COMPOUNDER CHEAP_QUALITY       LOWROIC_GROWTH◆   82.0             1  L1_cash+13 L1_value+42 L2_engine+3 L3_cash+10 L4_moat+5 L6_runway+8 dislocation+5
+ 16 TCB  BANK       CLEAN               nan               80.0             0  CAR+6 coverage+8 gate+40 npl+12 npl_trend+5 pb_vs_roe+4 roe+5
+ 17 PVT  COMPOUNDER CHEAP_QUALITY       LOWROIC_GROWTH    76.0            83  L1_cash+10 L1_value+39 L2_engine+3 L4_moat+5 L6_runway+8 dislocation+5 liq+8 liq_rising+2
+ 18 DHA  COMPOUNDER CHEAP_QUALITY       COMPOUNDER        74.0 NARROW      2  L1_value+38 L2_engine+22 L4_moat+10 L6_runway+1 dislocation+5 liq_rising+2
  19 BID  BANK       CLEAN               nan               71.0             0  CAR+1 coverage+5 gate+40 npl+8 npl_trend+5 pb_vs_roe+4 roe+8
- 20 VNM  COMPOUNDER CHEAP_QUALITY       -                 70.8   WIDE    328  L1_cash+1 L1_value+42 L2_engine+6 L4_moat+12 L6_runway+1 dislocation+2 liq+8 liq_rising+2 moat5f_dur+0
+ 20 VNM  COMPOUNDER CHEAP_QUALITY       -                 70.8   WIDE    326  L1_cash+1 L1_value+42 L2_engine+6 L4_moat+12 L6_runway+1 dislocation+2 liq+8 liq_rising+2 moat5f_dur+0
  21 LIX  COMPOUNDER CHEAP_QUALITY       COMPOUNDER        70.0             0  L1_value+27 L2_engine+22 L4_moat+10 L6_runway+5 dislocation+8 liq_rising+2
- 22 IDC  COMPOUNDER CHEAP_QUALITY       COMPOUNDER ASSE   70.0 NARROW     39  L2_engine+22 L4_moat+15 L6_runway+5 L8_backlog+15 L8_pbfloor+2 dislocation+5 liq+6
+ 22 IDC  COMPOUNDER CHEAP_QUALITY       COMPOUNDER ASSE   70.0 NARROW     37  L2_engine+22 L4_moat+15 L6_runway+5 L8_backlog+15 L8_pbfloor+2 dislocation+5 liq+6
  23 TCL  COMPOUNDER CHEAP_QUALITY       COMPOUNDER        69.5             0  L1_value+34 L2_engine+22 L4_moat+10 L6_runway+5 dislocation+2
- 24 BMP  COMPOUNDER CHEAP_QUALITY       COMPOUNDER        69.0 NARROW     18  L1_cash+1 L1_value+32 L2_engine+22 L4_moat+15 L5_margin-12 L6_runway+5 dislocation+2 liq+6 liq_rising+2
- 25 NTP  COMPOUNDER CHEAP_QUALITY       COMPOUNDER        68.0 NARROW      8  L1_value+39 L2_engine+22 L4_moat+10 L5_margin-12 L6_runway+5 dislocation+2 liq+4 liq_rising+2
- 26 SIP  COMPOUNDER CHEAP_QUALITY       COMPOUNDER ASSE   68.0             5  L2_engine+22 L4_moat+15 L6_runway+5 L8_backlog+20 dislocation+2 liq+4
- 27 HPG  CYCLICAL   cmdty_CHEAP         LOWROIC_GROWTH    68.0           572  PB+3 cmdty_pctile+17 dislocation+8 liq+8 liq_rising+2 regime+30
- 28 VCP  POWER      PRE_INFLECTION_CHEA nan               67.0             0  PB+12 lifecycle+45 roe+10
- 29 NTC  COMPOUNDER CHEAP_QUALITY       COMPOUNDER ASSE   67.0 NARROW      1  L2_engine+22 L4_moat+15 L6_runway+5 L8_backlog+20 dislocation+5
- 30 MWG  COMPOUNDER CHEAP_QUALITY       LOWROIC_GROWTH    66.0           387  L1_cash+7 L1_value+35 L2_engine+3 L4_moat+5 L6_runway+5 dislocation+5 liq+8 liq_rising+2
+ 24 NTP  COMPOUNDER CHEAP_QUALITY       COMPOUNDER        68.5 NARROW      8  L1_value+40 L2_engine+22 L4_moat+10 L5_margin-12 L6_runway+5 dislocation+2 liq+4 liq_rising+2
+ 25 SIP  COMPOUNDER CHEAP_QUALITY       COMPOUNDER ASSE   68.0             5  L2_engine+22 L4_moat+15 L6_runway+5 L8_backlog+20 dislocation+2 liq+4
+ 26 HPG  CYCLICAL   cmdty_CHEAP         LOWROIC_GROWTH    68.0           534  PB+3 cmdty_pctile+17 dislocation+8 liq+8 liq_rising+2 regime+30
+ 27 VCP  POWER      PRE_INFLECTION_CHEA nan               67.0             0  PB+12 lifecycle+45 roe+10
+ 28 NTC  COMPOUNDER CHEAP_QUALITY       COMPOUNDER ASSE   67.0 NARROW      1  L2_engine+22 L4_moat+15 L6_runway+5 L8_backlog+20 dislocation+5
+ 29 BMP  COMPOUNDER CHEAP_QUALITY       COMPOUNDER        67.0 NARROW     17  L1_cash+1 L1_value+32 L2_engine+22 L4_moat+15 L5_margin-12 L6_runway+5 dislocation+2 liq+6
+ 30 MWG  COMPOUNDER CHEAP_QUALITY       LOWROIC_GROWTH    66.0           372  L1_cash+7 L1_value+35 L2_engine+3 L4_moat+5 L6_runway+5 dislocation+5 liq+8 liq_rising+2
  31 PGC  COMPOUNDER CHEAP_QUALITY       nan               65.0             0  L1_cash+10 L1_value+43 L2_engine+6 L4_moat+5 L6_runway-2 dislocation+5 liq_rising+2
- 32 DMC  COMPOUNDER CHEAP_QUALITY       COMPOUNDER        65.0             0  L1_cash+1 L1_value+40 L2_engine+22 L4_moat+5 L6_runway+1
- 33 PVS  COMPOUNDER CHEAP_QUALITY       nan               64.5            96  L1_cash+4 L1_value+42 L2_engine+6 L6_runway-2 dislocation+8 liq+8 liq_rising+2
- 34 BWE  COMPOUNDER CHEAP_QUALITY       LOWROIC_GROWTH    64.0 NARROW      9  L1_cash+7 L1_value+39 L2_engine+3 L4_moat+5 L6_runway+8 liq+4 liq_rising+2
+ 32 PVS  COMPOUNDER CHEAP_QUALITY       nan               64.0            95  L1_cash+4 L1_value+42 L2_engine+6 L6_runway-2 dislocation+8 liq+8 liq_rising+2
+ 33 BWE  COMPOUNDER CHEAP_QUALITY       LOWROIC_GROWTH    64.0 NARROW      8  L1_cash+7 L1_value+39 L2_engine+3 L4_moat+5 L6_runway+8 liq+4 liq_rising+2
+ 34 DMC  COMPOUNDER CHEAP_QUALITY       COMPOUNDER        64.0             0  L1_cash+1 L1_value+39 L2_engine+22 L4_moat+5 L6_runway+1
  35 GEG  POWER      PRE_INFLECTION_CHEA nan               63.0            15  PB+12 lifecycle+45 liq+6
 
 ## Prioritized TOP-20 (by 8L composite)
-  HAH(108), NNC(96), NKG(95), HSG(93), CTG(93), CTR(92), ACB(91), NCT(90), FPT(90), SMC(89), MBB(87), PTB(86), SCS(86), VCB(84), TCB(80), FMC(79), PVT(76), DHA(72), BID(71), VNM(71)
+  HAH(108), NNC(96), NKG(93), HSG(93), CTG(93), ACB(91), NCT(90), FPT(90), SMC(89), CTR(88), MBB(87), SCS(86), PTB(84), VCB(84), FMC(82), TCB(80), PVT(76), DHA(74), BID(71), VNM(71)
 
 ## TOP-20 by route
   BANK (6): CTG(93), ACB(91), MBB(87), VCB(84), TCB(80), BID(71)
-  CYCLICAL (3): NKG(95), HSG(93), SMC(89)
+  CYCLICAL (3): NKG(93), HSG(93), SMC(89)
   SUGAR (0): 
-  COMPOUNDER (11): HAH(108), NNC(96), CTR(92), NCT(90), FPT(90), PTB(86), SCS(86), FMC(79), PVT(76), DHA(72), VNM(71)
+  COMPOUNDER (11): HAH(108), NNC(96), NCT(90), FPT(90), CTR(88), SCS(86), PTB(84), FMC(82), PVT(76), DHA(74), VNM(71)
 
 Caveat: composite is a PRIORITIZATION aid, not a buy signal. NEUTRAL state (FA/quality edge strongest in CRISIS/BEAR per fa-horizon study). Liquidity small names hard to deploy. SPECIAL_SITUATION (DGC/PAT) carry event risk not in score.

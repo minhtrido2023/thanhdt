@@ -1,5 +1,5 @@
-🛰️ V2.3 (DT5G) REPORT — 2026-08-14
-Sent: 2026-08-14 19:35 (next session T+1 entry)
+🛰️ V2.3 (DT5G) REPORT — 2026-08-17
+Sent: 2026-08-17 19:35 (next session T+1 entry)
 Market regime (DT5G): 🟡 NEUTRAL (state=3)
 Strategy: V2.3 = BAL | LAG static (always-on, no ensemble switch) + allocator + CAPIT v2
 BAL: max=12 · 10%/pos (book) · hold 45d · stop -20% · Fin/RE cap 4 · 8L≥4 half-size in BEAR/CRISIS
@@ -11,14 +11,14 @@ Guards: SV_TIGHT Fresh-Q · overheat P3 · AVOID_exbull (momentum chặn ở sta
 Không có signal — giữ cash cho book này.
 📋 BOOK B — LAG (PEAD always-on, 50% NAV target)
 Không có entry PEAD đến hạn — giữ vị thế LAG hiện có (hold 25td, NO stop) + parking.
-🧯 CAPIT v2: 📌 ĐANG GIỮ (episode CAPIT-2026-07-20) — tín hiệu hôm nay TẮT (breadth oversold 2.8% &lt; gate 30%) nhưng vị thế CHƯA thoát
-  entry 2026-07-20 · 19 phiên · size=0.75
+🧯 CAPIT v2: 📌 ĐANG GIỮ (episode CAPIT-2026-07-20) — tín hiệu hôm nay TẮT (breadth oversold 2.4% &lt; gate 30%) nhưng vị thế CHƯA thoát
+  entry 2026-07-20 · 20 phiên · size=0.75
   rổ gốc (5): NCT, PVT, SAB, SIP, VNM
   còn ở SpaceX: NCT 500, PVT 3,500, SAB 1,100, SIP 1,700, VNM 900
   còn ở ZaloPay: NCT 373, PVT 2,071, SAB 744, SIP 749, VNM 601
   → exit do NGƯỜI quyết (không có luật tự bán) · stop/slot-exempt
 📊 Universe distribution
-  BA-core: 0 mã | Compounder/info: 13 mã
+  BA-core: 0 mã | Compounder/info: 14 mã
   Wait/Pass/Avoid: 184 mã
 💡 Execution checklist (T+1 next session)
   • Vốn: BAL 50% / LAG 50% NAV (rebal CHỈ khi lệch &gt;10pp)
@@ -27,12 +27,12 @@ Không có entry PEAD đến hạn — giữ vị thế LAG hiện có (hold 25t
   • Cash dư cả 2 book → 70% E1VFVN30
 🛰️ MARKET-STATE ENGINE — DT5G (gated live)
 
-As of:   2026-08-14
+As of:   2026-08-17
 Source:  DT5G + macro overlay
 
 🔄 DT5G transitions từ 2026-04-01
 
-Số ngày: 95   |   transitions: 0
+Số ngày: 96   |   transitions: 0
   (không có transition — state ổn định)
 
 📊 V2.4 GO-LIVE paper-trade
