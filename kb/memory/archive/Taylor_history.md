@@ -207,3 +207,6 @@
 
 ## Archived 2026-08-17 (keep=12 days=0 require_done=False)
 - [2026-08-14T17:25:01Z] MO 2026-08-14: job Taylor_20260814_170351 (tran gia A vs B + participation) DA XONG, 2 finding + 1 answer tren bus. CHO USER QUYET 2 viec: (a) co doi tran sang Rule A khong — la CHINH SACH (fill-certainty doi lay ~16bps), KHONG phai edge; (b) co dang ky muc 'so phien gom ky vong theo block/ADV20' vao rnd-pipeline-tracker khong. KHONG wire gi cham pacing truoc 09-15 (paper trial P2 dang chay). Artifact: research/ceiling_ab_pacing_20260814/
+
+## Archived 2026-08-17 (keep=12 days=0 require_done=False)
+- [2026-08-15T00:57:49Z] CHO quant-skeptic + user duyet: Rule A tran gia mua da WIRE (commit 2db6d37 WorkingClaude, job Taylor_20260815_004105) nhung CHUA ap plan that nao. NEXT khi duyet: (1) DollarBill chay lag_rule_a_ceiling.py --apply roi re-derive qty theo ref_price moi (ref_price cu lam chase-cap thanh rang buoc buoc, mat phan lon tac dung); (2) quyet dinh RIENG: co doi dynamic_ceiling.sessions 5->1 cho TV1 (book DISCRETIONARY_SPECIAL) khong — sessions=5 chinh la Rule B.
