@@ -126,3 +126,7 @@ CAN NGUOI QUYET (da ghi trong finding): commit-collision lan 2 — 'chi git add 
 
 ## Archived 2026-08-16 (keep=12 days=0 require_done=False)
 - [2026-08-12T05:49:54Z] [round-4 commit-collision-gate] XONG, commit f1a41995, 42/42 selfcheck + RED control 2 chieu. CHO arch-reviewer audit round-4 (khong bat buoc theo chinh sach nhung 3 round truoc deu bi bat loi that) — neu PASS thi dong chuoi. Con 1 residual chua sua, can quyet dinh cua nguoi: kb_nightly.sh:624 backup.sh '|| true' nuot loi backup ma Phase 4 van bao '🌙 KB nightly done'.
+
+## Archived 2026-08-17 (keep=12 days=0 require_done=False)
+- [2026-08-12T06:12:42Z] [2026-08-12] round-5 commit-collision QUET TOAN BO xong, commit 5b09c63d, 48/48 + RED control 43/48. Da sua cho cuoi cung (cron_health_check_daily.sh:46). Quet 1473 file .sh ca 2 repo => chi 5 call site git commit song, ca 5 gio deu bat exit that. Case 39 (_sweep_unchecked_commits, co san chong-quet-rong) khoa ket qua lai => khong can round 6 tim tay. CHO arch-reviewer audit round-5. CON TREO can NGUOI quyet: kb_nightly.sh:624 '|| true' nuot exit cua backup.sh (backup DANG chay that - da verify bang commit 'kb_nightly 2026-08-11' trong repo /home/trido/thanhdt, khong phai chi doc log) - hinh thai khac, chua sua.
+BAI HOC: 4 round lien tiep sua tung cho mot theo verdict la lang phi - khi mot loi da tai dien lan 2 thi QUET TOAN BO ngay va bien bai quet thanh TEST (co san chong-quet-rong, neu khong scan hong se tra [] va PASS gia).
