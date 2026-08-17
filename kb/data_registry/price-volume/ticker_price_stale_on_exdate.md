@@ -225,6 +225,16 @@ nền của mã mỏng chứ không đo hiện tượng này. Phải giữ đủ
 5. Consumer đã biết là chạm đúng chỗ này: `mike/bin/lag_entry_anchor.py:105` (`entry_anchor_price`,
    TRẦN ràng buộc, đọc thẳng `tav2_bq.ticker.Price`) — mục **D** trong bản đồ nguồn giá của
    `exdate_order_pipeline_20260815/README.md` §1. Chưa vá tính đến 2026-08-15.
+6. **Nạn nhân thứ 2, ĐÃ VÁ 2026-08-17 — `update_shares_live.py::process()`.** Gate xác thực corp
+   action (`theo_ex = (cum_raw − cash)/(1+stock)` so với `cum_adj`) lấy `cum_raw` từ `iloc[-1]` của
+   các phiên cum ⇒ rơi đúng vào dòng 2026-08-06 có `Price` đông cứng 153.000 (thật 154.200) trong
+   khi `Close` đã chạy 76.500→77.100. Gate = **0,78% > tol 0,5% ⇒ REFUSE ghi** một ca 1:1 sách giáo
+   khoa; hệ quả là VHM nằm lì 10 ngày trong `corp_action_backlog.json` và `OShares` vẫn 4,107 tỷ
+   (PE/PB VHM sai **2×** suốt thời gian đó). **Fix**: đi lùi tới phiên cum gần nhất KHÔNG mang chữ
+   ký đông cứng (`raw` trùng phiên trước trong khi `adj` đã đổi) → dùng 2026-08-05, gate về
+   **0,00%**. Regression ACB/HDC/EVG: guard không fire, gate giữ nguyên 0,01/0,04/0,03%.
+   ⇒ Bài học chung: **gate an toàn đọc `ticker.Price` sẽ báo động GIẢ, không phải báo động thiếu** —
+   và một gate im lặng từ chối ghi thì nhìn giống hệt "chưa ai xử lý".
 
 ## SQL detector (chép chạy được)
 
