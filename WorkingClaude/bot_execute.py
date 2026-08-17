@@ -18,6 +18,7 @@ Giết process giữa chừng vô hại — chạy lại là resume từ state �
 """
 
 import argparse
+import copy
 import contextlib
 import datetime as dt
 import fcntl
@@ -39,6 +40,11 @@ from trading_bot.plan import (load_plan, filter_excluded_tickers, net_offsetting
                               apply_capit_lever, lever_live_preflight, approval_block_reason)
 from trading_bot.plan_funding_gate import check_plan_funding
 from trading_bot.exdate_gate import apply_exdate_gate
+from trading_bot import price_frame as exprice
+from trading_bot.gdkhq_rollout import (STATE_PATH as GDKHQ_ROLLOUT_STATE,
+                                       enabled as gdkhq_rollout_enabled,
+                                       mark_enabled as mark_gdkhq_enabled,
+                                       pending_resolver as gdkhq_pending_resolver)
 from trading_bot.netting_recon import (reconcile_netted_fills, get_net_fill_from_journal,
                                        write_recon_log)
 from trading_bot.executor import Executor, run_session, _publish_bot_event
@@ -46,8 +52,119 @@ from trading_bot.vn_market import today_ict
 
 _LOCK_HANDLES = []  # giữ sống file descriptor để lock tồn tại suốt vòng đời process
 
-_WC_ROOT = os.path.dirname(os.path.abspath(__file__))
+_WC_ROOT = os.path.abspath(os.environ.get("TRADING_BOT_RUNTIME_ROOT") or
+                           os.path.dirname(os.path.abspath(__file__)))
 _TRADING_DAILY_THREAD = "1521470705563340910"  # cùng thread run_bot.sh dùng
+_GDKHQ_DECISION_THREAD = "1522519012066721923"  # nơi user duyệt shadow→rollout 2026-08-15
+
+
+def _notify_gdkhq_shadow(message):
+    """Best-effort Discord notice; a notification failure never changes the trace verdict."""
+    script = os.path.join(_WC_ROOT, "mike", "bin", "notify_thread.sh")
+    if not os.path.isfile(script):
+        return
+    try:
+        for target in (_TRADING_DAILY_THREAD, _GDKHQ_DECISION_THREAD):
+            subprocess.run([script, message, target], timeout=20, check=False,
+                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    except Exception:
+        pass
+
+
+def _run_gdkhq_shadow(profiles, args, plan_date, otp_by_label, otp_common):
+    """Run D1-D3 against live DNSE reads only; never construct or run an Executor."""
+    watch = sorted({x.strip().upper() for x in (args.gdkhq_watch or "").split(",") if x.strip()})
+    if not watch:
+        print("⛔ --gdkhq-shadow cần --gdkhq-watch có ít nhất một mã")
+        return 4
+    d = dt.date.fromisoformat(plan_date)
+    trace = {
+        "kind": "GDKHQ_D1_D3_LIVE_SHADOW",
+        "plan_date": plan_date,
+        "watch": watch,
+        "read_only": True,
+        "accounts": [],
+        "passed": False,
+    }
+    try:
+        events = exprice.pricing_events(watch, since=(d - dt.timedelta(days=1)).isoformat(),
+                                        until=d.isoformat())
+        event_map = exprice.events_by_ticker_date(events)
+        missing = [tk for tk in watch if not exprice.events_on(event_map, tk, plan_date)]
+    except Exception as exc:  # noqa: BLE001 - trace must turn every dependency failure into FAIL
+        trace["calendar_error"] = f"{type(exc).__name__}: {exc}"
+        missing = list(watch)
+        event_map = {}
+    trace["calendar_missing"] = missing
+
+    all_ok = not missing
+    for p in profiles:
+        account = {"label": p["label"], "frames": {}, "plan_adjustments": [], "ok": False}
+        try:
+            cfg = dict(p["cfg"])
+            if args.mode:
+                cfg["mode"] = args.mode
+            otp = otp_by_label.get(p["label"], otp_common)
+            broker = make_broker(cfg, otp=otp, profile=p).connect()
+            getter = getattr(broker, "positions_raw", None)
+            if not callable(getter):
+                raise RuntimeError("broker không có positions_raw()")
+            position_rows = getter()
+            if not isinstance(position_rows, list):
+                raise TypeError(f"positions_raw() trả {type(position_rows).__name__}, cần list")
+            account["position_rows"] = len(position_rows)
+            for tk in watch:
+                frame = exprice.resolve_reference(broker, tk, plan_date,
+                                                  events_map=event_map,
+                                                  position_rows=position_rows)
+                account["frames"][tk] = frame
+            plan = load_plan(plan_date, account=p["label"])
+            if plan is not None:
+                shadow_plan, adjustments = apply_exdate_gate(
+                    copy.deepcopy(plan), broker, plan_date, events_map=event_map,
+                    position_rows=position_rows)
+                account["plan_orders_before"] = len(plan.orders)
+                account["plan_orders_after"] = len(shadow_plan.orders)
+                account["plan_adjustments"] = adjustments
+            bad_frames = [tk for tk, frame in account["frames"].items() if not frame.get("ok")]
+            bad_plan = [a for a in account["plan_adjustments"]
+                        if a.get("action") in ("BLOCKED", "CALENDAR_FAIL")]
+            account["ok"] = not bad_frames and not bad_plan
+            account["bad_frames"] = bad_frames
+            all_ok = all_ok and account["ok"]
+        except Exception as exc:  # noqa: BLE001
+            account["error"] = f"{type(exc).__name__}: {exc}"
+            all_ok = False
+        trace["accounts"].append(account)
+
+    trace["passed"] = bool(all_ok and trace["accounts"])
+    trace_dir = os.path.join(_WC_ROOT, "data", "gdkhq_shadow")
+    os.makedirs(trace_dir, exist_ok=True)
+    trace_path = os.path.join(trace_dir, f"gdkhq_shadow_{plan_date}.json")
+    tmp_path = trace_path + f".tmp.{os.getpid()}"
+    with open(tmp_path, "w", encoding="utf-8") as f:
+        json.dump(trace, f, ensure_ascii=False, indent=2, default=str)
+        f.write("\n")
+        f.flush()
+        os.fsync(f.fileno())
+    os.replace(tmp_path, trace_path)
+
+    if trace["passed"] and args.promote_gdkhq_on_pass:
+        mark_gdkhq_enabled(trace_path, plan_date)
+        trace["promoted"] = True
+        verdict = (f"✅ GDKHQ D1-D3 shadow {plan_date} PASS ({', '.join(watch)}; "
+                   f"{len(trace['accounts'])} account) — đã rollout cho lệnh thật. Trace: {trace_path}")
+    elif trace["passed"]:
+        trace["promoted"] = False
+        verdict = f"✅ GDKHQ D1-D3 shadow {plan_date} PASS — chưa promote (không có cờ explicit)."
+    else:
+        trace["promoted"] = False
+        verdict = (f"⛔ GDKHQ D1-D3 shadow {plan_date} FAIL — KHÔNG rollout; lệnh mã GDKHQ "
+                   f"tiếp tục bị chặn riêng. Trace: {trace_path}")
+    print(verdict)
+    print(json.dumps(trace, ensure_ascii=False, indent=2, default=str))
+    _notify_gdkhq_shadow(verdict)
+    return 0 if trace["passed"] else 4
 
 
 def _alert_approval_block(label, plan_date, reason):
@@ -327,6 +444,12 @@ def main():
                     help="gửi email OTP cho account DNSE (email_otp) rồi thoát")
     ap.add_argument("--auto-otp", action="store_true",
                     help="tự động gửi + đọc OTP qua Gmail API cho account DNSE live")
+    ap.add_argument("--gdkhq-shadow", action="store_true",
+                    help="đọc DNSE sống + chạy D1-D3 trong RAM rồi thoát; KHÔNG tạo Executor")
+    ap.add_argument("--gdkhq-watch", default="",
+                    help="danh sách mã GDKHQ phân cách dấu phẩy cho --gdkhq-shadow")
+    ap.add_argument("--promote-gdkhq-on-pass", action="store_true",
+                    help="sau shadow PASS, ghi marker bật D1-D3 cho vốn thật")
     args = ap.parse_args()
 
     if args.probe:
@@ -384,6 +507,11 @@ def main():
     profiles = pick_accounts(load_accounts(base), args.account)
     otp_by_label, otp_common = parse_otp(args.otp)
     plan_date = args.date or today_ict().strftime("%Y-%m-%d")
+
+    if args.promote_gdkhq_on_pass and not args.gdkhq_shadow:
+        ap.error("--promote-gdkhq-on-pass chỉ hợp lệ cùng --gdkhq-shadow")
+    if args.gdkhq_shadow:
+        return _run_gdkhq_shadow(profiles, args, plan_date, otp_by_label, otp_common)
 
     shared_fills = {}                            # sổ participation chung của fleet
     net_adjustments = {}                         # label -> adj của net_offsetting_orders
@@ -518,7 +646,14 @@ def main():
         # ĐÃ quy về hệ đúng). Ngày thường: 0 lệnh bị đụng, 0 lời gọi thêm.
         # Cơ chế + độ lớn đã đo (median 5,46%, max 50,0%): trading_bot/price_frame.py và
         # mike/agents/Taylor/research/exdate_order_pipeline_20260815/README.md.
-        plan, ex_adj = apply_exdate_gate(plan, broker, plan_date)
+        # User duyệt rollout hai bước 2026-08-15: một live shadow 2026-08-17 rồi mới bật vốn
+        # thật. Trước marker PASS, vẫn tra lịch như bình thường nhưng resolver cố ý từ chối:
+        # chỉ lệnh của mã GDKHQ bị bỏ, mọi mã thường là NO-OP. Nếu trace PASS, shadow command
+        # ghi marker atomically và từ lần bot kế tiếp dùng resolver D1 thật.
+        _gdkhq_live = gdkhq_rollout_enabled()
+        plan, ex_adj = apply_exdate_gate(
+            plan, broker, plan_date,
+            resolver=None if _gdkhq_live else gdkhq_pending_resolver)
         for a in ex_adj:
             if a["action"] == "BLOCKED":
                 print(f"[{p['label']}] ⛔ GDKHQ BỎ lệnh {a['ticker']} "
@@ -527,6 +662,9 @@ def main():
                 print(f"[{p['label']}] 🔁 GDKHQ quy hệ quy chiếu {a['ticker']}: {a['reason']}")
             elif a["action"] == "CALENDAR_FAIL":
                 print(f"[{p['label']}] ⚠️⚠️ CỔNG GDKHQ KHÔNG CHẠY ĐƯỢC — {a['reason']}")
+        if not _gdkhq_live and any(a.get("action") == "BLOCKED" for a in ex_adj):
+            print(f"[{p['label']}] ℹ️ D1-D3 đang SHADOW_PENDING ({GDKHQ_ROLLOUT_STATE}); "
+                  f"chỉ mã GDKHQ bị chặn tới khi live trace PASS")
         if not plan.orders:
             print(f"[{p['label']}] plan {plan_date} không còn lệnh nào sau cổng GDKHQ — bỏ qua")
             continue

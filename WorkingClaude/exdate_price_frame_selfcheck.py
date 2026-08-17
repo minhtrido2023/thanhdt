@@ -23,6 +23,7 @@ Chạy: `python3 exdate_price_frame_selfcheck.py`   (exit 0 = PASS)
 import os
 import subprocess
 import sys
+import tempfile
 
 WC_ROOT = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, WC_ROOT)
@@ -31,6 +32,7 @@ os.environ.setdefault("MIKE_BOT_TEST_MODE", "1")          # §5b coding_guidelin
 from trading_bot import price_frame as pf                          # noqa: E402
 from trading_bot.exdate_gate import apply_exdate_gate              # noqa: E402
 from trading_bot.plan import PlannedOrder, TradePlan               # noqa: E402
+from trading_bot import gdkhq_rollout                              # noqa: E402
 
 FAILS = []
 
@@ -109,10 +111,11 @@ class FakeQuote:
 
 
 class FakeBroker:
-    """Broker tất định: quote + positions RAW + ohlc, đúng ba thứ price_frame cần."""
+    """Broker tất định: quote + positions RAW + cum_prices (offline thay BQ)."""
 
     def __init__(self, quotes=None, rows=None, cum=None):
         self.quotes, self.rows, self.cum = quotes or {}, rows or [], cum or {}
+        self.cum_prices = self.cum
         self.client = self
 
     def get_quote(self, tk):
@@ -121,11 +124,23 @@ class FakeBroker:
     def positions_raw(self):
         return list(self.rows)
 
-    def ohlc(self, ticker, resolution="1D", **kw):
-        px = self.cum.get(ticker)
-        if px is None:
-            return {}
-        return {"t": [kw["to"] - 86400], "c": [px]}
+
+print("── 0. p_cum = tav2_bq.ticker.Price thô của phiên cum cuối (BID 08-14 = 38.250đ) ──")
+got, info = pf.p_cum_from_broker(FakeBroker(cum={"BID": 38_250}), "BID", "2026-08-17")
+check("BID phiên cum 08-14 trả 38.250đ — KHÔNG phải Close 35.800đ đã điều chỉnh",
+      got == 38_250, f"got={got}, info={info}")
+got_missing, info_missing = pf.p_cum_from_broker(FakeBroker(cum={}), "BID", "2026-08-17")
+check("thiếu dữ liệu phiên cum ⇒ fail-closed như cũ", got_missing is None,
+      info_missing["reason"][:80])
+got_bq, info_bq = pf.p_cum_from_bq(
+    "BID", "2026-08-17",
+    bq_query=lambda sql: [{"d": "2026-08-14", "px": 38_250.0}])
+check("đường BQ thật đọc đúng 1 dòng Price thô trước exright_date", got_bq == 38_250,
+      f"got={got_bq}, info={info_bq}")
+got_bad, info_bad = pf.p_cum_from_bq(
+    "BID", "2026-08-17", bq_query=lambda sql: [{"d": "2026-08-17", "px": 35_900.0}])
+check("BQ trả dòng đúng ngày GDKHQ ⇒ fail-closed, không lấy hệ mới", got_bad is None,
+      info_bad["reason"][:80])
 
 
 # ══════════════════════════════════════════════════════════════════════════════════════
@@ -487,6 +502,38 @@ try:
           len(keep3) == 1)
 finally:
     _cal.pricing_events = _real_pricing
+
+
+# ══════════════════════════════════════════════════════════════════════════════════════
+print("\n── 10. Rollout hai bước — pending chặn riêng mã GDKHQ, PASS marker bật atomically ──")
+# ══════════════════════════════════════════════════════════════════════════════════════
+with tempfile.TemporaryDirectory() as td:
+    state_path = os.path.join(td, "rollout.json")
+    check("thiếu marker ⇒ mặc định SHADOW_PENDING (fail-safe sau restore/deploy mới)",
+          not gdkhq_rollout.enabled(state_path))
+    trace_path = os.path.join(td, "trace.json")
+    with open(trace_path, "w", encoding="utf-8") as f:
+        f.write("{}\n")
+    state = gdkhq_rollout.mark_enabled(trace_path, "2026-08-17", state_path)
+    check("chỉ mark_enabled sau trace PASS mới bật rollout",
+          gdkhq_rollout.enabled(state_path) and state.get("approved_by") == "user")
+
+pending_plan, pending_adj = apply_exdate_gate(
+    plan_main_0811(), br_mbb, "2026-08-11", events_map=emap_mbb,
+    resolver=gdkhq_rollout.pending_resolver)
+check("SHADOW_PENDING chặn RIÊNG mọi lệnh mã GDKHQ trước khi rollout",
+      not pending_plan.orders and pending_adj
+      and all(a.get("gate") == "ROLLOUT_PENDING" for a in pending_adj))
+
+normal_plan = TradePlan(plan_date="2026-08-12", signal_date="2026-08-11",
+                        strategy="fixture", strategy_version="1", state=2,
+                        state_name="NEUTRAL", nav_basis={}, account="main", created_at="",
+                        orders=[PlannedOrder("BUY-FPT", "FPT", "buy", 100, 73200)])
+normal_after, normal_adj = apply_exdate_gate(
+    normal_plan, br_mbb, "2026-08-12", events_map=pf.events_by_ticker_date([]),
+    resolver=gdkhq_rollout.pending_resolver)
+check("SHADOW_PENDING không đụng mã thường trong cùng cơ chế",
+      len(normal_after.orders) == 1 and normal_adj[0].get("action") == "NO_EVENT")
 
 
 # ══════════════════════════════════════════════════════════════════════════════════════

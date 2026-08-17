@@ -56,15 +56,21 @@ VHM 2026-08-06 ghi 153.000 (giá phiên TRƯỚC, trễ một phiên, sai đúng
 khi MBB 2026-08-11 ghi 20.350 (đã ở hệ mới). ⇒ `P_cum` ở đây LUÔN lấy từ phiên cum CUỐI CÙNG
 (strictly trước `exright_date`), không bao giờ từ dòng ngày GDKHQ.
 
+⚠️ NGUỒN `P_cum` = `tav2_bq.ticker.Price` (giá THÔ của phiên đóng cửa cuối cùng trước
+`exright_date`), KHÔNG phải DNSE `/price/ohlc` và KHÔNG phải BQ `Close`: DNSE OHLC trả lịch sử
+ĐÃ ĐIỀU CHỈNH (BID 08-14 ra 35.800đ thay vì 38.250đ) và BQ `Close` cũng điều chỉnh hồi tố; cả
+hai đều là hệ quy chiếu MỚI và sẽ làm G5 dựng kỳ vọng sai rồi chặn oan hoặc thả lỏng oan từng
+mã có sự kiện. Phiên cum cuối lấy bằng câu truy vấn `time < exright_date` — không dựa vào bất
+kỳ con số nào của dòng ngày GDKHQ (bẫy VHM 08-06 phía trên).
+
 FAIL-CLOSED MỌI HƯỚNG: thiếu dữ liệu / không tra được / bất kỳ cổng nào fail ⇒ `ok=False` và
 caller KHÔNG được sinh lệnh cho mã đó. Không đoán, không rơi về mặc định (đúng triết lý job
 Taylor_20260815_034407).
 """
 import datetime as dt
-from zoneinfo import ZoneInfo
 
 from .no_chase_ceiling import check_reference_snapshot
-from .vn_market import tick_size
+from .vn_market import normalize_price_vnd, tick_size
 
 # Giá phát hành của QUYỀN MUA — tham số DUY NHẤT của công thức G5 mà bảng vendor KHÔNG có
 # (`value_per_share` của mọi dòng ISS đều NULL, kiểm 2026-08-15 trên 14 sự kiện thật).
@@ -93,11 +99,6 @@ EX_WINDOW_DAYS = 4
 # tắc là `corp_action_lib.PRICE_ADJUSTING_ISS`; ở đây chỉ tách riêng nhánh QUYỀN MUA vì nó là
 # loại duy nhất có thêm dòng tiền vào (cổ đông phải TRẢ giá phát hành).
 RIGHTS_METHOD = "Quyền mua CP cho Cổ đông hiện hữu"
-
-# §16 coding_guidelines: mọi mốc thời gian trong file này neo TZ TƯỜNG MINH, không bao giờ
-# mượn TZ của process (cron/headless không export TZ — đã cắn thật nhiều lần trong repo này).
-_ICT = ZoneInfo("Asia/Ho_Chi_Minh")
-
 
 def _f(x):
     try:
@@ -359,52 +360,79 @@ def check_ref_vs_events(ref, p_cum, events, symbol="", exchange="HOSE", tol_tick
     return True, info
 
 
-# ──────────────────────────────────────────────────────── giá phiên cum cuối (I/O — DNSE ohlc)
+# ─────────────────────────────────────────────── giá phiên cum cuối (I/O — BQ raw `Price`)
 
-def p_cum_from_broker(broker, ticker, exright_date):
-    """Giá ĐÓNG của phiên giao dịch cuối cùng TRƯỚC `exright_date` → (giá | None, info).
+def p_cum_from_bq(ticker, exright_date, bq_query=None):
+    """Giá THÔ của phiên giao dịch cuối cùng TRƯỚC `exright_date` → (giá | None, info).
 
-    Nguồn = DNSE `/price/ohlc` 1D — CÙNG feed với `q.ref` đang được đối soát, nên hai vế của
-    G5 không lệch cơ sở giá vì lý do vụn vặt. Bar được lọc **strictly < exright_date**: bar
-    của chính ngày GDKHQ đã ở hệ MỚI, lấy nhầm nó là tự đối soát mình với mình.
-    (Vì sao không lấy `tav2_bq.ticker.Price`: xem bẫy §1.1 ở docstring module — dòng ngày
-    GDKHQ không nhất quán giữa các sự kiện; phiên cum thì hai nguồn đều đúng, chọn DNSE cho
-    thống nhất feed.)
+    Nguồn = `tav2_bq.ticker.Price` — cột giá THÔ (cùng hệ quy chiếu với giá live DNSE), lấy
+    dòng `time < exright_date` mới nhất. KHÔNG dùng `Close` (đã điều chỉnh hồi tố) và KHÔNG
+    dùng DNSE OHLC (lịch sử đã điều chỉnh — BID 08-14 trả 35.800đ thay vì 38.250đ, đúng lỗi
+    G5 shadow thật 2026-08-17). Không bao giờ lấy dòng của chính ngày GDKHQ (bẫy VHM 08-06
+    trong docstring module). `bq_query` chỉ để selfcheck tiêm fixture offline; production mặc
+    định dùng `corp_action_lib.bq`.
     """
     d = _date(exright_date)
     if d is None:
         return None, {"reason": f"exright_date không parse được ({exright_date!r})"}
-    client = getattr(broker, "client", None)
-    if client is None or not hasattr(client, "ohlc"):
-        return None, {"reason": "broker không có client DNSE — không lấy được giá phiên cum"}
+    tk = str(ticker).strip().upper()
+    if not tk:
+        return None, {"reason": f"ticker rỗng ({ticker!r})"}
+    sql = f"""
+        SELECT t.Price AS px, CAST(t.time AS STRING) AS d
+        FROM `lithe-record-440915-m9.tav2_bq.ticker` AS t
+        WHERE t.ticker = '{tk}'
+          AND t.time < DATE '{d.isoformat()}'
+          AND t.Price > 0
+        ORDER BY t.time DESC
+        LIMIT 1
+    """
     try:
-        # §16: neo TZ TƯỜNG MINH. Bar 1D của DNSE mang `t` = 09:00 **ICT** của ngày giao dịch;
-        # đọc/ghi mốc đó bằng TZ của process (cron không export TZ, máy đặt UTC) làm lệch NGÀY
-        # của bar và có thể lấy nhầm chính bar ngày GDKHQ làm "phiên cum" — tức tự đối soát
-        # mình với mình, đúng thứ hàm này sinh ra để tránh.
-        to_ts = int(dt.datetime.combine(d, dt.time(9, 0), tzinfo=_ICT).timestamp())
-        raw = client.ohlc(ticker, resolution="1D", **{"from": to_ts - 30 * 86400, "to": to_ts})
+        if bq_query is None:
+            import os
+            import sys
+            root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            if root not in sys.path:
+                sys.path.insert(0, root)
+            import corp_action_lib as cal
+            run = cal.bq
+        else:
+            run = bq_query
+        rows = run(sql)
     except Exception as exc:                                        # noqa: BLE001
-        return None, {"reason": f"DNSE ohlc lỗi: {type(exc).__name__}: {exc}"}
-    closes = raw.get("c") if isinstance(raw, dict) else None
-    stamps = raw.get("t") if isinstance(raw, dict) else None
-    if not isinstance(closes, list) or not isinstance(stamps, list) or len(closes) != len(stamps):
-        return None, {"reason": "ohlc thiếu/lệch mảng t↔c — không xác định được bar nào là phiên nào"}
-    best_ts, best_px = None, None
-    for ts, c in zip(stamps, closes):
-        try:
-            bar_d = dt.datetime.fromtimestamp(int(ts), _ICT).date()
-        except (TypeError, ValueError, OSError, OverflowError):
-            continue
-        if bar_d >= d:
-            continue                    # bar ngày GDKHQ trở đi đã ở hệ MỚI — loại
-        px = _pos(c)
-        if px is not None and (best_ts is None or ts > best_ts):
-            best_ts, best_px = ts, px
-    if best_px is None:
-        return None, {"reason": f"không có bar phiên nào trước {d} trong 30 ngày gần nhất"}
-    return best_px, {"reason": f"phiên cum cuối {dt.datetime.fromtimestamp(best_ts, _ICT).date()}: "
-                               f"{best_px:,.0f}đ (DNSE ohlc 1D)"}
+        return None, {"reason": f"BQ raw price lỗi: {type(exc).__name__}: {exc}"}
+    if not isinstance(rows, list) or len(rows) != 1:
+        return None, {"reason": "BQ raw price không trả đúng 1 dòng phiên cum cuối — "
+                                "dữ liệu thiếu/tách rời, fail-closed"}
+    row = rows[0]
+    px = _pos(normalize_price_vnd(row.get("px")))
+    if px is None:
+        return None, {"reason": f"BQ raw price trả giá rác cho phiên cum ({row!r})"}
+    row_d = _date(str(row.get("d") or "")[:10])
+    if row_d is None or row_d >= d:
+        return None, {"reason": f"BQ raw price trả dòng không phải phiên trước {d} ({row!r})"}
+    return px, {"reason": f"phiên cum cuối {row_d.isoformat()}: {px:,.0f}đ "
+                          f"(tav2_bq.ticker.Price thô, trước GDKHQ {d.isoformat()})"}
+
+
+def p_cum_from_broker(broker, ticker, exright_date):
+    """Giá phiên cum cuối cho G5 — production đọc BQ raw `Price`, selfcheck tiêm fixture.
+
+    Hàm nhận `broker` để giữ chữ ký call-site cũ; selfcheck gán `broker.cum_prices` là một
+    dict {ticker: giá} để chạy offline không cần mạng. Production broker KHÔNG có thuộc tính
+    đó ⇒ đi qua `p_cum_from_bq()` fail-closed.
+    """
+    d = _date(exright_date)
+    if d is None:
+        return None, {"reason": f"exright_date không parse được ({exright_date!r})"}
+    cum_prices = getattr(broker, "cum_prices", None)
+    if isinstance(cum_prices, dict):
+        tk = str(ticker).strip().upper()
+        px = _pos(normalize_price_vnd(cum_prices.get(tk)))
+        if px is None:
+            return None, {"reason": f"fixture cum_prices thiếu/rác {tk} ({cum_prices.get(tk)!r})"}
+        return px, {"reason": f"phiên cum cuối fixture: {px:,.0f}đ (tav2_bq.ticker.Price thô)"}
+    return p_cum_from_bq(ticker, d)
 
 
 # ────────────────────────────────────────────────────────────────────── hàm chính (D1)

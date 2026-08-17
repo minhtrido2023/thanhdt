@@ -236,6 +236,11 @@ psl = exl.state["parents"][o5.id]
 check("mode=live + live_gate ⇒ mult 1.0 + không trần (LIVE byte-identical)",
       exl._fill_timing_mult(o5, T(11, 0)) == 1.0
       and exl._child_qty(o5, psl, exl.broker.quote, PX, T(11, 0)) == 5000)
+ex_sep = mk([o5], mode="live", fill_timing_live_gate=False)
+ps_sep = ex_sep.state["parents"][o5.id]
+check("mở base fill-timing LIVE nhưng hybrid_live_gate còn True ⇒ chỉ base chạy, HYBRID vẫn tắt",
+      ex_sep._hybrid_active(o5) is False
+      and ex_sep._child_qty(o5, ps_sep, ex_sep.broker.quote, PX, T(11, 0)) == 5000)
 exm = mk([o5], fill_timing_enabled=False)
 psm = exm.state["parents"][o5.id]
 check("fill_timing_enabled=False ⇒ master tắt, cờ hybrid bị bỏ qua hoàn toàn",

@@ -4,7 +4,12 @@
 import json
 import os
 
-WORKDIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# Isolated worktrees can execute code against the canonical runtime data/secrets only when the
+# operator opts in explicitly.  Normal bot/cron processes do not set this and retain the exact
+# historical path.  Used by the one-session GDKHQ shadow: code stays isolated, reads the same
+# approved plans and broker profiles as production, and still never constructs an Executor.
+_CODE_WORKDIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+WORKDIR = os.path.abspath(os.environ.get("TRADING_BOT_RUNTIME_ROOT") or _CODE_WORKDIR)
 DATA_DIR = os.path.join(WORKDIR, "data")
 PLAN_DIR = os.path.join(DATA_DIR, "trade_plans")
 EXEC_DIR = os.path.join(DATA_DIR, "execution_logs")
@@ -125,6 +130,10 @@ DEFAULTS = {
     # Lợi ~17.6bps/lệnh mua vs Open, ~5-6bps vs uniform/VWAP (edge trung bình, std cao).
     "fill_timing_enabled": True,      # True: side-aware schedule; False: uniform (tắt hẳn)
     "fill_timing_live_gate": True,    # True: chỉ paper; live cần user tắt thủ công (real money)
+    # HYBRID là lịch thực thi khác, có thêm defer/block-cap và đã từng lộ bug tương tác
+    # EXTREME trong paper.  Giữ cổng LIVE ĐỘC LẬP: ngày mở fill-timing cơ bản không được
+    # vô tình mở luôn HYBRID chỉ vì cả hai cùng là Layer-3.
+    "fill_timing_hybrid_live_gate": True,  # True: HYBRID paper-only, kể cả base timing đã live
     "buy_window_start": "10:45",      # BUY: đầu cửa sổ tập trung (ICT)
     "buy_window_end": "11:15",        # BUY: cuối cửa sổ (đáy intraday)
     "sell_window_start": "09:15",     # SELL: tập trung ở Open (đỉnh morning premium)
@@ -149,8 +158,8 @@ DEFAULTS = {
     # (4) giá thực thi là XẤP XỈ `(H+L+C)/3` của block, KHÔNG phải fill thật; (5) bỏ ATC 14:45.
     # DEFAULT OFF + fill_timing_live_gate ⇒ paper-only; bật LIVE cần user duyệt riêng.
     # BẬT TRÊN PAPER 2026-08-10 (job Taylor_20260810_034544, quant-skeptic CONFIRMED). VẪN LÀ
-    # PAPER-ONLY: `fill_timing_live_gate=True` chặn mọi account mode="live" — muốn chạy LIVE phải
-    # TẮT `fill_timing_live_gate` (quyết định RIÊNG, ảnh hưởng cả layer fill-timing, CHƯA duyệt).
+    # PAPER-ONLY: muốn chạy HYBRID LIVE phải tắt RIÊNG `fill_timing_hybrid_live_gate`; việc
+    # tắt `fill_timing_live_gate` chỉ mở lịch fill-timing cơ bản, không kéo HYBRID theo.
     "fill_timing_hybrid_enabled": True,    # PAPER 2026-08-10 (was False) — cần fill_timing_enabled=True
     # Nhãn block = ĐÚNG các nến 15' đã đo (trung bình của chúng tái lập chính xác −6,94/+8,89 bps
     # trong §6 báo cáo) — KHÔNG phải "chia đều N điểm trong khoảng", vì khoảng 11:00-13:45 có

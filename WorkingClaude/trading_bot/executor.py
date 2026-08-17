@@ -1313,6 +1313,8 @@ class Executor:
                     and self.cfg.get("fill_timing_hybrid_enabled", False)
                     and o.urgency != "high"
                     and not (self.cfg.get("fill_timing_live_gate", True)
+                             and self.cfg.get("mode") != "paper")
+                    and not (self.cfg.get("fill_timing_hybrid_live_gate", True)
                              and self.cfg.get("mode") != "paper"))
 
     def _gap_override_active(self, o, now):
