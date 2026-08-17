@@ -78,3 +78,6 @@
 
 ## Archived 2026-08-14 (keep=12 days=0 require_done=False)
 - [2026-08-09T13:18:45Z] Plan 08-10 CA 2 ACCOUNT XONG (job DollarBill_20260809_131002): LAG sinh lai theo luat cua so moi, 12 due_today -> 4 BUY/account (DRI/POW/SCL/SSI). SpaceX 2900/2800/1500/1200cp=140,86tr; ZaloPay 1900/1800/1000/800cp=92,58tr. DA VA 3 loi phai sinh tu patch gia cua Taylor: qty vuot slot (+2.6-3.4%) da re-derive theo anchor, orders_summary stale da tinh lai, enforcement_anchor stale da viet lai. DRI KHONG bo — dieu kien <=13.000d cuong che bang hard_no_chase_ceiling_vnd (verify that qua load_plan). Backup /tmp/plan_*_2026-08-10.pre_slotfix.bak.json. CHO USER DUYET truoc 08:45 ICT 08-10, approved_by=null. TREO: L2 jit needed_vnd tinh o notional truoc patch (du tien muc tong, khong sua tay).
+
+## Archived 2026-08-17 (keep=12 days=0 require_done=False)
+- [2026-08-10T17:56:37Z] plan_SpaceX_2026-08-11.json DA CO (job anh em _174021 sinh 00:52, toi _175251 verify doc lap PASS) — HOLD ALL 0 lenh, CHO USER DUYET truoc 08:45 ICT 11-08 | MO: (1) MBB so lo lech 165cp => L1 BLOCKED_RECONCILE, da hoi Winston tren bus, can nguoi quyet truoc phien co trim/JIT that; (2) pipeline-4 trong bq_freshness_check.sh dispatch SpaceX THU HAI va fail im lang, khong retry — da ghi finding, thuoc pham vi Wags/ops sua

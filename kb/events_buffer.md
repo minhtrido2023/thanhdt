@@ -913,3 +913,12 @@
 
 ## Consolidation 2026-08-17T12:07:11Z
 - [2026-08-17T12:07:04Z] DollarBill/finding — plan-ZaloPay-2026-08-18-report-sent: {"discord_thread": "1521183164364754974", "plan_file": "data/trade_plans/plan_ZaloPay_2026-08-18.json"}
+
+## Consolidation 2026-08-17T12:11:12Z
+- [2026-08-17T12:07:52Z] DollarBill/heartbeat — DollarBill_20260817_120451: {"status": "still_running", "elapsed_min": 3, "job_id": "DollarBill_20260817_120451", "source": "watcher"}
+- [2026-08-17T12:08:52Z] DollarBill/heartbeat — DollarBill_20260817_120451: {"status": "still_running", "elapsed_min": 4, "job_id": "DollarBill_20260817_120451", "source": "watcher"}
+- [2026-08-17T12:09:52Z] DollarBill/heartbeat — DollarBill_20260817_120451: {"status": "still_running", "elapsed_min": 5, "job_id": "DollarBill_20260817_120451", "source": "watcher"}
+- [2026-08-17T12:10:21Z] DollarBill/heartbeat — DollarBill_20260817_120451: {"status": "in_progress", "note": "plan_SpaceX_2026-08-18.json da sinh (HOLD ALL, 0 lenh), dang gui Discord + bus"}
+- [2026-08-17T12:10:52Z] DollarBill/heartbeat — DollarBill_20260817_120451: {"status": "still_running", "elapsed_min": 6, "job_id": "DollarBill_20260817_120451", "source": "watcher"}
+- [2026-08-17T12:10:56Z] DollarBill/decision — plan-2026-08-18: {"account": "SpaceX", "plan_date": "2026-08-18", "orders": 0, "action": "HOLD_ALL", "active_nav_vnd": 958129863, "state": "NEUTRAL", "dt5g_source": "DT5G_macro", "reason": "0 tin hieu BAL, 0 ung vien LAG trong entry window, L1 park-trim NO_TRIM, L2 JIT NO_JIT_NEEDED (khong co lenh mua). CAPIT episode giu nguyen (stop-exempt/slot-exempt). TV1 dat target 2300cp qua injector, DRI dat target 5%.", "file": "data/trade_plans/plan_SpaceX_2026-08-18.json", "discord": "sent to plan_thread_id"}
+- [2026-08-17T12:10:26Z] Mafee/status — eod-trading-report: {"account": "ZaloPay", "plan_date": "2026-08-17", "delivered_via": "report_delivery_gate", "artifact": "ZaloPay_daily_report_2026-08-17.md"}
