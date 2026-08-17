@@ -21,6 +21,72 @@ preserve_verbatim: >
 
 # Log thay đổi Cron Registry
 
+- 2026-08-16 (Mike/Codex, user yêu cầu tự động hóa gửi báo cáo tuần sáng chủ nhật 09:00
+  không miss): **THÊM cron `0 2 * * 0` = Sun 09:00 ICT**
+  `/home/trido/thanhdt/WorkingClaude/mike/bin/spend_report_weekly.sh >> .../mike/logs/spend_report_weekly.log 2>&1`.
+  Script mới `mike/bin/spend_report_weekly.py` dùng lại logic `spend_report.py`, sinh report
+  Markdown có bảng so sánh WoW, 4 PNG charts (bar/pie), nhận xét kiểu manager, và gửi email
+  HTML + `.md` đính kèm qua `send_report_email.py`.
+  4 câu hỏi §11: (1) đọc `bus/jobs/*.json` + `git log` 7 ngày + `state/spend_history.csv`
+  tuần trước — đều local live, không gọi BQ/DNSE/web; (2) nguồn tươi sau khi tuần đã đóng,
+  chủ nhật 09:00 ICT đủ điều kiện; (3) cần T-1/tuần đã đóng, không cần same-day; (4) consumer
+  là CEO/user qua email, deadline chủ nhật 09:00 ICT theo yêu cầu user.
+  Chống xung đột: Sunday 09:00 không trùng job nặng; `fleet_housekeeping.sh --apply` chạy
+  22:00 CN sau đó, chỉ dọn log/registry archive cũ.
+  Verify trước khi cài: dry-run chạy trên root production (`--root /home/trido/thanhdt/WorkingClaude/mike
+  --dry-run`) sinh đủ report + 4 PNG; HTML render nhúng 4 ảnh base64 (không còn ảnh thiếu);
+  `py_compile` 3 file Python + `bash -n` wrapper đều OK.
+
+- 2026-08-14 (Taylor, job `Taylor_20260814_142151`; user duyệt §6 `agents/Taylor/research/
+  park_merge_wire_20260811.md`): **THÊM 3 dòng** dựng chuỗi PARK-merge — `30 12` (19:30 ICT)
+  `park_trim_daily.sh` (L1), `40 12` (19:40) `jit_unpark_daily.sh` (L2), `20 13` (20:20)
+  `merge_park_daily.sh --write`. Cả 3 đều T2-T6, đều là wrapper MỚI trong `mike/bin/` theo khuôn
+  `inject_discretionary_orders.sh`/`compute_active_nav_all.sh` (tự lặp `live_dnse_labels()`) —
+  **không** dùng được `for_each_live_account.sh` vì 3 script này cần tham số per-account-per-date
+  (`--out park_trim_<acct>_<T+1>.json`, `--plan-date`) mà wrapper đó không dựng được.
+  Bối cảnh: L1/L2 **chưa từng có cron**; artifact tới nay chỉ có nhờ DollarBill chạy tay trong
+  dispatch EOD, nên `merge_park_orders.py` (đã ship + quant-skeptic CONFIRMED `high` 08-11, commit
+  `2633eb44`) không có gì để gộp vào ngày thường.
+  4 câu hỏi §11 — chi tiết đầy đủ nằm ở 3 dòng tương ứng của bảng chính, tóm tắt:
+  (1) L1/L2 đọc **DNSE LIVE same-day** (bắt buộc, §6 bright-line) + `bq_cache/ticker` T-1 chỉ để
+  tính ADV lịch sử + rổ `custom30v_8l_publish.csv` + sổ lô local; merge **thuần file local, không
+  gọi DNSE, không chạm BQ**. (2) DNSE tươi ngay sau đóng cửa 14:45; cache từ sync 23:45 đêm trước;
+  plan T+1 do DollarBill ghi ~19:0x. (3) L1/L2 cần **T** ⇒ **ràng buộc cứng sau 15:00 ICT**, cưỡng
+  chế **bằng code** trong wrapper (`now_ict().hour < 15` ⇒ rc=1) chứ không chỉ bằng giờ cron —
+  `close_price()` trả 0 khi phiên chưa đóng, đúng sự cố 2026-08-07. (4) Consumer: L1→L2→merge→
+  `inject_discretionary_orders.sh` 20:30 → `send_plan_report.sh` 21:00, deadline cuối là user duyệt
+  trước `preflight_check.sh` 08:45 sáng sau.
+  Chống xung đột: 19:30 lệch 10' với `pt_8l_daily` 19:20 và 5' với `telegram_run_daily` 19:35;
+  20:20 nằm sau `compute_active_nav_all.sh` 20:15 (5') nhưng **không tranh tài nguyên** vì merge
+  không gọi DNSE, và trước `inject_discretionary_orders.sh` 20:30 (10'). Runtime đo thật: L1/L2
+  <60s, merge <5s cho cả 2 account.
+  Verify trước khi cài: ShellCheck 0 finding/3 file; 5 selfcheck liên quan xanh (merge 120/120 ·
+  park_trim 63/63 · jit_unpark + ma trận TZ · approve_plan_with_jit 27/27 · preflight 16/16);
+  E2E **trên dữ liệu SỐNG hôm nay** trong sandbox `PARK_CHAIN_PLAN_DIR` (dry-run ⇒ plan y hệt từng
+  byte; `--write` ⇒ `orders[]` không đổi, `approved_by=None` giữ nguyên); chứng minh ngược 2 nhánh
+  fail-closed của L2 (thiếu L1 / thiếu plan ⇒ rc=1, 0 artifact) và 4 nhánh guard giờ/ngày bằng đồng
+  hồ giả; ma trận TZ `{-u TZ, NY, UTC, env -i}` 4/4.
+  ⚠️ Ghi nhận khi cài, KHÔNG do 3 dòng này gây ra: (a) plan T+1 **2/5 phiên gần đây được ghi SAU
+  21:00** (08-11 lúc 23:25, 08-13 lúc 21:31) ⇒ những ngày đó L2 no-op fail-closed và chuỗi không
+  giao gì — an toàn nhưng vô ích, không phải hồi quy; (b) tối 08-14 L1 trả `BLOCKED_RECONCILE` cả
+  2 account (sổ lô BID lệch broker: SpaceX 1.100 vs 1.175, ZaloPay 400 vs 427, cùng tỷ lệ ~6,8%) —
+  lúc 19:04 còn `NO_TRIM`, tức broker ghi có thêm CP trong buổi tối; chuỗi sẽ chạy nhưng không sinh
+  lệnh nào tới khi sổ lô được đối soát lại.
+  Rollback 1 lệnh: `crontab -l | grep -v park_trim_daily.sh | grep -v jit_unpark_daily.sh | grep -v
+  merge_park_daily.sh | crontab -`; bản crontab trước khi đổi lưu ở
+  `agents/Taylor/research/crontab_backup_20260814_before_park_chain.txt`.
+  📌 **Quy chiếu commit — CÙNG JOB nhưng ĐÚNG RA LÀ HAI COMMIT LIỀN KỀ, không phải một**
+  (quant-skeptic bắt được 2026-08-14, đính chính ngay tại đây): 3 wrapper `.sh` + bản sao lưu
+  crontab nằm ở **`f44b5e23`** (21:38:30 +0700); 2 file tài liệu này (`kb/cron_registry.md` +
+  `kb/cron_registry/CHANGELOG.md`) thực tế đã bị **`3a807740`** (21:38:16 +0700, commit
+  `consolidate` KB v2192) gom mất **14 giây trước** — `consolidate.sh` chạy tự động ngay sau
+  `append_event.sh` và commit TOÀN BỘ `kb/`, nên tới lượt commit của job thì 2 path đó không còn
+  gì để stage. Nội dung khớp đúng ý định §11 (cùng job, cùng phút, đều trên `master`) nhưng ai
+  truy vết bằng một hash duy nhất sẽ hụt. **Bài học cho cron/registry sau này**: ở repo `mike`,
+  hễ job có `append_event.sh` chạy trước `git commit` thì file `kb/` gần như chắc chắn đi theo
+  commit của consolidator — muốn "cùng commit" theo nghĩa đen phải commit `kb/` TRƯỚC khi ghi bus,
+  còn không thì khai báo cả hai hash như dòng này.
+
 - 2026-08-11 (Mike, user mandate): cron 16:00 ICT `paper_programs_daily_report.sh` thêm cờ
   `--email`, vẫn giữ `--post` để Discord và email dùng cùng một lần render. Wrapper lưu artifact
   `reports/paper_programs_daily_report_YYYY-MM-DD.md`, gửi HTML + file Markdown đính kèm qua

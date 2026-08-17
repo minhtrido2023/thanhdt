@@ -76,8 +76,8 @@ def case_positive_matches():
                       "can-user-quyet-mo-cong-CASH_VENDOR-va-kiem-freshness. Triển khai ngay.")
     check("CHẮC: prompt chứa nguyên văn topic ⇒ khớp mức CHẮC",
           "[CHẮC]" in out and "CASH_VENDOR" in out, out[:160])
-    check("CHẮC: in kèm lệnh append_event.sh sẵn để copy (nhắc CƠ HỌC, không phải lời khuyên)",
-          "append_event.sh Mike decision" in out, out[:200])
+    check("CHẮC: in kèm helper canonical sẵn để copy (nhắc CƠ HỌC, không phải lời khuyên)",
+          "close_bus_question.py" in out and "--resolution" in out, out[:200])
 
     # Ca root-cause-A kinh điển: Mike nghe user quyết qua Discord rồi dispatch thẳng, prompt
     # chỉ nhắc nhãn ngày ĐẦY ĐỦ. Đây là lớp tái diễn nhiều nhất (coord-*).

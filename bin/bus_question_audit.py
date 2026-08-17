@@ -6,7 +6,10 @@ Dùng cho báo cáo TUẦN (Friday KB editorial review, kb_nightly.sh) — KHÔN
 bin/ops_health_check.sh check #5 (gate hàng ngày, đã hardening 4 vòng arch-review,
 KHÔNG đụng vào để tránh regression). Script này PORT lại đúng thuật toán match đã
 verify của check #5 (cross-agent answer, decision-là-resolver, substring+timestamp,
-dedup theo (agent,topic,ts), quét archive) — nếu sửa thuật toán match ở 1 nơi, sửa
+dedup theo (agent,topic,ts), quét archive, `rollup_of` khớp CHÍNH XÁC topic con —
+thêm 2026-08-16 theo arch-review coord-2026-08-14 required_change #4: trước đó
+grep rollup_of ở script này = 0, nên "danh sách ĐẦY ĐỦ" của báo cáo tuần lệch với
+gate hàng ngày đúng ở loại câu hỏi TỔNG) — nếu sửa thuật toán match ở 1 nơi, sửa
 luôn nơi kia (xem comment "resolvers"/"_resolved" ở bin/ops_health_check.sh check #5).
 
 Output: mỗi dòng PENDING = 1 câu hỏi, cũ nhất trước, KHÔNG cắt bớt (đây là điểm khác
@@ -84,7 +87,10 @@ def main():
             if rec.get("event_type") == "question" and rec.get("topic"):
                 all_question_topics.add(rec.get("topic"))
 
-    resolvers = []
+    resolvers = []          # (agent, resolver_topic, ts, explicit question refs from payload.resolves)
+    # Xem `_split_ref` trong ops_health_check.sh — tiền tố chỉ được bóc khi là agent-id CÓ
+    # THẬT, nếu không thì topic tự chứa '/' (vd "selfcheck-red: mike/bin/x.py") bị hiểu sai.
+    known_agents = {agent_of(p) for p in files}
     prov_cutoff = now - dt.timedelta(days=a.provenance_days)
     recent_closures = []   # (ts, agent_of_file, topic, decided_by_or_None)
     for p in files:
@@ -97,7 +103,18 @@ def main():
                     r_ts = dt.datetime.fromisoformat(rec.get("ts", "").replace("Z", "+00:00"))
                 except Exception:
                     continue
-                resolvers.append((t, r_ts))
+                payload = rec.get("payload")
+                if isinstance(payload, str):
+                    try:
+                        payload = json.loads(payload)
+                    except Exception:
+                        payload = {}
+                raw_resolves = payload.get("resolves", []) if isinstance(payload, dict) else []
+                if isinstance(raw_resolves, str):
+                    raw_resolves = [raw_resolves]
+                explicit = {str(x).strip() for x in raw_resolves
+                            if isinstance(raw_resolves, list) and str(x).strip()}
+                resolvers.append((agent_of(p), t, r_ts, explicit))
                 # chỉ đếm provenance nếu topic này THẬT SỰ đóng 1 question đã biết (exact hoặc
                 # chứa nguyên topic câu hỏi gốc, cùng quy ước hậu-tố trạng thái đã dùng ở resolved())
                 closes_real_question = any(t == qt or qt in t for qt in all_question_topics)
@@ -106,10 +123,72 @@ def main():
                     decided_by = payload.get("decided_by") if isinstance(payload, dict) else None
                     recent_closures.append((r_ts, agent_of(p), t, decided_by))
 
-    def resolved(q_topic, q_ts):
+    def resolved(q_agent, q_topic, q_ts):
         if not q_topic:
             return False
-        return any((r == q_topic or q_topic in r) and r_ts >= q_ts for r, r_ts in resolvers)
+        refs = {q_topic, f"{q_agent}/{q_topic}"}
+        return any(r_ts >= q_ts and
+                   ((r == q_topic or q_topic in r) or bool(refs & explicit))
+                   for _ra, r, r_ts, explicit in resolvers)
+
+    def split_ref(s):
+        # Port nguyên `_split_ref` của check #5 (arch-review round 3). Tiền tố chỉ được bóc
+        # khi là agent-id CÓ THẬT, nếu không thì topic tự chứa '/' ("selfcheck-red:
+        # mike/bin/x.py" — lớp câu hỏi đông nhất trên bus) bị hiểu sai thành "Agent/topic"
+        # và kẹt pending vĩnh viễn. None = chuỗi KHÔNG khai agent.
+        if "/" in s:
+            pfx, rest = s.split("/", 1)
+            if pfx in known_agents and rest.strip():
+                return pfx, rest.strip()
+        return None, s
+
+    def same_ref(a, a_agent, b):
+        # Ràng buộc agent CHỈ áp khi bên đó thật sự khai agent — quy ước đóng câu hỏi trên
+        # bus không đòi cùng agent (người đóng thường khác người hỏi). Nhưng khai tường minh
+        # "Taylor/x" là lời khai VỀ CÂU HỎI NÀO và phải được tôn trọng, nếu không sub trần
+        # của Mike bị đóng bằng resolves của Taylor (false-CLOSED chéo agent).
+        # Sửa một bên mà quên bên kia là để báo cáo TUẦN mâu thuẫn với gate hàng ngày.
+        a_ag, a_tp = split_ref(a)
+        b_ag, b_tp = split_ref(b)
+        if a_tp != b_tp:
+            return False
+        a_ag = a_ag or a_agent
+        return b_ag is None or not a_ag or b_ag == a_ag
+
+    def resolved_exact(q_topic, q_ts, q_agent=""):
+        # Bản KHÔNG substring, dùng RIÊNG cho topic con của `rollup_of` — port nguyên
+        # `_resolved_exact` ở ops_health_check.sh check #5 (arch-review coord-2026-08-14).
+        if not q_topic:
+            return False
+        return any(r_ts >= q_ts and
+                   (same_ref(q_topic, q_agent, r) or
+                    any(same_ref(q_topic, q_agent, e) for e in explicit))
+                   for _r_a, r, r_ts, explicit in resolvers)
+
+    def rollup_resolved(rec, q_ts, q_agent=""):
+        # Port `_rollup_resolved` của check #5 (arch-review coord-2026-08-14 required_change
+        # #4): trước đó script này KHÔNG hiểu `rollup_of`, nên "danh sách ĐẦY ĐỦ" của báo cáo
+        # tuần lại MÂU THUẪN với gate hàng ngày — đúng thứ nó ra đời để tránh. OPT-IN +
+        # fail-closed ở mọi đường lỗi (giữ nguyên hành vi cũ khi payload không khai).
+        pl = rec.get("payload")
+        if isinstance(pl, str):
+            try:
+                pl = json.loads(pl)
+            except Exception:
+                return False
+        if not isinstance(pl, dict):
+            return False
+        raw = pl.get("rollup_of")
+        if not isinstance(raw, list) or not raw:
+            return False
+        # Phần tử rỗng/sai kiểu ⇒ fail-closed CẢ tổng, không lọc lặng (xem ops_health_check.sh).
+        subs = []
+        for s in raw:
+            if not isinstance(s, str) or not s.strip():
+                return False
+            subs.append(s.strip())
+        # Dạng "Agent/topic" xử lý DUY NHẤT trong `split_ref`. Chỗ này KHÔNG tự bóc tiền tố.
+        return all(resolved_exact(s, q_ts, q_agent) for s in subs)
 
     seen = set()
     pending = []
@@ -127,7 +206,7 @@ def main():
             if key in seen:
                 continue
             seen.add(key)
-            if resolved(topic, ts_dt):
+            if resolved(agent, topic, ts_dt) or rollup_resolved(rec, ts_dt, agent):
                 continue
             age_d = (now - ts_dt).days
             pending.append({"agent": agent, "topic": topic, "ts": rec.get("ts"), "age_days": age_d})

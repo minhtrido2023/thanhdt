@@ -83,29 +83,40 @@ cao sẽ tự chạy tiếp, nhưng nếu phiên tôi restart giữa chừng th�
 
 **8. Fast wake-on-completion sau `dispatch.sh ... --bg`**
 
-> **§8 rút gọn — 4 dòng phải nhớ (thêm 2026-07-20, sau sự cố `missed-wakeup-after-bg-dispatch`,
+> **PUSH giờ là tín hiệu CHÍNH, ladder giờ là LƯỚI AN TOÀN (2026-08-15).** `_bg_wrapper` tự gọi
+> `bin/wake_thread.sh` khi job `from=Mike` xong (done/failed/timeout) → `POST /api/tasks` ccdb
+> (`run_immediately=true`, cùng nguyên lý ScheduleWakeup, gọi từ ngoài) → master loop 30s
+> (`claude_discord/cogs/scheduler.py`) resume Mike trong **~30s sau khi job THẬT SỰ xong**. Verify
+> thật (job `Taylor_20260815_005649`): task tạo đúng, nội dung đúng, và 1 lần TRÚNG timing khi
+> chưa kịp xoá test task — resume đúng thread/prompt trong cửa sổ 30s.
+> **Đổi cách đặt ladder**: vẫn `ScheduleWakeup` ngay sau `dispatch.sh --bg` như cũ (kỷ luật §8
+> gốc không đổi) — nhưng giờ CHỈ 1 lần, ở delay RỘNG (`wakeup_profile` hint hoặc trần 1200s),
+> không cần ladder sát 240→480→900 nữa vì push thường tới trước. Ladder tăng dần cũ CHỈ quay lại
+> khi tỉnh ở mốc rộng mà job VẪN chưa `done` (push đã trễ/fail) — lúc đó nó là lưới an toàn CỦA
+> lưới an toàn. Job không phải `from=Mike` (agent khác dispatch) → push không áp dụng, dùng
+> nguyên ladder gốc bên dưới.
+> ⚠️ Push fail-soft (lỗi ghi `logs/wake_thread_errors.log`, không gãy `_bg_wrapper`) — API
+> `127.0.0.1:8199` sập đúng lúc đó = mất push, không cảnh báo tức thời. **Luôn đặt CẢ HAI**
+> (push tự động + ScheduleWakeup lưới an toàn), đừng bỏ ScheduleWakeup vì "đã có push".
+
+> **§8 rút gọn — 3 dòng phải nhớ (thêm 2026-07-20, sau sự cố `missed-wakeup-after-bg-dispatch`,
 > xem `kb/incidents/2026-07/2026-07-20-missed-wakeup-after-bg-dispatch.md` + job `Wags_20260720_121120`):**
 > 1. `dispatch.sh --bg` xong thì `ScheduleWakeup` là tool call CUỐI CÙNG của lượt, không ngoại lệ.
 >    **Lần tỉnh ĐẦU: tra `state/wakeup_profile.json`** (sinh mỗi đêm bởi `bin/wakeup_profile.py`)
 >    theo khoá `"<to>|<model>|<effort>"` — có bucket → `median_s` kẹp trong [90s, 1200s]; không có
 >    → `global_fallback.median_s` kẹp tương tự; **file thiếu/hỏng → 240-270s như cũ, không bao giờ
->    chặn**. Fan-out nhiều job → `min(delay)` cả batch. Từ lần tỉnh thứ 2 mà job vẫn running thì
->    TĂNG DẦN (240→480→900→trần 1200s), không quay lại ngắn trừ khi có job MỚI trong batch.
->    *(Bỏ ladder cố định "3 lần tỉnh đầu 240-270s": đo trên 1192 job thật, ladder cố định tỉnh
->    thừa 21% và vẫn trễ hơn — job `Winston` đồng bộ median 16s vs `Wags|opus|high` median 751s
->    không thể dùng chung 1 con số. Wags 2026-08-01, job `Wags_20260801_153657`.)*
+>    chặn**. Fan-out nhiều job → `min(delay)` cả batch.
+>    **Sửa 2026-08-15**: từ lần tỉnh thứ 2 trở đi CHỈ áp dụng khi push (ở trên) đã trễ/fail —
+>    lúc đó mới TĂNG DẦN (240→480→900→trần 1200s), không quay lại ngắn trừ khi có job MỚI trong
+>    batch. *(Bỏ ladder cố định "3 lần tỉnh đầu 240-270s": đo trên 1192 job thật, ladder cố định
+>    tỉnh thừa 21% và vẫn trễ hơn — job `Winston` đồng bộ median 16s vs `Wags|opus|high` median
+>    751s không thể dùng chung 1 con số. Wags 2026-08-01, job `Wags_20260801_153657`.)*
 > 2. **Lượt nào bạn còn định viết một câu trả lời thực chất cho user là lúc nguy hiểm nhất** (đo từ
 >    147 lượt: QUÊN wakeup → trung vị 1.755 ký tự văn xuôi sau dispatch, NHỚ → 343 ký tự; rủi ro
 >    gấp ~25 lần). Đặt `ScheduleWakeup` NGAY sau dispatch, TRƯỚC KHI viết đoạn trả lời cho câu
 >    hỏi khác.
 > 3. Mọi phát ngôn về trạng thái job phải kèm `jobs.sh status` chạy trong CÙNG lượt — kể cả câu
 >    "job vừa mới xong" (sự cố 07-20: `ended_at` cách đó 19 phút vẫn bị thuật thành "vừa xong").
-> 4. **Nói rõ lịch wake-up cho user trước khi kết thúc lượt.** Sau khi đã đặt `ScheduleWakeup`,
->    câu trả lời phải nêu job/batch đang chờ và **mốc kiểm tra kế tiếp chính xác** (UTC hoặc ICT,
->    kèm số phút), ví dụ: “Taylor đang chạy; tôi sẽ tự kiểm tra lại lúc 10:57 UTC (~12 phút).”
->    Không dùng “sẽ notify khi xong” như một lời thay thế. Nếu job vẫn chạy khi tỉnh, câu cập
->    nhật tiếp theo cũng phải nói mốc kiểm tra sau theo ladder. Nếu không thể đặt wake-up, nói
->    thẳng là không có lịch tự quay lại và nêu lý do — tuyệt đối không kết thúc im lặng.
 >
 > Đo tuân thủ hồi cứu: `bin/wakeup_audit.py --since <ngày>` (gắn vào `daily_retro.sh`).
 
@@ -116,6 +127,13 @@ dòng "Theo dõi:" — làm theo đúng bản in.
 
 (Lịch sử cơ chế `Agent(run_in_background)` wrapper, MOOT từ 2026-07-07:
 `kb/archive/wake_on_completion_wrapper_history_20260707.md`.)
+
+**Công cụ mới**: `bin/wake_thread.sh <thread_id> "<prompt>" [name_suffix]` — active-resume 1
+thread Discord qua `POST /api/tasks` của ccdb (`run_immediately=true, one_shot=true`), KHÁC
+`notify_thread.sh` (chỉ post tin nhắn thụ động, không ai đọc lại vì `on_message` của ccdb bỏ
+qua tin nhắn do chính bot viết). Dùng khi biết chắc có 1 session live đang thật sự chờ ở thread
+đó (hiện tại: chỉ `_bg_wrapper` gọi, gated `from=Mike`) — đừng gọi cho thread không có session
+sống, ccdb sẽ MỞ session MỚI ở đó (tốn phí, không phải bonus).
 
 ## Việc định kỳ
 - Cron 30' chạy `bin/consolidate.sh` (cơ khí): gộp event mới từ bus → `KNOWLEDGE.md`, bump version,
@@ -137,12 +155,46 @@ Khi thấy event_type `question` trong KB delta, Mike phải:
 có topic RIÊNG, nên đóng hết các câu hỏi con KHÔNG đóng được nó (`ops_health_check` check #5
 khớp theo topic-string) ⇒ nó ở lại pending và đốt 1 job `wags_autofix` mỗi ngày cho tới khi ai
 đó nhớ ra (ca thật `retro-escalation-2026-08-13-patternB-and-backlog`). Khai tường minh danh
-sách topic con trong payload thì check #5 tự đóng tổng khi MỌI con đã có `answer`/`decision`:
+sách topic con trong payload thì check #5 tự đóng tổng khi MỌI con đã đóng:
 ```bash
 bin/append_event.sh Mike question "retro-escalation-<ngày>-..." \
   '{"summary":"...", "rollup_of":["topic-con-1","Mike/topic-con-2"], "urgency":"medium"}'
 ```
 Không khai thì hành vi y như cũ (fail-closed) — vẫn phải tự đăng `answer` giữ NGUYÊN topic tổng.
+
+**Luật khớp topic con — ĐỌC TRƯỚC KHI VIẾT `rollup_of`** (siết ngày 2026-08-16, commit
+`d65167a9` + arch-review; trước đó khớp lỏng hơn nên tài liệu cũ nói sai):
+- Topic con phải viết **ĐÚNG NGUYÊN VĂN** topic câu hỏi con. Cắt cụt / thêm / bớt là KHÔNG
+  khớp. (Khớp substring đã bị bỏ: nó cho MỘT decision thoả nhiều topic con cùng lúc, đóng oan
+  cả escalation tổng trong khi con vẫn đang chờ user.)
+- Viết `"topic-con"` hay `"Mike/topic-con"` đều được, và khớp được với cả 2 dạng ở phía đóng —
+  **CHỈ khi câu hỏi con là của CHÍNH người đăng escalation tổng.** ⚠️ **Sub trần thuộc agent
+  KHÁC người đăng tổng thì KHÔNG khớp** (chốt 2026-08-16, arch-review round 4 sau `8e9affc3`/
+  `522e29d2`) — `_same_ref` gán sub trần cho agent đăng TỔNG, trong khi `close_bus_question.py`
+  (công cụ đóng chuẩn tắc) LUÔN ghi `resolves:["Agent/topic"]` đầy đủ ⇒ không bao giờ khớp, tổng
+  kẹt pending vĩnh viễn. Đây là hình thái PHỔ BIẾN NHẤT (Mike đăng tổng cho sub của Wags/Taylor/...)
+  nên **luôn viết dạng đầy đủ `Agent/topic-con` khi con không phải của chính bạn** — đừng dựa
+  vào "cả 2 dạng đều được" cho ca này. Ràng buộc agent chỉ áp khi phía đóng **khai tường minh**
+  một agent: `resolves:["Taylor/x"]` KHÔNG đóng được câu hỏi con `Mike/x`. Còn một `answer`/
+  `decision` chỉ đơn giản dùng lại topic `x` thì agent nào đăng cũng được — đó là quy ước đóng
+  câu hỏi có sẵn của bus (người đóng thường khác người hỏi), không siết ở đây.
+- Tiền tố chỉ được hiểu là agent khi nó là **agent-id CÓ THẬT** trên bus. Nên topic tự nó
+  chứa `/` — ví dụ `selfcheck-red: mike/bin/job_cancel_guard_selfcheck.py` — là topic TRẦN,
+  cứ chép nguyên văn, không phải escape gì.
+- Phần tử **rỗng hoặc không phải chuỗi** trong `rollup_of` ⇒ fail-closed CẢ câu hỏi tổng (nó
+  KHÔNG bị lọc bỏ im lặng rồi chốt trên số con ít hơn bạn khai). Gõ thừa dấu phẩy thì tổng ở
+  lại pending — an toàn, và dòng gợi ý bên dưới sẽ nói ra.
+- Tổng không tự đóng được thì `ops_health_check` in thêm một dòng `[WARN-ONLY]` liệt kê
+  **đúng topic con nào chưa khớp** — đọc dòng đó trước khi đi tìm nguyên nhân.
+- Con được tính là đã đóng khi có `answer`/`decision` **trùng khít topic**, hoặc một event
+  khai `resolves` chứa topic đó (khuôn `bin/close_bus_question.py`) — đăng SAU câu hỏi tổng.
+- ⚠️ Đóng con theo **quy ước hậu-tố trạng thái** (`<topic>-question-closed`, `-CONFIRMED`…)
+  đóng được CHÍNH câu hỏi con, nhưng **KHÔNG tính cho rollup** — tổng sẽ vẫn pending. Muốn
+  đóng tổng thì tự đăng `answer` giữ nguyên topic tổng. Đây là lựa chọn có chủ đích: hướng
+  lỗi này chỉ tốn 1 job `wags_autofix` thừa, còn nới ra thì nuốt mất quyết định của user.
+- `rollup_of` tới nay **chưa có lần dùng thật nào trên bus**, nên lần escalation TỔNG đầu tiên
+  phải tự kiểm tận nơi (`bin/bus_question_audit.py` xem tổng có tự đóng không), đừng tin
+  cơ chế đã chạy đúng.
 
 ## Routing — khi user hỏi Mike
 1. Tra `kb/KNOWLEDGE.md` + `kb/context_pack.md` + `kb/fleet_status.md` trước.
@@ -205,173 +257,12 @@ nên nó chỉ tốn tài nguyên + rủi ro vận hành (sự cố Taylor 2026-
 > `systemctl --user enable --now mike@<id>`. Realtime risk monitor là **`risk_monitor.py`
 > (deterministic)**, không phải daemon LLM — đó mới là gate giám sát liên tục khi go-live.
 
-## Model routing — ladder 3 tầng theo độ phức tạp task (cập nhật 2026-07-14, user yêu cầu)
+## Model/provider routing (OKF)
 
-**Checklist thủ công SAU MỖI LẦN đổi model của chính Mike** (bài học sự cố schema-drift 07-06,
-`kb/incidents/2026-07/`, tìm `2026-07-06-*`): hỏi thử "liệt kê các tham số của Agent tool hiện có",
-khác §8 → cập nhật §8 + snippet `dispatch.sh` NGAY. Không xây cron cho việc này.
-`bin/model_config_watch.py` (watchdog.sh mỗi 10') phòng thủ RIÊNG cho model CONFIG, không thay
-được tool-schema drift ở trên.
-
-`dispatch.sh` nhận `--model NAME` (`sonnet|opus|haiku|fable`, validate lúc parse — sai giá trị thì
-exit 1 trước mọi side effect); không truyền → model mặc định của CLI. Áp cho cả 2 nhánh (`--bg` và
-đồng bộ). Native subagent (`Agent(subagent_type=...)`) có sẵn tham số `model` — cùng nguyên tắc.
-
-**Nguyên tắc: model chọn theo TASK, không phải theo AGENT cố định** — cùng một Taylor lúc chạy
-query BQ cơ học, lúc thiết kế backtest/giả thuyết mới; gắn cứng "Taylor = model X" sai một nửa số
-lần. Quyết định bởi **Mike, tại thời điểm dispatch**.
-
-**Ladder ưu tiên (SỬA 2026-07-14): Sonnet → Opus → Fable. Ưu tiên Opus/Sonnet; Fable CHỈ cho task
-cực kỳ phức tạp.**
-
-| # | Câu hỏi | YES → |
-|---|---|---|
-| Q1 | Tra cứu/query/check cơ học, có 1 đáp án đúng rõ ràng? | **Sonnet 5** (mặc định, omit `--model`) |
-| Q2 | Phức tạp thường: cân nhắc trade-off, tổng hợp nhiều nguồn, sinh giả thuyết, phản biện/soi lỗi tinh vi, hoặc chạm production chưa có template? | **Opus** (`--model opus`) |
-| Q3 | **CỰC KỲ phức tạp**: thiết kế chiến lược/hệ thống mới từ đầu, backtest đa-giả-thuyết nhiều tầng, verify đối kháng khó nhất — vượt tầm Opus? | **Fable 5** (`--model fable`) — hiếm |
-
-Không chắc → mặc định Sonnet 5. Lưỡng lự Opus-hay-Fable → chọn **Opus**. Tránh dùng model đắt cho
-việc thường lệ.
-
-**⚠️ "Omit `--model`" KHÔNG có nghĩa là "Sonnet 5" — nó có nghĩa là "lấy model trong
-`agents/<id>/.claude/settings.json`".** `dispatch.sh` khi `MODEL` rỗng thì **không truyền cờ nào**,
-nên CLI tự lấy từ file đó. Hai thứ này chỉ trùng nhau CHỪNG NÀO cả 8 `settings.json` còn ghi
-`claude-sonnet-5` — kiểm bằng:
-```bash
-for a in $(ls agents/); do printf '%-11s %s\n' "$a" \
-  "$(python3 -c "import json,sys;print(json.load(open(sys.argv[1])).get('model','-'))" agents/$a/.claude/settings.json)"; done
-```
-**Đã từng lệch và không ai thấy** (sửa 2026-08-03): commit `759ed5e8` (2026-06-23) gắn model theo
-AGENT — Taylor=`claude-opus-4-8`, 6 agent còn lại=`claude-sonnet-4-6`; chính sách 2026-07-14 thay
-thế nhưng **`settings.json` không được cập nhật**. Hệ quả đo được: `--model sonnet` →
-`claude-sonnet-5`, nhưng **omit** → `claude-sonnet-4-6` (đời trước); Taylor omit →
-`claude-opus-4-8` (tầng ĐẮT NHẤT, ngược ý "mặc định = tầng rẻ"). 64/400 job gần nhất chạy
-`model=default`. Nay cả 8 đã về `claude-sonnet-5`; đổi model 1 agent thì phải sửa cả mô tả này.
-
-**⚠️ Sự cố model-drift đã đo được (2026-07-17, chi tiết `kb/incidents/2026-07/2026-07-17-model-tier-drift-fable.md`)**: %fable dispatch lên
-58%/tuần dù hầu hết là task "phức tạp thường" (Q2, tầng Opus), không phải Q3 — compute wall-clock
-tăng 150% trong khi job count giảm. Lưới an toàn (không thay quyết định thật của Mike): `dispatch.sh`
-in nhắc stderr mỗi lần `--model fable`; `bin/spend_report.py` cảnh báo khi %fable tổng ≥30% (Friday
-editorial review). Tự hỏi đúng Q1-Q3, đừng phản xạ chọn tier cao khi việc "nghe có vẻ quan trọng".
-
-**Gợi ý xác suất ban đầu theo loại việc** (không phải rule cứng theo tên agent):
-- **Sonnet 5**: `bq-analyst`, `fleet-scout`, `corp-scanner`, `data-ops` (freshness/pipeline, rule-based),
-  `Mafee` (thực thi plan-bound), `ops_health_check`/`preflight_check`-style.
-- **Opus** (tầng phức tạp mặc định): `Taylor` khi làm R&D/backtest/sinh giả thuyết, `quant-skeptic`,
-  `DollarBill` khi plan có trade-off không tầm thường, `risk-auditor`/`legal-vn` khi câu hỏi mang
-  tính diễn giải.
-- **Fable 5**: chỉ khi task thực sự **cực kỳ phức tạp** (thiết kế chiến lược mới toàn diện, chuỗi
-  giả thuyết lớn nhiều tầng vượt tầm Opus) — dùng dè, không phải mặc định cho R&D thường.
-
-### Provider routing — CHỌN CLI trước, rồi mới chọn model (thêm 2026-08-03, multi-CLI)
-
-`dispatch.sh` nhận thêm **`--provider claude|opencode|codex`**. Bỏ qua ⇒ `claude` (mọi lệnh dispatch
-cũ chạy y nguyên, 0 thay đổi hành vi — chứng minh bằng `bin/cli_provider_selfcheck.sh` so argv
-byte-for-byte). Khai báo provider ở **`kb/cli_providers.json`** — thêm CLI mới = thêm 1 entry,
-KHÔNG sửa `dispatch.sh`.
-
-**Chính sách user 2026-08-03: coi `deepseek-v4-flash-free` ngang tầm Sonnet ⇒ CHỦ ĐỘNG đẩy việc
-tầng-Sonnet sang opencode để tiết kiệm quota claude.** Nay là kênh chia tải mặc định cho tầng rẻ,
-không còn là "chỉ dùng khi cần ý kiến trái chiều".
-
-**Chọn provider theo 3 bước, hỏi ĐÚNG THỨ TỰ (dừng ở bước nào ra `claude` thì dừng luôn):**
-
-**Bước 1 — Task có GHI gì không?** (sửa file/code/KB, sinh plan, đặt lệnh, ghi BQ, đổi cron)
-→ **CÓ ⇒ `claude`. Hết.** Agent opencode **không có tool `write`/`edit`** (đã xác minh: chỉ có
-bash·glob·grep·read·webfetch·websearch·skill·task·todowrite) và `bash` bị deny-by-default.
-
-**Bước 2 — Task có nằm trên ĐƯỜNG GĂNG vận hành không?** (plan T+1, EOD report, run_bot,
-alert chặn thực thi, bất cứ thứ gì có deadline trong ngày)
-→ **CÓ ⇒ `claude`.** Độ trễ free tier chưa đo đủ mẫu (mới n=1 quan sát bất thường) — không đặt
-cược deadline vào biến chưa biết.
-
-**Bước 3 — Còn lại (chỉ ĐỌC, không deadline): áp ladder Q1-Q3 như cũ, nhưng Q1 đổi đích.**
-
-| | Loại task | Đích |
-|---|---|---|
-| **Q1** | Tra cứu web (lãi suất, tin tức, corp-action), đọc/tóm tắt/so sánh tài liệu, phản biện một kết luận, smoke test, kiểm tra trạng thái | **`--provider opencode`** ⟵ *đổi từ Sonnet* |
-| **Q2** | Trade-off, tổng hợp nhiều nguồn, sinh giả thuyết, soi lỗi tinh vi | `claude --model opus` |
-| **Q3** | Cực kỳ phức tạp, vượt tầm Opus | `claude --model fable` (hiếm) |
-
-**Ngoại lệ cần nhớ: `bq` KHÔNG nằm trong allowlist của opencode** ⇒ mọi task cần query BigQuery
-vẫn phải đi `claude`, dù nó chỉ là tra cứu cơ học.
-
-Agent được phép trên opencode: `Taylor · Winston · Wendy · Spyros · Wags`
-(`DollarBill`/`Mafee`/`Mike` bị chặn — surface tiền thật + điều phối).
-
-**Đo hiệu quả chia tải**: `python3 bin/spend_report.py --days 7` — có dòng `offload: N/M job (x%)`
-và `model mix` tách riêng `opencode` khỏi model của claude.
-
-**Auto-fallback claude khi provider phụ hết usage/rate limit (chốt 2026-08-03, user mandate)**:
-`dispatch.sh` tự phát hiện lỗi dạng usage-limit ở BẤT KỲ provider phụ nào (opencode/deepseek...)
-và **fallback NGAY sang claude** (không chờ) — khác cách xử lý cho chính claude (đợi tới giờ reset
-dự đoán được rồi thử lại): claude có cửa sổ 5h/tuần đo được qua `usage_watch.py`, provider phụ có
-`usage_probe=null` (không đoán được giờ hồi quota) nên "chờ rồi thử lại provider đó" chỉ là đoán
-mù, còn claude là quota ĐỘC LẬP. Cơ chế: `_maybe_fallback_provider_on_usage_limit()` trong
-`dispatch.sh`, chạy TRƯỚC `_maybe_schedule_usage_resume` ở cả 2 nhánh (`--bg` và đồng bộ) — spawn
-1 job `--bg` mới cho ĐÚNG agent/prompt/effort đó nhưng KHÔNG truyền `--provider`/`--model` (rơi về
-routing claude, tức Sonnet cho việc Q1 vốn được route sang opencode). Tự động, không cần gì thêm.
-
-| Provider | Trạng thái |
-|---|---|
-| **claude** | ✅ mặc định |
-| **opencode** | ✅ dùng được ngay, 0 credentials |
-| **codex** | ❌ `enabled:false` — chỉ cần `codex login` + `enabled:true` (identity đã wire sẵn) |
-| **antigravity** (`agy`) | ❌ `enabled:false` — cần cài `agy` + login Gemini + điền `models` thật |
-
-```bash
-# CÁCH DÙNG CHÍNH — công cụ chuyên dụng, tự lo prompt phản biện + ghi bus:
-bin/second_opinion.sh <file-hoặc-kết-luận> [--agent Taylor] [--bg]
-
-# Hoặc dispatch thủ công (omit --model ⇒ default_model = deepseek free):
-bin/dispatch.sh Taylor "Phản biện kết luận X. Chỉ đọc, đừng sửa gì." --provider opencode
-
-bin/cli_provider.sh list                 # provider đang bật
-bin/cli_provider.sh check opencode       # CLI có chạy được không (phân biệt 'provider hỏng' vs 'task lỗi')
-```
-
-**`bin/second_opinion.sh` — việc chính đang chạy trên opencode.** Phản biện độc lập về một kết
-luận/tài liệu, ghi lên bus dưới topic `second-opinion: <chủ đề>`. **ADVISORY, KHÔNG phải cổng
-duyệt** — cổng thật vẫn là `verify_finding.sh` (quant-skeptic) và `arch-reviewer`, cố ý giữ trên
-một CLI đã hiệu chuẩn. Lần chạy đầu (job `Wags_20260803_041742`) đã bắt được **1 lỗi bằng chứng
-thật** trong chính tài liệu kiểm chứng của Mike — xem
-`agents/Wags/verify_opencode_adapter_20260803.md` §Hậu kiểm.
-
-⚠️ `allow_agents` trong registry chỉ chặn ở tầng `dispatch.sh` — agent có Bash vẫn gọi thẳng
-binary được. Cưỡng chế THẬT là `permission` trong `agents/<id>/opencode.json`, và **nó không phải
-sandbox bảo mật**: pattern khớp trên chuỗi lệnh nên lệnh trong allowlist vẫn có thể kèm chuyển
-hướng (`grep x y > z`) để ghi file. Giảm bề mặt **tai nạn**, không chặn được chủ đích.
-
-Ví dụ: `bin/dispatch.sh Taylor "Thiết kế lại toàn bộ hệ thống chọn cổ phiếu từ đầu" --model fable --effort high`
-· `bin/dispatch.sh Taylor "Backtest thêm 1 sector cho family có sẵn" --model opus --effort high`
-· `bin/dispatch.sh Taylor "Query PE hiện tại của VNM"` (omit `--model` → Sonnet 5, medium).
-
-**Reasoning-effort per dispatch — `--effort LEVEL` (chính sách user 2026-07-14):** `dispatch.sh`
-nhận `--effort low|medium|high|xhigh|max`, validate lúc parse, ghi vào job record (`effort=`), áp
-cho cả `--bg` lẫn đồng bộ.
-- **Mặc định (omit `--effort`) = `medium`** — mọi task thường lệ chỉ dùng `medium`.
-- **Task phức tạp → `--effort high`** (thiết kế backtest/giả thuyết mới, phản biện tinh vi, chạm
-  production chưa có template).
-- **Chặn cứng: model `fable` tối đa `high`.** Truyền `xhigh`/`max` cùng `--model fable` sẽ tự clamp
-  về `high` + cảnh báo stderr (không bao giờ chạy fable ở xhigh/max). `xhigh`/`max` chỉ dành cho
-  model khác (vd `opus`) khi thực sự cần.
-- Ghép với ladder model: lookup cơ học → omit cả hai (**Sonnet, medium**); phức tạp thường →
-  **`--model opus --effort high`**; cực kỳ phức tạp → **`--model fable --effort high`** (fable trần
-  high).
-
-**⚠️ Kỷ luật riêng cho dispatch TƯƠNG TÁC của chính Mike (chốt 2026-08-10, sau audit token-usage).**
-`bin/spend_report.py`'s "Effort-tier mix by agent" bắt được Taylor 88-94% `effort=high` trong 14
-ngày, KHÔNG ai giám sát — và chính Mike cũng làm y hệt trong 1 saga cùng ngày (5 lần dispatch Wags
-liên tiếp, cả 5 đều `--model opus --effort high` không cân nhắc riêng từng lần, kể cả lần chỉ là
-"xác nhận trạng thái, redispatch tiếp tục" đáng lẽ `medium` đã đủ). Đây là hành vi con người, không
-sửa được bằng code (5d trong `bin/kb_nightly.sh`'s Friday review chỉ ĐO, không tự sửa) — quy tắc
-cụ thể để tự áp dụng mỗi lần dispatch tương tác:
-- Mặc định `medium`. Chỉ gõ `--effort high` khi tự trả lời được câu hỏi cụ thể: "task NÀY cần
-  agent tự lập kế hoạch/suy luận nhiều bước MỚI, hay chỉ là tiếp nối/xác nhận/redispatch việc đã
-  rõ hướng?" — vế sau KHÔNG cần high.
-- Redispatch sau timeout/hết turn CHỈ giữ nguyên `--effort high` nếu job gốc đã ở high VÀ lý do
-  hết giờ là "việc thật sự khó" (không phải overhead dispatch/context) — không phản xạ copy y
-  nguyên flag cũ.
+Quy trình đầy đủ đã tách sang `kb/mike_model_routing.md` để core này luôn dưới ngưỡng 40KB.
+Mỗi lần dispatch phải đọc file đó: chọn provider trước, rồi model/effort theo độ phức tạp
+của task; không gắn model cố định theo agent. Tóm tắt: Q1 read-only không deadline →
+opencode; task có ghi/đường găng/BQ → claude; Q2 → opus/high; Q3 hiếm → fable/high.
 
 ## Tier phản biện — verify finding của Taylor (bắt buộc trước khi wire)
 Mọi finding R&D quan trọng (backtest, đổi config production, claim CAGR/Sharpe) phải qua một

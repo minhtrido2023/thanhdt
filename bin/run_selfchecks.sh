@@ -27,11 +27,21 @@ REGISTRY_MD="$MIKE/kb/selfcheck_registry.md"
 mkdir -p "$MIKE/state"
 
 # 1) Khám phá — cùng exclude-pattern đã verify tay lúc thiết kế (khảo sát vận hành 2026-08-01).
+#
+# Loại thêm `wt-*` (bản sao worktree của phiên) và `pending_*` (đề xuất CHƯA live) từ
+# 2026-08-15: đây KHÔNG phải production HEAD nên FAIL của chúng gần như luôn là hiện vật môi
+# trường (module chưa nằm trên sys.path, `logs/` chưa tồn tại, bản sao cũ của file đã vá) —
+# đúng lý do `bin/selfcheck_weekly_baseline_check.sh` (bộ dò đỏ HÀNG NGÀY, 2026-08-12) cố ý
+# chỉ quét `*_selfcheck.py` ở gốc + `mike/bin/`. Comment của script đó đã chỉ đích danh hậu
+# quả đo trên chính file này ("46 FAIL thì ~35 là nhiễu loại này, làm 4 ca đỏ THẬT chìm
+# nghỉm") nhưng bản thân script này chưa được sửa theo; tới weekly audit 2026-08-15 đã là
+# 133 FAIL / 517-trên-647 file thuộc wt-*/pending_*. Hai bộ quét nay cùng phạm vi.
 mapfile -t FILES < <(cd "$WC_ROOT" && find . \( -iname "*selfcheck*.py" -o -iname "*selfcheck*.sh" \) \
   2>/dev/null | grep -v node_modules | grep -v __pycache__ \
-  | grep -vE "/exp_|/job_2026|v4final_exp|/data/fscore_c30v" | sed 's|^\./||' | sort)
+  | grep -vE "/exp_|/job_2026|v4final_exp|/data/fscore_c30v" \
+  | grep -vE "(^|/)wt-|(^|/)pending_" | sed 's|^\./||' | sort)
 
-echo "Tìm thấy ${#FILES[@]} selfcheck (đã loại exp_*/job_2026*/v4final_exp — artifact 1 lần)."
+echo "Tìm thấy ${#FILES[@]} selfcheck (đã loại exp_*/job_2026*/v4final_exp + wt-*/pending_* — không phải production HEAD)."
 
 # 2) Phân loại tier — grep heuristic. LẦN ĐẦU CHẠY THẬT (2026-08-01) bắt được chính heuristic
 # này thiếu: chỉ khớp literal "bq query"/"bq show" bỏ sót MỌI script gọi qua wrapper
@@ -57,9 +67,11 @@ for f in "${FILES[@]}"; do
     continue
   fi
   # offline = sandbox tmpdir, phải nhanh (giây) — 60s đủ rộng phòng máy chậm; live = BQ/network
-  # thật, cho tới 300s. Timeout mismatch (offline hoá ra chậm) tự nó LÀ 1 finding đáng xem lại
+  # thật, cho tới 300s. immutable_publish tạo/đọc/drop sandbox BQ và đã đo >300s,
+  # nên có budget 720s riêng. Timeout mismatch (offline hoá ra chậm) tự nó LÀ 1 finding đáng xem lại
   # phân loại, không chỉ tăng số cho qua.
   t=60; [ "$tier" = "live" ] && t=300
+  [ "$f" = "immutable_publish_selfcheck.py" ] && t=720
   start=$(date +%s)
   if [[ "$f" == *.sh ]]; then
     ( cd "$WC_ROOT" && timeout "$t" bash "$f" ) >/tmp/rsc_out.$$ 2>&1

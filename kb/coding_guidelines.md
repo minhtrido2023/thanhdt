@@ -36,7 +36,7 @@ TÌNH HUỐNG, không phải mỗi phiên. Gặp đúng tình huống thì `Read
 | **§11** Tra `kb/cron_registry.md` trước khi thêm/đổi lịch cron | Thêm/xoá/đổi giờ bất kỳ dòng crontab nào |
 | **§13** Sửa file `kb/` cần Mike duyệt → ghi ra `<file>.proposed` | Sửa file trong `kb/` mà chưa được duyệt live |
 | **§14** Cặp producer→consumer phải có freshness-check thật | Viết/sửa script đọc output của script khác chạy cron riêng |
-| **§15** Chuỗi bash kiêm prompt LLM: escape `"`/`` ` `` | Viết prompt dài trong `.sh` (đã có gate cơ học `bin/shellcheck_gate.sh`) |
+| **§15** Chuỗi bash kiêm prompt LLM: escape `"`/`` ` `` | Viết prompt dài trong `.sh` (đã có gate cơ học `bin/shellcheck_gate.sh`); dispatch **tương tác** (Bash tool, không qua commit) → gate không phủ tới, dùng skill `~/.claude/skills/dispatch-prompt-heredoc/` |
 | **§17** Reader báo "còn mở" phải quét mọi tầng retention | Viết/sửa reader trạng thái bus (`mike_json.py`, checker inbox) |
 | **§18b** `srcwalk` để ĐỌC, `grep` để TÌM — số đo benchmark | Cần lại số benchmark; **luật hành động đã có sẵn ở `WorkingClaude/CLAUDE.md` § Code navigation (auto-load mỗi phiên)** |
 | **§22** Luật văn xuôi LLM áp sai → chuyển thành code | Thấy 2 phiên áp cùng luật ra 2 kết quả khác nhau |
@@ -171,10 +171,15 @@ report (daily/weekly/monthly, or any client-facing artifact):
    Discord xong, chạy `python3 mike/bin/send_report_email.py <report.md>` cho ĐÚNG file vừa gửi.
    Script tự fail-closed nếu cổng tỉ suất §21 chưa PASS hoặc thiếu credential — đừng `--skip-
    return-gate` trừ khi đã hiểu rõ vì sao gate lệch. Backstop nếu agent quên bước này:
-   `check_report_cadence.sh` (cron 08:30 ICT) quét lại MỌI report `*_daily_report_*.md` /
-   `*_weekly_report_*.md` / `*_monthly_report_*.md` chưa từng gửi qua `state/report_emailed.json`
-   và tự gửi bù — nhưng đó là lưới AN TOÀN trễ tới hôm sau, không thay được việc gửi ngay lúc
-   soạn xong report.
+   `check_report_cadence.sh` quét lại MỌI report `*_daily_report_*.md` /
+   `*_weekly_report_*.md` / `*_monthly_report_*.md` chưa có proof và gọi delivery gate gửi bù
+   — nhưng đó là lưới AN TOÀN, không thay được việc gửi ngay lúc soạn xong report.
+6. **Delivery closure — file được tạo KHÔNG có nghĩa là báo cáo đã gửi.** Mọi báo cáo tự động
+   phải kết thúc bằng `python3 mike/bin/report_delivery_gate.py <report.md> --topic
+   trading_report`. Chỉ `COMPLETE` (artifact qua gate + Discord + email đều có bằng chứng
+   hash-bound) mới được đóng job/bus question. `maxturns_pending`, `usage_limited`, file tồn
+   tại, hay chỉ một kênh thành công đều là **INCOMPLETE** và phải rescue/retry; retry không gửi
+   lại kênh đã có bằng chứng. Quy trình bắt buộc: skill `report-delivery-closure`.
 
 **Bright-line rule — same-day data: DNSE API, never BigQuery (user directive, 2026-07-09).** BQ
 (`tav2_bq.ticker`/`ticker_1m`) syncs overnight only (`sync_bq_cache_daily.sh`, 23:45 ICT) — a
@@ -404,12 +409,12 @@ một dòng vào bảng, đó là cách rule này không mốc.
 *→ `agents/Taylor/research/active_nav_cash_basis_fix_20260810.md` (bản vá + 26 selfcheck + đối
 soát độc lập khớp từng đồng, quant-skeptic CONFIRMED cao vòng 1).*
 
-## 26. Đóng Câu Hỏi Trên Bus NGAY Khi Xử Lý Xong — Theo `~/.claude/skills/close-the-loop/`
+## 26. Đóng Câu Hỏi Trên Bus NGAY Khi Xử Lý Xong — Theo skill `bus-question-closure`
 
 Khi hành động của bạn giải quyết một `question` trên bus (fix xong, quyết định xong, điều tra ra
 kết luận) — post event đóng (`answer`/`decision`/`finding` phù hợp) **NGAY**, đúng topic string,
 kèm bằng chứng artifact (commit hash, giá trị config đọc lại, output selfcheck thật) — không đợi
-cuối phiên. Đọc `~/.claude/skills/close-the-loop/SKILL.md` trước khi sửa/vận hành bất kỳ
+cuối phiên. Đọc `.claude/skills/bus-question-closure/SKILL.md` trước khi sửa/vận hành bất kỳ
 checker/pipeline escalation nào (autofix, health-check, weekly audit). 2 lỗi khác nhau cho cùng
 1 triệu chứng "báo động treo nhiều ngày dù việc đã xong": (A) người xử lý quên đóng — kỷ luật, có
 backstop là auto-close-bằng-artifact trước khi escalate; (B) chính pipeline verify tra topic

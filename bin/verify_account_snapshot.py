@@ -35,7 +35,8 @@ import sys
 from collections import defaultdict
 
 WC_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-EXEC_DIR = os.path.join(WC_ROOT, "data", "execution_logs")
+EXEC_DIR = os.environ.get("VERIFY_ACCOUNT_EXEC_DIR",
+                          os.path.join(WC_ROOT, "data", "execution_logs"))
 BQ_PATH_PREFIX = "/home/trido/google-cloud-sdk/bin"
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -77,16 +78,33 @@ class CostBook:
     52.583,33 thay vì 51.466,67 (= đúng costPrice broker). Sai cả giá vốn lẫn P&L% của mã.
     """
 
-    def __init__(self):
+    def __init__(self, recover_legacy=False):
         self.qty = 0.0      # KL ròng đang nắm giữ (đã nhân hệ số corp-action)
         self.basis = 0.0    # tổng tiền vốn CÒN LẠI của lô đang giữ (VND)
         self.resets = 0     # số lần vị thế về 0 (mỗi lần = 1 lô tất toán, cơ sở về 0)
+        self.legacy_reopens = 0  # mua lại sau phần bán legacy không có lịch sử mua
+        self.negative_since = None
+        self.recover_legacy = recover_legacy
 
-    def buy(self, qty, value):
+    def buy(self, qty, value, event_date=None):
+        # Ca VIB/ZaloPay 2026-08-11: lịch sử trace bắt đầu bằng lệnh bán sạch 9.200cp
+        # legacy nên qty=-9.200; lệnh mua mới 200cp sau đó phải mở một lô sống mới ở
+        # 14.900, không được cộng thành -9.000 rồi loại khỏi P&L. Chỉ reset ứng viên ở
+        # đây; main() bắt buộc đối chiếu book.qty với snapshot broker đúng ngày. Nếu
+        # legacy chỉ bán dở (broker còn 700 nhưng lô mới trace được 200), mismatch sẽ
+        # fail-closed và mã vẫn bị loại khỏi P&L — không bịa coverage.
+        # Chỉ một ngày SAU mới là lô mở lại có thể phân biệt được. Âm rồi mua trong
+        # cùng ngày có thể chỉ do modifiedDate không phải fill timestamp (thứ tự xấp
+        # xỉ); reset ca đó sẽ làm hỏng VHM/các lệnh khớp chéo trong phiên.
+        if (self.recover_legacy and self.qty < 0 and event_date is not None and self.negative_since is not None
+                and event_date > self.negative_since):
+            self.qty, self.basis = 0.0, 0.0
+            self.legacy_reopens += 1
+            self.negative_since = None
         self.qty += qty
         self.basis += value
 
-    def sell(self, qty):
+    def sell(self, qty, event_date=None):
         if self.qty > 0:
             self.basis -= self.basis * min(qty, self.qty) / self.qty
         self.qty -= qty
@@ -95,27 +113,44 @@ class CostBook:
             self.resets += 1
         elif self.qty < 0:              # bán quá KL trace được (vị thế legacy mua trước bot)
             self.basis = 0.0
+            if self.negative_since is None:
+                self.negative_since = event_date
 
     @property
     def avg_cost(self):
         return self.basis / self.qty if self.qty > 0 else 0.0
 
 
-def build_cost_books(events_by_date, asof, corp_actions):
+def build_cost_books(events_by_date, asof, corp_actions, recover_legacy=False):
     """{ticker: CostBook} từ các fill ĐÃ SẮP THEO THỜI GIAN.
 
     Thứ tự thời gian là BẮT BUỘC (không phải chi tiết trang trí): reset-khi-về-0 chỉ đúng
     khi lệnh được áp đúng trình tự thật — cả giữa các ngày lẫn trong cùng một ngày.
     """
-    books = defaultdict(CostBook)
+    books = defaultdict(lambda: CostBook(recover_legacy=recover_legacy))
     for date in sorted(events_by_date):
         for _ts, _key, tk, side, qty, price in events_by_date[date]:
             m = corp_action_multiplier(tk, date, asof, corp_actions)
             if side == "sell":
-                books[tk].sell(qty * m)
+                books[tk].sell(qty * m, date)
             else:
-                books[tk].buy(qty * m, qty * price)
+                books[tk].buy(qty * m, qty * price, date)
     return books
+
+
+def select_live_book(raw_qty, normal_book, candidate_book, broker_qty):
+    """Chọn lô P&L, chỉ promote legacy-reopen khi snapshot khớp tuyệt đối.
+
+    Trả `(book_or_none, qty, recovered, mismatch)`; pure để regression test khóa đúng
+    forcing function, không chỉ test CostBook rồi tự giả định main() sẽ dùng đúng.
+    """
+    if raw_qty > 0:
+        return normal_book, raw_qty, False, False
+    if broker_qty <= 0 or not candidate_book.legacy_reopens or candidate_book.qty <= 0:
+        return normal_book, raw_qty, False, False
+    if abs(candidate_book.qty - broker_qty) > 1e-6:
+        return None, 0.0, False, True
+    return candidate_book, candidate_book.qty, True, False
 
 
 def aggregate_events(events):
@@ -184,6 +219,41 @@ def dnse_fill_events(account_no, date):
                        float(o.get("averagePrice") or o.get("price") or 0)))
     events.sort(key=lambda e: (e[0], str(e[1])))
     return events, None
+
+
+def broker_positions_from_raw(account_no, asof):
+    """Snapshot broker đúng ngày từ bản ghi positions cuối cùng trong dnse_raw.
+
+    Gộp các loan package cùng mã. Đây là neo độc lập bắt buộc trước khi một lô mua
+    sau legacy-oversell được coi là coverage đầy đủ cho P&L.
+    """
+    path = os.path.join(EXEC_DIR, f"dnse_raw_{asof}.jsonl")
+    if not os.path.exists(path):
+        return None
+    latest = None
+    with open(path, encoding="utf-8") as f:
+        for line in f:
+            try:
+                rec = json.loads(line)
+            except (json.JSONDecodeError, UnicodeDecodeError):
+                continue
+            if rec.get("kind") != "positions":
+                continue
+            # File dùng chung hai account: thiếu tag cũng không được đoán (§12).
+            if rec.get("account_no") != account_no:
+                continue
+            latest = rec.get("payload", {}).get("positions") or []
+    if latest is None:
+        return None
+    out = {}
+    for p in latest:
+        qty = float(p.get("openQuantity") or 0)
+        if qty <= 0:
+            continue
+        tk = p.get("symbol")
+        row = out.setdefault(tk, {"qty": 0.0, "marketPrice": p.get("marketPrice")})
+        row["qty"] += qty
+    return out
 
 
 def true_fills_from_dnse_raw(account_no, date):
@@ -504,6 +574,10 @@ def main():
     # KHÔNG dùng raw_agg[buy_value]/raw_agg[buy_qty] — xem CostBook (bug LPB 2026-08-10).
     raw_books = build_cost_books(raw_events, args.asof, corp_actions)
     journal_books = build_cost_books(journal_events, args.asof, corp_actions)
+    # Candidate riêng; không thay semantics CostBook chuẩn cho VHM/các mã có thứ tự fill
+    # nội ngày xấp xỉ. Chỉ promote candidate ở vòng positions khi raw net<=0, broker đang
+    # giữ >0 và candidate khớp snapshot đúng ngày.
+    raw_reopen_books = build_cost_books(raw_events, args.asof, corp_actions, recover_legacy=True)
 
     if any(w.startswith("FATAL") for w in warnings):
         print("XÁC MINH THẤT BẠI — không đủ dữ liệu nguồn broker thật:", file=sys.stderr)
@@ -538,7 +612,13 @@ def main():
             rq = raw_agg.get(tk, (0, 0, 0))[0]
             if abs(rq - q) > 1e-6:
                 warnings.append(
-                    f"WARN qty vs broker-snapshot {tk}: dnse_raw={rq:.0f} snapshot={q:.0f}")
+                    f"WARN reconstructed qty vs broker-snapshot {tk}: book={rq:.0f} snapshot={q:.0f}")
+
+    # Neo snapshot đúng ngày cho mọi lần chạy, không chỉ khi caller nhớ truyền --broker-snapshot.
+    asof_positions = broker_positions_from_raw(args.account_no, args.asof)
+    if asof_positions is None:
+        warnings.append(f"WARN missing broker positions snapshot for {args.asof} — "
+                        "không được promote lô legacy-reopen vào P&L")
 
     tickers = sorted(raw_agg.keys())
     if not tickers:
@@ -563,15 +643,27 @@ def main():
     positions = []
     total_cost = total_mtm = 0.0
     for tk in tickers:
+        book = raw_books[tk]
         qty = raw_agg[tk][0]
+        broker_qty = (asof_positions or {}).get(tk, {}).get("qty", 0.0)
+        candidate = raw_reopen_books[tk]
+        book, qty, recovered, mismatch = select_live_book(qty, book, candidate, broker_qty)
+        if mismatch:
+            warnings.append(
+                f"WARN reconstructed qty vs broker {tk}: candidate={candidate.qty:.0f} "
+                f"snapshot={broker_qty:.0f} — loại khỏi P&L (coverage chưa đầy đủ)")
+            continue
         if qty <= 0:
             continue  # đã bán hết (net_qty<=0) -> không còn nắm giữ, bỏ khỏi báo cáo vị thế
-        book = raw_books[tk]
         cost = book.avg_cost  # bình quân gia quyền của LÔ ĐANG SỐNG (reset khi về 0)
         if book.resets:
             warnings.append(
                 f"INFO {tk}: vị thế đã về 0 {book.resets} lần rồi mua lại — giá vốn tính "
                 f"lại từ lô mới ({cost:,.2f}), KHÔNG trộn lô đã tất toán")
+        if recovered:
+            warnings.append(
+                f"INFO {tk}: mở lô mới sau {book.legacy_reopens} chuỗi bán legacy; "
+                f"book.qty={qty:.0f} khớp snapshot broker — giá vốn lô mới {cost:,.2f}")
         px = prices.get(tk)
         if px is None:
             warnings.append(f"WARN no BQ price for {tk} as of {args.asof}")
@@ -592,14 +684,7 @@ def main():
     # P&L partial thành P&L toàn account. Reuse broker_positions của daily_nav_snapshot
     # (import trong hàm — daily_nav_snapshot import ngược lại module này cũng ở function
     # level nên không tạo vòng import).
-    try:
-        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-        from daily_nav_snapshot import broker_positions
-        live_pos = broker_positions(args.account, args.account_no)
-    except Exception as e:
-        print(f"⚠️ Không kiểm tra được P&L coverage (broker_positions lỗi: {e})",
-              file=sys.stderr)
-        live_pos = None
+    live_pos = asof_positions
     cov_warns, legacy_tickers = pnl_coverage_warnings(
         [p["ticker"] for p in positions], live_pos)
     warnings.extend(cov_warns)

@@ -1,0 +1,82 @@
+#!/usr/bin/env bash
+# wake_thread.sh <thread_id> "<prompt>" [name_suffix]
+#
+# Actively RESUME a live Discord thread's Claude/Codex session — different from
+# notify_thread.sh, which only posts a passive message nobody's session reacts to
+# (ccdb's on_message handler ignores anything the bot itself wrote, precisely to
+# stop the bot replying to its own notifications). This uses ccdb's scheduler API
+# (`POST /api/tasks`, run_immediately=true, one_shot=true, thread_id=<target>) —
+# the SAME primitive the harness's own ScheduleWakeup tool is bridged onto
+# (mike/kb/... ScheduleWakeup → ccdb SQLite TaskRepository one-shot task), just
+# triggered externally instead of from inside a live tool call. ccdb's scheduler
+# master loop polls for due tasks every 30s (claude_discord/cogs/scheduler.py,
+# MASTER_LOOP_INTERVAL_SECONDS), so a run_immediately task fires within ~30s —
+# no 60s floor (that floor is a policy ScheduleWakeup's harness bridge applies
+# client-side, not a constraint of the underlying /api/tasks endpoint).
+#
+# Used by dispatch.sh's _bg_wrapper on job completion (see MIKE.md §8 rev
+# 2026-08-15) so a live Mike session waiting on a dispatched job is woken the
+# moment the job actually finishes, instead of only via its own blind-interval
+# ScheduleWakeup ladder. Kept as a SEPARATE primitive from notify_thread.sh
+# (not a replacement) — callers that just want a visible completion message with
+# no resume (e.g. informational report channels with no live waiting session)
+# should keep using notify_thread.sh; waking a thread with no active waiter
+# spins up a brand-new Claude/Codex session there (ccdb starts fresh when no
+# session record exists for that thread), which is wasted spend, not a bonus.
+#
+# Fails soft (never breaks the caller's completion path): unreachable API,
+# bad thread_id, or task-name collision all just log to
+# logs/wake_thread_errors.log and exit 1 — same convention as
+# notify_thread_errors.log (ops_health_check.sh reads both).
+set -euo pipefail
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+thread_id="${1:?usage: wake_thread.sh <thread_id> \"<prompt>\" [name_suffix]}"
+prompt="${2:?usage: wake_thread.sh <thread_id> \"<prompt>\" [name_suffix]}"
+name_suffix="${3:-$(date +%s%N)}"
+
+if ! [[ "$thread_id" =~ ^[0-9]+$ ]]; then
+  echo "wake_thread: thread_id must be numeric, got '$thread_id'" >&2
+  exit 1
+fi
+
+_log_fail() {
+  mkdir -p "$ROOT/logs"
+  printf '%s wake_thread: %s | thread_id=%s name_suffix=%s\n' \
+    "$(date -Iseconds)" "$1" "$thread_id" "$name_suffix" \
+    >> "$ROOT/logs/wake_thread_errors.log"
+}
+
+if ! out="$(python3 - "$thread_id" "$prompt" "$name_suffix" << 'PY' 2>&1
+import sys, json, urllib.request, urllib.error
+
+thread_id, prompt, name_suffix = sys.argv[1], sys.argv[2], sys.argv[3]
+payload = json.dumps({
+    "name": f"dispatch-wake-{name_suffix}",
+    "prompt": prompt,
+    "interval_seconds": 60,
+    "channel_id": int(thread_id),
+    "thread_id": int(thread_id),
+    "run_immediately": True,
+    "one_shot": True,
+}).encode()
+req = urllib.request.Request(
+    "http://127.0.0.1:8199/api/tasks",
+    data=payload, method="POST",
+    headers={"Content-Type": "application/json"},
+)
+try:
+    with urllib.request.urlopen(req, timeout=10) as r:
+        print(r.read().decode())
+except urllib.error.HTTPError as e:
+    print(f"HTTP {e.code}: {e.read().decode()}", file=sys.stderr)
+    sys.exit(1)
+except urllib.error.URLError as e:
+    print(f"unreachable: {e}", file=sys.stderr)
+    sys.exit(1)
+PY
+)"; then
+  _log_fail "$out"
+  exit 1
+fi
+echo "$out"

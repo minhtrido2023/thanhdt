@@ -2,34 +2,49 @@
 > Cập nhật mỗi khi đổi mạch việc. Bơm vào đầu phiên của Mike.
 
 # Working memory — Mike
-> Cập nhật lần cuối: 2026-08-14T05:07Z
+> Cập nhật mỗi khi đổi mạch việc. Bơm vào đầu phiên của Mike.
+> Cập nhật lần cuối: 2026-08-16T17:45Z (dọn cuối ngày sau daily retro bước 3/3)
 
-## Đang chờ (job nền)
-- Wags_20260814_050658 (--bg, opus/high, max-turns 160): 3 việc rẻ arch-reviewer đề xuất thay
-  problem_key/supersession — (1) sửa 2 chỗ nuốt exit code trong wags_autofix.sh, (2) miễn cắt
-  aged_q digest cho lớp wags-fix-not-confirmed (đang bị cắt khúc giữa khi backlog >10), (3)
-  mirror quyết định off-bus (Discord dispatch) về lại bus event. User: "đồng ý làm 3 việc rẻ
-  rồi quay lại problem_key" — SAU KHI xong 3 việc này, hỏi lại user có muốn tiếp tục thiết kế
-  problem_key/supersession không (đã bị arch-reviewer NEEDS_CHANGES ở dạng gốc, cần thiết kế
-  lại đáng kể — xem agents/Wags/research/cross_topic_closure_architecture_20260814.md +
-  verdict arch-reviewer trong bus/inbox/arch-reviewer.jsonl 2026-08-14T~04:5x).
+## Việc còn hở (chưa xử lý)
+1. Selfcheck-masking E5 capit_lever — chưa xác nhận đã vá hay chỉ mới ĐO.
+2. plan-dd-check-string fix (commit 9a9dbb1) — chờ xác nhận phiên LIVE 08-17.
+3. EOD daily report chưa bao giờ gửi email — hỏi user có wire không.
+4. Cân nhắc file `kb/incidents/` tổng hợp "cost-basis sai báo cáo" nếu có ca thứ 3.
+5. **rollup-of-agent-ownership-bug-20260816** — bug trong `_same_ref` khi `rollup_of` có sub
+   thuộc agent khác; finding đã ghi bus. CHƯA fix (`rollup_of` chưa dùng production, KHÔNG khẩn).
+   Chờ user quyết fix-now-vs-defer. Bối cảnh: cơ chế này đã bị bắt 3 bug riêng trong <48h mà chưa
+   từng dùng thật lần nào (retro-2026-08-16) — đáng cân nhắc PENDING_DECISION hoãn dùng.
+6. **Pattern B rộng hơn §28** (retro-2026-08-16) — "fix chỉ dập đúng hình dạng lỗi đã thấy, chưa
+   tổng quát hoá cho cả họ" vẫn tái diễn ở các bug KHÔNG thuộc dạng so-2-nguồn (vd
+   `wags_verdict_parse.py` delimiter tự-trích-dẫn, `bus/_rejected.jsonl` 2 bug tự thân). §28 chỉ
+   phủ nhánh so-2-nguồn. Chưa mở escalation mới (tránh lặp lỗi #5 hôm nay — mở trùng escalation) —
+   để retro-08-17 xác nhận có tiếp diễn không rồi mới quyết có escalate hay không.
 
-## Việc vừa xong trong phiên này (2026-08-14, mạch "warning vận hành lặp lại")
-- kb/coding_guidelines.md tách OKF → coding_guidelines_ext.md (Taylor, commit 13ca74bd),
-  48.7KB→33.4KB, fact-check 0 mất. Bus context-bloat-same-day đã đóng.
-- dt5g_writer_watch KAFFA_WINDOW false-alarm: code đã đúng từ 08-06 (2c77cf07), Winston verify
-  lại + đóng bus retro-pattern-recurring-dt5g-live-writer-la-3 (decided_by=user).
-- 3/4 mục wags-fix-not-confirmed cũ (coord-08-07/08-10/08-11) — Wags fix THẬT (không phải chỉ
-  đóng loop), Mike verify artifact + tự post 3 decision đóng bus (job Wags gốc timeout trước
-  khi kịp tự ghi).
-- notify_thread.sh mất tin nhắn — đã tự fix từ 08-12 (swap-arg detection, commit 6226c411),
-  15/15 selfcheck PASS, không cần làm gì thêm.
+## Cơ chế mới LIVE (2026-08-16) — ghi để nhớ qua restart
+- **check 9b trong ops_health_check.sh**: scan `## PENDING_DECISION: <topic>` trong Mike.md,
+  cảnh báo [WARN-ONLY] nếu không có bus question backing. Selfcheck PASS.
+- **PENDING_DECISION protocol**: Mọi quyết định đang chờ user PHẢI được mở bus question TRƯỚC,
+  rồi mới ghi vào working memory dạng: `## PENDING_DECISION: <exact-topic-trên-bus>`.
+  Working memory chỉ trỏ đến topic — KHÔNG phải nơi lưu nội dung quyết định.
+- **`daily_retro.sh` bước 3** giờ tự đọc `bus/inbox/Mike.jsonl` từ mốc bắt đầu chạy để liệt kê
+  escalation đã mở ở bước 1 — tránh mở trùng câu hỏi (fix sự cố #5 retro-08-16).
 
 ## Bối cảnh còn hiệu lực
-- TV1 mới đạt 61%(SpaceX)/50%(ZaloPay) kế hoạch 08-13 — chưa quyết mua nốt hay coi đã đóng.
-- `merge_park_orders.py` cron schedule — Taylor đề xuất C-rồi-A, chưa cài chính thức.
-- corp_action_daily.py SANITY_FACTOR WARN (phương án C) đã đóng 08-14, quant-skeptic CONFIRMED.
+- dispatch-prompt-heredoc skill — dùng cho MỌI prompt dispatch có backtick/code snippet.
+- CASH_VENDOR gate: giữ ĐÓNG (user duyệt 08-15), mở lại chỉ khi >=1 sự kiện ISS/hỗn hợp VÀ qua
+  2026-09-13. commit dce25180.
+- CAPIT margin: `enabled=false`. Pilot = canary 100cp đầu tiên trong chính phiên CAPIT signal thật
+  (đã discuss 08-11), KHÔNG đặt lệnh ngẫu nhiên để test. Chờ signal thật.
+- GDKHQ D1-D3: dry-run trace 08-17 (BID/MBB/SSI/VIX) — theo dõi kết quả dry-run ngày mai.
 
-- [2026-08-14T06:09:42Z] 2026-08-14: problem_key/supersession DEFERRED (user quyết dừng+quan sát, không overthink khi chi phí > lợi ích đo được) — mở lại nếu có ca thật root-cause-D trong 3-4 tuần/15-20 vòng coord tới. Mạch 'warning vận hành lặp lại' hôm nay ĐÃ ĐÓNG HẾT: kb/coding_guidelines split, dt5g false-alarm, notify_thread swap-fix, 3/4 wags-fix cũ + 3 việc rẻ (fail-loud/aged_q cap/dispatch hint).
-- [2026-08-14T06:44:02Z] [2026-08-14T06:45Z] Paper-main không có plan hôm nay — giải thích: git stash apply bỏ dở (session khác, 07:56 ICT) để lại conflict marker trong config.py+executor.py, giết CẢ 2 bot live 09:05 (đã tự phục hồi qua ops_autofix/Winston lúc 09:06-09:10, 0 tiền mất, incident kb/incidents/2026-08/2026-08-14-git-stash-conflict-markers-giet-bot-ca-2-account.md) VÀ giết cron paper_main_probe_plan.py 08:52 (không có autoheal như live). Đã chạy tay lại 13:40 ICT, plan_main_2026-08-14.json tồn tại nhưng evidence trong-cửa-sổ hôm nay coi như mất (paper-only). Còn mở: stash@{0} vẫn giữ 2 thay đổi thật CHƯA landed đúng cách (fill_timing_hybrid_enabled=True paper + REFRESH_SKIP fix executor.py +283/-22, liên quan job Taylor_20260810_042759 DRI cancel-reissue bug) — cần Taylor+quant-skeptic resolve ngoài giờ giao dịch, KHÔNG phải khôi phục vội.
-- [2026-08-14T09:09:50Z] 2026-08-14: paper checkpoint fill_timing gate5 sign-off = phương án A (chờ đủ 5 phiên hybrid, ~08-26 quant-skeptic + ~08-27 user sign-off). Mạch 'warning vận hành lặp lại' + '3 mục treo lâu mới + 10 selfcheck đỏ' hôm nay ĐÃ ĐÓNG HẾT hoàn toàn.
+## 2026-08-16 — đã đóng trong ngày (không cần theo dõi thêm)
+- Daily retro 2026-08-16 hoàn tất 3/3 bước, entry `kb/incidents/retro/retro-2026-08-16.md` —
+  6 sự cố, Wags verify GAPS FOUND (2 gap: sự cố bỏ sót + status escalation stale), đã sửa xong.
+- cron_health_check false-alarm root-cause XONG (commit f3863f54/a6516c7e + coding_guidelines §29).
+- Bus backlog 10→~2 pending qua nhiều vòng arch-review (d65167a9/8e9affc3/522e29d2/517261ac).
+- `selfcheck-red: send_plan_report_park_jit_selfcheck.py` fixed (commit 4cb89353), arch-review
+  CONFIRMED.
+- Pattern B escalation gốc (`retro-pattern-recurring-patternB-checker-wrong-representation`)
+  xác nhận ĐÃ ĐÓNG 2026-08-14 với Prevention = coding_guidelines §28 (chỉ phủ nhánh so-2-nguồn,
+  xem mục "Việc còn hở" #6 ở trên cho phần còn thiếu).
+

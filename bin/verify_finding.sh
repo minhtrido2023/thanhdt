@@ -135,6 +135,20 @@ PY
 )"
   # write the verification event to the bus (deterministic, outside the agent) — carry the
   # source finding's trace_id (if any) so finding + verdict land in the same job timeline.
+  #
+  # SANITIZE the inherited trace_id first (arch-review coord-2026-08-13, killer objection):
+  # it is read from an APPEND-ONLY bus whose historical records include poisoned values
+  # (a 232-char string with spaces, `thêm`, …) that the same finding decided NOT to rewrite.
+  # This line runs under `set -euo pipefail` with no guard, so a poisoned trace_id aborts
+  # run_and_record AFTER a full headless reviewer pass has already been spent — the verdict
+  # vanishes and consolidate never runs (under --bg, silently). This caller is clean and has
+  # no way to re-quote immutable history, so the right move is: drop the trace_id, warn, and
+  # STILL write the verdict. Never let a bad correlation id destroy a good verdict.
+  if [ -n "$finding_trace_id" ] && ! printf '%s' "$finding_trace_id" \
+       | grep -qE '^[A-Za-z0-9_.:-]+_[0-9]{8}_[0-9]{6}$'; then
+    echo "verify_finding.sh: trace_id kế thừa SAI HÌNH DẠNG ($(printf '%q' "$finding_trace_id")) — BỎ trace_id, VẪN ghi verdict. Timeline job sẽ không gộp được event này." >&2
+    finding_trace_id=""
+  fi
   "$ROOT/bin/append_event.sh" "$REVIEWER_ID" verification "VERIFY: $finding_topic" "$verdict_json" "$finding_trace_id" >/dev/null
   "$ROOT/bin/consolidate.sh" >> "$ROOT/logs/consolidator.log" 2>&1 || true
 

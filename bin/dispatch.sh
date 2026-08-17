@@ -1255,14 +1255,26 @@ làm lại có chủ đích, đừng âm thầm ghi đè mất công sức cũ m
           # 500-char window while SpaceX's short HOLD summary happened to survive intact).
           # send_plan_report.sh already posts the authoritative structured render to this
           # same channel later the same day — this ping only needs to confirm completion.
+          local _preview; _preview="$(tail -c 500 "$logfile" 2>/dev/null | tr '\n\t' '  ')"
           if [ "$id" = "DollarBill" ]; then
             # User feedback 2026-07-08: state the 19:30 ICT time explicitly so a short
             # completion ping is never mistaken for "nothing else is coming" — the full
             # structured report (targets/prices/reasons) always follows at that time.
             "$ROOT/bin/notify_thread.sh" "✅ **DollarBill** đã lập plan xong (job \`${job_id}\`) — report chi tiết (mục tiêu mua/bán, giá dự kiến, lý do) sẽ đăng vào kênh này lúc **19:30 ICT** hôm nay." "$_tid" 2>/dev/null || true
           else
-            local _preview; _preview="$(tail -c 500 "$logfile" 2>/dev/null | tr '\n\t' '  ')"
             "$ROOT/bin/notify_thread.sh" "✅ **$id** xong (job \`${job_id}\`): $_preview" "$_tid" 2>/dev/null || true
+          fi
+          # ACTIVE wake (2026-08-15, MIKE.md §8 rev) — chỉ khi Mike TỰ dispatch: đó là
+          # session live DUY NHẤT thật sự ngồi chờ (đã đặt ScheduleWakeup ladder). Agent
+          # khác (Taylor/Wags/...) không có Discord thread sống thường trực để đánh
+          # thức — auto-callback ở dưới đã là kênh đúng cho chúng. Wake KHÔNG THAY notify_
+          # thread.sh ở trên (đó là tin nhắn NGƯỜI thấy được); đây là tín hiệu khiến CHÍNH
+          # PHIÊN MIKE resume trong vòng ~30s (ccdb scheduler master loop) thay vì đợi
+          # ladder tự đoán delay, có thể tới 1200s. Fail-soft: wake_thread.sh tự nuốt lỗi.
+          if [ "$from" = "Mike" ]; then
+            "$ROOT/bin/wake_thread.sh" "$_tid" \
+              "Job \`${job_id}\` (${id}) đã hoàn thành: status=done. $_preview" \
+              "$job_id" 2>/dev/null || true
           fi
         fi
         # Auto-callback: notify the caller agent so it can pick up the result without manual prompt.
@@ -1327,6 +1339,14 @@ làm lại có chủ đích, đừng âm thầm ghi đè mất công sức cũ m
     # Không suy lại topic (2026-08-02, arch-reviewer S1) — chỉ đọc pin đã ghim lúc dispatch.
     if [ -n "$_tid" ]; then
       "$ROOT/bin/notify_thread.sh" "❌ **$id** $why (job \`${job_id}\`). Xem log: $logfile" "$_tid" 2>/dev/null || true
+      # Active wake on the failure path too — same rationale as the success path above
+      # (see comment there). A blind-interval ladder finding out about a FAILURE late is
+      # just as wasteful as finding out about a success late.
+      if [ "$from" = "Mike" ]; then
+        "$ROOT/bin/wake_thread.sh" "$_tid" \
+          "Job \`${job_id}\` (${id}) $why. Xem log: $logfile" \
+          "$job_id" 2>/dev/null || true
+      fi
     fi
     # Also notify the caller agent on failure so it can decide to retry or escalate.
     # Same guard: no callback for auto-callback jobs (prevent loop on failure path too).
@@ -1495,17 +1515,22 @@ else
     # board lie on 2026-08-09 (Mike read "failed", re-dispatched, two runs collided on
     # executor.py). Same order as `jobs.sh cancel`: kill the tree, give it a grace period,
     # SIGKILL the remainder, and only then stamp.
-    _wp="$(cat "$logfile.workerpid" 2>/dev/null || true)"
-    if [ -n "$_wp" ]; then
-      kill -TERM -- "-$_wp" 2>/dev/null || kill -TERM "$_wp" 2>/dev/null || true
-      _w=0
-      while [ "$_w" -lt "${DISPATCH_KILL_GRACE_S:-10}" ] && kill -0 "$_wp" 2>/dev/null; do
-        sleep 1; _w=$((_w + 1))
-      done
-      kill -KILL -- "-$_wp" 2>/dev/null || kill -KILL "$_wp" 2>/dev/null || true
-      sleep 1
+    # Do NOT trust $logfile.workerpid here.  It is a best-effort convenience file, and a
+    # stale/reused/partially-written PID must never become an unvalidated process-group kill.
+    # job-cancel already owns the only safe primitive: it discovers the sync worker through
+    # the pinned logfile/logfile.err evidence, proves target identity, kills, verifies death,
+    # then writes a terminal record.  It also supplies the fallback when TERM lands between
+    # `pid=$!` and the workerpid publish.  Using that one primitive keeps the trap from
+    # inventing a weaker second cancellation protocol.
+    _cancel_rc=0
+    "$ROOT/bin/jobs.sh" cancel "$job_id" "${DISPATCH_KILL_GRACE_S:-10}" || _cancel_rc=$?
+    if [ "$_cancel_rc" -eq 0 ]; then
       rm -f "$logfile.workerpid" 2>/dev/null || true
+      kill "$_wpid" 2>/dev/null || true
+      exit 143
     fi
+    echo "WARNING: dispatch.sh sync bị kill nhưng jobs.sh cancel KHÔNG xác minh/đóng được job $job_id (rc=$_cancel_rc)" >&2
+    echo "         => chạy verifier cũ bên dưới; chỉ đóng nếu nó chứng minh được không còn worker." >&2
     # VERIFY, đừng chỉ giết rồi tin. Cùng hợp đồng với `jobs.sh cancel` (exit 5): còn tiến
     # trình nào của job sống sót thì KHÔNG ghi trạng thái kết thúc — để record ở running và
     # nói ra sự thật. Giết-mà-không-kiểm chính là nửa đầu của sự cố 08-09; nửa sau là đóng

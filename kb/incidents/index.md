@@ -4,7 +4,7 @@ title: Incidents — Mike fleet (sổ postmortem, cấu trúc OKF)
 owner: Mike fleet (mọi agent ghi; daily_retro.sh ghi entry RETRO hằng đêm)
 format: OKF (Open Knowledge Format) — markdown + YAML frontmatter, 1 sự cố = 1 file
 migrated_from: kb/INCIDENTS.md (single-file 408KB, migrate → OKF 2026-07-30 job Winston_20260730_144031)
-entries: 108 file (75 sự cố + 32 RETRO + 1 mục open-items chung)
+entries: 112 file (77 sự cố + 34 RETRO + 1 mục open-items chung)
 ---
 
 # Incidents — Mike fleet
@@ -77,6 +77,9 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 
 | Ngày | Sự cố | status |
 |---|---|---|
+| 2026-08-15 | [2026-08/2026-08-15-for-each-live-account-fail-open-va-discover-sessions-ten-file-qua-dai.md](2026-08/2026-08-15-for-each-live-account-fail-open-va-discover-sessions-ten-file-qua-dai.md) | ? |
+| 2026-08-14 | [2026-08/2026-08-14-git-stash-conflict-markers-giet-bot-ca-2-account.md](2026-08/2026-08-14-git-stash-conflict-markers-giet-bot-ca-2-account.md) | ? |
+| 2026-08-04 | [2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md](2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md) | fixed (monitoring); production-code fix in progress (Taylor job Taylor_20260804_094514) |
 | 2026-08-14 | [2026-08-14: `git stash apply` bỏ dở lúc 07:56 để lại conflict marker trong `trading_bot/config.py`+`executor.py` ⇒ `SyntaxError` giết bot NGAY khi cron 09:05 khởi động, CẢ 2 account (0 lệnh đặt, không lệnh kẹt)](2026-08/2026-08-14-git-stash-conflict-markers-giet-bot-ca-2-account.md) | fixed — `git checkout HEAD --` 2 file (ours(stage2)==HEAD từng byte ⇒ không mất việc), stash@{0} giữ nguyên; CÒN MỞ: ai đó vẫn cần resolve stash đúng cách qua Taylor |
 | 2026-08-13 | [2026-08/2026-08-13-tv1-ceiling-decision-via-action-not-bus.md](2026-08/2026-08-13-tv1-ceiling-decision-via-action-not-bus.md) | ? |
 | 2026-08-13 | [2026-08/2026-08-13-codex-headless-dns-block-tv1-and-smtp.md](2026-08/2026-08-13-codex-headless-dns-block-tv1-and-smtp.md) | ? |
@@ -177,9 +180,12 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 | 2026-06-22 | [2026-06-22 — Mafee ZOMBIE: systemd reports healthy, agent isn't actually serving](2026-06/2026-06-22-mafee-zombie-systemd-healthy.md) | logged |
 
 ## RETRO hằng ngày (mới nhất trước)
+| 2026-08-16 | [RETRO — 2026-08-16: 6 sự cố (marathon "1 ngày dọn 4 backlog NEEDS_CHANGES", +1 selfcheck-red fix bổ sung qua verify Wags), 2 pattern xuyên suốt (§28 tiếp tục sống; Pattern B rộng hơn §28 chưa có Prevention riêng)](retro/retro-2026-08-16.md) | logged |
 
 | Ngày | Tóm tắt (nguyên văn tiêu đề) | status |
 |---|---|---|
+| 2026-08-15 | [RETRO — 2026-08-15: 4 sự cố (1 flip-live→bug→revert→fix trong 25 phút, 1 báo cáo sai cost-basis, 2 checker fail-open im lặng phát hiện qua weekly audit), 1 pattern ESCALATE (wakeup-miss tái diễn 2 retro liên tiếp)](retro/retro-2026-08-15.md) | logged |
+| 2026-08-14 | [RETRO — 2026-08-14: 6 sự cố, 0 pattern mới cần escalate — Pattern-B (4 ngày) và backlog-2 (5 ngày) ĐÃ ĐÓNG hôm nay, +1 gap qua verify Wags (ops_health_check.sh substring-match chưa vá theo NEEDS_CHANGES)](retro/retro-2026-08-14.md) | logged |
 | 2026-08-13 | [RETRO — 2026-08-13: 4 sự cố (1 fixed hoàn chỉnh, 1 hở bug hạ tầng vẫn treo dù bot tự phục hồi khớp lệnh một phần, 2 là câu hỏi bus chưa đóng), 2 pattern xuyên suốt (Pattern-B ngày thứ 4 liên tiếp, Pattern backlog ngày thứ 5)](retro/retro-2026-08-13.md) | logged |
 | 2026-08-12 | [RETRO — 2026-08-12: 9 sự cố, 3 pattern xuyên suốt (1 pattern-họ đã đặt tên "Pattern-B" tái diễn NGÀY THỨ 4 dưới 3 hình dạng MỚI cùng một ngày; 2 câu hỏi backlog VẪN CHƯA được user quyết sau nhiều ngày escalate)](retro/retro-2026-08-12.md) | logged |
 | 2026-08-11 | [RETRO — 2026-08-11: 5 sự cố, 2 pattern xuyên suốt (state_source escalated 2 retro liên tiếp, hôm nay fix THẬT nhưng SAU khi đã gây 30 lệnh lỡ phiên)](retro/retro-2026-08-11.md) | logged |

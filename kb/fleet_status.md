@@ -1,48 +1,33 @@
-# Fleet status — 2026-08-14T09:57:22 UTC
+# Fleet status — 2026-08-17T01:07:02 UTC
 
 | agent | title (desktop) | kind | status | last_heartbeat | age(min) | current_task |
 |---|---|---|---|---|---|---|
-| DollarBill | DollarBill | child | dead | 2026-08-13T12:06:54Z | 1310 |  |
-| Mike | Mike | child | working | 2026-08-14T09:44:50Z | 12 |  |
-| Mike_1918132 | mike-86 | child | dead | 2026-08-14T00:20:01Z | 577 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
-| Taylor | Taylor | child | working | 2026-08-14T09:45:30Z | 11 |  |
-| Taylor_1679177 | taylor-43 | child | dead | 2026-08-13T16:50:01Z | 1027 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
-| Taylor_1721529 | taylor-9f | child | dead | 2026-08-13T17:30:01Z | 987 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
-| Taylor_1922027 | taylor-9e | child | dead | 2026-08-14T00:50:01Z | 547 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
-| Taylor_1937946 | taylor-c0 | child | dead | 2026-08-14T00:40:01Z | 557 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
-| Taylor_1949280 | taylor-33 | child | dead | 2026-08-14T00:50:01Z | 547 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
-| Taylor_2254620 | taylor-2c | child | dead | 2026-08-14T08:20:01Z | 97 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
-| Wags | Wags | child | dead | 2026-08-14T05:34:04Z | 263 |  |
-| Wags_2150086 | wags-30 | child | dead | 2026-08-14T05:10:01Z | 287 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Wags |
-| Wags_695203 | wags-85 | child | dead | 2026-08-12T11:50:01Z | 2767 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Wags |
-| Winston | Winston | child | dead | 2026-08-14T04:18:26Z | 338 |  |
-| ccdb-mike-08 | ccdb-mike-08 | external | dead | 2026-08-13T03:30:01Z | 1827 | interactive · cwd=/workspace/ccdb-mike |
-| trido-7a | trido-7a | external | idle | 2026-08-14T09:50:01Z | 7 | interactive · cwd=/home/trido |
-| workingclaude-05 | workingclaude-05 | child | dead | 2026-08-13T06:06:48Z | 1670 |  |
-| workingclaude-0e | workingclaude-0e | child | dead | 2026-08-14T08:46:23Z | 70 |  |
-| workingclaude-17 | workingclaude-17 | child | dead | 2026-08-14T05:26:23Z | 270 |  |
-| workingclaude-29 | workingclaude-29 | child | dead | 2026-08-12T10:53:56Z | 2823 |  |
-| workingclaude-36 | workingclaude-36 | child | dead | 2026-08-12T17:20:18Z | 2437 |  |
-| workingclaude-39 | workingclaude-39 | child | dead | 2026-08-14T01:22:55Z | 514 |  |
-| workingclaude-40 | workingclaude-40 | child | dead | 2026-08-14T04:51:22Z | 306 |  |
-| workingclaude-42 | workingclaude-42 | child | dead | 2026-08-13T10:36:15Z | 1401 |  |
-| workingclaude-45 | workingclaude-45 | child | dead | 2026-08-13T14:00:47Z | 1196 |  |
-| workingclaude-5e | workingclaude-5e | child | dead | 2026-08-13T05:05:14Z | 1732 |  |
-| workingclaude-6c | workingclaude-6c | child | dead | 2026-08-13T15:31:08Z | 1106 |  |
-| workingclaude-7d | workingclaude-7d | child | dead | 2026-08-13T16:24:44Z | 1052 |  |
-| workingclaude-85 | workingclaude-85 | child | dead | 2026-08-13T07:53:00Z | 1564 |  |
-| workingclaude-9c | workingclaude-9c | child | dead | 2026-08-12T12:11:29Z | 2745 |  |
-| workingclaude-a1 | workingclaude-a1 | child | dead | 2026-08-13T18:22:19Z | 935 |  |
-| workingclaude-a2 | workingclaude-a2 | child | dead | 2026-08-14T06:02:25Z | 234 |  |
-| workingclaude-a3 | workingclaude-a3 | child | dead | 2026-08-13T09:50:27Z | 1446 |  |
-| workingclaude-a4 | workingclaude-a4 | child | dead | 2026-08-13T07:23:35Z | 1593 |  |
-| workingclaude-bc | workingclaude-bc | child | dead | 2026-08-13T08:05:14Z | 1552 |  |
-| workingclaude-c1 | workingclaude-c1 | child | dead | 2026-08-14T03:20:54Z | 396 |  |
-| workingclaude-c9 | workingclaude-c9 | child | dead | 2026-08-13T05:58:08Z | 1679 |  |
-| workingclaude-cb | workingclaude-cb | child | dead | 2026-08-14T04:50:56Z | 306 |  |
-| workingclaude-d6 | workingclaude-d6 | child | dead | 2026-08-13T11:23:19Z | 1354 |  |
-| workingclaude-e4 | workingclaude-e4 | child | dead | 2026-08-13T12:30:00Z | 1287 |  |
-| workingclaude-eb | workingclaude-eb | child | dead | 2026-08-13T17:09:14Z | 1008 |  |
-| workingclaude-ec | workingclaude-ec | child | dead | 2026-08-13T04:58:09Z | 1739 |  |
-| workingclaude-fb | workingclaude-fb | child | dead | 2026-08-14T08:24:49Z | 92 |  |
-| wt-1521735922066919515-f5 | wt-1521735922066919515-f5 | external | dead | 2026-08-14T08:30:01Z | 87 | interactive · cwd=/home/trido/thanhdt/wt-1521735922066919515 |
+| Mike | Mike | child | dead | 2026-08-16T17:41:50Z | 445 |  |
+| Mike_172581 | mike-1f | child | dead | 2026-08-16T11:40:01Z | 807 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
+| Mike_2983315 | mike-6c | child | dead | 2026-08-15T01:10:01Z | 2877 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
+| Taylor | Taylor | child | dead | 2026-08-15T13:18:01Z | 2149 |  |
+| Wags | Wags | child | dead | 2026-08-16T17:37:45Z | 449 |  |
+| Wags_140994 | wags-c1 | child | dead | 2026-08-16T11:20:01Z | 827 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Wags |
+| Winston | Winston | child | dead | 2026-08-15T08:34:06Z | 2432 |  |
+| claude-code-discord-bridge-d3 | claude-code-discord-bridge-d3 | external | dead | 2026-08-15T18:50:01Z | 1817 | interactive · cwd=/workspace/claude-code-discord-bridge |
+| cliproxyapi-3a | cliproxyapi-3a | external | dead | 2026-08-15T18:50:01Z | 1817 | interactive · cwd=/home/trido/cliproxyapi |
+| taylor-03 | taylor-03 | external | dead | 2026-08-15T02:20:01Z | 2807 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/wt-1522576692638388364/agents/Taylor |
+| taylor-0c | taylor-0c | external | dead | 2026-08-15T13:00:01Z | 2167 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/wt-1538146805207011358/agents/Taylor |
+| taylor-52 | taylor-52 | external | dead | 2026-08-15T12:10:01Z | 2217 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/wt-1538146805207011358/agents/Taylor |
+| taylor-e4 | taylor-e4 | external | dead | 2026-08-15T13:10:01Z | 2157 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/wt-1538146805207011358/agents/Taylor |
+| taylor-ef | taylor-ef | external | dead | 2026-08-15T12:50:01Z | 2177 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/wt-1538146805207011358/agents/Taylor |
+| workingclaude-2f | workingclaude-2f | child | dead | 2026-08-15T13:08:48Z | 2158 |  |
+| workingclaude-3f | workingclaude-3f | child | dead | 2026-08-17T00:17:02Z | 50 |  |
+| workingclaude-46 | workingclaude-46 | child | dead | 2026-08-15T03:09:15Z | 2757 |  |
+| workingclaude-72 | workingclaude-72 | child | dead | 2026-08-15T04:46:53Z | 2660 |  |
+| workingclaude-74 | workingclaude-74 | child | dead | 2026-08-17T00:24:29Z | 42 |  |
+| workingclaude-ab | workingclaude-ab | child | dead | 2026-08-15T01:16:53Z | 2870 |  |
+| workingclaude-b6 | workingclaude-b6 | child | dead | 2026-08-16T11:29:12Z | 817 |  |
+| workingclaude-bd | workingclaude-bd | child | dead | 2026-08-16T10:07:46Z | 899 |  |
+| workingclaude-d6 | workingclaude-d6 | child | dead | 2026-08-15T04:46:04Z | 2660 |  |
+| workingclaude-d9 | workingclaude-d9 | external | dead | 2026-08-16T09:50:01Z | 917 | interactive · cwd=/home/trido/thanhdt/WorkingClaude |
+| workingclaude-db | workingclaude-db | child | dead | 2026-08-15T06:40:49Z | 2546 |  |
+| wt-1521475726329516122-selfcheck-25 | wt-1521475726329516122-selfcheck-25 | external | dead | 2026-08-16T16:00:01Z | 547 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/wt-1521475726329516122-selfcheck |
+| wt-1521475726329516122-selfcheck-5e | wt-1521475726329516122-selfcheck-5e | external | dead | 2026-08-16T16:30:01Z | 517 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/wt-1521475726329516122-selfcheck |
+| wt-1521475726329516122-selfcheck-83 | wt-1521475726329516122-selfcheck-83 | external | dead | 2026-08-16T13:20:01Z | 707 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/wt-1521475726329516122-selfcheck |
+| wt-1521475726329516122-selfcheck-c8 | wt-1521475726329516122-selfcheck-c8 | external | dead | 2026-08-16T13:10:01Z | 717 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/wt-1521475726329516122-selfcheck |

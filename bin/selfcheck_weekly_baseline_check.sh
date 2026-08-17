@@ -24,7 +24,8 @@
 #      không báo lại mỗi ngày (bản cũ không ghi ⇒ ở nhịp ngày sẽ thành bão báo động giả).
 #
 # ⚠️ BẮT BUỘC dùng đúng $DNA_PYEXE (Python 3.12 + pandas 3) + GOOGLE_APPLICATION_CREDENTIALS +
-# PATH có gcloud sdk — chạy sai môi trường tự tạo FAIL/TIMEOUT giả (đã đo thật tối 2026-08-08:
+# CLOUDSDK_CONFIG của writer + PATH có gcloud sdk — chạy sai môi trường tự tạo
+# FAIL/TIMEOUT giả (đã đo thật tối 2026-08-08:
 # 4/51 file báo lỗi sai chỉ vì Mike verify bằng system python3 thay vì $DNA_PYEXE). Env này lấy
 # từ chính kb/selfcheck_baseline.json's required_env, không hardcode 2 lần.
 set -uo pipefail
@@ -57,10 +58,35 @@ else
     "$ROOT/bin/notify.sh" "⚠️ [selfcheck sweep] Không mở được file khoá — vẫn quét nhưng KHÔNG có bảo vệ chạy-song-song. Kiểm quyền $ROOT/logs/." >/dev/null 2>&1 || true
 fi
 BASELINE="$ROOT/kb/selfcheck_baseline.json"
-DNA_PYEXE=/home/trido/thanhdt/wc_venv/bin/python
-export GOOGLE_APPLICATION_CREDENTIALS="/home/trido/thanhdt/gcloud_dtienthanh/application_default_credentials.json"
+# `bq` CLI chọn identity từ gcloud config, KHÔNG từ GOOGLE_APPLICATION_CREDENTIALS.
+# Nếu chỉ export ADC, nó dùng default config read-only bq-reader-8l và immutable_publish
+# báo thiếu tables.create dù writer config đã có sẵn. Nguồn canonical của cron env:
+[ -f "$WC/wc_env.sh" ] && source "$WC/wc_env.sh" 2>/dev/null || true
+DNA_PYEXE="${DNA_PYEXE:-/home/trido/thanhdt/wc_venv/bin/python}"
+export GOOGLE_APPLICATION_CREDENTIALS="${GOOGLE_APPLICATION_CREDENTIALS:-/home/trido/thanhdt/gcloud_dtienthanh/application_default_credentials.json}"
+export CLOUDSDK_CONFIG="${CLOUDSDK_CONFIG:-/home/trido/thanhdt/gcloud_dtienthanh}"
 export PATH="/home/trido/google-cloud-sdk/bin:$PATH"
 export MIKE_BOT_TEST_MODE=1
+
+# PHIÊN NGƯỜI DÙNG systemd/D-Bus — cron KHÔNG kế thừa, và thiếu nó tự tạo ĐỎ GIẢ MỖI NGÀY.
+# Đo thật 2026-08-16: `mike/bin/job_cancel_guard_selfcheck.py` FAIL 4/4 lần quét gần nhất
+# (260/261, 262/263) đúng 1 assertion — "systemd-run scope path was actually exercised" —
+# trong khi chạy tay ở phiên tương tác nó 264/264 PASS. Tái lập chính xác bằng
+# `env -i` + đúng các export ở trên: FAIL; thêm 2 dòng dưới: PASS. `systemd-run --user`
+# cần XDG_RUNTIME_DIR + DBUS_SESSION_BUS_ADDRESS để nói chuyện với systemd --user, mà cron
+# chạy ngoài phiên đăng nhập nên không có. Assertion đó fail-loud là ĐÚNG thiết kế (nó từ
+# chối tuyên bố đã phủ đường production khi thực ra không chạy được) — thứ sai là MÔI
+# TRƯỜNG của bộ quét, nên sửa ở đây chứ không nới lỏng test. Cùng họ với cảnh báo
+# $DNA_PYEXE ở đầu file: chạy sai môi trường ⇒ đỏ giả ⇒ báo động lặp ⇒ mất niềm tin.
+# Chỉ export khi runtime dir CÓ THẬT — máy không có systemd --user thì để assertion đỏ
+# thật (đó mới là "production path UNTESTED", một sự thật cần thấy).
+_uid="$(id -u)"
+if [ -d "/run/user/$_uid" ]; then
+    export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$_uid}"
+    export DBUS_SESSION_BUS_ADDRESS="${DBUS_SESSION_BUS_ADDRESS:-unix:path=/run/user/$_uid/bus}"
+else
+    echo "⚠️ /run/user/$_uid không tồn tại — selfcheck cần systemd --user sẽ ĐỎ THẬT (không phải hồi quy code)." >&2
+fi
 
 [ -x "$DNA_PYEXE" ] || { echo "FATAL: DNA_PYEXE không tồn tại: $DNA_PYEXE" >&2; exit 2; }
 [ -f "$BASELINE" ] || { echo "FATAL: thiếu baseline: $BASELINE" >&2; exit 2; }
@@ -70,6 +96,7 @@ RESULT_JSON="$ROOT/logs/selfcheck_weekly_$(date -u +%Y%m%d).json"
 JSONL="$ROOT/logs/.selfcheck_weekly_raw_$$.jsonl"
 mkdir -p "$ROOT/logs"
 : > "$JSONL"
+trap 'rm -f "$JSONL" /tmp/wk_sc_"$$"_*.log' EXIT HUP INT TERM
 
 # Phạm vi = production HEAD của 2 repo sống. Glob thật mỗi lần chạy, KHÔNG danh sách chép tay
 # (§23). CỐ Ý KHÔNG có `test_*.py`: 165 file đó ở gốc là script backtest/R&D đặt tên theo lịch
@@ -92,7 +119,22 @@ print(b['required_env']['slow_files'].get('$f', b['required_env']['default_timeo
     timeout "$tmo" "$DNA_PYEXE" "$f" > "$log" 2>&1
     rc=$?
     if [ $rc -eq 0 ]; then st=PASS; elif [ $rc -eq 124 ]; then st=TIMEOUT; else st=FAIL; fi
-    [ "$st" != "PASS" ] && { echo "--- $st: $f (rc=$rc) ---"; tail -8 "$log"; }
+    # TRÍCH ĐÚNG DÒNG ĐỎ, không phải `tail -8`. Vì sao đổi (đo thật 2026-08-16): các
+    # selfcheck ở đây in tuần tự và kết thúc bằng một khối "ok" + dòng tổng kết, nên
+    # `tail -8` của một lần FAIL trông y hệt `tail -8` của một lần PASS — 4 lần escalate
+    # `selfcheck-red: job_cancel_guard` liên tiếp đều kèm 8 dòng "ok", KHÔNG lần nào nói
+    # assertion nào đỏ. Người nhận không có gì để sửa ⇒ ca đó nằm lại known_red rồi được
+    # báo lại ⇒ đúng vòng "báo động giả lặp mỗi ngày". Một lần tra cứu thất bại (tail lấy
+    # nhầm vùng) đã đội lốt một báo cáo sự cố (close-the-loop root-cause-B).
+    if [ "$st" != "PASS" ]; then
+        echo "--- $st: $f (rc=$rc) ---"
+        red="$(grep -nEi '❌|✗|\bFAIL\b|Traceback|^[[:space:]]*Error' "$log" | head -12)"
+        if [ -n "$red" ]; then
+            echo "$red"
+            echo "    … (đuôi log:)"
+        fi
+        tail -4 "$log"
+    fi
     python3 -c "import json,sys; print(json.dumps({'file': sys.argv[1], 'status': sys.argv[2]}))" "$f" "$st" >> "$JSONL"
     rm -f "$log"
 done
@@ -102,7 +144,6 @@ done
 # và nó chính là chỗ bug L2 (không ghi known_red ⇒ báo lại mỗi lần) sống 4 ngày.
 python3 "$ROOT/bin/selfcheck_baseline_diff.py" "$BASELINE" "$RESULT_JSON" "$JSONL"
 rc=$?
-rm -f "$JSONL"
 
 # rc=1 (có đỏ MỚI) và rc=2 (quét hỏng/rỗng) là HAI sự việc khác nhau và phải nói khác nhau —
 # gộp chúng vào một thông điệp "phát hiện đỏ mới" là đúng lỗi close-the-loop bug B cảnh báo

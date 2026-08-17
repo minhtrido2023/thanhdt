@@ -182,6 +182,18 @@ gate with a curated code list (its own header explains why curated, not "any fin
 a Semgrep rule for §12 (tested on `bin/verify_account_snapshot.py`; needs dataflow-aware engineering
 to hit "fires twice at 100% accuracy"). → rationale §15.*
 
+⚠️ **Gap `bin/shellcheck_gate.sh` KHÔNG phủ tới: dispatch gõ trực tiếp trong phiên tương tác
+(Bash tool call của Mike, không phải file `.sh` được commit).** Hook chỉ chạy ở `pre-commit` —
+một lệnh `bin/dispatch.sh Taylor "... \`code_snippet\` ..."` gõ thẳng vào Bash tool KHÔNG BAO GIỜ
+đi qua git commit, nên ShellCheck không bao giờ thấy nó. Ca thật: 2026-08-15 00:41Z, job
+`Taylor_20260815_004105` — 2 đoạn code (`` `_limit_price` ``, `ref_price = anchor/1.04`) biến mất
+khỏi prompt vì backtick bị bash coi là command substitution NGAY TRONG lệnh Bash tool, trước khi
+`dispatch.sh` kịp nhận `$2`. Không có cách nào vá phía `dispatch.sh` — hư hại xảy ra ở shell của
+NGƯỜI GỌI. Rule + template cụ thể cho tình huống này (không lặp lại nội dung):
+**`~/.claude/skills/dispatch-prompt-heredoc/SKILL.md`** — đọc trước bất kỳ dispatch tương tác nào
+mang theo backtick/`"`/code snippet, và ngay khi thấy "command not found" xuất hiện sát một lệnh
+dispatch (đó là dấu hiệu, không phải lỗi không liên quan).
+
 ## 17. A Reader Reporting "Still Open" State Must Scan Every Retention Tier a Mover Can Reach
 
 **Rule:** before shipping/auditing a "is X still open" reader, check `kb/cron_registry.md` for every
@@ -258,5 +270,50 @@ hard)` + guard cuối; journal `HARD_CEILING_BLOCK`. Nhờ có trần độc l�
 nghĩa giá tham chiếu thật ⇒ lệnh **bám `q.ask` sống** (re-price mỗi `slice_interval_min`) mà vẫn
 không bao giờ vượt trần. Selfcheck: `hard_no_chase_ceiling_selfcheck.py` (50 ca) — mọi ca "chặn
 được" đều có **ca chứng minh ngược** (bỏ trần ⇒ thật sự vượt), không chỉ khẳng định suông.
+
+## 29. `cron_health_check.py` Báo Lại Cùng 1 Lỗi Mỗi Ngày Dù Đã Sửa — Ack List + Bidirectional Date, Không Phải Trust-The-Report
+
+Triage 2026-08-16 (user: "mỗi ngày đều có warning... là warning thật hay báo động giả?") tìm ra
+**cả 6 mục trong `ERRORS_FOUND` hôm đó đều là báo động giả — bug thật đã được sửa từ trước**
+(`discover_sessions.py` ENAMETOOLONG, commit `03419973` 2026-08-15; `trading_bot/config.py`
+git-stash-conflict-marker ×3 log, đã đóng cùng ngày trong `kb/incidents/2026-08/
+2026-08-14-git-stash-conflict-markers-giet-bot-ca-2-account.md`). Root cause KHÔNG phải bug
+logic trading — là 2 lỗ hổng trong chính checker + hạ tầng log:
+
+1. **`mike/logs/*.log` không có cơ chế rotate cho log ghi tĩnh-tên-mãi-mãi** (`discover.log` mỗi
+   10 phút, `ops_health.log`/`preflight.log`/`paper_main_probe_plan.log` mỗi phiên
+   `for_each_live_account.sh`) — dòng lỗi CŨ nằm mãi trong 200KB tail mà `scan_errors()` quét,
+   dù bug gốc đã sửa từ lâu. `fleet_housekeeping.sh` CÓ category `rotate` nhưng ngưỡng `>10MB`
+   quá cao cho nhóm file này (discover.log mới 1,7MB, `paper_main_probe_plan.log` chỉ vài chục KB
+   — sẽ không bao giờ chạm ngưỡng dù mang lỗi hàng chục ngày tuổi).
+2. **`scan_errors()`'s recency filter chỉ nhìn NGƯỢC (look-behind)** — nếu dòng lỗi là dòng ĐẦU
+   file, hoặc mốc ngày gần nhất nằm SAU (không phải trước) dòng lỗi, filter không bao giờ lọc
+   được nó dù đã quá `RECENT_DAYS=10`. Ca thật: `newdeals_daily_report.log` giữ 1 lỗi
+   `2026-07-06` (41 ngày tuổi) sống sót qua ngưỡng 10 ngày chỉ vì mốc ngày nằm 3 dòng SAU dòng
+   traceback. Đã vá: tìm mốc ngày gần nhất CẢ HAI CHIỀU (`nearest_date()`).
+3. **`cron_health_check_daily.sh` post lại TOÀN BỘ report thô ra Discord mỗi ngày, không có bộ
+   nhớ triage** — đây là nguyên nhân trực tiếp của "ngày nào cũng có": dù Mike/user đã xác nhận
+   1 mục là báo động giả hôm qua, hôm nay checker chạy lại từ đầu, không biết gì về xác nhận đó,
+   và post lại y hệt.
+
+**Cơ chế đã thêm (không phải chỉ sửa 1 lần cho xong):**
+- `state/cron_health_ack.json` — mỗi entry khai `script` + `match_substr` (text PHẢI xuất hiện
+  trong 1 trong các dòng lỗi bắt được của job đó) + `acked_at`/`acked_by`/`expires_days`/`note`
+  (bắt buộc trích commit/incident file làm bằng chứng, không ghi "đã kiểm tra" suông). `find_job_ack()`
+  khớp ở granularity CẢ JOB (không phải từng dòng riêng) — 1 traceback thường sinh nhiều dòng hit
+  khác nhau (dòng header chung "Traceback (most recent call last):" + dòng exception cụ thể); ack
+  đúng dòng exception nhưng bỏ sót dòng header chung sẽ để lại 1 dòng vẫn báo động (bug thật gặp
+  khi build cơ chế này — xem comment `find_job_ack()`).
+- Ack có **HẠN** (`expires_days`, mặc định 14) — hết hạn tự động coi như CHƯA ack, để lỗi thật
+  còn sống lại tự trồi lên thay vì bị im lặng vĩnh viễn. Ack là SNOOZE, không phải tắt cảnh báo.
+- Thêm pattern regex bắt dòng exception Python thật (`^\s*\w+(Error|Exception):` — vd
+  `SyntaxError:`, `ValueError:`) — pattern cũ `^\s*Error:` chỉ khớp "Error:" trần, bỏ sót MỌI
+  tên class exception thật, khiến dòng hit duy nhất bắt được luôn là header chung vô nghĩa.
+
+**Thêm 1 ack mới khi triage xong 1 lỗi đã xác nhận sửa**: sửa `state/cron_health_ack.json`, chọn
+`match_substr` = đoạn text ĐẶC TRƯNG nhất THẬT SỰ xuất hiện trong output của `python3
+bin/cron_health_check.py` (không đoán — chạy thử trước, xem đúng dòng nào bị bắt), ghi rõ commit/
+incident file làm bằng chứng trong `note`. KHÔNG ack dựa trên "nhìn log thấy quen" — phải verify
+artifact thật (đúng tinh thần §6/§9/§14/§28).
 
 *→ job `Taylor_20260809_123917`.*
