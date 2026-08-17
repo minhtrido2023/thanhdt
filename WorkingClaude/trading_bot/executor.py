@@ -120,6 +120,10 @@ class Executor:
         self.state_file = os.path.join(EXEC_DIR, f"exec_{tag}_state.json")
         self.journal_file = os.path.join(EXEC_DIR, f"exec_{tag}_journal.csv")
         self.report_file = os.path.join(EXEC_DIR, f"exec_{tag}_report.md")
+        self.orderbook_file = os.environ.get(
+            "ORDER_BOOK_TEST_SINK",
+            os.path.join(EXEC_DIR, f"orderbook_shadow_{tag}.jsonl"),
+        )
         self._gap_ref = {}      # ticker -> {prior_close, rvol_20d}; loaded once at startup
         self._gap_z_cache = {}  # ticker -> gap_z or None (None = fail-safe, no override)
         self._last_gap_override = {}  # ticker -> gap_z; populated when override fires this tick
@@ -361,6 +365,115 @@ class Executor:
                 row += [(getattr(o, "book", "") or "") if o else "",
                         (getattr(o, "play_type", "") or "") if o else ""]
             w.writerow(row + [note])
+
+    def _order_book_shadow(self, o, q, child_oid, qty, price, cross, baseline_note,
+                           order_attempt_epoch_ms):
+        """Ghi một observation order-book v1; tuyệt đối không trả giá/KL/quyết định cho caller.
+
+        Policy KEEP/REDUCE/DEFER chỉ là khuyến nghị shadow. Snapshot thiếu/cũ/lỗi luôn KEEP
+        (fail-open về baseline). File JSONL riêng tránh làm phình journal kế toán dùng chung.
+        """
+        try:
+            if not self.cfg.get("order_book_shadow_enabled", False):
+                return
+            if os.environ.get("MIKE_BOT_TEST_MODE") == "1" and not os.environ.get("ORDER_BOOK_TEST_SINK"):
+                return
+            # Cửa sổ trial: chỉ ghi từ ngày bắt đầu chương trình paper (registry
+            # `order_book_execution_shadow`.start = 2026-08-18). `order_book_shadow_probe.py`
+            # lọc quan sát theo ĐÚNG mốc này (cùng biến `ORDER_BOOK_START`) — áp cùng một luật
+            # ở NGUỒN GHI để artifact trên đĩa và mẫu được đếm không thể lệch nhau, và để những
+            # phiên chạy trước ngày bắt đầu không đẻ ra quan sát nửa vời nằm ngoài mẫu.
+            if str(self.plan.plan_date) < os.environ.get("ORDER_BOOK_START", "2026-08-18"):
+                return
+            snap = getattr(q, "l2_snapshot", None) or {}
+            cap_ms = snap.get("captured_epoch_ms")
+            latency_ms = (max(0, int(order_attempt_epoch_ms - cap_ms))
+                          if isinstance(cap_ms, (int, float)) else None)
+            source_age = snap.get("source_age_ms")
+            max_age = int(self.cfg.get("order_book_snapshot_max_age_ms", 5000))
+            source_ok = (snap.get("source_time_status") == "ok"
+                         and isinstance(source_age, (int, float)) and 0 <= source_age <= max_age)
+            latency_ok = isinstance(latency_ms, int) and latency_ms <= max_age
+
+            bids, offers = snap.get("bids") or [], snap.get("offers") or []
+            bid = bids[0].get("price") if bids else None
+            ask = offers[0].get("price") if offers else None
+            touch = offers[0] if o.side == "buy" and offers else (bids[0] if bids else {})
+            touch_qty = touch.get("quantity")
+            spread = ask - bid if isinstance(ask, (int, float)) and isinstance(bid, (int, float)) else None
+            mid = (ask + bid) / 2 if spread is not None else None
+            tick = tick_size(mid, symbol=o.ticker, exchange=getattr(q, "exchange", "HOSE")) if mid else None
+            spread_ticks = spread / tick if spread is not None and tick else None
+            depth_ratio = (float(touch_qty) / qty
+                           if isinstance(touch_qty, (int, float)) and qty else None)
+            bid_qty = bids[0].get("quantity") if bids else None
+            ask_qty = offers[0].get("quantity") if offers else None
+            denom = ((bid_qty or 0) + (ask_qty or 0)
+                     if isinstance(bid_qty, (int, float)) and isinstance(ask_qty, (int, float)) else 0)
+            imbalance = (bid_qty - ask_qty) / denom if denom else None
+            microprice = ((ask * bid_qty + bid * ask_qty) / denom
+                          if denom and isinstance(bid, (int, float)) and isinstance(ask, (int, float)) else None)
+            depth_bid_10 = sum(float(x.get("quantity") or 0) for x in bids)
+            depth_ask_10 = sum(float(x.get("quantity") or 0) for x in offers)
+            levels_ok = (isinstance(bid, (int, float)) and isinstance(ask, (int, float))
+                         and ask >= bid and isinstance(touch_qty, (int, float))
+                         and touch_qty >= 0 and spread_ticks is not None)
+            units_ok = snap.get("price_unit") == "VND" and snap.get("quantity_unit") == "shares"
+            valid = bool(levels_ok and source_ok and latency_ok and units_ok)
+
+            recommendation, reason, shadow_qty = "KEEP", "baseline", qty
+            if not valid:
+                reason = "invalid_or_stale_snapshot_fail_open"
+            elif (spread_ticks >= float(self.cfg.get("order_book_defer_spread_ticks", 4.0))
+                  and depth_ratio is not None
+                  and depth_ratio < float(self.cfg.get("order_book_defer_depth_ratio", 0.5))):
+                recommendation, reason, shadow_qty = "DEFER", "wide_spread_and_thin_touch", 0
+            elif (spread_ticks >= float(self.cfg.get("order_book_reduce_spread_ticks", 2.0))
+                  and depth_ratio is not None
+                  and depth_ratio < float(self.cfg.get("order_book_reduce_depth_ratio", 1.0))):
+                recommendation, reason = "REDUCE", "spread_and_touch_depth"
+                shadow_qty = max(0, round_lot(qty / 2))
+
+            rec = {
+                "schema_version": "orderbook_execution_v1",
+                "policy_version": self.cfg.get("order_book_shadow_policy_version", "spread_depth_v1"),
+                # KHOÁ NỐI immutable, có `plan_date` ở giữa (account:ngày:parent:child): probe
+                # gộp MỌI file của MỌI ngày rồi dedup theo `trace_id`, mà `o.id` chỉ do plan
+                # sinh ra nên KHÔNG có gì bảo đảm nó duy nhất xuyên ngày. Thiếu ngày ⇒ hai quan
+                # sát của hai phiên khác nhau có thể đè nhau và N tụt xuống lặng lẽ — đúng loại
+                # hỏng mà cả chương trình này đang phải sửa.
+                "trace_id": f"{self.label}:{self.plan.plan_date}:{o.id}:{child_oid}",
+                "recorded_at": now_ict().isoformat(timespec="milliseconds"),
+                "account": self.label, "plan_date": self.plan.plan_date,
+                "parent_id": o.id, "child_oid": str(child_oid), "ticker": o.ticker,
+                "side": o.side, "book": getattr(o, "book", "") or "",
+                "baseline": {"qty": qty, "price": price, "cross": bool(cross),
+                             "decision_note": baseline_note or ""},
+                "shadow": {"recommendation": recommendation, "reason": reason,
+                            "qty": shadow_qty},
+                "snapshot_valid": valid,
+                "latency_snapshot_to_order_ms": latency_ms,
+                # `touch_qty` = KL Ở PHÍA MÌNH TIÊU THỤ (buy → offers[0], sell → bids[0]) — đó là
+                # thanh khoản thật sự khả dụng cho lệnh con này. Ghi kèm CẢ HAI mức 1
+                # (`bid_qty`/`ask_qty`) để nếu sau này muốn đọc "depth" theo quy ước phía ĐỐI
+                # DIỆN (KL đang xếp cùng chiều mình, tức vị trí hàng đợi khi kê lệnh chờ) thì
+                # dựng lại được offline từ chính bản ghi, không phải chạy lại trial.
+                "features": {"bid": bid, "ask": ask, "mid": mid, "spread": spread,
+                             "spread_ticks": spread_ticks, "touch_qty": touch_qty,
+                             "touch_side": "offer" if o.side == "buy" else "bid",
+                             "bid_qty": bid_qty, "ask_qty": ask_qty,
+                             "touch_depth_ratio": depth_ratio, "microprice": microprice,
+                             "imbalance_top": imbalance, "depth_bid_10": depth_bid_10,
+                             "depth_ask_10": depth_ask_10},
+                "snapshot": snap,
+                "behavior_contract": "LOG_ONLY_NO_BROKER_PATH",
+            }
+            os.makedirs(os.path.dirname(self.orderbook_file), exist_ok=True)
+            with open(self.orderbook_file, "a", encoding="utf-8") as fh:
+                fh.write(json.dumps(rec, ensure_ascii=False) + "\n")
+        except Exception:
+            # Telemetry nằm trên đường tiền thật: mọi lỗi phải rơi về baseline hiện hữu.
+            return
 
     # ------------------------------------------------------------ pricing/sizing
 
@@ -1631,6 +1744,7 @@ class Executor:
                                       note="thiếu tiền — chờ lệnh bán khớp"
                                       + (f" (sức mua broker {qmax} cp < {qty})" if qmax is not None else ""))
                         continue
+            order_attempt_epoch_ms = int(time.time() * 1000)
             try:
                 oid = self.broker.place_order(o.ticker, qty, o.side, price=px,
                                               cash_only=getattr(o, "cash_only", False),
@@ -1664,11 +1778,16 @@ class Executor:
             notes = [n for n in (dip_note,
                                  "nằm chờ tại trần đuổi" if capped else "",
                                  gap_note, ft_note) if n]
-            self._journal("PLACE", o, oid, qty, px, note="; ".join(notes))
+            baseline_note = "; ".join(notes)
+            self._journal("PLACE", o, oid, qty, px, note=baseline_note)
             # Idempotency: ghi state NGAY sau khi broker xác nhận đặt lệnh, không đợi hết
             # step() mới lưu — thu hẹp cửa sổ "lệnh đã đặt nhưng state chưa biết" (từ cả
             # 1 chu kỳ đa mã xuống 1 lần ghi JSON) nếu process bị kill giữa chừng.
             self._save_state()
+            # Telemetry PHẢI sau state idempotency: không được nới cửa sổ ghost-order chỉ để
+            # đổi lấy một observation nghiên cứu. Lỗi telemetry bị nuốt trong hàm.
+            self._order_book_shadow(o, q, oid, qty, px, cross, baseline_note,
+                                    order_attempt_epoch_ms)
 
     def _atc_sweep(self, ghost_tickers=(), positions=None):
         for o in self.plan.orders:
