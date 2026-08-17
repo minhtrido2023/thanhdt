@@ -54,23 +54,37 @@ CHECK10_SRC = extract_block("CHECK10")
 CHECK11_SRC = extract_block("CHECK11")
 
 
-def run_check5(wc_root):
-    """Chạy khối thật trên 1 bus giả; trả về (lines, warn_count)."""
-    lines, warn = [], []
+def run_check5(wc_root, now=None):
+    """Chạy khối thật trên 1 bus giả; trả về (lines, warn_count).
 
-    def W(msg):
-        warn.append(msg)
-        lines.append(f"⚠️ {msg}")
+    `now` chỉ dành cho ca 8d: chèn CHECK5_NOW để ghim một thời điểm lịch cố định; production
+    luôn chạy không có biến này nên hành vi không đổi.
+    """
+    old = os.environ.get("CHECK5_NOW")
+    if now is not None:
+        os.environ["CHECK5_NOW"] = now
+    try:
+        lines, warn = [], []
 
-    def OK(msg):
-        lines.append(f"✅ {msg}")
+        def W(msg):
+            warn.append(msg)
+            lines.append(f"⚠️ {msg}")
 
-    ns = {
-        "glob": __import__("glob"), "gzip": gzip, "json": json, "os": os, "re": re,
-        "wc_root": wc_root, "W": W, "OK": OK, "lines": lines,
-    }
-    exec(compile(CHECK5_SRC, SRC + ":CHECK5", "exec"), ns)
-    return lines, warn
+        def OK(msg):
+            lines.append(f"✅ {msg}")
+
+        ns = {
+            "glob": __import__("glob"), "gzip": gzip, "json": json, "os": os, "re": re,
+            "wc_root": wc_root, "W": W, "OK": OK, "lines": lines,
+        }
+        exec(compile(CHECK5_SRC, SRC + ":CHECK5", "exec"), ns)
+        return lines, warn
+    finally:
+        if now is not None:
+            if old is None:
+                os.environ.pop("CHECK5_NOW", None)
+            else:
+                os.environ["CHECK5_NOW"] = old
 
 
 def write_events(path, events, gz=False):
@@ -315,6 +329,47 @@ def case_grace_expired_question_is_routable():
               len(routable) == 1 and "qua-an-han" in routable[0], out)
         check("ân hạn: question 3h tuổi KHÔNG bị xếp vào dòng 'VỪA ĐĂNG'",
               not any("VỪA ĐĂNG" in ln for ln in lines), out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+# ── Ca 8d (2026-08-17, round-2): ân hạn KHÔNG được mở rộng khe T6→T2. Cron thật là
+#    `20 1 * * 1-5` + `45 5 * * 1-5`; khe hở lớn nhất T6 05:45Z→T2 01:20Z = 67h35 > cutoff
+#    48h. HAI HƯỚNG đều phải pin:
+#      - T5 còn lượt T6 01:20Z trước ts+48h ⇒ ân hạn giữ nguyên;
+#      - T6 không còn lượt cron nào trước ts+48h ⇒ question 31' tuổi VẪN routable ngay.
+def case_grace_schedule_aware_last_weekday_gap():
+    root, inbox = mkbus()
+    try:
+        write_events(os.path.join(inbox, "Wags.jsonl"),
+                     [ev("Wags", "question", "gap-t6-sang-t2",
+                         "2026-08-14T05:14:00Z")])
+        lines, _ = run_check5(root, now="2026-08-14T05:45:00Z")
+        out = joined(lines)
+        routable = [ln for ln in lines
+                    if "trong 48h qua CHƯA thấy answer" in ln and "[WARN-ONLY]" not in ln]
+        fresh = [ln for ln in lines if "VỪA ĐĂNG" in ln]
+        check("8d gap T6→T2: question 31' tuổi VẪN routable nếu không còn lượt cron "
+              "trước ts+48h",
+              len(routable) == 1 and "gap-t6-sang-t2" in routable[0], out)
+        check("8d gap T6→T2: KHÔNG rơi vào dòng VỪA ĐĂNG [WARN-ONLY]", not fresh, out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+    root, inbox = mkbus()
+    try:
+        write_events(os.path.join(inbox, "Wags.jsonl"),
+                     [ev("Wags", "question", "con-an-hand-thu-5",
+                         "2026-08-13T05:14:00Z")])
+        lines, _ = run_check5(root, now="2026-08-13T05:45:00Z")
+        out = joined(lines)
+        routable = [ln for ln in lines
+                    if "trong 48h qua CHƯA thấy answer" in ln and "[WARN-ONLY]" not in ln]
+        fresh = [ln for ln in lines if "VỪA ĐĂNG" in ln]
+        check("8d T5 còn lượt cron TRƯỚC ts+48h: ân hạn vẫn giữ nguyên",
+              len(fresh) == 1 and "con-an-hand-thu-5" in fresh[0], out)
+        check("8d T5 còn lượt cron: question chưa routable ngay",
+              not any("con-an-hand-thu-5" in ln for ln in routable), out)
     finally:
         shutil.rmtree(root, ignore_errors=True)
 
@@ -1272,6 +1327,7 @@ def main():
                case_no_crowd_out, case_small_pool_prints_all,
                case_corrupt_gz_warns, case_empty_archive_warns,
                case_grace_fresh_question_not_routable, case_grace_expired_question_is_routable,
+               case_grace_schedule_aware_last_weekday_gap,
                case_fresh_question_is_pending,
                case_wagsfix_not_confirmed_is_warn_only, case_wagsfix_prefix_not_substring,
                case_wagsfix_only_no_false_ok, case_wagsfix_prefix_list_in_sync,
