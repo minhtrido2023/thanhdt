@@ -224,7 +224,10 @@ else:
 # (và qua đó cả paper_checkpoint_escalation_selfcheck) NameError → gác hồi quy chết im.
 import datetime as dt
 from collections import defaultdict
-_now = dt.datetime.now(dt.timezone.utc)
+# CHECK5_NOW chỉ dành cho selfcheck ghim kịch bản lịch cố định; production không set biến này.
+_now_env = os.environ.get("CHECK5_NOW", "")
+_now = (dt.datetime.fromisoformat(_now_env.replace("Z", "+00:00"))
+        if _now_env else dt.datetime.now(dt.timezone.utc))
 cutoff = _now - dt.timedelta(hours=48)
 # Backlog TREO LÂU: câu hỏi >48h mà chưa có answer/decision trước đây RƠI KHỎI radar hoàn
 # toàn (check chỉ nhìn 48h) → chết im, không owner, không ai nhắc user quyết (đúng gap mà
@@ -321,13 +324,30 @@ WAGS_SELF_Q_PREFIXES = ("wags-fix-not-confirmed:", "wags-arch-review-inconclusiv
 # nào trả lời trong khung đó. Điều kiện dispatch phải là "đã có đủ thời gian trả lời mà vẫn
 # im", không phải "tại thời điểm quét chưa thấy answer" (đúng họ §28 coding_guidelines: đọc
 # một BIỂU DIỄN tức thời rồi kết luận về sự thật bền).
-# 60 phút: cron ops_health_check chỉ chạy 2 lần/ngày (01:20 + 05:45 UTC) nên ân hạn này KHÔNG
-# làm mất ca nào — câu hỏi thật sự bị bỏ rơi vẫn được bắt ở lượt kế tiếp, thừa sức trong cutoff
-# 48h. Nó chỉ cắt đúng lớp false alarm sinh ra khi ops_health_check được chạy TAY nhiều lần
-# liên tiếp (hôm 08-17: 5 lần trong 6 phút) chồng lên lúc fleet đang trao đổi.
+# 60 phút: ân hạn chỉ an toàn khi vẫn còn lượt quét theo lịch TRƯỚC mốc ts+48h. Cron thật là
+# 2 lần/ngày 01:20 + 05:45 UTC, CHỈ T2-T6 (`20 1 * * 1-5`, `45 5 * * 1-5`); khe hở lớn nhất
+# T6 05:45Z → T2 01:20Z = 67h35 > cutoff 48h. Vì vậy KHÔNG áp dụng ân hạn nếu không còn lượt
+# quét Mon-Fri nào trước ts+48h; nếu cứ hoãn, question trong T6 04:45-05:45Z sẽ rơi thẳng vào
+# aged_q [WARN-ONLY] mà không bao giờ được dispatch (xem selfcheck ca 8d).
 # KHÔNG im lặng: câu hỏi trong ân hạn vẫn IN ra báo cáo, chỉ mang marker [WARN-ONLY] để không
 # rơi vào COORD_WARN (che giấu = đúng thứ mọi comment khác trong check #5 này đang chống).
 QUESTION_GRACE_MIN = 60
+# Hai hằng số này phải khớp crontab thật. Nếu cron đổi, cập nhật cả selfcheck ca 8d — không để
+# ân hạn tự nới rộng khe cuối tuần của kênh escalate question.
+CRON_SCAN_UTC_TIMES = ((1, 20), (5, 45))
+
+def _future_scan_before(limit_ts):
+    # Có ít nhất 1 lượt quét Mon-Fri diễn ra SAU lượt quét hiện tại và TRƯỚC ts+48h không.
+    # Check #5 chạy TAY bất kỳ lúc nào nên phải xét tương đối với `_now`, không chỉ đếm lịch.
+    day = _now.date()
+    for offset in range(3):
+        for hour, minute in CRON_SCAN_UTC_TIMES:
+            cand = dt.datetime.combine(day + dt.timedelta(days=offset),
+                                       dt.time(hour, minute), tzinfo=dt.timezone.utc)
+            if cand.weekday() < 5 and _now < cand < limit_ts:
+                return True
+    return False
+
 inbox_dir = os.path.join(wc_root, "mike", "bus", "inbox")
 pending_q = []
 pending_q_fresh = []     # <QUESTION_GRACE_MIN phút tuổi — hiện trong báo cáo, KHÔNG routable
@@ -623,8 +643,10 @@ if os.path.isdir(inbox_dir):
                     pending_q_wagsfix.append(f"{agent}/{rec.get('topic')}")
                 elif _acked(agent, str(rec.get("topic") or ""), ts_dt):
                     pending_q_needs_human.append(f"{agent}/{rec.get('topic')}")
-                elif (_now - ts_dt).total_seconds() < QUESTION_GRACE_MIN * 60:
-                    # Ân hạn: quá mới để kết luận "không ai trả lời" (xem QUESTION_GRACE_MIN).
+                elif ((_now - ts_dt).total_seconds() < QUESTION_GRACE_MIN * 60
+                      and _future_scan_before(ts_dt + dt.timedelta(hours=48))):
+                    # Ân hạn: quá mới để kết luận "không ai trả lời" (xem QUESTION_GRACE_MIN),
+                    # và sẽ còn lượt quét theo lịch TRƯỚC ts+48h để bắt nếu thật sự bị bỏ rơi.
                     # Đặt SAU 2 nhánh trên có chủ đích — chúng phân loại theo BẢN CHẤT câu hỏi
                     # (tự-sinh / đã triage), ân hạn chỉ nói về TUỔI, không được ghi đè phân loại.
                     pending_q_fresh.append(
