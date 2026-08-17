@@ -129,6 +129,9 @@ class Quote:
                      "priorcloseprice", "ref")
         self.ceiling = p("ceiling", "ceilingprice", "ce", "highlimit")
         self.floor = p("floor", "floorprice", "fl", "lowlimit")
+        # Dấu thời gian bản ghi tham chiếu (secdef) — KHÔNG phải `time` khớp lệnh. None khi feed
+        # không cấp; cổng G6 (price_frame) coi None là "không phát biểu được", không phải FAIL.
+        self.secdef_time = qget(raw, "secdeftime")
         self.bid = p("bestbid1price", "bidprice1", "bestbid", "b1", "bidprice")
         self.ask = p("bestoffer1price", "askprice1", "offerprice1", "bestoffer", "o1", "askprice")
         v = _fnum(qget(raw, "totaltrading", "totalvolumetraded", "totalvolume",
@@ -678,6 +681,12 @@ class DNSEBroker(BrokerBase):
                 sd = {}
                 print(f"[dnse] ⚠ secdef {symbol} lỗi: {e}")
         raw.update(sd)
+        # Dấu thời gian RIÊNG của bản ghi secdef, chụp TRƯỚC khi `latest_trade`/`latest_quote`
+        # ghi đè khoá `time` bằng giờ khớp lệnh. Đây là thứ DUY NHẤT cho biết `basicPrice` đang
+        # nói về PHIÊN NÀO: sau ~15:00 ICT, DNSE lật secdef sang phiên kế (đo thật BID 08-17
+        # 19:23:45 → basicPrice 35,9 = tham chiếu 08-18). price_frame.check_snapshot_session (G6).
+        if isinstance(sd, dict) and sd.get("time") is not None:
+            raw["secdefTime"] = sd["time"]
         # 2) khớp lệnh mới nhất — {"trades":[board G1: matchPrice, totalVolumeTraded]}
         try:
             raw.update(self._pick_board(self.client.latest_trade(symbol), "trades"))

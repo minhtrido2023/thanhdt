@@ -130,6 +130,11 @@ def _run_gdkhq_shadow(profiles, args, plan_date, otp_by_label, otp_common):
                 account["plan_orders_after"] = len(shadow_plan.orders)
                 account["plan_adjustments"] = adjustments
             bad_frames = [tk for tk, frame in account["frames"].items() if not frame.get("ok")]
+            # Cổng G6 = "bản đọc thuộc phiên KHÁC" (chạy ngoài phiên, secdef đã lật). Vẫn KHÔNG
+            # promote — nhưng phải tách khỏi FAIL logic, nếu không báo cáo nghiệm thu sẽ nói
+            # "công thức sở sai" trong khi thứ sai là GIỜ CHẠY (ca thật BID 2026-08-17 21:41).
+            account["stale_frames"] = [tk for tk, frame in account["frames"].items()
+                                       if frame.get("gate") == "G6"]
             bad_plan = [a for a in account["plan_adjustments"]
                         if a.get("action") in ("BLOCKED", "CALENDAR_FAIL")]
             account["ok"] = not bad_frames and not bad_plan
@@ -153,11 +158,20 @@ def _run_gdkhq_shadow(profiles, args, plan_date, otp_by_label, otp_common):
     os.replace(tmp_path, trace_path)
 
     trace["promoted"] = False
-    verdict = (f"✅ GDKHQ D1-D3 shadow {plan_date} PASS ({', '.join(watch)}; "
-               f"{len(trace['accounts'])} account) — ghi report, chưa promote."
-               if trace["passed"] else
-               f"⛔ GDKHQ D1-D3 shadow {plan_date} FAIL — KHÔNG rollout; lệnh mã GDKHQ "
-               f"tiếp tục bị chặn riêng. Trace: {trace_path}")
+    stale = sorted({tk for a in trace["accounts"] for tk in (a.get("stale_frames") or [])})
+    trace["stale_frames"] = stale
+    trace["indeterminate"] = bool(stale) and not trace["passed"]
+    if trace["passed"]:
+        verdict = (f"✅ GDKHQ D1-D3 shadow {plan_date} PASS ({', '.join(watch)}; "
+                   f"{len(trace['accounts'])} account) — ghi report, chưa promote.")
+    elif trace["indeterminate"]:
+        verdict = (f"⚠️ GDKHQ D1-D3 shadow {plan_date} KHÔNG KẾT LUẬN ĐƯỢC ({', '.join(stale)}): "
+                   f"bản đọc tham chiếu của DNSE đã lật sang phiên kế (cổng G6) vì chạy NGOÀI "
+                   f"phiên. Không phải lỗi logic — chạy lại TRONG phiên (trước 15:00 giờ VN) "
+                   f"của một ngày GDKHQ. KHÔNG rollout. Trace: {trace_path}")
+    else:
+        verdict = (f"⛔ GDKHQ D1-D3 shadow {plan_date} FAIL — KHÔNG rollout; lệnh mã GDKHQ "
+                   f"tiếp tục bị chặn riêng. Trace: {trace_path}")
 
     report_path = None
     report_error = None

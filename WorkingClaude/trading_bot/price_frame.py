@@ -18,8 +18,8 @@ median |dịch giá tham chiếu| = **5,46%**, max **50,0%** (VHM 2026-08-06), 1
 Để so sánh: toàn bộ cơ chế chống-đuổi-giá của hệ làm việc ở thang 1–4%. Sai hệ quy chiếu
 KHÔNG phải nhiễu — nó nuốt trọn cơ chế bảo vệ. Tần suất ≈ 1 sự kiện mỗi 2,4 phiên.
 
-NĂM CỔNG. G1/G2/G3 tái dùng NGUYÊN `no_chase_ceiling.check_reference_snapshot()` (job trước,
-đã CONFIRMED) — không viết lại. G4/G5 là mới, sinh ra từ đúng hai cách hỏng job này đo được:
+SÁU CỔNG. G1/G2/G3 tái dùng NGUYÊN `no_chase_ceiling.check_reference_snapshot()` (job trước,
+đã CONFIRMED) — không viết lại. G4/G5/G6 là mới, sinh ra từ đúng ba cách hỏng đã đo được:
 
   **G4 — bất biến ĐỒNG-HỆ (mới).** Mọi lô của cùng MỘT mã trong CÙNG một bản đọc `positions`
   phải có cùng `marketPrice`. Bằng chứng cơ chế (README §3, `dnse_raw_2026-08-14.jsonl`,
@@ -42,6 +42,19 @@ NĂM CỔNG. G1/G2/G3 tái dùng NGUYÊN `no_chase_ceiling.check_reference_snaps
   = 20.200 = đúng ảnh chụp app DNSE của user; SSI 08-17 (24.500−1.000)/1,2 = 19.583 → tick
   → 19.600 = đúng `q.ref`. Đây là ĐỐI SOÁT, **không phải nguồn** — README §D5: không bao giờ
   tự tính lại giá tham chiếu để THAY `q.ref`.
+
+  **G6 — bản đọc thuộc ĐÚNG phiên đang xét (mới, 2026-08-18, job Taylor_20260817_171334).**
+  `q.ref` là authoritative CHỈ KHI bản ghi `secdef` sinh ra nó nói về phiên ta đang gác. Đo
+  thật trên chính BID 08-17: bản ghi `secdef.time = 2026-08-17 19:23:45.110` mang
+  `basicPrice 35,9 / ceiling 38,4 / floor 33,4` — đó là tham chiếu phiên **08-18** (= giá đóng
+  cửa 08-17), không phải 35.800đ của phiên GDKHQ 08-17. Shadow chạy 21:41 ICT đọc đúng bản ghi
+  đã lật đó ⇒ G5 báo "công thức sở lệch 2 bước giá" trong khi công thức đúng tới từng đồng.
+  ⚠️ Bài học chung: cổng đối soát báo SAI NGUYÊN NHÂN dẫn người sửa đi chữa phần đang đúng —
+  nên "so hai con số" bao giờ cũng phải kèm "hai con số này có cùng hệ quy chiếu THỜI GIAN không".
+  Bằng chứng ba đường độc lập rằng 35.800đ MỚI là tham chiếu phiên 08-17: (1) công thức sở
+  38.250/1,068433 = 35.800,1 → tick → 35.800; (2) `positions.marketPrice` của cả 3 lô BID
+  suốt buổi sáng 08-17 (04:44→08:13 ICT) = 35.800, chỉ đổi thành 35.900 từ 19:05 (giá ĐÓNG
+  CỬA); (3) `tav2_bq.ticker.Close` 08-14 (đã điều chỉnh hồi tố) = 35.800.
 
 ⚠️ BẪY `event_status` — đã cắn thật, quant-skeptic REFUTED vòng 1 (`corp_action_daily.py:422`):
 sự kiện TƯƠNG LAI mang trạng thái **`announced`**, chỉ đổi sang `executed` ở lần reload
@@ -69,7 +82,7 @@ Taylor_20260815_034407).
 """
 import datetime as dt
 
-from .no_chase_ceiling import check_reference_snapshot
+from .no_chase_ceiling import EXCHANGE_BAND_PCT, check_reference_snapshot
 from .vn_market import normalize_price_vnd, tick_size
 
 # Giá phát hành của QUYỀN MUA — tham số DUY NHẤT của công thức G5 mà bảng vendor KHÔNG có
@@ -118,6 +131,27 @@ def _date(x):
         return dt.date.fromisoformat(str(x)[:10])
     except (TypeError, ValueError):
         return None
+
+
+def _dtime(x):
+    """Chuỗi thời gian của feed → `datetime` naive (giờ ICT, feed DNSE không mang tzinfo)."""
+    s = str(x or "").strip()
+    if not s:
+        return None
+    try:
+        v = dt.datetime.fromisoformat(s.replace("Z", "+00:00"))
+    except (TypeError, ValueError):
+        for fmt in ("%Y-%m-%d %H:%M:%S.%f", "%Y-%m-%d %H:%M:%S", "%Y-%m-%dT%H:%M:%S.%f",
+                    "%Y-%m-%dT%H:%M:%S"):
+            try:
+                v = dt.datetime.strptime(s, fmt)
+                break
+            except ValueError:
+                continue
+        else:
+            return None
+    return v.replace(tzinfo=None) if v.tzinfo is None else v.astimezone(
+        dt.timezone(dt.timedelta(hours=7))).replace(tzinfo=None)
 
 
 # ─────────────────────────────────────────────────── lịch sự kiện (I/O — BQ, tra 1 lần/phiên)
@@ -326,6 +360,109 @@ def check_same_frame(position_rows, ticker):
     return True, info
 
 
+# ─────────────────────────────────────────────────────────────────────────── G6 (hàm THUẦN)
+
+# Giờ sở đóng cửa phiên (ATC HOSE khớp 14:45). Bản ghi `secdef` mang dấu thời gian SAU mốc này
+# là bản ghi đã LẬT sang phiên kế — đo thật: BID `secdef.time = 2026-08-17 19:23:45.110` mang
+# `basicPrice 35,9 / ceiling 38,4 / floor 33,4`, tức tham chiếu phiên **08-18** (= giá đóng cửa
+# phiên 08-17), trong khi tham chiếu THẬT của phiên GDKHQ 08-17 là 35.800đ.
+SECDEF_ROLL_CUTOFF = dt.time(15, 0)
+# Trần "cũ tới mức không giải thích được": phiên kế cách bản ghi tối đa 5 NGÀY LỊCH (đủ cho khe
+# cuối tuần dài + 1 ngày lễ). Xa hơn ⇒ fail-closed, không đoán.
+SECDEF_MAX_AGE_DAYS = 5
+
+
+def band_tol_one_tick(ref, symbol="", exchange="HOSE", floor_tol=0.01):
+    """Dung sai G2 đủ nuốt việc SỞ làm tròn trần/sàn về bước giá → `band_tol` cho
+    `check_reference_snapshot`. THUẦN.
+
+    `check_reference_snapshot` mặc định `band_tol=0.01` = 1% **tương đối trên biên độ** = ±0,07pp
+    với HOSE. Đo thật trên feed DNSE 2026-08-18 (8 mã): sở luôn làm tròn trần XUỐNG bước giá gần
+    nhất, và với mã giá thấp một bước giá đáng nhiều hơn 0,07pp ⇒ 4/8 mã bị G2 chặn OAN dù **8/8
+    đều nằm trong ĐÚNG một bước giá** so với biên lý thuyết:
+
+        VIX 13.350 → trần 14.250 (lý thuyết 14.284,5) = +6,742%  ← đúng mã GDKHQ 2026-08-20
+        HHP 14.250 → 15.200 (15.247,5) = +6,667%   MBB 19.900 → 21.250 (21.293) = +6,784%
+        VGT 11.600 → 13.300 (13.340)   = +14,655%  [UPCOM]
+        (qua được với dung sai cũ: BID +6,964%, RAL +6,941%, FPT +6,977%, QNS +14,912%)
+
+    Chính docstring của `check_reference_snapshot` đã ghi dải đo được là "HOSE 6,69–7,00%" —
+    rộng hơn hẳn dung sai nó tự đặt. Đây là mâu thuẫn nội bộ, không phải phát hiện mới về sở.
+
+    CHỈ NỚI, KHÔNG BAO GIỜ SIẾT: `max(floor_tol, …)` giữ nguyên hành vi cho mã giá cao (nơi một
+    bước giá < 0,07pp). Hàm này CỐ Ý không sửa mặc định của `check_reference_snapshot` — luật A
+    (`no_chase_ceiling`) đang chạy LIVE với dung sai đó; đổi mặc định là đổi hành vi live, việc
+    khác, cổng khác. Ở đây chỉ đường D1-D3 (chưa live, đang SHADOW_PENDING) dùng.
+    """
+    r = _pos(ref)
+    band = EXCHANGE_BAND_PCT.get(str(exchange or "").strip().upper())
+    if r is None or not band:
+        return floor_tol
+    tick = tick_size(r, symbol=symbol or "", exchange=exchange or "HOSE")
+    if not tick or tick <= 0:
+        return floor_tol
+    return max(float(floor_tol), float(tick) / (r * band))
+
+
+def check_snapshot_session(secdef_time, session_date):
+    """G6 — bản ghi giá tham chiếu của feed đang mô tả PHIÊN NÀO → `(ok, info)`. THUẦN.
+
+    Sinh ra từ ca THẬT 2026-08-17: shadow chạy 21:41 ICT đọc `secdef` đã lật sang phiên kế và
+    G5 báo FAIL với thông điệp "công thức sở sai" — trong khi công thức đúng tới từng đồng và
+    thứ sai là **giờ chạy**. Một cổng đối soát báo sai NGUYÊN NHÂN nguy hiểm gần bằng không có
+    cổng: nó dẫn người sửa đi chữa phần đang đúng.
+
+    Không đoán theo đồng hồ máy chạy — đọc dấu thời gian FEED TỰ KHAI (`secdef.time`) rồi suy
+    ra phiên mà bản ghi mô tả:
+      · giờ < 15:00 ⇒ bản ghi mô tả phiên CỦA CHÍNH NGÀY đó ⇒ phải trùng `session_date`;
+      · giờ ≥ 15:00 ⇒ bản ghi đã lật, mô tả phiên KẾ TIẾP ⇒ `session_date` phải LỚN HƠN ngày
+        của bản ghi (không cần lịch phiên: "lớn hơn" phủ đúng cả khe cuối tuần).
+
+    THIẾU trường (`None`/rỗng) ⇒ `ok=True` với lý do ghi rõ — feed không cấp thì cổng này không
+    phát biểu được gì và G1/G2/G3/G4/G5 vẫn đứng nguyên (cùng tiền lệ với `check_same_frame`
+    khi thiếu `marketPrice`). CÓ trường nhưng KHÔNG parse được ⇒ **fail-closed**: một trường
+    tồn tại mà ta đọc không nổi là dấu hiệu feed đã đổi định dạng, không phải chuyện im lặng bỏ qua.
+    """
+    d = _date(session_date)
+    info = {"secdef_time": None if secdef_time is None else str(secdef_time),
+            "session_date": str(session_date), "cutoff": SECDEF_ROLL_CUTOFF.isoformat()}
+    if d is None:
+        info["reason"] = f"session_date không parse được ({session_date!r})"
+        return False, info
+    if secdef_time is None or not str(secdef_time).strip():
+        info["reason"] = ("feed không cấp dấu thời gian bản ghi tham chiếu — G6 không phát biểu "
+                          "được (các cổng khác vẫn hiệu lực)")
+        return True, info
+    ts = _dtime(secdef_time)
+    if ts is None:
+        info["reason"] = (f"CÓ dấu thời gian nhưng KHÔNG parse được ({secdef_time!r}) — feed có "
+                          f"thể đã đổi định dạng ⇒ fail-closed thay vì bỏ qua im lặng")
+        return False, info
+    rolled = ts.time() >= SECDEF_ROLL_CUTOFF
+    frame_note = ("sau giờ đóng cửa ⇒ mô tả phiên KẾ TIẾP" if rolled else
+                  "trong phiên ⇒ mô tả phiên của chính ngày đó")
+    info.update({"snapshot_ts": ts.isoformat(), "rolled_past_close": rolled,
+                 "age_days": (d - ts.date()).days})
+    if rolled:
+        ok = ts.date() < d
+    else:
+        ok = ts.date() == d
+    if ok and (d - ts.date()).days > SECDEF_MAX_AGE_DAYS:
+        info["reason"] = (f"bản ghi tham chiếu cũ {(d - ts.date()).days} ngày lịch so với phiên "
+                          f"{d} (trần {SECDEF_MAX_AGE_DAYS}) — không đoán, fail-closed")
+        return False, info
+    if not ok:
+        info["reason"] = (
+            f"BẢN ĐỌC KHÔNG THUỘC PHIÊN ĐANG XÉT: bản ghi tham chiếu của feed mang dấu thời gian "
+            f"{ts:%Y-%m-%d %H:%M:%S} ({frame_note}) nên nó mô tả một phiên KHÁC {d} — mọi đối "
+            f"soát trên nó nói về phiên sai. Chạy lại TRONG phiên {d} (trước {SECDEF_ROLL_CUTOFF:%H:%M} "
+            f"giờ VN); đây KHÔNG phải bằng chứng công thức sở sai.")
+        return False, info
+    info["reason"] = (f"bản ghi tham chiếu {ts:%Y-%m-%d %H:%M:%S} ({frame_note}) đúng là của "
+                      f"phiên {d}")
+    return True, info
+
+
 # ─────────────────────────────────────────────────────────────────────────── G5 (hàm THUẦN)
 
 def check_ref_vs_events(ref, p_cum, events, symbol="", exchange="HOSE", tol_ticks=1):
@@ -453,6 +590,8 @@ def resolve_reference(broker, ticker, session_date, events_map=None, quote=None,
       G1  sàn xác định được          ┐ tái dùng nguyên check_reference_snapshot() của job trước
       G2  biên độ trần/sàn khớp sàn  │ (đã CONFIRMED) — KHÔNG viết lại logic đã có
       G3  ref ∈ [Low, High] phiên trước ┘ ⇒ **BỎ QUA có chủ đích khi ex_today** (xem dưới)
+      G6  bản đọc thuộc đúng phiên đang xét ← chỉ áp khi ex_today; đứng TRƯỚC G5 vì G5 chỉ có
+          nghĩa khi hai vế cùng nói về một phiên
       G5  đối soát chéo công thức sở ← chỉ áp khi ex_today (ngày thường không có gì để dựng)
 
     G3 bị bỏ khi `ex_today=True` là ĐÚNG, không phải nới lỏng: ngày GDKHQ giá tham chiếu ĐÃ
@@ -523,7 +662,9 @@ def resolve_reference(broker, ticker, session_date, events_map=None, quote=None,
         getattr(quote, "floor", None), getattr(quote, "exchange", None),
         getattr(quote, "exchange_known", False),
         prev_low=None if ex_today else prev_low,
-        prev_high=None if ex_today else prev_high)
+        prev_high=None if ex_today else prev_high,
+        band_tol=band_tol_one_tick(getattr(quote, "ref", None), symbol=tk,
+                                   exchange=getattr(quote, "exchange", None) or "HOSE"))
     if ex_today:
         info123["g3_skipped"] = ("ngày GDKHQ: tham chiếu ĐÃ điều chỉnh nên nằm ngoài biên phiên "
                                  "trước là ĐÚNG — G5 thay chỗ G3")
@@ -539,6 +680,15 @@ def resolve_reference(broker, ticker, session_date, events_map=None, quote=None,
         out.update({"ref_price": ref, "frame_session": d.isoformat(), "share_factor": 1.0,
                     "ok": True, "gate": None,
                     "reason": f"phiên thường (không có sự kiện quyền): {info123.get('reason')}"})
+        return out
+
+    # ── G6 — bản đọc tham chiếu có thuộc ĐÚNG phiên này không ───────────────────────────
+    # Đặt TRƯỚC G5 có chủ đích: G5 chỉ có nghĩa khi hai vế cùng nói về một phiên. Chạy G5
+    # trước rồi mới hỏi phiên thì thông điệp lỗi đã sai người nhận (ca thật 2026-08-17).
+    ok6, info6 = check_snapshot_session(getattr(quote, "secdef_time", None), d)
+    out["info"]["G6"] = info6
+    if not ok6:
+        out["gate"], out["reason"] = "G6", info6["reason"]
         return out
 
     # ── G5 — đối soát chéo với công thức sở ──────────────────────────────────────────────
@@ -559,5 +709,5 @@ def resolve_reference(broker, ticker, session_date, events_map=None, quote=None,
 
     out.update({"ref_price": ref, "frame_session": d.isoformat(),
                 "share_factor": info5.get("share_factor"), "ok": True, "gate": None,
-                "reason": f"NGÀY GDKHQ, hệ quy chiếu MỚI xác nhận bởi 5/5 cổng: {info5['reason']}"})
+                "reason": f"NGÀY GDKHQ, hệ quy chiếu MỚI xác nhận bởi 6/6 cổng: {info5['reason']}"})
     return out

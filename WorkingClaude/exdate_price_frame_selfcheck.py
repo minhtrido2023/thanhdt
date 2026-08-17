@@ -102,10 +102,12 @@ EV_HAH_ESOP = {"ticker": "HAH", "event_code": "ISS", "exright_date": "2026-07-28
 
 
 class FakeQuote:
-    def __init__(self, ref, exchange="HOSE", band=0.07, known=True):
+    def __init__(self, ref, exchange="HOSE", band=0.07, known=True, secdef_time=None):
         self.ref, self.exchange, self.exchange_known = ref, exchange, known
         self.ceiling = round(ref * (1 + band))
         self.floor = round(ref * (1 - band))
+        # None = feed không cấp ⇒ G6 không phát biểu (mặc định giữ nguyên mọi ca cũ).
+        self.secdef_time = secdef_time
 
     def ok(self):
         return True
@@ -203,6 +205,96 @@ check("resolve_reference() CHO QUA khi cả 5 cổng sạch (bản đọc sau l�
       res_ok["ok"] is True and res_ok["ex_today"] is True, res_ok["reason"][:80])
 check("share_factor trả về đúng hệ số nhân số CP của sự kiện (BID ×1,068433)",
       abs((res_ok.get("share_factor") or 0) - 1.068433) < 1e-6, str(res_ok.get("share_factor")))
+
+# ══════════════════════════════════════════════════════════════════════════════════════
+print("\n── 2b. CA CHỨNG MINH NGƯỢC C — shadow 2026-08-17 21:41: secdef ĐÃ LẬT sang phiên kế ──")
+# ══════════════════════════════════════════════════════════════════════════════════════
+# FIXTURE THẬT — `DNSEClient.secdef("BID")` đọc lúc 2026-08-18 00:17 ICT, chép nguyên văn:
+#   {"symbol":"BID","basicPrice":35.9,"ceilingPrice":38.4,"floorPrice":33.4,
+#    "time":"2026-08-17 19:23:45.110"}
+# 35,9 = giá ĐÓNG CỬA phiên 08-17 ⇒ đó là tham chiếu phiên 08-18, KHÔNG phải 35.800đ của
+# phiên GDKHQ 08-17. Shadow chạy 21:41 ICT đọc đúng bản ghi này rồi báo G5 FAIL sai nguyên nhân.
+SECDEF_TIME_BID_ROLLED = "2026-08-17 19:23:45.110"
+
+ok6, info6 = pf.check_snapshot_session(SECDEF_TIME_BID_ROLLED, "2026-08-17")
+check("G6 CHẶN bản ghi secdef đã lật (19:23:45 mô tả phiên KẾ, không phải 08-17)",
+      not ok6 and info6.get("rolled_past_close") is True, info6["reason"][:100])
+check("G6 nói ĐÚNG nguyên nhân — 'chạy lại TRONG phiên', không đổ lỗi cho công thức sở",
+      "công thức sở sai" in info6["reason"] and "Chạy lại TRONG phiên" in info6["reason"])
+check("G6 CHO QUA bản ghi sinh trong phiên đúng ngày (08-17 09:14)",
+      pf.check_snapshot_session("2026-08-17 09:14:02.001", "2026-08-17")[0])
+check("G6 CHO QUA bản ghi tối T6 08-14 cho phiên T2 08-17 (đã lật = mô tả phiên KẾ, vắt cuối tuần)",
+      pf.check_snapshot_session("2026-08-14 19:23:45.110", "2026-08-17")[0])
+check("G6 CHẶN bản ghi TRONG phiên nhưng của NGÀY KHÁC (08-14 10:00 vs phiên 08-17)",
+      not pf.check_snapshot_session("2026-08-14 10:00:00", "2026-08-17")[0])
+check("G6 CHẶN bản ghi quá cũ dù đã lật (08-08 19:00 vs phiên 08-17 = 9 ngày > trần 5)",
+      not pf.check_snapshot_session("2026-08-08 19:00:00", "2026-08-17")[0])
+ok6_missing, info6_missing = pf.check_snapshot_session(None, "2026-08-17")
+check("G6 thiếu trường ⇒ không phát biểu (ok=True), các cổng khác vẫn hiệu lực",
+      ok6_missing, info6_missing["reason"][:70])
+check("G6 CÓ trường nhưng KHÔNG parse được ⇒ fail-closed, không bỏ qua im lặng",
+      not pf.check_snapshot_session("hôm qua lúc nào đó", "2026-08-17")[0])
+
+# End-to-end: TÁI HIỆN đúng ca shadow 2026-08-17 và đòi cổng gọi tên G6, KHÔNG phải G5.
+br_rolled = FakeBroker(
+    quotes={"BID": FakeQuote(35_900, secdef_time=SECDEF_TIME_BID_ROLLED)},
+    rows=BID_LOTS_AFTER, cum={"BID": 38_250})
+res_rolled = pf.resolve_reference(br_rolled, "BID", "2026-08-17", events_map=emap)
+check("resolve_reference() tái hiện ca shadow thật và dừng ở G6 (KHÔNG phải G5 báo sai nguyên nhân)",
+      res_rolled["ok"] is False and res_rolled["gate"] == "G6", f"gate={res_rolled['gate']}")
+check("G5 KHÔNG được chạy khi bản đọc thuộc phiên khác (không sinh kết luận trên hệ sai)",
+      "G5" not in res_rolled["info"], str(list(res_rolled["info"].keys())))
+
+# Cùng bản đọc đó nhưng dấu thời gian TRONG phiên + q.ref 35.800 (= giá DNSE thật cấp suốt
+# buổi sáng 08-17 cho cả 3 lô BID) ⇒ 6/6 cổng sạch. Đây là kết quả shadow LẼ RA phải có.
+br_inframe = FakeBroker(
+    quotes={"BID": FakeQuote(35_800, secdef_time="2026-08-17 09:14:02.001")},
+    rows=BID_LOTS_AFTER, cum={"BID": 38_250})
+res_inframe = pf.resolve_reference(br_inframe, "BID", "2026-08-17", events_map=emap)
+check("chạy TRONG phiên với q.ref 35.800: 6/6 cổng sạch — logic D1-D3 đúng, chỉ giờ chạy sai",
+      res_inframe["ok"] is True and res_inframe["gate"] is None, res_inframe["reason"][:90])
+
+# ══════════════════════════════════════════════════════════════════════════════════════
+print("\n── 2c. G2 phải nuốt việc SỞ làm tròn trần về bước giá (đo thật 8 mã, feed 2026-08-18) ──")
+# ══════════════════════════════════════════════════════════════════════════════════════
+# FIXTURE THẬT — `secdef` DNSE đọc 2026-08-18 00:5x ICT (ref, ceiling, sàn). `pass_cu` = kết quả
+# của dung sai CŨ (1% tương đối trên biên): 4/8 bị chặn OAN dù cả 8 chỉ lệch ≤ 1 bước giá.
+SECDEF_BANDS_0818 = [  # (mã, ref, ceiling, sàn, có qua nổi dung sai CŨ không)
+    ("VIX", 13_350, 14_250, "HOSE", False),   # ← đúng mã GDKHQ 2026-08-20
+    ("HHP", 14_250, 15_200, "HOSE", False),
+    ("MBB", 19_900, 21_250, "HOSE", False),
+    ("VGT", 11_600, 13_300, "UPCOM", False),
+    ("BID", 35_900, 38_400, "HOSE", True),
+    ("RAL", 77_800, 83_200, "HOSE", True),
+    ("FPT", 68_800, 73_600, "HOSE", True),
+    ("QNS", 45_600, 52_400, "UPCOM", True),
+]
+from trading_bot.no_chase_ceiling import EXCHANGE_BAND_PCT as _BANDS   # noqa: E402
+from trading_bot.vn_market import tick_size as _tick                   # noqa: E402
+
+n_rescued = 0
+for sym, ref_px, ce_px, exch, passed_old in SECDEF_BANDS_0818:
+    band = _BANDS[exch]
+    tick = _tick(ref_px, symbol=sym, exchange=exch)
+    check(f"{sym}: trần THẬT lệch ≤ 1 bước giá so với biên lý thuyết ({exch} ±{band:.0%})",
+          abs(ce_px - ref_px * (1 + band)) <= tick,
+          f"lệch {ce_px - ref_px * (1 + band):+,.1f}đ, bước giá {tick:,.0f}đ")
+    tol = pf.band_tol_one_tick(ref_px, symbol=sym, exchange=exch)
+    fl_px = ref_px * (1 - band)                       # sàn lý thuyết (chưa làm tròn)
+    ok2, info2 = pf.check_reference_snapshot(ref_px, ce_px, fl_px, exch, True, band_tol=tol)
+    check(f"{sym}: G2 CHO QUA với dung sai một-bước-giá (cũ: {'qua' if passed_old else 'CHẶN OAN'})",
+          ok2, info2.get("reason", "")[:80])
+    if not passed_old:
+        n_rescued += 1
+check("dung sai mới cứu đúng 4 mã bị chặn oan, trong đó có VIX (GDKHQ 2026-08-20)",
+      n_rescued == 4, f"n_rescued={n_rescued}")
+check("dung sai CHỈ NỚI, không bao giờ SIẾT (mã giá cao: 1 bước giá < 0,07pp ⇒ giữ 1%)",
+      pf.band_tol_one_tick(200_000, symbol="XYZ", exchange="HOSE") == 0.01,
+      str(pf.band_tol_one_tick(200_000, symbol="XYZ", exchange="HOSE")))
+check("G2 vẫn CHẶN snapshot trộn hai phiên thật (trần lệch NHIỀU bước giá)",
+      not pf.check_reference_snapshot(
+          13_350, 15_000, 13_350 * 0.93, "HOSE", True,
+          band_tol=pf.band_tol_one_tick(13_350, symbol="VIX", exchange="HOSE"))[0])
 
 # ══════════════════════════════════════════════════════════════════════════════════════
 print("\n── 3. CA CHỨNG MINH NGƯỢC B — plan_main_2026-08-11 (ref 24.250, đúng 20.200) ──")
@@ -560,5 +652,5 @@ print()
 if FAILS:
     print(f"FAILED {len(FAILS)}: {FAILS}")
     sys.exit(1)
-print("OK — cổng GDKHQ (D1/D2/D3) PASS toàn bộ, gồm 2 ca chứng minh ngược từ artifact THẬT")
+print("OK — cổng GDKHQ (D1/D2/D3) PASS toàn bộ, gồm 3 ca chứng minh ngược từ artifact THẬT")
 sys.exit(0)
