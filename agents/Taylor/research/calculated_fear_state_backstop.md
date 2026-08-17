@@ -1336,6 +1336,13 @@ chuỗi chỉ số, đừng dùng cột mirror.
 phiên 17/08 (TV1) — luận điểm không gãy nhưng 2 cổng chưa đóng + 1 điểm giá đáng escalate.**
 **Mốc phải theo: TV1 kiểm toán + cổ tức (quá hạn, kiểm mỗi phiên) → TV4 30/08 → PNJ Q3 cuối 10/2026.**
 
+**✅ ĐÃ ĐÓNG (2026-08-17, Mike theo quyết định user):** tranche CUỐI TV1 đã khớp ĐỦ — SpaceX 500cp @
+**20.100** (PLACE/FILL 09:15 ICT, `exec_SpaceX_2026-08-17_journal.csv`, trong khi plan ref 20.640).
+Tracking `fearbuy-monday-buyside-TV1-2-cong-chua-dong` (2 cổng chưa đóng trước phiên 17/08) **CHÍNH
+THỨC ĐÓNG** — lệnh đã xong, không còn theo dõi. Chương trình tích luỹ TV1 2.300cp (5% NAV, cả 2
+account) vẫn hoạt động; mốc dài hạn giữ nguyên: TV1 kiểm toán + cổ tức (theo dõi chương trình) →
+TV4 30/08 → PNJ Q3 cuối 10/2026.
+
 Nguồn: [cafef — "tội đồ" nào khiến VN-Index bay gần 37 điểm phiên 14/8](https://cafef.vn/toi-do-nao-khien-vn-index-bay-gan-37-diem-trong-phien-14-8-188260814153439097.chn) ·
 [stockbiz — lý do POM bị duy trì hạn chế giao dịch](https://stockbiz.vn/tin-tuc/pom-ly-do-co-phieu-cua-thep-pomina-bi-duy-tri-han-che-giao-dich/40815374) ·
 [24hmoney — Pomina đối mặt án huỷ niêm yết](https://24hmoney.vn/news/pomina-doi-mat-an-huy-niem-yet-c1a2794307.html) ·
