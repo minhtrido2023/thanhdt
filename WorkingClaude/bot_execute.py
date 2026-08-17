@@ -41,10 +41,13 @@ from trading_bot.plan import (load_plan, filter_excluded_tickers, net_offsetting
 from trading_bot.plan_funding_gate import check_plan_funding
 from trading_bot.exdate_gate import apply_exdate_gate
 from trading_bot import price_frame as exprice
-from trading_bot.gdkhq_rollout import (STATE_PATH as GDKHQ_ROLLOUT_STATE,
+from trading_bot.gdkhq_rollout import (ACCEPTANCE_STATE_PATH as GDKHQ_ACCEPTANCE_STATE,
+                                       accept_shadow as accept_gdkhq_shadow,
+                                       STATE_PATH as GDKHQ_ROLLOUT_STATE,
                                        enabled as gdkhq_rollout_enabled,
-                                       mark_enabled as mark_gdkhq_enabled,
-                                       pending_resolver as gdkhq_pending_resolver)
+                                       pending_resolver as gdkhq_pending_resolver,
+                                       record_shadow_pass as record_gdkhq_shadow_pass,
+                                       write_acceptance_report as write_gdkhq_acceptance_report)
 from trading_bot.netting_recon import (reconcile_netted_fills, get_net_fill_from_journal,
                                        write_recon_log)
 from trading_bot.executor import Executor, run_session, _publish_bot_event
@@ -149,22 +152,58 @@ def _run_gdkhq_shadow(profiles, args, plan_date, otp_by_label, otp_common):
         os.fsync(f.fileno())
     os.replace(tmp_path, trace_path)
 
-    if trace["passed"] and args.promote_gdkhq_on_pass:
-        mark_gdkhq_enabled(trace_path, plan_date)
-        trace["promoted"] = True
-        verdict = (f"✅ GDKHQ D1-D3 shadow {plan_date} PASS ({', '.join(watch)}; "
-                   f"{len(trace['accounts'])} account) — đã rollout cho lệnh thật. Trace: {trace_path}")
-    elif trace["passed"]:
-        trace["promoted"] = False
-        verdict = f"✅ GDKHQ D1-D3 shadow {plan_date} PASS — chưa promote (không có cờ explicit)."
-    else:
-        trace["promoted"] = False
-        verdict = (f"⛔ GDKHQ D1-D3 shadow {plan_date} FAIL — KHÔNG rollout; lệnh mã GDKHQ "
-                   f"tiếp tục bị chặn riêng. Trace: {trace_path}")
+    trace["promoted"] = False
+    verdict = (f"✅ GDKHQ D1-D3 shadow {plan_date} PASS ({', '.join(watch)}; "
+               f"{len(trace['accounts'])} account) — ghi report, chưa promote."
+               if trace["passed"] else
+               f"⛔ GDKHQ D1-D3 shadow {plan_date} FAIL — KHÔNG rollout; lệnh mã GDKHQ "
+               f"tiếp tục bị chặn riêng. Trace: {trace_path}")
+
+    report_path = None
+    report_error = None
+    try:
+        report_path, acceptance = write_gdkhq_acceptance_report(
+            trace, verdict, plan_date, trace_path, state_path=GDKHQ_ACCEPTANCE_STATE)
+        trace["report_path"] = report_path
+        trace["acceptance_status"] = acceptance["acceptance_status"]
+    except Exception as exc:  # noqa: BLE001
+        report_error = f"{type(exc).__name__}: {exc}"
+        trace["report_error"] = report_error
+        verdict = (f"⛔ GDKHQ D1-D3 shadow {plan_date} report LỖI — KHÔNG promote; "
+                   f"trace vẫn được giữ để điều tra không im lặng. {report_error}")
+
+    recorded = False
+    record_error = None
+    if trace["passed"] and (args.promote_gdkhq_on_pass or args.record_gdkhq_shadow_pass) \
+            and report_error is None:
+        try:
+            record_gdkhq_shadow_pass(
+                trace_path, plan_date, report_path=report_path,
+                acceptance_path=GDKHQ_ACCEPTANCE_STATE)
+            recorded = True
+            trace["shadow_recorded"] = True
+            verdict = (f"✅ GDKHQ D1-D3 shadow {plan_date} PASS ({', '.join(watch)}; "
+                       f"{len(trace['accounts'])} account) — đã ghi shadow PASS, chờ nghiệm "
+                       f"thu; chưa bật lệnh thật. "
+                       f"Trace: {trace_path}")
+        except Exception as exc:  # noqa: BLE001
+            record_error = f"{type(exc).__name__}: {exc}"
+            trace["record_error"] = record_error
+            verdict = (f"⛔ GDKHQ D1-D3 shadow {plan_date} PASS nhưng GHI SHADOW PASS LỖI — "
+                       f"chưa thể nghiệm thu; cần xử lý trước khi bật vốn thật. {record_error}")
+
+    tmp_path = trace_path + f".tmp.{os.getpid()}"
+    with open(tmp_path, "w", encoding="utf-8") as f:
+        json.dump(trace, f, ensure_ascii=False, indent=2, default=str)
+        f.write("\n")
+        f.flush()
+        os.fsync(f.fileno())
+    os.replace(tmp_path, trace_path)
     print(verdict)
     print(json.dumps(trace, ensure_ascii=False, indent=2, default=str))
     _notify_gdkhq_shadow(verdict)
-    return 0 if trace["passed"] else 4
+    run_ok = trace["passed"] and report_error is None and record_error is None
+    return 0 if run_ok else 4
 
 
 def _alert_approval_block(label, plan_date, reason):
@@ -449,7 +488,13 @@ def main():
     ap.add_argument("--gdkhq-watch", default="",
                     help="danh sách mã GDKHQ phân cách dấu phẩy cho --gdkhq-shadow")
     ap.add_argument("--promote-gdkhq-on-pass", action="store_true",
-                    help="sau shadow PASS, ghi marker bật D1-D3 cho vốn thật")
+                    help="[tương thích cũ] sau shadow PASS, ghi marker shadow PASS chờ nghiệm thu")
+    ap.add_argument("--record-gdkhq-shadow-pass", action="store_true",
+                    help="sau shadow PASS, ghi marker shadow PASS chờ nghiệm thu (chưa bật live)")
+    ap.add_argument("--accept-gdkhq-shadow", default=None, metavar="YYYY-MM-DD",
+                    help="nghiệm thu trace shadow PASS và bật live D1-D3 (không cần broker)")
+    ap.add_argument("--accept-gdkhq-by", default="user",
+                    help="người nghiệm thu cho --accept-gdkhq-shadow")
     args = ap.parse_args()
 
     if args.probe:
@@ -508,8 +553,18 @@ def main():
     otp_by_label, otp_common = parse_otp(args.otp)
     plan_date = args.date or today_ict().strftime("%Y-%m-%d")
 
-    if args.promote_gdkhq_on_pass and not args.gdkhq_shadow:
-        ap.error("--promote-gdkhq-on-pass chỉ hợp lệ cùng --gdkhq-shadow")
+    if args.accept_gdkhq_shadow:
+        acceptance = accept_gdkhq_shadow(
+            args.accept_gdkhq_shadow, args.accept_gdkhq_by,
+            path=GDKHQ_ACCEPTANCE_STATE, rollout_path=GDKHQ_ROLLOUT_STATE)
+        print("✅ GDKHQ shadow đã được nghiệm thu "
+              f"{args.accept_gdkhq_shadow} bởi {args.accept_gdkhq_by}.")
+        print(json.dumps(acceptance, ensure_ascii=False, indent=2, default=str))
+        return 0
+
+    if (args.promote_gdkhq_on_pass or args.record_gdkhq_shadow_pass) and not args.gdkhq_shadow:
+        ap.error("--promote-gdkhq-on-pass / --record-gdkhq-shadow-pass chỉ hợp lệ cùng "
+                 "--gdkhq-shadow")
     if args.gdkhq_shadow:
         return _run_gdkhq_shadow(profiles, args, plan_date, otp_by_label, otp_common)
 
@@ -647,9 +702,9 @@ def main():
         # Cơ chế + độ lớn đã đo (median 5,46%, max 50,0%): trading_bot/price_frame.py và
         # mike/agents/Taylor/research/exdate_order_pipeline_20260815/README.md.
         # User duyệt rollout hai bước 2026-08-15: một live shadow 2026-08-17 rồi mới bật vốn
-        # thật. Trước marker PASS, vẫn tra lịch như bình thường nhưng resolver cố ý từ chối:
-        # chỉ lệnh của mã GDKHQ bị bỏ, mọi mã thường là NO-OP. Nếu trace PASS, shadow command
-        # ghi marker atomically và từ lần bot kế tiếp dùng resolver D1 thật.
+        # thật. Shadow command chỉ ghi marker PENDING_ACCEPTANCE + report; lệnh accept riêng
+        # mới chuyển sang ENABLED. Trước lúc đó, resolver cố ý từ chối: chỉ lệnh của mã GDKHQ
+        # bị bỏ, mọi mã thường là NO-OP.
         _gdkhq_live = gdkhq_rollout_enabled()
         plan, ex_adj = apply_exdate_gate(
             plan, broker, plan_date,
@@ -664,7 +719,7 @@ def main():
                 print(f"[{p['label']}] ⚠️⚠️ CỔNG GDKHQ KHÔNG CHẠY ĐƯỢC — {a['reason']}")
         if not _gdkhq_live and any(a.get("action") == "BLOCKED" for a in ex_adj):
             print(f"[{p['label']}] ℹ️ D1-D3 đang SHADOW_PENDING ({GDKHQ_ROLLOUT_STATE}); "
-                  f"chỉ mã GDKHQ bị chặn tới khi live trace PASS")
+                  f"chỉ mã GDKHQ bị chặn tới khi shadow trace được nghiệm thu")
         if not plan.orders:
             print(f"[{p['label']}] plan {plan_date} không còn lệnh nào sau cổng GDKHQ — bỏ qua")
             continue

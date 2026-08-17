@@ -20,6 +20,7 @@ lên trạng thái SỐNG). Chạy được không cần DNSE, không cần BigQ
 
 Chạy: `python3 exdate_price_frame_selfcheck.py`   (exit 0 = PASS)
 """
+import json
 import os
 import subprocess
 import sys
@@ -505,18 +506,36 @@ finally:
 
 
 # ══════════════════════════════════════════════════════════════════════════════════════
-print("\n── 10. Rollout hai bước — pending chặn riêng mã GDKHQ, PASS marker bật atomically ──")
+print("\n── 10. Rollout hai bước — pending chặn riêng mã GDKHQ, nghiệm thu mới bật live ──")
 # ══════════════════════════════════════════════════════════════════════════════════════
 with tempfile.TemporaryDirectory() as td:
     state_path = os.path.join(td, "rollout.json")
+    acceptance_path = os.path.join(td, "acceptance.json")
+    report_path = os.path.join(td, "acceptance.md")
     check("thiếu marker ⇒ mặc định SHADOW_PENDING (fail-safe sau restore/deploy mới)",
           not gdkhq_rollout.enabled(state_path))
     trace_path = os.path.join(td, "trace.json")
+    trace = {"passed": True, "watch": ["BID"], "accounts": [], "calendar_missing": []}
     with open(trace_path, "w", encoding="utf-8") as f:
-        f.write("{}\n")
-    state = gdkhq_rollout.mark_enabled(trace_path, "2026-08-17", state_path)
-    check("chỉ mark_enabled sau trace PASS mới bật rollout",
-          gdkhq_rollout.enabled(state_path) and state.get("approved_by") == "user")
+        json.dump(trace, f, ensure_ascii=False)
+    report_path, acceptance = gdkhq_rollout.write_acceptance_report(
+        trace, "PASS selfcheck", "2026-08-17", trace_path,
+        report_path=report_path, state_path=acceptance_path)
+    check("shadow PASS phải có report acceptance trước khi promote",
+          os.path.isfile(report_path)
+          and acceptance["acceptance_status"] == "PENDING_ACCEPTANCE")
+    state = gdkhq_rollout.record_shadow_pass(
+        trace_path, "2026-08-17", state_path,
+        report_path=report_path, acceptance_path=acceptance_path)
+    check("shadow PASS pending ⇒ live chưa bật, chỉ ghi marker PENDING",
+          state.get("status") == "shadow_passed"
+          and state.get("report_path") == report_path
+          and not gdkhq_rollout.enabled(state_path))
+    gdkhq_rollout.accept_shadow("2026-08-17", "user",
+                                path=acceptance_path, rollout_path=state_path)
+    check("chỉ sau nghiệm thu user marker mới chuyển ENABLED",
+          gdkhq_rollout.enabled(state_path)
+          and gdkhq_rollout.read_state(state_path)["acceptance_status"] == "ACCEPTED")
 
 pending_plan, pending_adj = apply_exdate_gate(
     plan_main_0811(), br_mbb, "2026-08-11", events_map=emap_mbb,
