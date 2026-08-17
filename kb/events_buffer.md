@@ -1016,3 +1016,22 @@
 ## Consolidation 2026-08-17T17:42:03Z
 - [2026-08-17T17:41:53Z] Mike/heartbeat — Mike_20260817_173852: {"status": "still_running", "elapsed_min": 3, "job_id": "Mike_20260817_173852", "source": "watcher"}
 - [2026-08-17T17:41:57Z] Mike/finding — daily-retro-2026-08-17-finalized: {"summary": "Retro 08-17 finalized: 4 sự cố (2 tự phát hiện qua audit), 2 pattern. Wags verify GAPS FOUND → fixed (sự cố #2 câu b HOÀN CHỈNH→HỞ, round-2 fix 4435b3e0 chưa merge master). Pattern B wakeup-miss escalate lại (27,3%, cao nhất từng đo).", "entry": "kb/incidents/retro/retro-2026-08-17.md", "commit": "d337a071", "escalation_topic": "wakeup-miss-recurring-post-push-2026-08-17"}
+
+## Consolidation 2026-08-17T18:07:02Z
+- [2026-08-17T17:47:27Z] Mike/decision — gdkhq-d1d3-accepted: {"acceptance_status": "ACCEPTED", "accepted_by": "user/John Dinh via Discord 2026-08-17", "accepted_at": "2026-08-17T17:47:09+00:00", "shadow_trace_date": "2026-08-18", "gates_passed": 6, "tickers_watched": ["HHP", "QNS", "RAL", "VGT"], "decided_by": "user", "note": "User confirmed Accept GDKHQ after shadow PASS"}
+- [2026-08-17T17:53:31Z] Taylor/heartbeat — Taylor_20260817_175306: {"status": "in_progress", "note": "Doc gdkhq_rollout.py + bot_execute shadow path; bat dau PHAN A auto-accept"}
+- [2026-08-17T17:54:07Z] Taylor/heartbeat — Taylor_20260817_175306: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20260817_175306", "source": "watcher"}
+- [2026-08-17T17:55:07Z] Taylor/heartbeat — Taylor_20260817_175306: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20260817_175306", "source": "watcher"}
+- [2026-08-17T17:56:07Z] Taylor/heartbeat — Taylor_20260817_175306: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20260817_175306", "source": "watcher"}
+- [2026-08-17T17:57:07Z] Taylor/heartbeat — Taylor_20260817_175306: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20260817_175306", "source": "watcher"}
+- [2026-08-17T17:58:07Z] Taylor/heartbeat — Taylor_20260817_175306: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20260817_175306", "source": "watcher"}
+- [2026-08-17T17:59:07Z] Taylor/heartbeat — Taylor_20260817_175306: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20260817_175306", "source": "watcher"}
+- [2026-08-17T18:00:08Z] Taylor/heartbeat — Taylor_20260817_175306: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20260817_175306", "source": "watcher"}
+- [2026-08-17T18:01:08Z] Taylor/heartbeat — Taylor_20260817_175306: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20260817_175306", "source": "watcher"}
+- [2026-08-17T18:02:08Z] Taylor/heartbeat — Taylor_20260817_175306: {"status": "in_progress", "note": "PHAN A bi classifier chan o buoc wire (se escalate). Sang PHAN B: phat hien tick_size DA exchange-aware san; dang verify ca VGT UPCOM"}
+- [2026-08-17T18:02:08Z] Taylor/heartbeat — Taylor_20260817_175306: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20260817_175306", "source": "watcher"}
+- [2026-08-17T18:03:07Z] Taylor/status — Taylor_20260817_175306: {"status": "deadline_extended", "hb_age_s": 59, "extension": 1, "max_ext": 3, "source": "watcher"}
+- [2026-08-17T18:03:08Z] Taylor/heartbeat — Taylor_20260817_175306: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20260817_175306", "source": "watcher"}
+- [2026-08-17T18:04:09Z] Taylor/heartbeat — Taylor_20260817_175306: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20260817_175306", "source": "watcher"}
+- [2026-08-17T18:05:09Z] Taylor/heartbeat — Taylor_20260817_175306: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20260817_175306", "source": "watcher"}
+- [2026-08-17T18:06:10Z] Taylor/heartbeat — Taylor_20260817_175306: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20260817_175306", "source": "watcher"}
