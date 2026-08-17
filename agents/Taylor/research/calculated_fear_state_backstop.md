@@ -1268,6 +1268,83 @@ Nguồn tin tuần này: [nguoiquansat — khởi tố CT/GĐ Đầu tư 706 (08
 
 ---
 
+### 2026-08-17 — QUÉT SÁNG THỨ HAI (job `Taylor_20260817_010002`, cadence khác quét tuần: mục đích là BẢO VỆ PHÍA MUA trước 09:00) — 1 case mới (POM → NON) · 0 QUALIFY · 1 mã đang mua có 2 cổng CHƯA đóng
+
+Cửa sổ tin 14/08 (sau phiên) → 16/08. Danh mục đang gác **29 mã** (13 NH + 16 ngoài NH).
+
+**Phần 1 — anomaly_scan** (`--backfill-days 5 --no-flags`): phiên cuối cache **2026-08-14**,
+universe 252 mã, **watchlist TƯƠI** (`active_nav` computed_at 2026-08-14) — không có cảnh báo quá hạn.
+**0 FLOOR2 · 0 IDIOCRASH.** Chỉ 2 cờ TĂNG (GAS/GVR `CEIL2` 10/08) đã ghi tuần trước.
+
+**Phần 2 — quét rộng** `bq_cache/ticker` 2026 (1.275 mã → **458 mã** đạt ADV ≥1 tỷ), IDIOCRASH
+12/08→14/08: **8 sự kiện / 8 mã**. 7/8 đã có kết luận tuần trước (ANT/DDG/HHP/TDM/L14 **NON**;
+HII/LLM **pullback từ đỉnh, không phải case**). **1 mã MỚI: POM.**
+
+| Mã | Số chặn | Kết luận |
+|---|---|---|
+| **POM** (Thép Pomina), 3.200đ, −33,3% so đỉnh 3M, +10,3% trên đáy | **Vốn chủ sở hữu ÂM** (−590 tỷ công ty mẹ / −630 tỷ hợp nhất, BCTC kiểm toán 2025) ⇒ trượt §2#4 + §10.5 solvency, và dưới sàn 30 tỷ để giữ tư cách công ty đại chúng · **ý kiến kiểm toán NGOẠI TRỪ ≥3 năm liên tiếp** = gạch ❌ tường minh của §2 · **hạn chế giao dịch từ 19/06/2026, chỉ khớp phiên thứ Sáu** · đang bị xem xét huỷ niêm yết/huỷ tư cách đại chúng | **NON** |
+
+⚠️ **Lớp dương-tính-giả CƠ HỌC mới phát hiện (đề xuất lọc, chưa wire):** POM chỉ giao dịch **1
+phiên/tuần** nên "ret 1 phiên" của nó thực chất là **ret 1 TUẦN** — mọi mã bị hạn chế giao dịch sẽ
+sinh cờ IDIOCRASH giả theo cùng cơ chế. Bước lọc rẻ: loại mã có <4 phiên có KL trong 5 phiên gần
+nhất, chạy TRƯỚC khi kéo dữ liệu tài chính (cùng tinh thần bước vị-trí-giá 3M thêm tuần trước).
+
+**Phần 3 — bối cảnh thị trường (mới, ảnh hưởng phía mua):** VNINDEX **14/08 đóng 1.729,08, −36,55đ
+(−2,07%)**, mất MA200; nhóm Vingroup lấy ~14,5 điểm chỉ số (VIC −3,5% / VRE −3,3% / VHM −2,7%);
+BĐS −2,93%, CNTT −2,17%, NH −0,82%. **DT5G vẫn NEUTRAL** (`golive_state_today` as_of 2026-08-14,
+published 19:01, base_state_dt4=3 == dt5g=3, không bị macro cap) — trạng thái này đã tính SAU cú
+giảm, không phải số cũ.
+
+**Phần 4 — PHÍA MUA phiên 17/08 (câu hỏi chính của lượt quét này): CHỈ CÓ 1 LỆNH MUA trên cả 2
+account** — SpaceX `BUY-TV1-DISC-2026-08-17`, 500cp LO ≤20.640 (10,32tr), tranche CUỐI của chương
+trình gom 2.300cp (đã khớp 1.800). ZaloPay 0 lệnh.
+- **Luận điểm TV1 KHÔNG gãy**: 0 tin mới 14→16/08 (vietstock tin-tức-sự-kiện trống trong cửa sổ);
+  nhân sự vẫn nguyên trạng (CT Nguyễn Hữu Chỉnh tạm đình chỉ từ 02/06, TGĐ Nguyễn Kim Cương phụ trách).
+- **NHƯNG cả 2 cổng §14 vẫn CHƯA đóng, và cổng (b) nay ĐÃ QUÁ HẠN:**
+  (a) **kết quả lấy ý kiến bằng văn bản chọn đơn vị kiểm toán (10/08) vẫn CHƯA công bố** — 7 ngày.
+  Nền: cả **4 Big4 (Deloitte/EY/KPMG/PwC) đã TỪ CHỐI** kiểm toán TV1 sau khi CT bị khởi tố.
+  (b) **cổ tức tiền mặt 15%, ngày thanh toán công bố 14/08 — KHÔNG có bằng chứng đã về.**
+  `cashDividendReceiving` của SpaceX = **9.775.000đ ĐỨNG YÊN** từ 13/08 qua 14/08 tới bản đọc mới
+  nhất, `totalCash` không tăng khoản nào ⇒ chưa credit. (Đây đúng là phép thử DDM §14 đặt ra.)
+- ⚠️ **Điểm giá đáng lưu ý (không phải vi phạm luật, nhưng nên cân nhắc):** limit **20.640** nằm
+  **+2,69% TRÊN giá đóng cửa 14/08 (20.100)**. Nguyên nhân cơ học: trần động neo vào **trung bình 5
+  phiên (20.140)**, mà trung bình 5 phiên TRỄ so với cú giảm −2,07% của chỉ số. Trần 20.744 vẫn dưới
+  `max_no_chase_ceiling` 25.000 nên hệ không chặn. Đề xuất escalate (KHÔNG tự đổi plan): hạ limit
+  tranche cuối về ≤20.100 hoặc hoãn 1 phiên, vì đây là 500cp cuối — không có áp lực thời gian.
+
+**Phần 5 — read-through peer (không phải case mua):** **TV3 (PECC3)** 14/08 bổ nhiệm PTGĐ Hồ Anh
+Tùng + tái bổ nhiệm GĐ Trung tâm Nhiệt điện — sau khi 3 lãnh đạo (nguyên CT Nguyễn Như Hoàng Tuấn,
+TGĐ Lạc Thái Phước, KTT Phạm Hoàng Vinh) bị khởi tố/tạm giam. Q2/2026 **doanh thu −53,8% YoY nhưng
+LNST +30,5% YoY** — chữ ký chất lượng lợi nhuận cần soi, nhưng TV3 quá nhỏ/mỏng thanh khoản, KHÔNG
+phải ứng viên. Giá trị duy nhất: xác nhận **cụm khởi tố ngành tư vấn điện (PECC1/3/4) là có thật và
+còn đang diễn tiến** — đúng bối cảnh rủi ro của TV1.
+
+**Phần 6 — nhóm ngân hàng (13 mã) + nhóm ngoài NH (16 mã):** 0 sự kiện. Không có tin kiểm soát đặc
+biệt / chuyển giao bắt buộc / khởi tố lãnh đạo NH / rút tiền hàng loạt trong cửa sổ. Ghi nhận 2 mục
+vận hành (không phải rủi ro): **VIX chốt quyền cổ tức CỔ PHIẾU 5% tuần 17-21/08** (điều chỉnh số
+lượng — việc của Winston/Mafee); **DGC vẫn trong danh sách cắt margin HOSE tháng 8** (đã biết).
+
+**Phần 7 — 1 khuyết tật dữ liệu (nhỏ, báo Winston):** trong `bq_cache/ticker/2026.parquet`, cột
+mirror `VNINDEX` phiên **2026-08-13** có **1 dòng (mã F88) mang giá trị CŨ 1793,18** thay vì 1765,63
+(775 dòng còn lại đúng). `anomaly_scan.compute_signals` dùng `.first()` theo ngày nên KHÔNG bị ảnh
+hưởng (F88 không đứng đầu bảng chữ cái và không nằm trong universe 252). Query ad-hoc dùng
+`max(VNINDEX)` thì BỊ — chính lượt này đã dính và phải tính lại: dùng **`ticker='VNINDEX'`** làm
+chuỗi chỉ số, đừng dùng cột mirror.
+
+**Tổng kết**: **29 mã đang gác** rà qua · 252 mã (anomaly_scan) + 458 mã (quét rộng) + 7 truy vấn tin
+· **1 case mới (POM → NON) · 0 QUALIFY mới** · watchlist **KHÔNG** quá hạn · **1 lệnh mua duy nhất
+phiên 17/08 (TV1) — luận điểm không gãy nhưng 2 cổng chưa đóng + 1 điểm giá đáng escalate.**
+**Mốc phải theo: TV1 kiểm toán + cổ tức (quá hạn, kiểm mỗi phiên) → TV4 30/08 → PNJ Q3 cuối 10/2026.**
+
+Nguồn: [cafef — "tội đồ" nào khiến VN-Index bay gần 37 điểm phiên 14/8](https://cafef.vn/toi-do-nao-khien-vn-index-bay-gan-37-diem-trong-phien-14-8-188260814153439097.chn) ·
+[stockbiz — lý do POM bị duy trì hạn chế giao dịch](https://stockbiz.vn/tin-tuc/pom-ly-do-co-phieu-cua-thep-pomina-bi-duy-tri-han-che-giao-dich/40815374) ·
+[24hmoney — Pomina đối mặt án huỷ niêm yết](https://24hmoney.vn/news/pomina-doi-mat-an-huy-niem-yet-c1a2794307.html) ·
+[cafef — 4 Big4 từ chối kiểm toán TV1](https://cafef.vn/mot-cong-ty-con-cua-evn-bi-ca-4-cong-ty-big4-tu-choi-kiem-toan-sau-khi-chu-tich-hdqt-bi-khoi-to-188260701114401433.chn) ·
+[nguoiquansat — PECC3 (TV3) biến động nhân sự 14/08](https://nguoiquansat.vn/bien-dong-moi-tai-doanh-nghiep-dien-quy-mo-300-ty-dong-sau-khi-dan-lanh-dao-bi-khoi-to-310429.html) ·
+[vietstock — lịch chốt quyền cổ tức tuần 17-21/08](https://vietstock.vn/2026/08/tuan-17-2108-noi-bat-khoan-co-tuc-hon-5-ngan-ty-cua-tan-binh-hose-738-1481215.htm)
+
+---
+
 ## 14. TV1 — cập nhật 2026-08-10 (Mike, due-diligence trực tiếp theo yêu cầu user, đúng ngày cổng T3)
 
 **Q2/2026 nay là số THẬT, không còn stale carry-forward.** Check 08-04 từng gắn cờ nghi ngờ dòng
