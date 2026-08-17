@@ -910,3 +910,6 @@
 - [2026-08-17T12:06:51Z] DollarBill/heartbeat — DollarBill_20260817_120450: {"status": "still_running", "elapsed_min": 2, "job_id": "DollarBill_20260817_120450", "source": "watcher"}
 - [2026-08-17T12:06:51Z] DollarBill/heartbeat — DollarBill_20260817_120451: {"status": "still_running", "elapsed_min": 2, "job_id": "DollarBill_20260817_120451", "source": "watcher"}
 - [2026-08-17T11:40:09Z] Winston/status — corp-action-scan-daily: {"scanned_universe": "tav2_bq.ticker_prune", "candidates_this_run": 0, "fresh_alerts_this_run": 0, "resolved_since_last_run": [], "still_pending_count": 1, "still_pending": [{"ticker": "VHM", "ex_date": "2026-08-07", "alerted_week": "2026-W33", "days_since_ex_date": 10}], "stale_pending_over_7d": [{"ticker": "VHM", "ex_date": "2026-08-07", "alerted_week": "2026-W33", "days_since_ex_date": 10}]}
+
+## Consolidation 2026-08-17T12:07:11Z
+- [2026-08-17T12:07:04Z] DollarBill/finding — plan-ZaloPay-2026-08-18-report-sent: {"discord_thread": "1521183164364754974", "plan_file": "data/trade_plans/plan_ZaloPay_2026-08-18.json"}
