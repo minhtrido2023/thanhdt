@@ -182,6 +182,7 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 | 2026-06-22 | [2026-06-22 — Mafee ZOMBIE: systemd reports healthy, agent isn't actually serving](2026-06/2026-06-22-mafee-zombie-systemd-healthy.md) | logged |
 
 ## RETRO hằng ngày (mới nhất trước)
+| 2026-08-17 | [RETRO — 2026-08-17: 4 sự cố, 2 pattern xuyên suốt (corp-action gate false-refuse tái diễn HỌ lỗi ticker.Price đông cứng; question-checker-grace-period fix round-2 chưa merge; Pattern B wakeup-miss bật lại 27,3% cao nhất từng đo, escalate lại)](retro/retro-2026-08-17.md) | logged |
 | 2026-08-16 | [RETRO — 2026-08-16: 6 sự cố (marathon "1 ngày dọn 4 backlog NEEDS_CHANGES", +1 selfcheck-red fix bổ sung qua verify Wags), 2 pattern xuyên suốt (§28 tiếp tục sống; Pattern B rộng hơn §28 chưa có Prevention riêng)](retro/retro-2026-08-16.md) | logged |
 
 | Ngày | Tóm tắt (nguyên văn tiêu đề) | status |
