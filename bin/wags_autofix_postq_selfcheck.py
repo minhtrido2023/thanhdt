@@ -114,7 +114,7 @@ _INNER = {
 
 
 def post_q_call_exprs():
-    """Trích ĐÚNG biểu thức (topic, payload) của cả 2 call site thật trong wags_autofix.sh.
+    """Trích ĐÚNG biểu thức (topic, payload) của cả 3 call site thật trong wags_autofix.sh.
 
     Không tự chế payload trong test: payload thật mới là thứ có `\\"` lồng nhau, có `$verdict`
     chứa dấu cách, có '"$PIPELOG"' nội suy chéo tầng — tức đúng những chỗ hỏng được. Tự chế
@@ -122,8 +122,8 @@ def post_q_call_exprs():
     """
     src = SRC.read_text(encoding="utf-8")
     exprs = re.findall(r'^\s*_post_q\s+("[^\n]*?")\s*\\\n\s*("[^\n]*")\s*$', src, re.M)
-    if len(exprs) != 2:
-        print(f"❌ FATAL: cần đúng 2 call site _post_q trong {SRC}, tìm thấy {len(exprs)} — "
+    if len(exprs) != 3:
+        print(f"❌ FATAL: cần đúng 3 call site _post_q trong {SRC}, tìm thấy {len(exprs)} — "
               "hình dạng call site đã đổi, selfcheck VÔ HIỆU.")
         sys.exit(1)
     return exprs
@@ -185,7 +185,7 @@ def run_postq(fail_q=False, fail_err=False, site=0):
 
 # ── Ca 1: đường xanh — ghi bus OK thì im lặng, đúng 1 event, không báo động giả ───────────
 def case_happy_path():
-    out, err, calls, notif = run_postq()
+    out, err, calls, notif = run_postq(site=1)  # site=1 = wags-fix-not-confirmed (original site 0)
     check("xanh: _post_q trả 0 khi append_event.sh thành công", "POSTQ_RC=0" in out, out.strip())
     check("xanh: đúng 1 lần ghi bus (không ghi thêm event error thừa)", len(calls) == 1,
           f"calls={len(calls)}")
@@ -197,7 +197,7 @@ def case_happy_path():
 
 # ── Ca 2: append_event hỏng — phải kêu TO qua đủ 3 chốt ĐỘC LẬP ──────────────────────────
 def case_bus_write_fails_is_loud():
-    out, err, calls, notif = run_postq(fail_q=True)
+    out, err, calls, notif = run_postq(fail_q=True, site=1)  # site=1 = wags-fix-not-confirmed
     check("đỏ→to: chốt 1 stderr — có WARN kèm ĐÚNG exit code thật (7)",
           "GHI BUS THAT BAI" in err and "exit=7" in err, err.strip()[:160])
     check("đỏ→to: stderr nói rõ HỆ QUẢ (checker §5 sẽ không thấy), không chỉ 'lỗi'",
@@ -216,7 +216,7 @@ def case_bus_write_fails_is_loud():
 
 # ── Ca 3: cả đường tối giản CŨNG chết — không được im, và Discord vẫn phải chạy ──────────
 def case_both_writes_fail():
-    out, err, calls, notif = run_postq(fail_q=True, fail_err=True)
+    out, err, calls, notif = run_postq(fail_q=True, fail_err=True, site=1)
     check("bus chết hẳn: nói thẳng 'bus coi nhu CHET' (không im lặng bỏ qua)",
           "bus coi nhu CHET" in err, err.strip()[:200])
     check("bus chết hẳn: VẪN giữ WARN đầu tiên (2 sự cố ⇒ 2 dòng, không đè nhau)",
@@ -229,9 +229,9 @@ def case_both_writes_fail():
 
 # ── Ca 4: chính lớp lỗi sinh ra bản vá — payload THẬT tới nơi nguyên vẹn, 1 đối số ───────
 def case_payload_not_word_split():
-    # Dùng call site #1 (nhánh inconclusive): payload thật lớn nhất, có $verdict_stdout chứa
+    # Dùng call site #2 (nhánh inconclusive): payload thật lớn nhất, có $verdict_stdout chứa
     # dấu cách + dấu ngoặc — đúng hình dạng đã làm 13 event/6 agent hỏng hồi 07-14.
-    out, err, calls, notif = run_postq(site=1)
+    out, err, calls, notif = run_postq(site=2)
     check("word-split: payload thật vẫn là ĐÚNG 1 đối số ($4) — nếu _post_q để $2 trần thì "
           "append_event.sh nhận >4 đối số",
           bool(calls) and calls[0][4] == "NARGS=4", str(calls[:1])[:200])
@@ -253,8 +253,9 @@ def case_payload_not_word_split():
 
 # ── Ca 5: topic có dấu cách (mọi topic thật đều có: "wags-fix-not-confirmed: <label>") ───
 def case_topic_with_space_intact():
-    for site, want in ((0, "wags-fix-not-confirmed: coord-2026-08-14"),
-                       (1, "wags-arch-review-inconclusive: coord-2026-08-14")):
+    for site, want in ((0, "wags-autofix-dispatch-failed: coord-2026-08-14"),
+                       (1, "wags-fix-not-confirmed: coord-2026-08-14"),
+                       (2, "wags-arch-review-inconclusive: coord-2026-08-14")):
         out, err, calls, notif = run_postq(site=site)
         check(f"topic call site #{site} có dấu cách vẫn nguyên 1 đối số ($3) — '{want}'",
               bool(calls) and calls[0][2] == want, str(calls[:1])[:200])
@@ -265,7 +266,7 @@ def case_nonzero_does_not_abort_pipeline():
     # wags_autofix.sh chạy `set -uo pipefail` (KHÔNG có -e), nhưng khối này nằm trong một
     # `bash -c` riêng. Nếu ai đó thêm `set -e` sau này, return khác 0 sẽ giết luôn phần đuôi
     # pipeline — đắt hơn hẳn lỗi mà nó đang báo. Khoá hành vi lại.
-    out, err, calls, notif = run_postq(fail_q=True)
+    out, err, calls, notif = run_postq(fail_q=True, site=1)
     check("ghi bus lỗi KHÔNG giết phần còn lại của pipeline (chỉ báo động, không abort)",
           "STILL_ALIVE" in out, out.strip())
 
@@ -281,8 +282,8 @@ def case_no_swallowing_call_sites_left():
     check("cấu trúc: KHÔNG còn call site nào ghi question mà nuốt lỗi (`|| true`)",
           not swallow, str(swallow)[:200])
     posts = [ln for ln in src.splitlines() if re.search(r"^\s*_post_q\s", ln)]
-    check("cấu trúc: cả 2 nhánh escalation (NEEDS_CHANGES + inconclusive) đều đi qua _post_q",
-          len(posts) == 2, f"{len(posts)} call site: {posts}")
+    check("cấu trúc: cả 3 nhánh escalation (dispatch-failed + NEEDS_CHANGES + inconclusive) đi qua _post_q",
+          len(posts) == 3, f"{len(posts)} call site: {posts}")
     check("cấu trúc: _post_q được định nghĩa TRƯỚC mọi call site",
           src.index("_post_q()") < min(src.index(p) for p in posts) if posts else False)
     check("cấu trúc: _notify_arch (chốt 3) được định nghĩa trước _post_q dùng nó",

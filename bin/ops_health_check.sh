@@ -925,7 +925,7 @@ if os.path.exists(mike_mem_9b):
     try:
         import re as _re9b
         _mem9b = open(mike_mem_9b, encoding="utf-8").read()
-        _pending9b = _re9b.findall(r'##\s+PENDING_DECISION:\s*(.+)', _mem9b)
+        _pending9b = _re9b.findall(r'^##\s+PENDING_DECISION:\s*(.+)', _mem9b, _re9b.MULTILINE)
         if _pending9b:
             # Build set of open bus question topics (question posted, no answer/decision yet)
             _open9b = set()
