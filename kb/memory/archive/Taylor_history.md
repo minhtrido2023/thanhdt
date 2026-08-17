@@ -204,3 +204,6 @@
 
 ## Archived 2026-08-17 (keep=12 days=0 require_done=False)
 - [2026-08-14T16:41:45Z] expvol_pacing (P2) paper trial CHẠY từ 2026-08-17, review 2026-09-15: nguồn số là EXPVOL_SHADOW trên journal LIVE (paper đo được số 0 vì account main chỉ sinh book=PROBE). NEXT tại review: chạy mike/bin/expvol_shadow_probe.py, kiểm lại _expvol_active()=False trên 3 account live, rồi quant-skeptic + xin user sign-off flip expected_volume_pacing_live_gate. CẢNH BÁO merge: entry order_book_execution_shadow nằm ở nhánh session/1521113190405247057 chưa merge — xung đột mảng programs trong paper_programs_registry.json phải giải quyết TAY.
+
+## Archived 2026-08-17 (keep=12 days=0 require_done=False)
+- [2026-08-14T17:25:01Z] MO 2026-08-14: job Taylor_20260814_170351 (tran gia A vs B + participation) DA XONG, 2 finding + 1 answer tren bus. CHO USER QUYET 2 viec: (a) co doi tran sang Rule A khong — la CHINH SACH (fill-certainty doi lay ~16bps), KHONG phai edge; (b) co dang ky muc 'so phien gom ky vong theo block/ADV20' vao rnd-pipeline-tracker khong. KHONG wire gi cham pacing truoc 09-15 (paper trial P2 dang chay). Artifact: research/ceiling_ab_pacing_20260814/
