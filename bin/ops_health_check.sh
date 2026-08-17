@@ -1173,13 +1173,34 @@ try:
         W(f"[WARN-ONLY] check 12: không đọc được journal ccdb-mike (rc={_jr.returncode}: "
           f"{(_jr.stderr or '').strip()[:160]}) — KHÔNG kết luận được có wakeup one-shot nào "
           f"bị mất hay không.")
+    elif not _jr.stdout.strip():
+        # rc=0 + rỗng KHÔNG phải "sạch". `journalctl --user -u <tên sai>` trả ĐÚNG rc=0 với 0
+        # byte (arch-review vòng 2 chạy thật: unit `definitely-not-a-unit` ⇒ rc=0). Daemon sống
+        # ghi ~4800 dòng/24h, nên rỗng nghĩa là sai tên unit / sai scope (--user vs system) /
+        # journal không giữ log — tức KHÔNG BIẾT, không phải "đã kiểm và sạch".
+        W(f"[WARN-ONLY] check 12: journal ccdb-mike KHÔNG có dòng nào trong 24h qua — daemon "
+          f"sống thì phải có log, nên đây là sai tên unit/scope hoặc daemon không ghi journal. "
+          f"KHÔNG kết luận được có wakeup one-shot nào bị mất hay không.")
     else:
-        _dropped = [l for l in _jr.stdout.splitlines() if "ONE_SHOT_DROPPED" in l]
+        # Hai marker, hai lớp sự cố khác nhau, đều là "đã claim + đã xoá row, không ai retry":
+        # DROPPED = chưa từng vào Claude; INTERRUPTED = đã vào nhưng không chạy xong (restart
+        # giữa lượt — chính lớp sự cố đẻ ra bản fix này, 4 lần ngày 2026-08-17).
+        _dropped = [l for l in _jr.stdout.splitlines()
+                    if "ONE_SHOT_DROPPED" in l or "ONE_SHOT_INTERRUPTED" in l]
+        # Row còn sống nhưng KHÔNG giao được: retry mỗi 60s vô hạn, không TTL. Mike vẫn "chờ
+        # mãi một job đã xong" y hệt ca mất wakeup, nên phải báo — nhưng báo RIÊNG vì cách xử
+        # lý khác hẳn (ca này còn cứu được: un-archive thread là nó tự chạy).
+        _unreach = [l for l in _jr.stdout.splitlines() if "has no reachable destination" in l]
         if _dropped:
             W(f"[WARN-ONLY] check 12: ccdb bridge MẤT {len(_dropped)} wakeup one-shot trong 24h "
               f"qua — job đã xong nhưng agent KHÔNG được đánh thức, không có gì retry. "
               f"Dòng cuối: {_dropped[-1][-300:]}")
-        else:
+        if _unreach:
+            W(f"[WARN-ONLY] check 12: {len(_unreach)} wakeup one-shot KHÔNG giao được (thread "
+              f"không có trong cache — thường do thread đã archive) trong 24h qua; row còn sống "
+              f"và retry mỗi 60s nhưng agent VẪN chưa được đánh thức. Dòng cuối: "
+              f"{_unreach[-1][-300:]}")
+        if not _dropped and not _unreach:
             OK("check 12: ccdb bridge không mất wakeup one-shot nào trong 24h qua.")
 except FileNotFoundError:
     W("[WARN-ONLY] check 12: không có lệnh journalctl — không giám sát được log ccdb bridge.")

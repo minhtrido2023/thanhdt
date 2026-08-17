@@ -1372,12 +1372,20 @@ class _FakeCompleted:
 
 
 class _FakeSubprocess:
-    """Đứng thay module subprocess: trả sẵn kết quả, hoặc ném lỗi đã hẹn."""
+    """Đứng thay module subprocess: trả sẵn kết quả, hoặc ném lỗi đã hẹn.
+
+    GHI LẠI argv của lời gọi: tiêm giả nghĩa là mọi thứ về CÁCH gọi journalctl (tên unit,
+    --user hay system, cửa sổ thời gian) nằm ngoài tầm kiểm — arch-review vòng 2 chạy thử 3
+    mutation (đổi tên unit, bỏ --user, đổi -24h thành -4000h) và cả 3 đều XANH. `calls` là
+    chỗ ca `case_c12_journalctl_invocation_is_pinned` bịt lại lỗ đó.
+    """
 
     def __init__(self, result=None, raises=None):
         self._result, self._raises = result, raises
+        self.calls = []
 
-    def run(self, *_a, **_kw):
+    def run(self, *a, **_kw):
+        self.calls.append(a[0] if a else [])
         if self._raises is not None:
             raise self._raises
         return self._result
@@ -1419,6 +1427,75 @@ def case_c12_dropped_wakeup_warns():
     check("check12: đếm đúng số wakeup bị mất", "MẤT 2 wakeup" in joined(lines2), joined(lines2))
     check("check12: WARN-ONLY (không kích autofix cho việc đã mất, không sửa lại được)",
           "[WARN-ONLY]" in out, out)
+
+
+_C12_INTERRUPTED = ("Aug 18 03:20:11 sgms python[1]: 2026-08-17 20:20:11 [ERROR] "
+                    "claude_discord.cogs.scheduler: ONE_SHOT_INTERRUPTED: task 42 "
+                    "(dispatch-wake-xyz) was claimed and deleted but its run did not finish")
+_C12_UNREACH = ("Aug 18 03:25:00 sgms python[1]: 2026-08-17 20:25:00 [WARNING] "
+                "claude_discord.cogs.scheduler: SchedulerCog: task 43 (dispatch-wake-def) "
+                "has no reachable destination (thread=555, channel=555) — leaving it due to retry")
+
+
+def case_c12_empty_journal_is_not_green():
+    """rc=0 + stdout RỖNG là XANH GIẢ, không phải 'sạch' (arch-review vòng 2, lỗ N1).
+
+    Chạy thật: `journalctl --user -u definitely-not-a-unit --since -24h -q` trả rc=0 và 0 byte.
+    Daemon sống ghi ~4800 dòng/24h ⇒ rỗng nghĩa là sai tên unit / sai scope / journal không giữ
+    log. Trước khi bịt, mọi ca đó in ✅ "không mất wakeup one-shot nào".
+    """
+    for label, out_s in (("rỗng hoàn toàn", ""), ("chỉ khoảng trắng", "  \n \n")):
+        lines, warn = run_check12(_FakeSubprocess(_FakeCompleted(0, out_s)))
+        out = joined(lines)
+        check(f"check12 [journal {label}]: WARN chứ không im lặng", len(warn) == 1, out)
+        check(f"check12 [journal {label}]: KHÔNG in dòng ✅ nào (xanh giả là lỗi tệ nhất ở đây)",
+              "✅" not in out, out)
+
+
+def case_c12_journalctl_invocation_is_pinned():
+    """Canh chính LỜI GỌI journalctl, không chỉ cách xử lý output.
+
+    Vì subprocess bị tiêm giả, đổi tên unit / bỏ --user / nới cửa sổ đều không làm ca nào đỏ —
+    check vẫn "chạy đúng" trên log giả trong khi ngoài đời soi nhầm chỗ.
+    """
+    fake = _FakeSubprocess(_FakeCompleted(0, "boring\n"))
+    run_check12(fake)
+    argv = list(fake.calls[0]) if fake.calls else []
+    check("check12: có gọi journalctl đúng 1 lần", len(fake.calls) == 1, repr(fake.calls))
+    check("check12: gọi đúng unit ccdb-mike", "ccdb-mike" in argv, repr(argv))
+    check("check12: đọc journal --user (daemon chạy dưới systemd --user, không phải system)",
+          "--user" in argv, repr(argv))
+    check("check12: cửa sổ đúng 24h như tiêu đề cảnh báo nói",
+          "--since" in argv and "-24h" in argv, repr(argv))
+
+
+def case_c12_interrupted_marker_also_counts():
+    """Restart GIỮA LƯỢT (lớp sự cố đẻ ra bản fix) ghi INTERRUPTED, không phải DROPPED."""
+    lines, warn = run_check12(_FakeSubprocess(_FakeCompleted(0, _C12_INTERRUPTED + "\n")))
+    out = joined(lines)
+    check("check12: ONE_SHOT_INTERRUPTED cũng tính là mất wakeup", len(warn) == 1, out)
+    check("check12: INTERRUPTED không bị bỏ qua thành ✅", "✅" not in out, out)
+    lines2, _ = run_check12(
+        _FakeSubprocess(_FakeCompleted(0, _C12_DROP + "\n" + _C12_INTERRUPTED + "\n"))
+    )
+    check("check12: đếm gộp cả 2 marker", "MẤT 2 wakeup" in joined(lines2), joined(lines2))
+
+
+def case_c12_unreachable_destination_is_reported_separately():
+    """Row còn sống nhưng không giao được: agent VẪN chưa được đánh thức ⇒ phải nhìn thấy.
+
+    Báo RIÊNG chứ không gộp vào 'MẤT': ca này còn cứu được (thread un-archive là tự chạy), gộp
+    vào sẽ nói với người đọc rằng wakeup đã mất hẳn.
+    """
+    lines, warn = run_check12(_FakeSubprocess(_FakeCompleted(0, _C12_UNREACH + "\n")))
+    out = joined(lines)
+    check("check12: 'has no reachable destination' ⇒ WARN", len(warn) == 1, out)
+    check("check12: KHÔNG in ✅ khi có wakeup chưa giao được", "✅" not in out, out)
+    check("check12: nói rõ row còn retry (khác hẳn ca MẤT hẳn)", "retry" in out, out)
+    lines2, warn2 = run_check12(
+        _FakeSubprocess(_FakeCompleted(0, _C12_DROP + "\n" + _C12_UNREACH + "\n"))
+    )
+    check("check12: 2 lớp sự cố báo thành 2 dòng riêng", len(warn2) == 2, joined(lines2))
 
 
 def case_c12_unreadable_journal_never_reports_green():
@@ -1466,6 +1543,9 @@ def main():
                case_c11_lists_every_red_no_truncation,
                case_c11_stale_is_routable, case_c11_missing_and_corrupt_never_silent,
                case_c12_clean_journal_is_ok, case_c12_dropped_wakeup_warns,
+               case_c12_empty_journal_is_not_green, case_c12_journalctl_invocation_is_pinned,
+               case_c12_interrupted_marker_also_counts,
+               case_c12_unreachable_destination_is_reported_separately,
                case_c12_unreadable_journal_never_reports_green,
                case_deliver_discord_ok_no_telegram,
                case_deliver_discord_fails_falls_back_to_telegram,
