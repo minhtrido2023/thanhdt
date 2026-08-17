@@ -195,3 +195,6 @@
 
 ## Archived 2026-08-15 (keep=12 days=0 require_done=False)
 - [2026-08-14T13:27:19Z] G1 ghost/_atc_sweep DOUBLY-masked da va: commit d0f6963 tren wt-1521735922066919515-sweep (branch session/1521735922066919515-sweep), CHUA merge — cho quant-skeptic review doc lap. Bai hoc dung cho MOI selfcheck sau: dung _NullBroker nem AssertionError la vo dung o bat ky code path nao boc trong try/except Exception rong (executor.py co nhieu cho) — phai GHI LAI loi goi + doc JOURNAL.
+
+## Archived 2026-08-17 (keep=12 days=0 require_done=False)
+- [2026-08-14T14:37:00Z] stash@{0} (4bbc394) DA DROP THAT ngay 2026-08-14 (job _142128, quant-skeptic CONFIRMED high, report research/stash_resolve_20260814.md) — dong dut diem muc 'stash STALE cho drop' o entry _080222; git object con khoi phuc ~90 ngay. VAN CON MO (uu tien, chua ai lam): HYBRID KHONG co cong LIVE RIENG — tat fill_timing_live_gate se bat luon HYBRID cho tien that; can them fill_timing_hybrid_live_gate. | LUU Y DIEU PHOI: job _142128 va _080222 doc lap ra CUNG ket luan ve stash = viec lam 2 lan; dau hieu Mike memory con ghi 'chua landed'.
