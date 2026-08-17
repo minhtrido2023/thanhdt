@@ -210,3 +210,6 @@
 
 ## Archived 2026-08-17 (keep=12 days=0 require_done=False)
 - [2026-08-15T00:57:49Z] CHO quant-skeptic + user duyet: Rule A tran gia mua da WIRE (commit 2db6d37 WorkingClaude, job Taylor_20260815_004105) nhung CHUA ap plan that nao. NEXT khi duyet: (1) DollarBill chay lag_rule_a_ceiling.py --apply roi re-derive qty theo ref_price moi (ref_price cu lam chase-cap thanh rang buoc buoc, mat phan lon tac dung); (2) quyet dinh RIENG: co doi dynamic_ceiling.sessions 5->1 cho TV1 (book DISCRETIONARY_SPECIAL) khong — sessions=5 chinh la Rule B.
+
+## Archived 2026-08-17 (keep=12 days=0 require_done=False)
+- [2026-08-15T03:01:51Z] CHO quant-skeptic verify 2 finding job Taylor_20260815_022340 (viec1 cong fail-safe co so gia luat A = WorkingClaude 59f9569; viec2 TV1 doi mean-5 -> luat A = WorkingClaude a106e97 + mike 0ccf192b). CA HAI CHUA AP LIVE: state_TV1_*.json van sessions=5, chua khai ceiling_rule — Mike lat trong commit RIENG sau khi CONFIRMED. Sau khi lat, phien LIVE dau kiem: lenh TV1 co ceiling_rule=A + ceiling_anchor_date=phien lien truoc, tran KHAC 20.000 (20.000 = fail-safe cam). | DE XUAT CHO USER QUYET (chua lam): lenh mang tran tuyet doi luat A co nen duoc mien tran duoi % khong — luat A chi that su bind khi rvol_20d >= 1,5%/phien, duoi muc do tran duoi 1,5% moi la rang buoc quyet dinh va tau=3% khong bao gio voi toi.
