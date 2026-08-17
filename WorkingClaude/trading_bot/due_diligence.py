@@ -34,6 +34,7 @@ import glob
 import json
 import logging
 import os
+from zoneinfo import ZoneInfo
 
 from .config import WORKDIR, DATA_DIR
 
@@ -217,6 +218,279 @@ def _anomaly_note(ticker, asof):
         return ""
 
 
+# =======================================================================================
+# 2 trường THÔNG TIN mới (2026-08-17, job Taylor_20260817_041248) — cổ tức sắp GDKHQ +
+# nội bộ bán ròng. **CHỈ nằm trong dict trả về** (`as_dict=True` / `parts`), CỐ Ý KHÔNG in ra
+# dòng text của run_due_diligence: đưa vào text = đổi ngay nội dung mọi report đang chạy, mà
+# bước đó phải qua quant-skeptic trước (dispatch nói rõ). Không sinh cờ đỏ, không chặn gì.
+#
+# Vì sao 2 trường này là CẢNH BÁO CHI PHÍ / RỦI RO ĐUÔI TRÁI chứ không phải factor:
+#   · cổ tức: BHAR_20 ≈ −0,50pp cho mỗi 1pp tỉ suất gộp (t=−5,60) — nhưng hiệu ứng TẬP TRUNG ở
+#     nhóm ADV thấp; nửa ADV cao (đúng rổ thật sau cổng ADV3T ≥ 2 tỷ) chỉ −0,52% với p=0,124,
+#     KHÔNG có ý nghĩa. ⇒ dùng làm cảnh báo chi phí, TUYỆT ĐỐI không làm gate.
+#     Nguồn: Sprint 2 corp-action (job Taylor_20260815_121850/_125247).
+#   · insider: P(fwd60 < −20%) = 19,7% khi có cờ vs 11,3% nền (lift 1,745×, z=12,90), ổn định
+#     IS↔OOS — nhưng ~80% mã bị bắt KHÔNG sập ⇒ WATCH, không exclude.
+#     Nguồn: research/insider_transaction_scoping_20260729.md §3.4.
+CORP_ACTION_LOOKAHEAD_DAYS = 25     # cửa sổ "sắp GDKHQ" — phủ horizon BHAR_20 (20 phiên)
+CORP_ACTION_STALE_DAYS_MAX = 4      # feed nạp ~22:2x ICT mỗi ngày; 4 ngày phủ được cuối tuần + 1 lễ
+EXDATE_COST_PP_PER_PP_YIELD = 0.50  # hệ số hồi quy BHAR_20 ~ tỉ suất gộp (pin Sprint 2)
+
+# Định nghĩa cờ insider PIN ở `mike/agents/Taylor/insider_flags.py` (§3.4) — là AND của HAI vế,
+# không chỉ vế khối lượng. Prompt dispatch chỉ nhắc vế ≥1%; lift 1,745× đo trên CẢ HAI vế nên
+# bỏ vế `nsell > nbuy` là báo một con số không thuộc về định nghĩa đang chạy.
+INSIDER_WINDOW_DAYS = 90
+INSIDER_SELL_PCT_OSH_MIN = 0.01
+INSIDER_STALE_SESSIONS_MAX = 10     # bảng cũ hơn ~10 phiên ⇒ coi như nguồn chết, KHÔNG kết luận
+
+_EXDATE_NOTE = ("COST-INFO: ước phí post-ex trung bình ~0.50pp/1pp yield "
+                "(ADV-thấp; không có ý nghĩa ở ADV-cao)")
+_INSIDER_NOTE = ("RISK-INFO: bán ròng nội bộ ≥1% CP lưu hành — P(fwd60<-20%) lift ~1.75x "
+                 "(IS/OOS ổn định, scoping 2026-07-29)")
+
+
+def _today_ict():
+    """Ngày hôm nay theo giờ VN — §16: KHÔNG bao giờ tin TZ của process gọi."""
+    return dt.datetime.now(ZoneInfo("Asia/Ho_Chi_Minh")).date()
+
+
+def _as_date(x):
+    """date | str | None → date (None ⇒ hôm nay ICT). Không raise."""
+    if isinstance(x, dt.date) and not isinstance(x, dt.datetime):
+        return x
+    if isinstance(x, dt.datetime):
+        return x.date()
+    try:
+        return dt.date.fromisoformat(str(x)[:10])
+    except Exception:
+        return _today_ict()
+
+
+def _corp_action_lib():
+    """Import `corp_action_lib` ở repo root (reader + taxonomy dùng chung, đã có 7 ca hồi quy).
+
+    Neo sys.path giống `strategies.py` — module này sống ở root chứ không trong package.
+    KHÔNG viết lại reader: `pricing_events()` là cái DUY NHẤT đúng cho lịch giá TƯƠNG LAI
+    (bao gồm `announced`; `events()` lọc `executed` ⇒ rỗng đúng những ngày cần).
+    """
+    import sys as _sys
+    if WORKDIR not in _sys.path:
+        _sys.path.insert(0, WORKDIR)
+    import corp_action_lib
+    return corp_action_lib
+
+
+def _corp_action_feed_ok(today):
+    """Cổng freshness BẮT BUỘC cho `corporate_action` (§14 + registry: bảng KHÔNG có writer
+    trong repo, chỉ có lời hứa refresh hằng ngày ⇒ verify artifact mỗi lần đọc).
+
+    Cache 1 lần/process: 1 query cho cả report, không phải mỗi mã."""
+    key = ("_ca_fresh", str(today))
+    if key in _CACHE:
+        return _CACHE[key]
+    ok = False
+    try:
+        fr = _corp_action_lib().feed_freshness()
+        ing = str(fr.get("max_ingested") or "")[:10]
+        age = (today - dt.date.fromisoformat(ing)).days
+        ok = age <= CORP_ACTION_STALE_DAYS_MAX
+        if not ok:
+            _log.warning("corporate_action feed cu %s ngay (max_ingested=%s) — bo qua exdate",
+                         age, ing)
+    except Exception as exc:
+        _log.warning("corporate_action freshness doc loi: %s", str(exc)[:200])
+    _CACHE[key] = ok
+    return ok
+
+
+def _get_upcoming_exdate(ticker, today_ict=None, ref_price=None):
+    """Cổ tức TIỀN MẶT sắp GDKHQ trong {CORP_ACTION_LOOKAHEAD_DAYS} ngày tới — hoặc None.
+
+    Trả dict: exright_date, value_per_share, gross_yield_pct, cost_estimate_20d_pp, note …
+    None = KHÔNG có sự kiện, HOẶC không đọc được/feed cũ (fail-closed, gộp làm một theo spec).
+
+    ⚠️ CẤM đọc `ticker.Price`/`Close` của CHÍNH ngày ex-date (cổng Sprint 1): giá ngày đó đã
+    điều chỉnh quyền, lấy nó làm mẫu số là trộn hai hệ quy chiếu. Ở đây không thể vi phạm —
+    ex-date nằm trong TƯƠNG LAI, giá tham chiếu luôn là phiên gần nhất ≤ asof.
+    """
+    today = _as_date(today_ict)
+    key = ("_exdate", ticker, str(today))
+    if key in _CACHE and ref_price is None:
+        return _CACHE[key]
+    out = None
+    try:
+        if _corp_action_feed_ok(today):
+            rows = _corp_action_lib().pricing_events(
+                [ticker], since=today.isoformat(),
+                until=(today + dt.timedelta(days=CORP_ACTION_LOOKAHEAD_DAYS)).isoformat(),
+                codes=("DIV",))
+            rows = [r for r in rows
+                    if r.get("exright_date") and r.get("value_per_share") not in (None, "")]
+            if rows:
+                ex = min(str(r["exright_date"])[:10] for r in rows)
+                same = [r for r in rows if str(r["exright_date"])[:10] == ex]
+                # Bẫy (3) registry: trùng (ticker, exright_date, event_code) có thể là NHIỀU ĐỢT
+                # (SUM đúng) hoặc AMENDMENT (lấy public_date mới nhất). Không SUM mù — lấy bản
+                # công bố mới nhất và CÔNG BỐ số dòng để người đọc biết còn nghi ngờ.
+                pick = sorted(same, key=lambda r: str(r.get("public_date") or ""))[-1]
+                vps = float(pick["value_per_share"])
+                px = ref_price if ref_price else _ref_price_for(ticker, today)
+                gy = (vps / float(px) * 100.0) if px else None
+                out = {
+                    "exright_date": ex,
+                    "days_to_ex": (dt.date.fromisoformat(ex) - today).days,
+                    "value_per_share": vps,
+                    "ref_price": float(px) if px else None,
+                    "gross_yield_pct": round(gy, 4) if gy is not None else None,
+                    "cost_estimate_20d_pp": (round(gy * EXDATE_COST_PP_PER_PP_YIELD, 4)
+                                             if gy is not None else None),
+                    "n_events_same_date": len(same),
+                    "event_status": pick.get("event_status"),
+                    "note": _EXDATE_NOTE,
+                }
+    except Exception as exc:
+        _log.warning("upcoming ex-date loi (%s): %s", ticker, str(exc)[:200])
+        out = None
+    if ref_price is None:
+        _CACHE[key] = out
+    return out
+
+
+def _ref_price_for(ticker, asof):
+    """Giá tham chiếu để quy ra tỉ suất = phiên gần nhất ≤ asof (KHÔNG phải ngày ex-date).
+
+    COALESCE(Price, Close) — cùng quy ước với `adv_vnd()`. None nếu không đọc được."""
+    import pandas as pd
+    try:
+        row = _latest_row(ticker, str(asof)[:10])
+    except Exception:
+        return None
+    if row is None:
+        return None
+    px = row.get("Price")
+    if pd.isna(px):
+        px = row.get("Close")
+    return None if pd.isna(px) else float(px)
+
+
+_INSIDER_SQL = """
+WITH ins AS (
+  SELECT i.ticker, i.public_date, i.trader_person_id AS pid,
+         IF(i.action_code = "S", -ABS(i.share_acquire), ABS(i.share_acquire)) AS qty
+  FROM `lithe-record-440915-m9.tav2_bq.insider_transaction` AS i
+  WHERE i.event_code IN ("DDIND","DDRP")
+    AND i.action_code IN ("B","S")
+    AND i.trade_status = "Đã thực hiện xong"
+    AND i.share_acquire IS NOT NULL AND ABS(i.share_acquire) > 0
+    AND i.public_date <= DATE "{asof}"
+    AND i.public_date > DATE_SUB(DATE "{asof}", INTERVAL {win} DAY)
+),
+agg AS (
+  SELECT x.ticker,
+         SUM(IF(x.qty < 0, -x.qty, 0)) AS sell_sh_90,
+         COUNT(DISTINCT IF(x.qty < 0, x.pid, NULL)) AS nsell_90,
+         COUNT(DISTINCT IF(x.qty > 0, x.pid, NULL)) AS nbuy_90,
+         MAX(IF(x.qty < 0, x.public_date, NULL)) AS last_sell_date
+  FROM ins x GROUP BY 1
+),
+osh AS (
+  SELECT q.ticker, q.OShares
+  FROM `lithe-record-440915-m9.tav2_bq.ticker_financial` AS q
+  WHERE q.OShares > 0 AND q.time <= DATE "{asof}"
+  QUALIFY ROW_NUMBER() OVER (PARTITION BY q.ticker ORDER BY q.time DESC) = 1
+)
+SELECT a.ticker, CAST(a.last_sell_date AS STRING) AS last_sell_date,
+       a.nsell_90, a.nbuy_90, a.sell_sh_90, o.OShares,
+       SAFE_DIVIDE(a.sell_sh_90, o.OShares) AS sell_pct_osh
+FROM agg a JOIN osh o ON o.ticker = a.ticker
+WHERE a.nsell_90 > a.nbuy_90
+  AND SAFE_DIVIDE(a.sell_sh_90, o.OShares) >= {thr}
+"""
+
+
+def _insider_scan(asof):
+    """Quét CẢ THỊ TRƯỜNG 1 lần/asof → {ticker: rec}. None = không kết luận được (fail-closed).
+
+    Quét cả thị trường thay vì lọc theo mã CỐ Ý: 1 query cho cả report (bảng ~vài chục MB,
+    quét full rất rẻ) thay vì 1 query/mã. Bản sao SQL của `insider_flags.py` — selfcheck
+    `due_diligence_corp_flags_selfcheck.py` (ca E) so hai bên tại chỗ để bắt drift định nghĩa.
+    """
+    key = ("_insider", str(asof))
+    if key in _CACHE:
+        return _CACHE[key]
+    res = None
+    try:
+        lib = _corp_action_lib()          # dùng chung wrapper bq() (đã chống cắt 100 dòng)
+        mx = lib.bq("SELECT CAST(MAX(public_date) AS STRING) d "
+                    "FROM `lithe-record-440915-m9.tav2_bq.insider_transaction`")[0]["d"]
+        stale = _sessions_between(dt.date.fromisoformat(str(mx)[:10]), _as_date(asof))
+        if stale > INSIDER_STALE_SESSIONS_MAX:
+            _log.warning("insider_transaction cu ~%s phien (MAX(public_date)=%s) — khong ket luan",
+                         stale, mx)
+        else:
+            rows = lib.bq(_INSIDER_SQL.format(asof=str(asof)[:10], win=INSIDER_WINDOW_DAYS,
+                                              thr=INSIDER_SELL_PCT_OSH_MIN))
+            res = {r["ticker"]: r for r in rows}
+    except Exception as exc:
+        _log.warning("insider scan loi: %s", str(exc)[:200])
+        res = None
+    _CACHE[key] = res
+    return res
+
+
+def _sessions_between(d0, d1):
+    """Số phiên xấp xỉ (đếm T2-T6, kể cả lễ) — cùng cách đếm với `insider_flags.py`:
+    ước lượng THỪA ⇒ dễ WARN hơn, đúng hướng cho một cổng 'đừng kết luận khi nguồn có thể chết'."""
+    n, d = 0, d0
+    while d < d1:
+        d += dt.timedelta(days=1)
+        if d.weekday() < 5:
+            n += 1
+    return n
+
+
+def _get_insider_net_sell_flag(ticker, today_ict=None):
+    """Cờ "nội bộ bán ròng ≥1% CP lưu hành/90 ngày" — hoặc None.
+
+    None = KHÔNG có cờ, HOẶC không đọc được/nguồn cũ (fail-closed, gộp làm một theo spec).
+    Trả dict: net_sell_pct (thập phân), window_days, n_sellers, n_buyers, last_sell_date, note.
+    """
+    today = _as_date(today_ict)
+    scan = _insider_scan(today)
+    if not scan:
+        return None
+    r = scan.get(ticker)
+    if not r:
+        return None
+    try:
+        return {
+            "net_sell_pct": round(float(r["sell_pct_osh"]), 5),
+            "window_days": INSIDER_WINDOW_DAYS,
+            "n_sellers": int(r["nsell_90"]),
+            "n_buyers": int(r["nbuy_90"]),
+            "last_sell_date": str(r.get("last_sell_date") or "")[:10] or None,
+            "note": _INSIDER_NOTE,
+        }
+    except Exception as exc:
+        _log.warning("insider flag doc loi (%s): %s", ticker, str(exc)[:200])
+        return None
+
+
+def _corp_flags(ticker, asof):
+    """(upcoming_exdate, insider_net_sell) — không bao giờ raise, không bao giờ chặn gì."""
+    try:
+        ex = _get_upcoming_exdate(ticker, asof)
+    except Exception as exc:                       # lưới cuối, 2 hàm trên đã tự nuốt lỗi
+        _log.warning("corp flag exdate loi (%s): %s", ticker, str(exc)[:200])
+        ex = None
+    try:
+        ins = _get_insider_net_sell_flag(ticker, asof)
+    except Exception as exc:
+        _log.warning("corp flag insider loi (%s): %s", ticker, str(exc)[:200])
+        ins = None
+    return ex, ins
+
+
 def _fmt_vnd(x):
     if x is None:
         return "n/a"
@@ -339,7 +613,7 @@ def dd_check_for_order(ticker, book=None, asof=None, est_value_vnd=None):
 
     Cố ý KHÔNG chứa text dài (plan JSON đọc bằng mắt): chỉ cờ + bằng chứng 1 dòng thanh khoản.
     skip_dcf=True — trục định giá đã có dcf_check riêng. KHÔNG BAO GIỜ raise."""
-    ctx = {"asof": asof or dt.date.today(), "skip_dcf": True}
+    ctx = {"asof": asof or dt.date.today(), "skip_dcf": True, "skip_corp_flags": True}
     if est_value_vnd:
         ctx["est_value_vnd"] = est_value_vnd
     d = run_due_diligence(ticker, book, ctx, as_dict=True)
@@ -360,6 +634,7 @@ def run_due_diligence(ticker, book=None, context=None, as_dict=False):
               (trục PEAD chỉ có nghĩa với LAG/PEAD) + hiển thị.
     context : dict tuỳ chọn — {"asof": date, "price": float, "est_value_vnd": float,
               "dcf": dcf_check dict đã tính sẵn, "skip_dcf": True,
+              "skip_corp_flags": True (bỏ 2 trường corp-action/insider — xem _corp_flags),
               "side": "buy"|"sell", "dd_override_reason": str}.
               side/dd_override_reason CHỈ đổi dòng ⚠ cuối (mirror format_dcf_check(has_override)),
               không đổi nội dung phân tích.
@@ -378,6 +653,7 @@ def run_due_diligence(ticker, book=None, context=None, as_dict=False):
         if row is None:
             out = {"ticker": ticker, "book": book, "as_of": asof,
                    "error": "không có dữ liệu trong bq_cache/ticker",
+                   "upcoming_exdate": None, "insider_net_sell": None,
                    "red_flags": ["DD_KHONG_CHAY_DUOC"], "has_red_flag": True}
             if as_dict:
                 return out
@@ -400,6 +676,14 @@ def run_due_diligence(ticker, book=None, context=None, as_dict=False):
         if str(book or "").upper() in ("LAG", "PEAD"):
             parts["signal_mechanics"], _pead_red = _pead_part(row)
             red += _pead_red
+        # 2 trường THÔNG TIN (2026-08-17) — chỉ vào dict, KHÔNG vào text, KHÔNG sinh cờ đỏ.
+        # `skip_corp_flags` cho đường SINH LỆNH (dd_check_for_order): 2 trường này không đi vào
+        # PlannedOrder.dd_check, nên ở đó chúng chỉ là ~1 query BQ/mã trên đúng đường găng 21:00.
+        if ctx.get("skip_corp_flags"):
+            parts["upcoming_exdate"], parts["insider_net_sell"] = None, None
+        else:
+            parts["upcoming_exdate"], parts["insider_net_sell"] = _corp_flags(ticker, asof)
+
         parts["red_flags"] = red
         parts["has_red_flag"] = bool(red)
 
@@ -441,6 +725,7 @@ def run_due_diligence(ticker, book=None, context=None, as_dict=False):
     except Exception as exc:
         _log.warning("run_due_diligence lỗi (%s): %s", ticker, exc)
         out = {"ticker": ticker, "book": book, "error": str(exc)[:200],
+               "upcoming_exdate": None, "insider_net_sell": None,
                "red_flags": ["DD_KHONG_CHAY_DUOC"], "has_red_flag": True}
         if as_dict:
             return out
