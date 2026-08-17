@@ -1,0 +1,21 @@
+stratum,ticker,subtype,exright_date,listing_date,record_date,public_date,gap_ex_minus_listing,event_title_vi
+A_gap_small_5_15,PVI,PRIVATE_PLACEMENT,2008-06-24,2008-07-01,2008-06-24,2007-11-05,-7,Phát hành cổ phiếu - Phát hành riêng lẻ
+A_gap_small_5_15,FIT,PRIVATE_PLACEMENT,2014-11-25,2014-12-08,2014-11-25,2014-11-24,-13,Phát hành cổ phiếu - Phát hành riêng lẻ
+A_gap_small_5_15,TCH,RIGHTS,2016-04-08,2016-04-19,2016-04-08,2016-03-30,-11,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 175.0%
+A_gap_small_5_15,PNC,PRIVATE_PLACEMENT,2007-11-13,2007-11-22,2007-11-13,2007-08-13,-9,Phát hành cổ phiếu - Phát hành riêng lẻ
+A_gap_small_5_15,PVE,PRIVATE_PLACEMENT,2012-05-16,2012-05-28,2012-05-16,2011-04-21,-12,Phát hành cổ phiếu - Phát hành riêng lẻ
+A_gap_small_5_15,TNA,RIGHTS,2007-03-27,2007-04-10,2007-01-15,2007-04-06,-14,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu
+A_gap_small_5_15,GGG,PRIVATE_PLACEMENT,2010-03-10,2010-03-15,2010-03-10,2010-03-03,-5,Phát hành cổ phiếu - Phát hành riêng lẻ
+A_gap_small_5_15,PAN,PRIVATE_PLACEMENT,2007-09-27,2007-10-11,2007-09-27,2007-05-25,-14,Phát hành cổ phiếu - Phát hành riêng lẻ
+A_gap_small_5_15,DIC,PRIVATE_PLACEMENT,2009-02-04,2009-02-12,2009-02-06,2008-05-16,-8,Phát hành cổ phiếu - Phát hành riêng lẻ
+A_gap_small_5_15,NDF,PRIVATE_PLACEMENT,2015-05-27,2015-06-11,2015-05-27,2014-11-27,-15,Phát hành cổ phiếu - Phát hành riêng lẻ
+B_gap_large_gt30,TTB,PRIVATE_PLACEMENT,2022-03-03,2023-03-06,2022-03-03,2022-03-07,-368,Phát hành cổ phiếu - Phát hành riêng lẻ
+B_gap_large_gt30,NQN,PRIVATE_PLACEMENT,2019-07-02,2019-08-05,2019-07-02,2018-06-22,-34,Phát hành cổ phiếu - Phát hành riêng lẻ
+B_gap_large_gt30,TKG,RIGHTS,2021-10-13,2022-02-10,2021-10-14,2021-10-08,-120,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 10.0%
+B_gap_large_gt30,STP,RIGHTS,2010-05-18,2010-09-01,2010-05-20,2010-05-07,-106,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 50.0%
+B_gap_large_gt30,DXG,RIGHTS,2011-09-12,2012-01-16,2011-09-14,2011-02-26,-126,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 62.5%
+B_gap_large_gt30,MAS,RIGHTS,2012-08-27,2013-01-07,2012-08-29,2012-08-20,-133,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 33.3%
+B_gap_large_gt30,QBS,PRIVATE_PLACEMENT,2016-12-30,2018-01-02,2016-12-30,2016-10-08,-368,Phát hành cổ phiếu - Phát hành riêng lẻ
+B_gap_large_gt30,DC4,PRIVATE_PLACEMENT,2010-04-16,2010-10-19,2010-04-21,2009-12-22,-186,Phát hành cổ phiếu - Phát hành riêng lẻ
+B_gap_large_gt30,SD5,PRIVATE_PLACEMENT,2009-11-05,2010-02-12,2009-11-05,2009-10-29,-99,Phát hành cổ phiếu - Phát hành riêng lẻ
+B_gap_large_gt30,BGM,PRIVATE_PLACEMENT,2013-07-29,2014-07-30,2013-07-29,2013-07-16,-366,Phát hành cổ phiếu - Phát hành riêng lẻ

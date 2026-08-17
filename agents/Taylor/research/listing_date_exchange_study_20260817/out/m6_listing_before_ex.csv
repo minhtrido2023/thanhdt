@@ -1,0 +1,26 @@
+subtype,ticker,exright_date,listing_date,record_date,public_date,gap_ex_minus_listing,event_title_vi
+PRIVATE_PLACEMENT,VC2,2007-07-09,2007-05-10,2007-08-15,2007-06-29,60,Phát hành cổ phiếu - Phát hành riêng lẻ
+PRIVATE_PLACEMENT,SJ1,2007-09-12,2007-02-12,2007-09-14,2007-09-06,212,Phát hành cổ phiếu - Phát hành riêng lẻ
+PRIVATE_PLACEMENT,PCF,2007-11-30,2007-11-20,2007-11-30,2007-11-30,10,Phát hành cổ phiếu - Phát hành riêng lẻ
+PRIVATE_PLACEMENT,ICF,2008-05-14,2008-04-06,2008-03-25,2008-05-02,38,Phát hành cổ phiếu - Phát hành riêng lẻ
+PRIVATE_PLACEMENT,ABT,2008-10-01,2007-07-23,2007-05-30,2007-03-06,436,Phát hành cổ phiếu - Phát hành riêng lẻ
+PRIVATE_PLACEMENT,MCP,2008-10-31,2008-01-31,2007-11-02,2007-10-18,274,Phát hành cổ phiếu - Phát hành riêng lẻ
+PRIVATE_PLACEMENT,HSG,2010-02-11,2009-10-07,2010-02-11,2009-10-06,127,Phát hành cổ phiếu - Phát hành riêng lẻ
+PRIVATE_PLACEMENT,TLC,2010-12-25,2010-08-11,2010-12-25,2010-08-11,136,Phát hành cổ phiếu - Phát hành riêng lẻ
+PRIVATE_PLACEMENT,WSS,2010-12-30,2010-04-16,2010-12-30,2010-04-16,258,Phát hành cổ phiếu - Phát hành riêng lẻ
+PRIVATE_PLACEMENT,CEO,2010-12-31,2010-10-31,2010-12-31,2010-12-31,61,Phát hành cổ phiếu - Phát hành riêng lẻ
+PRIVATE_PLACEMENT,DIC,2011-03-31,2010-04-17,2011-03-31,2010-04-17,348,Phát hành cổ phiếu - Phát hành riêng lẻ
+PRIVATE_PLACEMENT,PXS,2011-05-04,2010-11-12,2011-05-04,2010-11-12,173,Phát hành cổ phiếu - Phát hành riêng lẻ
+PRIVATE_PLACEMENT,VPD,2013-12-31,2013-12-12,2013-12-31,2013-12-31,19,Phát hành cổ phiếu - Phát hành riêng lẻ
+PRIVATE_PLACEMENT,ROS,2016-03-31,2016-03-21,2016-03-21,2016-03-21,10,Phát hành cổ phiếu - Phát hành riêng lẻ
+RIGHTS,HAS,2004-10-29,2004-10-27,2004-11-02,2004-10-27,2,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 33.3%
+RIGHTS,DTT,2007-07-16,2007-01-11,2007-07-18,2007-01-30,186,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 65.0%
+RIGHTS,SJ1,2007-09-12,2007-02-12,2007-09-14,2007-09-06,212,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 20.0%
+RIGHTS,SJM,2010-01-29,2009-06-25,2010-02-02,2009-10-14,218,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 100.0%
+RIGHTS,DTA,2011-03-23,2011-03-14,2011-03-25,2011-03-14,9,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 50.0%
+RIGHTS,VTI,2011-07-14,2011-03-24,2011-07-18,2011-03-24,112,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 28.6%
+RIGHTS,DHC,2011-08-29,2011-03-31,2011-08-31,2011-03-31,151,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 30.0%
+RIGHTS,VC9,2011-11-11,2011-04-20,2011-11-15,2011-04-20,205,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 66.7%
+RIGHTS,PXI,2012-07-05,2011-04-26,2012-07-07,2011-04-26,436,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 91.7%
+RIGHTS,V21,2012-07-05,2012-03-17,2012-07-09,2012-03-17,110,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 200.0%
+RIGHTS,FDC,2013-08-01,2012-10-21,2013-08-05,2012-07-09,284,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 25.0%
