@@ -64,6 +64,19 @@ sau và phân loại freshness theo **phiên giao dịch liền trước**, khô
 sẽ báo động giả mỗi sáng, mốc "ngày lịch trước" sẽ báo động giả mỗi thứ Hai). ⚠️ n=1 quan sát —
 đừng biến nó thành giả định; script tự đo `MAX(ingested_at)` mỗi lần chạy.
 
+## Bẫy (2b) — bảng bị UPSERT IN-PLACE: `public_date` bị ghi đè khi sự kiện lật trạng thái
+
+Đo thật 2026-08-17: batch ingest gần nhất rewrite 1.331 dòng, trong đó **1.185 (89%) có `public_date` cũ
+hơn 2026-08-01** (cũ nhất 2024-09-13) ⇒ vendor sửa dòng LỊCH SỬ mỗi lần chạy, không chỉ append. Với sự
+kiện đã `executed`, ngày công bố Ý ĐỊNH **đã mất vĩnh viễn** — cùng cơ chế đã xác nhận ở tầng source ETL
+cho `insider_transaction` ([`../fundamentals/insider_transaction.md`](../fundamentals/insider_transaction.md)
+§Bẫy(1)). Đây là lý do Sprint 1 `corp_action_program_20260815` CẤM announcement study.
+
+✅ **Vá từ 2026-08-17**: [`corporate_action_snapshots.md`](corporate_action_snapshots.md) —
+`tav2_mike.corporate_action_snapshots`, append-only, 1 vintage/ngày. Mọi câu hỏi dạng "bảng trông như thế
+nào ngày D" / "dòng này bị sửa lúc nào" phải đọc bảng đó, KHÔNG đọc bảng này. Bảng này chỉ trả lời được
+"hiện tại".
+
 ## Bẫy (3) — trùng `(ticker, exright_date, event_code)` — cần GROUP BY/dedup có chủ đích
 
 `id` là unique key thật (36.149 distinct = đúng số dòng) nhưng nhiều dòng CÓ THỂ trùng
