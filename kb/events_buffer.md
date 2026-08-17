@@ -1012,3 +1012,7 @@
 ## Consolidation 2026-08-17T17:41:39Z
 - [2026-08-17T17:39:53Z] Mike/heartbeat — Mike_20260817_173852: {"status": "still_running", "elapsed_min": 1, "job_id": "Mike_20260817_173852", "source": "watcher"}
 - [2026-08-17T17:40:53Z] Mike/heartbeat — Mike_20260817_173852: {"status": "still_running", "elapsed_min": 2, "job_id": "Mike_20260817_173852", "source": "watcher"}
+
+## Consolidation 2026-08-17T17:42:03Z
+- [2026-08-17T17:41:53Z] Mike/heartbeat — Mike_20260817_173852: {"status": "still_running", "elapsed_min": 3, "job_id": "Mike_20260817_173852", "source": "watcher"}
+- [2026-08-17T17:41:57Z] Mike/finding — daily-retro-2026-08-17-finalized: {"summary": "Retro 08-17 finalized: 4 sự cố (2 tự phát hiện qua audit), 2 pattern. Wags verify GAPS FOUND → fixed (sự cố #2 câu b HOÀN CHỈNH→HỞ, round-2 fix 4435b3e0 chưa merge master). Pattern B wakeup-miss escalate lại (27,3%, cao nhất từng đo).", "entry": "kb/incidents/retro/retro-2026-08-17.md", "commit": "d337a071", "escalation_topic": "wakeup-miss-recurring-post-push-2026-08-17"}
