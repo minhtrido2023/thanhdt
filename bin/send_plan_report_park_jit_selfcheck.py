@@ -38,9 +38,12 @@ def check(name, cond, detail=""):
 
 
 def expected_date(env=None):
+    # Always compute in ICT regardless of TZ env — matches sender's anchored ICT date (§16).
     r = subprocess.run(
-        [sys.executable, "-c", "import datetime as dt;from trading_bot.vn_market import "
-         "next_trading_day;print(next_trading_day(dt.date.today()))"],
+        [sys.executable, "-c",
+         "import datetime as dt; from zoneinfo import ZoneInfo; "
+         "from trading_bot.vn_market import next_trading_day; "
+         "print(next_trading_day(dt.datetime.now(ZoneInfo('Asia/Ho_Chi_Minh')).date()))"],
         cwd=WC, capture_output=True, text=True, env=env)
     return r.stdout.strip()
 
@@ -76,8 +79,20 @@ def load_real(account, date="2026-08-07"):
         return json.load(fh)
 
 
-SX = load_real("SpaceX")
-ZP = load_real("ZaloPay")
+def _unmerge(plan):
+    """Strip _merged_into_orders from proposals so tests see the 'not-yet-merged' state.
+    Real plans on disk may have _merged_into_orders set (already processed), which correctly
+    suppresses L1/L2 in the renderer. Tests verify rendering of proposals — they need the
+    pre-merge state regardless of when the plan file was last saved."""
+    p = copy.deepcopy(plan)
+    for key in ("park_trim_proposal", "jit_unpark_proposal"):
+        if isinstance(p.get(key), dict):
+            p[key].pop("_merged_into_orders", None)
+    return p
+
+
+SX = _unmerge(load_real("SpaceX"))
+ZP = _unmerge(load_real("ZaloPay"))
 
 
 # ── Kỳ vọng SUY TỪ ARTIFACT, không ghim số (sửa 2026-08-14, job Taylor_20260814_080528) ──
