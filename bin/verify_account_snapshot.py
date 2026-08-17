@@ -348,13 +348,16 @@ def bq_close_prices(tickers, as_of_date):
 def dnse_close_prices(tickers, with_source=False):
     """Giá tham chiếu ĐÚNG PHIÊN của từng mã qua API DNSE (đơn vị nghìn đồng → VND).
 
-    Chỉ dùng khi --asof LÀ HÔM NAY: BQ tav2_bq.ticker chỉ sync đêm (23:45 ICT) nên
-    khi eod_trading_report.sh chạy 15:00 ICT cùng ngày, BQ CHƯA CÓ giá đóng cửa hôm
-    đó — bq_close_prices() lặng lẽ rơi về giá của ngày giao dịch gần nhất trước đó
+    Chỉ dùng khi --asof LÀ HÔM NAY: bug 2026-07-06 xảy ra khi EOD còn chạy 15:00,
+    trước BQ sync đêm (23:45), nên BQ CHƯA CÓ giá đóng cửa hôm đó — bq_close_prices()
+    lặng lẽ rơi về giá của ngày giao dịch gần nhất trước đó
     (2026-07-06: rơi về 07-03, lệch ~4.79tr VND cho SpaceX). Bug phát hiện 2026-07-06
     khi user đối chiếu bảng giá với app thật — field positions().marketPrice CŨNG sai
     (không phải giá ATC) nên không dùng; verify_finding: close_price()/latest_trade()
     boardId=G1 khớp 100% với nhau và khớp chính xác tới đồng với ảnh chụp app DNSE.
+    EOD hiện chạy 19:10, sau ticker ingest (~17:2x) và daily_refresh (18:30), nên BQ
+    thường đã có dòng hôm nay; vẫn overlay DNSE ở main() khi asof == today để lấy đúng
+    G1 close/giá tham chiếu thật của phiên hiện tại.
 
     ⚠️ CÁI BẪY THỨ HAI, NGƯỢC CHIỀU CÁI TRÊN (vá 2026-08-11, job Taylor_20260810_183618):
     `close_price` G1 là giá đóng cửa của PHIÊN GẦN NHẤT ĐÃ XONG. Khi hàm này chạy TRƯỚC
@@ -387,8 +390,8 @@ def dnse_close_prices(tickers, with_source=False):
     Cả hai cửa sổ giờ đi chung một đường: G1 không thuộc phiên hôm nay (thiếu HOẶC cũ) ⇒
     `_today_session_price()`.
 
-    KHÔNG đổi hành vi ở đường chạy chính EOD (17:30) / báo cáo 15:00: lúc đó G1 close ĐÃ
-    thuộc phiên hôm nay ⇒ nhánh mới không kích hoạt, giá vẫn là giá ATC thật như cũ.
+    KHÔNG đổi hành vi ở đường chạy chính EOD 19:10: lúc đó G1 close ĐÃ thuộc phiên hôm
+    nay ⇒ nhánh mới không kích hoạt, giá vẫn là giá ATC thật như cũ.
 
     `with_source=True` ⇒ trả (prices, sources) với sources[tk] ∈ {'dnse_g1_today',
     'dnse_trade_today', 'dnse_secdef_basic'} để consumer ghi provenance trung thực thay vì
@@ -637,7 +640,8 @@ def main():
         missing_today = [tk for tk in tickers if price_source.get(tk) != "dnse_atc_g1"]
         if missing_today:
             warnings.append(
-                f"WARN dùng giá BQ (có thể trễ vài ngày do BQ chỉ sync đêm) thay vì "
+                f"WARN dùng giá BQ (BQ live có thể thiếu phiên hôm nay nếu ticker ingest "
+                f"chưa xong/gặp lỗi) thay vì "
                 f"giá ATC DNSE hôm nay cho: {missing_today}")
 
     positions = []

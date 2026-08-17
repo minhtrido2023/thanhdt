@@ -132,7 +132,7 @@ def call(client, tickers, **kw):
 
 # ══════════════════════════════════════════════════════════════════════════════════════════
 print("[1] G1 close ĐÃ thuộc phiên HÔM NAY ⇒ dùng nguyên giá ATC, KHÔNG đụng secdef")
-# Đây là đường chạy chính EOD 17:30 / báo cáo 15:00 — bản vá TUYỆT ĐỐI không được đổi hành vi
+# Đây là đường chạy chính EOD 19:10 — bản vá TUYỆT ĐỐI không được đổi hành vi
 # ở đây, nếu không là làm hỏng đúng cái fix 2026-07-06 đã dựng.
 c = FakeClient(REAL, close_day=TODAY)
 px, warn = call(c, ["MBB", "ACB"], with_source=True)
@@ -291,7 +291,7 @@ c = MidSessionClient(REAL, secdef_raises=True)
 check("cả hai nguồn hỏng ⇒ mã vắng khỏi kết quả (fail-safe, caller khai bq_close_stale)",
       "MBB" not in prices, prices)
 
-# (f) ĐƯỜNG EOD 17:30 KHÔNG ĐỔI: G1 close thuộc hôm nay ⇒ không gọi latest_trade lẫn secdef
+# (f) ĐƯỜNG EOD 19:10 KHÔNG ĐỔI: G1 close thuộc hôm nay ⇒ không gọi latest_trade lẫn secdef
 c = MidSessionClient(REAL, lt=(99.9, TODAY))
 c.close_price = FakeClient(REAL, close_day=TODAY).close_price
 (prices, src), _ = call(c, ["MBB"], with_source=True)

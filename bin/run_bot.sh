@@ -92,7 +92,7 @@ elif [ "$rc" -eq 0 ]; then
   elif [ "$_n_orders" = "0" ]; then
     _reason="kế hoạch hôm nay là HOLD — bot đã đồng bộ trạng thái xong và nghỉ"
   else
-    _reason="kết thúc đợt làm việc bình thường; nếu đang giữa ngày bot sẽ quay lại theo lịch (13:00 sau nghỉ trưa), cuối ngày chờ báo cáo EOD 15:00"
+    _reason="kết thúc đợt làm việc bình thường; nếu đang giữa ngày bot sẽ quay lại theo lịch (13:00 sau nghỉ trưa), cuối ngày chờ báo cáo EOD 19:10"
   fi
   _discord "✅ **Bot rời phiên ($_hr_end)** — account **$ACCOUNT**: ${_reason} (chạy $((elapsed/60)) phút)."
   "$ROOT/bin/append_event.sh" Mafee status "bot-done" \

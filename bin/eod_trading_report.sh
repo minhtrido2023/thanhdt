@@ -2,7 +2,7 @@
 # eod_trading_report.sh [--account LABEL] [--date YYYY-MM-DD]
 # Báo cáo tổng kết giao dịch cuối ngày: số lệnh, mua/bán, giá khớp TB, tổng giá trị.
 # Đọc plan (ticker/side/ref_price) + state.json (giá khớp thực từng child order).
-# Schedule: 15:00 ICT trading days (cron: 0 8 * * 1-5), sau khi phiên chiều đã đóng (~14:50).
+# Schedule: 19:10 ICT trading days (cron: 10 12 * * 1-5), sau khi phiên chiều đã đóng (~14:50).
 set -uo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 WC_ROOT="$(cd "$ROOT/.." && pwd)"

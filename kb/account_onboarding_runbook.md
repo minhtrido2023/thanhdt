@@ -15,7 +15,7 @@ thông qua `bin/for_each_live_account.sh <script> [args]` (đã wire sẵn trong
 **Nghĩa là:** một khi account mới có `enabled:true, mode:"live", broker:"dnse"` trong file
 config, nó **tự động** được đưa vào: preflight sáng, ops-health-check 08:20/12:45, gửi plan
 T+1 19:30, dispatch DollarBill lập plan (bước [pipeline-4] của `bq_freshness_check.sh`), và
-báo cáo EOD 15:00 — **không cần sửa cron/code gì thêm** cho các bước này.
+báo cáo EOD 19:10 — **không cần sửa cron/code gì thêm** cho các bước này.
 
 **KHÔNG tự động** (vẫn cần 1 dòng cron riêng, vì đây là tiến trình thực thi lệnh thật, mỗi
 account 1 tiến trình độc lập, không "lặp" được như các script trên):
