@@ -35,6 +35,7 @@ Run: python capit_lever_selfcheck.py     (exit 0 = all pass)
 import ast
 import builtins
 import copy
+import csv
 import dataclasses
 import datetime as _dt
 import glob
@@ -1047,10 +1048,25 @@ with tempfile.TemporaryDirectory() as TMP:
         def poll_orders(self):
             return {}
 
-    def mkexec(orders, tmpdir, account=TAG):
+    def mkexec(orders, tmpdir, account=TAG, cfg_over=None, broker=None):
         cfg = load_config()
+        # HYBRID fill-timing GHIM TẮT làm nền (cfg_over vẫn bật lại được — nhóm E8-E10 dùng).
+        # Vì sao: nhóm E đo LƯỚI ĐÒN BẨY (tạm dừng mã mang gói vay không ai duyệt), mà từ
+        # 2026-08-10 `fill_timing_hybrid_enabled` mặc định True (bật trên paper, commit
+        # 717307f). E5 chạy mode="paper" ở NOW=09:20 — NGOÀI block MUA của HYBRID
+        # (11:00-13:45) ⇒ lệnh MUA bị hoãn theo LỊCH trước khi tới chỗ kiểm lưới.
+        # ĐO THẬT (không suy luận), mutation gỡ `if o.ticker in ghost_tickers: continue` ở
+        # `_place_slices` rồi A/B đúng MỘT cờ: hybrid=True ⇒ broker KHÔNG bị gọi ⇒ E5 VẪN
+        # PASS; hybrid=False ⇒ get_quote bị gọi ⇒ E5 FAIL đúng như phải thế. Nghĩa là trước
+        # bản vá này E5 PASS KỂ CẢ KHI lưới bị gỡ sạch — nó không đo được gì nữa. Nguy hiểm
+        # hơn màu đỏ: "không gọi broker" không phân biệt được lưới AN TOÀN (chặn đòn bẩy
+        # không ai duyệt — TIỀN THẬT) với lịch CHI PHÍ (HYBRID_DEFER, chỉ hoãn). §23 hệ luận
+        # 1: selfcheck không assert lên trạng thái SỐNG (ở đây là cờ config toàn cục đang
+        # trôi). Ca KẾT HỢP đo ở E8-E10.
+        cfg["fill_timing_hybrid_enabled"] = False
+        cfg.update(cfg_over or {})
         cfg["mode"] = "paper"
-        ex = Executor(mkplan(orders, account=account), _NullBroker(), cfg, shared={})
+        ex = Executor(mkplan(orders, account=account), broker or _NullBroker(), cfg, shared={})
         ex.state_file = os.path.join(tmpdir, f"state_{account}.json")
         ex.journal_file = os.path.join(tmpdir, f"journal_{account}.csv")
         return ex
@@ -1165,6 +1181,65 @@ with tempfile.TemporaryDirectory() as TMP:
     check("E7 …và sự cố được ghi ra bus dưới dạng LEVER_PACKAGE_UNAUTHORIZED",
           "_lever_warned" in ex4.state and "FPT" in ex4.state["_lever_warned"],
           detail=str(ex4.state.get("_lever_warned")))
+
+    # ── E8-E10: LƯỚI ĐÒN BẨY × HYBRID (đúng cấu hình paper THẬT từ 2026-08-10) ─────────────
+    # Vì sao phải có: E1-E7 cố ý ghim HYBRID tắt để cô lập lưới. Nếu chỉ ghim mà không bù, bộ
+    # test sẽ mô tả một cấu hình KHÔNG ai chạy (paper thật đang bật HYBRID) và lần đổi cờ tiếp
+    # theo lại đi qua không ai thấy. Khi HYBRID bật, "broker không bị gọi" có HAI nguyên nhân
+    # khác hẳn nhau — lưới TẠM DỪNG (an toàn, chặn đòn bẩy không ai duyệt) và HYBRID_DEFER
+    # (lịch chi phí, chỉ hoãn). Đếm số lệnh không phân biệt được, nên phân biệt bằng JOURNAL
+    # + một ca CHỨNG MINH NGƯỢC.
+    NOW_HYB = _dt.datetime(2099, 1, 2, 11, 5)      # TRONG block MUA đầu tiên (11:00-11:15)
+    NOW_OUT = _dt.datetime(2099, 1, 2, 9, 20)      # NGOÀI block MUA — đúng giờ E5 đang dùng
+    HYB_ON = {"fill_timing_hybrid_enabled": True}
+
+    class _ReachedBroker(_NullBroker):
+        """Ghi lại việc luồng ĐI TỚI được tầng broker thay vì ném AssertionError. Quote None
+        ⇒ `_place_slices` ghi NO_QUOTE rồi `continue`: quan sát được mà không đặt lệnh."""
+
+        def __init__(self):
+            self.quote_calls = []
+
+        def get_quote(self, ticker, *a, **k):
+            self.quote_calls.append(ticker)
+            return None
+
+    def _ev_hyb(ex):
+        if not os.path.exists(ex.journal_file):
+            return set()
+        with open(ex.journal_file, encoding="utf-8") as f:
+            return {row[1] for row in csv.reader(f) if len(row) > 1}
+
+    def _mk_hyb(tag, paused, now):
+        br = _ReachedBroker()
+        exh = mkexec([o("B1", "FPT", book="BAL")], TMP, account=TAG + tag,
+                     cfg_over=HYB_ON, broker=br)
+        exh._place_slices(now, "MORNING", ghost_tickers=({"FPT"} if paused else set()))
+        return exh, br
+
+    # E8 — TRONG block MUA nên HYBRID KHÔNG hoãn; mã bị tạm dừng ⇒ thứ duy nhất còn có thể
+    # chặn là lưới đòn bẩy. Lưới `continue` LẶNG (không ghi journal) nên bằng chứng "không
+    # phải HYBRID" là: journal KHÔNG có HYBRID_DEFER và broker chưa hề bị chạm.
+    ex_h1, br_h1 = _mk_hyb("h1", paused=True, now=NOW_HYB)
+    check("E8 HYBRID bật, TRONG block MUA, mã bị TẠM DỪNG ⇒ chặn bởi lưới đòn bẩy, KHÔNG "
+          "phải HYBRID_DEFER (broker chưa bị chạm)",
+          "HYBRID_DEFER" not in _ev_hyb(ex_h1) and br_h1.quote_calls == [],
+          detail=f"events={sorted(_ev_hyb(ex_h1))} quote_calls={br_h1.quote_calls}")
+
+    # E9 — CHỨNG MINH NGƯỢC cho E8: cùng cấu hình, cùng giờ, đổi ĐÚNG MỘT biến (bỏ tạm dừng).
+    ex_h2, br_h2 = _mk_hyb("h2", paused=False, now=NOW_HYB)
+    check("E9 CHỨNG MINH NGƯỢC: cùng cấu hình/giờ, BỎ tạm dừng ⇒ luồng ĐI TỚI broker (lưới "
+          "đòn bẩy mới là thứ chặn E8)",
+          br_h2.quote_calls == ["FPT"] and "NO_QUOTE" in _ev_hyb(ex_h2),
+          detail=f"quote_calls={br_h2.quote_calls} events={sorted(_ev_hyb(ex_h2))}")
+
+    # E10 — chốt rằng ghim TẮT ở E1-E7 là cần thiết chứ không tuỳ tiện, và ghi lại ĐÚNG cơ chế
+    # đã che mất E5: cùng lệnh KHÔNG bị tạm dừng, chỉ dời ra ngoài block (09:20 = giờ E5).
+    ex_h3, br_h3 = _mk_hyb("h3", paused=False, now=NOW_OUT)
+    check("E10 HYBRID bật, NGOÀI block ⇒ HYBRID_DEFER và broker KHÔNG bị chạm (đây chính là "
+          "thứ làm E5 pass kể cả khi lưới đòn bẩy bị gỡ sạch)",
+          "HYBRID_DEFER" in _ev_hyb(ex_h3) and br_h3.quote_calls == [],
+          detail=f"events={sorted(_ev_hyb(ex_h3))} quote_calls={br_h3.quote_calls}")
 
     # ─────────────────── F. DIỄN TẬP ĐẦU–CUỐI trên PaperBroker ───────────────────
     section("F. DIỄN TẬP đầu–cuối (paper): tín hiệu → artifact → plan → lệnh")
