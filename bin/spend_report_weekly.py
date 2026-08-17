@@ -38,6 +38,7 @@ HISTORY_COLUMNS = [
     "other_jobs", "other_kb", "other_h",
     "sonnet_jobs", "opus_jobs", "fable_jobs", "default_jobs",
     "feat", "fix", "docs", "chore", "refactor", "test", "other_commits",
+    "retried_jobs", "extra_attempts", "resume_jobs", "cache_hit_pct",
 ]
 COMMIT_COLUMNS = ["feat", "fix", "docs", "chore", "refactor", "test", "other_commits"]
 
@@ -75,7 +76,8 @@ def _int(row, key):
 def compute_summary(root, days):
     since_ts = int(time.time()) - days * 86400
     spend_report.ROOT = root
-    job_buckets, agent_effort = spend_report._scan_jobs(since_ts)
+    job_buckets, agent_effort, retry_stats = spend_report._scan_jobs(since_ts)
+    cache_usage = spend_report._scan_cache_usage(since_ts)
     commit_counts, commit_total = spend_report._scan_commits(days)
 
     empty = {"jobs": 0, "log_bytes": 0, "duration_s": 0, "agents": {}, "models": {}}
@@ -124,10 +126,22 @@ def compute_summary(root, days):
             warnings.append(
                 f"effort=high của {agent} là {high_pct:.0f}% (n={n}) — trên ngưỡng 70%."
             )
+    retry_pct = (
+        100 * retry_stats["extra_attempts"] / total_jobs
+        if total_jobs and retry_stats["extra_attempts"]
+        else 0
+    )
+    if total_jobs >= spend_report.RETRY_WARN_MIN_JOBS and retry_pct >= spend_report.RETRY_WARN_PCT:
+        warnings.append(
+            f"Có {retry_stats['retried_jobs']} job chạy attempt >1, "
+            f"{retry_stats['extra_attempts']} lần compute thêm ({retry_pct:.0f}% của tổng job)."
+        )
 
     return {
         "categories": categories,
         "agent_effort": agent_effort,
+        "retry_stats": retry_stats,
+        "cache_usage": cache_usage,
         "commit_counts": commit_counts,
         "commit_total": commit_total,
         "total_jobs": total_jobs,
@@ -165,6 +179,7 @@ def row_from_summary(report_date, days, summary):
     cat = summary["categories"]
     c = summary["claude_counts"]
     cc = summary["commit_counts"]
+    cache_hit = summary["cache_usage"]["hit_pct"]
     return {
         "date": report_date.isoformat(),
         "days": days,
@@ -191,7 +206,35 @@ def row_from_summary(report_date, days, summary):
         "refactor": cc.get("refactor", 0),
         "test": cc.get("test", 0),
         "other_commits": cc.get("other", 0),
+        "retried_jobs": summary["retry_stats"]["retried_jobs"],
+        "extra_attempts": summary["retry_stats"]["extra_attempts"],
+        "resume_jobs": summary["retry_stats"]["resume_jobs"],
+        "cache_hit_pct": f"{cache_hit:.1f}" if cache_hit is not None else "",
     }
+
+
+def _ensure_history_header(path):
+    if not os.path.isfile(path):
+        return
+    with open(path, encoding="utf-8") as f:
+        try:
+            header = next(csv.reader(f))
+        except StopIteration:
+            header = []
+    missing = [col for col in HISTORY_COLUMNS if col not in header]
+    if not missing:
+        return
+    tmp = path + ".tmp"
+    with open(path, encoding="utf-8") as f, open(tmp, "w", encoding="utf-8") as out:
+        writer = csv.writer(out)
+        first = True
+        for row in csv.reader(f):
+            if first:
+                writer.writerow(header + missing)
+                first = False
+            else:
+                writer.writerow(row + [""] * len(missing))
+    os.replace(tmp, path)
 
 
 def append_history(state_dir, row):
@@ -200,6 +243,7 @@ def append_history(state_dir, row):
     rows = read_history(state_dir)
     if any(r.get("date") == row["date"] for r in rows):
         return False
+    _ensure_history_header(path)
     is_new = not os.path.isfile(path)
     with open(path, "a", encoding="utf-8") as f:
         if is_new:
@@ -341,6 +385,7 @@ def build_report(report_date, summary, previous, charts):
         ["Compute ước tính", f"{summary['total_hours']:.1f}h"],
         ["Log KB", summary["total_log_kb"]],
         ["Offload provider khác Claude", f"{summary['offload_jobs']} job ({summary['offload_pct']:.0f}%)"],
+        ["Retry / compute thêm", f"{summary['retry_stats']['extra_attempts']} attempt"],
         ["Commits", summary["commit_total"]],
     ]
     lines += _md_table(["Chỉ số", "Giá trị"], summary_rows)
@@ -407,13 +452,32 @@ def build_report(report_date, summary, previous, charts):
     lines.append(f"![Commits by type]({charts['commits']})")
     lines.append("")
 
-    lines.append("## Cảnh báo effort / model")
+    lines.append("## Token / retry watch")
+    lines.append("")
+    cache = summary["cache_usage"]
+    if cache["prompt_tokens"]:
+        lines.append(
+            "- Cache hit: "
+            f"**{cache['hit_pct']:.0f}%** của prompt tokens "
+            f"({cache['cache_read_tokens']:,} read / {cache['prompt_tokens']:,} total)."
+        )
+    else:
+        lines.append("- Cache hit: chưa có dữ liệu transcript trong cửa sổ.")
+    retry = summary["retry_stats"]
+    lines.append(
+        f"- Retry / duplicate compute: **{retry['retried_jobs']} job** chạy attempt >1, "
+        f"**{retry['extra_attempts']} attempt** thêm; "
+        f"{retry['resume_jobs']} job có prompt resume/re-dispatch."
+    )
+    lines.append("")
+
+    lines.append("## Cảnh báo effort / model / retry")
     lines.append("")
     if summary["warnings"]:
         for w in summary["warnings"]:
             lines.append(f"- ⚠ {w}")
     else:
-        lines.append("- Không có cảnh báo nào vượt ngưỡng effort=high hoặc fable.")
+        lines.append("- Không có cảnh báo nào vượt ngưỡng effort, fable hoặc retry.")
     lines.append("")
 
     lines.append("## Nhận xét của quản lý")

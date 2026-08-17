@@ -37,6 +37,7 @@ import re
 import subprocess
 import sys
 import time
+from datetime import datetime, timezone
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -52,10 +53,14 @@ AGENT_CATEGORY = {
 
 COMMIT_PREFIXES = ["feat", "fix", "docs", "chore", "refactor", "test"]
 
+RETRY_WARN_MIN_JOBS = 10
+RETRY_WARN_PCT = 10
+
 
 def _parse_args(argv):
     days = 7
     csv_path = None
+    root = ROOT
     i = 0
     while i < len(argv):
         if argv[i] == "--days":
@@ -64,9 +69,12 @@ def _parse_args(argv):
         elif argv[i] == "--csv-append":
             csv_path = argv[i + 1]
             i += 2
+        elif argv[i] == "--root":
+            root = argv[i + 1]
+            i += 2
         else:
             i += 1
-    return days, csv_path
+    return days, csv_path, root
 
 
 # Nhan model cua CLAUDE. Provider khac (opencode/codex/antigravity) KHONG dung nhan nay —
@@ -91,6 +99,13 @@ def _model_key(rec):
 def _scan_jobs(since_ts):
     buckets = {}  # category -> {"jobs", "log_bytes", "duration_s", "agents": {}, "models": {}}
     agent_effort = {}  # agent -> {effort_level: count} — drift watch, xem canh bao o main()
+    retry_stats = {
+        "attempt_counts": {},
+        "retried_jobs": 0,
+        "extra_attempts": 0,
+        "resume_jobs": 0,
+        "by_status": {},
+    }
     for path in glob.glob(os.path.join(ROOT, "bus", "jobs", "*.json")):
         try:
             with open(path, encoding="utf-8") as f:
@@ -104,6 +119,20 @@ def _scan_jobs(since_ts):
             continue
         if started < since_ts:
             continue
+        status = rec.get("status") or "unknown"
+        attempt = str(rec.get("attempt") or "1")
+        retry_stats["attempt_counts"][attempt] = retry_stats["attempt_counts"].get(attempt, 0) + 1
+        if attempt.isdigit() and int(attempt) > 1:
+            retry_stats["retried_jobs"] += 1
+            retry_stats["extra_attempts"] += int(attempt) - 1
+            retry_stats["by_status"][status] = retry_stats["by_status"].get(status, 0) + 1
+        prompt_summary = rec.get("prompt_summary") or ""
+        if (
+            "TIẾP TỤC job" in prompt_summary
+            or "TIẾP TỤC JOB" in prompt_summary
+            or prompt_summary.startswith("[RESUME sau usage-limit")
+        ):
+            retry_stats["resume_jobs"] += 1
         agent = rec.get("to", "?")
         cat = AGENT_CATEGORY.get(agent, "other")
         b = buckets.setdefault(
@@ -134,7 +163,84 @@ def _scan_jobs(since_ts):
             dur = 0
         if dur > 0:
             b["duration_s"] += dur
-    return buckets, agent_effort
+    return buckets, agent_effort, retry_stats
+
+
+def _timestamp_to_epoch(value):
+    if not value:
+        return None
+    text = value.replace("Z", "+00:00")
+    try:
+        dt = datetime.fromisoformat(text)
+    except ValueError:
+        return None
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt.timestamp()
+
+
+def _cache_project_dirs(since_ts):
+    """Claude project dirs for fleet agents, including worktree copies if present."""
+    proj_root = os.path.join(os.path.expanduser("~"), ".claude", "projects")
+    if not os.path.isdir(proj_root):
+        return
+    agents = set(AGENT_CATEGORY) | {"Mike"}
+    for name in os.listdir(proj_root):
+        if not (
+            name.startswith("-home-trido-thanhdt-WorkingClaude-mike-agents-")
+            or name.startswith("-home-trido-mike-lite-")
+        ):
+            continue
+        if "-agents-" in name:
+            suffix = name.rsplit("-agents-", 1)[-1]
+        else:
+            suffix = name.rsplit("-", 1)[-1]
+        if suffix not in agents:
+            continue
+        for tf in glob.glob(os.path.join(proj_root, name, "*.jsonl")):
+            if os.path.getmtime(tf) >= since_ts - 86400:
+                yield tf
+
+
+def _scan_cache_usage(since_ts):
+    """Read Claude transcript usage in the window and dedupe repeated usage lines."""
+    totals = {"input_tokens": 0, "cache_read_tokens": 0, "cache_creation_tokens": 0, "messages": 0}
+    seen = set()
+    for tf in _cache_project_dirs(since_ts):
+        try:
+            with open(tf, encoding="utf-8") as f:
+                for line in f:
+                    if '"usage"' not in line:
+                        continue
+                    try:
+                        event = json.loads(line)
+                    except Exception:
+                        continue
+                    msg = event.get("message")
+                    if not isinstance(msg, dict):
+                        continue
+                    usage = msg.get("usage")
+                    if not isinstance(usage, dict):
+                        continue
+                    uid = msg.get("id") or event.get("requestId") or event.get("uuid")
+                    if not uid or uid in seen:
+                        continue
+                    ts = _timestamp_to_epoch(event.get("timestamp"))
+                    if ts is None or ts < since_ts:
+                        continue
+                    seen.add(uid)
+                    totals["input_tokens"] += int(usage.get("input_tokens") or 0)
+                    totals["cache_read_tokens"] += int(usage.get("cache_read_input_tokens") or 0)
+                    totals["cache_creation_tokens"] += int(usage.get("cache_creation_input_tokens") or 0)
+                    totals["messages"] += 1
+        except Exception:
+            continue
+    prompt_tokens = (
+        totals["input_tokens"] + totals["cache_read_tokens"] + totals["cache_creation_tokens"]
+    )
+    totals["prompt_tokens"] = prompt_tokens
+    totals["hit_pct"] = 100 * totals["cache_read_tokens"] / prompt_tokens if prompt_tokens else None
+    return totals
 
 
 def _scan_commits(days):
@@ -163,10 +269,13 @@ def _scan_commits(days):
 
 
 def main():
-    days, csv_path = _parse_args(sys.argv[1:])
+    days, csv_path, root = _parse_args(sys.argv[1:])
+    global ROOT
+    ROOT = os.path.abspath(root)
     since_ts = int(time.time()) - days * 86400
 
-    job_buckets, agent_effort = _scan_jobs(since_ts)
+    job_buckets, agent_effort, retry_stats = _scan_jobs(since_ts)
+    cache_usage = _scan_cache_usage(since_ts)
     commit_counts, commit_total = _scan_commits(days)
 
     empty = {"jobs": 0, "log_bytes": 0, "duration_s": 0, "agents": {}, "models": {}}
@@ -241,6 +350,53 @@ def main():
                 f"MIKE.md §Model routing says default should be medium, high only for "
                 f"genuinely complex tasks."
             )
+    print()
+    # Retry / duplicate compute watch (2026-08-16) — attempt>1 records in bus/jobs/ are
+    # the only stable signal that a task already consumed one run and then consumed more.
+    print("Retry / duplicate compute watch:")
+    attempt_str = ", ".join(
+        f"attempt {k}={v}" for k, v in sorted(retry_stats["attempt_counts"].items())
+    )
+    print(f"  attempts: {attempt_str}")
+    if retry_stats["retried_jobs"]:
+        retry_pct = 100 * retry_stats["extra_attempts"] / total_jobs if total_jobs else 0
+        print(
+            f"  retried_jobs={retry_stats['retried_jobs']}  "
+            f"extra_attempts={retry_stats['extra_attempts']}  "
+            f"({retry_pct:.0f}% of jobs)"
+        )
+        status_str = ", ".join(
+            f"{k}={v}" for k, v in sorted(retry_stats["by_status"].items())
+        )
+        if status_str:
+            print(f"  retry status: {status_str}")
+        if retry_stats["resume_jobs"]:
+            print(f"  explicit resume/re-dispatch prompts: {retry_stats['resume_jobs']}")
+        if (
+            total_jobs >= RETRY_WARN_MIN_JOBS
+            and retry_pct >= RETRY_WARN_PCT
+        ):
+            print(
+                f"    ⚠ duplicate compute = {retry_pct:.0f}% of jobs — xem xét nguyên "
+                f"nhân retry/timeout trước khi tăng throughput."
+            )
+    else:
+        print("  no attempt>1 jobs in window")
+    print()
+    print("Cache usage (Claude transcripts in agent project dirs):")
+    if cache_usage["prompt_tokens"]:
+        print(
+            f"  prompt_tokens={cache_usage['prompt_tokens']:,}  "
+            f"input={cache_usage['input_tokens']:,}  "
+            f"cache_read={cache_usage['cache_read_tokens']:,}  "
+            f"cache_creation={cache_usage['cache_creation_tokens']:,}"
+        )
+        print(
+            f"  cache hit = {cache_usage['hit_pct']:.0f}% of prompt tokens "
+            f"({cache_usage['messages']} assistant messages)"
+        )
+    else:
+        print("  no transcript usage found in window")
     print()
     print(f"Commits by type ({commit_total} total):")
     for p in COMMIT_PREFIXES + ["other"]:
