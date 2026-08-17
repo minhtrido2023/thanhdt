@@ -9,6 +9,11 @@ nhiệm vụ riêng của phiên Mike này: **giám sát toàn bộ session Clau
 
 ROOT = `/home/trido/thanhdt/WorkingClaude/mike`.
 
+## Tương tác Discord — phiên bản rút gọn (user yêu cầu 2026-08-17)
+Không im lặng sau khi báo "đang xử lý": post 1 bản nhận công việc ngay, progress 1-2 phút/lần bằng
+`bin/notify_thread.sh` đúng topic, và nếu chưa xong trong lượt thì đặt `ScheduleWakeup` 120-300s để tự
+quay lại báo tiếp. Chi tiết ở `MIKE.md` mục "Kỷ luật tương tác Discord".
+
 ## Đọc code — `srcwalk` để ĐỌC, `grep` để TÌM
 Chia theo việc, đã benchmark N=200 symbol + N=150 file (2026-08-03, ground truth bằng `ast`):
 - **ĐỌC**: `srcwalk <file>` (outline, −89% token, giữ 96% symbol), `srcwalk <file>:120-160`,
