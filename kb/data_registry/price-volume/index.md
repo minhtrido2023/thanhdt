@@ -12,6 +12,7 @@ title: Giá / khối lượng cổ phiếu
 | [`corporate_action_bq.md`](corporate_action_bq.md) — tav2_bq.corporate_action (per-event corp action, mới tạo 2026-08-12) | TRAP |
 | [`corporate_action_snapshots.md`](corporate_action_snapshots.md) — lithe-record-440915-m9.tav2_mike.corporate_action_snapshots (snapshot tiến-tới, point-in-time provenance cho bảng nguồn bị upsert in-place) | CANONICAL |
 | [`dnse_api_live.md`](dnse_api_live.md) — DNSE API live (dnse_api.py secdef/latest_trade/positions/balances) | CANONICAL |
+| [`dnse_latest_trade_avgprice_upcom.md`](dnse_latest_trade_avgprice_upcom.md) — DNSE latest_trade().avgPrice board G1, cơ sở giá GDKHQ UPCOM (chưa wire G5) | CANONICAL |
 | [`shares_outstanding_live.md`](shares_outstanding_live.md) — tav2_bq.shares_outstanding_live | CANONICAL |
 | [`ticker_close_vs_price_dividend_adj.md`](ticker_close_vs_price_dividend_adj.md) — cặp cột Close (đã điều chỉnh) vs Price (thô) trong tav2_bq.ticker | TRAP |
 | [`ticker_ohlcv_tables.md`](ticker_ohlcv_tables.md) — tav2_bq.ticker / ticker_1m / ticker_prune | CANONICAL |
