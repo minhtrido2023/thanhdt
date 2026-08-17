@@ -377,22 +377,25 @@
         "type": "command",
         "cmd": [
           "python3",
-          "-c",
-          "print('Pha 0 chưa triển khai telemetry — daily report phải giữ WATCH, không được suy diễn không có hoạt động.')"
+          "mike/bin/order_book_shadow_probe.py"
         ],
-        "timeout": 10,
-        "max_chars": 500
+        "timeout": 60,
+        "max_chars": 1100
       },
       "data_sources": [
-        "telemetry v1 (sẽ tạo): timestamp, 10 mức bid/ask, spread/microprice/imbalance, baseline decision, shadow recommendation, order/fill và hậu kiểm 1/5/15 phút",
-        "data/execution_logs/exec_main_*_journal.csv (baseline HYBRID, chỉ đối chiếu)",
-        "snapshot nguồn broker với timestamp/freshness được kiểm tra"
+        "data/execution_logs/orderbook_shadow_<account>_<date>.jsonl — schema orderbook_execution_v1: trace_id parent/child, baseline, KEEP/REDUCE/DEFER, latency và snapshot immutable",
+        "data/execution_logs/dnse_raw_<date>.jsonl kind=quote_l2 — schema orderbook_l2_v1, G1 10 mức, VND + shares, source_ts/source_age_ms",
+        "data/execution_logs/exec_<account>_<date>_journal.csv — PLACE/FILL/DONE nối bằng child_oid; hậu kiểm 1/5/15 phút dựng offline từ snapshot kế tiếp"
       ],
-      "notes": "Kế hoạch đã được user chốt 2026-08-14: ưu tiên cải thiện chất lượng fill và giảm chi phí giao dịch, không nghiên cứu alpha. Pha 0 (trước 2026-08-18): audit nguồn snapshot + schema immutable + retention + freshness; Pha 1 (20 phiên): bot giữ nguyên HYBRID, shadow policy chỉ log KEEP/REDUCE/DEFER. Rule đầu tiên nếu đủ dữ liệu: REDUCE khi spread rộng và top-of-book mỏng; KHÔNG dùng imbalance để dự đoán giá hoặc tăng aggressiveness. Thiết kế phải fail-open về baseline HYBRID khi snapshot thiếu/cũ/lỗi. Mọi số phải tách theo side, ticker-liquidity bucket và phiên; kiểm định bằng paired comparison cùng opportunity, không so P&L toàn portfolio.",
+      "notes": "Kế hoạch đã được user chốt 2026-08-14 và duyệt triển khai telemetry v1 ngày 2026-08-15: ưu tiên cải thiện chất lượng fill và giảm chi phí giao dịch, không nghiên cứu alpha. Schema khóa version: orderbook_l2_v1 + orderbook_execution_v1; giá VND, quantity G1 là shares, timestamp nguồn tách timestamp capture, snapshot quá 5 giây hoặc thiếu timestamp nguồn = INVALID và policy bắt buộc KEEP (fail-open baseline). Shadow policy spread_depth_v1: KEEP mặc định; REDUCE khi spread >=2 tick và touch depth <1x child; DEFER khi spread >=4 tick và touch depth <0,5x child. Kết quả shadow KHÔNG có đường gọi broker/không được đọc vào giá, KL hoặc lịch HYBRID. Raw + telemetry giữ ít nhất xuyên review 16/09 và 30 ngày sau review. Hậu kiểm 1/5/15 phút dựng offline, không thêm API call. RESILIENCE LOẠI KHỎI v1 theo user duyệt 2026-08-15: cadence 60s không đủ đo tái tạo sổ trong vài giây; muốn nghiên cứu phải mở chương trình/log riêng. Mọi số tách theo side, ticker-liquidity bucket và phiên; paired comparison cùng opportunity, không so P&L toàn portfolio.",
       "review_short": "Review 2026-09-16 09:30 ICT — cần >=20 phiên evidence; chỉ quyết định sang paper A/B hay dừng, không go-live",
+      "headline": {
+        "regex": "order-book observations N=(\\d+) · valid=(\\d+)",
+        "template": "order-book opportunities N={0} · snapshot hợp lệ {1}"
+      },
       "today_activity": {
         "mode": "none_available",
-        "reason": "Telemetry order-book v1 chưa được triển khai; status WATCH là đúng, không suy diễn thành không có giao dịch hay hiệu quả bằng 0"
+        "reason": "Chương trình LOG-ONLY, không phát sinh lệnh riêng; activity đọc từ probe theo child-order opportunity. N=0 nghĩa là chưa có opportunity, không phải policy không có giá trị."
       }
     },
     {
