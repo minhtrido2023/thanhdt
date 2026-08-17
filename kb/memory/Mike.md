@@ -2,34 +2,33 @@
 > Cập nhật mỗi khi đổi mạch việc. Bơm vào đầu phiên của Mike.
 
 # Working memory — Mike
-> Cập nhật lần cuối: 2026-08-17T01:10Z (yêu cầu tóm tắt plan hôm nay, đang dispatch DollarBill)
+> Cập nhật lần cuối: 2026-08-17T08:23 ICT (2 plan hôm nay ĐÃ DUYỆT, chờ phiên sáng)
 
-## Tóm tắt plan hôm nay (08-17) — ĐANG CHỜ DollarBill trình bày
-- User yêu cầu gửi lại tóm tắt plan mua/bán hôm nay, đúng định dạng đã yêu cầu 08-10
-  (Bal/Lag/Park/Capit/Cash %NAV, trước/sau, lý do từng lệnh).
-- Dispatch DollarBill (job DollarBill_20260817_011043, opus/high, timeout 900s, --bg — LƯU Ý:
-  dispatch ĐỒNG BỘ bị timeout ở 2 phút Bash tool và job bị cancelled tự động, phải dùng --bg).
-- Dữ liệu thô đã đọc từ plan file: SpaceX 1 lệnh (mua TV1 500cp @20.640, ceiling_rule=None vì
-  injected TRƯỚC Rule A fix 08-15, không phải bug); ZaloPay 0 lệnh. Cả 2 approved_by=None.
-- Cần verify %NAV breakdown qua pipeline §6 chuẩn (verify_account_snapshot.py +
-  daily_nav_snapshot.py), không tự ước lượng.
-- Cũng cần xác nhận trạng thái GDKHQ dry-run trace 08-17 (BID/MBS/SSI/VIX) đã setup/chạy chưa.
-- ĐANG CHỜ job này — user cần trước ~09:05 ICT (giờ mở cửa).
+## Plan hôm nay (08-17) — ĐÃ DUYỆT, chờ chạy ~09:05 ICT
+- Cả 2 file plan đã có approved_by (John Dinh qua Discord, Mike ghi hộ 08:23 ICT). Verify qua
+  production loader: block_reason=None cả 2 account.
+- SpaceX: mua TV1 500cp @20.640đ. ZaloPay: 0 lệnh (HOLD ALL).
+- THEO DÕI: phiên sáng nay chạy có đúng không (journal, fill TV1 — đây cũng là dịp quan sát
+  lệnh TV1 dùng cơ chế TRƯỚC Rule A fix, ceiling_rule=None, không phải bug).
 
-## GDKHQ D1-D3 — CONFIRMED (high), quyết định: dry-run trace 08-17 trước khi bật thật
-- Cần theo dõi/xác nhận dry-run hôm nay đã chạy đúng chưa (xem output trong job DollarBill vừa
-  dispatch, hoặc tự kiểm riêng sau).
+## ⚠️ GDKHQ dry-run D1-D3 CHƯA setup (gap thật, tự theo dõi)
+- BID có GDKHQ THẬT hôm nay (đã áp đúng vào sổ lô qua corp_actions.json có sẵn, không liên quan
+  D1-D3). apply_exdate_gate() chưa wire vào executor/bot thật — dry-run mà user chọn 08-16 chưa
+  từng chạy. Không hại hôm nay (BID không có lệnh nào). Cần quyết setup dry-run trước GDKHQ tiếp
+  theo (VIX 08-20) hoặc để bàn sau.
 
-## Việc còn hở (chưa xử lý, không khẩn)
-1. Selfcheck-masking E5 capit_lever — chưa xác nhận đã vá hay chỉ mới ĐO.
-2. plan-dd-check-string fix (commit 9a9dbb1) — chờ xác nhận phiên LIVE 08-17 (HÔM NAY).
-3. EOD daily report chưa bao giờ gửi email — hỏi user có wire không.
-4. lag_entry_anchor.py:105 đọc thẳng ticker.Price làm trần — chưa vá, không khẩn, 0đ thiệt hại.
-5. rollup-of-agent-ownership-bug-20260816 — chưa fix, không khẩn (rollup_of chưa dùng thật).
+## Việc còn hở khác (chưa xử lý, không khẩn)
+1. verify_account_snapshot.py trả cost-basis 0 cho CẢ 2 account ("no fill history legacy") —
+   pipeline §6 gap thật, cần điều tra.
+2. book_breakdown_current trong plan file ghi nhãn sai (SCL không phải LAG, thật ra LÀ LAG) —
+   sửa ở lần lập plan kế tiếp.
+3. Selfcheck-masking E5 capit_lever — chưa xác nhận đã vá.
+4. plan-dd-check-string fix (commit 9a9dbb1) — chờ xác nhận phiên LIVE 08-17 (HÔM NAY).
+5. EOD daily report chưa bao giờ gửi email.
+6. lag_entry_anchor.py:105 — chưa vá, không khẩn.
 
 ## Bối cảnh còn hiệu lực
-- dispatch-prompt-heredoc skill — dùng cho MỌI prompt dispatch có backtick/code snippet.
-- Dispatch job >2 phút BẮT BUỘC --bg — sync dispatch bị Bash tool cắt ở 2 phút và tự cancel job.
-- CASH_VENDOR gate: giữ ĐÓNG. CAPIT margin: enabled=false, pilot chờ signal thật.
+- dispatch-prompt-heredoc skill; dispatch job >2 phút BẮT BUỘC --bg.
 - TV1 Rule A (bản fix UPCOM) đang LIVE từ 08-15, an toàn.
+- CASH_VENDOR gate: giữ ĐÓNG. CAPIT margin: enabled=false.
 
