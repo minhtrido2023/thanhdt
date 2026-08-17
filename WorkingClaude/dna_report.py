@@ -292,8 +292,9 @@ def build_dt_gate_line(html=True):
         return None
     B = (lambda s: f"<b>{s}</b>") if html else (lambda s: s)
     # c['asof'] = ngày cuối của chuỗi state (data vintage), KHÔNG phải ngày chạy report —
-    # report EOD 15:00 chạy TRƯỚC daily_refresh 18:30 nên vintage thường là T-1. Ghi rõ
-    # "dữ liệu tới" để không bị đọc nhầm thành report bị gắn nhãn ngày cũ (fix 2026-07-14).
+    # report EOD 19:10 chạy SAU daily_refresh 18:30 nên vintage thường là T; nếu refresh
+    # hôm đó trễ/chưa publish vẫn có thể là T-1. Ghi rõ "dữ liệu tới" để không bị đọc
+    # nhầm thành report bị gắn nhãn ngày cũ (fix 2026-07-14).
     asof = f"[dữ liệu tới {c['asof']}]"
     asof = f"<i>{asof}</i>" if html else asof
     if not c["active"]:
