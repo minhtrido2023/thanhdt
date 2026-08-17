@@ -2,25 +2,29 @@
 > Cập nhật mỗi khi đổi mạch việc. Bơm vào đầu phiên của Mike.
 
 # Working memory — Mike
-> Cập nhật lần cuối: 2026-08-17T07:57Z (sau merge selfcheck E5/F1/G1)
+> Cập nhật lần cuối: 2026-08-17T21:18 ICT (2 plan 08-18 ĐÃ DUYỆT)
 
-## Việc vừa xong (08-17)
-- **Order-book Pha 0 telemetry**: commit `d6346efd` (main), 29/29 selfcheck PASS. `_order_book_shadow()` ghi `orderbook_shadow_<acct>_<date>.jsonl` tại mỗi child order. Trial bắt đầu 08-18 — kiểm probe `N>0 valid>0` sáng 08-18 sau phiên.
-- **P2 expvol_pacing**: EXPVOL_SHADOW đã ghi trong journal 08-17 (TV1 buy, P2 OFF đúng trên live).
-- **TV1 tranche cuối**: 500cp @ 20,100 FILL 09:15 ICT SpaceX. Vị thế hoàn tất.
-- **Selfcheck isolation E5/F1/G1**: commit `d73e673d` (main) — merge từ session/1521735922066919515-sweep, user duyệt 08-17. capit_lever E5, ghost_order F1/G1 giờ đo đúng tầng guard (không bị HYBRID che). Verified PASS env -u TZ.
+## Plan 08-18 — ĐÃ DUYỆT, cả 2 HOLD ALL
+- approved_by ghi vào cả 2 file (John Dinh qua Discord, Mike ghi hộ 21:18 ICT). Verify qua
+  production loader: block_reason=None cả 2 account. 0 lệnh cả 2 — chỉ theo dõi injector TV1
+  20:30 ICT tối nay như thường lệ.
 
-## Theo dõi ngày mai 08-18
-- Sau phiên sáng: chạy `python3 mike/bin/order_book_shadow_probe.py` — kiểm N>0 và valid>0.
-  Nếu valid=0 trong khi N>0 → đọc `source_time_status` trong record (DNSE timestamp format "YYYY-MM-DD HH:MM:SS.mmm" đã pin vào selfcheck).
-- EXPVOL_SHADOW tiếp tục log trên mọi lệnh CAPIT/DISCRETIONARY.
-- plan-dd-check-string fix (commit 9a9dbb1 trên main) — cần ngày có LAG/BAL để verify đường code thật chạy đúng.
-
-## Quy trình tương tác Discord — user yêu cầu 2026-08-17
-Đã wire vào MIKE.md + agents/Mike/CLAUDE.md: interactive turn phải báo nhận việc ngay, post progress 1-2 phút/lần, tự ScheduleWakeup khi chưa xong trong lượt. Không im lặng chờ user hỏi.
+## Việc còn hở (chưa xử lý, không khẩn)
+1. GDKHQ dry-run D1-D3 chưa setup (BID GDKHQ đã qua 08-17 an toàn, apply_exdate_gate() vẫn
+   chưa wire vào executor thật) — cần quyết trước GDKHQ tiếp theo (VIX 08-20).
+2. verify_account_snapshot.py trả cost-basis 0 cho CẢ 2 account ("no fill history legacy") —
+   pipeline §6 gap thật, cần điều tra.
+3. book_breakdown_current trong plan file ghi nhãn sai (SCL không phải LAG, thật ra LÀ LAG).
+4. Selfcheck-masking E5 capit_lever — Taylor báo đã vá xong (merge d73e673d 08-17), xác nhận.
+5. plan-dd-check-string fix (commit 9a9dbb1) — cần ngày có LAG/BAL để verify đường code thật.
+6. Order-book Pha 0 telemetry (commit d6346efd) — kiểm probe N>0/valid>0 sau phiên 08-18.
+7. EOD daily report chưa bao giờ gửi email.
+8. lag_entry_anchor.py:105 — chưa vá, không khẩn.
 
 ## Bối cảnh còn hiệu lực
-- dispatch-prompt-heredoc skill — dùng cho MỌI prompt dispatch có backtick/code snippet.
-- CASH_VENDOR gate: giữ ĐÓNG (user duyệt 08-15), mở lại chỉ khi >=1 sự kiện ISS/hỗn hợp VÀ qua 2026-09-13.
-- corp-action: VN long-only = due-diligence/chi phí, KHÔNG alpha. Quyết định còn chờ user: (A) snapshot pipeline bật thêm inside_transaction NGAY (time-sensitive); (B) wire cờ insider-net-sell-left-tail vào due_diligence.py.
+- dispatch-prompt-heredoc skill; dispatch job >2 phút BẮT BUỘC --bg.
+- TV1 Rule A (bản fix UPCOM) đang LIVE từ 08-15, an toàn. TV1 đã đạt target (2.300cp, fill
+  09:15 08-17), DRI đã đạt 5% NAV cả 2 account.
+- CASH_VENDOR gate: giữ ĐÓNG. CAPIT margin: enabled=false.
+- Quy trình Discord: báo nhận việc ngay, progress 1-2 phút/lần, ScheduleWakeup khi chưa xong.
 
