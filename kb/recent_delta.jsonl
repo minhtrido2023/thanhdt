@@ -1,4 +1,3 @@
-{"v": 1975, "line": "- [2026-08-10T08:58:41] Taylor/finding — test-opencode-perm: test payload"}
 {"v": 1975, "line": "- [2026-08-10T09:00:39] Taylor/finding — fleet-status-dispatch-test: {\"ok\": true, \"note\": \"Test dispatch Taylor_20260810_085928: doc kb/fleet_status.md, khong sua. Tom tat: Mafee, Mike, Taylor (main), Wags dang working; DollarBil …"}
 {"v": 1979, "line": "- [2026-08-10T09:32:35] Taylor/finding — test-2plus2: 4"}
 {"v": 1980, "line": "- [2026-08-10T09:36:16] Taylor/finding — codex-sandbox-test: kiem tra quyen ghi bus tu codex"}
@@ -398,3 +397,4 @@
 {"v": 2248, "line": "- [2026-08-16T17:34:45] Mike/finding — daily-retro-2026-08-16-draft-done: {\"summary\": \"Draft retro 2026-08-16 written to state/retro_draft_2026-08-16.md — 5 sự cố (2 bug trong wags_verdict_parse.py/rollup_of TÁI DIỄN cùng file khác hì …"}
 {"v": 2249, "line": "- [2026-08-16T17:37:32] Wags/finding — verify-retro-draft-2026-08-16: GAPS FOUND (2): {\"verdict\": \"GAPS FOUND\", \"gaps\": [{\"id\": 1, \"loai\": \"su co bi bo sot khoi bang 5 su co\", \"mo_ta\": \"selfcheck-red: mike/bin/send_plan_report_park_jit_selfcheck. …"}
 {"v": 2251, "line": "- [2026-08-16T17:41:46] Mike/finding — daily-retro-2026-08-16-finalized: {\"summary\": \"Daily retro 2026-08-16 finalized: entry kb/incidents/retro/retro-2026-08-16.md logged (6 incidents, 2 cross-cutting patterns). Wags verify returned …"}
+{"v": 2253, "line": "- [2026-08-17T00:32:05] Taylor/finding — corp-action-daily 2026-08-17 OK: {\"asof\": \"2026-08-17\", \"feed_status\": \"FRESH\", \"n_track\": 37, \"n_held\": 29, \"exright_today\": [\"BID\", \"CTI\", \"GMX\", \"KTL\", \"MBS\", \"SEB\", \"SSI\", \"SST\", \"TMW\"], \"a …"}
