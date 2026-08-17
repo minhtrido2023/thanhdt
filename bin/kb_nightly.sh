@@ -1065,6 +1065,17 @@ rút về 1-2 câu như quy ước ở đầu file current_ops.md) → rút gọ
 07-17 (giữ current-state + pointer kb/incidents/, xoá play-by-play đã có nơi khác lưu). CHỈ rút
 gọn mục đã XÁC NHẬN đóng — mục còn 'CHỜ USER'/'chưa quyết' GIỮ NGUYÊN, không rút gọn nhầm việc
 đang mở thành trông như đã xong.
+8. **Pyramid L0→L3 audit-lens — fact đúng tầng chưa? (thêm 2026-08-17, từ TencentDB-Agent-Memory research):**
+Dùng 4 tầng L0→L3 làm khung soát KB — không phải để tạo hạ tầng mới, mà để phát hiện fact bị nhầm tầng gây tốn token hoặc mất signal. Tầng cho fleet mình:
+  - L3/Core (bền, áp dụng lâu dài, inject mọi phiên): \`kb/canonical.md\`, \`context_safety_core.md\`, rule trong CLAUDE.md.
+  - L2/Scenario (theo project/incident, tra cứu khi cần): \`kb/projects/\`, \`kb/incidents/\`.
+  - L1/Atom (1 nguồn=1 file, OKF, tra cứu theo query): \`kb/data_registry/\`.
+  - L0/Raw (hội thoại/log thô, không bền): bus event, job log — KHÔNG inject thường xuyên.
+Kiểm tra 3 loại vi phạm thường gặp:
+  (a) **L1 bị nhầm vào L3**: fact cụ thể (schema 1 bảng BQ, rule 1 broker quirk, 1 account detail) đang nằm inline trong \`context_pack.md\` hoặc \`current_ops.md\` nhưng đúng ra thuộc \`kb/data_registry/\` — nếu có, di chuyển + thay bằng pointer 1 dòng.
+  (b) **L3 bị outdate nhưng chưa xuống L2**: fact trong \`canonical.md\` hay \`context_safety_core.md\` mô tả trạng thái đã thay đổi (dự án đã đóng, gate đã bỏ, rule đã đổi) — nếu có, rút gọn/archive xuống L2 \`kb/projects/\`, giữ L3 tươi.
+  (c) **Pattern L0 chín muồi chưa promote**: nếu ≥2 bus finding/decision tuần vừa rồi có cùng chủ đề kỹ thuật (ví dụ: cùng loại bug tái diễn, cùng data source gây nhầm), đó là ứng cử viên thăng L1 (thêm entry \`kb/data_registry/\`) hoặc L2 (\`kb/incidents/\` hoặc project tracker) — ghi nhận + thực hiện nếu rõ ràng, nếu chưa chắc thì ghi NOTE trong \`kb/data_registry/_todo.md\`.
+Không cần soát toàn bộ KB — chỉ soát \`context_pack.md\` (hot-path) và \`kb/current_ops.md\` (inject mọi restart), vì đây là 2 file gây lãng phí token nhất nếu bị nhầm tầng. Không tạo cấu trúc file mới — chỉ di chuyển/rút gọn/thêm pointer.
 10. **Token-saver skill audit** (thêm 2026-07-29, user yêu cầu): invoke Skill \`token-saver\`
 (args: \`audit\`) — chạy đủ 6 mục checklist của nó (size-gate/hardcoded-drift/schedule-drift/
 duplicate-content/ownership-scoped-import/fixed-per-call-overhead) trên toàn bộ
