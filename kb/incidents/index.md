@@ -77,6 +77,7 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 
 | Ngày | Sự cố | status |
 |---|---|---|
+| 2026-08-17 | [2026-08-17: gate corp-action của `update_shares_live.py` TỪ CHỐI GIẢ 10 ngày vì `cum_raw` rơi trúng dòng `ticker.Price` đông cứng (VHM 1:1 ex 08-07) ⇒ OShares sai 2× ⇒ PE/PB VHM rẻ giả một nửa](2026-08/2026-08-17-corp-action-gate-false-refuse-stale-price-vhm.md) | fixed (`ced702ac` — lùi về phiên cum không đông cứng, gate 0,78%→0,00%; VHM ghi 8.214.824.008 khớp công bố từng cổ phiếu; regression ACB/HDC/EVG sạch; backlog + ops_health_check xanh) |
 | 2026-08-04 | [2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md](2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md) | fixed (monitoring); production-code fix in progress (Taylor job Taylor_20260804_094514) |
 | 2026-08-15 | [2026-08/2026-08-15-for-each-live-account-fail-open-va-discover-sessions-ten-file-qua-dai.md](2026-08/2026-08-15-for-each-live-account-fail-open-va-discover-sessions-ten-file-qua-dai.md) | ? |
 | 2026-08-14 | [2026-08/2026-08-14-git-stash-conflict-markers-giet-bot-ca-2-account.md](2026-08/2026-08-14-git-stash-conflict-markers-giet-bot-ca-2-account.md) | ? |
