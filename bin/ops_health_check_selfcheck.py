@@ -52,6 +52,7 @@ def extract_block(tag):
 CHECK5_SRC = extract_block("CHECK5")
 CHECK10_SRC = extract_block("CHECK10")
 CHECK11_SRC = extract_block("CHECK11")
+CHECK12_SRC = extract_block("CHECK12")
 
 
 def run_check5(wc_root, now=None):
@@ -534,8 +535,18 @@ def case_c10_no_file_is_ok():
         shutil.rmtree(root, ignore_errors=True)
 
 
+def _nte_ts(hours_ago):
+    """Timestamp bản ghi notify_thread, TƯƠNG ĐỐI với now.
+
+    Ngày cứng trong fixture sẽ tự mốc: cửa sổ 24h của check #10 nay áp lên TỪNG bản ghi
+    (sửa 2026-08-18), nên một fixture ghi "2026-08-16" sẽ tụt ra ngoài cửa sổ vài ngày sau
+    khi viết và ca test lặng lẽ đổi nghĩa (coding_guidelines §23 hệ luận 1).
+    """
+    return (dt.datetime.now().astimezone() - dt.timedelta(hours=hours_ago)).isoformat(timespec="seconds")
+
+
 def case_c10_fresh_log_warns():
-    root = _mklog("2026-08-02T23:14:57+07:00 notify_thread: KHONG phan giai duoc topic foo\n"
+    root = _mklog(f"{_nte_ts(1)} notify_thread: KHONG phan giai duoc topic foo\n"
                   "  ten hop le: architecture, trading_daily\n")
     try:
         lines, warn = run_check10(root)
@@ -571,10 +582,10 @@ def case_c10_fresh_log_without_timestamp_line():
 #    nghĩa là caller đảo thứ tự đối số nhưng tin ĐÃ ĐẾN nơi; gộp nó vào tiêu đề "TIN NHẮN ĐÃ
 #    BỊ NUỐT" là nói với người rằng một tin đã giao là bị mất. "Sửa cả người ĐỌC, không chỉ
 #    người GHI."
-SWAP_LINE = ('2026-08-16T09:00:00+07:00 notify_thread: DOI SO BI DAO (topic o vi tri 1, '
+SWAP_LINE = (f'{_nte_ts(2)} notify_thread: DOI SO BI DAO (topic o vi tri 1, '
              'message o vi tri 2) — DA TU SUA VA GUI toi topic "architecture". '
              'SUA CALL SITE: dung `notify_thread.sh "<message>" <topic>`. caller=bin/foo.sh\n')
-HARD_LINE = "2026-08-16T09:05:00+07:00 notify_thread: KHONG phan giai duoc topic bar\n"
+HARD_LINE = f"{_nte_ts(1)} notify_thread: KHONG phan giai duoc topic bar\n"
 
 
 def case_c10_swap_recovery_is_not_swallowed():
@@ -611,6 +622,39 @@ def case_c10_old_log_is_ok():
     try:
         lines, warn = run_check10(root)
         check("check10: log cũ hơn 24h ⇒ OK (cảnh báo tự tắt)", not warn, joined(lines))
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+# ── Ca c10-window (2026-08-18, sự cố thật ops-health-SpaceX 02:58 ICT): file append-only
+#    KHÔNG xoay vòng ⇒ mtime của FILE chỉ nói "vừa có ai ghi", không nói bản ghi NÀO mới.
+#    Bản trước lọc cửa sổ 24h theo mtime rồi đọc TOÀN BỘ lịch sử: một dòng tự-sửa mới làm file
+#    tươi, check lôi lỗi thật 6 ngày trước ra báo "TIN NHẮN ĐÃ BỊ NUỐT trong 24h qua" —
+#    sai sự kiện, sai mốc thời gian, và che luôn kết luận đúng của bản ghi mới.
+def case_c10_old_hard_error_not_reported_as_recent():
+    root = _mklog("2026-08-12T18:46:56+07:00 notify_thread: KHONG phan giai duoc topic cu\n"
+                  + SWAP_LINE)
+    try:
+        lines, warn = run_check10(root)
+        out = joined(lines)
+        check("check10: lỗi THẬT cũ >24h + bản ghi tự-sửa mới ⇒ KHÔNG báo 'TIN NHẮN ĐÃ BỊ NUỐT'",
+              "TIN NHẮN ĐÃ BỊ NUỐT" not in out, out)
+        check("check10: bản ghi MỚI (tự-sửa) vẫn được báo đúng là tin ĐÃ GỬI",
+              len(warn) == 1 and "ĐÃ ĐƯỢC GỬI" in out, out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+def case_c10_fresh_file_all_records_old_is_ok():
+    # File vừa được chạm (mtime tươi) nhưng MỌI bản ghi đều cũ hơn 24h ⇒ OK thật, KHÔNG được
+    # rơi vào nhánh "không đọc được bản ghi nào có timestamp" (nhánh đó dành cho file rác).
+    root = _mklog("2026-07-01T10:00:00+07:00 notify_thread: loi cu\n")
+    try:
+        lines, warn = run_check10(root)
+        out = joined(lines)
+        check("check10: file tươi nhưng mọi bản ghi đều cũ >24h ⇒ OK, 0 WARN", not warn, out)
+        check("check10: ca đó KHÔNG bị nhầm sang nhánh 'không đọc được bản ghi'",
+              "KHÔNG đọc được bản ghi nào có timestamp" not in out, out)
     finally:
         shutil.rmtree(root, ignore_errors=True)
 
@@ -1318,9 +1362,83 @@ def case_c11_missing_and_corrupt_never_silent():
         shutil.rmtree(d, ignore_errors=True)
 
 
+# --- check #12: ccdb bridge mất wakeup one-shot (thêm 2026-08-17, job Wags_20260817_193233) ---
+# Cùng khuôn extract-and-test như check #10/#11, và vì đúng LÝ DO đó: check #12 tồn tại để phát
+# hiện một sự cố VÔ HÌNH (wakeup mất thì "không có gì xảy ra"). Nếu chính nó hỏng mà im lặng
+# xanh thì nó tệ hơn không có. `subprocess` được tiêm giả để khỏi phụ thuộc journalctl thật.
+class _FakeCompleted:
+    def __init__(self, returncode=0, stdout="", stderr=""):
+        self.returncode, self.stdout, self.stderr = returncode, stdout, stderr
+
+
+class _FakeSubprocess:
+    """Đứng thay module subprocess: trả sẵn kết quả, hoặc ném lỗi đã hẹn."""
+
+    def __init__(self, result=None, raises=None):
+        self._result, self._raises = result, raises
+
+    def run(self, *_a, **_kw):
+        if self._raises is not None:
+            raise self._raises
+        return self._result
+
+
+def run_check12(fake_sub):
+    lines, warn = [], []
+
+    def W(msg):
+        warn.append(msg)
+        lines.append(f"⚠️ {msg}")
+
+    def OK(msg):
+        lines.append(f"✅ {msg}")
+
+    ns = {"subprocess": fake_sub, "W": W, "OK": OK, "lines": lines}
+    exec(compile(CHECK12_SRC, SRC + ":CHECK12", "exec"), ns)
+    return lines, warn
+
+
+_C12_DROP = ("Aug 18 02:50:02 sgms python[1]: 2026-08-17 19:50:02 [ERROR] "
+             "claude_discord.cogs.scheduler: ONE_SHOT_DROPPED: task 41 (dispatch-wake-abc) was "
+             "claimed and deleted but never reached Claude — this wakeup is lost and will NOT retry")
+
+
+def case_c12_clean_journal_is_ok():
+    lines, warn = run_check12(_FakeSubprocess(_FakeCompleted(0, "some boring INFO line\n")))
+    check("check12: journal sạch ⇒ OK, 0 WARN", not warn, joined(lines))
+
+
+def case_c12_dropped_wakeup_warns():
+    lines, warn = run_check12(_FakeSubprocess(_FakeCompleted(0, _C12_DROP + "\n")))
+    out = joined(lines)
+    check("check12: có ONE_SHOT_DROPPED ⇒ WARN", len(warn) == 1, out)
+    # Đếm SAI thì người đọc tưởng mất 1 wakeup trong khi mất nhiều.
+    lines2, warn2 = run_check12(
+        _FakeSubprocess(_FakeCompleted(0, _C12_DROP + "\n" + _C12_DROP + "\n"))
+    )
+    check("check12: đếm đúng số wakeup bị mất", "MẤT 2 wakeup" in joined(lines2), joined(lines2))
+    check("check12: WARN-ONLY (không kích autofix cho việc đã mất, không sửa lại được)",
+          "[WARN-ONLY]" in out, out)
+
+
+def case_c12_unreadable_journal_never_reports_green():
+    """Không đọc được journal ≠ không có sự cố — đây đúng là chỗ check #11 đã phải bịt một lần."""
+    for label, fake in (
+        ("rc!=0", _FakeSubprocess(_FakeCompleted(1, "", "Failed to add match: bad"))),
+        ("thiếu journalctl", _FakeSubprocess(raises=FileNotFoundError("journalctl"))),
+        ("lỗi lạ", _FakeSubprocess(raises=RuntimeError("boom"))),
+    ):
+        lines, warn = run_check12(fake)
+        out = joined(lines)
+        check(f"check12 [{label}]: WARN chứ không im lặng", len(warn) == 1, out)
+        check(f"check12 [{label}]: KHÔNG in dòng ✅ nào (khác hẳn 'đã kiểm và sạch')",
+              "✅" not in out, out)
+
+
 def main():
     print("ops_health_check_selfcheck: check #5 (backlog question) + check #10 (notify_thread) "
-          "+ check #11 (selfcheck_red_sweep freshness) + khối DELIVER (Discord→Telegram) regression")
+          "+ check #11 (selfcheck_red_sweep freshness) + check #12 (ccdb one-shot dropped) "
+          "+ khối DELIVER (Discord→Telegram) regression")
     for fn in (case_archived_question_visible, case_cross_layer_resolve,
                case_explicit_cross_topic_resolve,
                case_resolver_must_be_after, case_dedupe_hot_and_archive,
@@ -1342,9 +1460,13 @@ def main():
                case_c10_no_file_is_ok, case_c10_fresh_log_warns,
                case_c10_swap_recovery_is_not_swallowed, case_c10_hard_error_wins_over_swap,
                case_c10_fresh_log_without_timestamp_line, case_c10_old_log_is_ok,
+               case_c10_old_hard_error_not_reported_as_recent,
+               case_c10_fresh_file_all_records_old_is_ok,
                case_c11_fresh_all_green, case_c11_red_is_warn_only,
                case_c11_lists_every_red_no_truncation,
                case_c11_stale_is_routable, case_c11_missing_and_corrupt_never_silent,
+               case_c12_clean_journal_is_ok, case_c12_dropped_wakeup_warns,
+               case_c12_unreadable_journal_never_reports_green,
                case_deliver_discord_ok_no_telegram,
                case_deliver_discord_fails_falls_back_to_telegram,
                case_deliver_both_fail_logs_for_check10):

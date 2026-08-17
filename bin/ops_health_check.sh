@@ -1031,16 +1031,33 @@ if os.path.exists(mike_mem_9b):
 # CHECK10_BEGIN — marker ỔN ĐỊNH: bin/ops_health_check_selfcheck.py trích ĐÚNG khối giữa
 # CHECK10_BEGIN/CHECK10_END rồi chạy nó trên log giả. Đổi/xoá marker ⇒ selfcheck FAIL ngay.
 import time as _time
+import datetime as _dt
 nte_file = os.path.join(wc_root, "mike", "logs", "notify_thread_errors.log")
 if os.path.exists(nte_file) and (_time.time() - os.path.getmtime(nte_file)) < 86400:
     try:
         # Chỉ lấy dòng MỞ ĐẦU BẢN GHI (có timestamp) — thông điệp lỗi có thể tràn nhiều dòng
         # (discord_channel.sh in thêm danh sách tên hợp lệ), lấy dòng cuối thô sẽ ra đúng cái
         # đuôi vô nghĩa đó.
-        _nte_lines = [l for l in open(nte_file, encoding="utf-8", errors="replace").read().splitlines()
-                      if re.match(r"^\d{4}-\d{2}-\d{2}T", l)]
+        _nte_all = [l for l in open(nte_file, encoding="utf-8", errors="replace").read().splitlines()
+                    if re.match(r"^\d{4}-\d{2}-\d{2}T", l)]
     except Exception:
-        _nte_lines = []
+        _nte_all = []
+    # Cửa sổ 24h phải áp lên TỪNG BẢN GHI, không chỉ lên mtime của FILE (sửa 2026-08-18).
+    # File này append-only không xoay vòng ⇒ mtime chỉ nói "có ai đó vừa ghi", không nói bản
+    # ghi NÀO mới. Trước sửa: một dòng tự-sửa mới (08-17) làm file tươi, rồi check đọc TOÀN BỘ
+    # lịch sử và lôi lỗi thật từ 08-12 (6 ngày trước, đã xử lý) ra báo "TIN NHẮN ĐÃ BỊ NUỐT
+    # trong 24h qua" — sai cả sự kiện lẫn mốc thời gian, và nhánh _nte_hard che luôn kết luận
+    # ĐÚNG của bản ghi mới ("đã tự sửa, KHÔNG mất tin"). Bản ghi không đọc được giờ thì GIỮ
+    # (fail-loud): không loại được khả năng nó vừa xảy ra.
+    _nte_now = _time.time()
+
+    def _nte_recent(l):
+        try:
+            return (_nte_now - _dt.datetime.fromisoformat(l.split(" ", 1)[0]).timestamp()) < 86400
+        except Exception:
+            return True
+
+    _nte_lines = [l for l in _nte_all if _nte_recent(l)]
     # notify_thread.sh ghi HAI loại bản ghi vào cùng file, và chúng có hệ quả NGƯỢC nhau:
     # "DA TU SUA VA GUI" = phát hiện caller đảo thứ tự đối số, script TỰ SỬA và tin ĐÃ ĐẾN
     # nơi; mọi bản ghi còn lại = tin KHÔNG gửi được. Trước 2026-08-16 check này gộp cả hai
@@ -1057,7 +1074,9 @@ if os.path.exists(nte_file) and (_time.time() - os.path.getmtime(nte_file)) < 86
         W(f"[WARN-ONLY] notify_thread.sh: {len(_nte_swap)} call site ĐẢO THỨ TỰ đối số trong 24h "
           f"qua — tin ĐÃ ĐƯỢC GỬI (script tự sửa), KHÔNG mất tin. Sửa call site cho đúng "
           f"`notify_thread.sh \"<message>\" <topic>`. Dòng cuối: {_nte_swap[-1][:300]}")
-    elif not _nte_lines:
+    elif not _nte_all:
+        # File tươi nhưng KHÔNG có bản ghi nào có timestamp ⇒ không kết luận được (khác hẳn
+        # với "có bản ghi nhưng đều cũ hơn 24h" — ca đó rơi xuống else và là OK thật).
         W(f"[WARN-ONLY] notify_thread_errors.log vừa được ghi trong 24h qua nhưng KHÔNG đọc "
           f"được bản ghi nào có timestamp — không kết luận được có mất tin hay không.")
     else:
@@ -1125,6 +1144,49 @@ except Exception as _e:
     W(f"Quét selfcheck: KHÔNG đọc được artifact ({type(_e).__name__}) — không kết luận được có "
       f"selfcheck nào đỏ hay không.")
 # CHECK11_END
+
+# 12. ccdb bridge NUỐT MẤT một wakeup one-shot (thêm 2026-08-17, job Wags_20260817_193233,
+#     arch-review required_change #2). Bối cảnh: fix double-answer đổi scheduler thành XOÁ row
+#     one_shot TRƯỚC khi chạy Claude. Đánh đổi có chủ ý — nhưng nó bỏ mất tính TỰ HỒI PHỤC:
+#     trước đây thất bại giữa chừng thì row còn nguyên và tick sau chạy lại; giờ row đã mất,
+#     KHÔNG ai retry. Mất 1 wakeup dispatch nghĩa là Mike ngồi chờ mãi một job đã xong.
+#
+#     Vì sao cần check này: mất wakeup là sự cố VÔ HÌNH theo đúng bản chất — "không có gì xảy
+#     ra" trông y hệt "không có việc gì để làm". Scheduler đã ghi ERROR `ONE_SHOT_DROPPED`,
+#     nhưng arch-reviewer grep ra ops_health_check.sh KHÔNG hề đọc log daemon ccdb (0 khớp cho
+#     ccdb|scheduler|journalctl) ⇒ fail-loud mà không có người đọc thì vẫn là fail-silent, đúng
+#     cái bẫy check #10 đã phải bịt một lần rồi.
+#
+#     [WARN-ONLY] có chủ ý: đây là sự cố ĐÃ XẢY RA RỒI, không sửa lại được bằng job autofix
+#     (wakeup đã mất là mất); và cửa sổ 24h nghĩa là nó tự kêu tới hết ngày dù đã xử lý xong.
+#     Việc của dòng này là LỌT VÀO MẮT NGƯỜI ĐỌC, không phải kích thêm 4 job/ngày.
+# CHECK12_BEGIN — marker ỔN ĐỊNH (giống CHECK5/10/11): selfcheck trích đúng khối này chạy trên
+# log giả. Đổi/xoá marker ⇒ bin/ops_health_check_selfcheck.py FAIL ngay.
+try:
+    _jr = subprocess.run(
+        ["journalctl", "--user", "-u", "ccdb-mike", "--since", "-24h", "--no-pager", "-q"],
+        capture_output=True, text=True, timeout=60,
+    )
+    if _jr.returncode != 0:
+        # KHÔNG nuốt: đọc không được journal thì ta KHÔNG BIẾT có mất wakeup hay không —
+        # trạng thái đó phải trông khác hẳn "đã kiểm và sạch".
+        W(f"[WARN-ONLY] check 12: không đọc được journal ccdb-mike (rc={_jr.returncode}: "
+          f"{(_jr.stderr or '').strip()[:160]}) — KHÔNG kết luận được có wakeup one-shot nào "
+          f"bị mất hay không.")
+    else:
+        _dropped = [l for l in _jr.stdout.splitlines() if "ONE_SHOT_DROPPED" in l]
+        if _dropped:
+            W(f"[WARN-ONLY] check 12: ccdb bridge MẤT {len(_dropped)} wakeup one-shot trong 24h "
+              f"qua — job đã xong nhưng agent KHÔNG được đánh thức, không có gì retry. "
+              f"Dòng cuối: {_dropped[-1][-300:]}")
+        else:
+            OK("check 12: ccdb bridge không mất wakeup one-shot nào trong 24h qua.")
+except FileNotFoundError:
+    W("[WARN-ONLY] check 12: không có lệnh journalctl — không giám sát được log ccdb bridge.")
+except Exception as _e12:
+    W(f"[WARN-ONLY] check 12: lỗi khi quét log ccdb bridge ({type(_e12).__name__}: "
+      f"{str(_e12)[:120]}) — không kết luận được có mất wakeup hay không.")
+# CHECK12_END
 
 print("\n".join(lines))
 print(f"__WARN_COUNT__={warn}")
