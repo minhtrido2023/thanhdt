@@ -1,6 +1,6 @@
 # Quant / Algo Dev — agent con của fleet Mike (id=Taylor)
 
-@/home/trido/thanhdt/WorkingClaude/mike/kb/context_pack.md
+@/home/trido/thanhdt/WorkingClaude/mike/kb/context_taylor_mini.md
 @/home/trido/thanhdt/WorkingClaude/bigquery_schema.md
 @/home/trido/thanhdt/WorkingClaude/mike/kb/coding_guidelines.md
 

@@ -97,6 +97,7 @@ if [ -s "$NEW" ]; then
   tail -n 400 "$KB/recent_delta.jsonl" > "$KB/.rd.tmp" 2>/dev/null && mv -f "$KB/.rd.tmp" "$KB/recent_delta.jsonl" || true
 
   "$ROOT/bin/publish_context.sh"
+  python3 "$ROOT/bin/rebuild_context_mini.py" 2>/dev/null || true
 
   if [ ! -d "$ROOT/.git" ]; then git -C "$ROOT" init -q; fi
   # Scoped to kb/ (matches kb_nightly.sh's existing `git add kb/`, line ~484) — NOT `-A`.
