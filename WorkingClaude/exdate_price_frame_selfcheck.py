@@ -111,10 +111,11 @@ class FakeQuote:
 
 
 class FakeBroker:
-    """Broker tất định: quote + positions RAW + ohlc, đúng ba thứ price_frame cần."""
+    """Broker tất định: quote + positions RAW + cum_prices (offline thay BQ)."""
 
     def __init__(self, quotes=None, rows=None, cum=None):
         self.quotes, self.rows, self.cum = quotes or {}, rows or [], cum or {}
+        self.cum_prices = self.cum
         self.client = self
 
     def get_quote(self, tk):
@@ -123,11 +124,23 @@ class FakeBroker:
     def positions_raw(self):
         return list(self.rows)
 
-    def ohlc(self, ticker, resolution="1D", **kw):
-        px = self.cum.get(ticker)
-        if px is None:
-            return {}
-        return {"t": [kw["to"] - 86400], "c": [px]}
+
+print("── 0. p_cum = tav2_bq.ticker.Price thô của phiên cum cuối (BID 08-14 = 38.250đ) ──")
+got, info = pf.p_cum_from_broker(FakeBroker(cum={"BID": 38_250}), "BID", "2026-08-17")
+check("BID phiên cum 08-14 trả 38.250đ — KHÔNG phải Close 35.800đ đã điều chỉnh",
+      got == 38_250, f"got={got}, info={info}")
+got_missing, info_missing = pf.p_cum_from_broker(FakeBroker(cum={}), "BID", "2026-08-17")
+check("thiếu dữ liệu phiên cum ⇒ fail-closed như cũ", got_missing is None,
+      info_missing["reason"][:80])
+got_bq, info_bq = pf.p_cum_from_bq(
+    "BID", "2026-08-17",
+    bq_query=lambda sql: [{"d": "2026-08-14", "px": 38_250.0}])
+check("đường BQ thật đọc đúng 1 dòng Price thô trước exright_date", got_bq == 38_250,
+      f"got={got_bq}, info={info_bq}")
+got_bad, info_bad = pf.p_cum_from_bq(
+    "BID", "2026-08-17", bq_query=lambda sql: [{"d": "2026-08-17", "px": 35_900.0}])
+check("BQ trả dòng đúng ngày GDKHQ ⇒ fail-closed, không lấy hệ mới", got_bad is None,
+      info_bad["reason"][:80])
 
 
 # ══════════════════════════════════════════════════════════════════════════════════════
