@@ -24,6 +24,8 @@ import argparse
 import glob
 import json
 import os
+import re
+import shlex
 from datetime import datetime, timedelta, timezone
 
 TRANSCRIPTS = os.path.expanduser(
@@ -33,6 +35,119 @@ TRANSCRIPTS = os.path.expanduser(
 # là turn "bundle" — dạng đã chứng minh có rủi ro quên wakeup cao gấp ~25 lần
 # (50% số ca quên vs 2% số ca tuân thủ, đo trên 147 turn từ 2026-07-07).
 BUNDLE_CHARS = 1500
+
+# --- phát hiện "lượt này có dispatch --bg" ---
+# Bản đầu dùng `"dispatch.sh" in cmd and "--bg" in cmd` — substring trên TOÀN BỘ chuỗi lệnh.
+# Nên `notify_thread.sh <id> "<bài viết NÓI VỀ dispatch.sh ... --bg>"` bị đếm là 1 lần dispatch.
+# Bắt được 2 ca thật (turn 2026-08-17T08:45:02Z và 2026-08-15T17:40:34Z) trong audit
+# `agents/Wags/research/wakeup_double_answer_audit_20260817.md`, và cái sai đó thổi phồng MẪU SỐ
+# ⇒ tỷ lệ MISS báo cáo THẤP HƠN sự thật (20,0% -> 23,3% khi đo lại). Vì vậy phải neo vào VỊ TRÍ
+# GỌI LỆNH: dispatch.sh phải đứng ở chỗ tên chương trình, và --bg phải là 1 token RIÊNG của
+# chính lệnh đó — chữ nằm trong tham số đã được nháy của lệnh khác không tính.
+_HEREDOC = re.compile(r"<<-?\s*(?:'([^']+)'|\"([^\"]+)\"|([A-Za-z_][A-Za-z0-9_]*))")
+
+
+def _quote_open(s):
+    """Ký tự nháy còn ĐANG mở ở cuối chuỗi (None nếu cân bằng)."""
+    quote, i = None, 0
+    while i < len(s):
+        ch = s[i]
+        if quote:
+            if ch == "\\" and quote == '"' and i + 1 < len(s):
+                i += 2; continue
+            if ch == quote:
+                quote = None
+        elif ch in "\"'":
+            quote = ch
+        elif ch == "\\" and i + 1 < len(s):
+            i += 2; continue
+        i += 1
+    return quote
+
+
+def strip_heredocs(cmd):
+    """Bỏ THÂN heredoc trước khi phân tích.
+
+    Thân heredoc là dữ liệu (prompt gửi cho agent), không phải lệnh — mà prompt của fleet
+    này thường xuyên NÓI VỀ `dispatch.sh --bg`. Bỏ nó đi cũng làm dấu nháy trong lệnh cân
+    bằng trở lại: dạng `dispatch.sh X "$(cat <<'PROMPT' ... PROMPT )" --bg` (dùng thật ngày
+    2026-08-14) khiến bộ quét nháy lệch pha nếu thân prompt có dấu `"`.
+    """
+    lines = cmd.split("\n")
+    out, i = [], 0
+    while i < len(lines):
+        line = lines[i]
+        tags = [m.group(1) or m.group(2) or m.group(3) for m in _HEREDOC.finditer(line)]
+        if not tags:
+            out.append(line); i += 1; continue
+        cur = _HEREDOC.sub("", line)
+        i += 1
+        for tag in tags:
+            while i < len(lines) and lines[i].strip() != tag:
+                i += 1
+            i += 1  # bỏ luôn dòng đóng
+        # Chỉ NỐI phần sau vào cùng dòng logic khi dòng mở heredoc còn nháy dở — tức heredoc
+        # nằm TRONG một tham số đang mở. Ngược lại (`cat > file <<'EOF'` rồi dòng sau là lệnh
+        # dispatch riêng) nối vào sẽ đẩy dispatch.sh khỏi vị trí tên chương trình.
+        while _quote_open(cur) and i < len(lines):
+            cur += lines[i]; i += 1
+        out.append(cur)
+    return "\n".join(out)
+
+
+def split_commands(cmd):
+    """Cắt chuỗi shell thành từng segment lệnh, BỎ QUA mọi ký tự nằm trong dấu nháy.
+    Không phải parser bash đầy đủ — chỉ đủ để biết token nào đứng ở vị trí tên chương trình."""
+    segments, buf, quote, i = [], [], None, 0
+    while i < len(cmd):
+        ch = cmd[i]
+        if quote:
+            if ch == "\\" and quote == '"' and i + 1 < len(cmd):
+                buf.append(cmd[i:i + 2]); i += 2; continue
+            if ch == quote:
+                quote = None
+            buf.append(ch); i += 1; continue
+        if ch in "\"'":
+            quote = ch; buf.append(ch); i += 1; continue
+        if ch == "\\" and i + 1 < len(cmd):
+            buf.append(cmd[i:i + 2]); i += 2; continue
+        if cmd[i:i + 2] in ("&&", "||"):
+            segments.append("".join(buf)); buf = []; i += 2; continue
+        if ch in ";|&\n":
+            segments.append("".join(buf)); buf = []; i += 1; continue
+        # '(' mở subshell CHỈ khi đứng đầu hoặc sau khoảng trắng — `$(` là command
+        # substitution, cắt ở đó sẽ tách `--bg` khỏi chính lệnh dispatch của nó.
+        if ch == "(" and (not buf or buf[-1] in " \t"):
+            segments.append("".join(buf)); buf = []; i += 1; continue
+        buf.append(ch); i += 1
+    segments.append("".join(buf))
+    return [s for s in (seg.strip() for seg in segments) if s]
+
+
+def is_bg_dispatch(cmd):
+    """True khi chuỗi lệnh THỰC SỰ gọi dispatch.sh ... --bg (không phải chỉ nhắc tới nó).
+
+    Điều kiện: trong CÙNG một segment lệnh, `dispatch.sh` là MỘT TOKEN riêng (sau khi bóc
+    nháy) và `--bg` cũng là một token riêng. Chính phép bóc nháy làm việc chính: văn bản
+    `"...dispatch.sh ... --bg..."` trong tham số của notify_thread.sh/append_event.sh là
+    MỘT token dài, không bao giờ bằng `dispatch.sh`.
+
+    Cố tình KHÔNG đòi dispatch.sh phải đứng đúng vị trí token đầu: các dạng bọc thật trong
+    transcript (`env -u VAR ... bash -x <path>/dispatch.sh`) đẩy nó ra sau những tham số
+    không đoán trước được, và một bộ đếm tuân thủ mà im lặng bỏ sót thì tệ hơn một bộ đếm
+    thỉnh thoảng nhận dư — dư thì nhìn bảng là thấy, thiếu thì không.
+    """
+    for seg in split_commands(strip_heredocs(cmd)):
+        try:
+            tokens = shlex.split(seg)
+        except ValueError:
+            # nháy lệch (heredoc bị cắt…) — thà nhận nhầm còn hơn im lặng bỏ sót
+            tokens = seg.split()
+        if "--bg" not in tokens:
+            continue
+        if any(os.path.basename(t) == "dispatch.sh" for t in tokens):
+            return True
+    return False
 
 
 def is_turn_boundary(rec):
@@ -84,7 +199,7 @@ def scan_turns(since):
                         cur["wake"] = True
                     elif blk.get("name") == "Bash":
                         cmd = str(blk.get("input", {}).get("command", ""))
-                        if "dispatch.sh" in cmd and "--bg" in cmd:
+                        if is_bg_dispatch(cmd):
                             cur["bg"].append(rec.get("timestamp", ""))
         flush(cur)
     turns.sort(key=lambda t: t["bg"][0])

@@ -33,7 +33,24 @@ FAKE_TRANSPORT_OK = (
     "    'name': f'dispatch-wake-{sys.argv[3]}',\n"
     "    'prompt': sys.argv[2],\n"
     "    'thread_id': int(sys.argv[1]),\n"
+    "    'id': 4242,\n"
     "}))\n"
+    "PY\n)\"; then"
+)
+
+# Body 201 thật chỉ có {"status":"created","id":N} — không có name/prompt. Dùng bản này cho
+# các ca kiểm log thành công để task_id được trích từ ĐÚNG hình dạng production.
+FAKE_TRANSPORT_REAL_BODY = (
+    "if ! out=\"$(python3 - \"$thread_id\" \"$prompt\" \"$name_suffix\" << 'PY' 2>&1\n"
+    "import json\n"
+    "print(json.dumps({'status': 'created', 'id': 4242}))\n"
+    "PY\n)\"; then"
+)
+
+# Body không phải JSON (proxy chen vào, API đổi định dạng): vẫn phải ghi SUCCESS, task_id='?'.
+FAKE_TRANSPORT_JUNK_BODY = (
+    "if ! out=\"$(python3 - \"$thread_id\" \"$prompt\" \"$name_suffix\" << 'PY' 2>&1\n"
+    "print('<html>200 OK</html>')\n"
     "PY\n)\"; then"
 )
 
@@ -84,6 +101,12 @@ def run(root, args):
     log_path = os.path.join(root, "logs", "wake_thread_errors.log")
     logtxt = open(log_path, encoding="utf-8").read() if os.path.exists(log_path) else ""
     return r, logtxt
+
+
+def ok_log(root):
+    """Nội dung logs/wake_thread.log (log push THÀNH CÔNG) — '' nếu chưa có file."""
+    p = os.path.join(root, "logs", "wake_thread.log")
+    return open(p, encoding="utf-8").read() if os.path.exists(p) else ""
 
 
 def sent_payload(stdout):
@@ -152,6 +175,50 @@ def main():
         "4b transport failure: logged to wake_thread_errors.log",
         "unreachable" in log,
         log[:200],
+    )
+    check(
+        "4c transport failure: does NOT write a SUCCESS line (RED control)",
+        ok_log(d2) == "",
+        ok_log(d2)[:200],
+    )
+
+    # 5. Push THÀNH CÔNG phải để lại vết trong logs/wake_thread.log — nếu không, "push chưa
+    #    bao giờ chạy" và "push chạy ngon" không phân biệt được từ trong fleet này.
+    d3 = build_root(FAKE_TRANSPORT_REAL_BODY)
+    r, _ = run(d3, ["999999002", "hello", "Wags_20260817_191153"])
+    line = ok_log(d3).strip()
+    check("5 push OK: exit 0", r.returncode == 0, f"rc={r.returncode} stderr={r.stderr!r}")
+    check(
+        "5b push OK: 1 dòng SUCCESS, đủ job_id + thread_id + task_id",
+        len(ok_log(d3).splitlines()) == 1
+        and "SUCCESS" in line
+        and "job_id=Wags_20260817_191153" in line
+        and "thread_id=999999002" in line
+        and "task_id=4242" in line,
+        f"line={line!r}",
+    )
+    check(
+        "5c push OK: dòng mở đầu bằng timestamp ISO (cùng dạng log lỗi)",
+        bool(line) and line.split()[0][:4].isdigit() and "T" in line.split()[0],
+        f"line={line!r}",
+    )
+    # Gọi lần 2: append chứ không đè — 1 push = 1 dòng.
+    run(d3, ["999999003", "hello", "job-2"])
+    check(
+        "5d push thứ hai: APPEND (2 dòng), không ghi đè",
+        len(ok_log(d3).splitlines()) == 2,
+        ok_log(d3)[:300],
+    )
+
+    # 6. Body lạ (không JSON) vẫn phải ghi SUCCESS với task_id='?' — mất id thì đừng mất luôn
+    #    bằng chứng là push đã tới.
+    d4 = build_root(FAKE_TRANSPORT_JUNK_BODY)
+    r, _ = run(d4, ["999999004", "hello", "job-junk"])
+    line4 = ok_log(d4).strip()
+    check(
+        "6 body không phải JSON: vẫn exit 0 và vẫn ghi SUCCESS với task_id=?",
+        r.returncode == 0 and "SUCCESS" in line4 and "task_id=?" in line4,
+        f"rc={r.returncode} line={line4!r}",
     )
 
     print(f"\n{len(passes)} PASS, {len(fails)} FAIL")

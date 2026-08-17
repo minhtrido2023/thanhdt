@@ -21,13 +21,20 @@
 #                                     agent editing files while the board said "failed"
 #                                     (incident 2026-08-09, 3rd duplicate-dispatch
 #                                     collision, that one on executor.py).
-#   jobs.sh mark-replied <job_id>     stamp replied_at on the job record so subsequent
-#                                     wakeup turns (from ladder or a late push) know Mike
-#                                     already posted the result — anti-double-reply guard.
-#                                     Idempotent; safe to call multiple times.
-#   jobs.sh is-replied <job_id>       exit 0 = replied_at is set (skip this wakeup turn);
-#                                     exit 1 = not yet replied (proceed normally).
-#                                     Call at the TOP of every wakeup turn before posting.
+#   jobs.sh claim-reply <job_id>      THE anti-double-reply primitive (use this one).
+#                                     Atomic test-and-set of replied_at: exit 0 = you are
+#                                     the FIRST claimer, go post; exit 1 = already replied,
+#                                     stay silent; exit 2 = record missing/corrupt.
+#                                     Call at the TOP of every wakeup turn, INSTEAD of
+#                                     is-replied + mark-replied.
+#   jobs.sh mark-replied <job_id>     [legacy] stamp replied_at unconditionally. Kept for
+#                                     back-compat; prefer claim-reply, which cannot lose a
+#                                     race the way mark-replied+is-replied can.
+#   jobs.sh is-replied <job_id>       [legacy] exit 0 = replied_at is set; exit 1 = not yet.
+#                                     Read-only check. Two turns can both read "not replied"
+#                                     before either writes -> both post. claim-reply closes
+#                                     that window; this stays only for callers that just want
+#                                     to LOOK without claiming.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -77,23 +84,33 @@ case "$cmd" in
       sleep 15
     done
     ;;
+  claim-reply)
+    # Atomic test-and-set of replied_at — the read and the write happen under one lock in
+    # mike_json.py, so of N concurrent wakeup turns exactly ONE gets exit 0.
+    #   exit 0 -> this turn owns the reply: post the result, then end the turn.
+    #   exit 1 -> another turn already replied: ScheduleWakeup(noop:true, stop:true), post nothing.
+    #   exit 2 -> no readable job record: nothing was written; do NOT read this as "replied".
+    job_id="${2:?usage: jobs.sh claim-reply <job_id>}"
+    set +e; MJ job-claim-reply "$JOBS_DIR" "$job_id"; rc=$?; set -e
+    exit "$rc"
+    ;;
   mark-replied)
-    # Stamp replied_at on the job record — idempotent, safe to call multiple times.
+    # [legacy] Stamp replied_at on the job record — idempotent, safe to call multiple times.
     # Call immediately after posting a job's result to Discord, before ending the turn.
     # Prevents duplicate responses when push-wake + ladder-wake both fire for the same job.
     job_id="${2:?usage: jobs.sh mark-replied <job_id>}"
     MJ job-set "$JOBS_DIR" "$job_id" "replied_at=$(date -u +%FT%TZ)"
     ;;
   is-replied)
-    # Exit 0 = replied_at is set (this job was already reported — stop the wakeup turn).
-    # Exit 1 = not yet replied (proceed normally).
-    # Call at the TOP of every wakeup turn, before reading job status or posting anything.
+    # [legacy] Exit 0 = replied_at is set; exit 1 = not yet. Read-only, claims nothing —
+    # so two turns can both see "not replied" and both post. Wakeup turns must use
+    # claim-reply instead; this remains for callers that only want to inspect.
     job_id="${2:?usage: jobs.sh is-replied <job_id>}"
     val=$(MJ job-field "$JOBS_DIR" "$job_id" replied_at 2>/dev/null || true)
     [ -n "$val" ]
     ;;
   *)
-    echo "usage: jobs.sh {list [limit] | status <job_id> | wait <job_id> [--timeout SEC] | cancel <job_id> [grace_sec] | reap [grace_sec] [--dry-run] | mark-replied <job_id> | is-replied <job_id>}" >&2
+    echo "usage: jobs.sh {list [limit] | status <job_id> | wait <job_id> [--timeout SEC] | cancel <job_id> [grace_sec] | reap [grace_sec] [--dry-run] | claim-reply <job_id> | mark-replied <job_id> | is-replied <job_id>}" >&2
     exit 2
     ;;
 esac

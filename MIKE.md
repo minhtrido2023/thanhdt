@@ -98,6 +98,9 @@ cao sẽ tự chạy tiếp, nhưng nếu phiên tôi restart giữa chừng th�
 > ⚠️ Push fail-soft (lỗi ghi `logs/wake_thread_errors.log`, không gãy `_bg_wrapper`) — API
 > `127.0.0.1:8199` sập đúng lúc đó = mất push, không cảnh báo tức thời. **Luôn đặt CẢ HAI**
 > (push tự động + ScheduleWakeup lưới an toàn), đừng bỏ ScheduleWakeup vì "đã có push".
+> Lần push THÀNH CÔNG ghi `logs/wake_thread.log` (`SUCCESS | job_id= thread_id= task_id=`,
+> thêm 2026-08-17): trước đó chỉ nhánh lỗi có log, nên "push chưa từng chạy" và "push chạy
+> ngon" nhìn giống hệt nhau từ trong repo này — audit phải mượn log ccdb ở repo khác.
 
 > **§8 rút gọn — 3 dòng phải nhớ (thêm 2026-07-20, sau sự cố `missed-wakeup-after-bg-dispatch`,
 > xem `kb/incidents/2026-07/2026-07-20-missed-wakeup-after-bg-dispatch.md` + job `Wags_20260720_121120`):**
@@ -117,24 +120,46 @@ cao sẽ tự chạy tiếp, nhưng nếu phiên tôi restart giữa chừng th�
 >    hỏi khác.
 > 3. Mọi phát ngôn về trạng thái job phải kèm `jobs.sh status` chạy trong CÙNG lượt — kể cả câu
 >    "job vừa mới xong" (sự cố 07-20: `ended_at` cách đó 19 phút vẫn bị thuật thành "vừa xong").
-> 4. **Anti-double-reply (thêm 2026-08-17)** — push-wake và ladder-wake là 2 task ccdb ĐỘC LẬP,
->    cùng fire khi job xong. Không có giao thức idempotency → cả hai lượt đều post kết quả →
->    Mike trả lời 2 lần (token × 2, gây nhầm cho user). **Bắt buộc:**
+> 4. **Anti-double-reply (thêm 2026-08-17, sửa chẩn đoán + giao thức cùng ngày —
+>    `agents/Wags/research/wakeup_double_answer_audit_20260817.md`)** — Mike post kết quả CÙNG
+>    MỘT job 2 lần (token × 2, user tưởng có 2 kết quả khác nhau).
 >
->    **Bước A — khi post kết quả:** Ngay sau khi post xong kết quả lên Discord, TRƯỚC khi kết thúc lượt:
->    ```
->    bin/jobs.sh mark-replied <job_id>   # ghi replied_at vào job record, idempotent
->    ```
->    **Bước B — ĐẦU TIÊN của MỌI lượt wakeup**, trước khi đọc job status hay post bất cứ gì:
->    ```
->    bin/jobs.sh is-replied <job_id>     # exit 0 = đã reply rồi; exit 1 = chưa
->    ```
->    Nếu exit 0 → `ScheduleWakeup(noop: true, stop: true)`, không làm gì thêm.
+>    ⚠️ **KHÔNG phải vì "push-wake và ladder-wake là 2 task ccdb độc lập cùng fire"** — đó là
+>    tiền đề bản đầu của mục này và nó SAI. ccdb đã tự cưỡng chế bất biến *tối đa 1 one-shot
+>    wakeup pending mỗi thread*: cả bridge `ScheduleWakeup` (`cogs/_run_helper.py`) lẫn push
+>    ngoài (`ext/api_server.py`) đều gọi `delete_pending_one_shot_by_thread()` ngay trước khi
+>    tạo task. Quan sát thật 3 lần ngày 08-17 ("Cancelled 1 pending one-shot wakeup(s)…").
+>    Hai nguyên nhân THẬT:
+>    - **(a) Replay ở tầng harness** — lượt wake cạn context → auto-compaction → bị ngắt →
+>      prompt wake trong hàng đợi được giao LẠI trong cùng phiên. Bằng chứng trực tiếp:
+>      `Taylor_20260817_112844`, ccdb chỉ fire task 1729 đúng 1 lần. **Chỉ Bước A/B dưới đây
+>      chặn được ca này** — không có fix tầng ccdb nào với tới.
+>    - **(b) ccdb restart giữa lượt** — row one-shot chỉ bị xoá SAU khi lượt Claude xong, mà
+>      chống chạy lại chỉ là `self._running` trong RAM ⇒ restart giữa lượt là fire lại prompt
+>      cũ (`ccdb-mike.service` restart 4 lần chỉ riêng 08-17). Vá ở repo bridge (F1/F3).
 >
->    **Prompt `ScheduleWakeup` phải encode Bước B làm dòng đầu tiên.** Template chuẩn:
->    `"Đầu tiên: bin/jobs.sh is-replied <job_id> → exit 0 → ScheduleWakeup(noop:true,stop:true), DỪNG. Nếu exit 1: [logic poll bình thường]."`
+>    ⇒ Bước A/B vẫn **BẮT BUỘC** kể cả sau khi F1/F3 land: chúng vá (b), không chạm được (a).
 >
->    Fan-out nhiều job: check is-replied cho TẤT CẢ job trong batch. Chỉ stop khi TẤT CẢ đã replied.
+>    **Bước A — ĐẦU TIÊN của MỌI lượt wakeup**, trước khi đọc job status hay post bất cứ gì:
+>    ```
+>    bin/jobs.sh claim-reply <job_id>   # test-and-set replied_at NGUYÊN TỬ (1 lock, 1 người thắng)
+>    ```
+>    **Bước B — xử theo exit code của chính lệnh trên** (không cần `is-replied` riêng nữa):
+>    - `0` = bạn là người ĐẦU TIÊN giành quyền trả lời → post kết quả rồi kết thúc lượt.
+>      Không phải gọi `mark-replied` nữa: claim-reply đã ghi `replied_at` rồi.
+>    - `1` = lượt khác đã trả lời → `ScheduleWakeup(noop: true, stop: true)`, post gì cũng KHÔNG.
+>    - `2` = không có job record đọc được → **đừng coi là "đã reply"** (sẽ nuốt mất kết quả);
+>      kiểm tra lại job_id, xử tay.
+>
+>    **Prompt `ScheduleWakeup` phải encode Bước A làm dòng đầu tiên.** Template chuẩn:
+>    `"Đầu tiên: bin/jobs.sh claim-reply <job_id> → exit 1 → ScheduleWakeup(noop:true,stop:true), DỪNG. exit 0 → [logic poll + post bình thường]. exit 2 → báo job record thiếu, đừng im lặng."`
+>
+>    Fan-out nhiều job: claim-reply cho TỪNG job; chỉ post job nào bạn claim được (exit 0).
+>    Stop khi mọi job trong batch đều không còn exit 0.
+>
+>    *(`mark-replied`/`is-replied` còn đó cho back-compat nhưng ĐỪNG dùng để chống trùng: hai
+>    lượt có thể cùng đọc "chưa reply" trước khi bên nào kịp ghi — đúng cái khe mà claim-reply
+>    đóng. Test: `bin/claim_reply_selfcheck.sh`, CA 3 chạy 12 tiến trình đồng thời.)*
 >
 > Đo tuân thủ hồi cứu: `bin/wakeup_audit.py --since <ngày>` (gắn vào `daily_retro.sh`).
 

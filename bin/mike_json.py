@@ -37,6 +37,11 @@ Centralizes all JSON building/reading so the shell scripts depend only on python
          -> refuses, writes nothing). Front door: bin/jobs.sh cancel <job_id>
   job-field <jobs_dir> <job_id> <field_name>
       -> print one field's raw value (exit 1 if job/field missing) — e.g. discord_thread_id
+  job-claim-reply <jobs_dir> <job_id>
+      -> ATOMIC test-and-set of replied_at under an exclusive lock. exit 0 = THIS caller is
+         the first to claim (go post the result); exit 1 = someone already claimed it (stay
+         silent); exit 2 = record missing/corrupt (nothing written, decide by hand).
+         Front door: bin/jobs.sh claim-reply <job_id>
   job-hb-age <jobs_dir> <job_id>
       -> seconds since the job's last AGENT-written bus event ('-' if none); excludes
          _job_watcher liveness pings — input to dispatch.sh heartbeat-aware deadline
@@ -49,7 +54,7 @@ Centralizes all JSON building/reading so the shell scripts depend only on python
       -> same, but topic matched by PREFIX — for producers told to write a topic
          "starting with X" and free to append their own description (Wags findings).
 """
-import sys, os, json, uuid, glob, datetime, hashlib, gzip, re, signal, time
+import sys, os, json, uuid, glob, datetime, hashlib, gzip, re, signal, time, fcntl
 
 TS_FMT = "%Y-%m-%dT%H:%M:%SZ"
 
@@ -2618,6 +2623,66 @@ def cmd_job_field(a):
     sys.exit(0)
 
 
+def cmd_job_claim_reply(a):
+    """job-claim-reply <jobs_dir> <job_id> — ATOMIC test-and-set of replied_at.
+
+    exit 0 = replied_at was EMPTY and this call stamped it -> this caller is the FIRST and
+             ONLY one allowed to post the job's result.
+    exit 1 = replied_at was already set (its value goes to stdout) -> someone already
+             replied; stay silent.
+    exit 2 = record missing or unreadable -> NOTHING was written; do not treat as "already
+             replied" (that would silently swallow the result) and do not treat as "mine"
+             either. Investigate.
+
+    Why this exists next to mark-replied/is-replied: those are two separate processes, so
+    two wakeup turns racing on the same job can BOTH read "not replied" before either
+    writes, and both post. That gap is exactly the double-answer this guard is for. Here the
+    read and the write happen under one flock on <job>.json.lock, so exactly one caller of
+    any number of concurrent ones gets exit 0.
+
+    Caveat, stated rather than pretended away: job-set does NOT take this lock (it has its
+    own read-modify-write), so a job-set landing in the same millisecond can still drop the
+    replied_at stamp. The wakeup callers all go through claim-reply, and dispatch.sh's
+    lifecycle writes do not race those turns in practice — the mutual exclusion that matters
+    (claim vs claim) is the one enforced.
+    """
+    jobs_dir, job_id = a[0], a[1]
+    fp = _job_path(jobs_dir, job_id)
+    os.makedirs(jobs_dir, exist_ok=True)
+    lock_fd = os.open(fp + ".lock", os.O_CREAT | os.O_WRONLY, 0o644)
+    try:
+        fcntl.flock(lock_fd, fcntl.LOCK_EX)
+        try:
+            with open(fp, encoding="utf-8") as f:
+                obj = json.load(f)
+            if not isinstance(obj, dict):
+                raise ValueError("job record is not a JSON object")
+        except FileNotFoundError:
+            sys.stderr.write(
+                "REFUSED: no job record at %s — cannot claim a reply for a job the board "
+                "does not know about. This is NOT 'already replied': check the job id.\n" % fp)
+            sys.exit(2)
+        except Exception as e:
+            sys.stderr.write(
+                "REFUSED: job record %s is unreadable (%s) — refusing to write over it.\n"
+                % (fp, e))
+            sys.exit(2)
+        prior = obj.get("replied_at", "")
+        if prior:
+            print(prior)
+            sys.exit(1)
+        stamp = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        obj["replied_at"] = stamp
+        tmp = fp + ".claim.tmp"
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump(obj, f, ensure_ascii=False)
+        os.replace(tmp, fp)
+        print(stamp)
+        sys.exit(0)
+    finally:
+        os.close(lock_fd)
+
+
 # --- circuit breaker (state/circuit/<id>.json) ---
 # Per-agent consecutive-failure counter for dispatch.sh. Trips (blocks new dispatches)
 # after N consecutive failed/timeout jobs; auto-resets to closed after a cooldown window
@@ -2751,6 +2816,7 @@ CMDS = {"event": cmd_event, "heartbeat": cmd_heartbeat, "recent": cmd_recent,
         "commit-collision-gate": cmd_commit_collision_gate,
         "terminal-statuses": cmd_terminal_statuses,
         "job-field": cmd_job_field, "job-hb-age": cmd_job_hb_age,
+        "job-claim-reply": cmd_job_claim_reply,
         "circuit-check": cmd_circuit_check, "circuit-record": cmd_circuit_record,
         "pending-resume-set": cmd_pending_resume_set,
         "settings": cmd_settings, "trace": cmd_trace,

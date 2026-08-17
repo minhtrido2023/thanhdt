@@ -47,6 +47,30 @@ _log_fail() {
     >> "$ROOT/logs/wake_thread_errors.log"
 }
 
+# Ghi CẢ lần push THÀNH CÔNG (2026-08-17) — trước đó chỉ có nhánh lỗi được ghi, nên khi
+# audit double-answer phải suy ngược "push có tới không" từ log ccdb ở repo KHÁC. Không có
+# dòng thành công thì "push im lặng không chạy" và "push chạy ngon" nhìn giống hệt nhau
+# trong logs/ của fleet này.
+# `name_suffix` chính là job_id: cả hai call site trong dispatch.sh (_bg_wrapper nhánh done
+# và nhánh fail) đều truyền "$job_id" vào tham số 3. Gọi tay không truyền tham số 3 thì đó
+# là timestamp tự sinh — vẫn ghi nguyên văn, không bịa.
+_log_ok() {
+  mkdir -p "$ROOT/logs"
+  local _task_id
+  # Body thật: {"status":"created","id":<int>} (claude_discord/ext/api_server.py POST
+  # /api/tasks). Body lạ/không phải JSON -> '?' chứ KHÔNG bỏ luôn dòng log: biết đã push
+  # thành công mà không biết task nào vẫn hơn là không biết gì.
+  _task_id="$(printf '%s' "$1" | python3 -c 'import sys,json
+try:
+    print(json.load(sys.stdin).get("id","?"))
+except Exception:
+    print("?")' 2>/dev/null)" || _task_id="?"
+  [ -n "$_task_id" ] || _task_id="?"
+  printf '%s wake_thread: SUCCESS | job_id=%s thread_id=%s task_id=%s\n' \
+    "$(date -Iseconds)" "$name_suffix" "$thread_id" "$_task_id" \
+    >> "$ROOT/logs/wake_thread.log"
+}
+
 if ! out="$(python3 - "$thread_id" "$prompt" "$name_suffix" << 'PY' 2>&1
 import sys, json, urllib.request, urllib.error
 
@@ -79,4 +103,7 @@ PY
   _log_fail "$out"
   exit 1
 fi
+# Ghi log KHÔNG được biến một push đã thành công thành exit 1 (dispatch.sh coi exit != 0 là
+# push hỏng) — nhưng cũng không nuốt im lặng: hỏng thì kêu ra stderr.
+_log_ok "$out" || echo "wake_thread: push OK nhưng ghi logs/wake_thread.log THẤT BẠI" >&2
 echo "$out"
