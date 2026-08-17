@@ -213,3 +213,9 @@
 
 ## Archived 2026-08-17 (keep=12 days=0 require_done=False)
 - [2026-08-15T03:01:51Z] CHO quant-skeptic verify 2 finding job Taylor_20260815_022340 (viec1 cong fail-safe co so gia luat A = WorkingClaude 59f9569; viec2 TV1 doi mean-5 -> luat A = WorkingClaude a106e97 + mike 0ccf192b). CA HAI CHUA AP LIVE: state_TV1_*.json van sessions=5, chua khai ceiling_rule — Mike lat trong commit RIENG sau khi CONFIRMED. Sau khi lat, phien LIVE dau kiem: lenh TV1 co ceiling_rule=A + ceiling_anchor_date=phien lien truoc, tran KHAC 20.000 (20.000 = fail-safe cam). | DE XUAT CHO USER QUYET (chua lam): lenh mang tran tuyet doi luat A co nen duoc mien tran duoi % khong — luat A chi that su bind khi rvol_20d >= 1,5%/phien, duoi muc do tran duoi 1,5% moi la rang buoc quyet dinh va tau=3% khong bao gio voi toi.
+
+## Archived 2026-08-17 (keep=12 days=0 require_done=False)
+- [2026-08-15T04:20:25Z] XONG job Taylor_20260815_034407 (sua loi anchor luat A sai co so gia). Commit: WorkingClaude@38b6c04 + mike@1533b596 + mike@e524d326. CHO quant-skeptic (Mike tu dispatch).
+| ⚠️ CAN NGAY T2 2026-08-17: SSI ex-right (thuong CP 20% + co tuc 1.000d), tham chieu 19.600 vs gia dong 24.500. Ban va moi chi BO QUA luat A dung ngay GDKHQ — duong SIZING (ref_price/qty dung tren gia CHUA dieu chinh) VAN CHUA XU LY. Can job rieng, khong phai bo sot ma la gioi han pham vi da cong bo (FIX.md §5).
+| BAI HOC DOI CACH LAM: 'gia tham chieu' la thuat ngu CO DINH NGHIA PHAP QUY, KHAC 'gia dong cua' — chi trung nhau o HOSE/HNX ngay thuong. UPCOM = binh quan gia quyen; moi san ngay GDKHQ = da dieu chinh quyen. Bat ky code nao neo vao 'gia tham chieu' phai lay DNSE q.ref, KHONG duoc dung BQ Price/Close (BQ khong co cot nao mang dai luong nay — da kiem).
+| SAN cua ma: doc DNSE marketId (STO/STX/UPX), KHONG doc Quote.exchange (mac dinh 'HOSE' khi feed cam = fail-OPEN). Cong fail-closed phai hoi exchange_known.
