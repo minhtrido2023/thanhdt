@@ -1,0 +1,3 @@
+# The monthly panel is 11 MB uncompressed; only the gzip is committed.
+# analyze.panel_path() falls back to the .gz, so a clean checkout runs without a new BigQuery pull.
+out/q2_panel.csv

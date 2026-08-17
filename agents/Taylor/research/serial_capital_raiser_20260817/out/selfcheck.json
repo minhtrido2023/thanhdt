@@ -1,0 +1,147 @@
+{
+  "offline": false,
+  "pass": 28,
+  "total": 28,
+  "results": [
+    {
+      "name": "T1a no forward-looking profit_* column referenced",
+      "ok": true,
+      "detail": "{}"
+    },
+    {
+      "name": "T1b OShares (restated, non-PIT) not referenced",
+      "ok": true,
+      "detail": "{'build.py': 0, 'analyze.py': 0, 'robust.py': 0, 'scr_lib.py': 0}"
+    },
+    {
+      "name": "T1c no Price/Close ratio built anywhere (registry b\u1eaby (4))",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "T1d turnover uses Price*Volume not Close*Volume",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "T1e no wall-clock/TZ-dependent date logic (\u00a716)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "T1f public_date used only as dedup tie-break, never as an anchor",
+      "ok": true,
+      "detail": "2 occurrences"
+    },
+    {
+      "name": "T2a Index.level returns NaN before history and for a missing date",
+      "ok": true,
+      "detail": "[   nan    nan 741.27]"
+    },
+    {
+      "name": "T2b as-of lookup takes the previous session, never a future one",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "T2c h=250 window spans ~250 index sessions (session-indexed, not calendar)",
+      "ok": true,
+      "detail": "median=250.0, p05=250, p95=250"
+    },
+    {
+      "name": "T2d events without a t0+h session carry NaN and rise with h",
+      "ok": true,
+      "detail": "missing c_250=174, c_750=569"
+    },
+    {
+      "name": "T3a every surviving event id appears exactly once",
+      "ok": true,
+      "detail": "7301 rows, 7301 unique ids"
+    },
+    {
+      "name": "T3b one row per (ticker, exright_date, subtype, id)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "T3c [BQ] survivors + dropped-dups + UNKNOWN = raw rows",
+      "ok": true,
+      "detail": "raw=7318 kept=7301 dup=12 unknown=5 lineage=7301"
+    },
+    {
+      "name": "T4a n_raise_3y reproduced by an independent Python recompute",
+      "ok": true,
+      "detail": "0 mismatches over 54361 rows (>=2013-01-04)"
+    },
+    {
+      "name": "T4b the recompute is boundary-sensitive (a +180d window moves counts)",
+      "ok": true,
+      "detail": "3441 rows change when the window end moves forward"
+    },
+    {
+      "name": "T4c future-probe column is non-negative and separate from n_raise_3y",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "T5a universe membership varies by month (gate is per-day, not a static list)",
+      "ok": true,
+      "detail": "41/895 tickers (4.6%) present in all 197 months; months-present median=57; names/month 159..590"
+    },
+    {
+      "name": "T5b [BQ] a real ticker flips in_universe across dates",
+      "ok": true,
+      "detail": "660 tickers flip membership 2015-2025"
+    },
+    {
+      "name": "T6a two-way SE == one-way SE when cluster 2 is unique per row",
+      "ok": true,
+      "detail": "max|\u0394|=1.39e-17"
+    },
+    {
+      "name": "T6b clustered SE differs from iid SE (clustering is actually applied)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "T7a Q1 primary BHAR_250 recomputed independently",
+      "ok": true,
+      "detail": "recompute=-0.0774251611 results.json=-0.0774251611"
+    },
+    {
+      "name": "T7b Q2a serial coefficient identical via explicit cell dummies vs within-demeaning",
+      "ok": true,
+      "detail": "dummies=-0.027945654371 absorb=-0.027945654371 \u0394=4.10e-14"
+    },
+    {
+      "name": "T8a same seed => bit-identical CI",
+      "ok": true,
+      "detail": "lo=-0.104659533773"
+    },
+    {
+      "name": "T8b a different seed moves the CI (the seed is really used)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "T8c block CI wider than singleton CI when blocks share a shock",
+      "ok": true,
+      "detail": "block=1.0807 singleton=0.3753 ratio=2.88x"
+    },
+    {
+      "name": "T9a a non-consecutive next month yields a NULL forward return, never a stale one",
+      "ok": true,
+      "detail": "5 gap rows, 0 with a non-null return"
+    },
+    {
+      "name": "T9b forward return is not a function of the current price level",
+      "ok": true,
+      "detail": "corr(ln Close, fwd_ret)=-0.0341"
+    },
+    {
+      "name": "T9c the >=3-per-leg floor drops some quintiles (matching is real)",
+      "ok": true,
+      "detail": "months with <5 usable quintiles: 57/197"
+    }
+  ]
+}
