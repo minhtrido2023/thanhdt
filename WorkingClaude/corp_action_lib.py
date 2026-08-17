@@ -22,9 +22,12 @@ them would undercount shares. Same rows, opposite treatment — hence one taxono
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 
 BQ_PROJECT = "lithe-record-440915-m9"
+BQ_PATH_PREFIX = "/home/trido/google-cloud-sdk/bin"      # not in cron PATH by default
+BQ_CLOUDSDK_CONFIG = "/home/trido/thanhdt/gcloud_dtienthanh"  # dtienthanh@gmail.com credentials
 TABLE = f"{BQ_PROJECT}.tav2_bq.corporate_action"
 
 # ISS methods that give existing shareholders something -> the price adjusts at exright_date.
@@ -78,10 +81,13 @@ def bq(sql: str, timeout: int = 300):
     recent quarters, and silently fell back to a year-old anchor while looking perfectly healthy.
     A truncated read is indistinguishable from a short history unless you ask for the ceiling.
     """
+    env = os.environ.copy()
+    env["PATH"] = BQ_PATH_PREFIX + ":" + env.get("PATH", "")
+    env.setdefault("CLOUDSDK_CONFIG", BQ_CLOUDSDK_CONFIG)
     out = subprocess.run(
         ["bq", "query", "--use_legacy_sql=false", f"--project_id={BQ_PROJECT}",
          "--format=json", "--quiet", f"--max_rows={MAX_ROWS}", sql],
-        capture_output=True, text=True, timeout=timeout,
+        capture_output=True, text=True, timeout=timeout, env=env,
     )
     if out.returncode != 0:
         raise RuntimeError(f"bq failed: {out.stderr[-400:]}")

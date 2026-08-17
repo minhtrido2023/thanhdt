@@ -214,6 +214,12 @@ def _rights_free_factor(ticker, asof, factor_terp, until, cache_dir):
     error instead of a number. Non-accruing ISS (ESOP, placement) contribute nothing to the price
     step by construction (`corp_action_lib`) and are correctly skipped.
     """
+    # Fast path: no price adjustment at all → no corp-action of any kind → skip BQ entirely.
+    # This is the control property stated in the module docstring: factor == 1.0 exactly when
+    # nothing happened. Avoids spurious BQ calls (and BQ-unavailable warnings) for clean positions.
+    if abs(factor_terp - 1.0) <= FACTOR_EPS:
+        return factor_terp, (), None
+
     from corp_action_lib import events as ca_events, is_price_adjusting
 
     evs = ca_events([ticker], since=asof, until=until)
@@ -373,11 +379,19 @@ def adjust_entries(items, cache_dir=None, convention="accrue_only") -> dict:
             except Exception as e:                    # BQ down, duckdb missing, ...
                 factor, err = None, f"không tra được corporate_action: {str(e)[:90]}"
             if factor is None:
+                # rights==() here means either (a) BQ failed before we could check, or
+                # (b) rights were found but their factor couldn't be resolved (rights non-empty).
+                # Use different note text so the reader knows which case they're looking at.
+                if rights:
+                    note_text = (f"có quyền mua sau {asof} nhưng không tách được phần quyền "
+                                 f"({err}) — KHÔNG dùng TERP thay thế, giữ giá gốc")
+                else:
+                    note_text = (f"BQ không khả dụng, không xác định được quyền mua sau {asof} "
+                                 f"({err}) — tạm giữ giá gốc đến khi BQ phục hồi")
                 out[(ticker, asof)] = AdjustedEntry(
                     ticker, entry_price, entry_price, None, price_at, time_used,
                     "RIGHTS_UNRESOLVED",
-                    f"có quyền mua sau {asof} nhưng không tách được phần quyền ({err}) — "
-                    f"KHÔNG dùng TERP thay thế, giữ giá gốc",
+                    note_text,
                     factor_terp=factor_terp, convention=convention, rights_events=rights,
                 )
                 continue
