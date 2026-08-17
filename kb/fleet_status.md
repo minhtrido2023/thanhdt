@@ -1,4 +1,4 @@
-# Fleet status — 2026-08-17T04:30:45 UTC
+# Fleet status — 2026-08-17T04:30:47 UTC
 
 | agent | title (desktop) | kind | status | last_heartbeat | age(min) | current_task |
 |---|---|---|---|---|---|---|
@@ -21,11 +21,11 @@
 | taylor-ef | taylor-ef | external | dead | 2026-08-15T12:50:01Z | 2380 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/wt-1538146805207011358/agents/Taylor |
 | workingclaude-2f | workingclaude-2f | child | dead | 2026-08-15T13:08:48Z | 2361 |  |
 | workingclaude-3f | workingclaude-3f | child | dead | 2026-08-17T00:17:02Z | 253 |  |
-| workingclaude-69 | workingclaude-69 | external | running | 2026-08-17T04:30:01Z | 0 | interactive · cwd=/home/trido/thanhdt/WorkingClaude |
+| workingclaude-69 | workingclaude-69 | child | working | 2026-08-17T04:30:45Z | 0 |  |
 | workingclaude-72 | workingclaude-72 | child | dead | 2026-08-15T04:46:53Z | 2863 |  |
 | workingclaude-74 | workingclaude-74 | child | dead | 2026-08-17T00:24:29Z | 246 |  |
 | workingclaude-b6 | workingclaude-b6 | external | running | 2026-08-17T04:30:01Z | 0 | interactive · cwd=/home/trido/thanhdt/WorkingClaude |
-| workingclaude-bd | workingclaude-bd | child | dead | 2026-08-16T10:07:46Z | 1102 |  |
+| workingclaude-bd | workingclaude-bd | child | dead | 2026-08-16T10:07:46Z | 1103 |  |
 | workingclaude-d6 | workingclaude-d6 | child | dead | 2026-08-15T04:46:04Z | 2864 |  |
 | workingclaude-d9 | workingclaude-d9 | external | dead | 2026-08-16T09:50:01Z | 1120 | interactive · cwd=/home/trido/thanhdt/WorkingClaude |
 | workingclaude-db | workingclaude-db | child | dead | 2026-08-15T06:40:49Z | 2749 |  |
