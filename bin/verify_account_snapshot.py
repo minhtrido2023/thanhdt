@@ -506,6 +506,61 @@ def pnl_coverage_warnings(covered_tickers, live_positions):
     return warns, legacy
 
 
+def _dates_with_fills(account, upto_date):
+    """Trùng logic trading_dates_with_fills() trong daily_nav_snapshot.py — duplicate nhỏ có
+    chủ đích, KHÔNG import cross-module (daily_nav_snapshot.py đã import ngược lại module này
+    ở function level — import module-level 2 chiều sẽ vòng)."""
+    dates = []
+    for path in sorted(glob.glob(os.path.join(EXEC_DIR, f"exec_{account}_*_journal.csv"))):
+        base = os.path.basename(path)
+        date = base[len(f"exec_{account}_"):-len("_journal.csv")]
+        if date <= upto_date:
+            dates.append(date)
+    return dates
+
+
+def legacy_majority_guard(legacy_tickers, live_positions, dates_arg, account, asof_date):
+    """Phát hiện dấu hiệu `--dates` truyền vào quá hẹp: đa số vị thế live đang bị gắn nhãn
+    "legacy" và loại khỏi P&L. Bug thật đã xảy ra: caller truyền --dates=<1 ngày duy nhất>
+    (thay vì full fill history) => MỌI vị thế bị coi là legacy, cost-basis toàn account = 0
+    trong khi pipeline sản xuất daily_nav_snapshot.py không dính vì nó tự glob toàn bộ journal
+    qua trading_dates_with_fills(). Guard này KHÔNG đổi behavior (vẫn exclude legacy khỏi
+    P&L) — chỉ làm sai sót invocation không thể trôi qua âm thầm.
+
+    Trả về warning string (kèm gợi ý lệnh đúng) hoặc None nếu không có dấu hiệu. Pure ngoại
+    trừ 1 lần glob() để gợi ý ngày thật — tách khỏi pnl_coverage_warnings() để hàm đó giữ
+    nguyên ý nghĩa "cảnh báo per-ticker".
+    """
+    if not live_positions:
+        return None
+    n_legacy = len(legacy_tickers)
+    n_total = len(live_positions)
+    if n_legacy == 0 or (n_legacy / n_total < 0.5 and n_legacy < 3):
+        return None
+    full_dates = _dates_with_fills(account, asof_date)
+    if full_dates:
+        suggestion = (f"trading_dates_with_fills() (daily_nav_snapshot.py) tìm thấy "
+                      f"{len(full_dates)} ngày có journal cho {account} tính tới {asof_date}: "
+                      f"{','.join(full_dates)}")
+        example_dates = ",".join(full_dates)
+    else:
+        suggestion = (f"không tìm thấy file exec_{account}_*_journal.csv nào trong {EXEC_DIR} "
+                      f"tính tới {asof_date} — account có thể thật sự chưa có fill nào qua bot "
+                      f"(mọi vị thế đều legacy, không phải lỗi invocation)")
+        example_dates = "<toàn bộ ngày có journal, xem trading_dates_with_fills()>"
+    n_dates_passed = len(dates_arg.split(","))
+    return (
+        f"🚨 LEGACY-MAJORITY GUARD: {n_legacy}/{n_total} vị thế live bị gắn nhãn \"no fill "
+        f"history (legacy)\" và bị loại khỏi P&L — kết quả cost-basis/P&L bên dưới có thể "
+        f"KHÔNG đáng tin.\n"
+        f"   Nghi ngờ: --dates=\"{dates_arg}\" chỉ truyền {n_dates_passed} ngày — quá hẹp so "
+        f"với lịch sử fill thật?\n"
+        f"   Gợi ý: {suggestion}\n"
+        f"   Lệnh đúng ví dụ: python3 verify_account_snapshot.py --account {account} "
+        f"--dates \"{example_dates}\" --asof {asof_date} ..."
+    )
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--account", required=True)
@@ -690,6 +745,12 @@ def main():
     warnings.extend(cov_warns)
     for w in cov_warns:
         print(f"⚠️ {w}", file=sys.stderr)
+
+    guard_warn = legacy_majority_guard(legacy_tickers, live_pos, args.dates, args.account,
+                                        args.asof)
+    if guard_warn:
+        warnings.append(guard_warn)
+        print(guard_warn, file=sys.stderr)
 
     result = {
         "account": args.account,
