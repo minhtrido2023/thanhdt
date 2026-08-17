@@ -23,25 +23,5 @@
     }
   },
   "known_red": {
-    "mike/bin/send_plan_report_park_jit_selfcheck.py": {
-      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
-      "since": "2026-08-15T21:50:49Z",
-      "status": "FAIL",
-      "auto": true,
-      "topic": "selfcheck-red: mike/bin/send_plan_report_park_jit_selfcheck.py",
-      "escalated_utc": "2026-08-15T21:50:49Z",
-      "ack_pending": false,
-      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
-    },
-    "mike/bin/wags_autofix_postq_selfcheck.py": {
-      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
-      "since": "2026-08-16T21:51:05Z",
-      "status": "FAIL",
-      "auto": true,
-      "topic": "selfcheck-red: mike/bin/wags_autofix_postq_selfcheck.py",
-      "escalated_utc": "2026-08-16T21:51:05Z",
-      "ack_pending": false,
-      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
-    }
   }
 }
