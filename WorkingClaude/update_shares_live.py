@@ -63,6 +63,11 @@ CORP_ACTIONS = {
                  source="cafef/Vietstock: 2025 div = 15% stock (pure), ~30M new shares")],
     "EVG": [dict(ex_date="2026-06-25", stock_div_ratio=0.05, cash_div_per_share=0.0,
                  source="Vietstock/vietbao: 2025 div = stock 20:1 (5%), ex 25/06/2026, record 26/06/2026")],
+    "VHM": [dict(ex_date="2026-08-07", stock_div_ratio=1.0, cash_div_per_share=0.0,
+                 source="mekongasean/dnse/Vietstock: 2025 div bang co phieu ty le 100% (1:1), "
+                        "phat hanh them 4,1 ty cp (41.074 ty dong menh gia). Cau phan TIEN MAT "
+                        "cua cung dot chia da co ex-date rieng cuoi 06/2026 (factor 0.4815->0.5), "
+                        "KHONG thuoc ex-date nay -> cash_div_per_share=0")],
 }
 WATCHLIST = list(CORP_ACTIONS.keys())
 
@@ -210,8 +215,22 @@ def process(ticker, write=True):
     cum_rows = fac[pd.to_datetime(fac["time"]) < pd.to_datetime(ex_date)]
     if cum_rows.empty:
         print("  cannot locate cum day before ex -> skip"); return None
-    cum_raw = float(cum_rows.iloc[-1]["raw"])
-    cum_adj = float(cum_rows.iloc[-1]["adj"])
+    # ticker.Price (raw) freezes for 1-4 sessions around an ex-date cluster while Close
+    # (adj) keeps moving — documented TRAP, kb/data_registry/price-volume/
+    # ticker_price_stale_on_exdate.md (2026-08-15, bq_admin CONFIRMED it never self-heals).
+    # Taking iloc[-1] blindly can land on a frozen-raw row and inflate the gate by ~0.8%
+    # (VHM 2026-08-07: raw frozen 153,000 while adj went 76,500->77,100 -> gate 0.78% > tol
+    # 0.5% -> false REFUSE on a textbook 1:1). Walk back to the newest cum row NOT showing
+    # that signature (raw identical to the prior session while adj moved).
+    ci = len(cum_rows) - 1
+    while ci > 0 and (float(cum_rows.iloc[ci]["raw"]) == float(cum_rows.iloc[ci - 1]["raw"])
+                      and float(cum_rows.iloc[ci]["adj"]) != float(cum_rows.iloc[ci - 1]["adj"])):
+        ci -= 1
+    if ci != len(cum_rows) - 1:
+        print(f"  [stale-raw] cum day {cum_rows.iloc[-1]['time']} has frozen Price -> "
+              f"using {cum_rows.iloc[ci]['time']} instead")
+    cum_raw = float(cum_rows.iloc[ci]["raw"])
+    cum_adj = float(cum_rows.iloc[ci]["adj"])
 
     theo_ex = (cum_raw - cash) / (1.0 + stock)
     gate_bq = abs(theo_ex / cum_adj - 1.0)
