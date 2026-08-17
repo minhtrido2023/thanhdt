@@ -201,3 +201,6 @@
 
 ## Archived 2026-08-17 (keep=12 days=0 require_done=False)
 - [2026-08-14T14:48:35Z] CHUOI CRON PARK-MERGE DA LIVE tu T2 2026-08-17 (L1 19:30 / L2 19:40 / merge 20:20 ICT, commit f44b5e23, quant-skeptic CONFIRMED high). THEO DOI 2 dieu o lan chay that dau tien: (a) BID so lo lech broker => L1/L2 se BLOCKED_RECONCILE khong sinh lenh nao cho toi khi Winston doi soat xong (bus question BID-lot-ledger-lech-broker); (b) plan T+1 2/5 phien gan day ghi SAU 21:00 => nhung ngay do chuoi no-op fail-closed. Muc #1 (send_plan_report hien TRUNG) gio hien MOI NGAY, nen day uu tien.
+
+## Archived 2026-08-17 (keep=12 days=0 require_done=False)
+- [2026-08-14T16:41:45Z] expvol_pacing (P2) paper trial CHẠY từ 2026-08-17, review 2026-09-15: nguồn số là EXPVOL_SHADOW trên journal LIVE (paper đo được số 0 vì account main chỉ sinh book=PROBE). NEXT tại review: chạy mike/bin/expvol_shadow_probe.py, kiểm lại _expvol_active()=False trên 3 account live, rồi quant-skeptic + xin user sign-off flip expected_volume_pacing_live_gate. CẢNH BÁO merge: entry order_book_execution_shadow nằm ở nhánh session/1521113190405247057 chưa merge — xung đột mảng programs trong paper_programs_registry.json phải giải quyết TAY.
