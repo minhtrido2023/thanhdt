@@ -198,3 +198,6 @@
 
 ## Archived 2026-08-17 (keep=12 days=0 require_done=False)
 - [2026-08-14T14:37:00Z] stash@{0} (4bbc394) DA DROP THAT ngay 2026-08-14 (job _142128, quant-skeptic CONFIRMED high, report research/stash_resolve_20260814.md) — dong dut diem muc 'stash STALE cho drop' o entry _080222; git object con khoi phuc ~90 ngay. VAN CON MO (uu tien, chua ai lam): HYBRID KHONG co cong LIVE RIENG — tat fill_timing_live_gate se bat luon HYBRID cho tien that; can them fill_timing_hybrid_live_gate. | LUU Y DIEU PHOI: job _142128 va _080222 doc lap ra CUNG ket luan ve stash = viec lam 2 lan; dau hieu Mike memory con ghi 'chua landed'.
+
+## Archived 2026-08-17 (keep=12 days=0 require_done=False)
+- [2026-08-14T14:48:35Z] CHUOI CRON PARK-MERGE DA LIVE tu T2 2026-08-17 (L1 19:30 / L2 19:40 / merge 20:20 ICT, commit f44b5e23, quant-skeptic CONFIRMED high). THEO DOI 2 dieu o lan chay that dau tien: (a) BID so lo lech broker => L1/L2 se BLOCKED_RECONCILE khong sinh lenh nao cho toi khi Winston doi soat xong (bus question BID-lot-ledger-lech-broker); (b) plan T+1 2/5 phien gan day ghi SAU 21:00 => nhung ngay do chuoi no-op fail-closed. Muc #1 (send_plan_report hien TRUNG) gio hien MOI NGAY, nen day uu tien.
