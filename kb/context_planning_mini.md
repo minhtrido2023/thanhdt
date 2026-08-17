@@ -229,6 +229,20 @@ lại theo tên mã hay theo "mã nào từng thấy trong rổ nào". Mã KHÔN
 ngày snapshot) → dùng đúng `book`/`play_type` đã ghi trên order lúc đặt lệnh (đã có sẵn trong
 plan ngày đó), không đoán.
 
+⚠️ **Cùng lỗi tái diễn ở field `book_breakdown_current` (phát hiện 2026-08-17,
+`plan_SpaceX_2026-08-17.json` viết 08-14)**: field này KHÔNG có script nào sinh ra — DollarBill tự
+gõ tay mỗi lần lập plan, và đã lấy PARK từ `compute_park_trim.py` (chỉ tính rổ custom30V) rồi coi
+mọi mã tồn dư không khớp làm "phần dư ngoài custom30V" thay vì tra đúng book của nó → SCL 1500cp
+(book LAG thật, `play_type=LAG_HI`, mua 2026-08-10 theo journal) bị ghi thành `LAG: {mv_vnd: 0,
+"0 vị thế LAG"}`. **Nguồn ĐÚNG để viết `book_breakdown_current` mỗi lần lập plan**:
+```bash
+python3 mike/bin/park_holdings.py --account <SpaceX|ZaloPay> --json
+```
+Đọc field `by_book` (đã gộp bootstrap snapshot + toàn bộ fill journal sau ngày bootstrap, mới hơn
+và đầy đủ hơn đọc thẳng file bootstrap tĩnh) — dùng đúng `mv_vnd`/`qty` theo từng book nó trả về,
+KHÔNG tự suy "mã không nằm trong rổ compute_park_trim.py thì là phần dư ngoài PARK". Field này
+chỉ ảnh hưởng báo cáo (cosmetic), không đụng `orders[]`/executor.
+
 ## L1 park-trim — MỖI LẦN lập plan phải chạy `compute_park_trim.py` trước (thêm 2026-08-04, ĐÃ BẬT)
 
 > **TRẠNG THÁI: BẬT từ 2026-08-04.** Cả 3 điều kiện đã đủ: (a) quant-skeptic CONFIRMED cao
