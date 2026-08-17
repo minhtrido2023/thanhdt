@@ -276,6 +276,49 @@ def case_empty_archive_warns():
         shutil.rmtree(root, ignore_errors=True)
 
 
+# ── Ca 8b (2026-08-17, sự cố coord-2026-08-17): question VỪA ĐĂNG vài phút KHÔNG được kéo
+#    dispatch. Thật: Taylor đăng `hybrid-fill-live-deadline-20260817` 02:01:45Z, checker chạy
+#    02:06:15Z thấy "chưa có answer" sau 4m31s → dispatch job Wags (Opus); Mike đăng answer
+#    02:06:56Z. Ân hạn 60' cắt đúng lớp này. HAI chiều đều phải pin — chỉ pin chiều "không
+#    dispatch" thì đổi ân hạn thành ∞ vẫn PASS mà kênh escalate chết im.
+def case_grace_fresh_question_not_routable():
+    root, inbox = mkbus()
+    try:
+        write_events(os.path.join(inbox, "Taylor.jsonl"),
+                     [ev("Taylor", "question", "hybrid-fill-live-deadline", ago(0, 0))])
+        lines, _ = run_check5(root)
+        out = joined(lines)
+        routable = [ln for ln in lines
+                    if "trong 48h qua CHƯA thấy answer" in ln and "[WARN-ONLY]" not in ln]
+        check("ân hạn: question 0 phút tuổi KHÔNG vào dòng routable (không dispatch Wags)",
+              not routable, out)
+        check("ân hạn: vẫn HIỆN trong báo cáo với marker [WARN-ONLY] (không im lặng)",
+              any("VỪA ĐĂNG" in ln and "[WARN-ONLY]" in ln
+                  and "hybrid-fill-live-deadline" in ln for ln in lines), out)
+        check("ân hạn: KHÔNG in ✅ 'không có câu hỏi nào đang chờ' khi vẫn còn câu hỏi mới",
+              "Không có câu hỏi (question) nào đang chờ xử lý" not in out, out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+# ── Ca 8c: quá ân hạn thì PHẢI routable trở lại — chiều ngược của ca 8b.
+def case_grace_expired_question_is_routable():
+    root, inbox = mkbus()
+    try:
+        write_events(os.path.join(inbox, "Taylor.jsonl"),
+                     [ev("Taylor", "question", "qua-an-han", ago(0, 3))])
+        lines, _ = run_check5(root)
+        out = joined(lines)
+        routable = [ln for ln in lines
+                    if "trong 48h qua CHƯA thấy answer" in ln and "[WARN-ONLY]" not in ln]
+        check("ân hạn: question 3h tuổi VẪN routable (kênh escalate còn sống)",
+              len(routable) == 1 and "qua-an-han" in routable[0], out)
+        check("ân hạn: question 3h tuổi KHÔNG bị xếp vào dòng 'VỪA ĐĂNG'",
+              not any("VỪA ĐĂNG" in ln for ln in lines), out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
 # ── Ca 9: question <48h nằm ở dòng "pending" (nhánh CÓ dispatch), không phải aged.
 def case_fresh_question_is_pending():
     root, inbox = mkbus()
@@ -1228,6 +1271,7 @@ def main():
                case_resolver_must_be_after, case_dedupe_hot_and_archive,
                case_no_crowd_out, case_small_pool_prints_all,
                case_corrupt_gz_warns, case_empty_archive_warns,
+               case_grace_fresh_question_not_routable, case_grace_expired_question_is_routable,
                case_fresh_question_is_pending,
                case_wagsfix_not_confirmed_is_warn_only, case_wagsfix_prefix_not_substring,
                case_wagsfix_only_no_false_ok, case_wagsfix_prefix_list_in_sync,

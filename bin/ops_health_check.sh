@@ -310,8 +310,27 @@ ACK_MAX_SUPPRESS_DAYS = 14
 # ⇒ LUẬT: thêm bất kỳ nhánh `append_event.sh Wags question` MỚI nào vào wags_autofix.sh thì
 # PHẢI thêm tiền tố đó vào tuple này CÙNG LÚC (và pin bằng selfcheck ca 10/11).
 WAGS_SELF_Q_PREFIXES = ("wags-fix-not-confirmed:", "wags-arch-review-inconclusive:")
+# Cửa sổ ÂN HẠN trước khi 1 câu hỏi trở thành ROUTABLE (được phép kéo dispatch wags_autofix).
+# Sự cố THẬT 2026-08-17: Taylor đăng question `hybrid-fill-live-deadline-20260817` lúc
+# 02:01:45Z (đang trả lời chính dispatch mà Mike vừa giao lúc 02:00:06Z); một lần chạy
+# ops_health_check lúc 02:06:15Z thấy nó "CHƯA có answer" sau ĐÚNG 4 phút 31 giây và dispatch
+# job Wags coord-2026-08-17 (Opus). Mike đăng answer lúc 02:06:56Z — tức người phụ trách ĐANG
+# xử lý, chỉ là chưa kịp ghi bus. Toàn bộ job Wags đó là false alarm thuần.
+# Vì sao là lỗi CHECKER chứ không phải lỗi Taylor/Mike: "chưa có answer sau vài phút" KHÔNG
+# mang thông tin gì về việc câu hỏi có bị bỏ rơi hay không — không con người nào, không agent
+# nào trả lời trong khung đó. Điều kiện dispatch phải là "đã có đủ thời gian trả lời mà vẫn
+# im", không phải "tại thời điểm quét chưa thấy answer" (đúng họ §28 coding_guidelines: đọc
+# một BIỂU DIỄN tức thời rồi kết luận về sự thật bền).
+# 60 phút: cron ops_health_check chỉ chạy 2 lần/ngày (01:20 + 05:45 UTC) nên ân hạn này KHÔNG
+# làm mất ca nào — câu hỏi thật sự bị bỏ rơi vẫn được bắt ở lượt kế tiếp, thừa sức trong cutoff
+# 48h. Nó chỉ cắt đúng lớp false alarm sinh ra khi ops_health_check được chạy TAY nhiều lần
+# liên tiếp (hôm 08-17: 5 lần trong 6 phút) chồng lên lúc fleet đang trao đổi.
+# KHÔNG im lặng: câu hỏi trong ân hạn vẫn IN ra báo cáo, chỉ mang marker [WARN-ONLY] để không
+# rơi vào COORD_WARN (che giấu = đúng thứ mọi comment khác trong check #5 này đang chống).
+QUESTION_GRACE_MIN = 60
 inbox_dir = os.path.join(wc_root, "mike", "bus", "inbox")
 pending_q = []
+pending_q_fresh = []     # <QUESTION_GRACE_MIN phút tuổi — hiện trong báo cáo, KHÔNG routable
 pending_q_wagsfix = []   # xem chú thích ở khối "if pending_q_wagsfix" phía dưới
 # Câu hỏi ĐÃ được triage và kết luận "chỉ NGƯỜI quyết được, không có fix tooling" →
 # vẫn HIỆN đầy đủ trong báo cáo nhưng KHÔNG spawn wags_autofix nữa (xem ACK_PREFIX).
@@ -604,6 +623,13 @@ if os.path.isdir(inbox_dir):
                     pending_q_wagsfix.append(f"{agent}/{rec.get('topic')}")
                 elif _acked(agent, str(rec.get("topic") or ""), ts_dt):
                     pending_q_needs_human.append(f"{agent}/{rec.get('topic')}")
+                elif (_now - ts_dt).total_seconds() < QUESTION_GRACE_MIN * 60:
+                    # Ân hạn: quá mới để kết luận "không ai trả lời" (xem QUESTION_GRACE_MIN).
+                    # Đặt SAU 2 nhánh trên có chủ đích — chúng phân loại theo BẢN CHẤT câu hỏi
+                    # (tự-sinh / đã triage), ân hạn chỉ nói về TUỔI, không được ghi đè phân loại.
+                    pending_q_fresh.append(
+                        f"{agent}/{rec.get('topic')} "
+                        f"({int((_now - ts_dt).total_seconds() // 60)}m)")
                 else:
                     pending_q.append(f"{agent}/{rec.get('topic')}")
                     pending_q_meta.append((agent, str(rec.get("topic") or ""), ts_dt))
@@ -702,9 +728,16 @@ if pending_q:
           f"nhưng ghi bus SAI QUY ƯỚC (có sự kiện đăng sau, cùng tiền tố topic HOẶC chung "
           f"từ hiếm trong {WIN_H}h — GỢI Ý thôi, phải tự kiểm chứng; quy ước đóng: "
           f"`answer`/`decision` GIỮ NGUYÊN topic câu hỏi): {hints}")
-elif os.path.isdir(inbox_dir) and not pending_q_wagsfix and not pending_q_needs_human:
+elif os.path.isdir(inbox_dir) and not pending_q_wagsfix and not pending_q_needs_human \
+        and not pending_q_fresh:
     # Điều kiện isdir là BẮT BUỘC: không quét được ≠ quét xong và sạch (xem `else` ở trên).
+    # `not pending_q_fresh` cũng BẮT BUỘC: có câu hỏi mới tinh chưa ai trả lời mà in ✅ "không
+    # có câu hỏi nào đang chờ" là nói SAI — ân hạn hoãn DISPATCH, không xoá sự tồn tại.
     OK("Không có câu hỏi (question) nào đang chờ xử lý trong 48h qua.")
+if pending_q_fresh:
+    W(f"{WARN_ONLY} {len(pending_q_fresh)} câu hỏi (question) VỪA ĐĂNG (<{QUESTION_GRACE_MIN}"
+      f" phút) chưa có answer — QUÁ MỚI để kết luận bị bỏ rơi, KHÔNG dispatch lượt này; lượt "
+      f"kiểm tra kế tiếp sẽ tự đưa vào diện xử lý nếu vẫn im: {pending_q_fresh}")
 if pending_q_needs_human:
     W(f"{WARN_ONLY} {len(pending_q_needs_human)} câu hỏi ĐÃ TRIAGE, chờ NGƯỜI quyết (không "
       f"có fix tooling — KHÔNG tự dispatch lại, vẫn hiện ở đây cho tới khi có "
