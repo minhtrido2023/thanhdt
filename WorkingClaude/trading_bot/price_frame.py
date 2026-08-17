@@ -497,6 +497,44 @@ def check_ref_vs_events(ref, p_cum, events, symbol="", exchange="HOSE", tol_tick
     return True, info
 
 
+# Sàn mà CƠ SỞ GIÁ của G5 (`tav2_bq.ticker.Price` = giá ĐÓNG CỬA phiên cum) đúng là cơ sở sở
+# dùng để tính tham chiếu. Đo 2026-08-18 trên 509 mã, phiên thường, cùng feed, có đối chứng nội
+# bộ: HOSE 289/289 và HNX 106/106 ref khớp close TUYỆT ĐỐI (không mã nào lệch dù 1đ), UPCOM
+# lệch 62,3% (38/114 mã vượt dung sai ±1 tick của G5, max 16 tick).
+G5_CLOSE_BASIS_EXCHANGES = ("HOSE", "HNX")
+
+
+def g5_applies(exchange):
+    """G5 có phát biểu được trên sàn này không → (bool, info). THUẦN.
+
+    UPCOM lấy **giá bình quân gia quyền phiên trước** làm tham chiếu, không phải giá đóng cửa
+    (bằng chứng: `agents/Taylor/research/gdkhq_exchange_rounding_20260818.md`, n=509 có đối
+    chứng HOSE/HNX trong cùng lần đo ⇒ khác biệt nằm ở LUẬT CỦA SỞ, không ở đường dữ liệu).
+    G5 dựng vế kỳ vọng từ giá đóng cửa nên trên UPCOM hai vế đứng trên HAI cơ sở giá khác
+    nhau: cổng vừa **chặn oan ~1/3 số mã** vừa PASS nhầm ở phần còn lại. Nới dung sai để nuốt
+    chênh lệch phải nới tới 6 tick — cổng mất hết khả năng bắt lỗi thật mà vẫn tạo cảm giác an
+    toàn giả, nên tệ hơn tắt hẳn.
+
+    ⇒ **Decline-to-speak** (user duyệt 2026-08-17), đúng tiền lệ đã có trong chính module này:
+    G4 khi feed không cấp `marketPrice`, G6 khi thiếu dấu thời gian. Nói "cổng này không phát
+    biểu được trên sàn này" là TRUNG THỰC; giả vờ đã đối soát mới là nguy hiểm. Đổi lại, mã
+    UPCOM có sự kiện quyền chỉ được 5/6 cổng bảo đảm — `resolve_reference` công bố đúng như vậy
+    trong `reason`, không được im lặng nâng lên "6/6".
+
+    Bỏ được ngay khi có nguồn giá bình quân THẬT cho UPCOM (`Trading_Value` của BQ là cột DẪN
+    XUẤT = Price × Volume, tính VWAP từ nó là phép lặp vòng — xem §5 tài liệu trên).
+    """
+    ex = str(exchange or "").strip().upper()
+    info = {"exchange": ex, "g5_basis_exchanges": list(G5_CLOSE_BASIS_EXCHANGES)}
+    if ex in G5_CLOSE_BASIS_EXCHANGES:
+        info["reason"] = f"sàn {ex}: tham chiếu = giá đóng cửa phiên cum ⇒ G5 đối soát được"
+        return True, info
+    info["reason"] = (f"sàn {ex or '?'} không dùng giá đóng cửa làm cơ sở tham chiếu (UPCOM lấy "
+                      f"giá bình quân gia quyền phiên trước) ⇒ G5 KHÔNG phát biểu — decline-to-"
+                      f"speak, không FAIL và không chặn lệnh")
+    return False, info
+
+
 # ─────────────────────────────────────────────── giá phiên cum cuối (I/O — BQ raw `Price`)
 
 def p_cum_from_bq(ticker, exright_date, bq_query=None):
@@ -593,6 +631,9 @@ def resolve_reference(broker, ticker, session_date, events_map=None, quote=None,
       G6  bản đọc thuộc đúng phiên đang xét ← chỉ áp khi ex_today; đứng TRƯỚC G5 vì G5 chỉ có
           nghĩa khi hai vế cùng nói về một phiên
       G5  đối soát chéo công thức sở ← chỉ áp khi ex_today (ngày thường không có gì để dựng)
+          **và chỉ trên sàn dùng giá đóng cửa làm cơ sở tham chiếu** (HOSE/HNX). Trên UPCOM
+          G5 decline-to-speak (`g5_applies()`) — `ok=True`, `gate="G5_UPCOM_DECLINE_TO_SPEAK"`,
+          mức bảo đảm công bố là 5/6 cổng chứ không phải 6/6.
 
     G3 bị bỏ khi `ex_today=True` là ĐÚNG, không phải nới lỏng: ngày GDKHQ giá tham chiếu ĐÃ
     điều chỉnh nên nằm NGOÀI biên phiên trước theo đúng thiết kế (SSI 19.600 vs biên
@@ -603,7 +644,7 @@ def resolve_reference(broker, ticker, session_date, events_map=None, quote=None,
     d = _date(session_date)
     out = {"ticker": tk, "session_date": str(session_date), "ref_price": None,
            "frame_session": None, "ex_today": None, "share_factor": None,
-           "ok": False, "gate": None, "reason": "", "info": {}}
+           "ok": False, "gate": None, "note": None, "reason": "", "info": {}}
     if d is None:
         out["gate"], out["reason"] = "G0", f"session_date không parse được ({session_date!r})"
         return out
@@ -692,6 +733,35 @@ def resolve_reference(broker, ticker, session_date, events_map=None, quote=None,
         return out
 
     # ── G5 — đối soát chéo với công thức sở ──────────────────────────────────────────────
+    # Sàn không dùng giá đóng cửa làm cơ sở tham chiếu (UPCOM) ⇒ G5 decline-to-speak. Đặt
+    # TRƯỚC khi lấy `p_cum` có chủ đích: con số đó vô nghĩa trên sàn này, lấy về rồi mới bỏ chỉ
+    # tốn một truy vấn BQ và thêm một đường fail-closed oan.
+    speaks5, info5_na = g5_applies(exchange)
+    if not speaks5:
+        # Vẫn PHẢI dựng được hệ số điều chỉnh: đó là "có đọc hiểu được sự kiện không", một
+        # câu hỏi KHÔNG phụ thuộc sàn. Decline-to-speak chỉ bỏ vế ĐỐI SOÁT GIÁ, không bỏ
+        # fail-closed khi chính sự kiện không diễn giải được (vd quyền mua thiếu giá phát hành).
+        adjm, info_adj = adjustment(today_events)
+        if adjm is None:
+            out["gate"] = "G5"
+            out["reason"] = (f"NGÀY GDKHQ nhưng không dựng được hệ số điều chỉnh của sự kiện "
+                             f"({info_adj.get('reason')}) ⇒ fail-closed")
+            return out
+        info5_na.update({"share_factor": adjm["share_factor"], "event": info_adj.get("reason")})
+        out["info"]["G5"] = info5_na
+        # `gate` khác None trong khi `ok=True`: mọi consumer quyết định BẰNG `ok` (exdate_gate,
+        # bot_execute), `gate` ở đây là NHÃN mức bảo đảm để báo cáo đọc được — 5/6 cổng, không
+        # phải 6/6. Đừng dịch nhãn này thành FAIL.
+        out.update({"ref_price": ref, "frame_session": d.isoformat(),
+                    "share_factor": adjm["share_factor"], "ok": True,
+                    "gate": "G5_UPCOM_DECLINE_TO_SPEAK",
+                    "note": ("UPCOM dùng VWAP làm reference price, không phải close — "
+                             "decline-to-speak"),
+                    "reason": (f"NGÀY GDKHQ, hệ quy chiếu MỚI xác nhận bởi 5/6 cổng "
+                               f"(G5 KHÔNG phát biểu): {info5_na['reason']} — "
+                               f"sự kiện: {info_adj.get('reason')}")})
+        return out
+
     if p_cum is None:
         p_cum, info_cum = p_cum_from_broker(broker, tk, d)
         out["info"]["p_cum"] = info_cum

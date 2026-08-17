@@ -255,6 +255,80 @@ check("chạy TRONG phiên với q.ref 35.800: 6/6 cổng sạch — logic D1-D3
       res_inframe["ok"] is True and res_inframe["gate"] is None, res_inframe["reason"][:90])
 
 # ══════════════════════════════════════════════════════════════════════════════════════
+print("\n── 2d. G5 decline-to-speak trên UPCOM (cơ sở giá = VWAP, không phải close) ──")
+# ══════════════════════════════════════════════════════════════════════════════════════
+# Bằng chứng: probe 2026-08-18, n=509 mã, phiên THƯỜNG, có đối chứng nội bộ trong cùng lần đo —
+# HOSE 289/289 và HNX 106/106 ref khớp close TUYỆT ĐỐI, UPCOM lệch 62,3% (38/114 vượt dung sai
+# ±1 tick của G5). Chi tiết: agents/Taylor/research/gdkhq_exchange_rounding_20260818.md.
+# User duyệt 2026-08-17: G5 KHÔNG phát biểu trên UPCOM (không kiểm, không FAIL, không chặn).
+check("g5_applies: HOSE/HNX đối soát được", pf.g5_applies("HOSE")[0] and pf.g5_applies("HNX")[0])
+ok_up, info_up = pf.g5_applies("UPCOM")
+check("g5_applies: UPCOM KHÔNG phát biểu, và nói rõ vì cơ sở giá (không phải 'thiếu dữ liệu')",
+      not ok_up and "bình quân gia quyền" in info_up["reason"], info_up["reason"][:90])
+
+# Sự kiện UPCOM tự dựng theo đúng ngữ nghĩa cột đã kiểm ở §1 (DIV: value_per_share = VND/CP).
+EV_UPC_0818_DIV = {"ticker": "UPC", "event_code": "DIV", "exright_date": "2026-08-18",
+                   "event_status": "announced", "value_per_share": 300.0,
+                   "exercise_ratio": 0.03, "issue_method_name_vi": None}
+emap_up = pf.events_by_ticker_date([EV_UPC_0818_DIV])
+# q.ref 11.000 vs công thức trên close (12.000 − 300 = 11.700) lệch −700đ = 7 bước giá UPCOM
+# ⇒ ĐÚNG loại ca G5 sẽ chặn OAN (P90 đo được là 5 tick, max 16). Không truyền `cum` để chứng
+# minh luôn: nhánh UPCOM KHÔNG chạm p_cum, nên không tốn truy vấn BQ và không fail-closed oan.
+q_up = dict(secdef_time="2026-08-18 09:14:02.001", exchange="UPCOM", band=0.15)
+br_up = FakeBroker(quotes={"UPC": FakeQuote(11_000, **q_up)}, rows=[], cum={})
+res_up = pf.resolve_reference(br_up, "UPC", "2026-08-18", events_map=emap_up)
+check("UPCOM ngày GDKHQ: ok=True, gate=G5_UPCOM_DECLINE_TO_SPEAK (không FAIL, không chặn lệnh)",
+      res_up["ok"] is True and res_up["gate"] == "G5_UPCOM_DECLINE_TO_SPEAK",
+      f"ok={res_up['ok']} gate={res_up['gate']}")
+check("UPCOM: công bố ĐÚNG mức bảo đảm 5/6 cổng, KHÔNG im lặng nâng lên 6/6",
+      "5/6" in res_up["reason"] and "6/6" not in res_up["reason"], res_up["reason"][:100])
+check("UPCOM: note nêu đích danh lý do VWAP để người đọc log tái lập được kết luận",
+      "VWAP" in (res_up.get("note") or ""), str(res_up.get("note")))
+check("UPCOM: share_factor vẫn trả về (DIV tiền mặt ⇒ ×1,0) — hạ tầng D2 reprice không mất đầu vào",
+      abs((res_up.get("share_factor") or 0) - 1.0) < 1e-9, str(res_up.get("share_factor")))
+check("UPCOM: KHÔNG chạm p_cum (nhánh decline đứng TRƯỚC truy vấn BQ)",
+      "p_cum" not in res_up["info"], str(list(res_up["info"].keys())))
+
+# Đối chứng — CÙNG con số, đổi MỖI sàn: HOSE phải CHẶN. Chứng minh decline-to-speak bị khoanh
+# theo sàn, không phải nới lỏng G5 cho mọi mã.
+br_hose = FakeBroker(quotes={"UPC": FakeQuote(11_000, secdef_time="2026-08-18 09:14:02.001")},
+                     rows=[], cum={"UPC": 12_000})
+res_hose = pf.resolve_reference(br_hose, "UPC", "2026-08-18", events_map=emap_up)
+check("ĐỐI CHỨNG: y hệt số liệu nhưng sàn HOSE ⇒ G5 vẫn CHẶN (decline chỉ khoanh theo sàn)",
+      res_hose["ok"] is False and res_hose["gate"] == "G5", f"gate={res_hose['gate']}")
+
+# G1-G4 và G6 phải nguyên vẹn trên UPCOM — decline-to-speak gỡ ĐÚNG một cổng, không gỡ cả tầng.
+br_up_g4 = FakeBroker(
+    quotes={"UPC": FakeQuote(11_000, **q_up)},
+    rows=[{"symbol": "UPC", "marketPrice": 11_000, "loanPackageId": 1826},
+          {"symbol": "UPC", "marketPrice": 12_000, "loanPackageId": 1258}], cum={})
+check("UPCOM: G4 vẫn CHẶN bản đọc trộn hai hệ quy chiếu",
+      pf.resolve_reference(br_up_g4, "UPC", "2026-08-18", events_map=emap_up)["gate"] == "G4")
+br_up_g6 = FakeBroker(
+    quotes={"UPC": FakeQuote(11_000, secdef_time="2026-08-18 19:23:45.110",
+                             exchange="UPCOM", band=0.15)}, rows=[], cum={})
+check("UPCOM: G6 vẫn CHẶN bản đọc đã lật sang phiên kế",
+      pf.resolve_reference(br_up_g6, "UPC", "2026-08-18", events_map=emap_up)["gate"] == "G6")
+br_up_g1 = FakeBroker(quotes={"UPC": FakeQuote(11_000, exchange="UPCOM", band=0.15, known=False)},
+                      rows=[], cum={})
+check("UPCOM: G1 vẫn CHẶN khi feed không xác nhận được SÀN (decline KHÔNG phải cửa sau đoán sàn)",
+      pf.resolve_reference(br_up_g1, "UPC", "2026-08-18", events_map=emap_up)["gate"] == "G1")
+
+# Decline-to-speak bỏ vế ĐỐI SOÁT GIÁ, KHÔNG bỏ fail-closed khi chính sự kiện không diễn giải
+# được — câu hỏi đó không phụ thuộc sàn.
+emap_up_bad = pf.events_by_ticker_date(
+    [dict(EV_MBB_0811_RIGHTS, ticker="UPC", exright_date="2026-08-18")])
+res_up_bad = pf.resolve_reference(br_up, "UPC", "2026-08-18", events_map=emap_up_bad)
+check("UPCOM + quyền mua KHÔNG có giá phát hành ⇒ VẪN fail-closed (decline không nuốt lỗi này)",
+      res_up_bad["ok"] is False and res_up_bad["gate"] == "G5", res_up_bad["reason"][:90])
+
+# Ngày THƯỜNG trên UPCOM: nhánh decline không được đụng tới (G5 vốn không chạy).
+res_up_normal = pf.resolve_reference(br_up, "UPC", "2026-08-19",
+                                     events_map=pf.events_by_ticker_date([]))
+check("UPCOM ngày thường: hành vi CŨ nguyên vẹn (ok, gate=None, không nhãn decline)",
+      res_up_normal["ok"] is True and res_up_normal["gate"] is None, res_up_normal["reason"][:70])
+
+# ══════════════════════════════════════════════════════════════════════════════════════
 print("\n── 2c. G2 phải nuốt việc SỞ làm tròn trần về bước giá (đo thật 8 mã, feed 2026-08-18) ──")
 # ══════════════════════════════════════════════════════════════════════════════════════
 # FIXTURE THẬT — `secdef` DNSE đọc 2026-08-18 00:5x ICT (ref, ceiling, sàn). `pass_cu` = kết quả
