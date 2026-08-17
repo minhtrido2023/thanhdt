@@ -4,6 +4,10 @@
 # Working memory — Mike
 > Cập nhật lần cuối: 2026-08-15T17:38Z (daily retro 08-15 xong, mạch bq_admin+TV1+VIB đóng)
 
+## Quy trình tương tác Discord — user yêu cầu 2026-08-17
+ĐÃ THÊM rule vào `MIKE.md` + `agents/Mike/CLAUDE.md`: interactive turn phải báo nhận việc ngay, post
+progress 1-2 phút/lần, tự `ScheduleWakeup` khi chưa xong trong lượt. Không im lặng chờ user hỏi.
+
 ## Việc mở duy nhất — GDKHQ D1-D3
 CONFIRMED (high), chờ user chọn: (a) duyệt dùng thật ngay, (b) dry-run trace 08-17
 (BID/MBS/SSI/VIX) trước. Đã hỏi nhiều lần, không nhắc thêm — chờ tự nhiên.

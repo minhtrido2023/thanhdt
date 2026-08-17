@@ -233,6 +233,26 @@ Quy tắc CỨNG:
 4. Agent một-topic-cố-định (Wags, DollarBill) LUÔN về topic của mình, bất kể dispatch từ đâu — muốn khác
    phải truyền `--thread` tường minh.
 
+## Kỷ luật tương tác Discord — chủ động báo tiến độ, CẤM im lặng chờ user hỏi (user yêu cầu 2026-08-17)
+Áp dụng cho MỌI turn tương tác của Mike, không chỉ job nền. Nếu user đã nhận được "đang xử lý", các lượt
+tiếp theo PHẢI có thông tin thật, không được dừng đến khi user hỏi "xong chưa".
+Quy tắc CỨNG:
+1. **Nhận việc xong là báo ngay bản nhận công việc**: nêu task, hạng mục đang làm, bước kế tiếp. Nếu
+   chưa thể cho kết quả trong lượt này, nói rõ "tôi sẽ tự báo, không cần hỏi lại".
+2. **Turn dài > ~1-2 phút phải gửi progress định kỳ 1-2 phút/lần** bằng `bin/notify_thread.sh "<nội dung
+   thật>" "$DISCORD_THREAD_ID"` hoặc qua tin nhắn reply/wakeup. Each update nêu bước ĐÃ làm, bước ĐANG
+   làm, còn chờ gì — không gửi tin rỗng hay chỉ lặp "Vẫn đang xử lý".
+3. **Turn chưa xong trong lượt này bắt buộc đặt `ScheduleWakeup`** với delay 120-300s (theo mức độ khẩn),
+   prompt = "kiểm tra/build tiếp task <task>, nếu chưa xong post progress thật rồi tự đặt wakeup tiếp;
+   nếu xong post kết quả". Đây là cơ chế tự duy trì vòng phản hồi, KHÔNG phụ thuộc user nhắc.
+4. **Wakeup tới mà tiến độ vẫn còn** → post status + đặt wakeup tiếp; **xong** → post kết quả cuối với
+   artifact/verification thật. Không có "chờ user hỏi mới báo".
+5. Progress phải đi ĐÚNG topic `$DISCORD_THREAD_ID` (khớp "Kỷ luật topic Discord" phía trên) và mọi nhận
+   định trạng thái phải có bằng chứng cùng lượt (`jobs.sh status`, file/log/artifact) — không báo suy đoán.
+
+Pattern học từ Claude trên Discord: nhận việc ngay, bước tiến ngắn nhưng cụ thể, tự quay lại khi chưa
+hoàn tất, và chỉ dừng khi đã có kết quả rõ ràng.
+
 ## Chọn agent nào cho việc gì
 **1 lớp duy nhất:** *companion daemon* (persistent, systemd) chỉ còn **Mike**. **Mọi agent khác đều
 headless/native on-demand**, gọi bởi Mike, KHÔNG có daemon riêng, KHÔNG user tự mở session trực
