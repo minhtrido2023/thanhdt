@@ -118,6 +118,43 @@ consumer khác — ai đọc bảng này ngoài cron đó thì vẫn phải tự
 - Nếu wire vào `dividend_adjusted_return.py`/report §21 gate: qua Taylor + quant-skeptic review
   (đổi công thức đo lợi nhuận per-position, thuộc diện §21/§22 coding_guidelines).
 
+## Bẫy (5) — `listing_date` KHÔNG phải ngày công bố/thông báo Sở; nó là ngày NIÊM YẾT BỔ SUNG
+
+**Phủ sóng**: NULL ở MỌI `event_code` **trừ `ISS`**, nơi **9.594/11.722 = 81,8%** dòng có giá trị.
+(⚠️ `corp_action_program_20260815/DATA_DICTIONARY.md` từng ghi "100% NULL toàn bảng" — SAI, do đo
+gộp cả bảng trong khi `DIV` chiếm 47% dòng và luôn NULL. Đã sửa 2026-08-17.)
+
+**Ngữ nghĩa (đo, không suy)**: `ISS.listing_date` = cùng đại lượng với `AIS.effective_date` = ngày
+CP mới chính thức vào lưu hành. Khi mã có dòng `AIS` trong ±365 ngày, tỉ lệ khớp CHÍNH XÁC:
+STOCK_DIVIDEND 90,9% · BONUS 90,7% · PP 84,9% · ESOP 74,1% · RIGHTS 65,9%. Placebo chạy đúng phép
+thử đó trên `exright_date`: 0,1–12,3%. Khớp exact và khớp ±3 ngày lệch nhau <1pp ở mọi subtype ⇒
+đây là CÙNG MỘT trường, không phải hai ngày tình cờ gần nhau. Ca mẫu khớp tay: FPT thưởng CP 15%
+2025 — `ISS.listing_date = 2025-09-12` = `AIS.effective_date = 2025-09-12` (đúng ca ~7 tuần mà
+Bẫy (1) của file này đã mô tả).
+
+**⇒ Ba hệ quả khi dùng:**
+1. **Nằm SAU `exright_date`**, không phải trước: median RIGHTS **+91 ngày**, STOCK_DIVIDEND +50,
+   BONUS +49. Chỉ 11/1.542 sự kiện RIGHTS có `listing_date` trước ex-date, và 9/11 lệch 100–436
+   ngày (dữ liệu cũ hỏng, không phải thông báo).
+2. **Là KẾT QUẢ của chính sự kiện** — CP mới lên sàn nhanh hay chậm phụ thuộc việc tổ chức phát
+   hành thu tiền + hoàn tất hồ sơ, KHÔNG biết được tại `exright_date`. Neo lợi suất lên nó (kể cả
+   cửa sổ hậu sự kiện) là **look-ahead**, không chỉ "sai ngày".
+3. **Càng lùi về quá khứ càng kém tin**: `listing_date == exright_date` (giá trị rác, vendor chép
+   ex-date khi không có ngày thật) chiếm 72,3% sự kiện RIGHTS giai đoạn 2002–2008, giảm đơn điệu
+   về **0,0%** các năm 2023/2025/2026. Với PP, khối rác này là 69% toàn mẫu ⇒ **median gap của PP
+   bằng 0 KHÔNG có nghĩa "niêm yết cùng ngày"**.
+
+**Dùng được cho**: mô hình số CP lưu hành (thay/bổ sung cho việc phải chờ dòng `AIS` xuất hiện —
+`ISS.listing_date` có sẵn ngay trên dòng phát hành, phủ 81,8% vs `AIS` chỉ 4.884 dòng).
+**KHÔNG dùng được cho**: bất kỳ neo point-in-time nào, bất kỳ study nào cần "thị trường biết tin
+lúc nào".
+
+**Nhắc lại cho rõ**: bảng này **KHÔNG có cột nào ghi thời điểm thị trường lần đầu biết tin.** Cả 3
+ứng viên đều đã bị loại bằng đo đạc — `public_date` (ghi đè tại chỗ, không vintage — Bẫy 2b),
+`id_created_date` (89,4% = ngày backfill 2024-10-11), `listing_date` (hậu sự kiện, mục này). Đường
+duy nhất còn lại là tích luỹ vintage ở `tav2_mike.corporate_action_snapshots` (sống từ 2026-08-17),
+đo lại N **không sớm hơn 2027-08**.
+
 ## Nguồn
 Kiểm tra trực tiếp bằng `bq` CLI 2026-08-13 (Mike, theo yêu cầu user tra cứu bảng mới).
 
