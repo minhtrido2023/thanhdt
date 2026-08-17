@@ -6,6 +6,13 @@
 set -uo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 WC_ROOT="$(cd "$ROOT/.." && pwd)"
+# Cron không thừa hưởng PATH/CLOUDSDK_CONFIG của shell login. Thiếu env này làm
+# BQ query trong report_return_gate fallback sang bq-reader và fail invalid_scope,
+# khiến mọi EOD full-return chỉ gửi được account HOLD (skip gate).
+if [ -f "$WC_ROOT/wc_env.sh" ]; then
+  # shellcheck source=/dev/null
+  source "$WC_ROOT/wc_env.sh"
+fi
 
 ACCOUNT="SpaceX"
 PLAN_DATE="$(TZ='Asia/Ho_Chi_Minh' date +%Y-%m-%d)"
