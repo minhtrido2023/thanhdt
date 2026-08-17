@@ -2,33 +2,42 @@
 > Cập nhật mỗi khi đổi mạch việc. Bơm vào đầu phiên của Mike.
 
 # Working memory — Mike
-> Cập nhật lần cuối: 2026-08-17T08:23 ICT (2 plan hôm nay ĐÃ DUYỆT, chờ phiên sáng)
+> Cập nhật lần cuối: 2026-08-15T17:38Z (daily retro 08-15 xong, mạch bq_admin+TV1+VIB đóng)
 
-## Plan hôm nay (08-17) — ĐÃ DUYỆT, chờ chạy ~09:05 ICT
-- Cả 2 file plan đã có approved_by (John Dinh qua Discord, Mike ghi hộ 08:23 ICT). Verify qua
-  production loader: block_reason=None cả 2 account.
-- SpaceX: mua TV1 500cp @20.640đ. ZaloPay: 0 lệnh (HOLD ALL).
-- THEO DÕI: phiên sáng nay chạy có đúng không (journal, fill TV1 — đây cũng là dịp quan sát
-  lệnh TV1 dùng cơ chế TRƯỚC Rule A fix, ceiling_rule=None, không phải bug).
+## Quy trình tương tác Discord — user yêu cầu 2026-08-17
+ĐÃ THÊM rule vào `MIKE.md` + `agents/Mike/CLAUDE.md`: interactive turn phải báo nhận việc ngay, post
+progress 1-2 phút/lần, tự `ScheduleWakeup` khi chưa xong trong lượt. Không im lặng chờ user hỏi.
 
-## ⚠️ GDKHQ dry-run D1-D3 CHƯA setup (gap thật, tự theo dõi)
-- BID có GDKHQ THẬT hôm nay (đã áp đúng vào sổ lô qua corp_actions.json có sẵn, không liên quan
-  D1-D3). apply_exdate_gate() chưa wire vào executor/bot thật — dry-run mà user chọn 08-16 chưa
-  từng chạy. Không hại hôm nay (BID không có lệnh nào). Cần quyết setup dry-run trước GDKHQ tiếp
-  theo (VIX 08-20) hoặc để bàn sau.
+## Việc mở duy nhất — GDKHQ D1-D3
+CONFIRMED (high), chờ user chọn: (a) duyệt dùng thật ngay, (b) dry-run trace 08-17
+(BID/MBS/SSI/VIX) trước. Đã hỏi nhiều lần, không nhắc thêm — chờ tự nhiên.
 
-## Việc còn hở khác (chưa xử lý, không khẩn)
-1. verify_account_snapshot.py trả cost-basis 0 cho CẢ 2 account ("no fill history legacy") —
-   pipeline §6 gap thật, cần điều tra.
-2. book_breakdown_current trong plan file ghi nhãn sai (SCL không phải LAG, thật ra LÀ LAG) —
-   sửa ở lần lập plan kế tiếp.
-3. Selfcheck-masking E5 capit_lever — chưa xác nhận đã vá.
-4. plan-dd-check-string fix (commit 9a9dbb1) — chờ xác nhận phiên LIVE 08-17 (HÔM NAY).
-5. EOD daily report chưa bao giờ gửi email.
-6. lag_entry_anchor.py:105 — chưa vá, không khẩn.
+## Escalation vừa mở hôm nay — wakeup-miss pattern (chờ user quyết)
+Bus question `wakeup-miss-pattern-escalate-2026-08-15`: ScheduleWakeup sau dispatch --bg bị bỏ
+sót tăng dần 2 retro liên tiếp (08-14: 5,9%, 08-15: 10,0%). Hỏi user: giữ kỷ luật prose hay
+thêm cơ chế nhắc/lint tự động. Chưa có trả lời — theo dõi.
+
+## Sự cố hôm nay 08-15 — đã đóng, đã ghi kb/incidents/retro/retro-2026-08-15.md
+1. TV1 Rule A UPCOM anchor bug: flip live 02:24Z→bug phát hiện 03:43Z→revert→fix→relit 05:03Z.
+   Đã CONFIRMED, đã fix, verify Wags xong.
+2. VIB cost-basis sai trong báo cáo tuần (netting CostBook âm, bán không có lịch sử mua) — fix
+   commit c74b3a69, correction đã gửi, PASS gate. Còn hở: chưa có guard chung mọi ticker.
+3. `for_each_live_account.sh` fail-open + `discover_sessions.py` ENAMETOOLONG — cả 2 đã vá,
+   verify chạy thật OK (Winston, weekly_ops_audit).
+
+## Việc còn hở từ trước (chưa xử lý, không khẩn)
+1. ops_health_check.sh::_rollup_resolved() substring-match — NEEDS_CHANGES 08-14, CHƯA vá.
+2. Selfcheck-masking E5 capit_lever — chưa xác nhận đã vá hay chỉ mới ĐO.
+3. plan-dd-check-string fix (commit 9a9dbb1) — chờ xác nhận phiên LIVE 08-17.
+4. MIKE.md 44,2KB vượt 40KB — cần tách OKF.
+5. EOD daily report chưa bao giờ gửi email — hỏi user có wire không.
+6. Cân nhắc file `kb/incidents/` tổng hợp "cost-basis sai báo cáo" nếu có ca thứ 3 (sau 07-03, 08-15).
 
 ## Bối cảnh còn hiệu lực
-- dispatch-prompt-heredoc skill; dispatch job >2 phút BẮT BUỘC --bg.
-- TV1 Rule A (bản fix UPCOM) đang LIVE từ 08-15, an toàn.
-- CASH_VENDOR gate: giữ ĐÓNG. CAPIT margin: enabled=false.
+- dispatch-prompt-heredoc skill — dùng cho MỌI prompt dispatch có backtick/code snippet.
+- CASH_VENDOR gate: giữ ĐÓNG (user duyệt 08-15), mở lại chỉ khi >=1 sự kiện ISS/hỗn hợp VÀ qua
+  2026-09-13. commit dce25180.
 
+- [2026-08-16T11:40:26Z] 2026-08-16 ~11:40Z: cron_health_check false-alarm root-cause XONG (3 commit: f3863f54/a6516c7e + coding_guidelines §29) — verified ERRORS_FOUND 6→0. Cụm bus-backlog (coord-2026-08-16, 5 round Wags) cũng XONG: 6 câu hỏi treo 2-4 ngày đã ĐÓNG THẬT bằng close_bus_question.py + bằng chứng commit, 2 vòng arch-review độc lập của tôi verify. 1 bug mới (rollup_of agent-ownership, _same_ref dùng agent đăng tổng thay vì chủ sở hữu con) tách finding riêng 'rollup-of-agent-ownership-bug-20260816' — KHÔNG khẩn (rollup_of chưa dùng production), đang chờ user quyết fix ngay hay defer.
+- [2026-08-16T11:41:27Z] 2026-08-16: chuỗi cron_health_check false-positive + wags-autofix backlog ĐÃ ĐÓNG. cron_health_check.py: bidirectional-date fix + ack mechanism (state/cron_health_ack.json), fleet_housekeeping rotate threshold 10M->300K (commit f3863f54/a6516c7e). Bus backlog 10->2 pending qua 4 vòng arch-review (d65167a9/0f7ac327/c528aa7e/8e9affc3/522e29d2/517261ac) + 1 job cron tự động đóng 7 câu hỏi thật (Wags_20260816_111706). Bài học: chuỗi arch-review lặp 4 vòng, mỗi vòng tự tìm ra bug DO VÒNG TRƯỚC gây ra — dừng đúng lúc reviewer nói không phải blocker thay vì review vô hạn.
+- [2026-08-17T03:54:37Z] corp-action research (4-sprint program, worktree session/1538146805207011358, 2026-08-15): XONG, methodology mẫu mực (prereg-trước-outcome, placebo/pretrend, self-caught entitlement bug). Kết luận đề tài: corp-action VN long-only = due-diligence/chi phí, KHÔNG alpha (cả 4 họ). 2 quyết định chờ user: (A) khởi động snapshot-tiến-tới corporate_action+insider_transaction NGAY (time-sensitive, không backfill được — announcement/pre-trade drift bị upsert huỷ public_date); (B) wire cờ ex-date+yield chi phí + cổng insider-net-sell-left-tail (lift 1.75x) vào due_diligence dạng thông tin. Insider mới scoping 07-29, chưa sprint thật.
