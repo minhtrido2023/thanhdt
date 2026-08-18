@@ -589,6 +589,50 @@ try:
 except Exception:
     pass
 
+# ── TRỨNG VÀNG: cảnh báo rút tiền trước 9:05 nếu có egg và mua > tiền mặt ────────────────
+# Fail-open: lỗi đọc file → bỏ dòng, không chặn report.
+try:
+    import os as _os
+    _nav_file = _os.path.join(
+        _os.getcwd(), "data", "execution_logs", f"active_nav_{acct}.json"
+    )
+    _nav_live: dict = {}
+    if _os.path.exists(_nav_file):
+        with open(_nav_file) as _f:
+            _nav_live = json.load(_f)
+    _egg_vnd  = float(_nav_live.get("egg_assets") or 0)
+    _cash_avail = float(_nav_live.get("cash_available_vnd") or 0)
+    _buy_orders = [o for o in orders if str(o.get("side", "")).lower() in ("buy", "mua", "b")]
+    _total_buy_vnd = sum(
+        float(o.get("value_vnd") or o.get("est_value_vnd") or 0)
+        or float(o.get("qty") or o.get("quantity") or 0) * float(o.get("ref_price") or 0)
+        for o in _buy_orders
+    )
+    # JIT proceeds: if JIT is decided, PARK sells partially fund buys
+    _jit_proceeds = 0.0
+    if str(plan.get("jit_unpark_proposal", {}).get("decision") or "") == "JIT":
+        _jit_proceeds = sum(
+            float(o.get("value_vnd") or o.get("est_value_vnd") or 0)
+            or float(o.get("qty") or o.get("quantity") or 0) * float(o.get("ref_price") or o.get("mtm_price_ref") or 0)
+            for o in (plan.get("jit_unpark_proposal", {}).get("orders") or [])
+            if isinstance(o, dict)
+        )
+    _shortfall = max(0.0, _total_buy_vnd - _cash_avail - _jit_proceeds)
+    if _egg_vnd > 0 and _total_buy_vnd > 0:
+        if _shortfall > 0:
+            lines.append(
+                f"🥚 **Trứng vàng {_egg_vnd/1e6:,.1f}tr — CẦN RÚT {_shortfall/1e6:,.1f}tr trước 9:05 ICT sáng mai**"
+                f" (Tổng mua {_total_buy_vnd/1e6:,.1f}tr"
+                + (f" · JIT-bán-PARK {_jit_proceeds/1e6:,.1f}tr" if _jit_proceeds > 0 else "")
+                + f" − tiền mặt sẵn có {_cash_avail/1e6:,.1f}tr = thiếu {_shortfall/1e6:,.1f}tr)."
+            )
+        else:
+            lines.append(
+                f"🥚 Trứng vàng {_egg_vnd/1e6:,.1f}tr — đủ tiền mua, không cần rút trước phiên."
+            )
+except Exception:
+    pass
+
 # Transition context nếu có (ZaloPay Option A)
 tsched = plan.get("transition_schedule") or []
 tday = next((t for t in tsched if t.get("date") == date), None)
