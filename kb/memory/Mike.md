@@ -28,3 +28,4 @@ accept_shadow() sau PASS.
 
 ## Không có việc mở
 
+- [2026-08-18T02:55:27Z] dividend-yield-floor CONFIRMED: stable payer gần sàn yield sụt ÍT HƠN 3.46pp vs matched control (t=5.14 IS/OOS nhất quán), phi ngân hàng, sống qua CRISIS+EX-BULL loại; mean return (BHAR) chỉ significant ở ngưỡng cao 7-8%; không phải alpha signal mà là downside protection. Chưa wire production.
