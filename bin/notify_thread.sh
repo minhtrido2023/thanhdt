@@ -75,6 +75,10 @@ fi
 # giải ĐƯỢC (registry/snowflake) VÀ trông như một token topic (1 dòng, ≤64 ký tự, không khoảng
 # trắng) — một message thật không bao giờ thoả cả ba. Vẫn ghi 1 dòng vào error log (ops_health
 # check #10 đọc file này) vì call site vẫn SAI và phải sửa; dòng ghi nói rõ tin nhắn ĐÃ GỬI.
+# Kèm `job=$JOB_ID` (dispatch.sh export, xem đó): `caller=` chỉ cho ra comm của PPID = "bash" với
+# MỌI call site — kể cả lệnh Bash ad-hoc do agent tự gõ, vốn là nguồn thật của cả 4 ca đã ghi
+# nhận. Không có job id thì cảnh báo "sửa call site" không truy được ai, và WARN lặp lại mỗi
+# ngày mà không ai sửa được. `?` = gọi ngoài dispatch (cron/tay).
 _swap_candidate=0
 if [ "$topic_from_arg" = "1" ] && [ ${#msg} -le 64 ] && [[ "$msg" != *$'\n'* ]] && [[ "$msg" != *" "* ]]; then
   _swap_candidate=1
@@ -88,15 +92,15 @@ elif ! resolved="$("$ROOT/bin/discord_channel.sh" "$thread_id" 2>&1)"; then
   fi
   mkdir -p "$ROOT/logs"
   if [ -n "$_swapped" ]; then
-    printf '%s notify_thread: DOI SO BI DAO (topic o vi tri 1, message o vi tri 2) — DA TU SUA VA GUI toi topic %q. SUA CALL SITE: dung `notify_thread.sh "<message>" <topic>`. caller=%s\n' \
-      "$(date -Iseconds)" "$msg" "${0##*/}<-$(ps -o comm= -p "$PPID" 2>/dev/null)" \
+    printf '%s notify_thread: DOI SO BI DAO (topic o vi tri 1, message o vi tri 2) — DA TU SUA VA GUI toi topic %q. SUA CALL SITE: dung `notify_thread.sh "<message>" <topic>`. caller=%s job=%s\n' \
+      "$(date -Iseconds)" "$msg" "${0##*/}<-$(ps -o comm= -p "$PPID" 2>/dev/null)" "${JOB_ID:-?}" \
       >> "$ROOT/logs/notify_thread_errors.log"
     echo "notify_thread: đối số bị đảo — đã tự sửa, gửi tới topic '$msg'; sửa call site" >&2
     msg="$thread_id"
     resolved="$_swapped"
   else
-    printf '%s notify_thread: KHONG phan giai duoc topic %q — TIN NHAN KHONG GUI. %s\n' \
-      "$(date -Iseconds)" "$thread_id" "$resolved" >> "$ROOT/logs/notify_thread_errors.log"
+    printf '%s notify_thread: KHONG phan giai duoc topic %q — TIN NHAN KHONG GUI. %s job=%s\n' \
+      "$(date -Iseconds)" "$thread_id" "$resolved" "${JOB_ID:-?}" >> "$ROOT/logs/notify_thread_errors.log"
     echo "notify_thread: $resolved" >&2
     exit 1
   fi
