@@ -237,3 +237,6 @@
 
 ## Archived 2026-08-18 (keep=12 days=0 require_done=False)
 - [2026-08-17T01:10:21Z] QUET SANG T2 17/08 (job _010002) XONG: 0 QUALIFY, 1 case moi POM=NON. VIEC CON MO cho lan sau: TV1 (lenh mua duy nhat 17/08, tranche cuoi 500cp) con 2 cong CHUA dong — (a) ket qua chon don vi kiem toan sau lay y kien 10/08 van chua cong bo (ca 4 Big4 da tu choi), (b) co tuc 15% ngay TT 14/08 CHUA thay credit (cashDividendReceiving SpaceX dung yen 9.775.000d tu 13/08). Da escalate them: limit 20.640 = +2,69% tren close 14/08 (20.100) vi tran dong neo trung binh 5 phien, tre so VNINDEX -2,07% phien 14/08 — de xuat ha ve <=20.100 hoac hoan 1 phien, CHUA duoc quyet.
+
+## Archived 2026-08-18 (keep=12 days=0 require_done=False)
+- [2026-08-17T04:24:26Z] CHO quant-skeptic: 2 truong THONG TIN moi trong due_diligence.py (upcoming_exdate + insider_net_sell), commit WorkingClaude@5c67e2a2 + mike@1d2f1378, job Taylor_20260817_041248. CHUA render ra bao cao nao — CHUA sua caller nao. Buoc sau (chi lam khi quant-skeptic CONFIRMED + user duyet): cho golive_recommend_v23/send_plan_report/eod_trading_report render 2 truong. Canh bao phai mang theo khi render: hieu ung co tuc post-ex chi co y nghia o ADV THAP (nua ADV cao p=0,124), co insider ~80% khong sap.
