@@ -34,3 +34,4 @@
 - park_holdings.py stdout lẫn dòng "[dnse] kết nối OK" trước JSON — cần tail -n +2 khi parse.
 - yield_floor: H2 CONFIRMED (downside protection), H1 REFUTED. Option C deployed. B sau 2027-02.
 
+- [2026-08-18T17:10:36Z] BLOCKER 08-18 17:15Z: dispatch Taylor cho top5-postearnings-sleeve-backtest bị chặn bởi sự cố Anthropic thật (status.claude.com: 'Degraded performance for multiple models', từ 16:20 UTC, Unresolved). 6/6 attempt liên tiếp (3 dispatch: Taylor_20260818_155835/163629/170217) đều 529 Overloaded. Dữ liệu+engine.py đã kéo an toàn tại agents/Taylor/research/top5_postearnings_sleeve_20260818/. Đang backoff dài (~30min/lần) trước khi retry lần 4, kiểm tra status page mỗi lần tỉnh. KHÔNG phải bug của mình.
