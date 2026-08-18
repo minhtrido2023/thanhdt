@@ -1351,6 +1351,7 @@ if [ "${WARN_COUNT:-0}" -gt 0 ] && [ "$DRY_RUN" != "1" ]; then
   # Daily để user thấy (thêm Wags 2026-07-30, coord-2026-07-30). Lọc bằng MARKER chứ không bằng
   # câu chữ tiếng Việt: đổi wording WARN không còn âm thầm đổi routing, và topic tự do nhúng
   # trong dòng không kéo được dòng đó vào COORD_WARN (arch-reviewer required_change #5).
+# ROUTING_BEGIN
   ROUTABLE_WARN="$(echo "$MSG" | grep -E '⚠️|❌' | grep -vF '[WARN-ONLY]' || true)"
   COORD_WARN="$(echo "$ROUTABLE_WARN" | grep -E "Circuit breaker|câu hỏi \(question\)|Job board:" || true)"
   OTHER_WARN="$(echo "$ROUTABLE_WARN" | grep -vE "NOT_APPROVED|KHÔNG TÌM THẤY|Circuit breaker|câu hỏi \(question\)|Job board:" || true)"
@@ -1363,6 +1364,19 @@ if [ "${WARN_COUNT:-0}" -gt 0 ] && [ "$DRY_RUN" != "1" ]; then
     "$ROOT/bin/wags_autofix.sh" "coord-${TODAY}" "$COORD_WARN (checker run: account=${ACCOUNT})" 2>/dev/null || true
   fi
   if [ -n "$OTHER_WARN" ]; then
-    "$ROOT/bin/ops_autofix.sh" "ops-health-${ACCOUNT}" "$MSG" 2>/dev/null || true
+    # Truyền $OTHER_WARN, KHÔNG phải $MSG. Dòng "$MSG" là di sản commit a8e5b8a6 (2026-07-06),
+    # thời điểm CHỈ có một nhánh autofix; khi nhánh COORD_WARN → Wags được tách ra sau đó,
+    # lời gọi này không được sửa theo ⇒ Winston vẫn nhận TOÀN BỘ báo cáo, gồm cả triệu chứng
+    # ĐIỀU PHỐI vừa được route sang Wags. Hệ quả đo được (Wags coord-2026-08-18): 2 ngày liên
+    # tiếp Winston và Wags cùng chẩn đoán một câu hỏi tồn đọng — 08-17 (Winston_20260817_195843
+    # kết luận "question Taylor/gdkhq-auto-accept còn mở thật" trong khi Wags_20260817_195842
+    # được dispatch đúng cho việc đó) và 08-18 (Winston_20260818_001950 đóng 2 question gdkhq
+    # lúc 00:21-00:22, Wags_20260818_001950 dispatch lúc 00:19:50 cho ĐÚNG 2 question đó).
+    # Hai job Opus cho một triệu chứng. Truyền OTHER_WARN làm nhánh này ĐỐI XỨNG với nhánh
+    # Wags ở trên (mỗi bên chỉ thấy domain của mình). ĐÁNH ĐỔI CÓ CHỦ ĐÍCH: Winston không còn
+    # thấy các dòng NOT_APPROVED / "KHÔNG TÌM THẤY" (plan chưa duyệt) — vốn ĐÃ bị loại khỏi
+    # routing có chủ đích vì là việc của user; chúng vẫn nằm nguyên trong báo cáo Trading Daily.
+    "$ROOT/bin/ops_autofix.sh" "ops-health-${ACCOUNT}" "$OTHER_WARN (checker run: account=${ACCOUNT})" 2>/dev/null || true
   fi
+# ROUTING_END
 fi

@@ -53,6 +53,7 @@ CHECK5_SRC = extract_block("CHECK5")
 CHECK10_SRC = extract_block("CHECK10")
 CHECK11_SRC = extract_block("CHECK11")
 CHECK12_SRC = extract_block("CHECK12")
+ROUTING_SRC = extract_block("ROUTING")
 
 
 def run_check5(wc_root, now=None):
@@ -1512,6 +1513,112 @@ def case_c12_unreadable_journal_never_reports_green():
               "✅" not in out, out)
 
 
+
+# ── Khối ROUTING (dispatch domain split) ────────────────────────────────────────────────
+# TẠI SAO: nhánh COORD_WARN → Wags được TÁCH RA sau commit gốc a8e5b8a6, nhưng lời gọi
+# ops_autofix.sh vẫn giữ nguyên "$MSG" (toàn bộ báo cáo) suốt từ đó ⇒ Winston nhận CẢ triệu
+# chứng điều phối vừa route sang Wags. Đo được 2 ngày liên tiếp 08-17 và 08-18: hai job Opus
+# chẩn đoán CÙNG một câu hỏi tồn đọng. Bản chất là refactor DỞ DANG, không phải bug logic —
+# loại lỗi mà không test nào bắt được vì cả 2 nhánh đều "chạy đúng". Ca này chạy ĐÚNG khối
+# bash thật (không copy) với 2 autofix GIẢ ghi lại argv, nên hồi quy = đỏ ngay.
+_ROUTE_MSG = "\n".join([
+    "✅ Kiểm tra sức khỏe vận hành SpaceX 2026-08-18",
+    "⚠️ Có 2 câu hỏi (question) trong 48h qua CHƯA thấy answer tương ứng: ['Mike/x', 'Wags/y']",
+    "⚠️ Circuit breaker đang TRIPPED cho Mafee",
+    "⚠️ Job board: 1 job overdue (Taylor_20260818_000000)",
+    "❌ run_bot ZaloPay lỗi: TimeoutError khi gọi broker",
+    "⚠️ [WARN-ONLY] question TREO LÂU >48h cần user chọn A/B: Mike/foo",
+    "⚠️ plan T+1 NOT_APPROVED cho SpaceX",
+])
+
+
+def run_routing(msg, src=None):
+    """Exec ĐÚNG khối ROUTING của ops_health_check.sh; trả argv thật của 2 autofix (None = không gọi)."""
+    import shlex
+    import subprocess as sp
+    d = tempfile.mkdtemp(prefix="ops_health_routing_")
+    try:
+        os.makedirs(os.path.join(d, "bin"))
+        for name in ("ops_autofix.sh", "wags_autofix.sh"):
+            fp = os.path.join(d, "bin", name)
+            with open(fp, "w", encoding="utf-8") as f:
+                f.write("#!/usr/bin/env bash\n"
+                        "printf '%s\\n=ARG=\\n' \"$@\" > \"$ARGV_DIR/" + name + ".argv\"\n")
+            os.chmod(fp, 0o755)
+        script = ("set -uo pipefail\n"
+                  "ROOT=" + shlex.quote(d) + "\n"
+                  "ACCOUNT=SpaceX\n"
+                  "TODAY=2026-08-18\n"
+                  "MSG=" + shlex.quote(msg) + "\n") + (src if src is not None else ROUTING_SRC)
+        env = dict(os.environ, ARGV_DIR=d)
+        sp.run(["bash", "-c", script], env=env, capture_output=True, text=True, timeout=30)
+
+        def read(name):
+            fp = os.path.join(d, name + ".argv")
+            if not os.path.exists(fp):
+                return None
+            with open(fp, encoding="utf-8") as f:
+                parts = f.read().split("\n=ARG=\n")
+            return [x for x in parts[:-1]]
+        return read("ops_autofix.sh"), read("wags_autofix.sh")
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+
+def case_routing_domain_split_is_real():
+    ops, wags = run_routing(_ROUTE_MSG)
+    check("routing: khối bash thật gọi ĐƯỢC cả 2 autofix (harness sống)",
+          ops is not None and wags is not None, "ops=%r wags=%r" % (ops, wags))
+    if ops is None or wags is None:
+        return
+    check("routing: label ops giữ nguyên per-account", ops[0] == "ops-health-SpaceX", ops[0])
+    check("routing: label wags fleet-wide theo ngày", wags[0] == "coord-2026-08-18", wags[0])
+    ops_d, wags_d = ops[1], wags[1]
+    check("routing: Winston VẪN nhận lỗi vận hành của mình (run_bot)",
+          "run_bot ZaloPay" in ops_d, ops_d)
+    for term in ("câu hỏi (question)", "Circuit breaker", "Job board:"):
+        check("routing: Winston KHÔNG nhận triệu chứng ĐIỀU PHỐI %r (đã route sang Wags)" % term,
+              term not in ops_d, ops_d)
+        check("routing: Wags nhận %r" % term, term in wags_d, wags_d)
+    check("routing: Wags KHÔNG nhận lỗi vận hành của Winston", "run_bot" not in wags_d, wags_d)
+    for who, det in (("Winston", ops_d), ("Wags", wags_d)):
+        check("routing: %s không nhận dòng [WARN-ONLY] (chỉ user quyết được)" % who,
+              "[WARN-ONLY]" not in det, det)
+        check("routing: %s không nhận dòng NOT_APPROVED (việc của user)" % who,
+              "NOT_APPROVED" not in det, det)
+    check("routing: chi tiết gửi Winston có nêu account đang chạy", "account=SpaceX" in ops_d, ops_d)
+
+
+def case_routing_coord_only_does_not_wake_winston():
+    ops, wags = run_routing("\n".join([
+        "⚠️ Có 1 câu hỏi (question) trong 48h qua CHƯA thấy answer tương ứng: ['Wags/y']",
+        "✅ phần còn lại ổn"]))
+    check("routing: chỉ có triệu chứng điều phối ⇒ KHÔNG dispatch Winston", ops is None, repr(ops))
+    check("routing: … nhưng vẫn dispatch Wags", wags is not None, repr(wags))
+
+
+def case_routing_red_control():
+    """RED control: 2 đột biến phải làm ĐỎ đúng assertion ở trên, nếu không test này vô nghĩa."""
+    mut_msg = ROUTING_SRC.replace('"$OTHER_WARN (checker run: account=${ACCOUNT})"',
+                                  '"$MSG"')
+    check("routing RED: đột biến 1 áp dụng được (chuỗi lời gọi chưa trôi)",
+          mut_msg != ROUTING_SRC, "không tìm thấy lời gọi ops_autofix để đột biến")
+    ops, _ = run_routing(_ROUTE_MSG, src=mut_msg)
+    check("routing RED#1 (quay lại $MSG): Winston LẠI nhận triệu chứng điều phối ⇒ assertion "
+          "chính phân biệt được",
+          ops is not None and "câu hỏi (question)" in ops[1], repr(ops))
+
+    mut_filter = ROUTING_SRC.replace('grep -vE "NOT_APPROVED|KHÔNG TÌM THẤY|Circuit breaker|'
+                                     'câu hỏi \\(question\\)|Job board:"',
+                                     'grep -vE "NOT_APPROVED|KHÔNG TÌM THẤY"')
+    check("routing RED: đột biến 2 áp dụng được (bộ lọc OTHER_WARN chưa trôi)",
+          mut_filter != ROUTING_SRC, "không tìm thấy bộ lọc OTHER_WARN để đột biến")
+    ops2, _ = run_routing(_ROUTE_MSG, src=mut_filter)
+    check("routing RED#2 (bỏ lọc coord khỏi OTHER_WARN): Winston LẠI nhận Circuit breaker",
+          ops2 is not None and "Circuit breaker" in ops2[1], repr(ops2))
+
+
+
 def main():
     print("ops_health_check_selfcheck: check #5 (backlog question) + check #10 (notify_thread) "
           "+ check #11 (selfcheck_red_sweep freshness) + check #12 (ccdb one-shot dropped) "
@@ -1547,6 +1654,9 @@ def main():
                case_c12_interrupted_marker_also_counts,
                case_c12_unreachable_destination_is_reported_separately,
                case_c12_unreadable_journal_never_reports_green,
+               case_routing_domain_split_is_real,
+               case_routing_coord_only_does_not_wake_winston,
+               case_routing_red_control,
                case_deliver_discord_ok_no_telegram,
                case_deliver_discord_fails_falls_back_to_telegram,
                case_deliver_both_fail_logs_for_check10):
