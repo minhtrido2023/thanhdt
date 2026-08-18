@@ -21,6 +21,24 @@ preserve_verbatim: >
 
 # Log thay đổi Cron Registry
 
+- 2026-08-18 (Mike/Codex, user duyệt 2026-08-18): **THÊM cron daily `0 20 * * *` =
+  03:00 ICT** `/home/trido/thanhdt/WorkingClaude/mike/bin/worktree_cleanup_daily.sh --apply`,
+  ghi log `logs/worktree_cleanup.log`. Script mới dọn worktree/branch session đã merge,
+  mặc định DRY-RUN và chỉ xoá khi có `--apply`.
+  4 câu hỏi §11: (1) đọc git local `worktree list --porcelain` + `for-each-ref
+  refs/heads/session/*` + `merge-base --is-ancestor` với `master` + CCDB `/api/sessions`
+  và `/api/claims` — không gọi BQ/DNSE/web, vintage không liên quan; (2) nguồn là git
+  + CCDB local luôn tươi tại thời điểm chạy; (3) không cần T/T-1 vì job thuần dọn dẹp
+  metadata local; (4) không có consumer có deadline; mục tiêu là giảm tải token/quản lý
+  worktree, không ảnh hưởng tiến trình dữ liệu.
+  An toàn bắt buộc: fail-closed nếu CCDB không đọc được, chỉ xoá worktree sạch + branch
+  đã merge, không `--force`, bỏ qua dirty/unmerged/detached và mọi path/branch thuộc
+  thread/claim CCDB đã biết; remote branch chỉ báo cáo.
+  Chống xung đột: 03:00 nằm sau `kb_nightly.sh` 02:00 (hết cửa sổ git-lock KB) và trước
+  `selfcheck_weekly_baseline_check.sh` 04:30; dùng `flock` riêng nên chạy lặp vô hại.
+  Verify: `bash -n` + `shellcheck_gate.sh` + dry-run trên production root cả hai chế độ
+  `CCDB_API_URL` (process env và fallback `http://127.0.0.1:8199`) đều PASS.
+
 - 2026-08-17 (Mike/Codex, user duyệt 2026-08-17 04:06 UTC): **THÊM cron `late_plan_catchup.sh`**
   3 mốc tối: `45 14 * * 1-5` (21:45 ICT), `0 15 * * 1-5` (22:00 ICT), `30 16 * * 1-5`
   (23:30 ICT), cùng chạy `/home/trido/thanhdt/WorkingClaude/mike/bin/late_plan_catchup.sh`.
