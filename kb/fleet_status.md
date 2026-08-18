@@ -1,8 +1,8 @@
-# Fleet status — 2026-08-18T12:09:20 UTC
+# Fleet status — 2026-08-18T12:09:52 UTC
 
 | agent | title (desktop) | kind | status | last_heartbeat | age(min) | current_task |
 |---|---|---|---|---|---|---|
-| DollarBill | DollarBill | child | working | 2026-08-18T12:09:17Z | 0 |  |
+| DollarBill | DollarBill | child | working | 2026-08-18T12:09:47Z | 0 |  |
 | Mike | Mike | child | dead | 2026-08-18T10:43:10Z | 86 |  |
 | Mike_1583603 | mike-cf | child | dead | 2026-08-17T18:30:01Z | 1059 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
 | Mike_837219 | mike-33 | child | dead | 2026-08-17T01:10:01Z | 2099 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
@@ -15,9 +15,9 @@
 | claude-code-discord-bridge-4f | claude-code-discord-bridge-4f | external | dead | 2026-08-17T03:00:02Z | 1989 | interactive · cwd=/workspace/claude-code-discord-bridge |
 | cliproxyapi-09 | cliproxyapi-09 | external | dead | 2026-08-17T03:50:01Z | 1939 | interactive · cwd=/home/trido/cliproxyapi |
 | workingclaude-3f | workingclaude-3f | child | dead | 2026-08-17T00:17:02Z | 2152 |  |
-| workingclaude-69 | workingclaude-69 | child | dead | 2026-08-17T04:30:45Z | 1898 |  |
-| workingclaude-74 | workingclaude-74 | child | dead | 2026-08-17T00:24:29Z | 2144 |  |
-| workingclaude-7e | workingclaude-7e | child | dead | 2026-08-17T20:11:39Z | 957 |  |
+| workingclaude-69 | workingclaude-69 | child | dead | 2026-08-17T04:30:45Z | 1899 |  |
+| workingclaude-74 | workingclaude-74 | child | dead | 2026-08-17T00:24:29Z | 2145 |  |
+| workingclaude-7e | workingclaude-7e | child | dead | 2026-08-17T20:11:39Z | 958 |  |
 | workingclaude-b6 | workingclaude-b6 | child | dead | 2026-08-17T04:35:00Z | 1894 |  |
 | workingclaude-dc | workingclaude-dc | child | dead | 2026-08-17T18:20:16Z | 1069 |  |
 | workingclaude-f3 | workingclaude-f3 | child | dead | 2026-08-18T00:43:54Z | 685 |  |

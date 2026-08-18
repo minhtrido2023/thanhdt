@@ -1,31 +1,29 @@
 # Working memory — Mike
 > Cập nhật mỗi khi đổi mạch việc. Bơm vào đầu phiên của Mike.
 
-## Ưu tiên hiện tại (2026-08-18T00:55Z)
+# Working memory — Mike
+> Cập nhật lần cuối: 2026-08-18T12:11Z (plan 08-19 xong, cả 2 HOLD ALL, chờ duyệt)
 
-## Đã xong hôm nay 08-18
-- F1+F3 anti-double-reply: merge feat/mention-only-toggle vào main ccdb, restart service (commit 70d4b9c)
-- gdkhq Option B: xoá auto-accept code path (commit 0f90f3d1); data/gdkhq_config.json không tồn tại
-- UPCOM VWAP cron: cài 15 8 * * 1-5, cron_registry cập nhật (commit 5db3be84)
-- Wags coord-2026-08-18: fix exit=5 fail-CLOSED + arch-review debt (commit e25f2a33, arch-review CONFIRMED)
+## Plan 08-19 — ĐÃ SINH XONG, cả 2 HOLD ALL, CHỜ DUYỆT
+- SpaceX (job DollarBill_20260818_120604): HOLD ALL, 0 lệnh. ZaloPay (job
+  DollarBill_20260818_120602): HOLD ALL, 0 lệnh. Cả 2 approved_by=None, cần duyệt trước
+  08:45 ICT sáng mai (08-19).
+- Cả 2 đã báo cáo đầy đủ vào thread.
 
-## Arch-review xong — CLEAN
-Cả 2 verdicts coord-2026-08-18 đã resolved:
-- Verdict 1 (gdkhq): superseded bởi 0f90f3d1 + file không tồn tại
-- Verdict 2 (rc=5 c9d1fa30): 4 changes apply bởi e25f2a33, CONFIRMED
+## Đã xong 08-18 (từ trước, giữ nguyên)
+- F1+F3 anti-double-reply, gdkhq Option B, UPCOM VWAP cron, Wags coord fix — arch-review CLEAN.
+- G5 UPCOM: cron cài xong (15:15 ICT T2-T6), đang tích luỹ history, cần ≥3 phiên trước khi wire.
+- VIX ex-date 08-20: shadow trong phiên 09:10-14:30, G2 tolerance fix xong.
+- dividend-yield-floor: CONFIRMED downside-protection signal, CHƯA wire production.
+- book_breakdown_current SCL mislabel: FIXED 08-17, verify độc lập OK.
 
-## G5 UPCOM — kế hoạch
-1. [DONE] Winston data_registry + script capture_upcom_vwap_eod.sh
-2. [DONE] Cron installed: 15 8 * * 1-5 (15:15 ICT T2-T6)
-3. Tích ≥3 phiên avgPrice history
-4. Probe lại ≥3 lần; giải thích 6 mã UPCOM chưa khớp (VNE/MZG/VBB/SDA/AAV/DDG)
-5. quant-skeptic + user final → wire G5 UPCOM
+## Việc còn hở (ưu tiên giảm dần)
+1. GDKHQ dry-run D1-D3 chưa setup — theo dõi trước VIX 08-20 (còn 2 phiên).
+2. plan-dd-check-string fix (commit 9a9dbb1) — cần ngày có LAG/BAL entry để verify.
+3. Order-book Pha 0 telemetry (commit d6346efd) — chờ phiên thật có giao dịch.
 
-## VIX ex-date 08-20
-Shadow TRONG PHIÊN 09:10-14:30 ICT 08-20.
-G2 tolerance fix đã xong (max(1%, 1 tick)).
-accept_shadow() sau PASS.
+## Bối cảnh còn hiệu lực
+- TV1 Rule A LIVE từ 08-15, an toàn, đã đạt target. CASH_VENDOR gate: giữ ĐÓNG.
+- CAPIT margin: enabled=false. dispatch-prompt-heredoc skill cho prompt có backtick.
+- park_holdings.py stdout lẫn dòng "[dnse] kết nối OK" trước JSON — cần tail -n +2 khi parse.
 
-## Không có việc mở
-
-- [2026-08-18T02:55:27Z] dividend-yield-floor CONFIRMED: stable payer gần sàn yield sụt ÍT HƠN 3.46pp vs matched control (t=5.14 IS/OOS nhất quán), phi ngân hàng, sống qua CRISIS+EX-BULL loại; mean return (BHAR) chỉ significant ở ngưỡng cao 7-8%; không phải alpha signal mà là downside protection. Chưa wire production.
