@@ -125,7 +125,8 @@ VIỆC CẦN LÀM:
       tổ chức xếp hạng tín nhiệm hạ bậc · ngân hàng siết nợ/thu hồi tài sản đảm bảo · dự án hạ tầng
       chậm tiến độ/đội vốn bị thanh tra · SBV/NHNN thay đổi chính sách loại trừ room tín dụng ·
       Vingroup/VinFast dòng tiền · huỷ/hoãn niêm yết trái phiếu · kiện tụng nhà thầu/nợ đọng xây dựng ·
-      giải chấp cổ phiếu · call margin cổ đông lớn · cầm cố cổ phiếu Vingroup
+      giải chấp cổ phiếu · call margin cổ đông lớn · cầm cố cổ phiếu Vingroup ·
+      chuyển nhượng cổ phiếu đảm bảo nghĩa vụ trái phiếu · giao dịch cổ phiếu người liên quan nội bộ Vingroup
 
    d) NHÓM NGOÀI NGÂN HÀNG — BỔ SUNG:
       tai nạn/sự cố nhà máy · thu hồi sản phẩm · mất giấy phép/mỏ · kê biên tài sản · tranh chấp
