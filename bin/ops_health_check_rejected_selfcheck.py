@@ -15,6 +15,7 @@ Ba ca HOSTILE ở cuối là phần quan trọng nhất: file này chứa dữ l
 (nó là hàng đợi pháp y cho arg đã bị chặn vì hỏng), nên "happy path xanh" không nói lên gì.
 """
 import datetime as dt
+import hashlib
 import json
 import os
 import re
@@ -42,12 +43,16 @@ def extract_block():
     return m.group(1)
 
 
-def run(block, records, label="", unreadable=False):
+def run(block, records, label="", unreadable=False, resolved=None):
     """Chạy khối trên một wc_root giả.
 
     records=None ⇒ không tạo file. unreadable=True ⇒ tạo _rejected.jsonl là THƯ MỤC, tức
     os.path.exists() vẫn True nhưng open() ném IsADirectoryError — đường lỗi đọc file, thứ
     duy nhất trong khối này còn có nhánh `except` bao ngoài.
+
+    resolved: danh sách bản ghi (hoặc chuỗi thô) coi như ĐÃ XỬ LÝ ⇒ ghi sidecar
+    _rejected_resolved.jsonl với khoá sha256 dòng thô, y hệt bin/bus_rejected_resolve.py.
+    resolved=[str] không-phải-JSON ⇒ mô phỏng sidecar HỎNG.
     """
     d = tempfile.mkdtemp(prefix="ophc_5b_")
     os.makedirs(os.path.join(d, "mike", "bus"))
@@ -59,6 +64,18 @@ def run(block, records, label="", unreadable=False):
             for r in records:
                 f.write(r if isinstance(r, str) else json.dumps(r, ensure_ascii=False))
                 f.write("\n")
+    if resolved is not None:
+        with open(os.path.join(d, "mike", "bus", "_rejected_resolved.jsonl"), "w",
+                  encoding="utf-8") as f:
+            for r in resolved:
+                if isinstance(r, str) and not r.startswith("{"):
+                    f.write(r + "\n")          # dòng rác: sidecar hỏng
+                    continue
+                raw = r if isinstance(r, str) else json.dumps(r, ensure_ascii=False)
+                f.write(json.dumps(
+                    {"key": hashlib.sha256(raw.strip().encode("utf-8", "replace")
+                                           ).hexdigest(), "by": "test",
+                     "note": "test"}, ensure_ascii=False) + "\n")
     warns, oks, lines = [], [], []
     ns = {"os": os, "json": json, "wc_root": d, "lines": lines,
           "W": lambda s: warns.append(s), "OK": lambda s: oks.append(s)}
@@ -141,6 +158,33 @@ def main():
           bool(w) and "KHÔNG được giám sát" in w[0], w)
     check("đường lỗi đọc KHÔNG ném ra ngoài (không giết 11 check còn lại)", e is None,
           f"exc={e!r}")
+
+    # ── Sidecar ĐÃ-XỬ-LÝ (thêm 2026-08-18). Ca thật: bản ghi Taylor 08-17T16:49 đã được
+    #    ghi lại lên bus 3 lần (Taylor tự retry sau 39s + Winston khôi phục từ _rejected),
+    #    nhưng §5b không có cách nào biết ⇒ dựng lại y nguyên cảnh báo ở mọi lần chạy trong
+    #    24h. Đây là nhóm lỗi "checker không phân biệt XONG với ĐANG MỞ" (§26/§28).
+    print("\ncase_sidecar_da_xu_ly")
+    _r_done = rec(fresh, who="Taylor")
+    w, o, _l, e = run(block, [_r_done], resolved=[_r_done])
+    check("bản ghi 24h ĐÃ đánh dấu xử lý ⇒ KHÔNG báo động, ra OK",
+          e is None and not w and len(o) == 1, f"W={w} OK={o} exc={e!r}")
+    check("OK vẫn nêu rõ có ca mới đã xử lý (không im lặng như thể không có gì)",
+          bool(o) and "đã được đánh dấu xử lý" in o[0], o)
+
+    _r_open = rec(fresh, who="Mike")
+    w, o, _l, e = run(block, [_r_done, _r_open], resolved=[_r_done])
+    check("1 đã xử lý + 1 chưa ⇒ vẫn W, và chỉ đếm 1 ca CHƯA xử lý",
+          e is None and len(w) == 1 and "CÁCH LY 1 bản ghi trong 24h" in w[0], f"W={w}")
+    check("W chỉ nêu agent của ca CHƯA xử lý (không đổ oan Taylor đã xong)",
+          bool(w) and "Mike" in w[0] and "Taylor" not in w[0].split("Lý do")[0], w)
+
+    w, o, _l, e = run(block, [_r_done], resolved=["dong-rac-khong-phai-json"])
+    check("sidecar HỎNG ⇒ fail-loud: vẫn báo động (không nuốt event mất thật)",
+          e is None and len(w) == 1, f"W={w} exc={e!r}")
+
+    w, o, _l, e = run(block, [rec(old, who="Taylor")], resolved=[rec(old, who="Taylor")])
+    check("bản ghi CŨ đã xử lý ⇒ vẫn chỉ là OK, không đếm vào 24h",
+          e is None and not w and len(o) == 1, f"W={w} OK={o}")
 
     print("\ncase_CONTROL_khong_duoc_keu_oan")
     w, o, _l, e = run(block, [])

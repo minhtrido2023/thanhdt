@@ -834,7 +834,26 @@ if aged_q:
 _qf = os.path.join(wc_root, "mike", "bus", "_rejected.jsonl")
 if os.path.exists(_qf):
     import datetime as _dt
-    _q24, _qtot, _qbad = [], 0, 0
+    import hashlib as _hl
+    # Sidecar ĐÃ-XỬ-LÝ (bin/bus_rejected_resolve.py ghi): khoá = sha256 DÒNG THÔ. File pháp
+    # y append-only KHÔNG được sửa, nên "đã khôi phục event lên bus rồi" phải nói ở chỗ
+    # khác — không có nó, một bản ghi đã xử lý xong vẫn báo động lặp đủ 24h (ca thật
+    # 2026-08-18: bản ghi Taylor 08-17T16:49 đã được ghi lại lên bus 3 lần, checker vẫn
+    # dựng lại cùng cảnh báo ở lần chạy sau). Sidecar hỏng/thiếu ⇒ coi như KHÔNG có gì được
+    # xử lý (fail-loud: thà báo động thừa còn hơn nuốt một event mất thật).
+    _qdone = set()
+    _qrf = os.path.join(wc_root, "mike", "bus", "_rejected_resolved.jsonl")
+    if os.path.exists(_qrf):
+        try:
+            with open(_qrf, encoding="utf-8", errors="replace") as _f:
+                for _ln in _f:
+                    try:
+                        _qdone.add(json.loads(_ln)["key"])
+                    except Exception:
+                        continue
+        except Exception:
+            _qdone = set()
+    _q24, _qtot, _qbad, _qres24 = [], 0, 0, 0
     _qcut = (_dt.datetime.now(_dt.timezone.utc) - _dt.timedelta(hours=24)
              ).strftime("%Y-%m-%dT%H:%M:%SZ")
     _qerr = None
@@ -857,7 +876,10 @@ if os.path.exists(_qf):
                     if not isinstance(_r, dict):
                         raise ValueError("dòng JSON không phải object")
                     if str(_r.get("ts", "")) >= _qcut:
-                        _q24.append(_r)
+                        if _hl.sha256(_ln.encode("utf-8", "replace")).hexdigest() in _qdone:
+                            _qres24 += 1
+                        else:
+                            _q24.append(_r)
                 except Exception:
                     _qbad += 1
                     continue
@@ -879,6 +901,7 @@ if os.path.exists(_qf):
         _why = sorted({str(_r.get("reason") or "?").split("\n")[0][:70] for _r in _q24})
         W(f"append_event.sh đã CÁCH LY {len(_q24)} bản ghi trong 24h qua "
           f"({_qtot} bản ghi trong file hiện tại"
+          f"{f', {_qres24} ca khác trong 24h đã được đánh dấu xử lý' if _qres24 else ''}"
           f"{f', {_qbad} dòng không parse được' if _qbad else ''}) "
           f"— đây là event KHÔNG BAO GIỜ lên bus: agent gọi bị shell word-split payload và "
           f"phần lớn call site nuốt stderr nên agent tưởng đã ghi thành công. "
@@ -887,7 +910,8 @@ if os.path.exists(_qf):
           f"(hàng đợi này là PHÁP Y, không ai tự phát lại — payload hỏng phát lại vẫn hỏng).")
     elif _qtot:
         OK(f"Hàng đợi cách ly append_event.sh: {_qtot} bản ghi cũ trong file hiện tại, "
-           f"24h qua không có ca mới.")
+           f"24h qua không có ca CHƯA XỬ LÝ"
+           f"{f' ({_qres24} ca mới đã được đánh dấu xử lý)' if _qres24 else ''}.")
 # 5b_END — bin/ops_health_check_rejected_selfcheck.py TRÍCH khối giữa 5b_BEGIN/5b_END rồi
 # chạy trên namespace stub. Đổi/xoá 2 marker này ⇒ selfcheck FAIL ngay, không im lặng.
 
