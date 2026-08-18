@@ -79,3 +79,6 @@
 
 ## Archived 2026-08-18 (keep=12 days=0 require_done=False)
 - [2026-08-07T02:07:30Z] ĐANG CHỜ USER: plan 2026-08-07 (SpaceX+ZaloPay) chưa duyệt (approved_by=null) → run_bot rc=2, gate chặn ĐÚNG, không bug. Lệnh BUY DRI timing 11:15 ICT. NEXT: nếu user duyệt trước 11:15 → chạy lại bin/run_bot.sh --account <acc> --auto-otp; nếu không, plan hết hạn cuối phiên. Bus question: ops-autofix-unresolved run-bot-fail-SpaceX-2026-08-07 (job Winston_20260807_020516).
+
+## Archived 2026-08-18 (keep=12 days=0 require_done=False)
+- [2026-08-07T06:05:11Z] Ưu tiên: CHỜ user quyết plan 2026-08-07 (ZaloPay 9 lệnh + SpaceX 15 lệnh) — user duyệt thật 12:36 nhưng job DollarBill_20260807_054858 ghi đè plan 12:52 làm MẤT approved_by → run_bot 13:00 rc=2 cả 2 account. Đã escalate bus question + notify trading_daily/plan_approval, deadline 14:30 ICT. Incident commit 77dcc656. VIỆC MỞ: đề xuất approved_orders_hash (gate so orders[] với bản đã duyệt) — chưa vá, cần user/Wags/Taylor quyết vì phải sửa writer luồng duyệt + gate executor (vùng cấm Winston).
