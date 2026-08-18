@@ -342,10 +342,56 @@ class PHSBroker(BrokerBase):
             return None
         row = rows[0] if isinstance(rows, list) and rows else rows
         q = Quote(row) if isinstance(row, dict) else None
-        if q and not q.ok():
-            self._log_raw("quote_unmapped", row)   # mapping field chưa khớp → cần xem raw
+        if q:
+            if not q.ok():
+                self._log_raw("quote_unmapped", row)
+            q.l2_snapshot = self._phs_l2_snapshot(symbol, row) if isinstance(row, dict) else None
         self._quote_cache[symbol] = (_t.time(), q)
         return q
+
+    @staticmethod
+    def _phs_l2_snapshot(symbol, row):
+        """Build orderbook_l2_v1 snapshot từ PHS flat bid/ask fields (3 mức).
+        Trả None nếu không có data. Không raise — nằm trên đường đặt lệnh."""
+        try:
+            import time as _t
+            captured = now_ict()
+            captured_epoch_ms = int(_t.time() * 1000)
+            bids, offers = [], []
+            for i in (1, 2, 3):
+                p = normalize_price_vnd(_fnum(row.get(f"bidPrice{i}")))
+                v = _fnum(row.get(f"bidVol{i}"))
+                if p is not None and v is not None:
+                    bids.append({"price": p, "quantity": v})
+            for i in (1, 2, 3):
+                p = normalize_price_vnd(_fnum(row.get(f"offerPrice{i}")))
+                v = _fnum(row.get(f"offerVol{i}"))
+                if p is not None and v is not None:
+                    offers.append({"price": p, "quantity": v})
+            if not bids and not offers:
+                return None
+            return {
+                "schema_version": "orderbook_l2_v1",
+                "symbol": symbol,
+                "board_id": row.get("FloorCode") or row.get("exchange") or "G1",
+                "captured_at": captured.isoformat(timespec="milliseconds"),
+                "captured_epoch_ms": captured_epoch_ms,
+                # PHS instruments không có sub-second timestamp; dùng capture time làm proxy.
+                # source_age_ms=0 là đúng với nghĩa "vừa fetch xong", không phải stale.
+                "source_ts": captured.isoformat(timespec="milliseconds"),
+                "source_age_ms": 0,
+                "source_time_status": "ok",
+                "price_unit": "VND",
+                "quantity_unit": "shares",
+                "bids": bids,
+                "offers": offers,
+                "n_bid": len(bids),
+                "n_offer": len(offers),
+                "last": normalize_price_vnd(_fnum(row.get("closePrice") or row.get("averagePrice"))),
+                "day_volume": _fnum(row.get("totalTrading")),
+            }
+        except Exception:
+            return None
 
     def place_order(self, symbol, qty, side, price=None, order_type="LO",
                     cash_only=False, loan_package_id=None):
