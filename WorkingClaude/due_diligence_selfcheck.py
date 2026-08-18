@@ -328,5 +328,129 @@ class Integration(unittest.TestCase):
                                               dict(ctx, dd_override_reason="user chốt 08-03")))
 
 
+class YieldFloor(unittest.TestCase):
+    """Block `yield_floor` (2026-08-18) — DISPLAY_ONLY.
+
+    Dữ liệu cổ tức là SYNTHETIC (monkeypatch `_corp_action_lib`), CỐ Ý không assert lên trạng
+    thái sống (§23 hệ luận 1: "REE là stable payer" đúng hôm nay và sai sau một quý bỏ chia →
+    test tự vô hiệu). Cái được khoá ở đây là BẤT BIẾN: quan hệ giữa các số, nhãn theo dải,
+    ngân hàng bị loại khỏi diễn giải, và — quan trọng nhất — block này KHÔNG sinh cờ đỏ."""
+
+    ASOF = "2026-08-17"
+
+    def setUp(self):
+        self._lr, self._ip, self._an = dd._latest_row, dd._in_universe, dd._anomaly_note
+        self._ca, self._ok, self._icb = (dd._corp_action_lib, dd._corp_action_feed_ok,
+                                         dd._icb_code)
+        self._ins = dd._get_insider_net_sell_flag
+        dd._in_universe = lambda t, a: (True, self.ASOF, "QUALITY_OK")
+        dd._anomaly_note = lambda t, a: ""
+        dd._latest_row = lambda t, a: _row(ticker=t, time=self.ASOF)
+        dd._corp_action_feed_ok = lambda d: True
+        dd._get_insider_net_sell_flag = lambda t, a=None: None
+        dd._CACHE.clear()
+
+    def tearDown(self):
+        (dd._latest_row, dd._in_universe, dd._anomaly_note) = self._lr, self._ip, self._an
+        (dd._corp_action_lib, dd._corp_action_feed_ok, dd._icb_code) = self._ca, self._ok, self._icb
+        dd._get_insider_net_sell_flag = self._ins
+        dd._CACHE.clear()
+
+    def _yf(self, div0, n=(1, 1, 1), icb=7535, price=10000.0):
+        """Giả lập 1 lượt đọc: div0/n từ BQ, ICB từ cache, giá từ `_row` (mặc định 10.000đ)."""
+        class _Lib:
+            @staticmethod
+            def bq(sql, timeout=300):
+                return [{"div0": div0, "n0": n[0], "n1": n[1], "n2": n[2]}]
+        dd._corp_action_lib = lambda: _Lib
+        dd._icb_code = lambda t, a: icb
+        dd._latest_row = lambda t, a: _row(ticker=t, time=self.ASOF, Price=price, Close=price)
+        dd._CACHE.clear()
+        return dd._yield_floor("XXX", self.ASOF)
+
+    def test_60_prox_is_deposit_over_yield(self):
+        """Bất biến neo về research (`analyze.py:347`): prox = giá/sàn ≡ lãi suất/tỉ suất."""
+        yf = self._yf(500.0, price=10000.0)
+        self.assertAlmostEqual(yf["prox_to_floor"],
+                               yf["deposit_rate_pct"] / yf["trailing_yield_pct"], places=3)
+        self.assertAlmostEqual(yf["yield_floor_price_vnd"],
+                               yf["trailing_annual_div_vnd"] / (yf["deposit_rate_pct"] / 100.0),
+                               places=1)
+
+    def test_61_labels_follow_the_band(self):
+        """Nhãn bám ĐÚNG dải [0,97; 1,03] đã prereg — và < 1 nghĩa là tỉ suất > lãi tiền gửi."""
+        dep = dd._deposit_rate_pct(self.ASOF)[0]
+        px = 10000.0
+        for prox, want in ((0.80, "BELOW_FLOOR"), (0.97, "NEAR_FLOOR"), (1.00, "NEAR_FLOOR"),
+                           (1.03, "NEAR_FLOOR"), (1.50, "ABOVE_FLOOR")):
+            div0 = px * dep / 100.0 / prox          # đảo công thức để đặt prox đúng điểm cần
+            yf = self._yf(div0, price=px)
+            self.assertEqual(yf["yield_floor_note"], want, f"prox={prox}")
+            self.assertAlmostEqual(yf["prox_to_floor"], prox, places=3)
+        yf = self._yf(px * dep / 100.0 / 0.80, price=px)
+        self.assertGreater(yf["trailing_yield_pct"], yf["deposit_rate_pct"])   # dưới sàn
+
+    def test_62_not_stable_payer_is_no_data(self):
+        """Thiếu 1 trong 3 cửa sổ 365 ngày ⇒ không phải stable payer ⇒ không dán nhãn sàn."""
+        yf = self._yf(500.0, n=(1, 0, 1))
+        self.assertFalse(yf["is_stable_payer"])
+        self.assertEqual(yf["yield_floor_note"], "NO_DATA")
+        self.assertIsNotNone(yf["prox_to_floor"])      # số thô vẫn có, chỉ nhãn bị giữ lại
+
+    def test_63_zero_dividend_is_no_data(self):
+        yf = self._yf(0.0, n=(0, 0, 0))
+        self.assertEqual(yf["yield_floor_note"], "NO_DATA")
+        self.assertIsNone(yf["trailing_yield_pct"])
+        self.assertIsNone(yf["prox_to_floor"])
+
+    def test_64_banking_excluded_even_when_qualified(self):
+        """Ngân hàng đủ điều kiện vẫn bị loại khỏi DIỄN GIẢI (n=3, không có ý nghĩa)."""
+        yf = self._yf(500.0, n=(1, 1, 1), icb=dd.YIELD_FLOOR_ICB_BANKING)
+        self.assertIsNone(yf["is_stable_payer"])
+        self.assertEqual(yf["yield_floor_note"], "BANKING_EXCLUDED")
+        self.assertIsNotNone(yf["trailing_yield_pct"])   # số thô là sự thật, vẫn hiển thị
+
+    def test_65_stale_feed_is_no_data_never_raises(self):
+        dd._corp_action_feed_ok = lambda d: False
+        yf = dd._yield_floor("XXX", self.ASOF)
+        self.assertEqual(yf["yield_floor_note"], "NO_DATA")
+
+        def boom():
+            raise RuntimeError("bq chết")
+        dd._corp_action_feed_ok = lambda d: True
+        dd._corp_action_lib = boom
+        dd._CACHE.clear()
+        self.assertEqual(dd._yield_floor("XXX", self.ASOF)["yield_floor_note"], "NO_DATA")
+
+    def test_66_display_only_never_flags_never_blocks(self):
+        """BẤT BIẾN CHÍNH: block chỉ nằm trong dict, không sinh cờ đỏ, không vào text."""
+        self._yf(500.0)
+        d = dd.run_due_diligence("XXX", "BAL", {"asof": self.ASOF, "skip_dcf": True},
+                                 as_dict=True)
+        self.assertIsInstance(d["yield_floor"], dict)
+        self.assertFalse(d["has_red_flag"])
+        self.assertEqual(d["red_flags"], [])
+        txt = dd.run_due_diligence("XXX", "BAL", {"asof": self.ASOF, "skip_dcf": True})
+        for k in ("yield_floor", "FLOOR", "sàn cổ tức"):
+            self.assertNotIn(k, txt)
+        # đường SINH LỆNH không trả thêm query nào
+        d2 = dd.run_due_diligence("XXX", "BAL",
+                                  {"asof": self.ASOF, "skip_dcf": True, "skip_corp_flags": True},
+                                  as_dict=True)
+        self.assertIsNone(d2["yield_floor"])
+
+    def test_67_every_error_path_keeps_the_key(self):
+        """Mọi nhánh trả sớm của run_due_diligence phải giữ khoá — caller không phải .get() mù."""
+        dd._latest_row = lambda t, a: None
+        self.assertIn("yield_floor",
+                      dd.run_due_diligence("ZZZZ", "BAL", {"asof": self.ASOF}, as_dict=True))
+
+        def boom(t, a):
+            raise RuntimeError("nổ")
+        dd._latest_row = boom
+        self.assertIn("yield_floor",
+                      dd.run_due_diligence("ZZZZ", "BAL", {"asof": self.ASOF}, as_dict=True))
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

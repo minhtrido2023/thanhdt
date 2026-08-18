@@ -248,6 +248,183 @@ _EXDATE_NOTE = ("COST-INFO: ước phí post-ex trung bình ~0.50pp/1pp yield "
 _INSIDER_NOTE = ("RISK-INFO: bán ròng nội bộ ≥1% CP lưu hành — P(fwd60<-20%) lift ~1.75x "
                  "(IS/OOS ổn định, scoping 2026-07-29)")
 
+# ---------------------------------------------------------------------------------------
+# Trường THÔNG TIN thứ 3 (2026-08-18, job Taylor_20260818_032101) — "sàn giá cổ tức".
+# **DISPLAY_ONLY**: không sizing, không gate, không cờ đỏ, không filter mã nào.
+#
+# Nguồn: research `dividend_yield_floor_20260818` (FINDINGS.md, CONFIRMED chân H2 / REFUTED
+# chân H1). Đọc nguyên văn trước khi diễn giải con số này:
+#   · CÁI ĐO ĐƯỢC: mã trả cổ tức tiền mặt ổn định 3 năm liên tiếp, khi tỉ suất trailing chạm
+#     lãi suất tiền gửi (prox ∈ [0,97; 1,03]) → MDD 60 phiên tiếp theo NHẸ HƠN 3,46pp so với
+#     nhóm chứng ghép cặp cùng ICB + cùng rvol (t=5,14, n=412 episode/188 mã;
+#     IS +4,53pp t=4,11 · OOS +2,93pp t=3,48).
+#   · CÁI **KHÔNG** ĐO ĐƯỢC: lợi suất vượt trội. BHAR_60 = +0,64pp, t=0,67, **median âm**
+#     (−0,97pp). ⇒ đây là ĐỆM ĐUÔI TRÁI, TUYỆT ĐỐI không phải tín hiệu mua.
+#   · Mức tin cậy research tự khai: TRUNG BÌNH (placebo ghép cặp không bằng 0; phần dư sau khi
+#     trừ placebo không đạt t≥2,0). Đủ để HIỂN THỊ, chưa đủ để đổi cách làm.
+#   · Ngân hàng: n=3 episode, không có ý nghĩa thống kê, và cơ chế cổ tức ngân hàng khác hẳn
+#     (phụ thuộc room vốn/NHNN duyệt, nhiều năm chia bằng cổ phiếu) ⇒ loại khỏi diễn giải.
+#
+# Định nghĩa BÁM ĐÚNG research (`research/dividend_yield_floor_20260818/build.py`), không tự
+# chế lại: cửa sổ 365 ngày lịch (không phải "năm dương lịch"), dedup DIV theo
+# (ticker, exright_date, dividend_year, dividend_stage_vi) lấy `public_date` mới nhất rồi SUM
+# các tranche còn lại (registry Bẫy 3: gộp theo (mã, ex-date) trần sẽ nuốt mất 1 đợt chi trả).
+YIELD_FLOOR_NEAR_LO = 0.97          # PREREG §6 — dải "chạm sàn" [0,97; 1,03]
+YIELD_FLOOR_NEAR_HI = 1.03
+YIELD_FLOOR_ICB_BANKING = 8355      # ICB subsector 4 chữ số (DEVIATIONS.md D3), KHÔNG phải "NH"
+YIELD_FLOOR_DEPOSIT_FALLBACK_PCT = 5.5   # chỉ dùng khi deposit_rate_vn.py không import được
+
+_YIELD_FLOOR_NOTE = ("DOWNSIDE-INFO (DISPLAY_ONLY): chạm sàn cổ tức ⇒ MDD60 nhẹ hơn ~3,46pp vs "
+                     "nhóm chứng ghép cặp (t=5,14) — KHÔNG có alpha lợi suất (BHAR60 t=0,67, "
+                     "median âm). Không phải tín hiệu mua.")
+_YIELD_FLOOR_BANKING_NOTE = ("Ngân hàng loại khỏi diễn giải: n=3 episode, không có ý nghĩa; "
+                             "cơ chế cổ tức ngân hàng khác (room vốn/NHNN duyệt).")
+
+# Đếm DIV theo 3 cửa sổ 365 ngày liên tiếp lùi từ asof — n0/n1/n2 và div0 giữ NGUYÊN ngữ nghĩa
+# của `build.py` (`stable3 = n0>=1 ∧ n1>=1 ∧ n2>=1`, `div0` = tổng VND/cp cửa sổ gần nhất).
+_YIELD_FLOOR_SQL = """
+WITH dd AS (
+  SELECT c.exright_date AS ex, c.value_per_share,
+         ROW_NUMBER() OVER (
+           PARTITION BY c.ticker, c.exright_date, c.dividend_year, c.dividend_stage_vi
+           ORDER BY c.public_date DESC, c.id DESC) AS rn
+  FROM `lithe-record-440915-m9.tav2_bq.corporate_action` AS c
+  WHERE c.event_code = "DIV" AND c.event_status = "executed"
+    AND c.ticker = "{ticker}"
+    AND c.exright_date IS NOT NULL AND c.value_per_share > 0
+    AND c.exright_date <= DATE "{asof}"
+    AND c.exright_date > DATE_SUB(DATE "{asof}", INTERVAL 1095 DAY)
+)
+SELECT
+  IFNULL(SUM(IF(ex > DATE_SUB(DATE "{asof}", INTERVAL 365 DAY), value_per_share, 0)), 0) AS div0,
+  COUNTIF(ex > DATE_SUB(DATE "{asof}", INTERVAL 365 DAY)) AS n0,
+  COUNTIF(ex <= DATE_SUB(DATE "{asof}", INTERVAL 365 DAY)
+      AND ex >  DATE_SUB(DATE "{asof}", INTERVAL 730 DAY)) AS n1,
+  COUNTIF(ex <= DATE_SUB(DATE "{asof}", INTERVAL 730 DAY)
+      AND ex >  DATE_SUB(DATE "{asof}", INTERVAL 1095 DAY)) AS n2
+FROM dd WHERE rn = 1
+"""
+
+
+def _icb_code(ticker, asof):
+    """ICB subsector 4 chữ số tại phiên gần nhất ≤ asof — None nếu không đọc được.
+
+    Đọc RIÊNG khỏi `_latest_row`: thêm cột vào `_TICKER_COLS` sẽ đổi khoá cache và lượng đọc
+    của MỌI caller sẵn có (§3 surgical). Cache theo (ticker, asof) như các trường khác."""
+    key = ("_icb", ticker, str(asof)[:10])
+    if key in _CACHE:
+        return _CACHE[key]
+    import pandas as pd
+    out = None
+    try:
+        year = int(str(asof)[:4])
+        cols = ["ticker", "time", "ICB_Code"]
+        d = None
+        for y in (year, year - 1):
+            try:
+                df = _read_year("ticker", y, cols)
+            except Exception:
+                continue
+            d = df[(df["ticker"] == ticker) &
+                   (pd.to_datetime(df["time"]) <= pd.Timestamp(str(asof)[:10]))]
+            if not d.empty:
+                break
+        if d is not None and not d.empty:
+            v = d.sort_values("time").iloc[-1]["ICB_Code"]
+            out = None if pd.isna(v) else int(v)
+    except Exception as exc:
+        _log.warning("ICB_Code doc loi (%s): %s", ticker, str(exc)[:200])
+        out = None
+    _CACHE[key] = out
+    return out
+
+
+def _deposit_rate_pct(asof):
+    """Lãi suất tiền gửi 12M Big-4 tại asof (%/năm) — `deposit_rate_vn.current_deposit_rate`.
+
+    Đây là ĐÚNG chuỗi research dùng (`analyze.py` import `merge_deposit` từ cùng module), nên
+    không hardcode khi module có sẵn. Fallback 5,5% chỉ khi import/đọc hỏng — khi đó
+    con số hiển thị không còn cùng hệ với research, nên block tự hạ về NO_DATA ở tầng trên nếu
+    cả giá lẫn cổ tức cũng thiếu; ở đây chỉ trả cờ để caller ghi rõ nguồn."""
+    key = ("_deprate", str(asof)[:10])
+    if key in _CACHE:
+        return _CACHE[key]
+    out = (YIELD_FLOOR_DEPOSIT_FALLBACK_PCT, "fallback")
+    try:
+        import sys as _sys
+        if WORKDIR not in _sys.path:
+            _sys.path.insert(0, WORKDIR)
+        from deposit_rate_vn import current_deposit_rate
+        out = (float(current_deposit_rate(str(asof)[:10])), "deposit_rate_vn")
+    except Exception as exc:
+        _log.warning("deposit_rate_vn doc loi: %s", str(exc)[:200])
+    _CACHE[key] = out
+    return out
+
+
+def _yield_floor(ticker, asof, ref_price=None):
+    """Sàn giá cổ tức — DISPLAY_ONLY, xem khối chú thích ở `_YIELD_FLOOR_NOTE`.
+
+    Trả dict luôn ĐỦ khoá (không bao giờ None, không bao giờ raise). Mọi đường hỏng —
+    feed corporate_action cũ/không đọc được, không có DIV, thiếu giá — đều về
+    `yield_floor_note = "NO_DATA"` và KHÔNG chặn gì.
+
+    ⚠️ `prox_to_floor < 1` = giá DƯỚI sàn = tỉ suất CAO HƠN lãi tiền gửi. Cùng đại lượng với
+    `prox = deposit_rate / yield` của research (`analyze.py:347`), chỉ viết theo hệ giá.
+    """
+    asof = str(_as_date(asof))
+    out = {"is_stable_payer": None, "trailing_annual_div_vnd": None, "trailing_yield_pct": None,
+           "deposit_rate_pct": None, "deposit_rate_source": None, "yield_floor_price_vnd": None,
+           "prox_to_floor": None, "ref_price_vnd": None, "icb_code": None,
+           "n_div_windows": None, "yield_floor_note": "NO_DATA", "note": _YIELD_FLOOR_NOTE}
+    key = ("_yfloor", ticker, asof)
+    if key in _CACHE and ref_price is None:
+        return _CACHE[key]
+    try:
+        dep, dep_src = _deposit_rate_pct(asof)
+        out["deposit_rate_pct"] = round(dep, 4)
+        out["deposit_rate_source"] = dep_src
+        icb = _icb_code(ticker, asof)
+        out["icb_code"] = icb
+
+        if _corp_action_feed_ok(_as_date(asof)):
+            rows = _corp_action_lib().bq(_YIELD_FLOOR_SQL.format(ticker=ticker, asof=asof))
+            if rows:
+                r = rows[0]
+                n0, n1, n2 = int(r["n0"]), int(r["n1"]), int(r["n2"])
+                div0 = float(r["div0"] or 0.0)
+                out["n_div_windows"] = [n0, n1, n2]
+                out["trailing_annual_div_vnd"] = round(div0, 4)
+                stable = (n0 >= 1 and n1 >= 1 and n2 >= 1)
+                px = ref_price if ref_price else _ref_price_for(ticker, asof)
+                out["ref_price_vnd"] = float(px) if px else None
+                if div0 > 0 and px and dep > 0:
+                    out["trailing_yield_pct"] = round(div0 / float(px) * 100.0, 4)
+                    floor_px = div0 / (dep / 100.0)
+                    out["yield_floor_price_vnd"] = round(floor_px, 2)
+                    prox = float(px) / floor_px
+                    out["prox_to_floor"] = round(prox, 4)
+                    if stable:
+                        out["yield_floor_note"] = (
+                            "BELOW_FLOOR" if prox < YIELD_FLOOR_NEAR_LO else
+                            "ABOVE_FLOOR" if prox > YIELD_FLOOR_NEAR_HI else "NEAR_FLOOR")
+                # `is_stable_payer` là SỰ THẬT đo được, tách khỏi nhãn diễn giải: mã trả đều
+                # nhưng thiếu giá vẫn là stable payer, chỉ không định vị được so với sàn.
+                out["is_stable_payer"] = bool(stable)
+
+        # Ngân hàng: giữ NGUYÊN các số thô (chúng là sự thật), chỉ CẤM phần diễn giải —
+        # research không có quyền phát biểu ở đây (n=3).
+        if icb == YIELD_FLOOR_ICB_BANKING:
+            out["is_stable_payer"] = None
+            out["yield_floor_note"] = "BANKING_EXCLUDED"
+            out["note"] = _YIELD_FLOOR_BANKING_NOTE
+    except Exception as exc:
+        _log.warning("yield_floor loi (%s): %s", ticker, str(exc)[:200])
+        out["yield_floor_note"] = "NO_DATA"
+    if ref_price is None:
+        _CACHE[key] = out
+    return out
+
 
 def _today_ict():
     """Ngày hôm nay theo giờ VN — §16: KHÔNG bao giờ tin TZ của process gọi."""
@@ -653,7 +830,7 @@ def run_due_diligence(ticker, book=None, context=None, as_dict=False):
         if row is None:
             out = {"ticker": ticker, "book": book, "as_of": asof,
                    "error": "không có dữ liệu trong bq_cache/ticker",
-                   "upcoming_exdate": None, "insider_net_sell": None,
+                   "upcoming_exdate": None, "insider_net_sell": None, "yield_floor": None,
                    "red_flags": ["DD_KHONG_CHAY_DUOC"], "has_red_flag": True}
             if as_dict:
                 return out
@@ -681,8 +858,17 @@ def run_due_diligence(ticker, book=None, context=None, as_dict=False):
         # PlannedOrder.dd_check, nên ở đó chúng chỉ là ~1 query BQ/mã trên đúng đường găng 21:00.
         if ctx.get("skip_corp_flags"):
             parts["upcoming_exdate"], parts["insider_net_sell"] = None, None
+            parts["yield_floor"] = None
         else:
             parts["upcoming_exdate"], parts["insider_net_sell"] = _corp_flags(ticker, asof)
+            # DISPLAY_ONLY (2026-08-18) — cùng cổng `skip_corp_flags` với 2 trường trên vì cùng
+            # đọc `corporate_action`: đường SINH LỆNH 21:00 không phải trả thêm query/mã.
+            # KHÔNG đi vào text, KHÔNG sinh cờ đỏ, KHÔNG đụng `red`/`has_red_flag`.
+            try:
+                parts["yield_floor"] = _yield_floor(ticker, asof, ctx.get("price"))
+            except Exception as exc:                   # lưới cuối; _yield_floor đã tự nuốt lỗi
+                _log.warning("yield_floor wrapper loi (%s): %s", ticker, str(exc)[:200])
+                parts["yield_floor"] = None
 
         parts["red_flags"] = red
         parts["has_red_flag"] = bool(red)
@@ -725,7 +911,7 @@ def run_due_diligence(ticker, book=None, context=None, as_dict=False):
     except Exception as exc:
         _log.warning("run_due_diligence lỗi (%s): %s", ticker, exc)
         out = {"ticker": ticker, "book": book, "error": str(exc)[:200],
-               "upcoming_exdate": None, "insider_net_sell": None,
+               "upcoming_exdate": None, "insider_net_sell": None, "yield_floor": None,
                "red_flags": ["DD_KHONG_CHAY_DUOC"], "has_red_flag": True}
         if as_dict:
             return out
