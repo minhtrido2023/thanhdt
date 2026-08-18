@@ -76,6 +76,7 @@ def run_block(block, dispatch_rc, out, label="coord-2026-08-13"):
     """Chạy khối với stub ghi lại lời gọi ra 2 file, trả (rc, notify_lines, postq_lines)."""
     d = tempfile.mkdtemp(prefix="wags_dispatch_dead_")
     nf, qf = os.path.join(d, "notify.txt"), os.path.join(d, "postq.txt")
+    sf = os.path.join(d, "posts.txt")
     # `out` đi qua FILE, không nội suy vào script. repr() của Python KHÔNG phải literal bash
     # (nó escape kiểu \' và \n mà nháy đơn bash hiểu theo nghĩa đen) — bản đầu làm vậy và
     # 2 ca "out bẩn" fail vì HARNESS sai chứ không phải production sai.
@@ -90,6 +91,7 @@ dispatch_rc={dispatch_rc}
 out="$(cat {of})"
 _notify_arch() {{ printf '%s\\n' "$1" >> {nf}; }}
 _post_q() {{ printf '%s\\n%s\\n' "$1" "$2" >> {qf}; }}
+_post_s() {{ printf '%s\\n%s\\n' "$1" "$2" >> {sf}; }}
 {block}
 echo "REACHED_END_OF_BLOCK"
 """
@@ -101,7 +103,7 @@ echo "REACHED_END_OF_BLOCK"
     # nào vừa gãy. Surrogate lọt qua đây sẽ bị chính assertion "không lọt \udcxx" tố cáo.
     rd = lambda f: (open(f, encoding="utf-8", errors="surrogateescape").read()
                     if os.path.exists(f) else "")
-    return p, rd(nf), rd(qf)
+    return p, rd(nf), rd(qf), rd(sf)
 
 
 def main():
@@ -115,7 +117,7 @@ def main():
         sys.exit(1)
 
     print("\ncase_dispatch_chet_ra_dung_topic")
-    p, notify, postq = run_block(block, dispatch_rc=1, out=REAL_OUT)
+    p, notify, postq, _posts = run_block(block, dispatch_rc=1, out=REAL_OUT)
     check("dispatch chết ⇒ DỪNG pipeline (không chạy tiếp xuống arch-review)",
           "REACHED_END_OF_BLOCK" not in p.stdout, p.stdout[:200])
     check("dispatch chết ⇒ có post question", postq.strip() != "", "không post gì")
@@ -151,7 +153,7 @@ def main():
 
     print("\ncase_out_ban_co_nhay_va_backslash")
     dirty = 'error: "unauthorized" \\ token=\'abc\' expired at C:\\tmp\n'
-    p2, _, postq2 = run_block(block, dispatch_rc=2, out=dirty)
+    p2, _, postq2, _ = run_block(block, dispatch_rc=2, out=dirty)
     try:
         json.loads(postq2.strip().split("\n")[1])
         ok2 = True
@@ -192,7 +194,7 @@ def main():
           f"pad={pad if pad is None else len(pad)}")
     if pad is None:
         pad = "x" * 276
-    p4, _, postq4 = run_block(block, dispatch_rc=1, out=f"{_pfx}{pad}{viet}\n")
+    p4, _, postq4, _ = run_block(block, dispatch_rc=1, out=f"{_pfx}{pad}{viet}\n")
     line = postq4.strip().split("\n")[1] if len(postq4.strip().split("\n")) > 1 else ""
     try:
         line.encode("utf-8")
@@ -219,13 +221,54 @@ def main():
           r.returncode == 0 and r.stdout.strip() == "1",
           f"rc={r.returncode} out={r.stdout.strip()} err={r.stderr.strip()[-300:]}")
 
+    print("\ncase_exit5_la_TU_RESUME_khong_phai_chet")
+    # Ca thật 2026-08-18T00:29:30Z: job Wags_20260818_001950 hết max-turns ⇒ dispatch.sh
+    # exit 5 ⇒ nhánh `!= 0` gói thành question "agent sua loi CHUA CHAY" — trong khi agent
+    # ĐANG được resume_pending.py chạy tiếp và về sau nộp finding thật. exit 5 là ma DUY
+    # NHAT của dispatch.sh cho nhóm "đã lên lịch tự resume" (usage-limit / provider-fallback
+    # / max-turns), xem bin/dispatch.sh dòng ~1596-1610 + khối chú thích đầu file.
+    OUT5 = ("JOB Wags_20260818_001950 (from=Mike, timeout=1500s)\n"
+            "NOTE: dispatch Wags (job Wags_20260818_001950) het turn budget "
+            "(--max-turns=120) - KHONG PHAI loi task.\n"
+            "      Da tu dong len lich resume NGAY voi tran cao hon.\n")
+    p5, notify5, postq5, posts5 = run_block(block, dispatch_rc=5, out=OUT5,
+                                            label="coord-2026-08-18")
+    check("exit=5 ⇒ KHÔNG post question (không phải việc cần người)",
+          postq5.strip() == "", postq5[:300])
+    check("exit=5 ⇒ CÓ ghi bus status để còn dấu vết", posts5.strip() != "", "không ghi gì")
+    s_topic = posts5.splitlines()[0] if posts5 else ""
+    check("status mang topic resume-pending, KHÔNG mang chữ dispatch-failed",
+          "wags-autofix-resume-pending" in s_topic
+          and "dispatch-failed" not in s_topic, s_topic)
+    check("exit=5 ⇒ DỪNG pipeline (bản resume mới là bản chạy tiếp)",
+          "REACHED_END_OF_BLOCK" not in p5.stdout, p5.stdout[:200])
+    check("exit=5 ⇒ KHÔNG báo động 🔴 (không phải sự cố)", "🔴" not in notify5, notify5[:200])
+    # Khoảng trống arch-review là THẬT và không tự lành: pipeline chết trước bước review,
+    # còn bản resume chỉ chạy lại dispatch chứ không chạy lại pipeline. Im lặng ở đây đúng
+    # là hình thái "monitoring fix creates silence" đã cắn 2026-08-06.
+    check("tin báo NÓI RÕ arch-review sẽ không tự chạy cho vòng resume",
+          "ARCH-REVIEW" in notify5 and "KHONG tu chay" in notify5.replace("Ô", "O"),
+          notify5[:400])
+    check("payload status cũng ghi lại khoảng trống arch-review (bus đọc được, không chỉ Discord)",
+          "arch_review" in posts5, posts5[:300])
+    try:
+        obj5 = json.loads(posts5.strip().split("\n")[1])
+        ok5 = isinstance(obj5, dict) and obj5.get("dispatch_exit") == "5"
+    except Exception as e:
+        obj5, ok5 = None, False
+        print(f"       (lỗi parse: {e})")
+    check("payload status parse được thành JSON object và ghi đúng exit=5", ok5,
+          posts5[:300])
+
     print("\ncase_CONTROL_dispatch_song_thi_khong_duoc_chan")
-    p3, notify3, postq3 = run_block(block, dispatch_rc=0, out="moi thu binh thuong\n")
+    p3, notify3, postq3, posts3 = run_block(block, dispatch_rc=0, out="moi thu binh thuong\n")
     check("CONTROL: dispatch exit=0 ⇒ KHÔNG post question dispatch-failed",
           postq3.strip() == "", postq3[:200])
     check("CONTROL: dispatch exit=0 ⇒ chạy tiếp xuống phần sau (không exit sớm)",
           "REACHED_END_OF_BLOCK" in p3.stdout, p3.stdout[:200])
     check("CONTROL: dispatch exit=0 ⇒ không báo động 🔴 oan", "🔴" not in notify3, notify3[:200])
+    check("CONTROL: dispatch exit=0 ⇒ KHÔNG ghi status resume-pending oan",
+          posts3.strip() == "", posts3[:200])
 
     print()
     if _fails:

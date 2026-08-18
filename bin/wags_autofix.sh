@@ -175,6 +175,12 @@ setsid bash -c '
   }
   # WAGS_POSTQ_END
 
+  # _post_s — ghi bus `status` (KHONG phai question): dung cho trang thai TRUNG GIAN, thu
+  # ma khong ai can ra tay. Co y KHONG fail-loud 3 tang nhu _post_q: day khong phai duong
+  # escalation, mat mot event status thi khong ai mat viec, va vong fix khong dang chet vi
+  # mot dong log.
+  _post_s() { "$ROOT/bin/append_event.sh" Wags status "$1" "$2" >/dev/null 2>&1 || true; }
+
   # 1) Wags fix (đồng bộ trong pipeline nền; timeout rộng vì job chẩn đoán sâu). Wags
   #    tự nhận context ops-mini qua chính agents/Wags/CLAUDE.md (cost-opt #1b,
   #    2026-07-17) — không cần cờ gì ở đây. BẮT BUỘC báo files_changed (mảng đường dẫn
@@ -222,6 +228,25 @@ Quy trình: (1) chẩn đoán từ artifact thật (jobs.sh list cột HB_AGE, t
     # — nhánh đó fail-safe sang tier=high và vẫn đáng được arch-review.
     # WAGS_DISPATCH_DEAD_BEGIN  (marker cho bin/wags_dispatch_dead_selfcheck.py — nó TRÍCH
     # đúng khối này chạy trên stub, KHÔNG chép lại logic. Đổi/xoá marker ⇒ selfcheck FAIL.)
+      # exit 5 KHONG phai chet. dispatch.sh dung ma nay cho DUY NHAT nhom "da len lich TU
+      # RESUME": het usage window, fallback provider, va het turn budget (--max-turns). Ca
+      # ba deu duoc bin/resume_pending.py chay lai, deu duoc chinh dispatch.sh ghi chu
+      # "KHONG PHAI loi task", va deu KHONG trip circuit breaker. Coi no la chet gay 2 hai:
+      #   1. post question "agent sua loi CHUA CHAY" trong khi agent DANG chay tiep — dung
+      #      hinh thai da cam nhieu lan: mot BIEU DIEN TUC THOI (luc quet chua xong) bi ghi
+      #      thanh SU THAT BEN (that bai). Ca that 2026-08-18T00:29:30Z: job
+      #      Wags_20260818_001950 het max-turns -> exit 5 -> question false-alarm, va chinh
+      #      lan resume ke tiep phai bo cong don.
+      #   2. `exit 0` ben duoi cat pipeline, nen khi ban resume ghi finding THAT thi khong
+      #      con ai goi arch-reviewer. Khoang trong do co THAT va khong tu lanh => phai noi
+      #      TO ra (status + Discord) chu khong duoc im lang.
+      # Co y KHONG tu doi/cho resume o day: uu tien quan sat tu nhien hon tu dong phuc hoi.
+      if [ "$dispatch_rc" = 5 ]; then
+        _notify_arch "⏳ **[wags-autofix] $LABEL — dispatch.sh exit=5: DA LEN LICH TU RESUME, khong phai that bai.** Agent van chay tiep qua bin/resume_pending.py, khong can ai ra tay. Nhung pipeline dung tai day, nen ARCH-REVIEW cho vong fix do se KHONG tu chay — neu ban resume ghi finding cham file rui ro cao, phai goi arch-reviewer THU CONG. Log: '"$PIPELOG"'"
+        _post_s "wags-autofix-resume-pending: $LABEL" \
+          "{\"dispatch_exit\":\"5\",\"note\":\"da len lich tu resume (usage-limit / provider-fallback / max-turns) - KHONG phai that bai, KHONG can nguoi ra tay\",\"arch_review\":\"SE KHONG TU CHAY cho vong resume nay - goi thu cong neu finding cham file rui ro cao\",\"pipelog\":\"'"$PIPELOG"'\"}"
+        exit 0
+      fi
     if [ "$dispatch_rc" != 0 ]; then
       # tr dùng ESCAPE BÁT PHÂN \042 \047 \134 (nháy kép, nháy đơn, backslash) — CỐ Ý.
       # Khối này nằm trong chuỗi nháy đơn của setsid bash -c, nên MỘT dấu nháy đơn gõ
