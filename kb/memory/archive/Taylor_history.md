@@ -240,3 +240,6 @@
 
 ## Archived 2026-08-18 (keep=12 days=0 require_done=False)
 - [2026-08-17T04:24:26Z] CHO quant-skeptic: 2 truong THONG TIN moi trong due_diligence.py (upcoming_exdate + insider_net_sell), commit WorkingClaude@5c67e2a2 + mike@1d2f1378, job Taylor_20260817_041248. CHUA render ra bao cao nao — CHUA sua caller nao. Buoc sau (chi lam khi quant-skeptic CONFIRMED + user duyet): cho golive_recommend_v23/send_plan_report/eod_trading_report render 2 truong. Canh bao phai mang theo khi render: hieu ung co tuc post-ex chi co y nghia o ADV THAP (nua ADV cao p=0,124), co insider ~80% khong sap.
+
+## Archived 2026-08-18 (keep=12 days=0 require_done=False)
+- [2026-08-17T04:30:05Z] [2026-08-17] Snapshot tien-toi corp_action/insider XONG + DA CHAY vintage dau (commit mike@bc736f54, job _041202). CHO USER/MIKE 2 quyet dinh (bus question corp-action-snapshot-dataset-va-cron-20260817): (a) dataset tav2_mike hay tav2_bq — toi chon tav2_mike vi tav2_bq co tien le TRUNCATE xoa lich su ma bang nay khong tai tao duoc; doi cang muon cang dat; (b) duyet cron 50 23 * * * ICT — moi ngay khong chay = mat vinh vien vintage ngay do. Announcement study mo lai KHONG som hon 2027-08, phai do lai N that.

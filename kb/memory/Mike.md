@@ -39,3 +39,6 @@ SpaceX + ZaloPay: HOLD ALL, 0 lệnh, approved_by=None.
 - park_holdings.py stdout lẫn dòng "[dnse] kết nối OK" trước JSON — cần tail -n +2 khi parse.
 - dispatch-prompt-heredoc skill cho prompt có backtick.
 
+- [2026-08-18T17:41:51Z] BLOCKER top5-postearnings-sleeve-backtest: kiểm tra 17:41 UTC (~1h20 sau lúc bắt đầu) — status.claude.com VẪN Unresolved, update mới nhất nói đang điều tra lỗi tăng cao trên Opus 5 cụ thể. Backoff cycle #1/3 (1800s) đã dùng, đang chờ cycle #2. Chưa retry dispatch.
+- [2026-08-18T18:13:09Z] BLOCKER top5-postearnings-sleeve-backtest: kiểm tra 18:12 UTC (~1h52 sau khi bắt đầu) — status.claude.com VẪN Unresolved/Investigating. Backoff cycle #2/3 dùng xong, đang chờ cycle #3 (trần theo chỉ đạo trước) — nếu vẫn chưa fix ở lần tỉnh kế tiếp PHẢI hỏi user thay vì tự lặp cycle #4.
+- [2026-08-18T18:45:37Z] BLOCKER top5-postearnings-sleeve-backtest RESOLVED (outage side): Anthropic status chuyển Monitoring ~18:44 UTC, retry lần 4 (job Taylor_20260818_184457) chạy bình thường qua vòng đầu, không gãy 529. Đang chờ kết quả backtest thật.
