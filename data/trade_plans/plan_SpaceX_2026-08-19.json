@@ -1,0 +1,196 @@
+{
+  "plan_date": "2026-08-19",
+  "account": "SpaceX",
+  "broker": "DNSE",
+  "account_no": "0002023347",
+  "mode": "live",
+  "strategy": "V2.4",
+  "strategy_version": "V2.4",
+  "state": 3,
+  "state_name": "NEUTRAL",
+  "state_source": "DT5G_macro",
+  "state_note": "get_gated_state() OK — deploy_golive_dt5g_v4/golive_state_today.json: published_at=2026-08-18T19:01:27, as_of=2026-08-18, bq_publish_ok=true, base_state_dt4=3 == macro_state_dt5g=3, KHÔNG bị macro cap. Đọc tav2_bq.vnindex_5state_dt5g_live (KHÔNG phải bare vnindex_5state).",
+  "dt4_gate_line": "base=3(NEUTRAL) == DT5G=3(NEUTRAL), không bị macro cap.",
+  "requires_user_approval": true,
+  "approved_by": "John Dinh (qua Discord thread DollarBill plan) — Mike ghi hộ 2026-08-18T20:00 ICT",
+  "approved_at": "2026-08-18T20:00:40+07:00",
+  "signal_date": "2026-08-18",
+  "recommendations_file": "deploy_golive_dt5g_v4/out/golive_v23_recommendations_2026-08-18.csv + data/golive_v23_status.json (signal_date=2026-08-18)",
+  "next_trading_day_check": "calendar_check ok=true qua mike/bin/filter_lag_entry_window.py (signal_date 2026-08-18 → next trading day = 2026-08-19, không phải T7/CN/lễ) — không tự cộng 1 vào hôm nay.",
+  "nav_basis": {
+    "source": "DNSE API live (mike/bin/compute_active_nav.py, positions+balances live, KHÔNG dùng BQ — §6 bright-line rule), chạy lúc lập plan 2026-08-18 tối",
+    "nav_date": "2026-08-18",
+    "available_cash_vnd": 100204810.0,
+    "total_cash_minus_debt_vnd": 109984412.0,
+    "total_debt_vnd": 0.0,
+    "total_stock_value_vnd": 848906750.0,
+    "excluded_value_vnd": 0.0,
+    "total_nav_vnd": 958891162.0,
+    "active_nav_vnd": 958891162.0,
+    "offbook_assets_vnd": 0,
+    "active_nav_note": "SpaceX KHÔNG có excluded_tickers ⇒ active_nav = total_nav. Trứng vàng đã rút hết vĩnh viễn (offbook=0).",
+    "cash_basis_note": "Cơ sở NAV dùng totalCash−totalDebt = 109.984.412đ theo §25 CLAUDE.md, KHÔNG dùng availableCash (100.204.810đ). Chênh 9.775.000đ = cổ tức phải thu (đã nằm trong totalCash), tự triệt tiêu sau 1-2 phiên khi qua ex-date.",
+    "buying_power_note": "availableCash = 100.204.810đ ⇒ sức mua tức thì thật. Không có lệnh V2.4/discretionary nào do DollarBill viết trong plan này nên không cần đối chiếu funding."
+  },
+  "book_breakdown_current": {
+    "asof": "2026-08-18 (giá DNSE live, đóng cửa thật hôm nay)",
+    "basis": "PARK/CAPIT/LAG/DISCRETIONARY_SPECIAL/CASH lấy trực tiếp từ output mike/bin/park_holdings.py --account SpaceX --json (chạy sống 2026-08-18, gộp bootstrap snapshot + toàn bộ fill journal, authoritative theo CLAUDE.md — KHÔNG tự suy theo tên mã).",
+    "books": {
+      "PARK": {
+        "mv_vnd": 411396750.0,
+        "pct_active_nav": 42.9,
+        "source": "mike/bin/park_holdings.py --account SpaceX --json (asof 2026-08-18)"
+      },
+      "CAPIT": {
+        "mv_vnd": 303550000.0,
+        "pct_active_nav": 31.66,
+        "tickers_note": "NCT 500cp + PVT 3500cp + SAB 1100cp + SIP 1700cp + VNM 900cp (qty theo capit_episode.json, khớp 100% broker live) — giá đóng cửa 2026-08-18"
+      },
+      "LAG": {
+        "mv_vnd": 37800000.0,
+        "pct_active_nav": 3.94,
+        "tickers_note": "SCL 1500cp — vị thế LAG thật (play_type=LAG_HI, mua 2026-08-10 theo journal), KHÔNG phải phần dư ngoài custom30V."
+      },
+      "DISCRETIONARY_SPECIAL": {
+        "mv_vnd": 96090000.0,
+        "pct_active_nav": 10.02,
+        "tickers": [
+          "TV1 (2300cp — đã đạt target_qty accumulation_program từ 2026-08-17; injector tự đánh giá lại target động theo active_nav mỗi phiên, DollarBill KHÔNG viết lệnh TV1)",
+          "DRI (3700cp, giá live 13.700đ — đã đạt target 5% NAV, không top-up; khung giá rải bậc chỉ dùng khi cần trim/chốt lời, chưa chạm vùng bán 14.000-18.000đ)"
+        ]
+      },
+      "CASH": {
+        "mv_vnd": 109984412.0,
+        "pct_active_nav": 11.47
+      }
+    },
+    "reconcile_note": "Tổng 4 sleeve stock (PARK+CAPIT+LAG+DISC = 848.836.750) + CASH (109.984.412) = 958.821.162, khớp active_nav 958.891.162 trong phạm vi ~70.000đ (làm tròn giá) — không có khoảng lệch đáng kể."
+  },
+  "allocator": {
+    "w_lag_target": 0.5,
+    "w_lag_current": 0.4981,
+    "alloc_band": 0.1,
+    "band_breach": false,
+    "etf_park_frac_published": 0.8
+  },
+  "lag_analysis": {
+    "signal_date": "2026-08-18",
+    "source_script": "mike/bin/filter_lag_entry_window.py --account SpaceX --json (chạy trực tiếp, KHÔNG tự lọc bằng mắt)",
+    "calendar_check_ok": true,
+    "counts": {
+      "due_today": 0,
+      "upcoming_next_plans": 0,
+      "window_passed": 0,
+      "anchor_unavailable": 0,
+      "unparsed": 0
+    },
+    "due_today": [],
+    "note": "0 ứng viên LAG cho phiên 2026-08-19 (n_lag_upcoming=0, n_lag_recent=0 trong golive_v23_status.json signal_date=2026-08-18). KHÔNG có lệnh LAG trong plan này."
+  },
+  "bal_analysis": {
+    "note": "golive_v23_status.json (signal_date 2026-08-18): n_bal = 0 — không có tín hiệu BAL (SIGNAL_V11/yieldcombo) nào đạt chuẩn. Không có lệnh BAL."
+  },
+  "capit_sizing": {
+    "note": "golive_v23_status.json (2026-08-18): capit_signal_today=false, capit_fired=false — CHỈ là điều kiện breadth của riêng ngày chạy, KHÔNG có nghĩa episode đã thoát.",
+    "episode": "CAPIT-2026-07-20, status=open, 21 phiên kể từ tín hiệu vào (2026-07-20) tính tới signal_date 2026-08-18. Rổ gốc: NCT, PVT, SAB, SIP, VNM. capit_size=0.75.",
+    "spacex_qty_held": {
+      "NCT": 500,
+      "PVT": 3500,
+      "SAB": 1100,
+      "SIP": 1700,
+      "VNM": 900
+    },
+    "verify": "Khớp 100% với vị thế broker live 2026-08-18 (park_holdings.py) và với capit_episode.json remaining_qty.",
+    "policy": "5 mã CAPIT là stop-exempt + slot-exempt — KHÔNG tính vào slot BAL/LAG, KHÔNG áp stop −20% của BAL, KHÔNG bị L1 park_trim/L2 jit_unpark đụng (chỉ sleeve PARK). KHÔNG tự sinh lệnh bán 'dọn rổ' — exit do NGƯỜI quyết định. KHÔNG có lệnh nào chạm 5 mã này trong plan này.",
+    "rubber_watch": "Ngưỡng xét lại RSS3 2.26 USD/kg CHƯA thủng (data/rubber_monthly.csv mới nhất 2026-07 = 2.78 USD/kg; data/rubber_weekly.csv mới nhất có giá 2026-08-17 = 2.677 USD/kg). GVR/PHR không nằm trong rổ CAPIT hay vị thế SpaceX hiện tại — không áp dụng hôm nay."
+  },
+  "park_trim_proposal": {
+    "source": "mike/bin/compute_park_trim.py",
+    "account_label": "SpaceX",
+    "asof": "2026-08-18",
+    "target_park": 0.8,
+    "trim_band": 0.005,
+    "orders": [],
+    "blocked": [],
+    "notes": [
+      "PARK 411.4tr vs target 417.1tr (pool 521.4tr) — vượt 0.0tr, chưa quá ngưỡng 2.6tr"
+    ],
+    "at_or_below_target": [],
+    "park_mv_vnd": 411396750.0,
+    "cash_available_vnd": 100204810.0,
+    "cash_total_vnd": 109984412.0,
+    "reconcile_ok": true,
+    "unverified_tickers": [],
+    "excluded_tickers": [],
+    "state": {
+      "state": 3,
+      "state_name": "NEUTRAL",
+      "date": "2026-08-18",
+      "etf_park_frac_live": 0.8
+    },
+    "cash_basis": "total_cash",
+    "cash_dividend_receiving_vnd": 9775000.0,
+    "cash_debt_vnd": 0.0,
+    "pool_vnd": 521381162.0,
+    "target_park_vnd": 417104929.6,
+    "delta_vnd": 5708179.6,
+    "threshold_vnd": 2606905.81,
+    "decision": "NO_TRIM",
+    "_merged_into_orders": "⛔ KHÔNG merge vào orders[] — L1 park_trim: decision='NO_TRIM' ≠ 'TRIM' — tầng này không sinh lệnh."
+  },
+  "orders": [],
+  "deferred_orders": [],
+  "notes": [
+    "HOLD ALL — không có lệnh BAL/LAG nào (0 tín hiệu BAL, 0 ứng viên LAG trong entry window 2026-08-19 — xác nhận qua filter_lag_entry_window.py, calendar_check ok=true).",
+    "L1 park-trim: NO_TRIM (PARK 411,40tr dưới trần 417,10tr, còn dư ~5,71tr đầu room, chưa chạm ngưỡng trim). L2 JIT-unpark: NO_JIT_NEEDED (không có lệnh mua BAL/LAG).",
+    "CAPIT episode (NCT/PVT/SAB/SIP/VNM, mở 2026-07-20, 21 phiên tới 2026-08-18): GIỮ NGUYÊN, không có lệnh nào chạm — capit_signal_today=false chỉ là điều kiện ngày chạy, KHÔNG phải tín hiệu thoát; exit do người quyết.",
+    "TV1 (DISCRETIONARY_SPECIAL): đã đạt target_qty 2300/2300 từ 2026-08-17. KHÔNG viết lệnh TV1 trong plan này — injector (mike/bin/discretionary_accumulation_inject.py, cron 20:30 ICT) là nguồn DUY NHẤT sinh lệnh TV1, sẽ tự tính lại target động theo active_nav mỗi phiên.",
+    "DRI đã đạt target 5% NAV (3700cp, giá live 13.700đ), không cần thêm — theo dõi khung giá rải bậc discretionary chỉ khi cần trim/chốt lời (chưa chạm vùng bán 14.000-18.000đ).",
+    "Rubber watch: RSS3 CHƯA thủng ngưỡng 2.26 USD/kg (monthly 2026-07 = 2.78, weekly 2026-08-17 = 2.677) — không cần xét lại luận điểm PEAD cao su hôm nay.",
+    "2 nhãn anomaly cũ, KHÔNG mới hôm nay (anomaly_flags_stale=false, generated_at 2026-08-18T05:45:09Z) trên vị thế đang giữ: LPB tier H VOLSPIKE (last_alert 2026-06-24, ~8 tuần trước) và VND tier H IDIOCRASH (last_alert 2026-07-27, ~3 tuần trước) — cả hai stale, không có cảnh báo mới hôm nay, không cần hành động. VRE có 1 nhãn tier W CEIL2 (last_alert 2026-07-30), cũng stale."
+  ],
+  "jit_unpark_proposal": {
+    "layer": "L2_JIT_UNPARK",
+    "account_label": "SpaceX",
+    "asof": "2026-08-18",
+    "park_mv_vnd": 411396750.0,
+    "cash_available_vnd": 100204810.0,
+    "reconcile_ok": true,
+    "unverified_tickers": [],
+    "excluded_tickers": [],
+    "margin_room_vnd": 0.0,
+    "friction": 0.0015,
+    "orders": [],
+    "buy_amendments": [],
+    "blocked": [],
+    "notes": [
+      "không có lệnh MUA book BAL/LAG trong plan ⇒ L2 no-op (đúng thiết kế: L2 chỉ chạy khi có lệnh mua thật)"
+    ],
+    "plan_path": "plan_SpaceX_2026-08-19.json",
+    "n_buy_orders_bal_lag": 0,
+    "decision": "NO_TRIGGER",
+    "_merged_into_orders": "⛔ KHÔNG merge vào orders[] — L2 jit_unpark: decision='NO_TRIGGER' ≠ 'JIT' — tầng này không sinh lệnh."
+  },
+  "merge_park_orders": {
+    "owner": "park_merge_v1",
+    "layers": {
+      "L1": {
+        "accepted": false,
+        "reason": "L1 park_trim: decision='NO_TRIM' ≠ 'TRIM' — tầng này không sinh lệnh."
+      },
+      "L2": {
+        "accepted": false,
+        "reason": "L2 jit_unpark: decision='NO_TRIGGER' ≠ 'JIT' — tầng này không sinh lệnh."
+      }
+    },
+    "n_generated": 0,
+    "n_dropped_owned": 0,
+    "sell_gross_vnd": 0,
+    "sell_fee_est_vnd": 0,
+    "warnings": [
+      "L1 park_trim: decision='NO_TRIM' ≠ 'TRIM' — tầng này không sinh lệnh.",
+      "L2 jit_unpark: decision='NO_TRIGGER' ≠ 'JIT' — tầng này không sinh lệnh."
+    ],
+    "note": "orders[] phần bán PARK được DỰNG LẠI mỗi lần chạy (không cộng dồn). Chạy lại merge với artifact mới = kết quả mới đúng, không phải chồng lên."
+  }
+}
