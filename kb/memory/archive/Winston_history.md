@@ -76,3 +76,6 @@
 
 ## Archived 2026-08-17 (keep=12 days=0 require_done=False)
 - [2026-08-06T12:02:04Z] Xong job Winston_20260806_111121: fix bug bien 52 tuan rubber_weekly.py (commit d2aeb9f, selfcheck 60/60 x4 TZ, quant-skeptic CONFIRMED high). CON MO: (1) ~2027-05/06 khi chuoi ngay that du 330-365d, chay lai kich ban hardening cua rubber_weekly_selfcheck.py tren du lieu SONG de xac nhan co MEM tu tat; (2) rui ro ton du da cong bo — co MEM bat khi co BAT KY diem WB monthly trong cua so, nen mot cu truot CHAM xuyen day 52 tuan that ma khong vuot WoW>=12%/3mo>=25% se chi nam WATCH (chi Taylor thay) toi ~2027-06; (3) nghi van chat luong du lieu 2026-08-04 (RSS3 -6,95%/ngay vs spot TQ +1,52%) CHUA giai quyet — neu tai dien nen truy nguon regionalert.
+
+## Archived 2026-08-18 (keep=12 days=0 require_done=False)
+- [2026-08-07T02:07:30Z] ĐANG CHỜ USER: plan 2026-08-07 (SpaceX+ZaloPay) chưa duyệt (approved_by=null) → run_bot rc=2, gate chặn ĐÚNG, không bug. Lệnh BUY DRI timing 11:15 ICT. NEXT: nếu user duyệt trước 11:15 → chạy lại bin/run_bot.sh --account <acc> --auto-otp; nếu không, plan hết hạn cuối phiên. Bus question: ops-autofix-unresolved run-bot-fail-SpaceX-2026-08-07 (job Winston_20260807_020516).
