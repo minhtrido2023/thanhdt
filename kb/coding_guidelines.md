@@ -198,6 +198,28 @@ tables, next-week plan, methodology appendix). **Monthly** = institutional conve
 (MTD/QTD/YTD, benchmark comparison, attribution, risk metrics, fee/expense summary, compliance
 disclosures, outlook).
 
+**§6b. Weekly/monthly BẮT BUỘC có khối "Market regime context" — tái dùng `dna_report.py`, KHÔNG
+tự tính lại (chốt 2026-08-18, sau khi audit thấy weekly/monthly chỉ có DT5G committed state +
+P/E percentile 2-năm TỰ TÍNH, thiếu cả 2 mảnh sau đã có sẵn trong daily EOD từ 07-30/07-31):**
+- **DT gate candidate/streak clock** — `dna_report.build_dt_gate_line()` (đọc `get_dt_gate_clock()`):
+  không chỉ state đã COMMIT (`DT5G = NEUTRAL`) mà cả state đang TÍCH LUỸ (vd "candidate BEAR
+  6/10, còn 4 phiên để commit") — đây chính là câu trả lời cho "có xu hướng mới đang hình thành
+  chưa", KHÔNG PHẢI khái niệm khác cần dựng mới.
+- **Value Radar chính thức** — `dna_report.build_value_radar_line()` (module `value_radar.py`,
+  composite P/E+P/B+spread lãi suất, rolling-10Y, nhãn RẺ<33/TRUNG TÍNH/ĐẮT>67). **KHÔNG** tự tính
+  percentile P/E ad-hoc theo cửa sổ tuỳ chọn (weekly 08-10→08-14 dùng percentile 2-năm riêng, khác
+  hẳn radar canonical) — hai con số khác công thức/cửa sổ sẽ cho nhãn khác nhau cùng ngày (xem
+  `mike/kb/data_registry/market-state/value_radar_series.md` bẫy #5). Value Radar **DISPLAY-ONLY**
+  (không diễn giải như tín hiệu mua/bán — xem §C.5 `market_regime_probability_20260729.md`: hiệu
+  RẺ−ĐẮT p=0,049 thô, chưa qua BH/Bonferroni, đầu RẺ không đơn điệu).
+- Cách lấy 2 dòng trên (đã có sẵn, KHÔNG viết lại logic): tái dùng `eod_trading_report.sh`'s
+  `_dt_gate_line()` làm mẫu gọi (`from dna_report import build_dt_gate_line, build_value_radar_line,
+  build_neutral_base_line`), hoặc chạy trực tiếp `python3 -c "from dna_report import
+  build_dt_gate_line, build_value_radar_line; print(build_dt_gate_line(html=False));
+  print(build_value_radar_line(html=False))"` từ `WC_ROOT`.
+- Daily EOD đã đúng từ 07-30/07-31, KHÔNG cần sửa — chỉ weekly/monthly (hiện do Taylor soạn tay
+  qua `check_report_cadence.sh`/dispatch) thiếu.
+
 *→ rationale §6.*
 
 ## 8. Never Write Experiment Output to a Canonical / Registry-Pinned Filename
