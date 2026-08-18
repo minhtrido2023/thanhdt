@@ -4,7 +4,7 @@ title: Incidents — Mike fleet (sổ postmortem, cấu trúc OKF)
 owner: Mike fleet (mọi agent ghi; daily_retro.sh ghi entry RETRO hằng đêm)
 format: OKF (Open Knowledge Format) — markdown + YAML frontmatter, 1 sự cố = 1 file
 migrated_from: kb/INCIDENTS.md (single-file 408KB, migrate → OKF 2026-07-30 job Winston_20260730_144031)
-entries: 113 file (77 sự cố + 35 RETRO + 1 mục open-items chung)
+entries: 117 file (80 sự cố + 36 RETRO + 1 mục open-items chung)
 ---
 
 # Incidents — Mike fleet
@@ -77,6 +77,10 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 
 | Ngày | Sự cố | status |
 |---|---|---|
+| 2026-08-18 | [2026-08/2026-08-18-check10-cua-so-24h-ap-nham-len-mtime-file.md](2026-08/2026-08-18-check10-cua-so-24h-ap-nham-len-mtime-file.md) | ? |
+| 2026-08-17 | [2026-08/2026-08-17-question-checker-no-grace-period.md](2026-08/2026-08-17-question-checker-no-grace-period.md) | ? |
+| 2026-08-17 | [2026-08/2026-08-17-corp-action-gate-false-refuse-stale-price-vhm.md](2026-08/2026-08-17-corp-action-gate-false-refuse-stale-price-vhm.md) | ? |
+| 2026-08-04 | [2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md](2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md) | fixed (monitoring); production-code fix in progress (Taylor job Taylor_20260804_094514) |
 | 2026-08-18 | [2026-08-18: check #10 báo "TIN NHẮN ĐÃ BỊ NUỐT trong 24h qua" bằng một lỗi 6 ngày trước — cửa sổ 24h áp lên MTIME của file append-only thay vì lên từng bản ghi, và che luôn kết luận đúng ("đã tự sửa, KHÔNG mất tin") của bản ghi mới](2026-08/2026-08-18-check10-cua-so-24h-ap-nham-len-mtime-file.md) | fixed (lọc 24h theo từng bản ghi + 2 ca hồi quy mới, PASS ×4 TZ, checker thật 4→3 điểm; **chưa commit — file mang việc dở của phiên khác, quy tắc 2b**) |
 | 2026-08-17 | [2026-08-17: gate corp-action của `update_shares_live.py` TỪ CHỐI GIẢ 10 ngày vì `cum_raw` rơi trúng dòng `ticker.Price` đông cứng (VHM 1:1 ex 08-07) ⇒ OShares sai 2× ⇒ PE/PB VHM rẻ giả một nửa](2026-08/2026-08-17-corp-action-gate-false-refuse-stale-price-vhm.md) | fixed (`ced702ac` — lùi về phiên cum không đông cứng, gate 0,78%→0,00%; VHM ghi 8.214.824.008 khớp công bố từng cổ phiếu; regression ACB/HDC/EVG sạch; backlog + ops_health_check xanh) |
 | 2026-08-04 | [2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md](2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md) | fixed (monitoring); production-code fix in progress (Taylor job Taylor_20260804_094514) |
