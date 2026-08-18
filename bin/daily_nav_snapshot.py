@@ -534,7 +534,7 @@ def main():
                        "cum_dividend_excl": f"{cum_div['amount']:.0f}"})
     hist_rows.sort(key=lambda r: r["date"])
     # `cash` = tiền THẬT của broker TRỪ cổ tức phải thu chưa qua ex-date (cum_dividend_excl),
-    # để bất biến nav = mtm_stock + cash − margin_debt + offbook_assets luôn đúng trên mọi dòng.
+    # để bất biến nav = mtm_stock + cash − margin_debt + offbook_assets + egg_assets luôn đúng trên mọi dòng.
     fieldnames = ["date", "nav", "mtm_stock", "cash", "margin_debt", "offbook_assets",
                   "egg_assets", "balance_ts", "cum_dividend_excl"]
     _write_nav_history(hist_path, hist_rows, fieldnames)
