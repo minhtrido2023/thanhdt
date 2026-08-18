@@ -9,6 +9,10 @@ mike/kb/data_registry/price-volume/dnse_latest_trade_avgprice_upcom.md
 
 Cửa sổ chạy hợp lệ: sau ~15:05 ICT tới trước 09:00 ICT hôm sau (đọc trong phiên ra avgPrice
 dở dang — script tự chặn, không cưỡng chế qua cron time).
+
+Session date: lấy từ field `time` của bản ghi G1 trong DNSE (không dùng wall-clock date).
+Bẫy đã xảy ra: script chạy pre-session (trước 09:00 ICT ngày T+1) thấy data phiên T nhưng
+gán nhãn wall-clock date = T+1 → `already_captured` skip cron chính lúc 15:15, mất data thật.
 """
 import csv
 import os
@@ -36,18 +40,33 @@ def load_seed_tickers(path=SEED_FILE):
         return [row["ticker"].strip() for row in csv.DictReader(f) if row["ticker"].strip()]
 
 
-def fetch_g1_avg_price(client, ticker):
-    """Trả (avg_price, total_volume) hoặc (None, None) nếu mã không có board G1 phiên đó."""
+def fetch_g1_record(client, ticker):
+    """Returns the G1 trade record dict, or None nếu mã không có board G1 phiên đó."""
     resp = client.latest_trade(ticker)
     trades = resp.get("trades", []) if isinstance(resp, dict) else []
     g1 = [t for t in trades if t.get("boardId") == "G1"]
-    if not g1:
-        return None, None
-    rec = g1[0]
-    return rec.get("avgPrice"), rec.get("totalVolumeTraded")
+    return g1[0] if g1 else None
 
 
-def already_captured_today(out_path, date_str):
+def get_session_date(client, seed_tickers):
+    """Lấy session date từ DNSE latest_trade time field (thử 5 mã đầu danh sách).
+
+    Trả None nếu không mã nào có G1 data (có thể không có phiên giao dịch).
+    Không dùng wall-clock date để tránh gán sai nhãn cho pre-session run:
+    script chạy trước 09:00 ngày T+1 thấy data phiên T, time field = "T 14:xx:xx",
+    date_str = T (đúng) thay vì wall-clock = T+1 (sai).
+    """
+    for t in seed_tickers[:5]:
+        try:
+            rec = fetch_g1_record(client, t)
+            if rec and rec.get("time"):
+                return rec["time"][:10]  # "2026-08-18 14:59:30.005" → "2026-08-18"
+        except DNSEError:
+            continue
+    return None
+
+
+def already_captured(out_path, date_str):
     if not os.path.exists(out_path):
         return False
     with open(out_path, newline="", encoding="utf-8") as f:
@@ -65,7 +84,6 @@ def append_rows(out_path, rows):
 
 def main():
     now = datetime.now(ICT)
-    date_str = now.strftime("%Y-%m-%d")
 
     # Cửa sổ xuyên nửa đêm (15:00 ICT hôm nay → 09:00 ICT hôm sau) ⇒ OR, không phải range đơn giản.
     in_window = now.hour >= MARKET_CLOSE_HOUR_ICT or now.hour < 9
@@ -74,30 +92,37 @@ def main():
               f"avgPrice sẽ dở dang, không chụp.")
         return 1
 
-    if already_captured_today(OUT_FILE, date_str):
-        print(f"[skip] {date_str} đã capture rồi (idempotent) — không ghi trùng.")
-        return 0
-
     tickers = load_seed_tickers()
     client = DNSEClient.from_credentials_file()
+
+    # Lấy session date từ DNSE, không phải wall-clock date.
+    date_str = get_session_date(client, tickers)
+    if date_str is None:
+        print(f"[skip] Không có mã nào trả G1 data — có thể không có phiên giao dịch hôm nay.")
+        return 0
+
+    if already_captured(OUT_FILE, date_str):
+        print(f"[skip] {date_str} đã capture rồi (idempotent) — không ghi trùng.")
+        return 0
 
     rows = []
     ok, no_g1, errors = 0, 0, 0
     for t in tickers:
         try:
-            avg_price, vol = fetch_g1_avg_price(client, t)
+            rec = fetch_g1_record(client, t)
         except DNSEError as e:
             print(f"[err] {t}: {e}")
             errors += 1
             rows.append({"date": date_str, "ticker": t, "avg_price": "", "total_volume_g1": ""})
             continue
-        if avg_price is None:
+        if rec is None:
             no_g1 += 1
             rows.append({"date": date_str, "ticker": t, "avg_price": "", "total_volume_g1": ""})
         else:
             ok += 1
-            rows.append({"date": date_str, "ticker": t, "avg_price": avg_price,
-                         "total_volume_g1": vol})
+            rows.append({"date": date_str, "ticker": t,
+                         "avg_price": rec.get("avgPrice"),
+                         "total_volume_g1": rec.get("totalVolumeTraded")})
 
     append_rows(OUT_FILE, rows)
     print(f"[done] {date_str}: {ok}/{len(tickers)} mã capture được avgPrice G1 "
