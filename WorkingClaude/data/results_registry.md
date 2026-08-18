@@ -5699,3 +5699,66 @@ sau đó dùng **cùng hạ tầng, cùng cổng chống no-op, cùng self-check
 **Báo cáo:** `mike/agents/Taylor/research/capacity_curve_nav_20260804.md` **§10** ·
 **Hiện vật bổ sung:** `cap{1,5,10,20,30,50,75,100}b_real_liqpct0p04.log` (8 log) + `sens.py` +
 `sens_liqpct_raw.csv` + `cap50b_real.log.orig` (đối chứng regression).
+
+---
+
+## KẾT QUẢ THAM CHIẾU phiên 2026-08-18 — Dividend Yield Floor (sàn giá từ cổ tức tiền mặt)
+
+**Job** `Taylor_20260818_024006` (tiếp `_021828`) · **PREREG** khoá trước ở `mike@beabb4f8`
+(§9 GO/NO-GO không sửa sau khi nhìn số) · **Outcome** `mike@f81cbb96` ·
+**Báo cáo** `mike/agents/Taylor/research/dividend_yield_floor_20260818/FINDINGS.md`
+
+**Câu hỏi (của user):** mã trả cổ tức tiền mặt ổn định nhiều năm **không giảm mạnh** khi tỉ suất
+cổ tức chạm/vượt lãi suất huy động ⇒ có "sàn giá tự nhiên" không? PREREG khoá trước rằng đây là
+claim về **ĐUÔI TRÁI**, không phải về lợi suất trung bình, và đặt 2 chân đồng-primary.
+
+### VERDICT: **CONFIRMED chân H2 (drawdown) · KHÔNG ĐẠT chân H1 (lợi suất)**
+
+**Test B — episode chạm sàn** (`prox ∈ [0,97;1,03]` tiếp cận TỪ TRÊN; chứng = NON-PAYER cùng ngày,
+cùng ICB industry, `rvol_60` ∈ [0,8;1,25]×, ≤3 mã gần nhất), horizon primary **60 phiên**:
+
+| | n | mean | CI 95% | t (two-way cluster) |
+|---|---:|---:|---|---:|
+| **ΔMDD_60 (sự kiện − chứng)** | **412** ep / 188 mã / 127 tháng | **+3,46 pp** | [+2,15;+4,79] | **+5,14** |
+| IS (≤2019) | 136 | +4,53 | [+2,49;+6,79] | +4,11 |
+| OOS (≥2020) | 276 | +2,93 | [+1,38;+4,56] | +3,48 |
+| ΔBHAR_60 (cùng cặp) | 412 | +2,56 | [−0,55;+5,51] | +1,61 ❌ |
+
+P(MDD_60 < −10%) = **42,7%** (sự kiện) vs **57,0%** (chứng) · P(< −20%) = 18,2% vs 26,5%.
+
+**Bảng 4 ngưỡng CỐ ĐỊNH (trọng tài §7.1 — miễn nhiễm hindsight của `deposit_rate_vn.py`):**
+5% +2,65 (t=3,98) · 6% +2,52 (t=4,20) · 7% +3,69 (t=6,01) · 8% +3,82 (t=6,33). **4/4 dương,
+mọi nhánh IS lẫn OOS đều dương và có ý nghĩa.**
+Bỏ CRISIS+EX-BULL: +2,97 (t=4,92, giữ 86%) · STABLE-5: +3,46 (t=5,36) · dương ở CẢ 5 state DT5G.
+LOO-year: năm gánh nhiều nhất **2022 = 20,9%** (< ngưỡng 60% §7.3), 0 lần đổi dấu.
+
+**Test A (crossing ngưỡng, chân H1) KHÔNG ĐẠT:** BHAR_60 = +0,64 (t=0,67), **median −0,97**,
+lật **âm** khi bỏ CRISIS+EX-BULL (−0,14), và **2022 gánh 68,4% > 60%** ⇒ §7.3 tự động hạ WEAK.
+Ở 4 ngưỡng cố định BHAR_60 tăng **đơn điệu** 5%→8% (−0,36 → +4,65) = chữ ký **deep-value**, không
+phải chữ ký "sàn". **Không tuyên bố gì từ chân này.**
+
+### ⚠️ HẠN CHẾ QUYẾT ĐỊNH — placebo ghép cặp KHÔNG bằng 0
+Placebo (§8, ngày giả `t−250` phiên, **re-match đầy đủ** — deviation D4): ΔMDD = **+1,29 pp**
+(t=1,77). Phần **ròng sự kiện−placebo = +2,08 pp, t=1,63, CI[−0,34;+4,82] CHỨA 0**.
+⇒ **Độ lớn quy được cho cơ chế là ~+2 pp, KHÔNG phải +3,5 pp**, và ở tiêu chuẩn chặt nhất nó
+**chưa đạt** t≥2,0. §9 không đặt placebo-net vào GO/NO-GO nên không lật verdict — nhưng
+quant-skeptic có lý do chính đáng để lập luận WEAK. **Câu hỏi mở, chưa đóng.**
+Falsification xa-sàn (`prox>1,3`, n=1.391): +0,70 (t=1,84) — hiệu ứng **gần như biến mất** khi
+không ở sàn ⇒ ủng hộ tính đặc thù của vị trí "ở sàn".
+
+**Hạn chế khác:** ngân hàng **n=3** ⇒ §7.4 KHÔNG chạy được, mọi kết luận chỉ về **phi ngân hàng** ·
+`ticker.DY` trùng khớp **tuyệt đối** (ρ=1,0000, max|Δ|=2,8e-14) ⇒ **chung nguồn upstream**, xác nhận
+công thức/đơn vị chứ **KHÔNG** phải nguồn kiểm chứng độc lập · hiệu ứng nằm ở **giữa** phân phối
+(gap p50 4,3pp) hơn là ở **đuôi** (gap p10 3,6pp) — ngược với cơ chế "dòng tiền đỡ giá" ·
+chạm sàn **vẫn** sụt trung bình −10,8%.
+
+**Selfcheck 20/20 PASS**, byte-identical dưới `env -u TZ` và `TZ=UTC` (§16). Bao gồm: tái tạo 3 số
+headline bằng đường độc lập từ CSV, t-stat two-way cluster tự dựng lại theo định nghĩa CGM, kiểm
+đơn vị `value_per_share`, biên PIT trên 200 episode, tính toàn vẹn benchmark EW.
+
+**⛔ KHÔNG WIRE.** Tri thức **định cỡ rủi ro / due-diligence** (cùng loại Sprint 2 corp-action),
+**không phải tín hiệu vào lệnh** — chân lợi suất H1 không đạt. Đường đi đúng nếu muốn dùng: `prox`
+như **trường thông tin** trong bảng due-diligence, KHÔNG phải gate.
+**Deviations D1–D5:** `DEVIATIONS.md`. D2 đáng nhớ nhất — `ticker.Low/High` là giá **hồi tố** còn
+`Price` là **thô**; đọc §4.2 đúng chữ (`Price ∉ [Low,High]`) vứt **96%** mẫu (1.469→65 crossing) vì
+lệch hệ quy chiếu, không phải vì dữ liệu hỏng.
