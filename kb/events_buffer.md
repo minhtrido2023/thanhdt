@@ -1124,3 +1124,34 @@
 - [2026-08-18T16:04:37Z] Taylor/heartbeat — Taylor_20260818_155835: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20260818_155835", "source": "watcher"}
 - [2026-08-18T16:05:37Z] Taylor/heartbeat — Taylor_20260818_155835: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20260818_155835", "source": "watcher"}
 - [2026-08-18T16:06:37Z] Taylor/heartbeat — Taylor_20260818_155835: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20260818_155835", "source": "watcher"}
+
+## Consolidation 2026-08-18T16:31:48Z
+- [2026-08-18T16:07:37Z] Taylor/heartbeat — Taylor_20260818_155835: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20260818_155835", "source": "watcher"}
+- [2026-08-18T16:08:37Z] Taylor/heartbeat — Taylor_20260818_155835: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20260818_155835", "source": "watcher"}
+- [2026-08-18T16:08:39Z] Taylor/heartbeat — Taylor_20260818_155835: {"status": "in_progress", "note": "data pull xong px 3.35M rows; dang pull fund tai 49 ngay rebalance"}
+- [2026-08-18T16:09:38Z] Taylor/heartbeat — Taylor_20260818_155835: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20260818_155835", "source": "watcher"}
+- [2026-08-18T16:10:38Z] Taylor/heartbeat — Taylor_20260818_155835: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20260818_155835", "source": "watcher"}
+- [2026-08-18T16:11:27Z] Taylor/heartbeat — Taylor_20260818_155835: {"status": "in_progress", "note": "PIT validated (ticker.PE step dung Release_Date, basis=Price); dang viet engine backtest 49 mua"}
+- [2026-08-18T16:11:38Z] Taylor/heartbeat — Taylor_20260818_155835: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20260818_155835", "source": "watcher"}
+- [2026-08-18T16:12:39Z] Taylor/heartbeat — Taylor_20260818_155835: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20260818_155835", "source": "watcher"}
+- [2026-08-18T16:13:39Z] Taylor/heartbeat — Taylor_20260818_155835: {"status": "still_running", "elapsed_min": 15, "job_id": "Taylor_20260818_155835", "source": "watcher"}
+- [2026-08-18T16:14:39Z] Taylor/heartbeat — Taylor_20260818_155835: {"status": "still_running", "elapsed_min": 16, "job_id": "Taylor_20260818_155835", "source": "watcher"}
+- [2026-08-18T16:15:39Z] Taylor/heartbeat — Taylor_20260818_155835: {"status": "still_running", "elapsed_min": 17, "job_id": "Taylor_20260818_155835", "source": "watcher"}
+- [2026-08-18T16:16:39Z] Taylor/heartbeat — Taylor_20260818_155835: {"status": "still_running", "elapsed_min": 18, "job_id": "Taylor_20260818_155835", "source": "watcher"}
+- [2026-08-18T16:16:54Z] Taylor/heartbeat — Taylor_20260818_155835: {"status": "in_progress", "note": "primary run xong: selfcheck 0 VND, CAGR 18.4% vs VNI 9.2%, MaxDD -61%; dang kiem thanh khoan + robustness"}
+- [2026-08-18T16:17:39Z] Taylor/heartbeat — Taylor_20260818_155835: {"status": "still_running", "elapsed_min": 19, "job_id": "Taylor_20260818_155835", "source": "watcher"}
+- [2026-08-18T16:18:40Z] Taylor/heartbeat — Taylor_20260818_155835: {"status": "still_running", "elapsed_min": 20, "job_id": "Taylor_20260818_155835", "source": "watcher"}
+- [2026-08-18T16:19:40Z] Taylor/heartbeat — Taylor_20260818_155835: {"status": "still_running", "elapsed_min": 21, "job_id": "Taylor_20260818_155835", "source": "watcher"}
+- [2026-08-18T16:20:40Z] Taylor/heartbeat — Taylor_20260818_155835: {"status": "still_running", "elapsed_min": 22, "job_id": "Taylor_20260818_155835", "source": "watcher"}
+- [2026-08-18T16:21:40Z] Taylor/heartbeat — Taylor_20260818_155835: {"status": "still_running", "elapsed_min": 23, "job_id": "Taylor_20260818_155835", "source": "watcher"}
+- [2026-08-18T16:22:41Z] Taylor/heartbeat — Taylor_20260818_155835: {"status": "still_running", "elapsed_min": 24, "job_id": "Taylor_20260818_155835", "source": "watcher"}
+- [2026-08-18T16:23:35Z] Taylor/heartbeat — Taylor_20260818_155835: {"status": "in_progress", "note": "attempt2: found prior run complete (primary, N=48 seasons, selfcheck 0 VND). Auditing engine PIT correctness, then adding DSR/PBO variants + manual event verify + writeup"}
+- [2026-08-18T16:23:41Z] Taylor/heartbeat — Taylor_20260818_155835: {"status": "still_running", "elapsed_min": 25, "job_id": "Taylor_20260818_155835", "source": "watcher"}
+- [2026-08-18T16:24:41Z] Taylor/heartbeat — Taylor_20260818_155835: {"status": "still_running", "elapsed_min": 26, "job_id": "Taylor_20260818_155835", "source": "watcher"}
+- [2026-08-18T16:25:41Z] Taylor/heartbeat — Taylor_20260818_155835: {"status": "still_running", "elapsed_min": 27, "job_id": "Taylor_20260818_155835", "source": "watcher"}
+- [2026-08-18T16:26:41Z] Taylor/heartbeat — Taylor_20260818_155835: {"status": "still_running", "elapsed_min": 28, "job_id": "Taylor_20260818_155835", "source": "watcher"}
+- [2026-08-18T16:27:41Z] Taylor/heartbeat — Taylor_20260818_155835: {"status": "still_running", "elapsed_min": 29, "job_id": "Taylor_20260818_155835", "source": "watcher"}
+- [2026-08-18T16:28:41Z] Taylor/heartbeat — Taylor_20260818_155835: {"status": "still_running", "elapsed_min": 30, "job_id": "Taylor_20260818_155835", "source": "watcher"}
+- [2026-08-18T16:29:42Z] Taylor/heartbeat — Taylor_20260818_155835: {"status": "still_running", "elapsed_min": 31, "job_id": "Taylor_20260818_155835", "source": "watcher"}
+- [2026-08-18T16:30:42Z] Taylor/heartbeat — Taylor_20260818_155835: {"status": "still_running", "elapsed_min": 32, "job_id": "Taylor_20260818_155835", "source": "watcher"}
+- [2026-08-18T16:31:42Z] Taylor/heartbeat — Taylor_20260818_155835: {"status": "still_running", "elapsed_min": 33, "job_id": "Taylor_20260818_155835", "source": "watcher"}
