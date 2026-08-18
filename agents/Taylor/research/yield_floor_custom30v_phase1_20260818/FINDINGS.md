@@ -1,6 +1,8 @@
 # yield_dividend_floor Phase 1 — điều tra trước khi wire vào custom30V
 
 **Job** `Taylor_20260818_131745` · **Ngày** 2026-08-18 · **Trạng thái: KHÔNG WIRE — cần user quyết**
+**quant-skeptic: CONFIRMED (confidence high)** — tái lập độc lập khớp từng con số; bắt 1 lỗi *diễn giải*
+ở §3b (đã đính chính tại chỗ), không lỗi số. Log: `mike/logs/verify_20260818_132819_2274736.log`.
 
 ## Kết luận một dòng
 
@@ -74,9 +76,21 @@ kỳ hỏng đó. `score` là tổng hai rank-percentile liên tục ⇒ hoà tu
 | số mã bị thay so với rổ production | **16,29 / 30 mỗi kỳ (54%)**, min 12 max 21, **35/35 kỳ đều đổi** |
 |---|---|
 
-Vì sort key này là **PRIMARY**, `score` value-yield bị vứt bỏ hoàn toàn. Chỉ ~7 mã/kỳ có nhãn
-BELOW/NEAR; 30 suất còn lại được lấp bằng nhóm trung tính **theo thứ tự alphabet** (`name` là tie-break
-thứ hai). Rổ parking money-path sẽ được chọn bằng bảng chữ cái.
+Vì sort key này là **PRIMARY**, `score` value-yield bị vứt bỏ hoàn toàn.
+
+⚠️ **Đính chính cơ chế (quant-skeptic bắt được, 2026-08-18 — số 16,29 KHÔNG đổi, chỉ lời giải thích
+sai):** bản đầu tiên viết "chỉ ~7 mã/kỳ có nhãn BELOW/NEAR, 23 suất còn lại lấp theo alphabet" — SAI.
+Trong `_yield_floor`, nhãn `ABOVE_FLOOR` **chỉ được gán khi `stable=True`** (khối `if stable:` ở
+`due_diligence.py:408-410`) ⇒ mọi ABOVE_FLOOR đều rơi vào **priority 3** ("stable nhưng ABOVE"), không
+phải 4. Đo lại: **22,9 mã/kỳ có priority < 4** (≈4,1 BELOW + 0,5 NEAR + **18,3 stable-ABOVE**), chỉ
+~7 mã/kỳ thật sự thuộc nhóm trung tính (NO_DATA/BANKING). Vậy 30 suất được lấp chủ yếu từ **khối
+stable-ABOVE_FLOOR 18,3 mã** — tức V3 xếp rổ theo "có trả cổ tức đều hay không" rồi mới tới alphabet.
+Kết luận không đổi: 16,29/30 mã bị thay ⇒ **thay selector, không phải phá hoà.**
+
+**Hệ quả cho spec:** hai bậc ưu tiên 3 ("stable_payer nhưng ABOVE_FLOOR") và 4 ("ABOVE_FLOOR") mà
+dispatch yêu cầu là **KHÔNG PHÂN BIỆT ĐƯỢC** với ngữ nghĩa hiện tại của `_yield_floor` — bậc 4 trong
+spec là nhánh chết. Bất kỳ implement nào sau này phải hoặc bỏ bậc 4, hoặc đổi `due_diligence.py`
+(mà constraint của dispatch lại cấm).
 
 **⇒ Đây KHÔNG phải tiebreaker. Đây là thay toàn bộ selector. KHÔNG được implement như đã viết.**
 
@@ -115,7 +129,13 @@ kiện cần trước khi wire production".
    chỉ trong-process. `custom30_history.py` **dựng lại TOÀN BỘ ~50 kỳ rebal mỗi ngày** ⇒ spec "gọi
    `_yield_floor()` cho từng mã" = **~3.000 query BQ mỗi ngày** thêm vào pipeline 15:30. Phải batch
    (2 query cho cả panel — xem `probe_yield_bonus.py`) nếu wire.
-3. **Không có vi phạm price-basis:** `_ref_price_for` dùng `COALESCE(Price, Close)` — cùng hệ raw PIT
+3. **Panel batched ≡ `_yield_floor()` — đã kiểm chứng, không phải khẳng định suông:**
+   `probe_panel_equiv.py` gọi THẲNG `trading_bot.due_diligence._yield_floor()` và so từng ô với panel
+   trên 24 mã × 5 kỳ rebal (2025-08 → 2026-08) phủ cả 5 nhãn: **khớp 120/120 (100%)**, `prox_to_floor`
+   khớp tới 4 chữ số thập phân ở mọi ô cả hai bên cùng tính được. quant-skeptic chạy độc lập một
+   script tương đương trên 25 cặp phân tầng: **25/25 khớp**. Đây là mắt xích yếu nhất của phép đo và
+   nó đã được đóng.
+4. **Không có vi phạm price-basis:** `_ref_price_for` dùng `COALESCE(Price, Close)` — cùng hệ raw PIT
    với `pxw_sql()`. Nhánh cổ tức as-of đúng (`exright_date <= asof`). Đây là điểm SẠCH, không phải lo.
 
 ## 6. Khuyến nghị
@@ -138,5 +158,6 @@ DNA_PYEXE=/home/trido/thanhdt/wc_venv/bin/python
 $DNA_PYEXE probe_pool_size.py     # bảng §2
 $DNA_PYEXE probe_tie_rate.py      # bảng §3a (tie rate 35 kỳ)
 $DNA_PYEXE probe_yield_bonus.py   # bảng §3 phân bố nhãn + §3a/3b/4 + §5.1
+$DNA_PYEXE probe_panel_equiv.py   # §5.3 — panel vs _yield_floor(), 120/120
 ```
-Cả 3 script **chỉ đọc** — không ghi file, không `bq load`, không đụng `tav2_bq.custom30v_8l`.
+Cả 4 script **chỉ đọc** — không ghi file, không `bq load`, không đụng `tav2_bq.custom30v_8l`.
