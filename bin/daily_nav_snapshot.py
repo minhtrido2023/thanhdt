@@ -447,6 +447,10 @@ def main():
         return 2
 
     cash, debt = stock["totalCash"], stock["totalDebt"]
+    # Trứng vàng — từ 2026-08-18, DNSE expose qua API (field egg.totalValue trong balances).
+    # Đọc tự động từ bản ghi log, không cần user báo tay nữa. manual_offbook_assets_vnd vẫn
+    # dùng cho tài sản off-book KHÁC egg (nếu có trong tương lai).
+    egg_value = float((bal.get("payload", {}).get("egg") or {}).get("totalValue") or 0)
 
     # INVARIANT (bug 2026-07-07 lần 2, user chỉ ra): bản ghi balance phải MỚI HƠN cú khớp
     # CUỐI CÙNG trong ngày — ngày vừa mua vừa bán, DNSE cập nhật tiền theo TỪNG khớp
@@ -485,9 +489,10 @@ def main():
     # Lần đọc sau (cuối ngày) mới đúng, khớp ảnh chụp thật. => KHÔNG tự suy luận/mô hình hoá
     # thêm gì — chỉ cần đảm bảo balance record dùng để tính NAV là bản MỚI NHẤT trong ngày
     # (đã tự động nhờ latest_balance() lấy dòng cuối), và cảnh báo rõ nếu có dấu hiệu stale.
-    # + offbook: tài sản off-book user tự báo (vd Trứng vàng, xem ACCOUNT_DEFAULTS) — cộng
-    # thẳng vào NAV thật, KHÔNG lẫn vào 'cash' (cash vẫn = sức mua thật ở tài khoản môi giới).
-    nav = mtm_stock + cash - debt + offbook
+    # + egg_value: Trứng vàng tự đọc từ API (field egg.totalValue trong balances), live từ 2026-08-18.
+    # + offbook: tài sản off-book user tự báo KHÁC egg — cộng thẳng vào NAV thật,
+    # KHÔNG lẫn vào 'cash' (cash vẫn = sức mua thật ở tài khoản môi giới).
+    nav = mtm_stock + cash - debt + offbook + egg_value
 
     sell_today = today_sell_value(args.account, args.date)
     stale_warning = None
@@ -524,13 +529,14 @@ def main():
     hist_rows = [row for row in hist_rows if row["date"] != args.date]
     hist_rows.append({"date": args.date, "nav": f"{nav:.0f}", "mtm_stock": f"{mtm_stock:.0f}",
                        "cash": f"{cash:.0f}", "margin_debt": f"{debt:.0f}",
-                       "offbook_assets": f"{offbook:.0f}", "balance_ts": bal["ts"],
+                       "offbook_assets": f"{offbook:.0f}", "egg_assets": f"{egg_value:.0f}",
+                       "balance_ts": bal["ts"],
                        "cum_dividend_excl": f"{cum_div['amount']:.0f}"})
     hist_rows.sort(key=lambda r: r["date"])
     # `cash` = tiền THẬT của broker TRỪ cổ tức phải thu chưa qua ex-date (cum_dividend_excl),
     # để bất biến nav = mtm_stock + cash − margin_debt + offbook_assets luôn đúng trên mọi dòng.
     fieldnames = ["date", "nav", "mtm_stock", "cash", "margin_debt", "offbook_assets",
-                  "balance_ts", "cum_dividend_excl"]
+                  "egg_assets", "balance_ts", "cum_dividend_excl"]
     _write_nav_history(hist_path, hist_rows, fieldnames)
 
     since_inception = nav - args.starting_capital
@@ -539,6 +545,7 @@ def main():
     lines = [
         f"💰 **NAV {args.date}: {nav:,.0f} VND** ({day_change:+,.0f} VND, {day_change_pct:+.2f}% so với hôm trước)",
         f"   Cổ phiếu {mtm_stock:,.0f} · Tiền mặt {cash:,.0f} · Nợ margin {debt:,.0f}"
+        + (f" · Trứng vàng {egg_value:,.0f}" if egg_value else "")
         + (f" · Off-book {offbook:,.0f}" if offbook else ""),
         f"   Từ go-live: {since_inception:+,.0f} VND ({since_inception_pct:+.2f}%)",
     ]
@@ -564,6 +571,7 @@ def main():
     out = {"account": args.account, "date": args.date, "nav": nav,
            "mtm_stock": mtm_stock, "cash": cash, "cash_broker": cash_broker,
            "cum_dividend_excl": cum_div, "margin_debt": debt,
+           "egg_assets": egg_value, "egg_assets_auto": True,
            "offbook_assets": offbook, "offbook_assets_note": offbook_note,
            "offbook_assets_asof": offbook_asof, "offbook_stale_warning": offbook_stale_warning,
            "stale_warning": stale_warning, "prev_nav": prev_nav, "day_change": day_change,
@@ -572,6 +580,7 @@ def main():
            "source": "verify_account_snapshot.py (fills) + dnse_raw balances (real broker API, "
                      "chọn bản GHI CUỐI CÙNG trong ngày — balance có thể cần thời gian đối soát "
                      "cuối phiên mới phản ánh đúng, xem cảnh báo staleness nếu có) + "
+                     "egg.totalValue từ balances API (tự động, live từ 2026-08-18) + "
                      "manual_offbook_assets_vnd (trading_bot_accounts.json, user tự báo, KHÔNG "
                      "có API — xem note/asof)"}
     with open(os.path.join(EXEC_DIR, f"nav_snapshot_{args.account}_{args.date}.json"), "w",

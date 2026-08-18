@@ -152,8 +152,10 @@ def live_balance_and_positions(account_id, label):
     bal = b.client.balances(account_id)
     b._log_raw("balances", bal)                 # cùng dấu vết audit như get_cash() vẫn ghi
     cash, cash_detail = cash_basis(bal)
+    # Trứng vàng — live API trả thẳng (không có wrapper "payload" như trong log file).
+    egg_value = float((bal.get("egg") or {}).get("totalValue") or 0)
     positions = b.get_positions()
-    return cash, positions, cash_detail
+    return cash, positions, cash_detail, egg_value
 
 
 def bq_close_prices(tickers, as_of_date=None):
@@ -249,7 +251,7 @@ def main():
         except ValueError:
             pass
 
-    cash, positions, cash_detail = live_balance_and_positions(account_id, args.account)
+    cash, positions, cash_detail, egg_value = live_balance_and_positions(account_id, args.account)
     if cash is None:
         # FAIL-CLOSED (§cash): không ghi đè file active_nav cũ bằng một con số sai. Consumer
         # (`golive_recommend_v23._account_nav_basis`) tự thấy file quá hạn theo `computed_at`
@@ -262,8 +264,8 @@ def main():
     tickers = list(positions.keys())
     if not tickers:
         print(f"⚠️ Account {args.account} không có vị thế nào — "
-              f"active_nav = cash + offbook = {cash + offbook:,.0f} "
-              f"(cash {cash:,.0f} = totalCash − totalDebt + offbook {offbook:,.0f})")
+              f"active_nav = cash + egg + offbook = {cash + egg_value + offbook:,.0f} "
+              f"(cash {cash:,.0f}, egg {egg_value:,.0f}, offbook {offbook:,.0f})")
         return
 
     prices, price_source, err = resolve_prices(tickers, args.asof)
@@ -288,7 +290,7 @@ def main():
             excluded_mv += mv
         rows.append((tk, qty, px, mv, is_excluded))
 
-    total_nav = cash + total_mv + offbook
+    total_nav = cash + total_mv + egg_value + offbook
     active_nav = total_nav - excluded_mv
 
     print(f"== Active NAV — {args.account} (account_id={account_id}) ==")
@@ -305,10 +307,14 @@ def main():
           f"(sức mua TỨC THÌ — KHÔNG dùng làm cơ sở NAV, chỉ để đối chiếu)")
     print(f"Tổng giá trị cổ phiếu:    {total_mv:>16,.0f}")
     print(f"  trong đó excluded:      {excluded_mv:>16,.0f}  ({', '.join(sorted(excluded)) or '(none)'})")
+    if egg_value:
+        print(f"Trứng vàng (tự đọc từ egg.totalValue trong balances API): {egg_value:>16,.0f}")
     if offbook:
-        print(f"Off-book (vd Trứng vàng, user tự báo, KHÔNG phải sức mua ngay): {offbook:>16,.0f}")
+        print(f"Off-book (user tự báo, KHÔNG phải sức mua ngay):          {offbook:>16,.0f}")
     print(f"= TỔNG NAV:               {total_nav:>16,.0f}")
     print(f"= ACTIVE NAV (cho chiến lược V2.4, loại trừ excluded_tickers): {active_nav:>16,.0f}")
+    if egg_value:
+        print(f"ℹ️ Trứng vàng {egg_value:,.0f} đã cộng vào NAV tự động — KHÔNG phải sức mua đặt lệnh ngay.")
     if offbook:
         print(f"⚠️ ACTIVE NAV đã cộng {offbook:,.0f} off-book làm cơ sở TÍNH TỶ TRỌNG mục tiêu — "
               f"nhưng sức mua THỰC THI NGAY vẫn phải kiểm tra `cash`/ppse live (DNSE), vì số "
@@ -344,6 +350,7 @@ def main():
         "cash_basis": cash_detail["cash_basis"],
         "cash_dividend_double_count_warning": div_warning,
         "total_stock_value": total_mv, "excluded_value": excluded_mv,
+        "egg_assets": egg_value, "egg_assets_auto": True,
         "offbook_assets": offbook, "offbook_assets_asof": offbook_asof,
         "offbook_stale_warning": offbook_stale_warning,
         "excluded_tickers": sorted(excluded), "total_nav": total_nav, "active_nav": active_nav,
