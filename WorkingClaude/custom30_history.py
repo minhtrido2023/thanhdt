@@ -15,6 +15,7 @@ sys.path.insert(0, WORKDIR); os.chdir(WORKDIR)
 from simulate_holistic_nav import bq
 from pt_dates import detect_end_date
 import custom_basket as cb
+import custom30_yield_labels as yfl
 
 NAME_CAP = 0.10
 START = "2014-01-02"; END = detect_end_date()
@@ -64,11 +65,27 @@ for i, rd in enumerate(rebals):
             rating_8l=(int(r["rating"]) if pd.notna(r["rating"]) else ""),
             weight=round(float(w[j]), 6), quarter=str(r["quarter"])))
 df = pd.DataFrame(rows)
+
+# --- nhãn QUAN SÁT yield_floor (Phase 1 Option C, 2026-08-18, job Taylor_20260818_134610) ------
+# Chạy SAU khi `rows` đã đóng: rổ đã chọn xong, weight đã cap xong. Hai cột này KHÔNG quay lại
+# ảnh hưởng `mem`/`w`/thứ tự — thuần quan sát cho chương trình `yield_floor_custom30v_observe`
+# (review 2027-02-10, `mike/kb/paper_programs_registry.json`). Fail-open: `label_basket()` không
+# bao giờ raise; cặp nào hỏng về ("NO_DATA", None). Xem custom30_yield_labels.py.
+_lab = yfl.label_basket(bq, list(zip(df["ticker"], df["rebal_date"])))
+_pair = list(zip(df["ticker"], df["rebal_date"].astype(str)))
+df["yield_floor_note"] = [_lab.get(k, ("NO_DATA", None))[0] for k in _pair]
+df["is_stable_payer"] = ["" if _lab.get(k, ("NO_DATA", None))[1] is None
+                         else ("true" if _lab[k][1] else "false") for k in _pair]
+_cur = df[df["rebal_date"] == pd.Timestamp(rebals[-1]).date()]
+print("  yield_floor (rebal hien tai): " +
+      ", ".join(f"{k}={v}" for k, v in _cur["yield_floor_note"].value_counts().items()))
 df.to_csv(CSV, index=False, encoding="utf-8")
 print(f"  {len(df)} rows, {len(rebals)} rebals -> {CSV}")
 
+# `bq load --replace` ghi lai CA schema lan du lieu ⇒ 2 cot moi khong can ALTER TABLE.
 schema = ("rebal_date:DATE,effective_from:DATE,effective_to:DATE,ticker:STRING,"
-          "liq_rank:INTEGER,rating_8l:INTEGER,weight:FLOAT,quarter:STRING")
+          "liq_rank:INTEGER,rating_8l:INTEGER,weight:FLOAT,quarter:STRING,"
+          "yield_floor_note:STRING,is_stable_payer:BOOLEAN")
 cmd = f'"{BQ}" load --replace --source_format=CSV --skip_leading_rows=1 {TABLE} "{CSV}" {schema}'
 print("  bq load ...")
 r = subprocess.run(cmd, capture_output=True, text=True, shell=True)
