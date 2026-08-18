@@ -107,13 +107,13 @@ def _golive_src():
         return f.read()
 
 
-def extract_func(src, name):
+def extract_func(src, name, where=None):
     """Source của đúng 1 def top-level trong `src` (AST, không regex)."""
     tree = ast.parse(src)
     for node in tree.body:
         if isinstance(node, ast.FunctionDef) and node.name == name:
             return ast.get_source_segment(src, node)
-    raise AssertionError(f"không tìm thấy def {name}() trong {GOLIVE}")
+    raise AssertionError(f"không tìm thấy def {name}() trong {where or GOLIVE}")
 
 
 def extract_consts(src, prefix="CAPIT_LEVER_", allow_empty=False):
@@ -2008,10 +2008,16 @@ with tempfile.TemporaryDirectory() as TMP:
     section("K. Mối nối cascade trong bot_execute.py")
 
     _bx = open(os.path.join(HERE, "bot_execute.py"), encoding="utf-8").read()
-    _i_lever = _bx.find("apply_capit_lever(plan")
-    _i_conn = _bx.find("make_broker(cfg, otp=otp, profile=p).connect()")
-    _i_pref = _bx.find("lever_live_preflight(")
-    _i_shadow = _bx.find("_log_plan_buying_power_shadow(p[")
+    # K1-K3 kiểm THỨ TỰ trong cascade thực thi, mà cascade nằm gọn trong `main()`. Phải cắt
+    # nguồn về đúng thân `main()` TRƯỚC khi `.find()`: một hàm phụ đứng trước main mà tình cờ
+    # chứa cùng chuỗi mốc sẽ làm `.find()` trả về vị trí của hàm phụ đó và thứ tự so ra SAI
+    # (sự cố thật 2026-08-18: `_run_gdkhq_shadow` dòng 111 cũng gọi
+    # `make_broker(cfg, otp=otp, profile=p).connect()` ⇒ K3 FAIL trong khi bot_execute.py đúng).
+    _bx_main = extract_func(_bx, "main", where="bot_execute.py")
+    _i_lever = _bx_main.find("apply_capit_lever(plan")
+    _i_conn = _bx_main.find("make_broker(cfg, otp=otp, profile=p).connect()")
+    _i_pref = _bx_main.find("lever_live_preflight(")
+    _i_shadow = _bx_main.find("_log_plan_buying_power_shadow(p[")
     check("K1 bot_execute.py có gọi lever_live_preflight", _i_pref > 0)
     check("K2 …SAU connect() (cần sổ broker sống) và TRƯỚC shadow-log P0 (shadow phải đo "
           "theo trạng thái đòn bẩy CHUNG CUỘC, nếu không nó ghi would_block GIẢ)",
