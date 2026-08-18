@@ -245,16 +245,12 @@ ACCOUNT_DEFAULTS = {
                                 # `bin/compute_active_nav.py` để tính NAV thực sự khả dụng cho
                                 # chiến lược (= account_nav − giá trị thị trường các mã này) khi
                                 # lên plan/backtest/báo cáo cho account có field này khác rỗng.
-    "manual_offbook_assets_vnd": 0,      # tài sản off-book KHÔNG lộ qua DNSE OpenAPI (vd "Trứng
-                                # vàng" — sản phẩm tiền gửi tự động của DNSE; xác nhận 2026-07-16
-                                # sau khi cạn 19 endpoint pattern + SDK chính thức: KHÔNG có field
-                                # nào trả về số dư này, balances() chỉ phủ tiểu khoản giao dịch).
-                                # User TỰ báo số dư mỗi lần nạp/rút — Mike cập nhật 3 field này
-                                # NGAY khi nhận thông báo. Cộng vào TRUE NAV ở
-                                # daily_nav_snapshot.py/compute_active_nav.py — KHÔNG cộng vào
-                                # 'cash': cash vẫn phải phản ánh đúng sức mua THỰC SỰ khả dụng
-                                # trong tài khoản môi giới (user phải rút tay từ Trứng vàng trước
-                                # khi bot mua được — xem kb/current_ops.md mục Trứng vàng).
+    "manual_offbook_assets_vnd": 0,      # tài sản off-book KHÔNG lộ qua DNSE OpenAPI (KHÔNG bao
+                                # gồm "Trứng vàng" — từ 2026-08-18 Trứng vàng tự đọc qua field
+                                # egg.totalValue trong balances() API, không cần user báo tay nữa).
+                                # Field này CHỈ dùng cho tài sản off-book KHÁC egg (nếu có).
+                                # Cộng vào TRUE NAV ở daily_nav_snapshot.py/compute_active_nav.py —
+                                # KHÔNG cộng vào 'cash' (sức mua thực sự khả dụng để đặt lệnh).
     "manual_offbook_assets_asof": None,  # ngày user báo số dư này (YYYY-MM-DD)
     "manual_offbook_assets_note": None,  # vd "Trứng vàng DNSE"
 }
