@@ -7,6 +7,7 @@ src = (Path(__file__).resolve().parent / "eod_trading_report.sh").read_text(enco
 checks = {
     "helper calls report_delivery_gate": 'report_delivery_gate.py" "${gate_args[@]}"' in src,
     "artifact name is cadence-discoverable": '_daily_report_${PLAN_DATE}.md' in src,
+    "cron loads shared env before gates": 'source "$WC_ROOT/wc_env.sh"' in src,
     "all three early branches call helper": src.count('_deliver_eod "$MSG" not_applicable') == 3,
     "early alerts skip only inapplicable return validation": 'gate_args+=(--skip-validation)' in src,
     "normal branch calls helper": '_deliver_eod "$FULL_REPORT"' in src,
