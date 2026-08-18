@@ -19,7 +19,7 @@
 #      Trading report topic (không chôn ở Trading Daily) + bus event question.
 #
 # Đây là lớp CẢNH BÁO SỚM bổ sung, KHÔNG thay thế preflight_check.sh (08:45) hay
-# eod_trading_report.sh (15:00) — chạy TRƯỚC mỗi phiên để con người có thời gian phản ứng.
+# eod_trading_report.sh (19:10) — chạy TRƯỚC mỗi phiên để con người có thời gian phản ứng.
 # Post tóm tắt vào Trading Daily (vận hành sống trong ngày), không phải Trading report
 # (báo cáo tổng hợp) — đúng phân tách 2026-07-03.
 set -uo pipefail
