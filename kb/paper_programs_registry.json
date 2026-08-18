@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updated": "2026-08-14",
+  "updated": "2026-08-18",
   "description": "Registry các chương trình PAPER-TRADING đang active — nguồn duy nhất cho paper_programs_daily_report.py. Thêm sleeve mới = thêm 1 entry (không sửa code render). Probe types: command | journal_scan | alphalens. Field BẮT BUỘC cho entry mới (v3, redesign trình bày 2026-07-31): today_activity (mode journal|csv_row|static|none_available — thiếu field này thì report báo WATCH vì không phân biệt được 'không có giao dịch' với 'không đo được'), review_short (mốc nghiệm thu 1 dòng), và nên có headline (csv_row hoặc regex) để dòng đầu section có số. objective/end_or_trigger/gate_criteria/notes = phần TĨNH, KHÔNG in lại mỗi ngày nữa — tự sinh ra mike/kb/paper_programs_charter/<id>.md, report chỉ link tới.",
   "programs": [
     {
@@ -555,6 +555,45 @@
         "mode": "none_available",
         "reason": "chương trình LOG-ONLY: không phát sinh lệnh riêng nào (P2 chưa được phép đổi hành vi trên live). Hoạt động trong ngày đọc ở dòng cuối output probe ('hôm nay: N order-day · M slice')"
       }
+    },
+    {
+      "id": "yield_floor_custom30v_observe",
+      "name": "custom30V yield_floor — nhãn quan sát (Option C)",
+      "owner": "Taylor",
+      "objective": "Observational labels (yield_floor_note, is_stable_payer) trong tav2_bq.custom30v_8l qua 2 kỳ rebalance — KHÔNG đổi cách chọn mã. User (John) chọn Option C từ finding yield-floor-phase1-wire-20260818: research dividend_yield_floor_20260818 CONFIRMED chân H2 (ΔMDD60 +3,46pp) nhưng REFUTED chân H1 (không có alpha lợi suất, BHAR60 t=0,67 median ÂM) và tự khai độ tin cậy TRUNG BÌNH ⇒ chưa đủ để đụng selector rổ parking đang chạy tiền thật. Thu dữ liệu thật trước, quyết sau.",
+      "start": "2026-08-18",
+      "end": "2027-02-05",
+      "review_date": "2027-02-10",
+      "end_or_trigger": "2 kỳ rebalance q2m5: 2026-11-05 và 2027-02-05. Sau kỳ thứ 2 → review 2027-02-10. Forcing function KHÔNG phải trí nhớ: paper_checkpoint_escalation.sh (cron 16:10) escalate + tự dispatch Taylor khi `end` đã qua mà gate_criteria còn `pending`.",
+      "gate_criteria": [
+        {
+          "text": "Nhãn có mặt trong tav2_bq.custom30v_8l từ kỳ rebalance 2026-11-05 (yield_floor_note khác NULL cho mọi dòng; is_stable_payer NULL đúng bằng số dòng BANKING_EXCLUDED)",
+          "status": "pending"
+        },
+        {
+          "text": "NẾU có episode drawdown ≥5% VNINDEX trong kỳ quan sát: nhóm BELOW_FLOOR trong rổ có ΔMDD ≥1pp tốt hơn nhóm ABOVE_FLOOR trong cùng rổ (nhất quán với chân H2 của research)",
+          "status": "pending"
+        },
+        {
+          "text": "Thành phần rổ KHÔNG đổi vì nhãn — 30 mã + weight y hệt như khi không có 2 cột (đã chứng minh A/B tại ngày wire 2026-08-18, phải giữ đúng ở mỗi kỳ rebalance)",
+          "status": "pending"
+        }
+      ],
+      "phase2_trigger": "2/3 gate_criteria đạt → sang B: cộng điểm mềm W=0,10 vào score V2 (BONUS {BELOW:1,0 · NEAR:0,6 · stable-ABOVE:0,2 · trung tính:0,0}, đo sẵn ~1,03 mã đổi/kỳ) — BẮT BUỘC backtest NAV/DD IS 2014-19 / OOS 2020+ + self-check 0 VND + quant-skeptic CONFIRMED TRƯỚC khi wire, theo §18.",
+      "feature_flag": "N/A — không có cờ nào cần bật, đường code không đổi hành vi (thuần thêm 2 cột output)",
+      "reporting": false,
+      "reporting_reason": "Cadence QUÝ, không phải ngày: chỉ có đúng 2 điểm dữ liệu mới (rebalance 2026-11-05 và 2027-02-05) trong suốt chương trình. Render mỗi ngày ~6 tháng = nhiễu nền chứ không phải thông tin. Vẫn hiện 1 dòng ở khối 'Đã chuyển khỏi báo cáo ngày', và vẫn được paper_checkpoint_escalation.sh bắt khi quá hạn (script đó KHÔNG lọc theo `reporting`).",
+      "today_activity": {
+        "mode": "none_available",
+        "reason": "Chương trình THUẦN QUAN SÁT: không sinh lệnh, không có sleeve NAV, không có journal riêng. Sản phẩm duy nhất là 2 cột nhãn trong tav2_bq.custom30v_8l, chỉ đổi giá trị ở ngày rebalance quý."
+      },
+      "data_sources": [
+        "tav2_bq.custom30v_8l (2 cột yield_floor_note + is_stable_payer)",
+        "custom30_yield_labels.py",
+        "trading_bot/due_diligence._yield_floor (định nghĩa nhãn chuẩn tắc)"
+      ],
+      "notes": "Wire 2026-08-18 (job Taylor_20260818_134610): custom30_yield_labels.py (panel batch 2 query, ĐÃ kiểm chứng bằng nhau với _yield_floor 30/30 trên rổ hiện tại + 120/120 ở research phase 1) + custom30_history.py gọi SAU khi rổ đã chốt. Fail-open: mọi đường hỏng về NO_DATA/None, không bao giờ raise. ⚠️ ĐỌC NHÃN: BELOW_FLOOR là ĐỆM ĐUÔI TRÁI, TUYỆT ĐỐI không phải tín hiệu mua (H1 REFUTED). Research: mike/agents/Taylor/research/yield_floor_custom30v_phase1_20260818/FINDINGS.md.",
+      "review_short": "2027-02-10 — sau kỳ rebalance 2027-02-05: nhóm BELOW_FLOOR trong rổ có ΔMDD tốt hơn ABOVE_FLOOR ở drawdown nào giữa 08/2026→02/2027 không? 2/3 gate đạt → sang B (backtest W=0,10)."
     }
   ]
 }
