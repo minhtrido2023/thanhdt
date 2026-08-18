@@ -2,28 +2,35 @@
 > Cập nhật mỗi khi đổi mạch việc. Bơm vào đầu phiên của Mike.
 
 # Working memory — Mike
-> Cập nhật lần cuối: 2026-08-18T12:11Z (plan 08-19 xong, cả 2 HOLD ALL, chờ duyệt)
+> Cập nhật lần cuối: 2026-08-18T14:15Z
 
-## Plan 08-19 — ĐÃ SINH XONG, cả 2 HOLD ALL, CHỜ DUYỆT
-- SpaceX (job DollarBill_20260818_120604): HOLD ALL, 0 lệnh. ZaloPay (job
-  DollarBill_20260818_120602): HOLD ALL, 0 lệnh. Cả 2 approved_by=None, cần duyệt trước
-  08:45 ICT sáng mai (08-19).
-- Cả 2 đã báo cáo đầy đủ vào thread.
+## Hôm nay 08-18 — XONG
 
-## Đã xong 08-18 (từ trước, giữ nguyên)
-- F1+F3 anti-double-reply, gdkhq Option B, UPCOM VWAP cron, Wags coord fix — arch-review CLEAN.
-- G5 UPCOM: cron cài xong (15:15 ICT T2-T6), đang tích luỹ history, cần ≥3 phiên trước khi wire.
-- VIX ex-date 08-20: shadow trong phiên 09:10-14:30, G2 tolerance fix xong.
-- dividend-yield-floor: CONFIRMED downside-protection signal, CHƯA wire production.
-- book_breakdown_current SCL mislabel: FIXED 08-17, verify độc lập OK.
+### yield_floor Option C — WIRED (commits 9ed56854 + a6ea3f06 + 133d9854)
+- `custom30_yield_labels.py` (mới) + `custom30_history.py`: thêm 2 cột `yield_floor_note` +
+  `is_stable_payer` vào `custom30v_8l` — thuần observational, selection logic UNCHANGED (A/B verify).
+- Nhãn có trong bảng thật từ cron 15:30 ICT hôm nay trở đi.
+- Review milestone: **2027-02-10** (sau 2 kỳ rebalance 11-05 + 02-05).
+- Forcing function: `paper_checkpoint_escalation.sh` tự escalate 2027-02-06 nếu gate còn pending.
+
+### cron paper-reporting — DỊCH (commit 0550e5d3 worktree, crontab đã đổi)
+- dc_book_waterfall: 15:05 → 00:15 ICT (sau BQ sync 23:45)
+- paper_programs_daily_report: 16:00 → 07:30 ICT sáng hôm sau
+- paper_checkpoint_escalation: 16:10 → 07:40 ICT sáng hôm sau
+- ⚠️ Commit worktree chưa push (git push bị auto-mode block lần trước)
+
+## Plan 08-19 — cần duyệt trước 08:45 ICT
+- SpaceX + ZaloPay: HOLD ALL, 0 lệnh, approved_by=None
 
 ## Việc còn hở (ưu tiên giảm dần)
 1. GDKHQ dry-run D1-D3 chưa setup — theo dõi trước VIX 08-20 (còn 2 phiên).
 2. plan-dd-check-string fix (commit 9a9dbb1) — cần ngày có LAG/BAL entry để verify.
 3. Order-book Pha 0 telemetry (commit d6346efd) — chờ phiên thật có giao dịch.
+4. Push commit 0550e5d3 (cron_registry worktree) — bị block, cần user allow git push.
 
 ## Bối cảnh còn hiệu lực
-- TV1 Rule A LIVE từ 08-15, an toàn, đã đạt target. CASH_VENDOR gate: giữ ĐÓNG.
+- TV1 Rule A LIVE từ 08-15, an toàn. CASH_VENDOR gate: ĐÓNG.
 - CAPIT margin: enabled=false. dispatch-prompt-heredoc skill cho prompt có backtick.
 - park_holdings.py stdout lẫn dòng "[dnse] kết nối OK" trước JSON — cần tail -n +2 khi parse.
+- yield_floor: H2 CONFIRMED (downside protection), H1 REFUTED. Option C deployed. B sau 2027-02.
 
