@@ -106,10 +106,13 @@ echo "== CA 1: from=Mike, job THÀNH CÔNG, có thread pinned ⇒ wake_thread.sh
 FROM_AGENT=Mike
 run_dispatch -u DISCORD_THREAD_ID CLAUDE_STUB_RC=0 -- Wags "selfcheck wake ca1" --thread architecture --bg --timeout 30
 _wait_bg
+JOB1="$(ls "$MK/bus/jobs"/*.json 2>/dev/null | sed -n '1s#.*/##;1s/\.json$//p')"
+[ -n "$JOB1" ] || JOB1=missing
 assert "exit code (--bg trả ngay)" "$RC" "0"
 assert "wake_thread.sh được gọi đúng 1 lần" "$NWAKE" "1"
 assert "wake gọi đúng thread pinned" "$(echo "$WAKE_LINE" | grep -oP 'thread_id=\K[0-9]+')" "$ARCH_ID"
 assert "prompt wake nêu status=done" "$(echo "$WAKE_LINE" | grep -c 'status=done')" "1"
+assert "prompt wake bắt đầu bằng claim-reply đúng job" "$(echo "$WAKE_LINE" | grep -c "prompt=.*claim-reply $JOB1")" "1"
 
 echo "== CA 2: from=Taylor (agent khác, không phải Mike) ⇒ wake_thread.sh KHÔNG được gọi dù thành công"
 FROM_AGENT=Taylor
@@ -121,8 +124,11 @@ echo "== CA 3: from=Mike, job THẤT BẠI (hết retry) ⇒ wake_thread.sh vẫ
 FROM_AGENT=Mike
 run_dispatch -u DISCORD_THREAD_ID CLAUDE_STUB_RC=1 -- Wags "selfcheck wake ca3" --thread architecture --bg --timeout 30 --retries 0
 _wait_bg
+JOB3="$(ls "$MK/bus/jobs"/*.json 2>/dev/null | sed -n '1s#.*/##;1s/\.json$//p')"
+[ -n "$JOB3" ] || JOB3=missing
 assert "wake_thread.sh được gọi đúng 1 lần (nhánh fail)" "$NWAKE" "1"
 assert "prompt wake nêu lý do fail (THẤT BẠI/timeout)" "$(echo "$WAKE_LINE" | grep -cE 'THẤT BẠI|timeout')" "1"
+assert "prompt wake fail bắt đầu bằng claim-reply đúng job" "$(echo "$WAKE_LINE" | grep -c "prompt=.*claim-reply $JOB3")" "1"
 
 echo "== CA 4: from=Mike, KHÔNG có thread nào pinned (không --thread, không ambient) ⇒ wake_thread.sh KHÔNG được gọi"
 FROM_AGENT=Mike

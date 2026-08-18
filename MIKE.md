@@ -154,6 +154,10 @@ cao sẽ tự chạy tiếp, nhưng nếu phiên tôi restart giữa chừng th�
 >    **Prompt `ScheduleWakeup` phải encode Bước A làm dòng đầu tiên.** Template chuẩn:
 >    `"Đầu tiên: bin/jobs.sh claim-reply <job_id> → exit 1 → ScheduleWakeup(noop:true,stop:true), DỪNG. exit 0 → [logic poll + post bình thường]. exit 2 → báo job record thiếu, đừng im lặng."`
 >
+>    Từ 2026-08-18: prompt active-wake do `dispatch.sh --bg` tự sinh (`from=Mike`, cả nhánh
+>    done/fail) đã prepend sẵn template này kèm đúng job_id; prompt in ra stderr sau dòng
+>    "Theo dõi:" cũng là bản sẵn dùng. Wakeup từ nguồn khác vẫn phải tự encode Bước A.
+>
 >    Fan-out nhiều job: claim-reply cho TỪNG job; chỉ post job nào bạn claim được (exit 0).
 >    Stop khi mọi job trong batch đều không còn exit 0.
 >

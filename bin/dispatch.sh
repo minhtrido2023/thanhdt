@@ -1272,8 +1272,12 @@ làm lại có chủ đích, đừng âm thầm ghi đè mất công sức cũ m
           # PHIÊN MIKE resume trong vòng ~30s (ccdb scheduler master loop) thay vì đợi
           # ladder tự đoán delay, có thể tới 1200s. Fail-soft: wake_thread.sh tự nuốt lỗi.
           if [ "$from" = "Mike" ]; then
+            # Anti-double-reply (MIKE.md §8.4): prompt wake phải bắt đầu bằng claim-reply.
+            # Lần fire thứ hai (replay/restart) sẽ bị claim-reply chặn trước khi post.
+            local _wake_prompt
+            _wake_prompt="Đầu tiên: $ROOT/bin/jobs.sh claim-reply $job_id → exit 1 → ScheduleWakeup(noop:true,stop:true), DỪNG. exit 0 → [logic poll + post bình thường]. exit 2 → báo job record thiếu, đừng im lặng. Job \`${job_id}\` (${id}) đã hoàn thành: status=done. $_preview"
             "$ROOT/bin/wake_thread.sh" "$_tid" \
-              "Job \`${job_id}\` (${id}) đã hoàn thành: status=done. $_preview" \
+              "$_wake_prompt" \
               "$job_id" 2>/dev/null || true
           fi
         fi
@@ -1343,8 +1347,10 @@ làm lại có chủ đích, đừng âm thầm ghi đè mất công sức cũ m
       # (see comment there). A blind-interval ladder finding out about a FAILURE late is
       # just as wasteful as finding out about a success late.
       if [ "$from" = "Mike" ]; then
+        local _wake_prompt
+        _wake_prompt="Đầu tiên: $ROOT/bin/jobs.sh claim-reply $job_id → exit 1 → ScheduleWakeup(noop:true,stop:true), DỪNG. exit 0 → [logic poll + post bình thường]. exit 2 → báo job record thiếu, đừng im lặng. Job \`${job_id}\` (${id}) $why. Xem log: $logfile"
         "$ROOT/bin/wake_thread.sh" "$_tid" \
-          "Job \`${job_id}\` (${id}) $why. Xem log: $logfile" \
+          "$_wake_prompt" \
           "$job_id" 2>/dev/null || true
       fi
     fi
@@ -1470,6 +1476,7 @@ except Exception:
   else
     echo "  1) CƠ CHẾ CHÍNH: ScheduleWakeup THÍCH ỨNG — không có gợi ý wakeup_profile.json cho bucket '$_wkey' (file thiếu/hỏng/mẫu quá ít) → dùng ladder mặc định: 3 lần tỉnh ĐẦU ~240-270s; từ lần thứ 4 trở đi mà job vẫn running thì TĂNG DẦN (240→480→900→trần 1200s), không quay lại ngắn trừ khi có job MỚI phát sinh trong batch. Mỗi lần tỉnh chạy '$ROOT/bin/jobs.sh status $job_id'; chưa done → đặt lại wakeup theo bậc thang; done → xử lý ngay. KHÔNG đặt 1 lần chờ dài (worst-case chờ tối đa ~${_ww}s vẫn phủ qua nhiều lần poll)." >&2
   fi
+  echo "  1b) ScheduleWakeup prompt sẵn dùng (claim-reply là dòng đầu): \"Đầu tiên: $ROOT/bin/jobs.sh claim-reply $job_id → exit 1 → ScheduleWakeup(noop:true,stop:true), DỪNG. exit 0 → [logic poll + post bình thường]. exit 2 → báo job record thiếu, đừng im lặng.\"" >&2
   echo "  2) CHỈ nếu schema tool phiên này THẬT SỰ có tham số nền (run_in_background trên Agent/Bash) mới thêm wrapper bọc '$ROOT/bin/jobs.sh wait $job_id --timeout $_ww'. isolation:worktree KHÔNG phải background — cấm dùng thay thế." >&2
   echo "  3) SELF-CHECK: trước khi nói với user bất kỳ điều gì về trạng thái job này (đang chờ/xong/chết), chạy '$ROOT/bin/jobs.sh status $job_id' trong CÙNG turn — không nói từ trí nhớ." >&2
   # 4) Nhắc đóng vòng bus (Wags 2026-08-14, root-cause-A): user quyết qua Discord → Mike
