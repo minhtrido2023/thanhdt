@@ -1,0 +1,19 @@
+{
+  "built_at_utc": "2026-08-18T02:36:04.463737+00:00",
+  "study_window": [
+    "2014-01-01",
+    "2026-06-15"
+  ],
+  "div_min": "2010-01-01",
+  "panel_start": "2012-06-01",
+  "n_div_events": 15317,
+  "n_div_tickers": 1495,
+  "n_tickers_all": 1292,
+  "n_bench_days": 3547,
+  "n_state_days": 3148,
+  "n_panel_rows": 729664,
+  "n_panel_tickers": 720,
+  "n_panel_rows_stable3": 360143,
+  "n_panel_rows_nonpayer": 369521,
+  "resumed": "stages 1-5 reused from disk (attempt 1 artifacts); only q6_panel re-run"
+}
