@@ -2046,6 +2046,12 @@ def run_session(executors, once=False, max_cycles=None, force_phase=None):
             break
 
         if once or (max_cycles and cycles >= max_cycles):
+            # time-block mode: --once nhưng phase chưa cho đặt lệnh (ATO/PRE/LUNCH)
+            # → tiếp tục chờ đến khi cont=True, rồi mới exit sau 1 vòng đặt lệnh.
+            # Tránh bot start 9:05 (ATO) rồi exit ngay mà không đặt lệnh nào.
+            if once and not cont and phase not in ("CLOSED", "ATC") and not force_phase:
+                time.sleep(poll)
+                continue
             break
         time.sleep(poll)
 
