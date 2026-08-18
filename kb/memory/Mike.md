@@ -1,34 +1,30 @@
 # Working memory — Mike
 > Cập nhật mỗi khi đổi mạch việc. Bơm vào đầu phiên của Mike.
 
-## Ưu tiên hiện tại (2026-08-17T19:34Z)
+## Ưu tiên hiện tại (2026-08-18T00:55Z)
 
-## Đang chạy
-- Wags_20260817_193233 (opus/high, timeout=1800s): F1+F3 bridge repo
-  F1: scheduler.py _run_task — delete one_shot TRƯỚC run_claude
-  F3: executed_at column atomic check — skip nếu đã chạy (defense-in-depth)
-  Sau khi xong: arch-reviewer bắt buộc (scheduler là daemon dùng chung)
+## Đã xong hôm nay 08-18
+- F1+F3 anti-double-reply: merge feat/mention-only-toggle vào main ccdb, restart service (commit 70d4b9c)
+- gdkhq Option B: xoá auto-accept code path (commit 0f90f3d1); data/gdkhq_config.json không tồn tại
+- UPCOM VWAP cron: cài 15 8 * * 1-5, cron_registry cập nhật (commit 5db3be84)
+- Wags coord-2026-08-18: fix exit=5 fail-CLOSED + arch-review debt (commit e25f2a33, arch-review CONFIRMED)
 
-## Xong hôm nay 08-17
-- F2+F4+F5+F6 (commit 600b9fa1): claim-reply atomic, MIKE.md §8 fix, wakeup_audit, wake_thread log
-- G2 band tolerance D1-D3 (commit Taylor): max(1%, 1 tick) — VIX 08-20 sẽ PASS
-- Winston UPCOM VWAP infra: script + data_registry (cron chưa install — chờ user duyệt)
-
-## Chờ user
-- Duyệt install cron UPCOM VWAP: `15 8 * * 1-5` (15:15 ICT T2-T6)
+## Arch-review xong — CLEAN
+Cả 2 verdicts coord-2026-08-18 đã resolved:
+- Verdict 1 (gdkhq): superseded bởi 0f90f3d1 + file không tồn tại
+- Verdict 2 (rc=5 c9d1fa30): 4 changes apply bởi e25f2a33, CONFIRMED
 
 ## G5 UPCOM — kế hoạch
-1. [DONE] Winston data_registry + script
-2. Tích ≥3 phiên avgPrice history (cron chạy T2-T6 sau khi được install)
-3. Lặp lại probe ≥3 phiên
-4. Giải thích 6 mã UPCOM chưa khớp (VNE/MZG/VBB/SDA/AAV/DDG) hoặc gate tường minh
+1. [DONE] Winston data_registry + script capture_upcom_vwap_eod.sh
+2. [DONE] Cron installed: 15 8 * * 1-5 (15:15 ICT T2-T6)
+3. Tích ≥3 phiên avgPrice history
+4. Probe lại ≥3 lần; giải thích 6 mã UPCOM chưa khớp (VNE/MZG/VBB/SDA/AAV/DDG)
 5. quant-skeptic + user final → wire G5 UPCOM
 
 ## VIX ex-date 08-20
-Shadow TRONG PHIÊN 09:10-14:30 ICT 08-20. G2 fix đã xong.
+Shadow TRONG PHIÊN 09:10-14:30 ICT 08-20.
+G2 tolerance fix đã xong (max(1%, 1 tick)).
 accept_shadow() sau PASS.
 
-## Context
-- BQ trap: bq query truncate 100 rows
-- dispatch-prompt-heredoc skill cho prompt có backtick
+## Không có việc mở
 
