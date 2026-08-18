@@ -1049,6 +1049,14 @@ prompt_summary), tự hỏi đúng câu MIKE.md §Model routing đặt ra — ta
 (medium không đủ), hay việc thường lệ/tiếp nối/xác nhận trạng thái bị chọn high theo phản xạ?
 Cùng nguyên tắc 5b/5c: hành vi con người, không tự sửa thói quen dispatch, chỉ ghi nhận vào
 KNOWLEDGE.md nếu lệch để Mike tự điều chỉnh.
+5e. **Routing retrospective (thêm 2026-08-18)**: chạy '$ROOT/bin/routing_retrospective.py --days 7'
+và đọc toàn bộ output. Tập trung vào 2 mục: (a) [FAIL-RATE] — agent nào có >20% job không thành
+công: điều tra xem routing đúng agent chưa, hay prompt thiếu rõ ràng; (b) [RETRY-RATE] — >15%
+retry sau khi đã loại auto-resume: prompt scope mismatch hoặc task quá lớn cho 1 dispatch. KHÔNG
+flag [OVERSPEC] đơn lẻ là vấn đề (high-effort jobs của Taylor R&D thường dài 10-20 phút — đúng).
+Flag chỉ đáng ghi vào KNOWLEDGE.md khi lặp ≥2 tuần liên tiếp — 1 tuần bất thường do sự cố đơn lẻ
+không đủ mẫu. Nếu thấy anomaly bền vững, đề xuất CỤ THỂ rule nào trong MIKE.md §Routing cần cập nhật
+(kèm thay đổi đề xuất bằng text), không tự sửa — để Mike cân nhắc và user duyệt.
 6. Role-scoped context drift check (MIKE.md §Context theo vai trò, 2026-07-17): đọc
 '$ROOT/kb/context_safety_core.md', 'context_execution_mini.md', 'context_planning_mini.md',
 'context_dataops_mini.md' — đối chiếu với KNOWLEDGE.md/current_ops.md mới nhất. Fact nào đã
