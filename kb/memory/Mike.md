@@ -2,36 +2,40 @@
 > Cập nhật mỗi khi đổi mạch việc. Bơm vào đầu phiên của Mike.
 
 # Working memory — Mike
-> Cập nhật lần cuối: 2026-08-18T14:15Z
+> Cập nhật lần cuối: 2026-08-18T17:40Z (retro finalize, dọn cuối ngày)
 
-## Hôm nay 08-18 — XONG
+## Retro 08-18 — XONG
+3 sự cố hôm nay, tất cả cùng họ §28 (checker so tín hiệu tức thời thay vì sự thật bền): check#10
+mtime, hàng đợi cách ly không đóng vòng đời, Wags coi dispatch exit=5 là fail thật. 2/3 cùng file
+`ops_health_check.sh` — gợi ý cần audit toàn bộ checker con trong file đó, chưa làm.
+Wags verify CONFIRMED. Entry: `kb/incidents/retro/retro-2026-08-18.md`, commit `5f25f2fc`.
+Wakeup-miss về 0,0% (12/12) sau ngày tệ nhất 08-17 (27,3%) — chưa đủ xác nhận xu hướng, KHÔNG
+mở lại escalation (theo Option B user chốt 08-17).
 
-### yield_floor Option C — WIRED (commits 9ed56854 + a6ea3f06 + 133d9854)
-- `custom30_yield_labels.py` (mới) + `custom30_history.py`: thêm 2 cột `yield_floor_note` +
-  `is_stable_payer` vào `custom30v_8l` — thuần observational, selection logic UNCHANGED (A/B verify).
-- Nhãn có trong bảng thật từ cron 15:30 ICT hôm nay trở đi.
-- Review milestone: **2027-02-10** (sau 2 kỳ rebalance 11-05 + 02-05).
-- Forcing function: `paper_checkpoint_escalation.sh` tự escalate 2027-02-06 nếu gate còn pending.
+## Đang mở — chuyển sang ngày mai
+1. **BLOCKER top5-postearnings-sleeve-backtest**: Anthropic 529 Overloaded (status.claude.com
+   "Degraded performance", từ 08-18 16:20 UTC, Unresolved lúc kiểm cuối). 3 dispatch Taylor liên
+   tiếp đều fail (155835/163629/170217, job cuối fail hẳn attempt 2/2 lúc 17:15Z). Dữ liệu +
+   engine.py đã kéo an toàn tại `agents/Taylor/research/top5_postearnings_sleeve_20260818/`.
+   Việc ngày mai: kiểm status.claude.com trước, retry dispatch Taylor nếu đã phục hồi.
+2. GDKHQ dry-run D1-D3 chưa setup — theo dõi trước VIX 08-20 (còn 2 phiên).
+3. plan-dd-check-string fix (commit 9a9dbb1) — cần ngày có LAG/BAL entry để verify.
+4. Order-book Pha 0 telemetry (commit d6346efd) — chờ phiên thật có giao dịch.
+5. Push commit 0550e5d3 (cron_registry worktree, dịch giờ cron paper-reporting) — bị auto-mode
+   block, cần user allow git push.
+6. Đề xuất chưa quyết: audit toàn bộ checker con `ops_health_check.sh` theo khuôn §28 + cân nhắc
+   1 selfcheck lint chung quét mẫu mtime-as-recency/exit-code-binary trong `bin/*.sh` (từ retro
+   08-18, chưa ai giao việc này).
 
-### cron paper-reporting — DỊCH (commit 0550e5d3 worktree, crontab đã đổi)
-- dc_book_waterfall: 15:05 → 00:15 ICT (sau BQ sync 23:45)
-- paper_programs_daily_report: 16:00 → 07:30 ICT sáng hôm sau
-- paper_checkpoint_escalation: 16:10 → 07:40 ICT sáng hôm sau
-- ⚠️ Commit worktree chưa push (git push bị auto-mode block lần trước)
-
-## Plan 08-19 — cần duyệt trước 08:45 ICT
-- SpaceX + ZaloPay: HOLD ALL, 0 lệnh, approved_by=None
-
-## Việc còn hở (ưu tiên giảm dần)
-1. GDKHQ dry-run D1-D3 chưa setup — theo dõi trước VIX 08-20 (còn 2 phiên).
-2. plan-dd-check-string fix (commit 9a9dbb1) — cần ngày có LAG/BAL entry để verify.
-3. Order-book Pha 0 telemetry (commit d6346efd) — chờ phiên thật có giao dịch.
-4. Push commit 0550e5d3 (cron_registry worktree) — bị block, cần user allow git push.
+## Plan 08-19 (đã sinh, cần duyệt trước 08:45 ICT)
+SpaceX + ZaloPay: HOLD ALL, 0 lệnh, approved_by=None.
 
 ## Bối cảnh còn hiệu lực
-- TV1 Rule A LIVE từ 08-15, an toàn. CASH_VENDOR gate: ĐÓNG.
-- CAPIT margin: enabled=false. dispatch-prompt-heredoc skill cho prompt có backtick.
+- yield_floor Option C WIRED (commits 9ed56854/a6ea3f06/133d9854), display-only, review milestone
+  2027-02-10, forcing function `paper_checkpoint_escalation.sh`.
+- cron paper-reporting đã dịch giờ (dc_book_waterfall→00:15, daily_report→07:30,
+  checkpoint_escalation→07:40 ICT) — xem việc mở #5 (chưa push).
+- TV1 Rule A LIVE từ 08-15, an toàn. CASH_VENDOR gate: ĐÓNG. CAPIT margin: enabled=false.
 - park_holdings.py stdout lẫn dòng "[dnse] kết nối OK" trước JSON — cần tail -n +2 khi parse.
-- yield_floor: H2 CONFIRMED (downside protection), H1 REFUTED. Option C deployed. B sau 2027-02.
+- dispatch-prompt-heredoc skill cho prompt có backtick.
 
-- [2026-08-18T17:10:36Z] BLOCKER 08-18 17:15Z: dispatch Taylor cho top5-postearnings-sleeve-backtest bị chặn bởi sự cố Anthropic thật (status.claude.com: 'Degraded performance for multiple models', từ 16:20 UTC, Unresolved). 6/6 attempt liên tiếp (3 dispatch: Taylor_20260818_155835/163629/170217) đều 529 Overloaded. Dữ liệu+engine.py đã kéo an toàn tại agents/Taylor/research/top5_postearnings_sleeve_20260818/. Đang backoff dài (~30min/lần) trước khi retry lần 4, kiểm tra status page mỗi lần tỉnh. KHÔNG phải bug của mình.
