@@ -21,7 +21,6 @@ WC_ROOT = os.path.abspath(os.environ.get("TRADING_BOT_RUNTIME_ROOT") or
 STATE_PATH = os.path.join(WC_ROOT, "data", "gdkhq_d1d3_rollout.json")
 ACCEPTANCE_STATE_PATH = os.path.join(WC_ROOT, "data", "gdkhq_shadow_acceptance.json")
 REPORT_DIR = os.path.join(WC_ROOT, "data", "gdkhq_shadow")
-CONFIG_PATH = os.path.join(WC_ROOT, "data", "gdkhq_config.json")
 
 
 def _now_iso():
@@ -66,41 +65,6 @@ def enabled(path=STATE_PATH):
 def read_acceptance(path=ACCEPTANCE_STATE_PATH):
     """Read the latest GDKHQ shadow acceptance state; missing/invalid -> {}."""
     return read_state(path)
-
-
-def read_gdkhq_config(path=CONFIG_PATH):
-    """Read the persistent GDKHQ rollout config; missing/unreadable/invalid -> ``{}``.
-
-    Never raises: a config the operator cannot read must degrade to "no standing
-    authorization", never to an exception that aborts a shadow run that already succeeded.
-    """
-    return read_state(path)
-
-
-def auto_accept_decision(acceptance, config=None, config_path=CONFIG_PATH):
-    """Should this PASS shadow be signed off without a human? -> ``(bool, reason)``.
-
-    Fail-closed on every axis: standing authorization must be the literal boolean ``True``
-    (a missing file, a string ``"true"``, or ``1`` does NOT authorize), the trace must have
-    passed, the error list must be empty, and the record must still be awaiting sign-off.
-    Reason is always returned so the operator sees WHY an auto-accept did not fire — a
-    silent no-op here looks identical to "the feature is not wired".
-    """
-    config = read_gdkhq_config(config_path) if config is None else (config or {})
-    if config.get("auto_accept_shadow_pass") is not True:
-        return False, (f"chưa có ủy quyền auto-accept trong {config_path} "
-                       f"(auto_accept_shadow_pass != true) — chờ nghiệm thu tay")
-    acceptance = acceptance or {}
-    if acceptance.get("trace_passed") is not True:
-        return False, "trace không PASS — không auto-accept"
-    if acceptance.get("errors"):
-        return False, (f"trace PASS nhưng còn {len(acceptance['errors'])} lỗi/vi phạm ghi nhận "
-                       f"— giữ PENDING_ACCEPTANCE cho người xem")
-    if acceptance.get("acceptance_status") != "PENDING_ACCEPTANCE":
-        return False, (f"acceptance_status = {acceptance.get('acceptance_status')!r}, "
-                       f"không phải PENDING_ACCEPTANCE — không auto-accept")
-    authorized_by = config.get("auto_accept_authorized_by") or "unknown"
-    return True, f"auto-accept theo ủy quyền thường trực của {authorized_by}"
 
 
 def write_acceptance_report(trace, verdict, plan_date, trace_path, report_path=None,
