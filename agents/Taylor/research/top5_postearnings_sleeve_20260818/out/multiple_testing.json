@@ -1,0 +1,15 @@
+{
+  "N_trials": 24,
+  "n_seasons": 48,
+  "n_configs": 24,
+  "PBO_cscv_S8": 0.2714285714285714,
+  "n_splits": 70,
+  "best_by_sharpe": "ey+cfy|top15|score",
+  "DSR_best": 0.9382583563979385,
+  "SR_best_daily": 0.0676000893514701,
+  "SR0_threshold": 0.038525963313371124,
+  "primary": "ey+cfy+ps|top5|equal",
+  "DSR_primary": 0.7200071473516544,
+  "SR_primary_daily": 0.04925246212699433,
+  "primary_rank_by_sharpe": 11
+}
