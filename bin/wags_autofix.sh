@@ -175,11 +175,12 @@ setsid bash -c '
   }
   # WAGS_POSTQ_END
 
-  # _post_s — ghi bus `status` (KHONG phai question): dung cho trang thai TRUNG GIAN, thu
-  # ma khong ai can ra tay. Co y KHONG fail-loud 3 tang nhu _post_q: day khong phai duong
-  # escalation, mat mot event status thi khong ai mat viec, va vong fix khong dang chet vi
-  # mot dong log.
-  _post_s() { "$ROOT/bin/append_event.sh" Wags status "$1" "$2" >/dev/null 2>&1 || true; }
+  # KHONG co _post_s / event `status` trong pipeline nay (arch-review coord-2026-08-18,
+  # required_change #3). Event `status` la EVENT MO COI: khong checker nao doc no, nen mot
+  # ket luan "con no arch-review, can nguoi xem" ghi bang `status` la ghi vao hu khong. MOI
+  # ket luan can nguoi phai di duong _post_q voi tien to NAM TRONG WAGS_SELF_Q_PREFIXES
+  # (bin/ops_health_check.sh) — the moi vua hien [WARN-ONLY] trong bao cao ops hang ngay
+  # (nguoi thay), vua KHONG keo COORD_WARN dispatch lai chinh vong fix nay (khong tu nuoi).
 
   # 1) Wags fix (đồng bộ trong pipeline nền; timeout rộng vì job chẩn đoán sâu). Wags
   #    tự nhận context ops-mini qua chính agents/Wags/CLAUDE.md (cost-opt #1b,
@@ -230,8 +231,11 @@ Quy trình: (1) chẩn đoán từ artifact thật (jobs.sh list cột HB_AGE, t
     # đúng khối này chạy trên stub, KHÔNG chép lại logic. Đổi/xoá marker ⇒ selfcheck FAIL.)
       # exit 5 KHONG phai chet. dispatch.sh dung ma nay cho DUY NHAT nhom "da len lich TU
       # RESUME": het usage window, fallback provider, va het turn budget (--max-turns). Ca
-      # ba deu duoc bin/resume_pending.py chay lai, deu duoc chinh dispatch.sh ghi chu
-      # "KHONG PHAI loi task", va deu KHONG trip circuit breaker. Coi no la chet gay 2 hai:
+      # ba deu TU chay tiep va deu KHONG trip circuit breaker, nhung KHONG cung mot duong:
+      # usage-limit + max-turns di qua bin/resume_pending.py, con provider-fallback thi
+      # dispatch.sh spawn thang mot job --bg voi provider khac (khong qua pending_resumes).
+      # Vi vay dung neo thong bao vao "qua bin/resume_pending.py" — sai 1/3 so ca.
+      # Coi no la chet gay 2 hai:
       #   1. post question "agent sua loi CHUA CHAY" trong khi agent DANG chay tiep — dung
       #      hinh thai da cam nhieu lan: mot BIEU DIEN TUC THOI (luc quet chua xong) bi ghi
       #      thanh SU THAT BEN (that bai). Ca that 2026-08-18T00:29:30Z: job
@@ -239,12 +243,28 @@ Quy trình: (1) chẩn đoán từ artifact thật (jobs.sh list cột HB_AGE, t
       #      lan resume ke tiep phai bo cong don.
       #   2. `exit 0` ben duoi cat pipeline, nen khi ban resume ghi finding THAT thi khong
       #      con ai goi arch-reviewer. Khoang trong do co THAT va khong tu lanh => phai noi
-      #      TO ra (status + Discord) chu khong duoc im lang.
+      #      TO ra (question co tien to trong WAGS_SELF_Q_PREFIXES + Discord) chu khong duoc
+      #      im lang. Va cau chu phai tach 2 ve: vong RETRY khong can nguoi, ARCH-REVIEW thi
+      #      CAN — ban cu noi trong "khong can ai ra tay" cho ca hai ve la sai (rc #4).
       # Co y KHONG tu doi/cho resume o day: uu tien quan sat tu nhien hon tu dong phuc hoi.
-      if [ "$dispatch_rc" = 5 ]; then
-        _notify_arch "⏳ **[wags-autofix] $LABEL — dispatch.sh exit=5: DA LEN LICH TU RESUME, khong phai that bai.** Agent van chay tiep qua bin/resume_pending.py, khong can ai ra tay. Nhung pipeline dung tai day, nen ARCH-REVIEW cho vong fix do se KHONG tu chay — neu ban resume ghi finding cham file rui ro cao, phai goi arch-reviewer THU CONG. Log: '"$PIPELOG"'"
-        _post_s "wags-autofix-resume-pending: $LABEL" \
-          "{\"dispatch_exit\":\"5\",\"note\":\"da len lich tu resume (usage-limit / provider-fallback / max-turns) - KHONG phai that bai, KHONG can nguoi ra tay\",\"arch_review\":\"SE KHONG TU CHAY cho vong resume nay - goi thu cong neu finding cham file rui ro cao\",\"pipelog\":\"'"$PIPELOG"'\"}"
+      # KHONG duoc tin rieng con so 5. `dispatch_rc` la ma thoat cua CA LENH dispatch.sh, ma
+      # 5 chi mang nghia "da len lich tu resume" khi chinh dispatch.sh di qua 1 trong 3 site
+      # do; bat ky duong nao KHAC lam CLI/wrapper tra ve 5 (oauth het han, loi cau hinh, mot
+      # nhanh tuong lai chon lai ma nay) se doi lot "dang tu chay tiep" va vong fix bien mat
+      # im lang — dung ho "mot lan tra cuu that bai doi lot mot ket luan". Nen: doi chieu voi
+      # NOI DUNG log. Ca 3 site exit 5 deu in mot dong NOTE rieng (bin/dispatch.sh ~1596-1610)
+      # va `2>&1` o buoc 1 da gom stderr vao $out.
+      # Regex phu CA 3 site, khong chi 2: site provider-fallback KHONG in "KHONG PHAI loi
+      # task" lan "len lich resume" (no in "da fallback NGAY sang claude (job moi chay nen)"),
+      # nen mau chi bat 2 cum kia se fail-closed OAN cho dung nhanh fallback. Giu ca ban co
+      # dau lan ban ASCII: nguon in co dau, nhung log da tung di qua lop chuyen tu.
+      # Fail-CLOSED co chu dich: khong khop => roi xuong nhanh `!= 0` ben duoi va thanh
+      # question dispatch-failed. "Khong ro" phai nghieng ve escalation.
+      _EXIT5_RESUME_RE="KHÔNG PHẢI lỗi task|KHONG PHAI loi task|lên lịch resume|len lich resume|Đã tự động lên lịch|Da tu dong len lich|fallback NGAY sang|scheduled.*resume"
+      if [ "$dispatch_rc" = 5 ] && grep -qE "$_EXIT5_RESUME_RE" <<< "$out"; then
+        _notify_arch "⏳ **[wags-autofix] $LABEL — dispatch.sh exit=5: DA LEN LICH TU RESUME / TU FALLBACK, khong phai that bai.** Vong retry tu chay tiep, khong can ai can thiep VAO VONG RETRY. Nhung pipeline dung tai day, nen ARCH-REVIEW cho vong fix do se KHONG tu chay — arch-review VAN LA VIEC CUA NGUOI: neu ban resume ghi finding cham file rui ro cao, phai goi arch-reviewer THU CONG. Da ghi question '"'"'wags-autofix-review-needed: $LABEL'"'"' de con no nay hien trong bao cao ops. Log: '"$PIPELOG"'"
+        _post_q "wags-autofix-review-needed: $LABEL" \
+          "{\"dispatch_exit\":\"5\",\"note\":\"da len lich tu resume/tu fallback (usage-limit / provider-fallback / max-turns) - KHONG phai that bai, vong retry tu chay khong can can thiep\",\"arch_review\":\"CON NO: se KHONG tu chay cho vong resume nay - arch-review van la viec cua nguoi, goi thu cong neu finding cham file rui ro cao\",\"pipelog\":\"'"$PIPELOG"'\"}"
         exit 0
       fi
     if [ "$dispatch_rc" != 0 ]; then

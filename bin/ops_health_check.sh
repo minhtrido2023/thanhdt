@@ -312,7 +312,15 @@ ACK_MAX_SUPPRESS_DAYS = 14
 # đóng cho tiền tố cũ.
 # ⇒ LUẬT: thêm bất kỳ nhánh `append_event.sh Wags question` MỚI nào vào wags_autofix.sh thì
 # PHẢI thêm tiền tố đó vào tuple này CÙNG LÚC (và pin bằng selfcheck ca 10/11).
-WAGS_SELF_Q_PREFIXES = ("wags-fix-not-confirmed:", "wags-arch-review-inconclusive:")
+# THÊM 2026-08-18 (arch-review coord-2026-08-18 required_change #3) —
+# "wags-autofix-review-needed:": nhánh dispatch.sh exit=5 (đã lên lịch tự resume / tự
+# fallback). Pipeline DỪNG trước bước arch-review nên vòng fix đó còn NỢ một lượt review;
+# bản cũ ghi nợ đó bằng event `status` "wags-autofix-resume-pending:" — MỒ CÔI, không
+# checker nào đọc, tức nợ biến mất im lặng. Giờ đi đường question để người thấy trong báo
+# cáo ops hằng ngày, và nằm trong tuple này để KHÔNG kéo COORD_WARN dispatch lại chính
+# vòng fix vừa dừng (nó đang tự chạy tiếp — re-dispatch là chạy song song với chính nó).
+WAGS_SELF_Q_PREFIXES = ("wags-fix-not-confirmed:", "wags-arch-review-inconclusive:",
+                        "wags-autofix-review-needed:")
 # Cửa sổ ÂN HẠN trước khi 1 câu hỏi trở thành ROUTABLE (được phép kéo dispatch wags_autofix).
 # Sự cố THẬT 2026-08-17: Taylor đăng question `hybrid-fill-live-deadline-20260817` lúc
 # 02:01:45Z (đang trả lời chính dispatch mà Mike vừa giao lúc 02:00:06Z); một lần chạy

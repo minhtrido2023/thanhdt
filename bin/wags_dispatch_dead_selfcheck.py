@@ -224,22 +224,31 @@ def main():
     print("\ncase_exit5_la_TU_RESUME_khong_phai_chet")
     # Ca thật 2026-08-18T00:29:30Z: job Wags_20260818_001950 hết max-turns ⇒ dispatch.sh
     # exit 5 ⇒ nhánh `!= 0` gói thành question "agent sua loi CHUA CHAY" — trong khi agent
-    # ĐANG được resume_pending.py chạy tiếp và về sau nộp finding thật. exit 5 là ma DUY
-    # NHAT của dispatch.sh cho nhóm "đã lên lịch tự resume" (usage-limit / provider-fallback
-    # / max-turns), xem bin/dispatch.sh dòng ~1596-1610 + khối chú thích đầu file.
+    # ĐANG được resume chạy tiếp và về sau nộp finding thật. exit 5 là mã DUY NHẤT của
+    # dispatch.sh cho nhóm "đã lên lịch tự resume" (usage-limit / provider-fallback /
+    # max-turns), xem bin/dispatch.sh dòng ~1596-1610 + khối chú thích đầu file.
+    # NGUYÊN VĂN từ log thật (logs/wags_pipeline_20260818_001949.log) — CÓ DẤU, không phải
+    # bản chuyển tự cho dễ đậu. Bản trước dùng chuỗi ASCII "KHONG PHAI loi task"; nếu regex
+    # production chỉ bắt bản có dấu thì test vẫn xanh còn production fail-closed oan mỗi lần.
     OUT5 = ("JOB Wags_20260818_001950 (from=Mike, timeout=1500s)\n"
-            "NOTE: dispatch Wags (job Wags_20260818_001950) het turn budget "
-            "(--max-turns=120) - KHONG PHAI loi task.\n"
-            "      Da tu dong len lich resume NGAY voi tran cao hon.\n")
+            "NOTE: dispatch Wags (job Wags_20260818_001950) hết turn budget "
+            "(--max-turns=50) — KHÔNG PHẢI lỗi task.\n"
+            "      Đã tự động lên lịch resume NGAY với trần cao hơn "
+            "(bin/resume_pending.py sẽ tự chạy lại).\n")
     p5, notify5, postq5, posts5 = run_block(block, dispatch_rc=5, out=OUT5,
                                             label="coord-2026-08-18")
-    check("exit=5 ⇒ KHÔNG post question (không phải việc cần người)",
-          postq5.strip() == "", postq5[:300])
-    check("exit=5 ⇒ CÓ ghi bus status để còn dấu vết", posts5.strip() != "", "không ghi gì")
-    s_topic = posts5.splitlines()[0] if posts5 else ""
-    check("status mang topic resume-pending, KHÔNG mang chữ dispatch-failed",
-          "wags-autofix-resume-pending" in s_topic
-          and "dispatch-failed" not in s_topic, s_topic)
+    check("exit=5 + có dấu hiệu resume ⇒ KHÔNG post question dispatch-failed",
+          "wags-autofix-dispatch-failed" not in postq5, postq5[:300])
+    check("exit=5 ⇒ CÓ post question để nợ arch-review không rơi vào hư không",
+          postq5.strip() != "", "không post gì")
+    q_topic = postq5.splitlines()[0] if postq5 else ""
+    # Tiền tố PHẢI nằm trong WAGS_SELF_Q_PREFIXES của bin/ops_health_check.sh, nếu không thì
+    # question này kéo COORD_WARN dispatch lại chính vòng fix vừa dừng (vòng tự nuôi §14).
+    # Ca kiểm đồng bộ 2 danh sách nằm ở bin/ops_health_check_selfcheck.py ca 11b.
+    check("topic dùng tiền tố review-needed (WARN-ONLY, không kéo re-dispatch)",
+          "wags-autofix-review-needed" in q_topic, q_topic)
+    check("exit=5 ⇒ KHÔNG ghi event `status` mồ côi nữa (không consumer nào đọc)",
+          posts5.strip() == "", posts5[:300])
     check("exit=5 ⇒ DỪNG pipeline (bản resume mới là bản chạy tiếp)",
           "REACHED_END_OF_BLOCK" not in p5.stdout, p5.stdout[:200])
     check("exit=5 ⇒ KHÔNG báo động 🔴 (không phải sự cố)", "🔴" not in notify5, notify5[:200])
@@ -247,18 +256,75 @@ def main():
     # còn bản resume chỉ chạy lại dispatch chứ không chạy lại pipeline. Im lặng ở đây đúng
     # là hình thái "monitoring fix creates silence" đã cắn 2026-08-06.
     check("tin báo NÓI RÕ arch-review sẽ không tự chạy cho vòng resume",
-          "ARCH-REVIEW" in notify5 and "KHONG tu chay" in notify5.replace("Ô", "O"),
+          "ARCH-REVIEW" in notify5 and "KHONG tu chay" in notify5, notify5[:400])
+    # required_change #4 (arch-review coord-2026-08-18): câu cũ "khong can ai ra tay" nói về
+    # CẢ vòng retry LẪN arch-review — sai vế sau. Và neo cứng "qua bin/resume_pending.py"
+    # sai cho nhánh provider-fallback (dispatch.sh spawn job --bg, không qua pending_resumes).
+    check("tin báo KHÔNG còn câu 'khong can ai ra tay' trống trơn",
+          "khong can ai ra tay" not in notify5.lower(), notify5[:400])
+    check("tin báo KHÔNG neo cứng vào bin/resume_pending.py (sai cho provider-fallback)",
+          "resume_pending.py" not in notify5, notify5[:400])
+    check("tin báo tách rõ 2 vế: retry tự lo, arch-review là việc của NGƯỜI",
+          "VONG RETRY" in notify5.upper() and "VIEC CUA NGUOI" in notify5.upper(),
           notify5[:400])
-    check("payload status cũng ghi lại khoảng trống arch-review (bus đọc được, không chỉ Discord)",
-          "arch_review" in posts5, posts5[:300])
     try:
-        obj5 = json.loads(posts5.strip().split("\n")[1])
+        obj5 = json.loads(postq5.strip().split("\n")[1])
         ok5 = isinstance(obj5, dict) and obj5.get("dispatch_exit") == "5"
     except Exception as e:
         obj5, ok5 = None, False
         print(f"       (lỗi parse: {e})")
-    check("payload status parse được thành JSON object và ghi đúng exit=5", ok5,
-          posts5[:300])
+    check("payload parse được thành JSON object và ghi đúng exit=5", ok5, postq5[:300])
+    check("payload cũng ghi lại khoảng trống arch-review (bus đọc được, không chỉ Discord)",
+          "arch_review" in postq5, postq5[:300])
+
+    print("\ncase_exit5_provider_fallback_cung_phai_duoc_nhan")
+    # Site exit-5 THỨ BA của dispatch.sh (dòng ~1598) in câu chữ HOÀN TOÀN KHÁC hai site kia:
+    # KHÔNG có "KHÔNG PHẢI lỗi task", KHÔNG có "lên lịch resume". Mẫu nhận dạng chỉ bắt 2 cụm
+    # đó sẽ fail-closed OAN cho đúng nhánh fallback — và fail-closed oan ở đây nghĩa là mỗi
+    # lần provider hết quota lại đẻ 1 question "DISPATCH CHẾT" giả.
+    OUT5_FB = ("JOB Wags_20260818_010203 (from=Mike, timeout=1500s)\n"
+               "NOTE: dispatch Wags (job Wags_20260818_010203) provider 'fable' hết "
+               "usage/rate limit — đã fallback NGAY sang claude (job mới chạy nền, "
+               "không chờ reset).\n")
+    p7, notify7, postq7, posts7 = run_block(block, dispatch_rc=5, out=OUT5_FB,
+                                            label="coord-2026-08-18-fb")
+    check("provider-fallback: KHÔNG bị gán nhãn DISPATCH CHẾT",
+          "wags-autofix-dispatch-failed" not in postq7 and "🔴" not in notify7,
+          (postq7 + notify7)[:300])
+    check("provider-fallback: vẫn ra question review-needed",
+          "wags-autofix-review-needed" in (postq7.splitlines()[0] if postq7 else ""),
+          postq7[:300])
+    check("provider-fallback: DỪNG pipeline", "REACHED_END_OF_BLOCK" not in p7.stdout,
+          p7.stdout[:200])
+
+    print("\ncase_RED_exit5_khong_co_dau_hieu_resume_thi_FAIL_CLOSED")
+    # Đối chứng ÂM (arch-review coord-2026-08-18 required_change #2). Fixture cũ chỉ có
+    # đường HẠNH PHÚC: rc=5 kèm đúng dòng NOTE. Nhưng rc=5 là mã thoát của CẢ LỆNH
+    # dispatch.sh — một lỗi thật ở tầng khác (oauth hết hạn, wrapper, nhánh tương lai) cũng
+    # có thể trả 5 mà KHÔNG hề có chuỗi resume nào. Không có ca này thì lỗ hổng "tin con số,
+    # không tin nội dung" luôn xanh: vòng fix biến mất im lặng, không question, không ai biết.
+    OUT5_BAD = ("JOB Wags_20260818_014455 (from=Mike, timeout=1500s)\n"
+                "Failed to authenticate: OAuth session expired and could not be refreshed\n"
+                "WARNING: dispatch Wags ket thuc bat thuong (exit=5, job "
+                "Wags_20260818_014455)\n")
+    p6, notify6, postq6, posts6 = run_block(block, dispatch_rc=5, out=OUT5_BAD,
+                                            label="coord-2026-08-18-bad")
+    check("RED: exit=5 KHÔNG có dòng NOTE resume ⇒ VẪN phải post question (không nuốt)",
+          postq6.strip() != "", "không post gì — vòng fix biến mất im lặng")
+    b_topic = postq6.splitlines()[0] if postq6 else ""
+    check("RED: topic là dispatch-failed, KHÔNG phải review-needed (fail-CLOSED)",
+          "wags-autofix-dispatch-failed" in b_topic
+          and "review-needed" not in b_topic, b_topic)
+    check("RED: KHÔNG ghi bất kỳ status resume-pending nào", posts6.strip() == "",
+          posts6[:300])
+    check("RED: KHÔNG có chữ resume-pending ở đâu cả (kể cả question)",
+          "resume-pending" not in postq6 and "resume-pending" not in posts6,
+          (postq6 + posts6)[:300])
+    check("RED: payload giữ dấu vết OAuth để người biết phải gia hạn cái gì",
+          "authenticate" in postq6.lower() or "expired" in postq6.lower(), postq6[:300])
+    check("RED: có báo động 🔴 (đây LÀ sự cố, khác ca exit=5 hợp lệ)",
+          "🔴" in notify6, notify6[:300])
+    check("RED: DỪNG pipeline", "REACHED_END_OF_BLOCK" not in p6.stdout, p6.stdout[:200])
 
     print("\ncase_CONTROL_dispatch_song_thi_khong_duoc_chan")
     p3, notify3, postq3, posts3 = run_block(block, dispatch_rc=0, out="moi thu binh thuong\n")

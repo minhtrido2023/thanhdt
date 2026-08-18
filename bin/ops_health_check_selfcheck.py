@@ -405,7 +405,8 @@ def case_fresh_question_is_pending():
 #    selfcheck VẪN xanh trong lúc production đã lặp vòng thật (question 08-11T05:57:50Z →
 #    dispatch coord-2026-08-12 → INCONCLUSIVE → question coord-2026-08-12). Selfcheck chỉ pin
 #    một mẫu đại diện thì không bắt được lớp lỗi "quên mở rộng danh sách".
-WAGS_SELF_Q_PREFIXES = ("wags-fix-not-confirmed:", "wags-arch-review-inconclusive:")
+WAGS_SELF_Q_PREFIXES = ("wags-fix-not-confirmed:", "wags-arch-review-inconclusive:",
+                        "wags-autofix-review-needed:")
 
 
 def case_wagsfix_not_confirmed_is_warn_only():
