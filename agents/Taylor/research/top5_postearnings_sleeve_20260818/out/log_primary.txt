@@ -1,0 +1,112 @@
+=== Top-5 post-earnings sleeve — tag=primary n_top=5 lenses=('ey', 'cfy', 'ps') require_reported=True TC=0.001 capital=1,000,000,000 threads=1
+  [forensic exclude] 8 names: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+
+[selection] seasons=49 picks=245 distinct tickers=98
+count     49.000000
+mean     142.204082
+std       41.607782
+min       69.000000
+25%      114.000000
+50%      136.000000
+75%      165.000000
+max      254.000000
+
+[self-check] cash-flow identity max err = 0.000002 VND
+[self-check] final NAV identity err     = 0.000000 VND
+[costs] fees 345,663,911 VND on turnover 345,663,911,335 VND (34.57% of starting capital)
+
+[NAV metrics] sleeve vs VNINDEX buy&hold, same window
+                     sleeve       VNINDEX
+years          1.202000e+01  1.202000e+01
+final_nav_vnd  7.620813e+09  2.878161e+09
+CAGR           1.842293e-01  9.196142e-02
+Sharpe         7.818586e-01  5.754933e-01
+Sortino        1.040721e+00  6.805449e-01
+MaxDD         -6.143619e-01 -4.526334e-01
+Calmar         2.998709e-01  2.031697e-01
+vol_ann        2.624634e-01  1.838142e-01
+
+====================================================================================================
+HORIZON = to_next   (N seasons = 48)
+
+### IS/OOS split — to_next
+        era  sleeve_n  sleeve_mean  sleeve_med  sleeve_win  sleeve_t  vs VNINDEX_n  vs VNINDEX_mean  vs VNINDEX_med  vs VNINDEX_win  vs VNINDEX_t  vs ICB sector_n  vs ICB sector_mean  vs ICB sector_med  vs ICB sector_win  vs ICB sector_t
+IS(2014-19)        22         4.60        2.64        68.0      2.02            22             2.32            2.84            64.0          0.86               22                3.86               3.68               73.0             2.12
+ OOS(2020+)        26         7.07       -0.49        46.0      1.62            26             4.01           -1.16            50.0          1.20               26                2.06               2.33               69.0             1.34
+ FULL exc_vni : {'n': 48, 'mean': 0.03234493935469656, 'median': 0.02028318647479426, 'win_rate': 0.5625, 't': 1.4838101805347068, 'ci5': -0.0022834883570953053, 'ci95': 0.06883830199139956}
+ FULL exc_sec : {'n': 48, 'mean': 0.028832406887512835, 'median': 0.027976364417626416, 'win_rate': 0.7083333333333334, 't': 2.453031383606098, 'ci5': 0.009807153921650612, 'ci95': 0.04832874039276996}
+
+### by DT5G state at T0 — to_next
+   dt5g  sleeve_n  sleeve_mean  sleeve_med  sleeve_win  sleeve_t  vs VNINDEX_n  vs VNINDEX_mean  vs VNINDEX_med  vs VNINDEX_win  vs VNINDEX_t  vs ICB sector_n  vs ICB sector_mean  vs ICB sector_med  vs ICB sector_win  vs ICB sector_t
+   BEAR        11         6.84        3.83        73.0      0.93            11             8.66           10.80            64.0          1.61               11                7.08               7.88               82.0             3.59
+   BULL         8         8.13       -0.63        38.0      1.52             8            -0.30           -2.92            38.0         -0.09                8                3.38               2.80               88.0             1.72
+ EXBULL         1        39.63       39.63       100.0       NaN             1            30.95           30.95           100.0           NaN                1               15.88              15.88              100.0              NaN
+NEUTRAL        28         3.75        0.55        54.0      1.33            28             1.12            2.03            57.0          0.42               28                0.63               1.44               61.0             0.39
+
+### by Value Radar at T0 — to_next
+     radar  sleeve_n  sleeve_mean  sleeve_med  sleeve_win  sleeve_t  vs VNINDEX_n  vs VNINDEX_mean  vs VNINDEX_med  vs VNINDEX_win  vs VNINDEX_t  vs ICB sector_n  vs ICB sector_mean  vs ICB sector_med  vs ICB sector_win  vs ICB sector_t
+       DAT        16         8.72        4.34        62.0      2.09            16             4.99            3.37            62.0          1.16               16                3.39               2.78               62.0             1.61
+        RE        13         5.69       -0.47        46.0      0.87            13             2.18           -2.37            46.0          0.47               13                2.45               2.61               85.0             1.55
+TRUNG TINH        19         3.76        0.79        58.0      1.12            19             2.47            1.59            58.0          0.85               19                2.75               3.68               68.0             1.25
+
+====================================================================================================
+HORIZON = h21   (N seasons = 48)
+
+### IS/OOS split — h21
+        era  sleeve_n  sleeve_mean  sleeve_med  sleeve_win  sleeve_t  vs VNINDEX_n  vs VNINDEX_mean  vs VNINDEX_med  vs VNINDEX_win  vs VNINDEX_t  vs ICB sector_n  vs ICB sector_mean  vs ICB sector_med  vs ICB sector_win  vs ICB sector_t
+IS(2014-19)        22         4.28        4.15        68.0      2.88            22             2.96            2.81            73.0          2.06               22                1.84               0.41               59.0             1.65
+ OOS(2020+)        26         6.13        4.69        73.0      3.37            26             3.95            3.23            73.0          2.44               26                1.95               1.94               65.0             2.46
+ FULL exc_vni : {'n': 48, 'mean': 0.03499271051283382, 'median': 0.0306210284587872, 'win_rate': 0.7291666666666666, 't': 3.21511026402093, 'ci5': 0.017271852018076, 'ci95': 0.05310442233928311}
+ FULL exc_sec : {'n': 48, 'mean': 0.018989802218436522, 'median': 0.006163185741558684, 'win_rate': 0.625, 't': 2.876939377788946, 'ci5': 0.008273151109410402, 'ci95': 0.03000658211639212}
+
+### by DT5G state at T0 — h21
+   dt5g  sleeve_n  sleeve_mean  sleeve_med  sleeve_win  sleeve_t  vs VNINDEX_n  vs VNINDEX_mean  vs VNINDEX_med  vs VNINDEX_win  vs VNINDEX_t  vs ICB sector_n  vs ICB sector_mean  vs ICB sector_med  vs ICB sector_win  vs ICB sector_t
+   BEAR        11         8.17        5.60        91.0      3.45            11             6.56            5.96            91.0          2.89               11                4.06               4.50               73.0             3.64
+   BULL         8         4.39        4.20        75.0      2.78             8             0.32            2.10            75.0          0.18                8                1.48               2.06               62.0             0.96
+ EXBULL         1        29.41       29.41       100.0       NaN             1            25.50           25.50           100.0           NaN                1               10.65              10.65              100.0              NaN
+NEUTRAL        28         3.54        2.15        61.0      2.37            28             2.42            2.27            64.0          1.91               28                0.86               0.22               57.0             1.00
+
+### by Value Radar at T0 — h21
+     radar  sleeve_n  sleeve_mean  sleeve_med  sleeve_win  sleeve_t  vs VNINDEX_n  vs VNINDEX_mean  vs VNINDEX_med  vs VNINDEX_win  vs VNINDEX_t  vs ICB sector_n  vs ICB sector_mean  vs ICB sector_med  vs ICB sector_win  vs ICB sector_t
+       DAT        16         6.31        4.24        69.0      2.60            16             3.81            1.70            62.0          1.54               16                3.10               0.80               69.0             1.99
+        RE        13         4.79        4.11        77.0      2.88            13             1.57            3.29            69.0          1.21               13                1.52               0.22               62.0             1.48
+TRUNG TINH        19         4.76        4.72        68.0      2.40            19             4.56            3.17            84.0          2.86               19                1.15               0.65               58.0             1.49
+
+====================================================================================================
+HORIZON = h63   (N seasons = 48)
+
+### IS/OOS split — h63
+        era  sleeve_n  sleeve_mean  sleeve_med  sleeve_win  sleeve_t  vs VNINDEX_n  vs VNINDEX_mean  vs VNINDEX_med  vs VNINDEX_win  vs VNINDEX_t  vs ICB sector_n  vs ICB sector_mean  vs ICB sector_med  vs ICB sector_win  vs ICB sector_t
+IS(2014-19)        22         4.99        3.48        59.0      2.10            22             2.71            1.53            68.0          1.00               22                3.64               2.85               82.0             1.90
+ OOS(2020+)        26         6.16       -0.21        50.0      1.48            26             3.45           -0.24            50.0          1.05               26                1.65               2.04               62.0             1.06
+ FULL exc_vni : {'n': 48, 'mean': 0.03108540760610674, 'median': 0.010286902210482528, 'win_rate': 0.5833333333333334, 't': 1.4462694143358525, 'ci5': -0.0026689874721235293, 'ci95': 0.06715895070694232}
+ FULL exc_sec : {'n': 48, 'mean': 0.02563061487232808, 'median': 0.023285990626599893, 'win_rate': 0.7083333333333334, 't': 2.1148536425180064, 'ci5': 0.0058294682643029025, 'ci95': 0.04551866836191327}
+
+### by DT5G state at T0 — h63
+   dt5g  sleeve_n  sleeve_mean  sleeve_med  sleeve_win  sleeve_t  vs VNINDEX_n  vs VNINDEX_mean  vs VNINDEX_med  vs VNINDEX_win  vs VNINDEX_t  vs ICB sector_n  vs ICB sector_mean  vs ICB sector_med  vs ICB sector_win  vs ICB sector_t
+   BEAR        11         6.24        3.73        55.0      0.82            11             8.43           11.25            64.0          1.46               11                7.07               7.10               82.0             3.75
+   BULL         8         6.08        0.25        50.0      1.45             8            -0.39           -1.70            50.0         -0.12                8                3.06               3.13               88.0             1.65
+ EXBULL         1        38.46       38.46       100.0       NaN             1            27.87           27.87           100.0           NaN                1               12.92              12.92              100.0              NaN
+NEUTRAL        28         4.08        1.25        54.0      1.51            28             1.13            0.51            57.0          0.44               28                0.28               0.42               61.0             0.16
+
+### by Value Radar at T0 — h63
+     radar  sleeve_n  sleeve_mean  sleeve_med  sleeve_win  sleeve_t  vs VNINDEX_n  vs VNINDEX_mean  vs VNINDEX_med  vs VNINDEX_win  vs VNINDEX_t  vs ICB sector_n  vs ICB sector_mean  vs ICB sector_med  vs ICB sector_win  vs ICB sector_t
+       DAT        16         8.50        4.35        62.0      2.23            16             4.90            3.86            69.0          1.25               16                3.24               1.13               69.0             1.49
+        RE        13         6.39        1.52        62.0      0.98            13             2.19           -1.65            46.0          0.44               13                2.04               2.20               77.0             1.15
+TRUNG TINH        19         2.67       -0.28        42.0      0.83            19             2.23            0.13            58.0          0.77               19                2.35               4.08               68.0             1.06
+
+====================================================================================================
+DECISION MATRIX  DT5G x Value Radar  (horizon=to_next, N=48)
+   DT5G      Radar  N  sleeve_mean%  excVNI_mean%  excVNI_med%  excVNI_win%  excSEC_mean%  excSEC_win%                                                                                    seasons
+   BEAR        DAT  2          9.37         12.15        12.15        100.0         11.16        100.0                                                                              2018Q1,2019Q1
+   BEAR         RE  5          8.24          8.65         6.75         60.0          4.64         80.0                                                         2022Q2,2022Q3,2022Q4,2023Q3,2024Q2
+   BEAR TRUNG TINH  4          3.84          6.93         6.72         50.0          8.10         75.0                                                                2016Q3,2020Q1,2021Q4,2022Q1
+   BULL        DAT  3          5.42          1.54        -2.82         33.0          0.83         67.0                                                                       2017Q4,2021Q1,2021Q3
+   BULL         RE  3          4.93         -3.76        -3.02         33.0          2.95        100.0                                                                       2023Q4,2024Q1,2025Q1
+   BULL TRUNG TINH  2         17.02          2.12         2.12         50.0          7.83        100.0                                                                              2020Q3,2025Q4
+ EXBULL        DAT  1         39.63         30.95        30.95        100.0         15.88        100.0                                                                                     2020Q4
+NEUTRAL        DAT 10          6.49          2.00         2.84         60.0          1.36         50.0                      2016Q4,2017Q1,2017Q2,2017Q3,2018Q2,2018Q3,2018Q4,2019Q2,2019Q3,2021Q2
+NEUTRAL         RE  5          3.61         -0.72        -2.37         40.0         -0.03         80.0                                                         2015Q4,2023Q1,2023Q2,2024Q3,2024Q4
+NEUTRAL TRUNG TINH 13          1.70          1.16         1.59         62.0          0.32         62.0 2014Q2,2014Q3,2014Q4,2015Q1,2015Q2,2015Q3,2016Q1,2016Q2,2019Q4,2020Q2,2025Q2,2025Q3,2026Q1
+
+artifacts -> /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/top5_postearnings_sleeve_20260818/out

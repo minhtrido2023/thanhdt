@@ -1,0 +1,37 @@
+{
+  "tag": "primary",
+  "n_top": 5,
+  "lenses": [
+    "ey",
+    "cfy",
+    "ps"
+  ],
+  "require_reported": true,
+  "selfcheck": {
+    "cash_identity_err_vnd": 1.7881393432617188e-06,
+    "nav_identity_err_vnd": 0.0,
+    "fees_total_vnd": 345663911.33485085,
+    "turnover_notional_vnd": 345663911334.85077
+  },
+  "nav_sleeve": {
+    "years": 12.02,
+    "final_nav_vnd": 7620812572.40987,
+    "CAGR": 0.1842292612817995,
+    "Sharpe": 0.7818585974739276,
+    "Sortino": 1.0407208261584886,
+    "MaxDD": -0.6143619103868012,
+    "Calmar": 0.29987090372482417,
+    "vol_ann": 0.2624633624851493
+  },
+  "nav_vnindex": {
+    "years": 12.02,
+    "final_nav_vnd": 2878161454.352089,
+    "CAGR": 0.09196141623108312,
+    "Sharpe": 0.575493255555279,
+    "Sortino": 0.6805448950630322,
+    "MaxDD": -0.4526334144295999,
+    "Calmar": 0.20316974686230613,
+    "vol_ann": 0.18381416313129093
+  },
+  "n_seasons_to_next": 48
+}
