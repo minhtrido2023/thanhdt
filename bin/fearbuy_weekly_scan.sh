@@ -119,7 +119,15 @@ VIỆC CẦN LÀM:
       kiểm soát đặc biệt · chuyển giao bắt buộc · rút tiền hàng loạt · khởi tố chủ tịch/TGĐ ngân
       hàng · cho vay sân sau · thao túng cổ phiếu ngân hàng
 
-   c) NHÓM NGOÀI NGÂN HÀNG — BỔ SUNG:
+   c) NHÓM BĐS ĐẦU NGÀNH/HẠ TẦNG CÔNG — BỔ SUNG (research/vic_family_credit_concentration_20260818.md
+      §6, cùng khung Tầng 1 đã duyệt 08-14, không dựng cơ chế mới):
+      chậm/vỡ nợ trái phiếu doanh nghiệp · không thanh toán được lãi/gốc trái phiếu đến hạn ·
+      tổ chức xếp hạng tín nhiệm hạ bậc · ngân hàng siết nợ/thu hồi tài sản đảm bảo · dự án hạ tầng
+      chậm tiến độ/đội vốn bị thanh tra · SBV/NHNN thay đổi chính sách loại trừ room tín dụng ·
+      Vingroup/VinFast dòng tiền · huỷ/hoãn niêm yết trái phiếu · kiện tụng nhà thầu/nợ đọng xây dựng ·
+      giải chấp cổ phiếu · call margin cổ đông lớn · cầm cố cổ phiếu Vingroup
+
+   d) NHÓM NGOÀI NGÂN HÀNG — BỔ SUNG:
       tai nạn/sự cố nhà máy · thu hồi sản phẩm · mất giấy phép/mỏ · kê biên tài sản · tranh chấp
       lãnh đạo
 
