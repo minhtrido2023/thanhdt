@@ -99,6 +99,20 @@ def buggy_ext_gate_fn():
     return slice_fn(blob.stdout)
 
 
+def unanchored_ext_gate_fn():
+    """The @-import gate exactly as shipped in b3935515: unconditional but UNANCHORED
+    (`grep -qE "@[^[:space:]]*<ext>"` with no `^`) — arch-reviewer coord-2026-08-19 round 3
+    reproduced that this matches prose that merely QUOTES the `@ext.md` pattern inside
+    backticks (e.g. kb/coding_guidelines.md's own anti-`@`-import warning), permanently
+    blocking compression of any file whose live content mentions the pattern. Used only as a
+    RED control for case 14 below."""
+    blob = subprocess.run(["git", "show", "b3935515:bin/kb_nightly.sh"],
+                          cwd=ROOT, capture_output=True, text=True)
+    if blob.returncode != 0:
+        raise RuntimeError("could not recover b3935515 kb_nightly.sh for RED control")
+    return slice_fn(blob.stdout)
+
+
 # --- fixtures -----------------------------------------------------------------------------
 CORE_OLD = """# FIXTURE core
 
@@ -355,6 +369,47 @@ rc, log, d = run_case("case13 RED at-import-pure-compress (38c64695 gate)", BUGG
 check("13a 38c64695 gate wrongly applies it (rc=0)", rc == 0)
 check("13b core ends up holding the recursive @ pointer (the bug case 12 blocks)",
       "@fixture_ext.md" in (read(d, "fixture.md") or ""))
+
+# 14 — regression guard for round-3: PROSE that merely QUOTES the `@ext.md` pattern inside
+# backticks (verbatim shape of kb/coding_guidelines.md's own anti-@-import warning, which the
+# dispatch prompt requires a compression to keep byte-for-byte) must NOT trip the gate just
+# because the pattern appears mid-line — only a REAL @-import (sole content of its line, no
+# leading text) should. Fixture text is the live kb/coding_guidelines.md:45-46 paragraph with
+# the real path swapped for `fixture_ext.md` (arch-review coord-2026-08-19 round 3, reproduced
+# on the real file: `grep -qE "@[^[:space:]]*coding_guidelines_ext.md" kb/coding_guidelines.md`
+# matched line 46 before this fix, which would REJECT every future compression of that file).
+CORE_PROSE_MENTION = """# FIXTURE core
+
+## Mục đã tách sang `fixture_ext.md` — đọc khi cần, KHÔNG auto-load
+| Mục | Khi nào phải đọc |
+|---|---|
+| Quy trình hiếm dùng | Thêm agent mới |
+
+⚠️ Con trỏ này CỐ Ý không dùng cú pháp `@`. `@`-import của Claude Code là đệ quy — viết
+`@.../fixture_ext.md` ở đây sẽ nạp lại toàn bộ file ext vào mọi phiên. Ai "sửa" dòng này
+thành `@` là tái lập đúng vấn đề vượt ngưỡng.
+
+## Nguyên tắc
+Quy tắc nền, phải nạp mỗi phiên. Ngưỡng cứng 40KB, chốt 2026-07-30.
+
+## Quy trình hiếm dùng
+Chi tiết ở `fixture_ext.md`.
+"""
+rc, log, d = run_case("case14 prose-quotes-at-import-not-blocked", NEW, CORE_PROSE_MENTION,
+                      None, pre_ext=EXT_SPLIT)
+check("14a applied despite prose mention (rc=0)", rc == 0)
+check("14b core becomes the prose-mention version", read(d, "fixture.md") == CORE_PROSE_MENTION)
+check("14c pre-existing ext untouched", read(d, "fixture_ext.md") == EXT_SPLIT)
+
+# 15 — RED control: the SAME prose-mention proposal against the b3935515 (unanchored) gate
+# must be WRONGLY rejected — proving case 14 exercises the round-3 anchor fix, not slack that
+# was already there.
+UNANCHORED_EXT_GATE = unanchored_ext_gate_fn()
+rc, log, d = run_case("case15 RED prose-quotes-at-import (b3935515 gate)", UNANCHORED_EXT_GATE,
+                      CORE_PROSE_MENTION, None, pre_ext=EXT_SPLIT)
+check("15a b3935515 gate wrongly rejects it (rc=1)", rc == 1)
+check("15b core left at the old unsplit fixture (the false block case 14 fixes)",
+      read(d, "fixture.md") == CORE_OLD)
 
 print("\n%d PASS, %d FAIL" % (len(PASS), len(FAIL)))
 sys.exit(1 if FAIL else 0)
