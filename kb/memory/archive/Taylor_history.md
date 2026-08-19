@@ -246,3 +246,6 @@
 
 ## Archived 2026-08-19 (keep=12 days=0 require_done=False)
 - [2026-08-17T07:15:32Z] Order-book shadow Pha 0 XONG (commit d6346efd tren main, 29/29 selfcheck). CHO MOC 2026-08-18: chay mike/bin/order_book_shadow_probe.py kiem N>0 VA valid>0 that; neu N>0 ma valid=0 thi doc source_time_status trong record truoc khi ket luan (DNSE tra time dang '2026-08-17 14:03:30.279').
+
+## Archived 2026-08-19 (keep=12 days=0 require_done=False)
+- [2026-08-17T08:22:08Z] Serial-capital-raiser (job Taylor_20260817_075412) XONG — verdict RISK/DESCRIPTIVE, khong wire. Cau hoi mo dang gia: S2 (phan ra PE thanh gia vs EPS quanh moi lan raise — re, mo duoc ngay), S1 (rights matched-control theo pretrend 12M — can prereg RIENG, khong phai robustness). CHO: sua corp_action_program_20260815/DATA_DICTIONARY.md dong 'listing_date 100% NULL' (do lai thay populated phan lon; Sprint 4 CO neo theo listing_date).
