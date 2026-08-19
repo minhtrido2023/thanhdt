@@ -86,6 +86,19 @@ def buggy_order_fn():
     return slice_fn(blob.stdout)
 
 
+def buggy_ext_gate_fn():
+    """The @-import gate exactly as shipped in 38c64695: `[ -s "$ext_proposed" ] && grep ...`
+    — arch-reviewer coord-2026-08-19 round 2 reproduced that this condition turns the gate OFF
+    for a pure-compress proposal (no ext_proposed written) when `$ext` already exists from an
+    earlier split, which is the live state of both monitored files. Used only as a RED control
+    for case 13 below."""
+    blob = subprocess.run(["git", "show", "38c64695:bin/kb_nightly.sh"],
+                          cwd=ROOT, capture_output=True, text=True)
+    if blob.returncode != 0:
+        raise RuntimeError("could not recover 38c64695 kb_nightly.sh for RED control")
+    return slice_fn(blob.stdout)
+
+
 # --- fixtures -----------------------------------------------------------------------------
 CORE_OLD = """# FIXTURE core
 
@@ -321,6 +334,27 @@ check("11a applied despite unrelated @-import (rc=0)", rc == 0)
 check("11b core keeps the unrelated import + becomes the pointer version",
       read(d, "fixture.md") == CORE_UNRELATED_IMPORT)
 check("11c ext written", read(d, "fixture_ext.md") == EXT_SPLIT)
+
+# 12 — @-import gate must ALSO fire on a PURE-COMPRESS proposal (no ext_proposed written) when
+# `$ext` already exists from an earlier split — this is the live state of both monitored files
+# (MIKE_ext.md, kb/coding_guidelines_ext.md) today, so every future breach hits this path, not
+# the fresh-split path case 9 covers (arch-review coord-2026-08-19 round 2, reproduced live).
+rc, log, d = run_case("case12 at-import-pure-compress-existing-ext", NEW, CORE_ATIMPORT, None,
+                      pre_ext=EXT_SPLIT)
+check("12a rejected (rc=1)", rc == 1)
+check("12b core untouched", read(d, "fixture.md") == CORE_OLD)
+check("12c pre-existing ext untouched", read(d, "fixture_ext.md") == EXT_SPLIT)
+check("12d REJECTED logged", "AUTO-FIX REJECTED" in log)
+
+# 13 — RED control: the SAME pure-compress @-import proposal against the 38c64695 gate (which
+# only checked `[ -s "$ext_proposed" ]`) must be WRONGLY applied — proving case 12 exercises the
+# round-2 fix, not a pre-existing check.
+BUGGY_EXT_GATE = buggy_ext_gate_fn()
+rc, log, d = run_case("case13 RED at-import-pure-compress (38c64695 gate)", BUGGY_EXT_GATE,
+                      CORE_ATIMPORT, None, pre_ext=EXT_SPLIT)
+check("13a 38c64695 gate wrongly applies it (rc=0)", rc == 0)
+check("13b core ends up holding the recursive @ pointer (the bug case 12 blocks)",
+      "@fixture_ext.md" in (read(d, "fixture.md") or ""))
 
 print("\n%d PASS, %d FAIL" % (len(PASS), len(FAIL)))
 sys.exit(1 if FAIL else 0)

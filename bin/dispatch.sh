@@ -331,8 +331,13 @@ MAX_EXT="${DISPATCH_HB_MAX_EXTENSIONS:-3}"
 # Su co that 2026-08-19: 3 job Taylor lien tiep (oshares_live.py, opus/high) bi giet dung
 # luc dang lam, 0 lan gia han, breaker TRIPPED; Mike phai lam lai ca 3 viec trong phien
 # cua chinh no. 600s = lam tron len tu p90.
-# KHONG noi rong worst case: MAX_EXT van chan tong doi mot attempt o TIMEOUT×(MAX_EXT+1).
-# Job treo THAT (khong ghi heartbeat nao) van chet — chi ton toi da mot lan gia han thua.
+# CONG THUC tran (TIMEOUT×(MAX_EXT+1)) khong doi, nhung HANH VI THUC co doi (arch-review
+# coord-2026-08-19 vong 2, killer_objection): "chi ton toi da mot lan gia han thua" chi
+# dung cho job co nhip heartbeat > HB_FRESH_S=600s. Voi DollarBill (nhip ~300s, dong
+# TIMEOUT o duoi) co che gia han gio LUON kich — mot attempt thuc te di tu ~1800s len toi
+# 4×1800s=7200s, khong phai truong hop hiem. Chi tiet + luoi do (late_plan_catchup.sh): xem
+# khoi phan tich DollarBill ngay tren dinh nghia TIMEOUT (~dong 172-186).
+# Job treo THAT (khong ghi heartbeat nao) van chet o lan TIMEOUT dau, khong duoc gia han nao.
 HB_FRESH_S="${DISPATCH_HB_FRESH_S:-600}"
 
 AGENT_DIR="$ROOT/agents/$id"

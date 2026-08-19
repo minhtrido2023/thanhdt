@@ -276,3 +276,9 @@ CONFIRMED = ✅ xong; NEEDS_CHANGES/REFUTED = ⚠ cần người xem + bus quest
 vòng 2 — chống ping-pong). Review ad-hoc 1 finding Wags: `wags_autofix.sh --review-topic
 "<substr>"`. `ops_health_check.sh` tự route: cảnh báo circuit-breaker/question → Wags,
 còn lại → Winston.
+
+**`_ext.md` size (OKF split, chủ: Wags)**: `kb_nightly.sh` cảnh báo (không chặn) qua
+`notify.sh` khi bất kỳ `*_ext.md` nào >35KB (cùng tỉ lệ ngưỡng core 40KB) — split là xử lý
+MẶC ĐỊNH của Phase 4.6 (mandate 2026-08-19) nên `_ext.md` không có trần tự nhiên. Hành động:
+rà soát/nén tay khi cảnh báo tới, không có auto-fix cho ext (khác core — chưa rõ tách ext
+tiếp về đâu). Không phải arch-review bắt buộc (chỉ đụng nội dung KB, không đụng tooling).

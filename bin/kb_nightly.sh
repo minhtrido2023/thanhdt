@@ -714,14 +714,19 @@ elif [ "$_CG_KB" -gt 40 ]; then
     _BREACH_KEY="${_BREACH_KEY}CG:OVER|"
 fi
 # _ext.md size — WARNING-only, KHÔNG chặn gì (arch-review coord-2026-08-19, long_term_ops
-# fail): OKF split là xử lý MẶC ĐỊNH của Phase 4.6 khi core vượt ngưỡng (mandate 2026-08-19),
-# nhưng KHÔNG file _ext.md nào được giám sát kích thước — coding_guidelines_ext.md đã 25KB.
-# Ngưỡng 35KB dùng cùng tỉ lệ với ngưỡng core 40KB (không phải hard gate, chỉ để audit thấy).
+# fail, vòng 2: chỉ ghi `log` là im lặng thật — không script nào đọc logs/kb_nightly.log để
+# tìm WARNING, "audit_ops_health" không tồn tại trong repo). OKF split là xử lý MẶC ĐỊNH của
+# Phase 4.6 khi core vượt ngưỡng (mandate 2026-08-19), nhưng KHÔNG file _ext.md nào được giám
+# sát kích thước — coding_guidelines_ext.md đã 25KB. Ngưỡng 35KB dùng cùng tỉ lệ ngưỡng core
+# 40KB (không phải hard gate). Chủ sở hữu + hành động: Wags, xem kb/ops_runbook.md §Phân
+# domain tự sửa lỗi — rà soát/nén tay, không auto-fix (khác core, không có dispatch OKF split
+# cho ext quá khổ vì chưa rõ tách tiếp về đâu).
 for _ext_f in "$ROOT"/*_ext.md "$ROOT"/kb/*_ext.md; do
     [ -f "$_ext_f" ] || continue
     _ext_kb=$(( $(wc -c < "$_ext_f") / 1024 ))
     if [ "$_ext_kb" -gt 35 ]; then
         log "WARNING (không chặn): $(basename "$_ext_f") = ${_ext_kb}KB > 35KB — _ext.md không có trần cứng, có thể phình không giới hạn qua các đợt OKF split. Cân nhắc rà soát/nén tay."
+        "$ROOT/bin/notify.sh" "⚠️ [kb_nightly] $(basename "$_ext_f") = ${_ext_kb}KB > 35KB — _ext.md không có trần cứng (không tự chặn, không tự nén). Chủ: Wags — cần rà soát/nén tay. Xem logs/kb_nightly.log." >/dev/null 2>&1 || true
     fi
 done
 mkdir -p "$ROOT/state"
@@ -823,7 +828,11 @@ Tiền lệ: kb/coding_guidelines_ext.md (2026-08-14), MIKE_ext.md (2026-08-19).
     # tự nó có 1 dòng `@context_pack.md` HỢP LỆ ở đầu file mà bản nén PHẢI giữ nguyên; chặn mù
     # theo `^@` sẽ REJECT vĩnh viễn mọi lần nén MIKE.md, đúng lỗi đang muốn tránh (fail_silent
     # kiểu khác: gate quá tay khiến auto-fix không bao giờ chạy được, tự thấy khi viết case9).
-    if [ -s "$ext_proposed" ] && grep -qE "@[^[:space:]]*$(basename "$ext")" "$proposed"; then
+    # KHÔNG điều kiện hoá theo `[ -s "$ext_proposed" ]` (bug arch-review vòng 2, tái lập thật
+    # 2026-08-19): điều đó tắt hẳn gate cho một bản NÉN THUẦN (không ghi ext_proposed) khi
+    # `$ext` ĐÃ tồn tại từ lần split trước — đúng trạng thái hiện tại của CẢ HAI file đang
+    # giám sát (MIKE_ext.md, kb/coding_guidelines_ext.md), nên mọi đợt breach kế tiếp đều lọt.
+    if grep -qE "@[^[:space:]]*$(basename "$ext")" "$proposed"; then
         log "AUTO-FIX REJECTED: $label — \$proposed dùng \`@\`-import trỏ tới $(basename "$ext") làm con trỏ (đệ quy, xoá sạch tác dụng tách), KHÔNG áp dụng."
         rm -f "$proposed" "$ext_proposed"
         return 1

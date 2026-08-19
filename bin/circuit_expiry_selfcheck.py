@@ -12,6 +12,11 @@ Bao ve HAI quyet dinh, ca hai deu la su co that 2026-08-19 (job Wags_20260819_05
      trip het han thi checker se GHI vao state ma duong dispatch dang doc — va lan doc thu
      hai se thay khac lan dau.
 
+  3. HB_FRESH_S phai <= TIMEOUT co so (dispatch.sh nhanh `*`, hien 600s). "Co che gia han
+     chi ton toi da MOT lan thua" (dispatch.sh, khoi phan tich DollarBill) chi dung o dung
+     bien nay — vuot qua, mot job co nhip heartbeat deu se an toan gia han o CA MAX_EXT lan
+     (arch-review coord-2026-08-19 vong 2, required_change #2).
+
 Chay: python3 bin/circuit_expiry_selfcheck.py    (exit 0 = PASS)
 Mutation RED: --mutate <ten> co y lam hong de chung minh assertion that su do dung cai gi.
 """
@@ -110,6 +115,9 @@ def main():
     if MUTATE == "hb_fresh_revert":
         src = src.replace('HB_FRESH_S="${DISPATCH_HB_FRESH_S:-600}"',
                           'HB_FRESH_S="${DISPATCH_HB_FRESH_S:-120}"')
+    if MUTATE == "hb_fresh_over_base":
+        src = src.replace('HB_FRESH_S="${DISPATCH_HB_FRESH_S:-600}"',
+                          'HB_FRESH_S="${DISPATCH_HB_FRESH_S:-700}"')
     m = re.search(r'HB_FRESH_S="\$\{DISPATCH_HB_FRESH_S:-(\d+)\}"', src)
     check("dispatch.sh co dinh nghia HB_FRESH_S", bool(m), True)
     if m:
@@ -117,6 +125,16 @@ def main():
     m2 = re.search(r'MAX_EXT="\$\{DISPATCH_HB_MAX_EXTENSIONS:-(\d+)\}"', src)
     check("MAX_EXT van chan tong doi mot attempt (<=5)",
           bool(m2) and 1 <= int(m2.group(1)) <= 5, True)
+    # required_change #2, arch-review coord-2026-08-19 vong 2 (finding2): "chi ton toi da MOT
+    # lan gia han thua" chi dung khi HB_FRESH_S <= TIMEOUT co so — tren nguong do, mot job co
+    # nhip heartbeat deu hon HB_FRESH_S se gia han o CA MAX_EXT lan (xem dispatch.sh, khoi
+    # phan tich DollarBill ngay tren dinh nghia TIMEOUT). Bat bien dang o DUNG BIEN (600==600)
+    # nen 1 override per-agent ngan hon co the pha vo no ma khong ai bao.
+    m3 = re.search(r'\*\)\s+TIMEOUT=(\d+)\s*;;', src)
+    check("dispatch.sh co dinh nghia TIMEOUT co so (nhanh *)", bool(m3), True)
+    if m and m3:
+        check("HB_FRESH_S <= TIMEOUT co so (gia han khong the vuot qua 1 lan 'thua' theo gia thiet)",
+              int(m.group(1)) <= int(m3.group(1)), True)
 
     print("\n%s — %d/%d" % ("FAIL" if _fails else "PASS", len(_total) - len(_fails), len(_total)))
     if _fails:
