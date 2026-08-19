@@ -212,6 +212,31 @@ DEFAULTS = {
     # nếu không, chuỗi quote lỗi đúng nhịp 60s sẽ khoá EXTREME cả cửa sổ hoãn (REFUTED vòng 4).
     "extreme_defer_poll_sec": 60,
 
+    # --- PROBE HARNESS: kéo dài tuổi thọ phiên PAPER + đo tick (Taylor, job Taylor_20260819_124400) ---
+    # KHÔNG phải thay đổi gate. Checkpoint 2026-08-19 (paper_gates_checkpoint_20260819.md) đo được
+    # bằng chứng của EXTREME gate là MỘT CHIỀU vì hai lý do CẤU TRÚC của harness, không phải vì
+    # thị trường lành tính:
+    #   (A) trigger (i) cận sàn: 0/242 dòng PLACE nằm trong band, headroom nhỏ nhất từng thấy
+    #       +4,43% vs band 3,00% — nhưng 3 phiên (07-15 FPT, 07-20 HPG, 07-22 HDB) giá THỰC SỰ
+    #       rơi vào band trong ngày, sau khi executor đã tắt. Suy gián tiếp từ OHLC ngày, không
+    #       có dữ liệu tại-thời-điểm.
+    #   (B) trigger (ii) 3-sigma: executor sống TRUNG VỊ 20 GIÂY, 20/28 phiên < dip_window_min
+    #       (15') ⇒ `_r15` trả None ⇒ fail-safe False. Chỉ 49/242 dòng tính được r15.
+    # `probe_linger_min` > 0 ⇒ sau khi mọi parent đã khớp, phiên KHÔNG thoát ngay mà sống thêm N
+    # phút CHỈ để lấy mẫu giá (không đặt lệnh — nhánh linger trong `step()` không gọi
+    # `_place_slices`/`_atc_sweep`). Đủ dài để px_hist vượt 0,7×dip_window_min ⇒ r15 tính được.
+    # `probe_tick_log` ghi quan sát mỗi chu kỳ sample ra data/execution_logs/probe_ticks_<tag>.csv:
+    # khoảng cách tới SÀN tại đúng giây executor còn sống + r15 + ngưỡng −z×rvol_20d. THUẦN
+    # QUAN SÁT — không field nào được đọc lại bởi `_extreme_regime*`/`_floor_guard_buy`/
+    # `_extreme_slice_mult` hay bất kỳ đường đặt lệnh nào.
+    # Cùng khuôn cổng LIVE với `fill_timing_live_gate`/`expected_volume_pacing_live_gate`:
+    # `.get(..., True)` ⇒ cấu hình THIẾU khoá = gate BẬT (paper-only), không mở toang. Ngoài ra
+    # còn một chốt cứng thứ hai trong code: linger chỉ chạy khi `cfg["mode"] == "paper"`. Ba
+    # account LIVE (SpaceX/ZaloPay/RocketX) giữ hành vi byte-identical.
+    "probe_linger_min": 30,           # 0 = tắt. 30' > 2,0×dip_window_min ⇒ r15 luôn có mẫu hợp lệ.
+    "probe_linger_live_gate": True,   # True ⇒ chỉ ăn ở account mode == "paper"
+    "probe_tick_log": True,           # ghi CSV quan sát band-proximity/r15 mỗi chu kỳ sample
+
     # --- DC-book NEUTRAL idle-cash WATERFALL (Taylor 2026-07-06, user-approved paper trial) ---
     # When DT5G=NEUTRAL and BAL/LAG have no qualifying deal, fill idle cash in priority:
     #   BAL/LAG (unchanged) → DC book (ConvergePort double-confirm, 8L≤2 ∧ sector-lens BUY,

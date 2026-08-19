@@ -124,6 +124,11 @@ class Executor:
             "ORDER_BOOK_TEST_SINK",
             os.path.join(EXEC_DIR, f"orderbook_shadow_{tag}.jsonl"),
         )
+        # Quan sát THUẦN của probe harness paper (probe_tick_log) — không đường nào đọc lại.
+        self.probe_tick_file = os.environ.get(
+            "PROBE_TICK_TEST_SINK",
+            os.path.join(EXEC_DIR, f"probe_ticks_{tag}.csv"),
+        )
         self._gap_ref = {}      # ticker -> {prior_close, rvol_20d}; loaded once at startup
         self._gap_z_cache = {}  # ticker -> gap_z or None (None = fail-safe, no override)
         self._last_gap_override = {}  # ticker -> gap_z; populated when override fires this tick
@@ -479,13 +484,19 @@ class Executor:
 
     def _record_prices(self, now, phase):
         """Lấy mẫu giá last mỗi px_sample_sec cho các mã còn lệnh → px_hist (tính r15).
-        get_quote có TTL cache 3s nên chi phí ~1 call/phút/mã."""
+        get_quote có TTL cache 3s nên chi phí ~1 call/phút/mã.
+
+        Probe harness paper (`probe_linger_min` > 0, xem config.py): mẫu được lấy cho CẢ parent
+        đã `done`. Không đổi hành vi đặt lệnh — parent done không bao giờ được `_place_slices`
+        xét tới; đây thuần là mở rộng chuỗi quan sát để `_r15` có đủ lịch sử. Cổng LIVE tắt
+        ⇒ nhánh này không tồn tại với account thật."""
         if phase in ("PRE", "CLOSED"):
             return
+        linger = self._probe_linger_on()
         hist = self.state.setdefault("px_hist", {})
         keep_from = (now - dt.timedelta(minutes=40)).isoformat(timespec="seconds")
         for o in self.plan.orders:
-            if self.state["parents"][o.id]["done"]:
+            if self.state["parents"][o.id]["done"] and not linger:
                 continue
             h = hist.setdefault(o.ticker, [])
             if h and (now - dt.datetime.fromisoformat(h[-1][0])).total_seconds() \
@@ -495,6 +506,99 @@ class Executor:
             if q and q.ok() and q.last:
                 h.append([now.isoformat(timespec="seconds"), q.last])
                 hist[o.ticker] = [s for s in h if s[0] >= keep_from]
+                self._probe_tick_log(o, q, now)
+
+    # ------------------------------------------------- probe harness (PAPER only)
+
+    def _probe_linger_on(self):
+        """Harness kéo dài phiên có được BẬT cho account này không.
+
+        HAI chốt độc lập, cả hai phải mở: (1) `probe_linger_min` > 0; (2) cổng LIVE —
+        `.get(..., True)` nên cấu hình THIẾU khoá = paper-only (fail-safe, không mở toang) và
+        `mode` phải đúng bằng "paper". Account LIVE ⇒ luôn False ⇒ mọi nhánh probe biến mất."""
+        try:
+            mins = float(self.cfg.get("probe_linger_min", 0) or 0)
+        except (TypeError, ValueError):
+            return False
+        if mins <= 0:
+            return False
+        if self.cfg.get("probe_linger_live_gate", True) and self.cfg.get("mode") != "paper":
+            return False
+        return True
+
+    def _probe_linger_active(self, now, phase):
+        """True = đã khớp hết nhưng còn trong cửa sổ lấy mẫu ⇒ giữ phiên sống.
+
+        Mốc `until` đóng dấu MỘT LẦN (lưu vào state, bền qua restart giữa phiên) nên linger
+        không tự gia hạn vô hạn: process khởi động lại vẫn kết thúc đúng mốc cũ.
+
+        Chỉ linger trong phiên KHỚP LIÊN TỤC. Hai lý do, không phải cho gọn: (a) ngoài phiên
+        liên tục giá đứng im nên mẫu vô nghĩa — r15 sẽ đọc ra 0% giả; (b) cron `pkill` 11:32
+        dừng paper main qua trưa, nếu còn linger lúc đó process bị giết giữa chừng và
+        `write_report()` không bao giờ chạy. Dừng đúng lúc 11:30 ⇒ phiên tự kết thúc sạch."""
+        if not self._probe_linger_on():
+            return False
+        if phase not in ("MORNING", "AFTERNOON"):
+            return False
+        until = self.state.get("_probe_linger_until")
+        if not until:
+            until = (now + dt.timedelta(
+                minutes=float(self.cfg["probe_linger_min"]))).isoformat(timespec="seconds")
+            self.state["_probe_linger_until"] = until
+            self._journal("PROBE_LINGER_START",
+                          note=f"mọi parent đã khớp — giữ phiên lấy mẫu giá tới {until} "
+                               f"(harness paper, KHÔNG đặt lệnh)")
+        try:
+            if now < dt.datetime.fromisoformat(until):
+                return True
+        except (TypeError, ValueError):
+            return False        # state rác → kết thúc phiên như cũ (fail-safe)
+        if not self.state.get("_probe_linger_ended"):
+            self.state["_probe_linger_ended"] = True
+            self._journal("PROBE_LINGER_END", note="hết cửa sổ lấy mẫu → kết thúc phiên")
+        return False
+
+    def _probe_tick_log(self, o, q, now):
+        """Ghi 1 dòng quan sát tại đúng giây executor còn sống: khoảng cách tới SÀN so với
+        `extreme_band`, và r15 so với ngưỡng −extreme_move_z × rvol_20d.
+
+        Đây là câu trả lời trực tiếp cho việc checkpoint 2026-08-19 chỉ suy được gián tiếp từ
+        OHLC ngày ("giá có vào band lúc executor còn sống không?"). THUẦN QUAN SÁT: không giá
+        trị nào ở đây được đọc lại bởi `_extreme_regime*`, `_floor_guard_buy`, `_extreme_slice_mult`
+        hay bất kỳ nhánh đặt lệnh nào. Nuốt mọi lỗi — một dòng log hỏng KHÔNG được làm hỏng phiên."""
+        if not self.cfg.get("probe_tick_log", False) or not self._probe_linger_on():
+            return
+        try:
+            last = q.last or q.ref
+            floor = q.floor if (q.floor and q.floor > 0) else None
+            band = float(self.cfg.get("extreme_band", 0.03))
+            headroom = (last / floor - 1.0) if (floor and last and last > 0) else None
+            in_band = (headroom is not None and headroom <= band)
+            ref = self._gap_ref.get(o.ticker) or {}
+            rvol = ref.get("rvol_20d")
+            z = float(self.cfg.get("extreme_move_z", 3.0))
+            thr = (-z * rvol) if (rvol and rvol > 0) else None
+            r15 = self._r15(o.ticker, now)
+            fmt = lambda v: "" if v is None else f"{v:.6f}"
+            new = not os.path.exists(self.probe_tick_file)
+            with open(self.probe_tick_file, "a", newline="", encoding="utf-8") as f:
+                w = csv.writer(f)
+                if new:
+                    w.writerow(["ts", "account", "ticker", "last", "floor", "ceiling", "ref",
+                                "headroom_floor", "extreme_band", "in_band",
+                                "r15", "rvol_20d", "trig_ii_threshold", "trig_ii_would_fire",
+                                "parent_done", "linger"])
+                w.writerow([
+                    now.isoformat(timespec="seconds"), self.label, o.ticker,
+                    last or "", floor or "", q.ceiling or "", q.ref or "",
+                    fmt(headroom), f"{band:.6f}", int(in_band),
+                    fmt(r15), fmt(rvol), fmt(thr),
+                    "" if (r15 is None or thr is None) else int(r15 < thr),
+                    int(bool(self.state["parents"][o.id]["done"])),
+                    int(bool(self.state.get("_probe_linger_until"))),
+                ])
+        except Exception:
+            return
 
     def _r15(self, ticker, now):
         """Return ~dip_window_min phút gần nhất từ px_hist; None = chưa đủ lịch sử."""
@@ -1921,6 +2025,17 @@ class Executor:
             self._journal("POLL_FAIL", note=str(e))
             ghost_tickers = {o.ticker for o in self.plan.orders}
         if self.all_done:
+            # Probe harness PAPER: giữ phiên sống thêm để px_hist đủ dài cho `_r15` và để đo
+            # band-proximity tại-thời-điểm. Trả False = chưa xong ⇒ `run_session` lặp tiếp,
+            # nhưng nhánh này KHÔNG gọi `_place_slices`/`_atc_sweep` nên không có lệnh nào được
+            # đặt thêm. Account LIVE: `_probe_linger_active` luôn False ⇒ đường cũ nguyên vẹn.
+            if self._probe_linger_active(now, phase):
+                try:
+                    self._record_prices(now, phase)
+                except Exception as e:
+                    self._journal("PX_HIST_FAIL", note=str(e))
+                self._save_state()
+                return False
             self._save_state()
             return True
         try:
