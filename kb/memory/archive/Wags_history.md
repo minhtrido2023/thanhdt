@@ -161,3 +161,6 @@ BAI HOC 2: selfcheck cho khoi bash nam trong 'bash -c ...' phai chay TRONG DUNG 
 
 ## Archived 2026-08-18 (keep=12 days=0 require_done=False)
 - [2026-08-16T10:00:09Z] [2026-08-16] coord-2026-08-16 (job Wags_20260816_090511, attempt 2/2): commit 0f7ac327 sua 4 loi trong chinh vong wags-autofix (verdict-parse trich sai dau dong; sweep thieu D-Bus => do gia moi ngay; sweep trich tail -8 => khong ai biet assertion nao do = LY DO loi kia sua mai khong dut; dispatch chet bi gan nhan arch-review-inconclusive). 49+46+16+114 assertion, RED control 4 chieu. DANG CHO arch-reviewer (chay detached, log logs/arch_review_20260816_*.log). CON LAI: post 6 event dong question + bao cao topic Architecture 1521475726329516122.
+
+## Archived 2026-08-19 (keep=12 days=0 require_done=False)
+- [2026-08-16T10:50:02Z] rollup_of (escalation TỔNG) chưa có lần dùng THẬT nào trên bus tính tới 2026-08-16 — lần đầu dùng phải tự chạy bin/bus_question_audit.py kiểm tổng có tự đóng không, đừng tin cơ chế đã chạy đúng. Luật khớp ở MIKE.md § Escalation TỔNG (exact, trần↔Agent/topic OK, khác agent KHÔNG, hậu-tố trạng thái KHÔNG tính cho rollup).
