@@ -25,11 +25,10 @@ esac
 
 labels="$(cd "$WC_ROOT" && python3 -c 'from trading_bot.config import live_dnse_labels;print(" ".join(live_dnse_labels()))')" || exit 1
 rc=0
-ran_chain=0
-for acct in $labels; do
-  plan="$PLAN_DIR/plan_${acct}_${PLAN_DATE}.json"
-  # JSON is the authority, not mtime: reject wrong date, malformed or already-approved plans.
-  status="$(python3 - "$plan" "$PLAN_DATE" <<'PY'
+
+# JSON is the authority, not mtime: reject wrong date, malformed or already-approved plans.
+check_status() {
+  python3 - "$1" "$2" <<'PY'
 import json,sys
 try:
  p=json.load(open(sys.argv[1]))
@@ -41,23 +40,57 @@ try:
 except FileNotFoundError: print('MISSING')
 except Exception: print('INVALID')
 PY
-)"
+}
+
+# Pass 1: chấm trạng thái từng account, quyết định có cần chạy chuỗi hay không.
+# park_trim_daily.sh/jit_unpark_daily.sh/merge_park_daily.sh xử lý TẤT CẢ account cùng lúc
+# (không nhận --account riêng) — nên chỉ cần MỘT account NEEDS_CHAIN là đủ để chạy 1 lần,
+# chạy xong nó sửa luôn account khác đang NEEDS_CHAIN.
+needs_chain=0
+declare -A status_of
+for acct in $labels; do
+  plan="$PLAN_DIR/plan_${acct}_${PLAN_DATE}.json"
+  status="$(check_status "$plan" "$PLAN_DATE")"
+  status_of["$acct"]="$status"
   case "$status" in
-    READY|MISSING) echo "[late_plan] $acct $PLAN_DATE — $status, no-op."; continue ;;
-    APPROVED|INVALID) echo "[late_plan] $acct $PLAN_DATE — $status, REFUSE." >&2; rc=1; continue ;;
+    APPROVED|INVALID) echo "[late_plan] $acct $PLAN_DATE — $status, REFUSE." >&2; rc=1 ;;
+    MISSING) echo "[late_plan] $acct $PLAN_DATE — $status, no-op." ;;
+    NEEDS_CHAIN) needs_chain=1 ;;
   esac
-  lock="$LOCK_DIR/late_plan_${acct}_${PLAN_DATE}.lock"
-  if ! mkdir "$lock" 2>/dev/null; then echo "[late_plan] $acct — lock held, no-op."; continue; fi
-  (
-    trap 'rmdir "$lock"' EXIT
-    if [ "$ran_chain" = 0 ]; then
-      echo "[late_plan] $acct $PLAN_DATE — catch-up L1→L2→merge→inject."
+done
+
+if [ "$needs_chain" = 1 ]; then
+  lock="$LOCK_DIR/late_plan_chain_${PLAN_DATE}.lock"
+  if mkdir "$lock" 2>/dev/null; then
+    (
+      trap 'rmdir "$lock"' EXIT
+      echo "[late_plan] $PLAN_DATE — catch-up L1→L2→merge→inject (1 lần cho mọi account cần)."
       PARK_CHAIN_PLAN_DIR="$PLAN_DIR" "$ROOT/bin/park_trim_daily.sh" || exit 1
       PARK_CHAIN_PLAN_DIR="$PLAN_DIR" "$ROOT/bin/jit_unpark_daily.sh" || exit 1
       PARK_CHAIN_PLAN_DIR="$PLAN_DIR" "$ROOT/bin/merge_park_daily.sh" --write || exit 1
       "$ROOT/bin/inject_discretionary_orders.sh" || exit 1
-      ran_chain=1
-    fi
+    ) || rc=1
+  else
+    echo "[late_plan] chain — lock held, no-op."
+  fi
+fi
+
+# Pass 2: gửi second-chance cho MỌI account NEEDS_CHAIN hoặc READY — không chỉ account tự
+# kích hoạt chain. Bug cũ: account #2 (SpaceX) có thể đã được chain của account #1 (ZaloPay)
+# sửa xong TRƯỚC KHI tới lượt nó trong vòng lặp, nên status đọc được là READY và bị bỏ qua
+# hoàn toàn (kể cả bước gửi lại) dù plan trên đĩa đã đổi thật từ sau lần gửi 21:00 — Discord
+# vẫn hiển thị bản BLOCKED_RECONCILE cũ. second-chance tự idempotent (so md5), gọi thêm cho
+# account đã READY từ trước là an toàn (in NO-OP nếu không đổi gì).
+for acct in $labels; do
+  status="${status_of[$acct]:-}"
+  case "$status" in
+    NEEDS_CHAIN|READY) ;;
+    *) continue ;;
+  esac
+  lock="$LOCK_DIR/late_plan_send_${acct}_${PLAN_DATE}.lock"
+  if ! mkdir "$lock" 2>/dev/null; then echo "[late_plan] $acct — send-lock held, no-op."; continue; fi
+  (
+    trap 'rmdir "$lock"' EXIT
     "$ROOT/bin/send_plan_report.sh" --account "$acct" --second-chance || exit 1
   ) || rc=1
 done
