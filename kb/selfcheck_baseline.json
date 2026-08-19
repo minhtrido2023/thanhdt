@@ -23,13 +23,33 @@
     }
   },
   "known_red": {
-    "mike/bin/wags_autofix_postq_selfcheck.py": {
+    "lag_forensic_filter_selfcheck.py": {
       "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
-      "since": "2026-08-18T21:53:39Z",
+      "since": "2026-08-19T21:54:07Z",
       "status": "FAIL",
       "auto": true,
-      "topic": "selfcheck-red: mike/bin/wags_autofix_postq_selfcheck.py",
-      "escalated_utc": "2026-08-18T21:53:39Z",
+      "topic": "selfcheck-red: lag_forensic_filter_selfcheck.py",
+      "escalated_utc": "2026-08-19T21:54:07Z",
+      "ack_pending": false,
+      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
+    },
+    "mike/bin/corp_action_daily_selfcheck.py": {
+      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
+      "since": "2026-08-19T21:54:07Z",
+      "status": "FAIL",
+      "auto": true,
+      "topic": "selfcheck-red: mike/bin/corp_action_daily_selfcheck.py",
+      "escalated_utc": "2026-08-19T21:54:07Z",
+      "ack_pending": false,
+      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
+    },
+    "mike/bin/nav_cum_dividend_selfcheck.py": {
+      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
+      "since": "2026-08-19T21:54:07Z",
+      "status": "FAIL",
+      "auto": true,
+      "topic": "selfcheck-red: mike/bin/nav_cum_dividend_selfcheck.py",
+      "escalated_utc": "2026-08-19T21:54:07Z",
       "ack_pending": false,
       "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
     }
