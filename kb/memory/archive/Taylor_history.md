@@ -243,3 +243,6 @@
 
 ## Archived 2026-08-18 (keep=12 days=0 require_done=False)
 - [2026-08-17T04:30:05Z] [2026-08-17] Snapshot tien-toi corp_action/insider XONG + DA CHAY vintage dau (commit mike@bc736f54, job _041202). CHO USER/MIKE 2 quyet dinh (bus question corp-action-snapshot-dataset-va-cron-20260817): (a) dataset tav2_mike hay tav2_bq — toi chon tav2_mike vi tav2_bq co tien le TRUNCATE xoa lich su ma bang nay khong tai tao duoc; doi cang muon cang dat; (b) duyet cron 50 23 * * * ICT — moi ngay khong chay = mat vinh vien vintage ngay do. Announcement study mo lai KHONG som hon 2027-08, phai do lai N that.
+
+## Archived 2026-08-19 (keep=12 days=0 require_done=False)
+- [2026-08-17T07:15:32Z] Order-book shadow Pha 0 XONG (commit d6346efd tren main, 29/29 selfcheck). CHO MOC 2026-08-18: chay mike/bin/order_book_shadow_probe.py kiem N>0 VA valid>0 that; neu N>0 ma valid=0 thi doc source_time_status trong record truoc khi ket luan (DNSE tra time dang '2026-08-17 14:03:30.279').
