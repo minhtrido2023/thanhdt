@@ -43,6 +43,15 @@ def cached(name, sql, **kw):
     return df
 
 
+# fund is read ONLY at the 49 rebalance dates (engine.py does `fund[fund["time"] == D]` per
+# season) — seasons.csv is a pre-existing local artifact, not itself a BQ pull.
+_seasons_csv = os.path.join(DATA, "seasons.csv")
+if os.path.exists(_seasons_csv):
+    _REBAL_DATES = sorted(pd.read_csv(_seasons_csv)["rebal"].unique())
+else:
+    _REBAL_DATES = []
+_REBAL_DATES_SQL = ", ".join(f"DATE '{d}'" for d in _REBAL_DATES)
+
 QUERIES = {
     # trading calendar (VNINDEX is the market clock)
     "calendar": f"""
@@ -55,13 +64,30 @@ ORDER BY t.time""",
 SELECT t.ticker, t.time, t.Close, t.Price FROM tav2_bq.ticker AS t
 WHERE t.time BETWEEN DATE '{START}' AND DATE '{END}' AND t.Close IS NOT NULL""",
 
-    # gate inputs, daily (only rebalance dates are read, but partition scan is by date range)
+    # gate inputs, read ONLY at the 49 rebalance dates (engine.py never reads fund at any other
+    # date). Column set/order + date scope pinned to match the cached fund.parquet exactly
+    # (verified: t.time IN <49 rebal dates> gives 52,767 rows == cached row count; CTG @
+    # 2026-08-10 byte-matches cached PE/PCF/PB/EVEB/ROE_Min3Y/CF_OA_5Y/Price/Close).
     "fund": f"""
-SELECT t.ticker, t.time, t.ICB_Code, t.PE, t.PCF, t.PS, t.PB,
-       t.ROE_Min3Y, t.CF_OA_3Y, t.Risk_Rating.Risk_Rating AS risk_rating
+SELECT t.ticker, t.time, t.ICB_Code, t.PE, t.PCF, t.PB, t.EVEB,
+       t.ROE_Min3Y, t.CF_OA_5Y, t.Price, t.Close
 FROM tav2_bq.ticker AS t
-WHERE t.time BETWEEN DATE '{START}' AND DATE '{END}'
+WHERE t.time IN ({_REBAL_DATES_SQL})
   AND t.ticker != 'VNINDEX'""",
+
+    # release-date fundamentals, quarterly (source for engine.py's finp merge_asof: PS_rel carried
+    # forward by price ratio, CF_OA_3Y for the golden floor). Renamed to avoid colliding with
+    # fund's own daily PE/PCF/ROE_Min3Y after the merge. Lower bound 2012-01-01 (2 years before
+    # module START) so merge_asof(direction='backward') has release history for early 2014Q2+
+    # seasons. Verified: this exact range gives 59,907 rows == cached row count, min/max
+    # release_date 2012-01-17/2026-08-14 match exactly; CTG @ 2026-07-30 byte-matches cached
+    # PE_rel/PS_rel/PCF_rel/CF_OA_3Y/ROE_Min3Y_f.
+    "fin": f"""
+SELECT f.ticker, f.time AS release_date, f.quarter,
+       f.PE AS PE_rel, f.PS AS PS_rel, f.PCF AS PCF_rel,
+       f.CF_OA_3Y, f.ROE_Min3Y AS ROE_Min3Y_f, f.EPS_P0
+FROM tav2_bq.ticker_financial AS f
+WHERE f.time BETWEEN DATE '2012-01-01' AND DATE '{END}'""",
 
     "universe_pit": f"""
 SELECT u.time, u.ticker, u.in_universe FROM tav2_mike.universe_pit AS u
