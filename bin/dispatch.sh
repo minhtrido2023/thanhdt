@@ -8,7 +8,8 @@
 # failed / timeout). Poll it with bin/jobs.sh — a coordinator never has to block
 # blindly. The claude run is wrapped in a HEARTBEAT-AWARE deadline (_hb_aware_timeout,
 # 2026-07-09, thay `timeout` cứng): tới hạn TIMEOUT mà heartbeat bus CỦA AGENT còn tươi
-# (<DISPATCH_HB_FRESH_S, mặc định 120s) → gia hạn thêm 1 chu kỳ TIMEOUT thay vì giết một
+# (<DISPATCH_HB_FRESH_S, mặc định 600s — nâng từ 120s 2026-08-19, xem chú thích tại chỗ
+# định nghĩa) → gia hạn thêm 1 chu kỳ TIMEOUT thay vì giết một
 # job đang sống khỏe sắp xong (đã xảy ra 2 lần: Winston_20260707_072729,
 # Wags_20260709_134401). Trần tuyệt đối: tối đa DISPATCH_HB_MAX_EXTENSIONS (mặc định 3)
 # lần gia hạn = sống tối đa TIMEOUT×(N+1) mỗi attempt — hết trần thì giết thật dù
@@ -160,13 +161,32 @@ while [ $# -gt 0 ]; do
 done
 
 # Per-agent BASE-timeout default — applies only when the caller passed no --timeout.
-# DollarBill plan-T+1 jobs do 10-20+ min of real work and emit substantive heartbeats
-# only every ~5 min, so the generic 600s base + HB_FRESH_S=120s extension window kills
-# them mid-work (real HB is always >120s old at the 600s deadline → no extension).
+# DollarBill plan-T+1 jobs do 10-20+ min of real work, so the generic 600s base alone
+# routinely kills them mid-work regardless of HB_FRESH_S — the override below is needed
+# on its own merit (typical work 600-1200s > generic 600s base), not just as a hedge
+# against a stingy extension window.
 # Measured 2026-07-13: SpaceX plan needed 725s (survived on a lucky extension), ZaloPay
 # plan (job DollarBill_20260713_120124) was killed alive at 600s on BOTH attempts →
 # plan_ZaloPay_2026-07-14.json never written, bot had no plan on 07-14. Same mechanism
 # as the 07-06 "DollarBill treo" transition-plan timeouts.
+#
+# HB_FRESH_S=600 (2026-08-19, xem chú thích tại chỗ định nghĩa) tình cờ ≈ 2× nhịp
+# heartbeat thật của DollarBill (~300s, "mỗi ~5 phút" ở trên) — nghĩa là kể từ giờ,
+# DollarBill LUÔN đủ điều kiện gia hạn mỗi khi chạm deadline (khác trước, khi
+# HB_FRESH_S=120s gần như không bao giờ đủ tươi để gia hạn cho nhịp 5 phút này). Worst
+# case MỘT attempt giờ là TIMEOUT×(MAX_EXT+1) = 1800×4 = 7200s (2h), so với ~3600s
+# (1 lần gia hạn may mắn) trước đây — phân tích 2026-08-19 (đối chiếu arch-reviewer
+# coord-2026-08-19). Trên đường tiền thật: cron dispatch DollarBill 19:00 →
+# inject_discretionary_orders 20:30 → send_plan_report 21:00. Worst case 7200s chạm
+# đúng mốc 21:00, nghĩa là inject_discretionary_orders CÓ THỂ chạy trước khi plan tồn
+# tại. KHÔNG hạ HB_FRESH_S để né việc này — 600s là số đo được từ nhịp heartbeat thật
+# toàn fleet (xem chú thích tại chỗ định nghĩa), hạ xuống tái lập đúng bug đã sửa hôm
+# nay. Rủi ro này đã có lưới đỡ sẵn, không phải lỗ hổng mới: late_plan_catchup.sh (chạy
+# 21:45/22:00/23:30) đọc trạng thái plan qua JSON (không phải mtime), thấy NEEDS_CHAIN
+# nếu plan xuất hiện muộn mà chưa qua L1→L2→merge→inject, và TỰ chạy lại toàn bộ chuỗi
+# kể cả inject_discretionary_orders + gửi qua send_plan_report --second-chance (cron
+# 23:00). Plan không bị mất câm lặng trong worst case — chỉ có thể trễ tới ~21:45-23:00
+# thay vì 20:30-21:00 bình thường.
 if [ -z "$TIMEOUT" ]; then
   case "$id" in
     DollarBill) TIMEOUT="${DISPATCH_TIMEOUT_DOLLARBILL:-1800}" ;;

@@ -24,9 +24,11 @@ MIKE_JSON = os.environ.get("SELFCHECK_MIKE_JSON") or os.path.join(ROOT, "bin", "
 DISPATCH = os.path.join(ROOT, "bin", "dispatch.sh")
 MUTATE = ""
 _fails = []
+_total = []
 
 
 def check(name, got, want):
+    _total.append(name)
     ok = got == want
     print("  %s %-58s got=%r want=%r" % ("PASS" if ok else "FAIL", name, got, want))
     if not ok:
@@ -116,8 +118,7 @@ def main():
     check("MAX_EXT van chan tong doi mot attempt (<=5)",
           bool(m2) and 1 <= int(m2.group(1)) <= 5, True)
 
-    print("\n%s — %d/%d" % ("FAIL" if _fails else "PASS",
-                            8 - len(_fails) + (len(_fails) and 0), 8) if False else "")
+    print("\n%s — %d/%d" % ("FAIL" if _fails else "PASS", len(_total) - len(_fails), len(_total)))
     if _fails:
         print("FAILED: %s" % ", ".join(_fails))
         return 1
