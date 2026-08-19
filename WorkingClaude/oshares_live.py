@@ -106,7 +106,58 @@ ACCURACY, STATED HONESTLY
                    handling is not modelled.
 `UNKNOWN_RATIO`  — an intervening ISS carries no usable size. **`value is None`** — the caller
                    gets nothing, deliberately, rather than a number that is quietly the old one.
+`FIN_FALLBACK`   — the explanation gate REFUSED the quarterly row, but the AIS anchor has been
+                   silent for more than `FIN_FALLBACK_MAX_AIS_AGE_DAYS` and the row is both newer
+                   than that AIS and LOWER than what rolling the AIS forward predicts. Served
+                   anyway, rolled through any ISS since. `anchor_verified` is False — the gate
+                   never cleared it. See the policy note below.
 `NO_ANCHOR`      — nothing admissible at or before D.
+
+STALE-AIS FALLBACK TO `ticker_financial` (policy, user-approved 2026-08-19)
+---------------------------------------------------------------------------
+Every corporate action that moves the share count between reports (issue, buyback, split) is
+reflected in the next published financial statement, and `ticker_financial.OShares` is then
+restated to the true count. So once the last AIS is more than a quarter old, the newest quarterly
+row is the better statement of reality — the AIS has simply stopped being updated.
+
+`VRE` is the case that forced this: its only AIS is **2018-12-26 = 2.328.818.410**, the 2019
+buyback of 56.500.000 shares produced **no corp-action row at all**, and the quarterly rows have
+carried the correct **2.272.318.410** since 2019-10-29. Before this change `oshares_at` served the
+2018 number — 2,49% too high — for seven years, at the highest-confidence label `AIS_EXACT`,
+because the explanation gate rejected the (correct) quarterly row: 2.272.318.410 cannot be rolled
+forward from the 2018 AIS, there being no event to explain the DECREASE. A gate built to catch
+restatement cannot tell a restated row from an unreported buyback, so it rejects both.
+
+⚠️ THE COST, STATED BECAUSE IT IS REAL. `ticker_financial.OShares` is filed **TRAP** in the data
+registry (`mike/kb/data_registry/fundamentals/ticker_financial_oshares.md`) precisely because it is
+RESTATED, not point-in-time: 2.667 quarterly rows across 576 tickers carry a value that only became
+effective LATER (measured 2026-08-13). This fallback re-admits that column, so on a STALE-AIS
+ticker a historical `asof` can now receive a restated — i.e. look-ahead — number, which the
+explanation gate used to block. Two things bound the damage and neither is a proof of safety:
+  * the fallback only fires when the AIS anchor is stale, so the tickers with an actively
+    maintained AIS trail (where the gate does real work) are untouched;
+  * it does not disable the ISS roll-forward — a quarterly row is still moved through every ISS
+    dated after it, so a bonus that went ex after the last report is not lost.
+For VRE specifically the fallback is clean point-in-time (the quarterly series steps 1.901.078.733
+→ 2.328.818.410 on 2018-10-31 → 2.272.318.410 on 2019-10-29, i.e. it tracks the events instead of
+being back-filled). That is one ticker, not a guarantee about the other 575.
+WHAT KEEPS THE LOOK-AHEAD OUT — DIRECTION, and it is structural, not a heuristic
+The first cut of this fallback ("stale AIS ⇒ trust the quarterly row") re-broke HAH on the spot:
+at 2026-03-01 it served 185.840.401, the exact number regression check H1 exists to prevent, born
+of a conversion and an ESOP that had not happened yet. The two cases look identical at the moment
+of asking — a quarterly row disagreeing with a stale AIS, no event to explain the gap — and are
+told apart by SIGN. Of the codes this module reads, `ISS` only ever ADDS shares (0 of 9.304
+executed rows carry `shares_delta`; none is negative) and there is **no event code for a buyback**:
+a DECREASE is exactly the change the feed structurally cannot report, an unexplained INCREASE is
+one it was supposed to. So the fallback fires on decreases and refuses increases
+(`_stale_fallback_verdict`), and a ticker whose expectation cannot be built at all is refused too.
+Refusing wrongly costs nothing new (the caller keeps the stale AIS it already had); admitting
+wrongly serves look-ahead under a fresh label. Not symmetric, so the gate leans.
+⚠️ `SUSP` carries 605 executed rows with a NEGATIVE `shares_delta` (cancellations) and this module
+does not read it. Wiring it in could turn some of these refusals into explained decreases — not
+attempted here, out of scope, written down so it is not rediscovered.
+⇒ A BACKTEST consumer that cares about look-ahead must read `method == "FIN_FALLBACK"` and decide
+for itself; `anchor_verified` is False on every one of them.
 
 RESIDUAL LIMITATION, STATED BECAUSE IT CANNOT BE CLOSED FROM THIS SIDE
 -----------------------------------------------------------------------
@@ -119,14 +170,29 @@ row, is the primary anchor here.
 """
 from __future__ import annotations
 
+from datetime import date
+
 from corp_action_lib import TABLE, bq, dilutes_share_count
 
 FIN_TABLE = "lithe-record-440915-m9.tav2_bq.ticker_financial"
+
+# An AIS older than this (in days, relative to `asof`) is no longer treated as the freshest
+# statement of the listed count: a quarterly `ticker_financial` row dated after it takes over as
+# the anchor (`FIN_FALLBACK`). 90 days = one reporting quarter, the interval at which OShares is
+# republished — the point past which "no AIS since" stops meaning "nothing has changed".
+FIN_FALLBACK_MAX_AIS_AGE_DAYS = 90
 
 # a quarterly count is "explained" by the rolled-forward AIS when it lands this close. The largest
 # real gap measured is FPT's 0,0013% (fractional-share rounding on a 15% bonus); 0,1% leaves two
 # orders of magnitude of headroom over that while still rejecting HAH's 10,1% jump.
 EXPLAIN_TOL = 0.001
+
+
+def _days_between(d0, d1):
+    """`d1 - d0` in days, both "YYYY-MM-DD" strings. Plain date arithmetic — no timezone enters
+    here (both ends are calendar dates already fixed by BQ / the caller's `asof`), so §16 of the
+    coding guidelines does not apply."""
+    return (date.fromisoformat(d1) - date.fromisoformat(d0)).days
 
 
 def _dedup_iss(events):
@@ -203,7 +269,12 @@ def _fetch(tickers, until):
 
 
 def _explain_quarterly(q, ais, iss):
-    """(ok, verified, reason) — can the last AIS at-or-before `q` be rolled forward INTO `q`?
+    """(ok, verified, reason, expected) — can the last AIS at-or-before `q` be rolled INTO `q`?
+
+    `expected` is the rolled-forward count the gate compared against, or None when no expectation
+    could be built at all (no prior AIS, or a blocking ISS). The stale-AIS fallback below needs the
+    NUMBER, not just the verdict: the direction of the miss is what separates an unreported buyback
+    from a restatement, and re-deriving it at the call site would be a second copy of this roll.
 
     This is the gate that makes a restated quarterly row unusable. `ais`/`iss` are already clipped
     to `asof` by the caller, and the primary test looks only at rows dated at or before
@@ -227,20 +298,74 @@ def _explain_quarterly(q, ais, iss):
         if hit:
             return False, False, (
                 f"{v:,.0f} trùng ĐÚNG số của AIS {hit[0]['effective_date']} (SAU ngày quý "
-                f"{t}) và không có AIS nào trước đó để giải thích ⇒ RESTATE")
-        return True, False, "không có AIS nào <= ngày quý ⇒ nhận nhưng KHÔNG kiểm chứng được"
+                f"{t}) và không có AIS nào trước đó để giải thích ⇒ RESTATE"), None
+        return True, False, "không có AIS nào <= ngày quý ⇒ nhận nhưng KHÔNG kiểm chứng được", None
     a = max(prior, key=lambda r: r["effective_date"])
     between = _dedup_iss([e for e in iss if a["effective_date"] < e["exright_date"] <= t])
     expected, _applied, blockers = _roll(float(a["shares_total_after"]), between)
     if blockers:
         return False, False, (f"ISS {[b['exright_date'] for b in blockers]} không có tỉ lệ/"
-                              f"shares_delta ⇒ không dựng được kỳ vọng để đối chiếu")
+                              f"shares_delta ⇒ không dựng được kỳ vọng để đối chiếu"), None
     if abs(v - expected) / expected > EXPLAIN_TOL:
         return False, False, (f"{v:,.0f} không giải thích được từ AIS {a['effective_date']} "
                               f"({float(a['shares_total_after']):,.0f}) + {len(between)} ISS "
-                              f"⇒ kỳ vọng {expected:,.0f}, lệch {(v/expected-1)*100:+.2f}% "
-                              f"— dấu hiệu số đã bị RESTATE về sau")
-    return True, True, ""
+                              f"⇒ kỳ vọng {expected:,.0f}, lệch {(v/expected-1)*100:+.2f}%"), expected
+    return True, True, "", expected
+
+
+def _stale_fallback_verdict(q, a, ais_age_days, expected, ais_certified):
+    """(allow, reason) — số quý bị cổng giải thích LOẠI có được phục vụ như FIN_FALLBACK không?
+
+    Chỉ chạy khi `_explain_quarterly` đã LOẠI dòng quý. Năm điều kiện, tất cả đều cần:
+
+      1. CÓ một neo AIS. Không có AIS mà vẫn bị loại thì lý do loại duy nhất là chữ ký RESTATE
+         (`v` trùng khít một AIS SAU ngày quý) — đó là bằng chứng look-ahead, không phải lý do
+         để tin dòng quý.
+      1b. Neo AIS đó phải ĐƯỢC CHỨNG NHẬN (`_ais_certified`). Cổng vòng 4 nói rõ: neo AIS trượt
+         cổng thì KHÔNG được "tụt sang neo dòng quý" — làm thế là ĐỔI SỐ chứ không phải dời cổng.
+         Không có điều kiện này, fallback trở thành đúng đường vòng mà cổng đó cấm: đo trên IDC
+         2021-02-05, neo AIS 2020-05-28 (3.000.000.000) verdict UNVERIFIED, dòng quý 300.000.000
+         thấp hơn ⇒ hợp lệ theo điều kiện 4 và được phục vụ ở nhãn MỚI, trong khi luật hiện hành
+         là từ chối trả lời. Chênh lệch −90% ở đó cũng cho thấy điều kiện 4 KHÔNG phải là chốt
+         chặn đủ mạnh khi bản thân neo đã hỏng: nó chỉ đọc CHIỀU, không đọc ĐỘ LỚN.
+      2. Neo AIS đã CŨ hơn một kỳ báo cáo (`FIN_FALLBACK_MAX_AIS_AGE_DAYS`). Còn tươi thì nó vẫn
+         là phát biểu mới nhất của sở về số CP niêm yết; không có gì để thay thế.
+      3. Dòng quý phải MỚI HƠN neo AIS. Nếu không, "rơi về BCTC" là đi LÙI.
+      4. Dòng quý KHÔNG được CAO hơn kỳ vọng lăn từ neo AIS. Đây là điều kiện phân biệt hai ca
+         nhìn giống hệt nhau tại thời điểm hỏi, và nó có cơ sở CẤU TRÚC chứ không phải kinh
+         nghiệm: feed corp-action mà module này đọc chỉ có `ISS` (luôn CỘNG cổ phiếu, 0/9.304
+         dòng có `shares_delta`, không dòng nào âm) và `AIS`. **Không tồn tại mã sự kiện cho mua
+         lại cổ phiếu quỹ** ⇒ một số GIẢM so với AIS là đúng loại thay đổi mà feed về cấu trúc
+         không thể báo — chính là ca VRE. Ngược lại, một số TĂNG là thứ feed lẽ ra phải có; khi
+         nó không có, nguyên nhân đã ĐO ĐƯỢC là restatement chạy trước một AIS chưa ingest
+         (2.667 dòng / 576 mã, `mike/kb/data_registry/fundamentals/ticker_financial_oshares.md`)
+         — ca HAH 2026-02-02 mang 185.840.401, con số chỉ ra đời với AIS 2026-05-27.
+         Không dựng được kỳ vọng (`expected is None`, ISS chắn đường) ⇒ không biết chiều ⇒ TỪ CHỐI.
+
+    Chiều sai của cổng này là CỐ Ý và không đối xứng: từ chối oan ⇒ giữ nguyên số hôm nay đang
+    dùng (neo AIS cũ); cho qua oan ⇒ phục vụ một số look-ahead ở nhãn mới mà chưa ai đo.
+    """
+    if a is None:
+        return False, "không có neo AIS: dòng quý bị loại vì chữ ký RESTATE, không phải vì AIS cũ"
+    if not ais_certified:
+        return False, (f"neo AIS {a['effective_date']} CHƯA được chứng nhận ⇒ giữ nguyên luật "
+                       f"vòng 4 (từ chối trả lời), không đi vòng sang neo dòng quý")
+    if ais_age_days is None or ais_age_days <= FIN_FALLBACK_MAX_AIS_AGE_DAYS:
+        return False, (f"neo AIS {a['effective_date']} còn tươi ({ais_age_days} ngày "
+                       f"<= {FIN_FALLBACK_MAX_AIS_AGE_DAYS}) ⇒ không rơi về BCTC")
+    if q["time"] <= a["effective_date"]:
+        return False, (f"dòng quý {q['time']} CŨ hơn neo AIS {a['effective_date']} ⇒ rơi về BCTC "
+                       f"là đi LÙI")
+    if expected is None:
+        return False, "không dựng được kỳ vọng từ neo AIS ⇒ không biết dòng quý tăng hay giảm"
+    v = float(q["OShares"])
+    if v > expected * (1.0 + EXPLAIN_TOL):
+        return False, (f"dòng quý {v:,.0f} CAO hơn kỳ vọng {expected:,.0f} "
+                       f"({v/expected-1:+.2%}) — cổ phiếu chỉ có thể tăng qua ISS mà feed lẽ ra "
+                       f"phải có ⇒ dấu hiệu RESTATE (look-ahead), KHÔNG phải sự kiện feed bỏ sót")
+    return True, (f"neo AIS {a['effective_date']} cũ {ais_age_days} ngày; dòng quý {q['time']} "
+                  f"{v:,.0f} THẤP hơn kỳ vọng {expected:,.0f} ({v/expected-1:+.2%}) — feed không "
+                  f"có mã sự kiện nào làm GIẢM số CP (mua cổ phiếu quỹ) nên BCTC là nguồn duy nhất")
 
 
 # Verdict nào của một neo AIS thì ĐƯỢC PHỤC VỤ. Đây là dòng CHÍNH SÁCH của cổng — mọi thứ khác
@@ -389,19 +514,42 @@ def oshares_at(tickers, asof, _cache=None):
                and c["exright_date"] and c["exright_date"] <= asof and dilutes_share_count(c)]
 
         anchors, rejected, unverified = [], [], False
-        if ais:
-            a = max(ais, key=lambda r: r["effective_date"])
+        fin_fallback = None
+        a = max(ais, key=lambda r: r["effective_date"]) if ais else None
+        q = max(qs, key=lambda r: r["time"]) if qs else None
+        ais_age_days = _days_between(a["effective_date"], asof) if a else None
+
+        if a:
             anchors.append((a["effective_date"], float(a["shares_total_after"]),
                             "corporate_action.AIS"))
-        if qs:
-            q = max(qs, key=lambda r: r["time"])
-            ok, verified, why = _explain_quarterly(q, ais, iss)
+        if q:
+            ok, verified, why, expected = _explain_quarterly(q, ais, iss)
             if ok:
                 anchors.append((q["time"], float(q["OShares"]), "ticker_financial"))
                 unverified = not verified
             else:
-                rejected.append({"source": "ticker_financial", "date": q["time"],
-                                 "value": float(q["OShares"]), "reason": why})
+                # STALE-AIS FALLBACK (2026-08-19, user policy). The gate has just refused the
+                # quarterly row. That refusal is right when the row was restated ahead of an AIS
+                # not yet ingested — and WRONG when the count genuinely moved through something
+                # the feed carries no event for. `_stale_fallback_verdict` is the only place that
+                # distinguishes them; nothing here decides on its own.
+                # certification is read HERE, not only at the gate below: once a quarterly
+                # anchor wins, `anchor_src` is no longer AIS and that gate never runs.
+                a_ok = bool(a) and _ais_certified(corp, tk, asof, a["effective_date"])
+                allow, fb_why = _stale_fallback_verdict(q, a, ais_age_days, expected, a_ok)
+                if allow:
+                    anchors.append((q["time"], float(q["OShares"]), "ticker_financial"))
+                    unverified = True          # served, but the gate never cleared it
+                    fin_fallback = {"fin_fallback": True, "fin_quarter": q["time"],
+                                    "fin_value": float(q["OShares"]),
+                                    "ais_anchor_date": a["effective_date"] if a else None,
+                                    "ais_age_days": ais_age_days,
+                                    "fin_expected_from_ais": expected,
+                                    "fin_explain_note": why, "fin_fallback_reason": fb_why}
+                else:
+                    rejected.append({"source": "ticker_financial", "date": q["time"],
+                                     "value": float(q["OShares"]), "reason": why,
+                                     "fallback_refused": fb_why})
 
         if not anchors:
             out[tk] = {"ticker": tk, "asof": asof, "value": None, "method": "NO_ANCHOR",
@@ -423,6 +571,13 @@ def oshares_at(tickers, asof, _cache=None):
         base = {"ticker": tk, "asof": asof, "anchor_date": anchor_date,
                 "anchor_value": anchor_value, "anchor_source": anchor_src,
                 "anchor_verified": anchor_verified, "rejected_anchors": rejected}
+        # provenance only counts when the fallback anchor actually WON the max() above; a
+        # fallback candidate that lost to a newer AIS must not stamp its keys on someone else's
+        # answer.
+        fin_served = fin_fallback is not None and anchor_src == "ticker_financial" \
+            and anchor_date == fin_fallback["fin_quarter"]
+        if fin_served:
+            base.update(fin_fallback)
 
         if blockers:
             out[tk] = {**base, "value": None, "method": "UNKNOWN_RATIO",
@@ -432,7 +587,15 @@ def oshares_at(tickers, asof, _cache=None):
                                f"lẫn shares_delta ⇒ KHÔNG trả số (fail-closed)"}
             continue
 
-        if applied and any(h == "exercise_ratio" for _e, h, _s in applied):
+        iss_estimate = bool(applied) and any(h == "exercise_ratio" for _e, h, _s in applied)
+        if fin_served:
+            # ONE label for the whole branch: what a consumer must know first is that the number
+            # came from the quarterly column, not from the registry. Whether an ISS was rolled on
+            # top is a separate fact and is reported separately (`iss_estimate` + `events_applied`)
+            # rather than by mangling it into the method string.
+            method = "FIN_FALLBACK"
+            base["iss_estimate"] = iss_estimate
+        elif iss_estimate:
             method = "ISS_ESTIMATE"
         elif anchor_src == "corporate_action.AIS":
             method = "AIS_EXACT"           # applied deltas, if any, are exact registry counts
@@ -655,17 +818,28 @@ def _selfcheck() -> int:
     # CHỨNG MINH NGƯỢC — nếu không có ca test này thì N1/N2 có thể PASS chỉ vì mã đó rỗng dữ liệu.
     # Sửa `globals()` chứ không `import oshares_live`: chạy bằng `python oshares_live.py` thì
     # module này là `__main__`, một lệnh import sẽ nạp BẢN THỨ HAI và vá nhầm chỗ.
+    # Phải mở CẢ HAI cổng thì hai số sai mới quay lại được. Từ 2026-08-19 cổng chứng nhận không
+    # còn là thứ duy nhất chặn IDC: fallback FIN_FALLBACK cũng chặn (xem N3b). Mở mỗi cổng chứng
+    # nhận rồi kết luận "cổng không chặn" là đọc nhầm một lớp phòng thủ thứ hai thành thất bại.
     _keep_serve = _SERVE_AIS_VERDICTS
+    _keep_age = FIN_FALLBACK_MAX_AIS_AGE_DAYS
     globals()["_SERVE_AIS_VERDICTS"] = ("OK", "NO_PRIOR", "UNVERIFIED")
     try:
+        idc_half = oshares_at(["IDC"], "2021-02-05")["IDC"]     # chỉ mở cổng chứng nhận
+        globals()["FIN_FALLBACK_MAX_AIS_AGE_DAYS"] = 10 ** 9    # …rồi tắt luôn fallback
         idc_no = oshares_at(["IDC"], "2021-02-05")["IDC"]
         fpt_no = oshares_at(["FPT"], "2020-05-05")["FPT"]
     finally:
         globals()["_SERVE_AIS_VERDICTS"] = _keep_serve
-    check("N3. CHỨNG MINH NGƯỢC: mở cổng ⇒ CẢ HAI số sai THẬT SỰ quay lại (cổng đang chặn thật)",
+        globals()["FIN_FALLBACK_MAX_AIS_AGE_DAYS"] = _keep_age
+    check("N3. CHỨNG MINH NGƯỢC: mở CẢ HAI cổng ⇒ CẢ HAI số sai THẬT SỰ quay lại (đang chặn thật)",
           idc_no["value"] == 3_000_000_000.0 and idc_no["method"] == "AIS_EXACT"
           and fpt_no["value"] == 461_723_054.0,
           f"IDC {fmt(idc_no['value'])} · FPT {fmt(fpt_no['value'])}")
+    check("N3b. PHÒNG THỦ HAI LỚP: mở riêng cổng chứng nhận thì 3.000.000.000 VẪN không ra — "
+          "fallback chặn độc lập (số quý 300.000.000 thấp hơn neo hỏng)",
+          idc_half["value"] == 300_000_000.0 and idc_half["method"] == "FIN_FALLBACK",
+          f"{fmt(idc_half['value'])} [{idc_half['method']}]")
     # FAIL-CLOSED: hàm chứng nhận hỏng ⇒ KHÔNG phục vụ (không phải "không kiểm được thì cho qua")
     _keep_v = _ais_verdicts
 
@@ -702,8 +876,57 @@ def _selfcheck() -> int:
           "2022-09-05" not in _ais_verdicts(icache[1], "IDC", "2020-01-01"),
           str(sorted(_ais_verdicts(icache[1], "IDC", "2020-01-01"))))
 
+    # ── FIN_FALLBACK: neo AIS CŨ quá một kỳ báo cáo ⇒ rơi về dòng quý ─────────────────────
+    # Chính sách user chốt 2026-08-19. VRE là ca buộc phải có: AIS duy nhất 2018-12-26, đợt mua
+    # cổ phiếu quỹ 2019 KHÔNG sinh dòng corp-action nào, và dòng quý mang số đúng từ 2019-10-29.
+    print("== FIN_FALLBACK — VRE: AIS 2018 đứng im, mua CP quỹ 2019 không có sự kiện ==")
+    vre = oshares_at(["VRE"], "2026-08-19")["VRE"]
+    print(f"  VRE 2026-08-19: {fmt(vre['value'])} [{vre['method']}] anchor={vre['anchor_date']} "
+          f"({vre['anchor_source']}) AIS {vre.get('ais_anchor_date')} cũ "
+          f"{vre.get('ais_age_days')} ngày")
+    check("F1. VRE 2026-08-19 ⇒ FIN_FALLBACK = 2.272.318.410 (số BCTC), KHÔNG phải AIS 2018",
+          vre["value"] == 2_272_318_410.0 and vre["method"] == "FIN_FALLBACK",
+          f"{fmt(vre['value'])} [{vre['method']}]")
+    check("F1b. …và xuất xứ được ghi đủ để tra tay: quý neo, tuổi AIS, anchor_verified=False",
+          vre.get("fin_quarter") == vre["anchor_date"] and vre.get("ais_age_days", 0) > 90
+          and vre["anchor_verified"] is False and vre.get("fin_fallback") is True,
+          f"quý={vre.get('fin_quarter')} tuổi AIS={vre.get('ais_age_days')} "
+          f"verified={vre['anchor_verified']}")
+    # CHỨNG MINH NGƯỢC — nếu không có ca này thì F1 có thể PASS vì bất kỳ lý do nào khác.
+    _keep_age = FIN_FALLBACK_MAX_AIS_AGE_DAYS
+    globals()["FIN_FALLBACK_MAX_AIS_AGE_DAYS"] = 10 ** 9
+    try:
+        vre_off = oshares_at(["VRE"], "2026-08-19")["VRE"]
+    finally:
+        globals()["FIN_FALLBACK_MAX_AIS_AGE_DAYS"] = _keep_age
+    check("F1c. CHỨNG MINH NGƯỢC: tắt fallback ⇒ VRE quay lại ĐÚNG con số sai 2.328.818.410 "
+          "(+2,49%) — fallback là thứ đang sửa, không phải trùng hợp",
+          vre_off["value"] == 2_328_818_410.0,
+          f"{fmt(vre_off['value'])} [{vre_off['method']}]")
+
+    print("== FIN_FALLBACK — ba ca KHÔNG được đụng tới ==")
+    # (a) AIS còn tươi: fallback không có cửa xen vào
+    tcb_age = _days_between(ctrl["TCB"]["anchor_date"], "2026-08-12")
+    check(f"F2. AIS còn tươi ({tcb_age} ngày <= {FIN_FALLBACK_MAX_AIS_AGE_DAYS}) ⇒ TCB vẫn "
+          f"AIS_EXACT, nhãn KHÔNG đổi",
+          tcb_age <= FIN_FALLBACK_MAX_AIS_AGE_DAYS
+          and ctrl["TCB"]["method"] == "AIS_EXACT" and "fin_fallback" not in ctrl["TCB"],
+          f"{ctrl['TCB']['method']} tuổi={tcb_age}")
+    # (b) không có cả AIS lẫn dòng quý: NO_ANCHOR như cũ, không bịa số
+    na = oshares_at(["FPT"], "2001-01-01")["FPT"]
+    check("F3. không có AIS lẫn dòng quý ⇒ NO_ANCHOR, value=None (fallback không bịa số)",
+          na["value"] is None and na["method"] == "NO_ANCHOR", f"{na['method']}")
+    # (c) chiều TĂNG: đúng ca HAH mà cổng RESTATE sinh ra, fallback phải TỪ CHỐI và nói lý do
+    check("F4. dòng quý CAO hơn kỳ vọng (HAH 2026-02-02, +10,06%) ⇒ fallback TỪ CHỐI, "
+          "lý do được ghi lại chứ không im lặng",
+          h["method"] != "FIN_FALLBACK"
+          and any("CAO hơn kỳ vọng" in (r.get("fallback_refused") or "")
+                  for r in h["rejected_anchors"]),
+          f"{h['method']}; " + "; ".join(
+              (r.get("fallback_refused") or "")[:60] for r in h["rejected_anchors"]))
+
     print("== Bất biến chung: value is None ⟺ method ∈ {UNKNOWN_RATIO, NO_ANCHOR, AIS_UNCERTIFIED} ==")
-    every = [h, m, idc, fpt5, tcb_boom, *ctrl.values(), *series.values()]
+    every = [h, m, idc, fpt5, tcb_boom, vre, vre_off, na, *ctrl.values(), *series.values()]
     check("10. không bao giờ trả số kèm nhãn 'không biết', và ngược lại",
           all((r["value"] is None)
               == (r["method"] in ("UNKNOWN_RATIO", "NO_ANCHOR", "AIS_UNCERTIFIED"))
