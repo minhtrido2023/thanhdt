@@ -14,7 +14,8 @@ về đúng thiết kế; nó KHÔNG phụ thuộc bất kỳ tín hiệu mua n�
 CÔNG THỨC (§D1 `park_membership_sync_L0_design_20260806.md` — user John duyệt 2026-08-07,
 job Taylor_20260807_020402. Mọi hằng số vẫn PORT từ engine/gate đã chạy, KHÔNG tham số mới):
 
-    pool        = (totalCash − totalDebt) + park_mv (sổ book, §park_holdings)  # ← §pool, sửa 08-09
+    pool        = (totalCash − totalDebt) + egg_assets + park_mv (sổ book, §park_holdings)
+                                                          # ← §pool, sửa 08-09 · §pool-egg sửa 08-19
     target_park = pool × PARK_TARGET
     delta       = target_park − park_mv
     if delta < −pool × 0.005:                          # ngưỡng 0,005 = engine dòng 918 (GIỮ NGUYÊN)
@@ -89,6 +90,23 @@ không đổi. Cùng quy ước NAV = totalCash − totalDebt của `daily_nav_s
 
 ⚠️ `compute_jit_unpark.py` (L2) CỐ Ý vẫn dùng `availableCash`: nó hỏi "tiền tôi TIÊU được ngay
 phiên tới", không phải "vốn tôi sở hữu". Đừng đồng bộ hai chỗ này thành một field.
+
+§pool-egg — CỘNG Trứng vàng (DNSE egg product) vào mẫu số (sửa 2026-08-19, sự cố thật cùng ngày:
+user hỏi vì sao TRIM sinh ra dù không phải kỳ rebalance custom30V). Root cause: `totalCash` của
+CẢ HAI account rơi tự do đúng 1 phiên (SpaceX 109,98tr→9,78tr, ZaloPay 45,22tr→6,46tr, asof
+2026-08-17→2026-08-18) — khớp gần tuyệt đối với số dư Trứng vàng cùng ngày (SpaceX ~100,22tr,
+ZaloPay ~38,77tr). Tiền KHÔNG mất, chỉ chuyển sang một sản phẩm khác của DNSE (đọc qua field
+`egg.totalValue`, sibling của `stock` trong payload `balances` thô — KHÔNG nằm trong `totalCash`).
+`compute_active_nav.py`/`daily_nav_snapshot.py` đã cộng field này vào NAV từ 2026-08-18, nhưng L1
+(`compute_park_trim.py`) bị bỏ sót ⇒ pool co lại ĐÚNG BẰNG số tiền chuyển vào egg trong khi
+park_mv gần như không đổi ⇒ TRIM giả (sinh lệnh bán PARK để "kéo về đúng tỷ trọng" của một mẫu số
+đã bị thu hẹp sai) — không phục vụ mục đích tái cân bằng thật nào, chỉ tốn phí giao dịch.
+
+Egg CỐ Ý cộng vào L1 (câu hỏi "sở hữu bao nhiêu vốn") nhưng KHÔNG cộng vào L2 `compute_jit_unpark`
+(câu hỏi "tiêu được ngay bao nhiêu" — egg cần lệnh rút + về tài khoản hôm sau, không phải sức mua
+tức thời) — cùng ranh giới đã có sẵn giữa `totalCash` và `availableCash` ở trên, chỉ thêm một
+field vào phía "sở hữu". User John duyệt 2026-08-19 (Discord, kênh DollarBill plan): "Trứng
+vàng là cash và tất cả các formula liên quan đến cash đều phải cập nhật để không bị tính sai."
 
 FAIL-CLOSED per-name (sao chép nguyên `cap_lag_orders._block`): không đo được ADV / ADV cũ
 hơn LAG_ADV_MAX_STALE_DAYS / ADV ≤ 0 / không dựng được danh sách account live ⇒ KHÔNG trim mã
@@ -323,10 +341,14 @@ def compute_trim(account_label, asof=None, target=PARK_TARGET_F1, holdings=None,
     # lên đúng bằng tiền đi vay ⇒ trần PARK cao giả ⇒ UNDER-trim — đúng chế độ hỏng NGƯỢC LẠI với
     # bug vừa sửa (quant-skeptic 2026-08-09 nêu; SpaceX từng nợ 409,9tr ngày 2026-07-03).
     cash = float(h["cash_total_vnd"]) - float(h["cash_debt_vnd"])
+    # Trứng vàng (§pool-egg) — vốn CHỦ SỞ HỮU thật, chỉ thiếu thanh khoản tức thời (cần rút T+1),
+    # nên cộng vào mẫu số "sở hữu bao nhiêu" giống totalCash, KHÔNG giống availableCash của L2.
+    egg = float(h.get("egg_assets_vnd") or 0.0)
     out["cash_basis"] = h.get("cash_basis")
     out["cash_dividend_receiving_vnd"] = h.get("cash_dividend_receiving_vnd")
     out["cash_debt_vnd"] = h.get("cash_debt_vnd")
-    pool = cash + park_mv
+    out["egg_assets_vnd"] = egg
+    pool = cash + egg + park_mv
     target_value = pool * target
     delta = target_value - park_mv
     out.update({"pool_vnd": pool, "target_park_vnd": target_value, "delta_vnd": delta,
@@ -574,10 +596,11 @@ def main():
         _unset = (r["cash_total_vnd"] or 0) - (r["cash_available_vnd"] or 0) \
             - (r.get("cash_dividend_receiving_vnd") or 0)
         _debt = r.get("cash_debt_vnd") or 0
+        _egg = r.get("egg_assets_vnd") or 0
         print(f"  pool = cash {((r['cash_total_vnd'] or 0) - _debt)/1e6:,.2f}tr (totalCash: settled "
               f"{(r['cash_available_vnd'] or 0)/1e6:,.2f} + bán chưa settle {_unset/1e6:,.2f} "
               f"+ cổ tức chờ {(r.get('cash_dividend_receiving_vnd') or 0)/1e6:,.2f} "
-              f"− nợ margin {_debt/1e6:,.2f}) + PARK "
+              f"− nợ margin {_debt/1e6:,.2f}) + Trứng vàng {_egg/1e6:,.2f}tr + PARK "
               f"{r['park_mv_vnd']/1e6:,.2f}tr = {r['pool_vnd']/1e6:,.2f}tr")
         print(f"  target {r['target_park']:.0%} = {r['target_park_vnd']/1e6:,.2f}tr  →  "
               f"vượt {max(0, -r['delta_vnd'])/1e6:,.2f}tr "

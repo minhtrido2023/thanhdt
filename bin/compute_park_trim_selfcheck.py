@@ -68,7 +68,7 @@ FIXTURE_DEBT = 50e6     # xem `holdings()` — chỉ để sổ mặc định KH
 
 
 def holdings(lots, cash=0.0, excluded=(), unver=(), reconcile_ok=True, sellable=None,
-             total_cash="net_zero", div_recv=0.0, debt="net_zero"):
+             total_cash="net_zero", div_recv=0.0, debt="net_zero", egg=0.0):
     """lots = [(ticker, qty, entry_date, source)] — mv tính từ PX.
 
     `total_cash` = mẫu số pool L1 (totalCash DNSE). `None` = DNSE thiếu field ⇒ phải fail-closed.
@@ -102,6 +102,7 @@ def holdings(lots, cash=0.0, excluded=(), unver=(), reconcile_ok=True, sellable=
             "cash_total_vnd": total_cash,
             "cash_dividend_receiving_vnd": div_recv,
             "cash_debt_vnd": debt,
+            "egg_assets_vnd": egg,
             "cash_basis": "total_cash",
             "reconcile": {"ok": reconcile_ok,
                           "mismatches": [] if reconcile_ok else [{"ticker": "AAA", "diff": 100}]},
@@ -481,6 +482,64 @@ check("T18u ĐƯỜNG THẬT: dnse_raw ăn 2/3 field ⇒ read_broker_snapshot tr
       "⇒ consumer fail-closed",
       m_partial["total_cash_vnd"] is None and m_partial["balance_all_zero"] is True,
       f"{m_partial['total_cash_vnd']} / {m_partial['balance_all_zero']}")
+
+# ── T19: §pool-egg (2026-08-19) — tái lập ĐÚNG sự cố thật (user hỏi "đâu phải kỳ rebalance,
+# sao lại TRIM"). Cùng sổ PARK, cùng cash_total, chỉ khác: một phần vốn đã chuyển sang Trứng
+# vàng (egg). KHÔNG cộng egg ⇒ TRIM oan; CÓ cộng egg ⇒ NO_TRIM/trim nhỏ hơn đúng bằng phần vốn
+# đó. Đây là bug THẬT đã xảy ra (SpaceX 08-18: totalCash rơi 100,2tr, egg tăng ~100,2tr).
+r19_no_egg = run(holdings(BASE_LOTS, cash=0.0, total_cash=100e6, debt=0.0, egg=0.0))
+r19_with_egg = run(holdings(BASE_LOTS, cash=0.0, total_cash=100e6, debt=0.0, egg=100e6))
+check("T19a KHÔNG cộng egg — sổ hệt T18 base nhưng cash chỉ còn 100tr (phần kia đã sang egg) "
+      "⇒ TRIM oan (đúng chữ ký sự cố thật 08-19)",
+      r19_no_egg["decision"] == "TRIM",
+      f"{r19_no_egg['decision']} pool={r19_no_egg.get('pool_vnd')}")
+check("T19b CÓ cộng egg 100tr (đúng số đã 'biến mất' khỏi cash) ⇒ pool phục hồi về 1.100tr, "
+      "target 880tr > PARK 1.000tr? — PARK vẫn > target nên vẫn TRIM, nhưng NHẸ HƠN HẲN "
+      "(egg bù đúng phần đã mất, không bù thêm/bớt)",
+      close(r19_with_egg["pool_vnd"], r19_no_egg["pool_vnd"] + 100e6, 1)
+      and r19_with_egg["delta_vnd"] > r19_no_egg["delta_vnd"],
+      f"pool no_egg={r19_no_egg['pool_vnd']:,.0f} with_egg={r19_with_egg['pool_vnd']:,.0f} "
+      f"delta no_egg={r19_no_egg['delta_vnd']:,.0f} with_egg={r19_with_egg['delta_vnd']:,.0f}")
+check("T19c egg_assets_vnd được ghi lại nguyên vẹn vào output (audit trail — không bị nuốt "
+      "âm thầm trong phép cộng)",
+      r19_with_egg.get("egg_assets_vnd") == 100e6 and r19_no_egg.get("egg_assets_vnd") == 0.0,
+      f"{r19_with_egg.get('egg_assets_vnd')} / {r19_no_egg.get('egg_assets_vnd')}")
+check("T19d không khai egg (default 0.0, mọi ca T1-T18 cũ) ⇒ hành vi Y HỆT trước khi vá — "
+      "không có regression cho holdings không mang field mới",
+      run(holdings(BASE_LOTS, cash=100e6, total_cash=420e6))["pool_vnd"]
+      == run(holdings(BASE_LOTS, cash=100e6, total_cash=420e6, egg=0.0))["pool_vnd"])
+
+# ĐƯỜNG THẬT: dnse_raw có field "egg" sibling của "stock" (đúng schema thật, xem
+# data/execution_logs/dnse_raw_2026-08-18.jsonl) ⇒ read_broker_snapshot() (historical branch,
+# park_holdings.py) phải đọc ra egg_assets_vnd đúng, KHÔNG chỉ fixture bơm tay ở trên.
+def _raw_snapshot_egg(stock_block, egg_value):
+    with tempfile.TemporaryDirectory() as td:
+        acc, day = "0009999999", "2026-08-07"
+        with open(os.path.join(td, f"dnse_raw_{day}.jsonl"), "w", encoding="utf-8") as f:
+            f.write(json.dumps({"account_no": acc, "kind": "positions", "ts": f"{day}T19:00:00",
+                                "payload": {"positions": [{"accountNo": acc, "symbol": "AAA",
+                                                           "openQuantity": 100,
+                                                           "marketPrice": 10000,
+                                                           "tradeQuantity": 100}]}}) + "\n")
+            f.write(json.dumps({"account_no": acc, "kind": "balances", "ts": f"{day}T19:01:00",
+                                "payload": {"stock": stock_block,
+                                            "egg": {"totalValue": egg_value}}}) + "\n")
+        return PH.read_broker_snapshot("TEST", acc, day, exec_dir=td)
+
+
+_, _, m_egg = _raw_snapshot_egg({"totalCash": 9_783_984, "totalDebt": 0,
+                                 "availableCash": 4_382, "depositInterest": 318,
+                                 "cashDividendReceiving": 9_775_000}, 100_223_898)
+check("T19e ĐƯỜNG THẬT (historical branch) — dnse_raw có sibling \"egg\" đúng schema thật ⇒ "
+      "read_broker_snapshot() đọc ra egg_assets_vnd đúng số (số thật SpaceX 08-18)",
+      m_egg["egg_assets_vnd"] == 100_223_898.0,
+      f"egg_assets_vnd={m_egg.get('egg_assets_vnd')}")
+_, _, m_egg_zero = _raw_snapshot_egg({"totalCash": 100e6, "totalDebt": 0, "availableCash": 20e6,
+                                      "depositInterest": 318, "cashDividendReceiving": 0}, 0)
+check("T19f ĐƯỜNG THẬT — egg=0 (tài khoản không dùng Trứng vàng) ⇒ egg_assets_vnd=0.0, "
+      "không lỗi/None",
+      m_egg_zero["egg_assets_vnd"] == 0.0,
+      f"egg_assets_vnd={m_egg_zero.get('egg_assets_vnd')}")
 
 print(f"\n=== {len(PASS)} PASS / {len(FAIL)} FAIL ===")
 if FAIL:
