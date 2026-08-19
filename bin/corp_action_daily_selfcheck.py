@@ -22,8 +22,10 @@ Usage: python3 mike/bin/corp_action_daily_selfcheck.py [--no-subprocess]
 """
 from __future__ import annotations
 
+import contextlib
 import datetime as dt
 import inspect
+import io
 import json
 import os
 import subprocess
@@ -688,6 +690,112 @@ def t_magnitude_gate():
                         back=oshares_at(["VHM"], "2021-12-30", _cache=VHM_CACHE))
     check("MG16. `check_retro` với `back=` truyền sẵn cho KẾT QUẢ Y HỆT bản tự tính — tham số mới "
           "chỉ để dùng lại phép tính, không đổi hành vi", a == b, f"{a} vs {b}")
+
+
+# ──────────────────────────── LỚP 4c WIRING · run() có THẬT SỰ nối tới cổng biên độ không
+
+# quant-skeptic (2026-08-19): mọi ca MG* ở trên gọi THẲNG `sanity_flag`/`sanity_warns`/
+# `_fmt_magnitude` — không ca nào đi qua `run()`. Nếu ai gỡ 3 lệnh gọi `sanity_warns*(...)` khỏi
+# thân `run()` (dòng `mag = (sanity_warns(cur, …) + sanity_warns(back, …) +
+# sanity_warns_from_crosscheck(diverge))`), toàn bộ 178 ca hiện có (kể cả MG1-MG16) VẪN XANH, vì
+# chúng kiểm hàm con, không kiểm dây nối. Ca dưới đây gọi `run()` NGUYÊN VẸN (dry-run, hermetic —
+# mọi phụ thuộc ngoài, kể cả BQ/Discord/bus/state file, đều được patch tại module), rồi kiểm đúng
+# NGAY output mà `run()` thật sự trả về và IN ra — không đọc lại `sanity_warns()` một lần nữa.
+
+def t_run_level_wiring():
+    print("== LỚP 4c WIRING · run() phải THẬT SỰ gọi sanity_warns*(), không chỉ định nghĩa hàm con ==")
+    asof = "2026-06-01"
+    cache = ([_q("MAG", "2020-01-01", 1000.0)], [])
+    positions = {"SpaceX": {"asof": asof, "stale_days": 0, "positions": {"MAG": 100},
+                            "excluded_tickers": [], "source": "test-fixture"}}
+
+    def fake_oshares_at(tickers, at, _cache=None):
+        # cũ (dòng quý) = 1.000, mới (live) = 3.001 — ngay trên biên `>×3,0` (cùng con số ví dụ
+        # trong prompt dispatch), độc lập với ca thật VHM đã dùng ở MG1-MG16 phía trên.
+        return {tk: {"value": 3001.0, "method": "TEST_INJECTED", "anchor_date": at,
+                     "anchor_source": "test"} for tk in tickers}
+
+    PATCHED = ("OUT_DIR", "STATE_PATH", "bus", "notify", "gate_selfcheck", "gate_freshness",
+              "read_positions", "triggered_today", "_fetch", "oshares_at", "upcoming_events",
+              "sanity_warns", "sanity_warns_from_crosscheck")
+
+    def _run_hermetic(tmp):
+        """Patch MỌI phụ thuộc ngoài của `run()` (BQ, Discord/Telegram, bus, state file trên
+        đĩa) rồi gọi `run()` nguyên vẹn — không mock chính cổng biên độ đang kiểm."""
+        cad.OUT_DIR = os.path.join(tmp, "out")
+        cad.STATE_PATH = os.path.join(tmp, "state.json")
+        cad.bus = lambda *a, **k: None
+        cad.notify = lambda *a, **k: None
+        cad.gate_selfcheck = lambda: (True, [{"module": "test", "rc": 0, "tail": ["ok"]}])
+        cad.gate_freshness = lambda a: ("FRESH", {
+            "max_ingested_utc": "2026-05-31T15:00:00+00:00",
+            "max_ingested_ict": "2026-05-31T22:00:00+07:00",
+            "max_public_date": None, "rows": 1, "age_days": 0, "prev_trading_day": "2026-05-29"})
+        cad.read_positions = lambda asof=None, nav_glob=None: positions
+        cad.triggered_today = lambda a, rows=None: (set(), set(), [])
+        cad._fetch = lambda tickers, until: cache
+        cad.oshares_at = fake_oshares_at
+        cad.upcoming_events = lambda a, tickers, days=cad.LOOKAHEAD_DAYS, rows=None: []
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            rc, snap = cad.run(asof=asof, dry_run=True, alert=False)
+        return rc, snap, buf.getvalue()
+
+    keep = {n: getattr(cad, n) for n in PATCHED}
+    try:
+        with tempfile.TemporaryDirectory() as tmp:
+            rc, snap, out = _run_hermetic(tmp)
+
+        check("R1. run() publish OK (rc=0) qua trọn 7 lớp với fixture hermetic — không cổng nào "
+              "khác tự đỏ vì input của ca này (nếu FAIL thì R2-R7 dưới đây không có nghĩa)",
+              rc == 0, f"rc={rc}")
+        check("R2. `tickers['MAG']['value']` GIỮ NGUYÊN 3001 sau khi đi qua CẢ `run()` — phương "
+              "án C (WARN, không SUPPRESS, user chốt 2026-08-14) đúng ngay ở tầng điều phối, "
+              "không chỉ ở `sanity_warns()` gọi trực tiếp (đó là điều MG2 đã kiểm)",
+              snap.get("tickers", {}).get("MAG", {}).get("value") == 3001.0,
+              str(snap.get("tickers", {}).get("MAG")))
+        check("R3. bản ghi MAG mang `sanity_warn` gắn TẠI CHỖ, đúng số dòng quý (1.000) — cờ đến "
+              "từ ĐÚNG phép so trong `run()`, không phải một dict test tự bịa",
+              snap.get("tickers", {}).get("MAG", {}).get("sanity_warn", {}).get("quarterly")
+              == 1000.0, str(snap.get("tickers", {}).get("MAG", {}).get("sanity_warn")))
+        check("R4. snapshot cấp cao có `magnitude_suspect == ['MAG']` — ĐÂY LÀ DÂY NỐI "
+              "quant-skeptic đòi kiểm: gỡ `sanity_warns*()` khỏi thân `run()` sẽ làm field này "
+              "rỗng dù mọi ca MG* (sanity_flag/sanity_warns gọi trực tiếp) vẫn xanh 100% — xem R8",
+              snap.get("magnitude_suspect") == ["MAG"], str(snap.get("magnitude_suspect")))
+        check("R5. mã đó tách riêng vào `magnitude_suspect_held` (đang giữ thật, không phải mã "
+              "lịch sử) — đúng nhánh MG10 đã kiểm ở tầng `_fmt_magnitude`, nay kiểm ở tầng `run()`",
+              snap.get("magnitude_suspect_held") == ["MAG"],
+              str(snap.get("magnitude_suspect_held")))
+        check("R6. dòng 📏 THẬT SỰ nằm trong nội dung `run()` IN RA khi `--no-alert` (đường "
+              "`[dry] tin nhắn SẼ gửi` dùng CHUNG list `lines` với đường gửi Discord thật khi "
+              "`alert=True`) — bằng chứng người đọc Discord thấy đúng cảnh báo, không chỉ dict",
+              "📏" in out and "MAG" in out, out[-400:])
+        check("R7. KHÔNG có dòng 🚨 THẬT (bất biến bị giấu — tiêu đề '🚨 **Bất biến số CP vi "
+              "phạm**') hay `value_withheld` bị trộn vào ca này — cờ này phải đến từ lớp 4c "
+              "(WARN), không phải lớp 4 (SUPPRESS). Không đếm bằng ký tự 🚨 trần: dòng 📏 CỐ Ý "
+              "nhắc tới 🚨 trong văn bản đối chiếu của chính nó (xem MG9b/MG11)",
+              "🚨 **Bất biến số CP vi phạm**" not in out
+              and snap.get("invariant_violations") == []
+              and "value_withheld" not in snap.get("tickers", {}).get("MAG", {}),
+              out[-400:])
+
+        # ── R8: MUTANT — gỡ CẢ HAI hàm phát cảnh báo biên độ (`sanity_warns`,
+        # `sanity_warns_from_crosscheck`) khỏi những gì `run()` gọi được, input Y HỆT ca trên.
+        # Mô phỏng đúng kiểu lỗi quant-skeptic mô tả: dây nối trong `run()` bị cắt mà bản thân
+        # `sanity_flag`/`sanity_warns` (đã kiểm ở MG1-MG16) không đổi một chữ.
+        cad.sanity_warns = lambda *a, **k: []
+        cad.sanity_warns_from_crosscheck = lambda *a, **k: []
+        with tempfile.TemporaryDirectory() as tmp2:
+            _, snap_mut, out_mut = _run_hermetic(tmp2)
+        check("R8. MUTANT PROOF — input Y HỆT ca PASS ở trên, chỉ cắt dây `sanity_warns*()` khỏi "
+              "`run()` ⇒ `magnitude_suspect` RỖNG và không còn 📏 trong tin nhắn. Chứng minh "
+              "R4/R6 KHÔNG PASS vì cổng chết sẵn — test này THẬT SỰ bắt được kiểu gỡ dây nối mà "
+              "0/178 ca cũ bắt được",
+              snap_mut.get("magnitude_suspect") == [] and "📏" not in out_mut,
+              f"magnitude_suspect={snap_mut.get('magnitude_suspect')!r} 📏 in out={'📏' in out_mut}")
+    finally:
+        for n, v in keep.items():
+            setattr(cad, n, v)
 
 
 # ─────────────────────────────────────── lịch trigger + LỚP 6 · cảnh báo proactive
@@ -1453,6 +1561,7 @@ def main():
     t_render_divergence()
     t_none_value_watch()
     t_magnitude_gate()
+    t_run_level_wiring()
     t_triggers_and_alerts()
     t_query_shape()
     t_confirm_unique_key()
