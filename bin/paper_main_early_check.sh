@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # paper_main_early_check.sh — phát hiện SỚM khi paper-main (probe harness cho EXTREME-regime
 # gate + vol-scale chase-cap + fill-timing) không sinh evidence thật, thay vì chỉ biết qua báo
-# cáo Paper Programs 16:00 hay khi user hỏi. Chạy ~30' sau mỗi cron executor (09:10 sáng / 13:05 chiều ICT).
+# cáo Paper Programs 07:30 hay khi user hỏi. Chạy ~30' sau mỗi cron executor (09:10 sáng / 13:05 chiều ICT).
 #
 # Gốc sự cố 2026-07-08/09: ghost-guard/TZ bug khiến journal tồn tại nhưng 0 lệnh thật cả 2
 # ngày liền — không ai biết cho tới khi user hỏi trực tiếp 07-09 chiều. Script này đóng đúng
@@ -102,7 +102,7 @@ except OSError:
 
 if [ "$HAS_REAL" != "yes" ]; then
   GHOST_COUNT="$(grep -c ',GHOST_ORDER,' "$JOURNAL" 2>/dev/null || echo 0)"
-  _notify "🔴 **paper-main early-check ($SESSION, $NOW_ICT)** — journal tồn tại nhưng 0 lệnh PLACE/FILL/DONE thật (GHOST_ORDER: $GHOST_COUNT dòng). Đây đúng dấu hiệu sự cố 07-08/09 (ghost-guard/TZ) — evidence cho EXTREME-regime gate + vol-scale chase-cap hôm nay = 0, không tính vào tiến độ. Cần kiểm tra ngay, đừng đợi báo cáo Paper Programs 16:00."
+  _notify "🔴 **paper-main early-check ($SESSION, $NOW_ICT)** — journal tồn tại nhưng 0 lệnh PLACE/FILL/DONE thật (GHOST_ORDER: $GHOST_COUNT dòng). Đây đúng dấu hiệu sự cố 07-08/09 (ghost-guard/TZ) — evidence cho EXTREME-regime gate + vol-scale chase-cap hôm nay = 0, không tính vào tiến độ. Cần kiểm tra ngay, đừng đợi báo cáo Paper Programs 07:30."
   exit 1
 fi
 
