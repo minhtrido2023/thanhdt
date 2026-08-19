@@ -735,10 +735,20 @@ _CTXBLOAT_AUTOFIX_STAMP="$ROOT/state/ctxbloat_autofix_attempted.txt"
 # touches the live file. Only "OVER" files are auto-fix candidates — "MISSING" means the file
 # itself vanished (publish_context.sh dead, or worse), a different failure that needs human eyes
 # immediately, not a compression job.
+# OKF-SPLIT (2026-08-19, user mandate "vượt ngưỡng thì mặc định tách, không hỏi lại"): prose
+# compression alone could never fix a file whose remaining bytes ARE facts/structure — MIKE.md
+# and coding_guidelines.md each hit that wall and each needed a HAND split into `<file>_ext.md`
+# (2026-08-14, 2026-08-19) while this function kept re-escalating to a human every episode. The
+# agent may now also emit `<file>_ext.md.proposed`; the mechanical gate then fact-checks
+# core+ext CONCATENATED against old core+ext, so moving a section out is fact-preserving by
+# construction while deleting one still gets rejected. Size gate stays on the CORE file only —
+# the core is what auto-loads every session; the ext file is read on demand.
 _ctxbloat_autofix_one() {
     local file="$1" limit_kb="$2" label="$3" old_kb="$4"
     local proposed="${file}.proposed"
-    rm -f "$proposed"
+    local ext="${file%.md}_ext.md"
+    local ext_proposed="${ext}.proposed"
+    rm -f "$proposed" "$ext_proposed"
     log "AUTO-FIX: dispatching compression for $label (${old_kb}KB > ${limit_kb}KB)..."
     DISPATCH_FROM=user "$ROOT/bin/dispatch.sh" Mike \
 "KB context-bloat auto-fix (tự động, kb_nightly.sh Phase 4.6, $(date -u +%Y-%m-%dT%H:%M:%SZ)).
@@ -752,25 +762,57 @@ ID. Nếu không chắc 1 câu là narrative hay fact — GIỮ NGUYÊN câu đ�
 Mục tiêu: xuống dưới ${limit_kb}KB có biên độ an toàn (~2KB). Khi ghi xong \`$proposed\`, DỪNG —
 không làm gì thêm. kb_nightly.sh sẽ tự kiểm bằng công cụ cơ học (ctxbloat_fact_check.py, diff
 từng fact token giữa bản gốc và \`$proposed\`) rồi mới quyết định có áp dụng hay không; agent
-không tự quyết định việc này." \
+không tự quyết định việc này.
+
+CÁCH 2 — OKF SPLIT (dùng khi nén văn xuôi KHÔNG thể xuống dưới ${limit_kb}KB mà không mất fact;
+mandate user 2026-08-19: mặc định tách, KHÔNG cần hỏi lại): ngoài \`$proposed\`, ghi thêm
+\`$ext_proposed\`. Chuyển NGUYÊN VĂN (không nén, không sửa nghĩa) các mục DÙNG-THEO-TÌNH-HUỐNG
+— lịch sử quyết định/rationale dài, quy trình hiếm dùng, quy tắc onboarding — sang
+\`$ext_proposed\`; trong \`$proposed\` mỗi mục đó để lại 1 con trỏ 1-3 dòng, và thêm bảng
+\"Mục đã tách sang \`$(basename "$ext")\` — đọc khi cần, KHÔNG auto-load\" ở đầu file.
+⚠️ Con trỏ TUYỆT ĐỐI không được dùng \`@\`-import — \`@\` là đệ quy, nạp lại y nguyên, xoá sạch
+tác dụng tách. Nếu \`$ext\` đã tồn tại, \`$ext_proposed\` phải chứa TOÀN BỘ nội dung cũ của nó
+CỘNG phần mới (gate cơ học so core+ext cũ với core+ext mới; thiếu = REJECT).
+Tiền lệ: kb/coding_guidelines_ext.md (2026-08-14), MIKE_ext.md (2026-08-19)." \
         --model opus --effort high --timeout 900 >> "$LOG" 2>&1 || true
 
     if [ ! -s "$proposed" ]; then
         log "AUTO-FIX FAILED: $label — dispatch không tạo được $proposed (rỗng/thiếu)."
         return 1
     fi
-    if ! python3 "$ROOT/bin/ctxbloat_fact_check.py" "$file" "$proposed" >> "$LOG" 2>&1; then
-        log "AUTO-FIX REJECTED: $label — ctxbloat_fact_check.py phát hiện mất fact, KHÔNG áp dụng. Chi tiết: $LOG"
-        rm -f "$proposed"
+    # Fact-check compares core+ext on BOTH sides so an OKF split is a no-op to the gate and a
+    # deletion is not. No ext on either side => byte-identical to the old single-file compare.
+    local _old_all _new_all
+    _old_all="$(mktemp)"; _new_all="$(mktemp)"
+    cat "$file" > "$_old_all"
+    if [ -s "$ext" ]; then cat "$ext" >> "$_old_all"; fi
+    cat "$proposed" > "$_new_all"
+    if [ -s "$ext_proposed" ]; then
+        cat "$ext_proposed" >> "$_new_all"
+    elif [ -s "$ext" ]; then
+        cat "$ext" >> "$_new_all"
+    fi
+    if ! python3 "$ROOT/bin/ctxbloat_fact_check.py" "$_old_all" "$_new_all" >> "$LOG" 2>&1; then
+        log "AUTO-FIX REJECTED: $label — ctxbloat_fact_check.py phát hiện mất fact (so core+ext cũ vs mới), KHÔNG áp dụng. Chi tiết: $LOG"
+        rm -f "$proposed" "$ext_proposed" "$_old_all" "$_new_all"
         return 1
     fi
+    rm -f "$_old_all" "$_new_all"
+    # Size gate on the CORE file only — that is the one auto-loaded every session.
     local new_kb=$(( $(wc -c < "$proposed") / 1024 ))
     if [ "$new_kb" -gt "$limit_kb" ]; then
         log "AUTO-FIX INSUFFICIENT: $label vẫn ${new_kb}KB > ${limit_kb}KB sau nén (fact-check PASS nhưng chưa đủ nhỏ) — có thể là nội dung cấu trúc (evergreen), không nén thêm được đêm nay."
-        rm -f "$proposed"
+        rm -f "$proposed" "$ext_proposed"
         return 1
     fi
     mv "$proposed" "$file"
+    local _paths _split_note
+    _paths=("$file"); _split_note=""
+    if [ -s "$ext_proposed" ]; then
+        mv "$ext_proposed" "$ext"
+        _paths+=("$ext")
+        _split_note=" + OKF split → $(basename "$ext")"
+    fi
     # `|| true` + an unconditional "committed." line (arch-review round 2, 2026-08-12): the
     # pre-commit collision gate (bin/repo_commit_gate.sh) can REFUSE this commit, and swallowed
     # that way the log claimed a commit that never happened.
@@ -783,11 +825,11 @@ không tự quyết định việc này." \
     # `git add "$file"` only controls what THIS function stages — a commit with no pathspec
     # commits the whole index, so anything another in-flight session left staged rides along
     # inside a commit whose message claims it is one auto-compressed file.
-    if (cd "$ROOT" && git add "$file" && git commit -q -m "kb: auto-compress $label ${old_kb}KB→${new_kb}KB (ctxbloat_autofix, mechanical fact-check PASS, kb_nightly.sh Phase 4.6)" -- "$file") >> "$LOG" 2>&1; then
-        log "AUTO-FIX APPLIED: $label ${old_kb}KB → ${new_kb}KB, committed."
+    if (cd "$ROOT" && git add "${_paths[@]}" && git commit -q -m "kb: auto-compress $label ${old_kb}KB→${new_kb}KB${_split_note} (ctxbloat_autofix, mechanical fact-check PASS, kb_nightly.sh Phase 4.6)" -- "${_paths[@]}") >> "$LOG" 2>&1; then
+        log "AUTO-FIX APPLIED: $label ${old_kb}KB → ${new_kb}KB${_split_note}, committed."
         return 0
     fi
-    log "AUTO-FIX APPLIED NHƯNG CHƯA COMMIT: $label ${old_kb}KB → ${new_kb}KB — file ĐÃ đổi trên đĩa, git add/commit bị từ chối (commit-collision gate?) hoặc lỗi. Chi tiết: $LOG. Cần commit tay."
+    log "AUTO-FIX APPLIED NHƯNG CHƯA COMMIT: $label ${old_kb}KB → ${new_kb}KB${_split_note} — file ĐÃ đổi trên đĩa, git add/commit bị từ chối (commit-collision gate?) hoặc lỗi. Chi tiết: $LOG. Cần commit tay."
     return 2
 }
 
