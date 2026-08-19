@@ -66,15 +66,21 @@ còn sống không?" trả lời được **trực tiếp**, hết phải suy t�
 `_extreme_regime_raw`, `_floor_guard_buy`, `_extreme_slice_mult` hay bất kỳ đường đặt lệnh nào.
 `_probe_tick_log` nuốt mọi exception — một dòng log hỏng không được làm hỏng phiên.
 
-### 2.3 An toàn LIVE — hai chốt độc lập
+### 2.3 An toàn LIVE — ba chốt, không chốt nào lồng trong chốt nào
 
-Cùng khuôn `fill_timing_live_gate` / `expected_volume_pacing_live_gate`:
+**Bản đầu SAI và quant-skeptic bác đúng.** Nó viết `live_gate and mode != "paper"`, tức chỉ là
+MỘT phép AND: đặt `probe_linger_live_gate=False` ở override của một account live sẽ **bỏ qua
+luôn phép kiểm `mode`** ⇒ harness chạy trên live chỉ bằng một dòng cấu hình sai, không phải hai
+hỏng hóc độc lập. Bản đã sửa tách hẳn ra:
 
-1. **Cổng cấu hình**: `probe_linger_live_gate` đọc bằng `.get(..., True)` ⇒ cấu hình **thiếu
-   khoá = paper-only**, không mở toang.
-2. **Chốt cứng trong code**: `cfg["mode"]` phải đúng bằng `"paper"`.
+1. `probe_linger_min` > 0 (rác/không parse được ⇒ tắt, không raise)
+2. `cfg["mode"] == "paper"` — **CỨNG, không cấu hình nào bỏ qua được**
+3. `probe_linger_live_gate` phải True — `.get(..., True)` ⇒ thiếu khoá = cổng BẬT (fail-safe)
 
-Ngoài ra `probe_linger_min` rác/không parse được ⇒ tắt, không raise.
+⚠️ Ngữ nghĩa chốt 3 **cố ý KHÁC** `fill_timing_live_gate`. Ở đó `False` = "cho phép chạy trên
+tiền thật", vì cơ chế kia có công dụng live. Đây là **dụng cụ đo của paper** — không có công
+dụng live nào chính đáng — nên `False` = **tắt hẳn harness**, không bao giờ là "mở sang live".
+Không có đường nào bật nó trên account live.
 
 **Không sửa `secrets/trading_bot_accounts.json`** — mặc định nằm ở `DEFAULTS`, cổng LIVE lo phần
 phân biệt. (Cũng tránh luôn xung đột với session GDKHQ/VIX đang chạy song song.)
@@ -93,20 +99,22 @@ Config hiệu lực đọc lại qua `load_config()` + `load_accounts()` (không
 
 ## 3. Selfcheck
 
-`probe_linger_selfcheck.py` (mới, 43 ca) + toàn bộ **20 selfcheck phụ thuộc `executor.py`** tra
+`probe_linger_selfcheck.py` (mới, 46 ca) + toàn bộ **20 selfcheck phụ thuộc `executor.py`** tra
 bằng `bin/selfcheck_scope_map.sh` (executor.py là module lõi dùng chung ⇒ §23 bắt buộc quét rộng).
 
 | Môi trường | Kết quả |
 |---|---|
-| TZ mặc định | **21/21 file PASS**, 841 assertion |
-| `env -u TZ` | **21/21 PASS**, 841 |
-| `TZ=America/New_York` | **21/21 PASS**, 841 |
+| TZ mặc định | **21/21 file PASS**, 844 assertion |
+| `env -u TZ` | **21/21 PASS**, 844 |
+| `TZ=America/New_York` | **21/21 PASS**, 844 |
 
 Nhóm ca đáng chú ý trong bộ mới:
 
 - **A (regression)** — `mode=live` ⇒ harness tắt dù `probe_linger_min=30`; phiên vẫn kết thúc
   ngay khi khớp xong; không sinh file tick log. Thiếu khoá `probe_linger_live_gate` ⇒ vẫn
-  paper-only. `probe_linger_min=0`/rác ⇒ tắt. Parent done vẫn KHÔNG được lấy mẫu khi harness tắt.
+  paper-only. **Cổng đặt `False` TƯỜNG MINH trên account live ⇒ vẫn tắt** (ca quant-skeptic chỉ
+  ra là chưa được phủ — nay có A4b/A4c/A4d). `probe_linger_min=0`/rác ⇒ tắt. Parent done vẫn
+  KHÔNG được lấy mẫu khi harness tắt.
 - **B (cơ chế)** — giữ phiên sống, **0 lệnh đặt trong linger**, mốc không tự gia hạn, kết thúc
   đúng mốc, journal có START/END, không linger ngoài phiên liên tục.
 - **B′ (gap B)** — sau ~20 giây r15 = `None` (đúng hiện trạng hôm nay); sau 20′ linger
@@ -168,6 +176,30 @@ PASS (đúng cái bẫy `extreme_regime_selfcheck.py` đã cảnh báo trong com
 |---|---|
 | `trading_bot/config.py` | +3 khoá DEFAULTS + khối comment lý do (số đo gap A/B) |
 | `trading_bot/executor.py` | `probe_tick_file` trong `__init__`; `_record_prices` honour linger + gọi tick log; 3 hàm mới `_probe_linger_on` / `_probe_linger_active` / `_probe_tick_log`; nhánh linger trong `step()` |
-| `probe_linger_selfcheck.py` | MỚI — 43 ca |
+| `probe_linger_selfcheck.py` | MỚI — 46 ca |
 | `mike/kb/paper_programs_registry.json` | `extreme_regime`: end/end_or_trigger/gate 4/notes/review_short/data_sources |
 | `mike/kb/paper_programs_charter/extreme_regime.md` | regen bằng `sync_charter()` |
+
+
+---
+
+## 7. Vòng quant-skeptic (2026-08-19)
+
+**Verdict: CONFIRMED, confidence HIGH** (log `mike/logs/verify_20260819_130210_3204510.log`).
+
+Reviewer tự tái lập độc lập 3 con số headline và khớp chính xác: 844 assertion × 21 file × 3 môi
+trường TZ; mô phỏng ngày fire escalation (08-19 không fire / 08-25 fire `extreme_regime` / 08-26
+fire thêm `fill_timing`); config hiệu lực từng account qua `load_config()`+`load_accounts()`.
+Reviewer còn **truy vết call-graph** và xác nhận cách ly gate là đúng **về mặt cấu trúc**, không
+chỉ do selfcheck khẳng định: `_extreme_regime` / `_floor_guard_buy` / `_extreme_slice_mult` chỉ
+tới được qua `_would_be_unchanged`→`_cancel_stale` hoặc `_place_slices`/`_atc_sweep`, tất cả đều
+nằm sau `if cont:` trong `step()` — nhánh không thể với tới khi early-return của linger đã chạy.
+
+**Killer objection (ĐÚNG, đã sửa)**: "hai chốt độc lập" là nói quá — code thật là một phép AND
+duy nhất, và đặt `probe_linger_live_gate=False` trên một account live sẽ bỏ qua luôn phép kiểm
+`mode`. Đã tách thành 3 chốt độc lập (§2.3) + thêm 3 ca selfcheck A4b/A4c/A4d phủ đúng kịch bản
+đó (trước: chỉ phủ nhánh "thiếu khoá").
+
+**Khuyến nghị còn lại của reviewer, chuyển thẳng vào điều kiện deadline 2026-08-25**: khi kiểm
+điều kiện (2) ZERO false-trigger, phải đếm lại trên TỔNG số phiên **bao gồm các phiên linger
+mới**, không dùng lại con số 22/25 phiên trước 08-19.
