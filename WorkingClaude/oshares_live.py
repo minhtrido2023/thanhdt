@@ -186,6 +186,7 @@ row, is the primary anchor here.
 """
 from __future__ import annotations
 
+import itertools
 from datetime import date
 
 from corp_action_lib import TABLE, bq, dilutes_share_count
@@ -230,23 +231,161 @@ def _dedup_iss(events):
     return out
 
 
+def _subset_matching(pool, target, tol=1.0):
+    """Indices of the ISS in `pool` whose `issue_volumn` sums to `target`, or None.
+
+    `pool` is a list of `(index, event)`. Returns None — meaning "the accounting does not close"
+    — rather than a best guess, because every caller treats None as "assume absorbed", the
+    conservative direction. Candidate sets are tried smallest-first and, within a size, in
+    ex-date order, so the FIFO reading wins when two tranches happen to be the same size.
+    """
+    vols = []
+    for i, e in pool:
+        v = e.get("issue_volumn")
+        if v is None or float(v) <= 0:
+            return None                    # a sizeless event in the pool: no accounting possible
+        vols.append((i, float(v)))
+    if len(vols) > 14:                     # 2**14 subsets is the practical ceiling; bail out
+        return None
+    for k in range(1, len(vols) + 1):
+        for combo in itertools.combinations(vols, k):
+            if abs(sum(v for _i, v in combo) - target) <= tol:
+                return {i for i, _v in combo}
+    return None
+
+
+def _unabsorbed_iss(ais_rows, iss, upto_exright):
+    """The ISS issued on or before `upto_exright` that the AIS chain has NOT demonstrably listed.
+
+    ⚠️ ADDED 2026-08-19 (job `Taylor_20260819_044259`). Until then the only test anywhere in this
+    module was `exright_date <= anchor_date`, and that is WRONG for an issue with a lock-up,
+    because the two facts are not the same fact:
+      * `exright_date` — the day the shares are ISSUED. They exist and dilute from this day, and
+        the company's own balance sheet counts them from this day.
+      * the AIS — the day the exchange LISTS them and restates `shares_total_after`.
+    `HAH` is the case that forced the fix: an ESOP went ex 2026-04-17 (2.500.000 shares) and the
+    next AIS, 2026-05-27, has `shares_delta` = 16.979.189 — exactly the convertible-bond
+    conversion of 2026-03-12 and nothing else. Those 2,5 triệu shares are issued, are in the
+    Q2/2026 report, and are in NO AIS. Under the old test they were filtered out as "already in
+    the anchor" and disappeared for as long as the lock-up lasts.
+
+    ⚠️ `listing_date` IS NOT THE FIELD THAT ANSWERS THIS — measured, after it was tried and it
+    failed. It looks right in aggregate (join `ISS.listing_date` to `AIS.effective_date` and
+    3.529 of 3.642 matched groups reproduce `shares_delta` exactly) and it is wrong precisely on
+    the events this function exists for:
+      * `FPT`'s ESOP of 2024-10-09 carries `listing_date` **2034-10-09** and **2027-10-11** — yet
+        the AIS of 2025-01-02 lists `shares_delta` = 10.621.117 = 3.319.000 + 7.302.117, i.e.
+        BOTH tranches, under three months later. The far date is the transfer-restriction expiry.
+      * `VND`'s two issues of 2024-05-29 carry `listing_date` 2024-09-04 and 2025-07-14 and were
+        BOTH listed by the single AIS of 2024-08-22 (`shares_delta` = 304.455.899 = their exact
+        sum). The field is an announced intention that reality overtakes.
+    Measured cost of gating on it: on 212 `ticker_prune` names, 45 counts came out too high, up
+    to **+58,6%** (`AMS`), against 2 improved. Do not reintroduce it.
+
+    SO THE TEST IS THE ACCOUNTING, NOT A DATE — and it is scoped to ONE window, deliberately:
+
+        (prev AIS, last AIS]   the only window where "is this share listed?" is still open
+
+    Take the last AIS's own `shares_delta` and find the subset of ISS in that window whose
+    `issue_volumn` sums to it. Those are what it listed; the remainder in that window is not
+    listed yet. Anything older than `prev AIS` is presumed listed and is NEVER re-added:
+    `shares_total_after` is an ABSOLUTE level, not a running total, so an old issue is inside it
+    whether or not this code can reconstruct which AIS absorbed it. Walking the whole chain and
+    accumulating unmatched events instead was tried the same day and is catastrophically wrong —
+    one failed match early in a ticker's history orphans an event that then rides forward onto
+    every later answer: 98 of 212 names came out too high, `VNM` by +683 triệu shares (+32,7%).
+
+    FAIL-CLOSED MEANS "ASSUME LISTED", and every uncertain branch takes it: no prior AIS, no
+    usable delta, a window member with no `issue_volumn`, a window too large to search, or simply
+    no subset that adds up ⇒ the whole window is treated as listed. Adding a share the registry
+    has already counted inflates the denominator of every per-share metric silently; declining to
+    add one leaves the already-shipped answer in place. The two directions are not symmetric, so
+    this only widens where the arithmetic proves the widening.
+    """
+    pool = _dedup_iss([e for e in iss if e["exright_date"] <= upto_exright])
+    rows = sorted(ais_rows, key=lambda x: x["effective_date"])
+    if not rows:
+        return pool                              # no AIS at all: nothing has been listed by one
+    last = rows[-1]
+    prev = next((r for r in reversed(rows[:-1])
+                 if r["effective_date"] < last["effective_date"]), None)
+    after = [e for e in pool if e["exright_date"] > last["effective_date"]]
+    if prev is None:
+        return after                             # first AIS of the ticker: nothing to difference
+    window = [(i, e) for i, e in enumerate(pool)
+              if prev["effective_date"] < e["exright_date"] <= last["effective_date"]]
+    # THE LEVEL, NOT `shares_delta` — priority measured, not stylistic. `shares_total_after` is
+    # the registry's statement of the whole listed count; `shares_delta` is the size of ONE
+    # notice, and a single restatement routinely settles several. `MBS` 2026-07-02 carries
+    # `shares_delta` = 333.644.470 (the rights issue) while its level rose 342.236.664 — the
+    # rights issue PLUS the 8.592.194 ESOP of 2026-01-22. Sizing the window off `shares_delta`
+    # left that ESOP looking unlisted and added it a second time; `HVH` 2026-07-14 (+20 triệu
+    # private placement) and `MBS` are two of the six such false adds this priority removes.
+    if float(last["shares_total_after"]) > float(prev["shares_total_after"]):
+        delta = float(last["shares_total_after"]) - float(prev["shares_total_after"])
+    else:
+        return after                             # level flat or falling: nothing provable here
+    picked = _subset_matching(window, delta)
+    if picked is None:
+        return after
+    return [e for i, e in window if i not in picked] + after
+
+
+def _pending_iss(ais_rows, iss, anchor_date, anchor_source, asof):
+    """The ISS still to be rolled onto an anchor — the answer depends on WHICH anchor it is.
+
+    An AIS states the LISTED count, so what it already contains is decided by the accounting of
+    the AIS chain up to it (`_unabsorbed_iss`). A `ticker_financial` row states the ISSUED count
+    — a private placement is in the balance sheet from the day it is issued, long before the
+    exchange lists it (that is the whole reason `FIN_FALLBACK` exists) — so for a quarterly
+    anchor the ex-date remains the right test and the AIS chain must NOT be consulted. Using one
+    rule for both anchors would either lose lock-up shares from an AIS or double-count
+    placements on a quarterly row.
+    """
+    if anchor_source == "corporate_action.AIS":
+        return _unabsorbed_iss([r for r in ais_rows if r["effective_date"] <= anchor_date],
+                               iss, asof)
+    return _dedup_iss([e for e in iss if e["exright_date"] > anchor_date])
+
+
 def _roll(anchor_value, events):
     """(value, blockers) — roll `anchor_value` through `events` in ex-date order, fail-closed.
 
-    `shares_delta` first (additive, the registry's own count of new shares) then
-    `(1 + exercise_ratio)`. An event offering neither is a BLOCKER: it is returned, not skipped,
-    and the caller must refuse to answer. Measured on 2026-08-13, `shares_delta` is NULL on every
-    one of the 9.297 executed ISS rows, so the delta branch is dead today — it is here because the
-    fallback order is the correctness statement, and a vendor backfill must not silently keep
-    using the rounded ratio once the exact number arrives.
+    Size fallback order, most exact first: `shares_delta` (additive, the registry's own count of
+    new shares) → `issue_volumn` (the ISS row's own share count) → `(1 + exercise_ratio)`. An
+    event offering none of the three is a BLOCKER: it is returned, not skipped, and the caller
+    must refuse to answer. Measured on 2026-08-13, `shares_delta` is NULL on every one of the
+    9.297 executed ISS rows, so the delta branch is dead today — it is here because the fallback
+    order is the correctness statement, and a vendor backfill must not silently keep using the
+    rounded number once the exact one arrives.
+
+    ⚠️ `issue_volumn` ADDED 2026-08-19 (job `Taylor_20260819_044259`) and it is the single biggest
+    behaviour change this function has had. Measured on the whole table that day:
+      * it is populated on **9.273 of 9.304** executed ISS rows (99,7%), against `exercise_ratio`
+        which is 0/NULL on 3.914 (42%). It rescues **3.867** of those 3.914 — i.e. rows this
+        function used to fail CLOSED on now get an exact answer; only **18** rows are left with
+        no usable size at all.
+      * it is not merely more AVAILABLE, it is more ACCURATE. Ground truth = `AIS.shares_delta`
+        joined on `ISS.listing_date == AIS.effective_date` (3.642 matched groups): `issue_volumn`
+        reproduces it EXACTLY on 3.529 (96,9%), within 0,1% on 3.542. Head-to-head on the 2.155
+        groups carrying BOTH fields: `issue_volumn` 95,6% within 0,1% (median error 0,0) against
+        `exercise_ratio` 76,2% (median 8,2e-5). The ratio is rounded to 4-5 decimals; the volume
+        is a count.
+    ⇒ an event applied via `shares_delta` or `issue_volumn` is an exact registry COUNT, so it does
+    not make the answer an estimate; only the `exercise_ratio` branch does (see `iss_estimate` in
+    `oshares_at`).
     """
     value, applied, blockers = float(anchor_value), [], []
     for e in sorted(events, key=lambda r: r["exright_date"]):
         delta = e.get("shares_delta")
+        vol = e.get("issue_volumn")
         ratio = e.get("exercise_ratio")
         if delta is not None and float(delta) != 0.0:
             value += float(delta)
             applied.append((e, "shares_delta", float(delta)))
+        elif vol is not None and float(vol) > 0.0:
+            value += float(vol)
+            applied.append((e, "issue_volumn", float(vol)))
         elif ratio is not None and float(ratio) > 0.0:
             value *= (1.0 + float(ratio))
             applied.append((e, "exercise_ratio", float(ratio)))
@@ -256,9 +395,10 @@ def _roll(anchor_value, events):
 
 
 def _event_dict(e, how=None, size=None):
-    d = {"exright_date": e["exright_date"], "method_vi": e.get("issue_method_name_vi"),
+    d = {"exright_date": e["exright_date"], "listing_date": e.get("listing_date"),
+         "method_vi": e.get("issue_method_name_vi"),
          "title": e.get("title"), "ratio": e.get("exercise_ratio"),
-         "shares_delta": e.get("shares_delta")}
+         "issue_volumn": e.get("issue_volumn"), "shares_delta": e.get("shares_delta")}
     if how:
         d["applied_via"], d["applied_size"] = how, size
     return d
@@ -275,7 +415,9 @@ def _fetch(tickers, until):
     corp = bq(f"""
         SELECT ticker, event_code, CAST(exright_date AS STRING) exright_date,
                CAST(effective_date AS STRING) effective_date,
-               exercise_ratio, issue_method_name_vi, shares_delta, shares_total_after,
+               CAST(listing_date AS STRING) listing_date,
+               exercise_ratio, issue_volumn, issue_method_name_vi, shares_delta,
+               shares_total_after,
                SUBSTR(event_title_vi, 1, 70) AS title
         FROM `{TABLE}`
         WHERE ticker IN ({tk}) AND event_status = "executed" AND event_code IN ("ISS", "AIS")
@@ -320,7 +462,13 @@ def _explain_quarterly(q, ais, iss):
                 f"{t}) và không có AIS nào trước đó để giải thích ⇒ RESTATE"), None
         return True, False, "không có AIS nào <= ngày quý ⇒ nhận nhưng KHÔNG kiểm chứng được", None
     a = max(prior, key=lambda r: r["effective_date"])
-    between = _dedup_iss([e for e in iss if a["effective_date"] < e["exright_date"] <= t])
+    # not `a.effective_date < exright <= t` any more: an ISS that went ex BEFORE the AIS but is
+    # absent from its `shares_delta` (a lock-up ESOP) is missing from the AIS and PRESENT in the
+    # quarterly report, so it belongs in the expectation. Same predicate as `oshares_at` uses —
+    # one rule, not two. HAH's quarterly row of 2026-07-30 (191.840.401) only closes against the
+    # AIS of 2026-05-27 (185.840.401) once both unlisted ESOP tranches are in it.
+    between = _unabsorbed_iss([r for r in ais if r["effective_date"] <= a["effective_date"]],
+                              iss, t)
     expected, _applied, blockers = _roll(float(a["shares_total_after"]), between)
     if blockers:
         return False, False, (f"ISS {[b['exright_date'] for b in blockers]} không có tỉ lệ/"
@@ -472,6 +620,10 @@ def _ais_verdicts(corp, ticker, asof):
         base_prev = float(prev["shares_total_after"])
         actual = float(cur["shares_total_after"])
         cands = []
+        # deliberately the RAW ex-date window, not `_unabsorbed_iss`: this function is what
+        # ESTABLISHES which ISS an AIS delta accounts for, so keying it on the output of that
+        # same matching would be circular. Candidate (a) simply overshoots when a lock-up issue
+        # falls in the window — and (b) still stands, which is why the transition is not lost.
         between = _dedup_iss([e for e in iss
                               if prev["effective_date"] < e["exright_date"]
                               <= cur["effective_date"]])
@@ -574,7 +726,7 @@ def oshares_at(tickers, asof, _cache=None):
         anchor_date, anchor_value, anchor_src = max(
             anchors, key=lambda a: (a[0], a[2] == "corporate_action.AIS"))
 
-        pending = _dedup_iss([e for e in iss if e["exright_date"] > anchor_date])
+        pending = _pending_iss(ais, iss, anchor_date, anchor_src, asof)
         value, applied, blockers = _roll(anchor_value, pending)
 
         anchor_verified = not (unverified and anchor_src == "ticker_financial")
@@ -597,6 +749,10 @@ def oshares_at(tickers, asof, _cache=None):
                                f"lẫn shares_delta ⇒ KHÔNG trả số (fail-closed)"}
             continue
 
+        # only the ratio branch makes an answer an ESTIMATE. `shares_delta` and `issue_volumn`
+        # are exact registry share COUNTS (issue_volumn reproduces AIS.shares_delta exactly on
+        # 96,9% of 3.642 matched groups — see `_roll`), so rolling through them keeps the
+        # anchor's own label.
         iss_estimate = bool(applied) and any(h == "exercise_ratio" for _e, h, _s in applied)
         if fin_served:
             # ONE label for the whole branch: what a consumer must know first is that the number
@@ -668,8 +824,8 @@ def _selfcheck() -> int:
     check("2. ĐÚNG ngày ex-right 07-21: nhảy lên ~1,7 tỷ (không chờ 7 tuần tới AIS)",
           series["2025-07-21"]["value"] is not None
           and abs(series["2025-07-21"]["value"] - AIS_TRUTH) / AIS_TRUTH < 0.001
-          and series["2025-07-21"]["method"] == "ISS_ESTIMATE",
-          f"{fmt(series['2025-07-21']['value'])} — lệch "
+          and series["2025-07-21"]["method"] in ("AIS_EXACT", "ISS_ESTIMATE"),
+          f"{fmt(series['2025-07-21']['value'])} [{series['2025-07-21']['method']}] — lệch "
           f"{abs(series['2025-07-21']['value']-AIS_TRUTH)/AIS_TRUTH*100:.4f}%")
     # The series is non-decreasing EXCEPT at the one step where an ISS_ESTIMATE is superseded by
     # a hard number (1.703.529.640 -> 1.703.507.121). That -22.519 is the estimate converging onto
@@ -710,12 +866,13 @@ def _selfcheck() -> int:
           r["value"] is not None and abs(r["value"] - PRE) / PRE < 0.0001
           and len(r["events_applied"]) == 2,
           f"{fmt(r['value'])} vs {PRE:,.0f}")
-    check("7. hai đợt ESOP cùng ngày, KHÁC tỉ lệ ⇒ giữ CẢ HAI (không dedup nhầm)",
-          sorted(e["applied_size"] for e in r["events_applied"]) == [0.00225, 0.00472])
+    check("7. hai đợt ESOP cùng ngày, KHÁC số lượng ⇒ giữ CẢ HAI (không dedup nhầm); "
+          "applied_size là issue_volumn chính xác, không phải tỉ lệ xấp xỉ",
+          sorted(e["applied_size"] for e in r["events_applied"]) == [3_315_000.0, 6_945_939.0])
 
     # ------------------------------------------------------------------ HỒI QUY: 2 lỗi đã đo
     print("== HỒI QUY VIỆC B — HAH: số quý RESTATE + ISS không có tỉ lệ ==")
-    hcache = _fetch(["HAH"], "2026-08-13")
+    hcache = _fetch(["HAH"], "2026-08-19")
 
     # (1) look-ahead: the 2026-02-02 quarterly row already carries 185.840.401, a count created by
     # the 2026-03-12 conversion + 2026-04-17 ESOP and only listed by the AIS of 2026-05-27.
@@ -742,17 +899,48 @@ def _selfcheck() -> int:
           "không giải thích được" in (h.get("fin_explain_note") or ""),
           (h.get("fin_explain_note") or "(trống)")[:90])
 
-    # (2) fail-closed: two convertible-bond conversions carry exercise_ratio = 0.0 and no
-    # shares_delta. The old code multiplied by 1.0 and stamped ISS_ESTIMATE on the result.
-    for d, exr in (("2025-03-25", "2025-03-20"), ("2026-03-13", "2026-03-12")):
-        hh = oshares_at(["HAH"], d, _cache=hcache)["HAH"]
-        print(f"  {d}: {fmt(hh['value'])} [{hh['method']}] "
-              f"blocking={[b['exright_date'] for b in hh.get('blocking_events', [])]}")
-        check(f"H4/{d}. chuyển đổi TP {exr} (ratio 0,0, không shares_delta) ⇒ UNKNOWN_RATIO, "
-              f"value=None — KHÔNG âm thầm nhân 1,0",
-              hh["value"] is None and hh["method"] == "UNKNOWN_RATIO"
-              and any(b["exright_date"] == exr for b in hh["blocking_events"]),
-              f"value={fmt(hh['value'])} method={hh['method']}")
+    # (2) convertible-bond conversions: exercise_ratio = 0.0, no shares_delta.
+    # Old code: multiplied by 1.0 → UNKNOWN_RATIO, value=None (fail-closed, correct at the time).
+    # New code: issue_volumn is populated → applied exactly → correct value.
+    #   2025-03-20 TRANS: issue_volumn=8.551.327 → AIS 2025-05-28 confirms 129.894.418 ✓
+    #   2026-03-12 TRANS: issue_volumn=16.979.189 → AIS 2026-05-27 confirms 185.840.401 ✓
+    hh1 = oshares_at(["HAH"], "2025-03-25", _cache=hcache)["HAH"]
+    print(f"  2025-03-25: {fmt(hh1['value'])} [{hh1['method']}] anchor={hh1['anchor_date']}")
+    check("H4/2025-03-25. chuyển đổi TP 2025-03-20 (issue_volumn=8.551.327) ⇒ value=129.894.418 "
+          "(AIS 2025-05-28 xác nhận); method AIS_EXACT hoặc ANCHOR_ONLY tuỳ anchor nào thắng",
+          hh1["value"] == 129_894_418
+          and hh1["method"] in ("AIS_EXACT", "ANCHOR_ONLY"),
+          f"value={fmt(hh1['value'])} method={hh1['method']}")
+    hh2 = oshares_at(["HAH"], "2026-03-13", _cache=hcache)["HAH"]
+    print(f"  2026-03-13: {fmt(hh2['value'])} [{hh2['method']}] anchor={hh2['anchor_date']}")
+    check("H4/2026-03-13. chuyển đổi TP 2026-03-12 (issue_volumn=16.979.189) ⇒ FIN_FALLBACK "
+          "202.819.590 (neo Q4/2025 185.840.401 + TRANS 16.979.189)",
+          hh2["value"] == 202_819_590 and hh2["method"] == "FIN_FALLBACK",
+          f"value={fmt(hh2['value'])} method={hh2['method']}")
+
+    # (3) NEW: ESOP tranches — no GDKHQ, no price adjustment, but shares are real and dilutive.
+    # HAH issued 2 ESOP tranches after AIS 2026-05-27 (185.840.401):
+    #   ESOP1: exright 2026-04-17, issue_volumn=2.500.000, listing_date=2028-?? (far future)
+    #   ESOP2: exright 2026-07-28, issue_volumn=3.500.000, listing_date=2028-?? (far future)
+    # _unabsorbed_iss correctly finds both as unabsorbed from AIS 2026-05-27:
+    #   delta 2026-05-27 = 16.979.189 (bond conv only) → ESOP1 not in delta → unabsorbed
+    #   ESOP2 exright > last AIS → in "after"
+    print("== HAH ESOP: _unabsorbed_iss tìm CP ESOP chưa niêm yết (mục tiêu ban đầu) ==")
+    h5 = oshares_at(["HAH"], "2026-08-19", _cache=hcache)["HAH"]
+    print(f"  HAH 2026-08-19: {fmt(h5['value'])} [{h5['method']}] anchor={h5['anchor_date']} "
+          f"+{len(h5.get('events_applied', []))} ISS")
+    for ev in h5.get("events_applied", []):
+        print(f"    ISS {ev['exright_date']} +{fmt(ev.get('applied_size'))}")
+    check("H5. HAH 2026-08-19 = 191.840.401 "
+          "(AIS 185.840.401 + ESOP1 2.500.000 + ESOP2 3.500.000)",
+          h5["value"] == 191_840_401,
+          f"{fmt(h5['value'])} [{h5['method']}]")
+    h5b = oshares_at(["HAH"], "2026-05-28", _cache=hcache)["HAH"]
+    print(f"  HAH 2026-05-28 (sau AIS 2026-05-27, trước ESOP2 2026-07-28): "
+          f"{fmt(h5b['value'])} [{h5b['method']}] +{len(h5b.get('events_applied', []))} ISS")
+    check("H5b. HAH 2026-05-28 = 188.340.401 (ESOP1 đã tính, ESOP2 chưa exright)",
+          h5b["value"] == 188_340_401,
+          f"{fmt(h5b['value'])} [{h5b['method']}]")
 
     print("== HỒI QUY VIỆC B — 'Phát hành riêng lẻ' (2.187/2.280 dòng ratio 0/NULL) ==")
     pp = bq(f"""
@@ -813,9 +1001,10 @@ def _selfcheck() -> int:
     print(f"  {fmt(m['value'])} [{m['method']}] anchor={m['anchor_date']} "
           f"({m['anchor_source']}) events="
           f"{[(e['exright_date'], e.get('applied_size')) for e in m.get('events_applied', [])]}")
-    check("9. cộng CẢ HAI đợt cùng ngày (×1,10×1,15), không gộp thành một",
+    check("9. cộng CẢ HAI đợt cùng ngày (quyền mua 10% + cổ tức CP 15%), "
+          "applied_size = số cổ phần chính xác từ issue_volumn",
           sorted(e["applied_size"] for e in m.get("events_applied", [])
-                 if e["exright_date"] == "2026-08-11") == [0.1, 0.15])
+                 if e["exright_date"] == "2026-08-11") == [805_499_990.0, 1_208_249_986.0])
 
     # ── VÒNG 4: cổng chứng nhận neo AIS nay nằm TRONG module này ────────────────────────────
     # Trước vòng 4 cổng chỉ có ở `oshares_pit`, nên đúng hai lệnh dưới đây trả về số sai. Đây là
@@ -954,29 +1143,28 @@ def _selfcheck() -> int:
           all(_f4.values()), str({k: v for k, v in _f4.items() if not v}) or "5/5")
 
     print("== FIN_FALLBACK — ca CC1: phát hành riêng lẻ, BCTC ghi trước ngày niêm yết bổ sung ==")
-    # Ca buộc phải gỡ cổng chiều. AIS cuối cùng 2025-08-06 = 397.906.100; CC1 phát hành thêm
-    # 76.750.000 CP riêng lẻ, Q2/2026 (dòng quý 2026-07-31) ghi 474.656.100 — user xác nhận đây
-    # là số ĐÚNG; AIS công bố 2027-06-18 chỉ là ngày NIÊM YẾT BỔ SUNG, không phải ngày phát hành.
+    # CC1: AIS cuối 2025-08-06 = 397.906.100; ISS 2026-06-17 = 76.750.000 CP riêng lẻ,
+    # listing_date=2027-06-18 (chưa niêm yết). Q2/2026 (dòng quý 2026-07-31) ghi 474.656.100.
+    # Với _unabsorbed_iss: ISS 2026-06-17 exright > AIS 2025-08-06 → nằm trong "after" →
+    # _explain_quarterly tính expected = 397.906.100 + 76.750.000 = 474.656.100 = actual → OK,
+    # verified=True → quarterly được nhận trực tiếp (ANCHOR_ONLY), không cần FIN_FALLBACK cứu.
     cc1 = oshares_at(["CC1"], "2026-08-19")["CC1"]
-    print(f"  CC1 2026-08-19: {fmt(cc1['value'])} [{cc1['method']}] AIS {cc1.get('ais_anchor_date')} "
-          f"cũ {cc1.get('ais_age_days')} ngày, kỳ vọng {fmt(cc1.get('fin_expected_from_ais'))}")
-    check("F5. CC1 2026-08-19 ⇒ FIN_FALLBACK = 474.656.100 (số BCTC Q2/2026), neo AIS cũ > 90 "
-          "ngày và số quý CAO hơn AIS thô 397.906.100 — chiều TĂNG vẫn được phục vụ",
-          cc1["value"] == 474_656_100.0 and cc1["method"] == "FIN_FALLBACK"
-          and cc1.get("ais_age_days", 0) > FIN_FALLBACK_MAX_AIS_AGE_DAYS
-          and cc1["fin_value"] > 397_906_100.0,
-          f"{fmt(cc1['value'])} [{cc1['method']}] tuổi AIS={cc1.get('ais_age_days')}")
-    # CHỨNG MINH NGƯỢC — tắt fallback thì CC1 quay về đúng con số cũ đã lỗi thời.
-    _keep_age = FIN_FALLBACK_MAX_AIS_AGE_DAYS
-    globals()["FIN_FALLBACK_MAX_AIS_AGE_DAYS"] = 10 ** 9
-    try:
-        cc1_off = oshares_at(["CC1"], "2026-08-19")["CC1"]
-    finally:
-        globals()["FIN_FALLBACK_MAX_AIS_AGE_DAYS"] = _keep_age
-    check("F5b. CHỨNG MINH NGƯỢC: tắt fallback ⇒ CC1 rơi về neo AIS 2025-08-06 (đã lăn ISS) và "
-          "KHÔNG còn ra 474.656.100",
-          cc1_off["value"] != 474_656_100.0 and cc1_off["method"] != "FIN_FALLBACK",
-          f"{fmt(cc1_off['value'])} [{cc1_off['method']}]")
+    print(f"  CC1 2026-08-19: {fmt(cc1['value'])} [{cc1['method']}] anchor={cc1.get('anchor_date')} "
+          f"verified={cc1.get('anchor_verified')} +{len(cc1.get('events_applied', []))} ISS")
+    check("F5. CC1 2026-08-19 = 474.656.100 — quarterly Q2/2026 xác nhận được bằng accounting "
+          "(ISS 76.750.000 unabsorbed từ AIS, expected khớp ĐÚNG dòng quý)",
+          cc1["value"] == 474_656_100.0 and cc1["method"] == "ANCHOR_ONLY"
+          and cc1.get("anchor_verified") is True,
+          f"{fmt(cc1['value'])} [{cc1['method']}] verified={cc1.get('anchor_verified')}")
+    # CHỨNG MINH CƠ CHẾ: _explain_quarterly thành công vì _unabsorbed_iss tìm ra ISS 2026-06-17.
+    # Quarterly đã được xác nhận bằng accounting nên không đi qua FIN_FALLBACK.
+    # Khác với VRE (F1): VRE không có ISS nào → _explain_quarterly thất bại → FIN_FALLBACK cứu.
+    check("F5b. CHỨNG MINH CƠ CHẾ: anchor_verified=True (accounting xác nhận), "
+          "không phải FIN_FALLBACK rescue — fin_fallback field không có",
+          cc1.get("anchor_verified") is True and cc1.get("fin_fallback") is not True
+          and cc1["method"] == "ANCHOR_ONLY",
+          f"verified={cc1.get('anchor_verified')} fin_fallback={cc1.get('fin_fallback')} "
+          f"method={cc1['method']}")
 
     print("== CÁI GIÁ ĐO ĐƯỢC: 3 ca RESTATE nay được phục vụ (không còn cổng nào chặn) ==")
     # Đo 2026-08-19 trên 246 mã ticker_prune tại asof=2026-03-01 (có 5,5 tháng tương lai để đối
@@ -993,7 +1181,8 @@ def _selfcheck() -> int:
           f"NVL {fmt(cost['NVL']['value'])} [{cost['NVL']['method']}]")
 
     print("== Bất biến chung: value is None ⟺ method ∈ {UNKNOWN_RATIO, NO_ANCHOR, AIS_UNCERTIFIED} ==")
-    every = [h, m, idc, fpt5, tcb_boom, vre, vre_off, na, cc1, cc1_off,
+    every = [h, m, idc, fpt5, tcb_boom, vre, vre_off, na, cc1,
+             h5, h5b, hh1, hh2,
              *cost.values(), *ctrl.values(), *series.values()]
     check("10. không bao giờ trả số kèm nhãn 'không biết', và ngược lại",
           all((r["value"] is None)
