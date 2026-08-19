@@ -1,9 +1,8 @@
-# Mike fleet — context pack (v2370)
+# Mike fleet — context pack (v2371)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-08-19T10:29:12] arch-reviewer/verification — ✅ CONFIRMED ARCH-REVIEW: kb_nightly ctxbloat @-import gate — vòng 5 (commit bf9fc3c5) — CONFIRMED: {"finding_topic": "kb_nightly ctxbloat @-import gate — vòng 5 (commit bf9fc3c5)", "verdict": "CONFIRMED", "confidence": "high", "summary": "Gate (^|[^`])@[^[:sp …
 - [2026-08-19T11:25:32] Taylor/finding — paper-gate extreme_regime checkpoint 2026-08-19: 25/20 phien evidence, 0 marker, gate 2 PASS kem caveat pham vi: {"job": "Taylor_20260819_110954", "program": "extreme_regime", "verdict": "GATE 2 -> PASS kem caveat pham vi; gate 4 (user sign-off) van PENDING. KHONG flip liv …
 - [2026-08-19T11:25:58] Taylor/finding — paper-gate fill_timing checkpoint 2026-08-19: 4/5 phien hybrid (khong phai 3), dinh chinh thuoc do block, block-spreading da thuc chung: {"job": "Taylor_20260819_110954", "program": "fill_timing", "verdict": "GATE 5 GIU PENDING. CHUA du 5 phien theo BAT KY cach doc nao => KHONG dispatch quant-ske …
 - [2026-08-19T11:26:27] Taylor/answer — checkpoint 2 gate paper-program 2026-08-19 hoan tat (job Taylor_20260819_110954): {"job": "Taylor_20260819_110954", "context": "Dispatch tu Mike: CHECKPOINT REVIEW 2 gate paper-program bang du lieu that. Da hoan tat, KHONG flip live gate nao, …
@@ -11,6 +10,7 @@
 - [2026-08-19T12:10:42] DollarBill/finding — bot_prepare_plan-py-broken-and-mismatched: {"bug1": "trading_bot/strategies.py:372 next_trading_day(signal_date) called with str not date, crashed 100% since commit e39aafbe 2026-08-15 (GDKHQ feature) -  …
 - [2026-08-19T12:15:34] DollarBill/decision — plan-2026-08-20: {"account": "SpaceX", "plan_date": "2026-08-20", "orders": 0, "action": "HOLD_ALL", "reason": "cash tuc thi ~0 (availableCash 4.382d, qmaxBuy VPI=0); 0 tin hieu …
 - [2026-08-19T12:17:53] DollarBill/decision — plan-ZaloPay-2026-08-20: {"account": "ZaloPay", "plan_date": "2026-08-20", "file": "data/trade_plans/plan_ZaloPay_2026-08-20.json", "orders": 0, "deferred_orders": 1, "deferred_ticker": …
+- [2026-08-19T12:48:59] Mike/answer — zalopay-vix-reconcile-blocks-l1l2: {"resolved": "CONFIRMED corp action VIX-2026-08-20-STOCK-DIVIDEND ghi vao data/corp_actions.json (co tuc CP 5%, exright_date=2026-08-20, tav2_bq.corporate_actio …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -43,9 +43,32 @@
   tổng quát cho account tương lai có vị thế legacy — `kb/coding_guidelines.md` §7. Known gap:
   `daily_nav_snapshot.py` chưa tính đúng P&L breakdown cho vị thế legacy (NAV/active_nav đúng).
 - **AlphaLens Paper**: FPT/ACB/MBB/HDB, tracking vs VNINDEX đến 2026-09-30. DollarBill phụ trách.
-- **Trứng vàng DNSE** (off-book idle cash): ĐÃ ĐÓNG HẲN cả 2 account (2026-07-23),
-  `manual_offbook_assets_vnd=0` vĩnh viễn — KHÔNG đề xuất "rút thêm" bù cash gap. Chi tiết:
-  [[project-dnse-trung-vang-offbook-assets]] (memory Mike).
+- **Trứng vàng DNSE** (off-book idle cash, `manual_offbook_assets_vnd`): ĐÃ ĐÓNG HẲN cả 2 account
+  (2026-07-23), vĩnh viễn — KHÔNG đề xuất "rút thêm" bù cash gap. Chi tiết:
+  [[project-dnse-trung-vang-offbook-assets]] (memory Mike). ⚠️ KHÁC field `egg.totalValue`
+  (API balances, live 2026-08-18) — đó là số dư THẬT hiện có trong sản phẩm Trứng vàng của DNSE
+  (SpaceX ~100,2tr/ZaloPay ~38,8tr đo 2026-08-19), đã cộng vào NAV tự động qua
+  `compute_active_nav.py`/`daily_nav_snapshot.py` nhưng KHÔNG phải sức mua tức thời (`availableCash`)
+  — cần lệnh rút, về tài khoản sáng hôm sau. Xem `kb/context_planning_ext.md` không tồn tại mục
+  này (đã để trong `context_planning_mini.md` § "`egg.totalValue`") — DollarBill phải đọc egg
+  trước khi kết luận "thiếu tiền".
+
+## VPI (BAL) — HOLD 2026-08-20, KHÔNG PHẢI thiếu tiền — chờ paper-trading BAL đánh giá lại (quyết định user 2026-08-19)
+Plan SpaceX/ZaloPay 2026-08-20 ghi lý do HOLD/defer VPI là "cash tức thời ~0" — **đúng về mặt kỹ
+thuật** (`availableCash` thấp thật) nhưng **KHÔNG phải lý do THẬT user không mua**. User xác nhận
+trực tiếp (Discord, topic 1521183164364754974, 2026-08-19): chưa mua VPI lần này vì (1) các chỉ số
+thị trường/kỹ thuật chưa tốt, và (2) **hiệu suất gần đây của book BAL chưa tốt** — cần quan sát
+thêm một thời gian trước khi mua thật. Đây là quyết định RỦI RO/TIN TƯỞNG vào tín hiệu, không phải
+giới hạn vốn (egg SpaceX ~100,2tr/ZaloPay ~38,8tr thừa sức tài trợ 25,08tr nếu muốn, xem mục trên).
+- **Quyết định**: đưa **BAL vào theo dõi paper-trading** để đánh giá thêm hiệu suất gần đây, TRƯỚC
+  KHI resume mua thật cho tín hiệu BAL (bắt đầu từ case VPI). `decided_by: user`.
+- **Việc cần làm** (đã dispatch Taylor 2026-08-19, xem bus): đăng ký 1 entry trong
+  `mike/kb/paper_programs_registry.json` cho track này (owner Taylor), xác nhận account "main"
+  paper hiện có đã chạy BAL trong strategy đầy đủ hay chưa (verify artifact, không giả định), đặt
+  tiêu chí/checkpoint cụ thể để quay lại xét resume mua thật.
+- **Ranh giới**: KHÔNG tự resume mua VPI (hay bất kỳ tín hiệu BAL mới nào ở mức tương tự) cho tới
+  khi có checkpoint đánh giá rõ ràng + user xác nhận lại — nếu tín hiệu BAL khác xuất hiện trong
+  lúc chờ, escalate hỏi thay vì tự áp dụng cùng logic HOLD hay tự resume.
 
 ## CAPIT (bear-washout) — vị thế THẬT đang giữ, `capit_fired` ≠ "đang giữ" (verify 2026-07-31)
 ⚠️ **`capit_fired`** trong `data/golive_v23_status.json` là điều kiện đúng CỦA NGÀY CHẠY
