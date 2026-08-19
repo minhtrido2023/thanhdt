@@ -126,6 +126,24 @@ ex.cfg.pop("probe_linger_live_gate", None)
 check("A4 thiếu khoá probe_linger_live_gate ⇒ vẫn paper-only (fail-safe .get(...,True))",
       ex._probe_linger_on() is False)
 
+# Ca quant-skeptic 2026-08-19 chỉ ra là CHƯA ĐƯỢC PHỦ: cờ cổng bị đặt False TƯỜNG MINH trên
+# một account LIVE. Bản đầu viết `live_gate and mode != "paper"` ⇒ ca này BẬT harness trên live
+# chỉ bằng MỘT dòng override. Sau khi tách chốt, `mode` được kiểm vô điều kiện.
+ex, o, q = make_exec({"mode": "live", "probe_linger_min": 30,
+                      "probe_linger_live_gate": False}, tag=TAG + "-livebypass")
+check("A4b cổng đặt False TƯỜNG MINH trên account LIVE ⇒ VẪN tắt (mode kiểm vô điều kiện)",
+      ex._probe_linger_on() is False)
+mark_done(ex)
+check("A4c ⇒ step() vẫn kết thúc phiên ngay, không linger trên live",
+      ex.step(NOW0, "MORNING", True) is True)
+
+# Trên PAPER, cờ False = TẮT HẲN harness (ngữ nghĩa cố ý khác fill_timing_live_gate — xem
+# docstring `_probe_linger_on`): không có đường nào biến nó thành "mở sang live".
+ex, o, q = make_exec({"probe_linger_min": 30, "probe_linger_live_gate": False},
+                     tag=TAG + "-papergate")
+check("A4d paper + cổng False ⇒ tắt hẳn harness (kill-switch, KHÔNG phải mở live)",
+      ex._probe_linger_on() is False)
+
 ex, o, q = make_exec({"probe_linger_min": 0}, tag=TAG + "-off")
 check("A5 probe_linger_min=0 ⇒ TẮT dù đang paper", ex._probe_linger_on() is False)
 mark_done(ex)

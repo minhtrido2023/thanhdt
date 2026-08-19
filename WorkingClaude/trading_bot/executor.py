@@ -513,16 +513,29 @@ class Executor:
     def _probe_linger_on(self):
         """Harness kéo dài phiên có được BẬT cho account này không.
 
-        HAI chốt độc lập, cả hai phải mở: (1) `probe_linger_min` > 0; (2) cổng LIVE —
-        `.get(..., True)` nên cấu hình THIẾU khoá = paper-only (fail-safe, không mở toang) và
-        `mode` phải đúng bằng "paper". Account LIVE ⇒ luôn False ⇒ mọi nhánh probe biến mất."""
+        BA chốt, mỗi chốt tự nó đủ để tắt — KHÔNG chốt nào lồng trong chốt nào (quant-skeptic
+        2026-08-19 bác đúng bản đầu: khi viết `live_gate and mode != "paper"` thì đặt
+        `probe_linger_live_gate=False` ở override của MỘT account live là bỏ qua luôn cả phép
+        kiểm `mode` — một dòng cấu hình sai, không phải hai hỏng hóc độc lập):
+          1. `probe_linger_min` > 0 (rác/không parse được ⇒ tắt, không raise)
+          2. `mode == "paper"` — CỨNG, KHÔNG cấu hình nào bỏ qua được
+          3. `probe_linger_live_gate` phải True — `.get(..., True)` ⇒ thiếu khoá = BẬT cổng
+             (fail-safe, không mở toang)
+
+        ⚠️ Ngữ nghĩa chốt 3 KHÁC `fill_timing_live_gate` một cách CỐ Ý. Ở đó `False` = "cho
+        phép chạy trên tiền thật" vì cơ chế kia có công dụng live. Đây là DỤNG CỤ ĐO của
+        paper — không có công dụng live nào chính đáng — nên `False` = **tắt hẳn harness**,
+        không bao giờ là "mở sang live". Muốn tắt harness thì đặt cờ này False hoặc
+        `probe_linger_min=0`; không có đường nào bật nó trên account live."""
         try:
             mins = float(self.cfg.get("probe_linger_min", 0) or 0)
         except (TypeError, ValueError):
             return False
         if mins <= 0:
             return False
-        if self.cfg.get("probe_linger_live_gate", True) and self.cfg.get("mode") != "paper":
+        if self.cfg.get("mode") != "paper":
+            return False
+        if not self.cfg.get("probe_linger_live_gate", True):
             return False
         return True
 
