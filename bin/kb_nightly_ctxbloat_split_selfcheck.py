@@ -53,8 +53,17 @@ def slice_fn(text):
 
 
 def old_fn():
-    """Pre-2026-08-19 body, from git (the version that could not validate a split)."""
-    for rev in ("HEAD", "HEAD~1", "HEAD~2", "HEAD~3", "HEAD~4"):
+    """Pre-2026-08-19 body, from git (the version that could not validate a split).
+
+    Walks commits that touched bin/kb_nightly.sh specifically (not a flat HEAD~N depth) —
+    a fixed depth of 4 went stale within days as unrelated consolidate commits piled up on
+    top of the split-introducing commit and pushed it past HEAD~4 (caught 2026-08-19,
+    arch-reviewer coord-2026-08-19 follow-up: this selfcheck itself crashed instead of
+    running, on a repo with 21 commits since ff35c6a5).
+    """
+    revs = subprocess.run(["git", "log", "--format=%H", "--", "bin/kb_nightly.sh"],
+                          cwd=ROOT, capture_output=True, text=True).stdout.split()
+    for rev in revs[:20]:
         blob = subprocess.run(["git", "show", "%s:bin/kb_nightly.sh" % rev],
                               cwd=ROOT, capture_output=True, text=True)
         if blob.returncode != 0:
@@ -63,6 +72,18 @@ def old_fn():
         if "_ext.md" not in body:
             return body
     raise RuntimeError("could not recover pre-split _ctxbloat_autofix_one from git history")
+
+
+def buggy_order_fn():
+    """The OKF-split body exactly as shipped in ff35c6a5: `mv "$proposed" "$file"` (core)
+    BEFORE `mv "$ext_proposed" "$ext"` — the ordering arch-reviewer flagged coord-2026-08-19
+    (race_idempotency fail: kill between the two mv calls leaves core already pointing at an
+    ext file that was never written). Used only as a RED control for case 8 below."""
+    blob = subprocess.run(["git", "show", "ff35c6a5:bin/kb_nightly.sh"],
+                          cwd=ROOT, capture_output=True, text=True)
+    if blob.returncode != 0:
+        raise RuntimeError("could not recover ff35c6a5 kb_nightly.sh for RED control")
+    return slice_fn(blob.stdout)
 
 
 # --- fixtures -----------------------------------------------------------------------------
@@ -106,8 +127,13 @@ Thêm agent mới. Sự cố gốc 2026-08-14, commit d65167a9, mất 12% throug
 """
 
 
-def run_case(name, fn_body, core_out, ext_out, limit_kb=40, pre_ext=None):
-    """Run the sliced function in a sandbox repo. Returns (rc, log_text, sandbox_dir)."""
+def run_case(name, fn_body, core_out, ext_out, limit_kb=40, pre_ext=None, kill_at_nth_mv=None):
+    """Run the sliced function in a sandbox repo. Returns (rc, log_text, sandbox_dir).
+
+    kill_at_nth_mv: if set, shadow `mv` with a shell function that passes the first N-1 calls
+    through untouched and, on the Nth call, exits with 137 (simulated SIGKILL) INSTEAD of
+    running it — probes what state a kill mid-function leaves on disk.
+    """
     d = tempfile.mkdtemp(prefix="ctxbloat_sc_")
     subprocess.run(["git", "init", "-q", d], check=True)
     subprocess.run(["git", "-C", d, "config", "user.email", "sc@test"], check=True)
@@ -131,8 +157,21 @@ def run_case(name, fn_body, core_out, ext_out, limit_kb=40, pre_ext=None):
     subprocess.run(["git", "-C", d, "add", "-A"], check=True)
     subprocess.run(["git", "-C", d, "commit", "-qm", "seed"], check=True)
 
+    kill_shim = ""
+    if kill_at_nth_mv is not None:
+        kill_shim = (
+            "_mv_n=0\n"
+            "mv() {\n"
+            "  _mv_n=$((_mv_n+1))\n"
+            "  if [ \"$_mv_n\" -eq %d ]; then\n"
+            "    log \"SIMULATED-KILL before mv call #$_mv_n ($*)\"\n"
+            "    exit 137\n"
+            "  fi\n"
+            "  command mv \"$@\"\n"
+            "}\n" % kill_at_nth_mv
+        )
     script = ("#!/bin/bash\nset -euo pipefail\nROOT=%s\nLOG=%s/log.txt\n"
-              "log() { echo \"$*\" >> \"$LOG\"; }\n" % (d, d)) + fn_body + \
+              "log() { echo \"$*\" >> \"$LOG\"; }\n" % (d, d)) + kill_shim + fn_body + \
              '\n_ctxbloat_autofix_one "%s/fixture.md" %d "fixture.md" 42\n' % (d, limit_kb)
     sp = os.path.join(d, "run.sh")
     with open(sp, "w", encoding="utf-8") as f:
@@ -207,6 +246,81 @@ check("5e both .proposed cleaned up",
 rc, log, d = run_case("case6 RED old-body-split", OLD, CORE_SPLIT, EXT_SPLIT)
 check("6a old body refuses the split (rc!=0)", rc != 0)
 check("6b old body leaves core unchanged", read(d, "fixture.md") == CORE_OLD)
+
+# 7 — kill mid-function, between the two mv calls (fixed order: ext moves first). A crash
+# here must NOT leave core pointing at an ext file that doesn't exist yet — worst case is
+# duplicated content (ext updated, core still old/self-consistent), never a dangling ref.
+rc, log, d = run_case("case7 kill-mid-mv (fixed order)", NEW, CORE_SPLIT, EXT_SPLIT,
+                      kill_at_nth_mv=2)
+check("7a killed before the 2nd mv (rc=137)", rc == 137)
+check("7b ext already moved (1st mv, succeeded)", read(d, "fixture_ext.md") == EXT_SPLIT)
+check("7c core NOT yet touched (2nd mv, interrupted) — no dangling pointer",
+      read(d, "fixture.md") == CORE_OLD)
+
+# 8 — RED control: the SAME kill-mid-mv probe against the ORIGINAL ff35c6a5 ordering (core
+# moved first) must reproduce the actual bug — core already rewritten to point at
+# `fixture_ext.md` while that file was never written, i.e. a dangling reference.
+BUGGY_ORDER = buggy_order_fn()
+rc, log, d = run_case("case8 RED kill-mid-mv (buggy pre-fix order)", BUGGY_ORDER,
+                      CORE_SPLIT, EXT_SPLIT, kill_at_nth_mv=2)
+check("8a killed before the 2nd mv (rc=137)", rc == 137)
+check("8b core ALREADY swapped to pointer version (dangling risk)",
+      read(d, "fixture.md") == CORE_SPLIT)
+check("8c ext NOT moved yet — core points at a file that doesn't exist (the bug)",
+      read(d, "fixture_ext.md") is None)
+
+# 9 — @-import gate: a split whose core uses `@`-recursion as its pointer defeats the whole
+# point of splitting (content re-loads verbatim every session) even though no fact is lost —
+# must be mechanically REJECTED, not just discouraged in the dispatch prompt (arch-review
+# coord-2026-08-19, fail_silent: fact-check + size gate both PASS this on their own).
+CORE_ATIMPORT = """# FIXTURE core
+
+@fixture_ext.md
+
+## Nguyên tắc
+Quy tắc nền, phải nạp mỗi phiên. Ngưỡng cứng 40KB, chốt 2026-07-30.
+
+## Quy trình hiếm dùng
+Chi tiết ở `fixture_ext.md`.
+"""
+rc, log, d = run_case("case9 at-import-pointer", NEW, CORE_ATIMPORT, EXT_SPLIT)
+check("9a rejected (rc=1)", rc == 1)
+check("9b core untouched", read(d, "fixture.md") == CORE_OLD)
+check("9c ext not created", read(d, "fixture_ext.md") is None)
+check("9d REJECTED logged", "AUTO-FIX REJECTED" in log)
+
+# 10 — RED control: the SAME @-import proposal against the pre-gate (ff35c6a5) body must be
+# WRONGLY applied — proving case 9 exercises new behaviour, not a pre-existing check.
+rc, log, d = run_case("case10 RED at-import (pre-gate body)", BUGGY_ORDER, CORE_ATIMPORT, EXT_SPLIT)
+check("10a pre-gate body wrongly applies the @-import split (rc=0)", rc == 0)
+check("10b core ends up holding the recursive @ pointer (the bug case 9 blocks)",
+      "@fixture_ext.md" in (read(d, "fixture.md") or ""))
+
+# 11 — regression guard: an UNRELATED pre-existing @-import (e.g. MIKE.md's own real
+# `@context_pack.md` at line 3, which a legitimate compression must preserve verbatim) must
+# NOT trip the case-9 gate just because it also starts a line with `@`. A first draft of the
+# gate matched bare `^@` and would have permanently blocked every future MIKE.md compression —
+# caught before commit by checking real files, not just synthetic fixtures.
+CORE_UNRELATED_IMPORT = """# FIXTURE core
+
+@fixture_other.md
+
+## Mục đã tách sang `fixture_ext.md` — đọc khi cần, KHÔNG auto-load
+| Mục | Khi nào phải đọc |
+|---|---|
+| Quy trình hiếm dùng | Thêm agent mới |
+
+## Nguyên tắc
+Quy tắc nền, phải nạp mỗi phiên. Ngưỡng cứng 40KB, chốt 2026-07-30.
+
+## Quy trình hiếm dùng
+Chi tiết ở `fixture_ext.md`.
+"""
+rc, log, d = run_case("case11 unrelated-at-import-not-blocked", NEW, CORE_UNRELATED_IMPORT, EXT_SPLIT)
+check("11a applied despite unrelated @-import (rc=0)", rc == 0)
+check("11b core keeps the unrelated import + becomes the pointer version",
+      read(d, "fixture.md") == CORE_UNRELATED_IMPORT)
+check("11c ext written", read(d, "fixture_ext.md") == EXT_SPLIT)
 
 print("\n%d PASS, %d FAIL" % (len(PASS), len(FAIL)))
 sys.exit(1 if FAIL else 0)

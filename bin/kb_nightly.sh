@@ -713,6 +713,17 @@ elif [ "$_CG_KB" -gt 40 ]; then
     SAME_DAY_BREACH="${SAME_DAY_BREACH}kb/coding_guidelines.md=${_CG_KB}KB(ngưỡng 40KB); "
     _BREACH_KEY="${_BREACH_KEY}CG:OVER|"
 fi
+# _ext.md size — WARNING-only, KHÔNG chặn gì (arch-review coord-2026-08-19, long_term_ops
+# fail): OKF split là xử lý MẶC ĐỊNH của Phase 4.6 khi core vượt ngưỡng (mandate 2026-08-19),
+# nhưng KHÔNG file _ext.md nào được giám sát kích thước — coding_guidelines_ext.md đã 25KB.
+# Ngưỡng 35KB dùng cùng tỉ lệ với ngưỡng core 40KB (không phải hard gate, chỉ để audit thấy).
+for _ext_f in "$ROOT"/*_ext.md "$ROOT"/kb/*_ext.md; do
+    [ -f "$_ext_f" ] || continue
+    _ext_kb=$(( $(wc -c < "$_ext_f") / 1024 ))
+    if [ "$_ext_kb" -gt 35 ]; then
+        log "WARNING (không chặn): $(basename "$_ext_f") = ${_ext_kb}KB > 35KB — _ext.md không có trần cứng, có thể phình không giới hạn qua các đợt OKF split. Cân nhắc rà soát/nén tay."
+    fi
+done
 mkdir -p "$ROOT/state"
 _CTXBLOAT_STAMP="$ROOT/state/ctxbloat_episode.txt"
 _CTXBLOAT_AUTOFIX_STAMP="$ROOT/state/ctxbloat_autofix_attempted.txt"
@@ -748,6 +759,12 @@ _ctxbloat_autofix_one() {
     local proposed="${file}.proposed"
     local ext="${file%.md}_ext.md"
     local ext_proposed="${ext}.proposed"
+    # Cố ý dọn TRƯỚC dispatch, không dời xuống sau (arch-review coord-2026-08-19 lưu ý
+    # phụ): nếu để leftover từ lần chạy trước (vd process bị kill giữa 2 mv bên dưới),
+    # check `[ ! -s "$proposed" ]` sau dispatch sẽ không phân biệt được "dispatch mới vừa
+    # ghi xong" với "rác cũ chưa dọn" — áp nhầm nội dung đã lỗi thời. Cái giá là lãng phí
+    # tối đa 1 lần dispatch Opus khi trường hợp đó xảy ra (dispatch mới sẽ tính lại đúng
+    # nội dung, qua lại đúng fact-check + size gate) — không phải mất dữ liệu.
     rm -f "$proposed" "$ext_proposed"
     log "AUTO-FIX: dispatching compression for $label (${old_kb}KB > ${limit_kb}KB)..."
     DISPATCH_FROM=user "$ROOT/bin/dispatch.sh" Mike \
@@ -798,6 +815,19 @@ Tiền lệ: kb/coding_guidelines_ext.md (2026-08-14), MIKE_ext.md (2026-08-19).
         return 1
     fi
     rm -f "$_old_all" "$_new_all"
+    # Cơ học, không chỉ nhắc trong prompt (arch-review coord-2026-08-19, fail_silent):
+    # ctxbloat_fact_check.py PASS một bản core dùng `@X_ext.md` thay vì con trỏ văn xuôi —
+    # `@` là đệ quy nạp lại nguyên văn, context auto-load không giảm byte nào, nhưng core đã
+    # xuống dưới ngưỡng nên Phase 4.6 sẽ không bao giờ báo động lại. Chặn TRƯỚC khi áp dụng.
+    # Chỉ khớp @-pointer TRỎ ĐÚNG VÀO ext của LẦN SPLIT NÀY (không phải `^@` bất kỳ) — MIKE.md
+    # tự nó có 1 dòng `@context_pack.md` HỢP LỆ ở đầu file mà bản nén PHẢI giữ nguyên; chặn mù
+    # theo `^@` sẽ REJECT vĩnh viễn mọi lần nén MIKE.md, đúng lỗi đang muốn tránh (fail_silent
+    # kiểu khác: gate quá tay khiến auto-fix không bao giờ chạy được, tự thấy khi viết case9).
+    if [ -s "$ext_proposed" ] && grep -qE "@[^[:space:]]*$(basename "$ext")" "$proposed"; then
+        log "AUTO-FIX REJECTED: $label — \$proposed dùng \`@\`-import trỏ tới $(basename "$ext") làm con trỏ (đệ quy, xoá sạch tác dụng tách), KHÔNG áp dụng."
+        rm -f "$proposed" "$ext_proposed"
+        return 1
+    fi
     # Size gate on the CORE file only — that is the one auto-loaded every session.
     local new_kb=$(( $(wc -c < "$proposed") / 1024 ))
     if [ "$new_kb" -gt "$limit_kb" ]; then
@@ -805,7 +835,11 @@ Tiền lệ: kb/coding_guidelines_ext.md (2026-08-14), MIKE_ext.md (2026-08-19).
         rm -f "$proposed" "$ext_proposed"
         return 1
     fi
-    mv "$proposed" "$file"
+    # EXT trước, CORE sau (arch-review coord-2026-08-19, race_idempotency fail): nếu process
+    # bị kill giữa 2 lệnh mv, thứ tự cũ (core trước) để lại core đã trỏ pointer sang một
+    # $ext chưa tồn tại — dangling reference. Đảo lại: kill giữa chừng nhiều nhất để lại nội
+    # dung TRÙNG LẶP giữa $ext (đã cập nhật) và $file cũ (core chưa đổi, còn nguyên văn phần
+    # đáng ra đã chuyển đi) — không có gì tham chiếu tới file thiếu, không hỏng.
     local _paths _split_note
     _paths=("$file"); _split_note=""
     if [ -s "$ext_proposed" ]; then
@@ -813,6 +847,7 @@ Tiền lệ: kb/coding_guidelines_ext.md (2026-08-14), MIKE_ext.md (2026-08-19).
         _paths+=("$ext")
         _split_note=" + OKF split → $(basename "$ext")"
     fi
+    mv "$proposed" "$file"
     # `|| true` + an unconditional "committed." line (arch-review round 2, 2026-08-12): the
     # pre-commit collision gate (bin/repo_commit_gate.sh) can REFUSE this commit, and swallowed
     # that way the log claimed a commit that never happened.
