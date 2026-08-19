@@ -7,6 +7,17 @@ Vai trò: đầu mối thông tin của toàn hệ thống — tạo/giám sát/
 
 ROOT = `/home/trido/thanhdt/WorkingClaude/mike`. Mọi đường dẫn dưới đây tương đối với ROOT.
 
+## Mục đã tách sang `MIKE_ext.md` — đọc khi cần, KHÔNG auto-load
+
+| Mục | Khi nào phải đọc |
+|---|---|
+| **§Escalation TỔNG** — `rollup_of` matching rules đầy đủ | Khi viết escalation tổng có `rollup_of` |
+| **§Tạo/thu agent con** — spawn/retire chi tiết | Khi spawn/retire agent |
+| **§Giám sát sức khỏe fleet** — watchdog, health check, zombie | Khi debug fleet health hoặc daemon vấn đề |
+| **§Context role-scoped** — quy tắc ghi chép fact mới, onboarding | Khi thêm agent mới / đổi vai trò / thêm fact KB |
+
+⚠️ Con trỏ này CỐ Ý không dùng `@`. `@`-import là đệ quy — viết ở đây sẽ nạp lại toàn bộ ext vào mỗi phiên, xoá sạch tác dụng tách.
+
 ## Nguyên tắc
 - **Không nhớ trong đầu — luôn tra KB.** Nguồn sự thật: `kb/KNOWLEDGE.md` (chuẩn tắc),
   `kb/context_pack.md` (delta gần đây), `kb/fleet_status.md` (trạng thái con). Mọi thứ bền nằm ở
@@ -98,6 +109,9 @@ cao sẽ tự chạy tiếp, nhưng nếu phiên tôi restart giữa chừng th�
 > ⚠️ Push fail-soft (lỗi ghi `logs/wake_thread_errors.log`, không gãy `_bg_wrapper`) — API
 > `127.0.0.1:8199` sập đúng lúc đó = mất push, không cảnh báo tức thời. **Luôn đặt CẢ HAI**
 > (push tự động + ScheduleWakeup lưới an toàn), đừng bỏ ScheduleWakeup vì "đã có push".
+> Lần push THÀNH CÔNG ghi `logs/wake_thread.log` (`SUCCESS | job_id= thread_id= task_id=`,
+> thêm 2026-08-17): trước đó chỉ nhánh lỗi có log, nên "push chưa từng chạy" và "push chạy
+> ngon" nhìn giống hệt nhau từ trong repo này — audit phải mượn log ccdb ở repo khác.
 
 > **§8 rút gọn — 3 dòng phải nhớ (thêm 2026-07-20, sau sự cố `missed-wakeup-after-bg-dispatch`,
 > xem `kb/incidents/2026-07/2026-07-20-missed-wakeup-after-bg-dispatch.md` + job `Wags_20260720_121120`):**
@@ -117,6 +131,50 @@ cao sẽ tự chạy tiếp, nhưng nếu phiên tôi restart giữa chừng th�
 >    hỏi khác.
 > 3. Mọi phát ngôn về trạng thái job phải kèm `jobs.sh status` chạy trong CÙNG lượt — kể cả câu
 >    "job vừa mới xong" (sự cố 07-20: `ended_at` cách đó 19 phút vẫn bị thuật thành "vừa xong").
+> 4. **Anti-double-reply (thêm 2026-08-17, sửa chẩn đoán + giao thức cùng ngày —
+>    `agents/Wags/research/wakeup_double_answer_audit_20260817.md`)** — Mike post kết quả CÙNG
+>    MỘT job 2 lần (token × 2, user tưởng có 2 kết quả khác nhau).
+>
+>    ⚠️ **KHÔNG phải vì "push-wake và ladder-wake là 2 task ccdb độc lập cùng fire"** — đó là
+>    tiền đề bản đầu của mục này và nó SAI. ccdb đã tự cưỡng chế bất biến *tối đa 1 one-shot
+>    wakeup pending mỗi thread*: cả bridge `ScheduleWakeup` (`cogs/_run_helper.py`) lẫn push
+>    ngoài (`ext/api_server.py`) đều gọi `delete_pending_one_shot_by_thread()` ngay trước khi
+>    tạo task. Quan sát thật 3 lần ngày 08-17 ("Cancelled 1 pending one-shot wakeup(s)…").
+>    Hai nguyên nhân THẬT:
+>    - **(a) Replay ở tầng harness** — lượt wake cạn context → auto-compaction → bị ngắt →
+>      prompt wake trong hàng đợi được giao LẠI trong cùng phiên. Bằng chứng trực tiếp:
+>      `Taylor_20260817_112844`, ccdb chỉ fire task 1729 đúng 1 lần. **Chỉ Bước A/B dưới đây
+>      chặn được ca này** — không có fix tầng ccdb nào với tới.
+>    - **(b) ccdb restart giữa lượt** — row one-shot chỉ bị xoá SAU khi lượt Claude xong, mà
+>      chống chạy lại chỉ là `self._running` trong RAM ⇒ restart giữa lượt là fire lại prompt
+>      cũ (`ccdb-mike.service` restart 4 lần chỉ riêng 08-17). Vá ở repo bridge (F1/F3).
+>
+>    ⇒ Bước A/B vẫn **BẮT BUỘC** kể cả sau khi F1/F3 land: chúng vá (b), không chạm được (a).
+>
+>    **Bước A — ĐẦU TIÊN của MỌI lượt wakeup**, trước khi đọc job status hay post bất cứ gì:
+>    ```
+>    bin/jobs.sh claim-reply <job_id>   # test-and-set replied_at NGUYÊN TỬ (1 lock, 1 người thắng)
+>    ```
+>    **Bước B — xử theo exit code của chính lệnh trên** (không cần `is-replied` riêng nữa):
+>    - `0` = bạn là người ĐẦU TIÊN giành quyền trả lời → post kết quả rồi kết thúc lượt.
+>      Không phải gọi `mark-replied` nữa: claim-reply đã ghi `replied_at` rồi.
+>    - `1` = lượt khác đã trả lời → `ScheduleWakeup(noop: true, stop: true)`, post gì cũng KHÔNG.
+>    - `2` = không có job record đọc được → **đừng coi là "đã reply"** (sẽ nuốt mất kết quả);
+>      kiểm tra lại job_id, xử tay.
+>
+>    **Prompt `ScheduleWakeup` phải encode Bước A làm dòng đầu tiên.** Template chuẩn:
+>    `"Đầu tiên: bin/jobs.sh claim-reply <job_id> → exit 1 → ScheduleWakeup(noop:true,stop:true), DỪNG. exit 0 → [logic poll + post bình thường]. exit 2 → báo job record thiếu, đừng im lặng."`
+>
+>    Từ 2026-08-18: prompt active-wake do `dispatch.sh --bg` tự sinh (`from=Mike`, cả nhánh
+>    done/fail) đã prepend sẵn template này kèm đúng job_id; prompt in ra stderr sau dòng
+>    "Theo dõi:" cũng là bản sẵn dùng. Wakeup từ nguồn khác vẫn phải tự encode Bước A.
+>
+>    Fan-out nhiều job: claim-reply cho TỪNG job; chỉ post job nào bạn claim được (exit 0).
+>    Stop khi mọi job trong batch đều không còn exit 0.
+>
+>    *(`mark-replied`/`is-replied` còn đó cho back-compat nhưng ĐỪNG dùng để chống trùng: hai
+>    lượt có thể cùng đọc "chưa reply" trước khi bên nào kịp ghi — đúng cái khe mà claim-reply
+>    đóng. Test: `bin/claim_reply_selfcheck.sh`, CA 3 chạy 12 tiến trình đồng thời.)*
 >
 > Đo tuân thủ hồi cứu: `bin/wakeup_audit.py --since <ngày>` (gắn vào `daily_retro.sh`).
 
@@ -151,16 +209,7 @@ Khi thấy event_type `question` trong KB delta, Mike phải:
    bin/dispatch.sh <agent_đã_hỏi> "Trả lời cho câu hỏi '<topic>': <quyết định của user>"
    ```
 
-**Escalation TỔNG (gom nhiều câu hỏi con đang mở) — bắt buộc khai `rollup_of`.** Câu hỏi tổng
-có topic RIÊNG, nên đóng hết các câu hỏi con KHÔNG đóng được nó (`ops_health_check` check #5
-khớp theo topic-string) ⇒ nó ở lại pending và đốt 1 job `wags_autofix` mỗi ngày cho tới khi ai
-đó nhớ ra (ca thật `retro-escalation-2026-08-13-patternB-and-backlog`). Khai tường minh danh
-sách topic con trong payload thì check #5 tự đóng tổng khi MỌI con đã có `answer`/`decision`:
-```bash
-bin/append_event.sh Mike question "retro-escalation-<ngày>-..." \
-  '{"summary":"...", "rollup_of":["topic-con-1","Mike/topic-con-2"], "urgency":"medium"}'
-```
-Không khai thì hành vi y như cũ (fail-closed) — vẫn phải tự đăng `answer` giữ NGUYÊN topic tổng.
+→ **Đọc `MIKE_ext.md` §Escalation-TỔNG** khi cần dùng `rollup_of` — luật khớp topic con đầy đủ (topic phải NGUYÊN VĂN, agent khác thì dùng dạng `Agent/topic-con`, `rollup_of` phần tử rỗng fail-closed cả tổng).
 
 ## Routing — khi user hỏi Mike
 1. Tra `kb/KNOWLEDGE.md` + `kb/context_pack.md` + `kb/fleet_status.md` trước.
@@ -198,6 +247,26 @@ Quy tắc CỨNG:
    trỏ global.
 4. Agent một-topic-cố-định (Wags, DollarBill) LUÔN về topic của mình, bất kể dispatch từ đâu — muốn khác
    phải truyền `--thread` tường minh.
+
+## Kỷ luật tương tác Discord — chủ động báo tiến độ, CẤM im lặng chờ user hỏi (user yêu cầu 2026-08-17)
+Áp dụng cho MỌI turn tương tác của Mike, không chỉ job nền. Nếu user đã nhận được "đang xử lý", các lượt
+tiếp theo PHẢI có thông tin thật, không được dừng đến khi user hỏi "xong chưa".
+Quy tắc CỨNG:
+1. **Nhận việc xong là báo ngay bản nhận công việc**: nêu task, hạng mục đang làm, bước kế tiếp. Nếu
+   chưa thể cho kết quả trong lượt này, nói rõ "tôi sẽ tự báo, không cần hỏi lại".
+2. **Turn dài > ~1-2 phút phải gửi progress định kỳ 1-2 phút/lần** bằng `bin/notify_thread.sh "<nội dung
+   thật>" "$DISCORD_THREAD_ID"` hoặc qua tin nhắn reply/wakeup. Each update nêu bước ĐÃ làm, bước ĐANG
+   làm, còn chờ gì — không gửi tin rỗng hay chỉ lặp "Vẫn đang xử lý".
+3. **Turn chưa xong trong lượt này bắt buộc đặt `ScheduleWakeup`** với delay 120-300s (theo mức độ khẩn),
+   prompt = "kiểm tra/build tiếp task <task>, nếu chưa xong post progress thật rồi tự đặt wakeup tiếp;
+   nếu xong post kết quả". Đây là cơ chế tự duy trì vòng phản hồi, KHÔNG phụ thuộc user nhắc.
+4. **Wakeup tới mà tiến độ vẫn còn** → post status + đặt wakeup tiếp; **xong** → post kết quả cuối với
+   artifact/verification thật. Không có "chờ user hỏi mới báo".
+5. Progress phải đi ĐÚNG topic `$DISCORD_THREAD_ID` (khớp "Kỷ luật topic Discord" phía trên) và mọi nhận
+   định trạng thái phải có bằng chứng cùng lượt (`jobs.sh status`, file/log/artifact) — không báo suy đoán.
+
+Pattern học từ Claude trên Discord: nhận việc ngay, bước tiến ngắn nhưng cụ thể, tự quay lại khi chưa
+hoàn tất, và chỉ dừng khi đã có kết quả rõ ràng.
 
 ## Chọn agent nào cho việc gì
 **1 lớp duy nhất:** *companion daemon* (persistent, systemd) chỉ còn **Mike**. **Mọi agent khác đều
@@ -249,22 +318,12 @@ Verdict (`CONFIRMED|REFUTED|INCONCLUSIVE`) ghi lên bus là event `verification`
 production.** Verifier read-only (Bash/Read/Grep/Glob), không sửa code/KB.
 
 ## Tạo / thu agent con
-- Tạo: `bin/spawn_child.sh <id> "<role>" "<mô tả>"` → dựng `agents/<id>/` (CLAUDE.md + hooks),
-  seed registry idle. Sau khi OAuth claude.ai hợp lệ: `systemctl --user enable --now mike@<id>`.
-- Thu: `systemctl --user disable --now mike@<id>` (tri thức đã ở KB, không mất). Giữ `agents/<id>/` để audit.
 
-## Giám sát sức khỏe fleet (auto-recovery cho nhân viên)
-`bin/watchdog.sh` (cron 10') giám sát mọi unit `mike@<id>` bằng `bin/is_serving.py` (oracle agent
-có THỰC SỰ phục vụ session — mạnh hơn `systemctl is-active`, bắt được ca ZOMBIE host sống nhưng
-không serving). DOWN → restart (persistent DOWN sau 3 lần → nghi OAuth logout). ZOMBIE →
-`clear_bridge` + restart (plain restart không đủ, xem `kb/incidents/`). Alert qua `bin/notify.sh`
-→ Telegram (dedup 300s, kill-switch `state/NOTIFY_OFF`). Bảng sức khỏe đầy đủ
-(STATE/SERVING/CTX/uptime/streak): chạy tay `bin/fleet_health.sh`.
-`bin/context_watch.py` + `bin/usage_watch.py` (cùng cron 10') canh độ dài hội thoại từng phiên
-(auto-compact của Claude Code tự lo, Mike chỉ cảnh báo) và trần 5h usage CHUNG của tài khoản (ước
-lượng, không phải API chính thức — cảnh báo sớm để giãn việc nặng, không tự resume hộ phiên
-khác). **2 việc CHỈ con người làm tay** (restart không cứu): logout → `claude login`; zombie dai
-dẳng → mở agent trong app Claude để re-pair.
+→ **Đọc `MIKE_ext.md` §Tạo/thu-agent-con** (`spawn_child.sh`, `systemctl enable/disable mike@<id>`).
+
+## Giám sát sức khỏe fleet
+
+→ **Đọc `MIKE_ext.md` §Giám-sát-sức-khỏe-fleet** (`watchdog.sh`, `fleet_health.sh`, `is_serving.py`, zombie/DOWN/OAuth). Công cụ nhanh: `bin/fleet_health.sh`.
 
 ## Công cụ
 - **`bin/dispatch.sh <id> "prompt" [--bg] [--timeout SEC] [--retries N] [--model NAME] [--effort LV]`**
@@ -363,30 +422,6 @@ tự ý bớt file này khỏi Mafee/DollarBill/Winston để "tiết kiệm tok
 Wags cân nhắc thêm nếu autofix của mình tái phạm đúng loại lỗi guideline này nhắm tới (chưa cần,
 lý do đầy đủ: git log file này).
 
-**Tách OKF 2026-08-14** (user duyệt, sau 3 lần vượt ngưỡng 40KB): 11 mục dùng-theo-tình-huống
-(§7/§8b/§10/§11/§13/§14/§15/§17/§18b/§22/§24) sang `kb/coding_guidelines_ext.md` — KHÔNG auto-load,
-số hiệu § giữ nguyên, bảng con trỏ ở đầu `coding_guidelines.md`. ⚠️ Con trỏ đó **không được** đổi
-thành `@`-import (đệ quy ⇒ nạp lại, mất sạch tác dụng tách); mục mới loại tình-huống thêm vào file
-ext, đừng nhồi vào file chính.
+**Audit định kỳ — gộp vào Friday KB editorial review có sẵn**: mục 5 trong dispatch Friday của `bin/kb_nightly.sh` yêu cầu Mike đọc lại các file role-scoped, đối chiếu `KNOWLEDGE.md`/`current_ops.md` mới nhất — fact đã đổi ở nguồn canonical nhưng chưa lan sang file role-scoped liên quan thì sửa ngay.
 
-**Quy tắc ghi chép — mở rộng nguyên tắc "ghi 1 lần đúng chỗ" ở trên:** khi tạo tri thức bền mới
-(quyết định/kết luận/quy tắc), trước khi ghi vào `context_pack.md`/`canonical.md`, tự hỏi **"role
-nào thực sự cần fact này khi làm việc?"** rồi sửa đúng (các) file role-scoped tương ứng CÙNG LÚC:
-- Fact chạm tiền thật/an toàn (kill-switch, banned ticker, account LIVE mới) → `context_safety_core.md`.
-- Fact riêng thực thi lệnh (broker quirk, settlement, executor bug) → `context_execution_mini.md`.
-- Fact riêng lập plan (allocator, regime-gate, pricing rule, plan-file convention) → `context_planning_mini.md`.
-- Fact riêng data-ops (bảng BQ mới, cron, cache) → `context_dataops_mini.md`.
-- Fact chỉ Taylor cần (backtest method, R&D history) → giữ nguyên ở `context_pack.md`/`KNOWLEDGE.md`, KHÔNG cần lan sang các file role-scoped khác.
-Fact liên quan ≥2 role — ghi vào MỖI file liên quan (chấp nhận trùng nhỏ, ưu tiên đúng hơn DRY
-tuyệt đối cho nội dung an toàn-quan trọng), HOẶC nếu đủ nhỏ/nền tảng thì đưa vào
-`context_safety_core.md` thay vì lặp nhiều file.
-
-**Audit định kỳ — gộp vào Friday KB editorial review có sẵn** (không tạo cron mới, theo pattern
-`coding_guidelines.md` §9/§10/§11): mục 5 trong dispatch Friday của `bin/kb_nightly.sh` yêu cầu
-Mike đọc lại các file role-scoped, đối chiếu `KNOWLEDGE.md`/`current_ops.md` mới nhất — fact đã đổi
-ở nguồn canonical nhưng chưa lan sang file role-scoped liên quan (vd đổi target NEUTRAL parking,
-thêm account LIVE mới, đổi tên bảng DT5G) thì sửa ngay.
-
-**Khi thêm agent mới hoặc đổi vai trò 1 agent:** chọn file role-scoped theo BẢNG trên (không mặc
-định full `context_pack.md` trừ khi vai trò thực sự cần tổng hợp xuyên domain như Taylor/Mike) —
-cập nhật cả bảng này khi quyết định.
+→ **Đọc `MIKE_ext.md` §Context-role-scoped** khi thêm agent mới, đổi vai trò, hoặc cần biết fact nào ghi ở file nào (quy tắc ghi chép + OKF history + onboarding rule).
