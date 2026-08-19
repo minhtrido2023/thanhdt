@@ -60,6 +60,7 @@ from trading_bot.brokers import DNSEBroker  # noqa: E402
 from trading_bot.no_chase_ceiling import (  # noqa: E402
     RULE_A_TAU_DEFAULT, RULE_A_TAU_MAX, apply_rule_a, check_reference_snapshot,
     resolve_buy_ceiling)
+from trading_bot.price_frame import band_tol_one_tick  # noqa: E402
 
 BQ_PROJECT = os.environ.get("BQ_PROJECT", "lithe-record-440915-m9")
 BQ_MAX_ROWS = 10_000
@@ -313,7 +314,8 @@ def main():
             continue
         ok, ginfo = check_reference_snapshot(
             q.get("ref"), q.get("ceiling"), q.get("floor"),
-            q.get("exchange"), q.get("exchange_known"), prev_low=lo, prev_high=hi)
+            q.get("exchange"), q.get("exchange_known"), prev_low=lo, prev_high=hi,
+            band_tol=band_tol_one_tick(q.get("ref"), exchange=q.get("exchange") or "HOSE"))
         if not ok:
             skipped.append(f"{tk}: [{ginfo.get('gate')}] {ginfo.get('reason')}")
             continue
