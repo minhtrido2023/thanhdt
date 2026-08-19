@@ -160,17 +160,32 @@ else:
     lines.append(f"ℹ️ Chưa có journal hôm nay ({today}) — chưa tới giờ giao dịch hoặc chưa có phiên.")
 
 # 4. Circuit breaker per-agent
+# `tripped_until` KHÔNG tự bị xoá khi hết hạn — bin/mike_json.py circuit-check dọn LAZY,
+# chỉ vào đúng lúc có dispatch mới tới agent đó. Nên test truthiness (`if tripped_until:`)
+# báo TRIPPED VĨNH VIỄN cho mọi agent từng trip rồi không được dispatch lại. Sự cố thật
+# 2026-08-19: breaker Taylor hết hạn 05:43:03Z, check này 05:45:07Z vẫn báo TRIPPED → đốt
+# một job Wags(Opus) cho trạng thái đã tự khỏi. Hỏi mike_json (so với NOW, read-only) thay
+# vì tự đọc file. KHÔNG fail-OPEN: lệnh lỗi phải KÊU, không được nuốt rồi in ✅.
 circuit_dir = os.path.join(wc_root, "mike", "state", "circuit")
-tripped = []
-if os.path.isdir(circuit_dir):
-    for p in glob.glob(os.path.join(circuit_dir, "*.json")):
-        try:
-            c = json.load(open(p, encoding="utf-8"))
-        except Exception:
-            continue
-        if c.get("tripped_until", 0):
-            tripped.append(os.path.basename(p).replace(".json", ""))
-if tripped:
+tripped, _cb_err = [], ""
+try:
+    _cb = subprocess.run([sys.executable, os.path.join(wc_root, "mike", "bin", "mike_json.py"),
+                          "circuit-tripped", circuit_dir],
+                         capture_output=True, text=True, timeout=30)
+    if _cb.returncode != 0:
+        _cb_err = (_cb.stderr or "rc=%d" % _cb.returncode).strip()[:200]
+    else:
+        for _ln in _cb.stdout.splitlines():
+            _ln = _ln.strip()
+            if not _ln:
+                continue
+            _ag, _, _rem = _ln.partition(" ")
+            tripped.append(f"{_ag} (còn {int(_rem) // 60}p{int(_rem) % 60}s)" if _rem.isdigit() else _ag)
+except Exception as e:
+    _cb_err = f"{type(e).__name__}: {e}"[:200]
+if _cb_err:
+    W(f"Circuit breaker: KHÔNG kiểm tra được ({_cb_err}) — coi như CHƯA BIẾT, không phải 'bình thường'.")
+elif tripped:
     W(f"Circuit breaker đang TRIPPED cho: {', '.join(tripped)} — dispatch các agent này sẽ bị chặn tạm thời.")
 else:
     OK("Circuit breaker: tất cả agent bình thường (0 tripped).")

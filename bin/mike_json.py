@@ -2710,6 +2710,36 @@ def _circuit_save(state_dir, agent_id, obj):
     os.replace(tmp, fp)
 
 
+def cmd_circuit_tripped(a):
+    """circuit-tripped <state_dir> — in ra cac agent DANG THUC SU bi chan, moi dong
+    "<agent> <remaining_s>". READ-ONLY: khong sua/khong xoa state (viec don trip het han
+    la cua circuit-check, tren duong dispatch).
+
+    Vi sao can lenh rieng thay vi doc thang file: `tripped_until` KHONG bao gio duoc don
+    khi het han neu khong co dispatch moi toi agent do — circuit-check don LAZY, chi luc
+    dispatch. Nen mot checker doc file va test truthiness (`if c["tripped_until"]:`) se
+    bao TRIPPED VINH VIEN cho moi agent tung trip roi khong duoc dispatch lai. Do la
+    su co that 2026-08-19: breaker Taylor het han 05:43:03Z, ops_health_check 05:45:07Z
+    van bao TRIPPED -> dot mot job Wags(Opus) cho trang thai da tu khoi phuc. Cung ho loi
+    voi QUESTION_GRACE_MIN (2026-08-17): quyet dinh escalate tu mot co TUC THOI ma khong
+    xet no CON HIEU LUC hay khong."""
+    state_dir = a[0]
+    n = now_epoch()
+    rows = []
+    for fp in sorted(glob.glob(os.path.join(state_dir, "*.json"))):
+        try:
+            with open(fp, encoding="utf-8") as f:
+                obj = json.load(f)
+        except Exception:
+            continue
+        tripped_until = _as_int(obj.get("tripped_until"), 0)
+        if tripped_until and n < tripped_until:
+            agent = os.path.basename(fp)[:-len(".json")]
+            rows.append((agent, tripped_until - n))
+    for agent, remaining in rows:
+        print("%s %d" % (agent, remaining))
+
+
 def cmd_circuit_check(a):
     """circuit-check <state_dir> <agent_id> — exit 0 (closed/allowed) or 1 (open/blocked).
     Auto-clears an expired trip (cooldown passed) before checking, allowing a trial dispatch."""
@@ -2818,6 +2848,7 @@ CMDS = {"event": cmd_event, "heartbeat": cmd_heartbeat, "recent": cmd_recent,
         "job-field": cmd_job_field, "job-hb-age": cmd_job_hb_age,
         "job-claim-reply": cmd_job_claim_reply,
         "circuit-check": cmd_circuit_check, "circuit-record": cmd_circuit_record,
+        "circuit-tripped": cmd_circuit_tripped,
         "pending-resume-set": cmd_pending_resume_set,
         "settings": cmd_settings, "trace": cmd_trace,
         "verify-coverage": cmd_verify_coverage, "has-event": cmd_has_event,

@@ -301,7 +301,19 @@ esac
 # lifetime of one attempt at TIMEOUT×(MAX_EXT+1) — every worst-case computation below
 # (watcher zombie cap, wake-on-completion hint) must use that product, not bare TIMEOUT.
 MAX_EXT="${DISPATCH_HB_MAX_EXTENSIONS:-3}"
-HB_FRESH_S="${DISPATCH_HB_FRESH_S:-120}"
+# HB_FRESH_S = "heartbeat moi the nao thi coi la agent CON SONG" tai dung khoanh khac cham
+# deadline. 120s (gia tri cu) la SAI so voi nhip heartbeat THAT: do tren 362 khoang cach
+# heartbeat-agent lien tiep / 89 job (bus/inbox, 2026-08-05..08-19) thi p50=116s, p75=273s,
+# p90=557s — tuc 48% khoang cach VUOT 120s va 78% job co it nhat MOT khoang >120s. Nguyen
+# nhan: agent duoc dan "heartbeat moi 4-5 tool call", ma 4-5 tool call trong viec sua code
+# nang thi lau hon 2 phut. Hau qua: co che gia han — dung ra de CUU job dang chay that —
+# gan nhu tung dong xu, va cang de truot voi job NANG (dung loai no sinh ra de cuu).
+# Su co that 2026-08-19: 3 job Taylor lien tiep (oshares_live.py, opus/high) bi giet dung
+# luc dang lam, 0 lan gia han, breaker TRIPPED; Mike phai lam lai ca 3 viec trong phien
+# cua chinh no. 600s = lam tron len tu p90.
+# KHONG noi rong worst case: MAX_EXT van chan tong doi mot attempt o TIMEOUT×(MAX_EXT+1).
+# Job treo THAT (khong ghi heartbeat nao) van chet — chi ton toi da mot lan gia han thua.
+HB_FRESH_S="${DISPATCH_HB_FRESH_S:-600}"
 
 AGENT_DIR="$ROOT/agents/$id"
 if [ ! -d "$AGENT_DIR" ]; then
