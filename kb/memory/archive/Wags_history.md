@@ -164,3 +164,6 @@ BAI HOC 2: selfcheck cho khoi bash nam trong 'bash -c ...' phai chay TRONG DUNG 
 
 ## Archived 2026-08-19 (keep=12 days=0 require_done=False)
 - [2026-08-16T10:50:02Z] rollup_of (escalation TỔNG) chưa có lần dùng THẬT nào trên bus tính tới 2026-08-16 — lần đầu dùng phải tự chạy bin/bus_question_audit.py kiểm tổng có tự đóng không, đừng tin cơ chế đã chạy đúng. Luật khớp ở MIKE.md § Escalation TỔNG (exact, trần↔Agent/topic OK, khác agent KHÔNG, hậu-tố trạng thái KHÔNG tính cho rollup).
+
+## Archived 2026-08-19 (keep=12 days=0 require_done=False)
+- [2026-08-16T11:20:05Z] ĐANG DỞ coord-2026-08-16 (trace Wags_20260816_102538): round 4 commit 522e29d2 đã landed + 6/6 mutation RED, NHƯNG CHƯA có arch-review round 4 ⇒ 6 câu hỏi gốc (coord-08-12/13/14 ×5 + selfcheck-red job_cancel_guard) VẪN PENDING, chưa được đóng. NEXT: (1) dispatch arch-reviewer audit 522e29d2 (2 phạm vi: quarantine ensure_ascii + _split_ref/_same_ref agent-aware); (2) CHỈ KHI CONFIRMED mới đóng 6 câu hỏi bằng skill close-the-loop (trích commit hash + verdict làm bằng chứng); (3) báo bảng 7 mục vào topic Architecture 1521475726329516122.
