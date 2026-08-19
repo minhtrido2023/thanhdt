@@ -9,6 +9,10 @@
 #   4. Record không tồn tại / hỏng -> exit 2, KHÔNG phải 1 (nếu trả 1, lượt wake sẽ im lặng
 #      bỏ qua kết quả job — mất việc, không phải chống trùng).
 #   5. mark-replied cũ vẫn ăn khớp: đã mark-replied thì claim-reply trả 1.
+#   6. status=running (CHƯA terminal) -> exit 3, KHÔNG stamp replied_at — đây là bug
+#      2026-08-19: 1 lượt POLL TIẾN ĐỘ claim thành công trên job đang chạy, khoá replied_at
+#      trước khi lượt HOÀN THÀNH thật tới nơi -> kết quả thật không bao giờ được post.
+#   7. status=running, N tiến trình claim ĐỒNG THỜI -> TẤT CẢ exit 3, không cái nào stamp.
 #
 # Chạy trên sandbox riêng (mktemp -d), KHÔNG đụng bus/jobs thật.
 set -uo pipefail
@@ -27,6 +31,7 @@ assert() { # assert <mô tả> <thực tế> <mong đợi>
   fi
 }
 mkjob() { printf '{"job_id":"%s","status":"done"}' "$1" > "$JOBS/$1.json"; }
+mkjob_status() { printf '{"job_id":"%s","status":"%s"}' "$1" "$2" > "$JOBS/$1.json"; }
 claim() {
   python3 "$ROOT/bin/mike_json.py" job-claim-reply "$JOBS" "$1" >/dev/null 2>&1
   echo $?
@@ -82,6 +87,27 @@ printf '{"job_id":"J5","status":"done"}' > "$FAKE/bus/jobs/J5.json"
 assert "claim đầu qua jobs.sh" "$(claim_front J5)" "0"
 assert "claim lại qua jobs.sh" "$(claim_front J5)" "1"
 assert "record thiếu qua jobs.sh" "$(claim_front KHONG_CO)" "2"
+
+echo "== CA 7: job CHƯA terminal (status=running) -> exit 3, KHÔNG stamp replied_at"
+mkjob_status J6 running
+assert "exit code" "$(claim J6)" "3"
+assert "replied_at KHÔNG bị ghi" \
+  "$(python3 -c 'import json,sys;print("yes" if json.load(open(sys.argv[1])).get("replied_at") else "no")' "$JOBS/J6.json")" \
+  "no"
+assert "claim lại vẫn exit 3 (không đổi trạng thái)" "$(claim J6)" "3"
+
+echo "== CA 8: status=running, 12 tiến trình claim ĐỒNG THỜI -> TẤT CẢ exit 3, không cái nào stamp"
+mkjob_status J7 running
+RC_DIR2="$SB/rc2"; mkdir -p "$RC_DIR2"
+for i in $(seq 1 12); do
+  ( claim J7 > "$RC_DIR2/$i" ) &
+done
+wait
+REFUSED="$(grep -lx 3 "$RC_DIR2"/* 2>/dev/null | wc -l | tr -d ' ')"
+assert "số tiến trình exit 3" "$REFUSED" "12"
+assert "replied_at vẫn KHÔNG bị ghi" \
+  "$(python3 -c 'import json,sys;print("yes" if json.load(open(sys.argv[1])).get("replied_at") else "no")' "$JOBS/J7.json")" \
+  "no"
 
 echo
 if [ "$FAIL" -eq 0 ]; then echo "claim_reply_selfcheck: PASS"; else echo "claim_reply_selfcheck: FAIL"; fi

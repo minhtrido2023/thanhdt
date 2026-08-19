@@ -24,7 +24,10 @@
 #   jobs.sh claim-reply <job_id>      THE anti-double-reply primitive (use this one).
 #                                     Atomic test-and-set of replied_at: exit 0 = you are
 #                                     the FIRST claimer, go post; exit 1 = already replied,
-#                                     stay silent; exit 2 = record missing/corrupt.
+#                                     stay silent; exit 2 = record missing/corrupt; exit 3 =
+#                                     job not terminal yet (still running/retrying) -> this
+#                                     is a progress-poll turn, NOT a completion turn, keep
+#                                     polling normally.
 #                                     Call at the TOP of every wakeup turn, INSTEAD of
 #                                     is-replied + mark-replied.
 #   jobs.sh mark-replied <job_id>     [legacy] stamp replied_at unconditionally. Kept for
@@ -90,6 +93,9 @@ case "$cmd" in
     #   exit 0 -> this turn owns the reply: post the result, then end the turn.
     #   exit 1 -> another turn already replied: ScheduleWakeup(noop:true, stop:true), post nothing.
     #   exit 2 -> no readable job record: nothing was written; do NOT read this as "replied".
+    #   exit 3 -> job status is not terminal yet: nothing was written; this is a progress-poll
+    #             turn (job still running/retrying), NOT a completion turn — keep polling,
+    #             do not treat as "replied" or "mine to post".
     job_id="${2:?usage: jobs.sh claim-reply <job_id>}"
     set +e; MJ job-claim-reply "$JOBS_DIR" "$job_id"; rc=$?; set -e
     exit "$rc"

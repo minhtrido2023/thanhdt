@@ -160,9 +160,15 @@ cao sẽ tự chạy tiếp, nhưng nếu phiên tôi restart giữa chừng th�
 >    - `1` = lượt khác đã trả lời → `ScheduleWakeup(noop: true, stop: true)`, post gì cũng KHÔNG.
 >    - `2` = không có job record đọc được → **đừng coi là "đã reply"** (sẽ nuốt mất kết quả);
 >      kiểm tra lại job_id, xử tay.
+>    - `3` = **job CHƯA terminal** (status vẫn `running`/`retrying`/...) → lượt này là POLL
+>      TIẾN ĐỘ, không phải HOÀN THÀNH. KHÔNG claim gì cả (chưa ghi `replied_at`), KHÔNG post
+>      kết quả (chưa có kết quả), tiếp tục poll/`ScheduleWakeup` như một lượt poll bình
+>      thường. (Thêm 2026-08-19 sau sự cố job Taylor bị khoá mất kết quả thật: một lượt POLL
+>      TIẾN ĐỘ claim thành công trên job đang `running`, khoá `replied_at` trước khi lượt
+>      HOÀN THÀNH thật chạy tới → kết quả thật không bao giờ được post.)
 >
 >    **Prompt `ScheduleWakeup` phải encode Bước A làm dòng đầu tiên.** Template chuẩn:
->    `"Đầu tiên: bin/jobs.sh claim-reply <job_id> → exit 1 → ScheduleWakeup(noop:true,stop:true), DỪNG. exit 0 → [logic poll + post bình thường]. exit 2 → báo job record thiếu, đừng im lặng."`
+>    `"Đầu tiên: bin/jobs.sh claim-reply <job_id> → exit 1 → ScheduleWakeup(noop:true,stop:true), DỪNG. exit 0 → [logic poll + post bình thường]. exit 2 → báo job record thiếu, đừng im lặng. exit 3 → job chưa xong, post progress bình thường (KHÔNG claim, KHÔNG coi là đã reply), tiếp tục ScheduleWakeup như lượt poll thông thường."`
 >
 >    Từ 2026-08-18: prompt active-wake do `dispatch.sh --bg` tự sinh (`from=Mike`, cả nhánh
 >    done/fail) đã prepend sẵn template này kèm đúng job_id; prompt in ra stderr sau dòng

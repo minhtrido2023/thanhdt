@@ -1144,6 +1144,33 @@ def cmd_job_write_scope_conflict(a):
     sys.exit(0 if found else 1)
 
 
+def cmd_job_live_for_thread(a):
+    """job-live-for-thread <jobs_dir> <from_agent> <thread_id> — print job_id (one per line)
+    of every job where from==<from_agent>, discord_thread_id==<thread_id>, and status is
+    'running' or 'retrying'. Exit 0 if any printed, 1 if none.
+
+    Purpose (F2, 2026-08-19, hooks/stop.sh circuit breaker): a turn is about to end on a
+    Discord thread that has an async job still in flight, dispatched by <from_agent> — the
+    caller uses this to decide whether ending the turn would strand that job with nobody
+    scheduled to check on it. Deliberately narrower than TERMINAL_STATUSES/LIVE_STATUSES:
+    only 'running'/'retrying' count as 'someone should still be watching this' — the other
+    LIVE_STATUSES (usage_limited, provider_fallback, maxturns_pending) are parked states
+    with their OWN separate resume mechanism (bus/pending_resumes/), not a live worker
+    waiting on a wakeup."""
+    jobs_dir, from_agent, thread_id = a[0], a[1], a[2]
+    found = 0
+    for o in _load_jobs(jobs_dir):
+        if o.get("from") != from_agent:
+            continue
+        if str(o.get("discord_thread_id", "")) != str(thread_id):
+            continue
+        if o.get("status") not in ("running", "retrying"):
+            continue
+        print(o.get("job_id", "?"))
+        found += 1
+    sys.exit(0 if found else 1)
+
+
 # Paths that belong to NO single job: the fleet's shared coordination surface. A commit
 # touching one of these while a coordination job is live is the exact shape that has now
 # recurred three times (2026-07-31, 2026-08-02, 2026-08-12) — someone commits from outside
@@ -2626,19 +2653,31 @@ def cmd_job_field(a):
 def cmd_job_claim_reply(a):
     """job-claim-reply <jobs_dir> <job_id> — ATOMIC test-and-set of replied_at.
 
-    exit 0 = replied_at was EMPTY and this call stamped it -> this caller is the FIRST and
-             ONLY one allowed to post the job's result.
+    exit 0 = replied_at was EMPTY, job status was TERMINAL, and this call stamped it ->
+             this caller is the FIRST and ONLY one allowed to post the job's result.
     exit 1 = replied_at was already set (its value goes to stdout) -> someone already
              replied; stay silent.
     exit 2 = record missing or unreadable -> NOTHING was written; do not treat as "already
              replied" (that would silently swallow the result) and do not treat as "mine"
              either. Investigate.
+    exit 3 = job status is NOT terminal yet (still running/retrying/pending-resume, per
+             TERMINAL_STATUSES) -> NOTHING was written. This is a PROGRESS-POLL turn, not
+             a completion turn: there is no result to claim yet. Keep polling normally
+             (do NOT treat this as "replied" or as "mine to post").
 
     Why this exists next to mark-replied/is-replied: those are two separate processes, so
     two wakeup turns racing on the same job can BOTH read "not replied" before either
     writes, and both post. That gap is exactly the double-answer this guard is for. Here the
     read and the write happen under one flock on <job>.json.lock, so exactly one caller of
     any number of concurrent ones gets exit 0.
+
+    Why the terminal-status gate (added after the 2026-08-19 incident): claiming succeeded
+    unconditionally regardless of job status, so a wakeup turn that only POLLED progress on
+    a still-running job could stamp replied_at anyway — permanently locking out the later
+    turn that would have posted the job's REAL result once it actually finished. That result
+    was then never posted at all. Gating on TERMINAL_STATUSES (the same one definition
+    dispatch.sh/kb_nightly.sh/fleet_housekeeping.sh already share) closes that: a claim can
+    only succeed once the run is actually over.
 
     Caveat, stated rather than pretended away: job-set does NOT take this lock (it has its
     own read-modify-write), so a job-set landing in the same millisecond can still drop the
@@ -2671,6 +2710,13 @@ def cmd_job_claim_reply(a):
         if prior:
             print(prior)
             sys.exit(1)
+        status = obj.get("status", "")
+        if status not in TERMINAL_STATUSES:
+            sys.stderr.write(
+                "REFUSED: job %s status=%s chua terminal - day la luot POLL TIEN DO, khong "
+                "phai luot HOAN THANH. Khong claim, tiep tuc poll binh thuong (khong duoc "
+                "post ket qua vi chua co ket qua).\n" % (job_id, status or "?"))
+            sys.exit(3)
         stamp = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
         obj["replied_at"] = stamp
         tmp = fp + ".claim.tmp"
@@ -2843,6 +2889,7 @@ CMDS = {"event": cmd_event, "heartbeat": cmd_heartbeat, "recent": cmd_recent,
         "job-live-pids": cmd_job_live_pids, "job-pin-log": cmd_job_pin_log,
         "job-find-dup": cmd_job_find_dup,
         "job-write-scope-conflict": cmd_job_write_scope_conflict,
+        "job-live-for-thread": cmd_job_live_for_thread,
         "commit-collision-gate": cmd_commit_collision_gate,
         "terminal-statuses": cmd_terminal_statuses,
         "job-field": cmd_job_field, "job-hb-age": cmd_job_hb_age,

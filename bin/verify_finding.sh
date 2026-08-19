@@ -95,13 +95,48 @@ mkdir -p "$ROOT/logs"
 ts="$(date -u +%Y%m%d_%H%M%S)"
 log="$ROOT/logs/verify_${ts}_$$.log"
 
+# --- F3 (2026-08-19): --bg used to be a bare `&` + notify.sh, with NO bus/jobs/ record —
+# jobs.sh could never see it, and nothing ever pushed a wake on completion (silent unless
+# someone happened to grep the log). quant-skeptic has no agents/<id>/ home dir (it is a
+# headless reviewer role invoked directly via `claude -p`, not a fleet agent identity), so
+# `dispatch.sh quant-skeptic ... --bg` is not an option (dispatch.sh hard-requires
+# agents/$id/ to exist). Mirror dispatch.sh's _bg_wrapper pattern by hand instead: a real job
+# record (job_id follows the fleet's `<id>_<UTC-ts>` convention so it also satisfies the
+# trace_id shape check below), pid stamped once the backgrounded run actually starts (so
+# mike_json.py job-set's anti-lying guard recognizes this process as the record's own
+# writer), status closed at the end, and — only when the SOURCE finding's own job carried a
+# Discord topic — a real active-wake push via wake_thread.sh so a live Mike session resumes
+# instead of waiting out a blind ladder.
+job_id=""; _verify_src_tid=""
+if [ -n "$bg" ]; then
+  JOBS_DIR="$ROOT/bus/jobs"
+  job_id="${REVIEWER_ID}_${ts}"
+  if [ -n "$finding_trace_id" ]; then
+    _verify_src_tid="$(python3 "$ROOT/bin/mike_json.py" job-field "$JOBS_DIR" "$finding_trace_id" discord_thread_id 2>/dev/null || true)"
+  fi
+  # dispatcher_pid="$$": recorded on the SAME initial call that creates the record (record
+  # does not exist yet -> mike_json.py's anti-lying guard exempts this write unconditionally,
+  # same as dispatch.sh:1182). Without it, the pid= stamp below is a SECOND, separate job-set
+  # call on an already-"running" record with no dispatcher_pid to prove legitimacy against —
+  # reproduced 2026-08-19: the guard refused it (exit 3), run_and_record died under `set -e`
+  # before ever opening $log, and the record was stuck at status=running forever with no pid,
+  # no log, no completion, no wake — silently defeating the entire point of this fix.
+  python3 "$ROOT/bin/mike_json.py" job-set "$JOBS_DIR" "$job_id" \
+    job_id="$job_id" from="${DISPATCH_FROM:-Mike}" to="$REVIEWER_ID" status=running \
+    started_at="$(date +%s)" logfile="$log" discord_thread_id="$_verify_src_tid" \
+    dispatcher_pid="$$" prompt_summary="VERIFY: $finding_topic" >/dev/null
+fi
+
 run_and_record() {
   cd "$WORKDIR"
+  set +e
   "$CLAUDE" -p "$prompt" \
     --permission-mode auto \
     --allowedTools "Bash Read Grep Glob" \
     --max-turns 50 \
-    > "$log" 2>"$log.err" || true
+    > "$log" 2>"$log.err"
+  _claude_rc=$?
+  set -e
 
   # extract the VERDICT_JSON block → verdict_json
   verdict_json="$(python3 - "$log" "$finding_topic" <<'PY'
@@ -156,12 +191,41 @@ PY
   echo "=== quant-skeptic verdict: $verdict ==="
   printf '%s\n' "$verdict_json" | python3 -m json.tool 2>/dev/null || printf '%s\n' "$verdict_json"
   echo "(full reviewer log: $log)"
+
+  if [ -n "$job_id" ]; then
+    _jstatus=done
+    [ "$_claude_rc" -eq 0 ] || _jstatus=failed
+    MIKE_JOB_OWNER="$job_id" python3 "$ROOT/bin/mike_json.py" job-set "$JOBS_DIR" "$job_id" \
+      status="$_jstatus" ended_at="$(date +%s)" exit_code="$_claude_rc" \
+      result_summary="verdict=$verdict" >/dev/null
+    # Active wake (same claim-reply protocol as MIKE.md §8.4, in sync with the exit-3 gate
+    # job-claim-reply now enforces): only fires when the source finding's OWN job named a
+    # Discord topic — verify_finding.sh has none of its own to guess, and guessing is exactly
+    # the bug class §8 exists to prevent.
+    if [ -n "$_verify_src_tid" ]; then
+      _wake_prompt="Đầu tiên: $ROOT/bin/jobs.sh claim-reply $job_id → exit 1 → ScheduleWakeup(noop:true,stop:true), DỪNG. exit 0 → [logic poll + post bình thường]. exit 2 → báo job record thiếu, đừng im lặng. exit 3 → job chưa xong, post progress bình thường (KHÔNG claim, KHÔNG coi là đã reply), tiếp tục poll. quant-skeptic đã xong verify \"$finding_topic\" (job \`${job_id}\`): verdict=$verdict."
+      "$ROOT/bin/wake_thread.sh" "$_verify_src_tid" "$_wake_prompt" "$job_id" 2>/dev/null || true
+    fi
+  fi
+
   [ -n "$bg" ] && "$ROOT/bin/notify.sh" "[verify] $finding_topic → $verdict" 2>/dev/null || true
 }
 
 if [ -n "$bg" ]; then
   run_and_record &
-  echo "VERIFYING (pid=$!) → log: $log ; verdict will land on bus as quant-skeptic/verification"
+  _bg_pid=$!
+  # pid=$_bg_pid, stamped HERE (top-level script, still alive) rather than from inside
+  # run_and_record: mike_json.py's anti-lying guard only accepts this first pid= write when
+  # the CALLER's own /proc ancestry chain reaches `dispatcher_pid` (stamped above as "$$").
+  # This top-level process IS that dispatcher_pid, so the write is trivially self-provable —
+  # but by the time run_and_record's OWN body runs, this script has already reached its exit
+  # (nothing left to do after backgrounding) and $_bg_pid has been reparented away from it,
+  # breaking that exact ancestry chain. Reproduced 2026-08-19: stamping from inside
+  # run_and_record got refused (exit 3) every time, silently killing the background worker
+  # before it ever opened $log — the record was left at status=running forever with no pid,
+  # no log, no completion, no wake. Stamping here, one line after backgrounding, is the fix.
+  MIKE_JOB_OWNER="$job_id" python3 "$ROOT/bin/mike_json.py" job-set "$JOBS_DIR" "$job_id" pid="$_bg_pid" >/dev/null
+  echo "VERIFYING (pid=$_bg_pid, job=$job_id) → log: $log ; bin/jobs.sh status $job_id ; verdict will land on bus as quant-skeptic/verification"
 else
   run_and_record
 fi
