@@ -113,6 +113,21 @@ def unanchored_ext_gate_fn():
     return slice_fn(blob.stdout)
 
 
+def linestart_anchored_ext_gate_fn():
+    """The @-import gate exactly as shipped in 4708be51: anchored to line-start
+    (`grep -qE "^[[:space:]]*@[^[:space:]]*<ext>"`) — arch-reviewer coord-2026-08-19 round 4
+    reproduced with an independent driver that this UNDER-matches: a real @-import that is
+    NOT the first thing on its line (bullet, blockquote, table cell, heading — all shapes that
+    already exist verbatim in the two live monitored files, just with a plain-text mention
+    instead of a real `@`) slips through as an APPLY. Used only as a RED control for case 16-18
+    below."""
+    blob = subprocess.run(["git", "show", "4708be51:bin/kb_nightly.sh"],
+                          cwd=ROOT, capture_output=True, text=True)
+    if blob.returncode != 0:
+        raise RuntimeError("could not recover 4708be51 kb_nightly.sh for RED control")
+    return slice_fn(blob.stdout)
+
+
 # --- fixtures -----------------------------------------------------------------------------
 CORE_OLD = """# FIXTURE core
 
@@ -410,6 +425,59 @@ rc, log, d = run_case("case15 RED prose-quotes-at-import (b3935515 gate)", UNANC
 check("15a b3935515 gate wrongly rejects it (rc=1)", rc == 1)
 check("15b core left at the old unsplit fixture (the false block case 14 fixes)",
       read(d, "fixture.md") == CORE_OLD)
+
+# 16/17/18 — regression guard for round-4: a REAL @-import that is NOT the first thing on its
+# line (bullet, table cell, heading) must STILL be rejected. Both live monitored files already
+# mention the ext filename in exactly these shapes as plain text (MIKE.md heading, table rows in
+# both) — the most plausible slip during a compression pass is swapping the backtick pointer for
+# a bare `@` on one of those EXISTING lines, not writing a fresh column-0 import (arch-review
+# coord-2026-08-19 round 4, reproduced with an independent driver: line-start anchoring alone
+# missed 6/11 probed shapes).
+CORE_BULLET_ATIMPORT = """# FIXTURE core
+
+## Nguyên tắc
+Quy tắc nền, phải nạp mỗi phiên. Ngưỡng cứng 40KB, chốt 2026-07-30.
+- @fixture_ext.md
+
+## Quy trình hiếm dùng
+Chi tiết ở `fixture_ext.md`.
+"""
+CORE_TABLE_ATIMPORT = """# FIXTURE core
+
+## Mục đã tách sang `fixture_ext.md` — đọc khi cần, KHÔNG auto-load
+| Mục | @fixture_ext.md |
+|---|---|
+| Quy trình hiếm dùng | Thêm agent mới |
+
+## Nguyên tắc
+Quy tắc nền, phải nạp mỗi phiên. Ngưỡng cứng 40KB, chốt 2026-07-30.
+"""
+CORE_HEADING_ATIMPORT = """# FIXTURE core
+
+## Mục đã tách sang @fixture_ext.md — đọc khi cần, KHÔNG auto-load
+
+## Nguyên tắc
+Quy tắc nền, phải nạp mỗi phiên. Ngưỡng cứng 40KB, chốt 2026-07-30.
+"""
+NONLINESTART_FIXTURES = [
+    ("case16 bullet-at-import-still-blocked", CORE_BULLET_ATIMPORT),
+    ("case17 table-at-import-still-blocked", CORE_TABLE_ATIMPORT),
+    ("case18 heading-at-import-still-blocked", CORE_HEADING_ATIMPORT),
+]
+for _name, _core in NONLINESTART_FIXTURES:
+    rc, log, d = run_case(_name, NEW, _core, None, pre_ext=EXT_SPLIT)
+    check(_name + " rejected (rc=1)", rc == 1)
+    check(_name + " core untouched", read(d, "fixture.md") == CORE_OLD)
+    check(_name + " REJECTED logged", "AUTO-FIX REJECTED" in log)
+
+# 19 — RED control: the SAME 3 fixtures against the 4708be51 (line-start-anchored) gate must
+# be WRONGLY applied — proving case 16-18 exercise the round-4 fix, not slack that was already
+# there.
+LINESTART_ANCHORED_EXT_GATE = linestart_anchored_ext_gate_fn()
+for _name, _core in NONLINESTART_FIXTURES:
+    rc, log, d = run_case("case19 RED " + _name + " (4708be51 gate)", LINESTART_ANCHORED_EXT_GATE,
+                          _core, None, pre_ext=EXT_SPLIT)
+    check("case19 RED " + _name + " wrongly applies it (rc=0)", rc == 0)
 
 print("\n%d PASS, %d FAIL" % (len(PASS), len(FAIL)))
 sys.exit(1 if FAIL else 0)

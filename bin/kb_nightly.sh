@@ -832,14 +832,17 @@ Tiền lệ: kb/coding_guidelines_ext.md (2026-08-14), MIKE_ext.md (2026-08-19).
     # 2026-08-19): điều đó tắt hẳn gate cho một bản NÉN THUẦN (không ghi ext_proposed) khi
     # `$ext` ĐÃ tồn tại từ lần split trước — đúng trạng thái hiện tại của CẢ HAI file đang
     # giám sát (MIKE_ext.md, kb/coding_guidelines_ext.md), nên mọi đợt breach kế tiếp đều lọt.
-    # NEO vào ĐẦU DÒNG (`^[[:space:]]*@...`, arch-review vòng 3, tái lập thật trên chính
-    # kb/coding_guidelines.md:46 — dòng VĂN XUÔI trong backtick giải thích lý do KHÔNG dùng
-    # @-import lại tự chứa chuỗi `@.../coding_guidelines_ext.md`, khớp gate mù không neo và
-    # REJECT vĩnh viễn mọi lần nén file đó). Quy ước thật của cả fleet (MIKE.md:3 và mọi
-    # agents/*/CLAUDE.md): một @-import THẬT luôn là NỘI DUNG DUY NHẤT của dòng, không nằm
-    # trong backtick/văn xuôi — neo đầu dòng vừa loại trừ đúng ca giả, vừa không cần bóc
-    # backtick (đơn giản hơn, ít cạnh lạ hơn).
-    if grep -qE "^[[:space:]]*@[^[:space:]]*$(basename "$ext")" "$proposed"; then
+    # KHÔNG neo cứng đầu dòng (arch-review vòng 4, tái lập độc lập bằng driver riêng — 6/11
+    # hình dạng @-import THẬT lọt qua neo `^[[:space:]]*@`: bullet `- @x`, blockquote `> @x`,
+    # ô bảng `| Mục | @x |`, heading `## ... @x`. Cả 2 file giám sát ĐÃ có tên ext trong
+    # heading (MIKE.md:10, kb/coding_guidelines.md:25) và ô bảng — nếu agent nén lỡ đổi
+    # backtick thành @ ngay TRÊN dòng có sẵn đó, neo đầu dòng không bắt được). Loại trừ đúng
+    # ca giả (arch-review vòng 3 — văn xuôi TRÍCH DẪN trong backtick, kb/coding_guidelines.md
+    # :46) bằng cách chặn @ chỉ khi KHÔNG có backtick ngay trước nó, thay vì chặn @ chỉ khi
+    # Ở đẦU dòng — rộng hơn đúng chỗ cần rộng, hẹp hơn đúng chỗ cần hẹp. `[^\`]` PHẢI escape
+    # backtick trong nháy kép, nếu không nó mở command substitution và regex không bao giờ
+    # khớp = gate câm hoàn toàn (tự bắt lỗi này khi thử ở vòng 4).
+    if grep -qE "(^|[^\`])@[^[:space:]]*$(basename "$ext")" "$proposed"; then
         log "AUTO-FIX REJECTED: $label — \$proposed dùng \`@\`-import trỏ tới $(basename "$ext") làm con trỏ (đệ quy, xoá sạch tác dụng tách), KHÔNG áp dụng."
         rm -f "$proposed" "$ext_proposed"
         return 1
