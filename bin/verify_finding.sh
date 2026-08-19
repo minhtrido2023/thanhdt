@@ -121,9 +121,18 @@ if [ -n "$bg" ]; then
   # reproduced 2026-08-19: the guard refused it (exit 3), run_and_record died under `set -e`
   # before ever opening $log, and the record was stuck at status=running forever with no pid,
   # no log, no completion, no wake — silently defeating the entire point of this fix.
+  # deadline: without one, bin/watcher (job-reap) can never close a record whose worker died
+  # mid-run (crash, OOM, host restart) — it stays "running" forever, which (arch-review
+  # coord-mechanism-08-19) also permanently locks its own result out of claim-reply (F1) and
+  # permanently trips hooks/stop.sh's circuit breaker (F2) on every future Mike turn on the
+  # same thread. 900s mirrors dispatch.sh's TIMEOUT default (600s) with headroom for
+  # quant-skeptic's deeper multi-step review (7 attacks + recompute) vs a typical dispatch.
+  _deadline_s="${VERIFY_FINDING_TIMEOUT_S:-900}"
+  _started_epoch="$(date +%s)"
   python3 "$ROOT/bin/mike_json.py" job-set "$JOBS_DIR" "$job_id" \
     job_id="$job_id" from="${DISPATCH_FROM:-Mike}" to="$REVIEWER_ID" status=running \
-    started_at="$(date +%s)" logfile="$log" discord_thread_id="$_verify_src_tid" \
+    started_at="$_started_epoch" deadline=$((_started_epoch + _deadline_s)) \
+    logfile="$log" discord_thread_id="$_verify_src_tid" \
     dispatcher_pid="$$" prompt_summary="VERIFY: $finding_topic" >/dev/null
 fi
 

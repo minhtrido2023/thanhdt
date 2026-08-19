@@ -1144,10 +1144,14 @@ def cmd_job_write_scope_conflict(a):
     sys.exit(0 if found else 1)
 
 
+HB_LIVE_BOUND_S = int(os.environ.get("MIKE_HB_LIVE_BOUND_S", "600"))
+
+
 def cmd_job_live_for_thread(a):
     """job-live-for-thread <jobs_dir> <from_agent> <thread_id> — print job_id (one per line)
-    of every job where from==<from_agent>, discord_thread_id==<thread_id>, and status is
-    'running' or 'retrying'. Exit 0 if any printed, 1 if none.
+    of every job where from==<from_agent>, discord_thread_id==<thread_id>, status is
+    'running' or 'retrying', AND the job is not a stale zombie (see bound below). Exit 0 if
+    any printed, 1 if none.
 
     Purpose (F2, 2026-08-19, hooks/stop.sh circuit breaker): a turn is about to end on a
     Discord thread that has an async job still in flight, dispatched by <from_agent> — the
@@ -1156,8 +1160,18 @@ def cmd_job_live_for_thread(a):
     only 'running'/'retrying' count as 'someone should still be watching this' — the other
     LIVE_STATUSES (usage_limited, provider_fallback, maxturns_pending) are parked states
     with their OWN separate resume mechanism (bus/pending_resumes/), not a live worker
-    waiting on a wakeup."""
+    waiting on a wakeup.
+
+    Staleness bound (arch-reviewer audit, coord-mechanism-08-19): a job record that is stuck
+    at status=running forever (e.g. a crashed watcher, or a --bg record created with no
+    `deadline` so job-reap can never close it) must NOT trip this breaker on every future
+    turn just because its status field never advanced. HB_FRESH_S (dispatch.sh) already
+    calibrates 600s as 'fresh enough to mean the agent is alive' fleet-wide — reused here via
+    MIKE_HB_LIVE_BOUND_S. A job counts as live only if its last AGENT heartbeat is within
+    that window, OR it has no heartbeat yet but was started within that window (a brand-new
+    dispatch legitimately has no heartbeat yet)."""
     jobs_dir, from_agent, thread_id = a[0], a[1], a[2]
+    n = now_epoch()
     found = 0
     for o in _load_jobs(jobs_dir):
         if o.get("from") != from_agent:
@@ -1166,6 +1180,13 @@ def cmd_job_live_for_thread(a):
             continue
         if o.get("status") not in ("running", "retrying"):
             continue
+        age = _hb_age(o, n, agent_only=True)
+        if age == "-":
+            started_age = n - _as_int(o.get("started_at"), n)
+            if started_age > HB_LIVE_BOUND_S:
+                continue   # no heartbeat ever, and not a fresh dispatch -> zombie, not live
+        elif _as_int(age, HB_LIVE_BOUND_S + 1) > HB_LIVE_BOUND_S:
+            continue       # heartbeat gone stale -> zombie, not live
         print(o.get("job_id", "?"))
         found += 1
     sys.exit(0 if found else 1)
