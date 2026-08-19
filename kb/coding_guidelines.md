@@ -394,8 +394,19 @@ mặc định"; `DNSEBroker.get_cash()` **không** phải mặc định an toàn
 
 | Câu hỏi | Field ĐÚNG | Dùng ở | Sai thì hỏng kiểu gì |
 |---|---|---|---|
-| "Tôi **SỞ HỮU** bao nhiêu vốn?" (cơ sở NAV / mẫu số tính tỷ trọng mục tiêu) | **`totalCash − totalDebt`** | `daily_nav_snapshot.py:449`, `reconcile_equity.py`, `compute_park_trim.py` (mẫu số pool), `compute_active_nav.py` (§cash) | Khai THIẾU NAV đúng bằng tiền bán chưa settle ⇒ under-deploy, hoặc pool co lại đúng bằng lượng vừa bán ⇒ **vòng lặp tự kích bán tiếp** |
+| "Tôi **SỞ HỮU** bao nhiêu vốn?" (cơ sở NAV / mẫu số tính tỷ trọng mục tiêu) | **`totalCash − totalDebt` (+ `egg.totalValue` nếu consumer là NAV/pool, xem dưới)** | `daily_nav_snapshot.py:449`, `reconcile_equity.py`, `compute_park_trim.py` (mẫu số pool), `compute_active_nav.py` (§cash) | Khai THIẾU NAV đúng bằng tiền bán chưa settle ⇒ under-deploy, hoặc pool co lại đúng bằng lượng vừa bán ⇒ **vòng lặp tự kích bán tiếp** |
 | "Tôi **TIÊU ĐƯỢC NGAY** bao nhiêu?" (sức mua đặt lệnh phiên này) | **`ppse.pp0Buy`/`qmaxBuy`**, hoặc `availableCash` khi không gọi được ppse | `DNSEBroker.get_cash()`, `check_plan_funding()`, `executor.py`, `compute_jit_unpark.py` (L2) | Nới lỏng gate tiền ⇒ đặt lệnh không có tiền; hoặc chặn oan plan tự cấp vốn đủ |
+
+**Chiều thứ BA (thêm 2026-08-19, sau sự cố TRIM giả cùng ngày): Trứng vàng (`egg.totalValue`,
+sibling của `stock` trong payload `balances` — xem `kb/data_registry/trading-bot/
+dnse_openapi_v2_calling_guideline.md`) KHÔNG nằm trong `totalCash` VÀ KHÔNG nằm trong
+`availableCash`.** Nó là vốn CHỦ SỞ HỮU thật (thuộc dòng "SỞ HỮU" ở trên) nhưng cần lệnh rút +
+về tài khoản T+1 mới tiêu được (KHÔNG thuộc dòng "TIÊU ĐƯỢC NGAY"). Consumer thuộc dòng "SỞ HỮU"
+PHẢI cộng thêm field này (đã làm ở `compute_active_nav.py`/`daily_nav_snapshot.py` từ 08-18,
+`compute_park_trim.py` từ 08-19 — sự cố xảy ra vì L1 bị bỏ sót khi 2 file kia đã sửa: tiền
+chuyển từ cash sang egg làm pool L1 co lại giả, sinh TRIM oan ~58,7tr cho SpaceX+ZaloPay).
+Consumer thuộc dòng "TIÊU ĐƯỢC NGAY" (`compute_jit_unpark.py` L2, `check_plan_funding()`,
+`executor.py`) **KHÔNG được cộng egg** — đó là nới lỏng gate tiền y hệt lỗi ở dòng trên.
 
 **Vì sao là luật chứ không phải trùng hợp — HAI bug cùng loại trong HAI ngày liên tiếp:**
 `compute_park_trim.py` (mẫu số pool, 2026-08-09, job `Taylor_20260809_150316`, commit `df7d92b4`)

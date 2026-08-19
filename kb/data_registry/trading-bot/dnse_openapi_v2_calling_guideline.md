@@ -24,6 +24,16 @@ này.
 mua thật NGAY bây giờ, gate mua duy nhất đáng tin). Nhầm 3 field này từng gây incident thật
 (bot tưởng hết tiền, ngồi im cả buổi sáng dù thực ra có sức mua).
 
+**Field thứ 4, dễ bị bỏ sót vì nó KHÔNG nằm trong block `stock`** (thêm 2026-08-19, sự cố TRIM
+giả cùng ngày — `mike/kb/coding_guidelines.md` §25): `egg.totalValue` — số dư sản phẩm "Trứng
+vàng" của DNSE, một SIBLING riêng của `stock` trong payload `balances`
+(`{"stock": {...}, "derivative": {...}, "bond": {...}, "egg": {"totalValue": ...}}`), KHÔNG
+cộng vào `totalCash`/`availableCash`. Vốn CHỦ SỞ HỮU thật (đưa vào mọi phép tính "sở hữu bao
+nhiêu" — NAV, mẫu số pool rebalance) nhưng cần lệnh RÚT + về tài khoản T+1 mới thành sức mua
+(KHÔNG đưa vào bất kỳ phép tính "tiêu được ngay" nào — buying-power/funding-gate). Đọc field
+bằng `(bal.get("egg") or {}).get("totalValue")` (payload gốc, TRƯỚC khi thu hẹp về block
+`stock`) — xem `mike/bin/park_holdings.py::read_broker_snapshot()` làm ví dụ tham chiếu.
+
 **Các điểm khác đáng chú ý** (chi tiết đầy đủ trong file gốc):
 - HMAC signing ký trên PATH THÔI (không kèm query string); clock skew >±1 phút → 401/403 dù
   HMAC đúng.
