@@ -230,8 +230,12 @@ def read_broker_snapshot(label, account_no, asof, exec_dir=EXEC_DIR):
         pos = {sym: {"qty": p["total"], "market_price": float(p.get("marketPrice") or 0),
                      "sellable": p.get("sellable", p["total"])}
                for sym, p in raw_pos.items() if p.get("total", 0) > 0}
-        st = (bal[0] if isinstance(bal, list) and bal else bal) or {}
-        st = st.get("stock", st) if isinstance(st, dict) else {}
+        braw = (bal[0] if isinstance(bal, list) and bal else bal) or {}
+        # Trứng vàng — sibling của "stock" trong payload gốc (giống compute_active_nav.py §cash),
+        # phải đọc TRƯỚC khi st bị thu hẹp về block "stock" ở dòng dưới.
+        egg_value = float((braw.get("egg") or {}).get("totalValue") or 0) \
+            if isinstance(braw, dict) else 0.0
+        st = braw.get("stock", braw) if isinstance(braw, dict) else {}
         cash = float(st.get("availableCash") or 0)   # tiền TIÊU ĐƯỢC ngay (L2 dùng)
         _zero = (_stock_block_all_zero(st) or _cash_fields_all_zero(st)
                  or _cash_fields_inconsistent(st))
@@ -239,6 +243,7 @@ def read_broker_snapshot(label, account_no, asof, exec_dir=EXEC_DIR):
                            "total_cash_vnd": None if _zero else _f_or_none(st.get("totalCash")),
                            "dividend_receiving_vnd": _f_or_none(st.get("cashDividendReceiving")),
                            "total_debt_vnd": None if _zero else _f_or_none(st.get("totalDebt")),
+                           "egg_assets_vnd": egg_value,
                            "balance_all_zero": _zero,
                            "ts": dt.datetime.now(ICT).isoformat(timespec="seconds")}
 
@@ -247,6 +252,7 @@ def read_broker_snapshot(label, account_no, asof, exec_dir=EXEC_DIR):
         raise SystemExit(f"[park_holdings] không có {path} để đối soát tại asof={asof}")
     pos, cash, ts_pos, ts_bal = {}, None, None, None
     total_cash = div_recv = total_debt = None
+    egg_assets = 0.0
     all_zero = False
     for line in open(path, encoding="utf-8"):
         try:
@@ -289,12 +295,16 @@ def read_broker_snapshot(label, account_no, asof, exec_dir=EXEC_DIR):
                 total_cash = None if all_zero else _f_or_none(st.get("totalCash"))
                 div_recv = _f_or_none(st.get("cashDividendReceiving"))
                 total_debt = None if all_zero else _f_or_none(st.get("totalDebt"))
+                # Trứng vàng — sibling của "stock" trong payload gốc, cùng bản ghi balances.
+                egg_assets = float((payload.get("egg") or {}).get("totalValue") or 0) \
+                    if isinstance(payload, dict) else 0.0
     if not pos:
         raise SystemExit(f"[park_holdings] {path} không có bản ghi positions nào của account "
                          f"{account_no} — không đối soát được")
     return pos, cash, {"source": os.path.basename(path), "asof": asof,
                        "total_cash_vnd": total_cash, "dividend_receiving_vnd": div_recv,
-                       "total_debt_vnd": total_debt, "balance_all_zero": all_zero,
+                       "total_debt_vnd": total_debt, "egg_assets_vnd": egg_assets,
+                       "balance_all_zero": all_zero,
                        "ts_positions": ts_pos, "ts_balances": ts_bal}
 
 
@@ -587,6 +597,12 @@ def park_holdings(account_label, asof=None, plan_dir=PLAN_DIR, exec_dir=EXEC_DIR
         # tường minh, kể cả None) ⇒ None = DNSE thiếu field thật ⇒ consumer fail-closed.
         "cash_total_vnd": bmeta["total_cash_vnd"] if "total_cash_vnd" in bmeta else cash,
         "cash_dividend_receiving_vnd": bmeta.get("dividend_receiving_vnd"),
+        # Trứng vàng (DNSE egg product) — vốn CHỦ SỞ HỮU thật, cần T+1 rút mới tiêu được nên
+        # KHÔNG vào availableCash/cash_total_vnd (bmeta không có key ⇒ 0.0, vd `broker=` bơm tay
+        # ở selfcheck). Chỉ compute_park_trim.py (L1, "sở hữu bao nhiêu vốn") cộng field này vào
+        # pool — compute_jit_unpark.py (L2, "tiêu được ngay bao nhiêu") CỐ Ý vẫn dùng
+        # availableCash thẳng từ đây, không đọc field này (RANH GIỚI CỨNG §B5 trong file đó).
+        "egg_assets_vnd": bmeta.get("egg_assets_vnd") or 0.0,
         # Nợ margin: pool phải là VỐN CHỦ SỞ HỮU nhàn rỗi, không gồm tiền đi vay (cùng quy ước
         # NAV = totalCash − totalDebt của daily_nav_snapshot.py/reconcile_equity.py). SpaceX là
         # tài khoản margin và ĐÃ từng nợ thật 409,9tr (sự cố 2026-07-03) ⇒ không phải giả định.
