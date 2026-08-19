@@ -1,10 +1,10 @@
 # pt_v22_dt5g — V2.3 = V2.2 (BAL | LAG static + park) + CAPIT v2 on DT5G
 
-*Period*: 2026-06-11 -> 2026-08-17 (0.183y, 48 trading days)
+*Period*: 2026-06-11 -> 2026-08-18 (0.186y, 49 trading days)
 
-*Init NAV*: 50B  |  *Final NAV*: 48.9280B  |  *Total ret*: -2.14%  |  *MaxDD*: -9.77%
+*Init NAV*: 50B  |  *Final NAV*: 48.8619B  |  *Total ret*: -2.28%  |  *MaxDD*: -9.73%
 
-*Books*: BAL 24.5301B | LAG 24.3465B  |  *CAPIT events*: 1
+*Books*: BAL 24.5320B | LAG 24.2785B  |  *CAPIT events*: 1
 
 ## CAPIT washout events
 

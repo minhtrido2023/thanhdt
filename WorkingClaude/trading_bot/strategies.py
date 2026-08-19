@@ -369,7 +369,8 @@ class V23Strategy(StrategyBase):
 
         # Mã có GDKHQ đúng phiên plan này thực thi ⇒ mọi fallback giá LỊCH SỬ trong _price()
         # bị chặn cho riêng chúng (README §8-D3 mục 1). Tra MỘT lần cho toàn bộ mã ứng viên.
-        _plan_date = next_trading_day(signal_date).strftime("%Y-%m-%d")
+        _sig_date = dt.datetime.strptime(str(signal_date)[:10], "%Y-%m-%d").date()
+        _plan_date = next_trading_day(_sig_date).strftime("%Y-%m-%d")
         _ex = self._ex_tickers_for(
             sorted({str(t) for t in paper["positions"]["ticker"]}
                    | {str(r["ticker"]) for _, r in recs.iterrows()}),
