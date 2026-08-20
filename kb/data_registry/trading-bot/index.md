@@ -17,5 +17,6 @@ title: Trading bot / execution (money-path thật)
 | [`trade_plans.md`](trade_plans.md) — data/trade_plans/plan_<account>_<YYYY-MM-DD>.json | CANONICAL |
 | [`trading_bot_accounts.md`](trading_bot_accounts.md) — secrets/trading_bot_accounts.json | CANONICAL |
 | [`trading_rules.md`](trading_rules.md) — data/trading_rules.json | CANONICAL |
+| [`phs_flashapi_evaluation.md`](phs_flashapi_evaluation.md) — PHS FlashAPI (flashapi.phs.vn) go-live evaluation, khác hẳn PHS FLEX cũ | EVALUATION (chưa wire) |
 
 ↩ [Về index tổng](../index.md)
