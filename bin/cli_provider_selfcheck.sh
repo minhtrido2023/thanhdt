@@ -76,7 +76,13 @@ fi
 # run <dispatch args...> — chay dong bo, roi doc argv.bin
 run() {
   rm -f "$SB/argv.bin" "$SB/stdin.bin"
-  ( cd "$MK" && env DISPATCH_CGROUP_DETACH=0 \
+  # `env -u DISCORD_THREAD_ID`: selfcheck nay phai HERMETIC. Chay no TU TRONG mot phien
+  # dispatch (dung luc can no nhat — Wags verify thay doi dispatch.sh) thi bien do duoc
+  # ke thua, `_ambient_thread` bat duoc mot topic that, roi `discord_channel.sh` (da stub
+  # exit 1 o tren) lam dispatch HUY som => CLI stub khong bao gio chay, argv.bin khong ton
+  # tai, va 15/21 ca bao FAIL nhu the co regression. Do that 2026-08-20: cung commit,
+  # co bien => 15/21 FAIL, khong co bien => 21/21 PASS.
+  ( cd "$MK" && env -u DISCORD_THREAD_ID DISPATCH_CGROUP_DETACH=0 \
       DISPATCH_CLAUDE_BIN="$SB/cli_stub.sh" DISPATCH_OPENCODE_BIN="$SB/cli_stub.sh" \
       DISPATCH_FROM=Mike \
       bash "$MK/bin/dispatch.sh" "$@" ) > "$SB/out" 2> "$SB/err"
