@@ -1312,7 +1312,18 @@ làm lại có chủ đích, đừng âm thầm ghi đè mất công sức cũ m
             # Anti-double-reply (MIKE.md §8.4): prompt wake phải bắt đầu bằng claim-reply.
             # Lần fire thứ hai (replay/restart) sẽ bị claim-reply chặn trước khi post.
             local _wake_prompt
-            _wake_prompt="Đầu tiên: $ROOT/bin/jobs.sh claim-reply $job_id → exit 1 → ScheduleWakeup(noop:true,stop:true), DỪNG. exit 0 → [logic poll + post bình thường]. exit 2 → báo job record thiếu, đừng im lặng. exit 3 → job chưa xong (hiếm ở đây vì job đã terminal lúc push), post progress bình thường, KHÔNG claim. Job \`${job_id}\` (${id}) đã hoàn thành: status=done. $_preview"
+            # KHÔNG nhúng $_preview vào prompt wake (bỏ 2026-08-20, Phase 2 của
+            # agents/Mike/research/wakeup_architecture_redesign_20260820.md). $_preview
+            # là `tail -c 500` — cắt theo BYTE, nên chém đôi ký tự UTF-8 nhiều byte và
+            # đẻ lone surrogate; chuỗi đó đi tiếp vào argv → Python → JSON → sqlite của
+            # ccdb và giết CẢ lượt push (3 lần thật: 08-15, 08-19, 08-20 — ca 08-20 còn
+            # xoá mất ladder đang chờ trước khi chết). wake_thread.sh đã sanitize từ
+            # commit 886d9158, nhưng prompt wake KHÔNG CẦN preview: luật MIKE.md §8.3
+            # bắt mọi lượt wake phải đọc job record thật trước khi post, nên preview chỉ
+            # thêm một tầng encoding có thể hỏng mà không thêm thông tin. Preview cho
+            # NGƯỜI đọc vẫn nguyên ở notify_thread.sh phía trên (kênh hiển thị, đã chứng
+            # minh chịu được bytes hỏng).
+            _wake_prompt="Đầu tiên: $ROOT/bin/jobs.sh claim-reply $job_id → exit 1 → ScheduleWakeup(noop:true,stop:true), DỪNG. exit 0 → [logic poll + post bình thường]. exit 2 → báo job record thiếu, đừng im lặng. exit 3 → job chưa xong (hiếm ở đây vì job đã terminal lúc push), post progress bình thường, KHÔNG claim. Job \`${job_id}\` (${id}) đã hoàn thành: status=done. Đọc kết quả từ \`$ROOT/bin/jobs.sh status ${job_id}\` + logfile ghi trong job record ($logfile), đừng đoán từ tóm tắt."
             "$ROOT/bin/wake_thread.sh" "$_tid" \
               "$_wake_prompt" \
               "$job_id" 2>/dev/null || true

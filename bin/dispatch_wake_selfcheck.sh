@@ -113,6 +113,12 @@ assert "wake_thread.sh được gọi đúng 1 lần" "$NWAKE" "1"
 assert "wake gọi đúng thread pinned" "$(echo "$WAKE_LINE" | grep -oP 'thread_id=\K[0-9]+')" "$ARCH_ID"
 assert "prompt wake nêu status=done" "$(echo "$WAKE_LINE" | grep -c 'status=done')" "1"
 assert "prompt wake bắt đầu bằng claim-reply đúng job" "$(echo "$WAKE_LINE" | grep -c "prompt=.*claim-reply $JOB1")" "1"
+# Phase 2 (2026-08-20): prompt wake KHÔNG được nhúng preview log nữa — `tail -c 500`
+# cắt theo BYTE, đẻ lone surrogate và giết cả lượt push (3 ca thật 08-15/19/20). Stub
+# claude in "[claude-stub] ok" vào logfile, nên chuỗi đó xuất hiện trong prompt = preview
+# đã quay lại. Preview cho NGƯỜI vẫn ở notify_thread.sh, không đụng tới.
+assert "prompt wake KHÔNG chứa preview nội dung logfile" "$(echo "$WAKE_LINE" | grep -c "claude-stub")" "0"
+assert "prompt wake chỉ đường đọc kết quả thật (jobs.sh status)" "$(echo "$WAKE_LINE" | grep -c "jobs.sh status $JOB1")" "1"
 
 echo "== CA 2: from=Taylor (agent khác, không phải Mike) ⇒ wake_thread.sh KHÔNG được gọi dù thành công"
 FROM_AGENT=Taylor

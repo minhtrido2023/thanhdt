@@ -93,10 +93,11 @@ def build_root(fake_transport):
     return d
 
 
-def run(root, args):
+def run(root, args, env=None):
     r = subprocess.run(
         ["bash", os.path.join(root, "bin", "wake_thread.sh")] + args,
         capture_output=True, text=True, timeout=30,
+        env=None if env is None else dict(os.environ, **env),
     )
     log_path = os.path.join(root, "logs", "wake_thread_errors.log")
     logtxt = open(log_path, encoding="utf-8").read() if os.path.exists(log_path) else ""
@@ -188,6 +189,25 @@ def main():
     r, _ = run(d3, ["999999002", "hello", "Wags_20260817_191153"])
     line = ok_log(d3).strip()
     check("5 push OK: exit 0", r.returncode == 0, f"rc={r.returncode} stderr={r.stderr!r}")
+    # 5e. Dấu thời gian phải NEO ICT bất kể TZ của tiến trình gọi (§16, thêm 2026-08-20).
+    #     wake_thread.sh chạy cả từ crontab (TZ=ICT) lẫn từ service ccdb (không export TZ);
+    #     logs/wake_thread.log đã có dòng `+00:00` thật lẫn giữa `+07:00`, mà daily_retro.sh
+    #     đếm push success-rate theo tiền tố ngày ICT ⇒ lệch ngày, lệch tỷ lệ.
+    d3b = build_root(FAKE_TRANSPORT_REAL_BODY)
+    run(d3b, ["999999009", "hello", "tzcheck"], env={"TZ": "UTC"})
+    tzline = ok_log(d3b).strip()
+    check(
+        "5e dấu thời gian log NEO +07:00 kể cả khi TZ=UTC",
+        "+07:00" in tzline.split()[0],
+        f"line={tzline!r}",
+    )
+    d3c = build_root(FAKE_TRANSPORT_FAIL)
+    _, errtxt = run(d3c, ["999999010", "hello", "tzcheck"], env={"TZ": "UTC"})
+    check(
+        "5f dấu thời gian log LỖI cũng neo +07:00 khi TZ=UTC",
+        bool(errtxt.strip()) and "+07:00" in errtxt.strip().split()[0],
+        f"err={errtxt.strip()!r}",
+    )
     check(
         "5b push OK: 1 dòng SUCCESS, đủ job_id + thread_id + task_id",
         len(ok_log(d3).splitlines()) == 1
