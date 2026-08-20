@@ -152,7 +152,7 @@ biết, không phải đề xuất cơ chế mới (đã NO-GO, không mở lạ
 ## 2 tài khoản LIVE hiện tại — xem safety core (SpaceX margin, ZaloPay cash-only+excluded DGC).
 
 ## LAG entry EXCLUDE list — kiểm tra TRƯỚC khi đưa mã LAG mới vào plan → `context_planning_ext.md`
-Danh sách hiện tại: IVS, TMG (cả hai loại 2026-07-21). Đọc `context_planning_ext.md` § "LAG entry
+Danh sách hiện tại: **IVS**, **TMG** (cả hai loại 2026-07-21). Đọc `context_planning_ext.md` § "LAG entry
 EXCLUDE list" trước khi đưa BẤT KỲ mã LAG_HI/LAG_LO mới nào vào plan.
 
 ## Trứng vàng DNSE (manual off-book tracking) — ĐÃ RÚT HẾT VĨNH VIỄN cả 2 account (cập nhật 2026-07-23)
