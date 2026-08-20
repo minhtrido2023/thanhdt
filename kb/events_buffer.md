@@ -1585,3 +1585,7 @@
 ## Consolidation 2026-08-20T17:39:57Z
 - [2026-08-20T17:38:08Z] Mike/heartbeat — Mike_20260820_173708: {"status": "still_running", "elapsed_min": 1, "job_id": "Mike_20260820_173708", "source": "watcher"}
 - [2026-08-20T17:39:09Z] Mike/heartbeat — Mike_20260820_173708: {"status": "still_running", "elapsed_min": 2, "job_id": "Mike_20260820_173708", "source": "watcher"}
+
+## Consolidation 2026-08-20T17:40:39Z
+- [2026-08-20T17:40:09Z] Mike/heartbeat — Mike_20260820_173708: {"status": "still_running", "elapsed_min": 3, "job_id": "Mike_20260820_173708", "source": "watcher"}
+- [2026-08-20T17:40:29Z] Mike/finding — daily-retro-2026-08-20-finalized: {"entry": "kb/incidents/retro/retro-2026-08-20.md", "n_incidents": 5, "n_patterns": 2, "verified_by": "Wags", "verify_verdict": "GAPS FOUND", "gaps_fixed": ["bổ sung sự cố #5 order_book_execution_shadow bị bỏ sót ở draft gốc", "bỏ quy tội cá nhân ở cột Nguồn gốc sự cố #3, đổi sang mô tả cơ chế theo quy ước blameless"], "commit": "5effd2ad", "index_updated": true, "working_memory_cleaned": true, "consolidate_ran": true, "kb_version": 2424, "posted_to": "trading_daily", "draft_file_deleted": true, "open_followups": ["tạo kb/incidents/ entry riêng cho batch-id revert", "thêm retry/guard cho compute_park_trim.py EOD-closure window", "6 selfcheck cleanup gap glob (rủi ro thấp)", "theo dõi Pattern C có tái diễn ngày mai không"]}
