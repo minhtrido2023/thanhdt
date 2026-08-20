@@ -1315,3 +1315,9 @@
 
 ## Consolidation 2026-08-20T11:07:01Z
 - [2026-08-20T10:41:36Z] Mike/answer — selfcheck-red: lag_forensic_filter_selfcheck.py: {"status": "closed", "resolution": "live file kb/context_planning_mini.md line 155 da co IVS TMG in dam dung format. Selfcheck 33/33 PASS tren HEAD. Khong can ap .proposed.", "decided_by": "user"}
+
+## Consolidation 2026-08-20T12:07:02Z
+- [2026-08-20T12:06:51Z] DollarBill/heartbeat — DollarBill_20260820_120550: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20260820_120550", "source": "watcher"}
+- [2026-08-20T12:06:52Z] DollarBill/heartbeat — DollarBill_20260820_120551: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20260820_120551", "source": "watcher"}
+- [2026-08-20T11:11:20Z] Winston/finding — new-listings-daily: {"date": "2026-08-20", "lookback_days": 90, "total_new": 1, "needs_manual_rating": 0, "fresh_ipo": 0, "research_queue": [], "snapshot": "/home/trido/thanhdt/WorkingClaude/data/new_listings.csv", "note": "0 mã mới < 20Q lịch sử → cần 8L manual rating. Taylor flag để đọc bản cáo bạch + tạo override documented reason+expiry."}
+- [2026-08-20T11:40:07Z] Winston/status — corp-action-scan-daily: {"scanned_universe": "tav2_bq.ticker_prune", "candidates_this_run": 0, "fresh_alerts_this_run": 0, "resolved_since_last_run": [], "still_pending_count": 0, "still_pending": [], "stale_pending_over_7d": []}
