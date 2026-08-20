@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 # dispatch.sh <agent_id> "prompt" [--bg] [--timeout SEC] [--retries N] [--model NAME] [--effort LEVEL] [--max-turns N] [--write-scope SCOPE]
-#              [--batch-id ID] [--batch-size N]
 #
 # Run a HEADLESS Claude session as the specified agent. The session inherits the
 # agent's CLAUDE.md + hooks (KB context injection, bus writes, heartbeat).
@@ -123,8 +122,6 @@ FORCE_TID=""
 MAX_TURNS=""
 PROVIDER=""
 WRITE_SCOPE=""
-BATCH_ID=""
-BATCH_SIZE=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --bg) bg="--bg" ;;
@@ -155,22 +152,6 @@ while [ $# -gt 0 ]; do
     --model=*) MODEL="${1#*=}" ;;
     --effort) EFFORT="${2:?--effort needs a value}"; shift ;;
     --effort=*) EFFORT="${1#*=}" ;;
-    # --batch-id / --batch-size: một CALLER fan-out N job cùng lúc (vd bq_freshness_check.sh
-    # dispatch DollarBill cho MỖI account live) khai báo rằng N job này là MỘT đợt ⇒ chỉ ĐÚNG
-    # MỘT lượt wake_thread.sh cho cả đợt, do job terminal cuối cùng bắn. Bỏ 2 cờ này ⇒ hành vi
-    # y hệt trước: mỗi job tự bắn wake của nó. Xem bin/batch_wake.sh (RCA lỗi #1, 2026-08-20).
-    # --batch-size = số job caller ĐỊNH fan-out; thiếu nó thì job #1 xong trước khi job #2 kịp
-    # đăng ký sẽ tưởng mình là người cuối và bắn sớm — đúng lỗi đang vá.
-    --batch-id) BATCH_ID="${2:?--batch-id needs a value}"; shift ;;
-    --batch-id=*) BATCH_ID="${1#*=}"
-                  [ -n "$BATCH_ID" ] || { echo "ERROR: --batch-id= rỗng (biến chưa set?)" >&2; exit 1; } ;;
-    # Guard ĐỐI XỨNG với --batch-id (arch-reviewer vòng 6, #5). `--batch-size=$VAR` với VAR
-    # chưa set ⇒ chuỗi rỗng ⇒ `${BATCH_SIZE:-0}` = 0 ⇒ expected=0 ⇒ MẤT HẲN lớp chống đua đăng
-    # ký, mà không một dòng log nào nói vì sao. Rác không phải số cũng vậy: _as_int() ở
-    # mike_json.py quy về 0, cùng hậu quả, cũng im. Cả hai phải CHẾT TO ngay tại chỗ gõ sai.
-    --batch-size) BATCH_SIZE="${2:?--batch-size needs a value}"; shift ;;
-    --batch-size=*) BATCH_SIZE="${1#*=}"
-                    [ -n "$BATCH_SIZE" ] || { echo "ERROR: --batch-size= rỗng (biến chưa set?)" >&2; exit 1; } ;;
     --write-scope) WRITE_SCOPE="${2:?--write-scope needs a value}"; shift ;;
     --write-scope=*) WRITE_SCOPE="${1#*=}"
                      [ -n "$WRITE_SCOPE" ] || { echo "ERROR: --write-scope= rỗng (biến chưa set?)" >&2; exit 1; } ;;
@@ -178,22 +159,6 @@ while [ $# -gt 0 ]; do
   esac
   shift
 done
-
-# Số học, không phải chuỗi: `--batch-size abc` / `--batch-size -1` đi tới _as_int() rồi lặng lẽ
-# thành 0 (= "không khai báo"). Chặn tại parse để lỗi gõ nổ ở CHỖ GÕ, không nổ thành một lượt
-# wake trùng vài chục phút sau (arch-reviewer vòng 6, #5).
-if [ -n "$BATCH_SIZE" ] && ! printf '%s' "$BATCH_SIZE" | grep -qE '^[0-9]+$'; then
-  echo "ERROR: --batch-size '$BATCH_SIZE' không hợp lệ (phải là số nguyên không âm)" >&2
-  exit 1
-fi
-# --batch-size KHÔNG kèm --batch-id là lệnh VÔ NGHĨA và im lặng: không có batch thì không có
-# gì để đếm, cờ bị bỏ qua sạch, caller tưởng mình đã gộp wake trong khi vẫn N push như cũ
-# (arch-reviewer vòng 7, NIT-2). Đúng hình dạng "guard đối xứng" mà #5 đặt ra: sai thì chết
-# tại chỗ gõ, đừng để nó thành một lượt wake trùng vài chục phút sau.
-if [ -n "$BATCH_SIZE" ] && [ -z "$BATCH_ID" ]; then
-  echo "ERROR: --batch-size cần đi kèm --batch-id (thiếu batch-id thì cờ này bị bỏ qua im lặng)" >&2
-  exit 1
-fi
 
 # Per-agent BASE-timeout default — applies only when the caller passed no --timeout.
 # DollarBill plan-T+1 jobs do 10-20+ min of real work, so the generic 600s base alone
@@ -518,9 +483,6 @@ _maybe_schedule_usage_resume() {
   printf '%s' "$prompt" | python3 "$ROOT/bin/mike_json.py" pending-resume-set \
     "$ROOT/bus/pending_resumes/${job_id}.json" "$id" "$from" "$job_id" "$resume_at" "$((n + 1))" \
     "usage_limit" "${MODEL:-}" "$EFFORT" "" "$PROVIDER"
-  # ĐỖ XE: có `ended_at` nhưng status CHƯA terminal, và wrapper `return 0` mà KHÔNG gọi
-  # `_wake_now` (lượt resume là job KHÁC). mike_json `_batch_member_blocks` dựa ĐÚNG vào
-  # dấu hiệu đó để không chờ một member sẽ-không-bao-giờ-bắn — đổi ở đây thì sửa cả ở đó.
   JSET status=usage_limited ended_at="$(date +%s)" \
        result_summary="account usage limit — auto-resume scheduled at epoch $resume_at (attempt $((n + 1))/$cap)"
   local resume_ict; resume_ict="$(TZ=Asia/Ho_Chi_Minh date -d "@$resume_at" '+%H:%M %d/%m' 2>/dev/null || echo '?')"
@@ -556,9 +518,6 @@ _maybe_fallback_provider_on_usage_limit() {
   local lf="$1" ef="${2:-}"
   [ -n "${PROVIDER:-}" ] && [ "$PROVIDER" != "claude" ] || return 1
   _looks_like_usage_limit "$lf" "$ef" || return 1
-  # ĐỖ XE: có `ended_at` nhưng status CHƯA terminal, và wrapper `return 0` mà KHÔNG gọi
-  # `_wake_now` (lượt resume là job KHÁC). mike_json `_batch_member_blocks` dựa ĐÚNG vào
-  # dấu hiệu đó để không chờ một member sẽ-không-bao-giờ-bắn — đổi ở đây thì sửa cả ở đó.
   JSET status=provider_fallback ended_at="$(date +%s)" \
        result_summary="provider '$PROVIDER' hết usage/rate limit — fallback NGAY sang claude (quota độc lập, không chờ)"
   local _fb_argv=("$ROOT/bin/dispatch.sh" "$id" "[FALLBACK provider->claude sau usage-limit, job gốc=$job_id] $prompt" --bg --timeout "$TIMEOUT")
@@ -621,9 +580,6 @@ _maybe_schedule_maxturns_resume() {
   printf '%s' "$prompt" | python3 "$ROOT/bin/mike_json.py" pending-resume-set \
     "$ROOT/bus/pending_resumes/${job_id}.json" "$id" "$from" "$job_id" "$resume_at" "$((n + 1))" \
     "max_turns" "${MODEL:-}" "$EFFORT" "$bumped" "$PROVIDER"
-  # ĐỖ XE: có `ended_at` nhưng status CHƯA terminal, và wrapper `return 0` mà KHÔNG gọi
-  # `_wake_now` (lượt resume là job KHÁC). mike_json `_batch_member_blocks` dựa ĐÚNG vào
-  # dấu hiệu đó để không chờ một member sẽ-không-bao-giờ-bắn — đổi ở đây thì sửa cả ở đó.
   JSET status=maxturns_pending ended_at="$(date +%s)" \
        result_summary="hết turn budget (--max-turns=$MAX_TURNS) — auto-resume ngay với --max-turns=$bumped (lần thử #$((n + 1))/$cap)"
   "$ROOT/bin/notify.sh" "[dispatch] $id: hết turn budget (job $job_id, --max-turns=$MAX_TURNS) — KHÔNG PHẢI lỗi nội dung. Tự động resume NGAY với trần cao hơn (--max-turns=$bumped, lần thử #$((n + 1))/$cap)." 2>/dev/null || true
@@ -1272,59 +1228,8 @@ JSET job_id="$job_id" from="$from" to="$id" status=running attempt=1 dispatcher_
 MIKE_JOB_OWNER="$job_id" python3 "$ROOT/bin/mike_json.py" job-pin-log "$JOBS_DIR" "$job_id" \
   >/dev/null 2>&1 || true
 
-# BATCH: ghi job này vào bus/batches/<batch_id>.json ngay khi record vừa ra đời, TRƯỚC khi
-# worker chạy — nếu đăng ký sau, một job chạy nhanh có thể xong trước khi mình kịp có tên
-# trong batch. Đăng ký hỏng KHÔNG BAO GIỜ được chặn dispatch: batch-claim-wake sẽ trả
-# "KHÔNG BIẾT" (exit 3) và batch_wake.sh quay về wake đơn lẻ như trước — mất dedupe, không
-# mất wake.
-# CHỈ nhánh --bg (arch-reviewer S3, vòng 2): `_wake_now` chỉ tồn tại trong `_bg_wrapper`, nên
-# một job dispatch ĐỒNG BỘ đăng ký vào batch sẽ không bao giờ bắn được wake mà vẫn CHẶN anh em
-# tới `deadline + 300` (với DollarBill là ~35 phút) — chặn để đổi lấy đúng con số 0.
-if [ -n "$BATCH_ID" ] && [ "$bg" = "--bg" ]; then
-  if ! printf '%s' "$BATCH_ID" | grep -qE '^[A-Za-z0-9._-]{1,120}$'; then
-    echo "ERROR: --batch-id '$BATCH_ID' không hợp lệ (chỉ [A-Za-z0-9._-], ≤120 ký tự)" >&2
-    exit 1
-  fi
-  # JSET batch_id CHỈ khi đăng ký THÀNH CÔNG (arch-reviewer vòng 3, nit 4). Gắn batch_id cho
-  # một job KHÔNG nằm trong members là nói dối hai tầng cùng lúc: wakeup_reconcile.py hỏi
-  # batch_in_flight() và được trả True (anh em còn chạy) ⇒ nó KHÔNG cứu job này, trong khi job
-  # này lại không phải member nên chẳng ai bắn thay ⇒ nếu lượt wake đơn lẻ của nó hỏng thì
-  # LƯỚI CUỐI đã bị chính cái nhãn sai bịt miệng. Không gắn nhãn ⇒ đường cũ y nguyên.
-  if python3 "$ROOT/bin/mike_json.py" batch-register "$ROOT/bus/batches" "$BATCH_ID" "$job_id" \
-       "${BATCH_SIZE:-0}" >/dev/null 2>&1; then
-    JSET batch_id="$BATCH_ID" || true
-  else
-    # stderr của dispatch.sh KHÔNG đủ: bq_freshness_check.sh gọi với `2>/dev/null` ⇒ cảnh báo
-    # rơi vào hố đen, mất dedupe mà không để lại dấu vết nào. Ghi thêm event bus để lần sau
-    # điều tra "sao hôm đó lại 2 lượt wake" có chỗ mà tra.
-    echo "WARNING: không đăng ký được job vào batch $BATCH_ID — job vẫn chạy, chỉ mất dedupe wake" >&2
-    "$ROOT/bin/append_event.sh" "$from" error "batch-register-failed" \
-      "{\"job_id\":\"$job_id\",\"batch_id\":\"$BATCH_ID\",\"impact\":\"mất dedupe wake — job này bắn wake đơn lẻ, có thể trùng với wake gộp của batch\"}" \
-      "$job_id" >/dev/null 2>&1 || true
-  fi
-fi
-
 if [ "$bg" = "--bg" ]; then
   # Background wrapper: run agent (with timeout + retry) → consolidate → notify
-  # _wake_now <thread_id> <prompt đơn-lẻ> — MỘT cửa duy nhất cho mọi lượt push wake của
-  # _bg_wrapper. Không có --batch-id ⇒ gọi thẳng wake_thread.sh, y hệt hành vi từ 2026-08-15.
-  # Có --batch-id ⇒ batch_wake.sh quyết định: chỉ job terminal CUỐI CÙNG của đợt được bắn, và
-  # nó bắn MỘT prompt gộp cho cả đợt (RCA 2026-08-20 lỗi #1 — N job = N phiên Mike song song).
-  # Fail-soft cả hai nhánh: lỗi ở đây không bao giờ được làm hỏng đường hoàn tất của job.
-  _wake_now() {
-    if [ -n "${BATCH_ID:-}" ]; then
-      # 2>/dev/null, KHÔNG redirect vào file log (arch-reviewer vòng 5, BLOCKER — bản vòng 4
-      # sai ở đúng đây). Bash KHÔNG CHẠY LỆNH khi không mở được file redirect, mà `|| true`
-      # nuốt mã lỗi: đo end-to-end với `chmod 000 logs/wake_thread.log` ⇒ 0 lượt wake cho cả
-      # đợt, câm tuyệt đối (stderr của bash cũng vào /dev/null của _detached_spawn). Không bao
-      # giờ để khả năng GHI LOG gác cổng một lượt wake. batch_wake.sh tự append chẩn đoán của
-      # nó vào logs/wake_thread.log theo kiểu fail-soft — script sinh ra chẩn đoán thì sở hữu
-      # việc ghi, đúng mẫu bin/wake_thread.sh:134.
-      "$ROOT/bin/batch_wake.sh" "$BATCH_ID" "$job_id" "$1" "$2" >/dev/null 2>/dev/null || true
-    else
-      "$ROOT/bin/wake_thread.sh" "$1" "$2" "$job_id" 2>/dev/null || true
-    fi
-  }
   _bg_wrapper() {
     local max_attempts=$((RETRIES + 1))
     local attempt=1 rc=0 astart
@@ -1419,7 +1324,9 @@ làm lại có chủ đích, đừng âm thầm ghi đè mất công sức cũ m
             # NGƯỜI đọc vẫn nguyên ở notify_thread.sh phía trên (kênh hiển thị, đã chứng
             # minh chịu được bytes hỏng).
             _wake_prompt="Đầu tiên: $ROOT/bin/jobs.sh claim-reply $job_id → exit 1 → ScheduleWakeup(noop:true,stop:true), DỪNG. exit 0 → [logic poll + post bình thường]. exit 2 → báo job record thiếu, đừng im lặng. exit 3 → job chưa xong (hiếm ở đây vì job đã terminal lúc push), post progress bình thường, KHÔNG claim. Job \`${job_id}\` (${id}) đã hoàn thành: status=done. Đọc kết quả từ \`$ROOT/bin/jobs.sh status ${job_id}\` + logfile ghi trong job record ($logfile), đừng đoán từ tóm tắt."
-            _wake_now "$_tid" "$_wake_prompt"
+            "$ROOT/bin/wake_thread.sh" "$_tid" \
+              "$_wake_prompt" \
+              "$job_id" 2>/dev/null || true
           fi
         fi
         # Auto-callback: notify the caller agent so it can pick up the result without manual prompt.
@@ -1490,7 +1397,9 @@ làm lại có chủ đích, đừng âm thầm ghi đè mất công sức cũ m
       if [ "$from" = "Mike" ]; then
         local _wake_prompt
         _wake_prompt="Đầu tiên: $ROOT/bin/jobs.sh claim-reply $job_id → exit 1 → ScheduleWakeup(noop:true,stop:true), DỪNG. exit 0 → [logic poll + post bình thường]. exit 2 → báo job record thiếu, đừng im lặng. exit 3 → job chưa xong (hiếm ở đây vì job đã terminal lúc push), post progress bình thường, KHÔNG claim. Job \`${job_id}\` (${id}) $why. Xem log: $logfile"
-        _wake_now "$_tid" "$_wake_prompt"
+        "$ROOT/bin/wake_thread.sh" "$_tid" \
+          "$_wake_prompt" \
+          "$job_id" 2>/dev/null || true
       fi
     fi
     # Also notify the caller agent on failure so it can decide to retry or escalate.
@@ -1534,7 +1443,7 @@ làm lại có chủ đích, đừng âm thầm ghi đè mất công sức cũ m
   # function and everything it closes over (JSET, SUMMARY, and the vars they use)
   # must be exported and re-entered via `bash -c`. Verified empirically: a plain
   # `setsid _bg_wrapper &` silently fails to find "_bg_wrapper" as a command.
-  export -f _wake_now _bg_wrapper _job_watcher JSET SUMMARY _agent_thread_override _ambient_thread _circuit_record \
+  export -f _bg_wrapper _job_watcher JSET SUMMARY _agent_thread_override _ambient_thread _circuit_record \
             _maybe_schedule_usage_resume _looks_like_usage_limit _parse_reset_epoch \
             _current_resume_count _job_thread_id _hb_aware_timeout \
             _maybe_schedule_maxturns_resume _looks_like_max_turns _bumped_max_turns \
@@ -1544,7 +1453,7 @@ làm lại có chủ đích, đừng âm thầm ghi đè mất công sức cũ m
          CIRCUIT_DIR CIRCUIT_THRESHOLD CIRCUIT_COOLDOWN MODEL_FLAG EFFORT_FLAG MAX_EXT HB_FRESH_S \
          MAX_TURNS MAXTURNS_CEILING MODEL EFFORT \
          PROVIDER CLI_BIN AGENT_DIR CLI_SUPPORTS_TURNS CLI_USAGE_PROBE CLI_MAXTURNS_PAT CIRCUIT_KEY CLI_PROFILE \
-         PROFILE_PROMPT_FILE BATCH_ID BATCH_SIZE
+         PROFILE_PROMPT_FILE
   # systemd-run --user needs the user manager socket; cron strips XDG_RUNTIME_DIR.
   export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
   _detach_ok=0

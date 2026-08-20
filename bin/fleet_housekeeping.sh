@@ -40,7 +40,6 @@ Category DELETE (đã xác minh nội dung, xem báo cáo §2):
   empty      logs/*.log|*.err size 0
   errnoise   logs/*.err chỉ chứa warning stdin của harness
   jobtmp     bus/jobs/*.json.tmp mồ côi (atomic-write bị kill)
-  batchstate bus/batches/*.json|*.lock >30d (state điều phối wake của 1 đợt fan-out)
   pycache    __pycache__/ (regenerable, đã gitignore cả 2 repo)
 
 Category ARCHIVE (đảo ngược được, giữ nguyên nội dung):
@@ -61,7 +60,7 @@ for a in "$@"; do
   esac
 done
 
-DEFAULT_CATS="pid empty errnoise jobtmp batchstate pycache dispatchlog toollog registry rotate"
+DEFAULT_CATS="pid empty errnoise jobtmp pycache dispatchlog toollog registry rotate"
 want() {
   if [ -n "$ONLY" ]; then case ",$ONLY," in *",$1,"*) return 0 ;; *) return 1 ;; esac; fi
   case " $DEFAULT_CATS " in *" $1 "*) return 0 ;; *) return 1 ;; esac
@@ -256,20 +255,6 @@ if want jobtmp; then
     elif [ -f "$arch" ]; then do_delete "$f" "record thật đã archive: $(basename "$arch")"
     else say "  GIỮ (không có bản đầy đủ ở hot lẫn archive — .tmp là dấu vết DUY NHẤT): $f"; fi
   done < <(find "$ROOT/bus/jobs" -maxdepth 1 -type f -name '*.json.tmp' -mtime +7 2>/dev/null)
-fi
-
-# ── 4b. batchstate — bus/batches/<batch_id>.json (dispatch.sh --batch-id) ────
-# Nội dung: members + wake_claimed_by của MỘT đợt fan-out (bin/batch_wake.sh, 2026-08-20).
-# Vòng đời thật của nó tính bằng PHÚT (từ lúc dispatch tới lúc job cuối bắn wake); giữ 30d là
-# thừa thãi cho việc soi lại sự cố. Không có consumer nào đọc file cũ hơn thế: batch_id có
-# timestamp nên không bao giờ tái sử dụng, và mọi dấu vết bền đã nằm ở job record
-# (`batch_id=`) + logs/wake_thread.log. 2 file/ngày × ~200B nên đây là chống rò rỉ dài hạn,
-# không phải dọn dung lượng.
-if want batchstate; then
-  hdr "batchstate — bus/batches/* >30d (đợt fan-out đã đóng từ lâu)"
-  while IFS= read -r f; do
-    do_delete "$f" "batch state đã hết vòng đời (job record giữ batch_id, đây chỉ là khoá điều phối)"
-  done < <(find "$ROOT/bus/batches" -maxdepth 1 -type f \( -name '*.json' -o -name '*.json.lock' -o -name '*.json.tmp' \) -mtime +30 2>/dev/null)
 fi
 
 # ── 5. pycache — regenerable theo định nghĩa ─────────────────────────────────

@@ -100,17 +100,6 @@ if [ "$N" -eq 0 ]; then
   exit 0
 fi
 
-# BATCH: cùng lý do và cùng cơ chế với check_report_cadence.sh — N checkpoint quá hạn = N job
-# Taylor --bg, CÙNG $TRADING_REPORT_THREAD, from=Mike ⇒ không gộp thì N lượt wake vào một
-# thread ⇒ phiên Mike song song, post trùng (RCA plan_pipeline_3loi_rca_20260820.md lỗi #1;
-# arch-reviewer vòng 6, #1). $N đếm xong TRƯỚC vòng lặp nên `expected` là số thật.
-# Ở file này dispatch fail được xử lý tường minh (`continue` khi DRC≠0) ⇒ member đó KHÔNG đăng
-# ký ⇒ `expected` cao hơn số member thật ⇒ anh em nhường thêm tối đa BATCH_REG_GRACE_S (600s)
-# rồi bắn. Trễ có trần, không nuốt lượt. CỐ Ý không hạ $N sau mỗi lần fail: $N phải cố định
-# TRƯỚC vòng lặp, còn `expected` trong batch record chỉ tăng (max) chứ không giảm.
-PAPER_BATCH_ID="papercheckpoint_$(TZ='Asia/Ho_Chi_Minh' date +%Y%m%d_%H%M%S)_$$"
-echo "paper_checkpoint_escalation: [batch] wake gộp cho $N job Taylor — batch_id=$PAPER_BATCH_ID"
-
 echo "$PLAN" | python3 -c "
 import json, sys
 for a in json.load(sys.stdin):
@@ -130,8 +119,7 @@ for a in json.load(sys.stdin):
   # ${OWNER}", question bị hạ xuống WARN-ONLY nên không wags_autofix nào đi triage, và
   # cooldown chặn escalate lại — đúng cái detector mà chính commit này vừa gỡ đi
   # (arch-reviewer NEEDS_CHANGES high, coord-2026-08-05; pattern monitoring-fix-creates-silence).
-  DISPATCH_OUT="$("$ROOT/bin/dispatch.sh" Taylor "$PROMPT" --thread "$TRADING_REPORT_THREAD" --bg --model opus --effort high --timeout 2400 \
-    --batch-id "$PAPER_BATCH_ID" --batch-size "$N" 2>&1)"
+  DISPATCH_OUT="$("$ROOT/bin/dispatch.sh" Taylor "$PROMPT" --thread "$TRADING_REPORT_THREAD" --bg --model opus --effort high --timeout 2400 2>&1)"
   DRC=$?
   printf '%s\n' "$DISPATCH_OUT" | tail -5
 

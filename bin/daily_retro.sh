@@ -112,19 +112,6 @@ _wake_read_rotated() {
 _wake_ok="$(_wake_read_rotated "$ROOT/logs/wake_thread.log" | grep -c "^$TODAY.*wake_thread: SUCCESS" || true)"
 _wake_err="$(_wake_read_rotated "$ROOT/logs/wake_thread_errors.log" | grep -c "^$TODAY" || true)"
 _wake_rescued="$(_wake_read_rotated "$ROOT/logs/wakeup_reconcile.log" | grep -c "^$TODAY.*RESCUED" || true)"
-# TẦNG BATCH cũng phải có người đếm (arch-reviewer vòng 6, #4). `bin/batch_wake.sh` ghi chẩn
-# đoán của nó vào CÙNG wake_thread.log, nhưng trước dòng này KHÔNG checker nào đọc — tức hai
-# đường thoái hoá im lặng nhất của cơ chế gộp wake không có ai nhìn:
-#   · `KHÔNG BIẾT`  = batch-claim-wake thoát 1/2 mà KHÔNG có marker BATCH-SILENT-OK ⇒ mike_json.py
-#     hỏng/thiếu/đổi subcommand. Đã fail-safe về wake ĐƠN LẺ (không mất lượt) nhưng nghĩa là cơ
-#     chế dedupe ĐÃ CHẾT — post trùng sẽ quay lại, đúng bug mà cả kiến trúc này sinh ra để diệt.
-#   · `mktemp HỎNG` = không có chỗ chứa bằng chứng im-lặng ⇒ MỌI lượt rơi về wake đơn lẻ ⇒ N
-#     member = N push = bug GỐC sống lại nguyên vẹn.
-# Cả hai đều KHÔNG làm `push_err` tăng (wake vẫn thành công), nên không có bộ đếm riêng thì
-# chúng vô hình sau lưng một dòng retro "tầng edge phủ đủ". Dấu thời gian của `_log` neo cứng
-# ICT (`date -Iseconds`) nên `^$TODAY` khớp đúng, cùng quy ước với các bộ đếm trên.
-_batch_unknown="$(_wake_read_rotated "$ROOT/logs/wake_thread.log" | grep -c "^$TODAY.*batch_wake: KHÔNG BIẾT" || true)"
-_batch_mktemp="$(_wake_read_rotated "$ROOT/logs/wake_thread.log" | grep -c "^$TODAY.*batch_wake: mktemp HỎNG" || true)"
 # Hai số dưới đây tồn tại để KHÔNG được phép suy "tầng edge khoẻ" từ `rescued=0` (arch-reviewer
 # N2, vòng 4). Reconciler MÙ cả ngày (abort mọi chu kỳ vì ccdb chết) và reconciler CHẾT HẲN
 # (cron bị gỡ) đều cho rescued=0 — tức dòng trấn an mạnh nhất lại được in ra đúng lúc lưới an
@@ -141,8 +128,6 @@ _wake_blind="$(_wake_read_rotated "$ROOT/logs/wakeup_reconcile_cron.log" | grep 
 [ -n "${_wake_rescued:-}" ] || _wake_rescued=0
 [ -n "${_wake_cycles:-}" ] || _wake_cycles=0
 [ -n "${_wake_blind:-}" ] || _wake_blind=0
-[ -n "${_batch_unknown:-}" ] || _batch_unknown=0
-[ -n "${_batch_mktemp:-}" ] || _batch_mktemp=0
 _wake_total=$((_wake_ok + _wake_err))
 if [ "$_wake_total" -gt 0 ]; then
   _wake_rate="$(awk -v a="$_wake_ok" -v b="$_wake_total" 'BEGIN{printf "%.1f%%", 100*a/b}')"
@@ -182,12 +167,7 @@ elif [ "$_wake_cycles" -lt "$_wake_cycles_min" ]; then
 else
   _wake_verdict="Reconciler chạy $_wake_cycles/$_wake_cycles_full chu kỳ, đối chiếu được hết, không phải cứu lần nào — tầng edge (push + ladder) phủ đủ trong ngày."
 fi
-# Bộ đếm batch NỐI VÀO verdict chứ không thay thế: nó nói về tầng DEDUPE (post trùng), còn
-# verdict trên nói về tầng PHỦ (thread ngủ) — hai lớp lỗi khác nhau, gộp là mất một cái.
-if [ "$((_batch_unknown + _batch_mktemp))" -gt 0 ]; then
-  _wake_verdict="$_wake_verdict ⚠️ TẦNG BATCH THOÁI HOÁ ngày $TODAY: $_batch_unknown lượt \"KHÔNG BIẾT\" (batch-claim-wake lỗi ⇒ mike_json.py hỏng/thiếu/đổi subcommand) + $_batch_mktemp lượt \"mktemp HỎNG\". Cả hai đều fail-safe về wake ĐƠN LẺ nên KHÔNG mất lượt, nhưng dedupe đã chết ⇒ đợt fan-out sẽ post TRÙNG trở lại. Xem logs/wake_thread.log, grep 'batch_wake:'."
-fi
-echo "$(date -Iseconds) [wake-metrics] $TODAY push_ok=$_wake_ok push_err=$_wake_err rate=$_wake_rate rescued=$_wake_rescued cycles=$_wake_cycles blind=$_wake_blind batch_unknown=$_batch_unknown batch_mktemp=$_batch_mktemp" >> "$LOG"
+echo "$(date -Iseconds) [wake-metrics] $TODAY push_ok=$_wake_ok push_err=$_wake_err rate=$_wake_rate rescued=$_wake_rescued cycles=$_wake_cycles blind=$_wake_blind" >> "$LOG"
 
 # --- Bước 1: Mike viết DRAFT (đồng bộ — bash CHỜ THẬT, không dùng &) ------------------
 # DISPATCH_FROM=user bắt buộc — xem fix 2026-07-09 kb_nightly.sh (Friday editorial

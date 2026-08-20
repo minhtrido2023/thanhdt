@@ -262,19 +262,6 @@ if [ "$N" -eq 0 ]; then
   exit 0
 fi
 
-# BATCH: N báo cáo quá hạn = N job Taylor --bg, CÙNG $TRADING_REPORT_THREAD, from=Mike ⇒ N lượt
-# wake_thread.sh riêng lẻ vào cùng một thread. ccdb chỉ dedupe task PENDING chứ không dedupe
-# session RUNNING ⇒ từ lượt thứ hai trở đi là một phiên Mike SONG SONG post trùng nội dung
-# (đo thật 08-18/08-20 với đợt plan N=2, xem RCA plan_pipeline_3loi_rca_20260820.md lỗi #1).
-# Fan-out ở ĐÂY còn lớn hơn: tới 8 tuần backlog + 1 tháng = 9 job (arch-reviewer vòng 6, #1).
-# $N đã đếm XONG trước vòng lặp nên `expected` là con số THẬT, không phải phỏng đoán.
-# ⚠️ Dispatch của một action có thể FAIL (exit code bị `| tail -5` nuốt) ⇒ member đó không bao
-# giờ đăng ký ⇒ `expected > len(members)` ⇒ member còn lại nhường "job chưa kịp đăng ký" cho
-# tới hết BATCH_REG_GRACE_S (600s) rồi mới bắn. TRỄ có giới hạn, không mất lượt — đúng chiều
-# fail-safe, và các job này timeout 3600s nên 10' trễ nằm gọn trong nhịp bình thường của đợt.
-CADENCE_BATCH_ID="reportcadence_$(TZ='Asia/Ho_Chi_Minh' date +%Y%m%d_%H%M%S)_$$"
-echo "check_report_cadence: [batch] wake gộp cho $N job Taylor — batch_id=$CADENCE_BATCH_ID"
-
 echo "$PLAN" | python3 -c "
 import json, sys
 for a in json.load(sys.stdin)['actions']:
@@ -314,8 +301,7 @@ for a in json.load(sys.stdin)['actions']:
   # cùng --effort high dù comment ngay trên nói rõ nhánh tuần "templated, không cần Opus" (hạ
   # model rồi nhưng quên xét lại effort, cùng dạng lệch đã tìm thấy ở Taylor interactive
   # dispatch). Tuần=medium (templated), tháng=high (attribution/outlook thật sự phức tạp hơn).
-  "$ROOT/bin/dispatch.sh" Taylor "$PROMPT" --thread "$TRADING_REPORT_THREAD" --bg --model "$MODEL" --effort "$EFFORT" --timeout 3600 \
-    --batch-id "$CADENCE_BATCH_ID" --batch-size "$N" 2>&1 | tail -5
+  "$ROOT/bin/dispatch.sh" Taylor "$PROMPT" --thread "$TRADING_REPORT_THREAD" --bg --model "$MODEL" --effort "$EFFORT" --timeout 3600 2>&1 | tail -5
 
   python3 -c "
 import json

@@ -86,6 +86,40 @@ except Exception:
     >> "$ROOT/logs/wake_thread.log"
 }
 
+# ── DEBOUNCE: một thread chỉ được đánh thức 1 lần mỗi WAKE_DEBOUNCE_S giây ──────────────
+# Vấn đề đã cắn thật 2 lần (08-18 cách 31s, 08-20 cách 83s): fan-out N account ⇒ N job xong
+# lệch nhau vài chục giây ⇒ mỗi _bg_wrapper tự push wake ⇒ ccdb mở phiên Mike THỨ HAI song
+# song với phiên đang chạy (ccdb chỉ dedupe task PENDING, không dedupe session RUNNING) ⇒
+# 2 phiên cùng post 1 nội dung. Chốt ở ĐÂY vì đây là cửa DUY NHẤT mọi call site đi qua.
+#
+# Vì sao BỎ một wake là AN TOÀN (và vì sao không cần giao thức batch phức tạp):
+# bin/wakeup_reconcile.py (cron */5) là lưới level-triggered — job terminal `from=Mike` chưa
+# `replied_at`, thread không còn wakeup pending và session không `running` ⇒ nó tự bắn lại.
+# Nên trường hợp xấu nhất của debounce là "job thứ hai được báo trễ ≤5 phút", KHÔNG phải mất.
+# Đánh đổi có chủ đích: chấp nhận trễ ≤5' để đổi lấy KHÔNG BAO GIỜ có 2 phiên song song.
+#
+# Fail-open: mọi trục trặc của chính lớp debounce (không mkdir/ghi được, flock thiếu, giá trị
+# rác trong file) đều để wake ĐI TIẾP — thà đánh thức thừa còn hơn nuốt mất lượt đánh thức.
+WAKE_DEBOUNCE_S="${WAKE_DEBOUNCE_S:-180}"
+if [ "$WAKE_DEBOUNCE_S" -gt 0 ] 2>/dev/null; then
+  _dbdir="$ROOT/state/wake_debounce"
+  if mkdir -p "$_dbdir" 2>/dev/null; then
+    _dbf="$_dbdir/$thread_id"
+    _now="$(date +%s)"
+    _last="$(cat "$_dbf" 2>/dev/null || echo 0)"
+    [[ "$_last" =~ ^[0-9]+$ ]] || _last=0          # giá trị rác ⇒ coi như chưa từng wake
+    if [ "$_last" -gt 0 ] && [ $((_now - _last)) -lt "$WAKE_DEBOUNCE_S" ]; then
+      mkdir -p "$ROOT/logs" 2>/dev/null || true
+      printf '%s wake_thread: DEBOUNCED | job_id=%s thread_id=%s since_last=%ss window=%ss\n' \
+        "$(TZ='Asia/Ho_Chi_Minh' date -Iseconds)" "$name_suffix" "$thread_id" \
+        "$((_now - _last))" "$WAKE_DEBOUNCE_S" >> "$ROOT/logs/wake_thread.log" 2>/dev/null || true
+      exit 0   # 0 = "đã xử lý xong", caller không coi là lỗi; reconciler lo phần còn lại
+    fi
+    # Ghi mốc TRƯỚC khi POST: hai tiến trình chạy sát nhau thì kẻ thua vẫn thấy mốc mới.
+    printf '%s' "$_now" > "$_dbf" 2>/dev/null || true
+  fi
+fi
+
 if ! out="$(python3 - "$thread_id" "$prompt" "$name_suffix" << 'PY' 2>&1
 import sys, json, urllib.request, urllib.error
 
@@ -111,8 +145,14 @@ payload = json.dumps({
     "run_immediately": True,
     "one_shot": True,
 }).encode()
+# Endpoint override CHỈ để test (bin/wake_debounce_selfcheck.sh trỏ vào cổng chết). Mặc định
+# vẫn là ccdb thật — không đổi hành vi production. Có biến này vì selfcheck bản đầu đã lỡ tạo
+# task thật (id 1885) trên một thread không tồn tại rồi phải xoá tay: test chạm hệ thống sống
+# là lỗi của TEST, vá bằng cách cho test một cửa riêng.
+import os
+_base = os.environ.get("WAKE_THREAD_API_BASE", "http://127.0.0.1:8199")
 req = urllib.request.Request(
-    "http://127.0.0.1:8199/api/tasks",
+    _base.rstrip("/") + "/api/tasks",
     data=payload, method="POST",
     headers={"Content-Type": "application/json"},
 )

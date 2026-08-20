@@ -7,12 +7,6 @@ Bất biến được cưỡng chế ở đây:
     `replied_at`, và `ended_at` đã quá GRACE_SECONDS ⇒ thread đó PHẢI có ≥1 one-shot
     wakeup còn PENDING trong tasks.db của ccdb, HOẶC session của thread đang `running`.
 
-MỘT NGOẠI LỆ, thêm 2026-08-20: job thuộc một đợt fan-out (`batch_id`, dispatch.sh
---batch-id) mà batch CÒN ĐANG BAY thì im lặng là ĐÚNG THIẾT KẾ — anh em terminal cuối cùng
-của đợt sẽ bắn MỘT lượt wake gộp cho cả batch (bin/batch_wake.sh). Cứu sớm ở đây chính là
-dựng lại phiên Mike thứ hai mà batch sinh ra để chặn. Batch hết bay mà vẫn chưa ai
-`claim-reply` ⇒ quay lại đường cứu bình thường — reconciler là lưới CUỐI của cơ chế batch.
-
 Vi phạm ⇒ gọi lại `bin/wake_thread.sh` với prompt template chuẩn (MIKE.md §8.4, claim-reply
 làm dòng đầu). Một lượt wake THỪA là vô hại (claim-reply là test-and-set nguyên tử, lượt thừa
 tốn đúng 1 lượt exit-1) — nhưng lượt thừa LẶP VÔ HẠN thì không.
@@ -82,7 +76,6 @@ liên tiếp (nhanh hơn, nhưng đi qua chính ccdb nên im khi ccdb là thứ 
 import datetime
 import fcntl
 import glob
-import importlib.util
 import json
 import os
 import subprocess
@@ -110,48 +103,6 @@ ERR_LOG = _env("WAKEUP_RECONCILE_ERR_LOG", os.path.join(ROOT, "logs", "wake_thre
 LOG = _env("WAKEUP_RECONCILE_LOG", os.path.join(ROOT, "logs", "wakeup_reconcile.log"))
 STATE_FILE = _env("WAKEUP_RECONCILE_STATE", os.path.join(ROOT, "state", "wakeup_reconcile_state.json"))
 LOCK_FILE = _env("WAKEUP_RECONCILE_LOCK", os.path.join(ROOT, "state", "locks", "wakeup_reconcile.lock"))
-BATCHES_DIR = _env("WAKEUP_RECONCILE_BATCHES_DIR", os.path.join(ROOT, "bus", "batches"))
-
-# batch_in_flight: một job thuộc đợt fan-out (dispatch.sh --batch-id) CỐ Ý im lặng khi xong
-# sớm — anh em cuối cùng của đợt mới bắn MỘT lượt wake gộp (bin/batch_wake.sh, RCA lỗi #1
-# 2026-08-20). Không biết luật đó thì reconciler thấy "job terminal, chưa replied, thread
-# không có wakeup pending" là ĐÚNG VI PHẠM theo bất biến cũ, và cứu nó sau 3 phút — dựng lại
-# đúng cái phiên Mike thứ hai mà batch sinh ra để chặn. Import trực tiếp (không subprocess):
-# gọi cho từng candidate mỗi 5 phút, một tiến trình python mỗi lần là phí vô ích.
-# Nạp theo ĐƯỜNG DẪN, không `sys.path.insert(0, bin/)`: chèn bin/ lên đầu sys.path nghĩa là
-# bất kỳ file bin/<tên>.py nào trùng tên module stdlib (token.py, types.py…) sẽ che stdlib cho
-# CẢ tiến trình này — hôm nay chưa file nào trùng (đo 118 file), nhưng đó là bẫy đặt sẵn cho
-# người viết script sau (arch-reviewer N7).
-# NẠP CÓ BỌC (arch-reviewer vòng 3, BLOCKER-2): trước bản vá batch, file này KHÔNG phụ thuộc
-# gì vào mike_json.py; nay LƯỚI CUỐI bị buộc vào đúng file mà chuỗi vá này vừa thêm mấy trăm
-# dòng. Đo thật: chèn SyntaxError vào mike_json.py ⇒ reconciler chết ngay ở exec_module (exit
-# 1), không note_abort, không dòng CRITICAL ABORT, không notify — cả chu kỳ chết CÂM tới
-# cron_health_check 08:25 hôm sau. Vòng 2 (N7) chỉ bọc LỜI GỌI ở _batch_in_flight, quá muộn.
-# Nạp hỏng ⇒ mike_json=None ⇒ mọi job bị coi như KHÔNG thuộc batch đang bay ⇒ cứu y như trước
-# khi có batch. Mất dedupe, không mất wake — đúng chiều fail-safe của cả kiến trúc này.
-try:
-    _mj_spec = importlib.util.spec_from_file_location(
-        "mike_json_for_reconcile", os.path.join(ROOT, "bin", "mike_json.py"))
-    mike_json = importlib.util.module_from_spec(_mj_spec)
-    _mj_spec.loader.exec_module(mike_json)
-    _MJ_LOAD_ERROR = ""
-except Exception as _exc:            # noqa: BLE001 — CỐ Ý bắt tất, xem khối trên
-    mike_json = None
-    _MJ_LOAD_ERROR = "%s: %s" % (type(_exc).__name__, _exc)
-
-
-def _batch_in_flight(batch_id, job_id):
-    """Lỗi lạ ở đây KHÔNG được giết cả chu kỳ của LƯỚI CUỐI: không đọc được ⇒ False =
-    "không đang bay" ⇒ cứu như trước khi có batch (thà wake thừa còn hơn ngủ vô hạn)."""
-    if mike_json is None:
-        log("BATCH-CHECK-DISABLED batch=%s job=%s: nạp mike_json.py hỏng (%s) — coi như "
-            "KHÔNG đang bay, cứu bình thường" % (batch_id, job_id, _MJ_LOAD_ERROR))
-        return False
-    try:
-        return mike_json.batch_in_flight(BATCHES_DIR, batch_id, JOBS_DIR, job_id)
-    except Exception as exc:
-        log("BATCH-CHECK-FAILED batch=%s job=%s: %s — coi như KHÔNG đang bay" % (batch_id, job_id, exc))
-        return False
 
 # Tên topic trong kb/discord_channels.json — KHÔNG bao giờ ID trần (bin/discord_id_gate.sh
 # chặn commit nếu snowflake xuất hiện ngoài registry; 4 lần rò rỉ chéo topic đều từ ID trần).
@@ -430,15 +381,6 @@ def scan_unreplied(now):
         if ended < MIN_EFFECTIVE_TS or ended < now - LOOKBACK_SECONDS:
             continue
         if now - ended <= GRACE_SECONDS:
-            continue
-        bid = str(j.get("batch_id") or "").strip()
-        jid_here = str(j.get("job_id") or os.path.basename(fp)[:-5])
-        if bid and _batch_in_flight(bid, jid_here):
-            # Im lặng CÓ CHỦ Ý, không phải tín hiệu mất: anh em cùng batch còn đang chạy và
-            # sẽ bắn một lượt wake gộp cho cả đợt. Batch hết bay (đã có người claim, hoặc mọi
-            # member còn lại đã chết/quá deadline) mà vẫn chưa ai claim-reply ⇒ chu kỳ sau
-            # rơi lại vào đường cứu bình thường — đó chính là lưới cuối của cơ chế batch.
-            log("BATCH-IN-FLIGHT bỏ qua %s (batch=%s) — chờ anh em cùng đợt" % (jid_here, bid))
             continue
         out.append({"job_id": str(j.get("job_id") or os.path.basename(fp)[:-5]),
                     "to": str(j.get("to") or "?"),
