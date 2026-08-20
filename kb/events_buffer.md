@@ -1393,3 +1393,70 @@
 - [2026-08-20T14:04:44Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 43, "job_id": "Wags_20260820_132135", "source": "watcher"}
 - [2026-08-20T14:05:44Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 44, "job_id": "Wags_20260820_132135", "source": "watcher"}
 - [2026-08-20T14:06:44Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 45, "job_id": "Wags_20260820_132135", "source": "watcher"}
+
+## Consolidation 2026-08-20T15:07:01Z
+- [2026-08-20T14:07:24Z] Wags/heartbeat — Wags_20260820_132135: {"status": "in_progress", "note": "đã sửa B1/B2/N1-N7, selfcheck 35/35 + hồi quy sạch, commit b1c9031b; gọi arch-reviewer vòng 2"}
+- [2026-08-20T14:07:44Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 46, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:08:44Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 47, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:09:44Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 48, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:10:44Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 49, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:11:44Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 50, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:12:45Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 51, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:13:45Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 52, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:14:45Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 53, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:15:45Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 54, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:16:45Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 55, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:17:45Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 56, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:18:45Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 57, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:19:45Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 58, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:20:46Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 59, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:21:46Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 60, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:22:46Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 61, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:23:16Z] Wags/heartbeat — Wags_20260820_132135: {"status": "in_progress", "note": "vòng 3: S1/S2/S3 + N-a/N-b xong, selfcheck 41/41; chạy hồi quy toàn bộ"}
+- [2026-08-20T14:23:46Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 62, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:24:46Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 63, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:25:46Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 64, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:26:46Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 65, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:27:46Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 66, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:28:19Z] Wags/heartbeat — Wags_20260820_132135: {"status": "in_progress", "note": "attempt2 resume: code+2 vòng arch-review đã commit (dfd24a43/b1c9031b/f8102ae1); còn lại: re-verify độc lập, arch-review vòng 3, bus finding, báo Architecture"}
+- [2026-08-20T14:28:47Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 67, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:29:47Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 68, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:30:47Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 69, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:31:47Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 70, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:32:47Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 71, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:33:47Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 72, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:34:47Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 73, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:35:47Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 74, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:36:47Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 75, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:37:48Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 76, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:38:48Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 77, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:39:48Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 78, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:40:48Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 79, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:41:48Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 80, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:42:48Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 81, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:43:48Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 82, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:44:48Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 83, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:45:49Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 84, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:46:49Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 85, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:47:49Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 86, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:48:49Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 87, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:49:36Z] Wags/heartbeat — Wags_20260820_132135: {"status": "in_progress", "note": "arch-review vòng 3 ra NEEDS_CHANGES (2 BLOCKER đo bằng mutation); đã vá cả 7 mục + thêm CA19-CA22; đang chạy lại selfcheck"}
+- [2026-08-20T14:49:49Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 88, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:50:49Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 89, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:51:49Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 90, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:52:50Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 91, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:53:50Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 92, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:54:50Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 93, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:55:21Z] Wags/heartbeat — Wags_20260820_132135: {"status": "in_progress", "note": "vòng 3 vá xong + commit a885e1a1 (54/54 + 5 hồi quy xanh); đang chờ arch-review vòng 4 xác nhận"}
+- [2026-08-20T14:55:50Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 94, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:56:50Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 95, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:57:50Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 96, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:58:50Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 97, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:59:50Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 98, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T15:00:51Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 99, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T15:01:51Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 100, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T15:02:51Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 101, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T15:03:51Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 102, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T15:04:51Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 103, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T15:05:51Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 104, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T15:06:51Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 105, "job_id": "Wags_20260820_132135", "source": "watcher"}
