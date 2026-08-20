@@ -193,6 +193,7 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 | 2026-06-22 | [2026-06-22 — Mafee ZOMBIE: systemd reports healthy, agent isn't actually serving](2026-06/2026-06-22-mafee-zombie-systemd-healthy.md) | logged |
 
 ## RETRO hằng ngày (mới nhất trước)
+| 2026-08-19 | [RETRO — 2026-08-19: 5 sự cố, 2 pattern xuyên suốt (§28 chạm lớp mới — công thức NAV tài chính, chưa xác nhận độc lập; Pattern 2 mới — cùng lỗ hổng "sửa chung working copy không cách ly" cho ra 1 ca mất-diff + 1 ca tự-cứu cùng đêm, tái diễn từ 08-07; retro pipeline tự lộ sự cố #2: dispatch trùng claim ghi file nhưng file không tồn tại)](retro/retro-2026-08-19.md) | logged |
 | 2026-08-18 | [RETRO — 2026-08-18: 3 sự cố, 2 pattern xuyên suốt (cả 3 sự cố cùng họ §28 — biểu diễn tức thời thay vì sự thật bền — 2 ca cùng file `ops_health_check.sh`, 1 ca mới ở dispatch exit-code; wakeup-miss về lại 0,0% sau ngày tệ nhất)](retro/retro-2026-08-18.md) | logged |
 | 2026-08-17 | [RETRO — 2026-08-17: 4 sự cố, 2 pattern xuyên suốt (corp-action gate false-refuse tái diễn HỌ lỗi ticker.Price đông cứng; question-checker-grace-period fix round-2 chưa merge; Pattern B wakeup-miss bật lại 27,3% cao nhất từng đo, escalate lại)](retro/retro-2026-08-17.md) | logged |
 | 2026-08-16 | [RETRO — 2026-08-16: 6 sự cố (marathon "1 ngày dọn 4 backlog NEEDS_CHANGES", +1 selfcheck-red fix bổ sung qua verify Wags), 2 pattern xuyên suốt (§28 tiếp tục sống; Pattern B rộng hơn §28 chưa có Prevention riêng)](retro/retro-2026-08-16.md) | logged |
