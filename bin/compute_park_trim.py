@@ -88,8 +88,10 @@ UNDER-trim — chế độ hỏng NGƯỢC LẠI với bug vừa sửa, cùng m�
 2026-07-03 (`kb/incidents/2026-07/`). Ngày 08-07 totalDebt=0 ở cả 2 account nên mọi số dẫn ở trên
 không đổi. Cùng quy ước NAV = totalCash − totalDebt của `daily_nav_snapshot.py`/`reconcile_equity.py`.
 
-⚠️ `compute_jit_unpark.py` (L2) CỐ Ý vẫn dùng `availableCash`: nó hỏi "tiền tôi TIÊU được ngay
-phiên tới", không phải "vốn tôi sở hữu". Đừng đồng bộ hai chỗ này thành một field.
+⚠️ `check_plan_funding()`/`executor.py` (gate P0, thực thi thật) CỐ Ý vẫn dùng `availableCash`/
+`ppse`: chúng hỏi "tiền tôi TIÊU được ngay phiên tới", không phải "vốn tôi sở hữu". Đừng đồng bộ
+hai chỗ này thành một field. `compute_jit_unpark.py` (L2) ĐÃ ĐẢO (2026-08-19, cùng ngày với sửa
+L1 dưới đây) — xem §pool-egg-L2 trong chính file đó.
 
 §pool-egg — CỘNG Trứng vàng (DNSE egg product) vào mẫu số (sửa 2026-08-19, sự cố thật cùng ngày:
 user hỏi vì sao TRIM sinh ra dù không phải kỳ rebalance custom30V). Root cause: `totalCash` của
@@ -102,11 +104,12 @@ ZaloPay ~38,77tr). Tiền KHÔNG mất, chỉ chuyển sang một sản phẩm k
 park_mv gần như không đổi ⇒ TRIM giả (sinh lệnh bán PARK để "kéo về đúng tỷ trọng" của một mẫu số
 đã bị thu hẹp sai) — không phục vụ mục đích tái cân bằng thật nào, chỉ tốn phí giao dịch.
 
-Egg CỐ Ý cộng vào L1 (câu hỏi "sở hữu bao nhiêu vốn") nhưng KHÔNG cộng vào L2 `compute_jit_unpark`
-(câu hỏi "tiêu được ngay bao nhiêu" — egg cần lệnh rút + về tài khoản hôm sau, không phải sức mua
-tức thời) — cùng ranh giới đã có sẵn giữa `totalCash` và `availableCash` ở trên, chỉ thêm một
-field vào phía "sở hữu". User John duyệt 2026-08-19 (Discord, kênh DollarBill plan): "Trứng
-vàng là cash và tất cả các formula liên quan đến cash đều phải cập nhật để không bị tính sai."
+Egg cộng vào L1 (câu hỏi "sở hữu bao nhiêu vốn") — user John duyệt 2026-08-19 (Discord, kênh
+DollarBill plan): "Trứng vàng là cash và tất cả các formula liên quan đến cash đều phải cập nhật
+để không bị tính sai." L2 `compute_jit_unpark.py` CŨNG cộng egg (§pool-egg-L2 trong file đó) sau
+khi user làm rõ quy trình vận hành thật (rút Trứng vàng trong giờ hành chính, về TRONG PHIÊN,
+không phí) — khác `check_plan_funding()`/`executor.py` (gate thực thi thật) VẪN loại egg, xem
+`kb/coding_guidelines.md` §25 cho ranh giới đầy đủ.
 
 FAIL-CLOSED per-name (sao chép nguyên `cap_lag_orders._block`): không đo được ADV / ADV cũ
 hơn LAG_ADV_MAX_STALE_DAYS / ADV ≤ 0 / không dựng được danh sách account live ⇒ KHÔNG trim mã
