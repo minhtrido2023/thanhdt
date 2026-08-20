@@ -26,8 +26,10 @@
 #
 # Fails soft (never breaks the caller's completion path): unreachable API,
 # bad thread_id, or task-name collision all just log to
-# logs/wake_thread_errors.log and exit 1 — same convention as
-# notify_thread_errors.log (ops_health_check.sh reads both).
+# logs/wake_thread_errors.log and exit 1. ⚠️ CHƯA có checker nào đọc file log này
+# (kiểm chứng 2026-08-20 — câu cũ "ops_health_check.sh reads both" là SAI); lỗi push
+# vì thế im lặng hoàn toàn cho tới khi có người tự phát hiện. Đề xuất reconciler:
+# agents/Mike/research/wakeup_architecture_redesign_20260820.md
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
@@ -75,6 +77,18 @@ if ! out="$(python3 - "$thread_id" "$prompt" "$name_suffix" << 'PY' 2>&1
 import sys, json, urllib.request, urllib.error
 
 thread_id, prompt, name_suffix = sys.argv[1], sys.argv[2], sys.argv[3]
+
+# Bash truyền argv theo BYTE; Python decode bằng surrogateescape, nên một chuỗi bị cắt
+# giữa ký tự UTF-8 nhiều byte (vd `tail -c 500` trong _bg_wrapper chém đôi một chữ tiếng
+# Việt/emoji) mang theo lone surrogate (\udcXX). json.dumps escape nó qua được HTTP, nhưng
+# sqlite phía ccdb chết khi INSERT ("surrogates not allowed") — và handler ở đó dán nhãn
+# NHẦM mọi lỗi insert thành "409 Task name already exists". Đã ăn 3 lần thật (2026-08-15,
+# 08-19, 08-20 — ca 08-20 còn XOÁ mất ladder wakeup đang chờ của thread trước khi chết,
+# thread ngủ 12' tới khi user tự phát hiện). Sanitize tại đây = chặn cả class cho MỌI
+# caller, không cần restart ccdb. Incident:
+# kb/incidents/2026-08/2026-08-20-wake-push-utf8-surrogate-deletes-ladder.md
+prompt = prompt.encode("utf-8", "replace").decode("utf-8")
+name_suffix = name_suffix.encode("utf-8", "replace").decode("utf-8")
 payload = json.dumps({
     "name": f"dispatch-wake-{name_suffix}",
     "prompt": prompt,
