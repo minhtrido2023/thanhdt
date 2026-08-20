@@ -58,10 +58,30 @@ docs (`022C099995` / `123456aA@`), không cần đăng ký:
 - `GET /priceboard/all-stocks` (và 3 biến thể tên khác) → 404 tất cả — path thật của
   "get_all_stocks" CHƯA XÁC ĐỊNH.
 
+## Thông tin bổ sung từ PHS support (Zalo, 2026-08-20 ~14:07 ICT)
+
+**`accountId` trong path API = SỐ TIỂU KHOẢN, không phải số tài khoản master:**
+- Tài khoản master: `022Cxxxx` (prefix 4 ký tự + số)
+- Tiểu khoản cơ sở (cho API `/eqt`): `0120xxxx` (8 chữ số)
+- Tiểu khoản phái sinh (cho API `/fno`): `02120xxxx` (9 chữ số)
+
+**Hệ quả quan trọng:**
+1. Sandbox demo dùng `022C099995` cho `accountId` → 404 "buying power" có thể do sandbox KHÔNG
+   tự sinh tiểu khoản riêng, hoặc path thật dùng **`/eqt/`** và **`/fno/`** (không phải
+   `/underlying/` và `/derivative/`). Chưa re-probe được (sandbox 503 lúc 14:12 ICT).
+2. **Gap #8 ĐÃ XÁC NHẬN**: cơ sở và phái sinh dùng HAI số tiểu khoản KHÁC NHAU — adapter phải
+   giữ cả hai, routing theo loại asset.
+3. Tham chiếu path mới từ PHS support: "api /eqt" = underlying, "api /fno" = derivatives → gợi
+   ý endpoint thật có thể là `/accounts/{eqt_subacc}/eqt/...` và `/accounts/{fno_subacc}/fno/...`
+   thay vì `/underlying/...`, `/derivative/...`. **Cần verify lại sau khi sandbox online.**
+4. Nếu đúng, các probe cũ (portfolio/dailyOrder/openPositions) hoạt động vì sandbox dùng path
+   `/underlying/` và `/derivative/` — production có thể khác. Hỏi PHS để xác nhận.
+
 ## Gap PHẢI hỏi PHS trực tiếp trước khi build production adapter
 
 1. Path chính xác của "buying power"/"assets" (cơ sở + phái sinh) và "all-stocks" — probe thật
-   404 hết trên mọi biến thể hợp lý.
+   404 hết; gợi ý path production dùng `/eqt/` và `/fno/` thay vì `/underlying/`/`/derivative/`.
+   **Cần xác nhận path đầy đủ cho assets/buying-power với tiểu khoản thật.**
 2. Enum đầy đủ `type` lệnh (ATO/ATC/MP/GTC...) — sandbox chấp nhận bất kỳ giá trị nào nên không
    verify được bằng probe.
 3. Cơ chế vay/margin ở tầng đặt lệnh CƠ SỞ — không thấy field tương đương `loan_package_id`
@@ -79,8 +99,8 @@ docs (`022C099995` / `123456aA@`), không cần đăng ký:
 7. Rate limit, HMAC/chữ ký request, SLA, phí — không công khai trên docs, PHS ghi rõ các mục này
    nằm trong "Service Scope Technical Appendix" dạng file rời (Google Drive), chưa mở được qua
    WebFetch.
-8. Tài khoản phái sinh có tách biệt số tài khoản với cơ sở không (2 endpoint auth riêng
-   `.../gen-secret-key/underlying` vs `.../derivative` nhưng không rõ có phải cùng 1 tài khoản).
+8. ~~Tài khoản phái sinh có tách biệt số tài khoản với cơ sở không~~ — **ĐÃ XÁC NHẬN (PHS support
+   2026-08-20)**: tách biệt, tiểu khoản eqt ≠ tiểu khoản fno, cả hai khác master account.
 9. Thời gian xét duyệt hồ sơ đăng ký (không công khai số ngày cụ thể).
 
 ## Quy trình đăng ký (đã đọc form, CHƯA nộp)
