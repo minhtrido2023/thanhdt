@@ -111,6 +111,35 @@ cao sẽ tự chạy tiếp, nhưng nếu phiên tôi restart giữa chừng th�
 > Lần push THÀNH CÔNG ghi `logs/wake_thread.log` (`SUCCESS | job_id= thread_id= task_id=`,
 > thêm 2026-08-17): trước đó chỉ nhánh lỗi có log, nên "push chưa từng chạy" và "push chạy
 > ngon" nhìn giống hệt nhau từ trong repo này — audit phải mượn log ccdb ở repo khác.
+> ⚠️ Trường `job_id=` trong file log đó là **tham số 3 truyền vào `wake_thread.sh`**, KHÔNG
+> phải luôn là job_id thuần: từ 2026-08-20 có call site thứ ba (`wakeup_reconcile.fire_wake`)
+> truyền `<job_id>-reconcile<lần bắn>` — bắt buộc phải khác nhau vì cột `name` của
+> `scheduled_tasks` là UNIQUE. Parser nào cần job_id thật thì cắt hậu tố `-reconcile\d+`.
+
+> **TẦNG THỨ BA — RECONCILER level-triggered (thêm 2026-08-20, `bin/wakeup_reconcile.py`, cron
+> `*/5`).** Push và ladder đều là **edge**: mất cạnh (push chết vì encoding/ccdb restart, ladder bị
+> ccdb xoá, Mike quên đặt) = thread ngủ VÔ HẠN, không ai biết (sự cố 08-20, user tự phát hiện sau
+> 12'). Reconciler không thêm cạnh — nó so *trạng thái mong muốn vs thực tế* mỗi 5 phút: job
+> terminal `from=Mike` chạy NỀN, có thread, chưa `replied_at`, xong quá 3' mà thread không còn
+> one-shot wakeup nào pending và session không `running` ⇒ nó gọi lại `wake_thread.sh`. Hệ quả
+> cho bạn: **lỗi wake-up của job nền `from=Mike` có thread ghim, terminal trong vòng
+> `RESCUE_MAX_AGE` (4h), suy biến thành "trễ ≤ 5 phút", không còn "im lặng vô hạn"** — nhưng
+> ĐỪNG vì thế mà bỏ `ScheduleWakeup` (mục 1 dưới đây): reconciler là lưới CUỐI, chậm hơn cả
+> ladder, và nó có TRẦN. ⚠️ Job **cũ hơn 4h** thì reconciler **KHÔNG tự đánh thức** — chỉ báo
+> Trading Daily đúng 1 lần rồi im (arch-reviewer killer objection trước-commit 08-20: dry-run
+> thật cho ra job 43 GIỜ tuổi vẫn bị bắn vào kênh duyệt plan tiền thật; sau bất kỳ khoảng mù
+> nào — vd ccdb restart — reconciler sẽ dựng hàng loạt phiên Claude post KẾT QUẢ CŨ vào đúng
+> kênh money-adjacent nếu không có trần tuổi này). Job quá cũ báo "quá cũ, KHÔNG tự đánh thức"
+> ⇒ xử TAY qua `bin/jobs.sh status <job_id>`.
+> **Khi bạn nhận prompt wake mở đầu `[WAKEUP-RECONCILER]`**: xử lý y hệt một lượt wake bình thường
+> — `jobs.sh claim-reply <job_id>` là dòng đầu, exit 1 thì `ScheduleWakeup(noop:true,stop:true)` và
+> dừng. Khác biệt duy nhất: prompt đó nghĩa là **tín hiệu wake gốc đã mất**, nên nếu bạn thấy nó
+> nhiều lần trong ngày thì đó là bug ở tầng edge cần báo, không phải chuyện thường
+> (`daily_retro.sh` đã tự đếm và ghi vào retro hằng ngày).
+> ⚠️ **Reconciler CÓ TRẦN CỨNG, không phải bảo hiểm vô hạn**: tối đa 3 lượt cứu cho MỘT job
+> (cách nhau ≥15'), tối đa 3 wake mỗi chu kỳ. Hết trần nó DỪNG HẲN job đó và báo Trading Daily
+> ("wakeup-reconciler bỏ cuộc") — vì ccdb xoá row one-shot TRƯỚC khi Claude chạy, nên "được đánh
+> thức" không đảm bảo "sẽ claim", và không có trần thì nó bắn lại mỗi 5' vô tận.
 
 > **§8 rút gọn — 3 dòng phải nhớ (thêm 2026-07-20, sau sự cố `missed-wakeup-after-bg-dispatch`,
 > xem `kb/incidents/2026-07/2026-07-20-missed-wakeup-after-bg-dispatch.md` + job `Wags_20260720_121120`):**
