@@ -583,10 +583,20 @@ def _selfcheck() -> int:                                    # noqa: C901 — a f
               f"{pr['MBB']['value']:,.0f} vs nền {fb_real['MBB']:,.0f}")
         # ca IDC THẬT — cổng hợp lý chạy trên dữ liệu sống, không chỉ trên fixture dựng tay
         idc = oshares_pit(["IDC"], "2021-02-05", {"IDC": 300_000_000.0})
-        check("L4. IDC 2021-02-05 THẬT: AIS vendor nói 3 tỷ ⇒ cổng chặn, giữ 300 triệu",
+        # ⚠️ HÌNH DẠNG ĐỔI 2026-08-20 (cửa sổ nhìn lùi, job `Taylor_20260820_062330`), GIÁ TRỊ
+        # THÌ KHÔNG. Trước: neo AIS 3 tỷ trượt cổng ⇒ `oshares_live` câm ⇒ adapter giữ số nền
+        # (`source="ticker_financial"`, `live_value=3e9` = số bị từ chối). Nay: dòng AIS 3 tỷ VẪN
+        # không chứng nhận được (bất biến thật, kiểm ở A1), nhưng dòng quý 300 triệu đối chiếu
+        # ĐƯỢC với mốc AIS lành 2019-06-13 nên `oshares_live` TỰ tính ra 300.000.000 — trùng
+        # KHÍT số nền (`rel_diff == 0`). Kiểm GIÁ TRỊ + "3 tỷ không bao giờ xuất hiện", chứ
+        # không kiểm con đường: cùng một con số, hai nguồn độc lập, là kết quả TỐT HƠN.
+        check("L4. IDC 2021-02-05 THẬT: AIS vendor nói 3 tỷ ⇒ cổng chặn; số phục vụ vẫn là 300 "
+              "triệu và nay chính `oshares_live` dựng ra nó (khớp số nền, rel_diff=0)",
               idc["IDC"]["value"] == 300_000_000.0
-              and idc["IDC"]["source"] == "ticker_financial"
-              and idc["IDC"]["live_value"] == 3_000_000_000.0, idc["IDC"]["reason"])
+              and idc["IDC"]["live_value"] != 3_000_000_000.0
+              and abs(idc["IDC"]["rel_diff"] or 0.0) < 1e-9,
+              f"{idc['IDC']['value']:,.0f} từ {idc['IDC']['source']} "
+              f"(live={idc['IDC']['live_value']}, rel_diff={idc['IDC']['rel_diff']})")
 
         print("== Cổng CHỨNG NHẬN neo AIS trên dữ liệu THẬT ==")
         cc = fetch_cache(["IDC", "AAA", "FPT", "VNM"], "2026-06-16")
@@ -610,14 +620,18 @@ def _selfcheck() -> int:                                    # noqa: C901 — a f
               "(cổng không loại bừa tất cả)",
               sum(1 for v in vd["VNM"].values() if v in _SERVE_AIS_VERDICTS) >= 4
               and vd["VNM"][max(vd["VNM"])] == "OK", f"VNM={vd['VNM']}")
-        # GIÁ PHẢI TRẢ, ĐO ĐƯỢC — ghi thành ca test để nó không biến mất khỏi trí nhớ: khi một ISS
-        # THẬT xen giữa mà feed không mô tả nổi (ESOP 2016-07-11 tỉ lệ 0,0), ứng viên (a) chết vì
-        # blocker và (b) = prev+delta thiếu đúng phần ESOP đó ⇒ VNM 2016-09-20 bị coi là KHÔNG xác
-        # minh được dù nó ĐÚNG (1.451.453.429 vs dòng quý 2016-11-01 = 1.451.426.329, lệch 0,002%).
-        # Đây là chiều sai AN TOÀN: rơi về đúng số caller đang dùng, ở đây lệch 0,002%.
-        check("A4b. GIÁ PHẢI TRẢ: VNM 2016-09-20 (dòng ĐÚNG) bị UNVERIFIED vì ESOP tỉ lệ 0 xen "
-              "giữa — chi phí là rơi về số quý lệch 0,002%, KHÔNG phải mất số",
-              vd["VNM"].get("2016-09-20") == "UNVERIFIED"
+        # ⚠️ CA "GIÁ PHẢI TRẢ" NÀY ĐÃ ĐÓNG — và nó ĐÃ ĐỎ TRÊN `main` TRƯỚC bản vá 2026-08-20
+        # (chạy lại `oshares_pit.py --selfcheck` trên `main` ngày 2026-08-20: FAILED 1/48, đúng
+        # dòng này). Nguyên nhân là bản vá KHÁC: `issue_volumn` được thêm vào `_roll` ngày
+        # 2026-08-19 (job `Taylor_20260819_044259`), nên ứng viên (a) không còn chết vì blocker —
+        # ESOP 2016-07-11 nay có cỡ (8.887.731 CP) và roll ra ĐÚNG 1.451.453.429.
+        # Giữ ca này lại ở chiều NGƯỢC: nó nay là bằng chứng `issue_volumn` thật sự cứu được
+        # nhóm "ISS tỉ lệ 0", chứ không phải xoá đi cho sạch bảng (§23 hệ luận 1 — test rot thì
+        # SỬA cho đúng sự thật mới, đừng để nó thành nhiễu nền).
+        check("A4b. [ĐÃ ĐÓNG] VNM 2016-09-20 nay CHỨNG NHẬN ĐƯỢC: ESOP 2016-07-11 tỉ lệ 0,0 có "
+              "`issue_volumn` 8.887.731 (thêm vào `_roll` 2026-08-19) ⇒ ứng viên (a) dựng ra "
+              "ĐÚNG 1.451.453.429. Ca này đã ĐỎ trên `main` trước bản vá 2026-08-20",
+              vd["VNM"].get("2016-09-20") == "OK"
               and abs(1_451_453_429 - 1_451_426_329) / 1_451_426_329 < 0.0001,
               f"verdict={vd['VNM'].get('2016-09-20')}")
         # POINT-IN-TIME: quyết định cũng không được dùng dòng của tương lai
@@ -651,9 +665,14 @@ def _selfcheck() -> int:                                    # noqa: C901 — a f
         f1 = oshares_pit(["FPT"], "2020-05-05", {"FPT": 681_668_102.0}, cache=fcc)["FPT"]
         check("A7. FPT 2020-05-05 KHÔNG trả 461.723.054 nữa (ca REFUTED vòng 2)",
               f1["value"] != 461_723_054.0, f"{f1['value']:,.0f} từ {f1['source']}")
-        check("A8. …và rơi về ĐÚNG số nền 681.668.102, không bịa số thứ ba",
-              f1["value"] == 681_668_102.0 and f1["source"] == "ticker_financial"
-              and f1["live_value"] == 461_723_054.0, f"{f1['reason']}")
+        # cùng lý do như L4: từ 2026-08-20 `oshares_live` tự dựng ra 681.668.102 (neo dòng quý
+        # đối chiếu được qua mốc lùi) thay vì câm và để adapter giữ số nền. Số KHÔNG đổi.
+        check("A8. …và số phục vụ ĐÚNG là 681.668.102, không bịa số thứ ba — nay do chính "
+              "`oshares_live` dựng ra và trùng khít số nền (rel_diff=0)",
+              f1["value"] == 681_668_102.0 and f1["live_value"] != 461_723_054.0
+              and abs(f1["rel_diff"] or 0.0) < 1e-9,
+              f"{f1['value']:,.0f} từ {f1['source']} (live={f1['live_value']}, "
+              f"rel_diff={f1['rel_diff']})")
         check("A9. verdict của chính neo đó là UNVERIFIED (chặn ĐÚNG lý do, không phải trùng hợp)",
               _ais_verdicts(fcc[1], "FPT", "2020-05-05").get("2020-04-06") == "UNVERIFIED",
               str(_ais_verdicts(fcc[1], "FPT", "2020-05-05")))
