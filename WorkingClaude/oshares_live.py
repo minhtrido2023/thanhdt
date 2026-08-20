@@ -187,7 +187,7 @@ row, is the primary anchor here.
 from __future__ import annotations
 
 import itertools
-from datetime import date
+from datetime import date, timedelta
 
 from corp_action_lib import TABLE, bq, dilutes_share_count
 
@@ -203,6 +203,13 @@ FIN_FALLBACK_MAX_AIS_AGE_DAYS = 90
 # real gap measured is FPT's 0,0013% (fractional-share rounding on a 15% bonus); 0,1% leaves two
 # orders of magnitude of headroom over that while still rejecting HAH's 10,1% jump.
 EXPLAIN_TOL = 0.001
+
+# Cửa sổ QUÝ-END → NGÀY CÔNG BỐ mà `_absorption_test` quét ngược từ ngày của dòng quý. Một dòng
+# `ticker_financial` mang ngày CÔNG BỐ (vd 07-31) nhưng số của nó có thể là số chốt tại QUÝ-END
+# (30-06): mọi sự kiện trong khoảng giữa hai mốc đó có thể đã, hoặc chưa, nằm trong con số. 120
+# ngày phủ cả trường hợp chậm nhất (BCTC năm đã kiểm toán: hạn 90 ngày sau ngày chốt) mà vẫn là
+# một khoảng ĐÓNG — cửa sổ còn bị chặn dưới bởi AIS gần nhất, nên con số này chỉ là trần.
+ABSORB_WINDOW_DAYS = 120
 
 
 def _days_between(d0, d1):
@@ -329,6 +336,147 @@ def _unabsorbed_iss(ais_rows, iss, upto_exright):
     if picked is None:
         return after
     return [e for i, e in window if i not in picked] + after
+
+
+def _unsizable(e):
+    """True nếu `_roll` sẽ coi `e` là BLOCKER — không có cỡ nào dùng được. Giữ ĐÚNG thứ tự
+    fallback của `_roll` (`shares_delta` → `issue_volumn` → `exercise_ratio`); đọc lại điều kiện
+    ở đây thay vì gọi `_roll` để không phải dựng một `value` giả chỉ để hỏi một câu boolean."""
+    return not any((e.get(f) is not None and float(e[f]) != 0.0)
+                   for f in ("shares_delta", "issue_volumn", "exercise_ratio"))
+
+
+def _size_hint(e):
+    """Cỡ mà `_roll` SẼ dùng cho `e`, dạng chuỗi cho `note` — không giả định trường nào có sẵn."""
+    for f in ("shares_delta", "issue_volumn"):
+        if e.get(f) is not None and float(e[f]) != 0.0:
+            return f"{float(e[f]):,.0f} ({f})"
+    r = e.get("exercise_ratio")
+    return f"×{1.0 + float(r):.4f} (exercise_ratio)" if r else "(không cỡ)"
+
+
+def _absorption_test(row_time, row_value, ais, iss):
+    """(events_to_roll, report) — dòng quý `row_time` ĐÃ nuốt những ISS nào trong cửa sổ quý-end?
+
+    ⚠️ THÊM 2026-08-20 (job `Taylor_20260820_043511`, chỉ đạo user). Lỗ hổng nó bịt, nguyên văn
+    quan sát của user: *"ngày ra BCTC ví dụ 28.07 chỉ phản ánh dữ liệu đúng đến 30.06 (quý-end);
+    sự kiện từ 01.07 trở đi CHƯA được phản ánh đầy đủ trong báo cáo"*. Một dòng
+    `ticker_financial` mang NGÀY CÔNG BỐ, còn con số trong nó có thể là số chốt tại QUÝ-END. Khi
+    dòng quý làm NEO (`FIN_FALLBACK` / `ANCHOR_UNVERIFIED`), `_pending_iss` chỉ lăn các ISS có
+    `exright_date > anchor_date`, tức mọi sự kiện rơi vào khoảng `(quý-end, ngày công bố]` bị coi
+    là ĐÃ nằm trong neo — và nếu vendor chép nguyên số quý-end thì đó là THIẾU ÂM THẦM.
+
+    KHÔNG THAY MỘT LUẬT CẮT-NGÀY BẰNG MỘT LUẬT CẮT-NGÀY KHÁC. Vendor KHÔNG nhất quán — đo được
+    cả hai phía, cùng một bảng:
+      * `HHV` dòng 2026-07-31 = 574.511.888. Cổ tức CP 5% ex 2026-07-09 khai
+        `issue_volumn` 27.345.592 / `exercise_ratio` 0,05 ⇒ base vendor tự khai
+        B = 546.911.840, và B × 1,05 = 574.257.432 — lệch 0,044% so với dòng quý, TRONG
+        `EXPLAIN_TOL`. Dòng đó ĐÃ GỒM sự kiện: cắt theo quý-end sẽ đếm HAI LẦN (+4,76%).
+      * `FPT` dòng 2025-07-22 mang số SAU đợt thưởng 15% ex 2025-07-21 (registry
+        `ticker_financial_oshares.md`) — vendor cập nhật tới tận ngày công bố.
+    ⇒ Không có ngày nào tách được hai ca này. Cái tách được chúng là SỐ HỌC, và số học đó do
+    CHÍNH sự kiện khai ra: `B = issue_volumn / exercise_ratio` là số CP trước sự kiện theo lời
+    khai của tổ chức phát hành.
+
+    GIẢ THUYẾT, TỔNG QUÁT CHO n SỰ KIỆN trong cửa sổ (sắp theo `exright_date` tăng dần). Gọi
+    `B_k` = base khai của sự kiện thứ k ⇒ `B_k` chính là số CP SAU khi đã gồm k−1 sự kiện đầu:
+
+        H_k ("dòng quý gồm đúng k sự kiện đầu"),  k = 0..n
+            k < n :  kỳ vọng = B_{k+1}
+            k = n :  kỳ vọng = B_n × (1 + ratio_n)
+
+    So `row_value` với từng kỳ vọng trong `EXPLAIN_TOL`:
+      (a) khớp ĐÚNG MỘT `H_k` ⇒ lăn các sự kiện thứ k+1..n (k = n ⇒ không lăn gì, ca `HHV`).
+          Lăn bằng `issue_volumn` — số ĐẾM, không phải tỉ lệ (xem `_roll`).
+      (b) không khớp cái nào, khớp NHIỀU cái, hoặc thiếu `ratio`/`issue_volumn` ở bất kỳ sự kiện
+          nào trong cửa sổ ⇒ **GIỮ NGUYÊN HÀNH VI CŨ (không lăn)** và gắn nhãn
+          `WINDOW_AMBIGUOUS` kèm CẢ HAI/ CẢ n+1 con số giả thuyết, để người đọc snapshot thấy
+          khoảng chưa quyết được thay vì im lặng.
+
+    Vì sao ca không quyết được lại nghiêng về KHÔNG LĂN: cùng bất đối xứng mà cả module này theo
+    (xem `_unabsorbed_iss`) — cộng thêm một lượng CP đã nằm trong neo thì thổi phồng mẫu số của
+    mọi chỉ số per-share một cách âm thầm; không cộng thì để nguyên con số đang phục vụ hôm nay,
+    và nhãn `WINDOW_AMBIGUOUS` nói ra chỗ thiếu.
+
+    ⚠️ TỈ LỆ NHỎ LÀM B KÉM TIN CẬY, và điều đó tự đẩy ca về nhánh (b), có chủ đích. `exercise_ratio`
+    được làm tròn 4–5 chữ số ⇒ sai số tương đối của `B` ≈ 5e-6/ratio: ratio 0,05 cho 0,01%
+    (trong `EXPLAIN_TOL`), nhưng một đợt ESOP ratio 0,00225 cho ~0,22% (NGOÀI `EXPLAIN_TOL`) ⇒
+    không giả thuyết nào khớp ⇒ `WINDOW_AMBIGUOUS`, không lăn. Đó là kết quả ĐÚNG: với ESOP nhỏ,
+    `B` đơn giản không đủ độ phân giải để trả lời, và nói "không biết" rẻ hơn đoán.
+
+    CỬA SỔ BỊ CHẶN HAI ĐẦU, không quét vô hạn về quá khứ:
+        (max(AIS gần nhất ≤ row_time, row_time − ABSORB_WINDOW_DAYS), row_time]
+    Chặn dưới bằng AIS gần nhất vì một ISS có `exright` TRƯỚC AIS đó đã ở trong cả AIS lẫn BCTC
+    (hoặc là ca lock-up mà `_unabsorbed_iss` xử lý ở nhánh neo AIS) — kéo nó vào đây là mở lại
+    đúng lỗi "orphan event cưỡi lên mọi câu trả lời sau" đã đo ở `_unabsorbed_iss`. Lấy `max` =
+    cửa sổ HẸP NHẤT = gần hành vi cũ nhất.
+    """
+    floor = (date.fromisoformat(row_time) - timedelta(days=ABSORB_WINDOW_DAYS)).isoformat()
+    prior_ais = [a["effective_date"] for a in ais if a["effective_date"] <= row_time]
+    if prior_ais:
+        floor = max(floor, max(prior_ais))
+    window = sorted(_dedup_iss([e for e in iss if floor < e["exright_date"] <= row_time]),
+                    key=lambda e: e["exright_date"])
+    if not window:
+        return [], None
+
+    bases = []
+    for e in window:
+        r, v = e.get("exercise_ratio"), e.get("issue_volumn")
+        bases.append(None if (r is None or float(r) <= 0 or v is None or float(v) <= 0)
+                     else float(v) / float(r))
+    hyps = []                                   # hyps[k] = kỳ vọng của H_k, k = 0..n
+    for k in range(len(window) + 1):
+        if k < len(window):
+            hyps.append(bases[k])
+        elif bases[-1] is None:
+            hyps.append(None)
+        else:
+            hyps.append(bases[-1] * (1.0 + float(window[-1]["exercise_ratio"])))
+    matches = [k for k, exp in enumerate(hyps)
+               if exp and abs(row_value - exp) / exp <= EXPLAIN_TOL]
+
+    rep = {"window_from": floor, "window_to": row_time, "row_value": row_value,
+           "events": [_event_dict(e) for e in window],
+           "hypotheses": [{"absorbed_count": k, "expected": exp,
+                           "rel_diff": (None if not exp else row_value / exp - 1.0)}
+                          for k, exp in enumerate(hyps)]}
+    def _ambiguous(why):
+        rep["verdict"] = "WINDOW_AMBIGUOUS"
+        rep["rolled"] = []
+        rep["note"] = (
+            f"{len(window)} ISS trong cửa sổ ({floor}, {row_time}] KHÔNG quyết được là dòng quý "
+            f"{row_value:,.0f} đã gồm hay chưa ({why}) ⇒ GIỮ hành vi cũ: KHÔNG lăn. "
+            "Các số giả thuyết: "
+            + " · ".join(f"gồm {k}/{len(window)} ⇒ "
+                         + ("thiếu ratio/issue_volumn" if not h else f"{h:,.0f}")
+                         for k, h in enumerate(hyps)))
+        return [], rep
+
+    if len(matches) != 1:
+        return _ambiguous(f"{len(matches)} giả thuyết khớp trong {EXPLAIN_TOL*100:.1f}%")
+    k = matches[0]
+    extra = window[k:]
+    # ⚠️ 2026-08-20 (attempt 2): một sự kiện mà `_roll` KHÔNG định cỡ được (thiếu cả
+    # `shares_delta`, `issue_volumn` LẪN `exercise_ratio`) có thể lọt vào `extra` — giả thuyết
+    # của CHÍNH nó là None nên nó không bao giờ được khớp, nhưng một giả thuyết k' < k khớp thì
+    # nó vẫn bị kéo theo. Để nguyên thì hoặc `_roll` biến nó thành blocker (một câu trả lời ĐANG
+    # CÓ SỐ bị đẩy về `UNKNOWN_RATIO` — regression), hoặc — đo thật — dòng `note` ném `TypeError`
+    # thô vì `float(None)`. Không quyết cỡ được thì đúng là "không quyết được": về nhánh (c).
+    if any(_unsizable(e) for e in extra):
+        return _ambiguous(
+            "khớp giả thuyết 'đã gồm %d/%d' NHƯNG %d sự kiện phải lăn không có cỡ dùng được "
+            "(thiếu cả shares_delta, issue_volumn lẫn exercise_ratio)"
+            % (k, len(window), sum(1 for e in extra if _unsizable(e))))
+    rep["verdict"] = "ABSORBED" if not extra else "ROLLED"
+    rep["rolled"] = [_event_dict(e) for e in extra]
+    rep["note"] = (
+        f"dòng quý {row_value:,.0f} khớp giả thuyết 'đã gồm {k}/{len(window)} ISS của cửa sổ' "
+        f"(kỳ vọng {hyps[k]:,.0f}, lệch {(row_value/hyps[k]-1)*100:+.3f}%) ⇒ "
+        + ("KHÔNG lăn lại sự kiện nào" if not extra else
+           f"LĂN {len(extra)} sự kiện chưa được phản ánh: "
+           + ", ".join(f"{e['exright_date']} +{_size_hint(e)}" for e in extra)))
+    return extra, rep
 
 
 def _pending_iss(ais_rows, iss, anchor_date, anchor_source, asof):
@@ -716,6 +864,11 @@ def oshares_at(tickers, asof, _cache=None, live=False):
     `_stale_fallback_verdict`). Nới ở đây là nhận thêm look-ahead để đổi lấy độ phủ, nên nó CHỈ
     hợp lệ khi câu hỏi là "hôm nay có bao nhiêu CP" — không bao giờ hợp lệ trong một backtest.
     Cổng chứng nhận neo AIS ở cuối hàm KHÔNG bị `live` chạm tới ở cả hai nhánh.
+
+    NỚI THỨ HAI CỦA NHÁNH LIVE (2026-08-20): `_absorption_test`. Khi neo là dòng quý CHƯA được
+    cổng giải thích thông qua, các ISS rơi vào cửa sổ `(quý-end, ngày công bố]` được KIỂM bằng số
+    học xem dòng quý đã gồm chúng chưa, thay vì mặc định "đã gồm". Kết luận luôn được ghi ra
+    `absorption_test` (kể cả ca `WINDOW_AMBIGUOUS` = không quyết được ⇒ giữ hành vi cũ).
     """
     if isinstance(tickers, str):
         tickers = [tickers]
@@ -785,13 +938,28 @@ def oshares_at(tickers, asof, _cache=None, live=False):
         anchor_date, anchor_value, anchor_src = max(
             anchors, key=lambda a: (a[0], a[2] == "corporate_action.AIS"))
 
-        pending = _pending_iss(ais, iss, anchor_date, anchor_src, asof)
+        # ── ABSORPTION TEST (2026-08-20) ────────────────────────────────────────────────────
+        # CHỈ nhánh LIVE, và CHỈ khi neo là dòng quý CHƯA được cổng giải thích thông qua
+        # (`FIN_FALLBACK` / `ANCHOR_UNVERIFIED`). Neo dòng quý ĐÃ verified thì `_explain_quarterly`
+        # đã đối chiếu xong bằng `_unabsorbed_iss` — hỏi lại ở đây là hai lời đáp cho một câu hỏi.
+        # `live` gác cổng vì nhánh PIT KHÔNG được đổi một số nào (backtest đang ghim); mở cho PIT
+        # là một quyết định riêng, cần đo lại trên rổ, không phải hệ quả tự nhiên của bản vá này.
+        absorb = None
+        extra = []
+        if live and anchor_src == "ticker_financial" and unverified:
+            extra, absorb = _absorption_test(anchor_date, anchor_value, ais, iss)
+
+        pending = _pending_iss(ais, iss, anchor_date, anchor_src, asof) + extra
         value, applied, blockers = _roll(anchor_value, pending)
 
         anchor_verified = not (unverified and anchor_src == "ticker_financial")
         base = {"ticker": tk, "asof": asof, "anchor_date": anchor_date,
                 "anchor_value": anchor_value, "anchor_source": anchor_src,
                 "anchor_verified": anchor_verified, "rejected_anchors": rejected}
+        if absorb:
+            # ghi RA bản ghi kể cả khi kết luận là "không lăn": ca WINDOW_AMBIGUOUS chỉ có giá trị
+            # nếu người đọc snapshot NHÌN THẤY nó — im lặng ở đây là đúng lỗi mà nó đi sửa.
+            base["absorption_test"] = absorb
         # provenance only counts when the fallback anchor actually WON the max() above; a
         # fallback candidate that lost to a newer AIS must not stamp its keys on someone else's
         # answer.
@@ -1362,6 +1530,160 @@ def _selfcheck() -> int:
               == oshares_at([t], LV_ASOF, _cache=c, live=True)[t]["value"]
               for t, c in (("TCBX", TCB_C), ("HAHX", HAH_C))))
 
+    print("== ABSORPTION TEST: cửa sổ QUÝ-END → NGÀY CÔNG BỐ (2026-08-20) ==")
+    # Lỗ hổng: dòng quý mang NGÀY CÔNG BỐ nhưng số có thể chốt tại QUÝ-END ⇒ ISS trong khoảng
+    # giữa có thể ĐÃ hoặc CHƯA nằm trong neo. Vendor KHÔNG nhất quán (HHV gồm, FPT gồm, nhưng
+    # không có gì bảo đảm) ⇒ quyết bằng SỐ HỌC `B = issue_volumn / exercise_ratio`, không bằng
+    # một luật cắt-ngày thứ hai. Xem `_absorption_test`.
+
+    # (a) CA THẬT, dữ liệu SỐNG — HHV: dòng quý 2026-07-31 ĐÃ gồm cổ tức CP 5% ex 2026-07-09.
+    # Đây là ca duy nhất của khối này chạm BQ, cố ý: luật thì hermetic, còn "vendor thật sự có
+    # hành xử như thế không" thì phải hỏi dữ liệu thật.
+    hhv = oshares_at(["HHV"], "2026-08-19", live=True)["HHV"]
+    ab = hhv.get("absorption_test") or {}
+    print(f"  HHV 2026-08-19 [live]: {fmt(hhv['value'])} [{hhv['method']}] "
+          f"absorption={ab.get('verdict')} rolled={len(ab.get('rolled') or [])}")
+    for hy in ab.get("hypotheses", []):
+        print(f"     gồm {hy['absorbed_count']}/1 ⇒ kỳ vọng {fmt(hy['expected'])} "
+              f"(lệch {hy['rel_diff']*100:+.3f}%)" if hy["expected"] else "     (không dựng được)")
+    check("AB1. [THẬT, (a) ĐÃ GỒM] HHV 2026-08-19 = 574.511.888 và ISS ex 07-09 KHÔNG bị lăn "
+          "lại — cắt theo quý-end sẽ ra 601.857.480 (+4,76%), đếm hai lần",
+          hhv["value"] == 574_511_888.0 and hhv["events_applied"] == []
+          and ab.get("verdict") == "ABSORBED",
+          f"{fmt(hhv['value'])} [{hhv['method']}] verdict={ab.get('verdict')}")
+    check("AB1b. …và kết luận đó có SỐ đỡ, không phải mặc định im lặng: giả thuyết 'chưa gồm' = "
+          "546.911.840 (lệch +5,05%), 'đã gồm' = 574.257.432 (lệch +0,044% < EXPLAIN_TOL)",
+          [h["expected"] for h in ab.get("hypotheses", [])] == [546_911_840.0, 574_257_432.0],
+          str([h["expected"] for h in ab.get("hypotheses", [])]))
+
+    # (b) SỐ QUÝ-END: cùng hình dạng HHV nhưng dòng quý = ĐÚNG base vendor khai ⇒ CHƯA gồm sự
+    # kiện ⇒ PHẢI lăn. Hermetic: đây là hành vi user cảnh báo, hiện chưa quan sát được ca thật
+    # nào trên rổ (xem báo cáo job), nên fixture là cách DUY NHẤT giữ nó không mốc.
+    QE_C = ([_Q("QENDX", "2026-07-31", 546_911_840.0)],
+            [_A("QENDX", "2026-05-07", 473_755_528.0),
+             _I("QENDX", "2026-07-09", vol=27_345_592.0, ratio=0.05)])
+    qe = {tag: oshares_at(["QENDX"], LV_ASOF, _cache=QE_C, live=(tag == "LIVE"))["QENDX"]
+          for tag in ("PIT", "LIVE")}
+    print(f"  QENDX PIT: {fmt(qe['PIT']['value'])} [{qe['PIT']['method']}] · "
+          f"LIVE: {fmt(qe['LIVE']['value'])} [{qe['LIVE']['method']}] "
+          f"{(qe['LIVE'].get('absorption_test') or {}).get('verdict')}")
+    check("AB2. [(b) CHƯA GỒM] dòng quý = ĐÚNG base vendor khai (546.911.840) ⇒ LĂN ISS ex "
+          "07-09 bằng issue_volumn ⇒ 574.257.432, không để thiếu 27.345.592 CP",
+          qe["LIVE"]["value"] == 574_257_432.0
+          and (qe["LIVE"].get("absorption_test") or {}).get("verdict") == "ROLLED"
+          and [e["exright_date"] for e in qe["LIVE"]["events_applied"]] == ["2026-07-09"],
+          f"{fmt(qe['LIVE']['value'])} +{len(qe['LIVE']['events_applied'])} ISS")
+    check("AB2b. NHÁNH PIT KHÔNG ĐỔI MỘT SỐ NÀO — cùng fixture, neo AIS ĐƯỢC chứng nhận nên PIT "
+          "cũng phục vụ FIN_FALLBACK, nhưng absorption test không chạy: value = đúng dòng quý, "
+          "không có field `absorption_test`",
+          qe["PIT"]["value"] == 546_911_840.0 and qe["PIT"]["method"] == "FIN_FALLBACK"
+          and "absorption_test" not in qe["PIT"] and qe["PIT"]["events_applied"] == [],
+          f"{fmt(qe['PIT']['value'])} [{qe['PIT']['method']}] "
+          f"absorb={'absorption_test' in qe['PIT']}")
+
+    # (c) KHÔNG QUYẾT ĐƯỢC — hai kiểu, cả hai phải GIỮ hành vi cũ VÀ nói ra
+    AMB_C = ([_Q("AMBX", "2026-07-31", 560_000_000.0)],
+             [_A("AMBX", "2026-05-07", 473_755_528.0),
+              _I("AMBX", "2026-07-09", vol=27_345_592.0, ratio=0.05)])
+    amb = oshares_at(["AMBX"], LV_ASOF, _cache=AMB_C, live=True)["AMBX"]
+    ab_a = amb.get("absorption_test") or {}
+    print(f"  AMBX: {fmt(amb['value'])} [{amb['method']}] {ab_a.get('verdict')} — "
+          f"{(ab_a.get('note') or '')[:100]}")
+    check("AB3. [(c) MƠ HỒ] dòng quý 560.000.000 không khớp GIẢ THUYẾT NÀO ⇒ GIỮ hành vi cũ "
+          "(không lăn) và gắn WINDOW_AMBIGUOUS",
+          amb["value"] == 560_000_000.0 and amb["events_applied"] == []
+          and ab_a.get("verdict") == "WINDOW_AMBIGUOUS" and ab_a.get("rolled") == [],
+          f"{fmt(amb['value'])} verdict={ab_a.get('verdict')}")
+    check("AB3b. …và KHÔNG IM LẶNG: note nêu CẢ HAI con số giả thuyết để người đọc snapshot thấy "
+          "khoảng chưa quyết được (546.911.840 ↔ 574.257.432)",
+          "546,911,840" in (ab_a.get("note") or "")
+          and "574,257,432" in (ab_a.get("note") or ""),
+          (ab_a.get("note") or "(trống)")[-110:])
+    NOR_C = ([_Q("NORX", "2026-07-31", 560_000_000.0)],
+             [_A("NORX", "2026-05-07", 473_755_528.0),
+              _I("NORX", "2026-07-09", vol=27_345_592.0, ratio=None)])
+    nor = oshares_at(["NORX"], LV_ASOF, _cache=NOR_C, live=True)["NORX"]
+    ab_n = nor.get("absorption_test") or {}
+    check("AB3c. [(c) THIẾU TRƯỜNG] ISS không có exercise_ratio ⇒ không dựng nổi base ⇒ vẫn "
+          "WINDOW_AMBIGUOUS + KHÔNG lăn (KHÔNG được biến thành blocker: value vẫn có số)",
+          nor["value"] == 560_000_000.0 and nor["method"] != "UNKNOWN_RATIO"
+          and ab_n.get("verdict") == "WINDOW_AMBIGUOUS"
+          and "thiếu ratio/issue_volumn" in (ab_n.get("note") or ""),
+          f"{fmt(nor['value'])} [{nor['method']}] {(ab_n.get('note') or '')[-60:]}")
+
+    # n = 2: hấp thụ MỘT PHẦN. B_k của sự kiện thứ k chính là số CP sau k−1 sự kiện đầu, nên
+    # luật tổng quát hoá thẳng; nếu chỉ test n=1 thì một bản cài chỉ-xét-sự-kiện-cuối vẫn PASS.
+    TWO_C = ([_Q("TWOX", "2026-07-31", 510_000_000.0)],
+             [_A("TWOX", "2026-05-07", 500_000_000.0),
+              _I("TWOX", "2026-07-05", vol=10_000_000.0, ratio=0.02),
+              _I("TWOX", "2026-07-20", vol=20_400_000.0, ratio=0.04)])
+    two = oshares_at(["TWOX"], LV_ASOF, _cache=TWO_C, live=True)["TWOX"]
+    ab_t = two.get("absorption_test") or {}
+    print(f"  TWOX: {fmt(two['value'])} {ab_t.get('verdict')} rolled="
+          f"{[e['exright_date'] for e in ab_t.get('rolled') or []]}")
+    check("AB4. HẤP THỤ MỘT PHẦN (n=2): dòng quý 510.000.000 = base khai của ISS 07-20 ⇒ đã gồm "
+          "ISS 07-05, CHƯA gồm ISS 07-20 ⇒ lăn ĐÚNG một sự kiện ⇒ 530.400.000",
+          two["value"] == 530_400_000.0
+          and [e["exright_date"] for e in ab_t.get("rolled") or []] == ["2026-07-20"],
+          f"{fmt(two['value'])} rolled={[e['exright_date'] for e in ab_t.get('rolled') or []]}")
+
+    # CHẶN DƯỚI của cửa sổ: một ISS TRƯỚC AIS gần nhất KHÔNG được kéo vào — đó là đường quay lại
+    # lỗi "orphan event cưỡi lên mọi câu trả lời sau" đã đo ở `_unabsorbed_iss`.
+    OLD_C = ([_Q("OLDX", "2026-07-31", 546_911_840.0)],
+             [_A("OLDX", "2026-05-07", 473_755_528.0),
+              _I("OLDX", "2026-05-06", vol=27_345_592.0, ratio=0.05)])
+    old = oshares_at(["OLDX"], LV_ASOF, _cache=OLD_C, live=True)["OLDX"]
+    check("AB5. CHẶN DƯỚI: ISS ex 2026-05-06 nằm TRƯỚC AIS 2026-05-07 ⇒ ngoài cửa sổ ⇒ không "
+          "absorption test, không lăn (dù dòng quý khớp khít giả thuyết 'chưa gồm')",
+          old["value"] == 546_911_840.0 and old["events_applied"] == []
+          and "absorption_test" not in old,
+          f"{fmt(old['value'])} absorb={'absorption_test' in old}")
+    # …và ĐỐI CHỨNG NGƯỢC: dời đúng sự kiện đó sang SAU AIS thì nó PHẢI vào cửa sổ và được lăn.
+    IN_C = ([_Q("INX", "2026-07-31", 546_911_840.0)],
+            [_A("INX", "2026-05-07", 473_755_528.0),
+             _I("INX", "2026-05-08", vol=27_345_592.0, ratio=0.05)])
+    inn = oshares_at(["INX"], LV_ASOF, _cache=IN_C, live=True)["INX"]
+    check("AB5b. ĐỐI CHỨNG NGƯỢC cho AB5 — cùng sự kiện dời sang 2026-05-08 (SAU AIS) thì vào "
+          "cửa sổ và ĐƯỢC lăn ⇒ 574.257.432 (nếu không, AB5 xanh chỉ vì cửa sổ luôn rỗng)",
+          inn["value"] == 574_257_432.0 and len(inn["events_applied"]) == 1,
+          f"{fmt(inn['value'])} +{len(inn['events_applied'])} ISS")
+    # SỰ KIỆN KHÔNG ĐỊNH CỠ ĐƯỢC lọt vào `extra`. Giả thuyết của CHÍNH nó là None nên nó không
+    # bao giờ được khớp — nhưng một giả thuyết k' nhỏ hơn khớp thì nó vẫn bị kéo theo. Đo thật
+    # 2026-08-20 (attempt 2) trên bản chưa vá: `_absorption_test` ném `TypeError: float()
+    # argument must be ... not 'NoneType'` từ dòng `note`; và nếu qua được dòng đó thì `_roll`
+    # biến nó thành blocker ⇒ một câu trả lời ĐANG CÓ SỐ bị đẩy về `UNKNOWN_RATIO`. Cả hai đều
+    # là regression so với hành vi cũ (cũ: không lăn, vẫn có số).
+    NOSZ_C = ([_Q("NOSZX", "2026-07-31", 500_000_000.0)],
+              [_A("NOSZX", "2026-05-07", 500_000_000.0),
+               _I("NOSZX", "2026-07-05", vol=10_000_000.0, ratio=0.02),
+               _I("NOSZX", "2026-07-20")])          # không shares_delta / issue_volumn / ratio
+    nosz = oshares_at(["NOSZX"], LV_ASOF, _cache=NOSZ_C, live=True)["NOSZX"]
+    ab_z = nosz.get("absorption_test") or {}
+    print(f"  NOSZX: {fmt(nosz['value'])} [{nosz['method']}] {ab_z.get('verdict')}")
+    check("AB7. [(c) KHÔNG ĐỊNH CỠ ĐƯỢC] dòng quý khớp khít 'đã gồm 0/2' NHƯNG sự kiện 07-20 "
+          "không có cỡ nào dùng được ⇒ về WINDOW_AMBIGUOUS, KHÔNG lăn, KHÔNG crash và KHÔNG bị "
+          "đẩy về UNKNOWN_RATIO (giữ nguyên số cũ 500.000.000)",
+          nosz["value"] == 500_000_000.0 and nosz["method"] != "UNKNOWN_RATIO"
+          and nosz["events_applied"] == []
+          and ab_z.get("verdict") == "WINDOW_AMBIGUOUS"
+          and "không có cỡ dùng được" in (ab_z.get("note") or ""),
+          f"{fmt(nosz['value'])} [{nosz['method']}] {ab_z.get('verdict')}")
+    check("AB7b. ĐỐI CHỨNG NGƯỢC cho AB7 — cùng cửa sổ nhưng sự kiện 07-20 CÓ issue_volumn thì "
+          "vẫn ROLLED cả hai ⇒ 530.400.000 (nếu không, AB7 xanh chỉ vì luật chặn mọi ca n=2)",
+          oshares_at(["OKZX"], LV_ASOF, live=True, _cache=(
+              [_Q("OKZX", "2026-07-31", 500_000_000.0)],
+              [_A("OKZX", "2026-05-07", 500_000_000.0),
+               _I("OKZX", "2026-07-05", vol=10_000_000.0, ratio=0.02),
+               _I("OKZX", "2026-07-20", vol=20_400_000.0, ratio=0.04)]))["OKZX"]["value"]
+          == 530_400_000.0)
+
+    # neo AIS / neo dòng quý ĐÃ verified: absorption test KHÔNG được chạm tới
+    check("AB6. neo KHÔNG phải dòng quý-chưa-verified ⇒ KHÔNG có field `absorption_test` "
+          "(EVF: không ISS nào; TCB nhánh LIVE: neo AIS)",
+          "absorption_test" not in oshares_at(["EVFX"], LV_ASOF, _cache=EVF_C, live=True)["EVFX"]
+          and "absorption_test" not in oshares_at(["TCBX"], LV_ASOF, _cache=TCB_C,
+                                                  live=True)["TCBX"])
+
     print("== CÁI GIÁ ĐO ĐƯỢC: 3 ca RESTATE nay được phục vụ (không còn cổng nào chặn) ==")
     # Đo 2026-08-19 trên 246 mã ticker_prune tại asof=2026-03-01 (có 5,5 tháng tương lai để đối
     # chiếu): 12 mã đổi số, 3 mã mang chữ ký RESTATE — giá trị phục vụ trùng KHÍT một AIS chỉ có
@@ -1391,6 +1713,7 @@ def _selfcheck() -> int:
     print("== Bất biến chung: value is None ⟺ method ∈ {UNKNOWN_RATIO, NO_ANCHOR, AIS_UNCERTIFIED} ==")
     every = [h, m, idc, fpt5, tcb_boom, vre, vre_off, na, cc1,
              h5, h5b, hh1, hh2, kbc, kbc_pit,
+             hhv, amb, nor, two, old, inn, *qe.values(),
              *cost.values(), *ctrl.values(), *series.values()]
     check("10. không bao giờ trả số kèm nhãn 'không biết', và ngược lại",
           all((r["value"] is None)
