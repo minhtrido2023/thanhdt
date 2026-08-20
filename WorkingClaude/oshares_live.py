@@ -211,6 +211,13 @@ EXPLAIN_TOL = 0.001
 # một khoảng ĐÓNG — cửa sổ còn bị chặn dưới bởi AIS gần nhất, nên con số này chỉ là trần.
 ABSORB_WINDOW_DAYS = 120
 
+# CỬA SỔ NHÌN LÙI của cổng chứng nhận AIS (2026-08-20, job `Taylor_20260820_062330`). Áp dụng
+# CHỈ KHI mắt xích AIS liền trước KHÔNG chứng nhận được — xem `_anchor_candidates`. Hai trần là
+# lưới an toàn, không phải tham số tinh chỉnh: mọi ca thật đo được (HHV, IDC 2022, ba dòng lớn
+# của FPT) chỉ cần đi lùi ĐÚNG MỘT bước qua một mắt xích gãy.
+AIS_LOOKBACK_MAX_STEPS = 5
+AIS_LOOKBACK_MAX_DAYS = 730
+
 
 def _days_between(d0, d1):
     """`d1 - d0` in days, both "YYYY-MM-DD" strings. Plain date arithmetic — no timezone enters
@@ -261,7 +268,7 @@ def _subset_matching(pool, target, tol=1.0):
     return None
 
 
-def _unabsorbed_iss(ais_rows, iss, upto_exright):
+def _unabsorbed_iss(ais_rows, iss, upto_exright, verdicts=None):
     """The ISS issued on or before `upto_exright` that the AIS chain has NOT demonstrably listed.
 
     ⚠️ ADDED 2026-08-19 (job `Taylor_20260819_044259`). Until then the only test anywhere in this
@@ -314,8 +321,24 @@ def _unabsorbed_iss(ais_rows, iss, upto_exright):
     if not rows:
         return pool                              # no AIS at all: nothing has been listed by one
     last = rows[-1]
-    prev = next((r for r in reversed(rows[:-1])
-                 if r["effective_date"] < last["effective_date"]), None)
+    # MỐC `prev` ĐI THEO CÙNG LUẬT VỚI CỔNG CHỨNG NHẬN (`_anchor_candidates`, 2026-08-20). Cả
+    # hàm này lẫn cổng kia đều dựa vào MỘT giả định: `prev` là một phát biểu ĐÚNG về mức niêm
+    # yết, vì `delta = last - prev` chỉ có nghĩa khi cả hai đầu đều đúng. Trên một chuỗi vendor
+    # xáo trộn thứ tự thì mắt xích liền trước KHÔNG đúng, và `delta` ra một số vô nghĩa ⇒
+    # `_subset_matching` không khớp được gì ⇒ hàm rơi về `after` và bỏ sót ISS chưa niêm yết.
+    #   TCB, đo 2026-08-20: AIS 2024-08-06 = 7.045.021.622 (thưởng 1:1) → AIS 2024-11-21 =
+    #   3.522.510.811 (RA SAU, total NHỎ HƠN — chốt trên nền 2023-08-30, bỏ qua đợt thưởng) →
+    #   AIS 2025-12-01 = 7.064.851.739. Lấy `prev` = 2024-11-21 cho `delta` = 3.542.340.928,
+    #   không khớp ISS nào; lấy `prev` = mốc LÀNH 2024-08-06 cho `delta` = 19.830.117 = ĐÚNG
+    #   ISS 2024-11-30, và phần dư (ESOP 2025-08-04, 21.388.675 CP) hiện ra là CHƯA niêm yết —
+    #   đúng như thực tế. Không có mốc lùi thì TCB@2026-03-01 trả 7.064.851.739, thấp hơn sự
+    #   thật (7.086.240.414, mọi dòng quý và AIS 2026-08-05 đều xác nhận) đúng 0,30%.
+    # `verdicts` VẮNG ⇒ `_anchor_candidates` trả đúng mắt xích liền trước ⇒ hành vi CŨ y nguyên;
+    # hàm này không bao giờ tự nới khi caller không đưa được bảng verdict.
+    _prior = _distinct_ais([r for r in rows[:-1]
+                            if r["effective_date"] < last["effective_date"]])
+    _cands = _anchor_candidates(_prior, verdicts or {}, last["effective_date"])
+    prev = _cands[-1] if _cands else None
     after = [e for e in pool if e["exright_date"] > last["effective_date"]]
     if prev is None:
         return after                             # first AIS of the ticker: nothing to difference
@@ -479,7 +502,7 @@ def _absorption_test(row_time, row_value, ais, iss):
     return extra, rep
 
 
-def _pending_iss(ais_rows, iss, anchor_date, anchor_source, asof):
+def _pending_iss(ais_rows, iss, anchor_date, anchor_source, asof, verdicts=None):
     """The ISS still to be rolled onto an anchor — the answer depends on WHICH anchor it is.
 
     An AIS states the LISTED count, so what it already contains is decided by the accounting of
@@ -489,10 +512,13 @@ def _pending_iss(ais_rows, iss, anchor_date, anchor_source, asof):
     anchor the ex-date remains the right test and the AIS chain must NOT be consulted. Using one
     rule for both anchors would either lose lock-up shares from an AIS or double-count
     placements on a quarterly row.
+
+    `verdicts` (2026-08-20) chỉ đi tiếp xuống `_unabsorbed_iss` để nó chọn được mốc `prev` LÀNH
+    trên một chuỗi AIS bị xáo trộn thứ tự. Vắng ⇒ hành vi cũ y nguyên.
     """
     if anchor_source == "corporate_action.AIS":
         return _unabsorbed_iss([r for r in ais_rows if r["effective_date"] <= anchor_date],
-                               iss, asof)
+                               iss, asof, verdicts)
     return _dedup_iss([e for e in iss if e["exright_date"] > anchor_date])
 
 
@@ -574,7 +600,7 @@ def _fetch(tickers, until):
     return quarters, corp
 
 
-def _explain_quarterly(q, ais, iss):
+def _explain_quarterly(q, ais, iss, verdicts=None):
     """(ok, verified, reason, expected) — can the last AIS at-or-before `q` be rolled INTO `q`?
 
     `expected` is the rolled-forward count the gate compared against, or None when no expectation
@@ -600,7 +626,7 @@ def _explain_quarterly(q, ais, iss):
         cannot be cleared. Unverifiable is not the same as verified.
     """
     t, v = q["time"], float(q["OShares"])
-    prior = [a for a in ais if a["effective_date"] <= t]
+    prior = _distinct_ais([a for a in ais if a["effective_date"] <= t])
     if not prior:
         hit = [a for a in ais if a["effective_date"] > t
                and abs(float(a["shares_total_after"]) - v) < 1.0]
@@ -609,23 +635,43 @@ def _explain_quarterly(q, ais, iss):
                 f"{v:,.0f} trùng ĐÚNG số của AIS {hit[0]['effective_date']} (SAU ngày quý "
                 f"{t}) và không có AIS nào trước đó để giải thích ⇒ RESTATE"), None
         return True, False, "không có AIS nào <= ngày quý ⇒ nhận nhưng KHÔNG kiểm chứng được", None
-    a = max(prior, key=lambda r: r["effective_date"])
-    # not `a.effective_date < exright <= t` any more: an ISS that went ex BEFORE the AIS but is
-    # absent from its `shares_delta` (a lock-up ESOP) is missing from the AIS and PRESENT in the
-    # quarterly report, so it belongs in the expectation. Same predicate as `oshares_at` uses —
-    # one rule, not two. HAH's quarterly row of 2026-07-30 (191.840.401) only closes against the
-    # AIS of 2026-05-27 (185.840.401) once both unlisted ESOP tranches are in it.
-    between = _unabsorbed_iss([r for r in ais if r["effective_date"] <= a["effective_date"]],
-                              iss, t)
-    expected, _applied, blockers = _roll(float(a["shares_total_after"]), between)
+    if verdicts is None:
+        verdicts = _ais_verdicts_from_rows(ais, iss)
+    # CÙNG luật chọn mốc với cổng chứng nhận AIS (`_anchor_candidates`, nới 2026-08-20): mốc mặc
+    # định vẫn là AIS liền trước; chỉ khi CHÍNH mốc đó không chứng nhận được mới lùi tới mốc lành
+    # gần nhất. Một luật, hai chỗ dùng — nếu không, cùng một chuỗi AIS xáo trộn sẽ cho cổng này
+    # và cổng kia hai câu trả lời khác nhau (đúng ca HHV 2026-07-31: đối chiếu với AIS 2026-05-07
+    # lệch +14,65%, đối chiếu với AIS 2026-04-08 khớp TỪNG ĐƠN VỊ).
+    first = None                    # (mốc, kỳ vọng|None, blockers|None) của ứng viên GẦN NHẤT
+    for a in _anchor_candidates(prior, verdicts, t):
+        # not `a.effective_date < exright <= t` any more: an ISS that went ex BEFORE the AIS but
+        # is absent from its `shares_delta` (a lock-up ESOP) is missing from the AIS and PRESENT
+        # in the quarterly report, so it belongs in the expectation. Same predicate as
+        # `oshares_at` uses — one rule, not two. HAH's quarterly row of 2026-07-30 (191.840.401)
+        # only closes against the AIS of 2026-05-27 (185.840.401) once both unlisted ESOP
+        # tranches are in it.
+        between = _unabsorbed_iss([r for r in prior if r["effective_date"] <= a["effective_date"]],
+                                  iss, t, verdicts)
+        expected, _applied, blockers = _roll(float(a["shares_total_after"]), between)
+        if blockers:
+            first = first or (a, None, blockers)
+            continue
+        if abs(v - expected) / expected <= EXPLAIN_TOL:
+            return True, True, "", expected
+        first = first or (a, expected, None)
+    # BÁO CÁO theo ứng viên GẦN NHẤT (mốc mặc định), không phải theo ứng viên cuối cùng đã thử:
+    # người đọc `reason` hỏi "dòng quý này lệch bao nhiêu so với phát biểu mới nhất của sở", và
+    # `fin_expected_from_ais` phải giữ đúng nghĩa đó. Số ứng viên đã thử được nói ra khi >1 để
+    # không ai đọc nhầm thành "chỉ đối chiếu một chỗ".
+    a, expected, blockers = first
+    n = len(_anchor_candidates(prior, verdicts, t))
+    more = f" (đã thử {n} mốc AIS, kể cả mốc lùi)" if n > 1 else ""
     if blockers:
         return False, False, (f"ISS {[b['exright_date'] for b in blockers]} không có tỉ lệ/"
-                              f"shares_delta ⇒ không dựng được kỳ vọng để đối chiếu"), None
-    if abs(v - expected) / expected > EXPLAIN_TOL:
-        return False, False, (f"{v:,.0f} không giải thích được từ AIS {a['effective_date']} "
-                              f"({float(a['shares_total_after']):,.0f}) + {len(between)} ISS "
-                              f"⇒ kỳ vọng {expected:,.0f}, lệch {(v/expected-1)*100:+.2f}%"), expected
-    return True, True, "", expected
+                              f"shares_delta ⇒ không dựng được kỳ vọng để đối chiếu{more}"), None
+    return False, False, (f"{v:,.0f} không giải thích được từ AIS {a['effective_date']} "
+                          f"({float(a['shares_total_after']):,.0f}) "
+                          f"⇒ kỳ vọng {expected:,.0f}, lệch {(v/expected-1)*100:+.2f}%{more}"), expected
 
 
 def _stale_fallback_verdict(q, a, ais_age_days, ais_certified, live=False):
@@ -742,6 +788,113 @@ def _stale_fallback_verdict(q, a, ais_age_days, ais_certified, live=False):
 _SERVE_AIS_VERDICTS = ("OK", "NO_PRIOR")
 
 
+def _distinct_ais(ais_rows):
+    """AIS sort tăng dần theo `effective_date`, MỘT dòng mỗi ngày (giữ dòng CUỐI của nhóm).
+
+    Giữ dòng cuối là để bảo toàn nguyên xi hành vi của vòng lặp cũ (`zip(rows, rows[1:])` +
+    `continue` khi trùng ngày): ở đó mốc dùng cho transition kế tiếp luôn là dòng SAU CÙNG của
+    nhóm cùng ngày. FPT có 4 dòng AIS y hệt nhau ngày 2018-07-16 và 2 dòng ngày 2018-04-23 (một
+    dòng `shares_total_after` rỗng đã bị caller lọc trước) — trùng ngày là chuyện thường, không
+    suy ra được thứ tự trong ngày, nên gộp lại thành một mốc.
+    """
+    by_date = {}
+    for r in sorted(ais_rows, key=lambda x: x["effective_date"]):
+        by_date[r["effective_date"]] = r
+    return [by_date[d] for d in sorted(by_date)]
+
+
+def _anchor_candidates(prior, verdicts, upto_date):
+    """Những AIS được phép làm MỐC đối chiếu cho một phát biểu tại `upto_date`, gần nhất trước.
+
+    `prior` = AIS đã lọc theo ngày bởi caller (`< upto_date` cho một AIS, `<= upto_date` cho một
+    dòng quý), đã qua `_distinct_ais`. Luôn trả về ÍT NHẤT mắt xích liền trước — tức luật cũ là
+    một TẬP CON của luật này, không phải một luật khác.
+
+    NỚI 2026-08-20 (job `Taylor_20260820_062330`, chỉ đạo user). Trước đó cổng chứng nhận chỉ đối
+    chiếu với **AIS LIỀN TRƯỚC**, và điều đó gãy khi chính mắt xích liền trước là dòng hỏng — mà
+    feed vendor xáo trộn thứ tự thì lỗi ấy KHÔNG hiếm:
+
+      HHV, đo trên BQ 2026-08-20 (văn bản HOSE 1692/TB-SGDHCM xác nhận con số):
+        AIS 2026-04-08  delta 49.733.293  total 547.166.296   (executed)
+        AIS 2026-05-07  delta 41.500.000  total 473.755.528   (executed — RA SAU nhưng total NHỎ
+                                                               HƠN; 473.755.528 = 432.255.528 +
+                                                               41.500.000, tức nó chốt trên nền
+                                                               của AIS 2024-09-09, bỏ qua hai AIS
+                                                               ở giữa ⇒ vendor xáo trộn thứ tự)
+        AIS 2026-08-20  delta 27.345.592  total 574.511.888
+      547.166.296 + 27.345.592 = 574.511.888 — KHỚP TỪNG ĐƠN VỊ với cả dòng `ticker_financial`
+      2026-07-31 lẫn văn bản HOSE. Đối chiếu với AIS liền trước (473.755.528) lệch +14,65% ⇒
+      dòng ĐÚNG bị đánh UNVERIFIED, và tối 2026-08-20 khi AIS này lật `executed` nó trở thành neo
+      tươi nhất ⇒ HHV lẽ ra REGRESS từ 574.511.888 về `None` (AIS_UNCERTIFIED) đúng ngay sau khi
+      sở xác nhận chính con số đó.
+
+    ĐIỀU KIỆN VÀO — mắt xích liền trước phải KHÔNG chứng nhận được. Đây là chỗ luật này khác hẳn
+    "thử mọi AIS trong 24 tháng", và sự khác biệt ĐÃ ĐO ĐƯỢC, không phải khẩu vị:
+      * `AAA` 2019-06-03 (`shares_total_after` 58.664.988, `shares_delta` 1.700.000) là một trong
+        HAI ca vendor sai mà cả module này được viết ra để chặn. Mắt xích liền trước của nó
+        (2018-10-18, 171.199.976) chứng nhận ĐƯỢC ⇒ không đi lùi ⇒ vẫn UNVERIFIED. Nếu bỏ điều
+        kiện vào và cho thử mọi AIS trong cửa sổ 5 bước, nó KHỚP CHÍNH XÁC mốc 2017-01-24
+        (56.964.988 + 1.700.000 = 58.664.988) và ca chặn kinh điển này lọt lưới. Trùng hợp số học
+        thuần tuý — hai mốc cách nhau 860 ngày và 4 đợt phát hành.
+      * `IDC` 2020-05-28 (3.000.000.000, ~10× thật) — mắt xích liền trước (2019-06-13,
+        300.000.000) chứng nhận được ⇒ không đi lùi ⇒ vẫn UNVERIFIED.
+    ⇒ Lý do DUY NHẤT được phép bước qua một mắt xích là mắt xích đó GÃY. Một chuỗi lành thì phát
+    biểu gần nhất là phát biểu đúng, và "một mốc cũ hơn tình cờ cộng ra đúng số" là trùng hợp,
+    không phải bằng chứng.
+
+    MỐC THAY THẾ PHẢI TỰ NÓ ĐÃ ĐƯỢC CHỨNG NHẬN, và dừng ở cái ĐẦU TIÊN tìm được. Neo vào một dòng
+    chưa kiểm để chứng nhận dòng sau là bắc cầu trên nền không kiểm — đúng thứ vòng-tròn mà cổng
+    này tồn tại để chặn. `verdicts` luôn đã có đủ verdict của mọi dòng TRƯỚC `upto_date` vì hàm
+    gọi đi theo thứ tự thời gian.
+
+    KHÔNG dùng `ticker_financial` để chứng nhận một AIS (đã cân nhắc, BÁC — chỉ đạo cho phép tự
+    quyết): dòng quý là thứ `_explain_quarterly`/`_stale_fallback_verdict` đang PHỤC VỤ dựa trên
+    chính neo AIS này. Lấy nó chứng nhận neo rồi lấy neo giải thích nó là vòng tròn hoàn hảo, và
+    nó cũng đưa look-ahead của `ticker_financial` (2.667 dòng restate, xem docstring module) vào
+    thẳng nhánh AIS vốn đang sạch. Hai nguồn chỉ độc lập khi không nguồn nào là hệ quả của nguồn
+    kia; ở đây chúng không độc lập.
+    """
+    if not prior:
+        return []
+    out = [prior[-1]]
+    if verdicts.get(prior[-1]["effective_date"]) in _SERVE_AIS_VERDICTS:
+        return out                              # mắt xích liền trước LÀNH ⇒ không có cớ đi lùi
+    for step, r in enumerate(reversed(prior[:-1]), start=1):
+        if step > AIS_LOOKBACK_MAX_STEPS or \
+                _days_between(r["effective_date"], upto_date) > AIS_LOOKBACK_MAX_DAYS:
+            break
+        if verdicts.get(r["effective_date"]) in _SERVE_AIS_VERDICTS:
+            out.append(r)
+            break                               # mắt xích LÀNH đầu tiên, không đi xa hơn
+    return out
+
+
+def _ais_reconciles(base, actual, delta, iss, upto_date):
+    """`actual` (mức CP niêm yết công bố tại `upto_date`) có giải thích được từ mốc `base` không?
+
+    HAI đường hợp lệ, khớp MỘT là đủ — giữ nguyên chữ và nghĩa của bản 2026-08-13, chỉ tách ra
+    thành hàm để phần "mốc nào" và phần "khớp thế nào" không còn dính vào nhau:
+        (a) roll(base, ISS ở giữa)      — ISS đã cộng phần tăng, AIS chỉ là lần đăng ký niêm yết
+        (b) base + shares_delta         — không có ISS tương ứng, `shares_delta` là nguồn duy nhất
+    Cộng cả hai là ĐẾM HAI LẦN (xem `_ais_verdicts`). Ngưỡng khớp vẫn là `EXPLAIN_TOL` (0,1%) —
+    cổng nới CHỖ ĐỐI CHIẾU, KHÔNG nới ĐỘ CHÍNH XÁC.
+    """
+    base_v = float(base["shares_total_after"])
+    cands = []
+    # RAW ex-date window, cố ý — xem `_ais_verdicts`: chính hàm này XÁC LẬP xem một AIS đã niêm
+    # yết ISS nào, nên khoá nó theo output của phép khớp đó là vòng tròn.
+    between = _dedup_iss([e for e in iss
+                          if base["effective_date"] < e["exright_date"] <= upto_date])
+    rolled, _applied, blockers = _roll(base_v, between)
+    if not blockers:
+        cands.append(rolled)                                 # (a) — chỉ khi lăn được HẾT ISS
+    if delta is not None and float(delta) > 0:
+        cands.append(base_v + float(delta))                  # (b) — không phụ thuộc ISS
+    # `cands` RỖNG (blocker chắn (a) VÀ không có delta cho (b)) ⇒ không dựng được kỳ vọng nào.
+    # Đây là chỗ `all([]) == True` từng làm nghĩa đảo ngược nếu viết gọn ⇒ viết TƯỜNG MINH.
+    return bool(cands) and any(e > 0 and abs(actual - e) / e <= EXPLAIN_TOL for e in cands)
+
+
 def _ais_verdicts(corp, ticker, asof):
     """{effective_date: "OK" | "NO_PRIOR" | "UNVERIFIED"} cho MỌI AIS của mã, tại `asof`.
 
@@ -800,39 +953,36 @@ def _ais_verdicts(corp, ticker, asof):
                       (58,66/171,20 = 0,343, hụt biên 1/3 = 0,333) — đó là lý do phải có cổng theo
                       bất biến, không chỉ cổng theo biên độ.
     """
-    rows = sorted((c for c in corp
-                   if c["ticker"] == ticker and c["event_code"] == "AIS"
-                   and c["effective_date"] and c["effective_date"] <= asof
-                   and c["shares_total_after"]),
-                  key=lambda r: r["effective_date"])
+    ais_rows = [c for c in corp
+                if c["ticker"] == ticker and c["event_code"] == "AIS"
+                and c["effective_date"] and c["effective_date"] <= asof
+                and c["shares_total_after"]]
     iss = [c for c in corp if c["ticker"] == ticker and c["event_code"] == "ISS"
            and c["exright_date"] and c["exright_date"] <= asof]
+    return _ais_verdicts_from_rows(ais_rows, iss)
+
+
+def _ais_verdicts_from_rows(ais_rows, iss):
+    """Lõi của `_ais_verdicts`, tách ra 2026-08-20 để `_explain_quarterly` dùng CHUNG một bản.
+
+    `oshares_at` đã có sẵn hai danh sách này (đã cắt theo `asof`, đã lọc `shares_total_after`) —
+    trước đây nó phải đi vòng qua `corp`/`ticker`/`asof` để hỏi lại cùng một câu, và
+    `_explain_quarterly` thì không hỏi được câu đó chút nào. Hai bộ lọc là TƯƠNG ĐƯƠNG:
+    `dilutes_share_count` ở `oshares_at` chính là `event_code == "ISS"`.
+    """
+    rows = _distinct_ais(ais_rows)
     verdicts = {}
     if rows:
         verdicts[rows[0]["effective_date"]] = "NO_PRIOR"
-    for prev, cur in zip(rows, rows[1:]):
-        if cur["effective_date"] == prev["effective_date"]:
-            continue                                        # cùng ngày: không suy ra thứ tự được
-        base_prev = float(prev["shares_total_after"])
+    # theo thứ tự thời gian, KHÔNG phải vì gọn: `_anchor_candidates` đọc verdict của các dòng
+    # TRƯỚC dòng đang xét, nên chúng phải đã tính xong.
+    for i, cur in enumerate(rows):
+        if i == 0:
+            continue
         actual = float(cur["shares_total_after"])
-        cands = []
-        # deliberately the RAW ex-date window, not `_unabsorbed_iss`: this function is what
-        # ESTABLISHES which ISS an AIS delta accounts for, so keying it on the output of that
-        # same matching would be circular. Candidate (a) simply overshoots when a lock-up issue
-        # falls in the window — and (b) still stands, which is why the transition is not lost.
-        between = _dedup_iss([e for e in iss
-                              if prev["effective_date"] < e["exright_date"]
-                              <= cur["effective_date"]])
-        rolled, _applied, blockers = _roll(base_prev, between)
-        if not blockers:
-            cands.append(rolled)                             # (a) — chỉ khi lăn được HẾT ISS
         delta = cur.get("shares_delta")
-        if delta is not None and float(delta) > 0:
-            cands.append(base_prev + float(delta))           # (b) — không phụ thuộc ISS
-        # `cands` RỖNG (blocker chắn (a) VÀ không có delta cho (b)) ⇒ không dựng được kỳ vọng nào
-        # ⇒ UNVERIFIED. Đây là chỗ `all([]) == True` từng làm nghĩa của hàm đảo ngược nếu viết
-        # gọn, nên điều kiện được viết TƯỜNG MINH.
-        ok = bool(cands) and any(e > 0 and abs(actual - e) / e <= EXPLAIN_TOL for e in cands)
+        ok = any(_ais_reconciles(base, actual, delta, iss, cur["effective_date"])
+                 for base in _anchor_candidates(rows[:i], verdicts, cur["effective_date"]))
         verdicts[cur["effective_date"]] = "OK" if ok else "UNVERIFIED"
     return verdicts
 
@@ -882,6 +1032,14 @@ def oshares_at(tickers, asof, _cache=None, live=False):
                and c["shares_total_after"]]
         iss = [c for c in corp if c["ticker"] == tk and c["event_code"] == "ISS"
                and c["exright_date"] and c["exright_date"] <= asof and dilutes_share_count(c)]
+        # MỘT lần cho cả mã, và FAIL-CLOSED: cổng chứng nhận sập ⇒ bảng verdict RỖNG ⇒ mọi neo
+        # AIS coi như chưa chứng nhận (`.get()` trả None), và `_anchor_candidates` co về đúng luật
+        # cũ "chỉ AIS liền trước" vì không mốc lùi nào chứng nhận được. Không có nhánh nào của
+        # cổng sập mà lại NỚI ra.
+        try:
+            verdicts = _ais_verdicts(corp, tk, asof)
+        except Exception:                       # noqa: BLE001 — fail-closed by design
+            verdicts = {}
 
         anchors, rejected, unverified = [], [], False
         fin_fallback = None
@@ -893,7 +1051,7 @@ def oshares_at(tickers, asof, _cache=None, live=False):
             anchors.append((a["effective_date"], float(a["shares_total_after"]),
                             "corporate_action.AIS"))
         if q:
-            ok, verified, why, expected = _explain_quarterly(q, ais, iss)
+            ok, verified, why, expected = _explain_quarterly(q, ais, iss, verdicts)
             if ok:
                 anchors.append((q["time"], float(q["OShares"]), "ticker_financial"))
                 unverified = not verified
@@ -905,7 +1063,7 @@ def oshares_at(tickers, asof, _cache=None, live=False):
                 # distinguishes them; nothing here decides on its own.
                 # certification is read HERE, not only at the gate below: once a quarterly
                 # anchor wins, `anchor_src` is no longer AIS and that gate never runs.
-                a_ok = bool(a) and _ais_certified(corp, tk, asof, a["effective_date"])
+                a_ok = bool(a) and verdicts.get(a["effective_date"]) in _SERVE_AIS_VERDICTS
                 allow, fb_why = _stale_fallback_verdict(q, a, ais_age_days, a_ok, live=live)
                 if allow:
                     anchors.append((q["time"], float(q["OShares"]), "ticker_financial"))
@@ -949,7 +1107,7 @@ def oshares_at(tickers, asof, _cache=None, live=False):
         if live and anchor_src == "ticker_financial" and unverified:
             extra, absorb = _absorption_test(anchor_date, anchor_value, ais, iss)
 
-        pending = _pending_iss(ais, iss, anchor_date, anchor_src, asof) + extra
+        pending = _pending_iss(ais, iss, anchor_date, anchor_src, asof, verdicts) + extra
         value, applied, blockers = _roll(anchor_value, pending)
 
         anchor_verified = not (unverified and anchor_src == "ticker_financial")
@@ -1005,12 +1163,13 @@ def oshares_at(tickers, asof, _cache=None, live=False):
         #     là ĐỔI SỐ, không còn là dời cổng — và số thay thế đó chưa ai đo. Ở đây từ chối trả
         #     lời; consumer rơi về đúng số nó đang dùng hôm nay (`oshares_pit`).
         if anchor_src == "corporate_action.AIS" \
-                and not _ais_certified(corp, tk, asof, anchor_date):
+                and verdicts.get(anchor_date) not in _SERVE_AIS_VERDICTS:
             out[tk] = {**base, "value": None, "method": "AIS_UNCERTIFIED",
                        "uncertified_value": value, "uncertified_method": method,
                        "events_applied": [_event_dict(e, h, s) for e, h, s in applied],
                        "note": f"neo AIS {anchor_date} ({anchor_value:,.0f}) không đối chiếu được "
-                               f"với AIS liền trước ⇒ KHÔNG phục vụ {value:,.0f} (fail-closed); "
+                               f"với BẤT KỲ mốc AIS nào trong cửa sổ nhìn lùi ⇒ KHÔNG phục vụ "
+                               f"{value:,.0f} (fail-closed); "
                                f"số bị từ chối giữ ở `uncertified_value` để ghi log"}
             continue
 
@@ -1237,19 +1396,52 @@ def _selfcheck() -> int:
     # Trước vòng 4 cổng chỉ có ở `oshares_pit`, nên đúng hai lệnh dưới đây trả về số sai. Đây là
     # lý do tồn tại của cả vòng này: gọi thẳng phải an toàn, không chỉ gọi qua lớp bọc.
     print("== VÒNG 4: gọi THẲNG oshares_at cũng không được trả neo AIS chưa chứng nhận ==")
-    idc = oshares_at(["IDC"], "2021-02-05")["IDC"]
-    print(f"  IDC 2021-02-05: {fmt(idc['value'])} [{idc['method']}] "
-          f"bị từ chối={fmt(idc.get('uncertified_value'))}")
-    check("N1. IDC 2021-02-05 KHÔNG còn trả 3.000.000.000 khi gọi thẳng",
-          idc["value"] is None and idc["method"] == "AIS_UNCERTIFIED",
-          f"value={fmt(idc['value'])} method={idc['method']}")
-    check("N1b. …và số bị từ chối ĐÚNG là 3.000.000.000, giữ lại để ghi log chứ không phục vụ",
-          idc["uncertified_value"] == 3_000_000_000.0, fmt(idc.get("uncertified_value")))
-    fpt5 = oshares_at(["FPT"], "2020-05-05")["FPT"]
-    check("N2. FPT 2020-05-05 KHÔNG còn trả 461.723.054 khi gọi thẳng (ca REFUTED vòng 2)",
-          fpt5["value"] is None and fpt5["method"] == "AIS_UNCERTIFIED"
-          and fpt5["uncertified_value"] == 461_723_054.0,
-          f"value={fmt(fpt5['value'])} bị từ chối={fmt(fpt5.get('uncertified_value'))}")
+    # ⚠️ N1/N1b/N2 VIẾT LẠI 2026-08-20 (job `Taylor_20260820_062330`, cửa sổ nhìn lùi). Bất biến
+    # được bảo vệ KHÔNG ĐỔI — "hai số vendor sai này KHÔNG BAO GIỜ được phục vụ" — nhưng HÌNH DẠNG
+    # của việc từ chối thì đổi, và phải nói thẳng chứ không sửa lén con số kỳ vọng:
+    #   trước: dòng AIS hỏng là neo tươi nhất, dòng quý bị loại vì đối chiếu với CHÍNH nó ⇒
+    #          `oshares_at` câm (`value=None`, `AIS_UNCERTIFIED`);
+    #   nay:   dòng AIS hỏng vẫn UNVERIFIED (đó mới là cổng), nhưng dòng quý nay đối chiếu được
+    #          với mốc LÀNH phía trước nó ⇒ được nhận làm neo và trả về SỐ ĐÚNG.
+    # Kiểm ở tầng VERDICT chứ không chỉ ở tầng `method`: `method` đổi khi neo khác thắng, verdict
+    # thì phát biểu đúng cái cổng này chịu trách nhiệm. Một test chỉ đọc `method` sẽ đọc "trả số
+    # đúng" thành "cổng thủng".
+    icache4 = _fetch(["IDC"], "2021-02-05")
+    idc = oshares_at(["IDC"], "2021-02-05", _cache=icache4)["IDC"]
+    idc_v = _ais_verdicts(icache4[1], "IDC", "2021-02-05")
+    print(f"  IDC 2021-02-05: {fmt(idc['value'])} [{idc['method']}] anchor={idc['anchor_date']} "
+          f"({idc['anchor_source']}) · verdict AIS 2020-05-28 = {idc_v.get('2020-05-28')}")
+    check("N1. IDC: dòng AIS 2020-05-28 (3.000.000.000) VẪN không chứng nhận được, kể cả với cửa "
+          "sổ nhìn lùi — mắt xích liền trước của nó (2019-06-13) LÀNH nên không được phép đi lùi",
+          idc_v.get("2020-05-28") == "UNVERIFIED", str(idc_v))
+    check("N1b. …nên 3.000.000.000 KHÔNG BAO GIỜ là số phục vụ; số trả về là 300.000.000 từ neo "
+          "KHÁC (dòng quý, nay đối chiếu được với mốc AIS lành 2019-06-13)",
+          idc["value"] == 300_000_000.0 and idc["anchor_source"] == "ticker_financial"
+          and idc.get("uncertified_value") is None,
+          f"value={fmt(idc['value'])} method={idc['method']} anchor={idc['anchor_source']}")
+    # nạp một lần ở mốc MUỘN rồi cắt lại bằng `asof` trong từng lời gọi — `oshares_at` và
+    # `_ais_verdicts` đều tự lọc theo `asof`, nên một cache dùng được cho cả ca 2020 lẫn ca 2021.
+    fcache4 = _fetch(["FPT"], "2026-08-13")
+    fpt5 = oshares_at(["FPT"], "2020-05-05", _cache=fcache4)["FPT"]
+    fpt_v = _ais_verdicts(fcache4[1], "FPT", "2020-05-05")
+    fpt_v21 = _ais_verdicts(fcache4[1], "FPT", "2021-01-01")
+    check("N2. FPT: dòng AIS 2020-04-06 (461.723.054, ca REFUTED vòng 2) VẪN không chứng nhận "
+          "được — cả 5 mốc lùi đều không dựng ra nó",
+          fpt_v.get("2020-04-06") == "UNVERIFIED", str(fpt_v))
+    check("N2b. …và 461.723.054 không phải số phục vụ: FPT 2020-05-05 trả 681.668.102 — ĐÚNG con "
+          "số mà docstring module ghim là sự thật của ngày đó",
+          fpt5["value"] == 681_668_102.0 and fpt5["value"] != 461_723_054.0,
+          f"value={fmt(fpt5['value'])} method={fpt5['method']} anchor={fpt5['anchor_date']} "
+          f"({fpt5['anchor_source']})")
+    # LỢI ÍCH ĐO ĐƯỢC của cửa sổ nhìn lùi trên chính chuỗi FPT: 3 dòng AIS LỚN từng bị đánh
+    # UNVERIFIED oan (mắt xích liền trước của mỗi dòng là một dòng ESOP có `shares_total_after`
+    # hỏng) nay khớp CHÍNH XÁC — không phải "trong dung sai", mà bằng đúng từng cổ phiếu.
+    check("N2c. cửa sổ nhìn lùi CỨU chuỗi AIS thật của FPT: 2018-07-16 / 2019-06-24 / 2020-06-22 "
+          "đều OK (mỗi dòng lùi ĐÚNG 1 bước qua một dòng ESOP hỏng)",
+          all(fpt_v21.get(d) == "OK" for d in ("2018-07-16", "2019-06-24", "2020-06-22"))
+          and all(fpt_v21.get(d) == "UNVERIFIED"
+                  for d in ("2018-04-23", "2019-04-05", "2020-04-06")),
+          str(fpt_v21))
     # CHỨNG MINH NGƯỢC — nếu không có ca test này thì N1/N2 có thể PASS chỉ vì mã đó rỗng dữ liệu.
     # Sửa `globals()` chứ không `import oshares_live`: chạy bằng `python oshares_live.py` thì
     # module này là `__main__`, một lệnh import sẽ nạp BẢN THỨ HAI và vá nhầm chỗ.
@@ -1546,15 +1738,42 @@ def _selfcheck() -> int:
     for hy in ab.get("hypotheses", []):
         print(f"     gồm {hy['absorbed_count']}/1 ⇒ kỳ vọng {fmt(hy['expected'])} "
               f"(lệch {hy['rel_diff']*100:+.3f}%)" if hy["expected"] else "     (không dựng được)")
-    check("AB1. [THẬT, (a) ĐÃ GỒM] HHV 2026-08-19 = 574.511.888 và ISS ex 07-09 KHÔNG bị lăn "
-          "lại — cắt theo quý-end sẽ ra 601.857.480 (+4,76%), đếm hai lần",
-          hhv["value"] == 574_511_888.0 and hhv["events_applied"] == []
-          and ab.get("verdict") == "ABSORBED",
-          f"{fmt(hhv['value'])} [{hhv['method']}] verdict={ab.get('verdict')}")
-    check("AB1b. …và kết luận đó có SỐ đỡ, không phải mặc định im lặng: giả thuyết 'chưa gồm' = "
-          "546.911.840 (lệch +5,05%), 'đã gồm' = 574.257.432 (lệch +0,044% < EXPLAIN_TOL)",
-          [h["expected"] for h in ab.get("hypotheses", [])] == [546_911_840.0, 574_257_432.0],
-          str([h["expected"] for h in ab.get("hypotheses", [])]))
+    # ⚠️ AB1 ĐỔI CƠ CHẾ 2026-08-20 (cửa sổ nhìn lùi, job `Taylor_20260820_062330`) — KẾT QUẢ thì
+    # không đổi. Trước đó dòng quý HHV 2026-07-31 bị `_explain_quarterly` LOẠI (nó chỉ đối chiếu
+    # được với AIS liền trước 2026-05-07, lệch +14,65%), nên câu trả lời đi qua nhánh
+    # `FIN_FALLBACK` + absorption test. Nay dòng quý ĐỐI CHIẾU ĐƯỢC qua mốc lùi 2026-04-08
+    # (547.166.296 + 27.345.592 = 574.511.888, khớp từng đơn vị) ⇒ neo được nhận thẳng, verified,
+    # và absorption test KHÔNG chạy — theo đúng thiết kế của nó ("neo dòng quý ĐÃ verified thì
+    # `_explain_quarterly` đã đối chiếu xong; hỏi lại ở đây là hai lời đáp cho một câu hỏi").
+    # Bất biến SỐ HỌC được bảo vệ vẫn y nguyên và vẫn được kiểm ở đây: KHÔNG lăn lại ISS ex 07-09.
+    check("AB1. [THẬT] HHV 2026-08-19 = 574.511.888 và ISS ex 07-09 KHÔNG bị lăn lại — cắt theo "
+          "quý-end sẽ ra 601.857.480 (+4,76%), đếm hai lần",
+          hhv["value"] == 574_511_888.0 and hhv["events_applied"] == [],
+          f"{fmt(hhv['value'])} [{hhv['method']}] +{len(hhv['events_applied'])} ISS")
+    check("AB1b. …và nay nó đi bằng ĐƯỜNG TỐT HƠN: dòng quý 07-31 đối chiếu ĐƯỢC qua mốc lùi ⇒ "
+          "anchor_verified=True và absorption test KHÔNG chạy (neo đã verified thì hỏi lại là "
+          "hai lời đáp cho một câu hỏi). Trước 2026-08-20 ca này ra FIN_FALLBACK + ABSORBED",
+          hhv["anchor_verified"] is True and "absorption_test" not in hhv
+          and hhv["anchor_source"] == "ticker_financial",
+          f"[{hhv['method']}] verified={hhv['anchor_verified']} "
+          f"absorb={'absorption_test' in hhv}")
+    # …nên khối này vẫn cần MỘT ca THẬT còn đi qua absorption test, nếu không toàn bộ AB* rớt
+    # xuống chỉ còn fixture và không ai biết vendor ngoài đời có hành xử như thế không nữa.
+    # VCI @2026-03-01: phát hành riêng lẻ 17,6% ex 2025-12-16 (127.500.000 CP, `listing_date`
+    # 2026-12-17 — một năm sau), dòng quý 2026-02-02 = 850.100.000 ĐÃ gồm nó.
+    vci = oshares_at(["VCI"], "2026-03-01", live=True)["VCI"]
+    ab_r = vci.get("absorption_test") or {}
+    hyp = {h["absorbed_count"]: h for h in ab_r.get("hypotheses", [])}
+    print(f"  VCI 2026-03-01 [live]: {fmt(vci['value'])} [{vci['method']}] "
+          f"{ab_r.get('verdict')} · giả thuyết {[(h['absorbed_count'], h['expected']) for h in ab_r.get('hypotheses', [])]}")
+    check("AB1c. [THẬT, (a) ĐÃ GỒM] VCI 2026-03-01: dòng quý 850.100.000 khớp giả thuyết 'đã gồm "
+          "1/1' trong EXPLAIN_TOL còn giả thuyết 'chưa gồm' lệch ~17,6% ⇒ ABSORBED, không lăn "
+          "lại 127,5 triệu CP. Kiểm QUAN HỆ giữa hai giả thuyết, không chép cứng float của vendor",
+          ab_r.get("verdict") == "ABSORBED" and vci["events_applied"] == []
+          and abs(hyp.get(1, {}).get("rel_diff", 9)) < EXPLAIN_TOL
+          and abs(hyp.get(0, {}).get("rel_diff", 0)) > EXPLAIN_TOL,
+          f"{fmt(vci['value'])} verdict={ab_r.get('verdict')} "
+          f"rel_diff 0/1 = {hyp.get(0, {}).get('rel_diff')} / {hyp.get(1, {}).get('rel_diff')}")
 
     # (b) SỐ QUÝ-END: cùng hình dạng HHV nhưng dòng quý = ĐÚNG base vendor khai ⇒ CHƯA gồm sự
     # kiện ⇒ PHẢI lăn. Hermetic: đây là hành vi user cảnh báo, hiện chưa quan sát được ca thật
@@ -1684,6 +1903,148 @@ def _selfcheck() -> int:
           and "absorption_test" not in oshares_at(["TCBX"], LV_ASOF, _cache=TCB_C,
                                                   live=True)["TCBX"])
 
+    print("== CỬA SỔ NHÌN LÙI của cổng chứng nhận AIS (2026-08-20) ==")
+    # HERMETIC — số lấy từ ca thật (HHV / AAA) nhưng ĐÓNG BĂNG ở đây: đây là test của LUẬT, và
+    # luật không được rot theo feed sống (§23 hệ luận 1). Ca thật, đo trên BQ, nằm ở N1/N2/N2c.
+    #
+    # HHVX = hình dạng HHV ngày 2026-08-20, văn bản HOSE 1692/TB-SGDHCM xác nhận 574.511.888:
+    #   AIS 04-08 total 547.166.296 → AIS 05-07 total 473.755.528 (RA SAU, total NHỎ HƠN — vendor
+    #   xáo trộn thứ tự) → AIS 08-20 total 574.511.888 = 547.166.296 + 27.345.592.
+    HHV_A = [_A("HHVX", "2025-09-15", 497_433_003.0, delta=23_677_475.0),
+             _A("HHVX", "2026-04-08", 547_166_296.0, delta=49_733_293.0),
+             _A("HHVX", "2026-05-07", 473_755_528.0, delta=41_500_000.0)]
+    HHV_I = [_I("HHVX", "2025-12-25", vol=49_733_293.0, ratio=0.10,
+                method="Quyền mua CP cho Cổ đông hiện hữu"),
+             _I("HHVX", "2026-07-09", vol=27_345_592.0, ratio=0.05)]
+    HHV_Q = [_Q("HHVX", "2026-07-31", 574_511_888.0)]
+    HHV_FEED = HHV_A + [_A("HHVX", "2026-08-20", 574_511_888.0, delta=27_345_592.0)] + HHV_I
+    lb_v = _ais_verdicts_from_rows([r for r in HHV_FEED if r["event_code"] == "AIS"], HHV_I)
+    print(f"  HHVX verdicts: {lb_v}")
+    check("LB1. AIS 2026-08-20 chứng nhận ĐƯỢC qua mốc lùi 2026-04-08 (547.166.296 + 27.345.592 "
+          "= 574.511.888), trong khi mốc liền trước 2026-05-07 vẫn UNVERIFIED",
+          lb_v.get("2026-08-20") == "OK" and lb_v.get("2026-05-07") == "UNVERIFIED"
+          and lb_v.get("2026-04-08") == "OK", str(lb_v))
+    lb1 = oshares_at(["HHVX"], LV_ASOF, live=False, _cache=(HHV_Q, HHV_FEED))["HHVX"]
+    check("LB1b. …⇒ khi AIS 08-20 lật `executed` (đợt ingest tối 2026-08-20) neo tươi nhất PHỤC "
+          "VỤ 574.511.888 [AIS_EXACT] thay vì REGRESS về None. Nhánh PIT (live=False) — cổng "
+          "chứng nhận là cổng CHUNG, không phải đặc quyền của nhánh LIVE",
+          lb1["value"] == 574_511_888.0 and lb1["method"] == "AIS_EXACT"
+          and lb1["anchor_date"] == "2026-08-20",
+          f"{fmt(lb1['value'])} [{lb1['method']}] anchor={lb1['anchor_date']}")
+    lb2 = oshares_at(["HHVX"], LV_ASOF, live=False, _cache=(HHV_Q, HHV_A + HHV_I))["HHVX"]
+    check("LB2. TRƯỚC đợt ingest (chưa có AIS 08-20): dòng quý 2026-07-31 nay ĐỐI CHIẾU ĐƯỢC qua "
+          "cùng mốc lùi ⇒ anchor_verified=True, hết residual 'không đối soát được tại 07-31'",
+          lb2["value"] == 574_511_888.0 and lb2["anchor_verified"] is True
+          and lb2["method"] == "ANCHOR_ONLY" and lb2.get("fin_fallback") is not True,
+          f"{fmt(lb2['value'])} [{lb2['method']}] verified={lb2['anchor_verified']}")
+
+    # ── ĐIỀU KIỆN VÀO: mắt xích liền trước LÀNH ⇒ CẤM đi lùi. Đây là cái giữ được bài học AAA/IDC.
+    # Số thật của AAA. 56.964.988 + 1.700.000 = 58.664.988 — mốc 2017-01-24 KHỚP CHÍNH XÁC dòng
+    # vendor sai 2019-06-03. Nếu cổng "thử mọi AIS trong cửa sổ" thì ca chặn kinh điển này lọt.
+    LOCK_A = [_A("LOCKX", "2017-01-24", 56_964_988.0, delta=5_065_000.0),
+              _A("LOCKX", "2017-07-28", 59_249_988.0, delta=2_285_000.0),
+              _A("LOCKX", "2018-01-09", 83_599_988.0, delta=24_350_000.0),
+              _A("LOCKX", "2018-06-06", 167_199_976.0, delta=83_599_988.0),
+              _A("LOCKX", "2018-10-18", 171_199_976.0, delta=4_000_000.0),
+              _A("LOCKX", "2019-06-03", 58_664_988.0, delta=1_700_000.0)]
+    lock_v = _ais_verdicts_from_rows(LOCK_A, [])
+    check("LB3. [KHÔNG NỚI LỎNG] AAA 2019-06-03 (58.664.988) VẪN UNVERIFIED: mắt xích liền trước "
+          "2018-10-18 (171.199.976) LÀNH ⇒ không được phép đi lùi — dù mốc 2017-01-24 cộng ra "
+          "ĐÚNG con số đó (56.964.988 + 1.700.000)",
+          lock_v.get("2019-06-03") == "UNVERIFIED" and lock_v.get("2018-10-18") == "OK"
+          and 56_964_988.0 + 1_700_000.0 == 58_664_988.0, str(lock_v))
+    # …và CHỨNG MINH NGƯỢC ngay tại `_anchor_candidates`: chính điều kiện vào là thứ đang chặn,
+    # không phải trùng hợp nào khác. Cùng một `prior`, chỉ đổi verdict của mắt xích liền trước.
+    lock_prior = _distinct_ais(LOCK_A[:-1])
+    c_lanh = _anchor_candidates(lock_prior, {r["effective_date"]: "OK" for r in lock_prior},
+                                "2019-06-03")
+    c_gay = _anchor_candidates(lock_prior,
+                               {**{r["effective_date"]: "OK" for r in lock_prior},
+                                "2018-10-18": "UNVERIFIED"}, "2019-06-03")
+    check("LB3b. CHỨNG MINH NGƯỢC cho LB3 — cùng chuỗi, chỉ đổi verdict mắt xích liền trước: "
+          "LÀNH ⇒ 1 mốc (luật cũ y nguyên); GÃY ⇒ 2 mốc (mở thêm 2018-06-06). Nếu không có ca "
+          "này, LB3 xanh có thể chỉ vì cửa sổ không bao giờ mở",
+          [r["effective_date"] for r in c_lanh] == ["2018-10-18"]
+          and [r["effective_date"] for r in c_gay] == ["2018-10-18", "2018-06-06"],
+          f"lành={[r['effective_date'] for r in c_lanh]} · "
+          f"gãy={[r['effective_date'] for r in c_gay]}")
+
+    # ── MỐC LÙI PHẢI TỰ NÓ ĐÃ CHỨNG NHẬN, và dừng ở cái LÀNH ĐẦU TIÊN.
+    # ⚠️ Mắt xích LIỀN TRƯỚC vẫn luôn là mốc mặc định dù verdict của nó là gì — đó là luật CŨ và
+    # nó không đổi (bản trước 2026-08-20 cũng đối chiếu với nó vô điều kiện). Cái phải chứng minh
+    # ở đây là MỐC LÙI THÊM — thứ duy nhất bản vá này thêm vào — phải TỰ NÓ đã chứng nhận.
+    CHAIN_A = [_A("CHAINX", "2026-01-05", 100_000_000.0),                  # NO_PRIOR
+               _A("CHAINX", "2026-02-05", 999_999_999.0, delta=1_000_000.0),   # UNVERIFIED
+               _A("CHAINX", "2026-03-05", 555_555_555.0, delta=1_000_000.0),   # UNVERIFIED
+               _A("CHAINX", "2026-04-05", 1_000_999_999.0, delta=1_000_000.0)]
+    chain_v = _ais_verdicts_from_rows(CHAIN_A, [])
+    check("LB4. mốc lùi thêm phải TỰ chứng nhận: 2026-04-05 (1.000.999.999) khớp KHÍT mốc lùi "
+          "2026-02-05 (999.999.999 + 1.000.000) nhưng CHÍNH mốc đó CHƯA kiểm ⇒ bỏ qua, đi tiếp "
+          "tới mốc lành đầu tiên (2026-01-05) và KHÔNG khớp ⇒ UNVERIFIED. Bắc cầu trên nền "
+          "không kiểm chính là vòng tròn cổng này tồn tại để chặn",
+          chain_v.get("2026-04-05") == "UNVERIFIED"
+          and chain_v.get("2026-02-05") == "UNVERIFIED"
+          and 999_999_999.0 + 1_000_000.0 == 1_000_999_999.0, str(chain_v))
+    check("LB4b. CHỨNG MINH NGƯỢC cho LB4 — cùng chuỗi, chỉ đánh dấu 2026-02-05 là ĐÃ chứng "
+          "nhận: nó lọt vào danh sách mốc và phép khớp thành công. Nếu không có ca này, LB4 "
+          "xanh có thể chỉ vì phép khớp sai chứ không phải vì cổng chặn",
+          [r["effective_date"] for r in _anchor_candidates(
+              _distinct_ais(CHAIN_A[:-1]),
+              {"2026-01-05": "NO_PRIOR", "2026-02-05": "OK", "2026-03-05": "UNVERIFIED"},
+              "2026-04-05")] == ["2026-03-05", "2026-02-05"]
+          and _ais_reconciles(CHAIN_A[1], 1_000_999_999.0, 1_000_000.0, [], "2026-04-05"))
+
+    # ── TRẦN THỜI GIAN của cửa sổ, và đối chứng ngược cho nó.
+    FAR_A = [_A("FARX", "2023-01-05", 100_000_000.0),
+             _A("FARX", "2026-02-05", 999_999_999.0, delta=1_000_000.0),
+             _A("FARX", "2026-03-05", 101_000_000.0, delta=1_000_000.0)]
+    NEAR_A = [_A("NEARX", "2025-01-05", 100_000_000.0),
+              _A("NEARX", "2026-02-05", 999_999_999.0, delta=1_000_000.0),
+              _A("NEARX", "2026-03-05", 101_000_000.0, delta=1_000_000.0)]
+    far_v = _ais_verdicts_from_rows(FAR_A, [])
+    near_v = _ais_verdicts_from_rows(NEAR_A, [])
+    check(f"LB5. TRẦN {AIS_LOOKBACK_MAX_DAYS} NGÀY chặn thật: mốc lành cách 1.155 ngày ⇒ ngoài "
+          f"cửa sổ ⇒ UNVERIFIED; cùng chuỗi với mốc cách 424 ngày ⇒ OK (đối chứng ngược — nếu "
+          f"không có nó, LB5 xanh có thể chỉ vì phép khớp sai)",
+          far_v.get("2026-03-05") == "UNVERIFIED" and near_v.get("2026-03-05") == "OK",
+          f"xa={far_v.get('2026-03-05')} · gần={near_v.get('2026-03-05')}")
+
+    # ── MỐC LÙI CŨNG ÁP CHO `_unabsorbed_iss` (cùng ranh giới "AIS liền trước") ──────────────
+    # Hình dạng TCB, đóng băng: AIS 2024-08-06 (thưởng 1:1) → AIS 2024-11-21 RA SAU nhưng total
+    # NHỎ HƠN (chốt trên nền cũ) → AIS 2025-12-01. Nếu `_unabsorbed_iss` lấy `prev` = 2024-11-21
+    # thì `delta` = 3.542.340.928 không khớp ISS nào ⇒ ESOP ex 2025-08-04 (21.388.675 CP) bị coi
+    # là ĐÃ niêm yết ⇒ dòng quý 7.086.240.414 bị LOẠI và câu trả lời tụt về 7.064.851.739 (−0,30%).
+    TCBS_A = [_A("TCBSX", "2023-08-30", 3_517_238_514.0, delta=6_323_716.0),
+              _A("TCBSX", "2024-08-06", 7_045_021_622.0, delta=3_522_510_811.0),
+              _A("TCBSX", "2024-11-21", 3_522_510_811.0, delta=5_272_297.0),
+              _A("TCBSX", "2025-12-01", 7_064_851_739.0, delta=19_830_117.0)]
+    TCBS_I = [_I("TCBSX", "2023-11-20", vol=5_272_297.0, ratio=0.0, method="Phát hành cho CBCNV"),
+              _I("TCBSX", "2024-06-20", vol=3_522_510_811.0, ratio=1.0,
+                 method="Cổ phiếu thưởng"),
+              _I("TCBSX", "2024-11-30", vol=19_830_117.0, ratio=0.002815,
+                 method="Phát hành cho CBCNV"),
+              _I("TCBSX", "2025-08-04", vol=21_388_675.0, ratio=0.0030275,
+                 method="Phát hành cho CBCNV")]
+    TCBS_Q = [_Q("TCBSX", "2026-01-22", 7_086_240_414.0)]
+    lb6 = oshares_at(["TCBSX"], "2026-03-01", live=False,
+                     _cache=(TCBS_Q, TCBS_A + TCBS_I))["TCBSX"]
+    _uni_no = [e["exright_date"] for e in _unabsorbed_iss(TCBS_A, TCBS_I, "2026-01-22")]
+    _uni_yes = [e["exright_date"] for e in _unabsorbed_iss(
+        TCBS_A, TCBS_I, "2026-01-22", _ais_verdicts_from_rows(TCBS_A, TCBS_I))]
+    print(f"  TCBSX 2026-03-01: {fmt(lb6['value'])} [{lb6['method']}] neo={lb6['anchor_date']} "
+          f"({lb6['anchor_source']}) verified={lb6['anchor_verified']}")
+    check("LB6. `_unabsorbed_iss` cũng lùi qua mắt xích gãy: ESOP ex 2025-08-04 hiện ra là CHƯA "
+          "niêm yết ⇒ dòng quý 7.086.240.414 ĐỐI CHIẾU ĐƯỢC (7.064.851.739 + 21.388.675) ⇒ phục "
+          "vụ ĐÚNG 7.086.240.414 thay vì 7.064.851.739 (−0,30%)",
+          lb6["value"] == 7_086_240_414.0 and lb6["anchor_verified"] is True
+          and lb6["anchor_source"] == "ticker_financial",
+          f"{fmt(lb6['value'])} [{lb6['method']}] verified={lb6['anchor_verified']}")
+    check("LB6b. CHỨNG MINH NGƯỢC cho LB6 — KHÔNG truyền `verdicts` thì `_unabsorbed_iss` giữ "
+          "NGUYÊN luật cũ (mốc = AIS liền trước) và ESOP 2025-08-04 bị coi là đã niêm yết. "
+          "Mặc định của hàm không bao giờ tự nới",
+          _uni_no == [] and _uni_yes == ["2025-08-04"],
+          f"không verdicts={_uni_no} · có verdicts={_uni_yes}")
+
     print("== CÁI GIÁ ĐO ĐƯỢC: 3 ca RESTATE nay được phục vụ (không còn cổng nào chặn) ==")
     # Đo 2026-08-19 trên 246 mã ticker_prune tại asof=2026-03-01 (có 5,5 tháng tương lai để đối
     # chiếu): 12 mã đổi số, 3 mã mang chữ ký RESTATE — giá trị phục vụ trùng KHÍT một AIS chỉ có
@@ -1712,7 +2073,7 @@ def _selfcheck() -> int:
 
     print("== Bất biến chung: value is None ⟺ method ∈ {UNKNOWN_RATIO, NO_ANCHOR, AIS_UNCERTIFIED} ==")
     every = [h, m, idc, fpt5, tcb_boom, vre, vre_off, na, cc1,
-             h5, h5b, hh1, hh2, kbc, kbc_pit,
+             h5, h5b, hh1, hh2, kbc, kbc_pit, lb1, lb2, lb6, vci,
              hhv, amb, nor, two, old, inn, *qe.values(),
              *cost.values(), *ctrl.values(), *series.values()]
     check("10. không bao giờ trả số kèm nhãn 'không biết', và ngược lại",
@@ -1721,7 +2082,9 @@ def _selfcheck() -> int:
               for r in every))
     served_ais = [r for r in every
                   if r["value"] is not None and r.get("anchor_source") == "corporate_action.AIS"]
-    _corp_memo = {}
+    # gieo sẵn feed HERMETIC: `_corp_of` đi hỏi BQ, mà `HHVX` là mã fixture nên không có ở đó.
+    # Gieo bằng CHÍNH feed đã dựng ⇒ bất biến 10b vẫn kiểm thật ca này, không phải miễn trừ nó.
+    _corp_memo = {"HHVX": HHV_FEED}
 
     def _corp_of(tk):
         if tk not in _corp_memo:
