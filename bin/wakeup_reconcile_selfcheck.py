@@ -106,6 +106,8 @@ class Sandbox:
         self.dir = tempfile.mkdtemp(prefix="wakerec_")
         self.jobs = os.path.join(self.dir, "jobs")
         os.makedirs(self.jobs)
+        self.batches = os.path.join(self.dir, "batches")
+        os.makedirs(self.batches)
         self.calls = os.path.join(self.dir, "wake.calls")
         self.notify_calls = os.path.join(self.dir, "notify.calls")
         self.db = os.path.join(self.dir, "tasks.db")
@@ -187,6 +189,13 @@ class Sandbox:
         with open(os.path.join(self.jobs, job_id + ".json"), "w") as f:
             json.dump(rec, f)
 
+    def batch(self, batch_id, members, expected=0, claimed=""):
+        """Dựng thẳng bus/batches/<id>.json — đợt fan-out của dispatch.sh --batch-id."""
+        with open(os.path.join(self.batches, batch_id + ".json"), "w") as f:
+            json.dump({"batch_id": batch_id, "created_at": int(time.time()) - 60,
+                       "expected": expected or len(members), "members": list(members),
+                       "wake_claimed_by": claimed}, f)
+
     def run(self, min_ts=0):
         env = dict(os.environ)
         env.update({
@@ -199,6 +208,7 @@ class Sandbox:
             "WAKEUP_RECONCILE_LOG": os.path.join(self.dir, "reconcile.log"),
             "WAKEUP_RECONCILE_STATE": self.state,
             "WAKEUP_RECONCILE_LOCK": os.path.join(self.dir, "lock"),
+            "WAKEUP_RECONCILE_BATCHES_DIR": self.batches,
             "WAKEUP_RECONCILE_MIN_TS": str(min_ts),
         })
         r = subprocess.run([sys.executable, SCRIPT], env=env, capture_output=True,
@@ -902,12 +912,33 @@ def main():
             "WAKEUP_RECONCILE_LOG": os.path.join(sb.dir, "reconcile.log"),
             "WAKEUP_RECONCILE_STATE": sb.state,
             "WAKEUP_RECONCILE_LOCK": os.path.join(sb.dir, "lock"),
+            "WAKEUP_RECONCILE_BATCHES_DIR": sb.batches,
             "WAKEUP_RECONCILE_MIN_TS": "0"},
         capture_output=True, text=True, timeout=60)
     check("dòng CRITICAL khớp ĐÚNG regex thật của cron_health_check.py",
           bool(CRON_HEALTH_ERROR_RE.search(r.stdout)), True)
     check("dòng CRITICAL nêu số record không đọc được",
           "1 job record không đọc được" in r.stdout, True)
+    sb.close()
+
+    print("== CA u: job thuộc đợt fan-out (--batch-id) mà batch CÒN ĐANG BAY ⇒ KHÔNG cứu "
+          "(im lặng là đúng thiết kế: anh em cuối đợt sẽ bắn 1 wake gộp). Hết bay ⇒ cứu lại.")
+    sb = Sandbox()
+    sb.job("Plan_A", batch_id="planT1_u", ended_at=str(int(time.time()) - 600))
+    # Anh em cùng đợt CÒN CHẠY THẬT: pid của chính tiến trình test (chắc chắn sống) + deadline
+    # còn hạn. Đây là ca đã tái diễn thật 08-18/08-20 — hai job DollarBill lệch nhau 31-83s.
+    sb.job("Plan_B", status="running", pid=str(os.getpid()),
+           deadline=str(int(time.time()) + 600), batch_id="planT1_u", ended_at=None)
+    sb.batch("planT1_u", ["Plan_A", "Plan_B"], expected=2)
+    sb.run()
+    check("batch còn bay ⇒ KHÔNG cứu job xong sớm (0 wake)", len(sb.wakes()), 0)
+    # Anh em xong ⇒ batch hết bay. Lượt wake gộp của dispatch.sh có thể đã chết (đó là lý do
+    # reconciler tồn tại) ⇒ lưới cuối phải cứu lại, đúng 1 lượt cho cả thread.
+    sb.job("Plan_B", status="done", pid=str(os.getpid()),
+           deadline=str(int(time.time()) + 600), batch_id="planT1_u",
+           ended_at=str(int(time.time()) - 600))
+    sb.run()
+    check("batch hết bay mà vẫn chưa ai claim-reply ⇒ lưới cuối cứu (1 wake)", len(sb.wakes()), 1)
     sb.close()
 
     print()

@@ -1,0 +1,237 @@
+#!/usr/bin/env bash
+# dispatch_batch_wake_selfcheck.sh — hồi quy cho BATCH-AWARE WAKE (2026-08-20, RCA
+# agents/Mike/research/plan_pipeline_3loi_rca_20260820.md lỗi #1).
+#
+# Bất biến phải giữ:
+#   (A) N job cùng --batch-id ⇒ ĐÚNG 1 lượt wake_thread.sh cho cả đợt, do job terminal
+#       CUỐI CÙNG bắn, prompt gộp liệt kê MỌI job của đợt.
+#   (B) Job KHÔNG có --batch-id ⇒ hành vi y hệt trước: mỗi job tự bắn wake của nó.
+#   (C) FAIL-SAFE — không bao giờ nuốt mất wake: anh em TREO (record kẹt non-terminal, pid
+#       chết, quá deadline) không được chặn; batch thiếu/hỏng ⇒ quay về wake đơn lẻ.
+#   (D) Reconciler (lưới cuối) KHÔNG cứu job đang im lặng chờ anh em (batch còn bay), nhưng
+#       cứu lại ngay khi batch hết bay.
+#
+# Hai tầng test, cố ý tách:
+#   PHẦN 1 — dispatch THẬT trong sandbox (symlink bin/ thật, chỉ stub side-effect ra ngoài),
+#            cùng khuôn với dispatch_wake_selfcheck.sh. Bắt được lỗi wiring (export biến,
+#            đặt call site sai chỗ) mà test đơn vị không thấy.
+#   PHẦN 2 — đua/treo ở mức nguyên thủy batch-claim-wake: dựng THẲNG job record ở trạng thái
+#            cần (đang chạy / treo pid chết / quá deadline) vì không cách nào ép một job thật
+#            treo đúng lúc mình muốn. Đây là chỗ duy nhất test được ca "1 job không bao giờ
+#            terminal".
+#
+# Usage: bash mike/bin/dispatch_batch_wake_selfcheck.sh   (exit 0 = PASS)
+set -uo pipefail
+
+REAL="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+SB="$(mktemp -d)"
+trap 'rm -rf "$SB"' EXIT
+MK="$SB/mike"
+
+mkdir -p "$MK/bin" "$MK/kb" "$MK/bus/jobs" "$MK/bus/batches" "$MK/logs" "$MK/state/circuit" \
+         "$MK/agents/Wags" "$MK/agents/Taylor" "$MK/agents/Mike/state"
+for f in "$REAL/bin"/*; do
+  [ -f "$f" ] && ln -s "$f" "$MK/bin/$(basename "$f")"
+done
+cp "$REAL/kb/discord_channels.json" "$MK/kb/discord_channels.json"
+cp "$REAL/kb/cli_providers.json" "$MK/kb/cli_providers.json"
+
+_stub() {  # _stub <tên file trong bin> <nội dung>
+  rm -f "$MK/bin/$1"
+  [ -e "$MK/bin/$1" ] && { echo "FATAL: không gỡ được $MK/bin/$1"; exit 1; }
+  printf '%s\n' "$2" > "$MK/bin/$1"
+  chmod +x "$MK/bin/$1"
+  [ -L "$MK/bin/$1" ] && { echo "FATAL: $MK/bin/$1 vẫn là symlink — dừng để khỏi hỏng file thật"; exit 1; }
+  return 0
+}
+_stub notify_thread.sh "#!/usr/bin/env bash
+exit 0"
+_stub notify.sh "#!/usr/bin/env bash
+exit 0"
+_stub append_event.sh "#!/usr/bin/env bash
+exit 0"
+_stub consolidate.sh "#!/usr/bin/env bash
+exit 0"
+# Stub ghi MỖI LỜI GỌI trên ĐÚNG MỘT DÒNG: prompt wake của batch là NHIỀU DÒNG (nó liệt kê
+# từng job), nên không ép xuống 1 dòng thì `wc -l` đếm 6 cho 1 lần gọi — đúng cái bẫy đã làm
+# bản selfcheck đầu tiên báo FAIL giả (2026-08-20).
+_stub wake_thread.sh "#!/usr/bin/env bash
+printf 'thread_id=%s\tprompt=%s\tsuffix=%s\n' \"\$1\" \"\${2//\$'\n'/ | }\" \"\${3:-}\" >> \"$SB/wake_thread.calls\""
+# Chốt an toàn y như dispatch_wake_selfcheck.sh: nếu _stub lỡ ghi vào bin/ THẬT thì dừng ngay.
+for n in notify.sh notify_thread.sh append_event.sh consolidate.sh wake_thread.sh; do
+  [ "$(wc -l < "$REAL/bin/$n")" -gt 5 ] || { echo "FATAL: $REAL/bin/$n bị ghi đè bởi stub — KHÔI PHỤC NGAY (git checkout -- bin/$n)"; exit 1; }
+done
+cat > "$SB/claude_stub.sh" <<EOF
+#!/usr/bin/env bash
+sleep \${CLAUDE_STUB_SLEEP:-0}
+echo "[claude-stub] ok"
+exit \${CLAUDE_STUB_RC:-0}
+EOF
+chmod +x "$SB/claude_stub.sh"
+
+ARCH_ID="$(bash "$REAL/bin/discord_channel.sh" architecture)"
+[ -n "$ARCH_ID" ] || { echo "FATAL: không phân giải được topic 'architecture' từ registry thật"; exit 1; }
+
+FAILS=0; CASES=0
+assert() {
+  CASES=$((CASES + 1))
+  if [ "$2" = "$3" ]; then
+    printf '    ok   %s = %q\n' "$1" "$2"
+  else
+    printf '    FAIL %s: thực=%q ≠ mong đợi=%q\n' "$1" "$2" "$3"; FAILS=$((FAILS + 1))
+  fi
+}
+_nwake() { [ -f "$SB/wake_thread.calls" ] && wc -l < "$SB/wake_thread.calls" | tr -d ' ' || echo 0; }
+_reset() { rm -f "$SB"/*.calls; rm -f "$MK/bus/jobs"/*.json "$MK/bus/jobs"/*.lock \
+                 "$MK/bus/batches"/* "$MK/logs"/*.log "$MK/logs"/*.err 2>/dev/null; return 0; }
+
+_dispatch_bg() {  # _dispatch_bg <agent> <prompt> [cờ thêm...]
+  ( cd "$MK" && env CLAUDE_STUB_RC=0 CLAUDE_STUB_SLEEP="${STUB_SLEEP:-0}" \
+      DISPATCH_CGROUP_DETACH=0 DISPATCH_CLAUDE_BIN="$SB/claude_stub.sh" DISPATCH_FROM=Mike \
+      bash "$MK/bin/dispatch.sh" "$@" --thread architecture --bg --timeout 30 ) \
+    > "$SB/out" 2>> "$SB/err"
+}
+
+_wait_all_terminal() {  # chờ mọi job record rời trạng thái đang chạy
+  local i n_run
+  for i in $(seq 1 120); do
+    n_run="$(grep -l '"status": *"\(running\|retrying\)"' "$MK/bus/jobs"/*.json 2>/dev/null | wc -l)"
+    [ "$n_run" = "0" ] && break
+    sleep 0.5
+  done
+  sleep 1.5
+}
+
+echo "== CA 1: 2 job cùng --batch-id (dispatch THẬT) ⇒ ĐÚNG 1 lượt wake, prompt gộp cả 2 job"
+_reset
+BID="selfcheck.batch1"
+_dispatch_bg Wags "batch job A" --batch-id "$BID" --batch-size 2
+STUB_SLEEP=3 _dispatch_bg Taylor "batch job B" --batch-id "$BID" --batch-size 2
+_wait_all_terminal
+JOBS_ALL="$(ls "$MK/bus/jobs"/*.json | sed 's#.*/##;s/\.json$//' | sort)"
+NJOB="$(printf '%s\n' "$JOBS_ALL" | grep -c .)"
+assert "2 job record được tạo" "$NJOB" "2"
+assert "wake_thread.sh được gọi ĐÚNG 1 lần cho cả batch" "$(_nwake)" "1"
+WLINE="$(tail -1 "$SB/wake_thread.calls" 2>/dev/null || true)"
+assert "prompt wake nêu batch_id" "$(echo "$WLINE" | grep -c "BATCH \`$BID\`")" "1"
+NLISTED=0
+for j in $JOBS_ALL; do
+  echo "$WLINE" | grep -q "claim-reply <job_id>" && : # template chung
+  echo "$WLINE" | grep -q "$j" && NLISTED=$((NLISTED + 1))
+done
+assert "prompt liệt kê ĐỦ cả 2 job của batch" "$NLISTED" "2"
+assert "wake bắn vào đúng thread pinned" "$(echo "$WLINE" | grep -oP 'thread_id=\K[0-9]+')" "$ARCH_ID"
+assert "batch record ghi wake_claimed_by" \
+  "$(python3 -c "import json;print(1 if json.load(open('$MK/bus/batches/$BID.json')).get('wake_claimed_by') else 0)")" "1"
+
+echo "== CA 1b: batch có job FAIL + job DONE ⇒ vẫn ĐÚNG 1 wake (call site nhánh thất bại)"
+_reset
+BID1B="selfcheck.batch1b"
+( cd "$MK" && env CLAUDE_STUB_RC=1 CLAUDE_STUB_SLEEP=0 DISPATCH_CGROUP_DETACH=0 \
+    DISPATCH_CLAUDE_BIN="$SB/claude_stub.sh" DISPATCH_FROM=Mike \
+    bash "$MK/bin/dispatch.sh" Wags "batch job FAIL" --batch-id "$BID1B" --batch-size 2 \
+      --thread architecture --bg --timeout 30 --retries 0 ) > "$SB/out" 2>> "$SB/err"
+STUB_SLEEP=3 _dispatch_bg Taylor "batch job DONE" --batch-id "$BID1B" --batch-size 2
+_wait_all_terminal
+assert "1 job fail + 1 job done cùng batch ⇒ vẫn đúng 1 wake" "$(_nwake)" "1"
+assert "prompt gộp nêu ĐỦ 2 trạng thái (failed + done)" \
+  "$(tail -1 "$SB/wake_thread.calls" | grep -cE 'status=(failed|timeout).*status=done|status=done.*status=(failed|timeout)')" "1"
+
+echo "== CA 2: KHÔNG --batch-id ⇒ hành vi cũ, mỗi job tự bắn wake (2 job = 2 wake)"
+_reset
+_dispatch_bg Wags "no-batch job A"
+_dispatch_bg Taylor "no-batch job B"
+_wait_all_terminal
+assert "2 job không batch ⇒ 2 lượt wake (giữ nguyên hành vi cũ)" "$(_nwake)" "2"
+
+echo "== CA 3: batch-id có nhưng batch record BỊ XOÁ giữa chừng ⇒ vẫn wake (đơn lẻ), không nuốt"
+_reset
+BID3="selfcheck.batch3"
+STUB_SLEEP=2 _dispatch_bg Wags "batch job mất record" --batch-id "$BID3" --batch-size 1
+sleep 0.8
+rm -f "$MK/bus/batches/$BID3.json"
+_wait_all_terminal
+assert "batch record mất ⇒ vẫn có đúng 1 wake (fallback đơn lẻ)" "$(_nwake)" "1"
+assert "prompt fallback là prompt ĐƠN LẺ (có status=done, không có chữ BATCH)" \
+  "$(tail -1 "$SB/wake_thread.calls" | grep -c 'BATCH')" "0"
+
+echo "== CA 4 (đơn vị): đua — 2 member cùng terminal, chỉ 1 người claim được"
+_reset
+JD="$MK/bus/jobs"; BD="$MK/bus/batches"
+mk_job() {  # mk_job <job_id> <status> <pid> <deadline_offset>
+  python3 - "$JD" "$1" "$2" "$3" "$4" <<'PY'
+import json, os, sys, time
+jd, jid, st, pid, off = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], int(sys.argv[5])
+json.dump({"job_id": jid, "to": "DollarBill", "from": "Mike", "status": st, "pid": pid,
+           "started_at": int(time.time()) - 60, "ended_at": int(time.time()) - 30,
+           "deadline": int(time.time()) + off, "discord_thread_id": "1"},
+          open(os.path.join(jd, jid + ".json"), "w"))
+PY
+}
+CLAIM() { python3 "$REAL/bin/mike_json.py" batch-claim-wake "$BD" "$1" "$2" "$JD" >/dev/null 2>&1; echo $?; }
+mk_job jobA done "" 60; mk_job jobB done "" 60
+python3 "$REAL/bin/mike_json.py" batch-register "$BD" b4 jobA 2 >/dev/null
+python3 "$REAL/bin/mike_json.py" batch-register "$BD" b4 jobB 2 >/dev/null
+R1="$(CLAIM b4 jobA)"; R2="$(CLAIM b4 jobB)"
+assert "member #1 claim ⇒ exit 0 (được bắn)" "$R1" "0"
+assert "member #2 claim ⇒ exit 1 (đã có người bắn)" "$R2" "1"
+
+echo "== CA 5 (đơn vị): xong LỆCH NHAU — anh em còn CHẠY THẬT ⇒ im lặng; xong sau ⇒ bắn"
+mk_job jobC done "" 60
+mk_job jobD running "$$" 60          # pid=$$ (chính selfcheck) = còn sống thật
+python3 "$REAL/bin/mike_json.py" batch-register "$BD" b5 jobC 2 >/dev/null
+python3 "$REAL/bin/mike_json.py" batch-register "$BD" b5 jobD 2 >/dev/null
+assert "job xong TRƯỚC im lặng khi anh em còn chạy" "$(CLAIM b5 jobC)" "2"
+assert "batch đang bay ⇒ reconciler phải bỏ qua (batch-in-flight exit 0)" \
+  "$(python3 "$REAL/bin/mike_json.py" batch-in-flight "$BD" b5 "$JD" >/dev/null 2>&1; echo $?)" "0"
+mk_job jobD done "$$" 60
+assert "job xong SAU bắn wake cho cả batch" "$(CLAIM b5 jobD)" "0"
+
+echo "== CA 6 (đơn vị): FAIL-SAFE — 1 job TREO vĩnh viễn (pid chết, quá deadline) không được nuốt wake"
+mk_job jobE done "" 60
+mk_job jobF running 999999999 -400    # pid không tồn tại + deadline đã qua > BATCH_DEATH_GRACE_S
+python3 "$REAL/bin/mike_json.py" batch-register "$BD" b6 jobE 2 >/dev/null
+python3 "$REAL/bin/mike_json.py" batch-register "$BD" b6 jobF 2 >/dev/null
+assert "anh em TREO không chặn ⇒ job terminal cuối VẪN bắn" "$(CLAIM b6 jobE)" "0"
+
+echo "== CA 7 (đơn vị): job treo NHƯNG chưa quá deadline ⇒ còn nhường (chưa kết luận là chết)"
+mk_job jobG done "" 60
+mk_job jobH running 999999999 120     # pid chết nhưng deadline còn ⇒ chưa đủ bằng chứng chết
+python3 "$REAL/bin/mike_json.py" batch-register "$BD" b7 jobG 2 >/dev/null
+python3 "$REAL/bin/mike_json.py" batch-register "$BD" b7 jobH 2 >/dev/null
+assert "chưa quá deadline ⇒ vẫn im lặng (chưa kết luận anh em đã chết)" "$(CLAIM b7 jobG)" "2"
+assert "…nhưng batch VẪN 'đang bay' nên reconciler chưa cứu" \
+  "$(python3 "$REAL/bin/mike_json.py" batch-in-flight "$BD" b7 "$JD" >/dev/null 2>&1; echo $?)" "0"
+mk_job jobH running 999999999 -400    # deadline trôi qua
+assert "hết deadline ⇒ batch KHÔNG còn bay ⇒ reconciler được phép cứu (lưới cuối)" \
+  "$(python3 "$REAL/bin/mike_json.py" batch-in-flight "$BD" b7 "$JD" >/dev/null 2>&1; echo $?)" "1"
+
+echo "== CA 8 (đơn vị): expected=2 mà mới đăng ký 1 ⇒ chưa được bắn (anh em chưa kịp dispatch)"
+mk_job jobI done "" 60
+python3 "$REAL/bin/mike_json.py" batch-register "$BD" b8 jobI 2 >/dev/null
+assert "thiếu member chưa đăng ký ⇒ im lặng" "$(CLAIM b8 jobI)" "2"
+python3 - "$BD/b8.json" <<'PY'
+import json, sys, time
+fp = sys.argv[1]; o = json.load(open(fp))
+o["created_at"] = int(time.time()) - 3600      # quá BATCH_REG_GRACE_S
+json.dump(o, open(fp, "w"))
+PY
+assert "quá hạn ân xá đăng ký ⇒ không kẹt vĩnh viễn, được bắn" "$(CLAIM b8 jobI)" "0"
+
+echo "== CA 9 (đơn vị): batch record HỎNG / job không phải member ⇒ exit 3 = KHÔNG BIẾT"
+mk_job jobJ done "" 60
+printf 'x' > "$BD/b9.json"
+assert "batch record hỏng ⇒ exit 3 (caller quay về wake đơn lẻ)" "$(CLAIM b9 jobJ)" "3"
+python3 "$REAL/bin/mike_json.py" batch-register "$BD" b9x jobJ 1 >/dev/null 2>&1
+assert "job KHÔNG nằm trong batch ⇒ exit 3" "$(CLAIM b9x jobKhongCo)" "3"
+assert "batch_id có ký tự lạ (traversal) ⇒ exit 3, không đụng file ngoài thư mục" \
+  "$(CLAIM ../../etc/passwd jobJ)" "3"
+
+echo
+if [ "$FAILS" -eq 0 ]; then
+  echo "PASS — $CASES/$CASES assertion đúng (batch wake: 1 lượt/đợt, fail-safe khi treo/hỏng, không batch = hành vi cũ)"
+  exit 0
+else
+  echo "FAIL — $FAILS/$CASES assertion sai"
+  exit 1
+fi

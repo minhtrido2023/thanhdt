@@ -587,6 +587,15 @@ _assert_fresh_artifact "golive_v23_recommendations (recommend output DollarBill 
 # thêm account mới vào file đó là tự động có plan T+1, không cần sửa gì ở đây. Xem
 # kb/account_onboarding_runbook.md.
 LIVE_LABELS="$(cd "$WORKDIR" && python3 -c "from trading_bot.config import live_dnse_labels; print(' '.join(live_dnse_labels()))")"
+# BATCH: N account = N job DollarBill (cố ý, KHÔNG gộp — tách per-account là hàng rào chống
+# nhiễm chéo tài khoản, sự cố 2026-07-19) nhưng chỉ ĐÚNG MỘT lượt đánh thức Mike cho cả đợt.
+# Không có nó thì mỗi job tự push wake ⇒ ccdb (chỉ dedupe task PENDING, không dedupe session
+# RUNNING) mở 2 phiên Mike song song trên cùng thread ⇒ post trùng nội dung (đo thật 08-18 và
+# 08-20). PLAN_BATCH_SIZE để job xong sớm không tưởng mình là người cuối khi anh em còn chưa
+# kịp đăng ký. Xem bin/batch_wake.sh + RCA plan_pipeline_3loi_rca_20260820.md lỗi #1.
+PLAN_BATCH_ID="planT1_$(TZ='Asia/Ho_Chi_Minh' date +%Y%m%d_%H%M%S)"
+PLAN_BATCH_SIZE="$(printf '%s\n' $LIVE_LABELS | grep -c . || true)"
+echo "  [batch] wake gộp cho $PLAN_BATCH_SIZE job DollarBill — batch_id=$PLAN_BATCH_ID"
 for ACCT in $LIVE_LABELS; do
   echo; echo "--- [pipeline-4] dispatch DollarBill lập plan T+1 cho $ACCT ---"
   HAS_EXCL="$(cd "$WORKDIR" && python3 -c "
@@ -655,7 +664,8 @@ except Exception:
   HOLDS_NOTE="$(cd "$ROOT" && python3 bin/signal_holds.py --note 2>/dev/null)"
   "$ROOT/bin/dispatch.sh" DollarBill \
     "Lập plan T+1 cho tài khoản $ACCT. Đọc DT5G từ deploy_golive_dt5g_v4/golive_state_today.json và recommend output mới nhất trong data/. Ghi plan vào data/plan_${ACCT}_${NEXT_TRADING_DAY}.json — dùng ĐÚNG NGUYÊN VĂN ngày $NEXT_TRADING_DAY (đã tính sẵn bằng next_trading_day(), bỏ T7/CN/lễ) làm plan_date và tên file, TUYỆT ĐỐI KHÔNG tự suy ra 'ngày mai' bằng cách cộng 1 vào ngày hôm nay (sự cố thật 2026-07-10: dispatch thứ Sáu tự tính '07-11' là ngày mai, nhưng đó là thứ Bảy không phải ngày giao dịch, đúng ra phải là 07-13 thứ Hai). Ngày hôm nay: $TODAY (ICT).${NAV_NOTE}${EGG_NOTE}${CAPIT_NOTE}${HOLDS_NOTE} YÊU CẦU VĂN PHONG (user 2026-07-07): kết thúc final message bằng 3-5 dòng tóm tắt DỄ HIỂU cho người đọc không chuyên — bắt buộc nêu rõ: Account nào · plan ngày nào · hành động chính (HOLD hay mấy lệnh gì) · VÌ SAO 1-2 câu · trạng thái duyệt — vì message này được đăng nguyên văn vào Discord plan channel. Lệnh MUA size bằng tiền bán cùng ngày: trừ phí 0.075% + chừa biên giá, đừng size khít ref price. BẮT BUỘC VỀ GIÁ THAM CHIẾU (user 2026-07-09, tái diễn nhiều lần): mtm_price_ref/ref_price của MỌI mã trong plan phải lấy từ DNSE live quote (dnse_api.py secdef/latest_trade — giá đóng cửa THẬT hôm nay $TODAY) — TUYỆT ĐỐI KHÔNG dùng giá đóng cửa BQ ('ticker'/'ticker_1m' close) làm ref_price, vì BQ cache local chỉ sync đêm 23:45 ICT nên tại giờ bạn chạy (~19:00) BQ cache luôn trễ ít nhất 1 ngày giao dịch — dùng BQ ở đây LUÔN cho ra giá sai/cũ, không phải thỉnh thoảng. Sự cố thật đã xảy ra: plan ZaloPay 07-10 có 2/4 mã (BID, MBB) dùng nhầm 'BQ close 07-08' lệch tới +5.7% so với giá đóng cửa thật 07-09, trong khi 2 mã còn lại dùng đúng DNSE live. Nếu DNSE live quote lỗi/thiếu cho 1 mã nào đó, ghi rõ note 'THIẾU GIÁ LIVE — cần kiểm tra tay' thay vì âm thầm dùng BQ thay thế." \
-    --bg 2>/dev/null || echo "  [WARN] dispatch DollarBill cho $ACCT fail — check mike/logs/"
+    --bg --batch-id "$PLAN_BATCH_ID" --batch-size "$PLAN_BATCH_SIZE" \
+    2>/dev/null || echo "  [WARN] dispatch DollarBill cho $ACCT fail — check mike/logs/"
 done
 
 echo; echo "=== EOD PIPELINE DONE — $(TZ='Asia/Ho_Chi_Minh' date +'%H:%M ICT') ==="

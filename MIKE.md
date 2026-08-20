@@ -116,6 +116,18 @@ cao sẽ tự chạy tiếp, nhưng nếu phiên tôi restart giữa chừng th�
 > truyền `<job_id>-reconcile<lần bắn>` — bắt buộc phải khác nhau vì cột `name` của
 > `scheduled_tasks` là UNIQUE. Parser nào cần job_id thật thì cắt hậu tố `-reconcile\d+`.
 
+> **FAN-OUT = 1 LƯỢT WAKE, KHÔNG PHẢI N (thêm 2026-08-20, `--batch-id`).** Một caller dispatch
+> N job cùng lúc (vd `bq_freshness_check.sh` → 1 job DollarBill cho MỖI account live; tách
+> per-account là CỐ Ý, đừng gộp) thì mỗi `_bg_wrapper` xong lại tự push wake ⇒ N lượt cách nhau
+> vài chục giây vào CÙNG thread. ccdb chỉ dedupe task **PENDING**, không dedupe session
+> **RUNNING** ⇒ lượt thứ hai mở phiên Mike SONG SONG với phiên đang chạy ⇒ post trùng nội dung
+> (đo thật: 08-18 cách 31s, 08-20 cách 83s). Cách gọi đúng cho mọi caller fan-out:
+> `dispatch.sh ... --bg --batch-id <id> --batch-size <N>` — job terminal CUỐI CÙNG của đợt bắn
+> ĐÚNG MỘT wake, prompt gộp liệt kê mọi job để bạn `claim-reply` từng job trong CÙNG một lượt
+> (`bin/batch_wake.sh`, test-and-set nguyên tử như `jobs.sh claim-reply`). Không truyền
+> `--batch-id` ⇒ hành vi cũ y nguyên. Anh em TREO không nuốt mất wake của cả đợt, và reconciler
+> (tầng dưới) là lưới cuối. RCA: `agents/Mike/research/plan_pipeline_3loi_rca_20260820.md` lỗi #1.
+
 > **TẦNG THỨ BA — RECONCILER level-triggered (thêm 2026-08-20, `bin/wakeup_reconcile.py`, cron
 > `*/5`).** Push và ladder đều là **edge**: mất cạnh (push chết vì encoding/ccdb restart, ladder bị
 > ccdb xoá, Mike quên đặt) = thread ngủ VÔ HẠN, không ai biết (sự cố 08-20, user tự phát hiện sau

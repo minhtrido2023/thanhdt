@@ -7,6 +7,12 @@ Bất biến được cưỡng chế ở đây:
     `replied_at`, và `ended_at` đã quá GRACE_SECONDS ⇒ thread đó PHẢI có ≥1 one-shot
     wakeup còn PENDING trong tasks.db của ccdb, HOẶC session của thread đang `running`.
 
+MỘT NGOẠI LỆ, thêm 2026-08-20: job thuộc một đợt fan-out (`batch_id`, dispatch.sh
+--batch-id) mà batch CÒN ĐANG BAY thì im lặng là ĐÚNG THIẾT KẾ — anh em terminal cuối cùng
+của đợt sẽ bắn MỘT lượt wake gộp cho cả batch (bin/batch_wake.sh). Cứu sớm ở đây chính là
+dựng lại phiên Mike thứ hai mà batch sinh ra để chặn. Batch hết bay mà vẫn chưa ai
+`claim-reply` ⇒ quay lại đường cứu bình thường — reconciler là lưới CUỐI của cơ chế batch.
+
 Vi phạm ⇒ gọi lại `bin/wake_thread.sh` với prompt template chuẩn (MIKE.md §8.4, claim-reply
 làm dòng đầu). Một lượt wake THỪA là vô hại (claim-reply là test-and-set nguyên tử, lượt thừa
 tốn đúng 1 lượt exit-1) — nhưng lượt thừa LẶP VÔ HẠN thì không.
@@ -103,6 +109,16 @@ ERR_LOG = _env("WAKEUP_RECONCILE_ERR_LOG", os.path.join(ROOT, "logs", "wake_thre
 LOG = _env("WAKEUP_RECONCILE_LOG", os.path.join(ROOT, "logs", "wakeup_reconcile.log"))
 STATE_FILE = _env("WAKEUP_RECONCILE_STATE", os.path.join(ROOT, "state", "wakeup_reconcile_state.json"))
 LOCK_FILE = _env("WAKEUP_RECONCILE_LOCK", os.path.join(ROOT, "state", "locks", "wakeup_reconcile.lock"))
+BATCHES_DIR = _env("WAKEUP_RECONCILE_BATCHES_DIR", os.path.join(ROOT, "bus", "batches"))
+
+# batch_in_flight: một job thuộc đợt fan-out (dispatch.sh --batch-id) CỐ Ý im lặng khi xong
+# sớm — anh em cuối cùng của đợt mới bắn MỘT lượt wake gộp (bin/batch_wake.sh, RCA lỗi #1
+# 2026-08-20). Không biết luật đó thì reconciler thấy "job terminal, chưa replied, thread
+# không có wakeup pending" là ĐÚNG VI PHẠM theo bất biến cũ, và cứu nó sau 3 phút — dựng lại
+# đúng cái phiên Mike thứ hai mà batch sinh ra để chặn. Import trực tiếp (không subprocess):
+# gọi cho từng candidate mỗi 5 phút, một tiến trình python mỗi lần là phí vô ích.
+sys.path.insert(0, os.path.join(ROOT, "bin"))
+import mike_json  # noqa: E402
 
 # Tên topic trong kb/discord_channels.json — KHÔNG bao giờ ID trần (bin/discord_id_gate.sh
 # chặn commit nếu snowflake xuất hiện ngoài registry; 4 lần rò rỉ chéo topic đều từ ID trần).
@@ -381,6 +397,15 @@ def scan_unreplied(now):
         if ended < MIN_EFFECTIVE_TS or ended < now - LOOKBACK_SECONDS:
             continue
         if now - ended <= GRACE_SECONDS:
+            continue
+        bid = str(j.get("batch_id") or "").strip()
+        if bid and mike_json.batch_in_flight(BATCHES_DIR, bid, JOBS_DIR, now):
+            # Im lặng CÓ CHỦ Ý, không phải tín hiệu mất: anh em cùng batch còn đang chạy và
+            # sẽ bắn một lượt wake gộp cho cả đợt. Batch hết bay (đã có người claim, hoặc mọi
+            # member còn lại đã chết/quá deadline) mà vẫn chưa ai claim-reply ⇒ chu kỳ sau
+            # rơi lại vào đường cứu bình thường — đó chính là lưới cuối của cơ chế batch.
+            log("BATCH-IN-FLIGHT bỏ qua %s (batch=%s) — chờ anh em cùng đợt"
+                % (str(j.get("job_id") or ""), bid))
             continue
         out.append({"job_id": str(j.get("job_id") or os.path.basename(fp)[:-5]),
                     "to": str(j.get("to") or "?"),

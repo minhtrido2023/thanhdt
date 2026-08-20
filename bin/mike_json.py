@@ -42,6 +42,20 @@ Centralizes all JSON building/reading so the shell scripts depend only on python
          the first to claim (go post the result); exit 1 = someone already claimed it (stay
          silent); exit 2 = record missing/corrupt (nothing written, decide by hand).
          Front door: bin/jobs.sh claim-reply <job_id>
+  batch-register <batches_dir> <batch_id> <job_id> [expected]
+      -> add this job to a fan-out batch (bus/batches/<batch_id>.json). `expected` = how many
+         jobs the caller intends to fan out, so a job that finishes before its siblings are
+         even registered does not think it is the last one.
+  batch-claim-wake <batches_dir> <batch_id> <job_id> <jobs_dir>
+      -> ATOMIC "am I the LAST terminal job of this batch, i.e. the one that fires the single
+         wake for all of us?". exit 0 = yours, stdout lists every member as
+         "<job_id>\t<to>\t<status>"; 1 = someone already claimed; 2 = siblings still running
+         (stay silent, the last one fires); 3 = UNKNOWN (batch missing/corrupt/not a member)
+         -> caller MUST fall back to a single-job wake. Front door: bin/batch_wake.sh
+  batch-in-flight <batches_dir> <batch_id> <jobs_dir>
+      -> exit 0 = batch still in flight (nobody claimed the wake AND >=1 member can still
+         fire it). bin/wakeup_reconcile.py uses it to not rescue a job that is deliberately
+         staying silent while it waits for its siblings.
   job-hb-age <jobs_dir> <job_id>
       -> seconds since the job's last AGENT-written bus event ('-' if none); excludes
          _job_watcher liveness pings — input to dispatch.sh heartbeat-aware deadline
@@ -2750,6 +2764,220 @@ def cmd_job_claim_reply(a):
         os.close(lock_fd)
 
 
+# --- batch wake (bus/batches/<batch_id>.json) ---
+#
+# Lỗi nó vá (RCA agents/Mike/research/plan_pipeline_3loi_rca_20260820.md, lỗi #1): một cron
+# fan-out N job — vd bq_freshness_check.sh dispatch DollarBill cho MỖI account live, việc
+# tách per-account là CỐ Ý và không được gộp — rồi mỗi `_bg_wrapper` tự gọi wake_thread.sh
+# khi job của nó xong ⇒ N lượt push cách nhau vài chục giây vào CÙNG một thread. ccdb chỉ
+# dedupe task PENDING chứ không dedupe session RUNNING, nên lượt thứ 2 mở một phiên Mike
+# SONG SONG với phiên thứ nhất ⇒ 2 lần post cùng nội dung (tái diễn thật 2026-08-18 cách
+# 31s và 2026-08-20 cách 83s, đo trên logs/wake_thread.log).
+#
+# Cách chữa: N job cùng `--batch-id` ⇒ ĐÚNG MỘT lượt wake, do job terminal CUỐI CÙNG bắn.
+# Test-and-set nguyên tử dưới flock, cùng kiểu job-claim-reply.
+#
+# FAIL-SAFE là phần quan trọng nhất ở đây — KHÔNG BAO GIỜ được nuốt mất một lượt wake.
+# Bốn tầng, xếp từ trong ra ngoài:
+#   1. Member TREO không chặn: record non-terminal mà pid đã chết VÀ quá deadline+grace thì
+#      không được tính là "sẽ tự bắn" — job terminal cuối cùng vẫn bắn bình thường.
+#   2. Batch file thiếu/hỏng/không chứa job này ⇒ exit 3 = "KHÔNG BIẾT" ⇒ caller quay về
+#      wake đơn lẻ y như trước khi có batch (bin/batch_wake.sh). Không biết thì bắn, đừng im.
+#   3. Lượt wake bắn hỏng (wake_thread.sh rc≠0) vẫn để `wake_claimed_by` — nhưng lúc đó batch
+#      hết "đang bay", nên tầng 4 nhìn thấy và cứu.
+#   4. bin/wakeup_reconcile.py (cron */5, level-triggered): bỏ qua job thuộc batch CÒN ĐANG
+#      BAY (batch_in_flight) và cứu bình thường ngay khi batch hết bay mà vẫn chưa ai
+#      claim-reply. Đây là lưới cuối cho MỌI ca lạ chưa lường, trần ≤5 phút.
+#
+# Cố ý KHÔNG có tiến trình canh (watchdog `sleep N` tách ra) cho ca "anh em chết sau khi tôi
+# đã nhường": tầng 4 đã level-triggered đúng ca đó với trần 5', thêm một lớp edge-triggered
+# nữa là thêm race mới — đúng thứ kiến trúc wake vừa phải gỡ bỏ.
+
+BATCH_REG_GRACE_S = 600     # `expected` > số member đã đăng ký chỉ chặn trong ngần này giây
+                            # (caller chết giữa vòng lặp fan-out thì batch không kẹt vĩnh viễn)
+BATCH_DEATH_GRACE_S = 300   # member non-terminal quá deadline + ngần này ⇒ coi như sẽ không bắn
+
+
+def _batch_path(batches_dir, batch_id):
+    """batch_id đi thẳng vào tên file ⇒ chặn traversal tại nguồn, không sửa lành."""
+    bid = str(batch_id or "")
+    if not bid or not re.fullmatch(r"[A-Za-z0-9._-]{1,120}", bid) or bid.startswith("."):
+        raise ValueError("batch_id không hợp lệ: %r (chỉ [A-Za-z0-9._-], ≤120 ký tự)" % (bid,))
+    return os.path.join(batches_dir, bid + ".json")
+
+
+def _batch_read(fp):
+    """dict = đọc được; None = KHÔNG đọc được (thiếu HOẶC hỏng).
+
+    Cố ý gộp thiếu/hỏng vào một giá trị: cả hai đều nghĩa "không biết batch này ra sao", và
+    câu trả lời đúng cho "không biết" ở đây là quay về hành vi cũ (wake đơn lẻ), không phải
+    dựng lại một file rỗng rồi tự tin dedupe trên đó — dựng lại sẽ xoá mất `wake_claimed_by`
+    và cho phép bắn lần hai."""
+    try:
+        with open(fp, encoding="utf-8") as f:
+            obj = json.load(f)
+        return obj if isinstance(obj, dict) else None
+    except Exception:
+        return None
+
+
+def _batch_write(fp, obj):
+    tmp = fp + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(obj, f, ensure_ascii=False)
+    os.replace(tmp, fp)
+
+
+def _batch_member_blocks(jobs_dir, jid, now):
+    """Member này CÒN có thể tự bắn wake không? True ⇒ phải nhường nó, đừng bắn.
+
+    Không đọc được record ⇒ False (không chờ một job mà board không biết gì về nó) — cùng kỷ
+    luật với claim-reply exit 2: thiếu bằng chứng KHÔNG được đọc thành "đã có người lo"."""
+    try:
+        with open(_job_path(jobs_dir, jid), encoding="utf-8") as f:
+            j = json.load(f)
+        if not isinstance(j, dict):
+            return False
+    except Exception:
+        return False
+    if str(j.get("status") or "") in TERMINAL_STATUSES:
+        return False
+    # `pid` = _bg_wrapper (job nền), `dispatcher_pid` = dispatch.sh (nhánh đồng bộ, không có
+    # `pid`). Còn sống ⇒ nó vẫn đang chạy và sẽ tới lượt claim của chính nó.
+    if _pid_alive(j.get("pid")) or _pid_alive(j.get("dispatcher_pid")):
+        return True
+    return now < _as_int(j.get("deadline"), 0) + BATCH_DEATH_GRACE_S
+
+
+def batch_in_flight(batches_dir, batch_id, jobs_dir, now=None):
+    """True = batch CÒN ĐANG BAY: chưa ai claim wake và còn ≥1 member có thể bắn.
+
+    Hàm module-level (không phải subcommand) vì bin/wakeup_reconcile.py import trực tiếp —
+    nó gọi cho từng candidate mỗi 5 phút, một subprocess python cho mỗi lần là phí vô ích.
+    Mọi lỗi ⇒ False = "không đang bay" ⇒ reconciler cứ cứu như trước khi có batch."""
+    now = int(time.time()) if now is None else int(now)
+    try:
+        obj = _batch_read(_batch_path(batches_dir, batch_id))
+    except ValueError:
+        return False
+    if obj is None:
+        return False
+    if str(obj.get("wake_claimed_by") or "").strip():
+        return False
+    members = obj.get("members") or []
+    if not isinstance(members, list):
+        return False
+    return any(_batch_member_blocks(jobs_dir, str(m), now) for m in members)
+
+
+def cmd_batch_register(a):
+    """batch-register <batches_dir> <batch_id> <job_id> [expected] — ghi member vào batch.
+
+    `expected` = số job caller ĐỊNH fan-out (bq_freshness_check.sh biết trước: số account
+    live). Không có nó thì tồn tại race thật: job #1 xong TRƯỚC khi job #2 kịp đăng ký ⇒ #1
+    thấy mình là member duy nhất đã terminal ⇒ bắn; #2 xong sau lại bắn tiếp = đúng lỗi đang
+    vá. Thiếu `expected` (=0) vẫn chạy, chỉ là mất lớp bảo vệ đó.
+
+    exit 0 = đã ghi (stdout: số member hiện có). exit 3 = file batch có nhưng hỏng ⇒ KHÔNG
+    ghi đè (xem _batch_read); caller coi như không có batch."""
+    batches_dir, batch_id, job_id = a[0], a[1], a[2]
+    expected = _as_int(a[3], 0) if len(a) > 3 else 0
+    os.makedirs(batches_dir, exist_ok=True)
+    fp = _batch_path(batches_dir, batch_id)
+    lock_fd = os.open(fp + ".lock", os.O_CREAT | os.O_WRONLY, 0o644)
+    try:
+        fcntl.flock(lock_fd, fcntl.LOCK_EX)
+        obj = _batch_read(fp)
+        if obj is None and os.path.exists(fp):
+            sys.stderr.write("REFUSED: batch record %s hỏng — không ghi đè.\n" % fp)
+            sys.exit(3)
+        if obj is None:
+            obj = {"batch_id": batch_id, "created_at": int(time.time()),
+                   "expected": 0, "members": [], "wake_claimed_by": ""}
+        members = obj.get("members")
+        if not isinstance(members, list):
+            members = []
+        if job_id not in members:
+            members.append(job_id)
+        obj["members"] = members
+        obj["expected"] = max(_as_int(obj.get("expected"), 0), expected)
+        _batch_write(fp, obj)
+        print(len(members))
+        sys.exit(0)
+    finally:
+        os.close(lock_fd)
+
+
+def cmd_batch_claim_wake(a):
+    """batch-claim-wake <batches_dir> <batch_id> <job_id> <jobs_dir> — ai được bắn wake.
+
+    exit 0 = BẠN bắn. stdout mỗi dòng một member: "<job_id>\\t<to>\\t<status>" — dùng dựng
+             prompt wake gộp cho CẢ batch (một phiên Mike post N kết quả, thay vì N phiên).
+    exit 1 = đã có người claim (stdout: job_id của người đó) ⇒ im lặng.
+    exit 2 = còn member khác đang chạy (stderr liệt kê) ⇒ im lặng, người cuối sẽ bắn.
+    exit 3 = KHÔNG BIẾT (batch thiếu/hỏng, hoặc job này không phải member) ⇒ caller phải
+             quay về wake đơn lẻ. Không bao giờ được hiểu thành "đã có người lo".
+    """
+    batches_dir, batch_id, job_id, jobs_dir = a[0], a[1], a[2], a[3]
+    try:
+        fp = _batch_path(batches_dir, batch_id)
+    except ValueError as e:
+        sys.stderr.write("REFUSED: %s\n" % e)
+        sys.exit(3)
+    if not os.path.exists(fp):
+        sys.stderr.write("KHÔNG BIẾT: không có batch record %s — caller phải wake đơn lẻ.\n" % fp)
+        sys.exit(3)
+    lock_fd = os.open(fp + ".lock", os.O_CREAT | os.O_WRONLY, 0o644)
+    try:
+        fcntl.flock(lock_fd, fcntl.LOCK_EX)
+        obj = _batch_read(fp)
+        if obj is None:
+            sys.stderr.write("KHÔNG BIẾT: batch record %s hỏng — caller phải wake đơn lẻ.\n" % fp)
+            sys.exit(3)
+        members = obj.get("members") or []
+        if not isinstance(members, list) or job_id not in members:
+            sys.stderr.write("KHÔNG BIẾT: %s không nằm trong batch %s (đăng ký hỏng?) — "
+                             "caller phải wake đơn lẻ.\n" % (job_id, batch_id))
+            sys.exit(3)
+        prior = str(obj.get("wake_claimed_by") or "").strip()
+        if prior:
+            print(prior)
+            sys.exit(1)
+        now = int(time.time())
+        blockers = [str(m) for m in members
+                    if str(m) != job_id and _batch_member_blocks(jobs_dir, str(m), now)]
+        missing = max(0, _as_int(obj.get("expected"), 0) - len(members))
+        if missing and now - _as_int(obj.get("created_at"), 0) <= BATCH_REG_GRACE_S:
+            blockers.append("<%d job trong batch chưa kịp đăng ký>" % missing)
+        if blockers:
+            sys.stderr.write("CHƯA TỚI LƯỢT: batch %s còn %d member chưa terminal (%s) — "
+                             "im lặng, người cuối cùng sẽ bắn.\n"
+                             % (batch_id, len(blockers), ", ".join(blockers)))
+            sys.exit(2)
+        obj["wake_claimed_by"] = job_id
+        obj["wake_claimed_at"] = now
+        _batch_write(fp, obj)
+        for m in members:
+            mj = {}
+            try:
+                with open(_job_path(jobs_dir, str(m)), encoding="utf-8") as f:
+                    mj = json.load(f)
+                if not isinstance(mj, dict):
+                    mj = {}
+            except Exception:
+                mj = {}
+            print("%s\t%s\t%s" % (m, mj.get("to") or "?", mj.get("status") or "?"))
+        sys.exit(0)
+    finally:
+        os.close(lock_fd)
+
+
+def cmd_batch_in_flight(a):
+    """batch-in-flight <batches_dir> <batch_id> <jobs_dir> — exit 0 = còn đang bay, 1 = không.
+    Front door dòng lệnh cho batch_in_flight() (selfcheck + soi tay dùng)."""
+    sys.exit(0 if batch_in_flight(a[0], a[1], a[2]) else 1)
+
+
 # --- circuit breaker (state/circuit/<id>.json) ---
 # Per-agent consecutive-failure counter for dispatch.sh. Trips (blocks new dispatches)
 # after N consecutive failed/timeout jobs; auto-resets to closed after a cooldown window
@@ -2915,6 +3143,9 @@ CMDS = {"event": cmd_event, "heartbeat": cmd_heartbeat, "recent": cmd_recent,
         "terminal-statuses": cmd_terminal_statuses,
         "job-field": cmd_job_field, "job-hb-age": cmd_job_hb_age,
         "job-claim-reply": cmd_job_claim_reply,
+        "batch-register": cmd_batch_register,
+        "batch-claim-wake": cmd_batch_claim_wake,
+        "batch-in-flight": cmd_batch_in_flight,
         "circuit-check": cmd_circuit_check, "circuit-record": cmd_circuit_record,
         "circuit-tripped": cmd_circuit_tripped,
         "pending-resume-set": cmd_pending_resume_set,
