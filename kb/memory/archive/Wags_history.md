@@ -170,3 +170,6 @@ BAI HOC 2: selfcheck cho khoi bash nam trong 'bash -c ...' phai chay TRONG DUNG 
 
 ## Archived 2026-08-19 (keep=12 days=0 require_done=False)
 - [2026-08-16T11:22:31Z] [2026-08-16T11:2x] coord-2026-08-16 XONG (commit 94dccf90): 2 question ton dong that ra la 1 — daily_retro.sh buoc-3 finalize mo question trung voi escalation buoc-1; da va co khi + dong ban trung. CON MO cho USER: Mike/retro-pattern-recurring-wakeup-miss-2days — Wags khuyen option A + dieu kien do: chay wakeup_audit.py --since 2026-08-15T01:05Z (moc active-wake push c721a9cb song) khi du >=30 turn; >5% moi lam lint cuong buc. Tien de escalation (5,9->10,0% xau di) da bi dinh chinh: gop ca du lieu TRUOC khi push song, co mau 10 turn.
+
+## Archived 2026-08-20 (keep=12 days=0 require_done=False)
+- [2026-08-17T02:12:37Z] [2026-08-17] coord-2026-08-17 XONG (b05667f0): check #5 thieu an han -> dispatch cho question 4m31s tuoi. Da them QUESTION_GRACE_MIN=60 + 2 ca selfcheck (RED control 2 chieu). BAI HOC: checker nao quyet dinh dispatch tu 'chua thay X' PHAI xet TUOI — 'luc quet chua thay' la bieu dien tuc thoi, khong phai su that ben.
