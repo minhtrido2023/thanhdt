@@ -122,15 +122,31 @@ BATCHES_DIR = _env("WAKEUP_RECONCILE_BATCHES_DIR", os.path.join(ROOT, "bus", "ba
 # bất kỳ file bin/<tên>.py nào trùng tên module stdlib (token.py, types.py…) sẽ che stdlib cho
 # CẢ tiến trình này — hôm nay chưa file nào trùng (đo 118 file), nhưng đó là bẫy đặt sẵn cho
 # người viết script sau (arch-reviewer N7).
-_mj_spec = importlib.util.spec_from_file_location(
-    "mike_json_for_reconcile", os.path.join(ROOT, "bin", "mike_json.py"))
-mike_json = importlib.util.module_from_spec(_mj_spec)
-_mj_spec.loader.exec_module(mike_json)
+# NẠP CÓ BỌC (arch-reviewer vòng 3, BLOCKER-2): trước bản vá batch, file này KHÔNG phụ thuộc
+# gì vào mike_json.py; nay LƯỚI CUỐI bị buộc vào đúng file mà chuỗi vá này vừa thêm mấy trăm
+# dòng. Đo thật: chèn SyntaxError vào mike_json.py ⇒ reconciler chết ngay ở exec_module (exit
+# 1), không note_abort, không dòng CRITICAL ABORT, không notify — cả chu kỳ chết CÂM tới
+# cron_health_check 08:25 hôm sau. Vòng 2 (N7) chỉ bọc LỜI GỌI ở _batch_in_flight, quá muộn.
+# Nạp hỏng ⇒ mike_json=None ⇒ mọi job bị coi như KHÔNG thuộc batch đang bay ⇒ cứu y như trước
+# khi có batch. Mất dedupe, không mất wake — đúng chiều fail-safe của cả kiến trúc này.
+try:
+    _mj_spec = importlib.util.spec_from_file_location(
+        "mike_json_for_reconcile", os.path.join(ROOT, "bin", "mike_json.py"))
+    mike_json = importlib.util.module_from_spec(_mj_spec)
+    _mj_spec.loader.exec_module(mike_json)
+    _MJ_LOAD_ERROR = ""
+except Exception as _exc:            # noqa: BLE001 — CỐ Ý bắt tất, xem khối trên
+    mike_json = None
+    _MJ_LOAD_ERROR = "%s: %s" % (type(_exc).__name__, _exc)
 
 
 def _batch_in_flight(batch_id, job_id):
     """Lỗi lạ ở đây KHÔNG được giết cả chu kỳ của LƯỚI CUỐI: không đọc được ⇒ False =
     "không đang bay" ⇒ cứu như trước khi có batch (thà wake thừa còn hơn ngủ vô hạn)."""
+    if mike_json is None:
+        log("BATCH-CHECK-DISABLED batch=%s job=%s: nạp mike_json.py hỏng (%s) — coi như "
+            "KHÔNG đang bay, cứu bình thường" % (batch_id, job_id, _MJ_LOAD_ERROR))
+        return False
     try:
         return mike_json.batch_in_flight(BATCHES_DIR, batch_id, JOBS_DIR, job_id)
     except Exception as exc:

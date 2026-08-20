@@ -329,6 +329,113 @@ BID18="selfcheck.batch18"
     --batch-id "$BID18" --batch-size 2 --thread architecture --timeout 30 ) >/dev/null 2>>"$SB/err"
 assert "job đồng bộ KHÔNG tạo/đăng ký batch record" "$([ -f "$MK/bus/batches/$BID18.json" ] && echo 1 || echo 0)" "0"
 
+echo "== CA 19 (arch-reviewer vòng 3, BLOCKER-1): mike_json.py KHÔNG CHẠY ĐƯỢC ⇒ batch_wake.sh"
+echo "   phải bắn wake ĐƠN LẺ, tuyệt đối không im. Mã 1/2 cũng là mã thoát của chính python3"
+echo "   khi nó chưa từng chạy tới cmd_batch_claim_wake — CA16 chỉ phủ lỗi BÊN TRONG hàm."
+# Root RIÊNG: $MK/bin/mike_json.py là symlink tới file THẬT, ghi đè ở đó là hỏng repo.
+BWR="$SB/bwroot"
+mkdir -p "$BWR/bin" "$BWR/bus/jobs" "$BWR/bus/batches"
+ln -s "$REAL/bin/batch_wake.sh" "$BWR/bin/batch_wake.sh"
+cat > "$BWR/bin/wake_thread.sh" <<EOF
+#!/usr/bin/env bash
+echo "WAKE \$1" >> "$SB/bwroot.calls"
+EOF
+chmod +x "$BWR/bin/wake_thread.sh"
+_bw_run() {  # _bw_run -> in "<rc> <số lượt wake>"
+  : > "$SB/bwroot.calls"
+  bash "$BWR/bin/batch_wake.sh" bw1 jobW 999 "prompt đơn lẻ" >/dev/null 2>&1
+  echo "$? $(wc -l < "$SB/bwroot.calls" | tr -d ' ')"
+}
+printf 'def (\n' > "$BWR/bin/mike_json.py"                     # SyntaxError ⇒ python exit 1
+assert "mike_json.py SyntaxError (exit 1) ⇒ rc=2 + ĐÚNG 1 wake đơn lẻ" "$(_bw_run)" "2 1"
+rm -f "$BWR/bin/mike_json.py"                                   # file thiếu ⇒ python exit 2
+assert "mike_json.py THIẾU (exit 2) ⇒ rc=2 + ĐÚNG 1 wake đơn lẻ" "$(_bw_run)" "2 1"
+printf 'import sys\nsys.exit(2)\n' > "$BWR/bin/mike_json.py"    # subcommand đổi tên/rollback lệch pha
+assert "subcommand đổi tên (main() sys.exit(2)) ⇒ rc=2 + ĐÚNG 1 wake đơn lẻ" "$(_bw_run)" "2 1"
+# Chiều NGƯỢC LẠI — bản vá không được biến mọi thứ thành "cứ bắn": im lặng CÓ CHỦ Ý vẫn im.
+rm -f "$BWR/bin/mike_json.py"; ln -s "$REAL/bin/mike_json.py" "$BWR/bin/mike_json.py"
+cat > "$BWR/bus/jobs/jobW.json" <<EOF
+{"job_id":"jobW","status":"done","from":"Mike","discord_thread_id":"999","deadline":$(( $(date +%s) + 600 )),"ended_at":$(date +%s),"replied_at":""}
+EOF
+python3 "$REAL/bin/mike_json.py" batch-register "$BWR/bus/batches" bw1 jobW 1 >/dev/null
+python3 - "$BWR/bus/batches/bw1.json" <<'PY'
+import json, sys
+fp = sys.argv[1]; o = json.load(open(fp))
+o["wake_claimed"] = {"999": "jobKhac"}     # đã có người claim thread này
+json.dump(o, open(fp, "w"))
+PY
+assert "…nhưng mike_json LÀNH + đã có người claim ⇒ VẪN im lặng (rc=1, 0 wake)" "$(_bw_run)" "1 0"
+
+echo "== CA 20 (arch-reviewer vòng 3, BLOCKER-2): mike_json.py hỏng KHÔNG được giết LƯỚI CUỐI."
+echo "   wakeup_reconcile.py nạp nó ở top-level; chết ở import = không note_abort, không"
+echo "   CRITICAL ABORT, không notify — im lặng tới cron_health_check 08:25 hôm sau."
+RCR="$SB/rcroot"
+mkdir -p "$RCR/bin" "$RCR/bus/jobs" "$RCR/bus/batches" "$RCR/logs" "$RCR/state/locks"
+ln -s "$REAL/bin/wakeup_reconcile.py" "$RCR/bin/wakeup_reconcile.py"
+printf 'def (\n' > "$RCR/bin/mike_json.py"
+for n in wake_thread.sh notify_thread.sh; do
+  printf '#!/usr/bin/env bash\nexit 0\n' > "$RCR/bin/$n"; chmod +x "$RCR/bin/$n"
+done
+env WAKEUP_RECONCILE_TASKS_DB="$RCR/none.db" WAKEUP_RECONCILE_SESSIONS_API="http://127.0.0.1:1/api" \
+    WAKEUP_RECONCILE_LOG="$RCR/logs/r.log" WAKEUP_RECONCILE_STATE="$RCR/state/s.json" \
+    WAKEUP_RECONCILE_LOCK="$RCR/state/locks/l" \
+  python3 "$RCR/bin/wakeup_reconcile.py" >/dev/null 2>"$RCR/err" || true
+assert "reconciler KHÔNG chết ở import (0 traceback exec_module/SyntaxError)" \
+  "$(grep -cE 'exec_module|SyntaxError' "$RCR/err")" "0"
+assert "…và chu kỳ CHẠY THẬT: log được ghi (không phải chết câm)" \
+  "$([ -s "$RCR/logs/r.log" ] && echo 1 || echo 0)" "1"
+
+echo "== CA 21 (arch-reviewer vòng 3, nit 5): ĐỒNG HỒ LÙI — created_at ở TƯƠNG LAI làm hiệu ÂM,"
+echo "   vế '<= GRACE' đúng vĩnh viễn ⇒ chặn claim VÀ bịt miệng luôn reconciler suốt thời gian lệch"
+mk_job jobSkew done "" 1700
+python3 "$REAL/bin/mike_json.py" batch-register "$BD" b21 jobSkew 2 >/dev/null   # expected=2, mới 1
+python3 - "$BD/b21.json" <<'PY'
+import json, sys, time
+fp = sys.argv[1]; o = json.load(open(fp))
+o["created_at"] = int(time.time()) + 7200      # NTP step / batch chép từ máy khác
+json.dump(o, open(fp, "w"))
+PY
+assert "created_at tương lai ⇒ KHÔNG kẹt: vẫn được bắn" "$(CLAIM b21 jobSkew)" "0"
+rm -f "$BD/b21.json"
+python3 "$REAL/bin/mike_json.py" batch-register "$BD" b21 jobSkew 2 >/dev/null
+python3 - "$BD/b21.json" <<'PY'
+import json, sys, time
+fp = sys.argv[1]; o = json.load(open(fp))
+o["created_at"] = int(time.time()) + 7200
+json.dump(o, open(fp, "w"))
+PY
+assert "…và reconciler KHÔNG bị bịt miệng (in-flight = 1, tức KHÔNG đang bay)" \
+  "$(IN_FLIGHT b21 jobSkew)" "1"
+
+echo "== CA 22 (arch-reviewer vòng 3, nit 6 — N6 chưa có assertion nào): NHƯỜNG phải để lại"
+echo "   dấu vết trong chính batch record, nếu không thì một wake biến mất là điều tra tay không"
+mk_job jobY1 done "" 1700
+mk_job jobY2 running "$$" 1700 Mike 1 -
+python3 "$REAL/bin/mike_json.py" batch-register "$BD" b22 jobY1 2 >/dev/null
+python3 "$REAL/bin/mike_json.py" batch-register "$BD" b22 jobY2 2 >/dev/null
+assert "jobY1 nhường vì jobY2 còn chạy" "$(CLAIM b22 jobY1)" "2"
+assert "…và ghi yielded[jobY1] kèm lý do (blockers) vào batch record" \
+  "$(python3 -c "
+import json
+y = (json.load(open('$BD/b22.json')).get('yielded') or {}).get('jobY1') or {}
+print(1 if y.get('at') and y.get('blockers') else 0)")" "1"
+
+echo "== CA 23 (arch-reviewer vòng 3, nit 4): batch-register HỎNG ⇒ job KHÔNG được mang nhãn"
+echo "   batch_id. Nhãn sai nói dối reconciler: batch_in_flight() trả True ⇒ lưới cuối bỏ qua"
+echo "   job này, trong khi nó không phải member nên chẳng ai bắn thay."
+_reset
+BID23="selfcheck.batch23"
+chmod 500 "$MK/bus/batches"
+_dispatch_bg Wags "job có batch-register hỏng" --batch-id "$BID23" --batch-size 2
+_wait_all_terminal
+chmod 700 "$MK/bus/batches"
+J23="$(ls "$MK/bus/jobs"/*.json 2>/dev/null | head -1)"
+assert "job vẫn chạy tới terminal dù register hỏng" \
+  "$(python3 -c "import json;print(json.load(open('$J23')).get('status'))")" "done"
+assert "job record KHÔNG mang batch_id (không nói dối reconciler)" \
+  "$(python3 -c "import json;print(json.load(open('$J23')).get('batch_id') or 'none')")" "none"
+assert "…và vẫn bắn wake ĐƠN LẺ như trước khi có batch (không nuốt mất)" "$(_nwake)" "1"
+
 echo
 if [ "$FAILS" -eq 0 ]; then
   echo "PASS — $CASES/$CASES assertion đúng (batch wake: 1 lượt/đợt, fail-safe khi treo/hỏng, không batch = hành vi cũ)"

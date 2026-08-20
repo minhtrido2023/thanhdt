@@ -2811,6 +2811,17 @@ BATCH_REG_GRACE_S = 600     # `expected` > số member đã đăng ký chỉ ch�
                             # (caller chết giữa vòng lặp fan-out thì batch không kẹt vĩnh viễn)
 BATCH_DEATH_GRACE_S = 300   # member non-terminal quá deadline + ngần này ⇒ coi như sẽ không bắn
 
+# BẰNG CHỨNG DƯƠNG cho "im lặng CÓ CHỦ Ý" (arch-reviewer vòng 3, BLOCKER-1). Mã thoát 1 và 2
+# của `batch-claim-wake` nghĩa là "đừng bắn wake" — nhưng 1 và 2 CŨNG là mã thoát của chính
+# python3 khi nó không bao giờ chạy tới hàm này: SyntaxError/ImportError trong file này ⇒ 1;
+# file thiếu hoặc subcommand bị đổi tên (rollback lệch pha giữa mike_json.py và batch_wake.sh)
+# ⇒ main() sys.exit(2). Đo thật trên bản copy: cả hai ca ⇒ 0 lượt wake rời tầng dispatch, không
+# log không notify — đúng ô NGƯỢC với doctrine "không biết thì BẮN, đừng im".
+# Nên: batch_wake.sh CHỈ im khi thấy marker này trên stderr. Suy ra vắng mặt là an toàn, còn
+# suy ra từ mã thoát trần thì không. Marker phải được in TẠI CHÍNH chỗ ra quyết định — một
+# tiến trình chết trước khi tới đó không thể giả mạo nó.
+BATCH_SILENT_OK = "BATCH-SILENT-OK"
+
 
 def _batch_path(batches_dir, batch_id):
     """batch_id đi thẳng vào tên file ⇒ chặn traversal tại nguồn, không sửa lành."""
@@ -2928,7 +2939,12 @@ def _batch_blockers(obj, jobs_dir, jid_self, tid, now):
     # Job chưa kịp ĐĂNG KÝ (caller còn đang trong vòng lặp fan-out) cũng là người sẽ bắn —
     # không tính thì job xong sớm tưởng mình là người cuối và bắn trước, đúng lỗi đang vá.
     missing = max(0, _as_int(obj.get("expected"), 0) - len(_batch_members(obj)))
-    if missing and now - _as_int(obj.get("created_at"), 0) <= BATCH_REG_GRACE_S:
+    # `0 <=` là cái chặn ĐỒNG HỒ LÙI (arch-reviewer vòng 3, nit 5): với `created_at` ở TƯƠNG
+    # LAI (NTP step, batch chép từ máy khác) thì hiệu là ÂM và vế `<= GRACE` đúng VĨNH VIỄN ⇒
+    # claim luôn ra exit 2 VÀ batch_in_flight luôn True ⇒ bịt miệng CẢ tầng dispatch lẫn
+    # reconciler suốt thời gian lệch. Cửa sổ ân hạn phải hai đầu, không chỉ một đầu.
+    age = now - _as_int(obj.get("created_at"), 0)
+    if missing and 0 <= age <= BATCH_REG_GRACE_S:
         out.append("<%d job trong batch chưa kịp đăng ký>" % missing)
     return out
 
@@ -3047,6 +3063,7 @@ def _batch_claim_wake(a):
         prior = _batch_claimer(obj, tid)
         if prior:
             print(prior)
+            sys.stderr.write("%s: thread %s đã được %s claim.\n" % (BATCH_SILENT_OK, tid, prior))
             sys.exit(1)
         now = int(time.time())
         blockers = _batch_blockers(obj, jobs_dir, job_id, tid, now)
@@ -3059,9 +3076,9 @@ def _batch_claim_wake(a):
             yielded[job_id] = {"at": now, "blockers": blockers[:5]}
             obj["yielded"] = yielded
             _batch_write(fp, obj)
-            sys.stderr.write("CHƯA TỚI LƯỢT: batch %s còn %d member có thể bắn (%s) — im "
+            sys.stderr.write("%s CHƯA TỚI LƯỢT: batch %s còn %d member có thể bắn (%s) — im "
                              "lặng, người cuối cùng sẽ bắn.\n"
-                             % (batch_id, len(blockers), ", ".join(blockers)))
+                             % (BATCH_SILENT_OK, batch_id, len(blockers), ", ".join(blockers)))
             sys.exit(2)
         rows = [(m, _batch_job(jobs_dir, m))
                 for m in _batch_group(obj, jobs_dir, tid, listing=True)]
@@ -3071,6 +3088,8 @@ def _batch_claim_wake(a):
         # wake của member xong sau, vi phạm bất biến số một.
         if rows and all(str(j.get("replied_at") or "").strip() for _, j in rows):
             print("all-replied")
+            sys.stderr.write("%s: mọi member cùng thread %s đã replied — không còn gì để post.\n"
+                             % (BATCH_SILENT_OK, tid))
             sys.exit(1)
         claimed = obj.get("wake_claimed")
         if not isinstance(claimed, dict):

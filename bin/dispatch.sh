@@ -1264,10 +1264,23 @@ if [ -n "$BATCH_ID" ] && [ "$bg" = "--bg" ]; then
     echo "ERROR: --batch-id '$BATCH_ID' không hợp lệ (chỉ [A-Za-z0-9._-], ≤120 ký tự)" >&2
     exit 1
   fi
-  python3 "$ROOT/bin/mike_json.py" batch-register "$ROOT/bus/batches" "$BATCH_ID" "$job_id" \
-    "${BATCH_SIZE:-0}" >/dev/null 2>&1 \
-    || echo "WARNING: không đăng ký được job vào batch $BATCH_ID — job vẫn chạy, chỉ mất dedupe wake" >&2
-  JSET batch_id="$BATCH_ID" || true
+  # JSET batch_id CHỈ khi đăng ký THÀNH CÔNG (arch-reviewer vòng 3, nit 4). Gắn batch_id cho
+  # một job KHÔNG nằm trong members là nói dối hai tầng cùng lúc: wakeup_reconcile.py hỏi
+  # batch_in_flight() và được trả True (anh em còn chạy) ⇒ nó KHÔNG cứu job này, trong khi job
+  # này lại không phải member nên chẳng ai bắn thay ⇒ nếu lượt wake đơn lẻ của nó hỏng thì
+  # LƯỚI CUỐI đã bị chính cái nhãn sai bịt miệng. Không gắn nhãn ⇒ đường cũ y nguyên.
+  if python3 "$ROOT/bin/mike_json.py" batch-register "$ROOT/bus/batches" "$BATCH_ID" "$job_id" \
+       "${BATCH_SIZE:-0}" >/dev/null 2>&1; then
+    JSET batch_id="$BATCH_ID" || true
+  else
+    # stderr của dispatch.sh KHÔNG đủ: bq_freshness_check.sh gọi với `2>/dev/null` ⇒ cảnh báo
+    # rơi vào hố đen, mất dedupe mà không để lại dấu vết nào. Ghi thêm event bus để lần sau
+    # điều tra "sao hôm đó lại 2 lượt wake" có chỗ mà tra.
+    echo "WARNING: không đăng ký được job vào batch $BATCH_ID — job vẫn chạy, chỉ mất dedupe wake" >&2
+    "$ROOT/bin/append_event.sh" "$from" error "batch-register-failed" \
+      "{\"job_id\":\"$job_id\",\"batch_id\":\"$BATCH_ID\",\"impact\":\"mất dedupe wake — job này bắn wake đơn lẻ, có thể trùng với wake gộp của batch\"}" \
+      "$job_id" >/dev/null 2>&1 || true
+  fi
 fi
 
 if [ "$bg" = "--bg" ]; then

@@ -35,19 +35,42 @@ _single_wake() {  # hành vi TRƯỚC khi có batch — giữ nguyên từng ch�
   "$ROOT/bin/wake_thread.sh" "$thread_id" "$single_prompt" "$job_id" 2>/dev/null || true
 }
 
+# stderr đi vào FILE chứ không /dev/null: nó chở BẰNG CHỨNG "im lặng có chủ ý" (xem dưới).
+# mktemp hỏng ⇒ err_f rỗng ⇒ không có bằng chứng ⇒ mọi lượt đều rơi về wake đơn lẻ. Ồn ào,
+# nhưng đúng chiều fail-safe: thà thừa một push còn hơn nuốt mất.
+err_f="$(mktemp 2>/dev/null || true)"
+# shellcheck disable=SC2064
+[ -n "$err_f" ] && trap "rm -f '$err_f'" EXIT
+
 # Truyền THẲNG thread_id đang cầm (chính pin mà _bg_wrapper vừa notify) thay vì để
 # mike_json đọc lại từ record — một sự thật, một cách đọc (arch-reviewer N-a vòng 2).
 members="$(python3 "$ROOT/bin/mike_json.py" batch-claim-wake \
-             "$BATCH_DIR" "$batch_id" "$job_id" "$JOBS_DIR" "$thread_id" 2>/dev/null)"
+             "$BATCH_DIR" "$batch_id" "$job_id" "$JOBS_DIR" "$thread_id" \
+             2>"${err_f:-/dev/null}")"
 rc=$?
 
+# IM LẶNG CHỈ KHI CÓ BẰNG CHỨNG (arch-reviewer vòng 3, BLOCKER-1). Mã 1 và 2 CŨNG chính là mã
+# thoát của python3 khi nó KHÔNG BAO GIỜ chạy tới cmd_batch_claim_wake — SyntaxError/ImportError
+# trong mike_json.py ⇒ 1; file thiếu hoặc subcommand bị đổi tên (rollback lệch pha giữa hai
+# file) ⇒ main() sys.exit(2). Đo thật trên bản copy: cả hai ca đều ra 0 lượt wake, không log
+# không notify. Suy "im lặng" từ mã thoát trần là suy từ sự VẮNG MẶT; chỉ marker in TẠI CHÍNH
+# chỗ ra quyết định mới là bằng chứng (tiến trình chết trước khi tới đó không giả mạo được).
+# Vòng 2 (S1) mới bọc try/except BÊN TRONG hàm ⇒ lớp "python chưa chạy tới hàm" lọt lưới.
+_silent_ok() { [ -n "$err_f" ] && grep -q 'BATCH-SILENT-OK' "$err_f"; }
+_dump_err() { [ -n "$err_f" ] && cat "$err_f" >&2 || true; }
+
 case "$rc" in
-  1) exit 1 ;;   # đã có người claim
-  2) exit 1 ;;   # còn anh em đang chạy — người cuối cùng sẽ bắn
+  1|2)   # 1 = đã có người claim / mọi member đã replied · 2 = anh em còn chạy, người cuối bắn
+     if _silent_ok; then exit 1; fi
+     _dump_err
+     echo "KHÔNG BIẾT: batch-claim-wake thoát $rc mà KHÔNG có bằng chứng im-lặng-có-chủ-ý (mike_json.py hỏng/thiếu/đổi subcommand?) — wake ĐƠN LẺ để không nuốt mất lượt." >&2
+     _single_wake
+     exit 2 ;;
   0) ;;          # tới lượt mình
   *) # 3 = KHÔNG BIẾT (batch thiếu/hỏng/không phải member). Không biết thì BẮN, đừng im:
      # một lượt wake thừa tốn đúng một exit-1 của claim-reply, một lượt wake bị nuốt là
      # thread ngủ vô hạn (đúng lớp lỗi mà cả kiến trúc wake này sinh ra để diệt).
+     _dump_err
      _single_wake
      exit 2 ;;
 esac
