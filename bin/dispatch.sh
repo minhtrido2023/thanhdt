@@ -164,8 +164,13 @@ while [ $# -gt 0 ]; do
     --batch-id) BATCH_ID="${2:?--batch-id needs a value}"; shift ;;
     --batch-id=*) BATCH_ID="${1#*=}"
                   [ -n "$BATCH_ID" ] || { echo "ERROR: --batch-id= rỗng (biến chưa set?)" >&2; exit 1; } ;;
+    # Guard ĐỐI XỨNG với --batch-id (arch-reviewer vòng 6, #5). `--batch-size=$VAR` với VAR
+    # chưa set ⇒ chuỗi rỗng ⇒ `${BATCH_SIZE:-0}` = 0 ⇒ expected=0 ⇒ MẤT HẲN lớp chống đua đăng
+    # ký, mà không một dòng log nào nói vì sao. Rác không phải số cũng vậy: _as_int() ở
+    # mike_json.py quy về 0, cùng hậu quả, cũng im. Cả hai phải CHẾT TO ngay tại chỗ gõ sai.
     --batch-size) BATCH_SIZE="${2:?--batch-size needs a value}"; shift ;;
-    --batch-size=*) BATCH_SIZE="${1#*=}" ;;
+    --batch-size=*) BATCH_SIZE="${1#*=}"
+                    [ -n "$BATCH_SIZE" ] || { echo "ERROR: --batch-size= rỗng (biến chưa set?)" >&2; exit 1; } ;;
     --write-scope) WRITE_SCOPE="${2:?--write-scope needs a value}"; shift ;;
     --write-scope=*) WRITE_SCOPE="${1#*=}"
                      [ -n "$WRITE_SCOPE" ] || { echo "ERROR: --write-scope= rỗng (biến chưa set?)" >&2; exit 1; } ;;
@@ -173,6 +178,14 @@ while [ $# -gt 0 ]; do
   esac
   shift
 done
+
+# Số học, không phải chuỗi: `--batch-size abc` / `--batch-size -1` đi tới _as_int() rồi lặng lẽ
+# thành 0 (= "không khai báo"). Chặn tại parse để lỗi gõ nổ ở CHỖ GÕ, không nổ thành một lượt
+# wake trùng vài chục phút sau (arch-reviewer vòng 6, #5).
+if [ -n "$BATCH_SIZE" ] && ! printf '%s' "$BATCH_SIZE" | grep -qE '^[0-9]+$'; then
+  echo "ERROR: --batch-size '$BATCH_SIZE' không hợp lệ (phải là số nguyên không âm)" >&2
+  exit 1
+fi
 
 # Per-agent BASE-timeout default — applies only when the caller passed no --timeout.
 # DollarBill plan-T+1 jobs do 10-20+ min of real work, so the generic 600s base alone

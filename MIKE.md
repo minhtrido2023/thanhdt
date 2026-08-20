@@ -128,6 +128,15 @@ cao sẽ tự chạy tiếp, nhưng nếu phiên tôi restart giữa chừng th�
 > từng job trong CÙNG một lượt (`bin/batch_wake.sh`, test-and-set nguyên tử như
 > `jobs.sh claim-reply`). Batch trải trên nhiều topic ⇒ mỗi topic là một đợt riêng, KHÔNG bao
 > giờ kéo kết quả topic khác sang. Không truyền `--batch-id` ⇒ hành vi cũ y nguyên.
+> **Call site fan-out ĐÃ chuyển đổi (danh sách ĐẦY ĐỦ, tự kiểm bằng `grep -rn 'batch-id' bin/`):**
+> `bq_freshness_check.sh` (N account live → DollarBill, 19:00) · `check_report_cadence.sh` (tới 8
+> tuần backlog + 1 tháng → Taylor, 08:30 / Sat 09:00 / mùng 1) · `paper_checkpoint_escalation.sh`
+> (N program quá hạn → Taylor, 07:40). Cả ba đếm N XONG trước vòng lặp nên `--batch-size` là số
+> THẬT, không phải phỏng đoán. Sweep 2026-08-20 xác nhận **không còn call site fan-out nào chưa
+> chuyển đổi**: mọi `dispatch.sh --bg` khác trong `bin/` đều là N=1 (`fearbuy_weekly_scan.sh`,
+> `ops_autofix.sh`, `wags_autofix.sh`, `eod_trading_report.sh`, `daily_retro.sh` — vòng
+> `for _attempt in 1 2` ở đó là RETRY tuần tự, không phải fan-out). Thêm caller fan-out MỚI ⇒
+> thêm 2 cờ NGAY và cập nhật dòng này.
 > Member sẽ-không-bao-giờ-bắn (treo, bị kill, `usage_limited`/`maxturns_pending`/
 > `provider_fallback`, `from != Mike`) KHÔNG chặn wake của cả đợt — mọi nhánh chặn đều có trần
 > `deadline + 300s`, và reconciler (tầng dưới) là lưới cuối. RCA:
@@ -139,7 +148,15 @@ cao sẽ tự chạy tiếp, nhưng nếu phiên tôi restart giữa chừng th�
 > muốn topic xong trước được đánh thức ngay.
 > ⚠️ MỘT job trong đợt KHÔNG dispatch được (circuit breaker, registry chặn, đăng ký hỏng) ⇒
 > `--batch-size` lớn hơn số member thật ⇒ member còn lại im đủ 600s rồi mới tới lượt reconciler.
-> Wake KHÔNG mất, nhưng TRỄ 10-15' — với đợt plan 19:05 là muộn hơn `send_plan_report` 19:30.
+> Wake KHÔNG mất, nhưng TRỄ 10-15' — với đợt plan 19:05 là ăn gần hết quỹ thời gian tới
+> `send_plan_report` **21:00** (kb/cron_registry.md dòng 21:00, KHÔNG phải 19:30).
+> ⚠️ Job ĐĂNG KÝ ĐƯỢC nhưng `_bg_wrapper` **không bao giờ khởi động** (detach hỏng ⇒ batch có
+> member, record chưa terminal, `pid` RỖNG) là ca CHẬM NHẤT: nhánh (c) của `_batch_member_blocks`
+> chỉ kết luận được khi CÓ `pid` để kiểm; `pid` rỗng thì cố ý KHÔNG kết luận (thà nhường nhầm còn
+> hơn bắn trùng) ⇒ rơi xuống trần `deadline + 300s`. Với đợt plan (timeout 600s) là ~15' im lặng,
+> cộng ≤5' reconciler. TRƯỚC khi có batch, anh em đã được đánh thức NGAY. Đây là cái giá đã biết
+> của việc gộp wake, không phải bug — nhưng đang chờ một đợt mà `jobs.sh list` cho thấy member
+> `pid` rỗng thì đừng ngồi đợi: đọc kết quả tay qua `jobs.sh status <job_id>`.
 > Thấy đợt nào thiếu job so với dự kiến thì đừng chờ: kiểm `logs/wake_thread.log` ngay.
 
 > **TẦNG THỨ BA — RECONCILER level-triggered (thêm 2026-08-20, `bin/wakeup_reconcile.py`, cron
