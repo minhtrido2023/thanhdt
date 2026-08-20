@@ -500,6 +500,48 @@ json.dump(o, open(fp, "w"))
 PY
 assert "…mọi member xong quá cửa sổ trễ ⇒ hết bay, reconciler được cứu (không kẹt)" \
   "$(IN_FLIGHT b26 jobZ1)" "1"
+# Chốt chặn ĐỒNG HỒ của mệnh đề TOCTOU: `0 <= d`. Không có ca này thì mutate `0 <=` đi vẫn
+# PASS (arch-reviewer vòng 5 đo thật) — mà lỗ đó bịt miệng reconciler suốt thời gian lệch, lệch
+# >4h thì job rơi vào RESCUE_MAX_AGE = KHÔNG BAO GIỜ được cứu. Bản sao của một chốt chặn cần
+# bản sao của bài test.
+rm -f "$BD/b26.json"
+mk_job jobZ2 done "" 1700 Mike 1 "$(( $(date +%s) + 7200 ))"   # ended_at TƯƠNG LAI (NTP step)
+python3 "$REAL/bin/mike_json.py" batch-register "$BD" b26 jobZ1 2 >/dev/null
+python3 "$REAL/bin/mike_json.py" batch-register "$BD" b26 jobZ2 2 >/dev/null
+python3 - "$BD/b26.json" <<'PY2'
+import json, sys, time
+fp = sys.argv[1]; o = json.load(open(fp))
+o["created_at"] = int(time.time()) - 3600
+json.dump(o, open(fp, "w"))
+PY2
+assert "member ended_at TƯƠNG LAI KHÔNG được giữ batch 'đang bay' vĩnh viễn" \
+  "$(IN_FLIGHT b26 jobZ1)" "1"
+# Cô lập THREAD (kỷ luật N3): member topic KHÁC vừa xong không được giữ chân reconciler topic này.
+rm -f "$BD/b27.json"
+mk_job jobZ3 done "" 1700 Mike 111 "$(( $(date +%s) - 400 ))"   # topic 111, xong lâu
+mk_job jobZ4 done "" 1700 Mike 222 "$(date +%s)"                # topic 222, VỪA xong
+python3 "$REAL/bin/mike_json.py" batch-register "$BD" b27 jobZ3 2 >/dev/null
+python3 "$REAL/bin/mike_json.py" batch-register "$BD" b27 jobZ4 2 >/dev/null
+python3 - "$BD/b27.json" <<'PY2'
+import json, sys, time
+fp = sys.argv[1]; o = json.load(open(fp))
+o["created_at"] = int(time.time()) - 3600
+json.dump(o, open(fp, "w"))
+PY2
+assert "member THREAD KHÁC vừa xong KHÔNG giữ chân reconciler của thread này" \
+  "$(IN_FLIGHT b27 jobZ3)" "1"
+
+echo "== CA 27 (arch-reviewer vòng 5, BLOCKER): GHI LOG KHÔNG ĐƯỢC GÁC CỔNG LƯỢT WAKE."
+echo '   Bash không chạy lệnh khi không mở được file redirect, "|| true" nuốt mã lỗi => bản'
+echo "   vòng 4 (dispatch.sh 2>>logs/wake_thread.log) cho 0 wake khi log không ghi được."
+_reset
+mkdir -p "$MK/logs"; : > "$MK/logs/wake_thread.log"; chmod 000 "$MK/logs/wake_thread.log"
+BID27="selfcheck.batch27"
+_dispatch_bg Wags "batch job log-hỏng A" --batch-id "$BID27" --batch-size 2
+STUB_SLEEP=3 _dispatch_bg Taylor "batch job log-hỏng B" --batch-id "$BID27" --batch-size 2
+_wait_all_terminal
+chmod 644 "$MK/logs/wake_thread.log"
+assert "logs/wake_thread.log KHÔNG ghi được ⇒ VẪN đúng 1 lượt wake cho cả đợt" "$(_nwake)" "1"
 
 echo
 if [ "$FAILS" -eq 0 ]; then

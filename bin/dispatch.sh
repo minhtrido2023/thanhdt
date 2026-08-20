@@ -1292,12 +1292,14 @@ if [ "$bg" = "--bg" ]; then
   # Fail-soft cả hai nhánh: lỗi ở đây không bao giờ được làm hỏng đường hoàn tất của job.
   _wake_now() {
     if [ -n "${BATCH_ID:-}" ]; then
-      # stderr vào logs/wake_thread.log, KHÔNG /dev/null (arch-reviewer vòng 4): batch_wake.sh
-      # chỉ nói ra khi fail-safe kích hoạt (mike_json hỏng, mktemp hỏng, batch không đọc được)
-      # — đúng những lượt cần soi. Vứt đi thì mỗi lần mất dedupe là một lượt push thừa không
-      # dấu vết, mà logs/wake_thread.log lại chính là file RCA 08-20 dùng để đếm số lượt.
-      "$ROOT/bin/batch_wake.sh" "$BATCH_ID" "$job_id" "$1" "$2" \
-        >/dev/null 2>>"$ROOT/logs/wake_thread.log" || true
+      # 2>/dev/null, KHÔNG redirect vào file log (arch-reviewer vòng 5, BLOCKER — bản vòng 4
+      # sai ở đúng đây). Bash KHÔNG CHẠY LỆNH khi không mở được file redirect, mà `|| true`
+      # nuốt mã lỗi: đo end-to-end với `chmod 000 logs/wake_thread.log` ⇒ 0 lượt wake cho cả
+      # đợt, câm tuyệt đối (stderr của bash cũng vào /dev/null của _detached_spawn). Không bao
+      # giờ để khả năng GHI LOG gác cổng một lượt wake. batch_wake.sh tự append chẩn đoán của
+      # nó vào logs/wake_thread.log theo kiểu fail-soft — script sinh ra chẩn đoán thì sở hữu
+      # việc ghi, đúng mẫu bin/wake_thread.sh:134.
+      "$ROOT/bin/batch_wake.sh" "$BATCH_ID" "$job_id" "$1" "$2" >/dev/null 2>/dev/null || true
     else
       "$ROOT/bin/wake_thread.sh" "$1" "$2" "$job_id" 2>/dev/null || true
     fi

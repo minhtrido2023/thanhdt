@@ -2992,7 +2992,11 @@ def batch_in_flight(batches_dir, batch_id, jobs_dir, job_id=None, now=None):
     # người cuối không" — trễ nó là trễ chính lượt wake. Reconciler hỏi "tôi có nên tránh đường
     # không" — kiên nhẫn thêm chỉ làm lưới cuối chậm hơn, KHÔNG BAO GIỜ làm tầng dispatch im.
     # Mọi sai lệch chỉ được phép nghiêng về phía đó.
-    ends = [_as_int(_batch_job(jobs_dir, m).get("ended_at"), 0) for m in _batch_members(obj)]
+    # `_batch_group` (member CÙNG THREAD) chứ không `_batch_members` (mọi topic) — cùng kỷ luật
+    # cô lập topic của N3 vòng 2: một member topic B vừa xong không có lý do gì giữ chân
+    # reconciler của topic A, vì lượt claim của B cũng chỉ bắn vào thread B.
+    ends = [_as_int(_batch_job(jobs_dir, m).get("ended_at"), 0)
+            for m in _batch_group(obj, jobs_dir, tid)]
     fresh = [now - e for e in ends if e]
     return any(0 <= d <= BATCH_CLAIM_LAG_S for d in fresh)   # `0 <=`: chặn đồng hồ lùi, như nit 5
 

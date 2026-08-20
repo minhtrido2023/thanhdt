@@ -38,15 +38,27 @@ _single_wake() {  # hành vi TRƯỚC khi có batch — giữ nguyên từng ch�
 # stderr đi vào FILE chứ không /dev/null: nó chở BẰNG CHỨNG "im lặng có chủ ý" (xem dưới).
 # mktemp hỏng ⇒ err_f rỗng ⇒ không có bằng chứng ⇒ mọi lượt đều rơi về wake đơn lẻ. Ồn ào,
 # nhưng đúng chiều fail-safe: thà thừa một push còn hơn nuốt mất.
+# CHÍNH SCRIPT NÀY sở hữu việc ghi chẩn đoán của nó, và ghi FAIL-SOFT (arch-reviewer vòng 5,
+# BLOCKER). Bản trước bắt dispatch.sh làm hộ bằng `2>>logs/wake_thread.log` — nhưng bash KHÔNG
+# CHẠY LỆNH nếu không mở được file redirect, và `|| true` nuốt luôn mã lỗi: đo end-to-end với
+# `chmod 000 logs/wake_thread.log` ⇒ 2 job batch done, batch record đủ, 0 lượt wake, CÂM tuyệt
+# đối. Tức một bản vá có mục đích duy nhất là TĂNG QUAN SÁT lại biến "ghi log được" thành điều
+# kiện để wake nổ. Luật đúng đã có sẵn ở bin/wake_thread.sh:134 — "ghi log KHÔNG được biến một
+# push đã thành công thành exit 1". Ở đây cũng vậy: `|| true` bọc ĐÚNG lệnh ghi, không bọc
+# đường wake. Dấu thời gian NEO CỨNG ICT (§16) vì file này bị daily_retro.sh đếm theo `^$TODAY`.
+LOGF="$ROOT/logs/wake_thread.log"
+_log() {
+  printf '%s batch_wake: %s | batch=%s job_id=%s\n' \
+    "$(TZ='Asia/Ho_Chi_Minh' date -Iseconds)" "$1" "$batch_id" "$job_id" \
+    >> "$LOGF" 2>/dev/null || true
+}
+
 err_f="$(mktemp 2>/dev/null || true)"
 if [ -z "$err_f" ]; then
   # Không có chỗ chứa bằng chứng ⇒ mọi lượt rơi về wake đơn lẻ ⇒ N member = N push, tức BUG
-  # GỐC sống lại. Đúng chiều fail-safe nhưng KHÔNG ĐƯỢC IM: dispatch.sh gọi script này với
-  # `2>&1` vào logs/wake_thread.log, còn dòng này ghi thẳng vào chính file mà RCA 08-20 dùng
-  # để đếm số lượt push — nơi người điều tra "sao hôm nay lại 2 lượt" sẽ nhìn đầu tiên.
-  printf '%s batch_wake: mktemp HỎNG (TMPDIR=%s) — không kiểm được bằng chứng im-lặng, rơi về wake ĐƠN LẺ cho batch=%s job=%s ⇒ có thể trùng lượt push\n' \
-    "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "${TMPDIR:-/tmp}" "$batch_id" "$job_id" \
-    >> "$ROOT/logs/wake_thread.log" 2>/dev/null || true
+  # GỐC sống lại. Đúng chiều fail-safe nhưng KHÔNG ĐƯỢC IM — đây là chính file mà RCA 08-20
+  # dùng để đếm số lượt push, nơi người điều tra "sao hôm nay 2 lượt" nhìn đầu tiên.
+  _log "mktemp HỎNG (TMPDIR=${TMPDIR:-/tmp}) — không kiểm được bằng chứng im-lặng, rơi về wake ĐƠN LẺ ⇒ có thể trùng lượt push"
 fi
 # shellcheck disable=SC2064
 [ -n "$err_f" ] && trap 'rm -f "$err_f"' EXIT INT TERM
@@ -73,12 +85,18 @@ rc=$?
 # đều in marker ở CỘT 0; traceback thụt 4 dấu cách. Neo là thứ duy nhất tách được hai cái đó,
 # nên marker chỉ "không giả mạo được" KHI CÒN NEO — đừng gỡ `^`.
 _silent_ok() { [ -n "$err_f" ] && grep -q '^BATCH-SILENT-OK' "$err_f"; }
-_dump_err() { [ -n "$err_f" ] && cat "$err_f" >&2 || true; }
+_dump_err() {   # chẩn đoán phải tới được NGƯỜI ĐỌC: dispatch.sh gọi script này với 2>/dev/null
+  [ -n "$err_f" ] || return 0
+  cat "$err_f" >&2
+  while IFS= read -r _l; do [ -n "$_l" ] && _log "claim stderr: $_l"; done < "$err_f"
+  return 0
+}
 
 case "$rc" in
   1|2)   # 1 = đã có người claim / mọi member đã replied · 2 = anh em còn chạy, người cuối bắn
      if _silent_ok; then exit 1; fi
      _dump_err
+     _log "KHÔNG BIẾT: batch-claim-wake thoát $rc mà KHÔNG có bằng chứng im-lặng-có-chủ-ý (mike_json.py hỏng/thiếu/đổi subcommand?) — wake ĐƠN LẺ để không nuốt mất lượt"
      echo "KHÔNG BIẾT: batch-claim-wake thoát $rc mà KHÔNG có bằng chứng im-lặng-có-chủ-ý (mike_json.py hỏng/thiếu/đổi subcommand?) — wake ĐƠN LẺ để không nuốt mất lượt." >&2
      _single_wake
      exit 2 ;;
