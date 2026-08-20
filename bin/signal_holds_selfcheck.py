@@ -99,6 +99,33 @@ def main():
     da = json.load(open(pfa))
     ok(len(da["orders"]) == 1, "plan đã duyệt KHÔNG bị sửa (fail-safe)")
 
+    # 10b. KILLER OBJECTION arch-reviewer 2026-08-20: ≥2 order THIẾU id, 1 vi phạm —
+    # KHÔNG được gỡ oan order hợp lệ (trước đây khoá theo id=None trùng nhau -> gỡ sạch).
+    plan_noid = {"plan_date": "2026-08-21", "approved_by": None, "orders": [
+        {"ticker": "VPI", "side": "buy", "book": "BAL", "qty": 400},   # vi phạm, KHÔNG id
+        {"ticker": "FPT", "side": "buy", "book": "LAG", "qty": 100}]}  # hợp lệ, KHÔNG id
+    pfn = _write(plan_noid)
+    act_n, _ = m.enforce_plan(pfn)
+    dn = json.load(open(pfn))
+    ok(act_n == "stripped", "thiếu id: action=stripped")
+    ok([o["ticker"] for o in dn["orders"]] == ["FPT"],
+       "thiếu id: CHỈ VPI bị gỡ, FPT hợp lệ GIỮ LẠI (không gỡ oan)")
+    ok(len(dn["deferred_orders"]) == 1 and dn["deferred_orders"][0]["ticker"] == "VPI",
+       "thiếu id: chỉ VPI vào deferred")
+    os.unlink(pfn)
+
+    # 10c. VPI-buy gắn book RỖNG/khác BAL -> vẫn bị chặn nhờ hold ticker=VPI (defense-in-depth).
+    # Fixture cần cả hold ticker=VPI (khác FIX ở trên) -> nạp fixture riêng.
+    fix2 = {"holds": [{"scope": "ticker", "value": "VPI", "side": "buy",
+                       "until": "2026-09-16", "reason": "r", "decided_by": "user"}]}
+    hf2 = _write(fix2)
+    m2 = _load(hf2)
+    ok(m2.match_order("VPI", "buy", "", plan_date="2026-08-21"),
+       "VPI-buy book RỖNG bị chặn bởi hold ticker=VPI")
+    ok(m2.match_order("VPI", "buy", "DISCRETIONARY", plan_date="2026-08-21"),
+       "VPI-buy book khác BAL bị chặn bởi hold ticker=VPI")
+    os.unlink(hf2)
+
     # 11. fail-open: file hold thiếu -> match None, không raise
     m.MOD_MISSING = _load("/nonexistent/holds.json")
     ok(m.MOD_MISSING.match_order("VPI", "buy", "BAL", plan_date="2026-08-21") is None,

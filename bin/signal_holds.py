@@ -128,35 +128,57 @@ def enforce_plan(plan_path):
     lại trên plan đã sạch = no-op. TỪ CHỐI đụng plan đã duyệt (approved_by != None) để không
     âm thầm sửa thứ user đã ký; trả ('refused_approved', violations) trong trường hợp đó.
 
-    Trả (action, violations): action ∈ {'clean','stripped','refused_approved'}."""
+    Trả (action, violations): action ∈ {'clean','stripped','refused_approved'}.
+
+    ⚠️ Quyết định gỡ per-order bằng match_order TRỰC TIẾP trên chính object order (không đối
+    chiếu qua order['id']) — order LLM-authored có thể thiếu 'id', khi đó khoá theo id sẽ để
+    None trùng nhau và gỡ OAN mọi order thiếu id (arch-reviewer killer objection 2026-08-20).
+    Ghi atomic có flock chống lost-update với writer plan đồng thời (park_trim/jit/merge 19:30-20:30,
+    second-chance 23:00)."""
+    import fcntl
+    import tempfile
     with open(plan_path, encoding="utf-8") as f:
         plan = json.load(f)
-    violations, plan_date = check_plan(plan_path)
-    if not violations:
+    if not any(plan.get("orders") or []):
         return "clean", []
+    plan_date = plan.get("plan_date")
     if plan.get("approved_by") is not None:
         # plan đã ký — KHÔNG tự sửa; để tầng bot_execute chặn + escalate cho người.
-        return "refused_approved", violations
+        violations, _ = check_plan(plan_path)
+        return ("refused_approved", violations) if violations else ("clean", [])
 
-    viol_ids = {v.get("order_id") for v in violations}
-    kept, moved = [], []
+    kept, moved, violations = [], [], []
     for o in plan.get("orders", []):
-        if o.get("id") in viol_ids:
-            v = next(x for x in violations if x.get("order_id") == o.get("id"))
-            h = v["hold"]
+        h = match_order(o.get("ticker"), o.get("side"), o.get("book"), plan_date=plan_date)
+        if h:
             o["deferred_reason"] = (
                 f"AUTO-DEFERRED by signal_holds gate: vi phạm hold [{h['scope']}={h['value']}, "
-                f"side={h['side']}] tới {h['until']} — {h['reason']} (decided_by={h['decided_by']}).")
+                f"side={h.get('side')}] tới {h['until']} — {h.get('reason')} "
+                f"(decided_by={h.get('decided_by')}).")
             moved.append(o)
+            violations.append({"order_id": o.get("id"), "ticker": o.get("ticker"),
+                               "side": o.get("side"), "book": o.get("book"),
+                               "qty": o.get("qty") or o.get("quantity"), "hold": h})
         else:
             kept.append(o)
+    if not moved:
+        return "clean", []
     plan["orders"] = kept
     plan.setdefault("deferred_orders", []).extend(moved)
 
-    tmp = plan_path + ".tmp"
-    with open(tmp, "w", encoding="utf-8") as f:
-        json.dump(plan, f, ensure_ascii=False, indent=2)
-    os.replace(tmp, plan_path)
+    # flock trên chính plan file (chống lost-update); tmp tên duy nhất qua mkstemp.
+    lock_path = plan_path + ".lock"
+    with open(lock_path, "w") as lk:
+        fcntl.flock(lk, fcntl.LOCK_EX)
+        d = os.path.dirname(os.path.abspath(plan_path)) or "."
+        fd, tmp = tempfile.mkstemp(prefix=".signal_holds_", suffix=".tmp", dir=d)
+        try:
+            with os.fdopen(fd, "w", encoding="utf-8") as f:
+                json.dump(plan, f, ensure_ascii=False, indent=2)
+            os.replace(tmp, plan_path)
+        finally:
+            if os.path.exists(tmp):
+                os.unlink(tmp)
     return "stripped", violations
 
 

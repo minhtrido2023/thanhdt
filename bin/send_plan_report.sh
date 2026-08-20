@@ -76,6 +76,13 @@ if [ -n "$PLAN_FILE" ] && [ -f "$PLAN_FILE" ]; then
     echo "[send_plan_report] signal_holds: plan ĐÃ DUYỆT nhưng chứa order vi phạm hold — KHÔNG tự sửa, escalate. $HOLD_OUT"
     "$ROOT/bin/notify_thread.sh" "$(TZ='Asia/Ho_Chi_Minh' date '+%H:%M %d/%m/%Y')
 🛑 **signal_holds gate — CẦN NGƯỜI**: plan $ACCOUNT $EXPECTED_DATE ĐÃ DUYỆT nhưng chứa order vi phạm ranh giới tạm giữ tín hiệu. Gate KHÔNG tự sửa plan đã ký. bot_execute sẽ chặn order này khi chạy, nhưng anh nên kiểm tra lại. $HOLD_OUT" plan_approval >/dev/null 2>&1 || true
+  elif [ "$HOLD_RC" != "0" ]; then
+    # RC ∉ {0,2,3} = gate CRASH (traceback/import lỗi), KHÔNG được coi là 'sạch' âm thầm
+    # (arch-reviewer fail_silent 2026-08-20). bot_execute vẫn chạy gate độc lập lúc 09:05 (backstop),
+    # nhưng phải báo to ở đây thay vì nuốt lỗi.
+    echo "[send_plan_report] ⚠⚠ signal_holds gate CRASH rc=$HOLD_RC — KHÔNG xác minh được plan có vi phạm hold hay không. $HOLD_OUT"
+    "$ROOT/bin/notify_thread.sh" "$(TZ='Asia/Ho_Chi_Minh' date '+%H:%M %d/%m/%Y')
+⚠️ **signal_holds gate LỖI (rc=$HOLD_RC)** khi kiểm plan $ACCOUNT $EXPECTED_DATE — KHÔNG xác minh được vi phạm ranh giới tạm giữ. bot_execute sẽ chạy lại gate lúc 09:05 (backstop độc lập), nhưng cần rà signal_holds.py. $HOLD_OUT" plan_approval >/dev/null 2>&1 || true
   fi
 fi
 
