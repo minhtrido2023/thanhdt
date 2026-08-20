@@ -1514,3 +1514,14 @@
 - [2026-08-20T15:54:57Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 153, "job_id": "Wags_20260820_132135", "source": "watcher"}
 - [2026-08-20T15:55:57Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 154, "job_id": "Wags_20260820_132135", "source": "watcher"}
 - [2026-08-20T15:56:58Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 155, "job_id": "Wags_20260820_132135", "source": "watcher"}
+
+## Consolidation 2026-08-20T16:23:01Z
+- [2026-08-20T16:18:12Z] Wags/heartbeat — Wags_20260820_161721: {"status": "in_progress", "note": "đã đọc batch_wake.sh/mike_json batch fns/2 call site chưa chuyển đổi — bắt đầu fix #1"}
+- [2026-08-20T16:18:21Z] Wags/heartbeat — Wags_20260820_161721: {"status": "still_running", "elapsed_min": 1, "job_id": "Wags_20260820_161721", "source": "watcher"}
+- [2026-08-20T16:19:22Z] Wags/heartbeat — Wags_20260820_161721: {"status": "still_running", "elapsed_min": 2, "job_id": "Wags_20260820_161721", "source": "watcher"}
+- [2026-08-20T16:20:11Z] Wags/heartbeat — Wags_20260820_161721: {"status": "in_progress", "note": "#5 + #1 (2 call site) đã patch, bash -n OK; sweep xác nhận chỉ 3 fan-out loop tồn tại"}
+- [2026-08-20T16:20:22Z] Wags/heartbeat — Wags_20260820_161721: {"status": "still_running", "elapsed_min": 3, "job_id": "Wags_20260820_161721", "source": "watcher"}
+- [2026-08-20T16:21:22Z] Wags/heartbeat — Wags_20260820_161721: {"status": "still_running", "elapsed_min": 4, "job_id": "Wags_20260820_161721", "source": "watcher"}
+- [2026-08-20T16:21:27Z] Wags/heartbeat — Wags_20260820_161721: {"status": "in_progress", "note": "#1/#2/#3/#5 xong; đang làm #4 daily_retro batch_wake counters"}
+- [2026-08-20T16:22:22Z] Wags/heartbeat — Wags_20260820_161721: {"status": "still_running", "elapsed_min": 5, "job_id": "Wags_20260820_161721", "source": "watcher"}
+- [2026-08-20T16:22:54Z] Wags/question — dispatch-rong: {"job_id": "Wags_20260820_162234", "prompt_summary": "x", "note": "Dispatch nhan duoc chi co noi dung la ky tu \"x\", khong ro viec can lam. Khong tu doan - cho Mike/user xac nhan lai noi dung that su can dispatch."}
