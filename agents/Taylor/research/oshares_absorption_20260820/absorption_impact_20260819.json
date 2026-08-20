@@ -1,0 +1,38 @@
+{
+ "asof": "2026-08-19",
+ "universe": 208,
+ "buckets": {
+  "N/A": 206,
+  "ABSORBED": 2
+ },
+ "detail": [
+  {
+   "ticker": "ABW",
+   "verdict": "ABSORBED",
+   "value": 301150000.0,
+   "method": "ANCHOR_UNVERIFIED",
+   "anchor_date": "2026-07-20",
+   "window": [
+    "2026-03-22",
+    "2026-07-20"
+   ],
+   "n_events": 1,
+   "rolled": 0,
+   "note": "dòng quý 301,150,000 khớp giả thuyết 'đã gồm 1/1 ISS của cửa sổ' (kỳ vọng 301,150,000, lệch -0.000%) ⇒ KHÔNG lăn lại sự kiện nào"
+  },
+  {
+   "ticker": "HHV",
+   "verdict": "ABSORBED",
+   "value": 574511888.0,
+   "method": "FIN_FALLBACK",
+   "anchor_date": "2026-07-31",
+   "window": [
+    "2026-05-07",
+    "2026-07-31"
+   ],
+   "n_events": 1,
+   "rolled": 0,
+   "note": "dòng quý 574,511,888 khớp giả thuyết 'đã gồm 1/1 ISS của cửa sổ' (kỳ vọng 574,257,432, lệch +0.044%) ⇒ KHÔNG lăn lại sự kiện nào"
+  }
+ ]
+}
