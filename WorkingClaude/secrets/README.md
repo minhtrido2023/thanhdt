@@ -7,6 +7,7 @@ on the server. When resuming on a fresh machine, recreate these files here:
 |------|---------|-------------------|
 | `phs_secret.json` | PHS API client_id / client_secret | keys: `PHS_CLIENT_ID`, `PHS_CLIENT_SECRET` |
 | `phs_credentials.json` | PHS login (username/password/client pair) | broker |
+| `phs_flash_credentials.json` | PHS **FlashAPI** login (username/password + tiểu khoản eqt/fno + env) — KHÁC FLEX ở trên | `phs_flash_credentials.json.sample` |
 | `dnse_credentials.json` | DNSE API key/secret | broker |
 | `telegram_config.json` | Telegram bot_token + chat_id | `telegram_config.template.json` |
 | `trading_bot_accounts.json` | trading bot account list | `trading_bot/` |

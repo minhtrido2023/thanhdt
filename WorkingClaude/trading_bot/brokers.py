@@ -29,6 +29,8 @@ from .vn_market import normalize_price_vnd, now_ict, today_ict
 PAPER_STATE_FILE = os.path.join(os.path.dirname(DATA_DIR), "secrets", "bot_paper_account.json")  # legacy (label main)
 DEFAULT_CREDENTIALS = os.path.join(os.path.dirname(DATA_DIR), "secrets", "phs_credentials.json")
 DEFAULT_DNSE_CREDENTIALS = os.path.join(os.path.dirname(DATA_DIR), "secrets", "dnse_credentials.json")
+DEFAULT_PHS_FLASH_CREDENTIALS = os.path.join(os.path.dirname(DATA_DIR), "secrets",
+                                             "phs_flash_credentials.json")
 
 # Pool FlexClient theo credentials file: nhiều tiểu khoản chung 1 login dùng chung
 # client + token (login lại nhiều lần có thể vô hiệu token cũ của nhau).
@@ -64,6 +66,19 @@ def get_dnse_client(credentials_file=None):
     if path not in _DNSE_POOL:
         _DNSE_POOL[path] = DNSEClient.from_credentials_file(path=path)
     return _DNSE_POOL[path]
+
+
+# Pool PHSFlashClient theo credentials file (1 login dùng chung cho mọi tiểu khoản
+# của cùng bộ credentials; token cache đặt cạnh theo tên file).
+_PHS_FLASH_POOL = {}
+
+
+def get_phs_flash_client(credentials_file=None):
+    from phs_flash_api import PHSFlashClient
+    path = os.path.abspath(credentials_file or DEFAULT_PHS_FLASH_CREDENTIALS)
+    if path not in _PHS_FLASH_POOL:
+        _PHS_FLASH_POOL[path] = PHSFlashClient.from_credentials_file(path=path)
+    return _PHS_FLASH_POOL[path]
 
 
 def qget(d, *names, default=None):
@@ -954,6 +969,251 @@ class DNSEBroker(BrokerBase):
         return out
 
 
+# ---------------------------------------------------------- PHS FlashAPI live
+
+class PHSFlashOrderUpdate(OrderUpdate):
+    """OrderUpdate cho PHS FlashAPI — `is_dead` quyết bởi MÃ trạng thái, không phải
+    heuristic chuỗi của lớp cha.
+
+    Lý do: heuristic cha khớp cả ký tự đơn `"f"`/`"x"`, nên một trạng thái CÒN SỐNG như
+    "Pending confirmation" (mã 13) sẽ bị coi là chết — chết-nhầm làm executor đóng con
+    lệnh và giải phóng chỗ trong khi lệnh vẫn còn khớp được. Ở đây deadness đến từ một
+    TẬP MÃ ĐÓNG lấy từ tài liệu chính thức; mã lạ ⇒ coi là CÒN SỐNG (fail-safe: kẹt một
+    con lệnh còn hơn tạo trạng thái phơi nhiễm kép).
+    """
+
+    DEAD_CODES = {"0", "3", "5", "6", "12", "E", "R"}   # reject/cancel/expire/fully-matched
+
+    def __init__(self, order_id, status="", filled_qty=0, avg_price=None, raw=None,
+                 code=None):
+        super().__init__(order_id, status, filled_qty, avg_price, raw)
+        self.code = None if code is None else str(code).strip()
+
+    @property
+    def is_dead(self):
+        if self.code in self.DEAD_CODES:
+            return True
+        if self.code == "4":            # "Matched" — chỉ chết khi không còn dư (số ĐO được)
+            remain = _fnum(qget(self.raw, "remainqtty", "remain_qtty"))
+            return remain is not None and remain == 0
+        return False
+
+
+class PHSFlashBroker(BrokerBase):
+    """Broker PHS FlashAPI (flashapi.phs.vn) — KHÁC hẳn PHSBroker/FLEX (fgateway.phs.vn).
+
+    Account profile trong secrets/trading_bot_accounts.json:
+        {"label": "PHS", "mode": "paper", "broker": "phs_flash",
+         "account_id": "0120xxxx",              # TIỂU KHOẢN CƠ SỞ, không phải 022Cxxxx
+         "credentials_file": "secrets/phs_flash_credentials.json",
+         "fno_account_id": "02120xxxx"}         # chỉ cần khi đọc phái sinh
+
+    CHƯA GO-LIVE: hồ sơ đăng ký FlashAPI chưa nộp, mọi số dưới đây mới verify trên
+    sandbox (sandbox trả fixture cho mọi accountId và KHÔNG validate Bearer token).
+    """
+
+    name = "phs_flash"
+    can_trade_live = True
+
+    def __init__(self, account_id=None, otp=None, quote_only=False,
+                 credentials_file=None, label="main", fno_account_id=None,
+                 loan_package_id=None):
+        self.account_id = account_id          # tiểu khoản CƠ SỞ (eqt)
+        self.fno_account_id = fno_account_id  # tiểu khoản PHÁI SINH (fno)
+        self.label = label
+        self._otp = otp                       # FlashAPI lấy otp_token ngay từ login
+        self.quote_only = quote_only
+        self.credentials_file = credentials_file
+        self.client = None
+        self._quote_cache = {}                # symbol -> (ts, Quote)
+        self._quote_ttl = 3.0
+        self._raw_log = os.path.join(
+            EXEC_DIR, f"phs_flash_raw_{today_ict():%Y-%m-%d}.jsonl")
+
+    def connect(self):
+        self.client = get_phs_flash_client(self.credentials_file)
+        self.account_id = self.account_id or self.client.eqt_account_id
+        self.fno_account_id = self.fno_account_id or self.client.fno_account_id
+        if self.quote_only:
+            print(f"[phs_flash] chế độ quote-only ({self.client.env})")
+            return self
+        self.client.login(asset_type="underlying")
+        if not self.account_id:
+            raise RuntimeError(f"PHS FlashAPI ({self.label}): thiếu tiểu khoản cơ sở "
+                               "(account_id/eqt_account_id)")
+        print(f"[phs_flash] login OK ({self.client.env}, eqt={self.account_id})")
+        return self
+
+    # ------------------------------------------------------------------ tiền
+
+    def get_cash(self):
+        """Sức mua an toàn `ppse` — KHÔNG phải tiền SỞ HỮU (coding_guidelines §25: đây là
+        vế "tiêu được ngay"). Consumer tính NAV/mẫu số tỷ trọng KHÔNG được dùng hàm này.
+
+        Production fail-closed: `/underlying/buyingPower` bắt buộc symbol+quotePrice, còn
+        `/underlying/assets` chưa probe được field (404 ở sandbox) ⇒ thà raise còn hơn đọc
+        đại một field tên nghe giống tiền.
+        """
+        if self.client.env != "sandbox":
+            raise RuntimeError(
+                "[phs_flash] get_cash() chưa dùng được ở production: buyingPower cần "
+                "symbol+quotePrice → gọi get_buying_power(symbol, price); trường tiền của "
+                "/underlying/assets chưa được xác nhận với PHS.")
+        rows = self.client.get_buying_power(self.account_id)
+        self._log_raw("underlying_balance", rows)
+        row = rows[0] if isinstance(rows, list) and rows else rows
+        return _fnum(qget(row, "ppse", default=0)) or 0.0
+
+    def get_max_buy_qty(self, symbol, price, loan_package_id=None):
+        """Số CP mua tối đa theo chính broker (`maxqty`). Lỗi → None (caller tự fail-safe)."""
+        try:
+            rows = self.client.get_buying_power(self.account_id, symbol, int(price))
+            self._log_raw("buying_power", {"symbol": symbol, "price": price, "resp": rows})
+            row = rows[0] if isinstance(rows, list) and rows else rows
+            v = _fnum(qget(row, "maxqty", "maxqtty"))
+            return int(v) if v is not None and v >= 0 else None
+        except Exception:
+            return None
+
+    def get_buying_power(self, symbol, price, loan_package_id=None):
+        """Sức mua VND (`ppse`) theo mã + giá. Lỗi → None, KHÔNG suy ra từ get_cash()."""
+        try:
+            rows = self.client.get_buying_power(self.account_id, symbol, int(price))
+            self._log_raw("buying_power", {"symbol": symbol, "price": price, "resp": rows})
+            row = rows[0] if isinstance(rows, list) and rows else rows
+            v = _fnum(qget(row, "ppse"))
+            return float(v) if v is not None and v >= 0 else None
+        except Exception:
+            return None
+
+    # ------------------------------------------------------------- danh mục
+
+    def get_positions(self):
+        rows = self.client.get_positions(self.account_id) or []
+        self._log_raw("portfolio", rows)
+        out = {}
+        for p in rows:
+            sym = qget(p, "symbol", "instrument", "code")
+            total = int(_fnum(qget(p, "total", default=0)) or 0)
+            sellable = int(_fnum(qget(p, "trade", default=total)) or total)
+            # CP chờ về = CẢ BA chặng T0/T1/T2 (mua T0 về T+2), không chỉ receivingT2:
+            # chỉ lấy T2 sẽ báo thiếu đúng phần vừa mua 1-2 phiên trước. Chưa có consumer
+            # nào đọc khóa này — thêm để đủ thông tin, không đổi ngữ nghĩa total/sellable.
+            receivable = sum(int(_fnum(qget(p, k, default=0)) or 0)
+                             for k in ("receivingT0", "receivingT1", "receivingT2"))
+            if sym and total > 0:
+                out[sym] = {"total": total, "sellable": sellable,
+                            "receivable": receivable,
+                            "costPrice": _fnum(qget(p, "costprice"))}
+        return out
+
+    # ------------------------------------------------------------- bảng giá
+
+    def get_quote(self, symbol):
+        import time as _t
+        hit = self._quote_cache.get(symbol)
+        if hit and _t.time() - hit[0] < self._quote_ttl:
+            return hit[1]
+        try:
+            rows = self.client.get_quote(symbol)
+        except Exception as e:
+            print(f"[phs_flash] ⚠ quote {symbol} lỗi: {e}")
+            return None
+        # Lấy ĐÚNG dòng của mã đã hỏi, KHÔNG lấy rows[0]: feed trả list và không đảm bảo
+        # thứ tự/đủ mã (sandbox còn trả nguyên fixture ACB cho mọi symbolList). Lấy nhầm
+        # dòng nghĩa là gán giá của mã KHÁC cho lệnh — sai im lặng, nên fail-closed: không
+        # khớp mã ⇒ trả None để caller tự xử, không đoán.
+        rows = rows if isinstance(rows, list) else [rows]
+        row = next((r for r in rows if isinstance(r, dict)
+                    and str(r.get("s", "")).strip().upper() == str(symbol).strip().upper()),
+                   None)
+        if row is None:
+            self._log_raw("quote_symbol_mismatch",
+                          {"asked": symbol, "got": [r.get("s") for r in rows if isinstance(r, dict)]})
+        q = None
+        if isinstance(row, dict):
+            q = Quote(self._quote_aliases(row))
+            if not q.ok():
+                self._log_raw("quote_unmapped", row)
+            # KHÔNG dựng l2_snapshot: symbol-latest-data chỉ có 3 mức LÔ LẺ (bbOd/boOd),
+            # không phải sổ lệnh lô chẵn — dựng L2 từ đó là bịa thanh khoản.
+            q.l2_snapshot = None
+        self._quote_cache[symbol] = (_t.time(), q)
+        return q
+
+    @staticmethod
+    def _quote_aliases(row):
+        """Thêm khóa alias mà `Quote` biết đọc, GIỮ NGUYÊN payload thô bên dưới.
+
+        Tên trường FlashAPI viết tắt một ký tự (`c` giá khớp, `re` tham chiếu, `s` mã) nên
+        `Quote` — vốn dò theo tên dài — không tự khớp được. Bid/ask CỐ Ý bỏ trống: feed chỉ
+        cấp lô lẻ.
+        """
+        return dict(row,
+                    symbol=row.get("s"),
+                    lastPrice=row.get("c"),
+                    refPrice=row.get("re"),
+                    totalVolume=row.get("vo"))
+
+    # ------------------------------------------------------------------ lệnh
+
+    def place_order(self, symbol, qty, side, price=None, order_type="LO",
+                    cash_only=False, loan_package_id=None):
+        """Đặt lệnh cơ sở. `cash_only`/`loan_package_id` là khái niệm gói vay của DNSE,
+        PHS không dùng → bỏ qua (giữ chữ ký chung cho executor).
+
+        Order type hợp lệ (PHS support xác nhận): HOSE = LO/ATO/ATC/MP;
+        HNX+UPCOM = LO/MOK/MAK/PLO.
+        """
+        if price is None:
+            # `limitPrice` là trường BẮT BUỘC của API kể cả với lệnh không phải LO; giá trị
+            # hợp lệ cho ATO/ATC/MP chưa được PHS xác nhận ⇒ chặn ở đây thay vì gửi 0.
+            raise RuntimeError(f"[phs_flash] {order_type} thiếu price — FlashAPI bắt buộc "
+                               "limitPrice, giá trị cho lệnh thị trường chưa xác nhận với PHS")
+        params = {"instrument": symbol, "qty": int(qty), "side": str(side).lower(),
+                  "type": order_type, "limitPrice": int(price), "timetype": "T"}
+        r = self.client.place_order(self.account_id, params)
+        self._log_raw("place_order", {"req": params, "resp": r})
+        oid = qget(r, "orderid", "orderId", "id")
+        if not oid:
+            raise RuntimeError(f"place_order không trả orderid: {r}")
+        return str(oid)
+
+    def cancel_order(self, order_id):
+        r = self.client.cancel_order(self.account_id, order_id)
+        self._log_raw("cancel_order", {"order_id": order_id, "resp": r})
+        return r
+
+    def poll_orders(self):
+        from phs_flash_api import underlying_status_label
+        rows = self.client.get_daily_orders(self.account_id) or []
+        self._log_raw("daily_orders", rows)
+        out = {}
+        for o in rows:
+            oid = qget(o, "orderid", "orderId", "id")
+            if oid is None:
+                continue
+            filled = _fnum(qget(o, "execqtty", "matchqtty", default=0)) or 0
+            avg = normalize_price_vnd(_fnum(qget(o, "execprice", "matchprice", "avgprice")))
+            code = qget(o, "orstatuscode", "orstatusvalue", "status_code")
+            out[str(oid)] = PHSFlashOrderUpdate(
+                oid, underlying_status_label(o), filled, avg, raw=o, code=code)
+        return out
+
+    # -------------------------------------------------------------- phái sinh
+
+    def get_derivative_balance(self):
+        """Phase 1 chỉ ĐỌC phái sinh (đặt lệnh phái sinh chưa xác nhận spec)."""
+        r = self.client.get_derivative_balance(self.fno_account_id)
+        self._log_raw("derivative_balance", r)
+        return r
+
+    def get_derivative_positions(self):
+        r = self.client.get_derivative_positions(self.fno_account_id)
+        self._log_raw("derivative_positions", r)
+        return r
+
+
 # --------------------------------------------------------------- Paper sim
 
 class PaperBroker(BrokerBase):
@@ -1132,7 +1392,8 @@ class PaperBroker(BrokerBase):
              "price": fill_px, "fee": round(fee)})
 
 
-BROKER_CLASSES = {"phs": PHSBroker, "dnse": DNSEBroker}
+BROKER_CLASSES = {"phs": PHSBroker, "dnse": DNSEBroker,
+                  "phs_flash": PHSFlashBroker}
 
 # Pool nguồn quote dùng chung (1 per broker-type × credentials) cho paper accounts
 _QUOTE_POOL = {}
