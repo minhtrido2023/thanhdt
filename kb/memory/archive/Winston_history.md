@@ -85,3 +85,6 @@
 
 ## Archived 2026-08-20 (keep=12 days=0 require_done=False)
 - [2026-08-10T02:11:25Z] ĐANG CHỜ QUYẾT: FUNDING gate chặn oan ZaloPay 2026-08-10 (Σ util 2 gói vay dùng chung 1 hũ tiền cash-only ⇒ 105,6% trong khi thật 54,6%). Đã escalate bus question + Telegram trading_daily, incident commit 770ff08e. KHÔNG tự vá (gate tiền thật). NEXT: nếu user/Taylor duyệt sửa Σ→max thì Taylor implement + quant-skeptic; theo dõi phiên 08-11 xem plan có lại nhiều nhóm gói vay không.
+
+## Archived 2026-08-20 (keep=12 days=0 require_done=False)
+- [2026-08-10T05:49:55Z] XONG job Winston_20260810_054508 (ops-autofix ZaloPay 12:45): bao dong 944 PLACE_FAIL chi la du am bug deal-not-found da sua 10:32/restart 10:35 (8/8 lenh BAN khop). Sua root cause THAT = ops_health_check.sh muc 3 dem tich luy ca ngay, khong biet loi da ngung -> commit b64611b1 (co PLACE/FILL/DONE sau lan loi cuoi => ha ⚠️ xuong ℹ️; test 2 chieu tren journal that). Incident 56fbbcba. Dong 3 question restart-zalopay. CON TREO CAN USER: 2 cau Mike (report-cadence-overdue-weekly, retro-pattern-recurring-2-days) + 5 cau >48h (Taylor/vol-scale-chase-cap-gate4 5d, dt5g-live-writer-la-3 4d, context-bloat-same-day 4d, Wags/coord-2026-08-07 x2). NEXT: khong co viec dang do.
