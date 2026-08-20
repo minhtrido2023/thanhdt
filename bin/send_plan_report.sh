@@ -61,6 +61,24 @@ print(next_trading_day(dt.date.today()))
 # Plan file mới nhất theo mtime (Bill ghi vào data/trade_plans/plan_<account>_<date>.json)
 PLAN_FILE="$(ls -t "$WORKDIR"/data/trade_plans/plan_${ACCOUNT}_*.json 2>/dev/null | head -1)"
 
+# --- signal_holds gate (tầng chặn cứng #1, fix lỗi #3 RCA 2026-08-20) ---
+# Chạy TRƯỚC khi tính hash + gửi: nếu DollarBill (dù đã có HOLDS_NOTE trong prompt) vẫn để lọt
+# 1 order vi phạm hold vào orders[], gate này gỡ nó sang deferred_orders (chưa duyệt) hoặc
+# escalate (đã duyệt). Không phụ thuộc LLM nhớ. Fail-safe: gỡ lệnh = chiều an toàn.
+if [ -n "$PLAN_FILE" ] && [ -f "$PLAN_FILE" ]; then
+  HOLD_OUT="$(cd "$ROOT" && python3 bin/signal_holds.py --enforce "$PLAN_FILE" 2>&1)"
+  HOLD_RC=$?
+  if [ "$HOLD_RC" = "3" ]; then
+    echo "[send_plan_report] signal_holds: ĐÃ GỠ order vi phạm hold khỏi plan $ACCOUNT (sang deferred_orders). Chi tiết: $HOLD_OUT"
+    "$ROOT/bin/notify_thread.sh" "$(TZ='Asia/Ho_Chi_Minh' date '+%H:%M %d/%m/%Y')
+⚠️ **signal_holds gate đã kích hoạt** — plan $ACCOUNT $EXPECTED_DATE có order vi phạm ranh giới tạm giữ tín hiệu, đã tự GỠ sang deferred_orders trước khi gửi. Nghĩa là tầng sinh plan (DollarBill) để lọt — cần rà lại vì sao. Plan gửi cho anh là bản ĐÃ SỬA." plan_approval >/dev/null 2>&1 || true
+  elif [ "$HOLD_RC" = "2" ]; then
+    echo "[send_plan_report] signal_holds: plan ĐÃ DUYỆT nhưng chứa order vi phạm hold — KHÔNG tự sửa, escalate. $HOLD_OUT"
+    "$ROOT/bin/notify_thread.sh" "$(TZ='Asia/Ho_Chi_Minh' date '+%H:%M %d/%m/%Y')
+🛑 **signal_holds gate — CẦN NGƯỜI**: plan $ACCOUNT $EXPECTED_DATE ĐÃ DUYỆT nhưng chứa order vi phạm ranh giới tạm giữ tín hiệu. Gate KHÔNG tự sửa plan đã ký. bot_execute sẽ chặn order này khi chạy, nhưng anh nên kiểm tra lại. $HOLD_OUT" plan_approval >/dev/null 2>&1 || true
+  fi
+fi
+
 # md5 NỘI DUNG plan, loại các field approval (approved_by/mafee_authorized/approv*/mafee_*/
 # requires_user_approval) — duyệt plan ghi thêm field vào file là thay đổi lành tính,
 # second-chance không được coi đó là "plan đổi" mà gửi lại lúc 23:00.
