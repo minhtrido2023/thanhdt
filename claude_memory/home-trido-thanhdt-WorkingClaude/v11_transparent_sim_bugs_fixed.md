@@ -83,7 +83,7 @@ entered (KBC, VHM, VIC). KBC stopped out at -22.95% via TIME (Jan→Mar 2026),
 but VHM (+8.06%) and VIC (+6.38%) still open. Net NAV change: **65.50B → 65.62B
 (+0.12B / +0.25pp CAGR)**. Cohort win-rate worse but exempt-slot mechanics
 preserve other winners → small net positive. Matches direction of D1's
-production validation (memory: ba_v11_production_proposal).
+[REDACTED] validation (memory: ba_v11_[REDACTED]_proposal).
 
 ## Bug 4 (extra): slot12 deployment + 10% fixed sizing (2026-05-18)
 

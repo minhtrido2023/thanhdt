@@ -7,7 +7,7 @@ metadata:
   originSessionId: da955fb4-3cf3-4f12-a372-44b0e169e1a4
 ---
 
-**[REDACTED]08.** User hỏi F-system (overlay phái sinh VN30F, không phải production chính) — đào sâu backtest + cải thiện. Production chính vẫn là DT5G + book cổ phiếu V4/V5; F-system là overlay OPTIONAL 20% vốn, state→long/short VN30F (CRISIS−100/BEAR−20/NEU+70/BULL+100/EXBULL+130 = map F_HAdapted live).
+**[REDACTED]08.** User hỏi F-system (overlay phái sinh VN30F, không phải [REDACTED] chính) — đào sâu backtest + cải thiện. Production chính vẫn là DT5G + book cổ phiếu V4/V5; F-system là overlay OPTIONAL 20% vốn, state→long/short VN30F (CRISIS−100/BEAR−20/NEU+70/BULL+100/EXBULL+130 = map F_HAdapted live).
 
 **Dữ liệu VN30F:** KHÔNG có trong BigQuery ban đầu (chỉ `VN30` spot index + `E1VFVN30` ETF). **vnstock (source VCI) CÓ**: `VN30F1M` + `VN30F2M` full history 2017-08-10→now (~2188 phiên, OHLCV). Đã nạp vào **`tav2_bq.vn30f_daily`** (f1m OHLCV + f2m_close + spot_vn30 + basis + basis_pct). Files: vn30f1m_raw.csv, vn30f2m_raw.csv, vn30f_bq_upload.csv.
 
@@ -22,7 +22,7 @@ metadata:
 **Gate-speed + vol-target van (f_system_van_gatespeed_test.py, futures, map F_HAdapted):**
 - Q1 quan sát user "futures intraday → smooth nhẹ/bỏ 10-25-25" = **SAI/BÁC BỎ**. Smooth NẶNG hơn TỐT hơn: thang raw(497tr,Sh.64/DD−30) → 5_15_15(Sh.56/DD−41) → 7_20_20(Sh.51/DD−47=TỆ NHẤT) → 10_25_25(Sh.72) → 15_25_30(62tr,OOS Sh.89/Cal.90=tốt nhất no-van) → dt5g_live(Sh.74-82). Khung trung gian nhẹ = valley-of-death (whipsaw + vẫn dính long-đòn-bẩy vào cú rớt). Smoothing lọc NHIỄU TÍN HIỆU không phải bù trễ thực thi; execution speed≠signal responsiveness. → GIỮ smooth nặng cho futures.
 - Q2 Vol-target van = ĐÚNG công cụ chữa deep-DD (gate-speed KHÔNG chữa được). Van B full (pos×clip(tgt/rv,0,1.5), tgt=median vol 17.5%): **DT5G+VanB Sharpe .74→.86 (2018+), deep-DD −36→−23%, CAGR gần giữ; OOS Sh.87/DD−19.4**. Van A de-risk-only cắt DD sâu hơn (−19.5) nhưng −3pp CAGR. ⚠️van rescale daily → trades 42→~900 (cần BANDING giảm churn).
-- **CHỐT: DT5G live (giữ 10-25-25+macro) + Vol-target Van B = nâng cấp sạch** (nhất quán 2 cửa sổ, deep-DD chữa xong, đồng bộ production). Alt risk-adj cao nhất = DT 15-25-30 + Van B.
+- **CHỐT: DT5G live (giữ 10-25-25+macro) + Vol-target Van B = nâng cấp sạch** (nhất quán 2 cửa sổ, deep-DD chữa xong, đồng bộ [REDACTED]). Alt risk-adj cao nhất = DT 15-25-30 + Van B.
 
 **Banding (f_system_van_banding_test.py):** DEADBAND là cơ chế thắng (bucket/weekly kém hơn; weekly DD−25% do lệch nhịp vol spike). Deadband .10 VƯỢT cả van no-band: Sharpe .86→.90 (cả 2 cửa sổ), DD −22.6→−20.6%, trades 889→292 (3×) — vùng no-trade lọc vol-noise mean-revert = ít lệnh HƠN và mượt HƠN (cải tiến free). Deadband .25 = 17-26 lệnh/năm, chỉ mất ~.04 Sharpe.
 **CẤU HÌNH CHỐT CUỐI: DT5G live (10-25-25+macro) + Vol-target Van B + deadband 0.10** → 2018+ Sh.90/DD−20.6 · OOS Sh.90/DD−19.1/Cal.78 · ~35 lệnh/năm. vs baseline live no-van (Sh.74/DD−36): Sharpe .74→.90, deep-DD −36→−21%, CAGR giữ ~14%. Alt: DT15-25-30+deadband.10 = OOS Sh.99/Cal1.02 (cao nhất) nhưng DD 2018+ −30%, biến động cửa-sổ lớn hơn. Công thức van: pos=base(state)×applied; desired=clip(median_vol/rv_20d_annual,0,1.5) causal T-1; applied chỉ đổi khi |desired−applied|≥0.10.

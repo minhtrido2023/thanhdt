@@ -63,7 +63,7 @@ orders placed at open).
 4. Report: CAGR, Sharpe, MaxDD, miss-rate (limit modes only), per-segment lift
 5. **CRITICAL**: Validate on real BA journal flow (not synthetic universe).
    Layer 3 backfill check showed synthetic results misleading when applied
-   to production flow distribution.
+   to [REDACTED] flow distribution.
 
 ## Decision rule
 

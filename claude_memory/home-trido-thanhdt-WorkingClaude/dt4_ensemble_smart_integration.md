@@ -12,7 +12,7 @@ metadata:
 User: "DT4 vượt trội TQ34b; tích hợp vào Kelly ensemble paper-trade sao cho hợp lý hơn thay vì tích hợp thô như trước." Scope chosen: **backtest research only, no paper-trade changes**. User selected ALL 4 designs + a 5th custom (switch-decision timeframe).
 
 ## ⚠️ TOP-LINE VERDICT (read this first — PROD-SPEC re-validation, 2026-05-28)
-The reduced-harness research below (phases 1-4) suggested DECOUPLE {3:0.85}+weekly was a +2.9pp win. **The user then asked to compare directly against V5 production. On the FULL prod spec (`run_prodspec_dt_v6.py`, identical to `run_5systems_prodspec.py`: max_pos=12, tier_weights 10%, RE_BACKLOG_BUY, SV_TIGHT, t1_open_exec), the win EVAPORATES:**
+The reduced-harness research below (phases 1-4) suggested DECOUPLE {3:0.85}+weekly was a +2.9pp win. **The user then asked to compare directly against V5 [REDACTED]. On the FULL prod spec (`run_prodspec_dt_v6.py`, identical to `run_5systems_prodspec.py`: max_pos=12, tier_weights 10%, RE_BACKLOG_BUY, SV_TIGHT, t1_open_exec), the win EVAPORATES:**
 
 | Arm (prod spec) | Full | IS | OOS20 | OOS24 | DD | Calmar | Sharpe | flips |
 |---|---|---|---|---|---|---|---|---|

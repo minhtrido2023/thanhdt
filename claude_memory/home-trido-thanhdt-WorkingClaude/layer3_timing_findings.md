@@ -1,6 +1,6 @@
 ---
 name: Intraday BUY/SELL timing for BA-system (3-segment + slippage)
-description: 29,260-session study (top30/midcap/penny × ~225 phiên, Aug25-May26, vnstock API only) — production-ready rules for entry/exit timing with Almgren-Chriss slippage model
+description: 29,260-session study (top30/midcap/penny × ~225 phiên, Aug25-May26, vnstock API only) — [REDACTED]-ready rules for entry/exit timing with Almgren-Chriss slippage model
 type: project
 originSessionId: 90878235-541c-4207-a725-44398117b136
 ---

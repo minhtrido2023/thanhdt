@@ -147,7 +147,7 @@ Rank within (quarter, sub-sector) → tier:
 ## Status & Next steps
 
 - [x] Tier-level validation complete
-- [ ] **DO NOT DEPLOY** to production yet — v5 and earlier attempts FAIL on canonical BA sim due to v10 scoring interactions
+- [ ] **DO NOT DEPLOY** to [REDACTED] yet — v5 and earlier attempts FAIL on canonical BA sim due to v10 scoring interactions
 - [ ] Pending: BA v11 re-tune (separate work)
 
 ## ⏳ Pending future exploration
@@ -265,9 +265,9 @@ v10+v4 is **co-evolved optimum** for BA-45d. Tier-level FA improvements break:
 3. 45d hold too short for FA quality alpha (IC 0.08 at 3M vs 0.18 at 2Y)
 4. Higher financial diversification → correlated drawdowns
 
-### FINAL DECISION for BA-45d production
+### FINAL DECISION for BA-45d [REDACTED]
 
-✅ **KEEP v10 + v4 FA** (current production stays)
+✅ **KEEP v10 + v4 FA** (current [REDACTED] stays)
 - Stable 17.15% CAGR, Sharpe 1.21
 - Risk-adjusted optimal for 45d hold
 - Don't deploy any v11 variant
@@ -276,7 +276,7 @@ v10+v4 is **co-evolved optimum** for BA-45d. Tier-level FA improvements break:
 - Long-hold strategy (separate session — LH-system built, CAGR 16.73%, OOS +23.5%)
 - Live screening discovery in recommend_holistic.py (use v8c findings as filters before BA selection)
 
-❌ **DON'T deploy** v8c to BA-45d production
+❌ **DON'T deploy** v8c to BA-45d [REDACTED]
 ❌ **DON'T extend** ticker prices to pre-2014 (data limit not blocking; v10+v4 baseline robust)
 
 ### Key insight crystallized

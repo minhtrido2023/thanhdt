@@ -70,12 +70,12 @@ Each system starts fresh at 50B VND on Apr 1. All use Tam Quan v3.4b state class
 **[REDACTED]**: identical to V2 (BAL + LAGGED V12 fixed 8%)
 
 **Config difference vs V2**:
-- State source: **LIVE Ngũ Hành "Tinh Tế / Sâu Sắc"** (production 5-state, not TQ v3.4b)
+- State source: **LIVE Ngũ Hành "Tinh Tế / Sâu Sắc"** ([REDACTED] 5-state, not TQ v3.4b)
 - Everything else identical to V2
 
-**Purpose**: Tests whether the LIVE production 5-state classifier (with current parameters) generates better signals than TQ v3.4b static state. Direct comparison V2 vs V3 isolates state-classifier impact.
+**Purpose**: Tests whether the LIVE [REDACTED] 5-state classifier (with current parameters) generates better signals than TQ v3.4b static state. Direct comparison V2 vs V3 isolates state-classifier impact.
 
-**Note**: This is a state-machine swap experiment. If V3 ≈ V2 → both classifiers equivalent. If V3 > V2 → LIVE classifier deserves to be production state source.
+**Note**: This is a state-machine swap experiment. If V3 ≈ V2 → both classifiers equivalent. If V3 > V2 → LIVE classifier deserves to be [REDACTED] state source.
 
 ---
 
@@ -202,7 +202,7 @@ After 5 months of live paper trade data:
 2. Identify which architecture wins on the user's preferred metric (likely Sharpe or Calmar)
 3. Verify Q2_ONLY didn't blow up DD in V5 vs V4 (gate: V5 DD ≤ V4 DD + 4pp tolerance)
 4. Verify ensemble flipping frequency matches backtest expectation
-5. Pick production system for real-money deployment
+5. Pick [REDACTED] system for real-money deployment
 6. If V5 wins → may also consider Q3 BOOST overlay later (gated by V5 success)
 
 ## Files inventory

@@ -122,7 +122,7 @@ Trong khi các nhân tố momentum/strength đều có edge dương:
 
 **How to apply:**
 - Chạy `python ta_score_daily.py` mỗi ngày sau 14:45
-- Chỉ trade khi regime ≠ BEAR; production: layer với 5-state system để skip CRISIS/BEAR/2022-style
+- Chỉ trade khi regime ≠ BEAR; [REDACTED]: layer với 5-state system để skip CRISIS/BEAR/2022-style
 - Watchlist: tier S_HIGH/S/A (score ≥ 95) + liquidity ≥ 1B VND
 - Cross-reference với FA tier A/B trước khi vào lệnh
 - Layer 3 (intraday VWAP/volume) dùng để tinh chỉnh thời điểm đặt lệnh trong phiên hôm sau

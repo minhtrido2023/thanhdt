@@ -4,7 +4,7 @@ description: (a) SELL anticipation huge win on STOP (+8.5pp), TP fails. (b) Tune
 type: project
 originSessionId: 90878235-541c-4207-a725-44398117b136
 ---
-Scripts: `layer3_sell_anticipate.py` (51K events), `layer3_s2_tune_fast.py` (grid 30 variants), `paper_trade_daily.py` (production integration).
+Scripts: `layer3_sell_anticipate.py` (51K events), `layer3_s2_tune_fast.py` (grid 30 variants), `paper_trade_daily.py` ([REDACTED] integration).
 
 ### (a) SELL ANTICIPATION — STOP wins big, TP fails
 - 51,071 sell-events across 85 tickers × 2 lookback windows × stops/TPs

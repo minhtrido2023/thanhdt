@@ -18,7 +18,7 @@ metadata:
 - 3 systems, mỗi cái start fresh 50B all-cash 2026-04-01:
   1. **V11 Song Sinh + Tam Quan v3.4b** (`pt_v11_tq34b.py`) — 25B BAL + 25B VN30
   2. **V12 Âm Dương + Tam Quan v3.4b** (`pt_v12_tq34b.py`) — 25B BAL + 25B LAGGED HL3y
-  3. **V12 Âm Dương + LIVE Tinh Tế** (`pt_v12_live.py`) — 25B BAL + 25B LAGGED, dùng `tav2_bq.vnindex_5state` production
+  3. **V12 Âm Dương + LIVE Tinh Tế** (`pt_v12_live.py`) — 25B BAL + 25B LAGGED, dùng `tav2_bq.vnindex_5state` [REDACTED]
 - Helper: `pt_dates.py` — START="2026-04-01", `detect_end_date()` returns min(today-1, lagged_pos_ov.pkl max, BQ 5state max) — currently caps at 2026-05-19
 - Comparison: `papertrade_compare.py` → `data/papertrade_compare3.md` (headline metrics + delta vs V12 LIVE + weekly NAV snapshot) + `data/papertrade_compare3.csv`
 - Benchmark: VNINDEX rebased 50B (passive B&H)

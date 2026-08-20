@@ -25,7 +25,7 @@ under `tbot/`, per the write-scope rule). Output HTML goes to
 
 The calling guideline for DNSE OpenAPI v2 (signing, endpoints, gotchas) is now a proper versioned
 KB concept at `WorkingClaude/tbot/kb/concepts/dnse-openapi-v2-calling-guideline/` (status
-`unverified` — imported from Mike fleet's production-tested copy, not yet independently
+`unverified` — imported from Mike fleet's [REDACTED]-tested copy, not yet independently
 reconfirmed within tbot's own governance). Key gotchas to reuse: three different "cash" fields
 (`availableCash` vs `totalCash` vs `ppse`'s `pp0Buy`) answer three different questions and must be
 labeled separately; positions need `total` vs `sellable` shown distinctly; T+2 settlement flips

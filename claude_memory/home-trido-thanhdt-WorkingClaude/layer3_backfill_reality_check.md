@@ -1,6 +1,6 @@
 ---
 name: Backfill simulation reality check — intraday stop fails on real BA-system flow
-description: Synthetic backtest 51K events said intraday stop +8.5pp/event. Real 18-event journal sim says -5.4pp. FP rate 40% (vs 17% synthetic). DISABLE intraday stop in production; use SHADOW logging mode instead.
+description: Synthetic backtest 51K events said intraday stop +8.5pp/event. Real 18-event journal sim says -5.4pp. FP rate 40% (vs 17% synthetic). DISABLE intraday stop in [REDACTED]; use SHADOW logging mode instead.
 type: project
 originSessionId: 90878235-541c-4207-a725-44398117b136
 ---
@@ -34,7 +34,7 @@ Scripts: `layer3_backfill_simulation.py` (main), `layer3_backfill_stop_variants.
 - Keeps entry rules (T1115 / S2) and X1 sell timing — these showed small positive lift on TIME exits
 
 **Bigger takeaway about backtest design:**
-- Synthetic universe-wide backtests can mislead when production flow has different distribution
+- Synthetic universe-wide backtests can mislead when [REDACTED] flow has different distribution
 - For BA-system specifically, future improvements must be validated on JOURNAL events (small sample but real), not just universe simulation
 - 18 events is small — paper trade over 3+ months needed for reliable conclusion
 - SHADOW logging during paper trade is the cheapest way to build that sample

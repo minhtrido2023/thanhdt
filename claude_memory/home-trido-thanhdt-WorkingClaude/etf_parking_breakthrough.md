@@ -119,7 +119,7 @@ Working capital roughly DOUBLED vs P1 baseline (28% → 55%).
 
 4. **Rebalance threshold:** Only act if delta > 0.5% of cash pool (avoid over-trading)
 
-### Expected outcomes at production NAV
+### Expected outcomes at [REDACTED] NAV
 
 | NAV | CAGR (P2) | Sharpe | DD |
 |---|---|---|---|
@@ -133,9 +133,9 @@ ETF benefit scales well — VN30 ETF has deep liquidity.
 ### Files
 - `test_etf_parking.py` — 8-variant grid (single book)
 - `test_expanded_neutral.py` — expanded NEUTRAL tier set (rejected)
-- `test_production_etf.py` — final 50/50 production test
-- `etf_parking_results.csv`, `expanded_neutral_results.csv`, `production_etf_results.csv`
-- `production_etf_nav_traces.csv` — daily NAV for P0/P1/P2
+- `test_[REDACTED]_etf.py` — final 50/50 [REDACTED] test
+- `etf_parking_results.csv`, `expanded_neutral_results.csv`, `[REDACTED]_etf_results.csv`
+- `[REDACTED]_etf_nav_traces.csv` — daily NAV for P0/P1/P2
 
 ### Engine extension
 

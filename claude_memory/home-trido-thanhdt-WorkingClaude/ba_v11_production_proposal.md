@@ -1,10 +1,10 @@
 ---
-name: BA v11 production proposal — STATE_VAR + P3 + state-tight Fresh-Q
+name: BA v11 [REDACTED] proposal — STATE_VAR + P3 + state-tight Fresh-Q
 description: Combined filter stack tested. V4 winner +2.50pp FULL CAGR, +3.20pp OOS, all 3 periods consistent improvement
 type: project
 originSessionId: 762b6179-ddcb-41b7-ac2b-ee8d2f143ccc
 ---
-# BA v11 production candidate — V4 (SV_TIGHT + P3)
+# BA v11 [REDACTED] candidate — V4 (SV_TIGHT + P3)
 
 **Script**: `test_state_var_with_p3.py` | NAV: `ba_state_p3_combinations.csv` | log: `state_p3_results.txt`
 **Date**: 2026-05-14
@@ -138,11 +138,11 @@ This v11 = SIGNAL_V10 + v4 FA + STATE_VAR/P3 filter improvements → WINS all me
 - v8c attempted to improve picks at the TIER level (FA refactor) → broke BA co-evolution
 - V4 SV+P3 improves picks at the TIMING level (filter when to apply) → respects BA co-evolution
 
-→ Filter timing (when to skip) > Pick quality refactor (FA tier rework) for BA-45d production.
+→ Filter timing (when to skip) > Pick quality refactor (FA tier rework) for BA-45d [REDACTED].
 
 ## Pending validations
 
-- [ ] Implement in `recommend_holistic.py` (production code change)
+- [ ] Implement in `recommend_holistic.py` ([REDACTED] code change)
 - [ ] Test live picks for 2-4 weeks before full switch
 - [ ] Monitor 2025-H2-2026 Q1 BEAR period was the recent trigger — confirm V4 captures the alpha live
 
@@ -220,7 +220,7 @@ Tested 7 adaptive mechanisms:
 3. **Walk-forward percentile only wins OOS** — overfits to recent
 4. **Pure state5 transition signal weak alone** — needs ratio anchor
 
-### Robustness story for production
+### Robustness story for [REDACTED]
 
 BA-system has multi-layer defense — VNI/MA200 = 1.30 is just one layer:
 - 5-state regime model (data-driven, adapts via retraining)
@@ -260,7 +260,7 @@ def filter_v11(cand, state5_today, days_since_release, vni_ratio, vni_rsi):
 
 ALL 4 periods improve materially. Plus inherent robustness via regime co-confirmation.
 
-### Monitoring layer (for production)
+### Monitoring layer (for [REDACTED])
 
 Add to `qwf_hybrid_v3.py`:
 ```python

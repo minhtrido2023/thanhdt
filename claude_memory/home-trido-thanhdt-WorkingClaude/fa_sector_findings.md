@@ -71,4 +71,4 @@ Root cause: v6b's universal scoring already picks well across sectors (Materials
 - [x] Sector-conditional v7 weights tested → reject
 - [x] Sector-elite filters tested → reject  
 - [x] Sector findings documented as manual knowledge
-- **FA-system production stays at v6b** (uniform scoring)
+- **FA-system [REDACTED] stays at v6b** (uniform scoring)

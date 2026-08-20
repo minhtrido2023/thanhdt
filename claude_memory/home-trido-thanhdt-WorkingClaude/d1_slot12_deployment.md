@@ -57,7 +57,7 @@ Restored bonus raises CAGR ~1pp but worsens DD ~2pp (more aggressive entries).
 | FULL 2014-2026 | CAGR 16.58 / Sh 1.41 / DD -15.1 | CAGR 16.84 / Sh 1.46 / **DD -14.3** | +0.26pp / +0.05 / **DD -0.8pp** |
 | OOS 2024-2026 | CAGR 26.29 / Sh 1.84 / DD -11.3 | **CAGR 27.94 / Sh 1.94** / DD -11.5 | **+1.65pp** / +0.10 |
 
-### Corrected production-true (system_current_results.py, END=2026-05-15, computed rsi_max3m):
+### Corrected [REDACTED]-true (system_current_results.py, END=2026-05-15, computed rsi_max3m):
 | Period | v4 | D1+slot12 | Δ vs v4 |
 |---|---|---|---|
 | FULL 2014→2026-05-15 | CAGR 16.14 / Sh 1.25 / DD -17.7 / Wealth 6.36× | **CAGR 16.52** / Sh 1.30 / **DD -16.9** / **6.62×** | +0.38pp / +0.05 / DD +0.8pp |

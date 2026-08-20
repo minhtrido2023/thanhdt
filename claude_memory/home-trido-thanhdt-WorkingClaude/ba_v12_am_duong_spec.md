@@ -49,7 +49,7 @@ TOTAL NAV (50B baseline)
 - Position: max 12, sizing 8% NAV
 - Friction: slip 0.1/0.15%, tax 0.1%, liq cap 20% ADV × 5d
 - Deposit: 1%/yr cash idle
-- Code: `lagged_pos_papertrade.py` (production-ready)
+- Code: `lagged_pos_papertrade.py` ([REDACTED]-ready)
 
 ---
 
@@ -98,7 +98,7 @@ TOTAL NAV (50B baseline)
 
 ### Pre-deployment checklist
 
-- [ ] BA v11 production already running (`recommend_holistic.py`) — confirmed ✅
+- [ ] BA v11 [REDACTED] already running (`recommend_holistic.py`) — confirmed ✅
 - [ ] LAGGED HL_3y backtested + validated lookahead-free — confirmed ✅
 - [ ] Paper-trade running since 2026-04-01 — confirmed ✅
 - [ ] Memory + spec documented — confirmed ✅
@@ -112,7 +112,7 @@ TOTAL NAV (50B baseline)
 - OR liquidate manually if want fast switch
 
 **Step 2: Start LAGGED book at 25B**
-- Run `lagged_pos_papertrade.py` (already production-ready)
+- Run `lagged_pos_papertrade.py` (already [REDACTED]-ready)
 - Confirm daily run schedule:
   - 15:30 VN time daily → fetch new releases, scan signals
   - Output: pending entries for T+1, pending exits for T+1
@@ -200,7 +200,7 @@ python lagged_pos_papertrade.py --start <deployment_start_date>
 | `simulate_holistic_nav.py` | Backtest engine for BA book |
 | `validate_lagged_hl3y.py` | LAGGED HL_3y walk-forward validation |
 | `verify_hl3y_no_lookahead.py` | Lookahead verification |
-| `test_ba_v11_production_12y.py` | v11 production baseline backtest |
+| `test_ba_v11_[REDACTED]_12y.py` | v11 [REDACTED] baseline backtest |
 | `test_option1_bal_lagged.py` | v12 architecture validation |
 | `validate_option1_walkforward.py` | v12 walk-forward validation |
 | `test_capacity_option1.py` | v12 capacity scaling |

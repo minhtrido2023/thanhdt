@@ -1,7 +1,7 @@
 # Tam Quan v3.4b daily-refresh workflow (REMEMBER FULLY)
 
 ## Trigger
-User hỏi "trạng thái thị trường hôm nay" hoặc "state hôm nay theo v3.4b/v5 production":
+User hỏi "trạng thái thị trường hôm nay" hoặc "state hôm nay theo v3.4b/v5 [REDACTED]":
 - **KHÔNG được trả lời chỉ bằng query BQ** — BQ table có thể stale nếu daily job chưa chạy.
 - **PHẢI** kiểm tra freshness và rebuild full chain nếu thiếu.
 
@@ -23,7 +23,7 @@ So sánh với `today`. Nếu < today (Mon-Fri trading day) → rebuild.
 | 5 | `python deploy_v3_4b_package/pull_us_market.py` | `deploy_v3_4b_package/us_market_history.csv` | yfinance SPX+VIX; **PHẢI copy sang main WORKDIR** sau khi pull |
 | 6a | `STATE_WORKDIR=<MAIN> python deploy_v3_4b_package/build_v3_1_clean.py` | `vnindex_5state_tam_quan_v3_1_clean.csv` (main) | Set `STATE_WORKDIR` = main workdir để dùng staging fresh |
 | 6b | `cp vnindex_5state_tam_quan_v3_1_clean.csv vnindex_5state_tam_quan_v3_1_full_history.csv` | (rename) | Builder v3.4 đọc tên `_full_history` |
-| 6c | `STATE_WORKDIR=<MAIN> python deploy_v3_4b_package/build_v3_4_bull_aware.py` | `vnindex_5state_tam_quan_v3_4b_full_history.csv` (main) | Output v3.4a/b/c — chỉ b là production |
+| 6c | `STATE_WORKDIR=<MAIN> python deploy_v3_4b_package/build_v3_4_bull_aware.py` | `vnindex_5state_tam_quan_v3_4b_full_history.csv` (main) | Output v3.4a/b/c — chỉ b là [REDACTED] |
 | 7 | **`cp vnindex_5state_tam_quan_v3_4b_full_history.csv deploy_v3_4b_package/`** rồi `python deploy_v3_4b_package/deploy_v3_4b_to_live.py` | BQ `tav2_bq.vnindex_5state` updated | **BUG QUAN TRỌNG**: deploy script đọc CSV từ package dir, KHÔNG phải main WORKDIR. Phải copy fresh CSV vào package dir TRƯỚC khi deploy |
 | 8 | (optional) sync `tav2_bq.vnindex_5state_tam_quan_v34b_clean` | Cùng schema | `bq load --replace ... --schema=time:DATE,state:INT64,state_raw:INT64` |
 

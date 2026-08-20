@@ -8,7 +8,7 @@ originSessionId: df3c1340-40c2-46c7-b6dc-247737308843
 
 Tested 7 stops × 7 periods = 49 BA-system simulations on BAL+Fin/RE-max-4 v10 at 50B. Output: `stop_validation_results.csv`.
 
-### Δ Stop -25% vs -20% (production baseline)
+### Δ Stop -25% vs -20% ([REDACTED] baseline)
 
 | Period | ΔCAGR | ΔSharpe | ΔDD | ΔCalmar |
 |---|---|---|---|---|

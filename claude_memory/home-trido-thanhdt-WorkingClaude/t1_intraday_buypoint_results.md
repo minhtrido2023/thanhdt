@@ -171,7 +171,7 @@ Per `t1_intraday_research_plan.md` decision rule, applied at the OPTIMAL slot:
 - MaxDD ≤ -2pp worse: **0pp** ✓ (identical -16.1%)
 - Robust across sub-periods: **only 14:15 and 14:45 pass this gate** ✓
 
-🟢 **ADOPT — T+1 14:45 ATC market order** as production entry.
+🟢 **ADOPT — T+1 14:45 ATC market order** as [REDACTED] entry.
 
 Operationally: place "Match On Close" (MOC) or "Match At Close" market order
 during 14:30-14:45 ATC period. All Vietnamese brokers support this order type.
@@ -196,7 +196,7 @@ Already extended (2026-05-17) with optional `entry_alt_prices` + `entry_fill_mod
 params. Default behavior remains BQ.Open (no change to existing backtests).
 Production canonical sims can optionally use intraday alt prices going forward.
 
-### Updated production baseline (v11, realistic T+1, 2.5y)
+### Updated [REDACTED] baseline (v11, realistic T+1, 2.5y)
 
 | Metric | OPEN (legacy) | ATC OPTIMISTIC | **ATC REALISTIC (gated)** | HYBRID |
 |---|---|---|---|---|

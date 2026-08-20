@@ -61,4 +61,4 @@ v3.3b chưa implement bull-fatigue counter. Trong sustained bull (vd 2026 nếu 
 ## Related insights
 
 - Connect to **`feedback_us_vn_correlation_interpretation.md`** — tail dependence chỉ matter ở crisis tail, full-sample Pearson misleading. Bull psychology cũng decouple US-VN linkage tạm thời.
-- Connect to **`ba_v11_production_proposal.md`** P3 overheat guard — VNI/MA200 > 1.30 + RSI > 0.75 → AVOID. P3 đã có sẵn cho buy-side; gate logic chưa có equivalent cho state-side.
+- Connect to **`ba_v11_[REDACTED]_proposal.md`** P3 overheat guard — VNI/MA200 > 1.30 + RSI > 0.75 → AVOID. P3 đã có sẵn cho buy-side; gate logic chưa có equivalent cho state-side.

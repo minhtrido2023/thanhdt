@@ -110,7 +110,7 @@ Script: `verify_hl3y_no_lookahead.py`
 
 ---
 
-## 6. BA v11 production verification
+## 6. BA v11 [REDACTED] verification
 
 Trong quá trình so sánh, phát hiện baseline BA "v11" được dùng trước đó thực ra là v10 (chưa bao gồm Fresh-Q SV_TIGHT + P3 overheat patches). Re-ran proper v11:
 
@@ -213,8 +213,8 @@ User-locked nomenclature:
 - ✅ **LAGGED HL_3y paper-trade live từ 2026-04-01** (49 days), via `lagged_pos_papertrade.py`
 - ✅ **v12 spec documented** ở `memory/ba_v12_am_duong_spec.md`
 - ✅ **LAGGED HL_3y standalone spec** ở `memory/lagged_pos_hl3y_spec.md`
-- ✅ Verified BA v11 production số liệu đúng (19.42% CAGR — đã update memory)
-- 🟡 **v11 production unchanged** (deploy v12 pending user approval + thêm 5 tháng paper-trade)
+- ✅ Verified BA v11 [REDACTED] số liệu đúng (19.42% CAGR — đã update memory)
+- 🟡 **v11 [REDACTED] unchanged** (deploy v12 pending user approval + thêm 5 tháng paper-trade)
 
 ---
 
@@ -333,9 +333,9 @@ User-locked nomenclature:
 
 ### Memory cross-references
 
-- `lagged_pos_hl3y_spec.md` — LAGGED standalone production spec
+- `lagged_pos_hl3y_spec.md` — LAGGED standalone [REDACTED] spec
 - `ba_v12_am_duong_spec.md` — v12 architecture spec + deploy guide
-- `production_2026-05-15.md` — pre-session production decision context
+- `[REDACTED]_2026-05-15.md` — pre-session [REDACTED] decision context
 - `ba_system_definition.md` — BA v11 canonical definition
 - `holistic_engine_definition.md` — 15-round BA evolution log
 - `breadth_universe_finding.md` — ticker_prune universe convention

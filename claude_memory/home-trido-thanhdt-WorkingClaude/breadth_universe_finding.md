@@ -1,6 +1,6 @@
 # Breadth Universe Convention (2026-05-20)
 
-**TL;DR**: 5-state production breadth dùng `tav2_bq.ticker_prune` (500 mã,
+**TL;DR**: 5-state [REDACTED] breadth dùng `tav2_bq.ticker_prune` (500 mã,
 mixed HSX/HNX/UPCOM). KHÔNG dùng HSX-only, KHÔNG dùng full ticker table.
 Đây là **intentional design choice** đã empirically validate.
 
@@ -11,7 +11,7 @@ machine standalone backtest 2014-2026:
 
 | Universe | n_tickers | FULL CAGR | OOS CAGR | Transitions |
 |---|---|---|---|---|
-| **prune (production)** | 500 | **12.01** | 12.51 | 111 |
+| **prune ([REDACTED])** | 500 | **12.01** | 12.51 | 111 |
 | HSX-only proxy | 458 | 11.72 (-0.29pp) | 11.91 | 116 |
 | ensemble split 6+6 | 500+458 | 12.23 (+0.22pp) | 12.72 | 113 |
 | all tickers (mistake) | 1272 | weakest IC | — | — |
@@ -29,7 +29,7 @@ State-conditional IC vs fwd20:
 ## Convention cho future research
 
 **Always use `tav2_bq.ticker_prune` for breadth** computations to match
-production. SQL template:
+[REDACTED]. SQL template:
 
 ```sql
 SELECT t.time,

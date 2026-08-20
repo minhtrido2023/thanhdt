@@ -39,4 +39,4 @@ S2 OVERSOLD_REV (BA-system DEEP_VALUE-relevant):
 - For MOMENTUM picks: stick with EoD decision + T1115 limit (S1 anticipation not safe for 45d hold)
 - Hybrid approach: T+45 holdings should use S2 only; short-term tactical trades (5-20d) can use S1
 
-**Caveats:** Signal definitions are proxies, not BA-system's actual condition. Real BA-system filter has FA tier + 5-state regime that we don't replicate intraday. To productionize: would need re-implement BA-system filter on intraday data (non-trivial for FA components).
+**Caveats:** Signal definitions are proxies, not BA-system's actual condition. Real BA-system filter has FA tier + 5-state regime that we don't replicate intraday. To [REDACTED]ize: would need re-implement BA-system filter on intraday data (non-trivial for FA components).

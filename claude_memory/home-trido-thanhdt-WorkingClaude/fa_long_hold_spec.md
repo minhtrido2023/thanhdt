@@ -10,7 +10,7 @@ originSessionId: 70c13426-2492-456b-9547-d14c8cf8fcb7
 
 Original results were sizing-bug inflated (true CAGR 11.5% vs reported 19.85%).
 6 v2c trend-following variants ALL underperformed v1.
-See [production_2026-05-15.md](production_2026-05-15.md) for final decision.
+See [[REDACTED]_2026-05-15.md]([REDACTED]_2026-05-15.md) for final decision.
 Artifacts retained for future LH v3 research (multi-factor direction).
 
 ---
@@ -125,7 +125,7 @@ Common range: 2014-04-01 → 2026-01-16 (~12 years)
 
 ### Verdict
 
-🏆 **PROMOTE: Hybrid_50/50 rebal qtrly + CRISIS gate** as the new combined production system.
+🏆 **PROMOTE: Hybrid_50/50 rebal qtrly + CRISIS gate** as the new combined [REDACTED] system.
 - Highest Sharpe (1.44) AND Calmar (1.18) of any tested configuration
 - CAGR +1.86pp over BA-only, +1.57pp over LH-only
 - MaxDD -16.4% (only +1.9pp worse than BA-only)
@@ -206,7 +206,7 @@ Note: BA-only refreshed CAGR dropped from 17.47% (old NAV to 2026-01-16) → 15.
 
 - 4 GREEN + 1 YELLOW + 0 RED on snapshot windows
 - 24 GREEN + 0 YELLOW + 4 RED (all 2019 mild bull-lag) on 28 rolling-3Y quarters since 2014
-- Sharpe 1.35 production-grade
+- Sharpe 1.35 [REDACTED]-grade
 - Calmar 1.08 > BA-only's 0.72 (BA-only Calmar dropped because of -21.7% DD)
 - Alpha vs VNI grows in bearish regimes (+18.7pp in 5Y vs +9.0pp full) — diversifier working
 
@@ -381,7 +381,7 @@ Lumpy first rebal (deploy 10 positions immediately) + staggered after.
 | Lumpy | 10.07% | 0.63 | -31.75% | +3.21% |
 | 🏆 **Hybrid_init** | **10.98%** | 0.91 | -18.76% | **+3.21%** ⭐ |
 
-**Use hybrid_init for production**: fresh-start deploy benefits + steady-state diversification.
+**Use hybrid_init for [REDACTED]**: fresh-start deploy benefits + steady-state diversification.
 
 ### Caveat: hybrid_init steady-state synchronized cohort risk
 
@@ -389,7 +389,7 @@ After lumpy initial, all 10 positions share Q1 vintage. After 4Q they all expire
 Mitigation: stagger sells (sell 2-3 oldest per quarter starting from Q+4) → portfolio matures
 into 4-quarter cohort spread within 2-3 years.
 
-Updated production recommendation: deploy hybrid_init mode TODAY (2026-05-15) with Q1 2026 picks.
+Updated [REDACTED] recommendation: deploy hybrid_init mode TODAY (2026-05-15) with Q1 2026 picks.
 
 ## Deployment plan (2026-05-14, REVISED 2026-05-15)
 

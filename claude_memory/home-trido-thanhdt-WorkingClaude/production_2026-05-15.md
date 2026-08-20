@@ -1,12 +1,12 @@
 ---
 name: Production spec 2026-05-15 — BA v11 only
-description: Final production decision after LH backtest research. Drop LH from v11 deployment; continue R&D separately.
+description: Final [REDACTED] decision after LH backtest research. Drop LH from v11 deployment; continue R&D separately.
 type: project
 originSessionId: 70c13426-2492-456b-9547-d14c8cf8fcb7
 ---
 # Production Spec 2026-05-15 — BA v11 ONLY
 
-**Decision**: Drop LH-system from production v11 deployment. Run 100% NAV in BA v11.
+**Decision**: Drop LH-system from [REDACTED] v11 deployment. Run 100% NAV in BA v11.
 **LH status**: R&D paused, all artifacts retained, redesign required before retry.
 
 ## Why drop LH
@@ -26,7 +26,7 @@ originSessionId: 70c13426-2492-456b-9547-d14c8cf8fcb7
 
 ### LH only ~2.5pp alpha vs VNI — marginal value
 - VNI B&H 12y CAGR ~9.0% → LH +2.5pp
-- BA v11 CAGR ~17% (per memory `ba_v11_production_proposal.md`) → BA +8pp vs VNI
+- BA v11 CAGR ~17% (per memory `ba_v11_[REDACTED]_proposal.md`) → BA +8pp vs VNI
 - LH delivers 1/3 the alpha of BA at same NAV
 - Capacity advantage doesn't compensate (both scale similarly at <200B)
 
@@ -47,9 +47,9 @@ Tested 6 v2c variants (OR-logic exits): trend_break, trailing stop, CRISIS_LOCK,
 
 **Root cause**: Vietnamese stocks have high volatility — MA200 breaks frequently then recover, causing whipsaws. CRISIS_LOCK cuts winners (FPT 2018 at +33% missed subsequent 5-year 8x). Trend-following + FA-quality doesn't generate alpha here.
 
-## BA v11 production (PROCEED)
+## BA v11 [REDACTED] (PROCEED)
 
-Per memory `ba_v11_production_proposal.md` and `hybrid_v11_deployment.md`:
+Per memory `ba_v11_[REDACTED]_proposal.md` and `hybrid_v11_deployment.md`:
 
 ### Configuration
 - 100% NAV in BA v11
@@ -94,7 +94,7 @@ Current LH design failed because:
 
 ## Artifacts retained (LH R&D)
 
-LH v1 scripts (do NOT use for production):
+LH v1 scripts (do NOT use for [REDACTED]):
 - `score_fa_lh.py` — FA scoring with v8c_final + pre-sales
 - `simulate_lh_nav.py` — simulator (bugs fixed)
 - `simulate_lh_v2.py` — dynamic trend-following variant
@@ -111,7 +111,7 @@ Memory files (mark as R&D, not deployed):
 2. **FA signals LAG market** — quarterly reports cannot anticipate market peaks (4+ investigations confirmed)
 3. **Vietnamese market has weak trend persistence** — MA200/MA50 breaks frequent, whipsaws kill trend-following
 4. **Simulator bugs inflate results** — [REDACTED] validate sizing logic on fresh-start before reporting
-5. **BA-system v10/v11 is the production winner** — TA momentum + FA tier + regime overlay outperforms pure FA
+5. **BA-system v10/v11 is the [REDACTED] winner** — TA momentum + FA tier + regime overlay outperforms pure FA
 6. **Diversification has diminishing returns when one leg is much stronger** — 50/50 hybrid was actually pulled down by weaker LH leg
 
 ## Deployment action

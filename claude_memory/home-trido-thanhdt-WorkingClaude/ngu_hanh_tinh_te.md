@@ -1,6 +1,6 @@
 ---
 name: ng-h-nh-tinh-t-current-live-5-state
-description: "🟢 LIVE production codename \"Ngũ Hành — Tinh Tế\" (tech v2g_pe3c_s3). 5-state market system family is \"Ngũ Hành\"; iterations have Vietnamese poetic sub-names. Integrated V11 12y CAGR 17.86% vs Cổ Điển 16.44%."
+description: "🟢 LIVE [REDACTED] codename \"Ngũ Hành — Tinh Tế\" (tech v2g_pe3c_s3). 5-state market system family is \"Ngũ Hành\"; iterations have Vietnamese poetic sub-names. Integrated V11 12y CAGR 17.86% vs Cổ Điển 16.44%."
 metadata: 
   node_type: memory
   type: project
@@ -114,4 +114,4 @@ python deploy_v2g_pe3c_s3.py[REDACTED]  # overwrite canonical with s3 + auto-bac
 - DD -23.3% on FULL (-5.9pp worse than baseline). User explicitly accepted this trade-off in exchange for +1.42pp CAGR.
 - Mid 2018-23 still slightly behind baseline (-0.21pp CAGR, -0.13 Sharpe). Not a hard win, but tied.
 - s3 smoothing parameter was chosen via single sweep; not stress-tested across market regimes.
-- If next quarter shows v11 production NAV drift from backtest by > 5%, reconsider rollback to baseline.
+- If next quarter shows v11 [REDACTED] NAV drift from backtest by > 5%, reconsider rollback to baseline.

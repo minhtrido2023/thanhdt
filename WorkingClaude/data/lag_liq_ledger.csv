@@ -1701,3 +1701,132 @@ signal_date,gate,ticker,reason_kind,metric,reason,first_seen_ts
 2026-08-19,rating,VOS,rating_fail,4,RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27),2026-08-19T12:05:52Z
 2026-08-19,forensic,BFC,forensic,2026-06-20,"FORENSIC_EXCLUDE — cờ 2026-06-20 ≤ asof 2026-08-19, data/forensic_flags.csv severity=exclude",2026-08-19T12:05:52Z
 2026-08-19,forensic,VVS,banned,,BANNED_TICKER — BANNED vĩnh viễn (mike/kb/KNOWLEDGE.md),2026-08-19T12:05:52Z
+2026-08-20,liq,ABC,adv_thin,50000000.0,"ADV3T 0.05 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,AFX,adv_thin,900000000.0,"ADV3T 0.90 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,AGP,adv_thin,80000000.0,"ADV3T 0.08 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,AMC,adv_thin,0.0,"ADV3T 0.00 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,APF,adv_thin,990000000.0,"ADV3T 0.99 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,BCA,adv_thin,40000000.0,"ADV3T 0.04 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,BCE,adv_thin,160000000.0,"ADV3T 0.16 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,BMS,adv_thin,1520000000.0,"ADV3T 1.52 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,BTW,adv_zero,0.0,"Volume_3M_P50=0.0 → ADV ≤ 0, không mua được (mirror liquidity_require_positive)",2026-08-20T12:05:39Z
+2026-08-20,liq,C32,adv_thin,90000000.0,"ADV3T 0.09 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,C47,adv_thin,130000000.0,"ADV3T 0.13 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,CDP,adv_thin,10000000.0,"ADV3T 0.01 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,CHS,adv_thin,0.0,"ADV3T 0.00 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,CKG,adv_thin,190000000.0,"ADV3T 0.19 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,CLC,adv_thin,40000000.0,"ADV3T 0.04 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,CMX,adv_thin,140000000.0,"ADV3T 0.14 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,CRE,adv_thin,1000000000.0,"ADV3T 1.00 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,DDN,adv_thin,10000000.0,"ADV3T 0.01 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,DHD,adv_thin,70000000.0,"ADV3T 0.07 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,DNN,stale_adv,63.0,dữ liệu ADV cũ 63 ngày (> 30) — có thể ngừng giao dịch/huỷ niêm yết,2026-08-20T12:05:39Z
+2026-08-20,liq,DP3,adv_thin,360000000.0,"ADV3T 0.36 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,DQC,adv_thin,60000000.0,"ADV3T 0.06 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,DWS,adv_zero,0.0,"Volume_3M_P50=0.0 → ADV ≤ 0, không mua được (mirror liquidity_require_positive)",2026-08-20T12:05:39Z
+2026-08-20,liq,FIC,adv_thin,80000000.0,"ADV3T 0.08 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,FID,adv_thin,70000000.0,"ADV3T 0.07 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,GLT,adv_thin,30000000.0,"ADV3T 0.03 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,HAR,adv_thin,90000000.0,"ADV3T 0.09 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,HDW,adv_zero,0.0,"Volume_3M_P50=0.0 → ADV ≤ 0, không mua được (mirror liquidity_require_positive)",2026-08-20T12:05:39Z
+2026-08-20,liq,HKT,adv_thin,150000000.0,"ADV3T 0.15 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,HMH,adv_thin,0.0,"ADV3T 0.00 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,HMR,adv_thin,20000000.0,"ADV3T 0.02 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,HOT,stale_adv,63.0,dữ liệu ADV cũ 63 ngày (> 30) — có thể ngừng giao dịch/huỷ niêm yết,2026-08-20T12:05:39Z
+2026-08-20,liq,HT1,adv_thin,1920000000.0,"ADV3T 1.92 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,IDI,adv_thin,1110000000.0,"ADV3T 1.11 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,IDP,stale_adv,43.0,dữ liệu ADV cũ 43 ngày (> 30) — có thể ngừng giao dịch/huỷ niêm yết,2026-08-20T12:05:39Z
+2026-08-20,liq,IDV,adv_thin,50000000.0,"ADV3T 0.05 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,IPA,adv_thin,550000000.0,"ADV3T 0.55 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,ITC,adv_thin,570000000.0,"ADV3T 0.57 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,ITQ,adv_thin,150000000.0,"ADV3T 0.15 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,IVS,adv_thin,160000000.0,"ADV3T 0.16 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,KHS,adv_thin,40000000.0,"ADV3T 0.04 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,L10,adv_thin,0.0,"ADV3T 0.00 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,L18,adv_thin,140000000.0,"ADV3T 0.14 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,L40,adv_thin,1670000000.0,"ADV3T 1.67 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,LIG,adv_thin,250000000.0,"ADV3T 0.25 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,MAC,adv_thin,10000000.0,"ADV3T 0.01 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,MCP,adv_thin,620000000.0,"ADV3T 0.62 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,MDF,adv_thin,0.0,"ADV3T 0.00 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,MNB,adv_thin,0.0,"ADV3T 0.00 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,MVC,adv_thin,150000000.0,"ADV3T 0.15 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,NBC,adv_thin,260000000.0,"ADV3T 0.26 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,NED,adv_thin,80000000.0,"ADV3T 0.08 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,NSH,adv_thin,120000000.0,"ADV3T 0.12 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,OGC,adv_thin,540000000.0,"ADV3T 0.54 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,PCT,adv_thin,0.0,"ADV3T 0.00 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,PGS,adv_thin,10000000.0,"ADV3T 0.01 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,PGV,adv_thin,110000000.0,"ADV3T 0.11 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,PLP,adv_thin,140000000.0,"ADV3T 0.14 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,PMG,adv_thin,0.0,"ADV3T 0.00 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,PRC,adv_thin,10000000.0,"ADV3T 0.01 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,PRE,adv_thin,110000000.0,"ADV3T 0.11 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,PV2,adv_thin,80000000.0,"ADV3T 0.08 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,PVI,adv_thin,1070000000.0000001,"ADV3T 1.07 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,PXL,adv_thin,250000000.0,"ADV3T 0.25 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,QHD,stale_adv,38.0,dữ liệu ADV cũ 38 ngày (> 30) — có thể ngừng giao dịch/huỷ niêm yết,2026-08-20T12:05:39Z
+2026-08-20,liq,S99,adv_thin,180000000.0,"ADV3T 0.18 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,SBL,adv_thin,0.0,"ADV3T 0.00 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,SCL,adv_thin,1910000000.0,"ADV3T 1.91 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,SD2,adv_thin,0.0,"ADV3T 0.00 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,SDC,stale_adv,42.0,dữ liệu ADV cũ 42 ngày (> 30) — có thể ngừng giao dịch/huỷ niêm yết,2026-08-20T12:05:39Z
+2026-08-20,liq,SDN,adv_zero,0.0,"Volume_3M_P50=0.0 → ADV ≤ 0, không mua được (mirror liquidity_require_positive)",2026-08-20T12:05:39Z
+2026-08-20,liq,SDT,adv_thin,70000000.0,"ADV3T 0.07 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,SGP,adv_thin,480000000.0,"ADV3T 0.48 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,SPM,adv_thin,0.0,"ADV3T 0.00 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,STK,adv_thin,120000000.0,"ADV3T 0.12 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,TCI,adv_thin,400000000.0,"ADV3T 0.40 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,TCL,adv_thin,260000000.0,"ADV3T 0.26 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,TED,adv_thin,10000000.0,"ADV3T 0.01 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,TIN,adv_thin,1330000000.0,"ADV3T 1.33 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,TIX,stale_adv,31.0,dữ liệu ADV cũ 31 ngày (> 30) — có thể ngừng giao dịch/huỷ niêm yết,2026-08-20T12:05:39Z
+2026-08-20,liq,TLH,adv_thin,480000000.0,"ADV3T 0.48 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,TMG,adv_zero,0.0,"Volume_3M_P50=0.0 → ADV ≤ 0, không mua được (mirror liquidity_require_positive)",2026-08-20T12:05:39Z
+2026-08-20,liq,TNH,adv_thin,640000000.0,"ADV3T 0.64 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,TTC,adv_thin,0.0,"ADV3T 0.00 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,TV3,adv_thin,0.0,"ADV3T 0.00 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,UNI,adv_thin,10000000.0,"ADV3T 0.01 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,VC7,adv_thin,590000000.0,"ADV3T 0.59 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,VCR,adv_thin,0.0,"ADV3T 0.00 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,VDL,adv_zero,0.0,"Volume_3M_P50=0.0 → ADV ≤ 0, không mua được (mirror liquidity_require_positive)",2026-08-20T12:05:39Z
+2026-08-20,liq,VE3,adv_zero,0.0,"Volume_3M_P50=0.0 → ADV ≤ 0, không mua được (mirror liquidity_require_positive)",2026-08-20T12:05:39Z
+2026-08-20,liq,VE9,adv_thin,0.0,"ADV3T 0.00 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,VGV,adv_thin,10000000.0,"ADV3T 0.01 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,VLG,adv_thin,0.0,"ADV3T 0.00 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,VNA,adv_thin,10000000.0,"ADV3T 0.01 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,VNF,adv_thin,20000000.0,"ADV3T 0.02 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,VNP,adv_thin,290000000.0,"ADV3T 0.29 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,VPH,adv_thin,50000000.0,"ADV3T 0.05 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,VSI,adv_thin,10000000.0,"ADV3T 0.01 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,VTE,adv_thin,0.0,"ADV3T 0.00 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,VTO,adv_thin,850000000.0,"ADV3T 0.85 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,VTV,adv_thin,300000000.0,"ADV3T 0.30 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,XMC,adv_thin,110000000.0,"ADV3T 0.11 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,liq,XPH,adv_thin,30000000.0,"ADV3T 0.03 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)",2026-08-20T12:05:39Z
+2026-08-20,rating,AAV,rating_fail,5,RATING_FAIL 8L=5 (≥4) (auto-excluded per user policy 2026-07-27),2026-08-20T12:05:39Z
+2026-08-20,rating,AGR,rating_fail,4,RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27),2026-08-20T12:05:39Z
+2026-08-20,rating,ASP,rating_fail,4,RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27),2026-08-20T12:05:39Z
+2026-08-20,rating,CEO,rating_fail,4,RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27),2026-08-20T12:05:39Z
+2026-08-20,rating,DXS,rating_fail,4,RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27),2026-08-20T12:05:39Z
+2026-08-20,rating,ELC,rating_fail,4,RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27),2026-08-20T12:05:39Z
+2026-08-20,rating,HSG,rating_fail,4,RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27),2026-08-20T12:05:39Z
+2026-08-20,rating,HSL,rating_fail,4,RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27),2026-08-20T12:05:39Z
+2026-08-20,rating,KLB,rating_fail,4,RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27),2026-08-20T12:05:39Z
+2026-08-20,rating,KSB,rating_fail,4,RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27),2026-08-20T12:05:39Z
+2026-08-20,rating,LCG,rating_fail,4,RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27),2026-08-20T12:05:39Z
+2026-08-20,rating,MST,rating_fail,4,RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27),2026-08-20T12:05:39Z
+2026-08-20,rating,MZG,rating_fail,4,RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27),2026-08-20T12:05:39Z
+2026-08-20,rating,PET,rating_fail,4,RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27),2026-08-20T12:05:39Z
+2026-08-20,rating,PLC,rating_fail,4,RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27),2026-08-20T12:05:39Z
+2026-08-20,rating,PSI,rating_fail,4,RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27),2026-08-20T12:05:39Z
+2026-08-20,rating,PVS,rating_fail,4,RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27),2026-08-20T12:05:39Z
+2026-08-20,rating,SBG,rating_fail,4,RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27),2026-08-20T12:05:39Z
+2026-08-20,rating,SMC,rating_fail,5,RATING_FAIL 8L=5 (≥4) (auto-excluded per user policy 2026-07-27),2026-08-20T12:05:39Z
+2026-08-20,rating,STH,rating_fail,4,RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27),2026-08-20T12:05:39Z
+2026-08-20,rating,TDP,rating_fail,4,RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27),2026-08-20T12:05:39Z
+2026-08-20,rating,TRC,rating_fail,4,RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27),2026-08-20T12:05:39Z
+2026-08-20,rating,TVN,rating_fail,4,RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27),2026-08-20T12:05:39Z
+2026-08-20,rating,VOS,rating_fail,4,RATING_FAIL 8L=4 (≥4) (auto-excluded per user policy 2026-07-27),2026-08-20T12:05:39Z
+2026-08-20,forensic,BFC,forensic,2026-06-20,"FORENSIC_EXCLUDE — cờ 2026-06-20 ≤ asof 2026-08-20, data/forensic_flags.csv severity=exclude",2026-08-20T12:05:39Z
+2026-08-20,forensic,VVS,banned,,BANNED_TICKER — BANNED vĩnh viễn (mike/kb/KNOWLEDGE.md),2026-08-20T12:05:39Z

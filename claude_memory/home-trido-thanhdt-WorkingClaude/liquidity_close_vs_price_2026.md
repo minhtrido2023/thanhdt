@@ -43,7 +43,7 @@ r_score → correctly catches BULL/EX-BULL that Close-gate suppressed to NEUTRAL
 EMA→mode→min_stay smoothing) the change COLLAPSES to 0.7% (21/3092 days 2014+; FULL 2000+ 21
 days; transitions 271→273). The 2021 episode (103 ew-days) shrinks to 2 v3.4b-days.** The
 multi-layer chain absorbs almost all the breadth-gate difference → **deployed state is robust to
-the fix.** Dev's chain is real at the EW layer but production-immaterial.
+the fix.** Dev's chain is real at the EW layer but [REDACTED]-immaterial.
 Full chain rebuilt (ew_v1→concentration→dual_v3→[reuse us_market]→v3.1→v3.4b), NOT deployed.
 **Integrated V4/V5 (Fix-B delta = new state vs old, both on Fix-A real-liq pkl, 2014→2026):**
 V1 18.91→18.07 (−0.84pp), V2 21.39→20.85 (−0.54), V3 21.39→21.39 (0, uses LIVE state untouched),

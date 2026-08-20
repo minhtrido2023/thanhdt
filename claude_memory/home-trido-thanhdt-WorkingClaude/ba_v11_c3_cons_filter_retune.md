@@ -76,7 +76,7 @@ This came after a multi-stream research showing:
 
 ## C3_cons spec
 
-### Changes from V_PROD (current production)
+### Changes from V_PROD (current [REDACTED])
 
 ```python
 # In runner pre-processing (e.g. recommend_holistic.py or run_5systems_prodspec.py):

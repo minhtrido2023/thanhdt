@@ -92,7 +92,7 @@ Postbull THẮNG MỌI bản mọi trục (CAGR +2.12pp vs base!). > ew2d-hardbl
 
 **CƠ CHẾ DD đính chính (user bắt lỗi [REDACTED]13)**: CAPIT giữ ĐÚNG 60 ngày (cohort 2022-04 vào 04-20 thoát 07-18; 0 vị thế CAPIT trong 2023). Drawdown đáy 2023-04 KHÔNG do giữ vị thế. Thật ra ratio V2.3C/base = **1.18 (đầu 2022 = CAPIT +18% lãi 8 năm) → 1.00 (07/2022, trả gần hết 1 cú)**: cú 2022-04 full-size ~245B≈cả sổ (sizing flaw CRISIS=max-free-cash) lỗ ~19% NAV = xóa 8 năm edge. MaxDD sâu vì CAPIT THỔI ĐỈNH đầu-2022 +18%, drawdown đo từ đỉnh đó; "kéo qua 2023"=phép-đo-từ-đỉnh-thổi-phồng KHÔNG phải vị thế (giải thích "giữ xuyên gấu" trước đó SAI).
 
-**Note kỹ thuật**: (1) đã vá lỗ hổng pending partial-fill (1.59B BAL) bằng MTM phantom `MTM_PENDING_PARTIAL` per book → file tự khớp 100%. (2) MTM mark = last Close forward-[REDACTED] (ticker halt như PXI mark tại Close cũ). (3) engine `simulate_holistic_nav.py` KHÔNG sửa (prod dùng chung). Liên quan [[v4_faithful_reproduction_2026]], [[version_naming_v23_2026]].
+**Note kỹ thuật**: (1) đã vá lỗ hổng pending partial-fill (1.59B BAL) bằng MTM phantom `MTM_PENDING_PARTIAL` per book → file tự khớp 100%. (2) MTM mark = last Close forward-[REDACTED] (ticker halt như PXI mark tại Close cũ). (3) engine `simulate_holistic_nav.py` KHÔNG sửa (prod dùng chung). Liên quan [[v4_faithful_re[REDACTED]_2026]], [[version_naming_v23_2026]].
 
 ## UPDATE [REDACTED]20 — audit PHẢI dùng [REDACTED]V selector (đừng default blend)
 `pt_v23_audit_2014.py` parking default = ETF_LIQ `off`; và build_pit BASKET_SELECT default = `blend`. **Production = V2.3 + [REDACTED]V + gated-overflow** → phải set **`ETF_LIQ=custompitg BASKET_SELECT=yieldcombo`** ([REDACTED]V). Quên = chạy nhầm blend, THẤP hơn nhiều.

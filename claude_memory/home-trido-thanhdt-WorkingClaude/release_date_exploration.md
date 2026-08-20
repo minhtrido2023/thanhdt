@@ -1,6 +1,6 @@
 ---
 name: Release_Date filter exploration on BA-45d (canonical sim)
-description: STATE_VAR (Fresh-Q only in BEAR/NEUTRAL state) beats current F1_60 production filter; deeper insight on Release_Date impact
+description: STATE_VAR (Fresh-Q only in BEAR/NEUTRAL state) beats current F1_60 [REDACTED] filter; deeper insight on Release_Date impact
 type: project
 originSessionId: 762b6179-ddcb-41b7-ac2b-ee8d2f143ccc
 ---
@@ -10,7 +10,7 @@ originSessionId: 762b6179-ddcb-41b7-ac2b-ee8d2f143ccc
 
 ## Motivation
 
-Existing production F1_60 filter (`recommend_holistic.py` FRESH_Q_MAX_DAYS=60) was validated on BAL leg only with ~+0.05pp CAGR / +0.12 Sharpe. Goal: test on **full canonical 50/50 BAL+VN30** sim and explore more sophisticated Release_Date filters.
+Existing [REDACTED] F1_60 filter (`recommend_holistic.py` FRESH_Q_MAX_DAYS=60) was validated on BAL leg only with ~+0.05pp CAGR / +0.12 Sharpe. Goal: test on **full canonical 50/50 BAL+VN30** sim and explore more sophisticated Release_Date filters.
 
 ## Methodology
 
@@ -89,7 +89,7 @@ Trade count efficient: 276 (only 13 less than baseline 289), filters where it ma
 
 ## Recommendation
 
-### REPLACE F1_60 with STATE_VAR in production
+### REPLACE F1_60 with STATE_VAR in [REDACTED]
 - Modify `recommend_holistic.py` to use state-conditional fresh-Q
 - 2014-2026 wins +2.94pp CAGR vs F1_60 on canonical 50/50
 - OOS 2024-2026 wins +3.47pp CAGR
@@ -110,7 +110,7 @@ def apply_fresh_q_filter(cand, state5_today, fresh_q_max_days=60):
 - DD slightly worse FULL (-16.1 vs -13.5 baseline)
 - Calmar similar (1.12 vs 1.25)
 - Trade-off: catch upside in BULL but pay DD when state turns BEAR
-- Need user confirmation before production deployment
+- Need user confirmation before [REDACTED] deployment
 
 ## Files reference
 - `test_release_date_advanced.py` — 10-variant test script

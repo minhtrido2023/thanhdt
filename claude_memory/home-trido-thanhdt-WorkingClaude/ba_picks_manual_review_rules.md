@@ -142,7 +142,7 @@ Adding Cash_MktCap bonus or anti-commodity-peak penalty to BA score v10 would re
 4. Tuning interaction with existing Fin/RE +10/-10 bonus
 5. QWF re-snapshot
 
-→ Better to apply as MANUAL discretion until canonical-validated. Safer for production.
+→ Better to apply as MANUAL discretion until canonical-validated. Safer for [REDACTED].
 
 Future work (if needed): convert these rules into BA score v12 patches with proper canonical validation.
 

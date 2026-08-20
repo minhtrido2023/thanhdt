@@ -165,7 +165,7 @@ Portfolio scoring (v10) có interactions phi-tuyến với tier distribution —
 sẽ phá tương tác đã tune. **Phải test full canonical sim trước khi adopt bất kỳ FA refactor nào.**
 
 ### Adoption decision
-**❌ KHÔNG DEPLOY v5** vào production. 3 options:
+**❌ KHÔNG DEPLOY v5** vào [REDACTED]. 3 options:
 1. **Keep v4** (safe, BA đang stable ~17% CAGR)
 2. **Partial adopt**: v5 cho `recommend_holistic.py` (live single-quarter screening) nhưng giữ v4 cho BA sim/historical
 3. **Re-tune BA v11**: refactor Fin/RE bonus/penalty + sector limits cho v5 distribution (1-2 phiên work, ROI uncertain)

@@ -164,7 +164,7 @@ User's hypothesis (validated): equal-weighted mean treats 10-year-old events sam
 
 ## Production deploy decision
 
-✅ **HL_3y is production-ready** for LAGGED_POS standalone or as overlay
+✅ **HL_3y is [REDACTED]-ready** for LAGGED_POS standalone or as overlay
 ❌ **Don't integrate into BA v11 score** (proven no synergy)
 🤔 **Hybrid weight test pending** — to find optimal 70/30 / 80/20 / 50/50 split
 

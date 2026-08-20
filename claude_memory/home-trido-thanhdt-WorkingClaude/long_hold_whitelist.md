@@ -99,7 +99,7 @@ These qualify on data but have specific risks requiring quarterly review.
 - **7.3y multiple**: 5.11× (from first A) — currently DOWN -62% from June 2024 peak
 - **CAGR**: +25.1% (from entry)
 - **Current price** (~2026-05): 49,500 VND (from peak 128,310)
-- **Thesis**: Vietnam's only producer of yellow phosphorus (P4) at scale. Proprietary technology, production capability moat. P4 prices trending up per user observation.
+- **Thesis**: Vietnam's only producer of yellow phosphorus (P4) at scale. Proprietary technology, [REDACTED] capability moat. P4 prices trending up per user observation.
 - **Recent drawdown driver**: Political/criminal investigation of economic cases involving leadership — **NON-FUNDAMENTAL drawdown**
 - **Mean-reversion thesis**: When political noise clears + P4 prices rise → multiple expansion + earnings rebound
 
@@ -109,7 +109,7 @@ These qualify on data but have specific risks requiring quarterly review.
 
 **Hold conditions** (continue holding while ALL true):
 - FA tier remains A or B
-- Political investigation hasn't resulted in operational disruption (production continues)
+- Political investigation hasn't resulted in operational disruption ([REDACTED] continues)
 - P4 spot prices trend up or stable (need [REDACTED] commodity data source)
 - No major management exit
 

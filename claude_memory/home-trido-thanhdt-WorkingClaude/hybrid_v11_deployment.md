@@ -1,5 +1,5 @@
 ---
-name: Hybrid v11 production deployment spec
+name: Hybrid v11 [REDACTED] deployment spec
 description: Final deployment configuration for 50/50 BA v11 (SV_TIGHT + P3) + LH gated, validated 2026-05-15
 type: project
 originSessionId: 70c13426-2492-456b-9547-d14c8cf8fcb7
@@ -45,7 +45,7 @@ originSessionId: 70c13426-2492-456b-9547-d14c8cf8fcb7
 ### Costs
 - TC 0.1% per side, CG tax [REDACTED]sales, slippage tiered (0.1% base + 0.1-0.5% extra at large position sizes)
 
-### Validated metrics (from memory ba_v11_production_proposal.md)
+### Validated metrics (from memory ba_v11_[REDACTED]_proposal.md)
 - FULL 12y: CAGR **19.37%** / Sharpe **1.41** / MaxDD **-16.1%** / Calmar **1.20**
 - OOS 2024-2026: CAGR **25.91%** / Sharpe **1.43** / DD **-13.1%**
 

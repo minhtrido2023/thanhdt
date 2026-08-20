@@ -26,7 +26,7 @@ live at `tbot/code/kb_tools/*.py` (kb_new_concept, kb_new_version, kb_verify, kb
 kb_dispute, kb_resolve_conflict, kb_reindex, kb_lint, kb_contradiction_sweep) with a passing
 end-to-end selfcheck at `tbot/code/tests/selfcheck.py`. First real concept node migrated in:
 `tbot/kb/concepts/dnse-openapi-v2-calling-guideline/` (status `unverified` — imported from a
-proven production reference, not yet independently re-confirmed within tbot's own governance;
+proven [REDACTED] reference, not yet independently re-confirmed within tbot's own governance;
 see the open ask-to-verify request under `tbot/kb/process/ask_to_verify/`).
 
 See [[tbot-identity]] for the write-scope rule, [[dnse-portfolio-dashboard]] for the project that

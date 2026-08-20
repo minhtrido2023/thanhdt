@@ -9,7 +9,7 @@ metadata:
 
 # Paper-Trade 4 Systems — 2026-Q2/Q3 (Apr 1 → Aug 31, 2026)
 
-**Why:** decision target Sept 2026 for production system. 4-way head-to-head: 3 baselines + ensemble candidate from concentration-switch research (2026-05-22).
+**Why:** decision target Sept 2026 for [REDACTED] system. 4-way head-to-head: 3 baselines + ensemble candidate from concentration-switch research (2026-05-22).
 
 **How to apply:** monitor daily, decision at end of August.
 
@@ -19,7 +19,7 @@ metadata:
 |-----|------|---------------|
 | `V11_TQ34b` | V11 Song Sinh (BAL+VN30+ETF) + Tam Quan v3.4b state | `pt_v11_tq34b.py` |
 | `V12_TQ34b` | V12 Âm Dương (BAL+LAGGED HL_3y+ETF) + Tam Quan v3.4b | `pt_v12_tq34b.py` |
-| `V12_LIVE` | V12 Âm Dương + LIVE Ngũ Hành Tinh Tế (production state) | `pt_v12_live.py` |
+| `V12_LIVE` | V12 Âm Dương + LIVE Ngũ Hành Tinh Tế ([REDACTED] state) | `pt_v12_live.py` |
 | **`V121_ENS` ⭐** | V12.1 ÂD-TT (S2 sizing on LAGGED) + **M1+M3r AND-HOLD ensemble** + TQ v3.4b | `pt_v121_ensemble.py` |
 
 **V121_ENS architecture**: 25B BAL leg [REDACTED]-on. 25B switched leg routes between VN30 (V11 mode) and LAGGED V12.1 (V12 mode) based on AND-HOLD ensemble of:
@@ -83,7 +83,7 @@ Tested DT4 vs **DT4+macro-smooth** on the real prod-spec harness (`run_5systems_
 
 **Verdict (OVERTURNS the reduced-harness "macro inert ~+0.05pp" reading)**: on prod spec macro splits by system. **V5 (KELLY): macro is a genuine net win** — its cap-de-risk trims V5's deep-DD weakness (−20.8→−19.5) AND adds +1.1pp CAGR; V5+macro Calmar 1.26 ≈ V4-plain 1.24 but at higher CAGR. **V4 (BASE): macro NOT worth it** — costs −0.55pp full / −2.5pp OOS24 (over-de-risks the 2024-26 bull), DD help marginal because BASE's 30% cash buffer already overlaps the macro de-risk. Why prod-spec ≠ reduced-harness: prod deploys more capital → the macro "brake" has more exposure to protect (opposite of DT-parking which mattered LESS with more deployment).
 
-**REVISED stance (2026-05-29, user pushback — accepted): macro = cheap DORMANT tail-hedge, worth including for BOTH V4 and V5.** User named it **"DT5" = DT4 + macro overlay**. My earlier "V4: macro not worth it" over-weighted raw CAGR; on RISK-ADJUSTED terms macro improves BOTH: V4 DD −18.13→−16.66 / Calmar 1.24→1.32; V5 DD −20.84→−19.50 / Calmar 1.12→1.26. Footprint is tiny — vs true DT4 gate, macro changes state on **only 60/3089 modern days (1.9%)**, concentrated 2014(11)/2020(15)/2023(34), **ZERO in 2015-19, 2021-22, 2024, 2025, 2026**; 49/60 are cap-DOWN (de-risk). **Currently dormant: macro state = DT4 = 3 (NEUTRAL) as of 2026-05.** Key nuance: the OOS24 CAGR gaps (V4 −2.49pp, V5 +0.47pp) are NOT macro acting in 2024-26 (0 diffs) — they're **path-dependent echoes of the 2023 caps** (de-risked 2023 → different carry into 2024). So at go-live macro changes NOTHING near-term; it only arms in a stress regime (SBV-tighten/US-panic). **The only real caveat is OPERATIONAL not performance**: macro has never fired in live production → when it needs to (stress), the daily SBV-refi + US-VIX/SPX fetch (`macro_state_live.py`) MUST be reliable; a broken macro feed = no protection exactly when needed. Recommendation: include DT5 (macro) in the go-live candidate for whichever of V4/V5 is chosen, conditioned on a robust macro data pipeline. Files: `run_5systems_dt4.py` (DT_TABLE env), BQ `tav2_bq.vnindex_5state_dt4_macro`, `data/5sys_dt4_macro_nav.csv`, `sim_dt4g_macro_overlay.py`, `vnindex_5state_dt4_macro.csv`, `data/dt4g_macro_overlay_report.md`, `data/validate_macro_report.md`.
+**REVISED stance (2026-05-29, user pushback — accepted): macro = cheap DORMANT tail-hedge, worth including for BOTH V4 and V5.** User named it **"DT5" = DT4 + macro overlay**. My earlier "V4: macro not worth it" over-weighted raw CAGR; on RISK-ADJUSTED terms macro improves BOTH: V4 DD −18.13→−16.66 / Calmar 1.24→1.32; V5 DD −20.84→−19.50 / Calmar 1.12→1.26. Footprint is tiny — vs true DT4 gate, macro changes state on **only 60/3089 modern days (1.9%)**, concentrated 2014(11)/2020(15)/2023(34), **ZERO in 2015-19, 2021-22, 2024, 2025, 2026**; 49/60 are cap-DOWN (de-risk). **Currently dormant: macro state = DT4 = 3 (NEUTRAL) as of 2026-05.** Key nuance: the OOS24 CAGR gaps (V4 −2.49pp, V5 +0.47pp) are NOT macro acting in 2024-26 (0 diffs) — they're **path-dependent echoes of the 2023 caps** (de-risked 2023 → different carry into 2024). So at go-live macro changes NOTHING near-term; it only arms in a stress regime (SBV-tighten/US-panic). **The only real caveat is OPERATIONAL not performance**: macro has never fired in live [REDACTED] → when it needs to (stress), the daily SBV-refi + US-VIX/SPX fetch (`macro_state_live.py`) MUST be reliable; a broken macro feed = no protection exactly when needed. Recommendation: include DT5 (macro) in the go-live candidate for whichever of V4/V5 is chosen, conditioned on a robust macro data pipeline. Files: `run_5systems_dt4.py` (DT_TABLE env), BQ `tav2_bq.vnindex_5state_dt4_macro`, `data/5sys_dt4_macro_nav.csv`, `sim_dt4g_macro_overlay.py`, `vnindex_5state_dt4_macro.csv`, `data/dt4g_macro_overlay_report.md`, `data/validate_macro_report.md`.
 
 ## Macro pipeline health-check + fail-safe wired (2026-05-29, pre-go-live)
 

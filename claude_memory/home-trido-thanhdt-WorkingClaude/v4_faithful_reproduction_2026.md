@@ -1,5 +1,5 @@
 ---
-name: v4-faithful-reproduction-2026
+name: v4-faithful-re[REDACTED]-2026
 description: V4 (V121_ENS) reproduced as two real 25B ledgers with real flip liquidation — honest full-period CAGR ~14.2% (not 23.1%); capit sleeve +3.6pp on this host; switched-leg idealization quantified
 metadata: 
   node_type: memory
@@ -17,7 +17,7 @@ metadata:
 
 **V2.2 RE-VERIFY ([REDACTED]12, `v22_reverify_2014.py`)** — tái dựng độc lập từ leg NAV thật (pt_v22_bal/lag_v21), 2014→2026-05: V2.2 base SUM **24.5%/Sh1.61/DD−21.6/Cal1.13** (khớp claimed 24.08, diff +0.4pp do period chưa gồm 2026 âm); **V2.2+capit 26.2%/Sh1.66/Sortino1.98/DD−20.1(khớp tuyệt đối)/Cal1.31**. VNINDEX 11.4%/Sh0.68/DD−45.3. IS19.6/OOS29.3 không overfit. Beats VNI 9/13y; 2022 VNI−34%→V2.2+1.8%. **2026 YTD base−1.6%/capit−0.1% (grind) = điểm yếu độc canh momentum → chỗ Book C value bù**. Combination 2-leg: SUM/drift 24.5 vs Band±10pp Sh/Cal tốt nhất (1.63/1.14). ✅ V2.2 XÁC NHẬN THẬT. Synthesis: SESSION_SYNTHESIS_2026_06_12.md. Xem [[book-c-value-design-2026]].
 
-**V4 FULL-FAITHFUL reproduction ([REDACTED]10, `pt_v4_full_faithful.py [--capit]`)** — user asked to reproduce V4's REAL number as faithfully as possible. Finding that triggered it: even the LIVE `pt_v4_dt5g.py` builds the SWITCHED leg idealized (lines ~522-542: return-switching between two independently-running sims, flat 0.5%/flip, SWITCH events "virtual", inactive book keeps compounding and flips inherit its NAV) — **V4's switched leg had never been a real wallet anywhere**.
+**V4 FULL-FAITHFUL re[REDACTED] ([REDACTED]10, `pt_v4_full_faithful.py [--capit]`)** — user asked to reproduce V4's REAL number as faithfully as possible. Finding that triggered it: even the LIVE `pt_v4_dt5g.py` builds the SWITCHED leg idealized (lines ~522-542: return-switching between two independently-running sims, flat 0.5%/flip, SWITCH events "virtual", inactive book keeps compounding and flips inherit its NAV) — **V4's switched leg had never been a real wallet anywhere**.
 
 Faithful build = two REAL 25B ledgers (real partition, like two accounts):
 - **Book A (BAL 25B)**: real BA-v11 pkl signal + SV_TIGHT + overheat-AVOID, TIER_BAL tw10%, max12, hold45, stop−20%, DT5G parking {3:0.7} E1VFVN30, real fills (T+1 Open, slip, 20%ADV cap, 0.3%TC).

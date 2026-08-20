@@ -100,7 +100,7 @@ originSessionId: cc0496d6-7fd6-4cd3-8964-4af6fe223c99
 
 ## Validated metrics
 
-### REALISTIC T+1 Open execution (2026-05-17 canonical, production default)
+### REALISTIC T+1 Open execution (2026-05-17 canonical, [REDACTED] default)
 | NAV | CAGR | Sharpe | MaxDD | Calmar | Notes |
 |---|---|---|---|---|---|
 | 50B v11 stack (SV_TIGHT + P3 + RE_BACKLOG + V6 ETF) | **18.18%** | ~1.15 | ~-15-16% | ~1.10 | T+1 Open buy + exit, no look-ahead |

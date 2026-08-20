@@ -29,7 +29,7 @@ Scripts: `layer3_backtest_rules.py` (universe), `layer3_backtest_real_buys.py` (
 - **DEEP_VALUE plays prefer ATC entry** (buy after intraday selling) over T1115 (lunch dip)
 - Sample n=22 is small; lift magnitude noisy but direction consistent with play-type logic
 
-**Final production rule (play-type aware):**
+**Final [REDACTED] rule (play-type aware):**
 - BUY MOMENTUM_*: limit @ 11:15 close, fallback ATC market
 - BUY DEEP_VALUE_RECOVERY/COMPOUNDER: market @ ATC
 - SELL all segments: limit @ 09:45 close, fallback next-day OPEN market

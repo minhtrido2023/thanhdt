@@ -7,7 +7,7 @@ metadata:
   originSessionId: 169175c2-e4bb-43b4-990e-5ab581fd0038
 ---
 
-> ⛔ **DROPPED [REDACTED]12** — user bỏ kế hoạch 3-book. Lý do: Book C KHÔNG phải grind-hedge tin cậy (grind 2025-26 value+momentum CÙNG rơi −7%; lợi ích chỉ là Sharpe full-cycle, không bõ tradeoff MaxDD −2.7pp/Calmar + phức tạp). pt_book_c.py gỡ khỏi pipeline (giữ tham khảo). PRODUCTION = **V2.3 = V2.2 + capit** (xem [[v4-faithful-reproduction-2026]]). Nghiên cứu dưới đây GIỮ làm tham khảo (signal/timing/rebal đều đúng, chỉ là quyết định không deploy).
+> ⛔ **DROPPED [REDACTED]12** — user bỏ kế hoạch 3-book. Lý do: Book C KHÔNG phải grind-hedge tin cậy (grind 2025-26 value+momentum CÙNG rơi −7%; lợi ích chỉ là Sharpe full-cycle, không bõ tradeoff MaxDD −2.7pp/Calmar + phức tạp). pt_book_c.py gỡ khỏi pipeline (giữ tham khảo). PRODUCTION = **V2.3 = V2.2 + capit** (xem [[v4-faithful-re[REDACTED]-2026]]). Nghiên cứu dưới đây GIỮ làm tham khảo (signal/timing/rebal đều đúng, chỉ là quyết định không deploy).
 
 ## Book C — VALUE (3rd book bên cạnh BAL + LAG trong V2.2 extended)
 
