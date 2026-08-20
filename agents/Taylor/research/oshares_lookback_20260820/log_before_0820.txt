@@ -1,0 +1,4 @@
+[universe] 2 mã tại phiên cuối <= 2026-08-20 (WC=/home/trido/thanhdt/WorkingClaude)
+[pit] từ chối 0/2
+[live] từ chối 0/2
+-> snap_before_20260820.json

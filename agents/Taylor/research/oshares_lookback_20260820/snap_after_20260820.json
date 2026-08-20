@@ -1,0 +1,56 @@
+{
+ "wc": "/home/trido/thanhdt/wt-oshares-cert/WorkingClaude",
+ "asof": "2026-08-20",
+ "future_until": "2026-08-20",
+ "n_universe": 2,
+ "tickers": [
+  "TVS",
+  "VIX"
+ ],
+ "branches": {
+  "pit": {
+   "TVS": {
+    "value": 228639917.0,
+    "method": "ANCHOR_ONLY",
+    "anchor_date": "2026-07-21",
+    "anchor_value": 228639917.0,
+    "anchor_source": "ticker_financial",
+    "anchor_verified": true,
+    "restate_future_ais": [],
+    "absorption": null
+   },
+   "VIX": {
+    "value": 2450287772.0,
+    "method": "ANCHOR_ONLY",
+    "anchor_date": "2026-07-20",
+    "anchor_value": 2450287772.0,
+    "anchor_source": "ticker_financial",
+    "anchor_verified": true,
+    "restate_future_ais": [],
+    "absorption": null
+   }
+  },
+  "live": {
+   "TVS": {
+    "value": 228639917.0,
+    "method": "ANCHOR_ONLY",
+    "anchor_date": "2026-07-21",
+    "anchor_value": 228639917.0,
+    "anchor_source": "ticker_financial",
+    "anchor_verified": true,
+    "restate_future_ais": [],
+    "absorption": null
+   },
+   "VIX": {
+    "value": 2450287772.0,
+    "method": "ANCHOR_ONLY",
+    "anchor_date": "2026-07-20",
+    "anchor_value": 2450287772.0,
+    "anchor_source": "ticker_financial",
+    "anchor_verified": true,
+    "restate_future_ais": [],
+    "absorption": null
+   }
+  }
+ }
+}
