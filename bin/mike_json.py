@@ -2881,15 +2881,28 @@ def _batch_thread(jobs_dir, jid):
     return str(_batch_job(jobs_dir, jid).get("discord_thread_id") or "").strip()
 
 
-def _batch_group(obj, jobs_dir, tid):
-    """Member CÙNG THREAD với người hỏi. Batch trải trên nhiều topic thì mỗi topic là một
-    đợt riêng — một lượt wake cho topic này KHÔNG được kéo theo kết quả của topic khác
-    (arch-reviewer N3: đó đúng là lớp sự cố rò chéo topic mà discord_id_gate.sh sinh ra để
-    chặn). Thread không đọc được ⇒ xếp chung nhóm để vẫn được đánh giá, không rơi ra ngoài."""
-    members = [str(m) for m in (obj.get("members") or []) if isinstance(obj.get("members"), list)]
+def _batch_members(obj):
+    m = obj.get("members")
+    return [str(x) for x in m] if isinstance(m, list) else []
+
+
+def _batch_group(obj, jobs_dir, tid, listing=False):
+    """Member thuộc "đợt của topic này". Batch trải trên nhiều topic thì mỗi topic là một đợt
+    riêng — một lượt wake cho topic này KHÔNG được kéo theo kết quả của topic khác
+    (arch-reviewer N3: đó đúng là lớp sự cố rò chéo topic mà discord_id_gate.sh sinh ra để chặn).
+
+    `listing` tách HAI công dụng khác nhau của cùng một nhóm (arch-reviewer S2, vòng 2):
+      - CHẶN (listing=False): member chưa đọc được topic (pin rỗng / record chưa kịp ghi) VẪN
+        được tính là có thể bắn — bảo thủ, thà nhường nhầm còn hơn bắn trùng.
+      - LIỆT KÊ vào prompt (listing=True): tuyệt đối KHÔNG. Kéo một job pin rỗng vào prompt của
+        topic khác là bảo Mike post kết quả của nó vào topic đó — trái đúng luật dispatch.sh tự
+        đặt sau 4 sự cố rò chéo topic ("pin rỗng ⇒ IM LẶNG phía Discord, KHÔNG BAO GIỜ đoán
+        topic", dispatch.sh:687 và khối wake). Job pin rỗng vốn dĩ không có wake nào cả."""
+    members = _batch_members(obj)
     if not tid:
         return members
-    return [m for m in members if _batch_thread(jobs_dir, m) in (tid, "")]
+    ok = (tid,) if listing else (tid, "")
+    return [m for m in members if _batch_thread(jobs_dir, m) in ok]
 
 
 def _batch_claimer(obj, tid):
@@ -2914,8 +2927,7 @@ def _batch_blockers(obj, jobs_dir, jid_self, tid, now):
     out = [m for m in group if m != jid_self and _batch_member_blocks(jobs_dir, m, now)]
     # Job chưa kịp ĐĂNG KÝ (caller còn đang trong vòng lặp fan-out) cũng là người sẽ bắn —
     # không tính thì job xong sớm tưởng mình là người cuối và bắn trước, đúng lỗi đang vá.
-    members = obj.get("members") or []
-    missing = max(0, _as_int(obj.get("expected"), 0) - len(members))
+    missing = max(0, _as_int(obj.get("expected"), 0) - len(_batch_members(obj)))
     if missing and now - _as_int(obj.get("created_at"), 0) <= BATCH_REG_GRACE_S:
         out.append("<%d job trong batch chưa kịp đăng ký>" % missing)
     return out
@@ -2980,17 +2992,37 @@ def cmd_batch_register(a):
 
 
 def cmd_batch_claim_wake(a):
-    """batch-claim-wake <batches_dir> <batch_id> <job_id> <jobs_dir> — ai được bắn wake.
+    """batch-claim-wake <batches_dir> <batch_id> <job_id> <jobs_dir> [thread_id] — ai bắn wake.
 
     exit 0 = BẠN bắn. stdout mỗi dòng một member CÙNG THREAD: "<job_id>\\t<to>\\t<status>" —
              dùng dựng prompt wake gộp (một phiên Mike post N kết quả, thay vì N phiên).
     exit 1 = không cần bạn bắn: đã có người claim thread này, HOẶC mọi member cùng thread đã
              `replied_at` (không còn gì để post) ⇒ im lặng.
     exit 2 = còn member khác có thể bắn (stderr liệt kê) ⇒ im lặng, người cuối sẽ bắn.
-    exit 3 = KHÔNG BIẾT (batch thiếu/hỏng, hoặc job này không phải member) ⇒ caller phải
-             quay về wake đơn lẻ. Không bao giờ được hiểu thành "đã có người lo".
+    exit 3 = KHÔNG BIẾT (batch thiếu/hỏng, job này không phải member, HOẶC bất kỳ lỗi lạ nào)
+             ⇒ caller phải quay về wake đơn lẻ. Không bao giờ được hiểu thành "đã có người lo".
+
+    Vì sao mọi ngoại lệ phải quy về 3 chứ không để Python thoát mã 1 (arch-reviewer S1, vòng
+    2): mã 1 ở đây có nghĩa "đã có người claim ⇒ im lặng". Đo thật: chmod thư mục batches
+    read-only ⇒ PermissionError trên đường ghi claim ⇒ rc=1 ⇒ batch_wake.sh im, KHÔNG lượt
+    wake nào rời tầng dispatch — tức cả lớp lỗi chưa lường rơi vào đúng ô NGƯỢC với doctrine
+    ghi ngay trong file này ("không biết thì BẮN, đừng im").
     """
+    try:
+        _batch_claim_wake(a)
+    except SystemExit:
+        raise
+    except Exception as e:
+        sys.stderr.write("KHÔNG BIẾT: batch-claim-wake lỗi (%s) — caller phải wake đơn lẻ.\n" % e)
+        sys.exit(3)
+
+
+def _batch_claim_wake(a):
     batches_dir, batch_id, job_id, jobs_dir = a[0], a[1], a[2], a[3]
+    # thread_id do caller truyền vào (bin/batch_wake.sh đã cầm sẵn, chính là pin mà
+    # _bg_wrapper dùng để notify) — MỘT sự thật, MỘT cách đọc, đúng bài học B2. Thiếu thì mới
+    # tự đọc từ record.
+    tid_arg = str(a[4]).strip() if len(a) > 4 else ""
     try:
         fp = _batch_path(batches_dir, batch_id)
     except ValueError as e:
@@ -3011,7 +3043,7 @@ def cmd_batch_claim_wake(a):
             sys.stderr.write("KHÔNG BIẾT: %s không nằm trong batch %s (đăng ký hỏng?) — "
                              "caller phải wake đơn lẻ.\n" % (job_id, batch_id))
             sys.exit(3)
-        tid = _batch_thread(jobs_dir, job_id)
+        tid = tid_arg or _batch_thread(jobs_dir, job_id)
         prior = _batch_claimer(obj, tid)
         if prior:
             print(prior)
@@ -3031,8 +3063,8 @@ def cmd_batch_claim_wake(a):
                              "lặng, người cuối cùng sẽ bắn.\n"
                              % (batch_id, len(blockers), ", ".join(blockers)))
             sys.exit(2)
-        group = _batch_group(obj, jobs_dir, tid)
-        rows = [(m, _batch_job(jobs_dir, m)) for m in group]
+        rows = [(m, _batch_job(jobs_dir, m))
+                for m in _batch_group(obj, jobs_dir, tid, listing=True)]
         # Mọi member đã được post rồi (vd reconciler đã cứu cả thread) ⇒ đánh thức thêm một
         # phiên nữa chỉ để nhận đủ exit-1 là tiền vứt đi. CHỈ im khi KHÔNG CÒN GÌ để post —
         # cố ý KHÔNG "đóng batch khi reconciler cứu một member": làm thế sẽ NUỐT mất lượt

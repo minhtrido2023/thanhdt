@@ -159,7 +159,7 @@ echo "== CA 4 (đơn vị): đua — 2 member cùng terminal, chỉ 1 người c
 _reset
 JD="$MK/bus/jobs"; BD="$MK/bus/batches"
 mk_job() {  # mk_job <job_id> <status> <pid> <deadline_offset> [from] [thread] [ended_at|-] [replied|-]
-  python3 - "$JD" "$1" "$2" "$3" "$4" "${5:-Mike}" "${6:-1}" "${7:-auto}" "${8:--}" <<'PY'
+  python3 - "$JD" "$1" "$2" "$3" "$4" "${5-Mike}" "${6-1}" "${7-auto}" "${8--}" <<'PY'
 import json, os, sys, time
 jd, jid, st, pid, off, frm, tid, ended, replied = sys.argv[1:10]
 now = int(time.time())
@@ -295,6 +295,39 @@ python3 "$REAL/bin/mike_json.py" batch-register "$BD" b15 jobP 2 >/dev/null
 python3 "$REAL/bin/mike_json.py" batch-register "$BD" b15 jobQ 2 >/dev/null
 assert "…nhưng CÒN job chưa post thì VẪN bắn (không được nuốt wake của người xong sau)" \
   "$(CLAIM b15 jobQ)" "0"
+
+echo "== CA 16 (đơn vị, arch-reviewer S1): LỖI LẠ phải ra 'KHÔNG BIẾT' (3), tuyệt đối không phải"
+echo "   'đã có người claim' (1) — 1 nghĩa là IM LẶNG, tức nuốt mất wake vì một lỗi hạ tầng"
+mk_job jobR done "" 1700
+python3 "$REAL/bin/mike_json.py" batch-register "$BD" b16 jobR 1 >/dev/null
+chmod 500 "$BD"
+RC_RO="$(CLAIM b16 jobR)"
+chmod 700 "$BD"
+assert "thư mục batches read-only ⇒ exit 3 (quay về wake đơn lẻ), KHÔNG phải 1" "$RC_RO" "3"
+assert "…ghi lại được thì bắn bình thường" "$(CLAIM b16 jobR)" "0"
+
+echo "== CA 17 (đơn vị, arch-reviewer S2): member PIN RỖNG được CHẶN nhưng KHÔNG được kéo vào"
+echo "   prompt của topic khác (luật 'pin rỗng ⇒ im lặng phía Discord, không đoán topic')"
+mk_job jobU done "" 1700 Mike 777
+mk_job jobV running "$$" 1700 Mike "" -      # pin rỗng + đang chạy
+python3 "$REAL/bin/mike_json.py" batch-register "$BD" b17 jobU 2 >/dev/null
+python3 "$REAL/bin/mike_json.py" batch-register "$BD" b17 jobV 2 >/dev/null
+assert "member pin rỗng đang chạy VẪN chặn (bảo thủ)" "$(CLAIM b17 jobU)" "2"
+mk_job jobV done "" 1700 Mike "" auto
+assert "…xong rồi thì anh em bắn được" "$(CLAIM b17 jobU)" "0"
+rm -f "$BD/b17.json"; python3 "$REAL/bin/mike_json.py" batch-register "$BD" b17 jobU 2 >/dev/null
+python3 "$REAL/bin/mike_json.py" batch-register "$BD" b17 jobV 2 >/dev/null
+assert "nhưng prompt của topic 777 KHÔNG liệt kê job pin rỗng" \
+  "$(python3 "$REAL/bin/mike_json.py" batch-claim-wake "$BD" b17 jobU "$JD" 777 2>/dev/null | grep -c jobV)" "0"
+
+echo "== CA 18 (arch-reviewer S3): --batch-id mà KHÔNG --bg ⇒ KHÔNG đăng ký (nó không bao giờ"
+echo "   bắn được wake, đăng ký chỉ để chặn anh em tới deadline+300)"
+_reset
+BID18="selfcheck.batch18"
+( cd "$MK" && env CLAUDE_STUB_RC=0 DISPATCH_CGROUP_DETACH=0 DISPATCH_CLAUDE_BIN="$SB/claude_stub.sh" \
+    DISPATCH_FROM=Mike bash "$MK/bin/dispatch.sh" Wags "job đồng bộ trong batch" \
+    --batch-id "$BID18" --batch-size 2 --thread architecture --timeout 30 ) >/dev/null 2>>"$SB/err"
+assert "job đồng bộ KHÔNG tạo/đăng ký batch record" "$([ -f "$MK/bus/batches/$BID18.json" ] && echo 1 || echo 0)" "0"
 
 echo
 if [ "$FAILS" -eq 0 ]; then

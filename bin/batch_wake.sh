@@ -35,8 +35,10 @@ _single_wake() {  # hành vi TRƯỚC khi có batch — giữ nguyên từng ch�
   "$ROOT/bin/wake_thread.sh" "$thread_id" "$single_prompt" "$job_id" 2>/dev/null || true
 }
 
+# Truyền THẲNG thread_id đang cầm (chính pin mà _bg_wrapper vừa notify) thay vì để
+# mike_json đọc lại từ record — một sự thật, một cách đọc (arch-reviewer N-a vòng 2).
 members="$(python3 "$ROOT/bin/mike_json.py" batch-claim-wake \
-             "$BATCH_DIR" "$batch_id" "$job_id" "$JOBS_DIR" 2>/dev/null)"
+             "$BATCH_DIR" "$batch_id" "$job_id" "$JOBS_DIR" "$thread_id" 2>/dev/null)"
 rc=$?
 
 case "$rc" in

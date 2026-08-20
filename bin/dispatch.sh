@@ -497,6 +497,9 @@ _maybe_schedule_usage_resume() {
   printf '%s' "$prompt" | python3 "$ROOT/bin/mike_json.py" pending-resume-set \
     "$ROOT/bus/pending_resumes/${job_id}.json" "$id" "$from" "$job_id" "$resume_at" "$((n + 1))" \
     "usage_limit" "${MODEL:-}" "$EFFORT" "" "$PROVIDER"
+  # ĐỖ XE: có `ended_at` nhưng status CHƯA terminal, và wrapper `return 0` mà KHÔNG gọi
+  # `_wake_now` (lượt resume là job KHÁC). mike_json `_batch_member_blocks` dựa ĐÚNG vào
+  # dấu hiệu đó để không chờ một member sẽ-không-bao-giờ-bắn — đổi ở đây thì sửa cả ở đó.
   JSET status=usage_limited ended_at="$(date +%s)" \
        result_summary="account usage limit — auto-resume scheduled at epoch $resume_at (attempt $((n + 1))/$cap)"
   local resume_ict; resume_ict="$(TZ=Asia/Ho_Chi_Minh date -d "@$resume_at" '+%H:%M %d/%m' 2>/dev/null || echo '?')"
@@ -532,6 +535,9 @@ _maybe_fallback_provider_on_usage_limit() {
   local lf="$1" ef="${2:-}"
   [ -n "${PROVIDER:-}" ] && [ "$PROVIDER" != "claude" ] || return 1
   _looks_like_usage_limit "$lf" "$ef" || return 1
+  # ĐỖ XE: có `ended_at` nhưng status CHƯA terminal, và wrapper `return 0` mà KHÔNG gọi
+  # `_wake_now` (lượt resume là job KHÁC). mike_json `_batch_member_blocks` dựa ĐÚNG vào
+  # dấu hiệu đó để không chờ một member sẽ-không-bao-giờ-bắn — đổi ở đây thì sửa cả ở đó.
   JSET status=provider_fallback ended_at="$(date +%s)" \
        result_summary="provider '$PROVIDER' hết usage/rate limit — fallback NGAY sang claude (quota độc lập, không chờ)"
   local _fb_argv=("$ROOT/bin/dispatch.sh" "$id" "[FALLBACK provider->claude sau usage-limit, job gốc=$job_id] $prompt" --bg --timeout "$TIMEOUT")
@@ -594,6 +600,9 @@ _maybe_schedule_maxturns_resume() {
   printf '%s' "$prompt" | python3 "$ROOT/bin/mike_json.py" pending-resume-set \
     "$ROOT/bus/pending_resumes/${job_id}.json" "$id" "$from" "$job_id" "$resume_at" "$((n + 1))" \
     "max_turns" "${MODEL:-}" "$EFFORT" "$bumped" "$PROVIDER"
+  # ĐỖ XE: có `ended_at` nhưng status CHƯA terminal, và wrapper `return 0` mà KHÔNG gọi
+  # `_wake_now` (lượt resume là job KHÁC). mike_json `_batch_member_blocks` dựa ĐÚNG vào
+  # dấu hiệu đó để không chờ một member sẽ-không-bao-giờ-bắn — đổi ở đây thì sửa cả ở đó.
   JSET status=maxturns_pending ended_at="$(date +%s)" \
        result_summary="hết turn budget (--max-turns=$MAX_TURNS) — auto-resume ngay với --max-turns=$bumped (lần thử #$((n + 1))/$cap)"
   "$ROOT/bin/notify.sh" "[dispatch] $id: hết turn budget (job $job_id, --max-turns=$MAX_TURNS) — KHÔNG PHẢI lỗi nội dung. Tự động resume NGAY với trần cao hơn (--max-turns=$bumped, lần thử #$((n + 1))/$cap)." 2>/dev/null || true
@@ -1247,7 +1256,10 @@ MIKE_JOB_OWNER="$job_id" python3 "$ROOT/bin/mike_json.py" job-pin-log "$JOBS_DIR
 # trong batch. Đăng ký hỏng KHÔNG BAO GIỜ được chặn dispatch: batch-claim-wake sẽ trả
 # "KHÔNG BIẾT" (exit 3) và batch_wake.sh quay về wake đơn lẻ như trước — mất dedupe, không
 # mất wake.
-if [ -n "$BATCH_ID" ]; then
+# CHỈ nhánh --bg (arch-reviewer S3, vòng 2): `_wake_now` chỉ tồn tại trong `_bg_wrapper`, nên
+# một job dispatch ĐỒNG BỘ đăng ký vào batch sẽ không bao giờ bắn được wake mà vẫn CHẶN anh em
+# tới `deadline + 300` (với DollarBill là ~35 phút) — chặn để đổi lấy đúng con số 0.
+if [ -n "$BATCH_ID" ] && [ "$bg" = "--bg" ]; then
   if ! printf '%s' "$BATCH_ID" | grep -qE '^[A-Za-z0-9._-]{1,120}$'; then
     echo "ERROR: --batch-id '$BATCH_ID' không hợp lệ (chỉ [A-Za-z0-9._-], ≤120 ký tự)" >&2
     exit 1
