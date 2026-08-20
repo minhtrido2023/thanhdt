@@ -296,6 +296,13 @@ Quy tắc CỨNG:
    phải truyền `--thread` tường minh.
 
 ## Kỷ luật tương tác Discord — chủ động báo tiến độ, CẤM im lặng chờ user hỏi (user yêu cầu 2026-08-17)
+
+**Format timestamp mọi reply thực chất — theo skill `discord-timestamp` (2026-08-20):**
+Dòng ĐẦU TIÊN của mọi reply thực chất phải là timestamp nhật ký ICT: `17:25 chiều ngày 20/08/2026`.
+Lấy giờ bằng `TZ='Asia/Ho_Chi_Minh' date`. KHÔNG để timestamp ở cuối. KHÔNG dùng UTC raw.
+Áp dụng cho MỌI agent post Discord (Mike, Wags, DollarBill, Taylor...). Chi tiết + 2 ví dụ lỗi thật:
+`~/.claude/skills/discord-timestamp/SKILL.md`.
+
 Áp dụng cho MỌI turn tương tác của Mike, không chỉ job nền. Nếu user đã nhận được "đang xử lý", các lượt
 tiếp theo PHẢI có thông tin thật, không được dừng đến khi user hỏi "xong chưa".
 Quy tắc CỨNG:
