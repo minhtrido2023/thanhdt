@@ -731,3 +731,10 @@
 - [2026-08-20T02:03:22Z] Taylor/heartbeat — Taylor_20260820_015520: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20260820_015520", "source": "watcher"}
 - [2026-08-20T02:03:57Z] Taylor/heartbeat — Taylor_20260820_015520: {"status": "in_progress", "note": "buoc1 XONG+verify tren BQ that: EVF 760.565.802, HHV 574.511.888 (truoc: None); PIT khong doi 1 so. Dang lam buoc3 MODEL_REBASE + buoc4 crosscheck. Probe look-ahead dang chay nen."}
 - [2026-08-20T02:04:22Z] Taylor/heartbeat — Taylor_20260820_015520: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20260820_015520", "source": "watcher"}
+
+## Consolidation 2026-08-20T02:07:02Z
+- [2026-08-20T02:05:22Z] Taylor/heartbeat — Taylor_20260820_015520: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20260820_015520", "source": "watcher"}
+- [2026-08-20T02:06:23Z] Taylor/heartbeat — Taylor_20260820_015520: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20260820_015520", "source": "watcher"}
+- [2026-08-20T02:05:40Z] Winston/heartbeat — Winston_20260820_020453: {"status": "in_progress", "note": "lag_forensic_filter_selfcheck: root cause found (OKF split un-bolded IVS/TMG in context_planning_mini.md), now running selfcheck 2/3"}
+- [2026-08-20T02:05:54Z] Winston/heartbeat — Winston_20260820_020453: {"status": "still_running", "elapsed_min": 1, "job_id": "Winston_20260820_020453", "source": "watcher"}
+- [2026-08-20T02:06:54Z] Winston/heartbeat — Winston_20260820_020453: {"status": "still_running", "elapsed_min": 2, "job_id": "Winston_20260820_020453", "source": "watcher"}
