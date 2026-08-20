@@ -1,0 +1,95 @@
+{
+ "asof": "2026-02-15",
+ "universe": 259,
+ "buckets": {
+  "N/A": 253,
+  "WINDOW_AMBIGUOUS": 4,
+  "ABSORBED": 2
+ },
+ "detail": [
+  {
+   "ticker": "ABB",
+   "verdict": "WINDOW_AMBIGUOUS",
+   "value": 1397208685.0,
+   "method": "FIN_FALLBACK",
+   "anchor_date": "2026-02-02",
+   "window": [
+    "2025-10-05",
+    "2026-02-02"
+   ],
+   "n_events": 1,
+   "rolled": 0,
+   "note": "1 ISS trong cửa sổ (2025-10-05, 2026-02-02] KHÔNG quyết được là dòng quý 1,397,208,685 đã gồm hay chưa (0 giả thuyết khớp trong 0.1%) ⇒ GIỮ hành vi cũ: KHÔNG lăn. Các số giả thuyết: gồm 0/1 ⇒ 1,034,733,743 · gồm 1/1 ⇒ 1,345,153,866"
+  },
+  {
+   "ticker": "DXG",
+   "verdict": "WINDOW_AMBIGUOUS",
+   "value": 1112384189.0,
+   "method": "FIN_FALLBACK",
+   "anchor_date": "2026-02-02",
+   "window": [
+    "2025-10-05",
+    "2026-02-02"
+   ],
+   "n_events": 1,
+   "rolled": 0,
+   "note": "1 ISS trong cửa sổ (2025-10-05, 2026-02-02] KHÔNG quyết được là dòng quý 1,112,384,189 đã gồm hay chưa (0 giả thuyết khớp trong 0.1%) ⇒ GIỮ hành vi cũ: KHÔNG lăn. Các số giả thuyết: gồm 0/1 ⇒ 870,852,970 · gồm 1/1 ⇒ 964,352,970"
+  },
+  {
+   "ticker": "GEG",
+   "verdict": "WINDOW_AMBIGUOUS",
+   "value": 358308371.0,
+   "method": "FIN_FALLBACK",
+   "anchor_date": "2026-01-29",
+   "window": [
+    "2025-10-01",
+    "2026-01-29"
+   ],
+   "n_events": 1,
+   "rolled": 0,
+   "note": "1 ISS trong cửa sổ (2025-10-01, 2026-01-29] KHÔNG quyết được là dòng quý 358,308,371 đã gồm hay chưa (0 giả thuyết khớp trong 0.1%) ⇒ GIỮ hành vi cũ: KHÔNG lăn. Các số giả thuyết: gồm 0/1 ⇒ thiếu ratio/issue_volumn · gồm 1/1 ⇒ thiếu ratio/issue_volumn"
+  },
+  {
+   "ticker": "NVL",
+   "verdict": "WINDOW_AMBIGUOUS",
+   "value": 2234496474.0,
+   "method": "FIN_FALLBACK",
+   "anchor_date": "2026-02-02",
+   "window": [
+    "2025-11-07",
+    "2026-02-02"
+   ],
+   "n_events": 2,
+   "rolled": 0,
+   "note": "2 ISS trong cửa sổ (2025-11-07, 2026-02-02] KHÔNG quyết được là dòng quý 2,234,496,474 đã gồm hay chưa (0 giả thuyết khớp trong 0.1%) ⇒ GIỮ hành vi cũ: KHÔNG lăn. Các số giả thuyết: gồm 0/2 ⇒ thiếu ratio/issue_volumn · gồm 1/2 ⇒ 1,899,470,648 · gồm 2/2 ⇒ 2,063,129,039"
+  },
+  {
+   "ticker": "TNG",
+   "verdict": "ABSORBED",
+   "value": 128731266.0,
+   "method": "FIN_FALLBACK",
+   "anchor_date": "2026-01-20",
+   "window": [
+    "2025-09-22",
+    "2026-01-20"
+   ],
+   "n_events": 1,
+   "rolled": 0,
+   "note": "dòng quý 128,731,266 khớp giả thuyết 'đã gồm 1/1 ISS của cửa sổ' (kỳ vọng 128,731,260, lệch +0.000%) ⇒ KHÔNG lăn lại sự kiện nào"
+  },
+  {
+   "ticker": "VCI",
+   "verdict": "ABSORBED",
+   "value": 850100000.0,
+   "method": "FIN_FALLBACK",
+   "anchor_date": "2026-02-02",
+   "window": [
+    "2025-11-12",
+    "2026-02-02"
+   ],
+   "n_events": 1,
+   "rolled": 0,
+   "note": "dòng quý 850,100,000 khớp giả thuyết 'đã gồm 1/1 ISS của cửa sổ' (kỳ vọng 850,100,682, lệch -0.000%) ⇒ KHÔNG lăn lại sự kiện nào"
+  }
+ ]
+}

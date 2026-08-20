@@ -1,0 +1,95 @@
+{
+ "asof": "2025-11-15",
+ "universe": 281,
+ "buckets": {
+  "N/A": 275,
+  "WINDOW_AMBIGUOUS": 3,
+  "ABSORBED": 3
+ },
+ "detail": [
+  {
+   "ticker": "BSR",
+   "verdict": "WINDOW_AMBIGUOUS",
+   "value": 5007299686.0,
+   "method": "FIN_FALLBACK",
+   "anchor_date": "2025-10-30",
+   "window": [
+    "2025-07-02",
+    "2025-10-30"
+   ],
+   "n_events": 2,
+   "rolled": 0,
+   "note": "2 ISS trong cửa sổ (2025-07-02, 2025-10-30] KHÔNG quyết được là dòng quý 5,007,299,686 đã gồm hay chưa (0 giả thuyết khớp trong 0.1%) ⇒ GIỮ hành vi cũ: KHÔNG lăn. Các số giả thuyết: gồm 0/2 ⇒ 3,100,480,035 · gồm 1/2 ⇒ 3,100,496,197 · gồm 2/2 ⇒ 4,030,645,056"
+  },
+  {
+   "ticker": "HDB",
+   "verdict": "WINDOW_AMBIGUOUS",
+   "value": 3844334315.0,
+   "method": "FIN_FALLBACK",
+   "anchor_date": "2025-10-30",
+   "window": [
+    "2025-07-02",
+    "2025-10-30"
+   ],
+   "n_events": 1,
+   "rolled": 0,
+   "note": "1 ISS trong cửa sổ (2025-07-02, 2025-10-30] KHÔNG quyết được là dòng quý 3,844,334,315 đã gồm hay chưa (0 giả thuyết khớp trong 0.1%) ⇒ GIỮ hành vi cũ: KHÔNG lăn. Các số giả thuyết: gồm 0/1 ⇒ thiếu ratio/issue_volumn · gồm 1/1 ⇒ thiếu ratio/issue_volumn"
+  },
+  {
+   "ticker": "KSF",
+   "verdict": "WINDOW_AMBIGUOUS",
+   "value": 899787308.0,
+   "method": "ANCHOR_UNVERIFIED",
+   "anchor_date": "2025-10-15",
+   "window": [
+    "2025-06-17",
+    "2025-10-15"
+   ],
+   "n_events": 1,
+   "rolled": 0,
+   "note": "1 ISS trong cửa sổ (2025-06-17, 2025-10-15] KHÔNG quyết được là dòng quý 899,787,308 đã gồm hay chưa (0 giả thuyết khớp trong 0.1%) ⇒ GIỮ hành vi cũ: KHÔNG lăn. Các số giả thuyết: gồm 0/1 ⇒ thiếu ratio/issue_volumn · gồm 1/1 ⇒ thiếu ratio/issue_volumn"
+  },
+  {
+   "ticker": "LCG",
+   "verdict": "ABSORBED",
+   "value": 206602129.0,
+   "method": "FIN_FALLBACK",
+   "anchor_date": "2025-10-30",
+   "window": [
+    "2025-07-02",
+    "2025-10-30"
+   ],
+   "n_events": 1,
+   "rolled": 0,
+   "note": "dòng quý 206,602,129 khớp giả thuyết 'đã gồm 1/1 ISS của cửa sổ' (kỳ vọng 206,529,826, lệch +0.035%) ⇒ KHÔNG lăn lại sự kiện nào"
+  },
+  {
+   "ticker": "NAF",
+   "verdict": "ABSORBED",
+   "value": 61181992.0,
+   "method": "FIN_FALLBACK",
+   "anchor_date": "2025-10-30",
+   "window": [
+    "2025-07-02",
+    "2025-10-30"
+   ],
+   "n_events": 2,
+   "rolled": 0,
+   "note": "dòng quý 61,181,992 khớp giả thuyết 'đã gồm 2/2 ISS của cửa sổ' (kỳ vọng 61,178,766, lệch +0.005%) ⇒ KHÔNG lăn lại sự kiện nào"
+  },
+  {
+   "ticker": "TCB",
+   "verdict": "ABSORBED",
+   "value": 7086240414.0,
+   "method": "FIN_FALLBACK",
+   "anchor_date": "2025-10-21",
+   "window": [
+    "2025-06-23",
+    "2025-10-21"
+   ],
+   "n_events": 1,
+   "rolled": 0,
+   "note": "dòng quý 7,086,240,414 khớp giả thuyết 'đã gồm 1/1 ISS của cửa sổ' (kỳ vọng 7,086,186,363, lệch +0.001%) ⇒ KHÔNG lăn lại sự kiện nào"
+  }
+ ]
+}

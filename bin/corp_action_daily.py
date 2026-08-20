@@ -140,6 +140,23 @@ os.environ.pop("BQ_LOCAL_CACHE", None)
 
 from corp_action_lib import events as ca_events, feed_freshness, is_price_adjusting  # noqa: E402
 from oshares_live import EXPLAIN_TOL, _dedup_iss, _fetch, _roll, oshares_at  # noqa: E402
+
+# ── CỔNG PHIÊN BẢN: `oshares_at(..., live=)` PHẢI tồn tại ───────────────────────────────────
+# `oshares_live.py` sống trong repo `WorkingClaude`, file này sống trong repo `mike` — HAI repo
+# git khác nhau, merge độc lập. Kwarg `live` ra đời 2026-08-20 (job Taylor_20260820_015520) và
+# CẢ BA điểm gọi bên dưới truyền nó. Merge lệch một repo ⇒ `TypeError: oshares_at() got an
+# unexpected keyword argument 'live'` ném ra từ giữa `run()`, sau khi đã truy vấn BQ, với một
+# thông báo không nói được nguyên nhân thật. Kiểm ngay lúc import và chết SỚM, có chỉ dẫn.
+# (khuyến nghị quant-skeptic vòng CONFIRMED 2026-08-20 04:14, job Taylor_20260820_015520.)
+import inspect as _inspect  # noqa: E402
+
+if "live" not in _inspect.signature(oshares_at).parameters:
+    raise SystemExit(
+        "LỖI PHIÊN BẢN: oshares_live.oshares_at() KHÔNG có tham số `live` — hai repo lệch bản.\n"
+        f"  đang nạp: {getattr(sys.modules.get('oshares_live'), '__file__', '?')}\n"
+        "  cần: merge nhánh oshares (repo WorkingClaude) CÙNG LÚC với repo mike.\n"
+        "  kiểm nhanh: cd $WORKDIR_8L && git log --oneline -1 -- oshares_live.py\n"
+        "              cd $WORKDIR_8L/mike && git log --oneline -1 -- bin/corp_action_daily.py")
 # MODULE chứ không `from oshares_pit import SANITY_FACTOR`: bản `from` đóng băng giá trị lúc
 # import ⇒ mọi phép monkeypatch của selfcheck sẽ im lặng không có tác dụng ở file này trong khi
 # vẫn có tác dụng ở `oshares_pit`. Đúng loại chỗ hở "hai phần của fleet đọc hai giá trị của cùng
