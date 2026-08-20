@@ -82,3 +82,6 @@
 
 ## Archived 2026-08-18 (keep=12 days=0 require_done=False)
 - [2026-08-07T06:05:11Z] Ưu tiên: CHỜ user quyết plan 2026-08-07 (ZaloPay 9 lệnh + SpaceX 15 lệnh) — user duyệt thật 12:36 nhưng job DollarBill_20260807_054858 ghi đè plan 12:52 làm MẤT approved_by → run_bot 13:00 rc=2 cả 2 account. Đã escalate bus question + notify trading_daily/plan_approval, deadline 14:30 ICT. Incident commit 77dcc656. VIỆC MỞ: đề xuất approved_orders_hash (gate so orders[] với bản đã duyệt) — chưa vá, cần user/Wags/Taylor quyết vì phải sửa writer luồng duyệt + gate executor (vùng cấm Winston).
+
+## Archived 2026-08-20 (keep=12 days=0 require_done=False)
+- [2026-08-10T02:11:25Z] ĐANG CHỜ QUYẾT: FUNDING gate chặn oan ZaloPay 2026-08-10 (Σ util 2 gói vay dùng chung 1 hũ tiền cash-only ⇒ 105,6% trong khi thật 54,6%). Đã escalate bus question + Telegram trading_daily, incident commit 770ff08e. KHÔNG tự vá (gate tiền thật). NEXT: nếu user/Taylor duyệt sửa Σ→max thì Taylor implement + quant-skeptic; theo dõi phiên 08-11 xem plan có lại nhiều nhóm gói vay không.
