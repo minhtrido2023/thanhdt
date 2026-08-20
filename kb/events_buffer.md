@@ -1208,3 +1208,27 @@
 - [2026-08-20T06:46:16Z] Wags/heartbeat — Wags_20260820_042255: {"status": "still_running", "elapsed_min": 143, "job_id": "Wags_20260820_042255", "source": "watcher"}
 - [2026-08-20T06:47:16Z] Wags/heartbeat — Wags_20260820_042255: {"status": "still_running", "elapsed_min": 144, "job_id": "Wags_20260820_042255", "source": "watcher"}
 - [2026-08-20T06:48:16Z] Wags/heartbeat — Wags_20260820_042255: {"status": "still_running", "elapsed_min": 145, "job_id": "Wags_20260820_042255", "source": "watcher"}
+
+## Consolidation 2026-08-20T07:07:02Z
+- [2026-08-20T06:49:05Z] Taylor/heartbeat — Taylor_20260820_062330: {"status": "in_progress", "note": "probe 263 ma XONG: PIT tu choi 28->17 (+11 phu), LIVE 7->6; tap look-ahead KHONG DOI (PIT 4 ma, LIVE 5 ma). Dang chay lai selfcheck sau khi va AB1/LB4/10b"}
+- [2026-08-20T06:49:39Z] Taylor/heartbeat — Taylor_20260820_062330: {"status": "still_running", "elapsed_min": 26, "job_id": "Taylor_20260820_062330", "source": "watcher"}
+- [2026-08-20T06:50:39Z] Taylor/heartbeat — Taylor_20260820_062330: {"status": "still_running", "elapsed_min": 27, "job_id": "Taylor_20260820_062330", "source": "watcher"}
+- [2026-08-20T06:51:39Z] Taylor/heartbeat — Taylor_20260820_062330: {"status": "still_running", "elapsed_min": 28, "job_id": "Taylor_20260820_062330", "source": "watcher"}
+- [2026-08-20T06:52:39Z] Taylor/heartbeat — Taylor_20260820_062330: {"status": "still_running", "elapsed_min": 29, "job_id": "Taylor_20260820_062330", "source": "watcher"}
+- [2026-08-20T06:53:40Z] Taylor/heartbeat — Taylor_20260820_062330: {"status": "still_running", "elapsed_min": 30, "job_id": "Taylor_20260820_062330", "source": "watcher"}
+- [2026-08-20T06:54:40Z] Taylor/heartbeat — Taylor_20260820_062330: {"status": "still_running", "elapsed_min": 31, "job_id": "Taylor_20260820_062330", "source": "watcher"}
+- [2026-08-20T06:55:41Z] Taylor/heartbeat — Taylor_20260820_062330: {"status": "still_running", "elapsed_min": 32, "job_id": "Taylor_20260820_062330", "source": "watcher"}
+- [2026-08-20T06:56:41Z] Taylor/heartbeat — Taylor_20260820_062330: {"status": "still_running", "elapsed_min": 33, "job_id": "Taylor_20260820_062330", "source": "watcher"}
+- [2026-08-20T06:56:48Z] Taylor/heartbeat — Taylor_20260820_062330: {"status": "in_progress", "note": "oshares_live 82/82 PASS, oshares_pit 48/48 PASS, oshares_wire 11/11 PASS. Phat hien A4b da DO tren main tu truoc (issue_volumn 08-19). Tiep: corp_action_daily_selfcheck + TZ matrix"}
+- [2026-08-20T06:57:41Z] Taylor/heartbeat — Taylor_20260820_062330: {"status": "still_running", "elapsed_min": 34, "job_id": "Taylor_20260820_062330", "source": "watcher"}
+- [2026-08-20T06:58:41Z] Taylor/heartbeat — Taylor_20260820_062330: {"status": "still_running", "elapsed_min": 35, "job_id": "Taylor_20260820_062330", "source": "watcher"}
+- [2026-08-20T06:59:41Z] Taylor/heartbeat — Taylor_20260820_062330: {"status": "still_running", "elapsed_min": 36, "job_id": "Taylor_20260820_062330", "source": "watcher"}
+- [2026-08-20T07:00:41Z] Taylor/heartbeat — Taylor_20260820_062330: {"status": "still_running", "elapsed_min": 37, "job_id": "Taylor_20260820_062330", "source": "watcher"}
+- [2026-08-20T07:01:41Z] Taylor/heartbeat — Taylor_20260820_062330: {"status": "still_running", "elapsed_min": 38, "job_id": "Taylor_20260820_062330", "source": "watcher"}
+- [2026-08-20T07:02:41Z] Taylor/heartbeat — Taylor_20260820_062330: {"status": "still_running", "elapsed_min": 39, "job_id": "Taylor_20260820_062330", "source": "watcher"}
+- [2026-08-20T07:03:42Z] Taylor/heartbeat — Taylor_20260820_062330: {"status": "still_running", "elapsed_min": 40, "job_id": "Taylor_20260820_062330", "source": "watcher"}
+- [2026-08-20T07:03:43Z] Taylor/heartbeat — Taylor_20260820_062330: {"status": "in_progress", "note": "Da them moc lui cho _unabsorbed_iss (TCB -0,30% duoc sua). oshares_live 84/84, oshares_pit 48/48, corp_action_daily 201/201. Tiep: TZ matrix + verify_finding"}
+- [2026-08-20T07:04:28Z] Taylor/heartbeat — Taylor_20260820_062330: {"status": "in_progress", "note": "attempt2: found wt-oshares-cert worktree with 517-line uncommitted diff from attempt1; auditing before deciding reuse vs rewrite"}
+- [2026-08-20T07:04:42Z] Taylor/heartbeat — Taylor_20260820_062330: {"status": "still_running", "elapsed_min": 41, "job_id": "Taylor_20260820_062330", "source": "watcher"}
+- [2026-08-20T07:05:42Z] Taylor/heartbeat — Taylor_20260820_062330: {"status": "still_running", "elapsed_min": 42, "job_id": "Taylor_20260820_062330", "source": "watcher"}
+- [2026-08-20T07:06:42Z] Taylor/heartbeat — Taylor_20260820_062330: {"status": "still_running", "elapsed_min": 43, "job_id": "Taylor_20260820_062330", "source": "watcher"}
