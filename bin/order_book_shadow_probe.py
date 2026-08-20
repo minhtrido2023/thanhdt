@@ -10,6 +10,11 @@ import statistics
 WC_ROOT = os.environ.get("ORDER_BOOK_WC_ROOT", "/home/trido/thanhdt/WorkingClaude")
 EXEC_DIR = os.path.join(WC_ROOT, "data", "execution_logs")
 START = os.environ.get("ORDER_BOOK_START", "2026-08-18")
+# Selfcheck/tickcheck fixtures dùng account tag "selfcheck-*"/"tickcheck-*" + plan_date sentinel
+# "2099-01-01" (§23 convention) và ghi thẳng vào EXEC_DIR thật khi quên set ORDER_BOOK_TEST_SINK
+# (bug xác nhận 2026-08-20: 12 file rác từ 6 selfcheck khác nhau). "2099-01-01" >= START luôn
+# đúng nên lọc theo plan_date không chặn được — phải lọc theo account.
+_TEST_ACCOUNT_PREFIXES = ("selfcheck-", "tickcheck-")
 
 
 def parse_ts(value):
@@ -29,6 +34,8 @@ def load_observations():
                 try:
                     row = json.loads(line)
                 except json.JSONDecodeError:
+                    continue
+                if str(row.get("account", "")).startswith(_TEST_ACCOUNT_PREFIXES):
                     continue
                 if str(row.get("plan_date", "")) >= START:
                     out.append(row)

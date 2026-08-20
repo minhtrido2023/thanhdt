@@ -543,6 +543,42 @@ _wait_all_terminal
 chmod 644 "$MK/logs/wake_thread.log"
 assert "logs/wake_thread.log KHÔNG ghi được ⇒ VẪN đúng 1 lượt wake cho cả đợt" "$(_nwake)" "1"
 
+echo "== CA 28 (arch-reviewer vòng 7, #5+NIT-2): GUARD CỜ BATCH phải chết TẠI PARSE."
+echo "   --batch-size rỗng/không-phải-số bị _as_int() quy về 0 = 'không khai báo' ⇒ mất lớp"
+echo "   chống đua đăng ký, KHÔNG một dòng log nào nói vì sao. Guard phải nổ ở CHỖ GÕ SAI."
+_reset
+# Chạy dispatch.sh với cờ SAI: mọi ca phải exit != 0 và KHÔNG tạo job record nào (chết trước
+# khi có side-effect). Không cần stub claude — guard nằm ở tầng parse, trước mọi thứ khác.
+_bad_flag() {  # _bad_flag <mô tả> <cờ...>
+  local desc="$1"; shift
+  local rc njob
+  ( cd "$MK" && env DISPATCH_FROM=Mike bash "$MK/bin/dispatch.sh" Wags "prompt" "$@" \
+      --thread architecture --bg --timeout 30 ) > "$SB/gout" 2> "$SB/gerr"
+  rc=$?
+  njob="$(ls "$MK/bus/jobs"/*.json 2>/dev/null | wc -l | tr -d ' ')"
+  assert "$desc ⇒ exit≠0" "$([ "$rc" -ne 0 ] && echo yes || echo no)" "yes"
+  assert "$desc ⇒ KHÔNG tạo job record" "$njob" "0"
+  assert "$desc ⇒ có dòng ERROR giải thích" "$(grep -c '^ERROR: --batch' "$SB/gerr")" "1"
+  _reset
+}
+_bad_flag "--batch-size= rỗng"        --batch-id b --batch-size=
+_bad_flag "--batch-size=abc"          --batch-id b --batch-size=abc
+_bad_flag "--batch-size=-1"           --batch-id b --batch-size=-1
+_bad_flag "--batch-size 7x (dạng space)" --batch-id b --batch-size 7x
+# NIT-2: --batch-size KHÔNG kèm --batch-id là lệnh vô nghĩa — trước đây bị bỏ qua IM LẶNG,
+# caller tưởng đã gộp wake trong khi vẫn N push như cũ.
+_bad_flag "--batch-size thiếu --batch-id" --batch-size 3
+
+echo "== CA 29: giá trị HỢP LỆ vẫn phải đi lọt (guard không được chặn nhầm caller thật)."
+echo "   bq_freshness_check.sh tính PLAN_BATCH_SIZE bằng \`grep -c .\` ⇒ có thể ra '0' khi"
+echo "   không có account live nào; '0' PHẢI hợp lệ, đừng biến nó thành exit 1 giữa đường tiền thật."
+_reset
+BID29="selfcheck.batch29"
+_dispatch_bg Wags "batch size hợp lệ" --batch-id "$BID29" --batch-size 0
+_wait_all_terminal
+assert "--batch-size 0 được chấp nhận (tạo được job record)" \
+  "$(ls "$MK/bus/jobs"/*.json 2>/dev/null | wc -l | tr -d ' ')" "1"
+
 echo
 if [ "$FAILS" -eq 0 ]; then
   echo "PASS — $CASES/$CASES assertion đúng (batch wake: 1 lượt/đợt, fail-safe khi treo/hỏng, không batch = hành vi cũ)"

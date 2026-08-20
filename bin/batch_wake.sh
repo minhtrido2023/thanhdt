@@ -104,6 +104,16 @@ case "$rc" in
   *) # 3 = KHÔNG BIẾT (batch thiếu/hỏng/không phải member). Không biết thì BẮN, đừng im:
      # một lượt wake thừa tốn đúng một exit-1 của claim-reply, một lượt wake bị nuốt là
      # thread ngủ vô hạn (đúng lớp lỗi mà cả kiến trúc wake này sinh ra để diệt).
+     #
+     # MARKER ĐẾM ĐƯỢC, in TRƯỚC _dump_err (arch-reviewer vòng 7, HIGH-3). Nhánh này là ĐƯỜNG
+     # THOÁI HOÁ HAY XẢY RA NHẤT của tầng batch (batch-register hỏng, record bị xoá/hỏng, job
+     # không nằm trong members) và hậu quả của nó là MỌI member rơi về wake đơn lẻ = N push =
+     # đúng bug gốc sống lại. Bản vòng 6 chỉ có `_dump_err`, mà _dump_err ghi dạng
+     # "batch_wake: claim stderr: KHÔNG BIẾT: …" — tức chuỗi đếm của daily_retro.sh
+     # ("batch_wake: KHÔNG BIẾT") KHÔNG khớp, và ca dễ xảy ra nhất lọt lưới đúng bộ đếm vừa
+     # dựng để bắt nó. Phải là dòng RIÊNG: `claim stderr:` in ra N dòng cho một sự cố (đếm
+     # theo nó là đếm trùng), dòng này in ĐÚNG MỘT lần cho mỗi lượt thoái hoá.
+     _log "KHÔNG BIẾT (rc=$rc): batch thiếu/hỏng hoặc job không phải member — wake ĐƠN LẺ (mất dedupe, đợt fan-out có thể post TRÙNG)"
      _dump_err
      _single_wake
      exit 2 ;;

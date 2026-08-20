@@ -272,7 +272,7 @@ fi
 # giờ đăng ký ⇒ `expected > len(members)` ⇒ member còn lại nhường "job chưa kịp đăng ký" cho
 # tới hết BATCH_REG_GRACE_S (600s) rồi mới bắn. TRỄ có giới hạn, không mất lượt — đúng chiều
 # fail-safe, và các job này timeout 3600s nên 10' trễ nằm gọn trong nhịp bình thường của đợt.
-CADENCE_BATCH_ID="reportcadence_$(TZ='Asia/Ho_Chi_Minh' date +%Y%m%d_%H%M%S)"
+CADENCE_BATCH_ID="reportcadence_$(TZ='Asia/Ho_Chi_Minh' date +%Y%m%d_%H%M%S)_$$"
 echo "check_report_cadence: [batch] wake gộp cho $N job Taylor — batch_id=$CADENCE_BATCH_ID"
 
 echo "$PLAN" | python3 -c "

@@ -186,6 +186,14 @@ if [ -n "$BATCH_SIZE" ] && ! printf '%s' "$BATCH_SIZE" | grep -qE '^[0-9]+$'; th
   echo "ERROR: --batch-size '$BATCH_SIZE' không hợp lệ (phải là số nguyên không âm)" >&2
   exit 1
 fi
+# --batch-size KHÔNG kèm --batch-id là lệnh VÔ NGHĨA và im lặng: không có batch thì không có
+# gì để đếm, cờ bị bỏ qua sạch, caller tưởng mình đã gộp wake trong khi vẫn N push như cũ
+# (arch-reviewer vòng 7, NIT-2). Đúng hình dạng "guard đối xứng" mà #5 đặt ra: sai thì chết
+# tại chỗ gõ, đừng để nó thành một lượt wake trùng vài chục phút sau.
+if [ -n "$BATCH_SIZE" ] && [ -z "$BATCH_ID" ]; then
+  echo "ERROR: --batch-size cần đi kèm --batch-id (thiếu batch-id thì cờ này bị bỏ qua im lặng)" >&2
+  exit 1
+fi
 
 # Per-agent BASE-timeout default — applies only when the caller passed no --timeout.
 # DollarBill plan-T+1 jobs do 10-20+ min of real work, so the generic 600s base alone

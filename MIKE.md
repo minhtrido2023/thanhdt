@@ -128,15 +128,33 @@ cao sẽ tự chạy tiếp, nhưng nếu phiên tôi restart giữa chừng th�
 > từng job trong CÙNG một lượt (`bin/batch_wake.sh`, test-and-set nguyên tử như
 > `jobs.sh claim-reply`). Batch trải trên nhiều topic ⇒ mỗi topic là một đợt riêng, KHÔNG bao
 > giờ kéo kết quả topic khác sang. Không truyền `--batch-id` ⇒ hành vi cũ y nguyên.
-> **Call site fan-out ĐÃ chuyển đổi (danh sách ĐẦY ĐỦ, tự kiểm bằng `grep -rn 'batch-id' bin/`):**
-> `bq_freshness_check.sh` (N account live → DollarBill, 19:00) · `check_report_cadence.sh` (tới 8
-> tuần backlog + 1 tháng → Taylor, 08:30 / Sat 09:00 / mùng 1) · `paper_checkpoint_escalation.sh`
-> (N program quá hạn → Taylor, 07:40). Cả ba đếm N XONG trước vòng lặp nên `--batch-size` là số
-> THẬT, không phải phỏng đoán. Sweep 2026-08-20 xác nhận **không còn call site fan-out nào chưa
-> chuyển đổi**: mọi `dispatch.sh --bg` khác trong `bin/` đều là N=1 (`fearbuy_weekly_scan.sh`,
-> `ops_autofix.sh`, `wags_autofix.sh`, `eod_trading_report.sh`, `daily_retro.sh` — vòng
-> `for _attempt in 1 2` ở đó là RETRY tuần tự, không phải fan-out). Thêm caller fan-out MỚI ⇒
-> thêm 2 cờ NGAY và cập nhật dòng này.
+> ⚠️ Bảo đảm thật là **1 lượt wake / BATCH / topic**, KHÔNG phải 1 lượt / topic. Hai batch khác
+> nhau chồng lấn trên cùng topic (vd `paper_checkpoint_escalation` 07:40 và `check_report_cadence`
+> 08:30 đều bắn vào `trading_report`) vẫn cho 2 lượt — batch chỉ gộp được trong phạm vi MỘT caller.
+> **Call site ĐÃ chuyển đổi — phạm vi đã chứng minh: mọi vòng lặp `dispatch.sh --bg` trong
+> `bin/*.sh`** (tự kiểm: `grep -rn 'batch-id' bin/`): `bq_freshness_check.sh` (N account live →
+> DollarBill, 19:00) · `check_report_cadence.sh` (tới 8 tuần backlog + 1 tháng → Taylor, 08:30 /
+> Sat 09:00 / mùng 1) · `paper_checkpoint_escalation.sh` (N program quá hạn → Taylor, 07:40).
+> Cả ba đếm N XONG trước vòng lặp nên `--batch-size` là số THẬT, không phải phỏng đoán.
+> **Ba đường fan-out CHƯA phủ (biết rõ, không phải bỏ sót — batch per-caller không cắt ngang
+> được ranh giới tiến trình):**
+> 1. **CHÍNH BẠN fan-out trong MỘT lượt** — đường hay xảy ra nhất, đo trên `bus/jobs`: hai job
+>    Taylor cách nhau **2 giây** vào cùng một topic (`Taylor_20260820_075059` / `_075101`). Luật
+>    cho bạn ở ngay dưới.
+> 2. `bin/resume_pending.py` — vòng lặp python bắn nhiều `--bg` mỗi tick, `from`/`--thread` giữ
+>    nguyên của job gốc; usage-limit reset đặt CÙNG `resume_at` cho mọi job đang đỗ nên 2 job
+>    cùng topic hồi sinh một lượt là ca bình thường.
+> 3. `for_each_live_account.sh` → `ops_health_check.sh` → `ops_autofix.sh`: label `ops-health-<acct>`
+>    kèm account nên cooldown per-label KHÔNG chặn account thứ hai ⇒ một lượt cron sinh 2 job
+>    Winston cùng `trading_daily`. (Nhánh COORD cố ý dùng label không kèm account để né đúng
+>    chuyện này; nhánh OTHER thì không.)
+>
+> 🔴 **LUẬT CHO CHÍNH BẠN (Mike):** bạn dispatch **≥2 job `--bg` vào CÙNG một topic trong một
+> lượt** ⇒ **tự sinh `batch_id` và truyền `--batch-id <id> --batch-size <N>` cho TẤT CẢ** (N =
+> tổng số job bạn sắp bắn, đếm TRƯỚC khi bắn job đầu tiên). Không làm ⇒ N lượt wake ⇒ phiên
+> song song ⇒ post trùng, đúng bug RCA #1. `batch_id` tự đặt, chỉ cần duy nhất:
+> `mikefanout_<YYYYmmdd_HHMMSS>`.
+> Thêm caller fan-out MỚI ⇒ thêm 2 cờ NGAY và cập nhật danh sách này.
 > Member sẽ-không-bao-giờ-bắn (treo, bị kill, `usage_limited`/`maxturns_pending`/
 > `provider_fallback`, `from != Mike`) KHÔNG chặn wake của cả đợt — mọi nhánh chặn đều có trần
 > `deadline + 300s`, và reconciler (tầng dưới) là lưới cuối. RCA:
@@ -148,13 +166,16 @@ cao sẽ tự chạy tiếp, nhưng nếu phiên tôi restart giữa chừng th�
 > muốn topic xong trước được đánh thức ngay.
 > ⚠️ MỘT job trong đợt KHÔNG dispatch được (circuit breaker, registry chặn, đăng ký hỏng) ⇒
 > `--batch-size` lớn hơn số member thật ⇒ member còn lại im đủ 600s rồi mới tới lượt reconciler.
-> Wake KHÔNG mất, nhưng TRỄ 10-15' — với đợt plan 19:05 là ăn gần hết quỹ thời gian tới
-> `send_plan_report` **21:00** (kb/cron_registry.md dòng 21:00, KHÔNG phải 19:30).
+> Wake KHÔNG mất, nhưng TRỄ tối đa 10' (`BATCH_REG_GRACE_S`) + ≤5' reconciler. Với đợt plan
+> 19:05 thì 19:20 vẫn còn ~1h40' tới `send_plan_report` **21:00** (kb/cron_registry.md dòng
+> 21:00, KHÔNG phải 19:30) — không nguy hiểm, nhưng thấy là phải đi tìm job thiếu.
 > ⚠️ Job ĐĂNG KÝ ĐƯỢC nhưng `_bg_wrapper` **không bao giờ khởi động** (detach hỏng ⇒ batch có
 > member, record chưa terminal, `pid` RỖNG) là ca CHẬM NHẤT: nhánh (c) của `_batch_member_blocks`
 > chỉ kết luận được khi CÓ `pid` để kiểm; `pid` rỗng thì cố ý KHÔNG kết luận (thà nhường nhầm còn
-> hơn bắn trùng) ⇒ rơi xuống trần `deadline + 300s`. Với đợt plan (timeout 600s) là ~15' im lặng,
-> cộng ≤5' reconciler. TRƯỚC khi có batch, anh em đã được đánh thức NGAY. Đây là cái giá đã biết
+> hơn bắn trùng) ⇒ rơi xuống trần `deadline + 300s`. Với đợt plan là **~35'** im lặng, cộng ≤5'
+> reconciler — DollarBill có timeout MẶC ĐỊNH **1800s** (`dispatch.sh` case theo agent) và
+> `bq_freshness_check.sh` KHÔNG truyền `--timeout`, nên trần là 1800+300=2100s, KHÔNG phải 600s;
+> con số đúng cũng đã ghi sẵn trong chú thích `dispatch.sh` tại chỗ batch-register. TRƯỚC khi có batch, anh em đã được đánh thức NGAY. Đây là cái giá đã biết
 > của việc gộp wake, không phải bug — nhưng đang chờ một đợt mà `jobs.sh list` cho thấy member
 > `pid` rỗng thì đừng ngồi đợi: đọc kết quả tay qua `jobs.sh status <job_id>`.
 > Thấy đợt nào thiếu job so với dự kiến thì đừng chờ: kiểm `logs/wake_thread.log` ngay.

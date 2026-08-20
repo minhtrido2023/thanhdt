@@ -108,7 +108,7 @@ fi
 # ký ⇒ `expected` cao hơn số member thật ⇒ anh em nhường thêm tối đa BATCH_REG_GRACE_S (600s)
 # rồi bắn. Trễ có trần, không nuốt lượt. CỐ Ý không hạ $N sau mỗi lần fail: $N phải cố định
 # TRƯỚC vòng lặp, còn `expected` trong batch record chỉ tăng (max) chứ không giảm.
-PAPER_BATCH_ID="papercheckpoint_$(TZ='Asia/Ho_Chi_Minh' date +%Y%m%d_%H%M%S)"
+PAPER_BATCH_ID="papercheckpoint_$(TZ='Asia/Ho_Chi_Minh' date +%Y%m%d_%H%M%S)_$$"
 echo "paper_checkpoint_escalation: [batch] wake gộp cho $N job Taylor — batch_id=$PAPER_BATCH_ID"
 
 echo "$PLAN" | python3 -c "
