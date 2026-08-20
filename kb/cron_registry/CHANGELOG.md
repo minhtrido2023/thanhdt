@@ -21,6 +21,60 @@ preserve_verbatim: >
 
 # Log thay đổi Cron Registry
 
+- 2026-08-20 (Wags, user duyệt tường minh ~11:17 ICT — đề xuất
+  `agents/Mike/research/wakeup_architecture_redesign_20260820.md` Phase 1): **THÊM cron `*/5`**
+  `/usr/bin/python3 /home/trido/thanhdt/WorkingClaude/mike/bin/wakeup_reconcile.py >>
+  /home/trido/thanhdt/WorkingClaude/mike/logs/wakeup_reconcile_cron.log 2>&1`.
+  Tầng LEVEL-TRIGGERED đầu tiên cho hệ wake-up: cưỡng chế bất biến *"job terminal `from=Mike`
+  có `discord_thread_id`, chưa `replied_at`, `ended_at` quá 3' ⇒ thread phải còn ≥1 one-shot
+  wakeup pending trong tasks.db HOẶC session đang running"*; vi phạm ⇒ gọi lại `wake_thread.sh`
+  với prompt template §8.4 (an toàn vì `jobs.sh claim-reply` idempotent). Kiêm consumer DUY NHẤT
+  của `logs/wake_thread_errors.log` (file này tồn tại từ 08-15 mà KHÔNG checker nào đọc ⇒ 3 lần
+  push chết im lặng suốt 5 ngày). Root cause:
+  `kb/incidents/2026-08/2026-08-20-wake-push-utf8-surrogate-deletes-ladder.md`.
+  4 câu hỏi §11: (1) đọc `bus/jobs/*.json` (local live), `/workspace/ccdb-mike/data/tasks.db`
+  (sqlite `mode=ro`, DB của service khác — TUYỆT ĐỐI không ghi), `127.0.0.1:8199/api/sessions`
+  (live), `logs/wake_thread_errors.log`; KHÔNG chạm BQ/DNSE/web nên không có chuyện vintage/cache;
+  (2) cả 3 nguồn tươi tức thời; (3) cần T — bất biến chỉ có nghĩa trên trạng thái hiện tại;
+  (4) consumer = phiên Mike ở thread Discord (được đánh thức) + người đọc Trading Daily khi push
+  lỗi + `daily_retro.sh` 00:30 (Phase 4 đọc log tính success-rate/số lần cứu).
+  Chống xung đột: flock `state/locks/wakeup_reconcile.lock` (chạy đè ⇒ exit im lặng); state file
+  ghi atomic tmp+rename; tối đa 1 wake/thread/chu kỳ (ccdb xoá one-shot pending trước khi tạo cái
+  mới, bắn 2 phát liền là phát sau huỷ phát trước). Fail-safe: tasks.db/API không đọc được ⇒
+  KHÔNG bắn wake nào, exit 2/3 (mandate user 2026-08-03 "ưu tiên quan sát tự nhiên").
+  Chống bắn hàng loạt lần đầu: hằng số `MIN_EFFECTIVE_TS=1787199900` (mốc deploy 11:25 ICT) +
+  look-back trần 48h — đo thật trên job board production: bỏ mốc ⇒ 7 job cũ bị bắn, có mốc ⇒ 0.
+  ⚠️ **Sửa sau audit (arch-reviewer NEEDS_CHANGES, cùng ngày — 1 BLOCKER thật)**: bản đầu giả định
+  "wake thành công ⇒ tasks.db có row pending ⇒ chu kỳ sau tự im". Đọc code ccdb thật
+  (`SchedulerCog._claim_one_shot`) thì row one-shot bị XOÁ **trước khi** Claude chạy (guard F1/F3
+  chống replay) ⇒ phiên được đánh thức mà không `claim-reply` sẽ bị bắn lại mỗi 5' vô tận (đo
+  sandbox: 5 chu kỳ = 5 wake cùng 1 job; trần cũ duy nhất là look-back 48h = 576 lượt, mỗi lượt
+  dựng 1 phiên Claude). Base rate thật: 4/5 job `--bg` chưa `replied_at` từ 08-17 ĐỀU đã có dòng
+  SUCCESS trong `logs/wake_thread.log`. Đã vá bằng TRẦN CỨNG ghi bền vào state file (ghi TRƯỚC khi
+  gọi wake, §5): `MAX_FIRES_PER_JOB=3` (hết ⇒ dừng hẳn + notify `trading_daily` đúng 1 lần),
+  `REFIRE_COOLDOWN=900s`, `MAX_WAKES_PER_CYCLE=3`. Kèm 3 vá nữa cùng audit: (a) loại job dispatch
+  ĐỒNG BỘ khỏi phạm vi (`pid` có trong record = chạy nền; 192/773 record là sync, mỗi lượt
+  `wags_autofix.sh` sẽ là 1 false-positive đánh thức topic Architecture); (b) chỉ tiến
+  `errlog_offset` khi `notify_thread.sh` trả 0 (gửi hỏng mà tiến offset = mất vĩnh viễn đúng dòng
+  lỗi quan trọng nhất); (c) in 1 dòng heartbeat ra stdout mỗi lần chạy để
+  `bin/cron_health_check.py` (đo bằng mtime log target, bucket `frequent` ngưỡng 2h) không báo
+  STALE giả mỗi ngày.
+  Phụ trợ cùng commit: neo `+07:00` tường minh cho dấu thời gian `wake_thread.sh` (§16 — log thật
+  đã có 1 dòng `+00:00` lẫn giữa 33 dòng `+07:00` vì script chạy từ 2 nơi TZ khác nhau, làm lệch
+  cửa sổ ngày của metric Phase 4); sửa câu "chưa checker nào đọc log này" trong header
+  `wake_thread.sh` (giờ reconciler là consumer); `MIKE.md` §8 thêm mô tả tầng thứ 3 + cách xử lý
+  prompt `[WAKEUP-RECONCILER]`.
+  Verify: `bin/wakeup_reconcile_selfcheck.py` **49/49 PASS** (hermetic hoàn toàn: sqlite fixture,
+  HTTP server fixture, stub `wake_thread.sh`/`notify_thread.sh`; chạy cả `env -u TZ`,
+  `TZ=Pacific/Kiritimati`, `TZ=America/Anchorage`) + 6 mutation test đều bị bắt + dry-run trên
+  dữ liệu production (0 wake, phát hiện đúng 3 dòng lỗi push lịch sử) + 11 mutation test (5 vòng đầu, 5 vòng sau audit,
+  1 cho neo TZ) đều bị bắt. Selfcheck kèm theo: `bin/wake_thread_selfcheck.py` 16/16 (thêm 2 ca TZ),
+  `bin/daily_retro_wake_metrics_selfcheck.sh` 13/13 (MỚI), `bin/dispatch_wake_selfcheck.sh` 12/12
+  (thêm 2 ca hồi quy Phase 2).
+  State file được SEED lúc deploy (`state/wakeup_reconcile_state.json`, offset = cuối
+  `wake_thread_errors.log` hiện tại) để lần chạy đầu không báo lại 3 dòng lỗi lịch sử đã chẩn đoán.
+  Backup crontab trước khi cài: `state/crontab_backup_20260820_wakeup_reconcile.txt`.
+
 - 2026-08-18 (Mike/Codex, user duyệt 2026-08-18): **THÊM cron daily `0 20 * * *` =
   03:00 ICT** `/home/trido/thanhdt/WorkingClaude/mike/bin/worktree_cleanup_daily.sh --apply`,
   ghi log `logs/worktree_cleanup.log`. Script mới dọn worktree/branch session đã merge,
