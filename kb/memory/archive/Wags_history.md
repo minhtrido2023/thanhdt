@@ -173,3 +173,6 @@ BAI HOC 2: selfcheck cho khoi bash nam trong 'bash -c ...' phai chay TRONG DUNG 
 
 ## Archived 2026-08-20 (keep=12 days=0 require_done=False)
 - [2026-08-17T02:12:37Z] [2026-08-17] coord-2026-08-17 XONG (b05667f0): check #5 thieu an han -> dispatch cho question 4m31s tuoi. Da them QUESTION_GRACE_MIN=60 + 2 ca selfcheck (RED control 2 chieu). BAI HOC: checker nao quyet dinh dispatch tu 'chua thay X' PHAI xet TUOI — 'luc quet chua thay' la bieu dien tuc thoi, khong phai su that ben.
+
+## Archived 2026-08-20 (keep=12 days=0 require_done=False)
+- [2026-08-17T19:00:17Z] CHO USER QUYET (job Wags_20260817_184558): fix double-answer — F1(bit restart-replay)+F3(dedup_key) nam o repo claude-code-discord-bridge, NGOAI pham vi Wags. Khuyen nghi B. Bao cao: agents/Wags/research/wakeup_double_answer_audit_20260817.md | KET LUAN: push cuu kip 96%, tien de MIKE.md §8 item 4 SAI (ccdb da cuong che 1-pending-wakeup/thread), root cause that = compaction-replay + _running chi trong RAM. NEXT khi duoc duyet: F2 jobs.sh claim-reply nguyen tu, F5 sua wakeup_audit.py:87 substring bug.
