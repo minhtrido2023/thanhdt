@@ -82,6 +82,7 @@ liên tiếp (nhanh hơn, nhưng đi qua chính ccdb nên im khi ccdb là thứ 
 import datetime
 import fcntl
 import glob
+import importlib.util
 import json
 import os
 import subprocess
@@ -117,8 +118,24 @@ BATCHES_DIR = _env("WAKEUP_RECONCILE_BATCHES_DIR", os.path.join(ROOT, "bus", "ba
 # không có wakeup pending" là ĐÚNG VI PHẠM theo bất biến cũ, và cứu nó sau 3 phút — dựng lại
 # đúng cái phiên Mike thứ hai mà batch sinh ra để chặn. Import trực tiếp (không subprocess):
 # gọi cho từng candidate mỗi 5 phút, một tiến trình python mỗi lần là phí vô ích.
-sys.path.insert(0, os.path.join(ROOT, "bin"))
-import mike_json  # noqa: E402
+# Nạp theo ĐƯỜNG DẪN, không `sys.path.insert(0, bin/)`: chèn bin/ lên đầu sys.path nghĩa là
+# bất kỳ file bin/<tên>.py nào trùng tên module stdlib (token.py, types.py…) sẽ che stdlib cho
+# CẢ tiến trình này — hôm nay chưa file nào trùng (đo 118 file), nhưng đó là bẫy đặt sẵn cho
+# người viết script sau (arch-reviewer N7).
+_mj_spec = importlib.util.spec_from_file_location(
+    "mike_json_for_reconcile", os.path.join(ROOT, "bin", "mike_json.py"))
+mike_json = importlib.util.module_from_spec(_mj_spec)
+_mj_spec.loader.exec_module(mike_json)
+
+
+def _batch_in_flight(batch_id, job_id):
+    """Lỗi lạ ở đây KHÔNG được giết cả chu kỳ của LƯỚI CUỐI: không đọc được ⇒ False =
+    "không đang bay" ⇒ cứu như trước khi có batch (thà wake thừa còn hơn ngủ vô hạn)."""
+    try:
+        return mike_json.batch_in_flight(BATCHES_DIR, batch_id, JOBS_DIR, job_id)
+    except Exception as exc:
+        log("BATCH-CHECK-FAILED batch=%s job=%s: %s — coi như KHÔNG đang bay" % (batch_id, job_id, exc))
+        return False
 
 # Tên topic trong kb/discord_channels.json — KHÔNG bao giờ ID trần (bin/discord_id_gate.sh
 # chặn commit nếu snowflake xuất hiện ngoài registry; 4 lần rò rỉ chéo topic đều từ ID trần).
@@ -399,13 +416,13 @@ def scan_unreplied(now):
         if now - ended <= GRACE_SECONDS:
             continue
         bid = str(j.get("batch_id") or "").strip()
-        if bid and mike_json.batch_in_flight(BATCHES_DIR, bid, JOBS_DIR, now):
+        jid_here = str(j.get("job_id") or os.path.basename(fp)[:-5])
+        if bid and _batch_in_flight(bid, jid_here):
             # Im lặng CÓ CHỦ Ý, không phải tín hiệu mất: anh em cùng batch còn đang chạy và
             # sẽ bắn một lượt wake gộp cho cả đợt. Batch hết bay (đã có người claim, hoặc mọi
             # member còn lại đã chết/quá deadline) mà vẫn chưa ai claim-reply ⇒ chu kỳ sau
             # rơi lại vào đường cứu bình thường — đó chính là lưới cuối của cơ chế batch.
-            log("BATCH-IN-FLIGHT bỏ qua %s (batch=%s) — chờ anh em cùng đợt"
-                % (str(j.get("job_id") or ""), bid))
+            log("BATCH-IN-FLIGHT bỏ qua %s (batch=%s) — chờ anh em cùng đợt" % (jid_here, bid))
             continue
         out.append({"job_id": str(j.get("job_id") or os.path.basename(fp)[:-5]),
                     "to": str(j.get("to") or "?"),

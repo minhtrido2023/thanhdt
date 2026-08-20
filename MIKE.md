@@ -123,10 +123,15 @@ cao sẽ tự chạy tiếp, nhưng nếu phiên tôi restart giữa chừng th�
 > **RUNNING** ⇒ lượt thứ hai mở phiên Mike SONG SONG với phiên đang chạy ⇒ post trùng nội dung
 > (đo thật: 08-18 cách 31s, 08-20 cách 83s). Cách gọi đúng cho mọi caller fan-out:
 > `dispatch.sh ... --bg --batch-id <id> --batch-size <N>` — job terminal CUỐI CÙNG của đợt bắn
-> ĐÚNG MỘT wake, prompt gộp liệt kê mọi job để bạn `claim-reply` từng job trong CÙNG một lượt
-> (`bin/batch_wake.sh`, test-and-set nguyên tử như `jobs.sh claim-reply`). Không truyền
-> `--batch-id` ⇒ hành vi cũ y nguyên. Anh em TREO không nuốt mất wake của cả đợt, và reconciler
-> (tầng dưới) là lưới cuối. RCA: `agents/Mike/research/plan_pipeline_3loi_rca_20260820.md` lỗi #1.
+> ĐÚNG MỘT wake **cho mỗi topic**, prompt gộp liệt kê mọi job CÙNG TOPIC để bạn `claim-reply`
+> từng job trong CÙNG một lượt (`bin/batch_wake.sh`, test-and-set nguyên tử như
+> `jobs.sh claim-reply`). Batch trải trên nhiều topic ⇒ mỗi topic là một đợt riêng, KHÔNG bao
+> giờ kéo kết quả topic khác sang. Không truyền `--batch-id` ⇒ hành vi cũ y nguyên.
+> Member sẽ-không-bao-giờ-bắn (treo, bị kill, `usage_limited`/`maxturns_pending`/
+> `provider_fallback`, `from != Mike`) KHÔNG chặn wake của cả đợt — mọi nhánh chặn đều có trần
+> `deadline + 300s`, và reconciler (tầng dưới) là lưới cuối. RCA:
+> `agents/Mike/research/plan_pipeline_3loi_rca_20260820.md` lỗi #1; audit vòng 2 (2026-08-20)
+> đóng 2 BLOCKER: trạng thái "đỗ xe" từng chặn tới ~34' và hai guard đọc lệch nhau về `expected`.
 
 > **TẦNG THỨ BA — RECONCILER level-triggered (thêm 2026-08-20, `bin/wakeup_reconcile.py`, cron
 > `*/5`).** Push và ladder đều là **edge**: mất cạnh (push chết vì encoding/ccdb restart, ladder bị

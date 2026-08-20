@@ -121,8 +121,8 @@ for j in $JOBS_ALL; do
 done
 assert "prompt liệt kê ĐỦ cả 2 job của batch" "$NLISTED" "2"
 assert "wake bắn vào đúng thread pinned" "$(echo "$WLINE" | grep -oP 'thread_id=\K[0-9]+')" "$ARCH_ID"
-assert "batch record ghi wake_claimed_by" \
-  "$(python3 -c "import json;print(1 if json.load(open('$MK/bus/batches/$BID.json')).get('wake_claimed_by') else 0)")" "1"
+assert "batch record ghi người claim theo THREAD (wake_claimed[thread])" \
+  "$(python3 -c "import json;print(1 if (json.load(open('$MK/bus/batches/$BID.json')).get('wake_claimed') or {}).get('$ARCH_ID') else 0)")" "1"
 
 echo "== CA 1b: batch có job FAIL + job DONE ⇒ vẫn ĐÚNG 1 wake (call site nhánh thất bại)"
 _reset
@@ -158,14 +158,23 @@ assert "prompt fallback là prompt ĐƠN LẺ (có status=done, không có chữ
 echo "== CA 4 (đơn vị): đua — 2 member cùng terminal, chỉ 1 người claim được"
 _reset
 JD="$MK/bus/jobs"; BD="$MK/bus/batches"
-mk_job() {  # mk_job <job_id> <status> <pid> <deadline_offset>
-  python3 - "$JD" "$1" "$2" "$3" "$4" <<'PY'
+mk_job() {  # mk_job <job_id> <status> <pid> <deadline_offset> [from] [thread] [ended_at|-] [replied|-]
+  python3 - "$JD" "$1" "$2" "$3" "$4" "${5:-Mike}" "${6:-1}" "${7:-auto}" "${8:--}" <<'PY'
 import json, os, sys, time
-jd, jid, st, pid, off = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], int(sys.argv[5])
-json.dump({"job_id": jid, "to": "DollarBill", "from": "Mike", "status": st, "pid": pid,
-           "started_at": int(time.time()) - 60, "ended_at": int(time.time()) - 30,
-           "deadline": int(time.time()) + off, "discord_thread_id": "1"},
-          open(os.path.join(jd, jid + ".json"), "w"))
+jd, jid, st, pid, off, frm, tid, ended, replied = sys.argv[1:10]
+now = int(time.time())
+rec = {"job_id": jid, "to": "DollarBill", "from": frm, "status": st, "pid": pid,
+       "started_at": now - 60, "deadline": now + int(off), "discord_thread_id": tid}
+# ended_at: "auto" = theo lẽ thường (job đã xong thì có); "-" = KHÔNG có (job đang chạy thật);
+# số = ép giá trị. Đây là trường phân biệt job ĐANG CHẠY với job ĐỖ XE (usage_limited…).
+if ended == "auto":
+    rec["ended_at"] = now - 30 if st not in ("running", "retrying") else None
+elif ended != "-":
+    rec["ended_at"] = int(ended)
+if replied != "-":
+    rec["replied_at"] = replied
+rec = {k: v for k, v in rec.items() if v is not None}
+json.dump(rec, open(os.path.join(jd, jid + ".json"), "w"))
 PY
 }
 CLAIM() { python3 "$REAL/bin/mike_json.py" batch-claim-wake "$BD" "$1" "$2" "$JD" >/dev/null 2>&1; echo $?; }
@@ -178,33 +187,30 @@ assert "member #2 claim ⇒ exit 1 (đã có người bắn)" "$R2" "1"
 
 echo "== CA 5 (đơn vị): xong LỆCH NHAU — anh em còn CHẠY THẬT ⇒ im lặng; xong sau ⇒ bắn"
 mk_job jobC done "" 60
-mk_job jobD running "$$" 60          # pid=$$ (chính selfcheck) = còn sống thật
+mk_job jobD running "$$" 60 Mike 1 -   # pid=$$ (selfcheck) = còn sống thật, chưa có ended_at
 python3 "$REAL/bin/mike_json.py" batch-register "$BD" b5 jobC 2 >/dev/null
 python3 "$REAL/bin/mike_json.py" batch-register "$BD" b5 jobD 2 >/dev/null
 assert "job xong TRƯỚC im lặng khi anh em còn chạy" "$(CLAIM b5 jobC)" "2"
 assert "batch đang bay ⇒ reconciler phải bỏ qua (batch-in-flight exit 0)" \
-  "$(python3 "$REAL/bin/mike_json.py" batch-in-flight "$BD" b5 "$JD" >/dev/null 2>&1; echo $?)" "0"
+  "$(python3 "$REAL/bin/mike_json.py" batch-in-flight "$BD" b5 "$JD" jobC >/dev/null 2>&1; echo $?)" "0"
 mk_job jobD done "$$" 60
 assert "job xong SAU bắn wake cho cả batch" "$(CLAIM b5 jobD)" "0"
 
 echo "== CA 6 (đơn vị): FAIL-SAFE — 1 job TREO vĩnh viễn (pid chết, quá deadline) không được nuốt wake"
 mk_job jobE done "" 60
-mk_job jobF running 999999999 -400    # pid không tồn tại + deadline đã qua > BATCH_DEATH_GRACE_S
+mk_job jobF running 999999999 -400 Mike 1 -   # pid không tồn tại + quá deadline > BATCH_DEATH_GRACE_S
 python3 "$REAL/bin/mike_json.py" batch-register "$BD" b6 jobE 2 >/dev/null
 python3 "$REAL/bin/mike_json.py" batch-register "$BD" b6 jobF 2 >/dev/null
 assert "anh em TREO không chặn ⇒ job terminal cuối VẪN bắn" "$(CLAIM b6 jobE)" "0"
 
 echo "== CA 7 (đơn vị): job treo NHƯNG chưa quá deadline ⇒ còn nhường (chưa kết luận là chết)"
 mk_job jobG done "" 60
-mk_job jobH running 999999999 120     # pid chết nhưng deadline còn ⇒ chưa đủ bằng chứng chết
+mk_job jobH running 999999999 120 Mike 1 -    # pid chết ⇒ theo luật (c) là KHÔNG chặn nữa
 python3 "$REAL/bin/mike_json.py" batch-register "$BD" b7 jobG 2 >/dev/null
 python3 "$REAL/bin/mike_json.py" batch-register "$BD" b7 jobH 2 >/dev/null
-assert "chưa quá deadline ⇒ vẫn im lặng (chưa kết luận anh em đã chết)" "$(CLAIM b7 jobG)" "2"
-assert "…nhưng batch VẪN 'đang bay' nên reconciler chưa cứu" \
-  "$(python3 "$REAL/bin/mike_json.py" batch-in-flight "$BD" b7 "$JD" >/dev/null 2>&1; echo $?)" "0"
-mk_job jobH running 999999999 -400    # deadline trôi qua
-assert "hết deadline ⇒ batch KHÔNG còn bay ⇒ reconciler được phép cứu (lưới cuối)" \
-  "$(python3 "$REAL/bin/mike_json.py" batch-in-flight "$BD" b7 "$JD" >/dev/null 2>&1; echo $?)" "1"
+assert "pid wrapper CHẾT (dù còn deadline) ⇒ không chặn: nó sẽ không bao giờ bắn nữa" "$(CLAIM b7 jobG)" "0"
+IN_FLIGHT() { python3 "$REAL/bin/mike_json.py" batch-in-flight "$BD" "$1" "$JD" "${2:-}" >/dev/null 2>&1; echo $?; }
+assert "đã có người claim ⇒ batch không còn 'đang bay'" "$(IN_FLIGHT b7 jobG)" "1"
 
 echo "== CA 8 (đơn vị): expected=2 mà mới đăng ký 1 ⇒ chưa được bắn (anh em chưa kịp dispatch)"
 mk_job jobI done "" 60
@@ -226,6 +232,69 @@ python3 "$REAL/bin/mike_json.py" batch-register "$BD" b9x jobJ 1 >/dev/null 2>&1
 assert "job KHÔNG nằm trong batch ⇒ exit 3" "$(CLAIM b9x jobKhongCo)" "3"
 assert "batch_id có ký tự lạ (traversal) ⇒ exit 3, không đụng file ngoài thư mục" \
   "$(CLAIM ../../etc/passwd jobJ)" "3"
+
+echo "== CA 10 (đơn vị, arch-reviewer B1): member ĐỖ XE (usage_limited/maxturns_pending/"
+echo "   provider_fallback — có ended_at, status chưa terminal) KHÔNG được chặn cả batch"
+# Vì sao đây là BLOCKER chứ không phải góc khuất: 3 nhánh này `return 0` trong _bg_wrapper mà
+# KHÔNG gọi wake, lượt resume là job KHÁC. Chặn tới deadline+300 = ~34' đo trên record thật
+# 08-20 ⇒ kết quả account còn lại post SAU send_plan_report 19:30.
+for ST in usage_limited maxturns_pending provider_fallback; do
+  rm -f "$BD/b10_$ST.json"
+  mk_job "jobPark_$ST" "$ST" "$$" 1700 Mike 1 "$(date +%s)"   # ended_at CÓ, pid còn sống
+  mk_job "jobDone_$ST" done "" 1700
+  python3 "$REAL/bin/mike_json.py" batch-register "$BD" "b10_$ST" "jobPark_$ST" 2 >/dev/null
+  python3 "$REAL/bin/mike_json.py" batch-register "$BD" "b10_$ST" "jobDone_$ST" 2 >/dev/null
+  assert "member $ST không chặn ⇒ anh em bắn ngay" "$(CLAIM "b10_$ST" "jobDone_$ST")" "0"
+done
+
+echo "== CA 11 (đơn vị, arch-reviewer N1): pid bị TÁI SỬ DỤNG (luôn 'còn sống') vẫn phải có TRẦN"
+mk_job jobK done "" 1700
+mk_job jobL running "$$" -400 Mike 1 -      # pid sống thật nhưng quá deadline + grace
+python3 "$REAL/bin/mike_json.py" batch-register "$BD" b11 jobK 2 >/dev/null
+python3 "$REAL/bin/mike_json.py" batch-register "$BD" b11 jobL 2 >/dev/null
+assert "pid 'sống' + quá deadline+grace ⇒ hết chặn (không kẹt vĩnh viễn)" "$(CLAIM b11 jobK)" "0"
+
+echo "== CA 12 (đơn vị, arch-reviewer B2): claim và batch-in-flight phải ĐỌC GIỐNG NHAU"
+mk_job jobM done "" 1700
+python3 "$REAL/bin/mike_json.py" batch-register "$BD" b12 jobM 2 >/dev/null   # expected=2, mới có 1
+assert "claim nói im lặng (còn job chưa đăng ký)" "$(CLAIM b12 jobM)" "2"
+assert "batch-in-flight phải nói CÙNG điều đó (đang bay) — không thì reconciler cứu sớm" \
+  "$(IN_FLIGHT b12 jobM)" "0"
+
+echo "== CA 13 (đơn vị, arch-reviewer N3): member KHÁC THREAD là đợt RIÊNG, không gộp chéo topic"
+mk_job jobT1 done "" 1700 Mike 111
+mk_job jobT2 running "$$" 1700 Mike 222 -
+python3 "$REAL/bin/mike_json.py" batch-register "$BD" b13 jobT1 2 >/dev/null
+python3 "$REAL/bin/mike_json.py" batch-register "$BD" b13 jobT2 2 >/dev/null
+python3 - "$BD/b13.json" <<'PY'
+import json, sys, time
+fp = sys.argv[1]; o = json.load(open(fp))
+o["created_at"] = int(time.time()) - 3600   # bỏ yếu tố "chưa đăng ký xong" để cô lập yếu tố THREAD
+json.dump(o, open(fp, "w"))
+PY
+assert "anh em ở THREAD KHÁC không chặn (đợt của topic này đã xong)" "$(CLAIM b13 jobT1)" "0"
+assert "prompt gộp CHỈ liệt kê member cùng thread" \
+  "$(python3 "$REAL/bin/mike_json.py" batch-claim-wake "$BD" b13 jobT2 "$JD" 2>/dev/null | grep -c jobT1)" "0"
+
+echo "== CA 14 (đơn vị, arch-reviewer N5): member from != Mike không bao giờ bắn ⇒ không được chặn"
+mk_job jobN done "" 1700
+mk_job jobO running "$$" 1700 Taylor 1 -
+python3 "$REAL/bin/mike_json.py" batch-register "$BD" b14 jobN 2 >/dev/null
+python3 "$REAL/bin/mike_json.py" batch-register "$BD" b14 jobO 2 >/dev/null
+assert "member from=Taylor (không push wake) không chặn" "$(CLAIM b14 jobN)" "0"
+
+echo "== CA 15 (đơn vị, arch-reviewer N2): mọi member đã replied ⇒ không đánh thức thêm phiên nào"
+mk_job jobP done "" 1700 Mike 1 auto "2026-08-20T12:00:00Z"
+mk_job jobQ done "" 1700 Mike 1 auto "2026-08-20T12:01:00Z"
+python3 "$REAL/bin/mike_json.py" batch-register "$BD" b15 jobP 2 >/dev/null
+python3 "$REAL/bin/mike_json.py" batch-register "$BD" b15 jobQ 2 >/dev/null
+assert "cả 2 đã được post (reconciler cứu trước) ⇒ im lặng" "$(CLAIM b15 jobQ)" "1"
+mk_job jobQ done "" 1700 Mike 1 auto -      # còn 1 job chưa post
+rm -f "$BD/b15.json"
+python3 "$REAL/bin/mike_json.py" batch-register "$BD" b15 jobP 2 >/dev/null
+python3 "$REAL/bin/mike_json.py" batch-register "$BD" b15 jobQ 2 >/dev/null
+assert "…nhưng CÒN job chưa post thì VẪN bắn (không được nuốt wake của người xong sau)" \
+  "$(CLAIM b15 jobQ)" "0"
 
 echo
 if [ "$FAILS" -eq 0 ]; then
