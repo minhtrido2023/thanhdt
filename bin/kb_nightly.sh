@@ -1180,10 +1180,21 @@ Kiểm tra 3 loại vi phạm thường gặp:
   (b) **L3 bị outdate nhưng chưa xuống L2**: fact trong \`canonical.md\` hay \`context_safety_core.md\` mô tả trạng thái đã thay đổi (dự án đã đóng, gate đã bỏ, rule đã đổi) — nếu có, rút gọn/archive xuống L2 \`kb/projects/\`, giữ L3 tươi.
   (c) **Pattern L0 chín muồi chưa promote**: nếu ≥2 bus finding/decision tuần vừa rồi có cùng chủ đề kỹ thuật (ví dụ: cùng loại bug tái diễn, cùng data source gây nhầm), đó là ứng cử viên thăng L1 (thêm entry \`kb/data_registry/\`) hoặc L2 (\`kb/incidents/\` hoặc project tracker) — ghi nhận + thực hiện nếu rõ ràng, nếu chưa chắc thì ghi NOTE trong \`kb/data_registry/_todo.md\`.
 Không cần soát toàn bộ KB — chỉ soát \`context_pack.md\` (hot-path) và \`kb/current_ops.md\` (inject mọi restart), vì đây là 2 file gây lãng phí token nhất nếu bị nhầm tầng. Không tạo cấu trúc file mới — chỉ di chuyển/rút gọn/thêm pointer.
+9. **context_pack.md proactive trim (thêm 2026-08-20, user mandate)**: Chạy \`wc -c $ROOT/kb/context_pack.md\`.
+Nếu ≥30KB (soft warning, dưới ngưỡng cứng 45KB nhưng đang phình): (a) Đọc phần MỚI NHẤT —
+xác định event nào đã được ghi đầy đủ vào KNOWLEDGE.md hoặc kb/projects/ (không còn cần thiết
+trong context mỗi phiên) và giảm \`RECENT_LINES\` trong \`bin/publish_context.sh\` từ 8 xuống 5–6
+bằng cách đổi số trong dòng \`tail -n 8\` (hoặc tương đương); chạy lại \`bin/publish_context.sh\`
+và verify MỚI NHẤT vẫn có ≥4 event tươi. (b) Đọc \`kb/current_ops.md\` — nếu bất kỳ mục nào có
+narrative đầy đủ nhưng trạng thái là LIVE/ổn định không đổi từ ≥14 ngày, rút gọn về 2–3 câu +
+pointer kb/incidents/ hay kb/projects/. NGƯỠNG HÀNH ĐỘNG: chỉ can thiệp khi context_pack.md ≥30KB
+(không phải mỗi tuần) — nếu <30KB thì bỏ qua bước này và ghi \"context_pack = <N>KB, dưới 30KB,
+không cần trim\". Mục tiêu dài hạn: giữ context_pack.md <30KB (dưới đây 20% ngưỡng cứng) để có
+buffer trước khi Phase 4.6 tự động trigger.
 10. **Token-saver skill audit** (thêm 2026-07-29, user yêu cầu): invoke Skill \`token-saver\`
 (args: \`audit\`) — chạy đủ 6 mục checklist của nó (size-gate/hardcoded-drift/schedule-drift/
 duplicate-content/ownership-scoped-import/fixed-per-call-overhead) trên toàn bộ
-agents/*/CLAUDE.md + kb/*.md + bin/kb_nightly.sh + bin/dispatch.sh. Đây LÀ việc 1-9 ở trên
+agents/*/CLAUDE.md + kb/*.md + bin/kb_nightly.sh + bin/dispatch.sh. Đây LÀ việc 1-10 ở trên
 nhìn qua 1 lăng kính khác (không thay thế, bổ sung phát hiện các mục kia có thể bỏ sót — vd
 schedule-drift từng lọt qua nhiều tuần vì không mục nào ở trên đối chiếu docs với \`crontab -l\`
 thật). Finding có rủi ro cao (chạm 'ranh giới cứng' của skill — có thể làm sai lệch 1 fact
