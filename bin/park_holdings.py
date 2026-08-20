@@ -597,11 +597,12 @@ def park_holdings(account_label, asof=None, plan_dir=PLAN_DIR, exec_dir=EXEC_DIR
         # tường minh, kể cả None) ⇒ None = DNSE thiếu field thật ⇒ consumer fail-closed.
         "cash_total_vnd": bmeta["total_cash_vnd"] if "total_cash_vnd" in bmeta else cash,
         "cash_dividend_receiving_vnd": bmeta.get("dividend_receiving_vnd"),
-        # Trứng vàng (DNSE egg product) — vốn CHỦ SỞ HỮU thật, cần T+1 rút mới tiêu được nên
-        # KHÔNG vào availableCash/cash_total_vnd (bmeta không có key ⇒ 0.0, vd `broker=` bơm tay
-        # ở selfcheck). Chỉ compute_park_trim.py (L1, "sở hữu bao nhiêu vốn") cộng field này vào
-        # pool — compute_jit_unpark.py (L2, "tiêu được ngay bao nhiêu") CỐ Ý vẫn dùng
-        # availableCash thẳng từ đây, không đọc field này (RANH GIỚI CỨNG §B5 trong file đó).
+        # Trứng vàng (DNSE egg product) — vốn CHỦ SỞ HỮU thật, KHÔNG nằm trong
+        # availableCash/cash_total_vnd (bmeta không có key ⇒ 0.0, vd `broker=` bơm tay ở
+        # selfcheck). compute_park_trim.py (L1) VÀ compute_jit_unpark.py (L2) đều cộng field này
+        # vào cash/pool riêng của mình (2026-08-19, user duyệt — xem §pool-egg-L2 trong
+        # compute_jit_unpark.py). Consumer KHÔNG được cộng: `check_plan_funding()`/`executor.py`
+        # (gate thực thi thật — "tiêu được ngay bao nhiêu", RANH GIỚI CỨNG khác hẳn L1/L2).
         "egg_assets_vnd": bmeta.get("egg_assets_vnd") or 0.0,
         # Nợ margin: pool phải là VỐN CHỦ SỞ HỮU nhàn rỗi, không gồm tiền đi vay (cùng quy ước
         # NAV = totalCash − totalDebt của daily_nav_snapshot.py/reconcile_equity.py). SpaceX là

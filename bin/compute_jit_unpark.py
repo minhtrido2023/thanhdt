@@ -58,8 +58,45 @@ CHIA LỆNH BÁN THEO MÃ — dùng lại nguyên quy ước của L1 (`compute_
     `round_lot(min(tv, bp)/px)` không có dung sai). Lô thêm vào vẫn phải lọt HẾT trần cứng (TỔNG/
     phiên, per-name, sellable T+2); không lọt ⇒ không thêm, lệnh mua co lại như cũ.
 
+§pool-egg-L2 (2026-08-19, 2 vòng quyết định cùng ngày). Vòng 1: egg bị loại khỏi L2 với lý do
+"cần lệnh rút + về tài khoản hôm sau, không phải sức mua tức thời". Vòng 2 (user John phản biện,
+quant-skeptic REFUTED bản vòng 2 đầu vì lý do "trung thành thiết kế engine" SAI — engine tách
+riêng cash/ETF, ETF chỉ hoá sức mua qua bước bán TƯỜNG MINH có phí). Vòng 3 (bản NÀY) — user làm
+rõ quy trình vận hành thật, không còn mâu thuẫn với vòng 1: **plan lập buổi tối** (như hiện tại,
+không đổi) → **sáng/chiều trong giờ hành chính, nếu bot thiếu tiền cho 1 lệnh đã lên plan, user
+tự rút Trứng vàng — về TRONG PHIÊN, KHÔNG CÓ PHÍ** (khác PARK: Trứng vàng không phải chứng
+khoán bán qua sổ lệnh có phí/FIFO/trần ADV, nó là RÚT một sản phẩm tiền gửi — không có bước "bán"
+nào để mô hình phí như PARK) → lệnh khớp ngay khi tiền về, không giới hạn khung giờ sáng/chiều.
+`cash`/`bp` ở đây CỘNG THẲNG `egg_assets_vnd`, KHÔNG chiết khấu phí (khác PARK — lý do khác loại
+tài sản, không phải một ngoại lệ tuỳ tiện). ⚠️ Hệ quả cơ chế: dòng ~470 `qf =
+round_lot(min(tv, bp)/px_ref)` quyết SHRINK lệnh mua theo `bp` — cộng egg đổi hành vi từ "mua
+PHẦN mua được bằng cash thật" sang "đề xuất mua ĐỦ, banking vào egg". `check_plan_funding()`/
+`executor.py` (gate P0, thực thi thật) KHÔNG đổi — vẫn `availableCash`/`ppse` thuần, và
+`merge_park_orders.py` KHÔNG ghi đè qty lệnh mua từ số L2 tính (chỉ chú thích, xem file đó
+dòng ~611 "chú thích lệnh MUA từ buy_amendments (KHÔNG đổi qty)") ⇒ nếu egg KHÔNG thực rút kịp,
+gate P0 chặn TOÀN BỘ lệnh (WAIT_CASH/fail-safe-pause) đúng "hold cho cash" user muốn — KHÔNG
+phải nới lỏng gate tiền, chỉ đổi cách L2 SIZING đề xuất bán PARK bao nhiêu.
+
+Vòng 4 (quant-skeptic REFUTED vòng 3 vì thiếu ĐÚNG cái user yêu cầu: "cần warning là rút tiền từ
+trứng vàng để thực hiện lệnh" — bản vòng 3 chỉ in CLI stdout, headless/`--out` JSON không thấy).
+Fix: mỗi `buy_amendments[i]` giờ mang `funded_via` ("cash" | "cash+egg") + `egg_relied_vnd` (CẬN
+TRÊN phần qty CÓ THỂ chỉ khớp được nhờ egg — tính bằng `bp_real = bp - egg0`). `egg_relied_vnd > 0`
+⇒ `out["notes"]` có cảnh báo tường minh "CẦN RÚT Trứng vàng ... TRƯỚC khi đặt lệnh" — kênh
+headless/JSON đọc được, không chỉ CLI.
+
+Vòng 5 (quant-skeptic REFUTED vòng 4 — bác đúng claim "chính xác không phải ước lượng": `bp_real`
+KHÔNG re-simulate nhánh JIT-bán-PARK cho thế giới "không egg" — khi egg đủ lớn để TỰ đẩy `cash`
+qua `JIT_TRIGGER_FRAC`, nhánh bán PARK bị tắt hẳn trong lượt chạy thật, nên `egg_relied_vnd` gán
+TOÀN BỘ target là "cần egg" dù PARK lẽ ra có thể bù phần lớn). Đã sửa thành CẬN TRÊN tường minh
+(không phải số chính xác) — `egg_relied_vnd` có thể CAO hơn thực tế cần (bỏ qua khả năng PARK tự
+bù), nhưng KHÔNG BAO GIỜ thấp hơn (không bỏ sót cảnh báo) — hướng AN TOÀN cho một cảnh báo tư vấn
+(KHÔNG phải một gate — gate thật vẫn là `check_plan_funding()`, không đổi). Multi-order dùng
+CHUNG `egg0` không trừ dần — cùng lý do cận-trên, chưa mô hình "egg còn lại qua các lệnh" (để lại
+làm sau nếu cần chính xác hơn — xem T20g).
+
 RANH GIỚI CỨNG (§B5) — giống hệt L1:
-  · Giá/tiền đọc DNSE, KHÔNG BQ (§6). Dùng `availableCash`, KHÔNG `totalCash`.
+  · Giá/tiền đọc DNSE, KHÔNG BQ (§6). `cash`/`bp` = `availableCash + egg_assets_vnd` (§pool-egg-L2
+    ở trên) — KHÔNG `totalCash` (tiền bán chưa settle T+2 KHÔNG vào đây, khác L1).
   · `excluded_tickers` (vd DGC ở ZaloPay) — KHÔNG BAO GIỜ bán.
   · Chỉ đụng lô có `book == "PARK"`. Vị thế CAPIT (stop_exempt/slot_exempt), LAG, BAL,
     DISCRETIONARY_SPECIAL, LEGACY_ORPHAN **không nằm trong `park_lots`** ⇒ cấu trúc không thể
@@ -310,6 +347,7 @@ def compute_jit_unpark(account_label, asof=None, orders=None, holdings=None, pla
 
     out = {"layer": "L2_JIT_UNPARK", "account_label": account_label, "asof": asof,
            "park_mv_vnd": h["park_mv_vnd"], "cash_available_vnd": h["cash_available_vnd"],
+           "egg_assets_vnd": float(h.get("egg_assets_vnd") or 0.0),
            "reconcile_ok": h["reconcile"]["ok"],
            "unverified_tickers": h["unverified_tickers"],
            "excluded_tickers": h["excluded_tickers"],
@@ -341,7 +379,12 @@ def compute_jit_unpark(account_label, asof=None, orders=None, holdings=None, pla
                             "(đúng thiết kế: L2 chỉ chạy khi có lệnh mua thật)")
         return out
 
-    cash = float(h["cash_available_vnd"] or 0)
+    # §pool-egg-L2 (2026-08-19, user John duyệt sau 2 vòng làm rõ) — cash/bp CỘNG Trứng vàng,
+    # KHÔNG chiết khấu phí (rút egg không qua sổ lệnh, khác PARK). Đọc RANH GIỚI CỨNG §B5 ở
+    # docstring trước khi đổi lại chỗ này. `egg0` GIỮ NGUYÊN không đổi suốt vòng lặp bên dưới —
+    # dùng làm hằng số phản chứng "cash sẽ có nếu không tính egg" (xem cảnh báo egg_relied_vnd).
+    egg0 = float(h.get("egg_assets_vnd") or 0.0)
+    cash = float(h["cash_available_vnd"] or 0) + egg0
     out["cash_start_vnd"] = cash
 
     # ── Trần TỔNG/phiên — DÙNG LẠI `_etf_day_cap` của L1, không đặt trần mới ──
@@ -451,6 +494,21 @@ def compute_jit_unpark(account_label, asof=None, orders=None, holdings=None, pla
         bp = cash + float(margin_room_vnd)
         tv = tv0 if bp >= tv0 * JIT_TRIGGER_FRAC else bp * SHRINK_FRAC
         rec["buying_power_vnd"] = bp
+
+        # §pool-egg-L2 cảnh báo (quant-skeptic vòng 2 yêu cầu — user John: "cần warning là rút
+        # tiền từ trứng vàng để thực hiện lệnh"). `bp_real = bp − egg0` KHÔNG phải phản chứng
+        # chính xác (quant-skeptic vòng 3 bác đúng, counterexample tái lập được: cash=10tr,
+        # egg=90tr, target=100tr — egg tự đẩy `cash` qua JIT_TRIGGER_FRAC nên nhánh JIT-bán-PARK
+        # bị TẮT trong lượt chạy thật; `bp_real` không re-simulate lại nhánh bán-PARK đó cho thế
+        # giới "không egg", nên egg_relied_vnd ở đây là CẬN TRÊN, không phải số chính xác — có
+        # thể báo cần egg NHIỀU HƠN thực tế (bỏ qua khả năng PARK tự bán bù phần lớn), nhưng
+        # KHÔNG BAO GIỜ báo ÍT hơn thực tế cần (vì bỏ qua nguồn tài trợ khác = ước lượng theo
+        # HƯỚNG AN TOÀN cho một cảnh báo, không phải cho một gate — xem T20g). Multi-order: mỗi
+        # lệnh dùng CÙNG `egg0` (không trừ dần theo lệnh trước) — CỐ Ý cùng lý do cận-trên, tránh
+        # phức tạp hoá "egg còn lại" mà không đổi tính an toàn của cảnh báo.
+        bp_real = bp - egg0
+        tv_real = tv0 if bp_real >= tv0 * JIT_TRIGGER_FRAC else max(bp_real, 0.0) * SHRINK_FRAC
+        qf_real = round_lot(min(tv_real, max(bp_real, 0.0)) / px_ref) if bp_real > 0 else 0
         if tv < MIN_ORDER_VND:
             rec.update({"status": "DROP", "qty_final": 0, "target_value_final_vnd": 0.0,
                         "cash_after_vnd": cash,
@@ -468,6 +526,21 @@ def compute_jit_unpark(account_label, asof=None, orders=None, holdings=None, pla
         # phần dư đó thành ra co qty. Đây là khác biệt HIỆN VẬT engine-vs-live, đã ghi rõ, và
         # nó chỉ đi theo hướng thận trọng (không bao giờ đặt lệnh vượt sức mua).
         qf = round_lot(min(tv, bp) / px_ref)
+        # egg_relied_vnd: CẬN TRÊN phần qty có thể chỉ khớp được nhờ egg (qf > qf_real) — cảnh
+        # báo tường minh, KHÔNG chỉ in CLI (headless/`--out` JSON phải thấy được, quant-skeptic
+        # vòng 2). Cận trên, không phải số chính xác — xem chú thích ở `bp_real` phía trên.
+        egg_relied_qty = max(0, int(qf) - int(qf_real))
+        egg_relied_vnd = egg_relied_qty * px_ref
+        rec["egg_relied_vnd"] = float(egg_relied_vnd)
+        rec["funded_via"] = "cash+egg" if egg_relied_vnd > 0 else "cash"
+        if egg_relied_vnd > 0:
+            out["notes"].append(
+                f"⚠️ {oid} ({o.get('ticker')}): tới {egg_relied_qty:,}cp trong lệnh này có thể "
+                f"cần Trứng vàng (≤{egg_relied_vnd/1e6:,.1f}tr, cận trên — có thể ít hơn nếu bán "
+                f"PARK bù được một phần) — CẦN RÚT Trứng vàng trong giờ hành chính TRƯỚC khi đặt "
+                f"lệnh, hoặc để hệ thống tự bán PARK bù nếu đủ. Nếu chưa rút và PARK không đủ bù, "
+                f"gate P0 (check_plan_funding) sẽ giữ HOLD toàn bộ lệnh này (đúng thiết kế, không "
+                f"phải lỗi).")
         if qf < LOT:
             rec.update({"status": "DROP", "qty_final": 0, "target_value_final_vnd": 0.0,
                         "cash_after_vnd": cash,
@@ -548,7 +621,10 @@ def main():
     print(f"=== L2 JIT-UNPARK (ĐỀ XUẤT, chưa vào plan nào) — {r['account_label']} "
           f"asof={r['asof']} — {r['decision']} ===")
     if "cash_start_vnd" in r:
-        print(f"  cash đầu {r['cash_start_vnd']/1e6:,.2f}tr | PARK {r['park_mv_vnd']/1e6:,.2f}tr "
+        _egg = r.get("egg_assets_vnd") or 0
+        print(f"  cash đầu {r['cash_start_vnd']/1e6:,.2f}tr (availableCash "
+              f"{(r.get('cash_available_vnd') or 0)/1e6:,.2f}tr + Trứng vàng {_egg/1e6:,.2f}tr) "
+              f"| PARK {r['park_mv_vnd']/1e6:,.2f}tr "
               f"| {r.get('n_buy_orders_bal_lag', 0)} lệnh mua BAL/LAG")
     if "etf_day_cap_vnd" in r:
         print(f"  trần TỔNG/phiên = {r['etf_day_cap_vnd']/1e9:,.2f} tỷ; còn lại đầu kỳ "
