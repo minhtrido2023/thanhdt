@@ -26,10 +26,14 @@
 #
 # Fails soft (never breaks the caller's completion path): unreachable API,
 # bad thread_id, or task-name collision all just log to
-# logs/wake_thread_errors.log and exit 1. ⚠️ CHƯA có checker nào đọc file log này
-# (kiểm chứng 2026-08-20 — câu cũ "ops_health_check.sh reads both" là SAI); lỗi push
-# vì thế im lặng hoàn toàn cho tới khi có người tự phát hiện. Đề xuất reconciler:
-# agents/Mike/research/wakeup_architecture_redesign_20260820.md
+# logs/wake_thread_errors.log and exit 1. File log đó có ĐÚNG MỘT consumer:
+# bin/wakeup_reconcile.py (cron */5, thêm 2026-08-20) — nó đếm dòng MỚI kể từ lần chạy
+# trước rồi báo Trading Daily, và ĐỘC LẬP với việc đó nó tự đối chiếu bất biến "job
+# terminal chưa replied ⇒ thread phải còn wakeup pending" nên một lượt push chết vẫn
+# được cứu trong ≤5'. (Câu cũ trong header này nói "ops_health_check.sh reads both" là
+# SAI — kiểm chứng bằng grep toàn bin/ ngày 2026-08-20, và 5 ngày im lặng đó là root
+# cause của sự cố 08-20. Đừng viết lại một câu "X giám sát Y" mà không grep.)
+# Kiến trúc: agents/Mike/research/wakeup_architecture_redesign_20260820.md
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
@@ -42,10 +46,16 @@ if ! [[ "$thread_id" =~ ^[0-9]+$ ]]; then
   exit 1
 fi
 
+# Dấu thời gian NEO CỨNG vào ICT (§16), không dùng TZ của tiến trình gọi. Lý do đo được:
+# wake_thread.sh chạy từ 2 nơi có TZ khác nhau — crontab (export TZ=Asia/Ho_Chi_Minh) và
+# phiên dưới service ccdb (không export) — nên logs/wake_thread.log đã có dòng `+00:00`
+# lẫn giữa các dòng `+07:00`. daily_retro.sh đếm push success-rate bằng tiền tố `^$TODAY`
+# (ngày ICT), nên một dòng UTC ghi trong khoảng 17:00-24:00 UTC bị xếp nhầm sang ngày
+# trước ⇒ tỷ lệ sai. Neo tường minh rẻ hơn dạy mọi consumer cách quy đổi.
 _log_fail() {
   mkdir -p "$ROOT/logs"
   printf '%s wake_thread: %s | thread_id=%s name_suffix=%s\n' \
-    "$(date -Iseconds)" "$1" "$thread_id" "$name_suffix" \
+    "$(TZ='Asia/Ho_Chi_Minh' date -Iseconds)" "$1" "$thread_id" "$name_suffix" \
     >> "$ROOT/logs/wake_thread_errors.log"
 }
 
@@ -53,9 +63,12 @@ _log_fail() {
 # audit double-answer phải suy ngược "push có tới không" từ log ccdb ở repo KHÁC. Không có
 # dòng thành công thì "push im lặng không chạy" và "push chạy ngon" nhìn giống hệt nhau
 # trong logs/ của fleet này.
-# `name_suffix` chính là job_id: cả hai call site trong dispatch.sh (_bg_wrapper nhánh done
-# và nhánh fail) đều truyền "$job_id" vào tham số 3. Gọi tay không truyền tham số 3 thì đó
-# là timestamp tự sinh — vẫn ghi nguyên văn, không bịa.
+# `name_suffix` KHÔNG phải lúc nào cũng là job_id thuần — đừng parse nó như vậy. Hai call
+# site trong dispatch.sh (_bg_wrapper nhánh done và nhánh fail) truyền "$job_id"; call site
+# THỨ BA, bin/wakeup_reconcile.py (thêm 2026-08-20), truyền "<job_id>-reconcile<lần bắn>" —
+# bắt buộc khác nhau mỗi lượt vì cột `name` của scheduled_tasks là UNIQUE, tên trùng thì lượt
+# cứu sau nhận 409 và tiêu trần mà không đánh thức được ai. Gọi tay không truyền tham số 3 thì
+# đó là timestamp tự sinh. Mọi trường hợp đều ghi NGUYÊN VĂN vào log, không bịa.
 _log_ok() {
   mkdir -p "$ROOT/logs"
   local _task_id
@@ -69,7 +82,7 @@ except Exception:
     print("?")' 2>/dev/null)" || _task_id="?"
   [ -n "$_task_id" ] || _task_id="?"
   printf '%s wake_thread: SUCCESS | job_id=%s thread_id=%s task_id=%s\n' \
-    "$(date -Iseconds)" "$name_suffix" "$thread_id" "$_task_id" \
+    "$(TZ='Asia/Ho_Chi_Minh' date -Iseconds)" "$name_suffix" "$thread_id" "$_task_id" \
     >> "$ROOT/logs/wake_thread.log"
 }
 
