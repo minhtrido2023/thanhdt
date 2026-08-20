@@ -104,9 +104,30 @@ nhiều đợt phát hành khác nhau chốt cùng ngày (SUM đúng) hoặc ame
 | Script | Đọc gì | Ghi gì | Trạng thái |
 |---|---|---|---|
 | `corp_action_lib.py` | reader + taxonomy dùng chung (`is_price_adjusting` / `dilutes_share_count` / `feed_freshness`) | — | LIVE, 7 ca hồi quy |
-| `oshares_live.py` | AIS + ISS → số CP lưu hành point-in-time | — (thư viện) | vòng 4: cổng chứng nhận neo AIS nằm TRONG module (`AIS_UNCERTIFIED` ⇒ `value=None`), 32 ca hồi quy — an toàn khi gọi thẳng `oshares_at()` |
+| `oshares_live.py` | AIS + ISS → số CP lưu hành point-in-time | — (thư viện) | vòng 4: cổng chứng nhận neo AIS nằm TRONG module (`AIS_UNCERTIFIED` ⇒ `value=None`) — an toàn khi gọi thẳng `oshares_at()`. **Từ 2026-08-20 có HAI nhánh**: `live=False` (mặc định, PIT/backtest — không đổi số nào) vs `live=True` (phục vụ hôm nay). 58 ca hồi quy |
 | `dividend_adjusted_return.py::bq_corp_action()` | DIV/ISS tại (mã, ex-date) | — | LIVE (tầng bổ sung; tiền broker vẫn là nguồn số chính thức §21) |
-| `mike/bin/corp_action_daily.py` | cả 3 cái trên + `active_nav_<label>.json` | `data/corp_action_daily/corp_action_daily_<date>.json` + Discord `trading_daily` | cron **CHƯA CÀI**, chờ quant-skeptic (job `Taylor_20260813_091128`) |
+| `mike/bin/corp_action_daily.py` | cả 3 cái trên + `active_nav_<label>.json` | `data/corp_action_daily/corp_action_daily_<date>.json` + Discord `trading_daily` | LIVE (cron). Gọi `oshares_at(..., live=True)` ở **cả 3 điểm gọi** — sót một điểm là `check_retro`/`crosscheck` so số của HAI chính sách và báo lệch giả mỗi ngày (ca R12 trong selfcheck bắt đúng kiểu sót này) |
+| `oshares_pit` (backtest) | qua `oshares_live` | — | **PHẢI giữ `live=False`**. `live=True` trong một backtest là look-ahead — xem bảng "HAI NHÁNH" trong [`../fundamentals/ticker_financial_oshares.md`](../fundamentals/ticker_financial_oshares.md) |
+
+### Chính sách neo, cập nhật 2026-08-20 (job `Taylor_20260820_015520`)
+
+Nguyên tắc user: *dữ liệu từ BCTC mới nhất là dữ liệu tươi nhất, TRỪ KHI có phát sinh sự kiện giữa
+2 kỳ báo cáo; BCTC vẫn là CHUẨN re-baseline mỗi quý.* Hệ quả cho bảng này: `AIS` KHÔNG còn được coi
+là phát biểu áp đảo khi chuỗi `AIS` **gãy** — chuỗi gãy là bằng chứng chống lại chính nó. Chi tiết
+điều kiện + cái giá look-ahead đo được (21 mã được phủ đổi lấy **1 mã** look-ahead mới, KBC):
+[`../fundamentals/ticker_financial_oshares.md`](../fundamentals/ticker_financial_oshares.md)
+§"HAI NHÁNH".
+
+**`MODEL_REBASE` — cổng bất biến ngày đổi bản mã.** `corp_action_daily.py` so số hôm nay với
+snapshot đã publish hôm trước. Khi `model_version` đổi giữa hai lượt, hai số đó do HAI công thức
+sinh ra ⇒ so chúng là so hai câu trả lời cho hai câu hỏi khác nhau, và cổng bất biến sẽ GIẤU đúng
+con số đúng (đo thật 2026-08-20: MBB `10.189.574.884,885` → `10.068.749.885`, VRE `2.328.818.410` →
+`2.272.318.410`; số LẺ ở bản cũ chính là mùi của phép nhân dồn `(1+ratio)` trên hai sự kiện CÙNG
+ex-date tính trên cùng một gốc). `model_rebase_set()` miễn cổng CHỈ khi đủ **cả ba**: model đổi
+thật (`None` = chưa kết luận được, KHÔNG đọc thành True) · tính lại hôm qua bằng mã hôm nay ra số
+KHÁC cái đã publish · quỹ đạo hôm nay tự nhất quán dưới mã hôm nay. Trượt bất kỳ điều nào ⇒ fail-
+closed như cũ. "Mô hình đổi" một mình KHÔNG bao giờ đủ — nếu đủ thì mọi lần sửa `oshares_live.py`
+sẽ tắt cổng bất biến đúng vào ngày dễ sai nhất.
 
 **Bẫy 2 nay đã được CƠ GIỚI HOÁ**, không còn là lời nhắc văn xuôi: `corp_action_daily.py` phân loại
 `FRESH / STALE / DEAD` mỗi lần chạy và **không publish** khi DEAD. Nhưng lời nhắc vẫn đúng cho MỌI
