@@ -36,7 +36,7 @@ from trading_bot.config import load_config, load_accounts, pick_accounts, EXEC_D
 from trading_bot.brokers import make_broker, get_quote_source, get_dnse_client
 from trading_bot.plan import (load_plan, filter_excluded_tickers, net_offsetting_orders,
                               cap_capit_orders, cap_lag_orders, filter_lag_rating_orders,
-                              filter_lag_governance_orders,
+                              filter_lag_governance_orders, filter_signal_holds,
                               apply_capit_lever, lever_live_preflight, approval_block_reason)
 from trading_bot.plan_funding_gate import check_plan_funding
 from trading_bot.exdate_gate import apply_exdate_gate
@@ -607,6 +607,19 @@ def main():
                   f"excluded_tickers={sorted({o.ticker for o in blocked})}: "
                   f"{[o.ticker for o in blocked]} — không bao giờ tự động giao dịch "
                   f"các mã này (xem trading_bot_accounts.json).")
+        # GATE signal_holds (tầng chặn cứng #2, fix lỗi #3 RCA 2026-08-20): loại lệnh MỞ MỚI
+        # vi phạm ranh giới tạm giữ tín hiệu (data/signal_holds.json — quyết định user/rủi ro).
+        # LƯỚI AN TOÀN cuối cho gate vốn cũng sống ở prompt DollarBill + send_plan_report; cùng
+        # khuôn filter_excluded_tickers, enforce ở tầng order không tin plan generator nhớ.
+        plan, holds_blocked = filter_signal_holds(plan)
+        for b in holds_blocked:
+            if b.get("action") == "FAIL_OPEN":
+                print(f"[{p['label']}] ⚠⚠ signal_holds gate KHÔNG CHẠY ĐƯỢC — {b['reason']}")
+            else:
+                o, h = b["order"], b["hold"]
+                print(f"[{p['label']}] ⛔ signal_holds BỎ lệnh {o.ticker} ({o.side} {o.qty} cp, "
+                      f"book {o.book}) — vi phạm hold [{h['scope']}={h['value']}] tới "
+                      f"{h['until']}: {h['reason']}")
         # Netting lệnh NGƯỢC CHIỀU cùng mã trong cùng plan (vd SELL park + BUY LAG cùng VPB)
         # → 1 lệnh NET ra broker; phần bù trừ là chuyển nội bộ giữa book (0 phí/spread). ĐẶT
         # SAU filter_excluded, TRƯỚC các trần %ADV — CHỦ ĐÍCH: trần đo tác động THỊ TRƯỜNG, mà

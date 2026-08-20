@@ -282,6 +282,46 @@ def filter_excluded_tickers(plan, excluded_tickers):
     return plan, blocked
 
 
+def _signal_holds_matcher():
+    """Nạp mike/bin/signal_holds.py theo file-path (KHÔNG copy logic match — tránh bẫy §25/§28
+    hai bản công thức phân kỳ). Trả về hàm match_order, hoặc None nếu module không nạp được
+    (fail-OPEN: gate này là LƯỚI phụ, không phải cổng chính; hold gốc cũng cưỡng chế ở
+    send_plan_report + prompt). None ⇒ caller log FAIL_OPEN, không chặn."""
+    import importlib.util
+    here = os.path.dirname(os.path.abspath(__file__))
+    mod_path = os.path.join(here, "..", "mike", "bin", "signal_holds.py")
+    try:
+        spec = importlib.util.spec_from_file_location("signal_holds", mod_path)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        return mod.match_order
+    except Exception:
+        return None
+
+
+def filter_signal_holds(plan, asof=None):
+    """Loại order MỞ MỚI vi phạm signal_holds (data/signal_holds.json). Tầng chặn cứng #2 trong
+    bot_execute (fix lỗi #3 RCA 2026-08-20) — độc lập với gate ở send_plan_report và prompt.
+    Cùng khuôn filter_excluded_tickers: enforce ở tầng order, không tin plan generator nhớ.
+
+    Trả (plan đã lọc, list blocked). Mỗi blocked là dict {order, hold} hoặc marker FAIL_OPEN.
+    Fail-OPEN khi module không nạp được (đã có 2 lớp khác) — báo to, không chặn mù."""
+    match = _signal_holds_matcher()
+    if match is None:
+        return plan, [{"action": "FAIL_OPEN",
+                       "reason": "signal_holds module không nạp được — gate #2 bỏ qua, dựa lớp send_plan_report + prompt."}]
+    plan_date = getattr(plan, "plan_date", None)
+    kept, blocked = [], []
+    for o in plan.orders:
+        h = match(o.ticker, o.side, o.book, asof=asof, plan_date=plan_date)
+        if h:
+            blocked.append({"order": o, "hold": h})
+        else:
+            kept.append(o)
+    plan.orders = kept
+    return plan, blocked
+
+
 def net_offsetting_orders(plan):
     """Gộp các lệnh NGƯỢC CHIỀU cùng mã trong CÙNG 1 plan thành 1 lệnh NET gửi broker.
 
