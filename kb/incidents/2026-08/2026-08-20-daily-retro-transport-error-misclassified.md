@@ -54,3 +54,34 @@ chờ backoff vô ích). ShellCheck gate: chỉ còn SC1091 info (pre-existing).
 không biến mất — nó bị GÁN NHÃN SAI, và cái nhãn sai đó tự truyền xuống mọi người đọc sau
 (log → Telegram → bus → job autofix hôm sau). Thêm nhánh `else` mang tên cụ thể rẻ hơn
 nhiều so với một buổi sáng đi tìm bug quoting không tồn tại.
+
+---
+
+## Phụ lục — sự cố THỨ HAI trong chính lần chạy bù (tự gây, 2026-08-20 08:28 ICT)
+
+Lần chạy bù đầu tiên (08:21) **hỏng vì chính tôi sửa `daily_retro.sh` TRONG LÚC nó đang chạy.**
+Bash không nạp trọn script vào bộ nhớ — nó đọc tiếp theo **byte offset**. Chèn ~30 dòng ở đầu
+file làm mọi offset phía sau dịch đi ⇒ tiến trình đang chạy đọc tiếp vào giữa câu lệnh:
+
+```
+mike/bin/daily_retro.sh: line 222: API_TRANSPORT_ERROR_RE: unbound variable
+mike/bin/daily_retro.sh: line 230: syntax error near unexpected token `done'
+```
+
+Hệ quả gây hiểu nhầm nặng hơn cả lỗi: draft Mike vừa viết ra bị gán nhãn *"SAI ĐỊNH DẠNG —
+thiếu header, nghi lạc đề"* và bị `mv` sang `state/retro_rejected_2026-08-19_a1.md`. **Draft đó
+hoàn toàn hợp lệ** — chạy lại đúng regex của gate trên chính file bị loại:
+
+```
+$ grep -qE "^#{1,2} RETRO — 2026-08-19" state/retro_rejected_2026-08-19_a1.md && echo PASS
+PASS        # 16.998 bytes, header đúng
+```
+
+Xác nhận cuối: lần chạy sạch 08:35 (không sửa file trong lúc chạy) qua gate ngay lần thử đầu —
+`Draft OK (14940 bytes)`. Tức gate KHÔNG có bug; nhãn "lạc đề" là thiệt hại phụ của việc sửa
+script đang chạy.
+
+**Luật rút ra:** không bao giờ `Edit`/`sed -i`/ghi đè một file `.sh` đang có tiến trình chạy.
+Nếu buộc phải vá gấp: `cp` sang tên mới rồi sửa bản copy, hoặc đợi tiến trình kết thúc. Đây
+cũng là một dạng "nhãn sai tự truyền đi" y hệt bug chính ở trên — lần này nạn nhân là chẩn
+đoán của chính người đang sửa.
