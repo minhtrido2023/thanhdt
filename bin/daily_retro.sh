@@ -82,6 +82,93 @@ for _stale in "$ROOT"/state/retro_draft_*.md; do
     "{\"reason\":\"leftover draft file phat hien khi chay daily_retro ngay $TODAY, nghia la finalize job truoc do fail am tham\",\"file\":\"$_stale\"}" 2>/dev/null || true
 done
 
+# --- Đo lường hệ WAKE-UP (Phase 4, 2026-08-20) ---------------------------------------
+# Tính TRONG BASH rồi bơm số vào prompt, KHÔNG bảo Mike tự grep: một con số đo được phải
+# giống nhau mỗi lần chạy, không phụ thuộc phiên LLM có nhớ chạy đúng lệnh hay không
+# (§6 provenance). Cả 3 file log đều ghi dấu thời gian ICT dạng `date -Iseconds`
+# (2026-08-20T11:44:54+07:00) nên cùng lọc được bằng tiền tố ^$TODAY.
+#   - wake_thread.log         : 1 dòng SUCCESS mỗi lần push wake-on-completion thành công
+#   - wake_thread_errors.log  : 1 dòng mỗi lần push THẤT BẠI (409/unreachable/…)
+#   - wakeup_reconcile.log    : 1 dòng RESCUED mỗi lần reconciler cron */5 phải tự cứu
+# RESCUED > 0 nghĩa là tầng edge (push + ladder) đã ĐỂ LỌT ít nhất một job — lưới an toàn
+# level-triggered bắt được, nhưng cái lọt đó vẫn là bug cần tìm, không phải chuyện thường.
+# ĐỌC CẢ CÁC ĐỜI LOG ĐÃ ROTATE, cho CẢ 4 file log dưới đây — không chỉ cron log (arch-reviewer
+# F3, trước-commit 08-20: bản đầu chỉ vá `_wake_cron_logs`, để 3 file kia (wake_thread.log,
+# wake_thread_errors.log, wakeup_reconcile.log) tự rơi vào đúng cái bẫy undercount-im-lặng mà
+# comment ngay dưới đây mô tả — `fleet_housekeeping.sh` rotate `logs/*.log` >300KB bằng
+# copytruncate lúc 22:00 CN và GIỮ 3 đời `.1.gz .2.gz .3.gz` — dữ liệu KHÔNG mất, chỉ nằm cạnh
+# file. Cron log tăng ~20,7KB/ngày (288 dòng × ~72B) ⇒ chạm 300KB sau ~14,8 ngày ⇒ ~20 lần/năm
+# retro thứ Hai chỉ thấy phần sau 22:00. Chỉ đọc file hot thì báo "không có bằng chứng nào"
+# trong khi bằng chứng nằm ngay bên cạnh (đo thật CN 2026-08-16: watchdog.log 91 dòng trong
+# .1.gz + 55 dòng hot = 146 = trọn ngày). `zcat -f` nuốt luôn ca không có .gz nào; lọc theo
+# tiền tố NGÀY nên gộp không double-count (copytruncate ⇒ hot và .gz rời nhau).
+_wake_read_rotated() {
+  # $1 = đường dẫn file log hot
+  cat "$1" 2>/dev/null || true
+  for _g in "$1".{1,2,3}.gz; do
+    [ -f "$_g" ] && { zcat -f -- "$_g" 2>/dev/null || true; }
+  done
+}
+_wake_ok="$(_wake_read_rotated "$ROOT/logs/wake_thread.log" | grep -c "^$TODAY.*wake_thread: SUCCESS" || true)"
+_wake_err="$(_wake_read_rotated "$ROOT/logs/wake_thread_errors.log" | grep -c "^$TODAY" || true)"
+_wake_rescued="$(_wake_read_rotated "$ROOT/logs/wakeup_reconcile.log" | grep -c "^$TODAY.*RESCUED" || true)"
+# Hai số dưới đây tồn tại để KHÔNG được phép suy "tầng edge khoẻ" từ `rescued=0` (arch-reviewer
+# N2, vòng 4). Reconciler MÙ cả ngày (abort mọi chu kỳ vì ccdb chết) và reconciler CHẾT HẲN
+# (cron bị gỡ) đều cho rescued=0 — tức dòng trấn an mạnh nhất lại được in ra đúng lúc lưới an
+# toàn không tồn tại. Đó chính là anti-pattern "im lặng = khoẻ" mà cả bản redesign này sinh ra
+# để diệt; tái tạo nó trong chính báo cáo đo lường của nó thì vô nghĩa.
+#   ^OK <ts ICT> …             = chu kỳ ĐỐI CHIẾU ĐƯỢC
+#   ^CRITICAL ABORT <ts ICT> … = chu kỳ MÙ (tasks.db / /api/sessions không đọc được)
+_wake_cycles="$(_wake_read_rotated "$ROOT/logs/wakeup_reconcile_cron.log" | grep -c "^OK $TODAY" || true)"
+_wake_blind="$(_wake_read_rotated "$ROOT/logs/wakeup_reconcile_cron.log" | grep -c "^CRITICAL ABORT $TODAY" || true)"
+# grep -c trên file không tồn tại in ra rỗng (stderr đã nuốt) → ép về 0, đừng để rỗng lọt
+# vào số học bash (lỗi cú pháp im lặng, đúng mẫu bug quoting đã ăn 2 lần ở chính file này).
+[ -n "${_wake_ok:-}" ] || _wake_ok=0
+[ -n "${_wake_err:-}" ] || _wake_err=0
+[ -n "${_wake_rescued:-}" ] || _wake_rescued=0
+[ -n "${_wake_cycles:-}" ] || _wake_cycles=0
+[ -n "${_wake_blind:-}" ] || _wake_blind=0
+_wake_total=$((_wake_ok + _wake_err))
+if [ "$_wake_total" -gt 0 ]; then
+  _wake_rate="$(awk -v a="$_wake_ok" -v b="$_wake_total" 'BEGIN{printf "%.1f%%", 100*a/b}')"
+else
+  _wake_rate="n/a (không có lượt push nào trong ngày)"
+fi
+# Một ngày đủ nhịp `*/5` = 288 chu kỳ. Ngưỡng ĐỘ PHỦ tồn tại vì `cycles > 0` KHÔNG đủ để
+# trấn an (arch-reviewer vòng 5, đo trên log thật: 4/288 chu kỳ = 1,4% bằng chứng vẫn cho ra
+# câu "tầng edge phủ đủ trong ngày" — mà đó là câu retro được lệnh ghi NGUYÊN VĂN). Ba đường
+# làm bộ đếm cụt, không đường nào là giả định:
+#   1. Ngày reconciler mới go-live / mới đổi format log — phần đầu ngày vô hình.
+#   2. `fleet_housekeeping.sh` rotate `logs/*.log` >300k bằng copytruncate lúc 22:00 CN; cron
+#      log tăng ~20KB/ngày ⇒ chạm ngưỡng ~2 tuần/lần ⇒ retro thứ Hai chỉ thấy phần sau 22:00
+#      VÀ mất sạch dòng CRITICAL ABORT của sáng hôm đó ⇒ blind=0, nhánh MÙ không bao giờ tới.
+#   3. Reboot / cron gián đoạn / lock kẹt (`SKIP` không tính vào cycles lẫn blind).
+# 250/288 ≈ 87%: đủ lỏng để không kêu vì vài chu kỳ lẻ (đo tick cron `*/10` chạy lâu năm:
+# 145/149/145 trên kỳ vọng 144 — nhịp cron không hụt trong ngày bình thường; một reboot phải
+# mất >3,2h mới kéo xuống dưới ngưỡng, mà thực tế reboot ~4-8 tuần/lần), đủ chặt để mọi ca
+# trên đều rơi ra. KHÔNG có DST: mọi dấu thời gian neo cứng `+07:00`.
+# ⚠️ 288 KHỚP NGẦM với nhịp `*/5` của dòng crontab `wakeup_reconcile.py` (kb/cron_registry.md).
+# Đổi nhịp mà quên sửa số này ⇒ vd `*/10` cho 144 < 250 ⇒ báo động giả VĨNH VIỄN, không ai
+# hiểu tại sao (§4: sửa một quy tắc thì grep mọi nơi nó được operationalize).
+_wake_cycles_full=288
+_wake_cycles_min=250
+# Thứ tự nhánh = thứ tự "số này có nghĩa gì không" TRƯỚC "số này nói gì".
+if [ "$((_wake_cycles + _wake_blind))" -eq 0 ]; then
+  _wake_verdict="RECONCILER KHÔNG CHẠY chu kỳ nào ngày $TODAY ⇒ \"cứu $_wake_rescued lần\" KHÔNG phải bằng chứng tầng edge khoẻ, mà là KHÔNG ĐO ĐƯỢC GÌ. Kiểm tra dòng crontab \`*/5\` và logs/wakeup_reconcile_cron.log TRƯỚC khi kết luận bất cứ điều gì về hệ wake-up."
+elif [ "$_wake_blind" -gt 0 ]; then
+  # Mẫu số phải là ĐỘ PHỦ CẢ NGÀY, không phải tổng chu kỳ quan sát được. "MÙ 1/25" đọc ra
+  # là "96% vẫn đối chiếu được", trong khi 263/288 chu kỳ không có bằng chứng nào — tức
+  # nhánh này sẽ bypass đúng cái cổng độ phủ vừa dựng (arch-reviewer vòng 6).
+  _wake_verdict="RECONCILER MÙ $_wake_blind chu kỳ (không đọc được tasks.db hoặc /api/sessions); tổng cộng chỉ đo được $((_wake_cycles + _wake_blind))/$_wake_cycles_full chu kỳ ngày $TODAY. Trong các chu kỳ mù KHÔNG tầng nào bắt được thread ngủ, nên \"cứu $_wake_rescued lần\" chỉ là SÀN DƯỚI. Truy nguyên nhân trong logs/wakeup_reconcile.log."
+elif [ "$_wake_rescued" -gt 0 ]; then
+  _wake_verdict="Reconciler phải cứu $_wake_rescued lần trên $_wake_cycles chu kỳ đối chiếu được ⇒ CÒN BUG EDGE ở tầng push/ladder — phải tìm ra cạnh nào mất, đừng coi việc lưới an toàn hoạt động là đã xong."
+elif [ "$_wake_cycles" -lt "$_wake_cycles_min" ]; then
+  _wake_verdict="CHỈ ĐO ĐƯỢC $_wake_cycles/$_wake_cycles_full chu kỳ ngày $TODAY — phần còn lại KHÔNG có bằng chứng nào (cron gián đoạn, máy tắt, log đã rotate quá 3 đời, hoặc ngày reconciler mới go-live/mới đổi format log). KHÔNG kết luận tầng edge phủ đủ; \"cứu $_wake_rescued lần\" chỉ nói về phần đo được."
+else
+  _wake_verdict="Reconciler chạy $_wake_cycles/$_wake_cycles_full chu kỳ, đối chiếu được hết, không phải cứu lần nào — tầng edge (push + ladder) phủ đủ trong ngày."
+fi
+echo "$(date -Iseconds) [wake-metrics] $TODAY push_ok=$_wake_ok push_err=$_wake_err rate=$_wake_rate rescued=$_wake_rescued cycles=$_wake_cycles blind=$_wake_blind" >> "$LOG"
+
 # --- Bước 1: Mike viết DRAFT (đồng bộ — bash CHỜ THẬT, không dùng &) ------------------
 # DISPATCH_FROM=user bắt buộc — xem fix 2026-07-09 kb_nightly.sh (Friday editorial
 # dispatch bị self-dispatch guard chặn âm thầm nhiều tuần vì thiếu dòng này).
@@ -112,6 +199,16 @@ QUY TRÌNH BẮT BUỘC (đọc bằng chứng thật, không suy đoán):
 2. Liệt kê MỌI bus event event_type=error/finding trong bus/inbox/*.jsonl có ts bắt đầu
    bằng '$TODAY' — đối chiếu xem có sự cố nào CHƯA được ghi vào kb/incidents/ không (nếu
    có, đây là gap báo cáo cần ghi luôn bổ sung, không bỏ sót).
+2d. SỐ LIỆU HỆ WAKE-UP NGÀY $TODAY (đã đo sẵn bằng bash, ĐỪNG tự grep lại — dùng đúng
+   các số này, chép nguyên vào draft dưới dạng 1 dòng \"Sức khỏe hệ wake-up\"):
+   - Push wake-on-completion: THÀNH CÔNG $_wake_ok / LỖI $_wake_err ⇒ success-rate $_wake_rate
+   - Số lần reconciler (bin/wakeup_reconcile.py, cron */5) phải tự cứu: $_wake_rescued
+   - Reconciler: $_wake_cycles/$_wake_cycles_full chu kỳ đối chiếu ĐƯỢC / $_wake_blind chu kỳ MÙ (abort vì ccdb).
+     ⚠️ rescued=0 mà cycles=0 nghĩa là KHÔNG ĐO ĐƯỢC GÌ, KHÔNG phải \"khoẻ\" — đọc kỹ câu kết luận.
+   - Kết luận bắt buộc ghi nguyên văn: \"$_wake_verdict\"
+   Nếu 2 số trên cho thấy có lỗi push (>0) hoặc có lần cứu (>0), đưa vào danh sách sự cố ở bước 3 với
+   category=dispatch-orchestration và truy ra job/thread cụ thể từ logs/wake_thread_errors.log
+   + logs/wakeup_reconcile.log.
 2c. CHẠY bin/wakeup_audit.py --since \$TODAY (script chỉ hỗ trợ --since, không có --until —
    chấp nhận nó quét luôn phần đầu hôm nay khi retro chạy, đọc kỹ output để CHỈ tính các
    lượt có timestamp thuộc \$TODAY, đừng gộp nhầm). Đo tuân thủ MIKE.md §8: mọi lượt dispatch
