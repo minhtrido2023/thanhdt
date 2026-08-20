@@ -1339,3 +1339,57 @@
 ## Consolidation 2026-08-20T12:12:17Z
 - [2026-08-20T12:11:51Z] DollarBill/heartbeat — DollarBill_20260820_120550: {"status": "still_running", "elapsed_min": 6, "job_id": "DollarBill_20260820_120550", "source": "watcher"}
 - [2026-08-20T12:12:04Z] DollarBill/finding — plan-2026-08-21-ZaloPay-verified: {"note": "Attempt 2 verified attempt-1 output before redoing anything: plan_ZaloPay_2026-08-21.json complete on disk (VPI 400cp BAL order), bus decision topic=plan-2026-08-21-ZaloPay already posted with correct trace_id, Discord plan-approval thread 1521183164364754974 already updated (live_session_ptr mtime 19:11 ICT). No further action needed — closing retry without re-running."}
+
+## Consolidation 2026-08-20T14:07:01Z
+- [2026-08-20T13:22:36Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 1, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T13:23:08Z] Wags/heartbeat — Wags_20260820_132135: {"status": "in_progress", "note": "đọc RCA + dispatch.sh/_bg_wrapper + mike_json claim-reply; đang thiết kế batch-claim-wake"}
+- [2026-08-20T13:23:36Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 2, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T13:24:36Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 3, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T13:25:36Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 4, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T13:25:52Z] Wags/heartbeat — Wags_20260820_132135: {"status": "in_progress", "note": "thiết kế xong: bus/batches state + mike_json batch-register/claim-wake/in-flight + bin/batch_wake.sh + reconciler skip-in-flight; bắt đầu code"}
+- [2026-08-20T13:26:36Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 5, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T13:27:37Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 6, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T13:28:37Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 7, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T13:29:37Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 8, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T13:29:57Z] Wags/heartbeat — Wags_20260820_132135: {"status": "in_progress", "note": "đã wire mike_json batch-* + bin/batch_wake.sh + dispatch.sh _wake_now; tiếp: bq_freshness_check + reconciler + selfcheck"}
+- [2026-08-20T13:30:37Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 9, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T13:31:37Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 10, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T13:32:38Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 11, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T13:33:38Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 12, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T13:34:38Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 13, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T13:35:09Z] Wags/heartbeat — Wags_20260820_132135: {"status": "in_progress", "note": "selfcheck batch-wake PASS 23/23; đang chạy hồi quy các selfcheck lân cận"}
+- [2026-08-20T13:35:39Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 14, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T13:36:39Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 15, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T13:37:39Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 16, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T13:38:39Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 17, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T13:39:39Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 18, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T13:39:43Z] Wags/heartbeat — Wags_20260820_132135: {"status": "in_progress", "note": "reconciler selfcheck 111/111 PASS + housekeeping batchstate; đang cập nhật docs MIKE.md §8"}
+- [2026-08-20T13:40:39Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 19, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T13:41:39Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 20, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T13:41:57Z] Wags/heartbeat — Wags_20260820_132135: {"status": "in_progress", "note": "commit dfd24a43 xong, selfcheck 25/25 + hồi quy sạch; đang gọi arch-reviewer audit"}
+- [2026-08-20T13:42:40Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 21, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T13:43:40Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 22, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T13:44:40Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 23, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T13:45:40Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 24, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T13:46:40Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 25, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T13:47:41Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 26, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T13:48:41Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 27, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T13:49:41Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 28, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T13:50:41Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 29, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T13:51:41Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 30, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T13:52:42Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 31, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T13:53:42Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 32, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T13:54:42Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 33, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T13:55:42Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 34, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T13:56:43Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 35, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T13:57:43Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 36, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T13:58:43Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 37, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T13:58:51Z] Wags/heartbeat — Wags_20260820_132135: {"status": "in_progress", "note": "arch-reviewer NEEDS_CHANGES (B1 đỗ-xe chặn 34p, B2 expected bất đồng, N1 pid tái dùng, N2/N3/N5); đang viết vòng sửa"}
+- [2026-08-20T13:59:43Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 38, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:00:43Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 39, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:01:43Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 40, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:02:43Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 41, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:03:43Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 42, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:04:44Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 43, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:05:44Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 44, "job_id": "Wags_20260820_132135", "source": "watcher"}
+- [2026-08-20T14:06:44Z] Wags/heartbeat — Wags_20260820_132135: {"status": "still_running", "elapsed_min": 45, "job_id": "Wags_20260820_132135", "source": "watcher"}
