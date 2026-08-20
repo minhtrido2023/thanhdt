@@ -812,7 +812,77 @@ def _as_roll_event(e):
             "issue_method_name_vi": e.get("method_vi")}
 
 
-def check_invariants(asof, cur, prev_asof, prev_snap):
+def model_changed_vs(prev_snap, mv):
+    """True/False/None — snapshot mốc có do BẢN MÃ KHÁC sinh ra không? MỘT vị ngữ cho mọi tầng.
+
+    `None` = KHÔNG KẾT LUẬN ĐƯỢC (mốc chưa ghi chữ ký — mọi snapshot trước 2026-08-14), khác hẳn
+    `False` = đã so và cùng bản mã. Ba tầng đọc câu này (`none_value_watch`, `model_rebase_set`,
+    dòng Discord) nên nó phải nằm ở MỘT chỗ: §28 coding_guidelines — hai bản chép tay của cùng
+    một phép so là cách hai tầng lặng lẽ trả lời khác nhau về cùng một ngày.
+    """
+    prev_mv = (prev_snap or {}).get("model_version")
+    if not prev_snap or not mv or not prev_mv:
+        return None
+    return prev_mv != mv
+
+
+def model_rebase_set(asof, cur, prev_asof, prev_snap, back, model_changed):
+    """({mã}, [ghi chú]) — mã mà TOÀN BỘ chênh lệch so với mốc là do MÃ đổi, không phải FEED đổi.
+
+    Vì sao cần: `model_version` đổi giữa hai lượt ⇒ số hôm nay và số đã publish hôm qua được sinh
+    bởi HAI công thức khác nhau, nên `check_invariants`/`check_retro` so chúng với nhau là so hai
+    câu trả lời cho hai câu hỏi khác nhau. Kết quả đo thật 2026-08-20: MBB và VRE cùng bị giấu số
+    — MBB vì `_roll` chuyển từ nhân dồn `(1+ratio)` sang cộng `issue_volumn` (10.189.574.884,885
+    → 10.068.749.885 — số LẺ ở bản cũ chính là mùi của phép nhân trên hai sự kiện CÙNG ex-date
+    tính trên cùng một gốc), VRE vì `FIN_FALLBACK` mới ra đời. Cả hai con số MỚI đều ĐÚNG, và
+    cổng bất biến đang giữ lại đúng cái nó nên công bố.
+
+    ⚠️ ĐIỀU KIỆN NGHIÊM NGẶT, KHÔNG PHẢI MIỄN TRỪ THEO NHÃN. "Mô hình đổi" một mình KHÔNG đủ để
+    bỏ qua vi phạm — nếu đủ thì mọi lần sửa `oshares_live.py` sẽ tắt cổng bất biến đúng vào ngày
+    dễ sai nhất. Mã chỉ được miễn khi CẢ BA đều đạt:
+      1. `model_changed is True` (mốc có chữ ký và chữ ký khác — `None` KHÔNG được coi là True);
+      2. tính LẠI `prev_asof` bằng mã HÔM NAY (`back`) ra số KHÁC cái đã publish hôm đó — tức có
+         một chênh lệch do mã thật, chứ không phải mượn cớ mô hình đổi cho một vi phạm feed;
+      3. quỹ đạo hôm nay TỰ NHẤT QUÁN dưới mã hôm nay: `roll(back, sự kiện giữa hai ngày)` khớp
+         số hôm nay trong `EXPLAIN_TOL`. Không dựng được kỳ vọng (blocker) ⇒ KHÔNG miễn.
+    Trượt bất kỳ điều nào ⇒ rơi lại đúng luồng cũ (vi phạm → giấu số). Fail-closed giữ nguyên.
+
+    Kỳ vọng dựng bằng CHÍNH `_roll` mà `check_invariants` dùng — không viết lại phép lăn thứ hai.
+    """
+    if model_changed is not True or not prev_snap or not back:
+        return set(), []
+    prev_tk = prev_snap.get("tickers") or {}
+    hit, notes = set(), []
+    for tk, row in sorted(cur.items()):
+        p, b = prev_tk.get(tk), back.get(tk)
+        if not p or not b:
+            continue
+        pv, bv, cv = p.get("value"), b.get("value"), row.get("value")
+        if pv is None or bv is None or cv is None or not float(pv):
+            continue
+        pv, bv, cv = float(pv), float(bv), float(cv)
+        if abs(bv - pv) / pv <= EXPLAIN_TOL:
+            continue                        # mã hôm qua không đổi ⇒ không có gì để quy cho mô hình
+        applied = [_as_roll_event(e) for e in row.get("events_applied") or []
+                   if prev_asof < (e.get("exright_date") or "") <= asof]
+        expected, _a, blockers = _roll(bv, _dedup_iss(applied))
+        if blockers or not expected:
+            continue                        # không dựng được kỳ vọng ⇒ KHÔNG miễn (fail-closed)
+        if abs(cv - expected) / expected > EXPLAIN_TOL:
+            continue                        # rebase rồi VẪN lệch ⇒ vi phạm THẬT, giữ nguyên
+        hit.add(tk)
+        notes.append({"ticker": tk, "kind": "MODEL_REBASE", "prev_asof": prev_asof,
+                      "published_then": pv, "recomputed_now": bv, "value": cv,
+                      "expected_from_recompute": expected,
+                      "err_pct_vs_published": abs(bv - pv) / pv * 100,
+                      "model_version_prev": (prev_snap or {}).get("model_version"),
+                      "events_between": [e.get("exright_date") for e in applied],
+                      "note": "chênh lệch so với mốc do BẢN MÃ đổi, không phải feed đổi; quỹ đạo "
+                              "hôm nay tự nhất quán dưới mã hôm nay ⇒ CÔNG BỐ kèm cảnh báo"})
+    return hit, notes
+
+
+def check_invariants(asof, cur, prev_asof, prev_snap, rebase=frozenset()):
     """[vi phạm] — Oshares hôm nay phải bằng Oshares hôm trước ĐÃ LĂN QUA sự kiện ở giữa.
 
     Vì sao KHÔNG dùng ngưỡng "%/ngày": một đợt thưởng 1:1 hợp lệ là +100%, còn +3% mà không sự
@@ -828,6 +898,10 @@ def check_invariants(asof, cur, prev_asof, prev_snap):
       * `RETRO_CHANGE` — tính lại NGÀY HÔM TRƯỚC bằng feed hôm nay ra số khác cái đã công bố hôm
         trước. Lịch sử vừa bị viết lại; số cũ đã đi vào báo cáo nào đó rồi.
 
+    `rebase` = mã đã được `model_rebase_set()` chứng minh là "mã đổi, không phải feed đổi" —
+    BỎ QUA, vì so số của hai bản mã khác nhau là so hai câu trả lời cho hai câu hỏi khác nhau.
+    Mặc định RỖNG: không ai truyền thì cổng chạy y như trước, không có miễn trừ ngầm.
+
     Giới hạn đã biết (nêu ra để người review không phải tự phát hiện): khi anchor NHẢY từ dòng
     quý/ước lượng sang một AIS hiệu lực ĐÚNG hôm nay, `events_applied` hôm nay rỗng (sự kiện đã
     nằm trong số của AIS) nên kỳ vọng = số hôm qua. Chênh do ước lượng nhường chỗ cho số đo luôn
@@ -840,7 +914,7 @@ def check_invariants(asof, cur, prev_asof, prev_snap):
     prev_tk = prev_snap.get("tickers") or {}
     for tk, row in sorted(cur.items()):
         p = prev_tk.get(tk)
-        if not p or p.get("value") is None or row.get("value") is None:
+        if tk in rebase or not p or p.get("value") is None or row.get("value") is None:
             continue
         pv, cv = float(p["value"]), float(row["value"])
         applied = [_as_roll_event(e) for e in row.get("events_applied") or []
@@ -1027,13 +1101,17 @@ def _fmt_magnitude(warns, held, limit=8):
               "bị GIẤU): " + " · ".join(parts))
 
 
-def check_retro(asof, prev_asof, prev_snap, cache, tickers, back=None):
+def check_retro(asof, prev_asof, prev_snap, cache, tickers, back=None, rebase=frozenset()):
     """`RETRO_CHANGE` — feed hôm nay kể một câu chuyện khác về ngày hôm trước.
 
     `back` = kết quả `oshares_at(..., prev_asof)` tính sẵn. `run()` truyền vào vì nó cần CHÍNH
     bộ số đó cho cờ biên độ (`sanity_warns`); gọi `oshares_at` lần thứ hai ở đây sẽ là hai lời
     trả lời cho cùng một câu hỏi — rẻ, nhưng đúng loại chỗ hở đã đẻ ra R8/R10. Mặc định `None`
     ⇒ tự tính, nên mọi caller cũ (và selfcheck) không đổi một chữ.
+
+    `rebase` = mã mà `model_rebase_set()` đã quy được chênh lệch cho BẢN MÃ (xem hàm đó). Với
+    những mã đó "feed kể chuyện khác về hôm qua" là phát biểu SAI — chính mã hôm nay kể khác, và
+    chuyện đó đã có nhãn riêng (`MODEL_REBASE`). Mặc định RỖNG.
     """
     out = []
     if not prev_snap or not tickers:
@@ -1042,7 +1120,7 @@ def check_retro(asof, prev_asof, prev_snap, cache, tickers, back=None):
     prev_tk = prev_snap.get("tickers") or {}
     for tk, r in sorted(back.items()):
         p = prev_tk.get(tk)
-        if not p or p.get("value") is None or r.get("value") is None:
+        if tk in rebase or not p or p.get("value") is None or r.get("value") is None:
             continue
         pv, rv = float(p["value"]), float(r["value"])
         if abs(rv - pv) / pv > EXPLAIN_TOL:
@@ -1055,7 +1133,7 @@ def check_retro(asof, prev_asof, prev_snap, cache, tickers, back=None):
 
 # ───────────────────────────────────────────────────────────── LỚP 2 · đối soát chéo
 
-def crosscheck(asof, tickers, cache):
+def crosscheck(asof, tickers, cache, live=True):
     """[lệch] giữa `oshares_live` (corp-action) và `ticker_financial.OShares` (bq_admin).
 
     So TẠI NGÀY CỦA DÒNG QUÝ, không tại `asof` — xem §ĐỐI SOÁT trong docstring. Hai nguồn nói về
@@ -1064,6 +1142,24 @@ def crosscheck(asof, tickers, cache):
 
     KHÔNG chọn bên nào đúng. Trả cả hai số + ngày + lý do (nếu cổng giải thích của `oshares_live`
     đã nêu ra), để người đọc quyết.
+
+    §ĐỐI SOÁT VỚI NHÁNH ĐANG PHỤC VỤ, KHÔNG VỚI NHÁNH PIT (sửa 2026-08-20)
+    ----------------------------------------------------------------------
+    `live=True` mặc định: đối soát phải hỏi ĐÚNG câu mà hệ đang trả lời hằng ngày. Trước đó hàm
+    này gọi nhánh PIT, nên mọi mã bị PIT từ chối (EVF, HHV) rơi vào `NO_MODEL_VALUE` và kêu
+    "KHÔNG đối soát được" MỖI NGÀY — trong khi nhánh phục vụ có số hẳn hoi. Đó là báo động về
+    một chính sách fail-closed CỐ Ý của backtest, không phải về dữ liệu hôm nay. Nhánh LIVE nới
+    hơn PIT ở đúng một điều kiện nên nó là TẬP CHA: `NO_MODEL_VALUE` dưới `live=True` ⇒ PIT cũng
+    câm ⇒ báo động khi đó là thật ("cả hai nhánh đều không trả lời được").
+
+    BA loại bản ghi, đếm RIÊNG (xem `_fmt_divergence`):
+      * `DIVERGENT`           — hai nguồn ĐỘC LẬP cùng trả số và khác nhau ⇒ cảnh báo.
+      * `NO_MODEL_VALUE`      — mô hình câm ở cả hai nhánh ⇒ cảnh báo.
+      * `FIN_FALLBACK_SERVED` — mô hình đang phục vụ CHÍNH dòng quý (`FIN_FALLBACK`). Hai "nguồn"
+        lúc này KHÔNG còn độc lập: sai số luôn 0 và một dòng "khớp 0,00%" ở đây là VÔ NGHĨA, đúng
+        loại con số trấn an. Nhưng phần tin thật vẫn còn và KHÔNG được để mất — chuỗi AIS dự đoán
+        bao nhiêu, BCTC nói bao nhiêu, lệch bao nhiêu chưa giải thích được — nên nó được GHI NHẬN
+        riêng (`ais_expected` + `err_pct_vs_ais_expected`), KHÔNG tính vào hai con số cảnh báo.
     """
     quarters, _corp = cache
     out = []
@@ -1075,14 +1171,34 @@ def crosscheck(asof, tickers, cache):
         if q is None:
             continue
         qd, qv = q
-        mine = oshares_at([tk], qd, _cache=cache)[tk]
+        mine = oshares_at([tk], qd, _cache=cache, live=live)[tk]
         if mine.get("value") is None:
             out.append({"ticker": tk, "at": qd, "ticker_financial": qv, "oshares_live": None,
                         "kind": "NO_MODEL_VALUE", "method": mine.get("method"),
-                        "note": "mô hình từ chối trả số tại ngày dòng quý (fail-closed) ⇒ "
-                                "không đối soát được, KHÔNG suy ra dòng quý đúng hay sai"})
+                        "note": "mô hình từ chối trả số ở CẢ nhánh phục vụ lẫn nhánh PIT tại ngày "
+                                "dòng quý (fail-closed) ⇒ không đối soát được, KHÔNG suy ra dòng "
+                                "quý đúng hay sai"})
             continue
         mv = float(mine["value"])
+        if mine.get("method") == "FIN_FALLBACK":
+            # neo CHÍNH là dòng quý đang đem ra so ⇒ hai vế không độc lập. Ghi nhận khoảng cách
+            # với chuỗi AIS (thứ DUY NHẤT còn độc lập ở đây), không phát biểu "khớp".
+            exp = mine.get("fin_expected_from_ais")
+            out.append({"ticker": tk, "at": qd, "ticker_financial": qv, "oshares_live": mv,
+                        "kind": "FIN_FALLBACK_SERVED", "model_method": mine.get("method"),
+                        "model_anchor": mine.get("anchor_date"),
+                        "model_anchor_source": mine.get("anchor_source"),
+                        "ais_anchor_date": mine.get("ais_anchor_date"),
+                        "ais_anchor_certified": mine.get("fin_anchor_ais_certified"),
+                        "ais_age_days": mine.get("ais_age_days"),
+                        "ais_expected": exp,
+                        "err_pct_vs_ais_expected": (None if not exp else
+                                                    abs(qv - float(exp)) / float(exp) * 100),
+                        "explain_gate_reasons": [mine.get("fin_explain_note")],
+                        "note": "mô hình phục vụ CHÍNH dòng quý (FIN_FALLBACK) ⇒ hai vế không độc "
+                                "lập, sai số 0 không có nghĩa; con số đáng xem là khoảng cách với "
+                                "chuỗi AIS. GHI NHẬN, không phải cảnh báo"})
+            continue
         # MẪU SỐ nằm ngay trong TÊN TRƯỜNG có chủ đích: chuỗi `reason` do `oshares_live` sinh ra
         # chia cho KỲ VỌNG, còn ở đây chia cho số `ticker_financial`. Cùng một sự kiện ra hai con
         # số (EVF: 7,40% vs 8,00%) — một tên trường trung tính là cách người đọc trích nhầm.
@@ -1171,6 +1287,28 @@ def refused(d):
     return d.get("kind") == "NO_MODEL_VALUE" or d.get("oshares_live") is None
 
 
+def informational(d):
+    """MỘT vị ngữ "bản ghi `crosscheck()` này là GHI NHẬN, KHÔNG phải cảnh báo" — mọi tầng.
+
+    Cùng lý do tồn tại như `refused()` (ca R10): `run()` đếm cho dòng log + trường bus, còn
+    `_fmt_divergence` đếm cho dòng Discord. Hai bản chép tay của cùng phép phân loại là cách ba
+    kênh nói ba con số cho cùng một ngày.
+    """
+    return d.get("kind") == "FIN_FALLBACK_SERVED"
+
+
+def one_info(d):
+    """Một dòng cho bản ghi GHI NHẬN (`FIN_FALLBACK_SERVED`). Ở mức module vì `_fmt_divergence`
+    dùng nó ở CẢ nhánh early-return lẫn khuôn chung."""
+    err = d.get("err_pct_vs_ais_expected")
+    exp = d.get("ais_expected")
+    gap = ("chuỗi AIS không dựng được kỳ vọng" if exp is None or err is None else
+           f"chuỗi AIS {d.get('ais_anchor_date')} dự đoán {float(exp):,.0f}, lệch {err:.2f}%")
+    cert = "" if d.get("ais_anchor_certified") else ", neo AIS CHƯA chứng nhận"
+    return (f"{d['ticker']}@{d['at']} mô hình phục vụ CHÍNH số BCTC {d['ticker_financial']:,.0f} "
+            f"(FIN_FALLBACK{cert}) — {gap}, chưa giải thích được")
+
+
 def _fmt_divergence(diverge, limit=8):
     """Dòng Discord cho kết quả `crosscheck()`. Trả `None` khi không có gì để báo.
 
@@ -1199,14 +1337,24 @@ def _fmt_divergence(diverge, limit=8):
         return None
 
     n_none = sum(1 for d in diverge if refused(d))
-    n_div = len(diverge) - n_none
+    n_info = sum(1 for d in diverge if informational(d))
+    n_div = len(diverge) - n_none - n_info
     head = []
     if n_div:
         head.append(f"{n_div} mã LỆCH")
     if n_none:
         head.append(f"{n_none} mã KHÔNG đối soát được")
+    if n_info:
+        head.append(f"{n_info} mã GHI NHẬN (không phải cảnh báo)")
+    if not n_div and not n_none:
+        # KHÔNG có gì để cảnh báo — chỉ còn ghi nhận. Đầu dòng phải nói đúng thế, nếu không một
+        # dòng toàn ghi-nhận vẫn đọc như báo động và người xem học cách bỏ qua nó.
+        return ("ℹ️ **Đối soát nguồn Oshares** — không có mã nào lệch hay câm; "
+                f"{n_info} mã GHI NHẬN: " + "; ".join(one_info(d) for d in diverge[:limit]))
 
     def one(d):
+        if informational(d):
+            return one_info(d)
         if refused(d):
             return (f"{d['ticker']}@{d['at']} mô hình TỪ CHỐI trả số "
                     f"({d.get('method') or 'không rõ nhãn'}) — KHÔNG đối soát được với bq_admin "
@@ -1293,9 +1441,9 @@ def none_value_watch(cur, prev_snap, mv=None):
             # None = mốc không ghi chữ ký ⇒ CHƯA ĐÁNH GIÁ ĐƯỢC, không phải "không đổi"
             "model_version": mv,
             "model_version_prev": (prev_snap or {}).get("model_version"),
-            "model_changed": (None if not prev_snap or not mv
-                              or not (prev_snap or {}).get("model_version")
-                              else (prev_snap or {}).get("model_version") != mv),
+            # qua `model_changed_vs` — CÙNG vị ngữ với `model_rebase_set` và dòng Discord. Bản
+            # chép tay tại chỗ (cũ) là cách hai tầng trả lời khác nhau về cùng một ngày (§28).
+            "model_changed": model_changed_vs(prev_snap, mv),
             "by_method": {m: sorted(t for t, mm in now_all.items() if mm == m)
                           for m in sorted({m for m in now_all.values()})},
             # `has_baseline=False` ⇒ CHƯA ĐÁNH GIÁ ĐƯỢC, không phải "không tăng". Cùng kỷ luật
@@ -1367,16 +1515,31 @@ def run(asof=None, dry_run=False, alert=True, lookahead=LOOKAHEAD_DAYS, trace=No
 
     # ── Oshares point-in-time cho toàn track set (một lần fetch, dùng lại cho mọi phép so)
     cache = _fetch(track, asof) if track else ([], [])
-    cur = oshares_at(track, asof, _cache=cache) if track else {}
+    # `live=True` ở CẢ BA điểm gọi `oshares_at` của file này — đây là nhánh PHỤC VỤ HÔM NAY, không
+    # phải backtest. Xem §NHÁNH LIVE trong `oshares_live._stale_fallback_verdict`: neo AIS chưa
+    # chứng nhận không còn chặn được một dòng BCTC MỚI HƠN nó. Ba điểm gọi phải dùng CÙNG một
+    # nhánh, nếu không `check_retro`/`crosscheck` sẽ so số của hai chính sách khác nhau và báo
+    # lệch giả mỗi ngày (§28). `oshares_pit`/backtest giữ mặc định `live=False`.
+    cur = oshares_at(track, asof, _cache=cache, live=True) if track else {}
 
     # ── LỚP 4 · bất biến, so với snapshot ĐÃ PUBLISH gần nhất
     prev_asof, prev_snap = prior_snapshot(asof)
-    viol = check_invariants(asof, cur, prev_asof, prev_snap) if prev_snap else []
-    # `back` tính MỘT LẦN ở đây rồi dùng cho CẢ `check_retro` lẫn cờ biên độ điểm gọi #2 — xem
-    # tham số `back` của `check_retro`.
-    back = (oshares_at(sorted(set(cur)), prev_asof, _cache=cache)
+    # `back` tính MỘT LẦN ở đây rồi dùng cho `model_rebase_set`, `check_retro` VÀ cờ biên độ điểm
+    # gọi #2 — xem tham số `back` của `check_retro`. Phải đứng TRƯỚC `check_invariants`: cổng bất
+    # biến cần biết mã nào đã được quy cho "bản mã đổi" trước khi kết luận vi phạm.
+    back = (oshares_at(sorted(set(cur)), prev_asof, _cache=cache, live=True)
             if prev_snap and cur else {})
-    viol += check_retro(asof, prev_asof, prev_snap, cache, set(cur), back=back) if prev_snap else []
+    mv_changed = model_changed_vs(prev_snap, mv)
+    rebase_tk, rebases = model_rebase_set(asof, cur, prev_asof, prev_snap, back, mv_changed)
+    if rebases:
+        print(f"[gate-4 rebase] {len(rebase_tk)} mã có chênh lệch do BẢN MÃ đổi "
+              f"({(prev_snap or {}).get('model_version')} → {mv}), không phải feed — CÔNG BỐ kèm "
+              f"cảnh báo MODEL_REBASE: {sorted(rebase_tk)}")
+    viol = check_invariants(asof, cur, prev_asof, prev_snap, rebase=rebase_tk) if prev_snap else []
+    viol += (check_retro(asof, prev_asof, prev_snap, cache, set(cur), back=back, rebase=rebase_tk)
+             if prev_snap else [])
+    for r in rebases:                       # dấu vết đi THEO mã, không chỉ nằm ở mục tổng hợp
+        cur[r["ticker"]]["model_rebase"] = r
     n_cmp = len(set(cur) & set((prev_snap or {}).get("tickers") or {}))
     # đếm theo MÃ, không theo số dòng vi phạm: một mã có thể sinh 2 vi phạm (JUMP + RETRO) nên
     # đếm dòng sẽ gọi 2 mã hỏng là "diện rộng" ở ngưỡng 3. Câu hỏi là "bao nhiêu MÃ sai".
@@ -1412,8 +1575,10 @@ def run(asof=None, dry_run=False, alert=True, lookahead=LOOKAHEAD_DAYS, trace=No
     # ra CẢ dòng log, CẢ trường bus `n_crosscheck_no_model_value`, trong khi chuỗi Discord đếm
     # bằng `refused()`; hai vị ngữ khác nhau = ba kênh có thể nói ba con số khác nhau. (Ca R10.)
     n_nomodel = sum(1 for d in diverge if refused(d))
-    print(f"[gate-4 đối soát] {len(diverge) - n_nomodel} mã LỆCH + {n_nomodel} mã KHÔNG đối soát "
-          f"được (mô hình từ chối trả số) giữa corp-action và ticker_financial")
+    n_info = sum(1 for d in diverge if informational(d))
+    print(f"[gate-4 đối soát] {len(diverge) - n_nomodel - n_info} mã LỆCH + {n_nomodel} mã KHÔNG "
+          f"đối soát được (mô hình câm ở CẢ hai nhánh) + {n_info} mã GHI NHẬN (mô hình phục vụ "
+          f"chính dòng quý — hai vế không độc lập) giữa corp-action và ticker_financial")
 
     # ── LỚP 4c · cổng BIÊN ĐỘ, CẢ BA điểm gọi `oshares_at` (WARN — không đổi số nào)
     # Đặt SAU `withhold_suspect` là CỐ Ý: mã vừa bị lớp 4 giấu số có `value=None` nên tự rơi ra
@@ -1530,6 +1695,9 @@ def run(asof=None, dry_run=False, alert=True, lookahead=LOOKAHEAD_DAYS, trace=No
         # file này thấy được xu hướng mà không phải tự dựng lại từ `tickers`.
         "none_value_watch": none_watch,
         "invariant_violations": viol, "n_compared": n_cmp, "prev_snapshot_asof": prev_asof,
+        # mã được MIỄN cổng bất biến vì chênh lệch quy được cho BẢN MÃ (xem `model_rebase_set`).
+        # Publish RA snapshot, không chỉ log: một lần miễn trừ phải tra lại được sau nhiều tháng.
+        "model_rebases": rebases, "model_rebase_tickers": sorted(rebase_tk),
         # `0 vi phạm` với `n_compared == 0` KHÔNG phải PASS — không có gì để so. Ghi cờ ra
         # snapshot để người đọc (và mọi script đọc lại file này) không trích nhầm nó là kết quả.
         "invariant_evaluated": inv_evaluated,
@@ -1590,6 +1758,18 @@ def run(asof=None, dry_run=False, alert=True, lookahead=LOOKAHEAD_DAYS, trace=No
             for tk, v in sorted(div_today.items())))
     if ais_today:
         lines.append(f"🧾 **AIS hiệu lực hôm nay** (số CP chính thức đổi): {sorted(ais_today)}")
+    if rebases:
+        # KHÁC HẲN dòng 🚨 (số bị GIẤU) và dòng ⚠️ (số publish nhưng đáng ngờ): ở đây số ĐƯỢC
+        # publish và lý do lệch đã truy được tới CHÍNH bản vá của mình. Nói ra cả hai con số để
+        # người đọc đối chiếu tay được, đừng chỉ nói "đã rebase".
+        lines.append(
+            f"🔧 **Mô hình đổi bản, KHÔNG phải feed đổi** ({(prev_snap or {}).get('model_version')}"
+            f" → {mv}) — {len(rebase_tk)} mã lệch so với mốc {prev_asof} nhưng quỹ đạo hôm nay TỰ "
+            f"NHẤT QUÁN dưới mã hôm nay ⇒ **số VẪN được công bố** (trước bản vá này chúng bị giấu "
+            f"vô hạn): " + "; ".join(
+                f"{r['ticker']} {r['published_then']:,.0f} → {r['value']:,.0f} "
+                f"({r['err_pct_vs_published']:.2f}%)" for r in rebases[:8])
+            + (f" … và {len(rebases) - 8} mã nữa" if len(rebases) > 8 else ""))
     if diverge:
         lines.append(_fmt_divergence(diverge))
     if mag:
@@ -1678,8 +1858,12 @@ def run(asof=None, dry_run=False, alert=True, lookahead=LOOKAHEAD_DAYS, trace=No
          "cash_dividend_today": sorted(div_today), "n_upcoming_held": len(upcoming),
          # tách HAI loại: "hai nguồn nói khác nhau" và "mô hình từ chối trả số" là hai tình trạng
          # khác hẳn nhau; gộp thành một con số là đúng cái nhầm lẫn dòng Discord từng mắc.
-         "n_crosscheck_divergent": len(diverge) - n_nomodel,
+         "n_crosscheck_divergent": len(diverge) - n_nomodel - n_info,
          "n_crosscheck_no_model_value": n_nomodel,
+         # loại thứ BA: mô hình phục vụ chính dòng quý (`FIN_FALLBACK`) ⇒ hai vế không độc lập.
+         # KHÔNG phải cảnh báo và KHÔNG được cộng vào `n_crosscheck_divergent` — nếu cộng thì mọi
+         # mã đi qua nhánh FIN_FALLBACK sẽ đọc như "hai nguồn nói khác nhau" mỗi ngày.
+         "n_crosscheck_fin_fallback": n_info,
          # cổng biên độ: tách hẳn khỏi hai bộ đếm trên. `n_crosscheck_*` nói "hai nguồn khác
          # nhau", `n_invariant_violations` nói "số đã bị GIẤU"; hai field dưới nói "số VẪN được
          # publish nhưng đáng ngờ về bậc độ lớn" — trộn vào bộ đếm nào cũng sai nghĩa.
@@ -1695,6 +1879,7 @@ def run(asof=None, dry_run=False, alert=True, lookahead=LOOKAHEAD_DAYS, trace=No
          "n_none_value_invariant": none_watch["n_none_invariant"],
          "model_version": mv, "model_version_changed": none_watch["model_changed"],
          "n_invariant_violations": len(viol),
+         "n_model_rebase": len(rebase_tk), "model_rebase_tickers": sorted(rebase_tk),
          # `n_invariant_violations: 0` một mình là mơ hồ — kèm luôn cờ "có so được gì không"
          # để người đọc bus không phải mở snapshot mới biết con số 0 đó có nghĩa hay không.
          "invariant_evaluated": inv_evaluated, "n_compared": n_cmp,
