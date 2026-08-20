@@ -375,6 +375,20 @@ có **1–6** selfcheck phụ thuộc → chạy đúng những file đó.
 trading_bot/plan.py` = chỉ file đó). Bảng trên chỉ là mốc tham chiếu đo ngày 2026-08-08; nguồn
 chuẩn tắc là output của script.
 
+**Bảng trên liệt kê FILE CODE — nhưng "lõi dùng chung" có 2 dạng nữa mà bản đồ import KHÔNG
+thấy** (mở rộng 2026-08-20, escalation `retro-pattern-recurring-patternB-round2-4days` sau 4 ngày
+Pattern-A tái diễn 08-16→08-19; cả 2 dạng đều đã cắn thật):
+
+| Dạng lõi ẩn | Ví dụ đã cắn | Vì sao `selfcheck_scope_map.sh` mù |
+|---|---|---|
+| **CÔNG THỨC lặp lại ở nhiều consumer** (không phải file) | Bất biến NAV §25: mandate 08-18 thêm `egg.totalValue`, `nav_cum_dividend_selfcheck.py` ĐỎ 08-19 vì công thức trong nó chưa cập nhật — lệch đúng bằng egg (~100,2tr SpaceX / ~38,8tr ZaloPay) | Bản đồ đi theo `import`, mà công thức được **chép tay** vào từng consumer, không import từ đâu cả |
+| **Module có consumer GIÁN TIẾP** (gọi qua subprocess / tên chuỗi / file dữ liệu trung gian) | `bin/oshares_live.py` sửa 3 lần trong ngày 08-19 ⇒ `corp_action_daily_selfcheck.py` IndexError ×2 | Đo thật 2026-08-20: `selfcheck_scope_map.sh bin/oshares_live.py` trả **RỖNG**, dù `corp_action_daily_selfcheck.py` phụ thuộc nó — nó không `import bin.oshares_live`, nó chạy subprocess |
+
+**Hệ quả thao tác:** trước khi kết luận "file này ít phụ thuộc, chạy hẹp là đủ", ngoài
+`selfcheck_scope_map.sh` phải thêm **một lượt `grep -rl "<tên file/tên công thức>" mike/bin`**.
+Bản đồ import trả rỗng ≠ không ai phụ thuộc — nó chỉ có nghĩa "không ai IMPORT". Đây đúng chữ ký
+§28: đừng suy từ sự vắng mặt trong MỘT biểu diễn ra sự vắng mặt trong thực tế.
+
 **Hệ luận — 2 quy ước để bộ test không mốc tiếp:**
 1. **Selfcheck KHÔNG được assert lên trạng thái SỐNG.** Chép cứng một rổ mã, một số đếm đo tại một
    ngày, hay đọc thẳng file production (`data/trade_plans/…`, `anomaly_flags.json`, `universe_pit`)

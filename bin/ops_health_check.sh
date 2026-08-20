@@ -1008,14 +1008,52 @@ else:
 #    daily_retro.sh crash/không hoàn tất — chính lớp lỗi mà bản thân RETRO được dựng ra để
 #    bắt, nhưng lại là nạn nhân của nó (crash trước khi kịp tự báo). WARN-only, KHÔNG tự
 #    sửa ở đây — rơi vào OTHER_WARN nên tự động dispatch ops_autofix.sh (Winston chẩn đoán+sửa).
-retro_yday = today_d - _timedelta(days=1)
-retro_file = os.path.join(wc_root, "mike", "kb", "incidents", "retro", f"retro-{retro_yday.isoformat()}.md")
-if os.path.exists(retro_file):
-    OK(f"daily_retro.sh: có entry cho {retro_yday} ({os.path.basename(retro_file)}).")
+# CHECK9_BEGIN — marker ỔN ĐỊNH (giống CHECK5/10/11/12): bin/ops_health_check_selfcheck.py trích
+# ĐÚNG khối giữa CHECK9_BEGIN/CHECK9_END rồi chạy nó trên thư mục retro giả. Đổi/xoá marker ⇒
+# selfcheck FAIL ngay.
+#
+# Cửa sổ 7 NGÀY, không phải 1 (sửa 2026-08-20, audit coord-2026-08-20 theo khuôn lỗi 08-18):
+# bản cũ chỉ hỏi "có retro của HÔM QUA không". Nếu checker không chạy đúng ngày đó (cron chết,
+# máy tắt), hoặc người đọc bỏ qua đúng báo cáo đó, thì hôm sau câu hỏi đã đổi sang ngày mới và
+# lần retro bị mất KHÔNG BAO GIỜ được hỏi lại — cảnh báo tự bốc hơi thay vì tự đóng. Đây đúng
+# gap `long_term_ops` arch-reviewer nêu 2026-08-20T01:29:01Z. Kênh ĐÓNG vẫn là artifact thật
+# (file retro tồn tại ⇒ hết báo), nên quét rộng KHÔNG đẻ báo động lặp.
+_retro_dir = os.path.join(wc_root, "mike", "kb", "incidents", "retro")
+_RETRO_WINDOW_D = 7
+# Sàn dưới = ngày retro CŨ NHẤT có thật trên đĩa: đừng bao giờ đòi retro của ngày trước khi cơ
+# chế tồn tại (tự thích nghi, không cần chép ngày cứng vào code).
+_retro_floor = None
+try:
+    _retro_have = sorted(re.findall(r"retro-(\d{4}-\d{2}-\d{2})\.md",
+                                    " ".join(os.listdir(_retro_dir))))
+    if _retro_have:
+        _retro_floor = _date.fromisoformat(_retro_have[0])
+except Exception:
+    _retro_have = []
+_retro_missing = []
+for _i in range(1, _RETRO_WINDOW_D + 1):
+    _d9 = today_d - _timedelta(days=_i)
+    if _retro_floor is not None and _d9 < _retro_floor:
+        continue
+    if not os.path.exists(os.path.join(_retro_dir, f"retro-{_d9.isoformat()}.md")):
+        _retro_missing.append(_d9.isoformat())
+_retro_missing.sort()
+if not _retro_have:
+    lines.append("ℹ️ daily_retro.sh: chưa có entry RETRO nào trên đĩa — bỏ qua (chưa tới lần chạy đầu).")
+elif _retro_missing:
+    _yday9 = (today_d - _timedelta(days=1)).isoformat()
+    _fresh9 = _yday9 in _retro_missing
+    W(f"daily_retro.sh THIẾU {len(_retro_missing)} entry RETRO trong {_RETRO_WINDOW_D} ngày qua: "
+      f"{_retro_missing}"
+      + (" (gồm HÔM QUA — nghi cron 00:30 ICT đêm qua crash/không hoàn tất, đúng lớp lỗi 08-01: "
+         "quoting bug làm script chết trước khi kịp notify)." if _fresh9 else
+         " (KHÔNG gồm hôm qua — đây là (các) lần đã bị bỏ lỡ trước đó, bản check 1-ngày cũ đã "
+         "để trôi mất; vẫn là việc còn NỢ).")
+      + " Kiểm logs/daily_retro.log tìm lỗi bash gần nhất; viết bù entry để cảnh báo tự tắt.")
 else:
-    W(f"daily_retro.sh KHÔNG có entry RETRO cho {retro_yday} (thiếu {os.path.relpath(retro_file, wc_root)}) "
-      f"— nghi cron 00:30 ICT đêm qua crash/không hoàn tất (đúng lớp lỗi 08-01: quoting bug làm "
-      f"script chết trước khi kịp notify). Kiểm logs/daily_retro.log tìm lỗi bash gần nhất.")
+    OK(f"daily_retro.sh: đủ entry RETRO cho {_RETRO_WINDOW_D} ngày qua "
+       f"(mới nhất {(today_d - _timedelta(days=1)).isoformat()}).")
+# CHECK9_END
 
 # 9b. Pending decisions trong working memory phải có bus question backing (thêm 2026-08-16,
 #     sau incident GDKHQ D1-D3 chỉ tracked trong memory — quyết định mất khi session restart).

@@ -50,6 +50,7 @@ def extract_block(tag):
 
 
 CHECK5_SRC = extract_block("CHECK5")
+CHECK9_SRC = extract_block("CHECK9")
 CHECK10_SRC = extract_block("CHECK10")
 CHECK11_SRC = extract_block("CHECK11")
 CHECK12_SRC = extract_block("CHECK12")
@@ -511,6 +512,115 @@ def run_check10(wc_root):
     ns = {"os": os, "re": re, "wc_root": wc_root, "W": W, "OK": OK, "lines": lines}
     exec(compile(CHECK10_SRC, SRC + ":CHECK10", "exec"), ns)
     return lines, warn
+
+
+def run_check9(wc_root, today_d=None):
+    """Chạy khối CHECK9 thật trên một thư mục retro giả."""
+    lines, warn = [], []
+
+    def W(msg):
+        warn.append(msg)
+        lines.append(f"⚠️ {msg}")
+
+    def OK(msg):
+        lines.append(f"✅ {msg}")
+
+    today_d = today_d or dt.date.today()
+    ns = {"os": os, "re": re, "wc_root": wc_root, "W": W, "OK": OK, "lines": lines,
+          "today_d": today_d, "_date": dt.date, "_timedelta": dt.timedelta}
+    exec(compile(CHECK9_SRC, SRC + ":CHECK9", "exec"), ns)
+    return lines, warn
+
+
+def _mkretro(days_present, today_d):
+    """wc_root giả có mike/kb/incidents/retro/retro-<ngày>.md cho từng offset trong days_present."""
+    d = tempfile.mkdtemp(prefix="ops_health_check9_")
+    rd = os.path.join(d, "mike", "kb", "incidents", "retro")
+    os.makedirs(rd, exist_ok=True)
+    for off in days_present:
+        day = today_d - dt.timedelta(days=off)
+        with open(os.path.join(rd, f"retro-{day.isoformat()}.md"), "w", encoding="utf-8") as f:
+            f.write("# retro\n")
+    return d
+
+
+def case_c9_full_week_is_ok():
+    today = dt.date(2026, 8, 20)
+    root = _mkretro(range(1, 9), today)
+    try:
+        lines, warn = run_check9(root, today)
+        check("check9: đủ 7 ngày ⇒ OK, 0 WARN", not warn, joined(lines))
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+def case_c9_yesterday_missing_warns():
+    today = dt.date(2026, 8, 20)
+    root = _mkretro([2, 3, 4, 5, 6, 7, 8], today)   # thiếu đúng hôm qua
+    try:
+        lines, warn = run_check9(root, today)
+        out = joined(lines)
+        check("check9: thiếu hôm qua ⇒ WARN", len(warn) == 1, out)
+        check("check9: nói rõ nghi cron đêm qua chết", "HÔM QUA" in out, out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+def case_c9_older_gap_still_reported():
+    """Ca REGRESSION chính (sửa 2026-08-20): bản 1-ngày cũ trả OK cho đúng ca này ⇒ lần retro
+    bị mất 3 ngày trước biến mất khỏi mọi báo cáo vĩnh viễn."""
+    today = dt.date(2026, 8, 20)
+    root = _mkretro([1, 2, 4, 5, 6, 7, 8], today)   # thiếu ngày -3, hôm qua CÓ
+    try:
+        lines, warn = run_check9(root, today)
+        out = joined(lines)
+        check("check9: lỗ CŨ (không phải hôm qua) vẫn được báo", len(warn) == 1, out)
+        check("check9: nêu đúng ngày thiếu",
+              (today - dt.timedelta(days=3)).isoformat() in out, out)
+        check("check9: phân biệt lỗ cũ với ca hôm qua", "KHÔNG gồm hôm qua" in out, out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+def case_c9_no_demand_before_mechanism_existed():
+    """Sàn dưới = retro cũ nhất có thật: đừng đòi entry của ngày trước khi cơ chế tồn tại."""
+    today = dt.date(2026, 8, 20)
+    root = _mkretro([1, 2], today)   # cơ chế mới chạy 2 ngày
+    try:
+        lines, warn = run_check9(root, today)
+        check("check9: không đòi retro trước ngày cũ nhất có thật", not warn, joined(lines))
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+def case_c9_empty_dir_is_not_warn():
+    today = dt.date(2026, 8, 20)
+    root = _mkretro([], today)
+    try:
+        lines, warn = run_check9(root, today)
+        check("check9: thư mục retro rỗng ⇒ ℹ️, không WARN giả", not warn, joined(lines))
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+def case_c9_red_control_one_day_window():
+    """RED control: đột biến cửa sổ về 1 ngày phải làm ĐỎ đúng ca lỗ-cũ ở trên."""
+    mut = CHECK9_SRC.replace("_RETRO_WINDOW_D = 7", "_RETRO_WINDOW_D = 1")
+    check("check9 RED: đột biến áp dụng được (hằng cửa sổ chưa trôi)", mut != CHECK9_SRC,
+          "không tìm thấy _RETRO_WINDOW_D để đột biến")
+    today = dt.date(2026, 8, 20)
+    root = _mkretro([1, 2, 4, 5, 6, 7, 8], today)
+    try:
+        lines, warn = [], []
+        ns = {"os": os, "re": re, "wc_root": root, "lines": lines,
+              "W": lambda m: (warn.append(m), lines.append(f"⚠️ {m}")),
+              "OK": lambda m: lines.append(f"✅ {m}"),
+              "today_d": today, "_date": dt.date, "_timedelta": dt.timedelta}
+        exec(compile(mut, SRC + ":CHECK9_MUT", "exec"), ns)
+        check("check9 RED (cửa sổ 1 ngày): lỗ cũ bị BỎ QUA ⇒ assertion chính phân biệt được",
+              not warn, joined(lines))
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
 
 
 def _mklog(content, age_seconds=0):
@@ -1621,7 +1731,8 @@ def case_routing_red_control():
 
 
 def main():
-    print("ops_health_check_selfcheck: check #5 (backlog question) + check #10 (notify_thread) "
+    print("ops_health_check_selfcheck: check #5 (backlog question) + check #9 (retro freshness) "
+          "+ check #10 (notify_thread) "
           "+ check #11 (selfcheck_red_sweep freshness) + check #12 (ccdb one-shot dropped) "
           "+ khối DELIVER (Discord→Telegram) regression")
     for fn in (case_archived_question_visible, case_cross_layer_resolve,
@@ -1642,6 +1753,10 @@ def main():
                case_ack_suppress_days_capped,
                case_aged_wagsfix_never_truncated, case_aged_no_wagsfix_keeps_old_cut,
                case_aged_wagsfix_overflow_is_loud,
+               case_c9_full_week_is_ok, case_c9_yesterday_missing_warns,
+               case_c9_older_gap_still_reported,
+               case_c9_no_demand_before_mechanism_existed,
+               case_c9_empty_dir_is_not_warn, case_c9_red_control_one_day_window,
                case_c10_no_file_is_ok, case_c10_fresh_log_warns,
                case_c10_swap_recovery_is_not_swallowed, case_c10_hard_error_wins_over_swap,
                case_c10_fresh_log_without_timestamp_line, case_c10_old_log_is_ok,
