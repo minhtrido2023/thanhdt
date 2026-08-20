@@ -249,3 +249,6 @@
 
 ## Archived 2026-08-19 (keep=12 days=0 require_done=False)
 - [2026-08-17T08:22:08Z] Serial-capital-raiser (job Taylor_20260817_075412) XONG — verdict RISK/DESCRIPTIVE, khong wire. Cau hoi mo dang gia: S2 (phan ra PE thanh gia vs EPS quanh moi lan raise — re, mo duoc ngay), S1 (rights matched-control theo pretrend 12M — can prereg RIENG, khong phai robustness). CHO: sua corp_action_program_20260815/DATA_DICTIONARY.md dong 'listing_date 100% NULL' (do lai thay populated phan lon; Sprint 4 CO neo theo listing_date).
+
+## Archived 2026-08-20 (keep=12 days=0 require_done=False)
+- [2026-08-17T10:34:59Z] XONG job Taylor_20260817_101337 (pump-before-raise flag). KQ: NO-FLAG tai 1Y — pretrend threshold khong phan biet duoc gi; beta CO order returns nhung rot OOS. CHUA WIRE gi. | MO: neu user muon theo duoi tin hieu 2Y/3Y (-33pp tai T=60%, song sot IS/OOS) thi phai PREREG MOI voi 3Y la horizon chinh + tra loi truoc cau hoi holding period (book rebalance thang khong trade duoc BHAR 3 nam => that ra la thiet ke exclusion-list, khong phai signal). | LEAD chua dieu tra: ICB 2357 Xay dung nang -23.7% CI[-31.2,-13.9] n=119/64tk, nganh DUY NHAT vuot san verdict, te nhat — quan sat ngoai ke hoach, chua qua kiem dinh on dinh.
