@@ -50,13 +50,21 @@ docs (`022C099995` / `123456aA@`), không cần đăng ký:
 - `POST /accounts/{id}/orders/underlying` (LO và ATO đều test) → 200, `{"orderid":
   "8000180326000219"}` **CỐ ĐỊNH bất kể input** — sandbox không validate order-type thật, KHÔNG
   dùng được để suy ra enum order type hợp lệ (ATO/ATC/MP...).
-- **404 "Cannot GET"** cho mọi biến thể path đã thử của "buying power"/"assets" cơ sở
-  (`underlying/assets`, `underlying/buyingPower`, `assets/underlying`) và **derivative/assets**,
-  **derivative/portfolio** — path thật KHÁC những gì tài liệu/agent suy ra, hoặc endpoint này cần
-  tham số path khác (accountId không phải "022C099995"?). **CHƯA XÁC ĐỊNH ĐƯỢC PATH ĐÚNG** — việc
-  còn treo, không đoán thêm.
+- `GET /accounts/{id}/underlying/balance` → 200 (**probe thật**, `underlying/buyingPower` là tên
+  PRODUCTION per PHS support, sandbox dùng tên `balance`). Fields: `ppse`(sức mua an toàn),
+  `ppseref`, `mrratioloan`, `mrpriceloan`(margin loan info), `maxqtty`, `trade`, `receiving`,
+  `rtt`, `allbalance`, `avladvance`, `mrirate`, `blocked`, `mortage`. Response là array `[{}]`.
+- `GET /accounts/{id}/derivative/balance` → 200. Fields: `cashonhand`, `pp`(purchasing power),
+  `nav`, `eca`, `accountratio`, `acccountstatus`("An toàn"), `requiredmarginamt`, `vmamt`(P&L
+  biến động), `nonpnlamt`, `execpnlamt`, `totalfeeamt`, DTA/CCP split cho mọi field margin.
+  `accountid` trả về là sub-account fno thật (`"0104005401"`).
+- `GET /accounts/{id}/underlying/assets` → 404 trong sandbox (PHS support xác nhận path đúng cho
+  production là `/underlying/assets`; sandbox chưa implement hoặc dùng tên khác).
 - `GET /priceboard/all-stocks` (và 3 biến thể tên khác) → 404 tất cả — path thật của
   "get_all_stocks" CHƯA XÁC ĐỊNH.
+- **Quan trọng — sandbox không validate accountId/username/password** (PHS support xác nhận
+  2026-08-20): có thể dùng mock data bất kỳ. Vì vậy 404 trước đây KHÔNG do sai accountId mà do
+  path chưa implement trong sandbox.
 
 ## Thông tin bổ sung từ PHS support (Zalo, 2026-08-20 ~14:07 ICT)
 
@@ -79,29 +87,33 @@ docs (`022C099995` / `123456aA@`), không cần đăng ký:
 
 ## Gap PHẢI hỏi PHS trực tiếp trước khi build production adapter
 
-1. Path chính xác của "buying power"/"assets" (cơ sở + phái sinh) và "all-stocks" — probe thật
-   404 hết; gợi ý path production dùng `/eqt/` và `/fno/` thay vì `/underlying/`/`/derivative/`.
-   **Cần xác nhận path đầy đủ cho assets/buying-power với tiểu khoản thật.**
-2. Enum đầy đủ `type` lệnh (ATO/ATC/MP/GTC...) — sandbox chấp nhận bất kỳ giá trị nào nên không
-   verify được bằng probe.
-3. Cơ chế vay/margin ở tầng đặt lệnh CƠ SỞ — không thấy field tương đương `loan_package_id`
-   (DNSE) trong body đặt lệnh; PHS có hỗ trợ đòn bẩy qua API này không, nếu có thì field nào.
-4. `refresh_token` — trả về nhưng KHÔNG có endpoint refresh nào được tài liệu hoá; phải re-login
+### ĐÃ XÁC NHẬN từ PHS support (2026-08-20):
+- **Gap #1 (Buying power/assets path)**: ĐÃ XÁC NHẬN production paths:
+  - `GET /oapi/accounts/:accountId/underlying/buyingPower` (cơ sở)
+  - `GET /oapi/accounts/:accountId/underlying/assets` (tổng tài sản cơ sở)
+  - Sandbox dùng `underlying/balance` (probe 200 thật). Production dùng `buyingPower`.
+- **Gap #2 (Order type enum)**: ĐÃ XÁC NHẬN:
+  - HOSE: `LO`, `ATO`, `ATC`, `MP`
+  - HNX & UPCOM: `LO`, `MOK`, `MAK`, `PLO`
+- **Gap #3 (Margin qua API)**: XÁC NHẬN MỨC ĐỘ HỖ TRỢ:
+  - **Xem margin overview**: CÓ, qua `GET /underlying/assets`
+  - **Đăng ký gói margin mới / gia hạn / tất toán**: KHÔNG có API hiện tại — chỉ trên PHS Xpro
+    Trading (app). "Giai đoạn sau Flash API sẽ bổ sung." → **Ràng buộc quan trọng:** nếu dùng
+    margin tại PHS, phải tự quản lý vòng đời margin thủ công qua app, KHÔNG tự động hoá được qua
+    bot như DNSE.
+- **Gap #8 (Tiểu khoản riêng cho eqt vs fno)**: ĐÃ XÁC NHẬN — tách biệt hoàn toàn:
+  - Master: `022Cxxxx`; Sub-eqt: `0120xxxx`; Sub-fno: `02120xxxx`
+  - Adapter phải lưu cả hai sub-account số, routing theo asset type.
+
+### Còn treo (5 gap):
+1. `refresh_token` — trả về nhưng không có endpoint refresh được tài liệu hoá; phải re-login
    mỗi 8h nếu đúng vậy.
-5. OTP thật ở production: sandbox otp_token phát ngẫu nhiên NGAY trong login response, không có
-   bước verify OTP tách rời lộ ra trong tài liệu — production có giống vậy không, hay cần 1 bước
-   verify OTP qua SMS/Smart OTP như FLEX cũ (`verify_smart_otp`)? Nếu passive hoàn toàn thì khác
-   hẳn mô hình DNSE (`--auto-otp` phải tự nhập OTP nhận qua email).
-6. WebSocket/streaming real-time — toàn bộ market-data endpoint đã thấy là REST GET polling
-   thuần, marketing text nói "real-time" nhưng chưa có bằng chứng push. Registration form CÓ 1
-   mục "WebSocket streaming" riêng để xin cấp — gợi ý có tồn tại nhưng ở nhóm quyền/tài liệu khác
-   chưa đọc.
-7. Rate limit, HMAC/chữ ký request, SLA, phí — không công khai trên docs, PHS ghi rõ các mục này
-   nằm trong "Service Scope Technical Appendix" dạng file rời (Google Drive), chưa mở được qua
-   WebFetch.
-8. ~~Tài khoản phái sinh có tách biệt số tài khoản với cơ sở không~~ — **ĐÃ XÁC NHẬN (PHS support
-   2026-08-20)**: tách biệt, tiểu khoản eqt ≠ tiểu khoản fno, cả hai khác master account.
-9. Thời gian xét duyệt hồ sơ đăng ký (không công khai số ngày cụ thể).
+2. OTP thật ở production: sandbox otp_token phát ngẫu nhiên trong login response, không có bước
+   verify tách rời — production có passive hoàn toàn như sandbox không, hay cần verify SMS/OTP?
+3. WebSocket/streaming real-time — REST polling thuần trong probe; Registration form có mục
+   "WebSocket streaming" riêng — gợi ý tồn tại nhưng tài liệu ở nhóm quyền khác.
+4. Rate limit, HMAC, SLA, phí — nằm trong "Service Scope Technical Appendix" (Google Drive riêng).
+5. Thời gian xét duyệt hồ sơ đăng ký.
 
 ## Quy trình đăng ký (đã đọc form, CHƯA nộp)
 
