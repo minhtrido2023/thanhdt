@@ -137,6 +137,10 @@ cao sẽ tự chạy tiếp, nhưng nếu phiên tôi restart giữa chừng th�
 > ⚠️ Fan-out ĐA TOPIC: `--batch-size` đếm chung cả đợt, nên topic xong sớm phải chờ tới khi mọi
 > job của đợt đăng ký xong (trần 600s) rồi mới bắn — dùng batch-id RIÊNG cho mỗi topic nếu
 > muốn topic xong trước được đánh thức ngay.
+> ⚠️ MỘT job trong đợt KHÔNG dispatch được (circuit breaker, registry chặn, đăng ký hỏng) ⇒
+> `--batch-size` lớn hơn số member thật ⇒ member còn lại im đủ 600s rồi mới tới lượt reconciler.
+> Wake KHÔNG mất, nhưng TRỄ 10-15' — với đợt plan 19:05 là muộn hơn `send_plan_report` 19:30.
+> Thấy đợt nào thiếu job so với dự kiến thì đừng chờ: kiểm `logs/wake_thread.log` ngay.
 
 > **TẦNG THỨ BA — RECONCILER level-triggered (thêm 2026-08-20, `bin/wakeup_reconcile.py`, cron
 > `*/5`).** Push và ladder đều là **edge**: mất cạnh (push chết vì encoding/ccdb restart, ladder bị

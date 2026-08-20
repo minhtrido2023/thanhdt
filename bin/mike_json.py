@@ -2810,6 +2810,12 @@ def cmd_job_claim_reply(a):
 BATCH_REG_GRACE_S = 600     # `expected` > số member đã đăng ký chỉ chặn trong ngần này giây
                             # (caller chết giữa vòng lặp fan-out thì batch không kẹt vĩnh viễn)
 BATCH_DEATH_GRACE_S = 300   # member non-terminal quá deadline + ngần này ⇒ coi như sẽ không bắn
+BATCH_CLAIM_LAG_S = 180     # khoảng TRỄ giữa "member terminal" và "member đó claim xong": giữa
+                            # hai mốc đó _bg_wrapper còn consolidate + notify + notify_thread
+                            # (timeout 10s). CHỈ reconciler đọc hằng số này (batch_in_flight),
+                            # để nó tránh đường; claim KHÔNG bao giờ bị nó làm chậm. Bằng
+                            # GRACE_SECONDS của wakeup_reconcile.py — cùng một câu hỏi "job vừa
+                            # xong, đường hoàn tất bình thường vẫn đang chạy".
 
 # BẰNG CHỨNG DƯƠNG cho "im lặng CÓ CHỦ Ý" (arch-reviewer vòng 3, BLOCKER-1). Mã thoát 1 và 2
 # của `batch-claim-wake` nghĩa là "đừng bắn wake" — nhưng 1 và 2 CŨNG là mã thoát của chính
@@ -2818,8 +2824,14 @@ BATCH_DEATH_GRACE_S = 300   # member non-terminal quá deadline + ngần này �
 # ⇒ main() sys.exit(2). Đo thật trên bản copy: cả hai ca ⇒ 0 lượt wake rời tầng dispatch, không
 # log không notify — đúng ô NGƯỢC với doctrine "không biết thì BẮN, đừng im".
 # Nên: batch_wake.sh CHỈ im khi thấy marker này trên stderr. Suy ra vắng mặt là an toàn, còn
-# suy ra từ mã thoát trần thì không. Marker phải được in TẠI CHÍNH chỗ ra quyết định — một
-# tiến trình chết trước khi tới đó không thể giả mạo nó.
+# suy ra từ mã thoát trần thì không. Marker phải được in TẠI CHÍNH chỗ ra quyết định.
+#
+# ⚠️ Marker chỉ chống giả mạo KHI PHÍA ĐỌC CÒN NEO ĐẦU DÒNG (arch-reviewer vòng 4). Traceback
+# SyntaxError của Python in lại NGUYÊN VĂN dòng nguồn, mà chính DÒNG DƯỚI ĐÂY là một chuỗi chứa
+# marker: cú pháp hỏng ngay quanh đây ⇒ traceback echo marker ⇒ `grep BATCH-SILENT-OK` không neo
+# sẽ khớp ⇒ im lặng, nuốt mất wake (đo thật, rc=1 wakes=0). Ba đường im hợp lệ đều in marker ở
+# CỘT 0, traceback thụt 4 dấu cách ⇒ batch_wake.sh dùng `grep -q '^BATCH-SILENT-OK'`. Giữ marker
+# ở đầu chuỗi format khi thêm đường im mới, và ĐỪNG gỡ `^` bên kia.
 BATCH_SILENT_OK = "BATCH-SILENT-OK"
 
 
@@ -2966,7 +2978,23 @@ def batch_in_flight(batches_dir, batch_id, jobs_dir, job_id=None, now=None):
     tid = _batch_thread(jobs_dir, job_id) if job_id else ""
     if _batch_claimer(obj, tid):
         return False
-    return bool(_batch_blockers(obj, jobs_dir, str(job_id or ""), tid, now))
+    if _batch_blockers(obj, jobs_dir, str(job_id or ""), tid, now):
+        return True
+    # TOCTOU với member VỪA terminal mà CHƯA kịp claim (arch-reviewer vòng 4). `status=done`
+    # được JSET xong là member đó hết chặn ⇒ blockers rỗng ⇒ reconciler tưởng đợt đã tàn; nhưng
+    # _bg_wrapper còn phải chạy consolidate.sh + notify.sh + notify_thread.sh (timeout 10s) rồi
+    # MỚI gọi batch_wake.sh. Đo thật: reconciler cứu job cũ ĐỒNG THỜI member cuối bắn wake gộp
+    # (liệt kê cả job cũ) ⇒ đúng 2 phiên Mike song song — hình dạng sự cố mà tính năng này sinh
+    # ra để diệt. Nên: còn coi là đang bay thêm GRACE sau `ended_at` MỚI NHẤT.
+    #
+    # CỐ Ý BẤT ĐỐI XỨNG với claim (không đặt trong `_batch_blockers` dùng chung, dù B2 vòng 1
+    # bắt hai tầng phải đọc GIỐNG NHAU): hai tầng hỏi hai câu khác nhau. Claim hỏi "tôi có phải
+    # người cuối không" — trễ nó là trễ chính lượt wake. Reconciler hỏi "tôi có nên tránh đường
+    # không" — kiên nhẫn thêm chỉ làm lưới cuối chậm hơn, KHÔNG BAO GIỜ làm tầng dispatch im.
+    # Mọi sai lệch chỉ được phép nghiêng về phía đó.
+    ends = [_as_int(_batch_job(jobs_dir, m).get("ended_at"), 0) for m in _batch_members(obj)]
+    fresh = [now - e for e in ends if e]
+    return any(0 <= d <= BATCH_CLAIM_LAG_S for d in fresh)   # `0 <=`: chặn đồng hồ lùi, như nit 5
 
 
 def cmd_batch_register(a):

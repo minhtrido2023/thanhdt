@@ -39,8 +39,17 @@ _single_wake() {  # hành vi TRƯỚC khi có batch — giữ nguyên từng ch�
 # mktemp hỏng ⇒ err_f rỗng ⇒ không có bằng chứng ⇒ mọi lượt đều rơi về wake đơn lẻ. Ồn ào,
 # nhưng đúng chiều fail-safe: thà thừa một push còn hơn nuốt mất.
 err_f="$(mktemp 2>/dev/null || true)"
+if [ -z "$err_f" ]; then
+  # Không có chỗ chứa bằng chứng ⇒ mọi lượt rơi về wake đơn lẻ ⇒ N member = N push, tức BUG
+  # GỐC sống lại. Đúng chiều fail-safe nhưng KHÔNG ĐƯỢC IM: dispatch.sh gọi script này với
+  # `2>&1` vào logs/wake_thread.log, còn dòng này ghi thẳng vào chính file mà RCA 08-20 dùng
+  # để đếm số lượt push — nơi người điều tra "sao hôm nay lại 2 lượt" sẽ nhìn đầu tiên.
+  printf '%s batch_wake: mktemp HỎNG (TMPDIR=%s) — không kiểm được bằng chứng im-lặng, rơi về wake ĐƠN LẺ cho batch=%s job=%s ⇒ có thể trùng lượt push\n' \
+    "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "${TMPDIR:-/tmp}" "$batch_id" "$job_id" \
+    >> "$ROOT/logs/wake_thread.log" 2>/dev/null || true
+fi
 # shellcheck disable=SC2064
-[ -n "$err_f" ] && trap "rm -f '$err_f'" EXIT
+[ -n "$err_f" ] && trap 'rm -f "$err_f"' EXIT INT TERM
 
 # Truyền THẲNG thread_id đang cầm (chính pin mà _bg_wrapper vừa notify) thay vì để
 # mike_json đọc lại từ record — một sự thật, một cách đọc (arch-reviewer N-a vòng 2).
@@ -54,9 +63,16 @@ rc=$?
 # trong mike_json.py ⇒ 1; file thiếu hoặc subcommand bị đổi tên (rollback lệch pha giữa hai
 # file) ⇒ main() sys.exit(2). Đo thật trên bản copy: cả hai ca đều ra 0 lượt wake, không log
 # không notify. Suy "im lặng" từ mã thoát trần là suy từ sự VẮNG MẶT; chỉ marker in TẠI CHÍNH
-# chỗ ra quyết định mới là bằng chứng (tiến trình chết trước khi tới đó không giả mạo được).
-# Vòng 2 (S1) mới bọc try/except BÊN TRONG hàm ⇒ lớp "python chưa chạy tới hàm" lọt lưới.
-_silent_ok() { [ -n "$err_f" ] && grep -q 'BATCH-SILENT-OK' "$err_f"; }
+# chỗ ra quyết định mới là bằng chứng. Vòng 2 (S1) mới bọc try/except BÊN TRONG hàm ⇒ lớp
+# "python chưa chạy tới hàm" lọt lưới.
+#
+# NEO `^` LÀ BẮT BUỘC, không phải cho gọn (arch-reviewer vòng 4, BLOCKER). Traceback SyntaxError
+# của Python IN LẠI NGUYÊN VĂN DÒNG NGUỒN — mà dòng định nghĩa marker trong mike_json.py chính
+# là một chuỗi chứa marker. Đo thật: cú pháp hỏng ngay dòng đó ⇒ traceback echo marker ⇒ grep
+# không neo KHỚP ⇒ im lặng, 0 wake — đúng ô mà cả commit này tồn tại để bịt. Ba đường im hợp lệ
+# đều in marker ở CỘT 0; traceback thụt 4 dấu cách. Neo là thứ duy nhất tách được hai cái đó,
+# nên marker chỉ "không giả mạo được" KHI CÒN NEO — đừng gỡ `^`.
+_silent_ok() { [ -n "$err_f" ] && grep -q '^BATCH-SILENT-OK' "$err_f"; }
 _dump_err() { [ -n "$err_f" ] && cat "$err_f" >&2 || true; }
 
 case "$rc" in

@@ -387,7 +387,10 @@ assert "…và chu kỳ CHẠY THẬT: log được ghi (không phải chết c�
 
 echo "== CA 21 (arch-reviewer vòng 3, nit 5): ĐỒNG HỒ LÙI — created_at ở TƯƠNG LAI làm hiệu ÂM,"
 echo "   vế '<= GRACE' đúng vĩnh viễn ⇒ chặn claim VÀ bịt miệng luôn reconciler suốt thời gian lệch"
-mk_job jobSkew done "" 1700
+# ended_at CŨ (quá BATCH_CLAIM_LAG_S) để cô lập đúng yếu tố ĐỒNG HỒ: nếu để ended_at=now thì
+# mệnh đề TOCTOU (CA26) giữ batch "đang bay" 180s và ca này đo lẫn hai thứ. Khác biệt cốt lõi:
+# cửa sổ TOCTOU tự hết sau 180s, còn `created_at` tương lai thì bịt miệng VÔ HẠN.
+mk_job jobSkew done "" 1700 Mike 1 "$(( $(date +%s) - 400 ))"
 python3 "$REAL/bin/mike_json.py" batch-register "$BD" b21 jobSkew 2 >/dev/null   # expected=2, mới 1
 python3 - "$BD/b21.json" <<'PY'
 import json, sys, time
@@ -435,6 +438,68 @@ assert "job vẫn chạy tới terminal dù register hỏng" \
 assert "job record KHÔNG mang batch_id (không nói dối reconciler)" \
   "$(python3 -c "import json;print(json.load(open('$J23')).get('batch_id') or 'none')")" "none"
 assert "…và vẫn bắn wake ĐƠN LẺ như trước khi có batch (không nuốt mất)" "$(_nwake)" "1"
+
+echo "== CA 24 (arch-reviewer vòng 4, BLOCKER): marker phải NEO ĐẦU DÒNG. Traceback SyntaxError"
+echo "   của Python in lại NGUYÊN VĂN dòng nguồn — mà dòng định nghĩa marker trong mike_json.py"
+echo "   chính là chuỗi chứa marker ⇒ grep không neo sẽ coi một VỤ SẬP là 'im lặng hợp lệ'."
+# Tái hiện đúng hình dạng traceback thật: dòng nguồn được echo, THỤT 4 DẤU CÁCH.
+# rm TRƯỚC KHI ghi: CA19 để lại đây một SYMLINK tới bin/mike_json.py THẬT, `cat >` sẽ ghi
+# XUYÊN symlink và huỷ file của repo (cùng lớp tai nạn mà _stub đã dựng chốt chặn ở đầu file).
+_bw_mj() { rm -f "$BWR/bin/mike_json.py"; [ -L "$BWR/bin/mike_json.py" ] && { echo "FATAL: không gỡ được symlink mike_json trong sandbox — dừng để khỏi hỏng file thật"; exit 1; }; cat > "$BWR/bin/mike_json.py"; }
+_bw_mj <<'PYEOF'
+BATCH_SILENT_OK = "BATCH-SILENT-OK
+PYEOF
+assert "traceback echo dòng định nghĩa marker ⇒ VẪN phải wake đơn lẻ (không bị giả mạo)" \
+  "$(_bw_run)" "2 1"
+# Cùng chuỗi nhưng ở CỘT 0 trên stderr = marker thật ⇒ vẫn phải im. Neo không được chặt quá.
+_bw_mj <<'PYEOF'
+import sys
+sys.stderr.write("BATCH-SILENT-OK: im lặng có chủ ý\n")
+sys.exit(1)
+PYEOF
+assert "…nhưng marker THẬT ở cột 0 vẫn được tôn trọng (rc=1, 0 wake)" "$(_bw_run)" "1 0"
+rm -f "$BWR/bin/mike_json.py"; ln -s "$REAL/bin/mike_json.py" "$BWR/bin/mike_json.py"
+
+echo "== CA 25 (arch-reviewer vòng 4, nit 2): mktemp HỎNG ⇒ không kiểm được bằng chứng ⇒ rơi về"
+echo "   wake đơn lẻ (N member = N push = bug gốc). Đúng chiều fail-safe nhưng PHẢI để lại dấu vết."
+mkdir -p "$BWR/logs"; : > "$BWR/logs/wake_thread.log"
+: > "$SB/bwroot.calls"
+TMPDIR=/nonexistent-khong-ton-tai bash "$BWR/bin/batch_wake.sh" bw1 jobW 999 "prompt" >/dev/null 2>&1
+assert "mktemp hỏng ⇒ vẫn bắn wake đơn lẻ (không nuốt)" \
+  "$(wc -l < "$SB/bwroot.calls" | tr -d ' ')" "1"
+assert "…và GHI LẠI vào logs/wake_thread.log (mất dedupe không được im lặng)" \
+  "$(grep -c 'mktemp HỎNG' "$BWR/logs/wake_thread.log")" "1"
+
+echo "== CA 26 (arch-reviewer vòng 4, nit 3): TOCTOU — member VỪA terminal mà CHƯA kịp claim."
+echo "   status=done là hết chặn, nhưng _bg_wrapper còn consolidate+notify rồi mới gọi batch_wake"
+echo "   ⇒ reconciler cứu job cũ ĐỒNG THỜI member cuối bắn wake gộp = 2 phiên Mike song song."
+mk_job jobZ1 done "" 1700 Mike 1 "$(( $(date +%s) - 400 ))"   # xong lâu rồi
+mk_job jobZ2 done "" 1700 Mike 1 "$(date +%s)"                # VỪA terminal, chưa claim
+python3 "$REAL/bin/mike_json.py" batch-register "$BD" b26 jobZ1 2 >/dev/null
+python3 "$REAL/bin/mike_json.py" batch-register "$BD" b26 jobZ2 2 >/dev/null
+python3 - "$BD/b26.json" <<'PY'
+import json, sys, time
+fp = sys.argv[1]; o = json.load(open(fp))
+o["created_at"] = int(time.time()) - 3600      # cô lập yếu tố TOCTOU khỏi ân hạn đăng ký
+json.dump(o, open(fp, "w"))
+PY
+assert "reconciler phải TRÁNH ĐƯỜNG: batch còn 'đang bay' vì có member vừa terminal" \
+  "$(IN_FLIGHT b26 jobZ1)" "0"
+assert "…nhưng claim KHÔNG bị làm chậm (bất đối xứng CÓ CHỦ Ý: kiên nhẫn chỉ nghiêng về reconciler)" \
+  "$(CLAIM b26 jobZ2)" "0"
+# Hết cửa sổ trễ ⇒ reconciler làm việc lại bình thường (không kẹt vĩnh viễn).
+rm -f "$BD/b26.json"
+mk_job jobZ2 done "" 1700 Mike 1 "$(( $(date +%s) - 400 ))"
+python3 "$REAL/bin/mike_json.py" batch-register "$BD" b26 jobZ1 2 >/dev/null
+python3 "$REAL/bin/mike_json.py" batch-register "$BD" b26 jobZ2 2 >/dev/null
+python3 - "$BD/b26.json" <<'PY'
+import json, sys, time
+fp = sys.argv[1]; o = json.load(open(fp))
+o["created_at"] = int(time.time()) - 3600
+json.dump(o, open(fp, "w"))
+PY
+assert "…mọi member xong quá cửa sổ trễ ⇒ hết bay, reconciler được cứu (không kẹt)" \
+  "$(IN_FLIGHT b26 jobZ1)" "1"
 
 echo
 if [ "$FAILS" -eq 0 ]; then
