@@ -135,3 +135,50 @@ poll_orders) đã đủ tổng quát để cắm 1 broker mới — không cần
 - Docs: `https://phuhungsecurities.mintlify.app/*.md` (39 trang, index `llms.txt`).
 - Probe thật: curl trực tiếp sandbox `flashapi.phs.vn/sandbox/oapi/*`, 2026-08-20, demo creds
   công khai trong docs.
+
+## ĐÃ BUILD ADAPTER — phase 1 (2026-08-20, job Taylor_20260820_075059, commit `0a875d1c`)
+
+`phs_flash_api.py` (PHSFlashClient) + `trading_bot/brokers.py::PHSFlashBroker`
+(`BROKER_CLASSES["phs_flash"]`) + `secrets/phs_flash_credentials.json.sample`.
+Selfcheck `phs_flash_api_selfcheck.py`: **96 assertion PASS thật trên sandbox** (chỉ ĐỌC,
+không đặt lệnh), PASS lại dưới `env -u TZ` / `TZ=UTC` / `TZ=America/New_York`; 13 selfcheck
+phụ thuộc `trading_bot/brokers.py` đều PASS. **VẪN CHƯA GO-LIVE** (hồ sơ đăng ký chưa nộp).
+
+### 3 đính chính cho chính tài liệu PHS (đo thật, không suy đoán)
+
+1. **"Fixture OTP token" của sandbox là SAI.** `trading-underlying.md` bảo sandbox nhận
+   `552066a35eb30a9815afc952b14287a8` cho `x-otp-token`. Gửi đúng chuỗi đó → **401**
+   `Invalid x-otp-token (use otp_token from the matching auth response)`; gửi `otp_token`
+   của chính lần login → 200. ⇒ sandbox và production cùng một cơ chế, adapter không cần
+   nhánh riêng.
+2. **Bảng mã trạng thái lệnh cơ sở trong prompt dispatch (Mike) MÂU THUẪN với tài liệu.**
+   Hai trang chính thức (`ref-order-status-codes.md` §10.2 và `api-reference/error-status.md`)
+   trùng khớp nhau: `0`=Rejected by exchange, `1`=Open, `2`=Sent, **`3`=Cancelled**,
+   `4`=Matched, `5`=Expired, `8`=Pending send, `12`=Fully matched. Prompt ghi `3`=Khớp hết,
+   `5`=Hủy hết, `8`=Chờ cancel — map theo prompt là **báo KHỚP cho một lệnh đã HUỶ**. Bằng
+   chứng độc lập nghiêng về tài liệu: bản ghi sandbox `dailyOrder` có `orstatuscode="8"` kèm
+   `status="Chờ gửi"` / `orstatus="Sending pending"` = Pending send. Adapter theo TÀI LIỆU.
+3. **Sandbox BỎ QUA `symbolList`** — `priceboard/symbol-latest-data` luôn trả đúng 1 fixture
+   ACB, kể cả khi hỏi `FPT` hay mã không tồn tại (`ZZZ`). ⇒ khả năng hỏi NHIỀU MÃ một lần
+   **chưa verify được**, phải đo lại ở production. Hệ quả thiết kế: broker lấy đúng dòng khớp
+   mã, KHÔNG lấy `rows[0]` — không khớp thì trả `None` (lấy nhầm dòng = gán giá mã KHÁC cho
+   lệnh, sai im lặng).
+
+### 3 chốt FAIL-CLOSED đã cài (cố ý không đoán)
+
+| Chốt | Vì sao |
+|---|---|
+| Đặt/hủy lệnh **phái sinh** → `raise` | Body chưa xác nhận với PHS; phase 1 chỉ đọc `derivative/balance` + `openPositions` |
+| `get_cash()` ở **production** → `raise` | `buyingPower` bắt buộc symbol+quotePrice; field tiền của `/underlying/assets` chưa probe được (sandbox 404) ⇒ dùng `get_buying_power(symbol, price)`, không đọc bừa field nghe giống tiền (coding_guidelines §25) |
+| Lệnh không có `price` → `raise` | `limitPrice` là trường bắt buộc kể cả với ATO/ATC/MP, nhưng giá trị hợp lệ cho lệnh thị trường chưa được PHS xác nhận |
+
+`get_cash()` = `ppse` (sức mua an toàn) — thuộc vế **"tiêu được ngay"** của §25, **KHÔNG**
+phải cơ sở NAV. Consumer tính NAV/mẫu số tỷ trọng không được dùng.
+
+### Còn treo, phải làm trước khi go-live
+- Verify trên production: `underlying/buyingPower`, `underlying/assets` (tên field tiền),
+  tên query khi hủy lệnh (tài liệu tự mâu thuẫn `timetype` vs `timeType` — adapter theo ví
+  dụ cURL `timeType`), batching nhiều mã ở priceboard.
+- Bid/ask **lô chẵn**: `symbol-latest-data` chỉ có 3 mức lô LẺ (`bbOd`/`boOd`) ⇒ adapter cố ý
+  KHÔNG dựng `l2_snapshot` (dựng từ lô lẻ là bịa thanh khoản). Cần endpoint L2 khác.
+- Body đặt lệnh phái sinh; OTP thật ở production; rate limit/SLA.
