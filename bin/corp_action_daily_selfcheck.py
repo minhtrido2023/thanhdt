@@ -68,12 +68,16 @@ def _q(tk, time, shares):
 
 # AAA: sạch — AIS đầu năm, thưởng 15% ex 06-10, dòng quý 04-01 GIẢI THÍCH ĐƯỢC.
 # BBB: hình dạng HAH — dòng quý 2026-02-02 mang số của AIS 2026-05-27 (RESTATE / look-ahead).
+#   Anchor AIS 2025-11-15 CỐ Ý trong vòng 90 ngày (FIN_FALLBACK_MAX_AIS_AGE_DAYS, oshares_live.py)
+#   — sau policy 2026-08-19 (commit 269e16f5, "trust ticker_financial khi AIS cũ >90d"), anchor
+#   CŨ hơn 90 ngày rơi vào FIN_FALLBACK và tự khớp ticker_financial (0% lệch), không còn tạo được
+#   DIVERGENT cho ca X2/X2b nữa — đổi ngày để ca này tiếp tục đi qua nhánh AIS_EXACT như dự định.
 # CCC: chuyển đổi TP ratio 0,0 ⇒ mô hình fail-closed, không có số để đối soát.
 CACHE = (
     [_q("AAA", "2026-04-01", 100_000_000), _q("BBB", "2026-02-02", 185_840_401),
      _q("CCC", "2026-04-01", 100_000_000)],
     [_ais("AAA", "2026-01-05", 100_000_000), _iss("AAA", "2026-06-10", 0.15),
-     _ais("BBB", "2025-09-09", 168_861_212), _ais("BBB", "2026-05-27", 185_840_401),
+     _ais("BBB", "2025-11-15", 168_861_212), _ais("BBB", "2026-05-27", 185_840_401),
      _ais("CCC", "2026-01-05", 100_000_000),
      _iss("CCC", "2026-03-20", 0.0, "Chuyển từ trái phiếu chuyển đổi")],
 )
