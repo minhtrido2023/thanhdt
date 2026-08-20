@@ -34,6 +34,20 @@ set -uo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # Shared usage-limit phrase list (single source of truth, also used by dispatch.sh).
 source "$ROOT/bin/usage_limit_phrases.sh"
+# Lỗi TRUYỀN TẢI (API/mạng/TLS bị chặn giữa đường) — lớp thứ BA, khác CẢ usage-limit lẫn
+# "Mike trả lạc đề". Sự cố thật 2026-08-20 00:30 ICT: cả 2 lần thử chết sau 16-18 giây với
+# "API Error: Unable to connect to API: Self-signed certificate detected" (proxy/ISP chèn
+# cert) ⇒ retro 2026-08-19 mất hẳn. Hai hệ quả phải vá, không phải một:
+#   1. Retry TỨC THÌ (18 giây sau lần đầu) rơi đúng vào cùng khoảng blip ⇒ vô dụng. Lớp này
+#      cần chờ một nhịp; usage-limit thì không (chờ cũng vô nghĩa, đã dừng hẳn).
+#   2. Log/notify cũ gán MỌI thất bại không-phải-usage-limit thành "nghi Mike trả nhầm task
+#      cũ" ⇒ sáng hôm sau người đọc đi tìm bug quoting/prompt trong khi nguyên nhân nằm ở
+#      tầng mạng (đúng ca ops-autofix Winston_20260820_012008 bị dẫn sai hướng).
+# Cố ý KHÔNG gộp vào usage_limit_phrases.sh: file đó là hợp đồng dùng chung với dispatch.sh
+# (khớp ⇒ auto-resume). Lỗi mạng KHÔNG được kích auto-resume của dispatch.sh.
+API_TRANSPORT_ERROR_RE='Unable to connect to API|Self-signed certificate|Connection error|fetch failed|ECONNREFUSED|ECONNRESET|ETIMEDOUT|getaddrinfo|EAI_AGAIN'
+# Chờ giữa 2 lần thử khi gặp lỗi truyền tải (giây). Cron 00:30 không có deadline gấp.
+API_RETRY_BACKOFF_SEC="${DAILY_RETRO_API_BACKOFF_SEC:-180}"
 LOG="$ROOT/logs/daily_retro.log"
 # Chạy 00:30 ICT = đã sang ngày lịch MỚI — review NGÀY VỪA KẾT THÚC (hôm qua theo giờ chạy),
 # không phải "hôm nay" theo đồng hồ lúc script chạy. Bug tiềm ẩn nếu dùng `date` trực tiếp:
@@ -197,7 +211,14 @@ for _attempt in 1 2; do
     log "Draft rỗng/sai định dạng vì usage-limit — không retry."
     break
   fi
-  [ "$_attempt" -lt 2 ] && log "Draft rỗng/sai định dạng (không phải usage-limit) — nghi Mike trả nhầm task cũ; retry lần cuối với prompt sạch."
+  if tail -c 4000 "$draft_log" 2>/dev/null | grep -qiE "$API_TRANSPORT_ERROR_RE"; then
+    [ "$_attempt" -lt 2 ] && {
+      log "Draft thất bại vì LỖI TRUYỀN TẢI API/mạng (không phải usage-limit, không phải lạc đề) — chờ ${API_RETRY_BACKOFF_SEC}s rồi retry lần cuối."
+      sleep "$API_RETRY_BACKOFF_SEC"
+    }
+  else
+    [ "$_attempt" -lt 2 ] && log "Draft rỗng/sai định dạng (không phải usage-limit) — nghi Mike trả nhầm task cũ; retry lần cuối với prompt sạch."
+  fi
 done
 log "Draft dispatch xong sau $_attempt lần thử (exit $rc1, log: $draft_log)"
 
@@ -219,10 +240,17 @@ if ! _draft_valid "$DRAFT_FILE"; then
     log "=== daily_retro SKIPPED (usage-limit, transient) ==="
     exit 0
   fi
-  log "ERROR: draft job không tạo được '$DRAFT_FILE' hợp lệ sau 2 lần thử (rc=$rc1) — DỪNG pipeline, không dispatch Wags. Xem state/retro_rejected_${TODAY}_a*.md nếu có (draft lạc đề đã bị gate chặn)."
-  "$ROOT/bin/notify.sh" "[daily_retro] LỖI: draft RETRO $TODAY không hợp lệ sau 2 lần thử (job Mike rc=$rc1). Xem $draft_log và state/retro_rejected_${TODAY}_a*.md. Retro hôm nay KHÔNG chạy — cần người kiểm tra." 2>/dev/null || true
+  # Nêu ĐÚNG lớp nguyên nhân trong log/notify/bus — người đọc sáng hôm sau không phải
+  # đoán giữa "bug prompt" và "mạng chết" (xem chú thích API_TRANSPORT_ERROR_RE ở đầu file).
+  if tail -c 4000 "$draft_log" 2>/dev/null | grep -qiE "$API_TRANSPORT_ERROR_RE"; then
+    _fail_cause="loi truyen tai API/mang (vd TLS bi proxy chen cert) — KHONG phai bug prompt/quoting"
+  else
+    _fail_cause="draft rong hoac sai dinh dang (thieu header RETRO) — nghi Mike tra lac de"
+  fi
+  log "ERROR: draft job không tạo được '$DRAFT_FILE' hợp lệ sau 2 lần thử (rc=$rc1, nguyên nhân: $_fail_cause) — DỪNG pipeline, không dispatch Wags. Xem state/retro_rejected_${TODAY}_a*.md nếu có (draft lạc đề đã bị gate chặn)."
+  "$ROOT/bin/notify.sh" "[daily_retro] LỖI: draft RETRO $TODAY không hợp lệ sau 2 lần thử (job Mike rc=$rc1). Nguyên nhân: $_fail_cause. Xem $draft_log và state/retro_rejected_${TODAY}_a*.md. Retro hôm nay KHÔNG chạy — cần người kiểm tra." 2>/dev/null || true
   "$ROOT/bin/append_event.sh" Mike question "daily-retro-draft-failed-$TODAY" \
-    "{\"reason\":\"draft file rong hoac sai dinh dang (thieu header RETRO) sau 2 lan thu, rc=$rc1\",\"log\":\"$draft_log\",\"rejected_glob\":\"state/retro_rejected_${TODAY}_a*.md\"}" 2>/dev/null || true
+    "{\"reason\":\"$_fail_cause (sau 2 lan thu), rc=$rc1\",\"log\":\"$draft_log\",\"rejected_glob\":\"state/retro_rejected_${TODAY}_a*.md\"}" 2>/dev/null || true
   log "=== daily_retro ABORTED ==="
   exit 1
 fi
