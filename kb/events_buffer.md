@@ -1091,3 +1091,20 @@
 - [2026-08-20T05:53:07Z] Wags/heartbeat — Wags_20260820_054506: {"status": "still_running", "elapsed_min": 8, "job_id": "Wags_20260820_054506", "source": "watcher"}
 - [2026-08-20T05:53:09Z] Wags/heartbeat — Wags_20260820_042255: {"status": "still_running", "elapsed_min": 90, "job_id": "Wags_20260820_042255", "source": "watcher"}
 - [2026-08-20T05:53:17Z] Wags/heartbeat — Wags_20260820_042255: {"status": "in_progress", "note": "đã vá 3 required_change; selfcheck 58->76 PASS × 4 TZ; 6 mutation đều bị bắt sạch. Tiếp: chạy thật + arch-review vòng 4."}
+
+## Consolidation 2026-08-20T06:00:03Z
+- [2026-08-20T06:00:02Z] Mafee/status — bot-start: {"account": "SpaceX", "plan_date": "2026-08-20", "auto_otp": true}
+- [2026-08-20T06:00:02Z] Mafee/status — bot-start: {"account": "ZaloPay", "plan_date": "2026-08-20", "auto_otp": true}
+- [2026-08-20T06:00:03Z] Mafee/status — bot-done: {"account": "SpaceX", "plan_date": "2026-08-20", "elapsed_s": 1, "rc": 0}
+- [2026-08-20T05:54:24Z] Taylor/heartbeat — Taylor_20260820_043511: {"status": "still_running", "elapsed_min": 79, "job_id": "Taylor_20260820_043511", "source": "watcher"}
+- [2026-08-20T05:55:24Z] Taylor/heartbeat — Taylor_20260820_043511: {"status": "still_running", "elapsed_min": 80, "job_id": "Taylor_20260820_043511", "source": "watcher"}
+- [2026-08-20T05:56:24Z] Taylor/heartbeat — Taylor_20260820_043511: {"status": "still_running", "elapsed_min": 81, "job_id": "Taylor_20260820_043511", "source": "watcher"}
+- [2026-08-20T05:57:24Z] Taylor/heartbeat — Taylor_20260820_043511: {"status": "still_running", "elapsed_min": 82, "job_id": "Taylor_20260820_043511", "source": "watcher"}
+- [2026-08-20T05:58:24Z] Taylor/heartbeat — Taylor_20260820_043511: {"status": "still_running", "elapsed_min": 83, "job_id": "Taylor_20260820_043511", "source": "watcher"}
+- [2026-08-20T05:59:24Z] Taylor/heartbeat — Taylor_20260820_043511: {"status": "still_running", "elapsed_min": 84, "job_id": "Taylor_20260820_043511", "source": "watcher"}
+- [2026-08-20T05:54:09Z] Wags/heartbeat — Wags_20260820_042255: {"status": "still_running", "elapsed_min": 91, "job_id": "Wags_20260820_042255", "source": "watcher"}
+- [2026-08-20T05:55:09Z] Wags/heartbeat — Wags_20260820_042255: {"status": "still_running", "elapsed_min": 92, "job_id": "Wags_20260820_042255", "source": "watcher"}
+- [2026-08-20T05:56:10Z] Wags/heartbeat — Wags_20260820_042255: {"status": "still_running", "elapsed_min": 93, "job_id": "Wags_20260820_042255", "source": "watcher"}
+- [2026-08-20T05:57:10Z] Wags/heartbeat — Wags_20260820_042255: {"status": "still_running", "elapsed_min": 94, "job_id": "Wags_20260820_042255", "source": "watcher"}
+- [2026-08-20T05:58:10Z] Wags/heartbeat — Wags_20260820_042255: {"status": "still_running", "elapsed_min": 95, "job_id": "Wags_20260820_042255", "source": "watcher"}
+- [2026-08-20T05:59:10Z] Wags/heartbeat — Wags_20260820_042255: {"status": "still_running", "elapsed_min": 96, "job_id": "Wags_20260820_042255", "source": "watcher"}
