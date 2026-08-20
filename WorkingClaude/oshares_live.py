@@ -480,7 +480,7 @@ def _explain_quarterly(q, ais, iss):
     return True, True, "", expected
 
 
-def _stale_fallback_verdict(q, a, ais_age_days, ais_certified):
+def _stale_fallback_verdict(q, a, ais_age_days, ais_certified, live=False):
     """(allow, reason) — số quý bị cổng giải thích LOẠI có được phục vụ như FIN_FALLBACK không?
 
     Chỉ chạy khi `_explain_quarterly` đã LOẠI dòng quý. BA điều kiện, tất cả đều cần:
@@ -488,8 +488,8 @@ def _stale_fallback_verdict(q, a, ais_age_days, ais_certified):
       1. CÓ một neo AIS. Không có AIS mà vẫn bị loại thì lý do loại duy nhất là chữ ký RESTATE
          (`v` trùng khít một AIS SAU ngày quý) — đó là bằng chứng look-ahead, không phải lý do
          để tin dòng quý.
-      1b. Neo AIS đó phải ĐƯỢC CHỨNG NHẬN (`_ais_certified`). Cổng vòng 4 nói rõ: neo AIS trượt
-         cổng thì KHÔNG được "tụt sang neo dòng quý" — làm thế là ĐỔI SỐ chứ không phải dời cổng.
+      1b. **CHỈ NHÁNH PIT (`live=False`)** — neo AIS đó phải ĐƯỢC CHỨNG NHẬN (`_ais_certified`).
+         Xem §NHÁNH LIVE bên dưới: điều kiện này ĐẢO CHIỀU khi `live=True`.
       2. Neo AIS đã CŨ hơn một kỳ báo cáo (`FIN_FALLBACK_MAX_AIS_AGE_DAYS`). Còn tươi thì nó vẫn
          là phát biểu mới nhất của sở về số CP niêm yết; không có gì để thay thế.
       3. Dòng quý phải MỚI HƠN neo AIS. Nếu không, "rơi về BCTC" là đi LÙI.
@@ -501,6 +501,31 @@ def _stale_fallback_verdict(q, a, ais_age_days, ais_certified):
     được BCTC ghi nhận từ trước ngày NIÊM YẾT BỔ SUNG**, nên một số đúng vẫn tới dưới dạng TĂNG
     không giải thích được. Chính sách user: khi AIS đã cũ, `ticker_financial` là nguồn tốt nhất.
 
+    §NHÁNH LIVE — ĐIỀU KIỆN 1b ĐẢO CHIỀU (2026-08-20, chỉ đạo user, job Taylor_20260820_015520)
+    ---------------------------------------------------------------------------------------
+    `live=True` ⇒ neo AIS CHƯA chứng nhận KHÔNG còn là lý do từ chối; điều kiện 2 và 3 vẫn phải
+    đạt, nên BCTC chỉ thắng khi nó MỚI HƠN ngày neo AIS và neo đó đã quá một kỳ báo cáo.
+
+    Vì sao đảo: luật vòng 4 đọc "neo AIS trượt cổng" thành "nghi ngờ TẤT CẢ", nhưng chuỗi AIS
+    gãy/không đối chiếu được là bằng chứng chống lại CHÍNH AIS, không phải chống lại BCTC — nó
+    làm BCTC ĐÁNG TIN HƠN một cách tương đối, không phải kém hơn. Bằng chứng sống, TCB 2026-08-20:
+    dòng quý 2026-07-21 = 7.086.240.414 bị cổng loại 2 tuần liền (lệch +0,30% so với chuỗi AIS);
+    ngày 08-05 AIS mới về và `shares_total_after` của nó = **đúng con số BCTC đã nói từ 07-21**.
+    BCTC đi TRƯỚC AIS và ĐÚNG. Hai ca đang bị kẹt cùng hình dạng, cùng ngày: EVF (AIS 2024-12-06
+    uncertified, BCTC 2026-07-21 = 760.565.802 mới hơn **1,5 năm**) và HHV (AIS 2026-05-07
+    uncertified, BCTC 2026-07-31 = 574.511.888).
+
+    Vẫn TỪ CHỐI khi BCTC CŨ HƠN neo AIS uncertified (điều kiện 3 — đó là đi LÙI), và vẫn từ chối
+    khi neo AIS còn tươi ≤ `FIN_FALLBACK_MAX_AIS_AGE_DAYS` (điều kiện 2 — sở vừa phát biểu thì
+    không có gì để thay thế, kể cả khi phát biểu đó chưa đối chiếu được). Cơ chế CHỨNG NHẬN
+    (`_ais_verdicts`/`_ais_certified`) KHÔNG bị xoá và cổng neo AIS ở cuối `oshares_at` KHÔNG đổi:
+    một neo AIS uncertified vẫn không bao giờ được phục vụ như `AIS_EXACT`. Chỉ đổi đúng một
+    hành vi: từ "trượt cổng ⇒ câm với mọi nguồn" sang "trượt cổng ⇒ nhường cho BCTC mới hơn".
+
+    ⚠️ PIT GIỮ NGUYÊN. `oshares_at()` mặc định `live=False`, nên `oshares_pit`/backtest không đổi
+    một số nào: ở đó fail-closed vẫn đắt hơn look-ahead. Chỉ `corp_action_daily.py` (nhánh phục vụ
+    LIVE, publish snapshot hằng ngày) truyền `live=True`.
+
     ⚠️ CÁI GIÁ, ĐO ĐƯỢC, KHÔNG ĐƯỢC QUÊN: bỏ cổng này đồng thời nhận lại look-ahead thật. Trên
     246 mã `ticker_prune`, tại asof=2026-03-01 (có 5,5 tháng dữ liệu tương lai để đối chiếu) 12 mã
     đổi số và **3 mã mang chữ ký RESTATE** — giá trị phục vụ trùng KHÍT một AIS chỉ có hiệu lực
@@ -508,22 +533,45 @@ def _stale_fallback_verdict(q, a, ais_age_days, ais_certified):
     2.234.496.474 (AIS 2026-05-29). Không còn cổng point-in-time nào chặn chúng: chữ ký RESTATE
     cần chính AIS TƯƠNG LAI mới tính được. Consumer backtest phải tự đọc `method == "FIN_FALLBACK"`
     (`anchor_verified` luôn False) và tự quyết.
+
+    ⚠️ CÁI GIÁ RIÊNG CỦA NHÁNH LIVE, ĐO TRÊN CÙNG PHÉP ĐO (2026-08-20, job Taylor_20260820_015520,
+    script `mike/agents/Taylor/research/oshares_live_anchor_20260820/lookahead_cost_probe.py`,
+    kết quả `cost_20260301.json`). Rổ = 263 mã `ticker_prune` tại phiên cuối ≤ 2026-03-01, đối
+    chiếu bằng 5,5 tháng dữ liệu tương lai. CẢ HAI nhánh đo lại trên CÙNG rổ đó, vì rổ "246 mã"
+    của phép đo 08-19 không tái lập được và so hai con số trên hai rổ là so hai thứ khác nhau:
+      * ĐƯỢC: PIT từ chối **28/263** mã, LIVE từ chối **7/263** ⇒ nhánh LIVE cứu **21 mã**
+        (+8,0pp phủ). Cả 21 đều đi đúng một đường `AIS_UNCERTIFIED → FIN_FALLBACK`; KHÔNG mã nào
+        đổi số theo kiểu khác, tức nhánh mới không rò sang hành vi nào ngoài ca nó nhắm tới.
+      * MẤT: chữ ký RESTATE trên neo KHÔNG kiểm chứng được (`FIN_FALLBACK`/`ANCHOR_UNVERIFIED` —
+        con đường DUY NHẤT một số tương lai vào được câu trả lời) đi từ **4 mã** (ABB, HAH, NVL,
+        TDC) lên **5** — thêm ĐÚNG **1 mã: KBC** (941.754.759 = AIS 2026-06-25).
+      * KHÔNG ĐƯỢC TRÍCH con số "chữ ký RESTATE thô" (11 → 12): 7/11 ca của nhánh PIT có neo
+        `ANCHOR_ONLY`, tức dòng quý ĐÃ đối chiếu xong với chuỗi AIS — một mã không đổi số CP thì
+        AIS kế tiếp trùng khít một cách hoàn toàn vô tội, đó không phải look-ahead.
+      * Kiểm chứng chéo phép đo: `FIN_FALLBACK`-RESTATE của nhánh PIT ra ĐÚNG 3 mã ABB/HAH/NVL —
+        khớp tuyệt đối con số 3 ghim ở đoạn trên, đo độc lập trên một rổ khác.
+    ⇒ tỉ lệ đánh đổi 21 ăn 1. Con số phải nhắc lại khi ai đó muốn siết/nới nhánh này là **1 mã**,
+    không phải 12.
     """
     if a is None:
         return False, "không có neo AIS: dòng quý bị loại vì chữ ký RESTATE, không phải vì AIS cũ"
-    if not ais_certified:
-        return False, (f"neo AIS {a['effective_date']} CHƯA được chứng nhận ⇒ giữ nguyên luật "
-                       f"vòng 4 (từ chối trả lời), không đi vòng sang neo dòng quý")
+    if not ais_certified and not live:
+        return False, (f"neo AIS {a['effective_date']} CHƯA được chứng nhận ⇒ nhánh PIT giữ "
+                       f"nguyên luật vòng 4 (từ chối trả lời), không đi vòng sang neo dòng quý")
     if ais_age_days is None or ais_age_days <= FIN_FALLBACK_MAX_AIS_AGE_DAYS:
         return False, (f"neo AIS {a['effective_date']} còn tươi ({ais_age_days} ngày "
                        f"<= {FIN_FALLBACK_MAX_AIS_AGE_DAYS}) ⇒ không rơi về BCTC")
     if q["time"] <= a["effective_date"]:
         return False, (f"dòng quý {q['time']} CŨ hơn neo AIS {a['effective_date']} ⇒ rơi về BCTC "
                        f"là đi LÙI")
+    uncert = ("" if ais_certified else
+              " — neo AIS này CHƯA chứng nhận, và đó là lý do TĂNG chứ không giảm độ tin của "
+              "BCTC (nhánh LIVE, chính sách user 2026-08-20)")
     return True, (f"neo AIS {a['effective_date']} cũ {ais_age_days} ngày (> "
                   f"{FIN_FALLBACK_MAX_AIS_AGE_DAYS}); dòng quý {q['time']} = "
                   f"{float(q['OShares']):,.0f} mới hơn ⇒ BCTC là phát biểu tốt nhất về số CP "
-                  f"đang lưu hành (chính sách user 2026-08-19, KHÔNG xét chiều tăng/giảm)")
+                  f"đang lưu hành (chính sách user 2026-08-19, KHÔNG xét chiều tăng/giảm)"
+                  + uncert)
 
 
 # Verdict nào của một neo AIS thì ĐƯỢC PHỤC VỤ. Đây là dòng CHÍNH SÁCH của cổng — mọi thứ khác
@@ -654,13 +702,20 @@ def _ais_certified(corp, ticker, asof, anchor_date):
         return False
 
 
-def oshares_at(tickers, asof, _cache=None):
+def oshares_at(tickers, asof, _cache=None, live=False):
     """{ticker: dict} — shares outstanding at `asof`, with the derivation shown.
 
     Each value carries `value`, `method`, `anchor_date`, `anchor_value`, `anchor_source` and the
     list of ISS events applied, so any number can be re-derived by hand from the output alone.
     `value is None` whenever the method is `UNKNOWN_RATIO`, `NO_ANCHOR` or `AIS_UNCERTIFIED` —
     callers MUST handle that; there is no "best effort" number behind it.
+
+    `live=False` (mặc định) = nhánh POINT-IN-TIME, dùng cho backtest/`oshares_pit`: không đổi một
+    số nào so với trước 2026-08-20. `live=True` = nhánh PHỤC VỤ HÔM NAY: nới ĐÚNG MỘT điều kiện —
+    neo AIS chưa chứng nhận không còn chặn được một dòng BCTC MỚI HƠN nó (xem §NHÁNH LIVE trong
+    `_stale_fallback_verdict`). Nới ở đây là nhận thêm look-ahead để đổi lấy độ phủ, nên nó CHỈ
+    hợp lệ khi câu hỏi là "hôm nay có bao nhiêu CP" — không bao giờ hợp lệ trong một backtest.
+    Cổng chứng nhận neo AIS ở cuối hàm KHÔNG bị `live` chạm tới ở cả hai nhánh.
     """
     if isinstance(tickers, str):
         tickers = [tickers]
@@ -698,7 +753,7 @@ def oshares_at(tickers, asof, _cache=None):
                 # certification is read HERE, not only at the gate below: once a quarterly
                 # anchor wins, `anchor_src` is no longer AIS and that gate never runs.
                 a_ok = bool(a) and _ais_certified(corp, tk, asof, a["effective_date"])
-                allow, fb_why = _stale_fallback_verdict(q, a, ais_age_days, a_ok)
+                allow, fb_why = _stale_fallback_verdict(q, a, ais_age_days, a_ok, live=live)
                 if allow:
                     anchors.append((q["time"], float(q["OShares"]), "ticker_financial"))
                     unverified = True          # served, but the gate never cleared it
@@ -707,6 +762,10 @@ def oshares_at(tickers, asof, _cache=None):
                                     "ais_anchor_date": a["effective_date"] if a else None,
                                     "ais_age_days": ais_age_days,
                                     "fin_expected_from_ais": expected,
+                                    # ghi RA bản ghi, không chỉ vào chuỗi lý do: người đọc snapshot
+                                    # phải lọc được "số này chỉ tồn tại nhờ nhánh LIVE" bằng một
+                                    # trường, không phải bằng cách grep tiếng Việt trong `reason`.
+                                    "fin_anchor_ais_certified": a_ok, "fin_branch_live": bool(live),
                                     "fin_explain_note": why, "fin_fallback_reason": fb_why}
                 else:
                     rejected.append({"source": "ticker_financial", "date": q["time"],
@@ -1166,6 +1225,143 @@ def _selfcheck() -> int:
           f"verified={cc1.get('anchor_verified')} fin_fallback={cc1.get('fin_fallback')} "
           f"method={cc1['method']}")
 
+    print("== NHÁNH LIVE vs PIT: neo AIS uncertified nhường cho BCTC MỚI HƠN (2026-08-20) ==")
+    # HERMETIC — CỐ Ý, không chạm BQ. Các ca dưới kiểm LUẬT RẼ NHÁNH, và luật thì không được rot
+    # theo dữ liệu sống (§23 hệ luận 1): hình dạng lấy từ ca thật EVF/HHV/TCB/HAH ngày 2026-08-20
+    # nhưng số được ĐÓNG BĂNG ở đây. Ca thật, đo trên BQ sống, nằm ở khối "CÁI GIÁ" ngay dưới.
+    def _A(tk, eff, total, delta=None):
+        return {"ticker": tk, "event_code": "AIS", "exright_date": None, "effective_date": eff,
+                "exercise_ratio": None, "issue_method_name_vi": None, "shares_delta": delta,
+                "issue_volumn": None, "listing_date": None, "shares_total_after": total,
+                "title": f"AIS {tk} {eff}"}
+
+    def _I(tk, ex, vol=None, ratio=None, method="Trả Cổ tức bằng Cổ phiếu"):
+        return {"ticker": tk, "event_code": "ISS", "exright_date": ex, "effective_date": None,
+                "exercise_ratio": ratio, "issue_method_name_vi": method, "shares_delta": None,
+                "issue_volumn": vol, "listing_date": None, "shares_total_after": None,
+                "title": f"ISS {tk} {ex}"}
+
+    def _Q(tk, t, sh):
+        return {"ticker": tk, "time": t, "OShares": sh}
+
+    # Neo AIS "uncertified" dựng bằng hình dạng ĐÃ ĐO của cổng: một transition có shares_delta
+    # MÂU THUẪN với neo trước (ứng viên (b) dựng được và sai) ⇒ verdict UNVERIFIED. KHÔNG
+    # monkeypatch `_ais_certified` — vá cổng đi thì ca này không còn chứng minh được gì.
+    #   EVF: AIS ...-12-06 uncertified, BCTC 1,5 NĂM SAU = 760.565.802, không giải thích được.
+    LV_ASOF = "2026-08-20"
+    EVF_C = ([_Q("EVFX", "2026-07-21", 760_565_802.0)],
+             [_A("EVFX", "2023-06-01", 100_000_000.0),
+              _A("EVFX", "2024-12-06", 704_248_289.0, delta=1_000_000.0)])
+    for tag, want_live in (("PIT", None), ("LIVE", 760_565_802.0)):
+        r = oshares_at(["EVFX"], LV_ASOF, _cache=EVF_C, live=(tag == "LIVE"))["EVFX"]
+        check(f"LV1{'' if tag == 'PIT' else 'b'}. [{tag}] neo AIS 2024-12-06 CHƯA chứng nhận + "
+              f"BCTC 2026-07-21 mới hơn 1,5 năm ⇒ "
+              + ("TỪ CHỐI (AIS_UNCERTIFIED) — backtest không đổi một số nào"
+                 if tag == "PIT" else "phục vụ BCTC 760.565.802 (FIN_FALLBACK)"),
+              r["value"] == want_live
+              and r["method"] == ("AIS_UNCERTIFIED" if tag == "PIT" else "FIN_FALLBACK"),
+              f"{fmt(r['value'])} [{r['method']}]")
+    r = oshares_at(["EVFX"], LV_ASOF, _cache=EVF_C, live=True)["EVFX"]
+    check("LV1c. số phục vụ qua nhánh LIVE mang CỜ TRUY VẾT: anchor_verified=False, "
+          "fin_anchor_ais_certified=False, fin_branch_live=True — consumer lọc được bằng FIELD, "
+          "không phải bằng cách đọc tiếng Việt trong `reason`",
+          r.get("anchor_verified") is False and r.get("fin_anchor_ais_certified") is False
+          and r.get("fin_branch_live") is True,
+          f"verified={r.get('anchor_verified')} cert={r.get('fin_anchor_ais_certified')} "
+          f"live={r.get('fin_branch_live')}")
+
+    #   HHV: y hệt, NHƯNG có 1 ISS ex 07-09 nằm TRƯỚC ngày dòng quý 07-31 ⇒ BCTC đã chứa nó rồi.
+    #   Đây là ca CHỐNG ĐẾM HAI LẦN: lăn thêm ISS đó lên neo BCTC sẽ ra 601.857.480, sai +4,76%.
+    HHV_C = ([_Q("HHVX", "2026-07-31", 574_511_888.0)],
+             [_A("HHVX", "2024-01-05", 400_000_000.0),
+              _A("HHVX", "2026-05-07", 473_755_528.0, delta=1_000_000.0),
+              _I("HHVX", "2026-07-09", vol=27_345_592.0, ratio=0.05)])
+    r = oshares_at(["HHVX"], LV_ASOF, _cache=HHV_C, live=True)["HHVX"]
+    check("LV2. [CHỐNG ĐẾM HAI LẦN] ISS ex 07-09 nằm TRƯỚC neo BCTC 07-31 ⇒ KHÔNG lăn lại; giá "
+          "trị đúng bằng dòng quý 574.511.888, KHÔNG phải 601.857.480",
+          r["value"] == 574_511_888.0 and r["events_applied"] == [],
+          f"{fmt(r['value'])} +{len(r['events_applied'])} ISS")
+    HHV_C2 = (HHV_C[0], HHV_C[1] + [_I("HHVX", "2026-08-14", vol=5_000_000.0)])
+    r2 = oshares_at(["HHVX"], LV_ASOF, _cache=HHV_C2, live=True)["HHVX"]
+    check("LV2b. CHỨNG MINH NGƯỢC cho LV2 — ISS ex 08-14 nằm SAU neo BCTC 07-31 thì PHẢI được "
+          "lăn (nếu không, LV2 xanh chỉ vì hàm không bao giờ lăn gì)",
+          r2["value"] == 579_511_888.0 and len(r2["events_applied"]) == 1,
+          f"{fmt(r2['value'])} +{len(r2['events_applied'])} ISS")
+
+    #   TCB: neo AIS uncertified nhưng CÒN TƯƠI (15 ngày) ⇒ điều kiện 2 vẫn chặn ở CẢ HAI nhánh.
+    TCB_C = ([_Q("TCBX", "2026-07-21", 7_086_240_414.0)],
+             [_A("TCBX", "2025-12-01", 7_064_851_739.0),
+              _A("TCBX", "2026-08-05", 7_086_240_414.0, delta=1.0)])
+    why_pit = (oshares_at(["TCBX"], LV_ASOF, _cache=TCB_C, live=False)["TCBX"]
+               .get("rejected_anchors") or [{}])[0].get("fallback_refused", "")
+    r_live = oshares_at(["TCBX"], LV_ASOF, _cache=TCB_C, live=True)["TCBX"]
+    why_live = (r_live.get("rejected_anchors") or [{}])[0].get("fallback_refused", "")
+    check("LV3. [PIT] neo AIS uncertified ⇒ chặn ngay ở điều kiện 1b, KHÔNG bao giờ tới điều "
+          "kiện 2 (thứ tự điều kiện là một phần của luật, không phải chi tiết cài đặt)",
+          "CHƯA được chứng nhận" in why_pit, why_pit[:90])
+    check(f"LV3b. [LIVE] ĐIỀU KIỆN 2 CÒN NGUYÊN — 1b đã nới nên luồng chạy tới đây, và neo AIS "
+          f"mới 15 ngày (<= {FIN_FALLBACK_MAX_AIS_AGE_DAYS}) VẪN chặn: sở vừa phát biểu thì "
+          f"không có gì để thay thế, kể cả khi phát biểu đó chưa đối chiếu được",
+          "còn tươi" in why_live, why_live[:90])
+
+    #   Đi LÙI: neo AIS uncertified MỚI HƠN dòng quý ⇒ điều kiện 3 chặn ở cả hai nhánh.
+    BACK_C = ([_Q("BWDX", "2024-01-31", 50_000_000.0)],
+              [_A("BWDX", "2023-01-05", 40_000_000.0),
+               _A("BWDX", "2026-05-07", 90_000_000.0, delta=1.0)])
+    r = oshares_at(["BWDX"], LV_ASOF, _cache=BACK_C, live=True)["BWDX"]
+    why = (r.get("rejected_anchors") or [{}])[0].get("fallback_refused", "")
+    check("LV4. ĐIỀU KIỆN 3 CÒN NGUYÊN — dòng quý 2024-01-31 CŨ hơn neo AIS 2026-05-07 ⇒ nhánh "
+          "LIVE vẫn TỪ CHỐI (rơi về BCTC lúc này là đi LÙI)",
+          r["value"] is None and r["method"] == "AIS_UNCERTIFIED" and "đi LÙI" in why,
+          f"{fmt(r['value'])} [{r['method']}] {why[:80]}")
+
+    #   HAH thật: dòng quý 02-02 mang số của AIS 05-27, neo AIS trước đó (09-09) đã cũ 146 ngày
+    #   ⇒ FIN_FALLBACK phục vụ chính con số look-ahead. Đây là CÁI GIÁ CÓ TỪ 2026-08-19, KHÔNG
+    #   phải của nhánh LIVE — pin lại để một hồi quy sau này đổ nhầm tội cho bản vá này.
+    HAH_C = ([_Q("HAHX", "2026-02-02", 185_840_401.0)],
+             [_A("HAHX", "2025-09-09", 168_861_212.0),
+              _A("HAHX", "2026-05-27", 185_840_401.0)])
+    hah = {tag: oshares_at(["HAHX"], "2026-03-01", _cache=HAH_C,
+                           live=(tag == "LIVE"))["HAHX"] for tag in ("PIT", "LIVE")}
+    check("LV5. ca HAH (look-ahead ĐÃ CÓ từ chính sách 2026-08-19) ra Y HỆT nhau ở hai nhánh ⇒ "
+          "nhánh LIVE KHÔNG làm ca này tệ thêm; nó cũng không sửa được ca này",
+          hah["PIT"]["value"] == hah["LIVE"]["value"] == 185_840_401.0
+          and hah["PIT"]["method"] == hah["LIVE"]["method"] == "FIN_FALLBACK",
+          f"PIT {fmt(hah['PIT']['value'])} [{hah['PIT']['method']}] · "
+          f"LIVE {fmt(hah['LIVE']['value'])} [{hah['LIVE']['method']}]")
+
+    #   Chữ ký RESTATE — cổng look-ahead point-in-time DUY NHẤT còn lại: không có AIS nào TRƯỚC
+    #   dòng quý, và dòng quý trùng khít một AIS SAU nó (đã nhìn thấy được tại `asof`).
+    RST_C = ([_Q("RSTX", "2026-02-02", 185_840_401.0)],
+             [_A("RSTX", "2026-05-27", 185_840_401.0)])
+    for tag in ("PIT", "LIVE"):
+        r = oshares_at(["RSTX"], LV_ASOF, _cache=RST_C, live=(tag == "LIVE"))["RSTX"]
+        why = (r.get("rejected_anchors") or [{}])[0].get("reason", "")
+        check(f"LV5{'b' if tag == 'PIT' else 'c'}. [{tag}] CỔNG CHỮ KÝ RESTATE CÒN NGUYÊN — dòng "
+              f"quý 02-02 bị LOẠI vì trùng khít AIS 05-27, và neo thắng là AIS chứ KHÔNG phải "
+              f"dòng quý (nhánh LIVE không mở đường vòng nào ở đây)",
+              "RESTATE" in why and r["anchor_source"] == "corporate_action.AIS"
+              and r["anchor_date"] == "2026-05-27",
+              f"anchor={r['anchor_date']} ({r['anchor_source']}) · {why[:70]}")
+
+    #   Cổng CHỨNG NHẬN NEO AIS ở cuối `oshares_at` KHÔNG bị `live` chạm tới: không có dòng quý
+    #   nào để nhường thì neo AIS uncertified vẫn bị từ chối y như trước.
+    NOQ_C = ([], [_A("NOQX", "2023-01-05", 40_000_000.0),
+                  _A("NOQX", "2025-01-05", 90_000_000.0, delta=1.0)])
+    r = oshares_at(["NOQX"], LV_ASOF, _cache=NOQ_C, live=True)["NOQX"]
+    check("LV6. CỔNG CHỨNG NHẬN NEO AIS KHÔNG BỊ NỚI — không có dòng quý để nhường thì neo AIS "
+          "uncertified vẫn AIS_UNCERTIFIED dưới live=True (chỉ đổi HÀNH VI KHI TRƯỢT CỔNG, "
+          "không xoá cổng)",
+          r["value"] is None and r["method"] == "AIS_UNCERTIFIED"
+          and r.get("uncertified_value") == 90_000_000.0,
+          f"{fmt(r['value'])} [{r['method']}] uncertified={fmt(r.get('uncertified_value'))}")
+
+    check("LV7. neo AIS ĐƯỢC chứng nhận ⇒ hai nhánh trả Y HỆT nhau (nhánh LIVE chỉ đụng đúng "
+          "nhánh uncertified, không phải một chính sách khác cho mọi mã)",
+          all(oshares_at([t], LV_ASOF, _cache=c, live=False)[t]["value"]
+              == oshares_at([t], LV_ASOF, _cache=c, live=True)[t]["value"]
+              for t, c in (("TCBX", TCB_C), ("HAHX", HAH_C))))
+
     print("== CÁI GIÁ ĐO ĐƯỢC: 3 ca RESTATE nay được phục vụ (không còn cổng nào chặn) ==")
     # Đo 2026-08-19 trên 246 mã ticker_prune tại asof=2026-03-01 (có 5,5 tháng tương lai để đối
     # chiếu): 12 mã đổi số, 3 mã mang chữ ký RESTATE — giá trị phục vụ trùng KHÍT một AIS chỉ có
@@ -1180,9 +1376,21 @@ def _selfcheck() -> int:
           f"ABB {fmt(cost['ABB']['value'])} [{cost['ABB']['method']}] · "
           f"NVL {fmt(cost['NVL']['value'])} [{cost['NVL']['method']}]")
 
+    # CÁI GIÁ RIÊNG của nhánh LIVE, đo cùng ngày trên cùng rổ: đúng MỘT mã look-ahead mới.
+    kbc = oshares_at(["KBC"], "2026-03-01", live=True)["KBC"]
+    kbc_pit = oshares_at(["KBC"], "2026-03-01", live=False)["KBC"]
+    check("F6b. [CÁI GIÁ NHÁNH LIVE] KBC 2026-03-01: PIT từ chối, LIVE phục vụ 941.754.759 = "
+          "ĐÚNG số của AIS 2026-06-25 (look-ahead). Đây là mã DUY NHẤT nhánh LIVE thêm vào tập "
+          "look-ahead trên rổ 263 mã — đổi lại 21 mã được phủ. Pin để lần siết/nới sau nhìn thấy "
+          "cả hai vế",
+          kbc_pit["value"] is None and kbc["value"] == 941_754_759.0
+          and kbc["method"] == "FIN_FALLBACK",
+          f"PIT {fmt(kbc_pit['value'])} [{kbc_pit['method']}] · "
+          f"LIVE {fmt(kbc['value'])} [{kbc['method']}]")
+
     print("== Bất biến chung: value is None ⟺ method ∈ {UNKNOWN_RATIO, NO_ANCHOR, AIS_UNCERTIFIED} ==")
     every = [h, m, idc, fpt5, tcb_boom, vre, vre_off, na, cc1,
-             h5, h5b, hh1, hh2,
+             h5, h5b, hh1, hh2, kbc, kbc_pit,
              *cost.values(), *ctrl.values(), *series.values()]
     check("10. không bao giờ trả số kèm nhãn 'không biết', và ngược lại",
           all((r["value"] is None)
