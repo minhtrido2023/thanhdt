@@ -113,6 +113,25 @@ id="${1:?usage: dispatch.sh <agent_id> \"prompt\" [--bg] [--timeout SEC] [--retr
 prompt="${2:?usage: dispatch.sh <agent_id> \"prompt\" [--bg] [--timeout SEC] [--retries N]}"
 shift 2
 
+# GUARD PROMPT RỖNG/QUÁ NGẮN — chặn NGAY tại người gọi, trước khi tốn 1 phiên headless.
+# Sự cố thật 2026-08-20T16:22Z (job Wags_20260820_162234): một dispatch chỉ có nội dung "x"
+# chạy hết cả một phiên agent, agent (đúng) từ chối đoán việc và post event `question`
+# "dispatch-rong" — câu hỏi đó KHÔNG có nội dung nào để user quyết, nhưng vẫn nằm trong
+# backlog 48h của ops_health_check #5 và làm wags_autofix dispatch lặp. Rẻ nhất là fail
+# NGAY, ồn ào, ở đúng chỗ gõ nhầm.
+# Ngưỡng 8 ký tự (sau khi trim) là số ĐO ĐƯỢC, không phải đoán: prompt ngắn nhất từng
+# dispatch thật trong 1.781 job record là "ping test" = 9 ký tự. Ngưỡng này chưa từng chặn
+# nhầm một dispatch nào trong toàn bộ lịch sử job board.
+# Escape hatch cho selfcheck/test: MIKE_ALLOW_TINY_PROMPT=1.
+_prompt_trimmed="$(printf '%s' "$prompt" | tr -d '[:space:]')"
+if [ "${MIKE_ALLOW_TINY_PROMPT:-0}" != "1" ] && [ "${#_prompt_trimmed}" -lt 8 ]; then
+  echo "ERROR: dispatch bị HUỶ — prompt rỗng/quá ngắn (${#_prompt_trimmed} ký tự sau khi trim): '$prompt'" >&2
+  echo "   Agent không đoán được việc cần làm; một dispatch như vậy chỉ tốn 1 phiên headless" >&2
+  echo "   rồi đẻ ra 1 câu hỏi treo trong backlog. Gõ lại nội dung việc cụ thể." >&2
+  echo "   (Cố ý test với prompt siêu ngắn? đặt MIKE_ALLOW_TINY_PROMPT=1.)" >&2
+  exit 1
+fi
+
 bg=""
 TIMEOUT=""
 RETRIES=1
