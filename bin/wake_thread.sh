@@ -14,26 +14,19 @@
 # no 60s floor (that floor is a policy ScheduleWakeup's harness bridge applies
 # client-side, not a constraint of the underlying /api/tasks endpoint).
 #
-# Used by dispatch.sh's _bg_wrapper on job completion (see MIKE.md §8 rev
-# 2026-08-15) so a live Mike session waiting on a dispatched job is woken the
-# moment the job actually finishes, instead of only via its own blind-interval
-# ScheduleWakeup ladder. Kept as a SEPARATE primitive from notify_thread.sh
-# (not a replacement) — callers that just want a visible completion message with
-# no resume (e.g. informational report channels with no live waiting session)
-# should keep using notify_thread.sh; waking a thread with no active waiter
-# spins up a brand-new Claude/Codex session there (ccdb starts fresh when no
-# session record exists for that thread), which is wasted spend, not a bonus.
+# ⚠️ MANUAL-ONLY PRIMITIVE từ 2026-08-21. TRƯỚC ĐÂY dispatch.sh/_bg_wrapper,
+# verify_finding.sh và wakeup_reconcile.py đều gọi tự động khi job xong. TẤT CẢ đã
+# GỠ (xem MIKE.md §8 "kết quả là DỮ LIỆU, không phải lượt đánh thức"): auto-push là
+# nguồn chung của cả 3 lớp lỗi — miss-wake, double-answer, và resume-session-chết
+# (08-21). Giờ script này KHÔNG có caller tự động nào; giữ lại như công cụ TAY hiếm
+# khi cần chủ động resume một thread mà bạn BIẾT CHẮC có session sống đang chờ. Đánh
+# thức thread không có session sống ⇒ ccdb mở phiên MỚI (tốn phí, không phải bonus).
+# An toàn hơn trước: ccdb đã tự retry với session mới khi gặp "No conversation found"
+# (commit ccdb 6a709e7, 2026-08-21) nên resume session cũ/chết không còn báo lỗi.
 #
-# Fails soft (never breaks the caller's completion path): unreachable API,
-# bad thread_id, or task-name collision all just log to
-# logs/wake_thread_errors.log and exit 1. File log đó có ĐÚNG MỘT consumer:
-# bin/wakeup_reconcile.py (cron */5, thêm 2026-08-20) — nó đếm dòng MỚI kể từ lần chạy
-# trước rồi báo Trading Daily, và ĐỘC LẬP với việc đó nó tự đối chiếu bất biến "job
-# terminal chưa replied ⇒ thread phải còn wakeup pending" nên một lượt push chết vẫn
-# được cứu trong ≤5'. (Câu cũ trong header này nói "ops_health_check.sh reads both" là
-# SAI — kiểm chứng bằng grep toàn bin/ ngày 2026-08-20, và 5 ngày im lặng đó là root
-# cause của sự cố 08-20. Đừng viết lại một câu "X giám sát Y" mà không grep.)
-# Kiến trúc: agents/Mike/research/wakeup_architecture_redesign_20260820.md
+# Fails soft: unreachable API / bad thread_id / task-name collision → log
+# logs/wake_thread_errors.log + exit 1. (Reconciler đã gỡ 2026-08-21 — không còn
+# consumer tự động nào của log lỗi đó; daily_retro chỉ đọc để thống kê.)
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 

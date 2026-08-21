@@ -207,17 +207,16 @@ PY
     MIKE_JOB_OWNER="$job_id" python3 "$ROOT/bin/mike_json.py" job-set "$JOBS_DIR" "$job_id" \
       status="$_jstatus" ended_at="$(date +%s)" exit_code="$_claude_rc" \
       result_summary="verdict=$verdict" >/dev/null
-    # Active wake (same claim-reply protocol as MIKE.md §8.4, in sync with the exit-3 gate
-    # job-claim-reply now enforces): only fires when the source finding's OWN job named a
-    # Discord topic — verify_finding.sh has none of its own to guess, and guessing is exactly
-    # the bug class §8 exists to prevent.
-    if [ -n "$_verify_src_tid" ]; then
-      _wake_prompt="Đầu tiên: $ROOT/bin/jobs.sh claim-reply $job_id → exit 1 → ScheduleWakeup(noop:true,stop:true), DỪNG. exit 0 → [logic poll + post bình thường]. exit 2 → báo job record thiếu, đừng im lặng. exit 3 → job chưa xong, post progress bình thường (KHÔNG claim, KHÔNG coi là đã reply), tiếp tục poll. quant-skeptic đã xong verify \"$finding_topic\" (job \`${job_id}\`): verdict=$verdict."
-      "$ROOT/bin/wake_thread.sh" "$_verify_src_tid" "$_wake_prompt" "$job_id" 2>/dev/null || true
-    fi
+    # (2026-08-21) Push-wake GỠ BỎ — cùng lý do dispatch.sh/MIKE.md §8: kết quả verify là
+    # DỮ LIỆU (event `verification` trên bus + notify dưới đây), không cần spin phiên Mike để
+    # resume. Nếu Mike đang chờ verdict để wire thì Mike tự đặt ScheduleWakeup.
   fi
 
   [ -n "$bg" ] && "$ROOT/bin/notify.sh" "[verify] $finding_topic → $verdict" 2>/dev/null || true
+  # Báo thẳng verdict vào topic của finding gốc (nếu có) — thay cho push-wake đã gỡ.
+  [ -n "$_verify_src_tid" ] && "$ROOT/bin/notify_thread.sh" \
+    "🔎 quant-skeptic xong verify \"$finding_topic\" (job \`${job_id}\`): **verdict=$verdict**. Log: $log" \
+    "$_verify_src_tid" 2>/dev/null || true
 }
 
 if [ -n "$bg" ]; then

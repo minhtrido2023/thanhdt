@@ -91,141 +91,58 @@ prompt = tiếp tục task đang dở.
 được từ bên ngoài. KHÔNG nói "chắc chắn sẽ tự resume" — nói rõ "đã đặt cron trong phiên, xác suất
 cao sẽ tự chạy tiếp, nhưng nếu phiên tôi restart giữa chừng thì cron này mất, anh vẫn cần nhắc."
 
-**8. Fast wake-on-completion sau `dispatch.sh ... --bg`**
+**8. Sau `dispatch.sh ... --bg`: kết quả là DỮ LIỆU, KHÔNG phải lượt đánh thức (viết lại 2026-08-21)**
 
-> **PUSH giờ là tín hiệu CHÍNH, ladder giờ là LƯỚI AN TOÀN (2026-08-15).** `_bg_wrapper` tự gọi
-> `bin/wake_thread.sh` khi job `from=Mike` xong (done/failed/timeout) → `POST /api/tasks` ccdb
-> (`run_immediately=true`, cùng nguyên lý ScheduleWakeup, gọi từ ngoài) → master loop 30s
-> (`claude_discord/cogs/scheduler.py`) resume Mike trong **~30s sau khi job THẬT SỰ xong**. Verify
-> thật (job `Taylor_20260815_005649`): task tạo đúng, nội dung đúng, và 1 lần TRÚNG timing khi
-> chưa kịp xoá test task — resume đúng thread/prompt trong cửa sổ 30s.
-> **Đổi cách đặt ladder**: vẫn `ScheduleWakeup` ngay sau `dispatch.sh --bg` như cũ (kỷ luật §8
-> gốc không đổi) — nhưng giờ CHỈ 1 lần, ở delay RỘNG (`wakeup_profile` hint hoặc trần 1200s),
-> không cần ladder sát 240→480→900 nữa vì push thường tới trước. Ladder tăng dần cũ CHỈ quay lại
-> khi tỉnh ở mốc rộng mà job VẪN chưa `done` (push đã trễ/fail) — lúc đó nó là lưới an toàn CỦA
-> lưới an toàn. Job không phải `from=Mike` (agent khác dispatch) → push không áp dụng, dùng
-> nguyên ladder gốc bên dưới.
-> ⚠️ Push fail-soft (lỗi ghi `logs/wake_thread_errors.log`, không gãy `_bg_wrapper`) — API
-> `127.0.0.1:8199` sập đúng lúc đó = mất push, không cảnh báo tức thời. **Luôn đặt CẢ HAI**
-> (push tự động + ScheduleWakeup lưới an toàn), đừng bỏ ScheduleWakeup vì "đã có push".
-> Lần push THÀNH CÔNG ghi `logs/wake_thread.log` (`SUCCESS | job_id= thread_id= task_id=`,
-> thêm 2026-08-17): trước đó chỉ nhánh lỗi có log, nên "push chưa từng chạy" và "push chạy
-> ngon" nhìn giống hệt nhau từ trong repo này — audit phải mượn log ccdb ở repo khác.
-> ⚠️ Trường `job_id=` trong file log đó là **tham số 3 truyền vào `wake_thread.sh`**, KHÔNG
-> phải luôn là job_id thuần: từ 2026-08-20 có call site thứ ba (`wakeup_reconcile.fire_wake`)
-> truyền `<job_id>-reconcile<lần bắn>` — bắt buộc phải khác nhau vì cột `name` của
-> `scheduled_tasks` là UNIQUE. Parser nào cần job_id thật thì cắt hậu tố `-reconcile\d+`.
-
-> **TẦNG THỨ BA — RECONCILER level-triggered (thêm 2026-08-20, `bin/wakeup_reconcile.py`, cron
-> `*/5`).** Push và ladder đều là **edge**: mất cạnh (push chết vì encoding/ccdb restart, ladder bị
-> ccdb xoá, Mike quên đặt) = thread ngủ VÔ HẠN, không ai biết (sự cố 08-20, user tự phát hiện sau
-> 12'). Reconciler không thêm cạnh — nó so *trạng thái mong muốn vs thực tế* mỗi 5 phút: job
-> terminal `from=Mike` chạy NỀN, có thread, chưa `replied_at`, xong quá 3' mà thread không còn
-> one-shot wakeup nào pending và session không `running` ⇒ nó gọi lại `wake_thread.sh`. Hệ quả
-> cho bạn: **lỗi wake-up của job nền `from=Mike` có thread ghim, terminal trong vòng
-> `RESCUE_MAX_AGE` (4h), suy biến thành "trễ ≤ 5 phút", không còn "im lặng vô hạn"** — nhưng
-> ĐỪNG vì thế mà bỏ `ScheduleWakeup` (mục 1 dưới đây): reconciler là lưới CUỐI, chậm hơn cả
-> ladder, và nó có TRẦN. ⚠️ Job **cũ hơn 4h** thì reconciler **KHÔNG tự đánh thức** — chỉ báo
-> Trading Daily đúng 1 lần rồi im (arch-reviewer killer objection trước-commit 08-20: dry-run
-> thật cho ra job 43 GIỜ tuổi vẫn bị bắn vào kênh duyệt plan tiền thật; sau bất kỳ khoảng mù
-> nào — vd ccdb restart — reconciler sẽ dựng hàng loạt phiên Claude post KẾT QUẢ CŨ vào đúng
-> kênh money-adjacent nếu không có trần tuổi này). Job quá cũ báo "quá cũ, KHÔNG tự đánh thức"
-> ⇒ xử TAY qua `bin/jobs.sh status <job_id>`.
-> **Khi bạn nhận prompt wake mở đầu `[WAKEUP-RECONCILER]`**: xử lý y hệt một lượt wake bình thường
-> — `jobs.sh claim-reply <job_id>` là dòng đầu, exit 1 thì `ScheduleWakeup(noop:true,stop:true)` và
-> dừng. Khác biệt duy nhất: prompt đó nghĩa là **tín hiệu wake gốc đã mất**, nên nếu bạn thấy nó
-> nhiều lần trong ngày thì đó là bug ở tầng edge cần báo, không phải chuyện thường
-> (`daily_retro.sh` đã tự đếm và ghi vào retro hằng ngày).
-> ⚠️ **Reconciler CÓ TRẦN CỨNG, không phải bảo hiểm vô hạn**: tối đa 3 lượt cứu cho MỘT job
-> (cách nhau ≥15'), tối đa 3 wake mỗi chu kỳ. Hết trần nó DỪNG HẲN job đó và báo Trading Daily
-> ("wakeup-reconciler bỏ cuộc") — vì ccdb xoá row one-shot TRƯỚC khi Claude chạy, nên "được đánh
-> thức" không đảm bảo "sẽ claim", và không có trần thì nó bắn lại mỗi 5' vô tận.
-
-> **§8 rút gọn — 3 dòng phải nhớ (thêm 2026-07-20, sau sự cố `missed-wakeup-after-bg-dispatch`,
-> xem `kb/incidents/2026-07/2026-07-20-missed-wakeup-after-bg-dispatch.md` + job `Wags_20260720_121120`):**
-> 1. `dispatch.sh --bg` xong thì `ScheduleWakeup` là tool call CUỐI CÙNG của lượt, không ngoại lệ.
->    **Lần tỉnh ĐẦU: tra `state/wakeup_profile.json`** (sinh mỗi đêm bởi `bin/wakeup_profile.py`)
->    theo khoá `"<to>|<model>|<effort>"` — có bucket → `median_s` kẹp trong [90s, 1200s]; không có
->    → `global_fallback.median_s` kẹp tương tự; **file thiếu/hỏng → 240-270s như cũ, không bao giờ
->    chặn**. Fan-out nhiều job → `min(delay)` cả batch.
->    **Sửa 2026-08-15**: từ lần tỉnh thứ 2 trở đi CHỈ áp dụng khi push (ở trên) đã trễ/fail —
->    lúc đó mới TĂNG DẦN (240→480→900→trần 1200s), không quay lại ngắn trừ khi có job MỚI trong
->    batch. *(Bỏ ladder cố định "3 lần tỉnh đầu 240-270s": đo trên 1192 job thật, ladder cố định
->    tỉnh thừa 21% và vẫn trễ hơn — job `Winston` đồng bộ median 16s vs `Wags|opus|high` median
->    751s không thể dùng chung 1 con số. Wags 2026-08-01, job `Wags_20260801_153657`.)*
-> 2. **Lượt nào bạn còn định viết một câu trả lời thực chất cho user là lúc nguy hiểm nhất** (đo từ
->    147 lượt: QUÊN wakeup → trung vị 1.755 ký tự văn xuôi sau dispatch, NHỚ → 343 ký tự; rủi ro
->    gấp ~25 lần). Đặt `ScheduleWakeup` NGAY sau dispatch, TRƯỚC KHI viết đoạn trả lời cho câu
->    hỏi khác.
-> 3. Mọi phát ngôn về trạng thái job phải kèm `jobs.sh status` chạy trong CÙNG lượt — kể cả câu
->    "job vừa mới xong" (sự cố 07-20: `ended_at` cách đó 19 phút vẫn bị thuật thành "vừa xong").
-> 4. **Anti-double-reply (thêm 2026-08-17, sửa chẩn đoán + giao thức cùng ngày —
->    `agents/Wags/research/wakeup_double_answer_audit_20260817.md`)** — Mike post kết quả CÙNG
->    MỘT job 2 lần (token × 2, user tưởng có 2 kết quả khác nhau).
+> **Thay đổi lớn 2026-08-21 (user duyệt).** GỠ toàn bộ auto-wake: push-wake-on-completion
+> (`_bg_wrapper`→`wake_thread.sh`), reconciler cron `*/5` (`wakeup_reconcile.py`), và debounce.
+> Ba tháng vá bằng cách THÊM edge (ladder→push→claim-reply→debounce→reconciler) — mỗi edge mới đẻ
+> race mới: miss-wake (ladder/push lệch), double-answer (2 edge cùng fire), resume-session-chết
+> (08-21, session codex kẹt trong thread). Nguyên nhân gốc chung: ta bắt việc *giao kết quả cho
+> người* (chỉ cần 1 tin nhắn) đi qua việc *resume một phiên Claude sống* (đắt, có trạng thái, hỏng
+> nhiều kiểu). Bỏ đường đó = bỏ nguyên lớp lỗi.
 >
->    ⚠️ **KHÔNG phải vì "push-wake và ladder-wake là 2 task ccdb độc lập cùng fire"** — đó là
->    tiền đề bản đầu của mục này và nó SAI. ccdb đã tự cưỡng chế bất biến *tối đa 1 one-shot
->    wakeup pending mỗi thread*: cả bridge `ScheduleWakeup` (`cogs/_run_helper.py`) lẫn push
->    ngoài (`ext/api_server.py`) đều gọi `delete_pending_one_shot_by_thread()` ngay trước khi
->    tạo task. Quan sát thật 3 lần ngày 08-17 ("Cancelled 1 pending one-shot wakeup(s)…").
->    Hai nguyên nhân THẬT:
->    - **(a) Replay ở tầng harness** — lượt wake cạn context → auto-compaction → bị ngắt →
->      prompt wake trong hàng đợi được giao LẠI trong cùng phiên. Bằng chứng trực tiếp:
->      `Taylor_20260817_112844`, ccdb chỉ fire task 1729 đúng 1 lần. **Chỉ Bước A/B dưới đây
->      chặn được ca này** — không có fix tầng ccdb nào với tới.
->    - **(b) ccdb restart giữa lượt** — row one-shot chỉ bị xoá SAU khi lượt Claude xong, mà
->      chống chạy lại chỉ là `self._running` trong RAM ⇒ restart giữa lượt là fire lại prompt
->      cũ (`ccdb-mike.service` restart 4 lần chỉ riêng 08-17). Vá ở repo bridge (F1/F3).
+> **Mô hình mới — 2 nhu cầu TÁCH BIỆT:**
+> 1. **Giao kết quả cho NGƯỜI**: agent tự ghi finding lên bus + tự post vào topic của nó; `_bg_wrapper`
+>    post thêm 1 tin `✅ <agent> xong (job …): <preview>` vào đúng thread. KHÔNG cần phiên Mike nào
+>    resume để đọc lại thứ agent vừa tự viết. Đây là mặc định cho MỌI job nền (kể cả cron:
+>    ops-autofix, fearbuy, bq-freshness — chúng tự báo, Mike không cần tỉnh).
+> 2. **Mike TIẾP TỤC một chuỗi việc phụ thuộc** (dispatch → đọc kết quả → verify → wire): CHỈ khi
+>    CHÍNH Mike có bước kế tiếp. Lúc đó Mike **tự đặt `ScheduleWakeup`** — cơ chế harness sẵn có, 1
+>    PRODUCER DUY NHẤT, ccdb ép ≤1 one-shot pending/thread ⇒ không race, không double.
 >
->    ⇒ Bước A/B vẫn **BẮT BUỘC** kể cả sau khi F1/F3 land: chúng vá (b), không chạm được (a).
+> **Kỷ luật ScheduleWakeup (giữ nguyên, vẫn BẮT BUỘC khi có bước kế tiếp):**
+> 1. `dispatch.sh --bg` mà Mike CÒN bước phụ thuộc kết quả ⇒ `ScheduleWakeup` là tool call CUỐI của
+>    lượt, đặt NGAY sau dispatch, TRƯỚC khi viết đoạn văn trả lời câu khác (đo: quên wakeup tương
+>    quan mạnh với "còn viết văn dài sau dispatch"). Delay: tra `state/wakeup_profile.json` theo khoá
+>    `"<to>|<model>|<effort>"` (median_s kẹp [90s,1200s]); thiếu/hỏng file → 240s. Fan-out nhiều job
+>    → **1 lượt poll cho CẢ batch** (min delay), không phải 1 lượt/job. Job đứng riêng KHÔNG có bước
+>    kế tiếp phụ thuộc ⇒ không cần ScheduleWakeup (agent đã tự báo).
+> 2. Mọi phát ngôn trạng thái job phải kèm `jobs.sh status` chạy CÙNG lượt (kể cả "vừa xong").
 >
->    **Bước A — ĐẦU TIÊN của MỌI lượt wakeup**, trước khi đọc job status hay post bất cứ gì:
->    ```
->    bin/jobs.sh claim-reply <job_id>   # test-and-set replied_at NGUYÊN TỬ (1 lock, 1 người thắng)
->    ```
->    **Bước B — xử theo exit code của chính lệnh trên** (không cần `is-replied` riêng nữa):
->    - `0` = bạn là người ĐẦU TIÊN giành quyền trả lời → post kết quả rồi kết thúc lượt.
->      Không phải gọi `mark-replied` nữa: claim-reply đã ghi `replied_at` rồi.
->    - `1` = lượt khác đã trả lời → `ScheduleWakeup(noop: true, stop: true)`, post gì cũng KHÔNG.
->    - `2` = không có job record đọc được → **đừng coi là "đã reply"** (sẽ nuốt mất kết quả);
->      kiểm tra lại job_id, xử tay.
->    - `3` = **job CHƯA terminal** (status vẫn `running`/`retrying`/...) → lượt này là POLL
->      TIẾN ĐỘ, không phải HOÀN THÀNH. KHÔNG claim gì cả (chưa ghi `replied_at`), KHÔNG post
->      kết quả (chưa có kết quả), tiếp tục poll/`ScheduleWakeup` như một lượt poll bình
->      thường. (Thêm 2026-08-19 sau sự cố job Taylor bị khoá mất kết quả thật: một lượt POLL
->      TIẾN ĐỘ claim thành công trên job đang `running`, khoá `replied_at` trước khi lượt
->      HOÀN THÀNH thật chạy tới → kết quả thật không bao giờ được post.)
+> **Anti-double-reply — claim-reply NGUYÊN TỬ (GIỮ NGUYÊN, vẫn cần).** Ngay cả với 1 producer,
+> harness vẫn có thể GIAO LẠI một prompt ScheduleWakeup trong cùng phiên (auto-compaction ngắt lượt
+> rồi replay) hoặc ccdb restart giữa lượt. Vì vậy **DÒNG ĐẦU của MỌI lượt wakeup** (trước khi đọc
+> status hay post gì):
+> ```
+> bin/jobs.sh claim-reply <job_id>   # test-and-set replied_at nguyên tử, 1 người thắng
+> ```
+> Xử theo exit code: `0` = bạn giành quyền → post kết quả rồi kết thúc (claim-reply đã ghi
+> `replied_at`, KHÔNG cần mark-replied). `1` = lượt khác đã trả lời → `ScheduleWakeup(noop:true,
+> stop:true)`, KHÔNG post gì. `2` = không đọc được job record → xử tay, đừng coi là đã reply. `3` =
+> job CHƯA terminal → đây là lượt POLL tiến độ: KHÔNG claim, KHÔNG post kết quả, post progress rồi
+> `ScheduleWakeup` tiếp như lượt poll thường. Fan-out: claim-reply TỪNG job, chỉ post job exit 0.
+> Prompt ScheduleWakeup phải encode dòng claim-reply làm bước đầu. Test: `bin/claim_reply_selfcheck.sh`.
 >
->    **Prompt `ScheduleWakeup` phải encode Bước A làm dòng đầu tiên.** Template chuẩn:
->    `"Đầu tiên: bin/jobs.sh claim-reply <job_id> → exit 1 → ScheduleWakeup(noop:true,stop:true), DỪNG. exit 0 → [logic poll + post bình thường]. exit 2 → báo job record thiếu, đừng im lặng. exit 3 → job chưa xong, post progress bình thường (KHÔNG claim, KHÔNG coi là đã reply), tiếp tục ScheduleWakeup như lượt poll thông thường."`
+> **Đo tuân thủ**: `bin/wakeup_audit.py --since <ngày>` (gắn `daily_retro.sh`).
 >
->    Từ 2026-08-18: prompt active-wake do `dispatch.sh --bg` tự sinh (`from=Mike`, cả nhánh
->    done/fail) đã prepend sẵn template này kèm đúng job_id; prompt in ra stderr sau dòng
->    "Theo dõi:" cũng là bản sẵn dùng. Wakeup từ nguồn khác vẫn phải tự encode Bước A.
+> **`wake_thread.sh` giờ là primitive TAY, không caller tự động** (xem header file). Dùng khi biết
+> CHẮC có 1 session sống đang chờ ở thread đích; thread không có session sống ⇒ ccdb mở phiên MỚI
+> (tốn phí). An toàn hơn trước: ccdb đã tự retry session mới khi gặp "No conversation found" (commit
+> ccdb `6a709e7`, 2026-08-21) — resume session cũ/chết không còn báo lỗi ra Discord.
 >
->    Fan-out nhiều job: claim-reply cho TỪNG job; chỉ post job nào bạn claim được (exit 0).
->    Stop khi mọi job trong batch đều không còn exit 0.
->
->    *(`mark-replied`/`is-replied` còn đó cho back-compat nhưng ĐỪNG dùng để chống trùng: hai
->    lượt có thể cùng đọc "chưa reply" trước khi bên nào kịp ghi — đúng cái khe mà claim-reply
->    đóng. Test: `bin/claim_reply_selfcheck.sh`, CA 3 chạy 12 tiến trình đồng thời.)*
->
-> Đo tuân thủ hồi cứu: `bin/wakeup_audit.py --since <ngày>` (gắn vào `daily_retro.sh`).
-
-Bổ sung: **fan-out song song → 1 lượt poll cho CẢ batch** (không phải 1 lượt/job); **luôn dùng,
-không "fire-and-forget"** kể cả chuỗi research nhiều bước tự trị — ngoại lệ duy nhất là 1 job đứng
-riêng không có bước kế tiếp phụ thuộc; `dispatch.sh --bg` in sẵn các bước theo dõi ra stderr sau
-dòng "Theo dõi:" — làm theo đúng bản in.
-
-(Lịch sử cơ chế `Agent(run_in_background)` wrapper, MOOT từ 2026-07-07:
-`kb/archive/wake_on_completion_wrapper_history_20260707.md`.)
-
-**Công cụ mới**: `bin/wake_thread.sh <thread_id> "<prompt>" [name_suffix]` — active-resume 1
-thread Discord qua `POST /api/tasks` của ccdb (`run_immediately=true, one_shot=true`), KHÁC
-`notify_thread.sh` (chỉ post tin nhắn thụ động, không ai đọc lại vì `on_message` của ccdb bỏ
-qua tin nhắn do chính bot viết). Dùng khi biết chắc có 1 session live đang thật sự chờ ở thread
-đó (hiện tại: chỉ `_bg_wrapper` gọi, gated `from=Mike`) — đừng gọi cho thread không có session
-sống, ccdb sẽ MỞ session MỚI ở đó (tốn phí, không phải bonus).
+> (Lịch sử: `wakeup_architecture_redesign_20260820.md` (reconciler, ĐÃ GỠ 08-21) +
+> `wakeup_simplification_proposal_20260821.md` (bản thay thế được duyệt). `Agent(run_in_background)`
+> wrapper MOOT từ 07-07: `kb/archive/wake_on_completion_wrapper_history_20260707.md`.)
 
 ## Việc định kỳ
 - Cron 30' chạy `bin/consolidate.sh` (cơ khí): gộp event mới từ bus → `KNOWLEDGE.md`, bump version,

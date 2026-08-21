@@ -1360,33 +1360,14 @@ làm lại có chủ đích, đừng âm thầm ghi đè mất công sức cũ m
           else
             "$ROOT/bin/notify_thread.sh" "✅ **$id** xong (job \`${job_id}\`): $_preview" "$_tid" 2>/dev/null || true
           fi
-          # ACTIVE wake (2026-08-15, MIKE.md §8 rev) — chỉ khi Mike TỰ dispatch: đó là
-          # session live DUY NHẤT thật sự ngồi chờ (đã đặt ScheduleWakeup ladder). Agent
-          # khác (Taylor/Wags/...) không có Discord thread sống thường trực để đánh
-          # thức — auto-callback ở dưới đã là kênh đúng cho chúng. Wake KHÔNG THAY notify_
-          # thread.sh ở trên (đó là tin nhắn NGƯỜI thấy được); đây là tín hiệu khiến CHÍNH
-          # PHIÊN MIKE resume trong vòng ~30s (ccdb scheduler master loop) thay vì đợi
-          # ladder tự đoán delay, có thể tới 1200s. Fail-soft: wake_thread.sh tự nuốt lỗi.
-          if [ "$from" = "Mike" ]; then
-            # Anti-double-reply (MIKE.md §8.4): prompt wake phải bắt đầu bằng claim-reply.
-            # Lần fire thứ hai (replay/restart) sẽ bị claim-reply chặn trước khi post.
-            local _wake_prompt
-            # KHÔNG nhúng $_preview vào prompt wake (bỏ 2026-08-20, Phase 2 của
-            # agents/Mike/research/wakeup_architecture_redesign_20260820.md). $_preview
-            # là `tail -c 500` — cắt theo BYTE, nên chém đôi ký tự UTF-8 nhiều byte và
-            # đẻ lone surrogate; chuỗi đó đi tiếp vào argv → Python → JSON → sqlite của
-            # ccdb và giết CẢ lượt push (3 lần thật: 08-15, 08-19, 08-20 — ca 08-20 còn
-            # xoá mất ladder đang chờ trước khi chết). wake_thread.sh đã sanitize từ
-            # commit 886d9158, nhưng prompt wake KHÔNG CẦN preview: luật MIKE.md §8.3
-            # bắt mọi lượt wake phải đọc job record thật trước khi post, nên preview chỉ
-            # thêm một tầng encoding có thể hỏng mà không thêm thông tin. Preview cho
-            # NGƯỜI đọc vẫn nguyên ở notify_thread.sh phía trên (kênh hiển thị, đã chứng
-            # minh chịu được bytes hỏng).
-            _wake_prompt="Đầu tiên: $ROOT/bin/jobs.sh claim-reply $job_id → exit 1 → ScheduleWakeup(noop:true,stop:true), DỪNG. exit 0 → [logic poll + post bình thường]. exit 2 → báo job record thiếu, đừng im lặng. exit 3 → job chưa xong (hiếm ở đây vì job đã terminal lúc push), post progress bình thường, KHÔNG claim. Job \`${job_id}\` (${id}) đã hoàn thành: status=done. Đọc kết quả từ \`$ROOT/bin/jobs.sh status ${job_id}\` + logfile ghi trong job record ($logfile), đừng đoán từ tóm tắt."
-            "$ROOT/bin/wake_thread.sh" "$_tid" \
-              "$_wake_prompt" \
-              "$job_id" 2>/dev/null || true
-          fi
+          # (2026-08-21) Push-wake GỠ BỎ — xem MIKE.md §8 "kết quả là DỮ LIỆU, không phải
+          # lượt đánh thức". Tin `✅ xong` ở trên đã giao kết quả cho NGƯỜI mà không cần
+          # spin một phiên Mike để đọc lại thứ agent vừa tự ghi (bus finding + post topic
+          # của chính agent). Mike chỉ resume khi CHÍNH Mike có bước kế tiếp phụ thuộc —
+          # và lúc đó Mike tự đặt ScheduleWakeup (1 producer duy nhất, ccdb ép ≤1 one-shot/
+          # thread, không race). Push-wake auto là nguồn chung của cả 3 lớp lỗi đã gặp:
+          # miss-wake (ladder/push lệch nhau), double-answer (2 edge cùng fire), và
+          # resume-session-chết (08-21). Gỡ edge auto = gỡ nguyên lớp lỗi.
         fi
         # Auto-callback: notify the caller agent so it can pick up the result without manual prompt.
         # Only when caller is a real companion agent (not Mike/user — they have other channels).
@@ -1450,16 +1431,9 @@ làm lại có chủ đích, đừng âm thầm ghi đè mất công sức cũ m
     # Không suy lại topic (2026-08-02, arch-reviewer S1) — chỉ đọc pin đã ghim lúc dispatch.
     if [ -n "$_tid" ]; then
       "$ROOT/bin/notify_thread.sh" "❌ **$id** $why (job \`${job_id}\`). Xem log: $logfile" "$_tid" 2>/dev/null || true
-      # Active wake on the failure path too — same rationale as the success path above
-      # (see comment there). A blind-interval ladder finding out about a FAILURE late is
-      # just as wasteful as finding out about a success late.
-      if [ "$from" = "Mike" ]; then
-        local _wake_prompt
-        _wake_prompt="Đầu tiên: $ROOT/bin/jobs.sh claim-reply $job_id → exit 1 → ScheduleWakeup(noop:true,stop:true), DỪNG. exit 0 → [logic poll + post bình thường]. exit 2 → báo job record thiếu, đừng im lặng. exit 3 → job chưa xong (hiếm ở đây vì job đã terminal lúc push), post progress bình thường, KHÔNG claim. Job \`${job_id}\` (${id}) $why. Xem log: $logfile"
-        "$ROOT/bin/wake_thread.sh" "$_tid" \
-          "$_wake_prompt" \
-          "$job_id" 2>/dev/null || true
-      fi
+      # (2026-08-21) Push-wake GỠ BỎ trên cả nhánh fail — xem chú thích nhánh done phía
+      # trên + MIKE.md §8. Tin ❌ đã báo NGƯỜI; nếu Mike có bước phụ thuộc thì Mike tự đặt
+      # ScheduleWakeup. Không tự đánh thức = không tái tạo lớp lỗi resume-session-chết.
     fi
     # Also notify the caller agent on failure so it can decide to retry or escalate.
     # Same guard: no callback for auto-callback jobs (prevent loop on failure path too).

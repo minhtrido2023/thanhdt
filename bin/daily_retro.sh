@@ -200,7 +200,12 @@ QUY TRÌNH BẮT BUỘC (đọc bằng chứng thật, không suy đoán):
    bằng '$TODAY' — đối chiếu xem có sự cố nào CHƯA được ghi vào kb/incidents/ không (nếu
    có, đây là gap báo cáo cần ghi luôn bổ sung, không bỏ sót).
 2d. SỐ LIỆU HỆ WAKE-UP NGÀY $TODAY (đã đo sẵn bằng bash, ĐỪNG tự grep lại — dùng đúng
-   các số này, chép nguyên vào draft dưới dạng 1 dòng \"Sức khỏe hệ wake-up\"):
+   các số này, chép nguyên vào draft dưới dạng 1 dòng \"Sức khỏe hệ wake-up\").
+   ⚠️ TỪ 2026-08-21: push wake-on-completion + reconciler cron ĐÃ GỠ (kiến trúc mới
+   \"kết quả là DỮ LIỆU, không phải lượt đánh thức\", MIKE.md §8). Vì vậy push=0/n/a và
+   \"reconciler KHÔNG CHẠY\" là TRẠNG THÁI MONG ĐỢI, KHÔNG phải regression — ĐỪNG mở sự cố
+   cho việc chúng =0. Chỉ còn ý nghĩa: tuân thủ ScheduleWakeup (mục 2c) khi Mike có bước
+   kế tiếp phụ thuộc. (Các dòng số dưới giữ lại tạm cho tới khi trim hẳn section này.):
    - Push wake-on-completion: THÀNH CÔNG $_wake_ok / LỖI $_wake_err ⇒ success-rate $_wake_rate
    - Số lần reconciler (bin/wakeup_reconcile.py, cron */5) phải tự cứu: $_wake_rescued
    - Reconciler: $_wake_cycles/$_wake_cycles_full chu kỳ đối chiếu ĐƯỢC / $_wake_blind chu kỳ MÙ (abort vì ccdb).
