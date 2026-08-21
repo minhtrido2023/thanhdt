@@ -241,6 +241,10 @@ Khi thấy event_type `question` trong KB delta, Mike phải:
 3. Sau khi user quyết → dispatch kết quả xuống agent đã hỏi:
    ```bash
    bin/dispatch.sh <agent_đã_hỏi> "Trả lời cho câu hỏi '<topic>': <quyết định của user>"
+
+   (Ràng buộc chung cho MỌI lời gọi `dispatch.sh`: prompt phải >= 8 BYTE sau khi bỏ whitespace.
+   Ngắn hơn ⇒ HUỶ ngay, không tốn phiên headless, có ghi logs/dispatch_rejected_prompts.log.
+   Muốn test với prompt siêu ngắn: `MIKE_ALLOW_TINY_PROMPT=1`.)
    ```
 
 **Escalation TỔNG (gom nhiều câu hỏi con đang mở) — bắt buộc khai `rollup_of`.** Câu hỏi tổng

@@ -4,6 +4,11 @@
 # Run a HEADLESS Claude session as the specified agent. The session inherits the
 # agent's CLAUDE.md + hooks (KB context injection, bus writes, heartbeat).
 #
+# RÀNG BUỘC PROMPT: "prompt" phải có >= 8 BYTE sau khi bỏ hết whitespace, nếu không dispatch
+# bị HUỶ ngay (exit 1) + ghi 1 dòng vào logs/dispatch_rejected_prompts.log (ops_health_check
+# check 10b đọc file này). Chi tiết + lý do ở khối GUARD ngay sau chỗ parse tham số.
+# Cần dispatch prompt siêu ngắn cho test: MIKE_ALLOW_TINY_PROMPT=1.
+#
 # Every dispatch is tracked as a JOB in bus/jobs/<job_id>.json (running → done /
 # failed / timeout). Poll it with bin/jobs.sh — a coordinator never has to block
 # blindly. The claude run is wrapped in a HEARTBEAT-AWARE deadline (_hb_aware_timeout,
@@ -116,19 +121,48 @@ shift 2
 # GUARD PROMPT RỖNG/QUÁ NGẮN — chặn NGAY tại người gọi, trước khi tốn 1 phiên headless.
 # Sự cố thật 2026-08-20T16:22Z (job Wags_20260820_162234): một dispatch chỉ có nội dung "x"
 # chạy hết cả một phiên agent, agent (đúng) từ chối đoán việc và post event `question`
-# "dispatch-rong" — câu hỏi đó KHÔNG có nội dung nào để user quyết, nhưng vẫn nằm trong
-# backlog 48h của ops_health_check #5 và làm wags_autofix dispatch lặp. Rẻ nhất là fail
-# NGAY, ồn ào, ở đúng chỗ gõ nhầm.
-# Ngưỡng 8 ký tự (sau khi trim) là số ĐO ĐƯỢC, không phải đoán: prompt ngắn nhất từng
-# dispatch thật trong 1.781 job record là "ping test" = 9 ký tự. Ngưỡng này chưa từng chặn
-# nhầm một dispatch nào trong toàn bộ lịch sử job board.
+# "dispatch-rong". Câu hỏi đó KHÔNG có nội dung nào để user quyết, nhưng vẫn nằm trong
+# backlog 48h của ops_health_check #5 và làm wags_autofix dispatch lặp.
+#
+# ⚠️ NGUỒN sinh ra "x" là UNKNOWN, KHÔNG phải "user gõ nhầm" (đó là giả định chưa verify):
+# job record bus/jobs/Wags_20260820_162234.json đã BIẾN MẤT (không ở hot dir, không ở
+# archive) trong khi logfile còn ⇒ field `from` mất vĩnh viễn. Chính vì chưa biết nguồn là
+# NGƯỜI hay MÁY nên nhánh reject dưới đây PHẢI để lại dấu vết bền (xem REJECT LOG): nếu
+# nguồn là một script tầng trên, một `exit 1` không log sẽ chảy vào `| tail -5` / `>> log`
+# và biến tín hiệu duy nhất fleet từng có (event question user THẤY) thành im lặng —
+# đúng lớp lỗi fail-silent mà guard này định bịt (arch-reviewer F1, vòng 1).
+#
+# ĐẾM BYTE, không đếm ký tự, và đếm TẤT ĐỊNH: `${#var}` phụ thuộc locale kế thừa (LANG=C
+# ⇒ byte, C.UTF-8 ⇒ ký tự), nên cùng một prompt tiếng Việt "Rà lại KQ" bị CHẶN dưới
+# C.UTF-8 (7 ký tự) nhưng QUA dưới LANG=C (10 byte) — nhánh quyết định đổi theo môi
+# trường cron/systemd/tương tác (arch-reviewer F2, vòng 1). Chốt về BYTE vì đó là chiều
+# KHOAN DUNG hơn với tiếng Việt: mọi prompt Việt ngắn đều nhiều byte hơn số ký tự ⇒ không
+# bao giờ false-reject một câu tiếng Việt có nghĩa.
+# Ngưỡng 8 byte là số ĐO ĐƯỢC: prompt ngắn nhất từng dispatch thật trong 1.781 job record
+# là "ping test" = 8 byte sau trim (ASCII ⇒ byte = ký tự). Chưa từng chặn nhầm ca nào.
 # Escape hatch cho selfcheck/test: MIKE_ALLOW_TINY_PROMPT=1.
 _prompt_trimmed="$(printf '%s' "$prompt" | tr -d '[:space:]')"
-if [ "${MIKE_ALLOW_TINY_PROMPT:-0}" != "1" ] && [ "${#_prompt_trimmed}" -lt 8 ]; then
-  echo "ERROR: dispatch bị HUỶ — prompt rỗng/quá ngắn (${#_prompt_trimmed} ký tự sau khi trim): '$prompt'" >&2
+_prompt_len="$(printf '%s' "$_prompt_trimmed" | LC_ALL=C wc -c | tr -cd '0-9')"
+if [ "${MIKE_ALLOW_TINY_PROMPT:-0}" != "1" ] && [ "${_prompt_len:-0}" -lt 8 ]; then
+  echo "ERROR: dispatch bị HUỶ — prompt rỗng/quá ngắn (${_prompt_len} byte sau khi trim): '$prompt'" >&2
   echo "   Agent không đoán được việc cần làm; một dispatch như vậy chỉ tốn 1 phiên headless" >&2
   echo "   rồi đẻ ra 1 câu hỏi treo trong backlog. Gõ lại nội dung việc cụ thể." >&2
+  case "$prompt" in
+    --*) echo "   GỢI Ý: prompt bắt đầu bằng '--' — có vẻ gõ nhầm THỨ TỰ tham số. Đúng là" >&2
+         echo "   dispatch.sh <agent_id> \"<việc>\" [--bg ...]: prompt là tham số THỨ 2, cờ đứng sau." >&2 ;;
+  esac
   echo "   (Cố ý test với prompt siêu ngắn? đặt MIKE_ALLOW_TINY_PROMPT=1.)" >&2
+  # REJECT LOG — dấu vết bền, cùng khuôn với logs/notify_thread_errors.log: nguồn gọi có
+  # thể là MÁY (script tầng trên) chứ không phải người đọc stderr. ops_health_check đọc
+  # file này để reject do máy sinh không chết im lặng. fail-open: log hỏng KHÔNG đổi verdict.
+  # Đường dẫn ghi đè được (MIKE_DISPATCH_REJECT_LOG) CHỈ để test tự cách ly: mỗi lượt chạy
+  # bin/dispatch_tiny_prompt_selfcheck.sh sinh ~10 reject. Ghi thẳng vào file thật thì check
+  # 10b (cửa sổ 24h) WARN bằng chính rác của test mỗi ngày có ai chạy bộ selfcheck, và cảnh
+  # báo THẬT chìm trong đó — đo thật 2026-08-21: 56/56 dòng trong file là do selfcheck sinh.
+  _rejlog="${MIKE_DISPATCH_REJECT_LOG:-$ROOT/logs/dispatch_rejected_prompts.log}"
+  printf '%s\tto=%s\tfrom=%s\tbytes=%s\tprompt=%s\n' \
+    "$(date -Iseconds)" "$id" "${DISPATCH_FROM:-Mike}" "$_prompt_len" "$prompt" \
+    >> "$_rejlog" 2>/dev/null || true
   exit 1
 fi
 

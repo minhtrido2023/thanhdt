@@ -1172,6 +1172,38 @@ else:
     OK("notify_thread.sh: không có lỗi gửi Discord trong 24h qua.")
 # CHECK10_END
 
+# 10b. dispatch.sh TỪ CHỐI một prompt rỗng/quá ngắn (thêm 2026-08-21, job Wags_20260821_012007).
+#      Guard ở dispatch.sh:116+ exit 1 và ghi 1 dòng vào logs/dispatch_rejected_prompts.log.
+#      Nguồn sinh prompt rỗng có thể là NGƯỜI gõ (thấy stderr ngay, vô hại) hoặc MÁY — một
+#      script tầng trên bọc `| tail -5` / `>> log` sẽ nuốt trọn exit 1. Không ai đọc file
+#      này thì fail-loud lại thành fail-silent — đúng lỗi check 10 vừa bịt cho notify_thread.
+#      WARN-only, cửa sổ 24h áp lên TỪNG BẢN GHI (không chỉ mtime file, bài học 2026-08-18).
+# CHECK10B_BEGIN
+drp_file = os.path.join(wc_root, "mike", "logs", "dispatch_rejected_prompts.log")
+if os.path.exists(drp_file):
+    try:
+        _drp_all = [l for l in open(drp_file, encoding="utf-8", errors="replace").read().splitlines()
+                    if re.match(r"^\d{4}-\d{2}-\d{2}T", l)]
+    except Exception:
+        _drp_all = []
+
+    def _drp_recent(l):
+        try:
+            return (_time.time() - _dt.datetime.fromisoformat(l.split("\t", 1)[0]).timestamp()) < 86400
+        except Exception:
+            return True   # không đọc được ts thì GIỮ (fail-loud), không loại trừ
+
+    _drp = [l for l in _drp_all if _drp_recent(l)]
+    if _drp:
+        W(f"[WARN-ONLY] dispatch.sh đã TỪ CHỐI {len(_drp)} dispatch vì prompt rỗng/quá ngắn "
+          f"trong 24h qua — nếu cột from= là một SCRIPT (không phải người gõ) thì có chỗ nào đó "
+          f"đang dựng prompt rỗng và nuốt exit 1. Dòng cuối: {_drp[-1][:300]}")
+    else:
+        OK("dispatch.sh: không có dispatch nào bị từ chối vì prompt rỗng trong 24h qua.")
+else:
+    OK("dispatch.sh: không có dispatch nào bị từ chối vì prompt rỗng trong 24h qua.")
+# CHECK10B_END
+
 # 11. Quét selfcheck production: đã chạy gần đây chưa + đang có ca ĐỎ nào (thêm 2026-08-12,
 #     job Wags_20260812_112724 — sự cố 4 selfcheck đỏ 2 ngày không ai biết).
 #     ĐỌC ARTIFACT, KHÔNG chạy lại 92 selfcheck: bộ quét mất ~15-25' và đã chạy 1 lần/ngày bằng
