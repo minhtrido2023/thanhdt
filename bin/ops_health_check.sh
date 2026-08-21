@@ -913,15 +913,17 @@ if os.path.exists(_qf):
             _a = _r.get("argv")
             return str(_a[0]) if isinstance(_a, list) and _a else "?"
         _who = sorted({_q_who(_r) for _r in _q24})
-        _why = sorted({str(_r.get("reason") or "?").split("\n")[0][:70] for _r in _q24})
+        _why = sorted({str(_r.get("reason") or "?").split("\n")[0][:110] for _r in _q24})
         W(f"append_event.sh đã CÁCH LY {len(_q24)} bản ghi trong 24h qua "
           f"({_qtot} bản ghi trong file hiện tại"
           f"{f', {_qres24} ca khác trong 24h đã được đánh dấu xử lý' if _qres24 else ''}"
           f"{f', {_qbad} dòng không parse được' if _qbad else ''}) "
-          f"— đây là event KHÔNG BAO GIỜ lên bus: agent gọi bị shell word-split payload và "
+          f"— đây là event KHÔNG BAO GIỜ lên bus: guard của append_event.sh từ chối và "
           f"phần lớn call site nuốt stderr nên agent tưởng đã ghi thành công. "
+          f"NGUYÊN NHÂN KHÁC NHAU THEO TỪNG CA (word-split, JSON không hợp lệ, payload cụt…) "
+          f"— đọc đúng `Lý do` dưới đây, đừng mặc định là lỗi quote. "
           f"Agent: {_who}. Lý do: {_why}. "
-          f"Xem `tail bus/_rejected.jsonl`; sửa cách quote ở call site rồi ghi LẠI event "
+          f"Xem `tail bus/_rejected.jsonl`; sửa đúng nguyên nhân ở call site rồi ghi LẠI event "
           f"(hàng đợi này là PHÁP Y, không ai tự phát lại — payload hỏng phát lại vẫn hỏng).")
     elif _qtot:
         OK(f"Hàng đợi cách ly append_event.sh: {_qtot} bản ghi cũ trong file hiện tại, "
