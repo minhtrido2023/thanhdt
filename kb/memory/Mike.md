@@ -35,3 +35,4 @@
 - BAL+VPI signal_holds until 09-16. SpaceX+ZaloPay HOLD_ALL.
 - OKF split mandate: file >40KB tự split.
 
+- [2026-08-21T17:54:59Z] CAPIT margin test: DollarBill_20260821_175438 đang làm plan T2 08-24. Sau khi user confirm fill → flip capit_margin_lever.enabled=true trong data/trading_rules.json. Fill-timing: cả 2 gate vẫn True (paper-only), KHÔNG đổi trong test này.
