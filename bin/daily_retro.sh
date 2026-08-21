@@ -169,6 +169,16 @@ else
 fi
 echo "$(date -Iseconds) [wake-metrics] $TODAY push_ok=$_wake_ok push_err=$_wake_err rate=$_wake_rate rescued=$_wake_rescued cycles=$_wake_cycles blind=$_wake_blind" >> "$LOG"
 
+# --- Time-claim audit (§S4, discord_time_reasoning_by_construction_plan_20260821.md) --
+# Đo loại lỗi C ("LLM suy luận giờ sai") thay vì chờ user chụp màn hình — scan trong bash
+# (không bảo Mike tự grep, cùng triết lý với khối wake-metrics phía trên). KHÔNG
+# --dry-run: script tự ghi bus + Discord Architecture nếu có mismatch — daily_retro chỉ cần
+# đếm số dòng để đưa vào draft, không tự ghi lại lần hai.
+_time_claim_out="$(python3 "$ROOT/bin/time_claim_audit.py" --days 1 2>&1 || true)"
+_time_claim_count="$(echo "$_time_claim_out" | head -1 | grep -oE '[0-9]+ mismatch' | grep -oE '^[0-9]+' || true)"
+[ -n "$_time_claim_count" ] || _time_claim_count=0
+echo "$(date -Iseconds) [time-claim-audit] $TODAY count=$_time_claim_count" >> "$LOG"
+
 # --- Bước 1: Mike viết DRAFT (đồng bộ — bash CHỜ THẬT, không dùng &) ------------------
 # DISPATCH_FROM=user bắt buộc — xem fix 2026-07-09 kb_nightly.sh (Friday editorial
 # dispatch bị self-dispatch guard chặn âm thầm nhiều tuần vì thiếu dòng này).
@@ -220,6 +230,14 @@ QUY TRÌNH BẮT BUỘC (đọc bằng chứng thật, không suy đoán):
    --bg có ScheduleWakeup theo sau không. Nếu có lượt vi phạm trong \$TODAY, đưa vào danh
    sách sự cố ở bước 3 (category=dispatch-orchestration), trích số lượt vi phạm/tổng lượt
    --bg trong ngày.
+2e. TIME-CLAIM AUDIT (§S4, bin/time_claim_audit.py — đã chạy sẵn bằng bash, ĐỪNG tự chạy
+   lại): số mệnh đề giờ tương đối ('còn ~N phút', 'mở lúc HH:MM') KHÔNG khớp thời điểm gửi
+   thật trong 24h qua = $_time_claim_count (xem dòng '[time-claim-audit]' trong
+   logs/daily_retro.log để lấy đúng số). Script tự ghi bus (agent quant-skeptic, topic
+   'time-claim-audit-<ngày>') + Discord Architecture khi count>0 nên KHÔNG cần bạn tự ghi
+   lại — chỉ cần: nếu count>0, đưa vào danh sách sự cố ở bước 3 (category=data-registry-
+   accuracy), trích chi tiết từ bus event vừa nêu (grep bus/inbox/*.jsonl). Mục tiêu S4 là
+   0 mismatch/tuần; count=0 KHÔNG cần nêu gì thêm (không phải regression, không mở sự cố).
 2b. VERIFY ARTIFACT THẬT trước khi báo bất kỳ vấn đề nào là 'chưa xử lý'/'còn treo' — đây
    là quy tắc BẮT BUỘC (bài học 2026-07-10: chính retro lần đầu đã sai — báo 1 câu hỏi
    'crontab paper-main chưa cài' là còn mở CHỈ vì bus event question chưa có answer, trong

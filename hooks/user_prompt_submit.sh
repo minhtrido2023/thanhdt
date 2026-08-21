@@ -10,6 +10,12 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 KB="$ROOT/kb"
 source "$ROOT/hooks/_resolve_id.sh"   # sets $id from $1 or stdin session_id; exits 0 if excluded
 
+# [now: …] fact injection (§S2.3, discord_time_reasoning_by_construction_plan_20260821.md):
+# headless dispatch has no Discord bridge to inject it, so every agent turn gets it here
+# instead — same derived time+market fact ccdb shows on the Discord side. Never fails loud.
+now_line="$(python3 "$ROOT/bin/now_line.py" 2>/dev/null || true)"
+[ -n "$now_line" ] && echo "$now_line"
+
 cur="$(tr -dc '0-9' < "$KB/version.txt" 2>/dev/null || true)"; cur="${cur:-0}"
 cache="${XDG_CACHE_HOME:-$HOME/.cache}/mike_kbver_$id"
 mkdir -p "$(dirname "$cache")"
