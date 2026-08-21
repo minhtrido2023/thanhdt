@@ -879,3 +879,12 @@
 
 ## Consolidation 2026-08-21T08:07:01Z
 - [2026-08-21T08:00:20Z] Winston/finding — sbv-weekly-check-2026-08-21: {"date": "2026-08-21", "current_rate": 4.5, "fetch_status": "fetch_failed", "rate_changed": false, "note": "fetch_failed_assumed_unchanged", "verify_log": "/home/trido/thanhdt/WorkingClaude/data/sbv_verify_log.json"}
+
+## Consolidation 2026-08-21T10:40:16Z
+- [2026-08-21T10:37:36Z] Taylor/heartbeat — Taylor_20260821_103634: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20260821_103634", "source": "watcher"}
+- [2026-08-21T10:38:20Z] Taylor/heartbeat — Taylor_20260821_103727: {"status": "in_progress", "note": "HUONG A: da xac dinh nguon buy entries = TX rows trong CSV pin R3 08-03; dang viet PREREG"}
+- [2026-08-21T10:38:28Z] Taylor/heartbeat — Taylor_20260821_103727: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20260821_103727", "source": "watcher"}
+- [2026-08-21T10:38:36Z] Taylor/heartbeat — Taylor_20260821_103634: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20260821_103634", "source": "watcher"}
+- [2026-08-21T10:39:28Z] Taylor/heartbeat — Taylor_20260821_103727: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20260821_103727", "source": "watcher"}
+- [2026-08-21T10:39:36Z] Taylor/heartbeat — Taylor_20260821_103634: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20260821_103634", "source": "watcher"}
+- [2026-08-21T10:40:06Z] Taylor/finding — div-growth-wire-20260821: {"summary": "Them field div_growth_signal vao yield_floor block (DISPLAY_ONLY), khong doi selection/gate nao", "commit": "67a20f88", "file": "trading_bot/due_diligence.py", "def": "CAGR_3Y=(div_W0/div_W3)^(1/3)-1, div_W0=cua so (t-365,t], div_W3=cua so (t-4*365,t-3*365], chi tinh khi is_stable_payer=True", "labels": "GROWING(>5%) STABLE([-5%,5%]) DECLINING(<-5%) NO_HISTORY(div_W3<=0) N/A(khong stable payer hoac banking ICB 8355)", "selfcheck": "49/49 PASS due_diligence_selfcheck.py (them 6 test moi: not_stable/no_history/growing/stable/declining/banking)", "live_check_2026-08-21": {"REE": "STABLE", "FPT": "STABLE", "MBB": "N/A(BANKING_EXCLUDED)", "HAG": "N/A(NO_DATA, khong stable payer)"}, "sql_change": "mo rong _YIELD_FLOOR_SQL tu 1095 len 1460 ngay, them cot div3/n3, dung r.get() de khong vo mock test cu"}
