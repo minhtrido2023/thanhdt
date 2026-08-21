@@ -26,9 +26,18 @@
 - NEUTRAL parking: **production (30 mã, cap 0.10)** — phần tin cậy nhất: +7.4pp Full.
 - **(30, 0.15) là OVERFIT** — walk-forward bác.
 - Bull parking: chỉ bật khi NAV ≥150B. Custom30B bull-sleeve FAIL walk-forward, không hạ NAV threshold.
-- **NEUTRAL parking target = 70%, ở MỌI mức NAV** — chính thức hoá `trading_rules.json` v2.1 section `neutral_parking` (default 0.70 của phần idle cash khi BAL/LAG rỗng, KHÔNG phải trần tổng cổ phiếu). Muốn park≠0.70 bắt buộc `risk_dial_override` (2 field: `risk_dial_confirmed_by_user` + `risk_dial_warning_acknowledged`) — thiếu 1 trong 2 thì Mafee tự block plan.
-  - Nguồn quyết định 70% (không phải 93.8-94.7% go-live gốc do DollarBill tự đặt không qua backtest): full 2-book NAV backtest (job `Taylor_20260703_130720`, quant-skeptic CONFIRMED) — 70% thắng tuyệt đối mọi metric risk-adjusted (Sharpe 1.78 vs 1.66 @94%, Calmar 1.63 vs 1.49, DD −16.5% vs −18.8%).
-  - **2026-07-09 sweep NAV nhỏ (job `Taylor_20260709_012737`):** premise "NAV nhỏ (~20B) → nên đẩy park 70→90 an toàn hơn" — **REFUTED, đảo ngược**. Ở NAV nhỏ, tăng park mua ÍT CAGR hơn (+0.56pp) và trả NHIỀU risk hơn (Sharpe −0.12, Calmar −0.14, DD −2.0pp) so với ở 50B (+1.26pp CAGR, risk cost thấp hơn) — vì 2 book lõi ở NAV nhỏ đã chạy giàu hơn baseline, phần park thêm chỉ cộng DD không cộng lợi tương xứng. **GIỮ park=0.70 ở mọi NAV hiện hành**, không đổi production/paper.
+- **NEUTRAL parking target = 80% (config F1), ở MỌI mức NAV** — đổi từ 70% ngày **2026-08-04** (user
+  chốt, `trading_rules.json` v2.3 `neutral_parking.default_park_of_idle_pct=0.8` — v2.1 gốc là 0.70).
+  80% thắng Calmar cả dải trong 3 mức so sánh cùng vintage `universe_pit`/`LAG_ADV_BASIS=price`:
+  70%=CAGR 28,86%/Sharpe 1,90/DD−17,8%/Calmar 1,62 · **80%=29,85%/1,87/−18,3%/Calmar 1,63** (đỉnh) ·
+  85%=30,51%/1,86/−18,9%/1,62 (nguồn: `agents/Taylor/research/park_wiring_two_options_20260804.md`).
+  Muốn park≠0.80 bắt buộc `risk_dial_override` (2 field: `risk_dial_confirmed_by_user` +
+  `risk_dial_warning_acknowledged`) — thiếu 1 trong 2 thì Mafee tự block plan.
+  - *Lịch sử (SUPERSEDED bởi 80% ở trên, giữ làm bối cảnh):* quyết định 70% gốc (thay 93.8-94.7%
+    go-live không qua backtest) đến từ full 2-book NAV backtest job `Taylor_20260703_130720`
+    (quant-skeptic CONFIRMED). Sweep NAV nhỏ 07-09 (`Taylor_20260709_012737`) cũng đo trên baseline
+    70% — kết luận "giữ park thấp ở NAV nhỏ" của sweep đó KHÔNG tự động áp cho baseline 80% mới,
+    chưa có sweep NAV-nhỏ nào re-run trên F1.
 
 **Multiple-testing discipline (chốt 2026-07-05, Bailey–López de Prado):** mọi wire production khai báo **N trials** + **DSR** trên NAV daily. **DSR<0.95 → RED FLAG**, không wire nếu chưa sign-off. Khi chọn từ họ ≥~8 biến thể: báo thêm **PBO (CSCV)** — PBO≥0.5 = ưu tiên config robust-trung vị. Kèm **per-year leave-one-out** khi OOS edge mỏng năm (bài học Wave1/H8a-tiebreaker, xem §7/§8: OOS tăng đúng luật nhưng toàn bộ đến từ 2 năm, LOO rớt → route qua skeptic trước khi wire, KHÔNG wire).
 
@@ -93,20 +102,31 @@ như ladder cũ 07-06. Chi tiết đầy đủ + `--effort` per-dispatch: `MIKE.
 subagent dùng tham số `model` sẵn có.
 
 **Opus-drift check (item 5c KB editorial, thêm 2026-08-01, đo lần đầu 2026-08-03, tái đo
-2026-08-08, 2026-08-14):** opus% đi từ 14,3% (07-17) → **74,2% (08-02)** → sustained **65-80% MỖI
-TUẦN liên tục 08-02→08-14** (spend_history.csv, `opus_jobs/(sonnet+opus+fable+default)`), đỉnh
-79,6% (08-04), tuần mới nhất 08-14 = **67,8%** — dao động quanh mốc cũ, KHÔNG có xu hướng giảm
-rõ ràng sau 6 tuần. fable% đã về gần 0% ổn định (0,0-0,8%/tuần từ 07-29), nên đây thuần là drift
-Opus, không lẫn fable. Vẫn đúng kết luận 08-08: KHÔNG phải lạm dụng kiểu fable-drift 07-17 (không
-có việc cơ học/lookup đơn giản bị gắn Opus oan hàng loạt) — nguồn chính vẫn là (a) sự cố production
-cần fix nhanh, (b) saga `coord-YYYY-MM-DD` hàng ngày của Wags mặc định Opus kể cả ACK/triage đơn
-giản, (c) R&D Taylor hợp lệ, (d) DollarBill approval overrides. **Mục (b) vẫn là ứng viên downgrade
-thật, CHƯA ai sửa** sau 2 tuần ghi nhận (08-08→08-14) — đề xuất hạ default model `wags_autofix.sh`
-xuống Sonnet cho nhánh ACK/triage-only vẫn treo, chưa tự sửa (nguyên tắc item 5c). Effort-tier mix
-(item 5d, đo lần đầu 08-10 bằng `spend_report.py`, tái đo 08-14): Taylor 88-94% high (08-10) → **69%
-high/31% medium (08-14, n=98)** — dưới ngưỡng cảnh báo ⚠ (n≥10 và %high≥70%) lần đầu tiên kể từ khi
-đo, cải thiện thật nhưng vẫn sát ngưỡng, theo dõi tiếp tuần sau. Không agent nào khác vượt ngưỡng
-5d tuần này (Wags 46% high/n=35, DollarBill 38% high/n=24, còn lại ≤25%).
+2026-08-08/14/21):** opus% đi từ 14,3% (07-17) → **74,2% (08-02)** → sustained **65-80% MỖI
+TUẦN liên tục 08-02→08-14**, đỉnh 79,6% (08-04) → **XU HƯỚNG GIẢM THẬT bắt đầu 08-14→08-21**:
+67,8% (08-14) → 62,7% (08-19) → **53,2% (08-21, tuần mới nhất, dưới ngưỡng flag 60% lần đầu tiên
+kể từ khi bắt đầu đo 08-03)**. `spend_report.py --days 7` (đo trực tiếp, khác cột CSV) xác nhận
+cùng chiều: overall opus mix 52% trailing-7d tại 08-21. fable% vẫn ~0% ổn định (không lẫn fable-
+drift). Chưa rõ nguyên nhân giảm (không có thay đổi cấu hình nào ghi nhận) — có thể do research
+Taylor giảm khối lượng (research_h 25,4h→13,2h cùng giai đoạn 08-14→08-21, xem spend-trend dưới)
+chứ không phải đổi thói quen dispatch. Mục (b) cũ (saga `coord-YYYY-MM-DD` Wags mặc định Opus cho
+ACK/triage) **VẪN CHƯA sửa** — theo dõi tiếp, chưa downgrade độ ưu tiên đề xuất.
+Effort-tier mix (item 5d, đo lần đầu 08-10, tái đo 08-14/21): Taylor 88-94% high (08-10) → 69%
+high (08-14, dưới ngưỡng ⚠ lần đầu) → **71% high/28% medium (08-21, n=58) — QUAY LẠI ⚠ ngưỡng
+cảnh báo** (n≥10 và %high≥70%). Đồng thời `routing_retrospective.py --days 7` (mới, item 5e)
+flag Taylor **[HIGH+FAIL] 71% high VÀ 17% fail-rate cùng tuần** — effort cao không cải thiện tỷ
+lệ thành công ở agent này. Đã lấy mẫu 1 dispatch high thật (`Taylor_20260821_123019`, sửa
+`strategies.py` build_plan diff-floor cho CAPIT-exit, xem §8 incidents) — task này hợp lý ở mức
+high (kiến trúc, chạm production money-path, cần viết + verify selfcheck). Chưa đủ mẫu để kết
+luận 71% có hệ thống lệch hay không — theo dõi tiếp tuần sau, KHÔNG tự đổi effort mặc định của
+Taylor (nguyên tắc item 5d: hành vi dispatch của Mike, không phải bug 1 lần sửa được).
+Không agent nào khác vượt ngưỡng 5d tuần 08-21 (Wags 32% high/n=37, DollarBill 14%/n=14).
+**Routing retrospective (item 5e, LẦN ĐẦU chạy trong 1 review định kỳ — 2026-08-21, chưa có
+baseline tuần trước để so ≥2-tuần-liên-tiếp):** ngoài Taylor ở trên, flag thêm RETRY-RATE cao ở
+Wags (24%), DollarBill (21%), Winston (27%) và FAIL-RATE Wags (23%). Theo đúng luật item 5e (chỉ
+ghi nhận có ý nghĩa khi lặp ≥2 tuần) — đây là điểm dữ liệu BASELINE đầu tiên, CHƯA đề xuất sửa
+routing rule nào; review tuần sau (08-28) sẽ so trực tiếp với các số này để phân biệt drift bền
+vững vs biến động 1 tuần.
 **Model mặc định của chính Mike:** đổi sang Fable 5 (2026-07-06) rồi **ĐẢO NGƯỢC LẠI Sonnet 5** (2026-07-07, user yêu cầu). Phát hiện **3 tầng config** trong bridge Discord (`ccdb-mike`): thread override (DB) > global (DB) > `.env` fallback — sửa `.env` vô tác dụng nếu DB đã có row cũ. Dọn 4 dòng rác sai format (`"Sonnet 5"`/`"sonnet 5"` có dấu cách — CLI từ chối) từng gây lỗi `/model` ở 1 thread. Đã đồng bộ cả 3 nơi.
 
 **Routing guards (2026-06-27):**
@@ -190,7 +210,7 @@ cầu (commit `087a3d0`). Chi tiết đầy đủ: `kb/current_ops.md` §Domain-
 | Đặc thù | Trim 07-06 hoàn tất (23/23 lệnh khớp broker 100%) — trạng thái mở/vận hành ngày-qua-ngày xem `kb/current_ops.md` | **DGC (legacy) EXCLUDED** khỏi rebalancing (`excluded_tickers`, xem §4) — HOSE hạn chế GD (QĐ 448) + cảnh báo (QĐ 544) do lãnh đạo bị khởi tố hình sự 17/03/2026; ước gỡ ~11-12/2026. Transition sang custom30V (bán dần) — trạng thái hiện tại xem `kb/current_ops.md` |
 | Cron thực thi thật | run_bot.sh sáng/chiều, bot_heartbeat.sh, lunch-pkill | Cùng bộ cron từ 2026-07-06 — tự động y hệt SpaceX |
 
-**Neutral parking:** cả 2 account cùng dùng `trading_rules.json` `neutral_parking` default 0.70 (xem §1) — không có override riêng account nào tại thời điểm này.
+**Neutral parking:** cả 2 account cùng dùng `trading_rules.json` `neutral_parking` default **0.80** (config F1, xem §1) — không có override riêng account nào tại thời điểm này.
 
 **Known gap:** `daily_nav_snapshot.py` chưa tính đúng P&L cho vị thế legacy ZaloPay (thiếu lịch sử FILL nội bộ) — NAV/active_nav đúng, P&L breakdown cho báo cáo cần việc riêng.
 

@@ -325,6 +325,15 @@ corp_action_daily hôm nay, tổng giá vốn bất biến") thay vì chỉ "l�
 người xử lý phải tự điều tra lại từ đầu những gì bạn đã có sẵn trong tay. Sau khi record được ghi
 `CONFIRMED`, `park_holdings.py` tự áp lại và `reconcile.ok` trở về `true` — không cần bạn làm gì thêm.
 
+## CAPIT exit (60 phiên) không còn bán oan phần custom30V cùng mã (fix 2026-08-21, commit `2baf6581`)
+Khi 1 episode CAPIT paper đóng ở phiên 60 (`CAPIT_HOLD`), `strategies.py::build_plan()` diff step
+trước đây tính `target=0` cho mã đó rồi sinh lệnh BÁN TOÀN BỘ vị thế broker — kể cả phần mã đó đang
+nằm trong custom30V parking (case thật: PVT/SIP vừa là CAPIT vừa là parking). Đã vá bằng
+`_capit_qty_per_ticker()`/`_capit_floor_diff()`: lệnh bán giờ chỉ floor đúng phần CAPIT-attributable
+(theo `capit_episode.json` `qty_per_account`), phần custom30V còn lại giữ nguyên. Episode đang mở
+hiện tại (`CAPIT-2026-07-20`, basket NCT/PVT/SAB/SIP/VNM) ở phiên 24/60, ETA chạm ngưỡng ~đầu
+10/2026 — khi lập plan quanh mốc đó, KHÔNG cần tự thêm exit logic thủ công, cơ chế đã tự chạy đúng.
+
 ## `egg.totalValue` (Trứng vàng) — tiền THẬT, KHÔNG PHẢI sức mua hôm nay (thêm 2026-08-19)
 Balances API DNSE trả thêm khối `egg` (`{"egg": {"totalValue": ...}}`, live từ 2026-08-18) — đây
 CHÍNH LÀ "Trứng vàng"/tiền gửi thông minh của DNSE, một sản phẩm TÁCH RIÊNG khỏi `stock.totalCash`/

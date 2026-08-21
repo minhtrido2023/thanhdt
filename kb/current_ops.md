@@ -10,8 +10,8 @@
 - V2.5: `trading_rules.json v1.7` → v25_leverage STATUS=DISABLED
 
 ## Đang trading (LIVE)
-- **SpaceX** (DNSE 0002023347): V2.4 LIVE từ 2026-07-01, có margin. NEUTRAL parking 70% idle cash. run_bot.sh 09:05 ICT T2-T6. NAV: `nav_history_SpaceX.csv` hoặc EOD report.
-- **ZaloPay** (DNSE 0001743768): V2.4 LIVE từ 2026-07-06, CASH-ONLY. **DGC EXCLUDED** (`excluded_tickers`, HOSE hạn chế giao dịch đến ~11-12/2026). Sizing dùng `active_nav`.
+- **SpaceX** (DNSE 0002023347): V2.4 LIVE từ 2026-07-01, có margin. NEUTRAL parking **80%** idle cash (config F1, đổi từ 70% ngày 2026-08-04, `trading_rules.json` `neutral_parking.default_park_of_idle_pct`). run_bot.sh 09:05 ICT T2-T6. NAV: `nav_history_SpaceX.csv` hoặc EOD report.
+- **ZaloPay** (DNSE 0001743768): V2.4 LIVE từ 2026-07-06, CASH-ONLY. **DGC EXCLUDED** (`excluded_tickers`, HOSE hạn chế giao dịch đến ~11-12/2026). Sizing dùng `active_nav`. Cùng target parking 80% (không có override riêng).
 - **AlphaLens Paper**: FPT/ACB/MBB/HDB, tracking đến 2026-09-30. DollarBill phụ trách.
 - **Trứng vàng** (`egg.totalValue`): SpaceX ~100,2tr / ZaloPay ~38,8tr (đo 08-19), đã cộng NAV tự động — KHÔNG phải `availableCash`, cần rút T+1. `manual_offbook_assets_vnd` ĐÃ ĐÓNG vĩnh viễn 07-23.
 
