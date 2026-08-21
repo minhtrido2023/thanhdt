@@ -32,6 +32,19 @@ cực kỳ phức tạp.**
 Không chắc → mặc định Sonnet 5. Lưỡng lự Opus-hay-Fable → chọn **Opus**. Tránh dùng model đắt cho
 việc thường lệ.
 
+**🔴 BRIGHT LINE — Fable = LÊN KẾ HOẠCH, không tự thực thi (user mandate, 2026-08-21)**
+
+Fable CHỈ được dùng để **PLAN**: thiết kế kiến trúc, phân tích chiến lược, đề xuất phương án —
+những việc mà OUTPUT là một bản kế hoạch/thiết kế để người hoặc Opus/Sonnet thực hiện tiếp.
+
+Fable **KHÔNG được** dùng để **IMPLEMENT**: viết code thật, sửa file production, chạy backtest,
+đặt lệnh, commit, hoặc bất kỳ hành động có side effect. Những việc đó dùng Opus (hoặc Sonnet).
+
+Lý do: Fable chậm + đắt; việc implement không cần reasoning cực phức tạp của Fable — và quan
+trọng hơn, **plan do Fable tạo ra vẫn cần human/Mike review trước khi wire vào production**. Để
+Fable tự implement là bỏ qua bước review đó. Không có exception: kể cả khi dispatch prompt nghe có
+vẻ "chỉ là implement một plan rõ ràng" — lúc đó dùng Opus, không phải Fable.
+
 **⚠️ "Omit `--model`" KHÔNG có nghĩa là "Sonnet 5" — nó có nghĩa là "lấy model trong
 `agents/<id>/.claude/settings.json`".** `dispatch.sh` khi `MODEL` rỗng thì **không truyền cờ nào**,
 nên CLI tự lấy từ file đó. Hai thứ này chỉ trùng nhau CHỪNG NÀO cả 8 `settings.json` còn ghi
