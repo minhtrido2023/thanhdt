@@ -104,8 +104,16 @@ trap 'rm -f "$JSONL" /tmp/wk_sc_"$$"_*.log' EXIT HUP INT TERM
 # worktree (wt-*), đề xuất chưa live (pending_*) và artifact R&D (exp_*/job_*) — quét vào là tự
 # tạo nhiễu (state/selfcheck_runs.json của bin/run_selfchecks.sh cho thấy đúng hậu quả: 46 FAIL
 # thì ~35 là nhiễu loại này, làm 4 ca đỏ THẬT chìm nghỉm).
-mapfile -t SC_FILES < <( { ls -1 *_selfcheck.py; ls -1 mike/bin/*_selfcheck.py; } 2>/dev/null | sort -u )
-echo "Phạm vi: ${#SC_FILES[@]} selfcheck (gốc WorkingClaude + mike/bin)."
+# `*_selfcheck.sh` THÊM 2026-08-21 (job Wags_20260821_051049). Trước đó glob chỉ lấy `.py`, nên
+# 12 selfcheck viết bằng bash KHÔNG có bộ đo nào hằng ngày — đo thật lúc thêm: 11/12 xanh,
+# `daily_retro_wake_metrics_selfcheck.sh` ĐỎ THẬT (`_batch_unknown: unbound variable`) và đã đỏ từ
+# trước 08-21 mà không ai biết, đúng loại lỗ hổng này. Cả 12 đều hermetic (sandbox + stub
+# notify/notify_thread/append_event — đã verify không có event nào rơi lên bus khi chạy).
+# Harness `selfcheck_weekly_baseline_check.sh` / `selfcheck_scope_map.sh` KHÔNG khớp glob này
+# (chúng bắt đầu bằng `selfcheck_`, không kết thúc bằng `_selfcheck.sh`) — cố ý, chúng không phải
+# selfcheck.
+mapfile -t SC_FILES < <( { ls -1 *_selfcheck.py *_selfcheck.sh; ls -1 mike/bin/*_selfcheck.py mike/bin/*_selfcheck.sh; } 2>/dev/null | sort -u )
+echo "Phạm vi: ${#SC_FILES[@]} selfcheck (gốc WorkingClaude + mike/bin, .py + .sh)."
 
 for f in "${SC_FILES[@]}"; do
     tmo="$(python3 -c "
@@ -116,7 +124,13 @@ print(b['required_env']['slow_files'].get('$f', b['required_env']['default_timeo
     # `$f` nay có thể chứa `/` (mike/bin/…) ⇒ phải làm phẳng cho tên file log tạm, nếu không
     # redirect ghi vào thư mục không tồn tại và MỌI ca mike/bin thành FAIL giả.
     log="/tmp/wk_sc_$$_${f//\//_}.log"
-    timeout "$tmo" "$DNA_PYEXE" "$f" > "$log" 2>&1
+    # Chạy bằng interpreter ĐÚNG THEO ĐUÔI FILE: `.sh` bằng bash, còn lại bằng DNA_PYEXE.
+    # Ném một file bash vào DNA_PYEXE thì nó FAIL vì SyntaxError — một ca đỏ GIẢ trông y hệt
+    # regression thật.
+    case "$f" in
+        *.sh) timeout "$tmo" bash "$f" > "$log" 2>&1 ;;
+        *)    timeout "$tmo" "$DNA_PYEXE" "$f" > "$log" 2>&1 ;;
+    esac
     rc=$?
     if [ $rc -eq 0 ]; then st=PASS; elif [ $rc -eq 124 ]; then st=TIMEOUT; else st=FAIL; fi
     # TRÍCH ĐÚNG DÒNG ĐỎ, không phải `tail -8`. Vì sao đổi (đo thật 2026-08-16): các

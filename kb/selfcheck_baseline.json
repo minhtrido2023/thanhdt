@@ -19,7 +19,9 @@
       "eyrisk_selector_selfcheck.py": 600,
       "v4final_selector_selfcheck.py": 600,
       "basket_price_basis_selfcheck.py": 300,
-      "immutable_publish_selfcheck.py": 720
+      "immutable_publish_selfcheck.py": 720,
+      "cli_provider_selfcheck.sh": 240,
+      "dispatch_discord_topic_selfcheck.sh": 240
     }
   },
   "known_red": {
@@ -33,16 +35,6 @@
       "ack_pending": false,
       "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
     },
-    "mike/bin/wake_thread_selfcheck.py": {
-      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
-      "since": "2026-08-20T21:54:22Z",
-      "status": "FAIL",
-      "auto": true,
-      "topic": "selfcheck-red: mike/bin/wake_thread_selfcheck.py",
-      "escalated_utc": "2026-08-20T21:54:22Z",
-      "ack_pending": false,
-      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
-    },
     "phs_flash_api_selfcheck.py": {
       "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
       "since": "2026-08-20T21:54:22Z",
@@ -52,6 +44,13 @@
       "escalated_utc": "2026-08-20T21:54:22Z",
       "ack_pending": false,
       "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
+    },
+    "mike/bin/daily_retro_wake_metrics_selfcheck.sh": {
+      "reason": "ĐỎ THẬT, đã triage bởi Wags (job Wags_20260821_051049) NGAY LÚC đưa selfcheck .sh vào phạm vi quét — không phải đỏ mới phát sinh. Lỗi: `run_block` in ra `$_batch_unknown`/`$_batch_mktemp` nhưng khối wake-metrics trong bin/daily_retro.sh không còn set 2 biến này ⇒ `unbound variable` ở dòng 54 ⇒ R[] rỗng. Đỏ từ TRƯỚC 2026-08-21 (commit 541b50f3 ghi nhận 'pre-existing broken'), sống được vì glob cũ chỉ lấy *_selfcheck.py.",
+      "since": "2026-08-21T05:20:00Z",
+      "status": "FAIL",
+      "auto": false,
+      "fix_needed": "Chủ sở hữu daily_retro.sh quyết: khối wake-metrics còn NGHĨA GÌ sau khi 541b50f3 gỡ push-wake/reconciler/debounce? Nếu machinery đã retire thì gỡ CẢ khối lẫn selfcheck; nếu còn giữ thì set lại 2 biến. Wags KHÔNG tự quyết vì đây là phạm vi retro/wakeup của Mike, không phải bug điều phối."
     }
   }
 }
