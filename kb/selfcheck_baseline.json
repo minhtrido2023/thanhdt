@@ -51,6 +51,36 @@
       "status": "FAIL",
       "auto": false,
       "fix_needed": "Chủ sở hữu daily_retro.sh quyết: khối wake-metrics còn NGHĨA GÌ sau khi 541b50f3 gỡ push-wake/reconciler/debounce? Nếu machinery đã retire thì gỡ CẢ khối lẫn selfcheck; nếu còn giữ thì set lại 2 biến. Wags KHÔNG tự quyết vì đây là phạm vi retro/wakeup của Mike, không phải bug điều phối."
+    },
+    "mike/bin/notify_thread_argswap_selfcheck.py": {
+      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
+      "since": "2026-08-21T19:31:56Z",
+      "status": "FAIL",
+      "auto": true,
+      "topic": "selfcheck-red: mike/bin/notify_thread_argswap_selfcheck.py",
+      "escalated_utc": "2026-08-21T19:31:56Z",
+      "ack_pending": false,
+      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
+    },
+    "mike/bin/now_injection_selfcheck.sh": {
+      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
+      "since": "2026-08-21T19:31:56Z",
+      "status": "FAIL",
+      "auto": true,
+      "topic": "selfcheck-red: mike/bin/now_injection_selfcheck.sh",
+      "escalated_utc": "2026-08-21T19:31:56Z",
+      "ack_pending": false,
+      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
+    },
+    "mike/bin/ops_health_check_selfcheck.py": {
+      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
+      "since": "2026-08-21T19:31:56Z",
+      "status": "FAIL",
+      "auto": true,
+      "topic": "selfcheck-red: mike/bin/ops_health_check_selfcheck.py",
+      "escalated_utc": "2026-08-21T19:31:56Z",
+      "ack_pending": false,
+      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
     }
   }
 }
