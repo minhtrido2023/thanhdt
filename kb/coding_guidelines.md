@@ -409,7 +409,7 @@ mặc định"; `DNSEBroker.get_cash()` **không** phải mặc định an toàn
 | Câu hỏi | Field ĐÚNG | Dùng ở | Sai thì hỏng kiểu gì |
 |---|---|---|---|
 | "Tôi **SỞ HỮU** bao nhiêu vốn?" (cơ sở NAV / mẫu số tính tỷ trọng mục tiêu) | **`totalCash − totalDebt` (+ `egg.totalValue` nếu consumer là NAV/pool, xem dưới)** | `daily_nav_snapshot.py:449`, `reconcile_equity.py`, `compute_park_trim.py` (mẫu số pool), `compute_active_nav.py` (§cash) | Khai THIẾU NAV đúng bằng tiền bán chưa settle ⇒ under-deploy, hoặc pool co lại đúng bằng lượng vừa bán ⇒ **vòng lặp tự kích bán tiếp** |
-| "Tôi **TIÊU ĐƯỢC NGAY** bao nhiêu?" (sức mua đặt lệnh phiên này) | **`ppse.pp0Buy`/`qmaxBuy`**, hoặc `availableCash` khi không gọi được ppse | `DNSEBroker.get_cash()`, `check_plan_funding()`, `executor.py`, `compute_jit_unpark.py` (L2) | Nới lỏng gate tiền ⇒ đặt lệnh không có tiền; hoặc chặn oan plan tự cấp vốn đủ |
+| "Tôi **TIÊU ĐƯỢC NGAY** bao nhiêu?" (sức mua đặt lệnh phiên này) | **`ppse.pp0Buy`/`qmaxBuy`**, hoặc `availableCash` khi không gọi được ppse | `DNSEBroker.get_cash()`, `check_plan_funding()`, `executor.py` · ⚠️ `compute_jit_unpark.py` (L2) là NGOẠI LỆ user duyệt — xem ghi chú ngay dưới bảng | Nới lỏng gate tiền ⇒ đặt lệnh không có tiền; hoặc chặn oan plan tự cấp vốn đủ |
 
 **Chiều thứ BA (thêm 2026-08-19, sau sự cố TRIM giả cùng ngày): Trứng vàng (`egg.totalValue`,
 sibling của `stock` trong payload `balances` — xem `kb/data_registry/trading-bot/
@@ -419,8 +419,25 @@ về tài khoản T+1 mới tiêu được (KHÔNG thuộc dòng "TIÊU ĐƯỢC
 PHẢI cộng thêm field này (đã làm ở `compute_active_nav.py`/`daily_nav_snapshot.py` từ 08-18,
 `compute_park_trim.py` từ 08-19 — sự cố xảy ra vì L1 bị bỏ sót khi 2 file kia đã sửa: tiền
 chuyển từ cash sang egg làm pool L1 co lại giả, sinh TRIM oan ~58,7tr cho SpaceX+ZaloPay).
-Consumer thuộc dòng "TIÊU ĐƯỢC NGAY" (`compute_jit_unpark.py` L2, `check_plan_funding()`,
-`executor.py`) **KHÔNG được cộng egg** — đó là nới lỏng gate tiền y hệt lỗi ở dòng trên.
+Consumer thuộc dòng "TIÊU ĐƯỢC NGAY" (`check_plan_funding()`, `executor.py`)
+**KHÔNG được cộng egg** — đó là nới lỏng gate tiền y hệt lỗi ở dòng trên.
+
+⚠️ **NGOẠI LỆ DUY NHẤT, user duyệt 2026-08-19: `compute_jit_unpark.py` (L2) CÓ cộng egg.**
+Bảng trên xếp L2 vào dòng "TIÊU ĐƯỢC NGAY" và cấm cộng egg; commit `956d8ec5` (2026-08-20)
+làm NGƯỢC LẠI, và đó là quyết định có chủ đích chứ không phải vi phạm — 2 vòng làm rõ cùng
+ngày + quant-skeptic vòng 2, user chốt. Lý do hợp lệ: **L2 là tầng ĐỀ XUẤT, không phải tầng
+GATE.** Gate cứng vẫn là `check_plan_funding()` (P0) và nó vẫn KHÔNG cộng egg — nghĩa là
+egg không hề nới lỏng cổng tiền, nó chỉ cho phép L2 đề xuất "mua đủ, có rút egg" thay vì
+âm thầm SHRINK lệnh xuống phần cash thật. Bù lại, mỗi `buy_amendments[i]` phải mang
+`funded_via` ("cash" | "cash+egg") + `egg_relied_vnd` (CẬN TRÊN, không phải số chính xác)
+và in cảnh báo rút egg tường minh; egg không rút kịp ⇒ P0 giữ HOLD, đúng thiết kế.
+Ranh giới cứng + vì sao KHÔNG chiết khấu phí: docstring `§pool-egg-L2` trong
+`mike/bin/compute_jit_unpark.py` — ĐỌC TRƯỚC khi đổi lại chỗ đó.
+Bằng chứng chạy thật (2026-08-19, ZaloPay): `cash đầu 39.17tr (availableCash 0.39tr +
+Trứng vàng 38.78tr)` kèm đúng dòng cảnh báo "CẦN RÚT Trứng vàng ... TRƯỚC khi đặt lệnh".
+(Ghi lại 2026-08-22 tại weekly ops audit: bảng §25 viết 08-19 còn quyết định L2 chốt 08-19→20,
+nên hai nguồn mâu thuẫn nhau đúng 3 ngày. Ai đọc bảng mà không đọc dòng này sẽ "sửa" L2 bỏ
+egg đi và lặng lẽ revert một quyết định user đã duyệt.)
 
 **Vì sao là luật chứ không phải trùng hợp — HAI bug cùng loại trong HAI ngày liên tiếp:**
 `compute_park_trim.py` (mẫu số pool, 2026-08-09, job `Taylor_20260809_150316`, commit `df7d92b4`)
