@@ -86,3 +86,20 @@ H2 báo cáo kèm nhưng **không** lật verdict theo cả hai chiều.
 ## 8. Deviation log
 
 Ghi nối vào cuối file, có ngày + lý do. Không sửa nội dung phía trên.
+
+---
+
+### Deviation log
+
+**2026-08-21 (sau khi chạy, trước khi viết RESULTS)** — 2 bổ sung, **không** đụng quy tắc quyết định §7:
+
+1. **Thêm scope `EX_REGIME_STRICT`.** Bản `EX_REGIME` viết theo §5 (`state NOT IN {0,4}`) vô tình
+   GIỮ LẠI sự kiện có `state` NULL — mà `vnindex_5state_dt5g_live` chỉ phủ từ 2014 (359/632 sự kiện
+   có nhãn) ⇒ 273 sự kiện không nhãn bị đọc thành "không phải CRISIS". Đây đúng chữ ký
+   `coding_guidelines §28` (suy từ sự vắng mặt của một biểu diễn). Giữ CẢ HAI bản trong bảng kết
+   quả: `EX_REGIME` (như đăng ký, có lỗ hổng NULL) và `EX_REGIME_STRICT` (bắt buộc có nhãn DT5G).
+2. **Thêm thống kê mô tả `pct_negative` + Wilcoxon signed-rank.** Phân phối `BHAR_60` hoá ra lệch
+   phải rất mạnh (mean và median ngược dấu) nên chỉ báo trung bình sẽ giấu mất hình dạng thật.
+   **KHÔNG được dùng để lật verdict** — §7 khoá theo trung bình + t-test, và đổi thống kê sau khi
+   nhìn dữ liệu chính là thứ PREREG sinh ra để chặn. Kết quả Wilcoxon báo cáo như **LEAD phải
+   PREREG riêng**, không phải kết quả của job này.
