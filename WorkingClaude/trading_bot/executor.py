@@ -383,6 +383,11 @@ class Executor:
                 return
             if os.environ.get("MIKE_BOT_TEST_MODE") == "1" and not os.environ.get("ORDER_BOOK_TEST_SINK"):
                 return
+            # Selfcheck/tickcheck fixtures dùng account tag "selfcheck-*"/"tickcheck-*" +
+            # plan_date sentinel "2099-01-01" >= ORDER_BOOK_START → lọt qua guard ngày ở dưới
+            # và ghi rác vào EXEC_DIR thật. Cùng cơ chế lọc với order_book_shadow_probe.py.
+            if self.label.startswith(("selfcheck-", "tickcheck-")):
+                return
             # Cửa sổ trial: chỉ ghi từ ngày bắt đầu chương trình paper (registry
             # `order_book_execution_shadow`.start = 2026-08-18). `order_book_shadow_probe.py`
             # lọc quan sát theo ĐÚNG mốc này (cùng biến `ORDER_BOOK_START`) — áp cùng một luật
