@@ -49,3 +49,4 @@
   coding_guidelines; F3.3 checker cảnh báo khi signal_hold hết hạn 09-16.
 - P3 ccdb session-dedupe: KHÔNG CẦN NỮA — debounce đã giải quyết ở tầng gửi.
 
+- [2026-08-21T02:06:38Z] 2026-08-21 09:xx: user yêu cầu đơn giản hoá lớp wake-up. Root cause 'No conversation found' = session CODEX (UUIDv7) kẹt trong thread Trading Daily sau đổi backend global→claude 08-20; scheduler._run_task ccdb không có guard session_is_resumable. Đề xuất 'kết quả là dữ liệu, không phải wake': agents/Mike/research/wakeup_simplification_proposal_20260821.md — CHỜ USER QUYẾT, chưa sửa gì. Việc ngay: user gõ /backend claude ở Trading Daily.
