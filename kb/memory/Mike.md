@@ -18,3 +18,4 @@
 - BAL signal shadow-track (VPI) review 09-16. signal_holds BAL+VPI until 09-16.
 - OKF split mandate: file >40KB tự split.
 
+- [2026-08-21T11:11:45Z] 2026-08-21 18:20 ICT: PLAN discord stamp/format by-construction (agents/Mike/research/discord_outbound_format_by_construction_plan_20260821.md) — chờ user chốt 3 điểm §7 rồi mới implement (ccdb outbound_format.py ở event_processor RESULT + /api/notify; gỡ prose). CHƯA sửa code.
