@@ -133,6 +133,43 @@ def _dd_check_for_order(ticker, book, asof, est_value_vnd=None):
         return None
 
 
+def _capit_qty_per_ticker(account_label):
+    """{ticker: qty CAPIT thật (fill broker)} của account, CHỈ khi có episode CAPIT đang mở.
+
+    Dùng để floor sell qty trong diff step: KHÔNG bán phần custom30V parking chỉ vì episode
+    CAPIT đóng ở paper (PVT/SIP có thể vừa là CAPIT vừa là parking — capit_episode.py §GIỚI HẠN
+    ĐÃ BIẾT). Fail-safe: import/đọc lỗi hoặc không có episode mở → {} (guard không kích hoạt,
+    hành vi y như trước khi có cơ chế này — bán toàn bộ diff).
+    """
+    try:
+        import sys as _sys
+        if WORKDIR not in _sys.path:
+            _sys.path.insert(0, WORKDIR)
+        import capit_episode as _ce
+        ep = _ce._open_episode(_ce._load(_ce.LEDGER_PATH))
+        if not ep:
+            return {}
+        return dict((ep.get("qty_per_account") or {}).get(account_label) or {})
+    except Exception as exc:
+        _log.warning("capit_episode qty_per_account lỗi (%s): %s", account_label, exc)
+        return {}
+
+
+def _capit_floor_diff(diff, tgt, have, capit_qty):
+    """Floor 1 lệnh SELL trong diff step để không bán quá phần CAPIT (guard §CAPIT exit floor).
+
+    `capit_qty` = qty CAPIT thật (fill broker) của MÃ NÀY trong episode đang mở, hoặc None nếu
+    mã không nằm trong episode (guard không áp). Chỉ tác động khi diff<0 (SELL). Trả về
+    (diff_mới, non_capit_have) — non_capit_have chỉ có nghĩa khi guard có áp (để ghi note).
+    """
+    if diff >= 0 or capit_qty is None:
+        return diff, None
+    capit_qty = max(0.0, capit_qty)
+    non_capit_have = max(0.0, have - capit_qty)
+    eff_tgt = max(tgt, non_capit_have)
+    return eff_tgt - have, non_capit_have
+
+
 def _format_alt_lens(ticker):
     """Lăng kính định giá thay thế khi DCF NOT_COMPUTED. Fail-safe: import/lỗi → ""."""
     if not ticker:
@@ -440,6 +477,10 @@ class V23Strategy(StrategyBase):
         orders = []
         tol = cfg["qty_tolerance_pct"]
         all_syms = sorted(set(target) | set(real_pos))
+        # CAPIT exit floor (2026-08-21): khi episode CAPIT đang mở, phần custom30V parking
+        # nằm chung mã với rổ CAPIT (vd PVT/SIP) KHÔNG được bán chỉ vì paper-row CAPIT đóng
+        # (60 phiên). {} khi không có episode mở ⇒ guard không kích hoạt, hành vi y như trước.
+        _capit_qty = _capit_qty_per_ticker(getattr(broker, "label", None))
         for t in all_syms:
             tgt = target.get(t, 0.0)
             have = real_pos.get(t, {}).get("total", 0)
@@ -448,7 +489,11 @@ class V23Strategy(StrategyBase):
                                                 ex_tickers=_ex)
             if px is None:
                 continue
-            diff = tgt - have
+            diff_raw = tgt - have
+            diff, non_capit_have = _capit_floor_diff(diff_raw, tgt, have, _capit_qty.get(t))
+            if diff > diff_raw + 1e-9:
+                notes.append(f"CAPIT exit floor: {t} giữ lại {non_capit_have:.0f}cp "
+                             f"(ngoài CAPIT), chỉ bán phần CAPIT")
             if tgt > 0 and abs(diff) < tol * tgt:
                 continue
             if abs(diff) * px < cfg["min_order_value"]:
