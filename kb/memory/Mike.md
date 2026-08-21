@@ -19,3 +19,5 @@
 - OKF split mandate: file >40KB tự split.
 
 - [2026-08-21T11:11:45Z] 2026-08-21 18:20 ICT: PLAN discord stamp/format by-construction (agents/Mike/research/discord_outbound_format_by_construction_plan_20260821.md) — chờ user chốt 3 điểm §7 rồi mới implement (ccdb outbound_format.py ở event_processor RESULT + /api/notify; gỡ prose). CHƯA sửa code.
+- [2026-08-21T12:25:45Z] 2026-08-21 19:4x ICT: Discord timestamp by-construction lớp 2 (thân tin): ccdb 4e6f2cb (_normalize_times UTC→ICT, ~Ns→phút, embed) + fleet 34037199 (dispatch.sh ETA ICT+phút, utc_text_gate.sh pre-commit). ĐANG restart ccdb-mike; SAU restart: verify E2E bằng notify_thread tin thử '12:14 UTC (~435s)' rồi đọc lại qua /api/threads/<tid>/messages; lounge closing note.
+- [2026-08-21T12:26:39Z] 2026-08-21 19:27 ICT: XONG Discord timestamp by-construction (ccdb 56e3b29+4e6f2cb, fleet cb346fa4+34037199). E2E verified sau restart. Không còn việc treo về chủ đề này.
