@@ -356,12 +356,13 @@ class YieldFloor(unittest.TestCase):
         dd._get_insider_net_sell_flag = self._ins
         dd._CACHE.clear()
 
-    def _yf(self, div0, n=(1, 1, 1), icb=7535, price=10000.0):
+    def _yf(self, div0, n=(1, 1, 1), icb=7535, price=10000.0, div3=0.0, n3=0):
         """Giả lập 1 lượt đọc: div0/n từ BQ, ICB từ cache, giá từ `_row` (mặc định 10.000đ)."""
         class _Lib:
             @staticmethod
             def bq(sql, timeout=300):
-                return [{"div0": div0, "n0": n[0], "n1": n[1], "n2": n[2]}]
+                return [{"div0": div0, "n0": n[0], "n1": n[1], "n2": n[2],
+                          "div3": div3, "n3": n3}]
         dd._corp_action_lib = lambda: _Lib
         dd._icb_code = lambda t, a: icb
         dd._latest_row = lambda t, a: _row(ticker=t, time=self.ASOF, Price=price, Close=price)
@@ -438,6 +439,35 @@ class YieldFloor(unittest.TestCase):
                                   {"asof": self.ASOF, "skip_dcf": True, "skip_corp_flags": True},
                                   as_dict=True)
         self.assertIsNone(d2["yield_floor"])
+
+    def test_68_div_growth_not_stable_is_na(self):
+        """Không phải stable payer ⇒ div_growth_signal = N/A, kể cả có div3."""
+        yf = self._yf(500.0, n=(1, 0, 1), div3=500.0, n3=1)
+        self.assertEqual(yf["div_growth_signal"], "N/A")
+
+    def test_69_div_growth_no_history_when_div3_zero(self):
+        yf = self._yf(500.0, n=(1, 1, 1), div3=0.0, n3=0)
+        self.assertEqual(yf["div_growth_signal"], "NO_HISTORY")
+
+    def test_70_div_growth_growing(self):
+        """div0 gấp đôi div3 trong 3 năm ⇒ CAGR_3Y = 2^(1/3)-1 ≈ 25,99% > 5% ⇒ GROWING."""
+        yf = self._yf(1000.0, n=(1, 1, 1), div3=500.0, n3=1)
+        self.assertEqual(yf["div_growth_signal"], "GROWING")
+
+    def test_71_div_growth_stable(self):
+        """div0 ≈ div3 (đi ngang) ⇒ CAGR_3Y ≈ 0 ∈ [-5%; 5%] ⇒ STABLE."""
+        yf = self._yf(500.0, n=(1, 1, 1), div3=500.0, n3=1)
+        self.assertEqual(yf["div_growth_signal"], "STABLE")
+
+    def test_72_div_growth_declining(self):
+        """div0 chỉ còn nửa div3 ⇒ CAGR_3Y = 0.5^(1/3)-1 ≈ -20,6% < -5% ⇒ DECLINING."""
+        yf = self._yf(500.0, n=(1, 1, 1), div3=1000.0, n3=1)
+        self.assertEqual(yf["div_growth_signal"], "DECLINING")
+
+    def test_73_div_growth_banking_is_na(self):
+        """Ngân hàng đủ điều kiện stable + div3>0 vẫn bị ép về N/A (giống yield_floor_note)."""
+        yf = self._yf(500.0, n=(1, 1, 1), div3=500.0, n3=1, icb=dd.YIELD_FLOOR_ICB_BANKING)
+        self.assertEqual(yf["div_growth_signal"], "N/A")
 
     def test_67_every_error_path_keeps_the_key(self):
         """Mọi nhánh trả sớm của run_due_diligence phải giữ khoá — caller không phải .get() mù."""

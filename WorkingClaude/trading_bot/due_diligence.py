@@ -282,6 +282,8 @@ _YIELD_FLOOR_BANKING_NOTE = ("Ngân hàng loại khỏi diễn giải: n=3 episo
 
 # Đếm DIV theo 3 cửa sổ 365 ngày liên tiếp lùi từ asof — n0/n1/n2 và div0 giữ NGUYÊN ngữ nghĩa
 # của `build.py` (`stable3 = n0>=1 ∧ n1>=1 ∧ n2>=1`, `div0` = tổng VND/cp cửa sổ gần nhất).
+# div3/n3 = cửa sổ thứ 4 (t-4*365, t-3*365] — chỉ dùng cho `div_growth_signal` (job
+# Taylor_20260821_103634), KHÔNG đụng tới STABLE-3 (vẫn chỉ n0/n1/n2).
 _YIELD_FLOOR_SQL = """
 WITH dd AS (
   SELECT c.exright_date AS ex, c.value_per_share,
@@ -293,7 +295,7 @@ WITH dd AS (
     AND c.ticker = "{ticker}"
     AND c.exright_date IS NOT NULL AND c.value_per_share > 0
     AND c.exright_date <= DATE "{asof}"
-    AND c.exright_date > DATE_SUB(DATE "{asof}", INTERVAL 1095 DAY)
+    AND c.exright_date > DATE_SUB(DATE "{asof}", INTERVAL 1460 DAY)
 )
 SELECT
   IFNULL(SUM(IF(ex > DATE_SUB(DATE "{asof}", INTERVAL 365 DAY), value_per_share, 0)), 0) AS div0,
@@ -301,9 +303,16 @@ SELECT
   COUNTIF(ex <= DATE_SUB(DATE "{asof}", INTERVAL 365 DAY)
       AND ex >  DATE_SUB(DATE "{asof}", INTERVAL 730 DAY)) AS n1,
   COUNTIF(ex <= DATE_SUB(DATE "{asof}", INTERVAL 730 DAY)
-      AND ex >  DATE_SUB(DATE "{asof}", INTERVAL 1095 DAY)) AS n2
+      AND ex >  DATE_SUB(DATE "{asof}", INTERVAL 1095 DAY)) AS n2,
+  IFNULL(SUM(IF(ex <= DATE_SUB(DATE "{asof}", INTERVAL 1095 DAY)
+      AND ex >  DATE_SUB(DATE "{asof}", INTERVAL 1460 DAY), value_per_share, 0)), 0) AS div3,
+  COUNTIF(ex <= DATE_SUB(DATE "{asof}", INTERVAL 1095 DAY)
+      AND ex >  DATE_SUB(DATE "{asof}", INTERVAL 1460 DAY)) AS n3
 FROM dd WHERE rn = 1
 """
+
+YIELD_FLOOR_DIV_GROWTH_HI = 0.05    # PREREG job _103634 — CAGR_3Y > 5% ⇒ GROWING
+YIELD_FLOOR_DIV_GROWTH_LO = -0.05   # CAGR_3Y < -5% ⇒ DECLINING
 
 
 def _icb_code(ticker, asof):
@@ -376,7 +385,8 @@ def _yield_floor(ticker, asof, ref_price=None):
     out = {"is_stable_payer": None, "trailing_annual_div_vnd": None, "trailing_yield_pct": None,
            "deposit_rate_pct": None, "deposit_rate_source": None, "yield_floor_price_vnd": None,
            "prox_to_floor": None, "ref_price_vnd": None, "icb_code": None,
-           "n_div_windows": None, "yield_floor_note": "NO_DATA", "note": _YIELD_FLOOR_NOTE}
+           "n_div_windows": None, "yield_floor_note": "NO_DATA", "note": _YIELD_FLOOR_NOTE,
+           "div_growth_signal": "N/A"}
     key = ("_yfloor", ticker, asof)
     if key in _CACHE and ref_price is None:
         return _CACHE[key]
@@ -393,9 +403,18 @@ def _yield_floor(ticker, asof, ref_price=None):
                 r = rows[0]
                 n0, n1, n2 = int(r["n0"]), int(r["n1"]), int(r["n2"])
                 div0 = float(r["div0"] or 0.0)
+                div3 = float(r.get("div3") or 0.0)
                 out["n_div_windows"] = [n0, n1, n2]
                 out["trailing_annual_div_vnd"] = round(div0, 4)
                 stable = (n0 >= 1 and n1 >= 1 and n2 >= 1)
+                if stable:
+                    if div3 > 0:
+                        cagr3y = (div0 / div3) ** (1.0 / 3.0) - 1.0
+                        out["div_growth_signal"] = (
+                            "GROWING" if cagr3y > YIELD_FLOOR_DIV_GROWTH_HI else
+                            "DECLINING" if cagr3y < YIELD_FLOOR_DIV_GROWTH_LO else "STABLE")
+                    else:
+                        out["div_growth_signal"] = "NO_HISTORY"
                 px = ref_price if ref_price else _ref_price_for(ticker, asof)
                 out["ref_price_vnd"] = float(px) if px else None
                 if div0 > 0 and px and dep > 0:
@@ -418,6 +437,7 @@ def _yield_floor(ticker, asof, ref_price=None):
             out["is_stable_payer"] = None
             out["yield_floor_note"] = "BANKING_EXCLUDED"
             out["note"] = _YIELD_FLOOR_BANKING_NOTE
+            out["div_growth_signal"] = "N/A"
     except Exception as exc:
         _log.warning("yield_floor loi (%s): %s", ticker, str(exc)[:200])
         out["yield_floor_note"] = "NO_DATA"
