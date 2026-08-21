@@ -990,3 +990,24 @@
 
 ## Consolidation 2026-08-21T12:39:11Z
 - [2026-08-21T12:39:03Z] Taylor/finding — capit-exit-floor-wired: {"status": "DONE", "commit": "2baf6581", "fix": "floor sell qty trong strategies.py build_plan() diff step - chi ban phan CAPIT (qty_per_account episode dang mo), giu lai phan custom30V parking cung ma", "test_cases": 13, "quant_skeptic": "CONFIRMED", "verify_log": "mike/logs/verify_20260821_123620_1298759.log", "episode": "CAPIT-2026-07-20", "sessions_held": 24, "sessions_to_exit": 36, "eta_exit": "~dau 10/2026 (60 phien tu 2026-07-20, con 36 phien)"}
+
+## Consolidation 2026-08-21T17:15:44Z
+- [2026-08-21T17:09:03Z] Taylor/heartbeat — Taylor_20260821_170812: {"status": "in_progress", "note": "grep done, ~140 files found, filtering noise (worktree dup/vendor/md) then dispatching parallel classification"}
+- [2026-08-21T17:09:13Z] Taylor/heartbeat — Taylor_20260821_170812: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20260821_170812", "source": "watcher"}
+- [2026-08-21T17:10:13Z] Taylor/heartbeat — Taylor_20260821_170812: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20260821_170812", "source": "watcher"}
+- [2026-08-21T17:11:13Z] Taylor/heartbeat — Taylor_20260821_170812: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20260821_170812", "source": "watcher"}
+- [2026-08-21T17:12:13Z] Taylor/heartbeat — Taylor_20260821_170812: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20260821_170812", "source": "watcher"}
+- [2026-08-21T17:13:14Z] Taylor/heartbeat — Taylor_20260821_170812: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20260821_170812", "source": "watcher"}
+- [2026-08-21T17:13:44Z] Taylor/heartbeat — Taylor_20260821_170812: {"status": "in_progress", "note": "deep-dived ~55 candidate files, found host TZ=Etc/UTC no override on ccdb-mike.service; writing report now"}
+- [2026-08-21T17:14:14Z] Taylor/heartbeat — Taylor_20260821_170812: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20260821_170812", "source": "watcher"}
+- [2026-08-21T17:15:14Z] Taylor/heartbeat — Taylor_20260821_170812: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20260821_170812", "source": "watcher"}
+- [2026-08-21T17:15:32Z] Taylor/finding — s1-datetime-audit: {"status": "done", "report": "agents/Mike/research/s1_datetime_audit_20260821.md", "commit": "010b2406", "files_a_count": 1, "files_a": ["mike/agents/Taylor/anomaly_scan.py:294"], "safe_to_flip": true, "note": "host TZ=Etc/UTC, ccdb-mike.service co Environment TZ rong. Codebase da quy uoc ICT rong khap (crontab per-line TZ, wc_env.sh, ZoneInfo helpers) - flip la FIX cho ad-hoc calls duoi service, khong phai pha vo logic dang dung. Chi 1 dong can sua (thap, khong blocking): anomaly_scan.py:294 asof nen doi sang _ict_now() da co san cung file de nhat quan noi bo. Discord Embed.timestamp=datetime.now() da verify AN TOAN (discord.py embeds.py astimezone() tu gan dung offset theo TZ he thong). macro_state_live.py get_gated_state age_min: lech hien tai (agent ad-hoc UTC vs cron-writer ICT) nam o huong AN TOAN (overcount tuoi -> de fail-closed DT4 hon), flip xoa lech nay."}
+- [2026-08-21T17:08:44Z] Wags/heartbeat — Wags_20260821_170744: {"status": "still_running", "elapsed_min": 1, "job_id": "Wags_20260821_170744", "source": "watcher"}
+- [2026-08-21T17:09:45Z] Wags/heartbeat — Wags_20260821_170744: {"status": "still_running", "elapsed_min": 2, "job_id": "Wags_20260821_170744", "source": "watcher"}
+- [2026-08-21T17:10:45Z] Wags/heartbeat — Wags_20260821_170744: {"status": "still_running", "elapsed_min": 3, "job_id": "Wags_20260821_170744", "source": "watcher"}
+- [2026-08-21T17:11:45Z] Wags/heartbeat — Wags_20260821_170744: {"status": "still_running", "elapsed_min": 4, "job_id": "Wags_20260821_170744", "source": "watcher"}
+- [2026-08-21T17:12:45Z] Wags/heartbeat — Wags_20260821_170744: {"status": "still_running", "elapsed_min": 5, "job_id": "Wags_20260821_170744", "source": "watcher"}
+- [2026-08-21T17:13:20Z] Wags/heartbeat — Wags_20260821_170744: {"status": "in_progress", "note": "S2.1+S2.2+S3 done (prompt_builder early-return fix, scheduler injection, thread_context ICT); next: outbound_format market state"}
+- [2026-08-21T17:13:45Z] Wags/heartbeat — Wags_20260821_170744: {"status": "still_running", "elapsed_min": 6, "job_id": "Wags_20260821_170744", "source": "watcher"}
+- [2026-08-21T17:14:45Z] Wags/heartbeat — Wags_20260821_170744: {"status": "still_running", "elapsed_min": 7, "job_id": "Wags_20260821_170744", "source": "watcher"}
+- [2026-08-21T17:15:33Z] Wags/heartbeat — Wags_20260821_170744: {"status": "in_progress", "note": "S2 market state + S2.3 fleet hook now_line.py done and tested; next: S4 time_claim_audit.py + selfcheck script"}
