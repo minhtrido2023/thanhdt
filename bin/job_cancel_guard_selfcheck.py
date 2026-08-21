@@ -297,7 +297,11 @@ def run_sync_kill_trap(tmp, break_verifier=False, break_cancel=False):
     env = dict(os.environ)
     env.update({"DISPATCH_CLAUDE_BIN": stub, "DISPATCH_KILL_GRACE_S": "3",
                 "DISPATCH_FROM": "Mike", "MIKE_ROOT": mk})
-    p = subprocess.Popen(["bash", os.path.join(mk, "bin", "dispatch.sh"), "Taylor", "hello"],
+    # Prompt PHẢI >= 8 byte sau trim: dispatch.sh có guard chặn prompt rỗng/quá ngắn (2026-08-20).
+    # Fixture cũ "hello" (5 byte) bị guard chặn ⇒ CLI không bao giờ được spawn ⇒ 7 assertion về
+    # sync-trap / cancel fail-closed / pin logfile im lặng không chạy. KHÔNG né bằng
+    # MIKE_ALLOW_TINY_PROMPT=1: né thì ca này không còn đi qua đúng đường production.
+    p = subprocess.Popen(["bash", os.path.join(mk, "bin", "dispatch.sh"), "Taylor", "hello sandbox"],
                          cwd=mk, env=env, stdout=subprocess.DEVNULL,
                          stderr=subprocess.PIPE, text=True, start_new_session=True)
     SPAWNED.append(p.pid)

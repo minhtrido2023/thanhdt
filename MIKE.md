@@ -396,7 +396,7 @@ tay: `claude login` khi logout, re-pair trong app Claude khi zombie dai dẳng.
   **≥ 8 BYTE** sau khi bỏ hết whitespace. Ngắn hơn ⇒ **HUỶ ngay (exit 1)**, không tạo job, không
   tốn phiên headless, và ghi 1 dòng vào `logs/dispatch_rejected_prompts.log` (`ops_health_check`
   check 10b đọc file này để reject do MÁY sinh không chết im lặng). Đếm BYTE chứ không đếm ký tự
-  vì `${#var}` đổi nghĩa theo locale — mọi prompt tiếng Việt ngắn đều >8 byte nên không bao giờ
+  vì `${#var}` đổi nghĩa theo locale — mọi prompt tiếng Việt CÓ NGHĨA đều >8 byte nên không bao giờ
   bị chặn nhầm. Test với prompt siêu ngắn: `MIKE_ALLOW_TINY_PROMPT=1`.
 - **`bin/jobs.sh {list | status <job_id> | wait <job_id>}`** — poll job board (read-only).
   `status` exit-code: `0=done 2=running 3=overdue 5=pending-resume(tự chạy lại) 1=failed/timeout 4=not-found`.
