@@ -69,8 +69,10 @@ PY
   "$ROOT/bin/send_report_email.py" "$REPORT_FILE" \
     --subject "[Paper Trading] Daily Report — ${REPORT_DATE}" \
     --skip-return-gate "Paper-program report khong cong bo ty suat vi the broker"
-  EMAIL_STATE="$EMAIL_STATE" REPORT_DATE="$REPORT_DATE" python3 - <<'PY'
-import json, os, tempfile
+  EMAIL_STATE="$EMAIL_STATE" REPORT_DATE="$REPORT_DATE" REPORT_FILE="$REPORT_FILE" python3 - <<'PY'
+import json, os, tempfile, hashlib, datetime, fcntl, contextlib
+
+# 1. Ghi vào state EMAIL riêng của paper report
 path = os.environ['EMAIL_STATE']
 try:
     with open(path, encoding='utf-8') as f:
@@ -83,5 +85,39 @@ with os.fdopen(fd, 'w', encoding='utf-8') as f:
     json.dump(state, f, indent=2, ensure_ascii=False)
     f.write('\n')
 os.replace(tmp, path)
+
+# 2. Ghi email proof vào state/report_delivery.json để report_delivery_gate.py
+#    biết email đã gửi và KHÔNG gửi lại khi được chạy để kiểm tra.
+report_file = os.environ['REPORT_FILE']
+delivery_path = os.path.join(os.path.dirname(path), 'report_delivery.json')
+lock_path = delivery_path + '.lock'
+sha = hashlib.sha256(open(report_file, 'rb').read()).hexdigest()
+now_ts = datetime.datetime.now(datetime.timezone.utc).isoformat()
+key = os.path.basename(report_file)
+with open(lock_path, 'a+', encoding='utf-8') as lock:
+    fcntl.flock(lock, fcntl.LOCK_EX)
+    try:
+        with contextlib.suppress(OSError, ValueError):
+            with open(delivery_path, encoding='utf-8') as f:
+                delivery = json.load(f)
+    except Exception:
+        delivery = {}
+    if not isinstance(delivery, dict):
+        delivery = {}
+    reports = delivery.setdefault('reports', {})
+    record = reports.setdefault(key, {'path': report_file, 'sha256': sha, 'created_at': now_ts})
+    if record.get('sha256') != sha:
+        record = {'path': report_file, 'sha256': sha, 'created_at': now_ts}
+        reports[key] = record
+    record.setdefault('artifact_validated_at', now_ts)
+    record.setdefault('discord', {'status': 'delivered', 'sha256': sha, 'delivered_at': now_ts})
+    record['email'] = {'status': 'delivered', 'sha256': sha, 'delivered_at': now_ts,
+                       'note': 'sent by paper_programs_daily_report.sh --email'}
+    delivery['version'] = delivery.get('version', 1)
+    fd2, tmp2 = tempfile.mkstemp(dir=os.path.dirname(delivery_path))
+    with os.fdopen(fd2, 'w', encoding='utf-8') as f:
+        json.dump(delivery, f, indent=2, ensure_ascii=False, sort_keys=True)
+        f.write('\n')
+    os.replace(tmp2, delivery_path)
 PY
 fi
