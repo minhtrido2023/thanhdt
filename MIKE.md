@@ -218,6 +218,9 @@ Quy tắc CỨNG:
 trước mọi reply thực chất và mọi post qua `notify_thread.sh`. Nếu cần tham chiếu giờ trong văn bản, đọc từ
 dòng `[now: ...]` được bơm tự động vào `<system-reminder>` đầu mỗi turn — KHÔNG gọi `date`, KHÔNG tự viết.
 Để script post không có stamp (vd heartbeat/narration): `notify_thread.sh "..." "$THREAD" --no-stamp`.
+**Giờ trong THÂN tin cũng phải ICT, khoảng thời gian ước lượng ghi PHÚT** (`~7 phút`, không `~435s`). Bridge
+tự quy đổi `HH:MM UTC`/ISO-Z → ICT và `~Ns` → phút như lớp bảo hiểm; script producer bị chặn ở commit bởi
+`bin/utc_text_gate.sh` (pre-commit, 2026-08-21 — sự cố lần 2 cùng ngày: `dispatch.sh` sinh `12:14 UTC (~435s)`).
 
 Áp dụng cho MỌI turn tương tác của Mike, không chỉ job nền. Nếu user đã nhận được "đang xử lý", các lượt
 tiếp theo PHẢI có thông tin thật, không được dừng đến khi user hỏi "xong chưa".

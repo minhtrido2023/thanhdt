@@ -1576,14 +1576,18 @@ except Exception:
   # Discord 127.0.0.1:8199 — xem chú thích tại nhánh "registry hỏng" bên dưới.)
     if [ -n "${_dtid:-}" ]; then
       _dp="$(printf '%s' "$prompt" | head -c 120 | tr '\n\t' '  ')"
-      # Do not make the user infer whether Mike has scheduled a return.  The same
-      # profile-derived delay printed above is the first-poll target, so expose it
-      # in the initial notification with an absolute timestamp.  This is an ETA for
-      # Mike's check, not a claim that the child itself will complete then.
+      # ETA = profile-derived median for this <agent|model|effort> (same value as the
+      # ScheduleWakeup hint above).  Giờ cho NGƯỜI đọc: LUÔN ICT (TZ tường minh — §16) và
+      # đơn vị PHÚT, không giây (user 2026-08-21: "12:14 UTC (~435s)" lọt thân tin dù header
+      # đã đúng — producer phải đúng tại gốc; bridge còn lớp quy đổi UTC→ICT/giây→phút nữa,
+      # và bin/utc_text_gate.sh chặn commit mới viết `date -u … %H:%M`).  Sau đơn giản hoá
+      # §8 (08-21) Mike KHÔNG còn tự quay lại kiểm tra job nền — agent/_bg_wrapper tự báo —
+      # nên câu cũ "Tôi sẽ tự kiểm tra lại lúc …" là lời hứa sai, bỏ.
       _wake_delay="${_wsugg:-240}"
-      _wake_at="$(date -u -d "+${_wake_delay} seconds" '+%H:%M UTC' 2>/dev/null || true)"
-      [ -n "$_wake_at" ] || _wake_at="sau ~${_wake_delay}s"
-      "$ROOT/bin/notify_thread.sh" "🚀 **$id** nhận việc (job \`$job_id\`): $_dp… Tôi sẽ tự kiểm tra lại lúc **$_wake_at** (~${_wake_delay}s); nếu xong sớm hệ thống sẽ báo ngay." "$_dtid" 2>/dev/null || true
+      _eta_min=$(( (_wake_delay + 30) / 60 )); [ "$_eta_min" -ge 1 ] || _eta_min=1
+      _eta_at="$(TZ='Asia/Ho_Chi_Minh' date -d "+${_wake_delay} seconds" '+%H:%M ICT' 2>/dev/null || true)"
+      [ -n "$_eta_at" ] && _eta_txt="dự kiến ~${_eta_min} phút (≈ **${_eta_at}**)" || _eta_txt="dự kiến ~${_eta_min} phút"
+      "$ROOT/bin/notify_thread.sh" "🚀 **$id** nhận việc (job \`$job_id\`): $_dp… — ${_eta_txt}; xong sẽ tự báo tại đây." "$_dtid" 2>/dev/null || true
     fi; } &
 else
   # Synchronous: caller gets stdout directly (bounded by --timeout, no auto-retry)

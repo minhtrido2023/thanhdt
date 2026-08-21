@@ -44,3 +44,14 @@ repos:
         entry: bin/discord_id_gate.sh
         language: system
         files: '^(bin|hooks)/.*\.(sh|py)$'
+
+      # Thêm 2026-08-21, sau 2 sự cố cùng ngày "giờ sai trong tin Discord": lần 1 do LLM
+      # (đã chặn bằng header stamp ở ccdb outbound_format.py), lần 2 NGAY SAU deploy lần 1 do
+      # chính dispatch.sh sinh `date -u … '+%H:%M UTC'` vào THÂN tin. Hai producer khác nhau,
+      # cùng triệu chứng; coding_guidelines §16 đã dặn từ lâu vẫn lọt ⇒ biến §16 thành gate.
+      # Bridge còn lớp quy đổi UTC→ICT ở transport (bảo hiểm), gate này chặn producer MỚI.
+      - id: utc-text-gate
+        name: Giờ UTC trong text gửi người (ICT + phút — xem bin/utc_text_gate.sh, §16)
+        entry: bin/utc_text_gate.sh
+        language: system
+        files: '^(bin|hooks)/.*\.(sh|py)$'
