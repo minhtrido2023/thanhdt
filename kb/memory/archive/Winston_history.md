@@ -88,3 +88,6 @@
 
 ## Archived 2026-08-20 (keep=12 days=0 require_done=False)
 - [2026-08-10T05:49:55Z] XONG job Winston_20260810_054508 (ops-autofix ZaloPay 12:45): bao dong 944 PLACE_FAIL chi la du am bug deal-not-found da sua 10:32/restart 10:35 (8/8 lenh BAN khop). Sua root cause THAT = ops_health_check.sh muc 3 dem tich luy ca ngay, khong biet loi da ngung -> commit b64611b1 (co PLACE/FILL/DONE sau lan loi cuoi => ha ⚠️ xuong ℹ️; test 2 chieu tren journal that). Incident 56fbbcba. Dong 3 question restart-zalopay. CON TREO CAN USER: 2 cau Mike (report-cadence-overdue-weekly, retro-pattern-recurring-2-days) + 5 cau >48h (Taylor/vol-scale-chase-cap-gate4 5d, dt5g-live-writer-la-3 4d, context-bloat-same-day 4d, Wags/coord-2026-08-07 x2). NEXT: khong co viec dang do.
+
+## Archived 2026-08-21 (keep=12 days=0 require_done=False)
+- [2026-08-11T06:04:53Z] ĐANG CHỜ QUYẾT (2): (1) FUNDING gate chan oan khi RESUME phien chieu — gate cong Sigma mua tren toan plan, khong tru fills sang (ZaloPay 08-11: 108,2tr vs con lai that 27,2tr / pp0Buy 60,5tr); bot ZaloPay chet ca chieu 11/08, incident 5b1b7da2, bus question funding-gate-chan-oan-khi-resume-phien-chieu. De xuat: need tren qty con lai, fail-safe giu qty goc. (2) dd_check dang chuoi gay POLL_FAIL (job 054509). Ca 2 deu vung cam, can Taylor+quant-skeptic+user.
