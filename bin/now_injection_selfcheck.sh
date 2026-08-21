@@ -27,18 +27,34 @@ _check_thread() {
     overall_rc=1
     return
   }
-  file="$(grep -l "$tid" "$PROJECTS"/*.jsonl 2>/dev/null | xargs -r stat -c '%Y %n' 2>/dev/null | sort -rn | head -1 | cut -d' ' -f2-)"
+  # Loại transcript của phiên HEADLESS DISPATCH (2026-08-22, weekly ops audit): chúng nằm
+  # CÙNG project dir agents-Mike, KB context của chúng nhắc cả 3 thread_id, và chúng KHÔNG đi
+  # qua bridge Discord nên 30 dòng cuối (toàn tool result) không bao giờ có "[now:". Một phiên
+  # dispatch đang chạy vì thế luôn là file MỚI NHẤT khớp mọi thread_id ⇒ cả 3 ca FAIL GIẢ.
+  # Đây đúng lỗ hổng phần đầu file đã nêu ("headless fleet dispatch ... would self-match") —
+  # scope agents-Mike chưa đủ vì chính Mike cũng nhận dispatch. Marker phân biệt: prompt
+  # dispatch luôn mở đầu bằng "[DISPATCH từ user | job=..." (bin/dispatch.sh), phiên Discord
+  # thật không có. Đo lúc vá: 3/5 transcript mới nhất là dispatch, file mới nhất là chính
+  # phiên weekly-ops-audit này.
+  file="$(grep -l "$tid" "$PROJECTS"/*.jsonl 2>/dev/null \
+          | { grep -vFxf <(grep -l 'DISPATCH từ user | job=' "$PROJECTS"/*.jsonl 2>/dev/null) - || true; } \
+          | xargs -r stat -c '%Y %n' 2>/dev/null | sort -rn | head -1 | cut -d' ' -f2-)"
   if [ -z "$file" ]; then
     echo "FAIL $name — không tìm thấy transcript nào nhắc tới thread_id của $channel"
     overall_rc=1
     return
   fi
-  if tail -n 30 "$file" | grep -q '\[now:'; then
-    echo "PASS $name (file=$file)"
-  else
-    echo "FAIL $name — 30 dòng cuối của $file không có \"[now:\" (file=$file)"
-    overall_rc=1
-  fi
+  # Neo vào LƯỢT PROMPT gần nhất, không phải "30 dòng JSONL cuối" (sửa 2026-08-22) — lý do
+  # đầy đủ trong docstring bin/_now_injection_probe.py.
+  local probe_out probe_rc
+  probe_out="$(python3 "$ROOT/bin/_now_injection_probe.py" "$file" 2>&1)"; probe_rc=$?
+  case "$probe_rc" in
+    0) echo "PASS $name (file=$file)" ;;
+    2) echo "FAIL $name — $file không có lượt prompt người dùng nào để kiểm (file=$file)"
+       overall_rc=1 ;;
+    *) echo "FAIL $name — lượt prompt GẦN NHẤT trong $file không có \"[now:\" [$probe_out] (file=$file)"
+       overall_rc=1 ;;
+  esac
 }
 
 _check_thread "Trading strategy" "taylor_research"
