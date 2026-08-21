@@ -160,6 +160,12 @@ if [ "${MIKE_ALLOW_TINY_PROMPT:-0}" != "1" ] && [ "${_prompt_len:-0}" -lt 8 ]; t
   # 10b (cửa sổ 24h) WARN bằng chính rác của test mỗi ngày có ai chạy bộ selfcheck, và cảnh
   # báo THẬT chìm trong đó — đo thật 2026-08-21: 56/56 dòng trong file là do selfcheck sinh.
   _rejlog="${MIKE_DISPATCH_REJECT_LOG:-$ROOT/logs/dispatch_rejected_prompts.log}"
+  # mkdir -p BẮT BUỘC (arch-reviewer, vòng 3): logs/ bị .gitignore:4 loại, `git ls-files logs`
+  # = 0 file ⇒ mọi clone/restore từ backup KHÔNG có thư mục này. Thiếu bước này thì append
+  # hỏng, `2>/dev/null || true` nuốt lỗi, và check 10b báo xanh "không có dispatch bị từ chối"
+  # — chính cơ chế chống fail-silent lại fail-silent. bin/notify_thread.sh:47,93 (khuôn mẫu
+  # được viện dẫn ở trên) vẫn luôn mkdir trước khi ghi; nhánh này ban đầu bỏ sót.
+  mkdir -p "$(dirname "$_rejlog")" 2>/dev/null || true
   printf '%s\tto=%s\tfrom=%s\tbytes=%s\tprompt=%s\n' \
     "$(date -Iseconds)" "$id" "${DISPATCH_FROM:-Mike}" "$_prompt_len" "$prompt" \
     >> "$_rejlog" 2>/dev/null || true

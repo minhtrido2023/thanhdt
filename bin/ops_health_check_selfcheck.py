@@ -52,6 +52,7 @@ def extract_block(tag):
 CHECK5_SRC = extract_block("CHECK5")
 CHECK9_SRC = extract_block("CHECK9")
 CHECK10_SRC = extract_block("CHECK10")
+CHECK10B_SRC = extract_block("CHECK10B")
 CHECK11_SRC = extract_block("CHECK11")
 CHECK12_SRC = extract_block("CHECK12")
 ROUTING_SRC = extract_block("ROUTING")
@@ -767,6 +768,142 @@ def case_c10_fresh_file_all_records_old_is_ok():
         check("check10: file tươi nhưng mọi bản ghi đều cũ >24h ⇒ OK, 0 WARN", not warn, out)
         check("check10: ca đó KHÔNG bị nhầm sang nhánh 'không đọc được bản ghi'",
               "KHÔNG đọc được bản ghi nào có timestamp" not in out, out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+# ── Check 10b (dispatch.sh TỪ CHỐI prompt rỗng/quá ngắn) ────────────────────────────────
+# Thêm 2026-08-21 vòng 3 (arch-reviewer, required_change): logic 10b là code MỚI và trước đó
+# chỉ được canh bằng 2 assertion `grep chuỗi` trong bin/dispatch_tiny_prompt_selfcheck.sh —
+# tức kiểm SỰ TỒN TẠI của khối, không kiểm HÀNH VI của nó. Cùng khuôn extract-and-exec như
+# check #10 ngay trên: cửa sổ 24h áp per-record, ts rác thì GIỮ (fail-loud), file đọc không
+# được thì nói KHÔNG BIẾT chứ không im lặng thành OK.
+def run_check10b(wc_root):
+    lines, warn = [], []
+
+    def W(msg):
+        warn.append(msg)
+        lines.append(f"⚠️ {msg}")
+
+    def OK(msg):
+        lines.append(f"✅ {msg}")
+
+    import time as _time_mod
+    ns = {"os": os, "re": re, "wc_root": wc_root, "W": W, "OK": OK, "lines": lines,
+          "_time": _time_mod, "_dt": dt}
+    exec(compile(CHECK10B_SRC, SRC + ":CHECK10B", "exec"), ns)
+    return lines, warn
+
+
+def _drp_ts(hours_ago):
+    """Timestamp reject TƯƠNG ĐỐI với now — không hardcode ngày (coding_guidelines §23)."""
+    return (dt.datetime.now().astimezone() - dt.timedelta(hours=hours_ago)).isoformat(timespec="seconds")
+
+
+def _mkdrp(lines_):
+    """Dựng wc_root giả có mike/logs/dispatch_rejected_prompts.log; lines_=None ⇒ không tạo file."""
+    d = tempfile.mkdtemp(prefix="ops_health_check10b_")
+    if lines_ is not None:
+        logdir = os.path.join(d, "mike", "logs")
+        os.makedirs(logdir, exist_ok=True)
+        with open(os.path.join(logdir, "dispatch_rejected_prompts.log"), "w", encoding="utf-8") as f:
+            f.write("".join(l + "\n" for l in lines_))
+    return d
+
+
+def _drp_line(ts, prompt="x", to="Taylor", frm="Mike", nbytes=1):
+    return f"{ts}\tto={to}\tfrom={frm}\tbytes={nbytes}\tprompt={prompt}"
+
+
+def case_c10b_no_file_is_ok():
+    root = _mkdrp(None)
+    try:
+        lines, warn = run_check10b(root)
+        check("check10b: không có file log ⇒ OK, 0 WARN", not warn, joined(lines))
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+def case_c10b_fresh_reject_warns():
+    root = _mkdrp([_drp_line(_drp_ts(1))])
+    try:
+        lines, warn = run_check10b(root)
+        out = joined(lines)
+        check("check10b: 1 reject cách đây 1h ⇒ WARN", len(warn) == 1, out)
+        check("check10b: WARN mang nhãn [WARN-ONLY] (user quyết, không đẻ vòng autofix)",
+              "[WARN-ONLY]" in out, out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+def case_c10b_old_reject_is_ok():
+    root = _mkdrp([_drp_line(_drp_ts(25))])
+    try:
+        lines, warn = run_check10b(root)
+        check("check10b: reject 25h trước ⇒ ngoài cửa sổ 24h ⇒ OK, 0 WARN", not warn, joined(lines))
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+def case_c10b_window_is_per_record():
+    # Cửa sổ áp lên TỪNG BẢN GHI, không phải mtime file: 1 cũ + 1 mới ⇒ đếm ĐÚNG 1.
+    root = _mkdrp([_drp_line(_drp_ts(25), prompt="cu"), _drp_line(_drp_ts(1), prompt="moi")])
+    try:
+        lines, warn = run_check10b(root)
+        out = joined(lines)
+        check("check10b: 25h + 1h ⇒ WARN", len(warn) == 1, out)
+        check("check10b: đếm ĐÚNG 1 (cửa sổ per-record, không phải mtime file)",
+              "TỪ CHỐI 1 dispatch" in out, out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+def case_c10b_unparseable_ts_is_kept():
+    # ts đúng dạng ngày nhưng KHÔNG parse được ⇒ GIỮ (fail-loud), không lặng lẽ loại trừ.
+    root = _mkdrp(["2026-13-45T99:99:99\tto=Taylor\tfrom=Mike\tbytes=1\tprompt=x"])
+    try:
+        lines, warn = run_check10b(root)
+        check("check10b: ts rác ⇒ GIỮ bản ghi (fail-loud), vẫn WARN", len(warn) == 1, joined(lines))
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+def case_c10b_unreadable_file_says_unknown():
+    # File CÓ nhưng đọc không được ⇒ phải nói KHÔNG BIẾT. Nuốt thành OK là biến chính cơ chế
+    # chống fail-silent thành fail-silent (arch-reviewer vòng 3).
+    root = _mkdrp([_drp_line(_drp_ts(1))])
+    path = os.path.join(root, "mike", "logs", "dispatch_rejected_prompts.log")
+    try:
+        os.chmod(path, 0o000)
+        if os.access(path, os.R_OK):   # chạy dưới root ⇒ chmod vô hiệu, bỏ ca này
+            check("check10b: (bỏ qua) đang chạy quyền root, không mô phỏng được file cấm đọc",
+                  True, "")
+            return
+        lines, warn = run_check10b(root)
+        out = joined(lines)
+        check("check10b: file cấm đọc ⇒ WARN 'KHÔNG ĐỌC ĐƯỢC', không im lặng thành OK",
+              len(warn) == 1 and "KHÔNG ĐỌC ĐƯỢC" in out, out)
+    finally:
+        os.chmod(path, 0o600)
+        shutil.rmtree(root, ignore_errors=True)
+
+
+def case_c10b_red_control_window():
+    """RED control: nới cửa sổ 24h→100 ngày phải làm ĐỎ đúng ca 'reject 25h ⇒ OK'."""
+    mut = CHECK10B_SRC.replace("< 86400", "< 8640000")
+    check("check10b RED: đột biến áp dụng được (hằng cửa sổ chưa trôi)", mut != CHECK10B_SRC,
+          "không tìm thấy '< 86400' để đột biến")
+    root = _mkdrp([_drp_line(_drp_ts(25))])
+    try:
+        lines, warn = [], []
+        import time as _time_mod
+        ns = {"os": os, "re": re, "wc_root": root, "lines": lines,
+              "W": lambda m: (warn.append(m), lines.append(f"⚠️ {m}")),
+              "OK": lambda m: lines.append(f"✅ {m}"),
+              "_time": _time_mod, "_dt": dt}
+        exec(compile(mut, SRC + ":CHECK10B_MUT", "exec"), ns)
+        check("check10b RED (cửa sổ 100 ngày): reject 25h LẠI bị báo ⇒ ca 24h phân biệt được",
+              len(warn) == 1, joined(lines))
     finally:
         shutil.rmtree(root, ignore_errors=True)
 
@@ -1762,6 +1899,10 @@ def main():
                case_c10_fresh_log_without_timestamp_line, case_c10_old_log_is_ok,
                case_c10_old_hard_error_not_reported_as_recent,
                case_c10_fresh_file_all_records_old_is_ok,
+               case_c10b_no_file_is_ok, case_c10b_fresh_reject_warns,
+               case_c10b_old_reject_is_ok, case_c10b_window_is_per_record,
+               case_c10b_unparseable_ts_is_kept, case_c10b_unreadable_file_says_unknown,
+               case_c10b_red_control_window,
                case_c11_fresh_all_green, case_c11_red_is_warn_only,
                case_c11_lists_every_red_no_truncation,
                case_c11_stale_is_routable, case_c11_missing_and_corrupt_never_silent,

@@ -1180,12 +1180,16 @@ else:
 #      WARN-only, cửa sổ 24h áp lên TỪNG BẢN GHI (không chỉ mtime file, bài học 2026-08-18).
 # CHECK10B_BEGIN
 drp_file = os.path.join(wc_root, "mike", "logs", "dispatch_rejected_prompts.log")
+_drp_err = None
 if os.path.exists(drp_file):
     try:
         _drp_all = [l for l in open(drp_file, encoding="utf-8", errors="replace").read().splitlines()
                     if re.match(r"^\d{4}-\d{2}-\d{2}T", l)]
-    except Exception:
-        _drp_all = []
+    except Exception as e:
+        # KHÔNG nuốt thành [] rồi in OK: file có mà đọc không được (perm/IO) thì đây là
+        # "KHÔNG BIẾT", không phải "không có reject nào" — một detector chống fail-silent
+        # mà tự fail-silent là vô nghĩa (arch-reviewer vòng 3).
+        _drp_all, _drp_err = [], f"{type(e).__name__}: {e}"
 
     def _drp_recent(l):
         try:
@@ -1194,7 +1198,10 @@ if os.path.exists(drp_file):
             return True   # không đọc được ts thì GIỮ (fail-loud), không loại trừ
 
     _drp = [l for l in _drp_all if _drp_recent(l)]
-    if _drp:
+    if _drp_err:
+        W(f"[WARN-ONLY] KHÔNG ĐỌC ĐƯỢC logs/dispatch_rejected_prompts.log ({_drp_err}) — "
+          f"không kết luận được có dispatch nào bị từ chối hay không; kiểm quyền/encoding file.")
+    elif _drp:
         W(f"[WARN-ONLY] dispatch.sh đã TỪ CHỐI {len(_drp)} dispatch vì prompt rỗng/quá ngắn "
           f"trong 24h qua — nếu cột from= là một SCRIPT (không phải người gõ) thì có chỗ nào đó "
           f"đang dựng prompt rỗng và nuốt exit 1. Dòng cuối: {_drp[-1][:300]}")

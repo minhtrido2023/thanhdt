@@ -241,10 +241,6 @@ Khi thấy event_type `question` trong KB delta, Mike phải:
 3. Sau khi user quyết → dispatch kết quả xuống agent đã hỏi:
    ```bash
    bin/dispatch.sh <agent_đã_hỏi> "Trả lời cho câu hỏi '<topic>': <quyết định của user>"
-
-   (Ràng buộc chung cho MỌI lời gọi `dispatch.sh`: prompt phải >= 8 BYTE sau khi bỏ whitespace.
-   Ngắn hơn ⇒ HUỶ ngay, không tốn phiên headless, có ghi logs/dispatch_rejected_prompts.log.
-   Muốn test với prompt siêu ngắn: `MIKE_ALLOW_TINY_PROMPT=1`.)
    ```
 
 **Escalation TỔNG (gom nhiều câu hỏi con đang mở) — bắt buộc khai `rollup_of`.** Câu hỏi tổng
@@ -396,6 +392,12 @@ tay: `claude login` khi logout, re-pair trong app Claude khi zombie dai dẳng.
   — chỉ dùng khi biết rõ file đích (vd core file dùng chung như `plan_funding_gate.py`,
   `dispatch.sh`), không đoán từ prompt. Không thay thế cảnh báo mềm `job-find-dup` (khớp
   prompt-y-hệt-cùng-agent) — 2 cơ chế bắt 2 dạng va chạm khác nhau.
+  **Ràng buộc PROMPT (2026-08-21, áp cho MỌI lời gọi kể cả từ script/cron):** prompt phải
+  **≥ 8 BYTE** sau khi bỏ hết whitespace. Ngắn hơn ⇒ **HUỶ ngay (exit 1)**, không tạo job, không
+  tốn phiên headless, và ghi 1 dòng vào `logs/dispatch_rejected_prompts.log` (`ops_health_check`
+  check 10b đọc file này để reject do MÁY sinh không chết im lặng). Đếm BYTE chứ không đếm ký tự
+  vì `${#var}` đổi nghĩa theo locale — mọi prompt tiếng Việt ngắn đều >8 byte nên không bao giờ
+  bị chặn nhầm. Test với prompt siêu ngắn: `MIKE_ALLOW_TINY_PROMPT=1`.
 - **`bin/jobs.sh {list | status <job_id> | wait <job_id>}`** — poll job board (read-only).
   `status` exit-code: `0=done 2=running 3=overdue 5=pending-resume(tự chạy lại) 1=failed/timeout 4=not-found`.
   `cancelled` và `orphaned` cũng trả **1** — cố ý, KHÔNG thêm mã mới: cả hai chỉ được ghi sau khi

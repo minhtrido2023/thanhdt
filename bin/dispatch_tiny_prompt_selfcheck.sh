@@ -85,11 +85,14 @@ assert "check 10b trỏ đúng tên file" "$?"
 # Ghi đè ở trên làm mọi ca trên KHÔNG còn chứng minh đường dẫn MẶC ĐỊNH đúng — một lỗi đánh
 # máy trong nhánh `:-` sẽ xanh 100%. Nên chạy THẬT một bản sao dispatch.sh đặt trong ROOT giả
 # (thư mục tạm), KHÔNG set biến ghi đè, rồi đòi file xuất hiện đúng ở <ROOT_giả>/logs/…
-FAKE="$TMPD/fakeroot"; mkdir -p "$FAKE/bin" "$FAKE/logs"
+# CỐ Ý không tạo sẵn "$FAKE/logs": thư mục logs/ bị gitignore (0 file tracked) nên trên một
+# clone/restore thật nó KHÔNG tồn tại. Tạo sẵn ở đây là che đúng cái lỗi cần bắt — dispatch.sh
+# phải tự mkdir -p (arch-reviewer vòng 3).
+FAKE="$TMPD/fakeroot"; mkdir -p "$FAKE/bin"
 cp "$D" "$ROOT/bin/usage_limit_phrases.sh" "$FAKE/bin/" 2>/dev/null
 ( unset MIKE_DISPATCH_REJECT_LOG; "$FAKE/bin/dispatch.sh" NoSuchAgentXYZ "x" ) >/dev/null 2>&1 </dev/null
 [ -s "$FAKE/logs/dispatch_rejected_prompts.log" ]
-assert "KHÔNG set biến ghi đè ⇒ ghi đúng <ROOT>/logs/dispatch_rejected_prompts.log (đường dẫn mặc định)" "$?"
+assert "KHÔNG set biến ghi đè + thư mục logs/ CHƯA tồn tại ⇒ vẫn ghi đúng <ROOT>/logs/dispatch_rejected_prompts.log" "$?"
 
 echo "== test KHÔNG được làm bẩn log production (nếu bẩn, check 10b WARN mỗi ngày bằng rác test)"
 PRODLINES_AFTER="$( [ -f "$PRODLOG" ] && wc -l < "$PRODLOG" || echo 0 )"
