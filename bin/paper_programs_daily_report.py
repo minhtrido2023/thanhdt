@@ -144,7 +144,7 @@ def _attention_flags(out, prog):
 
 def _flag(text, notes):
     """1 cờ cảnh báo + note giải thích khớp từ registry (không khớp ⇒ note=None ⇒ RED)."""
-    hit = next((n for n in notes if n.get("match") and n["match"] in text), None)
+    hit = next((n for n in notes if n.get("match") and re.search(n["match"], text)), None)
     return {"text": text, "note": hit.get("note") if hit else None,
             "severity": (hit or {}).get("severity", "red")}
 
