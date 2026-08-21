@@ -314,6 +314,97 @@ FROM dd WHERE rn = 1
 YIELD_FLOOR_DIV_GROWTH_HI = 0.05    # PREREG job _103634 — CAGR_3Y > 5% ⇒ GROWING
 YIELD_FLOOR_DIV_GROWTH_LO = -0.05   # CAGR_3Y < -5% ⇒ DECLINING
 
+# ---------------------------------------------------------------------------------------
+# Trường THÔNG TIN thứ 4 (2026-08-21, job Taylor_20260821_113730) — "rights offering gần đây".
+# **DISPLAY_ONLY**: không sizing, không gate, không cờ đỏ, không filter mã nào.
+#
+# Nguồn: research `iss-median-study-20260821` (PREREG `mike@36c8b2fd` → CONFIRMED_BUT_RARE
+# `mike@a589e208`). Đọc nguyên văn trước khi diễn giải:
+#   · CÁI ĐO ĐƯỢC: median BHAR_60 sau rights offering = −3,51pp (p=2,6e-4), net ghép cặp ICB
+#     −2,34pp (p=1,1e-3), dấu nhất quán IS+OOS.
+#   · CÁI GIỚI HẠN: chỉ 34/2.056 deal BAL/LAG (1,65%) trùng vào cửa sổ 60 phiên sau ISS/Rights
+#     ⇒ trần tác động tổng thể ~0,04pp trên toàn portfolio — CĂN CỨ ĐỦ ĐỂ HIỂN THỊ, KHÔNG ĐỦ
+#     ĐỂ GATE (bus finding `iss-median-study-20260821`).
+#   · `issue_method_code = "Rights"` (KHÔNG phải `event_code = "RIGHTS"` — cột đó không tồn tại,
+#     đã xác nhận sai trong nghiên cứu trước `iss-event-study-20260821`).
+#   · `value_per_share` NULL ở hầu hết dòng ISS (đo thật 2026-08-21: 20/20 dòng Rights gần nhất
+#     đều NULL) ⇒ `iss_discount_pct` gần như luôn None trong thực tế — đúng như spec, KHÔNG tự
+#     chế proxy khác (vd `total_value/issue_volumn`) để lấp chỗ trống.
+RECENT_ISS_WINDOW_TRADING_DAYS = 60   # cửa sổ nghiên cứu — đếm PHIÊN GIAO DỊCH, không phải ngày lịch
+RECENT_ISS_LOOKBACK_DAYS = 120        # margin lịch an toàn phủ 60 phiên (cuối tuần + lễ)
+
+_RECENT_ISS_NOTE = ("DOWNSIDE-INFO (DISPLAY_ONLY): rights offering trong 60 phiên gần đây — "
+                    "median BHAR60 -3,51pp (p=2,6e-4) NHƯNG chỉ trúng ~1,65% deal BAL/LAG "
+                    "(iss-median-study-20260821). Không phải gate, không phải tín hiệu bán.")
+
+# Hai truy vấn tách rời (KHÔNG gộp bằng correlated subquery) — BQ standard SQL từ chối correlated
+# subquery tham chiếu bảng KHÁC (`Correlated subqueries that reference other tables are not
+# supported unless they can be de-correlated`), đo thật khi thử gộp 1 câu 2026-08-21. JOIN theo
+# `ev.ex = t.time` (đo tại đúng exright_date) cho giá; COUNT phiên dùng khoảng mở `t.time > ev.ex`
+# nên phải là truy vấn RIÊNG (điều kiện JOIN khác nhau, không gộp cùng 1 JOIN được).
+_RECENT_ISS_EVENT_SQL = """
+SELECT CAST(c.exright_date AS STRING) AS exright_date, c.value_per_share
+FROM `lithe-record-440915-m9.tav2_bq.corporate_action` AS c
+WHERE c.ticker = "{ticker}" AND c.event_code = "ISS" AND c.issue_method_code = "Rights"
+  AND c.event_status = "executed"
+  AND c.exright_date <= DATE "{asof}"
+  AND c.exright_date > DATE_SUB(DATE "{asof}", INTERVAL {lookback} DAY)
+ORDER BY c.exright_date DESC, c.public_date DESC, c.id DESC
+LIMIT 1
+"""
+
+_RECENT_ISS_TDAYS_SQL = """
+SELECT
+  (SELECT COUNT(*) FROM `lithe-record-440915-m9.tav2_bq.ticker` AS t
+   WHERE t.ticker = "{ticker}" AND t.time > DATE "{exright_date}" AND t.time <= DATE "{asof}"
+  ) AS n_trading_days,
+  (SELECT t2.Price FROM `lithe-record-440915-m9.tav2_bq.ticker` AS t2
+   WHERE t2.ticker = "{ticker}" AND t2.time = DATE "{exright_date}" LIMIT 1
+  ) AS px_exright
+"""
+
+
+def _recent_iss(ticker, asof):
+    """Rights offering (ISS) gần đây — DISPLAY_ONLY, xem khối chú thích ở `_RECENT_ISS_NOTE`.
+
+    Trả dict luôn ĐỦ khoá (không bao giờ None, không bao giờ raise). Feed cũ/lỗi/không có
+    ISS trong cửa sổ đều về `iss_note` phù hợp — "NO_DATA" (lỗi/feed cũ) hoặc "CLEAR"
+    (feed đọc được, không có sự kiện) — và KHÔNG chặn gì.
+    """
+    asof_d = _as_date(asof)
+    out = {"has_recent_iss": False, "days_since_iss": None, "iss_discount_pct": None,
+           "iss_note": "NO_DATA", "note": _RECENT_ISS_NOTE}
+    key = ("_riss", ticker, str(asof_d))
+    if key in _CACHE:
+        return _CACHE[key]
+    try:
+        if _corp_action_feed_ok(asof_d):
+            out["iss_note"] = "CLEAR"
+            lib = _corp_action_lib()
+            ev_rows = lib.bq(_RECENT_ISS_EVENT_SQL.format(
+                ticker=ticker, asof=asof_d.isoformat(), lookback=RECENT_ISS_LOOKBACK_DAYS))
+            if ev_rows:
+                ev = ev_rows[0]
+                ex = str(ev["exright_date"])[:10]
+                td_rows = lib.bq(_RECENT_ISS_TDAYS_SQL.format(
+                    ticker=ticker, exright_date=ex, asof=asof_d.isoformat()))
+                n_td = td_rows[0].get("n_trading_days") if td_rows else None
+                if n_td is not None and int(n_td) <= RECENT_ISS_WINDOW_TRADING_DAYS:
+                    days_cal = (asof_d - dt.date.fromisoformat(ex)).days
+                    out["has_recent_iss"] = True
+                    out["days_since_iss"] = days_cal
+                    vps = ev.get("value_per_share")
+                    px = td_rows[0].get("px_exright") if td_rows else None
+                    if vps not in (None, "") and px not in (None, "") and float(px) > 0:
+                        out["iss_discount_pct"] = round((1.0 - float(vps) / float(px)) * 100.0, 4)
+                    out["iss_note"] = f"RECENT_RIGHTS ({days_cal} ngày)"
+    except Exception as exc:
+        _log.warning("recent_iss loi (%s): %s", ticker, str(exc)[:200])
+        out = {"has_recent_iss": False, "days_since_iss": None, "iss_discount_pct": None,
+               "iss_note": "NO_DATA", "note": _RECENT_ISS_NOTE}
+    _CACHE[key] = out
+    return out
+
 
 def _icb_code(ticker, asof):
     """ICB subsector 4 chữ số tại phiên gần nhất ≤ asof — None nếu không đọc được.
@@ -850,7 +941,7 @@ def run_due_diligence(ticker, book=None, context=None, as_dict=False):
         if row is None:
             out = {"ticker": ticker, "book": book, "as_of": asof,
                    "error": "không có dữ liệu trong bq_cache/ticker",
-                   "upcoming_exdate": None, "insider_net_sell": None, "yield_floor": None,
+                   "upcoming_exdate": None, "insider_net_sell": None, "yield_floor": None, "recent_iss": None,
                    "red_flags": ["DD_KHONG_CHAY_DUOC"], "has_red_flag": True}
             if as_dict:
                 return out
@@ -879,6 +970,7 @@ def run_due_diligence(ticker, book=None, context=None, as_dict=False):
         if ctx.get("skip_corp_flags"):
             parts["upcoming_exdate"], parts["insider_net_sell"] = None, None
             parts["yield_floor"] = None
+            parts["recent_iss"] = None
         else:
             parts["upcoming_exdate"], parts["insider_net_sell"] = _corp_flags(ticker, asof)
             # DISPLAY_ONLY (2026-08-18) — cùng cổng `skip_corp_flags` với 2 trường trên vì cùng
@@ -889,6 +981,13 @@ def run_due_diligence(ticker, book=None, context=None, as_dict=False):
             except Exception as exc:                   # lưới cuối; _yield_floor đã tự nuốt lỗi
                 _log.warning("yield_floor wrapper loi (%s): %s", ticker, str(exc)[:200])
                 parts["yield_floor"] = None
+            # DISPLAY_ONLY (2026-08-21, job Taylor_20260821_113730) — trường THÔNG TIN thứ 4,
+            # cùng cổng/lý do như yield_floor ở trên. KHÔNG đi vào text, KHÔNG sinh cờ đỏ.
+            try:
+                parts["recent_iss"] = _recent_iss(ticker, asof)
+            except Exception as exc:                   # lưới cuối; _recent_iss đã tự nuốt lỗi
+                _log.warning("recent_iss wrapper loi (%s): %s", ticker, str(exc)[:200])
+                parts["recent_iss"] = None
 
         parts["red_flags"] = red
         parts["has_red_flag"] = bool(red)
@@ -931,7 +1030,7 @@ def run_due_diligence(ticker, book=None, context=None, as_dict=False):
     except Exception as exc:
         _log.warning("run_due_diligence lỗi (%s): %s", ticker, exc)
         out = {"ticker": ticker, "book": book, "error": str(exc)[:200],
-               "upcoming_exdate": None, "insider_net_sell": None, "yield_floor": None,
+               "upcoming_exdate": None, "insider_net_sell": None, "yield_floor": None, "recent_iss": None,
                "red_flags": ["DD_KHONG_CHAY_DUOC"], "has_red_flag": True}
         if as_dict:
             return out
