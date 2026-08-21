@@ -114,3 +114,24 @@ thêm account LIVE mới, đổi tên bảng DT5G) thì sửa ngay.
 **Khi thêm agent mới hoặc đổi vai trò 1 agent:** chọn file role-scoped theo BẢNG trên (không mặc
 định full `context_pack.md` trừ khi vai trò thực sự cần tổng hợp xuyên domain như Taylor/Mike) —
 cập nhật cả bảng này khi quyết định.
+
+---
+
+## Công cụ chi tiết (tách từ MIKE.md 2026-08-21)
+
+- **`bin/dispatch.sh <id> "prompt" [--bg] [--timeout SEC] [--retries N] [--model NAME] [--effort LV]`**
+  dispatch việc cho agent (headless `claude -p`), đồng bộ (mặc định) hoặc `--bg`.
+  `--model`/`--effort` chọn theo độ phức tạp TASK. Mỗi dispatch = 1 JOB ở `bus/jobs/<job_id>.json`, bọc trong `timeout` (mặc định 600s). `--bg` trả `job_id` tức thì, retry 1 lần rồi Telegram notify. Guards: self-dispatch chặn; target Mike chỉ cho `DISPATCH_FROM=user`.
+  **`--write-scope "path1,path2"`** (2026-08-11): khai file sẽ sửa — có job LIVE scope trùng ⇒ HỦY (exit 6). Opt-in, chỉ dùng khi biết rõ file đích.
+  **Prompt ≥ 8 BYTE** (2026-08-21): ngắn hơn ⇒ HUỶ (exit 1), ghi `logs/dispatch_rejected_prompts.log`. Test: `MIKE_ALLOW_TINY_PROMPT=1`.
+- **`bin/jobs.sh {list | status <id> | wait <id>}`** — poll job board.
+  `status` exit: `0=done 2=running 3=overdue 5=pending-resume 1=failed/timeout 4=not-found`.
+  `cancelled`/`orphaned` cũng trả **1** — cố ý (chỉ ghi sau khi đã CHỨNG MINH không còn tiến trình sống).
+- **`bin/jobs.sh cancel <id> [grace]`** — cách DUY NHẤT dừng job. Giết cả cây tiến trình (tìm worker `setsid` qua `/proc/<pid>/fd`), XÁC MINH đã chết, RỒI ghi cancelled. Exit: `0=huỷ 3=không hành động được 4=không tìm thấy 5=worker còn sống`.
+  ⚠️ ĐỪNG `kill <pid>` + `job-set status=failed` — pid là `_bg_wrapper`, worker vẫn chạy (ngày 08-09: 33 phút sau còn sửa `executor.py`). `job-set` từ chối (exit 3) mọi status kết thúc khi job còn tiến trình sống.
+- **`bin/jobs.sh reap [grace]`** — đóng record mồ côi. Chỉ đóng khi quá hạn + không còn tiến trình sống (quá hạn ≠ chết).
+- **`bin/trace.sh <id> [--log]`** — timeline job + bus events cùng trace_id.
+- **`bin/verification_audit.sh <agent_id> [days]`** — coverage kiểm chứng finding (báo cáo, không phải gate).
+- **`bin/resume_pending.py`** (cron `*/10`) — auto-resume sau usage-limit/max-turns (§Quy chuẩn mục 6/6b).
+- Khác: `bin/append_event.sh`, `bin/heartbeat.sh`, `bin/consolidate.sh`, `bin/publish_context.sh`, `bin/spawn_child.sh`, `bin/watchdog.sh`, `bin/fleet_health.sh`, `bin/staleness_watch.py`, `bin/session_brief.py`, `bin/discover_sessions.py`, `bin/notify.sh`, `bin/cron_health_check.py`, `bin/mike_json.py`.
+- `claude agents` (dashboard phiên nền), Monitor (stream live).

@@ -295,58 +295,16 @@ Tóm tắt: `bin/spawn_child.sh` tạo, `systemctl --user disable --now mike@<id
 tay: `claude login` khi logout, re-pair trong app Claude khi zombie dai dẳng.
 
 ## Công cụ
-- **`bin/dispatch.sh <id> "prompt" [--bg] [--timeout SEC] [--retries N] [--model NAME] [--effort LV]`**
-  — dispatch việc cho agent (headless `claude -p`), đồng bộ (mặc định) hoặc `--bg`.
-  `--model`/`--effort` chọn theo độ phức tạp TASK — xem §Model routing. Mỗi dispatch = 1 JOB ở
-  `bus/jobs/<job_id>.json`, bọc trong `timeout` (mặc định 600s, **không bao giờ treo vô hạn**).
-  `--bg` trả `job_id` tức thì, tự retry 1 lần khi fail/timeout rồi Telegram notify. **Đừng ngồi
-  chờ** — fan-out `--bg` nhiều con, theo dõi bằng `bin/jobs.sh`, dùng `ScheduleWakeup`. Guards:
-  self-dispatch (`from==id`) bị chặn; target Mike chỉ cho `DISPATCH_FROM=user` (agent tới Mike
-  phải escalate bằng event `question`). **`--write-scope "path1,path2"`** (2026-08-11, thay thế
-  thiết kế worktree-pool bị arch-reviewer bounce 2 vòng): khai khi CALLER biết trước job này sẽ
-  sửa file nào — có job khác đang LIVE khai scope trùng ⇒ **HỦY dispatch (exit 6)**, không tạo
-  job record. Thuần so sánh JSON (`mike_json.py job-write-scope-conflict`), không đụng git. Opt-in
-  — chỉ dùng khi biết rõ file đích (vd core file dùng chung như `plan_funding_gate.py`,
-  `dispatch.sh`), không đoán từ prompt. Không thay thế cảnh báo mềm `job-find-dup` (khớp
-  prompt-y-hệt-cùng-agent) — 2 cơ chế bắt 2 dạng va chạm khác nhau.
-  **Ràng buộc PROMPT (2026-08-21, áp cho MỌI lời gọi kể cả từ script/cron):** prompt phải
-  **≥ 8 BYTE** sau khi bỏ hết whitespace. Ngắn hơn ⇒ **HUỶ ngay (exit 1)**, không tạo job, không
-  tốn phiên headless, và ghi 1 dòng vào `logs/dispatch_rejected_prompts.log` (`ops_health_check`
-  check 10b đọc file này để reject do MÁY sinh không chết im lặng). Đếm BYTE chứ không đếm ký tự
-  vì `${#var}` đổi nghĩa theo locale — mọi prompt tiếng Việt CÓ NGHĨA đều >8 byte nên không bao giờ
-  bị chặn nhầm. Test với prompt siêu ngắn: `MIKE_ALLOW_TINY_PROMPT=1`.
-- **`bin/jobs.sh {list | status <job_id> | wait <job_id>}`** — poll job board (read-only).
-  `status` exit-code: `0=done 2=running 3=overdue 5=pending-resume(tự chạy lại) 1=failed/timeout 4=not-found`.
-  `cancelled` và `orphaned` cũng trả **1** — cố ý, KHÔNG thêm mã mới: cả hai chỉ được ghi sau khi
-  đã CHỨNG MINH không còn tiến trình nào sống, nên "1 = chưa xong, an toàn để chạy lại" đúng với
-  chúng. Nguy hiểm ngày 08-09 là mã 1 trên một job worker VẪN ĐANG chạy — nay bị chặn ở tầng ghi
-  (xem `cancel` dưới).
-- **`bin/jobs.sh cancel <job_id> [grace]`** — cách DUY NHẤT đúng để dừng 1 job. Giết cả cây
-  tiến trình (kể cả worker `setsid` đã mồ côi, tìm qua `/proc/<pid>/fd` trỏ tới logfile),
-  XÁC MINH đã chết, RỒI mới ghi `status=cancelled`. Exit: `0=đã huỷ (idempotent)
-  3=không thể hành động (không có pid / pid vô nghĩa / pid không thuộc job này / đang ở trong
-  chính job đó) 4=không thấy record 5=còn tiến trình SỐNG SÓT sau SIGTERM+SIGKILL (record cố ý
-  giữ nguyên `running` — không bao giờ báo đã dừng một writer còn sống)`.
-  ⚠️ **ĐỪNG BAO GIỜ tự ứng biến `kill <pid>` + `job-set status=failed`** — pid trong record là
-  `_bg_wrapper`, giết nó KHÔNG chạm tới worker (worker chạy dưới `setsid`, bị reparent về init
-  và tiếp tục sửa repo; ngày 2026-08-09 nó chạy thêm 33 phút và gây dispatch trùng lên
-  `executor.py`). `job-set` nay TỪ CHỐI (exit 3) mọi status kết thúc — kể cả tự nghĩ ra như
-  `aborted`/`superseded` — khi job còn tiến trình sống thật.
-- **`bin/jobs.sh reap [grace]`** — đóng record mồ côi (dispatcher chết giữa chừng, không ai ghi
-  status kết thúc). Chỉ đóng khi quá hạn + **không còn tiến trình nào của job còn sống**; job
-  quá hạn mà worker vẫn chạy thì KHÔNG bị đụng (quá hạn ≠ chết).
-- **`bin/trace.sh <job_id> [--log]`** — gộp job record + mọi bus event cùng `trace_id` (=job_id)
-  thành 1 timeline, thay vì grep tay nhiều file.
-- **`bin/verification_audit.sh <agent_id> [days]`** — báo cáo (KHÔNG phải gate) coverage kiểm
-  chứng: mỗi `finding` trong N ngày gần nhất có `verification` khớp `trace_id` chưa.
-- **`bin/resume_pending.py`** (cron `*/10 * * * *`) — cơ chế auto-resume sau usage-limit, xem
-  §Quy chuẩn bắt buộc mục 6.
-- Khác (đọc header từng script khi cần chi tiết, không lặp lại ở đây): `bin/append_event.sh`,
-  `bin/heartbeat.sh`, `bin/consolidate.sh`, `bin/publish_context.sh`, `bin/spawn_child.sh`,
-  `bin/watchdog.sh`, `bin/fleet_health.sh`, `bin/staleness_watch.py`, `bin/session_brief.py`,
-  `bin/discover_sessions.py`, `bin/notify.sh`, `bin/cron_health_check.py` (audit toàn bộ crontab,
-  mới 2026-08-01), helper JSON `bin/mike_json.py`.
-- `claude agents` (dashboard mọi phiên nền), Monitor (stream live giữa hai nhịp 30').
+> Tài liệu đầy đủ từng lệnh: `MIKE_ext.md § Công cụ chi tiết`. Dưới đây chỉ là số/cờ cốt lõi.
+
+- **`bin/dispatch.sh <id> "prompt" [--bg] [--timeout SEC] [--model NAME] [--effort LV] [--write-scope "p1,p2"]`**
+  Prompt **≥ 8 BYTE** (bắt buộc). `--bg` trả `job_id` tức thì. `--write-scope` khai file sẽ sửa → HỦY (exit 6) nếu scope trùng job đang LIVE. Guards: self-dispatch chặn; target Mike phải dùng event `question`.
+- **`bin/jobs.sh status <id>`** exit-code: `0=done 2=running 3=overdue 5=pending-resume 1=failed/timeout/cancelled/orphaned 4=not-found`.
+- **`bin/jobs.sh cancel <id>`** — CÁCH DUY NHẤT dừng job. ⚠️ ĐỪNG `kill <pid>` thủ công — worker chạy dưới `setsid`, kill wrapper không chạm tới nó.
+- **`bin/jobs.sh claim-reply <id>`** — test-and-set nguyên tử, dùng làm DÒNG ĐẦU mọi wakeup turn. Exit: `0`=giành quyền `1`=đã reply `2`=lỗi đọc `3`=job chưa terminal.
+- **`bin/trace.sh <id> [--log]`** — timeline job + bus events cùng trace_id.
+- **`bin/resume_pending.py`** (cron `*/10`) — auto-resume sau usage-limit/max-turns.
+- Khác: `append_event.sh`, `heartbeat.sh`, `consolidate.sh`, `publish_context.sh`, `verification_audit.sh`, `notify.sh`, `mike_json.py`. `claude agents` (dashboard), Monitor.
 
 ## Bus event — chỉ dành cho báo cáo KHÔNG đồng bộ (cập nhật 2026-07-01)
 
