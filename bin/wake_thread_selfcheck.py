@@ -94,10 +94,18 @@ def build_root(fake_transport):
 
 
 def run(root, args, env=None):
+    # Tắt debounce mặc định: nhiều ca ở đây CỐ Ý tái dùng cùng thread_id để kiểm đường
+    # POST, mà lớp debounce (thêm 2026-08-20, WAKE_DEBOUNCE_S mặc định 180s) sẽ nuốt lượt
+    # POST thứ hai vào cùng thread ⇒ payload=None ⇒ FAIL giả phụ thuộc THỨ TỰ ca. Debounce
+    # có selfcheck riêng (wake_debounce_selfcheck.sh); ở đây cô lập nó ra. Ca nào muốn test
+    # debounce thì truyền env WAKE_DEBOUNCE_S tường minh (hiện không ca nào cần).
+    merged_env = {"WAKE_DEBOUNCE_S": "0"}
+    if env:
+        merged_env.update(env)
     r = subprocess.run(
         ["bash", os.path.join(root, "bin", "wake_thread.sh")] + args,
         capture_output=True, text=True, timeout=30,
-        env=None if env is None else dict(os.environ, **env),
+        env=dict(os.environ, **merged_env),
     )
     log_path = os.path.join(root, "logs", "wake_thread_errors.log")
     logtxt = open(log_path, encoding="utf-8").read() if os.path.exists(log_path) else ""
