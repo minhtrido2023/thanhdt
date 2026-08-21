@@ -36,12 +36,26 @@ mkdir -p "$MIKE/state"
 # quả đo trên chính file này ("46 FAIL thì ~35 là nhiễu loại này, làm 4 ca đỏ THẬT chìm
 # nghỉm") nhưng bản thân script này chưa được sửa theo; tới weekly audit 2026-08-15 đã là
 # 133 FAIL / 517-trên-647 file thuộc wt-*/pending_*. Hai bộ quét nay cùng phạm vi.
+#
+# BỔ SUNG 2026-08-22 (weekly ops audit) — lần vá 08-15 CHƯA đủ, đo lại trên state thật:
+#   (a) `.claude/worktrees/<tên>` KHÔNG khớp `(^|/)wt-` nên 77 bản sao worktree vẫn lọt lưới;
+#       22/35 FAIL của lượt quét 2026-08-21 là bản sao trong `.claude/worktrees/wags-fix-coord-08-19`
+#       — đúng loại nhiễu mà chú thích trên nói đã loại xong. Câu "Hai bộ quét nay cùng phạm vi"
+#       vì vậy SAI ở thời điểm viết (236 file ở đây vs ~136 ở bộ dò ngày).
+#   (b) `-iname "*selfcheck*"` là khớp CHUỖI CON nên nuốt cả HARNESS/THƯ VIỆN, không phải selfcheck:
+#       `selfcheck_weekly_baseline_check.sh` (bộ dò ngày — chạy nó ở đây = quét lồng, rc=124 sau
+#       1579s), `selfcheck_baseline_diff.py` (CLI 3 tham số ⇒ luôn rc=1 usage), `selfcheck_scope_map.sh`,
+#       và CHÍNH file này. Bộ dò ngày tránh được vì neo HẬU TỐ `*_selfcheck.{py,sh}`; ở đây phải
+#       loại đích danh vì vẫn cố ý giữ dạng tiền tố `selfcheck_*.py` của 3 study R&D Taylor.
+#   Đo sau khi vá: 236 -> 155 file (bỏ 77 worktree + 4 harness), KHÔNG file hợp lệ nào bị mất.
 mapfile -t FILES < <(cd "$WC_ROOT" && find . \( -iname "*selfcheck*.py" -o -iname "*selfcheck*.sh" \) \
   2>/dev/null | grep -v node_modules | grep -v __pycache__ \
   | grep -vE "/exp_|/job_2026|v4final_exp|/data/fscore_c30v" \
-  | grep -vE "(^|/)wt-|(^|/)pending_" | sed 's|^\./||' | sort)
+  | grep -vE "(^|/)wt-|(^|/)pending_|/\.claude/worktrees/" \
+  | grep -vE "/(run_selfchecks\.sh|selfcheck_baseline_diff\.py|selfcheck_scope_map\.sh|selfcheck_weekly_baseline_check\.sh)$" \
+  | sed 's|^\./||' | sort)
 
-echo "Tìm thấy ${#FILES[@]} selfcheck (đã loại exp_*/job_2026*/v4final_exp + wt-*/pending_* — không phải production HEAD)."
+echo "Tìm thấy ${#FILES[@]} selfcheck (đã loại exp_*/job_2026*/v4final_exp + wt-*/pending_*/.claude/worktrees/* + 4 harness — không phải production HEAD)."
 
 # 2) Phân loại tier — grep heuristic. LẦN ĐẦU CHẠY THẬT (2026-08-01) bắt được chính heuristic
 # này thiếu: chỉ khớp literal "bq query"/"bq show" bỏ sót MỌI script gọi qua wrapper
