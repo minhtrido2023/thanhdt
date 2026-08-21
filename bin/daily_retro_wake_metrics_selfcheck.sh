@@ -51,9 +51,8 @@ run_block() {
     ROOT="$SB"; TODAY="$1"; LOG="$SB/daily_retro.log"
     # shellcheck disable=SC1090
     source "$BLOCK"
-    printf '%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n' "$_wake_ok" "$_wake_err" "$_wake_total" \
-      "$_wake_rate" "$_wake_cycles" "$_wake_blind" "$_wake_verdict" "$_wake_rescued" \
-      "$_batch_unknown" "$_batch_mktemp" )
+    printf '%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n' "$_wake_ok" "$_wake_err" "$_wake_total" \
+      "$_wake_rate" "$_wake_cycles" "$_wake_blind" "$_wake_verdict" "$_wake_rescued" )
 }
 
 # Dòng log batch DỰNG THEO ĐÚNG format printf của `_log` trong bin/batch_wake.sh — không tự
@@ -214,47 +213,15 @@ assert "rate" "${R[3]}" "n/a (không có lượt push nào trong ngày)"
 assert "ngày không có chu kỳ nào ⇒ verdict nói KHÔNG CHẠY, không trấn an" \
   "$(printf '%s' "${R[6]}" | grep -c 'KHÔNG CHẠY')" "1"
 
-echo "== CA 12 (arch-reviewer vòng 7, HIGH-3): TẦNG BATCH phải có người đếm. batch_wake.sh ghi"
-echo "   chẩn đoán vào CÙNG wake_thread.log; cả 2 đường thoái hoá đều fail-safe về wake ĐƠN LẺ"
-echo "   nên push_err KHÔNG tăng ⇒ không bộ đếm riêng thì dedupe chết mà retro vẫn nói 'phủ đủ'."
-rm -f "$SB/logs/wake_thread.log" "$SB/logs/wakeup_reconcile.log" "$SB/logs/wakeup_reconcile_cron.log"
-{
-  echo "2026-08-19T09:00:00+07:00 wake_thread: SUCCESS thread=1"
-  _batch_log_line 2026-08-19 "KHÔNG BIẾT: batch-claim-wake thoát 1 mà KHÔNG có bằng chứng im-lặng-có-chủ-ý"
-  _batch_log_line 2026-08-19 "KHÔNG BIẾT (rc=3): batch thiếu/hỏng hoặc job không phải member — wake ĐƠN LẺ"
-  _batch_log_line 2026-08-19 "mktemp HỎNG (TMPDIR=/tmp) — không kiểm được bằng chứng im-lặng"
-  _batch_log_line 2026-08-20 "KHÔNG BIẾT: ngày KHÁC, không được đếm"
-} >> "$SB/logs/wake_thread.log"
-mapfile -t R < <(run_block 2026-08-19)
-assert "đếm CẢ 2 dạng KHÔNG BIẾT (rc=1/2 và rc=3), bỏ ngày khác" "${R[8]}" "2"
-assert "đếm mktemp HỎNG" "${R[9]}" "1"
-assert "verdict PHẢI cảnh báo tầng batch thoái hoá" \
-  "$(printf '%s' "${R[6]}" | grep -c 'TẦNG BATCH THOÁI HOÁ')" "1"
-
-echo '== CA 13: "claim stderr:" in ra N dòng cho MỘT sự cố ⇒ đếm theo nó là đếm TRÙNG. Chỉ dòng'
-echo "   marker RIÊNG mới được tính (đây là lý do batch_wake.sh phải _log riêng ở nhánh rc=3)."
-rm -f "$SB/logs/wake_thread.log"
-{
-  _batch_log_line 2026-08-19 "KHÔNG BIẾT (rc=3): batch thiếu/hỏng hoặc job không phải member"
-  _batch_log_line 2026-08-19 "claim stderr: KHÔNG BIẾT: không có batch record /x/y.json"
-  _batch_log_line 2026-08-19 "claim stderr: KHÔNG BIẾT: dòng thứ hai của cùng sự cố"
-} >> "$SB/logs/wake_thread.log"
-mapfile -t R < <(run_block 2026-08-19)
-assert "một sự cố rc=3 đếm ĐÚNG 1, không nhân theo số dòng stderr" "${R[8]}" "1"
-
-echo "== CA 14: ngày SẠCH tầng batch ⇒ 0/0 và verdict KHÔNG được kèm cảnh báo batch (không báo động giả)"
-rm -f "$SB/logs/wake_thread.log"
-echo "2026-08-19T09:00:00+07:00 wake_thread: SUCCESS thread=1" >> "$SB/logs/wake_thread.log"
-mapfile -t R < <(run_block 2026-08-19)
-assert "batch_unknown = 0" "${R[8]}" "0"
-assert "batch_mktemp = 0" "${R[9]}" "0"
-assert "KHÔNG có cảnh báo batch khi tầng batch sạch" \
-  "$(printf '%s' "${R[6]}" | grep -c 'TẦNG BATCH THOÁI HOÁ')" "0"
-
-echo "== CA 15: nhánh rc=3 trong bin/batch_wake.sh PHẢI in marker đếm được. Đây là chốt CẤU TRÚC:"
-echo "   xoá _log đó đi thì CA 7/8 vẫn xanh (chúng dùng log dựng sẵn), nên phải kiểm file thật."
-assert "batch_wake.sh nhánh rc=3 có _log 'KHÔNG BIẾT'" \
-  "$(sed -n '/^  \*)/,/exit 2 ;;/p' "$REAL/bin/batch_wake.sh" | grep -c '_log "KHÔNG BIẾT')" "1"
+# CA 12-15 (TẦNG BATCH) ĐÃ GỠ 2026-08-22 (weekly ops audit) — chúng test một hệ THỐNG KHÔNG
+# CÒN TỒN TẠI: giao thức batch-id bị revert ở commit 1cf275ca ("gỡ giao thức batch-id, thay
+# bằng debounce"), `bin/batch_wake.sh` đã bị xoá, và `daily_retro.sh` không còn đặt
+# `_batch_unknown`/`_batch_mktemp`. Hệ quả đo thật: `set -u` trong run_block bắn
+# "_batch_unknown: unbound variable" ở dòng 54 rồi "R[0]: unbound variable" ở dòng 70 ⇒ TOÀN BỘ
+# suite này đỏ (kể cả CA 1-11 vẫn còn giá trị), và đã đỏ im lặng từ trước 2026-08-21.
+# Giữ lại CA 1-11 (đo push/reconciler) — nhưng xem bus question
+# "daily-retro-wake-metrics-do-he-thong-da-go" : chính khối đo trong daily_retro.sh cũng đang đo
+# một hệ đã gỡ ngày 2026-08-21 (commit 541b50f3), cần quyết định kiến trúc chứ không phải vá test.
 
 echo
 echo "---"; echo "PASS=$pass FAIL=$fail"
