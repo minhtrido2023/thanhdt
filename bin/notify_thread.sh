@@ -23,7 +23,16 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-msg="${1:?usage: notify_thread.sh \"<message>\" [thread_id]}"
+# Parse --no-stamp flag (optional, any position before positional args).
+# Passes "stamp": false to /api/notify so bridge skips the ICT timestamp header.
+_stamp_flag=true
+_args=()
+for _a in "$@"; do
+  if [ "$_a" = "--no-stamp" ]; then _stamp_flag=false; else _args+=("$_a"); fi
+done
+set -- "${_args[@]+"${_args[@]}"}"
+
+msg="${1:?usage: notify_thread.sh \"<message>\" [thread_id] [--no-stamp]}"
 thread_id="${2:-}"
 topic_from_arg=0
 [ -n "${2:-}" ] && topic_from_arg=1
@@ -107,10 +116,11 @@ elif ! resolved="$("$ROOT/bin/discord_channel.sh" "$thread_id" 2>&1)"; then
 fi
 thread_id="$resolved"
 
-python3 - "$thread_id" "$msg" << 'PY'
+python3 - "$thread_id" "$msg" "$_stamp_flag" << 'PY'
 import sys, json, urllib.request
 
 thread_id, message = sys.argv[1], sys.argv[2]
+stamp = sys.argv[3].lower() != "false" if len(sys.argv) > 3 else True
 # sanitize: undo argv's surrogateescape decode of any non-UTF-8 byte upstream, re-encode
 # with errors='replace' so a corrupt byte becomes U+FFFD instead of round-tripping back out
 # as invalid UTF-8 on the wire (same root cause + fix as notify_discord.sh, 2026-08-03).
@@ -143,7 +153,7 @@ pieces = chunk(message, LIMIT) if len(message) > LIMIT else [message]
 
 for i, piece in enumerate(pieces, 1):
     body = f"[{i}/{len(pieces)}]\n{piece}" if len(pieces) > 1 else piece
-    payload = json.dumps({"message": body, "channel_id": int(thread_id), "format": "text"}).encode()
+    payload = json.dumps({"message": body, "channel_id": int(thread_id), "format": "text", "stamp": stamp}).encode()
     req = urllib.request.Request(
         "http://127.0.0.1:8199/api/notify",
         data=payload, method="POST",
