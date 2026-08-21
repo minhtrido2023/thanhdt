@@ -299,12 +299,24 @@ def case_empty_archive_warns():
 #    02:06:15Z thấy "chưa có answer" sau 4m31s → dispatch job Wags (Opus); Mike đăng answer
 #    02:06:56Z. Ân hạn 60' cắt đúng lớp này. HAI chiều đều phải pin — chỉ pin chiều "không
 #    dispatch" thì đổi ân hạn thành ∞ vẫn PASS mà kênh escalate chết im.
+#
+#    ⚠️ GHIM ĐỒNG HỒ (sửa 2026-08-22, weekly ops audit): ca 8b/8c CHẠY ĐƯỢC hay không phụ
+#    thuộc HÔM NAY LÀ THỨ MẤY, vì ân hạn là schedule-aware (xem ca 8d) — nó chỉ giữ im lặng
+#    khi CÒN một lượt cron nữa trước khi hết hạn. Đo thật cùng fixture, chỉ đổi ngày:
+#    T2-T5 routable=0 (PASS) · T6/T7/CN routable=1 (FAIL). Tức là 3/7 ngày trong tuần bộ
+#    này đỏ GIẢ — nó đỏ đúng vào thứ Bảy, ngày weekly ops audit chạy. Production KHÔNG sai:
+#    cuối tuần không còn lượt cron nào nên routable NGAY là đúng thiết kế (chính ca 8d pin
+#    điều đó). Cái sai là ca 8b/8c đọc đồng hồ thật. Nay ghim vào một ngày THỨ TƯ cố định,
+#    cùng cơ chế CHECK5_NOW mà ca 8d đã dùng. §16 + §23 hệ luận 1.
+GRACE_PINNED_WEDNESDAY = "2026-08-19T06:00:00Z"
+
 def case_grace_fresh_question_not_routable():
     root, inbox = mkbus()
     try:
         write_events(os.path.join(inbox, "Taylor.jsonl"),
-                     [ev("Taylor", "question", "hybrid-fill-live-deadline", ago(0, 0))])
-        lines, _ = run_check5(root)
+                     [ev("Taylor", "question", "hybrid-fill-live-deadline",
+                          GRACE_PINNED_WEDNESDAY)])
+        lines, _ = run_check5(root, now=GRACE_PINNED_WEDNESDAY)
         out = joined(lines)
         routable = [ln for ln in lines
                     if "trong 48h qua CHƯA thấy answer" in ln and "[WARN-ONLY]" not in ln]
@@ -324,8 +336,9 @@ def case_grace_expired_question_is_routable():
     root, inbox = mkbus()
     try:
         write_events(os.path.join(inbox, "Taylor.jsonl"),
-                     [ev("Taylor", "question", "qua-an-han", ago(0, 3))])
-        lines, _ = run_check5(root)
+                     [ev("Taylor", "question", "qua-an-han",
+                          "2026-08-19T03:00:00Z")])   # 3h trước mốc ghim
+        lines, _ = run_check5(root, now=GRACE_PINNED_WEDNESDAY)
         out = joined(lines)
         routable = [ln for ln in lines
                     if "trong 48h qua CHƯA thấy answer" in ln and "[WARN-ONLY]" not in ln]
