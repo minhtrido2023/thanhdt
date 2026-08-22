@@ -161,3 +161,26 @@ fi
   || echo "⚠ notify_thread.sh lỗi — Discord không nhận được, báo lại kênh duyệt plan bằng tay."
 
 echo "Xong. Bot sẽ tự nhận trong lần retry/khởi động kế tiếp."
+
+# ── Auto-approve margin nếu plan có CAPIT leveraged orders (user chốt 2026-08-22) ────
+# "Đồng ý plan = duyệt margin" — khi user duyệt plan chứa lệnh CAPIT leveraged, duyệt
+# đó đã bao hàm việc chấp thuận margin. Auto-chạy approve_margin_day.py ở đây để khỏi
+# cần bước riêng. `--decided-by user` đúng vì bản duyệt plan ĐÃ là xác nhận của user.
+_LEVERAGED="$(python3 - "$PLAN_PATH" 2>/dev/null <<'PYEOF' || echo 0
+import json, sys
+try:
+    plan = json.load(open(sys.argv[1]))
+    print(sum(1 for o in (plan.get("orders") or []) if o.get("loan_package_id") is not None))
+except Exception:
+    print(0)
+PYEOF
+)"
+if [[ "${_LEVERAGED:-0}" -gt 0 ]]; then
+  echo "↳ Plan có $_LEVERAGED lệnh CAPIT đòn bẩy — tự động tạo margin approval."
+  python3 "$SCRIPT_DIR/approve_margin_day.py" \
+    --account "$ACCOUNT" \
+    --date "$PLAN_DATE" \
+    --approved-by "${APPROVED_BY} [auto từ duyệt plan]" \
+    --decided-by user \
+    || echo "⚠ approve_margin_day.py lỗi — margin approval không được tạo, kiểm tay trước 09:05."
+fi

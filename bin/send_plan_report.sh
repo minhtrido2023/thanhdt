@@ -497,12 +497,11 @@ try:
                 f"{float(_rec.get('max_lever_total_vnd') or 0)/1e6:,.1f}tr.")
         else:
             margin_note.append(
-                f"   ⛔ **CẦN DUYỆT RIÊNG CHO ĐÒN BẨY** (khác với duyệt plan thường): {_aerr}")
+                f"   ✅ **Đồng ý plan = duyệt margin tự động** — khi anh duyệt plan, Mike tự "
+                f"tạo bản duyệt margin cho {len(_pv['orders'])} lệnh này. Không cần chạy tay.")
             margin_note.append(
-                f"   Duyệt xong, Mike chạy: `python3 mike/bin/approve_margin_day.py "
-                f"--account {acct} --date {date} --approved-by \"...\"`. Không duyệt ⇒ bot TỰ "
-                f"GỠ đòn bẩy và chạy {len(_pv['orders'])} lệnh này bằng VỐN TỰ CÓ (không chặn "
-                f"lệnh).")
+                f"   Không duyệt plan ⇒ bot TỰ GỠ đòn bẩy và chạy bằng VỐN TỰ CÓ (không "
+                f"chặn lệnh). [{_aerr}]")
 except Exception as _e:          # fail-open: không chặn plan vì một dòng báo cáo
     margin_note = [f"⚠️ ĐÒN BẨY: không kiểm được trạng thái duyệt margin "
                    f"({type(_e).__name__}: {_e}) — nếu plan có lệnh CAPIT, kiểm tay trước 09:05."]
