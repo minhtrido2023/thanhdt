@@ -5762,3 +5762,124 @@ như **trường thông tin** trong bảng due-diligence, KHÔNG phải gate.
 **Deviations D1–D5:** `DEVIATIONS.md`. D2 đáng nhớ nhất — `ticker.Low/High` là giá **hồi tố** còn
 `Price` là **thô**; đọc §4.2 đúng chữ (`Price ∉ [Low,High]`) vứt **96%** mẫu (1.469→65 crossing) vì
 lệch hệ quy chiếu, không phải vì dữ liệu hỏng.
+
+---
+
+## A1+A2 — Rate-bucket parking & ma trận FORWARD (2026-08-22, job Taylor_20260822_131318)
+
+**⛔ KHÔNG WIRE. Không đề xuất thay đổi production nào.** Tri thức **định cỡ kỳ vọng**, không phải
+tín hiệu. Mọi thay đổi rổ/cap/ETF_PARK phải qua quant-skeptic CONFIRMED (§18).
+
+### A1 — `parking_rate_bucket_20260822.md`
+Replay rổ `tav2_bq.custom30v_8l` PIT (1.470 dòng / **49 rebal** 2014-08-05→2026-08-05), giá
+`ticker.Close` (adj), 2.961 phiên, **thực thi T+1** (`effective_from == rebal_date` ⇒ áp trọng số
+mới ngay ngày rebal là nhìn trước). Bucket lãi suất từ `deposit_rate_vn.py`: LOW<5% · MID 5-6,5% ·
+HIGH>6,5%. Ngân hàng = `ICB_Code=8355` (18 mã).
+
+**Đối chuẩn đúng của parking = TIỀN NHÀN RỖI 0%/năm** (`ETF_PARK={3:0.8}` thay cash trong sổ BAL),
+KHÔNG phải VNINDEX. CAGR rổ, block-bootstrap L=20, CI[5;95]:
+
+| scope | CAGR rổ | CI | đọc |
+|---|---:|---|---|
+| NEUTRAL/MID | +21,16% | [+3,72; +41,17] | vượt tiền mặt |
+| NEUTRAL/LOW | +51,62% | [+9,01; +96,93] | vượt tiền mặt (N=1 chu kỳ) |
+| **NEUTRAL/HIGH** | **−0,70%** | **[−22,30; +22,67]** | **KHÔNG vượt tiền mặt** |
+| NEUTRAL/* | +18,72% | [+4,82; +34,09] | vượt — nhưng edge đến từ MID/LOW |
+
+⇒ **+7,4pp KHÔNG còn đứng trong bucket hiện tại (6,8% = HIGH).** *(A1 KHÔNG tái tạo +7,4pp — đó là
+delta CAGR toàn hệ có/không parking ở pin R3; A1 đo sức sinh lời của chính rổ. Kết luận nói về
+CƠ CHẾ, không phủ định số học của 7,4.)*
+
+**Sector-cap ngân hàng:** cap40 −0,32pp / cap50 +0,27pp toàn kỳ; NEUTRAL/* **+1,28 / +1,05pp**;
+riêng ALL/HIGH −3,02 / −1,02pp. **Không phải chi phí cấu trúc mà là đánh đổi PHƯƠNG SAI** — toàn bộ
+chi phí cap40 đến từ ĐÚNG 1 episode (2022-10→2023-05, −7,28pp) và được bù bởi episode kế (+7,25pp).
+
+**NGƯỢC giả thuyết ban đầu:** nhánh ngân hàng của rổ **không** yếu trong HIGH (bank_ex **+8,45pp**);
+cái sập là **NON-BANK** (−3,83pp; CAGR tuyệt đối −7,83%). Không mâu thuẫn finding #5 (+1,0pp) — số
+đó đo *cổ phiếu ngân hàng nói chung*, A1 đo *ngân hàng ĐÃ QUA lọc 8L + rẻ theo yieldcombo*.
+
+**Selfcheck 4/4 = 0 VND**: NAV dựng 2 đường độc lập (cumprod daily return vs sổ cái VND từng mã)
+cho base/cap40/cap50 + **rổ NGẪU NHIÊN** (30 mã, seed 20260822); max lệch 5,1e-4 VND trên NAV 1 tỷ.
+*(Lần chạy đầu lệch 172.406.159 VND — `port_ret` dùng trọng số CÙNG phiên còn sổ cái dùng phiên
+trước; đã đưa cả hai về T+1.)* LOO theo năm: 2/2 · 7/7 · 4/4 · 9/9 dương. *(Lần chạy đầu LOO drop
+cả năm KHÔNG có phiên trong bucket = no-op ⇒ n_pos giả 9/9 mọi bucket; đã sửa.)*
+
+**Hạn chế lớn nhất:** trọng số ngân hàng của rổ tăng đơn điệu 16,9%→45%→62,6%→65,3%→73,4%→68,4%
+→**80,7%** ⇒ cấu hình 74-78% hôm nay chỉ được thử ~3 năm cuối; nửa đầu mẫu cap40 KHÔNG binding
+(chi phí 0,00-0,21pp). **Đọc cột episode, đừng đọc dòng ALL/*.** N hiệu dụng = **3 chu kỳ HIGH,
+1 LOW, 4 MID** — bootstrap không tạo thêm chu kỳ. Phí/slippage **chưa trừ** (rổ gross).
+
+⚠️ **Caveat nguồn:** `deposit_rate_vn.py` = **CANONICAL-PROXY**, caveat (b): 26 mốc neo hồi tố
+CÙNG 1 lần 2026-06-19 ⇒ nhãn bucket quá khứ mang **hindsight bias**, không phải PIT thật.
+
+### A2 — `forward_horizon_matrix_20260822.md` · `forward_matrix.csv`
+Forward 60/120/250 phiên kể từ phiên **BƯỚC VÀO** ô (131 lần vào ô / 3.107 phiên), thêm hàng
+PARKING (rổ A1) + CAPIT (18 `EVENT_CAPIT` từ **chính file pin R3**).
+
+**BASE RATE vô điều kiện (phải đọc TRƯỚC ma trận):** COMB fwd-250 median **+27,3%, p_pos 92%**
+(fwd-120 +12,5% · fwd-60 +5,1%); VNI +8,5% · PARK +13,7%. ⇒ `p_pos = 100%` ở gần mọi ô **là hệ số
+nền, KHÔNG phải tín hiệu của ô**.
+
+**Ô hiện tại NEUTRAL+RẺ:** COMB fwd-250 = +33,9% (n=17 chồng lấn) → **+26,9% sau de-overlap
+(n độc lập = 6)** ≈ base rate +27,3% ⇒ **không có lợi thế forward đo được**.
+
+**Radar có value gì không** (de-overlap, fwd-250): với **HỆ** RẺ 26,9 / TRUNGTINH 33,9 / ĐẮT 23,3
+(n=6/5/4) — không đơn điệu, RẺ dưới base rate ⇒ **nhiễu**. Với **VNI** 16,1/9,7/**3,3** và **PARK**
+19,8/20,1/**6,3** — tách được, đơn điệu, ĐẮT tụt hẳn. ⇒ V2.4 **hấp thụ** thông tin radar; đây là
+lập luận **ỦNG HỘ giữ Value Radar DISPLAY-ONLY**. Trùng hướng §C.5 `market_regime_probability_20260729`.
+
+**Khác:** CRISIS h=60 là ô DUY NHẤT âm (−1,8%, p_pos 45%) rồi lật ở h=250 (+26,3%, p_beat 95%) ⇒
+đừng đánh giá một lần vào CRISIS bằng cửa sổ 3 tháng · PARK là chuỗi DUY NHẤT bị vùng ĐẮT đánh gục
+(NEUTRAL|ĐẮT −2,9%, BULL|ĐẮT −1,5%) trong khi COMB cùng ô +26,9/+32,8% · **CAPIT thật = 16 lần,
+không phải 18** — 2 dòng `size=0,000` (2022-04-19, 2022-09-28) là gate cấp size **bằng 0**, và cả
+hai rơi đúng vào 2022 = 2/3 cửa sổ forward âm ⇒ **gate đã đúng khi từ chối**. Mọi ô CAPIT n≤4 ⇒
+**chỉ liệt kê, không p-value**.
+
+**Đuôi trái COMB fwd-250 trong NEUTRAL dương ở mọi zone (+9,0/+17,2/+3,2)** — dấu hiệu **mẫu quá
+thuận** (12 năm bull ròng), KHÔNG phải bằng chứng hệ không thể lỗ. Kỳ vọng downside vẫn là
+bootstrap 5th-pct DD ~−29%. Chồng lấn nặng (NEUTRAL|RẺ h=250: 14/16 cặp kế tiếp <250 phiên);
+confound zone≈kỷ nguyên giữ nguyên.
+
+## B1+B2+B3 phiên 2026-08-22 — exit-theo-regime / breadth-thay-radar / CAPIT-band-guard (job `Taylor_20260822_141143`)
+
+**PAPER-ONLY. Cả 3 hướng đều NO-GO/ARCHIVE — không đề xuất wire gì.** Nguồn: pin R3 2026-08-03
+(`..._repin0803_price_univpit.csv`) TX ledger + `tav2_bq.ticker` + `tav2_mike.universe_pit` (PIT).
+Báo cáo: `mike/agents/Taylor/research/{bal_exit_dt_candidate,breadth_vs_radar_matrix,capit_radar_band_guard}_20260822.md`.
+
+**Self-check tái dựng NAV từ TX ledger** (điều kiện cần cho cả 3): BAL CAGR 27,57% vs pin 27,57%,
+NAV cuối khớp **0 VND** (519.486.726.936); LAG CAGR 28,92% vs 28,89%, NAV cuối lệch 0,28%.
+
+⚠️ **BẪY MANG ĐI — hiệu chỉnh cơ sở giá, BẮT BUỘC cho mọi lần tái dựng ledger từ file pin:**
+`tav2_bq.ticker.Close` điều chỉnh NGƯỢC về cơ sở HÔM NAY, engine chạy point-in-time ⇒ `adj_price`
+trong TX lệch theo mã/theo kỳ (LHG 2016 tỷ lệ engine/BQ = **1,148**, ITD 1,194). MTM thẳng bằng
+`Close` cho sai số giữa đường **10,09% NAV**, DD lệch 2,3pp. Chữa: lấy `adj_price` của TX làm MỐC,
+nội suy `f = adj_price/Close`, MTM bằng `Close × f` ⇒ DD lệch còn 0,27pp.
+
+**B1 — BAL exit theo DT downgrade/candidate streak: NO-GO cả 2 variant.** Variant A (committed
+downgrade, 156 vị thế/**19 episode**): DD IS −22,49%→−18,39% nhưng **OOS đứng yên** (−18,88%→−18,93%),
+Calmar OOS **giảm** 1,81→1,76. Variant B (streak xấp xỉ ≥10 phiên): CAGR FULL −2,71pp, DD OOS
+−18,88%→−25,10%. Test sự kiện (`r_avoided` = lợi suất từ exit sớm tới exit gốc; có edge ⇒ phải ÂM):
+A **+2,28%** CI[−1,06;+6,06] p=0,195 (dấu NGƯỢC; LOO bỏ 2021 còn +0,2%); B **+10,23%** CI[+4,72;+16,26]
+**p<0,001 — ANTI-PREDICTIVE**, ngày trigger dồn cục 04/2024 + 04/2025 = vùng đáy. *Lead ghi lại,
+KHÔNG wire*: streak "BASE < COMMITTED" là **tín hiệu ĐÁY** (+10,2% forward, 33 episode).
+
+**B2 — breadth (`%>MA200`, universe_pit PIT) thay Value Radar làm trục 2: trục tốt hơn để MÔ TẢ,
+không để wire.** Confound kỷ nguyên **breadth thắng dứt khoát**: 0% số năm bị một nhãn chiếm ≥90%
+phiên (share nhãn trội TB 57%) vs radar **54%** (share TB 84%). n_effective: **262 episode vs 131 =
+gấp 2,0×** (median 6 vs 5 năm/ô). **Nhưng vẫn 0/27 ô PASS BH FDR 10%** (radar: 0/24 — hoà). Marginal
+nhìn như phát hiện (COMB excess LOW +27,1 / MID +10,8 / HIGH +5,4pp, đơn điệu, IS≈OOS, LOO 13/13
+không đảo dấu) **bị 2 kiểm tra phá**: (a) **trễ nhãn 1 phiên** ⇒ đơn điệu biến mất (LOW +24,9 > HIGH
++17,4 > MID +8,4) và VNI trong ô LOW nhảy −19,2%→**+1,9%** (`corr(pct252_t, r_vni_t)=+0,109` vì
+`breadth_t` dùng `Close` phiên t); (b) **khử beta** (0,43/0,59/0,55) ⇒ alpha LOW +16,3 / MID +20,2 /
+HIGH +28,1 — **thứ tự ĐẢO NGƯỢC**. ⇒ Đề xuất quy trình chi phí 0: **dùng breadth-tercile PIT làm
+trục 2 mặc định cho mọi phân tích conditional thay radar zone**; radar giữ DISPLAY-ONLY (§6b).
+
+**B3 — CAPIT × radar band guard (radar<20 ⇒ size ×0,5): ARCHIVE, giả thuyết bị bác NGƯỢC CHIỀU.**
+Chỉ **4/16** lần fire ở radar<20 (2016-01-18 r19,5 · 2023-10-30 r3,2 · 2024-08-05 r18,1 · 2025-04-03
+r9,1). **VNI fwd-250 sau 4 lần đó: median +30,6%, cả 4 trong [+20,7;+36,4], không lần nào âm** (nhóm
+radar≥20: median +11,9%, dải [−8,0;+62,1]). EXCESS@250 −18,8pp (p_perm 0,156) là **ảo giác mẫu số**:
+COMB@250 hai nhóm bằng nhau (+36,7 vs +36,9%), chênh nằm ở VNI. NAV giả định: BAL ΔCAGR −0,01pp
+ΔDD **−0,14pp**, LAG ΔCAGR −0,29pp ΔDD −0,11pp ⇒ **mất CAGR VÀ DD xấu đi**, không phải đánh đổi.
+⚠️ **Bẫy chung mang đi**: Phụ lục C nói `P(bear | radar 0-20)=20,9%` **không điều kiện**; áp nó lên
+**tập con có điều kiện** (sự kiện CAPIT = đã có drawdown 52 tuần) là sai — giao 2 điều kiện = "rẻ
+VÀ đã rơi đủ sâu" = mô tả của ĐÁY. Không mâu thuẫn, chỉ là hai điều kiện khác nhau.
