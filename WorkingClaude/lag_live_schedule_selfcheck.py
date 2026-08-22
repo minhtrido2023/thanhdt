@@ -143,7 +143,19 @@ if len(mbs):
     check("B4 pa_HL3 ≈ 4.06 (< 5 gate)", 3.9 < r["pa_HL3"] < 4.2, f"pa_HL3={r['pa_HL3']:.2f}")
     check("B5 qualify=False (pa_HL3 gate) — scored, not skipped", not bool(r["qualify"]))
 mbs_old = old[(old["ticker"] == "MBS") & (old["Release_Date"] == pd.Timestamp("2026-07-08"))]
-check("B6 old CSV path blind to MBS (the R1 gap)", len(mbs_old) == 0)
+# §23: KHÔNG assert cứng "phải rỗng" — `old` được nạp từ CSV production SỐNG, và CSV này
+# tự nhiên bắt kịp MBS sau đủ số phiên (đo 2026-08-22: csv_max đã bằng chính ngày MBS release,
+# ~30 phiên sau 2026-07-08). Bất biến thật là QUAN HỆ giữa hai mốc: release nằm SAU cutoff hiện
+# tại của CSV ⇒ blind (đúng gap R1 tại THỜI ĐIỂM phát hiện); release đã nằm TRONG cutoff ⇒ CSV đã
+# bắt kịp, đó là kỳ vọng đúng của thiết kế +30-phiên, không phải hồi quy. Ca "blind ngay lúc phát
+# hành" đã được test độc lập với dữ liệu synthetic không phụ thuộc thời gian ở C5 bên dưới.
+mbs_release = pd.Timestamp("2026-07-08")
+if mbs_release > csv_max:
+    check("B6 old CSV path blind to MBS (release date sau cutoff CSV hiện tại)",
+          len(mbs_old) == 0, f"csv_max={csv_max.date()}")
+else:
+    check("B6 old CSV path đã bắt kịp MBS (release date đã trong cutoff CSV — đúng thiết kế "
+          "+30-phiên, không phải gap)", len(mbs_old) == 1, f"csv_max={csv_max.date()}")
 
 # ── C. synthetic event released TODAY qualifies + schedules immediately ─────
 print("[C] synthetic new event released today...")

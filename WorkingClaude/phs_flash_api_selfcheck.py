@@ -90,8 +90,8 @@ p0 = pos[0] if isinstance(pos, list) and pos else {}
 for f in ("symbol", "total", "trade", "costPrice", "pnlAmt", "receivingT2"):
     check(f in p0, f"portfolio có field `{f}`")
 
-bp = c.get_buying_power(SANDBOX_ACC)          # sandbox → /underlying/balance
-check(isinstance(bp, list) and bp, "buying power (sandbox: underlying/balance) → list")
+bp = c.get_buying_power(SANDBOX_ACC)          # sandbox → /underlying/buyingpower
+check(isinstance(bp, list) and bp, "buying power (sandbox: underlying/buyingpower) → list")
 b0 = bp[0] if isinstance(bp, list) and bp else {}
 check("ppse" in b0, "buying power có field `ppse` (sức mua an toàn)")
 check("maxqtty" in b0 or "maxqty" in b0, "buying power có field maxqty/maxqtty")
@@ -104,10 +104,10 @@ for f in ("orderid", "orstatuscode", "execqtty", "remainqtty", "symbol"):
 
 print("\n== A. Sandbox: bảng giá ==")
 q = c.get_quote(["ACB", "FPT"])
-# Sandbox BỎ QUA symbolList: luôn trả đúng 1 fixture ACB (đo 2026-08-20 với ACB,FPT / FPT /
-# ZZZ đều ra ACB) ⇒ KHÔNG khẳng định được adapter hỏi-nhiều-mã chạy đúng; đó là gap phải đo
-# lại ở production, ghi ra đây thay vì assert một điều sandbox không trả lời được.
-check(isinstance(q, list) and q, f"symbol-latest-data → list không rỗng (sandbox: 1 fixture ACB, thấy {len(q) if isinstance(q, list) else q})")
+# Verify lại 2026-08-22: sandbox nay TÔN TRỌNG symbolList (2 mã hỏi → 2 dòng khác nhau,
+# mã trả đúng theo `s`) — trước đó (đo 2026-08-20) luôn trả 1 fixture ACB bất kể hỏi gì.
+check(isinstance(q, list) and len(q) == 2,
+      f"symbol-latest-data → 2 dòng đúng số mã hỏi (thấy {len(q) if isinstance(q, list) else q})")
 row = q[0] if isinstance(q, list) and q else {}
 for f in ("s", "c", "re", "ce", "fl", "marketId", "vo"):
     check(f in row, f"quote có field `{f}`")
@@ -193,8 +193,20 @@ check(qt.day_volume and qt.day_volume > 0, f"Quote.day_volume map từ `vo` ({qt
 check(qt.l2_snapshot is None,
       "KHÔNG dựng l2_snapshot từ bbOd/boOd (đó là lô LẺ, dựng L2 từ đó là bịa thanh khoản)")
 check(b.get_quote("ACB") is qt, "quote cache 3s: gọi lại trả đúng object cũ")
+check(b.get_quote("FPT") is not None and b.get_quote("FPT").symbol == "FPT",
+      "hỏi FPT → feed nay trả đúng dòng FPT (sandbox verify lại 2026-08-22: đã tôn trọng "
+      "symbolList, không còn fixture ACB cố định)")
+
+# Cổng fail-closed (§B.mismatch) là bất biến CẤU TRÚC, không phải quan sát sandbox hôm nay —
+# test bằng row giả mạo mã, không phụ thuộc sandbox có còn trộn mã hay không (§23).
+_orig_get_quote = c.get_quote
+c.get_quote = lambda symbol_list: [{"s": "ACB", "c": 1000, "re": 1000, "ce": 1070,
+                                     "fl": 930, "marketId": "STO", "vo": 1}]
+b._quote_cache.clear()
 check(b.get_quote("FPT") is None,
-      "hỏi FPT mà feed trả dòng ACB → None, KHÔNG gán giá mã khác (sandbox chính là ca thử)")
+      "row trả về mã KHÁC mã đã hỏi → None, KHÔNG gán giá mã khác (fail-closed giả lập)")
+c.get_quote = _orig_get_quote
+b._quote_cache.clear()
 
 bpos = b.get_positions()
 check(isinstance(bpos, dict) and bpos, f"broker.get_positions() → dict ({len(bpos)} mã)")

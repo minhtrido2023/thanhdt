@@ -25,13 +25,16 @@ Dùng:
 ĐÃ PROBE THẬT trên sandbox 2026-08-20 (demo creds công khai 022C099995/123456aA@ —
 sandbox KHÔNG validate accountId lẫn Bearer token, trả fixture cho mọi input):
   - `POST /auth/gen-secret-key/{underlying,derivative}` → 200, otp_token NGẪU NHIÊN mỗi lần.
-  - `GET  /accounts/{id}/underlying/portfolio|balance|dailyOrder` → 200.
-  - `GET  /accounts/{id}/derivative/balance|openPositions|dailyOrder` → 200.
+  - `GET  /accounts/{id}/underlying/portfolio|buyingpower|dailyOrder` → 200 (`balance`
+    ĐỔI TÊN thành `buyingpower` — verify lại 2026-08-22, `balance` cũ nay trả 404).
+  - `GET  /accounts/{id}/derivative/assets|openPositions|dailyOrder` → 200 (`balance`
+    ĐỔI TÊN thành `assets` — verify lại 2026-08-22, `balance` cũ nay trả 404).
   - `GET  /priceboard/symbol-latest-data?symbolList=ACB,FPT` → 200, KHÔNG cần Bearer.
   - `POST /accounts/{id}/orders/underlying` → 200 `{"orderid": "8000180326000219"}` CỐ ĐỊNH.
-  - `GET  /accounts/{id}/underlying/buyingPower` và `/underlying/assets` → **404 trong
-    sandbox** (chỉ có ở production per PHS support; sandbox dùng `/underlying/balance`).
-    ⇒ `get_buying_power()` chọn path theo `env`, KHÔNG phải fallback im lặng khi 404.
+  - `GET  /accounts/{id}/underlying/buyingPower` (camelCase, gốc) và `/underlying/assets`
+    → **404 trong sandbox** (chỉ có ở production per PHS support; sandbox dùng
+    `/underlying/buyingpower` lowercase). ⇒ `get_buying_power()` chọn path theo `env`,
+    KHÔNG phải fallback im lặng khi 404.
 
 ĐÍNH CHÍNH TÀI LIỆU PHS (đo được, không suy đoán): trang `trading-underlying.md` bảo
 sandbox nhận "fixture OTP token" `552066a35eb30a9815afc952b14287a8` — SAI. Gửi đúng
@@ -186,13 +189,14 @@ class PHSFlashClient:
 
         Production: `GET /underlying/buyingPower?symbol=&quotePrice=` (PHS support xác
         nhận; symbol + quotePrice BẮT BUỘC vì sức mua phụ thuộc tỷ lệ ký quỹ của mã).
-        Sandbox: endpoint đó 404, chỉ có `/underlying/balance` (không nhận tham số) —
-        chọn theo `self.env` chứ KHÔNG bắt 404 rồi đổi path, để môi trường nào trả số gì
-        là đọc được từ code, không phải đoán từ log.
+        Sandbox: endpoint đổi tên thành `/underlying/buyingpower` (lowercase, không nhận
+        tham số) — verify lại 2026-08-22, `/underlying/balance` cũ giờ trả 404. Chọn
+        theo `self.env` chứ KHÔNG bắt 404 rồi đổi path, để môi trường nào trả số gì là
+        đọc được từ code, không phải đoán từ log.
         """
         acc = self._acc(eqt_account_id, "underlying")
         if self.env == "sandbox":
-            return self._request("GET", f"/accounts/{acc}/underlying/balance")
+            return self._request("GET", f"/accounts/{acc}/underlying/buyingpower")
         if not symbol or quote_price is None:
             raise PHSFlashError("production/buyingPower cần symbol + quote_price")
         return self._request("GET", f"/accounts/{acc}/underlying/buyingPower",
@@ -207,18 +211,24 @@ class PHSFlashClient:
 
     # -------------------------------------------------------------- bảng giá
 
-    def get_quote(self, symbol_list):
-        """GET /priceboard/symbol-latest-data?symbolList=... → list snapshot.
+    QUOTE_FIELDS = "s,c,re,ce,fl,marketId,vo"
 
-        Nhận str ("ACB") hoặc list (["ACB","FPT"]). Field: `c` giá khớp mới nhất,
+    def get_quote(self, symbol_list):
+        """GET /priceboard/symbol-latest-data?symbolList=...&fields=... → list snapshot.
+
+        Nhận str ("ACB") hoặc list (["ACB","FPT"]). Field: `s` mã, `c` giá khớp mới nhất,
         `re` tham chiếu, `ce` trần, `fl` sàn, `marketId` (STO/STX/UPX), `vo` KL luỹ kế.
-        Endpoint này KHÔNG cần Bearer (đo sandbox 2026-08-20). ⚠ Sandbox BỎ QUA
-        `symbolList` — luôn trả đúng 1 fixture ACB, kể cả khi hỏi FPT hay mã không tồn
-        tại ⇒ khả năng hỏi NHIỀU mã một lần CHƯA verify được, phải đo lại ở production.
+        `fields` giờ là tham số BẮT BUỘC (verify lại 2026-08-22 — thiếu nó API trả lỗi
+        "symbolList and fields query parameters are required"; thiếu `s` trong `fields`
+        thì response không có mã, không khớp được dòng nào với symbol đã hỏi).
+        Endpoint này KHÔNG cần Bearer (đo sandbox 2026-08-20). Sandbox nay trả giá trị
+        RIÊNG theo từng mã hỏi (không còn fixture 1-ACB-cho-mọi-symbolList như trước
+        2026-08-22) — verify lại nếu quan sát ngược lại ở production.
         """
         syms = symbol_list if isinstance(symbol_list, str) else ",".join(symbol_list)
         return self._request("GET", "/priceboard/symbol-latest-data",
-                             params={"symbolList": syms}, auth=False)
+                             params={"symbolList": syms, "fields": self.QUOTE_FIELDS},
+                             auth=False)
 
     # ------------------------------------------------------------ cơ sở (ghi)
 
@@ -262,10 +272,14 @@ class PHSFlashClient:
     # ------------------------------------------------------------- phái sinh
 
     def get_derivative_balance(self, fno_account_id=None):
-        """GET /accounts/{fno}/derivative/balance → dict (pp, nav, cashonhand,
-        acccountstatus, requiredmarginamt…). Chú ý: `d` là DICT, không phải list."""
+        """GET /accounts/{fno}/derivative/assets → dict (pp, nav, cashonhand,
+        acccountstatus, requiredmarginamt…). Chú ý: `d` là DICT, không phải list.
+
+        Path đổi từ `balance` sang `assets` — verify lại 2026-08-22, `balance` cũ giờ
+        trả 404 ở sandbox; chưa có bằng chứng production dùng path khác (không như
+        `get_buying_power()`, chưa từng probe path riêng cho production ở đây)."""
         acc = self._acc(fno_account_id, "derivative")
-        return self._request("GET", f"/accounts/{acc}/derivative/balance",
+        return self._request("GET", f"/accounts/{acc}/derivative/assets",
                              asset_type="derivative")
 
     def get_derivative_positions(self, fno_account_id=None):
