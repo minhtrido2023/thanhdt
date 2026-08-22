@@ -276,3 +276,9 @@
 
 ## Archived 2026-08-22 (keep=12 days=0 require_done=False)
 - [2026-08-18T14:12:26Z] yield_floor Phase1 = Option C DA WIRE (2026-08-18, WorkingClaude@9ed56854 + mike@a6ea3f06): 2 cot nhan quan sat trong custom30v_8l/custom30_8l, selection logic KHONG doi. Cho: rebalance 2026-11-05 (gate #1) + review 2027-02-10 (auto-escalate qua paper_checkpoint_escalation.sh, khong can nho tay). Phase 2 (B: bonus W=0,10) CHI mo neu 2/3 gate dat + backtest NAV/DD IS/OOS truoc.
+
+## Archived 2026-08-22 (keep=12 days=0 require_done=False)
+- [2026-08-18T18:54:03Z] top5-postearnings-sleeve (job _184457) XONG: NO-GO. Edge chi o 8/48 mua 2020-21; 2022+ (n=17) excVNI -2.19% t=-0.57; DSR 0.720<0.95; MaxDD -61.4%; Top-5 hang 11/24 bien the (so '5' khong robust). CHO Mike dispatch quant-skeptic verify. | LEAD chua du ket luan, dang gia neu user muon theo: value-vs-NGANH trong DT5G BEAR — excSEC +5.90% t=2.64 n=9 sau khi loai 2020-21, nhung la 1/12 o chon hau nghiem (Bonferroni can t~3.1) => phai PREREG RIENG, khong duoc coi la ket qua job nay. | Nguoc lai NEUTRAL 2022+ (state modal) LO co y nghia: excVNI -7.79% t=-2.75.
+
+## Archived 2026-08-22 (keep=12 days=0 require_done=False)
+- [2026-08-19T11:26:27Z] [2026-08-19] Checkpoint 2 gate paper (job _110954) XONG, commit mike@9ea5fd80 — NHUNG git push BI CHAN boi permission classifier, con o LOCAL. | CHO: (a) user sign-off gate 4 extreme_regime (25/20 phien, 0 marker, nhung bang chung MOT CHIEU: ca 2 nhanh trigger chua tung toi gan nguong — 4.43% vs band 3.00%; -0.90% vs -2.42%); (b) fill_timing 4/5 phien hybrid, cho 08-20 (+08-25) roi moi quant-skeptic. | LUAT MANG DI: hybrid dung 5 block 11:00/11:15/13:00/13:15/13:30 (config.py:167), KHONG phai cua so 10:45-11:15 — do bang cua so cu la dem THIEU. | GAP CONG CU: program reporting:false thi paper_programs_daily_report.py khong bao gio regen charter (sync_charter chi goi tu render_section).
