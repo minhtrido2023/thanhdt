@@ -97,3 +97,21 @@ Lý do + chuỗi R&D: `kb/projects/momentum-deals.md`, `plan_close_mom_20260712.
 - Banking (MBB/ACB/HDB): Tier 1. FPT: Tier 1. CTR: Tier 2. Pharma: buy-and-hold only (timing phá alpha).
 - DGC: 2 nhánh tách biệt — compounder-screen (exclude) ≠ special-situation case.
 - Sector sweeps #1–9 (đã đóng, kết luận lens/tilt): `kb/KNOWLEDGE.md` §7.
+
+## Quy ước phân tích conditional — trục 2 mặc định (chốt 2026-08-22, user duyệt)
+
+**Breadth-tercile PIT thay Value Radar zone làm trục 2 mặc định cho mọi phân tích conditional.**
+
+Lý do:
+- Value Radar zone ≈ kỷ nguyên: 54% số năm bị 1 nhãn chiếm ≥90% phiên → n_effective ~2-3 chu kỳ, không bao giờ đủ sức thống kê
+- Breadth-tercile PIT (universe_pit %>MA200, phân vị rolling 252 phiên trước): 0% năm bị 1 nhãn chiếm ≥90%; 2.0× số episode so với radar
+
+Cách tính breadth chuẩn:
+- Nguồn: `tav2_mike.universe_pit` (CANONICAL)
+- breadth_t = COUNT(Close_t > MA200_t | in_universe=True) / COUNT(in_universe=True)
+- Phân loại phiên t: dùng breadth_{t-1} (PIT, không look-ahead cùng phiên)
+- Tercile: phân vị rolling 252 phiên trước (không phân vị toàn mẫu)
+
+Value Radar vẫn giữ vai trò DISPLAY-ONLY trong báo cáo (§6b coding_guidelines). Không wire vào sizing.
+
+Kết quả dẫn tới quyết định: breadth-vs-radar-matrix-20260822 (Taylor, B2) + user confirm 2026-08-22.

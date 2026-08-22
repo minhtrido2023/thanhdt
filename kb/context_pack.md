@@ -1,13 +1,13 @@
-# Mike fleet — context pack (v2471)
+# Mike fleet — context pack (v2472)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-08-22T13:31:40] Taylor/finding — a1-a2-combined-20260822: {"summary": "A1+A2 xong. Mot cau: dieu kien hien tai (lai suat HIGH 6,8% + o NEUTRAL+RE) la o MA CA HAI nguon edge duoc gia dinh deu KHONG do duoc — parking hoa …
 - [2026-08-22T14:21:11] Taylor/finding — bal-exit-dt-candidate-20260822: {"verdict": "NO-GO ca 2 variant, archive, KHONG wire", "summary": "BAL exit theo regime khong tao ra DD tot hon ngoai mau. Variant A (exit khi DT5G committed do …
 - [2026-08-22T14:26:05] Taylor/finding — breadth-vs-radar-matrix-20260822: {"verdict": "Breadth THANG radar ve CAU TRUC thong ke, nhung VAN 0/27 o qua BH FDR 10% => truc tot hon de MO TA, KHONG de wire", "summary": "Ma tran DT5G(5) x b …
 - [2026-08-22T14:31:32] Taylor/finding — capit-radar-band-guard-20260822: {"verdict": "ARCHIVE — khong prereg, khong wire. capit_base() giu nguyen (mu radar la DUNG o day).", "summary": "Gia thuyet 'CAPIT fire khi radar 0-20 thi nen g …
 - [2026-08-22T14:33:05] Taylor/finding — b1-b2-b3-combined-20260822: {"summary": "B1+B2+B3 XONG, ca 3 deu NO-GO/ARCHIVE, khong de xuat wire gi. Mot cau: khong huong nao trong 3 huong 'gan them mot truc dieu kien vao he' (regime v …
+- [2026-08-22T15:47:49] Taylor/finding — b2-alpha-breadth-20260822: {"verdict": "REFUTE", "hypothesis": "H1: beta-adjusted alpha cua V2.4 cao hon o breadth HIGH so voi LOW (tu observation B2)", "prereg": "agents/Taylor/research/ …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -151,6 +151,24 @@ Lý do + chuỗi R&D: `kb/projects/momentum-deals.md`, `plan_close_mom_20260712.
 - Banking (MBB/ACB/HDB): Tier 1. FPT: Tier 1. CTR: Tier 2. Pharma: buy-and-hold only (timing phá alpha).
 - DGC: 2 nhánh tách biệt — compounder-screen (exclude) ≠ special-situation case.
 - Sector sweeps #1–9 (đã đóng, kết luận lens/tilt): `kb/KNOWLEDGE.md` §7.
+
+## Quy ước phân tích conditional — trục 2 mặc định (chốt 2026-08-22, user duyệt)
+
+**Breadth-tercile PIT thay Value Radar zone làm trục 2 mặc định cho mọi phân tích conditional.**
+
+Lý do:
+- Value Radar zone ≈ kỷ nguyên: 54% số năm bị 1 nhãn chiếm ≥90% phiên → n_effective ~2-3 chu kỳ, không bao giờ đủ sức thống kê
+- Breadth-tercile PIT (universe_pit %>MA200, phân vị rolling 252 phiên trước): 0% năm bị 1 nhãn chiếm ≥90%; 2.0× số episode so với radar
+
+Cách tính breadth chuẩn:
+- Nguồn: `tav2_mike.universe_pit` (CANONICAL)
+- breadth_t = COUNT(Close_t > MA200_t | in_universe=True) / COUNT(in_universe=True)
+- Phân loại phiên t: dùng breadth_{t-1} (PIT, không look-ahead cùng phiên)
+- Tercile: phân vị rolling 252 phiên trước (không phân vị toàn mẫu)
+
+Value Radar vẫn giữ vai trò DISPLAY-ONLY trong báo cáo (§6b coding_guidelines). Không wire vào sizing.
+
+Kết quả dẫn tới quyết định: breadth-vs-radar-matrix-20260822 (Taylor, B2) + user confirm 2026-08-22.
 
 ## Dự án đã đóng — 1 dòng/dự án, chi tiết `cat kb/projects/<file>.md`
 <!-- Rút gọn 2026-08-10: mỗi dòng trước đây là 2-4 câu kể lại diễn biến. File này bơm vào MỌI

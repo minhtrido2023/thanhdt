@@ -291,3 +291,6 @@
 
 ## Archived 2026-08-22 (keep=12 days=0 require_done=False)
 - [2026-08-20T06:07:13Z] XONG job Taylor_20260820_043511 (absorption test oshares, MERGED ca 2 repo, quant-skeptic CONFIRMED medium). | LUAT MANG DI 1: wc_env.sh:12 co 'cd $WORKDIR_8L' — source no roi chay 'python3 <file> --selfcheck' se chay ban CHUA VA o repo chinh, KHONG phai file trong worktree (in 58/58 thay vi 71/71, rat thuyet phuc). Luon cd lai vao worktree SAU khi source, va doi chieu so test voi mot lan chay doi chung tren cay chua va. | LUAT MANG DI 2: giu diff TRUOC khi va (throwaway commit/git stash) — quant-skeptic khong tai hien duoc cau chuyen loi tu tri nho nen ha confidence xuong medium.
+
+## Archived 2026-08-22 (keep=12 days=0 require_done=False)
+- [2026-08-20T07:44:00Z] [2026-08-20] oshares cua so nhin lui (job _062330) MERGED (WC a1e02674, mike 01791b21), quant-skeptic CONFIRMED. | CHO: sau ingest toi nay ~22:2x ICT khi AIS HHV 2026-08-20 lat executed -> chay lai oshares_at(['HHV'], today) tren BQ THAT xac nhan 574.511.888 qua AIS_EXACT (ca thuc te chua xay ra luc review). | MO: SC2 trong corp_action_daily_selfcheck.py khop substring 'oshares' tren duong dan day du -> FAIL gia neu WORKDIR_8L co 'oshares' trong ten; nen doi sang khop ten module.
