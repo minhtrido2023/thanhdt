@@ -1288,6 +1288,33 @@ MIKE_JOB_OWNER="$job_id" python3 "$ROOT/bin/mike_json.py" job-pin-log "$JOBS_DIR
   >/dev/null 2>&1 || true
 
 if [ "$bg" = "--bg" ]; then
+  # _preempt_wakeup <thread_id>
+  # Khi job terminal: kéo next_run_at của row ScheduleWakeup cho thread này về NOW nếu row
+  # đang tồn tại. Mike tự đặt ScheduleWakeup khi có bước kế tiếp (1 producer, ≤1 row/thread,
+  # claim nguyên tử ở scheduler) — hàm này không tạo edge mới, chỉ dời deadline từ "timer ban
+  # đầu" xuống "ngay bây giờ". Không race, không double (scheduler xoá row trước khi chạy).
+  # No-op khi: CCDB_API_URL chưa set, không có row, hoặc API lỗi.
+  _preempt_wakeup() {
+    local tid="$1" api task_id tasks_json
+    api="${CCDB_API_URL:-}"
+    [ -n "$api" ] && [ -n "$tid" ] || return 0
+    tasks_json="$(curl -sf "$api/api/tasks" 2>/dev/null)" || return 0
+    task_id="$(printf '%s' "$tasks_json" \
+      | WAKEUP_TASK_NAME="wakeup-thread-$tid" python3 -c "
+import json, sys, os
+tasks = json.load(sys.stdin).get('tasks', [])
+name = os.environ['WAKEUP_TASK_NAME']
+for t in tasks:
+    if t.get('name') == name:
+        print(t['id'])
+        break
+" 2>/dev/null)" || return 0
+    [ -n "$task_id" ] || return 0
+    curl -sf -X PATCH "$api/api/tasks/$task_id" \
+      -H "Content-Type: application/json" \
+      -d "{\"next_run_at\": $(date +%s)}" >/dev/null 2>&1 || true
+  }
+
   # Background wrapper: run agent (with timeout + retry) → consolidate → notify
   _bg_wrapper() {
     local max_attempts=$((RETRIES + 1))
@@ -1360,14 +1387,10 @@ làm lại có chủ đích, đừng âm thầm ghi đè mất công sức cũ m
           else
             "$ROOT/bin/notify_thread.sh" "✅ **$id** xong (job \`${job_id}\`): $_preview" "$_tid" 2>/dev/null || true
           fi
-          # (2026-08-21) Push-wake GỠ BỎ — xem MIKE.md §8 "kết quả là DỮ LIỆU, không phải
-          # lượt đánh thức". Tin `✅ xong` ở trên đã giao kết quả cho NGƯỜI mà không cần
-          # spin một phiên Mike để đọc lại thứ agent vừa tự ghi (bus finding + post topic
-          # của chính agent). Mike chỉ resume khi CHÍNH Mike có bước kế tiếp phụ thuộc —
-          # và lúc đó Mike tự đặt ScheduleWakeup (1 producer duy nhất, ccdb ép ≤1 one-shot/
-          # thread, không race). Push-wake auto là nguồn chung của cả 3 lớp lỗi đã gặp:
-          # miss-wake (ladder/push lệch nhau), double-answer (2 edge cùng fire), và
-          # resume-session-chết (08-21). Gỡ edge auto = gỡ nguyên lớp lỗi.
+          # (2026-08-22) Preempt wakeup: nếu Mike đã đặt ScheduleWakeup cho thread này,
+          # kéo next_run_at về NOW thay vì chờ hết timer (≤30s thay vì ≤20 phút).
+          # Không tạo edge mới — 1 producer duy nhất vẫn là Mike, claim nguyên tử giữ nguyên.
+          _preempt_wakeup "$_tid"
         fi
         # Auto-callback: notify the caller agent so it can pick up the result without manual prompt.
         # Only when caller is a real companion agent (not Mike/user — they have other channels).
@@ -1431,9 +1454,8 @@ làm lại có chủ đích, đừng âm thầm ghi đè mất công sức cũ m
     # Không suy lại topic (2026-08-02, arch-reviewer S1) — chỉ đọc pin đã ghim lúc dispatch.
     if [ -n "$_tid" ]; then
       "$ROOT/bin/notify_thread.sh" "❌ **$id** $why (job \`${job_id}\`). Xem log: $logfile" "$_tid" 2>/dev/null || true
-      # (2026-08-21) Push-wake GỠ BỎ trên cả nhánh fail — xem chú thích nhánh done phía
-      # trên + MIKE.md §8. Tin ❌ đã báo NGƯỜI; nếu Mike có bước phụ thuộc thì Mike tự đặt
-      # ScheduleWakeup. Không tự đánh thức = không tái tạo lớp lỗi resume-session-chết.
+      # (2026-08-22) Preempt wakeup trên cả nhánh fail — Mike thấy ❌ ngay thay vì chờ timer.
+      _preempt_wakeup "$_tid"
     fi
     # Also notify the caller agent on failure so it can decide to retry or escalate.
     # Same guard: no callback for auto-callback jobs (prevent loop on failure path too).
@@ -1476,7 +1498,7 @@ làm lại có chủ đích, đừng âm thầm ghi đè mất công sức cũ m
   # function and everything it closes over (JSET, SUMMARY, and the vars they use)
   # must be exported and re-entered via `bash -c`. Verified empirically: a plain
   # `setsid _bg_wrapper &` silently fails to find "_bg_wrapper" as a command.
-  export -f _bg_wrapper _job_watcher JSET SUMMARY _agent_thread_override _ambient_thread _circuit_record \
+  export -f _bg_wrapper _preempt_wakeup _job_watcher JSET SUMMARY _agent_thread_override _ambient_thread _circuit_record \
             _maybe_schedule_usage_resume _looks_like_usage_limit _parse_reset_epoch \
             _current_resume_count _job_thread_id _hb_aware_timeout \
             _maybe_schedule_maxturns_resume _looks_like_max_turns _bumped_max_turns \
