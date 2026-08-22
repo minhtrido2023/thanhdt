@@ -698,6 +698,61 @@ bật/tắt: 2026 hiện chưa −30% → screen "ngủ", crash sâu tự kích 
 
 ---
 
+## 9.5. Mở rộng mẫu nhóm (b) — 14 case, 6 ngành: **discriminator KHÔNG phân biệt được ở 12M** (Taylor, job `Taylor_20260822_022947`, 2026-08-22)
+
+**Kết quả đầy đủ + số liệu: `cycle_fear_backtest_20260822.md`. PREREG commit `4e36d170` TRƯỚC mọi truy
+vấn outcome (`cycle_fear_prereg_20260822.md`). Verdict: NO-GO. KHÔNG wire, KHÔNG đổi §2.5.**
+
+Mục đích: §8 chỉ có **1** case (b) verify (HPG 2022). Job này mở ra **14 case × 6 ngành** (thép, chứng
+khoán, BĐS, chăn nuôi, phân bón, hoá chất), có **3 negative control chỉ định trước** (HSG/NKG = không
+phải leader chi phí thấp; NVL = nghi cấu trúc).
+
+| Giả thuyết | Ngưỡng | Đo được | |
+|---|---|---|---|
+| H1 median BHAR_12M > 0, N ≥ 5 | >0, N≥5 | **+108,3pp**, N=14 | ✅ đạt |
+| H2 median(PASS) − median(FAIL) ≥ +20pp @12M | ≥+20pp | **−17,0pp** | ❌ **bác bỏ** |
+
+### ★ Ba bài học ghi vào khung (KHÔNG đổi tiêu chí §2.5 — N_eff ≈ 2 cú sốc độc lập, sửa là overfit)
+
+1. **Chân trời đánh giá nhóm (b) phải là 24M, KHÔNG phải 12M.** Ở 12M **mọi thứ rơi sâu đều nảy** —
+   tiêu chí #2 (sống sót) có gap ≈ 0 (+104,9 vs +108,3pp). Ở 24M gap bung ra **−82,8pp** (nhóm nghi
+   ngờ +34,5 vs nhóm ổn +117,3). **12M quá ngắn để thiệt hại cấu trúc kịp cắn.** Bổ sung, không mâu
+   thuẫn, với ghi chú §8 ("recovery của (b) chậm hơn nhưng bền").
+2. **Tiêu chí #3 (leader chi phí thấp) ANTI-phân biệt ở 12M.** Cùng ngành cùng đáy: HSG **+178,1pp**
+   và NKG **+166,8pp** (biên mỏng, DD −80%/−82%) **ĐÁNH BẠI HPG +102,5pp** (leader, DD −71%). §8 viết
+   "HSG/NKG cùng đáy nhưng bật yếu hơn nhiều" — **số liệu bác bỏ câu đó ở chân trời 12M**. Cơ chế:
+   **độ nảy đi theo độ RƠI, không theo CHẤT LƯỢNG**. Đừng dùng #3 để kỳ vọng "leader nảy mạnh hơn";
+   giữ nó như bộ lọc rủi ro dài hạn thì được.
+3. **#2 (sống sót qua đáy) là tiêu chí duy nhất làm việc — và làm việc theo kiểu PHÒNG THỦ.** NVL,
+   case chỉ định trước là structural, là mã **DUY NHẤT âm ở 24M** (−22,0pp; neo thực tế T20 **−43,1pp**).
+   Giá trị của discriminator = **tránh thảm hoạ**, không phải chọn người thắng — đúng vai trò
+   "golden floor cắt blow-up" ở §9 phát hiện #2.
+
+**Cảnh báo đọc số:** median +108,3pp là **neo tại đáy ex-post**; neo thực tế trough+20 phiên còn
+**+52,6pp**. VNINDEX từ chính đáy đó đã +23,1%/12M. Và kết quả này **đá với screen N-lớn §9**
+(non-commodity +47,5% > commodity +12,5%, N=237 episode, 8 regime) ⟹ **khi hai bên đá nhau, tin §9**;
+đọc job này là bằng chứng cho "2022Q4 là một đáy tốt", KHÔNG phải "nhóm chu kỳ có edge".
+
+### Nhóm (c) vĩ mô — 1 case phản chứng đáng giá hơn cả 3 case thuận
+
+Mua **chỉ số** trong panic vĩ mô hiệu quả (VNINDEX từ đáy COVID 2020-03-24: **+76,2%**/12M; từ đáy
+2022-11-15: **+23,1%**). Nhưng **chọn mã vẫn cần discriminator**: cùng đáy COVID, FPT **+49,1pp** và
+MWG **+43,5pp** BHAR_12M, còn **VNM −28,3pp @12M và −106,7pp @24M** — large-cap "rẻ", cùng panic,
+nhưng **lõi đang xấu đi thật**. Đây là minh hoạ sạch nhất cho câu hỏi trung tâm của nhóm (c): *giá sập
+vì KỸ THUẬT hay vì lõi xấu đi thật*.
+⚠️ **Đính chính mô tả thường gặp**: đáy 2022 rơi vào **Q4/2022** (siết trái phiếu + margin call),
+KHÔNG phải Q1/2022 (Nga-Ukraine) — Q1/2022 là vùng **ĐỈNH** của VN-Index.
+
+### Nhóm (d) gián đoạn vận hành — vẫn CHƯA có case
+
+5 ứng viên tìm được (RAL cháy nhà máy 08/2019; MSH/TNG/VHC/FMC đóng cửa "3 tại chỗ" Q3/2021) đều có
+DD chỉ **−14,6% đến −28,9%**, trong khi nhóm (b) có DD **−43% đến −90%**. **Thị trường chưa bao giờ
+định giá đây là khủng hoảng** ⟹ không có nỗi sợ nào để mua. BHAR dương của chúng là lợi suất của DN
+tốt trong thị trường tăng, **không phải bằng chứng cho khung này**. Ô "case đã có" của nhóm (d) trong
+bảng §0.5 **giữ nguyên trống**.
+
+---
+
 ## 10. Checklist phân tích SÂU cho case KHÔNG có gate thị trường — khi không có −30% VNINDEX làm bộ lọc thô, phân tích phải GÁNH HẾT việc phân biệt hàng tốt vs hàng lởm
 > Thêm 2026-07-23 (job `Taylor_20260723_130951`, user chỉ đạo). Trích xuất TRỰC TIẾP từ due-diligence
 > đã làm rất kỹ với TV1 (SOTP) và DGC (CF one-time vs cấu trúc). Đây là **công cụ ĐỊNH TÍNH, SÂU,
