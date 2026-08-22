@@ -13,6 +13,14 @@
 - Mỗi ngày có leveraged CAPIT orders: chạy `approve_margin_day.py --account SpaceX --date YYYY-MM-DD --approved-by "John"`
 - Lever chỉ fire khi: capit_signal_today AND dd52<=-20% AND approval file tồn tại
 
+### R&D đang chạy
+- **Taylor_20260822_131318**: A1 (rate-regime×parking bank 74%) + A2 (forward-horizon matrix + parking/CAPIT rows)
+  - A1: replay custom30V PIT × 3 rate bucket (LOW<5/MID5-6.5/HIGH>6.5%), sector-cap 40/50%, LOO/năm
+  - A2: forward-matrix 60/120/250 phiên cho mỗi ô + thêm hàng parking+CAPIT
+  - Bus: finding "parking-rate-bucket-20260822" + "forward-horizon-matrix-20260822" + "a1-a2-combined-20260822"
+  - Timeout 7200s, opus/high
+  - User chốt hướng 2026-08-22 ~20:08 ICT
+
 ### Việc còn hở
 - Wags/wags-fix-not-confirmed: coord-2026-08-21 CHƯA ĐÓNG (wake_debounce_selfcheck.sh ghi fixture vào log production)
 - Weekly report 08-17→08-21 quá hạn (bus question open)
@@ -24,4 +32,10 @@
 - SpaceX + ZaloPay: HOLD_ALL
 
 ### probe_linger_live_gate: vẫn True (paper-only)
+
+### R&D backlog (user đã review, chưa dispatch)
+- B1: BAL exit theo DT candidate streak
+- B2: Breadth thay Value Radar làm trục 2 (sửa confound zone≈kỷ nguyên)
+- B3: CAPIT × radar band guard (dải 0-20 vs 20-33)
+- Tier C: LAG-in-BEAR (đóng), Alpha Lens audit 09-30, CAPIT hold dài hơn
 
