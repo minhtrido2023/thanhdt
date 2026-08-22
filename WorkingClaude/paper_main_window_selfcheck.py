@@ -35,6 +35,7 @@ import tempfile
 # (retro-2026-08-07 Pattern 1 — 4 lần tái diễn 08-03/04/05/07). Xem coding_guidelines §5.
 os.environ.setdefault("MIKE_BOT_TEST_MODE", "1")
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import trading_bot.brokers as _brokers_mod  # noqa: E402
 from trading_bot.brokers import PaperBroker, OrderUpdate  # noqa: E402
 from trading_bot.plan import PlannedOrder, TradePlan  # noqa: E402
 from trading_bot.executor import Executor  # noqa: E402
@@ -55,8 +56,12 @@ def check(name, cond, detail=""):
 
 
 REFS = {"FPT": 72100, "MBB": 26000}
-TODAY = dt.date.today().isoformat()
-YESTERDAY = (dt.date.today() - dt.timedelta(days=1)).isoformat()
+# Ngày cố định (§23 point 1: assert lên fixture đã ghim, KHÔNG lên "hôm nay" sống — trước đây
+# dt.date.today() dùng TZ tiến trình trong khi PaperBroker.poll_orders() day-scope bằng
+# trading_bot.brokers.today_ict() (ICT thật) → lệch nhau khi TZ=America/New_York cross ngày).
+_FROZEN_TODAY = dt.date(2026, 1, 15)
+TODAY = _FROZEN_TODAY.isoformat()
+YESTERDAY = (_FROZEN_TODAY - dt.timedelta(days=1)).isoformat()
 
 
 def make_env(tmp, sub, hybrid=False):
@@ -99,84 +104,92 @@ def journal_places(path):
     return rows
 
 
-with tempfile.TemporaryDirectory() as tmp:
-    # ---- A. day-scope: yesterday's filled order must not ghost today's run ----
-    broker, ex = make_env(tmp, "a")
-    broker.state["open_orders"]["P000001"] = {
-        "symbol": "FPT", "qty": 400, "side": "buy", "price": 72000, "type": "LO",
-        "filled": 400, "status": "filled", "avg_price": 72000,
-        "ts": f"{YESTERDAY}T14:19:38"}
-    updates = broker.poll_orders()
-    check("A1 yesterday's order absent from poll_orders()", "P000001" not in updates,
-          detail=f"returned={list(updates)}")
-    check("A2 no ghost pause from yesterday's order",
-          ex._ghost_tickers(updates) == set(), detail=str(ex._ghost_tickers(updates)))
-    # Negative control — the exact 2026-07-08/09 incident signature (pre-fix behavior):
-    stale = {"P000001": OrderUpdate("P000001", "filled", 400, 72000, raw={"symbol": "FPT"})}
-    check("A3 negative control: same update WOULD ghost if still returned",
-          ex._ghost_tickers(stale) == {"FPT"})
+# Ghim today_ict() (dùng bởi PaperBroker.poll_orders() để day-scope) về đúng _FROZEN_TODAY,
+# để checks A/B (so TODAY/YESTERDAY với kết quả poll_orders()) không phụ thuộc TZ tiến trình
+# hay ngày chạy thật. Khôi phục ở cuối, kể cả khi có lỗi.
+_orig_today_ict = _brokers_mod.today_ict
+_brokers_mod.today_ict = lambda: _FROZEN_TODAY
+try:
+    with tempfile.TemporaryDirectory() as tmp:
+        # ---- A. day-scope: yesterday's filled order must not ghost today's run ----
+        broker, ex = make_env(tmp, "a")
+        broker.state["open_orders"]["P000001"] = {
+            "symbol": "FPT", "qty": 400, "side": "buy", "price": 72000, "type": "LO",
+            "filled": 400, "status": "filled", "avg_price": 72000,
+            "ts": f"{YESTERDAY}T14:19:38"}
+        updates = broker.poll_orders()
+        check("A1 yesterday's order absent from poll_orders()", "P000001" not in updates,
+              detail=f"returned={list(updates)}")
+        check("A2 no ghost pause from yesterday's order",
+              ex._ghost_tickers(updates) == set(), detail=str(ex._ghost_tickers(updates)))
+        # Negative control — the exact 2026-07-08/09 incident signature (pre-fix behavior):
+        stale = {"P000001": OrderUpdate("P000001", "filled", 400, 72000, raw={"symbol": "FPT"})}
+        check("A3 negative control: same update WOULD ghost if still returned",
+              ex._ghost_tickers(stale) == {"FPT"})
 
-    # ---- B. same-day ghost rehearsal preserved ----
-    broker.state["open_orders"]["P000002"] = {
-        "symbol": "FPT", "qty": 100, "side": "buy", "price": 72100, "type": "LO",
-        "filled": 100, "status": "filled", "avg_price": 72100,
-        "ts": f"{TODAY}T09:20:00"}
-    updates = broker.poll_orders()
-    check("B1 today's unknown filled order still returned and ghosts",
-          "P000002" in updates and ex._ghost_tickers(updates) == {"FPT"},
-          detail=str(ex._ghost_tickers(updates)))
+        # ---- B. same-day ghost rehearsal preserved ----
+        broker.state["open_orders"]["P000002"] = {
+            "symbol": "FPT", "qty": 100, "side": "buy", "price": 72100, "type": "LO",
+            "filled": 100, "status": "filled", "avg_price": 72100,
+            "ts": f"{TODAY}T09:20:00"}
+        updates = broker.poll_orders()
+        check("B1 today's unknown filled order still returned and ghosts",
+              "P000002" in updates and ex._ghost_tickers(updates) == {"FPT"},
+              detail=str(ex._ghost_tickers(updates)))
 
-    # ---- C. sim: run starting in the BUY window (Tue/Thu 10:46 cron) ----
-    broker, ex = make_env(tmp, "c")
-    now = dt.datetime.combine(dt.date.today(), dt.time(10, 46, 30))
-    ex.step(now, "MORNING", True)
-    places = journal_places(ex.journal_file)
-    buys = [r for r in places if r["side"] == "buy"]
-    sells = [r for r in places if r["side"] == "sell"]
-    check("C1 BUY placed in a 10:46 step", len(buys) == 1, detail=f"{len(buys)} buy PLACE")
-    check("C2 BUY tagged ft:in-window (10:45-11:15)",
-          buys and "ft:in-window" in buys[0]["note"], detail=buys[0]["note"] if buys else "")
-    check("C3 SELL still places at 10:46, tagged ft:out",
-          sells and "ft:out" in sells[0]["note"], detail=sells[0]["note"] if sells else "")
+        # ---- C. sim: run starting in the BUY window (Tue/Thu 10:46 cron) ----
+        broker, ex = make_env(tmp, "c")
+        now = dt.datetime.combine(_FROZEN_TODAY, dt.time(10, 46, 30))
+        ex.step(now, "MORNING", True)
+        places = journal_places(ex.journal_file)
+        buys = [r for r in places if r["side"] == "buy"]
+        sells = [r for r in places if r["side"] == "sell"]
+        check("C1 BUY placed in a 10:46 step", len(buys) == 1, detail=f"{len(buys)} buy PLACE")
+        check("C2 BUY tagged ft:in-window (10:45-11:15)",
+              buys and "ft:in-window" in buys[0]["note"], detail=buys[0]["note"] if buys else "")
+        check("C3 SELL still places at 10:46, tagged ft:out",
+              sells and "ft:out" in sells[0]["note"], detail=sells[0]["note"] if sells else "")
 
-    # ---- D. sim: run starting at open (Mon/Wed/Fri 09:10 cron → first step ~09:16) ----
-    broker, ex = make_env(tmp, "d")
-    now = dt.datetime.combine(dt.date.today(), dt.time(9, 16, 0))
-    ex.step(now, "MORNING", True)
-    places = journal_places(ex.journal_file)
-    buys = [r for r in places if r["side"] == "buy"]
-    sells = [r for r in places if r["side"] == "sell"]
-    check("D1 SELL placed at 09:16 tagged ft:in-window (09:15-09:45)",
-          sells and "ft:in-window" in sells[0]["note"], detail=sells[0]["note"] if sells else "")
-    check("D2 BUY places immediately at 09:16 (first slice ignores window) tagged ft:out",
-          buys and "ft:out" in buys[0]["note"], detail=buys[0]["note"] if buys else "")
+        # ---- D. sim: run starting at open (Mon/Wed/Fri 09:10 cron → first step ~09:16) ----
+        broker, ex = make_env(tmp, "d")
+        now = dt.datetime.combine(_FROZEN_TODAY, dt.time(9, 16, 0))
+        ex.step(now, "MORNING", True)
+        places = journal_places(ex.journal_file)
+        buys = [r for r in places if r["side"] == "buy"]
+        sells = [r for r in places if r["side"] == "sell"]
+        check("D1 SELL placed at 09:16 tagged ft:in-window (09:15-09:45)",
+              sells and "ft:in-window" in sells[0]["note"], detail=sells[0]["note"] if sells else "")
+        check("D2 BUY places immediately at 09:16 (first slice ignores window) tagged ft:out",
+              buys and "ft:out" in buys[0]["note"], detail=buys[0]["note"] if buys else "")
 
-    # ---- F. paper THẬT hôm nay: HYBRID bật (fill_timing_hybrid_enabled=True từ 2026-08-10) ----
-    # Nhóm A-E cố ý ghim HYBRID tắt để đo tầng nền. Nhóm này đo cái account paper `main`
-    # THẬT SỰ làm: lịch HYBRID THAY cửa sổ nền — 10:46 không còn là giờ mua (block MUA đầu
-    # tiên là 11:00), 11:00 mới là. Thiếu nhóm này thì bộ test mô tả một cấu hình không ai
-    # chạy, và lần đổi cờ tiếp theo sẽ lại đi qua mà không ai thấy.
-    broker, ex = make_env(tmp, "f1", hybrid=True)
-    ex.step(dt.datetime.combine(dt.date.today(), dt.time(10, 46, 30)), "MORNING", True)
-    buys_f1 = [r for r in journal_places(ex.journal_file) if r["side"] == "buy"]
-    check("F1 HYBRID bật ⇒ 10:46 KHÔNG còn đặt mua (ngoài block, block đầu là 11:00)",
-          len(buys_f1) == 0, detail=f"{len(buys_f1)} buy PLACE")
+        # ---- F. paper THẬT hôm nay: HYBRID bật (fill_timing_hybrid_enabled=True từ 2026-08-10) ----
+        # Nhóm A-E cố ý ghim HYBRID tắt để đo tầng nền. Nhóm này đo cái account paper `main`
+        # THẬT SỰ làm: lịch HYBRID THAY cửa sổ nền — 10:46 không còn là giờ mua (block MUA đầu
+        # tiên là 11:00), 11:00 mới là. Thiếu nhóm này thì bộ test mô tả một cấu hình không ai
+        # chạy, và lần đổi cờ tiếp theo sẽ lại đi qua mà không ai thấy.
+        broker, ex = make_env(tmp, "f1", hybrid=True)
+        ex.step(dt.datetime.combine(_FROZEN_TODAY, dt.time(10, 46, 30)), "MORNING", True)
+        buys_f1 = [r for r in journal_places(ex.journal_file) if r["side"] == "buy"]
+        check("F1 HYBRID bật ⇒ 10:46 KHÔNG còn đặt mua (ngoài block, block đầu là 11:00)",
+              len(buys_f1) == 0, detail=f"{len(buys_f1)} buy PLACE")
 
-    broker, ex = make_env(tmp, "f2", hybrid=True)
-    ex.step(dt.datetime.combine(dt.date.today(), dt.time(11, 0, 30)), "MORNING", True)
-    buys_f2 = [r for r in journal_places(ex.journal_file) if r["side"] == "buy"]
-    check("F2 …và 11:00 (đầu block MUA) thì đặt mua bình thường — CHỨNG MINH NGƯỢC cho F1",
-          len(buys_f2) == 1, detail=f"{len(buys_f2)} buy PLACE")
+        broker, ex = make_env(tmp, "f2", hybrid=True)
+        ex.step(dt.datetime.combine(_FROZEN_TODAY, dt.time(11, 0, 30)), "MORNING", True)
+        buys_f2 = [r for r in journal_places(ex.journal_file) if r["side"] == "buy"]
+        check("F2 …và 11:00 (đầu block MUA) thì đặt mua bình thường — CHỨNG MINH NGƯỢC cho F1",
+              len(buys_f2) == 1, detail=f"{len(buys_f2)} buy PLACE")
 
-    # ---- E. TZ mechanism (what the crontab fix relies on) ----
-    r = subprocess.run(
-        [sys.executable, "-c",
-         "import datetime as dt;"
-         "print((dt.datetime.now() - dt.datetime.utcnow()).total_seconds())"],
-        env={**os.environ, "TZ": "Asia/Ho_Chi_Minh"}, capture_output=True, text=True)
-    offset_h = float(r.stdout.strip()) / 3600 if r.returncode == 0 else None
-    check("E1 TZ=Asia/Ho_Chi_Minh gives datetime.now() = UTC+7",
-          offset_h is not None and abs(offset_h - 7) < 0.02, detail=f"offset={offset_h}h")
+        # ---- E. TZ mechanism (what the crontab fix relies on) ----
+        r = subprocess.run(
+            [sys.executable, "-c",
+             "import datetime as dt;"
+             "print((dt.datetime.now() - dt.datetime.utcnow()).total_seconds())"],
+            env={**os.environ, "TZ": "Asia/Ho_Chi_Minh"}, capture_output=True, text=True)
+        offset_h = float(r.stdout.strip()) / 3600 if r.returncode == 0 else None
+        check("E1 TZ=Asia/Ho_Chi_Minh gives datetime.now() = UTC+7",
+              offset_h is not None and abs(offset_h - 7) < 0.02, detail=f"offset={offset_h}h")
+finally:
+    _brokers_mod.today_ict = _orig_today_ict
 
 for f in glob.glob(os.path.join(EXEC_DIR, f"exec_{TAG}_*")):
     os.remove(f)

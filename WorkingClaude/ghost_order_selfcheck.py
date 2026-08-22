@@ -350,18 +350,29 @@ with tempfile.TemporaryDirectory() as tmp:
     #    same-day crash-between-place-and-save signature.
     import datetime as _dt
 
+    import trading_bot.brokers as _brokers_mod
     from trading_bot.brokers import PaperBroker
 
+    # Ngày cố định (§23 point 1: assert lên fixture đã ghim, KHÔNG lên "hôm nay" sống).
+    # poll_orders() day-scopes bằng trading_bot.brokers.today_ict() (ICT thật, không phụ
+    # thuộc TZ tiến trình) — ghim luôn hàm đó về CÙNG ngày với ts của fixture, nếu không
+    # test tự phụ thuộc "hôm nay theo ICT thật" và trôi mỗi ngày chạy.
+    _FROZEN_TODAY = _dt.date(2026, 1, 15)
     pb = PaperBroker(label="selfcheck-ghost")
     pb.state_file = os.path.join(tmp, "paper_state.json")
     pb.state = {"cash": 0, "positions": {}, "open_orders": {
         "P000001": {"symbol": "PAPERGHOST", "qty": 100, "side": "buy", "price": 20000,
                     "type": "LO", "filled": 100, "status": "Filled",
-                    "ts": f"{_dt.date.today().isoformat()}T09:15:00"}},
+                    "ts": f"{_FROZEN_TODAY.isoformat()}T09:15:00"}},
         "fills": [], "next_id": 2}
     ex3 = make_executor(tmp, [PlannedOrder(id="BUY-04", ticker="PAPERGHOST", side="buy",
                                            qty=1000, ref_price=20000)])
-    paper_updates = pb.poll_orders()
+    _orig_today_ict = _brokers_mod.today_ict
+    _brokers_mod.today_ict = lambda: _FROZEN_TODAY
+    try:
+        paper_updates = pb.poll_orders()
+    finally:
+        _brokers_mod.today_ict = _orig_today_ict
     ghosts = ex3._ghost_tickers(paper_updates)
     # Asserts the PROPERTY the guard depends on (a resolvable symbol), not an exact dict:
     # the raw row is deliberately grown over time to mirror the real DNSEBroker row, and an
