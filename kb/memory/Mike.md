@@ -1,45 +1,49 @@
 # Working memory — Mike
 > Cập nhật mỗi khi đổi mạch việc. Bơm vào đầu phiên của Mike.
 
-## Ưu tiên hiện tại (2026-08-22)
+# Working memory — Mike
+> Cập nhật mỗi khi đổi mạch việc. Bơm vào đầu phiên của Mike.
 
-### Go-live HOÀN TẤT
-- fill_timing (cả fill_timing_live_gate + hybrid_live_gate) → FALSE cho SpaceX + ZaloPay
+## Ưu tiên hiện tại (cuối ngày 2026-08-22)
+
+### Go-live V2.4 lever HOÀN TẤT — hiệu lực T2 24/08
+- fill_timing (fill_timing_live_gate + hybrid_live_gate) → FALSE cho SpaceX + ZaloPay
 - extreme_regime_enabled → TRUE cho SpaceX + ZaloPay
-- **capit_margin_lever.enabled → TRUE** (user confirmed 2026-08-22, bus event ghi)
-- Hiệu lực T2 24/08 khi run_bot.sh chạy
+- capit_margin_lever.enabled → TRUE (user confirmed 08-22)
+- CAPIT margin lever: mỗi ngày có leveraged CAPIT orders phải chạy
+  `approve_margin_day.py --account <acct> --date <date> --approved-by "John"` trước khi bot chạy —
+  lever chỉ fire khi capit_signal_today AND dd52<=-20% AND approval file tồn tại.
 
-### CAPIT margin lever — cổng thứ hai PHẢI chạy khi lever fire
-- Mỗi ngày có leveraged CAPIT orders: chạy `approve_margin_day.py --account SpaceX --date YYYY-MM-DD --approved-by "John"`
-- Lever chỉ fire khi: capit_signal_today AND dd52<=-20% AND approval file tồn tại
+### R&D — TẤT CẢ đã đóng, không còn backlog mở từ tuần này
+- A1/A2 (rate-regime × parking, forward-horizon matrix): KHÔNG đổi production, radar giữ DISPLAY-ONLY.
+- B1 (BAL exit DT candidate), B2 (breadth vs radar), B3 (CAPIT radar-band guard): cả 3 NO-GO/ARCHIVE.
+  capit_base() giữ nguyên. Breadth-tercile PIT (không phải radar) là trục 2 mặc định mới (đã ghi
+  kb/canonical.md, user duyệt 08-22).
+- Taylor_20260822_153901 (B2-ext, alpha vs breadth-tercile) đang chạy lúc cuối ngày — kiểm kết quả
+  khi vào phiên tiếp theo (bus finding "b2-alpha-breadth-20260822" — REFUTE, đã có kết quả rồi,
+  không cần chờ thêm).
 
-### R&D đang chạy
-- **Taylor_20260822_131318**: A1 (rate-regime×parking bank 74%) + A2 (forward-horizon matrix + parking/CAPIT rows)
-  - A1: replay custom30V PIT × 3 rate bucket (LOW<5/MID5-6.5/HIGH>6.5%), sector-cap 40/50%, LOO/năm
-  - A2: forward-matrix 60/120/250 phiên cho mỗi ô + thêm hàng parking+CAPIT
-  - Bus: finding "parking-rate-bucket-20260822" + "forward-horizon-matrix-20260822" + "a1-a2-combined-20260822"
-  - Timeout 7200s, opus/high
-  - User chốt hướng 2026-08-22 ~20:08 ICT
+### Retro 2026-08-22 — XONG, đã đóng đúng
+- File: kb/incidents/retro/retro-2026-08-22.md. 4 sự cố: #1 weekly report có 2 nội dung lỗi thời
+  (CÒN HỞ — cần user quyết có gửi đính chính không), #2 insider_flags cron-env (đã đóng),
+  #3 wags-fix-not-confirmed coord-2026-08-21 (đã đóng thật bằng commit 13f7bd591 — draft ban đầu
+  từng báo sai "còn hở", Wags GAPS FOUND sửa lại, escalation sai đã đóng bằng answer event),
+  #4 ScheduleWakeup MISS 10% (dao động, chưa cần escalate).
+- 3 pattern xuyên suốt CHƯA có gate cơ học: (1) report nội dung lỗi thời không tự xoá, (2) cron-env
+  câm lặng đường lỗi (lần 3), (3) ScheduleWakeup MISS dao động 8-27% (lần 4). Đề xuất formalize
+  Pattern 2 vào coding_guidelines nếu tái diễn lần 4.
 
 ### Việc còn hở
-- Wags/wags-fix-not-confirmed: coord-2026-08-21 CHƯA ĐÓNG (wake_debounce_selfcheck.sh ghi fixture vào log production)
-- Weekly report 08-17→08-21 quá hạn (bus question open)
-- expvol_pacing: 1/25 order-day (cần Taylor điều tra)
-- order_book_execution_shadow: 0/40 outcome coverage
+- Weekly report 08-17→08-21 đã gửi có 2 nội dung sai (breadth ticker_prune, limitation egg lỗi
+  thời) — CHƯA đính chính, chờ user quyết (retro #1).
+- expvol_pacing: 1/25 order-day (cần Taylor điều tra — chưa dispatch).
+- order_book_execution_shadow: 0/40 outcome coverage.
+- wake_debounce_selfcheck.sh vẫn ghi fixture vào logs/wake_thread_errors.log (nợ kỹ thuật nhẹ,
+  không còn gây báo động giả vì daily_retro.sh đã ngừng đọc file đó).
 
-### Signal holds
-- VPI/BAL: HOLD đến 2026-09-16
-- SpaceX + ZaloPay: HOLD_ALL
+### Signal holds — KHÔNG tự đổi
+- VPI/BAL: HOLD đến 2026-09-16.
+- SpaceX + ZaloPay: HOLD_ALL (theo VPI hold).
 
 ### probe_linger_live_gate: vẫn True (paper-only)
 
-### R&D backlog (user đã review, chưa dispatch)
-- B1: BAL exit theo DT candidate streak
-- B2: Breadth thay Value Radar làm trục 2 (sửa confound zone≈kỷ nguyên)
-- B3: CAPIT × radar band guard (dải 0-20 vs 20-33)
-- Tier C: LAG-in-BEAR (đóng), Alpha Lens audit 09-30, CAPIT hold dài hơn
-
-- [2026-08-22T13:50:34Z] A1+A2 xong (Taylor_20260822_131318). Kết luận: KHÔNG thay đổi production. Parking HIGH bucket -0.7% CI[-22,+22] = hòa vốn; edge ở MID/LOW. NON-BANK (không phải ngân hàng) là cái sập trong HIGH. Forward ô NEUTRAL+RE không vượt base rate. V2.4 đã hấp thụ radar → giữ DISPLAY-ONLY. Chờ user chốt B1/B2/B3.
-- [2026-08-22T14:12:03Z] Taylor_20260822_141143 đang chạy B1 (BAL exit DT candidate) + B2 (breadth vs radar matrix) + B3 (CAPIT radar-band guard). opus/high, timeout 9000s. Dispatch 2026-08-22 ~21:11 ICT.
-- [2026-08-22T14:48:26Z] B1+B2+B3 xong (Taylor_20260822_141143). Tất cả NO-GO/ARCHIVE. Key: (1) BAL exit DT-downgrade không cải thiện DD ngoài mẫu; streak BASE<COMMITTED là tín hiệu đáy +10.2%/33ep (prereg mới nếu muốn). (2) Breadth thắng radar về cấu trúc (2x episode) nhưng 0/27 BH. Đề xuất dùng breadth-tercile PIT thay radar làm trục phân tích mặc định (chi phí 0). (3) CAPIT radar<20 = ĐÁY, band guard cắt đúng 4 lần tốt nhất. capit_base() giữ nguyên. Không còn R&D backlog nào từ ngày hôm nay.
-- [2026-08-22T15:39:33Z] Taylor_20260822_153901 đang chạy: prereg 'alpha sau khử beta (rolling 252) có phụ thuộc breadth-tercile PIT không?' (B2-ext). H1: HIGH breadth → alpha cao hơn. Dispatch 22:38 ICT. Breadth-axis convention đã ghi vào kb/canonical.md.
