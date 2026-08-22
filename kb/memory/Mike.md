@@ -39,3 +39,5 @@
 - B3: CAPIT × radar band guard (dải 0-20 vs 20-33)
 - Tier C: LAG-in-BEAR (đóng), Alpha Lens audit 09-30, CAPIT hold dài hơn
 
+- [2026-08-22T13:50:34Z] A1+A2 xong (Taylor_20260822_131318). Kết luận: KHÔNG thay đổi production. Parking HIGH bucket -0.7% CI[-22,+22] = hòa vốn; edge ở MID/LOW. NON-BANK (không phải ngân hàng) là cái sập trong HIGH. Forward ô NEUTRAL+RE không vượt base rate. V2.4 đã hấp thụ radar → giữ DISPLAY-ONLY. Chờ user chốt B1/B2/B3.
+- [2026-08-22T14:12:03Z] Taylor_20260822_141143 đang chạy B1 (BAL exit DT candidate) + B2 (breadth vs radar matrix) + B3 (CAPIT radar-band guard). opus/high, timeout 9000s. Dispatch 2026-08-22 ~21:11 ICT.
