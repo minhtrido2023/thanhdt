@@ -44,6 +44,10 @@ import sys
 WC = "/home/trido/thanhdt/WorkingClaude"
 FLAGS_PATH = os.path.join(WC, "data", "insider_flags.json")
 PROJECT = "lithe-record-440915-m9"
+# Cron KHÔNG source wc_env.sh ⇒ không có CLOUDSDK_CONFIG ⇒ bq rơi về ~/.config/gcloud
+# (credential scope hỏng) và in lỗi ra STDOUT, không phải stderr. Tự khai như
+# corp_action_lib.py:86 để script chạy độc lập với env của caller.
+CLOUDSDK_CONFIG = "/home/trido/thanhdt/gcloud_dtienthanh"   # dtienthanh@gmail.com
 
 SELL_PCT_OSH_MIN = 0.01   # §3.4: 1,0% CP lưu hành / 90 ngày (plateau với 0,5%, không phải đỉnh nhọn)
 WINDOW_DAYS = 90
@@ -86,12 +90,16 @@ ORDER BY sell_pct_osh DESC
 
 def bq_csv(sql):
     """Chạy 1 query, trả về list[dict] (header + rows). Lỗi bq ⇒ raise, KHÔNG nuốt."""
+    env = os.environ.copy()
+    env.setdefault("CLOUDSDK_CONFIG", CLOUDSDK_CONFIG)
     out = subprocess.run(
         ["bq", "query", "--use_legacy_sql=false", "--format=csv",
          f"--project_id={PROJECT}", "--max_rows=100000", sql],
-        capture_output=True, text=True)
+        capture_output=True, text=True, env=env)
     if out.returncode != 0:
-        raise RuntimeError(f"bq query lỗi: {out.stderr.strip()[:500]}")
+        # bq in lỗi ra stdout; chỉ đọc stderr ⇒ thông báo rỗng, mù nguyên nhân.
+        msg = (out.stderr.strip() or out.stdout.strip())[:500]
+        raise RuntimeError(f"bq query lỗi: {msg}")
     lines = [l for l in out.stdout.strip().splitlines() if l.strip()]
     if len(lines) < 2:
         return []
