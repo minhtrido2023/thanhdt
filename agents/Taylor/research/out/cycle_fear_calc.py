@@ -1,4 +1,15 @@
-"""Outcome calc cho PREREG cycle_fear_prereg_20260822.md. Chay SAU khi prereg commit 4e36d170."""
+"""Outcome calc cho PREREG cycle_fear_prereg_20260822.md. Chay SAU khi prereg commit 4e36d170.
+
+Tai lap du lieu tho (out/cycle_fear_px.csv):
+  source /home/trido/thanhdt/WorkingClaude/wc_env.sh
+  bq query --use_legacy_sql=false --project_id=lithe-record-440915-m9 --format=csv --max_rows=200000 '
+    SELECT ticker, time, Close FROM `lithe-record-440915-m9.tav2_bq.ticker`
+    WHERE ticker IN ("VNINDEX","HPG","HSG","NKG","SSI","VCI","HCM","DIG","PDR","NVL","DBC","BAF",
+                     "DCM","DPM","DGC","RAL","MSH","TNG","VHC","FMC","VNM","FPT","MWG")
+      AND time BETWEEN "2019-01-01" AND "2026-06-15" AND Close IS NOT NULL
+    ORDER BY ticker, time' > out/cycle_fear_px.csv
+Dung Close (adjusted), KHONG dung Price (raw) - prereg §2.
+"""
 import csv, collections, statistics, datetime as dt, json
 
 PX = collections.defaultdict(dict)
