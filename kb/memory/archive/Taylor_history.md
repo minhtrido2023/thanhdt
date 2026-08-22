@@ -273,3 +273,6 @@
 
 ## Archived 2026-08-21 (keep=12 days=0 require_done=False)
 - [2026-08-18T13:39:14Z] yield_floor Phase1 custom30V (job _131745): KHONG WIRE, cho user chon A/B/C — bus finding yield-floor-phase1-wire-20260818, artifact agents/Taylor/research/yield_floor_custom30v_phase1_20260818/. Do duoc: pool=60 moi ky NHUNG tiebreaker that fire 0/34 ky; spec literal se thay 16,29/30 ma (=xoa selector). Neu user chon B (soft-bonus W=0,10) thi PHAI backtest NAV/DD truoc. Bai hoc chung: 'pool > 30' KHONG phai dieu kien du de tiebreaker fire — score lien tuc thi hoa tuyet doi ~khong bao gio xay ra; phai do tie rate tai bien, khong suy tu pool size.
+
+## Archived 2026-08-22 (keep=12 days=0 require_done=False)
+- [2026-08-18T14:12:26Z] yield_floor Phase1 = Option C DA WIRE (2026-08-18, WorkingClaude@9ed56854 + mike@a6ea3f06): 2 cot nhan quan sat trong custom30v_8l/custom30_8l, selection logic KHONG doi. Cho: rebalance 2026-11-05 (gate #1) + review 2027-02-10 (auto-escalate qua paper_checkpoint_escalation.sh, khong can nho tay). Phase 2 (B: bonus W=0,10) CHI mo neu 2/3 gate dat + backtest NAV/DD IS/OOS truoc.
