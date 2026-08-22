@@ -1,38 +1,25 @@
 # Working memory — Mike
 > Cập nhật mỗi khi đổi mạch việc. Bơm vào đầu phiên của Mike.
 
-# Working memory — Mike
-> Cập nhật mỗi khi đổi mạch việc. Bơm vào đầu phiên của Mike.
+## Ưu tiên hiện tại (2026-08-22)
 
-## Trạng thái 2026-08-22 00:41 ICT (đầu ngày, sau retro 08-21)
+### Go-live HOÀN TẤT
+- fill_timing (cả fill_timing_live_gate + hybrid_live_gate) → FALSE cho SpaceX + ZaloPay
+- extreme_regime_enabled → TRUE cho SpaceX + ZaloPay
+- Commit mike: 08af2637 (stress test 40/40) + 2357e231 (tracker)
+- secrets/trading_bot_accounts.json: gitignored, đã cập nhật trên đĩa
+- Hiệu lực T2 24/08 khi run_bot.sh chạy
 
-### Lỗi giờ lần 3 — ĐÃ ĐÓNG (S1-S4 hoàn tất)
-- ccdb commit ce4778e + fleet commit fd3b710f: [now:] injected by-construction mọi đường prompt.
-- `time_claim_audit.py --since 2026-08-21` → 0 mismatch. now_injection_selfcheck PASS cả 3 topic.
-- S1 flip (TZ=ICT ở ccdb-mike.service) vẫn CHƯA LÀM — chờ vài ngày verify ổn định trước khi flip.
-  Taylor audit: chỉ 1 dòng cần sửa trước (mike/agents/Taylor/anomaly_scan.py:294).
-- ccdb-mike.service restart: đã CẦN cho S2/S3 có hiệu lực — kiểm tra đã restart chưa trước khi
-  báo cáo trạng thái S2/S3 là "live".
+### Việc còn hở (từ retro 08-21 + session này)
+- Wags/wags-fix-not-confirmed: coord-2026-08-21 CHƯA ĐÓNG (wake_debounce_selfcheck.sh ghi fixture vào log production)
+- Weekly report 08-17→08-21 quá hạn (bus question Mike/report-cadence-overdue-weekly_2026-08-17_2026-08-21 open)
+- expvol_pacing: 1/25 order-day (cần Taylor điều tra)
+- order_book_execution_shadow: 0/40 outcome coverage (adverse-selection gate không đo được)
+- Cycle fear backtest: NO-GO, chờ quant-skeptic verify
 
-### Wake-up architecture — ĐÓNG bằng loại bỏ (commit 541b50f3, 10:12 ICT 08-21)
-- Gỡ toàn bộ push-wake-on-completion + reconciler cron + debounce. Mô hình mới: agent tự báo kết
-  quả lên bus/thread; Mike chỉ ScheduleWakeup khi CHÍNH Mike còn bước phụ thuộc (MIKE.md §8).
-- Claim-reply nguyên tử vẫn giữ nguyên, vẫn bắt buộc dòng đầu mọi wakeup turn.
+### Signal holds
+- VPI/BAL: HOLD đến 2026-09-16
+- SpaceX + ZaloPay: HOLD_ALL
 
-### Việc còn HỞ từ retro 2026-08-21 (kb/incidents/retro/retro-2026-08-21.md)
-- **`Wags/wags-fix-not-confirmed: coord-2026-08-21` CHƯA ĐÓNG** — `wake_debounce_selfcheck.sh`
-  ghi rác (fixture thread_id giả) thẳng vào `logs/wake_thread_errors.log` production, làm
-  `daily_retro.sh` đếm sai (50/50 dòng push_err ngày 08-21 = 100% fixture). Cần: sink cách ly
-  (`WAKE_THREAD_ERR_SINK`) hoặc lọc thread_id fixture trong daily_retro.sh. Hạ ưu tiên NẾU xác
-  nhận không còn script nào đọc log này sau khi kiến trúc wake-up mới ổn định vài ngày.
-- Chưa có entry `kb/incidents/2026-08/` riêng cho sự cố #3 (log fixture pollution) và #5
-  (CAPIT/custom30V qty floor sizing bug, đã fix, chỉ có bus finding).
-- Theo dõi "gộp nguồn quên tách xuất xứ" (tiền §25, vị thế broker, nay CAPIT/parking qty) — lần
-  thứ 4 ở field khác thì formalize thành mục coding_guidelines mới.
+### probe_linger_live_gate: vẫn True (paper-only)
 
-### Bối cảnh còn hiệu lực
-- GDKHQ D1-D3 LIVE. TV1 Rule A LIVE. CASH_VENDOR gate ĐÓNG.
-- BAL+VPI signal_holds until 09-16. SpaceX+ZaloPay HOLD_ALL.
-- OKF split mandate: file >40KB tự split.
-
-- [2026-08-21T17:54:59Z] CAPIT margin test: DollarBill_20260821_175438 đang làm plan T2 08-24. Sau khi user confirm fill → flip capit_margin_lever.enabled=true trong data/trading_rules.json. Fill-timing: cả 2 gate vẫn True (paper-only), KHÔNG đổi trong test này.
