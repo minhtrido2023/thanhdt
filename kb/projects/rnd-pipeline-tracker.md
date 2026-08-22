@@ -21,18 +21,13 @@ Chi tiết đầy đủ từng mục: bus finding của Taylor + `kb/incidents/i
   exclude ở bất kỳ giai đoạn nào** — 85% mã bị cờ không sập (§3.5 research file), chỉ là dòng bằng
   chứng WATCH cho người duyệt plan cân nhắc. Research đầy đủ:
   `mike/agents/Taylor/research/insider_transaction_scoping_20260729.md`.
-- **EXTREME-regime gate** (paper `main` only, từ 07-01): checkpoint 07-28 kiểm lại 2026-08-04
-  (job `Taylor_20260804_124404`) — **CHƯA đủ điều kiện chuyển bước**. Evidence 15/20 phiên (đếm
-  bằng hàm production thật), nhưng **0/15 marker EXTREME từng bắn** — gate chưa từng bị thử thách
-  thật. Ước đủ 20 phiên ~2026-08-11 (evidence chạy lại từ 08-05 sau khi gỡ bug netting probe
-  07-28→08-04). Câu hỏi M5 (giá đông cứng 06-26→07-13) **giải xong**: chỉ chạm nhánh trigger (ii)
-  3-sigma (3 phiên 07-07/10/13), trigger (i) không bị ảnh hưởng vì đọc quote sống; đếm bảo thủ
-  trigger (i) 15/20, trigger (ii) 12/20. User quan sát "hiệu quả cho case PNJ" **KHÔNG xác nhận
-  được** — PNJ chưa từng nằm trong phạm vi thử nghiệm (0 dòng/0 marker); hệ thống không mua PNJ
-  nhờ vòng chọn mã lọc bỏ, không nhờ gate này — case 07-13 còn lộ ra gate **thất bại** (khớp lệnh
-  trước khi kịp chặn), giá trị thật của case là phơi ra lỗ hổng đã vá (`_floor_guard_buy`). Bắt
-  thêm 2 lỗi khai báo marker trong registry (tên không tồn tại + thiếu marker bản vá), đã sửa.
-  KHÔNG bật live cho tới khi đủ 20 phiên + có marker EXTREME thật đã qua thử thách.
+- **EXTREME-regime gate — ĐÃ LIVE từ 2026-08-22** (SpaceX + ZaloPay, user sign-off):
+  `extreme_regime_enabled=True` trong `overrides` của cả 2 account (`secrets/trading_bot_accounts.json`).
+  Gate chain 6/6 PASS (quant-skeptic CONFIRMED high sau fix 2 TZ-fragile selfcheck, commit `70acee62`).
+  Stress test `mike/agents/Taylor/stress_extreme_regime.py` 40/40 PASS (commit `08af2637`).
+  `probe_linger_live_gate` vẫn True (paper-only, chưa go-live — feature riêng).
+  History gate: paper `main` từ 07-01, checkpoint 07-28/08-04 (15/20 phiên, 0 marker EXTREME bắn),
+  gate chain hoàn tất 08-22 sau 21/21 TZ-independent selfcheck pass.
 - **Vol-scale buy chase-cap patch#3 — ĐÃ LIVE từ 2026-08-04** (`chase_cap_vol_scale_enabled=True`,
   k=2.0/ceil=0.04, commit `d4f667b` + mike `1396db13`, job `Taylor_20260804_124404`). Checkpoint
   07-28 kiểm lại: gate 1-3 PASS (80 lệnh BUY thật/13 phiên), gate 4 (real-fill vs proxy @50B)
@@ -44,13 +39,12 @@ Chi tiết đầy đủ từng mục: bus finding của Taylor + `kb/incidents/i
   commit ban đầu cũng bị classifier chặn — user cấp quyền tường minh mới qua được.
   **Mốc mở lại gate 4**: NAV live tiến gần 50 tỷ (theo dõi: gross lệnh/phiên vượt ~343tr).
 - **Sector sweep #10+**: chờ Mike dispatch.
-- **Fill-timing khung giờ** (BUY 11:15 / SELL open): edge thật đo được (+17.6bps BUY t=12.0,
-  +11.8bps SELL), KHÔNG flip `fill_timing_live_gate` — cần ≥5 phiên paper có BUY fill trong cửa sổ
-  + 0 reject + không lệnh treo → quant-skeptic → user sign-off (điều kiện chốt sau audit fill thật
-  `Taylor_20260709_101602`, phát hiện `execution_quality_review.py` từng đếm nhầm lệnh LIVE làm
-  "98% adherence" giả — evidence-rate thật ≈0 khi đó). Checkpoint tự nhiên ~cuối 07 **ĐÃ TỚI, CHƯA
-  XÁC NHẬN đủ điều kiện chưa** — cần Taylor kiểm tra số phiên đã đạt. Option: pilot ZaloPay trước
-  SpaceX — chưa quyết.
+- **Fill-timing khung giờ — ĐÃ LIVE từ 2026-08-22** (SpaceX + ZaloPay cả 2, user sign-off):
+  `fill_timing_live_gate=False` + `fill_timing_hybrid_live_gate=False` trong `overrides` cả 2 account.
+  Gate chain 5/5 PASS (quant-skeptic CONFIRMED high). Hybrid block schedule: `["11:00","11:15","13:00","13:15","13:30"]` ICT.
+  Edge: +17.6bps BUY (t=12.0), +11.8bps SELL. `probe_linger_live_gate` vẫn True (paper-only).
+  History: edge đo từ 07-09 (`Taylor_20260709_101602`), gate 5 PASS 08-22 sau ≥5 phiên paper BUY fill
+  + 0 reject + 4/5 phiên hybrid + selfcheck TZ 21/21.
 - **V2.5**: R&D-complete, DISABLED. Reminder 2026-07-07: Mike hỏi user go-ahead integration.
 - **DC-book (ConvergePort) NEUTRAL idle-cash waterfall** (paper `main` only, từ 07-06): thứ tự ưu
   tiên giải ngân **BAL/LAG (full trước) → DC book (double-confirm sector-lens BUY ∧ 8L rating≤2,
@@ -67,9 +61,7 @@ Chi tiết đầy đủ từng mục: bus finding của Taylor + `kb/incidents/i
   (3) cap gộp 0.15/tên (chống trùng DC↔custom30V); (4) liquidity floor 3B thay hard-exclude DHG.
   4 góc khác đã kiểm tra kỹ, không còn dư địa cải thiện — không cần backtest thêm cho chúng.
 
-## Checkpoint quá hạn — cập nhật 2026-08-04
-- EXTREME-regime gate: kiểm lại 08-04, 15/20 phiên, 0 marker bắn — CHƯA đủ điều kiện, ước đủ mẫu ~08-11.
-- Vol-scale chase-cap patch#3: **ĐÃ LIVE 2026-08-04** (xem mục ở trên) — đóng, không còn treo.
-- Fill-timing: 2/5 gate PASS (job Taylor_20260804_091703), vẫn bị chặn cấu trúc gate 4 (paper
-  không sinh được fill thật). Bug netting giết bằng chứng cả 3 chương trình từ 07-28 đã fix
-  (job Taylor_20260804_094514), evidence tích luỹ lại từ 08-05.
+## Checkpoint quá hạn — cập nhật 2026-08-22
+- **EXTREME-regime gate: ĐÃ LIVE 2026-08-22** (xem mục trên) — đóng.
+- **Fill-timing: ĐÃ LIVE 2026-08-22** (xem mục trên) — đóng.
+- Vol-scale chase-cap patch#3: **ĐÃ LIVE 2026-08-04** — đóng.
