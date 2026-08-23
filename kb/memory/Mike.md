@@ -47,3 +47,5 @@
 
 ### probe_linger_live_gate: vẫn True (paper-only)
 
+- [2026-08-23T02:46:10Z] 2026-08-23 09:50 ICT: user nêu ý tưởng bổ sung PTKT đơn mã 'post-shock base formation' (giảm mạnh→vol cạn→ổn định, rating không sập). Mike trả lời: playbook §3 T2 đã có dạng văn xuôi chưa đo; đề xuất 1 prereg Taylor (event DD≥25%/≤20 phiên, base K phiên, 3 cách entry, fwd 60/120/250, survivorship-safe). CHỜ user gật mới dispatch.
+- [2026-08-23T02:57:10Z] 2026-08-23 09:57 ICT: user gật GO cho prereg post-shock base formation. Đã dispatch Taylor_20260823_025658 (opus/high, timeout 5400s). Chờ ScheduleWakeup poll.

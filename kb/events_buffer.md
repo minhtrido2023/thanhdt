@@ -532,3 +532,17 @@
 - [2026-08-22T21:57:25Z] Wags/answer — selfcheck-red: mike/bin/notify_thread_argswap_selfcheck.py — recovered 2026-08-22: {"context": "selfcheck_baseline_diff tự đóng: ca đỏ này đã XANH trở lại", "file": "mike/bin/notify_thread_argswap_selfcheck.py", "artifact": "chạy lại lúc 2026-08-22T21:57:25Z bằng đúng required_env ⇒ PASS", "red_since": "2026-08-21T19:31:56Z", "was_status": "FAIL", "decided_by": "automation (bằng chứng chạy lại, không phải self-report)"}
 - [2026-08-22T21:57:25Z] Wags/answer — selfcheck-red: mike/bin/now_injection_selfcheck.sh — recovered 2026-08-22: {"context": "selfcheck_baseline_diff tự đóng: ca đỏ này đã XANH trở lại", "file": "mike/bin/now_injection_selfcheck.sh", "artifact": "chạy lại lúc 2026-08-22T21:57:25Z bằng đúng required_env ⇒ PASS", "red_since": "2026-08-21T19:31:56Z", "was_status": "FAIL", "decided_by": "automation (bằng chứng chạy lại, không phải self-report)"}
 - [2026-08-22T21:57:26Z] Wags/answer — selfcheck-red: mike/bin/ops_health_check_selfcheck.py — recovered 2026-08-22: {"context": "selfcheck_baseline_diff tự đóng: ca đỏ này đã XANH trở lại", "file": "mike/bin/ops_health_check_selfcheck.py", "artifact": "chạy lại lúc 2026-08-22T21:57:25Z bằng đúng required_env ⇒ PASS", "red_since": "2026-08-21T19:31:56Z", "was_status": "FAIL", "decided_by": "automation (bằng chứng chạy lại, không phải self-report)"}
+
+## Consolidation 2026-08-23T03:07:01Z
+- [2026-08-23T02:57:14Z] Taylor/heartbeat — Taylor_20260823_025658: {"status": "in_progress", "note": "đọc data_registry + playbook, chuẩn bị viết prereg post-shock base formation"}
+- [2026-08-23T02:57:58Z] Taylor/heartbeat — Taylor_20260823_025658: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20260823_025658", "source": "watcher"}
+- [2026-08-23T02:58:58Z] Taylor/heartbeat — Taylor_20260823_025658: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20260823_025658", "source": "watcher"}
+- [2026-08-23T02:59:59Z] Taylor/heartbeat — Taylor_20260823_025658: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20260823_025658", "source": "watcher"}
+- [2026-08-23T03:00:59Z] Taylor/heartbeat — Taylor_20260823_025658: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20260823_025658", "source": "watcher"}
+- [2026-08-23T03:01:59Z] Taylor/heartbeat — Taylor_20260823_025658: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20260823_025658", "source": "watcher"}
+- [2026-08-23T03:02:49Z] Taylor/heartbeat — Taylor_20260823_025658: {"status": "in_progress", "note": "prereg committed 1a3bf8b0; bắt đầu pull dữ liệu BQ + viết script event study"}
+- [2026-08-23T03:02:59Z] Taylor/heartbeat — Taylor_20260823_025658: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20260823_025658", "source": "watcher"}
+- [2026-08-23T03:03:59Z] Taylor/heartbeat — Taylor_20260823_025658: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20260823_025658", "source": "watcher"}
+- [2026-08-23T03:04:59Z] Taylor/heartbeat — Taylor_20260823_025658: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20260823_025658", "source": "watcher"}
+- [2026-08-23T03:05:59Z] Taylor/heartbeat — Taylor_20260823_025658: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20260823_025658", "source": "watcher"}
+- [2026-08-23T03:06:59Z] Taylor/heartbeat — Taylor_20260823_025658: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20260823_025658", "source": "watcher"}
