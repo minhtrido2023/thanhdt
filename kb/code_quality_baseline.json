@@ -1,5 +1,5 @@
 {
-  "_comment": "Baseline Tầng 1 code-quality (ruff, rule set hẹp F/E9/B006/B008 — xem pyproject.toml). Dùng bởi bin/code_quality_gate.sh (ratchet per-file, xem kb/projects/code-quality-review-plan-20260823.md §3). Đây KHÔNG phải nợ phải trả ngay — chỉ là điểm xuất phát; gate chỉ chặn khi số lỗi TĂNG so với số ở đây.",
+  "_comment": "Baseline Tầng 1 code-quality (ruff, rule set hẹp F/E9/B006/B008 — xem pyproject.toml). Dùng bởi bin/code_quality_gate.sh (ratchet per-file, xem kb/projects/code-quality-review-plan-20260823.md §3). Đây KHÔNG phải nợ phải trả ngay — chỉ là điểm xuất phát; gate chỉ chặn khi số lỗi TĂNG so với số ở đây. Key ngoài 3 scope built_from.scope (vd do gate ratchet thêm từ 1 worktree khác) được GIỮ NGUYÊN qua mỗi lần refresh — xem merge logic trong script build.",
   "built_from": {
     "job": "Wags_20260823_071251",
     "date": "2026-08-23",
@@ -15,8 +15,9 @@
       "bot_execute.py",
       "mike/bin/*.py"
     ],
-    "total_files": 143,
-    "total_errors": 37
+    "total_files_this_scope": 143,
+    "total_errors_this_scope": 37,
+    "kept_from_previous_outside_scope": 0
   },
   "by_rule": {
     "F401": 17,

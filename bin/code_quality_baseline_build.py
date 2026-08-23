@@ -6,9 +6,14 @@ trading_bot/*.py, bot_execute.py, mike/bin/*.py bằng ruff (rule set hẹp — 
 Tầng 2/3 dọn xong 1 đợt nợ); ratchet ngày-thường do bin/code_quality_gate.sh tự cập nhật
 per-file, không cần chạy lại script này.
 
+MERGE, không overwrite: key nào không thuộc 3 scope quét ở đây (vd do gate ratchet thêm từ 1
+worktree khác, hoặc 1 scope tương lai) được GIỮ NGUYÊN, không bị xoá — chỉ key thuộc scope này
+mới bị ghi đè bằng số đo mới nhất.
+
 Usage: DNA_PYEXE mike/bin/code_quality_baseline_build.py
 """
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -16,7 +21,7 @@ from pathlib import Path
 WC_ROOT = Path(__file__).resolve().parents[2]
 MIKE_ROOT = WC_ROOT / "mike"
 OUT = MIKE_ROOT / "kb" / "code_quality_baseline.json"
-RUFF = "/home/trido/thanhdt/wc_venv/bin/ruff"
+RUFF = os.environ.get("CODE_QUALITY_RUFF", "/home/trido/thanhdt/wc_venv/bin/ruff")
 
 
 def gather_targets():
@@ -37,7 +42,8 @@ def ruff_version():
 def main():
     targets = gather_targets()
     proc = subprocess.run(
-        [RUFF, "check", "--no-cache", "--output-format=json", *[str(f) for f in targets]],
+        [RUFF, "check", "--no-cache", "--force-exclude", "--output-format=json",
+         *[str(f) for f in targets]],
         cwd=str(WC_ROOT),
         capture_output=True,
         text=True,
@@ -55,12 +61,22 @@ def main():
             per_file[rp] += 1
         by_rule[f["code"]] = by_rule.get(f["code"], 0) + 1
 
+    try:
+        existing = json.loads(OUT.read_text())
+    except (FileNotFoundError, json.JSONDecodeError):
+        existing = {}
+    merged_files = dict(existing.get("files", {}))
+    kept = len(merged_files) - len(set(merged_files) & set(per_file))
+    merged_files.update(per_file)
+
     baseline = {
         "_comment": (
             "Baseline Tầng 1 code-quality (ruff, rule set hẹp F/E9/B006/B008 — xem "
             "pyproject.toml). Dùng bởi bin/code_quality_gate.sh (ratchet per-file, xem "
             "kb/projects/code-quality-review-plan-20260823.md §3). Đây KHÔNG phải nợ phải trả "
-            "ngay — chỉ là điểm xuất phát; gate chỉ chặn khi số lỗi TĂNG so với số ở đây."
+            "ngay — chỉ là điểm xuất phát; gate chỉ chặn khi số lỗi TĂNG so với số ở đây. "
+            "Key ngoài 3 scope built_from.scope (vd do gate ratchet thêm từ 1 worktree khác) "
+            "được GIỮ NGUYÊN qua mỗi lần refresh — xem merge logic trong script build."
         ),
         "built_from": {
             "job": "Wags_20260823_071251",
@@ -68,14 +84,18 @@ def main():
             "ruff_version": ruff_version(),
             "rule_set": ["F", "E9", "B006", "B008"],
             "scope": ["trading_bot/*.py", "bot_execute.py", "mike/bin/*.py"],
-            "total_files": len(per_file),
-            "total_errors": sum(per_file.values()),
+            "total_files_this_scope": len(per_file),
+            "total_errors_this_scope": sum(per_file.values()),
+            "kept_from_previous_outside_scope": kept,
         },
         "by_rule": dict(sorted(by_rule.items(), key=lambda kv: -kv[1])),
-        "files": dict(sorted(per_file.items())),
+        "files": dict(sorted(merged_files.items())),
     }
     OUT.write_text(json.dumps(baseline, ensure_ascii=False, indent=2) + "\n")
-    print(f"wrote {OUT} — {len(per_file)} files, {sum(per_file.values())} errors total")
+    print(
+        f"wrote {OUT} — {len(per_file)} file trong scope ({sum(per_file.values())} lỗi), "
+        f"giữ nguyên {kept} key ngoài scope"
+    )
 
 
 if __name__ == "__main__":
