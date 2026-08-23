@@ -60,10 +60,18 @@ repos:
       # 2026-08-23, xem kb/projects/code-quality-review-plan-20260823.md §3). ruff (rule set
       # hẹp F/E9/B006/B008, KHÔNG style) trên file .py thay đổi trong commit, RATCHET so với
       # kb/code_quality_baseline.json của chính file đó — chỉ chặn khi số lỗi TĂNG, nợ cũ
-      # không bắt sửa ngay. Trong repo mike/ này thực tế chỉ chạm bin/*.py (trading_bot/ và
-      # bot_execute.py nằm ở repo WorkingClaude khác, ngoài phạm vi commit ở đây).
+      # không bắt sửa ngay.
+      #
+      # `files` PHẢI khớp đúng phạm vi đã seed trong kb/code_quality_baseline.json
+      # (bin/code_quality_baseline_build.py chỉ quét trading_bot/*.py, bot_execute.py,
+      # mike/bin/*.py — 2 nhóm đầu ở repo WorkingClaude khác, không có pre-commit). Trước
+      # 2026-08-23 (sau vòng vá) pattern là '\.py$' — khớp CẢ 444 file .py của repo mike, trong
+      # đó ~115 file ngoài bin/ (vd agents/Taylor/anomaly_scan.py) có nợ ruff sẵn nhưng KHÔNG
+      # có trong baseline ⇒ baseline ngầm định 0 ⇒ hard-block oan file không sửa gì, trúng agent
+      # khác. Xem arch-review job Wags_20260823_071251 (round 2). Mở rộng scope thật (không chỉ
+      # đổi regex) thì phải rebuild baseline cho toàn bộ .py trước, không chỉ nới `files`.
       - id: code-quality-gate
         name: ruff ratchet (F/E9/B006/B008, per-file so với baseline — xem bin/code_quality_gate.sh)
         entry: bin/code_quality_gate.sh
         language: system
-        files: '\.py$'
+        files: '^bin/.*\.py$'

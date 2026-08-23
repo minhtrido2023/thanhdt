@@ -81,7 +81,13 @@ declare -A BASELINE_KEY_OF_ABS=()
 for f in "$@"; do
   [ -f "$f" ] || continue
   abs="$(cd "$(dirname "$f")" && pwd)/$(basename "$f")"
-  rel_in_repo="${abs#"$MIKE_ROOT"/}"
+  case "$abs" in
+    "$MIKE_ROOT"/*) rel_in_repo="${abs#"$MIKE_ROOT"/}" ;;
+    *)
+      echo "⚠️  code_quality_gate: $abs nằm ngoài MIKE_ROOT ($MIKE_ROOT) — bỏ qua, không tính baseline-key." >&2
+      continue
+      ;;
+  esac
   if is_excluded "$rel_in_repo"; then
     echo "  ⏭️  $rel_in_repo — loại trừ (R&D/test artifact, xem pyproject.toml extend-exclude)"
     continue
@@ -141,10 +147,12 @@ for key, new_n in to_update.items():
 PYEOF
 )"
 
+declare -a BLOCK_LINES=()
 while IFS='|' read -r kind rel a b; do
   [ -z "${kind:-}" ] && continue
   if [ "$kind" = "BLOCK" ]; then
     BLOCKED=$((BLOCKED + 1))
+    BLOCK_LINES+=("$rel|$a|$b")
     echo "  🔴 $rel: ruff lỗi $b (baseline $a) — TĂNG so với baseline [HARD-BLOCK] (code_quality_gate.sh)"
   fi
 done <<< "$result"
@@ -159,6 +167,11 @@ if [ "$BLOCKED" -gt 0 ] && [ "${MIKE_CQ_GATE:-block}" = "block" ]; then
 elif [ "$BLOCKED" -gt 0 ]; then
   echo
   echo "⚠️  code_quality_gate: $BLOCKED file tăng lỗi ruff (downgraded — MIKE_CQ_GATE=warn), commit vẫn qua."
+  echo "  Baseline SẼ được nâng lên số lỗi mới (ratchet coi nợ mới này là hợp lệ từ nay):"
+  for line in "${BLOCK_LINES[@]}"; do
+    IFS='|' read -r brel ba bb <<< "$line"
+    echo "    $brel: baseline $ba → $bb"
+  done
 fi
 
 # Bỏ qua auto-update baseline nếu file baseline đã có sửa đổi CHƯA STAGE từ trước (vd vừa chạy
@@ -204,7 +217,7 @@ if [ "$status_line" = "CHANGED" ] && [ -f "$TMP_BASELINE" ]; then
   # BASELINE nằm dưới kb/ của CHÍNH repo đang chạy (canonical hoặc worktree) — `git -C
   # "$MIKE_ROOT" add` luôn đúng repo vì MIKE_ROOT giờ tính bằng git rev-parse, không phải suy
   # diễn đường dẫn tĩnh.
-  git -C "$MIKE_ROOT" add "$BASELINE" 2>/dev/null || true
+  git -C "$MIKE_ROOT" add "$BASELINE" || echo "⚠️  code_quality_gate: git add baseline thất bại — baseline đã ghi nhưng CHƯA stage, commit có thể lệch khỏi HEAD." >&2
 else
   rm -f "$TMP_BASELINE"
 fi
