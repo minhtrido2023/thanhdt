@@ -5946,3 +5946,38 @@ sập tiếp ≥30% trong một năm. Gross, chưa trừ phí/slippage/thuế.
 **KHÔNG wire.** Khuyến nghị: đóng sổ nhánh "base formation như tín hiệu định lượng"; giữ playbook
 §3 tranche T2 như **kỷ luật chia tranche hạ giá vốn**, không phải tín hiệu tăng xác suất thắng
 (sửa file KB ⇒ ghi `.proposed` theo §13, cần Mike/user duyệt).
+
+## KẾT QUẢ THAM CHIẾU phiên 2026-08-23 — Phase 1 margin theo KHOẢNG CÁCH ĐỊNH GIÁ (NO-GO)
+
+Job `Taylor_20260823_120317` · RESEARCH-ONLY, production **không bị sửa**.
+Prereg `e27e5ec1` (commit TRƯỚC khi chạy) · kết quả `bd834070` · verify `95af3268`.
+Artifact: `mike/agents/Taylor/research/margin_valuation_spread_phase1_20260823/`.
+
+Harness: `engine_p1.py` (= `exp_margin_kelly/p5_engine/engine_lever.py` + 2 hunk khai trước),
+lệnh pin R3 nguyên văn + `BQ_LOCAL_CACHE=data/bq_cache_asof20260729_postrestate`,
+`BQ_CACHE_THREADS=1`, `$DNA_PYEXE`. 27 leg (9 biến thể × 3 lãi vay) + 5 leg LOO + 2 leg validation.
+
+**Điều kiện tin cậy (cả 2 PASS trước khi đọc số):** control `f=1,0` tái lập TUYỆT ĐỐI pin R3
+(CAGR 28,8627% / MaxDD −17,7851% / Calmar 1,6229 / NAV cuối 1.178,0099B / IS 27,0925% / OOS 30,4786%);
+`engine_p1.py` INERT vs `E125_f13` (2026-08-03) = **0 VND / 3.107 phiên**. `self-check 0 VND` mọi leg.
+
+**Số chính @ lãi vay THẬT 12,5%/năm (gói 1840), dCAGR so BASE `f=1,0`:**
+V0 (production `dd52<=-20%`, f=1,3) **+0,586pp** · V1 +0,540 · V2 +0,137 (N=1) · V3 +0,663 ·
+V4 +0,642 · V5 +0,137 (N=1) · V6 +0,135 (N=1, f=1,5) · V7 +0,578 · V8 +0,586 (≡ V0, **0 VND**).
+dMaxDD xấu nhất −0,040pp. **V7 − V0 = −0,0086pp CAGR, −0,0179pp IS** ⇒ cổng G1 **FAIL** ở cả 3 mức lãi vay.
+
+**Margin call (maintenance 40% / liquidation 30%, số THẬT gói 1840):** 0 call / 0 liquidation trên
+27 leg; equity_ratio mỏng nhất **87,24%** (2014-05-13, V3) — cách ngưỡng gọi ký quỹ 47,24pp.
+
+**PBO/CSCV** (N_trials = 8): 0,071 / 0,124 / 0,080 tại S = 8/12/16.
+
+> ⚠️ **THƯỚC ĐO NHIỄU — con số quan trọng nhất của mục này, phải trích kèm mọi so sánh trong họ
+> backtest full-run V2.4:** biên độ nhiễu path của harness đo được = **0,3854pp CAGR**
+> (V3 vi phạm đơn điệu theo lãi vay: +0,2779pp@10% → +0,6633pp@12,5%, không thể về kinh tế; kiểm
+> chứng độc lập: đóng góp biên của ĐÚNG 1 sự kiện E6 đổi dấu +0,3751 → −0,0211pp). Đã loại trừ lỗi
+> cấu hình (`leveraudit.csv` xác nhận cùng 5 sự kiện, `loan_vnd` lệch < 0,05%).
+> **Mọi chênh lệch < ~0,4pp CAGR giữa hai cấu hình trong họ này nằm DƯỚI ngưỡng phân giải của công cụ.**
+
+**Verdict: NO-GO** — 3/6 cổng prereg FAIL (G1, G3, G6); G2 chỉ qua tầm thường vì chính control cũng qua.
+quant-skeptic **CONFIRMED (high)**, `mike/logs/verify_20260823_132019_3012254.log`.
+Đóng hướng, không wire, không shadow-monitor cho cơ chế sizing. `capit_margin_lever` giữ nguyên.
