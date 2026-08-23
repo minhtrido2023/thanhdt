@@ -883,3 +883,6 @@
 ## Consolidation 2026-08-23T17:40:51Z
 - [2026-08-23T17:39:48Z] Mike/heartbeat — Mike_20260823_173847: {"status": "still_running", "elapsed_min": 1, "job_id": "Mike_20260823_173847", "source": "watcher"}
 - [2026-08-23T17:40:48Z] Mike/heartbeat — Mike_20260823_173847: {"status": "still_running", "elapsed_min": 2, "job_id": "Mike_20260823_173847", "source": "watcher"}
+
+## Consolidation 2026-08-23T17:41:23Z
+- [2026-08-23T17:41:17Z] Mike/finding — daily-retro-finalized-2026-08-23: {"status": "logged", "file": "kb/incidents/retro/retro-2026-08-23.md", "n_incidents": 2, "verified_by": "Wags", "verify_result": "GAPS_FOUND_1_minor_fixed", "gap_fixed": "checkpoint c9cc670c date corrected 2026-06-26 -> 2026-06-21", "posted_to": "trading_daily", "working_memory": "cleaned", "consolidate": "ran, KB v2500"}
