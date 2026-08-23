@@ -1,0 +1,22 @@
+# Ruff config — Tầng 1 code-quality gate (kb/projects/code-quality-review-plan-20260823.md §3).
+#
+# Rule set CỐ Ý hẹp: chỉ lỗi gần như chắc chắn là bug thật (import thừa, tên chưa định nghĩa,
+# mutable default argument…), KHÔNG bật style (độ dài dòng, quote-style, import-order…) — đó là
+# nhiễu, không phải bug, và tạo áp lực sửa code không cần sửa (user mandate 2026-08-23).
+[tool.ruff]
+target-version = "py312"
+extend-exclude = [
+    "test_*.py",
+    "exp_*.py",
+    "probe_*.py",
+    "stress_*.py",
+    "agents/*/research",
+    "archive",
+    "wc_venv",
+]
+
+[tool.ruff.lint]
+# F = pyflakes (F401 import thừa, F811 định nghĩa đè, F821 tên chưa định nghĩa, F841 biến
+#     không dùng); E9 = lỗi cú pháp; B006/B008 = mutable default argument (chỉ 2 rule trong
+#     nhóm flake8-bugbear "B", không bật cả nhóm).
+select = ["F", "E9", "B006", "B008"]
