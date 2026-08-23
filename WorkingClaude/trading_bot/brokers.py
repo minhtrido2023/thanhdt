@@ -175,12 +175,17 @@ class OrderUpdate:
 
     @property
     def is_dead(self):
-        """Lệnh không còn sống (hủy/từ chối/khớp hết) — best-effort theo status string."""
+        """Lệnh không còn sống (hủy/từ chối/khớp hết) — best-effort theo status string.
+
+        KHÔNG khớp substring đơn ký tự `"f"`/`"x"` (đã gỡ — cùng lỗi mà `PHSFlashOrderUpdate`
+        tự nhận ở docstring lớp con: một status CÒN SỐNG như "Pending confirmation" chứa 'f'
+        sẽ bị coi là chết). `DNSEBroker`/`PHSBroker` dùng thẳng lớp này qua `poll_orders()` nên
+        heuristic phải đúng ở đây, không chỉ ở subclass PHS FlashAPI."""
         s = self.status.lower()
         if "partial" in s:        # PartiallyFilled (DNSE) vẫn đang sống
             return False
         return any(k in s for k in ("cancel", "hủy", "huy", "reject", "từ chối",
-                                    "fill", "khớp hết", "matchall", "expire", "f", "x"))
+                                    "fill", "khớp hết", "matchall", "expire"))
 
 
 # --------------------------------------------------------------------- base
@@ -529,6 +534,43 @@ class DNSEBroker(BrokerBase):
                        "cashavailable", "totalcash", "cash", "balance",
                        default=0))
         return v or 0.0
+
+    def _cash_totalcash_minus_debt(self):
+        """`totalCash − totalDebt` (§25 "SỞ HỮU") từ payload `balances` thô — cơ sở đúng cho
+        NAV/get_nav(), KHÁC get_cash() (§25 "TIÊU ĐƯỢC NGAY" — availableCash-family, thiếu
+        tiền bán chờ về/cổ tức phải thu). None nếu DNSE không trả đủ hai field, HOẶC nếu cả
+        ba field tiền (totalCash/totalDebt/availableCash) đều = 0 (bẫy fail-closed §25/
+        `park_holdings._cash_fields_all_zero` — DNSE thỉnh thoảng trả block toàn 0 do lỗi
+        API tạm thời, sự cố thật 2026-07-27, KHÔNG phải tiền về 0 thật)."""
+        bal = self.client.balances(self.account_id)
+        self._log_raw("balances", bal)
+        row = bal[0] if isinstance(bal, list) and bal else bal
+        if isinstance(row, dict) and isinstance(row.get("stock"), dict):
+            row = row["stock"]
+        tc = _fnum(qget(row, "totalcash", default=None))
+        td = _fnum(qget(row, "totaldebt", default=None))
+        if tc is None or td is None:
+            return None
+        av = _fnum(qget(row, "availablecash", default=None))
+        if tc == 0 and td == 0 and (av is None or av == 0):
+            return None
+        return tc - td
+
+    def get_nav(self):
+        """NAV = totalCash−totalDebt (§25 cơ sở "SỞ HỮU") + market value vị thế — KHÔNG dùng
+        `get_cash()` làm cơ sở NAV (đó là sức mua tức thời, coding_guidelines.md §25). Field
+        tiền thiếu ⇒ rơi về `get_cash()` (hành vi cũ) thay vì raise, vì get_nav() không có
+        hợp đồng fail-closed như compute_active_nav.py."""
+        cash = self._cash_totalcash_minus_debt()
+        if cash is None:
+            cash = self.get_cash()
+        pos = self.get_positions()
+        mv = 0.0
+        for sym, p in pos.items():
+            q = self.get_quote(sym)
+            px = (q.last or q.ref) if q and q.ok() else 0
+            mv += p["total"] * (px or 0)
+        return cash + mv
 
     def get_max_buy_qty(self, symbol, price, loan_package_id=None):
         """Sức mua tối đa theo mã+giá qua GET /accounts/{acc}/ppse (qmaxBuy). ppse đã tính

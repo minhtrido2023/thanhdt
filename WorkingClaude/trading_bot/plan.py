@@ -1965,7 +1965,14 @@ def lever_live_preflight(plan, account_label, broker, mode, status_path=None,
                       f"⇒ không có mốc nào để đối chiếu với NAV sống")
     excluded = set(excluded_tickers or [])
     try:
-        cash = float(broker.get_cash() or 0)
+        # §25 "SỞ HỮU": neo NAV sống PHẢI dùng totalCash−totalDebt, KHÔNG `get_cash()`
+        # (đó là §25 "TIÊU ĐƯỢC NGAY" — thiếu tiền bán chờ về/cổ tức phải thu, đúng lớp bug
+        # đã sửa ở compute_park_trim.py 2026-08-09 + compute_active_nav.py 2026-08-10).
+        # Không có method (broker không phải DNSEBroker) ⇒ rơi về get_cash() — CHỈ làm
+        # nav_live nhỏ hơn thật, tức fail-safe theo đúng chiều "chỉ gỡ, không bao giờ cấp".
+        _cash_basis = getattr(broker, "_cash_totalcash_minus_debt", None)
+        _cash_val = _cash_basis() if callable(_cash_basis) else None
+        cash = float(_cash_val if _cash_val is not None else (broker.get_cash() or 0))
         pos = broker.get_positions() or {}
         mv = excl_mv = 0.0
         missing = []
