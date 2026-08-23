@@ -167,7 +167,8 @@ if [ "$BLOCKED" -gt 0 ] && [ "${MIKE_CQ_GATE:-block}" = "block" ]; then
 elif [ "$BLOCKED" -gt 0 ]; then
   echo
   echo "⚠️  code_quality_gate: $BLOCKED file tăng lỗi ruff (downgraded — MIKE_CQ_GATE=warn), commit vẫn qua."
-  echo "  Baseline SẼ được nâng lên số lỗi mới (ratchet coi nợ mới này là hợp lệ từ nay):"
+  echo "  Nếu baseline chưa có sửa đổi chưa-stage khác, nó SẼ được nâng lên số lỗi mới bên dưới"
+  echo "  (ratchet coi nợ mới này là hợp lệ từ nay — xem dòng 'baseline updated'/'bỏ qua auto-update' ở cuối để biết có nâng thật hay không):"
   for line in "${BLOCK_LINES[@]}"; do
     IFS='|' read -r brel ba bb <<< "$line"
     echo "    $brel: baseline $ba → $bb"

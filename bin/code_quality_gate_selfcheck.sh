@@ -12,13 +12,26 @@
 #   (a) file có baseline=0, thêm F821 mới → gate PHẢI CHẶN (exit non-zero)
 #   (b) file sạch, không lỗi mới → gate PHẢI CHO QUA (exit 0)
 #   (c) file trong danh sách loại trừ (test_*.py) có F821 → gate PHẢI BỎ QUA (exit 0)
-# +2 ca phụ (e, f) thêm sau arch-review round 2 (job Wags_20260823_071251): (e) đường
-# auto-update+git-add PHẢI thực sự chạy nhánh đó (không rơi vào nhánh "baseline dirty ⇒ bỏ
-# qua"); (f) commit từ 1 git worktree lồng PHẢI ra baseline-key "mike/<rel>", không lẫn tên
-# thư mục worktree — khoá hồi quy cho đúng bug mà round 2 vừa vá.
+# +4 ca phụ thêm sau arch-review (job Wags_20260823_071251):
+#   (e) đường auto-update+git-add PHẢI thực sự chạy nhánh đó (không rơi vào nhánh "baseline
+#       dirty ⇒ bỏ qua") — round 2.
+#   (f) commit từ 1 git worktree lồng PHẢI ra baseline-key "mike/<rel>", không lẫn tên thư mục
+#       worktree — round 2.
+#   (g) MIKE_CQ_GATE=warn PHẢI in tường minh baseline nâng lên (không chỉ âm thầm ghi JSON) —
+#       round 3.
+#   (h) file NGOÀI MIKE_ROOT PHẢI bị bỏ qua có cảnh báo, không sinh baseline-key rác — round 3.
+#
+# HERMETIC: script này tự `git init`/`commit`/`worktree add` trong SANDBOX — `git -C <dir>` đổi
+# cwd nhưng KHÔNG override GIT_DIR/GIT_WORK_TREE/GIT_INDEX_FILE nếu biến đó đã có sẵn trong môi
+# trường gọi (vd tự chạy selfcheck NÀY từ bên trong một git hook khác đang set GIT_DIR). Nếu
+# không unset, mọi lệnh git bên dưới có thể âm thầm thao tác lên REPO THẬT của caller thay vì
+# sandbox — bug thật bắt được ở arch-review round 3 (tái hiện: GIT_DIR=<repo lạ>/.git bash
+# code_quality_gate_selfcheck.sh ghi 2 commit thật vào repo lạ mà vẫn in "7/7 ca đúng").
 #
 # Usage: bash mike/bin/code_quality_gate_selfcheck.sh   (exit 0 = tất cả ca PASS)
 set -uo pipefail
+unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE GIT_COMMON_DIR GIT_OBJECT_DIRECTORY \
+      GIT_ALTERNATE_OBJECT_DIRECTORIES
 
 REAL_MIKE="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 REAL_WC="$(cd "$REAL_MIKE/.." && pwd)"
@@ -166,8 +179,57 @@ else
 fi
 
 echo
+echo "--- (g, phụ) MIKE_CQ_GATE=warn: PHẢI in tường minh baseline nâng lên, không chỉ âm thầm ghi JSON ---"
+write_baseline "mike/bin/warn_target.py=0"
+cat > "$WC/mike/bin/warn_target.py" <<'PYEOF'
+def broken_warn():
+    return undefined_name_in_warn_case + 1
+PYEOF
+# $WC/mike đã là git repo thật từ ca (e)/(f) — write_baseline vừa rồi ghi đè baseline.json làm
+# nó DIRTY so với commit gần nhất, mà gate.sh có nhánh "baseline dirty ⇒ bỏ qua auto-update"
+# (đúng thiết kế, tránh đụng cơ chế stash của pre-commit) — phải commit lại baseline SẠCH
+# trước, nếu không ca này sẽ rơi nhầm vào nhánh dirty-skip và never thấy update thật.
+git -C "$WC/mike" add -A
+git -C "$WC/mike" commit -q -m "seed warn case"
+out_g="$(cd "$WC" && MIKE_CQ_GATE=warn bash mike/bin/code_quality_gate.sh "$WC/mike/bin/warn_target.py" 2>&1)"
+rc_g=$?
+baseline_after_g="$(cat "$WC/mike/kb/code_quality_baseline.json")"
+if [ "$rc_g" -eq 0 ] \
+   && grep -q 'mike/bin/warn_target.py: baseline 0 → 1' <<<"$out_g" \
+   && grep -q '"mike/bin/warn_target.py": 1' <<<"$baseline_after_g"; then
+  echo "PASS  warn mode: exit 0, in rõ 'baseline 0 → 1', baseline JSON cũng nâng lên 1"
+else
+  printf 'FAIL  %-70s got exit=%s\n' "MIKE_CQ_GATE=warn in rõ + nâng baseline" "$rc_g"
+  sed 's/^/        | /' <<<"$out_g"
+  echo "        | baseline sau: $baseline_after_g"
+  FAILS=$((FAILS + 1))
+fi
+
+echo
+echo "--- (h, phụ) file NGOÀI MIKE_ROOT -> PHẢI bỏ qua có cảnh báo, KHÔNG sinh baseline-key rác ---"
+OUTSIDE_DIR="$SANDBOX/outside"
+mkdir -p "$OUTSIDE_DIR"
+cat > "$OUTSIDE_DIR/rogue.py" <<'PYEOF'
+def rogue():
+    return undefined_name_outside_root + 1
+PYEOF
+baseline_before_h="$(cat "$WC/mike/kb/code_quality_baseline.json")"
+out_h="$(cd "$WC" && bash mike/bin/code_quality_gate.sh "$OUTSIDE_DIR/rogue.py" 2>&1)"
+rc_h=$?
+baseline_after_h="$(cat "$WC/mike/kb/code_quality_baseline.json")"
+if [ "$rc_h" -eq 0 ] \
+   && grep -q 'nằm ngoài MIKE_ROOT' <<<"$out_h" \
+   && [ "$baseline_before_h" = "$baseline_after_h" ]; then
+  echo "PASS  file ngoài MIKE_ROOT: exit 0, có cảnh báo, baseline không đổi (không sinh key rác)"
+else
+  printf 'FAIL  %-70s got exit=%s\n' "file ngoài MIKE_ROOT bị bỏ qua an toàn" "$rc_h"
+  sed 's/^/        | /' <<<"$out_h"
+  FAILS=$((FAILS + 1))
+fi
+
+echo
 if [ "$FAILS" -eq 0 ]; then
-  echo "=== SELFCHECK OK — 7/7 ca đúng ==="
+  echo "=== SELFCHECK OK — 9/9 ca đúng ==="
   exit 0
 fi
 echo "=== SELFCHECK FAIL — $FAILS ca sai ==="
