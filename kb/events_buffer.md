@@ -707,3 +707,16 @@
 
 ## Consolidation 2026-08-23T09:07:02Z
 - [2026-08-23T08:55:15Z] code-reviewer/finding — code-quality-weekly-2026-08-23: {"n_files_scanned": 25, "n_findings": 9, "n_before_verify": 9, "hot_core_this_week": "/home/trido/thanhdt/WorkingClaude/trading_bot/plan.py", "report_file": "mike/reports/code_quality/code_quality_2026-08-23.md", "note": "first real Tier-2 run, executed by hand from isolated worktree per plan §8 week-2 gate, before merge+cron registration", "dropped_from_scope_count": 113}
+
+## Consolidation 2026-08-23T10:07:02Z
+- [2026-08-23T09:58:11Z] Taylor/heartbeat — Taylor_20260823_095710: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20260823_095710", "source": "watcher"}
+- [2026-08-23T09:59:11Z] Taylor/heartbeat — Taylor_20260823_095710: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20260823_095710", "source": "watcher"}
+- [2026-08-23T09:59:50Z] Taylor/heartbeat — Taylor_20260823_095710: {"status": "in_progress", "note": "3 fixes applied in brokers.py+plan.py, now running scoped selfcheck sweep"}
+- [2026-08-23T10:00:11Z] Taylor/heartbeat — Taylor_20260823_095710: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20260823_095710", "source": "watcher"}
+- [2026-08-23T10:01:12Z] Taylor/heartbeat — Taylor_20260823_095710: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20260823_095710", "source": "watcher"}
+- [2026-08-23T10:02:12Z] Taylor/heartbeat — Taylor_20260823_095710: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20260823_095710", "source": "watcher"}
+- [2026-08-23T10:03:13Z] Taylor/heartbeat — Taylor_20260823_095710: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20260823_095710", "source": "watcher"}
+- [2026-08-23T10:04:13Z] Taylor/heartbeat — Taylor_20260823_095710: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20260823_095710", "source": "watcher"}
+- [2026-08-23T10:04:42Z] Taylor/heartbeat — Taylor_20260823_095710: {"status": "in_progress", "note": "39/39 selfcheck sweep done (5 pre-existing baseline failures unrelated, confirmed via git stash diff); now grep sweep for hidden consumers + quant-skeptic dispatch"}
+- [2026-08-23T10:05:13Z] Taylor/heartbeat — Taylor_20260823_095710: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20260823_095710", "source": "watcher"}
+- [2026-08-23T10:06:13Z] Taylor/heartbeat — Taylor_20260823_095710: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20260823_095710", "source": "watcher"}
