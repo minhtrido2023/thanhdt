@@ -379,6 +379,74 @@ def get_neutral_base_rate():
     return val
 
 
+_MSPREAD_CACHE = {"t": 0.0, "val": None}
+
+
+def get_margin_spread():
+    """EY_med (median 1/PE của universe_pit, point-in-time) − LÃI VAY THẬT, cached 15 phút.
+
+    **Lãi vay KHÔNG hardcode ở đây.** Đọc từ `data/trading_rules.json`
+    ::capit_margin_lever.borrow_rate_annual = gói **1840 RocketX**, `interest_rate` 12,5%/năm,
+    xác nhận trực tiếp qua DNSE API ngày **2026-08-23** (job Mafee_20260823_083327; ghi ở
+    `kb/data_registry/trading-bot/dnse_openapi_v2_calling_guideline.md`, cùng maintenance 40%
+    / liquidation 30%). Số này CÓ THỂ đổi khi DNSE đổi biểu phí — đổi ở trading_rules.json là
+    dòng report tự đổi theo, không có bản sao thứ hai để lệch.
+
+    Universe = `tav2_mike.universe_pit` (CANONICAL point-in-time). PE lấy từ `tav2_bq.ticker`
+    — lưu ý PE/DY ở bảng này là tỷ số tính trên giá THÔ `Price`, không phải `Close` điều chỉnh
+    (`kb/data_registry/price-volume/ticker_close_vs_price_dividend_adj.md`).
+
+    ⚠️ **THUẦN HIỂN THỊ — theo mandate, KHÔNG phụ thuộc kết quả nghiên cứu.** Dòng này KHÔNG
+    nối vào sizing, KHÔNG là cổng, KHÔNG ghi vào trading_rules.json. Nó là shadow-log để đội
+    quan sát khoảng cách giữa lợi suất thị trường và chi phí vốn theo thời gian. Cổng đòn bẩy
+    duy nhất đang chạy vẫn là `capit_margin_lever` (dd52<=-20%, f=1,3) — spread không tham gia.
+
+    None khi bất kỳ khâu nào hỏng ⇒ caller bỏ dòng, không crash."""
+    if _MSPREAD_CACHE["val"] is not None and (time.time() - _MSPREAD_CACHE["t"]) < 900:
+        return _MSPREAD_CACHE["val"]
+    val = None
+    try:
+        import json
+        with open(os.path.join(W, "data", "trading_rules.json"), encoding="utf-8") as f:
+            rate = float(json.load(f)["capit_margin_lever"]["borrow_rate_annual"]) * 100.0
+        d = _bq("""
+            WITH last_d AS (SELECT MAX(time) AS d FROM `tav2_mike.universe_pit` WHERE in_universe),
+            uni AS (SELECT ticker FROM `tav2_mike.universe_pit`, last_d
+                    WHERE in_universe AND time = last_d.d)
+            SELECT last_d.d AS asof, COUNT(*) AS n,
+                   COUNTIF(t.PE > 0) AS n_pe,
+                   APPROX_QUANTILES(IF(t.PE > 0, 100/t.PE, NULL), 100)[OFFSET(50)] AS ey_med_pct
+            FROM `tav2_bq.ticker` t JOIN uni USING (ticker), last_d
+            WHERE t.time = last_d.d
+            GROUP BY asof""", max_rows=5)
+        if len(d) and pd.notna(d.iloc[0].get("ey_med_pct")):
+            r = d.iloc[0]
+            if int(r["n_pe"]) >= 30:            # fail-safe: mẫu mỏng thì không hiển thị
+                ey = float(r["ey_med_pct"])
+                val = {"asof": str(r["asof"])[:10], "ey_med": ey, "rate": rate,
+                       "spread": ey - rate, "n": int(r["n"]), "n_pe": int(r["n_pe"])}
+    except Exception as e:
+        import sys as _sys
+        print(f"[dna_report] margin_spread skipped (fail-safe): {e}", file=_sys.stderr)
+    _MSPREAD_CACHE["t"] = time.time(); _MSPREAD_CACHE["val"] = val
+    return val
+
+
+def build_margin_spread_line(html=True):
+    """Shadow-log MỘT DÒNG: lợi suất cổ phiếu median vs chi phí vay thật. **DISPLAY-ONLY**
+    (xem docstring `get_margin_spread`). None khi lỗi ⇒ caller bỏ dòng."""
+    v = get_margin_spread()
+    if not v:
+        return None
+    B = (lambda s: f"<b>{s}</b>") if html else (lambda s: s)
+    sp = v["spread"]
+    badge = "🟢" if sp >= 0 else ("🟡" if sp >= -2.0 else "🔴")
+    asof = f"[dữ liệu tới {v['asof']}, {v['n_pe']}/{v['n']} mã có PE>0]"
+    asof = f"<i>{asof}</i>" if html else asof
+    return (f"Spread định giá: {badge} EY median {v['ey_med']:.2f}% − lãi vay {v['rate']:.1f}% "
+            f"= {B(f'{sp:+.2f}pp')} · chỉ hiển thị, không tác động sizing/gate  {asof}")
+
+
 def build_neutral_base_line(html=True):
     """One-line unconditional NEUTRAL→BEAR/CRISIS historical base-rate, shared by the
     dna_report NOW block and eod_trading_report.sh. None when not NEUTRAL / data failure
