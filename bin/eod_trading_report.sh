@@ -89,6 +89,17 @@ try:
         print('🧭 ' + vr)
 except Exception:
     pass
+try:
+    # Shadow-log spread định giá: EY median (universe_pit, PIT) − lãi vay THẬT gói 1840
+    # (12,5%/năm, đọc từ trading_rules.json — không hardcode). THUẦN HIỂN THỊ theo mandate:
+    # KHÔNG nối vào sizing/gate nào. Cổng đòn bẩy đang chạy vẫn chỉ là capit_margin_lever
+    # (dd52<=-20%). Thêm ở job Taylor_20260823_120317 (việc B, tách rời kết quả việc A).
+    from dna_report import build_margin_spread_line
+    ms = build_margin_spread_line(html=False)
+    if ms:
+        print('💵 ' + ms)
+except Exception:
+    pass
 " 2>/dev/null || true
 }
 # --- Cảnh báo độ tươi DT5G (audit §14, job Winston_20260731_062642) ---------------------
