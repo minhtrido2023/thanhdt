@@ -49,6 +49,32 @@ bằng `(bal.get("egg") or {}).get("totalValue")` (payload gốc, TRƯỚC khi t
 - `loanPackageId` bắt buộc trên MỌI lệnh kể cả cash-only (không phải field riêng cho margin).
 - Đặt lệnh: broker's live order book là nguồn sự thật duy nhất, không tái tạo state từ log cục bộ.
 
+**Loan-package margin ratios — `GET /accounts/{acc}/loan-packages?symbol=X`, verified LIVE
+2026-08-23** (SpaceX `0002023347`, symbol MBB; job `Mafee_20260823_083327`): response trả trực
+tiếp đủ 3 ratio, không cần đoán/tra biểu phí ngoài:
+```json
+{"id": 1840, "name": "RocketX", "initialRate": 0.5, "interestRate": 0.125,
+ "liquidRate": 0.3, "maintenanceRate": 0.4, "type": "M", ...}
+```
+- `initialRate` = tỷ lệ ký quỹ BAN ĐẦU (0,5 cho 1840/RocketX ⇒ khớp đúng qmaxBuy gấp 2x gói
+  1841/GD Tiền mặt `initialRate=1.0`, đã đo 2026-08-03 `spacex_pp0buy_capit_20260803.md`).
+- **`maintenanceRate` = 0,4 = tỷ lệ ký quỹ DUY TRÌ (maintenance margin ratio)** — đây là số Phase 1
+  margin-valuation-spread cần. Equity ratio (vốn CSH / giá trị TS) rơi dưới ngưỡng này ⇒ cảnh báo
+  margin call.
+- `liquidRate` = 0,3 = ngưỡng XỬ LÝ BẮT BUỘC (force-sell/liquidation threshold) — thấp hơn
+  maintenance đúng logic bậc thang VN (initial 0,5 > maintenance 0,4 > liquid 0,3).
+- `interestRate` = 0,125 = lãi vay margin 12,5%/năm, khớp con số đã biết ở `trading_rules.json`.
+- Cùng field set cho gói 1841 (cash) — `initialRate=1.0`, `maintenanceRate=0.4`,
+  `liquidRate=0.3` — hai gói maintenance/liquid GIỐNG NHAU, chỉ initial khác (đúng vì maintenance/
+  liquid là ràng buộc của BROKER trên tài khoản, không phải của từng gói vay).
+- **Cảnh báo (warning) DNSE dùng gần đúng `maintenanceRate` làm mốc gọi margin call** — DNSE
+  không trả riêng field "warning threshold" khác `maintenanceRate` qua endpoint này; nếu cần số
+  chính xác hơn cho ngưỡng CẢNH BÁO SỚM (trước cả maintenance) phải xác nhận qua tổng đài DNSE
+  hoặc hợp đồng margin ký — **KHÔNG suy đoán thêm** một tầng ngưỡng thứ 4 không có trong response.
+- Field KHÔNG phải per-symbol thật (cùng response y hệt cho mọi mã trong custom30V, đã probe
+  28/28 mã 2026-08-04 `probe_margin2_result.json`) — ratio là thuộc tính của GÓI VAY, không phải
+  của cổ phiếu thế chấp cụ thể.
+
 **Liên quan / không thay thế:**
 - [`../price-volume/dnse_api_live.md`](../price-volume/dnse_api_live.md) — entry registry cho
   DNSE làm nguồn giá/khối lượng/vị thế TRONG NGÀY (bright-line rule `coding_guidelines.md` §6:
