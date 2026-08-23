@@ -864,3 +864,11 @@
 
 ## Consolidation 2026-08-23T15:07:02Z
 - [2026-08-23T15:00:14Z] Wags/status — fleet-housekeeping chạy thật: {"deleted_items": 311, "deleted_bytes": 5191137, "archived_items": 262, "archived_bytes": 1800609, "only": "default", "log": "/home/trido/thanhdt/WorkingClaude/mike/logs/fleet_housekeeping.log"}
+
+## Consolidation 2026-08-23T17:35:13Z
+- [2026-08-23T17:31:07Z] Mike/heartbeat — Mike_20260823_173007: {"status": "still_running", "elapsed_min": 1, "job_id": "Mike_20260823_173007", "source": "watcher"}
+- [2026-08-23T17:32:08Z] Mike/heartbeat — Mike_20260823_173007: {"status": "still_running", "elapsed_min": 2, "job_id": "Mike_20260823_173007", "source": "watcher"}
+- [2026-08-23T17:33:08Z] Mike/heartbeat — Mike_20260823_173007: {"status": "still_running", "elapsed_min": 3, "job_id": "Mike_20260823_173007", "source": "watcher"}
+- [2026-08-23T17:34:08Z] Mike/heartbeat — Mike_20260823_173007: {"status": "still_running", "elapsed_min": 4, "job_id": "Mike_20260823_173007", "source": "watcher"}
+- [2026-08-23T17:35:02Z] Mike/finding — daily-retro-draft-2026-08-23: {"draft_path": "state/retro_draft_2026-08-23.md", "n_incidents": 2, "n_patterns": 1, "summary": "Sự cố #1: DNSEBroker.get_nav() dùng sai field tiền (§25 tái diễn lần thứ 3, code cũ có trước §25, bắt được bởi lượt chạy đầu tiên Tier-2 code-quality scanner), commit 6eded72cb285, ĐÃ ĐÓNG. Sự cố #2: Wags verify coord-2026-08-23 chạy ops_health_check.sh LIVE thay vì dry-run gây side-effect thật (mao danh Mike, gửi trùng Discord Chủ Nhật), arch-reviewer NEEDS_CHANGES, fix commit fc2d8532 thêm rule OPS_HEALTH_DRY_RUN=1 vào ops_runbook.md, ĐÃ ĐÓNG <1h10. wakeup_audit 0% vi phạm, time-claim-audit count=0, 0 bus error event, 0 job fail. Đề xuất Prevention mạnh hơn cho §25: quét ngược full-repo 1 lần mỗi khi ban hành §-rule mới về field tiền, không chờ scanner định kỳ tình cờ trúng.", "status": "draft_written_awaiting_pipeline_step2_3"}
+- [2026-08-23T17:35:08Z] Mike/heartbeat — Mike_20260823_173007: {"status": "still_running", "elapsed_min": 5, "job_id": "Mike_20260823_173007", "source": "watcher"}
