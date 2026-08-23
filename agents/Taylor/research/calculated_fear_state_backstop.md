@@ -175,6 +175,14 @@ chỉ giao dịch là thật). Không bao giờ size như một vị thế momen
 ### Entry — 3 tranche (không cố bắt đáy)
 - **T1 (1/3)** khi đã QUALIFY §2 **và** DD>35% **và** giá ≤ book hữu hình. Chấp nhận còn dò đáy.
 - **T2 (1/3)** khi có *ổn định giá* (higher-low + volume cạn kiệt) **hoặc** 1 catalyst dương đầu tiên.
+  ⚠️ **Đây là KỶ LUẬT CHIA TRANCHE để hạ giá vốn trung bình, KHÔNG PHẢI tín hiệu làm tăng xác suất
+  thắng.** Kiểm định trực tiếp (`postshock_base_formation_20260823.md`, job `Taylor_20260823_025658`,
+  n=45 sự kiện RATING_OK độc lập, entry sau khi "ổn định giá" xác nhận): excess vs VNINDEX **ÂM** cả
+  3 horizon (H60 −5,9% / H120 −8,8% / H250 −20,1%, CI dưới 0 cả 3), rủi ro rơi tiếp ≥−30% KHÔNG giảm
+  so với vào ngay lúc sập (51,2% vs 48,8%, không có ý nghĩa thống kê). Cái quyết định thắng-thua vẫn
+  là discriminator ĐỊNH TÍNH §2/§2.5 (khủng hoảng có chạm lõi kinh doanh hay không), không phải hình
+  dạng giá/volume — đợi "ổn định giá" không mua được xác suất thắng cao hơn, chỉ mua được giá vốn
+  bình quân thấp hơn nếu giá tiếp tục đi ngang/xuống.
 - **T3 (1/3)** khi **catalyst xác nhận** (chọn được kiểm toán / công bố BCTC kiểm toán sạch / cổ tức
   thực trả / gỡ hạn chế giao dịch). Đây là tranche "thêm khi luận điểm được chứng minh", không phải đoán.
 
