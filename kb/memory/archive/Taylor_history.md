@@ -309,3 +309,6 @@
 
 ## Archived 2026-08-23 (keep=12 days=0 require_done=False)
 - [2026-08-21T12:15:16Z] ĐANG DỞ: job Taylor_20260821_121057 (wire CAPIT 60-session exit) — KHÔNG implement theo literal spec, escalated 'question' capit-60session-exit-architecture-mismatch: exit đã tự động chạy qua pt_v22_dt5g paper-mirror (simulate_holistic_nav.py:697 force-close days_held>=60) -> strategies.py diff engine đã tự sell khi tới hạn. Gap thật = overlap PVT/SIP với custom30V (paper không track park theo mã), cần fix ở strategies.py build_plan diff step, KHÔNG PHẢI thêm trigger mới ở golive_recommend_v23.py (sẽ double-sell). KHÔNG khẩn (24/60 phiên, còn ~7 tuần). NEXT: chờ user/Mike quyết hướng, rồi mới implement fix + selfcheck + quant-skeptic.
+
+## Archived 2026-08-23 (keep=12 days=0 require_done=False)
+- [2026-08-22T02:34:49Z] fill_timing phien hybrid BUY thu 5 DA DAT 2026-08-20 (08-11/13/17/18/20) => cho Mike dispatch quant-skeptic roi escalate user ky flip fill_timing_live_gate, KHONG hoi lai A/B/C. | extreme_regime deadline 2026-08-25 16:00 ICT: dieu kien 1-4 DU (27 phien 0 marker, ca 2 trigger do duoc qua probe_ticks), con (5) selfcheck sweep 21 file executor.py + (6) quant-skeptic. | expvol_pacing pace 1/25 order-day sau 5 phien = KHONG kip 09-15, phai dieu tra nguon sinh order-day.
