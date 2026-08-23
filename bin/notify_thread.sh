@@ -55,7 +55,7 @@ fi
 if [ -z "$thread_id" ]; then
   mkdir -p "$ROOT/logs"
   printf '%s notify_thread: KHONG CO topic (khong ai truyen, $DISCORD_THREAD_ID rong) — TIN NHAN KHONG GUI, khong doan topic. caller=%s | msg=%.80s\n' \
-    "$(date -Iseconds)" "${0##*/}<-$(ps -o comm= -p "$PPID" 2>/dev/null)" "$msg" \
+    "$(TZ='Asia/Ho_Chi_Minh' date -Iseconds)" "${0##*/}<-$(ps -o comm= -p "$PPID" 2>/dev/null)" "$msg" \
     >> "$ROOT/logs/notify_thread_errors.log"
   echo "notify_thread: no thread_id (arg rỗng + \$DISCORD_THREAD_ID rỗng) — không gửi, không đoán topic" >&2
   exit 1
@@ -102,14 +102,14 @@ elif ! resolved="$("$ROOT/bin/discord_channel.sh" "$thread_id" 2>&1)"; then
   mkdir -p "$ROOT/logs"
   if [ -n "$_swapped" ]; then
     printf '%s notify_thread: DOI SO BI DAO (topic o vi tri 1, message o vi tri 2) — DA TU SUA VA GUI toi topic %q. SUA CALL SITE: dung `notify_thread.sh "<message>" <topic>`. caller=%s job=%s\n' \
-      "$(date -Iseconds)" "$msg" "${0##*/}<-$(ps -o comm= -p "$PPID" 2>/dev/null)" "${JOB_ID:-?}" \
+      "$(TZ='Asia/Ho_Chi_Minh' date -Iseconds)" "$msg" "${0##*/}<-$(ps -o comm= -p "$PPID" 2>/dev/null)" "${JOB_ID:-?}" \
       >> "$ROOT/logs/notify_thread_errors.log"
     echo "notify_thread: đối số bị đảo — đã tự sửa, gửi tới topic '$msg'; sửa call site" >&2
     msg="$thread_id"
     resolved="$_swapped"
   else
     printf '%s notify_thread: KHONG phan giai duoc topic %q — TIN NHAN KHONG GUI. %s job=%s\n' \
-      "$(date -Iseconds)" "$thread_id" "$resolved" "${JOB_ID:-?}" >> "$ROOT/logs/notify_thread_errors.log"
+      "$(TZ='Asia/Ho_Chi_Minh' date -Iseconds)" "$thread_id" "$resolved" "${JOB_ID:-?}" >> "$ROOT/logs/notify_thread_errors.log"
     echo "notify_thread: $resolved" >&2
     exit 1
   fi
