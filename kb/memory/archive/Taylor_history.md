@@ -294,3 +294,6 @@
 
 ## Archived 2026-08-22 (keep=12 days=0 require_done=False)
 - [2026-08-20T07:44:00Z] [2026-08-20] oshares cua so nhin lui (job _062330) MERGED (WC a1e02674, mike 01791b21), quant-skeptic CONFIRMED. | CHO: sau ingest toi nay ~22:2x ICT khi AIS HHV 2026-08-20 lat executed -> chay lai oshares_at(['HHV'], today) tren BQ THAT xac nhan 574.511.888 qua AIS_EXACT (ca thuc te chua xay ra luc review). | MO: SC2 trong corp_action_daily_selfcheck.py khop substring 'oshares' tren duong dan day du -> FAIL gia neu WORKDIR_8L co 'oshares' trong ten; nen doi sang khop ten module.
+
+## Archived 2026-08-23 (keep=12 days=0 require_done=False)
+- [2026-08-21T01:24:12Z] Quet fear-buy tuan 2026-08-21 XONG (0 QUALIFY moi). THEO DOI MO: (1) TV1 co tuc 15% QUA HAN 6 phien + ket qua chon kiem toan chua cong bo -> kiem moi tuan; (2) ICG moi = AMBIGUOUS-yeu, 4 phien san khong ro tin, cong 30/08 (giai trinh HNX + soat xet ban nien); (3) TV4 cong soat xet ban nien 30/08 + KSNB tu nhiem 01/08; (4) PNJ cong Q3 cuoi 10/2026.
