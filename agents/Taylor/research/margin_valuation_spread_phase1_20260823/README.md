@@ -163,3 +163,26 @@ kiến trúc**, và đó là lý do thứ hai đủ để không đề xuất ch
 | `arm_conditions_events.csv`, `build_arm_table.py`, `_dy_daily.csv` | bảng điều kiện ARM tại 15 sự kiện, đo theo NGÀY |
 | `metrics_p1.csv` / `.py`, `margincall_p1.csv` / `.py`, `noise_ruler_p1.py`, `loo_episode_p1.csv` / `.py` | phân tích |
 | `logs/` | 34 log leg + 4 log phân tích |
+
+## 9. quant-skeptic — **CONFIRMED (high)** + đóng nốt phản biện duy nhất còn mở
+
+`bin/verify_finding.sh --topic margin-valuation-spread-phase1` →
+**CONFIRMED, confidence high** (log: `mike/logs/verify_20260823_132019_3012254.log`).
+7/7 check pass hoặc n/a. Reviewer **tự recompute độc lập 4 con số đầu bảng thẳng từ CSV thô**
+(không đọc prose): dCAGR(V7−V0)@12,5% = −0,008584 · dIS = −0,017903 · vi phạm đơn điệu V3 =
+0,38541pp · E6 đổi dấu +0,3751/−0,0211/−0,0222pp — khớp tới chữ số thứ 4. Cũng tự xác minh trong
+**log thô** (không phải prose) rằng 2 điều kiện tin cậy thật sự đã chạy và pass, và `diff`
+`engine_p1.py` vs `engine_lever.py` **chỉ chứa đúng 2 hunk đã khai**, không có gì khác.
+
+**Phản biện duy nhất còn mở** (reviewer đánh giá "immaterial to the verdict"): không truy được
+script sinh `_dt5g_daily.csv` để chứng minh nó đọc `vnindex_5state_dt5g_live` chứ không phải bảng
+BASE v3.4b (đúng cái bẫy `CLAUDE.md` cảnh báo). **Đã đóng bằng đối chiếu trực tiếp, không phải truy
+script** (2026-08-23):
+
+| Đối chiếu `_dt5g_daily.csv` (3.152 dòng, 2014-01-02→2026-08-21) | Số dòng lệch |
+|---|---:|
+| vs `tav2_bq.vnindex_5state_dt5g_live` | **0 / 3.152 — KHỚP HOÀN TOÀN** |
+| vs `tav2_bq.vnindex_5state` (BASE v3.4b) | **1.120 / 3.152 — KHÁC** |
+
+⇒ file dùng đúng bảng DT5G production. (Engine thì vốn đã được reviewer xác nhận độc lập là đọc
+đúng bảng live, kèm guard `.replace()` chống chính lỗi thay-nhầm-bảng này.)
