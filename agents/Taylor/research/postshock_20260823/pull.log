@@ -1,0 +1,26 @@
+/home/trido/thanhdt/wc_venv/lib/python3.12/site-packages/google/auth/_default.py:113: UserWarning: Your application has authenticated using end user credentials from Google Cloud SDK without a quota project. You might receive a "quota exceeded" or "API not enabled" error. See the following page for troubleshooting: https://cloud.google.com/docs/authentication/adc-troubleshooting/user-creds. 
+  warnings.warn(_CLOUD_SDK_CREDENTIALS_WARNING)
+/home/trido/thanhdt/wc_venv/lib/python3.12/site-packages/google/cloud/bigquery/table.py:2082: UserWarning: BigQuery Storage module not found, fetch data with the REST endpoint instead.
+  warnings.warn(
+/home/trido/thanhdt/wc_venv/lib/python3.12/site-packages/google/cloud/bigquery/table.py:2082: UserWarning: BigQuery Storage module not found, fetch data with the REST endpoint instead.
+  warnings.warn(
+/home/trido/thanhdt/wc_venv/lib/python3.12/site-packages/google/cloud/bigquery/table.py:2082: UserWarning: BigQuery Storage module not found, fetch data with the REST endpoint instead.
+  warnings.warn(
+[bq] pre-2013: 563,313 dòng
+[cache] 2013: 157,843 dòng
+[cache] 2014: 158,414 dòng
+[cache] 2015: 171,354 dòng
+[cache] 2016: 194,681 dòng
+[cache] 2017: 234,689 dòng
+[cache] 2018: 269,299 dòng
+[cache] 2019: 284,852 dòng
+[cache] 2020: 296,162 dòng
+[cache] 2021: 303,743 dòng
+[cache] 2022: 309,440 dòng
+[cache] 2023: 312,564 dòng
+[cache] 2024: 316,345 dòng
+[cache] 2025: 316,592 dòng
+[cache] 2026: 177,823 dòng
+[ok] panel.parquet: 4,067,114 dòng, 1292 mã, 2007-06-01 → 2026-08-21
+[ok] vnindex.parquet: 4,800 dòng
+[ok] ratings8l.parquet: 53,611 dòng
