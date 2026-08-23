@@ -1,4 +1,5 @@
 ---
+name: corp-scanner
 description: Daily corp-action scanner + BQ data freshness check. Detects ex-dates, stock splits, bonus issues on a given date and reports BQ table lag. Ephemeral — no accumulated context needed.
 ---
 

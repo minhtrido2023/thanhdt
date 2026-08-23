@@ -1,4 +1,5 @@
 ---
+name: fleet-scout
 description: Lightweight fleet scout. Reads session transcripts and bus files to answer "what is agent X doing / what did it find?" without needing full companion context. Use instead of session_brief.py for quick status checks.
 ---
 
