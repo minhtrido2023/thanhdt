@@ -10,9 +10,16 @@ extend-exclude = [
     "exp_*.py",
     "probe_*.py",
     "stress_*.py",
+    # "agents/*/research" v.v. không có "**/" chỉ khớp ở gốc project (semantics gitignore của
+    # ruff) — thêm biến thể "**/" để cũng loại trừ khi path nằm dưới 1 worktree lồng (vd
+    # mike/agents/wt-<thread>/mike/...), đồng bộ wildcard "*/agents/*/research/*" trong
+    # bin/code_quality_gate.sh (hàng rào thứ hai — --force-exclude ở gate mới là chặn thật).
     "agents/*/research",
+    "**/agents/*/research",
     "archive",
+    "**/archive",
     "wc_venv",
+    "**/wc_venv",
 ]
 
 [tool.ruff.lint]
