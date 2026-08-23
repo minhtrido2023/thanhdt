@@ -4,6 +4,15 @@
 > dd52≤−20%, CAPIT sleeve): đây là **đơn mã, discretionary, xét từng case**, không có backtest vì
 > N không thể đủ lớn theo bản chất (due-diligence sâu không scale). Quyết bằng rào chắn rủi ro +
 > duyệt người từng ca, không phải bằng thống kê.
+>
+> **VIỆC KẾ TIẾP — implement code, hẹn Thứ Bảy 2026-08-29 (phiên nghỉ, user chốt 2026-08-23 21:24
+> ICT):** lý do dời từ tối 08-23 (đã có ~12h trước phiên 08-24) — không case nào đủ điều kiện áp
+> dụng ngay (TV1 UPCOM không marginable) nên không có deadline thật, trong khi code đụng
+> `plan.py`/`executor.py` đúng lúc `capit_margin_lever` LIVE lần đầu sáng 08-24 mang rủi ro thật
+> không tương xứng lợi ích. Việc cần làm 08-29: viết nhánh cấp phép margin riêng (không tái dùng
+> `apply_capit_lever`), script duyệt riêng (không chung file `margin_approval_*` của CAPIT), enforce
+> 4 rào chắn số ở §"Rào chắn rủi ro" dưới, selfcheck đầy đủ, cân nhắc arch-review vì chạm execution
+> path.
 
 ## Nguồn gốc — vì sao KHÔNG backtest được
 Cùng ngày, `postshock-base-formation` (Taylor) test đúng ý tưởng "sập nhanh + rating vẫn ổn (lọc thô
