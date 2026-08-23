@@ -14,7 +14,9 @@ cd "$ROOT"
 TID=8888888888888888          # thread giả, không tồn tại
 MARK="$ROOT/state/wake_debounce/$TID"
 LOG="$ROOT/logs/wake_thread.log"
-ERRLOG="$ROOT/logs/wake_thread_errors.log"
+# Isolated temp log — fixture rows không lẫn vào production wake_thread_errors.log (§5b pattern)
+ERRLOG="$(mktemp /tmp/wake_sc_XXXXXX_errors.log)"
+export WAKE_THREAD_ERRLOG="$ERRLOG"
 export WAKE_THREAD_API_BASE="http://127.0.0.1:9"   # discard port -> POST chắc chắn fail, KHÔNG chạm ccdb thật
 
 n=0
@@ -78,6 +80,6 @@ WAKE_DEBOUNCE_S=0 bin/wake_thread.sh "$TID" "selfcheck call 6" "sc-6" >/dev/null
 ok "$([ "$(_calls_since "$LOG" "$LOFF" DEBOUNCED)" = 0 ] && echo 1 || echo 0)" \
    "WAKE_DEBOUNCE_S=0 tắt được lớp debounce"
 
-rm -f "$MARK" "$ROOT/state/wake_debounce/$TID2"
+rm -f "$MARK" "$ROOT/state/wake_debounce/$TID2" "$ERRLOG"
 echo
 echo "wake_debounce_selfcheck: $n/$n PASS"

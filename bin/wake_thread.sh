@@ -46,10 +46,11 @@ fi
 # (ngày ICT), nên một dòng UTC ghi trong khoảng 17:00-24:00 UTC bị xếp nhầm sang ngày
 # trước ⇒ tỷ lệ sai. Neo tường minh rẻ hơn dạy mọi consumer cách quy đổi.
 _log_fail() {
-  mkdir -p "$ROOT/logs"
+  local errlog="${WAKE_THREAD_ERRLOG:-$ROOT/logs/wake_thread_errors.log}"
+  mkdir -p "$(dirname "$errlog")"
   printf '%s wake_thread: %s | thread_id=%s name_suffix=%s\n' \
     "$(TZ='Asia/Ho_Chi_Minh' date -Iseconds)" "$1" "$thread_id" "$name_suffix" \
-    >> "$ROOT/logs/wake_thread_errors.log"
+    >> "$errlog"
 }
 
 # Ghi CẢ lần push THÀNH CÔNG (2026-08-17) — trước đó chỉ có nhánh lỗi được ghi, nên khi
