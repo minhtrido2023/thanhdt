@@ -200,3 +200,6 @@ BAI HOC 2: backtick trong message cua 'git commit -m' bi command-substitution TR
 ## Archived 2026-08-23 (keep=12 days=0 require_done=False)
 - [2026-08-18T00:42:20Z] [2026-08-18 resume#1] coord-2026-08-18: commit c9d1fa30 landed, pending questions=0, 2 question goc dong that (verify DOC LAP lai: ccdb-mike code merged main 70d4b9c + restart 07:10:34+07 + cot executed_at CO trong DB LIVE). DANG CHO arch-review PID 1843064 (log logs/adhoc_archreview_20260818.log, 0 byte vi output qua pipe). NEXT: doc verdict -> neu NEEDS_CHANGES thi sua, neu CONFIRMED thi bao topic Architecture 1521475726329516122.
 BAI HOC: DB path cua ccdb KHONG nam trong repo code — service WorkingDirectory=/workspace/ccdb-mike, con /workspace/claude-code-discord-bridge/data/tasks.db la ban CU (Jun 23) khong ai dung. Kiem schema live phai lay path tu 'systemctl --user show -p WorkingDirectory', dung doan theo repo.
+
+## Archived 2026-08-23 (keep=12 days=0 require_done=False)
+- [2026-08-18T00:53:48Z] arch-review round2 coord-2026-08-18 XONG (commit e25f2a33, 4/4 required_change). Tien to question MOI 'wags-autofix-review-needed:' da vao WAGS_SELF_Q_PREFIXES — them nhanh question nao khac vao wags_autofix.sh thi PHAI them tien to vao CA ops_health_check.sh LAN ops_health_check_selfcheck.py (ca 11b pin 2 danh sach).
