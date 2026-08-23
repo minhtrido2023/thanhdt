@@ -5883,3 +5883,66 @@ COMB@250 hai nhóm bằng nhau (+36,7 vs +36,9%), chênh nằm ở VNI. NAV gi�
 ⚠️ **Bẫy chung mang đi**: Phụ lục C nói `P(bear | radar 0-20)=20,9%` **không điều kiện**; áp nó lên
 **tập con có điều kiện** (sự kiện CAPIT = đã có drawdown 52 tuần) là sai — giao 2 điều kiện = "rẻ
 VÀ đã rơi đủ sâu" = mô tả của ĐÁY. Không mâu thuẫn, chỉ là hai điều kiện khác nhau.
+
+---
+
+## 2026-08-23 — POST-SHOCK BASE FORMATION (event study, KHÔNG phải NAV backtest) — **INCONCLUSIVE, nghiêng REFUTE**
+
+Job `Taylor_20260823_025658` (ý tưởng user/John, dispatch Mike). **PREREG commit `1a3bf8b0` viết
+TRƯỚC kết quả** — `agents/Taylor/research/postshock_base_formation_prereg_20260823.md`.
+Báo cáo: `agents/Taylor/research/postshock_base_formation_20260823.md` (commit `912c54a8`).
+
+**Tái lập** (không có `AUDIT_END` vì đây là event study trên dữ liệu lịch sử, không phải NAV sim;
+đông cứng bằng CSV + panel pull):
+```bash
+cd mike/agents/Taylor/research/postshock_20260823
+$DNA_PYEXE pull_data.py                                  # panel.parquet (gitignored, 24MB, tái tạo được)
+$DNA_PYEXE postshock_base_formation_20260823.py          # seed 20260823, threads=1
+$DNA_PYEXE sensitivity_exploratory.py                    # EXPLORATORY §7, ngoài prereg
+```
+Nguồn PIT: `tav2_mike.universe_pit` (universe) · `tav2_bq.ticker` (Close ADJUSTED, Volume) ·
+`tav2_bq.fa_ratings_8l` (rating as-of). Dữ liệu tới **2026-08-21**.
+CSV đông cứng: `postshock_events_20260823.csv` (1.614 sự kiện × 60 cột) ·
+`postshock_{stats,tailrisk,desc,walkforward,sensitivity}_20260823.csv`.
+
+**Định nghĩa** (chốt trước): shock = giảm ≥25% từ đỉnh rolling-60 phiên trong ≤20 phiên · đáy xác
+nhận PIT (5 phiên không phá đáy) · nền K=20 phiên cần ĐỦ 3: vol < 0,5× vol nhánh rơi ∧ turnover
+< 0,5× ∧ higher-low. Entry T+1. Độc lập = cooldown 250 phiên/mã.
+
+| Kết quả (RATING_OK, entry (b) chờ nền, median) | H=60 | H=120 | H=250 |
+|---|---:|---:|---:|
+| excess vs VNINDEX | **−5,94%** | **−8,80%** | **−20,12%** |
+| CI 95% (cluster block bootstrap L=20, 10k) | [−13,1;−2,8] | [−15,2;−2,0] | [−32,2;−11,6] |
+| paired (b)−(a) | −3,63% | +0,43% (p=0,301) | −2,06% |
+
+**0/12 test qua BH FDR 10%** (p nhỏ nhất trong họ = 0,255, thuộc nhóm n=3). CI của excess **nằm
+TRỌN dưới 0** ⇒ bằng chứng có ý nghĩa theo hướng NGƯỢC. Cổng rủi ro đuôi **KHÔNG ĐẠT**:
+`P(maxDD250 ≤ −30%)` 51,2% (a) → 48,8% (b), Δ=−2,4pp, p=0,366.
+N: 1.614 shock độc lập / 56 tạo nền (**3,47%**) / RATING_OK **45** (33 cụm tháng) · RATING_BAD **3**
+(không kết luận được) · RATING_NA 8. IS/OOS: excess âm cả hai giai đoạn.
+
+**Self-check**: recompute từ BQ TRỰC TIẾP 30/30 con số khớp (max diff 5,6e-17) · assert look-ahead
+PASS (`entry_b = t_b+21` phiên trên cả 56 ca) · "0 VND" KHÔNG áp dụng (không mô phỏng NAV, đã khai
+trước ở prereg §5.3.5).
+
+⚠️ **BẪY MANG ĐI — quan trọng hơn cả kết quả**: **0/10 case chủ chốt của playbook
+`calculated_fear_state_backstop.md` lọt vào mẫu.** Bộ lọc **tốc độ ≤20 phiên** loại PNJ 2015
+(speed 47) · HPG 11/2022 (DD −50,2% nhưng 93/93 phiên đủ biên độ đều speed ≥21) · TV1 2026
+(speed 57); VEA 2019 DD −24,5% chưa chạm ngưỡng; OGC 10/2014 bị COOLDOWN từ sự kiện 04/2014;
+TIS `in_universe`=0/213. ⇒ **Khủng hoảng doanh nghiệp thật ở VN sập CHẬM (40-60 phiên).** Ai
+dựng lại nghiên cứu loại này: đừng mặc định "shock = sập nhanh".
+⚠️ **`tav2_bq.ticker` có 0 dòng FLC toàn lịch sử** — mã huỷ niêm yết bị xoá SẠCH khỏi bảng nguồn,
+không phải chỉ cụt chuỗi ⇒ mọi thống kê rủi ro đuôi trên bảng này là **CẬN DƯỚI**.
+
+**Sensitivity EXPLORATORY** (ngoài prereg, sau self-check): 6 cấu hình speed{20,40,60} ×
+ngưỡng nén{0,5;0,7}, tới n=296 sự kiện RATING_OK → **18/18 điểm ước lượng excess đều ÂM**
+(−4,2%…−20,1%), paired âm 17/18, và ở cả 3 cấu hình ratio=0,7 chờ nền còn **TĂNG** tail risk.
+⇒ kết luận âm KHÔNG phải artifact ngưỡng.
+
+**Số nền tảng đáng nhớ (n=1.536 sự kiện độc lập, 2008-2026)**: mua cổ phiếu vừa sập ≥25% **không**
+có bộ lọc định tính → median thua VNINDEX **6,7 / 8,3 / 15,4pp** ở 60/120/250 phiên; **54,5%**
+sập tiếp ≥30% trong một năm. Gross, chưa trừ phí/slippage/thuế.
+
+**KHÔNG wire.** Khuyến nghị: đóng sổ nhánh "base formation như tín hiệu định lượng"; giữ playbook
+§3 tranche T2 như **kỷ luật chia tranche hạ giá vốn**, không phải tín hiệu tăng xác suất thắng
+(sửa file KB ⇒ ghi `.proposed` theo §13, cần Mike/user duyệt).
