@@ -96,6 +96,20 @@ không được đóng bằng lý do "false alarm do bug tra cứu". Ca thật: 
 `wags-fix-not-confirmed: coord-2026-08-10 / coord-2026-08-11` từng bị nghi là do bug prefix ở trên,
 kiểm lại thì cả 2 đều là `NEEDS_CHANGES` có bằng chứng — vẫn đang mở, cần round-2.
 
+### Verify tự thân của Wags KHÔNG được chạy dispatcher ở chế độ LIVE (2026-08-23)
+
+Ca `coord-2026-08-23`: Wags verify 1 ack bằng cách chạy thẳng `bin/ops_health_check.sh` LIVE
+từ bên trong chính job đang được dispatch — kết quả ghi bus event mạo danh Mike + gửi trùng
+báo cáo Discord Chủ Nhật (script không tự biết hôm nay không phải ngày cron chạy), và nếu ack
+không ăn thì chính lượt verify đó tự kích hoạt lại khối routing `wags_autofix.sh`, tạo tín hiệu
+"tái diễn trong cooldown" giả — phép đo tự tạo ra cái nó đang đo.
+
+**Luật: verify bất kỳ thay đổi nào chạm `ops_health_check.sh`/`ops_autofix.sh`/`wags_autofix.sh`
+PHẢI dùng `OPS_HEALTH_DRY_RUN=1 bin/ops_health_check.sh --account <acct>` (khối đã có sẵn trong
+script, dòng ~1423-1429), KHÔNG BAO GIỜ chạy live để "kiểm tra thử".** Cần trạng thái thật (đã
+ghi bus/Discord chưa) thì đọc file/bus có sẵn (`logs/ops_health.log`, bus event cùng ngày), đừng
+tái tạo bằng cách chạy lại chính bộ dispatcher.
+
 ## Timeline ngày giao dịch (T2–T6, giờ ICT) — bước / kiểm tra gì / lỗi thì sao
 
 | Giờ | Bước (cron) | Kiểm tra | Khi lỗi |
