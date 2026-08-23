@@ -24,6 +24,26 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+# Guard ngày-không-giao-dịch (thêm 2026-08-23, ca thật: ai đó chạy tay script này một Chủ Nhật,
+# in ra "KHÔNG TÌM THẤY plan — có thể lỗi DollarBill" — cảnh báo VÔ NGHĨA vì DollarBill/bot
+# KHÔNG BAO GIỜ chạy cuối tuần/ngày lễ theo thiết kế (cron eod `1-5`, DollarBill cron cũng vậy).
+# Cron thật (`10 12 * * 1-5`) đã tự chặn đúng — guard này chỉ bắt trường hợp CHẠY TAY/thủ công
+# nhắm nhầm ngày. Không gửi Discord/email, không tạo report rác — chỉ log rồi thoát êm.
+if _wd_holiday_check="$(cd "$WC_ROOT" && python3 -c "
+import sys, datetime as dt
+sys.path.insert(0, '.')
+from trading_bot.vn_market import is_holiday
+d = dt.date.fromisoformat('$PLAN_DATE')
+print('1' if d.weekday() >= 5 or is_holiday(d) else '0')
+" 2>/dev/null)"; then
+  if [ "$_wd_holiday_check" = "1" ]; then
+    echo "eod_trading_report.sh: $PLAN_DATE không phải phiên giao dịch (cuối tuần/ngày lễ) — bỏ qua, không gửi Discord/email. Có thể do chạy tay nhầm ngày; cron thật ('10 12 * * 1-5') không bao giờ gọi script này vào ngày này." >&2
+    exit 0
+  fi
+fi
+# python3/vn_market import lỗi (ImportError, cú pháp ngày sai...) → $_wd_holiday_check rỗng,
+# KHÔNG chặn — fail-open để không biến 1 lỗi import thành báo cáo EOD ngày thường bị nuốt câm.
+
 TRADING_REPORT_THREAD="trading_report"   # tên trong kb/discord_channels.json (đổi từ Trading Daily 2026-07-03, theo yêu cầu user)
 
 # Delivery closure (user chốt phương án A 2026-08-15): EOD daily cũng là báo cáo client-facing,
