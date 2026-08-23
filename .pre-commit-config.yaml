@@ -55,3 +55,15 @@ repos:
         entry: bin/utc_text_gate.sh
         language: system
         files: '^(bin|hooks)/.*\.(sh|py)$'
+
+      # Thêm 2026-08-23 — Tầng 1 của kế hoạch code-quality review 3 tầng (user duyệt
+      # 2026-08-23, xem kb/projects/code-quality-review-plan-20260823.md §3). ruff (rule set
+      # hẹp F/E9/B006/B008, KHÔNG style) trên file .py thay đổi trong commit, RATCHET so với
+      # kb/code_quality_baseline.json của chính file đó — chỉ chặn khi số lỗi TĂNG, nợ cũ
+      # không bắt sửa ngay. Trong repo mike/ này thực tế chỉ chạm bin/*.py (trading_bot/ và
+      # bot_execute.py nằm ở repo WorkingClaude khác, ngoài phạm vi commit ở đây).
+      - id: code-quality-gate
+        name: ruff ratchet (F/E9/B006/B008, per-file so với baseline — xem bin/code_quality_gate.sh)
+        entry: bin/code_quality_gate.sh
+        language: system
+        files: '\.py$'
