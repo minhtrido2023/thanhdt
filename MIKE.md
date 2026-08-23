@@ -253,6 +253,7 @@ nên nó chỉ tốn tài nguyên + rủi ro vận hành (sự cố Taylor 2026-
 | **DollarBill** (plan giao dịch) | headless on-demand | `dispatch.sh DollarBill "..."` | Lập plan, chuẩn bị lệnh |
 | **Mafee** (thực thi plan-bound) | headless on-demand | `dispatch.sh Mafee "..."` | Chạy lệnh trong plan đã duyệt |
 | **quant-skeptic** (phản biện R&D — công tố) | native | `bin/verify_finding.sh` / `Agent(subagent_type="quant-skeptic")` | Sau finding quan trọng, TRƯỚC khi wire |
+| **fundamental-skeptic** (phản biện due-diligence cơ bản — công tố, thêm 2026-08-23) | native | `Agent(subagent_type="fundamental-skeptic")` | Trước khi chốt QUALIFY/NON case fear-buy/special-situation mới (sleeve discretionary DGC/TV1-style) |
 | **data-ops** (was Winston: DT5G/BQ freshness, pipeline health, feeds) | native | `Agent(subagent_type="data-ops")` / `dispatch.sh Winston "..."` | Check freshness/pipeline/corp-action |
 | **corp-scanner** (corp-action scan hẹp) | native | `Agent(subagent_type="corp-scanner")` | Quét tách/cổ tức một phiên |
 | **risk-auditor** (was Spyros: DD/concentration/leverage/recon, read-only) | native | `Agent(subagent_type="risk-auditor")` / `dispatch.sh Spyros "..."` | Review rủi ro, audit EOD, recon fill↔plan |
@@ -289,6 +290,22 @@ bin/verify_finding.sh --bg                 # chạy nền + Telegram khi xong
 Verdict (`CONFIRMED|REFUTED|INCONCLUSIVE`) ghi lên bus là event `verification` của
 `quant-skeptic` → vào KB. **Quy tắc: REFUTED/INCONCLUSIVE = KHÔNG wire; CONFIRMED mới được đưa lên
 production.** Verifier read-only (Bash/Read/Grep/Glob), không sửa code/KB.
+
+## Tier phản biện cơ bản — fundamental-skeptic (thêm 2026-08-23, user duyệt)
+Khoảng trống khác quant-skeptic: due-diligence discretionary (sleeve fear-buy/special-situation,
+kiểu DGC/TV1) trước giờ chỉ có MỘT người phân tích (Taylor) rồi lên thẳng Mike/user duyệt — không
+ai đóng vai phản biện trước quyết định, khác R&D định lượng đã có quant-skeptic bắt buộc. Case
+DGC/TV1 từng đảo verdict 2 lần chỉ vì user tình cờ phản biện bằng data — nếu không ai hỏi lại,
+kết luận sai có thể đứng yên.
+
+`Agent(subagent_type="fundamental-skeptic", prompt="phản biện case <ticker>: <đường dẫn writeup>")`
+— stateless, read-only (Bash/Read/Grep/Glob), một việc DUY NHẤT: cố REFUTE verdict QUALIFY/NON
+hiện có. 7 đòn tấn công cố định (cherry-pick discriminator §2/§2.5, rủi ro scandal di cư sang
+pháp nhân, comp/SOTP lạc quan chọn lọc, provenance dữ liệu, thanh khoản/capacity thật, xác nhận
+thiên lệch nếu verdict từng đảo, thiếu kỷ luật exit). Trả `CONFIRMED|REFUTED|INCONCLUSIVE` —
+**Quy tắc giống quant-skeptic: REFUTED/INCONCLUSIVE = KHÔNG đưa vào sleeve discretionary, CONFIRMED
+mới trình user duyệt mua thật.** Gọi trước khi chốt bất kỳ case mới hoặc downgrade/upgrade quan
+trọng — KHÔNG chạy thường trực, KHÔNG sinh ý tưởng mới (khác Taylor).
 
 ## Tạo / thu agent con · Giám sát sức khỏe fleet
 Quy trình hiếm dùng — chi tiết ở `MIKE_ext.md` (§ Tạo / thu agent con, § Giám sát sức khỏe fleet).
