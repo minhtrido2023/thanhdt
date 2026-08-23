@@ -215,6 +215,7 @@ PYEOF
 )"
 if [ "$status_line" = "CHANGED" ] && [ -f "$TMP_BASELINE" ]; then
   mv -f "$TMP_BASELINE" "$BASELINE"
+  echo "  ✓ baseline updated: $BASELINE"
   # BASELINE nằm dưới kb/ của CHÍNH repo đang chạy (canonical hoặc worktree) — `git -C
   # "$MIKE_ROOT" add` luôn đúng repo vì MIKE_ROOT giờ tính bằng git rev-parse, không phải suy
   # diễn đường dẫn tĩnh.
