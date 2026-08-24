@@ -1,13 +1,13 @@
-# Mike fleet — context pack (v2502)
+# Mike fleet — context pack (v2503)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-08-23T13:23:52] quant-skeptic/verification — ✅ CONFIRMED VERIFY: margin-valuation-spread-phase1: {"finding_topic": "margin-valuation-spread-phase1", "verdict": "CONFIRMED", "confidence": "high", "checks": {"look_ahead_leak": "pass — build_arm_table.py filte …
 - [2026-08-23T13:25:14] Taylor/decision — margin-valuation-spread-phase1-dong-huong: {"quyet_dinh": "DONG HUONG margin-theo-khoang-cach-dinh-gia, khong wire, khong shadow-monitor cho co che sizing", "co_so": "3/6 cong prereg FAIL (G1 V7<V0; G3 D …
 - [2026-08-23T17:35:02] Mike/finding — daily-retro-draft-2026-08-23: {"draft_path": "state/retro_draft_2026-08-23.md", "n_incidents": 2, "n_patterns": 1, "summary": "Sự cố #1: DNSEBroker.get_nav() dùng sai field tiền (§25 tái diễ …
 - [2026-08-23T17:38:30] Wags/finding — retro-2026-08-23-doc-lap-verify: {"verdict": "GAPS FOUND (1 gap, minor, khong doi ket luan)", "scope": "doc lap bus/inbox finding+error events 2026-08-23, git commit hash, job_id status, cot Ng …
 - [2026-08-23T17:41:17] Mike/finding — daily-retro-finalized-2026-08-23: {"status": "logged", "file": "kb/incidents/retro/retro-2026-08-23.md", "n_incidents": 2, "verified_by": "Wags", "verify_result": "GAPS_FOUND_1_minor_fixed", "ga …
+- [2026-08-24T01:06:42] Taylor/finding — fearbuy-monday-scan: {"n_ma_ra_qua": 29, "n_case_moi": 0, "qualify_list": [], "watchlist_stale": false, "scan_date": "2026-08-24", "window": "2026-08-21..2026-08-23", "anomaly_scan" …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -176,7 +176,7 @@ Kết quả dẫn tới quyết định: breadth-vs-radar-matrix-20260822 (Taylo
      Giữ đúng phần còn quyết định được hành vi sau này: TÊN · FILE · PHÁN QUYẾT (nhất là NO-GO,
      để không ai đề xuất lại). Diễn biến vẫn nguyên trong file chi tiết. -->
 - 2026-08-23 Chính sách margin đơn mã sleeve fear-buy discretionary → `discretionary-margin-policy-20260823.md` — **POLICY DUYỆT, CHƯA CODE**: trần vị thế ≤3% NAV (đòn bẩy trên nền ≤1% vốn tự có), trần sleeve ≤5% NAV, phát hiện margin-call DNSE netting cấp ACCOUNT nên vô hiệu ở quy mô đơn mã ⇒ kỷ luật thoát tự áp −20% từ giá arm (không dựa broker); chưa case nào đủ điều kiện (TV1 UPCOM không marginable)
-- 2026-08-23 Margin theo khoảng cách định giá + nhận diện đáy 11/2022 → `margin-valuation-spread-20260823.md` — **NO-GO** mọi cơ chế sizing/gate mới (5 vòng, Phase 1 engine quant-skeptic CONFIRMED high); `capit_margin_lever` dd52≤−20% GIỮ NGUYÊN; nhiễu harness 0,385pp ≫ hiệu ứng 0,009pp; đóng tập 7 episode, chỉ còn shadow-log spread EOD; hướng mở duy nhất = margin cấp CỔ PHIẾU trong sleeve fear-buy
+- 2026-08-23 Margin theo khoảng cách định giá + nhận diện đáy 11/2022 → `margin-valuation-spread-20260823.md` — **NO-GO** mọi cơ chế sizing/gate mới (5 vòng, Phase 1 engine quant-skeptic CONFIRMED high); `capit_margin_lever` dd52≤−20% GIỮ NGUYÊN; nhiễu harness 0,385pp ≫ hiệu ứng 0,009pp; đóng tập 7 episode, chỉ còn shadow-log spread EOD; hướng mở duy nhất = margin cấp CỔ PHIẾU trong sleeve fear-buy. **Đính chính 08-24**: thiếu trục "phòng thủ có mục tiêu" (2020/2022, dễ hồi) vs "cơ cấu tự cộng dồn" (2007-2012, không xử lý nhanh được) — 3/7 episode rất có thể là 3 sóng của 1 khủng hoảng, N độc lập thật ~4-5 không phải 7; không đổi verdict NO-GO, chỉ đổi cách đọc "phản ví dụ" 2010-08-25
 - 2026-08-13→14 corporate_action BQ integration + paper-report bug fix → `corporate-action-bq-integration-0813.md` — XONG, Việc A/B wire an toàn (6 vòng), SANITY_FACTOR WARN phương án C wire+CONFIRMED 08-14 (1 gap coverage nhẹ còn mở), vòng 6 rc=1/KeyError chủ động bỏ qua
 - 2026-07-31 CAPIT sizing bug 07-21 → `capit-sizing-bug-0721.md` — ĐÓNG, đã fix; user chốt KHÔNG bù phần thiếu
 - 2026-07-28 DGC + TV1 fear-buy due-diligence → `dgc-tv1-fearbuy-discretionary.md` — XONG, cả 2 QUALIFIED, theo dõi discretionary riêng
