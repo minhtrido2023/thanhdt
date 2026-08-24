@@ -102,6 +102,53 @@ except OSError:
 
 if [ "$HAS_REAL" != "yes" ]; then
   GHOST_COUNT="$(grep -c ',GHOST_ORDER,' "$JOURNAL" 2>/dev/null || echo 0)"
+
+  # SỬA 2026-08-24 (false-positive thật, phát hiện thứ Hai 2026-08-24 09:40 ICT): khi TOÀN
+  # BỘ 6 mã net cùng một chiều (vd Monday's BUY_VALUE_FACTOR=0.85 > Friday's 0.70 → mọi mã
+  # net BUY, chân SELL netting về 0 sạch), journal chỉ có HYBRID_DEFER — KHÔNG có nghĩa ghost-
+  # guard/TZ tái phát, mà đúng lịch: hybrid_buy_blocks (config.py) mở block ĐẦU TIÊN lúc 11:00
+  # ICT, hybrid_sell_blocks từ 09:15. Check này chạy 09:40/11:16 — trước 11:00 hoàn toàn có
+  # thể 0 evidence mà không có gì sai. Phân biệt: journal CHỈ có HYBRID_DEFER (không PLACE/
+  # FILL/DONE — đã biết ở HAS_REAL — và không GHOST_ORDER/NO_QUOTE/event lạ khác) VÀ mọi block
+  # được lên lịch cho (các) chiều xuất hiện trong journal vẫn CÒN block chưa kết thúc tính từ
+  # giờ hiện tại → đây là "đang chờ lịch", không phải lỗi. Nếu block đã hết mà journal vẫn
+  # chỉ có HYBRID_DEFER (executor không quay lại đặt lệnh khi tới block) → đó MỚI là bất
+  # thường thật, rơi xuống nhánh RED bên dưới như cũ.
+  HYBRID_STATUS="$(python3 -c "
+import csv, sys, datetime as dt
+sys.path.insert(0, '$WC_ROOT')
+try:
+    from trading_bot.config import DEFAULTS
+    with open('$JOURNAL', encoding='utf-8') as f:
+        rows = list(csv.DictReader(f))
+    events = {r.get('event') for r in rows}
+    if not rows or (events - {'HYBRID_DEFER'}):
+        print('not_pure_hybrid_defer')
+    else:
+        now = dt.datetime.now()
+        width = dt.timedelta(minutes=int(DEFAULTS.get('hybrid_block_min', 15)))
+        sides = {r.get('side') for r in rows}
+        still_ahead = True
+        for side in sides:
+            blocks = DEFAULTS.get('hybrid_buy_blocks' if side == 'buy' else 'hybrid_sell_blocks') or []
+            ends = []
+            for s in blocks:
+                h, m = map(int, s.split(':'))
+                ends.append(now.replace(hour=h, minute=m, second=0, microsecond=0) + width)
+            if not ends or now >= max(ends):
+                still_ahead = False
+                break
+        print('still_ahead' if still_ahead else 'window_exhausted')
+except Exception:
+    print('not_pure_hybrid_defer')
+" 2>/dev/null || echo not_pure_hybrid_defer)"
+
+  if [ "$HYBRID_STATUS" = "still_ahead" ]; then
+    _reset_streak
+    _notify "ℹ️ **paper-main early-check ($SESSION, $NOW_ICT)** — 0 lệnh thật, nhưng KHÔNG phải ghost-guard/TZ: mọi mã hôm nay net cùng một chiều (journal chỉ có HYBRID_DEFER, 0 GHOST_ORDER), lịch HYBRID chưa mở block đầu tiên. Sẽ tự có evidence khi vào block, không cần làm gì."
+    exit 0
+  fi
+
   _notify "🔴 **paper-main early-check ($SESSION, $NOW_ICT)** — journal tồn tại nhưng 0 lệnh PLACE/FILL/DONE thật (GHOST_ORDER: $GHOST_COUNT dòng). Đây đúng dấu hiệu sự cố 07-08/09 (ghost-guard/TZ) — evidence cho EXTREME-regime gate + vol-scale chase-cap hôm nay = 0, không tính vào tiến độ. Cần kiểm tra ngay, đừng đợi báo cáo Paper Programs 07:30."
   exit 1
 fi
