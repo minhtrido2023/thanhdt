@@ -254,6 +254,7 @@ nên nó chỉ tốn tài nguyên + rủi ro vận hành (sự cố Taylor 2026-
 | **Mafee** (thực thi plan-bound) | headless on-demand | `dispatch.sh Mafee "..."` | Chạy lệnh trong plan đã duyệt |
 | **quant-skeptic** (phản biện R&D — công tố) | native | `bin/verify_finding.sh` / `Agent(subagent_type="quant-skeptic")` | Sau finding quan trọng, TRƯỚC khi wire |
 | **fundamental-skeptic** (phản biện due-diligence cơ bản — công tố, thêm 2026-08-23) | native | `Agent(subagent_type="fundamental-skeptic")` | Trước khi chốt QUALIFY/NON case fear-buy/special-situation mới (sleeve discretionary DGC/TV1-style) |
+| **macro-strategist** (đọc vĩ mô VN độc lập — KHÔNG phải công tố, thêm 2026-08-24) | native | `Agent(subagent_type="macro-strategist")` | Trước khi Taylor phân loại nguyên nhân vĩ mô một episode/khủng hoảng — dispatch macro-strategist TRƯỚC, KHÔNG cho biết forward-return/giả thuyết đang test (tránh đồng thuận sớm giữa người đọc vĩ mô và người chạy backtest, cùng lỗi đã cắn ở `margin-valuation-spread-20260823.md` §Đính chính) |
 | **data-ops** (was Winston: DT5G/BQ freshness, pipeline health, feeds) | native | `Agent(subagent_type="data-ops")` / `dispatch.sh Winston "..."` | Check freshness/pipeline/corp-action |
 | **corp-scanner** (corp-action scan hẹp) | native | `Agent(subagent_type="corp-scanner")` | Quét tách/cổ tức một phiên |
 | **risk-auditor** (was Spyros: DD/concentration/leverage/recon, read-only) | native | `Agent(subagent_type="risk-auditor")` / `dispatch.sh Spyros "..."` | Review rủi ro, audit EOD, recon fill↔plan |
