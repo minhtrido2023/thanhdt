@@ -1532,6 +1532,119 @@ Nguồn tuần này: [vietstock — SGT chào bán 148 triệu cp trả nợ / L
 
 ---
 
+### 2026-08-24 — QUÉT SÁNG THỨ HAI (job `Taylor_20260824_010002`, mục đích: BẢO VỆ PHÍA MUA trước 09:00) — 0 case mới · 0 QUALIFY · 1 read-through có CATALYST THẬT (DGC gỡ 1 lý do cảnh báo, hiệu lực ĐÚNG hôm nay) · 1 corp-action trên mã đang giữ (EVF pha loãng)
+
+Cửa sổ tin **21/08 → 23/08** (sau phiên thứ Sáu tới hết Chủ Nhật). Danh mục đang gác **29 mã**
+(13 NH + 16 ngoài NH).
+
+**Phần 1 — anomaly_scan** (`--backfill-days 3`): phiên cuối cache **2026-08-21**, universe **251 mã**
+(H:29 / W:240), **watchlist TƯƠI** (`active_nav` computed_at 2026-08-21 = đúng phiên cuối) — KHÔNG
+có cảnh báo quá hạn. **0 FLOOR2 · 0 IDIOCRASH · 0 CEIL2 · 0 VOLSPIKE** — không tín hiệu nào.
+Cửa sổ chỉ có **1 phiên giao dịch mới** (21/08) vì lượt quét 08-21 đã phủ tới 20/08.
+
+**Phần 2 — quét RỘNG** `bq_cache/ticker/2026.parquet`: 1.275 mã → **694 mã** đạt sàn thanh khoản
+(`max(Close×Volume)` 2026 ≥1 tỷ), IDIOCRASH (ret ≤ −6% ∧ idio ≤ −5% ∧ val ngày ≥1 tỷ), phiên 21/08
+→ **0 sự kiện**. Nới xuống ngưỡng mềm (ret ≤ −4% ∧ idio ≤ −3,5%) ra 25 mã nhưng **KHÔNG mã nào có
+giá trị khớp ngày ≥1 tỷ** (cao nhất VNE 816tr; TCD −26,7% chỉ 316tr, DFF −20,0% chỉ 60tr) ⇒ toàn
+bộ là penny thanh khoản mỏng, không đầu tư được, **0 ứng viên**.
+⚠️ Bối cảnh phải đọc kèm: **VNINDEX 21/08 +1,95%** (1.734,24 → 1.768,12) nên `idio = ret − mret` bị
+kéo xuống ~2pp cho MỌI mã — tức lượt này ngưỡng idio DỄ trip hơn bình thường mà vẫn 0 hit. Kết luận
+"sạch" ở đây là kết luận CHẶT, không phải do gate lỏng.
+
+**Phần 3 — WebSearch tin theo BỘ TỪ KHOÁ NHÓM (10 truy vấn + 1 WebFetch):**
+- **Nhóm chung** (khởi tố/thanh tra/đình chỉ/hạn chế giao dịch/từ chối kiểm toán/huỷ niêm yết):
+  **0 case NIÊM YẾT MỚI** trong cửa sổ. Mọi tên trả về đều đã có kết luận trước (PAT/DGC vụ Lưu Bách
+  Đạt 22-23/07, PC1 **BANNED**, HBS/DVT hạn chế giao dịch từ đầu tháng).
+- **Nhóm ngân hàng (13 mã)** — bổ sung §4.2 `bank_tailrisk_insurance_design_20260814.md`:
+  **0 sự kiện.** Không kiểm soát đặc biệt / chuyển giao bắt buộc / rút tiền hàng loạt / khởi tố lãnh
+  đạo NH niêm yết. Hit duy nhất trong cửa sổ là **cựu Phó GĐ chi nhánh Ngân hàng Hợp tác xã Thanh
+  Hoá bị bắt 20/08** — pháp nhân KHÔNG niêm yết, không thuộc 13 mã đang gác, không read-through.
+- **Nhóm BĐS đầu ngành/hạ tầng (VHM, VRE)** — §6 `vic_family_credit_concentration_20260818.md`:
+  **0 sự kiện tín dụng mới.** Không có chậm/vỡ nợ trái phiếu, hạ bậc tín nhiệm, giải chấp/call
+  margin cổ đông lớn, siết tài sản đảm bảo trong cửa sổ.
+- **Nhóm ngoài NH (16 mã)** — tai nạn nhà máy / thu hồi sản phẩm / mất mỏ-giấy phép / kê biên /
+  tranh chấp lãnh đạo: **0 sự kiện.**
+
+**Phần 4 — PHÍA MUA (câu hỏi bắt buộc của lượt quét): KHÔNG có rủi ro luận-điểm-gãy.**
+`plan_SpaceX_2026-08-24.json` và `plan_ZaloPay_2026-08-24.json` đều **0 orders** (HOLD_ALL cả 2
+account). Lý do HOLD của SpaceX là **signal_hold chính sách** (BAL paper-track tới 2026-09-16),
+KHÔNG phải thiếu tiền. Ứng viên mua duy nhất còn treo là **VPI** (BAL, RE_BACKLOG_BUY, weight 10%,
+carry-forward phiên thứ 4 liên tiếp, nay nằm ở `deferred_orders[]` với `deferred_reason=signal_hold`).
+→ **VPI KHÔNG có tin xấu nào trong cửa sổ** (giá 65.000 ngày 21/08, +2,36%). Nhưng ghi lại một dữ
+kiện NỀN cần theo nếu VPI được kích hoạt mua sau 16/09, vì nó rơi đúng bộ từ khoá nhóm (c) đã duyệt
+08-14: **dư nợ trái phiếu >2.584 tỷ so tiền mặt cuối Q1/2026 chỉ ~143 tỷ, ≥8 lô trái phiếu dùng
+CHÍNH cổ phiếu VPI của lãnh đạo/bên liên quan làm tài sản đảm bảo** (cấu trúc "cầm cố cổ phiếu đảm
+bảo nghĩa vụ trái phiếu" — cùng chữ ký rủi ro mà §6 VIC-family liệt kê). Đây là **nền, không phải
+sự kiện tuần này**; và định giá hiện tại (PE 52,0 · PB 3,63) **không phải case fear-buy** — ghi ở
+đây để lượt sau không phải tra lại từ đầu, KHÔNG phải khuyến nghị chặn lệnh.
+
+**Phần 5 — read-through case đang theo dõi + mã đang giữ dính tin**
+
+- **DGC** (§6, AMBIGUOUS-nghiêng-constructive · ZaloPay giữ 10.000cp, `excluded=True`): ★ **CÓ
+  CATALYST THẬT, HIỆU LỰC ĐÚNG HÔM NAY 24/08.** HOSE **gỡ MỘT lý do cảnh báo** (Quyết định 567 ngày
+  02/07 vì chưa họp ĐHĐCĐ thường niên đúng hạn) sau khi DGC **đã tổ chức ĐHĐCĐ 2026 ngày 13/08**.
+  Giá phản ứng ngay: **41.400 (20/08) → 43.050 (21/08), +3,99%**, bật khỏi đáy tuần trước và trở lại
+  **PB 1,01** (vừa trên book), PE 7,53.
+  ⚠️ **Nhưng đây mới là gỡ 1/3, KHÔNG phải mở cổng.** DGC **VẪN**: (a) **hạn chế giao dịch** do chậm
+  nộp BCTC kiểm toán 2025 quá 45 ngày; (b) **còn một diện cảnh báo KHÁC do kiểm toán ra Ý KIẾN NGOẠI
+  TRỪ trên BCTC 2025** — dữ kiện này chưa từng ghi tường minh trong §6, và nó là gạch ❌ §2 (*"cáo
+  buộc/nghi vấn làm con số BCTC mất giá trị"*) ở dạng nhẹ, phải mang theo khi đọc mọi số của DGC.
+  ⇒ **Không đổi phân loại.** Cổng xác nhận thật của DGC vẫn là **BCTC kiểm toán 2025 nộp xong +
+  ý kiến kiểm toán sạch**, không phải quyết định hành chính hôm nay.
+- **TV1** (§4/§14/§13, QUALIFY — SpaceX 2.300cp + ZaloPay 1.200cp): giá **20.000** (21/08, +0,00%,
+  KL 24.100), PB 1,06 · PE 3,46, vẫn dưới MA50 (21.118). **Cả 2 cổng VẪN CHƯA đóng; cổng (b) nay
+  quá hạn 7 phiên:** (a) kết quả lấy ý kiến bằng văn bản chọn kiểm toán (thực hiện 10/08) — WebSearch
+  + WebFetch trang vietstock TV1 đều **không có tin kết quả sau 14 ngày**; (b) cổ tức tiền mặt 15%
+  vẫn chưa đo được là đã về. Giữ nguyên cảnh báo §14: *"chưa thấy tin xấu" ≠ "đã qua cổng"*.
+- **TV4** (AMBIGUOUS): 14.000 (21/08, +1,45%), PB 1,06 · PE 6,30 — tiếp tục tăng, **+9,4% trong 2
+  phiên** kể từ mức 12.800 ngày 19/08. **Không có tin mới trong cửa sổ.** Cổng nhị phân giữ nguyên và
+  nay còn **~6 ngày**: **ý kiến kiểm toán BCTC bán niên soát xét 2026, hạn ~30/08**. Nhắc lại nguyên
+  văn kết luận tuần trước vì giá đang đi ngược: **giá tăng KHÔNG phải bằng chứng cổng sẽ mở.**
+- **PNJ** (§7, AMBIGUOUS): **39.900 (21/08, +6,97%, KL 4,04 triệu cp)** — phiên tăng mạnh nhất trong
+  chuỗi theo dõi, **+29,8% trên đáy 30.750 (24/07)**. Không có tin mới trong cửa sổ (dữ kiện giảm
+  rủi ro đã ghi tuần trước: kết luận thanh tra 08/08 lượng hoá ~11 tỷ, không trọng yếu). **Không đổi
+  AMBIGUOUS**, nhưng ghi rõ hệ quả thực dụng: **biên an toàn để chờ cổng BCTC Q3/2026 (~cuối 10/2026)
+  nay đã mỏng gần 30%** so với đáy — case này đang mất dần tính "mua khi sợ hãi" theo đúng nghĩa đen.
+- **ICG** (AMBIGUOUS-yếu, mở 08-21): **11.200 (21/08, +3,70%)**, PB 0,63 · PE 7,58 — đã hồi 2 phiên
+  liên tiếp sau chuỗi 4 phiên sàn. **KHÔNG tìm được công bố giải trình HNX** (WebSearch 1 truy vấn)
+  ⇒ **cổng (a) vẫn treo**, cổng (b) BCTC bán niên soát xét ~30/08 còn ~6 ngày. Không đổi phân loại;
+  chặn thanh khoản (vốn hoá ~190 tỷ) vẫn mạnh hơn mọi phân loại.
+- **SGT** (NON, đóng 08-21): 8.570 (+3,13%). Không có gì đổi kết luận — PE 39,1 · PB 0,51, vẫn đúng
+  hình "PB rẻ nhưng lõi không sinh tiền". Không theo tiếp.
+
+**Phần 6 — 2 corp-action/CBTT trên mã ĐANG GIỮ (không phải case fear-buy, nhưng phải ghi ra):**
+- **EVF** (đang giữ, nhóm ngoài NH): **ĐHĐCĐ bất thường 21/08 thông qua 3 nội dung** — (1) chào bán
+  **riêng lẻ tối đa 85 triệu cp (+850 tỷ mệnh giá)**, vốn điều lệ 7.605 tỷ → tối đa ~**8.455 tỷ**
+  (**pha loãng ~11,2%**), vốn thu về để cấp tín dụng giai đoạn 2027-2028; (2) **nới room ngoại lên
+  50%**; (3) bổ sung thành viên độc lập HĐQT. **Đọc theo khung**: đây là tăng vốn TĂNG TRƯỞNG (giá
+  21/08 12.550, +2,03%, PB 0,92), **KHÔNG phải "pha loãng ở đáy để sống sót"** — tức KHÔNG chạm gạch
+  ❌ §2.5. Nới room 50% là chiều dương cho dòng vốn ngoại. **Không escalate**; theo dõi giá phát hành
+  riêng lẻ khi công bố (phát hành dưới book ở PB 0,92 sẽ là pha loãng giá trị sổ sách thật).
+  ⚠️ Một dữ kiện nền đáng nhớ cho §6 (khoảng trống "exposure tài chính → BĐS" đã nêu 08-22): báo chí
+  cùng đợt ghi EVF **rót >11.369 tỷ vào bất động sản** — nếu sau này dựng thước đo exposure BĐS của
+  nhóm NH/tài chính thì EVF là mẫu quan sát được, không phải hộp đen.
+- **CTG** (đang giữ, nhóm NH): CBTT **bất thường** về HĐQT thông qua hợp đồng mua bán tài sản **qua
+  đấu giá giữa VietinBank và người có liên quan của thành viên nội bộ** (21/08). Là giao dịch bên
+  liên quan có cơ chế đấu giá công khai — **không phải sự kiện tail-risk §4.2**, không escalate; ghi
+  để lượt sau không đếm nhầm là tin mới.
+
+**Tổng kết**: **29 mã đang gác** rà qua · 251 mã (anomaly_scan) + **694 mã** (quét rộng) + **10 truy
+vấn tin + 1 WebFetch** · **0 case mới · 0 QUALIFY mới · 0 NON mới** · **watchlist KHÔNG quá hạn** ·
+**0 lệnh mua trên cả 2 account phiên 24/08 ⇒ KHÔNG có luận điểm mua nào bị gãy.**
+**Mốc phải theo, gần → xa: TV4 soát xét bán niên ~30/08 (~6 ngày) + ICG soát xét bán niên ~30/08 →
+TV1 kiểm toán + cổ tức (QUÁ HẠN 7 phiên, kiểm mỗi tuần) → DGC nộp BCTC kiểm toán 2025 + ý kiến sạch
+(gỡ hạn chế giao dịch; hôm nay MỚI gỡ được lý do cảnh báo ĐHĐCĐ) → PNJ Q3 cuối 10/2026.**
+
+Nguồn lượt này: [vietstock — HOSE gỡ một lý do cảnh báo, cổ phiếu DGC vẫn kẹt trong diện hạn chế giao dịch](https://vietstock.vn/2026/08/hose-go-mot-ly-do-canh-bao-co-phieu-dgc-van-ket-trong-dien-han-che-giao-dich-830-1483695.htm) ·
+[cafef — Tin vui cho cổ đông Hoá chất Đức Giang (21/08)](https://cafef.vn/tin-vui-cho-co-dong-hoa-chat-duc-giang-188260821150111887.chn) ·
+[baodautu — EVF nới room ngoại lên 50%, tăng vốn và kiện toàn bộ máy](https://baodautu.vn/evf-noi-room-ngoai-len-50-tang-von-va-kien-toan-bo-may-d679205.html) ·
+[antt — EVF chào bán riêng lẻ 85 triệu cp, tăng vốn thêm 850 tỷ](http://antt.vn/evf-du-kien-chao-ban-rieng-le-85-trieu-co-phieu-tang-von-them-850-ty-dong-404249.htm) ·
+[vietstock — Nhịp đập Thị trường 21/08 (VN-Index bứt phá, khối ngoại mua ròng)](https://vietstock.vn/2026/08/nhip-dap-thi-truong-2108-khoi-ngoai-quay-lai-mua-rong-vn-index-but-pha-cung-thanh-khoan-hoi-phuc-1636-1483481.htm) ·
+[dantri — TV1 bị cả 4 Big4 từ chối kiểm toán, lấy ý kiến cổ đông 10/08](https://dantri.com.vn/kinh-doanh/chu-tich-vua-bi-bat-cong-ty-dien-bi-ca-4-ben-big-4-tu-choi-kiem-toan-20260701145835409.htm) ·
+[docnhanh — bắt cựu Phó GĐ Ngân hàng Hợp tác xã CN Thanh Hoá 20/08 (KHÔNG niêm yết)](https://docnhanh.vn/phap-luat/thanh-hoa-bat-tam-giam-cuu-pho-giam-doc-ngan-hang-bi-cao-buoc-chiem-doat-65-ty-dong-tintuc1049408)
+
+---
+
 ## 14. TV1 — cập nhật 2026-08-10 (Mike, due-diligence trực tiếp theo yêu cầu user, đúng ngày cổng T3)
 
 **Q2/2026 nay là số THẬT, không còn stale carry-forward.** Check 08-04 từng gắn cờ nghi ngờ dòng
