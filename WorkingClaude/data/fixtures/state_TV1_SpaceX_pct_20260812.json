@@ -5,7 +5,7 @@
   "ticker": "TV1",
   "company": "PECC1 — CTCP Tư vấn Xây dựng Điện 1 (UPCOM)",
   "account": "SpaceX",
-  "account_no": "0002023347",
+  "account_no": "[SPACEX-ACCOUNT]",
   "book": "DISCRETIONARY_SPECIAL",
   "cash_only": true,
   "cash_only_note": "Lệnh tiền mặt thuần — engine gắn cash_only=true vào mọi order chèn ra → executor KHÔNG gắn gói vay 1841 (bug TV1 07-28, DNSE reject UPCOM dưới gói này). Fix Taylor_20260728_033332.",

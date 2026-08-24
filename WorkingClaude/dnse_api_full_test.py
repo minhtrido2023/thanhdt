@@ -2,8 +2,8 @@
 """Test đầy đủ DNSE API: auto-OTP → place → poll → modify → cancel.
 
 Chạy:
-  python dnse_api_full_test.py                        # SpaceX acc 0002023347, symbol FPT
-  python dnse_api_full_test.py --account 0001743768   # account cũ
+  python dnse_api_full_test.py                        # SpaceX acc [SPACEX-ACCOUNT], symbol FPT
+  python dnse_api_full_test.py --account [ZALOPAY-ACCOUNT]   # account cũ
   python dnse_api_full_test.py --symbol HPG           # đổi mã
   python dnse_api_full_test.py --skip-otp             # nếu token cache còn hạn
 
@@ -22,6 +22,7 @@ if hasattr(sys.stdout, "reconfigure"):
 
 from dnse_api import DNSEClient, DNSEError
 from trading_bot.vn_market import tick_size
+from trading_bot.account_ids import SPACEX as SPACEX_ACCOUNT, ZALOPAY as ZALOPAY_ACCOUNT
 
 
 # ─────────────────────── helpers ────────────────────────
@@ -59,7 +60,7 @@ def order_status(o):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--account", default="0002023347", help="tiểu khoản DNSE")
+    ap.add_argument("--account", default=SPACEX_ACCOUNT, help="tiểu khoản DNSE")
     ap.add_argument("--symbol", default="FPT")
     ap.add_argument("--qty", type=int, default=100)
     ap.add_argument("--skip-otp", action="store_true",

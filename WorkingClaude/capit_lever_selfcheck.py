@@ -57,6 +57,7 @@ from trading_bot.plan import (PlannedOrder, TradePlan, apply_capit_lever,  # noq
                              margin_day_approval, lever_live_preflight)
 from trading_bot.executor import Executor  # noqa: E402
 from trading_bot.config import load_config, EXEC_DIR  # noqa: E402
+from trading_bot.account_ids import SPACEX as SPACEX_ACCOUNT, ZALOPAY as ZALOPAY_ACCOUNT
 
 GOLIVE = os.path.join(HERE, "deploy_golive_dt5g_v4", "golive_recommend_v23.py")
 REAL_RULES = os.path.join(HERE, "data", "trading_rules.json")
@@ -968,7 +969,7 @@ with tempfile.TemporaryDirectory() as TMP:
 
     def mkbroker(**kw):
         b = DNSEBroker.__new__(DNSEBroker)
-        b.account_id = "0002023347"
+        b.account_id = SPACEX_ACCOUNT
         b.label = "SpaceX"
         b.client = _FakeDNSEClient(**kw)
         b._lever_pkg_cache = {}

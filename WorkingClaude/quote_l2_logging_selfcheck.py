@@ -28,6 +28,7 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, ROOT)
 sys.path.insert(0, os.environ.get("QUOTE_L2_MIKE_BIN", os.path.join(ROOT, "mike", "bin")))
 from trading_bot.brokers import DNSEBroker  # noqa: E402
+from trading_bot.account_ids import SPACEX as SPACEX_ACCOUNT, ZALOPAY as ZALOPAY_ACCOUNT
 
 fails = []
 
@@ -49,7 +50,7 @@ RAW = {"symbol": "TV1", "matchPrice": 20300, "totalVolumeTraded": 39500}
 
 
 def fresh_broker(tmp, symbol_log=None):
-    b = DNSEBroker(account_id="0002023347", label="SpaceX")
+    b = DNSEBroker(account_id=SPACEX_ACCOUNT, label="SpaceX")
     b._raw_log = os.path.join(tmp, "dnse_raw_2099-01-01.jsonl")
     return b
 
@@ -70,7 +71,7 @@ with tempfile.TemporaryDirectory() as tmp:
     r = recs[0]
     check("A2 kind = 'quote_l2' (kind MỚI, không đụng kind cũ)", r["kind"] == "quote_l2", r.get("kind"))
     check("A3 có account_no + account_label ở TOP-LEVEL (§12 — file dùng chung nhiều account)",
-          r["account_no"] == "0002023347" and r["account_label"] == "SpaceX")
+          r["account_no"] == SPACEX_ACCOUNT and r["account_label"] == "SpaceX")
     p = r["payload"]
     check("A4 giữ ĐỦ 10 mức bid (payload thật có 11 mức → cắt đúng 10)",
           len(p["bids"]) == 10 and p["n_bid"] == 10, f"{p['n_bid']}")
@@ -197,7 +198,7 @@ with tempfile.TemporaryDirectory() as tmp:
 DATE = "2026-08-11"      # ngày QUÁ KHỨ, có đủ orders/positions/balances/ppse của cả 2 account
 SRC = os.environ.get("QUOTE_L2_REAL_LOG",
                      os.path.join(ROOT, "data", "execution_logs", f"dnse_raw_{DATE}.jsonl"))
-ACCTS = [("SpaceX", "0002023347"), ("ZaloPay", "0001743768")]
+ACCTS = [("SpaceX", SPACEX_ACCOUNT), ("ZaloPay", ZALOPAY_ACCOUNT)]
 
 if not os.path.exists(SRC):
     check(f"E0 có file dnse_raw THẬT {DATE} để đối soát", False, "thiếu file")

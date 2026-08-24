@@ -8,11 +8,12 @@ Mọi call chỉ truy vấn — không tạo/sửa/hủy lệnh nào.
 import json
 import sys
 import traceback
+from trading_bot.account_ids import SPACEX as SPACEX_ACCOUNT, ZALOPAY as ZALOPAY_ACCOUNT
 
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-TARGET_ACCT = "0001743768"   # tiểu khoản DNSE theo directive
+TARGET_ACCT = ZALOPAY_ACCOUNT   # tiểu khoản DNSE theo directive
 SYMBOL = "HPG"
 
 

@@ -30,6 +30,7 @@ import sys
 WC_ROOT = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, WC_ROOT)
 
+from trading_bot.account_ids import SPACEX as SPACEX_ACCOUNT, ZALOPAY as ZALOPAY_ACCOUNT
 from dnse_api import DNSEClient
 
 FAILS = []
@@ -58,24 +59,24 @@ def make_client(loan_default):
 
 print("=== L1 (client body) default present → loanPackageId ALWAYS attached ===")
 c, cap = make_client(1841)
-c.place_order("0002023347", "FPT", 100, "buy", price=100000)
+c.place_order(SPACEX_ACCOUNT, "FPT", 100, "buy", price=100000)
 check(cap["body"].get("loanPackageId") == 1841,
       "no explicit id → account default 1841 attached (BAL/LAG/CAPIT unchanged)")
 
 c, cap = make_client(1841)
-c.place_order("0002023347", "TV1", 400, "buy", price=19900, loan_package_id=1122)
+c.place_order(SPACEX_ACCOUNT, "TV1", 400, "buy", price=19900, loan_package_id=1122)
 check(cap["body"].get("loanPackageId") == 1122,
       "explicit loan_package_id=1122 → body carries 1122 (TV1/UPCOM correct pkg)")
 check("loanPackageId" in cap["body"],
       "field PRESENT (regression guard: fix must never OMIT the required key)")
 
 c, cap = make_client(1841)
-c.place_order("0002023347", "FPT", 100, "buy", price=100000, loan_package_id=0)
+c.place_order(SPACEX_ACCOUNT, "FPT", 100, "buy", price=100000, loan_package_id=0)
 check(cap["body"].get("loanPackageId") == 1841,
       "loan_package_id=0 falls back to default 1841 (0 falsy — resolver never returns 0)")
 
 c, cap = make_client(None)  # ZaloPay: no default configured
-c.place_order("0001743768", "MBB", 100, "buy", price=25000)
+c.place_order(ZALOPAY_ACCOUNT, "MBB", 100, "buy", price=25000)
 check("loanPackageId" not in cap["body"],
       "no account default (ZaloPay) → no key, unchanged natural cash behavior")
 
@@ -109,7 +110,7 @@ class FakeClient:
 
 def make_broker(client):
     b = DNSEBroker.__new__(DNSEBroker)
-    b.account_id = "0002023347"
+    b.account_id = SPACEX_ACCOUNT
     b.label = "SpaceX"
     b.client = client
     b._loan_pkg_cache = {}

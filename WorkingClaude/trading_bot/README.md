@@ -157,7 +157,7 @@ python test_trading_bot.py                # smoke test offline
 ## TODO / nâng cấp sau
 
 - [ ] Live đặt lệnh khi PHS cấp client_id/secret (test 1 lệnh lô nhỏ trước).
-- [x] DNSE verified trên TK thật 0001743768 (2026-06-12): inquiry + quote +
+- [x] DNSE verified trên TK thật [ZALOPAY-ACCOUNT] (2026-06-12): inquiry + quote +
   NAV OK; `loanPackageId=1258` (gói ZaloPay, phí 0.07%) đã set trong creds.
   Ghi chú schema: market data đơn vị NGHÌN theo board (G1 lô chẵn);
   balances lồng `stock`; positions sellable=`tradeQuantity`.

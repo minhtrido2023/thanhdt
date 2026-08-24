@@ -19,7 +19,7 @@ fi
 # Belt-and-suspenders: refuse to commit if a known secret pattern slipped in.
 echo "==> Secret gate…"
 if git -c core.quotepath=false ls-files -o -c --exclude-standard -z 2>/dev/null \
-   | xargs -0 grep -lEI '(-----BEGIN [A-Z ]*PRIVATE KEY-----[A-Za-z0-9+/]|[0-9]{8,10}:[A-Za-z0-9_-]{35})' 2>/dev/null \
+   | xargs -0 grep -lEI '(-----BEGIN [A-Z ]*PRIVATE KEY-----[A-Za-z0-9+/]|[0-9]{8,10}:[A-Za-z0-9_-]{35}|000[0-9]{7})' 2>/dev/null \
    | grep -vE 'tools/sync_claude_history\.py|\.template\.json|^backup\.sh$' | grep . ; then
   echo "!! possible secret detected in tracked/untracked files above — aborting." >&2
   exit 1

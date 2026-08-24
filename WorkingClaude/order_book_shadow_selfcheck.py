@@ -87,12 +87,13 @@ with tempfile.TemporaryDirectory() as tmp:
 import tempfile as _tf  # noqa: E402
 from trading_bot.brokers import DNSEBroker  # noqa: E402
 from trading_bot.vn_market import now_ict  # noqa: E402
+from trading_bot.account_ids import SPACEX as SPACEX_ACCOUNT, ZALOPAY as ZALOPAY_ACCOUNT
 
 with _tf.TemporaryDirectory() as tmp:
     os.environ["DNSE_L2_LOG_SEC"] = "0"
     sink = os.path.join(tmp, "shadow.jsonl")
     os.environ["ORDER_BOOK_TEST_SINK"] = sink
-    b = DNSEBroker(account_id="0002023347", label="SpaceX")
+    b = DNSEBroker(account_id=SPACEX_ACCOUNT, label="SpaceX")
     b._raw_log = os.path.join(tmp, "dnse_raw_2099-01-01.jsonl")
     # Neo vào đồng hồ ICT ngay lúc chạy (KHÔNG hằng số ngày) — test phải đúng dưới `env -u TZ`
     # và không được tự mốc theo thời gian (§16 + §23 hệ luận 1).

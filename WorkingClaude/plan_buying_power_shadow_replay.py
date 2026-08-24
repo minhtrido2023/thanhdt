@@ -36,11 +36,12 @@ sys.path.insert(0, WORKDIR)
 
 import bot_execute
 from trading_bot.plan import (PlannedOrder, TradePlan, load_plan, net_offsetting_orders)
+from trading_bot.account_ids import SPACEX as SPACEX_ACCOUNT, ZALOPAY as ZALOPAY_ACCOUNT
 
 PASS = FAIL = 0
 
-SPACEX_NO = "0002023347"
-ZALOPAY_NO = "0001743768"
+SPACEX_NO = SPACEX_ACCOUNT
+ZALOPAY_NO = ZALOPAY_ACCOUNT
 
 
 def check(name, cond, detail=""):

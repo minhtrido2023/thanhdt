@@ -5,6 +5,10 @@ telegram_run_*.log
 # Secrets — credentials, tokens, API keys
 secrets/
 
+# Execution logs / audit evidence — may contain real account numbers
+data/execution_logs/*_evidence.txt
+data/execution_logs/*_evidence.json
+
 # Python
 __pycache__/
 *.pyc

@@ -28,6 +28,7 @@ import tempfile
 
 WC_ROOT = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, WC_ROOT)
+from trading_bot.account_ids import SPACEX as SPACEX_ACCOUNT, ZALOPAY as ZALOPAY_ACCOUNT
 os.environ.setdefault("MIKE_BOT_TEST_MODE", "1")          # §5b coding_guidelines
 
 from trading_bot import price_frame as pf                          # noqa: E402
@@ -49,13 +50,13 @@ def check(name, cond, detail=""):
 # ══════════════════════════════════════════════════════════════════════════════════════
 
 # `data/execution_logs/dnse_raw_2026-08-14.jsonl`, kind=positions, ts=2026-08-14T19:10:23,
-# account ZaloPay (0001743768). Đây là bản đọc bắt được DNSE ĐANG GIỮA cú lật hệ quy chiếu.
+# account ZaloPay ([ZALOPAY-ACCOUNT]). Đây là bản đọc bắt được DNSE ĐANG GIỮA cú lật hệ quy chiếu.
 BID_LOTS_191023 = [
-    {"id": 2766555, "marketType": "STOCK", "symbol": "BID", "accountNo": "0001743768",
+    {"id": 2766555, "marketType": "STOCK", "symbol": "BID", "accountNo": ZALOPAY_ACCOUNT,
      "status": "OPEN", "loanPackageId": 1826, "side": "NB", "accumulateQuantity": 107,
      "tradeQuantity": 100, "closedQuantity": 0, "openQuantity": 107,
      "costPrice": 36962.6168, "marketPrice": 35800, "breakEvenPrice": 37071.7987},
-    {"id": 2697547, "marketType": "STOCK", "symbol": "BID", "accountNo": "0001743768",
+    {"id": 2697547, "marketType": "STOCK", "symbol": "BID", "accountNo": ZALOPAY_ACCOUNT,
      "status": "OPEN", "loanPackageId": 1258, "side": "NB", "accumulateQuantity": 900,
      "tradeQuantity": 300, "closedQuantity": 600, "openQuantity": 300,
      "costPrice": 40316.6667, "marketPrice": 38850, "breakEvenPrice": 40436.1693},

@@ -634,7 +634,7 @@ Wired regime-conditional deploy vehicle: base parking = yieldcombo, deep-cheap d
 - **V2.4** = leverage-free core (custom30V NEUTRAL-only parking + recovery-park leverage-free). **Go-live 2026-06-30.**
 - **V2.5** = V2.4 + the LEVERAGE layer (was "V2.4-L"; renamed for simplicity). The ONLY difference vs V2.4 = leverage.
   - = state-blind + PE-gate recovery-LEVER, **MGE 1.5** (Spyros-approved, MGE_HARD 1.65), deploy vehicle = yieldcombo (pbcombo rejected), + safety stack: 4 entry-guards + episode breaker −15% (Spyros) + NAV≤100B auto-disable (B3) + PE-freshness fail-closed (B4).
-  - **Account: 0002023347** (DNSE RocketX margin, loan_package_id=1840, borrow 12.5%/yr, 28 custom30V eligible collateral) — user-confirmed 2026-06-27.
+  - **Account: [SPACEX-ACCOUNT]** (DNSE RocketX margin, loan_package_id=1840, borrow 12.5%/yr, 28 custom30V eligible collateral) — user-confirmed 2026-06-27.
   - **@50B: 30.05% / Sharpe 1.82 / MaxDD −20.1 / Calmar 1.49 / self-check 0** at real 12.5% borrow (lever net +1.00pp vs leverage-free).
   - Risk layering (Mafee-confirmed): Spyros −15% NAV → S4 internal ~−31% NAV → DNSE call −44.4% **portfolio** (=−66.7% NAV @1.5x). System always cuts well before the broker.
   - **Status:** R&D-complete, all 4 blockers cleared. Live-activation = POST-go-live (needs live-recommend integration). Go-live 2026-06-30 = V2.4 leverage-free, unaffected. All V2.5 env knobs default OFF = byte-identical.

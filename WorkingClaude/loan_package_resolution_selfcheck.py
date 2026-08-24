@@ -18,6 +18,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from trading_bot.brokers import DNSEBroker              # noqa: E402
 from trading_bot.plan_funding_gate import _effective_loan_package  # noqa: E402
+from trading_bot.account_ids import SPACEX as SPACEX_ACCOUNT, ZALOPAY as ZALOPAY_ACCOUNT
 
 ACCOUNT_DEFAULT = 1841          # gói default SpaceX (mainboard-only)
 UPCOM_PKG = 1122                # gói hợp lệ cho mã UPCOM (ca TV1 thật 07-29)
@@ -57,7 +58,7 @@ class Order:
 
 
 def make_broker(valid_ids):
-    b = DNSEBroker(account_id="0002023347", label="SpaceX")
+    b = DNSEBroker(account_id=SPACEX_ACCOUNT, label="SpaceX")
     b.client = FakeClient(valid_ids)
     b._raw_log = None             # không ghi vào data/execution_logs/dnse_raw_*.jsonl thật
     return b

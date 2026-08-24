@@ -5,7 +5,7 @@
   "ticker": "TV1",
   "company": "PECC1 — CTCP Tư vấn Xây dựng Điện 1 (UPCOM)",
   "account": "ZaloPay",
-  "account_no": "0001743768",
+  "account_no": "[ZALOPAY-ACCOUNT]",
   "book": "DISCRETIONARY_SPECIAL",
   "cash_only": true,
   "cash_only_note": "ZaloPay là account CASH-ONLY (không margin) nên cash_only=true vừa đúng bản chất account vừa đúng thiết kế book discretionary. Nó cũng là thứ giữ executor giải gói vay theo MÃ cho UPCOM (bug TV1 07-28 / DRI 08-07).",
