@@ -43,7 +43,8 @@ def extract_block():
     return m.group(1)
 
 
-def run(block, records, label="", unreadable=False, resolved=None):
+def run(block, records, label="", unreadable=False, resolved=None,
+        inbox=None):
     """Chạy khối trên một wc_root giả.
 
     records=None ⇒ không tạo file. unreadable=True ⇒ tạo _rejected.jsonl là THƯ MỤC, tức
@@ -76,6 +77,15 @@ def run(block, records, label="", unreadable=False, resolved=None):
                     {"key": hashlib.sha256(raw.strip().encode("utf-8", "replace")
                                            ).hexdigest(), "by": "test",
                      "note": "test"}, ensure_ascii=False) + "\n")
+    if inbox is not None:
+        # bus/inbox/<agent>.jsonl — nguồn ỨNG VIÊN RETRY. Harness cũ KHÔNG tạo thư mục này,
+        # nên các case cũ vẫn đi đúng nhánh "không có gợi ý" (đó là hành vi phải giữ).
+        os.makedirs(os.path.join(d, "mike", "bus", "inbox"))
+        for who, evs in inbox.items():
+            with open(os.path.join(d, "mike", "bus", "inbox", who + ".jsonl"), "w",
+                      encoding="utf-8") as f:
+                for ev in evs:
+                    f.write(json.dumps(ev, ensure_ascii=False) + "\n")
     warns, oks, lines = [], [], []
     ns = {"os": os, "json": json, "wc_root": d, "lines": lines,
           "W": lambda s: warns.append(s), "OK": lambda s: oks.append(s)}
@@ -185,6 +195,36 @@ def main():
     w, o, _l, e = run(block, [rec(old, who="Taylor")], resolved=[rec(old, who="Taylor")])
     check("bản ghi CŨ đã xử lý ⇒ vẫn chỉ là OK, không đếm vào 24h",
           e is None and not w and len(o) == 1, f"W={w} OK={o}")
+
+    print("\ncase_ung_vien_retry")
+    # rec() đặt argv[4] = "nguoi" ⇒ đó là trace_id mà khối 5b dùng để khớp.
+    t0 = now - dt.timedelta(minutes=30)
+    rej = t0.strftime("%Y-%m-%dT%H:%M:%SZ")
+    hit = (t0 + dt.timedelta(seconds=40)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    late = (t0 + dt.timedelta(minutes=40)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    ev = {"event_id": "abcd1234-x", "ts": hit, "agent_id": "Taylor",
+          "event_type": "status", "topic": "chu-de-viet-lai", "trace_id": "nguoi"}
+
+    w, o, _l, e = run(block, [rec(rej, who="Taylor")], inbox={"Taylor": [ev]})
+    check("có event cùng trace_id ≤15 phút sau ⇒ W nêu ỨNG VIÊN RETRY",
+          bool(w) and "ỨNG VIÊN RETRY" in w[0] and "abcd1234" in w[0], w)
+    check("vẫn là W (gợi ý KHÔNG được tự đóng báo động thay người)",
+          len(w) == 1 and not o and e is None, f"W={w} OK={o} exc={e!r}")
+
+    w, o, _l, e = run(block, [rec(rej, who="Taylor")],
+                      inbox={"Taylor": [dict(ev, ts=late)]})
+    check("event đến SAU 15 phút ⇒ KHÔNG tính là ứng viên",
+          bool(w) and "KHÔNG tìm thấy ứng viên retry" in w[0], w)
+
+    w, o, _l, e = run(block, [rec(rej, who="Taylor")],
+                      inbox={"Taylor": [dict(ev, trace_id="job-khac")]})
+    check("trace_id KHÁC ⇒ KHÔNG tính là ứng viên (không đổ oan event lạ)",
+          bool(w) and "KHÔNG tìm thấy ứng viên retry" in w[0], w)
+
+    w, o, _l, e = run(block, [rec(rej, who="Taylor")],
+                      inbox={"Taylor": [{"ts": hit}, {"khong": "co ts"}, ev]})
+    check("inbox có dòng méo (thiếu trace_id/thiếu ts) ⇒ vẫn tìm ra ứng viên, không nổ",
+          e is None and bool(w) and "ỨNG VIÊN RETRY" in w[0], f"W={w} exc={e!r}")
 
     print("\ncase_CONTROL_khong_duoc_keu_oan")
     w, o, _l, e = run(block, [])

@@ -912,6 +912,42 @@ if os.path.exists(_qf):
         def _q_who(_r):
             _a = _r.get("argv")
             return str(_a[0]) if isinstance(_a, list) and _a else "?"
+
+        # ỨNG VIÊN RETRY — 6/6 ca cách ly tính tới 2026-08-24 đều được chính agent ghi lại
+        # thành công trong vòng 47 giây, nhưng thông điệp cũ không nói điều đó nên mỗi ca đẻ
+        # ra một job ops-autofix chỉ để đi tra lại đúng việc này. Đây là GỢI Ý bằng chứng,
+        # KHÔNG phải auto-resolve: sidecar vẫn phải do người/agent đánh dấu sau khi đối chiếu
+        # nội dung (hàng đợi này là pháp y — xem incident 2026-08-18-rejected-queue-no-closure).
+        # Toàn bộ khối bọc try: thiếu bus/inbox (harness selfcheck) ⇒ không có gợi ý, không nổ.
+        _qcand = []
+        try:
+            for _r in _q24:
+                _a = _r.get("argv") if isinstance(_r.get("argv"), list) else []
+                _ag = str(_a[0]) if _a else ""
+                _tr = str(_a[4]) if len(_a) >= 5 else ""
+                _ets = str(_r.get("ts") or "")
+                _fp = os.path.join(wc_root, "mike", "bus", "inbox", _ag + ".jsonl")
+                if not (_ag and _ets and os.path.exists(_fp)):
+                    continue
+                _t0 = _dt.datetime.strptime(_ets, "%Y-%m-%dT%H:%M:%SZ")
+                _t1 = (_t0 + _dt.timedelta(minutes=15)).strftime("%Y-%m-%dT%H:%M:%SZ")
+                with open(_fp, encoding="utf-8", errors="replace") as _bf:
+                    for _bl in _bf:
+                        try:
+                            _be = json.loads(_bl)
+                            _bts = str(_be.get("ts") or "")
+                            if not (_ets < _bts <= _t1):
+                                continue
+                            if _tr and str(_be.get("trace_id") or "") != _tr:
+                                continue
+                            _qcand.append(
+                                f"{_ag}/{_ets} → {_bts} event {str(_be.get('event_id'))[:8]} "
+                                f"topic {str(_be.get('topic'))[:60]}")
+                            break
+                        except Exception:
+                            continue
+        except Exception:
+            _qcand = []
         _who = sorted({_q_who(_r) for _r in _q24})
         _why = sorted({str(_r.get("reason") or "?").split("\n")[0][:110] for _r in _q24})
         W(f"append_event.sh đã CÁCH LY {len(_q24)} bản ghi trong 24h qua "
@@ -924,7 +960,13 @@ if os.path.exists(_qf):
           f"— đọc đúng `Lý do` dưới đây, đừng mặc định là lỗi quote. "
           f"Agent: {_who}. Lý do: {_why}. "
           f"Xem `tail bus/_rejected.jsonl`; sửa đúng nguyên nhân ở call site rồi ghi LẠI event "
-          f"(hàng đợi này là PHÁP Y, không ai tự phát lại — payload hỏng phát lại vẫn hỏng).")
+          f"(hàng đợi này là PHÁP Y, không ai tự phát lại — payload hỏng phát lại vẫn hỏng)."
+          + (f" ỨNG VIÊN RETRY đã lên bus (cùng agent + cùng trace_id, ≤15 phút sau): "
+             f"{_qcand} — nhiều khả năng agent đã TỰ ghi lại; ĐỐI CHIẾU nội dung rồi đánh dấu "
+             f"bằng `bin/bus_rejected_resolve.py --index N --by <ai> --note ...`, đừng bỏ qua "
+             f"bước đánh dấu (không đánh dấu = báo động lặp lại suốt 24h)." if _qcand else
+             " KHÔNG tìm thấy ứng viên retry nào trên bus trong 15 phút sau đó — khả năng cao "
+             "event MẤT THẬT, phải dựng lại nội dung từ argv rồi ghi lại."))
     elif _qtot:
         OK(f"Hàng đợi cách ly append_event.sh: {_qtot} bản ghi cũ trong file hiện tại, "
            f"24h qua không có ca CHƯA XỬ LÝ"
