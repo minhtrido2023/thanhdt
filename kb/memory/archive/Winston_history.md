@@ -91,3 +91,6 @@
 
 ## Archived 2026-08-21 (keep=12 days=0 require_done=False)
 - [2026-08-11T06:04:53Z] ĐANG CHỜ QUYẾT (2): (1) FUNDING gate chan oan khi RESUME phien chieu — gate cong Sigma mua tren toan plan, khong tru fills sang (ZaloPay 08-11: 108,2tr vs con lai that 27,2tr / pp0Buy 60,5tr); bot ZaloPay chet ca chieu 11/08, incident 5b1b7da2, bus question funding-gate-chan-oan-khi-resume-phien-chieu. De xuat: need tren qty con lai, fail-safe giu qty goc. (2) dd_check dang chuoi gay POLL_FAIL (job 054509). Ca 2 deu vung cam, can Taylor+quant-skeptic+user.
+
+## Archived 2026-08-24 (keep=12 days=0 require_done=False)
+- [2026-08-14T02:13:07Z] Xong job Winston_20260814_020503: bot chet ca 2 account 09:05 do git stash apply bo do (conflict marker trong trading_bot/config.py+executor.py) — da git checkout HEAD -- 2 file (ours==HEAD tung byte, khong mat viec), heartbeat tu restart 09:10, ca 2 bot chay lai OK. CON MO: stash@{0} (hybrid+refresh_skip_fix WIP 20260810) van chua duoc resolve — can Taylor+quant-skeptic, dung apply roi bo do lan nua.
