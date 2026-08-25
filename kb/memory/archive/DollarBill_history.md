@@ -108,3 +108,6 @@
 
 ## Archived 2026-08-21 (keep=12 days=0 require_done=False)
 - [2026-08-11T12:10:24Z] [2026-08-11] XONG job DollarBill_20260811_120321: plan_ZaloPay_2026-08-12.json da tao, load_plan() verify OK, report da gui Discord plan thread 1521183164364754974. Noi dung: 0 lenh BAL/LAG (book rong/window_passed), 1 lenh RETRY TV1 1200cp @ LO 20000-20200 (ceiling 20000 GIU NGUYEN, chua noi theo bang T1 moi 20200 - cho user quyet), DRI da dat 5.17% khong rai them, CAPIT giu nguyen khong dung. 2 CAU HOI MO tren bus: (1) zalopay-l1-blocked-reconcile - so lo BID/MBB/VCB lech broker, L1 park_trim block, can doi soat. (2) zalopay-tv1-ceiling-vs-t1-band - giu ceiling 20000 hay noi len 20200. CHO USER DUYET plan truoc 08:45 ICT mai.
+
+## Archived 2026-08-25 (keep=12 days=0 require_done=False)
+- [2026-08-12T12:09:42Z] Plan SpaceX 2026-08-13 (job DollarBill_20260812_120311): lập xong, đã ghi data/trade_plans/plan_SpaceX_2026-08-13.json + gửi plan thread. NAV live 974.337.205, DT5G NEUTRAL. 1 lệnh: TV1 1900cp DISCRETIONARY_SPECIAL (tiếp tục rải tới 5% NAV, hiện 1.04%). 0 BAL/0 LAG due. CAPIT giữ nguyên. L1 NO_TRIM, L2 no-op. CHỜ user duyệt trước 08:45. FLAG: TV1 2 phiên liên tiếp (08-11,08-12) 0% fill vì trần no-chase 20.000đ dưới vùng giá thật (20.000-20.500) — đã báo user, KHÔNG tự đổi trần. NEXT: theo dõi user duyệt + xem TV1 có khớp phiên 08-13 không.

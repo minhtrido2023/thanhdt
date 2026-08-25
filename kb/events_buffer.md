@@ -803,3 +803,18 @@
 - [2026-08-25T11:46:30Z] Taylor/heartbeat — Taylor_20260825_113846: {"status": "done", "note": "Phan A+B xong, 2 finding da post len bus, report tai agents/Taylor/research/margin_cap_recovery_forensic_20260825.md"}
 - [2026-08-25T11:11:18Z] Winston/finding — new-listings-daily: {"date": "2026-08-25", "lookback_days": 90, "total_new": 1, "needs_manual_rating": 0, "fresh_ipo": 0, "research_queue": [], "snapshot": "/home/trido/thanhdt/WorkingClaude/data/new_listings.csv", "note": "0 mã mới < 20Q lịch sử → cần 8L manual rating. Taylor flag để đọc bản cáo bạch + tạo override documented reason+expiry."}
 - [2026-08-25T11:40:22Z] Winston/status — corp-action-scan-daily: {"scanned_universe": "tav2_bq.ticker_prune", "candidates_this_run": 0, "fresh_alerts_this_run": 0, "resolved_since_last_run": [], "still_pending_count": 0, "still_pending": [], "stale_pending_over_7d": []}
+
+## Consolidation 2026-08-25T12:13:32Z
+- [2026-08-25T12:09:55Z] DollarBill/heartbeat — DollarBill_20260825_120939: {"status": "in_progress", "note": "đọc DT5G state + active NAV + recommendations ZaloPay"}
+- [2026-08-25T12:10:40Z] DollarBill/heartbeat — DollarBill_20260825_120939: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20260825_120939", "source": "watcher"}
+- [2026-08-25T12:10:41Z] DollarBill/heartbeat — DollarBill_20260825_120940: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20260825_120940", "source": "watcher"}
+- [2026-08-25T12:11:40Z] DollarBill/heartbeat — DollarBill_20260825_120939: {"status": "still_running", "elapsed_min": 2, "job_id": "DollarBill_20260825_120939", "source": "watcher"}
+- [2026-08-25T12:11:41Z] DollarBill/heartbeat — DollarBill_20260825_120940: {"status": "still_running", "elapsed_min": 2, "job_id": "DollarBill_20260825_120940", "source": "watcher"}
+- [2026-08-25T12:12:40Z] DollarBill/heartbeat — DollarBill_20260825_120939: {"status": "still_running", "elapsed_min": 3, "job_id": "DollarBill_20260825_120939", "source": "watcher"}
+- [2026-08-25T12:12:41Z] DollarBill/heartbeat — DollarBill_20260825_120940: {"status": "in_progress", "note": "Plan SpaceX 08-26 da xong, dang gui Discord + bus"}
+- [2026-08-25T12:12:42Z] DollarBill/heartbeat — DollarBill_20260825_120940: {"status": "still_running", "elapsed_min": 3, "job_id": "DollarBill_20260825_120940", "source": "watcher"}
+- [2026-08-25T12:13:12Z] DollarBill/decision — plan-2026-08-26: {"account": "SpaceX", "plan_date": "2026-08-26", "orders": 0, "deferred": ["VIC-BAL (signal_hold paper-track toi 2026-09-16)"], "active_nav_vnd": 974642760, "dt5g_state": "NEUTRAL", "l1_park_trim": "NO_TRIM", "l2_jit_unpark": "not_needed_no_buy_orders", "capit_episode_sessions": 26, "rubber_rss3": 2.284, "file": "data/trade_plans/plan_SpaceX_2026-08-26.json"}
+- [2026-08-25T12:13:14Z] DollarBill/heartbeat — DollarBill_20260825_120939: {"status": "in_progress", "note": "plan JSON đã ghi + verify load_plan() OK, chuẩn bị gửi Discord"}
+- [2026-08-25T12:13:21Z] DollarBill/finding — plan-SpaceX-2026-08-26-done: {"summary": "Plan SpaceX 2026-08-26 HOLD ALL (0 lenh), gui Discord plan thread + bus decision xong.", "account": "SpaceX", "plan_date": "2026-08-26"}
+- [2026-08-25T12:10:07Z] Mafee/status — eod-trading-report: {"account": "ZaloPay", "plan_date": "2026-08-25", "delivered_via": "report_delivery_gate", "artifact": "ZaloPay_daily_report_2026-08-25.md"}
+- [2026-08-25T12:10:12Z] Mafee/status — eod-trading-report: {"account": "SpaceX", "plan_date": "2026-08-25", "delivered_via": "report_delivery_gate", "artifact": "SpaceX_daily_report_2026-08-25.md"}

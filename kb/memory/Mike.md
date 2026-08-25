@@ -23,3 +23,4 @@
 - order_book_execution_shadow: 0/40 outcome coverage.
 
 - [2026-08-25T11:39:07Z] Taylor job Taylor_20260825_113846 đang chạy: margin cap sizing Loại-2 + early-recovery forensic. Dispatch 18:38 ICT 25/08. Timeout 90 phút.
+- [2026-08-25T11:48:08Z] Taylor job Taylor_20260825_113846 DONE: margin_cap_recovery_forensic_20260825.md. Kết quả: trần ≤5% NAV equity sleeve giữ nguyên nhưng cơ sở đổi (lỗ tối đa trước de-lever = 1% NAV/lần escalate); trần exposure làm rõ thành ≤6,5% NAV (≠≤5%). Recovery-entry NO-GO. Cần user/risk-auditor xác nhận trần mới chính thức.
