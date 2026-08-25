@@ -1087,13 +1087,40 @@ if not _retro_have:
 elif _retro_missing:
     _yday9 = (today_d - _timedelta(days=1)).isoformat()
     _fresh9 = _yday9 in _retro_missing
+    # ĐỪNG ĐOÁN NGUYÊN NHÂN — TRA LOG (coding_guidelines §28). Bản trước hardcode "nghi quoting
+    # bug 08-01" vào thông điệp; hai lần liên tiếp nó dẫn autofix đi sai hướng: 2026-08-20 (lỗi
+    # TRUYỀN TẢI API, script chạy trọn vẹn) và 2026-08-25 (HOST TẮT 08-24 15:30→08-25 09:45 ICT,
+    # cron 00:30 không hề fire). Phân biệt được bằng đúng MỘT bit cơ khí: log daily_retro.log có
+    # dòng START cho ngày cần review hay không. Có START ⇒ lỗi NẰM TRONG script/dispatch; không
+    # START ⇒ script CHƯA BAO GIỜ chạy, tìm bug trong script là phí công.
+    _log9 = os.path.join(wc_root, "mike", "logs", "daily_retro.log")
+    _started9 = None
+    if _fresh9:
+        try:
+            with open(_log9, "r", errors="replace") as _fh9:
+                _started9 = (f"daily_retro START (reviewing {_yday9}" in _fh9.read())
+        except OSError:
+            _started9 = None
+    if not _fresh9:
+        _why9 = (" (KHÔNG gồm hôm qua — đây là (các) lần đã bị bỏ lỡ trước đó, bản check 1-ngày "
+                 "cũ đã để trôi mất; vẫn là việc còn NỢ).")
+    elif _started9 is True:
+        _why9 = (f" (gồm HÔM QUA — logs/daily_retro.log CÓ dòng START cho {_yday9} ⇒ script ĐÃ "
+                 "chạy nhưng không hoàn tất; nguyên nhân nằm TRONG chuỗi dispatch, đọc "
+                 "logs/daily_retro_draft_*.log của đêm đó và phân lớp: usage-limit / lỗi truyền "
+                 "tải API / Mike trả lạc đề).")
+    elif _started9 is False:
+        _why9 = (f" (gồm HÔM QUA — logs/daily_retro.log KHÔNG có dòng START cho {_yday9} ⇒ cron "
+                 "00:30 ICT KHÔNG hề chạy: máy tắt hoặc cron không fire, KHÔNG phải bug trong "
+                 "script. Xác nhận bằng `last -x` + mtime các file trong mike/logs/ quanh 00:30 "
+                 "ICT TRƯỚC khi đi tìm bug; nếu đúng downtime thì mọi cron khác trong cùng cửa "
+                 "sổ cũng đã bị bỏ lỡ.)")
+    else:
+        _why9 = (" (gồm HÔM QUA — KHÔNG đọc được logs/daily_retro.log để phân biệt 'script chạy "
+                 "rồi chết' với 'cron không hề chạy'; kiểm thủ công, đừng giả định.)")
     W(f"daily_retro.sh THIẾU {len(_retro_missing)} entry RETRO trong {_RETRO_WINDOW_D} ngày qua: "
-      f"{_retro_missing}"
-      + (" (gồm HÔM QUA — nghi cron 00:30 ICT đêm qua crash/không hoàn tất, đúng lớp lỗi 08-01: "
-         "quoting bug làm script chết trước khi kịp notify)." if _fresh9 else
-         " (KHÔNG gồm hôm qua — đây là (các) lần đã bị bỏ lỡ trước đó, bản check 1-ngày cũ đã "
-         "để trôi mất; vẫn là việc còn NỢ).")
-      + " Kiểm logs/daily_retro.log tìm lỗi bash gần nhất; viết bù entry để cảnh báo tự tắt.")
+      f"{_retro_missing}" + _why9
+      + " Viết bù entry để cảnh báo tự tắt.")
 else:
     OK(f"daily_retro.sh: đủ entry RETRO cho {_RETRO_WINDOW_D} ngày qua "
        f"(mới nhất {(today_d - _timedelta(days=1)).isoformat()}).")

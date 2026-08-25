@@ -617,6 +617,59 @@ def case_c9_empty_dir_is_not_warn():
         shutil.rmtree(root, ignore_errors=True)
 
 
+def _c9_write_retro_log(root, text):
+    """Ghi mike/logs/daily_retro.log vào wc_root giả (text=None ⇒ không tạo file)."""
+    ld = os.path.join(root, "mike", "logs")
+    os.makedirs(ld, exist_ok=True)
+    if text is not None:
+        with open(os.path.join(ld, "daily_retro.log"), "w", encoding="utf-8") as f:
+            f.write(text)
+
+
+# ── Ca 2026-08-25: check 9 TỪNG hardcode "nghi quoting bug 08-01" vào thông điệp, dẫn autofix
+# đi sai hướng 2 lần liên tiếp (08-20 lỗi truyền tải API; 08-25 HOST TẮT nên cron không fire).
+# 3 ca dưới khoá hành vi mới: nguyên nhân được TRA từ log, không đoán.
+def case_c9_started_but_incomplete():
+    today = dt.date(2026, 8, 20)
+    yday = (today - dt.timedelta(days=1)).isoformat()
+    root = _mkretro([2, 3], today)
+    try:
+        _c9_write_retro_log(root, f"[x] === daily_retro START (reviewing {yday}, chạy lúc y) ===\n")
+        lines, warn = run_check9(root, today)
+        j = joined(lines)
+        check("check9: log CÓ dòng START ⇒ quy lỗi vào chuỗi dispatch, không đổ cho cron",
+              warn and "CÓ dòng START" in j and "KHÔNG hề chạy" not in j, j)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+def case_c9_never_started_host_down():
+    today = dt.date(2026, 8, 20)
+    other = (today - dt.timedelta(days=5)).isoformat()
+    root = _mkretro([2, 3], today)
+    try:
+        _c9_write_retro_log(root, f"[x] === daily_retro START (reviewing {other}) ===\n")
+        lines, warn = run_check9(root, today)
+        j = joined(lines)
+        check("check9: log KHÔNG có START ⇒ nói rõ cron không fire, KHÔNG phải bug script",
+              warn and "KHÔNG hề chạy" in j and "CÓ dòng START" not in j, j)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+def case_c9_no_log_file_says_so():
+    today = dt.date(2026, 8, 20)
+    root = _mkretro([2, 3], today)
+    try:
+        _c9_write_retro_log(root, None)
+        lines, warn = run_check9(root, today)
+        j = joined(lines)
+        check("check9: không đọc được log ⇒ khai KHÔNG BIẾT, không đoán bừa",
+              warn and "KHÔNG đọc được" in j, j)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
 def case_c9_red_control_one_day_window():
     """RED control: đột biến cửa sổ về 1 ngày phải làm ĐỎ đúng ca lỗ-cũ ở trên."""
     mut = CHECK9_SRC.replace("_RETRO_WINDOW_D = 7", "_RETRO_WINDOW_D = 1")
@@ -1907,6 +1960,8 @@ def main():
                case_c9_older_gap_still_reported,
                case_c9_no_demand_before_mechanism_existed,
                case_c9_empty_dir_is_not_warn, case_c9_red_control_one_day_window,
+               case_c9_started_but_incomplete, case_c9_never_started_host_down,
+               case_c9_no_log_file_says_so,
                case_c10_no_file_is_ok, case_c10_fresh_log_warns,
                case_c10_swap_recovery_is_not_swallowed, case_c10_hard_error_wins_over_swap,
                case_c10_fresh_log_without_timestamp_line, case_c10_old_log_is_ok,
