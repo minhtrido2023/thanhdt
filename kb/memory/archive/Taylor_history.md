@@ -318,3 +318,6 @@
 
 ## Archived 2026-08-25 (keep=12 days=0 require_done=False)
 - [2026-08-22T02:44:00Z] [2026-08-22] Gate 5 extreme_regime XONG (job _023836, commit mike fed79746): 21/21 selfcheck + TZ matrix PASS, 0 marker/30 phien journal (29 SACH - 07-30 hong), replay 1140 tick qua ham production that = 0 armed, chung minh nguoc 1134/1140. Nhanh trigger (ii) NAY DA DO DUOC (942 tick co r15, bien 3.25pp) => caveat 'mot chieu' 08-19 chi con dung cho y 'chua tung toi gan nguong'. CON LAI: gate 6 quant-skeptic (Mike dispatch rieng) + user sign-off truoc 2026-08-25 16:00 ICT. MO: 08-03 va 08-14 khong co journal paper main du thi truong mo - chua giai thich.
+
+## Archived 2026-08-25 (keep=12 days=0 require_done=False)
+- [2026-08-22T10:26:37Z] [2026-08-22] Ma tran DT5G x Value Radar (job _101400) XONG: 0/24 o qua BH(FDR10%), DSR 0.83<0.95 => ban do MO TA, khong wire. Confound cot loi: radar zone ~ ky nguyen (DAT=2017-19+2021, RE=2015-16+2022-25, khong chong lan) - MOI phan tich conditional theo radar zone sau nay deu dinh bay nay. Watch (KHONG hanh dong): BEAR+RE LAG-ref ex +36.9pp trong khi w_LAG=0, nhung dau dao nguoc o BEAR+TT => overfit. Alpha Lens audit 2026-09-30: ro 3/4 ngan hang, deposit_rate 6.8%% roi dung bucket 6.5-8%% ma NH excess chi +1.0pp con FPT +20.3pp.
