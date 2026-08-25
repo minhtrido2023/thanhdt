@@ -7,12 +7,13 @@
 - Thứ Bảy 2026-08-29: implement code chính sách margin đơn mã discretionary.
 
 ## Đang chờ
-- Taylor_20260825_134238: BULL/EX-BULL gross scarcity — engine-level phân rã theo state, dùng CSV F1 park=0.80. Dispatch 20:42 ICT 25/08. Timeout 60 phút.
+- Taylor_20260825_142021: Hướng B backtest (PARK_STATES_DICT {4:X}) + 3-book design (LAG+BAL+DC 1/3 each). Dispatch 21:20 ICT 25/08. Timeout 90 phút. Job phức tạp, poll 5-10 phút/lần.
 
 ## Đã đóng hôm nay (25/08)
-- Early-recovery margin lever: NO-GO CONFIRMED (N=2, 0 IS, unconditional beats windowed). Quant-skeptic CONFIRMED high (job 131849).
-- Taylor early-recovery research dùng R3 pin park=0.70, production là 0.80 từ 08-04 — đã disclosed. Không lật NO-GO.
-- Mandate Loại-2 adaptive đã commit vào kb/canonical.md + discretionary-margin-policy-20260823.md + crisis_margin_framework_adaptive_20260825.md (commit 975e37bd).
+- Early-recovery margin lever: NO-GO CONFIRMED. Quant-skeptic CONFIRMED high.
+- BULL/EX-BULL gross scarcity: LAG thủ phạm (PEAD signal khan trong BULL). EX-BULL out of scope.
+- LAG cash routing BULL: Hướng A LOẠI (BAL full), Hướng B promising (parking), 3-book (DC) mở.
+- Mandate Loại-2 adaptive committed (975e37bd).
 
 ## KHẨN — security leak CHƯA đóng
 - Số tài khoản DNSE THẬT lộ public GitHub minhtrido2023/thanhdt. 2 commit fix local chưa push.
