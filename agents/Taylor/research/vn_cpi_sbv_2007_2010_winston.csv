@@ -1,0 +1,49 @@
+year,month,cpi_yoy_pct,sbv_refi_rate_pct,deposit_rate_approx_pct,confidence,note
+2007,1,6.74,6.50,7.5,medium,CPI est-CEIC
+2007,2,7.03,6.50,7.5,medium,CPI est-CEIC
+2007,3,6.73,6.50,7.5,medium,CPI est-CEIC
+2007,4,7.13,6.50,7.5,medium,CPI est-CEIC
+2007,5,7.14,6.50,7.5,medium,CPI est-CEIC
+2007,6,7.82,6.50,7.5,high,CPI GSO-press-release
+2007,7,8.27,6.50,7.5,medium,CPI est-CEIC
+2007,8,8.27,6.50,7.5,medium,CPI est-CEIC
+2007,9,8.73,6.50,7.5,medium,CPI est-CEIC
+2007,10,8.84,6.50,8.0,medium,CPI est-CEIC; avg10mo=7.71% confirmed GSO
+2007,11,9.37,6.50,8.0,medium,CPI est-CEIC
+2007,12,12.63,6.50,8.5,medium,CPI est-CEIC
+2008,1,14.11,6.50,9.0,medium,CPI est-CEIC; Q1avg~16% confirmed
+2008,2,15.74,7.50,9.5,medium,CPI est-CEIC; refi raised 7.5% Feb-01
+2008,3,19.39,7.50,10.0,medium,CPI est-CEIC
+2008,4,21.42,7.50,11.0,high,CPI GSO-press-release
+2008,5,25.20,12.00,12.0,medium,CPI est-CEIC; refi raised May 2008
+2008,6,26.84,15.00,13.0,medium,CPI est-CEIC; refi peak 15% Jun-11
+2008,7,27.04,15.00,13.0,high,CPI GSO-press-release
+2008,8,28.32,15.00,13.0,high,CPI GSO-press-release; PEAK
+2008,9,27.90,15.00,13.0,high,CPI GSO-search-snippet
+2008,10,26.74,15.00,12.0,medium,CPI est-CEIC; base rate cut Oct21
+2008,11,24.22,15.00,11.0,high,CPI GSO-press-release
+2008,12,19.89,9.50,10.0,medium,CPI est-CEIC; refi cut 9.5% Dec-22 Decision 3161
+2009,1,17.49,7.50,9.0,medium,CPI est-CEIC
+2009,2,14.81,7.00,9.0,medium,CPI est-CEIC; stimulus regime
+2009,3,11.19,7.00,9.0,medium,CPI est-CEIC
+2009,4,9.23,7.00,9.0,medium,CPI est-CEIC
+2009,5,5.65,7.00,9.0,medium,CPI est-CEIC
+2009,6,3.67,7.00,9.0,medium,CPI est-CEIC
+2009,7,3.31,7.00,9.0,high,CPI GSO-press-release
+2009,8,2.27,7.00,9.0,medium,CPI est-CEIC
+2009,9,0.68,7.00,9.0,medium,CPI est-CEIC
+2009,10,-0.02,7.00,9.0,medium,CPI est-CEIC; deflation momentary
+2009,11,4.35,7.00,9.0,medium,CPI est-CEIC
+2009,12,6.52,7.00,9.0,medium,CPI est-CEIC; annual end-period 6.5% confirmed
+2010,1,7.62,7.00,9.5,medium,CPI est-CEIC
+2010,2,8.46,7.00,10.0,medium,CPI est-CEIC
+2010,3,9.46,7.00,10.0,medium,CPI est-CEIC
+2010,4,9.23,7.00,10.0,medium,CPI est-CEIC
+2010,5,9.09,7.00,10.0,medium,CPI est-CEIC
+2010,6,8.69,7.00,10.0,medium,CPI est-CEIC
+2010,7,8.19,7.00,10.0,medium,CPI est-CEIC
+2010,8,8.23,7.00,10.5,medium,CPI est-CEIC
+2010,9,7.57,7.00,10.5,medium,CPI est-CEIC
+2010,10,7.89,7.00,10.5,medium,CPI est-CEIC
+2010,11,8.84,7.00,11.0,medium,CPI est-CEIC
+2010,12,11.75,9.00,11.0,medium,CPI est-CEIC; refi+base raised Dec-01 to 9%
