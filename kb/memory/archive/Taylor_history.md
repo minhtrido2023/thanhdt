@@ -321,3 +321,6 @@
 
 ## Archived 2026-08-25 (keep=12 days=0 require_done=False)
 - [2026-08-22T10:26:37Z] [2026-08-22] Ma tran DT5G x Value Radar (job _101400) XONG: 0/24 o qua BH(FDR10%), DSR 0.83<0.95 => ban do MO TA, khong wire. Confound cot loi: radar zone ~ ky nguyen (DAT=2017-19+2021, RE=2015-16+2022-25, khong chong lan) - MOI phan tich conditional theo radar zone sau nay deu dinh bay nay. Watch (KHONG hanh dong): BEAR+RE LAG-ref ex +36.9pp trong khi w_LAG=0, nhung dau dao nguoc o BEAR+TT => overfit. Alpha Lens audit 2026-09-30: ro 3/4 ngan hang, deposit_rate 6.8%% roi dung bucket 6.5-8%% ma NH excess chi +1.0pp con FPT +20.3pp.
+
+## Archived 2026-08-25 (keep=12 days=0 require_done=False)
+- [2026-08-22T13:31:51Z] A1+A2 (job Taylor_20260822_131318) XONG, 3 finding tren bus (parking-rate-bucket / forward-horizon-matrix / a1-a2-combined) + results_registry. KHONG de xuat thay doi production. | MO: neu Mike/user muon wire bat cu gi tu A1/A2 -> BAT BUOC quant-skeptic truoc; diem yeu de bi tan cong nhat = N=3 chu ky HIGH + hindsight bias cua deposit_rate (caveat b) + bank weight ro tang 16,9%->80,7% nen mau lich su khong kiem tra duoc cau hinh 78% hom nay.
