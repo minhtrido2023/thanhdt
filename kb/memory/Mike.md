@@ -6,13 +6,14 @@
 - VPI/BAL signal HOLD đến 2026-09-16 — HOLD_ALL theo VPI.
 - Thứ Bảy 2026-08-29: implement code chính sách margin đơn mã discretionary.
 
-## Chờ quyết định user
-- LAG cash drag BULL: Hướng B (parking) NO-GO (Calmar 1.63→1.41, DD xấu +2-3pp, CAGR flat). Hướng C (cash drag = feature) có bằng chứng ủng hộ. 3-book DC chưa phân tích đủ. User cần quyết: đóng hướng BULL routing hay tiếp tục 3-book?
+## Đang chạy
+- Taylor_20260825_151108 (DC sleeve phase 2, ~90-120 phút): A=backtest 3-book thật, B=factor-neutral check, C1=state-conditional LAG→DC trong BULL, C2=replace LAG hoàn toàn, C3=creative architecture alternatives, C4=capacity. Output: agents/Taylor/research/dc_3book_architecture_20260825/ (thư mục con, 5 file).
 
 ## Đã đóng hôm nay (25/08)
 - Early-recovery margin lever: NO-GO CONFIRMED. Quant-skeptic CONFIRMED high.
-- BULL/EX-BULL gross scarcity: LAG thủ phạm (PEAD signal khan). EX-BULL out of scope.
+- BULL/EX-BULL gross scarcity: LAG thủ phạm (PEAD signal khan). Feature, không phải bug.
 - LAG cash routing BULL: Hướng A LOẠI, Hướng B NO-GO (tăng DD -2-3pp không tương xứng).
+- DC sleeve Q1-Q4 research (phase 1): GO có điều kiện — DC outperform BULL rõ OOS (Calmar 0.53→0.80), cơ chế THAY THẾ không thêm beta. Chuyển sang phase 2.
 - Mandate Loại-2 adaptive committed (975e37bd).
 
 ## KHẨN — security leak CHƯA đóng
