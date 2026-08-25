@@ -24,3 +24,4 @@
 
 - [2026-08-25T11:39:07Z] Taylor job Taylor_20260825_113846 đang chạy: margin cap sizing Loại-2 + early-recovery forensic. Dispatch 18:38 ICT 25/08. Timeout 90 phút.
 - [2026-08-25T11:48:08Z] Taylor job Taylor_20260825_113846 DONE: margin_cap_recovery_forensic_20260825.md. Kết quả: trần ≤5% NAV equity sleeve giữ nguyên nhưng cơ sở đổi (lỗ tối đa trước de-lever = 1% NAV/lần escalate); trần exposure làm rõ thành ≤6,5% NAV (≠≤5%). Recovery-entry NO-GO. Cần user/risk-auditor xác nhận trần mới chính thức.
+- [2026-08-25T13:18:56Z] Taylor_20260825_125936 DONE: early_recovery_margin_lever_20260825.md. VERDICT NO-GO. 3 lý do: N=2 (LOO 77-94% từ COVID), 0 IS session, chân vô điều kiện thắng cửa sổ. 2 đính chính: V2.4 chưa bao giờ vay thật (gross 0.60), hệ không có 130% EX-BULL (SB_GATE code). Quant-skeptic đang verify (bg). Câu hỏi mở thật: vì sao BULL/EX-BULL gross 0.60-0.62 thấp hơn NEUTRAL 0.72 — signal scarcity.
