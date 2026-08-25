@@ -77,6 +77,7 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 
 | Ngày | Sự cố | status |
 |---|---|---|
+| 2026-08-25 | [2026-08-25: retro 2026-08-24 mất vì HOST TẮT ~18h (08-24 15:30 → 08-25 09:45 ICT), cron 00:30 chưa từng fire — checker check#9 hardcode "nghi quoting bug 08-01" đã dẫn ops-autofix đi sai hướng 2 lần liên tiếp (08-20 transport, 08-25 downtime); cả loạt cron đêm khác cũng bị bỏ lỡ](2026-08/2026-08-25-host-downtime-missed-nightly-crons.md) | check#9 nay TRA log thay vì đoán (`52eb62ea`, +3 ca hồi quy, PASS x4 TZ); retro 08-24 + corp_action_daily đã chạy bù; CÒN HỞ: không có @reboot catch-up cho cron đêm |
 | 2026-08-04 | [2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md](2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md) | fixed (monitoring); production-code fix in progress (Taylor job Taylor_20260804_094514) |
 | 2026-08-20 | [2026-08/2026-08-20-wake-push-utf8-surrogate-deletes-ladder.md](2026-08/2026-08-20-wake-push-utf8-surrogate-deletes-ladder.md) | ? |
 | 2026-08-04 | [2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md](2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md) | fixed (monitoring); production-code fix in progress (Taylor job Taylor_20260804_094514) |
