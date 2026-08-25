@@ -34,7 +34,12 @@ _FIXED_HOLIDAYS = frozenset([
 # Ngày nghỉ biến động được khai báo thủ công theo từng năm.
 # Thêm vào đây khi có thông báo chính thức của SSC/HoSE.
 # Format: set of date objects.
-_VARIABLE_HOLIDAYS: set = set()
+_VARIABLE_HOLIDAYS: set = {
+    # Quốc khánh 2026 — nghỉ bù theo thông báo DNSE (email 25/08/2026):
+    # 31/08 (T2, ngày làm việc hoán đổi) + 01/09 (T3, ngày bù) + 02/09 đã có _FIXED_HOLIDAYS
+    dt.date(2026, 8, 31),
+    dt.date(2026, 9,  1),
+}
 
 # (tên phiên, giờ bắt đầu, giờ kết thúc, có được đặt LO liên tục không)
 SESSIONS = [
