@@ -5981,3 +5981,213 @@ dMaxDD xấu nhất −0,040pp. **V7 − V0 = −0,0086pp CAGR, −0,0179pp IS**
 **Verdict: NO-GO** — 3/6 cổng prereg FAIL (G1, G3, G6); G2 chỉ qua tầm thường vì chính control cũng qua.
 quant-skeptic **CONFIRMED (high)**, `mike/logs/verify_20260823_132019_3012254.log`.
 Đóng hướng, không wire, không shadow-monitor cho cơ chế sizing. `capit_margin_lever` giữ nguyên.
+
+## BACKTEST 2008-2026 V2.4 FULL WINDOW (2026-08-25, quant-skeptic CONFIRMED)
+
+Job `Taylor_20260825_055651` (backtest gốc) + `Taylor_20260825_074227` (đính chính 2 lỗi sau
+quant-skeptic). Artifact: `agents/Taylor/research/backtest_2008_v24_20260825.md`, engine
+`agents/Taylor/research/backtest_2008_v24_20260825/engine_2008.py`, log
+`agents/Taylor/research/backtest_2008_v24_20260825/logs/{scenarioA_baseline,scenarioB_production}.log`.
+RESEARCH-ONLY — **KHÔNG đổi production, KHÔNG tuning tham số** (mở rộng cửa sổ backtest lùi về
+2008, dùng `universe_pit` + state đọc lại qua `get_macro_state()` trực tiếp — KHÔNG phải
+`tav2_bq.vnindex_5state_dt5g_live`, xem cảnh báo bên dưới).
+
+**Kịch bản B (production V2.4: allocator + `capit_margin_lever` f=1.3 + PIT filter, NAV 50B =
+25B BAL + 25B LAG), FULL WINDOW 2008-2026:**
+- CAGR 28,71% · Sharpe 1,90 · MaxDD −17,6% · Calmar 1,63.
+- Self-check 0 VND (BAL và LAG, cả 2 scenario). quant-skeptic verdict **CONFIRMED (medium
+  confidence)** — `mike/bus/inbox/quant-skeptic.jsonl` topic `VERIFY: backtest-2008-v24-full`,
+  2026-08-25T07:29:46Z.
+
+**OOS 2014-2026 (kịch bản B) — đối chiếu pin R3:**
+- CAGR 28,71% / Sharpe 1,90 / MaxDD −17,6% / Calmar 1,63 — khớp pin R3 (28,86% / 1,90 / −17,8% /
+  1,62, xem `## KẾT QUẢ THAM CHIẾU phiên 2026-06-19`) trong dung sai đã khai (≤1pp CAGR/≤0,1
+  Sharpe). Delta −0,15pp CAGR do DT5G tính bằng `get_macro_state()` trực tiếp (job này) khác
+  nguồn với bảng LIVE `vnindex_5state_dt5g_live` (pin R3) — quant-skeptic đã recompute độc lập
+  qua BQ và xác nhận khớp trong dung sai. **Không đổi kết luận production.**
+
+**IS 2008-2013 (chỉ tham khảo — KHÔNG PHẢI production claim):**
+- CAGR 0,35% · Sharpe 0,10 · MaxDD −7,9% · Calmar 0,04 (kịch bản B); Scenario A (không lever)
+  0,42% / 0,12 / −7,8% tương tự — delta B−A gần như 0 vì lever không có cơ hội hoạt động (xem dưới).
+- **3 lưu ý bắt buộc khi đọc con số IS này:**
+  1. 8L rating composite 2008-2012 gần như chỉ có nhánh PE hoạt động — PCF/PS coverage ~0% giai
+     đoạn này (xem `agents/Taylor/research/backtest_pre2014_feasibility_20260825.md` mục d),
+     KHÔNG phải composite 3-lens đầy đủ như production hiện tại.
+  2. DT5G ở IS này được tính lại qua `get_macro_state()` gọi trực tiếp (bypass wrapper
+     `get_gated_state()`), đọc bảng `tav2_bq.taylor_exp_dt5g_recompute_2008_2026_20260825` —
+     **CHƯA từng được A/B validate ngoài cửa sổ 2014+** (module docstring `macro_state_live.py`
+     dòng 23-29). Số IS này là "chạy được", không phải "đã kiểm chứng đúng ngoài 2014".
+  3. IS gần như đứng yên (invested_bal/lag=0,000 hầu hết 6 năm, kể cả 2009 VNI+57,9% hệ thống vẫn
+     +0,00%) là **ĐẶC TÍNH THIẾT KẾ** của DT5G/SIGNAL_V11 (state chưa từng đạt 4/5 BULL/EXBULL
+     trong 2008-2013 theo query BQ trực tiếp, và SIGNAL_V11 chỉ gate tier momentum mạnh nhất vào
+     state∈{4,5}) — **KHÔNG PHẢI anomaly/bug**. Self-check 0 VND xác nhận sổ sách trung thực.
+
+**`capit_margin_lever` trong Loại-1 (2008-2012) — câu hỏi vẫn CHƯA được test [ĐÍNH CHÍNH]:**
+Bản gốc (job `_055651`) đếm nhầm — quant-skeptic phát hiện & Taylor đếm lại trực tiếp từ log
+(`[lever-gate-blocked B/L]`/`[capit-lever-force B/L]`, scenario B):
+- **10 washout event** có dd52≤−20% trong 2008-2012 (không phải 5) — 2008-01-07, 2008-10-13,
+  2008-12-10, 2009-02-05, 2009-12-10, 2010-08-09, 2010-10-20, 2011-08-02, 2011-11-14, 2011-12-23.
+- **2 event** tới được tầng lever-gate (không phải 1): 2010-08-09 (`dd_gate_ok=True
+  pit_gate_ok=False` — PIT chặn) và 2012-08-23 (`dd_gate_ok=False pit_gate_ok=False` — chặn cả 2
+  tầng; dd52=−19,5%, dưới ngưỡng ≤−20% của nhóm washout ở trên nhưng vẫn được CAPIT tier hoá
+  thành event lever-gate riêng ở book LAG).
+- Không lần nào lever thực sự kích hoạt (FORCE) trong 2008-2012 — 5 lần FORCE thật đều ở Loại-2
+  (2018/2020×2/2022). Tổng chi phí vay margin cả 18,6 năm B = 4.054.406.010 VND, 100% từ Loại-2.
+- **Kết luận KHÔNG đổi dù sửa số đếm**: N=2 vẫn quá nhỏ để coi là đã test câu hỏi "margin-lever
+  có an toàn trong khủng hoảng cấu trúc đa năm (Loại-1) hay không" — nhất quán với finding
+  `macro-margin-review` cùng ngày.
+
+**Ghi chú lỗi thứ 2 quant-skeptic phát hiện (đã vá riêng, không ảnh hưởng số trên):** ancillary
+PIT-filter sub-analysis (`agents/Taylor/research/pit_filter_full_2007_2026_test.py`) có look-ahead
+publication-lag (CPI tag month-start, merge_asof backward không shift) — đã vá bằng hàm
+`merge_cpi_pit()` (+1 tháng shift), re-run xác nhận **KHÔNG đổi kết luận** (vẫn 8/8 cluster Loại-1
+BLOCKED, 5/5 cluster Loại-2 PASS) — chi tiết
+`agents/Taylor/research/capit_margin_pit_filter_full_2007_2026_20260825.md`. Đây là sub-analysis
+CHƯA wire vào production, không tự nó đổi số backtest B ở trên.
+
+**Không đề xuất thay đổi production. Không tuning tham số (không cần DSR/PBO).**
+
+## 2026-08-25 — SÀN THANH KHOẢN LAG: ĐỘNG vs TĨNH (job `Taylor_20260825_094721`) — **NO-GO, giữ 2 tỷ cứng**
+
+Research paper-only, **KHÔNG wire**. Engine = bản sao NC `mike/agents/Taylor/exp_lag_advdyn_20260825/pt_v23_advdyn.py`
+(khác production đúng 3 khối, no-op khi `mode=static, LAG_ADV_MIN_VND=0`). Production files sạch.
+Báo cáo: `mike/agents/Taylor/research/lag_dynamic_threshold_20260825.md` · prereg:
+`…/lag_dynamic_threshold_prereg_20260825.md`.
+
+**Chân control tái lập pin R3 TỪNG CHỮ SỐ**: `28,86% / 1,90 / −17,8% / 1,62 / 1.178,01B`;
+self-check BAL+LAG = **0 VND trên cả 11 chân**. Đồng thời tái lập từng chữ số job
+`Taylor_20260804_080547` (static 1,0B = 32,41 IS 27,58 OOS 37,02; static 2,0B = 32,44 IS 27,52
+OOS 37,12) — **lần tái lập độc lập thứ 3** của harness ADV-gate.
+
+Lệnh pin: `BQ_LOCAL_CACHE=data/bq_cache_asof20260729_postrestate BQ_CACHE_THREADS=1 NAV_TOTAL_B=50
+ETF_LIQ=custompitg BASKET_WT=namecap BASKET_SELECT=yieldcombo PARK_STATES="3:0.7"
+AUDIT_END=2026-06-19 LAG_ADV_BASIS=price $DNA_PYEXE … v23a none postbull 0 edge` + `EXP_TAG` mọi chân.
+
+| Chân | CAGR | Sharpe | MaxDD | Calmar | NAV | IS | OOS |
+|---|---|---|---|---|---|---|---|
+| control ADV=0 | 28,86% | 1,90 | −17,8% | 1,62 | 1.178,01B | 27,09% | 30,48% |
+| static 1,0B | 32,41% | 1,92 | −18,3% | 1,77 | 1.652,88B | 27,58% | 37,02% |
+| static 1,5B | 32,40% | 1,93 | −18,3% | 1,77 | 1.650,54B | 27,66% | 36,90% |
+| **static 2,0B (baseline)** | **32,44%** | 1,93 | −18,2% | 1,78 | 1.656,39B | 27,52% | 37,12% |
+| static 3,0B | 32,10% | 1,90 | −18,2% | 1,76 | 1.604,90B | 27,00% | 36,97% |
+| static 4,0B | 32,38% | 1,92 | −18,3% | 1,77 | 1.648,14B | 27,26% | 37,27% |
+| A inflate 7%/năm | 32,47% | 1,93 | −18,3% | 1,77 | 1.661,24B | 27,54% | 37,16% |
+| B pctile k=20 | 32,48% | 1,93 | −18,3% | 1,78 | 1.663,25B | 27,32% | 37,41% |
+| B pctile k=25 | 32,43% | 1,92 | −18,3% | 1,77 | 1.654,74B | 27,35% | 37,27% |
+| B pctile k=30 | 32,40% | 1,92 | −18,3% | 1,77 | 1.650,36B | 27,60% | 36,96% |
+| B pctile k=43 (calib) | 32,40% | 1,93 | −18,3% | 1,77 | 1.651,51B | 27,50% | 37,08% |
+
+⚠️ **KHÔNG được trích bất kỳ ngưỡng nào ở đây như điểm tối ưu.** PBO của chính họ tham số này =
+**0,916** (08-04). Bootstrap khối OOS (21 phiên, 10.000 lần), BH FDR **m=9**: **0/9 chân qua**,
+p nhỏ nhất **0,421** (trượt cả α=0,05 thô). Mọi Δ lật dấu dưới LOO trừ static 3,0B — và 3,0B
+**xấu hơn** 2B mọi năm (−0,23…−0,50pp).
+
+**Ba số dùng được (không phải từ backtest):**
+1. **Xói mòn danh nghĩa CÓ THẬT nhưng nhỏ và đã dừng** — sàn 2B chặn 70,6% ứng viên LAG (2014) →
+   65,0% (2026), Spearman ρ=−0,764 **p=0,002**; nhưng riêng OOS 2020-2026 ρ=**0,000** p=**1,000**.
+   Biến thiên theo chu kỳ (42,5% năm 2021 ↔ 70,6% năm 2014) lớn **~5×** toàn bộ độ trôi thế kỷ.
+2. **Sàn percentile KHÔNG khử được trôi** — k=43 tự co giãn cũng trôi 69,1→67,8, và chênh lệch
+   (k43 − 2B) **tăng** theo thời gian (ρ=+0,718 p=0,006).
+3. **Sàn 2B không phải ràng buộc capacity ở bất kỳ thang NAV nào — nó sai CẢ HAI CHIỀU.**
+   `required_ADV = slot/(X%×5)`, slot LIVE = 10%×w_LAG 0,65×NAV, X=3,86% (fill LIVE, xuất xứ sổ
+   CAPIT không phải sổ LAG): NAV thật ~0,98B → **0,33 tỷ** (2B chặt hơn **6,1×**); **điểm giao
+   NAV ≈ 5,9B**; NAV 50B → **16,84 tỷ** (2B lỏng hơn **8,4×**); NAV 200B → 67,36 tỷ.
+
+**Đính chính công thức lan truyền từ dispatch:** slot LAG trong ENGINE = `LAG_NAV = TOTAL_NAV/2`
+(`pt_v23_audit_2014.py:57`) × tier weight (`LAG_HI 0,10` / `LAG_LO 0,08`, `:1362`) = **2,5B tại
+NAV 50B**, KHÔNG phải `8% × w_LAG × NAV` = 2,6B (công thức đó đúng cho tầng LIVE, không cho engine).
+
+**BAL (đối chiếu, không backtest):** không đo được xói mòn có ý nghĩa (ρ=−0,242 p=0,426 ở sàn 1B
+trong `signal_v11_sql.py:143`; ρ=−0,407 p=0,168 ở 2B). **Cả hai book dùng `max_fill_days=5` y hệt**
+(`LIQ_FULL :990` / `LIQ_LAG :1333`) ⇒ hold 45 vs 25 phiên **không** đổi ràng buộc fill.
+
+## 2026-08-25 — EARLY-RECOVERY MARGIN LEVER trên main book V2.4: **NO-GO** — job `Taylor_20260825_125936`
+
+**Câu hỏi (Mike/user):** sau khủng hoảng, khi DT5G xác nhận thoát CRISIS/BEAR + episode được Bobby
+xếp Loại-2 + định giá còn rẻ — nhân position sizing main book V2.4 R3 lên ×f (1,1/1,2/1,3) trong
+cửa sổ đó tốt hơn hay tệ hơn base? *(khác V2.5-leverage và margin-valuation-spread: cả hai test
+margin KHÔNG điều kiện hoá theo chu kỳ.)*
+
+**VERDICT: NO-GO. KHÔNG wire. ⚠️ KHÔNG trích bất kỳ số CAGR nào dưới đây như đề xuất** — toàn bộ là
+**overlay tầng NAV**, không phải chạy lại engine.
+
+### Control leg — PASS tuyệt đối
+Recompute độc lập từ CSV pin R3 08-03 (`..._advprice_exp_repin0803_price_univpit.csv`, 3.107 dòng
+`DAILY`): **28,8627% / 1,8999 / −17,7851% / 1,6229 / 1.178,0099B / IS 27,09% / OOS 30,48%** — khớp
+số pin 28,86 / 1,90 / −17,8 / 1,62 trên cả 7 chỉ tiêu.
+
+### Kết quả (bộ A = đúng chữ dispatch: Bobby Loại-2 + radar ≤67; 279 phiên active = 9,0% mẫu)
+| f | CAGR | Δ | Sharpe | MaxDD | Calmar | Vay tối đa |
+|---|---|---|---|---|---|---|
+| 1,0 base | 28,86% | — | 1,90 | −17,8% | **1,62** | 0 |
+| 1,1 | 29,17% | +0,31 | 1,90 | −18,1% | 1,61 | 0% |
+| 1,2 | 29,48% | +0,62 | 1,89 | −19,0% | 1,55 | 6,0% NAV |
+| 1,3 | 29,75% | +0,89 | 1,88 | −19,9% | **1,50** | 14,8% NAV |
+
+**CAGR tăng nhưng rủi ro điều chỉnh GIẢM ở mọi mức f.**
+
+### Ba lý do NO-GO (mỗi cái tự nó đủ)
+1. **LOO trượt** — 77% hiệu ứng (bộ A) / **93,9%** (biến bỏ cổng định giá) đến từ **MỘT episode
+   (COVID 2020)**. Bỏ COVID ⇒ Δ còn **+0,20pp**. **N thật = 2 episode vĩ mô độc lập** (COVID,
+   SCB 2022-23); 2018 là Loại-2 thứ ba nhưng bị cổng định giá loại (radar 90,7/81,6 = ĐẮT).
+   N<5 ⇒ **DSR/PBO không áp dụng**.
+2. **0 phiên active trong IS 2014-2019** (mọi cửa sổ đều ≥2020) ⇒ **walk-forward IS/OOS không thực
+   hiện được VỀ MẶT CẤU TRÚC** — không phải chưa làm. DT5G chỉ có data từ 2014 và episode IS duy
+   nhất (2018) bị cổng định giá loại.
+3. **Chân đối chứng vô điều kiện ĐÁNH BẠI cửa sổ**: lever f=1,3 áp cho MỌI phiên không-CRISIS/BEAR
+   ⇒ CAGR 37,83% (+8,97pp), Sharpe 1,91, **Calmar 1,66 > base 1,62**. Sau khi bỏ COVID, cửa sổ
+   early-recovery còn **kém hơn** chân vô điều kiện trên mỗi phiên active (**0,130 vs 0,378
+   pp/100 phiên**) ⇒ **việc điều kiện hoá theo early-recovery không tạo edge nào**.
+
+### Phát hiện quan trọng hơn cả câu trả lời — **đây KHÔNG phải câu hỏi về margin**
+**V2.4 R3 chưa bao giờ dùng đòn bẩy: gross TB 0,604, MAX toàn mẫu 0,942.** Gross theo state:
+CRISIS 0,344 · BEAR 0,195 · **NEUTRAL 0,722** · **BULL 0,607** · **EX-BULL 0,622**.
+Ở f=1,3 vay tối đa chỉ **14,8% NAV** (148tr/NAV 1 tỷ), chỉ **118/279 phiên** có vay > 0, và
+**đổi lãi vay 8%→15%/năm làm CAGR đổi đúng 0,05pp**. f-scaling ở đây chủ yếu là **triển khai tiền
+nhàn rỗi**, không phải vay.
+
+### ⚠️ ĐÍNH CHÍNH TIỀN ĐỀ — hệ hiện tại KHÔNG cho 130% ở EX-BULL
+`pt_v23_audit_2014.py:74`: `SB_GATE = {1:0.0, 2:0.2, 3:0.7, 4:1.0, 5:1.0}` — comment nguyên văn
+**`# single-book DT5G exposure (no EXBULL leverage)`**; `MGE` (`:458`) mặc định `0` = OFF.
+**"EX-BULL 130%" là ngữ nghĩa thang trạng thái DT5G trong tài liệu, KHÔNG phải hành vi của book.**
+⇒ "bỏ lever EX-BULL" là **no-op**. So sánh Bước 4 (giả định vs giả định): lever chỉ ở EX-BULL
+(60 phiên) cho +0,36pp với **MaxDD giữ nguyên −17,8% và Calmar TỐT LÊN 1,64**; đổi nó lấy cửa sổ
+early-recovery (279-543 phiên phơi nhiễm, MaxDD xấu 2,1pp) là **trao đổi tệ**. Hai thứ **không cộng
+dồn** (32,11 vs 32,12 — EX-BULL nằm gọn trong cửa sổ).
+
+### Cổng định giá LÀM HẠI (bằng chứng định lượng cho lệnh cấm wire Value Radar)
+Bỏ cổng định giá: CAGR 29,75 → **32,12**, Calmar 1,50 → 1,62. Cổng loại đúng 2018 (tốt) nhưng cắt
+đúng sóng hồi phục 2021 (rất tệ — nó đóng cửa sổ COVID-2 ngày 2020-12-07). Khớp cảnh báo Phụ lục C
+(`market_regime_probability_20260729.md`): Value Radar 0/17 lăng kính qua BH/Bonferroni, đầu "RẺ"
+không đơn điệu, registry ghi **DISPLAY-ONLY, cấm wire vào quyết định**.
+
+### Tiền đề bị chính dữ liệu bác
+"Chu kỳ NEUTRAL→BULL kéo dài" **SAI**: đời sống cửa sổ trung vị **~4 tháng**; **3/4 cửa sổ chết vì
+DT5G whipsaw ngược về BEAR/CRISIS**; **trần 18 tháng CHƯA BAO GIỜ cắn**. Cửa sổ COVID-2 mở
+2020-07-17 rồi ăn drawdown −17,2% đúng 10 phiên sau (sóng COVID-2 Đà Nẵng) — chính cú đó đẩy MaxDD
+levered từ −17,8% xuống −19,9%.
+
+### Điểm phương pháp giữ lại được
+Cổng Bobby (phân loại 2026, blind forward-return nhưng không blind với việc episode nào được đặt
+tên) **thay được bằng luật cơ học PIT**: `dd đáy spell ≤ −20%` + cùng cổng định giá chọn ra **đúng
+cùng tập** {2020-05-27, 2022-08-17, 2023-04-12}. ⇒ lo ngại hindsight-selection **được khử bằng đo,
+không bằng lập luận**.
+
+### Giới hạn
+Overlay tầng NAV (`r_lev = f·r_base − borrow·i/252 − TC·|Δf|·g`, trễ 1 phiên thực thi, độ nhạy lag
+0/1/2/3/5 ≈ 0) — **thiếu** capacity 50B, margin-eligibility DNSE, margin-call path, ramp 3 phiên ⇒
+mọi CAGR là **cận trên lạc quan**. Bootstrap khối §3.6 **KHÔNG hợp lệ ở tầng episode** (coi 49 khối
+là độc lập trong khi N thật = 2) — giữ trong báo cáo kèm cảnh báo, **không được trích**. Anchor DD
+base vẫn **~−29%** (bootstrap 5th-pct), không phải −17,8%. Muốn biến bất kỳ dòng nào thành đề xuất
+wire ⇒ **bắt buộc chạy lại engine thật** (`MGE`/`FORCE_REAL_LEVER` đã có đường code) + self-check
+0 VND + quant-skeptic.
+
+### Câu hỏi ĐANG MỞ (không phải đề xuất — cần user quyết định có mở không)
+Không phải margin: **vì sao V2.4 chạy ở gross 0,604, và vì sao BULL/EX-BULL gross còn THẤP HƠN
+NEUTRAL** (0,607/0,622 vs 0,722) — không phải vì trần rủi ro mà vì **không đủ tín hiệu lấp book**.
+V2.5-leverage NO-GO **không trả lời câu này** (nó test `MGE` với borrow-room CAPIT-only, cơ chế khác
+hẳn).
+
+**Files:** `mike/agents/Taylor/research/early_recovery_margin_lever_20260825.md` + thư mục cùng tên
+(`step0_control.py` … `step5_control_uncond.py`, `exits.csv`, `base_daily.csv`). CSV pin R3
+**KHÔNG bị đụng** (job này chỉ ĐỌC).

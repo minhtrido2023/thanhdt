@@ -25,6 +25,19 @@ DATA PROVENANCE (two tiers):
     individual month levels are +/- a few tenths. Kept as FALLBACK only; superseded by
     Tier-1 wherever the two overlap.
 
+  TIER 3 — BACKFILL, 2007-01 .. 2010-12 (pre-Tier-2-window; covers the 2008 hyperinflation
+    peak + 2009 base-effect trough): monthly headline CPI YoY (%) sourced by Winston
+    (data-ops) into `mike/agents/Taylor/research/vn_cpi_sbv_2007_2010_winston.csv`
+    (fetched 2026-08-25, job Taylor_20260825_052019). Mixed per-month confidence — kept in
+    the source CSV, NOT modeled here as a column (see CPI_YOY_BACKFILL_2007_2010 comment):
+      HIGH (direct GSO press-release/press-snippet print): 2007-06, 2008-04, 2008-07,
+        2008-08, 2008-09, 2008-11, 2009-07 (7 months).
+      MEDIUM (CEIC's own estimate/interpolation of the GSO series, not the primary print):
+        the other 41 months. Directionally reliable (2008 peak 28.3% Aug, 2009 trough
+        -0.02% Oct) but individual levels carry more uncertainty than Tier 1/2.
+    Superseded by Tier 2 from 2011-01 onward (no overlap by construction — Tier 2's
+    earliest anchor is exactly 2011-01-01).
+
   NOTE ON WHAT TIER 1 CHANGED: the old proxy badly missed early-2026 — it modeled a
     smooth rise (2026-01 proxy 4.5) whereas the real NSO print DIPPED to 2.53 in Jan
     then spiked (Mar 4.65 → May 5.60 → Jun 4.69). The spike is real but LATER and
@@ -88,17 +101,46 @@ CPI_ANCHORS = [
 ]
 
 
+# TIER 3 — BACKFILL headline CPI YoY (%), 2007-01..2010-12. Source: Winston (data-ops),
+# mike/agents/Taylor/research/vn_cpi_sbv_2007_2010_winston.csv (fetched 2026-08-25). Mixed
+# confidence per month (see module docstring); HIGH-confidence (direct GSO print) months are
+# 2007-06, 2008-04, 2008-07, 2008-08, 2008-09, 2008-11, 2009-07 — all other months MEDIUM
+# (CEIC estimate). Covers the 2008 hyperinflation peak (28.32% Aug-2008) and the 2009
+# base-effect trough (-0.02% Oct-2009).
+CPI_YOY_BACKFILL_2007_2010 = {
+    "2007-01-01": 6.74, "2007-02-01": 7.03, "2007-03-01": 6.73, "2007-04-01": 7.13,
+    "2007-05-01": 7.14, "2007-06-01": 7.82, "2007-07-01": 8.27, "2007-08-01": 8.27,
+    "2007-09-01": 8.73, "2007-10-01": 8.84, "2007-11-01": 9.37, "2007-12-01": 12.63,
+    "2008-01-01": 14.11, "2008-02-01": 15.74, "2008-03-01": 19.39, "2008-04-01": 21.42,
+    "2008-05-01": 25.20, "2008-06-01": 26.84, "2008-07-01": 27.04, "2008-08-01": 28.32,
+    "2008-09-01": 27.90, "2008-10-01": 26.74, "2008-11-01": 24.22, "2008-12-01": 19.89,
+    "2009-01-01": 17.49, "2009-02-01": 14.81, "2009-03-01": 11.19, "2009-04-01": 9.23,
+    "2009-05-01": 5.65, "2009-06-01": 3.67, "2009-07-01": 3.31, "2009-08-01": 2.27,
+    "2009-09-01": 0.68, "2009-10-01": -0.02, "2009-11-01": 4.35, "2009-12-01": 6.52,
+    "2010-01-01": 7.62, "2010-02-01": 8.46, "2010-03-01": 9.46, "2010-04-01": 9.23,
+    "2010-05-01": 9.09, "2010-06-01": 8.69, "2010-07-01": 8.19, "2010-08-01": 8.23,
+    "2010-09-01": 7.57, "2010-10-01": 7.89, "2010-11-01": 8.84, "2010-12-01": 11.75,
+}
+
+
 def cpi_monthly_df(end="2026-06-01"):
     """Monthly YoY CPI (%): real NSO chart-embed where available (2025-06..2026-06),
-    linear-interpolated proxy anchors before that (fallback)."""
+    linear-interpolated proxy anchors 2011-01..2025-05 (fallback), Tier-3 backfill
+    2007-01..2010-12 (fallback, pre-Tier-2 window)."""
     a = pd.DataFrame(CPI_ANCHORS, columns=["time", "cpi_yoy"])
     a["time"] = pd.to_datetime(a["time"])
     a = a.set_index("time").sort_index()
-    idx = pd.date_range(a.index.min(), pd.to_datetime(end), freq="MS")
+    backfill = pd.Series({pd.to_datetime(k): v for k, v in CPI_YOY_BACKFILL_2007_2010.items()})
+    start = min(a.index.min(), backfill.index.min())
+    idx = pd.date_range(start, pd.to_datetime(end), freq="MS")
     s = a["cpi_yoy"].reindex(a.index.union(idx)).interpolate(method="index").reindex(idx)
     out = s.reset_index()
     out.columns = ["time", "cpi_yoy"]
-    # Overlay REAL NSO values wherever present (Tier 1 overrides Tier-2 proxy).
+    # Overlay Tier-3 backfill first (lowest priority; NaN below 2011-01 since Tier-2's
+    # anchors start there and interpolate() never extrapolates before its first anchor).
+    out["cpi_yoy"] = out["time"].map(backfill).fillna(out["cpi_yoy"])
+    out["is_backfill_2007_2010"] = out["time"].isin(backfill.index)
+    # Overlay REAL NSO values wherever present (Tier 1 overrides Tier-2/Tier-3).
     real = pd.Series({pd.to_datetime(k): v for k, v in NSO_CPI_YOY_REAL.items()})
     out["cpi_yoy"] = out["time"].map(real).fillna(out["cpi_yoy"])
     out["is_real_nso"] = out["time"].isin(real.index)
