@@ -94,3 +94,6 @@
 
 ## Archived 2026-08-24 (keep=12 days=0 require_done=False)
 - [2026-08-14T02:13:07Z] Xong job Winston_20260814_020503: bot chet ca 2 account 09:05 do git stash apply bo do (conflict marker trong trading_bot/config.py+executor.py) — da git checkout HEAD -- 2 file (ours==HEAD tung byte, khong mat viec), heartbeat tu restart 09:10, ca 2 bot chay lai OK. CON MO: stash@{0} (hybrid+refresh_skip_fix WIP 20260810) van chua duoc resolve — can Taylor+quant-skeptic, dung apply roi bo do lan nua.
+
+## Archived 2026-08-25 (keep=12 days=0 require_done=False)
+- [2026-08-15T06:48:00Z] Xong job Winston_20260815_064023: xac nhan + tai lieu hoa bay ticker.Price ket he CUM ngay GDKHQ (commit 6a9c9dff, registry TRAP moi). CON TREO: (1) bus question bq-admin-ticker-price-exdate-backfill - can bq_admin xac nhan field nguon + backfill 42 dong; (2) lag_entry_anchor.py:105 doc thang ticker.Price lam TRAN rang buoc - chua va (vung Taylor/DollarBill, khong phai Winston).
