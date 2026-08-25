@@ -22,3 +22,4 @@
 ## Còn hở nhỏ (low priority)
 - order_book_execution_shadow: 0/40 outcome coverage.
 
+- [2026-08-25T11:39:07Z] Taylor job Taylor_20260825_113846 đang chạy: margin cap sizing Loại-2 + early-recovery forensic. Dispatch 18:38 ICT 25/08. Timeout 90 phút.
