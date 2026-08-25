@@ -714,3 +714,27 @@
 - [2026-08-25T07:46:29Z] Taylor/heartbeat — Taylor_20260825_074227: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20260825_074227", "source": "watcher"}
 - [2026-08-25T07:47:29Z] Taylor/heartbeat — Taylor_20260825_074227: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20260825_074227", "source": "watcher"}
 - [2026-08-25T07:47:30Z] Taylor/finding — backtest-2008-v24-corrections-applied: {"event_count_fixed": {"claimed": 5, "actual": 10, "lever_gate_events_claimed": 1, "lever_gate_events_actual": 2, "lever_gate_dates": ["2010-08-09", "2012-08-23"]}, "cpi_lag_fixed": true, "cpi_fix_method": "merge_cpi_pit() +1-month shift in pit_filter_full_2007_2026_test.py, wired into both call sites", "cpi_fix_invariant_check": "8/8 Loai-1 cluster van BLOCKED, 5/5 Loai-2 cluster van PASS sau fix", "conclusion_unchanged": true, "conclusion": "capit_margin_lever an toan trong Loai-1 van CHUA duoc test - N=2 qua nho", "registry_pinned": true, "registry_section": "## BACKTEST 2008-2026 V2.4 FULL WINDOW (2026-08-25, quant-skeptic CONFIRMED)", "files_updated": ["agents/Taylor/research/backtest_2008_v24_20260825.md", "mike/agents/Taylor/research/pit_filter_full_2007_2026_test.py", "mike/agents/Taylor/research/capit_margin_pit_filter_full_2007_2026_20260825.md", "mike/agents/Taylor/research/pit_filter_full_2007_2026_clusters.csv", "data/results_registry.md"], "production_changed": false}
+
+## Consolidation 2026-08-25T10:07:02Z
+- [2026-08-25T09:47:38Z] Taylor/heartbeat — Taylor_20260825_094721: {"status": "in_progress", "note": "orienting: read lag_liquidity_filter.py + lag-adv-filter-tracking.md; next = locate prior 0810 research + backtest engine knobs"}
+- [2026-08-25T09:48:23Z] Taylor/heartbeat — Taylor_20260825_094721: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20260825_094721", "source": "watcher"}
+- [2026-08-25T09:49:23Z] Taylor/heartbeat — Taylor_20260825_094721: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20260825_094721", "source": "watcher"}
+- [2026-08-25T09:50:23Z] Taylor/heartbeat — Taylor_20260825_094721: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20260825_094721", "source": "watcher"}
+- [2026-08-25T09:51:23Z] Taylor/heartbeat — Taylor_20260825_094721: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20260825_094721", "source": "watcher"}
+- [2026-08-25T09:52:23Z] Taylor/heartbeat — Taylor_20260825_094721: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20260825_094721", "source": "watcher"}
+- [2026-08-25T09:52:37Z] Taylor/heartbeat — Taylor_20260825_094721: {"status": "in_progress", "note": "prereg written; universe_pit ADV percentile series pulled (2007-2026, 4898 phien). Ket qua som: san 2B ~ p49 cua universe nam 2014 -> ~p42 nam 2026. Dang vá engine copy cho san dong."}
+- [2026-08-25T09:53:23Z] Taylor/heartbeat — Taylor_20260825_094721: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20260825_094721", "source": "watcher"}
+- [2026-08-25T09:54:23Z] Taylor/heartbeat — Taylor_20260825_094721: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20260825_094721", "source": "watcher"}
+- [2026-08-25T09:55:23Z] Taylor/heartbeat — Taylor_20260825_094721: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20260825_094721", "source": "watcher"}
+- [2026-08-25T09:56:24Z] Taylor/heartbeat — Taylor_20260825_094721: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20260825_094721", "source": "watcher"}
+- [2026-08-25T09:57:24Z] Taylor/heartbeat — Taylor_20260825_094721: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20260825_094721", "source": "watcher"}
+- [2026-08-25T09:58:24Z] Taylor/heartbeat — Taylor_20260825_094721: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20260825_094721", "source": "watcher"}
+- [2026-08-25T09:59:25Z] Taylor/heartbeat — Taylor_20260825_094721: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20260825_094721", "source": "watcher"}
+- [2026-08-25T10:00:25Z] Taylor/heartbeat — Taylor_20260825_094721: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20260825_094721", "source": "watcher"}
+- [2026-08-25T10:00:51Z] Taylor/heartbeat — Taylor_20260825_094721: {"status": "in_progress", "note": "CONTROL LEG PASS: tai lap pin R3 tung chu so 28.86/1.90/-17.8/1.62/1178.01B, selfcheck 0 VND. Dang chay 10 chan con lai (static sweep + bien the A/B), ~7 phut/chan, 4 song song."}
+- [2026-08-25T10:01:26Z] Taylor/heartbeat — Taylor_20260825_094721: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20260825_094721", "source": "watcher"}
+- [2026-08-25T10:02:27Z] Taylor/heartbeat — Taylor_20260825_094721: {"status": "still_running", "elapsed_min": 15, "job_id": "Taylor_20260825_094721", "source": "watcher"}
+- [2026-08-25T10:03:27Z] Taylor/heartbeat — Taylor_20260825_094721: {"status": "still_running", "elapsed_min": 16, "job_id": "Taylor_20260825_094721", "source": "watcher"}
+- [2026-08-25T10:04:27Z] Taylor/heartbeat — Taylor_20260825_094721: {"status": "still_running", "elapsed_min": 17, "job_id": "Taylor_20260825_094721", "source": "watcher"}
+- [2026-08-25T10:05:27Z] Taylor/heartbeat — Taylor_20260825_094721: {"status": "still_running", "elapsed_min": 18, "job_id": "Taylor_20260825_094721", "source": "watcher"}
+- [2026-08-25T10:06:27Z] Taylor/heartbeat — Taylor_20260825_094721: {"status": "still_running", "elapsed_min": 19, "job_id": "Taylor_20260825_094721", "source": "watcher"}
