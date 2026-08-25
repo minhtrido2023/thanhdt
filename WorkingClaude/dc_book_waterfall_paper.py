@@ -22,15 +22,31 @@ the paper account `main` (override in secrets/trading_bot_accounts.json).
     restarts from the 1B basis — a mechanism change means a new track record, and compounding a
     known-buggy stretch forward would make the v2 numbers uninterpretable. ***
 
+*** v2.1 — 2026-08-26 (job Taylor_20260825_170138, dispatch Mike, user đã duyệt tầng 1: DC
+    state-adaptive plan). DC universe hygiene, sourced from
+    mike/agents/Taylor/research/dc_3book_architecture_20260825/P3_C_capacity_sizing.md (capacity
+    sizing at NAV=200B SpaceX+ZaloPay gộp, kịch bản w_DC=0.46 = C1 BULL-swap, kịch bản nặng nhất
+    đã backtest):
+      - EXCLUDED_DEFAULT now ("DHG","MSH") and applies UNCONDITIONALLY (not just the
+        liq-unreadable fallback) — both names are >100% of 5%-ADV/phiên at every scenario tested,
+        safe cap <0.2% NAV, not worth executing. This supersedes the old "floor is by merit, not
+        by name" rule for these 2 specific names — capacity infeasibility at 200B NAV is a
+        DIFFERENT constraint than the 3B liquidity-health floor and the floor cannot override it.
+      - PER_NAME_CAP: 10 CAP_NEEDED names (MBB/HDB/VCB/VCI/VND/HCM/PVT/HAH/CTR/DBC) now capped at
+        their own 5%-ADV/@200B ceiling instead of the uniform 0.20 CAP_PER_NAME. ACB/TCB/SSI/FPT
+        keep 0.20 (safe at every scenario tested). SLEEVE_VERSION stays "v2" — trigger/cadence
+        mechanism unchanged, this is a universe/cap data update only, no NAV archival needed. ***
+
 WHAT THE WATERFALL IS (exactly as the dispatch/research fixed it — nothing invented here):
   When DT5G state = NEUTRAL, the parked idle cash is filled in priority order:
       BAL / LAG (unchanged, upstream)  →  DC book (ConvergePort double-confirm)  →  custom30V
   DC book = names where 8L rating ≤ 2 (golden/strong) AND sector_lens_monitor says BUY
   (the exact double-confirm signal, read live — no re-implementation), equal-weight, each
-  capped 0.20 of the sleeve, membership additionally requiring Trading_Value_1M_P50 ≥ 3B (v2
-  #4 — the floor removes DHG on its own merit; capacity §6.1: DHG's thin ADV drags the
-  full-universe ceiling to ~2B, ex-DHG the sleeve deploys ~10-15B). Whatever the DC book does
-  not absorb (thin set → 0.20 cap binds) parks in custom30V, and any single name's COMBINED
+  capped at its own PER_NAME_CAP (v2.1, default CAP_PER_NAME=0.20 unless the name is one of the
+  10 CAP_NEEDED capacity-limited names — see PER_NAME_CAP), membership additionally requiring
+  Trading_Value_1M_P50 ≥ 3B (v2 #4) AND not in EXCLUDED_DEFAULT (v2.1: DHG+MSH, unconditional
+  capacity exclusion — see PER_NAME_CAP comment). Whatever the DC book does not absorb (thin
+  set / tight per-name caps → capped) parks in custom30V, and any single name's COMBINED
   DC+custom30V exposure is capped at 0.15 (v2 #3).
   This sleeve MODELS THE PARKED FRACTION ITSELF. BAL/LAG taking cash back shrinks that
   fraction upstream; it does NOT flatten the sleeve's allocation (v2 #1). The sleeve goes flat
@@ -78,8 +94,27 @@ STATUS_FILE = os.path.join(DATA_DIR, "golive_v23_status.json")
 
 NEUTRAL = 3
 CUSTOM30V = "CUSTOM30V"                 # legacy pseudo-ticker (v1 aggregate) — kept for report labels
-EXCLUDED_DEFAULT = ("DHG",)             # v2: only a FALL-BACK when the liquidity floor is unreadable
-CAP_PER_NAME = 0.20                     # 0.20 of sleeve NAV per DC name (DC layer cap)
+EXCLUDED_DEFAULT = ("DHG", "MSH")       # v2.1 (Việc 1, job Taylor_20260825_170138): UNCONDITIONAL
+                                         # universe exclude — capacity infeasible at NAV=200B (both
+                                         # >100% of 5%-ADV/phiên at every scenario tested, safe cap
+                                         # <0.2% NAV — P3_C_capacity_sizing.md). Applies regardless
+                                         # of the liquidity floor below: that floor is a general
+                                         # health check for OTHER names, it cannot readmit a name
+                                         # excluded here on capacity grounds (supersedes the old
+                                         # "floor is by merit, not by name" rule for DHG only).
+CAP_PER_NAME = 0.20                     # 0.20 of sleeve NAV per DC name — DEFAULT cap for any name
+                                         # NOT in PER_NAME_CAP below.
+PER_NAME_CAP = {                        # v2.1 (Việc 1, job Taylor_20260825_170138): tighter caps
+    # for the 10 CAP_NEEDED names — 5%-ADV/phiên at NAV=200B (SpaceX+ZaloPay gộp), kịch bản
+    # w_DC=0.46 (C1 BULL-swap, nặng nhất đã backtest), cột max_pos_5pct_pct_nav_200B của
+    # mike/agents/Taylor/research/dc_3book_architecture_20260825/exp_dc3book_capacity_sizing.csv.
+    # ACB/TCB/SSI/FPT KHÔNG có ở đây → rơi về CAP_PER_NAME (0.20), an toàn ở mọi kịch bản đã đo.
+    "MBB": 0.0764, "HDB": 0.0679, "VCB": 0.0638, "VCI": 0.0459, "VND": 0.0631,
+    "HCM": 0.0321, "PVT": 0.0160, "HAH": 0.0081, "CTR": 0.0060, "DBC": 0.0069,
+    # DHG/MSH giữ luôn ở đây (gần 0) làm lớp phòng thủ thứ 2 — EXCLUDED_DEFAULT ở trên đã chặn
+    # cứng, nhưng nếu sau này ai nới EXCLUDED_DEFAULT thì cap gần 0 vẫn giữ an toàn.
+    "DHG": 0.0002, "MSH": 0.0008,
+}
 OVERLAP_CAP = 0.15                      # v2 fix#3: combined DC+custom30V cap per name (job _042827)
 LIQ_FLOOR_VND = 3_000_000_000.0         # v2 fix#4: Trading_Value_1M_P50 floor 3B (job _042827)
 TC = 0.001                             # 0.1% per unit one-way turnover (matches backtest §3)
@@ -95,23 +130,43 @@ SLEEVE_VERSION = "v2"                   # v2 = post trigger-bug fix (2026-07-20,
 def dc_membership(dc_set, liq=None, liq_floor=LIQ_FLOOR_VND, excluded=EXCLUDED_DEFAULT):
     """v2 fix#4 — DC book membership = double-confirm ∧ Trading_Value_1M_P50 ≥ liq_floor.
 
-    The liquidity floor REPLACES the DHG hard-exclude (job Taylor_20260707_042827: the floor
-    improved both IS and OOS, and removes DHG on its own merit rather than by name). Fail-safe,
-    exactly as the backtest: a name whose TV is missing does NOT clear the floor. If the whole
-    liquidity map is unreadable (liq is None) we fall back to the v1 hard-exclude list rather
-    than silently dropping the floor — degrading to the older, stricter behaviour, never to a
-    looser one.
+    The liquidity floor REPLACES the DHG hard-exclude for GENERAL liquidity health (job
+    Taylor_20260707_042827: the floor improved both IS and OOS, and removes a thin name on its
+    own merit rather than by name). Fail-safe, exactly as the backtest: a name whose TV is
+    missing does NOT clear the floor. If the whole liquidity map is unreadable (liq is None) we
+    fall back to the hard-exclude list rather than silently dropping the floor — degrading to
+    the older, stricter behaviour, never to a looser one.
+
+    v2.1 (Việc 1, job Taylor_20260825_170138): `excluded` now applies UNCONDITIONALLY, in BOTH
+    branches — not just the liq-unreadable fallback. This is a deliberate, documented change:
+    EXCLUDED_DEFAULT (DHG, MSH) are capacity-infeasible at NAV=200B (P3_C_capacity_sizing.md),
+    a DIFFERENT constraint than the 3B liquidity-health floor. A name can be liquid enough for
+    the floor (general health) yet still too thin at 200B scale for this book (capacity) — the
+    floor's "by merit, not by name" rule governs everything ELSE, not these 2 capacity excludes.
 
     Returns (members:dict, floor_active:bool, dropped:list).
     """
-    src = dict(dc_set or {})
+    excl = {t.upper() for t in excluded}
+    src = {t: m for t, m in (dc_set or {}).items() if t.upper() not in excl}
     if liq is None:
-        excl = {t.upper() for t in excluded}
-        members = {t: m for t, m in src.items() if t.upper() not in excl}
-        return members, False, sorted(set(src) - set(members))
+        return src, False, sorted(set(dc_set or {}) - set(src))
     members = {t: m for t, m in src.items()
                if isinstance(liq.get(t), (int, float)) and liq[t] >= liq_floor}
-    return members, True, sorted(set(src) - set(members))
+    return members, True, sorted(set(dc_set or {}) - set(members))
+
+
+def dc_weights(members, cap_per_name=CAP_PER_NAME, per_name_cap=None):
+    """v2.1 (Việc 1, job Taylor_20260825_170138) — equal-split among `members`, each name
+    individually capped at its own limit (per_name_cap override, else cap_per_name). Clipped
+    excess is NOT redistributed to other DC names (they may already sit at their own cap) — it
+    flows to the park leg like any other capacity constraint, same as the old uniform-cap case
+    (few names → cap binds → the rest parks). Returns {ticker: weight}."""
+    n = len(members)
+    if not n:
+        return {}
+    eq = 1.0 / n
+    caps = per_name_cap or {}
+    return {t: min(eq, caps.get(t, cap_per_name)) for t in members}
 
 
 def apply_overlap_cap(base, basket_members, cap=OVERLAP_CAP, passes=12):
@@ -154,7 +209,8 @@ def apply_overlap_cap(base, basket_members, cap=OVERLAP_CAP, passes=12):
 
 def compute_waterfall_targets(state, dc_set, basket, liq=None,
                               cap_per_name=CAP_PER_NAME, overlap_cap=OVERLAP_CAP,
-                              liq_floor=LIQ_FLOOR_VND, excluded=EXCLUDED_DEFAULT):
+                              liq_floor=LIQ_FLOOR_VND, excluded=EXCLUDED_DEFAULT,
+                              per_name_cap=None):
     """The waterfall allocation, as a pure function — v2 (post trigger-bug fix 2026-07-20).
 
     v2 fix#1 (CONTINUOUS-RESIDUAL): the DC book runs on the residual parked cash EVERY NEUTRAL
@@ -181,16 +237,18 @@ def compute_waterfall_targets(state, dc_set, basket, liq=None,
     """
     if state != NEUTRAL:
         return {}, False, "not-NEUTRAL → sleeve flat (waterfall is a NEUTRAL-only mechanism)", {}
+    if per_name_cap is None:
+        per_name_cap = PER_NAME_CAP
 
     members, floor_active, dropped = dc_membership(dc_set, liq, liq_floor, excluded)
     n = len(members)
-    w_dc = min(cap_per_name, 1.0 / n) if n else 0.0
-    dc_frac = w_dc * n
+    dcw = dc_weights(members, cap_per_name, per_name_cap)
+    dc_frac = round(sum(dcw.values()), 10)
     park_frac = round(max(0.0, 1.0 - dc_frac), 10)
 
     bk = {t: w for t, w in (basket or {}).items() if w > 0}
     bk_tot = sum(bk.values())
-    base = {t: w_dc for t in members}
+    base = dict(dcw)
     if bk_tot > 0 and park_frac > 1e-9:
         for t, w in bk.items():
             base[t] = base.get(t, 0.0) + park_frac * (w / bk_tot)
@@ -199,26 +257,41 @@ def compute_waterfall_targets(state, dc_set, basket, liq=None,
     cash = round(max(0.0, 1.0 - sum(capped.values())), 10)
     overlap = sorted(set(members) & set(bk))
 
+    # v2.1: split `dropped` into hard universe-excludes (EXCLUDED_DEFAULT, capacity — always
+    # applied) vs genuine liq-floor drops (only meaningful when floor_active), so the audit
+    # trail doesn't mislabel a capacity exclude as a liquidity-floor drop.
+    excl_upper = {t.upper() for t in excluded}
+    universe_excluded = sorted(t for t in dropped if t.upper() in excl_upper)
+    floor_dropped = sorted(t for t in dropped if t.upper() not in excl_upper)
+
     if not n:
         # No double-confirm name today → 100% custom30V. NOT a defect: an empty DC day = full
         # parking = automatic safety (the UNION experiment that tried to "fix" it was REFUTED).
-        reason = "NEUTRAL, no DC name clears double-confirm(+floor) → 100% custom30V"
+        reason = "NEUTRAL, no DC name clears double-confirm(+floor/universe) → 100% custom30V"
     else:
-        reason = (f"NEUTRAL continuous-residual → DC {n} names @ {w_dc:.4f} "
-                  f"(leg {dc_frac:.3f}) + custom30V {park_frac:.3f}; "
-                  f"overlap-cap {overlap_cap:.2f} on {len(overlap)} shared name(s)")
+        capped_names = sorted(t for t in members if per_name_cap.get(t, cap_per_name) < 1.0 / n - 1e-12)
+        reason = (f"NEUTRAL continuous-residual → DC {n} names (leg {dc_frac:.3f}) "
+                  f"+ custom30V {park_frac:.3f}; overlap-cap {overlap_cap:.2f} on "
+                  f"{len(overlap)} shared name(s)")
+        if capped_names:
+            reason += f"; per-name cap < 1/{n} bound trên: {','.join(capped_names)}"
     if not bk:
         reason += f" | custom30V basket unavailable → {park_frac:.3f} held as CASH (degraded)"
-    if floor_active and dropped:
-        reason += f" | liq-floor {liq_floor/1e9:.0f}B dropped {','.join(dropped)}"
-    elif not floor_active:
-        reason += " | ⚠ liq map unreadable → fell back to hard-exclude " + ",".join(excluded)
+    if universe_excluded:
+        reason += f" | universe-exclude (capacity, P3_C) {','.join(universe_excluded)}"
+    if not floor_active:
+        reason += " | ⚠ liq map unreadable → chỉ áp universe-exclude " + ",".join(excluded)
+    elif floor_dropped:
+        reason += f" | liq-floor {liq_floor/1e9:.0f}B dropped {','.join(floor_dropped)}"
 
     detail = {
         "dc_leg": round(dc_frac, 6), "park_leg": round(park_frac, 6),
         "cash": cash, "cap_residual": residual,
-        "overlap_names": overlap, "floor_active": floor_active, "floor_dropped": dropped,
-        "dc_weight_each": round(w_dc, 6), "dc_names": sorted(members),
+        "overlap_names": overlap, "floor_active": floor_active, "floor_dropped": floor_dropped,
+        "universe_excluded": universe_excluded,
+        "dc_weight_each": round(dc_frac / n, 6) if n else 0.0,
+        "dc_weights": {t: round(w, 6) for t, w in dcw.items()},
+        "dc_names": sorted(members),
     }
     return capped, bool(capped), reason, detail
 
@@ -559,6 +632,7 @@ def advance(account=ACCOUNT_DEFAULT):
 
     # on a HOLD/fail-safe session the membership was not refreshed → carry the stored set forward
     dc_names = detail.get("dc_names", st.get("dc_names", []))
+    dc_weights_map = detail.get("dc_weights", st.get("dc_weights", {}))
     row = {
         "date": data_date,
         "state": state, "state_name": state_name,
@@ -567,6 +641,7 @@ def advance(account=ACCOUNT_DEFAULT):
         "rebalanced": bool(do_rebal),
         "dc_names": dc_names,
         "dc_weight_each": detail.get("dc_weight_each", 0.0),
+        "dc_weights": dc_weights_map,
         "dc_leg": detail.get("dc_leg", 0.0),
         "c30v_weight": detail.get("park_leg", 0.0),
         "cash_weight": round(max(0.0, 1.0 - sum(target_w.values())), 4),
@@ -574,6 +649,7 @@ def advance(account=ACCOUNT_DEFAULT):
         "cap_residual": detail.get("cap_residual", 0.0),
         "floor_active": detail.get("floor_active"),
         "floor_dropped": detail.get("floor_dropped", []),
+        "universe_excluded": detail.get("universe_excluded", []),
         "gross_ret_pct": round(gross_r * 100, 4),
         "turnover": round(to, 4),
         "tc_pct": round(tc_cost * 100, 4),
@@ -595,6 +671,7 @@ def advance(account=ACCOUNT_DEFAULT):
     st["weights"] = target_w
     st["last_close"] = new_close
     st["dc_names"] = dc_names
+    st["dc_weights"] = dc_weights_map
     if do_rebal and rebal_date is not None:
         st["rebal_date"] = rebal_date
     if st["meta"]["start_date"] is None:
@@ -730,9 +807,13 @@ def generate_section(account=ACCOUNT_DEFAULT, do_advance=True):
                                      "giữ nguyên, trọng số drift (q2m5 — chưa tới kỳ)"))
 
         dc = last.get("dc_names") or []
+        dcw_map = last.get("dc_weights") or {}
         if deployed:
-            L.append(f"- DC book ({len(dc)}): {', '.join(dc) if dc else '—'} "
-                     f"@ {last.get('dc_weight_each',0)*100:.1f}%/tên "
+            if dcw_map and len({round(v, 4) for v in dcw_map.values()}) > 1:
+                names_str = ", ".join(f"{t} {dcw_map.get(t, 0)*100:.1f}%" for t in dc)
+            else:
+                names_str = ', '.join(dc) if dc else '—'
+            L.append(f"- DC book ({len(dc)}): {names_str} "
                      f"(leg {last.get('dc_leg',0)*100:.1f}%) "
                      f"| custom30V {last.get('c30v_weight',0)*100:.1f}% "
                      f"| cash {last.get('cash_weight',0)*100:.1f}%")
@@ -742,6 +823,9 @@ def generate_section(account=ACCOUNT_DEFAULT, do_advance=True):
                          f"{OVERLAP_CAP*100:.0f}%/tên đã áp"
                          + (f", {last['cap_residual']*100:.2f}% không đặt được → cash"
                             if last.get("cap_residual", 0) > 1e-9 else ""))
+            excl = last.get("universe_excluded") or []
+            if excl:
+                L.append(f"- Universe-exclude (capacity, P3_C): {', '.join(excl)}")
             dropped = last.get("floor_dropped") or []
             if dropped:
                 L.append(f"- Liq-floor {LIQ_FLOOR_VND/1e9:.0f}B loại: {', '.join(dropped)}")
