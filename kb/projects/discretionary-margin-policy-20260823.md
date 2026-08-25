@@ -68,8 +68,24 @@ due-diligence sâu không scale ra hàng trăm ca lịch sử, và phân loại 
 - Chưa có case nào đủ điều kiện áp dụng ngay — chính sách chờ case tương lai (vd cổ phiếu UPCOM
   uplist HOSE kiểu DRI, hoặc case QUALIFY mới marginable).
 
+## Sleeve Loại-2 washout — CHÍNH SÁCH BỔ SUNG (xác nhận 2026-08-25, user + risk-auditor Spyros)
+> Khác chính sách đơn mã trên: áp cho **portfolio-level**, khi cả thị trường vào Loại-2 Bobby.
+> Cơ sở số: `margin_cap_recovery_forensic_20260825.md` (Taylor A5) + Spyros CONDITIONAL-APPROVE.
+> Framework đầy đủ: `crisis_margin_framework_adaptive_20260825.md`.
+
+- **Trần equity sleeve tổng: ≤5% NAV vốn tự có** — cơ sở: lỗ tối đa trước exit −20% = 1% NAV/lần;
+  1% / 20% = 5%. (KHÔNG phải "2 case × 1%" — lý luận cũ đã thay.)
+- **Trần exposure: ≤6,5% NAV** (= 5% × f=1,3 của `capit_margin_lever` thật — KHÔNG phải ≤5% exposure)
+- **Bobby confidence "ambiguous" → size giảm 50%** (≤2,5% NAV equity): bắt case 2018-style
+- **Exit −20% từ arm là intent, không phải guaranteed price** — basket CAPIT trong panic có slippage
+- **Payload escalate PHẢI có combined exposure field** (main V2.4 + sleeve đề xuất vs allocation bình
+  thường — người duyệt cần thấy tổng, không chỉ sleeve đơn lẻ)
+- Chỉ SpaceX (margin account); KHÔNG code vào production cho đến khi có task triển khai riêng
+
 ## Liên quan
 - `dgc-tv1-fearbuy-discretionary.md` — nguồn case QUALIFY, lịch sử đảo verdict 2 lần.
 - `margin-valuation-spread-20260823.md` §"Hướng còn mở" — đề xuất gốc dẫn tới chính sách này.
 - `kb/incidents/` postshock_base_formation (Taylor, cùng ngày) — lý do không backtest bộ lọc thô.
 - `kb/data_registry/trading-bot/dnse_openapi_v2_calling_guideline.md` — số margin gói 1840 thật.
+- `crisis_margin_framework_adaptive_20260825.md` — framework 3 điều kiện + payload escalate đầy đủ.
+- `margin_cap_recovery_forensic_20260825.md` — cơ sở trần mới + forensic recovery-entry (NO-GO).
