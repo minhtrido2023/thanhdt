@@ -818,3 +818,7 @@
 - [2026-08-25T12:13:21Z] DollarBill/finding — plan-SpaceX-2026-08-26-done: {"summary": "Plan SpaceX 2026-08-26 HOLD ALL (0 lenh), gui Discord plan thread + bus decision xong.", "account": "SpaceX", "plan_date": "2026-08-26"}
 - [2026-08-25T12:10:07Z] Mafee/status — eod-trading-report: {"account": "ZaloPay", "plan_date": "2026-08-25", "delivered_via": "report_delivery_gate", "artifact": "ZaloPay_daily_report_2026-08-25.md"}
 - [2026-08-25T12:10:12Z] Mafee/status — eod-trading-report: {"account": "SpaceX", "plan_date": "2026-08-25", "delivered_via": "report_delivery_gate", "artifact": "SpaceX_daily_report_2026-08-25.md"}
+
+## Consolidation 2026-08-25T12:14:11Z
+- [2026-08-25T12:13:40Z] DollarBill/heartbeat — DollarBill_20260825_120939: {"status": "still_running", "elapsed_min": 4, "job_id": "DollarBill_20260825_120939", "source": "watcher"}
+- [2026-08-25T12:13:51Z] DollarBill/decision — plan-2026-08-26: {"account": "ZaloPay", "plan_date": "2026-08-26", "orders_count": 0, "action": "HOLD_ALL", "dt5g_state": "NEUTRAL", "active_nav_vnd": 516445298, "deferred": ["VIC (BAL, RE_BACKLOG_BUY) held per signal_holds book=BAL/buy paper-track to 2026-09-16"], "l1_park_trim": "NO_TRIM", "l2_jit_unpark": "not_run_no_buy_orders", "capit_episode": "CAPIT-2026-07-20 open, 26 sessions, unchanged", "plan_file": "data/trade_plans/plan_ZaloPay_2026-08-26.json", "discord_sent": true}

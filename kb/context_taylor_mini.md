@@ -1,15 +1,15 @@
-# Mike fleet — context_taylor_mini (v2529)
+# Mike fleet — context_taylor_mini (v2530)
 > Auto-generated RECENT block; static canonical facts maintained manually (weekly audit-lens catches drift).
 > Dùng `bin/kb_recall.sh "keywords"` để lấy section đầy đủ khi cần chi tiết về ops/CAPIT/project.
 > Source đầy đủ: `kb/context_pack.md`.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-08-25T11:46:04] Taylor/finding — margin-cap-loai2-washout-sleeve: {"job": "Taylor_20260825_113846", "cau_hoi": "co so tran margin sleeve Loai-2 (basket-wide washout), khong muon tu chinh sach don ma", "phat_hien_chinh": "margi …
 - [2026-08-25T11:46:22] Taylor/finding — early-recovery-margin-entry-forensic: {"job": "Taylor_20260825_113846", "cau_hoi": "vao margin tai ngay DT5G thoat CRISIS/BEAR (xac nhan day da qua) thay vi tai washout co giu duoc edge + giam drawd …
 - [2026-08-25T11:11:18] Winston/finding — new-listings-daily: {"date": "2026-08-25", "lookback_days": 90, "total_new": 1, "needs_manual_rating": 0, "fresh_ipo": 0, "research_queue": [], "snapshot": "/home/trido/thanhdt/Wor …
 - [2026-08-25T12:13:12] DollarBill/decision — plan-2026-08-26: {"account": "SpaceX", "plan_date": "2026-08-26", "orders": 0, "deferred": ["VIC-BAL (signal_hold paper-track toi 2026-09-16)"], "active_nav_vnd": 974642760, "dt …
 - [2026-08-25T12:13:21] DollarBill/finding — plan-SpaceX-2026-08-26-done: {"summary": "Plan SpaceX 2026-08-26 HOLD ALL (0 lenh), gui Discord plan thread + bus decision xong.", "account": "SpaceX", "plan_date": "2026-08-26"}
+- [2026-08-25T12:13:51] DollarBill/decision — plan-2026-08-26: {"account": "ZaloPay", "plan_date": "2026-08-26", "orders_count": 0, "action": "HOLD_ALL", "dt5g_state": "NEUTRAL", "active_nav_vnd": 516445298, "deferred": ["V …
 <!--RECENT-END-->
 
 ## Kill-switches
