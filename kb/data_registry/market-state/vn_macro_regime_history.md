@@ -441,3 +441,65 @@ lại chỉ cho các giai đoạn:
 Nếu phát hiện episode mới cần phân loại: dispatch macro-strategist với ngày + hành động giá,
 KHÔNG kèm forward-return/giả thuyết backtest.
 
+
+---
+
+## APPENDIX: MACRO CONTEXT 2016-2019 — GROWTH REGIME (không phải episode khủng hoảng)
+
+**Phân tích thêm ngày 2026-08-25** — theo yêu cầu xác định đặc trưng vĩ mô giai đoạn này để làm
+nền cho phân tích sector rotation. Đây KHÔNG phải entry phân loại khủng hoảng (không có crisis
+trigger) — mà là hồ sơ regime để tránh nhầm lẫn khi đọc dữ liệu 2017-2020 trong backtest context.
+
+### Chỉ số vĩ mô chính xác (PIT-dateable, có nguồn)
+
+| Chỉ tiêu | 2017 | 2018 | 2019 |
+|---|---|---|---|
+| GDP growth | 6.81% (beat target 6.7%) | 7.08% (10-year high) | ~7.02% |
+| CPI bình quân | ~3.53% | ~3.54% | 2.79% |
+| SBV refi rate | 6.5% → **6.25%** (cut July 2017) | 6.25% (held stable) | 6.25% → 6.0% (cut Sep 2019) |
+| Tín dụng | ~18-19% (trong target SBV 17-18%) | ~14% (siết chuẩn bị Basel II) | ~13% |
+| Tài khoản vãng lai | Thặng dư ~5-7% GDP | Thặng dư ~6.8% GDP (Q1) | Thặng dư |
+| FX reserves | Tích lũy thêm ~US$12.5 tỷ | Đạt ~US$63 tỷ (H1 2018, 3.6 tháng nhập khẩu) | Tiếp tục tăng |
+| FDI đăng ký | ~US$29 tỷ | ~US$29 tỷ | ~US$29 tỷ |
+
+Nguồn:
+- GDP, CPI: [IMF Executive Board 2017 Article IV](https://www.imf.org/en/News/Articles/2017/07/05/pr17262-vietnam-imf-executive-board-completes-the-2017-article-iv-consultation); [IMF 2018 Article IV PR](https://www.imf.org/en/news/articles/2018/07/10/pr18284-vietnam-imf-executive-board-concludes-the-2018-article-iv-consultation); IMF 2019 Article IV
+- SBV rate cut July 2017: [Central Banking "Vietnamese central bank cuts rates, despite IMF credit warning"](https://www.centralbanking.com/central-banks/monetary-policy/3269231/vietnamese-central-bank-cuts-rates-despite-imf-credit-warning); xác nhận giữ nguyên: [Vietnam News "VN central bank makes first key rate cut since 2017" ~2019](https://vietnamnews.vn/economy/535383/vn-central-bank-makes-first-key-rate-cut-since-2017.html)
+- CA surplus, FX reserves: [World Bank Vietnam Taking Stock June 2018](https://documents1.worldbank.org/curated/en/821801561652657954/pdf/Taking-Stock-Recent-Economic-Developments-of-Vietnam-Special-Focus-Vietnams-Tourism-Developments-Stepping-Back-from-the-Tipping-Point-Vietnams-Tourism-Trends-Challenges-and-Policy-Priorities.pdf)
+- FDI: Multiple sources confirm ~$29B registered across 2017-2019
+
+### Nhận định macro regime
+
+**Nhãn đúng cho 2017-2019: ACCOMMODATIVE LOW-RATE MANUFACTURING/FDI-LED GROWTH**
+
+Đặc trưng phân biệt rõ với 2007-2012 (STRUCTURAL):
+- SBV CẮT lãi suất tháng 7/2017 (bất chấp IMF khuyến cáo giữ nguyên vì lo tín dụng) — nghĩa là tiền tệ NỚI LỎNG chủ động, không phải "lãi suất cao"
+- Lãi suất thực = 6.25% - 3.5% CPI = ~2.75% — THẤP theo chuẩn lịch sử VN
+- Tín dụng ~18% năm 2017 — trong target SBV, không phải tăng vọt ngoài kiểm soát như 53% (2007)
+- Thâm hụt CA không tồn tại — trái lại thặng dư lớn và tích lũy FX reserves → KHÔNG có dấu hiệu mất cân đối macro nội địa
+- Driver tăng trưởng = FDI sản xuất điện tử/dệt may (Samsung, LG, Intel...) → xuất khẩu phi thương mại, KHÔNG phải tín dụng trong nước bơm bất động sản
+
+**Mô tả sai cần tránh:** "lãi suất cao, thanh khoản hạn chế" — đây là miêu tả 2011-2012, không phải 2017-2019.
+
+### Các đợt niêm yết ngân hàng lớn 2017-2018 (gây supply effect)
+
+| Ngân hàng | Mã | Ngày niêm yết | Sàn | Market cap xấp xỉ |
+|---|---|---|---|---|
+| VPBank | VPB | 17/08/2017 | HOSE | ~VND 52 tỷ (xếp hạng tư nhân cao nhất) |
+| HDBank | HDB | 05/01/2018 | HOSE | ~VND 32.4 tỷ |
+| Techcombank | TCB | 04/06/2018 | HOSE | ~$900M (~VND 20 nghìn tỷ) — IPO lớn nhất VN đến thời điểm đó |
+| TPBank | TPB | 04/2018 | HOSE | ~VND 17 nghìn tỷ (555 triệu cổ phần) |
+
+Nguồn: [FinanceAsia VPBank IPO](https://www.financeasia.com/article/vpbank-markets-key-vietnamese-banking-ipo/436386); [VIR "VPBank making its debut on HoSE"](https://vir.com.vn/vpbank-making-its-debut-on-hose-51304.html); [Techcombank official listing announcement 04/06/2018](https://techcombank.com/en/information/updates/techcombank-chinh-thuc-niem-yet-tai-so-giao-dich-chung-khoan-tp-ho-chi-minh-vao-ngay-04-06-2018); [VNEconomicTimes "HDBank lists on HoSE"](https://vneconomictimes.com/article/banking-finance/hdbank-lists-on-hose).
+
+Trong 12 tháng (August 2017 - June 2018): ~VND 120+ nghìn tỷ market cap ngân hàng mới gia nhập HOSE.
+Đây là cú supply shock đáng kể đối với nhóm banking đã có sẵn trên sàn.
+
+### Banking sector fundamentals 2016-2017 (Oxford Business Group, 2017)
+
+- ROE hệ thống: 5-7% (vs. 14.56% trước 2012) — đang hồi phục nhưng chậm
+- ROA: 0.4-0.5% (vs. 1.29% trước 2012)
+- NPL: VND 350 nghìn tỷ đã giải quyết qua VAMC từ 2013, còn VND 230 nghìn tỷ đang nằm tại VAMC
+- Ngân hàng quốc doanh (VCB/BID/CTG) chiếm >46% tổng tài sản → bị constrain bởi yêu cầu tỷ lệ vốn nhà nước + chuẩn bị Basel II (Circular 41/2016 của SBV)
+- Nguồn: [Oxford Business Group Vietnam 2017 Banking Sector](https://oxfordbusinessgroup.com/reports/vietnam/2017-report/economy/turning-point-banking-sector)
+
