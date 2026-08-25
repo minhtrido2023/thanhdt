@@ -228,3 +228,68 @@ re-pin, engine giữ `LIQ_ZERO_BLOCK=""` (opt-in). Production **không bị đ�
 Neo `%ADV/phiên` nào: **3,86%** (suy rộng liên-sổ **từ rổ CAPIT**, ca NCT 07-21 ⇒ ngưỡng hôm nay
 **0,32 tỷ**) hay **0,45%** (**chỉ-sổ-LAG**, nhưng **N=2 sự kiện** ⇒ ngưỡng **2,7 tỷ**, và khi đó gate
 tĩnh 2 tỷ **lại gần đúng**). Chênh nhau **8,4 lần**. Nguồn: `research/lag_fidelity_decomp_20260803/T4_RESULTS.md` §2.
+
+---
+
+## 2026-08-25 — Câu hỏi ĐÃ ĐÓNG: "sàn động (inflation-adj / percentile / capacity) tốt hơn 2B cứng?"
+
+**Job `Taylor_20260825_094721`, tái lập pin R3 độc lập lần thứ 3: 28,86/1,90/−17,8/1,62/1178,01B, selfcheck 0 VND.**
+Báo cáo: `mike/agents/Taylor/research/lag_dynamic_threshold_20260825.md`.
+Prereg: `mike/agents/Taylor/research/lag_dynamic_threshold_prereg_20260825.md`.
+
+**Kết luận: GIỮ NGUYÊN 2B cứng. NO-GO cả 3 biến thể động.**
+
+### Bằng chứng
+
+**Sweep ngưỡng tĩnh [1; 1,5; 2; 3; 4B] — xác nhận thang liều PHẲNG lần 3:**
+- Biên độ CAGR toàn dải = **0,34pp** (full) / **0,37pp** (OOS). 0→1B ăn 99% hiệu ứng.
+- Sàn 3,0B là ngưỡng duy nhất có dấu ổn định qua LOO: **âm nhất quán −0,23..−0,50pp** mỗi năm.
+- `delta_OOS_vs_2B`: [1B]=−0,11pp / [1,5B]=−0,22pp / [3B]=−0,15pp / [4B]=+0,15pp — không điểm gãy.
+
+**Biến thể A — Inflate lạm phát 7%/năm:**
+- CAGR delta +0,03pp / OOS delta +0,04pp / p=0,699 / BH FDR: TRƯỢT.
+- ⚠️ **Biến thể A là tautology theo cấu tạo**: hàm mũ của thời gian tự sinh xu hướng đơn điệu TRONG DỮ LIỆU, mọi xu hướng quan sát được là trivially true. Chỉ dùng nếu muốn vì lý do vận hành (xem dưới).
+- Sàn lịch sử: 2008=0,59B / 2012=0,77B / 2016=1,01B / 2020=1,32B / 2026=1,99B.
+
+**Biến thể B — Percentile universe_pit (k=20/25/30/43):**
+- p nhỏ nhất 0,421, **0/9 chan qua BH FDR** (ngưỡng BH nhỏ nhất 0,0056).
+- **Calibration quan trọng**: k=20/25/30 đều cho sàn THẤP HƠN HẲN 2B. Sàn 2B tương đương **percentile 43,1** của universe_pit tại 2026-08-10 (không phải 20-30 như dispatch giả định).
+- **Phát hiện có nội dung nhất**: xói mòn tỷ lệ chan là **BƯỚC NHẢY MỨC** giữa 2014-2019 và 2020+, KHÔNG phải trôi liên tục đang tiếp diễn — rho trong OOS 2020-2026 riêng = **0,000 (p=1,000)**. Câu chuyện "cần sàn động để giữ ổn định qua thời gian" vì vậy không được dữ liệu ủng hộ ở giai đoạn hiện tại.
+- Percentile k=43 (apple-to-apple với 2B): OOS delta = −0,04pp.
+
+**Biến thể C — Sàn neo NAV × fill thật (số học, không có p-value):**
+- Sàn 2B **SAI CẢ HAI CHIỀU**:
+  - NAV thật ~0,98B → capacity đòi ADV ≥ 0,33B → **2B chặt hơn 6,1×** nhu cầu thật.
+  - NAV 50B → capacity đòi ≥ 16,84B → **2B lỏng hơn 8,4×**.
+  - **Điểm giao NAV ~5,9B** (tại đó 2B ≈ đúng capacity).
+- 2B đang đúng **không phải vì capacity** — mà vì **quyết định hiệu quả vốn** (docstring `lag_liquidity_filter.py:16-28`).
+- Số mã hiện tại (universe_pit): ADV≥2B = 204 / ADV≥6,5B = 141 / ADV≥16,84B = 101 / ADV≥67B = 47.
+- ⚠️ Neo 3,86% suy rộng từ CAPIT (NCT 07-21), KHÔNG phải LAG. Fill LAG thật N=2, lớn nhất 0,45%ADV — nếu dùng số LAG thật thì required_ADV tăng lên ~2,7B (gần 2B hiện tại).
+
+**Đối chiếu BAL (conceptual + đếm):**
+- Không có xói mòn có ý nghĩa thống kê (rho=−0,24..−0,41, p=0,17-0,43).
+- Cửa sổ fill BAL và LAG giống hệt: max_fill_days=5 (hold 45 phiên chỉ quyết định EXIT, không ảnh hưởng cửa sổ VÀO).
+- Không đề xuất thay đổi gì ở BAL.
+
+### ⏸ 3 điều kiện để mở lại (prereg đã khai trước, ghi vào đây để tự động theo dõi)
+
+**Điều kiện 1 — Fill thật LAG N≥30 sự kiện** *(ưu tiên — trọng tài phân xử duy nhất)*
+- Hiện N=2, lớn nhất 0,45%ADV. Sổ `data/lag_liq_ledger.csv` đang tích luỹ từ 2026-07-31.
+- Mốc kiểm tra: **2026-12-15** (cohort Q3/2026) và **2027-03-31** (rà soát đầy đủ) — GIỮ NGUYÊN 2 mốc đã đặt ở trên, KHÔNG rút ngắn.
+- Khi đạt N≥30: kết hợp với Biến thể C (sàn capacity theo NAV) mới có thể đo được tác động thật.
+
+**Điều kiện 2 — NAV vượt ~5,9B** *(scaling milestone)*
+- Dưới mốc này: capacity chưa binding, toàn bộ tranh luận về sàn chỉ ảnh hưởng 1,6% vốn lịch sử.
+- Trên mốc này: câu hỏi ĐÚNG không còn là "2B hay biến thể A/B/C" mà là **sàn capacity tuyến tính theo NAV** (luật khác hẳn, phải đo lại từ đầu ở thang NAV thật).
+- Khi đạt: dispatch Taylor với NAV thật và fill thật N≥30 — KHÔNG dùng số từ job này.
+
+**Điều kiện 3 — Nếu muốn sàn động VÌ LÝ DO VẬN HÀNH (thẩm mỹ/nhất quán, không phải lợi nhuận)**
+- Biến thể A inflate 7% là ít tệ nhất: đơn giản, không phụ thuộc nguồn ngoài, không cần calibrate, Delta~0, 2026 cho 1,985B ≈ đúng sàn hiện tại, nhất quán với quy ước `Inflation_7` trong `filter.json`.
+- **Phải nói thẳng**: đây là quyết định thẩm mỹ/vận hành, backtest KHÔNG ủng hộ. Chỉ làm nếu user chủ động muốn và đã hiểu rõ điều này.
+- Không cần mốc thời gian — có thể triển khai bất cứ lúc nào theo yêu cầu.
+
+### Artifacts
+- Engine (bản sao R&D, KHÔNG đụng production): `mike/agents/Taylor/exp_lag_advdyn_20260825/`
+  - `legs_summary.csv`, `is_oos.csv`, `bootstrap_bh.csv`, `loo_delta.csv`, `dropped_per_year.csv`
+  - `diff_events.csv`, `floor_pctile_k*.csv`, `bal_candidates_per_year.csv`
+- Registry: `data/results_registry.md` mục **"2026-08-25 SÀN THANH KHOẢN LAG ĐỘNG vs TĨNH"**
