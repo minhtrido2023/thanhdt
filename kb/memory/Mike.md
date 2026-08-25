@@ -7,13 +7,14 @@
 - Thứ Bảy 2026-08-29: implement code chính sách margin đơn mã discretionary.
 
 ## Đang chạy
-- Taylor_20260825_151108 (DC sleeve phase 2, ~90-120 phút): A=backtest 3-book thật, B=factor-neutral check, C1=state-conditional LAG→DC trong BULL, C2=replace LAG hoàn toàn, C3=creative architecture alternatives, C4=capacity. Output: agents/Taylor/research/dc_3book_architecture_20260825/ (thư mục con, 5 file).
+- Taylor_20260825_153800 (DC phase 3, timeout 2h): Phần 1=C1 backtest thật (state-conditional BULL swap + turnover cost + walk-forward), Phần 2=validate ma trận C3 (bootstrap CI + OOS stability 3 giai đoạn), Phần 3=capacity sizing 16 mã DC universe (đặc biệt DHG/MSH). Output: agents/Taylor/research/dc_3book_architecture_20260825/.
 
 ## Đã đóng hôm nay (25/08)
-- Early-recovery margin lever: NO-GO CONFIRMED. Quant-skeptic CONFIRMED high.
-- BULL/EX-BULL gross scarcity: LAG thủ phạm (PEAD signal khan). Feature, không phải bug.
-- LAG cash routing BULL: Hướng A LOẠI, Hướng B NO-GO (tăng DD -2-3pp không tương xứng).
-- DC sleeve Q1-Q4 research (phase 1): GO có điều kiện — DC outperform BULL rõ OOS (Calmar 0.53→0.80), cơ chế THAY THẾ không thêm beta. Chuyển sang phase 2.
+- Early-recovery margin lever: NO-GO. Quant-skeptic CONFIRMED high.
+- BULL/EX-BULL gross scarcity: LAG thủ phạm (PEAD signal khan). Feature.
+- LAG cash routing BULL: Hướng A LOẠI, Hướng B NO-GO.
+- DC sleeve phase 1: GO có điều kiện.
+- DC sleeve phase 2: 3-book tĩnh NO-GO. C1 +4.19pp BULL. C3 ma trận factor×regime. C2 BÁC BỎ.
 - Mandate Loại-2 adaptive committed (975e37bd).
 
 ## KHẨN — security leak CHƯA đóng
