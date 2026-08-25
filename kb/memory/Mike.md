@@ -21,3 +21,4 @@
 - Số tài khoản DNSE THẬT lộ public GitHub minhtrido2023/thanhdt. 2 commit fix local chưa push.
 - CẦN user tự git push origin main ở /home/trido/thanhdt.
 
+- [2026-08-25T17:02:00Z] DC plan phân tầng user duyệt 26/08 00:00: T1 ngay = hygiene DHG/MSH exclude + per-name caps + C1 shadow paper (Taylor_20260825_170138 đang chạy); T2 = quant-skeptic pass C1 (quant-skeptic_20260825_170151 đang chạy) -> code allocator flag dc_swap disabled -> live 25% LAG khi BULL tới (user duyệt lại) -> scale full khi đạt 4 tiêu chí ex-ante (≥60 phiên BULL, DC gross ≥ LAG counterfactual, fill ≤5% ADV, turnover ≤ model). Checkpoint 2027-03-31. Bobby re-read 2017-2020: accommodative low-rate + bank listing wave (không phải lãi suất cao) — driver DC-thua-BULL là one-time structural.
