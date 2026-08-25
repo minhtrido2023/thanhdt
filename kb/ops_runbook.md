@@ -262,7 +262,10 @@ tái tạo bằng cách chạy lại chính bộ dispatcher.
    cùng nguồn — nếu lệch: bug checker (autofix được).
    Fail-safe khi chưa rõ: hệ thống tự rơi về DT4_only (an toàn, chỉ mất lớp macro-cap).
 
-## Recovery sau server downtime kéo dài (≥1h, bao qua cron tối)
+## Boot — khởi động lại pipeline sau server downtime (≥1h, bao qua cron tối)
+
+> **Trigger word: "boot"** — anh nhắn "boot" hoặc "boot YYYY-MM-DD" là Mike chạy ngay workflow này.
+> Không nhầm với OS reboot — "boot" ở đây = boot lại pipeline hàng ngày.
 
 **Khi nào áp dụng:** server tắt bất kỳ lúc nào từ 18:00 ICT và chưa khôi phục khi cron tối
 chạy — tức là bỏ lỡ ≥1 trong số: `daily_refresh` (18:30), `bq_freshness+DollarBill` (19:00),
