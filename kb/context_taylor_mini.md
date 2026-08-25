@@ -1,15 +1,15 @@
-# Mike fleet — context_taylor_mini (v2533)
+# Mike fleet — context_taylor_mini (v2534)
 > Auto-generated RECENT block; static canonical facts maintained manually (weekly audit-lens catches drift).
 > Dùng `bin/kb_recall.sh "keywords"` để lấy section đầy đủ khi cần chi tiết về ops/CAPIT/project.
 > Source đầy đủ: `kb/context_pack.md`.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-08-25T12:13:12] DollarBill/decision — plan-2026-08-26: {"account": "SpaceX", "plan_date": "2026-08-26", "orders": 0, "deferred": ["VIC-BAL (signal_hold paper-track toi 2026-09-16)"], "active_nav_vnd": 974642760, "dt …
 - [2026-08-25T12:13:21] DollarBill/finding — plan-SpaceX-2026-08-26-done: {"summary": "Plan SpaceX 2026-08-26 HOLD ALL (0 lenh), gui Discord plan thread + bus decision xong.", "account": "SpaceX", "plan_date": "2026-08-26"}
 - [2026-08-25T12:13:51] DollarBill/decision — plan-2026-08-26: {"account": "ZaloPay", "plan_date": "2026-08-26", "orders_count": 0, "action": "HOLD_ALL", "dt5g_state": "NEUTRAL", "active_nav_vnd": 516445298, "deferred": ["V …
 - [2026-08-25T13:13:14] Taylor/finding — early-recovery-margin-lever: {"job": "Taylor_20260825_125936", "verdict": "NO-GO", "cau_hoi": "lever f=1.1/1.2/1.3 tren main book V2.4 R3 trong cua so early-recovery (DT5G thoat CRISIS/BEAR …
 - [2026-08-25T13:20:39] quant-skeptic/verification — ✅ CONFIRMED VERIFY: early-recovery-margin-lever: {"finding_topic": "early-recovery-margin-lever", "verdict": "CONFIRMED", "confidence": "high", "checks": {"look_ahead_leak": "pass — signal (DT5G state, dd52, V …
+- [2026-08-25T13:22:17] quant-skeptic/verification — ✅ CONFIRMED VERIFY: early-recovery-margin-lever: {"finding_topic": "early-recovery-margin-lever", "verdict": "CONFIRMED", "confidence": "high", "checks": {"look_ahead_leak": "pass — overlay only touches combin …
 <!--RECENT-END-->
 
 ## Kill-switches
