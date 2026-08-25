@@ -554,6 +554,28 @@ CAPIT_LEVER_DD52_PCT = -20.0
 # −95% chọn để tách bạch sentinel: đáy tệ nhất lịch sử VNINDEX còn cách xa mức này.
 CAPIT_LEVER_DD52_SANITY_FLOOR = -95.0
 
+# ── PIT filter Loại 1 (STRUCTURAL/MULTI_YEAR) vs Loại 2 (CONFIDENCE_LIQUIDITY/CONTAINABLE) ──
+# Nguồn: macro-strategist (Bobby) `kb/data_registry/market-state/vn_macro_regime_history.md`
+# (2026-08-25) + tái đánh giá `agents/Taylor/research/macro-margin-review_20260825.md` (job
+# Taylor_20260825_040602): capit_margin_lever CHƯA từng test trên một ngày Loại 1 nào — cả 3
+# episode trong cửa sổ backtest 2014+ (2018/2020/2022) đều là Loại 2. Ngưỡng dưới đây là
+# ĐIỂM GIỮA thực nghiệm của 2 leg (CPI YoY, lãi suất huy động Big-4 12M) đo TẠI ngày mỗi
+# cluster dd52<=-20% bắt đầu, trên phần dữ liệu 2011-2026 CÓ SẴN (job
+# Taylor_20260825_042209): Loại-1-còn-đo-được (2011-05, 2011-07, 2011-10, 2012-08) CPI
+# 6,87-21,60% / deposit 12,0-14,0%; Loại-2 (2018/2020/2022, 6 cluster) CPI 2,71-5,14% /
+# deposit 5,50-6,80% — 2 dải KHÔNG chồng lấn (khoảng trống CPI 5,14→6,87; deposit 6,80→12,0).
+# ⚠️ GIỚI HẠN PHẢI MANG THEO: cả `cpi_vn.py` lẫn `deposit_rate_vn.py` KHÔNG có anchor nào
+# trước 2011-01 -> 6/10 cluster con dd52<=-20% CỦA LOẠI 1 (2007-04 -> 2010-11, GỒM ĐÁY SÂU
+# NHẤT lịch sử VNINDEX -71,0% năm 2008-2009) không có dữ liệu để kiểm ngưỡng này — bộ lọc
+# CHƯA ĐƯỢC XÁC NHẬN sẽ chặn được ngày ĐẦU của một khủng hoảng cơ cấu mới bùng phát kiểu
+# 2007 (CPI/lãi suất khi đó còn chưa kịp leo cao). Đây là lớp phòng thủ THÊM (đúng tinh thần
+# DT5G macro gate — "chốt rủi ro fail-safe, không phải công cụ tăng lợi nhuận"), KHÔNG PHẢI
+# một luật đã backtest đầy đủ trên toàn bộ Loại 1. `deposit_rate_vn.py` các mốc trước live-
+# refresh (2026-07-17) là hồi tố (đã ghi rõ trong registry của nó) — cùng mức tin cậy
+# CANONICAL-PROXY mà `rating_8l.py` đang dùng sống, không phải tiêu chuẩn mới đặt ra ở đây.
+CAPIT_LEVER_PIT_CPI_THRESHOLD = 6.0
+CAPIT_LEVER_PIT_DEPOSIT_THRESHOLD = 9.0
+
 
 def capit_base(state, dd52w, vn_cooling):
     if state == 1: return 1.0
@@ -880,7 +902,64 @@ _gate_pass = bool(pd.notna(dd52_now)
 if pd.notna(dd52_now) and dd52_now < CAPIT_LEVER_DD52_SANITY_FLOOR and not _lever_err:
     _lever_err = (f"dd52={dd52_now} dưới sàn tỉnh táo {CAPIT_LEVER_DD52_SANITY_FLOOR}% — "
                   f"gần như chắc chắn là sentinel thiếu dữ liệu, KHÔNG phải washout; coi như TẮT")
+
+# PIT filter Loại 1/Loại 2 (xem hằng số CAPIT_LEVER_PIT_*_THRESHOLD ở trên cho nguồn gốc
+# ngưỡng + giới hạn dữ liệu). Chỉ tính khi còn cơ hội arm (đỡ 1 lượt đọc CPI/lãi suất huy
+# động không cần thiết những ngày cổng dd52 chưa đạt) — nhưng LUÔN ghi vào artifact để
+# quan sát được ngay cả những ngày lever không fire.
+import cpi_vn, deposit_rate_vn
+_pit_cpi_yoy = _pit_deposit_rate = None
+_pit_structural, _pit_reason = False, "chưa tính (cổng dd52 hoặc công tắc chưa đạt)"
+if not _lever_err and _gate_pass:
+    try:
+        _pit_end = str((LATEST + cpi_vn.pd.DateOffset(months=2)).date())
+        _pit_q = cpi_vn.pd.DataFrame({"time": [LATEST]})
+        _pit_cpi_yoy = float(cpi_vn.merge_cpi(_pit_q, end=_pit_end)["cpi_yoy"].iloc[0])
+        _pit_deposit_rate = float(deposit_rate_vn.merge_deposit(_pit_q)["deposit_rate"].iloc[0])
+        # Chặn blind-spot ngoại suy của cpi_vn.py (đo thực nghiệm job Taylor_20260825_042209):
+        # QUÁ tháng NSO thật gần nhất (`NSO_CPI_YOY_REAL`, hiện 2026-06), hàm nội suy KHÔNG
+        # NaN mà lặng lẽ forward-fill từ mốc Tier-2 CŨ (2025-05, 3,4%) — bỏ qua hoàn toàn xu
+        # hướng thật gần nhất (2026 Q2 leo 4,65->5,60->4,69%). Với CỔNG CHẶN VAY, đánh giá
+        # THẤP CPI là sai chiều fail-safe -> lấy MAX(giá trị nội suy, số NSO thật gần nhất
+        # đã biết) khi ngày hỏi đã qua tháng NSO thật cuối cùng; không bao giờ hạ thấp hơn
+        # số thật gần nhất. KHÔNG sửa cpi_vn.py (module dùng chung, ngoài phạm vi job này).
+        _real_items = sorted(cpi_vn.NSO_CPI_YOY_REAL.items())
+        _last_real_date = cpi_vn.pd.to_datetime(_real_items[-1][0])
+        if cpi_vn.pd.Timestamp(LATEST) > _last_real_date and not cpi_vn.pd.isna(_pit_cpi_yoy):
+            _pit_cpi_yoy = max(_pit_cpi_yoy, _real_items[-1][1])
+    except Exception as _pit_ex:
+        _pit_structural = True
+        _pit_reason = (f"lỗi đọc CPI/lãi suất huy động ({type(_pit_ex).__name__}: {_pit_ex}) — "
+                       f"fail-closed COI NHƯ Loại 1, KHÔNG áp đòn bẩy")
+    else:
+        if cpi_vn.pd.isna(_pit_cpi_yoy) or cpi_vn.pd.isna(_pit_deposit_rate):
+            _pit_structural = True
+            _pit_reason = (f"CPI/lãi suất huy động NaN tại {LATEST.date()} (ngoài phạm vi dữ "
+                           f"liệu, trước 2011-01) — fail-closed COI NHƯ Loại 1, KHÔNG áp đòn bẩy")
+            # Chuẩn hoá NaN -> None TRƯỚC khi vào dict artifact: `json.dump` mặc định ghi
+            # literal `NaN` (không phải JSON hợp lệ, nhiều parser khác từ chối đọc) và nó
+            # cũng phá luôn phép so sánh `is None` mà mọi field khác trong dict này dùng
+            # (vd `dd52_pct` ở trên qua `pd.notna(...) else None`) — cùng quy ước, không bịa
+            # quy ước mới riêng cho 2 field này.
+            _pit_cpi_yoy = _pit_deposit_rate = None
+        elif _pit_cpi_yoy >= CAPIT_LEVER_PIT_CPI_THRESHOLD:
+            _pit_structural = True
+            _pit_reason = (f"CPI YoY {_pit_cpi_yoy:.2f}% >= ngưỡng "
+                           f"{CAPIT_LEVER_PIT_CPI_THRESHOLD}% — dấu hiệu khủng hoảng CƠ CẤU "
+                           f"(Loại 1 kiểu 2007-2012), KHÔNG áp đòn bẩy dù dd52 đã đạt cổng")
+        elif _pit_deposit_rate >= CAPIT_LEVER_PIT_DEPOSIT_THRESHOLD:
+            _pit_structural = True
+            _pit_reason = (f"lãi suất huy động Big-4 12M {_pit_deposit_rate:.2f}%/năm >= "
+                           f"ngưỡng {CAPIT_LEVER_PIT_DEPOSIT_THRESHOLD}%/năm — dấu hiệu khủng "
+                           f"hoảng CƠ CẤU (Loại 1), KHÔNG áp đòn bẩy dù dd52 đã đạt cổng")
+        else:
+            _pit_reason = (f"CPI YoY {_pit_cpi_yoy:.2f}% < {CAPIT_LEVER_PIT_CPI_THRESHOLD}% và "
+                           f"lãi suất huy động {_pit_deposit_rate:.2f}% < "
+                           f"{CAPIT_LEVER_PIT_DEPOSIT_THRESHOLD}% — tương thích khủng hoảng "
+                           f"NIỀM TIN/THANH KHOẢN có thể chứa được (Loại 2), PIT filter cho qua")
+
 _lever_active = bool(_lever_pol.get("enabled") and not _lever_err and _gate_pass
+                     and not _pit_structural
                      and capit_signal_today and capit_size > 0.005 and basket)
 if _lever_active:
     _f = float(_lever_pol["f"])
@@ -915,15 +994,24 @@ capit_lever = {
     "capit_size": round(capit_size, 4),
     "n_capit_basket": len(basket),
     "policy_error": _lever_err,
+    "pit_filter_structural": _pit_structural,
+    "pit_filter_reason": _pit_reason,
+    "pit_cpi_yoy": (round(_pit_cpi_yoy, 2) if _pit_cpi_yoy is not None else None),
+    "pit_deposit_rate": (round(_pit_deposit_rate, 2) if _pit_deposit_rate is not None else None),
+    "pit_cpi_threshold": CAPIT_LEVER_PIT_CPI_THRESHOLD,
+    "pit_deposit_threshold": CAPIT_LEVER_PIT_DEPOSIT_THRESHOLD,
     "reason": ("đòn bẩy CAPIT ĐANG ÁP cho sự kiện này" if _lever_active else
                ("chính sách TẮT (enabled=false) — cần user xác nhận riêng mới bật"
                 if not _lever_pol.get("enabled") else
                 (_lever_err or ("cổng dd52 chưa đạt "
                                 f"({dd52_now:.2f}% > {CAPIT_LEVER_DD52_PCT}%)" if not _gate_pass
-                                else "không có sự kiện CAPIT đang fire hôm nay")))),
+                                else (_pit_reason if _pit_structural
+                                      else "không có sự kiện CAPIT đang fire hôm nay"))))),
 }
 if _lever_err:
     print(f"  WARNING: chính sách đòn bẩy CAPIT — {_lever_err} (fail-closed: KHÔNG áp đòn bẩy)")
+if _pit_structural:
+    print(f"  WARNING: PIT filter chặn đòn bẩy CAPIT (nghi Loại 1 STRUCTURAL) — {_pit_reason}")
 if _lever_active:
     print(f"  🔺 ĐÒN BẨY CAPIT ÁP DỤNG: f={_lever_pol['f']} gói vay "
           f"{_lever_pol['loan_package_id']} cho account {_lever_pol['accounts']} "

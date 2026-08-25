@@ -192,11 +192,19 @@ def run_policy(workdir):
     return ns["capit_lever_policy"]()
 
 
-def run_block(rules_dir, *, dd52, signal, size, basket, targets):
+# Ngày mặc định cho `LATEST` khi ca kiểm không cố tình test PIT filter (CPI ~3,9%/lãi suất
+# huy động 7,0% theo anchor 2019 — cả hai đều dưới ngưỡng CAPIT_LEVER_PIT_*_THRESHOLD, PIT
+# filter cho qua) — giữ MỌI ca kiểm A-F đã có tiếp tục kiểm ĐÚNG thứ chúng đang kiểm (dd52/
+# công tắc/cổng), không bị PIT filter mới xen vào làm sai lệch kết quả.
+_PIT_PASS_DEFAULT_DATE = _dt.datetime(2019, 6, 1)
+
+
+def run_block(rules_dir, *, dd52, signal, size, basket, targets, latest=None):
     """Chạy §6a THẬT với đầu vào giả lập → (capit_lever dict, capit_targets sau khi chạy)."""
     ns = {"os": os, "json": json, "pd": _FakePd, "WORKDIR": rules_dir,
           "dd52_now": dd52, "capit_signal_today": signal, "capit_size": size,
           "basket": list(basket), "capit_targets": copy.deepcopy(targets),
+          "LATEST": latest or _PIT_PASS_DEFAULT_DATE,
           **CONSTS}
     exec(POLICY_SRC, ns)
     exec(BLOCK_SRC, ns)
@@ -373,6 +381,62 @@ with tempfile.TemporaryDirectory() as TMP:
           and not any("lever" in k for k in tgt_off["SpaceX"]), detail=lev_off["reason"])
     check("B10 …artifact VẪN công bố loan_package_id khi tắt → lưới an toàn E vẫn có gì để soi",
           lev_off["loan_package_id"] == 1840, detail=str(lev_off["loan_package_id"]))
+
+    # ─── B-PIT. Bộ lọc PIT Loại 1 (STRUCTURAL) vs Loại 2 (CONTAINABLE) — job
+    # Taylor_20260825_042209. Dùng NGÀY THẬT (không mock giá trị CPI/deposit_rate) để chạy
+    # đúng cpi_vn.py/deposit_rate_vn.py thật, giống cách B1-B10 chạy đúng §6a thật — nếu ai
+    # sửa ngưỡng hay đổi anchor mà đổi phân loại của 1 trong các ngày mốc này, test này fail.
+    section("B-PIT. PIT filter Loại 1/Loại 2 (CPI YoY / lãi suất huy động)")
+
+    lev, tgt = run_block(d_on, dd52=-25.0, signal=True, size=0.50,
+                         basket=BASKET5, targets=base_targets(),
+                         latest=_dt.datetime(2011, 7, 15))
+    check("B11 ngày Loại-1 THẬT (2011-07-15, đuôi mega-crisis 2007-2012, CPI YoY thật ~21,6%) "
+          "→ active=False dù dd52/cổng/tín hiệu đều ĐẠT, pit_filter_structural=True",
+          lev["active"] is False and lev["pit_filter_structural"] is True
+          and lev["gate_pass"] is True and "CƠ CẤU" in lev["pit_filter_reason"],
+          detail=f"cpi={lev['pit_cpi_yoy']} deposit={lev['pit_deposit_rate']} "
+                 f"reason={lev['pit_filter_reason']}")
+    check("B11b …không trường lever nào bị gắn vào targets khi PIT chặn",
+          not any("lever" in k for k in tgt["SpaceX"]), detail=str(list(tgt["SpaceX"])))
+
+    lev, tgt = run_block(d_on, dd52=-25.0, signal=True, size=0.50,
+                         basket=BASKET5, targets=base_targets(),
+                         latest=_dt.datetime(2012, 8, 27))
+    check("B11c ngày Loại-1 THẬT, đuôi cluster (2012-08-27, CPI YoY thật ~6,87% — sát ngưỡng "
+          "6,0%) → VẪN active=False (chặn đúng ca biên, không lọt qua vì gần ngưỡng)",
+          lev["active"] is False and lev["pit_filter_structural"] is True,
+          detail=f"cpi={lev['pit_cpi_yoy']} deposit={lev['pit_deposit_rate']}")
+
+    lev, tgt = run_block(d_on, dd52=-25.0, signal=True, size=0.50,
+                         basket=BASKET5, targets=base_targets(),
+                         latest=_dt.datetime(2022, 6, 1))
+    check("B12 ngày Loại-2 THẬT (2022-06-01, giữa episode SCB/Fed-hiking, CPI YoY thật ~3,4%) "
+          "→ active=True, PIT filter CHO QUA (không chặn oan khủng hoảng niềm tin/thanh khoản)",
+          lev["active"] is True and lev["pit_filter_structural"] is False,
+          detail=f"cpi={lev['pit_cpi_yoy']} deposit={lev['pit_deposit_rate']} "
+                 f"reason={lev['pit_filter_reason']}")
+    check("B12b …có trường lever khi PIT cho qua + mọi cổng khác đạt",
+          tgt["SpaceX"].get("lever_f") == 1.3, detail=str(tgt["SpaceX"].get("lever_f")))
+
+    lev, tgt = run_block(d_on, dd52=-25.0, signal=True, size=0.50,
+                         basket=BASKET5, targets=base_targets(),
+                         latest=_dt.datetime(2008, 9, 1))
+    check("B13 ngày TRƯỚC 2011-01 (2008-09-01, chính đáy sâu nhất mega-crisis, dd52 thật "
+          "-71,0%) → CPI/deposit_rate KHÔNG có anchor (NaN) → fail-closed COI NHƯ Loại 1, "
+          "active=False. GIỚI HẠN PHẢI GHI RÕ: đây là fail-closed vì THIẾU DỮ LIỆU, KHÔNG "
+          "phải bằng chứng bộ lọc đã được xác nhận trên chính ngày này",
+          lev["active"] is False and lev["pit_filter_structural"] is True
+          and lev["pit_cpi_yoy"] is None and lev["pit_deposit_rate"] is None
+          and "NaN" in lev["pit_filter_reason"],
+          detail=f"reason={lev['pit_filter_reason']}")
+
+    lev, tgt = run_block(d_on, dd52=-25.0, signal=True, size=0.50,
+                         basket=BASKET5, targets=base_targets())
+    check("B14 fixture mặc định (không truyền `latest`, dùng _PIT_PASS_DEFAULT_DATE 2019-06) "
+          "vẫn PIT-pass — bảo vệ ca B1-B10 phía trên khỏi bị PIT filter âm thầm đổi kết quả "
+          "nếu sau này ai đó sửa ngưỡng/anchor",
+          lev["pit_filter_structural"] is False, detail=str(lev["pit_filter_reason"]))
 
     # ─────────────────── C. Tầng cascade plan: apply_capit_lever ───────────────────
     section("C. Cascade plan (trading_bot/plan.py :: apply_capit_lever)")
