@@ -6,13 +6,13 @@
 - VPI/BAL signal HOLD đến 2026-09-16 — HOLD_ALL theo VPI.
 - Thứ Bảy 2026-08-29: implement code chính sách margin đơn mã discretionary.
 
-## Đang chờ
-- Taylor_20260825_142021: Hướng B backtest (PARK_STATES_DICT {4:X}) + 3-book design (LAG+BAL+DC 1/3 each). Dispatch 21:20 ICT 25/08. Timeout 90 phút. Job phức tạp, poll 5-10 phút/lần.
+## Chờ quyết định user
+- LAG cash drag BULL: Hướng B (parking) NO-GO (Calmar 1.63→1.41, DD xấu +2-3pp, CAGR flat). Hướng C (cash drag = feature) có bằng chứng ủng hộ. 3-book DC chưa phân tích đủ. User cần quyết: đóng hướng BULL routing hay tiếp tục 3-book?
 
 ## Đã đóng hôm nay (25/08)
 - Early-recovery margin lever: NO-GO CONFIRMED. Quant-skeptic CONFIRMED high.
-- BULL/EX-BULL gross scarcity: LAG thủ phạm (PEAD signal khan trong BULL). EX-BULL out of scope.
-- LAG cash routing BULL: Hướng A LOẠI (BAL full), Hướng B promising (parking), 3-book (DC) mở.
+- BULL/EX-BULL gross scarcity: LAG thủ phạm (PEAD signal khan). EX-BULL out of scope.
+- LAG cash routing BULL: Hướng A LOẠI, Hướng B NO-GO (tăng DD -2-3pp không tương xứng).
 - Mandate Loại-2 adaptive committed (975e37bd).
 
 ## KHẨN — security leak CHƯA đóng
