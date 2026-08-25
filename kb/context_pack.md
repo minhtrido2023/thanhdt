@@ -1,4 +1,4 @@
-# Mike fleet — context pack (v2530)
+# Mike fleet — context pack (v2531)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
@@ -151,6 +151,32 @@ Lý do + chuỗi R&D: `kb/projects/momentum-deals.md`, `plan_close_mom_20260712.
 - Banking (MBB/ACB/HDB): Tier 1. FPT: Tier 1. CTR: Tier 2. Pharma: buy-and-hold only (timing phá alpha).
 - DGC: 2 nhánh tách biệt — compounder-screen (exclude) ≠ special-situation case.
 - Sector sweeps #1–9 (đã đóng, kết luận lens/tilt): `kb/KNOWLEDGE.md` §7.
+
+## Mandate — Margin crisis sleeve Loại-2 adaptive (chốt 2026-08-25, user duyệt)
+
+**Thị trường VN có 90%+ nhà đầu tư cá nhân → overreaction là đặc trưng CẤU TRÚC, không phải noise.**
+Framework margin cho khủng hoảng phải ADAPTIVE theo loại crisis, không phải rigid policy chỉ đúng cho thị trường đã trưởng thành.
+
+**Phân loại Bobby (real-time BLIND):**
+- **Loại 1** — STRUCTURAL/MULTI_YEAR: tự củng cố, giải quyết lâu (VN 2008-2012) → KHÔNG margin
+- **Loại 2** — CONFIDENCE_LIQUIDITY/CONTAINABLE: có policy anchor rõ, phục hồi nhanh hơn (2020, 2022-23) → CÓ THỂ margin với 3 điều kiện
+
+**3 điều kiện bắt buộc (ANĐ — thiếu 1 = KHÔNG escalate):**
+1. Bobby Loại-2 **real-time BLIND** (chạy TRƯỚC khi biết forward return — tránh hindsight)
+2. PIT filter PASS (universe_pit — không dùng ticker_prune cho quyết định này)
+3. ≥1 chỉ báo overreaction xác nhận (VIX spike / intermarket dislocate / breadth collapse cực đoan)
+→ Kết quả: ESCALATE lên Mike + user — KHÔNG auto-trade, KHÔNG bypass human-in-the-loop
+
+**Statistical significance sai tool cho N=3-5 crisis** — dùng causal framework + human judgment.
+Observable indicators + escalation process là deliverable đúng, không phải auto-trade rule.
+
+**Trần (xác nhận 2026-08-25, Spyros CONDITIONAL-APPROVE):**
+- Equity sleeve: ≤5% NAV vốn tự có (cơ sở: 1% NAV max loss / 20% exit kỷ luật = 5%)
+- Exposure: ≤6,5% NAV (≠ ≤5% — f=1,3 của RocketX thật, không phải f=2,0 giả định)
+- Bobby confidence "ambiguous" (vd 2018): size −50% = ≤2,5% NAV equity
+
+**Chi tiết framework + payload escalate:** `agents/Taylor/research/crisis_margin_framework_adaptive_20260825.md`
+**Chính sách đầy đủ (đơn mã + sleeve Loại-2):** `kb/projects/discretionary-margin-policy-20260823.md`
 
 ## Quy ước phân tích conditional — trục 2 mặc định (chốt 2026-08-22, user duyệt)
 

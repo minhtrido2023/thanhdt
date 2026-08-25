@@ -822,3 +822,17 @@
 ## Consolidation 2026-08-25T12:14:11Z
 - [2026-08-25T12:13:40Z] DollarBill/heartbeat — DollarBill_20260825_120939: {"status": "still_running", "elapsed_min": 4, "job_id": "DollarBill_20260825_120939", "source": "watcher"}
 - [2026-08-25T12:13:51Z] DollarBill/decision — plan-2026-08-26: {"account": "ZaloPay", "plan_date": "2026-08-26", "orders_count": 0, "action": "HOLD_ALL", "dt5g_state": "NEUTRAL", "active_nav_vnd": 516445298, "deferred": ["VIC (BAL, RE_BACKLOG_BUY) held per signal_holds book=BAL/buy paper-track to 2026-09-16"], "l1_park_trim": "NO_TRIM", "l2_jit_unpark": "not_run_no_buy_orders", "capit_episode": "CAPIT-2026-07-20 open, 26 sessions, unchanged", "plan_file": "data/trade_plans/plan_ZaloPay_2026-08-26.json", "discord_sent": true}
+
+## Consolidation 2026-08-25T13:07:02Z
+- [2026-08-25T12:59:52Z] Taylor/heartbeat — Taylor_20260825_125936: {"status": "in_progress", "note": "orienting: data_registry + macro classification files"}
+- [2026-08-25T13:00:37Z] Taylor/heartbeat — Taylor_20260825_125936: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20260825_125936", "source": "watcher"}
+- [2026-08-25T13:01:24Z] Taylor/heartbeat — Taylor_20260825_125936: {"status": "in_progress", "note": "da tim duoc R3 pinned CSV (3107 DAILY rows) + Bobby regime registry; dang dung control leg"}
+- [2026-08-25T13:01:37Z] Taylor/heartbeat — Taylor_20260825_125936: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20260825_125936", "source": "watcher"}
+- [2026-08-25T13:02:38Z] Taylor/heartbeat — Taylor_20260825_125936: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20260825_125936", "source": "watcher"}
+- [2026-08-25T13:03:20Z] Taylor/heartbeat — Taylor_20260825_125936: {"status": "in_progress", "note": "CONTROL LEG PASS: tai lap chinh xac 28.8627/1.8999/-17.785/1.6229 tu CSV pin. Phat hien som: gross exposure book max 0.942, median 0.674 => f=1.3 phan lon KHONG can vay."}
+- [2026-08-25T13:03:38Z] Taylor/heartbeat — Taylor_20260825_125936: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20260825_125936", "source": "watcher"}
+- [2026-08-25T13:04:38Z] Taylor/heartbeat — Taylor_20260825_125936: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20260825_125936", "source": "watcher"}
+- [2026-08-25T13:05:10Z] Taylor/heartbeat — Taylor_20260825_125936: {"status": "in_progress", "note": "sim xong 3 bo episode x 4 muc f x 2 quy uoc lai vay. Set A (Bobby-gated) f=1.3: CAGR +0.89pp NHUNG Calmar 1.62->1.50, MaxDD -17.8->-19.9. Dang chay LOO + EX-BULL swap."}
+- [2026-08-25T13:05:38Z] Taylor/heartbeat — Taylor_20260825_125936: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20260825_125936", "source": "watcher"}
+- [2026-08-25T13:06:38Z] Taylor/heartbeat — Taylor_20260825_125936: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20260825_125936", "source": "watcher"}
+- [2026-08-25T13:06:39Z] Taylor/heartbeat — Taylor_20260825_125936: {"status": "in_progress", "note": "XAC NHAN trong code: SB_GATE line 74 = {5:1.0} — V2.4 KHONG he lever 130% o EX-BULL (tien de Buoc 4 cua dispatch sai). Gross max 0.942 toan mau. Dang chay bootstrap + LOO bien khong-gate-dinh-gia."}
