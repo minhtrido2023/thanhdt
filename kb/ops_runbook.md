@@ -262,6 +262,112 @@ tái tạo bằng cách chạy lại chính bộ dispatcher.
    cùng nguồn — nếu lệch: bug checker (autofix được).
    Fail-safe khi chưa rõ: hệ thống tự rơi về DT4_only (an toàn, chỉ mất lớp macro-cap).
 
+## Recovery sau server downtime kéo dài (≥1h, bao qua cron tối)
+
+**Khi nào áp dụng:** server tắt bất kỳ lúc nào từ 18:00 ICT và chưa khôi phục khi cron tối
+chạy — tức là bỏ lỡ ≥1 trong số: `daily_refresh` (18:30), `bq_freshness+DollarBill` (19:00),
+`eod_trading_report` (19:10), `sync_bq_cache_daily` (23:45).
+
+### Bước 0 — Kiểm tra an toàn (LUÔN làm trước)
+```bash
+ls /home/trido/thanhdt/WorkingClaude/data/BOT_STOP 2>/dev/null && echo "BOT STOPPED" || echo "bot ok"
+# Xem có lệnh nào treo không (bot đã tự cancel lúc ~14:50 nếu chạy bình thường)
+cat /home/trido/thanhdt/WorkingClaude/mike/logs/bot_*_$(date -d yesterday +%Y%m%d)*.log 2>/dev/null | grep -i "cancel\|error\|fail" | tail -10
+```
+Nếu BOT_STOP bật hoặc có lệnh treo → dừng, báo user trước khi làm gì khác.
+
+### Bước 1 — BQ cache sync (an toàn bất kỳ giờ nào)
+```bash
+nohup /home/trido/thanhdt/WorkingClaude/sync_bq_cache_daily.sh \
+  > /home/trido/thanhdt/WorkingClaude/mike/logs/sync_bq_recovery_$(date +%Y%m%d).log 2>&1 &
+echo "BQ sync PID=$!"
+```
+Đợi hoàn tất (theo dõi log). Sau khi xong: tất cả bảng BQ local cache có data của ngày bị miss.
+
+### Bước 2 — EOD report ngày bị miss (không cần BQ sync — đọc local plan/state)
+```bash
+MISSED_DATE=$(date -d yesterday +%Y-%m-%d)   # hoặc hardcode ngày cụ thể
+source /home/trido/thanhdt/WorkingClaude/wc_env.sh
+/home/trido/thanhdt/WorkingClaude/mike/bin/eod_trading_report.sh --account SpaceX --date $MISSED_DATE
+/home/trido/thanhdt/WorkingClaude/mike/bin/eod_trading_report.sh --account ZaloPay --date $MISSED_DATE
+```
+
+### Bước 3 — universe_pit rebuild cho ngày bị miss ⚠️ BẮT BUỘC (bài học 2026-08-25)
+```bash
+# PHẢI chạy SAU BQ sync — BQ sync thêm ngày mới vào ticker nhưng universe_pit lag lại.
+# Nếu bỏ bước này: papertrade_daily hôm sau FAIL đồng loạt (assert_universe_covers lỗi).
+source /home/trido/thanhdt/WorkingClaude/wc_env.sh
+$DNA_PYEXE /home/trido/thanhdt/WorkingClaude/mike/bin/build_universe_pit.py --date $MISSED_DATE
+```
+Kết quả mong đợi: `"status": "APPENDED"`. Nếu `"status": "REFUSED"` → BQ cho ngày đó chưa đủ
+data (n_rows quá thấp so với median) → có thể ngày đó thật sự không có data, KHÔNG force.
+
+### Bước 4 — Paper programs daily report ngày bị miss (chạy nền, ~10 phút)
+```bash
+nohup $DNA_PYEXE /home/trido/thanhdt/WorkingClaude/mike/bin/paper_programs_daily_report.py \
+  --date $MISSED_DATE --post --email \
+  > /home/trido/thanhdt/WorkingClaude/mike/logs/paper_report_recovery_$(date +%Y%m%d).log 2>&1 &
+echo "Paper report PID=$!"
+# Script mất ~10 phút do 7 probe tuần tự (tổng timeout ~560s). Đợi log hoàn tất.
+```
+
+### Bước 5 — daily_refresh + plan T+1 (CÓ RÀNG BUỘC THỜI GIAN)
+
+**⚠️ Quy tắc cứng: `daily_refresh_v34b_linux.sh` KHÔNG chạy được khi market đang mở
+(09:00–14:55 ICT)**. Script step [0] chờ ticker_prune có ≥200 mã cho HÔM NAY (data chỉ có sau
+khi HOSE đóng cửa và BQ ingest xong, ~17:30–18:00 ICT). Chạy sớm hơn → script treo 6×15min
+rồi abort.
+
+```
+Nếu giờ hiện tại < 18:30 ICT → để cron 18:30 tự chạy, KHÔNG chạy tay.
+Nếu giờ hiện tại ≥ 18:30 ICT → cron đã chạy hoặc đang chạy → verify log, không re-run.
+```
+
+Chỉ chạy tay nếu cron 18:30 ICT failed (xem log `daily_refresh_*.log`):
+```bash
+nohup /home/trido/thanhdt/WorkingClaude/daily_refresh_v34b_linux.sh \
+  > /home/trido/thanhdt/WorkingClaude/mike/logs/daily_refresh_recovery_$(date +%Y%m%d).log 2>&1 &
+```
+
+### Thứ tự thực thi và phụ thuộc
+
+```
+Bước 0 (safety)  →  Bước 1 (BQ sync)  →  Bước 3 (universe_pit)
+                                        →  Bước 2 (EOD report)      [độc lập với 1]
+                                        →  Bước 4 (paper report)     [độc lập với 1]
+                  →  Bước 5 (daily_refresh)  [chờ ≥18:30 ICT]
+```
+
+Bước 2 và 4 có thể chạy song song. Bước 3 PHẢI sau Bước 1. Bước 5 PHẢI sau 18:30 ICT.
+
+### Checklist nhanh (copy-paste khi cần)
+```bash
+# Thay YYYY-MM-DD bằng ngày server bị down:
+MISSED=2026-08-24
+source /home/trido/thanhdt/WorkingClaude/wc_env.sh && WC=/home/trido/thanhdt/WorkingClaude
+
+# [0] Safety
+ls $WC/data/BOT_STOP 2>/dev/null && echo "⛔ BOT_STOP bật — dừng lại"
+
+# [1] BQ sync
+nohup $WC/sync_bq_cache_daily.sh > $WC/mike/logs/sync_bq_recovery_$(date +%Y%m%d).log 2>&1 &
+
+# [2] EOD report (chạy ngay, không cần đợi BQ sync)
+$WC/mike/bin/eod_trading_report.sh --account SpaceX --date $MISSED
+$WC/mike/bin/eod_trading_report.sh --account ZaloPay --date $MISSED
+
+# [3] universe_pit rebuild (SAU khi BQ sync xong)
+$DNA_PYEXE $WC/mike/bin/build_universe_pit.py --date $MISSED
+
+# [4] Paper report (SAU BQ sync, nền ~10 phút)
+nohup $DNA_PYEXE $WC/mike/bin/paper_programs_daily_report.py \
+  --date $MISSED --post --email \
+  > $WC/mike/logs/paper_report_recovery_$(date +%Y%m%d).log 2>&1 &
+
+# [5] daily_refresh — CHỈ chạy thủ công nếu cron 18:30 failed và giờ đã ≥18:30
+# nohup $WC/daily_refresh_v34b_linux.sh > $WC/mike/logs/daily_refresh_recovery_$(date +%Y%m%d).log 2>&1 &
+```
+
 ## Nhật ký & kinh nghiệm
 
 - Mọi sự cố ảnh hưởng workflow sống → **1 file mới** trong `kb/incidents/<YYYY-MM>/` (blameless,
