@@ -1008,3 +1008,7 @@
 ## Consolidation 2026-08-25T17:43:14Z
 - [2026-08-25T17:41:15Z] Mike/heartbeat — Mike_20260825_174014: {"status": "still_running", "elapsed_min": 1, "job_id": "Mike_20260825_174014", "source": "watcher"}
 - [2026-08-25T17:42:15Z] Mike/heartbeat — Mike_20260825_174014: {"status": "still_running", "elapsed_min": 2, "job_id": "Mike_20260825_174014", "source": "watcher"}
+
+## Consolidation 2026-08-25T17:43:51Z
+- [2026-08-25T17:43:15Z] Mike/heartbeat — Mike_20260825_174014: {"status": "still_running", "elapsed_min": 3, "job_id": "Mike_20260825_174014", "source": "watcher"}
+- [2026-08-25T17:43:39Z] Mike/finding — daily-retro-2026-08-25-finalized: {"status": "logged", "file": "kb/incidents/retro/retro-2026-08-25.md", "n_incidents": 3, "verified_by": "Wags", "wags_verdict": "GAPS FOUND — fixed before logging (event count 39/2->40/4, incident#2 mechanism rewritten: 2 independent jobs not 1 job double-write, sudo-block scope narrowed)", "index_updated": true, "memory_cleaned": true, "consolidate_run": true, "posted_to": "trading_daily", "draft_deleted": true}
