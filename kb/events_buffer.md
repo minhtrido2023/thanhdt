@@ -658,3 +658,13 @@
 - [2026-08-25T06:04:53Z] Taylor/heartbeat — Taylor_20260825_055651: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20260825_055651", "source": "watcher"}
 - [2026-08-25T06:05:54Z] Taylor/heartbeat — Taylor_20260825_055651: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20260825_055651", "source": "watcher"}
 - [2026-08-25T06:06:54Z] Taylor/heartbeat — Taylor_20260825_055651: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20260825_055651", "source": "watcher"}
+
+## Consolidation 2026-08-25T06:10:44Z
+- [2026-08-25T06:07:37Z] Mike/heartbeat — Mike_20260825_055433: {"status": "still_running", "elapsed_min": 13, "job_id": "Mike_20260825_055433", "source": "watcher"}
+- [2026-08-25T06:08:37Z] Mike/heartbeat — Mike_20260825_055433: {"status": "still_running", "elapsed_min": 14, "job_id": "Mike_20260825_055433", "source": "watcher"}
+- [2026-08-25T06:09:37Z] Mike/heartbeat — Mike_20260825_055433: {"status": "still_running", "elapsed_min": 15, "job_id": "Mike_20260825_055433", "source": "watcher"}
+- [2026-08-25T06:10:37Z] Mike/heartbeat — Mike_20260825_055433: {"status": "still_running", "elapsed_min": 16, "job_id": "Mike_20260825_055433", "source": "watcher"}
+- [2026-08-25T06:07:56Z] Taylor/heartbeat — Taylor_20260825_055651: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20260825_055651", "source": "watcher"}
+- [2026-08-25T06:08:56Z] Taylor/heartbeat — Taylor_20260825_055651: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20260825_055651", "source": "watcher"}
+- [2026-08-25T06:09:56Z] Taylor/heartbeat — Taylor_20260825_055651: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20260825_055651", "source": "watcher"}
+- [2026-08-25T06:10:10Z] Taylor/heartbeat — Taylor_20260825_055651: {"status": "in_progress", "note": "Both scenarios launched in background (live BQ, no cache, full 2008-01-01->2026-08-21 continuous sim each). Engine = research copy of pt_v23_audit_2014.py (engine_p1.py lineage) with 2 additions: STATE_TABLE_OVERRIDE (points at temp table taylor_exp_dt5g_recompute_2008_2026_20260825, DT5G recomputed via get_macro_state() direct call, single continuous series for IS+OOS) + CAPIT_LEVER_DD_GATE/CAPIT_LEVER_PIT_FILTER (new event-level gates matching production capit_margin_lever spec f=1.3 dd52<=-20% + new PIT filter CPI/deposit, verified against known cluster verdicts 6/6 test cases OK). ScenarioA=baseline(no lever), ScenarioB=production(lever+both gates). Universe coverage gate caught universe_pit lag 1 session at tip (today 08-24 not yet built) - fixed by using AUDIT_END=2026-08-21 (matches universe_pit MAX(time)). Now waiting on both runs."}
