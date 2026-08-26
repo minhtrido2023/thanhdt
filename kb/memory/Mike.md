@@ -22,3 +22,4 @@
 ## Retro 2026-08-25 — đã đóng
 - kb/incidents/retro/retro-2026-08-25.md: 3 sự cố (host-downtime checker — đã sửa cùng ngày; job "cancelled" sai nhãn dù verdict đã lên bus qua job song song — MỚI, chưa điều tra vì sao dispatch trùng; bus question security-leak treo). Wags verify GAPS FOUND → đã sửa đúng cơ chế trước khi ghi.
 
+- [2026-08-26T05:24:22Z] 2026-08-26: Bobby report rủi ro BĐS VN xong (STRUCTURAL_ACCUMULATION/AMBIGUOUS). Thesis+playbook chốt ở kb/projects/vn-realestate-structural-risk-20260826.md. Review quý next ~2026-11-26 (dispatch Bobby refresh lead indicators). Đang audit RE-exposure bank trong danh mục (MBB/ACB/HDB).
