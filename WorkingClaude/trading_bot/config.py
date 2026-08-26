@@ -129,11 +129,11 @@ DEFAULTS = {
     # 11:15 là đáy intraday (+1.1bps). SELL: Open là TỐT nhất (+18.7bps morning premium).
     # Lợi ~17.6bps/lệnh mua vs Open, ~5-6bps vs uniform/VWAP (edge trung bình, std cao).
     "fill_timing_enabled": True,      # True: side-aware schedule; False: uniform (tắt hẳn)
-    "fill_timing_live_gate": True,    # True: chỉ paper; live cần user tắt thủ công (real money)
+    "fill_timing_live_gate": False,   # False: LIVE (user duyệt 2026-08-26 option A — variance-reduction, không phải edge claim)
     # HYBRID là lịch thực thi khác, có thêm defer/block-cap và đã từng lộ bug tương tác
     # EXTREME trong paper.  Giữ cổng LIVE ĐỘC LẬP: ngày mở fill-timing cơ bản không được
     # vô tình mở luôn HYBRID chỉ vì cả hai cùng là Layer-3.
-    "fill_timing_hybrid_live_gate": True,  # True: HYBRID paper-only, kể cả base timing đã live
+    "fill_timing_hybrid_live_gate": False, # False: HYBRID LIVE (cùng duyệt 2026-08-26 option A)
     "buy_window_start": "10:45",      # BUY: đầu cửa sổ tập trung (ICT)
     "buy_window_end": "11:15",        # BUY: cuối cửa sổ (đáy intraday)
     "sell_window_start": "09:15",     # SELL: tập trung ở Open (đỉnh morning premium)

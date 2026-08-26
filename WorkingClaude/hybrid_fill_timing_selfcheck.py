@@ -231,12 +231,12 @@ oh = order("buy", qty=5000, oid="BUY-URG", urgency="high")
 exg = mk([oh]); psg = exg.state["parents"][oh.id]
 check("urgency=high ⇒ mult 1.0 + không trần", exg._fill_timing_mult(oh, T(11, 0)) == 1.0
       and exg._child_qty(oh, psg, exg.broker.quote, PX, T(11, 0)) == 5000)
-exl = mk([o5], mode="live")     # live + fill_timing_live_gate mặc định True
+exl = mk([o5], mode="live", fill_timing_live_gate=True)  # explicit gate=True (2026-08-26: DEFAULTS flipped)
 psl = exl.state["parents"][o5.id]
 check("mode=live + live_gate ⇒ mult 1.0 + không trần (LIVE byte-identical)",
       exl._fill_timing_mult(o5, T(11, 0)) == 1.0
       and exl._child_qty(o5, psl, exl.broker.quote, PX, T(11, 0)) == 5000)
-ex_sep = mk([o5], mode="live", fill_timing_live_gate=False)
+ex_sep = mk([o5], mode="live", fill_timing_live_gate=False, fill_timing_hybrid_live_gate=True)
 ps_sep = ex_sep.state["parents"][o5.id]
 check("mở base fill-timing LIVE nhưng hybrid_live_gate còn True ⇒ chỉ base chạy, HYBRID vẫn tắt",
       ex_sep._hybrid_active(o5) is False
@@ -332,7 +332,7 @@ check("cờ TẮT ⇒ không bao giờ hoãn (hành vi cũ)",
       mk([ob], hybrid=False)._hybrid_defer(ob, T(9, 30)) is False)
 check("urgency=high ⇒ không hoãn", mk([oh])._hybrid_defer(oh, T(9, 30)) is False)
 check("mode=live + live_gate ⇒ không hoãn (LIVE byte-identical)",
-      mk([ob], mode="live")._hybrid_defer(ob, T(9, 30)) is False)
+      mk([ob], mode="live", fill_timing_live_gate=True)._hybrid_defer(ob, T(9, 30)) is False)
 
 print("\nN'. Chống kẹt hàng end-to-end + journal HYBRID_DEFER")
 ostr = order("buy", qty=5000, oid="BUY-STRAND")
