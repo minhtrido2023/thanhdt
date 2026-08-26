@@ -505,3 +505,7 @@
 
 ## Consolidation 2026-08-26T07:07:02Z
 - [2026-08-26T06:13:59Z] Mike/finding — fill_timing-gate5-PASS-live-deployed: {"summary": "fill_timing HYBRID LIVE: cả hai gate flipped False (2026-08-26, option A user duyệt). selfcheck 100% PASS. commit 9be375a4.", "fill_timing_live_gate": false, "fill_timing_hybrid_live_gate": false, "selfcheck": "ALL PASS", "commit": "9be375a4", "monitoring": "đo fill-vs-open mỗi ~10 live sessions; rollback nếu mean >+22bps liên tục", "decided_by": "user"}
+
+## Consolidation 2026-08-26T12:07:02Z
+- [2026-08-26T11:11:25Z] Winston/finding — new-listings-daily: {"date": "2026-08-26", "lookback_days": 90, "total_new": 2, "needs_manual_rating": 0, "fresh_ipo": 0, "research_queue": [], "snapshot": "/home/trido/thanhdt/WorkingClaude/data/new_listings.csv", "note": "0 mã mới < 20Q lịch sử → cần 8L manual rating. Taylor flag để đọc bản cáo bạch + tạo override documented reason+expiry."}
+- [2026-08-26T11:40:07Z] Winston/status — corp-action-scan-daily: {"scanned_universe": "tav2_bq.ticker_prune", "candidates_this_run": 0, "fresh_alerts_this_run": 0, "resolved_since_last_run": [], "still_pending_count": 0, "still_pending": [], "stale_pending_over_7d": []}
