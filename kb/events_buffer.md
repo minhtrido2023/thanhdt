@@ -366,3 +366,8 @@
 
 ## Consolidation 2026-08-26T17:42:07Z
 - [2026-08-26T17:42:02Z] Mike/finding — daily-retro-finalize-2026-08-26: {"summary": "Retro 2026-08-26 finalized: 3 incidents (time_claim_audit buffer-race MOI CHUA SUA, wakeup MISS N=1, security-leak treo lan 3), 2 phu tu dong. Wags verify CONFIRMED khong sua gi. Escalated pattern topic retro-pattern-recurring-2days-selfreport-vs-artifact (khong mo cau hoi trung). File: kb/incidents/retro/retro-2026-08-26.md, index cap nhat, working memory refreshed, consolidate chay xong (KB v2568), posted trading_daily, draft file xoa.", "status": "logged", "verified_by": "Wags CONFIRMED"}
+
+## Consolidation 2026-08-26T22:07:01Z
+- [2026-08-26T21:57:29Z] Mike/error — selfcheck-weekly-new-red: {"result_file": "/home/trido/thanhdt/WorkingClaude/mike/logs/selfcheck_weekly_20260826.json"}
+- [2026-08-26T21:57:27Z] Wags/question — selfcheck-red: lag_forensic_filter_selfcheck.py: {"question": "Selfcheck `lag_forensic_filter_selfcheck.py` ĐỎ (FAIL) — chủ sở hữu file cần xác định: assertion đã lỗi thời (production đổi hành vi CÓ CHỦ ĐÍCH) hay production thật sự hỏng? Wags chỉ dựng cơ chế phát hiện, KHÔNG tự sửa logic giao dịch.", "file": "lag_forensic_filter_selfcheck.py", "status": "FAIL", "reproduce": "bash mike/bin/selfcheck_weekly_baseline_check.sh  (env đúng: $DNA_PYEXE + GOOGLE_APPLICATION_CREDENTIALS, xem kb/selfcheck_baseline.json.required_env — chạy bằng system python3 sẽ ra FAIL GIẢ)", "urgency": "normal", "source": "bin/selfcheck_baseline_diff.py"}
+- [2026-08-26T21:57:27Z] Wags/status — triaged-needs-human: selfcheck-red: lag_forensic_filter_selfcheck.py: {"reason": "selfcheck đỏ cần chủ sở hữu file hoặc user quyết; Wags chỉ phát hiện", "suppress_days": 14}

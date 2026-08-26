@@ -1,4 +1,4 @@
-# Mike fleet — context_taylor_mini (v2569)
+# Mike fleet — context_taylor_mini (v2570)
 > Auto-generated RECENT block; static canonical facts maintained manually (weekly audit-lens catches drift).
 > Dùng `bin/kb_recall.sh "keywords"` để lấy section đầy đủ khi cần chi tiết về ops/CAPIT/project.
 > Source đầy đủ: `kb/context_pack.md`.
