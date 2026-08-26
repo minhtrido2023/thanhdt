@@ -1,13 +1,13 @@
-# Mike fleet — context pack (v2564)
+# Mike fleet — context pack (v2565)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-08-26T12:10:55] DollarBill/decision — plan-2026-08-27-SpaceX: {"account": "SpaceX", "plan_date": "2026-08-27", "orders": 0, "action": "HOLD_ALL", "deferred": ["VPI-BAL", "VIC-BAL"], "deferred_reason": "signal_hold book=BAL …
-- [2026-08-26T12:11:47] Taylor/finding — LBC-buoc1-TRC-profile: {"summary": "TRC co 2 episode LBC noi tiep, khong phai 1: Episode 1 (2022-07->2024-09 tich luy 27 thang ADV<2B) catalyst la BCTC Q3/Q4-2024 tot (NP x6 QoQ, GPM  …
-- [2026-08-26T12:20:32] Taylor/finding — LBC-buoc2-3-scan-va-forward-return: {"summary": "Scan 2009-2026 universe_pit: 92 su kien LBC (accumulation>=6mo ADV<2B -> catalyst BCTC/corp-action -> burst ADV x3) tren 85 ma doc lap. 85/92 catal …
 - [2026-08-26T12:20:32] Taylor/finding — LBC-buoc4-verdict-INCONCLUSIVE-deadend: {"verdict": "INCONCLUSIVE, nghieng DEAD-END cho production sizing/entry rule", "reason": "Catalyst->burst hit rate 4.9% (khong dung lam trigger), actionable pos …
 - [2026-08-26T12:20:48] Taylor/finding — LBC-nghien-cuu-XONG-tong-ket: {"summary": "Job Taylor_20260826_120750 hoan thanh 4 buoc: TRC profile (2 episode, episode 1 BCTC-driven da xong, episode 2 corp-action dang mo chua burst), sca …
+- [2026-08-26T15:59:15] DollarBill/decision — plan-approval-2026-08-27-SpaceX: {"account": "SpaceX", "plan_date": "2026-08-27", "action": "APPROVED", "approved_by": "user", "orders": 0, "deferred": ["VPI-BAL", "VIC-BAL"], "deferred_reason" …
+- [2026-08-26T15:59:15] DollarBill/decision — plan-approval-2026-08-27-ZaloPay: {"account": "ZaloPay", "plan_date": "2026-08-27", "action": "APPROVED", "approved_by": "user", "orders": 0, "deferred": ["VPI-BAL", "VIC-BAL"], "deferred_reason …
+- [2026-08-26T15:59:25] Mike/decision — abnormal-sell-email-rule-2026-08-26: {"rule": "Nếu user không hoặc quên duyệt plan → mặc định HOLD (không giao dịch, preflight tự chặn). Nếu có case bán bất thường → phải có due diligence và report …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -152,7 +152,7 @@ Lý do + chuỗi R&D: `kb/projects/momentum-deals.md`, `plan_close_mom_20260712.
    DSR/PBO (DSR≈1.0, PBO≈0.20 — `data/results_registry.md` mục "DSR / PBO Robustness Annex").
 
 ### Cổ phiếu — quy tắc nhanh
-- **BANNED vĩnh viễn**: PC1, VVS, KSF, NKG, HSG, HVN, VJC, NVL, GEG, SBA, DMC/IMP/TRA, TOS, VTP, BAF (leverage trap + extraction, 2026-08-26).
+- **BANNED vĩnh viễn**: PC1, VVS, KSF, NKG, HSG, HVN, VJC, NVL, GEG, SBA, DMC/IMP/TRA, TOS, VTP.
 - Banking (MBB/ACB/HDB): Tier 1. FPT: Tier 1. CTR: Tier 2. Pharma: buy-and-hold only (timing phá alpha).
 - DGC: 2 nhánh tách biệt — compounder-screen (exclude) ≠ special-situation case.
 - Sector sweeps #1–9 (đã đóng, kết luận lens/tilt): `kb/KNOWLEDGE.md` §7.
