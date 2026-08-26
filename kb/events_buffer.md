@@ -509,3 +509,21 @@
 ## Consolidation 2026-08-26T12:07:02Z
 - [2026-08-26T11:11:25Z] Winston/finding — new-listings-daily: {"date": "2026-08-26", "lookback_days": 90, "total_new": 2, "needs_manual_rating": 0, "fresh_ipo": 0, "research_queue": [], "snapshot": "/home/trido/thanhdt/WorkingClaude/data/new_listings.csv", "note": "0 mã mới < 20Q lịch sử → cần 8L manual rating. Taylor flag để đọc bản cáo bạch + tạo override documented reason+expiry."}
 - [2026-08-26T11:40:07Z] Winston/status — corp-action-scan-daily: {"scanned_universe": "tav2_bq.ticker_prune", "candidates_this_run": 0, "fresh_alerts_this_run": 0, "resolved_since_last_run": [], "still_pending_count": 0, "still_pending": [], "stale_pending_over_7d": []}
+
+## Consolidation 2026-08-26T12:10:56Z
+- [2026-08-26T12:07:55Z] DollarBill/heartbeat — DollarBill_20260826_120744: {"status": "in_progress", "note": "bat dau lap plan ZaloPay 2026-08-27: doc DT5G + active_nav"}
+- [2026-08-26T12:08:45Z] DollarBill/heartbeat — DollarBill_20260826_120744: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20260826_120744", "source": "watcher"}
+- [2026-08-26T12:08:47Z] DollarBill/heartbeat — DollarBill_20260826_120746: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20260826_120746", "source": "watcher"}
+- [2026-08-26T12:09:45Z] DollarBill/heartbeat — DollarBill_20260826_120744: {"status": "still_running", "elapsed_min": 2, "job_id": "DollarBill_20260826_120744", "source": "watcher"}
+- [2026-08-26T12:09:47Z] DollarBill/heartbeat — DollarBill_20260826_120746: {"status": "still_running", "elapsed_min": 2, "job_id": "DollarBill_20260826_120746", "source": "watcher"}
+- [2026-08-26T12:10:22Z] DollarBill/decision — plan-ZaloPay-2026-08-27: {"plan_date": "2026-08-27", "account": "ZaloPay", "orders": 0, "decision": "HOLD_ALL", "active_nav_vnd": 520373145, "dt5g_state": "NEUTRAL", "deferred": ["VPI-BAL", "VIC-BAL (signal_hold paper-track toi 2026-09-16)"], "lag_due": 0, "l1_park_trim": "NO_TRIM", "capit_episode_sessions": 27, "file": "data/trade_plans/plan_ZaloPay_2026-08-27.json"}
+- [2026-08-26T12:10:36Z] DollarBill/heartbeat — DollarBill_20260826_120746: {"status": "in_progress", "note": "da tao plan_SpaceX_2026-08-27.json HOLD ALL, verify load_plan OK, chuan bi gui Discord"}
+- [2026-08-26T12:10:46Z] DollarBill/heartbeat — DollarBill_20260826_120744: {"status": "still_running", "elapsed_min": 3, "job_id": "DollarBill_20260826_120744", "source": "watcher"}
+- [2026-08-26T12:10:47Z] DollarBill/heartbeat — DollarBill_20260826_120746: {"status": "still_running", "elapsed_min": 3, "job_id": "DollarBill_20260826_120746", "source": "watcher"}
+- [2026-08-26T12:10:48Z] DollarBill/finding — job-done-plan-ZaloPay-2026-08-27: {"job": "DollarBill_20260826_120744", "result": "plan_ZaloPay_2026-08-27.json created, load_plan() verified OK, Discord plan thread + bus decision posted", "orders": 0, "deferred": 2}
+- [2026-08-26T12:10:55Z] DollarBill/decision — plan-2026-08-27-SpaceX: {"account": "SpaceX", "plan_date": "2026-08-27", "orders": 0, "action": "HOLD_ALL", "deferred": ["VPI-BAL", "VIC-BAL"], "deferred_reason": "signal_hold book=BAL buy toi 2026-09-16 (paper-track, user 2026-08-19), khong lien quan cash/egg", "lag_due": 0, "park_trim": "NO_TRIM", "capit_episode": "CAPIT-2026-07-20 phien 28, giu nguyen", "active_nav_vnd": 982587257, "dt5g_state": "NEUTRAL", "discord_sent": true}
+- [2026-08-26T12:10:30Z] Mafee/status — eod-trading-report: {"account": "ZaloPay", "plan_date": "2026-08-26", "delivered_via": "report_delivery_gate", "artifact": "ZaloPay_daily_report_2026-08-26.md"}
+- [2026-08-26T12:10:54Z] Mafee/status — eod-trading-report: {"account": "SpaceX", "plan_date": "2026-08-26", "delivered_via": "report_delivery_gate", "artifact": "SpaceX_daily_report_2026-08-26.md"}
+- [2026-08-26T12:08:51Z] Taylor/heartbeat — Taylor_20260826_120750: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20260826_120750", "source": "watcher"}
+- [2026-08-26T12:09:51Z] Taylor/heartbeat — Taylor_20260826_120750: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20260826_120750", "source": "watcher"}
+- [2026-08-26T12:10:51Z] Taylor/heartbeat — Taylor_20260826_120750: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20260826_120750", "source": "watcher"}
