@@ -228,7 +228,7 @@ cầu (commit `087a3d0`). Chi tiết đầy đủ: `kb/current_ops.md` §Domain-
 - DNSE: equity-ratio per-symbol (margin call ≤40%, force-sell ≤30%).
 - PHS: collateral-coverage portfolio (call ≤80%, force-sell ≤75%). **PHS live BLOCKED** (chờ client credential, lỗi -700003) → PHS chạy paper.
 
-**Cổ phiếu BANNED vĩnh viễn:** PC1, VVS, KSF, NKG, HSG (leverage traps), HVN (equity âm), VJC (PB never <1), NVL, GEG, SBA, DMC/IMP/TRA (pharma timing destroys alpha), TOS, VTP.
+**Cổ phiếu BANNED vĩnh viễn:** PC1, VVS, KSF, NKG, HSG (leverage traps), HVN (equity âm), VJC (PB never <1), NVL, GEG, SBA, DMC/IMP/TRA (pharma timing destroys alpha), TOS, VTP, BAF (leverage trap + capital market extraction — Debt/Eq 2,1×, ROE 1,89%, serial dilution ×4,68, IPO mechanics bất thường; bị loại tự nhiên bởi mọi quality screen, confirm 2026-08-26).
 
 **DGC — hai nhánh TÁCH BIỆT, cập nhật 2026-07-06:**
 1. **Compounder screen**: permanent_exclude trong `sector_watchlist_framework` (valuation lens) — KHÔNG liên quan case bên dưới.

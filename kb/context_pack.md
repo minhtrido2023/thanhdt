@@ -152,7 +152,7 @@ Lý do + chuỗi R&D: `kb/projects/momentum-deals.md`, `plan_close_mom_20260712.
    DSR/PBO (DSR≈1.0, PBO≈0.20 — `data/results_registry.md` mục "DSR / PBO Robustness Annex").
 
 ### Cổ phiếu — quy tắc nhanh
-- **BANNED vĩnh viễn**: PC1, VVS, KSF, NKG, HSG, HVN, VJC, NVL, GEG, SBA, DMC/IMP/TRA, TOS, VTP.
+- **BANNED vĩnh viễn**: PC1, VVS, KSF, NKG, HSG, HVN, VJC, NVL, GEG, SBA, DMC/IMP/TRA, TOS, VTP, BAF (leverage trap + extraction, 2026-08-26).
 - Banking (MBB/ACB/HDB): Tier 1. FPT: Tier 1. CTR: Tier 2. Pharma: buy-and-hold only (timing phá alpha).
 - DGC: 2 nhánh tách biệt — compounder-screen (exclude) ≠ special-situation case.
 - Sector sweeps #1–9 (đã đóng, kết luận lens/tilt): `kb/KNOWLEDGE.md` §7.
