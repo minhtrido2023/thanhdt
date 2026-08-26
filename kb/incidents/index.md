@@ -200,6 +200,7 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 | 2026-06-22 | [2026-06-22 — Mafee ZOMBIE: systemd reports healthy, agent isn't actually serving](2026-06/2026-06-22-mafee-zombie-systemd-healthy.md) | logged |
 
 ## RETRO hằng ngày (mới nhất trước)
+| 2026-08-26 | [RETRO — 2026-08-26: 3 sự cố, 1 pattern xuyên suốt (self-report ≠ artifact thật — 3 ngày liên tiếp dưới hình dạng khác nhau: buffer-race trong `time_claim_audit.py` khiến log cron báo count=0 sai dù bus có 1 mismatch thật; wakeup MISS N=1; bus question security-leak vẫn treo lần 3 liên tiếp)](retro/retro-2026-08-26.md) | logged |
 | 2026-08-25 | [RETRO — 2026-08-25: 3 sự cố, 1 pattern xuyên suốt (checker hardcode chẩn đoán sai tái diễn lần 3 — host tắt 18h, ĐÃ SỬA cùng ngày commit 52eb62ea; job "cancelled" sai nhãn dù verdict đã lên bus qua job song song, MỚI; bus question security-leak vẫn treo >18h dù 1/3 việc đã xong qua kênh khác)](retro/retro-2026-08-25.md) | logged |
 | 2026-08-24 | [RETRO 2026-08-24: 3 su co, 1 pattern (repo backup public, HEAD van lo sau khi Wags kiem tra; word-split payload lan 2)](retro/retro-2026-08-24.md) | logged |
 | 2026-08-23 | [RETRO — 2026-08-23: 2 sự cố, 1 pattern xuyên suốt (§25 tái diễn lần thứ 3 — `DNSEBroker.get_nav()` viết TRƯỚC khi §25 tồn tại, bắt được lần đầu bằng scanner tự động thay vì bug sản xuất; sự cố #2 mới — Wags tự verify fix bằng cách chạy LIVE một dispatcher self-referencing, đóng trong <1h10')](retro/retro-2026-08-23.md) | logged |
