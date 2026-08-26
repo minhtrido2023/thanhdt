@@ -138,7 +138,7 @@
       "objective": "Edge backtest (BUY 11:15 rẻ hơn open +17.6bps t=12.0; SELL tại open +11.8bps vs ATC) có capture được NET-of-noise trên fill thật không? (noise 110-220bps >> edge 17bps → cần nhiều tuần)",
       "start": "2026-07-01",
       "end": "2026-08-25",
-      "end_or_trigger": "Checkpoint = phiên BUY-window HYBRID thứ 5. ĐẠT 2026-08-20 (job Taylor_20260826_004005 đo lại bằng timestamp + thước BLOCK): 6 phiên hybrid BUY tính tới 08-24 — 08-11, 08-13, 08-17, 08-18, 08-20 (thứ 5), 08-24 (thứ 6). Danh sách ngày phương án A có 4/5 thành hiện thực; 08-25 mất vì host downtime 08-24 15:30→08-25 09:45 ICT làm cron sinh plan không fire — danh sách ngày là DỰ BÁO LỊCH, không phải định nghĩa gate, và bộ đếm thực chất đã đủ từ 08-20. ⇒ ĐÃ đủ điều kiện dispatch quant-skeptic.",
+      "end_or_trigger": "Checkpoint = phiên BUY-window HYBRID thứ 5. ĐẠT 2026-08-20 (job Taylor_20260826_004005 đo lại bằng timestamp + thước BLOCK): 6 phiên hybrid BUY tính tới 08-24 — 08-11, 08-13, 08-17, 08-18, 08-20 (thứ 5), 08-24 (thứ 6). Danh sách ngày phương án A có 4/5 thành hiện thực; 08-25 mất vì host downtime 08-24 15:30→08-25 09:45 ICT làm cron sinh plan không fire — danh sách ngày là DỰ BÁO LỊCH, không phải định nghĩa gate, và bộ đếm thực chất đã đủ từ 08-20. ⇒ ĐÃ đủ điều kiện dispatch quant-skeptic. Gate 5 (user sign-off): PASS 2026-08-26 (option A duyệt có điều kiện theo dõi).",
       "gate_criteria": [
         {
           "text": "BUY window adherence cao (lệnh dồn 10:45-11:15)",
@@ -229,7 +229,9 @@
         "planA_dates_missing": {
           "2026-08-25": "khong co plan — cron paper_main_probe_plan 08:52 ICT roi vao host downtime 08-24 15:30 -> 08-25 09:45 ICT (incident 2026-08-25-host-downtime-missed-nightly-crons.md)"
         }
-      }
+      },
+      "status": "LIVE",
+      "attention_note": "2026-08-26: cả hai gate flipped False (fill_timing_live_gate + fill_timing_hybrid_live_gate). Monitoring: đo fill-vs-open mỗi ~10 live sessions; rollback nếu mean >+22bps liên tục. commit 9be375a4."
     },
     {
       "id": "vol_scale_chase_cap",
