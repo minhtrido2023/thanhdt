@@ -330,3 +330,6 @@
 
 ## Archived 2026-08-25 (keep=12 days=0 require_done=False)
 - [2026-08-22T15:47:57Z] B2-ext (job _153901) XONG: REFUTE — alpha-breadth la artefact same-day label (83%) + Simpson theo DT5G. DONG huong sizing-theo-breadth. Bai hoc de xuat cho fleet: (1) nhan dieu kien tinh tu Close_t PHAI tre 1 phien truoc khi ghep r_t (lan 2 trong ngay); (2) n_nam<=15 thi LOO khong thay the walk-forward split — LOO qua ma split truot thi tin split.
+
+## Archived 2026-08-26 (keep=12 days=0 require_done=False)
+- [2026-08-23T03:28:01Z] postshock-base-formation (job Taylor_20260823_025658) XONG: INCONCLUSIVE/nghieng REFUTE, 0/12 test qua BH, KHONG wire. MO: de xuat cap nhat playbook calculated_fear_state_backstop.md §3 tranche T2 (giu T2 la ky luat chia tranche, KHONG phai tin hieu) -> can Mike/user duyet roi moi ghi .proposed theo §13. BAY tai dung: khung hoang DN VN sap CHAM 40-60 phien (bo loc speed<=20 loai PNJ/HPG/TV1); tav2_bq.ticker co 0 dong FLC (ma huy niem yet bi xoa sach) => moi thong ke rui ro duoi tren bang nay la CAN DUOI.
