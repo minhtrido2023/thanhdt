@@ -121,4 +121,10 @@ else
 fi
 
 "$ROOT/bin/consolidate.sh" >> "$ROOT/logs/consolidator.log" 2>&1 || true
+
+# EXTREME-regime gate alert: quét journal sau phiên, gửi email nếu gate đã fire
+# Chạy background để không block; idempotent (flag file).
+"$ROOT/bin/extreme_regime_dd_alert.sh" "$ACCOUNT" "$PLAN_DATE" \
+  >> "$ROOT/logs/extreme_regime_alert_${ACCOUNT}_${PLAN_DATE}.log" 2>&1 &
+
 exit "$rc"
