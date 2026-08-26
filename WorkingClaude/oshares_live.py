@@ -642,8 +642,15 @@ def _explain_quarterly(q, ais, iss, verdicts=None):
     # gần nhất. Một luật, hai chỗ dùng — nếu không, cùng một chuỗi AIS xáo trộn sẽ cho cổng này
     # và cổng kia hai câu trả lời khác nhau (đúng ca HHV 2026-07-31: đối chiếu với AIS 2026-05-07
     # lệch +14,65%, đối chiếu với AIS 2026-04-08 khớp TỪNG ĐƠN VỊ).
+    # `upto_date` cho cửa sổ nhìn lùi = ngày AIS liền trước (`prior[-1]`), KHÔNG phải `t` (ngày
+    # quý) — cùng cách `_unabsorbed_iss` gọi hàm này (`last["effective_date"]`), vì `t` có thể
+    # cách rất xa mắt xích AIS cuối (đúng lúc AIS đã CŨ, tức chính lúc cổng này cần lùi mốc nhất —
+    # ca EVF 2026-08-26: mắt xích liền trước 2024-12-06 → 2023-12-22 chỉ cách 350 ngày, nhưng
+    # 2023-12-22 → t=2026-07-21 là 942 ngày, VƯỢT `AIS_LOOKBACK_MAX_DAYS` một cách giả tạo nếu đo
+    # theo `t`).
+    lookback_upto = prior[-1]["effective_date"]
     first = None                    # (mốc, kỳ vọng|None, blockers|None) của ứng viên GẦN NHẤT
-    for a in _anchor_candidates(prior, verdicts, t):
+    for a in _anchor_candidates(prior, verdicts, lookback_upto):
         # not `a.effective_date < exright <= t` any more: an ISS that went ex BEFORE the AIS but
         # is absent from its `shares_delta` (a lock-up ESOP) is missing from the AIS and PRESENT
         # in the quarterly report, so it belongs in the expectation. Same predicate as
@@ -664,7 +671,7 @@ def _explain_quarterly(q, ais, iss, verdicts=None):
     # `fin_expected_from_ais` phải giữ đúng nghĩa đó. Số ứng viên đã thử được nói ra khi >1 để
     # không ai đọc nhầm thành "chỉ đối chiếu một chỗ".
     a, expected, blockers = first
-    n = len(_anchor_candidates(prior, verdicts, t))
+    n = len(_anchor_candidates(prior, verdicts, lookback_upto))
     more = f" (đã thử {n} mốc AIS, kể cả mốc lùi)" if n > 1 else ""
     if blockers:
         return False, False, (f"ISS {[b['exright_date'] for b in blockers]} không có tỉ lệ/"
@@ -869,6 +876,33 @@ def _anchor_candidates(prior, verdicts, upto_date):
     return out
 
 
+def _delta_predates_anchor(base, delta, iss):
+    """True nếu `delta` trùng khít (trong `EXPLAIN_TOL`) cỡ một ISS đã ex-right TRƯỚC (hoặc đúng)
+    ngày hiệu lực của `base`.
+
+    ⚠️ EVF 2024-12-06 (job `Taylor_20260826_013256`). Candidate (b) của `_ais_reconciles`
+    (`base_v + delta`) ngầm giả định `delta` là hoạt động MỚI phát sinh SAU `base` — nhưng nếu
+    đúng cỡ đó đã ex-right TỪ TRƯỚC `base`, nó không phải hoạt động mới: đó là niêm yết TRỄ của
+    một lô đã tồn tại từ trước, và `base_v` (đúng ra) đã phải gồm nó rồi. Chấp nhận (b) trong ca
+    này hợp thức hoá một neo "chốt trên nền cũ" — same trùng hợp số học mà `_anchor_candidates`
+    cảnh báo cho AAA/IDC, chỉ khác chỗ trùng hợp xảy ra qua `shares_delta` thay vì qua một mốc
+    lùi khác. EVF: AIS 2023-12-22 (702.128.062) + delta 2.120.227 (AIS 2024-12-06) = 704.248.289
+    KHỚP KHÍT — nhưng 2.120.227 là cỡ của ISS "Phát hành cho CBCNV" ex-right 2023-12-05, TRƯỚC
+    2023-12-22. Lô đó đã được AIS 2024-11-22 (760.565.802, mốc THẬT ở giữa) cộng vào từ trước;
+    2024-12-06 chỉ đăng ký niêm yết TRỄ đúng lô đó trên nền CŨ. Chặn (b) ở đây; candidate (a) —
+    lăn qua ISS — không đụng tới, và đường đúng để giải thích các dòng SAU vẫn là (a) qua mốc lùi
+    `_anchor_candidates`/`_unabsorbed_iss` đã có sẵn (không mốc mới, không luật mới ở đó).
+    """
+    for e in iss:
+        if e["exright_date"] > base["effective_date"]:
+            continue
+        for f in ("shares_delta", "issue_volumn"):
+            sz = e.get(f)
+            if sz is not None and float(sz) > 0 and abs(float(sz) - delta) / delta <= EXPLAIN_TOL:
+                return True
+    return False
+
+
 def _ais_reconciles(base, actual, delta, iss, upto_date):
     """`actual` (mức CP niêm yết công bố tại `upto_date`) có giải thích được từ mốc `base` không?
 
@@ -888,7 +922,7 @@ def _ais_reconciles(base, actual, delta, iss, upto_date):
     rolled, _applied, blockers = _roll(base_v, between)
     if not blockers:
         cands.append(rolled)                                 # (a) — chỉ khi lăn được HẾT ISS
-    if delta is not None and float(delta) > 0:
+    if delta is not None and float(delta) > 0 and not _delta_predates_anchor(base, float(delta), iss):
         cands.append(base_v + float(delta))                  # (b) — không phụ thuộc ISS
     # `cands` RỖNG (blocker chắn (a) VÀ không có delta cho (b)) ⇒ không dựng được kỳ vọng nào.
     # Đây là chỗ `all([]) == True` từng làm nghĩa đảo ngược nếu viết gọn ⇒ viết TƯỜNG MINH.
