@@ -1,13 +1,13 @@
-# Mike fleet — context pack (v2565)
+# Mike fleet — context pack (v2566)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-08-26T12:20:32] Taylor/finding — LBC-buoc4-verdict-INCONCLUSIVE-deadend: {"verdict": "INCONCLUSIVE, nghieng DEAD-END cho production sizing/entry rule", "reason": "Catalyst->burst hit rate 4.9% (khong dung lam trigger), actionable pos …
-- [2026-08-26T12:20:48] Taylor/finding — LBC-nghien-cuu-XONG-tong-ket: {"summary": "Job Taylor_20260826_120750 hoan thanh 4 buoc: TRC profile (2 episode, episode 1 BCTC-driven da xong, episode 2 corp-action dang mo chua burst), sca …
 - [2026-08-26T15:59:15] DollarBill/decision — plan-approval-2026-08-27-SpaceX: {"account": "SpaceX", "plan_date": "2026-08-27", "action": "APPROVED", "approved_by": "user", "orders": 0, "deferred": ["VPI-BAL", "VIC-BAL"], "deferred_reason" …
 - [2026-08-26T15:59:15] DollarBill/decision — plan-approval-2026-08-27-ZaloPay: {"account": "ZaloPay", "plan_date": "2026-08-27", "action": "APPROVED", "approved_by": "user", "orders": 0, "deferred": ["VPI-BAL", "VIC-BAL"], "deferred_reason …
 - [2026-08-26T15:59:25] Mike/decision — abnormal-sell-email-rule-2026-08-26: {"rule": "Nếu user không hoặc quên duyệt plan → mặc định HOLD (không giao dịch, preflight tự chặn). Nếu có case bán bất thường → phải có due diligence và report …
+- [2026-08-26T17:36:10] Mike/finding — daily-retro-draft-2026-08-26: {"summary": "Draft retro 08-26 da viet xong tai state/retro_draft_2026-08-26.md: 3 su co chinh (1. time_claim_audit.py buffer-race khien log cron bao count=0 sa …
+- [2026-08-26T17:30:08] quant-skeptic/finding — time-claim-audit-20260827: {"count": 1, "days": 1, "findings": [{"sent_at_ict": "2026-08-26 08:57:21", "claimed_target": "09:13", "claimed_minutes": 28, "actual_minutes_to_target": 15.6,  …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -38,6 +38,15 @@
 ## Domain-constraint layer
 - **P1 LIVE**: `filter_lag_rating_orders()` — gate 8L rating≤3 tầng ORDER. 14/14+22/22 selfcheck.
 - **P0 ACTIVE (HARD BLOCK)**: `check_plan_funding()` trong `bot_execute.py:536` từ 08-04. Chi tiết 2 bug đã vá (08-07): `kb/current_ops_ext.md § Domain-constraint`.
+
+## Features đang LIVE — đọc đầu phiên, không để mất dấu
+> Cập nhật mỗi khi có feature mới go-live. Source of truth: `kb/projects/paper_programs_registry.json`.
+
+- **EXTREME-regime gate** (`extreme_regime_enabled=True`) — LIVE SpaceX+ZaloPay từ **2026-08-22** (account overrides `secrets/trading_bot_accounts.json`). Default config=False, override=True. Alert pipeline: `bin/extreme_regime_dd_alert.sh` hook trong `run_bot.sh`. Commit `07726527`.
+- **Vol-scale buy chase-cap** (`chase_cap_vol_scale_enabled=True`) — LIVE toàn bộ từ **2026-08-04** (`config.py:190`). k=2.0, ceil=4%, clamp static→ceil theo 20d rvol.
+- **fill_timing HYBRID** (`fill_timing_live_gate=False`, `fill_timing_hybrid_live_gate=False`) — LIVE từ **2026-08-26** (user duyệt option A). BUY blocks: 11:00/11:15/13:00/13:15/13:30. SELL blocks: 09:15/09:30/09:45/10:00. Monitoring: fill-vs-open mỗi ~10 phiên, rollback nếu mean >+22bps. Commit `9be375a4`.
+- **CAPIT margin lever** (`capit_margin_lever.enabled=True`) — LIVE từ **2026-08-24**. Ngày có CAPIT margin phải chạy `approve_margin_day.py` TRƯỚC bot.
+- **Domain-constraint P1** (`filter_lag_rating_orders()`, 8L rating≤3 gate) — LIVE. 14/14+22/22 selfcheck.
 
 ## R&D pipeline — PAPER-ONLY, chi tiết `kb/projects/rnd-pipeline-tracker.md`
 Fear-buy quét hàng tuần `bin/fearbuy_weekly_scan.sh` (Friday 08:10 ICT). Recon thuần, KHÔNG tự mua.
