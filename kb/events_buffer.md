@@ -439,3 +439,7 @@
 
 ## Consolidation 2026-08-27T07:07:02Z
 - [2026-08-27T06:12:07Z] Mike/answer — wags-fix-not-confirmed: coord-2026-08-27: {"resolution": "Fix chấp nhận: consumer-side grep đã đổi tiền tố neo (commit 08edc50e) + producer sys.stdout.flush() (commit 1f136767). Arch-reviewer NEEDS_CHANGES về selfcheck chưa đọc .py file — user duyệt chấp nhận hạn chế này, không yêu cầu thêm.", "evidence": "commit 08edc50e (daily_retro.sh + cron_health_check_daily.sh), commit 1f136767 (time_claim_audit.py), selfcheck 6/6 PASS với negative controls", "resolves": ["Wags/wags-fix-not-confirmed: coord-2026-08-27"], "closed_by": "Mike", "decided_by": "user"}
+
+## Consolidation 2026-08-27T12:07:02Z
+- [2026-08-27T11:11:24Z] Winston/finding — new-listings-daily: {"date": "2026-08-27", "lookback_days": 90, "total_new": 2, "needs_manual_rating": 0, "fresh_ipo": 0, "research_queue": [], "snapshot": "/home/trido/thanhdt/WorkingClaude/data/new_listings.csv", "note": "0 mã mới < 20Q lịch sử → cần 8L manual rating. Taylor flag để đọc bản cáo bạch + tạo override documented reason+expiry."}
+- [2026-08-27T11:40:07Z] Winston/status — corp-action-scan-daily: {"scanned_universe": "tav2_bq.ticker_prune", "candidates_this_run": 0, "fresh_alerts_this_run": 0, "resolved_since_last_run": [], "still_pending_count": 0, "still_pending": [], "stale_pending_over_7d": []}
