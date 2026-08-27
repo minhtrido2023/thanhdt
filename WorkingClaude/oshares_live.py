@@ -1517,9 +1517,12 @@ def _selfcheck() -> int:
           f"{fmt(tcb_boom['value'])} [{tcb_boom['method']}]")
     # …và cổng không được nuốt sạch: mã sạch vẫn phải ra AIS_EXACT, nếu không N1/N2 chỉ chứng minh
     # "chặn tất cả", một cổng vô dụng cũng PASS được.
-    check("N5. ĐỐI CHỨNG: TCB 2026-08-12 (neo AIS chứng nhận được) VẪN phục vụ AIS_EXACT",
-          ctrl["TCB"]["value"] is not None and ctrl["TCB"]["method"] == "AIS_EXACT",
-          f"{fmt(ctrl['TCB']['value'])} [{ctrl['TCB']['method']}]")
+    # TCB 2026-08-12 không còn dùng được (AIS 2026-08-05 mới vào BQ với verdict UNVERIFIED).
+    # Dùng 2025-12-05: AIS 2025-12-01 (OK, 4 ngày) — case sạch, neo ổn định hơn.
+    ctrl_tcb_ais = oshares_at(["TCB"], "2025-12-05")["TCB"]
+    check("N5. ĐỐI CHỨNG: TCB 2025-12-05 (neo AIS chứng nhận được) VẪN phục vụ AIS_EXACT",
+          ctrl_tcb_ais["value"] is not None and ctrl_tcb_ais["method"] == "AIS_EXACT",
+          f"{fmt(ctrl_tcb_ais['value'])} [{ctrl_tcb_ais['method']}]")
     check("N6. neo dòng quý KHÔNG bị cổng AIS đụng tới (đã có cổng RESTATE riêng)",
           all(ctrl[t]["value"] is not None
               and ctrl[t]["method"] in ("ANCHOR_ONLY", "ANCHOR_UNVERIFIED")
@@ -1567,12 +1570,12 @@ def _selfcheck() -> int:
 
     print("== FIN_FALLBACK — ba ca KHÔNG được đụng tới ==")
     # (a) AIS còn tươi: fallback không có cửa xen vào
-    tcb_age = _days_between(ctrl["TCB"]["anchor_date"], "2026-08-12")
+    tcb_age = _days_between(ctrl_tcb_ais["anchor_date"], "2025-12-05")
     check(f"F2. AIS còn tươi ({tcb_age} ngày <= {FIN_FALLBACK_MAX_AIS_AGE_DAYS}) ⇒ TCB vẫn "
           f"AIS_EXACT, nhãn KHÔNG đổi",
           tcb_age <= FIN_FALLBACK_MAX_AIS_AGE_DAYS
-          and ctrl["TCB"]["method"] == "AIS_EXACT" and "fin_fallback" not in ctrl["TCB"],
-          f"{ctrl['TCB']['method']} tuổi={tcb_age}")
+          and ctrl_tcb_ais["method"] == "AIS_EXACT" and "fin_fallback" not in ctrl_tcb_ais,
+          f"{ctrl_tcb_ais['method']} tuổi={tcb_age}")
     # (b) không có cả AIS lẫn dòng quý: NO_ANCHOR như cũ, không bịa số
     na = oshares_at(["FPT"], "2001-01-01")["FPT"]
     check("F3. không có AIS lẫn dòng quý ⇒ NO_ANCHOR, value=None (fallback không bịa số)",
