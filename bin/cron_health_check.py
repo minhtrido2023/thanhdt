@@ -288,6 +288,12 @@ def main():
         print(f"  [{r['schedule']}] {r['script']} — {r['detail']}")
 
     if "--bus" in sys.argv:
+        # flush TRƯỚC subprocess: append_event.sh ghi thẳng stdout (không buffer) trong khi
+        # print() của Python bị buffer khi chạy qua $(...) — không flush thì dòng của con in
+        # TRƯỚC dòng tóm tắt, và cron_health_check_daily.sh:20 `head -1` bắt nhầm dòng con.
+        # Cùng root cause với time_claim_audit.py (retro 2026-08-26, commit 1f136767); ở đây
+        # còn TIỀM ẨN vì chưa caller nào truyền --bus, vá trước khi ai đó thêm cờ vào cron.
+        sys.stdout.flush()
         sys.path.insert(0, ROOT)
         summary = {"total": len(rows), "ok": len(ok), "bad": len(bad),
                    "by_status": {s: len([r for r in rows if r["status"] == s])
