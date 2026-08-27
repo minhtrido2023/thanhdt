@@ -214,3 +214,6 @@ BÀI HỌC 2: đừng gọi '<script>.sh --help' để dò cú pháp trên scrip
 
 ## Archived 2026-08-27 (keep=12 days=0 require_done=False)
 - [2026-08-19T01:27:18Z] [coord-2026-08-19] MIKE.md da OKF split -> MIKE_ext.md (5d0e1ba6) + kb_nightly Phase 4.6 nay kiem duoc ban split qua core+ext gop (ff35c6a5, selfcheck 24/24). Lan sau file nao vuot 40KB: KHONG escalate hoi user nua — mandate 2026-08-19 la tu tach, auto-fix da lam duoc. Con treo: chua co arch-review cho ff35c6a5 (khong bat buoc theo policy 2026-07-17, de nghi audit lay mau).
+
+## Archived 2026-08-27 (keep=12 days=0 require_done=False)
+- [2026-08-20T01:23:47Z] coord-2026-08-20 XONG (0 commit): retro draft fail 08-19 = API transport error (self-signed cert), question payload noi 'draft sai format' la chuoi hardcode chu khong phai quan sat — da dong bang answer. Phien khac da va daily_retro.sh cung root cause; toi revert phan trung. CHO Mike/user quyet: retro-2026-08-19.md thieu vinh vien (cron chi review yesterday), co backfill tay khong. BAI HOC: git status/diff LAI ngay truoc khi sua, khong tin ban doc file tu vai phut truoc — 2 phien co the cung sua 1 file.
