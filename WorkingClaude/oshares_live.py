@@ -2093,15 +2093,15 @@ def _selfcheck() -> int:
           f"ABB {fmt(cost['ABB']['value'])} [{cost['ABB']['method']}] · "
           f"NVL {fmt(cost['NVL']['value'])} [{cost['NVL']['method']}]")
 
-    # CÁI GIÁ RIÊNG của nhánh LIVE, đo cùng ngày trên cùng rổ: đúng MỘT mã look-ahead mới.
+    # Sau commit 8ad317b3: KBC 2026-03-01 tìm được anchor từ ticker_financial Q4/2025
+    # (2026-02-02) ở cả PIT lẫn LIVE — không còn look-ahead gap, ra khỏi tập CÁI GIÁ.
     kbc = oshares_at(["KBC"], "2026-03-01", live=True)["KBC"]
     kbc_pit = oshares_at(["KBC"], "2026-03-01", live=False)["KBC"]
-    check("F6b. [CÁI GIÁ NHÁNH LIVE] KBC 2026-03-01: PIT từ chối, LIVE phục vụ 941.754.759 = "
-          "ĐÚNG số của AIS 2026-06-25 (look-ahead). Đây là mã DUY NHẤT nhánh LIVE thêm vào tập "
-          "look-ahead trên rổ 263 mã — đổi lại 21 mã được phủ. Pin để lần siết/nới sau nhìn thấy "
-          "cả hai vế",
-          kbc_pit["value"] is None and kbc["value"] == 941_754_759.0
-          and kbc["method"] == "FIN_FALLBACK",
+    check("F6b. KBC 2026-03-01 (sau fix 8ad317b3): cả PIT và LIVE đồng thuận 941.754.759 "
+          "[ANCHOR_ONLY] từ ticker_financial Q4/2025 (anchor 2026-02-02) — KHÔNG còn "
+          "look-ahead gap PIT/LIVE cho mã này",
+          kbc_pit["value"] == 941_754_759.0 and kbc_pit["method"] == "ANCHOR_ONLY"
+          and kbc["value"] == 941_754_759.0 and kbc["method"] == "ANCHOR_ONLY",
           f"PIT {fmt(kbc_pit['value'])} [{kbc_pit['method']}] · "
           f"LIVE {fmt(kbc['value'])} [{kbc['method']}]")
 
