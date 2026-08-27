@@ -1301,12 +1301,12 @@ def t_missed_runs():
     check("M2. (ca a) T2 sau snapshot T6 ⇒ 0 phiên lỡ dù cách 3 NGÀY LỊCH — đếm bằng số ngày "
           "lịch sẽ báo động giả mỗi sáng thứ Hai",
           md("2026-08-14", "2026-08-17") == [], str(md("2026-08-14", "2026-08-17")))
-    check("M3. (ca a) qua NGÀY LỄ (02/09) cũng 0 phiên lỡ — lịch lễ dùng chung "
-          "`trading_bot.vn_market`, không tự khai bản thứ hai",
-          md("2026-09-01", "2026-09-03") == [], str(md("2026-09-01", "2026-09-03")))
-    check("M4. CHỨNG MINH NGƯỢC cho M3: cùng khoảng đó nhưng lùi mốc thêm 1 phiên thì 09-01 PHẢI "
-          "hiện ra (cổng không phải lúc nào cũng trả rỗng)",
-          md("2026-08-31", "2026-09-03") == ["2026-09-01"], str(md("2026-08-31", "2026-09-03")))
+    check("M3. (ca a) qua kỳ nghỉ bù Quốc khánh (31/08–02/09, DNSE 25/08/2026) cũng 0 phiên lỡ "
+          "— lịch lễ dùng chung `trading_bot.vn_market`, không tự khai bản thứ hai",
+          md("2026-08-28", "2026-09-03") == [], str(md("2026-08-28", "2026-09-03")))
+    check("M4. CHỨNG MINH NGƯỢC cho M3: cùng mốc kết thúc nhưng lùi mốc bắt đầu thêm 1 phiên "
+          "thì 08-28 PHẢI hiện ra (cổng không phải lúc nào cũng trả rỗng)",
+          md("2026-08-27", "2026-09-03") == ["2026-08-28"], str(md("2026-08-27", "2026-09-03")))
 
     # ── (b) lỡ đúng 1 phiên
     check("M5. (ca b) lỡ đúng 1 phiên ⇒ đúng 1 ngày", md("2026-08-11", "2026-08-13")
