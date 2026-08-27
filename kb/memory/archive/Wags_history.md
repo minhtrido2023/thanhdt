@@ -217,3 +217,6 @@ BÀI HỌC 2: đừng gọi '<script>.sh --help' để dò cú pháp trên scrip
 
 ## Archived 2026-08-27 (keep=12 days=0 require_done=False)
 - [2026-08-20T01:23:47Z] coord-2026-08-20 XONG (0 commit): retro draft fail 08-19 = API transport error (self-signed cert), question payload noi 'draft sai format' la chuoi hardcode chu khong phai quan sat — da dong bang answer. Phien khac da va daily_retro.sh cung root cause; toi revert phan trung. CHO Mike/user quyet: retro-2026-08-19.md thieu vinh vien (cron chi review yesterday), co backfill tay khong. BAI HOC: git status/diff LAI ngay truoc khi sua, khong tin ban doc file tu vai phut truoc — 2 phien co the cung sua 1 file.
+
+## Archived 2026-08-27 (keep=12 days=0 require_done=False)
+- [2026-08-20T06:12:30Z] THEO DÕI 48h (tới 2026-08-22) — wakeup_reconcile.py vừa go-live cron */5: chạy `grep RESCUED logs/wakeup_reconcile.log` + đọc số cycles/blind/rescued trong retro 00:30. Nếu lớp cron-origin (DollarBill_*_1206xx plan-cron, Winston_*_0120xx ops-autofix) bị cứu hằng ngày (arch-reviewer đo 4/4 candidate 48h qua đều thuộc lớp này, 3/4 ĐÃ có wake SUCCESS mà vẫn không claim-reply) thì LOẠI job dispatch-từ-cron khỏi phạm vi reconciler — KHÔNG nới trần. Nguyên nhân gốc cần truy riêng: vì sao phiên Mike được đánh thức mà không claim-reply.
