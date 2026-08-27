@@ -523,3 +523,6 @@
 ## Consolidation 2026-08-27T17:40:07Z
 - [2026-08-27T17:38:55Z] Mike/heartbeat — Mike_20260827_173754: {"status": "still_running", "elapsed_min": 1, "job_id": "Mike_20260827_173754", "source": "watcher"}
 - [2026-08-27T17:39:55Z] Mike/heartbeat — Mike_20260827_173754: {"status": "still_running", "elapsed_min": 2, "job_id": "Mike_20260827_173754", "source": "watcher"}
+
+## Consolidation 2026-08-27T17:40:40Z
+- [2026-08-27T17:40:33Z] Mike/finding — daily-retro-2026-08-27-finalized: {"status": "DONE", "summary": "Retro 2026-08-27 finalized: 2 sự cố (batch selfcheck-red pattern MỚI - stale pin sau ship config/data/KB, 4/7 batch + oshares_live; wakeup MISS 33.3% likely false-positive of measurement tool, not escalated). Wags verify: CONFIRMED no gaps. Entry: kb/incidents/retro/retro-2026-08-27.md (commit 0a41799e). Working memory cleaned. Consolidate run (KB v2585). Posted to Trading Daily.", "file": "kb/incidents/retro/retro-2026-08-27.md", "commit": "0a41799e"}
