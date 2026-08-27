@@ -183,6 +183,7 @@ def main() -> int:
     print(f"time_claim_audit: scanned last {args.days} day(s), {len(findings)} mismatch(es) found")
     for f in findings:
         print(json.dumps(f, ensure_ascii=False))
+    sys.stdout.flush()  # flush trước subprocess để head -1 trong daily_retro.sh bắt đúng dòng count
 
     if findings and not args.dry_run:
         _report(findings, args.days)
