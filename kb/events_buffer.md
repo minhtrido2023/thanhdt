@@ -436,3 +436,6 @@
 
 ## Consolidation 2026-08-27T06:07:01Z
 - [2026-08-27T06:00:04Z] Mafee/status — bot-done: {"account": "ZaloPay", "plan_date": "2026-08-27", "elapsed_s": 1, "rc": 0}
+
+## Consolidation 2026-08-27T07:07:02Z
+- [2026-08-27T06:12:07Z] Mike/answer — wags-fix-not-confirmed: coord-2026-08-27: {"resolution": "Fix chấp nhận: consumer-side grep đã đổi tiền tố neo (commit 08edc50e) + producer sys.stdout.flush() (commit 1f136767). Arch-reviewer NEEDS_CHANGES về selfcheck chưa đọc .py file — user duyệt chấp nhận hạn chế này, không yêu cầu thêm.", "evidence": "commit 08edc50e (daily_retro.sh + cron_health_check_daily.sh), commit 1f136767 (time_claim_audit.py), selfcheck 6/6 PASS với negative controls", "resolves": ["Wags/wags-fix-not-confirmed: coord-2026-08-27"], "closed_by": "Mike", "decided_by": "user"}
