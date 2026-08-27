@@ -93,7 +93,11 @@ echo "$(date -Iseconds) [wake-metrics] REMOVED-2026-08-21 kiến-trúc-wake-up-�
 # --dry-run: script tự ghi bus + Discord Architecture nếu có mismatch — daily_retro chỉ cần
 # đếm số dòng để đưa vào draft, không tự ghi lại lần hai.
 _time_claim_out="$(python3 "$ROOT/bin/time_claim_audit.py" --days 1 2>&1 || true)"
-_time_claim_count="$(echo "$_time_claim_out" | head -1 | grep -oE '[0-9]+ mismatch' | grep -oE '^[0-9]+' || true)"
+# Neo theo TIỀN TỐ dòng tóm tắt, không theo VỊ TRÍ: time_claim_audit.py gọi subprocess kế thừa
+# stdout (append_event.sh, notify_thread.sh) và chuỗi notify của nó cũng chứa "N mismatch(es)" —
+# `head -1` + grep trần có thể bắt nhầm cả dòng con lẫn số của chính chuỗi notify (retro 08-26).
+_time_claim_count="$(printf '%s\n' "$_time_claim_out" | grep -m1 -E '^time_claim_audit: scanned last ' \
+  | grep -oE '[0-9]+ mismatch' | grep -oE '^[0-9]+' || true)"
 [ -n "$_time_claim_count" ] || _time_claim_count=0
 echo "$(date -Iseconds) [time-claim-audit] $TODAY count=$_time_claim_count" >> "$LOG"
 
