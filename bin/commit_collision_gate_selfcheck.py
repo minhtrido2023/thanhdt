@@ -635,7 +635,11 @@ def _sweep_unchecked_commits():
             dirnames[:] = [d for d in dirnames
                            if not d.startswith("wt-") and d not in (".git", "node_modules")]
             for fn in filenames:
-                if not fn.endswith(".sh"):
+                if not fn.endswith(".sh") or fn.endswith("_selfcheck.sh"):
+                    # *_selfcheck.sh scripts git-commit inside their OWN throwaway sandbox
+                    # (HERMETIC fixture repos, e.g. code_quality_gate_selfcheck.sh:24) — not
+                    # live automation touching a real repo, so an unguarded exit code there is
+                    # not the swallowed-commit bug this sweep hunts for.
                     continue
                 fp = os.path.join(dirpath, fn)
                 rel = os.path.relpath(fp, root)
