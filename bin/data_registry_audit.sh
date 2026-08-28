@@ -132,6 +132,32 @@ check_variant_archived "fundamental_rating.py" \
   "build_fa_ratings_v9.py" "build_fa_ratings_pre2014.py" \
   "fundamental_rating_v5.py" "fundamental_rating_v8c.py"
 
+# ── E. Unregistered-source scan — production readers of data/* not yet in the registry ────
+# Built 2026-08-28 (job Taylor_20260828_081256, after bank_lens_v3.csv/power_lens.csv were found
+# stale ~3 months with zero registry entry and zero cron -- the exact §9 gap: a NEW source can
+# be wired into production and nobody notices it was never registered. Sections A-D all assume
+# the registry already lists the source; this section is the one check that looks the other way
+# -- "is anything production reads NOT in the registry at all". WARN-only (not FAIL): a hit can be
+# a legitimate self-generated state/log file, judgment call stays with the human reading the report.
+log "--- E. Unregistered-source scan (production readers of data/* missing from registry) ---"
+
+E_TARGETS=(rating_8l.py rank_8l.py custom_basket.py macro_state_live.py gen_sql.py)
+for f in trading_bot/*.py; do E_TARGETS+=("$f"); done
+
+E_OUT="$(python3 "$ROOT/mike/bin/data_registry_scan_unregistered.py" "$ROOT" "${E_TARGETS[@]}")"
+E_STATUS=$?
+if [ "$E_STATUS" -ne 0 ]; then
+  fail "Section E: scan script crashed (exit $E_STATUS) -- audit script itself broken, fix before trusting this run"
+else
+  while IFS= read -r line; do
+    case "$line" in
+      INFO\ *)   log "$line" ;;
+      WARN\ *)   warn "${line#WARN }" ;;
+      UNSURE\ *) log "CẦN NGƯỜI PHÂN LOẠI ${line#UNSURE }" ;;
+    esac
+  done <<< "$E_OUT"
+fi
+
 log "=== SUMMARY: FAIL=$FAIL WARN=$WARN ==="
 
 if [ "${1:-}" = "--bus" ]; then

@@ -12,6 +12,8 @@ title: Trading bot / execution (money-path thật)
 | [`bot_stop.md`](bot_stop.md) — data/BOT_STOP | CANONICAL |
 | [`dnse_raw_execution_logs.md`](dnse_raw_execution_logs.md) — data/execution_logs/dnse_raw_<date>.jsonl | CANONICAL |
 | [`dnse_khoplenh_broker_email.md`](dnse_khoplenh_broker_email.md) — email DNSE "Báo cáo giao dịch khớp lệnh" + data/execution_logs/dnse_khoplenh_broker_confirm_<DD-MM-YYYY>.csv — fill THẬT, đối soát độc lập với dnse_raw | CANONICAL |
+| [`dcf_lens_history.md`](dcf_lens_history.md) — data/dcf_lens_history.csv (append-only DCF forecast log) | CANONICAL |
+| [`gdkhq_rollout_state.md`](gdkhq_rollout_state.md) — data/gdkhq_d1d3_rollout.json + gdkhq_shadow_acceptance.json | CANONICAL (cadence chưa xác nhận) |
 | [`executor_state_journal.md`](executor_state_journal.md) — data/execution_logs/exec_<label>_<date>_state.json / _journal.csv | CANONICAL |
 | [`nav_history.md`](nav_history.md) — data/execution_logs/nav_history_<account>.csv | CANONICAL |
 | [`trade_plans.md`](trade_plans.md) — data/trade_plans/plan_<account>_<YYYY-MM-DD>.json | CANONICAL |
