@@ -3,8 +3,8 @@ kind: script-output
 status: PARTIAL
 source: data/bank_lens_v3.csv
 group: rating-8l
-note: migrated off broken finance.ratio() 2026-08-28 (job Taylor_20260828_084735) — ROE/NIM/CIR/loanG/PB refreshed real; NPL/NPL_4q/NPL_slope/CAR/coverage/CASA structurally unavailable (need BCTC thuyet minh, not in vnstock balance_sheet/income_statement); KBS-source cross-check 2026-08-28 (job Taylor_20260828_092753) confirms self-calc correct, KBS vendor ROE unreliable for loss-quarter banks — kept self-calc, question closed
-writer: bank_lens_v3.py (repo root) — pull vnstock balance_sheet+income_statement+company.overview per ticker, ad-hoc chạy tay
+note: migrated off broken finance.ratio() 2026-08-28 (job Taylor_20260828_084735) — ROE/NIM/CIR/loanG/PB refreshed real; NPL_4q/NPL_slope/CAR/CASA structurally unavailable (need BCTC thuyet minh, not in vnstock balance_sheet/income_statement); NPL+coverage OCR'd 9/18 mã 2026-08-28 (job Taylor_20260828_110001, xem §NPL/coverage dưới); KBS-source cross-check 2026-08-28 (job Taylor_20260828_092753) confirms self-calc correct, KBS vendor ROE unreliable for loss-quarter banks — kept self-calc, question closed
+writer: bank_lens_v3.py (repo root) — pull vnstock balance_sheet+income_statement+company.overview per ticker + merge data/bank_npl_coverage_primary_20260828.csv, ad-hoc chạy tay
 ---
 
 # data/bank_lens_v3.csv (+ bank_lens_v3.md — cùng builder, cùng lần chạy)
@@ -116,3 +116,65 @@ trực tiếp. Đừng điều tra lại lần 3 trong vnstock; muốn 6 cột n
 
 Script cross-check (R&D, không canonical): `agents/Taylor/exp_bank_kbs_crosscheck.py` +
 `agents/Taylor/exp_bank_kbs_crosscheck.csv` (18 mã, đủ cột self vs KBS + diff pp).
+
+## NPL/coverage — CANONICAL cho 9/18 mã, PARTIAL toàn bộ (job Taylor_20260828_110001, 2026-08-28)
+
+Cùng phương pháp `build_bank_casa_primary.py` (OCR thuyết minh gốc BCTC Q2/2026 + 2 bất biến độc
+lập bắt buộc): `agents/Taylor/build_bank_npl_coverage.py`, PDF tải từ kho HOSE static2.vietstock.vn.
+
+**NPL = (Nhóm3+4+5)/Tổng dư nợ cho vay KH. coverage = Dự phòng rủi ro/NPL tuyệt đối.**
+2 bất biến: (A) 5 nhóm nợ [+ dòng "cho vay ký quỹ CK" khi có, xem note riêng ACB/TCB] cộng đúng
+= dòng tổng in sẵn trong bảng thuyết minh; (B) dòng tổng đó == `gross_loans` đọc ĐỘC LẬP từ
+`vnstock` VCI `balance_sheet` (`item_id=loans_and_advances_to_customers`), dung sai 0,05%.
+Provision: nếu OCR được (BID/CTG/ACB) → cross-check với `balance_sheet` provision item; nếu
+không (VCB/TCB/MBB/VIB/STB/SHB) → dùng thẳng API (không cần OCR riêng, provision là 1 dòng số
+không cần breakdown nhóm).
+
+**9/18 mã VERIFIED (cả 2 bất biến PASS, `verified=True`)**: BID CTG VCB ACB TCB MBB VIB STB SHB.
+NPL 2026-Q2 dao động 0,61% (VCB) → 7,54% (STB); coverage 43,6% (VIB) → 279% (VCB). File:
+`data/bank_npl_coverage_primary_20260828.csv`. Ghi chú riêng đáng đọc trước khi dùng số:
+- **VIB**: tự công bố NPL 2,10% dùng mẫu số RỘNG (gồm Mua nợ+CK đầu tư+TCTD khác); ở đây tính
+  mẫu số CHỈ cho vay KH (nhất quán 18 mã) ⇒ NPL=2,93% — khác số bank tự công bố, đừng lẫn.
+- **CTG/SHB**: dòng tổng in sẵn trong PDF bị OCR lệch nhẹ (CTG do lỗi OCR digit; SHB lệch 1.000
+  triệu, không xác định nhóm nào) — invariant (A)/(B) tự phát hiện và dùng số API làm neo sửa,
+  không phải OCR mù.
+- **ACB/TCB**: có dòng "cho vay ký quỹ chứng khoán" TÁCH RIÊNG khỏi phân loại nợ 5 nhóm, cộng
+  thêm vào tổng — KHÔNG lẫn vào nhóm nợ nào của phân loại rủi ro tín dụng chuẩn.
+
+**9/18 mã CÒN THIẾU — NaN, KHÔNG suy diễn**: HDB TPB MSB VPB OCB LPB EIB NAB SSB. Lý do cụ thể:
+script `locate.py` (tự động dò trang chứa từ khoá phân loại nợ trong PDF OCR) trả `npl_hits: []`
+cho CẢ 9 mã — khác CASA (từ khoá "Tiền gửi của khách hàng" dễ định vị hơn), bảng phân loại nợ
+nằm ở thuyết minh đánh số khác nhau mỗi ngân hàng và từ khoá OCR không khớp đủ tin cậy để tự động
+hoá; **OCB PDF tải về lỗi hoàn toàn** (146 bytes, không phải PDF thật — link vietstock cho OCB
+không đúng pattern chuẩn). Cần làm THỦ CÔNG (đọc mục lục PDF tìm đúng trang) cho 9 mã này, chưa
+làm trong job này — ưu tiên tiếp theo nếu cần đủ 18/18.
+
+**Wire vào `bank_lens_v3.py`**: đọc `data/bank_npl_coverage_primary_20260828.csv`, merge theo
+ticker (chỉ `verified=True`) vào cột `NPL`/`coverage` của `bank_lens_v3.csv`, đúng pattern
+CASA_PRESS trong `build_bank_casa_ldr.py`. 9 mã còn thiếu vẫn NaN như cũ. `gate()` KHÔNG đổi
+(vẫn ROE-only) — NPL/coverage mới chỉ là dữ liệu hiển thị/differentiator cho `rating_8l.py::
+rate_bank()`, chưa dùng làm hard gate ở tầng này.
+
+## CAR — khảo sát nguồn CTCK (job Taylor_20260828_110001, 2026-08-28) — KẾT LUẬN: KHÔNG khả thi qua CTCK sector report tự động
+
+Đã thử WebSearch + WebFetch 3 báo cáo ngành ngân hàng CTCK gần nhất (VCBS "Vững nhịp tăng
+trưởng" 1H2026, GTJASVN cập nhật KQKD Q1/2026, VNDirect quick note 13/05/2026) — cả 3 đều là
+PDF ẢNH/trình bày (không có text layer trích xuất được qua WebFetch, giống hệt vấn đề OCR đang
+gặp ở phần NPL trên) nên không kiểm chứng được có bảng CAR theo mã hay không từ nội dung text.
+Search tổng hợp (không phải fetch từng PDF) cho các báo cáo ngành ngân hàng Q2/2026 (SSI, VCBS,
+GTJASVN) đều nói về NIM/CIR/tăng trưởng tín dụng/lợi nhuận CẤP NGÀNH — không thấy trích dẫn nào
+có bảng CAR so sánh theo từng mã.
+
+**Lý do cấu trúc, không phải do tìm chưa đủ**: CAR ở VN công bố theo khuôn khổ Basel II/III
+Thông tư 41 là **Pillar 3 disclosure của chính ngân hàng** (thường niên, trong báo cáo thường
+niên/website riêng từng bank), KHÔNG phải số liệu CTCK research tổng hợp định kỳ theo quý — sector
+report của CTCK tập trung NIM/CIR/tăng trưởng tín dụng/lợi nhuận (nguồn từ income statement, dễ
+lấy) chứ hiếm khi tổng hợp CAR (cần risk-weighted-assets nội bộ ngân hàng, không suy ra được từ
+BCTC công khai).
+
+**Khuyến nghị**: KHÔNG đáng làm cron CTCK-CAR-scrape định kỳ — tần suất cập nhật CAR ở nguồn thực
+(annual Pillar 3, không phải quý) không khớp cadence mong muốn, và chưa xác nhận được CTCK nào
+publish bảng CAR theo mã một cách nhất quán. Nếu cần CAR thật, nguồn đúng là annual report/Pillar-3
+disclosure của TỪNG ngân hàng riêng lẻ (không phải 1 nguồn gộp) — việc lớn hơn nhiều so với OCR
+NPL (18 nguồn khác nhau, format khác nhau, chỉ có hàng năm). **Chưa ghi số CAR nào vào
+`bank_lens_v3.csv`** — không có `CTCK_..._UNVERIFIED` provisional nào tìm được đủ tin cậy để ghi.

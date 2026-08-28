@@ -628,3 +628,12 @@
 - [2026-08-28T10:56:02Z] Taylor/heartbeat — Taylor_20260828_102955: {"status": "still_running", "elapsed_min": 26, "job_id": "Taylor_20260828_102955", "source": "watcher"}
 - [2026-08-28T10:57:02Z] Taylor/heartbeat — Taylor_20260828_102955: {"status": "still_running", "elapsed_min": 27, "job_id": "Taylor_20260828_102955", "source": "watcher"}
 - [2026-08-28T10:58:02Z] Taylor/heartbeat — Taylor_20260828_102955: {"status": "still_running", "elapsed_min": 28, "job_id": "Taylor_20260828_102955", "source": "watcher"}
+
+## Consolidation 2026-08-28T11:07:01Z
+- [2026-08-28T11:01:02Z] Taylor/heartbeat — Taylor_20260828_110001: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20260828_110001", "source": "watcher"}
+- [2026-08-28T11:02:03Z] Taylor/heartbeat — Taylor_20260828_110001: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20260828_110001", "source": "watcher"}
+- [2026-08-28T11:03:03Z] Taylor/heartbeat — Taylor_20260828_110001: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20260828_110001", "source": "watcher"}
+- [2026-08-28T11:04:04Z] Taylor/heartbeat — Taylor_20260828_110001: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20260828_110001", "source": "watcher"}
+- [2026-08-28T11:05:04Z] Taylor/heartbeat — Taylor_20260828_110001: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20260828_110001", "source": "watcher"}
+- [2026-08-28T11:06:04Z] Taylor/heartbeat — Taylor_20260828_110001: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20260828_110001", "source": "watcher"}
+- [2026-08-28T11:06:36Z] Taylor/heartbeat — Taylor_20260828_110001: {"status": "in_progress", "note": "NPL/coverage OCR 9/18 mã DONE+wired vao bank_lens_v3.py; CAR CTCK survey DONE (khong kha thi, ghi registry); dang cho bank_lens_v3.py chay lai (vnstock network, ~5-8 phut) de verify wiring khong crash"}
