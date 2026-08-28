@@ -52,7 +52,7 @@ CHỮ KÝ (đã đo trên repo thật TRƯỚC khi chốt, theo đúng kỷ lu�
 
 BỀ RỘNG VÒNG 2 (2026-08-29, arch-review NEEDS_CHANGES trên 15c27547): bản đầu chỉ nhận ra ĐÚNG
 MỘT cách viết (`cmd 2>/dev/null || die`). `>/dev/null 2>&1` (repo đang dùng 84 lần), `|| { die; }`
-(41 chỗ `|| {`) và `|| _fail` (hàm có thật ở bin/preflight_check.sh:36) vứt stderr y hệt nhưng đi
+(39 chỗ `|| {` hôm nay) và `|| _fail` (hàm có thật ở bin/preflight_check.sh:36) vứt stderr y hệt nhưng đi
 qua gate im lặng — trong khi bịt lại đo được VẪN 0 false-positive, tức bề rộng bỏ lại là MIỄN PHÍ
 chứ không do sức ép FP. Với một fix mà tiền đề là "vá call-site 3 lần không ngăn được vị trí thứ
 4", để vị trí thứ 4 lọt chỉ vì nó viết theo cách repo đang dùng 84 lần là chưa đạt mục tiêu.
@@ -79,7 +79,7 @@ DISCARD = re.compile(
     r"|2>&-"  # đóng hẳn descriptor stderr
 )
 # Chỉ hàm CHẾT + có thông điệp trong nháy, kể cả khi bọc trong nhóm ngoặc nhọn `|| { die …; }`
-# (41 chỗ `|| {` trong repo). Đây là điều kiện tách true-positive khỏi các ca `|| echo 0` /
+# (39 chỗ `|| {` trong repo, đo 2026-08-29). Đây là điều kiện tách true-positive khỏi các ca `|| echo 0` /
 # `|| echo unknown` hợp lệ (default scalar khi thiếu file, không phải chẩn đoán gửi cho người)
 # — đo thật: nới emitter sang echo|printf làm rule bắn 99 hit/100 script. Mutation M2 canh đúng
 # nhánh đó. `_fail` có thật ở bin/preflight_check.sh:36.

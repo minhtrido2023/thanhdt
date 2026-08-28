@@ -26,8 +26,31 @@ import importlib.util
 # SAO trong mkdtemp để KHÔNG BAO GIỜ ghi đè file thật trong worktree sống (arch-review
 # 2026-08-29: `finally` không cứu được SIGKILL/OOM, sẽ để lại gate bị tháo ngòi ở đúng checkout
 # mà mọi commit sau chạy qua).
-GATE_PATH = os.environ.get(
-    "MIKE_DIAG_GATE_TARGET", os.path.join(ROOT, "bin", "diagnosis_evidence_gate.py")
+GATE_PROD = os.path.join(ROOT, "bin", "diagnosis_evidence_gate.py")
+
+
+def _resolve_target(env_target, mutation_flag, prod=GATE_PROD):
+    """Trả file gate sẽ kiểm; TỪ CHỐI override nếu thiếu cờ mutation tường minh.
+
+    Không có hàm này thì `MIKE_DIAG_GATE_TARGET` sót lại trong môi trường (shell còn export,
+    cron kế thừa, wrapper quên unset) làm selfcheck in "ALL PASS" trong khi KHÔNG hề đọc file
+    production — PASS GIẢ, đúng dạng fail-silent §29 mà chính gate này sinh ra để diệt.
+    Override chỉ hợp lệ khi ĐI KÈM `MIKE_DIAG_GATE_MUTATION=1` (chỉ run_mutations đặt).
+    """
+    if not env_target or env_target == prod:
+        return prod
+    if not mutation_flag:
+        raise SystemExit(
+            "❌ MIKE_DIAG_GATE_TARGET được đặt mà KHÔNG có MIKE_DIAG_GATE_MUTATION=1 — "
+            f"selfcheck sẽ kiểm {env_target} chứ KHÔNG phải file production {prod}, "
+            "và 'ALL PASS' sẽ là PASS GIẢ. Bỏ biến này hoặc chạy qua --mutations."
+        )
+    return env_target
+
+
+GATE_PATH = _resolve_target(
+    os.environ.get("MIKE_DIAG_GATE_TARGET"),
+    os.environ.get("MIKE_DIAG_GATE_MUTATION") == "1",
 )
 
 _spec = importlib.util.spec_from_file_location("diag_gate", GATE_PATH)
@@ -52,6 +75,22 @@ def git_show(ref):
 
 
 def main():
+    print(f"(đang kiểm file gate: {GATE_PATH})")
+    print("== ca 9: override target phải TỪ CHỐI khi thiếu cờ mutation (chống PASS giả) ==")
+    # Kiểm chính hàm, KHÔNG spawn subprocess: một ca subprocess với TARGET-không-sentinel sẽ đệ
+    # quy vô hạn ngay khi guard bị mutation gỡ đi (con chạy full suite → lại spawn cháu).
+    _fake = "/tmp/khong-phai-file-production.py"
+    try:
+        _resolve_target(_fake, False)
+        _got = "KHÔNG raise"
+    except SystemExit:
+        _got = "raise"
+    assert_eq("TARGET lạ + thiếu MIKE_DIAG_GATE_MUTATION → dừng ngay, không PASS giả",
+              _got, "raise")
+    assert_eq("TARGET lạ + có cờ mutation → chấp nhận", _resolve_target(_fake, True), _fake)
+    assert_eq("không đặt TARGET → luôn là file production", _resolve_target(None, False),
+              GATE_PROD)
+
     print("== ca 1: code THẬT lúc lỗi (55b3f34c^) vs đã vá (55b3f34c) ==")
     pre = git_show("55b3f34c^:bin/append_event.sh")
     post = git_show("55b3f34c:bin/append_event.sh")
@@ -216,7 +255,7 @@ def run_mutations():
     """
     import hashlib
 
-    gate_src = os.path.join(ROOT, "bin", "diagnosis_evidence_gate.py")
+    gate_src = GATE_PROD
     orig = open(gate_src, encoding="utf-8").read()
     sha_before = hashlib.sha256(orig.encode("utf-8")).hexdigest()
     tmpdir = tempfile.mkdtemp(prefix="diag_gate_mut_")
@@ -234,7 +273,8 @@ def run_mutations():
             with open(mutant, "w", encoding="utf-8") as fh:
                 fh.write(orig.replace(a, b, 1))
             env = dict(
-                os.environ, PYTHONDONTWRITEBYTECODE="1", MIKE_DIAG_GATE_TARGET=mutant
+                os.environ, PYTHONDONTWRITEBYTECODE="1", MIKE_DIAG_GATE_TARGET=mutant,
+                MIKE_DIAG_GATE_MUTATION="1",
             )
             r = subprocess.run(
                 [sys.executable, "-B", os.path.abspath(__file__)],
