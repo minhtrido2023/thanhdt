@@ -637,3 +637,7 @@
 - [2026-08-28T11:05:04Z] Taylor/heartbeat — Taylor_20260828_110001: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20260828_110001", "source": "watcher"}
 - [2026-08-28T11:06:04Z] Taylor/heartbeat — Taylor_20260828_110001: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20260828_110001", "source": "watcher"}
 - [2026-08-28T11:06:36Z] Taylor/heartbeat — Taylor_20260828_110001: {"status": "in_progress", "note": "NPL/coverage OCR 9/18 mã DONE+wired vao bank_lens_v3.py; CAR CTCK survey DONE (khong kha thi, ghi registry); dang cho bank_lens_v3.py chay lai (vnstock network, ~5-8 phut) de verify wiring khong crash"}
+
+## Consolidation 2026-08-28T11:08:03Z
+- [2026-08-28T11:07:04Z] Taylor/heartbeat — Taylor_20260828_110001: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20260828_110001", "source": "watcher"}
+- [2026-08-28T11:07:41Z] Taylor/heartbeat — Taylor_20260828_110001: {"status": "in_progress", "note": "phat hien+sua bug duong dan OUT trong build_bank_npl_coverage.py (luu ngoai repo do thua 1 cap ../), da re-run + xoa file sai; dang cho bank_lens_v3.py chay lai lan 2 de verify wiring that"}
