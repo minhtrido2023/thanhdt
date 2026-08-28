@@ -135,7 +135,14 @@ from dataclasses import dataclass, field
 
 BQ_PROJECT = "lithe-record-440915-m9"
 # bq có thể không có trong PATH khi gọi từ cron — dùng full path nếu cần
-_BQ_BIN = shutil.which("bq") or "/home/trido/google-cloud-sdk/bin/bq"
+_GCP_SDK_BIN = "/home/trido/google-cloud-sdk/bin"
+_BQ_BIN = shutil.which("bq") or f"{_GCP_SDK_BIN}/bq"
+# bq cần cả gcloud trong PATH + CLOUDSDK_CONFIG cho auth; wc_env.sh set cái này
+# nhưng cron không source wc_env.sh → tự bổ sung vào env subprocess
+_GCP_ENV = {**os.environ,
+            "CLOUDSDK_CONFIG": os.environ.get("CLOUDSDK_CONFIG",
+                                              "/home/trido/thanhdt/gcloud_dtienthanh"),
+            "PATH": os.environ.get("PATH", "") + f":{_GCP_SDK_BIN}"}
 EXEC_LOG_DIR = "/home/trido/thanhdt/WorkingClaude/data/execution_logs"
 ACCOUNTS = {"SpaceX": "0002023347", "ZaloPay": "0001743768"}
 
@@ -269,7 +276,7 @@ def _bq(sql: str) -> list:
     out = subprocess.run(
         [_BQ_BIN, "query", "--use_legacy_sql=false", f"--project_id={BQ_PROJECT}",
          f"--max_rows={BQ_MAX_ROWS}", "--format=json", sql],
-        capture_output=True, text=True, timeout=300,
+        capture_output=True, text=True, timeout=300, env=_GCP_ENV,
     )
     if out.returncode != 0:
         raise RuntimeError(f"bq query failed: {out.stderr.strip()[:500]}")
