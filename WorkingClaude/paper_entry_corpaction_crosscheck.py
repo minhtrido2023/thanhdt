@@ -54,7 +54,9 @@ def _bq(sql: str):
         capture_output=True, text=True, timeout=300, env=_GCP_ENV,
     )
     if out.returncode != 0:
-        raise RuntimeError(f"bq failed: {out.stderr[-400:]}")
+        # bq in lỗi ra STDOUT, không phải stderr (§29) — chỉ đọc stderr ⇒ "bq failed: " rỗng,
+        # đã làm newdeals_daily_report bị CHẶN fail-closed 2 ngày (08-27, 08-28) không rõ vì sao.
+        raise RuntimeError(f"bq failed: {(out.stderr.strip() or out.stdout.strip())[-400:]}")
     return json.loads(out.stdout or "[]")
 
 
