@@ -16,6 +16,7 @@ set -uo pipefail
 ROOT="/home/trido/thanhdt/WorkingClaude"
 PROJECT="lithe-record-440915-m9"
 export PATH="/home/trido/google-cloud-sdk/bin:$PATH"
+export CLOUDSDK_CONFIG="${CLOUDSDK_CONFIG:-/home/trido/thanhdt/gcloud_dtienthanh}"
 cd "$ROOT"
 
 FAIL=0
