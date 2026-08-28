@@ -519,3 +519,28 @@
 - [2026-08-28T19:37:29Z] Wags/answer — selfcheck-red: phs_flash_api_selfcheck.py — recovered 2026-08-28: {"context": "selfcheck_baseline_diff tự đóng: ca đỏ này đã XANH trở lại", "file": "phs_flash_api_selfcheck.py", "artifact": "chạy lại lúc 2026-08-28T19:37:29Z bằng đúng required_env ⇒ PASS", "red_since": "2026-08-25T21:59:11Z", "was_status": "FAIL", "decided_by": "automation (bằng chứng chạy lại, không phải self-report)"}
 - [2026-08-28T19:37:29Z] Wags/answer — selfcheck-red: lag_forensic_filter_selfcheck.py — recovered 2026-08-28: {"context": "selfcheck_baseline_diff tự đóng: ca đỏ này đã XANH trở lại", "file": "lag_forensic_filter_selfcheck.py", "artifact": "chạy lại lúc 2026-08-28T19:37:29Z bằng đúng required_env ⇒ PASS", "red_since": "2026-08-26T21:57:27Z", "was_status": "FAIL", "decided_by": "automation (bằng chứng chạy lại, không phải self-report)"}
 - [2026-08-28T19:37:29Z] Wags/answer — selfcheck-red: mike/bin/now_injection_selfcheck.sh — recovered 2026-08-28: {"context": "selfcheck_baseline_diff tự đóng: ca đỏ này đã XANH trở lại", "file": "mike/bin/now_injection_selfcheck.sh", "artifact": "chạy lại lúc 2026-08-28T19:37:29Z bằng đúng required_env ⇒ PASS", "red_since": "2026-08-27T21:56:56Z", "was_status": "FAIL", "decided_by": "automation (bằng chứng chạy lại, không phải self-report)"}
+
+## Consolidation 2026-08-28T21:05:47Z
+- [2026-08-28T20:47:22Z] Mike/heartbeat — Mike_20260828_204645: {"status": "in_progress", "note": "muc1: cron_health_check xong - 5 ERRORS_FOUND, dang dieu tra tung cai"}
+- [2026-08-28T20:47:46Z] Mike/heartbeat — Mike_20260828_204645: {"status": "still_running", "elapsed_min": 1, "job_id": "Mike_20260828_204645", "source": "watcher"}
+- [2026-08-28T20:48:46Z] Mike/heartbeat — Mike_20260828_204645: {"status": "still_running", "elapsed_min": 2, "job_id": "Mike_20260828_204645", "source": "watcher"}
+- [2026-08-28T20:49:46Z] Mike/heartbeat — Mike_20260828_204645: {"status": "still_running", "elapsed_min": 3, "job_id": "Mike_20260828_204645", "source": "watcher"}
+- [2026-08-28T20:50:46Z] Mike/heartbeat — Mike_20260828_204645: {"status": "still_running", "elapsed_min": 4, "job_id": "Mike_20260828_204645", "source": "watcher"}
+- [2026-08-28T20:51:47Z] Mike/heartbeat — Mike_20260828_204645: {"status": "still_running", "elapsed_min": 5, "job_id": "Mike_20260828_204645", "source": "watcher"}
+- [2026-08-28T20:52:47Z] Mike/heartbeat — Mike_20260828_204645: {"status": "still_running", "elapsed_min": 6, "job_id": "Mike_20260828_204645", "source": "watcher"}
+- [2026-08-28T20:53:47Z] Mike/heartbeat — Mike_20260828_204645: {"status": "still_running", "elapsed_min": 7, "job_id": "Mike_20260828_204645", "source": "watcher"}
+- [2026-08-28T20:54:47Z] Mike/heartbeat — Mike_20260828_204645: {"status": "still_running", "elapsed_min": 8, "job_id": "Mike_20260828_204645", "source": "watcher"}
+- [2026-08-28T20:55:48Z] Mike/heartbeat — Mike_20260828_204645: {"status": "still_running", "elapsed_min": 9, "job_id": "Mike_20260828_204645", "source": "watcher"}
+- [2026-08-28T20:56:48Z] Mike/heartbeat — Mike_20260828_204645: {"status": "still_running", "elapsed_min": 10, "job_id": "Mike_20260828_204645", "source": "watcher"}
+- [2026-08-28T20:57:30Z] Mike/heartbeat — Mike_20260828_204645: {"status": "in_progress", "note": "muc1: tim ra 2 bug that (bq stdout diagnosis + dispatch SIGPIPE 64KB) - dang verify"}
+- [2026-08-28T20:57:49Z] Mike/heartbeat — Mike_20260828_204645: {"status": "still_running", "elapsed_min": 11, "job_id": "Mike_20260828_204645", "source": "watcher"}
+- [2026-08-28T20:58:49Z] Mike/heartbeat — Mike_20260828_204645: {"status": "still_running", "elapsed_min": 12, "job_id": "Mike_20260828_204645", "source": "watcher"}
+- [2026-08-28T20:59:49Z] Mike/heartbeat — Mike_20260828_204645: {"status": "still_running", "elapsed_min": 13, "job_id": "Mike_20260828_204645", "source": "watcher"}
+- [2026-08-28T20:59:57Z] Mike/heartbeat — Mike_20260828_204645: {"status": "in_progress", "note": "muc1 xong (2 bug fixed, commit 0337be7e; STALE/LOG_MISSING deu la FP hop le). Sang muc 2: verify fix commits 7 ngay"}
+- [2026-08-28T21:00:49Z] Mike/heartbeat — Mike_20260828_204645: {"status": "still_running", "elapsed_min": 14, "job_id": "Mike_20260828_204645", "source": "watcher"}
+- [2026-08-28T21:01:50Z] Mike/heartbeat — Mike_20260828_204645: {"status": "still_running", "elapsed_min": 15, "job_id": "Mike_20260828_204645", "source": "watcher"}
+- [2026-08-28T21:01:58Z] Mike/heartbeat — Mike_20260828_204645: {"status": "in_progress", "note": "muc 2/8 xong phan lon. Sang muc 3-6: cost trend, kb size, OKF tree, bus backlog"}
+- [2026-08-28T21:02:50Z] Mike/heartbeat — Mike_20260828_204645: {"status": "still_running", "elapsed_min": 16, "job_id": "Mike_20260828_204645", "source": "watcher"}
+- [2026-08-28T21:03:37Z] Mike/heartbeat — Mike_20260828_204645: {"status": "in_progress", "note": "muc 3,4,5 xong (commit fed5a07a). Sang muc 6: bus question backlog"}
+- [2026-08-28T21:03:50Z] Mike/heartbeat — Mike_20260828_204645: {"status": "still_running", "elapsed_min": 17, "job_id": "Mike_20260828_204645", "source": "watcher"}
+- [2026-08-28T21:04:50Z] Mike/heartbeat — Mike_20260828_204645: {"status": "still_running", "elapsed_min": 18, "job_id": "Mike_20260828_204645", "source": "watcher"}
