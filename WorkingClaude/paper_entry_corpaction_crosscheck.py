@@ -28,6 +28,7 @@ Usage:  python3 paper_entry_corpaction_crosscheck.py            # both paper boo
 from __future__ import annotations
 
 import json
+import shutil
 import subprocess
 from pathlib import Path
 
@@ -36,14 +37,21 @@ from paper_entry_adjust import WORKDIR, adjust_entries
 
 BQ_PROJECT = "lithe-record-440915-m9"
 TABLE = f"{BQ_PROJECT}.tav2_bq.corporate_action"
+import os as _os
+_GCP_SDK_BIN = "/home/trido/google-cloud-sdk/bin"
+_BQ_BIN = shutil.which("bq") or f"{_GCP_SDK_BIN}/bq"
+_GCP_ENV = {**_os.environ,
+            "CLOUDSDK_CONFIG": _os.environ.get("CLOUDSDK_CONFIG",
+                                               "/home/trido/thanhdt/gcloud_dtienthanh"),
+            "PATH": _os.environ.get("PATH", "") + f":{_GCP_SDK_BIN}"}
 
 
 def _bq(sql: str):
     """Run a BQ query via the CLI (same auth path as every other script here)."""
     out = subprocess.run(
-        ["bq", "query", "--use_legacy_sql=false", f"--project_id={BQ_PROJECT}",
+        [_BQ_BIN, "query", "--use_legacy_sql=false", f"--project_id={BQ_PROJECT}",
          "--format=json", "--quiet", sql],
-        capture_output=True, text=True, timeout=300,
+        capture_output=True, text=True, timeout=300, env=_GCP_ENV,
     )
     if out.returncode != 0:
         raise RuntimeError(f"bq failed: {out.stderr[-400:]}")
