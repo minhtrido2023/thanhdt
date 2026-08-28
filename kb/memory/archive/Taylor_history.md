@@ -339,3 +339,6 @@
 
 ## Archived 2026-08-26 (keep=12 days=0 require_done=False)
 - [2026-08-23T08:49:55Z] [2026-08-23] extreme-bottom-recognition (job _083709) XONG: NO-GO luat dinh thoi diem day, GO-CO-DIEU-KIEN cho DUNG 1 bien the V8 (tranche dd52<=-35%, tranche KICH THUOC khong phai DON BAY) => CHO USER duyet nang N_trials 7->8 truoc khi dua vao Phase 1. | 2 LUAT MANG DI: (1) Phase 0 do spread theo THANG bo sot 2022 hoan toan - do lai theo NGAY thi 2022-10-24->11-25 la episode that, PHASE 1 PHAI DO THEO NGAY; (2) 'N khoi doc lap' phu thuoc NGUONG - doi margin=deposit+4pp sang +5pp lam net nhay +0,2%->+10,0% chu yeu vi luat gop khoi 90 ngay gop/tach khac di, khong phai kinh te. | BAY: fwd_tu_day > fwd_tu_arm o 7/7 episode la TAUTOLOGY (day = diem thap nhat), dung trich lam bang chung. Day 2010-08-25 la phan vi du: median ma -46,8% sau 12 thang.
+
+## Archived 2026-08-28 (keep=12 days=0 require_done=False)
+- [2026-08-23T10:20:24Z] [2026-08-23] code-quality-fix job _095710 XONG (commit 6eded72c): 3 fix trading_bot/brokers.py+plan.py (get_nav totalCash-totalDebt basis + fail-closed zero-guard, lever_live_preflight basis khớp nav_art, is_dead bỏ f/x). 39 selfcheck 38 PASS (1 fail pre-existing config, bisect xác nhận). quant-skeptic CONFIRMED. MỞ: PHSBroker chưa có get_nav() override (0 rủi ro hiện tại, mọi phs account=paper) - escalate nếu có phs live tương lai.
