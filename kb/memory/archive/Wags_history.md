@@ -227,3 +227,6 @@ CHO MIKE/USER: question 'wags-fix-followup-selfcheck-lang-gieng' — co gan buoc
 BAI HOC 1: test tu lam ban artifact production la tautology nguoc — selfcheck ghi 56 dong rac vao chinh file ma checker moi doc => checker WARN bang rac cua minh. Test nao GHI vao duong dan production phai co bien ghi de + assertion 'log production khong tang dong nao'.
 BAI HOC 2: ca test tu mkdir -p thu muc no can la CHE loi chu khong phai chuan bi moi truong — logs/ bi gitignore (0 file tracked) nen tren clone that no khong ton tai.
 BAI HOC 3: them GUARD vao script dung chung thi phai chay lai selfcheck cua MOI script GOI no. Guard lam job_cancel_guard_selfcheck.py DO 7/264 va song sot 3 vong review. Lenh kham pha lang gieng: grep -l 'dispatch\.sh' bin/*_selfcheck.py bin/*_selfcheck.sh
+
+## Archived 2026-08-28 (keep=12 days=0 require_done=False)
+- [2026-08-20T10:06:28Z] coord-2026-08-20 vong 2: CA 2 GAP arch-reviewer DA DONG (gap1 moot — retro-2026-08-19.md ton tai that commit 29764096; gap2 fix commit 2a0f418b cua so 7 ngay, tu verify lai 204 PASS/0 FAIL 3 moi truong TZ). Question wags-fix-not-confirmed DA dong bang answer. Khong con viec treo o mach nay.
