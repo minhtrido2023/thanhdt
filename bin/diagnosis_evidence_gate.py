@@ -33,20 +33,34 @@ PHẠM VI CHỈ BẮT ĐƯỢC 1/3 — nói thẳng, đừng để ai tưởng g
     kb/coding_guidelines.md §29.
 
 CHỮ KÝ (đã đo trên repo thật TRƯỚC khi chốt, theo đúng kỷ luật của shellcheck_gate.sh):
-  cùng MỘT câu lệnh (nối qua `\` xuống dòng) có ĐỦ 3 điều kiện —
-    (a) `2>/dev/null` → stderr bị VỨT (dạng ĐÚNG `2>&1 >/dev/null` — bắt lại để in — không
-        khớp, nên bản đã vá tự động sạch);
-    (b) nhánh `||` gọi một hàm CHẾT (`die`/`fail`/`_die`/`abort`) kèm thông điệp trong nháy.
-  Điều kiện (c) là cái tách true-positive khỏi 67 ca `|| echo 0` / `|| echo unknown` hợp lệ
+  trong CÙNG một cửa sổ 8 dòng phải có ĐỦ 2 điều kiện —
+    (a) stderr bị VỨT, ở BẤT KỲ cách viết nào bash dùng: `2>/dev/null`, `>/dev/null 2>&1`
+        (idiom silencing phổ biến NHẤT của bash), `&>/dev/null`, `2>&-`. Cố ý KHÔNG khớp dạng
+        ĐÚNG `2>&1 >/dev/null` (bắt stderr lại để in) — nên bản đã vá tự động sạch;
+    (b) nhánh `||` gọi một hàm CHẾT (`die`/`_die`/`fail`/`_fail`/`fatal`/`abort`/`bail`, kể cả
+        khi bọc trong nhóm ngoặc nhọn `|| { die "…"; }`) kèm thông điệp trong nháy.
+  Điều kiện (b) là cái tách true-positive khỏi các ca `|| echo 0` / `|| echo unknown` hợp lệ
   (default scalar khi thiếu file — không phải chẩn đoán gửi cho người). Mọi điều kiện ở đây
   đều đã bị MUTATION kiểm: phá cái nào thì selfcheck ĐỎ cái đó (2 điều kiện thừa — "không có
   2>&1" và "thông điệp ≥40 ký tự" — sống sót mutation ⇒ là guard giả ⇒ ĐÃ GỠ, không giữ lại
-  cho có). Đo thật:
-    - rule THÔ (chỉ a+b+`|| die|echo|printf`): 68 hit / 76 script → 1 đúng, 67 sai ⇒ vô dụng,
-      đúng cái "một rule bắn 200 lần với 50%" mà shellcheck_gate.sh cảnh báo.
+  cho có). Đo thật trên corpus HÔM NAY (100 file .sh trong bin/ + hooks/ ở HEAD):
+    - rule THÔ (a + `|| die|echo|printf`): **99 hit / 100 script** (33 file) → 1 đúng, còn lại
+      sai ⇒ vô dụng, đúng cái "một rule bắn 200 lần với 50%" mà shellcheck_gate.sh cảnh báo.
     - rule NÀY: HEAD = **0 hit** trên toàn bộ bin/*.sh + hooks/*.sh; chạy trên
-      `git show 55b3f34c^:bin/append_event.sh` (bản ĐÚNG LÚC LỖI) = **1 hit, đúng dòng 108**.
-      Fires on the real bug, silent on the real repo.
+      `git show 55b3f34c^:bin/append_event.sh` (bản ĐÚNG LÚC LỖI) = **1 hit, đúng dòng 108**;
+      im trên bản đã vá `55b3f34c`. Fires on the real bug, silent on the real repo.
+
+BỀ RỘNG VÒNG 2 (2026-08-29, arch-review NEEDS_CHANGES trên 15c27547): bản đầu chỉ nhận ra ĐÚNG
+MỘT cách viết (`cmd 2>/dev/null || die`). `>/dev/null 2>&1` (repo đang dùng 84 lần), `|| { die; }`
+(41 chỗ `|| {`) và `|| _fail` (hàm có thật ở bin/preflight_check.sh:36) vứt stderr y hệt nhưng đi
+qua gate im lặng — trong khi bịt lại đo được VẪN 0 false-positive, tức bề rộng bỏ lại là MIỄN PHÍ
+chứ không do sức ép FP. Với một fix mà tiền đề là "vá call-site 3 lần không ngăn được vị trí thứ
+4", để vị trí thứ 4 lọt chỉ vì nó viết theo cách repo đang dùng 84 lần là chưa đạt mục tiêu.
+
+CÒN HỞ (ghi ở đây VÀ trên bus/KB, đừng để chỉ nằm trong docstring): dạng PYTHON của cùng khiếm
+khuyết (`subprocess.run(..., stderr=subprocess.DEVNULL)` rồi hardcode chẩn đoán) CHƯA được gate
+nào canh — scope hiện tại chỉ `^(bin|hooks)/.*\.sh$`, trong khi 2 gate anh em đã dùng `(sh|py)`
+và có ≥4 file bin/*.py đang dùng DEVNULL.
 
 Escape hatch (cùng khuôn MIKE_CQ_GATE / MIKE_COMMIT_GATE): env MIKE_DIAG_GATE=warn hạ BLOCK
 xuống cảnh báo không chặn; =off tắt hẳn.
@@ -55,14 +69,23 @@ import os
 import re
 import sys
 
-# `2>/dev/null` = stderr bị VỨT. Cố ý KHÔNG khớp `2>&1 >/dev/null` — đó chính là cách ĐÚNG
-# (bắt stderr lại để in ra), và là hình dạng của bản đã vá 55b3f34c.
-DISCARD = re.compile(r"2>\s*/dev/null")
-# Chỉ hàm CHẾT + có thông điệp trong nháy. Đây là điều kiện tách 1 true-positive khỏi 67 ca
-# `|| echo 0` / `|| echo unknown` hợp lệ (default scalar khi thiếu file, không phải chẩn đoán
-# gửi cho người) — đo thật trên repo, xem docstring. Mutation M2 (thêm echo|printf vào đây)
-# làm selfcheck ĐỎ với 67 false-positive ⇒ điều kiện này có canh thật.
-DIAG = re.compile(r"\|\|\s*(die|fail|_die|abort)\b[^\n]{0,20}[\"']", re.S)
+# stderr bị VỨT — MỌI cách viết bash dùng để làm câm stderr. Cố ý KHÔNG khớp `2>&1 >/dev/null`
+# (bắt stderr lại để in ra) — đó là cách ĐÚNG và là hình dạng của bản đã vá 55b3f34c. Thứ tự
+# quan trọng: `>/dev/null 2>&1` VỨT stderr, `2>&1 >/dev/null` GIỮ — regex phân biệt bằng thứ tự.
+DISCARD = re.compile(
+    r"2>\s*/dev/null"  # cmd 2>/dev/null
+    r"|>\s*/dev/null\s+2>&1"  # cmd >/dev/null 2>&1 — idiom phổ biến nhất, 84 hit trong repo
+    r"|&>\s*/dev/null"  # cmd &>/dev/null (bash gộp)
+    r"|2>&-"  # đóng hẳn descriptor stderr
+)
+# Chỉ hàm CHẾT + có thông điệp trong nháy, kể cả khi bọc trong nhóm ngoặc nhọn `|| { die …; }`
+# (41 chỗ `|| {` trong repo). Đây là điều kiện tách true-positive khỏi các ca `|| echo 0` /
+# `|| echo unknown` hợp lệ (default scalar khi thiếu file, không phải chẩn đoán gửi cho người)
+# — đo thật: nới emitter sang echo|printf làm rule bắn 99 hit/100 script. Mutation M2 canh đúng
+# nhánh đó. `_fail` có thật ở bin/preflight_check.sh:36.
+DIAG = re.compile(
+    r"\|\|\s*\{?\s*(_die|_fail|die|fail|fatal|abort|bail)\b[^\n]{0,20}[\"']", re.S
+)
 
 
 def scan(text):
@@ -100,7 +123,8 @@ def main(argv):
                 sys.stderr.write(
                     f"\n⛔ {path}:{lineno} — vứt stderr rồi ĐOÁN nguyên nhân\n"
                     f"   {stmt[:160]}\n"
-                    "   `2>/dev/null` ném đi đúng thứ nói cho bạn biết chuyện gì đã xảy ra, rồi\n"
+                    "   Vứt stderr (`2>/dev/null` / `>/dev/null 2>&1` / `&>/dev/null` / `2>&-`)\n"
+                    "   ném đi đúng thứ nói cho bạn biết chuyện gì đã xảy ra, rồi\n"
                     "   nhánh `|| die` khẳng định một nguyên nhân code chưa hề đọc. Ba lần đã cắn\n"
                     "   thật (08-21, 08-25, 08-28) — xem đầu bin/diagnosis_evidence_gate.py.\n"
                     "   SỬA: bắt stderr lại rồi in ra, đừng vứt:\n"
