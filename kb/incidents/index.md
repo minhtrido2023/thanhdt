@@ -4,7 +4,7 @@ title: Incidents — Mike fleet (sổ postmortem, cấu trúc OKF)
 owner: Mike fleet (mọi agent ghi; daily_retro.sh ghi entry RETRO hằng đêm)
 format: OKF (Open Knowledge Format) — markdown + YAML frontmatter, 1 sự cố = 1 file
 migrated_from: kb/INCIDENTS.md (single-file 408KB, migrate → OKF 2026-07-30 job Winston_20260730_144031)
-entries: 131 file (84 sự cố + 46 RETRO + 1 mục open-items chung)
+entries: 132 file (84 sự cố + 47 RETRO + 1 mục open-items chung)
 ---
 
 # Incidents — Mike fleet
@@ -203,6 +203,7 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 | 2026-06-22 | [2026-06-22 — Mafee ZOMBIE: systemd reports healthy, agent isn't actually serving](2026-06/2026-06-22-mafee-zombie-systemd-healthy.md) | logged |
 
 ## RETRO hằng ngày (mới nhất trước)
+| 2026-08-28 | [RETRO — 2026-08-28: 4 sự cố, 2 pattern xuyên suốt (Pattern A — checker hardcode chẩn đoán lần thứ 3, escalate mở bus question; Pattern B — Wags mutation-gap round 1 NEEDS_CHANGES, còn hở chờ round 2; sự cố #2 DT5G MERGE bỏ sót asof_date NULL 26 phiên, đã fix + user duyệt UPDATE dòng SEALED; sự cố #3 MBB rights-issue ledger gap, đã vá journal)](retro/retro-2026-08-28.md) | logged |
 | 2026-08-27 | [RETRO — 2026-08-27: 2 sự cố, 1 pattern xuyên suốt (Pattern mới — 4/7 batch selfcheck-red + 1 ca oshares_live cùng ngày đều do thay đổi production đã duyệt (config/data/KB) ship xong nhưng selfcheck phụ thuộc không cập nhật pin cùng lượt, "lõi ẩn" dạng thứ 3 chưa có trong §23; sự cố #2 wakeup MISS 1/3 điều tra sâu tới prompt gốc, kết luận rất có thể false-positive của công cụ đo, không escalate theo bước 6)](retro/retro-2026-08-27.md) | logged |
 | 2026-08-26 | [RETRO — 2026-08-26: 3 sự cố, 1 pattern xuyên suốt (self-report ≠ artifact thật — 3 ngày liên tiếp dưới hình dạng khác nhau: buffer-race trong `time_claim_audit.py` khiến log cron báo count=0 sai dù bus có 1 mismatch thật; wakeup MISS N=1; bus question security-leak vẫn treo lần 3 liên tiếp)](retro/retro-2026-08-26.md) | logged |
 | 2026-08-25 | [RETRO — 2026-08-25: 3 sự cố, 1 pattern xuyên suốt (checker hardcode chẩn đoán sai tái diễn lần 3 — host tắt 18h, ĐÃ SỬA cùng ngày commit 52eb62ea; job "cancelled" sai nhãn dù verdict đã lên bus qua job song song, MỚI; bus question security-leak vẫn treo >18h dù 1/3 việc đã xong qua kênh khác)](retro/retro-2026-08-25.md) | logged |
