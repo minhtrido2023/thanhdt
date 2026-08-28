@@ -9,22 +9,23 @@
 - VPI/BAL signal HOLD đến 2026-09-16 — HOLD_ALL theo VPI.
 - Thứ Bảy 2026-08-29: implement code chính sách margin đơn mã discretionary.
 
+## Retro 2026-08-28 — đã đóng (kb/incidents/retro/retro-2026-08-28.md, Wags CONFIRMED)
+- 4 sự cố: #1 append_event JSON guard hardcode (FIXED, commit 55b3f34c); #2 DT5G MERGE bỏ sót
+  asof_date NULL 26 phiên (FIXED, commit 4bc6d2f4 repo WorkingClaude + user duyệt UPDATE dòng
+  SEALED 07-24, verify n_null=0); #3 MBB rights-issue ledger gap (FIXED, journal bổ sung, hết
+  BLOCKED_RECONCILE); #4 Wags fix cho routing câu hỏi -needs-taylor bị arch-reviewer NEEDS_CHANGES
+  (CÒN HỞ — chưa round 2).
+- **Pattern A escalate mở**: bus question `retro-pattern-recurring-checker-hardcode-diagnosis-3`
+  (lần 3 checker hardcode chẩn đoán thay vì đọc bằng chứng) — chờ Mike/user quyết biện pháp mạnh
+  hơn (lint rule/review checklist), KHÔNG chỉ thêm dòng khuyến nghị.
+- **Theo dõi tiếp**: nếu sang 08-29 vẫn chưa có round-2 fix cho
+  `Wags/wags-fix-not-confirmed: coord-2026-08-28` → escalate Pattern B ở retro kế tiếp.
+
 ## Đang chờ / mở nhỏ
 1. **capit-lever selfcheck 2 FAIL còn lại** (bus: Wags/capit-lever-selfcheck-2-remaining-fail-permission-blocked): L2/L3 bị chặn permission classifier; Taylor đề xuất patch cụ thể. Urgency=THẤP-TRUNG BÌNH. User chưa cho ý kiến.
 2. **Security leak VM**: user báo tạo máy ảo riêng trong server thay cho repo private/sudo revoke. Bus đóng DEFERRED. Theo dõi tiến độ VM khi có cập nhật.
-
-## Selfcheck status (sau batch fix đêm 08-28 01:51)
-- dc_book_waterfall, lag_forensic_filter, universe_pit_quality, phs_flash_api: ✅ PASS
-- capit_lever: ⚠️ 2 FAIL còn lại (L2/L3, permission blocked)
-- now_injection_selfcheck: ⚠️ likely false-positive (new sessions fresh)
-
-## wakeup_audit / buffer-race
-- time_claim_audit.py buffer-race CHƯA SỬA (bug gốc còn trong code)
+3. **wags-fix-not-confirmed: coord-2026-08-28** — Wags round 1 NEEDS_CHANGES (arch-reviewer), chưa round 2. Xem Pattern B ở trên.
 
 ## Macro watch
 - Bobby BĐS VN report xong 08-26 (STRUCTURAL_ACCUMULATION/AMBIGUOUS). Review quý next ~2026-11-26.
-
-## Quyết định đã chốt hôm nay (08-28)
-- BAF BQ retro-update: Option B — ghi nhận known caveat, không sửa lịch sử (decided_by: user)
-- Security leak: tạo VM riêng thay vì repo private/sudo revoke (decided_by: user)
 
