@@ -292,8 +292,15 @@ def eval_sugar(t):
 
 def eval_bank(t):
     r=bank[bank["ticker"]==t].iloc[0]; g=r["gate"]
-    act={"CLEAN":"BUY-eligible","WATCH":"WATCH","AVOID":"AVOID"}[g]
-    # CLEAN + cheap-for-ROE (roe/pb high) → BUY
+    # bank_lens_v3.py gate schema changed 2026-08-28 (job Taylor_20260828_084735): vnstock's
+    # ratio() endpoint went dead (KeyError lengthReport), NPL/coverage/CAR/CASA can no longer be
+    # recomputed for most banks -> old CLEAN/WATCH/AVOID asset-quality gate replaced with
+    # AVOID(ROE<8%) else DATA_GAP. "CLEAN"/"WATCH" no longer appear; kept here only so a future
+    # bank_lens_v3.py revert (asset-quality data restored) doesn't silently KeyError again.
+    act={"CLEAN":"BUY-eligible","WATCH":"WATCH","AVOID":"AVOID","DATA_GAP":"DATA_GAP"}[g]
+    # CLEAN + cheap-for-ROE (roe/pb high) → BUY. Gate no longer emits CLEAN (see above), so this
+    # upgrade is dormant until asset-quality data is restored — NOT extended to DATA_GAP, since
+    # DATA_GAP means asset quality is unverified, not confirmed clean.
     roepb=r["ROE"]/r["PB"] if r["PB"]>0 else 0
     if g=="CLEAN" and roepb>0.12: act="BUY-zone"
     detail=f"NPL{r['NPL']*100:.2f}% cov{r['coverage']*100:.0f}% CAR{(r['CAR']*100 if pd.notna(r['CAR']) else float('nan')):.0f}% ROE{r['ROE']*100:.0f}% PB{r['PB']:.2f} (4qNPL{r['NPL_chg4q']:+.1f}pp)"
