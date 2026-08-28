@@ -538,3 +538,34 @@ tự tránh, không lặp lại nhóm lỗi này ở vị trí thứ 7.
 *→ retro-2026-08-10 Pattern 1 · retro-2026-08-11 mục 1/4/5 · retro-2026-08-12 Pattern 2 ·
 retro-2026-08-13 Pattern 1 — chi tiết từng ca cụ thể nằm trong các file retro tương ứng
 (`kb/incidents/retro/`), không chép lại ở đây.
+
+## 29. Chẩn Đoán Phải Trích Bằng Chứng Đang Cầm Trong Tay — Không Đoán, Không Hardcode Nguyên Nhân
+
+**Quy tắc:** bất kỳ dòng nào một script in ra để NÓI CHO NGƯỜI biết "vì sao hỏng" đều phải
+**nội suy từ bằng chứng script vừa đọc được**, không phải một nguyên nhân viết cứng sẵn. Hai
+dạng vi phạm, cả hai đều đã cắn thật:
+- **Vứt bằng chứng rồi đoán** — `cmd 2>/dev/null || die "chắc là do X"`: `2>/dev/null` ném đi
+  đúng thứ parser/OS vừa nói cho bạn biết chuyện gì xảy ra. Sửa: bắt lại rồi in —
+  `_err="$(cmd 2>&1 >/dev/null)" || die "…\n  Lỗi thật: $_err"`.
+- **Khẳng định nguyên nhân chưa hề đọc bằng chứng nào** — thông điệp quy CHỤP mọi ca về một
+  nguyên nhân ("nghi quoting bug 08-01", "bị shell word-split") trong khi các ca khác nhau có
+  nguyên nhân khác nhau. Sửa: tìm **một bit cơ khí** phân biệt được (có/không dòng START trong
+  log, `Extra data` vs `Unterminated string`) rồi rẽ nhánh theo bit đó; không phân biệt được
+  thì nói thẳng "không xác định được nguyên nhân, kiểm thủ công" — đừng đoán hộ.
+
+**Vì sao thành luật riêng dù §28 đã nói tinh thần này:** §28 viết 2026-08-13 và **vẫn lọt 3
+lần sau đó** ở 3 vị trí khác nhau trong ~1 tuần (08-21 `ops_health_check.sh` §5b, 08-25
+check#9, 08-28 `append_event.sh` guard JSON) — mỗi lần thông điệp đoán mò được checker/dispatch
+chép nguyên văn đi tiếp, dẫn người xử lý sai hướng ngay dòng đầu. Escalate bus question
+`retro-pattern-recurring-checker-hardcode-diagnosis-3` (retro-2026-08-28 Pattern A).
+
+**Nửa CƠ HỌC đã tự động hoá — `bin/diagnosis_evidence_gate.py`** (pre-commit, `files:
+^(bin|hooks)/.*\.sh$`): chặn cứng dạng thứ nhất (`2>/dev/null` + `|| die "…"`). Đo thật trước
+khi chốt: 0 false-positive trên toàn bộ `bin/*.sh` + `hooks/*.sh` ở HEAD, và fire đúng dòng 108
+của `git show 55b3f34c^:bin/append_event.sh` (bản đúng lúc lỗi). Bỏ qua có chủ đích:
+`MIKE_DIAG_GATE=warn|off`.
+
+**Nửa còn lại KHÔNG lint được** — dạng thứ hai là văn xuôi, phát hiện nó = đọc hiểu ngôn ngữ tự
+nhiên. Đó là **mục bắt buộc trong review**: với mọi thay đổi chạm checker/guard/alert, hỏi đúng
+một câu — *"dòng này khẳng định nguyên nhân; code đã ĐỌC cái gì để biết điều đó?"* Không trả lời
+được bằng một biến/một lần đọc file cụ thể ⇒ trả lại sửa, đừng đợi tới khi nó gây báo động sai.

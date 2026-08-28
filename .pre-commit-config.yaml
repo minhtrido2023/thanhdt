@@ -70,6 +70,20 @@ repos:
       # có trong baseline ⇒ baseline ngầm định 0 ⇒ hard-block oan file không sửa gì, trúng agent
       # khác. Xem arch-review job Wags_20260823_071251 (round 2). Mở rộng scope thật (không chỉ
       # đổi regex) thì phải rebuild baseline cho toàn bộ .py trước, không chỉ nới `files`.
+      # Thêm 2026-08-29, sau lần thứ 3 trong ~1 tuần cùng một khiếm khuyết ở 3 vị trí khác
+      # nhau: checker/guard VỨT bằng chứng (stderr của lệnh vừa hỏng) rồi ĐOÁN nguyên nhân
+      # bằng một thông điệp cố định — 08-21 ops_health §5b, 08-25 check#9, 08-28
+      # append_event.sh guard JSON (bus question retro-pattern-recurring-checker-hardcode-
+      # diagnosis-3, retro-2026-08-28 Pattern A). §28 coding_guidelines đã dặn từ 08-13 và
+      # vẫn lọt cả 3 lần ⇒ biến nửa CƠ HỌC của §28 thành điều kiện commit. Nửa còn lại
+      # ("khẳng định nguyên nhân bằng văn xuôi, không hề đọc bằng chứng nào") KHÔNG lint được
+      # — nằm ở checklist review §29, xem docstring bin/diagnosis_evidence_gate.py.
+      - id: diagnosis-evidence-gate
+        name: Vứt stderr rồi đoán nguyên nhân (xem bin/diagnosis_evidence_gate.py, §29)
+        entry: bin/diagnosis_evidence_gate.py
+        language: system
+        files: '^(bin|hooks)/.*\.sh$'
+
       - id: code-quality-gate
         name: ruff ratchet (F/E9/B006/B008, per-file so với baseline — xem bin/code_quality_gate.sh)
         entry: bin/code_quality_gate.sh
