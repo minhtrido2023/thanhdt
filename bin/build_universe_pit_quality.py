@@ -69,7 +69,7 @@ BACKFILL_CHUNK_DAYS = 3500       # BigQuery: 1 DML chạm tối đa 4000 partiti
 FIN_VALID_DAYS = 400             # CF_OA_3Y as-of hết hiệu lực sau 400 ngày (giống G2b)
 
 BANNED = ["PC1", "VVS", "KSF", "NKG", "HSG", "HVN", "VJC", "NVL", "GEG", "SBA",
-          "DMC", "IMP", "TRA", "TOS", "VTP"]
+          "DMC", "IMP", "TRA", "TOS", "VTP", "BAF"]
 
 os.environ.setdefault("GOOGLE_APPLICATION_CREDENTIALS", ADC_PATH)
 
