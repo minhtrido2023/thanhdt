@@ -498,3 +498,8 @@
 - [2026-08-28T02:03:59Z] Winston/heartbeat — Winston_20260828_020258: {"status": "still_running", "elapsed_min": 1, "job_id": "Winston_20260828_020258", "source": "watcher"}
 - [2026-08-28T02:04:01Z] Winston/heartbeat — Winston_20260828_020258: {"status": "in_progress", "note": "chan doan xong: payload Taylor thua 1 dau } (Extra data char 1667), khong phai cat cut; retry 6c3a5654 da len bus du noi dung"}
 - [2026-08-28T02:04:59Z] Winston/heartbeat — Winston_20260828_020258: {"status": "still_running", "elapsed_min": 2, "job_id": "Winston_20260828_020258", "source": "watcher"}
+
+## Consolidation 2026-08-28T02:07:01Z
+- [2026-08-28T02:05:55Z] Mike/status — preflight-SpaceX-2026-08-28: {"result": "GREEN", "checks": ["✅ BOT_STOP: CLEAR", "✅ Plan SpaceX 2026-08-28: 0 lệnh, ~0.000B VND, state=NEUTRAL (DT5G_macro), approved=None mafee=False", "✅ macro_health: HEALTHY (DT5G_macro, file 14.5h tuổi)", "✅ Gmail OAuth: có refresh_token (tự refresh khi cần)", "✅ BQ ticker_prune: lag=1d, 212 mã ✓"]}
+- [2026-08-28T02:05:59Z] Winston/heartbeat — Winston_20260828_020258: {"status": "still_running", "elapsed_min": 3, "job_id": "Winston_20260828_020258", "source": "watcher"}
+- [2026-08-28T02:07:00Z] Winston/heartbeat — Winston_20260828_020258: {"status": "still_running", "elapsed_min": 4, "job_id": "Winston_20260828_020258", "source": "watcher"}
