@@ -81,7 +81,9 @@ def _bq(sql):
         capture_output=True, text=True, timeout=BQ_TIMEOUT_S,
     )
     if out.returncode != 0:
-        raise RuntimeError(f"bq query failed: {out.stderr.strip()[:400]}")
+        # bq in lỗi ra STDOUT, không phải stderr (§29) — đọc cả hai, ưu tiên cái không rỗng.
+        msg = (out.stderr.strip() or out.stdout.strip())[:400]
+        raise RuntimeError(f"bq query failed: {msg}")
     body = out.stdout.strip()
     start = body.find("[")          # bq đôi khi in dòng cảnh báo trước JSON
     rows = json.loads(body[start:]) if start >= 0 else []

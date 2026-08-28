@@ -1222,7 +1222,10 @@ fi
 # (`notify_thread.sh "<msg>"` không đối số 2) lại rơi vào topic Mike đang chat — đúng lớp lỗi
 # 07-22b (record và env của agent bất đồng). Pin rỗng phải rỗng ở CẢ HAI phía.
 if [ -n "$_dtid0" ]; then export DISCORD_THREAD_ID="$_dtid0"; else export DISCORD_THREAD_ID=""; fi
-_psum="$(printf '%s' "$prompt" | head -c 160 | tr '\n\t' '  ')"
+# `|| true`: prompt > 64KB (pipe buffer) ⇒ head thoát sớm ⇒ printf ăn SIGPIPE ⇒ pipefail
+# trả 141 ⇒ `set -e` giết dispatch TRƯỚC khi job kịp chạy. Đã cắn thật 2026-08-21: 3/3 lần
+# auto-resume weekly_ops_audit chết rc=141, mất trọn 1 tuần audit (không ai báo).
+_psum="$(printf '%s' "$prompt" | head -c 160 | tr '\n\t' '  ')" || true
 
 # Cảnh báo TRÙNG DISPATCH (2026-08-10) — CHỈ cảnh báo, KHÔNG chặn.
 # Dấu hiệu quan sát được của pattern "2 dispatch cùng sửa 1 file": 2/3 lần va chạm
@@ -1597,7 +1600,8 @@ except Exception:
   # đoán topic. (KHÔNG có kênh dự phòng độc lập nào ở đây: `notify.sh` cũng đi qua CÙNG bridge
   # Discord 127.0.0.1:8199 — xem chú thích tại nhánh "registry hỏng" bên dưới.)
     if [ -n "${_dtid:-}" ]; then
-      _dp="$(printf '%s' "$prompt" | head -c 120 | tr '\n\t' '  ')"
+      # || true — cùng lý do SIGPIPE/pipefail như _psum ở trên (prompt > 64KB).
+      _dp="$(printf '%s' "$prompt" | head -c 120 | tr '\n\t' '  ')" || true
       # ETA = profile-derived median for this <agent|model|effort> (same value as the
       # ScheduleWakeup hint above).  Giờ cho NGƯỜI đọc: LUÔN ICT (TZ tường minh — §16) và
       # đơn vị PHÚT, không giây (user 2026-08-21: "12:14 UTC (~435s)" lọt thân tin dù header

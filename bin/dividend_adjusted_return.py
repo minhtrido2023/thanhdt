@@ -279,7 +279,10 @@ def _bq(sql: str) -> list:
         capture_output=True, text=True, timeout=300, env=_GCP_ENV,
     )
     if out.returncode != 0:
-        raise RuntimeError(f"bq query failed: {out.stderr.strip()[:500]}")
+        # bq in lỗi ra STDOUT (đo thật 2026-08-29: rc=2, stderr rỗng, thông điệp nằm ở stdout);
+        # chỉ đọc stderr ⇒ "bq query failed: " rỗng, mù nguyên nhân (§29 coding_guidelines).
+        msg = (out.stderr.strip() or out.stdout.strip())[:500]
+        raise RuntimeError(f"bq query failed: {msg}")
     body = out.stdout.strip()
     # bq đôi khi in dòng cảnh báo trước JSON
     start = body.find("[")
