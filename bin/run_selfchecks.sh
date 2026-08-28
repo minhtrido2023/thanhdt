@@ -86,6 +86,18 @@ for f in "${FILES[@]}"; do
   # phân loại, không chỉ tăng số cho qua.
   t=60; [ "$tier" = "live" ] && t=300
   [ "$f" = "immutable_publish_selfcheck.py" ] && t=720
+  # Ngoại lệ ĐO THẬT (weekly audit 2026-08-29): 2 file offline vượt 60s nên báo rc=124 giả
+  # mỗi tuần, che lấp FAIL thật. Đã kiểm chứng bằng cách chạy tay với timeout rộng:
+  #   due_diligence_selfcheck.py   71,8s — 49/49 OK (chậm vì trading_bot.due_diligence chạm BQ
+  #                                lúc import; is_live() chỉ grep FILE selfcheck nên không thấy).
+  #                                KHÔNG đổi sang tier live: làm vậy nó bị SKIP ở lần chạy mặc
+  #                                định = MẤT coverage, tệ hơn là chờ lâu.
+  #   merge_park_orders_selfcheck.py 90,6s — PASS toàn bộ; thuần offline, chỉ là nặng tính toán.
+  # Khớp theo HẬU TỐ để bản sao mike_paseo/ cũng được cùng budget (nếu chỉ khớp đường dẫn
+  # tuyệt đối thì bản sao vẫn rc=124 giả — đúng lỗi đang sửa, chỉ dịch sang chỗ khác).
+  case "$f" in
+    *due_diligence_selfcheck.py|*merge_park_orders_selfcheck.py) t=240 ;;
+  esac
   start=$(date +%s)
   if [[ "$f" == *.sh ]]; then
     ( cd "$WC_ROOT" && timeout "$t" bash "$f" ) >/tmp/rsc_out.$$ 2>&1
