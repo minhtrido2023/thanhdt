@@ -88,7 +88,7 @@ import pandas as pd
 # Cấm VĨNH VIỄN — nguồn chuẩn tắc `mike/kb/KNOWLEDGE.md` ("Cổ phiếu BANNED vĩnh viễn").
 # Bản sao thứ hai: `mike/bin/build_universe_pit_quality.py:71`. Self-check so khớp cả 2 nguồn.
 BANNED = frozenset({"PC1", "VVS", "KSF", "NKG", "HSG", "HVN", "VJC", "NVL", "GEG", "SBA",
-                    "DMC", "IMP", "TRA", "TOS", "VTP"})
+                    "DMC", "IMP", "TRA", "TOS", "VTP", "BAF"})
 
 FORENSIC_CSV = "data/forensic_flags.csv"
 EXCLUDE_SEVERITY = "exclude"

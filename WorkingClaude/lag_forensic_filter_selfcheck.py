@@ -68,7 +68,13 @@ check("BANNED khớp build_universe_pit_quality.py", _other == set(BANNED),
 
 _kb = open(os.path.join(WORKDIR, "mike", "kb", "KNOWLEDGE.md"), encoding="utf-8").read()
 _line = next((l for l in _kb.splitlines() if "BANNED vĩnh viễn" in l), "")
-_kbset = set(re.findall(r"\b([A-Z]{2}[A-Z0-9])\b", _line.split(":**", 1)[-1]))
+# Bỏ phần trong ngoặc TRƯỚC khi trích mã: chú thích văn xuôi chứa token 3 ký tự IN HOA
+# không phải mã ("ROE", "IPO", "CF_OA"...) sẽ bị bắt nhầm nếu quét cả dòng (§28 — chuẩn hoá
+# GIÁ TRỊ trước khi so, đừng so chuỗi mô tả).
+_kbtxt = _line.split(":**", 1)[-1]
+while re.search(r"\([^()]*\)", _kbtxt):
+    _kbtxt = re.sub(r"\([^()]*\)", " ", _kbtxt)
+_kbset = set(re.findall(r"\b([A-Z]{2}[A-Z0-9])\b", _kbtxt))
 check("BANNED khớp mike/kb/KNOWLEDGE.md (nguồn chuẩn tắc)", _kbset == set(BANNED),
       f"chênh: {_kbset ^ set(BANNED)} | dòng KB: {_line[:120]}")
 
