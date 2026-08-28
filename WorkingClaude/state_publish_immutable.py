@@ -293,12 +293,18 @@ WHERE s.time <= DATE '{cutoff}' AND t.time IS NULL""")
 
     # ── MERGE: CẢ BA nhánh đều bị chặn cứng bởi `time > cutoff` ──
     # Vùng đã chốt KHÔNG NẰM TRONG phạm vi câu lệnh — bảo đảm cấu trúc, không phải cẩn thận.
+    # `OR T.asof_date IS NULL` trong WHEN MATCHED (thêm 2026-08-28): writer thứ hai ngoài luồng
+    # (kaffa_v2, xem mike/agents/Winston/dt5g_live_second_writer_20260729.md) ghi lại state
+    # ĐÚNG giá trị nhưng KHÔNG set asof_date. Khi state/state_raw không đổi (chuỗi đứng yên
+    # nhiều phiên), điều kiện cũ không khớp -> asof_date NULL vĩnh viễn (26 phiên
+    # 2026-07-24..2026-08-28 trong tail đo được). Không đổi kết quả state/state_raw.
     merge_sql = f"""
 MERGE `{project}.{table}` T
 USING (SELECT * FROM `{project}.{stage}` WHERE time > DATE '{cutoff}') S
 ON T.time = S.time AND T.time > DATE '{cutoff}'
 WHEN MATCHED AND (T.state IS DISTINCT FROM S.state
-                  OR T.state_raw IS DISTINCT FROM S.state_raw) THEN
+                  OR T.state_raw IS DISTINCT FROM S.state_raw
+                  OR T.asof_date IS NULL) THEN
   UPDATE SET state = S.state, state_raw = S.state_raw, asof_date = DATE '{asof}'
 WHEN NOT MATCHED BY TARGET THEN
   INSERT (time, state, state_raw, asof_date)
