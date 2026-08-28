@@ -684,3 +684,14 @@
 - [2026-08-28T11:11:20Z] Winston/finding — new-listings-daily: {"date": "2026-08-28", "lookback_days": 90, "total_new": 2, "needs_manual_rating": 0, "fresh_ipo": 0, "research_queue": [], "snapshot": "/home/trido/thanhdt/WorkingClaude/data/new_listings.csv", "note": "0 mã mới < 20Q lịch sử → cần 8L manual rating. Taylor flag để đọc bản cáo bạch + tạo override documented reason+expiry."}
 - [2026-08-28T11:30:10Z] Winston/error — dt5g-live-writer-la: {"tier": "HIGH", "label": "pre-publish-1830", "table": "tav2_bq.vnindex_5state_dt5g_live", "lastmod_ict": "2026-08-28 16:29:04", "writer_class": "KAFFA_KNOWN", "n_state_diff": 0, "state_diff_dates": [], "n_raw_diff": 0, "n_dup_time": 0, "n_null_asof": 26, "n_null_sealed": 1, "detail": ["1 dòng `asof_date` NULL trong vùng ĐÃ CHỐT (2026-07-24…2026-07-24) = LỊCH SỬ bị writer ngoài viết lại"]}
 - [2026-08-28T11:40:06Z] Winston/status — corp-action-scan-daily: {"scanned_universe": "tav2_bq.ticker_prune", "candidates_this_run": 0, "fresh_alerts_this_run": 0, "resolved_since_last_run": [], "still_pending_count": 0, "still_pending": [], "stale_pending_over_7d": []}
+
+## Consolidation 2026-08-28T12:07:02Z
+- [2026-08-28T11:58:14Z] Taylor/heartbeat — Taylor_20260828_115613: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20260828_115613", "source": "watcher"}
+- [2026-08-28T11:59:14Z] Taylor/heartbeat — Taylor_20260828_115613: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20260828_115613", "source": "watcher"}
+- [2026-08-28T12:00:15Z] Taylor/heartbeat — Taylor_20260828_115613: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20260828_115613", "source": "watcher"}
+- [2026-08-28T12:01:15Z] Taylor/heartbeat — Taylor_20260828_115613: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20260828_115613", "source": "watcher"}
+- [2026-08-28T12:02:15Z] Taylor/heartbeat — Taylor_20260828_115613: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20260828_115613", "source": "watcher"}
+- [2026-08-28T12:03:15Z] Taylor/heartbeat — Taylor_20260828_115613: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20260828_115613", "source": "watcher"}
+- [2026-08-28T12:04:16Z] Taylor/heartbeat — Taylor_20260828_115613: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20260828_115613", "source": "watcher"}
+- [2026-08-28T12:05:16Z] Taylor/heartbeat — Taylor_20260828_115613: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20260828_115613", "source": "watcher"}
+- [2026-08-28T12:06:16Z] Taylor/heartbeat — Taylor_20260828_115613: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20260828_115613", "source": "watcher"}
