@@ -687,7 +687,16 @@ if os.path.isdir(inbox_dir):
                 # dùng, để hai bên không trôi ra khỏi nhau khi thêm tiền tố mới.
                 _is_wags = str(rec.get("topic") or "").startswith(WAGS_SELF_Q_PREFIXES)
                 aged_q.append((age_d, f"{agent}/{rec.get('topic')} ({age_d}d)", _is_wags))
-                aged_q_meta.append((agent, str(rec.get("topic") or ""), ts_dt))
+                # Câu hỏi đã có ack `triaged-needs-human:` = ĐÃ TRIAGE, đang PARK chờ NGƯỜI
+                # quyết. Vẫn liệt kê ở dòng "TREO LÂU" (nó đang mở thật, người cần thấy),
+                # nhưng KHÔNG đưa vào nguồn owner-hint: gợi ý "dispatch <agent>" cho một câu
+                # hỏi mà kết luận đã là "chỉ người quyết được" là WARN RÁC lặp 2 lần/ngày
+                # VĨNH VIỄN — và nhiễu định kỳ chính là thứ làm cảnh báo thật bị bỏ qua.
+                # Nhánh <48h đã lọc đúng như vậy sẵn (đi vào pending_q_needs_human, KHÔNG vào
+                # pending_q_meta); nhánh >48h thiếu ⇒ mở rộng owner-hint sang aged (round 2)
+                # làm lộ ra. arch-review round 2, required_change #2.
+                if not _acked(agent, str(rec.get("topic") or ""), ts_dt):
+                    aged_q_meta.append((agent, str(rec.get("topic") or ""), ts_dt))
     if read_errors:
         # KHÔNG gắn [WARN-ONLY]: đây là lỗi TOOLING sửa được (khác với backlog chờ user).
         # Câu chữ cố ý chứa "câu hỏi (question)" để nhánh routing dưới đưa về COORD_WARN
@@ -852,17 +861,27 @@ _AGENTS_DIR = os.path.join(wc_root, "mike", "agents")
 _KNOWN_AGENTS = {}
 if os.path.isdir(_AGENTS_DIR):
     for _d in sorted(os.listdir(_AGENTS_DIR)):
-        # "wt-*" là git worktree tạm, không phải agent thật — loại khỏi danh sách hợp lệ.
-        if _d.startswith("wt-") or not os.path.isdir(os.path.join(_AGENTS_DIR, _d)):
+        if not os.path.isdir(os.path.join(_AGENTS_DIR, _d)):
             continue
+        # KHÔNG lọc "wt-*" (git worktree tạm) ở đây — điều kiện đó là CODE CHẾT, không phải
+        # guard: token owner luôn là SEGMENT ĐẦU trước dấu '-' (`_tail[1].split("-")[0]` bên
+        # dưới), nên với worktree tên `wt-<id>` token parse ra đúng chữ "wt" và không bao giờ
+        # bằng khoá `wt-<id>`. Đo được: thêm lại điều kiện đó → selfcheck KHÔNG đổi một
+        # assertion nào (mutation MU4, cố ý "expect survive"). Bất biến này được ghim bằng
+        # ca 9g thay cho một dòng lọc không canh gì. arch-review round 2, required_change #4.
         _KNOWN_AGENTS[_d.lower()] = _d
 _owner_q = {}
 for _qa, _qt, _ in pending_q_meta + aged_q_meta:
     _tail = _qt.rsplit("-needs-", 1)
     if len(_tail) != 2:
         continue
-    # Bỏ hậu tố mức-độ tuỳ ý người viết thêm (…-needs-taylor-urgent) rồi lấy token đầu.
-    _own_raw = _tail[1].split("-")[0].strip()
+    # Bỏ hậu tố mức-độ tuỳ ý người viết thêm (…-needs-taylor-urgent) rồi lấy token đầu, VÀ
+    # cắt tiếp tại ':' / '/' — quy ước ack thật trên bus là `triaged-needs-human:<Agent>/<topic>`
+    # (dạng không-dấu-cách, 6 topic thật trên bus hôm nay). Không cắt thì token parse ra
+    # `human:Taylor/vol`, KHÔNG bằng "human" trong phép so tuyệt đối ngay dưới ⇒ rơi vào nhánh
+    # "không khớp agent nào" và in WARN rác cho đúng loại câu hỏi đã được park cho NGƯỜI.
+    # arch-review round 2, required_change #1.
+    _own_raw = _tail[1].split("-")[0].split(":")[0].split("/")[0].strip()
     if not _own_raw or _own_raw.lower() in ("human", "user"):
         continue      # "needs-human/user" đã có kênh riêng (ACK_PREFIX) — không trùng lặp.
     # Gom KHÔNG phân biệt hoa-thường (người viết topic gõ tuỳ ý); tên IN RA lấy từ

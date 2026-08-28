@@ -26,6 +26,7 @@ import json
 import os
 import re
 import shutil
+import subprocess
 import sys
 import tempfile
 
@@ -476,6 +477,85 @@ def case_owner_hint_covers_aged_over_48h():
               any("loi-aged-needs-taylor" in ln for ln in own), out)
         check("owner-hint aged: vẫn dùng case chuẩn agent thật ('Taylor')",
               any("'Taylor'" in ln for ln in own), out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+# ── Ca 9e (round 3, arch-review round 2 required_change #1): quy ước ACK thật trên bus là
+#    `triaged-needs-human:<Agent>/<topic>` (dạng KHÔNG dấu cách — 6 topic thật hôm nay, vd
+#    `triaged-needs-human:Taylor/vol-scale-chase-cap-gate4-can-user-quyet-huong`). Token owner
+#    parse thô ra `human:Taylor/vol` ⇒ KHÔNG bằng "human" trong phép so tuyệt đối ⇒ rơi vào
+#    nhánh "không khớp agent nào" và in WARN rác. Phải chuẩn hoá (cắt tại ':' và '/') trước khi so.
+def case_owner_hint_ack_convention_is_human_skip():
+    root, inbox = mkbus()
+    try:
+        write_events(os.path.join(inbox, "Wags.jsonl"),
+                     [ev("Wags", "question",
+                         "triaged-needs-human:Taylor/vol-scale-chase-cap-gate4", ago(0, 5)),
+                      ev("Wags", "question",
+                         "triaged-needs-human: DollarBill/cap-margin-test", ago(0, 5)),
+                      ev("Wags", "question", "loi-needs-user/duyet-plan", ago(0, 5))])
+        lines, _ = run_check5(root)
+        out = joined(lines)
+        own = [ln for ln in lines
+               if "TỰ KHAI người phụ trách" in ln or "khai chủ" in ln]
+        # Assertion CHẶT: KHÔNG dòng owner-hint nào — cả dòng dispatch lẫn dòng "không khớp
+        # agent nào". Bản chưa chuẩn hoá in dòng thứ hai ⇒ mutation MU1 làm ca này ĐỎ.
+        check("owner-hint: topic theo quy ước ACK `triaged-needs-human:<Agent>/<topic>` "
+              "KHÔNG sinh dòng owner-hint nào (đã có kênh ACK riêng)",
+              len(own) == 0, out)
+        check("owner-hint: KHÔNG in lệnh dispatch cho owner giả 'human:Taylor/vol'",
+              not any("dispatch.sh human" in ln or "'human" in ln for ln in lines), out)
+        check("owner-hint: 'needs-user/<gì đó>' cũng được chuẩn hoá về 'user' và bỏ qua",
+              not any("duyet-plan" in ln for ln in own), out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+# ── Ca 9f (round 3, required_change #2): câu hỏi >48h ĐÃ có ack `triaged-needs-human:` là câu
+#    hỏi đang PARK chờ NGƯỜI quyết. Nó phải VẪN hiện ở dòng "TREO LÂU" (đang mở thật) nhưng
+#    KHÔNG được sinh owner-hint "dispatch <agent>" — nếu không, mỗi câu hỏi đã park sinh 1 dòng
+#    WARN rác 2 lần/ngày VĨNH VIỄN. Nhánh <48h đã lọc sẵn bằng _acked; nhánh >48h thì thiếu.
+def case_owner_hint_aged_respects_ack():
+    root, inbox = mkbus()
+    try:
+        write_events(os.path.join(inbox, "Wags.jsonl"),
+                     [ev("Wags", "question", "loi-parked-needs-taylor", ago(6)),
+                      ev("Wags", "status",
+                         "triaged-needs-human:Wags/loi-parked-needs-taylor", ago(5)),
+                      # Chứng: câu hỏi CÙNG TUỔI, CÙNG dạng topic nhưng KHÔNG ack ⇒ vẫn phải
+                      # có owner-hint. Không có nhánh đối chứng này thì một mutation "bỏ hẳn
+                      # owner-hint cho aged" cũng làm ca này XANH.
+                      ev("Wags", "question", "loi-chua-ai-nhan-needs-taylor", ago(6))])
+        lines, _ = run_check5(root)
+        out = joined(lines)
+        own = [ln for ln in lines if "TỰ KHAI người phụ trách" in ln]
+        check("owner-hint aged: câu hỏi ĐÃ ack (park chờ người) KHÔNG sinh dòng owner-hint",
+              not any("loi-parked-needs-taylor" in ln for ln in own), out)
+        check("owner-hint aged: câu hỏi CHƯA ai nhận VẪN sinh dòng owner-hint (đối chứng)",
+              any("loi-chua-ai-nhan-needs-taylor" in ln for ln in own), out)
+        check("aged: câu hỏi đã ack VẪN hiện ở dòng 'TREO LÂU' (nó đang mở thật)",
+              any("loi-parked-needs-taylor" in ln for ln in lines if "TREO LÂU" in ln), out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+# ── Ca 9g (round 3, required_change #4): thay cho điều kiện lọc "wt-*" ĐÃ GỠ (code chết). Bất
+#    biến thật: token owner là SEGMENT ĐẦU trước '-', nên với worktree tên `wt-<id>` token luôn
+#    ra đúng chữ "wt" và không bao giờ khớp khoá `wt-<id>` trong _KNOWN_AGENTS — dù thư mục
+#    worktree CÓ tồn tại trong agents/ (fixture mkbus tạo sẵn `wt-selfcheck-fixture`).
+def case_owner_hint_worktree_dir_never_becomes_owner():
+    root, inbox = mkbus()
+    try:
+        write_events(os.path.join(inbox, "Wags.jsonl"),
+                     [ev("Wags", "question", "loi-g-needs-wt-selfcheck-fixture", ago(0, 5))])
+        lines, _ = run_check5(root)
+        out = joined(lines)
+        check("owner-hint: worktree `wt-*` KHÔNG bao giờ thành owner có lệnh dispatch",
+              not any("dispatch.sh wt" in ln for ln in lines), out)
+        check("owner-hint: token 'wt' báo rõ là không khớp agent nào",
+              any("KHÔNG khớp agent nào" in ln and "loi-g-needs-wt-selfcheck-fixture" in ln
+                  for ln in lines), out)
     finally:
         shutil.rmtree(root, ignore_errors=True)
 
@@ -2039,6 +2119,9 @@ def main():
                case_fresh_question_is_pending, case_owner_hint_from_needs_suffix,
                case_owner_hint_covers_aged_over_48h,
                case_owner_hint_unmatched_agent_no_dispatch,
+               case_owner_hint_ack_convention_is_human_skip,
+               case_owner_hint_aged_respects_ack,
+               case_owner_hint_worktree_dir_never_becomes_owner,
                case_wagsfix_not_confirmed_is_warn_only, case_wagsfix_prefix_not_substring,
                case_wagsfix_only_no_false_ok, case_wagsfix_prefix_list_in_sync,
                case_triaged_needs_human_ack, case_triaged_only_no_false_ok,
@@ -2088,5 +2171,78 @@ def main():
     return 0
 
 
+# ── Mutation-test (round 3, arch-review round 2 required_change #3) ───────────────────────
+# Mỗi thay đổi của round 3 phải có 1 mutation CHỨNG MINH assertion tương ứng bắt được nó.
+# Mutate trên BẢN SAO của bin/ops_health_check.sh trong mkdtemp và trỏ selfcheck vào bản sao
+# qua OPS_HEALTH_CHECK_SRC — file production KHÔNG bao giờ bị ghi (bài học cùng ngày từ
+# diagnosis_evidence_gate_selfcheck: `finally` không cứu được SIGKILL/OOM).
+# Cột thứ 4 `expect_red`: True = mutation PHẢI bị giết. False = mutation PHẢI SỐNG SÓT — đó là
+# cách cơ học để chứng minh một dòng là CODE CHẾT (MU4: thêm lại điều kiện lọc "wt-" đã gỡ;
+# nếu nó bỗng làm suite đỏ thì nó KHÔNG chết và việc gỡ là sai).
+MUTATIONS = [
+    ("MU1 bỏ chuẩn hoá owner token (không cắt ':' và '/')",
+     '.split("-")[0].split(":")[0].split("/")[0].strip()', '.split("-")[0].strip()', True),
+    ("MU2 bỏ bộ lọc _acked cho aged_q_meta (owner-hint lại spam câu hỏi đã park)",
+     'if not _acked(agent, str(rec.get("topic") or ""), ts_dt):\n                    aged_q_meta.append',
+     'if True:\n                    aged_q_meta.append', True),
+    ("MU3 owner-hint bỏ hẳn nguồn aged_q_meta (hồi quy round 2)",
+     "for _qa, _qt, _ in pending_q_meta + aged_q_meta:",
+     "for _qa, _qt, _ in pending_q_meta:", True),
+    ("MU4 [expect SURVIVE] thêm lại điều kiện lọc 'wt-' đã gỡ ⇒ chứng minh nó là CODE CHẾT",
+     "        if not os.path.isdir(os.path.join(_AGENTS_DIR, _d)):",
+     '        if _d.startswith("wt-") or not os.path.isdir(os.path.join(_AGENTS_DIR, _d)):',
+     False),
+]
+
+
+def run_mutations():
+    import hashlib
+
+    src_real = os.path.join(ROOT, "bin", "ops_health_check.sh")
+    orig = open(src_real, encoding="utf-8").read()
+    sha_before = hashlib.sha256(orig.encode("utf-8")).hexdigest()
+    tmpdir = tempfile.mkdtemp(prefix="ops_health_mut_")
+    mutant = os.path.join(tmpdir, "ops_health_check.sh")
+    bad = []
+    try:
+        for desc, a, b, expect_red in MUTATIONS:
+            if a not in orig:
+                # Mutation không áp được = HARNESS hỏng, KHÔNG phải "code ổn". Báo ĐỎ.
+                bad.append(f"HARNESS-BROKEN: {desc}")
+                print(f"  ❌ HARNESS-BROKEN  {desc}: không tìm thấy chuỗi cần thay")
+                continue
+            with open(mutant, "w", encoding="utf-8") as fh:
+                fh.write(orig.replace(a, b, 1))
+            r = subprocess.run(
+                [sys.executable, "-B", os.path.abspath(__file__)],
+                capture_output=True, text=True, cwd=ROOT,
+                env=dict(os.environ, PYTHONDONTWRITEBYTECODE="1",
+                         OPS_HEALTH_CHECK_SRC=mutant),
+            )
+            red = r.returncode != 0
+            if red == expect_red:
+                print(f"  {'KILLED  ' if red else 'SURVIVED'}  {desc}  (đúng kỳ vọng)")
+            else:
+                bad.append(desc)
+                print(f"  ❌ {'SỐNG SÓT' if not red else 'BỊ GIẾT'}  {desc} — "
+                      f"kỳ vọng {'ĐỎ' if expect_red else 'XANH'}")
+    finally:
+        shutil.rmtree(tmpdir, ignore_errors=True)
+    sha_after = hashlib.sha256(open(src_real, "rb").read()).hexdigest()
+    if sha_after != sha_before:
+        bad.append("PRODUCTION-FILE-MODIFIED")
+        print(f"  ❌ bin/ops_health_check.sh BỊ THAY ĐỔI: {sha_before[:12]} → {sha_after[:12]}")
+    else:
+        print(f"  OK        bin/ops_health_check.sh nguyên vẹn (sha256 {sha_before[:12]}…)")
+    print()
+    if bad:
+        print(f"❌ {len(bad)} mutation sai kỳ vọng: {bad}")
+        return 1
+    print(f"✅ {len(MUTATIONS)}/{len(MUTATIONS)} mutation đúng kỳ vọng")
+    return 0
+
+
 if __name__ == "__main__":
+    if "--mutations" in sys.argv:
+        sys.exit(run_mutations())
     sys.exit(main())
