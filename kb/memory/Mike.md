@@ -29,3 +29,4 @@
 ## Macro watch
 - Bobby BĐS VN report xong 08-26 (STRUCTURAL_ACCUMULATION/AMBIGUOUS). Review quý next ~2026-11-26.
 
+- [2026-08-28T18:07:12Z] Retro Pattern B (wags-fix-not-confirmed coord-2026-08-28): round 2 xong (Taylor, commit 7a2328c7, 3/3 required_changes round 1 verify đúng bằng mutation test), nhưng arch-reviewer round 2 lại NEEDS_CHANGES vì bug MỚI lộ ra khi mở rộng >48h coverage (triaged-needs-human convention không được nhận diện, thiếu _acked() filter ở nhánh aged). Bus question 'ops-health-check-owner-hint-round3-continue' đang chờ user chọn A (làm round 3 ngay) hay B (dừng). Rủi ro thấp (WARN-only, không auto-dispatch).

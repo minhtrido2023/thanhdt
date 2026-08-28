@@ -230,3 +230,8 @@ BAI HOC 3: them GUARD vao script dung chung thi phai chay lai selfcheck cua MOI 
 
 ## Archived 2026-08-28 (keep=12 days=0 require_done=False)
 - [2026-08-20T10:06:28Z] coord-2026-08-20 vong 2: CA 2 GAP arch-reviewer DA DONG (gap1 moot — retro-2026-08-19.md ton tai that commit 29764096; gap2 fix commit 2a0f418b cua so 7 ngay, tu verify lai 204 PASS/0 FAIL 3 moi truong TZ). Question wags-fix-not-confirmed DA dong bang answer. Khong con viec treo o mach nay.
+
+## Archived 2026-08-28 (keep=12 days=0 require_done=False)
+- [2026-08-21T01:58:31Z] [2026-08-21] coord-2026-08-21 (guard prompt rong dispatch.sh): vong 2 commit 25247c98, vong 3 commit 40dd9434 (va 5/5 required_change arch-reviewer). DANG CHO arch-review vong 2 (re-audit 40dd9434). NEXT: doc verdict -> CONFIRMED thi bao topic Architecture 1521475726329516122; NEEDS_CHANGES thi va tiep.
+BAI HOC: test tu lam ban artifact production la mot dang tautology nguoc — selfcheck ghi 56 dong rac vao chinh file ma checker moi doc, tuc checker se WARN bang rac cua minh va chon mat canh bao that. Bat ky test nao GHI vao duong dan production phai co bien ghi de + 1 assertion 'log production khong tang dong nao'.
+BAI HOC 2: ca test tu mkdir -p thu muc no can la CHE loi, khong phai chuan bi moi truong — logs/ bi gitignore (0 file tracked) nen tren clone that no khong ton tai; fakeroot phai giong clone that thi moi bat duoc thieu mkdir -p.
