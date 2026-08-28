@@ -1,4 +1,4 @@
-# Bank lens v3 — ROE-based gate (NPL/CAR/coverage/CASA UNAVAILABLE post vnstock migration 2026-08-28)
+# Bank lens v3 — ROE-based gate (NPL/coverage OCR'd 9/18 mã 2026-08-28; CAR/CASA still unavailable)
 GATE: AVOID(ROE<8%) else DATA_GAP (profitable, asset-quality unverified — see data_gap col)
 
 tkr    ROE%  NIM%  CIR%   PB  loanG%      gate
@@ -43,6 +43,7 @@ rank tkr   SCORE  ROE%   PB
 AVOID (ROE<8%): STB, EIB, SSB
 DATA_GAP (profitable, AQ unverified): VCB, BID, CTG, TCB, MBB, ACB, VPB, VIB, HDB, SHB, TPB, MSB, OCB, LPB, NAB
 
-NOTE: NPL/CAR/coverage/CASA are NaN — vnstock's finance.ratio() (old source) is broken since 31/08/2025
-(KeyError lengthReport, community edition shape change). Recomputed ROE/NIM/CIR/loanG/PB from
-balance_sheet+income_statement+company.overview instead. See module docstring for what's recoverable.
+NOTE: vnstock's finance.ratio() (old source of ALL 11 cols) is broken since 31/08/2025 (KeyError
+lengthReport, community edition shape change). Recomputed ROE/NIM/CIR/loanG/PB from
+balance_sheet+income_statement+company.overview instead. NPL/coverage: 9/18 mã OCR'd from BCTC
+thuyet minh (see npl_source col in CSV); the other 9 + CAR/CASA still NaN. See module docstring.

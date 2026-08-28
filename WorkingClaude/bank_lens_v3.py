@@ -27,13 +27,19 @@ NIM self-calc 2.81% vs profile-stated 2.63% — same ballpark, method is sound):
             oldest available quarter is only ~3 quarters back, not 4).
   - PB    = current_price (company.overview) / (latest equity / issue_share)
 
-WHAT CANNOT BE RECOMPUTED — NPL, NPL_4q, NPL_slope, CAR, coverage, CASA. None of
-these appear in `balance_sheet`/`income_statement` main line items: NPL/coverage
-need the loan-classification-by-group note (nhóm 3-5), CAR is a regulatory capital
+WHAT CANNOT BE RECOMPUTED FROM balance_sheet/income_statement — NPL_4q, NPL_slope,
+CAR, CASA. None of these appear in main line items: CAR is a regulatory capital
 ratio not derivable from the balance sheet, CASA needs the deposit-type breakdown
 note. Same limitation `build_bank_casa_ldr.py` already hit for CASA (2026-08-14) —
 these live only in BCTC thuyết minh (footnotes), which vnstock's community balance
 sheet/income statement endpoints do not expose. Left as NaN, NOT estimated.
+
+**NPL/coverage — 9/18 mã ĐÃ CÓ (2026-08-28), qua OCR thuyết minh 'Phân loại nợ' gốc**
+(`mike/agents/Taylor/build_bank_npl_coverage.py`, PDF static2.vietstock.vn, cùng phương pháp CASA
+2 bất biến độc lập): VCB BID CTG ACB TCB MBB VIB STB SHB. 9 mã còn lại (HDB TPB MSB VPB OCB LPB
+EIB NAB SSB) VẪN NaN — locate-page tự động không tìm ra trang phân loại nợ trong PDF (OCB PDF tải
+lỗi hoàn toàn) — cần làm thủ công tiếp, KHÔNG suy diễn/estimate. Xem
+`mike/kb/data_registry/rating-8l/bank_lens_v3.md` cho trạng thái PARTIAL đầy đủ.
 `company.overview()`'s free-text `company_profile` DOES narrate NPL/NIM/ROE for the
 most recent FULL YEAR for some banks (e.g. VCB: "Tỷ lệ nợ xấu ở mức 0.58%") — this
 was deliberately NOT parsed into structured columns: it's prose (format/presence
@@ -67,6 +73,18 @@ from vnstock import Vnstock
 WORKDIR=r"/home/trido/thanhdt/WorkingClaude"
 BANKS=["VCB","BID","CTG","TCB","MBB","ACB","VPB","VIB","HDB","STB","SHB","TPB","MSB","OCB","LPB","EIB","NAB","SSB"]
 
+# NPL/coverage OCR'd from BCTC thuyet minh gốc, 2 bất biến verify (mike/agents/Taylor/
+# build_bank_npl_coverage.py) — 9/18 mã (VCB BID CTG ACB TCB MBB VIB STB SHB); 9 mã còn lại
+# (HDB TPB MSB VPB OCB LPB EIB NAB SSB) chưa OCR (locate-page tự động không tìm ra trang phân
+# loại nợ; OCB PDF tải lỗi) — vẫn NaN, KHÔNG suy diễn.
+NPL_COVERAGE_CSV=os.path.join(WORKDIR,"data","bank_npl_coverage_primary_20260828.csv")
+def load_npl_coverage():
+    if not os.path.exists(NPL_COVERAGE_CSV): return {}
+    d=pd.read_csv(NPL_COVERAGE_CSV)
+    d=d[d["verified"].astype(str)=="True"]
+    return {r["ticker"]:(r["NPL"],r["coverage"]) for _,r in d.iterrows()}
+NPL_COV=load_npl_coverage()
+
 IT_LOAN="Cho vay khách hàng"; IT_EQUITY="VỐN CHỦ SỞ HỮU"; IT_SEC="Chứng khoán đầu tư"
 IT_INTERBANK="Tiền gửi tại các TCTD khác và cho vay các TCTD khác"
 INC_NPAT_PARENT="Cổ đông của Công ty mẹ"; INC_NPAT="Lợi nhuận sau thuế"
@@ -82,6 +100,7 @@ def pull(tk, retries=4):
             inc=v.finance.income_statement(period="quarter", lang="vi", dropna=False)
             time.sleep(2)
             ov=v.company.overview()
+            ov=ov.loc[:,~ov.columns.duplicated()]  # vnstock 2026-08-28: overview() started returning dup cols (e.g. 4x issue_share)
             break
         except Exception as e:
             if attempt==retries-1: print(f"  [skip {tk}] {repr(e)[:60]}",flush=True); return None
@@ -113,10 +132,15 @@ def pull(tk, retries=4):
         price=float(ov["current_price"].iloc[0]) if len(ov) else np.nan
         shares=float(ov["issue_share"].iloc[0]) if len(ov) else np.nan
         pb=price/(eq/shares) if eq and shares else np.nan
-        return {"ticker":tk,"NIM":nim,"NPL":np.nan,"NPL_4q":np.nan,"NPL_slope":np.nan,
-            "CAR":np.nan,"CASA":np.nan,"coverage":np.nan,"CIR":cir,
+        npl,coverage=NPL_COV.get(tk,(np.nan,np.nan))
+        gap_note=("CAR/CASA need BCTC thuyet minh, not in vnstock balance_sheet/income_statement"
+                   if tk in NPL_COV else
+                   "NPL/CAR/coverage/CASA need BCTC thuyet minh, not in vnstock balance_sheet/income_statement")
+        return {"ticker":tk,"NIM":nim,"NPL":npl,"NPL_4q":np.nan,"NPL_slope":np.nan,
+            "CAR":np.nan,"CASA":np.nan,"coverage":coverage,"CIR":cir,
             "loanG":loanG,"ROE":roe,"PB":pb,
-            "loanG_basis":f"{periods[0]}->{periods[-1]}", "data_gap":"NPL/CAR/coverage/CASA need BCTC thuyet minh, not in vnstock balance_sheet/income_statement"}
+            "loanG_basis":f"{periods[0]}->{periods[-1]}", "data_gap":gap_note,
+            "npl_source":"OCR_thuyetminh_2026Q2_verified" if tk in NPL_COV else None}
     except Exception as e:
         print(f"  [skip {tk}] parse {repr(e)[:50]}",flush=True); return None
 
@@ -152,7 +176,7 @@ if len(ranked)>=2:
     ranked=ranked.sort_values("SCORE",ascending=False)
 
 lines=[]; P=lambda s="":(print(s),lines.append(s))
-P("# Bank lens v3 — ROE-based gate (NPL/CAR/coverage/CASA UNAVAILABLE post vnstock migration 2026-08-28)")
+P("# Bank lens v3 — ROE-based gate (NPL/coverage OCR'd 9/18 mã 2026-08-28; CAR/CASA still unavailable)")
 P("GATE: AVOID(ROE<8%) else DATA_GAP (profitable, asset-quality unverified — see data_gap col)")
 P("")
 P(f"{'tkr':<5}{'ROE%':>6}{'NIM%':>6}{'CIR%':>6}{'PB':>5}{'loanG%':>8}{'gate':>10}")
@@ -169,9 +193,10 @@ P("")
 P("AVOID (ROE<8%): "+", ".join(df[df['gate']=='AVOID']['ticker'].tolist() or ['none']))
 P("DATA_GAP (profitable, AQ unverified): "+", ".join(df[df['gate']=='DATA_GAP']['ticker'].tolist() or ['none']))
 P("")
-P("NOTE: NPL/CAR/coverage/CASA are NaN — vnstock's finance.ratio() (old source) is broken since 31/08/2025")
-P("(KeyError lengthReport, community edition shape change). Recomputed ROE/NIM/CIR/loanG/PB from")
-P("balance_sheet+income_statement+company.overview instead. See module docstring for what's recoverable.")
+P("NOTE: vnstock's finance.ratio() (old source of ALL 11 cols) is broken since 31/08/2025 (KeyError")
+P("lengthReport, community edition shape change). Recomputed ROE/NIM/CIR/loanG/PB from")
+P("balance_sheet+income_statement+company.overview instead. NPL/coverage: 9/18 mã OCR'd from BCTC")
+P("thuyet minh (see npl_source col in CSV); the other 9 + CAR/CASA still NaN. See module docstring.")
 df.to_csv(os.path.join(WORKDIR,"data","bank_lens_v3.csv"),index=False)
 with open(os.path.join(WORKDIR,"data","bank_lens_v3.md"),"w",encoding="utf-8") as f: f.write("\n".join(lines))
 P("Saved data/bank_lens_v3.{md,csv}")
