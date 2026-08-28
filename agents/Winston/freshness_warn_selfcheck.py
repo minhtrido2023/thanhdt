@@ -226,7 +226,17 @@ def _fake_tree(warn_on):
     for stub, body in (("notify_thread.sh", '#!/bin/bash\ncat > "$(dirname "$0")/../../sent.txt" <<< "$1"\n'),
                        ("notify.sh", "#!/bin/bash\nexit 0\n"),
                        ("append_event.sh", "#!/bin/bash\nexit 0\n"),
-                       ("daily_nav_snapshot.py", "print('NAV: 1.000.000.000đ (stub)')\n")):
+                       ("daily_nav_snapshot.py", "print('NAV: 1.000.000.000đ (stub)')\n"),
+                       # Từ §6.6 (2026-08) eod_trading_report.sh KHÔNG gọi notify_thread.sh nữa —
+                       # nó giao artifact cho report_delivery_gate.py. Thiếu stub này thì script
+                       # thoát rc=1 "DELIVERY INCOMPLETE", sent.txt không bao giờ ra đời và B9/B9b/
+                       # B9c/B10 đọc chuỗi RỖNG ⇒ 4 FAIL GIẢ (weekly audit 2026-08-29). Stub ghi
+                       # lại chính artifact được giao để 4 assertion vẫn soi đúng nội dung gửi đi.
+                       ("report_delivery_gate.py",
+                        "import sys\n"
+                        "a=[x for x in sys.argv[1:] if not x.startswith('--')]\n"
+                        "open(sys.path[0]+'/../../sent.txt','w').write("
+                        "open(a[0],encoding='utf-8').read()) if a else None\n")):
         f = os.path.join(root, "mike", "bin", stub); open(f, "w").write(body); os.chmod(f, 0o755)
     json.dump({"orders": []}, open(os.path.join(root, "data", "trade_plans",
                                                 "plan_SpaceX_2026-07-31.json"), "w"))
