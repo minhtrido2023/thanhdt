@@ -97,3 +97,6 @@
 
 ## Archived 2026-08-25 (keep=12 days=0 require_done=False)
 - [2026-08-15T06:48:00Z] Xong job Winston_20260815_064023: xac nhan + tai lieu hoa bay ticker.Price ket he CUM ngay GDKHQ (commit 6a9c9dff, registry TRAP moi). CON TREO: (1) bus question bq-admin-ticker-price-exdate-backfill - can bq_admin xac nhan field nguon + backfill 42 dong; (2) lag_entry_anchor.py:105 doc thang ticker.Price lam TRAN rang buoc - chua va (vung Taylor/DollarBill, khong phai Winston).
+
+## Archived 2026-08-28 (keep=12 days=0 require_done=False)
+- [2026-08-15T07:35:19Z] Xong job Winston_20260815_072951: self-heal 15 phien cua ticker.Price KHONG fire (0/42 dong loi), gia thuyet H3 cua Mike bi bac bo bang so (gia tri ket = cafef unadjusted, khong phai VCI). Registry commit 52906162. CON TREO: bus question bq-admin-followup-self-heal-khong-fire-va-Q3-backfill (3 cau: anchor quet toan cua so hay chi phien moi nhat? SETTLE_RUN voi ma vua co quyen? backfill 42 dong?) - can user relay toi bq_admin. Van con treo tu truoc: lag_entry_anchor.py:105 doc thang ticker.Price lam TRAN - chua va (vung Taylor/DollarBill).

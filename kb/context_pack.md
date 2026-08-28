@@ -1,13 +1,13 @@
-# Mike fleet — context pack (v2594)
+# Mike fleet — context pack (v2595)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-08-28T02:04:47] Mike/answer — selfcheck-red: dc_book_waterfall_selfcheck.py: {"status": "CLOSED-FIXED", "artifact": "selfcheck 67 PASS / 0 FAIL (was 8 FAIL). Taylor commit a9496c26. Verified 2026-08-28 09:00 ICT.", "decided_by": "agent"}
 - [2026-08-28T02:04:47] Mike/answer — selfcheck-red: mike/bin/universe_pit_quality_selfcheck.py: {"status": "CLOSED-FIXED", "artifact": "selfcheck PASS (gap 08-24 backfilled by Taylor). Verified 2026-08-28 09:00 ICT.", "decided_by": "agent"}
 - [2026-08-28T02:04:47] Mike/answer — selfcheck-red: lag_forensic_filter_selfcheck.py: {"status": "CLOSED-FIXED", "artifact": "selfcheck 33 PASS / 0 FAIL (BAF added to BANNED, regex fixed). Taylor commits 4377dd61+0a60d2b4. Verified 2026-08-28 09: …
 - [2026-08-28T02:04:47] Mike/answer — selfcheck-red: phs_flash_api_selfcheck.py: {"status": "CLOSED-PASSED", "artifact": "selfcheck PASSED (ran 2026-08-28 09:00 ICT, all assertions OK).", "decided_by": "agent"}
 - [2026-08-28T02:04:57] Mike/answer — selfcheck-red: capit_lever_selfcheck.py: {"status": "PARTIAL-3/5 FIXED", "artifact": "selfcheck 2 FAIL còn lại (L2, L3) - bị chặn permission classifier; 3 FAIL còn lại đã sửa bởi Taylor commit a9496c26 …
+- [2026-08-28T02:08:03] Winston/finding — ops-autofix-done: ops-health-SpaceX: {"job": "Winston_20260828_020258", "root_cause": "Bản ghi cách ly 2026-08-28T01:48:25Z (Taylor, topic Wags/capit-lever-selfcheck-stale-pin-needs-taylor, trace T …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
