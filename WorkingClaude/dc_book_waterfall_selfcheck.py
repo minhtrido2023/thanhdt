@@ -26,8 +26,10 @@ dispatch (job Taylor_20260706_132553) requires:
      E2 q2m5 cadence: no rebalance until the custom30V basket rebal_date changes; weights drift.
      E3 overlap cap 0.15: a name in BOTH DC book and custom30V never exceeds 0.15 combined,
         the trimmed excess goes to basket members with headroom (else cash).
-     E4 liquidity floor 3B replaces the DHG hard-exclude; missing TV fails the floor; an
-        unreadable TV map falls back to the OLD hard-exclude (never to a looser rule).
+     E4 liquidity floor 3B; missing TV fails the floor; an unreadable TV map falls back to the
+        OLD hard-exclude (never to a looser rule). v2.1 REVERSED the old "floor replaces the
+        DHG hard-exclude" clause: DHG/MSH are excluded by NAME again, unconditionally.
+     E6 (added 2026-08-28) v2.1 PER_NAME_CAP + unconditional EXCLUDED_DEFAULT.
 
 Run: python dc_book_waterfall_selfcheck.py   (exit 0 = all pass, non-zero = a check failed)
 """
@@ -79,7 +81,7 @@ def fresh_state_paths():
 
 # =======================================================================================
 print("A. WIRING / priority order (pure core)")
-DC5 = {"ACB": "ACCUMULATE", "MBB": "ACCUMULATE", "TCB": "ACCUMULATE",
+DC5 = {"ACB": "ACCUMULATE", "STB": "ACCUMULATE", "TCB": "ACCUMULATE",
        "FPT": "STRONG", "SSI": "ACCUMULATE"}
 # A REALISTIC custom30V basket: 30 equal names @ 3.33% — like production, so the 0.15 combined
 # cap never binds on the parking leg itself (a 2-name toy basket would be capped to shreds and
@@ -99,7 +101,7 @@ ok("A1 capped excess parked in the basket, total ≈ 1.0",
    abs(sum(tgt.values()) - 1.0) < 1e-9, f"sum={sum(tgt.values())}")
 
 # thin 3-name set → 0.20 DC cap binds first (park leg 0.40), then the 0.15 combined cap
-DC3 = {"ACB": "ACCUMULATE", "MBB": "ACCUMULATE", "TCB": "ACCUMULATE"}
+DC3 = {"ACB": "ACCUMULATE", "STB": "ACCUMULATE", "TCB": "ACCUMULATE"}
 tgt3, _, _, det3 = compute_waterfall_targets(NEUTRAL, DC3, PARK, LIQ_OK(*DC3))
 ok("A2 thin(3) → DC names at the 0.15 ceiling", all(abs(tgt3[t] - 0.15) < 1e-9 for t in DC3))
 ok("A2 thin(3) → pre-cap park leg 0.40", abs(det3["park_leg"] - 0.40) < 1e-9, f"park={det3['park_leg']}")
@@ -111,7 +113,7 @@ ok("A4 empty DC → 100% custom30V", abs(dete["park_leg"] - 1.0) < 1e-9 and depe
    and abs(sum(tgte.values()) - 1.0) < 1e-9, f"sum={sum(tgte.values())}")
 
 # build_orders: BUYS list DC before custom30V (deploy order)
-buys = build_orders({}, {"ACB": 0.2, "MBB": 0.2, CUSTOM30V: 0.6})
+buys = build_orders({}, {"ACB": 0.2, "STB": 0.2, CUSTOM30V: 0.6})
 buy_tickers = [o["ticker"] for o in buys if o["side"] == "buy"]
 ok("A5 deploy: DC bought before custom30V", buy_tickers and buy_tickers[-1] == CUSTOM30V and CUSTOM30V not in buy_tickers[:-1])
 
@@ -121,8 +123,8 @@ tgt_ns, dep_ns, _, _ = compute_waterfall_targets(2, DC5, PARK, LIQ_OK(*DC5))  # 
 ok("B1 non-NEUTRAL → sleeve flat", tgt_ns == {} and not dep_ns)
 
 # deployed → flat: sells list parking FIRST, then DC book
-prev = {"ACB": 0.2, "MBB": 0.2, "VHM": 0.3, "VCB": 0.3}
-unwind = build_orders(prev, {}, ["ACB", "MBB"])
+prev = {"ACB": 0.2, "STB": 0.2, "VHM": 0.3, "VCB": 0.3}
+unwind = build_orders(prev, {}, ["ACB", "STB"])
 sell_tickers = [o["ticker"] for o in unwind if o["side"] == "sell"]
 ok("B2 unwind: all positions sold", set(sell_tickers) == set(prev))
 ok("B2 unwind: parking sold FIRST", set(sell_tickers[:2]) == {"VHM", "VCB"}, f"order={sell_tickers}")
@@ -134,13 +136,13 @@ Inject.dc_set = dict(DC5)
 Inject.liq = LIQ_OK(*DC5)
 Inject.basket = ({"VHM": 0.5, "VCB": 0.5}, "2026-05-05")
 Inject.trigger = (NEUTRAL, "NEUTRAL", False)
-Inject.closes = ({"ACB": 22600, "MBB": 24750, "TCB": 33400, "FPT": 70800, "SSI": 26400,
+Inject.closes = ({"ACB": 22600, "STB": 24750, "TCB": 33400, "FPT": 70800, "SSI": 26400,
                   "VHM": 40000, "VCB": 60000}, "2026-07-06")
 st1, s1 = dcw.advance("main")
 ok("B3 day-1 advanced + deployed", st1 == "advanced" and s1["deployed"])
 # day-2 regime drops to BEAR → sleeve flattens
 Inject.trigger = (2, "BEAR", False)
-Inject.closes = ({"ACB": 23000, "MBB": 25000, "TCB": 34000, "FPT": 72000, "SSI": 27000,
+Inject.closes = ({"ACB": 23000, "STB": 25000, "TCB": 34000, "FPT": 72000, "SSI": 27000,
                   "VHM": 41000, "VCB": 61000}, "2026-07-07")
 st2, s2 = dcw.advance("main")
 ok("B3 day-2 reverse-unwind fired", st2 == "advanced" and s2["reverse_unwind_last"] and not s2["deployed"])
@@ -154,11 +156,11 @@ Inject.trigger = (NEUTRAL, "NEUTRAL", False)
 Inject.dc_set = dict(DC5)
 Inject.liq = LIQ_OK(*DC5)
 Inject.basket = ({"VHM": 1.0}, "2026-05-05")
-Inject.closes = ({"ACB": 22600, "MBB": 24750, "TCB": 33400, "FPT": 70800, "SSI": 26400,
+Inject.closes = ({"ACB": 22600, "STB": 24750, "TCB": 33400, "FPT": 70800, "SSI": 26400,
                   "VHM": 40000}, "2026-07-06")
 dcw.advance("main")
 Inject.dc_set = None  # signal vanishes
-Inject.closes = ({"ACB": 22600, "MBB": 24750, "TCB": 33400, "FPT": 70800, "SSI": 26400,
+Inject.closes = ({"ACB": 22600, "STB": 24750, "TCB": 33400, "FPT": 70800, "SSI": 26400,
                   "VHM": 40000}, "2026-07-07")
 stc, sc = dcw.advance("main")
 ok("C1 DC None → held (no rebalance)", stc == "advanced" and sc["history"][-1]["fail_safe"]
@@ -167,7 +169,7 @@ ok("C1 DC None → held (no rebalance)", stc == "advanced" and sc["history"][-1]
 # C2 DT5G state unreadable → hold prior
 Inject.dc_set = dict(DC5)
 Inject.trigger = (None, "?", None)
-Inject.closes = ({"ACB": 22600, "MBB": 24750, "TCB": 33400, "FPT": 70800, "SSI": 26400,
+Inject.closes = ({"ACB": 22600, "STB": 24750, "TCB": 33400, "FPT": 70800, "SSI": 26400,
                   "VHM": 40000}, "2026-07-08")
 stc2, sc2 = dcw.advance("main")
 ok("C2 state None → held prior weights", stc2 == "advanced"
@@ -179,7 +181,7 @@ Inject.trigger = (NEUTRAL, "NEUTRAL", False)
 Inject.dc_set = dict(DC3)          # thin → 40% park
 Inject.liq = LIQ_OK(*DC3)
 Inject.basket = ({}, None)         # basket gone
-Inject.closes = ({"ACB": 22600, "MBB": 24750, "TCB": 33400}, "2026-07-06")
+Inject.closes = ({"ACB": 22600, "STB": 24750, "TCB": 33400}, "2026-07-06")
 stc3, sc3 = dcw.advance("main")
 ok("C3 basket missing → only DC names held", set(sc3["weights"]) == set(DC3))
 # 3 DC names capped at 0.15 = 0.45 deployed; no basket to absorb the rest → 0.55 cash
@@ -199,14 +201,14 @@ Inject.trigger = (NEUTRAL, "NEUTRAL", False)
 Inject.dc_set = dict(DC5)
 Inject.liq = LIQ_OK(*DC5)
 Inject.basket = ({"VHM": 1.0}, "2026-05-05")
-Inject.closes = ({"ACB": 22600, "MBB": 24750, "TCB": 33400, "FPT": 70800, "SSI": 26400,
+Inject.closes = ({"ACB": 22600, "STB": 24750, "TCB": 33400, "FPT": 70800, "SSI": 26400,
                   "VHM": 40000}, "2026-07-06")
 dcw.advance("main")
 st5, s5 = dcw.advance("main")
 ok("C5 same close → unchanged (idempotent)", st5 == "unchanged" and len(s5["history"]) == 1)
 
 # C6 MTM correctness — day-2 +10% on all DC names, held weights earn it (minus TC≈0)
-Inject.closes = ({"ACB": 24860, "MBB": 27225, "TCB": 36740, "FPT": 77880, "SSI": 29040,
+Inject.closes = ({"ACB": 24860, "STB": 27225, "TCB": 36740, "FPT": 77880, "SSI": 29040,
                   "VHM": 40000}, "2026-07-07")  # DC +10%, VHM flat
 st6, s6 = dcw.advance("main")
 last = s6["history"][-1]
@@ -266,7 +268,7 @@ fresh_state_paths(); Inject.install()
 Inject.trigger = (NEUTRAL, "NEUTRAL", False)
 Inject.dc_set = dict(DC5); Inject.liq = LIQ_OK(*DC5)
 Inject.basket = ({"VHM": 0.5, "VCB": 0.5}, "2026-05-05")
-Inject.closes = ({"ACB": 22600, "MBB": 24750, "TCB": 33400, "FPT": 70800, "SSI": 26400,
+Inject.closes = ({"ACB": 22600, "STB": 24750, "TCB": 33400, "FPT": 70800, "SSI": 26400,
                   "VHM": 40000, "VCB": 60000}, "2026-07-06")
 _, e1a = dcw.advance("main")
 w_before = dict(e1a["weights"])
@@ -282,31 +284,31 @@ ok("E1 weights unchanged (flat prices)",
    all(abs(e1b["weights"].get(t, 0) - w) < 1e-9 for t, w in w_before.items()))
 
 # ---- E2 q2m5 cadence: no rebalance until the basket rebal_date changes ----
-Inject.dc_set = {"ACB": "ACCUMULATE", "MBB": "ACCUMULATE"}   # membership CHANGES mid-quarter
-Inject.liq = LIQ_OK("ACB", "MBB")
-Inject.closes = ({"ACB": 22600, "MBB": 24750, "TCB": 33400, "FPT": 70800, "SSI": 26400,
+Inject.dc_set = {"ACB": "ACCUMULATE", "STB": "ACCUMULATE"}   # membership CHANGES mid-quarter
+Inject.liq = LIQ_OK("ACB", "STB")
+Inject.closes = ({"ACB": 22600, "STB": 24750, "TCB": 33400, "FPT": 70800, "SSI": 26400,
                   "VHM": 40000, "VCB": 60000}, "2026-07-08")
 _, e2a = dcw.advance("main")
 ok("E2 membership change mid-quarter → NO rebalance", not e2a["history"][-1]["rebalanced"]
    and set(e2a["weights"]) == set(w_before), f"weights={sorted(e2a['weights'])}")
 ok("E2 no rebal → zero turnover/TC", abs(e2a["history"][-1]["turnover"]) < 1e-9)
 Inject.basket = ({"VHM": 0.5, "VCB": 0.5}, "2026-08-05")      # new q2m5 rebal_date
-Inject.closes = ({"ACB": 22600, "MBB": 24750, "TCB": 33400, "FPT": 70800, "SSI": 26400,
+Inject.closes = ({"ACB": 22600, "STB": 24750, "TCB": 33400, "FPT": 70800, "SSI": 26400,
                   "VHM": 40000, "VCB": 60000}, "2026-07-09")
 _, e2b = dcw.advance("main")
 ok("E2 new basket rebal_date → REBALANCE fires", e2b["history"][-1]["rebalanced"])
 ok("E2 rebalance adopts the new DC membership",
-   set(e2b["history"][-1]["dc_names"]) == {"ACB", "MBB"}, f"dc={e2b['history'][-1]['dc_names']}")
+   set(e2b["history"][-1]["dc_names"]) == {"ACB", "STB"}, f"dc={e2b['history'][-1]['dc_names']}")
 ok("E2 state records the rebal_date it built on", e2b["rebal_date"] == "2026-08-05")
 
 # ---- E2b weights DRIFT (not snapped) between rebalances ----
 fresh_state_paths(); Inject.install()
 Inject.trigger = (NEUTRAL, "NEUTRAL", False)
-Inject.dc_set = {"ACB": "ACCUMULATE", "MBB": "ACCUMULATE"}; Inject.liq = LIQ_OK("ACB", "MBB")
+Inject.dc_set = {"ACB": "ACCUMULATE", "STB": "ACCUMULATE"}; Inject.liq = LIQ_OK("ACB", "STB")
 Inject.basket = ({}, "2026-05-05")     # no basket → DC leg 0.40, rest cash; keeps the maths clean
-Inject.closes = ({"ACB": 10000, "MBB": 10000}, "2026-07-06")
+Inject.closes = ({"ACB": 10000, "STB": 10000}, "2026-07-06")
 _, d0 = dcw.advance("main")
-Inject.closes = ({"ACB": 12000, "MBB": 10000}, "2026-07-07")   # ACB +20%, MBB flat
+Inject.closes = ({"ACB": 12000, "STB": 10000}, "2026-07-07")   # ACB +20%, STB flat
 _, d1 = dcw.advance("main")
 # 2 names @ min(0.20, 0.5) = 0.20 → 0.15 combined cap → 0.15 each, 0.70 cash.
 # gross = 0.15*20% + 0.15*0 = 3%; ACB weight drifts to 0.15*1.2/1.03
@@ -318,7 +320,7 @@ ok("E2b drift: no turnover charged", abs(d1["history"][-1]["turnover"]) < 1e-9)
 
 # ---- E3 overlap cap 0.15 combined ----
 # ACB is in BOTH the DC book (0.20) and the basket → uncapped it would be 0.20 + park·w
-DC4 = {"ACB": "A", "MBB": "A", "TCB": "A", "FPT": "A"}          # 4 names @0.20 = 0.80 DC leg
+DC4 = {"ACB": "A", "STB": "A", "TCB": "A", "FPT": "A"}          # 4 names @0.20 = 0.80 DC leg
 BK = {"ACB": 0.5, "VHM": 0.5}                                   # park 0.20 → ACB +0.10 = 0.30
 tgtc, _, _, detc = compute_waterfall_targets(NEUTRAL, DC4, BK, LIQ_OK(*DC4))
 ok("E3 combined weight capped at 0.15", all(w <= OVERLAP_CAP + 1e-9 for w in tgtc.values()),
@@ -348,20 +350,58 @@ ok("E3 blanket cap: even a non-overlapping DC name is trimmed 0.20 → 0.15 (pin
    all(abs(tgtn[t] - OVERLAP_CAP) < 1e-9 for t in DC3),
    f"{ {t: round(tgtn[t], 6) for t in DC3} }")
 
-# ---- E4 liquidity floor 3B replaces the DHG hard-exclude ----
-DCL = {"ACB": "A", "DHG": "A", "MBB": "A"}
-liq_thin = {"ACB": BIG, "DHG": 1.2e9, "MBB": BIG}          # DHG below the 3B floor
+# ---- E4 liquidity floor 3B (v2.1: DHG/MSH are excluded by NAME again, unconditionally) ----
+# v2.1 (job Taylor_20260825_170138) made EXCLUDED_DEFAULT=("DHG","MSH") UNCONDITIONAL on
+# capacity grounds, so DHG can no longer serve as the sub-3B fixture: it would be dropped by
+# the exclude list, not by the floor, and the test would pass for the wrong reason (§28).
+# PNJ is in neither EXCLUDED_DEFAULT nor PER_NAME_CAP → it isolates the floor.
+DCL = {"ACB": "A", "PNJ": "A", "STB": "A"}
+liq_thin = {"ACB": BIG, "PNJ": 1.2e9, "STB": BIG}          # PNJ below the 3B floor
 mem, floor_on, dropped = dc_membership(DCL, liq_thin)
-ok("E4 floor drops a sub-3B name", set(mem) == {"ACB", "MBB"} and dropped == ["DHG"] and floor_on)
-mem2, _, dropped2 = dc_membership(DCL, {"ACB": BIG, "MBB": BIG})   # DHG's TV missing entirely
-ok("E4 missing TV fails the floor (fail-safe)", set(mem2) == {"ACB", "MBB"} and dropped2 == ["DHG"])
-mem3, floor_on3, _ = dc_membership(DCL, {"ACB": BIG, "DHG": 5e9, "MBB": BIG})
-ok("E4 a LIQUID DHG is now admitted (floor is by merit, not by name)",
-   set(mem3) == {"ACB", "DHG", "MBB"} and floor_on3)
-mem4, floor_on4, _ = dc_membership(DCL, None)                      # TV map unreadable
+ok("E4 floor drops a sub-3B name", set(mem) == {"ACB", "STB"} and dropped == ["PNJ"] and floor_on)
+mem2, _, dropped2 = dc_membership(DCL, {"ACB": BIG, "STB": BIG})   # PNJ's TV missing entirely
+ok("E4 missing TV fails the floor (fail-safe)", set(mem2) == {"ACB", "STB"} and dropped2 == ["PNJ"])
+# Fixture cho ca nay PHAI chua mot ten trong EXCLUDED_DEFAULT — day chinh la thu dang duoc
+# kiem ("khong doc duoc thanh khoan thi van con lop chan theo TEN"). DCL (ACB/PNJ/STB) khong
+# co ten nao nhu vay nen phai dung ro rieng.
+mem4, floor_on4, _ = dc_membership({"ACB": "A", "DHG": "A", "STB": "A"}, None)   # TV unreadable
 ok("E4 unreadable liq map → falls back to the OLD hard-exclude (never looser)",
-   set(mem4) == {"ACB", "MBB"} and not floor_on4)
+   set(mem4) == {"ACB", "STB"} and not floor_on4, f"mem={sorted(mem4)} floor_on={floor_on4}")
+# v2.1 REVERSAL of the v2 rule "floor is by merit, not by name": a perfectly LIQUID DHG is
+# still refused, because the reason is capacity at NAV=200B, not daily turnover.
+DCX = {"ACB": "A", "DHG": "A", "MSH": "A", "STB": "A"}
+memx, _, droppedx = dc_membership(DCX, {"ACB": BIG, "DHG": 5e9, "MSH": 5e9, "STB": BIG})
+ok("E4 v2.1: liquid DHG/MSH STILL excluded (unconditional capacity exclude, not a floor call)",
+   set(memx) == {"ACB", "STB"} and set(droppedx) == {"DHG", "MSH"},
+   f"mem={sorted(memx)} dropped={sorted(droppedx)}")
 ok("E4 floor threshold is 3B", abs(LIQ_FLOOR_VND - 3_000_000_000.0) < 1e-6)
+
+# ---- E6 v2.1 PER_NAME_CAP (job Taylor_20260825_170138) — DAY LA THU MOI CUA v2.1 ----
+# Cac test A/C/E o tren co tinh dung ten KHONG nam trong PER_NAME_CAP de co lap co che cap
+# chung. Nhom E6 lam viec nguoc lai: kiem CHINH bang suc chua, neu khong doi hang so nay se
+# khong con test nao chan.
+from dc_book_waterfall_paper import (CAP_PER_NAME, PER_NAME_CAP,       # noqa: E402
+                                     EXCLUDED_DEFAULT, dc_weights)
+ok("E6 EXCLUDED_DEFAULT = (DHG, MSH) — v2.1, khong con la fallback",
+   tuple(EXCLUDED_DEFAULT) == ("DHG", "MSH"), f"got={EXCLUDED_DEFAULT}")
+ok("E6 CAP_PER_NAME mac dinh van 0.20 cho ten KHONG bi gioi han suc chua",
+   abs(CAP_PER_NAME - 0.20) < 1e-12)
+# 5 ten -> chia deu 0.20 moi ten; MBB/HDB co tran rieng chat hon nen phai bi cat xuong dung
+# tran cua chinh no, con ACB/STB/TCB giu 0.20.
+w6 = dc_weights(["ACB", "STB", "TCB", "MBB", "HDB"], per_name_cap=PER_NAME_CAP)
+ok("E6 PER_NAME_CAP RANG BUOC: MBB 0.20 -> 0.0764, HDB -> 0.0679",
+   abs(w6["MBB"] - 0.0764) < 1e-9 and abs(w6["HDB"] - 0.0679) < 1e-9, f"got={w6}")
+ok("E6 …ten khong co trong bang giu nguyen 0.20 (khong bi cat lay)",
+   all(abs(w6[t] - 0.20) < 1e-9 for t in ("ACB", "STB", "TCB")), f"got={w6}")
+ok("E6 phan bi cat KHONG chia lai cho ten DC khac — no chay xuong chan park",
+   abs(sum(w6.values()) - (0.60 + 0.0764 + 0.0679)) < 1e-9, f"sum={sum(w6.values())}")
+# Duong THAT (compute_waterfall_targets) phai dung PER_NAME_CAP, khong phai cap phang.
+tgt6, _, _, det6 = compute_waterfall_targets(
+    NEUTRAL, {"ACB": "A", "STB": "A", "TCB": "A", "MBB": "A", "HDB": "A"},
+    PARK, LIQ_OK("ACB", "STB", "TCB", "MBB", "HDB"))
+ok("E6 duong THAT ap PER_NAME_CAP (MBB khong duoc 0.15 nhu ten thuong)",
+   abs(tgt6["MBB"] - 0.0764) < 1e-9 and abs(tgt6["ACB"] - 0.15) < 1e-9,
+   f"MBB={tgt6.get('MBB')} ACB={tgt6.get('ACB')}")
 
 # ---- E5 v1 history archived, v2 restarts from the 1B basis ----
 v1_csv = os.path.join(dcw.DATA_DIR, "dc_book_waterfall_paper_nav_v1.csv")

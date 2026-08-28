@@ -312,8 +312,13 @@ with tempfile.TemporaryDirectory() as TMP:
           real_err is None and real_pol["f"] == 1.3 and real_pol["loan_package_id"] == 1840
           and real_pol["accounts"] == ["SpaceX"] and real_pol["scope"] == "capit_only",
           detail=f"{real_pol} err={real_err}")
-    check("A7 …và đang TẮT (enabled=false) — ĐIỀU KIỆN CỨNG của job này",
-          real_pol["enabled"] is False, detail=f"enabled={real_pol['enabled']!r}")
+    # A7: BẬT từ 2026-08-22 (user John duyệt qua Discord thread 1521735922066919515). Pin cũ
+    # `enabled is False` là trạng thái TRƯỚC quyết định đó — giữ nguyên thì selfcheck khoá hệ
+    # vào một quyết định đã bị thay thế. Cổng NGƯỜI thứ hai KHÔNG mất: nó chuyển từ lệnh riêng
+    # `approve_margin_day.py` sang chính hành vi duyệt plan (approve_plan_simple.sh gọi hộ) —
+    # xem L2/L3.
+    check("A7 …và đang BẬT (enabled=true) — user duyệt 2026-08-22",
+          real_pol["enabled"] is True, detail=f"enabled={real_pol['enabled']!r}")
 
     # ─────────────────── B. Tầng tín hiệu: §6a với washout giả lập ───────────────────
     section("B. Tín hiệu §6a (source production giữa CAPIT_LEVER_BEGIN/END)")
@@ -660,10 +665,15 @@ with tempfile.TemporaryDirectory() as TMP:
     plan = mkplan([o("B1", "SAB")])
     plan.orders[0].loan_package_id = 1840
     plan, adj = apply_capit_lever(plan, "SpaceX", status_path=ART_ON)   # rules_path=None ⇒ FILE THẬT
-    check("C20 artifact BẬT + file chính sách THẬT (mặc định, đang TẮT) → KHÔNG cấp — "
+    # C20 giữ NGUYÊN mục đích: chứng minh file chính sách THẬT là thứ quyết định lúc đặt lệnh,
+    # kiểm qua chính đường MẶC ĐỊNH (rules_path=None) chứ không qua fixture. Chỉ chiều kỳ vọng
+    # đảo theo trạng thái thật: file đang BẬT (2026-08-22) ⇒ đường mặc định phải CẤP. Chiều TẮT
+    # vẫn được phủ đầy đủ ở C19 bằng fixture RULES_OFF, nên không mất độ phủ.
+    check("C20 artifact BẬT + file chính sách THẬT (mặc định, đang BẬT) → CẤP — "
           "trạng thái production hôm nay, kiểm bằng chính đường mặc định chứ không bằng fixture",
-          plan.orders[0].loan_package_id is None and adj and adj[0]["action"] == "STRIPPED",
-          detail=(adj[0]["reason"][:90] if adj else "(không có adj)"))
+          plan.orders[0].loan_package_id == 1840 and plan.orders[0].lever_f == 1.3
+          and not [a for a in adj if a["action"] == "STRIPPED"],
+          detail=f"pkg={plan.orders[0].loan_package_id} adj={adj[:1]}")
 
     # TRẦN TỔNG (arch-reviewer F4). Trần slot là PER-ORDER, `cap_capit_orders` cũng per-order,
     # còn `Executor.state["parents"]` khoá theo `o.id` chứ không theo mã ⇒ N lệnh trùng mã, mỗi
@@ -1362,8 +1372,8 @@ with tempfile.TemporaryDirectory() as TMP:
     section("G. Chốt chặn: cấu hình THẬT trên đĩa")
     with open(REAL_RULES, encoding="utf-8") as f:
         real_blk = json.load(f)["capit_margin_lever"]
-    check("G1 data/trading_rules.json :: capit_margin_lever.enabled == false",
-          real_blk["enabled"] is False, detail=f"enabled={real_blk['enabled']!r}")
+    check("G1 data/trading_rules.json :: capit_margin_lever.enabled == true (user 2026-08-22)",
+          real_blk["enabled"] is True, detail=f"enabled={real_blk['enabled']!r}")
     check("G2 …live_requires_user_approval == true",
           real_blk.get("live_requires_user_approval") is True)
     check("G3 …phạm vi đúng bản duyệt: f=1,3 · gói 1840 · capit_only · chỉ SpaceX",
