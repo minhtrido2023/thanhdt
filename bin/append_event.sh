@@ -102,12 +102,29 @@ if [ -n "$trace_id" ] && ! printf '%s' "$trace_id" \
   shell word-split và mảnh đuôi rơi vào tham số 5."
 fi
 
-# Payload mở đầu bằng { hoặc [ mà không parse được = JSON cụt (bị cắt), KHÔNG phải chuỗi thường.
+# Payload mở đầu bằng { hoặc [ mà không parse được = JSON hỏng, KHÔNG phải chuỗi thường.
+# NÓI ĐÚNG NGUYÊN NHÂN, ĐỪNG ĐOÁN (2026-08-28, job Winston_20260828_020258): bản cũ khẳng
+# định "nhiều khả năng bị cắt cụt" cho MỌI ca. Ca Taylor 2026-08-28T01:48:25Z không hề cụt —
+# payload đủ 3005 ký tự, đóng đúng `"}` ở cuối, lỗi thật là THỪA một dấu `}` sau khối `da_va`
+# ⇒ json.loads báo `Extra data: char 1667`. Thông điệp đoán mò được checker §5b của
+# ops_health_check.sh chép nguyên văn vào dispatch ops-autofix, nên nó dẫn người xử lý đi sai
+# hướng ngay từ dòng đầu — cùng nhóm lỗi đã sửa cho check 5b ngày 2026-08-21 (quy chụp mọi ca
+# là word-split). Parser đã biết chính xác chỗ hỏng: in ra, đừng phỏng đoán.
 case "$payload" in
   \{*|\[* )
-    python3 -c 'import json,sys; json.loads(sys.argv[1])' "$payload" 2>/dev/null \
-      || die "payload bắt đầu bằng '{' hoặc '[' nhưng KHÔNG phải JSON hợp lệ — nhiều khả năng bị cắt cụt.
-  Đuôi payload nhận được: ...$(printf '%s' "${payload: -60}")
+    _jerr="$(printf '%s' "$payload" | python3 -c '
+import json, sys
+try:
+    json.loads(sys.stdin.read())
+except ValueError as e:
+    sys.stderr.write(str(e))
+    sys.exit(1)
+' 2>&1 >/dev/null)" \
+      || die "payload bắt đầu bằng '{' hoặc '[' nhưng KHÔNG phải JSON hợp lệ.
+  Lỗi parser: $_jerr
+  Độ dài payload: ${#payload} ký tự · đuôi nhận được: ...$(printf '%s' "${payload: -60}")
+  Đọc lỗi parser: 'Extra data' = THỪA dấu đóng }/] (JSON viết tay lệch ngoặc), payload KHÔNG
+  cụt · 'Unterminated string'/'Expecting' ở gần cuối = cụt thật (word-split hoặc bị cắt).
   Muốn ghi chuỗi thường thì đừng mở đầu bằng { hoặc [." ;;
 esac
 

@@ -137,6 +137,32 @@ def case_truncated_json_payload():
         shutil.rmtree(d, ignore_errors=True)
 
 
+# ── 3b. JSON hỏng nhưng KHÔNG cụt: thông điệp phải nói ĐÚNG nguyên nhân, không đoán "cắt cụt".
+#    Ca thật: Taylor 2026-08-28T01:48:25Z — payload đủ, đóng đúng, thừa 1 dấu '}' giữa chừng
+#    ⇒ "Extra data". Thông điệp cũ khẳng định "nhiều khả năng bị cắt cụt" và checker §5b chép
+#    nguyên văn vào dispatch ops-autofix, dẫn người xử lý đi sai hướng.
+def case_json_error_message_names_real_cause():
+    d = mksandbox()
+    try:
+        extra = '{"a":{"b":1}},"c":"2"}'          # thừa '}' — KHÔNG cụt
+        rc, out, err = run(d, ["W", "finding", "t3", extra])
+        check("JSON thừa ngoặc: exit != 0", rc != 0, f"rc={rc}")
+        check("JSON thừa ngoặc: thông điệp in lỗi parser thật ('Extra data')",
+              "Extra data" in err, err)
+        check("JSON thừa ngoặc: KHÔNG khẳng định 'cắt cụt' cho ca không hề cụt",
+              "nhiều khả năng bị cắt cụt" not in err, err)
+        check("JSON thừa ngoặc: vẫn được cách ly nguyên văn",
+              any(r["argv"][3] == extra for r in rejected(d)), rejected(d))
+
+        cut = '{"question":"abc'                   # cụt thật
+        rc2, _, err2 = run(d, ["W", "question", "t4", cut])
+        check("JSON cụt: exit != 0", rc2 != 0, f"rc={rc2}")
+        check("JSON cụt: thông điệp in lỗi parser thật (Unterminated/Expecting)",
+              ("Unterminated" in err2 or "Expecting" in err2), err2)
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+
 # ── 4. trace_id SAI HÌNH DẠNG (arch-review coord-2026-08-13 required_change #2).
 #    Bản whitelist-ký-tự cũ để LỌT 7/8 giá trị rác trong chính danh sách sự cố của nó.
 def case_trace_id_shape():
@@ -356,6 +382,7 @@ def case_quarantine_ghi_duoc_arg_byte_hong():
 
 def main():
     for fn in (case_valid_paths, case_too_many_args, case_truncated_json_payload,
+               case_json_error_message_names_real_cause,
                case_trace_id_shape, case_job_id_fallback,
                case_verify_finding_sanitizes_inherited_trace_id,
                case_quarantine_survives_discarded_stderr,
