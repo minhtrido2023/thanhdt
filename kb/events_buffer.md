@@ -512,3 +512,14 @@
 - [2026-08-28T02:13:02Z] Mike/answer — baf-universe-pit-quality-retro-update-needs-user-approval: {"status": "CLOSED-OPTION-B", "decision": "Không sửa lịch sử universe_pit_quality. Ghi nhận known caveat: backtest dùng hậu tố pitgq có thể chọn BAF 2022-2024 (QUALITY_OK). Lý do: hệ thống không cần sửa quá khứ; việc chọn sai trong backtest giúp hệ thống nhận biết và sửa sai tốt hơn trong tương lai.", "decided_by": "user"}
 - [2026-08-28T02:13:03Z] Mike/decision — security-leak-2026-08-24-remaining-repo-visibility-and-sudo: {"status": "CLOSED-DEFERRED", "decision": "Repo visibility và sudo revoke tạm hoãn. Thay thế: tạo máy ảo riêng trong server để cô lập. Theo dõi tiếp.", "decided_by": "user"}
 - [2026-08-28T02:27:14Z] Mike/answer — capit-lever-selfcheck-2-remaining-fail-permission-blocked: {"status": "CLOSED-FIXED", "artifact": "capit_lever_selfcheck.py tất cả PASS (L2/L3 xanh). Commit 5c29f726 (WorkingClaude). Lỗi: Taylor dùng string không dấu duyet-margin-tu-dong thay vì duyệt-margin-tự-động. User John cấp quyền 2026-08-28.", "decided_by": "user"}
+
+## Consolidation 2026-08-28T03:26:15Z
+- [2026-08-28T03:20:17Z] Taylor/heartbeat — Taylor_20260828_032003: {"status": "in_progress", "note": "bat dau chay report_delivery_gate.py cho monthly report 2026-08"}
+- [2026-08-28T03:21:04Z] Taylor/heartbeat — Taylor_20260828_032003: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20260828_032003", "source": "watcher"}
+- [2026-08-28T03:22:04Z] Taylor/heartbeat — Taylor_20260828_032003: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20260828_032003", "source": "watcher"}
+- [2026-08-28T03:23:04Z] Taylor/heartbeat — Taylor_20260828_032003: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20260828_032003", "source": "watcher"}
+- [2026-08-28T03:24:05Z] Taylor/heartbeat — Taylor_20260828_032003: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20260828_032003", "source": "watcher"}
+- [2026-08-28T03:25:05Z] Taylor/heartbeat — Taylor_20260828_032003: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20260828_032003", "source": "watcher"}
+- [2026-08-28T03:25:28Z] Taylor/heartbeat — Taylor_20260828_032003: {"status": "in_progress", "note": "gate timeout sau 5 phut (BQ dividend query cham), dang kiem tra process/log con song khong"}
+- [2026-08-28T03:26:02Z] Taylor/heartbeat — Taylor_20260828_032003: {"status": "in_progress", "note": "gate chay nen PID 2422310 (nohup) de tranh bi tool-timeout kill giua chung; se poll"}
+- [2026-08-28T03:26:05Z] Taylor/heartbeat — Taylor_20260828_032003: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20260828_032003", "source": "watcher"}
