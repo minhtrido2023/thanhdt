@@ -16,6 +16,7 @@ title: Trading bot / execution (money-path thật)
 | [`gdkhq_rollout_state.md`](gdkhq_rollout_state.md) — data/gdkhq_d1d3_rollout.json + gdkhq_shadow_acceptance.json | CANONICAL (cadence chưa xác nhận) |
 | [`executor_state_journal.md`](executor_state_journal.md) — data/execution_logs/exec_<label>_<date>_state.json / _journal.csv | CANONICAL |
 | [`nav_history.md`](nav_history.md) — data/execution_logs/nav_history_<account>.csv | CANONICAL |
+| [`active_nav_snapshot.md`](active_nav_snapshot.md) — data/execution_logs/active_nav_<label>.json (label = SpaceX \| ZaloPay) | CANONICAL |
 | [`trade_plans.md`](trade_plans.md) — data/trade_plans/plan_<account>_<YYYY-MM-DD>.json | CANONICAL |
 | [`trading_bot_accounts.md`](trading_bot_accounts.md) — secrets/trading_bot_accounts.json | CANONICAL |
 | [`trading_rules.md`](trading_rules.md) — data/trading_rules.json | CANONICAL |

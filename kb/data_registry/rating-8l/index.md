@@ -17,5 +17,9 @@ title: 8L Rating / Composite v3 (quality gate production)
 | [`moat_tags.md`](moat_tags.md) — data/moat_tags.csv | CANONICAL |
 | [`power_lens.md`](power_lens.md) — data/power_lens.csv | CANONICAL |
 | [`rating_8l_csv.md`](rating_8l_csv.md) — data/rating_8l.csv (+ rating_8l_top30/_buynow/_screener.csv) | CANONICAL |
+| [`engine_class_csv.md`](engine_class_csv.md) — data/engine_class.csv (+ data/cash_machine_screen.csv, cùng writer) | CANONICAL |
+| [`margin_cycle_detector_csv.md`](margin_cycle_detector_csv.md) — data/margin_cycle_detector.csv | CANONICAL |
+| [`rank_8l_csv.md`](rank_8l_csv.md) — data/rank_8l.csv, data/rank_8l.md | CANONICAL |
+| [`unified_screener_csv.md`](unified_screener_csv.md) — data/unified_screener.csv | CANONICAL |
 
 ↩ [Về index tổng](../index.md)
