@@ -237,6 +237,56 @@ xuôi để LLM tự nhớ mỗi lần. Trước khi build/áp patch loại này
 đã ghi file** (dùng `patch` + verify độc lập sau mỗi lần áp), và **tách quyết định CHÍNH SÁCH (phải
 hỏi user) khỏi quyết định KỸ THUẬT** (quant-skeptic CONFIRMED là đủ).
 
+## 23. Chạy Selfcheck THEO PHẠM VI Cái Vừa Sửa — Không Chạy Cả Bộ Theo Phản Xạ
+
+**Nguyên tắc:** chạy selfcheck **liên quan tới file mình vừa đụng**, không chạy cả bộ mặc định —
+TRỪ KHI đụng vào **module lõi dùng chung**, lúc đó quét rộng là bắt buộc và **phải nói rõ trong báo
+cáo vì sao** (biến phán đoán đó thành hành động có chủ đích, không phải phản xạ).
+
+**Module lõi dùng chung — sửa là PHẢI quét rộng** (số đo bằng máy từ import thật):
+
+| Sửa | Số selfcheck phụ thuộc |
+|---|---:|
+| `trading_bot/plan.py` | 21 |
+| `trading_bot/config.py` | 15 |
+| `trading_bot/executor.py` | 11 |
+| `trading_bot/brokers.py` | 7 |
+| `trading_bot/plan_funding_gate.py` | 2 import trực tiếp, **nhưng ca 08-07 cho thấy phụ thuộc thật rộng hơn** (gate chạy trong luồng của 6+ selfcheck khác) — coi như lõi |
+
+Mọi module khác (`lag_*.py`, `dcf_*.py`, `custom_basket.py`, `anomaly_gate.py`,
+`trading_bot/{due_diligence,netting_recon,plan_cash_commitment,discretionary_accumulation}.py`, …)
+có **1–6** selfcheck phụ thuộc → chạy đúng những file đó.
+
+**Tra bản đồ ngược bằng LỆNH, đừng chép bảng vào đây** (bảng chép tay sẽ mốc; lệnh thì không) —
+`bin/selfcheck_scope_map.sh` (không tham số = toàn bộ bản đồ; `bin/selfcheck_scope_map.sh
+trading_bot/plan.py` = chỉ file đó). Bảng trên chỉ là mốc tham chiếu đo ngày 2026-08-08; nguồn
+chuẩn tắc là output của script.
+
+**Bảng trên liệt kê FILE CODE — nhưng "lõi dùng chung" có 2 dạng nữa mà bản đồ import KHÔNG
+thấy** (mở rộng 2026-08-20, escalation `retro-pattern-recurring-patternB-round2-4days` sau 4 ngày
+Pattern-A tái diễn 08-16→08-19; cả 2 dạng đều đã cắn thật):
+
+| Dạng lõi ẩn | Ví dụ đã cắn | Vì sao `selfcheck_scope_map.sh` mù |
+|---|---|---|
+| **CÔNG THỨC lặp lại ở nhiều consumer** (không phải file) | Bất biến NAV §25: mandate 08-18 thêm `egg.totalValue`, `nav_cum_dividend_selfcheck.py` ĐỎ 08-19 vì công thức trong nó chưa cập nhật — lệch đúng bằng egg (~100,2tr SpaceX / ~38,8tr ZaloPay) | Bản đồ đi theo `import`, mà công thức được **chép tay** vào từng consumer, không import từ đâu cả |
+| **Module có consumer GIÁN TIẾP** (gọi qua subprocess / tên chuỗi / file dữ liệu trung gian) | `bin/oshares_live.py` sửa 3 lần trong ngày 08-19 ⇒ `corp_action_daily_selfcheck.py` IndexError ×2 | Đo thật 2026-08-20: `selfcheck_scope_map.sh bin/oshares_live.py` trả **RỖNG**, dù `corp_action_daily_selfcheck.py` phụ thuộc nó — nó không `import bin.oshares_live`, nó chạy subprocess |
+
+**Hệ quả thao tác:** trước khi kết luận "file này ít phụ thuộc, chạy hẹp là đủ", ngoài
+`selfcheck_scope_map.sh` phải thêm **một lượt `grep -rl "<tên file/tên công thức>" mike/bin`**.
+Bản đồ import trả rỗng ≠ không ai phụ thuộc — nó chỉ có nghĩa "không ai IMPORT". Đây đúng chữ ký
+§28: đừng suy từ sự vắng mặt trong MỘT biểu diễn ra sự vắng mặt trong thực tế.
+
+**Hệ luận — 2 quy ước để bộ test không mốc tiếp:**
+1. **Selfcheck KHÔNG được assert lên trạng thái SỐNG.** Chép cứng một rổ mã, một số đếm đo tại một
+   ngày, hay đọc thẳng file production (`data/trade_plans/…`, `anomaly_flags.json`, `universe_pit`)
+   làm assertion ⇒ test **tự vô hiệu theo thời gian** và trở thành nhiễu nền. Đóng băng fixture,
+   hoặc assert lên *bất biến* (quan hệ, dấu, fail-safe) thay vì lên *giá trị*.
+2. **`test_*.py` ở repo root KHÔNG PHẢI test** — 165 file, là script backtest/R&D (đặt tên theo lịch
+   sử), 154/165 không đụng từ 2026-06-21. **Không archive** (artifact nghiên cứu, §10 mục 4) nhưng
+   **KHÔNG bao giờ gộp vào "chạy bộ test"**. Script R&D MỚI đặt tên `exp_*` / `probe_*` / `stress_*`.
+
+*→ rationale §23.*
+
 ## 24. Ràng Buộc Giá/Hạn Mức Của Plan Phải Là FIELD RIÊNG Được Cưỡng Chế Bằng CODE — Không Bẻ Cong Một Field Khác Để "Vô Tình" Ra Đúng Số
 
 **Luật:** khi một luật giao dịch nói "không bao giờ được X quá ngưỡng N" (trần giá entry-window,
@@ -270,6 +320,79 @@ hard)` + guard cuối; journal `HARD_CEILING_BLOCK`. Nhờ có trần độc l�
 nghĩa giá tham chiếu thật ⇒ lệnh **bám `q.ask` sống** (re-price mỗi `slice_interval_min`) mà vẫn
 không bao giờ vượt trần. Selfcheck: `hard_no_chase_ceiling_selfcheck.py` (50 ca) — mọi ca "chặn
 được" đều có **ca chứng minh ngược** (bỏ trần ⇒ thật sự vượt), không chỉ khẳng định suông.
+
+## 25. "Tiền" KHÔNG Phải Một Con Số — Mỗi Consumer Phải Khai Rõ Đang Hỏi Câu Nào
+
+**Luật:** bất kỳ code nào đọc số dư tiền từ broker PHẢI khai (trong tên biến hoặc comment ngay tại
+chỗ đọc) nó đang hỏi câu nào trong hai câu dưới, và lấy đúng field của câu đó. Không có "field tiền
+mặc định"; `DNSEBroker.get_cash()` **không** phải mặc định an toàn.
+
+| Câu hỏi | Field ĐÚNG | Dùng ở | Sai thì hỏng kiểu gì |
+|---|---|---|---|
+| "Tôi **SỞ HỮU** bao nhiêu vốn?" (cơ sở NAV / mẫu số tính tỷ trọng mục tiêu) | **`totalCash − totalDebt` (+ `egg.totalValue` nếu consumer là NAV/pool, xem dưới)** | `daily_nav_snapshot.py:449`, `reconcile_equity.py`, `compute_park_trim.py` (mẫu số pool), `compute_active_nav.py` (§cash) | Khai THIẾU NAV đúng bằng tiền bán chưa settle ⇒ under-deploy, hoặc pool co lại đúng bằng lượng vừa bán ⇒ **vòng lặp tự kích bán tiếp** |
+| "Tôi **TIÊU ĐƯỢC NGAY** bao nhiêu?" (sức mua đặt lệnh phiên này) | **`ppse.pp0Buy`/`qmaxBuy`**, hoặc `availableCash` khi không gọi được ppse | `DNSEBroker.get_cash()`, `check_plan_funding()`, `executor.py` · ⚠️ `compute_jit_unpark.py` (L2) là NGOẠI LỆ user duyệt — xem ghi chú ngay dưới bảng | Nới lỏng gate tiền ⇒ đặt lệnh không có tiền; hoặc chặn oan plan tự cấp vốn đủ |
+
+**Chiều thứ BA (thêm 2026-08-19, sau sự cố TRIM giả cùng ngày): Trứng vàng (`egg.totalValue`,
+sibling của `stock` trong payload `balances` — xem `kb/data_registry/trading-bot/
+dnse_openapi_v2_calling_guideline.md`) KHÔNG nằm trong `totalCash` VÀ KHÔNG nằm trong
+`availableCash`.** Nó là vốn CHỦ SỞ HỮU thật (thuộc dòng "SỞ HỮU" ở trên) nhưng cần lệnh rút +
+về tài khoản T+1 mới tiêu được (KHÔNG thuộc dòng "TIÊU ĐƯỢC NGAY"). Consumer thuộc dòng "SỞ HỮU"
+PHẢI cộng thêm field này (đã làm ở `compute_active_nav.py`/`daily_nav_snapshot.py` từ 08-18,
+`compute_park_trim.py` từ 08-19 — sự cố xảy ra vì L1 bị bỏ sót khi 2 file kia đã sửa: tiền
+chuyển từ cash sang egg làm pool L1 co lại giả, sinh TRIM oan ~58,7tr cho SpaceX+ZaloPay).
+Consumer thuộc dòng "TIÊU ĐƯỢC NGAY" (`check_plan_funding()`, `executor.py`)
+**KHÔNG được cộng egg** — đó là nới lỏng gate tiền y hệt lỗi ở dòng trên.
+
+⚠️ **NGOẠI LỆ DUY NHẤT, user duyệt 2026-08-19: `compute_jit_unpark.py` (L2) CÓ cộng egg.**
+Bảng trên xếp L2 vào dòng "TIÊU ĐƯỢC NGAY" và cấm cộng egg; commit `956d8ec5` (2026-08-20)
+làm NGƯỢC LẠI, và đó là quyết định có chủ đích chứ không phải vi phạm — 2 vòng làm rõ cùng
+ngày + quant-skeptic vòng 2, user chốt. Lý do hợp lệ: **L2 là tầng ĐỀ XUẤT, không phải tầng
+GATE.** Gate cứng vẫn là `check_plan_funding()` (P0) và nó vẫn KHÔNG cộng egg — nghĩa là
+egg không hề nới lỏng cổng tiền, nó chỉ cho phép L2 đề xuất "mua đủ, có rút egg" thay vì
+âm thầm SHRINK lệnh xuống phần cash thật. Bù lại, mỗi `buy_amendments[i]` phải mang
+`funded_via` ("cash" | "cash+egg") + `egg_relied_vnd` (CẬN TRÊN, không phải số chính xác)
+và in cảnh báo rút egg tường minh; egg không rút kịp ⇒ P0 giữ HOLD, đúng thiết kế.
+Ranh giới cứng + vì sao KHÔNG chiết khấu phí: docstring `§pool-egg-L2` trong
+`mike/bin/compute_jit_unpark.py` — ĐỌC TRƯỚC khi đổi lại chỗ đó.
+Bằng chứng chạy thật (2026-08-19, ZaloPay): `cash đầu 39.17tr (availableCash 0.39tr +
+Trứng vàng 38.78tr)` kèm đúng dòng cảnh báo "CẦN RÚT Trứng vàng ... TRƯỚC khi đặt lệnh".
+(Ghi lại 2026-08-22 tại weekly ops audit: bảng §25 viết 08-19 còn quyết định L2 chốt 08-19→20,
+nên hai nguồn mâu thuẫn nhau đúng 3 ngày. Ai đọc bảng mà không đọc dòng này sẽ "sửa" L2 bỏ
+egg đi và lặng lẽ revert một quyết định user đã duyệt.)
+
+**Vì sao là luật chứ không phải trùng hợp — HAI bug cùng loại trong HAI ngày liên tiếp:**
+`compute_park_trim.py` (mẫu số pool, 2026-08-09, job `Taylor_20260809_150316`, commit `df7d92b4`)
+và `compute_active_nav.py` (cơ sở NAV, 2026-08-10, job `Taylor_20260810_004252`). Cả hai đều lấy
+`availableCash` vì nó là field đầu tiên `get_cash()` trả về.
+
+**Số neo (đo thật, SpaceX 2026-08-07 — phiên bán 13 mã PARK ≈189,4tr):**
+`availableCash` 11:25 = **4.821.143**; 19:10 sau khi bán = **4.821.143** (Y HỆT); `totalCash`
+19:10 = **203.656.265**. ⇒ tiền bán **KHÔNG BAO GIỜ** vào `availableCash` trong ngày bán. Trên
+active_nav điều đó = **−198.835.122đ, −20,7% NAV**.
+Hằng đẳng thức đối soát: `totalCash == availableCash + cashDividendReceiving + depositInterest`
+(ZaloPay 08-07: `5.818.854 + 6.453.500 + 318 = 12.272.672`, khớp tuyệt đối).
+
+**Bốn hệ quả bắt buộc khi viết code loại này:**
+1. **Fail-closed, KHÔNG rơi về `availableCash`.** Không đọc được `totalCash`/`totalDebt` ⇒ thoát,
+   không ghi file. Rơi về = tái lập đúng bug vừa sửa, lặng lẽ.
+2. **Tái dùng 3 guard, đừng viết lại**: `park_holdings._stock_block_all_zero` /
+   `_cash_fields_all_zero` / `_cash_fields_inconsistent` (bất biến `totalCash ≥ availableCash`).
+   Cả ba đều bắt một cách hỏng mà hai cái kia mù — bỏ bất kỳ cái nào là để hở đúng một lối.
+3. **Đối soát chéo bằng nguồn có đường đi KHÁC** trước khi tin: `nav_history_<label>.csv`
+   (`daily_nav_snapshot.py`) tính NAV theo path hoàn toàn khác — lệch = một trong hai sai.
+4. **Cơ sở tỷ trọng ĐƯỢC PHÉP lớn hơn sức mua trong ngày** (tiền chưa settle T+2, cổ tức phải thu,
+   `manual_offbook_assets_vnd`). Đó KHÔNG phải lỗi sizing; chặn overshoot là việc của tầng thực thi
+   (gate P0 `check_plan_funding` + L2 JIT-unpark), không phải của tầng NAV. Nhưng phải **công bố**
+   khoảng cách đó ra output, đừng để người đọc plan tưởng là lỗi.
+
+**Vì sao prose ở data_registry KHÔNG đủ (bài học riêng):**
+`kb/data_registry/trading-bot/dnse_openapi_v2_calling_guideline.md` ĐÃ ghi rõ "3 field cash khác
+nhau" từ 2026-08-03 — bug vẫn xảy ra hai lần sau đó. Khác biệt: tài liệu kia nói *các field khác
+nhau*, bảng trên nói **script NÀO của mình phải dùng field NÀO**. Thêm consumer tiền mới ⇒ thêm
+một dòng vào bảng, đó là cách rule này không mốc.
+
+*→ `agents/Taylor/research/active_nav_cash_basis_fix_20260810.md` (bản vá + 26 selfcheck + đối
+soát độc lập khớp từng đồng, quant-skeptic CONFIRMED cao vòng 1).*
 
 ## 29. `cron_health_check.py` Báo Lại Cùng 1 Lỗi Mỗi Ngày Dù Đã Sửa — Ack List + Bidirectional Date, Không Phải Trust-The-Report
 
