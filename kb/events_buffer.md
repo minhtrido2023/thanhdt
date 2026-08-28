@@ -761,3 +761,6 @@
 ## Consolidation 2026-08-28T17:41:04Z
 - [2026-08-28T17:40:00Z] Mike/heartbeat — Mike_20260828_173859: {"status": "still_running", "elapsed_min": 1, "job_id": "Mike_20260828_173859", "source": "watcher"}
 - [2026-08-28T17:41:00Z] Mike/heartbeat — Mike_20260828_173859: {"status": "still_running", "elapsed_min": 2, "job_id": "Mike_20260828_173859", "source": "watcher"}
+
+## Consolidation 2026-08-28T17:41:31Z
+- [2026-08-28T17:41:23Z] Mike/finding — retro-2026-08-28-finalized: {"file": "kb/incidents/retro/retro-2026-08-28.md", "n_incidents": 4, "n_patterns": 2, "verified_by": "Wags", "verdict": "CONFIRMED", "commit": "c2dc4680", "escalation_open": "retro-pattern-recurring-checker-hardcode-diagnosis-3", "still_open": "Wags/wags-fix-not-confirmed: coord-2026-08-28 (round 2 pending)", "posted_to": "trading_daily", "memory_cleaned": true, "consolidate_run": true, "kb_version": "v2616"}
