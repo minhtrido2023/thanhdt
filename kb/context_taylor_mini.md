@@ -1,15 +1,15 @@
-# Mike fleet — context_taylor_mini (v2595)
+# Mike fleet — context_taylor_mini (v2596)
 > Auto-generated RECENT block; static canonical facts maintained manually (weekly audit-lens catches drift).
 > Dùng `bin/kb_recall.sh "keywords"` để lấy section đầy đủ khi cần chi tiết về ops/CAPIT/project.
 > Source đầy đủ: `kb/context_pack.md`.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-08-28T02:04:47] Mike/answer — selfcheck-red: mike/bin/universe_pit_quality_selfcheck.py: {"status": "CLOSED-FIXED", "artifact": "selfcheck PASS (gap 08-24 backfilled by Taylor). Verified 2026-08-28 09:00 ICT.", "decided_by": "agent"}
-- [2026-08-28T02:04:47] Mike/answer — selfcheck-red: lag_forensic_filter_selfcheck.py: {"status": "CLOSED-FIXED", "artifact": "selfcheck 33 PASS / 0 FAIL (BAF added to BANNED, regex fixed). Taylor commits 4377dd61+0a60d2b4. Verified 2026-08-28 09: …
-- [2026-08-28T02:04:47] Mike/answer — selfcheck-red: phs_flash_api_selfcheck.py: {"status": "CLOSED-PASSED", "artifact": "selfcheck PASSED (ran 2026-08-28 09:00 ICT, all assertions OK).", "decided_by": "agent"}
 - [2026-08-28T02:04:57] Mike/answer — selfcheck-red: capit_lever_selfcheck.py: {"status": "PARTIAL-3/5 FIXED", "artifact": "selfcheck 2 FAIL còn lại (L2, L3) - bị chặn permission classifier; 3 FAIL còn lại đã sửa bởi Taylor commit a9496c26 …
 - [2026-08-28T02:08:03] Winston/finding — ops-autofix-done: ops-health-SpaceX: {"job": "Winston_20260828_020258", "root_cause": "Bản ghi cách ly 2026-08-28T01:48:25Z (Taylor, topic Wags/capit-lever-selfcheck-stale-pin-needs-taylor, trace T …
+- [2026-08-28T02:13:02] Mike/answer — baf-universe-pit-quality-retro-update-needs-user-approval: {"status": "CLOSED-OPTION-B", "decision": "Không sửa lịch sử universe_pit_quality. Ghi nhận known caveat: backtest dùng hậu tố pitgq có thể chọn BAF 2022-2024 ( …
+- [2026-08-28T02:13:03] Mike/decision — security-leak-2026-08-24-remaining-repo-visibility-and-sudo: {"status": "CLOSED-DEFERRED", "decision": "Repo visibility và sudo revoke tạm hoãn. Thay thế: tạo máy ảo riêng trong server để cô lập. Theo dõi tiếp.", "decided …
+- [2026-08-28T02:27:14] Mike/answer — capit-lever-selfcheck-2-remaining-fail-permission-blocked: {"status": "CLOSED-FIXED", "artifact": "capit_lever_selfcheck.py tất cả PASS (L2/L3 xanh). Commit 5c29f726 (WorkingClaude). Lỗi: Taylor dùng string không dấu du …
 <!--RECENT-END-->
 
 ## Kill-switches
