@@ -1,8 +1,8 @@
-# Fleet status — 2026-08-28T12:11:02 UTC
+# Fleet status — 2026-08-28T12:11:13 UTC
 
 | agent | title (desktop) | kind | status | last_heartbeat | age(min) | current_task |
 |---|---|---|---|---|---|---|
-| DollarBill | DollarBill | child | working | 2026-08-28T12:10:59Z | 0 |  |
+| DollarBill | DollarBill | child | working | 2026-08-28T12:11:07Z | 0 |  |
 | DollarBill_1962792 | dollarbill-ef | child | dead | 2026-08-27T12:10:02Z | 1441 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/DollarBill |
 | DollarBill_2741258 | dollarbill-1e | child | running | 2026-08-28T12:10:01Z | 1 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/DollarBill |
 | Mike | Mike | child | working | 2026-08-28T12:08:00Z | 3 |  |
@@ -14,4 +14,4 @@
 | paseo-94 | paseo-94 | external | dead | 2026-08-28T04:20:01Z | 471 | interactive · cwd=/home/trido/.paseo |
 | workingclaude-06 | workingclaude-06 | child | dead | 2026-08-27T05:57:36Z | 1813 |  |
 | workingclaude-12 | workingclaude-12 | child | dead | 2026-08-28T01:34:23Z | 636 |  |
-| workingclaude-94 | workingclaude-94 | child | dead | 2026-08-27T01:34:08Z | 2076 |  |
+| workingclaude-94 | workingclaude-94 | child | dead | 2026-08-27T01:34:08Z | 2077 |  |
