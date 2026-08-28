@@ -118,6 +118,11 @@ def mkbus():
     d = tempfile.mkdtemp(prefix="ops_health_selfcheck_")
     inbox = os.path.join(d, "mike", "bus", "inbox")
     os.makedirs(inbox, exist_ok=True)
+    # Danh sách agent GIẢ cho khối owner-hint (case_owner_hint_from_needs_suffix): 2 agent
+    # thật + 1 worktree "wt-*" phải bị LOẠI khỏi danh sách hợp lệ (không phải agent).
+    agents_dir = os.path.join(d, "mike", "agents")
+    for name in ("Taylor", "DollarBill", "wt-selfcheck-fixture"):
+        os.makedirs(os.path.join(agents_dir, name), exist_ok=True)
     return d, inbox
 
 
@@ -425,13 +430,21 @@ def case_owner_hint_from_needs_suffix():
         lines, _ = run_check5(root)
         out = joined(lines)
         own = [ln for ln in lines if "TỰ KHAI người phụ trách" in ln]
-        check("owner-hint: gom 2 topic cùng owner 'taylor' vào ĐÚNG 1 dòng",
-              len([ln for ln in own if "'taylor'" in ln]) == 1
-              and "loi-a-needs-taylor" in "".join(own)
-              and "loi-b-needs-taylor-urgent" in "".join(own), out)
-        check("owner-hint: hậu tố mức-độ (-urgent) KHÔNG tách thành owner riêng",
-              not any("'urgent'" in ln for ln in own), out)
-        check("owner-hint: giữ NGUYÊN VĂN hoa-thường agent_id (DollarBill)",
+        # round 2 (required_change #1): đếm TỔNG SỐ DÒNG owner-hint và bắt buộc cả 2 topic
+        # 'taylor' nằm trên CÙNG 1 dòng — bản cũ đếm chuỗi con "'taylor'" nên một mutation làm
+        # owner tách sai (…-urgent KHÔNG bị cắt) vẫn lọt qua (xem changelog round 2).
+        taylor_lines = [ln for ln in own
+                        if "loi-a-needs-taylor" in ln or "loi-b-needs-taylor-urgent" in ln]
+        check("owner-hint: gom 2 topic cùng owner 'taylor' vào ĐÚNG 1 dòng (đếm tổng dòng, "
+              "không đếm chuỗi con)",
+              len(taylor_lines) == 1
+              and "loi-a-needs-taylor" in taylor_lines[0]
+              and "loi-b-needs-taylor-urgent" in taylor_lines[0], out)
+        check("owner-hint: hậu tố mức-độ (-urgent) KHÔNG tách thành owner riêng — tổng đúng "
+              "2 dòng owner (taylor + DollarBill)",
+              len(own) == 2, out)
+        check("owner-hint: tên agent in ra là CASE CHUẨN của agent thật (DollarBill), không "
+              "phải nguyên văn tuỳ ý người viết topic",
               any("'DollarBill'" in ln for ln in own), out)
         check("owner-hint: 'needs-human' KHÔNG bị nhận là owner (đã có kênh ACK riêng)",
               not any("'human'" in ln for ln in own), out)
@@ -440,6 +453,47 @@ def case_owner_hint_from_needs_suffix():
         check("owner-hint: câu hỏi không khai chủ vẫn nằm ở dòng pending routable",
               any("loi-e-khong-khai-chu" in ln for ln in lines
                   if "trong 48h qua CHƯA thấy answer" in ln), out)
+        check("owner-hint: tên agent KHÔNG bọc trong <> (lệnh mẫu copy-paste được thẳng)",
+              not any("<taylor>" in ln.lower() or "<dollarbill>" in ln.lower() for ln in own),
+              out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+# ── Ca 9c (round 2, arch-review coord-2026-08-28 required_change #2): owner-hint PHẢI phủ cả
+#    câu hỏi TREO >48h (aged_q) — bản round 1 chỉ đọc pending_q_meta (<48h), nghĩa là đúng lúc
+#    một câu hỏi "…-needs-<agent>" treo LÂU NHẤT (bằng chứng "chưa ai nhận" mạnh nhất) thì dòng
+#    gợi ý lại BIẾN MẤT.
+def case_owner_hint_covers_aged_over_48h():
+    root, inbox = mkbus()
+    try:
+        write_events(os.path.join(inbox, "Wags.jsonl"),
+                     [ev("Wags", "question", "loi-aged-needs-taylor", ago(5))])
+        lines, _ = run_check5(root)
+        out = joined(lines)
+        own = [ln for ln in lines if "TỰ KHAI người phụ trách" in ln]
+        check("owner-hint: câu hỏi TREO >48h (5 ngày) VẪN có dòng gợi ý chủ sở hữu",
+              any("loi-aged-needs-taylor" in ln for ln in own), out)
+        check("owner-hint aged: vẫn dùng case chuẩn agent thật ('Taylor')",
+              any("'Taylor'" in ln for ln in own), out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+# ── Ca 9d (round 2, required_change #3): owner token KHÔNG khớp agent thật nào (vd hậu tố
+#    "-needs-restart" không hề nói về agent) → PHẢI báo rõ, KHÔNG in lệnh dispatch cho một
+#    agent không tồn tại.
+def case_owner_hint_unmatched_agent_no_dispatch():
+    root, inbox = mkbus()
+    try:
+        write_events(os.path.join(inbox, "Wags.jsonl"),
+                     [ev("Wags", "question", "loi-f-needs-restart", ago(0, 5))])
+        lines, _ = run_check5(root)
+        out = joined(lines)
+        check("owner-hint: owner 'restart' không khớp agent thật nào → báo rõ, KHÔNG in "
+              "lệnh dispatch cho agent không tồn tại",
+              any("KHÔNG khớp agent nào" in ln and "loi-f-needs-restart" in ln for ln in lines)
+              and not any("dispatch.sh restart" in ln for ln in lines), out)
     finally:
         shutil.rmtree(root, ignore_errors=True)
 
@@ -1983,6 +2037,8 @@ def main():
                case_grace_fresh_question_not_routable, case_grace_expired_question_is_routable,
                case_grace_schedule_aware_last_weekday_gap,
                case_fresh_question_is_pending, case_owner_hint_from_needs_suffix,
+               case_owner_hint_covers_aged_over_48h,
+               case_owner_hint_unmatched_agent_no_dispatch,
                case_wagsfix_not_confirmed_is_warn_only, case_wagsfix_prefix_not_substring,
                case_wagsfix_only_no_false_ok, case_wagsfix_prefix_list_in_sync,
                case_triaged_needs_human_ack, case_triaged_only_no_false_ok,

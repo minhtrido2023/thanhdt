@@ -381,6 +381,8 @@ pending_q_needs_human = []
 pending_q_meta = []      # (agent, topic, ts) song song pending_q — chỉ để dựng dòng HINT
 closure_cands = []       # (agent, topic, ts) mọi finding/answer/decision — chỉ để HINT
 aged_q = []
+aged_q_meta = []         # (agent, topic, ts) song song aged_q — owner-hint PHẢI phủ cả >48h,
+                          # đúng lúc bằng chứng "chưa ai nhận" mạnh nhất (xem khối owner-hint).
 if os.path.isdir(inbox_dir):
     # PHẢI quét CẢ archive: kb_nightly Phase 1b2 (EVENT_KEEP_DAYS=30) chuyển MỌI event cũ
     # hơn 30 ngày khỏi bus/inbox/*.jsonl sang bus/inbox/archive/<id>_<YYYY-MM>.jsonl.gz,
@@ -685,6 +687,7 @@ if os.path.isdir(inbox_dir):
                 # dùng, để hai bên không trôi ra khỏi nhau khi thêm tiền tố mới.
                 _is_wags = str(rec.get("topic") or "").startswith(WAGS_SELF_Q_PREFIXES)
                 aged_q.append((age_d, f"{agent}/{rec.get('topic')} ({age_d}d)", _is_wags))
+                aged_q_meta.append((agent, str(rec.get("topic") or ""), ts_dt))
     if read_errors:
         # KHÔNG gắn [WARN-ONLY]: đây là lỗi TOOLING sửa được (khác với backlog chờ user).
         # Câu chữ cố ý chứa "câu hỏi (question)" để nhánh routing dưới đưa về COORD_WARN
@@ -773,34 +776,6 @@ if pending_q:
           f"nhưng ghi bus SAI QUY ƯỚC (có sự kiện đăng sau, cùng tiền tố topic HOẶC chung "
           f"từ hiếm trong {WIN_H}h — GỢI Ý thôi, phải tự kiểm chứng; quy ước đóng: "
           f"`answer`/`decision` GIỮ NGUYÊN topic câu hỏi): {hints}")
-    # Dòng CHỦ SỞ HỮU: câu hỏi mà topic tự khai người phụ trách theo quy ước "…-needs-<agent>".
-    # Sự cố THẬT 2026-08-27→28: Wags đăng 4 question kết thúc bằng `-needs-taylor` lúc 13:33-13:42Z.
-    # Hệ quả TỰ ĐỘNG duy nhất của một câu hỏi treo là COORD_WARN → dispatch **Wags**; không có
-    # đường nào đưa nó tới Taylor. Cả 4 nằm im 19 giờ, rồi đốt đúng 1 job wags_autofix để Wags
-    # kết luận lại y hệt điều nó đã tự viết hôm trước — trong đó có 1 mục URGENT (BAF đã BANNED
-    # trong KNOWLEDGE.md nhưng 2 bản sao hằng số trong code chưa cập nhật ⇒ chạm lựa chọn live).
-    # Vì sao chỉ IN chứ KHÔNG tự dispatch peer: auto-dispatch chéo agent theo một chuỗi trong
-    # topic là tự phục hồi mù (user chốt 2026-08-03: lỗi mà đọc output là thấy thì đừng xây
-    # auto-retry) — và người phụ trách ở đây làm việc trong domain trading, nơi Wags/checker
-    # KHÔNG được tự kích hoạt. Dòng này chỉ biến "im lặng" thành "một lệnh copy được".
-    _owner_q = {}
-    for _qa, _qt, _ in pending_q_meta:
-        _tail = _qt.rsplit("-needs-", 1)
-        if len(_tail) != 2:
-            continue
-        # Bỏ hậu tố mức-độ tuỳ ý người viết thêm (…-needs-taylor-urgent) rồi lấy token đầu.
-        _own = _tail[1].split("-")[0].strip()
-        if not _own or _own.lower() in ("human", "user"):
-            continue      # "needs-human/user" đã có kênh riêng (ACK_PREFIX) — không trùng lặp.
-        # Gom KHÔNG phân biệt hoa-thường (người viết topic gõ tuỳ ý) nhưng IN nguyên văn:
-        # agent_id thật phân biệt hoa-thường (DollarBill), tự lowercase là in ra lệnh chạy sai.
-        _owner_q.setdefault(_own.lower(), [_own, []])[1].append(f"{_qa}/{_qt}")
-    for _, (_own, _qs) in sorted(_owner_q.items()):
-        W(f"{WARN_ONLY} {len(_qs)} câu hỏi trên TỰ KHAI người phụ trách là '{_own}' "
-          f"(quy ước topic '…-needs-<agent>') — checker KHÔNG bao giờ tự dispatch chéo agent, "
-          f"nên nếu chưa ai gọi thì nó nằm im. Kiểm bằng `bin/jobs.sh list` rồi gọi tường minh: "
-          f"DISPATCH_FROM=Wags bin/dispatch.sh <{_own}> \"<việc>\" --bg. Đóng bằng `answer`/"
-          f"`decision` GIỮ NGUYÊN topic gốc: {_qs}")
 elif os.path.isdir(inbox_dir) and not pending_q_wagsfix and not pending_q_needs_human \
         and not pending_q_fresh:
     # Điều kiện isdir là BẮT BUỘC: không quét được ≠ quét xong và sạch (xem `else` ở trên).
@@ -860,6 +835,55 @@ if aged_q:
         W(f"{WARN_ONLY} Câu hỏi TREO LÂU (>48h, chưa ai quyết) — {len(aged_q)} mục, cần "
           f"USER quyết; {len(oldest)} cũ nhất: {oldest} …và {more} mục giữa… "
           f"{len(newest)} mới nhất: {newest}. Danh sách ĐẦY ĐỦ: bin/bus_question_audit.py")
+# Dòng CHỦ SỞ HỮU: câu hỏi mà topic tự khai người phụ trách theo quy ước "…-needs-<agent>".
+# Sự cố THẬT 2026-08-27→28: Wags đăng 4 question kết thúc bằng `-needs-taylor` lúc 13:33-13:42Z.
+# Hệ quả TỰ ĐỘNG duy nhất của một câu hỏi treo là COORD_WARN → dispatch **Wags**; không có
+# đường nào đưa nó tới Taylor. Cả 4 nằm im 19 giờ, rồi đốt đúng 1 job wags_autofix để Wags
+# kết luận lại y hệt điều nó đã tự viết hôm trước — trong đó có 1 mục URGENT (BAF đã BANNED
+# trong KNOWLEDGE.md nhưng 2 bản sao hằng số trong code chưa cập nhật ⇒ chạm lựa chọn live).
+# Vì sao chỉ IN chứ KHÔNG tự dispatch peer: auto-dispatch chéo agent theo một chuỗi trong
+# topic là tự phục hồi mù (user chốt 2026-08-03: lỗi mà đọc output là thấy thì đừng xây
+# auto-retry) — và người phụ trách ở đây làm việc trong domain trading, nơi Wags/checker
+# KHÔNG được tự kích hoạt. Dòng này chỉ biến "im lặng" thành "một lệnh copy được".
+# NGUỒN = pending_q_meta (<48h) VÀ aged_q_meta (>48h) — bản đầu (coord-2026-08-28 round 1) chỉ
+# phủ <48h, nghĩa là đúng lúc một câu hỏi -needs-<agent> treo LÂU NHẤT (bằng chứng "không ai
+# nhận" mạnh nhất) thì dòng gợi ý lại BIẾN MẤT. arch-reviewer required_change #2, round 2, đã sửa.
+_AGENTS_DIR = os.path.join(wc_root, "mike", "agents")
+_KNOWN_AGENTS = {}
+if os.path.isdir(_AGENTS_DIR):
+    for _d in sorted(os.listdir(_AGENTS_DIR)):
+        # "wt-*" là git worktree tạm, không phải agent thật — loại khỏi danh sách hợp lệ.
+        if _d.startswith("wt-") or not os.path.isdir(os.path.join(_AGENTS_DIR, _d)):
+            continue
+        _KNOWN_AGENTS[_d.lower()] = _d
+_owner_q = {}
+for _qa, _qt, _ in pending_q_meta + aged_q_meta:
+    _tail = _qt.rsplit("-needs-", 1)
+    if len(_tail) != 2:
+        continue
+    # Bỏ hậu tố mức-độ tuỳ ý người viết thêm (…-needs-taylor-urgent) rồi lấy token đầu.
+    _own_raw = _tail[1].split("-")[0].strip()
+    if not _own_raw or _own_raw.lower() in ("human", "user"):
+        continue      # "needs-human/user" đã có kênh riêng (ACK_PREFIX) — không trùng lặp.
+    # Gom KHÔNG phân biệt hoa-thường (người viết topic gõ tuỳ ý); tên IN RA lấy từ
+    # _KNOWN_AGENTS (case chuẩn của agent thật), không phải nguyên văn người viết topic.
+    _owner_q.setdefault(_own_raw.lower(), [_own_raw, []])[1].append(f"{_qa}/{_qt}")
+for _own_key, (_own_raw, _qs) in sorted(_owner_q.items()):
+    _canon = _KNOWN_AGENTS.get(_own_key)
+    if _canon:
+        # Không bọc <> quanh tên agent đã biết chắc — chỉ <việc> còn là chỗ người dùng phải tự
+        # điền mới cần placeholder; in thẳng tên thật thì lệnh mẫu copy-paste được ngay.
+        W(f"{WARN_ONLY} {len(_qs)} câu hỏi trên TỰ KHAI người phụ trách là '{_canon}' "
+          f"(quy ước topic '…-needs-<agent>') — checker KHÔNG bao giờ tự dispatch chéo agent, "
+          f"nên nếu chưa ai gọi thì nó nằm im. Kiểm bằng `bin/jobs.sh list` rồi gọi tường minh: "
+          f"DISPATCH_FROM=Wags bin/dispatch.sh {_canon} \"<việc>\" --bg. Đóng bằng `answer`/"
+          f"`decision` GIỮ NGUYÊN topic gốc: {_qs}")
+    else:
+        # Token không khớp agent thật nào (topic gõ sai, hoặc hậu tố "-needs-" không nói về
+        # agent) — KHÔNG in lệnh dispatch cho một agent không tồn tại, chỉ nêu sự kiện.
+        W(f"{WARN_ONLY} {len(_qs)} câu hỏi trên khai chủ '{_own_raw}' (quy ước topic "
+          f"'…-needs-<agent>') nhưng KHÔNG khớp agent nào trong {_AGENTS_DIR} — cần người tự "
+          f"tra, KHÔNG in lệnh dispatch: {_qs}")
 # CHECK5_END
 
 # 5b. Hàng đợi CÁCH LY của append_event.sh (bus/_rejected.jsonl) — thêm 2026-08-16 theo
