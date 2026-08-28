@@ -128,11 +128,14 @@ import argparse
 import glob
 import json
 import os
+import shutil
 import subprocess
 import sys
 from dataclasses import dataclass, field
 
 BQ_PROJECT = "lithe-record-440915-m9"
+# bq có thể không có trong PATH khi gọi từ cron — dùng full path nếu cần
+_BQ_BIN = shutil.which("bq") or "/home/trido/google-cloud-sdk/bin/bq"
 EXEC_LOG_DIR = "/home/trido/thanhdt/WorkingClaude/data/execution_logs"
 ACCOUNTS = {"SpaceX": "0002023347", "ZaloPay": "0001743768"}
 
@@ -264,7 +267,7 @@ BQ_MAX_ROWS = 200_000
 def _bq(sql: str) -> list:
     """Chạy BQ, trả về list[dict]. Không dùng cache env (§11) — đây là tra cứu lịch sử thuần."""
     out = subprocess.run(
-        ["bq", "query", "--use_legacy_sql=false", f"--project_id={BQ_PROJECT}",
+        [_BQ_BIN, "query", "--use_legacy_sql=false", f"--project_id={BQ_PROJECT}",
          f"--max_rows={BQ_MAX_ROWS}", "--format=json", sql],
         capture_output=True, text=True, timeout=300,
     )
