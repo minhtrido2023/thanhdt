@@ -32,63 +32,23 @@
       "auto": false,
       "fix_needed": "Chủ sở hữu daily_retro.sh quyết: khối wake-metrics còn NGHĨA GÌ sau khi 541b50f3 gỡ push-wake/reconciler/debounce? Nếu machinery đã retire thì gỡ CẢ khối lẫn selfcheck; nếu còn giữ thì set lại 2 biến. Wags KHÔNG tự quyết vì đây là phạm vi retro/wakeup của Mike, không phải bug điều phối."
     },
-    "capit_lever_selfcheck.py": {
+    "mike/bin/diagnosis_evidence_gate_selfcheck.py": {
       "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
-      "since": "2026-08-22T21:57:25Z",
+      "since": "2026-08-28T19:37:28Z",
       "status": "FAIL",
       "auto": true,
-      "topic": "selfcheck-red: capit_lever_selfcheck.py",
-      "escalated_utc": "2026-08-22T21:57:25Z",
+      "topic": "selfcheck-red: mike/bin/diagnosis_evidence_gate_selfcheck.py",
+      "escalated_utc": "2026-08-28T19:37:28Z",
       "ack_pending": false,
       "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
     },
-    "dc_book_waterfall_selfcheck.py": {
+    "mike/bin/dt5g_writer_watch_selfcheck.sh": {
       "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
-      "since": "2026-08-25T21:59:11Z",
+      "since": "2026-08-28T19:37:28Z",
       "status": "FAIL",
       "auto": true,
-      "topic": "selfcheck-red: dc_book_waterfall_selfcheck.py",
-      "escalated_utc": "2026-08-25T21:59:11Z",
-      "ack_pending": false,
-      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
-    },
-    "mike/bin/universe_pit_quality_selfcheck.py": {
-      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
-      "since": "2026-08-25T21:59:11Z",
-      "status": "FAIL",
-      "auto": true,
-      "topic": "selfcheck-red: mike/bin/universe_pit_quality_selfcheck.py",
-      "escalated_utc": "2026-08-25T21:59:11Z",
-      "ack_pending": false,
-      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
-    },
-    "phs_flash_api_selfcheck.py": {
-      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
-      "since": "2026-08-25T21:59:11Z",
-      "status": "FAIL",
-      "auto": true,
-      "topic": "selfcheck-red: phs_flash_api_selfcheck.py",
-      "escalated_utc": "2026-08-25T21:59:11Z",
-      "ack_pending": false,
-      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
-    },
-    "lag_forensic_filter_selfcheck.py": {
-      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
-      "since": "2026-08-26T21:57:27Z",
-      "status": "FAIL",
-      "auto": true,
-      "topic": "selfcheck-red: lag_forensic_filter_selfcheck.py",
-      "escalated_utc": "2026-08-26T21:57:27Z",
-      "ack_pending": false,
-      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
-    },
-    "mike/bin/now_injection_selfcheck.sh": {
-      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
-      "since": "2026-08-27T21:56:56Z",
-      "status": "FAIL",
-      "auto": true,
-      "topic": "selfcheck-red: mike/bin/now_injection_selfcheck.sh",
-      "escalated_utc": "2026-08-27T21:56:56Z",
+      "topic": "selfcheck-red: mike/bin/dt5g_writer_watch_selfcheck.sh",
+      "escalated_utc": "2026-08-28T19:37:28Z",
       "ack_pending": false,
       "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
     }

@@ -3,7 +3,7 @@
 > **Nguồn sự thật của toàn đội — canonical-only, Mike biên tập thủ công.**
 > Consolidator KHÔNG ghi vào đây (raw events → `kb/events_buffer.md`). File này ổn định.
 > Agent đọc `context_pack.md` (~8KB, distilled). File này dành cho tra cứu sâu và weekly editorial.
-> Raw event log: `kb/events_buffer.md` (hot, 7 ngày) + `kb/archive/` (lịch sử). **Curated: 2026-07-11 (Mike, weekly editorial).**
+> Raw event log: `kb/events_buffer.md` (hot, 7 ngày) + `kb/archive/` (lịch sử). **Curated: 2026-08-29 (Mike, weekly editorial).**
 
 ---
 
@@ -41,11 +41,33 @@
 
 **Multiple-testing discipline (chốt 2026-07-05, Bailey–López de Prado):** mọi wire production khai báo **N trials** + **DSR** trên NAV daily. **DSR<0.95 → RED FLAG**, không wire nếu chưa sign-off. Khi chọn từ họ ≥~8 biến thể: báo thêm **PBO (CSCV)** — PBO≥0.5 = ưu tiên config robust-trung vị. Kèm **per-year leave-one-out** khi OOS edge mỏng năm (bài học Wave1/H8a-tiebreaker, xem §7/§8: OOS tăng đúng luật nhưng toàn bộ đến từ 2 năm, LOO rớt → route qua skeptic trước khi wire, KHÔNG wire).
 
-**Paper-trading pipelines đang chạy (mọi cái đều account paper `main`, KHÔNG chạm live SpaceX/ZaloPay — trừ khi ghi rõ):**
-- **EXTREME-regime gate** (từ 2026-07-01, target kết thúc ~2026-07-28): Week-1 stress-injection PASS 24/24. Điều kiện LIVE: ZERO false-trigger ~4 tuần benign + không can thiệp NORMAL-path + user sign-off.
-- **Vol-scale buy chase-cap (patch#3)** (từ 2026-07-01, target kết thúc ~2026-07-14): executor-path stress PASS 15/15. Điều kiện LIVE: paper sạch + không can thiệp NORMAL-path + quant-skeptic rerun REAL-fill vs proxy + user sign-off.
-- **DC-book (ConvergePort) NEUTRAL idle-cash waterfall** (từ 2026-07-06, job `Taylor_20260706_125540` + `_131247` + deep-dive `_173317`): khi NEUTRAL và BAL/LAG rỗng, thứ tự ưu tiên **BAL/LAG (full trước) → DC book (double-confirm sector-lens BUY ∧ 8L rating≤2, ex-DHG, cap gộp overlap 0.15, floor thanh khoản Trading_Value_1M_P50≥3B) → custom30V**. DC làm top-priority (thay BAL/LAG) = REFUTE mạnh; DC làm lớp giữa (đúng thứ tự trên) = +5.0pp trên sleeve parking, ước tính +3.5pp/năm cho SpaceX-now. **Caveat: DSR phần excess chỉ 0.775 (<0.95 ngưỡng) — bảo hiểm hợp lý, CHƯA phải alpha tin cậy cao** → paper trước, không wire live. Review **event-anchored** (không phải ngày cố định): mốc = khi chu kỳ reverse-unwind ĐẦU TIÊN (LAG refill dự kiến cuối 07) hoàn tất + settle 4-6 tuần sau — sàn ~2 tháng, trần ~2026-10-06 (tránh mùa BCTC Q3), trượt theo nếu LAG refill trượt lịch.
-- **Fill-timing khung giờ** (BUY 10:45-11:15 / SELL 09:15-09:45): edge THẬT & IS/OOS-stable (BUY@11:15 rẻ hơn open +17.6bps/lệnh t=12.0; SELL@open +11.8bps vs ATC) nhưng **KHÔNG flip live ngay** — đây là mechanics-gate (cần verify cơ chế khớp lệnh sạch), không phải edge-gate (edge đã chứng minh trên backtest lịch sử, KHÔNG cần live tự chứng minh lại — noise 110-220bps >> edge 17bps nên live/paper vài tuần không bao giờ tự thấy edge, đúng thiết kế). **2026-07-09 audit fill thật** (job `Taylor_20260709_101602`, phản hồi user nghi "mua xong lỗ ngay trong phiên"): cảm nhận user ĐÚNG về giá trị (BUY vsClose −41.7bps VW) nhưng nguyên nhân = trôi thị trường 1 ngày cụ thể (07-02, deploy lớn lúc 09:15 gặp bank fade cả phiên), KHÔNG phải lỗi cơ chế khớp (vsOpen +3.4bps, sạch). Đồng thời phát hiện + sửa bug đo lường: `execution_quality_review.py` đếm nhầm cả lệnh LIVE (bị ép mult=1.0) vào "in-window adherence" → con số "98% adherence" là GIẢ; sau fix, evidence-rate thật ≈0 (paper main CHƯA từng chạy phiên sáng có BUY thật trong cửa sổ). Checkpoint flip vẫn ~cuối tháng 7, điều kiện: ≥5 phiên paper có BUY fill trong cửa sổ + 0 reject + không lệnh treo → quant-skeptic → user sign-off. Option trung gian: pilot flip riêng ZaloPay (cash-only, lệnh nhỏ) trước SpaceX — chưa quyết.
+**Paper→LIVE transitions (cập nhật 2026-08-29 — 3/4 mục dưới đã go-live, KB cũ lệch ~1 tháng):**
+- **EXTREME-regime gate**: đã GO-LIVE SpaceX+ZaloPay từ **2026-08-22** (`extreme_regime_enabled=True`
+  qua account override). Alert pipeline `bin/extreme_regime_dd_alert.sh` hook trong `run_bot.sh`,
+  commit `07726527`. Chi tiết: `kb/current_ops.md` § Features đang LIVE.
+- **Vol-scale buy chase-cap (patch#3)**: đã GO-LIVE toàn bộ từ **2026-08-04** (`config.py:190`,
+  `chase_cap_vol_scale_enabled=True`), k=2.0/ceil=4%/clamp static→ceil theo 20d rvol.
+- **Fill-timing khung giờ**: đã GO-LIVE (HYBRID) từ **2026-08-26** (user duyệt option A) — BUY
+  blocks 11:00/11:15/13:00/13:15/13:30, SELL blocks 09:15/09:30/09:45/10:00 (khác khung gốc dự
+  kiến BUY 10:45-11:15/SELL 09:15-09:45 ở nghiên cứu ban đầu — option A là bản đã được user chốt
+  khi flip). Monitoring: fill-vs-open mỗi ~10 phiên, rollback nếu mean >+22bps. Commit `9be375a4`.
+  *Bối cảnh nghiên cứu (giữ làm lịch sử):* edge THẬT & IS/OOS-stable (BUY@11:15 rẻ hơn open
+  +17.6bps/lệnh t=12.0; SELL@open +11.8bps vs ATC); audit fill thật 2026-07-09
+  (`Taylor_20260709_101602`) xác nhận vsOpen +3.4bps sạch, cảm nhận lỗ của user hôm đó là do trôi
+  thị trường 1 ngày cụ thể, không phải lỗi cơ chế khớp; đồng thời phát hiện+sửa bug đo lường
+  `execution_quality_review.py` (đếm nhầm lệnh LIVE mult=1.0 vào "in-window adherence").
+- **DC-book (ConvergePort) NEUTRAL idle-cash waterfall** — **VẪN PAPER-ONLY** (account `main`,
+  KHÔNG chạm live), chưa go-live. Từ 2026-07-06 (job `Taylor_20260706_125540` + `_131247` +
+  deep-dive `_173317`): khi NEUTRAL và BAL/LAG rỗng, thứ tự ưu tiên **BAL/LAG (full trước) → DC
+  book (double-confirm sector-lens BUY ∧ 8L rating≤2, ex-DHG, cap gộp overlap 0.15, floor thanh
+  khoản Trading_Value_1M_P50≥3B) → custom30V**. DC làm top-priority (thay BAL/LAG) = REFUTE mạnh;
+  DC làm lớp giữa (đúng thứ tự trên) = +5.0pp trên sleeve parking, ước tính +3.5pp/năm cho
+  SpaceX-now. **Caveat: DSR phần excess chỉ 0.775 (<0.95 ngưỡng)** — bảo hiểm hợp lý, CHƯA phải
+  alpha tin cậy cao → giữ paper. Review event-anchored, trần ~2026-10-06 (tránh mùa BCTC Q3),
+  trượt theo nếu LAG refill trượt lịch — trạng thái sống: `kb/projects/rnd-pipeline-tracker.md`.
+- **CAPIT margin lever** (`capit_margin_lever.enabled=True`) — đã GO-LIVE **2026-08-24** (mục mới,
+  không có trong ghi chép "paper" trước đó — đi thẳng từ R&D/duyệt user sang live). Ngày có CAPIT
+  margin phải chạy `approve_margin_day.py` TRƯỚC bot. Chi tiết: `kb/current_ops.md`.
 
 **Đã thử, BỊ LOẠI — không wire:**
 - Custom30V permanent-exclude 7 tên: HURTS −1.0pp (walk-forward bác). DO NOT wire.
@@ -101,32 +123,26 @@ giả thuyết/phản biện tinh vi/chạm production chưa có template → **
 như ladder cũ 07-06. Chi tiết đầy đủ + `--effort` per-dispatch: `MIKE.md §Model routing`. Native
 subagent dùng tham số `model` sẵn có.
 
-**Opus-drift check (item 5c KB editorial, thêm 2026-08-01, đo lần đầu 2026-08-03, tái đo
-2026-08-08/14/21):** opus% đi từ 14,3% (07-17) → **74,2% (08-02)** → sustained **65-80% MỖI
-TUẦN liên tục 08-02→08-14**, đỉnh 79,6% (08-04) → **XU HƯỚNG GIẢM THẬT bắt đầu 08-14→08-21**:
-67,8% (08-14) → 62,7% (08-19) → **53,2% (08-21, tuần mới nhất, dưới ngưỡng flag 60% lần đầu tiên
-kể từ khi bắt đầu đo 08-03)**. `spend_report.py --days 7` (đo trực tiếp, khác cột CSV) xác nhận
-cùng chiều: overall opus mix 52% trailing-7d tại 08-21. fable% vẫn ~0% ổn định (không lẫn fable-
-drift). Chưa rõ nguyên nhân giảm (không có thay đổi cấu hình nào ghi nhận) — có thể do research
-Taylor giảm khối lượng (research_h 25,4h→13,2h cùng giai đoạn 08-14→08-21, xem spend-trend dưới)
-chứ không phải đổi thói quen dispatch. Mục (b) cũ (saga `coord-YYYY-MM-DD` Wags mặc định Opus cho
-ACK/triage) **VẪN CHƯA sửa** — theo dõi tiếp, chưa downgrade độ ưu tiên đề xuất.
-Effort-tier mix (item 5d, đo lần đầu 08-10, tái đo 08-14/21): Taylor 88-94% high (08-10) → 69%
-high (08-14, dưới ngưỡng ⚠ lần đầu) → **71% high/28% medium (08-21, n=58) — QUAY LẠI ⚠ ngưỡng
-cảnh báo** (n≥10 và %high≥70%). Đồng thời `routing_retrospective.py --days 7` (mới, item 5e)
-flag Taylor **[HIGH+FAIL] 71% high VÀ 17% fail-rate cùng tuần** — effort cao không cải thiện tỷ
-lệ thành công ở agent này. Đã lấy mẫu 1 dispatch high thật (`Taylor_20260821_123019`, sửa
-`strategies.py` build_plan diff-floor cho CAPIT-exit, xem §8 incidents) — task này hợp lý ở mức
-high (kiến trúc, chạm production money-path, cần viết + verify selfcheck). Chưa đủ mẫu để kết
-luận 71% có hệ thống lệch hay không — theo dõi tiếp tuần sau, KHÔNG tự đổi effort mặc định của
-Taylor (nguyên tắc item 5d: hành vi dispatch của Mike, không phải bug 1 lần sửa được).
-Không agent nào khác vượt ngưỡng 5d tuần 08-21 (Wags 32% high/n=37, DollarBill 14%/n=14).
-**Routing retrospective (item 5e, LẦN ĐẦU chạy trong 1 review định kỳ — 2026-08-21, chưa có
-baseline tuần trước để so ≥2-tuần-liên-tiếp):** ngoài Taylor ở trên, flag thêm RETRY-RATE cao ở
-Wags (24%), DollarBill (21%), Winston (27%) và FAIL-RATE Wags (23%). Theo đúng luật item 5e (chỉ
-ghi nhận có ý nghĩa khi lặp ≥2 tuần) — đây là điểm dữ liệu BASELINE đầu tiên, CHƯA đề xuất sửa
-routing rule nào; review tuần sau (08-28) sẽ so trực tiếp với các số này để phân biệt drift bền
-vững vs biến động 1 tuần.
+**Opus-drift check (item 5c, đo lần đầu 2026-08-03, tái đo 08-08/14/21/28):** opus% đi từ 14,3%
+(07-17) → đỉnh 79,6% (08-04) → **XU HƯỚNG GIẢM LIÊN TỤC 4 tuần**: 67,8% (08-14) → 62,7% (08-19)
+→ 53,2% (08-21) → **29% (08-28, tuần mới nhất — `spend_report.py --days 7` đo trực tiếp, dưới
+ngưỡng flag 60% 2 tuần liên tiếp)**. fable% vẫn 0% (không lẫn fable-drift). Nguyên nhân giảm vẫn
+suy đoán (không có thay đổi cấu hình ghi nhận) — trùng thời điểm research Taylor giảm khối lượng
+(research_h giảm liên tục, xem spend-trend dưới). **Kết luận 08-28: opus-drift đã TỰ ĐIỀU CHỈNH
+về mức bình thường, ngừng theo dõi tần suất cao — quay lại đo định kỳ hàng tuần như bình thường,
+không cần sample dispatch nào tuần này.**
+**Effort-tier mix (item 5d, đo 08-10/14/21/28):** Taylor 88-94% high (08-10) → 69% (08-14) → 71%
+(08-21, quay lại ⚠) → **55% high/45% medium (08-28, tuần mới nhất — dưới ngưỡng ⚠ 70% lần thứ 2
+kể từ khi bắt đầu đo)**. Cùng chiều giảm với opus-drift ở trên (khả năng cùng nguyên nhân: khối
+lượng research Taylor giảm → tỷ trọng job phức tạp/high-effort giảm theo). Không agent nào khác
+vượt ngưỡng 5d tuần 08-28. **Không cần sample dispatch tuần này — xu hướng đã về dưới ngưỡng.**
+**Routing retrospective (item 5e, đo 08-21/28):** tuần 08-21 flag RETRY-RATE Wags(24%)/
+DollarBill(21%)/Winston(27%) + FAIL-RATE Wags(23%); tuần 08-28 **KHÔNG agent nào trong nhóm đó
+còn bị flag** (Wags/DollarBill/Winston retry+fail đều 0-12% tuần này) — **không lặp ≥2 tuần liên
+tiếp ở CÙNG agent ⇒ không phải drift bền vững, đã tự hết theo luật item 5e**. Tuần 08-28 xuất
+hiện flag MỚI, agent KHÁC: Taylor [RETRY-RATE] 19% (10/53 job) — điểm dữ liệu đơn lẻ đầu tiên
+cho agent này, chưa đủ 2 tuần để kết luận, theo dõi tiếp tuần sau (08-29 review kế tiếp sẽ tự
+đối chiếu — nếu Taylor retry vẫn ≥15% tuần đó thì đề xuất cụ thể sửa MIKE.md §Routing).
 **Model mặc định của chính Mike:** đổi sang Fable 5 (2026-07-06) rồi **ĐẢO NGƯỢC LẠI Sonnet 5** (2026-07-07, user yêu cầu). Phát hiện **3 tầng config** trong bridge Discord (`ccdb-mike`): thread override (DB) > global (DB) > `.env` fallback — sửa `.env` vô tác dụng nếu DB đã có row cũ. Dọn 4 dòng rác sai format (`"Sonnet 5"`/`"sonnet 5"` có dấu cách — CLI từ chối) từng gây lỗi `/model` ở 1 thread. Đã đồng bộ cả 3 nơi.
 
 **Routing guards (2026-06-27):**
