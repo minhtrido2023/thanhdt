@@ -28,6 +28,10 @@ case "${1:-}" in
 esac
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 WC_ROOT="$(cd "$ROOT/.." && pwd)"
+if [ -f "$WC_ROOT/wc_env.sh" ]; then
+  # shellcheck source=/dev/null
+  source "$WC_ROOT/wc_env.sh"
+fi
 TRADING_REPORT_THREAD="trading_report"
 STATE="$ROOT/state/report_cadence_dispatched.json"
 TODAY="$(TZ='Asia/Ho_Chi_Minh' date +%Y-%m-%d)"
