@@ -773,6 +773,34 @@ if pending_q:
           f"nhưng ghi bus SAI QUY ƯỚC (có sự kiện đăng sau, cùng tiền tố topic HOẶC chung "
           f"từ hiếm trong {WIN_H}h — GỢI Ý thôi, phải tự kiểm chứng; quy ước đóng: "
           f"`answer`/`decision` GIỮ NGUYÊN topic câu hỏi): {hints}")
+    # Dòng CHỦ SỞ HỮU: câu hỏi mà topic tự khai người phụ trách theo quy ước "…-needs-<agent>".
+    # Sự cố THẬT 2026-08-27→28: Wags đăng 4 question kết thúc bằng `-needs-taylor` lúc 13:33-13:42Z.
+    # Hệ quả TỰ ĐỘNG duy nhất của một câu hỏi treo là COORD_WARN → dispatch **Wags**; không có
+    # đường nào đưa nó tới Taylor. Cả 4 nằm im 19 giờ, rồi đốt đúng 1 job wags_autofix để Wags
+    # kết luận lại y hệt điều nó đã tự viết hôm trước — trong đó có 1 mục URGENT (BAF đã BANNED
+    # trong KNOWLEDGE.md nhưng 2 bản sao hằng số trong code chưa cập nhật ⇒ chạm lựa chọn live).
+    # Vì sao chỉ IN chứ KHÔNG tự dispatch peer: auto-dispatch chéo agent theo một chuỗi trong
+    # topic là tự phục hồi mù (user chốt 2026-08-03: lỗi mà đọc output là thấy thì đừng xây
+    # auto-retry) — và người phụ trách ở đây làm việc trong domain trading, nơi Wags/checker
+    # KHÔNG được tự kích hoạt. Dòng này chỉ biến "im lặng" thành "một lệnh copy được".
+    _owner_q = {}
+    for _qa, _qt, _ in pending_q_meta:
+        _tail = _qt.rsplit("-needs-", 1)
+        if len(_tail) != 2:
+            continue
+        # Bỏ hậu tố mức-độ tuỳ ý người viết thêm (…-needs-taylor-urgent) rồi lấy token đầu.
+        _own = _tail[1].split("-")[0].strip()
+        if not _own or _own.lower() in ("human", "user"):
+            continue      # "needs-human/user" đã có kênh riêng (ACK_PREFIX) — không trùng lặp.
+        # Gom KHÔNG phân biệt hoa-thường (người viết topic gõ tuỳ ý) nhưng IN nguyên văn:
+        # agent_id thật phân biệt hoa-thường (DollarBill), tự lowercase là in ra lệnh chạy sai.
+        _owner_q.setdefault(_own.lower(), [_own, []])[1].append(f"{_qa}/{_qt}")
+    for _, (_own, _qs) in sorted(_owner_q.items()):
+        W(f"{WARN_ONLY} {len(_qs)} câu hỏi trên TỰ KHAI người phụ trách là '{_own}' "
+          f"(quy ước topic '…-needs-<agent>') — checker KHÔNG bao giờ tự dispatch chéo agent, "
+          f"nên nếu chưa ai gọi thì nó nằm im. Kiểm bằng `bin/jobs.sh list` rồi gọi tường minh: "
+          f"DISPATCH_FROM=Wags bin/dispatch.sh <{_own}> \"<việc>\" --bg. Đóng bằng `answer`/"
+          f"`decision` GIỮ NGUYÊN topic gốc: {_qs}")
 elif os.path.isdir(inbox_dir) and not pending_q_wagsfix and not pending_q_needs_human \
         and not pending_q_fresh:
     # Điều kiện isdir là BẮT BUỘC: không quét được ≠ quét xong và sạch (xem `else` ở trên).

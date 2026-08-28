@@ -407,6 +407,43 @@ def case_fresh_question_is_pending():
         shutil.rmtree(root, ignore_errors=True)
 
 
+# ── Ca 9b (2026-08-28): câu hỏi khai chủ sở hữu bằng quy ước topic "…-needs-<agent>".
+#    Sự cố thật 08-27→28: 4 question `…-needs-taylor` của Wags nằm im 19h vì hệ quả tự động
+#    duy nhất của một câu hỏi treo là dispatch **Wags**, không có đường tới Taylor. Dòng mới
+#    chỉ IN ra chủ sở hữu + lệnh dispatch (KHÔNG tự gọi peer) — pin cả 4 tính chất: có dòng,
+#    mang [WARN-ONLY] (⇒ không đổi routing), giữ NGUYÊN VĂN hoa-thường của agent_id, và
+#    "needs-human" KHÔNG bị nhận nhầm (nó đã có kênh ACK riêng).
+def case_owner_hint_from_needs_suffix():
+    root, inbox = mkbus()
+    try:
+        write_events(os.path.join(inbox, "Wags.jsonl"),
+                     [ev("Wags", "question", "loi-a-needs-taylor", ago(0, 5)),
+                      ev("Wags", "question", "loi-b-needs-taylor-urgent", ago(0, 5)),
+                      ev("Wags", "question", "loi-c-needs-DollarBill", ago(0, 5)),
+                      ev("Wags", "question", "loi-d-needs-human", ago(0, 5)),
+                      ev("Wags", "question", "loi-e-khong-khai-chu", ago(0, 5))])
+        lines, _ = run_check5(root)
+        out = joined(lines)
+        own = [ln for ln in lines if "TỰ KHAI người phụ trách" in ln]
+        check("owner-hint: gom 2 topic cùng owner 'taylor' vào ĐÚNG 1 dòng",
+              len([ln for ln in own if "'taylor'" in ln]) == 1
+              and "loi-a-needs-taylor" in "".join(own)
+              and "loi-b-needs-taylor-urgent" in "".join(own), out)
+        check("owner-hint: hậu tố mức-độ (-urgent) KHÔNG tách thành owner riêng",
+              not any("'urgent'" in ln for ln in own), out)
+        check("owner-hint: giữ NGUYÊN VĂN hoa-thường agent_id (DollarBill)",
+              any("'DollarBill'" in ln for ln in own), out)
+        check("owner-hint: 'needs-human' KHÔNG bị nhận là owner (đã có kênh ACK riêng)",
+              not any("'human'" in ln for ln in own), out)
+        check("owner-hint: mọi dòng owner đều mang [WARN-ONLY] (không đổi routing dispatch)",
+              own and all("[WARN-ONLY]" in ln for ln in own), out)
+        check("owner-hint: câu hỏi không khai chủ vẫn nằm ở dòng pending routable",
+              any("loi-e-khong-khai-chu" in ln for ln in lines
+                  if "trong 48h qua CHƯA thấy answer" in ln), out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
 # ── Ca 10 (2026-07-31, audit kiến trúc fleet #14): câu hỏi do CHÍNH pipeline wags_autofix
 #    sinh ra ở cuối vòng fix+arch-review, <48h, KHÔNG được re-trigger COORD_WARN — đây chính
 #    là input của vòng lặp Wags coord-fix tự nuôi quan sát được thật hôm 07-31 (arch-reviewer
@@ -1945,7 +1982,7 @@ def main():
                case_corrupt_gz_warns, case_empty_archive_warns,
                case_grace_fresh_question_not_routable, case_grace_expired_question_is_routable,
                case_grace_schedule_aware_last_weekday_gap,
-               case_fresh_question_is_pending,
+               case_fresh_question_is_pending, case_owner_hint_from_needs_suffix,
                case_wagsfix_not_confirmed_is_warn_only, case_wagsfix_prefix_not_substring,
                case_wagsfix_only_no_false_ok, case_wagsfix_prefix_list_in_sync,
                case_triaged_needs_human_ack, case_triaged_only_no_false_ok,
