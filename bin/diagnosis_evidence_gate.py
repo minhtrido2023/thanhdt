@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""diagnosis_evidence_gate.py <file.sh> [...]
+# Docstring là RAW (r"""): nó chứa `\` làm ví dụ cú pháp bash — chuỗi thường sinh
+# SyntaxWarning "invalid escape sequence" ra stderr, làm bẩn cả nhánh MIKE_DIAG_GATE=off
+# (đáng lẽ im hoàn toàn) và làm đỏ diagnosis_evidence_gate_selfcheck.py.
+r"""diagnosis_evidence_gate.py <file.sh> [...]
 
 Pre-commit gate — CHẶN CỨNG commit khi một đoạn code VỨT BỎ stderr của lệnh vừa hỏng
 (`2>/dev/null`) rồi ở CHÍNH nhánh hỏng đó in ra một CHẨN ĐOÁN cho người đọc (`|| die "…"`).
