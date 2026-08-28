@@ -2143,13 +2143,14 @@ with tempfile.TemporaryDirectory() as TMP:
           m_none == "", detail=repr(m_none)[:80])
 
     m_wait = run_margin(_PV_ON, None, "CHƯA CÓ duyệt riêng cho ngày 2099-01-02")
-    check("L2 plan CÓ vay + chưa duyệt riêng → nêu BẬT LOẠT: có margin, Σ tiền vay, và "
-          "CẦN DUYỆT RIÊNG (không lẫn vào dòng duyệt plan thường)",
-          "CÓ DÙNG MARGIN" in m_wait and "CẦN DUYỆT RIÊNG" in m_wait
-          and "tiền VAY dự kiến" in m_wait, detail=m_wait[:130])
-    check("L3 …và chỉ ra ĐÚNG lệnh phải chạy để duyệt (người duyệt không phải tự tra)",
-          "approve_margin_day.py" in m_wait and "--date 2099-01-02" in m_wait,
-          detail=m_wait[-150:])
+    check("L2 plan CÓ vay + chưa duyệt riêng → nêu BẬT LOẠT: có margin, Σ tiền vay, và cơ chế duyệt tự động",
+          "CÓ DÙNG MARGIN" in m_wait and "tiền VAY dự kiến" in m_wait
+          and "duyệt margin tự động" in m_wait, detail=m_wait[:130])
+    _aps = open(os.path.join(HERE, "mike", "bin", "approve_plan_simple.sh")).read()
+    check("L3 …và cơ chế auto-approve THẬT tồn tại trong approve_plan_simple.sh "
+          "(không chỉ so chuỗi mô tả báo cáo — §28)",
+          "approve_margin_day.py" in _aps and "loan_package_id" in _aps
+          and "--decided-by user" in _aps)
     check("L4 …và nói rõ không duyệt thì KHÔNG bị chặn lệnh, chỉ chạy bằng vốn tự có",
           "VỐN TỰ CÓ" in m_wait)
 
