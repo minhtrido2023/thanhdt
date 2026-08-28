@@ -79,7 +79,12 @@ def scan(root: str, targets: list[str]) -> int:
 
     warn_list, ambiguous_list, ok_count = [], [], 0
     for relpath, srcfile in sorted(found.items()):
-        if any(relpath.startswith(d) for d in HARD_EXCLUDE_DIRS):
+        # relpath may or may not carry a trailing slash (os.path.join(WORKDIR,"data","margin_approvals")
+        # -> "data/margin_approvals", no slash) while HARD_EXCLUDE_DIRS entries always do -- compare the
+        # normalized (trailing-slash-stripped) value on both sides, per coding_guidelines.md §28 (never
+        # compare raw un-normalized strings between two sources).
+        rp_norm = relpath.rstrip("/")
+        if any(rp_norm == d.rstrip("/") or relpath.startswith(d) for d in HARD_EXCLUDE_DIRS):
             continue
         basename = os.path.basename(relpath)
         if SELF_GEN_RE.match(basename):
