@@ -29,3 +29,4 @@
 ## Macro watch
 - Bobby BĐS VN report xong 08-26 (STRUCTURAL_ACCUMULATION/AMBIGUOUS). Review quý next ~2026-11-26.
 
+- [2026-08-29T15:41:05Z] 29/08 tối: #2 insider-shadow review XONG — verdict NGỪNG (2/3 FAIL: volume 7-9 mã/tháng > ngưỡng 5, selftest FAIL do insider_flags.py đọc bảng live mutable thay vì insider_transaction_snapshots; điều kiện xét lại đã ghi bus insider-shadow-review-20260829, chờ user quyết đầu tư tiếp hay đóng). #1 ĐANG CHẠY: Taylor_20260829_154054 (effort high, timeout 2400s) — nghiên cứu tham số margin đơn mã: sleeve 5/10/15% NAV (user nghiêng 15%), per-name 3% vs 5%, exit -20% giữ; 5 trục: risk math correlated, capacity ADV, tương tác capit_margin_lever, stress 2022-11, mâu thuẫn mandate Loại-2 ≤5%. Sau Taylor → risk-auditor phản biện → user chốt → mới code.
