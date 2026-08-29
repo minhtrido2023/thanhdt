@@ -182,6 +182,9 @@ for last_monday in candidate_mondays:
             "desc": f"tuần {last_monday.isoformat()} → {last_friday.isoformat()}",
             "target_file": f"mike/reports/SpaceX_ZaloPay_weekly_report_{last_monday.isoformat()}_to_{last_friday.isoformat()}.md",
             "most_recent": most_recent_weekly.isoformat() if most_recent_weekly else "CHƯA CÓ",
+            # scheduled_kind=="weekly" -> lượt cron 09:00 T7 ĐÚNG LỊCH (this_monday luôn là tuần
+            # vừa đóng), không phải watchdog phát hiện quá hạn -> không được gắn nhãn "overdue".
+            "overdue": scheduled_kind == "",
         })
 
 # --- Monthly: từ ngày 5, tháng trước phải có báo cáo (bỏ qua trước go-live 2026-07) ---
@@ -203,6 +206,7 @@ if today.day >= 5 or scheduled_kind == "monthly":
                     "desc": f"tháng {last_month_str}",
                     "target_file": f"mike/reports/SpaceX_ZaloPay_monthly_report_{last_month_str}.md",
                     "most_recent": "CHƯA CÓ" if not monthly_files else "có tháng khác, thiếu tháng này",
+                    "overdue": scheduled_kind == "",
                 })
 
 # ── RC_CLOSE_BEGIN — quyết định "kỳ này ĐÃ ĐƯỢC PHỦ, đóng được question" ────────────────
@@ -269,13 +273,28 @@ fi
 echo "$PLAN" | python3 -c "
 import json, sys
 for a in json.load(sys.stdin)['actions']:
-    print(f\"{a['kind']}\t{a['period_key']}\t{a['desc']}\t{a['target_file']}\t{a['most_recent']}\")
-" | while IFS=$'\t' read -r KIND PKEY DESC TFILE MOSTRECENT; do
-  MSG="🔴 **Báo cáo ${KIND} quá hạn — ${DESC}** — chưa có file, đang TỰ ĐỘNG dispatch Taylor soạn + gửi (báo cáo gần nhất: ${MOSTRECENT}). File dự kiến: \`${TFILE}\`. Đây là auto-dispatch từ check_report_cadence.sh (cron), không phải người theo dõi thủ công — nếu 24h sau vẫn chưa thấy báo cáo, đó là dấu hiệu dispatch thất bại, cần Mike kiểm tra bin/jobs.sh."
+    print(f\"{a['kind']}\t{a['period_key']}\t{a['desc']}\t{a['target_file']}\t{a['most_recent']}\t{int(a.get('overdue', True))}\")
+" | while IFS=$'\t' read -r KIND PKEY DESC TFILE MOSTRECENT OVERDUE; do
+  # OVERDUE=1: watchdog (không cờ, cron 08:30 T2-T6) phát hiện kỳ THẬT SỰ bị bỏ sót — cảnh báo
+  # đỏ + bus `question` cần người theo dõi là đúng. OVERDUE=0: lượt --scheduled-weekly/monthly
+  # (09:00 T7 / ngày 1) chạy ĐÚNG LỊCH, không phải sự cố — trước đây dùng chung message "quá
+  # hạn" + `question` cho cả 2 trường hợp nên MỌI báo cáo tuần/tháng đều bị gắn cảnh báo lỗi dù
+  # đúng giờ (user báo cáo 2026-08-29). Tách message + loại event theo OVERDUE để chỉ ca thật
+  # sự trễ mới lên cảnh báo.
+  if [ "$OVERDUE" = "1" ]; then
+    MSG="🔴 **Báo cáo ${KIND} quá hạn — ${DESC}** — chưa có file, đang TỰ ĐỘNG dispatch Taylor soạn + gửi (báo cáo gần nhất: ${MOSTRECENT}). File dự kiến: \`${TFILE}\`. Đây là auto-dispatch từ check_report_cadence.sh (cron watchdog 08:30 T2-T6), không phải người theo dõi thủ công — nếu 24h sau vẫn chưa thấy báo cáo, đó là dấu hiệu dispatch thất bại, cần Mike kiểm tra bin/jobs.sh."
+    EVENT_TYPE="question"
+    TOPIC_PREFIX="report-cadence-overdue-"
+    EVENT_PAYLOAD="{\"kind\":\"${KIND}\",\"period\":\"${DESC}\",\"target_file\":\"${TFILE}\",\"question\":\"Bao cao ${KIND} qua han, da auto-dispatch Taylor. Xac nhan/theo doi.\"}"
+  else
+    MSG="📊 **Đang tạo báo cáo ${KIND} theo lịch — ${DESC}** — lượt chạy đúng lịch (Thứ Bảy 09:00 / ngày 1 09:00), không phải lỗi hay quá hạn. Đang dispatch Taylor soạn + gửi. File dự kiến: \`${TFILE}\`."
+    EVENT_TYPE="finding"
+    TOPIC_PREFIX="report-cadence-scheduled-"
+    EVENT_PAYLOAD="{\"kind\":\"${KIND}\",\"period\":\"${DESC}\",\"target_file\":\"${TFILE}\"}"
+  fi
   echo "$MSG"
   "$ROOT/bin/notify_thread.sh" "$MSG" "$TRADING_REPORT_THREAD" 2>/dev/null || true
-  "$ROOT/bin/append_event.sh" Mike question "report-cadence-overdue-${PKEY}" \
-    "{\"kind\":\"${KIND}\",\"period\":\"${DESC}\",\"target_file\":\"${TFILE}\",\"question\":\"Bao cao ${KIND} qua han, da auto-dispatch Taylor. Xac nhan/theo doi.\"}" \
+  "$ROOT/bin/append_event.sh" Mike "$EVENT_TYPE" "${TOPIC_PREFIX}${PKEY}" "$EVENT_PAYLOAD" \
     2>/dev/null || true
 
   EMAIL_STEP="Sau khi tạo artifact, BẮT BUỘC chạy: python3 mike/bin/report_delivery_gate.py ${TFILE} --topic ${TRADING_REPORT_THREAD}. File tồn tại, maxturns_pending hay gửi một kênh đều CHƯA hoàn tất; chỉ báo xong khi gate in COMPLETE."
