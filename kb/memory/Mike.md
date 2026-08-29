@@ -28,3 +28,4 @@
 ## Macro watch
 - Bobby BĐS VN report xong 08-26 (STRUCTURAL_ACCUMULATION/AMBIGUOUS). Review quý next ~2026-11-26.
 
+- [2026-08-29T17:35:11Z] 30/08 00:35: dispatch song song #3 Taylor_20260829_173433 (C1 rolling IS/OOS windows, 1/4 điều kiện mở lại C1) + #4 Taylor_20260829_173455 (custom30V cash-flow-quality selector design + IC test sơ bộ, chưa backtest full). Cả 2 timeout 2400s effort high, có BQ cache preflight fallback network warning lúc dispatch.
