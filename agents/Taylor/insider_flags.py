@@ -20,8 +20,14 @@ Số đo của ngưỡng này: bắt 5,4% universe, P(fwd60 < -20%) = 19,68% vs 
   - chỉ `trade_status = 'Đã thực hiện xong'` — dòng `Đăng ký` có public_date nghĩa khác
   - `share_acquire` KHÔNG luôn có dấu (~2.500 dòng Bán dương) ⇒ TỰ áp dấu theo `action_code`
 
-Nguồn = LIVE BQ (bảng không có trong bq_cache; và theo coding_guidelines §11 script publish
-phải đọc live, không qua cache env kế thừa).
+Nguồn = `tav2_mike.insider_transaction_snapshots` (migrate 2026-08-29, job Taylor_20260829_160426,
+theo user directive sau insider-shadow-review-20260829). LÝ DO ĐỔI: bảng gốc `tav2_bq.insider_transaction`
+là SNAPSHOT TRẠNG THÁI bị GHI ĐÈ (`public_date` dời khi Đăng ký→Đã thực hiện xong — xem
+`kb/data_registry/fundamentals/insider_transaction.md` §Bẫy(1)) ⇒ đọc bảng LIVE cho một `asof` quá
+khứ là đọc trạng thái đã bị vendor sửa SAU `asof` đó = look-ahead. Query chọn vintage snapshot GẦN
+NHẤT `<= asof` (KHÔNG phải bảng live hiện tại) để tái lập đúng những gì đã biết TẠI THỜI ĐIỂM asof.
+Snapshot bắt đầu 2026-08-17 — mọi `asof < 2026-08-17` không còn dữ liệu (censored trái, không phục
+hồi được).
 
 Output: data/insider_flags.json
     {ticker: {last_alert, tier, reasons, sell_pct_osh, n_sellers, window_end}}
@@ -54,11 +60,17 @@ WINDOW_DAYS = 90
 STALE_SESSIONS_MAX = 10   # §4.4: bảng cũ hơn ~10 phiên ⇒ WARN + KHÔNG bắn cờ mới
 
 FLAG_SQL = """
-WITH ins AS (
+WITH latest_snap AS (
+  SELECT MAX(snapshot_date) AS d
+  FROM tav2_mike.insider_transaction_snapshots
+  WHERE snapshot_date <= DATE "{asof}"
+),
+ins AS (
   SELECT i.ticker, i.public_date, i.trader_person_id AS pid,
          IF(i.action_code = "S", -ABS(i.share_acquire), ABS(i.share_acquire)) AS qty
-  FROM tav2_bq.insider_transaction AS i
-  WHERE i.event_code IN ("DDIND","DDRP")
+  FROM tav2_mike.insider_transaction_snapshots AS i, latest_snap
+  WHERE i.snapshot_date = latest_snap.d
+    AND i.event_code IN ("DDIND","DDRP")
     AND i.action_code IN ("B","S")
     AND i.trade_status = "Đã thực hiện xong"
     AND i.share_acquire IS NOT NULL AND ABS(i.share_acquire) > 0
@@ -107,8 +119,12 @@ def bq_csv(sql):
     return list(_csv.DictReader(lines))
 
 
-def table_max_public_date():
-    rows = bq_csv("SELECT MAX(i.public_date) AS d FROM tav2_bq.insider_transaction AS i")
+def table_max_snapshot_date():
+    """Freshness của PIPELINE SNAPSHOT (`snapshot_corp_action_daily.py`, cron 23:50 ICT),
+    không phải freshness của giao dịch nội bộ mới nhất — snapshot chụp TOÀN BỘ bảng nguồn
+    mỗi ngày kể cả khi không có giao dịch mới, nên MAX(snapshot_date) trả lời đúng câu
+    "cron còn sống không", đúng vai trò cũ của MAX(public_date) trên bảng live."""
+    rows = bq_csv("SELECT MAX(snapshot_date) AS d FROM tav2_mike.insider_transaction_snapshots")
     return datetime.date.fromisoformat(rows[0]["d"]) if rows and rows[0]["d"] else None
 
 
@@ -175,10 +191,15 @@ def write_flags(recs, path=FLAGS_PATH):
 
 
 def selftest():
-    """Ca đã biết từ exp_insider/panel2.csv (cột time=2026-07-24, ngưỡng 1% + nsell>nbuy)."""
-    asof = datetime.date(2026, 7, 24)
-    expect = {"ITD": 0.151343, "BIG": 0.075561, "BMS": 0.028817,
-              "VCI": 0.014681, "TOS": 0.013333, "DIG": 0.012155}
+    """Fixture dựng lại 2026-08-29 (job Taylor_20260829_160426) từ chính vintage snapshot
+    2026-08-17 (vintage ĐẦU TIÊN, append-only ⇒ bất biến, không trôi qua thời gian như bảng
+    live cũ). Fixture cũ (asof 2026-07-24) đọc panel dựng từ bảng mutable — không dùng lại
+    được vì snapshot chỉ tồn tại từ 2026-08-17 trở đi; số kỳ vọng bên dưới lấy trực tiếp từ
+    kết quả query migrated chạy tay 1 lần, verify bằng mắt trước khi hardcode (BQ console,
+    2026-08-29)."""
+    asof = datetime.date(2026, 8, 17)
+    expect = {"DBT": 0.49472, "BKG": 0.18549, "NRC": 0.11780,
+              "DIG": 0.04031, "BMS": 0.02882, "TMG": 0.01611}
     recs = {r["ticker"]: r for r in scan(asof)}
     ok = True
     for tk, pct in expect.items():
@@ -210,12 +231,12 @@ def main():
     asof = datetime.date.fromisoformat(args.asof) if args.asof else datetime.date.today()
 
     # --- fail-safe freshness (§4.4): nguồn chết ⇒ WARN + KHÔNG bắn cờ mới, KHÔNG đụng file cũ ---
-    max_pub = table_max_public_date()
+    max_pub = table_max_snapshot_date()
     if max_pub is None:
-        print("WARNING: insider_transaction rỗng/không đọc được — KHÔNG ghi cờ.")
+        print("WARNING: insider_transaction_snapshots rỗng/không đọc được — KHÔNG ghi cờ.")
         sys.exit(2)
     stale = sessions_between(max_pub, asof)
-    print(f"# insider_flags — asof {asof} | MAX(public_date)={max_pub} (~{stale} phiên trước)")
+    print(f"# insider_flags — asof {asof} | MAX(snapshot_date)={max_pub} (~{stale} phiên trước)")
     if stale > STALE_SESSIONS_MAX:
         print(f"WARNING: bảng cũ hơn {STALE_SESSIONS_MAX} phiên ⇒ nguồn nhiều khả năng đã dừng "
               f"cập nhật. KHÔNG bắn cờ mới (cờ cũ trong file vẫn hết hạn theo TTL 90 ngày ở "
