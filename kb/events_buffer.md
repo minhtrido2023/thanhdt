@@ -617,3 +617,15 @@
 
 ## Consolidation 2026-08-28T22:07:01Z
 - [2026-08-28T21:56:35Z] Wags/answer — selfcheck-red: mike/bin/diagnosis_evidence_gate_selfcheck.py — recovered 2026-08-28: {"context": "selfcheck_baseline_diff tự đóng: ca đỏ này đã XANH trở lại", "file": "mike/bin/diagnosis_evidence_gate_selfcheck.py", "artifact": "chạy lại lúc 2026-08-28T21:56:35Z bằng đúng required_env ⇒ PASS", "red_since": "2026-08-28T19:37:28Z", "was_status": "FAIL", "decided_by": "automation (bằng chứng chạy lại, không phải self-report)"}
+
+## Consolidation 2026-08-29T02:07:01Z
+- [2026-08-29T02:00:03Z] Mike/question — report-cadence-overdue-weekly_2026-08-24_2026-08-28: {"kind": "weekly", "period": "tuần 2026-08-24 → 2026-08-28", "target_file": "mike/reports/SpaceX_ZaloPay_weekly_report_2026-08-24_to_2026-08-28.md", "question": "Bao cao weekly qua han, da auto-dispatch Taylor. Xac nhan/theo doi."}
+- [2026-08-29T02:00:19Z] Taylor/heartbeat — Taylor_20260829_020004: {"status": "in_progress", "note": "bat dau: doc mau report cu + verify pipeline scripts"}
+- [2026-08-29T02:01:04Z] Taylor/heartbeat — Taylor_20260829_020004: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20260829_020004", "source": "watcher"}
+- [2026-08-29T02:02:05Z] Taylor/heartbeat — Taylor_20260829_020004: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20260829_020004", "source": "watcher"}
+- [2026-08-29T02:02:44Z] Taylor/heartbeat — Taylor_20260829_020004: {"status": "in_progress", "note": "da phat hien + tai dung 2 dong NAV thieu (08-25,08-27) tu dnse_raw positions+balances that; dang chay verify_account_snapshot cho ca 2 account"}
+- [2026-08-29T02:03:05Z] Taylor/heartbeat — Taylor_20260829_020004: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20260829_020004", "source": "watcher"}
+- [2026-08-29T02:04:05Z] Taylor/heartbeat — Taylor_20260829_020004: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20260829_020004", "source": "watcher"}
+- [2026-08-29T02:05:05Z] Taylor/heartbeat — Taylor_20260829_020004: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20260829_020004", "source": "watcher"}
+- [2026-08-29T02:06:05Z] Taylor/heartbeat — Taylor_20260829_020004: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20260829_020004", "source": "watcher"}
+- [2026-08-29T01:31:04Z] Winston/status — fa_ratings_8l-refresh-ok: {"rows": 53630}
