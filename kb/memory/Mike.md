@@ -29,3 +29,4 @@
 - Bobby BĐS VN report xong 08-26 (STRUCTURAL_ACCUMULATION/AMBIGUOUS). Review quý next ~2026-11-26.
 
 - [2026-08-29T17:35:11Z] 30/08 00:35: dispatch song song #3 Taylor_20260829_173433 (C1 rolling IS/OOS windows, 1/4 điều kiện mở lại C1) + #4 Taylor_20260829_173455 (custom30V cash-flow-quality selector design + IC test sơ bộ, chưa backtest full). Cả 2 timeout 2400s effort high, có BQ cache preflight fallback network warning lúc dispatch.
+- [2026-08-29T17:39:52Z] 30/08 00:40: #3 C1 rolling windows XONG — CỦNG CỐ REFUTED (không mở lại). Phát hiện: 1 episode COVID 2020-10->12 (59 ngày) = 90% tổng DC-LAG OOS; +2024-01->05 vượt 100%, 6 episode còn lại triệt tiêu nhau net -9.5pp. 2 episode gần nhất 2025 đều LAG thắng DC (recency đảo chiều). Files P4_rolling_windows_review.md. #4 custom30V selector (Taylor_20260829_173455) vẫn đang chạy.
