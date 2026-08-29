@@ -11,15 +11,21 @@ Chi tiết đầy đủ từng mục: bus finding của Taylor + `kb/incidents/i
   2026-07-29): cờ bán ròng nội bộ ≥1% CP lưu hành/90 ngày (chỉ `event_code IN ('DDIND','DDRP')`,
   TTL 90d). Scoping (job Taylor_20260729_015830 + Phụ lục A `_032713`) kết luận GO: overlap thấp
   với `anomaly_scan`/`forensic_flags` (7,1-21,7%), lift phần riêng 2,08× (z=5,74), ổn định IS/OOS;
-  hai cờ bắn ở hai thời điểm khác nhau (insider sớm hơn ~2 tháng so với anomaly). Đang dựng
-  writer/reader (job Taylor_20260729_104614). **Sàn review ~2026-08-29 (≥1 tháng shadow), trần
-  ~2026-09-15.** Điều kiện TIẾP TỤC (wire vào due-diligence report như dòng bằng chứng): cadence
-  refresh bảng nguồn xác nhận chạy đều (bq_admin đang fix bug tính đến 07-29) + shadow log sạch
-  (không false-trigger bất thường) + qua quant-skeptic trước khi vào due-diligence chính thức.
-  Điều kiện NGỪNG: bq_admin không fix xong cadence (bảng đứng im, cờ đóng băng) hoặc shadow log
-  noise quá tải (~>5 mã/tháng cần review tay, vượt xa ước tính ~3/tháng). **Tuyệt đối không hard-
-  exclude ở bất kỳ giai đoạn nào** — 85% mã bị cờ không sập (§3.5 research file), chỉ là dòng bằng
-  chứng WATCH cho người duyệt plan cân nhắc. Research đầy đủ:
+  hai cờ bắn ở hai thời điểm khác nhau (insider sớm hơn ~2 tháng so với anomaly). **Review
+  2026-08-29 (`insider-shadow-review-20260829`): NGỪNG wire (2/3 điều kiện FAIL), user CHỐT tiếp
+  tục shadow** với ngưỡng NGỪNG mới đã điều chỉnh — tần suất thật ~7-9 mã/tháng (không phải ~3
+  ước tính gốc) được CHẤP NHẬN; ngưỡng NGỪNG mới = **>9-10 mã/tháng**. **Review kế tiếp ~2026-09-29**
+  (~1 tháng shadow sạch, trên nguồn snapshot). Migrate nguồn 2026-08-29 (job Taylor_20260829_160426,
+  commit mike `7f13e11d` + root `3afec5bd`): đổi từ bảng live `tav2_bq.insider_transaction` (bị
+  ghi đè `public_date`, look-ahead cho asof quá khứ) sang `tav2_mike.insider_transaction_snapshots`
+  (vintage gần nhất <= asof, point-in-time đúng). `_get_insider_net_sell_flag()`/`_insider_scan()`
+  trong `due_diligence.py` migrate cùng lượt — selfcheck `due_diligence_corp_flags_selfcheck.py`
+  27/27 PASS (case E2 khớp tuyệt đối 2 bên), `insider_flags.py --selftest` PASS trên fixture rebuild
+  từ vintage 2026-08-17 (fixture cũ dựng trên panel mutable đã trôi, không dùng lại). Điều kiện
+  TIẾP TỤC (wire vào due-diligence report như dòng bằng chứng): shadow log sạch trên nguồn snapshot
+  đến ~09-29 + qua quant-skeptic trước khi vào due-diligence chính thức (BẮT BUỘC, không đổi).
+  **Tuyệt đối không hard-exclude ở bất kỳ giai đoạn nào** — 85% mã bị cờ không sập (§3.5 research
+  file), chỉ là dòng bằng chứng WATCH cho người duyệt plan cân nhắc. Research đầy đủ:
   `mike/agents/Taylor/research/insider_transaction_scoping_20260729.md`.
 - **EXTREME-regime gate — ĐÃ LIVE từ 2026-08-22** (SpaceX + ZaloPay, user sign-off):
   `extreme_regime_enabled=True` trong `overrides` của cả 2 account (`secrets/trading_bot_accounts.json`).
