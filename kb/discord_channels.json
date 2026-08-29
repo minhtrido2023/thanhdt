@@ -59,6 +59,11 @@
       "id": "1523612826260734112",
       "title": "New deals",
       "purpose": "newdeals_daily_report.py — AlphaLens Paper Portfolio + Golden/Strong Watchlist hang ngay."
+    },
+    "discretionary_stocks": {
+      "id": "1536642385235152906",
+      "title": "Discretionary stocks",
+      "purpose": "Co phieu dau tu rieng ngoai book V2.4 chinh (vd DGC/TV1 fear-buy sleeve) — phan tich, due-diligence, arm/exit alert cua discretionary_margin_gate.py. Tach khoi trading_daily/trading_report (user chot 2026-08-11)."
     }
   }
 }
