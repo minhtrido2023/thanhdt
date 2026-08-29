@@ -734,3 +734,6 @@
 ## Consolidation 2026-08-29T17:41:55Z
 - [2026-08-29T17:40:49Z] Mike/heartbeat — Mike_20260829_173848: {"status": "still_running", "elapsed_min": 2, "job_id": "Mike_20260829_173848", "source": "watcher"}
 - [2026-08-29T17:41:49Z] Mike/heartbeat — Mike_20260829_173848: {"status": "still_running", "elapsed_min": 3, "job_id": "Mike_20260829_173848", "source": "watcher"}
+
+## Consolidation 2026-08-29T17:42:24Z
+- [2026-08-29T17:42:15Z] Mike/finding — retro-2026-08-29-finalized: {"file": "kb/incidents/retro/retro-2026-08-29.md", "n_incidents": 6, "n_patterns": 2, "verified_by": "Wags", "verdict": "GAPS_FOUND_and_fixed", "gaps_fixed": ["escalation-section-bus-question-was-actually-already-closed-2026-08-28", "attribution-source-was-Mike-self-run-not-Taylor-job", "job-count-5-to-6"], "commit": "cad0fa58", "escalation_open": "none-new", "posted_to": "trading_daily", "memory_cleaned": true, "consolidate_run": true, "kb_version": "v2639"}
