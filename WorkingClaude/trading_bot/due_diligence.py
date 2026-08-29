@@ -662,11 +662,17 @@ def _ref_price_for(ticker, asof):
 
 
 _INSIDER_SQL = """
-WITH ins AS (
+WITH latest_snap AS (
+  SELECT MAX(snapshot_date) AS d
+  FROM `lithe-record-440915-m9.tav2_mike.insider_transaction_snapshots`
+  WHERE snapshot_date <= DATE "{asof}"
+),
+ins AS (
   SELECT i.ticker, i.public_date, i.trader_person_id AS pid,
          IF(i.action_code = "S", -ABS(i.share_acquire), ABS(i.share_acquire)) AS qty
-  FROM `lithe-record-440915-m9.tav2_bq.insider_transaction` AS i
-  WHERE i.event_code IN ("DDIND","DDRP")
+  FROM `lithe-record-440915-m9.tav2_mike.insider_transaction_snapshots` AS i, latest_snap
+  WHERE i.snapshot_date = latest_snap.d
+    AND i.event_code IN ("DDIND","DDRP")
     AND i.action_code IN ("B","S")
     AND i.trade_status = "Đã thực hiện xong"
     AND i.share_acquire IS NOT NULL AND ABS(i.share_acquire) > 0
@@ -709,11 +715,11 @@ def _insider_scan(asof):
     res = None
     try:
         lib = _corp_action_lib()          # dùng chung wrapper bq() (đã chống cắt 100 dòng)
-        mx = lib.bq("SELECT CAST(MAX(public_date) AS STRING) d "
-                    "FROM `lithe-record-440915-m9.tav2_bq.insider_transaction`")[0]["d"]
+        mx = lib.bq("SELECT CAST(MAX(snapshot_date) AS STRING) d "
+                    "FROM `lithe-record-440915-m9.tav2_mike.insider_transaction_snapshots`")[0]["d"]
         stale = _sessions_between(dt.date.fromisoformat(str(mx)[:10]), _as_date(asof))
         if stale > INSIDER_STALE_SESSIONS_MAX:
-            _log.warning("insider_transaction cu ~%s phien (MAX(public_date)=%s) — khong ket luan",
+            _log.warning("insider_transaction_snapshots cu ~%s phien (MAX(snapshot_date)=%s) — khong ket luan",
                          stale, mx)
         else:
             rows = lib.bq(_INSIDER_SQL.format(asof=str(asof)[:10], win=INSIDER_WINDOW_DAYS,
