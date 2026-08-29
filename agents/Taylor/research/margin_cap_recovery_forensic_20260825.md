@@ -88,19 +88,32 @@ buộc thật, và nó neo được vào kỷ luật thoát đã user duyệt s�
 + chính sách đơn mã).
 
 **Neo tính**: lỗ thực nhận tối đa TRƯỚC khi kỷ luật −20% kích hoạt buộc de-lever ≈
-`equity_cap × 20%`. Muốn giới hạn lỗ 1 lần escalate sai ở mức **≤1,0% NAV** (ngưỡng rủi ro đơn sự
-kiện hợp lý, cùng bậc với trần đơn mã ≤1,0% NAV vốn tự có đã duyệt) ⇒ `equity_cap ≤ 5% NAV` — **con
-số TRÙNG với số cũ, nhưng suy ra từ lý do KHÁC và ĐÚNG bối cảnh sleeve** (không phải trùng hợp mù
-quáng — nó khớp vì cả hai đều bị chặn bởi cùng kỷ luật −20%, chỉ khác cách tính ngược).
+`exposure_cap × 20%` (**SỬA 2026-08-29, `decided_by: user`, xem
+`agents/Taylor/research/discretionary_margin_sizing_20260829.md` §1** — bản gốc viết nhầm
+`equity_cap × 20%`; biến động giá dồn hết vào vốn tự có khi nợ VND tuyệt đối không đổi, nên công
+thức đúng luôn nhân theo EXPOSURE bất kể f: `equity_loss(d) = exposure_0 × |d|`, chứng minh bằng
+đảo `equity_ratio(d) = [f(1+d)-(f-1)]/[f(1+d)]`). Muốn giới hạn lỗ 1 lần escalate sai ở mức
+**≤1,0% NAV tính trên EXPOSURE** (ngưỡng rủi ro đơn sự kiện hợp lý, cùng bậc với trần đơn mã ≤1,0%
+NAV vốn tự có đã duyệt) ⇒ với f=1,3: `exposure_cap ≤ 5% NAV` sẽ cho max loss = 5%×20%=1,0% NAV —
+NHƯNG cách viết gốc bên dưới lại đặt **equity**_cap=5% NAV (không phải exposure_cap=5%), nên
+exposure_cap thật = 5%×1,3=6,5% NAV và max loss thật = 6,5%×20%=**1,3% NAV**, cao hơn 30% so với
+số 1,0% công bố gốc. Giữ nguyên số equity_cap=5%/exposure_cap=6,5% NAV (đã đúng, không đổi), chỉ
+sửa lại con số MAX LOSS công bố từ 1,0%→1,3% NAV.
 
-- **Trần equity SLEEVE TỔNG: ≤5% NAV vốn tự có** (GIỮ số cũ, nhưng đổi cơ sở lý luận — không còn
-  dựa vào "2 case đơn mã", dựa vào lỗ-tối-đa-trước-de-lever ≤1% NAV).
+- **Trần equity SLEEVE TỔNG: ≤5% NAV vốn tự có** (GIỮ số cũ — không đổi bởi bản sửa này, chỉ sửa
+  số max-loss suy ra từ nó).
 - **Trần EXPOSURE tương ứng (làm rõ điểm MƠ HỒ trong bản cũ — văn bản cũ không phân biệt equity
   cap và exposure cap)**: ở f=1,3, exposure = 5% × 1,3 = **≤6,5% NAV** (KHÔNG phải ≤5% NAV exposure
   như câu chữ cũ có thể bị đọc nhầm — 5% là VỐN TỰ CÓ, exposure luôn cao hơn theo f).
+- **Max loss thật tại exit −20%: 1,3% NAV** (= exposure_cap 6,5%×20% — **SỬA từ 1,0% NAV**, xem
+  đính chính công thức trên. 1,0% NAV chỉ đúng nếu equity_cap≡exposure_cap, tức f=1).
 - **Trần đơn mã (nếu chọn từng mã trong basket thay vì cả basket)**: giữ nguyên ≤1,0% NAV vốn tự có
-  / ≤3% NAV exposure của chính sách đơn mã KHÔNG ĐỔI — lý do due-diligence-error risk không đổi
-  theo bối cảnh sleeve; John chỉ chất vấn số SLEEVE TỔNG, không chất vấn số đơn mã.
+  / ≤3% NAV exposure của chính sách đơn mã 08-23 KHÔNG ĐỔI bởi bản sửa này — **⚠️ nhưng chính sách
+  đơn mã đã đổi per-name lên ≤5% NAV exposure ngày 2026-08-29** (`kb/projects/discretionary-margin-
+  policy-20260823.md`, `decided_by: user`); số 1%/3% ở đây là NEO CŨ giữ nguyên có chủ đích (Loại-2
+  chưa được risk-auditor/user duyệt lại theo per-name mới) — KHÔNG suy diễn rằng Loại-2 tự động
+  theo per-name 5% mới. John chỉ chất vấn số SLEEVE TỔNG lúc job này chạy (08-25), không chất vấn
+  số đơn mã.
 - **So với số cũ**: trần equity giữ NGUYÊN giá trị (≤5% NAV) nhưng lý luận đã ĐÚNG bối cảnh; trần
   exposure được làm RÕ (≤6,5% NAV, cao hơn cách đọc cũ ≤5% NAV exposure nếu ai từng hiểu vậy) vì
   f thật của sleeve (1,3) thấp hơn giả định ẩn cũ (2,0) — margin math dư sức, không phải điểm bó buộc.
