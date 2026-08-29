@@ -629,3 +629,25 @@
 - [2026-08-29T02:05:05Z] Taylor/heartbeat — Taylor_20260829_020004: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20260829_020004", "source": "watcher"}
 - [2026-08-29T02:06:05Z] Taylor/heartbeat — Taylor_20260829_020004: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20260829_020004", "source": "watcher"}
 - [2026-08-29T01:31:04Z] Winston/status — fa_ratings_8l-refresh-ok: {"rows": 53630}
+
+## Consolidation 2026-08-29T02:21:46Z
+- [2026-08-29T02:07:05Z] Taylor/heartbeat — Taylor_20260829_020004: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20260829_020004", "source": "watcher"}
+- [2026-08-29T02:07:41Z] Taylor/heartbeat — Taylor_20260829_020004: {"status": "in_progress", "note": "da xac dinh 2 corp-action that (MBB quyen mua 08-28, MSB bonus 20% ~08-27) giai thich cac gap; dang chay reconcile_equity + chuan bi viet report"}
+- [2026-08-29T02:08:05Z] Taylor/heartbeat — Taylor_20260829_020004: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20260829_020004", "source": "watcher"}
+- [2026-08-29T02:09:06Z] Taylor/heartbeat — Taylor_20260829_020004: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20260829_020004", "source": "watcher"}
+- [2026-08-29T02:10:06Z] Taylor/heartbeat — Taylor_20260829_020004: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20260829_020004", "source": "watcher"}
+- [2026-08-29T02:11:09Z] Taylor/heartbeat — Taylor_20260829_020004: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20260829_020004", "source": "watcher"}
+- [2026-08-29T02:11:14Z] Taylor/heartbeat — Taylor_20260829_020004: {"status": "in_progress", "note": "report da viet xong, dang gui Discord topic trading_report kem chart"}
+- [2026-08-29T02:12:09Z] Taylor/heartbeat — Taylor_20260829_020004: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20260829_020004", "source": "watcher"}
+- [2026-08-29T02:13:09Z] Taylor/heartbeat — Taylor_20260829_020004: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20260829_020004", "source": "watcher"}
+- [2026-08-29T02:14:09Z] Taylor/heartbeat — Taylor_20260829_020004: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20260829_020004", "source": "watcher"}
+- [2026-08-29T02:15:10Z] Taylor/heartbeat — Taylor_20260829_020004: {"status": "still_running", "elapsed_min": 15, "job_id": "Taylor_20260829_020004", "source": "watcher"}
+- [2026-08-29T02:15:45Z] Taylor/status — fa_ratings-refresh-ok: {"rows": 12716}
+- [2026-08-29T02:16:10Z] Taylor/heartbeat — Taylor_20260829_020004: {"status": "still_running", "elapsed_min": 16, "job_id": "Taylor_20260829_020004", "source": "watcher"}
+- [2026-08-29T02:17:10Z] Taylor/heartbeat — Taylor_20260829_020004: {"status": "still_running", "elapsed_min": 17, "job_id": "Taylor_20260829_020004", "source": "watcher"}
+- [2026-08-29T02:17:29Z] Taylor/heartbeat — Taylor_20260829_020004: {"status": "in_progress", "note": "Report written+edited, Discord sent (11 chunks) OK. Email send running in background (SMTP slow), then will run report_delivery_gate.py"}
+- [2026-08-29T02:18:10Z] Taylor/heartbeat — Taylor_20260829_020004: {"status": "still_running", "elapsed_min": 18, "job_id": "Taylor_20260829_020004", "source": "watcher"}
+- [2026-08-29T02:19:10Z] Taylor/heartbeat — Taylor_20260829_020004: {"status": "still_running", "elapsed_min": 19, "job_id": "Taylor_20260829_020004", "source": "watcher"}
+- [2026-08-29T02:20:10Z] Taylor/heartbeat — Taylor_20260829_020004: {"status": "still_running", "elapsed_min": 20, "job_id": "Taylor_20260829_020004", "source": "watcher"}
+- [2026-08-29T02:21:11Z] Taylor/heartbeat — Taylor_20260829_020004: {"status": "still_running", "elapsed_min": 21, "job_id": "Taylor_20260829_020004", "source": "watcher"}
+- [2026-08-29T02:21:29Z] Taylor/heartbeat — Taylor_20260829_020004: {"status": "in_progress", "note": "Discord sent OK (11 chunks). Email send hung >240s first attempt (timeout 124) at report_return_gate corp-action BQ check; retrying with 400s timeout in background, BQ itself verified fast/healthy so likely gate compute time not auth."}
