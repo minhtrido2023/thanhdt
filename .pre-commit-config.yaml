@@ -23,3 +23,22 @@ repos:
         entry: WorkingClaude/test_naming_gate.sh
         language: system
         files: '^WorkingClaude/[^/]+\.py$'
+
+      # Thêm 2026-08-30 (user duyệt) — hook ANH EM của `tz-anchor-gate` trong
+      # WorkingClaude/mike/.pre-commit-config.yaml. Cùng một lớp lỗi (`datetime.now()` trần /
+      # `date.today()` không neo timezone, coding_guidelines §16) đã nổ 5 lần trong 1 tuần ở CẢ
+      # HAI repo — 3/5 ở repo NÀY (WorkingClaude/deploy_golive_dt5g_v4/golive_recommend_v23.py
+      # :85+:1216, WorkingClaude/dna_report.py:69, commit 20bf2f20), nên gate phải có ở cả hai;
+      # hai hook độc lập, không thay thế nhau.
+      #
+      # `entry` trỏ vào repo LỒNG (WorkingClaude/mike/) — cố ý, để một script và MỘT baseline
+      # duy nhất phục vụ cả 2 repo thay vì 2 bản sao lệch nhau. Đánh đổi đã biết: xoá/di chuyển
+      # WorkingClaude/mike/ sẽ làm hook này lỗi cứng. Ratchet đọc
+      # WorkingClaude/mike/kb/tz_anchor_baseline.json; commit từ repo NGOÀI cố ý KHÔNG tự ghi
+      # baseline (không ghi vào repo lồng rồi bỏ đó unstaged) — siết bằng tay:
+      #     WorkingClaude/mike/bin/tz_anchor_gate.py --update-baseline <file.py>
+      - id: tz-anchor-gate
+        name: datetime.now()/date.today() không neo TZ (xem WorkingClaude/mike/bin/tz_anchor_gate.py, §16)
+        entry: WorkingClaude/mike/bin/tz_anchor_gate.py
+        language: system
+        files: '^WorkingClaude/.*\.py$'
