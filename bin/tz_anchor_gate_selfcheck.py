@@ -86,6 +86,11 @@ RED_CASES = [
     ("_dt.date.today()", "import datetime as _dt\nx = _dt.date.today()\n"),
     ("datetime.today() (naive local, biến thể ít gặp)", "from datetime import datetime\nx = datetime.today()\n"),
     ("nằm trong f-string: f'{datetime.now():%H:%M}'", "from datetime import datetime\ns = f'{datetime.now():%H:%M}'\n"),
+    # arch-review 2026-08-30 F8 — 4 dạng trước bản vá LỌT qua điều kiện (b)/(c).
+    ("alias import: from datetime import datetime as dtm", "from datetime import datetime as dtm\nx = dtm.now()\n"),
+    ("alias import: from datetime import date as d", "from datetime import date as d\nx = d.today()\n"),
+    ("datetime.now(None) — có arg nhưng vô hiệu", "from datetime import datetime\nx = datetime.now(None)\n"),
+    ("datetime.now(tz=None)", "from datetime import datetime\nx = datetime.now(tz=None)\n"),
 ]
 
 # ── 2. Detector: CONTROL — đã neo TZ, hoặc ngoài phạm vi §16 ⇒ PHẢI im ────────────────────
@@ -100,11 +105,22 @@ CONTROL_CASES = [
      "from datetime import datetime, timezone, timedelta\nx = (datetime.now(timezone.utc) + timedelta(hours=7)).date()\n"),
     ("call xuống dòng: now(\\n timezone.utc\\n) — regex đếm sai, AST đúng",
      "import datetime\nx = datetime.datetime.now(\n    datetime.timezone.utc,\n)\n"),
-    ("tham chiếu không gọi: f = datetime.now", "from datetime import datetime\nf = datetime.now\n"),
     ("receiver khác: okf.today()", "x = okf.today()\n"),
     ("ngoài phạm vi user duyệt: pd.Timestamp.now()", "import pandas as pd\nx = pd.Timestamp.now()\n"),
     ("ngoài phạm vi: datetime.utcnow() (naive UTC, không phụ thuộc TZ host)",
      "from datetime import datetime\nx = datetime.utcnow()\n"),
+]
+
+
+# ── 2b. KNOWN GAP — gate KHÔNG bắt, và điều đó được GHI NHẬN, không phải "đúng" ────────────
+# arch-review 2026-08-30 F8: trước đây `f = datetime.now` nằm trong CONTROL, tức selfcheck
+# khẳng định "im ở đây là hành vi đúng". Sai — nó là lỗ hổng. Ghi ở mục này để bản sau ai bịt
+# được thì biết phải chuyển sang RED, và để không ai đọc nhầm im lặng thành bảo đảm.
+KNOWN_GAPS = [
+    ("tham chiếu rồi gọi: n = datetime.now; n()", "from datetime import datetime\nn = datetime.now\nx = n()\n"),
+    ("datetime.fromtimestamp(t) — naive host-local, chưa canh", "from datetime import datetime\nx = datetime.fromtimestamp(0)\n"),
+    ("date.fromtimestamp(t)", "from datetime import date\nx = date.fromtimestamp(0)\n"),
+    ("datetime.now(*args) — có arg nên qua (c)", "from datetime import datetime\nx = datetime.now(*a)\n"),
 ]
 
 
@@ -117,6 +133,11 @@ def test_detector(gate, tmp):
     for name, src in CONTROL_CASES:
         p = _write(os.path.join(tmp, "det", "f.py"), src)
         check(name, gate.violations(p) == [], f"violations={gate.violations(p)}")
+    print("[2b] KNOWN GAP — gate còn hở, ghi nhận chứ không tuyên bố là đúng")
+    for name, src in KNOWN_GAPS:
+        p = _write(os.path.join(tmp, "det", "f.py"), src)
+        state = "vẫn hở" if gate.violations(p) == [] else "ĐÃ BỊT — chuyển ca này sang RED_CASES"
+        print(f"  · {name}: {state}")
 
 
 # ── 3. Ca THẬT: 5 finding §16 của code-quality-weekly 2026-08-30 ───────────────────────────
@@ -159,13 +180,14 @@ def test_historical(gate, tmp):
 
 
 # ── 4. End-to-end: ratchet + escape hatch + exclude, chạy qua CLI trong sandbox ────────────
-def _run(sandbox, baseline, files, env_extra=None):
+def _run(sandbox, baseline, files, env_extra=None, prefix=None):
     env = dict(os.environ)
     env["MIKE_TZ_GATE_ROOT"] = sandbox
     env["MIKE_TZ_GATE_BASELINE"] = baseline
     env.pop("MIKE_TZ_GATE", None)
+    env.pop("MIKE_TZ_GATE_ROOTS", None)
     env.update(env_extra or {})
-    r = subprocess.run([sys.executable, GATE_PATH] + files,
+    r = subprocess.run([sys.executable, GATE_PATH] + (prefix or []) + files,
                        capture_output=True, text=True, env=env, cwd=sandbox, check=False)
     return r.returncode, r.stdout + r.stderr
 
@@ -185,6 +207,8 @@ def test_ratchet(tmp):
     rc, out = _run(sb, bl, [f])
     check("file MỚI có 1 vi phạm, baseline 0 → BLOCK (rc=1)", rc == 1, f"rc={rc} out={out[:200]}")
     check("thông điệp BLOCK có số dòng + biểu thức", "app.py:2" in out and "datetime.now()" in out, out[:200])
+    check("thông điệp BLOCK nói baseline neo theo canonical + lối thoát SKIP (F6)",
+          "CANONICAL" in out and "SKIP=tz-anchor-gate" in out, out[:400])
 
     _write(bl, json.dumps({"files": {"app.py": 1}}))
     rc, out = _run(sb, bl, [f])
@@ -219,6 +243,155 @@ def test_ratchet(tmp):
           json.load(open(bl))["files"]["app.py"] == 5, "baseline đã bị ghi đè")
 
 
+SHIM = "/home/trido/thanhdt/WorkingClaude/tz_anchor_gate_shim.sh"
+
+
+def test_shim_missing_nested_repo(tmp):
+    """F1 (killer objection) — repo ngoài .gitignore chính WorkingClaude/mike/, nên trong mọi
+    worktree/clone mới đường dẫn gate KHÔNG tồn tại. Thiếu repo lồng phải là KHÔNG-GATE-ĐƯỢC
+    (cảnh báo + rc=0), tuyệt đối không phải CHẶN — phạm vi hook gồm bot_execute.py và
+    trading_bot/*.py."""
+    print("[6] F1 — shim khi repo lồng WorkingClaude/mike/ KHÔNG có mặt")
+    if not os.path.isfile(SHIM):
+        check("shim tồn tại", False, SHIM)
+        return
+    fake = os.path.join(tmp, "fake_wc")          # KHÔNG có thư mục mike/ bên trong
+    victim = _write(os.path.join(fake, "bot_execute.py"), BARE)
+    shutil.copy2(SHIM, os.path.join(fake, "tz_anchor_gate_shim.sh"))
+    r = subprocess.run([os.path.join(fake, "tz_anchor_gate_shim.sh"), victim],
+                       capture_output=True, text=True, check=False)
+    check("thiếu repo lồng → rc=0 (không chặn commit)", r.returncode == 0, f"rc={r.returncode}")
+    check("thiếu repo lồng → CÓ cảnh báo, không im lặng",
+          "KHÔNG ĐƯỢC GATE" in r.stderr, f"stderr={r.stderr[:160]!r}")
+
+    real = os.path.join(tmp, "real_wc")
+    os.makedirs(os.path.join(real, "mike", "bin"), exist_ok=True)
+    shutil.copy2(GATE_PATH, os.path.join(real, "mike", "bin", "tz_anchor_gate.py"))
+    shutil.copy2(SHIM, os.path.join(real, "tz_anchor_gate_shim.sh"))
+    v2 = _write(os.path.join(real, "app.py"), BARE)
+    env = dict(os.environ)
+    env["MIKE_TZ_GATE_ROOT"] = real
+    env["MIKE_TZ_GATE_BASELINE"] = _write(os.path.join(tmp, "bl_shim.json"), '{"files": {}}')
+    r2 = subprocess.run([os.path.join(real, "tz_anchor_gate_shim.sh"), v2],
+                        capture_output=True, text=True, env=env, check=False)
+    check("có repo lồng → shim ủy quyền cho gate thật và gate CHẶN",
+          r2.returncode == 1 and "app.py:2" in r2.stdout, f"rc={r2.returncode} out={r2.stdout[:160]}")
+
+
+def test_key_none_is_loud(tmp):
+    """F2 — 20 worktree của repo ngoài nằm ngoài WC_ROOT; trước bản vá gate trả rc=0 KHÔNG một
+    chữ trong khi vi phạm còn sống nguyên ở đó."""
+    print("[7] F2 — file ngoài WC_ROOT: phải KÊU, không im")
+    sb = os.path.join(tmp, "sandbox")
+    bl = _write(os.path.join(tmp, "bl_none.json"), '{"files": {}}')
+    outside = _write(os.path.join(tmp, "outside_tree", "x.py"), BARE)
+    rc, out = _run(sb, bl, [outside])
+    check("không chặn (fail-open)", rc == 0, f"rc={rc}")
+    check("nhưng CÓ cảnh báo nêu tên file + lý do",
+          "KHÔNG ĐƯỢC GATE" in out and "x.py" in out, f"out={out[:200]!r}")
+
+
+def test_warn_does_not_raise_baseline(tmp):
+    """F3 — warn cho qua ĐÚNG lần này; nếu nó nâng baseline thì một lần lách = chấp nhận nợ
+    vĩnh viễn (đúng cái code_quality_gate.sh làm và đã bị audit chỉ ra)."""
+    print("[8] F3 — MIKE_TZ_GATE=warn KHÔNG được nâng baseline")
+    sb = os.path.join(tmp, "sandbox_warn")
+    bl = _write(os.path.join(tmp, "bl_warn.json"), '{"files": {}}')
+    f = _write(os.path.join(sb, "app.py"), BARE2)
+    rc, out = _run(sb, bl, [f], {"MIKE_TZ_GATE": "warn"})
+    check("warn → rc=0", rc == 0, f"rc={rc}")
+    check("warn → baseline VẪN rỗng", json.load(open(bl))["files"] == {},
+          f"baseline={json.load(open(bl))['files']}")
+    check("warn → nói rõ commit sau vẫn chặn", "commit sau vẫn chặn" in out, out[:200])
+    rc2, _ = _run(sb, bl, [f])
+    check("lần commit sau vẫn BLOCK", rc2 == 1, f"rc={rc2}")
+
+
+def test_update_baseline_direction(tmp):
+    """F4 — config repo ngoài quảng cáo --update-baseline là cách 'siết bằng tay'."""
+    print("[9] F4 — --update-baseline mặc định chỉ SIẾT, nâng phải nói ra")
+    sb = os.path.join(tmp, "sandbox_upd")
+    bl = _write(os.path.join(tmp, "bl_upd.json"), '{"files": {}}')
+    f = _write(os.path.join(sb, "app.py"), BARE2)
+    rc, out = _run(sb, bl, [f], {}, prefix=["--update-baseline"])
+    check("nâng 0→2 mà không có cờ → TỪ CHỐI (rc=1)", rc == 1, f"rc={rc} out={out[:160]}")
+    check("baseline không đổi", json.load(open(bl))["files"] == {}, "baseline đã bị ghi")
+    rc, out = _run(sb, bl, [f], {}, prefix=["--update-baseline", "--accept-new-debt"])
+    check("có --accept-new-debt → nâng được", rc == 0 and json.load(open(bl))["files"].get("app.py") == 2,
+          f"rc={rc} baseline={json.load(open(bl))['files']}")
+    _write(os.path.join(sb, "app.py"), ANCHORED)
+    rc, out = _run(sb, bl, [f], {}, prefix=["--update-baseline"])
+    check("HẠ (siết) thì không cần cờ", rc == 0 and "app.py" not in json.load(open(bl))["files"],
+          f"rc={rc} baseline={json.load(open(bl))['files']}")
+
+
+def test_seed_refuses_partial(tmp):
+    """F5 — một root không đọc được thì kiểm kê THIẾU; ghi đè bằng nó biến 72 key thành
+    ngầm-định-0 ⇒ mọi commit sau chạm chúng đều hard-block."""
+    print("[10] F5 — --seed-baseline từ chối ghi khi kiểm kê thiếu")
+    bl = _write(os.path.join(tmp, "bl_seed.json"), '{"files": {"giu/nguyen.py": 9}}')
+    before = open(bl).read()
+    env = dict(os.environ)
+    env["MIKE_TZ_GATE_BASELINE"] = bl
+    env["MIKE_TZ_GATE_ROOTS"] = f"/nonexistent/repo|*.py:{ROOT}|*.py"
+    r = subprocess.run([sys.executable, GATE_PATH, "--seed-baseline"],
+                       capture_output=True, text=True, env=env, check=False)
+    check("root hỏng → rc != 0", r.returncode != 0, f"rc={r.returncode}")
+    check("root hỏng → baseline KHÔNG bị ghi đè", open(bl).read() == before, "baseline đã bị ghi")
+
+
+def test_auto_update_in_repo(tmp):
+    """F7 — nhánh auto-update + `git add` chỉ chạy khi commit TRONG repo chứa baseline. Trước
+    bản này nhánh đó KHÔNG có test nào (mutation xoá guard dirty sống sót)."""
+    print("[11] F7 — auto-update baseline trong repo thật + guard baseline bẩn")
+    r = os.path.join(tmp, "fakerepo")
+    os.makedirs(os.path.join(r, "bin"), exist_ok=True)
+    os.makedirs(os.path.join(r, "kb"), exist_ok=True)
+    for cmd in (["git", "init", "-q", r], ["git", "-C", r, "config", "user.email", "t@t"],
+                ["git", "-C", r, "config", "user.name", "t"]):
+        subprocess.run(cmd, capture_output=True, check=False)
+    bl = os.path.join(r, "kb", "tz_anchor_baseline.json")
+    _write(bl, json.dumps({"files": {"bin/app.py": 5}}))
+    f = _write(os.path.join(r, "bin", "app.py"), ANCHORED)
+    subprocess.run(["git", "-C", r, "add", "-A"], capture_output=True, check=False)
+    subprocess.run(["git", "-C", r, "commit", "-qm", "init"], capture_output=True, check=False)
+
+    env = dict(os.environ)
+    env.update({"MIKE_TZ_GATE_ROOT": r, "MIKE_TZ_GATE_BASELINE": bl})
+    env.pop("MIKE_TZ_GATE", None)
+    res = subprocess.run([sys.executable, GATE_PATH, f], capture_output=True, text=True,
+                         env=env, cwd=r, check=False)
+    check("trong repo + cây sạch → auto-update HẠ baseline",
+          res.returncode == 0 and "bin/app.py" not in json.load(open(bl))["files"],
+          f"rc={res.returncode} baseline={json.load(open(bl))['files']} out={res.stdout[:160]}")
+    staged = subprocess.run(["git", "-C", r, "diff", "--cached", "--name-only"],
+                            capture_output=True, text=True, check=False).stdout
+    check("baseline được `git add` vào cùng commit", "kb/tz_anchor_baseline.json" in staged, staged)
+
+    # F3 TRONG repo thật: đây là nơi DUY NHẤT nhánh ghi baseline chạy tới, nên warn phải được
+    # kiểm ở đây chứ không phải trong sandbox không-git (ở đó in_mike_repo()=None nên không ghi
+    # dù có lỗi hay không — assertion sẽ xanh giả).
+    subprocess.run(["git", "-C", r, "reset", "-q", "--hard"], capture_output=True, check=False)
+    _write(os.path.join(r, "bin", "app.py"), BARE2)
+    _write(bl, json.dumps({"files": {}}))
+    subprocess.run(["git", "-C", r, "add", "-A"], capture_output=True, check=False)
+    subprocess.run(["git", "-C", r, "commit", "-qm", "warn-case"], capture_output=True, check=False)
+    res = subprocess.run([sys.executable, GATE_PATH, f], capture_output=True, text=True,
+                         env={**env, "MIKE_TZ_GATE": "warn"}, cwd=r, check=False)
+    check("F3 trong repo thật: warn cho qua nhưng KHÔNG nâng baseline",
+          res.returncode == 0 and json.load(open(bl))["files"] == {},
+          f"rc={res.returncode} baseline={json.load(open(bl))['files']}")
+
+    subprocess.run(["git", "-C", r, "reset", "-q", "--hard"], capture_output=True, check=False)
+    _write(os.path.join(r, "bin", "app.py"), ANCHORED)
+    _write(bl, json.dumps({"files": {"bin/app.py": 5, "dirty": 1}}))   # sửa CHƯA stage
+    snapshot = open(bl).read()
+    res = subprocess.run([sys.executable, GATE_PATH, f], capture_output=True, text=True,
+                         env=env, cwd=r, check=False)
+    check("baseline BẨN (chưa stage) → bỏ qua auto-update, không ghi đè",
+          res.returncode == 0 and open(bl).read() == snapshot, f"rc={res.returncode}")
+
+
 def test_prod_baseline_untouched(sha_before):
     print("[5] File production không bị selfcheck đụng")
     sha_after = hashlib.sha256(open(PROD_BASELINE, "rb").read()).hexdigest()
@@ -235,6 +408,12 @@ def main():
         test_detector(gate, tmp)
         test_historical(gate, tmp)
         test_ratchet(tmp)
+        test_shim_missing_nested_repo(tmp)
+        test_key_none_is_loud(tmp)
+        test_warn_does_not_raise_baseline(tmp)
+        test_update_baseline_direction(tmp)
+        test_seed_refuses_partial(tmp)
+        test_auto_update_in_repo(tmp)
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
     test_prod_baseline_untouched(sha_before)
@@ -272,15 +451,34 @@ def run_all_tz():
 
 MUTATIONS = [
     ("bỏ điều kiện 'không có argument' (c) → datetime.now(_ICT) cũng bị bắt",
-     "        if node.args or node.keywords:\n            continue\n", ""),
+     "        if (node.args or node.keywords) and not _tz_arg_is_none(node):\n            continue\n", ""),
     ("nới receiver (b) sang mọi tên → okf.today()/pd.Timestamp.now() bị bắt",
-     '        if recv.split(".")[-1] not in DATETIME_RECEIVERS:\n            continue\n', ""),
+     '        if recv.split(".")[-1] not in receivers:\n            continue\n', ""),
     ("bỏ 'today' khỏi (a) → date.today() lọt",
      'BAD_ATTRS = {"now", "today"}', 'BAD_ATTRS = {"now"}'),
     ("bỏ 'now' khỏi (a) → datetime.now() lọt",
      'BAD_ATTRS = {"now", "today"}', 'BAD_ATTRS = {"today"}'),
     ("ratchet luôn cho qua → nợ TĂNG không bị chặn",
      "        if n > old:\n            blocked.append((key, old, n))\n", "        pass\n"),
+    # Mutation ĐÚNG cho F3 là bỏ `return 0` để warn RƠI XUỐNG nhánh auto-update — không phải
+    # xoá dòng print (bản đầu làm vậy và SURVIVED: dòng print thứ hai trong vòng lặp vẫn chứa
+    # chuỗi mà assertion tìm, nên assertion không hề canh hành vi GHI).
+    ("warn-mode rơi xuống auto-update (F3) → lách 1 lần = chấp nhận nợ vĩnh viễn",
+     "        return 0\n\n    mike_top = in_mike_repo()", "        pass\n\n    mike_top = in_mike_repo()"),
+    ("bỏ guard baseline BẨN (F7) → ghi đè sửa đổi chưa stage",
+     "    if dirty:\n", "    if False:\n"),
+    ("--seed-baseline ghi cả khi kiểm kê THIẾU (F5)",
+     "        if not complete:\n", "        if False:\n"),
+    ("bỏ alias-aware receiver (F8) → `from datetime import datetime as dtm` lọt",
+     "    names = set(DATETIME_RECEIVERS)\n", "    return set(DATETIME_RECEIVERS)\n    names = set(DATETIME_RECEIVERS)\n"),
+    ("bỏ nhận diện now(None) (F8)",
+     "        if (node.args or node.keywords) and not _tz_arg_is_none(node):\n",
+     "        if node.args or node.keywords:\n"),
+    ("key=None quay lại IM LẶNG (F2)",
+     "                f\"⚠️  tz_anchor_gate: {os.path.abspath(f)} nằm ngoài {WC_ROOT} và ngoài mọi \"\n                \"checkout mike — KHÔNG có baseline-key, file này KHÔNG ĐƯỢC GATE.\",",
+     '                "",'),
+    ("--update-baseline nâng được mà không cần cờ (F4)",
+     "        if raises and not accept_new_debt:\n", "        if False:\n"),
 ]
 
 

@@ -42,6 +42,17 @@ nằm cùng commit) CHỈ chạy khi đang commit TRONG repo mike — commit t�
 phép ghi vào repo lồng rồi bỏ đó unstaged. Từ repo ngoài gate chỉ CƯỠNG CHẾ (đọc baseline), và
 in ra lệnh `--update-baseline` nếu cần siết lại bằng tay.
 
+ESCAPE HATCH — 3 đường, cố ý khác nhau về HỆ QUẢ:
+  - `SKIP=tz-anchor-gate git commit …` — pre-commit hỗ trợ sẵn; dùng khi bị chặn vì LỆCH NHÁNH
+    (baseline neo theo checkout canonical; worktree đang ở commit cũ có thể đếm ra nhiều hơn ở
+    file mình không hề sửa — arch-review 2026-08-30 F6).
+  - `MIKE_TZ_GATE=warn` — qua ĐÚNG lần này, và cố ý **KHÔNG nâng baseline** (khác
+    bin/code_quality_gate.sh, nơi warn ghi nợ mới thành hợp lệ vĩnh viễn). Lần commit sau vẫn
+    chặn. Lách không được phép âm thầm biến thành chấp nhận (F3).
+  - `--update-baseline` — mặc định CHỈ hạ được baseline (siết). Nâng phải nói ra bằng
+    `--accept-new-debt` (F4).
+  - `MIKE_TZ_GATE=off` — tắt hẳn.
+
 CÒN HỞ (ghi ở đây, đừng để ai tưởng gate phủ cả họ lỗi):
   - `pd.Timestamp.now()` / `pd.Timestamp.today()` naive-host-local Y HỆT về ngữ nghĩa (đo được
     75 + 46 call trong WorkingClaude hôm nay) nhưng KHÔNG bị chặn — phạm vi user duyệt là
@@ -49,7 +60,15 @@ CÒN HỞ (ghi ở đây, đừng để ai tưởng gate phủ cả họ lỗi):
     nới điều kiện (b).
   - `datetime.utcnow()` (288 call) cũng trả naive nhưng là naive-UTC, không phụ thuộc TZ host ⇒
     KHÔNG thuộc lớp lỗi §16 này. Cố ý không chặn.
+  - `datetime.fromtimestamp(t)` / `date.fromtimestamp(t)` không có tz — naive-host-local y hệt,
+    CHƯA canh (arch-review 2026-08-30 F8).
+  - Dạng tham chiếu rồi gọi: `n = datetime.now; n()` — AST không nối được 2 câu lệnh. CHƯA canh;
+    selfcheck ghi nó ở mục KNOWN GAP chứ KHÔNG phải control "đúng".
+  - `datetime.now(*args)` / `now(**kw)` — có argument nên qua điều kiện (c). CHƯA canh.
   - Bash `date` không neo TZ: ngoài phạm vi (bin/utc_text_gate.sh canh nửa văn bản gửi người).
+  - File .py NGOÀI `WC_ROOT` và ngoài mọi checkout mike (vd 20 worktree của repo ngoài ở
+    /home/trido/thanhdt/wt-*) không có baseline-key ⇒ KHÔNG gate được. Từ 2026-08-30 gate KÊU
+    ra stderr thay vì im (F2), nhưng vẫn không chặn.
 
 Escape hatch (cùng khuôn MIKE_CQ_GATE / MIKE_DIAG_GATE / MIKE_COMMIT_GATE):
 env MIKE_TZ_GATE=warn hạ BLOCK xuống cảnh báo không chặn; =off tắt hẳn.
@@ -81,6 +100,34 @@ def _render(node):
     return "?"
 
 
+def _alias_receivers(tree):
+    """Tên cục bộ trỏ tới `datetime.datetime` / `datetime.date` trong CHÍNH file này.
+
+    `from datetime import datetime as dtm` rồi `dtm.now()` là cùng một lỗi nhưng receiver không
+    còn tên `datetime` ⇒ điều kiện (b) trượt. Đọc import của file thì bịt được, không cần đoán.
+    (arch-review 2026-08-30 F8 — đo được 0 ca sống trong 2 repo, nhưng bịt là MIỄN PHÍ.)
+    """
+    names = set(DATETIME_RECEIVERS)
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ImportFrom) and node.module == "datetime":
+            for a in node.names:
+                if a.name in DATETIME_RECEIVERS and a.asname:
+                    names.add(a.asname)
+        elif isinstance(node, ast.Import):
+            for a in node.names:
+                if a.name == "datetime" and a.asname:
+                    names.add(a.asname)  # `import datetime as dt` -> dt.datetime.now / dt.date.today
+    return names
+
+
+def _tz_arg_is_none(node):
+    """`datetime.now(None)` / `datetime.now(tz=None)` — CÓ argument nhưng vô hiệu, naive y hệt."""
+    for a in list(node.args) + [k.value for k in node.keywords]:
+        if not (isinstance(a, ast.Constant) and a.value is None):
+            return False
+    return bool(node.args or node.keywords)
+
+
 def violations(path):
     """-> [(lineno, 'datetime.now()' | 'date.today()')]; file không parse được -> []."""
     try:
@@ -88,6 +135,7 @@ def violations(path):
             tree = ast.parse(fh.read())
     except (OSError, SyntaxError, ValueError, UnicodeDecodeError):
         return []
+    receivers = _alias_receivers(tree)
     hits = []
     for node in ast.walk(tree):
         if not isinstance(node, ast.Call):
@@ -96,9 +144,9 @@ def violations(path):
         if not isinstance(func, ast.Attribute) or func.attr not in BAD_ATTRS:
             continue
         recv = _render(func.value)
-        if recv.split(".")[-1] not in DATETIME_RECEIVERS:
+        if recv.split(".")[-1] not in receivers:
             continue
-        if node.args or node.keywords:
+        if (node.args or node.keywords) and not _tz_arg_is_none(node):
             continue
         hits.append((func.lineno, f"{recv}.{func.attr}()"))
     return sorted(hits)
@@ -106,7 +154,7 @@ def violations(path):
 
 # Không phải code của fleet (thư viện vendor / bản sao repo cũ đã chết) hoặc là artifact R&D —
 # không gate, không tính vào baseline. `mike_paseo/` là bản SAO cũ của repo mike (git repo riêng,
-# worktree đã hỏng, không repo nào track); gate nó = nuôi 47 vi phạm ma trong baseline.
+# worktree đã hỏng, không repo nào track); gate nó = nuôi vi phạm ma trong baseline.
 EXCLUDED_DIRS = frozenset((
     "research", "archive", "wc_venv", "__pycache__", ".git", "node_modules", "site-packages",
     "vendor", "stockquery", "mike_paseo",
@@ -200,39 +248,55 @@ TRACKED_ROOTS = (
     ("/home/trido/thanhdt/WorkingClaude/mike", "*.py"),   # repo mike
     ("/home/trido/thanhdt", "WorkingClaude/*.py"),        # repo ngoài, chỉ phần WorkingClaude/
 )
+if os.environ.get("MIKE_TZ_GATE_ROOTS"):  # chỉ để selfcheck kiểm nhánh kiểm-kê-thiếu (F5)
+    TRACKED_ROOTS = tuple(
+        (spec.split("|", 1)[0], spec.split("|", 1)[1] if "|" in spec else "*.py")
+        for spec in os.environ["MIKE_TZ_GATE_ROOTS"].split(":")
+    )
 
 
 def enumerate_tracked():
-    """-> [abs_path] mọi .py được git track ở 2 checkout canonical. Repo thiếu → bỏ qua, có báo."""
+    """-> (paths, ok). ok=False khi BẤT KỲ root nào không đọc được — caller PHẢI không ghi đè
+    baseline bằng một kiểm kê thiếu (arch-review 2026-08-30 F5: một root sai đường dẫn cho ra
+    15 file/29 vi phạm thay vì 87/157, rc=0, commit được — 72 key biến mất thành ngầm-định-0 và
+    mọi commit sau chạm chúng đều hard-block)."""
     paths = []
+    ok = True
     for repo, pattern in TRACKED_ROOTS:
         r = subprocess.run(["git", "-C", repo, "ls-files", "-z", pattern],
                            capture_output=True, text=True, check=False)
         if r.returncode != 0:
             print(f"⚠️  không đọc được `git ls-files` ở {repo} — BỎ QUA cây này, kiểm kê sẽ THIẾU.",
                   file=sys.stderr)
+            ok = False
             continue
         for rel in r.stdout.split("\0"):
             if rel.endswith(".py"):
                 paths.append(os.path.join(repo, rel))
-    return paths
+    return paths, ok
 
 
 def scan_tree():
-    """Kiểm kê toàn bộ vi phạm còn sót -> {baseline_key: [(line, expr)]}."""
+    """Kiểm kê toàn bộ vi phạm còn sót -> ({baseline_key: [(line, expr)]}, complete)."""
     found = {}
-    for p in enumerate_tracked():
+    paths, complete = enumerate_tracked()
+    for p in paths:
         key = baseline_key(p)
         if key is None or is_excluded(key) or not os.path.isfile(p):
             continue
         hits = violations(p)
         if hits:
             found[key] = hits
-    return found
+    return found, complete
 
 
 def in_mike_repo():
-    """True khi CWD nằm trong repo mike (nơi baseline sống và stage được cùng commit)."""
+    """Top của checkout đang commit, NẾU baseline đang dùng nằm trong chính checkout đó.
+
+    Neo theo BASELINE (không phải một tên file cứng) để: (1) commit từ repo NGOÀI không bao giờ
+    ghi vào repo lồng rồi bỏ unstaged; (2) selfcheck dựng được sandbox repo thật để kiểm nhánh
+    auto-update — nếu không, nhánh đó vĩnh viễn không có test.
+    """
     try:
         top = subprocess.run(
             ["git", "rev-parse", "--show-toplevel"],
@@ -242,7 +306,7 @@ def in_mike_repo():
         return None
     if not top:
         return None
-    return top if os.path.isfile(os.path.join(top, "kb", "tz_anchor_baseline.json")) else None
+    return top if os.path.abspath(BASELINE).startswith(os.path.realpath(top) + "/") else None
 
 
 def main(argv):
@@ -252,7 +316,7 @@ def main(argv):
 
     args = list(argv)
     if args and args[0] == "--scan":
-        found = scan_tree()
+        found, _ = scan_tree()
         total = sum(len(v) for v in found.values())
         for key in sorted(found):
             for line, expr in found[key]:
@@ -263,7 +327,11 @@ def main(argv):
     if args and args[0] == "--seed-baseline":
         # Kiểm kê lại toàn bộ nợ cũ và GHI ĐÈ baseline. Chỉ chạy tay khi cố ý re-seed (vd mở
         # rộng phạm vi gate); vận hành thường ngày dùng ratchet auto-update ở cuối hàm này.
-        found = scan_tree()
+        found, complete = scan_tree()
+        if not complete:
+            print("❌ kiểm kê KHÔNG đầy đủ (xem cảnh báo ở trên) — KHÔNG ghi đè baseline.",
+                  file=sys.stderr)
+            return 1
         data = {
             "_note": "Kiểm kê `datetime.now()` trần / `date.today()` (coding_guidelines §16) tại "
                      "thời điểm bật bin/tz_anchor_gate.py. Ratchet per-file: nợ cũ không bắt sửa "
@@ -274,10 +342,9 @@ def main(argv):
         print(f"✓ {BASELINE}: {sum(data['files'].values())} vi phạm / {len(data['files'])} file")
         return 0
 
-    update_only = False
-    if args and args[0] == "--update-baseline":
-        update_only = True
-        args = args[1:]
+    update_only = "--update-baseline" in args
+    accept_new_debt = "--accept-new-debt" in args
+    args = [a for a in args if not a.startswith("--")]
 
     baseline = load_baseline()
     files_baseline = baseline.setdefault("files", {})
@@ -288,7 +355,18 @@ def main(argv):
         if not os.path.isfile(f):
             continue
         key = baseline_key(f)
-        if key is None or is_excluded(key):
+        if key is None:
+            # KHÔNG được im (arch-review 2026-08-30 F2): 20 worktree của repo ngoài nằm ở
+            # /home/trido/thanhdt/wt-*, ngoài WC_ROOT ⇒ trước bản này gate trả rc=0 không một
+            # chữ, trong khi dna_report.py:69 `date.today()` vẫn sống nguyên ở đó. Cùng khuôn
+            # cảnh báo với bin/code_quality_gate.sh:87.
+            print(
+                f"⚠️  tz_anchor_gate: {os.path.abspath(f)} nằm ngoài {WC_ROOT} và ngoài mọi "
+                "checkout mike — KHÔNG có baseline-key, file này KHÔNG ĐƯỢC GATE.",
+                file=sys.stderr,
+            )
+            continue
+        if is_excluded(key):
             continue
         hits = violations(f)
         counts[key] = len(hits)
@@ -298,6 +376,16 @@ def main(argv):
         return 0
 
     if update_only:
+        # NÂNG baseline = chấp nhận nợ MỚI vĩnh viễn. Config repo ngoài quảng cáo cờ này là cách
+        # "siết bằng tay", nên mặc định nó chỉ được phép SIẾT (hạ) — muốn nới phải nói ra
+        # (arch-review 2026-08-30 F4).
+        raises = {k: n for k, n in counts.items() if n > files_baseline.get(k, 0)}
+        if raises and not accept_new_debt:
+            for k, n in sorted(raises.items()):
+                print(f"  🔴 {k}: baseline {files_baseline.get(k, 0)} → {n} là NÂNG, không phải siết")
+            print("--update-baseline mặc định CHỈ siết (hạ) baseline. Chấp nhận nợ mới thì nói rõ:")
+            print("  bin/tz_anchor_gate.py --update-baseline --accept-new-debt <file.py>")
+            return 1
         changed = False
         for key, n in counts.items():
             if files_baseline.get(key, 0) != n:
@@ -324,16 +412,32 @@ def main(argv):
         print("coding_guidelines.md §16 — neo timezone tường minh, đừng tin TZ của host:")
         print('  datetime.now(ZoneInfo("Asia/Ho_Chi_Minh"))   # hoặc datetime.now(_ICT)')
         print("  (datetime.now(timezone.utc) + timedelta(hours=7)).date()   # thay date.today()")
-        print("  Escape hatch (nếu chắc chắn false-block): MIKE_TZ_GATE=warn git commit ...")
+        print("  Baseline neo theo checkout CANONICAL (master). Đang commit từ worktree/nhánh cũ và")
+        print("  KHÔNG hề sửa chỗ đó? Đó là lệch nhánh, không phải nợ mới — rebase, hoặc")
+        print("  SKIP=tz-anchor-gate git commit ... (bỏ qua đúng hook này, pre-commit hỗ trợ sẵn).")
+        print("  Escape hatch: MIKE_TZ_GATE=warn git commit ...  (qua 1 lần, KHÔNG nâng baseline")
+        print("  ⇒ lần commit sau vẫn chặn. Chấp nhận nợ mới thật thì:")
+        print("  bin/tz_anchor_gate.py --update-baseline --accept-new-debt <file.py>)")
         if mode == "block":
             return 1
-        print("⚠️  downgraded — MIKE_TZ_GATE=warn, commit vẫn qua.")
+        # CỐ Ý KHÁC bin/code_quality_gate.sh: ở đó warn NÂNG baseline (nợ mới thành hợp lệ vĩnh
+        # viễn chỉ vì một lần lách). Ở đây warn cho qua ĐÚNG lần này và dừng luôn — không ghi
+        # baseline — nên "lách" không bao giờ âm thầm biến thành "chấp nhận"
+        # (arch-review 2026-08-30 F3).
+        print("⚠️  downgraded — MIKE_TZ_GATE=warn, commit vẫn qua. Baseline KHÔNG được nâng:")
+        for key, old, new in blocked:
+            print(f"    {key}: baseline giữ nguyên {old} (file đang {new}) ⇒ commit sau vẫn chặn.")
+        return 0
 
     mike_top = in_mike_repo()
     if mike_top is None:
         # Commit từ repo NGOÀI: không ghi vào repo lồng rồi bỏ đó unstaged.
         return 0
 
+    # Guard này chỉ có tác dụng khi chạy TAY: dưới pre-commit, staged_files_only.py (bản
+    # ~/.local/lib/python3.10/site-packages/pre_commit/staged_files_only.py:80-82) đã stash mọi
+    # thay đổi chưa stage + `git checkout -- .` TRƯỚC khi hook chạy, nên cây luôn sạch ở đó.
+    # Giữ lại vì `--update-baseline`/chạy tay không đi qua cơ chế stash đó (arch-review F7).
     dirty = subprocess.run(
         ["git", "-C", mike_top, "diff", "--name-only", "--", BASELINE],
         capture_output=True, text=True, check=False,

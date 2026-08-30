@@ -311,8 +311,14 @@ và argument viết xuống dòng được ⇒ regex đếm sai), **ratchet per-
 `kb/tz_anchor_baseline.json` (kiểm kê ngày bật: **157 vi phạm / 87 file**) — nợ cũ không bắt sửa
 ngay, chỉ không được TĂNG. Cho qua: `datetime.now(_ICT)`, `datetime.now(ZoneInfo(...))`,
 `datetime.now(timezone.utc)` (bước 1 của ICT-anchor). CHƯA phủ: `pd.Timestamp.now()`,
-`date` trong bash. Escape hatch `MIKE_TZ_GATE=warn|off`; selfcheck
-`bin/tz_anchor_gate_selfcheck.py [--mutations|--all-tz]`.
+`date` trong bash, `datetime.fromtimestamp()`, và file .py NGOÀI `WorkingClaude/` (20 worktree
+của repo ngoài — gate KÊU ra stderr nhưng không chặn được). Ba lối thoát, hệ quả KHÁC nhau:
+`SKIP=tz-anchor-gate` (bị chặn do lệch nhánh — baseline neo theo canonical) · `MIKE_TZ_GATE=warn`
+(qua 1 lần, **không** nâng baseline, lần sau vẫn chặn — cố ý khác `code_quality_gate.sh`) ·
+`--update-baseline` (chỉ HẠ được; nâng phải thêm `--accept-new-debt`). Hook repo ngoài đi qua shim
+`WorkingClaude/tz_anchor_gate_shim.sh` vì `.gitignore` của repo đó ẩn chính `WorkingClaude/mike/`
+⇒ trỏ `entry` thẳng vào repo lồng sẽ hỏng cứng trong mọi worktree/clone mới. Selfcheck
+`bin/tz_anchor_gate_selfcheck.py [--mutations|--all-tz]` (44 assertion, 12/12 mutation bị giết).
 
 *→ rationale §16.*
 
