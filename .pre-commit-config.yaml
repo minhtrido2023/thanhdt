@@ -31,14 +31,20 @@ repos:
       # :85+:1216, WorkingClaude/dna_report.py:69, commit 20bf2f20), nên gate phải có ở cả hai;
       # hai hook độc lập, không thay thế nhau.
       #
-      # `entry` trỏ vào repo LỒNG (WorkingClaude/mike/) — cố ý, để một script và MỘT baseline
-      # duy nhất phục vụ cả 2 repo thay vì 2 bản sao lệch nhau. Đánh đổi đã biết: xoá/di chuyển
-      # WorkingClaude/mike/ sẽ làm hook này lỗi cứng. Ratchet đọc
-      # WorkingClaude/mike/kb/tz_anchor_baseline.json; commit từ repo NGOÀI cố ý KHÔNG tự ghi
-      # baseline (không ghi vào repo lồng rồi bỏ đó unstaged) — siết bằng tay:
+      # `entry` PHẢI là shim do CHÍNH repo này track, KHÔNG được trỏ thẳng vào repo lồng:
+      # .gitignore:107 ẩn `WorkingClaude/mike/`, nên trong mọi worktree/clone mới đường dẫn đó
+      # không tồn tại và pre-commit hỏng cứng ("Executable ... not found") ngay trên file SẠCH —
+      # phạm vi hook gồm bot_execute.py + trading_bot/*.py, tức khoá luôn hotfix tiền thật, và
+      # MIKE_TZ_GATE=off không cứu được vì script chưa chạy tới. Shim thiếu repo lồng thì CẢNH
+      # BÁO + exit 0 (không gate được ≠ chặn). Chi tiết: WorkingClaude/tz_anchor_gate_shim.sh.
+      # Bỏ qua có chủ đích:  SKIP=tz-anchor-gate git commit ...
+      #
+      # Ratchet đọc WorkingClaude/mike/kb/tz_anchor_baseline.json (157 vi phạm / 87 file ngày
+      # bật). Commit từ repo NGOÀI cố ý KHÔNG tự ghi baseline của repo lồng. Siết bằng tay:
       #     WorkingClaude/mike/bin/tz_anchor_gate.py --update-baseline <file.py>
+      # (mặc định chỉ HẠ được; nâng phải thêm --accept-new-debt).
       - id: tz-anchor-gate
-        name: datetime.now()/date.today() không neo TZ (xem WorkingClaude/mike/bin/tz_anchor_gate.py, §16)
-        entry: WorkingClaude/mike/bin/tz_anchor_gate.py
+        name: datetime.now()/date.today() không neo TZ (xem WorkingClaude/tz_anchor_gate_shim.sh, §16)
+        entry: WorkingClaude/tz_anchor_gate_shim.sh
         language: system
         files: '^WorkingClaude/.*\.py$'
