@@ -5,33 +5,26 @@
 - Go-live V2.4 lever LIVE từ 08-24: capit_margin_lever.enabled=TRUE. Ngày có CAPIT margin phải chạy approve_margin_day.py TRƯỚC bot.
 - VPI/BAL signal HOLD đến 2026-09-16 — HOLD_ALL theo VPI.
 
-## Margin đơn mã discretionary — LIVE
+## Margin đơn mã discretionary — LIVE, PB-adaptive WIRED
 - Per-name 5% / sleeve 10% NAV, f≤1.3, %ADV≤10%, exit -20%. Commit 022c48e7.
-- Phễu candidate LIVE (PB<1 tuyệt đối hiện tại): bin/discretionary_candidate_funnel.py +
-  bin/marginability_check.py, commit 31825348. 355 universe -> 113 fear cohort -> 14 FULLY_QUALIFIED.
+- Phễu candidate: bin/discretionary_candidate_funnel.py — PB threshold giờ là OR-logic ĐÃ WIRE
+  (cutoff=70%, trần=1.2, cơ sở universe_pit∩Volume>0), thay PB<1.0-only cũ. Commit 714b5889.
+  113->136 mã (+23). TV1(pb1.084/pct50.3%)/DGC(pb1.006/pct46.1%) đều lọt.
+  Trải qua 3 vòng quant-skeptic: REFUTED(data-snoop 2 bậc)->REFUTED(hẹp, chỉ trần)->CONFIRMED.
+- **PHÁT HIỆN QUAN TRỌNG**: TV1 VÀ DGC đều marginable=NO qua DNSE hiện tại — dù lọt phễu, không
+  dùng được margin lúc này.
+- Quality/insider/marginability 23 mã mới: 17/23 pass floor literal, 9/23 nếu golden_floor
+  production nghiêm ngặt.
+- Risk-auditor CONDITIONAL-APPROVE 2 cụm ngành: CTCK (ρ crisis 0.49-0.78, đề xuất cap count≤1 AND
+  exposure≤5%NAV), hoá chất/phân bón (ρ 0.38-0.78, đề xuất cap≤1 margin-armed HOẶC ≤2 cash-funded).
+- **CHƯA IMPLEMENT hard cap** — Taylor chủ động dừng đúng chỗ (funnel stateless, không biết case nào
+  đang ARM thật; enforcement thật phải ở discretionary_margin_gate.py, file khác, cần thêm khái
+  niệm funding-type margin/cash cho cụm hoá chất). Đã thêm cảnh báo INFORMATIONAL thay thế
+  (unit-tested, fire đúng). Rủi ro CHƯA hiện hữu (0 cảnh báo fire hôm nay).
+- **CHỜ USER QUYẾT**: có làm job riêng thiết kế+implement hard cap thật ở discretionary_margin_gate.py
+  ngay không, hay để sau.
 
-## PB-adaptive threshold — 3 VÒNG QUANT-SKEPTIC, VÒNG 3 CONFIRMED, CHỜ USER QUYẾT WIRE
-- V1 (job _060950): REFUTED — data-snoop 2 bậc (cơ sở percentile + cutoff/trần đều chọn sau khi
-  biết TV1/DGC).
-- V2 (job _075523): REFUTED nhưng hẹp hơn — cutoff 70% PASS (min-CV algorithm, độc lập thật),
-  chỉ trần PB<1.5 (giữ nguyên từ V1) chưa kiểm định (dao động 38% khi quét thử).
-- V3 (job _085015, verify quant-skeptic_20260830_085357): **CONFIRMED high**. Trần khoá bằng
-  CÙNG min-CV mechanical rule = **1.2** (không phải 1.5). Kết quả cuối: 113->136 (+20.4%, 23 mã
-  mới, hẹp hơn V2's 152/39). TV1(50.28%)/DGC(46.05%) vẫn lọt. Sector: CTCK=5, hoá chất=4 (cân
-  bằng hơn V2's 8-vs-6). Recompute độc lập khớp tuyệt đối + leave-one-out robustness pass.
-  Hạn chế công khai: N=7 episode mỏng, 5/7 đóng góp 0 vào min-CV pick.
-- **CHỜ USER CHỐT**: (1) wire trần=1.2/cutoff=70% vào bin/discretionary_candidate_funnel.py thật
-  (cần thêm: chạy quality floor/insider/marginability cho 23 mã mới trước — chưa làm; risk-auditor
-  review lại cụm CTCK=5/hoá chất=4 thay điều kiện cũ cap≤1 CTCK), hay (2) giữ nguyên PB<1 tuyệt đối.
-- Research 3 vòng: discretionary_funnel_adaptive_pb_20260830.md (V1, bài học data-snoop, giữ lại
-  làm lịch sử) → discretionary_funnel_adaptive_pb_redo_20260830.md (V2) → round3 file mới (V3).
-- Note vận hành: job quant-skeptic_20260830_085357 có bug bookkeeping (process chết sau khi ghi
-  xong verdict CONFIRMED nhưng job record không tự cập nhật status=done, kẹt "running"/OVERDUE) —
-  đã verify bằng đọc trực tiếp log file (well-formed, END_VERDICT, mtime khớp), không phải lỗi
-  substance. Không sửa được record (bị classifier chặn ghi trạng thái force), không quan trọng.
-
-## §16 gate tốt-nghiệp — ĐÓNG
-- Review tay APPROVED (30/08 12:52), gate LIVE. Không cần dispatch thêm.
+## §16 gate tốt-nghiệp — ĐÓNG (review tay APPROVED 30/08 12:52, gate LIVE)
 
 ## Chuỗi R&D 30/08 khác — đóng
 - custom30V accrual-quality: 3/3 phép thử NO-GO, đóng hẳn trục này.
@@ -48,8 +41,12 @@
    hardcode chẩn đoán) — chờ Mike/user quyết biện pháp mạnh hơn.
 4. dt5g-writer-la-1931-ngoai-moi-cua-so-20260828 — chờ data-ops truy JOBS_BY_PROJECT.
 5. job_cancel_guard_selfcheck FLAKY — theo dõi.
+6. job quant-skeptic_20260830_085357: bookkeeping bug (process chết sau verdict CONFIRMED nhưng
+   record kẹt running/OVERDUE) — không sửa được (bị chặn), không quan trọng, đã verify substance
+   qua log trực tiếp.
 
 ## Macro watch
 - Bobby BĐS VN report xong 08-26 (STRUCTURAL_ACCUMULATION/AMBIGUOUS). Review quý next ~2026-11-26.
 
-- [2026-08-30T09:21:16Z] 30/08 16:21 user duyệt hướng 1 (wire) -> dispatch Taylor_20260830_092103: bước 1 quality/insider/marginability 23 mã mới, bước 2 risk-auditor review lại cả 2 cụm CTCK+hoá chất, bước 3 sửa bin/discretionary_candidate_funnel.py CHỈ SAU bước 1+2 pass. Dừng nếu risk-auditor reject.
+- [2026-08-30T09:55:54Z] 30/08 16:55: user chốt KHÔNG cần implement hard cap ở discretionary_margin_gate.py — phễu chỉ chọn candidate, quyết định đầu tư thật đi qua DD workflow -> DollarBill lập plan -> user duyệt. Cảnh báo informational hiện có (đã wire, unit-tested) là đủ. Item đóng hẳn — PB-adaptive threshold chain (3 vòng quant-skeptic + wire + risk-auditor) HOÀN TẤT KHÔNG CÒN VIỆC MỞ.
+- [2026-08-30T10:08:42Z] 30/08 17:08: user hỏi 8L có nên adaptive như PB không -> đã trả lời nguyên tắc phân loại (neo GIÁ = ứng viên adaptive; neo KINH TẾ TUYỆT ĐỐI ROE>=0/CF>0 = fix đúng; rating<=3 gate = user khoá chủ đích 07-27 không mở lại) + dispatch Taylor_20260830_100832 audit read-only: kiểm kê ngưỡng cứng rating_8l.py, câu hỏi trung tâm = bins rating 1-8 cắt bằng cutoff tuyệt đối hay rank cross-sectional. Không sửa code.
