@@ -33,15 +33,16 @@ GATE_PROD = os.path.join(ROOT, "bin", "tz_anchor_gate.py")
 PROD_BASELINE = os.path.join(ROOT, "kb", "tz_anchor_baseline.json")
 
 
-def _resolve_target(env_target, mutation_flag):
+def _resolve_target(env_target, mutation_flag, prod=None, varname="MIKE_TZ_GATE_TARGET"):
     """Từ chối override target nếu thiếu cờ mutation — nếu không 'ALL PASS' có thể là PASS GIẢ
     trên một bản sao, trong khi file production chưa hề được đọc."""
-    if not env_target or env_target == GATE_PROD:
-        return GATE_PROD
+    prod = prod or GATE_PROD
+    if not env_target or env_target == prod:
+        return prod
     if not mutation_flag:
         raise SystemExit(
-            "❌ MIKE_TZ_GATE_TARGET được đặt mà KHÔNG có MIKE_TZ_GATE_MUTATION=1 — selfcheck sẽ "
-            f"kiểm {env_target} chứ KHÔNG phải {GATE_PROD}. Bỏ biến này hoặc chạy qua --mutations."
+            f"❌ {varname} được đặt mà KHÔNG có MIKE_TZ_GATE_MUTATION=1 — selfcheck sẽ "
+            f"kiểm {env_target} chứ KHÔNG phải {prod}. Bỏ biến này hoặc chạy qua --mutations."
         )
     return env_target
 
@@ -233,6 +234,9 @@ def test_ratchet(tmp):
     check("MIKE_TZ_GATE=warn → cảnh báo, không chặn", rc == 0 and "🔴" in out, f"rc={rc} out={out[:200]}")
     rc, out = _run(sb, bl, [f], {"MIKE_TZ_GATE": "off"})
     check("MIKE_TZ_GATE=off → im hoàn toàn", rc == 0 and out.strip() == "", f"rc={rc} out={out[:200]}")
+    rc, out = _run(sb, bl, [], {"MIKE_TZ_GATE": "off"}, prefix=["--scan"])
+    check("off + --scan (chạy TAY) → KHÔNG im: nói rõ là đã KHÔNG chạy",
+          rc == 0 and "KHÔNG chạy --scan" in out, f"rc={rc} out={out[:200]}")
 
     for rel in ("test_thing.py", "probe_x/run.py", "agents/T/research/r.py", "archive/old.py"):
         p = _write(os.path.join(sb, rel), BARE)
@@ -248,7 +252,12 @@ def test_ratchet(tmp):
           json.load(open(bl))["files"]["app.py"] == 5, "baseline đã bị ghi đè")
 
 
-SHIM = "/home/trido/thanhdt/WorkingClaude/tz_anchor_gate_shim.sh"
+SHIM_PROD = "/home/trido/thanhdt/WorkingClaude/tz_anchor_gate_shim.sh"
+# Cùng khuôn _resolve_target(): override chỉ hợp lệ khi ĐI KÈM cờ mutation, nếu không một biến
+# sót lại làm suite kiểm một BẢN SAO và "ALL PASS" thành PASS GIẢ.
+SHIM = _resolve_target(os.environ.get("MIKE_TZ_GATE_SHIM_TARGET"),
+                       os.environ.get("MIKE_TZ_GATE_MUTATION") == "1", prod=SHIM_PROD,
+                       varname="MIKE_TZ_GATE_SHIM_TARGET")
 
 
 def test_shim_missing_nested_repo(tmp):
@@ -282,6 +291,27 @@ def test_shim_missing_nested_repo(tmp):
                         capture_output=True, text=True, env=env, check=False)
     check("có repo lồng → shim ủy quyền cho gate thật và gate CHẶN",
           r2.returncode == 1 and "app.py:2" in r2.stdout, f"rc={r2.returncode} out={r2.stdout[:160]}")
+
+    # arch-review vòng 4 (killer): bản trước `exec "${DNA_PYEXE:-python3}"` không kiểm interpreter
+    # ⇒ DNA_PYEXE hỏng cho rc=127 = CHẶN commit SẠCH, và MIKE_TZ_GATE=off không gỡ được vì exec
+    # chết trước khi python chạy. Đúng killer F1 đổi biến. Giờ shim không đọc DNA_PYEXE nữa.
+    r3 = subprocess.run([os.path.join(real, "tz_anchor_gate_shim.sh"), v2],
+                        capture_output=True, text=True,
+                        env={**env, "DNA_PYEXE": "/nonexistent/python"}, check=False)
+    check("DNA_PYEXE hỏng KHÔNG còn ảnh hưởng shim (vẫn gate bình thường)",
+          r3.returncode == r2.returncode, f"rc={r3.returncode} (kỳ vọng {r2.returncode}) err={r3.stderr[:160]!r}")
+
+    poor = os.path.join(tmp, "poorpath")
+    os.makedirs(poor, exist_ok=True)
+    if os.path.exists("/bin/bash"):
+        os.symlink("/bin/bash", os.path.join(poor, "bash"))
+        r4 = subprocess.run(["/bin/bash", os.path.join(real, "tz_anchor_gate_shim.sh"), v2],
+                            capture_output=True, text=True, env={"PATH": poor}, check=False)
+        check("KHÔNG có python3 trên PATH → cảnh báo + rc=0 (không chặn)",
+              r4.returncode == 0 and "KHÔNG ĐƯỢC GATE" in r4.stderr,
+              f"rc={r4.returncode} err={r4.stderr[:200]!r}")
+    else:
+        check("dựng được PATH nghèo để thử", False, "không có /bin/bash")
 
 
 def test_key_none_is_loud(tmp):
@@ -503,7 +533,10 @@ def test_hook_verbose(tmp):
                 ok = True
                 continue
             if ok:
-                if ln.strip().startswith("- id: "):      # sang hook kế tiếp
+                # Kết thúc khối = dòng bắt đầu MỘT MỤC LIST MỚI ("- ..." ở cùng mức thụt), không
+                # phải riêng "- id: " — hook kế tiếp mở đầu bằng `- name:` sẽ bị nuốt vào khối
+                # này và cho FALSE GREEN (arch-review vòng 4 repro được ca đó).
+                if ln.lstrip().startswith("- "):
                     break
                 block.append(ln)
         check(f"{label}: khối hook tz-anchor-gate tồn tại", ok, "không thấy `- id: tz-anchor-gate`")
@@ -653,6 +686,30 @@ def run_all_tz():
     return 0
 
 
+# run_mutations() trước vòng 4 CHỈ mutate file .py — mọi guard trong shim (.sh) là guard chưa
+# từng bị kiểm (arch-review vòng 4). Danh sách này bịt đúng chỗ đó.
+SHIM_MUTATIONS = [
+    ("shim quay lại `exec $DNA_PYEXE` (killer vòng 4) → biến kế thừa hỏng = chặn commit sạch",
+     'PY="$(command -v python3 2>/dev/null || true)"\nif [ -z "$PY" ] || [ ! -x "$PY" ]; then',
+     'PY="${DNA_PYEXE:-python3}"\nif [ -z "" ]; then'),
+    ("shim bỏ guard thiếu repo lồng (F1) → Executable not found, chặn commit sạch",
+     'if [ ! -f "$GATE" ]; then', 'if [ ! -f "/dev/null/never" ]; then'),
+]
+
+# Hai hằng dưới đây là NGUYÊN VĂN khối `off` trong main() của gate — đọc từ chính chuỗi
+# literal ở đây, nên nếu gate đổi thì mutation báo HARNESS-HỎNG (đỏ) chứ không âm thầm
+# 'SURVIVED'/bỏ qua.
+OFF_BLOCK_SRC = (
+    '    mode = os.environ.get("MIKE_TZ_GATE", "block")\n'
+    '    if mode == "off":\n'
+    '        if argv and argv[0] in ("--scan", "--seed-baseline", "--update-baseline"):\n'
+    '            # Chạy TAY mà im hoàn toàn = người chạy tưởng đã re-seed/quét xong (arch-review vòng 4).\n'
+    '            print("⚠️  MIKE_TZ_GATE=off — KHÔNG chạy " + argv[0] + ". Bỏ biến rồi chạy lại.",\n'
+    '                  file=sys.stderr)\n'
+    '        return 0\n'
+)
+OFF_WARN_SRC = OFF_BLOCK_SRC.split('if mode == "off":\n')[1].rsplit('        return 0\n', 1)[0]
+
 MUTATIONS = [
     ("bỏ điều kiện 'không có argument' (c) → datetime.now(_ICT) cũng bị bắt",
      "        if (node.args or node.keywords) and not _tz_arg_is_none(node):\n            continue\n", ""),
@@ -700,28 +757,34 @@ MUTATIONS = [
      '("/home/trido/thanhdt/WorkingClaude/mike", "*.py")',
      '("/home/trido/thanhdt/WorkingClaude/mikeX", "*.py")'),
     ("guard env knob chạy TRƯỚC `off` (R5 vòng 3) → off không còn tắt được gate",
-     '    mode = os.environ.get("MIKE_TZ_GATE", "block")\n    if mode == "off":\n        return 0\n',
+     OFF_BLOCK_SRC,
      '    mode = os.environ.get("MIKE_TZ_GATE", "block")\n'),
+    ("bỏ cảnh báo `off` khi chạy TAY --scan/--seed/--update (vòng 4) → im lặng, người chạy "
+     "tưởng đã quét/re-seed xong",
+     OFF_WARN_SRC, ""),
 ]
 
 
-def run_mutations():
-    src = open(GATE_PROD, encoding="utf-8").read()
+def _run_mutation_set(target_prod, target_env, mutations, label):
+    """Chạy 1 bộ mutation trên MỘT file production (bản sao trong mkdtemp) -> [mô tả sống sót]."""
+    src = open(target_prod, encoding="utf-8").read()
     sha_before = hashlib.sha256(src.encode()).hexdigest()
     tmpdir = tempfile.mkdtemp(prefix="tz_anchor_mut_")
     survived = []
+    print(f"── {label}")
     try:
-        for desc, needle, repl in MUTATIONS:
+        for desc, needle, repl in mutations:
             if needle not in src:
                 survived.append(f"HARNESS-HỎNG: {desc}")
-                print(f"  ❌ HARNESS  chuỗi cần thay KHÔNG có trong gate: {desc}")
+                print(f"  ❌ HARNESS  chuỗi cần thay KHÔNG có trong {label}: {desc}")
                 continue
-            mutant = os.path.join(tmpdir, "mutant.py")
+            mutant = os.path.join(tmpdir, "mutant" + os.path.splitext(target_prod)[1])
             with open(mutant, "w", encoding="utf-8") as fh:
                 fh.write(src.replace(needle, repl, 1))
+            os.chmod(mutant, 0o755)
             shutil.rmtree(os.path.join(tmpdir, "__pycache__"), ignore_errors=True)
             env = dict(os.environ)
-            env["MIKE_TZ_GATE_TARGET"] = mutant
+            env[target_env] = mutant
             env["MIKE_TZ_GATE_MUTATION"] = "1"
             r = subprocess.run([sys.executable, os.path.abspath(__file__)],
                                capture_output=True, text=True, env=env, check=False)
@@ -732,17 +795,25 @@ def run_mutations():
                 print(f"  SURVIVED  {desc}  ← assertion tuyên bố canh nhánh này là GUARD GIẢ")
     finally:
         shutil.rmtree(tmpdir, ignore_errors=True)
-    sha_after = hashlib.sha256(open(GATE_PROD, "rb").read()).hexdigest()
+    sha_after = hashlib.sha256(open(target_prod, "rb").read()).hexdigest()
     if sha_after != sha_before:
-        survived.append("PRODUCTION-FILE-MODIFIED")
-        print(f"  ❌ gate production BỊ THAY ĐỔI: {sha_before[:12]} → {sha_after[:12]}")
+        survived.append(f"PRODUCTION-FILE-MODIFIED:{target_prod}")
+        print(f"  ❌ {label} production BỊ THAY ĐỔI: {sha_before[:12]} → {sha_after[:12]}")
     else:
-        print(f"  OK        gate production nguyên vẹn (sha256 {sha_before[:12]}…)")
+        print(f"  OK        {label} production nguyên vẹn (sha256 {sha_before[:12]}…)")
+    return survived
+
+
+def run_mutations():
+    survived = _run_mutation_set(GATE_PROD, "MIKE_TZ_GATE_TARGET", MUTATIONS, "tz_anchor_gate.py")
+    survived += _run_mutation_set(SHIM_PROD, "MIKE_TZ_GATE_SHIM_TARGET", SHIM_MUTATIONS,
+                                  "tz_anchor_gate_shim.sh")
+    total = len(MUTATIONS) + len(SHIM_MUTATIONS)
     print()
     if survived:
         print(f"❌ {len(survived)} mutation sống sót: {survived}")
         return 1
-    print(f"✅ {len(MUTATIONS)}/{len(MUTATIONS)} mutation bị giết")
+    print(f"✅ {total}/{total} mutation bị giết")
     return 0
 
 

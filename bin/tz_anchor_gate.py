@@ -341,6 +341,10 @@ def in_mike_repo():
 def main(argv):
     mode = os.environ.get("MIKE_TZ_GATE", "block")
     if mode == "off":
+        if argv and argv[0] in ("--scan", "--seed-baseline", "--update-baseline"):
+            # Chạy TAY mà im hoàn toàn = người chạy tưởng đã re-seed/quét xong (arch-review vòng 4).
+            print("⚠️  MIKE_TZ_GATE=off — KHÔNG chạy " + argv[0] + ". Bỏ biến rồi chạy lại.",
+                  file=sys.stderr)
         return 0
 
     if _STRAY:
