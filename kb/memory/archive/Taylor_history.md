@@ -369,3 +369,6 @@
 
 ## Archived 2026-08-30 (keep=12 days=0 require_done=False)
 - [2026-08-26T00:53:55Z] fill_timing: 6/5 phien hybrid DU, quant-skeptic CONFIRMED(medium) 2026-08-26 (job Taylor_20260826_004005). CHO DUY NHAT: chu ky user flip fill_timing_live_gate (bus question 'fill_timing-xin-chu-ky-user-flip-live-gate'). Neu ky: ly do la GIAM PHUONG SAI, KHONG phai edge 17,6bps — fill hybrid do duoc +13,4bps vs open (dau NGUOC backtest). DUNG trich rieng con so '2 sigma' (LOO: sigma 1,59-3,34, n=6).
+
+## Archived 2026-08-30 (keep=12 days=0 require_done=False)
+- [2026-08-26T00:54:47Z] extreme_regime: DA TOT NGHIEP go-live 2026-08-22 (commit 08af2637), registry+charter da va 08-26 (commit ad68b2d1). CHO Mike/user: (a) event decision hoi to decided_by=user cho go-live 08-22, (b) job rieng cap nhat registry fill_timing gate5 (dang fire bao dong gia moi ngay, cung commit da flip live), (c) dong bang fixture capit_lever_selfcheck.py. LUAT: flip live gate = cap nhat registry TRONG CUNG LUOT.
