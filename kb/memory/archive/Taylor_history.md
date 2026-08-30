@@ -366,3 +366,6 @@
 
 ## Archived 2026-08-30 (keep=12 days=0 require_done=False)
 - [2026-08-25T14:59:48Z] [2026-08-25] dc-3book-architecture (job _145251) XONG: GO co dieu kien. DC(sector-lens BUY+8L<=2) always-on proxy (converge_portfolio_backtest.py) beat parking manh nhat trong BULL (+64% vs +45% ann, OOS +69% vs +47%), overlap BAL/LAG thap co cau truc. NHUNG: Q3 (backtest 3-book that w_DC=1/3 trong allocator V2.4) chua chay duoc - can code moi; caveat outperformance BULL co the la beta Banking/Securities (56% universe DC) chu khong phai alpha, chua factor-neutral. NEXT (chua lam): tich hop DC vao allocator that + factor-neutral test + capacity check 4 ma securities truoc khi de xuat wire.
+
+## Archived 2026-08-30 (keep=12 days=0 require_done=False)
+- [2026-08-26T00:53:55Z] fill_timing: 6/5 phien hybrid DU, quant-skeptic CONFIRMED(medium) 2026-08-26 (job Taylor_20260826_004005). CHO DUY NHAT: chu ky user flip fill_timing_live_gate (bus question 'fill_timing-xin-chu-ky-user-flip-live-gate'). Neu ky: ly do la GIAM PHUONG SAI, KHONG phai edge 17,6bps — fill hybrid do duoc +13,4bps vs open (dau NGUOC backtest). DUNG trich rieng con so '2 sigma' (LOO: sigma 1,59-3,34, n=6).
