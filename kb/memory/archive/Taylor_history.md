@@ -372,3 +372,6 @@
 
 ## Archived 2026-08-30 (keep=12 days=0 require_done=False)
 - [2026-08-26T00:54:47Z] extreme_regime: DA TOT NGHIEP go-live 2026-08-22 (commit 08af2637), registry+charter da va 08-26 (commit ad68b2d1). CHO Mike/user: (a) event decision hoi to decided_by=user cho go-live 08-22, (b) job rieng cap nhat registry fill_timing gate5 (dang fire bao dong gia moi ngay, cung commit da flip live), (c) dong bang fixture capit_lever_selfcheck.py. LUAT: flip live gate = cap nhat registry TRONG CUNG LUOT.
+
+## Archived 2026-08-30 (keep=12 days=0 require_done=False)
+- [2026-08-26T12:20:48Z] LBC pattern research (Taylor_20260826_120750) XONG, verdict INCONCLUSIVE/DEAD-END - khong wire production. TRC episode 2 (thuong CP 1:3, exright 2026-09-15) dang mo, CHUA co du lieu burst rieng - theo doi khi exright qua neu can.
