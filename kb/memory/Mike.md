@@ -37,3 +37,4 @@
 - Bobby BĐS VN report xong 08-26 (STRUCTURAL_ACCUMULATION/AMBIGUOUS). Review quý next ~2026-11-26.
 
 - [2026-08-30T03:58:49Z] 30/08 10:58 user duyệt 2 hướng: A (Taylor_20260830_035805) định lượng correlation-risk thật cho sleeve 5%/10%/15%, sau đó risk-auditor phản biện; B (Taylor_20260830_035832) accrual sector-neutral - bước 1 đối soát panel gap BẮT BUỘC trước, bước 2 full backtest cycle. Cả 2 bắt buộc quant-skeptic trước wire. Song song, đang chạy.
+- [2026-08-30T04:17:00Z] 30/08 11:17: Hướng B XONG — trục accrual-quality ĐÓNG HẲN, 3/3 phép thử (gate pooled, tiebreak pooled, gate sector-neutral) đều NO-GO. Bước 1 tìm ra bug thật trong panel gốc (BQ query sụp còn tuần đầu tháng 1, N thổi phồng 4x) nhưng không đổi kết luận double-sort gốc. Bước 2 sector-neutral gate: IS +0.07pp OOS -0.09pp trái dấu, DSR 0.509, PBO 0.622. Không đề xuất thêm biến thể nào trên trục này. Hướng A (correlation-risk, Taylor_20260830_035805) vẫn đang chạy.
