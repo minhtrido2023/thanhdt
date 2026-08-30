@@ -52,3 +52,5 @@
 ## Macro watch
 - Bobby BĐS VN report xong 08-26 (STRUCTURAL_ACCUMULATION/AMBIGUOUS). Review quý next ~2026-11-26.
 
+- [2026-08-30T15:10:03Z] Bobby (macro-strategist) BLIND research xong: mức trưởng thành cấu trúc VN KHÔNG đơn điệu — trục quy định mở rộng (có 1 lần thụt lùi Q1/2021 HOSE quá tải) nhưng trục NĐT đi ngược (khối ngoại 22-25%->5-6%, F0 bùng nổ SAU 2020-03 chứ không phải điều kiện có sẵn). Khớp thời gian với 3 cụm khủng hoảng phục hồi nhanh (2012/2020/2022) chỉ 1 phần — mốc trưởng thành lớn nhất (KRX, FTSE) đều SAU cả 3 cụm nhiều năm. Kết luận: chưa đủ căn cứ hạ trọng số neo 2007-2008. File: kb/data_registry/market-state/vn_market_maturation_structural_20260830.md. Giữ nguyên khuyến nghị không re-tune DT5G.
+- [2026-08-30T15:38:48Z] User duyệt 22:37 ICT chuỗi BULL: dispatch song song (1) DC 3-book factor-neutral check job Taylor_20260830_153823 (alpha vs beta Banking+Securities, rồi backtest 3-book thật nếu alpha), (2) EXBULL exploitation audit job Taylor_20260830_153824 (độ trễ DT5G commit vs sóng giá thật, return bỏ lỡ). Cả 2 đang chạy, chưa xong. Việc #4 (BULL-mode LAG idle) chờ sau khi #1 xong.
