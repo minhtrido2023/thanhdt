@@ -335,4 +335,14 @@ else
   log "WARN: không resolve được topic '$ARCH_THREAD_NAME' từ discord_channels.json — không gửi Discord."
 fi
 
+# Gửi email (credential: WC_ROOT/secrets/gmail_smtp_app_password.json)
+if python3 "$ROOT/bin/send_report_email.py" "$report_file" \
+     --subject "Code quality weekly $TODAY — $n_final finding" \
+     --skip-return-gate "code-quality report không có tỉ suất lợi nhuận, gate không áp dụng" \
+     >> "$LOG" 2>&1; then
+  log "Email gửi thành công."
+else
+  log "WARN: email thất bại (exit $?), xem log — không chặn script."
+fi
+
 log "=== code_quality_weekly DONE ==="
