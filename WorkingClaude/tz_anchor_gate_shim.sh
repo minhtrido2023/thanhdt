@@ -10,7 +10,9 @@
 #     Executable `WorkingClaude/mike/bin/tz_anchor_gate.py` not found   → hook Failed, rc=1
 # Phạm vi hook là `^WorkingClaude/.*\.py$`, gồm `bot_execute.py` + 17 file `trading_bot/*.py`
 # ⇒ một hotfix chạm tiền thật commit từ worktree sẽ không commit được, và `MIKE_TZ_GATE=off`
-# KHÔNG cứu được vì script chưa từng được chạy tới. Đo lúc audit: 4/5 worktree ngoài lấy mẫu
+# KHÔNG cứu được vì script chưa từng được chạy tới (`MIKE_TZ_GATE=off` chỉ cứu được khi gate
+# CHẠY tới — nó là công tắc tắt hẳn bên trong gate, không phải bên ngoài).
+# Đo lúc audit: 4/5 worktree ngoài lấy mẫu
 # không có đường dẫn đó; cái thứ 5 sống nhờ một symlink làm tay.
 #
 # Quy tắc: THIẾU repo lồng = KHÔNG GATE ĐƯỢC, không phải = CHẶN. Báo ra stderr rồi exit 0.
