@@ -390,3 +390,6 @@
 
 ## Archived 2026-08-30 (keep=12 days=0 require_done=False)
 - [2026-08-28T21:51:05Z] MO (chua lam, da ghi bus): (1) OPS_HEALTH_CHECK_SRC thieu guard chong PASS-gia nhu diagnosis_evidence_gate_selfcheck::_resolve_target (9efac948); (2) --mutations cua CA HAI selfcheck chua gan lich chay nao (kb_nightly.sh:64 chi chay suite thuong) — needle troi im lang; (3) ccdb_bridge_drift_check.sh:26 la instance §29 dang song (vut stderr git roi doan '(network?)'), gate khong bat vi emitter la '|| { echo; exit }' va bit dang do sinh FP that.
+
+## Archived 2026-08-30 (keep=12 days=0 require_done=False)
+- [2026-08-29T15:49:45Z] discretionary-margin-sizing-20260829 (job Taylor_20260829_154054) XONG, bus finding da ghi. Ket luan chinh: nang SLEEVE cap 5%->15% mot minh gan nhu vo hai (chi 2 case TV1/DGC, khong du lap day); rui ro that nam o PER-NAME cap 3%->5% (tang truc tiep exposure moi case). Phat hien them: 2 tai lieu chinh sach dung nham exposure/equity cho '5% NAV' (Loai-2 forensic 08-25 thieu 30% max loss o f=1.3). Tuong tac capit_margin_lever (f=1.3, cung gate dd52<=-20%, no nang nhat 25.9% NAV) CHUA tinh rigorous o muc combined-account - can job rieng truoc khi wire. Cho user quyet, KHONG tu sua policy file.

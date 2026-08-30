@@ -44,3 +44,4 @@
 ## Macro watch
 - Bobby BĐS VN report xong 08-26 (STRUCTURAL_ACCUMULATION/AMBIGUOUS). Review quý next ~2026-11-26.
 
+- [2026-08-30T13:36:18Z] Hướng 2 DIVERGE composite: quant-skeptic REFUTED medium (job quant-skeptic_20260830_132949) — CAP_SIGNAL grid 6 biến thể không tái lập được (không script/CSV), nhầm nhãn 2 false-positive, 94% hiệu ứng dồn 3/8 episode nghi giả-độc-lập. Cần Taylor viết lại script persist + sửa nhãn + IS/OOS + leave-one-out trước khi trình lại. Hướng 1 redo (job Taylor_20260830_132917) đang chạy, chưa xong.
