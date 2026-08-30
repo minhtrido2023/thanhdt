@@ -44,7 +44,14 @@ Chi tiết đầy đủ từng mục: bus finding của Taylor + `kb/incidents/i
   thiết kế); Mike áp trong phiên tương tác, 3 self-check chạy lại THẬT (không mô phỏng) đều PASS,
   commit ban đầu cũng bị classifier chặn — user cấp quyền tường minh mới qua được.
   **Mốc mở lại gate 4**: NAV live tiến gần 50 tỷ (theo dõi: gross lệnh/phiên vượt ~343tr).
-- **Sector sweep #10+**: chờ Mike dispatch.
+- **Sector sweep: ĐÓNG 2026-08-30** — coverage đã đủ, không còn candidate mới đáng quét. Sweep
+  thật đã đi tới **#20** (không phải #10 — dòng cũ lỗi thời), phủ 20 sector qua 20 file
+  `agents/Taylor/*_valuation_framework.md`; verdict đồng nhất **LENS not BOOK** (Rule 3) qua mọi
+  sector kể cả sector 2-mã (aviation HVN/SCS). Đối chiếu `ICB_Code` thật trong `ticker_prune`
+  (2026-08-30, job `Taylor_20260830_034146`): các nhóm còn thiếu (bao bì giấy DHC/HHP n=2, lốp/phụ
+  tùng ôtô CSM/DRC/VEA/PAC n=1-2 mỗi mã, nước sạch BWE n=1, media YEG n=1) đều rời rạc/không đủ N
+  để thành 1 câu chuyện sector mạch lạc — không mở sweep #21. Utility điện (POW/NT2/PGV) ĐÃ nằm
+  trong `energy_valuation_framework.md` (sub-universe "mature utility"), không phải gap.
 - **Fill-timing khung giờ — ĐÃ LIVE từ 2026-08-22** (SpaceX + ZaloPay cả 2, user sign-off):
   `fill_timing_live_gate=False` + `fill_timing_hybrid_live_gate=False` trong `overrides` cả 2 account.
   Gate chain 5/5 PASS (quant-skeptic CONFIRMED high). Hybrid block schedule: `["11:00","11:15","13:00","13:15","13:30"]` ICT.
