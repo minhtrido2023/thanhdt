@@ -8,6 +8,7 @@ role: Sổ phân loại NGUYÊN NHÂN VĨ MÔ của mỗi episode khủng hoản
   CONFIDENCE/LIQUIDITY; nếu CONFIDENCE — CONTAINABLE vs EXTERNAL-CYCLE) — tách biệt khỏi việc chạy
   backtest để không bị "outcome shape the read" (xem MIKE.md routing table, sự cố 2026-08-24)
 last_full_analysis: 2026-08-25 (Bobby — phân tích toàn diện 2000-2026, thêm 5 episode mới)
+last_update: 2026-08-30 (Bobby — bản đồ pha trong-năm 2009/2018 ở file con vn_macro_regime_history_2009_2018_phases.md; ĐÍNH CHÍNH trục 2 EP-2018-01 CONTAINABLE→EXTERNAL_CYCLE)
 ---
 
 # VN Macro Regime History — sổ phân loại nguyên nhân vĩ mô từng episode khủng hoảng
@@ -18,6 +19,9 @@ khủng hoảng VNINDEX dùng trong backtest/margin-timing của Taylor. Quy t�
 return/kết quả backtest của episode đang đọc** — chỉ biết ngày + hành động giá đã kích hoạt
 episode đó (arm/trigger date, dd52 threshold). Vi phạm quy tắc này là chính sự cố 2026-08-24
 khiến vai trò này ra đời.
+
+> **File con (2026-08-30):** `vn_macro_regime_history_2009_2018_phases.md` — bản đồ pha TRONG-NĂM
+> 2009 & 2018 + bộ chỉ báo real-time (tần suất/độ trễ), phân biệt PIT vs hindsight.
 
 ## Khung phân loại (tóm tắt, đầy đủ ở agent definition)
 - **Trục 1 — Root cause**: `STRUCTURAL` (CPI/tín dụng nội địa đã xấu đi NHIỀU QUÝ trước episode,
@@ -250,17 +254,27 @@ Phân loại AMBIGUOUS vì:
 **Phân loại thực dụng:** `CONFIDENCE_LIQUIDITY / EXTERNAL_SHOCK` với mức độ nghiêm trọng thấp.
 Đây chủ yếu là market correction (valuation reset sau run-up 2017), không phải macro crisis.
 
-### Trục 2: `CONTAINABLE` — confidence: **ambiguous**
+### Trục 2: `EXTERNAL_CYCLE` — confidence: **clean** (ĐÍNH CHÍNH 2026-08-30, Bobby, đọc BLIND)
 
-- Thị trường VN phục hồi theo điều kiện global (Fed pivoted 2019, trade war tensions eased slightly)
-- SBV không cần "một hành động chính sách cụ thể" vì macro nội địa không bị stress
-- Phân loại `CONTAINABLE` ở đây có nghĩa là "VN không bị kéo vào vòng xoáy tự cộng dồn"
+**Nhãn cũ `CONTAINABLE` (2026-08-25) SAI so với định nghĩa khung.** Khung định nghĩa CONTAINABLE
+= "giải quyết bằng MỘT hành động chính sách VN tự thực thi trong tuần-tháng"; EXTERNAL_CYCLE =
+"gắn xu hướng ngoài VN không kiểm soát được, không có mốc VN tự quyết thời điểm kết thúc".
+2018 thuộc vế SAU một cách rõ ràng:
+- Nguồn áp lực = chu kỳ Fed-hiking (4 lần nâng 2018: 21/03, 13/06, 26/09, 19/12) + trade war
+  Mỹ-Trung (Section 301 22/03/2018 → thuế 06/07 → US$200 tỷ 24/09) — cả hai đa-tháng/đa-năm,
+  ngoài tầm VN.
+- KHÔNG tồn tại hành động chính sách VN nào kết thúc được áp lực (SBV chỉ phòng thủ tỷ giá);
+  áp lực chỉ hạ khi Fed pivot đầu 2019 — sự kiện NGOẠI, VN không quyết được thời điểm.
+- Nhãn cũ đã trộn 2 khái niệm: "VN không bị kéo vào vòng xoáy tự cộng dồn" (đúng — đó là kết
+  luận TRỤC 1: không structural) với "containable" (sai — trục 2 hỏi AI kiểm soát được trigger).
+Lưu ý sizing: theo mandate margin Loại-2 (2026-08-25), EXTERNAL_CYCLE KHÔNG thỏa điều kiện
+"policy anchor rõ" — 2018 không phải Loại-2 chuẩn như 2020/2022.
 
 ### Tổng kết EP-2018-01
 | Trục | Kết luận | Confidence |
 |---|---|---|
 | 1. Root cause | `CONFIDENCE_LIQUIDITY` (external shock EM-wide) | ambiguous |
-| 2. Containability | `CONTAINABLE` (VN macro remained solid, no SBV crisis response) | ambiguous |
+| 2. Containability | `EXTERNAL_CYCLE` (Fed cycle + trade war, VN không kiểm soát; đính chính 2026-08-30) | clean |
 
 - **shock_origin:** 03/2018 (thương mại Mỹ-Trung leo thang đầu tiên)
 - **policy_response_start:** N/A (không cần phản ứng macro-stabilization)
@@ -418,7 +432,7 @@ Ba nhánh trigger, MỖI nhánh có MỘT hành động chính sách nhắm đú
 | Episode | Loại | Trục 1 | Trục 2 | N_effective |
 |---|---|---|---|---|
 | MEGA-2007-2012 (3 sóng) | Khủng hoảng cơ cấu | STRUCTURAL | MULTI_YEAR | **1** cụm |
-| 2018 Q1-Q4 | Điều chỉnh thị trường, ngoại lực | CONFIDENCE_LIQUIDITY | CONTAINABLE | **0.5** (ambiguous severity) |
+| 2018 Q1-Q4 | Điều chỉnh thị trường, ngoại lực | CONFIDENCE_LIQUIDITY | EXTERNAL_CYCLE (đính chính 08-30) | **0.5** (ambiguous severity) |
 | 2020-2021 COVID | Cú sốc ngoại sinh | CONFIDENCE_LIQUIDITY | CONTAINABLE | **1** |
 | 2022-05 SCB/Fed | Cú sốc niềm tin + FX | CONFIDENCE_LIQUIDITY | CONTAINABLE | **1** |
 | **TỔNG** | | | | **~3.5** độc lập thật |

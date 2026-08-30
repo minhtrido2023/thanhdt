@@ -384,3 +384,6 @@
 
 ## Archived 2026-08-30 (keep=12 days=0 require_done=False)
 - [2026-08-28T08:26:44Z] [2026-08-28] stale-8l job (Taylor_20260828_081256) XONG: power_lens.csv refreshed+registered CANONICAL; bank_lens_v3 BLOCKED-STALE (vnstock lib deprecated 08-31-2025, 100% KeyError lengthReport, cần migrate sang vnstock.api.quote — chưa làm). Section E audit mechanism đã va + chứng minh bắt được đúng case này. MO: 10 nguon data/* moi phat hien chua dang ky (engine_class.csv, margin_approvals, rank_8l*, rating_8l_NEW/buynow/screener/top30.csv, unified_screener.csv) — follow-up triage, chua lam.
+
+## Archived 2026-08-30 (keep=12 days=0 require_done=False)
+- [2026-08-28T21:42:05Z] ĐANG DỞ job Taylor_20260828_212714: VIỆC1 diag-gate vòng2 commit 68675ba7 + VIỆC2 ops-health owner-hint vòng3 commit 0557e643, cả 2 đã ghi bus finding. NEXT: chờ 2 arch-reviewer chạy nền; nếu NEEDS_CHANGES thì DỪNG (giới hạn cứng của Mike, không lặp vòng 4) — ghi bus question để user quyết.
