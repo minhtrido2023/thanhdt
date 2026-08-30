@@ -376,7 +376,7 @@ def main():
     import pandas as pd
     hold, wl, uni_meta = load_universe()
     uni = hold | wl
-    end = datetime.date.fromisoformat(args.asof) if args.asof else datetime.date.today()
+    end = datetime.date.fromisoformat(args.asof) if args.asof else _ict_now().date()
     start = end - datetime.timedelta(days=70 + args.backfill_days)  # đủ cho Volume_1M + 2 phiên streak
     df = load_prices(uni, start, end)
     if df.empty:

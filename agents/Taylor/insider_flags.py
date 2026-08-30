@@ -228,7 +228,10 @@ def main():
     if args.selftest:
         sys.exit(selftest())
 
-    asof = datetime.date.fromisoformat(args.asof) if args.asof else datetime.date.today()
+    # §16: neo ICT thật, không phụ thuộc TZ của process (cron/host có thể là UTC)
+    _ict_today = (datetime.datetime.now(datetime.timezone.utc)
+                  + datetime.timedelta(hours=7)).date()
+    asof = datetime.date.fromisoformat(args.asof) if args.asof else _ict_today
 
     # --- fail-safe freshness (§4.4): nguồn chết ⇒ WARN + KHÔNG bắn cờ mới, KHÔNG đụng file cũ ---
     max_pub = table_max_snapshot_date()
