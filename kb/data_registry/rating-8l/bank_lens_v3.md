@@ -178,3 +178,41 @@ publish bảng CAR theo mã một cách nhất quán. Nếu cần CAR thật, ng
 disclosure của TỪNG ngân hàng riêng lẻ (không phải 1 nguồn gộp) — việc lớn hơn nhiều so với OCR
 NPL (18 nguồn khác nhau, format khác nhau, chỉ có hàng năm). **Chưa ghi số CAR nào vào
 `bank_lens_v3.csv`** — không có `CTCK_..._UNVERIFIED` provisional nào tìm được đủ tin cậy để ghi.
+
+## Feasibility scan nguồn thay thế cho NPL/CAR/CASA/NIM (job Taylor_20260830_031023, 2026-08-30) — bổ sung khảo sát trên, KHÔNG lặp lại phần đã có
+
+Dispatch 2026-08-30 xin khảo sát nguồn thay thế ngoài vnstock (cafef, stockbiz, fiingroup, SBV/BCTC
+trực tiếp) — job trên (08-28) đã trả lời phần lớn câu hỏi này (vnstock KBS thử rồi ⇒ không có
+NPL/CAR/CASA ở cả 2 source; CTCK sector report thử rồi ⇒ CAR không khả thi qua CTCK). Phần CHƯA
+được xét trước đó, khảo sát mới (WebSearch, chưa fetch/verify sâu — mức feasibility, không phải
+build):
+
+- **cafef.vn**: chỉ có bài báo tường thuật (narrative) trích NPL/CAR/CASA của từng bank theo quý —
+  KHÔNG phải bảng số có thể query/scrape theo mã. Cùng loại bẫy "prose không phải data có cấu
+  trúc" mà `bank_lens_v3.py` docstring đã cảnh báo cho `company.overview()['company_profile']`.
+  KHÔNG khả thi làm nguồn tự động.
+- **FiinGroup / FiinPro-X** (fiingroup.vn): nền tảng dữ liệu TRẢ PHÍ, tự nhận có NPL/CAR/CASA/NIM
+  cho 160+ tổ chức tài chính VN, có vẻ có lịch sử đủ dài cho backtest. Đây là nguồn ĐẦY ĐỦ NHẤT
+  tìm được nhưng cần mua subscription — giá/điều khoản truy cập CHƯA xác định (cần liên hệ vendor
+  xin báo giá), quyết định thương mại ngoài phạm vi feasibility scan này.
+- **VietstockXLS** (dichvu.vietstock.vn): dịch vụ xuất dữ liệu tài chính THEO YÊU CẦU của chính
+  Vietstock — đáng chú ý vì **đây CÙNG NGUỒN** đang bị OCR thủ công (`build_bank_npl_coverage.py`
+  đọc PDF từ `static2.vietstock.vn`, tài sản của Vietstock). Nếu Vietstock bán sẵn bản structured
+  của đúng dữ liệu này, mua có thể RẺ HƠN NHIỀU so với tiếp tục OCR tay 9 mã còn thiếu + mở rộng
+  lịch sử — nhưng giá/phạm vi cột (có NPL theo nhóm nợ + CAR không) CHƯA xác nhận, cần liên hệ.
+- **WiFeed** (wifeed.vn): API dữ liệu tiền tệ/tín dụng/lãi suất NGÀNH — có vẻ nghiêng vĩ mô hơn là
+  chỉ tiêu từng ngân hàng cụ thể, độ liên quan thấp hơn 2 nguồn trên cho use-case NPL/CAR per-ticker.
+
+**Độ sâu lịch sử (PIT, cần từ ~2014 để backtest)**: KHÔNG nguồn nào ở trên được verify có lịch sử
+đủ dài trong khảo sát này (chỉ tìm bằng WebSearch, chưa fetch/test API thật). Riêng đường OCR thủ
+công hiện tại (9/18 mã, CHỈ 1 quý 2026-Q2) muốn mở rộng về 2014 sẽ cần ước tính ~48 quý × 18 mã ≈
+864 PDF-quý OCR bán-thủ-công (tự động hoá định vị trang đã THẤT BẠI cho 9/18 mã ngay ở 1 quý) —
+không thực tế làm bằng tay; nếu cần lịch sử thật, mua vendor (FiinGroup/VietstockXLS) là đường duy
+nhất khả thi.
+
+**KẾT LUẬN (2026-08-30)**: KHÔNG có nguồn miễn phí/tự động nào khả thi cho CAR/CASA lịch sử. NPL
+hiện có (OCR) chỉ dùng được cho SCREENING SỐNG 9/18 mã tại 1 thời điểm, KHÔNG dùng được cho
+backtest (không có lịch sử). Đề xuất: (1) GIỮ NGUYÊN proxy `ROE_Min3Y`/Gordon-PB cho asset-quality
+trong mọi backtest/R&D cần lịch sử — không có gì thay thế được ngay; (2) nếu muốn NPL/CAR/CASA
+thật có lịch sử, bước tiếp theo là XIN BÁO GIÁ từ FiinGroup FiinPro-X hoặc VietstockXLS — quyết
+định ngân sách/thương mại, cần user, KHÔNG tự ý mua/đăng ký.

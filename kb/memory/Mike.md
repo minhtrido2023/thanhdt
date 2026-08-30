@@ -32,3 +32,4 @@
 ## Macro watch
 - Bobby BĐS VN report xong 08-26 (STRUCTURAL_ACCUMULATION/AMBIGUOUS). Review quý next ~2026-11-26.
 
+- [2026-08-30T03:10:38Z] 30/08 10:10 user duyệt thứ tự: #1 (Taylor_20260830_031004, forensic combined-margin account-level) + #2 (Taylor_20260830_031023, NPL/CAR data source feasibility) dispatch song song TRƯỚC. SAU KHI CẢ 2 XONG -> dispatch #4 (accrual tiebreak variant) + #5 (accrual sector-neutral) + #6 (sector sweep #10).
