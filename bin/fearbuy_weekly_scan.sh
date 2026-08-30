@@ -95,9 +95,11 @@ if [ "$MODE" = "weekly" ]; then
 BAT BUOC: tu chay lenh do va bao loi trong ket qua. TUYET DOI KHONG tu bia danh sach ma tu tri nho."
   fi
   CANDIDATE_FUNNEL_SECTION="
---- PHỄU CANDIDATE HỆ THỐNG (sinh tự động lúc chạy — universe fear PB<1+washout>=30%+dd52<=-20% từ
+--- PHỄU CANDIDATE HỆ THỐNG (sinh tự động lúc chạy — universe fear [PB<1 HOẶC (percentile PB
+<=70% AND PB<1,2, cơ sở universe_pit∩Volume>0 cùng ngày)] + washout>=30%+dd52<=-20% từ
 ticker_prune/universe_pit PIT, quality floor 8L, negative screens insider/redflag, marginability
-DNSE thật + %ADV; FULLY_QUALIFIED = qua đủ cả 4 tầng, VẪN LÀ RECON không phải quyết định) ---
+DNSE thật + %ADV; FULLY_QUALIFIED = qua đủ cả 4 tầng, VẪN LÀ RECON không phải quyết định. Cảnh báo
+tập trung ngành CTCK/hoá chất-phân bón informational-only, xem CẢNH BÁO trong output nếu có) ---
 $CANDIDATE_FUNNEL_BLOCK
 -------------------------------------------------------------------------------"
 fi
