@@ -375,3 +375,6 @@
 
 ## Archived 2026-08-30 (keep=12 days=0 require_done=False)
 - [2026-08-26T12:20:48Z] LBC pattern research (Taylor_20260826_120750) XONG, verdict INCONCLUSIVE/DEAD-END - khong wire production. TRC episode 2 (thuong CP 1:3, exright 2026-09-15) dang mo, CHUA co du lieu burst rieng - theo doi khi exright qua neu can.
+
+## Archived 2026-08-30 (keep=12 days=0 require_done=False)
+- [2026-08-28T01:21:24Z] [2026-08-28] fearbuy weekly scan (job _011001) XONG: 0 QUALIFY, 2 NON moi (LDP: 2 nam y kien ngoai tru + tranh chap kiem soat 54% + CF_OA am; VTD: phat hanh 10.000d tra no nguan hang trong khi thi gia 4.500 = chu ky SGT). MO/DANG CHO: (1) TV1 co tuc 15% CHUNG MINH DUOC la chua tung duoc DNSE book lam khoan phai thu (phan ra cashDividendReceiving khop tuyet doi = SAB 3.000d/cp + NCT 8.000d/cp + 1 khoan ty le 72:37; TV1 3.450.000/1.800.000 khong co mat) - qua han ~9 phien, kiem toan qua han 17 ngay; (2) TV4 + ICG soat xet ban nien han ~30/08, con 2 ngay - phai kiem luot sau. LUAT MANG DI: phan ra cashDividendReceiving theo TY LE SO CO PHIEU GIUA 2 ACCOUNT la phep thu chinh xac de xac dinh ma nao da/chua chi tra - manh hon moi WebSearch.
