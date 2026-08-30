@@ -33,3 +33,4 @@
 - Bobby BĐS VN report xong 08-26 (STRUCTURAL_ACCUMULATION/AMBIGUOUS). Review quý next ~2026-11-26.
 
 - [2026-08-30T03:10:38Z] 30/08 10:10 user duyệt thứ tự: #1 (Taylor_20260830_031004, forensic combined-margin account-level) + #2 (Taylor_20260830_031023, NPL/CAR data source feasibility) dispatch song song TRƯỚC. SAU KHI CẢ 2 XONG -> dispatch #4 (accrual tiebreak variant) + #5 (accrual sector-neutral) + #6 (sector sweep #10).
+- [2026-08-30T03:16:33Z] 30/08 10:16: #2 NPL/CAR feasibility XONG — dispatch của tôi dựa info lỗi thời, bank_lens_v3 đã tự fix cùng ngày 08-28 sau (vnstock migrate + OCR 9/18 bank NPL 1 quý). Kết luận: không nguồn free/scriptable cho CAR/CASA lịch sử; NPL chỉ live cross-section 9/18 bank, không backtest-usable. Khuyến nghị GIỮ proxy ROE_Min3Y/Gordon-PB. Muốn lịch sử thật -> quyết định ngân sách FiinGroup/VietstockXLS, cần user duyệt. #1 forensic combined-margin (Taylor_20260830_031004) vẫn đang chạy.
