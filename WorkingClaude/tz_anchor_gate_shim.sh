@@ -45,8 +45,11 @@ fi
 #     không thể đếm lệch nhau trên CÙNG một baseline (`violations()` nuốt SyntaxError → [] nên
 #     một file chỉ parse được ở 1 phiên bản sẽ bị đếm 0 rồi bị auto-update xoá key).
 # Vẫn guard: thiếu interpreter = KHÔNG GATE ĐƯỢC, không phải = CHẶN (đúng dòng 18 ở trên).
+# Chỉ kiểm `-z`: `command -v` đã tự lọc theo quyền execute khi tra PATH, nên nhánh
+# `[ ! -x "$PY" ]` là điều kiện KHÔNG assertion nào chạm tới được — gỡ (arch-review vòng 5,
+# R5-7). Gate càng ít điều kiện càng dễ chứng minh là đúng.
 PY="$(command -v python3 2>/dev/null || true)"
-if [ -z "$PY" ] || [ ! -x "$PY" ]; then
+if [ -z "$PY" ]; then
   echo "⚠️  tz-anchor-gate: không tìm thấy python3 chạy được — $# file .py KHÔNG ĐƯỢC GATE," >&2
   echo "    commit vẫn qua. coding_guidelines.md §16 vẫn áp dụng, tự kiểm bằng tay." >&2
   exit 0
