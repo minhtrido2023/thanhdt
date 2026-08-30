@@ -5,19 +5,21 @@
 - Go-live V2.4 lever LIVE từ 08-24: capit_margin_lever.enabled=TRUE. Ngày có CAPIT margin phải chạy approve_margin_day.py TRƯỚC bot.
 - VPI/BAL signal HOLD đến 2026-09-16 — HOLD_ALL theo VPI.
 
-## Chốt 30/08 — chuỗi 8 việc XONG, chờ user quyết cuối 1 điểm
-1. Forensic combined-margin: margin ratio KHÔNG chặn sleeve kể cả 15%.
-2. NPL/CAR feasibility: không nguồn free — giữ proxy ROE_Min3Y/Gordon-PB.
-3-6. custom30V accrual: 3/3 phép thử (gate pooled, tiebreak, gate sector-neutral) đều NO-GO.
-   ĐÓNG HẲN trục accrual-quality, không đề xuất thêm biến thể.
-7. Sector sweep: đóng, coverage đủ 20/20, tracker đã sửa lỗi thời.
-8. **Correlation-risk sizing sleeve — CHỜ USER CHỐT**: ρ crisis thật 0.17-0.19 (2.4-3.4x normal),
-   risk-auditor sửa 2 bug (cohort dilution, horizon chưa hội tụ) không đảo kết luận. Loss N=3
-   sleeve15%: trần xác định 4.5% NAV (15.7% budget), kỳ vọng ρ=0.20-0.25 chỉ 2.1-2.25% NAV
-   (7.3-7.9% budget). Risk-auditor khuyến nghị NGHIÊNG GIỮ 5% — lý do chính là điều kiện mở lại
-   chính sách (>=3 case marginable đồng thời thật) chưa thoả, không phải correlation math tự cấm.
-   Nếu nới: 10% (N=2) hợp lý hơn nhảy thẳng 15%. Research:
-   agents/Taylor/research/discretionary_sleeve_correlation_risk_20260830.md (mục 8 = risk-audit).
+## Margin đơn mã discretionary — CHỐT 30/08, LIVE
+- Per-name cap: 5% NAV exposure (từ 08-29). Sleeve cap: 10% NAV (nới từ 5%, 08-30 11:52 ICT,
+  commit 022c48e7). f hard-cap 1.3, %ADV≤10%, exit -20% tự áp.
+- Trigger mở 15%: ≥3 case marginable đồng thời THẬT (Mafee xác nhận từng case, không phải giả
+  định) → escalate Mike/user xem xét, KHÔNG tự động nới. Ghi trong code comment + 2 policy doc.
+- Cơ sở: forensic combined-margin (margin ratio không chặn kể cả 15%) + correlation-risk thật
+  (ρ crisis 0.17-0.19, risk-auditor CONDITIONAL-APPROVE, khuyến nghị 10% hợp lý hơn nhảy 15%).
+- Selfcheck 23/23 PASS. Không chạm plan.py/executor.py/trading_rules.json.
+
+## Chuỗi R&D 30/08 — đóng
+- custom30V accrual-quality: 3/3 phép thử (gate pooled, tiebreak, gate sector-neutral) NO-GO.
+  Đóng hẳn trục này, không đề xuất thêm biến thể.
+- NPL/CAR: không nguồn free — giữ proxy ROE_Min3Y/Gordon-PB.
+- Sector sweep: đóng hẳn, coverage đủ 20/20.
+- C1 (DC-swap): củng cố REFUTED.
 
 ## Đang chờ / mở nhỏ
 1. capit-lever selfcheck 2 FAIL (Wags/capit-lever-selfcheck-2-remaining-fail-permission-blocked):
@@ -28,10 +30,11 @@
 4. dt5g-writer-la-1931-ngoai-moi-cua-so-20260828 — writer LA ghi bảng DT5G production 19:31 ICT,
    dữ liệu không hỏng, chờ data-ops truy JOBS_BY_PROJECT.
 5. job_cancel_guard_selfcheck FLAKY — theo dõi.
-6. §16 gate tốt-nghiệp — dispatch Wags_20260830_033008 (opus/high) đang chạy: lint chặn
+6. §16 gate tốt-nghiệp — Wags_20260830_033008 (opus/high) đang chạy song song: lint chặn
    datetime.now() trần vào pre-commit + ratchet + baseline audit 2 repo + arch-reviewer. Chưa xong.
 
 ## Macro watch
 - Bobby BĐS VN report xong 08-26 (STRUCTURAL_ACCUMULATION/AMBIGUOUS). Review quý next ~2026-11-26.
 
-- [2026-08-30T04:54:01Z] 30/08 11:53 user chốt: sleeve cap 5%->10% NAV (per-name 5% giữ nguyên). Điều kiện xét lại 15%: >=3 case marginable đồng thời THẬT (Mafee xác nhận, không phải giả định) -> escalate Mike/user, KHÔNG tự động nới. Dispatch Taylor_20260830_045349 implement: code + selfcheck + đồng bộ 2 policy doc + dry-run TV1.
+- [2026-08-30T05:28:10Z] 30/08 12:27 §16 gate: CANCEL Wags_20260830_033008 sau 5 vòng arch-review NEEDS_CHANGES liên tiếp (9→2→8→1→7 mục, không hội tụ, vượt ngưỡng Pattern C). Git state sạch: mike 83c50fc4, WC e66b0256. Selfcheck 99/99 PASS thật (verify độc lập). Gate CHƯA CONFIRMED, đề xuất review tay thay vì dispatch tiếp. Chờ user quyết: review tay / dispatch người khác / bỏ.
+- [2026-08-30T05:43:32Z] 30/08 12:43 user duyệt #1+#2 (wire marginability + lắp phễu candidate sleeve, Taylor_20260830_054255) + #3 (insider cluster-buy scoping, Taylor_20260830_054316) song song. #4 (backtest full universe kể cả mã chết) để sau, cần data mã huỷ niêm yết riêng.

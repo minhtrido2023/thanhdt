@@ -764,3 +764,26 @@
 - [2026-08-30T05:13:23Z] Wags/heartbeat — Wags_20260830_033008: {"status": "still_running", "elapsed_min": 103, "job_id": "Wags_20260830_033008", "source": "watcher"}
 - [2026-08-30T05:14:24Z] Wags/heartbeat — Wags_20260830_033008: {"status": "still_running", "elapsed_min": 104, "job_id": "Wags_20260830_033008", "source": "watcher"}
 - [2026-08-30T05:15:24Z] Wags/heartbeat — Wags_20260830_033008: {"status": "still_running", "elapsed_min": 105, "job_id": "Wags_20260830_033008", "source": "watcher"}
+
+## Consolidation 2026-08-30T05:45:58Z
+- [2026-08-30T05:43:12Z] Taylor/heartbeat — Taylor_20260830_054255: {"status": "in_progress", "note": "exploring existing code: fearbuy_weekly_scan.sh, discretionary_margin_gate.py, insider_flags.py, dnse_openapi_guideline"}
+- [2026-08-30T05:43:55Z] Taylor/heartbeat — Taylor_20260830_054255: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20260830_054255", "source": "watcher"}
+- [2026-08-30T05:44:17Z] Taylor/heartbeat — Taylor_20260830_054316: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20260830_054316", "source": "watcher"}
+- [2026-08-30T05:44:55Z] Taylor/heartbeat — Taylor_20260830_054255: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20260830_054255", "source": "watcher"}
+- [2026-08-30T05:45:17Z] Taylor/heartbeat — Taylor_20260830_054316: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20260830_054316", "source": "watcher"}
+- [2026-08-30T05:45:48Z] Taylor/finding — insider-cluster-buy-scoping-20260830: {"scope": "Scoping tin hieu doi xung voi insider net-sell flag (insider_flags.py): cluster BUY, dac biet trong dd52<=-20%", "method": "tai dung panel PIT gate ban goc (job_20260729_015830, panel2.csv 49059 dong, universe_pit), khong chay BQ moi; 4 dinh nghia cluster-buy pre-register (A=net nbuy>nsell, B=cum>=2 nguoi khu ESOP, C=%OSH>=0.5%, D=cum+net)", "result": "NO-GO. IC toan universe yeu/khong y nghia (|t|<2, C sai dau t=-3.22). QUYET DINH: trong subset dd52<=-20% (dung use-case sleeve fear-buy) spread AM co y nghia CA 4 dinh nghia (fwd60 t=-3.60 den -4.73, delta -1.6 den -2.9pp) - nguoc hoan toan gia thuyet. B/D flip dau IS(+)->OOS(-). Coverage du (D: trung vi 27 ma/quy, khong phai ly do loai).", "conclusion": "KHONG dau tu xay writer/reader day du cho cluster-buy. Khong dispatch quant-skeptic (khong co gi de xac nhan, NO-GO tu chinh du lieu pre-register).", "artifact": "research/insider_cluster_buy_scoping_20260830.md, exp_insider/cluster_buy_scoping.py"}
+- [2026-08-30T05:45:56Z] Taylor/heartbeat — Taylor_20260830_054255: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20260830_054255", "source": "watcher"}
+- [2026-08-30T05:16:24Z] Wags/heartbeat — Wags_20260830_033008: {"status": "still_running", "elapsed_min": 106, "job_id": "Wags_20260830_033008", "source": "watcher"}
+- [2026-08-30T05:16:27Z] Wags/heartbeat — Wags_20260830_033008: {"status": "in_progress", "note": "7/7 required_change vòng 5 đã vá, selfcheck 99/99; chạy mutations + all-tz"}
+- [2026-08-30T05:17:24Z] Wags/heartbeat — Wags_20260830_033008: {"status": "still_running", "elapsed_min": 107, "job_id": "Wags_20260830_033008", "source": "watcher"}
+- [2026-08-30T05:18:24Z] Wags/heartbeat — Wags_20260830_033008: {"status": "still_running", "elapsed_min": 108, "job_id": "Wags_20260830_033008", "source": "watcher"}
+- [2026-08-30T05:19:24Z] Wags/heartbeat — Wags_20260830_033008: {"status": "still_running", "elapsed_min": 109, "job_id": "Wags_20260830_033008", "source": "watcher"}
+- [2026-08-30T05:20:24Z] Wags/heartbeat — Wags_20260830_033008: {"status": "still_running", "elapsed_min": 110, "job_id": "Wags_20260830_033008", "source": "watcher"}
+- [2026-08-30T05:21:24Z] Wags/heartbeat — Wags_20260830_033008: {"status": "still_running", "elapsed_min": 111, "job_id": "Wags_20260830_033008", "source": "watcher"}
+- [2026-08-30T05:22:25Z] Wags/heartbeat — Wags_20260830_033008: {"status": "still_running", "elapsed_min": 112, "job_id": "Wags_20260830_033008", "source": "watcher"}
+- [2026-08-30T05:23:01Z] Wags/heartbeat — Wags_20260830_033008: {"status": "in_progress", "note": "commit 83c50fc4 (mike) + e66b0256 (outer); dispatch arch-reviewer vòng 6"}
+- [2026-08-30T05:23:25Z] Wags/heartbeat — Wags_20260830_033008: {"status": "still_running", "elapsed_min": 113, "job_id": "Wags_20260830_033008", "source": "watcher"}
+- [2026-08-30T05:24:25Z] Wags/heartbeat — Wags_20260830_033008: {"status": "still_running", "elapsed_min": 114, "job_id": "Wags_20260830_033008", "source": "watcher"}
+- [2026-08-30T05:25:25Z] Wags/heartbeat — Wags_20260830_033008: {"status": "still_running", "elapsed_min": 115, "job_id": "Wags_20260830_033008", "source": "watcher"}
+- [2026-08-30T05:26:25Z] Wags/heartbeat — Wags_20260830_033008: {"status": "still_running", "elapsed_min": 116, "job_id": "Wags_20260830_033008", "source": "watcher"}
+- [2026-08-30T05:27:25Z] Wags/heartbeat — Wags_20260830_033008: {"status": "still_running", "elapsed_min": 117, "job_id": "Wags_20260830_033008", "source": "watcher"}
