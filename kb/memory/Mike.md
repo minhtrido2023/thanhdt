@@ -13,35 +13,44 @@
 - Phễu candidate WIRE (cutoff=70%, trần=1.2), commit 714b5889. TV1/DGC lọt nhưng marginable=NO
   qua DNSE hiện tại. Hard cap concentration risk KHÔNG implement (user chốt: DD workflow đủ).
 
+## Chuỗi nghiên cứu BULL — 30/08, 2/2 việc chính đã xong, chờ user quyết bước kế tiếp
+- **DC 3-book factor-neutral (job Taylor_20260830_153823) — XONG, quant-skeptic CONFIRMED medium**:
+  Việc 2: DC BULL outperform là ALPHA THẬT (rổ cap-weight thuần THUA baseline BULL −12..−17pp,
+  equal-weight chỉ giải thích 30-46% edge — phần lớn đến từ chính double-confirm gate).
+  Việc 1: backtest 3-book thật (w_BAL=w_LAG=w_DC=1/3, NAV production thật) → NO-GO, Sharpe/Calmar/
+  MaxDD xấu đi vì DC ungated tự sập -16,8%/năm trong BEAR (không có override BEAR/CRISIS). Tự sửa
+  1 lỗi nhân-quả giữa chừng (đổ oan cho LAG, quant-skeptic bác đúng — LAG thực ra hơi dương BEAR).
+  Việc 3: capacity không phải vấn đề ở NAV thật hiện tại (<0,1% ADV).
+  **Hướng mở CHƯA kiểm chứng**: gate DC CHỈ active BULL/EXBULL (tự flat BEAR/CRISIS/NEUTRAL) —
+  gợi ý cho job sau, chưa qua DSR/PBO/quant-skeptic, KHÔNG phải đề xuất sẵn sàng.
+  File: `agents/Taylor/research/dc_3book_factor_neutral_20260830.md`.
+  **Đã hỏi user: làm tiếp hướng gate-BULL-only hay dừng ở đây, chuyển việc #4 (BULL-mode LAG)?
+  CHƯA có trả lời — chờ chỉ đạo.**
+- **EXBULL exploitation audit (job Taylor_20260830_153824) — XONG**: 60 phiên/2 giai đoạn (2020-21,
+  2025), độ trễ cơ học 24 phiên (khớp gate 25 phiên) cả 2 ca, tác động ĐẢO NGƯỢC (2020-21 DT5G
+  thắng tín hiệu thô 154,5% capture nhờ lọc whipsaw; 2025 chỉ bắt 61%, giải thích drag -0,89pp đã
+  ghi nhận). N=2 quá mỏng, không đề xuất đổi tham số DT4-gate.
+  File: `agents/Taylor/research/exbull_exploitation_audit_20260830.md`.
+- Việc #4 (BULL-mode LAG idle cash, hạ ngưỡng SUE khi breadth cao) — chưa dispatch, chờ quyết định
+  về hướng gate-BULL-only trước (2 việc có thể liên quan, tránh làm trùng).
+
 ## CAP_SIGNAL advisory — KHÉP KÍN HOÀN TOÀN 2026-08-30
-- Chuỗi đầy đủ: nghiên cứu (DIVERGE-only NO-GO, CAP_SIGNAL composite dương) → quant-skeptic
-  round 1 REFUTED (grid không tái lập, nhãn FP sai, cluster mỏng) → round 2 sửa đủ 4 điểm →
-  quant-skeptic CONFIRMED medium (N=6 cụm macro độc lập/15 năm, quá mỏng để wire kỹ thuật) →
-  user duyệt dùng advisory tham khảo, tự tích luỹ case, tự đề xuất nâng cấp khi N≥10 → implement
-  script `agents/Taylor/cap_signal_advisory_check.py` (nguồn sống: VNI/BQ + EEM/DXY/TNX/yfinance
-  qua $DNA_PYEXE) → wire hiển thị:
-  - Daily (tự động): `dna_report.py::build_cap_signal_advisory_line()` → `mike/bin/
-    eod_trading_report.sh` (dòng 136-139, prefix 🧲). Verify trực tiếp trong file — CÓ THẬT.
-  - Weekly/monthly: không pipeline tự động, checklist tường minh trong project doc cho Taylor.
-  - Bug bắt được trước khi ship: python3 hệ thống thiếu yfinance, phải chạy riêng qua $DNA_PYEXE
-    subprocess (nếu chung khối python3 -c với DT-gate/Value-Radar sẽ lỗi âm thầm mãi mãi).
-  - Ngưỡng nâng cấp N≥10 cụm — đạt thì script tự bus question đề xuất quant-skeptic+user review,
-    KHÔNG bao giờ tự wire vào production thật.
-  - Không đụng file trading production nào (xác nhận qua git status).
-  Toàn bộ quyết định: `kb/projects/cap-signal-advisory-20260830.md` (đủ §1-4).
-- **KHÔNG còn việc gì treo lại ở chuỗi này.**
+- Chuỗi đầy đủ: nghiên cứu → quant-skeptic round1 REFUTED → round2 CONFIRMED (N=6 quá mỏng để
+  wire) → user duyệt advisory → implement `agents/Taylor/cap_signal_advisory_check.py` → wire cả
+  3 cadence (daily tự động qua `dna_report.py::build_cap_signal_advisory_line()`, weekly/monthly
+  checklist). Ngưỡng nâng cấp N≥10. Quyết định: `kb/projects/cap-signal-advisory-20260830.md`.
+  KHÔNG còn việc treo.
 
 ## Chuỗi khủng hoảng cơ cấu 2007-2012 + điểm mù 2018 — ĐÓNG HOÀN TOÀN
-- Hướng 1 (valuation-gated tier-unlock): NO-GO, capacity chặn (60-79% episode thiếu ADV, edge đảo
-  âm ở ngưỡng ≥10B/ngày). File: valuation_gated_tier_unlock_round2_20260830.md.
-- Hướng 2 (DIVERGE CAP_SIGNAL): xem mục CAP_SIGNAL advisory trên — đã khép kín hoàn toàn.
-- Episode clustering N=7->N=5, stress-test DT5G Phase A/B, Bobby BLIND read 2009/2018 — tài liệu
-  tham khảo, không đổi production. DT5G giữ nguyên "bảo hiểm fail-safe", không re-tune lịch sử.
+- Hướng 1 (valuation-gated tier-unlock): NO-GO, capacity chặn. Hướng 2: xem CAP_SIGNAL advisory.
+- Bobby market-maturation research (30/08): trưởng thành cấu trúc KHÔNG đơn điệu, chưa đủ căn cứ
+  hạ trọng số neo 2007-2008. File: vn_market_maturation_structural_20260830.md.
+- DT5G giữ nguyên "bảo hiểm fail-safe", không re-tune lịch sử.
 
 ## Chuỗi R&D 30/08 khác — đóng
 - custom30V accrual-quality: 3/3 phép thử NO-GO. Sector sweep: đóng, coverage 20/20.
-- C1 (DC-swap): củng cố REFUTED. Insider cluster-buy: NO-GO.
-- Audit 8L thresholds: KHÔNG cần adaptive mới. NPL/CAR: giữ proxy ROE_Min3Y/Gordon-PB.
+- C1 (DC-swap cũ, khác DC-3book mới): củng cố REFUTED. Insider cluster-buy: NO-GO.
+- Audit 8L thresholds: KHÔNG cần adaptive mới.
 
 ## Vận hành — dọn sạch 30/08, không còn việc treo cũ
 - job quant-skeptic_20260830_085357: OVERDUE cosmetic (không sửa được), đã verify substance qua
@@ -52,6 +61,4 @@
 ## Macro watch
 - Bobby BĐS VN report xong 08-26 (STRUCTURAL_ACCUMULATION/AMBIGUOUS). Review quý next ~2026-11-26.
 
-- [2026-08-30T15:10:03Z] Bobby (macro-strategist) BLIND research xong: mức trưởng thành cấu trúc VN KHÔNG đơn điệu — trục quy định mở rộng (có 1 lần thụt lùi Q1/2021 HOSE quá tải) nhưng trục NĐT đi ngược (khối ngoại 22-25%->5-6%, F0 bùng nổ SAU 2020-03 chứ không phải điều kiện có sẵn). Khớp thời gian với 3 cụm khủng hoảng phục hồi nhanh (2012/2020/2022) chỉ 1 phần — mốc trưởng thành lớn nhất (KRX, FTSE) đều SAU cả 3 cụm nhiều năm. Kết luận: chưa đủ căn cứ hạ trọng số neo 2007-2008. File: kb/data_registry/market-state/vn_market_maturation_structural_20260830.md. Giữ nguyên khuyến nghị không re-tune DT5G.
-- [2026-08-30T15:38:48Z] User duyệt 22:37 ICT chuỗi BULL: dispatch song song (1) DC 3-book factor-neutral check job Taylor_20260830_153823 (alpha vs beta Banking+Securities, rồi backtest 3-book thật nếu alpha), (2) EXBULL exploitation audit job Taylor_20260830_153824 (độ trễ DT5G commit vs sóng giá thật, return bỏ lỡ). Cả 2 đang chạy, chưa xong. Việc #4 (BULL-mode LAG idle) chờ sau khi #1 xong.
-- [2026-08-30T15:43:39Z] EXBULL exploitation audit XONG (job Taylor_20260830_153824): 60 phiên/2 giai đoạn (2020-21, 2025), độ trễ cơ học 24 phiên (khớp gate 25 phiên) cả 2 ca, nhưng tác động ĐẢO NGƯỢC (2020-21 DT5G thắng tín hiệu thô 154,5% capture vì lọc whipsaw; 2025 chỉ bắt 61%, giải thích drag -0,89pp đã ghi nhận). N=2 quá mỏng, không đề xuất đổi tham số. File: exbull_exploitation_audit_20260830.md. DC 3-book factor-neutral (job Taylor_20260830_153823) vẫn đang chạy.
+- [2026-08-30T16:24:16Z] User duyệt 23:23 ICT hướng DC state-gated BULL/EXBULL-only. Dispatch Taylor_20260830_162358 (effort high, timeout 3600s): backtest state-gated DC vs 2 baseline (không-DC, static 1/3 NO-GO), walk-forward IS/OOS, DSR/PBO, xử lý transition risk, quant-skeptic bắt buộc nếu GO. File đích: dc_state_gated_bull_only_20260830.md. Đang chạy, chưa xong.
