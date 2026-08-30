@@ -5,20 +5,19 @@
 - Go-live V2.4 lever LIVE từ 08-24: capit_margin_lever.enabled=TRUE. Ngày có CAPIT margin phải chạy approve_margin_day.py TRƯỚC bot.
 - VPI/BAL signal HOLD đến 2026-09-16 — HOLD_ALL theo VPI.
 
-## Chốt cuối tuần 29-30/08 — 4 việc XONG
+## Chốt cuối tuần 29-30/08 — 5 việc XONG
 1. Margin đơn mã discretionary: per-name 5% NAV / sleeve 5% NAV / f hard-cap 1.3 / %ADV≤10% /
    exit -20% tự áp. LIVE — commit a19fc256. Khoảng trống: forensic combined-margin account-level
    (capit lever + sleeve cùng gate dd52≤-20%) bắt buộc trước khi xét lại sleeve 15%.
 2. Insider-sell shadow: duyệt tiếp tục, migrate snapshot table xong (commit 7f13e11d/3afec5bd),
    ngưỡng NGỪNG mới >9-10/tháng, review kế ~2026-09-29.
-3. C1 rolling windows: CỦNG CỐ REFUTED — 1 episode COVID 59 ngày = 90% tổng DC-LAG OOS, 2 episode
-   gần nhất 2025 đều LAG thắng DC. Không đề xuất mở lại C1.
-4. custom30V accrual-ratio gate (cash-flow-quality): TÍN HIỆU THẬT — double-sort trong nhóm EY rẻ
-   nhất, tercile accrual tốt nhất fwd2M +9.14% vs xấu nhất +7.09%, +2.05pp/2m t=2.59 p=0.013 N=47Q.
-   Đề xuất: GATE/tiebreak trong ey-only top-30 (không phải leg cộng vào composite — bài học eyrisk
-   NO-GO). CHỜ USER DUYỆT full backtest IS/OOS+DSR/PBO+quant-skeptic trước khi wire custom_basket.py.
-   Research: agents/Taylor/research/custom30v_cashflow_quality_selector_20260830.md.
-   Phụ: bigquery_schema.md sai CF_OA_P0-P4 (ghi là ratio, thực RAW VND) — cần sửa doc.
+3. C1 rolling windows: CỦNG CỐ REFUTED — 1 episode COVID 59 ngày = 90% tổng DC-LAG OOS. Không mở lại.
+4→5. custom30V accrual-quality gate: preliminary IC test (p=0.013) → user duyệt full backtest →
+   **NO-GO, quant-skeptic CONFIRMED high**. Pre-registered agate33: IS -0.08pp, OOS -0.13pp (cả 2
+   XẤU đi), DSR 0.52 (gần coin-flip), PBO 0.607. Cùng nhóm lỗi eyrisk NO-GO cũ (proxy IC dương chết
+   khi vào full production pipeline + TC thật). custom_basket.py KHÔNG đụng, đã đưa vào BỊ LOẠI.
+   Bug phụ tìm thấy lúc verify (dropna() accrual history, ~11.2% ticker-quý lỗ) đã fix, kết quả
+   byte-identical. Đóng hẳn hướng này. Fix kèm: bigquery_schema.md CF_OA_P0-P4 doc.
 
 ## Đang chờ / mở nhỏ
 1. capit-lever selfcheck 2 FAIL (Wags/capit-lever-selfcheck-2-remaining-fail-permission-blocked):
@@ -33,4 +32,3 @@
 ## Macro watch
 - Bobby BĐS VN report xong 08-26 (STRUCTURAL_ACCUMULATION/AMBIGUOUS). Review quý next ~2026-11-26.
 
-- [2026-08-30T01:44:41Z] 30/08 08:44 user duyệt đề xuất #4 accrual gate -> dispatch Taylor_20260830_014429 full backtest cycle (pre-register threshold + IS/OOS + DSR/PBO + turnover cost thật + fix doc CF_OA). Sau Taylor -> quant-skeptic bắt buộc trước khi wire custom_basket.py.
