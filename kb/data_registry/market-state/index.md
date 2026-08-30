@@ -15,6 +15,7 @@ title: Market state / regime (nhóm rủi ro cao nhất — đã có sự cố t
 | [`golive_v23_recommendations.md`](golive_v23_recommendations.md) — golive_v23_recommendations_<date>.csv + data/golive_v23_status.json | DERIVED — ⚠️ status JSON là **ảnh chụp bị ghi đè mỗi phiên**, không phải lịch sử |
 | [`recommend_v23_bq.md`](recommend_v23_bq.md) — recommend_v23.status / .recommendations (BQ) | CANONICAL — **sổ lịch sử** của golive_v23 theo `signal_date` |
 | [`capit_episode.md`](capit_episode.md) — data/capit_episode.json | CANONICAL (quan sát thuần) — trả lời "**có đang giữ CAPIT không**" |
+| [`cap_signal_advisory_log.md`](cap_signal_advisory_log.md) — kb/data_registry/market-state/cap_signal_advisory_log.csv | CANONICAL (advisory-only, không consumer tự động) |
 | [`pt_v12_live_logs.md`](pt_v12_live_logs.md) — data/pt_v12_live_logs.csv | DEAD |
 | [`pt_v12_macro.md`](pt_v12_macro.md) — data/pt_v12_macro*.csv | RESEARCH |
 | [`pt_v22_dt5g_open_positions.md`](pt_v22_dt5g_open_positions.md) — data/pt_v22_dt5g_open_positions.csv | DERIVED |
