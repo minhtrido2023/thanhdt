@@ -416,3 +416,30 @@
 
 ## Consolidation 2026-08-29T17:42:24Z
 - [2026-08-29T17:42:15Z] Mike/finding — retro-2026-08-29-finalized: {"file": "kb/incidents/retro/retro-2026-08-29.md", "n_incidents": 6, "n_patterns": 2, "verified_by": "Wags", "verdict": "GAPS_FOUND_and_fixed", "gaps_fixed": ["escalation-section-bus-question-was-actually-already-closed-2026-08-28", "attribution-source-was-Mike-self-run-not-Taylor-job", "job-count-5-to-6"], "commit": "cad0fa58", "escalation_open": "none-new", "posted_to": "trading_daily", "memory_cleaned": true, "consolidate_run": true, "kb_version": "v2639"}
+
+## Consolidation 2026-08-30T02:07:02Z
+- [2026-08-30T01:45:30Z] Taylor/heartbeat — Taylor_20260830_014429: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20260830_014429", "source": "watcher"}
+- [2026-08-30T01:46:30Z] Taylor/heartbeat — Taylor_20260830_014429: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20260830_014429", "source": "watcher"}
+- [2026-08-30T01:47:30Z] Taylor/heartbeat — Taylor_20260830_014429: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20260830_014429", "source": "watcher"}
+- [2026-08-30T01:48:30Z] Taylor/heartbeat — Taylor_20260830_014429: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20260830_014429", "source": "watcher"}
+- [2026-08-30T01:49:30Z] Taylor/heartbeat — Taylor_20260830_014429: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20260830_014429", "source": "watcher"}
+- [2026-08-30T01:49:41Z] Taylor/heartbeat — Taylor_20260830_014429: {"status": "in_progress", "note": "forked custom_basket_ag.py + engine_ag.py, added yieldcombo_agate mode (pre-registered 33% worst-tercile accrual gate, non-fin routes only); py_compile check next then launch control+treatment full backtest runs"}
+- [2026-08-30T01:50:30Z] Taylor/heartbeat — Taylor_20260830_014429: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20260830_014429", "source": "watcher"}
+- [2026-08-30T01:50:56Z] Taylor/heartbeat — Taylor_20260830_014429: {"status": "in_progress", "note": "control leg (yieldcombo, harness-repro check) + treatment leg (yieldcombo_agate pct=33, PRE-REGISTERED) launched in background on frozen BQ cache asof20260729_postrestate, exact R3-pin env; doing doc fix (CF_OA_P0-P4 ratio->raw VND) while waiting"}
+- [2026-08-30T01:51:31Z] Taylor/heartbeat — Taylor_20260830_014429: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20260830_014429", "source": "watcher"}
+- [2026-08-30T01:52:31Z] Taylor/heartbeat — Taylor_20260830_014429: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20260830_014429", "source": "watcher"}
+- [2026-08-30T01:53:31Z] Taylor/heartbeat — Taylor_20260830_014429: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20260830_014429", "source": "watcher"}
+- [2026-08-30T01:54:32Z] Taylor/heartbeat — Taylor_20260830_014429: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20260830_014429", "source": "watcher"}
+- [2026-08-30T01:55:33Z] Taylor/heartbeat — Taylor_20260830_014429: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20260830_014429", "source": "watcher"}
+- [2026-08-30T01:56:33Z] Taylor/heartbeat — Taylor_20260830_014429: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20260830_014429", "source": "watcher"}
+- [2026-08-30T01:57:33Z] Taylor/heartbeat — Taylor_20260830_014429: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20260830_014429", "source": "watcher"}
+- [2026-08-30T01:58:33Z] Taylor/heartbeat — Taylor_20260830_014429: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20260830_014429", "source": "watcher"}
+- [2026-08-30T01:59:34Z] Taylor/heartbeat — Taylor_20260830_014429: {"status": "still_running", "elapsed_min": 15, "job_id": "Taylor_20260830_014429", "source": "watcher"}
+- [2026-08-30T02:00:34Z] Taylor/heartbeat — Taylor_20260830_014429: {"status": "still_running", "elapsed_min": 16, "job_id": "Taylor_20260830_014429", "source": "watcher"}
+- [2026-08-30T02:01:34Z] Taylor/heartbeat — Taylor_20260830_014429: {"status": "still_running", "elapsed_min": 17, "job_id": "Taylor_20260830_014429", "source": "watcher"}
+- [2026-08-30T02:02:34Z] Taylor/heartbeat — Taylor_20260830_014429: {"status": "still_running", "elapsed_min": 18, "job_id": "Taylor_20260830_014429", "source": "watcher"}
+- [2026-08-30T02:03:34Z] Taylor/heartbeat — Taylor_20260830_014429: {"status": "still_running", "elapsed_min": 19, "job_id": "Taylor_20260830_014429", "source": "watcher"}
+- [2026-08-30T02:04:34Z] Taylor/heartbeat — Taylor_20260830_014429: {"status": "still_running", "elapsed_min": 20, "job_id": "Taylor_20260830_014429", "source": "watcher"}
+- [2026-08-30T02:04:40Z] Taylor/heartbeat — Taylor_20260830_014429: {"status": "in_progress", "note": "control leg CONFIRMED byte-match to pinned R3 (28.86/1.90/-17.8/1.62, Final NAV 1178.01B) -> harness valid. Fixed nested-symlink bug in data/ dir, relaunching treatment leg (agate33, pre-registered)"}
+- [2026-08-30T02:05:34Z] Taylor/heartbeat — Taylor_20260830_014429: {"status": "still_running", "elapsed_min": 21, "job_id": "Taylor_20260830_014429", "source": "watcher"}
+- [2026-08-30T02:06:35Z] Taylor/heartbeat — Taylor_20260830_014429: {"status": "still_running", "elapsed_min": 22, "job_id": "Taylor_20260830_014429", "source": "watcher"}

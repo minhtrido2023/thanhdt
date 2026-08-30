@@ -33,3 +33,4 @@
 ## Macro watch
 - Bobby BĐS VN report xong 08-26 (STRUCTURAL_ACCUMULATION/AMBIGUOUS). Review quý next ~2026-11-26.
 
+- [2026-08-30T01:44:41Z] 30/08 08:44 user duyệt đề xuất #4 accrual gate -> dispatch Taylor_20260830_014429 full backtest cycle (pre-register threshold + IS/OOS + DSR/PBO + turnover cost thật + fix doc CF_OA). Sau Taylor -> quant-skeptic bắt buộc trước khi wire custom_basket.py.
