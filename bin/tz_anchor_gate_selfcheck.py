@@ -483,21 +483,32 @@ def test_hook_verbose(tmp):
     """R2 — pre_commit/commands/run.py:217 chỉ in output hook khi rc!=0 hoặc verbose. Gate này
     cố ý fail-open; không verbose thì mọi cảnh báo bị nuốt và fail-open thành FAIL-SILENT."""
     print("[14] R2 — hook phải có verbose:true, và verbose thật sự lộ stderr khi rc=0")
-    try:
-        import yaml
-    except ImportError:
-        check("đọc được YAML config", False, "thiếu module yaml")
-        return
+    # KHÔNG `import yaml`: 2 runner selfcheck của fleet (bin/run_selfchecks.sh:19,
+    # bin/selfcheck_weekly_baseline_check.sh:132) chạy bằng $DNA_PYEXE = wc_venv/bin/python, môi
+    # trường đó KHÔNG có PyYAML ⇒ ca này đỏ giả và cả file bị đẩy vào known_red (arch-review
+    # vòng 3, killer). Assertion chỉ cần "khối hook tz-anchor-gate có verbose: true" — quét văn
+    # bản là đủ, và chạy được ở MỌI interpreter. Đây đúng là lớp lỗi §16 dạy: giả định của môi
+    # trường tác giả không phải giả định của môi trường chạy thật.
     for cfg in (MIKE_CFG, OUTER_CFG):
+        label = os.path.basename(os.path.dirname(cfg)) + "/.pre-commit-config.yaml"
         try:
-            hooks = [h for r in yaml.safe_load(open(cfg))["repos"] for h in r["hooks"]
-                     if h.get("id") == "tz-anchor-gate"]
-        except (OSError, KeyError, yaml.YAMLError) as e:
-            check(f"{cfg}: đọc được hook", False, str(e)[:120])
+            lines = open(cfg, encoding="utf-8").read().splitlines()
+        except OSError as e:
+            check(f"{label}: đọc được", False, str(e)[:120])
             continue
-        check(f"{os.path.basename(os.path.dirname(cfg))}/.pre-commit-config.yaml: verbose=true",
-              bool(hooks) and hooks[0].get("verbose") is True,
-              f"hooks={hooks}")
+        block, ok = [], False
+        for ln in lines:
+            if ln.strip() == "- id: tz-anchor-gate":
+                block = []
+                ok = True
+                continue
+            if ok:
+                if ln.strip().startswith("- id: "):      # sang hook kế tiếp
+                    break
+                block.append(ln)
+        check(f"{label}: khối hook tz-anchor-gate tồn tại", ok, "không thấy `- id: tz-anchor-gate`")
+        check(f"{label}: verbose: true trong khối đó",
+              any(l.strip() == "verbose: true" for l in block), f"block={block[-6:]}")
     pc = shutil.which("pre-commit") or os.path.expanduser("~/.local/bin/pre-commit")
     if not os.path.exists(pc):
         check("có pre-commit để chứng minh hành vi verbose", False, "không tìm thấy pre-commit")
@@ -536,6 +547,47 @@ def test_env_knobs_guarded(tmp):
                            env=env, check=False)
         check(f"{knob} không có cờ → TỪ CHỐI chạy", r.returncode != 0 and "MIKE_TZ_GATE_SELFCHECK" in r.stderr,
               f"rc={r.returncode} err={r.stderr[:160]!r}")
+        r_off = subprocess.run([sys.executable, GATE_PATH, f], capture_output=True, text=True,
+                               env={**env, "MIKE_TZ_GATE": "off"}, check=False)
+        check(f"{knob} + MIKE_TZ_GATE=off → off THẮNG (rc=0, im)",
+              r_off.returncode == 0 and (r_off.stdout + r_off.stderr).strip() == "",
+              f"rc={r_off.returncode} out={(r_off.stdout + r_off.stderr)[:160]!r}")
+
+
+def test_git_add_failure_is_loud(tmp):
+    """arch-review vòng 3 — nhánh 'baseline ĐÃ GHI nhưng git add THẤT BẠI' để lại dirt trong cây
+    mike cho consolidate.sh `git add -A` quét (chính hiểm hoạ R1). Trước ca này nó không có
+    assertion nào: mutation xoá dòng cảnh báo SỐNG SÓT."""
+    print("[16] R3-residual — git add baseline thất bại phải KÊU")
+    r = os.path.join(tmp, "addfail")
+    os.makedirs(os.path.join(r, "bin"), exist_ok=True)
+    os.makedirs(os.path.join(r, "kb"), exist_ok=True)
+    _write(os.path.join(r, ".gitignore"), "kb/\n")           # baseline bị chính repo đó ignore
+    bl = _write(os.path.join(r, "kb", "tz_anchor_baseline.json"), json.dumps({"files": {"bin/app.py": 7}}))
+    f = _write(os.path.join(r, "bin", "app.py"), ANCHORED)     # 0 vi phạm ⇒ auto-update HẠ
+    subprocess.run(["git", "init", "-q", r], capture_output=True, check=False)
+    _git(r, "config", "user.email", "t@t"); _git(r, "config", "user.name", "t")
+    _git(r, "add", "-A"); _git(r, "commit", "-qm", "init")
+    env = dict(os.environ)
+    env.update({"MIKE_TZ_GATE_SELFCHECK": "1", "MIKE_TZ_GATE_ROOT": r, "MIKE_TZ_GATE_BASELINE": bl})
+    env.pop("MIKE_TZ_GATE", None)
+    res = subprocess.run([sys.executable, GATE_PATH, f], capture_output=True, text=True,
+                         env=env, cwd=r, check=False)
+    check("git add thất bại → không chặn commit", res.returncode == 0, f"rc={res.returncode}")
+    check("git add thất bại → CÓ cảnh báo 'CHƯA stage', không im",
+          "CHƯA stage" in (res.stdout + res.stderr),
+          f"out={(res.stdout + res.stderr)[:220]!r}")
+
+
+def test_tracked_roots_resolve(gate):
+    """arch-review vòng 3 — đổi đường dẫn canonical thành `mikeX` SỐNG SÓT cả suite: 2 hằng số
+    quyết định kiểm kê baseline mà không assertion nào chạm tới."""
+    print("[17] TRACKED_ROOTS phải trỏ vào 2 checkout git THẬT")
+    for repo, _pattern in gate.TRACKED_ROOTS:
+        top = subprocess.run(["git", "-C", repo, "rev-parse", "--show-toplevel"],
+                             capture_output=True, text=True, check=False)
+        check(f"{repo} là git checkout", top.returncode == 0 and top.stdout.strip() != "",
+              f"rc={top.returncode} err={top.stderr[:120]!r}")
 
 
 def test_prod_baseline_untouched(sha_before):
@@ -564,6 +616,8 @@ def main():
         test_baseline_key_worktree(tmp)
         test_hook_verbose(tmp)
         test_env_knobs_guarded(tmp)
+        test_git_add_failure_is_loud(tmp)
+        test_tracked_roots_resolve(gate)
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
     test_prod_baseline_untouched(sha_before)
@@ -636,7 +690,18 @@ MUTATIONS = [
      '    if top and os.path.isdir(os.path.join(top, "kb")) and os.path.isfile(os.path.join(top, "bin", "dispatch.sh")):\n        return "mike/" + os.path.relpath(abs_p, top)\n',
      ""),
     ("bỏ guard env knob (R5) → biến sót lại biến gate thành no-op im lặng",
-     "if _STRAY:\n", "if False:\n"),
+     "    if _STRAY:\n", "    if False:\n"),
+    # Needle phải nuốt TRỌN câu lệnh print. Bản đầu chỉ thay TIỀN TỐ chuỗi, phần đuôi
+    # "…CHƯA stage." vẫn được in ⇒ assertion vẫn xanh ⇒ mutation SỐNG SÓT dù guard đã bị tháo.
+    ("bỏ cảnh báo `git add` thất bại → baseline ghi rồi mà không ai biết chưa stage",
+     '            print("⚠️  tz_anchor_gate: git add baseline thất bại — baseline đã ghi nhưng CHƯA stage.", file=sys.stderr)',
+     '            pass'),
+    ("TRACKED_ROOTS trỏ sai checkout (mike → mikeX)",
+     '("/home/trido/thanhdt/WorkingClaude/mike", "*.py")',
+     '("/home/trido/thanhdt/WorkingClaude/mikeX", "*.py")'),
+    ("guard env knob chạy TRƯỚC `off` (R5 vòng 3) → off không còn tắt được gate",
+     '    mode = os.environ.get("MIKE_TZ_GATE", "block")\n    if mode == "off":\n        return 0\n',
+     '    mode = os.environ.get("MIKE_TZ_GATE", "block")\n'),
 ]
 
 

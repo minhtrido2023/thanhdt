@@ -51,7 +51,7 @@ ESCAPE HATCH — 3 đường, cố ý khác nhau về HỆ QUẢ:
     chặn. Lách không được phép âm thầm biến thành chấp nhận (F3).
   - `--update-baseline` — mặc định CHỈ hạ được baseline (siết). Nâng phải nói ra bằng
     `--accept-new-debt` (F4).
-  - `MIKE_TZ_GATE=off` — tắt hẳn.
+  - `MIKE_TZ_GATE=off` — tắt hẳn. Thắng MỌI thứ khác, kể cả guard env knob ở dưới.
 
 CÒN HỞ (ghi ở đây, đừng để ai tưởng gate phủ cả họ lỗi):
   - `pd.Timestamp.now()` / `pd.Timestamp.today()` naive-host-local Y HỆT về ngữ nghĩa (đo được
@@ -69,6 +69,10 @@ CÒN HỞ (ghi ở đây, đừng để ai tưởng gate phủ cả họ lỗi):
   - File .py NGOÀI `WC_ROOT` và ngoài mọi checkout mike (vd 20 worktree của repo ngoài ở
     /home/trido/thanhdt/wt-*) không có baseline-key ⇒ KHÔNG gate được. Từ 2026-08-30 gate KÊU
     ra stderr thay vì im (F2), nhưng vẫn không chặn.
+
+⚠️ `pre-commit run --all-files` TRONG repo mike sẽ chạy tới nhánh auto-update và GHI + `git add`
+baseline production NGOÀI mọi commit (không có cơ chế stash của commit thật che). Không script
+nào trong fleet làm việc này hôm nay; nếu chạy tay thì kiểm `git status kb/` sau đó.
 
 Escape hatch (cùng khuôn MIKE_CQ_GATE / MIKE_DIAG_GATE / MIKE_COMMIT_GATE):
 env MIKE_TZ_GATE=warn hạ BLOCK xuống cảnh báo không chặn; =off tắt hẳn.
@@ -88,16 +92,14 @@ MIKE_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # không có baseline-key ⇒ rc=0 (đã repro, arch-review vòng 2 R4). Cùng khuôn với
 # `_resolve_target()` ở phía selfcheck, vốn đã từ chối MIKE_TZ_GATE_TARGET không có cờ.
 _SELFCHECK = os.environ.get("MIKE_TZ_GATE_SELFCHECK") == "1"
+# CHỈ TÍNH ở module scope, KHÔNG raise ở đây: `MIKE_TZ_GATE=off` là công tắc tắt hẳn được
+# docstring và tz_anchor_gate_shim.sh quảng cáo là lối thoát cuối; raise ở module scope chạy
+# TRƯỚC khi main() đọc `mode` ⇒ một biến sót lại làm rc=1 trên file SẠCH mà KHÔNG lối thoát nào
+# gỡ được — đúng hình dạng F1 mà cả bản vá này sinh ra để diệt (arch-review vòng 3).
 _STRAY = [
     k for k in ("MIKE_TZ_GATE_ROOT", "MIKE_TZ_GATE_BASELINE", "MIKE_TZ_GATE_ROOTS")
     if os.environ.get(k) and not _SELFCHECK
 ]
-if _STRAY:
-    raise SystemExit(
-        f"❌ tz_anchor_gate: {', '.join(_STRAY)} được đặt mà KHÔNG có MIKE_TZ_GATE_SELFCHECK=1 — "
-        "biến này chỉ dành cho sandbox selfcheck; để nguyên sẽ gate SAI baseline hoặc no-op im "
-        "lặng. Bỏ biến, hoặc chạy qua bin/tz_anchor_gate_selfcheck.py."
-    )
 
 WC_ROOT = (os.environ.get("MIKE_TZ_GATE_ROOT") if _SELFCHECK else None) or "/home/trido/thanhdt/WorkingClaude"
 BASELINE = (os.environ.get("MIKE_TZ_GATE_BASELINE") if _SELFCHECK else None) or os.path.join(
@@ -340,6 +342,13 @@ def main(argv):
     mode = os.environ.get("MIKE_TZ_GATE", "block")
     if mode == "off":
         return 0
+
+    if _STRAY:
+        raise SystemExit(
+            f"❌ tz_anchor_gate: {', '.join(_STRAY)} được đặt mà KHÔNG có MIKE_TZ_GATE_SELFCHECK=1 — "
+            "biến này chỉ dành cho sandbox selfcheck; để nguyên sẽ gate SAI baseline hoặc no-op im "
+            "lặng. Bỏ biến, chạy qua bin/tz_anchor_gate_selfcheck.py, hoặc MIKE_TZ_GATE=off."
+        )
 
     args = list(argv)
     if args and args[0] == "--scan":
