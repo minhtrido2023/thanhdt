@@ -2,14 +2,15 @@
 # -*- coding: utf-8 -*-
 """Gate + checker cho sleeve margin đơn mã discretionary (TV1/DGC-style fear-buy).
 
-Chính sách: `kb/projects/discretionary-margin-policy-20260823.md` (RESYNC 2026-08-29,
+Chính sách: `kb/projects/discretionary-margin-policy-20260823.md` (RESYNC 2026-08-30,
 `decided_by: user`). KHÁC `capit_margin_lever`/`apply_capit_lever`: đây KHÔNG wire vào
 `plan.py`/`executor.py`/`trading_rules.json` — quy trình arm là hành động TAY của user (qua
 subcommand `arm` ở đây), checker exit chạy cron đọc-only, không có auto-sell.
 
 Rào chắn cưỡng chế (mọi %NAV = EXPOSURE, không phải vốn tự có — §"Rào chắn rủi ro" chính sách):
   - per-name  : exposure ≤ 5% NAV
-  - sleeve tổng: Σ exposure các case ĐANG active ≤ 5% NAV
+  - sleeve tổng: Σ exposure các case ĐANG active ≤ 10% NAV (user 08-30; trigger mở 15%: ≥3 case
+    marginable đồng thời THẬT → escalate user, không tự động)
   - đòn bẩy   : f ≤ 1,3 (hard-cap, đồng quy ước capit_margin_lever — KHÔNG dùng broker-max 2,0)
   - thanh khoản: exposure ≤ 10% ADV-3-tháng (đọc `data/bq_cache/ticker/<year>.parquet`)
   - marginability: PHẢI có xác nhận Mafee (chuỗi thật, không phải placeholder) trước khi arm
@@ -48,7 +49,10 @@ BQ_CACHE_TICKER_DIR = os.path.join(WC_ROOT, "data", "bq_cache", "ticker")
 
 ONLY_ACCOUNT = "SpaceX"           # chính sách chỉ áp dụng account có margin (ZaloPay cash-only)
 PER_NAME_CAP_PCT = 0.05            # NAV exposure — user 08-29, đổi từ 3%
-SLEEVE_CAP_PCT = 0.05               # NAV exposure tổng — GIỮ NGUYÊN (đề xuất 15% bị REJECT 08-29)
+SLEEVE_CAP_PCT = 0.10                # NAV exposure tổng — user 08-30 11:52 ICT, đổi từ 5%.
+                                       # Trigger mở lại 15%: ≥3 case marginable đồng thời THẬT
+                                       # (Mafee xác nhận, không phải giả định) → escalate
+                                       # Mike/user xem xét, KHÔNG tự động nâng lên 15%.
 MAX_F = 1.3                          # hard-cap đòn bẩy, đồng quy ước capit_margin_lever
 ADV_CAP_PCT = 0.10                    # exposure <= 10% ADV-3-thang
 ADV_WINDOW_SESSIONS = 63               # ~3 tháng phiên giao dịch

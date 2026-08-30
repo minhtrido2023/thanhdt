@@ -90,10 +90,15 @@ def main():
         check("record co f=1.3", arms[0]["f"] == 1.3)
         check("record co pct_nav_exposure ~0.05", abs(arms[0]["pct_nav_exposure"] - 0.05) < 1e-6)
 
-    # ---- 3. sleeve cap block: case thu 2 lam tong > 5% NAV ----
-    rc = gate.cmd_arm(mkargs(ticker="DGC", arm_price=5000, exposure_vnd=0.01 * NAV[0]))
-    check("sleeve cap chan case thu 2 (tong 6% > 5% cap)", rc == 2, f"rc={rc}")
-    check("sleeve cap block KHONG them record moi", len(gate.load_arms()) == 1)
+    # ---- 3. sleeve cap: case thu 2 tai dung tran per-name (5%) -> tong 10% == sleeve cap, PASS ----
+    rc = gate.cmd_arm(mkargs(ticker="DGC", arm_price=5000, exposure_vnd=0.05 * NAV[0]))
+    check("case thu 2 tai 5% NAV thanh cong (tong 10% == sleeve cap, khong vuot)", rc == 0, f"rc={rc}")
+    check("sleeve tai tran co 2 record", len(gate.load_arms()) == 2)
+
+    # ---- 3b. sleeve cap block: case thu 3 lam tong > 10% NAV ----
+    rc = gate.cmd_arm(mkargs(ticker="DRI", arm_price=8000, exposure_vnd=0.01 * NAV[0]))
+    check("sleeve cap chan case thu 3 (tong 11% > 10% cap)", rc == 2, f"rc={rc}")
+    check("sleeve cap block KHONG them record moi", len(gate.load_arms()) == 2)
 
     # ---- 4. f > 1.3 hard-cap block ----
     gate.save_arms([])

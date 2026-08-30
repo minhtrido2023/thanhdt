@@ -1,4 +1,12 @@
 # Trần margin sleeve Loại-2 + forensic entry sớm khi DT5G thoát khủng hoảng
+> **RESYNC 2026-08-30** (job `Taylor_20260830_045349`, `decided_by: user`): chính sách đơn mã
+> (`discretionary-margin-policy-20260823.md`) vừa nâng **sleeve cap TỔNG của sleeve đơn mã** từ
+> 5%→10% NAV exposure — số này KHÁC số Loại-2 dưới đây (portfolio-level, ≤5% NAV **vốn tự có** /
+> ≤6,5% NAV exposure ở f=1,3). Theo re-sync 08-29 đã ghi trong chính sách gốc, Loại-2 KHÔNG tự
+> động kế thừa thay đổi của sleeve đơn mã — số Phần A dưới GIỮ NGUYÊN, cảnh báo lỗi công thức A5
+> (equity_cap vs exposure_cap, đã sửa 08-29: max loss thật 1,3% NAV không phải 1,0%) vẫn còn hiệu
+> lực nguyên văn. Đổi số Loại-2 cần một vòng risk-auditor + user riêng.
+>
 > Job `Taylor_20260825_113846` · 2026-08-25 · **RESEARCH-ONLY, KHÔNG wire, KHÔNG sửa code/config.**
 > Mandate (anh John): số `≤3%/mã · ≤5%/sleeve` trong `crisis_margin_framework_adaptive_20260825.md`
 > Phần 3(c) là **mượn từ chính sách đơn mã** (`discretionary-margin-policy-20260823.md`, N=1-2
