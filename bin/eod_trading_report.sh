@@ -121,6 +121,25 @@ try:
 except Exception:
     pass
 " 2>/dev/null || true
+  # CAP_SIGNAL advisory (DIVERGE VN-vs-EM + xác nhận DXY/UST) — user duyệt 2026-08-30 21:33
+  # ICT làm tín hiệu ADVISORY THAM KHẢO (KHÔNG production). THUẦN HIỂN THỊ, cùng mẫu DT4-
+  # gate/Value Radar phía trên. Gọi từ đây cũng là nhịp ghi registry hàng ngày (idempotent
+  # per ngày, an toàn khi 2 account cùng chạy) — không cần cron riêng, theo
+  # kb/projects/cap-signal-advisory-20260830.md §4. TÁCH RIÊNG khỏi block python3 ở trên vì
+  # nó cần $DNA_PYEXE (yfinance chỉ có trong venv đó, không có trong python3 hệ thống —
+  # dùng nhầm python3 sẽ ModuleNotFoundError và fail-safe nuốt lỗi, không ai biết dòng này
+  # chưa từng chạy được).
+  "${DNA_PYEXE:-python3}" -c "
+import sys
+sys.path.insert(0, '$WC_ROOT')
+try:
+    from dna_report import build_cap_signal_advisory_line
+    cs = build_cap_signal_advisory_line()
+    if cs:
+        print('🧲 ' + cs)
+except Exception:
+    pass
+" 2>/dev/null || true
 }
 # --- Cảnh báo độ tươi DT5G (audit §14, job Winston_20260731_062642) ---------------------
 # Report chạy 19:10 trong khi chuỗi daily_refresh 18:30 worst-case ~90'. Khối regime bên

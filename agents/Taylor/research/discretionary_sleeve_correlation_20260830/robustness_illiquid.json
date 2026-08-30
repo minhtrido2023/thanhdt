@@ -1,0 +1,163 @@
+{
+  "2007-04": {
+    "all": {
+      "n_tickers": 179,
+      "n_pairs": 15931,
+      "mean_corr": 0.4015078068232259,
+      "median_corr": 0.4087662777021659
+    },
+    "illiquid_tercile": {
+      "n_tickers": 60,
+      "n_pairs": 1770,
+      "mean_corr": 0.30330564592377207,
+      "median_corr": 0.3092646542959495
+    },
+    "liquid_tercile": {
+      "n_tickers": 60,
+      "n_pairs": 1770,
+      "mean_corr": 0.4745882814684588,
+      "median_corr": 0.478938435076395
+    },
+    "n_cohort": 179,
+    "adv_p33": 54278333.33333333,
+    "adv_p67": 183027333.3333333
+  },
+  "2009-11": {
+    "all": {
+      "n_tickers": 243,
+      "n_pairs": 29370,
+      "mean_corr": 0.34795519959050053,
+      "median_corr": 0.3572414381808845
+    },
+    "illiquid_tercile": {
+      "n_tickers": 81,
+      "n_pairs": 3224,
+      "mean_corr": 0.19890711000894173,
+      "median_corr": 0.20114481680404583
+    },
+    "liquid_tercile": {
+      "n_tickers": 81,
+      "n_pairs": 3240,
+      "mean_corr": 0.4877292045689533,
+      "median_corr": 0.4980456894056793
+    },
+    "n_cohort": 243,
+    "adv_p33": 95209450.0,
+    "adv_p67": 521610266.6666662
+  },
+  "2011-05": {
+    "all": {
+      "n_tickers": 468,
+      "n_pairs": 108844,
+      "mean_corr": 0.16229922889093543,
+      "median_corr": 0.1525042788750129
+    },
+    "illiquid_tercile": {
+      "n_tickers": 154,
+      "n_pairs": 11498,
+      "mean_corr": 0.04170525860551039,
+      "median_corr": 0.04560511262551512
+    },
+    "liquid_tercile": {
+      "n_tickers": 157,
+      "n_pairs": 12246,
+      "mean_corr": 0.3863150847744103,
+      "median_corr": 0.39531161902854167
+    },
+    "n_cohort": 472,
+    "adv_p33": 5931500.0,
+    "adv_p67": 55416500.0
+  },
+  "2012-08": {
+    "all": {
+      "n_tickers": 352,
+      "n_pairs": 59560,
+      "mean_corr": 0.11430727030135426,
+      "median_corr": 0.10937853471619186
+    },
+    "illiquid_tercile": {
+      "n_tickers": 102,
+      "n_pairs": 4035,
+      "mean_corr": 0.007966068075419715,
+      "median_corr": 0.011579056966103974
+    },
+    "liquid_tercile": {
+      "n_tickers": 126,
+      "n_pairs": 7875,
+      "mean_corr": 0.3453499727944368,
+      "median_corr": 0.3425310033421091
+    },
+    "n_cohort": 378,
+    "adv_p33": 2862466.6666666665,
+    "adv_p67": 29115999.999999985
+  },
+  "2018-05": {
+    "all": {
+      "n_tickers": 448,
+      "n_pairs": 92359,
+      "mean_corr": 0.02576819166224813,
+      "median_corr": 0.028174622507160612
+    },
+    "illiquid_tercile": {
+      "n_tickers": 148,
+      "n_pairs": 7226,
+      "mean_corr": 0.0011575768701243335,
+      "median_corr": 0.005615565659979322
+    },
+    "liquid_tercile": {
+      "n_tickers": 153,
+      "n_pairs": 11626,
+      "mean_corr": 0.11016272691626036,
+      "median_corr": 0.10100565943250686
+    },
+    "n_cohort": 460,
+    "adv_p33": 4443000.0,
+    "adv_p67": 88750100.0
+  },
+  "2020-03": {
+    "all": {
+      "n_tickers": 518,
+      "n_pairs": 128618,
+      "mean_corr": 0.1020816920809059,
+      "median_corr": 0.09691263364362786
+    },
+    "illiquid_tercile": {
+      "n_tickers": 162,
+      "n_pairs": 9779,
+      "mean_corr": 0.01050693663939764,
+      "median_corr": 0.009583186411198106
+    },
+    "liquid_tercile": {
+      "n_tickers": 179,
+      "n_pairs": 15929,
+      "mean_corr": 0.34360322131113463,
+      "median_corr": 0.35250890169733595
+    },
+    "n_cohort": 541,
+    "adv_p33": 7504000.0,
+    "adv_p67": 188642000.0
+  },
+  "2022-05": {
+    "all": {
+      "n_tickers": 691,
+      "n_pairs": 235267,
+      "mean_corr": 0.15567013281428205,
+      "median_corr": 0.12513005796059826
+    },
+    "illiquid_tercile": {
+      "n_tickers": 228,
+      "n_pairs": 23625,
+      "mean_corr": 0.015754564178327185,
+      "median_corr": 0.016026265572199022
+    },
+    "liquid_tercile": {
+      "n_tickers": 233,
+      "n_pairs": 27028,
+      "mean_corr": 0.46013235882326475,
+      "median_corr": 0.4767023856957642
+    },
+    "n_cohort": 698,
+    "adv_p33": 18173333.333333332,
+    "adv_p67": 546686666.6666665
+  }
+}

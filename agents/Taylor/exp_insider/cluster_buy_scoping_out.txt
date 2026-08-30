@@ -1,0 +1,65 @@
+=== COVERAGE (toan mau, thang) ===
+  cbuy_A_net      :   6061/49059 (12.35%) — 45.2/thang trung binh
+  cbuy_B_nb2      :   2750/49059 ( 5.61%) — 20.5/thang trung binh
+  cbuy_C_pct05    :   4121/49059 ( 8.40%) — 30.8/thang trung binh
+  cbuy_D_combo    :   2342/49059 ( 4.77%) — 17.5/thang trung binh
+
+=== IC (rank-corr thang, ctrl ey+rating8l) ===
+         sig     h   n      IC     t      IS     OOS
+  cbuy_A_net fwd20 132  0.0092  1.60  0.0151  0.0049
+  cbuy_A_net fwd60 131  0.0035  0.54  0.0052  0.0023
+  cbuy_B_nb2 fwd20 132  0.0054  1.06  0.0096  0.0025
+  cbuy_B_nb2 fwd60 131  0.0007  0.12 -0.0047  0.0046
+cbuy_C_pct05 fwd20 132 -0.0114 -1.96 -0.0181 -0.0066
+cbuy_C_pct05 fwd60 131 -0.0188 -3.22 -0.0292 -0.0113
+cbuy_D_combo fwd20 132  0.0061  1.22  0.0076  0.0050
+cbuy_D_combo fwd60 131  0.0029  0.51 -0.0033  0.0074
+
+=== SPREAD demeaned (co cluster-buy vs khong), toan universe ===
+  cbuy_A_net       xs20: co n= 5952 mean=+0.00172 | khong n= 42361 mean=-0.00024 | delta=+0.00196 t=1.19
+  cbuy_A_net       xs60: co n= 5900 mean=+0.00254 | khong n= 41986 mean=-0.00036 | delta=+0.00290 t=0.96
+  cbuy_B_nb2       xs20: co n= 2714 mean=-0.00080 | khong n= 45599 mean=+0.00005 | delta=-0.00085 t=-0.35
+  cbuy_B_nb2       xs60: co n= 2690 mean=+0.00016 | khong n= 45196 mean=-0.00001 | delta=+0.00017 t=0.04
+  cbuy_C_pct05     xs20: co n= 4068 mean=-0.00032 | khong n= 44245 mean=+0.00003 | delta=-0.00035 t=-0.16
+  cbuy_C_pct05     xs60: co n= 4043 mean=-0.00248 | khong n= 43843 mean=+0.00023 | delta=-0.00271 t=-0.65
+  cbuy_D_combo     xs20: co n= 2307 mean=-0.00105 | khong n= 46006 mean=+0.00005 | delta=-0.00110 t=-0.43
+  cbuy_D_combo     xs60: co n= 2285 mean=-0.00023 | khong n= 45601 mean=+0.00001 | delta=-0.00025 t=-0.05
+
+=== SPREAD trong subset dd52<=-20% (dung mach fear-buy sleeve) ===
+  n quan sat trong subset dd52<=-20%: 17438 (35.54% toan mau)
+  cbuy_A_net       xs20: co n= 2229 mean=-0.00637 | khong n= 14764 mean=-0.00213 | delta=-0.00424 t=-1.69
+  cbuy_A_net       xs60: co n= 2205 mean=-0.02388 | khong n= 14560 mean=-0.00823 | delta=-0.01565 t=-3.60
+  cbuy_B_nb2       xs20: co n= 1005 mean=-0.01236 | khong n= 15988 mean=-0.00208 | delta=-0.01028 t=-2.82
+  cbuy_B_nb2       xs60: co n=  991 mean=-0.03613 | khong n= 15774 mean=-0.00866 | delta=-0.02746 t=-4.27
+  cbuy_C_pct05     xs20: co n= 1605 mean=-0.00896 | khong n= 15388 mean=-0.00203 | delta=-0.00693 t=-2.07
+  cbuy_C_pct05     xs60: co n= 1591 mean=-0.02494 | khong n= 15174 mean=-0.00875 | delta=-0.01619 t=-2.63
+  cbuy_D_combo     xs20: co n=  884 mean=-0.01144 | khong n= 16109 mean=-0.00221 | delta=-0.00923 t=-2.49
+  cbuy_D_combo     xs60: co n=  870 mean=-0.03782 | khong n= 15895 mean=-0.00878 | delta=-0.02904 t=-4.73
+
+=== ON DINH IS/OOS cua spread (dinh nghia manh nhat se chon o buoc sau) ===
+  cbuy_A_net       IS: n= 2188 mean=+0.00343 vs -0.00056 delta=+0.00398
+  cbuy_A_net       OOS: n= 3712 mean=+0.00202 vs -0.00026 delta=+0.00229
+  cbuy_B_nb2       IS: n=  908 mean=+0.00661 vs -0.00041 delta=+0.00702
+  cbuy_B_nb2       OOS: n= 1782 mean=-0.00313 vs +0.00018 delta=-0.00331
+  cbuy_C_pct05     IS: n= 1580 mean=-0.00891 vs +0.00100 delta=-0.00990
+  cbuy_C_pct05     OOS: n= 2463 mean=+0.00164 vs -0.00014 delta=+0.00178
+  cbuy_D_combo     IS: n=  760 mean=+0.00501 vs -0.00025 delta=+0.00527
+  cbuy_D_combo     OOS: n= 1525 mean=-0.00285 vs +0.00014 delta=-0.00299
+
+=== OVERLAP voi gate ban rong hien co (nsell_90>nbuy_90) ===
+  cbuy_A_net      : 0 dong VUA cluster-buy VUA gate-sell cu (trung 0.0% cua cluster-buy)
+  cbuy_B_nb2      : 185 dong VUA cluster-buy VUA gate-sell cu (trung 6.7% cua cluster-buy)
+  cbuy_C_pct05    : 521 dong VUA cluster-buy VUA gate-sell cu (trung 12.6% cua cluster-buy)
+  cbuy_D_combo    : 2 dong VUA cluster-buy VUA gate-sell cu (trung 0.1% cua cluster-buy)
+
+=== COVERAGE THUC TE — so ticker-thang qua nguong D (manh nhat, cum+net), quy doi /quy ===
+  trung vi ma/quy: 27.0 | max: 59 | min: 14 | so quy co >=1 ca: 46/46
+count    46.000000
+mean     29.521739
+std      10.616003
+min      14.000000
+25%      23.000000
+50%      27.000000
+75%      33.750000
+max      59.000000
+Name: ticker, dtype: float64
