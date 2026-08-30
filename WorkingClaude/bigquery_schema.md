@@ -46,7 +46,7 @@ Quarterly fundamental financial data per ticker. Source of all financial ratios;
   - Valuation: `PE`, `PB`, `PS`, `PCF`, `EVEB` (EV/EBITDA), `EPS`, `EPS_P0` (VND/share), `BVPS`, `OShares`, `DY`, `PEG` (PE/growth where growth=(NP_P0/NP_P4−1)×100)
   - Valuation history: `PE_MA5Y/1Y/3M`, `PE_SD5Y/1Y/3M`, `PB_MA5Y/1Y/3M`, `PB_SD5Y/1Y/3M`, `EVEB_MA5Y/1Y/3M`, `EVEB_SD5Y/1Y/3M`
   - Quality (multi-year): `ROE3Y/5Y/10Y` (avg), `ROE_Min3Y/5Y/10Y`, `ROIC3Y/5Y/10Y` (avg), `ROIC_Min3Y/5Y/10Y`, `ROE_Trailing` (sum last 4Q), `ROIC_Trailing` (self-calc), `ROIC_Trailing_v1` (report-sourced)
-  - Cash flow: `CF_OA_P0–P4` (operating/assets), `CF_OA_3Y/5Y` (sum), `CF_Invest_P0–P4` (capex), `CF_Invest_3Y/5Y` (sum)
+  - Cash flow: `CF_OA_P0–P4` (operating cashflow, **raw VND — NOT a ratio over assets despite the name**; only `CF_OA_3Y/5Y` are true assets-scaled ratios), `CF_Invest_P0–P4` (capex), `CF_Invest_3Y/5Y` (sum)
   - Dividend: `DY`, `Dividend_Min3Y`, `Dividend_1Y`, `Dividend_3Y`
   - Piotroski: `FSCORE` (0–9, current), `FSCORE_P1` (prior quarter)
 
