@@ -65,8 +65,9 @@ def get_regime():
         asof = str(d.iloc[0]["time"])
         # Freshness guard (OPS-7/DQ-6): warn if dt5g_live table is stale (>2 calendar days).
         try:
-            from datetime import date
-            lag = (date.today() - pd.Timestamp(asof).date()).days
+            from datetime import datetime, timedelta, timezone
+            _ict_today = (datetime.now(timezone.utc) + timedelta(hours=7)).date()
+            lag = (_ict_today - pd.Timestamp(asof).date()).days
             stale_flag = lag > 2  # allow weekend; >2 days = genuine freeze
         except Exception:
             stale_flag = False

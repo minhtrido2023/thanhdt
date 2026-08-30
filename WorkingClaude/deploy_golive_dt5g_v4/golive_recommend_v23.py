@@ -30,6 +30,9 @@ Point-in-time snapshot of the SAME logic as pt_v22_dt5g.py — NOT a NAV backtes
 """
 import os, sys, io, json
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
+
+_ICT = ZoneInfo("Asia/Ho_Chi_Minh")
 import numpy as np, pandas as pd
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
@@ -82,10 +85,10 @@ from lag_forensic_filter import lag_filter_forensic_banned
 
 OUTDIR = os.path.join(WORKDIR, "deploy_golive_dt5g_v4", "out"); os.makedirs(OUTDIR, exist_ok=True)
 DT_TABLE = "vnindex_5state_dt5g_live"
-END = datetime.now().strftime("%Y-%m-%d")
-START = (datetime.now() - timedelta(days=120)).strftime("%Y-%m-%d")    # recent window for "today"
-START_BR = (datetime.now() - timedelta(days=240)).strftime("%Y-%m-%d") # breadth window (grind lookback 90 sessions)
-START_VNI = (datetime.now() - timedelta(days=420)).strftime("%Y-%m-%d")# dd52w/rv10 window
+END = datetime.now(_ICT).strftime("%Y-%m-%d")
+START = (datetime.now(_ICT) - timedelta(days=120)).strftime("%Y-%m-%d")    # recent window for "today"
+START_BR = (datetime.now(_ICT) - timedelta(days=240)).strftime("%Y-%m-%d") # breadth window (grind lookback 90 sessions)
+START_VNI = (datetime.now(_ICT) - timedelta(days=420)).strftime("%Y-%m-%d")# dd52w/rv10 window
 
 MAX_POS = 12; POS_PCT = 0.10; WEAK_PCT = 0.05
 TIER_BAL = ["MEGA","MOMENTUM","DEEP_VALUE_RECOVERY","RE_BACKLOG_BUY"]  # MOM_N/MOM_S closed 2026-07-12 (CP1+CP-DVR1 NO-GO, user-approved Scope A — plan_close_mom_20260712.md)
@@ -1213,7 +1216,7 @@ with open(os.path.join(WORKDIR, "data", "golive_v23_status.json"), "w", encoding
 
 L = []
 L.append(f"# V2.3 + DT5G — Daily Recommendations — {END}\n")
-L.append(f"*Generated {datetime.now():%Y-%m-%d %H:%M}. System: V2.3 = BAL | LAG (static, always-on) + allocator + parking + CAPIT v2, gated DT5G state (fail-safe DT4).*\n")
+L.append(f"*Generated {datetime.now(_ICT):%Y-%m-%d %H:%M}. System: V2.3 = BAL | LAG (static, always-on) + allocator + parking + CAPIT v2, gated DT5G state (fail-safe DT4).*\n")
 if anomaly_fresh["is_stale"]:
     # Đặt NGAY ĐẦU báo cáo, không giấu trong log: đây là thứ người duyệt plan phải thấy
     # trước khi nhìn danh sách mua (audit §14 cron freshness, Winston_20260731_062642).
