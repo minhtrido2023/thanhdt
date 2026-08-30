@@ -357,3 +357,6 @@
 
 ## Archived 2026-08-29 (keep=12 days=0 require_done=False)
 - [2026-08-25T06:36:38Z] [2026-08-25] backtest-2008-v24-full (job _055651) XONG: OOS 2014-2026 control-leg PASS (khop pin R3 trong nguong). IS 2008-2013 gan phang (CAGR 0.4%) KHONG PHAI BUG - DT5G production chua tung dat BULL/EXBULL 2008-2013 (verify BQ) + SIGNAL_V11 gate momentum tier vao state5 IN(4,5) theo thiet ke => capit_margin_lever gan nhu KHONG co vi the de don bay trong Loai-1 2008-2012 (chi 1/5 washout event toi duoc lever-gate, bi PIT chan). Cung co macro-margin-review sang nay: cau hoi Loai-1 VAN CHUA test duoc, khong chi thieu du lieu ma V2.4 tu thiet ke khong tham gia. File: agents/Taylor/research/backtest_2008_v24_20260825.md. KHONG pin registry, cho user/Mike + quant-skeptic xem truoc.
+
+## Archived 2026-08-30 (keep=12 days=0 require_done=False)
+- [2026-08-25T10:35:28Z] Job Taylor_20260825_094721 (san LAG dong vs tinh) XONG: NO-GO ca 3 bien the, giu 2 ty cung; 5 finding + 1 decision tren bus, registry da pin. | MO: chua qua quant-skeptic. Diem yeu de bi tan cong: neo fill 3.86% la suy rong lien-so tu so CAPIT sang so LAG (so LAG that N=2, max 0.45%ADV); chuoi percentile lay tu BQ LIVE trong khi backtest doc snapshot asof20260729 (lech vintage). | So dung duoc lau dai: san 2B = 6.1x QUA CHAT o NAV that ~1 ty, diem giao NAV ~5.9 ty, 8.4x QUA LONG o NAV 50B.
