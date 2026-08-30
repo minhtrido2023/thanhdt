@@ -5,21 +5,19 @@
 - Go-live V2.4 lever LIVE từ 08-24: capit_margin_lever.enabled=TRUE. Ngày có CAPIT margin phải chạy approve_margin_day.py TRƯỚC bot.
 - VPI/BAL signal HOLD đến 2026-09-16 — HOLD_ALL theo VPI.
 
-## Chốt 30/08 — chuỗi 6 việc XONG
-1. Forensic combined-margin: margin ratio KHÔNG chặn sleeve kể cả 15% (buffer ~3x loss-discipline,
-   combined debt 27.05% NAV, equity ratio 75.36% tại arm, cách maintenance +35.36pp). Nếu giữ 5%
-   phải dựa correlation-risk, không phải margin-math. Open item không chặn: T+2 lag chưa verify.
-2. NPL/CAR feasibility: không nguồn free/scriptable cho lịch sử CAR/CASA. Giữ proxy ROE_Min3Y/
-   Gordon-PB. Muốn lịch sử thật -> quyết định ngân sách FiinGroup/VietstockXLS (cần user duyệt).
-3-4-5. custom30V accrual: GATE pooled NO-GO (08-30 sáng) -> TIEBREAK NO-GO (IS -0.07/OOS -0.85pp,
-   tổng quát hoá tiebreak-within-band không giúp selector family) -> SECTOR-NEUTRAL GO cho full
-   backtest (+2.69pp t=3.17 double-sort) NHƯNG có panel reconciliation gap CHƯA giải quyết
-   (IC EY mới 0.0316 t1.88 vs gốc 0.0697 t4.78) — PHẢI đối soát + quant-skeptic trước bước tiếp.
-   Việc còn mở duy nhất của chuỗi này.
-6. Sector sweep: ĐÓNG hẳn, coverage đủ (20/20 sector, LENS not BOOK). Tracker đã sửa lỗi thời.
-- Cần nhớ: 2 lần dispatch dựa info lỗi thời (NPL/CAR, sector sweep #10) — cơ chế verify-artifact
-  của agent tự phát hiện + sửa đúng cả 2 lần. Cũng gặp 1 lần job status="done" nhưng backtest nền
-  chưa xong thật (#4 accrual tiebreak) — đã verify artifact trước khi tin, xử lý đúng quy trình.
+## Chốt 30/08 — chuỗi 8 việc XONG, chờ user quyết cuối 1 điểm
+1. Forensic combined-margin: margin ratio KHÔNG chặn sleeve kể cả 15%.
+2. NPL/CAR feasibility: không nguồn free — giữ proxy ROE_Min3Y/Gordon-PB.
+3-6. custom30V accrual: 3/3 phép thử (gate pooled, tiebreak, gate sector-neutral) đều NO-GO.
+   ĐÓNG HẲN trục accrual-quality, không đề xuất thêm biến thể.
+7. Sector sweep: đóng, coverage đủ 20/20, tracker đã sửa lỗi thời.
+8. **Correlation-risk sizing sleeve — CHỜ USER CHỐT**: ρ crisis thật 0.17-0.19 (2.4-3.4x normal),
+   risk-auditor sửa 2 bug (cohort dilution, horizon chưa hội tụ) không đảo kết luận. Loss N=3
+   sleeve15%: trần xác định 4.5% NAV (15.7% budget), kỳ vọng ρ=0.20-0.25 chỉ 2.1-2.25% NAV
+   (7.3-7.9% budget). Risk-auditor khuyến nghị NGHIÊNG GIỮ 5% — lý do chính là điều kiện mở lại
+   chính sách (>=3 case marginable đồng thời thật) chưa thoả, không phải correlation math tự cấm.
+   Nếu nới: 10% (N=2) hợp lý hơn nhảy thẳng 15%. Research:
+   agents/Taylor/research/discretionary_sleeve_correlation_risk_20260830.md (mục 8 = risk-audit).
 
 ## Đang chờ / mở nhỏ
 1. capit-lever selfcheck 2 FAIL (Wags/capit-lever-selfcheck-2-remaining-fail-permission-blocked):
@@ -36,5 +34,4 @@
 ## Macro watch
 - Bobby BĐS VN report xong 08-26 (STRUCTURAL_ACCUMULATION/AMBIGUOUS). Review quý next ~2026-11-26.
 
-- [2026-08-30T03:58:49Z] 30/08 10:58 user duyệt 2 hướng: A (Taylor_20260830_035805) định lượng correlation-risk thật cho sleeve 5%/10%/15%, sau đó risk-auditor phản biện; B (Taylor_20260830_035832) accrual sector-neutral - bước 1 đối soát panel gap BẮT BUỘC trước, bước 2 full backtest cycle. Cả 2 bắt buộc quant-skeptic trước wire. Song song, đang chạy.
-- [2026-08-30T04:17:00Z] 30/08 11:17: Hướng B XONG — trục accrual-quality ĐÓNG HẲN, 3/3 phép thử (gate pooled, tiebreak pooled, gate sector-neutral) đều NO-GO. Bước 1 tìm ra bug thật trong panel gốc (BQ query sụp còn tuần đầu tháng 1, N thổi phồng 4x) nhưng không đổi kết luận double-sort gốc. Bước 2 sector-neutral gate: IS +0.07pp OOS -0.09pp trái dấu, DSR 0.509, PBO 0.622. Không đề xuất thêm biến thể nào trên trục này. Hướng A (correlation-risk, Taylor_20260830_035805) vẫn đang chạy.
+- [2026-08-30T04:54:01Z] 30/08 11:53 user chốt: sleeve cap 5%->10% NAV (per-name 5% giữ nguyên). Điều kiện xét lại 15%: >=3 case marginable đồng thời THẬT (Mafee xác nhận, không phải giả định) -> escalate Mike/user, KHÔNG tự động nới. Dispatch Taylor_20260830_045349 implement: code + selfcheck + đồng bộ 2 policy doc + dry-run TV1.

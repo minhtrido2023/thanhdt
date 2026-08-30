@@ -1,11 +1,22 @@
 # Chính sách margin đơn mã cho sleeve fear-buy discretionary
 > Chốt 2026-08-23 (user duyệt, sau khi đóng sổ `margin-valuation-spread-20260823.md`).
-> Status: **IMPLEMENTED 2026-08-29** — gate/checker `mike/bin/discretionary_margin_gate.py`
-> (arm/exit độc lập với `plan.py`/`executor.py`, KHÔNG chạm bot tự trade — sleeve này là quy
-> trình arm TAY + checker exit hằng ngày). Khác `capit_margin_lever` (đã LIVE, hệ thống,
-> dd52≤−20%, CAPIT sleeve): đây là **đơn mã, discretionary, xét từng case**, không có backtest vì
-> N không thể đủ lớn theo bản chất (due-diligence sâu không scale). Quyết bằng rào chắn rủi ro +
-> duyệt người từng ca, không phải bằng thống kê.
+> Status: **IMPLEMENTED 2026-08-29, sleeve cap RESYNC 2026-08-30** — gate/checker
+> `mike/bin/discretionary_margin_gate.py` (arm/exit độc lập với `plan.py`/`executor.py`, KHÔNG
+> chạm bot tự trade — sleeve này là quy trình arm TAY + checker exit hằng ngày). Khác
+> `capit_margin_lever` (đã LIVE, hệ thống, dd52≤−20%, CAPIT sleeve): đây là **đơn mã,
+> discretionary, xét từng case**, không có backtest vì N không thể đủ lớn theo bản chất
+> (due-diligence sâu không scale). Quyết bằng rào chắn rủi ro + duyệt người từng ca, không phải
+> bằng thống kê.
+>
+> **RESYNC 2026-08-30 (`decided_by: user`, 11:52 ICT)** — sau
+> `agents/Taylor/research/discretionary_sleeve_correlation_risk_20260830.md` (correlation risk
+> crisis thật ρ≈0,18-0,25, risk-auditor CONDITIONAL-APPROVE), user chốt:
+> - **Sleeve cap tổng: 5% → 10% NAV exposure** (per-name cap GIỮ NGUYÊN 5% NAV, không đổi).
+> - **Điều kiện TRIGGER xem xét lại 15%** (không phải tự động nâng): ≥3 case marginable ĐỒNG THỜI
+>   THẬT (đã xác nhận marginability qua Mafee cho từng case, không phải giả định/dự phóng) →
+>   escalate lên Mike/user để CÂN NHẮC nới 15%. Chưa đủ 3 case thật → KHÔNG tự nâng.
+> - Mã hoá trong code: `bin/discretionary_margin_gate.py` `SLEEVE_CAP_PCT = 0.10`. Selfcheck
+>   (`bin/discretionary_margin_gate_selfcheck.py`) đã cập nhật test breach mốc 10% mới, 23/23 PASS.
 >
 > **RESYNC 2026-08-29 (`decided_by: user`, 23:03 ICT)** — sau nghiên cứu lại
 > `agents/Taylor/research/discretionary_margin_sizing_20260829.md` (bus finding
@@ -64,12 +75,12 @@ due-diligence sâu không scale ra hàng trăm ca lịch sử, và phân loại 
   NAV SpaceX hiện tại), %ADV có thể chặt hơn %NAV; ràng buộc nào chặt hơn quyết định size thật.
   Enforce trong code (`bin/discretionary_margin_gate.py`), không chỉ ghi trong tài liệu.
 - **Trần TỔNG sleeve** (tách biệt hoàn toàn với `capit_margin_lever`): mọi vị thế discretionary-có-
-  margin đồng thời **≤5% NAV exposure** (GIỮ NGUYÊN — đề xuất nâng 15% bị user **REJECT 2026-08-29**
-  ở thời điểm này, xem `agents/Taylor/research/discretionary_margin_sizing_20260829.md`). **Điều
-  kiện mở lại**: (a) ≥3 case marginable đồng thời trong danh sách QUALIFY (hiện chỉ có TV1/DGC,
-  chưa từng có ≥3 case song song); (b) forensic combined-margin account-level (capit_margin_lever +
-  sleeve này cùng gate dd52≤−20%, cùng account SpaceX) đã chạy và risk-auditor xác nhận; (c) mandate
-  Loại-2 dưới đã re-sync theo số mới. Chưa đủ cả 3 → không tự nâng lại 15%.
+  margin đồng thời **≤10% NAV exposure** (nâng từ 5% → 10%, `decided_by: user` 2026-08-30 11:52
+  ICT, sau `agents/Taylor/research/discretionary_sleeve_correlation_risk_20260830.md` — correlation
+  crisis thật ρ≈0,18-0,25, risk-auditor CONDITIONAL-APPROVE). **Điều kiện TRIGGER xem xét nới 15%**
+  (không phải tự động nâng): ≥3 case marginable ĐỒNG THỜI THẬT (Mafee xác nhận marginability cho
+  từng case, không phải giả định) trong danh sách QUALIFY → escalate lên Mike/user để CÂN NHẮC —
+  chưa đủ 3 case thật thì không tự nâng lại 15%.
 - **Max-loss công bố per-case: ~1,5% NAV cho mã mỏng kiểu TV1** (haircut slippage khi thoát trong
   hoảng loạn + lãi vay margin tích luỹ trong thời gian giữ vị thế — KHÔNG trích con số lý thuyết
   1,0% NAV = 5%×20% làm số công bố cho người duyệt, vì đó bỏ qua 2 cấu phần chi phí thật đã biết
