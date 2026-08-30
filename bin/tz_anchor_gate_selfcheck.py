@@ -292,6 +292,14 @@ def test_shim_missing_nested_repo(tmp):
     check("có repo lồng → shim ủy quyền cho gate thật và gate CHẶN",
           r2.returncode == 1 and "app.py:2" in r2.stdout, f"rc={r2.returncode} out={r2.stdout[:160]}")
 
+    # R5-7: fallback `_shim_dir="."` khi BASH_SOURCE không chứa "/" (chạy `bash shim.sh` từ chính
+    # thư mục của nó). Trước vòng 5 nhánh này không assertion nào chạm tới ⇒ guard trang trí.
+    r2b = subprocess.run(["bash", "tz_anchor_gate_shim.sh", v2], capture_output=True, text=True,
+                         env=env, cwd=real, check=False)
+    check("gọi shim bằng TÊN TRẦN (không có '/') → vẫn tìm đúng gate và CHẶN",
+          r2b.returncode == 1 and "app.py:2" in r2b.stdout,
+          f"rc={r2b.returncode} out={r2b.stdout[:160]!r} err={r2b.stderr[:160]!r}")
+
     # arch-review vòng 4 (killer): bản trước `exec "${DNA_PYEXE:-python3}"` không kiểm interpreter
     # ⇒ DNA_PYEXE hỏng cho rc=127 = CHẶN commit SẠCH, và MIKE_TZ_GATE=off không gỡ được vì exec
     # chết trước khi python chạy. Đúng killer F1 đổi biến. Giờ shim không đọc DNA_PYEXE nữa.
@@ -429,6 +437,92 @@ def test_auto_update_in_repo(tmp):
           res.returncode == 0 and open(bl).read() == snapshot, f"rc={res.returncode}")
 
 
+UNPARSABLE = "from datetime import datetime, date\nx = datetime.now()\ny = date.today()\nz = (\n"
+
+
+def test_unparsable_is_loud(tmp):
+    """R5-1 (arch-review vòng 5, KILLER) — 'không parse được' KHÔNG được coi là 'sạch'.
+
+    Bản trước: violations() nuốt SyntaxError thành [] ⇒ (a) nợ §16 thật lọt im lặng, (b) nhánh
+    auto-update thấy n==0 nên _set_count() XOÁ key baseline rồi `git add` vào chính commit đó,
+    (c) commit SAU chạm file ấy bị HARD-BLOCK "N > baseline 0" trên code người commit không hề
+    viết. Ca này phải chạy trong repo GIT THẬT: chỉ ở đó nhánh ghi baseline mới chạy tới.
+    """
+    print("[18] R5-1 — file KHÔNG parse được: phải KÊU, không gate, KHÔNG đụng baseline")
+    r = os.path.join(tmp, "unparsable_repo")
+    os.makedirs(os.path.join(r, "bin"), exist_ok=True)
+    os.makedirs(os.path.join(r, "kb"), exist_ok=True)
+    for cmd in (["git", "init", "-q", r], ["git", "-C", r, "config", "user.email", "t@t"],
+                ["git", "-C", r, "config", "user.name", "t"]):
+        subprocess.run(cmd, capture_output=True, check=False)
+    bl = os.path.join(r, "kb", "tz_anchor_baseline.json")
+    _write(bl, json.dumps({"files": {"bin/broken.py": 2}}))
+    f = _write(os.path.join(r, "bin", "broken.py"), UNPARSABLE)
+    subprocess.run(["git", "-C", r, "add", "-A"], capture_output=True, check=False)
+    subprocess.run(["git", "-C", r, "commit", "-qm", "init"], capture_output=True, check=False)
+    snapshot = open(bl).read()
+
+    env = dict(os.environ)
+    env.update({"MIKE_TZ_GATE_SELFCHECK": "1", "MIKE_TZ_GATE_ROOT": r, "MIKE_TZ_GATE_BASELINE": bl})
+    env.pop("MIKE_TZ_GATE", None)
+    res = subprocess.run([sys.executable, GATE_PATH, f], capture_output=True, text=True,
+                         env=env, cwd=r, check=False)
+    check("file không parse được → không chặn commit (rc=0)", res.returncode == 0, f"rc={res.returncode}")
+    check("file không parse được → KÊU ra stderr, nêu tên file + nguyên văn exception",
+          "bin/broken.py" in res.stderr and "KHÔNG parse được" in res.stderr
+          and "SyntaxError" in res.stderr, f"stderr={res.stderr[:220]!r}")
+    check("file không parse được → baseline KHÔNG bị đụng (key 2 còn nguyên)",
+          open(bl).read() == snapshot, f"baseline={open(bl).read()[:160]!r}")
+    staged = subprocess.run(["git", "-C", r, "diff", "--cached", "--name-only"],
+                            capture_output=True, text=True, check=False).stdout
+    check("file không parse được → baseline KHÔNG bị `git add`",
+          "kb/tz_anchor_baseline.json" not in staged, f"staged={staged!r}")
+
+    # --seed-baseline: kiểm kê phải tự khai là THIẾU ⇒ từ chối ghi (đúng luật F5).
+    # MIKE_TZ_GATE_ROOTS BẮT BUỘC: không có nó, scan_tree() đi quét TRACKED_ROOTS = 2 checkout
+    # THẬT chứ không phải sandbox — assertion sẽ nói về repo khác hẳn với repo nó vừa dựng.
+    res = subprocess.run([sys.executable, GATE_PATH, "--seed-baseline"], capture_output=True,
+                         text=True, env={**env, "MIKE_TZ_GATE_ROOTS": r}, cwd=r, check=False)
+    check("--seed-baseline khi có file không parse được → TỪ CHỐI ghi (kiểm kê THIẾU)",
+          res.returncode != 0 and open(bl).read() == snapshot,
+          f"rc={res.returncode} out={(res.stdout + res.stderr)[:200]!r}")
+
+
+def test_corrupt_baseline_fails_open(tmp):
+    """R5-2 — baseline hỏng (mồi xung đột merge: file này auto-ghi + git add MỖI commit) không
+    được ngầm thành {} rồi hard-block toàn bộ nợ cũ kèm chẩn đoán SAI 'baseline 0'."""
+    print("[19] R5-2 — baseline HỎNG: fail-open + nói nguyên văn lỗi, không hard-block hàng loạt")
+    sb = os.path.join(tmp, "corrupt")
+    bl = os.path.join(tmp, "corrupt_baseline.json")
+    f = _write(os.path.join(sb, "app.py"), BARE)
+    _write(bl, '{"files": {\n<<<<<<< HEAD\n  "bin/a.py": 3\n=======\n  "bin/a.py": 4\n}}\n')
+    rc, out = _run(sb, bl, [f])
+    check("baseline hỏng → KHÔNG chặn (rc=0)", rc == 0, f"rc={rc} out={out[:200]}")
+    check("baseline hỏng → nói rõ là không đọc được + nguyên văn lỗi",
+          "KHÔNG đọc được" in out and ("JSONDecodeError" in out or "ValueError" in out),
+          f"out={out[:250]!r}")
+    check("baseline hỏng → KHÔNG khẳng định 'baseline 0' / HARD-BLOCK",
+          "HARD-BLOCK" not in out, f"out={out[:250]!r}")
+    # thiếu file baseline (chưa seed) VẪN phải là nợ 0 thật, không phải lỗi
+    rc, out = _run(sb, os.path.join(tmp, "khong-ton-tai.json"), [f])
+    check("baseline CHƯA seed (thiếu file) → vẫn gate bình thường (BLOCK nợ mới)",
+          rc == 1 and "app.py:2" in out, f"rc={rc} out={out[:200]}")
+
+
+def test_off_warns_flag_any_position(tmp):
+    """R5-5 — logic parse cờ thật không phụ thuộc vị trí, cảnh báo `off` cũng không được."""
+    print("[20] R5-5 — cảnh báo MIKE_TZ_GATE=off phải quét MỌI argv, không chỉ argv[0]")
+    sb = os.path.join(tmp, "offpos")
+    bl = os.path.join(tmp, "offpos_baseline.json")
+    f = _write(os.path.join(sb, "app.py"), BARE)
+    _write(bl, json.dumps({"files": {}}))
+    for prefix, files, label in ((["--update-baseline"], [f], "cờ ĐỨNG TRƯỚC"),
+                                 ([], [f, "--update-baseline"], "cờ ĐỨNG SAU file")):
+        rc, out = _run(sb, bl, files, {"MIKE_TZ_GATE": "off"}, prefix=prefix)
+        check(f"off + --update-baseline ({label}) → KHÔNG im lặng",
+              rc == 0 and "KHÔNG chạy --update-baseline" in out, f"rc={rc} out={out[:200]!r}")
+
+
 MIKE_CFG = os.path.join(ROOT, ".pre-commit-config.yaml")
 OUTER_CFG = "/home/trido/thanhdt/.pre-commit-config.yaml"
 
@@ -509,10 +603,42 @@ def test_baseline_key_worktree(tmp):
           f"canon={k_canon!r} wt={k_wt!r}")
 
 
+def _hook_block(lines, hook_id):
+    """-> (dòng thuộc khối hook `- id: <hook_id>`, có thấy hook đó không).
+
+    Kết thúc khối = BẤT KỲ mục list mới nào ("- " ở đầu sau khi bỏ thụt), KHÔNG phải riêng
+    "- id: ": pre-commit không bắt `id` phải là khoá đầu tiên, nên một hook kế tiếp mở đầu bằng
+    `- name:` sẽ bị nuốt vào khối này và `verbose: true` của NÓ làm assertion xanh giả.
+    """
+    block, ok = [], False
+    for ln in lines:
+        if ln.strip() == f"- id: {hook_id}":
+            block, ok = [], True
+            continue
+        if ok:
+            if ln.lstrip().startswith("- "):
+                break
+            block.append(ln)
+    return block, ok
+
+
 def test_hook_verbose(tmp):
     """R2 — pre_commit/commands/run.py:217 chỉ in output hook khi rc!=0 hoặc verbose. Gate này
     cố ý fail-open; không verbose thì mọi cảnh báo bị nuốt và fail-open thành FAIL-SILENT."""
     print("[14] R2 — hook phải có verbose:true, và verbose thật sự lộ stderr khi rc=0")
+    # Fixture TỔNG HỢP, chạy TRƯỚC 2 config thật: trên chính 2 config đang có, bản cũ
+    # (`startswith("- id: ")`) và bản mới cho kết quả Y HỆT ⇒ bản vá R4-3 sẽ không có assertion
+    # nào canh, revert lúc nào cũng được mà suite vẫn xanh (arch-review vòng 5, R5-3). Chỉ ca
+    # "hook KẾ TIẾP mở đầu bằng `- name:`" mới phân biệt được hai bản.
+    synth = (
+        "repos:\n  - repo: local\n    hooks:\n"
+        "      - id: tz-anchor-gate\n        name: gate\n        entry: x\n"
+        "      - name: hook-ke-tiep\n        id: khac\n        verbose: true\n"
+    ).splitlines()
+    sblock, sok = _hook_block(synth, "tz-anchor-gate")
+    check("R5-3 fixture: hook kế tiếp mở đầu `- name:` KHÔNG bị nuốt vào khối tz-anchor-gate",
+          sok and not any(l.strip() == "verbose: true" for l in sblock),
+          f"block={sblock}")
     # KHÔNG `import yaml`: 2 runner selfcheck của fleet (bin/run_selfchecks.sh:19,
     # bin/selfcheck_weekly_baseline_check.sh:132) chạy bằng $DNA_PYEXE = wc_venv/bin/python, môi
     # trường đó KHÔNG có PyYAML ⇒ ca này đỏ giả và cả file bị đẩy vào known_red (arch-review
@@ -526,19 +652,7 @@ def test_hook_verbose(tmp):
         except OSError as e:
             check(f"{label}: đọc được", False, str(e)[:120])
             continue
-        block, ok = [], False
-        for ln in lines:
-            if ln.strip() == "- id: tz-anchor-gate":
-                block = []
-                ok = True
-                continue
-            if ok:
-                # Kết thúc khối = dòng bắt đầu MỘT MỤC LIST MỚI ("- ..." ở cùng mức thụt), không
-                # phải riêng "- id: " — hook kế tiếp mở đầu bằng `- name:` sẽ bị nuốt vào khối
-                # này và cho FALSE GREEN (arch-review vòng 4 repro được ca đó).
-                if ln.lstrip().startswith("- "):
-                    break
-                block.append(ln)
+        block, ok = _hook_block(lines, "tz-anchor-gate")
         check(f"{label}: khối hook tz-anchor-gate tồn tại", ok, "không thấy `- id: tz-anchor-gate`")
         check(f"{label}: verbose: true trong khối đó",
               any(l.strip() == "verbose: true" for l in block), f"block={block[-6:]}")
@@ -650,6 +764,9 @@ def main():
         test_hook_verbose(tmp)
         test_env_knobs_guarded(tmp)
         test_git_add_failure_is_loud(tmp)
+        test_unparsable_is_loud(tmp)
+        test_corrupt_baseline_fails_open(tmp)
+        test_off_warns_flag_any_position(tmp)
         test_tracked_roots_resolve(gate)
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
@@ -690,25 +807,18 @@ def run_all_tz():
 # từng bị kiểm (arch-review vòng 4). Danh sách này bịt đúng chỗ đó.
 SHIM_MUTATIONS = [
     ("shim quay lại `exec $DNA_PYEXE` (killer vòng 4) → biến kế thừa hỏng = chặn commit sạch",
-     'PY="$(command -v python3 2>/dev/null || true)"\nif [ -z "$PY" ] || [ ! -x "$PY" ]; then',
+     'PY="$(command -v python3 2>/dev/null || true)"\nif [ -z "$PY" ]; then',
      'PY="${DNA_PYEXE:-python3}"\nif [ -z "" ]; then'),
+    # `/dev/null/never` (bản vòng 4) là mutation SAI HƯỚNG: `! -f` luôn ĐÚNG nên guard kích
+    # hoạt VÔ ĐIỀU KIỆN — bị giết bởi assertion "ủy quyền cho gate thật", trong khi 2 assertion
+    # fail-open F1 vẫn xanh. `if false; then` mới đúng nghĩa GỠ guard (arch-review vòng 5, R5-4).
     ("shim bỏ guard thiếu repo lồng (F1) → Executable not found, chặn commit sạch",
-     'if [ ! -f "$GATE" ]; then', 'if [ ! -f "/dev/null/never" ]; then'),
+     'if [ ! -f "$GATE" ]; then', 'if false; then'),
+    ("shim bỏ fallback _shim_dir → chạy bằng TÊN TRẦN (không có `/`) thì cd sai, gate câm",
+     '[ "$_shim_dir" = "${BASH_SOURCE[0]}" ] && _shim_dir="."', ':'),
+    ("shim bỏ guard thiếu python3 → PATH nghèo = rc!=0 = chặn commit sạch",
+     'if [ -z "$PY" ]; then', 'if false; then'),
 ]
-
-# Hai hằng dưới đây là NGUYÊN VĂN khối `off` trong main() của gate — đọc từ chính chuỗi
-# literal ở đây, nên nếu gate đổi thì mutation báo HARNESS-HỎNG (đỏ) chứ không âm thầm
-# 'SURVIVED'/bỏ qua.
-OFF_BLOCK_SRC = (
-    '    mode = os.environ.get("MIKE_TZ_GATE", "block")\n'
-    '    if mode == "off":\n'
-    '        if argv and argv[0] in ("--scan", "--seed-baseline", "--update-baseline"):\n'
-    '            # Chạy TAY mà im hoàn toàn = người chạy tưởng đã re-seed/quét xong (arch-review vòng 4).\n'
-    '            print("⚠️  MIKE_TZ_GATE=off — KHÔNG chạy " + argv[0] + ". Bỏ biến rồi chạy lại.",\n'
-    '                  file=sys.stderr)\n'
-    '        return 0\n'
-)
-OFF_WARN_SRC = OFF_BLOCK_SRC.split('if mode == "off":\n')[1].rsplit('        return 0\n', 1)[0]
 
 MUTATIONS = [
     ("bỏ điều kiện 'không có argument' (c) → datetime.now(_ICT) cũng bị bắt",
@@ -756,12 +866,31 @@ MUTATIONS = [
     ("TRACKED_ROOTS trỏ sai checkout (mike → mikeX)",
      '("/home/trido/thanhdt/WorkingClaude/mike", "*.py")',
      '("/home/trido/thanhdt/WorkingClaude/mikeX", "*.py")'),
+    ("violations() quay lại coi 'không parse được' = 'sạch' (R5-1 killer) → nợ lọt im lặng + "
+     "XOÁ key baseline",
+     '    except (OSError, SyntaxError, ValueError, UnicodeDecodeError) as e:\n'
+     '        _PARSE_ERR[os.path.abspath(path)] = f"{type(e).__name__}: {e}"\n'
+     '        return None',
+     '    except (OSError, SyntaxError, ValueError, UnicodeDecodeError):\n        return []'),
+    ("load_baseline() nuốt baseline hỏng thành {} (R5-2) → hard-block toàn bộ nợ cũ + chẩn đoán sai",
+     '    except (OSError, ValueError) as e:\n'
+     '        return {"files": {}}, f"{type(e).__name__}: {e}"',
+     '    except (OSError, ValueError):\n        return {"files": {}}, None'),
+    ("load_baseline() mất nhánh FileNotFoundError → chưa seed bị coi là HỎNG rồi fail-open, "
+     "gate thành no-op trên repo mới",
+     '    except FileNotFoundError:\n'
+     '        return {"files": {}}, None      # chưa seed = nợ 0, đúng nghĩa, không phải lỗi\n',
+     ''),
+    ("cảnh báo `off` quay lại chỉ nhìn argv[0] (R5-5) → cờ đứng sau file thì im lặng",
+     "        manual = [a for a in argv if a in ", "        manual = [a for a in argv[:1] if a in "),
+    # Hai mutation dưới đây CỐ Ý neo vào chuỗi NGẮN, không có comment: bản vòng 4 neo vào
+    # nguyên văn cả khối `off` nên mỗi lần sửa một dòng comment trong khối là mutation tự hỏng
+    # (HARNESS-HỎNG) — harness giòn thì mất luôn ý nghĩa canh gác.
     ("guard env knob chạy TRƯỚC `off` (R5 vòng 3) → off không còn tắt được gate",
-     OFF_BLOCK_SRC,
-     '    mode = os.environ.get("MIKE_TZ_GATE", "block")\n'),
+     '    if mode == "off":', "    if False:"),
     ("bỏ cảnh báo `off` khi chạy TAY --scan/--seed/--update (vòng 4) → im lặng, người chạy "
      "tưởng đã quét/re-seed xong",
-     OFF_WARN_SRC, ""),
+     "\n        if manual:", "\n        if False:"),
 ]
 
 

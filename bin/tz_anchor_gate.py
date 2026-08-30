@@ -139,6 +139,9 @@ def _alias_receivers(tree):
     return names
 
 
+_PARSE_ERR = {}   # abspath -> nguyên văn exception, để người gọi in ra được
+
+
 def _tz_arg_is_none(node):
     """`datetime.now(None)` / `datetime.now(tz=None)` — CÓ argument nhưng vô hiệu, naive y hệt."""
     for a in list(node.args) + [k.value for k in node.keywords]:
@@ -148,12 +151,22 @@ def _tz_arg_is_none(node):
 
 
 def violations(path):
-    """-> [(lineno, 'datetime.now()' | 'date.today()')]; file không parse được -> []."""
+    """-> [(lineno, 'datetime.now()' | 'date.today()')], hoặc **None** nếu KHÔNG parse được.
+
+    ⚠️ None ≠ [] và đây là khác biệt SỐNG CÒN (arch-review vòng 5, killer). Bản trước trả []
+    cho file không parse được ⇒ (1) nợ §16 thật lọt im lặng, (2) nhánh auto-update ở cuối
+    main() thấy n==0 nên `_set_count()` XOÁ LUÔN key baseline của file đó rồi `git add` vào
+    chính commit ấy, (3) commit SAU chạm file đó bị HARD-BLOCK "3 > baseline 0" trên code
+    người commit không hề viết. Và chênh lệch parse là THẬT trên máy này: hook chạy python3
+    (3.10) còn 2 runner selfcheck chạy $DNA_PYEXE (3.12) — cùng một file cho 0 vs 3 vi phạm.
+    Người gọi PHẢI xử lý None: KÊU ra stderr rồi BỎ QUA file (không gate, không đụng baseline).
+    """
     try:
         with open(path, encoding="utf-8") as fh:
             tree = ast.parse(fh.read())
-    except (OSError, SyntaxError, ValueError, UnicodeDecodeError):
-        return []
+    except (OSError, SyntaxError, ValueError, UnicodeDecodeError) as e:
+        _PARSE_ERR[os.path.abspath(path)] = f"{type(e).__name__}: {e}"
+        return None
     receivers = _alias_receivers(tree)
     hits = []
     for node in ast.walk(tree):
@@ -241,11 +254,20 @@ def _set_count(files_baseline, key, n):
 
 
 def load_baseline():
+    """-> (baseline_dict, errmsg|None). errmsg != None ⇒ KHÔNG được coi baseline là rỗng.
+
+    Bản trước nuốt ValueError rồi trả {"files": {}} ⇒ một baseline hỏng (rất dễ xảy ra: file
+    này bị auto-ghi + `git add` MỖI commit nên là mồi xung đột merge) làm TOÀN BỘ 87 file mang
+    nợ cũ hard-block cùng lúc, kèm chẩn đoán SAI "baseline 0" mà gate chưa từng kiểm chứng —
+    đúng lớp lỗi §29 (arch-review vòng 5, R5-2). Luật của gate này là "KHÔNG GATE ĐƯỢC ≠ CHẶN".
+    """
     try:
         with open(BASELINE, encoding="utf-8") as fh:
-            return json.load(fh)
-    except (OSError, ValueError):
-        return {"files": {}}
+            return json.load(fh), None
+    except FileNotFoundError:
+        return {"files": {}}, None      # chưa seed = nợ 0, đúng nghĩa, không phải lỗi
+    except (OSError, ValueError) as e:
+        return {"files": {}}, f"{type(e).__name__}: {e}"
 
 
 def write_baseline(data):
@@ -304,6 +326,11 @@ def scan_tree():
         if key is None or is_excluded(key) or not os.path.isfile(p):
             continue
         hits = violations(p)
+        if hits is None:
+            print(f"⚠️  {key}: KHÔNG parse được ({_PARSE_ERR.get(os.path.abspath(p), '?')}) — "
+                  "bỏ qua, kiểm kê sẽ THIẾU.", file=sys.stderr)
+            complete = False
+            continue
         if hits:
             found[key] = hits
     return found, complete
@@ -341,9 +368,14 @@ def in_mike_repo():
 def main(argv):
     mode = os.environ.get("MIKE_TZ_GATE", "block")
     if mode == "off":
-        if argv and argv[0] in ("--scan", "--seed-baseline", "--update-baseline"):
+        # Quét MỌI phần tử argv, không chỉ argv[0]: logic parse cờ thật ở dưới cũng không phụ
+        # thuộc vị trí (`"--update-baseline" in args`), nên chỉ nhìn argv[0] thì
+        # `gate.py x.py --update-baseline` im lặng còn `gate.py --update-baseline x.py` thì kêu —
+        # cùng một người, cùng một ý định (arch-review vòng 5, R5-5).
+        manual = [a for a in argv if a in ("--scan", "--seed-baseline", "--update-baseline")]
+        if manual:
             # Chạy TAY mà im hoàn toàn = người chạy tưởng đã re-seed/quét xong (arch-review vòng 4).
-            print("⚠️  MIKE_TZ_GATE=off — KHÔNG chạy " + argv[0] + ". Bỏ biến rồi chạy lại.",
+            print("⚠️  MIKE_TZ_GATE=off — KHÔNG chạy " + " ".join(manual) + ". Bỏ biến rồi chạy lại.",
                   file=sys.stderr)
         return 0
 
@@ -386,7 +418,12 @@ def main(argv):
     accept_new_debt = "--accept-new-debt" in args
     args = [a for a in args if not a.startswith("--")]
 
-    baseline = load_baseline()
+    baseline, bl_err = load_baseline()
+    if bl_err:
+        print(f"⚠️  tz_anchor_gate: KHÔNG đọc được {BASELINE} ({bl_err}) — sổ nợ không dùng "
+              f"được thì KHÔNG GATE ĐƯỢC, không phải = CHẶN. {len(args)} file .py qua không "
+              "gate. Sửa/khôi phục baseline rồi chạy lại; §16 vẫn áp dụng.", file=sys.stderr)
+        return 0
     files_baseline = baseline.setdefault("files", {})
 
     counts = {}
@@ -409,6 +446,14 @@ def main(argv):
         if is_excluded(key):
             continue
         hits = violations(f)
+        if hits is None:
+            # KHÔNG được coi là "sạch": không gate, KHÔNG đụng baseline (không vào counts nên
+            # nhánh auto-update ở cuối không thấy key này ⇒ không xoá/không ghi).
+            print(f"⚠️  tz_anchor_gate: {key}: KHÔNG parse được bằng {sys.executable} "
+                  f"({_PARSE_ERR.get(os.path.abspath(f), '?')}) — file này KHÔNG ĐƯỢC GATE và "
+                  "baseline của nó KHÔNG bị đụng tới. §16 vẫn áp dụng, tự kiểm bằng tay.",
+                  file=sys.stderr)
+            continue
         counts[key] = len(hits)
         detail[key] = hits
 

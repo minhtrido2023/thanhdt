@@ -318,9 +318,15 @@ của repo ngoài — gate KÊU ra stderr nhưng không chặn được). Ba l�
 `--update-baseline` (chỉ HẠ được; nâng phải thêm `--accept-new-debt`). Hook repo ngoài đi qua shim
 `WorkingClaude/tz_anchor_gate_shim.sh` vì `.gitignore` của repo đó ẩn chính `WorkingClaude/mike/`
 ⇒ trỏ `entry` thẳng vào repo lồng sẽ hỏng cứng trong mọi worktree/clone mới. Selfcheck
-`bin/tz_anchor_gate_selfcheck.py [--mutations|--all-tz]` — **83 assertion, 18/18 mutation bị giết,
-đo dưới `$DNA_PYEXE`** (interpreter mà `run_selfchecks.sh`/`selfcheck_weekly_baseline_check.sh`
-dùng thật; selfcheck tự đếm và tự in con số nên nó không bao giờ lệch).
+`bin/tz_anchor_gate_selfcheck.py [--mutations|--all-tz]` — **99 assertion, 27/27 mutation bị giết
+(23 trên gate .py + 4 trên shim .sh), đo dưới `$DNA_PYEXE`** (interpreter mà
+`run_selfchecks.sh`/`selfcheck_weekly_baseline_check.sh` dùng thật; selfcheck tự đếm và tự in con
+số nên nó không bao giờ lệch).
+⚠️ **Hook chạy `python3` (3.10) còn 2 runner selfcheck chạy `$DNA_PYEXE` (3.12) ⇒ 7 file .py của
+repo ngoài chỉ parse được ở 3.12** (f-string PEP 701). Gate phân biệt "không parse được" với
+"sạch": KÊU ra stderr, KHÔNG gate file đó và KHÔNG đụng baseline của nó. Trước bản vá vòng 5 nó
+trả 0 vi phạm im lặng rồi XOÁ key baseline ⇒ commit sau bị hard-block oan. Hệ quả vận hành:
+`--seed-baseline` chạy bằng 3.10 sẽ TỪ CHỐI ghi (kiểm kê thiếu) — re-seed bằng `$DNA_PYEXE`.
 Hook PHẢI có `verbose: true` ở cả 2 config: pre-commit chỉ in output hook khi rc≠0 hoặc verbose,
 mà gate này cố ý fail-open ⇒ thiếu verbose thì mọi cảnh báo bị nuốt, fail-open thành fail-silent.
 Ba biến `MIKE_TZ_GATE_ROOT/_BASELINE/_ROOTS` chỉ dành cho sandbox selfcheck và bị TỪ CHỐI nếu
