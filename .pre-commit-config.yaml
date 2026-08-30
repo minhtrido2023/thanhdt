@@ -118,4 +118,10 @@ repos:
         name: datetime.now()/date.today() không neo TZ (xem bin/tz_anchor_gate.py, §16)
         entry: bin/tz_anchor_gate.py
         language: system
+        # verbose BẮT BUỘC: pre_commit/commands/run.py:217 chỉ in output của hook khi
+        # rc!=0 hoặc verbose. Gate này CỐ Ý fail-open (thiếu repo lồng / file ngoài
+        # WC_ROOT → cảnh báo + rc=0); không có verbose thì đúng những cảnh báo đó bị
+        # nuốt sạch và fail-open biến thành FAIL-SILENT — thứ §16 đã thua một lần rồi
+        # (arch-review vòng 2, R2).
+        verbose: true
         files: '^(bin|hooks|agents)/.*\.py$'

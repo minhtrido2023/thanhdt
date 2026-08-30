@@ -79,12 +79,29 @@ import os
 import subprocess
 import sys
 
-# MIKE_TZ_GATE_ROOT / MIKE_TZ_GATE_BASELINE: override CHỈ để selfcheck chạy trong sandbox
-# (bin/tz_anchor_gate_selfcheck.py) — không dùng trong vận hành, mặc định là 2 đường dẫn thật.
-WC_ROOT = os.environ.get("MIKE_TZ_GATE_ROOT", "/home/trido/thanhdt/WorkingClaude")
 MIKE_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-BASELINE = os.environ.get(
-    "MIKE_TZ_GATE_BASELINE", os.path.join(MIKE_ROOT, "kb", "tz_anchor_baseline.json")
+
+# MIKE_TZ_GATE_ROOT / _BASELINE / _ROOTS: override CHỈ dành cho sandbox của
+# bin/tz_anchor_gate_selfcheck.py. CHỈ có hiệu lực khi ĐI KÈM MIKE_TZ_GATE_SELFCHECK=1 — một
+# biến sót lại trong môi trường (shell còn export, cron kế thừa, wrapper quên unset) mà đổi được
+# WC_ROOT là đủ biến gate production thành no-op im lặng: mọi file thành "ngoài WC_ROOT" ⇒
+# không có baseline-key ⇒ rc=0 (đã repro, arch-review vòng 2 R4). Cùng khuôn với
+# `_resolve_target()` ở phía selfcheck, vốn đã từ chối MIKE_TZ_GATE_TARGET không có cờ.
+_SELFCHECK = os.environ.get("MIKE_TZ_GATE_SELFCHECK") == "1"
+_STRAY = [
+    k for k in ("MIKE_TZ_GATE_ROOT", "MIKE_TZ_GATE_BASELINE", "MIKE_TZ_GATE_ROOTS")
+    if os.environ.get(k) and not _SELFCHECK
+]
+if _STRAY:
+    raise SystemExit(
+        f"❌ tz_anchor_gate: {', '.join(_STRAY)} được đặt mà KHÔNG có MIKE_TZ_GATE_SELFCHECK=1 — "
+        "biến này chỉ dành cho sandbox selfcheck; để nguyên sẽ gate SAI baseline hoặc no-op im "
+        "lặng. Bỏ biến, hoặc chạy qua bin/tz_anchor_gate_selfcheck.py."
+    )
+
+WC_ROOT = (os.environ.get("MIKE_TZ_GATE_ROOT") if _SELFCHECK else None) or "/home/trido/thanhdt/WorkingClaude"
+BASELINE = (os.environ.get("MIKE_TZ_GATE_BASELINE") if _SELFCHECK else None) or os.path.join(
+    MIKE_ROOT, "kb", "tz_anchor_baseline.json"
 )
 
 BAD_ATTRS = {"now", "today"}
@@ -248,7 +265,7 @@ TRACKED_ROOTS = (
     ("/home/trido/thanhdt/WorkingClaude/mike", "*.py"),   # repo mike
     ("/home/trido/thanhdt", "WorkingClaude/*.py"),        # repo ngoài, chỉ phần WorkingClaude/
 )
-if os.environ.get("MIKE_TZ_GATE_ROOTS"):  # chỉ để selfcheck kiểm nhánh kiểm-kê-thiếu (F5)
+if _SELFCHECK and os.environ.get("MIKE_TZ_GATE_ROOTS"):  # selfcheck kiểm nhánh kiểm-kê-thiếu (F5)
     TRACKED_ROOTS = tuple(
         (spec.split("|", 1)[0], spec.split("|", 1)[1] if "|" in spec else "*.py")
         for spec in os.environ["MIKE_TZ_GATE_ROOTS"].split(":")
@@ -291,11 +308,17 @@ def scan_tree():
 
 
 def in_mike_repo():
-    """Top của checkout đang commit, NẾU baseline đang dùng nằm trong chính checkout đó.
+    """Top của checkout đang commit, NẾU top ĐÚNG LÀ checkout sở hữu BASELINE đang dùng.
 
-    Neo theo BASELINE (không phải một tên file cứng) để: (1) commit từ repo NGOÀI không bao giờ
-    ghi vào repo lồng rồi bỏ unstaged; (2) selfcheck dựng được sandbox repo thật để kiểm nhánh
-    auto-update — nếu không, nhánh đó vĩnh viễn không có test.
+    ⚠️ Điều kiện phải là `samefile(top/kb/tz_anchor_baseline.json, BASELINE)`, KHÔNG được viết
+    thành "BASELINE nằm dưới top": repo lồng nằm BÊN TRONG cây thư mục của repo ngoài, nên
+    `abspath(BASELINE).startswith(top + "/")` ĐÚNG cho cả top=/home/trido/thanhdt ⇒ commit từ
+    repo NGOÀI sẽ ghi vào baseline của repo lồng rồi `git add` thất bại (path bị gitignore ở đó)
+    và để lại dirt trong cây mà consolidate cron `git add -A` mỗi ~15 phút. Đó chính là lỗi
+    arch-review vòng 2 (R1) tìm ra trong bản vá F7 của tôi — bản vòng 1 không có lỗ này.
+
+    Vẫn neo theo BASELINE (không phải một tên file cứng) để selfcheck dựng được sandbox repo
+    thật mà kiểm nhánh auto-update; điều kiện samefile giữ đúng cả hai tính chất.
     """
     try:
         top = subprocess.run(
@@ -306,7 +329,11 @@ def in_mike_repo():
         return None
     if not top:
         return None
-    return top if os.path.abspath(BASELINE).startswith(os.path.realpath(top) + "/") else None
+    cand = os.path.join(top, "kb", "tz_anchor_baseline.json")
+    try:
+        return top if os.path.isfile(cand) and os.path.samefile(cand, BASELINE) else None
+    except OSError:
+        return None
 
 
 def main(argv):

@@ -318,7 +318,11 @@ của repo ngoài — gate KÊU ra stderr nhưng không chặn được). Ba l�
 `--update-baseline` (chỉ HẠ được; nâng phải thêm `--accept-new-debt`). Hook repo ngoài đi qua shim
 `WorkingClaude/tz_anchor_gate_shim.sh` vì `.gitignore` của repo đó ẩn chính `WorkingClaude/mike/`
 ⇒ trỏ `entry` thẳng vào repo lồng sẽ hỏng cứng trong mọi worktree/clone mới. Selfcheck
-`bin/tz_anchor_gate_selfcheck.py [--mutations|--all-tz]` (44 assertion, 12/12 mutation bị giết).
+`bin/tz_anchor_gate_selfcheck.py [--mutations|--all-tz]` (74 assertion, 15/15 mutation bị giết).
+Hook PHẢI có `verbose: true` ở cả 2 config: pre-commit chỉ in output hook khi rc≠0 hoặc verbose,
+mà gate này cố ý fail-open ⇒ thiếu verbose thì mọi cảnh báo bị nuốt, fail-open thành fail-silent.
+Ba biến `MIKE_TZ_GATE_ROOT/_BASELINE/_ROOTS` chỉ dành cho sandbox selfcheck và bị TỪ CHỐI nếu
+thiếu `MIKE_TZ_GATE_SELFCHECK=1` (một biến sót lại đủ biến gate thành no-op im lặng).
 
 *→ rationale §16.*
 

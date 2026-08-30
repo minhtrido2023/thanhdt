@@ -53,7 +53,11 @@ GATE_PATH = _resolve_target(
 FAILED = []
 
 
+TOTAL = []
+
+
 def check(name, ok, detail=""):
+    TOTAL.append(name)
     if ok:
         print(f"  ✓ {name}")
     else:
@@ -182,6 +186,7 @@ def test_historical(gate, tmp):
 # ── 4. End-to-end: ratchet + escape hatch + exclude, chạy qua CLI trong sandbox ────────────
 def _run(sandbox, baseline, files, env_extra=None, prefix=None):
     env = dict(os.environ)
+    env["MIKE_TZ_GATE_SELFCHECK"] = "1"
     env["MIKE_TZ_GATE_ROOT"] = sandbox
     env["MIKE_TZ_GATE_BASELINE"] = baseline
     env.pop("MIKE_TZ_GATE", None)
@@ -270,6 +275,7 @@ def test_shim_missing_nested_repo(tmp):
     shutil.copy2(SHIM, os.path.join(real, "tz_anchor_gate_shim.sh"))
     v2 = _write(os.path.join(real, "app.py"), BARE)
     env = dict(os.environ)
+    env["MIKE_TZ_GATE_SELFCHECK"] = "1"
     env["MIKE_TZ_GATE_ROOT"] = real
     env["MIKE_TZ_GATE_BASELINE"] = _write(os.path.join(tmp, "bl_shim.json"), '{"files": {}}')
     r2 = subprocess.run([os.path.join(real, "tz_anchor_gate_shim.sh"), v2],
@@ -332,6 +338,7 @@ def test_seed_refuses_partial(tmp):
     bl = _write(os.path.join(tmp, "bl_seed.json"), '{"files": {"giu/nguyen.py": 9}}')
     before = open(bl).read()
     env = dict(os.environ)
+    env["MIKE_TZ_GATE_SELFCHECK"] = "1"
     env["MIKE_TZ_GATE_BASELINE"] = bl
     env["MIKE_TZ_GATE_ROOTS"] = f"/nonexistent/repo|*.py:{ROOT}|*.py"
     r = subprocess.run([sys.executable, GATE_PATH, "--seed-baseline"],
@@ -357,7 +364,7 @@ def test_auto_update_in_repo(tmp):
     subprocess.run(["git", "-C", r, "commit", "-qm", "init"], capture_output=True, check=False)
 
     env = dict(os.environ)
-    env.update({"MIKE_TZ_GATE_ROOT": r, "MIKE_TZ_GATE_BASELINE": bl})
+    env.update({"MIKE_TZ_GATE_SELFCHECK": "1", "MIKE_TZ_GATE_ROOT": r, "MIKE_TZ_GATE_BASELINE": bl})
     env.pop("MIKE_TZ_GATE", None)
     res = subprocess.run([sys.executable, GATE_PATH, f], capture_output=True, text=True,
                          env=env, cwd=r, check=False)
@@ -392,6 +399,145 @@ def test_auto_update_in_repo(tmp):
           res.returncode == 0 and open(bl).read() == snapshot, f"rc={res.returncode}")
 
 
+MIKE_CFG = os.path.join(ROOT, ".pre-commit-config.yaml")
+OUTER_CFG = "/home/trido/thanhdt/.pre-commit-config.yaml"
+
+
+def _git(repo, *a):
+    return subprocess.run(["git", "-C", repo] + list(a), capture_output=True, text=True, check=False)
+
+
+def test_outer_repo_never_writes_nested_baseline(tmp):
+    """R1 (arch-review vòng 2, killer) — repo lồng nằm BÊN TRONG cây của repo ngoài, nên điều
+    kiện 'BASELINE nằm dưới git-toplevel' ĐÚNG cho cả hai ⇒ commit từ repo NGOÀI ghi vào
+    baseline của repo lồng. Ca này dựng ĐÚNG layout thật, không phải tmpdir không-git — đó là
+    lý do assertion cũ ('commit ngoài repo mike → KHÔNG tự ghi baseline') xanh giả: nó chạy ở
+    thư mục không phải git repo nên nhánh cần canh không bao giờ chạy tới."""
+    print("[12] R1 — commit từ repo NGOÀI không được ghi baseline của repo LỒNG")
+    outer = os.path.join(tmp, "outer")
+    nested = os.path.join(outer, "WorkingClaude", "mike")
+    os.makedirs(os.path.join(nested, "kb"), exist_ok=True)
+    os.makedirs(os.path.join(nested, "bin"), exist_ok=True)
+    _write(os.path.join(outer, ".gitignore"), "WorkingClaude/mike/\n")
+    # Key PHẢI đúng cái baseline_key() sinh ra cho victim ("app.py", vì WC_ROOT của sandbox là
+    # <outer>/WorkingClaude) — nếu lệch key thì counts không khớp entry nào, `changed` = False,
+    # và ca này xanh kể cả khi guard bị tháo (bản đầu của tôi đúng như vậy: mutation R1 SỐNG SÓT
+    # dù test "PASS"). Đây là lý do harness phải tự chứng minh bằng mutation.
+    bl = _write(os.path.join(nested, "kb", "tz_anchor_baseline.json"),
+                json.dumps({"files": {"app.py": 9, "khac.py": 3}}))
+    _write(os.path.join(nested, "bin", "dispatch.sh"), "#!/bin/sh\n")
+    victim = _write(os.path.join(outer, "WorkingClaude", "app.py"), ANCHORED)  # ĐÃ VÁ ⇒ hạ 9→0
+    for cmd in (["init", "-q", outer], ["config", "user.email", "t@t"], ["config", "user.name", "t"]):
+        subprocess.run(["git"] + cmd if cmd[0] == "init" else ["git", "-C", outer] + cmd,
+                       capture_output=True, check=False)
+    _git(outer, "add", "-A")
+    _git(outer, "commit", "-qm", "init")
+    before = open(bl).read()
+    env = dict(os.environ)
+    env.update({"MIKE_TZ_GATE_SELFCHECK": "1",
+                "MIKE_TZ_GATE_ROOT": os.path.join(outer, "WorkingClaude"),
+                "MIKE_TZ_GATE_BASELINE": bl})
+    env.pop("MIKE_TZ_GATE", None)
+    r = subprocess.run([sys.executable, GATE_PATH, victim], capture_output=True, text=True,
+                       env=env, cwd=outer, check=False)
+    check("chạy từ repo NGOÀI → rc=0", r.returncode == 0, f"rc={r.returncode} out={r.stdout[:200]}")
+    check("baseline của repo LỒNG byte-identical (không bị ghi đè)", open(bl).read() == before,
+          f"đã bị ghi: {open(bl).read()[:160]}")
+
+
+def test_baseline_key_worktree(tmp):
+    """R4 — nhánh chuẩn hoá key của worktree (mike/agents/wt-*/bin/x.py → mike/bin/x.py) là bản
+    vá của một sự cố hard-block CÓ THẬT (arch-review Wags_20260823_071251) mà trước ca này
+    KHÔNG có test nào: mọi sandbox đều ở /tmp nên chỉ nhánh key=None được chạy."""
+    print("[13] R4 — baseline_key chuẩn hoá worktree về key canonical")
+    r = os.path.join(tmp, "mike")
+    os.makedirs(os.path.join(r, "bin"), exist_ok=True)
+    os.makedirs(os.path.join(r, "kb"), exist_ok=True)
+    _write(os.path.join(r, "bin", "dispatch.sh"), "#!/bin/sh\n")
+    _write(os.path.join(r, "kb", "tz_anchor_baseline.json"), '{"files": {}}')
+    _write(os.path.join(r, "bin", "x.py"), ANCHORED)
+    subprocess.run(["git", "init", "-q", r], capture_output=True, check=False)
+    _git(r, "config", "user.email", "t@t"); _git(r, "config", "user.name", "t")
+    _git(r, "add", "-A"); _git(r, "commit", "-qm", "init")
+    wt = os.path.join(r, "agents", "wt-test")
+    res = _git(r, "worktree", "add", "-q", "-b", "wtbranch", wt)
+    if res.returncode != 0:
+        check("dựng được git worktree", False, res.stderr[:160])
+        return
+    env = dict(os.environ)
+    env.update({"MIKE_TZ_GATE_SELFCHECK": "1", "MIKE_TZ_GATE_ROOT": tmp})
+    code = ("import importlib.util,sys;"
+            "spec=importlib.util.spec_from_file_location('g', sys.argv[1]);"
+            "m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m);"
+            "print(m.baseline_key(sys.argv[2]))")
+    k_canon = subprocess.run([sys.executable, "-c", code, GATE_PATH, os.path.join(r, "bin", "x.py")],
+                             capture_output=True, text=True, env=env, check=False).stdout.strip()
+    k_wt = subprocess.run([sys.executable, "-c", code, GATE_PATH, os.path.join(wt, "bin", "x.py")],
+                          capture_output=True, text=True, env=env, check=False).stdout.strip()
+    check("canonical → 'mike/bin/x.py'", k_canon == "mike/bin/x.py", f"got {k_canon!r}")
+    check("worktree → CÙNG key (không phải mike/agents/wt-test/bin/x.py)", k_wt == k_canon,
+          f"canon={k_canon!r} wt={k_wt!r}")
+
+
+def test_hook_verbose(tmp):
+    """R2 — pre_commit/commands/run.py:217 chỉ in output hook khi rc!=0 hoặc verbose. Gate này
+    cố ý fail-open; không verbose thì mọi cảnh báo bị nuốt và fail-open thành FAIL-SILENT."""
+    print("[14] R2 — hook phải có verbose:true, và verbose thật sự lộ stderr khi rc=0")
+    try:
+        import yaml
+    except ImportError:
+        check("đọc được YAML config", False, "thiếu module yaml")
+        return
+    for cfg in (MIKE_CFG, OUTER_CFG):
+        try:
+            hooks = [h for r in yaml.safe_load(open(cfg))["repos"] for h in r["hooks"]
+                     if h.get("id") == "tz-anchor-gate"]
+        except (OSError, KeyError, yaml.YAMLError) as e:
+            check(f"{cfg}: đọc được hook", False, str(e)[:120])
+            continue
+        check(f"{os.path.basename(os.path.dirname(cfg))}/.pre-commit-config.yaml: verbose=true",
+              bool(hooks) and hooks[0].get("verbose") is True,
+              f"hooks={hooks}")
+    pc = shutil.which("pre-commit") or os.path.expanduser("~/.local/bin/pre-commit")
+    if not os.path.exists(pc):
+        check("có pre-commit để chứng minh hành vi verbose", False, "không tìm thấy pre-commit")
+        return
+    demo = os.path.join(tmp, "verbdemo")
+    os.makedirs(demo, exist_ok=True)
+    _write(os.path.join(demo, "warn.sh"), '#!/bin/sh\necho "CANH-BAO-RC0" >&2\nexit 0\n')
+    os.chmod(os.path.join(demo, "warn.sh"), 0o755)
+    _write(os.path.join(demo, "f.py"), "x = 1\n")
+    for verbose, want in ((False, False), (True, True)):
+        _write(os.path.join(demo, ".pre-commit-config.yaml"),
+               "repos:\n  - repo: local\n    hooks:\n      - id: w\n        name: w\n"
+               "        entry: ./warn.sh\n        language: system\n        files: '\\.py$'\n"
+               + ("        verbose: true\n" if verbose else ""))
+        subprocess.run(["git", "init", "-q", demo], capture_output=True, check=False)
+        _git(demo, "add", "-A")
+        out = subprocess.run([pc, "run", "w", "--files", os.path.join(demo, "f.py")],
+                             capture_output=True, text=True, cwd=demo, check=False)
+        seen = "CANH-BAO-RC0" in (out.stdout + out.stderr)
+        check(f"pre-commit {'verbose' if verbose else 'mặc định'} + rc=0 → cảnh báo "
+              f"{'HIỆN' if want else 'BỊ NUỐT'}", seen == want,
+              f"seen={seen}, out={out.stdout[-200:]!r}")
+
+
+def test_env_knobs_guarded(tmp):
+    """R5 — một biến sót lại đổi được WC_ROOT là đủ biến gate thành no-op im lặng."""
+    print("[15] R5 — env knob sandbox phải bị từ chối nếu thiếu MIKE_TZ_GATE_SELFCHECK=1")
+    f = _write(os.path.join(tmp, "knob", "app.py"), BARE)
+    for knob in ("MIKE_TZ_GATE_ROOT", "MIKE_TZ_GATE_BASELINE", "MIKE_TZ_GATE_ROOTS"):
+        env = dict(os.environ)
+        env.pop("MIKE_TZ_GATE_SELFCHECK", None)
+        for k in ("MIKE_TZ_GATE_ROOT", "MIKE_TZ_GATE_BASELINE", "MIKE_TZ_GATE_ROOTS"):
+            env.pop(k, None)
+        env[knob] = "/nonexistent"
+        r = subprocess.run([sys.executable, GATE_PATH, f], capture_output=True, text=True,
+                           env=env, check=False)
+        check(f"{knob} không có cờ → TỪ CHỐI chạy", r.returncode != 0 and "MIKE_TZ_GATE_SELFCHECK" in r.stderr,
+              f"rc={r.returncode} err={r.stderr[:160]!r}")
+
+
 def test_prod_baseline_untouched(sha_before):
     print("[5] File production không bị selfcheck đụng")
     sha_after = hashlib.sha256(open(PROD_BASELINE, "rb").read()).hexdigest()
@@ -414,14 +560,18 @@ def main():
         test_update_baseline_direction(tmp)
         test_seed_refuses_partial(tmp)
         test_auto_update_in_repo(tmp)
+        test_outer_repo_never_writes_nested_baseline(tmp)
+        test_baseline_key_worktree(tmp)
+        test_hook_verbose(tmp)
+        test_env_knobs_guarded(tmp)
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
     test_prod_baseline_untouched(sha_before)
     print()
     if FAILED:
-        print(f"❌ {len(FAILED)} FAIL: {FAILED}")
+        print(f"❌ {len(FAILED)}/{len(TOTAL)} FAIL: {FAILED}")
         return 1
-    print("✅ ALL PASS")
+    print(f"✅ ALL PASS — {len(TOTAL)}/{len(TOTAL)} assertion")
     return 0
 
 
@@ -479,6 +629,14 @@ MUTATIONS = [
      '                "",'),
     ("--update-baseline nâng được mà không cần cờ (F4)",
      "        if raises and not accept_new_debt:\n", "        if False:\n"),
+    ("in_mike_repo() nới về 'BASELINE nằm dưới top' (R1) → repo ngoài ghi baseline repo lồng",
+     "        return top if os.path.isfile(cand) and os.path.samefile(cand, BASELINE) else None",
+     "        return top"),
+    ("baseline_key() mất nhánh chuẩn hoá worktree (R4) → hard-block oan như 2026-08-23",
+     '    if top and os.path.isdir(os.path.join(top, "kb")) and os.path.isfile(os.path.join(top, "bin", "dispatch.sh")):\n        return "mike/" + os.path.relpath(abs_p, top)\n',
+     ""),
+    ("bỏ guard env knob (R5) → biến sót lại biến gate thành no-op im lặng",
+     "if _STRAY:\n", "if False:\n"),
 ]
 
 
