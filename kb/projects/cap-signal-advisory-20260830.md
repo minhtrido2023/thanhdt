@@ -55,14 +55,36 @@ hợp lý). Khi `n_independent_clusters() >= 10`, script tự bắn 1 bus **`que
 này realistically mất nhiều năm để chạm — đúng tinh thần "advisory dài hạn", không phải cơ chế
 sẽ tự kích hoạt sớm.
 
-## 4. Hiển thị hàng ngày/tuần
-**CHƯA wire vào `dna_report.py`/cadence sản xuất trong job này** — cố ý, để tách rủi ro khỏi
-report pipeline đang chạy production. Đề xuất tái dùng pattern §6b `coding_guidelines.md`
-(`build_dt_gate_line()`/`build_value_radar_line()`, DISPLAY-ONLY): hàm
-`build_advisory_line()` đã có sẵn trong `cap_signal_advisory_check.py`, chỉ cần
-`from cap_signal_advisory_check import build_advisory_line` trong `dna_report.py` khi user
-duyệt wire hiển thị. KHÔNG cần cron riêng — chạy 1 lần/ngày cùng nhịp report EOD hiện có là đủ
-(tần suất W=60-phiên nên không cần realtime).
+## 4. Hiển thị hàng ngày/tuần/tháng — WIRED 2026-08-30 (job Taylor_20260830_143403, user duyệt
+21:33 ICT)
+
+**Daily — code, tự động:**
+- `mike/agents/Taylor/cap_signal_advisory_check.py::run_advisory()` — entry point mới: tính
+  composite sống, ghi 1 dòng registry nếu hôm nay fire (idempotent per ngày qua
+  `append_registry`'s dup-date check — an toàn khi cả 2 account cùng chạy report), trả về
+  `build_advisory_line()`.
+- `dna_report.py::build_cap_signal_advisory_line()` (ngay trước `_NBASE_CACHE`, cùng khối với
+  `build_dt_gate_line`/`build_value_radar_line`) — wrapper cache 900s + fail-safe try/except
+  (None khi lỗi BQ/yfinance → caller bỏ dòng, không crash report), cùng mẫu §6b.
+- `mike/bin/eod_trading_report.sh::_dt_gate_line()` — gọi `build_cap_signal_advisory_line()`
+  qua **`$DNA_PYEXE` riêng** (KHÔNG chung block `python3 -c` với DT-gate/Value Radar/margin
+  spread) vì `yfinance` chỉ có trong venv đó, không có trong `python3` hệ thống — bẫy đã bắt
+  trước khi wire: dùng nhầm `python3` sẽ `ModuleNotFoundError` bị fail-safe nuốt câm, không ai
+  biết dòng này chưa từng chạy. In với prefix `🧲`.
+- Test 2026-08-30: quiet-state render đúng qua `$DNA_PYEXE` (không fire, registry KHÔNG bị
+  tạo/đổi); FIRE-state giả lập bằng `mp`/`reg` synthetic (KHÔNG đụng registry thật) qua
+  `build_advisory_line()` trực tiếp — cả 2 nhánh hiển thị đúng.
+
+**Weekly/monthly — KHÔNG có pipeline tự động** (soạn tay qua `check_report_cadence.sh` theo
+đúng §6b) — checklist bổ sung cho Taylor: khi soạn weekly/monthly, chạy thêm 1 dòng cạnh
+DT-gate/Value Radar hiện có:
+```bash
+python3 -c "import sys; sys.path.insert(0,'.'); from dna_report import build_cap_signal_advisory_line as f; print(f())"
+```
+(dùng `$DNA_PYEXE` nếu gọi trực tiếp không qua eod script — venv đó mới có yfinance) và chèn
+dòng trả về (nếu không None) vào khối "Market regime context" ngay dưới Value Radar. Không có
+tên script cụ thể để wire code vì weekly/monthly hiện KHÔNG được sinh bởi 1 script chung —
+`check_report_cadence.sh` chỉ backstop retry-gửi, không compose nội dung.
 
 ## Ranh giới
 Không đụng `custom_basket.py`/`signal_v11_sql.py`/`macro_state_live.py`/`trading_rules.json`/
