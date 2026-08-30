@@ -21,7 +21,12 @@
 # repo mà repo này còn không track. Muốn bỏ qua hook có chủ đích:  SKIP=tz-anchor-gate git commit
 set -uo pipefail
 
-GATE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/mike/bin/tz_anchor_gate.py"
+# Chỉ dùng builtin của bash (parameter expansion + cd/pwd), KHÔNG gọi `dirname`: shim này phải
+# chạy được cả khi PATH nghèo nàn, và một `dirname: command not found` sẽ âm thầm làm GATE trỏ
+# sai chỗ rồi rơi vào nhánh "thiếu repo lồng" — fail-open đúng nhưng vì LÝ DO SAI.
+_shim_dir="${BASH_SOURCE[0]%/*}"
+[ "$_shim_dir" = "${BASH_SOURCE[0]}" ] && _shim_dir="."
+GATE="$(cd "$_shim_dir" && pwd)/mike/bin/tz_anchor_gate.py"
 
 if [ ! -f "$GATE" ]; then
   echo "⚠️  tz-anchor-gate: không thấy $GATE — repo lồng WorkingClaude/mike/ không có mặt ở" >&2
@@ -30,4 +35,21 @@ if [ ! -f "$GATE" ]; then
   exit 0
 fi
 
-exec "${DNA_PYEXE:-python3}" "$GATE" "$@"
+# CỐ Ý dùng `python3` trần, KHÔNG dùng $DNA_PYEXE (arch-review vòng 4):
+#  1. $DNA_PYEXE là biến KẾ THỪA (wc_env.sh; CLAUDE.md gốc bảo mọi agent source nó trước khi
+#     làm BigQuery) trỏ vào /home/trido/thanhdt/wc_venv — một venv NGOÀI mọi repo. `exec` một
+#     đường dẫn hỏng cho rc=127, tức CHẶN commit SẠCH, và `MIKE_TZ_GATE=off` không gỡ được vì
+#     exec chết trước khi python chạy. Đó đúng là killer F1, chỉ đổi biến.
+#  2. tz_anchor_gate.py chỉ dùng stdlib (ast/json/os/subprocess/sys) nên venv không cho thêm gì.
+#  3. Hook phía repo mike chạy bằng shebang `python3`. Dùng CÙNG interpreter ở đây thì hai hook
+#     không thể đếm lệch nhau trên CÙNG một baseline (`violations()` nuốt SyntaxError → [] nên
+#     một file chỉ parse được ở 1 phiên bản sẽ bị đếm 0 rồi bị auto-update xoá key).
+# Vẫn guard: thiếu interpreter = KHÔNG GATE ĐƯỢC, không phải = CHẶN (đúng dòng 18 ở trên).
+PY="$(command -v python3 2>/dev/null || true)"
+if [ -z "$PY" ] || [ ! -x "$PY" ]; then
+  echo "⚠️  tz-anchor-gate: không tìm thấy python3 chạy được — $# file .py KHÔNG ĐƯỢC GATE," >&2
+  echo "    commit vẫn qua. coding_guidelines.md §16 vẫn áp dụng, tự kiểm bằng tay." >&2
+  exit 0
+fi
+
+exec "$PY" "$GATE" "$@"
