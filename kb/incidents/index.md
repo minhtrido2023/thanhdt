@@ -4,7 +4,7 @@ title: Incidents — Mike fleet (sổ postmortem, cấu trúc OKF)
 owner: Mike fleet (mọi agent ghi; daily_retro.sh ghi entry RETRO hằng đêm)
 format: OKF (Open Knowledge Format) — markdown + YAML frontmatter, 1 sự cố = 1 file
 migrated_from: kb/INCIDENTS.md (single-file 408KB, migrate → OKF 2026-07-30 job Winston_20260730_144031)
-entries: 132 file (84 sự cố + 47 RETRO + 1 mục open-items chung)
+entries: 133 file (84 sự cố + 48 RETRO + 1 mục open-items chung)
 ---
 
 # Incidents — Mike fleet
@@ -203,6 +203,7 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 | 2026-06-22 | [2026-06-22 — Mafee ZOMBIE: systemd reports healthy, agent isn't actually serving](2026-06/2026-06-22-mafee-zombie-systemd-healthy.md) | logged |
 
 ## RETRO hằng ngày (mới nhất trước)
+| 2026-08-30 | [RETRO — 2026-08-30: 1 sự cố, 0 pattern xuyên suốt mới (`quant-skeptic_20260830_085357` kẹt status=running 500+ phút dù verdict CONFIRMED đã ghi bus/consolidate xong — biến thể MỚI, call-site cuối, của pattern anti-lying-guard-tự-chặn-chính-chủ đã biết từ 08-09/08-19; 2 ghi nhận phụ dưới ngưỡng: 1 MISS ScheduleWakeup 4%, 1 job cancelled dù việc đã hoàn tất qua Mike manual review)](retro/retro-2026-08-30.md) | logged |
 | 2026-08-29 | [RETRO — 2026-08-29: 6 sự cố, 1 pattern xuyên suốt đã đóng (Pattern A — §29 đọc nhầm kênh bằng chứng lần 4, bus question hardcode-chẩn-đoán ĐÃ ĐÓNG từ 08-28 commit 15c27547 — draft ban đầu tưởng còn mở, Wags GAPS FOUND sửa lại; Pattern C mới ghi nhận — cụm 4 selfcheck-FP khác nguyên nhân bắt cùng 1 lần weekly audit, chưa escalate; dispatch.sh SIGPIPE prompt>64KB mất trọn 1 lần audit 08-22; bq CLI lỗi ra stdout không phải stderr)](retro/retro-2026-08-29.md) | logged |
 | 2026-08-28 | [RETRO — 2026-08-28: 4 sự cố, 2 pattern xuyên suốt (Pattern A — checker hardcode chẩn đoán lần thứ 3, escalate mở bus question; Pattern B — Wags mutation-gap round 1 NEEDS_CHANGES, còn hở chờ round 2; sự cố #2 DT5G MERGE bỏ sót asof_date NULL 26 phiên, đã fix + user duyệt UPDATE dòng SEALED; sự cố #3 MBB rights-issue ledger gap, đã vá journal)](retro/retro-2026-08-28.md) | logged |
 | 2026-08-27 | [RETRO — 2026-08-27: 2 sự cố, 1 pattern xuyên suốt (Pattern mới — 4/7 batch selfcheck-red + 1 ca oshares_live cùng ngày đều do thay đổi production đã duyệt (config/data/KB) ship xong nhưng selfcheck phụ thuộc không cập nhật pin cùng lượt, "lõi ẩn" dạng thứ 3 chưa có trong §23; sự cố #2 wakeup MISS 1/3 điều tra sâu tới prompt gốc, kết luận rất có thể false-positive của công cụ đo, không escalate theo bước 6)](retro/retro-2026-08-27.md) | logged |
