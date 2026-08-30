@@ -13,26 +13,25 @@
 - Phễu candidate WIRE (cutoff=70%, trần=1.2), commit 714b5889. TV1/DGC lọt nhưng marginable=NO
   qua DNSE hiện tại. Hard cap concentration risk KHÔNG implement (user chốt: DD workflow đủ).
 
-## Chuỗi nghiên cứu BULL — 30/08, 2/2 việc chính đã xong, chờ user quyết bước kế tiếp
-- **DC 3-book factor-neutral (job Taylor_20260830_153823) — XONG, quant-skeptic CONFIRMED medium**:
-  Việc 2: DC BULL outperform là ALPHA THẬT (rổ cap-weight thuần THUA baseline BULL −12..−17pp,
-  equal-weight chỉ giải thích 30-46% edge — phần lớn đến từ chính double-confirm gate).
-  Việc 1: backtest 3-book thật (w_BAL=w_LAG=w_DC=1/3, NAV production thật) → NO-GO, Sharpe/Calmar/
-  MaxDD xấu đi vì DC ungated tự sập -16,8%/năm trong BEAR (không có override BEAR/CRISIS). Tự sửa
-  1 lỗi nhân-quả giữa chừng (đổ oan cho LAG, quant-skeptic bác đúng — LAG thực ra hơi dương BEAR).
-  Việc 3: capacity không phải vấn đề ở NAV thật hiện tại (<0,1% ADV).
-  **Hướng mở CHƯA kiểm chứng**: gate DC CHỈ active BULL/EXBULL (tự flat BEAR/CRISIS/NEUTRAL) —
-  gợi ý cho job sau, chưa qua DSR/PBO/quant-skeptic, KHÔNG phải đề xuất sẵn sàng.
-  File: `agents/Taylor/research/dc_3book_factor_neutral_20260830.md`.
-  **Đã hỏi user: làm tiếp hướng gate-BULL-only hay dừng ở đây, chuyển việc #4 (BULL-mode LAG)?
-  CHƯA có trả lời — chờ chỉ đạo.**
-- **EXBULL exploitation audit (job Taylor_20260830_153824) — XONG**: 60 phiên/2 giai đoạn (2020-21,
-  2025), độ trễ cơ học 24 phiên (khớp gate 25 phiên) cả 2 ca, tác động ĐẢO NGƯỢC (2020-21 DT5G
-  thắng tín hiệu thô 154,5% capture nhờ lọc whipsaw; 2025 chỉ bắt 61%, giải thích drag -0,89pp đã
-  ghi nhận). N=2 quá mỏng, không đề xuất đổi tham số DT4-gate.
-  File: `agents/Taylor/research/exbull_exploitation_audit_20260830.md`.
-- Việc #4 (BULL-mode LAG idle cash, hạ ngưỡng SUE khi breadth cao) — chưa dispatch, chờ quyết định
-  về hướng gate-BULL-only trước (2 việc có thể liên quan, tránh làm trùng).
+## Chuỗi nghiên cứu BULL — 30/08, ĐÓNG HOÀN TOÀN, không có mechanism nào wire
+1. **DC 3-book static 1/3** → NO-GO (DC ungated sập -16,8%/năm BEAR, không override).
+2. **DC state-gated BULL/EXBULL-only** → quant-skeptic CONFIRMED nhưng bằng chứng quá mỏng:
+   N=10 thổi phồng thành N thật ~6, 85% edge dồn 1 cụm (COVID 2020-21). Taylor tự hạ "weak-GO" ->
+   "đáng theo dõi, chưa đủ bằng chứng hành động".
+3. **EXBULL exploitation audit** → độ trễ cơ học 24 phiên (khớp gate 25 phiên) luôn xảy ra, nhưng
+   tác động 2 chiều tuỳ hình dạng sóng (2020-21 DT5G thắng 154,5% capture nhờ lọc whipsaw; 2025
+   chỉ bắt 61%, giải thích drag -0,89pp đã biết). N=2 quá mỏng, không đổi tham số DT4-gate.
+4. **LAG BULL-mode SUE (nới NP_R>=15 xuống 12/10.5 khi BULL+breadth cao)** → NO-GO. Deal mới
+   KHÔNG rác (win-rate 75-80%, gần bằng baseline) nhưng thua vì CROWDING-OUT: chênh lệch âm dồn
+   hết vào 2021 (năm tốt nhất), batch mới pha loãng funding LAG đang cash-constrained. N độc lập
+   chỉ 2/8 episode khả dụng.
+
+**Kết luận chung**: DC alpha có thật (xác nhận 2 lần độc lập) nhưng chưa tìm được kiến trúc khả
+thi để khai thác; LAG's funding-constraint là nút thắt thật (không phải tiêu chí SUE sai). Không
+mechanism nào đủ điều kiện wire — DT5G/V2.4 giữ nguyên. Files: dc_3book_factor_neutral_20260830.md,
+dc_state_gated_bull_only_20260830.md, exbull_exploitation_audit_20260830.md,
+lag_bull_mode_sue_20260830.md (tất cả agents/Taylor/research/).
+**Đã báo user đề xuất đóng chuỗi nghiên cứu hôm nay — chờ xác nhận hoặc việc mới.**
 
 ## CAP_SIGNAL advisory — KHÉP KÍN HOÀN TOÀN 2026-08-30
 - Chuỗi đầy đủ: nghiên cứu → quant-skeptic round1 REFUTED → round2 CONFIRMED (N=6 quá mỏng để
@@ -61,6 +60,3 @@
 ## Macro watch
 - Bobby BĐS VN report xong 08-26 (STRUCTURAL_ACCUMULATION/AMBIGUOUS). Review quý next ~2026-11-26.
 
-- [2026-08-30T16:24:16Z] User duyệt 23:23 ICT hướng DC state-gated BULL/EXBULL-only. Dispatch Taylor_20260830_162358 (effort high, timeout 3600s): backtest state-gated DC vs 2 baseline (không-DC, static 1/3 NO-GO), walk-forward IS/OOS, DSR/PBO, xử lý transition risk, quant-skeptic bắt buộc nếu GO. File đích: dc_state_gated_bull_only_20260830.md. Đang chạy, chưa xong.
-- [2026-08-30T16:34:04Z] DC state-gated BULL/EXBULL-only XONG (job Taylor_20260830_162358), quant-skeptic CONFIRMED nhưng bắt lỗi N=10 thổi phồng -> N thật ~6, 85% edge dồn 1 cụm (COVID 2020-21). Taylor tự hạ 'weak-GO' -> 'đáng theo dõi, chưa đủ bằng chứng hành động'. File: dc_state_gated_bull_only_20260830.md. Đã hỏi user: đóng hẳn nhánh DC-3-book (2/2 kiến trúc đã thử: static NO-GO, state-gated bằng chứng mỏng) hay chuyển việc #4 (BULL-mode LAG)? CHỜ TRẢ LỜI.
-- [2026-08-30T16:41:31Z] User duyệt 23:40 ICT việc #4: LAG BULL-mode SUE threshold. Dispatch Taylor_20260830_164112 (effort high, timeout 3600s): nới SUE CHỈ khi BULL/EXBULL+breadth cao, pre-register ngưỡng trước khi chạm data, KHÔNG đụng 8L rating gate (hard lock 07-27). File đích: lag_bull_mode_sue_20260830.md. Đang chạy, chưa xong. (DC-3-book vẫn treo câu hỏi 'đóng nhánh hay không' - user chưa trả lời rõ, có thể coi là đã chuyển hướng sang #4 luôn.)
