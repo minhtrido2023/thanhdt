@@ -387,3 +387,6 @@
 
 ## Archived 2026-08-30 (keep=12 days=0 require_done=False)
 - [2026-08-28T21:42:05Z] ĐANG DỞ job Taylor_20260828_212714: VIỆC1 diag-gate vòng2 commit 68675ba7 + VIỆC2 ops-health owner-hint vòng3 commit 0557e643, cả 2 đã ghi bus finding. NEXT: chờ 2 arch-reviewer chạy nền; nếu NEEDS_CHANGES thì DỪNG (giới hạn cứng của Mike, không lặp vòng 4) — ghi bus question để user quyết.
+
+## Archived 2026-08-30 (keep=12 days=0 require_done=False)
+- [2026-08-28T21:51:05Z] MO (chua lam, da ghi bus): (1) OPS_HEALTH_CHECK_SRC thieu guard chong PASS-gia nhu diagnosis_evidence_gate_selfcheck::_resolve_target (9efac948); (2) --mutations cua CA HAI selfcheck chua gan lich chay nao (kb_nightly.sh:64 chi chay suite thuong) — needle troi im lang; (3) ccdb_bridge_drift_check.sh:26 la instance §29 dang song (vut stderr git roi doan '(network?)'), gate khong bat vi emitter la '|| { echo; exit }' va bit dang do sinh FP that.
