@@ -89,3 +89,26 @@ repos:
         entry: bin/code_quality_gate.sh
         language: system
         files: '^bin/.*\.py$'
+
+      # Thêm 2026-08-30 (user duyệt), sau khi code-quality-weekly tìm ra 5 finding CÙNG MỘT lớp
+      # lỗi trong 1 tuần, ở CẢ 2 repo: `datetime.now()` trần / `date.today()` không neo timezone
+      # (WorkingClaude 20bf2f20 — golive_recommend_v23.py:85+1216, dna_report.py:69; mike
+      # b26008a6 — agents/Taylor/anomaly_scan.py:379, insider_flags.py:231). Cả 5 đều LATENT
+      # trên host này (host +07 + crontab TZ export che mất), chỉ nổ khi chạy tay/dispatch dưới
+      # env khác. coding_guidelines §16 đã dặn từ 2026-07 và vẫn lọt 5 lần ⇒ biến §16 thành
+      # điều kiện CƠ HỌC để commit, đúng "enforcement policy" của coding_guidelines.
+      #
+      # Phát hiện bằng AST chứ không regex: `datetime.now(tz)` và `datetime.now()` chỉ khác nhau
+      # ở việc CÓ ARGUMENT hay không, và argument đó viết xuống dòng được — regex đếm sai.
+      # Ratchet per-file so với kb/tz_anchor_baseline.json (kiểm kê ngày bật: 162 vi phạm / 89
+      # file trên cả 2 repo) — nợ cũ không bắt sửa ngay, chỉ không được TĂNG.
+      #
+      # `files` cố ý RỘNG hơn code-quality-gate (thêm agents/): 2 trong 5 finding nằm ở
+      # agents/Taylor/*.py, ngoài tầm `^bin/.*\.py$`. Loại trừ R&D/vendor nằm TRONG script
+      # (is_excluded) chứ không ở regex này — một nguồn sự thật, và baseline phủ đúng phần gate
+      # cưỡng chế. Hook anh em ở repo NGOÀI: /home/trido/thanhdt/.pre-commit-config.yaml.
+      - id: tz-anchor-gate
+        name: datetime.now()/date.today() không neo TZ (xem bin/tz_anchor_gate.py, §16)
+        entry: bin/tz_anchor_gate.py
+        language: system
+        files: '^(bin|hooks|agents)/.*\.py$'

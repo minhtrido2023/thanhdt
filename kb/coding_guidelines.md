@@ -302,6 +302,18 @@ nhận được cho công cụ review ad-hoc, KHÔNG được dùng làm nguồn
 
 Shipped alongside: a `TZ=Asia/Ho_Chi_Minh` crontab export (closes the ambient-env gap).
 
+**Cưỡng chế cơ học từ 2026-08-30 (user duyệt) — `bin/tz_anchor_gate.py`, pre-commit ở CẢ 2 repo**
+(`mike/.pre-commit-config.yaml` + `/home/trido/thanhdt/.pre-commit-config.yaml`). Lý do bật: luật
+văn xuôi này có từ 2026-07 mà code-quality-weekly 2026-08-30 vẫn tìm ra **5 vi phạm cùng lớp trong
+1 tuần** (WC `20bf2f20`, mike `b26008a6`) — tất cả LATENT vì host ở +07 + crontab export che mất.
+Phát hiện bằng **AST** (`datetime.now(tz)` vs `datetime.now()` chỉ khác nhau ở việc CÓ ARGUMENT,
+và argument viết xuống dòng được ⇒ regex đếm sai), **ratchet per-file** so với
+`kb/tz_anchor_baseline.json` (kiểm kê ngày bật: **157 vi phạm / 87 file**) — nợ cũ không bắt sửa
+ngay, chỉ không được TĂNG. Cho qua: `datetime.now(_ICT)`, `datetime.now(ZoneInfo(...))`,
+`datetime.now(timezone.utc)` (bước 1 của ICT-anchor). CHƯA phủ: `pd.Timestamp.now()`,
+`date` trong bash. Escape hatch `MIKE_TZ_GATE=warn|off`; selfcheck
+`bin/tz_anchor_gate_selfcheck.py [--mutations|--all-tz]`.
+
 *→ rationale §16.*
 
 ## 18. Any Quant R&D Task (Backtest, IC Test, Gate/Selector Change) — Follow `.claude/skills/quant-research/`
