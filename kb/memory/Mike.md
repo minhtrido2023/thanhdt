@@ -13,24 +13,28 @@
 - Phễu candidate WIRE (cutoff=70%, trần=1.2), commit 714b5889. TV1/DGC lọt nhưng marginable=NO
   qua DNSE hiện tại. Hard cap concentration risk KHÔNG implement (user chốt: DD workflow đủ).
 
-## CAP_SIGNAL advisory — implement XONG, chờ 1 quyết định nhỏ
-- User duyệt 21:10 ICT dùng CAP_SIGNAL (DIVERGE composite, quant-skeptic CONFIRMED medium nhưng
-  N=6 quá mỏng để wire) làm tín hiệu advisory tham khảo, tự tích luỹ case, tự đề xuất nâng cấp.
-- Script: `agents/Taylor/cap_signal_advisory_check.py` — nguồn sống (VNI từ BQ, EEM/DXY/TNX từ
-  yfinance qua $DNA_PYEXE, KHÔNG dùng tier2_macro_panel.csv đã đóng băng từ 15/05). Test hôm nay:
-  im lặng, không fire (EM_dd60 ~-5-6%, chưa chạm -8%). Ghi registry
-  `kb/data_registry/market-state/cap_signal_advisory_log.md`, gộp cụm ≤60 ngày = 1 cụm (đúng cách
-  đếm N=6). Ngưỡng nâng cấp N≥10 — đạt thì tự bus question đề xuất review, KHÔNG tự wire.
-  Quyết định đầy đủ: `kb/projects/cap-signal-advisory-20260830.md`.
-- **Còn treo**: hàm `build_advisory_line()` đã sẵn sàng (display-only, mẫu §6b) nhưng CHƯA wire
-  vào dna_report.py — đã hỏi user muốn wire ngay vào daily/weekly report hay để script chạy độc
-  lập/thủ công trước. Chờ trả lời.
+## CAP_SIGNAL advisory — KHÉP KÍN HOÀN TOÀN 2026-08-30
+- Chuỗi đầy đủ: nghiên cứu (DIVERGE-only NO-GO, CAP_SIGNAL composite dương) → quant-skeptic
+  round 1 REFUTED (grid không tái lập, nhãn FP sai, cluster mỏng) → round 2 sửa đủ 4 điểm →
+  quant-skeptic CONFIRMED medium (N=6 cụm macro độc lập/15 năm, quá mỏng để wire kỹ thuật) →
+  user duyệt dùng advisory tham khảo, tự tích luỹ case, tự đề xuất nâng cấp khi N≥10 → implement
+  script `agents/Taylor/cap_signal_advisory_check.py` (nguồn sống: VNI/BQ + EEM/DXY/TNX/yfinance
+  qua $DNA_PYEXE) → wire hiển thị:
+  - Daily (tự động): `dna_report.py::build_cap_signal_advisory_line()` → `mike/bin/
+    eod_trading_report.sh` (dòng 136-139, prefix 🧲). Verify trực tiếp trong file — CÓ THẬT.
+  - Weekly/monthly: không pipeline tự động, checklist tường minh trong project doc cho Taylor.
+  - Bug bắt được trước khi ship: python3 hệ thống thiếu yfinance, phải chạy riêng qua $DNA_PYEXE
+    subprocess (nếu chung khối python3 -c với DT-gate/Value-Radar sẽ lỗi âm thầm mãi mãi).
+  - Ngưỡng nâng cấp N≥10 cụm — đạt thì script tự bus question đề xuất quant-skeptic+user review,
+    KHÔNG bao giờ tự wire vào production thật.
+  - Không đụng file trading production nào (xác nhận qua git status).
+  Toàn bộ quyết định: `kb/projects/cap-signal-advisory-20260830.md` (đủ §1-4).
+- **KHÔNG còn việc gì treo lại ở chuỗi này.**
 
 ## Chuỗi khủng hoảng cơ cấu 2007-2012 + điểm mù 2018 — ĐÓNG HOÀN TOÀN
 - Hướng 1 (valuation-gated tier-unlock): NO-GO, capacity chặn (60-79% episode thiếu ADV, edge đảo
   âm ở ngưỡng ≥10B/ngày). File: valuation_gated_tier_unlock_round2_20260830.md.
-- Hướng 2 (DIVERGE CAP_SIGNAL): CONFIRMED nhưng chỉ advisory (xem mục trên) — không wire kỹ thuật
-  vào production. File: diverge_indicator_strategy_backtest_round2_20260830.md.
+- Hướng 2 (DIVERGE CAP_SIGNAL): xem mục CAP_SIGNAL advisory trên — đã khép kín hoàn toàn.
 - Episode clustering N=7->N=5, stress-test DT5G Phase A/B, Bobby BLIND read 2009/2018 — tài liệu
   tham khảo, không đổi production. DT5G giữ nguyên "bảo hiểm fail-safe", không re-tune lịch sử.
 
@@ -48,4 +52,3 @@
 ## Macro watch
 - Bobby BĐS VN report xong 08-26 (STRUCTURAL_ACCUMULATION/AMBIGUOUS). Review quý next ~2026-11-26.
 
-- [2026-08-30T14:34:16Z] User duyệt 21:33 ICT wire build_advisory_line() vào cả 3 cadence report (daily/weekly/monthly). Dispatch Taylor_20260830_143403. Đang chạy, chưa xong.
