@@ -37,3 +37,4 @@ Không circuit breaker trip, không pending_resumes, không bus question mới m
 
 ## Macro watch
 Bobby BĐS VN report xong 08-26 (STRUCTURAL_ACCUMULATION/AMBIGUOUS). Review quý next ~2026-11-26.
+- [2026-08-31T01:43:05Z] User duyệt 08:41 ICT 31/08 cả 3 hướng khai thác DC alpha (LENS not BOOK). Dispatch song song: (1) Taylor_20260831_014243 DC-tilt custom30V backtest (effort high), (2) Taylor_20260831_014244 candidate feeder + mở rộng dc_book_waterfall_paper.py sang BULL/EXBULL (effort medium, KHÔNG sửa bug trigger nhị phân đã biết, chờ mốc review 06/10). Cả 2 đang chạy, chưa xong.

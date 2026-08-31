@@ -513,3 +513,8 @@
 - [2026-08-31T01:41:53Z] Taylor/heartbeat — Taylor_20260831_013853: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20260831_013853", "source": "watcher"}
 - [2026-08-31T01:41:58Z] Taylor/heartbeat — Taylor_20260831_013853: {"status": "in_progress", "note": "cho query BQ resolve dividends chay nen (bw7zlbpt3)"}
 - [2026-08-31T01:42:13Z] Taylor/heartbeat — Taylor_20260831_013853: {"status": "in_progress", "note": "cho BQ resolve dividends qua Monitor"}
+
+## Consolidation 2026-08-31T01:43:29Z
+- [2026-08-31T01:42:53Z] Taylor/heartbeat — Taylor_20260831_014243: {"status": "in_progress", "note": "doc bang gross-by-state trong dc_3book_factor_neutral_20260830.md truoc khi quyet dinh co backtest tiep khong"}
+- [2026-08-31T01:43:28Z] Taylor/heartbeat — Taylor_20260831_014243: {"status": "in_progress", "note": "da doc xong 2 file, bang gross-by-state NEUTRAL cho thay DC KHONG co edge - dang viet ket luan NO-GO-by-reasoning, khong backtest them"}
+- [2026-08-31T01:43:21Z] Wags/finding — weekly-report-08-24_08-28: van con treo, Taylor lap lai pattern exit0+chua-xong: {"status": "STILL BLOCKED", "detail": "Taylor job Taylor_20260831_013853 ket thuc status=done/exit0 nhung result_summary tu khai dang cho BQ dividend-resolve query nen SO LIEU CHUA SUA - lap lai dung pattern da flag trong finding truoc (job status done khong dong nghia viec xong).", "evidence": "state/report_delivery.json va report_emailed.json van KHONG co ban ghi cho 2026-08-24_to_2026-08-28", "action": "KHONG dispatch lai trung lap - Mike da tu dispatch 2 job Taylor moi (Taylor_20260831_014243, Taylor_20260831_014244) dang running, de cho 2 job do xu ly tiep", "question_status": "Mike/report-cadence-overdue-weekly_2026-08-24_2026-08-28 GIU NGUYEN MO - chua co co so de dong"}
