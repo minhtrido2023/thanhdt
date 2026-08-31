@@ -197,13 +197,14 @@ def main():
           e is None and not w and len(o) == 1, f"W={w} OK={o}")
 
     print("\ncase_ung_vien_retry")
-    # rec() đặt argv[4] = "nguoi" ⇒ đó là trace_id mà khối 5b dùng để khớp.
+    # rec() đặt argv[-1] = "quyet" ⇒ đó là trace_id mà khối 5b dùng để khớp (tham số CUỐI,
+    # KHÔNG phải argv[4] — xem ca thật 2026-08-31 ở case_wordsplit_trace_o_cuoi bên dưới).
     t0 = now - dt.timedelta(minutes=30)
     rej = t0.strftime("%Y-%m-%dT%H:%M:%SZ")
     hit = (t0 + dt.timedelta(seconds=40)).strftime("%Y-%m-%dT%H:%M:%SZ")
     late = (t0 + dt.timedelta(minutes=40)).strftime("%Y-%m-%dT%H:%M:%SZ")
     ev = {"event_id": "abcd1234-x", "ts": hit, "agent_id": "Taylor",
-          "event_type": "status", "topic": "chu-de-viet-lai", "trace_id": "nguoi"}
+          "event_type": "status", "topic": "chu-de-viet-lai", "trace_id": "quyet"}
 
     w, o, _l, e = run(block, [rec(rej, who="Taylor")], inbox={"Taylor": [ev]})
     check("có event cùng trace_id ≤15 phút sau ⇒ W nêu ỨNG VIÊN RETRY",
@@ -225,6 +226,29 @@ def main():
                       inbox={"Taylor": [{"ts": hit}, {"khong": "co ts"}, ev]})
     check("inbox có dòng méo (thiếu trace_id/thiếu ts) ⇒ vẫn tìm ra ứng viên, không nổ",
           e is None and bool(w) and "ỨNG VIÊN RETRY" in w[0], f"W={w} exc={e!r}")
+
+    print("\ncase_wordsplit_trace_o_cuoi")
+    # Ca THẬT 2026-08-31 (Taylor, 13 tham số): payload bọc nháy đơn có "'" bên trong ⇒ bash
+    # tách thành 13 arg. trace_id vẫn ở CUỐI; argv[4] chỉ là một mảnh payload ("vi").
+    ws = rec(rej, who="Taylor", argc=13,
+             argv=["Taylor", "finding", "vn-jul2026-case", '{"a":1', "vi", "ket", "qua",
+                   "kinh", "doanh", "that", "su", 'xau"}', "Taylor_20260831_042737"])
+    ev_ws = {"event_id": "2ceafcdb-x", "ts": hit, "agent_id": "Taylor",
+             "event_type": "finding", "topic": "vn-jul2026-case",
+             "trace_id": "Taylor_20260831_042737"}
+    w, o, _l, e = run(block, [ws], inbox={"Taylor": [ev_ws]})
+    check("word-split 13 arg: trace_id ở CUỐI ⇒ VẪN tìm ra ứng viên (hồi quy 08-31)",
+          e is None and bool(w) and "ỨNG VIÊN RETRY" in w[0] and "2ceafcdb" in w[0], w)
+
+    w, o, _l, e = run(block, [ws], inbox={"Taylor": [
+        dict(ev_ws, event_id="lac1234-x", topic="chu-de-khac", trace_id="job-khac")]})
+    check("word-split: event khác cả trace lẫn topic ⇒ KHÔNG nhận bừa",
+          bool(w) and "KHÔNG tìm thấy ứng viên retry" in w[0], w)
+
+    w, o, _l, e = run(block, [ws], inbox={"Taylor": [
+        dict(ev_ws, event_id="topic999-x", trace_id="")]})
+    check("word-split: mất trace_id nhưng TRÙNG topic ⇒ vẫn là ứng viên",
+          bool(w) and "ỨNG VIÊN RETRY" in w[0] and "topic999" in w[0], w)
 
     print("\ncase_CONTROL_khong_duoc_keu_oan")
     w, o, _l, e = run(block, [])

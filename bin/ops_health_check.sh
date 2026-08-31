@@ -995,7 +995,15 @@ if os.path.exists(_qf):
             for _r in _q24:
                 _a = _r.get("argv") if isinstance(_r.get("argv"), list) else []
                 _ag = str(_a[0]) if _a else ""
-                _tr = str(_a[4]) if len(_a) >= 5 else ""
+                # trace_id là tham số CUỐI của append_event.sh. Khi payload bị word-split
+                # (argc>5 — dạng cách ly PHỔ BIẾN NHẤT) nó vẫn nằm ở CUỐI, còn _a[4] chỉ là
+                # một mảnh payload. Bám cứng _a[4] ⇒ đúng ca word-split không bao giờ khớp
+                # ứng viên và checker khẳng định "MẤT THẬT" (ca thật 2026-08-31: 13 tham số,
+                # event 2ceafcdb lên bus +42s vẫn bị báo mất). Thêm topic (_a[2] — KHÔNG bị
+                # ảnh hưởng bởi split trong payload) làm bằng chứng thứ hai; khớp 1 trong 2
+                # là đủ, không có bằng chứng nào thì KHÔNG nhận bừa event đầu tiên trong cửa sổ.
+                _tr = str(_a[-1]) if len(_a) >= 5 else ""
+                _tp = str(_a[2]) if len(_a) >= 3 else ""
                 _ets = str(_r.get("ts") or "")
                 _fp = os.path.join(wc_root, "mike", "bus", "inbox", _ag + ".jsonl")
                 if not (_ag and _ets and os.path.exists(_fp)):
@@ -1009,7 +1017,8 @@ if os.path.exists(_qf):
                             _bts = str(_be.get("ts") or "")
                             if not (_ets < _bts <= _t1):
                                 continue
-                            if _tr and str(_be.get("trace_id") or "") != _tr:
+                            if not ((_tr and str(_be.get("trace_id") or "") == _tr)
+                                    or (_tp and str(_be.get("topic") or "") == _tp)):
                                 continue
                             _qcand.append(
                                 f"{_ag}/{_ets} → {_bts} event {str(_be.get('event_id'))[:8]} "
