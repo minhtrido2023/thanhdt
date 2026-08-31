@@ -2,7 +2,6 @@
 > Cập nhật mỗi khi đổi mạch việc. Bơm vào đầu phiên của Mike.
 
 # Working memory — Mike
-> Cập nhật mỗi khi đổi mạch việc. Bơm vào đầu phiên của Mike.
 
 ## Ưu tiên hiện tại
 - Go-live V2.4 lever LIVE từ 08-24: capit_margin_lever.enabled=TRUE. Ngày có CAPIT margin phải chạy approve_margin_day.py TRƯỚC bot.
@@ -10,48 +9,49 @@
 
 ## Margin đơn mã discretionary — LIVE, PB-adaptive WIRED (đóng hoàn toàn)
 - Per-name 5% / sleeve 10% NAV, f≤1.3, %ADV≤10%, exit -20%. Commit 022c48e7.
-- Phễu candidate WIRE (cutoff=70%, trần=1.2), commit 714b5889. TV1/DGC lọt nhưng marginable=NO
-  qua DNSE hiện tại.
+- Phễu candidate WIRE (cutoff=70%, trần=1.2), commit 714b5889. TV1/DGC lọt nhưng marginable=NO qua DNSE hiện tại.
 
 ## Chuỗi khai thác DC alpha — 30/08 → 31/08, ĐÓNG HOÀN TOÀN
-- 30/08: 4 hướng research (static book NO-GO, state-gated weak-GO N mỏng, EXBULL audit, LAG
-  SUE NO-GO) — không mechanism nào wire.
-- 31/08 sáng, 3 việc LENS-not-BOOK (user duyệt 08:41 ICT):
-  1. **DC-tilt custom30V**: NO-GO bằng suy luận (không cần backtest) — DC_ann 22,83% ở NEUTRAL
-     thấp hơn cả BAL/LAG/baseline, mà custom30V chỉ active NEUTRAL. Lần tilt thất bại thứ 5,
-     nhưng có lý do cơ chế rõ. File: dc_tilt_custom30v_20260831.md.
-  2. **Candidate feeder**: file mới `mike/bin/dc_candidate_feeder.py` (registry đứng riêng, RECON-
-     only, idempotent). 9 mã qualify hôm nay (ACB/CTR/DHG/FPT/HAH/MBB/PVT/SSI/TCB). Commit mike
-     `2272a502`.
-  3. **Mở paper sang BULL/EXBULL**: gate `dc_book_waterfall_paper.py` mở rộng, cơ chế
-     deploy/trigger/cadence KHÔNG đổi. Selfcheck +11 test (78/78 pass). Commit WorkingClaude
-     `b9c585ab`.
-  File: dc_candidate_feeder_and_bull_paper_20260831.md.
-  **Phát hiện phụ + đã tự sửa**: `kb/projects/rnd-pipeline-tracker.md` mục DC-book bị LỖI THỜI
-  (mô tả 4 fix "còn treo" trong khi code đã áp dụng từ 07-20, SLEEVE_VERSION="v2") — đã cập nhật
-  lại cho khớp thực tế + thêm dòng 08-31 mở BULL/EXBULL. Commit mike `ee7200b8`.
-- **Kết luận chung chuỗi DC alpha**: alpha có thật (BULL, xác nhận độc lập nhiều lần) nhưng
-  KHÔNG có edge ở NEUTRAL; kiến trúc "book riêng" thất bại ở mọi biến thể đã thử; hướng khả thi
-  nhất là LENS/feeder (đã implement) + tích luỹ bằng chứng BULL tự nhiên qua paper (đã mở rộng)
-  cho tới mốc review ~06/10. KHÔNG còn việc treo trong chuỗi này.
+Không mechanism nào wire. Kết luận: alpha có thật ở BULL nhưng không NEUTRAL; hướng khả thi = LENS/feeder (đã implement, mike/bin/dc_candidate_feeder.py) + paper mở rộng BULL/EXBULL. Review ~06/10.
 
 ## CAP_SIGNAL advisory + khủng hoảng cơ cấu 2007-2012 — KHÉP KÍN (30/08)
 Wire cả 3 cadence, ngưỡng nâng cấp N≥10. kb/projects/cap-signal-advisory-20260830.md.
-DT5G giữ nguyên fail-safe.
 
 ## Retro 2026-08-30 — XONG
-kb/incidents/retro/retro-2026-08-30.md, Wags CONFIRMED. Sự cố #1 (quant-skeptic kẹt status
-running dù verdict thật CONFIRMED) chưa đạt ngưỡng escalate (cần 2 retro liên tiếp).
+kb/incidents/retro/retro-2026-08-30.md, Wags CONFIRMED.
 
 ## Vận hành — không có việc treo
 Không circuit breaker trip, không pending_resumes, không bus question mới mở.
-job quant-skeptic_20260830_085357: OVERDUE cosmetic đã biết, bỏ qua (verify substance qua log).
 
 ## Macro watch
 Bobby BĐS VN report xong 08-26 (STRUCTURAL_ACCUMULATION/AMBIGUOUS). Review quý next ~2026-11-26.
 
-- [2026-08-31T04:13:36Z] 31/08: chuỗi Bobby(blind)+Taylor(data) cho 3 crisis episode XONG — 2009(MIXED,job Taylor_20260831_033154)+2020/2022(CONTAINABLE,job Taylor_20260831_040228). Finding chính: LEAD-1..4 rút từ N=1(2009) hầu hết KHÔNG generalize sang N=3 — 'targeted action luôn thắng blanket' bị bác bỏ (2022: SCB targeted lag dài hơn blanket rate-hike); mốc lag ngắn nhất = nhánh rủi ro CUỐI CÙNG được giải quyết, không phải nhánh gốc. Phát hiện phụ mới: healing speed (10/12/47 phiên) tương quan HÌNH DẠNG cú sốc (1 lần sắc nét vs nhiều đợt), KHÔNG map theo Loại-1/Loại-2 Bobby. Research-only, không wire. Report: agents/Taylor/research/vn_2009_recovery_trigger_20260831/ + vn_2020_2022_recovery_trigger_20260831/.
-- [2026-08-31T04:55:38Z] 31/08 (tiếp): +2 job nữa đóng chuỗi crisis-trigger research — 2012(job 042736, W-shape 2 đáy, đáy giả 01/2012 rồi đáy thật 11/2012, cơ chế MỚI 'peak-stressor-exhaustion'+'uncertainty-resolution-qua-công-bố-tin-xấu', LEAD-1 breadth-trùng-đáy BỊ BÁC BỎ cho STRUCTURAL nhưng LEAD-1b healing-speed >50 phiên XÁC NHẬN MẠNH là dấu hiệu STRUCTURAL) + top-divergence/margin-selloff(job 042737, giả thuyết breadth-euphoria-tại-đỉnh CHỈ đúng 1/4 case=2022-01, volume-divergence 0/4 xác nhận — KHÔNG dùng làm gate độc lập; case 07/2026 xác nhận MẠNH margin-forced qua tin tức thật độc lập, dư nợ margin kỷ lục ~440k tỷ, BCTC Q2 thực ra TỐT hơn TB nên loại trừ fundamentals, hồi V-shape breadth lành ~1 tuần). Toàn chuỗi 4 job (2009/2020-2022/2012/top+margin) research-only ĐÓNG HẲN, không wire gì. Framework (B) phân biệt margin-forced vs fundamentals có thể feed vào crisis_margin_framework_adaptive_20260825.md nếu user muốn mở lại sau.
-- [2026-08-31T05:19:39Z] 31/08 (tiếp 2): job Taylor_20260831_050908 áp lại framework margin-forced vào 2022+2018 XONG. Cả 2 giả thuyết user đúng MỘT PHẦN: 2022 = margin-cascade LỒNG trong khủng hoảng niềm tin rộng hơn (4 cụm quanh Tân Hoàng Minh/SCB/rate-hike/call-margin, breadth jump 33-40pp MẠNH HƠN 07/2026, nhưng external_flag FAIL cả 4/4 — VIX 22-35, SPX dd tới -25%); 2018 = front-loaded acute leg (23/04-22/06, ĐỦ 3/3 flag y hệt 07/2026, biến động còn MẠNH HƠN) rồi grind gradual 76% thời lượng còn lại KHÔNG có cluster nào. Phát hiện mấu chốt: bản thân 'có cluster margin-cascade' KHÔNG phân biệt được case an toàn vs khủng hoảng sâu — phải kết hợp external_flag TẠI THỜI ĐIỂM + ĐIỀU GÌ XẢY RA SAU cluster (V-recover vs tiếp tục suy yếu). Framework cập nhật 3 archetype: pure-margin-contained(07/2026)/front-loaded-then-grind(2018)/cascade-nested-in-crisis(2022). Research-only, đóng hẳn. Report: agents/Taylor/research/vn_2022_2018_margin_signature_recheck_20260831/.
-- [2026-08-31T05:41:37Z] 31/08 (tiếp 3): job Taylor_20260831_053055 kiểm định giả thuyết mean-reversion-theo-prior-trend user đề xuất — BÁC BỎ như quy luật chung. 07/2026 và 2018 GIỐNG HỆT NHAU trên mọi thước đo prior-trend (12mo return 48%/65%, uptrend liên tục 1,3/1,8 tháng) nhưng outcome ĐỐI LẬP (07/2026 hồi nhanh nhất, 2018 không hồi được) — bác bỏ trực tiếp claim user về 2026='nền bình thường' (thực ra prior-trend CAO tương đương 2018, không hề yếu). Claim về 2020 COVID='đã đè nén từ 2018' thì ĐÚNG, thậm chí đúng rõ hơn (từ đỉnh 2018 tới đỉnh trước COVID: -17,68%, yếu nhất 6 case). Correlation N=6 vẻ ngoài ủng hộ (Pearson -0,805) sụp đổ khi bỏ 1 outlier (2007-2009) về +0,019 — driven-by-one-point, không phải bằng chứng thật. Giả thuyết chỉ đúng ở 2 đầu cực trị phân phối (đã có lời giải thích tốt hơn: external-shock-sạch, STRUCTURAL-credit, cascade-nested), MÙ hoàn toàn ở vùng giữa (nơi cần phân biệt nhất, chứa cả case tốt 07/2026 lẫn xấu 2018). LEAD-6 đề xuất (ngưỡng ~120-130% cumulative-từ-đáy-trước) chỉ N=2, yếu, KHÔNG thay 3-archetype framework. TOÀN BỘ chuỗi 6 job research crisis-trigger (2009/2012/2020-2022/top-margin/2022-2018-recheck/prior-trend) ĐÓNG HẲN 31/08, research-only, không wire gì vào production.
-- [2026-08-31T05:57:30Z] 31/08 (tiếp 4): job Taylor_20260831_054906 kiểm định breadth-of-prior-rally XONG, đóng chuỗi 7 job research crisis-trigger. Kết quả 2 tầng: (1) breadth xấu THẬT ở 2026 - YTD 05/01->18/05/2026 57,1% mã ticker_prune ÂM (median -3,12%) trong khi VNINDEX +7,80%; so 2018 cùng cửa sổ 133 ngày chỉ 45,4% mã âm - khác biệt thật, không tautology. (2) Cơ chế cụ thể user đề xuất (nhóm đầu tư công/hạ tầng nhà nước kéo chỉ số) BỊ BÁC BỎ bằng ICB_Code thật - cohort 14 mã EPC (CII/VCG/HHV/LCG/FCN/C4G/CTD/CTR/DPG/HBC/G36/VC7/NHA/HID) KÉM HƠN trung vị thị trường ở cả 2 cửa sổ 2026, không hề kéo chỉ số. Nhóm này thực sự dẫn dắt mạnh là 2022 (median +130% vs +28% thị trường, khớp đúng lịch sử đầu tư công 2021-2022) - ĐÚNG CHU KỲ TRƯỚC, không phải 2026. Top gainers thật kéo VNINDEX 2026: dầu khí PVN (BSR/OIL/PVC/PVP/PVT/DCM) + phân bón BFC + mega-cap VIC/GVR - quan sát phụ chưa kiểm định đầy đủ. Không đề xuất chỉ báo mới vào production. TOÀN BỘ 7 job chuỗi crisis-trigger research (2009/2012/2020-2022/top-margin/2022-2018-recheck/prior-trend/breadth-rally) ĐÓNG HẲN 31/08, research-only.
+## Chuỗi nghiên cứu crisis-trigger 31/08 — ĐÓNG HOÀN TOÀN, 8 job Taylor + Bobby blind 11 episode
+Research-only, không wire gì vào production. Kết luận cuối (job Taylor_20260831_070702,
+vn_rational_vs_overreaction_framework_20260831/REPORT.md):
+- **KHÔNG phải "thị trường luôn overreact"** — chỉ 1/11 case overreaction rõ (EP-2025-03 tariff
+  Liberation Day: breadth panic 80,05% CAO NHẤT 11 case dù Bobby xếp KHÔNG nặng), 1 nhóm
+  underreaction cường độ (Wave2/3 STRUCTURAL 2009-2012: case nặng nhất nhưng breadth panic đỉnh
+  THẤP vì xói mòn dần không capitulate 1 lần — washout-gate chỉ dựa %oversold sẽ BỎ LỠ dạng này),
+  case chuẩn "rational" = EP-2014-09 (giá dầu OPEC, cả 3 trục đồng thuận nhẹ).
+- 3-archetype framework margin-forced/fundamentals (job vn_2022_2018_margin_signature_recheck):
+  pure-margin-contained(07/2026) / front-loaded-then-grind(2018) / cascade-nested-in-crisis(2022).
+  Phải kết hợp external_flag TẠI THỜI ĐIỂM + ĐIỀU GÌ XẢY RA SAU cluster, không chỉ nhìn có cluster.
+- Giả thuyết mean-reversion-theo-prior-trend BỊ BÁC BỎ (07/2026 và 2018 giống hệt input, outcome
+  đối lập). Giả thuyết breadth-of-rally CÓ 1 phần đúng (participation 2026 hẹp, 57,1% mã âm YTD)
+  nhưng cơ chế cụ thể "nhóm đầu tư công kéo chỉ số" BỊ BÁC BỎ bằng ICB_Code thật (nhóm này thực ra
+  KÉM hơn thị trường 2026; nhóm này dẫn dắt thật là 2022). Thủ phạm thật kéo VNINDEX 2026 nghiêng
+  dầu khí PVN + mega-cap — quan sát phụ chưa kiểm định.
+- EP-2026-01 (mới, Bobby blind) là episode MIXED duy nhất — imbalance tín dụng/BĐS thật tích luỹ
+  12+ tháng, breadth panic đi TRƯỚC đáy giá 14 ngày (giống mẫu STRUCTURAL). Nối với 07/2026: panic-
+  oversold cho thấy 2 episode TÁCH BIỆT thật (7-8 tuần calm thật ở giữa), nhưng participation-breadth
+  cho thấy nhịp hồi 03-05/2026 HẸP — giả thuyết mở, cần dispatch macro-strategist KHÔNG-BLIND riêng
+  mới xác nhận được liệu imbalance BĐS/tín dụng có đang ẩn dưới rally hẹp không.
+- Không đề xuất chỉ báo mới vào production. Muốn dùng "đỉnh breadth panic %" chính thức cần dispatch
+  riêng formalize + quant-skeptic review.
+- Toàn bộ 8 report: agents/Taylor/research/vn_{2009,2012,2020_2022,top_divergence_and_margin_selloff,
+  2022_2018_margin_signature_recheck,prior_trend_meanreversion_hypothesis,breadth_of_prior_rally,
+  all_corrections_inventory,rational_vs_overreaction_framework}_20260831/
+
+- [2026-08-31T07:45:56Z] 31/08 (cuối): xác minh KHÔNG-BLIND imbalance EP-2026-01 bằng dữ liệu Q2/2026 thật (theo yêu cầu user sau chuỗi crisis-trigger research) - CHƯA xử lý căn cơ. BĐS tăng tốc không hạ nhiệt (Q1 +11,7% QoQ -> Q2 +12,71% QoQ), SBV 30/05/2026 ra biện pháp NỚI (loại NOXH/KCN khỏi công thức tính) chứ không siết thêm - không có Nghị quyết 11/2011-style hay Quyết định 254/2012-style nào ban hành sau Q1. NPL xấu đi rõ nhất: 1,72%(2025)->1,85%(Q1)->1,93-1,97%(Q2, cao nhất từ 2020), coverage ratio rơi 91,65%->84,5%. CPI là điểm sáng duy nhất: đỉnh 5,60%(T5)->4,69%(T6) đã đảo chiều. Độ tin cậy giả thuyết lặp mẫu 2011->2012: VỪA PHẢI (đúng chuỗi nhân quả định tính nhưng độ lớn tuyệt đối nhỏ hơn 1 bậc - NPL 1,97% vs 17,21%; CPI đỉnh 5,6% vs 23% - và mới 2 quý data, quá ngắn xác nhận mẫu đa năm). Khuyến nghị Bobby: KHÔNG đổi playbook margin/derisk đã chốt 26/08, đây là cập nhật giữa kỳ theo dõi (review quý gốc vẫn 26/11, đẩy sớm nếu Q3 xấu thêm). File cập nhật: kb/projects/vn-realestate-structural-risk-20260826.md (mục Interim status check mới, KHÔNG sửa entry BLIND gốc trong vn_macro_regime_history.md). Kế hoạch dự phòng Mike đề xuất: giữ nguyên CAP_SIGNAL tripwire đã wire, không mở rộng margin cho đợt giảm mới nếu xuất phát từ đúng nguồn gốc này (vẫn MIXED/ambiguous, escalate không tự quyết).
+- [2026-08-31T07:57:59Z] 31/08: đã chốt + ghi vào kb/projects/vn-realestate-structural-risk-20260826.md (commit 3c03ea57) cadence review MỚI theo yêu cầu user: (1) review quý neo theo mùa BCTC đã công bố xong (không ngày cố định) - Q3->cuối 10/đầu 11, next 2026-11-26 vẫn khớp; (2) review THÁNG interim MỚI - CPI + lãi suất huy động Big-4 + tin chính sách, escalate ngay nếu CPI relapse qua 4,5% / lãi suất +0,3pp trong 1 tháng / có thông tư SIẾT mới / NPL-bankrun tin ngoài chu kỳ. Hiện CHƯA có cron tự động (thủ công qua Mike nhắc mỗi đầu tháng) - đề xuất dispatch riêng để build+test cron+escalation cơ học nếu user muốn tự động hoá. NHỚ TỰ NHẮC kiểm tra đầu mỗi tháng (dispatch Bobby non-blind, mẫu prompt xem interim check 31/08).
