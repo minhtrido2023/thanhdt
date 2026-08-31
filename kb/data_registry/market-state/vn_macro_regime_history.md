@@ -10,6 +10,7 @@ role: Sổ phân loại NGUYÊN NHÂN VĨ MÔ của mỗi episode khủng hoản
 last_full_analysis: 2026-08-25 (Bobby — phân tích toàn diện 2000-2026, thêm 5 episode mới)
 last_update: 2026-08-30 (Bobby — bản đồ pha trong-năm 2009/2018 ở file con vn_macro_regime_history_2009_2018_phases.md; ĐÍNH CHÍNH trục 2 EP-2018-01 CONTAINABLE→EXTERNAL_CYCLE)
 last_update_2: 2026-08-31 (Bobby — addendum granular cửa sổ 2008Q4-2009Q3: đường lãi suất SBV theo ngày, tín dụng 37,53% vs mục tiêu 21-23%, CPI YoY tháng qua cpi_vn.py, FDI 7T/2009; XÁC NHẬN LẠI EP-2008-09 MIXED/EXTERNAL_CYCLE, không đổi verdict)
+last_update_3: 2026-08-31 (Bobby — 5 episode mới, BLIND, dispatch riêng: EP-2014-09 OPEC/oil CONFIDENCE_LIQUIDITY/EXTERNAL_CYCLE clean; EP-2015-07 China devaluation CONFIDENCE_LIQUIDITY ambiguous/EXTERNAL_CYCLE clean; EP-2023-09 FX-defense/margin/VIC-VHM CONFIDENCE_LIQUIDITY clean/CONTAINABLE dominant+EXTERNAL_CYCLE phụ ambiguous; EP-2025-03 Liberation Day tariff CONFIDENCE_LIQUIDITY clean/CONTAINABLE(tranh chấp)+EXTERNAL_CYCLE(nền) ambiguous; EP-2026-01 credit/BĐS+chiến tranh dầu MIXED ambiguous, N/A trục 2 hai timeline — nghi vấn CHƯA XÁC NHẬN liên hệ với episode 07/2026 đã có trong fleet)
 ---
 
 # VN Macro Regime History — sổ phân loại nguyên nhân vĩ mô từng episode khủng hoảng
@@ -355,6 +356,214 @@ nguồn IMF gốc nếu cần dùng làm số PIN cho phân tích định lượ
 
 ---
 
+## EP-2014-09 — OPEC Output Freeze / Global Oil Price Collapse (VNINDEX −19,12%, 2014-09-03→2014-12-17)
+
+**Cửa sổ episode (do caller cung cấp, dd52/arm-trigger, KHÔNG kèm forward-return):** VNINDEX
+giảm −19,12% trong 75 phiên, 2014-09-03 → 2014-12-17.
+
+**Trigger đã biết PIT (công khai tại thời điểm đó):** Brent bắt đầu trượt dốc từ đỉnh ~$115
+(06/2014) xuống dưới $80 (10/2014); cú sốc quyết định là cuộc họp OPEC **27/11/2014** — nhóm giữ
+nguyên trần sản lượng 30 triệu thùng/ngày bất chấp dư cung toàn cầu → Brent rơi thẳng từ $77,75
+xuống **$70,15** ngay hôm sau, tiếp tục về dưới $60 cuối 12/2014 — [CNN Money,
+2014-11-27](https://money.cnn.com/2014/11/27/investing/oil-prices-opec-crude/); [Business
+Standard, 2014-11-28](https://www.business-standard.com/amp/article/reuters/brent-near-four-year-low-after-opec-decides-against-output-cut-114112800074_1.html).
+Việt Nam là nước xuất khẩu dầu thô ròng (PVN đóng góp ngân sách nhà nước, cổ phiếu dòng dầu khí
+PVD/PVS/GAS chiếm tỷ trọng lớn trên sàn) — kênh truyền dẫn dự đoán được: doanh thu ngân sách từ
+dầu thô + lợi nhuận nhóm dầu khí niêm yết.
+
+### Trục 1: `CONFIDENCE_LIQUIDITY` (đọc đúng hơn: cú sốc giá hàng hoá ngoại sinh, không phải mất
+cân đối tín dụng/lạm phát nội địa) — confidence: **clean**
+
+Bằng chứng nền vĩ mô VN NGAY TRƯỚC và TRONG episode — tất cả đi NGƯỢC hướng với mẫu STRUCTURAL:
+- **CPI YoY giảm đều đặn, không xấu đi.** Chuỗi tháng qua `cpi_vn.py` (BQ nội bộ): 6,00% (12/2013)
+  → 5,50% (01/2014) → 3,83% (06/2014) → **2,81% (09/2014, đầu episode)** → **1,80% (12/2014, cuối
+  episode)** → tiếp tục về 0,60% (12/2015). Đây là DISINFLATION đều, không phải tích lũy lạm phát
+  nhiều quý trước episode — đối lập trực tiếp với mẫu 2007/2011 (CPI leo dần TRƯỚC đỉnh khủng
+  hoảng). Nguồn: `cpi_vn.cpi_monthly_df()`, cột `is_real_nso=False` (giai đoạn này là số tổng hợp
+  không phải bản gốc NSO trực tiếp — dùng để xác nhận XU HƯỚNG, khớp hướng với GSO/Trading
+  Economics công khai).
+- **Tín dụng cả năm 2014 = 14,2%** — dưới/ngang mục tiêu SBV (SBV thời điểm đó phàn nàn tín dụng
+  "thấp hơn kỳ vọng", KHÔNG phải vượt trần). Nguồn: FiinRatings Banking Sector report (tổng hợp);
+  World Bank Taking Stock Dec 2014 xác nhận "credit growth continues to come in below
+  expectation" — [World Bank Vietnam Taking Stock Dec
+  2014](https://www.worldbank.org/en/country/vietnam/publication/takingstockdecember2014).
+- **Lãi suất huy động (`deposit_rate_vn.py`) tiếp tục giảm đều, không có spike:** 7,0% (01/2014) →
+  6,3% (07/2014) → 5,5% (01/2015) — hướng đi hoàn toàn NGƯỢC với một cú sốc thanh khoản/bank-run
+  (lẽ ra phải thấy lãi suất huy động NHẢY lên để giữ tiền gửi). Không có dấu hiệu căng thẳng liên
+  ngân hàng đồng thời với episode giá cổ phiếu.
+- **GDP Q3/2014 tăng 6,2% YoY, 9 tháng đầu năm 5,6%** — tăng tốc, không suy giảm. Ngân sách nhà
+  nước 9 tháng đầu năm tăng 17% YoY. Cán cân vãng lai thặng dư, dự trữ ngoại hối tăng. Nguồn: World
+  Bank Taking Stock Dec 2014 (trên).
+- **PVN đã hoàn thành nộp ngân sách 2014 từ đầu tháng 11/2014** (trước khi giá dầu chạm đáy) và
+  VƯỢT kế hoạch năm — nộp 178.100 tỷ VND, vượt kế hoạch 37.600 tỷ VND — [Vietnam Energy Magazine,
+  2014-12-30](https://vietnamenergy.vn/petrovietnam-has-handed-in-the-budget-a-vnd-376-thousand-billion-sum-over-the-plan-11376.html).
+  Nghĩa là: tác động ngân sách 2014 THỰC TẾ chưa đến (đã nộp đủ trước khi giá sập); cú sốc là dự
+  báo FORWARD (lo ngại ngân sách/lợi nhuận PVN 2015), không phải tổn thất đã hiện thực hóa cho
+  2014 — càng khẳng định đây là phản ứng THỊ TRƯỜNG với 1 biến số giá hàng hóa cụ thể, không phải
+  phát hiện ra một imbalance vĩ mô nội địa đang tồn tại.
+
+**Kết luận trục 1:** Không có bất kỳ chỉ tiêu nào (CPI, tín dụng, lãi suất huy động, GDP, cán cân
+vãng lai) xấu đi trước hay trong episode — nền vĩ mô nội địa VN 2014 lành mạnh, đang trong xu
+hướng ổn định hóa hậu 2011-2012. Trigger là MỘT quyết định cụ thể của MỘT tổ chức bên ngoài (OPEC,
+27/11/2014) tác động qua kênh giá hàng hóa/kỳ vọng lợi nhuận nhóm dầu khí — không phải bằng chứng
+mất cân đối macro VN. ⇒ `CONFIDENCE_LIQUIDITY` (đọc đúng bản chất: cú sốc giá hàng hóa ngoại sinh,
+không phải khủng hoảng niềm tin ngân hàng kiểu 2022, nhưng cùng nhóm "trigger cụ thể, không tự nó
+là bằng chứng imbalance nội địa" theo khung phân loại).
+
+### Trục 2: `EXTERNAL_CYCLE` — confidence: **clean**
+
+- **Không có MỘT hành động chính sách VN nào có thể "sửa" giá dầu thế giới.** Đây là khác biệt cơ
+  bản với case CONTAINABLE (SCB 2022: SBV kiểm soát đặc biệt 1 ngân hàng cụ thể; COVID 2020: vaccine
+  + reopening) — không có đòn bẩy chính sách trong nước tương đương cho một cuộc chiến thị phần
+  dầu mỏ toàn cầu (OPEC vs. đá phiến Mỹ).
+  Nguồn (bối cảnh chiến lược OPEC): [CNBC,
+  2018-05-15](https://www.cnbc.com/2018/05/15/oil-prices-have-rebounded-since-opec-refused-to-cut-output-in-2014.html)
+  — "OPEC bet thấp giá sẽ buộc nhà sản xuất đá phiến Mỹ giảm sản lượng" — chiến lược đa năm, không
+  phải sự kiện giải quyết được trong vài tuần/tháng.
+- **Chu kỳ giá dầu thấp kéo dài nhiều năm, không phải một cú sốc rồi hồi phục nhanh.** Brent tiếp
+  tục rơi xuống đáy $27,10/thùng vào 01/2016 — nghĩa là bản thân chu kỳ giá dầu (nguyên nhân gốc
+  của episode) CHƯA kết thúc ngay cả 13 tháng sau điểm bắt đầu episode này; nó là một hiện tượng
+  thị trường hàng hóa toàn cầu đa năm, VN hoàn toàn là bên nhận (price-taker), không kiểm soát
+  được thời điểm kết thúc.
+- Phản ứng chính sách VN quan sát được chỉ là ĐIỀU CHỈNH THEO (Bộ Tài chính hạ giả định giá dầu
+  trong dự toán ngân sách 2015, Petrolimex điều chỉnh giá bán lẻ xăng dầu trong nước theo biến động
+  giá thế giới) — đây là thích ứng bị động, KHÔNG phải một hành động NHẮM ĐÚNG MỤC TIÊU để giải
+  quyết nguyên nhân gốc (giống refi rate cut cho COVID hay kiểm soát đặc biệt SCB).
+
+**Kết luận trục 2:** Không có cơ chế chính sách VN nào giải quyết trực tiếp nguyên nhân gốc (chu
+kỳ giá dầu toàn cầu do quyết định OPEC + cạnh tranh đá phiến Mỹ); thời điểm kết thúc chu kỳ không
+do VN quyết định. ⇒ `EXTERNAL_CYCLE`.
+
+### Tổng kết EP-2014-09
+| Trục | Kết luận | Confidence |
+|---|---|---|
+| 1. Root cause | `CONFIDENCE_LIQUIDITY` (cú sốc giá hàng hóa ngoại sinh) | clean |
+| 2. Containability | `EXTERNAL_CYCLE` | clean |
+
+- **shock_origin:** 06/2014 (Brent bắt đầu trượt dốc từ đỉnh); 27/11/2014 (quyết định OPEC — điểm
+  gãy dứt khoát nhất)
+- **policy_response_start:** N/A (không có macro-stabilization action; chỉ điều chỉnh thụ động giả
+  định ngân sách + giá bán lẻ xăng dầu trong nước)
+- **recovery_confirmed:** không xác định trong phạm vi phân tích BLIND này (đọc dừng ở
+  17/12/2014, không tra cứu diễn biến giá cổ phiếu sau đó theo đúng luật BLIND của vai trò)
+- **chain_classification:** `INDEPENDENT`
+- **analyst_notes:** Case này khác 2018 (EM risk-off đa nguyên nhân) ở chỗ trigger ở đây có MỘT
+  ngày cụ thể, MỘT quyết định của MỘT tổ chức (OPEC 27/11/2014) — sạch hơn về mặt nhận diện nguyên
+  nhân so với 2018. Điểm chung với 2018: cả hai đều xảy ra trên nền vĩ mô nội địa VN LÀNH MẠNH
+  (CPI thấp, tín dụng trong tầm kiểm soát, không có dấu hiệu overheating) — nhóm case này (2014,
+  2018) nên được sizing/đọc khác với nhóm STRUCTURAL (2007-2012) khi dùng cho phân tích thống kê
+  N_effective.
+
+---
+
+## EP-2015-07 — China Yuan Devaluation / Global "Black Monday" Risk-Off (VNINDEX −17,50%, 2015-07-14→2015-08-24)
+
+**Cửa sổ episode (do caller cung cấp, dd52/arm-trigger, KHÔNG kèm forward-return):** VNINDEX
+giảm −17,50% trong 29 phiên, 2015-07-14 → 2015-08-24.
+
+**Trigger đã biết PIT (công khai tại thời điểm đó):** Chứng khoán Trung Quốc đã giảm mạnh từ
+tháng 06/2015 (Shanghai Composite mất ~43% trong hơn 2 tháng June→Aug 2015). PBOC phá giá NDT
+**11/08/2015** gần 2% — mức phá giá lớn nhất trong 2 thập kỷ, làm dấy lên lo ngại tăng trưởng TQ
+yếu hơn dự báo và kích hoạt bán tháo lan rộng >US$5 nghìn tỷ vốn hóa toàn cầu — [CNN Money,
+2015-08-11](https://money.cnn.com/2015/08/11/news/economy/china-yuan-devaluation-stocks-market/index.html).
+Đỉnh điểm là "Black Monday" toàn cầu **24/08/2015** (đúng ngày cuối episode) khi Shanghai Composite
+rơi 8,5% trong 1 phiên — [Business Standard,
+2015-08-24](https://www.business-standard.com/amp/article/news-cm/asia-pacific-market-market-crashes-to-multi-month-lows-115082401471_1.html).
+Kênh truyền dẫn tới VN dự đoán được: TQ là đối tác thương mại lớn nhất VN (VN nhập siêu từ TQ
+~US$32-33 tỷ năm 2015 — [Vinachem tổng
+hợp](https://www.vinachem.com.vn/content/market-and-product-vnc/vietnam-trade-deficit-with-china-hits-150bn-after-five-years.html))
+→ NDT rẻ đi đe dọa sức cạnh tranh xuất khẩu VN + áp lực phá giá cạnh tranh (currency-war) trong cả
+khu vực châu Á.
+
+### Trục 1: `CONFIDENCE_LIQUIDITY` — confidence: **ambiguous**
+
+Đa số chỉ tiêu độc lập cho thấy nền vĩ mô nội địa VN lành mạnh, KHÔNG có tích lũy mất cân đối
+trước episode — nhưng có MỘT chỉ tiêu (tín dụng) cho tín hiệu trái chiều, nên đánh dấu ambiguous
+thay vì clean:
+
+- **CPI YoY cực thấp, gần giảm phát trong chính episode:** `cpi_vn.py` — **0,93% (07/2015)** →
+  **0,87% (08/2015)** — hoàn toàn không có áp lực cầu kéo nội địa. Đây là mức lạm phát thấp lịch
+  sử, đối lập hoàn toàn với mẫu STRUCTURAL (CPI phải xấu đi TRƯỚC episode).
+- **Lãi suất huy động ổn định tuyệt đối suốt cả năm:** `deposit_rate_vn.py` giữ nguyên **5,5%**
+  từ 01/2015 đến hết 2016 — không có bất kỳ dấu hiệu căng thẳng thanh khoản/huy động vốn nào đồng
+  thời với episode. Đây là bằng chứng mạnh CHỐNG lại giả thuyết bank-run/thanh khoản nội địa.
+- **Điểm ambiguous — tín dụng cả năm 2015 vượt mục tiêu:** tăng trưởng tín dụng đạt **17,02%** tính
+  đến 18/12/2015 — mức cao nhất kể từ 2011, VƯỢT mục tiêu SBV đề ra ~13-15% cho năm đó (nguồn tổng
+  hợp qua search, đối chiếu VietnamNews/SBV báo cáo cuối năm — **chưa fetch được văn bản mục tiêu
+  gốc của SBV đầu năm 2015, dùng số tổng hợp báo chí**). Đây là con số CẢ NĂM (tích lũy đến giữa
+  tháng 12), không phải số tại-thời-điểm-episode (giữa 07-08/2015) — không xác định được phần nào
+  của mức vượt này đã xảy ra TRƯỚC episode hay tích lũy dần suốt nửa cuối năm. Khác với 2007
+  (tín dụng 53-54%, vượt gấp 3-4 lần target) hay 2009 (36-37% vượt xa so với 21-23%), mức vượt
+  17,02% vs 13-15% ở đây NHỎ hơn nhiều về độ lớn VÀ không đi kèm CPI leo thang (CPI vẫn <1% suốt
+  episode và cả năm) — nghĩa là tín dụng tăng không truyền dẫn thành lạm phát, khác hẳn cơ chế
+  STRUCTURAL đã thấy ở 2007-2012.
+- **Không có sự kiện/tổ chức trong nước nào bị nêu tên** (không bank run, không scandal công ty) —
+  trigger hoàn toàn là 2 sự kiện bên ngoài VN có ngày cụ thể (PBOC 11/08, Black Monday toàn cầu
+  24/08).
+
+**Kết luận trục 1:** Đa số bằng chứng (CPI cực thấp, lãi suất huy động ổn định, không trigger nội
+địa) chỉ ra `CONFIDENCE_LIQUIDITY` với trigger ngoại sinh rõ ràng — nhưng tín dụng vượt mục tiêu cả
+năm là một tín hiệu trái chiều CHƯA thể loại trừ hoàn toàn (không đủ dữ liệu tần suất cao hơn để
+tách phần vượt trước/sau episode). ⇒ `CONFIDENCE_LIQUIDITY`, confidence **ambiguous**.
+
+### Trục 2: `EXTERNAL_CYCLE` — confidence: **clean**
+
+- **SBV PHẢN ỨNG rất nhanh với MỘT kênh cụ thể (tỷ giá):** nới biên độ giao dịch VND/USD từ ±1%
+  lên ±2% ngày **12/08/2015** (ngay sau NDT phá giá 1 ngày), rồi tiếp tục phá giá tỷ giá trung tâm
+  thêm 1% VÀ nới biên độ lên ±3% ngày **19/08/2015** — [Bloomberg,
+  2015-08-19](https://www.bloomberg.com/news/articles/2015-08-19/vietnam-s-central-bank-devalues-dong-for-third-time-this-year);
+  [Fox News/AP,
+  2015-08](https://www.foxnews.com/world/vietnam-doubles-currency-trading-band-to-spur-exports-after-china-devalues-yuan).
+  Đây LÀ một hành động nhắm đúng kênh truyền dẫn cụ thể (tỷ giá), tương tự tinh thần "1 hành động
+  nhắm đúng mục tiêu" — nhưng KHÔNG giải quyết được nguyên nhân gốc (xem dưới).
+- **NHƯNG áp lực tỷ giá KHÔNG dừng lại sau hành động tháng 08/2015** — VND tiếp tục yếu thêm hết
+  năm: "the dong weakened 4.5 percent in interbank... against the SBV's pledge to let it slip only
+  2 percent in 2015", kết năm ở 22.495đ/USD, yếu hơn 2,7% so với tỷ giá tham chiếu 31/12 —
+  [VOA/Reuters tổng
+  hợp](https://www.voanews.com/a/vietnam-devalues-currency-as-inflation-bites-115883724/167035.html).
+  Nguyên nhân là ÁP LỰC KÉP tiếp diễn: (a) chu kỳ giảm tốc/phá giá cạnh tranh của TQ (đa năm, VN
+  không kiểm soát), (b) kỳ vọng Fed nâng lãi suất lần đầu kể từ khủng hoảng 2008 (thực hiện
+  16/12/2015) — cả hai đều là xu hướng BÊN NGOÀI VN, không có mốc thời gian VN tự quyết được.
+- **Áp lực buộc VN phải THAY ĐỔI CƠ CHẾ (không chỉ 1 hành động đơn lẻ):** từ **04/01/2016** SBV bỏ
+  cơ chế tỷ giá trung tâm cố định/điều chỉnh rời rạc, chuyển sang cơ chế **tỷ giá trung tâm hàng
+  ngày neo theo rổ 8 đồng tiền** — một thay đổi CẤU TRÚC (structural policy redesign), không phải
+  "một hành động dập tắt 1 trigger" như kiểm soát đặc biệt SCB (2022) hay vaccine rollout (2020).
+  Việc phải redesign cả khung chính sách (thay vì chỉ 1 lần can thiệp) là dấu hiệu rõ nguyên nhân
+  gốc KHÔNG kết thúc trong episode — nó là một phần của chu kỳ đa năm (căng thẳng tỷ giá châu Á
+  2015-2016 gắn với chu kỳ thắt chặt Fed, tiếp diễn đến tận 2016).
+
+**Kết luận trục 2:** SBV có phản ứng nhanh và cụ thể về tỷ giá, nhưng bản thân stress indicator
+(áp lực phá giá VND) KHÔNG hạ nhiệt trong vòng vài tuần/tháng sau hành động — nó tiếp tục đến hết
+năm và buộc phải redesign cơ chế đầu 2016. Nguyên nhân gốc (chu kỳ TQ + kỳ vọng Fed) là xu hướng
+đa năm ngoài tầm kiểm soát VN. ⇒ `EXTERNAL_CYCLE`.
+
+### Tổng kết EP-2015-07
+| Trục | Kết luận | Confidence |
+|---|---|---|
+| 1. Root cause | `CONFIDENCE_LIQUIDITY` | ambiguous (tín dụng cả năm vượt target, không đi kèm CPI) |
+| 2. Containability | `EXTERNAL_CYCLE` | clean |
+
+- **shock_origin:** 06/2015 (TTCK Trung Quốc bắt đầu sụp — cảnh báo sớm); 11/08/2015 (PBOC phá
+  giá NDT — điểm gãy dứt khoát nhất); 24/08/2015 (Black Monday toàn cầu — trùng ngày cuối episode)
+- **policy_response_start:** 12/08/2015 (SBV nới biên độ ±1%→±2%); 19/08/2015 (phá giá tỷ giá
+  trung tâm 1% + nới biên độ ±2%→±3%)
+- **recovery_confirmed:** không xác định trong phạm vi phân tích BLIND này (đọc dừng ở
+  24/08/2015 theo đúng luật BLIND) — riêng CHỈ với stress indicator tỷ giá (macro, không phải giá
+  cổ phiếu): áp lực phá giá VND tiếp diễn hết 2015, buộc đổi cơ chế 04/01/2016 — bằng chứng
+  EXTERNAL_CYCLE nêu trên tự nó đã trả lời câu hỏi "có hạ nhiệt nhanh không" mà không cần biết giá
+  cổ phiếu.
+- **chain_classification:** `INDEPENDENT`
+- **analyst_notes:** So với EP-2014-09 (oil, cùng nhóm CONFIDENCE_LIQUIDITY/EXTERNAL_CYCLE, cùng
+  năm liền kề): điểm khác biệt là episode này có MỘT phản ứng chính sách trong nước NHANH VÀ CỤ THỂ
+  (SBV hành động trong vòng 1-8 ngày) — nhưng phản ứng đó chỉ xử lý được TRIỆU CHỨNG (tỷ giá tức
+  thời), không xử lý được NGUYÊN NHÂN GỐC (chu kỳ TQ + Fed) — đây là lý do phân biệt với case
+  CONTAINABLE thật (SCB 2022: hành động NHẮM ĐÚNG nguyên nhân gốc — 1 ngân hàng cụ thể — và stress
+  indicator liên quan hạ nhiệt trong vài tháng). Bài học phương pháp: "có phản ứng chính sách
+  nhanh" KHÔNG tự động nghĩa là CONTAINABLE — phải kiểm tra thêm liệu STRESS INDICATOR có thực sự
+  hạ nhiệt sau đó hay tiếp tục đến mức phải redesign cơ chế.
+
+---
+
 ## EP-2018-01 — US-China Trade War / EM Risk-Off Correction
 
 **Cửa sổ episode:** 01/2018 (thị trường VN correction bắt đầu từ đỉnh ~1200) → 12/2018 (giá ổn
@@ -531,6 +740,359 @@ Ba nhánh trigger, MỖI nhánh có MỘT hành động chính sách nhắm đú
 
 ---
 
+## EP-2023-09 — VND FX-Defense Liquidity Drain / VIC-VHM Overhang / Margin Unwind (VNINDEX −17,45%, 2023-09-06→2023-10-31)
+
+**Cửa sổ episode (do caller cung cấp, dd52/arm-trigger, KHÔNG kèm forward-return):** VNINDEX
+giảm −17,45% trong 39 phiên, 2023-09-06 → 2023-10-31.
+
+**Trigger đã biết PIT (công khai tại thời điểm đó, nguồn contemporaneous — VinaCapital Economist's
+Note, xuất bản 09/11/2023, tức chỉ ~1 tuần sau khi episode kết thúc — trích dẫn CHỈ phần nguyên
+nhân nhân quả, KHÔNG trích phần dự báo/khuyến nghị đầu tư của báo cáo để giữ đúng luật BLIND):**
+3 yếu tố đặc thù VN + 1 yếu tố toàn cầu, theo VinaCapital
+([PDF, 2023-11-09](https://vinacapital.com/wp-content/uploads/2023/11/VinaCapital-Insights-Reasons-for-VN-Indexs-Steep-Correction-of-16.pdf)):
+1. **Áp lực phá giá VND** → lo ngại SBV sẽ thắt chặt tiền tệ mạnh (kể cả khả năng nâng lãi suất
+   điều hành) → một phần bán ra của khối ngoại.
+2. **Trái phiếu chuyển đổi (CB) USD250 triệu của Vingroup** (công bố 26/10/2023, hoán đổi sang cổ
+   phiếu Vinhomes-VHM) — VIC+VHM chiếm ~10% VN-Index; sự kiện 1 công ty cụ thể.
+3. **Margin call của các CTCK** từ đầu tháng 09/2023 + tin đồn thanh tra 1 nguồn cho vay margin phi
+   chính thức, dẫn tới thanh lý vị thế đòn bẩy nhanh ngày 17/10/2023.
+4. **Yếu tố toàn cầu:** lợi suất trái phiếu Kho bạc Mỹ kỳ hạn 10 năm tăng 60bp (giữa 09→cuối
+   10/2023, đúng khung "higher for longer" của Fed) + căng thẳng địa chính trị → MSCI-EM Index
+   giảm 5% cùng kỳ. VinaCapital ghi nhận rõ VNINDEX **giảm mạnh hơn ĐÁNG KỂ** so với nhóm EM khu
+   vực (THB/PHP/IDR/MYR) trong cùng cửa sổ — cho thấy yếu tố ĐẶC THÙ VN (mục 1-3) là driver chính,
+   yếu tố toàn cầu là driver phụ.
+
+### Trục 1: `CONFIDENCE_LIQUIDITY` — confidence: **clean**
+
+- **CPI hoàn toàn trong tầm kiểm soát, KHÔNG xấu đi nhiều quý trước episode.** `cpi_vn.py`: CPI
+  YoY chạm đáy 2,0% (06/2023) rồi nhích nhẹ lên **2,80% (09/2023)** → **3,07% (10/2023)** — vẫn
+  cách xa trần mục tiêu Quốc hội ~4,5%. Đây là mức phục hồi từ đáy thấp, KHÔNG phải tích lũy
+  overheating multi-quarter.
+- **Tín dụng YẾU, không phải bùng nổ** — tăng trưởng tín dụng giảm tốc từ 9,4% YoY (08/2023) xuống
+  **8,7% YoY (09/2023)**, thấp hơn nhiều so với chuẩn thông thường (~13-14%/năm) — "excess
+  liquidity in banking system", đối lập hoàn toàn với mẫu STRUCTURAL (tín dụng phải VƯỢT trần).
+- **SBV đang trong chu kỳ CẮT lãi suất, không phải thắt chặt** — cắt tổng **150bp** từ tháng
+  03→06/2023 (5,5%→4,5%), đúng lúc Fed vẫn giữ lãi suất cao — chính SỰ KHÁC BIỆT chính sách này
+  (không phải lạm phát nội địa) mới là nguồn gốc áp lực tỷ giá: "the SBV's aggressive rate cuts in
+  H1 left short term interest rates in Vietnam a record 500bps below short-term USD interest
+  rates" — VinaCapital (trên).
+- **Lãi suất huy động (`deposit_rate_vn.py`) giảm đều suốt cả năm 2023:** 7,2% (03/2023) → 6,3%
+  (06/2023) → 5,5% (09/2023) → 5,0% (12/2023) — hướng đi hoàn toàn ngược với một cú sốc bank-
+  run/thanh khoản nội địa (lẽ ra lãi suất huy động phải NHẢY LÊN để giữ tiền gửi).
+- **GDP đang phục hồi rõ rệt trong episode, không suy thoái:** 3,3% (Q1) → 4,1% (Q2) → **5,3%
+  (Q3/2023)** YoY — nền kinh tế thực đang cải thiện đồng thời với đợt bán tháo cổ phiếu, một dấu
+  hiệu kinh điển của "cú sốc niềm tin/thanh khoản trên nền vĩ mô ổn định" chứ không phải khủng
+  hoảng thực.
+- Cả 3 yếu tố đặc thù VN đều có TÊN CỤ THỂ (SBV/tỷ giá, 1 công ty — Vingroup/Vinhomes, margin của
+  CTCK) — không phải bằng chứng mất cân đối vĩ mô lan tỏa.
+
+**Kết luận trục 1:** Không có chỉ tiêu STRUCTURAL nào (CPI, tín dụng, lãi suất huy động) xấu đi —
+ngược lại tất cả đang trong xu hướng NỚI LỎNG/phục hồi. Trigger là tổ hợp: áp lực tỷ giá do CHÊNH
+LỆCH LÃI SUẤT (bản thân là hệ quả của một lựa chọn chính sách cắt lãi suất, không phải lạm phát),
+1 sự kiện phát hành trái phiếu của 1 công ty, và 1 đợt thanh lý margin. ⇒ `CONFIDENCE_LIQUIDITY`.
+
+### Trục 2: `CONTAINABLE` (dominant) pha trộn với 1 thành phần `EXTERNAL_CYCLE` phụ — confidence:
+**ambiguous**
+
+Bằng chứng CONTAINABLE (3 yếu tố đặc thù VN, mỗi yếu tố có cơ chế tự giải quyết/công cụ nhắm đúng
+mục tiêu trong episode hoặc ngay sau đó):
+- **SBV hút ròng ~USD9 tỷ thanh khoản VND qua kênh tín phiếu (OMO) từ 21/09/2023 đến hết
+  10/2023** — công cụ CỤ THỂ, nhắm đúng mục tiêu (bảo vệ tỷ giá qua thanh khoản, KHÔNG cần nâng lãi
+  suất điều hành) — VinaCapital: "the SBV drained nearly USD9 billion... but it did not hike
+  policy interest rates to protect the currency."
+- **Nới biên độ giao dịch tỷ giá từ ±3% lên ±5%** ngày **17/10/2023** — một cơ chế linh hoạt hóa cụ
+  thể, tương tự logic 2015 nhưng lần này ĐI KÈM bằng chứng ổn định hóa NHANH: theo báo cáo xuất
+  bản chỉ 1 tuần sau khi episode kết thúc, "the USD-VND exchange rate has stabilized at current
+  levels for the past several weeks without the SBV having to resort to rate hikes" — khác hẳn
+  case 2015 (phải redesign cơ chế 4 tháng sau, phá giá tiếp tục cả năm).
+- **Margin liquidation là cơ chế TỰ GIỚI HẠN** — theo đúng bản chất một đợt xả đòn bẩy: một khi vị
+  thế bị thanh lý hết, áp lực bán tự nhiên chấm dứt, không cần một hành động chính sách riêng.
+- **Overhang trái phiếu chuyển đổi VIC/VHM là sự kiện 1 lần** — VinaCapital ghi nhận "hedge selling
+  by CB arb funds tends to be temporary."
+
+Bằng chứng KÉO NGƯỢC về `EXTERNAL_CYCLE` (lý do đánh dấu ambiguous, không phải clean):
+- **Một phần nguyên nhân gốc của áp lực tỷ giá là "higher for longer" — chu kỳ lãi suất Fed đa
+  năm mà VN không kiểm soát được thời điểm kết thúc.** DXY tăng 6-7% (giữa 07→đầu 10/2023) + UST
+  10Y +60bp cùng kỳ là bối cảnh toàn cầu, không phải VN tự quyết. Nếu Fed tiếp tục "cao hơn lâu
+  hơn", SBV có thể phải quay lại thắt chặt bất cứ lúc nào — đây chính xác là loại rủi ro
+  EXTERNAL_CYCLE (không có mốc VN tự quyết định thời điểm kết thúc).
+- **VNINDEX giảm mạnh hơn EM peer trung bình ~2 lần** (per chart VinaCapital: EM peers ~−5% vs
+  VNINDEX −16% cùng cửa sổ) — nghĩa là yếu tố ĐẶC THÙ VN (CONTAINABLE) chiếm phần LỚN hơn, nhưng
+  không loại trừ hoàn toàn thành phần EXTERNAL_CYCLE.
+
+**Kết luận trục 2:** Phần lớn cường độ episode (VN underperform EM ~2×) đến từ 3 yếu tố CONTAINABLE
+có công cụ/cơ chế giải quyết cụ thể và có bằng chứng ổn định hóa nhanh (vài tuần) — nhưng một phần
+thực sự gắn với chu kỳ Fed "higher for longer" ngoài tầm kiểm soát VN. ⇒ `CONTAINABLE` (chiếm ưu
+thế), confidence **ambiguous** do có hợp phần EXTERNAL_CYCLE thật không tách rời được hoàn toàn.
+
+### Tổng kết EP-2023-09
+| Trục | Kết luận | Confidence |
+|---|---|---|
+| 1. Root cause | `CONFIDENCE_LIQUIDITY` | clean |
+| 2. Containability | `CONTAINABLE` (dominant, pha trộn EXTERNAL_CYCLE phụ — Fed "higher for longer") | ambiguous |
+
+- **shock_origin:** giữa 09/2023 (áp lực VND bắt đầu rõ + margin call sớm từ CTCK); 21/09/2023
+  (SBV bắt đầu hút ròng thanh khoản qua tín phiếu — điểm chính sách rõ nhất)
+- **policy_response_start:** 21/09/2023 (hút thanh khoản qua tín phiếu); 17/10/2023 (nới biên độ
+  tỷ giá ±3%→±5%)
+- **recovery_confirmed:** không xác định trong phạm vi phân tích BLIND này (đọc dừng ở
+  31/10/2023) — RIÊNG với stress indicator tỷ giá (macro, không phải giá cổ phiếu): báo cáo
+  contemporaneous (09/11/2023, ~1 tuần sau episode) đã xác nhận tỷ giá "ổn định vài tuần" mà không
+  cần nâng lãi suất điều hành — khác biệt rõ với case 2015 (phải đổi cơ chế 4 tháng sau).
+- **chain_classification:** `INDEPENDENT`
+- **analyst_notes:** Case pha trộn hiếm — vừa có thành phần CONTAINABLE rõ ràng (công cụ SBV cụ
+  thể + tự giới hạn của margin/CB overhang, tương tự tinh thần 2022 SCB) vừa có thành phần
+  EXTERNAL_CYCLE thật (Fed "higher for longer", tương tự 2018). Khác 2015 (cũng có phản ứng chính
+  sách nhanh nhưng KHÔNG ngăn được stress tiếp diễn) — 2023 có bằng chứng ổn định hóa NHANH và
+  THẬT trong vòng vài tuần, đây là điểm phân biệt hai case tưởng giống nhau về hình thức (đều là
+  "SBV phản ứng nhanh với tỷ giá") nhưng khác nhau về HIỆU QUẢ đo được. Không nên gộp case này với
+  2018/2015 (EXTERNAL_CYCLE clean) hay với 2022 (CONTAINABLE clean) — nó nằm giữa, và gắn nhãn
+  ambiguous là lựa chọn trung thực hơn ép về một cực.
+
+---
+
+## EP-2025-03 — Trump "Liberation Day" Reciprocal Tariff Shock (VNINDEX −18,11%, 2025-03-17→2025-04-09, chỉ 16 phiên)
+
+**Cửa sổ episode (do caller cung cấp, dd52/arm-trigger, KHÔNG kèm forward-return):** VNINDEX
+giảm −18,11% trong CHỈ 16 phiên, 2025-03-17 → 2025-04-09 — tốc độ giảm nhanh nhất trong 5 episode
+được giao lần này.
+
+**Trigger đã biết PIT:** Một câu chuyện DUY NHẤT, tiến triển liên tục suốt cả cửa sổ, không phải
+2 sự kiện tách rời:
+- **Giữa 02→giữa 03/2025:** S&P 500 giảm từ đỉnh 19/02, chính thức vào vùng "correction" (−10,1%)
+  ngày **13/03/2025**, do lo ngại chiến tranh thương mại toàn cầu và nguy cơ suy thoái Mỹ từ các
+  đe dọa thuế quan của Trump — [Oakmark
+  Funds](https://oakmark.com/news-insights/the-sp-500-has-corrected-now-what-u-s-equity-market-commentary-1q-2025/);
+  Forbes ghi nhận "growing fears of higher tariffs and a trade war... increase the odds of a
+  policy-induced recession" — [Forbes,
+  2025-03-16](https://www.forbes.com/sites/bill_stone/2025/03/16/facts-about-the-stock--corrections-tariffs-and-consumer-confidence/).
+  Đây là bối cảnh NGAY TRƯỚC ngày bắt đầu episode (17/03/2025) — cùng MỘT mạch nguyên nhân, không
+  phải nguyên nhân riêng.
+- **02/04/2025 ("Liberation Day"):** Chính quyền Trump công bố thuế đối ứng cơ sở 10% cho hầu hết
+  các nước, kèm mức thuế "đối ứng" cao hơn cho các nước có thặng dư thương mại lớn với Mỹ — Việt
+  Nam nhận mức **46%**, cao thứ 5 toàn cầu (Trung Quốc 34%, Ấn Độ 26%) — [Yahoo
+  Finance/CBS News tổng
+  hợp](https://finance.yahoo.com/news/heres-every-country-facing-reciprocal-tariffs-announced-by-trump-on-liberation-day-231329935.html).
+- **09/04/2025:** mức thuế 46% CHÍNH THỨC có hiệu lực — trùng NGÀY CUỐI episode. VNINDEX mất
+  87,99 điểm (−6,68%) trong phiên, mức giảm mạnh nhất lịch sử tính theo điểm — [Vietnam News,
+  "Stock market plunges as US imposes 46%
+  tariff"](https://vietnamnews.vn/economy/1695173/stock-market-plunges-as-us-imposes-46-tariff.html);
+  [The Investor,
+  2025-04](https://theinvestor.vn/vietnams-benchmark-vn-index-records-sharpest-fall-in-history-following-president-trumps-tax-announcement-d15138.html).
+  Cùng ngày, Phó Thủ tướng Hồ Đức Phớc gặp trực tiếp USTR Jamieson Greer tại Washington — [Radio
+  Free Asia,
+  2025-04-10](https://www.rfa.org/english/vietnam/2025/04/10/us-trade-talks-tariff-cuts/).
+
+### Trục 1: `CONFIDENCE_LIQUIDITY` — confidence: **clean**
+
+- **CPI hoàn toàn trong tầm kiểm soát, không có tích lũy trước episode:** CPI Q1/2025 = **3,22%**
+  YoY, lạm phát lõi 3,01% — mức bình thường, cách xa trần mục tiêu — [Vietnam Briefing, "Vietnam's
+  Economy in H1
+  2025"](https://www.vietnam-briefing.com/news/vietnams-economic-performance-in-h1-2025-inflation-trade-fdi.html/).
+- **Lãi suất huy động vẫn THẤP VÀ ỔN ĐỊNH tại thời điểm episode:** `deposit_rate_vn.py` — 4,7%
+  (04/2024) → **4,8% (01/2025, ngay trước episode)**, chỉ bắt đầu nhích lên 5,2% từ 09/2025 — TẠI
+  THỜI ĐIỂM episode (03-04/2025) hoàn toàn KHÔNG có dấu hiệu căng thẳng huy động vốn — khác biệt rõ
+  với EP-2026-01 (nơi lãi suất huy động đã tăng liên tục 12 tháng trước episode).
+- **SBV đang trong chính sách NỚI LỎNG, không phải thắt chặt:** "SBV maintaining policy rates near
+  record lows since early 2023 to support the recovery" — [Vietnam Briefing/OECD tổng
+  hợp](https://www.vietnam-briefing.com/news/vietnam-gdp-fdi-and-trade-2025.html/).
+- **GDP tăng trưởng khỏe:** 7,52% (H1/2025), nối tiếp đà 7,09% (2024) — nền kinh tế thực đang tốt,
+  không có dấu hiệu suy yếu nội tại đồng thời với episode.
+- **Tín dụng ĐANG tăng tốc (15% năm 2024 → 19% YoY tháng 06/2025) nhưng CHƯA tạo ra funding stress
+  quan sát được tại thời điểm episode** (lãi suất huy động còn thấp, ổn định) — khác EP-2026-01 rõ
+  rệt: ở đây xu hướng tăng tốc tín dụng mới ở giai đoạn ĐẦU, chưa đủ thời gian (nhiều quý) để
+  crystallize thành một chỉ báo STRUCTURAL độc lập với CPI/lãi suất huy động. Ghi nhận đây là điểm
+  CẦN THEO DÕI cho các episode SAU episode này trong chuỗi 2025-2026 (khớp với việc EP-2026-01, chỉ
+  9-10 tháng sau, đã cho thấy đúng chỉ báo funding-stress này crystallize).
+- **Trigger có tên, có ngày, có con số cụ thể: 1 quyết định chính sách thương mại của TỔNG THỐNG
+  MỘT NƯỚC KHÁC** (Trump, 02/04/2025, 46% cho VN) — không phải bằng chứng mất cân đối vĩ mô nội
+  địa dưới bất kỳ hình thức nào.
+
+**Kết luận trục 1:** Không một chỉ tiêu STRUCTURAL nào (CPI, lãi suất huy động, chính sách SBV)
+cho thấy dấu hiệu xấu đi trước hay trong episode; nền vĩ mô nội địa lành mạnh, chính sách tiền tệ
+đang nới lỏng. Trigger 100% ngoại sinh, có tên cụ thể. ⇒ `CONFIDENCE_LIQUIDITY`.
+
+### Trục 2: `CONTAINABLE` (cho tranh chấp cụ thể) pha trộn `EXTERNAL_CYCLE` (cho rủi ro nền) —
+confidence: **ambiguous**
+
+Bằng chứng CONTAINABLE — khác biệt cốt lõi so với EP-2014-09 (OPEC, VN hoàn toàn không có đòn bẩy
+đàm phán) và giống EP-2022-05 (SCB) về CẤU TRÚC phản ứng (có MỘT kênh xử lý cụ thể, nhắm đúng mục
+tiêu):
+- **VN có quan hệ song phương trực tiếp với Mỹ và sử dụng ngay lập tức:** Phó Thủ tướng Hồ Đức
+  Phớc gặp Bộ trưởng Tài chính Bessent + Bộ trưởng Thương mại Lutnick tại Washington **09-
+  11/04/2025**, đúng ngày/hôm sau khi thuế có hiệu lực — [Bloomberg,
+  2025-04-11](https://www.bloomberg.com/news/articles/2025-04-11/vietnam-deputy-pm-meets-bessent-lutnick-to-push-trade-deal).
+  Ngày 11/04/2025, VN chính thức lập đoàn đàm phán riêng — [Chính phủ VN, tổng hợp qua RFA/globalsecurity].
+- **Cơ chế tạm hoãn 90 ngày cho phép một cửa sổ đàm phán cụ thể, có deadline rõ** — không phải một
+  chu kỳ đa năm không có điểm neo thời gian.
+- **Kênh xử lý (đàm phán song phương Việt-Mỹ) khác về BẢN CHẤT với EP-2014-09 (OPEC — VN không là
+  thành viên, không có ghế đàm phán) và khác EP-2015-07/2018/EP-2023-09-phần-Fed (chính sách tiền
+  tệ Mỹ — VN hoàn toàn là bên nhận, không đàm phán được với Fed).** Ở đây VN LÀ một bên trực tiếp
+  trong tranh chấp, có kênh ngoại giao song phương chính thức để tác động vào chính KẾT QUẢ của
+  trigger — không chỉ ứng phó hậu quả (như can thiệp tỷ giá) mà có thể thay đổi CHÍNH mức thuế gốc.
+
+Bằng chứng kéo về `EXTERNAL_CYCLE` (lý do đánh dấu ambiguous):
+- **Nguyên nhân gốc (chính sách thương mại đơn phương, khó đoán của một chính quyền Mỹ cụ thể) là
+  rủi ro TÁI DIỄN, không phải một sự kiện một lần.** Bản chất "thuế quan theo quyết định hành pháp,
+  có thể thay đổi bất cứ lúc nào" khác về cấu trúc với "1 ngân hàng cụ thể vỡ nợ rồi được kiểm soát
+  đặc biệt" (SCB) — không có gì đảm bảo tranh chấp thuế quan mới không phát sinh lại (đã có tín
+  hiệu cho thấy chủ đề thuế quan Mỹ-VN tiếp tục xuất hiện trong tin tức các quý sau đó — không đi
+  sâu vào đây vì đó là thông tin SAU cửa sổ episode, chỉ ghi nhận như một đặc điểm CẤU TRÚC của
+  loại rủi ro này, không phải bằng chứng forward-return).
+- **VN không kiểm soát được QUYẾT ĐỊNH GỐC** (mức thuế 46% là do Nhà Trắng đơn phương ấn định) —
+  chỉ có thể đàm phán để GIẢM NHẹ sau khi đã bị áp, không ngăn được từ đầu. Khác hẳn SCB (VN toàn
+  quyền quyết định thời điểm/cách xử lý ngân hàng của chính mình).
+
+**Kết luận trục 2:** Với ĐÚNG tranh chấp cụ thể trong episode này, VN có kênh đàm phán song phương
+trực tiếp và đã sử dụng ngay — cấu trúc CONTAINABLE. Nhưng bản chất rủi ro nền (chính sách thương
+mại đơn phương khó đoán từ 1 cường quốc) là một loại EXTERNAL_CYCLE mà VN không quyết định được
+liệu có tái diễn. ⇒ `CONTAINABLE` (cho đúng tranh chấp này), confidence **ambiguous** (do tính chất
+tái diễn của loại rủi ro nền).
+
+### Tổng kết EP-2025-03
+| Trục | Kết luận | Confidence |
+|---|---|---|
+| 1. Root cause | `CONFIDENCE_LIQUIDITY` | clean |
+| 2. Containability | `CONTAINABLE` (đúng tranh chấp cụ thể; rủi ro nền mang tính EXTERNAL_CYCLE tái diễn) | ambiguous |
+
+- **shock_origin:** giữa 02/2025 (S&P 500 bắt đầu điều chỉnh vì lo ngại thuế quan); **02/04/2025**
+  ("Liberation Day" — điểm gãy dứt khoát nhất, có tên, có số cụ thể: 46% cho VN)
+- **policy_response_start:** **09/04/2025** (Phó TT Hồ Đức Phớc gặp Bessent/Greer tại Washington,
+  đúng ngày thuế có hiệu lực); **11/04/2025** (VN lập đoàn đàm phán chính thức)
+- **recovery_confirmed:** không xác định trong phạm vi phân tích BLIND này về mặt CHỈ SỐ THỊ
+  TRƯỜNG (đọc dừng ở 09/04/2025) — riêng về mặt CHÍNH SÁCH THUẾ QUAN (đây là stress indicator của
+  chính trigger, không phải giá cổ phiếu, nên hợp lệ theo phương pháp trục 2 của khung phân loại):
+  cơ chế tạm hoãn 90 ngày tạo cửa sổ đàm phán rõ ràng — không đi sâu hơn để tránh chạm thông tin
+  SAU episode không cần thiết cho việc phân loại 2 trục.
+- **chain_classification:** `INDEPENDENT`
+- **analyst_notes:** Case này là minh chứng RÕ NHẤT cho việc "trigger 100% ngoại sinh" KHÔNG tự
+  động đồng nghĩa EXTERNAL_CYCLE ở trục 2 — điểm phân biệt quyết định là VN có phải MỘT BÊN có ghế
+  đàm phán trực tiếp trong chính trigger đó hay không (có ở đây và ở SCB 2022; không có ở OPEC 2014
+  hay chu kỳ Fed 2015/2018/2023). Đây cũng là episode NHANH NHẤT (16 phiên) trong 5 episode được
+  giao — tốc độ nhanh phù hợp với một cú sốc chính sách CÓ NGÀY HIỆU LỰC CỤ THỂ (không phải một quá
+  trình tích lũy dần như STRUCTURAL). So với EP-2026-01 (9-10 tháng sau): tại thời điểm episode này
+  (03-04/2025), tín dụng đang tăng tốc NHƯNG CHƯA đủ thời gian tích lũy để tạo funding stress quan
+  sát được — một minh họa hữu ích cho việc XU HƯỚNG credit boom cần NHIỀU QUÝ mới chuyển từ "đang
+  tăng tốc" (chưa đủ bằng chứng STRUCTURAL) sang "đã tạo áp lực huy động rõ ràng" (đủ bằng chứng).
+
+---
+
+## EP-2026-01 — Domestic Credit/Real-Estate Build-up + Middle East War Oil Shock (VNINDEX −16,38%, 2026-01-13→2026-03-23)
+
+**Cửa sổ episode (do caller cung cấp, dd52/arm-trigger, KHÔNG kèm forward-return; đọc BLIND, KHÔNG
+tham chiếu diễn biến sau 23/03/2026 kể cả đỉnh 18/05/2026 hay episode "07/2026" của fleet):** VNINDEX
+giảm −16,38% trong 44 phiên, 2026-01-13 → 2026-03-23.
+
+**Trigger đã biết PIT — HAI lớp riêng biệt, khác thời điểm bắt đầu:**
+- **Lớp nội địa (đã tích lũy TRƯỚC episode, không phải phát sinh trong episode):** tín dụng hệ
+  thống 2025 đạt **~19%** — cao nhất 5 năm, vượt mục tiêu thường lệ ~15% — [The Investor,
+  "Vietnam's credit growth to hit 19% in 2025, highest in many years: central
+  bank"](https://theinvestor.vn/vietnams-credit-growth-to-hit-19-in-2025-highest-in-many-years-central-bank-d17989.html).
+  Riêng **tín dụng bất động sản tăng ~36% trong 2025** — [tổng hợp báo chí ngành BĐS/lãi suất
+  2026]. SBV phản ứng bằng cách **giới hạn tín dụng BĐS quý 1/2026 ở mức 25% hạn mức cả năm** và
+  siết kiểm soát riêng lĩnh vực này, đặt mục tiêu tín dụng cả năm 2026 hạ về ~15% — [VietnamNet,
+  "Vietnam targets 15% credit growth in 2026 with tighter real estate
+  control"](https://vietnamnet.vn/en/vietnam-targets-15-credit-growth-in-2026-with-tighter-real-estate-control-2480915.html).
+- **Lớp ngoại sinh (bắt đầu ~đầu 03/2026, muộn hơn nhiều so với đầu episode 13/01/2026):** chiến
+  tranh Israel-Iran-Mỹ leo thang đầu tháng 03/2026 → Brent vượt $100/thùng (từ ~$70-80 trước đó) →
+  VN nhập khẩu ~50% dầu thô, ~70% LPG, gần như toàn bộ LNG từ khu vực Trung Đông — kênh truyền dẫn
+  chi phí nhập khẩu trực tiếp — [The Investor, 2026-03-12, "Middle East tensions weigh on
+  Vietnam's stock market
+  outlook"](https://theinvestor.vn/middle-east-tensions-weigh-on-vietnams-stock-market-outlook-d18574.html).
+  VNINDEX giảm >115 điểm phiên 09/03/2026, giảm ~12% chỉ trong 6 phiên đầu tháng 3 — [Vietnam.vn,
+  2026-03-12, "Chứng khoán tháng 3/2026: Vượt bão giá dầu, đón sóng nâng
+  hạng"](https://www.vietnam.vn/en/chung-khoan-thang-3-2026-vuot-bao-gia-dau-don-song-nang-hang).
+
+### Trục 1: `MIXED` (STRUCTURAL_ACCUMULATION giai đoạn sớm-giữa đang chạy + cú sốc dầu/chiến tranh
+ngoại sinh mới) — confidence: **ambiguous**
+
+Bằng chứng lớp STRUCTURAL đã tích lũy NHIỀU QUÝ trước episode (khác hẳn 3 episode trước — 2014,
+2015, phần lớn 2023 — vốn có nền vĩ mô lành mạnh):
+- **Tín dụng hệ thống 19% (2025) + tín dụng BĐS 36% (2025)** — đây là mức tăng KHÔNG bình thường,
+  đủ để SBV phải ban hành biện pháp macro-prudential HỆ THỐNG (trần 25% hạn mức quý cho tín dụng
+  BĐS toàn ngành, không phải xử lý 1 ngân hàng cụ thể) — đúng mẫu phản ứng STRUCTURAL (so sánh
+  Resolution 11/2011: cap tín dụng toàn hệ thống <20%).
+- **Lãi suất huy động TĂNG LIÊN TỤC suốt cả năm trước episode** — `deposit_rate_vn.py`: 4,8%
+  (01/2025) → 5,2% (09/2025) → **6,0% (01/2026, đầu episode)** → 6,8% (06/2026) — hướng đi NGƯỢC
+  HẲN với mọi episode CONFIDENCE_LIQUIDITY sạch đã phân loại trước đó (2014/2015/2020/phần lớn
+  2023 đều có lãi suất huy động ổn định hoặc giảm). Xu hướng tăng bắt đầu từ ĐẦU 2025 — 12+ tháng
+  trước episode — đúng tiêu chí "xấu đi nhiều quý trước, không phải phát sinh trong episode."
+  Nguyên nhân: mortgage rate thương mại đã leo lên 12-13%/năm nửa đầu 2026 dù SBV giữ nguyên refi
+  rate 4,5% — dấu hiệu tín dụng tăng nhanh hơn huy động (cầu vốn > cung vốn), đặc trưng giai đoạn
+  cuối chu kỳ tín dụng bùng nổ.
+- **GDP rất nóng:** 8,46% (Q4/2025) → 7,83% (Q1/2026) — mức tăng trưởng cao kéo dài, lịch sử VN
+  (2007, 2010) cho thấy tốc độ ~8%/năm kéo dài thường đi kèm rủi ro tích lũy tín dụng/tài sản.
+- **CPI tăng tốc RÕ RỆT ngay trong episode, một phần độc lập với cú sốc dầu:** `cpi_vn.py`: 2,53%
+  (01/2026) → 3,35% (02/2026, TRƯỚC khi chiến tranh nổ ra ~đầu 03) → **4,65% (03/2026, mức YoY
+  tháng 3 cao nhất 5 năm)**. Riêng bước nhảy 01→02/2026 (+0,82pp) xảy ra TRƯỚC cú sốc dầu, không
+  thể quy hết cho chiến tranh — phù hợp với báo cáo contemporaneous 12/03/2026 ghi nhận "nền kinh
+  tế đang bước vào giai đoạn thắt chặt thanh khoản và lãi suất tăng" do "áp lực từ số dư ngân khố
+  nhà nước tại NHTM" và "tăng trưởng tiền gửi chậm lại đầu năm" — nguyên nhân THANH KHOẢN NỘI ĐỊA,
+  không phải giá dầu.
+- Khớp với đánh giá độc lập trước đó của chính vai trò này (không dùng làm bằng chứng chính, chỉ
+  đối chiếu tính nhất quán): `kb/projects/vn-realestate-structural-risk-20260826.md` — phân loại
+  **STRUCTURAL_ACCUMULATION giai đoạn sớm-giữa, KHÔNG CONTAINABLE bằng 1 can thiệp**, credit/GDP
+  145%, BĐS/tổng dư nợ 25,5% (cận dưới).
+
+Bằng chứng lớp NGOẠI SINH (khiến không thể gọi thẳng là STRUCTURAL thuần, phải là MIXED):
+- **Chiến tranh Israel-Iran-Mỹ là sự kiện địa chính trị CỤ THỂ, có ngày, VN hoàn toàn không liên
+  quan** — không phải hệ quả của chính sách hay mất cân đối nào của VN.
+- **CPI ngay cả ở kịch bản xấu (Brent $100) vẫn được ước tính trong/quanh trần mục tiêu Chính phủ
+  4-4,5%** (kịch bản 4,12-5,06% tùy giá dầu, theo báo cáo 12/03/2026) — không phải runaway
+  inflation kiểu 2007-2008 (CPI 20%+).
+- **Đánh giá chuyên gia contemporaneous (SSI Research, trích trong Vietnam.vn 12/03/2026):** "đợt
+  bán tháo chủ yếu do yếu tố tâm lý/cảm xúc chứ không dựa trên biến số vĩ mô thực" — một đánh giá
+  độc lập tại thời điểm đó nghiêng về CONFIDENCE/tâm lý hơn là fundamentals xấu đi.
+
+**Kết luận trục 1:** Đây là case HIẾM thứ 2 (sau EP-2008-09) có 2 lớp nguyên nhân chồng chéo: một
+imbalance tín dụng/BĐS nội địa ĐANG tích lũy (không phải mới, đã chạy suốt 2025) VÀ một cú sốc giá
+dầu/chiến tranh ngoại sinh hoàn toàn mới xảy ra muộn hơn trong episode. Khác 2008-09 ở ĐỘ LỚN
+(19%/36% tín dụng vẫn nhỏ hơn nhiều so với 53%/2007 hay 36-37%/2009; CPI 4,65% vẫn trong tầm kiểm
+soát so với 23-28%/2008) — mức độ "sớm-giữa" chứ chưa "khủng hoảng đã crystallize". ⇒ `MIXED`,
+confidence **ambiguous** (2 lớp nguyên nhân thật, không lớp nào chiếm ưu thế tuyệt đối trong đúng
+44 phiên của episode — lớp nội địa giải thích ~2/3 đầu episode, lớp dầu/chiến tranh giải thích
+~1/3 cuối).
+
+### Trục 2: Không áp dụng thuần túy (MIXED tự thân có 2 timeline khác nhau)
+
+- **Hợp phần ngoại sinh (dầu/chiến tranh):** giống cấu trúc `EXTERNAL_CYCLE`/2014 — VN không có
+  đòn bẩy chính sách nào "sửa" được chiến tranh Trung Đông hay giá dầu toàn cầu; thời điểm kết
+  thúc hoàn toàn phụ thuộc diễn biến địa chính trị bên ngoài.
+- **Hợp phần nội địa (tín dụng/BĐS):** giống cấu trúc `MULTI_YEAR_STRUCTURAL` — biện pháp SBV (cap
+  25% hạn mức quý cho BĐS, mục tiêu hạ tín dụng cả năm 2026 về 15%) là một chương trình
+  macro-prudential ĐA QUÝ/ĐA NĂM (khớp với đánh giá timeline 3-7 năm ở
+  `vn-realestate-structural-risk-20260826.md`), không phải một hành động dập tắt 1 trigger trong
+  vài tuần như SCB 2022.
+
+**Kết luận trục 2:** N/A theo đúng khung 2 trục thuần túy (chỉ áp dụng khi trục 1 = CONFIDENCE_
+LIQUIDITY) — giống tiền lệ EP-2008-09. Ghi nhận tường minh 2 timeline khác nhau thay vì ép về 1
+nhãn.
+
+### Tổng kết EP-2026-01
+| Trục | Kết luận | Confidence |
+|---|---|---|
+| 1. Root cause | `MIXED` (STRUCTURAL_ACCUMULATION nội địa đang chạy + EXTERNAL_SHOCK dầu/chiến tranh mới) | ambiguous |
+| 2. Resolution | N/A — hợp phần ngoại sinh phụ thuộc diễn biến địa chính trị; hợp phần nội địa cần chương trình đa năm (không containable bằng 1 hành động) | — |
+
+- **shock_origin:** trong-năm-2025 (tín dụng/BĐS bắt đầu tích lũy, không có 1 ngày cụ thể);
+  đầu 03/2026 (chiến tranh Israel-Iran-Mỹ leo thang — điểm gãy ngoại sinh dứt khoát nhất)
+- **policy_response_start:** đầu 2026 (SBV cap tín dụng BĐS quý 1 ở 25% hạn mức năm; mục tiêu tín
+  dụng cả năm hạ về ~15%) — hành động PHÒNG NGỪA, không phải phản ứng với 1 sự kiện đã crystallize
+- **recovery_confirmed:** không xác định trong phạm vi phân tích BLIND này (đọc dừng ở
+  23/03/2026, KHÔNG tham chiếu đỉnh 18/05/2026 hay episode 07/2026 theo đúng luật BLIND)
+- **chain_classification:** `INDEPENDENT` (nhưng ĐÁNH DẤU liên hệ tiềm năng với episode 07/2026
+  đã có trong fleet — nếu cùng gốc tín dụng/BĐS nội địa tiếp diễn, có thể cần xem lại là 1 chuỗi
+  sóng liên tiếp giống mega-2007-2012, nhưng việc đó KHÔNG thuộc phạm vi phân tích BLIND này và
+  phải do một dispatch khác xác nhận bằng dữ liệu forward, không phải bởi vai trò macro-strategist)
+- **analyst_notes:** Đây là episode ĐẦU TIÊN trong 5 episode được giao (cùng đợt 31/08) có tín
+  hiệu STRUCTURAL thật, không phải CONFIDENCE_LIQUIDITY sạch — khác hẳn 2014/2015/2023. Điểm khác
+  biệt cốt lõi so với các case CONFIDENCE_LIQUIDITY khác: lãi suất huy động ĐANG TĂNG (không phải
+  ổn định/giảm) trong suốt 12+ tháng trước episode — đây là chỉ báo đơn lẻ dễ tách nhất, nên dùng
+  làm bộ lọc nhanh khi phân loại các episode tương lai (huy động tăng dần = nghi ngờ STRUCTURAL,
+  huy động ổn định/giảm = nghiêng CONFIDENCE_LIQUIDITY).
+
+---
+
 ## TRẠNG THÁI HIỆN TẠI 2023-2026 (không phải episode khủng hoảng)
 
 **Macro regime:** GROWTH / NEUTRAL (không có dấu hiệu stress nào rõ ràng)
@@ -559,25 +1121,42 @@ Ba nhánh trigger, MỖI nhánh có MỘT hành động chính sách nhắm đú
 | Episode | Loại | Trục 1 | Trục 2 | N_effective |
 |---|---|---|---|---|
 | MEGA-2007-2012 (3 sóng) | Khủng hoảng cơ cấu | STRUCTURAL | MULTI_YEAR | **1** cụm |
+| 2014-09 OPEC/oil crash | Cú sốc giá hàng hóa ngoại sinh | CONFIDENCE_LIQUIDITY (clean) | EXTERNAL_CYCLE (clean) | **1** |
+| 2015-07 China devaluation | Cú sốc niềm tin/tỷ giá ngoại sinh | CONFIDENCE_LIQUIDITY (ambiguous — tín dụng vượt target) | EXTERNAL_CYCLE (clean) | **0.75** |
 | 2018 Q1-Q4 | Điều chỉnh thị trường, ngoại lực | CONFIDENCE_LIQUIDITY | EXTERNAL_CYCLE (đính chính 08-30) | **0.5** (ambiguous severity) |
 | 2020-2021 COVID | Cú sốc ngoại sinh | CONFIDENCE_LIQUIDITY | CONTAINABLE | **1** |
 | 2022-05 SCB/Fed | Cú sốc niềm tin + FX | CONFIDENCE_LIQUIDITY | CONTAINABLE | **1** |
-| **TỔNG** | | | | **~3.5** độc lập thật |
+| 2023-09 FX-defense/margin/VIC-VHM | Cú sốc niềm tin + FX + đòn bẩy | CONFIDENCE_LIQUIDITY (clean) | CONTAINABLE dominant + EXTERNAL_CYCLE phụ | **0.75** |
+| 2025-03 Liberation Day tariff | Cú sốc chính sách thương mại ngoại sinh | CONFIDENCE_LIQUIDITY (clean) | CONTAINABLE (tranh chấp) + EXTERNAL_CYCLE (rủi ro nền) | **0.75** |
+| 2026-01 Credit/BĐS + chiến tranh dầu | Pha trộn 2 lớp nguyên nhân | MIXED (ambiguous) | N/A — 2 timeline riêng | **0.5** (chưa rõ có nối vào 1 chuỗi lớn hơn với episode 07/2026 hay không — CẦN dispatch riêng, không BLIND, để xác nhận) |
+| **TỔNG** | | | | **~7.75** độc lập thật (trước đây ~3.5, +5 episode phân tích 2026-08-31) |
 
-Bất kỳ phân tích nào dùng N=7 (đếm tất cả các "episode" riêng biệt) đều overestimate N_effective
-một cách đáng kể. N_effective ≈ 3-4 là ước lượng đúng hơn.
+Bất kỳ phân tích nào dùng N=12 (đếm tất cả các "episode" riêng biệt, gồm cả 5 episode mới) đều
+overestimate N_effective một cách đáng kể so với ~7,75. Lưu ý: 2014-09 và 2015-07 LIỀN KỀ NHAU
+(cùng thuộc giai đoạn hậu-taper-tantrum/thương phẩm 2014-2016) và EP-2026-01 có khả năng nối vào
+episode 07/2026 đã có trong fleet nếu cùng gốc tín dụng/BĐS — nếu xác nhận, N_effective còn giảm
+thêm. Đây là ước lượng SƠ BỘ, không phải con số cuối — Taylor/quant-skeptic cần tự đánh giá lại
+khi dùng cho phân tích thống kê thật (số N quá nhỏ để domain này chịu được sai số cộng dồn).
 
 ---
 
 ## Chưa phân loại độc lập — cần dispatch macro-strategist riêng nếu cần entry chính thức
 
-Sau bản phân tích toàn diện 2026-08-25, tất cả các episode chính đã được phân loại. Entry này còn
-lại chỉ cho các giai đoạn:
+Sau đợt phân tích 2026-08-31 (5 episode mới: 2014-09, 2015-07, 2023-09, 2025-03, 2026-01), các
+episode chính đã biết trong lịch sử VNINDEX đã được phân loại. Entry này còn lại:
 
 - **2000-2006 (pre-WTO):** Không phải episode khủng hoảng. Giai đoạn tăng trưởng ổn định. GDP
   6-7.5%/năm. CPI moderate. SBV đang xây dựng thể chế. Không cần phân loại crisis.
-- **2013-2019 (hậu khủng hoảng → growth):** Không phải episode khủng hoảng. Giai đoạn recovery rồi
-  growth. Các năm lẻ trong giai đoạn này không có triggers rõ ràng.
+- **2013-2019 (hậu khủng hoảng → growth, TRỪ 2014/2015 nay đã có entry riêng, TRỪ 2018):** Không
+  phải episode khủng hoảng. Các năm lẻ còn lại trong giai đoạn này không có triggers rõ ràng.
+- **Episode "07/2026" (đã có trong nghiên cứu khác của fleet, SAU đỉnh VNINDEX 2026-05-18):**
+  CHƯA được macro-strategist phân loại độc lập theo đúng khung 2 trục của registry này (nghiên cứu
+  hiện có tập trung phần giá/backtest). Ghi nhận NGHI VẤN (chưa xác nhận): EP-2026-01 (01-03/2026,
+  MIXED — có hợp phần STRUCTURAL_ACCUMULATION tín dụng/BĐS đang chạy) và episode 07/2026 CÓ THỂ là
+  2 sóng của CÙNG một chuỗi cơ cấu (giống mega-2007-2012), nếu hợp phần tín dụng/BĐS nội địa của
+  EP-2026-01 tiếp tục xấu đi thay vì được SBV kiểm soát thành công qua trần tín dụng BĐS 2026. XÁC
+  NHẬN việc này đòi hỏi đọc dữ liệu SAU 2026-03-23 (ngoài phạm vi BLIND) — phải giao cho một dispatch
+  macro-strategist RIÊNG, không phải suy luận thêm từ đây.
 
 Nếu phát hiện episode mới cần phân loại: dispatch macro-strategist với ngày + hành động giá,
 KHÔNG kèm forward-return/giả thuyết backtest.
