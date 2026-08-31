@@ -665,3 +665,13 @@
 
 ## Consolidation 2026-08-31T06:07:02Z
 - [2026-08-31T06:00:03Z] Mafee/status — bot-done: {"account": "ZaloPay", "plan_date": "2026-08-31", "elapsed_s": 2, "rc": 0}
+
+## Consolidation 2026-08-31T06:40:34Z
+- [2026-08-31T06:35:14Z] Taylor/heartbeat — Taylor_20260831_063413: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20260831_063413", "source": "watcher"}
+- [2026-08-31T06:36:14Z] Taylor/heartbeat — Taylor_20260831_063413: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20260831_063413", "source": "watcher"}
+- [2026-08-31T06:37:14Z] Taylor/heartbeat — Taylor_20260831_063413: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20260831_063413", "source": "watcher"}
+- [2026-08-31T06:37:25Z] Taylor/heartbeat — Taylor_20260831_063413: {"status": "in_progress", "note": "da tinh xong drawdown zigzag 10% threshold tren toan bo VNINDEX.csv (2000-2026-05), doi chieu voi 6 episode bien; dang viet report"}
+- [2026-08-31T06:38:14Z] Taylor/heartbeat — Taylor_20260831_063413: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20260831_063413", "source": "watcher"}
+- [2026-08-31T06:39:15Z] Taylor/heartbeat — Taylor_20260831_063413: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20260831_063413", "source": "watcher"}
+- [2026-08-31T06:40:15Z] Taylor/heartbeat — Taylor_20260831_063413: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20260831_063413", "source": "watcher"}
+- [2026-08-31T06:40:20Z] Taylor/finding — vn-all-corrections-inventory-20260831: {"job": "Taylor_20260831_063413", "report": "mike/agents/Taylor/research/vn_all_corrections_inventory_20260831/REPORT.md", "method": "zigzag pivot 10% reversal threshold tren data/VNINDEX.csv (2000-07-28..2026-05-26), loc dd>=15%", "summary": "36 chan zigzag dd>=15% tim duoc. 19 chan nam trong cua so 5/6 episode bien da nghien cuu (Wave1=10,Wave2/3=5,2018=1,COVID=1,2022=2); 07/2026 ngoai pham vi CSV (data het 2026-05-26, chi 8 phien sau dinh) va thuc ra chi -13.46% duoi nguong 15%. 17 chan MOI hoan toan chua tung duoc fleet nghien cuu: 12 dang MOI_DANG_XET (>=20 phien, vd 2002-05/2003-04 -34.8% 11thang, 2014-09/12 va 2015-07/08 nghi trung dau/CNY-devaluation, 2023-09/10 -17.45%, 2026-01/03 -16.38% ngay truoc dinh 05-2026), 5 NOISE_NHO (qua ngan <20 phien, gom cum 2001 va 2025-03 Liberation-Day-tariff nghi van). Bang tong hop day du + khuyen nghi uu tien cho Bobby trong report.", "caveat": "data/VNINDEX.csv chi den 2026-05-26 nen KHONG quet duoc phan con lai cua 07/2026; thi truong mong truoc 2008 (episode 2001-2004) rui ro nhieu thanh khoan cao hon"}
