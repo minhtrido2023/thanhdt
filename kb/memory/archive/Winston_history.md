@@ -100,3 +100,6 @@
 
 ## Archived 2026-08-28 (keep=12 days=0 require_done=False)
 - [2026-08-15T07:35:19Z] Xong job Winston_20260815_072951: self-heal 15 phien cua ticker.Price KHONG fire (0/42 dong loi), gia thuyet H3 cua Mike bi bac bo bang so (gia tri ket = cafef unadjusted, khong phai VCI). Registry commit 52906162. CON TREO: bus question bq-admin-followup-self-heal-khong-fire-va-Q3-backfill (3 cau: anchor quet toan cua so hay chi phien moi nhat? SETTLE_RUN voi ma vua co quyen? backfill 42 dong?) - can user relay toi bq_admin. Van con treo tu truoc: lag_entry_anchor.py:105 doc thang ticker.Price lam TRAN - chua va (vung Taylor/DollarBill).
+
+## Archived 2026-08-31 (keep=12 days=0 require_done=False)
+- [2026-08-15T08:33:39Z] Xong job Winston_20260815_082902: H2 (gate dong 209, self-heal khong bao gio cham loi giua cua so) + H4a (ffill T-1 im lang, co test) CONFIRMED boi bq_admin => ticker.Price sai ngay GDKHQ KHONG tu lanh, se tai dien. Registry commit 28c098fb. Da DONG ca 2 bus question bq-admin-* (Q3 backfill ha xuong ghi chu, khong mo question moi). CON TREO tu truoc: lag_entry_anchor.py:105 doc thang ticker.Price lam TRAN - chua va (vung Taylor/DollarBill); stash@{0} hybrid+refresh_skip_fix 20260810 chua resolve.
