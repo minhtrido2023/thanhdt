@@ -103,3 +103,6 @@
 
 ## Archived 2026-08-31 (keep=12 days=0 require_done=False)
 - [2026-08-15T08:33:39Z] Xong job Winston_20260815_082902: H2 (gate dong 209, self-heal khong bao gio cham loi giua cua so) + H4a (ffill T-1 im lang, co test) CONFIRMED boi bq_admin => ticker.Price sai ngay GDKHQ KHONG tu lanh, se tai dien. Registry commit 28c098fb. Da DONG ca 2 bus question bq-admin-* (Q3 backfill ha xuong ghi chu, khong mo question moi). CON TREO tu truoc: lag_entry_anchor.py:105 doc thang ticker.Price lam TRAN - chua va (vung Taylor/DollarBill); stash@{0} hybrid+refresh_skip_fix 20260810 chua resolve.
+
+## Archived 2026-08-31 (keep=12 days=0 require_done=False)
+- [2026-08-17T12:31:33Z] [2026-08-17T12:31Z] Xong job Winston_20260817_122149: gate corp-action trong update_shares_live.py tu choi GIA 10 ngay (cum_raw roi trung dong ticker.Price dong cung 08-06) => VHM 1:1 khong ghi duoc, OShares sai 2x. Va commit ced702ac (lui ve phien cum sach), VHM da ghi 8.214.824.008 khop cong bo, backlog+ops_health xanh. Incident add15074, registry 6e01f07b. CON TREO tu truoc: lag_entry_anchor.py:105 doc thang ticker.Price lam TRAN (vung Taylor/DollarBill); stash@{0} hybrid+refresh_skip_fix 20260810 chua resolve.
