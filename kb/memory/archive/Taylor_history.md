@@ -401,3 +401,6 @@
 
 ## Archived 2026-08-31 (keep=12 days=0 require_done=False)
 - [2026-08-30T08:07:19Z] discretionary-funnel-adaptive-pb-redo-20260830 (job _075523) XONG: lam lai dung 5 diem quant-skeptic, khoa co so/cutoff(70%,elbow 7-episode)/tran(1.5,Graham heuristic) TRUOC khi cham du lieu hom nay. TV1/DGC VAN LOT (50.3%/46.1%) - honest, khong bi ep. 113->152 (+34.5%, 39 ten moi, rong hon ban REFUTED 17 ten). Phat hien MOI: cum hoa chat/phan bon (8 ma) LON HON cum CTCK (6 ma) - dieu kien risk-auditor cu (cap CTCK<=1) CHUA phu, khuyen nghi risk-auditor xem lai vi thiet ke doi dang ke. CHUA sua code production. NEXT: cho quant-skeptic pass lai BAT BUOC + risk-auditor xem lai truoc khi de xuat wire.
+
+## Archived 2026-08-31 (keep=12 days=0 require_done=False)
+- [2026-08-30T08:56:13Z] ĐANG DỞ: round3 PB-adaptive (job Taylor_20260830_085015) - tran khoa min-CV ra 1.2 (khac 1.5), TV1/DGC van lot, 113->136 (+20.4%,23 ten), CTCK lai la cum lon nhat. Bus finding da ghi. DANG CHO: quant-skeptic verify lan 3 (job quant-skeptic_20260830_085357, deadline ~16:09 ICT). NEXT: doc log khi xong, neu CONFIRMED thi sua bin/discretionary_candidate_funnel.py (cutoff=70/tran=1.2), neu REFUTED thi bao user.
