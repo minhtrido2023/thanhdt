@@ -410,3 +410,6 @@
 
 ## Archived 2026-08-31 (keep=12 days=0 require_done=False)
 - [2026-08-30T09:36:43Z] [2026-08-30] discretionary-funnel-adaptive-pb WIRE XONG (job _092103, commit 714b5889 mike repo): PB OR-logic (cutoff=70%/tran=1.2) da vao bin/discretionary_candidate_funnel.py, selfcheck khop research (113->136, TV1/DGC ca 2 qua nhanh percentile). CON MO: risk-auditor duyet CONDITIONAL ca 2 cum (CTCK cap count<=1+5%NAV, hoa chat cap <=1margin/<=2cash) nhung CHUA enforce - can job rieng sua discretionary_margin_gate.py (can them state armed-position + funding-type margin/cash). Rieng: TV1 va DGC (2 case neo goc) deu marginable=NO qua DNSE - chi mua duoc tien mat.
+
+## Archived 2026-08-31 (keep=12 days=0 require_done=False)
+- [2026-08-30T10:39:30Z] crisis-episode-clustering-reanalysis-20260830 (job _103253) XONG, bus finding + research file da ghi. Gop 3 song 2007-2012 thanh 1 cum co cau (N 7->5), phat hien 2018-05 khong thuoc nhom nao (nhom C rieng, ngoai sinh khong chan duoc). Khung 2 truc tach bach ro hon nhi phan cu (min nhom B +26.3% > max A/C +21.2% o 12thang). N=5 qua mong - MO TA DINH TINH, khong CONFIRMED. Verdict NO-GO cua margin-valuation-spread KHONG doi, khong dung production.
