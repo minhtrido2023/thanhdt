@@ -1062,7 +1062,11 @@ if _LAG_FOR:   _m &= ~ev["_forbid"]
 LAG_BULL_SUE = os.environ.get("LAG_BULL_SUE", "").strip()
 if LAG_BULL_SUE:
     _thr_bull = float(LAG_BULL_SUE)
-    _qs_tag += f"_lagbullsue{LAG_BULL_SUE.replace('.', 'p')}"
+    # NOTE: AUDIT_PATH is already computed (line ~677) by the time this section runs -- appending
+    # to _qs_tag here would have NO effect on the filename (found this the hard way: control/T08/T07
+    # all raced to write the SAME bare AUDIT_PATH in the first run of this experiment, coding_guidelines
+    # §8 violation). Mutate AUDIT_PATH directly instead.
+    AUDIT_PATH = AUDIT_PATH.replace(".csv", f"_lagbullsue{LAG_BULL_SUE.replace('.', 'p')}.csv")
     _brdf = pd.read_csv(os.path.join(WORKDIR, "mike/agents/Taylor/research/strategy_regime_matrix_20260822/b2_breadth.csv"),
                          parse_dates=["time"]).sort_values("time").reset_index(drop=True)
     _bv = _brdf["breadth"].to_numpy()
