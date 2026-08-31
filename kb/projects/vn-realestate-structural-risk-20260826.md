@@ -46,12 +46,12 @@ Nhà nước cần hạ tầng nhanh → giao Vin/Sun/Masterise → chủ đầu
      đã đảo chiều giảm (relapse) · lãi suất huy động Big-4 tăng thêm ≥0,3pp trong 1 tháng · có
      quyết định/thông tư SIẾT MỚI ban hành (đổi hướng so với xu hướng NỚI đã ghi nhận 30/05/2026) ·
      bất kỳ tin NPL/bank-run cụ thể nào ngoài chu kỳ công bố quý thường lệ.
-   - **Cách thực hiện**: dispatch Bobby (Agent, macro-strategist, KHÔNG-BLIND — mẫu prompt xem
-     "Interim status check" dưới đây) mỗi đầu tháng, ghi thêm 1 mục ngắn vào file này. **Chưa có cơ
-     chế cron tự động** — đây là quy trình THỦ CÔNG Mike tự nhắc qua working memory mỗi phiên đầu
-     tháng; muốn tự động hoá (cron + escalation cơ học) cần 1 dispatch riêng để build+test+ghi vào
-     `kb/cron_registry.md` đúng chuẩn (4-câu-hỏi §11 + selfcheck) — CHƯA làm trong lượt này, đề xuất
-     làm ở phiên sau nếu user muốn.
+   - **TỰ ĐỘNG HOÁ XONG 2026-08-31**: cron `20:00 ICT ngày 6 hàng tháng` → `mike/bin/
+     vn_realestate_monthly_check.sh` (chi tiết đầy đủ + 2 bug đã bắt qua test end-to-end thật:
+     `kb/cron_registry.md` dòng "20:00 (ngày 6 hàng tháng)"). Dispatch `claude -p --agent
+     macro-strategist` headless, KHÔNG-BLIND. **Email LUÔN gửi mỗi tháng** (đúng yêu cầu, không chỉ
+     khi bất thường) qua `send_macro_note_email.py`; Discord `vn_macro_watch` + bus event thêm khi
+     có/không escalate. Artifact: `kb/projects/vn_realestate_monthly_checks/<YYYY-MM>.md`.
 
 ## Đang mở
 - Audit exposure BĐS của bank trong danh mục (MBB/ACB/HDB + tham chiếu TCB/VCB/BID) — chạy 2026-08-26.
@@ -132,3 +132,4 @@ Nguồn (ngày công bố cụ thể):
 - [24hmoney/doanhnhan.baophapluat.vn — "Ngành ngân hàng quý II/2026: nợ xấu bộc lộ rủi ro trên diện rộng"] — NPL ngành 1,97%, nhóm lớn 1,72%→1,85%→1,93%, coverage 91,65%→84,5%, nợ nhóm 2 +31,6% YTD
 - [Thời báo Tài chính VN, "Infographics: CPI 7 tháng năm 2026 tăng 4,39%"] + [tapchikinhtetaichinh.vn, "CPI tháng 7/2026 giảm 0,12%"]
 - Nội bộ PIT: `deposit_rate_vn.py` (CSV, xác nhận cuối 20/07/2026, refresh 03/08/2026 escalate), `cpi_vn.py` Tier-1 NSO (real, đến 06/2026)
+- 2026-08-31: interim tháng 2026-08 (test end-to-end pipeline cron mới) = **BINH_THUONG** (0/4 ngưỡng escalate bị vượt: CPI chưa có số tháng 8 nhưng xu hướng 7 tháng vẫn dưới trần 4,39%<4,5%; lãi suất huy động Big-4 đi ngang 6,8% hội tụ 4/4; không Thông tư/QĐ siết BĐS mới — TT29/2026 chỉ là quy trình cho vay chung; chưa tới kỳ công bố Q3 tín dụng/BĐS/NPL) — chi tiết `mike/kb/projects/vn_realestate_monthly_checks/2026-08.md`. Từ tháng sau, dòng này do `vn_realestate_monthly_check.py` tự ghi (agent không tự edit file này nữa).

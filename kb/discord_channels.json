@@ -64,6 +64,11 @@
       "id": "1536642385235152906",
       "title": "Discretionary stocks",
       "purpose": "Co phieu dau tu rieng ngoai book V2.4 chinh (vd DGC/TV1 fear-buy sleeve) — phan tich, due-diligence, arm/exit alert cua discretionary_margin_gate.py. Tach khoi trading_daily/trading_report (user chot 2026-08-11)."
+    },
+    "vn_macro_watch": {
+      "id": "1540662920889761883",
+      "title": "VN macro watch (crisis-trigger research thread)",
+      "purpose": "Topic nghien cuu chuoi crisis-trigger + VN real-estate structural risk (2026-08-31). vn_realestate_monthly_check.sh (cron ngay 6 hang thang) post ket qua interim check GSO monthly vao day."
     }
   }
 }
