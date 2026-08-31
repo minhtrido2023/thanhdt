@@ -738,3 +738,7 @@
 ## Consolidation 2026-08-31T17:37:04Z
 - [2026-08-31T17:36:11Z] Mike/heartbeat — Mike_20260831_173510: {"status": "still_running", "elapsed_min": 1, "job_id": "Mike_20260831_173510", "source": "watcher"}
 - [2026-08-31T17:36:36Z] Mike/answer — vn-realestate-monthly-check-2026-08: {"resolution": "question giả do dev-test buggy TRƯỚC KHI vá 2 bug (marker FINAL_STATUS vị trí sai) của vn_realestate_monthly_check.py — commit 8a01d08f đã vá, lần chạy đúng post finding BINH_THUONG 4 phút sau. Đóng theo retro 2026-08-31.", "evidence": "commit 8a01d08f; bus finding macro-strategist/vn-realestate-monthly-check-2026-08 08:17:25Z status=BINH_THUONG; kb/incidents/retro/retro-2026-08-31.md", "resolves": ["macro-strategist/vn-realestate-monthly-check-2026-08"], "closed_by": "Mike"}
+
+## Consolidation 2026-08-31T17:37:26Z
+- [2026-08-31T17:37:11Z] Mike/heartbeat — Mike_20260831_173510: {"status": "still_running", "elapsed_min": 2, "job_id": "Mike_20260831_173510", "source": "watcher"}
+- [2026-08-31T17:37:22Z] Mike/finding — daily-retro-2026-08-31: {"summary": "Retro 2026-08-31 xong, commit b344fc7d. 1 su co (bus question gia tu dev-test cua vn_realestate_monthly_check.py, da dong bang close_bus_question.py), 0 pattern xuyen suot moi. Wags GAPS FOUND (off-by-one dem event 37->38, da sua) roi CONFIRMED phan con lai. Working memory Mike da don, consolidate.sh chay xong KB v2719, summary da post Trading Daily.", "verified_by": "Wags", "file": "kb/incidents/retro/retro-2026-08-31.md"}
