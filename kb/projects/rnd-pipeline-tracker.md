@@ -59,20 +59,25 @@ Chi tiết đầy đủ từng mục: bus finding của Taylor + `kb/incidents/i
   History: edge đo từ 07-09 (`Taylor_20260709_101602`), gate 5 PASS 08-22 sau ≥5 phiên paper BUY fill
   + 0 reject + 4/5 phiên hybrid + selfcheck TZ 21/21.
 - **V2.5**: R&D-complete, DISABLED. Reminder 2026-07-07: Mike hỏi user go-ahead integration.
-- **DC-book (ConvergePort) NEUTRAL idle-cash waterfall** (paper `main` only, từ 07-06): thứ tự ưu
+- **DC-book (ConvergePort) idle-cash waterfall** (paper `main` only, từ 07-06): thứ tự ưu
   tiên giải ngân **BAL/LAG (full trước) → DC book (double-confirm sector-lens BUY ∧ 8L rating≤2,
-  capacity ~10-15B ex-DHG) → custom30V**; reverse-unwind khi BAL/LAG có deal lại. Backtest: +5.0pp
-  sleeve parking (~+3.5pp/năm SpaceX-now), nhưng DSR phần excess chỉ 0.775 (<0.95 ngưỡng an toàn) —
-  bảo hiểm hợp lý, CHƯA phải alpha tin cậy cao → lý do bắt buộc paper trước. Trong EOD daily report.
-  Review = EVENT-ANCHORED (khi chu kỳ reverse-unwind đầu tiên hoàn tất + settle 4-6 tuần), sàn
-  ~2 tháng, trần ~2026-10-06 (trượt theo nếu LAG refill trượt lịch).
-  ⚠️ **Bug đã biết, sửa TẠI mốc review (không sửa sớm — user chốt 07-13, muốn quan sát whipsaw thật
-  trước)**: paper sleeve dùng trigger NHỊ PHÂN thay vì spec đúng (DC book chạy liên tục trên residual)
-  → hiện TỆ HƠN baseline không-DC (CAGR 27.26%/DD−17.8%/Calmar 1.53/turnover 20.7× vs spec đúng
-  27.56%/−15.5%/1.77/3.18×). 4 việc khi tới review, theo thứ tự: (1) đổi sang continuous-residual
-  trigger — bug thực chất, ưu tiên nhất; (2) đồng bộ rebalance vào q2m5 (giảm whipsaw ~4 lần);
-  (3) cap gộp 0.15/tên (chống trùng DC↔custom30V); (4) liquidity floor 3B thay hard-exclude DHG.
-  4 góc khác đã kiểm tra kỹ, không còn dư địa cải thiện — không cần backtest thêm cho chúng.
+  capacity ~10-15B ex-DHG) → custom30V**; reverse-unwind khi BAL/LAG có deal lại. Backtest gốc:
+  +5.0pp sleeve parking (~+3.5pp/năm SpaceX-now), nhưng DSR phần excess chỉ 0.775 (<0.95 ngưỡng
+  an toàn) — bảo hiểm hợp lý, CHƯA phải alpha tin cậy cao → lý do bắt buộc paper trước. Trong EOD
+  daily report. Review = EVENT-ANCHORED (khi chu kỳ reverse-unwind đầu tiên hoàn tất + settle 4-6
+  tuần), sàn ~2 tháng, trần ~2026-10-06 (trượt theo nếu LAG refill trượt lịch).
+  ✅ **4 fix đã ÁP DỤNG từ 2026-07-20** (`SLEEVE_VERSION="v2"`, job `Taylor_20260720_091731`) —
+  đoạn "bug trigger nhị phân, sửa tại mốc review" ở trên đã LỖI THỜI, giữ lại làm lịch sử số liệu
+  cũ: (1) trigger continuous-residual — xong; (2) rebalance cadence q2m5 — xong; (3) cap gộp
+  0,15/tên DC↔custom30V — xong; (4) liquidity floor 3B thay hard-exclude DHG — xong. Thêm v2.1
+  (job `Taylor_20260825_170138`): PER_NAME_CAP siết riêng 10 mã capacity-limited
+  (MBB/HDB/VCB/VCI/VND/HCM/PVT/HAH/CTR/DBC), còn lại giữ 0,20.
+  📌 **08-31**: gate mở rộng từ NEUTRAL-only sang `state not in (NEUTRAL, BULL, EXBULL)` (job
+  `Taylor_20260831_014244`, commit WorkingClaude `b9c585ab`) — cơ chế deploy/weight/trigger/cadence
+  KHÔNG đổi, `SLEEVE_VERSION` vẫn "v2", chỉ mở phạm vi state được ghi lại để paper bắt đầu tích
+  luỹ bằng chứng BULL tự nhiên (27 phiên lịch sử trước đó toàn NEUTRAL). Selfcheck +11 test group F
+  (78/78 pass). Đọc số liệu mới nhất từ `dc_book_waterfall_paper_nav.csv`, không dùng số IS/OOS cũ
+  trong đoạn trên (đo trên trigger nhị phân đã lỗi thời).
 
 ## Checkpoint quá hạn — cập nhật 2026-08-22
 - **EXTREME-regime gate: ĐÃ LIVE 2026-08-22** (xem mục trên) — đóng.
