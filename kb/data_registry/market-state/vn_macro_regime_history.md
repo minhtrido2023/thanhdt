@@ -9,6 +9,7 @@ role: Sổ phân loại NGUYÊN NHÂN VĨ MÔ của mỗi episode khủng hoản
   backtest để không bị "outcome shape the read" (xem MIKE.md routing table, sự cố 2026-08-24)
 last_full_analysis: 2026-08-25 (Bobby — phân tích toàn diện 2000-2026, thêm 5 episode mới)
 last_update: 2026-08-30 (Bobby — bản đồ pha trong-năm 2009/2018 ở file con vn_macro_regime_history_2009_2018_phases.md; ĐÍNH CHÍNH trục 2 EP-2018-01 CONTAINABLE→EXTERNAL_CYCLE)
+last_update_2: 2026-08-31 (Bobby — addendum granular cửa sổ 2008Q4-2009Q3: đường lãi suất SBV theo ngày, tín dụng 37,53% vs mục tiêu 21-23%, CPI YoY tháng qua cpi_vn.py, FDI 7T/2009; XÁC NHẬN LẠI EP-2008-09 MIXED/EXTERNAL_CYCLE, không đổi verdict)
 ---
 
 # VN Macro Regime History — sổ phân loại nguyên nhân vĩ mô từng episode khủng hoảng
@@ -225,6 +226,132 @@ macro-stabilization toàn hệ thống + banking NPL cần 4-5 năm giải quy�
   crisis" — phân loại đó SAI về mặt cơ cấu. Imbalance gốc (NPL từ 2007-2010, đô la hóa, thiếu cơ
   chế kiểm soát tín dụng ngân hàng cổ phần nhỏ) không bao giờ được giải quyết giữa 2 episode, làm
   cho 2009 "recovery" chỉ là bề mặt.
+
+---
+
+## ADDENDUM — 2026-08-31: đọc lại chi tiết cửa sổ 2008Q4→2009Q3 (Bobby, BLIND)
+
+**Yêu cầu:** một dispatch riêng yêu cầu đọc chi tiết đúng 12 tháng 10/2008→09/2009 (SBV lãi suất
+theo quý+ngày cụ thể, gói kích cầu, tỷ giá/GIR, FDI/FII, thanh khoản liên ngân hàng/tín dụng/M2),
+**redact tường minh** diễn biến VNINDEX sau giai đoạn — tuân thủ đúng luật BLIND của vai trò này.
+Đây KHÔNG phải episode mới — trùng hoàn toàn với `EP-2008-09` ở trên + đầu Pha 1A/1B của
+`vn_macro_regime_history_2009_2018_phases.md`. Addendum này CHỈ bổ sung số liệu granular mới tìm
+được (đường lãi suất theo NGÀY, số tín dụng/FDI cụ thể) — không đổi phân loại đã chốt, chỉ làm nó
+sắc hơn.
+
+### Đường lãi suất cơ bản SBV theo ngày (bổ sung so với "14%→7% (02/2009)" đã có)
+
+Đỉnh thắt chặt: **14%/năm từ 06/2008** (đáp lại CPI 23%). Từ cuối 10/2008 SBV đảo chiều, cắt
+**5 lần liên tiếp trong ~2 tháng**:
+- **Quyết định 3161/QĐ-NHNN**, hạ từ 10% → **8,5%/năm, hiệu lực 22/12/2008**
+  ([Báo Chính phủ, 2008-12-19](https://baochinhphu.vn/tu-22-12-2008-lai-suat-co-ban-giam-con-85-nam-10212509.htm)).
+- Tiếp tục cắt đầu 2009, về **7%/năm từ 02/2009** — mức này giữ nguyên suốt Pha 1B/1C (đến khi
+  nâng lại 25/11/2009), khớp file cha EP-2008-09/Phases §Pha 1A.
+- Đồng thời: hạ dự trữ bắt buộc VND + cho phép biên độ tỷ giá nới — hướng đi xác nhận qua nhiều
+  nguồn tổng hợp nhưng KHÔNG tìm được quyết định/ngày chính xác qua search vòng này (đánh dấu
+  **chưa xác minh mức %/ngày cụ thể** — khác biệt với đường lãi suất đã có ngày rõ).
+- Nguồn tổng hợp chuỗi cắt: search tổng hợp nhiều báo VN (VnEconomy/Tuổi Trẻ/luatvietnam) +
+  1 nguồn quốc tế xác nhận "cắt 400bp từ cuối 10/2008... về 7% trong vài tháng."
+
+### Tín dụng & M2 — con số granular mới
+
+- **Tăng trưởng tín dụng CẢ NĂM 2009 đạt 37,53%, so với mục tiêu ban đầu 21-23%** — vượt mục tiêu
+  ~1,6-1,8 lần. Đây chính là cơ chế tái tích lũy STRUCTURAL đã nêu ở EP-2008-09/Phases §Pha 1B,
+  nay có con số cụ thể. (Nguồn: tổng hợp qua search, đối chiếu số liệu SBV thường được trích trong
+  các nghiên cứu học thuật; **confidence: medium** — chưa fetch được bản gốc IMF Article IV 2010
+  do trang chặn truy cập tự động 403, cần verify lại nếu dùng làm số PIN.)
+- Đối chứng: **năm 2007 mục tiêu M2 20-23%, thực tế 46,12%** — cho thấy mẫu hình "mục tiêu bị vượt
+  xa" đã có TRƯỚC episode này (từ 2007), củng cố thêm luận điểm STRUCTURAL của mega-episode
+  2007-2012 (không phải điểm mới của riêng cửa sổ 2008Q4-2009Q3).
+
+### CPI YoY theo tháng, xác nhận bằng BQ (`cpi_vn.py`, PIT nhưng gắn cờ backfill)
+
+Chạy `cpi_vn.cpi_monthly_df()` (dataset nội bộ, cột `is_backfill_2007_2010=True` /
+`is_real_nso=False` cho giai đoạn này — **nghĩa là số liệu backfill/ước tính, KHÔNG phải bản gốc
+GSO nạp trực tiếp — dùng để XÁC NHẬN xu hướng, không dùng để PIN số chính xác từng tháng**):
+
+| Tháng | CPI YoY | Tháng | CPI YoY |
+|---|---|---|---|
+| 09/2008 | 27,90% | 04/2009 | 9,23% |
+| 10/2008 | 26,74% | 05/2009 | 5,65% |
+| 11/2008 | 24,22% | 06/2009 | 3,67% |
+| 12/2008 | 19,89% | 07/2009 | 3,31% |
+| 01/2009 | 17,49% | 08/2009 | 2,27% |
+| 02/2009 | 14,81% | **09/2009** | **0,68%** ← cuối cửa sổ được hỏi |
+| 03/2009 | 11,19% | 10/2009 | −0,02% (đáy) |
+
+Ngay SAU cửa sổ được hỏi (không dùng để classify, chỉ để thấy điểm gãy đã ghi ở Phases §Pha 1C):
+11/2009 = 4,35%, 12/2009 = 6,52% — đảo chiều dốc đứng đúng như đã chốt trước đó.
+
+**Đọc đúng nghĩa của con số 0,68% (09/2009) khi KHÔNG biết trước điều gì xảy ra sau đó:** đây là
+đáy lạm phát so-sánh-cùng-kỳ do cơ số cao của 2008 (base effect) + giá hàng hóa toàn cầu sụp —
+KHÔNG phải bằng chứng ổn định cơ cấu. Người đọc real-time CÓ THỂ nghi ngờ điều này ngay tại thời
+điểm 09/2009 bằng 3 chỉ báo độc lập cùng có sẵn: (a) tín dụng đã vượt mục tiêu từ giữa năm
+(SBV công bố định kỳ), (b) cán cân thương mại đã đảo sang thâm hụt từ Q2/2009 (GSO/Hải quan trễ
+2-4 tuần), (c) premium tỷ giá chợ đen bắt đầu nới rộng (quan sát hàng ngày, trễ 0) — cả ba đã ghi
+trong `vn_macro_regime_history_2009_2018_phases.md` §Pha 1B.
+
+### FDI — bổ sung xu hướng (chưa xác minh được số tuyệt đối 2008 do nguồn mâu thuẫn)
+
+- **2009 (7 tháng đầu năm):** ~US$10,1 tỷ đăng ký (53% dự án cấp mới, 46% vốn bổ sung), giải ngân
+  thực tế ~US$4,6 tỷ trong cùng kỳ; mục tiêu cả năm công bố lúc đó: US$20 tỷ đăng ký / US$8 tỷ giải
+  ngân ([Vietnam Embassy US, 2009-08](https://vietnamembassy-usa.org/news/2009/08/nation-attracts-over-10-billion-usd-fdi)).
+- Đối chiếu 2008: một nguồn cho giải ngân 2008 ~US$11,5 tỷ (tăng từ ~US$8,1 tỷ năm 2007), một
+  nguồn khác cho ~US$10,5 tỷ — **hai nguồn lệch nhau, KHÔNG chốt số chính xác** (search vòng này
+  không tiếp cận được ADB working paper gốc do lỗi fetch). Hướng đi nhất quán ở mọi nguồn: FDI
+  ĐĂNG KÝ giảm mạnh 2008→2009 (từ mức kỷ lục ~US$71 tỷ đăng ký 2008 — số quy mô lớn phần nhiều
+  do vài dự án siêu lớn — về mặt bằng thấp hơn hẳn 2009-2014, theo mô tả định tính "quanh
+  US$8-9 tỷ/năm 2009-2014"). **FII/portfolio flow theo quý: KHÔNG tìm được số cụ thể** cho đúng
+  cửa sổ này qua search vòng này — cần dispatch riêng nếu cần con số chính xác (gợi ý: SSC/HOSE
+  báo cáo khối ngoại, hoặc IMF BOP data qua CEIC).
+
+### Phân loại — XÁC NHẬN LẠI, không đổi, cho đúng cửa sổ 2008Q4-2009Q3 hẹp
+
+| Trục | Kết luận | Confidence |
+|---|---|---|
+| 1. Root cause | `MIXED` — lớp NGOẠI (Lehman/cầu xuất khẩu sụp) chiếm ưu thế Ở ĐẦU cửa sổ; lớp NỘI ĐỊA (tín dụng tái tăng vượt mục tiêu, thương mại đảo thâm hụt, premium chợ đen nới) đã bắt đầu tái xuất hiện, QUAN SÁT ĐƯỢC ngay trong cửa sổ, TRƯỚC khi cửa sổ kết thúc (09/2009) | clean |
+| 2. Containability (áp dụng cho lớp ngoại) | `EXTERNAL_CYCLE`, KHÔNG phải `CONTAINABLE` — dù VN phản ứng nhanh/đơn lẻ (gói lãi suất 4% + cắt lãi suất 5 lần trong ~2 tháng), NGUYÊN NHÂN GỐC (cầu xuất khẩu toàn cầu sụp) chỉ hết khi thương mại thế giới phục hồi — một chu kỳ ngoài tầm quyết định của VN, không phải 1 hành động chính sách VN chấm dứt được nó | clean |
+
+**Điểm bước ngoặt (inflection points) theo trình tự thời gian, thuần chính sách/vĩ mô, KHÔNG
+tham chiếu giá cổ phiếu:**
+1. **15/09/2008** — Lehman Brothers sụp đổ (khởi phát cú sốc ngoại, không phải hành động chính
+   sách VN nhưng là mốc kích hoạt).
+2. **Cuối 10/2008 → 22/12/2008** — SBV đảo chiều 180°, cắt lãi suất cơ bản 5 lần liên tiếp
+   (14%→10%→8,5% theo QĐ 3161/QĐ-NHNN hiệu lực 22/12/2008).
+3. **23/01/2009 (ký) / 01/02/2009 (hiệu lực)** — QĐ 131/QĐ-TTg, gói bù lãi suất 4%/năm vay ngắn
+   hạn ≤8 tháng, quy mô ~17 nghìn tỷ VND — hành động tài khóa CỤ THỂ đầu tiên, nhắm đúng mục tiêu
+   (không phải macro-stabilization rộng như Resolution 11/2011 sau này).
+   Nguồn: [MOF](https://irt.mof.gov.vn/webcenter/portal/btcen/pages_r/l/newsdetails?dDocName=BTC078876).
+4. **02/2009** — lãi suất cơ bản chạm đáy chu kỳ 7%/năm.
+5. **04/04/2009** — QĐ 443/QĐ-TTg mở rộng bù lãi suất sang vay trung-dài hạn (mở rộng gói kích
+   cầu, không phải gói mới).
+6. **04/2009** — Thủ tướng công bố quy mô đầy đủ gói kích thích ~US$8 tỷ (≈5% GDP).
+7. **Giữa 2009 (quan sát được real-time, không phải hindsight)** — tín dụng vượt mục tiêu 21-23%
+   (SBV công bố định kỳ trễ ~1 tháng); cán cân thương mại đảo sang thâm hụt từ Q2 (GSO/Hải quan);
+   premium tỷ giá chợ đen bắt đầu nới (quan sát hàng ngày) — ba tín hiệu ĐỘC LẬP cùng chiều, đủ để
+   một người đọc kỷ luật nghi ngờ tính bền vững của "ổn định" cuối cửa sổ 09/2009, MÀ KHÔNG CẦN
+   biết trước điều gì xảy ra tháng 11/2009.
+8. **09/2009 — kết thúc cửa sổ được hỏi.** CPI YoY chạm đáy 0,68% (BQ `cpi_vn.py`, backfill/PIT-
+   proxy) — điểm này bản thân nó KHÔNG phải bước ngoặt chính sách, chỉ là điểm quan sát cuối của
+   yêu cầu; bước ngoặt chính sách TIẾP THEO (25/11/2009, ngoài cửa sổ được hỏi) đã ghi ở file
+   Phases §Pha 1C, không lặp lại ở đây.
+
+**Kết luận cho câu hỏi Loại-1/Loại-2 của mandate margin (2026-08-25):** cửa sổ 2008Q4-2009Q3
+đọc RIÊNG LẺ trông giống Loại-2 (có policy anchor rõ: QĐ 131 + chuỗi cắt lãi suất, phản ứng
+nhanh trong vài tháng) — nhưng đây là ĐỌC THIẾU NGỮ CẢNH nếu tách khỏi mega-episode 2007-2012.
+Đặt đúng trong chuỗi, nó là "cửa sổ tạm nghỉ do external shock" bên TRONG một khủng hoảng
+STRUCTURAL chưa giải quyết (đã chốt ở EP-2008-09/EP-2009-09) — root cause tổng thể vẫn `STRUCTURAL`,
+KHÔNG đủ điều kiện Loại-2 cho mục đích margin sizing. Không đổi verdict `WAVE_OF:MEGA_2007_2012`.
+
+*Soạn: macro-strategist (Bobby), 2026-08-31, dispatch BLIND (redact tường minh diễn biến
+VNINDEX sau cửa sổ). Nguồn mới bổ sung: Báo Chính phủ (QĐ 3161, 2008-12-19), search tổng hợp
+đường lãi suất VN 2008 (nhiều báo trong nước, chưa fetch được bản SBV gốc), Vietnam Embassy US
+(FDI 7 tháng 2009), BQ nội bộ `cpi_vn.cpi_monthly_df()`. Giới hạn đã nêu rõ: FII/portfolio flow
+theo quý KHÔNG xác minh được vòng này; số FDI tuyệt đối 2008 có 2 nguồn lệch nhau; dự trữ bắt
+buộc không tìm được % + ngày cụ thể; IMF Article IV 2010 (cr10281.pdf) — nguồn đã trích ở
+EP-2008-09/Phases nhưng KHÔNG fetch lại được trực tiếp vòng này (HTTP 403), số liệu tín dụng
+37,53%/21-23% lấy qua search tổng hợp, đối chiếu — khuyến nghị Taylor/Winston verify lại bằng
+nguồn IMF gốc nếu cần dùng làm số PIN cho phân tích định lượng.
 
 ---
 
