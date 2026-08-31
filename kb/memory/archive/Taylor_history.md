@@ -407,3 +407,6 @@
 
 ## Archived 2026-08-31 (keep=12 days=0 require_done=False)
 - [2026-08-30T09:12:06Z] discretionary-funnel-adaptive-pb round3 (job _085015) XONG + quant-skeptic verify lan 3 CONFIRMED (high conf, job quant-skeptic_20260830_085357). Tran khoa min-CV=1.2 (khac 1.5 gia dinh 2 ban truoc), cutoff=70% giu nguyen. 113->136 (+20.4%,23 ten), TV1/DGC van lot. CTCK lai la cum lon nhat (5/23) khop dieu kien risk-auditor da duyet - KHONG can risk-auditor xem lai them. CHUA sua bin/discretionary_candidate_funnel.py (ngoai pham vi job, dispatch cam ro) - CHO USER QUYET wire production.
+
+## Archived 2026-08-31 (keep=12 days=0 require_done=False)
+- [2026-08-30T09:36:43Z] [2026-08-30] discretionary-funnel-adaptive-pb WIRE XONG (job _092103, commit 714b5889 mike repo): PB OR-logic (cutoff=70%/tran=1.2) da vao bin/discretionary_candidate_funnel.py, selfcheck khop research (113->136, TV1/DGC ca 2 qua nhanh percentile). CON MO: risk-auditor duyet CONDITIONAL ca 2 cum (CTCK cap count<=1+5%NAV, hoa chat cap <=1margin/<=2cash) nhung CHUA enforce - can job rieng sua discretionary_margin_gate.py (can them state armed-position + funding-type margin/cash). Rieng: TV1 va DGC (2 case neo goc) deu marginable=NO qua DNSE - chi mua duoc tien mat.
