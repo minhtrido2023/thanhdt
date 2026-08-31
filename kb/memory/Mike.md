@@ -50,3 +50,4 @@ job quant-skeptic_20260830_085357: OVERDUE cosmetic đã biết, bỏ qua (verif
 ## Macro watch
 Bobby BĐS VN report xong 08-26 (STRUCTURAL_ACCUMULATION/AMBIGUOUS). Review quý next ~2026-11-26.
 
+- [2026-08-31T04:13:36Z] 31/08: chuỗi Bobby(blind)+Taylor(data) cho 3 crisis episode XONG — 2009(MIXED,job Taylor_20260831_033154)+2020/2022(CONTAINABLE,job Taylor_20260831_040228). Finding chính: LEAD-1..4 rút từ N=1(2009) hầu hết KHÔNG generalize sang N=3 — 'targeted action luôn thắng blanket' bị bác bỏ (2022: SCB targeted lag dài hơn blanket rate-hike); mốc lag ngắn nhất = nhánh rủi ro CUỐI CÙNG được giải quyết, không phải nhánh gốc. Phát hiện phụ mới: healing speed (10/12/47 phiên) tương quan HÌNH DẠNG cú sốc (1 lần sắc nét vs nhiều đợt), KHÔNG map theo Loại-1/Loại-2 Bobby. Research-only, không wire. Report: agents/Taylor/research/vn_2009_recovery_trigger_20260831/ + vn_2020_2022_recovery_trigger_20260831/.

@@ -404,3 +404,6 @@
 
 ## Archived 2026-08-31 (keep=12 days=0 require_done=False)
 - [2026-08-30T08:56:13Z] ĐANG DỞ: round3 PB-adaptive (job Taylor_20260830_085015) - tran khoa min-CV ra 1.2 (khac 1.5), TV1/DGC van lot, 113->136 (+20.4%,23 ten), CTCK lai la cum lon nhat. Bus finding da ghi. DANG CHO: quant-skeptic verify lan 3 (job quant-skeptic_20260830_085357, deadline ~16:09 ICT). NEXT: doc log khi xong, neu CONFIRMED thi sua bin/discretionary_candidate_funnel.py (cutoff=70/tran=1.2), neu REFUTED thi bao user.
+
+## Archived 2026-08-31 (keep=12 days=0 require_done=False)
+- [2026-08-30T09:12:06Z] discretionary-funnel-adaptive-pb round3 (job _085015) XONG + quant-skeptic verify lan 3 CONFIRMED (high conf, job quant-skeptic_20260830_085357). Tran khoa min-CV=1.2 (khac 1.5 gia dinh 2 ban truoc), cutoff=70% giu nguyen. 113->136 (+20.4%,23 ten), TV1/DGC van lot. CTCK lai la cum lon nhat (5/23) khop dieu kien risk-auditor da duyet - KHONG can risk-auditor xem lai them. CHUA sua bin/discretionary_candidate_funnel.py (ngoai pham vi job, dispatch cam ro) - CHO USER QUYET wire production.
