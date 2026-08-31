@@ -40,7 +40,7 @@ import tempfile
 import dc_book_waterfall_paper as dcw
 from dc_book_waterfall_paper import (compute_waterfall_targets, build_orders, turnover,
                                      dc_membership, apply_overlap_cap,
-                                     CUSTOM30V, NEUTRAL, OVERLAP_CAP, LIQ_FLOOR_VND)
+                                     CUSTOM30V, NEUTRAL, BULL, EXBULL, OVERLAP_CAP, LIQ_FLOOR_VND)
 
 BIG = 9e9          # comfortably clears the 3B liquidity floor
 LIQ_OK = lambda *tks: {t: BIG for t in tks}
@@ -407,6 +407,48 @@ ok("E6 duong THAT ap PER_NAME_CAP (MBB khong duoc 0.15 nhu ten thuong)",
 v1_csv = os.path.join(dcw.DATA_DIR, "dc_book_waterfall_paper_nav_v1.csv")
 ok("E5 v1 NAV series archived", os.path.exists(v1_csv))
 ok("E5 v2 state carries a version tag", dcw.SLEEVE_VERSION == "v2")
+
+# =======================================================================================
+print("F. v2.2 LOG_STATES gate (job Taylor_20260831_014244) — BULL/EXBULL now log, mechanism unchanged")
+tgt_bull, dep_bull, reason_bull, det_bull = compute_waterfall_targets(BULL, DC5, PARK, LIQ_OK(*DC5))
+ok("F1 BULL → sleeve deploys (was flat pre-v2.2)", dep_bull and tgt_bull)
+ok("F1 BULL → same 0.15 combined-cap mechanism as NEUTRAL",
+   all(abs(tgt_bull[t] - 0.15) < 1e-9 for t in DC5), f"got={[round(tgt_bull[t],4) for t in DC5]}")
+ok("F1 BULL → reason tags BULL, not NEUTRAL", "BULL" in reason_bull, reason_bull)
+
+tgt_exb, dep_exb, reason_exb, det_exb = compute_waterfall_targets(EXBULL, DC5, PARK, LIQ_OK(*DC5))
+ok("F2 EXBULL → sleeve deploys (was flat pre-v2.2)", dep_exb and tgt_exb)
+ok("F2 EXBULL → same combined-cap total as NEUTRAL/BULL",
+   abs(sum(tgt_exb.values()) - sum(tgt_bull.values())) < 1e-9)
+
+# CRISIS/BEAR still flat — the gate widened to exactly {NEUTRAL,BULL,EXBULL}, not "everything"
+tgt_crisis, dep_crisis, _, _ = compute_waterfall_targets(1, DC5, PARK, LIQ_OK(*DC5))
+ok("F3 CRISIS still flat (gate did not widen beyond LOG_STATES)", tgt_crisis == {} and not dep_crisis)
+tgt_bear, dep_bear, _, _ = compute_waterfall_targets(2, DC5, PARK, LIQ_OK(*DC5))
+ok("F3 BEAR still flat (gate did not widen beyond LOG_STATES)", tgt_bear == {} and not dep_bear)
+
+ok("F4 LOG_STATES = {NEUTRAL, BULL, EXBULL} exactly", set(dcw.LOG_STATES) == {NEUTRAL, BULL, EXBULL})
+
+# end-to-end via advance(): a NEUTRAL→BULL transition now REBALANCES (regime_flip) instead of
+# flattening, and deployment persists — this is the actual behaviour change the dispatch wants
+# ("27 phiên trước TOÀN BỘ NEUTRAL, không có bằng chứng BULL nào tự nhiên tích luỹ").
+fresh_state_paths(); Inject.install()
+Inject.dc_set = dict(DC5)
+Inject.liq = LIQ_OK(*DC5)
+Inject.basket = ({"VHM": 0.5, "VCB": 0.5}, "2026-05-05")
+Inject.trigger = (NEUTRAL, "NEUTRAL", False)
+Inject.closes = ({"ACB": 22600, "STB": 24750, "TCB": 33400, "FPT": 70800, "SSI": 26400,
+                  "VHM": 40000, "VCB": 60000}, "2026-08-20")
+stF1, sF1 = dcw.advance("main")
+ok("F5 day-1 NEUTRAL → advanced + deployed", stF1 == "advanced" and sF1["deployed"])
+Inject.trigger = (BULL, "BULL", False)
+Inject.closes = ({"ACB": 23000, "STB": 25000, "TCB": 34000, "FPT": 72000, "SSI": 27000,
+                  "VHM": 41000, "VCB": 61000}, "2026-08-21")
+stF2, sF2 = dcw.advance("main")
+ok("F5 day-2 BULL → still deployed (no flatten, no reverse-unwind)",
+   stF2 == "advanced" and sF2["deployed"] and not sF2["reverse_unwind_last"])
+ok("F5 day-2 BULL → history row records state_name=BULL",
+   sF2["history"][-1]["state_name"] == "BULL")
 
 # =======================================================================================
 print(f"\n{'='*60}\nRESULT: {len(PASS)} passed, {len(FAIL)} failed")

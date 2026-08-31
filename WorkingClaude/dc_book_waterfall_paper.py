@@ -37,6 +37,18 @@ the paper account `main` (override in secrets/trading_bot_accounts.json).
         keep 0.20 (safe at every scenario tested). SLEEVE_VERSION stays "v2" — trigger/cadence
         mechanism unchanged, this is a universe/cap data update only, no NAV archival needed. ***
 
+*** v2.2 — 2026-08-31 (job Taylor_20260831_014244, dispatch Mike, user duyệt Việc #3). Mở phạm vi
+    GHI LẠI của sleeve sang state ∈ {NEUTRAL, BULL, EXBULL} (`LOG_STATES`), trước đó gate cứng
+    `state != NEUTRAL → flat` khiến 27 phiên paper đầu tiên (26/06→28/08) TOÀN BỘ là NEUTRAL,
+    không có bằng chứng BULL nào tự nhiên tích luỹ dù DT5G đã có nhịp BULL thật trong giai đoạn
+    đó. KHÔNG đổi bất kỳ cơ chế nào khác (dc_membership/dc_weights/apply_overlap_cap/trigger
+    continuous-residual/cadence q2m5 nguyên vẹn) — chỉ mở điều kiện gate ở đầu
+    `compute_waterfall_targets()` và `want_deployed` cho regime-flip detection. SLEEVE_VERSION
+    stays "v2" (không phải thay đổi mechanism, chỉ mở phạm vi state được log — không NAV-archival,
+    lịch sử NEUTRAL-only vẫn hợp lệ nguyên vẹn). Quyết định này TÁCH BIỆT với bug trigger nhị phân
+    đã biết (kb/projects/rnd-pipeline-tracker.md mục DC-book) — bug đó GIỮ NGUYÊN tới mốc review
+    ~06/10 theo chỉ đạo user 13/07, không đụng ở đây. ***
+
 WHAT THE WATERFALL IS (exactly as the dispatch/research fixed it — nothing invented here):
   When DT5G state = NEUTRAL, the parked idle cash is filled in priority order:
       BAL / LAG (unchanged, upstream)  →  DC book (ConvergePort double-confirm)  →  custom30V
@@ -93,6 +105,16 @@ NAV_CSV = os.path.join(DATA_DIR, "dc_book_waterfall_paper_nav.csv")
 STATUS_FILE = os.path.join(DATA_DIR, "golive_v23_status.json")
 
 NEUTRAL = 3
+BULL = 4
+EXBULL = 5
+LOG_STATES = (NEUTRAL, BULL, EXBULL)    # v2.2 (job Taylor_20260831_014244, user duyệt 08-31): mở
+                                         # phạm vi GHI LẠI sang BULL/EXBULL — KHÔNG đổi cơ chế
+                                         # waterfall/deploy (dc_membership/dc_weights/overlap_cap
+                                         # nguyên vẹn). 27 phiên paper trước đó TOÀN BỘ là NEUTRAL
+                                         # (không có bằng chứng BULL nào tự nhiên tích luỹ) —
+                                         # quyết định mở rộng này TÁCH BIỆT với trigger-bug đã chốt
+                                         # giữ nguyên tới mốc review ~06/10
+                                         # (kb/projects/rnd-pipeline-tracker.md mục DC-book).
 CUSTOM30V = "CUSTOM30V"                 # legacy pseudo-ticker (v1 aggregate) — kept for report labels
 EXCLUDED_DEFAULT = ("DHG", "MSH")       # v2.1 (Việc 1, job Taylor_20260825_170138): UNCONDITIONAL
                                          # universe exclude — capacity infeasible at NAV=200B (both
@@ -235,8 +257,9 @@ def compute_waterfall_targets(state, dc_set, basket, liq=None,
                        the overlap cap can only be applied on combined per-name exposure.
       detail         : dict of leg decomposition for the audit trail.
     """
-    if state != NEUTRAL:
-        return {}, False, "not-NEUTRAL → sleeve flat (waterfall is a NEUTRAL-only mechanism)", {}
+    if state not in LOG_STATES:
+        return {}, False, ("state ngoài LOG_STATES(NEUTRAL/BULL/EXBULL) → sleeve flat "
+                           "(waterfall chỉ ghi lại ở 3 state này)"), {}
     if per_name_cap is None:
         per_name_cap = PER_NAME_CAP
 
@@ -264,13 +287,14 @@ def compute_waterfall_targets(state, dc_set, basket, liq=None,
     universe_excluded = sorted(t for t in dropped if t.upper() in excl_upper)
     floor_dropped = sorted(t for t in dropped if t.upper() not in excl_upper)
 
+    state_tag = {NEUTRAL: "NEUTRAL", BULL: "BULL", EXBULL: "EXBULL"}.get(state, str(state))
     if not n:
         # No double-confirm name today → 100% custom30V. NOT a defect: an empty DC day = full
         # parking = automatic safety (the UNION experiment that tried to "fix" it was REFUTED).
-        reason = "NEUTRAL, no DC name clears double-confirm(+floor/universe) → 100% custom30V"
+        reason = f"{state_tag}, no DC name clears double-confirm(+floor/universe) → 100% custom30V"
     else:
         capped_names = sorted(t for t in members if per_name_cap.get(t, cap_per_name) < 1.0 / n - 1e-12)
-        reason = (f"NEUTRAL continuous-residual → DC {n} names (leg {dc_frac:.3f}) "
+        reason = (f"{state_tag} continuous-residual → DC {n} names (leg {dc_frac:.3f}) "
                   f"+ custom30V {park_frac:.3f}; overlap-cap {overlap_cap:.2f} on "
                   f"{len(overlap)} shared name(s)")
         if capped_names:
@@ -597,7 +621,7 @@ def advance(account=ACCOUNT_DEFAULT):
     # (a flat↔deployed transition can't wait for a quarterly date). NOT on a BAL/LAG deal —
     # that binary trigger was the v1 bug (fix#1).
     fail_safe_hold = dc_set is None or state is None
-    want_deployed = (state == NEUTRAL)
+    want_deployed = (state in LOG_STATES)
     regime_flip = want_deployed != bool(st.get("deployed", False))
     cadence_due = (rebal_date is not None and rebal_date != st.get("rebal_date"))
     do_rebal = (not fail_safe_hold) and (first or regime_flip or cadence_due)
@@ -795,10 +819,12 @@ def generate_section(account=ACCOUNT_DEFAULT, do_advance=True):
         deployed = last.get("deployed")
         bal_lag = last.get("bal_lag_has_deal")
         regime = last.get("state_name", "?")
-        if regime != "NEUTRAL":
-            trig = f"regime **{regime}** (≠NEUTRAL) → sleeve FLAT (waterfall chỉ chạy ở NEUTRAL)"
+        log_state_names = ("NEUTRAL", "BULL", "EXBULL")   # v2.2 — khớp LOG_STATES
+        if regime not in log_state_names:
+            trig = (f"regime **{regime}** (ngoài NEUTRAL/BULL/EXBULL) → sleeve FLAT "
+                    f"(waterfall chỉ ghi lại ở 3 state này)")
         else:
-            trig = ("NEUTRAL → waterfall chạy LIÊN TỤC trên phần tiền dư"
+            trig = (f"{regime} → waterfall chạy LIÊN TỤC trên phần tiền dư"
                     + (" (BAL/LAG có deal hôm nay — v2 KHÔNG tắt sleeve, chỉ phần dư nhỏ lại)"
                        if bal_lag else " (BAL/LAG rỗng)"))
         L.append(f"- Trạng thái hôm nay: {trig}")
