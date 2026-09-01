@@ -24,19 +24,5 @@
       "dispatch_discord_topic_selfcheck.sh": 240
     }
   },
-  "known_red": {
-    "mike/bin/dt5g_writer_watch_selfcheck.sh": {
-      "reason": "ĐÃ TRIAGE, chấp nhận có lý do (Winston, job Winston_20260831_012004). Ca A của selfcheck này CỐ Ý đọc metadata bảng BQ THẬT (không sandbox được lastModifiedTime) ⇒ nó đỏ khi bảng vnindex_5state_dt5g_live có lần ghi NGOÀI cửa sổ writer đã biết. Lần ghi đó là 2026-08-28 19:31:30 ICT = UPDATE THỦ CÔNG ĐÃ USER DUYỆT (backfill asof_date 1 dòng sealed 2026-07-24 sau fix MERGE bug, commit 4bc6d2f4) — KHÔNG phải writer lạ, KHÔNG hỏng dữ liệu: rows=3157 dup_time=0 null_asof=0, lệch 0 so CSV công bố, checksum state+state_raw 9bcc922af79ebc1cb049a55bb39783c2 khớp trước/sau. Ca B/C/D vẫn PASS ⇒ monitor còn nguyên tác dụng. Bỏ 'auto' vì để nguyên thì ops_health_check báo 'CHƯA AI TRIAGE' lặp lại mỗi ngày trong khi câu hỏi đã đóng. TỰ HẾT: ca A xanh lại ngay khi publisher ghi bảng trong cửa sổ 18:25-19:20 ở phiên kế tiếp (Thứ Năm 2026-09-03) — lúc đó selfcheck_baseline_diff.py tự gỡ entry này. Còn đỏ sau 2026-09-04 = có vấn đề THẬT, điều tra lại.",
-      "since": "2026-08-28T19:37:28Z",
-      "status": "FAIL",
-      "topic": "selfcheck-red: mike/bin/dt5g_writer_watch_selfcheck.sh",
-      "escalated_utc": "2026-08-28T19:37:28Z",
-      "ack_pending": false,
-      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng",
-      "triaged_by": "Winston",
-      "triaged_at": "2026-08-31T08:24:19+07:00",
-      "evidence": "bus Mike answer 'dt5g-writer-la-1931-ngoai-moi-cua-so-20260828' 2026-08-30T10:40:31Z (đã đóng) + Mike answer 'selfcheck-red: mike/bin/dt5g_writer_watch_selfcheck.sh' 2026-08-28T19:43:35Z",
-      "expect_green_after": "2026-09-03 (phiên giao dịch kế tiếp, sau lần publish trong cửa sổ)"
-    }
-  }
+  "known_red": {}
 }
