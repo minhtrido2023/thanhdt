@@ -487,3 +487,7 @@
 ## Consolidation 2026-09-01T12:07:02Z
 - [2026-09-01T11:11:22Z] Winston/finding — new-listings-daily: {"date": "2026-09-01", "lookback_days": 90, "total_new": 2, "needs_manual_rating": 0, "fresh_ipo": 0, "research_queue": [], "snapshot": "/home/trido/thanhdt/WorkingClaude/data/new_listings.csv", "note": "0 mã mới < 20Q lịch sử → cần 8L manual rating. Taylor flag để đọc bản cáo bạch + tạo override documented reason+expiry."}
 - [2026-09-01T11:40:07Z] Winston/status — corp-action-scan-daily: {"scanned_universe": "tav2_bq.ticker_prune", "candidates_this_run": 0, "fresh_alerts_this_run": 0, "resolved_since_last_run": [], "still_pending_count": 0, "still_pending": [], "stale_pending_over_7d": []}
+
+## Consolidation 2026-09-01T17:31:54Z
+- [2026-09-01T17:31:09Z] Mike/heartbeat — Mike_20260901_173008: {"status": "still_running", "elapsed_min": 1, "job_id": "Mike_20260901_173008", "source": "watcher"}
+- [2026-09-01T17:31:45Z] Mike/finding — daily-retro-2026-09-01: {"summary": "Retro 2026-09-01: 0 su co, 0 pattern xuyen suot moi. Ngay im lang that su (bot chay dung gio rc=0 ca 2 account, corp-action feed FRESH, 0 dispatch --bg, time-claim-audit count=0). 3 cau hoi pending co san (report-cadence-overdue-weekly, 2x wags-fix-not-confirmed) khong phat sinh moi hom nay, chua vuot nguong escalate.", "draft_file": "state/retro_draft_2026-09-01.md"}
