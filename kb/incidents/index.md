@@ -4,7 +4,7 @@ title: Incidents — Mike fleet (sổ postmortem, cấu trúc OKF)
 owner: Mike fleet (mọi agent ghi; daily_retro.sh ghi entry RETRO hằng đêm)
 format: OKF (Open Knowledge Format) — markdown + YAML frontmatter, 1 sự cố = 1 file
 migrated_from: kb/INCIDENTS.md (single-file 408KB, migrate → OKF 2026-07-30 job Winston_20260730_144031)
-entries: 139 file (88 sự cố + 50 RETRO + 1 mục open-items chung)
+entries: 140 file (88 sự cố + 51 RETRO + 1 mục open-items chung)
 ---
 
 # Incidents — Mike fleet
@@ -210,6 +210,7 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 | 2026-06-22 | [2026-06-22 — Mafee ZOMBIE: systemd reports healthy, agent isn't actually serving](2026-06/2026-06-22-mafee-zombie-systemd-healthy.md) | logged |
 
 ## RETRO hằng ngày (mới nhất trước)
+| 2026-09-01 | [RETRO — 2026-09-01: 0 sự cố, 0 pattern xuyên suốt mới (ngày im lặng thật sự — bot chạy đúng giờ cả 2 account rc=0, corp-action feed FRESH, 0 event error/question mới; Wags GAPS FOUND minor: đếm event 17→19 do job retro tự post heartbeat+finding sau khi draft đếm, và "toàn bộ consolidate" sửa thành "toàn bộ cơ khí/cron")](retro/retro-2026-09-01.md) | logged |
 | 2026-08-31 | [RETRO — 2026-08-31: 1 sự cố, 0 pattern xuyên suốt mới (bus `question` giả để lại từ dev-test buggy của `vn_realestate_monthly_check.py` mới wire, không có đường đóng bằng `answer`/`decision` khi lần chạy sau chỉ post `finding`)](retro/retro-2026-08-31.md) | logged |
 | 2026-08-30 | [RETRO — 2026-08-30: 1 sự cố, 0 pattern xuyên suốt mới (`quant-skeptic_20260830_085357` kẹt status=running 500+ phút dù verdict CONFIRMED đã ghi bus/consolidate xong — biến thể MỚI, call-site cuối, của pattern anti-lying-guard-tự-chặn-chính-chủ đã biết từ 08-09/08-19; 2 ghi nhận phụ dưới ngưỡng: 1 MISS ScheduleWakeup 4%, 1 job cancelled dù việc đã hoàn tất qua Mike manual review)](retro/retro-2026-08-30.md) | logged |
 | 2026-08-29 | [RETRO — 2026-08-29: 6 sự cố, 1 pattern xuyên suốt đã đóng (Pattern A — §29 đọc nhầm kênh bằng chứng lần 4, bus question hardcode-chẩn-đoán ĐÃ ĐÓNG từ 08-28 commit 15c27547 — draft ban đầu tưởng còn mở, Wags GAPS FOUND sửa lại; Pattern C mới ghi nhận — cụm 4 selfcheck-FP khác nguyên nhân bắt cùng 1 lần weekly audit, chưa escalate; dispatch.sh SIGPIPE prompt>64KB mất trọn 1 lần audit 08-22; bq CLI lỗi ra stdout không phải stderr)](retro/retro-2026-08-29.md) | logged |
