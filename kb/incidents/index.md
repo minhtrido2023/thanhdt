@@ -4,7 +4,7 @@ title: Incidents — Mike fleet (sổ postmortem, cấu trúc OKF)
 owner: Mike fleet (mọi agent ghi; daily_retro.sh ghi entry RETRO hằng đêm)
 format: OKF (Open Knowledge Format) — markdown + YAML frontmatter, 1 sự cố = 1 file
 migrated_from: kb/INCIDENTS.md (single-file 408KB, migrate → OKF 2026-07-30 job Winston_20260730_144031)
-entries: 137 file (87 sự cố + 49 RETRO + 1 mục open-items chung)
+entries: 139 file (88 sự cố + 50 RETRO + 1 mục open-items chung)
 ---
 
 # Incidents — Mike fleet
@@ -77,6 +77,8 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 
 | Ngày | Sự cố | status |
 |---|---|---|
+| 2026-08-31 | [2026-08/2026-08-31-rejected-retry-candidate-trace-index.md](2026-08/2026-08-31-rejected-retry-candidate-trace-index.md) | ? |
+| 2026-08-04 | [2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md](2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md) | fixed (monitoring); production-code fix in progress (Taylor job Taylor_20260804_094514) |
 | 2026-08-29 | [2026-08/2026-08-29-dispatch-sigpipe-64kb-prompt-lost-weekly-audit.md](2026-08/2026-08-29-dispatch-sigpipe-64kb-prompt-lost-weekly-audit.md) | ? |
 | 2026-08-29 | [2026-08/2026-08-29-bq-error-on-stdout-empty-diagnosis.md](2026-08/2026-08-29-bq-error-on-stdout-empty-diagnosis.md) | ? |
 | 2026-08-28 | [2026-08/2026-08-28-append-event-json-guard-doan-mo-cat-cut.md](2026-08/2026-08-28-append-event-json-guard-doan-mo-cat-cut.md) | ? |
