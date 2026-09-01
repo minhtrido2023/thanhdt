@@ -470,3 +470,6 @@
 - [2026-09-01T01:20:13Z] Mike/status — ops-health-check-SpaceX-2026-09-01: {"account": "SpaceX", "label": "Trước phiên sáng", "warn_count": 2}
 - [2026-09-01T01:45:06Z] Mike/status — preflight-ZaloPay-2026-09-01: {"result": "RED", "checks": ["✅ BOT_STOP: CLEAR", "❌ Plan ZaloPay 2026-09-01 KHÔNG TÌM THẤY — DollarBill chưa lập plan hoặc BQ stale.", "✅ macro_health: HEALTHY (DT5G_macro, file 17.2h tuổi)", "✅ Gmail OAuth: có refresh_token (tự refresh khi cần)", "⚠️  BQ ticker_prune: lag=4d — giá ref_price trong plan có thể cũ; kiểm tra trước khi đặt lệnh."]}
 - [2026-09-01T01:45:11Z] Mike/status — preflight-SpaceX-2026-09-01: {"result": "RED", "checks": ["✅ BOT_STOP: CLEAR", "❌ Plan SpaceX 2026-09-01 KHÔNG TÌM THẤY — DollarBill chưa lập plan hoặc BQ stale.", "✅ macro_health: HEALTHY (DT5G_macro, file 17.2h tuổi)", "✅ Gmail OAuth: có refresh_token (tự refresh khi cần)", "⚠️  BQ ticker_prune: lag=4d — giá ref_price trong plan có thể cũ; kiểm tra trước khi đặt lệnh."]}
+
+## Consolidation 2026-09-01T02:07:02Z
+- [2026-09-01T02:05:14Z] Mafee/status — bot-done: {"account": "ZaloPay", "plan_date": "2026-09-01", "elapsed_s": 12, "rc": 0}
