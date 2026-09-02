@@ -90,9 +90,17 @@ def find_incomplete_markers(report_path: str) -> list:
 
 # ---------------------------------------------------------------- nguồn (1): broker
 def broker_positions(account_no: str, asof: str) -> dict:
-    """{mã: (qty, costPrice, marketPrice)} từ bản ghi `positions` CUỐI CÙNG của ngày `asof`.
+    """{mã: (qty, costPrice bình quân gia quyền GỘP lô, marketPrice)} từ bản ghi `positions`
+    CUỐI CÙNG của ngày `asof`.
 
     §12: lọc `account_no` TRƯỚC mọi phép tính — file dnse_raw dùng chung mọi tài khoản.
+
+    Gộp NHIỀU LÔ cùng mã (khác `loanPackageId`, vd margin thường + gói CAPIT riêng) — phát hiện
+    2026-09-02 khi dựng báo cáo tháng 08: bản trước GHI ĐÈ theo mã (dict[symbol] = lô cuối cùng
+    trong mảng `positions`), lặng lẽ BỎ mất lô đứng trước — ca thật ZaloPay 08-31: BID
+    107cp(loanPkg 1826)+320cp(1258) → gate chỉ thấy 320cp; MBB 400+252 → chỉ thấy 252cp; VCB
+    200+100 → chỉ thấy 100cp. Không phải test giả định — 3/30 mã ZaloPay bị cắt ngay lần dùng
+    thật đầu tiên.
     """
     path = os.path.join(EXEC_DIR, f"dnse_raw_{asof}.jsonl")
     if not os.path.exists(path):
@@ -112,14 +120,21 @@ def broker_positions(account_no: str, asof: str) -> dict:
             last = rec
     if last is None:
         raise ValueError(f"không có bản ghi positions nào của {account_no} ngày {asof} — CHẶN")
-    out = {}
+    agg = {}   # symbol -> [tổng qty, tổng cost_value, marketPrice (giống nhau mọi lô cùng mã)]
     for p in last["payload"].get("positions", []):
         if str(p.get("accountNo")) != str(account_no):
             continue
         qty = float(p.get("openQuantity") or 0)
         if qty <= 0:
             continue
-        out[p["symbol"]] = (qty, float(p.get("costPrice") or 0), float(p.get("marketPrice") or 0))
+        cp = float(p.get("costPrice") or 0)
+        mp = float(p.get("marketPrice") or 0)
+        a = agg.setdefault(p["symbol"], [0.0, 0.0, mp])
+        a[0] += qty
+        a[1] += qty * cp
+    out = {}
+    for sym, (qty, cost_value, mp) in agg.items():
+        out[sym] = (qty, cost_value / qty, mp)
     return out
 
 
@@ -636,6 +651,32 @@ def _selfcheck() -> int:
         check("thiếu dnse_raw ⇒ fail-closed", "không ném lỗi", "FileNotFoundError")
     except FileNotFoundError:
         check("thiếu dnse_raw ⇒ fail-closed", True, True)
+
+    # 16b: NHIỀU LÔ cùng mã (khác loanPackageId) ⇒ GỘP qty + bình quân gia quyền cost, không
+    # ghi đè mất lô đứng trước (bug thật 2026-09-02, ZaloPay 08-31: BID/MBB/VCB mỗi mã 2 lô).
+    _fake_asof = "9999-01-01"
+    _fake_path = os.path.join(EXEC_DIR, f"dnse_raw_{_fake_asof}.jsonl")
+    with open(_fake_path, "w", encoding="utf-8") as fh:
+        fh.write(json.dumps({
+            "account_no": "0009999999", "kind": "positions",
+            "payload": {"positions": [
+                {"accountNo": "0009999999", "symbol": "XYZ", "marketType": "STOCK",
+                 "openQuantity": 100, "costPrice": 10000.0, "marketPrice": 12000.0,
+                 "loanPackageId": 1},
+                {"accountNo": "0009999999", "symbol": "XYZ", "marketType": "STOCK",
+                 "openQuantity": 300, "costPrice": 11000.0, "marketPrice": 12000.0,
+                 "loanPackageId": 2},
+            ]},
+        }, ensure_ascii=False) + "\n")
+    try:
+        pos = broker_positions("0009999999", _fake_asof)
+        qty, cost, mp = pos["XYZ"]
+        # tổng qty = 100+300=400; cost bình quân = (100*10000+300*11000)/400 = 10750
+        check("multi-lot: gộp tổng qty (100+300, không mất lô đầu)", qty, 400.0)
+        check("multi-lot: cost bình quân gia quyền đúng", round(cost, 4), 10750.0)
+        check("multi-lot: marketPrice giữ nguyên", mp, 12000.0)
+    finally:
+        os.unlink(_fake_path)
 
     # 17-24: chân SỔ PAPER (T1). Logic thuần, chạy offline — không chạm BQ, không chạm cache.
     class _A:                                   # thế thân AdjustedEntry, chỉ các trường T1 đọc
