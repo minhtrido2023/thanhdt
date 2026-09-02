@@ -11,22 +11,22 @@
 - Per-name 5% / sleeve 10% NAV, f≤1.3, %ADV≤10%, exit -20%. Commit 022c48e7.
 - Phễu candidate WIRE (cutoff=70%, trần=1.2), commit 714b5889. TV1/DGC lọt nhưng marginable=NO qua DNSE hiện tại.
 
-## Retro 2026-09-01 — XONG
-kb/incidents/retro/retro-2026-09-01.md, commit a7a2185a. 0 sự cố, 0 pattern mới — ngày im lặng
-thật sự (bot rc=0 cả 2 account, corp-action FRESH). Wags GAPS FOUND minor (2 gap câu chữ, đã
-sửa: đếm event bus 17→19, "toàn bộ consolidate"→"toàn bộ cơ khí/cron"). 3 câu hỏi pending theo
-dõi (không mới hôm nay): report-cadence-overdue-weekly (3d), 2x wags-fix-not-confirmed (3d/1d).
+## Retro 2026-09-02 — XONG
+kb/incidents/retro/retro-2026-09-02.md, commit 60bc61a5. 3 sự cố: (1) paper_checkpoint_escalation
+báo động giả (registry field tổng vs per-gate không đồng bộ khi fill_timing go-live, đã vá
+commit 75dbc7a3), (2) SCL BQ Price vs broker giá lệch — CHƯA điều tra tận gốc, theo dõi tiếp,
+(3) báo cáo tuần 08-24→08-28 thiếu cổ tức 6 mã, chỉ 1/6 (SCL) bị report_return_gate.py chặn — 5
+mã còn lại lọt gate, chỉ người tự rà bắt được → khoảng trống gate THẬT (không phải điểm tích
+cực như draft ban đầu tưởng). 2 pattern theo dõi (chưa đủ 2 lần retro để escalate): Pattern 1
+registry field-sync (2 lần/tuần), Pattern 2 dividend-gate-gap. Wags GAPS FOUND đã sửa vào entry.
 
 ## Vận hành — không có việc treo
-Không circuit breaker trip, không pending_resumes, không bus question mới mở.
+Không circuit breaker trip, không pending_resumes, không bus question mới mở (3 câu cũ đã đóng
+thật trong ngày 09-02, có artifact).
 
 ## Macro watch
-Bobby BĐS VN report xong 08-26 (STRUCTURAL_ACCUMULATION/AMBIGUOUS). Interim monthly check
-tự động hóa xong 08-31 (commit 8a01d08f), cron 20:00 ICT ngày 6 hàng tháng. Review quý
-next ~2026-11-26.
+Bobby BĐS VN report xong 08-26 (STRUCTURAL_ACCUMULATION/AMBIGUOUS). Review quý next ~2026-11-26.
 
 ## Chuỗi crisis-trigger research (30/08-31/08) — ĐÓNG HOÀN TOÀN
-Research-only, không wire gì production. Framework 3-archetype margin-forced/fundamentals
-+ rational-vs-overreaction. EP-2026-01 imbalance BĐS/tín dụng xác nhận không-blind bằng
-Q2/2026 thật. KHÔNG đổi playbook margin/derisk đã chốt 26/08.
+Research-only, không wire gì production. KHÔNG đổi playbook margin/derisk đã chốt 26/08.
 
