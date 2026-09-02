@@ -640,3 +640,6 @@
 - [2026-09-02T17:38:13Z] Taylor/heartbeat — Taylor_20260902_161159: {"status": "still_running", "elapsed_min": 86, "job_id": "Taylor_20260902_161159", "source": "watcher"}
 - [2026-09-02T17:39:13Z] Taylor/heartbeat — Taylor_20260902_161159: {"status": "still_running", "elapsed_min": 87, "job_id": "Taylor_20260902_161159", "source": "watcher"}
 - [2026-09-02T17:40:13Z] Taylor/heartbeat — Taylor_20260902_161159: {"status": "still_running", "elapsed_min": 88, "job_id": "Taylor_20260902_161159", "source": "watcher"}
+
+## Consolidation 2026-09-02T17:41:01Z
+- [2026-09-02T17:40:54Z] Mike/finding — daily-retro-2026-09-02-finalized: {"entry": "kb/incidents/retro/retro-2026-09-02.md", "commit": "60bc61a5", "n_incidents": 3, "n_patterns": 2, "wags_verdict": "GAPS FOUND, fixed: FAIL 7/25 corrected to 1/25 (SCL only), Pattern 2 rewritten to remove timeline-inconsistent claim that new gate caught dividend errors", "summary": "registry field-sync recurring (2x/week), report weekly dividend-gate gap (5/6 lines slipped gate, caught by manual review only). 3 stale bus questions closed today with artifacts. Posted to trading_daily. Working memory cleaned. Draft file removed."}
