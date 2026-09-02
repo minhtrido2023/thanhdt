@@ -499,3 +499,22 @@
 - [2026-09-02T14:45:51Z] Taylor/heartbeat — Taylor_20260902_134640: {"status": "still_running", "elapsed_min": 59, "job_id": "Taylor_20260902_134640", "source": "watcher"}
 - [2026-09-02T14:46:51Z] Taylor/heartbeat — Taylor_20260902_134640: {"status": "still_running", "elapsed_min": 60, "job_id": "Taylor_20260902_134640", "source": "watcher"}
 - [2026-09-02T14:47:51Z] Taylor/heartbeat — Taylor_20260902_134640: {"status": "still_running", "elapsed_min": 61, "job_id": "Taylor_20260902_134640", "source": "watcher"}
+
+## Consolidation 2026-09-02T15:04:49Z
+- [2026-09-02T14:51:02Z] Taylor/heartbeat — Taylor_20260902_145001: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20260902_145001", "source": "watcher"}
+- [2026-09-02T14:52:02Z] Taylor/heartbeat — Taylor_20260902_145001: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20260902_145001", "source": "watcher"}
+- [2026-09-02T14:53:02Z] Taylor/heartbeat — Taylor_20260902_145001: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20260902_145001", "source": "watcher"}
+- [2026-09-02T14:54:02Z] Taylor/heartbeat — Taylor_20260902_145001: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20260902_145001", "source": "watcher"}
+- [2026-09-02T14:55:02Z] Taylor/heartbeat — Taylor_20260902_145001: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20260902_145001", "source": "watcher"}
+- [2026-09-02T14:56:02Z] Taylor/heartbeat — Taylor_20260902_145001: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20260902_145001", "source": "watcher"}
+- [2026-09-02T14:57:03Z] Taylor/heartbeat — Taylor_20260902_145001: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20260902_145001", "source": "watcher"}
+- [2026-09-02T14:58:03Z] Taylor/heartbeat — Taylor_20260902_145001: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20260902_145001", "source": "watcher"}
+- [2026-09-02T14:59:03Z] Taylor/heartbeat — Taylor_20260902_145001: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20260902_145001", "source": "watcher"}
+- [2026-09-02T15:00:04Z] Taylor/heartbeat — Taylor_20260902_145001: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20260902_145001", "source": "watcher"}
+- [2026-09-02T15:01:04Z] Taylor/heartbeat — Taylor_20260902_145001: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20260902_145001", "source": "watcher"}
+- [2026-09-02T15:02:04Z] Taylor/heartbeat — Taylor_20260902_145001: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20260902_145001", "source": "watcher"}
+- [2026-09-02T15:02:50Z] Taylor/heartbeat — Taylor_20260902_145001: {"status": "in_progress", "note": "resumed after max-turns cutoff: monthly report content already filled (428 insertions, sha 9464d365, 0 TBD markers) in previous attempt; report_return_gate.py running now to verify before re-delivery"}
+- [2026-09-02T15:03:05Z] Taylor/heartbeat — Taylor_20260902_145001: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20260902_145001", "source": "watcher"}
+- [2026-09-02T15:03:57Z] Taylor/heartbeat — Taylor_20260902_145001: {"status": "in_progress", "note": "report_return_gate.py --report monthly_2026-08 dang chay (BQ/dividend verify), cho ket qua"}
+- [2026-09-02T15:04:05Z] Taylor/heartbeat — Taylor_20260902_145001: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20260902_145001", "source": "watcher"}
+- [2026-09-02T15:04:27Z] Taylor/heartbeat — Taylor_20260902_145001: {"status": "in_progress", "note": "Viec2 selfcheck xac nhan LIVE: check_report_cadence_selfcheck.py 24/24 PASS, report_return_gate.py --selfcheck 49/49 PASS. Cho ket qua gate that cho monthly report."}
