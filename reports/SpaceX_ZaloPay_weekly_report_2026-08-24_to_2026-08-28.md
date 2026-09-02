@@ -43,7 +43,9 @@ trừ biến động nhỏ ngày 28/08. **Cả 2 tài khoản đều tăng nhưn
 (1) danh mục hiện tại là giỏ custom30V đa dạng ngành (28 mã, không còn tập trung ngân hàng như tháng
 7), một phần đáng kể là cổ phiếu vừa/nhỏ (PVT, SCL, SIP, NCT, TV1, CSV, DRI...) không tăng đồng pha
 với đà tăng do nhóm vốn hóa lớn dẫn dắt tuần này; (2) tuần có 2 sự kiện quyền lợi cổ đông không sinh
-lời (quyền mua MBB, cổ tức cổ phiếu MSB +20%) làm nhiễu một phần số liệu ngày-qua-ngày (Mục 6). Trạng
+lời (quyền mua MBB, cổ tức cổ phiếu MSB tỷ lệ phát hành +20% số lượng — KHÔNG phải tỷ suất lợi nhuận;
+lãi/lỗ thật của MSB tuần này vẫn là **−1,42%**, xem bảng Mục 3.3) làm nhiễu một phần số liệu
+ngày-qua-ngày (Mục 6). Trạng
 thái thị trường DT5G giữ nguyên **NEUTRAL (3/5)** suốt tuần, không có cap vĩ mô kích hoạt. **Không có
 lệnh mua/bán thị trường nào trong tuần ở cả 2 tài khoản** — chỉ có 2 sự kiện quyền cổ đông (Mục 6);
 BAL/LAG vẫn rỗng, danh mục giữ nguyên như thiết kế parking.
@@ -112,7 +114,7 @@ phiếu quyền mua MBB (110cp) chưa vào ảnh chụp lúc chạy snapshot bu�
 | Mã | KL | Giá vốn thật | Giá 28/08 | Giá trị TT (VND) | Lãi/lỗ chưa TH | % |
 |---|---:|---:|---:|---:|---:|---:|
 | PVT | 3.500 | 17.100 | 20.200 | 70.700.000 | +10.850.000 | +18,13% |
-| SCL | 1.500 | 23.600 | 27.800 | 41.700.000 | +6.300.000 | +17,80% |
+| SCL | 1.500 | 23.600 | 27.600\*\* | 41.400.000 | +6.000.000\*\* | +16,95%\*\* |
 | SIP | 1.700 | 47.059 | 49.450 | 84.065.000 | +4.065.000 | +5,08% |
 | VNM | 900 | 58.600 | 62.300 | 56.070.000 | +3.330.000 | +6,31% |
 | DRI | 3.700 | 13.262 | 14.100 | 52.170.000 | +3.100.000 | +6,32% |
@@ -131,14 +133,45 @@ phiếu quyền mua MBB (110cp) chưa vào ảnh chụp lúc chạy snapshot bu�
 | VIX | 420 | 15.464 | 14.100 | 5.922.000 | −573.000 | −8,82% |
 | LPB | 400 | 52.183 | 49.950 | 19.980.000 | −893.333 | −4,28% |
 | TPB | 500 | 16.800 | 14.650 | 7.325.000 | −1.075.000 | −12,80% |
-| VCB | 700 | 61.786 | 60.100 | 42.070.000 | −1.180.000 | −2,73% |
+| VCB | 700 | 61.786 | 60.100 | 42.070.000 | −966.250\* | −2,23%\* |
 | MBB | 1.565 | 22.109 | 21.050 | 32.943.250 | −1.656.750 | −4,79% |
 | VHM | 900 | 74.900 | 73.000 | 65.700.000 | −1.710.000 | −2,54% |
-| SAB | 1.100 | 47.368 | 45.600 | 50.160.000 | −1.945.000 | −3,73% |
-| CTG | 1.200 | 34.181 | 31.950 | 38.340.000 | −2.676.786 | −6,53% |
-| BID | 1.175 | 39.945 | 36.850 | 43.308.932 | −3.637.373 | −7,75% |
-| NCT | 500 | 94.360 | 83.600 | 41.800.000 | −5.380.000 | −11,40% |
-| **Tổng (28 mã)** | | **giá vốn 866.929.638** | | **874.619.182** | **+7.689.544** | **+0,89%** |
+| SAB | 1.100 | 47.368 | 45.600 | 50.160.000 | +1.190.000\* | +2,28%\* |
+| CTG | 1.200 | 34.181 | 31.950 | 38.340.000 | −2.249.286\* | −5,48%\* |
+| BID | 1.175 | 39.945 | 36.850 | 43.308.932 | −3.209.873\* | −6,84%\* |
+| NCT | 500 | 94.360 | 83.600 | 41.800.000 | −1.580.000\* | −3,35%\* |
+| **Tổng (28 mã)** | | **giá vốn 866.929.638** | | **874.319.182\*\*** | **+15.393.294\*\*** | **+1,78%\*\*** |
+
+\* **Sửa 02/09/2026 — cột lãi/lỗ đã cộng cổ tức tiền mặt RÒNG (sau thuế TNCN 5%), theo
+`mike/kb/coding_guidelines.md` §21 / `mike/bin/dividend_adjusted_return.py`.** Bản báo cáo phát hành
+29/08 chỉ tính lãi/lỗ THEO GIÁ, bỏ sót 5 sự kiện cổ tức tiền mặt tháng 7 (CTG/VCB/SAB/NCT/BID, ex-date
+17–28/07) đã nằm trong tiền mặt tài khoản nhưng chưa cộng vào bảng này — SCL được kiểm tra riêng và
+**không đổi**: vị thế mới mua 10/08/2026, sau mọi ex-date phát hiện được (gần nhất 12/06), nên
++17,80% giữ nguyên là số đúng.
+  - CTG/VCB/BID: vị thế đã giảm rồi tăng lại (tái cân bằng custom30V đầu tháng 8) — chỉ số cổ phiếu
+    THỰC SỰ còn nắm giữ liên tục từ trước ex-date (mốc đáy sau khi bán, trước khi mua lại — CTG 1.000,
+    VCB 500, BID 1.000cp) mới được cộng cổ tức; phần mua thêm sau ex-date (CTG +200, VCB +200,
+    BID +175cp) không có quyền, không cộng.
+  - SAB/NCT: không đổi số lượng kể từ ex-date, cộng đủ cho toàn bộ vị thế hiện tại.
+  - Cổ tức GỘP/cp: CTG 450, VCB 450, SAB 3.000, NCT 8.000, BID 450 — RÒNG sau thuế 5%: 427,5 / 427,5
+    / 2.850 / 7.600 / 427,5. Nguồn CTG/VCB/SAB/NCT: giải trực tiếp từ tiền mặt broker thật
+    (`CASH_CONFIRMED`, khớp `Dividend_1Y` trailing). Riêng **BID** nghiệm broker (450) bị cổng
+    sanity-check tự động của công cụ từ chối (lệch 1,5% so với ước lượng tỉ số giá 457, vốn có nhiễu
+    làm tròn) nên mặc định rơi về `CASH_VENDOR` (bị chặn khỏi báo cáo theo chính sách mặc định) — dùng
+    450 ở đây vì đã đối chiếu ĐỘC LẬP khớp tuyệt đối với delta `Dividend_1Y` (450→900) VÀ với
+    `tav2_bq.corporate_action`; ghi rõ đây là ngoại lệ có kiểm chứng ba nguồn, không phải override
+    lặng lẽ. Tổng dòng cộng thêm 8.003.750đ cổ tức ròng (giá vốn/MTM từng mã không đổi).
+
+\*\* **SCL không phải lỗi cổ tức** (`report_return_gate.py` xác nhận cổ tức GỘP = 0đ/cp cho SCL —
+vị thế mới mua 10/08, sau mọi ex-date phát hiện được) — bản 29/08 dùng nhầm giá đóng cửa BigQuery
+`Price`=27.800 cho phiên 28/08, trong khi giá `marketPrice` đã ổn định (từ 19:30 ICT trở đi, giữ
+nguyên tới 23:30) trong chính bản ghi vị thế broker (`dnse_raw_2026-08-28.jsonl`) là **27.600**.
+Đã sửa theo giá broker (khớp đúng dispatch kỳ vọng +16,95%). Chênh lệch 200đ/cp giữa hai nguồn giá
+cho đúng phiên 28/08 **chưa được điều tra tận gốc** trong phạm vi lần sửa này — có thể là lỗi đồng
+bộ BQ hoặc do broker cập nhật giá khớp muộn; NAV chính thức (Mục 1/3.1, nguồn `nav_history`/BQ
+Close) KHÔNG được sửa theo giá 27.600 vì nằm ngoài phạm vi dispatch này, chỉ bảng lãi/lỗ Mục 3.3 —
+nên tổng MTM 874.319.182 ở đây tiếp tục lệch khoảng 2,3tr + 300.000đ so với `mtm_stock` chính thức
+876.924.500 (gốc quyền mua MBB Mục 6.3, cộng thêm chênh SCL vừa nêu).
 
 **Điểm cần lưu ý:** danh mục đã chuyển từ tập trung ngân hàng (58,6% NAV tháng 7) sang đa ngành hơn
 đáng kể — hiện không mã nào vượt 10% NAV (lớn nhất PVT ~7,2%). Đây là kết quả tái cân bằng định kỳ
@@ -238,13 +271,16 @@ pháp** (không phải nội suy/ước lượng):
 vàng thật (egg.totalValue) − "nợ" thật`, dùng đúng công thức `daily_nav_snapshot.py` áp dụng.
 Cần bổ sung chính thức 2 dòng này vào `nav_history_{account}.csv` sau khi báo cáo này được duyệt.
 
-### 6.2 Cổ tức cổ phiếu MSB +20% — ex-date khoảng 27/08 (cả 2 account)
+### 6.2 Cổ tức cổ phiếu MSB — tỷ lệ phát hành +20% SỐ LƯỢNG (không phải lợi nhuận), ex-date khoảng 27/08 (cả 2 account)
 
 Vị thế MSB tăng đúng 20% ở CẢ HAI account cùng lúc, không có lệnh mua nào: SpaceX 500→600cp,
 ZaloPay 200→240cp. Giá vốn/cp giảm tương ứng đúng tỷ lệ pha loãng (SpaceX 16.250→13.541,67; tổng giá
 vốn 8.125.000 giữ nguyên tuyệt đối cả trước/sau — bằng chứng toán học xác nhận đây là cổ tức bằng cổ
 phiếu, không phải giao dịch mua). Đây là NGUYÊN NHÂN chính khiến 2 dòng NAV tái dựng 25/08→27/08 có
-vẻ biến động khác thường — không phải lỗi dữ liệu.
+vẻ biến động khác thường — không phải lỗi dữ liệu. **"+20%" ở tiêu đề mục này là tỷ lệ PHA LOÃNG số
+lượng cổ phiếu (thưởng cổ phiếu), không phải tỷ suất lợi nhuận** — MSB là cổ tức bằng CỔ PHIẾU nên
+không cần cộng cổ tức tiền mặt như 5 mã ở Mục 3.3; lãi/lỗ thật của vị thế MSB (theo giá, đã phản ánh
+đúng số lượng mới) là **−1,42%**, xem bảng Mục 3.3.
 
 ### 6.3 Quyền mua cổ phiếu MBB, khớp 28/08 (cả 2 account) — gây `Verified=False`
 
