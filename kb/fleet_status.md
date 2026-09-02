@@ -1,7 +1,7 @@
-# Fleet status — 2026-09-02T17:41:02 UTC
+# Fleet status — 2026-09-02T18:07:01 UTC
 
 | agent | title (desktop) | kind | status | last_heartbeat | age(min) | current_task |
 |---|---|---|---|---|---|---|
-| Mike | Mike | child | working | 2026-09-02T17:40:57Z | 0 |  |
-| Taylor | taylor-a1 | child | running | 2026-09-02T17:40:01Z | 1 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
-| Wags | Wags | child | working | 2026-09-02T17:38:02Z | 3 |  |
+| Mike | Mike | child | working | 2026-09-02T17:57:13Z | 9 |  |
+| Taylor | Taylor | child | working | 2026-09-02T17:44:52Z | 22 |  |
+| Wags | Wags | child | working | 2026-09-02T17:38:02Z | 28 |  |
