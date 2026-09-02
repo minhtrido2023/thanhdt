@@ -77,6 +77,7 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 
 | Ngày | Sự cố | status |
 |---|---|---|
+| 2026-08-04 | [2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md](2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md) | fixed (monitoring); production-code fix in progress (Taylor job Taylor_20260804_094514) |
 | 2026-08-31 | [2026-08/2026-08-31-rejected-retry-candidate-trace-index.md](2026-08/2026-08-31-rejected-retry-candidate-trace-index.md) | ? |
 | 2026-08-04 | [2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md](2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md) | fixed (monitoring); production-code fix in progress (Taylor job Taylor_20260804_094514) |
 | 2026-08-29 | [2026-08/2026-08-29-dispatch-sigpipe-64kb-prompt-lost-weekly-audit.md](2026-08/2026-08-29-dispatch-sigpipe-64kb-prompt-lost-weekly-audit.md) | ? |
