@@ -5,6 +5,9 @@
 **Ngày lập báo cáo:** 02/09/2026
 **Đối tượng:** Báo cáo hiệu suất & quản lý danh mục — dành cho nhà đầu tư
 
+> 📊 Báo cáo có kèm biểu đồ minh hoạ (NAV, lợi nhuận lũy kế so VN-Index, phân bổ danh mục) — xem
+> bản email để thấy đầy đủ hình ảnh; bản trên kênh chat chỉ hiển thị văn bản.
+
 ---
 
 ## 1. TÓM TẮT ĐIỀU HÀNH

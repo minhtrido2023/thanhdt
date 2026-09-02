@@ -19,6 +19,9 @@
 > quyền mua cổ phiếu MBB chưa kịp đồng bộ vào ảnh chụp vị thế broker (giải trình đầy đủ ở Mục 5).
 > Chi tiết đầy đủ, kể cả phần **chưa giải thích được**, ở Mục 5 và 6 — không làm tròn.
 
+> 📊 Báo cáo có kèm biểu đồ minh hoạ (NAV, lợi nhuận lũy kế so VN-Index, phân bổ danh mục) — xem
+> bản email để thấy đầy đủ hình ảnh; bản trên kênh chat chỉ hiển thị văn bản.
+
 ---
 
 ## 1. TÓM TẮT ĐIỀU HÀNH

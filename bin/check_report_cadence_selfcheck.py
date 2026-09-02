@@ -113,15 +113,34 @@ Q_MONTH = "report-cadence-overdue-monthly_2026-07"
 
 print(f"check_report_cadence_selfcheck — nguồn: {SRC}")
 
-out = run_detector(["SpaceX_ZaloPay_weekly_report_2026-08-03_to_2026-08-07.md"], [Q_WEEK])
-check("#1 happy path: đúng tên file chuẩn ⇒ đóng được",
+out = run_detector(["SpaceX_weekly_report_2026-08-03_to_2026-08-07.md",
+                     "ZaloPay_weekly_report_2026-08-03_to_2026-08-07.md"], [Q_WEEK])
+check("#1 happy path: 2 file per-account chuẩn MỚI (2026-09-02) ⇒ đóng được",
       [c[0] for c in out.get("closable", [])] == ["weekly_2026-08-03_2026-08-07"], str(out))
 
-# ── CA KILLER của arch-review: tên biến thể. Detector im (nó chỉ đọc ngày trong tên), nên
-#    closer BẮT BUỘC phải đóng được — nếu không, question này không còn đường thoát nào.
-out = run_detector(["SpaceX_weekly_report_2026-08-07.md"], [Q_WEEK])
-check("#2 TÊN FILE BIẾN THỂ vẫn đóng được (ca killer coord-2026-08-10)",
+# Tương thích ngược: kỳ CŨ (trước mốc tách) vẫn dùng 1 file gộp — phải tiếp tục đóng được, không
+# thì hàng loạt kỳ lịch sử đột nhiên bị coi là "quá hạn" theo chuẩn mới.
+out = run_detector(["SpaceX_ZaloPay_weekly_report_2026-08-03_to_2026-08-07.md"], [Q_WEEK])
+check("#1b tương thích ngược: 1 file gộp CŨ vẫn đóng được (kỳ trước mốc tách)",
       [c[0] for c in out.get("closable", [])] == ["weekly_2026-08-03_2026-08-07"], str(out))
+
+# ── CA KILLER của arch-review: tên biến thể (hậu tố CORRECTION, có thật trong repo —
+#    SpaceX_ZaloPay_weekly_report_2026-08-10_to_2026-08-14_CORRECTION_VIB.md). Sau khi tách
+#    per-account (2026-09-02), "đã xong" đòi hỏi CẢ HAI file account — chỉ 1 file biến thể của
+#    1 account KHÔNG đủ (đúng, vì account kia vẫn thật sự thiếu). Test lại với ĐỦ CẢ HAI account,
+#    mỗi file mang hậu tố biến thể khác chuẩn `_to_` thẳng — closer vẫn phải đóng được nhờ khớp
+#    theo tiền tố+ngày (substring), không phải tên tuyệt đối.
+out = run_detector(["SpaceX_weekly_report_2026-08-03_to_2026-08-07_CORRECTION.md",
+                     "ZaloPay_weekly_report_2026-08-03_to_2026-08-07_CORRECTION.md"], [Q_WEEK])
+check("#2 TÊN FILE BIẾN THỂ (cả 2 account) vẫn đóng được (ca killer coord-2026-08-10)",
+      [c[0] for c in out.get("closable", [])] == ["weekly_2026-08-03_2026-08-07"], str(out))
+
+# Biến thể của một hình PHẢN đối chứng: chỉ 1 account có file (dù đúng chuẩn) ⇒ KHÔNG đủ, vì
+# account còn lại thật sự chưa có báo cáo nào — đây là hành vi MỚI có chủ đích (trước khi tách
+# per-account, 1 file gộp là đủ cho cả 2 tài khoản).
+out = run_detector(["SpaceX_weekly_report_2026-08-03_to_2026-08-07.md"], [Q_WEEK])
+check("#2b CHỈ 1 account có file ⇒ KHÔNG đóng được (account kia còn thiếu thật)",
+      out.get("closable") == [], str(out))
 
 out = run_detector([], [Q_WEEK])
 check("#3 KHÔNG có báo cáo nào ⇒ KHÔNG đóng (không tự dọn câu hỏi còn thật)",
@@ -132,8 +151,12 @@ out = run_detector(["SpaceX_ZaloPay_weekly_report_2026-07-27_to_2026-07-31.md"],
 check("#4 chỉ có báo cáo kỳ CŨ hơn ⇒ KHÔNG đóng kỳ mới",
       out.get("closable") == [], str(out))
 
+out = run_detector(["SpaceX_monthly_report_2026-07.md", "ZaloPay_monthly_report_2026-07.md"], [Q_MONTH])
+check("#5 monthly: 2 file per-account chuẩn MỚI ⇒ đóng được",
+      [c[0] for c in out.get("closable", [])] == ["monthly_2026-07"], str(out))
+
 out = run_detector(["SpaceX_ZaloPay_monthly_report_2026-07.md"], [Q_MONTH])
-check("#5 monthly: có báo cáo tháng ⇒ đóng được",
+check("#5b tương thích ngược: 1 file gộp CŨ vẫn đóng được",
       [c[0] for c in out.get("closable", [])] == ["monthly_2026-07"], str(out))
 
 out = run_detector(["SpaceX_ZaloPay_monthly_report_2026-06.md"], [Q_MONTH])

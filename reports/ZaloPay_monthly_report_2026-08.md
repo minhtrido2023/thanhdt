@@ -11,6 +11,9 @@
 > Từ kỳ này, ZaloPay và SpaceX có báo cáo RIÊNG — SpaceX là bản client-facing đã lược bỏ chi tiết
 > vận hành nội bộ; ZaloPay là kênh Mike/user tự theo dõi, giữ đầy đủ chi tiết như trước.
 
+> 📊 Báo cáo có kèm biểu đồ minh hoạ (NAV, lợi nhuận lũy kế so VN-Index, phân bổ danh mục) — xem
+> bản email để thấy đầy đủ hình ảnh; bản trên kênh chat chỉ hiển thị văn bản.
+
 ---
 
 ## 1. TÓM TẮT ĐIỀU HÀNH
