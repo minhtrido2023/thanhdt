@@ -42,6 +42,10 @@ mkdir -p "$ROOT/state"
 EMAILED_STATE="$ROOT/state/report_emailed.json"
 [ -f "$EMAILED_STATE" ] || echo '{}' > "$EMAILED_STATE"
 DELIVERY_STATE="$ROOT/state/report_delivery.json"
+# De-dup cho cảnh báo "sweep DELIVERY INCOMPLETE" — 1 lần/file/ngày (mẫu bin/eod_trading_report.sh
+# ALERTED_STATE, arch-review coord-2026-08-31 required_changes #1).
+SWEEP_ALERTED_STATE="$ROOT/state/report_delivery_incomplete_alerted.json"
+[ -f "$SWEEP_ALERTED_STATE" ] || echo '{}' > "$SWEEP_ALERTED_STATE"
 
 # --- Catch-up DELIVERY sweep: cứu report đã tạo nhưng agent dừng/max-turn trước lúc gửi.
 #     Chỉ chọn file chưa có legacy email proof để không phát lại kho lịch sử khi rollout;
@@ -61,8 +65,31 @@ state = json.load(open('$EMAILED_STATE'))
 print('yes' if state.get('$FNAME') else 'no')
 ")"
   if [ "$ALREADY" = "no" ]; then
-    python3 "$ROOT/bin/report_delivery_gate.py" "$f" --topic "$TRADING_REPORT_THREAD" ||
+    if ! python3 "$ROOT/bin/report_delivery_gate.py" "$f" --topic "$TRADING_REPORT_THREAD"; then
       echo "check_report_cadence: DELIVERY INCOMPLETE cho $FNAME — giữ việc mở và tự retry lần sau." >&2
+      # arch-review coord-2026-08-31 (required_changes #1): trước đây CHỈ có dòng >&2 ở trên —
+      # chết trong logs/check_report_cadence.log, không ai thấy trừ khi tự đi đọc log. Cùng khuôn
+      # bin/eod_trading_report.sh:70-73 (append_event.sh error + notify_thread.sh), có de-dup
+      # 1 lần/file/ngày để không spam mỗi lượt cron cho cùng 1 file kẹt.
+      ALREADY_ALERTED="$(python3 -c "
+import json
+state = json.load(open('$SWEEP_ALERTED_STATE'))
+print('yes' if state.get('$FNAME') == '$TODAY' else 'no')
+")"
+      if [ "$ALREADY_ALERTED" = "no" ]; then
+        "$ROOT/bin/append_event.sh" Mike error "report-delivery-incomplete-${FNAME}" \
+          "{\"artifact\":\"${FNAME}\",\"retry\":\"check_report_cadence sweep (hằng ngày)\"}" \
+          2>/dev/null || true
+        "$ROOT/bin/notify_thread.sh" "🔴 **Delivery INCOMPLETE — ${FNAME}** — báo cáo đã tạo nhưng chưa giao đủ (Discord+email, hash-bound). Sweep tự retry mỗi ngày; nếu kéo dài, cần Taylor kiểm tra bin/report_delivery_gate.py --status ${FNAME}." \
+          "$TRADING_REPORT_THREAD" 2>/dev/null || true
+        python3 -c "
+import json
+state = json.load(open('$SWEEP_ALERTED_STATE'))
+state['$FNAME'] = '$TODAY'
+json.dump(state, open('$SWEEP_ALERTED_STATE', 'w'), indent=2, ensure_ascii=False)
+"
+      fi
+    fi
   fi
 done
 
@@ -119,10 +146,28 @@ try:
 except FileNotFoundError:
     delivery_state = {"reports": {}}
 
+# Content-completeness (thêm 2026-09-02, sau vụ báo cáo tháng 08: template tạo 25/08 với 5/10
+# mục còn "[TBD" được delivery gate coi là COMPLETE và giao thật 28/08, TRƯỚC CẢ KHI tháng đóng
+# — vì report_return_gate.py cũ không có phép kiểm nội dung nào, chỉ kiểm tỉ suất NẾU có bảng để
+# kiểm. Marker khớp NGUYÊN VĂN quy ước đang dùng trong reports/*.md — mở rộng nếu thấy quy ước
+# khác, đừng đoán. Cùng danh sách với report_return_gate.py's INCOMPLETE_MARKERS (giữ đồng bộ
+# tay — 2 file khác ngôn ngữ (bash-heredoc-python vs python thuần), không import chéo được).
+INCOMPLETE_MARKERS = ("[TBD", "[chưa điền", "[chua dien", "[placeholder")
+
+def content_complete(path):
+    try:
+        with open(path, encoding="utf-8") as fh:
+            text = fh.read()
+    except OSError:
+        return False
+    return not any(m in text for m in INCOMPLETE_MARKERS)
+
 def delivered(fname):
     path = os.path.join(reports_dir, fname)
     rec = delivery_state.get("reports", {}).get(fname, {})
     if not os.path.isfile(path) or not isinstance(rec, dict):
+        return False
+    if not content_complete(path):
         return False
     with open(path, "rb") as fh:
         sha = hashlib.sha256(fh.read()).hexdigest()
@@ -155,11 +200,16 @@ if scheduled_kind == "weekly":
     candidate_mondays = [this_monday]
 else:
     candidate_mondays = []
-if most_recent_weekly is None:
-    # chưa từng có báo cáo tuần nào — chỉ backfill 1 tuần gần nhất (tránh dispatch runaway lịch sử)
+if most_recent_delivered_weekly is None:
+    # chưa từng có báo cáo tuần nào ĐÃ GIAO XONG — chỉ backfill 1 tuần gần nhất (tránh dispatch
+    # runaway lịch sử)
     start_monday = this_monday - timedelta(days=7)
 else:
-    start_monday = most_recent_weekly + timedelta(days=3)  # thứ Sáu cũ -> thứ Hai tuần kế
+    # arch-review coord-2026-08-31 (required_changes #2): mốc PHẢI là tuần đã GIAO xong
+    # (delivered — sha khớp + Discord + email + không marker TBD), không phải "có file đúng
+    # tên" (most_recent_weekly) — một file tồn tại nhưng bị report_return_gate chặn/chưa gửi sẽ
+    # không còn sinh cảnh báo nào cho các tuần SAU đó nếu neo theo most_recent_weekly.
+    start_monday = most_recent_delivered_weekly + timedelta(days=3)  # thứ Sáu cũ -> thứ Hai tuần kế
 
 # Liệt kê MỌI tuần đã ĐÓNG ĐỦ (qua hết thứ Sáu + buffer 3 ngày) kể từ start_monday — KHÔNG
 # giới hạn bởi "tuần hiện tại" theo weekday(), vì hôm nay có thể là T7/CN và tuần T2-T6 vừa
@@ -197,7 +247,12 @@ if today.day >= 5 or scheduled_kind == "monthly":
         lm_year, lm_num = today.year, today.month - 1
     if (lm_year, lm_num) >= GO_LIVE_MONTH and scheduled_kind != "weekly":
         last_month_str = f"{lm_year}-{lm_num:02d}"
-        has_last_month = any(last_month_str in os.path.basename(f) for f in monthly_files)
+        # arch-review coord-2026-08-31 (required_changes #2, gộp với monthly cùng lỗi 2026-09-02):
+        # "đã xong" = có file ĐÚNG TÊN VÀ đã delivered() (sha khớp + Discord + email + KHÔNG còn
+        # marker TBD) — không phải chỉ SỰ TỒN TẠI FILE. File template rỗng (case tháng 08 thật)
+        # từng khớp "đúng tên" trong khi nội dung còn 5/10 mục "[TBD".
+        has_last_month = any(last_month_str in os.path.basename(f) and delivered(os.path.basename(f))
+                              for f in monthly_files)
         if not has_last_month:
             period_key = f"monthly_{last_month_str}"
             if state.get(period_key) != today_s:

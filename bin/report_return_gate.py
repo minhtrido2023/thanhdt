@@ -69,6 +69,24 @@ DEFAULT_TOL_PP = 0.15        # điểm %; nới hơn sai số làm tròn giá v�
 # review vì nó không đụng gate) sẽ âm thầm vô hiệu hoá gate.
 PAPER_MARKERS = ("AlphaLens Paper Portfolio", "DC Book Paper Portfolio")
 
+# Content-completeness gate (thêm 2026-09-02, sau vụ báo cáo tháng 08 — template tạo 25/08 với
+# 5/10 mục còn "[TBD" bị report_delivery_gate coi là hoàn tất và GIAO THẬT cho user 28/08, TRƯỚC
+# CẢ KHI tháng đóng). report_return_gate PASS trong rỗng vì các mục TBD không có dòng bảng/văn
+# xuôi nào để kiểm — cổng tỉ suất không phải cổng "báo cáo đã điền đủ". Marker khớp NGUYÊN VĂN
+# quy ước đang dùng trong reports/*.md (`[TBD`, `[chưa điền`, `[placeholder`) — mở rộng danh sách
+# này nếu thấy quy ước khác được dùng, đừng đoán.
+INCOMPLETE_MARKERS = ("[TBD", "[chưa điền", "[chua dien", "[placeholder")
+
+
+def find_incomplete_markers(report_path: str) -> list:
+    """[(dòng, nội dung)] cho mọi chỗ báo cáo còn nội dung CHƯA ĐIỀN."""
+    hits = []
+    with open(report_path, encoding="utf-8") as f:
+        for i, line in enumerate(f, 1):
+            if any(m in line for m in INCOMPLETE_MARKERS):
+                hits.append((i, line.strip()))
+    return hits
+
 
 # ---------------------------------------------------------------- nguồn (1): broker
 def broker_positions(account_no: str, asof: str) -> dict:
@@ -385,6 +403,16 @@ def paper_entry_gate(report_path: str, out=sys.stdout) -> tuple:
 
 # ---------------------------------------------------------------- cổng
 def run_gate(report_path: str, tol_pp: float = DEFAULT_TOL_PP, out=sys.stdout) -> int:
+    # Content-completeness TRƯỚC MỌI THỨ: một báo cáo còn "[TBD" không có tỉ suất nào để kiểm
+    # (đó chính là cách nó lọt PASS trong rỗng ở vụ tháng 08), nên phải chặn ở đây trước khi
+    # chân broker/paper thậm chí bắt đầu chạy.
+    incomplete = find_incomplete_markers(report_path)
+    if incomplete:
+        print(f"\n❌ CHẶN — {len(incomplete)} chỗ còn nội dung CHƯA ĐIỀN trong báo cáo:", file=out)
+        for ln, snippet in incomplete:
+            print(f"   • dòng {ln}: {snippet[:160]}", file=out)
+        return 1
+
     # chân sổ paper chạy TRƯỚC và độc lập với chân broker: báo cáo "New deals" mang mục paper
     # nhưng không mang nhãn tài khoản nào, nên nhánh thoát sớm dưới đây sẽ bỏ qua nó.
     paper_applied, paper_fails = paper_entry_gate(report_path, out=out)
@@ -764,6 +792,44 @@ def _selfcheck() -> int:
     crash_msg = notify_calls[0][1] if notify_calls else ""
     check("nhánh CRASH: nội dung alert đúng loại 'crash' (không lẫn 'blocked')",
           ("TỰ CRASH" in crash_msg) and ("BLOCKED by return gate" not in crash_msg), True)
+
+    # 30-32: content-completeness gate (thêm 2026-09-02, vụ báo cáo tháng 08 giao template dở).
+    # Ca 1: có marker TBD ⇒ CHẶN, kể cả khi tên file không mang nhãn tài khoản nào (accounts_
+    # asof_from_name() sẽ ném ValueError cho "SpaceX_ZaloPay_monthly_report_2026-08.md" là bình
+    # thường — completeness phải chặn TRƯỚC bước đó nên không phụ thuộc suy luận tên file).
+    with tempfile.NamedTemporaryFile("w", suffix="_monthly_report_2026-08.md", delete=False,
+                                      encoding="utf-8") as fh:
+        fh.write("## 1. TÓM TẮT ĐIỀU HÀNH\n\n| NAV | *[TBD]* |\n\n## 5. Vĩ mô\nĐã điền đầy đủ.\n")
+        p_tbd = fh.name
+    rc_tbd = run_gate(p_tbd, out=open(os.devnull, "w"))
+    check("content-gate: còn marker TBD ⇒ run_gate() CHẶN (rc=1)", rc_tbd, 1)
+    hits = find_incomplete_markers(p_tbd)
+    check("content-gate: báo đúng dòng chứa marker", [h[0] for h in hits], [3])
+    os.unlink(p_tbd)
+
+    # Ca 2: đầy đủ, không marker nào ⇒ im lặng hoàn toàn ở bước completeness (không tự tạo báo
+    # động giả) — dùng file không mang nhãn tài khoản để không phụ thuộc dnse_raw/BQ thật.
+    with tempfile.NamedTemporaryFile("w", suffix="_report_2026-08-13.md", delete=False,
+                                      encoding="utf-8") as fh:
+        fh.write("## 1. Đã điền đầy đủ\n\nKhông còn chỗ nào bỏ trống.\n")
+        p_full = fh.name
+    check("content-gate: đầy đủ ⇒ find_incomplete_markers() rỗng",
+          find_incomplete_markers(p_full), [])
+    rc_full = run_gate(p_full, out=open(os.devnull, "w"))
+    check("content-gate: đầy đủ + không tài khoản nào trong tên ⇒ run_gate() PASS (rc=0)",
+          rc_full, 0)
+    os.unlink(p_full)
+
+    # Ca 3: chạy 2 lần liên tiếp trên CÙNG file đầy đủ ⇒ vẫn PASS cả 2 lần, không đổi hành vi
+    # theo số lần chạy (gate không có state riêng, nên "không spam" tương đương "idempotent").
+    with tempfile.NamedTemporaryFile("w", suffix="_report_2026-08-14.md", delete=False,
+                                      encoding="utf-8") as fh:
+        fh.write("## Đầy đủ, chạy 2 lần\n")
+        p_twice = fh.name
+    rc1 = run_gate(p_twice, out=open(os.devnull, "w"))
+    rc2 = run_gate(p_twice, out=open(os.devnull, "w"))
+    check("content-gate: chạy 2 lần liên tiếp ⇒ kết quả giống nhau (rc, rc)", (rc1, rc2), (0, 0))
+    os.unlink(p_twice)
 
     print(f"SELFCHECK: {'PASS' if ok else 'FAIL'} ({pass_count}/{len(ran)} ca)")
     return 0 if ok else 1

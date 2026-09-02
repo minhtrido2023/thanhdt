@@ -72,13 +72,19 @@ def detector_block():
     return block
 
 
-def run_detector(report_files, pending_topics, today="2026-08-14", scheduled_kind=""):
-    """Chạy khối detector+closer thật trên một reports_dir giả."""
+def run_detector(report_files, pending_topics, today="2026-08-14", scheduled_kind="",
+                  content_by_file=None):
+    """Chạy khối detector+closer thật trên một reports_dir giả.
+
+    `content_by_file`: {tên file: nội dung} — mặc định "fixture" (đầy đủ, không marker TBD).
+    Dùng để dựng ca file tồn tại nhưng còn "[TBD" (content-completeness, 2026-09-02).
+    """
+    content_by_file = content_by_file or {}
     with tempfile.TemporaryDirectory() as td:
         reports = Path(td) / "mike" / "reports"
         reports.mkdir(parents=True)
         for fn in report_files:
-            (reports / fn).write_text("fixture", encoding="utf-8")
+            (reports / fn).write_text(content_by_file.get(fn, "fixture"), encoding="utf-8")
         state = Path(td) / "state.json"
         state.write_text("{}", encoding="utf-8")
         delivery = Path(td) / "delivery.json"
@@ -157,6 +163,40 @@ out = run_detector([], [], today="2026-08-01", scheduled_kind="monthly")
 check("#9c lượt scheduled-monthly sinh đúng tháng vừa đóng ngay ngày 1",
       [a.get("period_key") for a in out.get("actions", [])]
       == ["monthly_2026-07"], str(out))
+
+
+# ── Content-completeness (2026-09-02, vụ báo cáo tháng 08: template "[TBD" được coi là xong) ──
+TBD_MONTHLY = "SpaceX_ZaloPay_monthly_report_2026-07.md"
+TBD_CONTENT = "## 1. Tóm tắt\n\n| NAV | *[TBD]* |\n\n## 5. Vĩ mô\nĐã điền đầy đủ.\n"
+FULL_CONTENT = "## 1. Tóm tắt\n\nĐã điền đầy đủ, không còn chỗ nào bỏ trống.\n"
+
+# Ca 1: file tồn tại NHƯNG còn marker TBD ⇒ detector vẫn coi là THIẾU (sinh action monthly,
+# closable KHÔNG đóng question) — giống hệt vụ thật: file có mặt không còn đủ để tắt cảnh báo.
+out = run_detector([TBD_MONTHLY], [Q_MONTH], today="2026-08-14",
+                    content_by_file={TBD_MONTHLY: TBD_CONTENT})
+check("#18 file có marker TBD ⇒ vẫn sinh action (coi như overdue, KHÔNG coi là đã xong)",
+      any(a.get("period_key") == "monthly_2026-07" for a in out.get("actions", [])), str(out))
+check("#18b file có marker TBD ⇒ KHÔNG đóng được question (chưa xong thật)",
+      out.get("closable") == [], str(out))
+
+# Ca 2: file đầy đủ, ledger COMPLETE, không TBD ⇒ im lặng hoàn toàn (không action, đóng được
+# question nếu có) — hành vi giống #5 nhưng khẳng định tường minh bằng nội dung THẬT đã qua
+# content_complete(), không chỉ nhờ ledger.
+out = run_detector([TBD_MONTHLY], [Q_MONTH], today="2026-08-14",
+                    content_by_file={TBD_MONTHLY: FULL_CONTENT})
+check("#19 file đầy đủ + ledger COMPLETE ⇒ KHÔNG sinh action (im lặng, không báo động giả)",
+      not any(a.get("period_key") == "monthly_2026-07" for a in out.get("actions", [])), str(out))
+check("#19b file đầy đủ + ledger COMPLETE ⇒ đóng được question cũ",
+      [c[0] for c in out.get("closable", [])] == ["monthly_2026-07"], str(out))
+
+# Ca 3: chạy 2 lần liên tiếp trên CÙNG input ⇒ kết quả giống hệt nhau (không tự trôi, không tự
+# nhân đôi action/closable giữa các lần chạy — detector không giữ state ẩn nào giữa lần gọi).
+out_a = run_detector([TBD_MONTHLY], [Q_MONTH], today="2026-08-14",
+                      content_by_file={TBD_MONTHLY: FULL_CONTENT})
+out_b = run_detector([TBD_MONTHLY], [Q_MONTH], today="2026-08-14",
+                      content_by_file={TBD_MONTHLY: FULL_CONTENT})
+check("#20 chạy 2 lần liên tiếp cùng input ⇒ actions+closable giống hệt nhau (không spam/không giao trùng)",
+      out_a == out_b, f"a={out_a} b={out_b}")
 
 
 # ── Phần 2: danh sách "còn treo" lấy từ matcher CHÍNH THỐNG (bus_question_audit.py) ─────
