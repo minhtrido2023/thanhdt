@@ -585,3 +585,41 @@
 - [2026-09-02T17:04:09Z] Taylor/heartbeat — Taylor_20260902_161159: {"status": "still_running", "elapsed_min": 52, "job_id": "Taylor_20260902_161159", "source": "watcher"}
 - [2026-09-02T17:05:09Z] Taylor/heartbeat — Taylor_20260902_161159: {"status": "still_running", "elapsed_min": 53, "job_id": "Taylor_20260902_161159", "source": "watcher"}
 - [2026-09-02T17:06:09Z] Taylor/heartbeat — Taylor_20260902_161159: {"status": "still_running", "elapsed_min": 54, "job_id": "Taylor_20260902_161159", "source": "watcher"}
+
+## Consolidation 2026-09-02T17:34:19Z
+- [2026-09-02T17:31:08Z] Mike/heartbeat — Mike_20260902_173008: {"status": "still_running", "elapsed_min": 1, "job_id": "Mike_20260902_173008", "source": "watcher"}
+- [2026-09-02T17:32:08Z] Mike/heartbeat — Mike_20260902_173008: {"status": "still_running", "elapsed_min": 2, "job_id": "Mike_20260902_173008", "source": "watcher"}
+- [2026-09-02T17:33:09Z] Mike/heartbeat — Mike_20260902_173008: {"status": "still_running", "elapsed_min": 3, "job_id": "Mike_20260902_173008", "source": "watcher"}
+- [2026-09-02T17:34:09Z] Mike/heartbeat — Mike_20260902_173008: {"status": "still_running", "elapsed_min": 4, "job_id": "Mike_20260902_173008", "source": "watcher"}
+- [2026-09-02T17:34:12Z] Mike/finding — daily-retro-draft-2026-09-02: {"draft": "state/retro_draft_2026-09-02.md", "n_incidents": 3, "n_patterns": 2, "summary": "1) fill_timing checkpoint escalation gia (registry field khong dong bo, 2 lan trong 1 tuan cung Pattern A retro-08-28); 2) SCL BQ Price vs broker gia lech, chua dieu tra tan goc; 3) weekly report FAIL 7/25 gate truoc khi sua (co tuc+entitled-qty, gate content-completeness moi bat duoc dung ngay); 3 bus question ton dong deu da dong that hom nay, 0 pending; wakeup compliance 3/3, time-claim-audit=0"}
+- [2026-09-02T17:07:09Z] Taylor/heartbeat — Taylor_20260902_161159: {"status": "still_running", "elapsed_min": 55, "job_id": "Taylor_20260902_161159", "source": "watcher"}
+- [2026-09-02T17:08:09Z] Taylor/heartbeat — Taylor_20260902_161159: {"status": "still_running", "elapsed_min": 56, "job_id": "Taylor_20260902_161159", "source": "watcher"}
+- [2026-09-02T17:09:10Z] Taylor/heartbeat — Taylor_20260902_161159: {"status": "still_running", "elapsed_min": 57, "job_id": "Taylor_20260902_161159", "source": "watcher"}
+- [2026-09-02T17:10:10Z] Taylor/heartbeat — Taylor_20260902_161159: {"status": "still_running", "elapsed_min": 58, "job_id": "Taylor_20260902_161159", "source": "watcher"}
+- [2026-09-02T17:10:47Z] Taylor/finding — check_report_cadence-updated-for-per-account-split: {"file": "mike/bin/check_report_cadence.sh", "change": "detector+closer gio doi hoi CA HAI file per-account (SpaceX_{kind}_report_... + ZaloPay_{kind}_report_...) delivered() moi coi 1 ky la XONG, thay vi 1 file gop nhu truoc", "backward_compat": "fallback giu nguyen: file gop cu SpaceX_ZaloPay_*_report_*.md van duoc coi la XONG cho cac ky LICH SU (truoc moc tach 2026-08-24) - khong backfill trang lich su", "prompt_rewrite": "2 PROMPT dispatch (weekly/monthly) viet lai: bat buoc 2 file rieng, SpaceX sanitize client-facing (cam tu jobs/dispatch/gate/bug/circuit breaker/cron), ZaloPay giu day du noi bo, bat buoc dung mike/bin/report_charts.py sinh 3 chart/account nhung vao markdown, luu y gioi han Discord khong dinh kem file (chart chi trong email)", "new_tool": "mike/bin/report_charts.py (matplotlib PNG tinh, khong tuong tac)", "selfcheck": "mike/bin/check_report_cadence_selfcheck.py cap nhat fixture cho scheme moi (test #1/#1b/#2/#2b/#5/#5b) - PASS 27/27 (them 3 test moi so voi 24 cu)", "verified": "bash -n OK, selfcheck PASS 27/27, KHONG chay live check_report_cadence.sh (co side-effect that: Discord/email/dispatch that) de tranh kich hoat ngoai y muon - cron se tu chay dung lich"}
+- [2026-09-02T17:11:10Z] Taylor/heartbeat — Taylor_20260902_161159: {"status": "still_running", "elapsed_min": 59, "job_id": "Taylor_20260902_161159", "source": "watcher"}
+- [2026-09-02T17:11:49Z] Taylor/heartbeat — Taylor_20260902_161159: {"status": "in_progress", "note": "phat hien thieu dong luu y Discord/email cho chart (yeu cau muc 5) - da them vao ca 4 file, dang chay lai return+delivery gate (sha moi)"}
+- [2026-09-02T17:12:02Z] Taylor/status — Taylor_20260902_161159: {"status": "deadline_extended", "hb_age_s": 13, "extension": 1, "max_ext": 3, "source": "watcher"}
+- [2026-09-02T17:12:10Z] Taylor/heartbeat — Taylor_20260902_161159: {"status": "still_running", "elapsed_min": 60, "job_id": "Taylor_20260902_161159", "source": "watcher"}
+- [2026-09-02T17:13:10Z] Taylor/heartbeat — Taylor_20260902_161159: {"status": "still_running", "elapsed_min": 61, "job_id": "Taylor_20260902_161159", "source": "watcher"}
+- [2026-09-02T17:14:10Z] Taylor/heartbeat — Taylor_20260902_161159: {"status": "still_running", "elapsed_min": 62, "job_id": "Taylor_20260902_161159", "source": "watcher"}
+- [2026-09-02T17:15:10Z] Taylor/heartbeat — Taylor_20260902_161159: {"status": "still_running", "elapsed_min": 63, "job_id": "Taylor_20260902_161159", "source": "watcher"}
+- [2026-09-02T17:16:10Z] Taylor/heartbeat — Taylor_20260902_161159: {"status": "still_running", "elapsed_min": 64, "job_id": "Taylor_20260902_161159", "source": "watcher"}
+- [2026-09-02T17:17:11Z] Taylor/heartbeat — Taylor_20260902_161159: {"status": "still_running", "elapsed_min": 65, "job_id": "Taylor_20260902_161159", "source": "watcher"}
+- [2026-09-02T17:18:11Z] Taylor/heartbeat — Taylor_20260902_161159: {"status": "still_running", "elapsed_min": 66, "job_id": "Taylor_20260902_161159", "source": "watcher"}
+- [2026-09-02T17:19:11Z] Taylor/heartbeat — Taylor_20260902_161159: {"status": "still_running", "elapsed_min": 67, "job_id": "Taylor_20260902_161159", "source": "watcher"}
+- [2026-09-02T17:20:11Z] Taylor/heartbeat — Taylor_20260902_161159: {"status": "still_running", "elapsed_min": 68, "job_id": "Taylor_20260902_161159", "source": "watcher"}
+- [2026-09-02T17:21:11Z] Taylor/heartbeat — Taylor_20260902_161159: {"status": "still_running", "elapsed_min": 69, "job_id": "Taylor_20260902_161159", "source": "watcher"}
+- [2026-09-02T17:22:11Z] Taylor/heartbeat — Taylor_20260902_161159: {"status": "still_running", "elapsed_min": 70, "job_id": "Taylor_20260902_161159", "source": "watcher"}
+- [2026-09-02T17:23:11Z] Taylor/heartbeat — Taylor_20260902_161159: {"status": "still_running", "elapsed_min": 71, "job_id": "Taylor_20260902_161159", "source": "watcher"}
+- [2026-09-02T17:24:11Z] Taylor/heartbeat — Taylor_20260902_161159: {"status": "still_running", "elapsed_min": 72, "job_id": "Taylor_20260902_161159", "source": "watcher"}
+- [2026-09-02T17:25:11Z] Taylor/heartbeat — Taylor_20260902_161159: {"status": "still_running", "elapsed_min": 73, "job_id": "Taylor_20260902_161159", "source": "watcher"}
+- [2026-09-02T17:26:12Z] Taylor/heartbeat — Taylor_20260902_161159: {"status": "still_running", "elapsed_min": 74, "job_id": "Taylor_20260902_161159", "source": "watcher"}
+- [2026-09-02T17:27:12Z] Taylor/heartbeat — Taylor_20260902_161159: {"status": "still_running", "elapsed_min": 75, "job_id": "Taylor_20260902_161159", "source": "watcher"}
+- [2026-09-02T17:28:12Z] Taylor/heartbeat — Taylor_20260902_161159: {"status": "still_running", "elapsed_min": 76, "job_id": "Taylor_20260902_161159", "source": "watcher"}
+- [2026-09-02T17:29:12Z] Taylor/heartbeat — Taylor_20260902_161159: {"status": "still_running", "elapsed_min": 77, "job_id": "Taylor_20260902_161159", "source": "watcher"}
+- [2026-09-02T17:30:12Z] Taylor/heartbeat — Taylor_20260902_161159: {"status": "still_running", "elapsed_min": 78, "job_id": "Taylor_20260902_161159", "source": "watcher"}
+- [2026-09-02T17:31:12Z] Taylor/heartbeat — Taylor_20260902_161159: {"status": "still_running", "elapsed_min": 79, "job_id": "Taylor_20260902_161159", "source": "watcher"}
+- [2026-09-02T17:32:12Z] Taylor/heartbeat — Taylor_20260902_161159: {"status": "still_running", "elapsed_min": 80, "job_id": "Taylor_20260902_161159", "source": "watcher"}
+- [2026-09-02T17:33:13Z] Taylor/heartbeat — Taylor_20260902_161159: {"status": "still_running", "elapsed_min": 81, "job_id": "Taylor_20260902_161159", "source": "watcher"}
+- [2026-09-02T17:34:13Z] Taylor/heartbeat — Taylor_20260902_161159: {"status": "still_running", "elapsed_min": 82, "job_id": "Taylor_20260902_161159", "source": "watcher"}
