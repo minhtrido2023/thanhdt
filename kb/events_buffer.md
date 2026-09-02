@@ -363,3 +363,40 @@
 ## Consolidation 2026-09-02T12:07:02Z
 - [2026-09-02T11:11:24Z] Winston/finding — new-listings-daily: {"date": "2026-09-02", "lookback_days": 90, "total_new": 2, "needs_manual_rating": 0, "fresh_ipo": 0, "research_queue": [], "snapshot": "/home/trido/thanhdt/WorkingClaude/data/new_listings.csv", "note": "0 mã mới < 20Q lịch sử → cần 8L manual rating. Taylor flag để đọc bản cáo bạch + tạo override documented reason+expiry."}
 - [2026-09-02T11:40:08Z] Winston/status — corp-action-scan-daily: {"scanned_universe": "tav2_bq.ticker_prune", "candidates_this_run": 0, "fresh_alerts_this_run": 0, "resolved_since_last_run": [], "still_pending_count": 0, "still_pending": [], "stale_pending_over_7d": []}
+
+## Consolidation 2026-09-02T13:07:02Z
+- [2026-09-02T12:38:22Z] Mike/answer — wags-fix-not-confirmed: coord-2026-08-29: {"resolution": "diagnosis_evidence_gate vong 2 (Taylor, commit 68675ba7) da lam dung 5 required_changes cua arch-review vong 1: nới DISCARD/DIAG bao het idiom repo dùng thật, mutation harness chuyển sang mkdtemp (không ghi đè production), sửa docstring, ghi lại 2 gap còn mở vào bus/kb. Taylor tái lập độc lập: 0 FP/100 file, fire đúng dòng 108 case thật, selfcheck 23/23 PASS x4 môi trường, --mutations 13/13 KILLED, sha256 file production không đổi. Verdict CONFIRMED, confidence high.", "evidence": "commit 68675ba7; bus finding 'diag-evidence-gate vong 2' (Taylor, 2026-08-28T21:33:38Z, verdict CONFIRMED)", "resolves": ["Wags/wags-fix-not-confirmed: coord-2026-08-29"], "closed_by": "Mike", "source_topic": "diag-evidence-gate vong 2: noi be rong 4 hinh dang + mutation harness thoi ghi de file production (68675ba7)"}
+- [2026-09-02T12:39:19Z] Taylor/heartbeat — Taylor_20260902_123905: {"status": "in_progress", "note": "bat dau: doc report file + dividend_adjusted_return.py, chuan bi chay BQ query that"}
+- [2026-09-02T12:40:07Z] Taylor/heartbeat — Taylor_20260902_123905: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20260902_123905", "source": "watcher"}
+- [2026-09-02T12:40:09Z] Taylor/heartbeat — Taylor_20260902_123905: {"status": "in_progress", "note": "da doc report + tool; chuan bi chay dividend_adjusted_return.py --resolve cho SCL,VCB,SAB,CTG,BID,NCT,MSB tu 2026-07-01 den 2026-08-28"}
+- [2026-09-02T12:41:07Z] Taylor/heartbeat — Taylor_20260902_123905: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20260902_123905", "source": "watcher"}
+- [2026-09-02T12:42:07Z] Taylor/heartbeat — Taylor_20260902_123905: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20260902_123905", "source": "watcher"}
+- [2026-09-02T12:43:07Z] Taylor/heartbeat — Taylor_20260902_123905: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20260902_123905", "source": "watcher"}
+- [2026-09-02T12:44:07Z] Taylor/heartbeat — Taylor_20260902_123905: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20260902_123905", "source": "watcher"}
+- [2026-09-02T12:45:07Z] Taylor/heartbeat — Taylor_20260902_123905: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20260902_123905", "source": "watcher"}
+- [2026-09-02T12:46:07Z] Taylor/heartbeat — Taylor_20260902_123905: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20260902_123905", "source": "watcher"}
+- [2026-09-02T12:46:57Z] Taylor/heartbeat — Taylor_20260902_123905: {"status": "in_progress", "note": "BQ resolve xong: CTG/VCB/SAB/NCT/BID co co tuc tien mat thang7 chua cong; SCL kiem tra ky khong co su kien ap dung (mua 08-10, sau moi ex-date); dang tinh entitled-qty (trough) cho CTG/VCB/BID vi qty doi sau ex-date do rebalance dau thang8"}
+- [2026-09-02T12:47:08Z] Taylor/heartbeat — Taylor_20260902_123905: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20260902_123905", "source": "watcher"}
+- [2026-09-02T12:48:08Z] Taylor/heartbeat — Taylor_20260902_123905: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20260902_123905", "source": "watcher"}
+- [2026-09-02T12:49:08Z] Taylor/heartbeat — Taylor_20260902_123905: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20260902_123905", "source": "watcher"}
+- [2026-09-02T12:50:09Z] Taylor/heartbeat — Taylor_20260902_123905: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20260902_123905", "source": "watcher"}
+- [2026-09-02T12:51:09Z] Taylor/heartbeat — Taylor_20260902_123905: {"status": "in_progress", "note": "da sua 5 dong so lieu + footnote + MSB clarify; dang chay report_return_gate.py doc lap de xac nhan (query BQ, can nhieu thoi gian hon)"}
+- [2026-09-02T12:51:09Z] Taylor/heartbeat — Taylor_20260902_123905: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20260902_123905", "source": "watcher"}
+- [2026-09-02T12:52:09Z] Taylor/heartbeat — Taylor_20260902_123905: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20260902_123905", "source": "watcher"}
+- [2026-09-02T12:53:10Z] Taylor/heartbeat — Taylor_20260902_123905: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20260902_123905", "source": "watcher"}
+- [2026-09-02T12:54:10Z] Taylor/heartbeat — Taylor_20260902_123905: {"status": "still_running", "elapsed_min": 15, "job_id": "Taylor_20260902_123905", "source": "watcher"}
+- [2026-09-02T12:55:11Z] Taylor/heartbeat — Taylor_20260902_123905: {"status": "still_running", "elapsed_min": 16, "job_id": "Taylor_20260902_123905", "source": "watcher"}
+- [2026-09-02T12:56:11Z] Taylor/heartbeat — Taylor_20260902_123905: {"status": "still_running", "elapsed_min": 17, "job_id": "Taylor_20260902_123905", "source": "watcher"}
+- [2026-09-02T12:57:11Z] Taylor/heartbeat — Taylor_20260902_123905: {"status": "still_running", "elapsed_min": 18, "job_id": "Taylor_20260902_123905", "source": "watcher"}
+- [2026-09-02T12:57:13Z] Taylor/heartbeat — Taylor_20260902_123905: {"status": "in_progress", "note": "report_return_gate.py dang chay nen (~5+ phut, nhieu BQ subprocess call cho 27 ma), dang cho xong that su khong bo cuoc som"}
+- [2026-09-02T12:58:11Z] Taylor/heartbeat — Taylor_20260902_123905: {"status": "still_running", "elapsed_min": 19, "job_id": "Taylor_20260902_123905", "source": "watcher"}
+- [2026-09-02T12:59:11Z] Taylor/heartbeat — Taylor_20260902_123905: {"status": "still_running", "elapsed_min": 20, "job_id": "Taylor_20260902_123905", "source": "watcher"}
+- [2026-09-02T13:00:11Z] Taylor/heartbeat — Taylor_20260902_123905: {"status": "still_running", "elapsed_min": 21, "job_id": "Taylor_20260902_123905", "source": "watcher"}
+- [2026-09-02T13:01:11Z] Taylor/heartbeat — Taylor_20260902_123905: {"status": "still_running", "elapsed_min": 22, "job_id": "Taylor_20260902_123905", "source": "watcher"}
+- [2026-09-02T13:02:11Z] Taylor/heartbeat — Taylor_20260902_123905: {"status": "still_running", "elapsed_min": 23, "job_id": "Taylor_20260902_123905", "source": "watcher"}
+- [2026-09-02T13:03:07Z] Taylor/heartbeat — Taylor_20260902_123905: {"status": "in_progress", "note": "tim ra goc SCL: khong phai co tuc (gate xac nhan GOP=0d/cp) ma la sai gia dong cua - BQ Price 27800 vs broker marketPrice settled 27600 (khop dung ky vong dispatch 16.95%). Da sua ca 6 dong + tong + footnote. Dang chay lai report_return_gate.py de xac nhan PASS"}
+- [2026-09-02T13:03:12Z] Taylor/heartbeat — Taylor_20260902_123905: {"status": "still_running", "elapsed_min": 24, "job_id": "Taylor_20260902_123905", "source": "watcher"}
+- [2026-09-02T13:04:08Z] Taylor/status — Taylor_20260902_123905: {"status": "deadline_extended", "hb_age_s": 61, "extension": 1, "max_ext": 3, "source": "watcher"}
+- [2026-09-02T13:04:12Z] Taylor/heartbeat — Taylor_20260902_123905: {"status": "still_running", "elapsed_min": 25, "job_id": "Taylor_20260902_123905", "source": "watcher"}
+- [2026-09-02T13:05:12Z] Taylor/heartbeat — Taylor_20260902_123905: {"status": "still_running", "elapsed_min": 26, "job_id": "Taylor_20260902_123905", "source": "watcher"}
+- [2026-09-02T13:06:12Z] Taylor/heartbeat — Taylor_20260902_123905: {"status": "still_running", "elapsed_min": 27, "job_id": "Taylor_20260902_123905", "source": "watcher"}
