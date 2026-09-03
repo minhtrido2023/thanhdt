@@ -31,3 +31,4 @@ Bobby BĐS VN report xong 08-26 (STRUCTURAL_ACCUMULATION/AMBIGUOUS). Review quý
 Research-only, không wire gì production. KHÔNG đổi playbook margin/derisk đã chốt 26/08.
 
 - [2026-09-03T10:32:16Z] ARIA (Automated Research & Intelligence Analytics) = tên vận hành chính thức của hệ thống, duyệt 2026-09-03. Dùng trong email gửi nhà đầu tư bên ngoài. Wire: render_report_html.py header + footer (commit fb5caaba worktree session/1522576692638388364).
+- [2026-09-03T15:09:40Z] Mania research chuỗi 2: job Taylor_20260903_150931 (bg, 2h) — Phần 1: mania 2006+2007 (descriptive, universe quá mỏng cho detector chuẩn); Phần 2: formal hoá 'cracking mania' detector (divergence + sector concentration, phải bắt được 2022-01). User xác nhận cả 2 hướng đáng đào sâu. Thread 1545082018612908103.
