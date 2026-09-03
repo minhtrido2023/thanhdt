@@ -162,6 +162,40 @@ _dt_gate_block() {
   [ -n "$out" ] && printf '\n%s' "$out"
 }
 
+# --- Văn phong investor-facing cho SpaceX (job Taylor_20260903_144623) -------------------
+# SpaceX = tài khoản dành cho nhà đầu tư ngoài; ZaloPay giữ nguyên văn phong vận hành nội bộ
+# hiện có (không đổi). Hàm này CHỈ đổi CÁCH TRÌNH BÀY của chuỗi văn bản cuối cùng — không
+# đụng tới bất kỳ phép tính/logic đối soát/escalation nào phía trên. Lọc bỏ các dòng tín hiệu
+# định lượng nội bộ (Gate DT4/Value Radar/spread định giá/CAP_SIGNAL advisory — monthly/weekly
+# investor-facing vốn không hiển thị các dòng này) và diễn giải lại 1-2 câu còn mang thuật ngữ
+# vận hành (tên script/log nội bộ) sang câu văn phổ thông, giữ nguyên số liệu.
+_investor_polish() {
+  if [ "$ACCOUNT" != "SpaceX" ]; then
+    cat
+    return
+  fi
+  sed -E \
+    -e 's/📊 \*\*EOD Trading Report — SpaceX/📈 **Báo cáo giao dịch ngày — SpaceX/' \
+    -e 's/Bot đã trực phiên đồng bộ trạng thái\./Không phát sinh giao dịch mới trong phiên hôm nay theo kế hoạch đã duyệt trước đó\./' \
+    -e 's/verify_account_snapshot \(cross-check journal\) rc=[0-9]+ — NAV vẫn tính từ vị thế broker thật; cần xem cost-basis\/đối soát riêng\./Số liệu NAV được tính trực tiếp từ vị thế và số dư thực tại công ty chứng khoán lưu ký tài khoản\./' \
+    -e 's/Đối soát broker: fill thật khớp đúng state nội bộ, không lệch\./Đã đối chiếu số liệu khớp lệnh trong ngày với công ty chứng khoán, khớp đúng\./' \
+    -e 's/Leg 3 \(statement DNSE, độc lập với state\/dnse_raw\): số khớp trùng khớp state nội bộ, không có fill ngoài kế hoạch\./Đã đối chiếu độc lập với sao kê giao dịch của công ty chứng khoán, số khớp lệnh trùng khớp, không phát sinh giao dịch ngoài kế hoạch\./' \
+    -e 's/Không đối soát được \(không có dnse_raw log — bình thường nếu account paper\)\./ /' \
+    -e 's/\*\*CẢNH BÁO ĐỐI SOÁT — FILL THẬT \(broker\) ≠ STATE NỘI BỘ\*\* — khả năng có tiến trình chạy trùng hoặc lỗi đồng bộ:/**Đang xác minh lại số liệu khớp lệnh** — phát hiện chênh lệch giữa số liệu nội bộ và xác nhận từ công ty chứng khoán, đội ngũ đang đối chiếu:/' \
+    -e 's/👉 Kiểm tra ngay — xem có process bot_execute\.py trùng lặp, hoặc đối chiếu dnse_raw_[^ ]* thủ công\./👉 Số liệu NAV\/vị thế cuối kỳ vẫn lấy từ dữ liệu thực tại công ty chứng khoán lưu ký, không bị ảnh hưởng bởi chênh lệch tạm thời này\./' \
+    -e 's/\bgate\b/ngưỡng lọc/g' \
+    -e 's/\bcircuit breaker\b/cơ chế dừng khẩn cấp/gI' \
+    -e 's/\bdispatch\b/điều phối nội bộ/gI' \
+    -e 's/\bbug\b/lỗi kỹ thuật/gI' \
+    -e 's/sự cố/sự kiện cần theo dõi/g' \
+  | awk '
+      /^🛰️|^🧭|^💵|^🧲/ { skip_next=1; next }
+      skip_next && /^ *↳/ { skip_next=0; next }
+      { skip_next=0; print }
+    ' \
+  | sed -E '/^ *$/{ N; /^\n *$/D }'
+}
+
 # Mọi ngày PHẢI có 1 dòng báo cho account này — "im lặng" không phân biệt được với hệ
 # thống chết (user 2026-07-07). Trước đây "plan hoặc state thiếu" gộp chung 1 case rồi bỏ
 # qua — bug thật hôm nay: plan HOLD (0 lệnh) khiến bot_execute.py thoát ngay KHÔNG tạo
@@ -178,7 +212,11 @@ if [ ! -f "$PLAN_FILE" ]; then
   # (vd ZaloPay 2026-07-14: transition xong 07-13, không phát sinh lệnh — bản cũ khẳng
   # định chắc "KHÔNG phải ngày nghỉ bình thường" là kết luận sai, fix 2026-07-14).
   # Không có bằng chứng → nêu cả 2 khả năng, để người đọc xác nhận, không buộc kết luận.
-  MSG="🟡 **EOD $ACCOUNT ($PLAN_DATE)** — KHÔNG TÌM THẤY file plan hôm nay. 2 khả năng: (i) CHỦ ĐỘNG không lập plan cho account này (quyết định HOLD có chủ đích — bình thường), hoặc (ii) DollarBill lỗi lúc 17:30/19:30 hôm qua. Kiểm tra plan channel / bus để xác nhận là chủ động hay lỗi — báo cáo này không đủ bằng chứng tự kết luận."
+  if [ "$ACCOUNT" = "SpaceX" ]; then
+    MSG="🟡 **Báo cáo giao dịch ngày — SpaceX ($PLAN_DATE)** — Chưa ghi nhận kế hoạch giao dịch cho phiên hôm nay. Đội ngũ quản lý danh mục đang xác nhận và sẽ cập nhật báo cáo sớm nhất có thể."
+  else
+    MSG="🟡 **EOD $ACCOUNT ($PLAN_DATE)** — KHÔNG TÌM THẤY file plan hôm nay. 2 khả năng: (i) CHỦ ĐỘNG không lập plan cho account này (quyết định HOLD có chủ đích — bình thường), hoặc (ii) DollarBill lỗi lúc 17:30/19:30 hôm qua. Kiểm tra plan channel / bus để xác nhận là chủ động hay lỗi — báo cáo này không đủ bằng chứng tự kết luận."
+  fi
   echo "$MSG"
   _deliver_eod "$MSG" not_applicable
   exit $?
@@ -195,13 +233,18 @@ elif [ "$N_ORDERS_TODAY" = "0" ]; then
 ✅ HOLD — kế hoạch hôm nay không có lệnh nào (đúng thiết kế, không phải lỗi). Bot đã trực phiên đồng bộ trạng thái.
 
 $NAV_SECTION$(_dt_gate_block)"
+  MSG="$(printf '%s' "$MSG" | _investor_polish)"
   echo "$MSG"
   _deliver_eod "$MSG" not_applicable
   exit $?
 elif [ ! -f "$STATE_FILE" ]; then
   # Case 3: CÓ lệnh trong plan nhưng KHÔNG có state file — bot chưa từng chạy/crash trước
   # khi ghi state đầu tiên. Vấn đề thật, khác hẳn case 1/2.
-  MSG="🔴 **EOD $ACCOUNT ($PLAN_DATE)** — Plan có $N_ORDERS_TODAY lệnh nhưng KHÔNG có state file thực thi. Bot có thể chưa chạy được lần nào hôm nay (kiểm tra run_bot.sh log / bot_heartbeat) — cần xem ngay."
+  if [ "$ACCOUNT" = "SpaceX" ]; then
+    MSG="🟡 **Báo cáo giao dịch ngày — SpaceX ($PLAN_DATE)** — Báo cáo đang được xử lý, dữ liệu giao dịch trong ngày chưa sẵn sàng để tổng hợp. Đội ngũ sẽ cập nhật báo cáo đầy đủ ngay khi hoàn tất."
+  else
+    MSG="🔴 **EOD $ACCOUNT ($PLAN_DATE)** — Plan có $N_ORDERS_TODAY lệnh nhưng KHÔNG có state file thực thi. Bot có thể chưa chạy được lần nào hôm nay (kiểm tra run_bot.sh log / bot_heartbeat) — cần xem ngay."
+  fi
   echo "$MSG"
   _deliver_eod "$MSG" not_applicable
   exit $?
@@ -521,6 +564,7 @@ FULL_REPORT="${DT5G_WARN:+$DT5G_WARN
 }$REPORT
 
 $NAV_SECTION$(_dt_gate_block)"
+FULL_REPORT="$(printf '%s' "$FULL_REPORT" | _investor_polish)"
 
 echo "$FULL_REPORT"
 DELIVERY_RC=0
