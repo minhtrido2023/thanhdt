@@ -436,3 +436,7 @@
 
 ## Consolidation 2026-09-03T06:07:01Z
 - [2026-09-03T06:00:04Z] Mafee/status — bot-done: {"account": "SpaceX", "plan_date": "2026-09-03", "elapsed_s": 2, "rc": 0}
+
+## Consolidation 2026-09-03T12:07:02Z
+- [2026-09-03T11:11:23Z] Winston/finding — new-listings-daily: {"date": "2026-09-03", "lookback_days": 90, "total_new": 2, "needs_manual_rating": 0, "fresh_ipo": 0, "research_queue": [], "snapshot": "/home/trido/thanhdt/WorkingClaude/data/new_listings.csv", "note": "0 mã mới < 20Q lịch sử → cần 8L manual rating. Taylor flag để đọc bản cáo bạch + tạo override documented reason+expiry."}
+- [2026-09-03T11:40:08Z] Winston/status — corp-action-scan-daily: {"scanned_universe": "tav2_bq.ticker_prune", "candidates_this_run": 0, "fresh_alerts_this_run": 0, "resolved_since_last_run": [], "still_pending_count": 0, "still_pending": [], "stale_pending_over_7d": []}

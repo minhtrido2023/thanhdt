@@ -30,3 +30,4 @@ Bobby BĐS VN report xong 08-26 (STRUCTURAL_ACCUMULATION/AMBIGUOUS). Review quý
 ## Chuỗi crisis-trigger research (30/08-31/08) — ĐÓNG HOÀN TOÀN
 Research-only, không wire gì production. KHÔNG đổi playbook margin/derisk đã chốt 26/08.
 
+- [2026-09-03T10:32:16Z] ARIA (Automated Research & Intelligence Analytics) = tên vận hành chính thức của hệ thống, duyệt 2026-09-03. Dùng trong email gửi nhà đầu tư bên ngoài. Wire: render_report_html.py header + footer (commit fb5caaba worktree session/1522576692638388364).
