@@ -67,7 +67,7 @@ PY
   # Cổng tỉ suất chỉ áp dụng báo cáo NAV/vị thế broker. Paper report không công bố các tỉ suất
   # đó; bỏ qua có nêu lý do tường minh để email không bị chặn oan.
   "$ROOT/bin/send_report_email.py" "$REPORT_FILE" \
-    --subject "[Paper Trading] Daily Report — ${REPORT_DATE}" \
+    --subject "[Daily report] Paper Programs — ${REPORT_DATE}" \
     --skip-return-gate "Paper-program report khong cong bo ty suat vi the broker"
   EMAIL_STATE="$EMAIL_STATE" REPORT_DATE="$REPORT_DATE" REPORT_FILE="$REPORT_FILE" python3 - <<'PY'
 import json, os, tempfile, hashlib, datetime, fcntl, contextlib

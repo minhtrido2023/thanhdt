@@ -89,15 +89,10 @@ _dt_gate_line() {
 import sys
 sys.path.insert(0, '$WC_ROOT')
 try:
-    from dna_report import build_dt_gate_line, build_neutral_base_line
+    from dna_report import build_dt_gate_line
     line = build_dt_gate_line(html=False)
     if line:
         print('🛰️ ' + line)
-        # Tần suất lịch sử NEUTRAL→BEAR/CRISIS (base-rate DT5G, KHÔNG phải dự báo —
-        # nhãn nằm sẵn trong hàm). Tự None khi state không phải NEUTRAL → bỏ dòng.
-        nb = build_neutral_base_line(html=False)
-        if nb:
-            print('  ↳ ' + nb)
 except Exception:
     pass
 try:

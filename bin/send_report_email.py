@@ -107,7 +107,18 @@ def main():
         md_body = f.read()
 
     fname = os.path.basename(args.report_path)
-    subject = args.subject or f"[Trading Report] {fname}"
+    if not args.subject:
+        if "daily_report" in fname:
+            _prefix = "[Daily report]"
+        elif "weekly_report" in fname:
+            _prefix = "[Weekly report]"
+        elif "monthly_report" in fname:
+            _prefix = "[Monthly report]"
+        else:
+            _prefix = "[Trading Report]"
+        subject = f"{_prefix} {fname}"
+    else:
+        subject = args.subject
 
     title_line = md_body.split("\n", 1)[0]
     title = re.sub(r"^#+\s*", "", title_line).strip() or fname

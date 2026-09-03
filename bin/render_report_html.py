@@ -265,6 +265,9 @@ DISCLAIMER = """
   (dưới 12 tháng) có ý nghĩa thống kê hạn chế và không nên ngoại suy.</p>
   <p style="margin:4px 0;">Phương pháp tính toán, nguồn dữ liệu và các khoảng trống/giới hạn số
   liệu đã biết được công bố đầy đủ trong phần phụ lục của báo cáo này.</p>
+  <p style="margin:12px 0 4px 0;color:#9fb0c3;">
+    Báo cáo được soạn bởi <strong>ARIA</strong>
+    (Automated Research &amp; Intelligence Analytics).</p>
 </div>
 """
 
@@ -278,7 +281,7 @@ def render_html(md_text, title, base_dir=None):
             font-family:Arial,Helvetica,sans-serif;">
   <div style="background:#0d1b2a;padding:20px 28px;">
     <div style="color:#9fb0c3;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;">
-      Báo cáo hiệu suất &amp; vận hành</div>
+      ARIA &nbsp;·&nbsp; Báo cáo hiệu suất &amp; vận hành</div>
     <div style="color:#ffffff;font-size:20px;font-weight:600;margin-top:4px;
                 font-family:Georgia,'Times New Roman',serif;">{html.escape(title)}</div>
   </div>
