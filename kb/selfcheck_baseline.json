@@ -24,5 +24,16 @@
       "dispatch_discord_topic_selfcheck.sh": 240
     }
   },
-  "known_red": {}
+  "known_red": {
+    "mike/bin/due_diligence_corp_flags_selfcheck.py": {
+      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
+      "since": "2026-09-03T21:56:57Z",
+      "status": "FAIL",
+      "auto": true,
+      "topic": "selfcheck-red: mike/bin/due_diligence_corp_flags_selfcheck.py",
+      "escalated_utc": "2026-09-03T21:56:57Z",
+      "ack_pending": false,
+      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
+    }
+  }
 }
