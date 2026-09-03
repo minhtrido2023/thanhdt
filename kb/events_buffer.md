@@ -440,3 +440,11 @@
 ## Consolidation 2026-09-03T12:07:02Z
 - [2026-09-03T11:11:23Z] Winston/finding — new-listings-daily: {"date": "2026-09-03", "lookback_days": 90, "total_new": 2, "needs_manual_rating": 0, "fresh_ipo": 0, "research_queue": [], "snapshot": "/home/trido/thanhdt/WorkingClaude/data/new_listings.csv", "note": "0 mã mới < 20Q lịch sử → cần 8L manual rating. Taylor flag để đọc bản cáo bạch + tạo override documented reason+expiry."}
 - [2026-09-03T11:40:08Z] Winston/status — corp-action-scan-daily: {"scanned_universe": "tav2_bq.ticker_prune", "candidates_this_run": 0, "fresh_alerts_this_run": 0, "resolved_since_last_run": [], "still_pending_count": 0, "still_pending": [], "stale_pending_over_7d": []}
+
+## Consolidation 2026-09-03T12:10:24Z
+- [2026-09-03T12:08:38Z] DollarBill/heartbeat — DollarBill_20260903_120737: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20260903_120737", "source": "watcher"}
+- [2026-09-03T12:08:40Z] DollarBill/heartbeat — DollarBill_20260903_120739: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20260903_120739", "source": "watcher"}
+- [2026-09-03T12:09:31Z] DollarBill/heartbeat — DollarBill_20260903_120737: {"status": "in_progress", "note": "plan_ZaloPay_2026-09-04.json da viet, dang verify load_plan()"}
+- [2026-09-03T12:09:38Z] DollarBill/heartbeat — DollarBill_20260903_120737: {"status": "still_running", "elapsed_min": 2, "job_id": "DollarBill_20260903_120737", "source": "watcher"}
+- [2026-09-03T12:09:40Z] DollarBill/heartbeat — DollarBill_20260903_120739: {"status": "still_running", "elapsed_min": 2, "job_id": "DollarBill_20260903_120739", "source": "watcher"}
+- [2026-09-03T12:09:54Z] DollarBill/decision — plan-2026-09-04-ZaloPay: {"account": "ZaloPay", "plan_date": "2026-09-04", "decision": "HOLD_ALL", "n_orders": 0, "active_nav_vnd": 518938562, "egg_vnd": 38904787, "dt5g_state": "NEUTRAL", "bal_candidates_deferred": ["VPI", "VIC"], "defer_reason": "signal_hold paper-track BAL buy toi 2026-09-16 (checkpoint), khong phai thieu tien", "lag_due_today": 0, "capit_episode": "CAPIT-2026-07-20 (30 phien)", "park_trim": "NO_TRIM"}
