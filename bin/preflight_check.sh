@@ -177,18 +177,51 @@ PY
   IFS='|' read -r _hstatus _hsev _hsrc _hage <<< "$HEALTH"
 
   # Chấp nhận HEALTHY hoặc DEGRADED (SEV2); từ chối FAILED (SEV1)
-  # Ngưỡng tuổi file theo thứ: daily_refresh chạy 18:30 ICT T2-T6 → sáng T3-T6 file ~14h,
-  # nhưng sáng thứ Hai bản mới nhất là 18:30 thứ Sáu (~62h) — ngưỡng 68h tránh false-warn
-  # lặp lại mỗi thứ Hai (miss thật tối thứ Sáu đã có gate 19:00 bq_freshness_check
-  # MAX_STATE_LAG=0 bắt ngay trong tối đó, không cần chờ preflight sáng thứ Hai).
-  _max_age_h=20; [ "$DOW_ICT" = "1" ] && _max_age_h=68
+  # Ngưỡng tuổi file đo theo PHIÊN GIAO DỊCH, KHÔNG theo ngày lịch (2026-09-03 — cùng lớp
+  # lỗi vừa vá cho ticker_prune ở §5 dưới): daily_refresh chỉ chạy T2-T6 18:30 ICT VÀ chỉ
+  # tính được khi có dữ liệu phiên; nghỉ Quốc khánh 2026 (31/08+01/09+02/09) làm nó abort
+  # đúng ở step [0] (ticker_prune 0 mã) ⇒ macro_health.json đứng yên hợp lệ, nhưng ngưỡng
+  # cũ (20h, riêng thứ Hai 68h) vẫn báo động giả mỗi kỳ nghỉ dài.
+  # Mốc kỳ vọng = 18:30 ICT của phiên giao dịch gần nhất ĐÃ QUA giờ đó, + 3h ân hạn (step
+  # [0] có thể chờ tới ~1,5h trước khi macro_healthcheck ở step [14] ghi file).
+  _age_err=""
+  _age_out="$(cd "$WORKDIR" && python3 -c "
+from trading_bot.vn_market import is_holiday
+from zoneinfo import ZoneInfo
+import datetime as dt
+ICT = ZoneInfo('Asia/Ho_Chi_Minh')
+now = dt.datetime.now(ICT)
+d = now.date()
+if (now.hour, now.minute) < (18, 30):
+    d -= dt.timedelta(days=1)
+while d.weekday() >= 5 or is_holiday(d):
+    d -= dt.timedelta(days=1)
+exp = dt.datetime.combine(d, dt.time(18, 30), tzinfo=ICT)
+print('%.1f|%s' % ((now - exp).total_seconds() / 3600.0 + 3.0, d))
+" 2>&1)" || true
+  case "$_age_out" in
+    [0-9]*\|[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9])
+      _max_age_h="${_age_out%%|*}"; _exp_refresh_day="${_age_out##*|}" ;;
+    *)
+      # Fallback khi không tra được lịch nghỉ — giữ ngưỡng ngày lịch cũ, KÈM lỗi thật đọc được.
+      _max_age_h=20; [ "$DOW_ICT" = "1" ] && _max_age_h=68
+      _exp_refresh_day=""; _age_err="$(echo "$_age_out" | tail -1)" ;;
+  esac
+
   if [ "$_hstatus" = "FAILED" ]; then
     _fail "macro_health=FAILED (SEV1) — DT5G chạy DT4_only. Kiểm tra data pipeline."
   elif [ "$(echo "$_hage > $_max_age_h" | bc -l 2>/dev/null)" = "1" ]; then
-    _warn "macro_health OK ($_hstatus) nhưng file cũ ${_hage}h — daily_refresh chưa chạy tối qua?"
+    # §29: KHÔNG đoán nguyên nhân — trích đúng dòng cuối log của lần refresh gần nhất.
+    _rlog="$(ls -1t "$WORKDIR"/data/refresh_v34b_linux_*.log 2>/dev/null | head -1)"
+    if [ -n "$_rlog" ]; then
+      _rwhy="$(basename "$_rlog"): $(tail -1 "$_rlog" | cut -c1-240)"
+    else
+      _rwhy="không tìm thấy data/refresh_v34b_linux_*.log nào — chain có thể chưa từng chạy"
+    fi
+    _warn "macro_health OK ($_hstatus) nhưng file cũ ${_hage}h > ngưỡng ${_max_age_h}h (phiên refresh kỳ vọng=${_exp_refresh_day:-?}${_age_err:+, lỗi tra lịch nghỉ: $_age_err}). Log gần nhất → $_rwhy"
     _ok  "State source: $_hsrc"
   else
-    _ok "macro_health: $_hstatus ($_hsrc, file ${_hage}h tuổi)"
+    _ok "macro_health: $_hstatus ($_hsrc, file ${_hage}h tuổi ≤ ngưỡng ${_max_age_h}h theo phiên ${_exp_refresh_day:-fallback ngày lịch})"
   fi
 fi
 
