@@ -413,3 +413,6 @@
 
 ## Archived 2026-08-31 (keep=12 days=0 require_done=False)
 - [2026-08-30T10:39:30Z] crisis-episode-clustering-reanalysis-20260830 (job _103253) XONG, bus finding + research file da ghi. Gop 3 song 2007-2012 thanh 1 cum co cau (N 7->5), phat hien 2018-05 khong thuoc nhom nao (nhom C rieng, ngoai sinh khong chan duoc). Khung 2 truc tach bach ro hon nhi phan cu (min nhom B +26.3% > max A/C +21.2% o 12thang). N=5 qua mong - MO TA DINH TINH, khong CONFIRMED. Verdict NO-GO cua margin-valuation-spread KHONG doi, khong dung production.
+
+## Archived 2026-09-03 (keep=12 days=0 require_done=False)
+- [2026-08-30T11:48:47Z] [2026-08-30] crisis-stress dispatch (job _114100) XONG CA 2 PHASE, bus finding da ghi. Phase A: DT5G tu ve dung 2 diem then chot cum 2007-2012 (khoa CRISIS xuyen GFC H2 2008, cap som ~4.5thang truoc gia thang3/2011); diem mu thu2 XAC NHAN thuc nghiem - 2018-05 EM-outflow/trade-war macro gate KHONG fire (VIX/SPX/SBV deu duoi nguong). Phase B: TAI DUNG backtest 08-25 da verify (KHONG chay lai), dao sau invested-fraction/drawdown rieng cum 2007-2012 tu audit CSV co san - phat hien hong: V2.4 song sot bang TRANH NE khong phai HAP THU (chi 122/1248 phien co vi the, MaxDD ca cum chi -7.86%, 2008/2009/2011 invested=0 tuyet doi). KHONG con viec mo tren truc nay.
