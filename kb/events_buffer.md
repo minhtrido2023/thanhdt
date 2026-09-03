@@ -457,3 +457,18 @@
 
 ## Consolidation 2026-09-03T13:07:02Z
 - [2026-09-03T12:11:01Z] Mafee/status — eod-trading-report: {"account": "SpaceX", "plan_date": "2026-09-03", "delivered_via": "report_delivery_gate", "artifact": "SpaceX_daily_report_2026-09-03.md"}
+
+## Consolidation 2026-09-03T14:51:29Z
+- [2026-09-03T14:47:03Z] Taylor/heartbeat — Taylor_20260903_144602: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20260903_144602", "source": "watcher"}
+- [2026-09-03T14:47:24Z] Taylor/heartbeat — Taylor_20260903_144623: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20260903_144623", "source": "watcher"}
+- [2026-09-03T14:48:03Z] Taylor/heartbeat — Taylor_20260903_144602: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20260903_144602", "source": "watcher"}
+- [2026-09-03T14:48:24Z] Taylor/heartbeat — Taylor_20260903_144623: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20260903_144623", "source": "watcher"}
+- [2026-09-03T14:48:28Z] Taylor/heartbeat — Taylor_20260903_144602: {"status": "in_progress", "note": "BQ daily breadth+dispersion panel 2007-2026 pulled (4903 rows), giờ xử lý episode detection bằng pandas"}
+- [2026-09-03T14:48:47Z] Taylor/heartbeat — Taylor_20260903_144623: {"status": "in_progress", "note": "da doc monthly+weekly+daily mau, xac dinh eod_trading_report.sh la nguon sinh daily jargon; dang thiet ke polish layer cho SpaceX"}
+- [2026-09-03T14:49:03Z] Taylor/heartbeat — Taylor_20260903_144602: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20260903_144602", "source": "watcher"}
+- [2026-09-03T14:49:24Z] Taylor/heartbeat — Taylor_20260903_144623: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20260903_144623", "source": "watcher"}
+- [2026-09-03T14:50:04Z] Taylor/heartbeat — Taylor_20260903_144602: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20260903_144602", "source": "watcher"}
+- [2026-09-03T14:50:25Z] Taylor/heartbeat — Taylor_20260903_144623: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20260903_144623", "source": "watcher"}
+- [2026-09-03T14:51:04Z] Taylor/heartbeat — Taylor_20260903_144602: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20260903_144602", "source": "watcher"}
+- [2026-09-03T14:51:18Z] Taylor/finding — market-mania-euphoria-detector-20260903: {"summary": "Chi bao mania/euphoria (anh guong CAPIT): breadth>=p90 (252-phien causal) + junk(Risk_Rating>=5) thang quality(Risk_Rating<=2) rolling 21-phien spread>=p75, sustained >=21 phien. N=7 episode doc lap 2008-2026 (2009-08,2012-02,2013-11,2014-02,2016-04,2020-11,2025-07). Return huong 1-6 thang sau KHONG nhat quan (median +1M..+6M deu duong, khong dung lam ban-ngay). Pattern manh nhat: maxDD trong 6 thang sau episode 6/6 episode co du du lieu deu >=7% (mean -14.3%, range -7.1%..-21.3%); giu vung khi noi nguong (N=14 o p85/p60, mean maxDD -13.9%, 71% <-10%). Doi chieu voi job 08-31 (breadth-euphoria divergence 2022-01): dung nhu du kien KHONG flag 2021H2 vi breadth rach ngay truoc dinh gia - 2 cong cu bo sung nhau khong mau thuan.", "file": "mike/agents/Taylor/research/market_mania_euphoria_detector_20260903.md", "research_only": true, "n_episodes": 7, "limitation": "N nho, khong DSR/PBO, khong wire production"}
+- [2026-09-03T14:51:25Z] Taylor/heartbeat — Taylor_20260903_144623: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20260903_144623", "source": "watcher"}
