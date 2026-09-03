@@ -299,7 +299,7 @@ def build_dt_gate_line(html=True):
     asof = f"<i>{asof}</i>" if html else asof
     if not c["active"]:
         cn = STATE_MAP.get(c["committed"], ("?",))[0]
-        return f"Gate DT4: ✓ ổn định ({cn}) · không có candidate đang track  {asof}"
+        return f"Gate DT5G: ✓ ổn định ({cn}) · không có candidate đang track  {asof}"
     cn = STATE_MAP.get(c["cand"], ("?",))[0]
     comm = STATE_MAP.get(c["committed"], ("?",))[0]
     left = c["need"] - c["k"]
@@ -313,12 +313,12 @@ def build_dt_gate_line(html=True):
         badge, level = "🟢", "BÌNH THƯỜNG"
     base = ""
     if c["p"] is not None:
-        base = f" · P(commit|k={c['k']})≈{c['p']*100:.0f}%"
+        base = f" · P({cn} xác nhận|k={c['k']})≈{c['p']*100:.0f}%"
         if c["lo"] == c["lo"] and c["hi"] == c["hi"]:
             ntxt = f", n={c['n']}" if c["n"] is not None else ""
             base += f" [{c['lo']*100:.0f}–{c['hi']*100:.0f}%{ntxt}]"
     thin = " ⚠ mẫu mỏng, tham khảo" if c["thin"] else ""
-    return (f"Gate DT4: {badge} {level} · candidate {B(cn)} {c['k']}/{c['need']} "
+    return (f"Gate DT5G: {badge} {level} · candidate {B(cn)} {c['k']}/{c['need']} "
             f"({progress:.0%}, còn {left} phiên để commit, "
             f"base giữ từ {c['start']}, committed {comm}){base}{thin}  {asof}")
 
@@ -341,6 +341,36 @@ def build_value_radar_line(html=True):
         import sys as _sys
         print(f"[dna_report] value_radar skipped (fail-safe): {e}", file=_sys.stderr)
         return None
+
+
+_CAPSIG_CACHE = {"t": 0.0, "val": None}
+
+
+def build_cap_signal_advisory_line(trace_id=None):
+    """CAP_SIGNAL advisory (DIVERGE VN-vs-EM drawdown + xác nhận DXY/UST10Y) — user duyệt
+    2026-08-30 21:33 ICT (decided_by=user, job Taylor_20260830_143403) làm tín hiệu ADVISORY
+    THAM KHẢO, KHÔNG wire production: quant-skeptic CONFIRMED (medium confidence) nhưng
+    N~6 cụm macro độc lập/15 năm quá mỏng cho DSR/PBO chính thức. Nguồn:
+    `agents/Taylor/cap_signal_advisory_check.py::run_advisory()` — tự ghi 1 dòng vào registry
+    kb/data_registry/market-state/cap_signal_advisory_log.csv nếu hôm nay fire (idempotent per
+    ngày, an toàn gọi từ >=1 report/ngày). THUẦN HIỂN THỊ, giống DT4-gate/Value Radar — KHÔNG
+    nối sizing/allocator/threshold nào. Cached 900s (W=60-phiên, không cần realtime); None khi
+    lỗi (BQ/yfinance) → caller bỏ dòng, không crash report."""
+    if _CAPSIG_CACHE["val"] is not None and (time.time() - _CAPSIG_CACHE["t"]) < 900:
+        return _CAPSIG_CACHE["val"]
+    val = None
+    try:
+        import sys
+        if _HAZ_DIR not in sys.path:
+            sys.path.insert(0, _HAZ_DIR)
+        from cap_signal_advisory_check import run_advisory
+        val = run_advisory(trace_id=trace_id)
+    except Exception as e:
+        import sys as _sys
+        print(f"[dna_report] cap_signal_advisory skipped (fail-safe): {e}", file=_sys.stderr)
+        val = None
+    _CAPSIG_CACHE.update(t=time.time(), val=val)
+    return val
 
 
 _NBASE_CACHE = {"t": 0.0, "val": None}
