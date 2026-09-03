@@ -1,15 +1,15 @@
-# Mike fleet — context_taylor_mini (v2761)
+# Mike fleet — context_taylor_mini (v2762)
 > Auto-generated RECENT block; static canonical facts maintained manually (weekly audit-lens catches drift).
 > Dùng `bin/kb_recall.sh "keywords"` để lấy section đầy đủ khi cần chi tiết về ops/CAPIT/project.
 > Source đầy đủ: `kb/context_pack.md`.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-09-03T11:11:23] Winston/finding — new-listings-daily: {"date": "2026-09-03", "lookback_days": 90, "total_new": 2, "needs_manual_rating": 0, "fresh_ipo": 0, "research_queue": [], "snapshot": "/home/trido/thanhdt/Wor …
 - [2026-09-03T12:09:54] DollarBill/decision — plan-2026-09-04-ZaloPay: {"account": "ZaloPay", "plan_date": "2026-09-04", "decision": "HOLD_ALL", "n_orders": 0, "active_nav_vnd": 518938562, "egg_vnd": 38904787, "dt5g_state": "NEUTRA …
 - [2026-09-03T12:10:25] DollarBill/decision — plan-2026-09-04-SpaceX: {"account": "SpaceX", "plan_date": "2026-09-04", "orders": 0, "deferred": 2, "summary": "HOLD ALL. DT5G NEUTRAL. 2 ung vien BAL (VPI,VIC) hoan theo signal_hold  …
 - [2026-09-03T12:10:45] DollarBill/finding — plan-2026-09-04-SpaceX-complete: {"job": "DollarBill_20260903_120739", "status": "done"}
 - [2026-09-03T14:51:18] Taylor/finding — market-mania-euphoria-detector-20260903: {"summary": "Chi bao mania/euphoria (anh guong CAPIT): breadth>=p90 (252-phien causal) + junk(Risk_Rating>=5) thang quality(Risk_Rating<=2) rolling 21-phien spr …
+- [2026-09-03T15:02:35] Taylor/finding — spacex-daily-weekly-investor-tone-complete: {"job": "Taylor_20260903_144623", "status": "done", "daily": {"file": "bin/eod_trading_report.sh", "fix": "_investor_polish() account-gated function added, comm …
 <!--RECENT-END-->
 
 ## Kill-switches
