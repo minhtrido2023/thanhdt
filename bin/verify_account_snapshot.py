@@ -340,7 +340,10 @@ def bq_close_prices(tickers, as_of_date):
            "--max_rows=5000", sql]
     out = subprocess.run(cmd, capture_output=True, text=True, env=env)
     if out.returncode != 0:
-        return None, out.stderr.strip()
+        # `bq` ghi lỗi ra STDOUT chứ không phải stderr (kb/incidents/2026-08/
+        # 2026-08-29-bq-error-on-stdout-empty-diagnosis.md) — chỉ đọc stderr thì
+        # người vận hành nhận chuỗi RỖNG. Không đổi luồng, chỉ đổi chuỗi chẩn đoán.
+        return None, (out.stderr.strip() or out.stdout.strip())
     rows = json.loads(out.stdout)
     return {r["ticker"]: float(r["Close"]) for r in rows}, None
 

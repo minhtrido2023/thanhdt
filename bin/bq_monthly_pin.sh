@@ -19,6 +19,10 @@ set -uo pipefail
 ROOT="/home/trido/thanhdt/WorkingClaude"
 export PATH="/home/trido/google-cloud-sdk/bin:$PATH"
 export TZ="Asia/Ho_Chi_Minh"
+# CLOUDSDK_CONFIG: cron KHÔNG có nó => gcloud rơi về ~/.config/gcloud (scope hỏng, lỗi
+# invalid_scope) và `bq` fail auth. wc_env.sh là nguồn chuẩn tắc — đừng hardcode lại.
+# shellcheck source=/dev/null
+[ -f "$ROOT/wc_env.sh" ] && . "$ROOT/wc_env.sh" >/dev/null 2>&1
 LOG="$ROOT/mike/logs/bq_monthly_pin.log"
 mkdir -p "$(dirname "$LOG")"
 

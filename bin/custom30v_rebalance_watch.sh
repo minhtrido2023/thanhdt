@@ -13,6 +13,10 @@
 set -uo pipefail
 export PATH="/home/trido/google-cloud-sdk/bin:$PATH"
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# CLOUDSDK_CONFIG: cron KHÔNG có nó => gcloud rơi về ~/.config/gcloud (scope hỏng) và `bq` fail
+# auth. wc_env.sh là nguồn chuẩn tắc của biến này — đừng hardcode lại đường dẫn.
+# shellcheck source=/dev/null
+[ -f "$ROOT/../wc_env.sh" ] && . "$ROOT/../wc_env.sh" >/dev/null 2>&1
 TRADING_DAILY_THREAD="trading_daily"
 TODAY="$(TZ=Asia/Ho_Chi_Minh date +%Y-%m-%d)"
 STATE="$ROOT/state/custom30v_rebalance_streak.json"
@@ -41,11 +45,19 @@ for y in (today.year - 1, today.year):
 print(max(candidates).isoformat())
 ")"
 
-MAX_REBAL="$(bq query --use_legacy_sql=false --project_id=lithe-record-440915-m9 --format=csv --quiet \
-  'SELECT MAX(rebal_date) FROM tav2_bq.custom30v_8l' 2>/dev/null | tail -1)"
+# ⚠️ `bq` in lỗi ra STDOUT (không phải stderr) — xem kb/incidents/2026-08/2026-08-29-bq-error-
+# on-stdout-empty-diagnosis.md. Nên `2>/dev/null | tail -1` cũ trả về DÒNG CUỐI CỦA THÔNG ĐIỆP
+# LỖI ("to select an already authenticated account to use.") — chuỗi KHÔNG rỗng, lọt qua guard
+# `-z`, rồi so `"to select…" < "2026-08-05"` sai (lexical "t" > "2") ⇒ nhánh "Healthy, im lặng".
+# Watchdog money-path báo KHỎE khi thực ra nó mù. Vì vậy: giữ nguyên output (cả 2 kênh), kiểm rc,
+# và bắt buộc MAX_REBAL khớp ĐÚNG dạng ngày trước khi đem đi so sánh.
+BQ_OUT="$(bq query --use_legacy_sql=false --project_id=lithe-record-440915-m9 --format=csv --quiet \
+  'SELECT MAX(rebal_date) FROM tav2_bq.custom30v_8l' 2>&1)"
+BQ_RC=$?
+MAX_REBAL="$(printf '%s\n' "$BQ_OUT" | tail -1)"
 
-if [ -z "$MAX_REBAL" ]; then
-  _notify "🔴 **custom30v_rebalance_watch ($TODAY)** — không đọc được MAX(rebal_date) từ tav2_bq.custom30v_8l (query BQ lỗi). Kiểm tra kết nối BQ / quyền truy cập."
+if [ "$BQ_RC" -ne 0 ] || ! printf '%s' "$MAX_REBAL" | grep -qE '^[0-9]{4}-[0-9]{2}-[0-9]{2}$'; then
+  _notify "🔴 **custom30v_rebalance_watch ($TODAY)** — không đọc được MAX(rebal_date) từ tav2_bq.custom30v_8l (bq rc=$BQ_RC). Output thật của bq: $(printf '%s' "$BQ_OUT" | tr '\n' ' ' | cut -c1-400)"
   exit 1
 fi
 
