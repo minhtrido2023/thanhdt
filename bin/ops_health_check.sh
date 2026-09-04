@@ -1564,6 +1564,32 @@ if [ "$ACCOUNT" = "SpaceX" ] && [ -f "$ANOMALY_SCAN" ]; then
 fi
 WARN_COUNT=$(( ${WARN_COUNT:-0} + ${ANOMALY_WARN:-0} ))
 
+# 13. Hạn RÀ LẠI cờ forensic (user chốt 2026-09-04: "forensic cũng phải đưa thời hạn review
+#     xử lý vào, không được để treo mãi"). Cờ forensic là lớp bảo vệ DUY NHẤT cho rủi ro
+#     gian lận/thao túng — `adaptive_exclusion_v3_20260904.md` đã chứng minh gate tài chính
+#     động KHÔNG thay được nó (false-positive 91,9%, DSR 0,14) — nên nó PHẢI ở lại, nhưng
+#     không được phép nằm vĩnh viễn mà không ai nhìn lại.
+#     Quá hạn → FAIL-CLOSED (giữ nguyên cờ) + escalate; KHÔNG tự gỡ. Chỉ chạy lượt ACCOUNT
+#     đầu: danh sách cờ là FLEET-WIDE, per-account sẽ escalate trùng (cùng lý do như
+#     ANOMALY_SCAN ở trên và như sự cố coord-SpaceX/coord-ZaloPay 2026-07-08).
+FORENSIC_SUMMARY=""
+FORENSIC_WARN=0
+FORENSIC_CHECK="$ROOT/bin/forensic_flag_review_check.py"
+if [ "$ACCOUNT" = "SpaceX" ] && [ -f "$FORENSIC_CHECK" ]; then
+  # Bắt stderr LẠI để in ra khi hỏng, không ném vào /dev/null rồi đoán nguyên nhân (§29).
+  FORENSIC_OUT="$(timeout 120 python3 "$FORENSIC_CHECK" 2>&1)"; FORENSIC_RC=$?
+  if [ "$FORENSIC_RC" -eq 0 ]; then
+    FORENSIC_SUMMARY="$FORENSIC_OUT"
+  elif [ "$FORENSIC_RC" -eq 1 ]; then
+    FORENSIC_WARN=1
+    FORENSIC_SUMMARY="$FORENSIC_OUT"
+  else
+    FORENSIC_WARN=1
+    FORENSIC_SUMMARY="⚠️ forensic-flag review check lỗi (rc=${FORENSIC_RC}) — KHÔNG kết luận được hạn rà lại. Lỗi thật: ${FORENSIC_OUT}"
+  fi
+fi
+WARN_COUNT=$(( ${WARN_COUNT:-0} + ${FORENSIC_WARN:-0} ))
+
 MSG="🩺 **${ACCOUNT} — ${LABEL} — kiểm tra vận hành ${NOW_ICT}**
 ${REPORT_BODY}"
 if [ -n "$PREFLIGHT_TAIL" ]; then
@@ -1577,6 +1603,12 @@ if [ -n "$ANOMALY_SUMMARY" ]; then
 
 Quét bất thường (anomaly scan — cảnh báo sớm giá/khối lượng + theo dõi trạng thái sàn):
 ${ANOMALY_SUMMARY}"
+fi
+if [ -n "$FORENSIC_SUMMARY" ]; then
+  MSG="${MSG}
+
+Hạn rà lại cờ forensic (data/forensic_flags.csv — quá hạn KHÔNG tự gỡ cờ):
+${FORENSIC_SUMMARY}"
 fi
 if [ "${WARN_COUNT:-0}" -eq 0 ]; then
   MSG="${MSG}
