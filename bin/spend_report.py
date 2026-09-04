@@ -38,6 +38,15 @@ import subprocess
 import sys
 import time
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
+
+_ICT = ZoneInfo("Asia/Ho_Chi_Minh")
+
+
+def _ict_today():
+    """Ngày ICT — §16. time.gmtime() cũ cho ngày UTC: mọi lần chạy sau 17:00 ICT
+    sẽ dán nhãn NGÀY HÔM TRƯỚC vào dòng CSV."""
+    return datetime.now(_ICT).strftime("%Y-%m-%d")
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -415,10 +424,11 @@ def main():
                     "date,days,research_jobs,research_kb,research_h,production_jobs,production_kb,"
                     "production_h,ops_jobs,ops_kb,ops_h,other_jobs,other_kb,other_h,"
                     "sonnet_jobs,opus_jobs,fable_jobs,default_jobs,"
-                    "feat,fix,docs,chore,refactor,test,other_commits\n"
+                    "feat,fix,docs,chore,refactor,test,other_commits,"
+                    "retried_jobs,extra_attempts,resume_jobs,cache_hit_pct\n"
                 )
             f.write(
-                f"{time.strftime('%Y-%m-%d', time.gmtime())},{days},"
+                f"{_ict_today()},{days},"
                 f"{research['jobs']},{research['log_bytes']//1024},{research['duration_s']/3600:.1f},"
                 f"{production['jobs']},{production['log_bytes']//1024},{production['duration_s']/3600:.1f},"
                 f"{ops['jobs']},{ops['log_bytes']//1024},{ops['duration_s']/3600:.1f},"
@@ -428,7 +438,10 @@ def main():
                 f"{commit_counts.get('feat',0)},{commit_counts.get('fix',0)},"
                 f"{commit_counts.get('docs',0)},{commit_counts.get('chore',0)},"
                 f"{commit_counts.get('refactor',0)},{commit_counts.get('test',0)},"
-                f"{commit_counts.get('other',0)}\n"
+                # 4 cột cuối do spend_report_weekly.py tính (retry/cache); writer nightly
+                # này KHÔNG đo chúng — ghi RỖNG để giữ đúng số cột của header, thay vì
+                # cắt ngắn dòng (csv.DictReader trả None => consumer int()/float() nổ).
+                f"{commit_counts.get('other',0)},,,,\n"
             )
         print(f"\nAppended row to {csv_path}")
 
