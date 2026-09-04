@@ -17,11 +17,13 @@ title: Market state / regime (nhóm rủi ro cao nhất — đã có sự cố t
 | [`capit_episode.md`](capit_episode.md) — data/capit_episode.json | CANONICAL (quan sát thuần) — trả lời "**có đang giữ CAPIT không**" |
 | [`cap_signal_advisory_log.md`](cap_signal_advisory_log.md) — kb/data_registry/market-state/cap_signal_advisory_log.csv | CANONICAL (advisory-only, không consumer tự động) |
 | [`pt_v12_live_logs.md`](pt_v12_live_logs.md) — data/pt_v12_live_logs.csv | DEAD |
+| [`dt5g_ext_2008_research.md`](dt5g_ext_2008_research.md) — agents/Taylor/research/dt5g_ext_2008_20260904/dt5g_ext_2008_full.csv (chuỗi DT5G mở rộng về 2008, ad-hoc KHÔNG cron) | RESEARCH-ONLY |
 | [`pt_v12_macro.md`](pt_v12_macro.md) — data/pt_v12_macro*.csv | RESEARCH |
 | [`pt_v22_dt5g_open_positions.md`](pt_v22_dt5g_open_positions.md) — data/pt_v22_dt5g_open_positions.csv | DERIVED |
 | [`value_radar_series.md`](value_radar_series.md) — data/value_radar_series.csv (+ value_radar.py) | CANONICAL (DISPLAY-ONLY, cấm consumer quyết định) |
 | [`vn30f_daily.md`](vn30f_daily.md) — tav2_bq.vn30f_daily | DEAD |
 | [`vn_macro_regime_history.md`](vn_macro_regime_history.md) — sổ phân loại nguyên nhân vĩ mô episode (macro-strategist, blind-to-outcome) | CANONICAL |
+| [`vn_macro_regime_history_2009_2018_phases.md`](vn_macro_regime_history_2009_2018_phases.md) — bản đồ pha TRONG-NĂM 2009 & 2018 + chỉ báo quan sát-được-real-time (con của `vn_macro_regime_history.md`) | CANONICAL |
 | [`vn_market_maturation_structural_20260830.md`](vn_market_maturation_structural_20260830.md) — timeline trưởng thành cấu trúc TTCK VN 2000-2026 (thành phần NĐT/thanh khoản/hạ tầng-quy định, TÁCH biệt khỏi macro_regime_history) | CANONICAL |
 | [`vnindex_5state.md`](vnindex_5state.md) — tav2_bq.vnindex_5state | TRAP |
 | [`vnindex_5state_archive_family.md`](vnindex_5state_archive_family.md) — tav2_bq.vnindex_5state_staging / _archive_* / _v2g_* / _tam_quan_v31/v33b_clean / _baseline_* | ARCHIVE |
