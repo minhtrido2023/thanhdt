@@ -1,9 +1,6 @@
 # Working memory — Mike
 > Cập nhật mỗi khi đổi mạch việc. Bơm vào đầu phiên của Mike.
 
-# Working memory — Mike
-> Cập nhật mỗi khi đổi mạch việc. Bơm vào đầu phiên của Mike.
-
 ## Ưu tiên hiện tại
 - Go-live V2.4 lever LIVE từ 08-24: capit_margin_lever.enabled=TRUE. Ngày có CAPIT margin phải chạy approve_margin_day.py TRƯỚC bot.
 - VPI/BAL signal HOLD đến 2026-09-16 — HOLD_ALL theo VPI.
@@ -12,24 +9,36 @@
 - Per-name 5% / sleeve 10% NAV, f≤1.3, %ADV≤10%, exit -20%. Commit 022c48e7.
 - Phễu candidate WIRE (cutoff=70%, trần=1.2), commit 714b5889. TV1/DGC lọt nhưng marginable=NO qua DNSE hiện tại.
 
-## Retro 2026-09-04 — XONG, escalate mở
-kb/incidents/retro/retro-2026-09-04.md, commit 882a6bef. Wags CONFIRMED, 0 gap.
-2 sự cố: (1) `macro_healthcheck.py::tdays()` (repo WorkingClaude/, NGOÀI mike/bin) — CALL-SITE
-THỨ BA của cùng lỗi đếm tuổi dữ liệu bằng ngày lịch không biết lễ (sau preflight_check.sh §3+§5
-vá 09-03) — lan sang repo khác. Fix + entry đã có trước retro (Winston, 96ebd124+9380cbc3).
-(2) ops_health_check.sh deposit_rate hardening chủ động (§29), không phải sự cố thật.
-**Pattern 1 tái diễn 2 retro liên tiếp (09-03→09-04) → ĐÃ ESCALATE** bus question
-`retro-pattern-recurring-tdays-holiday-2days` — chờ Mike/user quyết có cơ học hoá gate kiểu
-tz_anchor_gate.py (AST quét đếm ngày không qua vn_market.is_holiday) hay không. Đừng mở question
-thứ 2 cho cùng pattern nếu nó tái diễn lần nữa — chỉ cập nhật escalation cũ.
+## Weekly ops audit 2026-09-05 — XONG (job Mike_20260904_211002, resume sau max-turns)
+Báo cáo đầy đủ ở topic Architecture + bus decision `weekly-ops-audit`.
+4 bug tự sửa: be1d64a0 (watchdog custom30v báo KHOẺ giả khi bq fail auth — money-path
+30% idle-pool parking mù mà im lặng; +2 lỗi kèm), d3924e24 (spend_history 12/53 dòng
+thiếu 4 cột + nhãn ngày UTC), e5700fbd (freshness_warn selfcheck neo cứng tiêu đề báo
+cáo, đỏ im lặng từ 09-03 sau tone-polish 14a90097 — KHÔNG phải bug production),
+0b2eeb60 (market-state/index.md thiếu 2 nguồn).
 
-## Retro 2026-09-03 — carry-over, vẫn mở
-`Wags/wags-fix-not-confirmed: coord-2026-09-03` (1d tuổi, chưa overdue): Wags chưa có bằng chứng
-đã đính chính với user trên trading_daily về claim sai cơ chế ack deposit-rate (ack KHÔNG tự
-re-escalate, khác gì Wags từng nói). Cửa sổ có ý nghĩa: trước 2026-09-11 (cron DCF kế tiếp).
+**CHỜ NGƯỜI QUYẾT — bus question mới `bq-monthly-pin-thieu-202608-202609-chay-bu-hay-khong`**:
+bq_monthly_pin chết 2 tháng ⇒ thiếu pin 202608+202609. Chạy bù bây giờ đóng dấu snapshot
+theo 09-05 chứ không phải ngày đáng lẽ chụp (nhãn sai vintage). 3 options A/B/C trong payload.
+Urgency thấp — rebalance thật vẫn đúng, chỉ mất 2 điểm lịch sử.
 
-## Vận hành — không có việc treo khác
-Không circuit breaker trip, không pending_resumes. 1 bus question mới mở hôm nay (escalation
-pattern), 1 carry-over từ 09-03, 1 recurring quen thuộc (due_diligence_corp_flags_selfcheck,
-trong hạn suppress, không cần theo dõi riêng).
+**CHƯA VERIFY ĐƯỢC trong production**: be1d64a0 + d3924e24 chưa có lần trigger thật kể từ
+khi fix. Lần đầu = nightly 19:00 ICT 09-05 (spend_report) và cron bq kế tiếp. Kiểm lại ở
+audit tuần sau nếu chưa ai đụng.
+
+**Quan sát cần quyết ở review sau (KHÔNG tự đổi)**: `run_selfchecks.sh` cố ý gộp `mike_paseo/`
+(clone đứng ở KB v2611, 2026-08-28, không cron nào dùng) vào phạm vi ⇒ 3/6 FAIL của lần chạy
+là nhiễu từ bản clone cũ. Chưa rõ mục đích bản clone nên chưa đổi phạm vi.
+
+**Sát ngưỡng OKF**: kb/coding_guidelines.md 37,9KB/40KB, còn ~2,0KB đệm (phẳng 6 ngày).
+§-mới tiếp theo gần như chắc chắn chạm ngưỡng → tách sang _ext.md khi đó.
+
+## Bus question đang mở (2)
+1. `Wags/wags-fix-not-confirmed: coord-2026-09-03` (2d) — Wags chưa có bằng chứng đã đính
+   chính với user trên trading_daily về cơ chế ack deposit-rate. Cửa sổ: trước 2026-09-11.
+2. `Mike/bq-monthly-pin-thieu-202608-202609-chay-bu-hay-khong` (mới 09-05) — chờ user.
+
+## Escalate cũ đã đóng
+`retro-pattern-recurring-tdays-holiday-2days` — đã quyết B (xây gate kiểu tz_anchor_gate.py
+quét AST tdays/busday_count/date-diff không kèm vn_market.is_holiday), decision 09-04.
 
