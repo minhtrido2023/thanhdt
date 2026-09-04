@@ -431,3 +431,6 @@
 
 ## Archived 2026-09-04 (keep=12 days=0 require_done=False)
 - [2026-08-30T14:16:04Z] cap-signal-advisory (job _141109) XONG: script mike/agents/Taylor/cap_signal_advisory_check.py (VNI tu BQ song + EEM/DXY/TNX tu yfinance song, KHONG dung tier2_macro_panel.csv dong bang 05-15), ghi registry kb/data_registry/market-state/cap_signal_advisory_log.csv, nguong nang cap N_clusters>=10 (hien 0, lich su 6). Test 08-30: quiet khong fire. CHUA wire hien thi vao dna_report.py - de xuat trong project doc, cho user duyet rieng. Khong con viec mo tren truc nay.
+
+## Archived 2026-09-04 (keep=12 days=0 require_done=False)
+- [2026-08-31T01:09:32Z] [2026-08-31] KHOANG TRONG TIN CHUA PHU: nghi le 31/08-02/09, phien ke tiep 03/09. Quet fear-buy sang 31/08 chi phu toi het 30/08 => can quet lai TOI 02/09 truoc khi plan 03/09 thuc thi. | TV1: co tuc 15% qua han ~11 phien chua duoc broker book (divRecv 28/08 = dung SAB, khong co TV1) + ket qua chon kiem toan qua han 21 ngay; chuong trinh gom TV1 la duy-tri-ty-trong DONG (gia giam => mua them) va ca 2 dieu kien hard_expiry deu manual_only => la chan la THU CONG, khong tu dong.
