@@ -1116,9 +1116,29 @@ if dep_last is None:  # CSV rỗng/không đọc được -> mốc cuối = anch
 if dep_last is not None:
     dep_age = (today_d - dep_last).days
     if dep_age > 45:
+        # 2026-09-04: mốc CSV đứng yên KHÔNG đồng nghĩa cron chưa chạy. refresh_deposit_rate_vn.sh
+        # (cron ngày 3 hàng tháng) cố ý KHÔNG ghi số khi nguồn mâu thuẫn — nó escalate bus question
+        # và giữ nguyên giá trị live. Bảo người xử lý "chạy refresh_deposit_rate_vn.sh" trong tình
+        # huống đó là chỉ sai hướng (chạy lại sẽ escalate lại). Đọc ARTIFACT — log run gần nhất —
+        # rồi mới nói nguyên nhân (§28 vắng-mặt-≠-chưa-làm, §29 không hardcode chẩn đoán).
+        dep_runs = sorted(glob.glob(os.path.join(wc_root, "data", "refresh_deposit_rate_vn_*.log")))
+        dep_hint = ("Chạy refresh_deposit_rate_vn.sh (nhắc) rồi append_deposit_rate.py để cập nhật.")
+        if dep_runs:
+            try:
+                dep_tail = open(dep_runs[-1], encoding="utf-8", errors="replace").read()
+                dep_run_days = (today_d - _date.fromtimestamp(os.path.getmtime(dep_runs[-1]))).days
+                if "Escalated instead of writing a number" in dep_tail:
+                    dep_hint = (f"KHÔNG phải cron hỏng: {os.path.basename(dep_runs[-1])} cho thấy job "
+                                f"đã chạy {dep_run_days} ngày trước và ESCALATE đúng thiết kế (nguồn mâu "
+                                f"thuẫn) — đang chờ NGƯỜI quyết qua bus question "
+                                f"Winston/deposit-rate-refresh-question. Chạy lại sẽ escalate lại.")
+                elif "refresh DONE" in dep_tail:
+                    dep_hint = (f"Job đã chạy {dep_run_days} ngày trước ({os.path.basename(dep_runs[-1])}) "
+                                f"nhưng CSV không đổi — đọc log đó trước khi chạy lại.")
+            except Exception as _e:
+                dep_hint += f" (không đọc được log run gần nhất: {type(_e).__name__}: {_e})"
         W(f"Lãi suất tiết kiệm (deposit_rate_vn) đã {dep_age} ngày chưa refresh "
-          f"(mốc cuối {dep_last}, {dep_kind}) — input rating_8l NEUTRAL tilt sống. "
-          f"Chạy refresh_deposit_rate_vn.sh (nhắc) rồi append_deposit_rate.py để cập nhật.")
+          f"(mốc cuối {dep_last}, {dep_kind}) — input rating_8l NEUTRAL tilt sống. " + dep_hint)
     else:
         OK(f"Lãi suất tiết kiệm (deposit_rate_vn): mốc cuối {dep_last} ({dep_age} ngày, {dep_kind}).")
 else:
