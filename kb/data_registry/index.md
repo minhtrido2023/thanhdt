@@ -3,7 +3,7 @@ kind: registry-index
 title: Data Registry — mọi nguồn dữ liệu hệ thống đang dùng
 owner: Winston (data-ops)
 format: OKF (Open Knowledge Format) — markdown + YAML frontmatter, 1 nguồn = 1 file
-last_full_audit: 2026-08-29
+last_full_audit: 2026-09-05
 migrated_from: kb/data_registry.md (single-file, migrate → OKF 2026-07-28 job Winston_20260728_104434)
 ---
 

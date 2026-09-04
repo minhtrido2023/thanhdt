@@ -143,6 +143,21 @@ tiếp ở CÙNG agent ⇒ không phải drift bền vững, đã tự hết the
 hiện flag MỚI, agent KHÁC: Taylor [RETRY-RATE] 19% (10/53 job) — điểm dữ liệu đơn lẻ đầu tiên
 cho agent này, chưa đủ 2 tuần để kết luận, theo dõi tiếp tuần sau (08-29 review kế tiếp sẽ tự
 đối chiếu — nếu Taylor retry vẫn ≥15% tuần đó thì đề xuất cụ thể sửa MIKE.md §Routing).
+**Cập nhật 09-04/09-05 (weekly editorial):** opus% tổng tuần mới nhất = **12%** (`spend_report.py
+--days 7`), tiếp tục dưới ngưỡng flag 60% — opus-drift vẫn ở mức bình thường. fable% = 0%. **Effort
+5d: Taylor 72% high (n=74) — LẠI vượt ngưỡng ⚠ 70%** (đã dao động 88-94%→69%→71%→55%→72% qua 6 tuần
+đo, không phải xu hướng một chiều). Lấy mẫu 8 dispatch high gần nhất (09-04): thiết kế lại kiến
+trúc adaptive-exclusion theo yêu cầu trực tiếp user ("effort cao, làm kỹ"), prereg regime-
+conditioned dividend gate, nghiên cứu cash-dividend premium mới, mở rộng chuỗi DT5G về 2008, quét
+fear-buy hàng tuần — toàn bộ là R&D/thiết kế mới genuinely phức tạp (Q2/Q3), KHÔNG phải việc
+thường lệ bị chọn high theo phản xạ. Kết luận: KHÔNG lệch, chỉ là tuần Taylor có nhiều task thiết
+kế mới đồng thời — không cần điều chỉnh routing. **5e routing retro 09-04: không agent nào bị
+flag** (Taylor retry 11%, dưới ngưỡng 15%; FAIL-RATE mọi agent trong ngưỡng) — flag RETRY-RATE
+Taylor 19% từ tuần 08-28 KHÔNG lặp lại, tự hết theo đúng luật "cần ≥2 tuần liên tiếp mới coi là
+drift bền vững". **Spend-trend (item 5): ops_h GIẢM liên tục 3 tuần** (8,1h 08-19 → 7,2h 08-26 →
+2,0h 09-04, cùng lúc research_h ổn định ~13-20h) — ngược hướng lo ngại của mandate item 5 (tăng
+liên tục), không cần đề xuất gì.
+
 **Model mặc định của chính Mike:** đổi sang Fable 5 (2026-07-06) rồi **ĐẢO NGƯỢC LẠI Sonnet 5** (2026-07-07, user yêu cầu). Phát hiện **3 tầng config** trong bridge Discord (`ccdb-mike`): thread override (DB) > global (DB) > `.env` fallback — sửa `.env` vô tác dụng nếu DB đã có row cũ. Dọn 4 dòng rác sai format (`"Sonnet 5"`/`"sonnet 5"` có dấu cách — CLI từ chối) từng gây lỗi `/model` ở 1 thread. Đã đồng bộ cả 3 nơi.
 
 **Routing guards (2026-06-27):**
@@ -253,6 +268,18 @@ cầu (commit `087a3d0`). Chi tiết đầy đủ: `kb/current_ops.md` §Domain-
 
 **Phát hiện rủi ro sector (2026-06-30, vẫn đúng):** HPG/Steel un-capturable; VOS/Shipping leverage trap; BVH/Insurance no margin of safety; Fertilizer edge = single 2021 supercycle, không lặp lại.
 
+**Discretionary margin sleeve (đơn mã, fear-buy/special-situation) — IMPLEMENTED 2026-08-29, cap
+RESYNC 2026-08-30 (commit `a19fc256`/`022c48e7`):** per-name ≤5% NAV exposure, sleeve tổng ≤10%
+NAV exposure, f≤1.3 hard-cap, %ADV≤10%, exit tự áp −20% từ giá arm (KHÔNG dựa margin-call broker —
+netting cấp ACCOUNT vô hiệu hoá tín hiệu này ở quy mô đơn mã). Gate `bin/discretionary_margin_gate.py`
+(arm/exit, độc lập `plan.py`/`executor.py`, KHÔNG chạm bot tự trade) + cron check-exits 15:20 ICT
+T2-T6. Trigger xem lại 15%: ≥3 case marginable ĐỒNG THỜI THẬT — chưa đạt (chỉ TV1/DGC biết trước,
+DGC ZaloPay EXCLUDED). Khác `capit_margin_lever` (hệ thống, dd52≤−20%, CAPIT basket) — đây là từng
+case, quyết bằng rào chắn rủi ro + duyệt người, không backtest (N không đủ lớn theo bản chất).
+Chi tiết: `kb/projects/discretionary-margin-policy-20260823.md`. Portfolio-level Loại-2 washout
+sleeve (Bobby real-time-blind + PIT filter + overreaction indicator, 3 điều kiện ANĐ) vẫn ở mức
+**mandate ESCALATE-ONLY, chưa code** — xem `context_pack.md` §Mandate margin crisis Loại-2.
+
 ---
 
 ## 7. Research Cổ Phiếu — Phát Hiện Đáng Nhớ
@@ -337,7 +364,7 @@ cầu (commit `087a3d0`). Chi tiết đầy đủ: `kb/current_ops.md` §Domain-
 - `kb/paper_programs_registry.json` — 9 chương trình paper-trading chính thức (bao gồm `pt_v22_dt5g` = production signal book, KHÔNG phải paper mirror).
 - `kb/archive/` — raw consolidation blocks cũ (không cần đọc thường xuyên).
 
-**Cron quan trọng (ICT)** — *nguồn sống là `kb/ops_runbook.md` (bảng timeline) + `crontab -l`; bảng dưới chỉ là bản tóm, đã đối chiếu 2026-07-30:*
+**Cron quan trọng (ICT)** — *nguồn sống là `kb/ops_runbook.md` (bảng timeline) + `crontab -l`; bảng dưới chỉ là bản tóm, đã đối chiếu 2026-09-05:*
 - 19:00 T2-T6: `bq_freshness_check.sh` → DollarBill lập plan T+1 *(đổi từ 17:30, 2026-07-10)*.
 - 21:00 T2-T6: `send_plan_report.sh` → gửi plan qua Telegram + Discord *(đổi từ 19:30, 2026-07-10; thêm 23:00 `--second-chance` từ 2026-07-13)*.
 - 08:20 & 12:45 T2-T6: `ops_health_check.sh` — tự kiểm vận hành, post Trading Daily.
@@ -353,9 +380,14 @@ cầu (commit `087a3d0`). Chi tiết đầy đủ: `kb/current_ops.md` §Domain-
 - 03:30 ICT Sat: `weekly_ops_audit.sh` (deep ops audit, thêm 2026-08-01).
 - 04:30 daily: `selfcheck_weekly_baseline_check.sh` (quét 93+ selfcheck production, diff `kb/selfcheck_baseline.json`, escalate đỏ mới — thêm 2026-08-12).
 - 08:25 T2-T6: `cron_health_check_daily.sh` (audit toàn bộ crontab, thêm 2026-08-01).
-- 08:30 T2-T6: `check_report_cadence.sh` (báo cáo tuần/tháng quá hạn → tự dispatch soạn+gửi, thêm 2026-08-01).
+- 08:30 **HÀNG NGÀY (T2-CN từ 2026-08-31, đổi từ T2-T6)**: `check_report_cadence.sh` (báo cáo
+  tuần/tháng quá hạn → tự dispatch soạn+gửi; đổi sang chạy cả cuối tuần vì report tuần sinh sáng
+  Thứ Bảy không có sweep delivery nào trước Thứ Hai = họ 47h, Wags phát hiện).
+- 09:00 Thứ Bảy: `check_report_cadence.sh --scheduled-weekly` (báo cáo tuần investor-grade,
+  cron riêng thêm cùng đợt 08-31, KHÔNG trùng job 08:30 ở trên).
+- 09:00 ngày 1 hàng tháng: `check_report_cadence.sh --scheduled-monthly` (báo cáo tháng investor-grade).
 - 00:00 daily: `fleet_backup.sh` → GitHub.
-- *(Nguồn đầy đủ nhất, luôn tra khi nghi ngờ: `kb/cron_registry.md` + `crontab -l` — bảng trên chỉ tóm các cron chạm tiền thật/vận hành sống, không liệt kê paper-trading `main` account.)*
+- *(Nguồn đầy đủ nhất, luôn tra khi nghi ngờ: `kb/cron_registry.md` + `crontab -l` — bảng trên chỉ tóm các cron chạm tiền thật/vận hành sống, không liệt kê paper-trading `main` account. Đối chiếu lần gần nhất: 2026-09-05.)*
 
 ---
 
