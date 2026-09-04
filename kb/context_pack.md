@@ -1,13 +1,13 @@
-# Mike fleet — context pack (v2797)
+# Mike fleet — context pack (v2798)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-09-04T12:09:15] DollarBill/decision — plan-2026-09-07-ZaloPay: {"account": "ZaloPay", "plan_date": "2026-09-07", "orders": 0, "action": "HOLD_ALL", "dt5g_state": "NEUTRAL", "active_nav_vnd": 520380088, "egg_vnd": 38913866,  …
-- [2026-09-04T12:09:45] DollarBill/decision — plan-2026-09-07: {"account": "SpaceX", "plan_date": "2026-09-07", "action": "HOLD_ALL", "orders": 0, "deferred_orders": 2, "dt5g_state": "NEUTRAL", "active_nav_vnd": 980696423,  …
-- [2026-09-04T17:33:45] Mike/finding — daily-retro-2026-09-04-draft-buoc1-xong: {"draft_path": "state/retro_draft_2026-09-04.md", "n_su_co": 2, "n_pattern": 1, "pattern_recurring_2days": true, "escalated_topic": "retro-pattern-recurring-tda …
 - [2026-09-04T17:35:52] Wags/finding — retro-draft-2026-09-04-independent-verify: CONFIRMED: {"verdict": "CONFIRMED", "checks": {"bus_omission_scan": "grep lai toan bo bus/inbox/*.jsonl ts=2026-09-04: 0 error, 1 question (chinh la escalation cua draft,  …
 - [2026-09-04T17:38:33] Mike/finding — daily-retro-2026-09-04-finalized: {"entry": "kb/incidents/retro/retro-2026-09-04.md", "commit": "882a6bef", "verified_by": "Wags", "verdict": "CONFIRMED", "n_incidents": 2, "pattern_escalated":  …
+- [2026-09-04T19:37:37] Mike/decision — retro-pattern-recurring-tdays-holiday-2days: {"decision": "B - xay gate kieu tz_anchor_gate.py (AST/regex chan tdays/busday_count/date-diff khong kem vn_market.is_holiday hoac tuong duong, pre-commit, base …
+- [2026-09-04T19:38:37] Mike/decision — kb-weekly-editorial: {"commit": "3844d93b", "task1_curation": "KNOWLEDGE.md: sync discretionary margin sleeve (IMPLEMENTED 08-29, cap RESYNC 08-30, commit a19fc256/022c48e7) vao Sec …
+- [2026-09-04T19:32:01] Wags/answer — selfcheck-red: mike/bin/due_diligence_corp_flags_selfcheck.py — recovered 2026-09-04: {"context": "selfcheck_baseline_diff tự đóng: ca đỏ này đã XANH trở lại", "file": "mike/bin/due_diligence_corp_flags_selfcheck.py", "artifact": "chạy lại lúc 20 …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -215,7 +215,7 @@ Kết quả dẫn tới quyết định: breadth-vs-radar-matrix-20260822 (Taylo
      dispatch có context_pack ⇒ tường thuật của việc ĐÃ ĐÓNG là chi phí trả lại mỗi phiên.
      Giữ đúng phần còn quyết định được hành vi sau này: TÊN · FILE · PHÁN QUYẾT (nhất là NO-GO,
      để không ai đề xuất lại). Diễn biến vẫn nguyên trong file chi tiết. -->
-- 2026-08-23 Chính sách margin đơn mã sleeve fear-buy discretionary → `discretionary-margin-policy-20260823.md` — **IMPLEMENTED 2026-08-29, cap RESYNC 2026-08-30 (commit a19fc256/022c48e7)**: per-name ≤5% NAV exposure, sleeve tổng ≤10% NAV exposure (f≤1,3, %ADV≤10%, exit tự áp −20% từ giá arm, KHÔNG dựa margin-call broker vì netting cấp ACCOUNT); gate `bin/discretionary_margin_gate.py` (arm/exit độc lập plan.py/executor.py) + cron check-exits 15:20 ICT; trigger xem lại 15% cần ≥3 case marginable đồng thời THẬT — chưa đạt
+- 2026-08-23 Chính sách margin đơn mã sleeve fear-buy discretionary → `discretionary-margin-policy-20260823.md` — **IMPLEMENTED 2026-08-29, cap RESYNC 2026-08-30 (commit a19fc256/022c48e7)**: per-name ≤5% NAV exposure, sleeve tổng ≤10% NAV exposure (f≤1,3, %ADV≤10%, exit tự áp −20% từ giá arm); gate `bin/discretionary_margin_gate.py` + cron check-exits 15:20 ICT; trigger 15% cần ≥3 case marginable đồng thời THẬT — chưa đạt
 - 2026-08-23 Margin theo khoảng cách định giá + nhận diện đáy 11/2022 → `margin-valuation-spread-20260823.md` — **NO-GO** mọi cơ chế sizing/gate mới (5 vòng, Phase 1 engine quant-skeptic CONFIRMED high); `capit_margin_lever` dd52≤−20% GIỮ NGUYÊN; nhiễu harness 0,385pp ≫ hiệu ứng 0,009pp; đóng tập 7 episode, chỉ còn shadow-log spread EOD; hướng mở duy nhất = margin cấp CỔ PHIẾU trong sleeve fear-buy. **Đính chính 08-24**: thiếu trục "phòng thủ có mục tiêu" (2020/2022, dễ hồi) vs "cơ cấu tự cộng dồn" (2007-2012, không xử lý nhanh được) — 3/7 episode rất có thể là 3 sóng của 1 khủng hoảng, N độc lập thật ~4-5 không phải 7; không đổi verdict NO-GO, chỉ đổi cách đọc "phản ví dụ" 2010-08-25
 - 2026-08-13→14 corporate_action BQ integration + paper-report bug fix → `corporate-action-bq-integration-0813.md` — XONG, Việc A/B wire an toàn (6 vòng), SANITY_FACTOR WARN phương án C wire+CONFIRMED 08-14 (1 gap coverage nhẹ còn mở), vòng 6 rc=1/KeyError chủ động bỏ qua
 - 2026-07-31 CAPIT sizing bug 07-21 → `capit-sizing-bug-0721.md` — ĐÓNG, đã fix; user chốt KHÔNG bù phần thiếu
