@@ -1,0 +1,15 @@
+{
+  "selected_at_utc": "2026-09-04T08:01:02.796459+00:00",
+  "is_cutoff": "2019-12-31",
+  "criterion": "percentile-95 of the metric distribution on IS universe (<=2019-12-31), frozen before any OOS run; p90 computed in parallel as a robustness variant, not a re-pick",
+  "n_trials_this_step": 1,
+  "n_obs_is_debt_eq": 27816,
+  "n_obs_is_dilution": 23397,
+  "debt_eq_threshold_PRIMARY_p95": 5.9,
+  "debt_eq_threshold_robustness_p90": 3.9,
+  "dilution_threshold_PRIMARY_p95": 1.75,
+  "dilution_threshold_robustness_p90": 1.0979,
+  "rule2_definition": "Debt_Eq_P0 > debt_eq_threshold AND EBITDA_P0 < 0, sustained 2 consecutive quarters (unchanged from v2's semantic fix, only the Debt_Eq cutoff value is now IS-only)",
+  "rule3_definition": "dilution_pct > dilution_threshold (OShares / min(OShares, trailing 12Q, shifted 1) - 1)",
+  "rule1_definition": "BVPS <= 0 (unchanged, not a tuned threshold -- objective accounting fact)"
+}
