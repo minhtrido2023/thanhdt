@@ -9,9 +9,12 @@ lại, kể cả khi doanh nghiệp đã sạch. User: "forensic cũng phải đ
 vào, không được để treo mãi."
 
 CƠ CHẾ (khớp thiết kế đã duyệt ở `adaptive_exclusion_v2_20260904.md` §Việc 3):
-  - `review_by` = `date` + 12 tháng (mặc định) hoặc + 3 tháng với
-    `flag_type=leadership_investigation` (diễn biến pháp lý nhanh hơn nhiều).
+  - `review_by` GIÃN theo nhóm (user chốt 2026-09-04, tránh 11 cảnh báo nổ cùng ngày):
+    nhóm 1 `exclude` fraud_confirmed/related_party → trước hạn gốc 2 TUẦN;
+    nhóm 2 `exclude` còn lại → trước 1 TUẦN; nhóm 3 `watch` → ĐÚNG hạn gốc (date+12 tháng).
+    `flag_type=leadership_investigation` (loại mới, xem v2 §Việc 4) dùng date + 3 tháng.
   - Còn ≤ SOON_DAYS ngày  → dòng FYI, KHÔNG mở question (tránh mệt mỏi cảnh báo).
+  - GỠ SỚM: có event đóng TRƯỚC hạn ⇒ cờ rời hàng đợi ngay, không chờ tới `review_by`.
   - ĐÃ QUÁ HẠN           → bus `question` topic `forensic-flag-review: <TICKER>`, LẶP LẠI
     mỗi lượt chạy cho tới khi có event đóng (§26 coding_guidelines: không để quyết định
     cần-người treo im lặng).
@@ -23,8 +26,9 @@ CƠ CHẾ (khớp thiết kế đã duyệt ở `adaptive_exclusion_v2_20260904.
 (tự do thêm mô tả phía sau), rồi cập nhật `review_by` mới trong CSV:
     bin/append_event.sh <agent> decision "forensic-flag-review: PC1 — giữ exclude, chưa có
       kết luận điều tra" '{"verdict":"keep_exclude","review_by_new":"2028-06-20"}'
-Dò bằng `mike_json.py has-event-prefix` — KHÔNG khớp tuyệt đối (§26/§28: producer luôn thêm
-hậu tố tự do; khớp tuyệt đối là đúng lỗi đã cắn ở `wags_autofix.sh` 2026-08-04→08-11).
+Dò bằng `scan_resolved()` — cùng ngữ nghĩa PREFIX của `mike_json.py has-event-prefix`, KHÔNG
+khớp tuyệt đối (§26/§28: producer luôn thêm hậu tố tự do; khớp tuyệt đối là đúng lỗi đã cắn ở
+`wags_autofix.sh` 2026-08-04→08-11) — nhưng quét bus MỘT LẦN thay vì 198 tiến trình con.
 
 Exit code: 0 = không có gì quá hạn (có thể có FYI); 1 = có ≥1 cờ quá hạn chưa đóng.
 `--json <path>` để caller đọc máy. Không tự gửi Discord/ghi bus — caller
@@ -32,9 +36,10 @@ Exit code: 0 = không có gì quá hạn (có thể có FYI); 1 = có ≥1 cờ 
 """
 import argparse
 import csv
+import glob
+import gzip
 import json
 import os
-import subprocess
 import sys
 from datetime import datetime
 from zoneinfo import ZoneInfo
@@ -51,40 +56,56 @@ BUS_DIR = os.path.join(MIKE_ROOT, "bus")
 TOPIC_PREFIX = "forensic-flag-review: "
 
 
-def _closed(ticker, since_iso):
-    """Đã có event đóng cho ticker này (bất kỳ agent nào) kể từ `since_iso` chưa?
+CLOSE_TYPES = ("decision", "answer", "finding")
 
-    Trả (closed: bool, err: str|None). Lỗi gọi được TRẢ VỀ chứ không nuốt — §29: thông điệp
-    chẩn đoán phải trích bằng chứng thật, không đoán hộ.
+
+def scan_resolved(bus_dir):
+    """Quét bus MỘT LẦN → {ticker: (ts, agent, topic)} cho mọi cờ đã được xử lý.
+
+    Quét một lượt thay vì gọi `mike_json.py has-event-prefix` cho từng (mã × agent × loại):
+    11 mã × 6 agent × 3 loại = 198 tiến trình con mỗi lượt cron — quá đắt cho một check chạy
+    2 lần/ngày. Ngữ nghĩa giữ y hệt has-event-prefix: khớp topic theo PREFIX
+    `forensic-flag-review: <TICKER>` (§26/§28 — producer luôn thêm mô tả tự do phía sau;
+    khớp tuyệt đối là đúng lỗi đã cắn ở `wags_autofix.sh` 2026-08-04→08-11).
+
+    Đọc CẢ hot (`inbox/<agent>.jsonl`) lẫn archive (`inbox/archive/<agent>_YYYY-MM.jsonl.gz`)
+    — cùng bố cục `mike_json._agent_files`. Bỏ sót archive = báo "chưa xử lý" cho việc đã
+    xử lý xong từ tháng trước.
+
+    Trả (resolved: dict, errors: list[str]). Lỗi ĐỌC được trả về, không nuốt (§29).
     """
-    topic = f"{TOPIC_PREFIX}{ticker}"
-    for agent in ("Mike", "Taylor", "Winston", "Spyros", "Wags", "quant-skeptic"):
-        for etype in ("decision", "answer", "finding"):
-            cmd = [
-                sys.executable,
-                os.path.join(MIKE_ROOT, "bin", "mike_json.py"),
-                "has-event-prefix",
-                BUS_DIR,
-                agent,
-                since_iso,
-                f"{etype}:{topic}",
-            ]
-            try:
-                r = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
-            except Exception as e:
-                return False, f"gọi has-event-prefix thất bại: {e!r}"
-            # HỢP ĐỒNG: has-event-prefix báo qua EXIT CODE (0=khớp, 1=không khớp); stdout là
-            # văn bản người đọc ("MATCH ..." / "no match: ..."). Bản nháp đầu kiểm stdout
-            # =="1"/"true" nên KHÔNG BAO GIỜ nhận ra cờ đã đóng — bắt được lúc test tay
-            # (§19 verify-before-done: chạy thật, đừng tin chữ ký trông có vẻ đúng).
-            if r.returncode == 0:
-                return True, None
-            if r.returncode not in (0, 1):
-                return False, (
-                    f"has-event-prefix rc={r.returncode} cho {agent}/{etype}: "
-                    f"{(r.stderr or r.stdout).strip()[:200]}"
-                )
-    return False, None
+    resolved, errors = {}, []
+    inbox = os.path.join(bus_dir, "inbox")
+    files = sorted(glob.glob(os.path.join(inbox, "*.jsonl")))
+    files += sorted(glob.glob(os.path.join(inbox, "archive", "*.jsonl.gz")))
+    for path in files:
+        try:
+            opener = gzip.open if path.endswith(".gz") else open
+            with opener(path, "rt", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if not line or TOPIC_PREFIX not in line:
+                        continue  # lọc thô trước khi parse JSON — phần lớn dòng không liên quan
+                    try:
+                        e = json.loads(line)
+                    except ValueError:
+                        continue
+                    if e.get("event_type") not in CLOSE_TYPES:
+                        continue
+                    topic = str(e.get("topic") or "")
+                    if not topic.startswith(TOPIC_PREFIX):
+                        continue
+                    rest = topic[len(TOPIC_PREFIX):].strip()
+                    tk = rest.split()[0].strip(":,-").upper() if rest else ""
+                    if not tk:
+                        continue
+                    ts = str(e.get("ts") or "")
+                    # giữ event MỚI NHẤT cho mỗi mã
+                    if tk not in resolved or ts > resolved[tk][0]:
+                        resolved[tk] = (ts, str(e.get("agent") or "?"), topic)
+        except Exception as ex:
+            errors.append(f"{os.path.basename(path)}: {ex!r}")
+    return resolved, errors
 
 
 def main():
@@ -112,7 +133,13 @@ def main():
     with open(args.csv, newline="", encoding="utf-8") as f:
         rows = list(csv.DictReader(f))
 
-    overdue, soon, missing, ok = [], [], [], 0
+    # GỠ SỚM (user chốt 2026-09-04): "nếu chưa đến thời gian review nhưng có sự kiện để loại
+    # khỏi danh sách thì cũng có cơ chế để bỏ khỏi thời điểm đến hạn cần xử lý". Quét bus MỘT
+    # LẦN cho MỌI dòng — không chỉ dòng đã quá hạn — nên một cờ được xử lý trước hạn sẽ rời
+    # hàng đợi ngay, không chờ tới ngày rồi mới báo.
+    resolved, scan_errs = scan_resolved(BUS_DIR)
+
+    overdue, soon, missing, early, ok = [], [], [], [], 0
     for r in rows:
         tk = (r.get("ticker") or "").strip()
         rb = (r.get("review_by") or "").strip()
@@ -133,15 +160,18 @@ def main():
             "review_by": rb,
             "days_left": days,
         }
-        if days < 0:
-            since = f"{rec['flag_date']}T00:00:00Z"
-            done, err = _closed(tk, since)
-            if err:
-                rec["lookup_error"] = err
-            if done:
-                ok += 1
+        hit = resolved.get(tk.upper())
+        # Chỉ tính event ghi SAU ngày gắn cờ — event cũ hơn nói về một lần flag TRƯỚC đó,
+        # không đóng được lần này (cùng kỷ luật `since_iso` của has-event-prefix).
+        if hit and hit[0] >= f"{rec['flag_date']}T00:00:00Z":
+            rec["resolved_at"], rec["resolved_by"] = hit[0], hit[1]
+            if days >= 0:
+                early.append(rec)   # xử lý TRƯỚC hạn → rời hàng đợi
             else:
-                overdue.append(rec)
+                ok += 1
+            continue
+        if days < 0:
+            overdue.append(rec)
         elif days <= SOON_DAYS:
             soon.append(rec)
         else:
@@ -163,10 +193,21 @@ def main():
     if soon:
         det = ", ".join(f"{s['ticker']}({s['days_left']}d)" for s in soon)
         lines.append(f"🗓️ forensic-flag sắp tới hạn rà lại (≤{SOON_DAYS}d): {det}")
+    if early:
+        det = ", ".join(f"{e['ticker']}(bởi {e['resolved_by']})" for e in early)
+        lines.append(
+            f"↩️ forensic-flag đã xử lý TRƯỚC hạn ({len(early)}): {det} — đã rời hàng đợi, "
+            f"không chờ tới `review_by`. Nhớ cập nhật/xoá dòng trong data/forensic_flags.csv."
+        )
     if missing:
         lines.append(
             f"⚠️ forensic-flag thiếu/hỏng `review_by` ({len(missing)}): {', '.join(missing)} "
             f"— điền ngày để cờ không treo vô hạn."
+        )
+    if scan_errs:
+        lines.append(
+            f"⚠️ forensic-flag: không đọc được {len(scan_errs)} file bus — có thể BỎ SÓT cờ đã "
+            f"xử lý. Lỗi thật: {'; '.join(scan_errs[:3])}"
         )
     if not lines:
         lines.append(f"✅ forensic-flag: {ok}/{len(rows)} cờ còn trong hạn rà lại.")
@@ -181,6 +222,8 @@ def main():
                     "overdue": overdue,
                     "soon": soon,
                     "missing_review_by": missing,
+                    "resolved_early": early,
+                    "scan_errors": scan_errs,
                     "ok": ok,
                     "total": len(rows),
                 },

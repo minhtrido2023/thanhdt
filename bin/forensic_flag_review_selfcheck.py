@@ -125,6 +125,63 @@ def main():
     check("§16: neo ZoneInfo('Asia/Ho_Chi_Minh'), không dùng datetime.now() trần",
           'ZoneInfo("Asia/Ho_Chi_Minh")' in src and "datetime.now(_ICT)" in src)
 
+    # ---- GỠ SỚM (user chốt 2026-09-04) ----
+    # 11. Event đóng ghi TRƯỚC hạn → mã rời hàng đợi ngay, không nằm trong "sắp tới hạn"
+    bus2 = os.path.join(d, "bus2")
+    os.makedirs(os.path.join(bus2, "inbox"))
+    with open(os.path.join(bus2, "inbox", "Taylor.jsonl"), "w", encoding="utf-8") as f:
+        f.write(json.dumps({
+            "ts": "2027-06-01T02:00:00Z", "agent": "Taylor", "event_type": "finding",
+            "topic": "forensic-flag-review: AAA — da go, CFO duong 4 quy lien tiep",
+            "payload": {},
+        }) + "\n")
+    rc, out = run(csv_soon, "2027-06-10", bus_dir=bus2)
+    check("gỡ sớm: mã đã xử lý trước hạn rời hàng đợi",
+          rc == 0 and "đã xử lý TRƯỚC hạn" in out and "AAA" in out.split("↩️")[-1],
+          f"rc={rc} out={out!r}")
+    check("gỡ sớm: mã CHƯA xử lý vẫn nằm trong FYI sắp hạn",
+          "sắp tới hạn" in out and "BBB" in out, out[:250])
+
+    # 12. Event đóng CŨ HƠN ngày gắn cờ → KHÔNG được tính (nói về lần flag trước đó)
+    bus3 = os.path.join(d, "bus3")
+    os.makedirs(os.path.join(bus3, "inbox"))
+    with open(os.path.join(bus3, "inbox", "Mike.jsonl"), "w", encoding="utf-8") as f:
+        f.write(json.dumps({
+            "ts": "2026-01-01T00:00:00Z", "agent": "Mike", "event_type": "decision",
+            "topic": "forensic-flag-review: AAA — lan flag cu", "payload": {},
+        }) + "\n")
+    rc, out = run(csv_soon, "2027-06-10", bus_dir=bus3)
+    check("event cũ hơn ngày gắn cờ KHÔNG đóng được cờ hiện tại",
+          rc == 0 and "đã xử lý TRƯỚC hạn" not in out and "AAA" in out,
+          f"rc={rc} out={out!r}")
+
+    # 13. Đọc được event trong ARCHIVE .jsonl.gz (bỏ sót archive = báo sai "chưa xử lý")
+    import gzip as _gz
+    bus4 = os.path.join(d, "bus4")
+    os.makedirs(os.path.join(bus4, "inbox", "archive"))
+    with _gz.open(os.path.join(bus4, "inbox", "archive", "Mike_2027-06.jsonl.gz"),
+                  "wt", encoding="utf-8") as f:
+        f.write(json.dumps({
+            "ts": "2027-06-02T00:00:00Z", "agent": "Mike", "event_type": "decision",
+            "topic": "forensic-flag-review: AAA — go, da sach", "payload": {},
+        }) + "\n")
+    rc, out = run(csv_soon, "2027-06-10", bus_dir=bus4)
+    check("đọc được event trong archive .jsonl.gz",
+          "đã xử lý TRƯỚC hạn" in out, f"rc={rc} out={out!r}")
+
+    # 14. Giãn nhóm: 3 mốc khác nhau → mỗi mốc tới hạn riêng, không nổ cùng lúc
+    csv_stag = os.path.join(d, "stagger.csv")
+    open(csv_stag, "w", encoding="utf-8").write(
+        HDR
+        + "G1,related_party,exclude,2026-06-20,t,n,2027-06-06\n"
+        + "G2,pump_no_moat,exclude,2026-06-20,t,n,2027-06-13\n"
+        + "G3,distress_cashburn,watch,2026-06-20,t,n,2027-06-20\n"
+    )
+    rc, out = run(csv_stag, "2027-06-07")
+    check("giãn nhóm: ở 2027-06-07 chỉ G1 quá hạn, G2/G3 chưa",
+          rc == 1 and "G1(exclude" in out and "G2(exclude" not in out
+          and "G3(watch" not in out, f"rc={rc} out={out!r}")
+
     print(f"\n{_pass} PASS, {_fail} FAIL")
     return 1 if _fail else 0
 
