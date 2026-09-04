@@ -106,3 +106,6 @@
 
 ## Archived 2026-08-31 (keep=12 days=0 require_done=False)
 - [2026-08-17T12:31:33Z] [2026-08-17T12:31Z] Xong job Winston_20260817_122149: gate corp-action trong update_shares_live.py tu choi GIA 10 ngay (cum_raw roi trung dong ticker.Price dong cung 08-06) => VHM 1:1 khong ghi duoc, OShares sai 2x. Va commit ced702ac (lui ve phien cum sach), VHM da ghi 8.214.824.008 khop cong bo, backlog+ops_health xanh. Incident add15074, registry 6e01f07b. CON TREO tu truoc: lag_entry_anchor.py:105 doc thang ticker.Price lam TRAN (vung Taylor/DollarBill); stash@{0} hybrid+refresh_skip_fix 20260810 chua resolve.
+
+## Archived 2026-09-04 (keep=12 days=0 require_done=False)
+- [2026-08-17T19:09:47Z] [2026-08-18T02:10Z] Xong job Winston_20260817_190446: UPCOM VWAP EOD-capture source dung xong (registry mike/kb/data_registry/price-volume/dnse_latest_trade_avgprice_upcom.md + script bin/capture_upcom_vwap_eod.sh/.py + seed 114 ma, chay song 114/114 OK, idempotent, commit 9f832d6d). Cron 15:15 ICT (08:15 UTC) DE XUAT, CHUA cai — cho user duyet. CON TREO: seed ticker se mon, can refresh dinh ky qua secdef.marketId (chua tu dong hoa). Con treo tu truoc: lag_entry_anchor.py:105 doc thang ticker.Price lam TRAN (vung Taylor/DollarBill); stash@{0} hybrid+refresh_skip_fix 20260810 chua resolve.
