@@ -428,3 +428,6 @@
 
 ## Archived 2026-09-04 (keep=12 days=0 require_done=False)
 - [2026-08-30T14:04:25Z] diverge-indicator-strategy-round2 (job _135407) XONG + quant-skeptic verify CONFIRMED (medium). Sua dung 4 diem REFUTED round1: grid persisted (exp_insider/cap_signal_grid_test_round2.py), nhan FP/TP dung (FP that=2014-10-09+2023-08-16), IS/OOS them (deu duong), leave-one-out 18/18 khong dao dau nhung mat ~46-57% gia tri khi loai top episode. Killer objection quant-skeptic: N that chi ~6 cum macro doc lap 15 nam - khong du DSR/PBO. Ket luan cuoi: KHONG wire, toi da la tin hieu advisory mem. Khong con viec mo tren truc nay.
+
+## Archived 2026-09-04 (keep=12 days=0 require_done=False)
+- [2026-08-30T14:16:04Z] cap-signal-advisory (job _141109) XONG: script mike/agents/Taylor/cap_signal_advisory_check.py (VNI tu BQ song + EEM/DXY/TNX tu yfinance song, KHONG dung tier2_macro_panel.csv dong bang 05-15), ghi registry kb/data_registry/market-state/cap_signal_advisory_log.csv, nguong nang cap N_clusters>=10 (hien 0, lich su 6). Test 08-30: quiet khong fire. CHUA wire hien thi vao dna_report.py - de xuat trong project doc, cho user duyet rieng. Khong con viec mo tren truc nay.
