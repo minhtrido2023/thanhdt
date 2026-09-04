@@ -284,3 +284,4 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 > mát khi migrate (69/69 entry gốc đã chuyển đủ, verify diff-based).
 
 - [2026-09-03] [preflight false-warn macro_health tuổi file theo ngày lịch trong kỳ nghỉ lễ + §29 đoán nguyên nhân](2026-09/2026-09-03-macro-health-false-warn-holiday-calendar-age.md) — nghỉ Quốc khánh 31/08-02/09, daily_refresh abort ĐÚNG; ngưỡng đổi sang phiên giao dịch + trích log thật (81cc0428)
+- [2026-09-04] [macro_health=FAILED giả: tdays() không trừ nghỉ lễ VN ⇒ DT5G rơi về DT4_only cả đêm](2026-09/2026-09-04-macro-health-failed-holiday-tdays.md) — call-site THỨ BA cùng lớp lỗi (sau 0b83f507/81cc0428), lần này ở repo NGOÀI `macro_healthcheck.py`; 28/08→03/09 đếm 4td thay vì 1td (96ebd124)
