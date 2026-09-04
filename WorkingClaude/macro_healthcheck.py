@@ -32,7 +32,7 @@ EXIT CODE: 0 HEALTHY, 1 DEGRADED, 2 FAILED  (so a scheduler/watchdog can branch)
 Run: python macro_healthcheck.py   (intended right AFTER macro_state_live in the daily job)
 """
 import os, sys, io, json, traceback
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 import numpy as np
 import pandas as pd
 
@@ -56,23 +56,55 @@ PROBE_LOOKBACK_DAYS = 120  # window for the get_macro_state liveness probe
 NOW = datetime.now()
 TODAY = NOW.date()
 
-def tdays(asof: date, ref: date = TODAY) -> int:
-    """Trading-day age (Mon-Fri, holidays ignored = slightly conservative)."""
+# Lịch nghỉ lễ VN — cùng nguồn preflight_check.sh/bq_freshness_check.sh dùng
+# (trading_bot.vn_market). Import best-effort: nếu hỏng thì GIỮ lỗi thật để in ra
+# (§29 coding_guidelines — không đoán nguyên nhân) và rơi về đếm Mon-Fri thuần.
+try:
+    from trading_bot.vn_market import is_holiday as _vn_is_holiday
+    VN_HOLIDAY_ERR = None
+except Exception as _e:  # pragma: no cover - chỉ chạy khi môi trường thiếu module
+    _vn_is_holiday = None
+    VN_HOLIDAY_ERR = f"{type(_e).__name__}: {_e}"
+
+
+def tdays(asof: date, ref: date = TODAY, vn_holidays: bool = False) -> int:
+    """Trading-day age.
+
+    vn_holidays=False -> Mon-Fri thuần (đúng cho nguồn theo lịch MỸ).
+    vn_holidays=True  -> trừ thêm ngày nghỉ lễ VN. BẮT BUỘC cho nguồn theo lịch HOSE:
+    kỳ nghỉ dài (Quốc khánh 2026: 31/08+01/09+02/09, Tết) làm tuổi thật 1 phiên bị đếm
+    thành 4 "trading day" ⇒ vượt STATE_MAX_TDAYS=3 ⇒ FAILED/SEV1 giả và DT5G rơi về
+    DT4_only. Sự cố thật 2026-09-03 18:37 (cùng lớp lỗi với preflight_check.sh 0b83f507).
+    """
     try:
-        return int(np.busday_count(np.datetime64(asof, "D"), np.datetime64(ref, "D")))
+        n = int(np.busday_count(np.datetime64(asof, "D"), np.datetime64(ref, "D")))
     except Exception:
         return (ref - asof).days
+    if vn_holidays and _vn_is_holiday is not None:
+        d = asof
+        while d < ref:
+            if d.weekday() < 5 and _vn_is_holiday(d):
+                n -= 1
+            d = d + timedelta(days=1)
+    return max(n, 0)
 
 # accumulators
 sources, checks = [], []
 def add_source(name, as_of, max_tdays, kind="trading"):
+    """kind: 'trading_vn' = phiên HOSE (trừ lễ VN) · 'trading' = Mon-Fri (lịch Mỹ) · khác = ngày lịch."""
     ok, age, detail = False, None, ""
     if as_of is None:
         detail = "MISSING / unreadable"
     else:
-        age = tdays(as_of) if kind == "trading" else (TODAY - as_of).days
+        if kind in ("trading", "trading_vn"):
+            age = tdays(as_of, vn_holidays=(kind == "trading_vn"))
+        else:
+            age = (TODAY - as_of).days
+        unit = "td" if kind in ("trading", "trading_vn") else "d"
         ok = age <= max_tdays
-        detail = f"as_of={as_of} age={age}{'td' if kind=='trading' else 'd'} (max {max_tdays})"
+        detail = f"as_of={as_of} age={age}{unit} (max {max_tdays})"
+        if kind == "trading_vn" and _vn_is_holiday is None:
+            detail += f" [CẢNH BÁO: không tra được lịch nghỉ VN, đếm Mon-Fri thuần — {VN_HOLIDAY_ERR}]"
     sources.append({"name": name, "as_of": str(as_of) if as_of else None,
                     "age": age, "ok": bool(ok), "detail": detail})
     return ok
@@ -107,7 +139,7 @@ if bq is not None:
     try:
         r = bq("SELECT MAX(s.time) AS mx FROM tav2_bq.vnindex_5state_tam_quan_v34b_clean AS s")
         d = pd.to_datetime(r["mx"].iloc[0]).date()
-        state_fresh = add_source("local_v34b_state_csv", d, STATE_MAX_TDAYS)
+        state_fresh = add_source("local_v34b_state_csv", d, STATE_MAX_TDAYS, kind="trading_vn")
     except Exception as e:
         state_fresh = add_source("local_v34b_state_csv", None, STATE_MAX_TDAYS)
         add_check("v34b_csv_read", False, "SEV1", str(e))
@@ -118,7 +150,7 @@ if bq is not None:
     try:
         r = bq("SELECT MAX(t.time) AS mx FROM tav2_bq.ticker AS t WHERE t.ticker='VNINDEX'")
         d = pd.to_datetime(r["mx"].iloc[0]).date()
-        ticker_fresh = add_source("bq_ticker_vnindex", d, TICKER_MAX_TDAYS)
+        ticker_fresh = add_source("bq_ticker_vnindex", d, TICKER_MAX_TDAYS, kind="trading_vn")
     except Exception as e:
         ticker_fresh = add_source("bq_ticker_vnindex", None, TICKER_MAX_TDAYS)
         add_check("bq_ticker_query", False, "SEV1", str(e))
@@ -230,7 +262,7 @@ missed = 0
 try:
     if os.path.exists(MARKER):
         prev = datetime.fromisoformat(open(MARKER, encoding="utf-8").read().strip().split()[0][:19])
-        missed = tdays(prev.date())
+        missed = tdays(prev.date(), vn_holidays=True)  # job chạy theo lịch HOSE (cron T2-T6, nghỉ lễ VN không phải "missed run")
         if missed > 1:
             add_check("missed_runs", False, "SEV2", f"{missed} trading days since last successful run ({prev:%Y-%m-%d})")
 except Exception:
