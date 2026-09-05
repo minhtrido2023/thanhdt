@@ -449,3 +449,6 @@
 
 ## Archived 2026-09-05 (keep=12 days=0 require_done=False)
 - [2026-08-31T05:39:33Z] vn-prior-trend-meanreversion-hypothesis-20260831 (job _053055) XONG, bus finding + report da ghi. Ket luan: gia thuyet mean-reversion-theo-prior-trend KHONG robust N=6 (correlation driven boi 1 outlier 2007-2009). Phat hien manh nhat: 07/2026 va 2018 giong het nhau tren moi prior-trend metric nhung outcome doi lap - prior-trend KHONG phan biet duoc, phai dung 3-archetype framework da co.
+
+## Archived 2026-09-05 (keep=12 days=0 require_done=False)
+- [2026-09-03T15:59:12Z] top-detection-technical-signals-20260903 (job _154921) XONG, bus finding + report da ghi. 10 bien the (volume/TV/VAP-proxy/RSI-divergence grid) + 1 combo (N_TRIALS=11) - KHONG cai nao vuot DIVERGE_DAY ve timing. RSI_DIVERGE_3M bat dinh tot nhat (must-catch ca 2007/2018/2022 o moi margin) nhung do sau dieu chinh yeu hon DIVERGE, khong dose-response - chi gioi GAN NHAN dinh khong gioi do LUONG. Combo RSI x TV lap lai loi §2.4 (AND lam mat must-catch). Khong con viec mo tren truc nay.
