@@ -318,8 +318,8 @@ của repo ngoài — gate KÊU ra stderr nhưng không chặn được). Ba l�
 `--update-baseline` (chỉ HẠ được; nâng phải thêm `--accept-new-debt`). Hook repo ngoài đi qua shim
 `WorkingClaude/tz_anchor_gate_shim.sh` vì `.gitignore` của repo đó ẩn chính `WorkingClaude/mike/`
 ⇒ trỏ `entry` thẳng vào repo lồng sẽ hỏng cứng trong mọi worktree/clone mới. Selfcheck
-`bin/tz_anchor_gate_selfcheck.py [--mutations|--all-tz]` — **99 assertion, 27/27 mutation bị giết
-(23 trên gate .py + 4 trên shim .sh), đo dưới `$DNA_PYEXE`** (interpreter mà
+`bin/tz_anchor_gate_selfcheck.py [--mutations|--all-tz]` — **137 assertion, 38/38 mutation bị giết
+(34 trên gate .py + 4 trên shim .sh), đo dưới `$DNA_PYEXE`** (interpreter mà
 `run_selfchecks.sh`/`selfcheck_weekly_baseline_check.sh` dùng thật; selfcheck tự đếm và tự in con
 số nên nó không bao giờ lệch).
 ⚠️ **Hook chạy `python3` (3.10) còn 2 runner selfcheck chạy `$DNA_PYEXE` (3.12) ⇒ 7 file .py của
@@ -331,6 +331,21 @@ Hook PHẢI có `verbose: true` ở cả 2 config: pre-commit chỉ in output ho
 mà gate này cố ý fail-open ⇒ thiếu verbose thì mọi cảnh báo bị nuốt, fail-open thành fail-silent.
 Ba biến `MIKE_TZ_GATE_ROOT/_BASELINE/_ROOTS` chỉ dành cho sandbox selfcheck và bị TỪ CHỐI nếu
 thiếu `MIKE_TZ_GATE_SELFCHECK=1` (một biến sót lại đủ biến gate thành no-op im lặng).
+
+**Mở rộng 2026-09-05 (user duyệt Discord) — RULE 2 cùng script, namespace baseline RIÊNG**
+(`tdays_files` cạnh `files`, ratchet độc lập): chặn gọi hàm tên KHỚP TUYỆT ĐỐI `tdays` (không
+phân biệt hoa/thường) trừ khi CHÍNH lệnh gọi đó có `vn_holidays=` (per-call), HOẶC hàm bao quanh
+có tham chiếu `trading_bot.vn_market.is_holiday` (khớp tuyệt đối, per-scope). Sự cố gốc:
+`macro_healthcheck.py::tdays()` dùng `np.busday_count` trần, nghỉ Quốc khánh 31/08→02/09 khiến
+tuổi dữ liệu thật 1 phiên bị đếm thành 4 "trading day" ⇒ `macro_health=FAILED` giả, DT5G tắt qua
+đêm — call-site thứ 3 của CÙNG lớp lỗi trong 2 ngày (`0b83f507`, `81cc0428` ở `mike/bin/`, rồi
+`96ebd124` ở repo ngoài; `kb/incidents/2026-09/2026-09-04-macro-health-failed-holiday-tdays.md`).
+Cố ý KHÔNG quét mù `np.busday_count` hay biến thể tên (`get_tdays`) — đo được cả hai là rủi ro
+false-positive cao (biến thể tên từng tự bắt nhầm chính `tdays_violations()`/`test_*_tdays()` của
+gate/selfcheck khi chạy `--scan` thật lần đầu). ⚠️ Bản đầu ân xá `vn_holidays=` theo CẢ SCOPE
+(không phải per-call) — arch-review vòng 1 phát hiện đây là no-op trên chính file gây sự cố:
+revert dòng vá thật về đúng bug SEV1 gốc vẫn KHÔNG bị bắt vì marker khác trong cùng scope còn
+sống; đã sửa thành per-call trước khi commit. *→ docstring đầu `bin/tz_anchor_gate.py` (RULE 2).*
 
 *→ rationale §16.*
 

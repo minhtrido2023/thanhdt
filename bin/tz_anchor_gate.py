@@ -31,6 +31,12 @@ RATCHET, không phải chặn tuyệt đối (cùng khuôn bin/code_quality_gate
 phạm của CHÍNH file đó TĂNG so với kb/tz_anchor_baseline.json. File không có trong baseline →
 baseline ngầm định 0. Nợ cũ (đã kiểm kê, xem baseline) không bị bắt sửa ngay.
 
+HAI RULE = HAI NAMESPACE ĐỘC LẬP trong CÙNG file baseline — `"files"` (rule 1, datetime.now()
+trần) và `"tdays_files"` (rule 2, tdays() thiếu vn_holidays). Ratchet per-file TÁCH RIÊNG cho
+từng rule: 1 file có thể tăng nợ rule 1 mà rule 2 không đổi và ngược lại — KHÔNG cộng gộp 2 con
+số khác BẢN CHẤT lỗi vào chung 1 ngưỡng (tăng thật của rule này có thể bị nợ cũ của rule kia che
+mất nếu gộp). `RULES` (danh sách rule + detector + label) là điểm mở rộng duy nhất nếu có rule 3.
+
 BASELINE-KEY: chuẩn hoá về đường dẫn tương đối so với `/home/trido/thanhdt/WorkingClaude` —
 "mike/bin/x.py", "dna_report.py", "trading_bot/y.py". Đúng quy ước kb/code_quality_baseline.json
 đang dùng, và ổn định qua mọi worktree của mike (mike/agents/wt-<thread>/... map về "mike/...").
@@ -53,7 +59,53 @@ ESCAPE HATCH — 3 đường, cố ý khác nhau về HỆ QUẢ:
     `--accept-new-debt` (F4).
   - `MIKE_TZ_GATE=off` — tắt hẳn. Thắng MỌI thứ khác, kể cả guard env knob ở dưới.
 
-CÒN HỞ (ghi ở đây, đừng để ai tưởng gate phủ cả họ lỗi):
+RULE 2 (thêm 2026-09-05, user duyệt qua Discord cùng ngày) — `tdays()` THIẾU vn_holidays, tức
+"pattern đếm ngày lịch không biết lễ VN" bị escalate `retro-pattern-recurring-tdays-holiday-2days`
+sau 3 lần va chạm CÙNG lớp lỗi trong 2 ngày (`0b83f507`, `81cc0428` ở `mike/bin/`, rồi
+`96ebd124` ở `WorkingClaude/macro_healthcheck.py` — call-site thứ 3 lọt vì 2 bản vá trước không
+phủ tới repo ngoài). Xem `kb/incidents/2026-09/2026-09-04-macro-health-failed-holiday-tdays.md`.
+
+CHỮ KÝ RULE 2 (hẹp có chủ đích — KHÔNG quét mù mọi `np.busday_count`/date-diff, đó chính là rủi
+ro false-positive Mike cảnh báo user trước khi duyệt): một `ast.Call` là VI PHẠM khi ĐỦ 2 điều —
+  (a) tên hàm được gọi (Name.id hoặc Attribute.attr) TRÙNG KHỚP TUYỆT ĐỐI (không phân biệt
+      hoa/thường) với `"tdays"` — đúng quy ước đặt tên đã dùng thật (`def tdays(...)`), KHÔNG bắt
+      `np.busday_count` trần, biến đổi ngày kiểu khác, hay biến thể tên như `get_tdays`/
+      `calc_tdays_age` (đo thật 2026-09-05: bản đầu dùng "chứa chuỗi con" tự bắt NHẦM chính
+      `tdays_violations()`/`test_*_tdays()` của module gate/selfcheck — khớp tuyệt đối loại bỏ
+      hẳn lớp false-positive này, đổi lấy việc không tự mở rộng sang tên hàm tương lai chưa tồn
+      tại; xem KHÔNG LÀM và KHÔNG LÀM CÒN HỞ bên dưới cho lựa chọn có chủ đích này);
+  (b) KHÔNG đủ MỘT TRONG BA lối thoát sau (đầu tiên xét PER-CALL, hai lối còn lại xét theo SCOPE):
+      (b1) CHÍNH lệnh gọi đó có keyword argument tên `vn_holidays` — ân xá CHỈ lệnh gọi này, không
+           lan sang lệnh `tdays()` khác trong cùng hàm (arch-review vòng 1 RULE-2, F1: bản đầu ân
+           xá theo SCOPE cho `vn_holidays=` khiến CẢ HÀM được miễn trừ vĩnh viễn chỉ vì MỘT lệnh
+           gọi có kwarg đó — đo được: revert `add_source()` dòng 100 về đúng bug SEV1 gốc
+           `tdays(as_of)` trần vẫn lọt vì marker khác trong cùng scope còn sống; per-call sửa
+           đúng lỗ này);
+      (b2) hàm BAO QUANH lệnh gọi (nearest enclosing `def`/`async def`, hoặc top-level module nếu
+           không nằm trong `def` nào) có tham chiếu `is_holiday` ở đâu đó trong CHÍNH phạm vi của
+           nó (không tính xuống `def` lồng bên trong — scope khác) — khớp TUYỆT ĐỐI trên cả
+           `ast.Attribute.attr` lẫn `ast.Name.id` (không phải substring — bản đầu dùng substring
+           trên Name, cùng họ lỗi F1: identifier chỉ CHỨA "is_holiday" như `_vn_is_holiday` không
+           còn được tính là marker thật);
+      (b3) chữ ký của `def` bao quanh có tham số tên `vn_holidays` (bắt ca chuyển tiếp THẬT bằng
+           VỊ TRÍ `tdays(a, vn_holidays)` — chuyển tiếp bằng KEYWORD đã đi qua (b1) rồi, không
+           cần (b3) — CHỈ kiểm khai báo, KHÔNG kiểm có thật sự dùng tham số đó hay không, xem
+           `_scope_has_vn_holidays_param`).
+  Ca thật `add_source()` (macro_healthcheck.py:93-100) chỉ có 1 câu
+  `tdays(as_of, vn_holidays=(kind == "trading_vn"))` phục vụ CẢ nhánh Mỹ (`kind="trading"` →
+  `vn_holidays=False`) lẫn nhánh VN (`kind="trading_vn"` → `True`) — PASS qua (b1) vì `vn_holidays=`
+  nằm ngay trên CHÍNH lệnh gọi đó. Đây chính là điểm Mike lưu ý: KHÔNG được hiểu nhầm
+  "kind=='trading'" (lịch Mỹ, cố ý Mon-Fri thuần, us_market_history.csv) là một nhánh cần sửa.
+
+KHÔNG LÀM (phạm vi bị THU HẸP có chủ đích theo user 2026-09-05, không phải thiếu sót) — Mike đề
+xuất thêm "hoặc đối số/biến `kind` mang giá trị KHÔNG PHẢI marker lịch nước ngoài" làm tín hiệu
+nhận-diện thứ 2; KHÔNG hiện thực hoá tín hiệu đó thành rule AST vì `kind` là tên tham số CỰC
+PHỔ BIẾN trong codebase (dùng cho nhiều mục đích không liên quan ngày tháng) — biến nó thành
+điều kiện AST sẽ tự sinh false-positive trên diện rộng, đúng thứ user đã cảnh báo trước khi
+duyệt. Nếu tương lai xuất hiện call-site cùng lớp lỗi mà rule (a) bỏ lọt, xử lý bằng sweep thủ
+công (grep) một lần rồi mở rộng rule có chủ đích, không nới điều kiện (a) một cách mù quáng.
+
+CÒN HỞ CHUNG (cả 2 rule, ghi ở đây, đừng để ai tưởng gate phủ cả họ lỗi):
   - `pd.Timestamp.now()` / `pd.Timestamp.today()` naive-host-local Y HỆT về ngữ nghĩa (đo được
     75 + 46 call trong WorkingClaude hôm nay) nhưng KHÔNG bị chặn — phạm vi user duyệt là
     `datetime.now()`/`date.today()`. Muốn mở rộng thì phải rebuild baseline trước, không chỉ
@@ -62,13 +114,44 @@ CÒN HỞ (ghi ở đây, đừng để ai tưởng gate phủ cả họ lỗi):
     KHÔNG thuộc lớp lỗi §16 này. Cố ý không chặn.
   - `datetime.fromtimestamp(t)` / `date.fromtimestamp(t)` không có tz — naive-host-local y hệt,
     CHƯA canh (arch-review 2026-08-30 F8).
-  - Dạng tham chiếu rồi gọi: `n = datetime.now; n()` — AST không nối được 2 câu lệnh. CHƯA canh;
-    selfcheck ghi nó ở mục KNOWN GAP chứ KHÔNG phải control "đúng".
+  - Dạng tham chiếu rồi gọi: `n = datetime.now; n()` — AST không nối được 2 câu lệnh. CHƯA canh
+    (áp dụng cho CẢ rule 2: `f = tdays; f(x)` cũng không bắt được); selfcheck ghi nó ở mục KNOWN
+    GAP chứ KHÔNG phải control "đúng".
   - `datetime.now(*args)` / `now(**kw)` — có argument nên qua điều kiện (c). CHƯA canh.
+  - Rule 2 dùng KHỚP TUYỆT ĐỐI `fname.lower() == "tdays"`, KHÔNG phải "chứa chuỗi con" — bản đầu
+    dùng substring và TỰ BẮT NHẦM `tdays_violations()`/`test_detector_tdays()`/`test_historical_
+    tdays()` của chính module gate/selfcheck khi chạy `--scan` thật lần đầu (đo được, không phải
+    giả định). Hệ quả: biến thể tên như `get_tdays`/`calc_tdays_age` KHÔNG bị bắt — CHƯA canh,
+    chấp nhận đổi lấy loại bỏ lớp false-positive tự-tham-chiếu; nếu tương lai xuất hiện call-site
+    thật với tên biến thể, mở rộng bằng allowlist tên cụ thể (không quay lại substring mù).
+  - Rule 2 KHÔNG resolve alias import kiểu `from macro_healthcheck import tdays as t; t(x)` — tên
+    hàm sau alias không còn khớp `"tdays"` nên trượt điều kiện (a). Đo hôm nay: 0 ca sống trong 2
+    repo (không ai import lại `tdays`), nên chưa cần bịt như rule 1 đã bịt alias `datetime`
+    (`_alias_receivers`) — CHƯA canh, ghi nhận known-gap.
+  - `_scope_has_vn_holidays_param` (b3) chỉ kiểm hàm bao quanh có KHAI BÁO tham số `vn_holidays`
+    trong chữ ký, KHÔNG kiểm tham số đó có thật sự được CHUYỂN TIẾP vào lệnh gọi `tdays()` hay
+    không: `def f(a, vn_holidays=False): return tdays(a)` (khai báo rồi bỏ xó, không dùng ở đâu
+    cả) vẫn PASS qua (b3) dù `tdays(a)` bên trong trần hoàn toàn. CHƯA canh — chấp nhận vì (b3)
+    chỉ cần cho ca chuyển tiếp THẬT bằng VỊ TRÍ (chuyển tiếp bằng keyword đã đi qua (b1) per-call
+    rồi, xem docstring `_scope_has_vn_holidays_param`). Cũng KHÔNG bắt được `**kwargs` mù
+    (`def f(a, **kw): return tdays(a, **kw)` bị FLAG OAN vì tên tham số thật là `kw` chứ không
+    phải `vn_holidays`) — chấp nhận vì flag oan an toàn hơn bỏ sót.
+  - Rule 2 KHÔNG kiểm tra interprocedural: call-site GỌI `add_source(..., kind="trading_vn")`
+    không tự nó bị xét — chỉ có ĐỊNH NGHĨA `add_source` (nơi `tdays()` thực sự được gọi) mới nằm
+    trong phạm vi rule. Nếu tương lai một wrapper mới gọi `tdays()`-tương-tự qua nhiều lớp hàm mà
+    không lộ ra tên "tdays" ở lớp ngoài cùng, rule không bắt được — chấp nhận theo phạm vi đã duyệt.
   - Bash `date` không neo TZ: ngoài phạm vi (bin/utc_text_gate.sh canh nửa văn bản gửi người).
+  - ⚠️ Rule 2 chỉ soi được file `.py` — **2/3 sự cố trích dẫn ở trên (`0b83f507`, `81cc0428`) nằm
+    trong `mike/bin/preflight_check.sh` (bash, gọi Python qua heredoc)**, cấu trúc mà gate AST
+    Python KHÔNG BAO GIỜ đọc được. Rule 2 hiện chỉ phủ 1/3 sự cố gốc (call-site thứ 3,
+    `WorkingClaude/macro_healthcheck.py`) — tính đến 2026-09-05, TOÀN BỘ 2 repo chỉ có 2 call-site
+    `tdays()` sống, cả hai đều ở file đó. Một regression tương tự lặp lại TRONG `preflight_check.sh`
+    sẽ KHÔNG bị gate này chặn — biết trước, chấp nhận theo phạm vi user đã duyệt (Python-only).
   - File .py NGOÀI `WC_ROOT` và ngoài mọi checkout mike (vd 20 worktree của repo ngoài ở
     /home/trido/thanhdt/wt-*) không có baseline-key ⇒ KHÔNG gate được. Từ 2026-08-30 gate KÊU
-    ra stderr thay vì im (F2), nhưng vẫn không chặn.
+    ra stderr thay vì im (F2), nhưng vẫn không chặn. `WorkingClaude/macro_healthcheck.py` (call-site
+    thứ 3 của sự cố gốc) ĐÃ nằm trong TRACKED_ROOTS hiện có (`WorkingClaude/*.py`) — không phải
+    known-gap, xác nhận lại 2026-09-05.
 
 ⚠️ `pre-commit run --all-files` TRONG repo mike sẽ chạy tới nhánh auto-update và GHI + `git add`
 baseline production NGOÀI mọi commit (không có cơ chế stash của commit thật che). Không script
@@ -142,6 +225,26 @@ def _alias_receivers(tree):
 _PARSE_ERR = {}   # abspath -> nguyên văn exception, để người gọi in ra được
 
 
+def _parse_file(path):
+    """-> ast.Module, hoặc **None** nếu KHÔNG parse được (lỗi ghi vào _PARSE_ERR).
+
+    ⚠️ None ≠ [] và đây là khác biệt SỐNG CÒN (arch-review vòng 5, killer — xem docstring cũ của
+    `violations()`, nguyên nhân giữ nguyên). KHÔNG cache theo path: `violations()` và
+    `tdays_violations()` parse lại file riêng — tốn thêm 1 lần đọc/file (rẻ, gate chạy one-shot
+    trên vài trăm file), đổi lấy loại bỏ hẳn một lớp bug cache-cũ — selfcheck ghi CÙNG 1 đường
+    dẫn tạm với NỘI DUNG khác nhau cho từng ca test trong CÙNG process; một bản v1 của hàm này
+    cache theo abspath và trả TREE CŨ cho ca thứ 2 trở đi ⇒ 9 ca CONTROL báo sai (bắt được bởi
+    chính selfcheck ngay lần chạy đầu — không phải giả định, đã đo).
+    """
+    try:
+        with open(path, encoding="utf-8") as fh:
+            tree = ast.parse(fh.read())
+    except (OSError, SyntaxError, ValueError, UnicodeDecodeError) as e:
+        _PARSE_ERR[os.path.abspath(path)] = f"{type(e).__name__}: {e}"
+        return None
+    return tree
+
+
 def _tz_arg_is_none(node):
     """`datetime.now(None)` / `datetime.now(tz=None)` — CÓ argument nhưng vô hiệu, naive y hệt."""
     for a in list(node.args) + [k.value for k in node.keywords]:
@@ -153,19 +256,11 @@ def _tz_arg_is_none(node):
 def violations(path):
     """-> [(lineno, 'datetime.now()' | 'date.today()')], hoặc **None** nếu KHÔNG parse được.
 
-    ⚠️ None ≠ [] và đây là khác biệt SỐNG CÒN (arch-review vòng 5, killer). Bản trước trả []
-    cho file không parse được ⇒ (1) nợ §16 thật lọt im lặng, (2) nhánh auto-update ở cuối
-    main() thấy n==0 nên `_set_count()` XOÁ LUÔN key baseline của file đó rồi `git add` vào
-    chính commit ấy, (3) commit SAU chạm file đó bị HARD-BLOCK "3 > baseline 0" trên code
-    người commit không hề viết. Và chênh lệch parse là THẬT trên máy này: hook chạy python3
-    (3.10) còn 2 runner selfcheck chạy $DNA_PYEXE (3.12) — cùng một file cho 0 vs 3 vi phạm.
-    Người gọi PHẢI xử lý None: KÊU ra stderr rồi BỎ QUA file (không gate, không đụng baseline).
+    Người gọi PHẢI xử lý None: KÊU ra stderr rồi BỎ QUA file (không gate, không đụng baseline) —
+    xem `_parse_file()` cho lý do None ≠ [].
     """
-    try:
-        with open(path, encoding="utf-8") as fh:
-            tree = ast.parse(fh.read())
-    except (OSError, SyntaxError, ValueError, UnicodeDecodeError) as e:
-        _PARSE_ERR[os.path.abspath(path)] = f"{type(e).__name__}: {e}"
+    tree = _parse_file(path)
+    if tree is None:
         return None
     receivers = _alias_receivers(tree)
     hits = []
@@ -181,6 +276,161 @@ def violations(path):
         if (node.args or node.keywords) and not _tz_arg_is_none(node):
             continue
         hits.append((func.lineno, f"{recv}.{func.attr}()"))
+    return sorted(hits)
+
+
+TDAYS_MARKER = "tdays"
+
+# Mọi node AST tự mở SCOPE RIÊNG trong Python — không chỉ def/async def. `_same_scope_nodes`
+# phải dừng lại ở TẤT CẢ, không riêng FunctionDef/AsyncFunctionDef (arch-review vòng 3, B2): bỏ
+# sót Lambda/ClassDef/comprehension nghĩa là `hols = [d for d in ds if is_holiday(d)]` rồi
+# `age = tdays(as_of)` TRẦN ngay sau đó vẫn được ân xá — đúng hình dạng hàm mà rule này sinh ra
+# để canh. Comprehension (ListComp/SetComp/DictComp/GeneratorExp) VÀ Lambda đều là EXPRESSION
+# (không phải statement), nên không bao giờ xuất hiện làm `stmt` top-level của `scope.body` —
+# chúng chỉ lộ ra qua `iter_child_nodes()` bên trong `walk()`; liệt ClassDef vào đây để class lồng
+# bên trong 1 hàm cũng được coi là scope riêng, giống hệt cách nó đã được coi từ trước cho def lồng.
+SCOPE_BOUNDARY_TYPES = (
+    ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda, ast.ClassDef,
+    ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp,
+)
+
+
+def _same_scope_nodes(scope):
+    """Mọi node con trong PHẠM VI RIÊNG của `scope` (Module hoặc FunctionDef/AsyncFunctionDef),
+    KHÔNG đi xuống các node tự mở SCOPE RIÊNG khác (`SCOPE_BOUNDARY_TYPES` — def/async def lồng,
+    lambda, class, comprehension) — đó là scope KHÁC, dấu hiệu nhận-biết-lễ trong đó không tính
+    là "cùng hàm" với call-site đang xét (và ngược lại). Mở rộng khỏi chỉ FunctionDef/
+    AsyncFunctionDef sau arch-review vòng 3 (B2): marker `is_holiday` trong 1 lambda/comprehension/
+    class lồng bên trong hàm trước đây rò ra ngoài, ân xá SAI 1 call `tdays()` trần khác trong
+    cùng hàm — đúng hình dạng thực tế `hols = [d for d in ds if is_holiday(d)]` rồi
+    `age = tdays(as_of)` trần ngay sau.
+
+    ⚠️ Bản đầu có 1 vòng lặp NGOÀI `for stmt in scope.body: yield stmt; yield from walk(stmt)`
+    tách rời khỏi bộ lọc FunctionDef bên trong `walk()` — bộ lọc chỉ áp dụng khi `walk()` xét
+    CHILD của một node, không áp dụng cho chính STATEMENT top-level của `scope.body`. Hệ quả:
+    nếu `stmt` top-level CHÍNH LÀ một `def` lồng, nó vẫn được `walk(stmt)` đi xuống bình thường
+    ⇒ marker `is_holiday` bên TRONG def lồng rò ra ngoài, ân xá được call ở scope CHA (arch-review
+    vòng 1 RULE-2, hướng ngược của cùng lỗi qua mutation X1/M7; đo trực tiếp: `def outer():
+    tdays(d); def inner(): is_holiday(d)` → outer's bare call KHÔNG bị bắt).
+
+    Bản vá ĐẦU của lỗi này (`yield from walk(scope)` gọi thẳng trên `scope`) SAI THEO HƯỚNG
+    KHÁC (arch-review vòng 2 RULE-2, R1): `iter_child_nodes(scope)` khi `scope` là FunctionDef
+    còn trả về `decorator_list`/`args` (default value, annotation)/`returns` — những biểu thức
+    này chạy trong scope BAO QUANH `def`, không phải bên TRONG thân hàm, nhưng lại bị tính là
+    "cùng scope" ⇒ `@is_holiday\ndef f(a): return tdays(a)` bị ân xá SAI (đo được, 4 hình dạng:
+    decorator/default/annotation/return-type). Cách đúng: seed walk từ CHÍNH `scope.body` (không
+    phải `iter_child_nodes(scope)`) và áp DỤNG bộ lọc FunctionDef cho cả statement top-level lẫn
+    mọi cấp con — vừa giữ được phạm vi "chỉ thân hàm" như bản gốc, vừa bịt lỗ def-lồng."""
+    def walk(node):
+        for child in ast.iter_child_nodes(node):
+            if isinstance(child, SCOPE_BOUNDARY_TYPES):
+                continue
+            yield child
+            yield from walk(child)
+    for stmt in scope.body:
+        if isinstance(stmt, SCOPE_BOUNDARY_TYPES):
+            continue
+        yield stmt
+        yield from walk(stmt)
+
+
+def _contains_holiday_marker(scope):
+    """True nếu scope có tham chiếu `is_holiday` (attribute hoặc tên đã import/alias từ
+    trading_bot.vn_market, khớp TUYỆT ĐỐI — không phải substring) ở đâu đó trong CHÍNH phạm vi
+    của nó (không tính def lồng bên trong, xem _same_scope_nodes).
+
+    KHÔNG còn xét `vn_holidays=` ở đây (đã chuyển thành kiểm PER-CALL trong tdays_violations() —
+    xem lý do ở đó): 1 lệnh gọi CÓ vn_holidays= chỉ nên ân xá CHÍNH nó, không phải mọi
+    `tdays()` khác trong cùng scope (arch-review vòng 1 RULE-2, F1 — bản trước amnesty theo
+    scope khiến `add_source()` thật ân xá vĩnh viễn: dòng 100 có `vn_holidays=` nhưng nếu dòng
+    100 bị revert lại thành `tdays(as_of)` trần (đúng bug SEV1 gốc), gate vẫn im vì
+    `is_holiday`/`vn_holidays=` KHÁC còn sống trong scope — no-op trên chính file gây sự cố).
+
+    Chỉ tính `ctx=Load` (đang ĐỌC giá trị `is_holiday`, vd gọi nó hoặc truyền nó đi) — KHÔNG tính
+    `Store`/`Del` (arch-review vòng 3, B3: `is_holiday = None` hay `del is_holiday` trước đây vẫn
+    ân xá dù không hề tham chiếu THẬT tới `trading_bot.vn_market.is_holiday`; docstring này TRƯỚC
+    đây cũng overclaim là có kiểm provenance import/alias — thật ra khớp bất kỳ `Name.id`/
+    `Attribute.attr` nào trùng "is_holiday", ctx=Load chỉ thu hẹp bớt false-amnesty rẻ tiền nhất,
+    KHÔNG phải resolve import thật; vẫn CHƯA canh ca đặt tên biến cục bộ khác trùng tên rồi ĐỌC nó,
+    xem KNOWN GAP)."""
+    for n in _same_scope_nodes(scope):
+        if isinstance(n, ast.Attribute) and n.attr == "is_holiday" and isinstance(n.ctx, ast.Load):
+            return True
+        if isinstance(n, ast.Name) and n.id == "is_holiday" and isinstance(n.ctx, ast.Load):
+            return True
+    return False
+
+
+def _scope_has_vn_holidays_param(scope):
+    """True nếu `scope` là 1 def có tham số tên `vn_holidays` trong CHỮ KÝ.
+
+    ⚠️ Chỉ kiểm tra KHAI BÁO, KHÔNG kiểm tra CHUYỂN TIẾP thật: `def f(a, vn_holidays=False):
+    return tdays(a)` (tham số khai báo rồi KHÔNG BAO GIỜ dùng ở lệnh gọi) vẫn trả True — CHƯA
+    canh, xem KNOWN GAP RULE 2 (`KNOWN_GAPS_TDAYS` trong selfcheck).
+
+    Ca CHUYỂN TIẾP THẬT bằng KEYWORD (`tdays(a, vn_holidays=vn_holidays)`) đã được bắt bởi nhánh
+    per-call `vn_holidays=` ở `tdays_violations()`, không cần hàm này. Hàm này chỉ còn cần thiết
+    cho ca CHUYỂN TIẾP THẬT bằng VỊ TRÍ (`tdays(a, vn_holidays)` — không có keyword ở lệnh gọi
+    nên per-call không thấy được, phải suy từ CHỮ KÝ). ⚠️ KHÔNG bắt được `**kwargs` mù dạng
+    `def f(a, **kw): return tdays(a, **kw)` (đo được: BỊ FLAG oan, vì tên tham số thật trong chữ
+    ký là `kw` chứ không phải `vn_holidays`) — CHƯA canh, chấp nhận vì đây là ca hiếm và flag oan
+    (over-block) an toàn hơn bỏ sót (dưới KHÔNG PHẢI risk như F1)."""
+    if not isinstance(scope, (ast.FunctionDef, ast.AsyncFunctionDef)):
+        return False
+    a = scope.args
+    names = {arg.arg for arg in (a.args + a.posonlyargs + a.kwonlyargs)}
+    if a.vararg:
+        names.add(a.vararg.arg)
+    if a.kwarg:
+        names.add(a.kwarg.arg)
+    return "vn_holidays" in names
+
+
+def tdays_violations(path):
+    """-> [(lineno, 'tdays(...)')], hoặc **None** nếu KHÔNG parse được (cùng hợp đồng None ≠ []
+    với `violations()` — xem `_parse_file()`).
+
+    Chữ ký hẹp có chủ đích: chỉ bắt call tới hàm có TÊN KHỚP TUYỆT ĐỐI "tdays" (không phải chứa
+    chuỗi con — xem `TDAYS_MARKER`/`fname.lower() != TDAYS_MARKER` bên dưới) mà hàm BAO QUANH lệnh gọi đó
+    (nearest enclosing def, hoặc module top-level) không có dấu hiệu nhận-biết-lễ-VN nào trong
+    CHÍNH phạm vi của nó. Xem docstring đầu file (RULE 2) cho lý do KHÔNG quét np.busday_count
+    trần hay đối số `kind`.
+    """
+    tree = _parse_file(path)
+    if tree is None:
+        return None
+    parent = {}
+    for node in ast.walk(tree):
+        for child in ast.iter_child_nodes(node):
+            parent[child] = node
+
+    def enclosing_scope(node):
+        cur = parent.get(node)
+        while cur is not None:
+            if isinstance(cur, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                return cur
+            cur = parent.get(cur)
+        return tree  # không nằm trong def nào -> scope = module top-level
+
+    hits = []
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        func = node.func
+        if isinstance(func, ast.Name):
+            fname = func.id
+        elif isinstance(func, ast.Attribute):
+            fname = func.attr
+        else:
+            continue
+        if fname.lower() != TDAYS_MARKER:
+            continue
+        if any(kw.arg == "vn_holidays" for kw in node.keywords):
+            continue  # PER-CALL: ân xá đúng lệnh gọi này, không lan sang call khác cùng scope
+        scope = enclosing_scope(node)
+        if _contains_holiday_marker(scope) or _scope_has_vn_holidays_param(scope):
+            continue
+        hits.append((node.lineno, f"{fname}(...)"))
     return sorted(hits)
 
 
@@ -317,15 +567,20 @@ def enumerate_tracked():
     return paths, ok
 
 
-def scan_tree():
-    """Kiểm kê toàn bộ vi phạm còn sót -> ({baseline_key: [(line, expr)]}, complete)."""
+def scan_tree(detector=violations):
+    """Kiểm kê toàn bộ vi phạm còn sót theo `detector` -> ({baseline_key: [(line, expr)]}, complete).
+
+    `detector` mặc định `violations` (rule 1, tương thích ngược cho code/test gọi không tham số).
+    Truyền `tdays_violations` để kiểm kê rule 2. Mỗi lần gọi enumerate lại cây (không cache paths
+    giữa 2 rule) — chi phí chấp nhận được, đổi lấy 2 lời gọi độc lập đơn giản, dễ audit.
+    """
     found = {}
     paths, complete = enumerate_tracked()
     for p in paths:
         key = baseline_key(p)
         if key is None or is_excluded(key) or not os.path.isfile(p):
             continue
-        hits = violations(p)
+        hits = detector(p)
         if hits is None:
             print(f"⚠️  {key}: KHÔNG parse được ({_PARSE_ERR.get(os.path.abspath(p), '?')}) — "
                   "bỏ qua, kiểm kê sẽ THIẾU.", file=sys.stderr)
@@ -334,6 +589,15 @@ def scan_tree():
         if hits:
             found[key] = hits
     return found, complete
+
+
+# Điểm mở rộng duy nhất nếu có rule 3: thêm 1 dict vào đây, không đụng logic main() bên dưới.
+RULES = (
+    {"key": "files", "detector": violations,
+     "label": "datetime.now()/date.today() trần (§16)"},
+    {"key": "tdays_files", "detector": tdays_violations,
+     "label": "tdays() thiếu vn_holidays trong hàm bao quanh (RULE 2, 2026-09-05)"},
+)
 
 
 def in_mike_repo():
@@ -388,30 +652,41 @@ def main(argv):
 
     args = list(argv)
     if args and args[0] == "--scan":
-        found, _ = scan_tree()
-        total = sum(len(v) for v in found.values())
-        for key in sorted(found):
-            for line, expr in found[key]:
-                print(f"{key}:{line}: {expr}")
-        print(f"\n{total} vi phạm / {len(found)} file", file=sys.stderr)
+        for rule in RULES:
+            found, _ = scan_tree(rule["detector"])
+            total = sum(len(v) for v in found.values())
+            print(f"\n=== {rule['label']} ===")
+            for key in sorted(found):
+                for line, expr in found[key]:
+                    print(f"{key}:{line}: {expr}")
+            print(f"{total} vi phạm / {len(found)} file", file=sys.stderr)
         return 0
 
     if args and args[0] == "--seed-baseline":
-        # Kiểm kê lại toàn bộ nợ cũ và GHI ĐÈ baseline. Chỉ chạy tay khi cố ý re-seed (vd mở
-        # rộng phạm vi gate); vận hành thường ngày dùng ratchet auto-update ở cuối hàm này.
-        found, complete = scan_tree()
-        if not complete:
-            print("❌ kiểm kê KHÔNG đầy đủ (xem cảnh báo ở trên) — KHÔNG ghi đè baseline.",
-                  file=sys.stderr)
-            return 1
+        # Kiểm kê lại toàn bộ nợ cũ (CẢ 2 rule) và GHI ĐÈ baseline. Chỉ chạy tay khi cố ý re-seed
+        # (vd mở rộng phạm vi gate); vận hành thường ngày dùng ratchet auto-update ở cuối hàm này.
+        # All-or-nothing: nếu MỘT rule kiểm kê thiếu thì KHÔNG ghi rule nào — tránh baseline lệch
+        # nhau giữa 2 namespace trong cùng 1 lần seed.
+        sections = {}
+        for rule in RULES:
+            found, complete = scan_tree(rule["detector"])
+            if not complete:
+                print(f"❌ kiểm kê KHÔNG đầy đủ cho rule '{rule['label']}' (xem cảnh báo ở trên) — "
+                      "KHÔNG ghi đè baseline (cả 2 rule).", file=sys.stderr)
+                return 1
+            sections[rule["key"]] = {k: len(v) for k, v in found.items()}
         data = {
-            "_note": "Kiểm kê `datetime.now()` trần / `date.today()` (coding_guidelines §16) tại "
-                     "thời điểm bật bin/tz_anchor_gate.py. Ratchet per-file: nợ cũ không bắt sửa "
-                     "ngay, chỉ không được TĂNG. Re-seed: bin/tz_anchor_gate.py --seed-baseline",
-            "files": {k: len(v) for k, v in found.items()},
+            "_note": "Kiểm kê 2 rule tại thời điểm bật bin/tz_anchor_gate.py — 'files': "
+                     "`datetime.now()` trần / `date.today()` (coding_guidelines §16); "
+                     "'tdays_files': tdays() thiếu vn_holidays (RULE 2, 2026-09-05). Ratchet "
+                     "per-file, MỖI namespace ĐỘC LẬP: nợ cũ không bắt sửa ngay, chỉ không được "
+                     "TĂNG. Re-seed: bin/tz_anchor_gate.py --seed-baseline",
         }
+        data.update(sections)
         write_baseline(data)
-        print(f"✓ {BASELINE}: {sum(data['files'].values())} vi phạm / {len(data['files'])} file")
+        for rule in RULES:
+            sect = sections[rule["key"]]
+            print(f"✓ {rule['key']}: {sum(sect.values())} vi phạm / {len(sect)} file")
         return 0
 
     update_only = "--update-baseline" in args
@@ -424,10 +699,13 @@ def main(argv):
               f"được thì KHÔNG GATE ĐƯỢC, không phải = CHẶN. {len(args)} file .py qua không "
               "gate. Sửa/khôi phục baseline rồi chạy lại; §16 vẫn áp dụng.", file=sys.stderr)
         return 0
-    files_baseline = baseline.setdefault("files", {})
+    per_rule_baseline = {rule["key"]: baseline.setdefault(rule["key"], {}) for rule in RULES}
 
-    counts = {}
-    detail = {}
+    # counts[rule_key][file_key] = n vi phạm; detail[rule_key][file_key] = [(line, expr)].
+    # 1 file chỉ vào counts khi CẢ 2 rule parse được — file không parse được thì KHÔNG rule nào
+    # được gate, KHÔNG rule nào đụng baseline (giữ đúng bất biến cũ, mở rộng cho rule 2).
+    counts = {rule["key"]: {} for rule in RULES}
+    detail = {rule["key"]: {} for rule in RULES}
     for f in args:
         if not os.path.isfile(f):
             continue
@@ -445,58 +723,89 @@ def main(argv):
             continue
         if is_excluded(key):
             continue
-        hits = violations(f)
-        if hits is None:
-            # KHÔNG được coi là "sạch": không gate, KHÔNG đụng baseline (không vào counts nên
-            # nhánh auto-update ở cuối không thấy key này ⇒ không xoá/không ghi).
+        per_file_hits = {}
+        parse_failed = False
+        for rule in RULES:
+            hits = rule["detector"](f)
+            if hits is None:
+                parse_failed = True
+                break
+            per_file_hits[rule["key"]] = hits
+        if parse_failed:
+            # KHÔNG được coi là "sạch": không gate CẢ 2 rule, KHÔNG đụng baseline của rule nào
+            # (không vào counts nên nhánh auto-update ở cuối không thấy key này ⇒ không xoá/ghi).
             print(f"⚠️  tz_anchor_gate: {key}: KHÔNG parse được bằng {sys.executable} "
-                  f"({_PARSE_ERR.get(os.path.abspath(f), '?')}) — file này KHÔNG ĐƯỢC GATE và "
-                  "baseline của nó KHÔNG bị đụng tới. §16 vẫn áp dụng, tự kiểm bằng tay.",
+                  f"({_PARSE_ERR.get(os.path.abspath(f), '?')}) — file này KHÔNG ĐƯỢC GATE (cả 2 "
+                  "rule) và baseline của nó KHÔNG bị đụng tới. §16 vẫn áp dụng, tự kiểm bằng tay.",
                   file=sys.stderr)
             continue
-        counts[key] = len(hits)
-        detail[key] = hits
+        for rule in RULES:
+            counts[rule["key"]][key] = len(per_file_hits[rule["key"]])
+            detail[rule["key"]][key] = per_file_hits[rule["key"]]
 
-    if not counts:
+    if not any(counts[rule["key"]] for rule in RULES):
         return 0
 
     if update_only:
         # NÂNG baseline = chấp nhận nợ MỚI vĩnh viễn. Config repo ngoài quảng cáo cờ này là cách
         # "siết bằng tay", nên mặc định nó chỉ được phép SIẾT (hạ) — muốn nới phải nói ra
-        # (arch-review 2026-08-30 F4).
-        raises = {k: n for k, n in counts.items() if n > files_baseline.get(k, 0)}
-        if raises and not accept_new_debt:
-            for k, n in sorted(raises.items()):
-                print(f"  🔴 {k}: baseline {files_baseline.get(k, 0)} → {n} là NÂNG, không phải siết")
+        # (arch-review 2026-08-30 F4). All-or-nothing CHO CẢ 2 rule: nếu rule nào NÂNG mà chưa
+        # accept_new_debt thì KHÔNG ghi rule nào — tránh baseline nửa vời giữa 2 namespace.
+        raises_by_rule = {}
+        for rule in RULES:
+            bl = per_rule_baseline[rule["key"]]
+            raises = {k: n for k, n in counts[rule["key"]].items() if n > bl.get(k, 0)}
+            if raises:
+                raises_by_rule[rule["key"]] = raises
+        if raises_by_rule and not accept_new_debt:
+            for rule in RULES:
+                raises = raises_by_rule.get(rule["key"])
+                if not raises:
+                    continue
+                bl = per_rule_baseline[rule["key"]]
+                print(f"  === {rule['label']} ===")
+                for k, n in sorted(raises.items()):
+                    print(f"  🔴 {k}: baseline {bl.get(k, 0)} → {n} là NÂNG, không phải siết")
             print("--update-baseline mặc định CHỈ siết (hạ) baseline. Chấp nhận nợ mới thì nói rõ:")
             print("  bin/tz_anchor_gate.py --update-baseline --accept-new-debt <file.py>")
             return 1
         changed = False
-        for key, n in counts.items():
-            if files_baseline.get(key, 0) != n:
-                _set_count(files_baseline, key, n)
-                changed = True
-                print(f"  baseline: {key} -> {n}")
+        for rule in RULES:
+            bl = per_rule_baseline[rule["key"]]
+            for key, n in counts[rule["key"]].items():
+                if bl.get(key, 0) != n:
+                    _set_count(bl, key, n)
+                    changed = True
+                    print(f"  baseline[{rule['key']}]: {key} -> {n}")
         if changed:
             write_baseline(baseline)
             print(f"  ✓ {BASELINE}")
         return 0
 
-    blocked = []
-    for key, n in sorted(counts.items()):
-        old = files_baseline.get(key, 0)
-        if n > old:
-            blocked.append((key, old, n))
+    blocked = []   # [(rule, key, old, new)]
+    for rule in RULES:
+        bl = per_rule_baseline[rule["key"]]
+        for key, n in sorted(counts[rule["key"]].items()):
+            old = bl.get(key, 0)
+            if n > old:
+                blocked.append((rule, key, old, n))
 
     if blocked:
-        for key, old, new in blocked:
-            print(f"  🔴 {key}: {new} lần dùng giờ KHÔNG neo TZ (baseline {old}) — TĂNG [HARD-BLOCK] (tz_anchor_gate.py, §16)")
-            for line, expr in detail[key]:
+        blocked_rule_keys = {rule["key"] for rule, _, _, _ in blocked}
+        for rule, key, old, new in blocked:
+            print(f"  🔴 [{rule['label']}] {key}: {new} vi phạm (baseline {old}) — TĂNG [HARD-BLOCK] (tz_anchor_gate.py)")
+            for line, expr in detail[rule["key"]][key]:
                 print(f"       {key}:{line}: {expr}")
         print()
-        print("coding_guidelines.md §16 — neo timezone tường minh, đừng tin TZ của host:")
-        print('  datetime.now(ZoneInfo("Asia/Ho_Chi_Minh"))   # hoặc datetime.now(_ICT)')
-        print("  (datetime.now(timezone.utc) + timedelta(hours=7)).date()   # thay date.today()")
+        if "files" in blocked_rule_keys:
+            print("coding_guidelines.md §16 — neo timezone tường minh, đừng tin TZ của host:")
+            print('  datetime.now(ZoneInfo("Asia/Ho_Chi_Minh"))   # hoặc datetime.now(_ICT)')
+            print("  (datetime.now(timezone.utc) + timedelta(hours=7)).date()   # thay date.today()")
+        if "tdays_files" in blocked_rule_keys:
+            print("RULE 2 (2026-09-05) — hàm đếm ngày kiểu tdays() phải khai báo rõ đã trừ lễ VN:")
+            print('  tdays(asof, vn_holidays=True)   # nguồn theo lịch HOSE')
+            print('  tdays(asof, vn_holidays=False)  # nguồn theo lịch nước ngoài (Mỹ...) - cố ý')
+            print("  (hoặc tham chiếu trading_bot.vn_market.is_holiday ngay trong cùng hàm)")
         print("  Baseline neo theo checkout CANONICAL (master). Đang commit từ worktree/nhánh cũ và")
         print("  KHÔNG hề sửa chỗ đó? Đó là lệch nhánh, không phải nợ mới — rebase, hoặc")
         print("  SKIP=tz-anchor-gate git commit ... (bỏ qua đúng hook này, pre-commit hỗ trợ sẵn).")
@@ -510,8 +819,8 @@ def main(argv):
         # baseline — nên "lách" không bao giờ âm thầm biến thành "chấp nhận"
         # (arch-review 2026-08-30 F3).
         print("⚠️  downgraded — MIKE_TZ_GATE=warn, commit vẫn qua. Baseline KHÔNG được nâng:")
-        for key, old, new in blocked:
-            print(f"    {key}: baseline giữ nguyên {old} (file đang {new}) ⇒ commit sau vẫn chặn.")
+        for rule, key, old, new in blocked:
+            print(f"    [{rule['label']}] {key}: baseline giữ nguyên {old} (file đang {new}) ⇒ commit sau vẫn chặn.")
         return 0
 
     mike_top = in_mike_repo()
@@ -532,10 +841,12 @@ def main(argv):
         return 0
 
     changed = False
-    for key, n in counts.items():
-        if files_baseline.get(key, 0) != n:
-            _set_count(files_baseline, key, n)
-            changed = True
+    for rule in RULES:
+        bl = per_rule_baseline[rule["key"]]
+        for key, n in counts[rule["key"]].items():
+            if bl.get(key, 0) != n:
+                _set_count(bl, key, n)
+                changed = True
     if changed:
         write_baseline(baseline)
         print(f"  ✓ baseline updated: {BASELINE}")

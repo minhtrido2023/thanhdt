@@ -129,6 +129,123 @@ KNOWN_GAPS = [
 ]
 
 
+# ── 1b. Detector RULE 2 (2026-09-05): tdays() thiếu vn_holidays trong hàm bao quanh ────────
+# RED — chính hình dạng sự cố thật (macro_healthcheck.py trước commit 96ebd124): gọi hàm tên
+# chứa "tdays" mà hàm bao quanh không hề tham chiếu lễ VN ở đâu cả.
+RED_CASES_TDAYS = [
+    ("tdays() trần trong def, không marker",
+     "def tdays(a, r=None):\n    return 1\ndef use(a):\n    return tdays(a)\n"),
+    ("tdays() trần ở module top-level, không marker",
+     "def tdays(a):\n    return 1\nx = tdays(1)\n"),
+    ("TDAYS() hoa toàn bộ vẫn bắt — khớp tuyệt đối KHÔNG phân biệt hoa/thường",
+     "def TDAYS(a):\n    return 1\ndef use(a):\n    return TDAYS(a)\n"),
+    ("gọi qua attribute: obj.tdays(x)",
+     "def use(obj, x):\n    return obj.tdays(x)\n"),
+    ("scope LỒNG: is_holiday ở hàm NGOÀI không cứu hàm lồng bên trong (scope riêng)",
+     "def outer(d):\n    def inner(a):\n        return tdays(a)\n"
+     "    from trading_bot.vn_market import is_holiday\n    is_holiday(d)\n    return inner(d)\n"),
+    # arch-review vòng 1 RULE-2 (F1, killer): ân xá theo SCOPE cho `vn_holidays=`/`is_holiday`
+    # khiến MỘT lệnh gọi anchored che mất MỌI lệnh gọi tdays() TRẦN khác trong cùng hàm/module —
+    # đúng hình dạng khiến gate mù với chính file gây sự cố (macro_healthcheck.py). 4 ca dưới
+    # ghim đúng lỗ đã vá (per-call vn_holidays= + exact-match is_holiday), không phải suy diễn.
+    ("F1: anchored + tdays() TRẦN khác trong CÙNG def — call anchored không được che call trần",
+     "def f(a, kind):\n    y = tdays(a, vn_holidays=(kind == \"trading_vn\"))\n"
+     "    z = tdays(a)\n    return y, z\n"),
+    ("F1: anchored + tdays() TRẦN khác ở CÙNG module top-level",
+     "def helper(a, kind):\n    return tdays(a, vn_holidays=(kind == \"trading_vn\"))\nz = tdays(1)\n"),
+    ("F1: identifier chỉ CHỨA chuỗi con 'is_holiday' (vd `_vn_is_holiday`) KHÔNG còn là marker "
+     "thật — khớp phải TUYỆT ĐỐI, không phải substring",
+     "def f(d):\n    _vn_is_holiday = None\n    return tdays(d)\n"),
+    ("scope LỒNG hướng NGƯỢC (M7b): marker is_holiday nằm TRONG def lồng TRỰC TIẾP ở top-level "
+     "scope.body KHÔNG được phép cứu call tdays() trần ở scope NGOÀI nó — pin bộ lọc top-level "
+     "(arch-review vòng 2 RULE-2 gốc)",
+     "def outer(d):\n    z = tdays(d)\n"
+     "    def inner():\n        from trading_bot.vn_market import is_holiday\n        return is_holiday(d)\n"
+     "    return z, inner()\n"),
+    ("scope LỒNG hướng NGƯỢC (M7): marker is_holiday nằm TRONG def lồng bên TRONG 1 compound "
+     "statement (if), không phải statement top-level trực tiếp của scope.body, để pin RIÊNG bộ "
+     "lọc bên trong walk() (arch-review vòng 3, B1: ca top-level chỉ pin được bộ lọc top-level — "
+     "xoá RIÊNG bộ lọc trong walk() không lộ ra nếu chỉ có ca top-level, đã đo: 129/129 vẫn PASS)",
+     "def outer(d):\n    if True:\n        z = tdays(d)\n"
+     "    if True:\n        def inner():\n            from trading_bot.vn_market import is_holiday\n"
+     "            return is_holiday(d)\n        inner()\n"),
+    # arch-review vòng 3, B2: SCOPE_BOUNDARY_TYPES trước đây chỉ có FunctionDef/AsyncFunctionDef —
+    # marker is_holiday trong lambda/comprehension/class LỒNG bên trong hàm rò ra ngoài, ân xá SAI
+    # 1 call tdays() trần khác. 4 ca dưới đúng hình dạng thực tế "hols = [d for d in ds if
+    # is_holiday(d)]" rồi "age = tdays(as_of)" trần ngay sau — bị lọt trước khi mở rộng bộ lọc.
+    ("B2: is_holiday trong LAMBDA lồng bên trong hàm không được cứu call tdays() trần khác",
+     "def f(d, ys):\n    cb = lambda x: is_holiday(x)\n    return tdays(d)\n"),
+    ("B2: is_holiday trong LIST COMPREHENSION không được cứu call tdays() trần khác",
+     "def f(d, ys):\n    xs = [is_holiday(y) for y in ys]\n    return tdays(d)\n"),
+    ("B2: is_holiday trong GENERATOR EXPRESSION không được cứu call tdays() trần khác",
+     "def f(d, ys):\n    xs = (is_holiday(y) for y in ys)\n    return tdays(d)\n"),
+    ("B2: is_holiday trong method của 1 CLASS lồng bên trong hàm không được cứu call tdays() trần",
+     "def f(d):\n    class C:\n        def m(self):\n            return is_holiday(d)\n    return tdays(d)\n"),
+    ("B2: is_holiday trong method của 1 class Ở MODULE TOP-LEVEL không được cứu call tdays() "
+     "trần khác cũng ở module top-level",
+     "class C:\n    def m(self):\n        return is_holiday(1)\nz = tdays(1)\n"),
+    ("B3: `is_holiday = None` (Store, không phải Load) KHÔNG được tính là marker thật",
+     "def f(d):\n    is_holiday = None\n    return tdays(d)\n"),
+    ("B3: `del is_holiday` (Del, không phải Load) KHÔNG được tính là marker thật",
+     "def f(d):\n    is_holiday = 1\n    del is_holiday\n    return tdays(d)\n"),
+]
+
+# CONTROL — có dấu hiệu nhận-biết-lễ-VN trong CHÍNH hàm bao quanh ⇒ PHẢI im.
+CONTROL_CASES_TDAYS = [
+    ("vn_holidays=True ngay tại lệnh gọi",
+     "def f(a):\n    return tdays(a, vn_holidays=True)\n"),
+    ("vn_holidays=False ngay tại lệnh gọi — vẫn PASS, có tham chiếu là đủ (ca us_market cố ý Mon-Fri)",
+     "def f(a):\n    return tdays(a, vn_holidays=False)\n"),
+    ("vn_holidays=<biểu thức> — ca thật macro_healthcheck.py add_source() dòng 100",
+     'def add_source(a, kind="trading"):\n    return tdays(a, vn_holidays=(kind == "trading_vn"))\n'),
+    ("is_holiday tham chiếu Ở NƠI KHÁC trong CÙNG hàm (không phải trên chính lệnh gọi)",
+     "def f(d):\n    from trading_bot.vn_market import is_holiday\n    if not is_holiday(d):\n        pass\n    return tdays(d)\n"),
+    ("is_holiday dạng ATTRIBUTE (vn_market.is_holiday(d)), không phải import trực tiếp — pin "
+     "riêng nhánh ast.Attribute (arch-review vòng 1 RULE-2, X4: bản trước chỉ CONTROL bằng "
+     "Name nên xoá riêng nhánh Attribute vẫn PASS 122/122)",
+     "import trading_bot.vn_market as vn_market\ndef f(d):\n    if not vn_market.is_holiday(d):\n        pass\n    return tdays(d)\n"),
+    ("hàm bao quanh có tham số vn_holidays trong chữ ký, CHUYỂN TIẾP THẬT vào lệnh gọi "
+     "(forward qua tham số vị trí) — khác ca KNOWN GAP bên dưới (khai báo rồi KHÔNG dùng)",
+     "def f(d, vn_holidays=False):\n    return tdays(d, vn_holidays)\n"),
+    ("np.busday_count trần — KHÔNG thuộc phạm vi rule 2 (chữ ký chỉ bắt tên KHỚP TUYỆT ĐỐI 'tdays')",
+     "def f(a, b):\n    return np.busday_count(a, b)\n"),
+    # Regression THẬT (2026-09-05): bản đầu dùng "chứa chuỗi con" tự bắt NHẦM chính hàm/test của
+    # module này khi chạy --scan thật lần đầu trên 2 repo. Khớp tuyệt đối phải PASS 2 ca này.
+    ("tên hàm chứa 'tdays' làm HẬU TỐ NGỮ NGHĨA KHÁC (tdays_violations) — KHÔNG phải call đếm ngày",
+     "def tdays_violations(a):\n    return 1\ndef use(a):\n    return tdays_violations(a)\n"),
+    ("tên hàm chứa 'tdays' dạng test_*_tdays — cùng lớp false-positive vừa đo được",
+     "def test_historical_tdays(a):\n    return 1\ndef use(a):\n    return test_historical_tdays(a)\n"),
+]
+
+KNOWN_GAPS_TDAYS = [
+    ("alias reimport: from x import tdays as t; t(a) — tên sau alias không còn khớp 'tdays'",
+     "def f(a):\n    from x import tdays as t\n    return t(a)\n"),
+    ("tham chiếu rồi gọi: f = tdays; f(a)", "def g(a):\n    f = tdays\n    return f(a)\n"),
+    ("biến thể tên get_tdays/calc_tdays_age — khớp tuyệt đối cố ý KHÔNG bắt (đổi lấy loại bỏ "
+     "false-positive tự-tham-chiếu tdays_violations/test_*_tdays, xem docstring đầu file)",
+     "def get_tdays(a):\n    return 1\ndef use(a):\n    return get_tdays(a)\n"),
+    ("_scope_has_vn_holidays_param CHỈ kiểm KHAI BÁO, KHÔNG kiểm CHUYỂN TIẾP thật (arch-review "
+     "vòng 2 RULE-2, R2): tham số `vn_holidays` khai báo rồi KHÔNG dùng ở lệnh gọi vẫn PASS",
+     "def f(a, vn_holidays=False):\n    return tdays(a)\n"),
+]
+
+
+def test_detector_tdays(gate, tmp):
+    print("[1b] Detector RULE 2 (tdays/holiday) — RED (phải bị bắt)")
+    for name, src in RED_CASES_TDAYS:
+        p = _write(os.path.join(tmp, "det2", "f.py"), src)
+        check(name, len(gate.tdays_violations(p)) >= 1, f"hits={gate.tdays_violations(p)}")
+    print("[2b'] Detector RULE 2 — CONTROL (phải im)")
+    for name, src in CONTROL_CASES_TDAYS:
+        p = _write(os.path.join(tmp, "det2", "f.py"), src)
+        check(name, gate.tdays_violations(p) == [], f"hits={gate.tdays_violations(p)}")
+    print("[2c] KNOWN GAP RULE 2 — gate còn hở, ghi nhận chứ không tuyên bố là đúng")
+    for name, src in KNOWN_GAPS_TDAYS:
+        p = _write(os.path.join(tmp, "det2", "f.py"), src)
+        state = "vẫn hở" if gate.tdays_violations(p) == [] else "ĐÃ BỊT — chuyển ca này sang RED_CASES_TDAYS"
+        print(f"  · {name}: {state}")
+
+
 def test_detector(gate, tmp):
     print("[1] Detector — RED (phải bị bắt)")
     for name, src in RED_CASES:
@@ -182,6 +299,54 @@ def test_historical(gate, tmp):
               set(lines).issubset(hit_before), f"bắt được {sorted(hit_before)}")
         check(f"{fname}: im ở dòng {lines} sau khi vá",
               not (set(lines) & hit_after), f"còn bắt {sorted(hit_after & set(lines))}")
+
+
+# Ca THẬT RULE 2: macro_healthcheck.py trước/sau commit 96ebd124 (sự cố macro_health=FAILED
+# giả 2026-09-04, kb/incidents/2026-09/2026-09-04-macro-health-failed-holiday-tdays.md). Bản
+# TRƯỚC vá có 2 call-site tdays() không holiday-aware (dòng 73 trong add_source(), dòng 233
+# module top-level); bản SAU vá có 3 call-site ĐÃ holiday-aware (dòng 70 def, 100 add_source(),
+# 265 module top-level) — 3 PASS/2 FLAG là ground-truth Mike giao khi duyệt rule này.
+HIST_TDAYS = [
+    ("/home/trido/thanhdt", "96ebd124", "WorkingClaude/macro_healthcheck.py",
+     "macro_healthcheck.py", [73, 233]),
+]
+
+
+def test_historical_tdays(gate, tmp):
+    print("[3b] Ca THẬT RULE 2 — macro_health=FAILED giả 2026-09-04 (commit 96ebd124)")
+    d = os.path.join(tmp, "hist_tdays")
+    os.makedirs(d, exist_ok=True)
+    for repo, commit, path, fname, lines in HIST_TDAYS:
+        before = _git_show(repo, commit + "^", path, os.path.join(d, "before_" + fname))
+        after = _git_show(repo, commit, path, os.path.join(d, "after_" + fname))
+        if before is None or after is None:
+            check(f"{fname} — git không truy được {commit}", False, "SKIP-KHÔNG-ÂM-THẦM-PASS")
+            continue
+        hit_before = {ln for ln, _ in gate.tdays_violations(before)}
+        hit_after = {ln for ln, _ in gate.tdays_violations(after)}
+        check(f"{fname}: bắt được đúng dòng {lines} ở bản TRƯỚC vá (2 FLAG)",
+              hit_before == set(lines), f"bắt được {sorted(hit_before)}")
+        check(f"{fname}: im HOÀN TOÀN sau khi vá (3 PASS: def dòng 70 không phải call, "
+              "call dòng 100+265 đều có vn_holidays)",
+              hit_after == set(), f"còn bắt {sorted(hit_after)}")
+
+        # F1 (arch-review vòng 1, killer): bản trước ân xá theo SCOPE khiến file THẬT này
+        # no-op ngay cả khi dòng 100 bị REVERT về đúng bug SEV1 gốc (vì vn_holidays=/is_holiday
+        # khác trong cùng scope vẫn sống). Regenerate bản AFTER với dòng 100 revert thủ công —
+        # đây là bằng chứng trực tiếp trên FILE THẬT, không phải fixture tổng hợp.
+        with open(after, encoding="utf-8") as fh:
+            after_src = fh.read()
+        reverted = after_src.replace(
+            'age = tdays(as_of, vn_holidays=(kind == "trading_vn"))', "age = tdays(as_of)")
+        check(f"{fname}: dòng 100 REVERT lại đúng bug SEV1 gốc — regenerate build đã đổi nội dung",
+              reverted != after_src, "replace() không khớp — kiểm lại chuỗi nguồn dòng 100")
+        reverted_path = os.path.join(d, "reverted_" + fname)
+        with open(reverted_path, "w", encoding="utf-8") as fh:
+            fh.write(reverted)
+        hit_reverted = {ln for ln, _ in gate.tdays_violations(reverted_path)}
+        check(f"{fname}: F1 — dòng 100 revert về bug SEV1 gốc PHẢI bị FLAG (không được ân xá "
+              "theo scope bởi vn_holidays=/is_holiday khác còn sống trong cùng file)",
+              100 in hit_reverted, f"bắt được {sorted(hit_reverted)} (mong đợi có 100)")
 
 
 # ── 4. End-to-end: ratchet + escape hatch + exclude, chạy qua CLI trong sandbox ────────────
@@ -250,6 +415,58 @@ def test_ratchet(tmp):
     _run(sb, bl, [f])
     check("commit ngoài repo mike → KHÔNG tự ghi baseline",
           json.load(open(bl))["files"]["app.py"] == 5, "baseline đã bị ghi đè")
+
+
+TDAYS_BARE = "def tdays(a, r=None):\n    return 1\ndef use(a):\n    return tdays(a)\n"
+TDAYS_BARE2 = ("def tdays(a, r=None):\n    return 1\ndef use(a):\n    return tdays(a)\n"
+               "def use2(a):\n    return tdays(a)\n")
+TDAYS_ANCHORED = ("def tdays(a, r=None, vn_holidays=False):\n    return 1\n"
+                   "def use(a):\n    return tdays(a, vn_holidays=True)\n")
+
+
+def test_ratchet_tdays(tmp):
+    print("[4b] End-to-end RULE 2 — ratchet per-file trong namespace 'tdays_files' RIÊNG")
+    sb = os.path.join(tmp, "sandbox2")
+    bl = os.path.join(tmp, "sandbox2_baseline.json")
+    f = _write(os.path.join(sb, "app.py"), TDAYS_BARE)
+
+    _write(bl, json.dumps({"files": {}, "tdays_files": {}}))
+    rc, out = _run(sb, bl, [f])
+    check("file MỚI có 1 vi phạm tdays, baseline tdays_files 0 → BLOCK (rc=1)", rc == 1,
+          f"rc={rc} out={out[:200]}")
+    check("thông điệp BLOCK gắn nhãn RULE 2 + số dòng + biểu thức",
+          "tdays" in out and "app.py:4" in out, out[:300])
+    check("thông điệp BLOCK có hướng dẫn vn_holidays= riêng cho RULE 2",
+          "vn_holidays=True" in out, out[:600])
+
+    # Nợ CŨ trong đúng namespace tdays_files (KHÔNG phải "files") → qua.
+    _write(bl, json.dumps({"files": {}, "tdays_files": {"app.py": 1}}))
+    rc, out = _run(sb, bl, [f])
+    check("nợ CŨ đã trong tdays_files (1) → qua (rc=0)", rc == 0, f"rc={rc} out={out[:200]}")
+
+    _write(os.path.join(sb, "app.py"), TDAYS_BARE2)
+    rc, out = _run(sb, bl, [f])
+    check("nợ RULE 2 TĂNG 1→2 → BLOCK", rc == 1, f"rc={rc}")
+
+    _write(os.path.join(sb, "app.py"), TDAYS_ANCHORED)
+    rc, out = _run(sb, bl, [f])
+    check("đã vá bằng vn_holidays=True (0 < baseline 1) → qua", rc == 0, f"rc={rc} out={out[:200]}")
+
+    # 2 namespace ĐỘC LẬP: nợ rule 1 tăng không được rule 2 (đang sạch) che, và ngược lại.
+    mixed = "from datetime import datetime\nx = datetime.now()\n" + TDAYS_ANCHORED
+    _write(os.path.join(sb, "mix.py"), mixed)
+    fm = os.path.join(sb, "mix.py")
+    _write(bl, json.dumps({"files": {}, "tdays_files": {"mix.py": 0}}))
+    rc, out = _run(sb, bl, [fm])
+    check("rule 1 vi phạm (datetime.now trần) TĂNG dù rule 2 SẠCH → vẫn BLOCK, không bị che",
+          rc == 1 and "datetime.now()" in out, f"rc={rc} out={out[:300]}")
+
+    # Sandbox KHÔNG phải checkout mike ⇒ tuyệt đối không auto-update namespace tdays_files ở đó.
+    _write(os.path.join(sb, "app.py"), TDAYS_ANCHORED)
+    _write(bl, json.dumps({"files": {}, "tdays_files": {"app.py": 5}}))
+    _run(sb, bl, [f])
+    check("commit ngoài repo mike → KHÔNG tự ghi tdays_files",
+          json.load(open(bl))["tdays_files"]["app.py"] == 5, "tdays_files đã bị ghi đè")
 
 
 SHIM_PROD = "/home/trido/thanhdt/WorkingClaude/tz_anchor_gate_shim.sh"
@@ -751,8 +968,11 @@ def main():
     tmp = tempfile.mkdtemp(prefix="tz_anchor_selfcheck_")
     try:
         test_detector(gate, tmp)
+        test_detector_tdays(gate, tmp)
         test_historical(gate, tmp)
+        test_historical_tdays(gate, tmp)
         test_ratchet(tmp)
+        test_ratchet_tdays(tmp)
         test_shim_missing_nested_repo(tmp)
         test_key_none_is_loud(tmp)
         test_warn_does_not_raise_baseline(tmp)
@@ -830,7 +1050,7 @@ MUTATIONS = [
     ("bỏ 'now' khỏi (a) → datetime.now() lọt",
      'BAD_ATTRS = {"now", "today"}', 'BAD_ATTRS = {"today"}'),
     ("ratchet luôn cho qua → nợ TĂNG không bị chặn",
-     "        if n > old:\n            blocked.append((key, old, n))\n", "        pass\n"),
+     "            if n > old:\n                blocked.append((rule, key, old, n))\n", "            pass\n"),
     # Mutation ĐÚNG cho F3 là bỏ `return 0` để warn RƠI XUỐNG nhánh auto-update — không phải
     # xoá dòng print (bản đầu làm vậy và SURVIVED: dòng print thứ hai trong vòng lặp vẫn chứa
     # chuỗi mà assertion tìm, nên assertion không hề canh hành vi GHI).
@@ -849,7 +1069,7 @@ MUTATIONS = [
      "                f\"⚠️  tz_anchor_gate: {os.path.abspath(f)} nằm ngoài {WC_ROOT} và ngoài mọi \"\n                \"checkout mike — KHÔNG có baseline-key, file này KHÔNG ĐƯỢC GATE.\",",
      '                "",'),
     ("--update-baseline nâng được mà không cần cờ (F4)",
-     "        if raises and not accept_new_debt:\n", "        if False:\n"),
+     "        if raises_by_rule and not accept_new_debt:\n", "        if False:\n"),
     ("in_mike_repo() nới về 'BASELINE nằm dưới top' (R1) → repo ngoài ghi baseline repo lồng",
      "        return top if os.path.isfile(cand) and os.path.samefile(cand, BASELINE) else None",
      "        return top"),
@@ -891,6 +1111,62 @@ MUTATIONS = [
     ("bỏ cảnh báo `off` khi chạy TAY --scan/--seed/--update (vòng 4) → im lặng, người chạy "
      "tưởng đã quét/re-seed xong",
      "\n        if manual:", "\n        if False:"),
+    # ── RULE 2 (tdays/holiday, 2026-09-05) — ghim đúng dòng vừa thêm, bắt bằng
+    # test_detector_tdays/test_historical_tdays/test_ratchet_tdays (không phải suy diễn).
+    ("RULE2 M1: đổi TDAYS_MARKER khỏi 'tdays' → mọi call-site thật sự lỗi lọt im lặng (rule "
+     "2 trở thành no-op)",
+     'TDAYS_MARKER = "tdays"', 'TDAYS_MARKER = "tdaysXXXNEVERMATCH"'),
+    ("RULE2 M2: bỏ điều kiện marker (contains_holiday_marker/scope_has_vn_holidays_param) → "
+     "MỌI call tdays() bị bắt vô điều kiện, kể cả ca đã khai vn_holidays= đúng",
+     '        if _contains_holiday_marker(scope) or _scope_has_vn_holidays_param(scope):\n            continue\n',
+     '        if False:\n            continue\n'),
+    ("RULE2 M3: bỏ nhận diện PER-CALL keyword vn_holidays= → ca khai vn_holidays=True ngay "
+     "tại lệnh gọi vẫn bị bắt oan (arch-review vòng 1 RULE-2: per-call thay cho scope-wide)",
+     '        if any(kw.arg == "vn_holidays" for kw in node.keywords):\n            continue  # PER-CALL',
+     '        if False:\n            continue  # PER-CALL'),
+    ("RULE2 M4: bỏ nhận diện is_holiday dạng Attribute → ca tham chiếu vn_market.is_holiday() "
+     "(dạng module.attribute, không phải Name import trực tiếp) vẫn bị bắt oan (X4, arch-review "
+     "vòng 1 — bản trước xoá CẢ HAI nhánh cùng lúc nên không tách được lỗ này)",
+     '        if isinstance(n, ast.Attribute) and n.attr == "is_holiday" and isinstance(n.ctx, ast.Load):\n            return True\n',
+     '        if False:\n            return True\n'),
+    ("RULE2 M4b: bỏ nhận diện is_holiday dạng Name (import trực tiếp) → ca `from … import "
+     "is_holiday; is_holiday(d)` vẫn bị bắt oan",
+     '        if isinstance(n, ast.Name) and n.id == "is_holiday" and isinstance(n.ctx, ast.Load):\n            return True\n',
+     '        if False:\n            return True\n'),
+    ("RULE2 M5: bỏ nhận diện tham số vn_holidays trong chữ ký hàm bao quanh → ca forward qua "
+     "tham số vẫn bị bắt oan",
+     '    return "vn_holidays" in names', '    return False'),
+    ("RULE2 M6: enclosing_scope() không còn dừng ở def GẦN NHẤT (luôn rơi về module top-level) "
+     "→ marker ở hàm bao quanh trực tiếp không còn được nhìn thấy",
+     '            if isinstance(cur, (ast.FunctionDef, ast.AsyncFunctionDef)):\n                return cur\n',
+     '            if isinstance(cur, (ast.FunctionDef, ast.AsyncFunctionDef)):\n                pass\n'),
+    ("RULE2 M7 (X1, arch-review vòng 1): bỏ ranh giới scope TRONG walk() (đệ quy qua compound "
+     "statement) → marker trong 1 def LỒNG bên trong 1 khối `if` lại ân xá được call ở scope "
+     "NGOÀI nó (hướng NGƯỢC với ca 'scope LỒNG' đã có — ca đó test marker ngoài không cứu được "
+     "lồng trong; mutation này test marker LỒNG TRONG không được phép cứu scope NGOÀI)",
+     '            if isinstance(child, SCOPE_BOUNDARY_TYPES):\n                continue\n',
+     '            if False:\n                continue\n'),
+    ("RULE2 M7b (arch-review vòng 3, B1): bỏ ranh giới scope Ở TOP-LEVEL của scope.body (khác "
+     "M7 — đây là bộ lọc RIÊNG cho statement top-level, không phải bộ lọc trong walk()) → def "
+     "lồng TRỰC TIẾP ở top-level (không qua compound statement nào) ân xá được scope NGOÀI; đo "
+     "được: xoá RIÊNG dòng này mà chỉ có ca 'if True' (M7) thì suite vẫn 129/129 PASS — cần ca "
+     "top-level TRỰC TIẾP riêng để 2 mutation không dùng chung 1 điểm hỏng",
+     '        if isinstance(stmt, SCOPE_BOUNDARY_TYPES):\n            continue\n',
+     '        if False:\n            continue\n'),
+    ("RULE2 M8 (arch-review vòng 3, B2): SCOPE_BOUNDARY_TYPES thu hẹp lại về CHỈ FunctionDef/"
+     "AsyncFunctionDef (bỏ Lambda/ClassDef/comprehension) → marker is_holiday trong lambda/"
+     "comprehension/class lồng bên trong hàm rò ra ngoài, ân xá SAI 1 call tdays() trần khác",
+     "SCOPE_BOUNDARY_TYPES = (\n    ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda, ast.ClassDef,\n"
+     "    ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp,\n)",
+     "SCOPE_BOUNDARY_TYPES = (ast.FunctionDef, ast.AsyncFunctionDef)"),
+    ("RULE2 B3 (arch-review vòng 3): bỏ ràng buộc ctx=Load trên marker is_holiday → "
+     "`is_holiday = None` (gán, không đọc) hoặc `del is_holiday` vẫn ân xá SAI call tdays() trần",
+     '        if isinstance(n, ast.Attribute) and n.attr == "is_holiday" and isinstance(n.ctx, ast.Load):\n'
+     '            return True\n'
+     '        if isinstance(n, ast.Name) and n.id == "is_holiday" and isinstance(n.ctx, ast.Load):\n'
+     '            return True\n',
+     '        if isinstance(n, ast.Attribute) and n.attr == "is_holiday":\n            return True\n'
+     '        if isinstance(n, ast.Name) and n.id == "is_holiday":\n            return True\n'),
 ]
 
 

@@ -1,5 +1,5 @@
 {
-  "_note": "Kiểm kê `datetime.now()` trần / `date.today()` (coding_guidelines §16) tại thời điểm bật bin/tz_anchor_gate.py. Ratchet per-file: nợ cũ không bắt sửa ngay, chỉ không được TĂNG. Re-seed: bin/tz_anchor_gate.py --seed-baseline",
+  "_note": "Kiểm kê 2 rule tại thời điểm bật bin/tz_anchor_gate.py — 'files': `datetime.now()` trần / `date.today()` (coding_guidelines §16); 'tdays_files': tdays() thiếu vn_holidays (RULE 2, 2026-09-05). Ratchet per-file, MỖI namespace ĐỘC LẬP: nợ cũ không bắt sửa ngay, chỉ không được TĂNG. Re-seed: bin/tz_anchor_gate.py --seed-baseline",
   "files": {
     "8l_package/cheap_pb_floor.py": 1,
     "8l_package/pt_8l_quarterly.py": 3,
@@ -88,5 +88,6 @@
     "update_shares_live.py": 2,
     "utils_v2.py": 1,
     "vcb_fx_feed.py": 1
-  }
+  },
+  "tdays_files": {}
 }

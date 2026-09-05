@@ -431,3 +431,71 @@
 - [2026-09-05T06:04:10Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 2, "job_id": "Wags_20260905_060209", "source": "watcher"}
 - [2026-09-05T06:05:10Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 3, "job_id": "Wags_20260905_060209", "source": "watcher"}
 - [2026-09-05T06:06:10Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 4, "job_id": "Wags_20260905_060209", "source": "watcher"}
+
+## Consolidation 2026-09-05T07:07:01Z
+- [2026-09-05T06:07:10Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 5, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T06:07:30Z] Wags/heartbeat — Wags_20260905_060209: {"status": "in_progress", "note": "ground truth confirmed (3 PASS/2 FLAG on tdays()); designing AST rule, now editing tz_anchor_gate.py"}
+- [2026-09-05T06:08:10Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 6, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T06:09:10Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 7, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T06:10:11Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 8, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T06:11:11Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 9, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T06:11:12Z] Wags/heartbeat — Wags_20260905_060209: {"status": "in_progress", "note": "ground-truth PASS/FLAG both match exactly; now running existing 234+ selfcheck suite for rule 1 regressions"}
+- [2026-09-05T06:12:11Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 10, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T06:13:12Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 11, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T06:14:12Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 12, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T06:14:54Z] Wags/heartbeat — Wags_20260905_060209: {"status": "in_progress", "note": "120/120 selfcheck assertions pass (99 orig rule1 + 21 new rule2); now adding mutation-pin entries for rule 2"}
+- [2026-09-05T06:15:12Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 13, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T06:16:12Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 14, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T06:17:14Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 15, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T06:18:14Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 16, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T06:19:14Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 17, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T06:20:14Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 18, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T06:21:15Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 19, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T06:22:15Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 20, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T06:23:07Z] Wags/heartbeat — Wags_20260905_060209: {"status": "in_progress", "note": "33/33 mutations killed, sha256 clean; running final selfcheck + --all-tz invariance check before arch-review"}
+- [2026-09-05T06:23:15Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 21, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T06:24:15Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 22, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T06:25:15Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 23, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T06:26:15Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 24, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T06:27:15Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 25, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T06:28:15Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 26, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T06:29:16Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 27, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T06:30:16Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 28, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T06:31:16Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 29, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T06:32:16Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 30, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T06:33:17Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 31, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T06:34:17Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 32, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T06:35:17Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 33, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T06:36:17Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 34, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T06:36:50Z] Wags/heartbeat — Wags_20260905_060209: {"status": "in_progress", "note": "resumed attempt 2: verified prior work (122/122 selfcheck, 33/33 mutations, baseline reseeded clean under python3.12) intact and uncommitted; dispatching arch-reviewer now"}
+- [2026-09-05T06:37:17Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 35, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T06:38:17Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 36, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T06:39:17Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 37, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T06:40:18Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 38, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T06:41:18Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 39, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T06:42:18Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 40, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T06:43:18Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 41, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T06:44:18Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 42, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T06:45:18Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 43, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T06:46:18Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 44, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T06:47:18Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 45, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T06:48:18Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 46, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T06:48:29Z] Wags/heartbeat — Wags_20260905_060209: {"status": "in_progress", "note": "arch-reviewer round 1: NEEDS_CHANGES (real killer F1 - scope-wide is_holiday substring amnesty makes RULE 2 a no-op on the exact incident file). Applying fix now."}
+- [2026-09-05T06:49:19Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 47, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T06:50:19Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 48, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T06:51:19Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 49, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T06:52:19Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 50, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T06:53:19Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 51, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T06:54:19Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 52, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T06:55:19Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 53, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T06:56:19Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 54, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T06:57:20Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 55, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T06:58:20Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 56, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T06:59:20Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 57, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T07:00:20Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 58, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T07:01:20Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 59, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T07:02:20Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 60, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T07:03:20Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 61, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T07:04:20Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 62, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T07:05:21Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 63, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T07:06:21Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 64, "job_id": "Wags_20260905_060209", "source": "watcher"}
