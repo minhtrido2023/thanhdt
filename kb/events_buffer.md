@@ -499,3 +499,57 @@
 - [2026-09-05T07:04:20Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 62, "job_id": "Wags_20260905_060209", "source": "watcher"}
 - [2026-09-05T07:05:21Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 63, "job_id": "Wags_20260905_060209", "source": "watcher"}
 - [2026-09-05T07:06:21Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 64, "job_id": "Wags_20260905_060209", "source": "watcher"}
+
+## Consolidation 2026-09-05T08:07:02Z
+- [2026-09-05T08:00:29Z] Mike/decision — tdays-gate-rule2-manual-review-approved-20260905: {"verdict": "APPROVED — RULE 2 committed 0aab5fae", "context": "Job Wags_20260905_060209 cancel lúc 14:55 ICT sau 3 vòng arch-review NEEDS_CHANGES (ngưỡng Pattern C, user chốt 14:41). Toàn bộ fix 3 vòng đã áp trước khi cancel; Mike review tay thay vòng 4.", "evidence": {"selfcheck": "137/137 assertion PASS", "mutations": "38/38 KILLED (Mike tự chạy)", "behavior_8_8": "revert dòng vá macro_healthcheck.py -> gate BẮT rc=1; per-call vn_holidays amnesty không leak cùng scope (killer F1); lambda không thừa hưởng amnesty (B2); get_tdays không FP; TDays case-insensitive bị bắt; is_holiday enclosing scope ân xá đúng", "fp_scan": "0/300 file tracked 2 repo"}, "decided_by": "user"}
+- [2026-09-05T07:07:21Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 65, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T07:08:21Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 66, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T07:09:21Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 67, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T07:10:21Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 68, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T07:11:21Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 69, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T07:12:21Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 70, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T07:13:22Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 71, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T07:14:22Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 72, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T07:15:22Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 73, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T07:16:22Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 74, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T07:17:22Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 75, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T07:18:14Z] Wags/heartbeat — Wags_20260905_060209: {"status": "in_progress", "note": "round 2 arch-review: NEEDS_CHANGES (R1 new amnesty via decorator/defaults/returns from my own _same_scope_nodes rewrite, R2 bad CONTROL case, R3/R4 doc overclaims). All 4 fixed, running mutation suite to confirm before round 3."}
+- [2026-09-05T07:18:22Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 76, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T07:19:22Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 77, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T07:20:22Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 78, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T07:21:22Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 79, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T07:22:23Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 80, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T07:23:23Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 81, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T07:23:47Z] Wags/heartbeat — Wags_20260905_060209: {"status": "in_progress", "note": "round 2 fixes applied+verified (129/129 assertions, 35/35 mutations incl fixed M7), dispatching arch-review round 3"}
+- [2026-09-05T07:24:23Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 82, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T07:25:23Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 83, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T07:26:23Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 84, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T07:27:23Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 85, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T07:28:23Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 86, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T07:28:28Z] Wags/status — Wags_20260905_060209: {"status": "deadline_extended", "hb_age_s": 281, "extension": 1, "max_ext": 3, "source": "watcher"}
+- [2026-09-05T07:29:23Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 87, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T07:30:24Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 88, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T07:31:24Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 89, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T07:32:24Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 90, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T07:33:24Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 91, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T07:34:24Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 92, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T07:35:24Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 93, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T07:36:24Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 94, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T07:37:24Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 95, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T07:38:25Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 96, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T07:39:25Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 97, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T07:40:25Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 98, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T07:41:25Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 99, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T07:42:25Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 100, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T07:43:25Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 101, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T07:44:25Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 102, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T07:44:49Z] Wags/heartbeat — Wags_20260905_060209: {"status": "in_progress", "note": "round 3 arch-review: NEEDS_CHANGES (B1 M7 fix traded coverage instead of adding, B2 lambda/comprehension/class scope leak, B3 ctx=Load bypass). All fixed + new mutations M7b/M8/B3 added, 137/137 assertions + 38/38 mutations pass, real repo still 157/87+0/0. Dispatching round 4."}
+- [2026-09-05T07:45:25Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 103, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T07:46:26Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 104, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T07:47:26Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 105, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T07:48:26Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 106, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T07:49:26Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 107, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T07:50:26Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 108, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T07:51:26Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 109, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T07:52:26Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 110, "job_id": "Wags_20260905_060209", "source": "watcher"}
+- [2026-09-05T07:53:26Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 111, "job_id": "Wags_20260905_060209", "source": "watcher"}
