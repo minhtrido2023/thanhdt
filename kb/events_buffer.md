@@ -375,3 +375,31 @@
 - [2026-09-05T02:05:51Z] Taylor/heartbeat — Taylor_20260905_020004: {"status": "in_progress", "note": "verified both accounts + charts done, writing SpaceX+ZaloPay report markdown now"}
 - [2026-09-05T02:06:05Z] Taylor/heartbeat — Taylor_20260905_020004: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20260905_020004", "source": "watcher"}
 - [2026-09-05T01:31:07Z] Winston/status — fa_ratings_8l-refresh-ok: {"rows": 53635}
+
+## Consolidation 2026-09-05T02:27:51Z
+- [2026-09-05T02:07:05Z] Taylor/heartbeat — Taylor_20260905_020004: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20260905_020004", "source": "watcher"}
+- [2026-09-05T02:08:06Z] Taylor/heartbeat — Taylor_20260905_020004: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20260905_020004", "source": "watcher"}
+- [2026-09-05T02:09:03Z] Taylor/heartbeat — Taylor_20260905_020004: {"status": "in_progress", "note": "both markdown reports written+charts embedded, running return gate + delivery gate next"}
+- [2026-09-05T02:09:06Z] Taylor/heartbeat — Taylor_20260905_020004: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20260905_020004", "source": "watcher"}
+- [2026-09-05T02:10:07Z] Taylor/heartbeat — Taylor_20260905_020004: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20260905_020004", "source": "watcher"}
+- [2026-09-05T02:11:07Z] Taylor/heartbeat — Taylor_20260905_020004: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20260905_020004", "source": "watcher"}
+- [2026-09-05T02:11:20Z] Taylor/heartbeat — Taylor_20260905_020004: {"status": "in_progress", "note": "return_gate running in background (>120s), waiting for completion"}
+- [2026-09-05T02:12:07Z] Taylor/heartbeat — Taylor_20260905_020004: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20260905_020004", "source": "watcher"}
+- [2026-09-05T02:13:07Z] Taylor/heartbeat — Taylor_20260905_020004: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20260905_020004", "source": "watcher"}
+- [2026-09-05T02:14:08Z] Taylor/heartbeat — Taylor_20260905_020004: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20260905_020004", "source": "watcher"}
+- [2026-09-05T02:15:08Z] Taylor/heartbeat — Taylor_20260905_020004: {"status": "still_running", "elapsed_min": 15, "job_id": "Taylor_20260905_020004", "source": "watcher"}
+- [2026-09-05T02:15:47Z] Taylor/status — fa_ratings-refresh-ok: {"rows": 12716}
+- [2026-09-05T02:16:09Z] Taylor/heartbeat — Taylor_20260905_020004: {"status": "still_running", "elapsed_min": 16, "job_id": "Taylor_20260905_020004", "source": "watcher"}
+- [2026-09-05T02:16:52Z] Taylor/heartbeat — Taylor_20260905_020004: {"status": "in_progress", "note": "return gate PASS both files, running delivery gate now"}
+- [2026-09-05T02:17:09Z] Taylor/heartbeat — Taylor_20260905_020004: {"status": "still_running", "elapsed_min": 17, "job_id": "Taylor_20260905_020004", "source": "watcher"}
+- [2026-09-05T02:18:09Z] Taylor/heartbeat — Taylor_20260905_020004: {"status": "still_running", "elapsed_min": 18, "job_id": "Taylor_20260905_020004", "source": "watcher"}
+- [2026-09-05T02:19:09Z] Taylor/heartbeat — Taylor_20260905_020004: {"status": "still_running", "elapsed_min": 19, "job_id": "Taylor_20260905_020004", "source": "watcher"}
+- [2026-09-05T02:20:09Z] Taylor/heartbeat — Taylor_20260905_020004: {"status": "still_running", "elapsed_min": 20, "job_id": "Taylor_20260905_020004", "source": "watcher"}
+- [2026-09-05T02:21:09Z] Taylor/heartbeat — Taylor_20260905_020004: {"status": "still_running", "elapsed_min": 21, "job_id": "Taylor_20260905_020004", "source": "watcher"}
+- [2026-09-05T02:22:09Z] Taylor/heartbeat — Taylor_20260905_020004: {"status": "still_running", "elapsed_min": 22, "job_id": "Taylor_20260905_020004", "source": "watcher"}
+- [2026-09-05T02:23:09Z] Taylor/heartbeat — Taylor_20260905_020004: {"status": "still_running", "elapsed_min": 23, "job_id": "Taylor_20260905_020004", "source": "watcher"}
+- [2026-09-05T02:24:09Z] Taylor/heartbeat — Taylor_20260905_020004: {"status": "still_running", "elapsed_min": 24, "job_id": "Taylor_20260905_020004", "source": "watcher"}
+- [2026-09-05T02:25:10Z] Taylor/heartbeat — Taylor_20260905_020004: {"status": "still_running", "elapsed_min": 25, "job_id": "Taylor_20260905_020004", "source": "watcher"}
+- [2026-09-05T02:26:10Z] Taylor/heartbeat — Taylor_20260905_020004: {"status": "still_running", "elapsed_min": 26, "job_id": "Taylor_20260905_020004", "source": "watcher"}
+- [2026-09-05T02:27:10Z] Taylor/heartbeat — Taylor_20260905_020004: {"status": "still_running", "elapsed_min": 27, "job_id": "Taylor_20260905_020004", "source": "watcher"}
+- [2026-09-05T02:27:40Z] Taylor/finding — weekly-report-2026-08-31_to_2026-09-04-COMPLETE: {"period": "2026-08-31_to_2026-09-04", "real_trading_sessions": 2, "note_holiday": "31/08,01/09,02/09 nghi le Quoc khanh (bu le), HOSE dong hoan toan - xac nhan trading_bot/vn_market.py + BQ khong co du lieu 3 ngay do; ky vong Mon-Fri full trong dispatch prompt SAI", "files": {"spacex": {"path": "mike/reports/SpaceX_weekly_report_2026-08-31_to_2026-09-04.md", "sha256": "0f7e206355b0cbfc2bc1c38784f2aefedace81f82cebcd0bfe9f5410dfa3f5b9", "nav_end": 980696423, "nav_start_2026-08-28": 985547490, "pct_change": -0.49, "vnindex_pct_change": 1.14, "delivery_gate": "COMPLETE"}, "zalopay": {"path": "mike/reports/ZaloPay_weekly_report_2026-08-31_to_2026-09-04.md", "sha256": "b1ec52bf02cb1ffeb96204349d6363a14471682281a9f29d5d34b59d465045ce", "nav_end": 991380088, "nav_start_2026-08-28": 952338703, "pct_change": 4.1, "delivery_gate": "COMPLETE"}}, "gaps_flagged_internal_only": ["MBB rights qty dnse_raw vs journal lech 20-110cp, TON DONG tu tuan truoc, van CHUA dong bo sau 1 tuan (SpaceX 1565 vs 1675, ZaloPay 632 vs 652)", "ZaloPay VPB reconstructed candidate=200 vs snapshot=1300 - binh thuong, legacy khong du lich su fill"], "key_finding": "ZaloPay +4.10% pct kỳ nay chu yeu do DGC legacy +9.53% (43000->47100, +41tr VND, LON HON tong NAV tang +39tr) - loai DGC thi ZaloPay ex-DGC -0.38% sat voi SpaceX -0.49%, xac nhan khong phai alpha chien luoc", "charts": "3 PNG/account (nav, cumret indexed100, allocation) sinh boi report_charts.py, nhung vao ca 2 file qua markdown image, embed base64 khi gui email", "commit": "65bbc920"}
