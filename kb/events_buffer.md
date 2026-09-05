@@ -553,3 +553,27 @@
 - [2026-09-05T07:51:26Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 109, "job_id": "Wags_20260905_060209", "source": "watcher"}
 - [2026-09-05T07:52:26Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 110, "job_id": "Wags_20260905_060209", "source": "watcher"}
 - [2026-09-05T07:53:26Z] Wags/heartbeat — Wags_20260905_060209: {"status": "still_running", "elapsed_min": 111, "job_id": "Wags_20260905_060209", "source": "watcher"}
+
+## Consolidation 2026-09-05T14:07:02Z
+- [2026-09-05T13:50:18Z] Taylor/heartbeat — Taylor_20260905_135003: {"status": "in_progress", "note": "read CCS proposal; starting data_registry + R3 harness discovery"}
+- [2026-09-05T13:51:03Z] Taylor/heartbeat — Taylor_20260905_135003: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20260905_135003", "source": "watcher"}
+- [2026-09-05T13:51:45Z] Taylor/heartbeat — Taylor_20260905_135003: {"status": "in_progress", "note": "pinned R3 artifact found (repin0803_price CSV, selfcheck 0 VND); mapping engine TX->trade ledger + frozen cache asof20260729_postrestate for PIT features"}
+- [2026-09-05T13:52:04Z] Taylor/heartbeat — Taylor_20260905_135003: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20260905_135003", "source": "watcher"}
+- [2026-09-05T13:53:04Z] Taylor/heartbeat — Taylor_20260905_135003: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20260905_135003", "source": "watcher"}
+- [2026-09-05T13:54:04Z] Taylor/heartbeat — Taylor_20260905_135003: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20260905_135003", "source": "watcher"}
+- [2026-09-05T13:55:04Z] Taylor/heartbeat — Taylor_20260905_135003: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20260905_135003", "source": "watcher"}
+- [2026-09-05T13:56:04Z] Taylor/heartbeat — Taylor_20260905_135003: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20260905_135003", "source": "watcher"}
+- [2026-09-05T13:56:15Z] Taylor/heartbeat — Taylor_20260905_135003: {"status": "in_progress", "note": "probe engine (pinned cmd + frozen snapshot asof20260729_postrestate) running in bg for sig_bal/sig_lag/lag_cand dumps; writing feature-join script meanwhile"}
+- [2026-09-05T13:57:04Z] Taylor/heartbeat — Taylor_20260905_135003: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20260905_135003", "source": "watcher"}
+- [2026-09-05T13:58:04Z] Taylor/heartbeat — Taylor_20260905_135003: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20260905_135003", "source": "watcher"}
+- [2026-09-05T13:59:04Z] Taylor/heartbeat — Taylor_20260905_135003: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20260905_135003", "source": "watcher"}
+- [2026-09-05T13:59:40Z] Taylor/heartbeat — Taylor_20260905_135003: {"status": "in_progress", "note": "ledger v1 runs; BAL identity 0 VND, LAG gap traced to 1 orphan holding_id (VCR 2020-06-04 _? suffix) - repaired; rerunning"}
+- [2026-09-05T14:00:05Z] Taylor/heartbeat — Taylor_20260905_135003: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20260905_135003", "source": "watcher"}
+- [2026-09-05T14:01:05Z] Taylor/heartbeat — Taylor_20260905_135003: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20260905_135003", "source": "watcher"}
+- [2026-09-05T14:02:05Z] Taylor/heartbeat — Taylor_20260905_135003: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20260905_135003", "source": "watcher"}
+- [2026-09-05T14:02:44Z] Taylor/heartbeat — Taylor_20260905_135003: {"status": "in_progress", "note": "probe relaunched to completion (drift check vs pin); ledger identity closes 0 VND both books; fixing ey-tercile + signal-rank pool coverage"}
+- [2026-09-05T14:03:05Z] Taylor/heartbeat — Taylor_20260905_135003: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20260905_135003", "source": "watcher"}
+- [2026-09-05T14:04:06Z] Taylor/heartbeat — Taylor_20260905_135003: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20260905_135003", "source": "watcher"}
+- [2026-09-05T14:04:33Z] Taylor/heartbeat — Taylor_20260905_135003: {"status": "in_progress", "note": "ledger+N-episode tables done (2056 entries, 70 buckets, 28 THIN); writing PIT audit + LAG vintage-drift quantification"}
+- [2026-09-05T14:05:06Z] Taylor/heartbeat — Taylor_20260905_135003: {"status": "still_running", "elapsed_min": 15, "job_id": "Taylor_20260905_135003", "source": "watcher"}
+- [2026-09-05T14:06:06Z] Taylor/heartbeat — Taylor_20260905_135003: {"status": "still_running", "elapsed_min": 16, "job_id": "Taylor_20260905_135003", "source": "watcher"}
