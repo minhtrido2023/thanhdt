@@ -363,3 +363,15 @@
 - [2026-09-04T21:18:40Z] Mike/decision — weekly-ops-audit: {"date": "2026-09-05", "bugs_found": 4, "bugs_fixed": 4, "commits": ["be1d64a0", "d3924e24", "e5700fbd", "0b2eeb60"], "escalated": 1, "escalated_topic": "bq-monthly-pin-thieu-202608-202609-chay-bu-hay-khong", "pending_bus_questions": 1, "pending_detail": "Wags/wags-fix-not-confirmed: coord-2026-09-03 (2d)", "pct_fable": 0.0, "pct_opus_by_week": {"2026-W33": 97.3, "2026-W34": 94.5, "2026-W35": 97.0, "2026-W36": 82.5}, "kb_sizes_bytes": {"context_pack.md": 23934, "current_ops.md": 5363, "MIKE.md": 30409, "coding_guidelines.md": 37932}, "kb_warning": "coding_guidelines.md 37.9KB/40KB — con ~2.0KB dem, phang 6 ngay", "retro_coverage": "7/7", "selfcheck_fails": 6, "selfcheck_real_bugs": 1, "selfcheck_known_red": 0, "data_registry_audit": "FAIL=0 WARN=0", "note": "job resume sau max-turns; muc 1-5 chay o luot truoc, muc 6-8b + bao cao o luot nay"}
 - [2026-09-04T21:19:05Z] Mike/heartbeat — Mike_20260904_211002: {"status": "still_running", "elapsed_min": 9, "job_id": "Mike_20260904_211002", "source": "watcher"}
 - [2026-09-04T21:19:10Z] Mike/heartbeat — Mike_20260904_211002: {"status": "done", "note": "weekly ops audit 2026-09-05 HOAN TAT: 4 bug sua, 1 escalate, bao cao da post Architecture + Telegram + bus"}
+
+## Consolidation 2026-09-05T02:07:02Z
+- [2026-09-05T02:00:03Z] Mike/finding — report-cadence-scheduled-weekly_2026-08-31_2026-09-04: {"kind": "weekly", "period": "tuần 2026-08-31 → 2026-09-04", "target_file_spacex": "mike/reports/SpaceX_weekly_report_2026-08-31_to_2026-09-04.md", "target_file_zalopay": "mike/reports/ZaloPay_weekly_report_2026-08-31_to_2026-09-04.md"}
+- [2026-09-05T02:00:38Z] Taylor/heartbeat — Taylor_20260905_020004: {"status": "in_progress", "note": "gathering nav_history + verify_account_snapshot data for both accounts, week 08-31 to 09-04"}
+- [2026-09-05T02:01:05Z] Taylor/heartbeat — Taylor_20260905_020004: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20260905_020004", "source": "watcher"}
+- [2026-09-05T02:02:05Z] Taylor/heartbeat — Taylor_20260905_020004: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20260905_020004", "source": "watcher"}
+- [2026-09-05T02:03:05Z] Taylor/heartbeat — Taylor_20260905_020004: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20260905_020004", "source": "watcher"}
+- [2026-09-05T02:04:05Z] Taylor/heartbeat — Taylor_20260905_020004: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20260905_020004", "source": "watcher"}
+- [2026-09-05T02:05:05Z] Taylor/heartbeat — Taylor_20260905_020004: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20260905_020004", "source": "watcher"}
+- [2026-09-05T02:05:51Z] Taylor/heartbeat — Taylor_20260905_020004: {"status": "in_progress", "note": "verified both accounts + charts done, writing SpaceX+ZaloPay report markdown now"}
+- [2026-09-05T02:06:05Z] Taylor/heartbeat — Taylor_20260905_020004: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20260905_020004", "source": "watcher"}
+- [2026-09-05T01:31:07Z] Winston/status — fa_ratings_8l-refresh-ok: {"rows": 53635}
