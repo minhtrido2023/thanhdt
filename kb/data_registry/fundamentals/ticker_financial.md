@@ -50,3 +50,28 @@ khoản đầu tư một lần) chứ không phải tồn kho tiền/đầu tư 
   giảm flag rate từ 5,97%→1,62% trên đúng tập `Debt_Eq_P0>3,5`.
 - Muốn công thức chính xác: hỏi thẳng nguồn dữ liệu (bq_admin/ai quản lý ETL `ticker_financial`),
   đừng tiếp tục suy diễn từ tương quan — độ tin cậy hiện tại là CAO nhưng KHÔNG xác nhận trực tiếp.
+
+**CẬP NHẬT 2026-09-05 — trả lời từ bq_admin, xác nhận trực tiếp, ĐÍNH CHÍNH giả thuyết "mẫu số
+ròng" ở trên (chỉ đúng cho một nhánh, không phải bản chất chung của cột):**
+`IntCov_P0` = **pass-through trực tiếp giá trị VCI trả về trong báo cáo ratio của VCI** (công thức
+nội bộ VCI, KHÔNG công khai, không suy ngược được). **CHỈ khi VCI trả `null`** thì mới rơi vào
+nhánh tự tính, công thức đã xác nhận: `profit_before_tax / abs(interest_expense) + 1`.
+
+**Hệ quả — vì sao KHÔNG tự tính lại được để thay thế nguồn BQ hiện tại, kể cả khi muốn:**
+1. **Chứng minh được bằng toán học rằng ca SBA đến từ nhánh VCI-opaque, không phải nhánh fallback**
+   đã biết công thức: `PBT/|IntExp| + 1` có mẫu số LUÔN dương tuyệt đối ⇒ nếu PBT dương thì kết
+   quả LUÔN ≥ 1, không bao giờ âm. SBA có PBT dương và TĂNG DẦN suốt 2013→2024 trong khi IntCov
+   thực tế càng ÂM SÂU hơn (−1,47→−24,26) — không thể sinh ra từ công thức này. Vậy giá trị SBA
+   chắc chắn đến từ số VCI tự trả (nhánh 1), phương pháp tính của VCI KHÔNG biết được, không phải
+   thiếu dữ liệu để tính lại mà là KHÔNG BIẾT công thức để tính lại.
+2. **Ngay cả nhánh fallback ĐÃ BIẾT công thức cũng không tái lập được từ BQ**: đã kiểm schema
+   `ticker_financial` trực tiếp (`INFORMATION_SCHEMA.COLUMNS`) — KHÔNG có cột `interest_expense`
+   hay `profit_before_tax`. Chỉ có `EBITM_P0` (biên EBIT, một cột KHÁC, đã dùng để ước tính EBIT
+   ở mục audit trên) — không đủ nguyên liệu để tự tính kể cả công thức đơn giản đã biết.
+3. **Kết luận thực hành**: `IntCov_P0` là con số HỘP ĐEN của vendor cho đa số dòng (khi VCI có trả
+   giá trị) — không phải lỗi pipeline, không phải điều tự tính lại được từ dữ liệu sẵn có trong
+   `tav2_bq`. Muốn dùng đúng công thức fallback cũng phải kéo báo cáo tài chính thô (interest
+   expense, profit before tax) từ vnstock/VCI trực tiếp, NGOÀI phạm vi `ticker_financial`.
+   **Quy tắc tiền xử lý dấu ở trên VẪN ĐÚNG và VẪN LÀ CÁCH DÙNG AN TOÀN** (dùng `EBITDA_P0`/`NP_P0`
+   đối chiếu thay vì tin `IntCov_P0` một mình) — phát hiện này xác nhận lý do gốc rễ, không đổi
+   khuyến nghị.
