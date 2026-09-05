@@ -1,0 +1,45 @@
+{
+  "no forward-looking profit_* column referenced": {
+    "pass": true,
+    "detail": "hits=[]"
+  },
+  "signal_date < entry_fill_date for every row": {
+    "pass": true,
+    "detail": "2056 rows, 0 violations"
+  },
+  "exit_date >= entry_fill_date": {
+    "pass": true,
+    "detail": "0 violations"
+  },
+  "dd52 reproduces from closes <= signal_date only": {
+    "pass": true,
+    "detail": "n=200 max|\u0394|=9.714e-17"
+  },
+  "breadth used at t-1, not same session": {
+    "pass": true,
+    "detail": "corr(pct252_t-1, r_vni_t)=+0.0300 vs same-session +0.1105"
+  },
+  "DT5G read from vnindex_5state_dt5g_live only": {
+    "pass": true,
+    "detail": "dt5g_live present, base table absent"
+  },
+  "universe_pit_q rating_asof <= session (whole table)": {
+    "pass": true,
+    "detail": "1,070,731 rows, 0 with rating_asof after the session"
+  },
+  "ledger rating_asof <= signal_date": {
+    "pass": true,
+    "detail": "1314 rated rows, 0 violations"
+  },
+  "fa_ratings_8l fallback used a backward as-of value": {
+    "pass": true,
+    "detail": "n=706 fallback rows, 0 not reproducible from a vintage <= signal_date"
+  },
+  "lag_vintage_drift": {
+    "lag_signals_pin_log": 5317,
+    "lag_signals_probe_today": 5319,
+    "lag_entries_in_ledger": 1498,
+    "matched_to_current_lag_cand": 1498,
+    "match_rate": 1.0
+  }
+}

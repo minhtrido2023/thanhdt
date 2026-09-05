@@ -1,0 +1,71 @@
+hypothesis,book,bucket,n_trades,n_entry_days,n_tickers,n_years,ep_gap5,ep_gap10,ep_gap21,verdict
+H1,BAL,H1 BAL dd52<=-20%,64,44,45,12,36,32,27,OK
+H1,BAL,H1 BAL dd52>-20%,441,175,222,13,74,61,39,OK
+H1,BAL,H1 BAL dd52 missing,0,0,0,0,0,0,0,THIN — descriptive only
+H1,LAG,H1 LAG dd52<=-20%,638,248,336,13,59,54,51,OK
+H1,LAG,H1 LAG dd52>-20%,912,298,389,13,60,53,51,OK
+H1,LAG,H1 LAG dd52 missing,1,1,1,1,1,1,1,THIN — descriptive only
+H1,BOTH,H1 BOTH dd52<=-20%,702,279,349,13,79,68,51,OK
+H1,BOTH,H1 BOTH dd52>-20%,1353,443,501,13,90,75,46,OK
+H1,BOTH,H1 BOTH dd52 missing,1,1,1,1,1,1,1,THIN — descriptive only
+H2,BAL,H2 BAL ey=CHEAP recovery=True,81,34,62,9,15,15,15,THIN — descriptive only
+H2,BAL,H2 BAL ey=CHEAP recovery=False,111,80,68,12,48,35,31,OK
+H2,BAL,H2 BAL ey=MID recovery=True,74,34,62,9,16,15,15,THIN — descriptive only
+H2,BAL,H2 BAL ey=MID recovery=False,99,63,70,12,39,36,30,OK
+H2,BAL,H2 BAL ey=EXPENSIVE recovery=True,70,27,55,9,15,15,15,THIN — descriptive only
+H2,BAL,H2 BAL ey=EXPENSIVE recovery=False,58,51,44,11,35,29,25,THIN — descriptive only
+H2,LAG,H2 LAG ey=CHEAP recovery=True,62,26,57,9,11,11,11,THIN — descriptive only
+H2,LAG,H2 LAG ey=CHEAP recovery=False,588,240,274,13,56,49,48,OK
+H2,LAG,H2 LAG ey=MID recovery=True,48,22,41,6,8,8,8,THIN — descriptive only
+H2,LAG,H2 LAG ey=MID recovery=False,441,197,247,13,62,53,49,OK
+H2,LAG,H2 LAG ey=EXPENSIVE recovery=True,36,18,32,8,9,9,9,THIN — descriptive only
+H2,LAG,H2 LAG ey=EXPENSIVE recovery=False,267,152,173,13,54,47,47,OK
+H2,BOTH,H2 BOTH ey=CHEAP recovery=True,143,54,109,12,21,20,20,THIN — descriptive only
+H2,BOTH,H2 BOTH ey=CHEAP recovery=False,699,307,309,13,79,64,51,OK
+H2,BOTH,H2 BOTH ey=MID recovery=True,122,51,93,11,18,17,17,THIN — descriptive only
+H2,BOTH,H2 BOTH ey=MID recovery=False,540,250,286,13,77,64,51,OK
+H2,BOTH,H2 BOTH ey=EXPENSIVE recovery=True,106,38,83,11,18,18,18,THIN — descriptive only
+H2,BOTH,H2 BOTH ey=EXPENSIVE recovery=False,325,198,200,13,74,61,50,OK
+H3,BAL,H3 BAL breadth_tm1=LOW,132,66,87,11,33,25,20,THIN — descriptive only
+H3,BAL,H3 BAL breadth_tm1=MID,172,65,120,12,30,27,25,THIN — descriptive only
+H3,BAL,H3 BAL breadth_tm1=HIGH,201,63,143,9,31,24,19,THIN — descriptive only
+H3,BAL,H3 BAL breadth LOW & turning up,41,26,34,5,15,12,9,THIN — descriptive only
+H3,LAG,H3 LAG breadth_tm1=LOW,736,165,383,12,34,32,30,OK
+H3,LAG,H3 LAG breadth_tm1=MID,438,97,285,13,29,28,28,THIN — descriptive only
+H3,LAG,H3 LAG breadth_tm1=HIGH,377,98,256,12,25,22,22,THIN — descriptive only
+H3,LAG,H3 LAG breadth LOW & turning up,252,63,194,12,19,18,17,THIN — descriptive only
+H3,BOTH,H3 BOTH breadth_tm1=LOW,868,212,422,13,46,39,30,OK
+H3,BOTH,H3 BOTH breadth_tm1=MID,610,151,351,13,45,42,35,OK
+H3,BOTH,H3 BOTH breadth_tm1=HIGH,578,151,352,12,43,33,27,OK
+H3,BOTH,H3 BOTH breadth LOW & turning up,293,86,220,12,28,24,19,THIN — descriptive only
+H3,market,H3 CALENDAR breadth=LOW,1251,1251,0,13,57,57,57,OK
+H3,market,H3 CALENDAR breadth=MID,917,917,0,13,110,110,110,OK
+H3,market,H3 CALENDAR breadth=HIGH,965,965,0,13,54,54,54,OK
+H4,LAG,H4 LAG surprise=HIGH ey=CHEAP,243,138,166,13,53,48,46,OK
+H4,LAG,H4 LAG surprise=HIGH ey=MID,191,112,139,13,53,47,47,OK
+H4,LAG,H4 LAG surprise=HIGH ey=EXPENSIVE,147,92,117,13,50,43,43,OK
+H4,LAG,H4 LAG surprise=MID ey=CHEAP,194,126,115,13,53,49,47,OK
+H4,LAG,H4 LAG surprise=MID ey=MID,174,113,119,13,56,50,48,OK
+H4,LAG,H4 LAG surprise=MID ey=EXPENSIVE,90,71,69,13,45,40,40,OK
+H4,LAG,H4 LAG surprise=LOW ey=CHEAP,190,130,136,13,56,46,46,OK
+H4,LAG,H4 LAG surprise=LOW ey=MID,98,77,78,13,42,41,40,OK
+H4,LAG,H4 LAG surprise=LOW ey=EXPENSIVE,62,50,54,12,34,32,31,OK
+H5,BAL,H5 BAL <=10 sessions since upgrade,232,50,165,10,18,18,18,THIN — descriptive only
+H5,BAL,H5 BAL >10 sessions since upgrade,270,143,147,11,70,51,35,OK
+H5,LAG,H5 LAG <=10 sessions since upgrade,162,35,132,10,12,12,12,THIN — descriptive only
+H5,LAG,H5 LAG >10 sessions since upgrade,1356,312,493,13,55,49,47,OK
+H5,BOTH,H5 BOTH <=10 sessions since upgrade,394,75,264,12,21,21,21,THIN — descriptive only
+H5,BOTH,H5 BOTH >10 sessions since upgrade,1626,426,555,13,89,70,47,OK
+H5,market,H5 CALENDAR <=10 sessions since upgrade,75,75,0,12,38,38,38,OK
+H6,BAL,H6 BAL rank=TOP,213,131,114,11,65,50,36,OK
+H6,BAL,H6 BAL rank=MID,141,83,104,10,44,39,30,OK
+H6,BAL,H6 BAL rank=BOTTOM,98,48,82,8,22,22,16,THIN — descriptive only
+H6,BAL,H6 BAL rank=n/a (CAPIT arm),53,14,32,10,14,14,14,THIN — descriptive only
+H6,LAG,H6 LAG rank=TOP,885,346,391,13,57,50,50,OK
+H6,LAG,H6 LAG rank=MID,403,207,263,13,53,49,49,OK
+H6,LAG,H6 LAG rank=BOTTOM,210,111,133,13,48,46,45,OK
+H6,LAG,H6 LAG rank=n/a (CAPIT arm),53,12,36,9,12,12,12,THIN — descriptive only
+H6,BOTH,H6 BOTH rank=TOP,1098,456,449,13,86,69,48,OK
+H6,BOTH,H6 BOTH rank=MID,544,283,339,13,80,68,51,OK
+H6,BOTH,H6 BOTH rank=BOTTOM,308,158,208,13,63,57,47,OK
+H6,BOTH,H6 BOTH rank=n/a (CAPIT arm),106,15,37,10,15,15,15,THIN — descriptive only
