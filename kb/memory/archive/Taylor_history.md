@@ -452,3 +452,6 @@
 
 ## Archived 2026-09-05 (keep=12 days=0 require_done=False)
 - [2026-09-03T15:59:12Z] top-detection-technical-signals-20260903 (job _154921) XONG, bus finding + report da ghi. 10 bien the (volume/TV/VAP-proxy/RSI-divergence grid) + 1 combo (N_TRIALS=11) - KHONG cai nao vuot DIVERGE_DAY ve timing. RSI_DIVERGE_3M bat dinh tot nhat (must-catch ca 2007/2018/2022 o moi margin) nhung do sau dieu chinh yeu hon DIVERGE, khong dose-response - chi gioi GAN NHAN dinh khong gioi do LUONG. Combo RSI x TV lap lai loi §2.4 (AND lam mat must-catch). Khong con viec mo tren truc nay.
+
+## Archived 2026-09-05 (keep=12 days=0 require_done=False)
+- [2026-09-03T17:10:53Z] mania-exit-reentry-roundtrip-20260903 (job _170018) XONG, bus finding + report da ghi. Ket luan cot loi: co che rut (DIVERGE_DAY/RSI_DIVERGE_3M) KHONG duoc xac nhan la bao toan von - round-trip NAV that thua rut-ngau-nhien-cung-tan-suat trong 8/12 to hop, Sharpe/Calmar cao nhat chi ngang buy-hold (khong vuot). Reentry rule R2_breadth050 (>=0.50) co noi dung timing that nhat (median 2.5 phien); R4_dt5g gan-nhu-no-op (DT5G risk-on 76.9% thoi gian); R3_capit (tai tao tu crisis_capitulation_signal.py) dung tinh than nhat nhung round-trip yeu nhat. Khong con viec mo tren truc nay tru khi user muon tiep.
