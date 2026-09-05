@@ -441,7 +441,7 @@ if os.path.isdir(inbox_dir):
     # sẵn sàng của account tiền thật biến mất khỏi check #5. Fix: required_change #1 của
     # arch-reviewer, NEEDS_CHANGES coord-2026-07-30.
     resolvers = []          # (agent, topic, ts, explicit refs from payload.resolves)
-    acks = []                # (topic_câu_hỏi_được_ack, hạn_ack) — xem ACK_PREFIX
+    acks = []                # (topic_câu_hỏi_được_ack, a_ts, hạn_ack, suppress_days) — xem ACK_PREFIX
     # Tập agent-id CÓ THẬT trên bus. Dùng để quyết định một chuỗi dạng "X/y" là
     # "Agent/topic" hay chỉ là topic tự nó có dấu '/'. Lấy từ tên file inbox chứ KHÔNG
     # hardcode: fleet thêm agent thì tập này tự đúng. Xem `_split_ref`.
@@ -480,7 +480,7 @@ if os.path.isdir(inbox_dir):
                         _sd = 0
                 _sd = max(0, min(_sd, ACK_MAX_SUPPRESS_DAYS))
                 acks.append((rec["topic"][len(ACK_PREFIX):].strip(),
-                             a_ts + dt.timedelta(days=_sd)))
+                             a_ts, a_ts + dt.timedelta(days=_sd), _sd))
                 continue
             if etype in ("answer", "decision", "finding"):
                 t = rec.get("topic")
@@ -630,10 +630,24 @@ if os.path.isdir(inbox_dir):
         # (đúng chuỗi checker in ra) để người copy thẳng từ báo cáo.
         if not q_topic:
             return False
-        # `a_until` = ts ack + suppress_days (mặc định 0 ⇒ đúng điều kiện cũ "ack đăng SAU
-        # câu hỏi"); >0 phủ thêm các lần cron phát lại CÙNG topic trong cửa sổ đó.
+        # Hai chế độ, tuỳ có khai `suppress_days` hay không:
+        # (a) suppress_days=0/không khai ⇒ hành vi cũ, VĨNH VIỄN cho ĐÚNG instance đã ack
+        #     (a_ts >= q_ts) — không có "hết hạn" nào cho ca này (fixture case_triaged_
+        #     needs_human_ack dựa đúng vào tính vĩnh viễn này, không được đổi).
+        # (b) suppress_days=N>0 ⇒ BUG (arch-review NEEDS_CHANGES, coord-2026-09-03): bản cũ
+        #     so `a_until >= q_ts` (q_ts = ts CỦA CÂU HỎI, cố định) — với câu hỏi KHÔNG bị
+        #     cron phát lại (ts không đổi qua các lần chạy check), ack luôn đăng sau câu hỏi
+        #     (a_ts > q_ts) nên a_until = a_ts + N >= a_ts > q_ts LUÔN đúng bất kể N ⇒ ack
+        #     vĩnh viễn dù khai suppress_days — "N ngày rồi tự nổi lại" chưa từng hoạt động
+        #     cho câu hỏi không tái phát (ca thật: Winston/deposit-rate-refresh-question).
+        #     Sửa: so `a_until` với THỜI ĐIỂM CHẠY CHECK (_now) — đúng ý định "phủ N ngày
+        #     kể từ lúc ack", còn khớp nguyên fixture case_ack_suppress_days_window (ack có
+        #     thể đăng TRƯỚC câu hỏi để phủ 1 lần cron phát lại tới sau, vì nhánh này không
+        #     đòi a_ts >= q_ts nữa — chỉ còn đòi cửa sổ chưa hết hạn theo NOW).
         want = (q_topic, f"{q_agent}/{q_topic}")
-        return any(a in want and a_until >= q_ts for a, a_until in acks)
+        return any(a in want and
+                   ((sd <= 0 and a_ts >= q_ts) or (sd > 0 and a_until >= _now))
+                   for a, a_ts, a_until, sd in acks)
     seen_q = set()
     for p in files:
         agent = _agent_of(p)
