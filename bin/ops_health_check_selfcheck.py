@@ -1573,6 +1573,35 @@ def case_ack_suppress_days_capped():
         shutil.rmtree(root, ignore_errors=True)
 
 
+# ── Ca 15c (arch-review coord-2026-09-03, commit c437548b): suppress_days>0 phải hết hạn
+#    theo THỜI ĐIỂM CHẠY CHECK (_now), không phải theo ts của câu hỏi (q_ts). Ca 14 KHÔNG
+#    phủ được lỗi này vì câu hỏi ở đó bị REISSUE (q_ts mới hơn ack) — với q_ts cố định
+#    (câu hỏi không tái phát, ca thật Winston/deposit-rate-refresh-question), a_until =
+#    a_ts + N luôn >= q_ts vĩnh viễn bất kể N vì a_ts luôn > q_ts (ack đăng SAU câu hỏi).
+#    arch-reviewer tái lập: revert `_acked` về so a_until >= q_ts → toàn bộ 234 assertion
+#    (kể cả ca 14) VẪN xanh — cần ca RIÊNG này để mutation MU5 bắt được đúng dòng đã sửa.
+def case_ack_suppress_days_expires_by_now_not_qts():
+    root, inbox = mkbus()
+    try:
+        # Câu hỏi trong cửa sổ 48h, KHÔNG tái phát (chỉ 1 event, q_ts cố định).
+        write_events(os.path.join(inbox, "Mike.jsonl"),
+                     [ev("Mike", "question", "khong-tai-phat-het-han", ago(0, 40))])
+        e = ev("Wags", "status", "triaged-needs-human: khong-tai-phat-het-han", ago(0, 30))
+        e["payload"] = {"suppress_days": 1}   # a_until = a_ts + 1d, hết hạn ~18h trước
+        write_events(os.path.join(inbox, "Wags.jsonl"), [e])
+        lines, _ = run_check5(root)
+        out = joined(lines)
+        pending = joined([ln for ln in lines if "trong 48h qua CHƯA thấy answer" in ln])
+        human = joined([ln for ln in lines if "ĐÃ TRIAGE, chờ NGƯỜI quyết" in ln])
+        check("suppress_days=1 hết hạn (so với NOW, không phải q_ts cố định): "
+              "câu hỏi KHÔNG tái phát quay lại routable",
+              "khong-tai-phat-het-han" in pending, out)
+        check("suppress_days=1 hết hạn: KHÔNG còn ở dòng ĐÃ TRIAGE/park",
+              "khong-tai-phat-het-han" not in human, out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
 # ── Ca 16 (2026-08-14, job Wags_20260814_050658): lớp vòng-wags-fix MIỄN CẮT trong aged_q.
 #    Vì sao cần: lớp này đã bị loại khỏi auto-dispatch (đúng — lặp tự động là vòng tự nuôi),
 #    nên dòng aged_q là kênh DUY NHẤT đưa nó tới người; mà nó lão hoá theo ngày ⇒ càng treo
@@ -2130,6 +2159,7 @@ def main():
                case_rollup_of_ref_forms_agent_aware,
                case_missing_inbox_dir_is_warn_not_green,
                case_ack_suppress_days_capped,
+               case_ack_suppress_days_expires_by_now_not_qts,
                case_aged_wagsfix_never_truncated, case_aged_no_wagsfix_keeps_old_cut,
                case_aged_wagsfix_overflow_is_loud,
                case_c9_full_week_is_ok, case_c9_yesterday_missing_warns,
@@ -2192,6 +2222,18 @@ MUTATIONS = [
      "        if not os.path.isdir(os.path.join(_AGENTS_DIR, _d)):",
      '        if _d.startswith("wt-") or not os.path.isdir(os.path.join(_AGENTS_DIR, _d)):',
      False),
+    # MU5/MU6 (arch-review round 2, coord-2026-09-03): ghim đúng dòng vừa sửa ở commit
+    # c437548b — round 1 (ca 14/15 sẵn có) KHÔNG bắt được vì câu hỏi ở đó bị reissue, còn
+    # ca 15c mới (case_ack_suppress_days_expires_by_now_not_qts) dùng câu hỏi KHÔNG tái
+    # phát nên phân biệt được q_ts (cố định, luôn < a_ts) khỏi _now (trôi theo thời gian).
+    ("MU5 quay lại so a_until >= q_ts (bug gốc coord-2026-09-03: ack không bao giờ hết hạn "
+     "cho câu hỏi không tái phát)",
+     "((sd <= 0 and a_ts >= q_ts) or (sd > 0 and a_until >= _now))",
+     "a_until >= q_ts", True),
+    ("MU6 gộp nhánh sd<=0 vào cùng so-với-NOW (phá tính vĩnh viễn của ack không khai "
+     "suppress_days — case_triaged_needs_human_ack)",
+     "((sd <= 0 and a_ts >= q_ts) or (sd > 0 and a_until >= _now))",
+     "a_until >= _now", True),
 ]
 
 
