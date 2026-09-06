@@ -40,6 +40,22 @@ really 14 events (BAL/LAG pairs aren't independent, same shock). Say the small-N
 loud before showing any result: "N=14 events, sign test p=0.549 — not significant on frequency."
 Never let a big row count in a CSV imply a big independent sample.
 
+**Panel (ticker, quarter) with >1 quarter per ticker: report BOTH p-values, not just row-level.**
+If declared N is ticker-quarter rows (e.g. 14,884) but independent tickers are far fewer (e.g.
+733), a row-level BH-p can overstate confidence by orders of magnitude. Add a **block bootstrap by
+ticker** (resample N_ticker tickers with replacement; each drawn ticker carries ALL its quarterly
+rows; B≥1000; take SE/CI of the statistic from the bootstrap distribution) as the official
+cluster-robust p-value — reported alongside the row-level one, not replacing it. **Do NOT use
+"one random row per ticker" as the cluster-robust standard** — that does not fix clustering, it
+discards ~95% of the data, destroying power artificially and can conclude "no longer significant"
+while the effect is real.
+
+*Measured case (T1 accruals, Phase 0b 2026-09-06, N=14,884 rows / 733 tickers):* row-level
+p_BH=1.4e-07 · block bootstrap B=2000 → AUC unchanged 0.4729, SE=0.0058, 95%CI=[0.4616, 0.4845],
+p≈3.5e-06 (still strong) · one-row-per-ticker Monte Carlo → median p=0.31, only 13.5% of draws
+significant. Two methods both called "cluster-robust" gave opposite answers on the same data —
+which is why the method is pinned here rather than left to each sprint's interpretation.
+
 **5. Match the statistical tool to N — don't force walk-forward on a handful of events.**
 N large (thousands of obs, dozens of quarters): walk-forward IS(2014-19)/OOS(2020+) is
 mandatory, and OOS is the tiebreaker, not Full or IS (the `v3latest` selector looked +0.27pp
