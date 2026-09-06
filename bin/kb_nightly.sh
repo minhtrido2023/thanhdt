@@ -1218,7 +1218,16 @@ superseded), số CÒN LẠI kèm tuổi từng câu — post báo cáo này (kh
 channel qua \`bash $ROOT/bin/notify_thread.sh \"<báo cáo>\" architecture\`. Đây LÀ cơ chế
 \"cuối tuần kiểm tra báo cáo lại đã hoàn thành chưa\" user yêu cầu — KHÔNG được bỏ qua mục này dù
 các mục 1-10 đã chiếm nhiều thời gian.
-KHÔNG xóa archive. Không cần hỏi user cho việc 1-6, 10-11 — đây là routine maintenance đã được user uỷ quyền. Sau khi xong: notify Telegram, VÀ BẮT BUỘC (hợp đồng đầu ra máy đọc được — dispatch này chạy nền, không ai chờ trực tiếp, kb_nightly.sh thứ Bảy tự kiểm event này để phát hiện lạc đề/chết im, đúng NGUYÊN VĂN topic sau, không viết biến thể khác dù có vẻ tương đương): append_event.sh Mike decision 'kb-weekly-editorial' \"<JSON tóm tắt thay đổi>\".${CTX_BLOAT_WARN}${STALE_SECTIONS_WARN}${SELFCHECK_WEEKLY_WARN}" \
+12. **Universe-pit migration tail G7/G8/G9 — theo dõi định kỳ (thêm 2026-09-06, user duyệt)**:
+đọc \`kb/projects/universe-pit-migration.md\` (chi tiết: \`agents/Taylor/research/ticker_prune_replacement_plan.md\` dòng ~1091-1094). 3 mục G7 (rà N-trial)/G8 (\`data_registry.md\`+\`cron_registry.md\`+\`coding_guidelines.md\`+\`universe_ruleset.md\` v1)/G9 (quant-skeptic full review)
+KHÔNG bị chặn bởi điều kiện thị trường nào (khác P5/P6 vốn chờ \`capit_fired=false\`, KHÔNG đụng
+tới P5/P6) — chỉ là backlog chưa ai làm. Nếu vẫn \"CÒN TREO\": ghi 1 dòng trong báo cáo cuối review
+nêu tuổi (\`git log -1 --format=%ad -- agents/Taylor/research/ticker_prune_replacement_plan.md\`);
+nếu ĐÃ xuất hiện \"CÒN TREO\" liên tục >8 tuần trong các báo cáo review trước (tra
+\`bus/inbox/Mike.jsonl\` topic \`kb-weekly-editorial\`) mà vẫn chưa ai làm → escalate hỏi user có
+nên bỏ hẳn G7-G9 hay ưu tiên làm dứt điểm. KHÔNG tự làm G7/G8/G9 trong review này (cần thời gian
+riêng, ngoài phạm vi task điều phối).
+KHÔNG xóa archive. Không cần hỏi user cho việc 1-6, 10-12 (trừ nhánh escalate của việc 12 sau >8 tuần) — đây là routine maintenance đã được user uỷ quyền. Sau khi xong: notify Telegram, VÀ BẮT BUỘC (hợp đồng đầu ra máy đọc được — dispatch này chạy nền, không ai chờ trực tiếp, kb_nightly.sh thứ Bảy tự kiểm event này để phát hiện lạc đề/chết im, đúng NGUYÊN VĂN topic sau, không viết biến thể khác dù có vẻ tương đương): append_event.sh Mike decision 'kb-weekly-editorial' \"<JSON tóm tắt thay đổi>\".${CTX_BLOAT_WARN}${STALE_SECTIONS_WARN}${SELFCHECK_WEEKLY_WARN}" \
         --timeout 900 >> "$LOG" 2>&1 &
     log "Editorial dispatch launched (background)."
 fi
