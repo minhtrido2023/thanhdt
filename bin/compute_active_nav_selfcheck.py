@@ -172,6 +172,24 @@ check("F3 KHÔNG có fallback âm thầm về availableCash trong nhánh lỗi",
           "availableCash` (xem §cash", ""))
 
 print()
+print("G. Off-book staleness — `_dt_stale` (code-quality-weekly 2026-09-06: NameError khi "
+      "manual_offbook_assets_vnd != 0 + asof set, dormant vì 2 account live đang để 0)")
+check("G1 `_dt_stale` là module `datetime` thật (không phải biến chưa import)",
+      hasattr(can, "_dt_stale") and can._dt_stale.__name__ == "datetime")
+_g2_ns = {"_dt_stale": getattr(can, "_dt_stale", None)}
+try:
+    exec(
+        "age_days = (_dt_stale.date.fromisoformat('2026-09-06') - "
+        "_dt_stale.date.fromisoformat('2026-08-01')).days",
+        _g2_ns,
+    )
+    _g2_ok, _g2_detail = _g2_ns["age_days"] == 36, f"age_days={_g2_ns['age_days']}"
+except (NameError, AttributeError) as e:
+    _g2_ok, _g2_detail = False, f"{type(e).__name__}: {e}"
+check("G2 tính age_days cho off-book asof KHÔNG NameError (compute_active_nav.py:~249)",
+      _g2_ok, _g2_detail)
+
+print()
 if fails:
     print(f"❌ {len(fails)} FAILED: {fails}")
     sys.exit(1)

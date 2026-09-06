@@ -51,7 +51,7 @@
     "mike/bin/code_quality_baseline_build.py": 0,
     "mike/bin/code_quality_ruff_count.py": 0,
     "mike/bin/commit_collision_gate_selfcheck.py": 0,
-    "mike/bin/compute_active_nav.py": 2,
+    "mike/bin/compute_active_nav.py": 0,
     "mike/bin/compute_active_nav_selfcheck.py": 0,
     "mike/bin/compute_jit_unpark.py": 0,
     "mike/bin/compute_jit_unpark_selfcheck.py": 2,

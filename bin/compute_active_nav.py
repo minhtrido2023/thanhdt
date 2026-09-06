@@ -76,6 +76,7 @@ dnse_raw + ex-date từ BQ, ngoài phạm vi bản vá này) mà CÔNG BỐ: in 
 `cash_dividend_receiving_vnd` vào JSON khi khoản đó vượt 0,5% NAV.
 """
 import argparse
+import datetime as _dt_stale
 import json
 import os
 import subprocess
