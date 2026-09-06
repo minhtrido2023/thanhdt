@@ -397,8 +397,8 @@
       "owner": "Taylor",
       "objective": "Giảm implementation shortfall/slippage và adverse selection của child order bằng dữ liệu snapshot 10 mức bid-ask; đây là nghiên cứu execution-only, KHÔNG tạo alpha, KHÔNG đổi chọn mã/sizing/lệnh.",
       "start": "2026-08-18",
-      "end": "2026-09-14",
-      "end_or_trigger": "20 phiên evidence từ 2026-08-18, không tính ngày không có snapshot hợp lệ hoặc không có child-order opportunity. Review cố định 2026-09-16 09:30 ICT; nếu <20 phiên, báo thiếu mẫu và gia hạn minh bạch, không kết luận sớm.",
+      "end": "2026-09-23",
+      "end_or_trigger": "20 phiên evidence từ 2026-08-18, không tính ngày không có snapshot hợp lệ hoặc không có child-order opportunity. GIA HẠN 2026-09-06 (user duyệt, đề xuất Taylor job Taylor_20260906_144656): mốc gốc 09-16 dựa trên ước tính nhịp phiên cũ, đo lại tại 09-06 cho tỉ lệ phiên-có-evidence thật 10/11 = 90,9% (đếm qua vn_market.is_holiday) — ngoại suy điểm 09-21, cận bảo thủ (Wilson lower-bound, N=11 còn mỏng) 10-05. Review mới cố định 2026-09-23 09:30 ICT, nằm giữa 2 cận có đệm; nếu <20 phiên tại đó, báo thiếu mẫu + gia hạn tiếp theo cùng công thức, không kết luận sớm.",
       "gate_criteria": [
         {
           "text": "Telemetry v1 ghi được snapshot 10 mức, quyết định baseline/HYBRID, child order, fill và hậu kiểm 1/5/15 phút với khóa nối traceable",
@@ -435,7 +435,7 @@
         "data/execution_logs/exec_<account>_<date>_journal.csv — PLACE/FILL/DONE nối bằng child_oid; hậu kiểm 1/5/15 phút dựng offline từ snapshot kế tiếp"
       ],
       "notes": "Kế hoạch đã được user chốt 2026-08-14 và duyệt triển khai telemetry v1 ngày 2026-08-15: ưu tiên cải thiện chất lượng fill và giảm chi phí giao dịch, không nghiên cứu alpha. Schema khóa version: orderbook_l2_v1 + orderbook_execution_v1; giá VND, quantity G1 là shares, timestamp nguồn tách timestamp capture, snapshot quá 5 giây hoặc thiếu timestamp nguồn = INVALID và policy bắt buộc KEEP (fail-open baseline). Shadow policy spread_depth_v1: KEEP mặc định; REDUCE khi spread >=2 tick và touch depth <1x child; DEFER khi spread >=4 tick và touch depth <0,5x child. Kết quả shadow KHÔNG có đường gọi broker/không được đọc vào giá, KL hoặc lịch HYBRID. Raw + telemetry giữ ít nhất xuyên review 16/09 và 30 ngày sau review. Hậu kiểm 1/5/15 phút dựng offline, không thêm API call. RESILIENCE LOẠI KHỎI v1 theo user duyệt 2026-08-15: cadence 60s không đủ đo tái tạo sổ trong vài giây; muốn nghiên cứu phải mở chương trình/log riêng. Mọi số tách theo side, ticker-liquidity bucket và phiên; paired comparison cùng opportunity, không so P&L toàn portfolio.",
-      "review_short": "Review 2026-09-16 09:30 ICT — cần >=20 phiên evidence; chỉ quyết định sang paper A/B hay dừng, không go-live",
+      "review_short": "Review 2026-09-23 09:30 ICT (gia hạn từ 09-16, xem end_or_trigger) — cần >=20 phiên evidence; chỉ quyết định sang paper A/B hay dừng, không go-live",
       "headline": {
         "regex": "order-book observations N=(\\d+) · valid=(\\d+)",
         "template": "order-book opportunities N={0} · snapshot hợp lệ {1}"
