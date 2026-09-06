@@ -32,3 +32,4 @@ tái diễn 5 lần — cân nhắc xây RULE 2 kiểu `tz_anchor_gate.py` cho `
 kb/coding_guidelines.md 37,9KB/40KB, còn ~2,0KB đệm. §-mới tiếp theo gần như chắc chắn chạm
 ngưỡng → tách sang _ext.md khi đó.
 
+- [2026-09-06T02:45:17Z] 8L accruals chuoi DONG HAN 2026-09-06: Phase0 (T1 song 1/4) -> quant-skeptic CONFIRMED medium (chi ra sector confound lam suy giam 17-31%) -> Phase0b (qua 4 kiem tra) -> R3 NO-GO CA 2 NHANH (Taylor_20260906_022452). Ly do giet: IS/OOS nguoc dau (IS -0,41/-0,15pp, OOS +0,48pp), DSR P=0,0004 sau khai N_trials=9 that cua ca chuoi, LOO cho thay 2021(-0,55pp) va 2022(+0,50pp) triet tieu nhau = reshuffle-luck. Harness tai lap pin byte-identical nen ket qua tin duoc. DAY LA LAN NO-GO THU 3 cho cung y tuong accrual-gate trong CFO_POOL custom30V (2 lan truoc 2026-08-30) => KHONG thu them bien the nguong/cong thuc o vi tri do. Bai hoc phuong phap thu duoc: block bootstrap da thanh chuan Phase-0 (commit WC 22948494, skill quant-research buoc 4).
