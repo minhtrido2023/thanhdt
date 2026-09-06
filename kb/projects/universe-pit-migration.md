@@ -1,5 +1,13 @@
 # Dự án thay thế `ticker_prune` → `universe_pit` — ĐANG MỞ (checklist G4-G9)
 
+**Quyết định lịch trình (2026-09-06, user, Discord):** không chốt mốc lịch cho toàn dự án.
+P5/P6 (CAPIT pool + ADV cap cutover) và G8.1 (executor.py) giữ **event-gated vô thời hạn**
+(chờ `capit_fired=false` + quyết định sàn thanh khoản pool riêng; chờ trước khi bật 3 cờ live)
+— đúng bản chất, không nên gán ngày lịch cho điều kiện thị trường. Riêng **G7/G8/G9** (không bị
+chặn bởi điều kiện gì, chỉ là backlog treo từ 07-22) được đưa vào quét định kỳ hàng tuần —
+`bin/kb_nightly.sh` item 12 (commit `852d8d34`): báo tuổi mỗi tuần, escalate hỏi user nếu
+"CÒN TREO" liên tục >8 tuần không ai làm.
+
 > Tách ra khỏi `kb/current_ops.md` 2026-08-01 (token-cost review). Fact QUYẾT ĐỊNH đã cutover
 > (universe_pit = production cho R3/CAPIT breadth) vẫn giữ tóm tắt trong current_ops.md — file
 > này chỉ chứa checklist chi tiết còn lại + lịch sử vintage. Đọc khi cần theo dõi tiến độ G5-G9,
