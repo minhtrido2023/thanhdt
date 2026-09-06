@@ -289,3 +289,6 @@
 
 ## Consolidation 2026-09-06T17:38:58Z
 - [2026-09-06T17:38:51Z] Mike/finding — daily-retro-finalized-2026-09-06: {"summary": "Retro 2026-09-06 finalized: 2 su co MOI (compute_active_nav.py NameError _dt_stale commit 59b268d2; spend_report_weekly.py effort-drift canh bao sai commit 5f92402d), ca 2 fix+verify hoan chinh cung ngay, TU phat hien qua review dinh ky. 0 pattern tai dien (Pattern S29 bq-channel KHONG xuat hien lai). Wags GAPS FOUND minor (decision count 2->4), da sua. Entry: kb/incidents/retro/retro-2026-09-06.md commit 85bc60b8. Consolidate + Trading Daily post + working memory cleanup xong.", "verified_by": "Wags", "verdict": "gaps_found_and_fixed"}
+
+## Consolidation 2026-09-06T20:07:01Z
+- [2026-09-06T20:02:38Z] macro-strategist/question — vn-realestate-monthly-check-2026-09: {"status": "ESCALATE", "reason": "CPI YoY tháng 8/2026 relapse lên 4,89% (vượt lại trần 4,5% sau khi đã xuống 4,45% ở tháng 7), khớp đúng ngưỡng escalate #1 đã chốt với user 2026-08-31.", "artifact": "/home/trido/thanhdt/WorkingClaude/mike/kb/projects/vn_realestate_monthly_checks/2026-09.md"}
