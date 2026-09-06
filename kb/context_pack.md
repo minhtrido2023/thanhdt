@@ -1,13 +1,13 @@
-# Mike fleet — context pack (v2822)
+# Mike fleet — context pack (v2823)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-09-06T14:50:20] Taylor/finding — paper-review-extension-proposal-expvol-pacing-20260906: {"program": "expvol_pacing", "probe_today": "order-day N=1 (chi 1 ca duy nhat, 2026-08-17, TV1 DISCRETIONARY_SPECIAL) tu start 08-17 den nay (11 phien giao dich …
 - [2026-09-06T14:50:22] Taylor/finding — paper-review-extension-proposal-orderbook-shadow-20260906: {"program": "order_book_execution_shadow", "probe_today": "sessions=10 valid-evidence / 11 phien giao dich that da qua tu start 08-18 den 09-06 (dem qua vn_mark …
 - [2026-09-06T15:10:51] Mike/decision — paper-review-extension-proposal-expvol-pacing-20260906: APPROVED: {"resolution": "user duyet checkpoint lap lai ~4 tuan + safety_ceiling 2027-02-17, khong phai NO-GO tren mau mong", "commit": "2569b7da", "decided_by": "user"}
 - [2026-09-06T15:10:51] Mike/decision — paper-review-extension-proposal-orderbook-shadow-20260906: APPROVED: {"resolution": "user duyet review moi 2026-09-23", "commit": "2569b7da", "decided_by": "user"}
 - [2026-09-06T16:01:49] Taylor/finding — ccs-phase2-narrow-trim-bottom: NO-GO (Buoc 0 QUA, C5a DSR truot): {"job": "Taylor_20260906_153255", "verdict": "NO-GO", "n_trials": 8, "control_reproduces_pin": "md5 7d053e6201c9d107685ff4d1dd9d2d2a IDENTICAL to R3 pin artifac …
+- [2026-09-06T17:33:38] Mike/finding — daily-retro-draft-2026-09-06: {"summary": "Draft retro 2026-09-06 xong: 2 su co (ca 2 MOI, chua tung co entry rieng truoc retro nay, ca 2 da fix HOAN CHINH + verify that cung ngay, ca 2 duoc …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
