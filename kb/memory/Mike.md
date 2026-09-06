@@ -12,19 +12,20 @@
 - Per-name 5% / sleeve 10% NAV, f≤1.3, %ADV≤10%, exit -20%. Commit 022c48e7.
 - Phễu candidate WIRE (cutoff=70%, trần=1.2), commit 714b5889. TV1/DGC lọt nhưng marginable=NO qua DNSE hiện tại.
 
-## Retro 2026-09-05 — XONG (job Mike_20260905_173627)
-File `kb/incidents/retro/retro-2026-09-05.md`, Wags CONFIRMED không sửa gì. 3 sự cố:
-bq watchdog false-healthy (đã có entry riêng, lần tái diễn thứ 5 của §29 "đọc nhầm kênh lỗi
-bq"), 1/6 turn thiếu ScheduleWakeup (nhẹ, không hậu quả), 3 vòng NEEDS_CHANGES trước review
-tay tdays-gate (lặp lần 2, ghi chú "cân nhắc review tay sớm hơn cho gate AST đa-repo").
-Escalation tdays-holiday từ 09-04 ĐÃ ĐÓNG hoàn toàn (0aab5fae).
+## CCS/8L accruals R&D — ĐÓNG HẲN 2026-09-06
+Phase 0→0b→R3→Phase2-NARROW, tất cả NO-GO (lần NO-GO thứ 3 cho ý tưởng accrual-gate).
+Phase 2-NARROW trim-bottom chết ở DSR (P=0.0012<0.95). Không thử thêm biến thể ở vị trí này —
+mở lại chỉ khi có dữ liệu ngoài mẫu 2014-2026 + câu hỏi tiền-đăng-ký riêng.
 
-**Đề xuất mở (chưa escalate, chưa đủ điều kiện 2-retro-liên-tiếp)**: Pattern §29 bq-channel
-tái diễn 5 lần — cân nhắc xây RULE 2 kiểu `tz_anchor_gate.py` cho `bin/diagnosis_evidence_gate.py`
-(quét call-site `bq` chỉ đọc 1 kênh stderr/stdout), nếu tái diễn lần 6 thì escalate thật.
+## Retro 2026-09-06 — XONG (job Mike_20260906_173637)
+File `kb/incidents/retro/retro-2026-09-06.md` (commit 85bc60b8), Wags GAPS FOUND (minor, đã sửa
+decision count 2→4). 2 sự cố MỚI, cả 2 fix+verify hoàn chỉnh cùng ngày: compute_active_nav.py
+NameError `_dt_stale` (59b268d2), spend_report_weekly.py effort-drift cảnh báo sai cho Taylor
+(5f92402d). 0 pattern tái diễn — §29 bq-channel KHÔNG xuất hiện lại hôm nay (vẫn dừng ở 5 lần,
+đề xuất RULE 2 cho diagnosis_evidence_gate.py chưa escalate, chờ lần tái diễn thứ 6).
 
 ## Bus question đang mở (2)
-1. `Wags/wags-fix-not-confirmed: coord-2026-09-03` (2d) — Wags chưa có bằng chứng đã đính
+1. `Wags/wags-fix-not-confirmed: coord-2026-09-03` (3d+) — Wags chưa có bằng chứng đã đính
    chính với user trên trading_daily về cơ chế ack deposit-rate. Cửa sổ: trước 2026-09-11.
 2. `Mike/bq-monthly-pin-thieu-202608-202609-chay-bu-hay-khong` — chờ user quyết A/B/C.
 
@@ -32,8 +33,3 @@ tái diễn 5 lần — cân nhắc xây RULE 2 kiểu `tz_anchor_gate.py` cho `
 kb/coding_guidelines.md 37,9KB/40KB, còn ~2,0KB đệm. §-mới tiếp theo gần như chắc chắn chạm
 ngưỡng → tách sang _ext.md khi đó.
 
-- [2026-09-06T02:45:17Z] 8L accruals chuoi DONG HAN 2026-09-06: Phase0 (T1 song 1/4) -> quant-skeptic CONFIRMED medium (chi ra sector confound lam suy giam 17-31%) -> Phase0b (qua 4 kiem tra) -> R3 NO-GO CA 2 NHANH (Taylor_20260906_022452). Ly do giet: IS/OOS nguoc dau (IS -0,41/-0,15pp, OOS +0,48pp), DSR P=0,0004 sau khai N_trials=9 that cua ca chuoi, LOO cho thay 2021(-0,55pp) va 2022(+0,50pp) triet tieu nhau = reshuffle-luck. Harness tai lap pin byte-identical nen ket qua tin duoc. DAY LA LAN NO-GO THU 3 cho cung y tuong accrual-gate trong CFO_POOL custom30V (2 lan truoc 2026-08-30) => KHONG thu them bien the nguong/cong thuc o vi tri do. Bai hoc phuong phap thu duoc: block bootstrap da thanh chuan Phase-0 (commit WC 22948494, skill quant-research buoc 4).
-- [2026-09-06T12:04:21Z] 2026-09-06: quyết định lịch trình universe-pit migration — không chốt mốc lịch tổng, P5/P6+G8.1 giữ event-gated (chờ capit_fired=false), G7/G8/G9 đưa vào quét định kỳ kb_nightly.sh item 12 (commit 852d8d34), escalate nếu treo >8 tuần. Đã ghi vào kb/projects/universe-pit-migration.md (commit 8b9e7717).
-- [2026-09-06T15:11:01Z] 2026-09-06: paper-trading tháng 9 review chủ động XONG — expvol_pacing (checkpoint lặp ~4 tuần + safety_ceiling 2027-02-17) và order_book_execution_shadow (review dời 09-16→09-23) đã ghi vào kb/paper_programs_registry.json (commit 2569b7da), user duyệt. Không có bug hệ thống ở cả 2 — chỉ thiếu mẫu do cơ hội thấp. bal_signal_recent_performance (2/3 tín hiệu, review 09-16) và alphalens (khoẻ, review 09-30) không cần hành động.
-- [2026-09-06T15:33:07Z] CCS Phase 2-NARROW dispatch 09-06 22:33 (Taylor_20260906_153255, opus/high, timeout 2h): user duyệt thử nốt trim-50%-BOTTOM. Tiền-đăng-ký N_trials=8, tiêu chí sống khai trước (ΔCAGR>0.385pp, Calmar không xấu, IS/OOS cùng dấu, LOO giữ dấu, DSR>=0.95, PBO<0.5). BƯỚC 0 LÀ GATE: đo trần trọng số TRƯỚC — vốn cắt ra có tái phân bổ lên trên không hay nằm im tiền mặt; <30% tái phân bổ = DỪNG, không chạy backtest. Cấm thử biến thể ngoài trim 50%.
-- [2026-09-06T16:03:32Z] CCS Phase 2-NARROW XONG 09-06 (Taylor_20260906_153255): NO-GO, trục CCS ĐÓNG. Bước 0 PASS ngược kỳ vọng — vốn cắt ra KHÔNG nằm im: redeploy 0.913 pooled (BAL 0.840/LAG 0.968), hấp thụ qua SIZE vị thế + parking custom30V, giả thuyết Phase1 6.2 bị BÁC bằng đo đạc. A/B: ΔCAGR +0.910pp, Calmar 1.623→1.790, DD −17.8→−16.6. P3: 5/6 PASS, chết ở C5a DSR P=0.0012 (<0.95) với N_trials=8. PHÁT HIỆN CẤU TRÚC quyết định: BOTTOM tercile TRÙNG tier engine đã tách sẵn (BAL 78.3% là _W, LAG 99.4% là LAG_LO; ta=const 400 toàn panel LAG) ⇒ trim-50%-BOTTOM = hạ trọng số tier _W/LAG_LO 0.08→0.04 = re-tune tham số trên chính mẫu đã tiêu 8 trial. KHÔNG wire gì. Mở lại chỉ khi có dữ liệu NGOÀI mẫu 2014-2026 và tiền-đăng-ký riêng câu hỏi '_W/LAG_LO có bị over-size không'. Estimator Phase1 +0.85pp vs harness +0.910pp ⇒ bound moved=min((k-1)C_treat,C_funding) đã hiệu chuẩn tốt, tái dùng được.
