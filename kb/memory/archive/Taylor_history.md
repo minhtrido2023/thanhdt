@@ -455,3 +455,6 @@
 
 ## Archived 2026-09-05 (keep=12 days=0 require_done=False)
 - [2026-09-03T17:10:53Z] mania-exit-reentry-roundtrip-20260903 (job _170018) XONG, bus finding + report da ghi. Ket luan cot loi: co che rut (DIVERGE_DAY/RSI_DIVERGE_3M) KHONG duoc xac nhan la bao toan von - round-trip NAV that thua rut-ngau-nhien-cung-tan-suat trong 8/12 to hop, Sharpe/Calmar cao nhat chi ngang buy-hold (khong vuot). Reentry rule R2_breadth050 (>=0.50) co noi dung timing that nhat (median 2.5 phien); R4_dt5g gan-nhu-no-op (DT5G risk-on 76.9% thoi gian); R3_capit (tai tao tu crisis_capitulation_signal.py) dung tinh than nhat nhung round-trip yeu nhat. Khong con viec mo tren truc nay tru khi user muon tiep.
+
+## Archived 2026-09-06 (keep=12 days=0 require_done=False)
+- [2026-09-03T17:36:53Z] mania-quality-tilt-20260904 (job _171818) XONG, bus finding + report da ghi. Dong chuoi mania (6 job): junk-premium dao nguoc nhe/khong nhat quan (Q1); rổ chat luong (golden-floor+ey PIT) co excess THAT trong episode nhung MAT bien do (duoi ca nen) 6 thang sau (Q2) - chi edge KHONG dieu kien dai han +3.1pp/nam la that; nghieng them khi thay mania cai thien ~0pp CAGR (Q3). Phat hien phu: ey-only KHONG golden-floor la value-trap that (CAGR 2.58% vs 11.47%). Khong con viec mo tren truc mania tru khi user muon tiep sang huong khac.
