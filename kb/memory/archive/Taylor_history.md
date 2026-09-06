@@ -464,3 +464,6 @@
 
 ## Archived 2026-09-06 (keep=12 days=0 require_done=False)
 - [2026-09-04T01:22:49Z] [2026-09-04] fearbuy-weekly-scan (job _011034) XONG: 0 QUALIFY, 1 AMBIGUOUS moi = VCS (Vicostone, dung day 52w, PB1.00 DY12% CF_OA>=NP 3 quy, cong nhi phan Q3/2026 bien LN hap thu thue 301 My 12,5%; ADV 1,34ty => sleeve idio khong phai book), 4 khong-phai-case (VSC/TSB/MVN/CRE). 0 lenh mua ca 3 kenh cho 04/09. | CON MO: (a) CAVEAT pheu candidate - washout/dd52 lech 7pp vs cache gia o SHB/VIB, chua ro nguyen nhan, can Winston/Mike kiem; (b) TV1 co tuc 15% qua han ~12 phien + chon kiem toan qua han 24 ngay, la chan hard_expiry van manual_only; (c) TV4+ICG soat xet ban nien qua han tuan 2.
+
+## Archived 2026-09-06 (keep=12 days=0 require_done=False)
+- [2026-09-04T05:05:55Z] [2026-09-04] adaptive-exclusion-architecture (job _043943) XONG: report mike/agents/Taylor/research/adaptive_exclusion_architecture_20260904.md. BANNED khong nam trong engine custom30V (chi bind o compute_park_trim.py live + lag_forensic_filter.py rieng LAG); 9/16 ma du thua, HSG bind that 27% ky nhung 10/13 lan lanh manh (ban chan oan); gate dong PIT (BVPS<=0 + Debt/Eq>3.5&IntCov<1.5 sustained + dilution>80%) bat dung HVN/BAF, mieng PC1 (gian lan hinh su). DE XUAT, chua wire - cho user duyet + quant-skeptic.

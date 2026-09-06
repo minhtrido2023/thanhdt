@@ -1,15 +1,15 @@
-# Mike fleet — context_taylor_mini (v2821)
+# Mike fleet — context_taylor_mini (v2822)
 > Auto-generated RECENT block; static canonical facts maintained manually (weekly audit-lens catches drift).
 > Dùng `bin/kb_recall.sh "keywords"` để lấy section đầy đủ khi cần chi tiết về ops/CAPIT/project.
 > Source đầy đủ: `kb/context_pack.md`.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-09-06T03:05:54] code-reviewer/finding — code-quality-weekly-2026-09-06: {"n_files_scanned": 25, "n_findings": 1, "n_before_verify": 1, "hot_core_this_week": "/home/trido/thanhdt/WorkingClaude/trading_bot/executor.py", "report_file": …
-- [2026-09-06T05:29:49] Mike/finding — code-quality-weekly-2026-09-06: fixed: {"finding": "compute_active_nav.py:248 NameError _dt_stale", "fix": "commit 59b268d2 — import datetime as _dt_stale; thêm selfcheck section G (mutation-verified …
-- [2026-09-06T05:38:43] Mike/finding — spend-report-weekly-2026-09-06-effort-drift-fp: {"finding": "spend_report_weekly.py bao dong gia effort=high cua Taylor 73% (n=71) la can hanh dong, trung lap va mau thuan voi kb-weekly-editorial task5d da di …
 - [2026-09-06T14:50:20] Taylor/finding — paper-review-extension-proposal-expvol-pacing-20260906: {"program": "expvol_pacing", "probe_today": "order-day N=1 (chi 1 ca duy nhat, 2026-08-17, TV1 DISCRETIONARY_SPECIAL) tu start 08-17 den nay (11 phien giao dich …
 - [2026-09-06T14:50:22] Taylor/finding — paper-review-extension-proposal-orderbook-shadow-20260906: {"program": "order_book_execution_shadow", "probe_today": "sessions=10 valid-evidence / 11 phien giao dich that da qua tu start 08-18 den 09-06 (dem qua vn_mark …
+- [2026-09-06T15:10:51] Mike/decision — paper-review-extension-proposal-expvol-pacing-20260906: APPROVED: {"resolution": "user duyet checkpoint lap lai ~4 tuan + safety_ceiling 2027-02-17, khong phai NO-GO tren mau mong", "commit": "2569b7da", "decided_by": "user"}
+- [2026-09-06T15:10:51] Mike/decision — paper-review-extension-proposal-orderbook-shadow-20260906: APPROVED: {"resolution": "user duyet review moi 2026-09-23", "commit": "2569b7da", "decided_by": "user"}
+- [2026-09-06T16:01:49] Taylor/finding — ccs-phase2-narrow-trim-bottom: NO-GO (Buoc 0 QUA, C5a DSR truot): {"job": "Taylor_20260906_153255", "verdict": "NO-GO", "n_trials": 8, "control_reproduces_pin": "md5 7d053e6201c9d107685ff4d1dd9d2d2a IDENTICAL to R3 pin artifac …
 <!--RECENT-END-->
 
 ## Kill-switches

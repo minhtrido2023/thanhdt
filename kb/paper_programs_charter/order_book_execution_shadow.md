@@ -7,7 +7,7 @@
 
 - **Người phụ trách (owner):** Taylor
 - **Trạng thái:** active
-- **Bắt đầu:** 2026-08-18 · **Kết thúc dự kiến:** 2026-09-14
+- **Bắt đầu:** 2026-08-18 · **Kết thúc dự kiến:** 2026-09-23
 
 ## 🎯 Mục đích
 
@@ -15,7 +15,7 @@ Giảm implementation shortfall/slippage và adverse selection của child order
 
 ## 📅 Nghiệm thu / mốc kết thúc
 
-20 phiên evidence từ 2026-08-18, không tính ngày không có snapshot hợp lệ hoặc không có child-order opportunity. Review cố định 2026-09-16 09:30 ICT; nếu <20 phiên, báo thiếu mẫu và gia hạn minh bạch, không kết luận sớm.
+20 phiên evidence từ 2026-08-18, không tính ngày không có snapshot hợp lệ hoặc không có child-order opportunity. GIA HẠN 2026-09-06 (user duyệt, đề xuất Taylor job Taylor_20260906_144656): mốc gốc 09-16 dựa trên ước tính nhịp phiên cũ, đo lại tại 09-06 cho tỉ lệ phiên-có-evidence thật 10/11 = 90,9% (đếm qua vn_market.is_holiday) — ngoại suy điểm 09-21, cận bảo thủ (Wilson lower-bound, N=11 còn mỏng) 10-05. Review mới cố định 2026-09-23 09:30 ICT, nằm giữa 2 cận có đệm; nếu <20 phiên tại đó, báo thiếu mẫu + gia hạn tiếp theo cùng công thức, không kết luận sớm.
 
 ## ✅ Tiêu chí GO/NO-GO
 
