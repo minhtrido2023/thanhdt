@@ -42,6 +42,15 @@ HISTORY_COLUMNS = [
 ]
 COMMIT_COLUMNS = ["feat", "fix", "docs", "chore", "refactor", "test", "other_commits"]
 
+# Agent có vai trò R&D/kiến trúc genuinely nặng: effort=high tỷ trọng cao là kỳ vọng bình
+# thường của vai trò, không phải drift. Xác nhận qua NHIỀU lần điều tra sampling thủ công
+# riêng (kb-weekly-editorial task5d, 2026-08-10→09-04: 88-94%→69%→71%→55%→72%, dao động quanh
+# ngưỡng 70% suốt 6 tuần) — mỗi lần sample dispatch thật đều kết luận KHÔNG phải drift (toàn
+# R&D/kiến trúc mới, user yêu cầu trực tiếp effort cao). Checker tuần này không sample được
+# dispatch thật như review thủ công nên loại khỏi flag tự động — tránh lặp lại kết luận "cần
+# hành động" đã bị bác bỏ nhiều lần, gây báo động giả cho người đọc báo cáo (CEO).
+EFFORT_HIGH_EXEMPT_AGENTS = {"Taylor"}
+
 
 def today_ict():
     try:
@@ -116,15 +125,15 @@ def compute_summary(root, days):
     if fable_pct >= 30:
         warnings.append(
             f"Fable = {fable_pct:.0f}% of Claude dispatches — cao hơn ngưỡng 30%, "
-            "cần rà soát model routing."
+            "cần rà soát model routing"
         )
     for agent in sorted(agent_effort, key=lambda a: -sum(agent_effort[a].values())):
         efforts = agent_effort[agent]
         n = sum(efforts.values())
         high_pct = 100 * efforts.get("high", 0) / n if n else 0
-        if n >= 10 and high_pct >= 70:
+        if n >= 10 and high_pct >= 70 and agent not in EFFORT_HIGH_EXEMPT_AGENTS:
             warnings.append(
-                f"effort=high của {agent} là {high_pct:.0f}% (n={n}) — trên ngưỡng 70%."
+                f"effort=high của {agent} là {high_pct:.0f}% (n={n}) — trên ngưỡng 70%"
             )
     retry_pct = (
         100 * retry_stats["extra_attempts"] / total_jobs
@@ -134,7 +143,7 @@ def compute_summary(root, days):
     if total_jobs >= spend_report.RETRY_WARN_MIN_JOBS and retry_pct >= spend_report.RETRY_WARN_PCT:
         warnings.append(
             f"Có {retry_stats['retried_jobs']} job chạy attempt >1, "
-            f"{retry_stats['extra_attempts']} lần compute thêm ({retry_pct:.0f}% của tổng job)."
+            f"{retry_stats['extra_attempts']} lần compute thêm ({retry_pct:.0f}% của tổng job)"
         )
 
     return {
