@@ -207,6 +207,37 @@ def main():
     tickers_matched = sorted(set(r["ticker"] for r in matched))
     tickers_unmatched_only = sorted(set(r["ticker"] for r in unmatched) - set(tickers_matched))
 
+    # Per-ticker classification for tickers_{handled,suspect,unexplained}.txt — derived here
+    # (not by a separate ad-hoc shell command) so the 3 output files stay reproducible from a
+    # single `python3 match_overlay.py` run. handled = >=1 delta matched HIGH/MEDIUM; suspect =
+    # matched deltas exist but ALL got downgraded to SUSPECT; unexplained = 0 matched deltas.
+    confs_by_ticker = defaultdict(list)
+    for r in results:
+        if r["matched"]:
+            confs_by_ticker[r["ticker"]].append(r["confidence"])
+    tickers_handled, tickers_suspect_only, tickers_unexplained = [], [], []
+    for t in tickers_all:
+        confs = confs_by_ticker.get(t, [])
+        if any(c in ("HIGH", "MEDIUM") for c in confs):
+            tickers_handled.append(t)
+        elif confs:
+            tickers_suspect_only.append(t)
+        else:
+            tickers_unexplained.append(t)
+
+    for fname, tickers in (
+        ("tickers_handled.txt", tickers_handled),
+        ("tickers_suspect.txt", tickers_suspect_only),
+        ("tickers_unexplained.txt", tickers_unexplained),
+    ):
+        with open(os.path.join(HERE, fname), "w") as f:
+            f.write("\n".join(tickers) + "\n" if tickers else "")
+    print(
+        f"\nwrote tickers_handled.txt ({len(tickers_handled)}) / "
+        f"tickers_suspect.txt ({len(tickers_suspect_only)}) / "
+        f"tickers_unexplained.txt ({len(tickers_unexplained)})"
+    )
+
     print(f"total quarter-pair deltas evaluated: {len(results)}")
     print(f"matched: {len(matched)}  unmatched: {len(unmatched)}")
     print(f"tickers with >=1 nontrivial delta: {len(tickers_all)}")
