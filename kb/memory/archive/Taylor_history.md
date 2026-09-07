@@ -467,3 +467,6 @@
 
 ## Archived 2026-09-06 (keep=12 days=0 require_done=False)
 - [2026-09-04T05:05:55Z] [2026-09-04] adaptive-exclusion-architecture (job _043943) XONG: report mike/agents/Taylor/research/adaptive_exclusion_architecture_20260904.md. BANNED khong nam trong engine custom30V (chi bind o compute_park_trim.py live + lag_forensic_filter.py rieng LAG); 9/16 ma du thua, HSG bind that 27% ky nhung 10/13 lan lanh manh (ban chan oan); gate dong PIT (BVPS<=0 + Debt/Eq>3.5&IntCov<1.5 sustained + dilution>80%) bat dung HVN/BAF, mieng PC1 (gian lan hinh su). DE XUAT, chua wire - cho user duyet + quant-skeptic.
+
+## Archived 2026-09-07 (keep=12 days=0 require_done=False)
+- [2026-09-04T05:56:48Z] [2026-09-04] adaptive-exclusion-v2 (job _054209) XONG: report mike/agents/Taylor/research/adaptive_exclusion_v2_20260904.md. SBA IntCov am = TIEN RONG khong phai yeu (v1 sai, da sua: universe-wide 67.6% cua luat cu Debt_Eq>3.5&IntCov<1.5 thuc ra co lai rong duong). Rule2 sua thanh EBITDA<0. Scenario D (BANNED rong+gate v2) CAGR 30.20% gan bang C cu, khong doi ket luan. Chi phi tha PC1 do duoc: -25.34% gia 1 ky giu (~-0.84pp NAV sleeve tho). review_by=date+12thang thiet ke, gan ops_health_check.sh co san, fail-closed qua han. DD-ky-hon = mo rong fearbuy_weekly_scan WebSearch + dispatch fundamental-skeptic. DE XUAT, chua wire - cho user duyet + quant-skeptic.
