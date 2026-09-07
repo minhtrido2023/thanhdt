@@ -412,3 +412,6 @@
 ## Consolidation 2026-09-07T17:38:02Z
 - [2026-09-07T17:36:43Z] Mike/heartbeat — Mike_20260907_173542: {"status": "still_running", "elapsed_min": 1, "job_id": "Mike_20260907_173542", "source": "watcher"}
 - [2026-09-07T17:37:43Z] Mike/heartbeat — Mike_20260907_173542: {"status": "still_running", "elapsed_min": 2, "job_id": "Mike_20260907_173542", "source": "watcher"}
+
+## Consolidation 2026-09-07T17:38:43Z
+- [2026-09-07T17:38:33Z] Mike/finding — retro-2026-09-07-finalized: {"file": "kb/incidents/retro/retro-2026-09-07.md", "commit": "47168ff6", "n_incidents": 1, "n_patterns_new": 1, "status": "còn hở", "summary": "cron vn_realestate_monthly_check.sh lệch giờ 17h do hiểu nhầm TZ header crontab, doc drift 3 nơi, chưa fix; verified by Wags CONFIRMED", "open_bus_question": "Wags/wags-fix-not-confirmed: coord-2026-09-07", "working_memory_updated": true, "consolidate_ran": true, "draft_deleted": true, "discord_posted": "trading_daily"}
