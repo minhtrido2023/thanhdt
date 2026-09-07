@@ -223,3 +223,75 @@ không phải cấp ticker). Cả 24 mã đều là tên nhỏ/thanh khoản th�
 Không đụng `oshares_live.py`/`corp_action_lib.py`/`corp_action_daily.py`. Chờ quant-skeptic verify
 lại bản v2 (bug đếm đã sửa + threshold đã sensitivity-test bằng bằng chứng, không chỉ 1 anecdote)
 trước khi Mike cân nhắc wire.
+
+---
+
+## 9. Vá theo dispatch v3 (job `Taylor_20260907_181104`, 2026-09-08) — 2 recommended_reruns còn treo
+
+### 9.1. Soát tay 5/5 mã biên ±3pp (CII, KDH, HDC, NBB, IDV) — tra trực tiếp `treasury_news`
+
+Đọc trực tiếp toàn bộ dòng `treasury_news` (mọi `action_type`, không chỉ `buy_done`/`sell_done`)
+quanh ngày sự kiện khớp của từng mã, đối chiếu số lượng đăng ký/công bố với Δ OShares liên-quý.
+
+| Mã | Δ / tỷ lệ | Sự kiện khớp | Bằng chứng | Kết luận |
+|---|---|---|---|---|
+| **CII** | +31.797.370 (12,6%) sell, 2023Q4→2023Q1 | `sell_done` 2023-06-26 | Chuỗi tin liền mạch: NQ 2023-05-26 → đăng ký "gần 32 triệu CP" 2023-05-27 → bắt đầu bán 12/6 → `sell_done` 26/6. Số đăng ký (31,8-32tr) khớp Δ trong <1% | **THẬT — giữ `handled`, MEDIUM đúng** |
+| **KDH** | +84.130.490 (15,1%) sell, 2021Q1→Q2 | `sell_done` 2021-09-28 | Tin đăng ký 2021-09-04 nói rõ "**gần 20 triệu CP**", 2021-09-29 xác nhận "bán **toàn bộ** CP quỹ" — đăng ký 20tr vs Δ thật 84,1tr lệch **4,2 lần**. Không có `other` cạnh tranh quanh đó | **SAI — đúng là `SUSPECT`**, Δ thật lớn hơn nhiều so với chương trình bán CP quỹ đã công bố; nguồn Δ có khả năng khác (không xác định — không đoán) |
+| **HDC** | +7.969.124 (16,0%) sell, 2019Q1→Q2 | `sell_done` 2019-06-26 | 2019-04-23 có dòng `other` "phát hành CP trả cổ tức, **sử dụng CP quỹ thưởng** cho cổ đông" ngay trước chuỗi bán CP quỹ (`sell` 2019-06-05 → `sell_done` 2019-06-26) — đúng lớp lỗi MCH (sự kiện chia CP quỹ trộn với phát hành mới bị gắn `other`) | **SAI — đúng là `SUSPECT`**, Δ nhiều khả năng lẫn cả phần `other` 04-23 |
+| **NBB** | −15.071.340 (16,1%) buy, 2020Q2→Q3 | `buy_done` 2020-11-17 | Tin đăng ký 2020-10-07 nói "đăng ký mua lại **hơn 15 triệu CP**" (`shares_delta=15.000.000` trên dòng `buy` cùng cụm) — khớp Δ thật trong **0,47%**, độ chính xác magnitude tương đương ca `HIGH` | **ĐÁNH GIÁ LẠI: gần như chắc chắn THẬT** — bị hạ `SUSPECT` chỉ vì ratio 16,1%>15%, KHÔNG PHẢI vì bằng chứng yếu. Nguyên nhân kỹ thuật: `shares_delta` nằm trên dòng `buy` (ngày công bố khác), không nằm trên chính dòng `buy_done` được match (Pass 1 chỉ nhìn shares_delta CỦA đúng sự kiện matched, không quét các dòng khác cùng cụm) → rơi vào Pass 2 MEDIUM rồi bị trần ratio hạ xuống dù có bằng chứng magnitude mạnh |
+| **IDV** | +3.209.399 (18,0%) sell, 2021Q2→Q3 | `sell_done` 2021-11-24 | Cụm 2021-06-11→2021-09-20 dày đặc dòng `other`/`buy` (ESOP phát từ CP quỹ, chia CP quỹ cho cổ đông, phát hành trả cổ tức, mua lại CP lẻ phát sinh) ngay trước `sell_done` — cùng lớp lỗi MCH, rõ hơn cả HDC (5 dòng `other`/`buy` chen giữa, không phải 1) | **SAI — đúng là `SUSPECT`**, Δ gần chắc chắn lẫn nhiều sự kiện cổ tức/ESOP |
+
+**Kết luận 5/5**: 4/5 mã (KDH, HDC, IDV — hạ đúng; CII — giữ đúng) khớp với thiết kế hiện tại,
+không cần sửa. **1/5 (NBB) là false-negative đã xác định rõ nguyên nhân kỹ thuật** — không phải
+dữ liệu mơ hồ mà là giới hạn thuật toán (Pass 1 không quét shares_delta trên các dòng LÂN CẬN
+cùng cụm sự kiện, chỉ trên đúng dòng matched). **KHÔNG sửa code/CSV cho ca này** — lý do: (a) sửa
+đúng cho NBB (vd mở Pass 1 quét cụm lân cận) có nguy cơ mở lại đúng cửa mà HDC/IDV/EIB/TV2/VNM vừa
+đóng (magnitude trên dòng lân cận không phải lúc nào cũng thuộc về đúng sự kiện, xem chính case MCH
+gốc); (b) `SUSPECT` vốn nghĩa là "cần review tay trước khi tin", NBB nằm đúng trong ý định thiết kế
+đó — chỉ khác là ở đây review tay cho kết quả "tin được" thay vì "không tin được". Ghi nhận NBB làm
+ví dụ residual limitation, không phải bug cần vá.
+
+### 9.2. Soát 27 mã bị loại bởi `MIN_DELTA_ABS=1.000` — check được 100% (27/27), không phải spot-check mẫu
+
+**Phương pháp**: (1) liệt kê chính xác 27 mã bằng cách trừ tập candidate 232 mã (`treasury_news`
+có `buy_done`/`sell_done`) khỏi tập 205 mã trong `overlay_results.csv` — khớp đúng danh sách trong
+report §4. (2) Với TOÀN BỘ 27 mã, query `tav2_bq.ticker_financial` xem có dòng nào tồn tại không.
+(3) Với các mã CÓ dòng, query trực tiếp cột `OShares` theo thời gian để xem giá trị thật (không suy
+diễn từ việc "không có Δ ≥1.000" — đọc thẳng số).
+
+**Kết quả (2):** chỉ **4/27** mã có bất kỳ dòng nào trong `ticker_financial`: QCC, RCD, SWC, SZE.
+**23/27 mã hoàn toàn vắng mặt** khỏi bảng — cùng lớp DATA GAP đã ghi ở §8.3 (tên nhỏ/thanh khoản
+thấp, vendor không phủ), một tập mã KHÁC nhưng cùng nguyên nhân, không phải phát hiện mới.
+
+**Kết quả (3), toàn bộ 4/4 mã có dữ liệu:**
+- **RCD**: 46 dòng nhưng cột `OShares` **NULL 100%** — chính là ca đã nêu ở §8.3 (1/24), trùng mã.
+- **QCC**: `OShares` = **1.500.000 CP không đổi tuyệt đối** suốt 2010-11→2015-11 (dữ liệu dừng
+  2015), trong khi `treasury_news` ghi nhận **4 sự kiện `buy_done` có `shares_delta` populate**
+  (40.400 CP 2019-06-12, 90.300 CP 2020-05-11, + 2 sự kiện không ghi số 2017/2018) — buyback CÓ
+  xảy ra thật (nguồn tin xác nhận số cụ thể) nhưng cột `OShares` trong `ticker_financial` **không
+  hề cập nhật** để phản ánh, kể cả ở ngưỡng 0 (không phải "Δ nhỏ dưới 1.000" mà là "Δ=0 tuyệt đối").
+- **SWC**: `OShares` = **67.100.000 CP không đổi tuyệt đối** suốt 2014-2026 (63 dòng), kể cả sau
+  sự kiện `buy_done` 2018-11-27 mà chính tiêu đề tin ghi rõ **"đã mua 0 cổ phiếu"** — tức là bản
+  thân sự kiện thật sự KHÔNG làm đổi số CP (chương trình đăng ký nhưng không mua được gì), khớp
+  hoàn hảo với Δ=0 quan sát được.
+- **SZE**: `OShares` = **30.000.000 CP không đổi tuyệt đối** suốt 2016-2026 (40 dòng), có 1 sự
+  kiện `buy_done` 2021-01-14 (không có `shares_delta` populate) — không đủ bằng chứng riêng để nói
+  buyback này thật sự đổi số CP hay không, nhưng dữ liệu OShares đứng yên tuyệt đối là nhất quán
+  với cả 3 mã còn lại trong nhóm 4.
+
+**Kết luận**: `MIN_DELTA_ABS=1.000 cp` **KHÔNG loại bỏ bất kỳ buyback nhỏ-float THẬT nào** trong
+27 mã này — 100% mã checkable (4/4, phần còn lại 23/27 không thể check vì không có dữ liệu để đọc)
+đều cho Δ=0 TUYỆT ĐỐI (không phải Δ nhỏ nằm dưới ngưỡng), tức ngưỡng 1.000 không phải là biên đang
+cắt cụt một tín hiệu thật — cột `OShares` của các mã này hoặc hoàn toàn vắng mặt (23/27, giống
+§8.3), hoặc NULL toàn phần (RCD), hoặc tồn tại nhưng KHÔNG BAO GIỜ được vendor cập nhật theo sự
+kiện buyback thật (QCC/SWC/SZE). Đây là DATA GAP ở tầng vendor, không phải lỗi tham số ngưỡng —
+hạ `MIN_DELTA_ABS` xuống 0 hay bất kỳ số nào khác cũng không cứu được các mã này vì Δ quan sát được
+là chính xác 0, không phải một số nhỏ bị cắt.
+
+### 9.3. Không còn recommended_reruns mở — SẴN SÀNG cho quyết định wire
+
+Cả 2 việc treo trong dispatch v3 đã xử lý xong với bằng chứng cụ thể (không đoán): 5/5 mã biên đã
+tra tay (4 đúng, 1 residual limitation đã giải thích rõ nguyên nhân kỹ thuật, quyết định KHÔNG sửa
+có lý do); 27/27 mã bị `MIN_DELTA_ABS` loại đã check 100% (không phải mẫu) và xác nhận không có
+false-negative. Không đụng `oshares_live.py`/`corp_action_lib.py`/`corp_action_daily.py` — quyết
+định wire vẫn thuộc về Mike/user.
