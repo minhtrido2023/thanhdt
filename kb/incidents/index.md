@@ -224,6 +224,7 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 | 2026-06-22 | [2026-06-22 — Mafee ZOMBIE: systemd reports healthy, agent isn't actually serving](2026-06/2026-06-22-mafee-zombie-systemd-healthy.md) | logged |
 
 ## RETRO hằng ngày (mới nhất trước)
+| 2026-09-07 | [RETRO — 2026-09-07: 1 sự cố (còn hở), 1 pattern xuyên suốt (cron `vn_realestate_monthly_check.sh` lệch giờ ~17h do hiểu nhầm dòng `TZ=` đầu crontab, doc drift 3 nơi + finding Wags còn tái khẳng định con số sai — CÒN HỞ, chưa fix; câu hỏi bus `wags-fix-not-confirmed: coord-2026-09-07` vẫn mở)](retro/retro-2026-09-07.md) | logged |
 | 2026-09-06 | [RETRO — 2026-09-06: 2 sự cố, 0 pattern xuyên suốt mới (2 bug thật tự bắt qua code-quality-weekly, chưa từng ghi entry riêng — `compute_active_nav.py` NameError `_dt_stale` + `spend_report_weekly.py` cảnh báo effort-drift sai cho Taylor; cả 2 fix+verify cùng ngày, commit `59b268d2`/`5f92402d`)](retro/retro-2026-09-06.md) | logged |
 | 2026-09-05 | [RETRO — 2026-09-05: 3 sự cố, 1 pattern xuyên suốt (§29 "đọc nhầm kênh lỗi bq" — lần tái diễn thứ 5, cả 2 fix trước 08-22/08-29 không quét đủ họ lỗi; escalation tdays-holiday từ 09-04 đã ĐÓNG hoàn toàn qua `tz_anchor_gate.py` RULE 2, commit `0aab5fae`)](retro/retro-2026-09-05.md) | logged |
 | 2026-09-04 | [RETRO — 2026-09-04: 2 sự cố, 1 pattern xuyên suốt (TÁI DIỄN 2 ngày liên tiếp — escalate: `tdays()` holiday-count bug lan sang call-site thứ 3, khác repo `WorkingClaude/macro_healthcheck.py`, prevention văn xuôi từ 09-03 không đủ mạnh)](retro/retro-2026-09-04.md) | logged |
