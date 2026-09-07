@@ -13,21 +13,30 @@
 - Phễu candidate WIRE (cutoff=70%, trần=1.2), commit 714b5889. TV1/DGC lọt nhưng marginable=NO qua DNSE hiện tại.
 
 ## CCS/8L accruals R&D — ĐÓNG HẲN 2026-09-06
-Phase 0→0b→R3→Phase2-NARROW, tất cả NO-GO (lần NO-GO thứ 3 cho ý tưởng accrual-gate).
-Phase 2-NARROW trim-bottom chết ở DSR (P=0.0012<0.95). Không thử thêm biến thể ở vị trí này —
-mở lại chỉ khi có dữ liệu ngoài mẫu 2014-2026 + câu hỏi tiền-đăng-ký riêng.
+Phase 0→0b→R3→Phase2-NARROW, tất cả NO-GO (lần thứ 3 cho ý tưởng accrual-gate). Mở lại chỉ khi có
+dữ liệu ngoài mẫu 2014-2026 + câu hỏi tiền-đăng-ký riêng.
 
-## Retro 2026-09-06 — XONG (job Mike_20260906_173637)
-File `kb/incidents/retro/retro-2026-09-06.md` (commit 85bc60b8), Wags GAPS FOUND (minor, đã sửa
-decision count 2→4). 2 sự cố MỚI, cả 2 fix+verify hoàn chỉnh cùng ngày: compute_active_nav.py
-NameError `_dt_stale` (59b268d2), spend_report_weekly.py effort-drift cảnh báo sai cho Taylor
-(5f92402d). 0 pattern tái diễn — §29 bq-channel KHÔNG xuất hiện lại hôm nay (vẫn dừng ở 5 lần,
-đề xuất RULE 2 cho diagnosis_evidence_gate.py chưa escalate, chờ lần tái diễn thứ 6).
+## Retro 2026-09-07 — XONG (job Mike_20260907_173542)
+File `kb/incidents/retro/retro-2026-09-07.md` (commit 47168ff6), Wags CONFIRMED. 1 sự cố CÒN HỞ:
+cron `vn_realestate_monthly_check.sh` chạy 20:00 UTC (=03:02 ICT ngày sau) nhưng comment/2 file doc
+(`cron_registry.md:93`, `vn-realestate-structural-risk-20260826.md:49`) ghi sai là 20:00 ICT ngày 6 —
+do hiểu nhầm dòng `TZ=` đầu crontab chỉ set env cho script, KHÔNG đổi cách cron parse giờ (host
+Etc/UTC). arch-reviewer bắt được (NEEDS_CHANGES), nhưng Wags CHƯA sửa 3 nơi doc drift + chưa sửa
+lại con số sai trong chính finding trên bus. Pattern §29 góc mới: agent xử lý sự cố tự chép giả
+định chưa verify runtime, dù bằng chứng (mtime/ts bus) đã nằm sẵn trong log agent đang đọc.
+**Việc còn treo, cần theo dõi**: câu hỏi bus `Wags/wags-fix-not-confirmed: coord-2026-09-07` — đóng
+khi có commit sửa cả 3 nơi doc + finding trên bus.
 
 ## Bus question đang mở (2)
-1. `Wags/wags-fix-not-confirmed: coord-2026-09-03` (3d+) — Wags chưa có bằng chứng đã đính
-   chính với user trên trading_daily về cơ chế ack deposit-rate. Cửa sổ: trước 2026-09-11.
-2. `Mike/bq-monthly-pin-thieu-202608-202609-chay-bu-hay-khong` — chờ user quyết A/B/C.
+1. `Wags/wags-fix-not-confirmed: coord-2026-09-07` (mới, 09-07) — 3 nơi doc drift cron
+   vn_realestate_monthly_check.sh CHƯA SỬA, xem chi tiết trên. Cửa sổ theo dõi: trước cron chạy
+   lại tháng sau (~10-06).
+2. `macro-strategist/vn-realestate-monthly-check-2026-09` — chờ user chọn A/B/C, đã ack
+   triaged-needs-human bởi Wags 01:21:19Z.
+
+⚠️ Đã ĐÓNG (không còn treo, verify lại 09-07 qua bus_question_audit.py): `Wags/wags-fix-not-confirmed:
+coord-2026-09-03` (retro 09-05, tz_anchor_gate.py RULE 2, commit 0aab5fae) và
+`Mike/bq-monthly-pin-thieu-202608-202609-chay-bu-hay-khong`.
 
 ## Sát ngưỡng OKF
 kb/coding_guidelines.md 37,9KB/40KB, còn ~2,0KB đệm. §-mới tiếp theo gần như chắc chắn chạm
