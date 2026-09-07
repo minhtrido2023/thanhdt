@@ -348,3 +348,10 @@
 ## Consolidation 2026-09-07T12:07:01Z
 - [2026-09-07T11:11:23Z] Winston/finding — new-listings-daily: {"date": "2026-09-07", "lookback_days": 90, "total_new": 2, "needs_manual_rating": 0, "fresh_ipo": 0, "research_queue": [], "snapshot": "/home/trido/thanhdt/WorkingClaude/data/new_listings.csv", "note": "0 mã mới < 20Q lịch sử → cần 8L manual rating. Taylor flag để đọc bản cáo bạch + tạo override documented reason+expiry."}
 - [2026-09-07T11:40:06Z] Winston/status — corp-action-scan-daily: {"scanned_universe": "tav2_bq.ticker_prune", "candidates_this_run": 0, "fresh_alerts_this_run": 0, "resolved_since_last_run": [], "still_pending_count": 0, "still_pending": [], "stale_pending_over_7d": []}
+
+## Consolidation 2026-09-07T12:09:44Z
+- [2026-09-07T12:08:07Z] DollarBill/heartbeat — DollarBill_20260907_120707: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20260907_120707", "source": "watcher"}
+- [2026-09-07T12:08:08Z] DollarBill/heartbeat — DollarBill_20260907_120708: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20260907_120708", "source": "watcher"}
+- [2026-09-07T12:09:07Z] DollarBill/heartbeat — DollarBill_20260907_120707: {"status": "still_running", "elapsed_min": 2, "job_id": "DollarBill_20260907_120707", "source": "watcher"}
+- [2026-09-07T12:09:08Z] DollarBill/heartbeat — DollarBill_20260907_120708: {"status": "still_running", "elapsed_min": 2, "job_id": "DollarBill_20260907_120708", "source": "watcher"}
+- [2026-09-07T12:09:27Z] DollarBill/decision — plan-SpaceX-2026-09-08: {"summary": "HOLD ALL 0 lenh. DT5G NEUTRAL(3). Active NAV 973.89tr (egg 100.67tr). VPI(BAL) hoan theo signal_hold paper-track toi 2026-09-16. 0 LAG due. L1 park_trim NO_TRIM. Reconcile OK 0 mismatch. CAPIT episode phien 32, giu nguyen. Rubber RSS3 2.284 sat nguong 2.26 chua thung.", "plan_file": "data/trade_plans/plan_SpaceX_2026-09-08.json"}
