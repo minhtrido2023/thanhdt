@@ -1,0 +1,584 @@
+ticker,public_date,action_type,shares_delta,title
+AAM,2018-11-29,buy_done,,AAM: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+AAM,2019-10-29,sell_done,,AAM: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+ACB,2019-11-01,sell_done,,ACB: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+ACB,2020-04-09,sell_done,,ACB: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+ACG,2021-11-03,sell_done,,ACG: Báo cáo kết quả giao dịch Bán cổ phiếu quỹ
+ACG,2023-11-24,sell_done,,ACG: Thông báo thay đổi số lượng cổ phiếu có quyền biểu quyết đang lưu hành và báo cáo kết quả sử dụng cổ phiếu quỹ bán cho người lao động
+ACS,2021-01-21,sell_done,,ACS: Báo cáo kết quả chào bán cổ phiếu quỹ riêng lẻ
+ACV,2019-01-17,buy_done,72200,ACV: Tổng công ty Cảng hàng không Việt Nam - CTCPđã mua 72.200 cổ phiếu làm cổ phiếu quỹ
+ACV,2019-10-23,buy_done,58600,ACV: Tổng công ty Cảng hàng không Việt Nam - CTCPđã mua 58.600 cổ phiếu làm cổ phiếu quỹ
+ACV,2025-07-11,buy_done,,ACV: Báo cáo kết quả giao dịch mua lại cổ phiếu
+AGG,2020-04-16,buy_done,,AGG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+AGG,2020-12-16,buy_done,,AGG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+AGR,2017-07-07,sell_done,,AGR: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+AGR,2021-08-18,sell_done,,AGR: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+ANV,2019-07-23,buy_done,,ANV: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+APC,2016-07-04,buy_done,15350,APC: Đã mua 15.350 cổ phiếu quỹ
+APH,2023-03-16,buy_done,,APH: Báo cáo kết quả giao dịch mua lại cổ phiếu ưu đãi
+API,2021-11-22,sell_done,-1000000,API: CTCP Đầu tư Châu Á - Thái Bình Dương đã bán 1.000.000 cổ phiếu quỹ
+BCP,2018-09-17,sell_done,-19600,BCP: CTCP Dược Becamex đã bán 19.600 cổ phiếu quỹ
+BDT,2018-01-22,buy_done,,BDT: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+BIO,2019-07-08,buy_done,,BIO: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+BSI,2020-02-14,buy_done,,BSI: Báo cáo kết quả giao dịch mua lại cổ phiếu làm cổ phiếu quỹ
+BSI,2023-12-19,sell_done,,BSI: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+BTV,2018-03-15,buy_done,,BTV: Báo cáo kết quả giao dịch mua lại cổ phiếu
+BTV,2020-10-20,buy_done,,BTV: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+BTV,2020-10-21,buy_done,,BTV: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+CAV,2019-12-25,buy_done,,CAV: Báo cáo kết quả giao dịch mua lại cổ phiếu
+CC1,2018-08-28,buy_done,184200,CC1: Tổng Công ty Xây dựng Số 1 - CTCP đã mua 184.200 cổ phiếu làm cổ phiếu quỹ
+CC1,2019-10-23,buy_done,153600,CC1: Tổng Công ty Xây dựng Số 1 - CTCPđã mua 153.600 cổ phiếu làm cổ phiếu quỹ
+CC1,2025-10-28,sell_done,,CC1: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+CCA,2024-01-29,sell_done,-1358309,CCA: Báo cáo kết quả bán 1.358.309 cổ phiếu quỹ
+CCR,2016-08-29,buy_done,28400,CCR: Cảng Cam Ranh đã mua 28.400 cổ phiếu làm cổ phiếu quỹ
+CCR,2018-08-31,buy_done,19800,CCR: CTCP Cảng Cam Ranhđã mua 19.800 cổ phiếu làm cổ phiếu quỹ
+CDP,2019-01-18,buy_done,16400,CDP: CTCP Dược phẩm Trung ương Coduphađã mua 16.400 cổ phiếu làm cổ phiếu quỹ
+CDP,2019-10-28,buy_done,16000,CDP: CTCP Dược phẩm Trung ương Codupha đã mua 16.000 cổ phiếu làm cổ phiếu quỹ
+CEE,2018-05-31,buy_done,,CEE: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+CIA,2021-01-13,buy_done,,CIA: Báo cáo kết quả giao dịch mua lại cổ phiếu làm cổ phiếu quỹ
+CIA,2022-02-16,sell_done,-279100,CIA: CTCP Dịch vụ Sân bay Quốc tế Cam Ranh đã bán 279.100 cổ phiếu quỹ
+CID,2016-09-13,buy_done,54500,CID: Xây dựng và Phát triển Cơ sở hạ tầng đã mua 54.500 cổ phiếu làm cổ phiếu quỹ
+CII,2018-07-24,buy_done,,CII: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+CII,2020-05-07,buy_done,,CII: Báo cáo kết quả giao dịch mua cổ phiếu quỹ
+CII,2022-02-23,sell_done,,CII: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+CII,2023-06-26,sell_done,,CII: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+CKV,2017-11-20,sell_done,,CKV: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+CKV,2018-02-13,sell_done,,CKV: CBTT Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+CKV,2018-10-17,sell_done,0,CKV: Đã bán 0 cổ phiếu quỹ
+CMG,2017-12-05,sell_done,,CMG: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+CMG,2024-09-06,buy_done,,CMG: Báo cáo kết quả giao dịch mua lại cổ phiếu
+CMG,2025-03-06,buy_done,,CMG: Báo cáo kết quả giao dịch mua lại cổ phiếu
+CMG,2025-12-15,buy_done,,CMG: Báo cáo kết quả giao dịch mua lại cổ phiếu
+CMG,2026-08-13,buy_done,,CMG: Báo cáo kết quả giao dịch mua lại cổ phiếu
+CMT,2019-02-21,buy_done,,CMT: Báo cáo kết quả giao dịch mua lại cổ phiếu và Thông báo thay đổi số lượng cổ phiếu có quyền biểu quyết đang lưu hành
+CTD,2017-08-25,buy_done,,CTD: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+CTD,2017-08-30,buy_done,,CTD: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+CTD,2018-02-06,sell_done,-448500,Coteccons đã bán xong 448.500 cổ phiếu quỹ
+CTD,2018-02-06,sell_done,,CTD: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+CTD,2018-11-01,buy_done,,CTD: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+CTD,2019-01-11,buy_done,,CTD: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+CTD,2019-09-24,buy_done,,CTD: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+CTD,2021-02-01,buy_done,,CTD: Báo cáo kết quả giao dịch mua lại cổ phiếu
+CTD,2021-02-03,buy_done,2000000,Coteccons đã mua lại hơn 2 triệu cổ phiếu quỹ giá 76.764 đồng
+CTD,2021-07-21,buy_done,,CTD: Thông báo thay đổi số lượng cổ phiếu có quyền biểu quyết đang lưu hành và báo cáo kết quả giao dịch mua lại cổ phiếu
+CTD,2023-06-22,sell_done,,CTD: Báo cáo kết quả sử dụng cổ phiếu quỹ bán cho người lao động trong công ty (điều chỉnh)
+CTD,2023-06-28,sell_done,,CTD: Thông báo công văn của UBCKNN về việc nhận được tài liệu báo cáo kết quả sử dụng cổ phiếu quỹ để bán cho người lao động của CTD
+CTD,2024-02-01,sell_done,,CTD: Báo cáo kết quả bán cổ phiếu quỹ theo chương trình ESOP
+CTD,2024-02-01,sell_done,,CTD: Nghị quyết HĐQT về việc thông qua kết quả giao dịch bán cổ phiếu quỹ
+CTD,2024-02-05,sell_done,,CTD: Thông báo công văn của UBCKNN về tài liệu báo cáo kết quả sử dụng cổ phiếu quỹ để bán cho người lao động của CTD
+CTI,2020-06-25,buy_done,,CTI: Báo cáo kết quả giao dịch mua lại cổ phiếu
+CTI,2025-07-01,sell_done,,CTI: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+CTI,2025-07-01,sell_done,,CTI: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+CTS,2024-05-29,sell_done,,CTS: Thông báo kết quả giao dịch bán cổ phiếu quỹ
+CTW,2017-02-07,buy_done,,CTW: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+CTW,2026-03-04,sell_done,,CTW: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+CX8,2018-09-04,sell_done,,CX8: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+DBD,2021-01-28,buy_done,,DBD: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+DBD,2021-02-04,buy_done,,DBD: Đính chính báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+DGW,2022-06-08,buy_done,,DGW: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+DGW,2023-04-28,buy_done,,DGW: Báo cáo kết quả mua lại cổ phiếu quỹ
+DGW,2024-01-03,buy_done,,DGW: Báo cáo kết quả giao dịch mua lại cổ phiếu
+DGW,2024-03-25,buy_done,,DGW: Báo cáo kết quả giao dịch mua lại cổ phiếu
+DGW,2026-07-14,buy_done,,DGW: Báo cáo kết quả giao dịch mua lại cổ phiếu
+DHA,2019-01-28,buy_done,,DHA: Báo cáo kết quả giao dịch mua lại cổ phiếu làm cổ phiếu quỹ
+DIC,2016-07-04,buy_done,501280,DIC: Đã mua 501.280 cổ phiếu quỹ
+DIG,2020-04-28,buy_done,,DIG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+DIG,2020-12-04,sell_done,,DIG: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+DIH,2024-02-02,sell_done,,DIH: DIH-BC kết quả giao dịch bán cổ phiếu quỹ
+DKP,2020-01-22,buy_done,8000,DKP: CTCP Dược khoađã mua 8.000 cổ phiếu làm cổ phiếu quỹ
+DNP,2019-03-18,buy_done,,DNP: Báo cáo kết quả giao dịch mua lại cổ phiếu
+DPG,2020-04-27,buy_done,,DPG: Báo cáo kết quả giao dịch mua lại cổ phiếu
+DPR,2021-07-06,sell_done,,DPR: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+DQC,2018-01-08,buy_done,,DQC: Báo cáo kết quả giao dịch mua lại cổ phiếu
+DQC,2019-02-27,buy_done,,DQC: Báo cáo kết quả giao dịch mua lại cổ phiếu
+DRH,2019-04-01,buy_done,,DRH: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+DRH,2019-10-28,buy_done,,DRH: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+DRH,2020-04-06,buy_done,,DRH: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+DTL,2017-09-20,sell_done,,DTL: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+DXG,2020-01-03,buy_done,,DXG: Báo cáo kết quả giao dịch mua lại cổ phiếu
+DXG,2020-01-03,buy_done,,DXG: Báo cáo kết quả giao dịch mua lại cổ phiếu
+DXG,2020-08-17,buy_done,,DXG: Báo cáo kết quả giao dịch mua lại cổ phiếu
+EBS,2015-12-24,sell_done,-1900000,"EBS đã bán thành công 1,9 triệu cổ phiếu quỹ"
+EIB,2024-02-20,sell_done,,EIB: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+ELC,2017-07-03,buy_done,,ELC: Báo cáo kết quả giao dịch mua lại cổ phiếu
+ELC,2017-11-17,buy_done,,ELC: Báo cáo kết quả giao dịch mua lại cổ phiếu
+ELC,2018-06-14,buy_done,,ELC: Báo cáo kết quả giao dịch mua lại cổ phiếu
+ELC,2026-01-10,buy_done,,ELC: Thông báo thay đổi số lượng cổ phiếu có quyền biểu quyết đang lưu hành và Báo cáo kết quả giao dịch mua lại cổ phiếu
+ELC,2026-03-19,buy_done,,ELC: Báo cáo kết quả giao dịch mua lại cổ phiếu và Thông báo thay đổi số lượng cổ phiếu có quyền biểu quyết đang lưu hành
+ELC,2026-04-20,buy_done,,ELC: Báo cáo kết quả giao dịch mua lại cổ phiếu và Thông báo thay đổi số lượng cổ phiếu có quyền biểu quyết đang lưu hành
+ELC,2026-06-19,buy_done,,ELC: Báo cáo kết quả giao dịch mua lại cổ phiếu và Thông báo thay đổi số lượng cổ phiếu có quyền biểu quyết đang lưu hành
+EVE,2018-01-10,buy_done,,EVE: Báo cáo kết quả giao dịch mua lại cổ phiếu
+EVE,2018-12-14,buy_done,,EVE: Báo cáo kết quả giao dịch mua lại cổ phiếu
+EVE,2022-09-22,sell_done,,EVE: Báo cáo kết quả sử dụng cổ phiếu quỹ bán cho người lao động trong công ty
+FCN,2020-06-09,buy_done,,FCN: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+FCN,2021-02-02,sell_done,,FCN: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+FMC,2020-06-26,buy_done,,FMC: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+FOC,2019-04-08,buy_done,2370,FOC: CTCP Dịch vụ Trực tuyến FPTđã mua 2.370 cổ phiếu làm cổ phiếu quỹ
+FOC,2019-06-25,buy_done,3880,FOC: CTCP Dịch vụ Trực tuyến FPTđã mua 3.880 cổ phiếu làm cổ phiếu quỹ
+GAS,2018-01-23,sell_done,,GAS: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+GAS,2018-01-24,sell_done,,"GAS đã bán hết cổ phiếu quỹ, thu về 61 tỷ đồng"
+GDT,2016-08-11,buy_done,5700,GDT: Đã mua 5.700 cổ phiếu quỹ
+GDT,2016-10-03,buy_done,1960,GDT: Đã mua lại 1.960 cổ phiếu quỹ
+GDT,2017-05-03,buy_done,,GDT: Báo cáo kết quả giao dịch mua lại cổ phiếu
+GDT,2017-07-04,buy_done,,GDT: Báo cáo kết quả giao dịch mua lại cổ phiếu
+GDT,2017-09-28,buy_done,,GDT: Báo cáo kết quả giao dịch mua lại cổ phiếu
+GDT,2017-11-17,buy_done,,GDT: Báo cáo kết quả giao dịch mua lại cổ phiếu
+GDT,2018-02-09,buy_done,,GDT: Báo cáo kết quả giao dịch mua lại cổ phiếu
+GDT,2018-06-14,buy_done,,GDT: Báo cáo kết quả giao dịch mua lại cổ phiếu
+GDT,2018-10-08,buy_done,,GDT: Báo cáo kết quả giao dịch mua lại cổ phiếu
+GDT,2018-12-14,buy_done,,GDT: Báo cáo kết quả giao dịch mua lại cổ phiếu
+GDT,2019-05-03,buy_done,,GDT: Báo cáo kết quả giao dịch mua lại cổ phiếu và thay đổi số lượng cổ phiếu lưu hành
+GDT,2019-07-19,buy_done,,GDT: Báo cáo kết quả giao dịch mua lại cổ phiếu
+GDT,2019-10-24,buy_done,,GDT: Báo cáo kết quả giao dịch mua lại cổ phiếu
+GDT,2019-12-13,buy_done,,GDT: Báo cáo kết quả giao dịch mua lại cổ phiếu
+GDT,2020-03-24,buy_done,,GDT: Báo cáo kết quả giao dịch mua lại cổ phiếu
+GDT,2020-05-28,buy_done,,GDT: Báo cáo kết quả giao dịch mua lại cổ phiếu
+GDT,2020-09-04,buy_done,,GDT: Báo cáo kết quả giao dịch mua lại cổ phiếu
+GDT,2020-12-08,buy_done,,GDT: Báo cáo kết quả giao dịch mua lại cổ phiếu
+GDT,2021-01-20,buy_done,,GDT: Báo cáo kết quả giao dịch mua lại cổ phiếu
+GDT,2021-11-15,buy_done,,GDT: Báo cáo kết quả giao dịch mua lại cổ phiếu
+GDT,2022-04-22,buy_done,,GDT: Báo cáo kết quả giao dịch mua lại cổ phiếu
+GDT,2023-04-03,buy_done,,GDT: Thông báo thay đổi số lượng cổ phiếu có quyền biểu quyết đang lưu hành và báo cáo kết quả mua lại cổ phiếu
+GDT,2023-04-03,buy_done,,GDT: Báo cáo kết quả mua lại cổ phiếu và thay đổi số lượng cổ phiếu có quyền biểu quyết
+GDT,2023-07-07,buy_done,,GDT: Thông báo kết quả giao dịch mua lại cổ phiếu quỹ đợt 2
+GDT,2023-07-14,buy_done,,GDT: Đính chính thời gian thực hiện của báo cáo kết quả giao dịch mua lại cổ phiếu đợt 2
+GDT,2024-06-06,buy_done,,GDT: Thông báo thay đổi số lượng cổ phiếu có quyền biểu quyết đang lưu hành và báo cáo kết quả giao dịch mua lại cổ phiếu
+GDT,2025-12-30,buy_done,,GDT: Thông báo thay đổi số lượng cổ phiếu có quyền biểu quyết và báo cáo kết quả giao dịch mua lại cổ phiếu
+GDT,2026-05-14,buy_done,,GDT: Báo cáo kết quả mua lại cổ phiếu ESOP đợt 2 và Thông báo thay đổi số lượng cổ phiếu có quyền biểu quyết đang lưu hành
+GEX,2020-05-27,buy_done,,GEX: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+GEX,2021-01-06,sell_done,,GEX: Báo cáo kết quả giao dịch bán cổ phiếu quỹ cho người lao động
+GEX,2021-01-15,sell_done,,GEX: Thông báo nhận được công văn của UBCKNN về kết quả giao dịch bán cổ phiếu quỹ cho người lao động của GEX
+GEX,2021-04-09,sell_done,,GEX: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+GEX,2021-04-15,sell_done,,GEX: Thông báo công văn của UBCKNN về kết quả giao dịch bán cổ phiếu quỹ của GEX
+GIL,2015-10-23,buy_done,12000,GIL - Đã mua 12.000 cổ phiếu quỹ
+GIL,2016-04-20,buy_done,10000,GIL - Đã mua 10.000 cổ phiếu quỹ
+GIL,2016-07-21,buy_done,2000,GIL: Đã mua 2.000 cổ phiếu quỹ
+GIL,2016-10-07,buy_done,2670,GIL: Đã mua 2.670 cổ phiếu quỹ
+GIL,2018-08-07,sell_done,,GIL: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+GIL,2020-09-22,buy_done,,GIL: Báo cáo kết quả giao dịch mua lại cổ phiếu
+GIL,2021-06-24,sell_done,,GIL: Báo cáo kết quả bán cổ phiếu quỹ
+GIL,2024-06-04,buy_done,,GIL: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+GIL,2024-09-13,sell_done,,GIL: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+GIL,2024-09-20,sell_done,,GIL: Công văn của UBCKNN về việc nhận được tài liệu báo cáo kết quả giao dịch bán cổ phiếu quỹ
+GLT,2024-10-17,buy_done,,GLT: GLT_Báo cáo kết quả giao dịch mua lại cổ phiếu
+GLT,2024-11-01,buy_done,,GLT: GLT_Đính chính Báo cáo kết quả mua lại cổ phiếu số 01.2024-BC ngày 16/10/2024
+GND,2020-06-02,buy_done,,GND: Báo cáo kết quả giao dịch mua lại cổ phiếu
+GND,2021-01-13,sell_done,,GND: báo cáo kết quả giao dịch bán cổ phiếu quỹ
+HAH,2017-01-06,buy_done,315950,HAH: Đã mua lại 315.950 cổ phiếu quỹ
+HAH,2020-05-04,buy_done,,HAH: Báo cáo kết quả giao dịch mua lại cổ phiếu
+HAH,2021-11-26,sell_done,,HAH: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+HAM,2019-01-04,sell_done,-622500,HAM: CTCP Vật tư Hậu Giang đã bán 622.500 cổ phiếu quỹ
+HAR,2020-01-16,buy_done,,HAR: Báo cáo kết quả giao dịch mua cổ phiếu quỹ
+HAR,2020-12-07,buy_done,,HAR: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+HAX,2019-03-20,buy_done,,HAX: Báo cáo kết quả giao dịch mua lại cổ phiếu và Thông báo thay đổi số lượng cổ phiếu có quyền biểu quyết đang lưu hành
+HAX,2019-04-08,buy_done,,HAX: Báo cáo kết quả giao dịch mua lại cổ phiếu và Thông báo thay đổi số lượng cổ phiếu có quyền biểu quyết đang lưu hành
+HAX,2021-01-29,sell_done,,HAX: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+HC3,2017-10-05,buy_done,,HC3: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+HC3,2019-04-22,sell_done,-15100,HC3: CTCP Xây dựng số 3 Hải Phòng đã bán 15.100 cổ phiếu quỹ
+HCM,2017-08-28,buy_done,,HCM: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+HCM,2017-12-05,buy_done,,HCM: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ và thay đổi số lượng cổ phiếu có quyền biểu quyết đang lưu hành
+HCM,2018-05-09,buy_done,,HCM: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+HCM,2018-07-11,buy_done,,HCM: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+HCM,2019-05-21,buy_done,,HCM: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+HCM,2019-09-16,buy_done,,HCM: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+HCM,2020-01-20,buy_done,,HCM: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+HCM,2020-02-14,buy_done,,HCM: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+HCM,2020-04-09,buy_done,,HCM: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+HCM,2020-06-19,buy_done,,HCM: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+HCM,2020-09-09,buy_done,,HCM: Thông báo thay đổi số lượng cổ phiếu có quyền biểu quyết đang lưu hành và báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+HDB,2020-01-13,buy_done,,HDB: Báo cáo kết quả giao dịch mua lại cổ phiếu
+HDB,2020-01-14,buy_done,18000000,HDBank đã mua 18 triệu cổ phiếu quỹ
+HDB,2020-04-06,sell_done,,HDB: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+HDB,2025-11-04,sell_done,-15000000,HDB: Đã bán thành công trên 15 triệu cổ phiếu quỹ
+HDB,2025-11-18,sell_done,,HDB: Thông báo công văn của UBCKNN về tài liệu báo cáo kết quả giao dịch bán cổ phiếu quỹ của HDB
+HDC,2017-09-26,sell_done,,HDC: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+HDC,2018-05-10,buy_done,,HDC: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+HDC,2019-06-26,sell_done,,HDC: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+HDC,2020-04-29,buy_done,,HDC: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+HDC,2021-02-04,sell_done,,HDC: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+HDG,2018-05-02,buy_done,,HDG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+HDG,2020-11-27,sell_done,,HDG: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+HEM,2021-06-01,sell_done,-155631,HEM: CTCP Chế tạo Điện cơ Hà Nội đã bán 155.631 cổ phiếu quỹ
+HGM,2015-03-03,buy_done,393900,HGM đã mua thành công 393.900 cổ phiếu quỹ
+HGM,2024-10-09,sell_done,,HGM: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+HHS,2016-05-31,buy_done,5000000,HHS: Đã mua 5 triệu cổ phiếu quỹ
+HHS,2018-05-25,buy_done,,HHS: Báo cáo kết quả giao dịch mua lại cổ phiếu
+HHS,2020-04-16,sell_done,,HHS: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+HIG,2016-11-03,buy_done,2000000,HIG đã mua hơn 2 triệu cổ phiếu quỹ
+HIG,2018-12-17,sell_done,-964000,HIG: CTCP Tập Đoàn HIPTđã bán 964.000 cổ phiếu quỹ
+HMH,2018-08-14,buy_done,291400,HMH: CTCP Hải Minh đã mua 291.400 cổ phiếu làm cổ phiếu quỹ
+HMH,2019-09-09,buy_done,60800,HMH: CTCP Hải Minh đã mua 60.800 cổ phiếu làm cổ phiếu quỹ
+HMH,2025-05-22,sell_done,,HMH: CTCP Hải Minh báo cáo kết quả giao dịch bán cổ phiếu quỹ
+HNF,2018-01-29,buy_done,,HNF: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+HNF,2019-10-21,sell_done,-1179500,HNF: CTCP Thực phẩm Hữu Nghị đã bán 1.179.500 cổ phiếu quỹ
+HSG,2017-12-28,buy_done,,HSG: Báo cáo kết quả giao dịch mua lại cổ phiếu
+HSG,2018-03-07,buy_done,,HSG: Báo cáo kết quả giao dịch mua lại cổ phiếu
+HSG,2018-07-11,buy_done,,HSG: Báo cáo kết quả giao dịch mua lại cổ phiếu
+HSG,2018-08-29,buy_done,,HSG: Báo cáo kết quả mua lại cổ phiếu
+HSG,2018-10-26,buy_done,,HSG: Báo cáo kết quả giao dịch mua lại cổ phiếu
+HSG,2018-12-26,buy_done,,HSG: Báo cáo kết quả giao dịch mua lại cổ phiếu
+HSG,2019-06-25,buy_done,,HSG: Báo cáo kết quả giao dịch mua lại cổ phiếu
+HSG,2019-08-22,buy_done,,HSG: Báo cáo kết quả giao dịch mua lại cổ phiếu
+HSG,2019-10-29,buy_done,,HSG: Báo cáo kết quả giao dịch mua lại cổ phiếu
+HSG,2020-07-08,buy_done,,HSG: Báo cáo kết quả giao dịch mua lại cổ phiếu
+HSG,2020-10-19,buy_done,,HSG: Báo cáo kết quả giao dịch mua lại cổ phiếu
+HSG,2021-03-31,sell_done,,HSG: Báo cáo kết quả bán cổ phiếu quỹ
+HT1,2022-02-21,sell_done,,HT1: Kết quả giao dịch bán cổ phiếu quỹ
+HTE,2019-01-10,sell_done,-229080,HTE: CTCP Đầu tư Kinh doanh Điện lực Thành phố Hồ Chí Minh đã bán 229.080 cổ phiếu quỹ
+HTK,2020-04-14,sell_done,-8000,HTK: CTCP Đăng kiểm xe cơ giới Hải Dương đã bán 8.000 cổ phiếu quỹ
+HTP,2021-03-25,sell_done,,HTP: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+HVG,2020-01-13,sell_done,,HVG: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+HVG,2020-01-13,sell_done,-5000000,Thủy sản Hùng Vương đã bán xong 5 triệu cổ phiếu quỹ ở mức giá xấp xỉ 8.000 đồng/cp
+HVH,2019-12-10,buy_done,,HVH: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+HVH,2020-10-08,sell_done,,HVH: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+HWS,2018-09-24,buy_done,58500,HWS: CTCP Cấp nước Thừa Thiên Huếđã mua 58.500 cổ phiếu làm cổ phiếu quỹ
+HWS,2019-06-25,buy_done,58500,HWS: CTCP Cấp nước Thừa Thiên Huế đã mua 58.500 cổ phiếu làm cổ phiếu quỹ
+HWS,2020-03-06,buy_done,30500,HWS: CTCP Cấp nước Thừa Thiên Huế đã mua 30.500 cổ phiếu làm cổ phiếu quỹ
+HWS,2021-01-21,buy_done,30000,HWS: CTCP Cấp nước Thừa Thiên Huế đã mua 30.000 cổ phiếu làm cổ phiếu quỹ
+ICG,2019-04-03,buy_done,,ICG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+IDV,2015-04-10,sell_done,-6913,IDV đã bán toàn bộ 6.913 cổ phiếu quỹ
+IDV,2018-08-10,buy_done,300000,IDV: Công ty Cổ phần Phát triển Hạ tầng Vĩnh Phúc đã mua 300.000 cổ phiếu làm cổ phiếu quỹ
+IDV,2021-10-25,buy_done,,IDV: Báo cáo kết quả mua lại cổ phiếu quỹ phát sinh từ đợt phát hành cổ phiếu trả cổ tức năm 2020
+IDV,2021-11-24,sell_done,,IDV: Báo cáo kết quả bán cổ phiếu quỹ phát sinh từ đợt chia cổ tức năm 2020 bằng cổ phiếu
+IMP,2016-10-28,buy_done,10300,IMP: Đã mua 10.300 cổ phiếu quỹ
+IMP,2017-11-30,buy_done,,IMP: Báo cáo kết quả giao dịch mua lại cổ phiếu quỷ từ đợt phát hành ESOP
+IMP,2019-08-22,buy_done,,IMP: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+IMP,2019-09-27,buy_done,,IMP: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+IPA,2021-10-21,sell_done,,IPA: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+ITD,2017-07-19,buy_done,,ITD: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+ITD,2017-10-13,buy_done,,ITD: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+ITD,2018-01-23,buy_done,,ITD: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+ITD,2018-05-04,buy_done,,ITD: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+ITD,2018-08-07,buy_done,,ITD: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+ITQ,2020-05-15,buy_done,,ITQ: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+ITQ,2021-04-09,sell_done,,ITQ: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+KBC,2022-03-18,sell_done,,KBC: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+KBC,2022-03-23,sell_done,,KBC121020: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+KDC,2021-12-10,sell_done,,KDC: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+KDC,2022-08-30,sell_done,,KDC: Thông báo thay đổi số lượng cổ phiếu có quyền biểu quyết đang lưu hành và báo cáo kết quả giao dịch bán cổ phiếu quỹ
+KDC,2024-06-21,sell_done,,KDC: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+KDC,2026-07-06,buy_done,,KDC: Báo cáo kết quả giao dịch mua lại cổ phiếu
+KDH,2020-05-15,buy_done,,KDH: Báo cáo kết quả giao dịch mua lại cổ phiếu
+KDH,2021-09-28,sell_done,,KDH: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+KHA,2016-12-28,sell_done,-1350000,"KHA: Đã bán trên 1,35 triệu cổ phiếu quỹ"
+KHP,2024-10-18,sell_done,,KHP: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+KHW,2018-02-22,sell_done,-24000,KHW: CTCP Cấp thoát nước Khánh Hòađã bán 24.000 cổ phiếu quỹ
+KHW,2018-02-22,sell_done,,KHW: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+KHW,2018-04-04,buy_done,,KHW: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+KHW,2020-03-16,sell_done,,KHW: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+KLB,2017-08-10,sell_done,,KLB: Báo cáo kết quả giao dịch bán cổ phiếu quỹ của Ngân hàng TMCP Kiên Long
+KSB,2020-07-24,buy_done,,KSB: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+L40,2024-08-26,sell_done,,L40: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+LBM,2017-09-18,sell_done,,LBM: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+LCG,2018-10-15,buy_done,,LCG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+LCW,2019-01-28,buy_done,20000,LCW: CTCP Nước sạch Lai Châuđã mua 20.000 cổ phiếu làm cổ phiếu quỹ
+LDG,2019-01-31,buy_done,,LDG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+LDG,2019-02-26,buy_done,,LDG: Thông báo công văn của UBCKNN về báo cáo kết quả giao dịch mua lại cổ phiếu của LDG
+LDG,2019-12-03,buy_done,,LDG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+LDG,2020-12-24,buy_done,,LDG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+LDG,2025-05-14,buy_done,,LDG: Báo cáo kết quả giao dịch mua lại cổ phiếu
+LDG,2025-06-06,buy_done,,LDG: Báo cáo kết quả giao dịch mua lại cổ phiếu
+LHG,2017-12-22,sell_done,,LHG: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+LSS,2018-02-08,buy_done,,LSS: Báo cáo kết quả giao dịch mua cổ phiếu quỹ
+LSS,2021-04-09,sell_done,,LSS: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+LSS,2021-08-30,sell_done,,LSS: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+LSS,2021-11-19,sell_done,,LSS: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+MCG,2026-05-14,sell_done,,MCG: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+MCH,2026-06-24,sell_done,,MCH: Báo cáo kết quả giao dịch bán cổ phiếu quỹ (sử dụng CPQ để phát hành ESOP)
+MPC,2021-06-29,buy_done,,MPC: Báo cáo kết quả giao dịch mua lại cổ phiếu (Thu hồi cổ phiếu ESOP)
+MPC,2021-12-10,sell_done,-633170,MPC: Đã bán 633.170 cổ phiếu quỹ
+MPC,2022-04-20,buy_done,,MPC: Báo cáo kết quả giao dịch mua lại cổ phiếu
+MSB,2021-07-22,sell_done,,MSB: Thông báo công văn của UBCKNN về chấp thuận kết quả chào bán cổ phiếu quỹ cho CBCNV theo chương trình ESOP và báo cáo kết quả đợt chào bán
+MSN,2024-06-19,buy_done,,MSN: Báo cáo kết quả giao dịch mua lại cổ phiếu ESOP của CBNV
+MWG,2018-10-24,buy_done,,MWG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+MWG,2018-11-13,buy_done,,MWG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+MWG,2019-03-25,buy_done,,MWG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+MWG,2019-05-23,buy_done,,MWG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+MWG,2019-07-29,buy_done,,MWG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+MWG,2019-11-14,buy_done,,MWG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+MWG,2020-03-20,buy_done,,MWG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+MWG,2020-08-24,buy_done,,MWG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+MWG,2020-10-16,buy_done,,MWG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+MWG,2021-06-29,buy_done,,MWG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+MWG,2021-07-30,buy_done,,MWG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+MWG,2021-11-26,buy_done,,MWG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+MWG,2022-05-24,buy_done,,MWG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+MWG,2022-09-28,buy_done,,MWG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+MWG,2022-12-19,buy_done,,MWG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+MWG,2023-05-31,buy_done,,MWG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+MWG,2023-07-19,buy_done,,MWG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+MWG,2023-11-29,buy_done,,MWG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+MWG,2024-03-05,buy_done,,MWG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+MWG,2024-06-28,buy_done,,MWG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+MWG,2024-12-27,buy_done,,MWG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+MWG,2025-06-24,buy_done,,MWG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+MWG,2025-07-21,buy_done,,MWG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+MWG,2025-12-15,buy_done,10000000,MWG: Đã mua 10 triệu cổ phiếu quỹ
+MWG,2026-02-09,buy_done,,MWG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+NAF,2024-09-10,buy_done,,NAF: Báo cáo kết quả giao dịch mua lại cổ phiếu
+NAF,2026-01-05,buy_done,,NAF: Báo cáo kết quả giao dịch mua lại cổ phiếu
+NBB,2019-05-03,buy_done,,NBB: Báo cáo kết quả giao dịch mua lại cổ phiếu
+NBB,2020-11-17,buy_done,,NBB: Báo cáo kết quả giao dịch mua lại cổ phiếu
+NBB,2022-11-10,sell_done,,NBB: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+NBB,2026-07-17,sell_done,,NBB: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+NDN,2017-01-04,buy_done,2500000,"NDN đã mua 2,5 triệu cổ phiếu quỹ"
+NDN,2018-05-17,buy_done,1000000,NDN: CTCP Đầu tư phát triển Nhà Đà Nẵng đã mua 1.000.000 cổ phiếu làm cổ phiếu quỹ
+NDN,2018-05-18,buy_done,1000000,Nhà Đà Nẵng (NDN) đã mua vào 1 triệu cổ phiếu quỹ
+NDN,2019-06-28,sell_done,,NDN: NDN CBTT Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+NDW,2020-12-17,buy_done,,NDW: Báo cáo kết quả mua lại cổ phiếu quỹ
+NDX,2018-05-22,buy_done,400000,NDX: CTCP Xây lắp Phát triển Nhà Đà Nẵng đã mua 400.000 cổ phiếu làm cổ phiếu quỹ
+NKG,2020-07-03,buy_done,,NKG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+NKG,2021-07-05,sell_done,,NKG: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+NKG,2021-07-13,sell_done,,NKG: Thông báo công văn của UBCKNN về việc đã nhận được báo cáo kết quả giao dịch bán cổ phiếu quỹ của NKG
+NLG,2019-07-05,buy_done,,NLG: Báo cáo kết quả giao dịch mua lại cổ phiếu
+NLG,2021-04-01,sell_done,,NLG: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+NSC,2018-06-14,buy_done,,NSC: Báo cáo kết quả giao dịch mua lại cổ phiếu
+ONE,2015-10-09,sell_done,-75100,ONE đã bán toàn bộ 75.100 cổ phiếu quỹ
+ONE,2021-01-07,buy_done,111952,ONE: CTCP Truyền thông số 1 đã mua 111.952 cổ phiếu làm cổ phiếu quỹ
+ONE,2022-05-11,sell_done,-65800,ONE: CTCP Truyền thông số 1 đã bán 65.800 cổ phiếu quỹ
+PAC,2016-05-26,sell_done,-362812,PAC: Đã bán 362.812 cổ phiếu quỹ
+PAN,2016-06-24,buy_done,,PAN: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+PAN,2018-05-11,buy_done,,PAN: Báo cáo kết quả giao dịch mua lại cổ phiếu
+PAN,2018-09-28,buy_done,,PAN: Báo cáo kết quả giao dịch mua lại cổ phiếu
+PAN,2019-04-24,buy_done,,PAN: Báo cáo kết quả giao dịch mua lại cổ phiếu
+PAN,2019-11-28,buy_done,,PAN: Báo cáo kết quả giao dịch mua lại cổ phiếu
+PAN,2020-05-06,buy_done,,PAN: Báo cáo kết quả giao dịch mua lại cổ phiếu
+PAN,2020-08-31,buy_done,,PAN: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+PAN,2021-01-12,buy_done,,PAN: Báo cáo kết quả giao dịch mua lại cổ phiếu
+PC1,2021-11-18,sell_done,,PC1: Báo cáo kết quả giao dịch bán cổ phiếu quỹ cho người lao động
+PET,2018-07-27,buy_done,,PET: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+PET,2020-06-29,buy_done,,PET: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+PET,2021-08-19,sell_done,,PET: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+PGT,2016-08-12,buy_done,1096,PGT đã mua 1.096 cổ phiếu quỹ
+PGT,2021-09-13,sell_done,-153900,PGT: Đã bán 153.900 cổ phiếu quỹ
+PGT,2022-02-14,sell_done,-230296,PGT: CTCP PGT Holdings đã bán 230.296 cổ phiếu quỹ
+PHC,2017-02-23,sell_done,-110000,PHC đã bán 110.000 cổ phiếu quỹ
+PHR,2018-05-21,sell_done,,PHR: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+PIT,2022-06-06,sell_done,,PIT: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+PLX,2017-05-26,sell_done,,PLX: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+PLX,2019-02-11,sell_done,,PLX: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+PLX,2019-03-15,sell_done,,PLX: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+PLX,2020-07-09,sell_done,,PLX: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+PLX,2020-07-10,sell_done,,Petrolimex (PLX) đã bán hết 100% cổ phiếu quỹ đăng ký
+PLX,2021-03-23,sell_done,,PLX: Thông báo thay đổi số lượng cổ phiếu có quyền biểu quyết đang lưu hành và báo cáo kết quả giao dịch bán cổ phiếu quỹ
+PLX,2021-09-07,sell_done,,PLX: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+PNJ,2019-09-11,buy_done,,PNJ: Báo cáo kết quả giao dịch mua lại cổ phiếu
+PNJ,2020-06-24,buy_done,,PNJ: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+PNJ,2021-02-01,buy_done,,PNJ: Báo cáo kết quả giao dịch mua lại cổ phiếu
+PPC,2017-10-11,sell_done,,PPC: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+PRC,2015-09-28,sell_done,-21110,PRC đã bán 21.110 cổ phiếu quỹ
+PSD,2021-01-04,buy_done,205300,PSD: CTCP Dịch vụ Phân phối Tổng hợp Dầu khí đã mua 205.300 cổ phiếu làm cổ phiếu quỹ
+PSD,2022-01-24,sell_done,,PSD: Báo cáo kết quả bán cổ phiếu quỹ cho người lao động
+PSD,2022-01-30,sell_done,,PSD: UBCKNN nhận được tài liệu báo cáo kết quả bán cổ phiếu quỹ
+PSH,2022-05-11,sell_done,,PSH: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+PTB,2019-04-22,buy_done,,PTB: Báo cáo kết quả giao dịch mua lại cổ phiếu làm cổ phiếu quỹ
+PTB,2020-05-18,buy_done,,PTB: Báo cáo kết quả giao dịch mua lại cổ phiếu làm cổ phiếu quỹ
+PTB,2021-06-23,sell_done,,PTB: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+PTB,2023-07-13,buy_done,,PTB: Thông báo thay đổi số lượng cổ phiếu có quyền biểu quyết đang lưu hành và báo cáo kết quả mua lại cổ phiếu
+PTC,2017-10-19,buy_done,,PTC: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+PTC,2020-09-30,buy_done,,PTC: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+PVC,2019-12-16,buy_done,2500000,PVC: Tổng Công ty Dung dịch khoan và Hoá phẩm Dầu khí - CTCPđã mua 2.500.000 cổ phiếu làm cổ phiếu quỹ
+PVC,2022-02-18,sell_done,-2500000,PVC: Tổng Công ty Hóa chất và Dịch vụ Dầu khí - CTCP (PVChem) đã bán 2.500.000 cổ phiếu quỹ
+PVI,2018-03-29,sell_done,-6621700,PVI: Đã bán 6.621.700 cổ phiếu quỹ
+PVI,2018-05-24,sell_done,-2000000,PVI: Công ty cổ phần PVI đã bán 2.000.000 cổ phiếu quỹ
+PVI,2020-05-06,buy_done,7590400,PVI: CTCP PVIđã mua 7.590.400 cổ phiếu làm cổ phiếu quỹ
+PVI,2021-10-27,sell_done,,PVI: Báo cáo kết quả bán cổ phiếu quỹ PVI
+PWS,2022-05-21,buy_done,34600,PWS: Công ty cổ phần Cấp thoát nước Phú Yên đã mua 34.600 cổ phiếu quỹ từ ngày 05/5/2022 đến ngày 13/5/2022
+QCC,2017-03-27,buy_done,,QCC: Báo cáo kết quả giao dịch mua lại cổ phiếu
+QCC,2018-06-11,buy_done,,QCC: Công bố thông tin về Kết quả giao dịch mua lại cổ phiếu quỹ
+QCC,2019-06-12,buy_done,40400,QCC: CTCP Đầu tư Xây dựng và Phát triển Hạ tầng Viễn thông đã mua 40.400 cổ phiếu làm cổ phiếu quỹ
+QCC,2020-05-11,buy_done,90300,QCC: CTCP Đầu tư Xây dựng và Phát triển Hạ tầng Viễn thông đã mua 90.300 cổ phiếu làm cổ phiếu quỹ
+RCD,2019-10-31,buy_done,,RCD: Công bố báo cáo kết quả giao dịch mua lại cổ phiếu
+REE,2020-12-31,buy_done,,REE: Báo cáo kết quả giao dịch mua cổ phiếu quỹ
+REE,2024-07-24,sell_done,,REE: Nghị quyết HĐQT về việc thông qua báo cáo kết quả sử dụng cổ phiếu quỹ bán cho người lao động
+REE,2024-07-24,sell_done,,REE: Báo cáo kết quả sử dụng cổ phiếu quỹ bán cho người lao động
+REE,2024-08-05,sell_done,,REE: Thông báo công văn của UBCKNN về tài liệu báo cáo kết quả sử dụng cổ phiếu quỹ để bán cho người lao động của REE
+SAC,2018-03-01,sell_done,,SAC: Công bố Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+SAS,2019-08-15,buy_done,29400,SAS: Đã mua 29.400 cổ phiếu làm cổ phiếu quỹ
+SBA,2017-11-22,buy_done,,SBA: Báo cáo kết quả giao dịch mua lại cổ phiếu
+SBA,2022-12-13,sell_done,,SBA: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+SBT,2018-05-18,buy_done,,SBT: Báo cáo kết quả giao dịch mua lại cổ phiếu
+SBT,2019-10-08,sell_done,,SBT: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+SBV,2019-01-11,buy_done,,SBV: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+SCR,2019-07-24,sell_done,,SCR: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+SED,2020-04-17,buy_done,728200,SED: CTCP Đầu tư và Phát triển Giáo dục Phương Nam đã mua 728.200 cổ phiếu làm cổ phiếu quỹ
+SFC,2025-03-06,sell_done,,SFC: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+SFI,2015-10-23,buy_done,30009,SFI - Đã mua 30.009 cổ phiếu quỹ
+SFI,2016-05-06,buy_done,,SFI - Báo cáo kết quả mua cổ phiếu quỹ
+SFI,2019-06-24,buy_done,,SFI: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+SFI,2019-10-23,buy_done,,SFI: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+SFI,2020-05-20,buy_done,,SFI: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+SFI,2020-08-04,buy_done,,SFI: Báo cáo kết quả giao dịch mua lại cổ phiếu
+SFI,2020-08-20,buy_done,,SFI: Báo cáo kết quả giao dịch mua lại cổ phiếu
+SFI,2020-08-21,buy_done,1500000,"Đại lý Vận tải SAFI (SFI) đã mua xong gần 1,5 triệu cổ phiếu quỹ"
+SGN,2016-03-31,buy_done,1000,SGN đã mua 1.000 cổ phiếu quỹ
+SGN,2017-03-06,buy_done,8500,SGN: CTCP Phục vụ Mặt đất Sài Gòn đã mua 8.500 cổ phiếu làm cổ phiếu quỹ
+SGN,2025-09-15,buy_done,,SGN: Báo cáo kết quả giao dịch mua lại cổ phiếu
+SGP,2018-06-04,buy_done,,SGP: Báo cáo kết quả giao dịch mua lại cổ phiếu
+SGR,2016-08-04,sell_done,-54600,SGR: Địa ốc Sài Gòn đã bán 54.600 cổ phiếu quỹ
+SIP,2022-11-14,buy_done,,SIP: Báo cáo kết quả giao dịch mua lại cổ phiếu
+SIP,2022-11-25,buy_done,,SIP: Công văn của UBCKNN về việc nhận được Báo cáo kết quả giao dịch mua lại cổ phiếu
+SJS,2025-07-11,sell_done,,SJS: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+SMN,2023-06-27,sell_done,,SMN: Báo cáo kết quả giao dịch bán cổ phiếu quỹ | Thông báo thay đổi số lượng cổ phiếu có quyền biểu quyết đang lưu hành
+SMN,2023-12-05,sell_done,,SMN: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+SNZ,2018-05-28,buy_done,,SNZ: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+SPP,2018-11-09,sell_done,-536200,SPP: CTCP Bao bì Nhựa Sài Gònđã bán 536.200 cổ phiếu quỹ
+SRF,2018-02-22,buy_done,,SRF: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+SRF,2018-12-27,buy_done,,SRF: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+SSC,2017-11-24,buy_done,,SSC: Báo cáo kết quả giao dịch mua lại cổ phiếu
+SSC,2019-06-05,buy_done,,SSC: Báo cáo kết quả giao dịch mua lại cổ phiếu
+SSI,2018-10-01,buy_done,,SSI: Báo cáo kết quả giao dịch mua lại cổ phiếu theo chương trình lựa chọn cho người lao động trong công ty
+SSI,2019-08-28,buy_done,,SSI: Báo cáo kết quả mua lại cổ phiếu theo chương trình lựa chọn cho người lao động
+SSI,2020-12-25,buy_done,,SSI: Báo cáo kết quả giao dịch mua lại cổ phiếu ESOP năm 2020
+SSI,2021-06-17,sell_done,,SSI: Báo cáo kết quả bán cổ phiếu quỹ
+SSI,2022-02-07,sell_done,,SSI: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+STB,2021-07-23,sell_done,,"STB đã bán 88% lượng cổ phiếu quỹ đăng ký, giao dịch đột biến"
+STB,2021-07-30,sell_done,-81500000,"Sacombank đã bán xong hơn 81,5 triệu cổ phiếu quỹ, thặng dư vốn gần 1.700 tỷ đồng"
+STB,2021-08-02,sell_done,,STB: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+STK,2020-05-08,buy_done,,STK: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+STK,2024-06-05,sell_done,,STK: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+SVI,2017-11-27,sell_done,,SVI: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+SWC,2018-11-27,buy_done,0,SWC: Tổng CTCP Đường sông Miền Namđã mua 0 cổ phiếu làm cổ phiếu quỹ
+SZE,2021-01-14,buy_done,,SZE: Báo cáo cáo kết quả giao dịch mua lại cổ phiếu
+SZL,2023-10-02,sell_done,,SZL: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+SZL,2026-07-27,sell_done,,SZL: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+TAG,2015-12-08,buy_done,26098,TAG - Đã mua thành công 26.098 cổ phiếu quỹ
+TAG,2018-08-10,buy_done,14300,TAG: CTCP Thế giới số Trần Anhđã mua 14.300 cổ phiếu làm cổ phiếu quỹ
+TCH,2018-01-09,buy_done,,TCH: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ và thay đổi số lượng cổ phiếu có quyền biểu quyết đang lưu hành
+TCH,2021-06-02,sell_done,,TCH: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+TCO,2016-11-18,buy_done,750000,TCO: Đã mua lại 750.000 cổ phiếu quỹ
+TCO,2017-09-20,buy_done,,TCO: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+TCO,2019-01-31,buy_done,,TCO: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+TCO,2021-09-10,sell_done,,TCO: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+THI,2018-10-25,buy_done,,THI: Báo cáo kết quả giao dịch mua lại cổ phiếu
+THW,2017-07-28,buy_done,,THW: Báo cáo kết quả giao dịch mua lại cổ phiếu bán ưu đãi cho người lao động khi cổ phần hóa
+TL4,2024-09-16,sell_done,-675000,TL4: Tổng công ty Xây dựng Thủy lợi 4 - CTCP đã bán 675.000 cổ phiếu quỹ từ ngày 16/08/2024 đến 13/09/2024
+TLG,2020-05-20,buy_done,,TLG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+TLG,2020-12-23,sell_done,,TLG: Báo cáo kết quả giao dịch bán cổ phiếu quỹ cho người lao động
+TLH,2021-10-28,sell_done,,TLH: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+TMS,2017-08-04,buy_done,,TMS: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+TNB,2022-07-26,sell_done,,TNB: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+TNH,2023-12-11,buy_done,,TNH: Thông báo thay đổi số lượng cổ phiếu có quyền biểu quyết đang lưu hành và báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+TNH,2025-03-28,buy_done,,TNH: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ và Thông báo thay đổi số lượng cổ phiếu có quyền biểu quyết đang lưu hành
+TNH,2026-05-25,buy_done,,TNH: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+TPB,2019-06-21,buy_done,,TPB: Báo cáo kết quả giao dịch mua lại cổ phiếu làm cổ phiếu quỹ
+TPB,2020-03-30,buy_done,,TPB: Báo cáo kết quả giao dịch mua lại cổ phiếu
+TPB,2021-05-20,sell_done,,TPB: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+TPC,2019-12-30,sell_done,,TPC: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+TPC,2026-01-09,buy_done,,TPC: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+TPH,2020-11-26,sell_done,-118900,TPH: CTCP In Sách giáo khoa tại Tp. Hà Nội đã bán 118.900 cổ phiếu quỹ
+TRC,2025-09-18,sell_done,,TRC: Thông báo thay đổi số lượng cổ phiếu có quyền biểu quyết và báo cáo kết quả giao dịch bán cổ phiếu quỹ
+TRS,2016-10-24,buy_done,1330,TRS: Đã mua 1.330 cổ phiếu làm cổ phiếu quỹ
+TRS,2021-10-27,buy_done,,TRS: Báo cáo kết quả mua lại cổ phiếu làm cổ phiếu quỹ
+TSD,2019-08-27,buy_done,,TSD: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+TSJ,2019-01-23,buy_done,,TSJ: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+TTF,2022-06-10,sell_done,,TTF: Giải trình về việc không công bố giao dịch bán cổ phiếu quỹ và Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+TTG,2024-01-24,sell_done,-50000,TTG: Báo cáo kết quả giao dịch bán 50.000 cổ phiếu quỹ
+TV2,2016-10-31,sell_done,-40500,TV2 đã bán 40.500 cổ phiếu quỹ
+TVB,2025-12-31,buy_done,,TVB: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+TVC,2021-08-30,sell_done,-7500,TVC: CTCP Tập đoàn Quản lý Tài sản Trí Việt đã bán 7.500 cổ phiếu quỹ
+TVC,2025-01-17,buy_done,8000000,TVC: CTCP Tập đoàn Quản lý Tài sản Trí Việt đã mua 8.000.000 cổ phiếu làm cổ phiếu quỹ
+TVC,2025-11-11,buy_done,14455100,TVC: Công ty Cổ phần Tập đoàn Quản lý tài sản T-Corp đã mua 14.455.100 cổ phiếu làm cổ phiếu quỹ
+TVC,2026-07-20,buy_done,20000000,TVC: Công ty Cổ phần Tập đoàn Quản lý tài sản T-Corp đã mua 20.000.000 cổ phiếu làm cổ phiếu quỹ
+TVS,2018-03-06,sell_done,,TVS: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+TVS,2018-05-10,sell_done,,TVS: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+TVS,2018-11-27,sell_done,,TVS: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+TVS,2019-02-01,sell_done,,TVS: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+TW3,2017-08-07,buy_done,600,TW3: CTCP Dược Trung ương 3 đã mua 600 cổ phiếu làm cổ phiếu quỹ
+TW3,2017-09-08,buy_done,,TW3: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+TW3,2017-11-28,buy_done,2000,TW3: CT CP Dược Trung ương 3 đã mua 2.000 cp tại ngày 27/11/2017 làm cổ phiếu quỹ
+TW3,2018-01-31,buy_done,4000,TW3: Báo cáo kết quả giao dịch mua lại 4.000 cổ phiếu quỹ
+TW3,2018-08-21,buy_done,2000,TW3: Báo cáo kết quả giao dịch mua lại 2.000 cổ phiếu của cổ đông Lê Bình Phương làm cổ phiếu quỹ
+TW3,2019-10-21,buy_done,8000,TW3: Báo cáo kết quả giao dịch mua lại 8.000 cổ phiếu quỹ
+TW3,2019-12-02,buy_done,,TW3: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ - Lần 2 năm 2019
+TW3,2019-12-26,buy_done,,TW3: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+TW3,2020-04-14,buy_done,,TW3: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ lần 1 năm 2020
+TW3,2020-10-13,buy_done,,TW3: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ lần 2 - Năm 2020
+TW3,2022-06-23,buy_done,,TW3: Báo cáo kết quả giao dịch mua lại cổ phiếu
+UDJ,2017-01-05,buy_done,,UDJ: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+UDJ,2021-03-29,sell_done,,UDJ: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+UDL,2025-06-11,buy_done,,UDL: Báo cáo kết quả giao dịch mua lại cổ phiếu
+UIC,2025-10-06,buy_done,,UIC: Báo cáo kết quả giao dịch mua lại cổ phiếu
+UNI,2021-03-25,sell_done,-301600,UNI: CTCP Viễn Liên đã bán 301.600 cổ phiếu quỹ
+VC1,2017-08-07,sell_done,-195800,VC1: Công ty cổ phần xây dựng số 1 đã bán 195.800 cổ phiếu quỹ
+VC2,2016-05-31,sell_done,-135496,VC2 đã bán 135.496 cổ phiếu quỹ
+VC3,2015-10-12,sell_done,-66200,VC3 đã bán toàn bộ 66.200 cổ phiếu quỹ
+VC7,2016-08-11,sell_done,-500000,VC7 đã bán 500.000 cổ phiếu quỹ
+VCG,2020-12-08,buy_done,39300000,VCG: Tổng CTCP XNK và Xây dựng Việt Nam đã mua 39.300.000 cổ phiếu làm cổ phiếu quỹ
+VCG,2021-08-30,sell_done,,VCG: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+VCI,2017-10-31,buy_done,,VCI: Báo cáo kết quả giao dịch mua lại cổ phiếu
+VCI,2018-03-29,buy_done,,VCI: Báo cáo kết quả giao dịch mua lại cổ phiếu
+VCI,2018-05-08,buy_done,,VCI: Báo cáo kết quả giao dịch mua lại cổ phiếu
+VCI,2018-06-11,sell_done,,VCI: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+VCI,2019-03-26,buy_done,,VCI: Báo cáo kết quả giao dịch mua lại cổ phiếu
+VCI,2020-03-23,buy_done,,VCI: Báo cáo kết quả giao dịch mua lại cổ phiếu
+VCI,2020-08-21,buy_done,,VCI: Báo cáo kết quả giao dịch mua lại cổ phiếu
+VCI,2020-10-02,sell_done,,VCI: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+VCR,2019-08-14,sell_done,-162100,VCR: CTCP Đầu tư và Phát triển Du lịch Vinaconexđã bán 162.100 cổ phiếu quỹ
+VCR,2019-12-10,sell_done,-597900,VCR: CTCP Đầu tư và Phát triển Du lịch Vinaconex đã bán 597.900 cổ phiếu quỹ
+VCS,2018-11-26,buy_done,3200000,VCS: CTCP VICOSTONEđã mua 3.200.000 cổ phiếu làm cổ phiếu quỹ
+VCS,2019-10-24,sell_done,,VCS: VICOSTONE công bố Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+VCS,2020-05-06,buy_done,4800000,VCS: Đã mua 4.800.000 cổ phiếu làm cổ phiếu quỹ
+VCS,2021-02-05,sell_done,,VCS: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+VDP,2017-10-17,buy_done,,VDP: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+VDP,2022-02-08,sell_done,,VDP: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+VE9,2020-09-01,buy_done,,VE9: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+VET,2018-08-28,buy_done,,VET: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+VET,2019-01-16,buy_done,,VET: Báo cáo kết quả giao dịch mua lại Cổ phiếu quỹ
+VET,2020-06-30,buy_done,,VET: Báo cáo kết quả giao dịch mua lại Cổ Phiếu quỹ
+VET,2020-12-30,sell_done,,VET: Báo cáo kết quả giao dịch bán cổ phiếu quỹ cho Người lao động trong Công ty
+VFG,2016-06-03,sell_done,,VFG: Báo cáo kết quả chào bán cổ phiếu quỹ cho CBCNV công ty
+VGP,2015-09-01,buy_done,85600,VGP đã mua 85.600 cổ phiếu quỹ
+VHC,2016-03-04,buy_done,102060,VHC - Đã mua 102.060 cổ phiếu quỹ
+VHC,2018-12-19,sell_done,,VHC: Thông báo về việc đã hoàn tất giao dịch bán toàn bộ cổ phiếu quỹ
+VHC,2018-12-20,sell_done,,Vĩnh Hoàn đã bán hết cổ phiếu quỹ thu hơn 10 tỷ đồng
+VHC,2019-10-23,buy_done,,VHC: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+VHC,2026-05-18,buy_done,,VHC: Báo cáo kết quả giao dịch mua lại cổ phiếu
+VHG,2015-11-16,buy_done,4000000,VHG - Đã mua trên 4 triệu cổ phiếu quỹ
+VHG,2017-03-24,sell_done,-4000000,VHG: Đã bán trên 4 triệu cổ phiếu quỹ
+VHM,2021-08-12,sell_done,,VHM: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+VHM,2024-11-26,buy_done,247000000,VHM: Đã mua 247 triệu cổ phiếu quỹ
+VIB,2018-09-20,sell_done,,VIB: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+VIB,2019-05-29,sell_done,,VIB: Báo cáo kết quả giao dịch bán cổ phiếu quỹ (dùng cổ phiếu quỹ để thưởng cho CBCNV)
+VIB,2019-07-15,sell_done,,VIB: Báo cáo kết quả giao dịch bán cổ phiếu quỹ (do thưởng cổ phiếu quỹ cho cổ đông hiện hữu)
+VIP,2018-01-08,buy_done,,VIP: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+VIP,2021-03-01,sell_done,,VIP: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+VJC,2019-08-28,buy_done,,VJC: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+VJC,2021-04-28,sell_done,,VJC: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+VJC,2021-04-29,sell_done,-17700000,"Vietjet đã bán xong hơn 17,7 triệu cổ phiếu quỹ, thu về 2.350 tỷ đồng"
+VKC,2019-02-27,buy_done,721000,VKC: CTCP Cáp nhựa Vĩnh Khánh đã mua 721.000 cổ phiếu làm cổ phiếu quỹ
+VLB,2016-10-05,buy_done,27200,VLB: CTCP Xây dựng và Sản xuất VLXD Biên Hòa đã mua 27.200 cổ phiếu làm cổ phiếu quỹ
+VLB,2019-03-08,buy_done,,VLB: Báo cáo kết quả giao dịch mua lại cổ phiếu
+VLB,2019-09-23,buy_done,,VLB: Báo cáo kết quả giao dịch mua lại cổ phiếu
+VLB,2020-08-06,buy_done,,VLB: Báo cáo kết quả giao dịch mua lại cổ phiếu
+VLB,2021-05-21,buy_done,,VLB: Báo cáo kết quả giao dịch mua lại cổ phiếu
+VLB,2023-04-17,buy_done,,VLB: Báo cáo kết quả giao dịch mua lại cổ phiếu
+VNB,2018-08-23,buy_done,11000,VNB: CTCP Sách Việt Namđã mua 11.000 cổ phiếu làm cổ phiếu quỹ
+VNB,2019-10-02,buy_done,,VNB: Báo cáo kết quả giao dịch về việc mua lại cổ phiếu quỹ
+VND,2016-05-24,buy_done,5000000,VND đã mua 5 triệu cổ phiếu quỹ
+VND,2017-01-23,buy_done,5000000,VND đã mua thành công 5 triệu cổ phiếu quỹ
+VND,2017-09-15,sell_done,,VND: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+VND,2018-12-14,buy_done,,VND: Báo cáo kết quả giao dịch mua lại cổ phiếu
+VND,2021-03-23,sell_done,,VND: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+VND,2021-11-26,sell_done,,VND: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+VNE,2017-11-27,buy_done,,VNE: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+VNE,2023-11-02,sell_done,,VNE: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+VNI,2018-09-28,sell_done,,VNI: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+VNM,2020-06-30,buy_done,,VNM: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+VNM,2021-02-01,sell_done,,VNM: Báo cáo kết quả giao dịch bán cổ phiếu quỹ
+VPB,2021-08-25,sell_done,,VPB: Thông báo công văn của UBCKNN về báo cáo kết quả sử dụng cổ phiếu quỹ để bán cho người lao động của VPB
+VPB,2023-10-03,sell_done,,VPB: Nghị quyết HĐQT về việc thông qua kết quả bán cổ phiếu theo chương trình ESOP và báo cáo kết quả chào bán cổ phiếu quỹ
+VRC,2015-03-02,sell_done,-51000,VRC - Đã bán 51.000 cổ phiếu quỹ
+VRC,2016-02-26,sell_done,-54000,VRC - Đã bán 54.000 cổ phiếu quỹ
+VRC,2016-11-25,sell_done,-196620,VRC: Đã bán 196.620 cổ phiếu quỹ
+VRE,2019-12-19,buy_done,,VRE: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+VSA,2017-06-20,buy_done,0,VSA: CTCP Đại lý Hàng hải Việt Nam đã mua 0 cổ phiếu làm cổ phiếu quỹ
+VSC,2015-08-30,sell_done,-166600,VSC - Đã bán 166.600 cổ phiếu quỹ
+VSN,2019-06-27,buy_done,,VSN: Báo cáo kết quả giao dịch mua lại cổ phiếu
+VSN,2023-05-26,buy_done,,VSN: Báo cáo kết quả mua lại cổ phiếu của người lao động
+VTP,2023-03-16,buy_done,,VTP: Báo cáo kết quả giao dịch mua lại cổ phiếu ESOP 2019 của Người lao động nghỉ việc
+VTR,2020-11-11,buy_done,,VTR: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ
+VTR,2021-05-20,buy_done,,VTR: Báo cáo kết quả giao dịch mua lại cổ phiếu của cán bộ nhân viên nghỉ việc
+XHC,2018-06-19,buy_done,,XHC: Báo cáo kết quả giao dịch cổ phiếu về việc mua lại cổ phiếu của người lao động - Ông Đào Đức Chính - Chủ tịch HĐQT
+YEG,2019-07-22,buy_done,,YEG: Báo cáo kết quả giao dịch mua lại cổ phiếu
+YEG,2020-10-15,sell_done,,YEG: Báo cáo kết quả giao dịch bán cổ phiếu quỹ

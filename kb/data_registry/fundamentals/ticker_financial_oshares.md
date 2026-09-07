@@ -131,6 +131,9 @@ chung của mọi tái dựng point-in-time.
 - [`ticker_financial.md`](ticker_financial.md) — bảng chứa cột này (CANONICAL cho các cột khác)
 - [`../price-volume/shares_outstanding_live.md`](../price-volume/shares_outstanding_live.md)
 - [`../price-volume/ticker_close_vs_price_dividend_adj.md`](../price-volume/ticker_close_vs_price_dividend_adj.md)
+- [`../price-volume/treasury_news_buyback.md`](../price-volume/treasury_news_buyback.md) — lớp lỗi
+  con cụ thể: RESTATE khi có sự kiện mua/bán CP quỹ (62-67% trong tập có `treasury_news`
+  buy_done/sell_done), overlay đo ngày hiệu lực thật (job `Taylor_20260907_160333`)
 
 ## Nguồn
 Job `Taylor_20260813_050945` (đo lại + vá sau khi quant-skeptic REFUTED vòng 1 của job
