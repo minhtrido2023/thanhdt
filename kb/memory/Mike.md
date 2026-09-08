@@ -13,34 +13,33 @@
 - Phễu candidate WIRE (cutoff=70%, trần=1.2), commit 714b5889. TV1/DGC lọt nhưng marginable=NO qua DNSE hiện tại.
 
 ## CCS/8L accruals R&D — ĐÓNG HẲN 2026-09-06
-Phase 0→0b→R3→Phase2-NARROW, tất cả NO-GO (lần thứ 3 cho ý tưởng accrual-gate). Mở lại chỉ khi có
-dữ liệu ngoài mẫu 2014-2026 + câu hỏi tiền-đăng-ký riêng.
+Phase 0→0b→R3→Phase2-NARROW, tất cả NO-GO (lần thứ 3). Mở lại chỉ khi có dữ liệu ngoài mẫu 2014-2026.
 
-## Retro 2026-09-07 — XONG (job Mike_20260907_173542)
-File `kb/incidents/retro/retro-2026-09-07.md` (commit 47168ff6), Wags CONFIRMED. 1 sự cố CÒN HỞ:
-cron `vn_realestate_monthly_check.sh` chạy 20:00 UTC (=03:02 ICT ngày sau) nhưng comment/2 file doc
-(`cron_registry.md:93`, `vn-realestate-structural-risk-20260826.md:49`) ghi sai là 20:00 ICT ngày 6 —
-do hiểu nhầm dòng `TZ=` đầu crontab chỉ set env cho script, KHÔNG đổi cách cron parse giờ (host
-Etc/UTC). arch-reviewer bắt được (NEEDS_CHANGES), nhưng Wags CHƯA sửa 3 nơi doc drift + chưa sửa
-lại con số sai trong chính finding trên bus. Pattern §29 góc mới: agent xử lý sự cố tự chép giả
-định chưa verify runtime, dù bằng chứng (mtime/ts bus) đã nằm sẵn trong log agent đang đọc.
-**Việc còn treo, cần theo dõi**: câu hỏi bus `Wags/wags-fix-not-confirmed: coord-2026-09-07` — đóng
-khi có commit sửa cả 3 nơi doc + finding trên bus.
+## Retro 2026-09-08 — XONG (job Mike_20260908_173646)
+File `kb/incidents/retro/retro-2026-09-08.md` (commit 1010d22c), Wags CONFIRMED. 4 sự cố, 2
+pattern. Mở 2 bus question mới (chưa từng escalate trước đó):
+1. `Mike/retro-2026-09-08-backup-silent-failure-recurring-3rd` — GitHub backup fail lần 3/5 tuần
+   (08-01, 08-12, 09-08), luôn cùng gốc: tín hiệu fail chìm trong digest chung, chưa có alert
+   riêng. Cần chọn: alert dòng đầu riêng / check tuổi backup độc lập / cả 2.
+2. `Mike/retro-2026-09-08-bq-cache-ticker-prune-disabled` — BQ cache TẮT cho MỌI dispatch từ
+   09-08 (ticker_prune lệch 909 dòng vs nguồn), chưa điều tra nguyên nhân, chưa có commit fix.
+   Blast radius rộng — mọi dispatch dùng BQ đang fallback network (chậm/đắt hơn).
+NAV PRICE_XCHECK gate 09-08 (broker marketPrice trễ đồng bộ) đã fix TRONG NGÀY (exit code 4 riêng
++ cron nav_sync_retry.sh 19:15-21:15, commit 8711a922/b375d0f1) — KHÔNG cần theo dõi thêm.
 
-## Bus question đang mở (2)
-1. `Wags/wags-fix-not-confirmed: coord-2026-09-07` (mới, 09-07) — 3 nơi doc drift cron
-   vn_realestate_monthly_check.sh CHƯA SỬA, xem chi tiết trên. Cửa sổ theo dõi: trước cron chạy
-   lại tháng sau (~10-06).
-2. `macro-strategist/vn-realestate-monthly-check-2026-09` — chờ user chọn A/B/C, đã ack
+## Retro 2026-09-07 — XONG
+File `kb/incidents/retro/retro-2026-09-07.md` (commit 47168ff6), Wags CONFIRMED.
+
+## Bus question đang mở (4)
+1. `Mike/retro-2026-09-08-backup-silent-failure-recurring-3rd` (mới) — xem trên.
+2. `Mike/retro-2026-09-08-bq-cache-ticker-prune-disabled` (mới) — xem trên.
+3. `Wags/wags-fix-not-confirmed: coord-2026-09-07` (09-07) — 3 nơi doc drift cron
+   vn_realestate_monthly_check.sh CHƯA SỬA (comment/2 file ghi sai giờ ICT thay vì UTC). Cửa sổ
+   theo dõi: trước cron chạy lại tháng sau (~10-06).
+4. `macro-strategist/vn-realestate-monthly-check-2026-09` — chờ user chọn A/B/C, đã ack
    triaged-needs-human bởi Wags 01:21:19Z.
-
-⚠️ Đã ĐÓNG (không còn treo, verify lại 09-07 qua bus_question_audit.py): `Wags/wags-fix-not-confirmed:
-coord-2026-09-03` (retro 09-05, tz_anchor_gate.py RULE 2, commit 0aab5fae) và
-`Mike/bq-monthly-pin-thieu-202608-202609-chay-bu-hay-khong`.
 
 ## Sát ngưỡng OKF
 kb/coding_guidelines.md 37,9KB/40KB, còn ~2,0KB đệm. §-mới tiếp theo gần như chắc chắn chạm
 ngưỡng → tách sang _ext.md khi đó.
 
-- [2026-09-08T05:01:27Z] Treasury-buyback OShares overlay (VRE vs AIS) ĐÓNG 2026-09-08: CONFIRMED 2 vòng quant-skeptic nhưng user chốt KHÔNG wire production, giữ ad-hoc tool. kb/projects/treasury-buyback-oshares-overlay-20260907.md
-- [2026-09-08T17:17:04Z] P2 warning-hygiene (đêm 09-09) tìm 3 lỗi THẬT: (1) backup GitHub chết exit128 từ 09-06 do gitlink worktree mồ côi — ĐÃ FIX commit ed19d852, verify push 057254e0 OK; (2) verify_account_snapshot rc=1 hằng ngày = MBB broker 1565 vs journal 1675 cp, cost lệch 3.6% — CHƯA điều tra, nghi corp-action 08-11; (3) BQ cache verified=false vì 1 bảng ticker_prune lệch 909 dòng → TẮT cache cho MỌI dispatch (blast radius, cùng họ lỗi retro 08-10). Thứ tự đã chốt với user: P2→P3→P1→P4.
