@@ -389,9 +389,13 @@ def main():
     # ngay trong ngày nhưng close_price() G1 vẫn trả giá TRƯỚC sự kiện — mtm_stock bị thổi
     # phồng đúng bằng giá trị 1 vị thế, cả SpaceX lẫn ZaloPay). Chỉ đối chiếu được khi
     # is_today (marketPrice của vị thế broker luôn là ảnh chụp HIỆN TẠI, vô nghĩa với
-    # --date lịch sử). Lệch >PRICE_XCHECK_TOLERANCE_PCT gần như chắc chắn là corporate
-    # action broker chưa đồng bộ hết mọi nguồn giá — fail-safe từ chối, không đoán giá nào
-    # đúng hơn (đúng nguyên tắc "không tự sửa, escalate" đã dùng xuyên suốt script này).
+    # --date lịch sử). Lệch >PRICE_XCHECK_TOLERANCE_PCT gần như chắc chắn hoặc (a) corporate
+    # action broker chưa đồng bộ hết mọi nguồn giá, hoặc (b) field marketPrice của vị thế
+    # tự đồng bộ TRỄ hơn close_price ở EOD (ca PVT 2026-09-08: broker cập nhật marketPrice
+    # trễ ~65' sau giờ đóng cửa, không phải corp-action) — script này không phân biệt được
+    # 2 trường hợp, nên vẫn fail-safe từ chối cả hai, không đoán giá nào đúng hơn. rc=4
+    # (khác rc=2 "thiếu dữ liệu") để caller (`nav_sync_retry.sh`) biết đây là case ĐÁNG
+    # RETRY tự động trong 1 cửa sổ ngắn, thay vì escalate ngay như (a).
     PRICE_XCHECK_TOLERANCE_PCT = 5.0
     if is_today:
         mismatched = []
@@ -408,9 +412,11 @@ def main():
                                f"(lệch {d:.1f}%)" for t, cp, mp, d in mismatched)
             print(f"❌ [{args.date}] Giá close_price(G1) và marketPrice của vị thế broker LỆCH "
                   f">{PRICE_XCHECK_TOLERANCE_PCT:.0f}% cho {len(mismatched)} mã — KHÔNG tính NAV "
-                  f"(nghi corporate action broker chưa đồng bộ hết nguồn giá, xem VHM 2026-08-05): "
-                  f"{detail}. Kiểm tra thủ công trước khi chạy lại.", file=sys.stderr)
-            return 2
+                  f"(broker chưa đồng bộ hết nguồn giá — corp-action hoặc trễ marketPrice EOD, "
+                  f"xem VHM 2026-08-05 / PVT 2026-09-08): "
+                  f"{detail}. Sẽ tự retry trong cửa sổ ngắn; nếu vẫn lệch sau đó cần kiểm tra thủ công.",
+                  file=sys.stderr)
+            return 4
 
     mtm_stock = sum(pos["qty"] * prices[t] for t, pos in positions.items())
 

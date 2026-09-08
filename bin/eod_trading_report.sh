@@ -154,6 +154,27 @@ _dt5g_warn_set() {
   DT5G_WARN="$(cd "$WC_ROOT" && timeout 60 python3 dt5g_freshness.py --warn-line 2>/dev/null || true)"
 }
 
+# NAV section, phân biệt "thiếu dữ liệu thật" (rc=2/3, cần người) vs "lệch giá TẠM THỜI,
+# tự retry được" (rc=4 — gate PRICE_XCHECK của daily_nav_snapshot.py; ca PVT 2026-09-08:
+# marketPrice của vị thế broker tự đồng bộ trễ ~65' sau EOD, không phải corp-action).
+# rc=4 → ghi marker cho `nav_sync_retry.sh` (cron 15'/lần, 19:15-21:15 ICT) tự chạy lại,
+# hiển thị dòng nhẹ thay vì "❌ ... kiểm tra thủ công" (phần lớn case tự hết <90').
+# Set biến toàn cục NAV_SECTION — dùng "$(...)" trực tiếp (không pipe) để không mất $?
+# (bug cũ: "cmd | grep -v ..." khiến exit code của cmd bị pipe nuốt mất).
+_nav_section() {
+  local raw rc
+  raw="$(python3 "$ROOT/bin/daily_nav_snapshot.py" --account "$ACCOUNT" --date "$PLAN_DATE" 2>&1)"
+  rc=$?
+  raw="$(printf '%s\n' "$raw" | grep -v '^\[dnse\]')"
+  if [ "$rc" = "4" ]; then
+    mkdir -p "$ROOT/state/nav_pending_retry"
+    printf '%s\n' "$raw" > "$ROOT/state/nav_pending_retry/${ACCOUNT}_${PLAN_DATE}.log"
+    NAV_SECTION="⏳ [$PLAN_DATE] NAV tạm hoãn — giá vị thế broker đang tự đồng bộ (thường xong trong ~90'), sẽ tự cập nhật, không cần kiểm tra tay."
+  else
+    NAV_SECTION="$raw"
+  fi
+}
+
 # Trả về block (có newline dẫn đầu) khi có dữ liệu, "" khi lỗi/không có. Gọi LAZY — chỉ
 # ở case HOLD-day + full-render, tránh chạy BQ trong nhánh cảnh báo lỗi (case 1/3).
 # Có thể nhiều dòng (gate + base-rate) — prefix đã gắn sẵn từng dòng trong python.
@@ -225,7 +246,7 @@ elif [ "$N_ORDERS_TODAY" = "0" ]; then
   # thiết kế). Vẫn báo NAV để xác nhận hệ thống sống + số đúng, không phải im lặng.
   # grep -v [dnse]: lọc log kết nối broker debug (connect()/token) — không thuộc về
   # report client-facing, giữ minh bạch/gọn (user 2026-07-07).
-  NAV_SECTION="$(python3 "$ROOT/bin/daily_nav_snapshot.py" --account "$ACCOUNT" --date "$PLAN_DATE" 2>&1 | grep -v '^\[dnse\]')"
+  _nav_section
   _dt5g_warn_set
   MSG="${DT5G_WARN:+$DT5G_WARN
 
@@ -551,7 +572,7 @@ elif os.path.exists(mismatch_file):
 PYEOF
 )"
 
-NAV_SECTION="$(python3 "$ROOT/bin/daily_nav_snapshot.py" --account "$ACCOUNT" --date "$PLAN_DATE" 2>&1 | grep -v '^\[dnse\]')"
+_nav_section
 
 # DC-book NEUTRAL waterfall (paper sleeve) MOVED OUT 2026-07-07 — user mandate: mọi
 # paper-trading report gộp về MỘT nhóm (Paper Programs Daily Report,
