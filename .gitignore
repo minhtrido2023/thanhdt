@@ -40,3 +40,11 @@ agents/Taylor/exp_valframe/metrics_daily.csv
 agents/Taylor/exp_valframe/metrics_full.csv
 agents/Taylor/probe_fa_rebuild/fundamental_rating_all_probe.csv
 agents/Taylor/probe_fa_rebuild/fundamental_rating_probe.csv
+
+# ---- Session worktrees (2026-09-09) — see the matching block in the parent repo's
+#      .gitignore. Transient per-session worktrees under agents/ were tracked as
+#      GITLINKS (mode 160000, no .gitmodules); a removed worktree leaves a dangling
+#      gitlink that makes `git status` fatal on recursion. That broke the nightly
+#      GitHub backup for 3+ days. Work always lands on master before cleanup, so
+#      nothing of value is lost by never tracking them.
+agents/wt-*/
