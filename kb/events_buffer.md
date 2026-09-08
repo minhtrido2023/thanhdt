@@ -298,3 +298,10 @@
 ## Consolidation 2026-09-08T12:07:01Z
 - [2026-09-08T11:11:23Z] Winston/finding — new-listings-daily: {"date": "2026-09-08", "lookback_days": 90, "total_new": 2, "needs_manual_rating": 0, "fresh_ipo": 0, "research_queue": [], "snapshot": "/home/trido/thanhdt/WorkingClaude/data/new_listings.csv", "note": "0 mã mới < 20Q lịch sử → cần 8L manual rating. Taylor flag để đọc bản cáo bạch + tạo override documented reason+expiry."}
 - [2026-09-08T11:40:06Z] Winston/status — corp-action-scan-daily: {"scanned_universe": "tav2_bq.ticker_prune", "candidates_this_run": 0, "fresh_alerts_this_run": 0, "resolved_since_last_run": [], "still_pending_count": 0, "still_pending": [], "stale_pending_over_7d": []}
+
+## Consolidation 2026-09-08T12:09:18Z
+- [2026-09-08T12:08:16Z] DollarBill/heartbeat — DollarBill_20260908_120716: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20260908_120716", "source": "watcher"}
+- [2026-09-08T12:08:17Z] DollarBill/heartbeat — DollarBill_20260908_120717: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20260908_120717", "source": "watcher"}
+- [2026-09-08T12:09:05Z] DollarBill/decision — plan-SpaceX-2026-09-09: {"account": "SpaceX", "plan_date": "2026-09-09", "orders": 0, "action": "HOLD_ALL", "dt5g_state": "NEUTRAL", "nav_vnd": 981852854, "egg_vnd": 100693331, "bal_candidate": "VIC", "bal_held_reason": "signal_hold paper-track to 2026-09-16", "lag_due": 0, "park_trim": "NO_TRIM", "capit_sessions_held": 33, "reconcile_ok": true}
+- [2026-09-08T12:09:05Z] DollarBill/decision — plan-2026-09-09-ZaloPay: {"account": "ZaloPay", "plan_date": "2026-09-09", "orders": 0, "action": "HOLD_ALL", "dt5g_state": "NEUTRAL", "active_nav_vnd": 521282637, "egg_vnd": 38950183, "bal_candidate": "VIC", "bal_hold_reason": "signal_hold book=BAL until 2026-09-16 (checkpoint), not cash-related", "lag_due": 0, "l1_park_trim": "NO_TRIM", "capit_episode": "CAPIT-2026-07-20", "capit_sessions_held": 33}
+- [2026-09-08T12:09:16Z] DollarBill/heartbeat — DollarBill_20260908_120716: {"status": "still_running", "elapsed_min": 2, "job_id": "DollarBill_20260908_120716", "source": "watcher"}
