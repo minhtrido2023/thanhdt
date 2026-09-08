@@ -43,3 +43,4 @@ File `kb/incidents/retro/retro-2026-09-07.md` (commit 47168ff6), Wags CONFIRMED.
 kb/coding_guidelines.md 37,9KB/40KB, còn ~2,0KB đệm. §-mới tiếp theo gần như chắc chắn chạm
 ngưỡng → tách sang _ext.md khi đó.
 
+- [2026-09-08T17:48:50Z] P2-③ BQ cache drift XONG 09-09: root cause = chunked delta khong bao gio tai lai nam cu (sync_bq_cache.py:464), upstream ghi de partition cu => drift 909 dong ticker_prune => co AND toan cuc tat CA cache cho moi dispatch. Fix _drifted_years() commit 3ff20579, verified OK 14/14 bang + preflight PASS. Con lai P2: (2) MBB journal 1565 vs 1675 chua dieu tra; (4)(5) nhieu log CLOUD_SDK + vnstock chua dap.
