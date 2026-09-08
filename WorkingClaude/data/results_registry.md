@@ -6191,3 +6191,290 @@ hẳn).
 **Files:** `mike/agents/Taylor/research/early_recovery_margin_lever_20260825.md` + thư mục cùng tên
 (`step0_control.py` … `step5_control_uncond.py`, `exits.csv`, `base_daily.csv`). CSV pin R3
 **KHÔNG bị đụng** (job này chỉ ĐỌC).
+
+## 2026-08-30 — CUSTOM30V ACCRUAL-QUALITY GATE (cash-flow-quality axis): **NO-GO trên ngưỡng pre-registered** — job `Taylor_20260830_014429`
+
+**Nguồn gốc:** đề xuất từ nghiên cứu sơ bộ 2026-08-29 (bus finding
+`custom30v-cashflow-quality-selector-20260830`, `research/custom30v_cashflow_quality_selector_20260830.md`)
+— double-sort 47 quý cho thấy trong nhóm EY rẻ nhất, tercile accrual TỐT NHẤT hơn tercile XẤU NHẤT
++2,05pp/2M (t=2,59, p=0,013). User duyệt 2026-08-30 08:44 ICT chạy full backtest cycle trước khi wire.
+
+**Pre-registration (TRƯỚC khi chạy full backtest):** ngưỡng gate = loại **tercile xấu nhất (33%)**
+theo `accrual_ratio=(TTM_NP-TTM_CFO)/|TTM_NP|` (TTM_X=X_P0+X_P1+X_P2+X_P3, **raw VND** — xem đính
+chính CF_OA_P0-P4 trong `bigquery_schema.md` cùng job), áp trong `CFO_POOL` (top-60 liquid+gated)
+TRƯỚC khi rank yieldcombo, chỉ non-financial routes (route NOT IN {BANK,INSURANCE,SECURITIES,
+REALESTATE}), PIT as-of Release_Date (fallback +45d, cùng quy ước QFLOOR/DY). `TTM_NP<=0` hoặc
+thiếu dữ liệu → neutral pass-through (không loại). 20%/50% chỉ là điểm robustness, KHÔNG phải ứng
+viên thay thế.
+
+**Harness:** fork `custom_basket.py`→`custom_basket_ag.py` (mode mới `yieldcombo_agate`,
+`custom_basket.py` KHÔNG bị đụng) + `pt_v23_audit_2014.py`→`engine_ag.py` (chỉ đổi import), tại
+`mike/agents/Taylor/research/custom30v_accrual_gate_20260830/`. Lệnh pin R3 nguyên văn (snapshot
+`bq_cache_asof20260729_postrestate`, `NAV_TOTAL_B=50 ETF_LIQ=custompitg BASKET_WT=namecap
+PARK_STATES="3:0.7" AUDIT_END=2026-06-19 LAG_ADV_BASIS=price`), chỉ thêm `BASKET_SELECT` +
+`BASKET_AGATE_PCT`. **Chân control (`BASKET_SELECT=yieldcombo`) tái lập pin R3 TỪNG CHỮ SỐ**
+(28,86%/1,90/−17,8%/1,62/1.178,01B, IS 27,09/OOS 30,48) ⇒ harness hợp lệ.
+
+| Leg | CAGR | Sharpe | MaxDD | Calmar | Final NAV | IS 14-19 | OOS 20+ | self-check |
+|---|---|---|---|---|---|---|---|---|
+| ctrl (0%, = R3) | 28,86% | 1,90 | −17,8% | 1,62 | 1.178,01B | 27,09% | 30,48% | 0 VND (BAL+LAG) |
+| agate20 (robustness) | 29,10% | 1,92 | −17,7% | 1,64 | 1.205,10B | 27,54% | 30,51% | 0 VND |
+| **agate33 (PRE-REGISTERED)** | **28,76%** | 1,91 | −17,7% | 1,63 | 1.166,72B | **27,01%** | **30,35%** | 0 VND |
+| agate50 (robustness) | 29,30% | 1,95 | −17,4% | 1,68 | 1.229,09B | 26,07% | 32,31% | 0 VND |
+
+**VERDICT trên ngưỡng pre-registered (agate33): NO-GO.** IS **−0,08pp** VÀ OOS **−0,13pp** (cả hai
+XẤU ĐI, fail luật WIRE cần cả hai cải thiện) — Sharpe/Calmar/DD nhích tốt hơn chút (nhiễu, không đủ
+bù CAGR). **DSR agate33 vs ctrl P=0,52** (gần như coin-flip, xa dưới ngưỡng 0,95 → RED FLAG per
+`coding_guidelines.md`). **PBO trên họ 4 điểm {0/20/33/50%} = 0,607 (≥0,5)** — họ biến thể dễ
+overfit nếu chọn theo kết quả nhìn thấy; 20%/50% lệch dương KHÔNG được đề xuất thay thế vì đó đúng
+là hành vi data-snooping mà pre-registration được dựng ra để chặn.
+
+**N thật:** ~47-48 lần rebalance quý (2014→2026), khớp thang N=47 của test IC sơ bộ — không có
+row-count inflation.
+
+**Vì sao double-sort dương nhưng full-portfolio âm/wash:** double-sort đo đúng CẠNH trong-nhóm
+(top-EY tercile only, 2M horizon, không cost); gate thật chạy trên TOÀN BỘ pipeline custom30V
+(pool-60→rank(1/PE+1/PCF)→top-30, không phải "top-EY-tercile trước") VÀ chỉ là 1 phần NAV (parking
+NEUTRAL, book BAL/LAG khác không đụng), qua TC 0,1%/chiều thật (`simulate_holistic_nav.py`) — pha
+loãng đúng như cơ chế `eyrisk` NO-GO trước đó (mọi discount/gate trên EY score làm tệ đi khi đưa vào
+production dù proxy/IC-level dương). **2022 (crisis) cải thiện +4-5pp mọi ngưỡng** (né đúng tên
+accrual xấu trong năm giảm) nhưng **2021 (bull) xấu đi ở agate33** (−7pp) — quality vs momentum
+đánh đổi, không phải bug.
+
+**Không wire.** Files: `mike/agents/Taylor/research/custom30v_accrual_gate_20260830/`
+(`custom_basket_ag.py`, `engine_ag.py`, `dsr_pbo_agate.py`, `eng_{ctrl,agate20,agate33,agate50}.log`).
+CSV pin R3 KHÔNG bị đụng (4 CSV output đều non-canonical `_exp_sel*`/`_exp_ctrl` tag).
+
+**Update 2026-08-30 (quant-skeptic pass):** verify tìm ra bug thật trong `accrual_asof`
+(`dropna()` xoá các dòng TTM_NP<=0 TRƯỚC khi dựng lịch sử per-ticker → tên đang lỗ tại rebal date
+âm thầm rơi về ratio CŨ HƠN thay vì `None`/pass-through như tài liệu — ~11,2% số report ticker-quý
+bị ảnh hưởng theo đo BQ trực tiếp). Đã sửa (mirror đúng pattern `dy_at`: kiểm định nghĩa TẠI thời
+điểm lookup, không lọc trước khi dựng lịch sử) + chạy lại cả 3 chân agate20/33/50. **Kết quả sau
+sửa BYTE-IDENTICAL với trước sửa** (Final NAV khớp tới VND, DSR/PBO khớp 4 chữ số thập phân) — bug
+có thật nhưng KHÔNG đổi kết quả thực tế (CFO_POOL đã lọc rating≤3 + top-60 thanh khoản, quần thể
+đó hiếm khi có TTM_NP≤0). **quant-skeptic verdict cuối: CONFIRMED, high confidence** — NO-GO đứng
+vững. Đề xuất thêm vào danh sách BỊ LOẠI vĩnh viễn ở `context_taylor_mini.md`.
+
+## 2026-08-30 — CUSTOM30V ACCRUAL-QUALITY GATE, biến thể SECTOR-NEUTRAL: **NO-GO** — job `Taylor_20260830_035832`
+
+**Nguồn gốc:** job `_031841` chuẩn hoá accrual theo sector-group (`FLOOR(ICB_Code/1000)`) thấy
+double-sort proxy mạnh hơn pooled (+2,69pp/2M t=3,17 vs +2,20pp t=2,35, LOO 12/12 năm không đổi
+dấu) nhưng tự flag 1 gap panel (IC(EY) 0,0316 vs 0,0697 gốc) — user duyệt 2 bước: (1) đối soát gap
+trước, (2) full backtest cycle nếu gap không phải lỗi nghiêm trọng.
+
+**Bước 1 — đối soát panel: XÁC NHẬN LỖI CODE trong panel gốc** (không phải vintage drift). BQ WHERE
+`EXTRACT(DAYOFYEAR FROM time) BETWEEN 1 AND 7 AND MOD(EXTRACT(MONTH FROM time),3)=1` — DAYOFYEAR
+reset mỗi năm nên [1,7] chỉ khớp tuần đầu tháng 1, giao với MOD(month,3)=1 sụp lại thành CHỈ tháng 1
+mỗi năm. "47 quý" của tài liệu gốc thực chất là 47 ngày giao dịch trong tuần đầu tháng 1 qua 12 năm
+(N bị thổi phồng ~4x, mẫu chỉ có tháng 1 — thiên lệch Tết/đầu năm). Panel sector-neutral (`_031841`,
+`pull_sector_panel.sql`) xác nhận ĐÚNG (48 (year,quarter) cell đầy đủ 4 quý, dedup rn=1). Kết luận
+double-sort GATE vẫn đứng (chạy lại đúng trên panel chuẩn), chỉ biên độ IC/double-sort của tài liệu
+gốc không đáng tin. Full-backtest engine không bị ảnh hưởng (tính PIT trực tiếp từ `ticker_financial`
+mỗi rebal, độc lập với 2 panel CSV explore). Chi tiết:
+`mike/agents/Taylor/research/custom30v_accrual_panel_reconciliation_20260830.md`.
+
+**Bước 2 — full backtest, mechanism = GATE (không phải tiebreak), sector-neutral standardization**:
+extend `custom_basket_ag.py` (biến `BASKET_AGATE_SECNEUTRAL`, OFF mặc định = byte-identical), rank/
+drop worst-tercile trong TỪNG sector-group thay vì pool-wide. Pre-registered 33% (khớp pooled để so
+sánh trực tiếp), 20%/50% chỉ robustness. ctrl dùng lại byte-identical từ job pooled (path code không
+chạm khi SECNEUTRAL=0).
+
+| Leg | FULL CAGR | IS 14-19 | OOS 20+ | Sharpe | MaxDD | Calmar | Final NAV | self-check |
+|---|---|---|---|---|---|---|---|---|
+| ctrl (0%, = pooled ctrl = R3) | 28,86% | 27,09% | 30,48% | 1,90 | −17,8% | 1,62 | 1.178,01B | 0 VND |
+| agate20sec (robustness) | 29,57% | 27,96% | 31,04% | 1,93 | −17,7% | 1,67 | 1.261,49B | 0 VND |
+| **agate33sec (PRE-REGISTERED)** | **28,85%** | **27,16%** | **30,39%** | 1,91 | −17,2% | 1,67 | 1.176,89B | 0 VND |
+| agate50sec (robustness) | 28,97% | 26,59% | 31,15% | 1,91 | −17,6% | 1,64 | 1.189,81B | 0 VND |
+
+**VERDICT trên ngưỡng pre-registered (agate33sec): NO-GO.** Δvs ctrl: FULL −0,01pp, **IS +0,07pp
+(cải thiện) NHƯNG OOS −0,09pp (xấu đi)** — trái dấu, fail luật WIRE (cần CẢ HAI cải thiện). **DSR
+agate33sec vs ctrl P=0,509** (coin-flip, RED FLAG <0,95). **PBO family {0/20/33/50%} = 0,622**
+(≥0,5, dễ overfit nếu chọn theo kết quả nhìn thấy).
+
+**So với bản pooled** (IS −0,08pp, OOS −0,13pp, cả hai xấu đi, DSR P=0,52, PBO=0,607): sector-neutral
+làm biên độ suy giảm NHỎ HƠN nhiều (gần như wash thay vì xấu rõ ràng cả hai phía) nhưng KHÔNG đổi
+được kết luận — vẫn trái dấu IS/OOS, vẫn fail DSR/PBO ở mức tương đương. Cùng cơ chế pha loãng đã
+chẩn đoán ở bản pooled: double-sort đo cạnh trong-nhóm (top-EY-tercile, không TC), gate thật chạy
+trên toàn pipeline (CFO_POOL→rank(1/PE+1/PCF)→top-30) qua TC 0,1%/chiều thật.
+
+**Không wire.** 3 phép thử độc lập (gate/pooled, tiebreak/pooled, gate/sector-neutral) trên cùng trục
+accrual-quality đều NO-GO cùng lý do cấu trúc — không đề xuất thêm biến thể ngưỡng/độ chi tiết sector
+nào nữa trên trục này. quant-skeptic KHÔNG được gọi (dispatch chỉ bắt buộc trước khi đề xuất wire;
+đây là NO-GO). Files: `mike/agents/Taylor/research/custom30v_accrual_gate_20260830/`
+(`custom_basket_ag.py` extended, `dsr_pbo_agate_sec.py` mới, `eng_agate{20,33,50}sec.log`). CSV pin
+R3 không bị đụng. Writeup đầy đủ:
+`mike/agents/Taylor/research/custom30v_accrual_gate_sector_neutral_full_backtest_20260830.md`.
+
+## 2026-09-05 — CCS Phase 0 (trade ledger BAL/LAG + PIT feature panel) — job `Taylor_20260905_135003`
+
+**Không phải một kết quả backtest** — đây là bước TRÍCH XUẤT của nghiên cứu Conditional Conviction
+Sizing (đề cương `mike/reports/research_proposal_conviction_sizing_20260905.md`, user duyệt 2026-09-05).
+Không đổi engine, không tune, không kết luận hypothesis nào. Ghi vào đây vì nó **tái xác nhận pin R3**.
+
+**PIN R3 TÁI LẬP BYTE-IDENTICAL sau 33 ngày.** Chạy lại `pt_v23_audit_2014.py` (bản sao có 2 khối dump
+gated `CCS_DUMP_DIR`, code production không đổi ký tự nào — verify bằng `diff`) với **đúng lệnh pin
+nguyên văn** + snapshot đóng cứng `data/bq_cache_asof20260729_postrestate` + `$DNA_PYEXE` + threads=1
+⇒ CSV md5 **`7d053e6201c9d107685ff4d1dd9d2d2a`**, trùng tuyệt đối artifact pin 2026-08-03; `diff` toàn
+file (chuẩn hoá hậu tố `EXP_TAG`) = **0 dòng**. Headline: Final NAV 1.178,01B / CAGR 28,86% /
+Sharpe 1,90 / MaxDD −17,8% / Calmar 1,62 / self-check 0 VND cả 2 sổ.
+
+⚠️ **Ghi lại vì suýt bị đọc nhầm:** `data/earnings_surprise_data.pkl` + `data/earnings_events_classified.csv`
+đã refresh 2026-09-04, và bản chạy hôm nay sinh **5.319** tín hiệu LAG thay vì **5.317** như log lần pin.
+Ledger vẫn không đổi một byte ⇒ 2 sự kiện thêm vào **không bao giờ thành lệnh** (trần vị thế/thanh
+khoản/đã nắm giữ). Drift có thật ở panel ứng viên nhưng **trơ với sổ giao dịch**. Đừng suy ra "engine
+không tất định" từ dòng `LAG signals in window`.
+
+**Deliverable:** `mike/agents/Taylor/research/ccs_phase0_Taylor_20260905_135003/trade_ledger_bal_lag_exp.csv`
+— 2.056 entry (505 BAL + 1.551 LAG, 2014-01-24→2026-05-29), 45 cột: feature PIT tại `signal_date`
+(dd52, 1/PE tercile cắt ngang universe_pit, 8L rating + `rating_asof`, %ADV, sector, DT5G state,
+số phiên từ upgrade, breadth-tercile **t−1**, rank tín hiệu trong book, LAG surprise) + outcome
+(ret, contribution VND, 2 định nghĩa R-multiple). Rổ parking custom30V tách sang file riêng.
+Báo cáo: `mike/agents/Taylor/research/ccs_phase0_trade_ledger_20260905.md`.
+
+**Self-check 0 VND — đọc cho đúng kiến trúc.** META `combination_note` của engine: *books are
+independent 25B reference ledgers; the allocator scales their RETURN STREAMS into combined NAV*
+⇒ đóng góp VND **chỉ cộng được ở cấp SỔ**. `25B + Σ contribution − NAV sổ cuối` = **−0,000061 VND (BAL)**
+/ **0,000000 VND (LAG)**; sai số lớn nhất trong mọi identity là 1,95 mili-VND trên 590,76 tỷ (2e-15
+tương đối, cùng bậc self-check của chính engine). Combined NAV cuối 1.178.009.871.755,57 VND khớp pin.
+
+**Ba bug/bẫy đã bắt được, đều mang đi được:**
+1. **`holding_id` mồ côi**: engine phát ra đúng 1 dòng exit `VCR_20200427_?` (fallback
+   `entry.get("seq_id","?")` ở `shn.py:1301`) trong khi buy mang `VCR_20200427_1409` ⇒ ledger lệch
+   **−770.867.164 VND**. Artifact đánh nhãn, KHÔNG ảnh hưởng NAV/số pin. Ai dựng lại ledger từ TX
+   phải xử lý, có `assert` chặn.
+2. **Gán ngược kết quả `merge_asof` bằng `.to_numpy()`** vào frame chưa sort ⇒ **528/706 dòng sai
+   8L rating**, im lặng, coverage vẫn đẹp. Luôn giữ index gốc rồi gán theo index.
+3. **Ngày tín hiệu ≠ phiên liền trước phiên fill đầu tiên**: `shn` xếp lệnh vào `pending_entries`,
+   trần vị thế/thanh khoản đẩy fill lùi tới 3 phiên (đo được: {0:1944, 1:3, 2:2, 3:1}). Khớp đúng
+   ngày hụt 6/1.498 dòng LAG (BAL 0/452). Sửa bằng backward as-of dung sai 5 phiên (= `max_fill_days`)
+   ⇒ **100% khớp**. Chẩn đoán đầu tiên đổ cho drift vintage là SAI — đo khoảng lệch trước khi quy nhân.
+
+**Audit PIT 9/9 PASS** (`pit_audit_exp.json`): 0 tham chiếu cột `profit_*`; `signal_date` <
+`entry_fill_date` 2.056/2.056; dd52 tái lập từ chỉ Close ≤ signal_date (max\|Δ\| 9,7e-17);
+**breadth thật sự trễ t−1 — corr(pct252_t−1, r_VNI_t) = +0,0300 vs cùng phiên +0,1105**; DT5G chỉ
+đọc `vnindex_5state_dt5g_live` (bảng base TRAP không xuất hiện); `universe_pit_q.rating_asof` ≤ phiên
+trên **toàn bảng** 0/1.070.731.
+
+**N episode độc lập** (`n_episode_by_bucket_exp.csv`, 70 bucket, episode = cụm entry cách nhau ≤10
+phiên): **28/70 THIN (<30 episode) ⇒ chỉ mô tả**. Ba ràng buộc thiết kế cho Phase 1: (a) **H5 mỏng
+đúng ở phía muốn upsize** — "≤10 phiên sau upgrade DT5G" chỉ **21 episode**, đây là trần cấu trúc
+(DT5G cố ý chỉ có 49 transition), không mở rộng mẫu được; (b) **H2 vỡ cả 3 ô recovery=True**
+(BAL 15 / LAG 11 / BOTH 20 episode) vì nó là H5 × tercile — cần định nghĩa "recovery" thứ hai không
+dựa DT5G-upgrade; (c) **H3 chỉ chạy được ở mức gộp 2 sổ hoặc LAG** — riêng BAL cả 3 tercile 24–27
+episode. H1/H4/H6 đủ N ở mọi ô.
+
+**Cảnh báo dữ liệu cho Phase 1:** `ABANDONED_REFUND` chiếm **853/1.551 = 55% dòng LAG** (BAL 191/505).
+Đó là lệnh bị bỏ dở giữa chừng khi fill nhiều phiên rồi hoàn vị thế — round-trip thật nhưng bản chất
+là ràng buộc thanh khoản, không phải một "kèo" của chiến lược. Phải chốt cách xử lý **trước khi nhìn số**.
+
+## 2026-09-06 — 8L PHASE 1: R3 BACKTEST T1 ACCRUALS FLOOR (custom30V/BAL, 2 nhánh abs/demean): **NO-GO cả 2** — job `Taylor_20260906_022452`
+
+**Nguồn gốc:** 8L Phase 0 (`Taylor_20260905_171403`, 4 trục chất lượng lợi nhuận, T1 accruals
+`accr_q=(NP_P0-CF_OA_P0)/totalAsset_P0` sống duy nhất, AUC 0,4729 p_BH=1,4e-7) → Phase 0b
+(`Taylor_20260906_015330`, qua sector-confound/liquidity/cluster-robust) → user duyệt chạy R3.
+Report đầy đủ: `mike/agents/Taylor/research/ccs_phase0_earnings_quality/report_r3_20260906.md`.
+
+**Harness:** fork `custom_basket.py`→`custom_basket_t1.py` (env `BASKET_T1FLOOR=""/abs/demean`,
+injection point giống hệt `BASKET_QFLOOR` — gate trong `CFO_POOL` của book BAL/custom30V NEUTRAL
+parking, KHÔNG chạm LAG) + `pt_v23_audit_2014.py`→`engine_t1.py` (chỉ đổi import), tại
+`mike/agents/Taylor/research/ccs_phase0_earnings_quality/r3_t1floor_20260906/`. Ngưỡng ĐÓNG BĂNG
+từ Phase 0b (không re-estimate): `abs_cutoff=0,045034` / `demean_cutoff=0,039267` (IS P80, sector
+mean theo `ICB_Code` đầy đủ 66 ngành). Lệnh pin R3 nguyên văn (`bq_cache_asof20260729_postrestate`,
+`NAV_TOTAL_B=50 ETF_LIQ=custompitg BASKET_WT=namecap PARK_STATES="3:0.7" AUDIT_END=2026-06-19
+LAG_ADV_BASIS=price`), chỉ thêm `BASKET_T1FLOOR`. **Chân control tái lập pin R3 BYTE-IDENTICAL**
+(28,86%/1,90/−17,8%/1,62/1.178,01B, IS 27,09/OOS 30,48) ⇒ harness hợp lệ.
+
+| Leg | CAGR (Δ) | IS 14-19 (Δ) | OOS 20+ (Δ) | Sharpe | MaxDD | Calmar | Final NAV | self-check |
+|---|---|---|---|---|---|---|---|---|
+| ctrl (=R3) | 28,86% | 27,09% | 30,48% | 1,90 | −17,8% | 1,62 | 1.178,01B | 0 VND |
+| t1abs | 28,91% (+0,05pp) | 26,68% (**−0,41pp**) | 30,96% (+0,48pp) | 1,95 | −16,1% | 1,80 | 1.183,74B | 0 VND |
+| t1demean | 29,04% (+0,18pp) | 26,94% (**−0,15pp**) | 30,96% (+0,48pp) | 1,95 | −16,6% | 1,75 | 1.197,96B | 0 VND |
+
+**VERDICT: NO-GO cả 2 nhánh, fail cả 3 tiêu chí GO đã khoá trước khi chạy:**
+1. **Trái dấu IS/OOS** — delta CAGR ÂM ở IS (−0,41/−0,15pp) trong khi DƯƠNG ở OOS (+0,48pp cả hai).
+2. **DSR RED FLAG mọi cách tính** — kể cả không hiệu chỉnh N-trial: P≈0,57 (gần coin-flip) vs
+   ctrl; hiệu chỉnh N_trials thật của cả chuỗi (Phase0 4 trục + Phase0b 3 biến thể + R3 tự nó 2
+   nhánh = N=9, sàn N=7): DSR sụp xuống **P=0,0004** (N=9) / **P=0,0061** (N=7).
+3. **Per-year LOO**: full-period delta thực chất là hiệu số 2 hiệu ứng đơn-năm bù trừ lớn — 2021
+   (bull, floor loại tên tăng nóng accrual cao → **chi phí −0,52/−0,58pp riêng năm đó**) vs 2022
+   (bear, floor tránh tên earnings-quality xấu → **lợi +0,49/+0,51pp riêng năm đó**), 11 năm còn
+   lại không năm nào đóng góp >0,3pp. Đóng góp đơn-năm lớn nhất **>>50%** full-period delta
+   (+0,15/+0,24pp) — chữ ký reshuffle-luck (bài học Wave1/H8a 2026-07-05).
+
+PBO family 3-điểm = 0,076 (không báo overfit, nhưng caveat: 3 chuỗi tương quan rất cao nên PBO ít
+quyền năng phân biệt ở đây — không dùng để bác DSR). Kiểm tra executable: floor giảm **<2% số mã /
+<4% số ngày-nắm-giữ** trên BAL (236→232/233 mã, 2.619→2.520/2.532 ngày), sổ LAG không đổi ⇒
+**KHÔNG phải hiện vật cô đặc danh mục** — delta đến từ 2021/2022 như LOO chỉ ra, không phải số mã
+ít đi.
+
+**Đối chiếu tiền lệ trực tiếp:** 2 thử nghiệm accrual-gate 2026-08-30 (pooled + sector-neutral,
+CÙNG book, CÙNG injection point `CFO_POOL`, công thức/ngưỡng khác — TTM tercile-33% thay vì
+quintile-IS-frozen) cũng NO-GO nhưng vì lý do KHÁC (pha loãng qua pipeline, IS/OOS trái dấu ở
+sector-neutral). Lần này NO-GO vì cơ chế khác (LOO 2-năm bù trừ + DSR sụp) — nhưng **3 phép thử
+độc lập trên cùng trục ý tưởng (accrual-quality gate trong `CFO_POOL` custom30V) nay đều NO-GO**,
+mỗi lần fail theo cách khác nhau. **Không đề xuất thêm biến thể ngưỡng/công thức accrual nào nữa
+trên injection point này.**
+
+**Không wire** `rating_8l.py`/`custom_basket.py` production. Files:
+`mike/agents/Taylor/research/ccs_phase0_earnings_quality/r3_t1floor_20260906/` (`custom_basket_t1.py`,
+`engine_t1.py`, `derive_t1floor_params.py`, `t1floor_params.json`, `analyze_r3.py`, `run_leg.sh`,
+`eng_{ctrl,t1abs,t1demean}.log`). CSV pin R3 KHÔNG bị đụng (3 CSV output tag `_exp_*`, §8).
+
+---
+
+## 2026-09-06 — CCS Phase 2-NARROW: trim 50% tercile ĐÁY của rank tín hiệu (job `Taylor_20260906_153255`) — **NO-GO**
+
+Overlay sizing THUẦN trên pin R3 (`NAV_TOTAL_B=50`, `universe_pit`, snapshot
+`bq_cache_asof20260729_postrestate`, `AUDIT_END=2026-06-19`, threads=1, `$DNA_PYEXE`): nhân 0,5 vào
+`target_value` của các lệnh mà `sig_rank_tercile == BOTTOM` (tính PIT trong harness, không join ngược
+ledger). Bộ chọn tín hiệu / DT5G / allocator `w_LAG` / CAPIT **không đổi tham số nào**. Tiền-đăng ký
+với **N_trials = 8** (7 hypothesis Phase 1 + trial hậu nghiệm này); 6 tiêu chí khoá trước khi chạy.
+
+**Chân control tái lập pin R3 md5 `7d053e6201c9d107685ff4d1dd9d2d2a` TRÙNG TUYỆT ĐỐI** artifact pin
+2026-08-03 (không cần chuẩn hoá) ⇒ lớp patch `_wmult` là no-op chứng minh được.
+
+**Kết quả A/B:** CAGR 28,863% → **29,773% (+0,910pp)** · MaxDD −17,785% → −16,629% · Calmar 1,623 →
+1,790 · Sharpe 1,832 → 1,906 · Final NAV 1.178,010B → 1.286,017B. Self-check cấp sổ 1e-4 VND.
+
+**BƯỚC 0 (cổng bắt buộc, đo trên harness) — QUA:** vốn cắt ra **KHÔNG** nằm im ở tiền mặt —
+`redeploy_ratio` gộp **0,913** (BAL 0,840 / LAG 0,968; IS 0,728/0,983, OOS 0,873/0,961), ngưỡng dừng
+<0,30 cách xa gấp 3. Kênh hấp thụ: kích cỡ vị thế (6.553 vs 6.411 fill mua; 24.162B vs 23.637B vốn
+mua ra) **và parking custom30V** (+0,29pp tỷ trọng TB) — số vị thế riêng biệt gần như không đổi
+(2.582→2.566). ⇒ **Giả thuyết Phase 1 §6.2 "vốn cắt ra kẹt vì trần trọng số/tên nên +1,69pp bốc
+hơi" BỊ BÁC bằng số đo.** Ước lượng khả thi bậc nhất của Phase 1 (+0,85pp) so với harness thật
+(+0,910pp) ⇒ estimator `moved = min((k−1)·C_treat, C_funding)` được kiểm định ngược, dùng lại được.
+
+**BƯỚC 1 — bảng điểm P3:** C1 ΔCAGR +0,910pp > sàn 0,385pp ✅ · C2 Calmar không xấu ✅ · C3 IS
++0,265pp / OOS +1,527pp cùng dấu ✅ (nhưng IS **dưới** sàn nhiễu) · C4 LOO 13/13 năm giữ dấu, năm
+lớn nhất (2018) chỉ 22% ✅ · **C5a DSR = 0,0012 tại N_trials=8 (N=7: 0,0051 · N=9: 0,0003) ❌** ·
+C5b PBO 0,010 ✅. **Thiếu 1 tiêu chí = NO-GO.**
+
+DSR trượt KHÔNG do quy ước khắt khe: bỏ hết hiệu chỉnh N, `DSR vs SR0=Sharpe pin` chỉ **P=0,602**.
+Bootstrap khối vòng L=21 trên chuỗi Δ log-return: CI95 **[−0,350; +1,749]pp**, P(Δ>0)=0,900; bootstrap
+THEO CẶP L=21 CI [−0,468; +2,232] P=0,900, L=63 CI [−0,189; +2,140] P=0,945 — **không cửa sổ nào loại
+trừ 0 ở 95%**. PBO=0,010 không phải bằng chứng độc lập (họ chỉ 2 cấu hình ⇒ PBO thấp là hệ quả tất
+yếu của C3/C4) — cấm trích rời khỏi DSR.
+
+**Cấu trúc thật của "tercile ĐÁY" (phát hiện phải nhớ):** BOTTOM **không phải** một trục conviction
+mới — nó gần trùng với hai tier engine đã phân biệt sẵn. BAL: **78,3%** dòng BOTTOM là tier `_W`
+(`TIER_PRIORITY`=0 ⇒ rơi đáy tất định); LAG: **99,4%** là `LAG_LO` (và `ta` là hằng số 400,0 trên
+toàn panel LAG ⇒ tercile ở đó HOÀN TOÀN do tier quyết định). Trên lệnh thực bị trim: BAL 74/88 là
+`_W`, LAG **214/218** là `LAG_LO`. ⇒ "trim 50% BOTTOM" ≈ **hạ tier weight `_W` và `LAG_LO`
+(0,08→0,04)** = re-tune tham số trên chính mẫu đã sinh 7 trial trước.
+
+**Không wire gì.** Trục CCS coi như ĐÓNG — không đề xuất biến thể trim khác (30%/70%, theo sổ, theo
+regime): mỗi biến thể chỉ nâng N_trials và nâng ngưỡng DSR. Nếu mở lại về sau, câu hỏi đúng là
+"tier `_W`/`LAG_LO` có bị định cỡ quá tay không", tiền-đăng ký riêng, **trên dữ liệu ngoài mẫu
+2014-2026** (mẫu này đã bị 8 trial dùng hết).
+
+Report: `mike/agents/Taylor/research/ccs_phase2_narrow_trim_bottom_20260906.md`. Files:
+`mike/agents/Taylor/research/ccs_phase2_Taylor_20260906_153255/` (`shn_trim.py`+`patch_shn.py`,
+`ccs_p2_engine.py`+`patch_engine.py`, `run_leg.sh`, `step0_where_did_the_cash_go.py`,
+`analyze_step1.py`, `boot_delta.py`, `tercile_trim50_exp.csv`, `trimlog_trim50_exp.csv`,
+`daily/tx/metric_{ctrl,trim50}_exp.csv`, `step0/step1/boot_delta_*.json`). CSV audit dưới
+`EXP_TAG=ccsp2ctrl`/`ccsp2trim50` — không chạm đường dẫn pin nào (§8).
+
+⚠️ Bẫy công cụ: `dsr_pbo_annex.circular_block_boot()` trả về **tuple `(CAGR, DD)`**, không phải một
+mảng. `ravel()` cái tuple → trộn drawdown vào mẫu CAGR, cho CI [−0,087; +0,016]pp mâu thuẫn thẳng
+với điểm ước lượng +0,714pp in ngay dòng trên. Luôn in điểm ước lượng cạnh CI và kiểm CI có ôm lấy
+nó không.

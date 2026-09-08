@@ -105,3 +105,16 @@ _scrub_sessions.py
 # ---- Mike fleet: own git repo, backed up separately to the 'mike-fleet'
 #      branch of this same GitHub repo (avoids a broken gitlink/submodule here).
 WorkingClaude/mike/
+
+# ---- Session worktrees (2026-09-09) — transient per-Discord-session git worktrees
+#      created by concurrent Claude sessions. They were being committed as GITLINKS
+#      (mode 160000) with no .gitmodules mapping; once a worktree is removed its
+#      gitlink dangles and `git status` recurses into it and dies with a fatal
+#      ("not a git repository: .../worktrees/<name>"). That fatal is what killed
+#      the nightly backup (exit 128) from 2026-09-06 on — silently, because it was
+#      one warning line in a nightly Discord message people had learned to skim.
+#      They are never source of truth: work is merged to master before cleanup.
+wt-*/
+WorkingClaude/wt-*/
+WorkingClaude/mike_paseo/
+WorkingClaude/.verify_a4_worktree/

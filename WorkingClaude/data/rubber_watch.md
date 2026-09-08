@@ -1,31 +1,31 @@
 # Cao su (RSS3) — theo dõi tuần
 
-_Cập nhật 2026-08-27 · nguồn: regionalert (SGX SICOM RSS3, USD/kg) + SunSirs-586 (spot TQ)_
+_Cập nhật 2026-09-07 · nguồn: regionalert (SGX SICOM RSS3, USD/kg) + SunSirs-586 (spot TQ)_
 
 ## Trạng thái: **🟢 INFO**
 
 ## Giá & xu hướng
-- **Mới nhất:** 2.73 USD/kg (2026-08-27)
-- **vs tuần trước (WoW):** +0.1% (vs 2026-08-20)
-- **4 tuần:** +0.2% (vs 2026-07-30)  ·  **3 tháng:** +1.5% (vs 2026-05-15)
-- **Biên 52 tuần:** 2.00–2.92 USD/kg (WB monthly ghép chuỗi ngày, phủ 346d) — giá nằm trong biên
+- **Mới nhất:** 2.73 USD/kg (2026-09-07)
+- **vs tuần trước (WoW):** +0.0% (vs 2026-09-04)
+- **4 tuần:** +1.4% (vs 2026-08-11)  ·  **3 tháng:** -2.4% (vs 2026-06-19)
+- **Biên 52 tuần:** 2.00–2.92 USD/kg (WB monthly ghép chuỗi ngày, phủ 357d) — giá nằm trong biên
 
 | Tuần (giá đóng) | RSS3 USD/kg |
 |---|---|
-| 2026-07-10 | 2.85 |
-| 2026-07-17 | 2.86 |
 | 2026-07-24 | 2.85 |
 | 2026-07-31 | 2.78 |
 | 2026-08-07 | 2.69 |
 | 2026-08-14 | 2.69 |
 | 2026-08-20 | 2.73 |
-| 2026-08-27 | 2.73 |
+| 2026-08-28 | 2.73 |
+| 2026-09-04 | 2.73 |
+| 2026-09-07 | 2.73 |
 
 ## Xu thế dài hạn — TREND_BREAK (tầng ĐỘC LẬP, nhịp THÁNG)
 - **Trạng thái:** 🟢 TREND_OK (trên đường) — từ 2026-02
-- **Giá tháng:** 2.70 USD/kg · **MA200-eq (MA10 tháng):** 2.44 → **+10.6%** so với đường
-- Tháng dưới đường trong 2 kỳ gần nhất: 0/2 · chuỗi 245 tháng (World Bank Pink Sheet)
-- Tháng 2026-08 là ước lượng từ các phiên ngày thật (trạng thái KHÔNG phụ thuộc vào nó)
+- **Giá tháng:** 2.73 USD/kg · **MA200-eq (MA10 tháng):** 2.52 → **+8.6%** so với đường
+- Tháng dưới đường trong 2 kỳ gần nhất: 0/2 · chuỗi 246 tháng (World Bank Pink Sheet)
+- Tháng 2026-09 là ước lượng từ các phiên ngày thật (trạng thái KHÔNG phụ thuộc vào nó)
 - Cách đọc: **XÁC NHẬN CHẾ ĐỘ dài hạn, KHÔNG phải tín hiệu bán/dự báo.** P(giảm thêm ≥15%/6th sau tín hiệu) = 31% ≈ base 32%; rổ CP cao su fwd-12m sau tín hiệu +26.5% vs base +12.5%.
 - Độc lập với WATCH/ALERT ở trên (khác chân trời: 6–24 tháng vs 1 tuần; khác nhịp: ~1 lần/18.7 tháng vs hàng tuần).
 
