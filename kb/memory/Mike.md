@@ -43,3 +43,4 @@ kb/coding_guidelines.md 37,9KB/40KB, còn ~2,0KB đệm. §-mới tiếp theo g�
 ngưỡng → tách sang _ext.md khi đó.
 
 - [2026-09-08T05:01:27Z] Treasury-buyback OShares overlay (VRE vs AIS) ĐÓNG 2026-09-08: CONFIRMED 2 vòng quant-skeptic nhưng user chốt KHÔNG wire production, giữ ad-hoc tool. kb/projects/treasury-buyback-oshares-overlay-20260907.md
+- [2026-09-08T17:17:04Z] P2 warning-hygiene (đêm 09-09) tìm 3 lỗi THẬT: (1) backup GitHub chết exit128 từ 09-06 do gitlink worktree mồ côi — ĐÃ FIX commit ed19d852, verify push 057254e0 OK; (2) verify_account_snapshot rc=1 hằng ngày = MBB broker 1565 vs journal 1675 cp, cost lệch 3.6% — CHƯA điều tra, nghi corp-action 08-11; (3) BQ cache verified=false vì 1 bảng ticker_prune lệch 909 dòng → TẮT cache cho MỌI dispatch (blast radius, cùng họ lỗi retro 08-10). Thứ tự đã chốt với user: P2→P3→P1→P4.
