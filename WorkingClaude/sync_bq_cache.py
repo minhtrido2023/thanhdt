@@ -440,6 +440,54 @@ def save_manifest(manifest: dict):
         raise
 
 
+def _drifted_years(name: str, config: dict, chunk_dir: str, chunk_years, max_year: int,
+                   qtimeout: int) -> set:
+    """Năm CŨ nào có số dòng local ≠ BQ (⇒ phải tải lại dù delta bỏ qua nó).
+
+    MỘT câu query gộp theo năm cho cả bảng, so với `num_rows` trong metadata parquet
+    (không đọc dữ liệu). Chỉ xét năm < max_year: năm max_year+ vốn đã luôn được tải lại.
+
+    FAIL-OPEN có chủ đích: query lỗi/timeout ⇒ trả set() ⇒ hành vi y hệt trước bản vá
+    (delta thường). Bước này là để TỰ LÀNH drift, không phải cổng chặn — biến nó thành
+    lỗi cứng sẽ đánh sập cả đường sync đêm chỉ vì một câu đếm hỏng.
+    """
+    col = config["partition_col"]
+    try:
+        # Dùng SQL COPY (`config["sql"]`), KHÔNG dùng `verify_sql`: verify_sql đã là một
+        # truy vấn TỔNG HỢP (`SELECT COUNT(*), MAX(time)`), bọc nó rồi GROUP BY năm sẽ ra
+        # số vô nghĩa. SQL copy cũng đúng về mặt ngữ nghĩa hơn — ta muốn so với chính tập
+        # dòng SẼ được chép về, không phải một định nghĩa thứ hai.
+        base = config["sql"]
+        # Bọc SQL gốc để dùng LẠI đúng bộ lọc của nó (vd ticker_prune: time >= 2013-01-01)
+        # — tự viết lại WHERE ở đây là mở đường cho lệch bộ lọc giữa copy và check, đúng
+        # cái bẫy §28 (so 2 nguồn thì phải cùng định nghĩa, không được chép tay mỗi nơi một kiểu).
+        sql = (
+            f"SELECT EXTRACT(YEAR FROM t.{col}) AS _yr, COUNT(*) AS _n FROM ("
+            + base.replace("{project}", PROJECT)
+            + ") AS t GROUP BY _yr"
+        )
+        df = bq_query_to_df(sql, timeout=qtimeout)
+    except Exception as e:
+        log(f"  {name}: drift-check bỏ qua (không đếm được theo năm: {e})")
+        return set()
+
+    bq_by_year = {int(r["_yr"]): int(r["_n"]) for _, r in df.iterrows()
+                  if pd.notna(r["_yr"])}
+    drifted = set()
+    for yr in chunk_years:
+        if yr >= max_year:
+            continue
+        yr_path = os.path.join(chunk_dir, f"{yr}.parquet")
+        if not os.path.exists(yr_path):
+            continue
+        local_n = _pq.read_metadata(yr_path).num_rows
+        bq_n = bq_by_year.get(yr)
+        if bq_n is not None and bq_n != local_n:
+            drifted.add(yr)
+            log(f"  {name}: drift {yr} local={local_n} vs BQ={bq_n} ({bq_n - local_n:+d}) — tải lại")
+    return drifted
+
+
 def download_table(name: str, config: dict, manifest: dict, delta: bool):
     """Download a table to parquet. Delta mode appends only new rows."""
     if config.get("full_only"):
@@ -457,11 +505,27 @@ def download_table(name: str, config: dict, manifest: dict, delta: bool):
             max_year = int(max_cached[:4])
             log(f"  {name}: delta — re-downloading {max_year}+ ...")
             col = config["partition_col"]
+            # Năm CŨ chỉ được ĐẾM lại, không tải lại (rẻ) — nhưng upstream có ghi
+            # đính chính/backfill VÀO các năm cũ, và delta kiểu này không bao giờ
+            # thấy chúng ⇒ cache lệch VĨNH VIỄN. Đo thật 2026-09-09 trên ticker_prune:
+            # 2015 −419, 2016 −496, 2017 −3, 2018 **+17** (local THỪA ⇒ upstream còn
+            # XOÁ dòng, không chỉ thêm), 2023 −1, 2025 −7 ⇒ đúng 909 dòng lệch mà
+            # verify_all() báo mỗi đêm. Hệ quả KHÔNG nằm ở bảng này: `verified` là cờ
+            # AND toàn cục nên MỘT bảng lệch ⇒ preflight_bq_cache.py FAIL ⇒ dispatch.sh
+            # `unset BQ_LOCAL_CACHE` ⇒ MỌI agent chạy query qua mạng BQ (chậm + tốn
+            # tiền), suốt từ khi drift bắt đầu. Cùng lớp lỗi đã được ghi nhận và đã
+            # chuyển sang full-refresh cho ticker_financial/fa_ratings ở phần TABLES
+            # bên trên; ticker/universe_pit_q/ticker_prune thì chưa từng được chuyển.
+            # Cách vá ở đây rẻ hơn full-refresh (bảng ticker ~3,5M dòng): hỏi BQ ĐÚNG
+            # MỘT câu đếm theo năm, rồi CHỈ tải lại những năm thật sự lệch — tự lành,
+            # không cần ai nhớ chạy --no-delta bằng tay.
+            drifted = _drifted_years(name, config, chunk_dir, chunk_years, max_year,
+                                    qtimeout)
             total_rows = 0
             max_time_val = None
             for yr in chunk_years:
                 yr_path = os.path.join(chunk_dir, f"{yr}.parquet")
-                if yr < max_year and os.path.exists(yr_path):
+                if yr < max_year and os.path.exists(yr_path) and yr not in drifted:
                     # Chỉ cần ĐẾM dòng — dùng parquet metadata thay vì đọc cả cột qua
                     # pandas: rẻ hơn nhiều và miễn nhiễm với dtype lạ trong file cũ
                     # (dbdate crash ở trên xảy ra đúng tại dòng này trước khi sửa).
@@ -479,7 +543,8 @@ def download_table(name: str, config: dict, manifest: dict, delta: bool):
                     yr_max = pd.to_datetime(yr_df[col]).max()
                     if max_time_val is None or yr_max > max_time_val:
                         max_time_val = yr_max
-                    log(f"    {yr}: {len(yr_df)} rows")
+                    _tag = " (drift-heal)" if yr in drifted else ""
+                    log(f"    {yr}: {len(yr_df)} rows{_tag}")
             table_info["rows"] = total_rows
             if max_time_val is not None:
                 table_info["max_time"] = str(max_time_val.date())
