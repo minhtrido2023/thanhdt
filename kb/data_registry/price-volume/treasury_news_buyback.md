@@ -85,6 +85,15 @@ Chi tiết đầy đủ (thuật toán, self-check, danh sách mã theo 3 nhóm,
 - [`corporate_action_bq.md`](corporate_action_bq.md) — bảng corp-action rộng hơn (ISS/AIS/DIV...),
   không phủ sự kiện treasury buyback dạng tin tức như bảng này.
 
+## ⚠️ Quyết định wire (user chốt 2026-09-08) — KHÔNG wire vào production
+
+Overlay đọc bảng này (`match_overlay.py`) đã CONFIRMED 2 vòng quant-skeptic (162/14/29 mã), nhưng
+user quyết **KHÔNG** đưa vào `oshares_live.py`/`corp_action_lib.py`/`corp_action_daily.py`: OShares
+chỉ nuôi 1/3 nhánh composite v3 (`ps`/sales_yield, KHÔNG phải PE — trụ chính "1/PE dominant factor"
+không phụ thuộc OShares), và lớp lỗi này chỉ nằm ở CỬA SỔ LỊCH SỬ đã tự hết (OShares hôm nay đã
+đúng) — không có bằng chứng nó đổi được xếp hạng/backtest nào. Giữ overlay làm **công cụ tra cứu
+ad-hoc**. Chi tiết: `kb/projects/treasury-buyback-oshares-overlay-20260907.md`.
+
 ## Nguồn
 Kiểm tra trực tiếp bằng `bq` CLI 2026-09-07, job `Taylor_20260907_160333` (dispatch data-ops
 2026-09-04 → Taylor verify độc lập + thiết kế overlay).
