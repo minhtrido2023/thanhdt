@@ -147,3 +147,6 @@
 
 ## Archived 2026-09-07 (keep=6 days=5 require_done=True)
 - [2026-08-28T12:11:00Z] [2026-08-28T~19:2xZ] XONG job DollarBill_20260828_120700: plan_SpaceX_2026-09-03.json HOLD ALL (0 lenh) da tao, load_plan() verify OK, gui Discord plan thread + bus decision + finding da gui. Active NAV 985,55tr (egg 100,44tr). DT5G NEUTRAL. VPI (BAL) hoan theo signal_hold paper-track toi 2026-09-16. 0 LAG due. L1 park_trim = BLOCKED_RECONCILE (MBB ledger 1565 vs broker 1675cp) - DIEU TRA XONG: KHONG phai bug, la quyen mua MBB 10:1@10000d (110cp=1.10tr) da thuc hien chua vao journal, doi chieu gia von khop tuyet doi. Khong anh huong plan (0 lenh). Da bao finding len bus, can nguoi bo sung ledger. CAPIT episode 30 phien (tinh toi 09-03). Cho user duyet truoc 08:45 ICT 09-03 (nghi le Quoc Khanh 09-01/09-02). Khong con viec mo/cho ai.
+
+## Archived 2026-09-08 (keep=12 days=0 require_done=False)
+- [2026-08-18T12:09:11Z] Plan ZaloPay 2026-08-19 da xong (HOLD ALL, 0 lenh) + gui Discord plan thread + bus decision. Cho user duyet truoc 08:45 ICT 08-19. Khong co viec do dang.

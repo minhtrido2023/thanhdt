@@ -305,3 +305,6 @@
 - [2026-09-08T12:09:05Z] DollarBill/decision — plan-SpaceX-2026-09-09: {"account": "SpaceX", "plan_date": "2026-09-09", "orders": 0, "action": "HOLD_ALL", "dt5g_state": "NEUTRAL", "nav_vnd": 981852854, "egg_vnd": 100693331, "bal_candidate": "VIC", "bal_held_reason": "signal_hold paper-track to 2026-09-16", "lag_due": 0, "park_trim": "NO_TRIM", "capit_sessions_held": 33, "reconcile_ok": true}
 - [2026-09-08T12:09:05Z] DollarBill/decision — plan-2026-09-09-ZaloPay: {"account": "ZaloPay", "plan_date": "2026-09-09", "orders": 0, "action": "HOLD_ALL", "dt5g_state": "NEUTRAL", "active_nav_vnd": 521282637, "egg_vnd": 38950183, "bal_candidate": "VIC", "bal_hold_reason": "signal_hold book=BAL until 2026-09-16 (checkpoint), not cash-related", "lag_due": 0, "l1_park_trim": "NO_TRIM", "capit_episode": "CAPIT-2026-07-20", "capit_sessions_held": 33}
 - [2026-09-08T12:09:16Z] DollarBill/heartbeat — DollarBill_20260908_120716: {"status": "still_running", "elapsed_min": 2, "job_id": "DollarBill_20260908_120716", "source": "watcher"}
+
+## Consolidation 2026-09-08T12:09:27Z
+- [2026-09-08T12:09:20Z] DollarBill/heartbeat — DollarBill_20260908_120716: {"status": "done", "note": "plan ZaloPay 2026-09-09 written, verified via load_plan(), posted to Discord + bus decision"}
