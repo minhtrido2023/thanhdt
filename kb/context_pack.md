@@ -1,4 +1,4 @@
-# Mike fleet — context pack (v2851)
+# Mike fleet — context pack (v2852)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
@@ -215,6 +215,7 @@ Kết quả dẫn tới quyết định: breadth-vs-radar-matrix-20260822 (Taylo
      dispatch có context_pack ⇒ tường thuật của việc ĐÃ ĐÓNG là chi phí trả lại mỗi phiên.
      Giữ đúng phần còn quyết định được hành vi sau này: TÊN · FILE · PHÁN QUYẾT (nhất là NO-GO,
      để không ai đề xuất lại). Diễn biến vẫn nguyên trong file chi tiết. -->
+- 2026-09-07 Treasury-buyback OShares PIT overlay (VRE vs AIS gap) → `treasury-buyback-oshares-overlay-20260907.md` — **KHÔNG WIRE** (user chốt 09-08): overlay CONFIRMED 2 vòng quant-skeptic (162/14/29 mã), nhưng OShares chỉ nuôi 1/3 nhánh composite (sales_yield, không phải PE dominant factor), vấn đề chỉ ở cửa sổ lịch sử đã tự hết (live OShares đã đúng) — giữ làm công cụ tra cứu ad-hoc
 - 2026-08-23 Chính sách margin đơn mã sleeve fear-buy discretionary → `discretionary-margin-policy-20260823.md` — **IMPLEMENTED 2026-08-29, cap RESYNC 2026-08-30 (commit a19fc256/022c48e7)**: per-name ≤5% NAV exposure, sleeve tổng ≤10% NAV exposure (f≤1,3, %ADV≤10%, exit tự áp −20% từ giá arm); gate `bin/discretionary_margin_gate.py` + cron check-exits 15:20 ICT; trigger 15% cần ≥3 case marginable đồng thời THẬT — chưa đạt
 - 2026-08-23 Margin theo khoảng cách định giá + nhận diện đáy 11/2022 → `margin-valuation-spread-20260823.md` — **NO-GO** mọi cơ chế sizing/gate mới (5 vòng, Phase 1 engine quant-skeptic CONFIRMED high); `capit_margin_lever` dd52≤−20% GIỮ NGUYÊN; nhiễu harness 0,385pp ≫ hiệu ứng 0,009pp; đóng tập 7 episode, chỉ còn shadow-log spread EOD; hướng mở duy nhất = margin cấp CỔ PHIẾU trong sleeve fear-buy. **Đính chính 08-24**: thiếu trục "phòng thủ có mục tiêu" (2020/2022, dễ hồi) vs "cơ cấu tự cộng dồn" (2007-2012, không xử lý nhanh được) — 3/7 episode rất có thể là 3 sóng của 1 khủng hoảng, N độc lập thật ~4-5 không phải 7; không đổi verdict NO-GO, chỉ đổi cách đọc "phản ví dụ" 2010-08-25
 - 2026-08-13→14 corporate_action BQ integration + paper-report bug fix → `corporate-action-bq-integration-0813.md` — XONG, Việc A/B wire an toàn (6 vòng), SANITY_FACTOR WARN phương án C wire+CONFIRMED 08-14 (1 gap coverage nhẹ còn mở), vòng 6 rc=1/KeyError chủ động bỏ qua

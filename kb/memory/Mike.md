@@ -42,3 +42,4 @@ coord-2026-09-03` (retro 09-05, tz_anchor_gate.py RULE 2, commit 0aab5fae) và
 kb/coding_guidelines.md 37,9KB/40KB, còn ~2,0KB đệm. §-mới tiếp theo gần như chắc chắn chạm
 ngưỡng → tách sang _ext.md khi đó.
 
+- [2026-09-08T05:01:27Z] Treasury-buyback OShares overlay (VRE vs AIS) ĐÓNG 2026-09-08: CONFIRMED 2 vòng quant-skeptic nhưng user chốt KHÔNG wire production, giữ ad-hoc tool. kb/projects/treasury-buyback-oshares-overlay-20260907.md
