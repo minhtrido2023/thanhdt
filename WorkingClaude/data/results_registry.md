@@ -6602,3 +6602,50 @@ nó không.
   thêm điểm pool (tuning, sẽ chết ở DSR) mà tiền đăng ký câu hỏi khác — placebo đếm-khớp tách hiệu ứng
   pha-loãng-ngành khỏi thêm-tên-rẻ (`BASKET_PLACEBO_FIN` đã có sẵn trong bản copy nghiên cứu).
 - Báo cáo: `mike/agents/Taylor/research/custom30v_selector_20260909/report.md`
+
+## VÒNG 5 custom30V — PHÂN RÃ PLACEBO nguồn gốc +2,62pp của L1b (2026-09-10, job Taylor_20260909_165335)
+
+PAPER-ONLY, **không wire gì**, không có verdict GO/NO-GO (vòng này đo phân rã, không tìm chân).
+Tiền đăng ký `mike/agents/Taylor/research/custom30v_placebo_20260910/PREREG.md`
+(md5 `6c11b1bc908cc74d18bda86b44b3e243`, viết trước khi chạy chân nào).
+Báo cáo: cùng thư mục, `report.md` (md5 `5f1013c0ea2a6b03d2fb1b5ab088c6e2`).
+Control tái lập **pin R3 byte-identical** (`7d053e6201c9d107685ff4d1dd9d2d2a`); `self-check 0 VND` 8/8 chân.
+
+Thiết kế 2×2: `pool ∈ {60,120}` × `số tên tài chính ép vào top-30 ∈ {đếm của ctrl, đếm của L1b}`,
+cưỡng chế bằng `BASKET_PLACEBO_FIN` + `BASKET_PLACEBO_MODE=top` (mới, bảo toàn thứ hạng; bản
+`random` gốc 07-14 giữ làm chân phụ). Khớp số đếm **48/48 kỳ** cả hai chiều.
+
+| | TỔNG (L1b) | ΔP1 pha loãng ngành | ΔP2 thêm tên rẻ | tương tác |
+|---|---|---|---|---|
+| cấp NAV | +2,621pp | +0,622 (23,7%) | +1,303 (49,7%) | +0,695 (26,5%) |
+| cấp RỔ gross | +6,325pp | **−3,064** (−48,4%) | **+5,731** (+90,6%) | +3,658 (57,8%) |
+
+- **Kết luận: (Y) THÊM TÊN RẺ chiếm ưu thế; (X) pha loãng ngành ÂM ở cấp rổ.** Bootstrap chung cấp
+  rổ: ΔP2 là thành phần DUY NHẤT có CI95 loại trừ 0 `[+0,05; +8,30]`; `P(ΔP2>ΔP1)=0,996`.
+  Theo luật NAV chốt trước thì nhãn là *hỗn hợp* (ΔP2 = 49,7% < ngưỡng 60%) — ghi đúng luật, không sửa.
+- **Tỷ lệ phân rã KHÔNG đo chính xác được**: `%ΔP1` CI95 **[−52%; +91%]**, `%ΔP2` **[−46%; +135%]**,
+  `P(ΔP2>ΔP1)` cấp NAV chỉ 0,718. Đừng trích "23,7%/49,7%" như số đã xác lập.
+- **Thứ hạng `yieldcombo` trong nhóm tài chính CÓ thông tin**: `mode=random` (bốc ngẫu nhiên tên tài
+  chính, cùng số đếm) xoá sạch cả hai hiệu ứng — ΔP1r +0,047 / ΔP2r +0,009, tương tác 97,8%.
+  Prior khai trước ("random ≈ top", dựa trên L3) **SAI**. Không mâu thuẫn L3: L3 hỏi "có lens KHÁC
+  tốt hơn 1/PE không" (không), vòng này hỏi "thứ tự 1/PE có ngẫu nhiên không" (không).
+- **Ghim SỐ ĐẾM không ghim được TIỀN**: P2d `%trọng số tài chính` 59,87% (ctrl 52,81 — vượt 7,1pp);
+  P1d 34,18% (L1b 39,48 — thấp 5,3pp). Giới hạn thật của phân rã, phần "tương tác" hưởng sai số này.
+- **Thanh khoản — ngân hàng LÀ thanh khoản**: ADV rổ trung vị ctrl 1.743,7B/ngày → **P1d 1.329,5B
+  (−23,8%)** dù pool KHÔNG đổi → P2d 971,8B (−44,3%) → L1b 510,3B (−70,7%). Giả thuyết dispatch
+  ("P1 giữ pool 60 nên giữ được thanh khoản") **bị phủ định**.
+- **Giá để de-bank** (trả lời chính sách user 2026-09-09 "giảm ngân hàng là mục tiêu tự thân"):
+  ép số đếm ở pool 60 cắt trọng số BANK **49,14% → 33,11% (−16,0pp)** với ΔCAGR NAV **+0,62pp
+  (CI [−0,68;+1,73], không phân biệt được với 0)** và **−23,8% ADV**. Khác hẳn `fincap` (cắt trọng
+  số trên CÙNG tập tên: −0,32…−0,84pp, 07-14).
+- Thống kê đúng như khai trước: **mọi chân trượt DSR** (max 0,778) và **mọi CI95 cấp NAV ôm 0**;
+  PBO CSCV 0,0275; LOYO P1d 0,87 / P2d 0,63 (>0,5). *Chưa chứng minh được*, không phải *đã bác bỏ*.
+- **Đề xuất (CHỈ đề xuất, chưa backtest, cần tiền đăng ký MỚI)**: nếu user muốn giảm ngân hàng vì
+  lý do cấu trúc → **trần theo SỐ TÊN** (giới hạn `k` tên BANK+INS+SEC trong top-30, giữ pool 60,
+  giữ `yieldcombo` chọn tên tài chính điểm cao nhất), KHÔNG phải trần trọng số, KHÔNG quét `k`.
+
+⚠️ **Bẫy harness bắt được vòng này**: `wc_env.sh` export `BQ_LOCAL_CACHE=data/bq_cache` (cache SỐNG,
+cron ghi 23:45 ICT) ⇒ script nghiên cứu dùng `os.environ.setdefault("BQ_LOCAL_CACHE", "<snapshot>")`
+**không ghi đè được** và âm thầm đọc cache sống → cùng một chân ctrl cho 3 level khác nhau ở 3 lần
+chạy. **Phải GÁN CỨNG `os.environ["BQ_LOCAL_CACHE"]` và in ra cache đang dùng.** Chân NAV không bị
+ảnh hưởng (`run_leg.sh` truyền tường minh qua `env`; ctrl trùng pin byte-identical).
