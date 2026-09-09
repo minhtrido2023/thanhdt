@@ -644,7 +644,12 @@ fi
 MSG="🌙 KB nightly done ($(date -u +%Y-%m-%d))"
 [ -n "${OVERSIZE:-}" ] && MSG="$MSG — ⚠️ oversized memories:$OVERSIZE"
 [ -n "${PRUNE_WARN:-}" ] && MSG="$MSG — ⚠️ $PRUNE_WARN"
-[ -n "${BACKUP_WARN:-}" ] && MSG="$MSG — ⚠️ $BACKUP_WARN"
+# Backup đi TRƯỚC, trên DÒNG RIÊNG (option A, bus question
+# Mike/retro-2026-09-08-backup-silent-failure-recurring-3rd): cả 3 lần backup hỏng trong 5
+# tuần, cảnh báo nằm ở CUỐI một dòng digest chung sau OVERSIZE/PRUNE_WARN — chìm nghỉm, cả 3
+# lần đều do người đọc chủ động soi mới thấy, không lần nào do dòng này báo.
+[ -n "${BACKUP_WARN:-}" ] && MSG="🚨 $BACKUP_WARN
+$MSG"
 "$ROOT/bin/notify.sh" "$MSG" 2>/dev/null || true
 # Topic CỐ ĐỊNH (Architecture) — trước 2026-07-22 đọc con trỏ global
 # state/ccdb_thread_id = "topic Mike mở phiên gần nhất", nên tin bảo trì KB đêm nào cũng

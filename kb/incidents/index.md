@@ -81,6 +81,7 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 | 2026-09-04 | [2026-09/2026-09-04-macro-health-failed-holiday-tdays.md](2026-09/2026-09-04-macro-health-failed-holiday-tdays.md) | ? |
 | 2026-09-03 | [2026-09/2026-09-03-preflight-prune-lag-false-alarm-holiday.md](2026-09/2026-09-03-preflight-prune-lag-false-alarm-holiday.md) | ? |
 | 2026-09-03 | [2026-09/2026-09-03-macro-health-false-warn-holiday-calendar-age.md](2026-09/2026-09-03-macro-health-false-warn-holiday-calendar-age.md) | ? |
+| 2026-09-09 | [2026-09/2026-09-09-backup-silent-failure-4th-shape-unpushed-commit.md](2026-09/2026-09-09-backup-silent-failure-4th-shape-unpushed-commit.md) | ? |
 
 ### 2026-08
 
