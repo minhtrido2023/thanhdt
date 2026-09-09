@@ -13,12 +13,30 @@ import subprocess
 import sys
 import os
 import json
+import logging
 import warnings
 from datetime import date, timedelta
 
 import pandas as pd
 
 warnings.filterwarnings("ignore")
+
+# vnstock ghi MỖI LẦN THỬ LẠI của nó ở mức ERROR rồi vẫn thử tiếp và thường thành công.
+# Đo trên chính log này: 380 dòng "ERROR - API request failed" so với 52 lần chạy EXIT 0 và
+# chỉ 2 lần EXIT 1 — gần như toàn bộ chữ ERROR trong log KHÔNG phải lỗi của lần chạy. Hai
+# lần hỏng THẬT (2026-06-27, ValueError format khi `exchange` là NaN — đã vá) thì nằm lẫn
+# giữa hàng trăm dòng ERROR vô hại nên không ai nhìn ra.
+#
+# Chặn ở CRITICAL, không phải WARNING: mức của logger là NGƯỠNG DƯỚI, đặt WARNING vẫn cho
+# ERROR đi qua (ERROR > WARNING) ⇒ không suppress được gì. Muốn chặn ERROR thì ngưỡng phải
+# CAO HƠN ERROR.
+#
+# Không mất tín hiệu thật: khi thử hết `retries` mà vẫn hỏng, CHÍNH các hàm dưới đây in
+# "[WARN] vnstock ... failed after N attempts" ra stderr, và kết luận cuối cùng của lần
+# chạy là dòng "EXIT <rc>" của wrapper. Cái bị bỏ đi chỉ là log-mỗi-lần-thử của thư viện,
+# vốn trùng lặp với chẩn đoán do chính ta phát ra.
+for _lg in ("vnstock", "vnstock.core.utils.client", "vnstock.explorer"):
+    logging.getLogger(_lg).setLevel(logging.CRITICAL)
 
 BQ_PROJECT = "lithe-record-440915-m9"
 
