@@ -476,3 +476,6 @@
 
 ## Archived 2026-09-09 (keep=12 days=0 require_done=False)
 - [2026-09-04T09:50:17Z] [2026-09-04] cash-dividend-premium-proxy (job _094347) XONG: report + bus finding da ghi. Proxy pre-ex-date (ex_date-14/-28 anchor, khong can announcement_date PIT) chay duoc, nhung KET LUAN NO-GO: CASH median AR +0.232% (N=10876, p=1e-5) KHONG phan biet duoc voi STOCK_DIV negative control +0.210% (MWU p=0.276, ca o muc event lan cluster-theo-ma) -> hieu ung khong dac thu cash-dividend info, co the la drift chung/value confound. H2/H3 dose-response (yield_ratio) song sot cluster-robust nhung thieu negative control tuong duong nen khong du de GO rieng. Khong con viec mo tren truc nay.
+
+## Archived 2026-09-09 (keep=12 days=0 require_done=False)
+- [2026-09-04T11:24:05Z] [2026-09-04] regime-conditioned-dividend-gate (job _111503) XONG: bus finding + report da ghi. Sua bug mapping DT5G cua Mike (dung 1=CRISIS,2=BEAR,3=NEUTRAL,4=BULL,5=EXBULL, khong phai 0-indexed). Tai lap doc lap: gate CRISIS/BEAR N=434 median+1.88% p=5.5e-05 nhung VERDICT NO-GO - 2 fail criteria da prereg deu fire: LOYO(2022) cluster-robust mat y nghia (p=0.227), va CASH khong tach duoc voi STOCK_DIV control o CRISIS(p=0.109)/BEAR(p=0.553) two-sided. Ticker/sector concentration va AR-window robustness deu PASS. Khong con viec mo tren truc nay.
