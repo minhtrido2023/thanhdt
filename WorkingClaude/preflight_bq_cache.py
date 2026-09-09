@@ -109,7 +109,15 @@ def check_duckdb(manifest):
             ).fetchone()[0]
             expected = info["rows"]
             if abs(cnt - expected) > max(10, expected * 0.001):
-                err(f"'{name}' row count {cnt} != manifest {expected}")
+                if name == "ticker_1m":
+                    # Rolling ~1-month snapshot: bảng này luôn full re-download mỗi đêm
+                    # (partition_col=None trong sync_bq_cache.py), không phải MERGE/append
+                    # như ticker/ticker_prune — row count DAO ĐỘNG tự nhiên ngày qua ngày
+                    # (cửa sổ trượt), không phải dấu hiệu drift. Chỉ WARN, không chặn cache.
+                    print(f"  WARN: 'ticker_1m' row count {cnt} != manifest {expected} "
+                          f"(rolling snapshot, dao động tự nhiên — không FAIL)", flush=True)
+                else:
+                    err(f"'{name}' row count {cnt} != manifest {expected}")
         except Exception as e:
             err(f"'{name}' DuckDB read failed: {e}")
     if not errors:

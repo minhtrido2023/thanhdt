@@ -797,6 +797,11 @@ def main():
                 continue
             try:
                 download_table(name, TABLES[name], manifest, args.delta)
+                # Ghi manifest ngay sau MỖI bảng thành công, không đợi hết vòng lặp —
+                # tiến trình sync bị kill/chạy lâu (self-heal _drifted_years re-download
+                # nhiều năm) giữa chừng vẫn giữ đúng các bảng đã xong, tránh cửa sổ
+                # manifest cũ + parquet mới khiến preflight FAIL giả (race, không phải bug).
+                save_manifest(manifest)
             except Exception as e:
                 log(f"  {name}: FAILED — {e}")
                 import traceback
