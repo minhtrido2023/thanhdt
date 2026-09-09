@@ -49,7 +49,32 @@ def find_fixtures(today):
           AND value_per_share > 0
           AND exright_date > DATE "{today.isoformat()}" AND exright_date <= DATE "{until}"
         ORDER BY exright_date LIMIT 50""")
-    with_ex = [r["ticker"] for r in rows]
+    # PHẢI lọc theo UNIVERSE, không lấy bừa mã đầu tiên của feed (sửa 2026-09-09).
+    # `corporate_action` phủ TOÀN THỊ TRƯỜNG (~36k dòng) nên mã đứng đầu theo ex-date rất
+    # thường xuyên nằm NGOÀI universe đang giao dịch. Với mã ngoài universe,
+    # `run_due_diligence` đi nhánh lỗi ĐÚNG THIẾT KẾ: trả dict rút gọn (không có `liquidity`)
+    # + `red_flags=['DD_KHONG_CHAY_DUOC']`. Ba assertion A1/C3/C4 giả định mã chạy được nên
+    # đỏ oan — production KHÔNG sai. Ca thật hôm nay: SAL (in_universe=None).
+    # Đây cũng là lý do selfcheck này chập chờn: xanh hay đỏ phụ thuộc mã nào tình cờ đứng
+    # đầu theo ex-date NGÀY HÔM ĐÓ, nên nó tự "recovered" rồi đỏ lại mà không ai sửa gì.
+    _cands = [r["ticker"] for r in rows]
+    # Lọc bằng ĐÚNG một truy vấn vào chính bảng universe mà DD dùng
+    # (`tav2_mike.universe_pit_q`, xem due_diligence._in_universe_pit) thay vì gọi
+    # run_due_diligence từng mã — bản thử đầu chạy tới 8 lượt DD thật và selfcheck quá 115s.
+    with_ex = []
+    if _cands:
+        _lst = ", ".join(f'"{t}"' for t in _cands)
+        try:
+            _u = corp_action_lib.bq(f"""
+                SELECT DISTINCT ticker
+                FROM `lithe-record-440915-m9.tav2_mike.universe_pit_q`
+                WHERE ticker IN ({_lst})""")
+            _in = {r["ticker"] for r in _u}
+            with_ex = [t for t in _cands if t in _in]
+        except Exception as _e:
+            # Không lọc được ⇒ KHÔNG đoán: để rỗng, nhánh A tự báo "BỎ QUA" thay vì đỏ oan.
+            print(f"  (fixture) không lọc được universe: {_e} — bỏ qua nhánh A")
+            with_ex = []
     # mã KHÔNG có sự kiện: lấy từ danh sách mã lớn, trừ đi tập trên (cũng verify lại bằng query)
     no_ex = [t for t in ("FPT", "ACB", "MBB", "VNM", "HPG", "VCB") if t not in with_ex]
     scan = DD._insider_scan(today) or {}
