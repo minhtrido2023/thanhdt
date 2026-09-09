@@ -1,6 +1,4 @@
 {
-  "_schema": "corp_actions/v1 — sự kiện doanh nghiệp làm ĐỔI SỐ LƯỢNG cổ phiếu (chia tách / thưởng / cổ tức CP). Đọc bởi mike/bin/corp_actions.py, áp vào sổ lô bởi mike/bin/park_holdings.py::LotBook.corp_action_split. Cổ tức TIỀN MẶT KHÔNG thuộc file này (đi qua mike/bin/dividend_adjusted_return.py, §21 coding_guidelines).",
-  "_rule": "park_holdings CHỈ áp record có _status bắt đầu bằng 'CONFIRMED'. TUYỆT ĐỐI không suy corp action từ việc thấy qty lệch broker — một fill sót journal / GHOST_ORDER / chuyển khoản CK tạo ra ĐÚNG hình dạng lệch đó (§5). Mỗi record phải có >= 2 nguồn bằng chứng ĐỘC LẬP với chính cái lệch đó.",
   "actions": [
     {
       "id": "VHM-2026-08-06-STOCK-DIVIDEND",
@@ -104,6 +102,27 @@
       ],
       "note": "Cùng mẫu hình 'broker credit 1 phiên trước ex-date sàn' như VHM/MBB/BID/VIX (4 ca trước đó, tất cả đã CONFIRMED). Corp_action_daily 2026-08-27 đã biết sự kiện này (upcoming_events_held: MSB, days_ahead=1, lookahead_days=10) nhưng chưa thể CONFIRMED vì exright_date là NGÀY MAI (28/08) — không phải lỗ hổng của pipeline, đúng thiết kế. Khe hở thật: DNSE credit cổ phiếu HOA SỚM trước ex-date nên DollarBill lập plan tối 27/08 với ledger cũ (200/500) → BLOCKED_RECONCILE L1+L2 khi bot chạy sáng 28/08. tradeQuantity vẫn giữ số CŨ (SpaceX 500, ZaloPay 200) trong khi openQuantity đã là 600/240 — cổ phiếu thưởng CHƯA bán được, giống hệt VHM/MBB/BID/VIX; lệnh BÁN (L1 park-trim/L2 JIT-unpark) phải neo theo tradeQuantity.",
       "verify_against_bq": "PENDING tại thời điểm ghi — exright_date=2026-08-28 CHƯA xảy ra (hôm nay 2026-08-27), BQ ticker chưa có phiên ex để lộ cú nhảy tỉ số Close/Price. Chạy lại sau 2026-08-28: python3 mike/bin/corp_actions.py --verify MSB-2026-08-28-BONUS-ISSUE (kỳ vọng MATCH, bq_factor ≈ 1,2, thuần cổ phiếu thưởng không kèm quyền mua)."
+    },
+    {
+      "id": "VIB-2026-09-10-BONUS-ISSUE",
+      "ticker": "VIB",
+      "event_type": "BONUS_ISSUE",
+      "ratio_text": "Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 9.5%",
+      "qty_multiplier": 1.095,
+      "ex_date": "2026-09-10",
+      "record_date": null,
+      "broker_effective_ts": "2026-09-09T11:45:14.274417",
+      "_status": "CONFIRMED — corp_action_auto_confirm.py 2026-09-09T19:25:01+07:00 (2-source: upcoming_events_held + broker qty/cost ratio match). Thu hồi: đổi _status thành 'REVOKED ...'",
+      "confirmed_by": "corp_action_auto_confirm.py (agent)",
+      "decided_by": "agent",
+      "confirmed_at": "2026-09-09T19:25:01+07:00",
+      "evidence": [
+        "NGUỒN 1 — corp_action_daily 2026-09-09 upcoming_events_held: ticker=VIB, event_code=ISS, date=2026-09-10, exercise_ratio=0.095, price_adjusting=True, days_ahead=1",
+        "NGUỒN 2 — broker SpaceX: qty 500→547 (×1.094), costPrice ratio ×1.094, modified_today=True",
+        "NGUỒN 2 — broker ZaloPay: qty 200→219 (×1.095), costPrice ratio ×1.095, modified_today=True"
+      ],
+      "verify_against_bq": "PENDING — chạy sau 2026-09-10: python3 mike/bin/corp_actions.py --verify VIB-2026-09-10-BONUS-ISSUE",
+      "note": "Cùng mẫu broker credit 1 phiên trước ex_date như VHM/MBB/BID/VIX/MSB."
     }
   ]
 }

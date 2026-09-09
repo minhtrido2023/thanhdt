@@ -6478,3 +6478,127 @@ Report: `mike/agents/Taylor/research/ccs_phase2_narrow_trim_bottom_20260906.md`.
 mảng. `ravel()` cái tuple → trộn drawdown vào mẫu CAGR, cho CI [−0,087; +0,016]pp mâu thuẫn thẳng
 với điểm ước lượng +0,714pp in ngay dòng trên. Luôn in điểm ước lượng cạnh CI và kiểm CI có ôm lấy
 nó không.
+
+## BAL 2025/2026 diagnosis + H-EY tilt (job Taylor_20260909_100425, 2026-09-09) — PAPER-ONLY, NO-GO
+- Control tái lập pin R3 BYTE-IDENTICAL: CAGR 28,8627% / Calmar 1,6229 / Final NAV 1.178,0099B,
+  md5 `7d053e6201c9d107685ff4d1dd9d2d2a`; self-check 0 VND cả 2 sổ × 4 chân.
+- **Tiền đề dispatch sai**: BAL 2025 = **+56,64%** (không âm). Cửa sổ âm = 2026 YTD −2,36%.
+- Nguyên nhân 2026 = **regime**, không phải chọn mã: cửa sổ BULL 12 phiên + hold cứng 45 phiên ⇒
+  mua đỉnh/bán đáy + gate `state∈{4,5}` khoá BAL ngoài nhịp +10,73% tháng 4. **N thật = 10 cửa sổ.**
+- IC test 12 indicator quốc tế, 150 tháng, universe_pit: **không indicator kỹ thuật nào sống OOS sau BH**.
+  Chỉ `ey` (IC OOS +0,0747, t 4,81, p_BH<1e-4) và `pe_z` sống. `prox52` đẹp IS, chết OOS (p_BH 0,638).
+- H-EY (`BAL_CFO_BLEND` λ=0,25/0,50/1,00, N_trials=3): **NO-GO** — C4 (2021 = +12,93pp / delta full
+  +0,78pp), C5a DSR vs control 0,570, C5b PBO 0,6845, C6 dose-response răng cưa. Bootstrap CI95
+  [−0,242; +1,666] ôm 0. **Không wire; `BAL_CFO_BLEND` giữ mặc định 0.**
+- Bẫy dữ liệu mới: `PC1W/PC2W/PC3W/PC1M/PC2M`, `Open_1D`, `O*` là **forward-looking** (khác `PC_6M`
+  quá khứ) ⇒ mở rộng danh sách cấm-filter-live ngoài `profit_*`.
+- Báo cáo: `mike/agents/Taylor/research/bal_2025_diagnosis_20260909/report_part{1,2,3}_*.md`
+
+## KẾT QUẢ THAM CHIẾU phiên 2026-09-09 (b) — BAL vòng 2: cơ chế EXIT/TÁI NHẬP adaptive theo market state (job `Taylor_20260909_112201`, PAPER-ONLY)
+- **VERDICT NO-GO cả 4 chân.** Tiền đăng ký `mike/agents/Taylor/research/bal_adaptive_exit_20260909/PREREG.md`
+  viết TRƯỚC mọi chân treatment; N_trials = 4; **0 tham số tự do** (mọi hằng số lấy từ quy ước
+  production: bảng tier-gate {4,5}/{3,4,5}, stop −20%, hằng số 10 phiên của DT exit-gate).
+- Control tái lập pin R3 **BYTE-IDENTICAL**: CAGR 28,8627% / NAV 1.178,0099B / Calmar 1,6229 /
+  MaxDD −17,785%, CSV md5 `7d053e6201c9d107685ff4d1dd9d2d2a`. Self-check **0 VND** cả 2 sổ, cả 5 chân.
+- ΔCAGR: **A (state-exit tại commit) −1,176pp · B (trailing −20% thay hold 45 phiên) −1,037pp ·
+  C (candidate clock k≥10) −1,608pp · D (A+B) −1,672pp.** C1 trượt ở mọi chân ⇒ 6 tiêu chí còn lại
+  moot. DSR vs SR_ctrl (chân tốt nhất) **0,430**; PBO **0,611**; bootstrap CI95 ôm 0 ở cả 4 chân.
+- **Cơ chế chạy ĐÚNG mà vẫn lỗ** (điểm quan trọng nhất): chân A thay 234 exit `TIME` bằng 131
+  `MODE_FLIP`; năm 2026 nó thoát 23-27/02 thay vì bị ép bán 10-21/04 đúng đáy — đúng thủ phạm Phần 1
+  chỉ ra. Lợi ròng cả năm 2026 chỉ **+0,21pp**, vì trong NEUTRAL "thoát" = đổi rổ momentum sang
+  **custom30V** (`PARK_STATES 3:0.7`), **không phải giảm rủi ro**: A tiết kiệm +2,19pp tháng 3 và
+  +2,09pp tháng 4 nhưng trả lại **−4,95pp trong tháng 2**.
+- Chi phí cấu trúc: DT gate commit **trễ giá 10 phiên** ⇒ thoát-tại-commit biến hold 45 phiên thành
+  market-timing trên tín hiệu trễ. 2021 (4/10 cửa sổ) mất **−12,40pp** (A) / −15,44pp (C); 2024 −4,12
+  (A) / −10,53 (C). Chân B đổi hình dạng rủi ro theo hướng xấu: mua BAL toàn kỳ 1.480 → 831 lệnh,
+  MaxDD −17,8% → **−21,0%**, Calmar 1,62 → **1,32**.
+- Candidate clock (`dt_candidate_clock_exp.csv`) tự kiểm chứng: `committed` khớp cổng production
+  **0/3.136 mismatch**; PIT test cắt đuôi 4 mốc **0 diff**. Nguồn = bản `vnindex_5state_tam_quan_v34b_clean`
+  **trong chính snapshot pin** ⇒ không lệch vintage. Clock chỉ khác commit ở **3 đợt / 45 phiên** toàn kỳ.
+- **Trục "sửa cơ chế thoát/tái nhập của BAL" ĐÓNG** (cộng với H-EY NO-GO vòng 1). Không đề xuất
+  biến thể tiếp. Hướng duy nhất còn cơ sở nhân quả = nới cổng vào BAL trong NEUTRAL = **đổi thiết kế**,
+  cần tiền đăng ký riêng + user duyệt phạm vi.
+- Báo cáo: `mike/agents/Taylor/research/bal_adaptive_exit_20260909/report.md`
+
+## KẾT QUẢ THAM CHIẾU phiên 2026-09-09 (c) — BAL vòng 3: nới cổng vào NEUTRAL (trục A) + median lệnh âm (trục B) (job `Taylor_20260909_121342`, PAPER-ONLY)
+- **VERDICT NO-GO cả 7 chân.** Tiền đăng ký `mike/agents/Taylor/research/bal_neutral_gate_20260909/PREREG.md`
+  viết TRƯỚC mọi chân treatment; N_trials = 7; **0 hằng số tự chế** (mọi giá trị lấy từ production:
+  tập state `{3,4,5}` của RE_BACKLOG_BUY, `pe_z < −0,5` của COMPOUNDER_BUY, `WEAK_SIZE=0,05` của
+  regime_size, quy ước breadth-tercile PIT 2026-08-22, stop −20%).
+- Control tái lập pin R3 **BYTE-IDENTICAL**: CAGR 28,8627% / NAV 1.178,0099B / Calmar 1,6229 /
+  MaxDD −17,785%, CSV md5 `7d053e6201c9d107685ff4d1dd9d2d2a`. Self-check **0 VND** cả 2 sổ, cả 8 chân.
+- **Trục A** ΔCAGR / MaxDD: **a1 mở `state5 IN (3,4,5)` −3,88pp / −33,59% · a2 (+`pe_z<−0,5`) −2,72pp /
+  −27,64% · a3 (+nửa size 5%) −1,56pp / −25,81% · a4 (+breadth tercile HIGH) +0,31pp / −18,79%**
+  (ctrl −17,785%). Không chân nào qua C1 (>+0,385pp). Siết càng chặt càng tiến **về phía control**,
+  không tới tối ưu mới.
+- **Cơ chế**: mở cổng đưa số lệnh BAL 452 → 976 (709 vào ở state 3); CẢ 4 chân A đổi ngày đáy
+  drawdown từ 2018-07-05 sang **2020-07-27**, tháng tệ nhất của a1 vs ctrl là **2020-03 −13,22pp**
+  ⇒ BAL đi vào cú sập COVID với sổ cổ phiếu gần đầy thay vì rổ parking. Gate `state5 IN (4,5)` đang
+  làm việc **chốt rủi ro thật**.
+- **Đối chứng exposure (bắt buộc, PREREG §6) — giả thuyết "chỉ hoán đổi rổ" BỊ BÁC**: trên 1.895
+  phiên NEUTRAL, `w_equity = w_stock + w_park` đi **73,00% (ctrl) → 88,12% (a1)**, Δ = **+15,1pp**
+  (ngưỡng chốt trước 2pp), vì `PARK_STATES="3:0.7"` chỉ nhận 70% book. Và **dù được cấp thêm vốn**,
+  lợi suất sổ BAL trong NEUTRAL vẫn GIẢM 32,56% → 29,4-32,8% ⇒ **rổ momentum thua rổ custom30V trong
+  NEUTRAL**; không có phần delta nào để quy cho selection.
+- **Trục B0 (mô tả, sổ 268 lệnh BAL 2015-2026)** — median lệnh âm là **ĐẶC TÍNH**, không phải khiếm
+  khuyết: `mean > median` **11/11 năm**, skew > 0 **10/11 năm**, median âm **4/11 năm** (2015, 2018,
+  2025, 2026). **2025 KHÔNG bất thường**: phân vị 30% về median/hit/top3-share, 40% về mean, 70% về
+  skew. Phản trực giác: 2025 **phụ thuộc đuôi ÍT HƠN** mức thường (top-3 share 42,5% vs trung vị các
+  năm 78,3%). Toàn kỳ top 3 lệnh (1,1%) = 14,5% tổng lãi gộp; top 10 (3,7%) = 32,4%.
+- **Trục B1** (ΔCAGR / Δmedian / Δhit / Δ đuôi-phải): **b1 stop −10% +0,32pp / −3,79pp / −8,25pp /
+  +7,70pp** (tỉ lệ dính stop 12,3% → **35,9%**; cắt lỗ sớm hơn làm median TỆ ĐI vì cắt trúng lệnh sẽ
+  hồi; toàn bộ delta từ **một năm 2021**, C4a = 1,49) · **b2 chốt lời 50% ở +20% −0,41pp / +2,06pp /
+  +2,47pp / −5,13pp** (chân DUY NHẤT nâng được median — và trả giá đúng bằng đuôi phải + CAGR, Calmar
+  1,623 → 1,471) · **b3 `pe_z<−0,5` mọi lệnh −0,80pp / −0,71pp** (cắt 23% số lệnh, nâng mean không
+  nâng median).
+- DSR vs SR_ctrl mọi chân **0,128-0,562** (ngưỡng 0,95); PBO (CSCV S=16, 8 config) **0,519**;
+  bootstrap CI95 ôm 0 ở cả 7 chân. b1 là chân DUY NHẤT qua C3 (IS +0,26 / OOS +0,37) nhưng dưới sàn nhiễu.
+- **Đóng cả 2 trục. Không wire gì** — `NGATE`/`BRULE` là env nghiên cứu mặc định `off`; production
+  `signal_v11_sql.py` / `pt_v23_audit_2014.py` / `simulate_holistic_nav.py` / `filter.json` /
+  `macro_state_live.py` KHÔNG bị sửa. Đây là **vòng NO-GO thứ 3 liên tiếp** trên BAL (chọn mã → cơ chế
+  thoát → cổng vào + luật lệnh) ⇒ V2.4 ở điểm ổn định cục bộ; nguồn lợi nhuận trong NEUTRAL là
+  **custom30V parking**, không phải momentum.
+- Báo cáo: `mike/agents/Taylor/research/bal_neutral_gate_20260909/report.md`
+
+## KẾT QUẢ THAM CHIẾU phiên 2026-09-09 (d) — custom30V vòng 4: thành phần/chọn mã của rổ parking (job `Taylor_20260909_153631`, PAPER-ONLY)
+- **VERDICT NO-GO cả 4 chân.** Tiền đăng ký `mike/agents/Taylor/research/custom30v_selector_20260909/PREREG.md`
+  (md5 `454f40c0a6846c260e34439f98a58d71`) viết TRƯỚC mọi chân treatment; N_trials = 4; 0 hằng số tự
+  chế (mọi giá trị lấy từ production / `banking_valuation_framework.md`). Mô tả nền: `PHASE0.md`.
+- Control tái lập pin R3 **BYTE-IDENTICAL**: CSV md5 `7d053e6201c9d107685ff4d1dd9d2d2a`, CAGR 28,8627% /
+  NAV 1.178,0099B / Calmar 1,6229 / MaxDD −17,785%. Self-check **0 VND** cả 5 chân.
+- **L2 (trục dòng tiền)** thay `1/PCF` → `cfy3 = (CF_OA_3Y/3)/vốn hoá` (phủ 100,0%, Spearman với
+  1/PCF chỉ **0,319**): ΔCAGR **+0,09pp**, Calmar 1,608 < ctrl, IS +0,80 / **OOS −0,60**, C4a 1,82 /
+  C4b 4,19 → trượt sạch. Cộng `eyonly` (−0,05pp, 07-14): **chân thứ hai của yieldcombo không mang
+  thông tin** — bỏ, giữ, hay thay bằng thước đo tương quan 0,32 đều ra cùng chỗ; rổ gần như hoàn toàn
+  do `rank(1/PE)` quyết định. **NO-GO thứ 4 trên trục cashflow-quality ⇒ đóng trục.**
+- **L3 (lens ngân hàng)** ghim SỐ LƯỢNG ngân hàng (`d_bank_name_share = 0,00pp` — cơ chế chạy đúng
+  thiết kế), chỉ đổi TÊN theo Gordon `(ROE5Y−0,05)/0,08`: ΔCAGR **+0,31pp** (dưới sàn nhiễu 0,385),
+  **Calmar TỆ ĐI** 1,591 < 1,623, MaxDD −18,34%. Chọn *ngân hàng nào* không có gì thu hoạch.
+  **⇒ đóng nốt trục (2)+(3) của roadmap selector.**
+- **L1 (độ rộng pool 60 → 90 → 120)** đơn điệu mọi chiều: **+1,07pp / +2,62pp**, MaxDD −16,33 / **−14,95**,
+  Calmar 1,833 / **2,105**, IS +0,20/+1,44 và OOS +1,90/**+3,75** (OOS > IS, ngược chữ ký overfit).
+  C4a 0,42/0,24 · C4b 0,45/0,37 · PBO toàn họ **0,0216**. **Nhưng trượt C5a DSR 0,656/0,778 (ngưỡng
+  0,95) và C6 bootstrap CI95 [−1,20;+2,75] / [−0,116;+3,98] ôm 0** (L1b P(Δ>0)=0,969, sát mép — sát
+  mép vẫn là trượt). Đọc đúng: **chưa chứng minh được** (12,5 năm không đủ mẫu), khác hẳn L2/L3 **đã bác bỏ**.
+- **Đối chứng bắt buộc §6 — phát hiện thật của L1**: (a) KHÔNG đổi mức rủi ro — trên 1.895 phiên
+  NEUTRAL `w_equity` 72,995 → 72,843/72,806, Δ **−0,2pp** (ngưỡng ±2pp) ⇒ delta đến từ chọn mã;
+  (b) **NHƯNG là một cú CƯỢC NGÀNH** — `d_fin_name_share` **−6,32/−12,43pp**, `d_bank_name_share`
+  −3,61/−8,06pp, vượt ngưỡng khai trước 5pp gấp 2,5 lần ⇒ theo luật đã chốt phải báo cáo như cược
+  ngành, không phải "selector tốt hơn". Cơ chế: ngân hàng là nhóm thanh khoản nhất VN nên pool
+  **top-60 thanh khoản** cấu-trúc-hoá việc quá tải ngân hàng (Phần 0 đo: **49,1% trọng số toàn kỳ,
+  67,5% OOS, đỉnh 93,3%, đang tăng**); nới pool **pha loãng** chứ không "chọn giỏi hơn".
+- **Đối chiếu `fincap` (07-14) — cùng mục tiêu, 2 cơ chế trái dấu ~3pp**: cắt trọng số cùng tập tên
+  0,30/0,45/0,50/0,55 = **−0,64/−0,84/−0,74/−0,32pp**; đổi tập tên được cạnh tranh (L1b) = **+2,62pp**.
+- **Cái giá của L1b**: ADV rổ trung vị **1.743,7B → 510,3B/ngày (−71%)**. Cap 20%-ADV được engine
+  cưỡng chế thật (`simulate_holistic_nav.py:440-446`) nên số L1b đã tính ràng buộc chặt hơn 3,4 lần,
+  nhưng **trần dung lượng V2.4 dịch xuống tương ứng** (không ràng buộc ở NAV 1-5B; là ràng buộc chính
+  từ ~100-150B). Turnover 32,3% → 35,5%/38,7%/quý (dưới trần 1,5×, không phải trừ thêm chi phí).
+- **Không wire gì**; env nghiên cứu (`eycfq`, `BASKET_BANKSWAP`, `BASKET_POOL_N`) mặc định **OFF**;
+  `filter.json` / `simulate_holistic_nav.py` / `pt_v23_audit_2014.py` / `trading_rules.json` KHÔNG bị sửa.
+  Mức park 80% (config F1) không đụng tới.
+- **Câu hỏi để lại cho user/Mike (quyết định, không phải backtest)**: rổ đỗ tiền đang có ~49% trọng số
+  ở ngân hàng — có chủ ý không? Nếu KHÔNG, nới pool là đòn bẩy rẻ nhất đã biết (đổi lại −71% thanh
+  khoản); nếu CÓ, khai báo tường minh thành rule ngành kiểm soát được. Nếu đi tiếp L1: **không** quét
+  thêm điểm pool (tuning, sẽ chết ở DSR) mà tiền đăng ký câu hỏi khác — placebo đếm-khớp tách hiệu ứng
+  pha-loãng-ngành khỏi thêm-tên-rẻ (`BASKET_PLACEBO_FIN` đã có sẵn trong bản copy nghiên cứu).
+- Báo cáo: `mike/agents/Taylor/research/custom30v_selector_20260909/report.md`
