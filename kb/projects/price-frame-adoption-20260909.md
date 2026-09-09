@@ -1,7 +1,6 @@
 # P1 — Giá: 4 consumer đọc `marketPrice` trần (2026-09-09)
 
-**Trạng thái:** việc 1/2/4 ĐÃ WIRE + verify trên dữ liệu thật (commit `65a6103b`, `3ca7fabd`, `9645d2bd`);
-việc 3 vẫn MỞ có lý do (xem cuối file). Thiết kế v2 sau arch-review **NEEDS_CHANGES** (confidence high).
+**Trạng thái:** CẢ 4 việc ĐÃ WIRE + verify trên dữ liệu thật (commit `65a6103b`, `3ca7fabd`, `9645d2bd`, `1cccc83f`). Thiết kế v2 sau arch-review **NEEDS_CHANGES** (confidence high).
 Bản v1 của tôi bị bác gần hết — giữ lại phần bị bác ở §"Sai ở đâu" để không ai đi lại đường đó.
 
 ## Kết luận sau phản biện
@@ -109,12 +108,22 @@ Bản vá đầu của câu gợi ý khởi tạo biến SAI SCOPE ⇒ `NameErro
 53/53 vẫn PASS** (fixture không chạm nhánh đó); chỉ chạy trên báo cáo THẬT mới lộ. Đúng §19 —
 selfcheck xanh không thay được một lần chạy trên artifact thật.
 
-### Việc 3 vẫn MỞ (không chặn kỳ báo cáo tới)
-`park_holdings.py` → `compute_park_trim/jit_unpark` vẫn định cỡ lệnh bằng `marketPrice`. Chưa
-làm, có lý do: (a) đổi SIZING LỆNH THẬT; (b) `park_holdings.py:562` ghi `§6: KHÔNG BQ` ⇒ nguồn
-đúng là `dnse_close_prices` (DNSE) chứ KHÔNG phải `bq_close_prices`; (c) nhánh jsonl LỊCH SỬ
-không dùng được nguồn live ⇒ cần thiết kế 2 nhánh; (d) phơi nhiễm đo được **0/26 park_trim +
-0/27 jit_unpark**. Nên làm thành đợt riêng có selfcheck, KHÔNG ghép vào đợt này.
+### Việc 3 — ĐÃ XONG (commit `1cccc83f`)
+`resolve_close_prices()` mới trong `park_holdings.py`, dùng ở CẢ 2 nhánh của
+`read_broker_snapshot`: `asof` hôm nay → `dnse_close_prices` (DNSE, đúng §6 same-day KHÔNG đọc
+BQ); `asof` quá khứ → `bq_close_prices` (§6 cho phép BQ cho lịch sử, và bản DNSE chỉ có phiên
+hiện tại). **Fail-closed TOÀN LƯỢT** khi thiếu/giá 0 — vì `park_mv` là mẫu số cấp account nên
+bỏ một mã sẽ ém trim của mọi mã khác.
+
+**Hành vi trên dữ liệu đo được KHÔNG ĐỔI**: 6 mã PARK ngày 08-28 có `marketPrice` trùng BQ
+`Close` tới từng đồng — khớp đúng phơi nhiễm 0/26 + 0/27 đã đo. Đây là gỡ phụ thuộc tiềm ẩn,
+không phải đổi số; ca lệch duy nhất (SCL) nằm ở sổ LAG, mà `park_mv` chỉ tính PARK.
+
+Verify: nhánh lịch sử ZaloPay asof 08-28 rc=0, reconcile khớp 27 mã, 22/22 `park_lots` có giá và
+không có None, đối chiếu khớp BQ Close; nhánh live chạy sạch hôm nay (thấy `dnse_close_prices`
+xử vintage cho mã GDKHQ); `compute_park_trim_selfcheck` 69→**72 PASS** (+3 bất biến: đúng nguồn,
+thiếu giá ⇒ chặn, giá 0 ⇒ coi như thiếu); `compute_jit_unpark_selfcheck` 80 PASS, digest đồng
+nhất qua ma trận TZ.
 
 ## Nguồn
 - arch-review 2026-09-09 (verdict NEEDS_CHANGES, confidence high) — 7 required_changes
