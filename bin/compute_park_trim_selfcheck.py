@@ -541,6 +541,29 @@ check("T19f ĐƯỜNG THẬT — egg=0 (tài khoản không dùng Trứng vàng)
       m_egg_zero["egg_assets_vnd"] == 0.0,
       f"egg_assets_vnd={m_egg_zero.get('egg_assets_vnd')}")
 
+# ── T20: giá PARK lấy từ GIÁ ĐÓNG CỬA, không từ `positions[].marketPrice` (sửa 2026-09-09) ──
+# `park_mv` là MẪU SỐ cấp tài khoản (pool/target_value/w_sum) nên một giá sai hoặc thiếu không
+# chỉ lệch một mã mà lệch quyết định trim của CẢ account. Ba bất biến:
+from park_holdings import resolve_close_prices   # noqa: E402
+
+_px = resolve_close_prices(["ACB", "BID"], "2026-08-28",
+                           price_fn=lambda tks, d: {"ACB": 22650.0, "BID": 36850.0})
+check("T20a giá đóng cửa được trả đúng theo nguồn (không đọc marketPrice)",
+      _px == {"ACB": 22650.0, "BID": 36850.0}, str(_px))
+
+try:
+    resolve_close_prices(["ACB", "BID"], "2026-08-28",
+                         price_fn=lambda tks, d: {"ACB": 22650.0})
+    check("T20b thiếu giá 1 mã ⇒ CHẶN cả lượt (fail-closed)", False, "không raise")
+except SystemExit as _e:
+    check("T20b thiếu giá 1 mã ⇒ CHẶN cả lượt (fail-closed)", "BID" in str(_e), str(_e)[:80])
+
+try:
+    resolve_close_prices(["ACB"], "2026-08-28", price_fn=lambda tks, d: {"ACB": 0})
+    check("T20c giá 0 cũng bị coi là THIẾU (không nhân 0 vào park_mv)", False, "không raise")
+except SystemExit:
+    check("T20c giá 0 cũng bị coi là THIẾU (không nhân 0 vào park_mv)", True)
+
 print(f"\n=== {len(PASS)} PASS / {len(FAIL)} FAIL ===")
 if FAIL:
     for f in FAIL:
