@@ -28,7 +28,20 @@ fi
 echo "==> Staging + committing…"
 git add -A
 if git diff --cached --quiet; then
-  echo "Nothing changed — already up to date."
+  # "Nothing to COMMIT" ≠ "nothing to PUSH" (Wags, 2026-09-09). A commit created OUTSIDE this
+  # script (a manual `git commit`, another session) used to stay local forever: this branch
+  # returned 0 without ever reaching the push below, and every caller printed success. Real
+  # case 2026-09-08: local 3ff20579 vs origin/main 057254e0 unpushed for 8h while the nightly
+  # backup reported "already up to date" — the 4th shape of the same silent-failure family.
+  remote_sha="$(git ls-remote origin main 2>/dev/null | awk 'NR==1{print $1}')"
+  if [ -n "$remote_sha" ] && [ "$remote_sha" != "$(git rev-parse HEAD)" ] \
+     && git merge-base --is-ancestor "$remote_sha" HEAD; then
+    echo "==> Nothing new to commit, but origin/main is behind — pushing existing commits…"
+    git push -q origin main
+    echo "✅ Backup pushed (existing commits): $(git rev-parse --short HEAD)"
+  else
+    echo "Nothing changed — already up to date."
+  fi
   exit 0
 fi
 git commit -q -m "$MSG"
