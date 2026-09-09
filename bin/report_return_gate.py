@@ -89,9 +89,9 @@ def find_incomplete_markers(report_path: str) -> list:
 
 
 # ---------------------------------------------------------------- nguồn (1): broker
-def broker_positions(account_no: str, asof: str) -> dict:
-    """{mã: (qty, costPrice bình quân gia quyền GỘP lô, marketPrice)} từ bản ghi `positions`
-    CUỐI CÙNG của ngày `asof`.
+def broker_positions(account_no: str, asof: str, price_fn=None) -> dict:
+    """{mã: (qty, costPrice bình quân gia quyền GỘP lô, giá đóng cửa BQ)} — khối lượng và giá
+    vốn từ bản ghi `positions` CUỐI CÙNG của ngày `asof`; GIÁ từ BQ, không từ `marketPrice`.
 
     §12: lọc `account_no` TRƯỚC mọi phép tính — file dnse_raw dùng chung mọi tài khoản.
 
@@ -120,7 +120,7 @@ def broker_positions(account_no: str, asof: str) -> dict:
             last = rec
     if last is None:
         raise ValueError(f"không có bản ghi positions nào của {account_no} ngày {asof} — CHẶN")
-    agg = {}   # symbol -> [tổng qty, tổng cost_value, marketPrice (giống nhau mọi lô cùng mã)]
+    agg = {}   # symbol -> [tổng qty, tổng cost_value]
     for p in last["payload"].get("positions", []):
         if str(p.get("accountNo")) != str(account_no):
             continue
@@ -128,13 +128,45 @@ def broker_positions(account_no: str, asof: str) -> dict:
         if qty <= 0:
             continue
         cp = float(p.get("costPrice") or 0)
-        mp = float(p.get("marketPrice") or 0)
-        a = agg.setdefault(p["symbol"], [0.0, 0.0, mp])
+        a = agg.setdefault(p["symbol"], [0.0, 0.0])
         a[0] += qty
         a[1] += qty * cp
+    if not agg:
+        return {}
+
+    # GIÁ THỊ TRƯỜNG KHÔNG lấy từ `positions[].marketPrice` nữa (sửa 2026-09-09).
+    # Hai lý do độc lập, cái nào cũng đủ:
+    #   1. Bản cũ `agg.setdefault(sym, [0, 0, mp])` khiến giá của lô ĐẦU TIÊN trong mảng
+    #      thắng im lặng, rồi giá đó được áp cho TỔNG khối lượng ở expected_pct(). Các lô
+    #      cùng mã KHÔNG phải lúc nào cũng cùng giá: đo thật trên dnse_raw 08→09 có 5 bản
+    #      đọc mà 2 lô cùng mã lệch nhau (ZaloPay 2026-08-14T19:10:23 BID 35.800 vs 38.850
+    #      — lệch 8,5%), do replica đọc-sau-ghi của DNSE trả dòng cũ trong lúc batch
+    #      reprice EOD đang chạy. Comment cũ ở đây khẳng định "giống nhau mọi lô cùng mã",
+    #      điều đã bị chính dữ liệu bác bỏ.
+    #   2. Kể cả khi mọi lô đồng giá, `marketPrice` VỐN không phải giá đóng cửa ATC —
+    #      `verify_account_snapshot.dnse_close_prices()` đã ghi rõ "không dùng" từ ca
+    #      2026-07-06. Cổng này công bố TỈ SUẤT cho nhà đầu tư nên phải dùng giá đóng cửa.
+    # Dùng `bq_close_prices` (KHÔNG phải `dnse_close_prices`): `asof` ở đây là ngày LỊCH SỬ,
+    # mà bản DNSE chỉ trả giá phiên hiện tại. BQ vốn đã là phụ thuộc cứng của cổng này
+    # (`dar.resolve_dividends` query `tav2_bq.corporate_action`) nên không thêm kiểu lỗi mới.
+    # `price_fn` chỉ để selfcheck chạy offline — production luôn dùng mặc định.
+    if price_fn is None:
+        from verify_account_snapshot import bq_close_prices
+        def price_fn(tks, d):
+            px, err = bq_close_prices(tks, d)
+            if px is None:
+                raise ValueError(f"không lấy được giá đóng cửa {d} từ BQ: {err} — CHẶN")
+            return px
+    prices = price_fn(sorted(agg), asof)
+
     out = {}
-    for sym, (qty, cost_value, mp) in agg.items():
-        out[sym] = (qty, cost_value / qty, mp)
+    for sym, (qty, cost_value) in agg.items():
+        px = prices.get(sym)
+        if not px:
+            # Fail-closed: thiếu giá 1 mã ⇒ chặn cả lượt, KHÔNG đoán và KHÔNG lặng lẽ bỏ mã
+            # (bỏ mã sẽ làm tỉ suất TỔNG công bố cho nhà đầu tư thiếu đúng mã đó).
+            raise ValueError(f"thiếu giá đóng cửa {sym} ngày {asof} — CHẶN (fail-closed)")
+        out[sym] = (qty, cost_value / qty, float(px))
     return out
 
 
@@ -669,14 +701,56 @@ def _selfcheck() -> int:
             ]},
         }, ensure_ascii=False) + "\n")
     try:
-        pos = broker_positions("0009999999", _fake_asof)
+        pos = broker_positions("0009999999", _fake_asof,
+                               price_fn=lambda tks, d: {"XYZ": 12000.0})
         qty, cost, mp = pos["XYZ"]
         # tổng qty = 100+300=400; cost bình quân = (100*10000+300*11000)/400 = 10750
         check("multi-lot: gộp tổng qty (100+300, không mất lô đầu)", qty, 400.0)
         check("multi-lot: cost bình quân gia quyền đúng", round(cost, 4), 10750.0)
-        check("multi-lot: marketPrice giữ nguyên", mp, 12000.0)
+        check("multi-lot: giá lấy từ nguồn giá đóng cửa, không từ lô", mp, 12000.0)
     finally:
         os.unlink(_fake_path)
+
+    # 16c: LÔ LỆCH GIÁ THẬT — fixture lấy nguyên từ ZaloPay 2026-08-14T19:10:23 (BID 107cp
+    # @35.800 gói 1826 / 300cp @38.850 gói 1258, lệch 8,5% trong CÙNG một bản đọc; nguyên nhân
+    # là replica đọc-sau-ghi của DNSE trong lúc batch reprice EOD chạy).
+    # Bản CŨ `agg.setdefault(sym, [0,0,mp])` lấy giá lô ĐẦU (35.800) rồi áp cho TỔNG 407cp.
+    # Bản mới KHÔNG đọc marketPrice nữa ⇒ lô lệch giá không còn ảnh hưởng kết quả. Đây là ca
+    # mà fixture cũ (2 lô CÙNG giá 12.000) không bao giờ chạm tới được.
+    _fake_asof2 = "9999-01-02"
+    _fake_path2 = os.path.join(EXEC_DIR, f"dnse_raw_{_fake_asof2}.jsonl")
+    with open(_fake_path2, "w", encoding="utf-8") as fh:
+        fh.write(json.dumps({
+            "account_no": "0009999999", "kind": "positions",
+            "payload": {"positions": [
+                {"accountNo": "0009999999", "symbol": "BID", "marketType": "STOCK",
+                 "openQuantity": 107, "costPrice": 30000.0, "marketPrice": 35800.0,
+                 "loanPackageId": 1826},
+                {"accountNo": "0009999999", "symbol": "BID", "marketType": "STOCK",
+                 "openQuantity": 300, "costPrice": 30000.0, "marketPrice": 38850.0,
+                 "loanPackageId": 1258},
+            ]},
+        }, ensure_ascii=False) + "\n")
+    try:
+        pos2 = broker_positions("0009999999", _fake_asof2,
+                                price_fn=lambda tks, d: {"BID": 35800.0})
+        q2, c2, mp2 = pos2["BID"]
+        check("lô lệch giá: vẫn gộp đủ khối lượng (107+300)", q2, 407.0)
+        check("lô lệch giá: KHÔNG lấy giá từ lô nào cả — dùng giá đóng cửa", mp2, 35800.0)
+        # Chứng minh ngược: nếu nguồn giá trả số khác, kết quả PHẢI đi theo nguồn giá,
+        # không bị lô 35.800/38.850 kéo về.
+        pos3 = broker_positions("0009999999", _fake_asof2,
+                                price_fn=lambda tks, d: {"BID": 36500.0})
+        check("lô lệch giá: đổi nguồn giá thì kết quả đổi theo (không dính giá lô)",
+              pos3["BID"][2], 36500.0)
+        # Thiếu giá 1 mã ⇒ CHẶN, không đoán và không lặng lẽ bỏ mã.
+        try:
+            broker_positions("0009999999", _fake_asof2, price_fn=lambda tks, d: {})
+            check("lô lệch giá: thiếu giá ⇒ phải CHẶN", "không raise", "raise ValueError")
+        except ValueError:
+            check("lô lệch giá: thiếu giá ⇒ CHẶN (fail-closed)", True, True)
+    finally:
+        os.unlink(_fake_path2)
 
     # 17-24: chân SỔ PAPER (T1). Logic thuần, chạy offline — không chạm BQ, không chạm cache.
     class _A:                                   # thế thân AdjustedEntry, chỉ các trường T1 đọc
