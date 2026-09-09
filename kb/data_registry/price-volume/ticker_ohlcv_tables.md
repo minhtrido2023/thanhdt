@@ -46,3 +46,13 @@ suspend) biến mất vĩnh viễn.
 chạy trước giờ đó đọc cache sẽ luôn trễ 1 ngày (sự cố thật 2026-07-09, DollarBill BID/MBB lệch +5.7%).
 BQ TABLE gốc (không qua cache) có thể fresh sớm hơn nhiều — đừng lẫn 2 khái niệm "BQ" và "BQ cache
 local".
+
+**TRAP look-ahead — cột forward-looking NGOÀI danh sách `profit_*` đã biết (phát hiện Taylor
+2026-09-09, job `Taylor_20260909_100425`, Mike duyệt):** `bigquery_dictionary.json` định nghĩa rõ
+nhưng TÊN cột không hề gợi ý tương lai:
+- `PC1W` / `PC2W` / `PC3W` / `PC1M` / `PC2M` = "Peak price in the **NEXT** 1W/2W/3W/1M/2M" —
+  forward-looking. RẤT dễ nhầm với `PC_6M` ("Peak Close price in the **LAST** 6M" — quá khứ, an toàn).
+- `Open_1D` = "Open price in the **NEXT** 1D" — forward-looking.
+- Nhóm `O1W..O2Y` (outcome stats) và `Pattern_*_3Y` — hậu nghiệm.
+⇒ Danh sách CẤM-làm-filter-live = `profit_*`, `_center_*`, **`PC1W/PC2W/PC3W/PC1M/PC2M`, `Open_1D`,
+`O1W..O2Y`, `Pattern_*_3Y`**. Chỉ được dùng làm nhãn train / forward-return đo IC trong nghiên cứu.
