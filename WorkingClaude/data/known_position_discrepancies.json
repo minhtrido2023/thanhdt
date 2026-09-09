@@ -1,0 +1,23 @@
+{
+  "_doc": "Lệch số lượng broker-vs-journal ĐÃ ĐƯỢC GIẢI THÍCH, đọc bởi mike/bin/verify_account_snapshot.py::_load_known_discrepancies(). Chỉ dùng cho lệch đã truy ra nguyên nhân và có ngày tự hết hiệu lực — KHÔNG phải chỗ để tắt cảnh báo chưa hiểu. Khớp theo qty_delta = journal − broker (thứ mà lý do thật sự giải thích, và bất biến khi mua-bán bình thường): hiệu đổi số là sự kiện khác và sẽ WARN trở lại. expires_at BẮT BUỘC, quá hạn là WARN trở lại.",
+  "discrepancies": [
+    {
+      "account": "SpaceX",
+      "ticker": "MBB",
+      "qty_delta": 110,
+      "reason": "Quyền mua MBB 10:1 @10.000đ đăng ký qua app DNSE 2026-08-28 (110cp). Tiền đã trả và journal đã ghi; broker chưa ghi có vì cổ phiếu phát hành thêm chưa về tài khoản. Đối chiếu giá vốn khớp tuyệt đối: 1565×21.405,75 = 33.500.000đ vs 1675×20.656,72 = 34.600.000đ, chênh đúng 1.100.000đ = 110×10.000đ.",
+      "evidence": "data/execution_logs/exec_SpaceX_2026-08-28_journal.csv — parent_id MBB-RIGHTS-2026-08-28",
+      "recorded_at": "2026-09-09",
+      "expires_at": "2026-11-30"
+    },
+    {
+      "account": "ZaloPay",
+      "ticker": "MBB",
+      "qty_delta": 20,
+      "reason": "Cùng đợt quyền mua MBB 10:1 @10.000đ ngày 2026-08-28 (20cp). Đối chiếu lúc khai báo: 232×21.417,15 vs 252×20.511,03, chênh đúng 200.000đ = 20×10.000đ. Vị thế tuyệt đối đã tăng từ đó do giao dịch thường (632/652 ngày 2026-09-08); hiệu vẫn đúng +20.",
+      "evidence": "data/execution_logs/exec_ZaloPay_2026-08-28_journal.csv — parent_id MBB-RIGHTS-2026-08-28",
+      "recorded_at": "2026-09-09",
+      "expires_at": "2026-11-30"
+    }
+  ]
+}
