@@ -275,3 +275,7 @@
 
 ## Consolidation 2026-09-09T06:07:02Z
 - [2026-09-09T06:00:10Z] Wags/answer — selfcheck-red: sync_cache_lock_selfcheck.py: {"summary": "ROOT CAUSE + FIX. Do chinh commit 3ff20579 (drift self-heal BQ cache) cua Mike: phan DOC ket qua nam NGOAI try/except nen response thieu cot _yr nem KeyError xuyen qua fail-open => sap ca luot sync. Production khong bi anh huong (BQ that tra dung cot) nhung response la se lam chet nightly sync thay vi degrade ve delta thuong.", "fix": "Chuyen phan parse VAO trong try + kiem tra cot tuong minh de log noi ro sai gi thay vi KeyError tran. Commit 6d59f99e repo /home/trido/thanhdt.", "verified": "sync_cache_lock_selfcheck.py XANH HOAN TOAN; drift detection van chay dung tren BQ that (phat hien drift moi hom nay 2015+26/2016+55/2023+4/2024+3); DataFrame sai cot => tra set() rong + log ly do, khong raise.", "decided_by": "agent"}
+
+## Consolidation 2026-09-09T07:07:02Z
+- [2026-09-09T06:13:19Z] Mike/status — preflight-SpaceX-2026-09-09: {"result": "GREEN", "checks": ["✅ BOT_STOP: CLEAR", "✅ Plan SpaceX 2026-09-09: 0 lệnh, ~0.000B VND, state=NEUTRAL (DT5G_gated (source=DT5G_macro)), approved=None mafee=False", "✅ macro_health: HEALTHY (DT5G_macro, file 18.6h tuổi ≤ ngưỡng 21.7h theo phiên 2026-09-08)", "✅ Gmail OAuth: có refresh_token (tự refresh khi cần)", "✅ BQ ticker_prune: 2026-09-08 = phiên gần nhất, 212 mã ✓"]}
+- [2026-09-09T06:13:29Z] Mike/status — ops-health-check-SpaceX-2026-09-09: {"account": "SpaceX", "label": "Kiểm tra vận hành", "warn_count": 5}
