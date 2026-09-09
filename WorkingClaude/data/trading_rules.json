@@ -1,0 +1,351 @@
+{
+  "_meta": {
+    "name": "trading_rules",
+    "version": "2.3",
+    "effective_date": "2026-07-03",
+    "changelog": "v2.3 (2026-08-04): NEUTRAL park DEFAULT RAISED 0.70 -> 0.80 (config F1 / \"Aggressive-lite\"). This is a PERMANENT DEFAULT change, not a per-plan override: the user's instruction (via Mike, Discord, ~10:41 ICT 2026-08-04) was to REPLACE the standing 0.70, and this file's own v2.1 enforcement clause named exactly that path (\"changing the engine DEFAULT away from 0.70 requires user approval applied to LIVE\"). risk_dial_override is therefore NOT consumed by this decision — it is RE-POINTED and stays ARMED for any level != 0.80 (e.g. a future F2=0.85, or a revert), so a plan running the default needs no confirmation fields while a plan proposing a NEW level is still hard-blocked by Mafee without them. The reasoning for not demanding those two fields on every daily plan is recorded verbatim in risk_dial_override._why_default_not_per_plan (a gate that fires every single day stops carrying information — the exact failure mode v2.1 was written to prevent). EVIDENCE RE-BASED: the v2.1 citation target measured_tradeoff_job_130720 is a 2026-07-03 vintage (ticker_prune, LAG_ADV_BASIS=close) holding NO 0.80 or 0.85 row, so citing it for a 0.80 decision would quote numbers that do not describe the chosen level; it is retained but clearly marked STALE and superseded by the new evidence_current_F1_2026-08-04 block (source mike/agents/Taylor/research/park_wiring_two_options_20260804.md, jobs Taylor_20260804_012953 / _022423, quant-skeptic CONFIRMED 2026-08-04T02:16:40Z). On ONE comparable current vintage (universe_pit, LAG_ADV_BASIS=price, NAV 50B, self-check 0 VND, no-op gate PASS): park 0.70 = CAGR 28.86% / Sharpe 1.90 / MaxDD -17.8% / Calmar 1.62; park 0.80 = CAGR 29.85% / Sharpe 1.87 / MaxDD -18.3% / Calmar 1.63 (Calmar peak of the whole sweep); 0.85 = 30.51% / 1.86 / -18.9% / 1.62; 0.90 = 31.01% / 1.84 / -19.5% / 1.59 (rejected — range boundary, plateau breaks). Bootstrap P(MaxDD<-30%) 2.2% -> 2.8% going 0.70 -> 0.80; realised average equity share 60.4% -> 63.1%; per-year LOO edge positive in every cell (+0.71..+1.25pp). N_trials 7 this round (~16 cumulative on this axis, not poolable across vintages); DSR = 1.0000 on all 7 legs = SATURATED and explicitly NOT usable as safety evidence; PBO(CAGR) = 0.080 (robust) vs PBO(Sharpe) = 0.411 (noise) — both family statistics, neither ranks an individual config. The risk anchor stays MaxDD ~ -30% (the liq<=0 fidelity bug is still open, so every MaxDD quoted here is a lower bound). WIRING STATE, stated plainly: the L1 sell rail exists as a READ-ONLY proposal script (mike/bin/compute_park_trim.py + mike/bin/park_holdings.py + P0 book/play_type tagging in trading_bot/executor.py._journal(); quant-skeptic CONFIRMED high 2026-08-04T03:16:01Z, re-derived against live DNSE to the VND) and every proposed order still passes requires_user_approval + the Mafee plan-bound gate — nothing here grants auto-execution. L2 (JIT unpark) deliberately NOT wired (L1-before-L2). NOT YET DONE, and it blocks true F1 behaviour: the engine BUY rail deploy_golive_dt5g_v4/golive_recommend_v23.py:96 ETF_PARK = {3: 0.7} still publishes 0.70 into data/golive_v23_status.json, so today the book would be bought up to 70% and only trimmed above 80% — a hybrid that was never backtested. See neutral_parking.pending_engine_consistency; that one-line engine change needs its own user/Mike go-ahead and was deliberately NOT made by job Taylor_20260804_034133. | v2.2 (2026-08-03): added capit_margin_lever block (DISABLED, enabled=false) — margin on the CAPIT bear-washout sleeve only, fixed f=1.3, gate dd52<=-20%, DNSE RocketX package 1840, SpaceX only. Wiring + rehearsal complete (job Taylor_20260803_122554, report mike/agents/Taylor/research/margin_kelly_production_wiring_20260803.md); ZERO live behaviour change while enabled=false. Scope is exactly what the p1-p5 research chain verified (p5 engine tier, quant-skeptic CONFIRMED-medium: dCAGR +0.663pp, dMaxDD worse 0.067pp, DSR 1.0, PBO 0.10-0.14) — NOT the p4 proxy numbers (+1.82pp), which p5 showed inflate both directions. Flipping enabled=true requires a separate explicit user confirmation; no agent may flip it. | v2.1 (2026-07-03): added neutral_parking section (governance policy, not a research change) — codifies the engine default that at DT5G NEUTRAL with 0 active BAL/LAG deals, idle cash parks into custom30V at 70% OF THE IDLE POOL (not a total-equity cap). Reason: go-live 2026-07-01 DollarBill wrote target_equity_pct=93.8% straight into a trade plan JSON that passed no policy/backtest gate; user caught it via direct questioning; backtest confirmed 70% is the risk-adjusted optimum. Evidence pinned: jobs Taylor_20260703_113818 (70 vs 94 isolated, quant-skeptic CONFIRMED 11:57:15), _120555 (70-100 sweep, no inflection), _130720 (CANONICAL full 2-book NAV: park0.70 CAGR26.83/Sh1.78/DD-16.5/Cal1.63 DOMINATES park0.94 28.01/1.66/-18.8/1.49 and park1.00 29.30/1.65/-19.3/1.52 on Sharpe+Calmar+MaxDD every window), _153738 (70 = properly-tested level, not a taste floor). Added risk_dial_override (PROPOSED/DISABLED, same guardrail pattern as deep_cheap_recovery_override/v25_leverage): any plan setting NEUTRAL park!=0.70 must carry risk_dial_confirmed_by_user:true + risk_dial_warning_acknowledged citing the job-130720 Sharpe/Calmar/DD cost, else Mafee BLOCKS. No algorithm/backtest logic changed — policy record only. | v2.0 (2026-06-29): added gap_adaptive_fill block (PROPOSED, enabled=false) — Layer-3 fill timing becomes gap_z-conditional: abnormal DOWN-gap (gap_z<-2) on a buy-list name -> BUY-AT-OPEN (current rule wrongly waits to 11:15, leaving ~173-206 bps); UP-gap unchanged. Evidence gap_adaptive_proxy.py (daily N=408k IS+OOS) + gap_path_crosscheck.py (16-name 1-min). Pure execution, zero alpha risk; paper-first, LIVE needs user approval. | v1.9 (2026-06-27): added v25_leverage block — NAMING V2.5 = V2.4 + leverage (user); account 0002023347 (DNSE RocketX loan_package_id=1840, borrow 12.5%) user-confirmed; documents B2(breaker-15% DONE)/B3(NAV-cap100B DONE)/B4(PE-freshness DONE) safety gates + risk layering. STATUS=DISABLED (prep) — paper until live-recommend integration + final user go-ahead; go-live 2026-06-30 = V2.4 leverage-free, unaffected. v1.8 (2026-06-27): MGE ceiling RAISED 1.30 -> 1.50 per Spyros mge20-tail-review decision (mge20-tail-review-REJECT-cap-at-1.5, 2026-06-27) — Taylor full 4-point MGE sweep on stable cache showed 1.5 better in-sample (lean default) over 1.3, LUMPY but manageable; 2.0 rejected (tail risk). Episode-drawdown breaker threshold updated -12% -> -15% to match the wider 1.5x ceiling (Spyros: -12% was calibrated for 1.3x; at 1.5x the wider position warrants 3pp more tolerance before knife-catcher fires). Spyros implements in risk_monitor.py (S4 breach = BOT_STOP + Telegram + halt-review flag for first 6m go-live). v1.7 (2026-06-26): added macro_kill_switches section (3 RECOVERY_PARK suspend conditions required by Spyros's v24-golive-risk-review sign-off, 2026-06-23) ahead of go-live 2026-06-30 — (A) SBV deposit rate >7.5% -> suspend new recovery deploy (outer hard-stop on top of the money_condition throttle); (B) median liquid-universe pb_z > -0.3 while a recovery episode is active -> tighten (stop adding, market no longer cheap; -0.5-in/-0.3-out hysteresis vs deep_cheap_recovery_override episode-open); (C) cumulative intra-episode NAV drawdown > -12% from episode entry -> HALT via BOT_STOP (knife-catching circuit breaker, distinct from the intraday -5% brake). All are SUSPEND (auto-arming, not permanent-off) except (C) which needs human review to restart. v1.6 (2026-06-23): deep_cheap_recovery_override ceiling TIGHTENED 1.50 -> 1.30. v1.5 (2026-06-23): money_condition dep_floor 0.06->0.075. v1.4 (2026-06-22): added money_condition.",
+    "author": "Taylor (quant/algo)",
+    "owners": "Taylor owns this file (single source of truth for risk/sizing limits)",
+    "consumers": {
+      "DollarBill": "reads to build data/plan_<acct>_<T+1>.json (sizing within these limits)",
+      "Mafee": "hard-blocks any order/plan beyond these limits (2nd gate after the approved plan)",
+      "Spyros": "owns BOT_STOP kill-switch; enforces the daily-loss circuit breaker threshold set here"
+    },
+    "approval": {
+      "applies_to": "live",
+      "approved_by": "user",
+      "approved_date": "2026-06-26",
+      "live_effective": "2026-07-01",
+      "live_requires_user_approval": true,
+      "note": "User approved live on 2026-06-26 for go-live 2026-07-01. Mafee must refuse live execution until today >= live_effective AND SpaceX account enabled=true in trading_bot_accounts.json."
+    },
+    "units": {
+      "scheme": "NAV-relative",
+      "nav_source": "Mafee reads live NAV from the latest data/eod_account_<date>.json (Mafee EOD snapshot); all *_pct limits multiply that NAV. No capital is hardcoded so the limits auto-scale on deposit/withdrawal.",
+      "pct_convention": "fractions (0.10 = 10%); loss limits negative (-0.05 = -5%)"
+    },
+    "consistency_with_bot_config": {
+      "file": "secrets/trading_bot_config.json (Mafee-owned execution mechanics)",
+      "rule": "where keys overlap, THIS file is the authoritative POLICY; trading_bot_config.json must stay consistent.",
+      "mapping": {
+        "participation_cap -> max_participation": "0.10 == bot 0.10 (match)",
+        "plan_deviation_tolerance_pct -> qty_tolerance_pct": "0.05 == bot 0.05 (match)",
+        "max_orders_per_day -> max_orders_per_day": "60 == bot 60 (match)",
+        "min_order_value_vnd -> min_order_value": "5,000,000 == bot 5M (match)",
+        "max_value_per_order_pct": "NAV-relative parent cap; bot max_child_value 200M slices within it",
+        "max_daily_gross_pct": "0.40*NAV ~= bot max_daily_gross_value 20B at 50B NAV"
+      }
+    }
+  },
+  "sizing": {
+    "gate_rating_max": 3,
+    "gate_rating_note": "only 8L as-of rating <=3 eligible (fa_ratings_8l). Validated robust-optimal 2026-06-22: 4 candidate enhancements all failed OOS/cosmetic, simple yieldcombo gate stands.",
+    "name_cap_pct": 0.1,
+    "name_cap_note": "max 10% of NAV per single ticker (V2.4 namecap). Concentration ceiling DollarBill sizes within.",
+    "min_order_value_vnd": 5000000
+  },
+  "neutral_parking": {
+    "_principle": "When DT5G state == NEUTRAL and the two core books (BAL momentum + LAG PEAD) have NO deal meeting their entry standard at that moment, the IDLE portion of NAV is parked into the custom30V yieldcombo sleeve at a FIXED 80% of that idle pool (was 70% from v2.1 until v2.3, 2026-08-04 — see changelog). This 80% is a fraction of the IDLE POOL (idle_pool = NAV - active_BAL_LAG_stock_value), NOT a cap on total portfolio equity: when BAL/LAG DO hold real deals, total stock exposure can run far above 80% of NAV (by design — this rule does not apply then, it governs only what to do with the leftover cash). The rule exists to close the go-live gap where a target equity % was written straight into a trade plan without passing any policy/backtest gate (see _meta changelog v2.1).",
+    "default_park_of_idle_pct": 0.8,
+    "default_park_note": "PARK 80% of idle cash into custom30V (30 names, name_cap 0.10, gate rating<=3, yieldcombo 1/PE+1/PCF). Level = config F1, user-confirmed 2026-08-04 via Mike (Discord), replacing the 0.70 that stood from v2.1 (2026-07-03). Exactly ONE parameter changed vs the pinned spec (0.70 -> 0.80); band 0.005, FIFO, _etf_day_cap all unchanged. This is the engine default, NOT a discretionary floor and NOT a ceiling to be topped up to by hand.",
+    "pending_engine_consistency": {
+      "status": "CLOSED 2026-08-04T11:34:00+07:00 — user explicitly confirmed via Mike (Discord, DollarBill plan channel) to change the BUY rail to match. Both rails now target 0.80.",
+      "what_was_0.70": "deploy_golive_dt5g_v4/golive_recommend_v23.py:96 `ETF_PARK = {3: 0.7}` -> feeds etf_frac -> published into data/golive_v23_status.json (`etf_park_frac`) and the daily recommendation text. Changed to `{3: 0.8}` 2026-08-04T11:34 ICT (syntax-checked via ast.parse, git diff verified single-line change, no other lines touched).",
+      "why_it_mattered": "ETF_PARK is the BUY rail (how much idle cash the engine deploys into custom30V); the L1 trim script is the SELL rail. Leaving them at 0.70 / 0.80 would have created a hybrid never backtested: the book would be bought up to 70% and only trimmed when above 80%, i.e. it would float in a 70-80% dead band instead of tracking the single target F1 actually measured. F1 = ONE target on BOTH rails — now true.",
+      "verification_owed": "next live run of golive_recommend_v23.py (09:05 ICT) should publish etf_park_frac=0.8 in data/golive_v23_status.json and the recommendation text should say 'park 80%' — confirm this on the next trading-day run, don't assume from the source-line change alone.",
+      "owner": "Taylor (file owner); change applied by Mike per explicit user go-ahead 2026-08-04."
+    },
+    "evidence_current_F1_2026-08-04": {
+      "source": "mike/agents/Taylor/research/park_wiring_two_options_20260804.md (jobs Taylor_20260804_012953 round-1, Taylor_20260804_022423 round-2 after quant-skeptic). THIS is the table any risk_dial_warning_acknowledged must quote — NOT measured_tradeoff_job_130720 below.",
+      "harness": "full 2-book NAV engine (BAL+LAG always-on + custom30V parking idle cash), 2014->AUDIT_END 2026-06-19 @ NAV 50B, universe_pit, BQ_LOCAL_CACHE=data/bq_cache_asof20260729_postrestate, LAG_ADV_BASIS=price (current production default), threads=1, self-check cash-flow + NAV identity = 0 VND on all 7 legs, no-op gate PASS (md5 7d053e62 identical to leg A).",
+      "dose_response_full_window": {
+        "park_0.70_Conservative": {
+          "CAGR": 0.2886,
+          "Sharpe": 1.9,
+          "MaxDD": -0.178,
+          "Calmar": 1.62,
+          "final_nav_B": 1178.0,
+          "IS_2014_19": 0.2709,
+          "OOS_2020plus": 0.3048
+        },
+        "park_0.80_F1_ACTIVE": {
+          "CAGR": 0.2985,
+          "Sharpe": 1.87,
+          "MaxDD": -0.183,
+          "Calmar": 1.63,
+          "final_nav_B": 1295.7,
+          "IS_2014_19": 0.2797,
+          "OOS_2020plus": 0.3157
+        },
+        "park_0.85_F2": {
+          "CAGR": 0.3051,
+          "Sharpe": 1.86,
+          "MaxDD": -0.189,
+          "Calmar": 1.62,
+          "final_nav_B": 1380.2,
+          "IS_2014_19": 0.2837,
+          "OOS_2020plus": 0.3248
+        },
+        "park_0.90_F3_REJECTED": {
+          "CAGR": 0.3101,
+          "Sharpe": 1.84,
+          "MaxDD": -0.195,
+          "Calmar": 1.59,
+          "note": "rejected: boundary of the swept range, Calmar plateau breaks here, P(MaxDD<-30%) jumps 3.4->4.8% for only +0.4pp CAGR p50."
+        }
+      },
+      "tail_risk_bootstrap": "stationary bootstrap (Politis-Romano, mean L=21, B=4000, seed=12345): P(MaxDD < -30%) = 2.2% at 0.70, 2.8% at 0.80 (F1), 3.4% at 0.85, 63.7% for the current unwired live behaviour. CAGR p5 = 19.6 / 20.5 / 20.8%.",
+      "realised_equity_share": "average stock/NAV measured from the simulated books: 60.4% at 0.70, 63.1% at F1 (+2.7pp), 64.7% at 0.85. 2022 (crash year) return: -8.0% at 0.70, -4.3% at F1 (least loss of the three), -5.4% at 0.85.",
+      "multiple_testing": "N_trials = 7 this round (target x band on the full engine), ~16 cumulative on this axis across 3 harnesses/vintages (NOT poolable across vintages — disclosed). DSR = 1.0000 for ALL 7 legs even at N=200 with Var(SR) from the wide 311-CSV family: it is SATURATED and therefore CANNOT rank inside this family — it must not be quoted as 'F1 is safe'. PBO (CSCV, S=16, 12870 splits) = 0.0803 ranking by CAGR (robust, well under the 0.5 flag) and 0.4105 ranking by Sharpe (noisy: all 7 legs sit in 1.84-1.91, so Sharpe/Calmar micro-differences inside 0.70/0.80/0.85 are NOT individually meaningful — both numbers are family statistics, neither ranks an individual config).",
+      "per_year_LOO": "dropping any single year, F1's edge vs 0.70 stays positive across the whole 2014-2026 grid: +0.71pp (weakest cell, 2022) to +1.25pp (2021), full-sample +1.01pp. No year carries the edge — passes the Wave1/H8a single-year-carry check.",
+      "capacity": "re-measured directly at F1's own park_mv (capacity_check_v2.py, not extrapolated): worst-case single-session liquidation of the F1 park book at its p95 size touches 0.058% of the binding name's ADV vs the 20% live cap — 2-3 orders of magnitude of headroom. Higher target actually means LESS daily trim pressure (L1 only sells the excess above target). Capacity does not discriminate between 0.70 / 0.80 / 0.85 at current NAV.",
+      "caveats_carried_forward": "(1) the liq<=0 fidelity bug is still open, so every MaxDD here is a LOWER bound — keep the -30% DD anchor from kb/current_ops.md, do not quote -18.3% as the risk anchor; (2) the run is NAV 50B, no margin — a margin account (SpaceX) can amplify beyond this; (3) quant-skeptic CONFIRMED medium on the report (2026-08-04T02:16:40Z) and CONFIRMED high on the L1 wiring implementation (2026-08-04T03:16:01Z)."
+    },
+    "evidence_historical_2026-07-03_STALE_VINTAGE": {
+      "_warning": "Kept for audit trail only. Vintage 2026-07-03 ran on ticker_prune and BEFORE LAG_ADV_BASIS changed close->price (2026-08-02), so its levels are NOT comparable to evidence_current_F1_2026-08-04 (same 0.70 config reads 26.83% there vs 28.86% here). It also never tested 0.80 or 0.85. Direction/shape agree; levels do not. Do NOT cite these numbers to justify or object to the 0.80 default.",
+      "Taylor_20260703_113818": "70% vs 94% at NEUTRAL / 0-active-pick, isolated sleeve. quant-skeptic CONFIRMED (verify 2026-07-03T11:57:15): pushing 94% buys ZERO risk-adjusted edge over 70%.",
+      "Taylor_20260703_120555": "exposure sweep 70-100%: 94% is NOT a special ceiling — the whole band is Sharpe-neutral with no inflection point in the isolated measure; V2.5 lever does NOT stack onto this (disjoint regimes). CORRECTION 2026-08-04: its 'Sharpe invariant 70->100, Calmar rises with exposure' conclusion is an ALGEBRAIC identity of the isolated sleeve (port = e*rb, e cancels in the Sharpe ratio), not an empirical finding — in the full 2-book engine Sharpe genuinely DECLINES 1.90 -> 1.84 across the same range. Do not reuse it for production decisions.",
+      "Taylor_20260703_130720": "CANONICAL numbers OF THAT VINTAGE, full 2-book NAV compounding, 2014->2026-06-19 @50B, DT5G, threads=1, self-check 0 VND.",
+      "Taylor_20260703_153738": "confirms 70% was the properly-tested/approved level at that time, NOT a 'flexible floor to taste'."
+    },
+    "measured_tradeoff_job_130720": {
+      "note": "⚠️ STALE VINTAGE (2026-07-03: ticker_prune, LAG_ADV_BASIS=close) and it contains NO 0.80 / 0.85 row — it CANNOT describe the cost of the active 0.80 default. Superseded for every decision purpose by evidence_current_F1_2026-08-04 above; retained only so older citations resolve. FULL 2-book NAV, full window: 94% and 100% buy raw nominal CAGR but LOSE Sharpe + Calmar + MaxDD in EVERY window (IS and OOS) relative to 70% ON THAT VINTAGE.",
+      "park_0.70": {
+        "CAGR": 0.2683,
+        "Sharpe": 1.78,
+        "MaxDD": -0.165,
+        "Calmar": 1.63
+      },
+      "park_0.94": {
+        "CAGR": 0.2801,
+        "Sharpe": 1.66,
+        "MaxDD": -0.188,
+        "Calmar": 1.49
+      },
+      "park_1.00": {
+        "CAGR": 0.293,
+        "Sharpe": 1.65,
+        "MaxDD": -0.193,
+        "Calmar": 1.52
+      },
+      "verdict": "ON THAT VINTAGE 70 was risk-adj optimal among {0.70, 0.94, 1.00}. Superseded 2026-08-04: the current-vintage sweep filled in 0.80/0.85 and showed the Calmar plateau extends to 0.85 (peak 1.63 at 0.80), so 0.80 is now the default. 0.94/1.00 remain outside the plateau and rejected."
+    },
+    "status": "ACTIVE — engine default is 0.80 (F1) since 2026-08-04, user-confirmed via Mike. Any level OTHER THAN 0.80 requires the risk_dial_override below. BUY rail (golive_recommend_v23.py ETF_PARK) and SELL rail (mike/bin/compute_park_trim.py) both target 0.80 as of 2026-08-04T11:34 ICT — see pending_engine_consistency (CLOSED) for the verification-owed note (confirm on next 09:05 live run).",
+    "default_change_history": {
+      "2026-07-03_v2.1": "0.70 codified as the default (job Taylor_20260703_130720 vintage).",
+      "2026-08-04_v2.3": "0.70 -> 0.80 (config F1). Decided by the USER, relayed via Mike (Discord) 2026-08-04 ~10:41 ICT, on evidence_current_F1_2026-08-04. This is a PERMANENT DEFAULT change, not a per-plan risk-dial deviation — see risk_dial_override._why_default_not_per_plan."
+    },
+    "risk_dial_override": {
+      "_principle": "The NEUTRAL park level is a risk-appetite dial the user MAY move in either direction away from the standing default (up = more equity beta / more nominal CAGR / deeper tail; down = the reverse). Moving it must be a CONSCIOUS, logged choice, never a silent default that slips into a plan. Same guardrail pattern as deep_cheap_recovery_override / v25_leverage: OFF until an explicit, evidence-acknowledged user confirmation is present.",
+      "status": "ARMED for any level != 0.80 — the default itself moved to 0.80 on 2026-08-04 (see default_change_record_2026-08-04), so plans running the default need NO override fields. A plan proposing 0.85 (F2), 0.70, 0.90 or anything else DOES need them.",
+      "_why_default_not_per_plan": "Decision taken 2026-08-04 (Taylor, job Taylor_20260804_034133), reasoning recorded so it can be argued with later: (1) the user's instruction was to REPLACE the standing 0.70 ('thay mức 0.70 hiện hành'), i.e. a standing level, not a one-off deviation on one day's plan; (2) this file's own enforcement clause already names that path — 'changing the engine DEFAULT away from 0.70 requires user approval applied to LIVE' — and that approval now exists; (3) requiring risk_dial_confirmed_by_user on EVERY daily plan for the level that IS the approved default would turn the field into copy-paste boilerplate, and a gate that fires every single day stops carrying information — which is exactly the failure mode v2.1 was written to prevent (a number flowing into a plan with nobody actually deciding it); (4) keeping the gate armed for levels != 0.80 preserves the original protection for the genuinely undecided cases (F2 0.85 and above, or any revert). The per-plan mechanism is NOT removed — it is re-pointed from 0.70 to 0.80.",
+      "default_change_record_2026-08-04": {
+        "risk_dial_confirmed_by_user": true,
+        "decided_by": "user",
+        "decision_channel": "user -> Mike (Discord) -> dispatch Taylor_20260804_034133, 2026-08-04 ~10:41 ICT",
+        "target_park_of_idle_pct": 0.8,
+        "chosen_config_label": "F1 (Aggressive-lite)",
+        "risk_dial_warning_acknowledged": "User acknowledged the F1-vs-Conservative(0.70) risk-adjusted cost from mike/agents/Taylor/research/park_wiring_two_options_20260804.md (quant-skeptic CONFIRMED 2026-08-04T02:16:40Z on the report methodology): Conservative(0.70) CAGR 28.86% / Sharpe 1.90 / MaxDD -17.8% / Calmar 1.62 vs F1(0.80) CAGR 29.85% / Sharpe 1.87 / MaxDD -18.3% / Calmar 1.63 / P(DD<-30%) 2.8%. F1 was chosen over F2(0.85, CAGR 30.51%/Sharpe 1.86/MaxDD -18.9%/Calmar 1.62) because F1 dominates F2 on 6/7 metrics ex-CAGR (quant-skeptic killer_objection 2026-08-04T02:16:40Z on the prior F2-only draft). DSR=1.0000 for the whole family (saturated, non-discriminating — NOT cited as safety evidence); PBO(CAGR)=0.080 (robust, justifies CAGR-based ranking within the plateau); PBO(Sharpe)=0.411 (noisy, so Sharpe/Calmar differences within 0.70/0.80/0.85 are not individually meaningful).",
+        "evidence_source": "evidence_current_F1_2026-08-04 above = mike/agents/Taylor/research/park_wiring_two_options_20260804.md (supersedes measured_tradeoff_job_130720 for this decision — different vintage/universe, see report §0 and §3.5)",
+        "wiring_mechanism": "L1 (park-target compliance) implemented 2026-08-04, mike/bin/compute_park_trim.py + mike/bin/park_holdings.py + P0 book-tagging in trading_bot/executor.py._journal(). Read-only proposal script; every proposed order still flows through the existing requires_user_approval + Mafee plan-bound gate — this override does not grant any auto-execution. L2 (JIT unpark) NOT yet implemented — deferred per L1-before-L2 recommendation (L1 alone recovers Calmar 0.98->1.57 vs today's live/unwired state per park_unpark_live_wiring_20260803.md §E). quant-skeptic CONFIRMED (high confidence, 2026-08-04T03:16:01Z) on the wiring implementation itself, including an independent live DNSE re-derivation matching to the VND.",
+        "known_limitation": "Lot-size rounding eats ~32% of the proposed trim per session; 3 tickers (VHM/SHS/VND) round to a 0-lot trim this session — not compensated, per design (compensating would be a new untested parameter)."
+      },
+      "rule": "Any trade plan that sets NEUTRAL parking != 0.80 (of idle pool; 0.80 is the default since 2026-08-04) MUST carry BOTH fields: (1) risk_dial_confirmed_by_user: true; (2) risk_dial_warning_acknowledged quoting the risk-adjusted cost of the CHOSEN level from evidence_current_F1_2026-08-04, which holds 0.70 / 0.80 / 0.85 / 0.90 on one comparable vintage — do NOT cite the stale measured_tradeoff_job_130720 numbers, they hold no 0.80/0.85 row and are a different vintage. If EITHER field is missing, Mafee (2nd gate) MUST BLOCK the plan. A plan running the default 0.80 needs NEITHER field.",
+      "required_fields": {
+        "risk_dial_confirmed_by_user": "boolean — must be literally true; a plan proposing park!=0.80 without it is blocked.",
+        "risk_dial_warning_acknowledged": "string/object — must quote the risk-adjusted cost table from evidence_current_F1_2026-08-04 (park_wiring_two_options_20260804.md), NOT measured_tradeoff_job_130720. A generic acknowledgement without the actual numbers does NOT satisfy the gate."
+      },
+      "enforcement": "DollarBill must not set park!=0.80 without user instruction + both fields. Mafee hard-blocks any plan with NEUTRAL parking != 0.80 lacking either field (same mechanical block as an over-limit order). Changing the engine DEFAULT away from 0.80 again requires user approval applied to LIVE (owners rule) — record it in default_change_history plus a new _meta changelog entry, never edit the number silently."
+    }
+  },
+  "execution_limits": {
+    "max_value_per_order_pct": 0.05,
+    "max_value_per_order_note": "single parent order <= 5% NAV; bot slices into <=200M children",
+    "participation_cap": 0.1,
+    "participation_cap_note": "buy/sell <= 10% of the ticker's cumulative matched volume that day",
+    "max_orders_per_day": 60,
+    "max_daily_gross_pct": 0.4,
+    "max_daily_gross_note": "total day turnover (buy+sell GTGD) <= 40% NAV",
+    "max_gross_exposure_pct": 1.5,
+    "max_gross_exposure_note": "DEFAULT hard ceiling on gross book exposure = 150% NAV = max 50% borrowed. RAISED 1.30 -> 1.50 (2026-06-27) per mge20-tail-review (Spyros). Mafee blocks any plan above this UNLESS the deep_cheap_recovery_override below is active.",
+    "deep_cheap_recovery_override": {
+      "max_gross_exposure_pct": 1.5,
+      "max_gross_exposure_ceiling_note": "RAISED 1.30 -> 1.50 (2026-06-27) per Spyros mge20-tail-review: Taylor full 4-point MGE sweep on stable cache showed 1.5 better in-sample (lean default), 2.0 REJECTED (tail risk at Q1_s4_fire). Episode-drawdown breaker recalibrated to -15% at 1.5x ceiling (was -12% for 1.3x). Previous: TIGHTENED 1.50 -> 1.30 (2026-06-23) based on pt_v23 real-margin with depth=ON; 2026-06-27 sweep runs Config-D with depth=OFF which changes tail profile. Ceiling 2.0 remains REJECTED.",
+      "condition": "ALL THREE: (1) DT5G state in {CRISIS, BEAR}; (2) median liquid-universe pb_z <= -0.7 (GENUINELY cheap vs own 5Y history — NOT cheap-vs-recent-peak; falling-knife filter: REJECTED Jun-2022 pb_z +0.75 despite -25% from top, FIRED at COVID-2020 pb_z -0.78); (3) money_condition below — system deposit rate LOW enough that cash opportunity-cost does not beat deploying.",
+      "money_condition": {
+        "rule": "scale the recovery deploy / >1.0x leverage budget by m = clip((dep_ceiling - deposit_rate)/(dep_ceiling - dep_floor), 0, 1); dep_floor=0.075, dep_ceiling=0.12. Deploy/lever fully only when deposit<=7.5%; ZERO extra deploy when deposit>=12% (hold cash even if pb_z cheap). Linear throttle between.",
+        "why": "2011-extension backtest (backtest_recovery_alloc_2011.py, 2026-06-22): deploying into the 2012 deep-cheap crisis LOST to baseline because deposit was 14% (cash earned 14% risk-free) + the recovery was L-shaped/slow. The deposit-gate restored 2011-13 to baseline (+8.4%), kept the 2020 win, gave best full-period CAGR 12.8%/Sharpe 1.11/Calmar 0.68. Encodes 'cautious when macro bad' + 'cheapness vs deposit rate' using the RELIABLE deposit series (pre-2014 PE is corrupt -> a 1/PE Fed-gate is unusable).",
+        "floor_calibration": "dep_floor=0.075 (DORMANT) chosen over 0.06 (ACTIVE) after measuring both in pt_v23 (2026-06-23): floor=0.075 -> avg m=1.00 -> CAGR 31.81% BYTE-IDENTICAL to baseline (gate never bit, deposit <=7.5% all of 2014-26). floor=0.06 -> avg m=0.85 -> 30.83% (-0.98pp, worse Sharpe/MaxDD/Calmar) because it wrongly trimmed the 2022 SCB-hike deploy which then recovered strongly in 2023. floor=0.075 distinguishes a TRUE high-rate crisis (>7.5%, 2012-like) from a moderate defensive hike. Consistent with the post-2011 disciplined-SBV macro-view.",
+        "dormancy": "deposit has been <=7.5% throughout 2014-2026 -> at floor=0.075 this gate is DORMANT in the DT5G era (m=1, ZERO change to the pinned recovery-park 31.81%, self-check 0 VND). It is FORWARD INSURANCE that only arms if rates spike >7.5% in a future crisis. Same fail-safe-not-return-enhancer profile as DT5G itself.",
+        "source": "deposit_rate_vn.DEPOSIT_EVENTS (Big-4 12M term, causal/announced); Mafee/Winston confirm the live deposit figure feeding any LIVE use."
+      },
+      "scaling": "DEPTH-SCALED on pb_z AND money-gated: leverage rises with cheapness toward the 1.50 ceiling at the deepest cheap, THEN multiplied by money_condition m; base (no margin) otherwise. Bet bigger the cheaper — but only when cash is also cheap, and never above 1.50x (revised ceiling from mge20-tail-review).",
+      "safety_basis": "TWO limits bind, take the tighter: (1) margin-call buffer — verified call at -44% market drop @1.5x (Mafee broker-API + Wendy), DNSE nets account-level; (2) EPISODE-DD BREAKER — S4 at -15% from episode-entry NAV (Spyros risk_monitor.py) fires BEFORE margin call. At 1.5x ceiling, Config-D (depth=OFF) tail is acceptable; 2.0x rejected at mge20-tail-review. 2.0x long-rejected (call buffer ~1.2x).",
+      "evidence_caveat": "the >1.0x margin portion has fired only ONCE in 2014-2026 (COVID 2020) -> deploy DELIBERATELY as opportunistic; core stays 1.0x full-beta. Limit is EVIDENCE (n=1), not call-risk.",
+      "status": "PROPOSED (user-agreed concept 2026-06-22) — paper until user go-live approval + Spyros risk review. Also confirm DNSE force-sell account-netting with Mafee.",
+      "strategic_note": "user thesis + Taylor IC (value-edge=0 at EXBULL, +0.148 in DOWN): the leverage budget belongs in deep-cheap RECOVERY, not EXBULL euphoria. Future: consider TIGHTENING EXBULL below 1.30 and shifting that budget to recovery (DT5G allocation-curve change, separate from this cap)."
+    },
+    "sector_cap": "DELIBERATELY NONE (user 2026-06-22): VN investable quality is structurally concentrated (banks/securities/real-estate/some retail/few strong manufacturers); a sector cap would force dilution away from the strong names and HURT performance. V2.4 uses name_cap (10%) only, NOT sector_cap. Do not add."
+  },
+  "risk_circuit_breakers": {
+    "daily_loss_limit_pct": -0.05,
+    "daily_loss_limit_note": "intraday NAV drawdown <= -5% -> HALT: Mafee stops new orders + cancels pending, Spyros confirms via BOT_STOP. Chosen 2026-06-22 (user); V2.4 backtest MaxDD ~ -19% so -5%/day is a disaster brake, not a normal-red-day trip.",
+    "plan_deviation_tolerance_pct": 0.05,
+    "plan_deviation_note": "if live fill vs approved plan deviates > 5% (qty or value), Mafee STOPS and reports (append_event Mafee error) instead of improvising."
+  },
+  "macro_kill_switches": {
+    "_principle": "Three macro/episode-level suspends on the RECOVERY_PARK (deep-cheap deploy) sleeve, required by Spyros's v24-golive-risk-review sign-off (2026-06-23) before go-live 2026-06-30. These are SLOWER, regime-level brakes — distinct from the intraday execution brakes in risk_circuit_breakers. Each SUSPENDS new recovery deploy when its trigger arms (auto-disarms when the trigger clears — 'suspend', not permanent off), EXCEPT the drawdown breaker (C) which HALTS via BOT_STOP and requires human review to restart. They do NOT touch the static core book (BAL/LAG); they gate only the opportunistic recovery sleeve and any >1.0x lever portion. Owners: Spyros enforces via risk_monitor.py + BOT_STOP; DollarBill must not plan new recovery adds while any switch is armed; Mafee hard-blocks recovery-sleeve orders while armed.",
+    "A_sbv_rate_suspend": {
+      "trigger": "SBV deposit rate (Big-4 12M term, causal/announced) > 0.075 (7.5%)",
+      "source": "deposit_rate_vn.DEPOSIT_EVENTS; live figure confirmed via data/macro_health.json (Winston/Mafee). Freshness-gated: if the deposit feed is stale, fail SAFE (treat as armed -> no new recovery deploy).",
+      "action": "SUSPEND — no NEW RECOVERY_PARK deploy and no NEW >1.0x lever while armed. Existing positions held (not force-unwound). Auto-disarms when deposit rate falls back <= 7.5%.",
+      "rationale": "Outer hard-stop layer ON TOP of the existing deep_cheap_recovery_override.money_condition throttle (which already linearly scales deploy to 0 between deposit 7.5%->12%). At deposit >7.5% cash earns >=7.5% risk-free AND high-rate crises are historically L-shaped/slow (2012 SBV ~14% deep-cheap deploy LOST to baseline — backtest_recovery_alloc_2011.py). 7.5% = the dep_floor already pinned in money_condition; this switch is the discrete debounced suspend on top of the continuous throttle. DORMANT since 2014 (SBV <=6% throughout) — forward insurance for a future rate spike."
+    },
+    "B_valuation_richening_suspend": {
+      "trigger": "median liquid-universe pb_z > -0.3 WHILE a RECOVERY episode is active",
+      "source": "median PB z-score across data/ticker_prune liquid universe vs each name's own 5Y history, causal (T-1). Same pb_z series that gates deep_cheap_recovery_override episode-open (<= -0.5) and the lever portion (<= -0.7).",
+      "action": "TIGHTEN — stop ADDING to the recovery sleeve (no new deploy); hold existing recovery positions. Auto-disarms (re-allows adds) only if pb_z falls back <= -0.5 (episode-open level).",
+      "rationale": "The recovery thesis is 'deploy WHILE genuinely cheap'. Episode opens at pb_z <= -0.5; once the universe richens back above -0.3 the cheapness edge is gone and continuing to deploy is chasing a no-longer-cheap tape. The -0.5-in / -0.3-out asymmetric band is deliberate HYSTERESIS to avoid whipsaw around a single threshold. This is a sizing tightener, not a halt — it does not write BOT_STOP."
+    },
+    "C_episode_drawdown_breaker": {
+      "trigger": "cumulative NAV drawdown since the recovery episode's entry point > -0.15 (-15%)",
+      "threshold_note": "UPDATED -12% -> -15% (2026-06-27) per mge20-tail-review: ceiling raised to MGE=1.5x, so the wider position warrants 3pp more tolerance before S4 fires. At 1.5x the tail distribution allows slightly deeper transient loss before a genuine knife-catch. -12% was calibrated for 1.3x (tighter position, tighter brake).",
+      "source": "NAV tracked from data/eod_account_<date>.json since the episode entry date (first deploy of the active recovery episode); Spyros risk_monitor.py persists episode state at data/recovery_episode_state.json. This is a CUMULATIVE episode drawdown, NOT the intraday measure.",
+      "action": "HALT — write data/BOT_STOP (forced unwind / knife-catching circuit breaker): Mafee stops new orders + cancels pending, Spyros confirms. NO auto-restart — requires human review; manual override window 24h. If firing within 6 months of go-live (2026-07-01 to 2026-12-31) Spyros flags halt-review on bus.",
+      "rationale": "Distinct from risk_circuit_breakers.daily_loss_limit_pct (-5% intraday disaster brake). This is the SLOW knife-catcher: if the book has bled -15% from where the recovery deploy started, the deep-cheap thesis for THIS episode is failing (still falling) — cut rather than average deeper into a falling knife.",
+      "implement_note": "BOT_STOP file + Telegram alert + bus decision event. Manual override within 24h; no automatic restart without documented human review (Spyros + user). Episode state in data/recovery_episode_state.json; opened auto when lever fire detected, closed on S4 or manual --close-episode."
+    },
+    "_cross_ref": {
+      "vs_risk_circuit_breakers": "risk_circuit_breakers = fast intraday execution brakes (-5%/day, plan-deviation). macro_kill_switches = slow regime/episode-level suspends on the recovery sleeve. Both can write BOT_STOP; (C) here is the only macro one that halts.",
+      "vs_deep_cheap_recovery_override": "These switches GATE that override: (A) duplicates the money_condition floor as a discrete suspend; (B) is the exit-side of the pb_z episode band (override opens at -0.5, B suspends adds above -0.3); (C) bounds the override's downside per episode. The override remains status PROPOSED/paper until user go-live approval.",
+      "status": "PROPOSED — paper. Spec authored by Spyros (risk), wired by Taylor. applies_to stays 'paper' and approved_by stays null until user explicitly approves live."
+    }
+  },
+  "v25_leverage": {
+    "_principle": "V2.5 = V2.4 + leverage (user naming 2026-06-27). The ONLY difference vs V2.4 (leverage-free, go-live 2026-06-30) is the deep-cheap recovery LEVER. This block documents the V2.5-specific account + broker + gates; the sizing/MGE/breaker policy already lives in execution_limits.deep_cheap_recovery_override + macro_kill_switches. STATUS=DISABLED until live-recommend integration + final user go-ahead (post-go-live).",
+    "status": "DISABLED (prep). Paper until: (1) live-recommend integration of the lever signals, (2) explicit user live go-ahead. Go-live 2026-06-30 = V2.4 leverage-free; V2.5 does NOT affect it.",
+    "config": "state-blind + PE-pctile gate recovery-LEVER, MGE 1.50 (Spyros-approved; MGE_HARD 1.65), deploy vehicle = yieldcombo (pbcombo rejected — worse risk-adjusted), entry = A∧C-confirm capitulation + pb_z<=-0.5 + PE_pctile5y<=0.20.",
+    "account": {
+      "subaccount": "0002023347",
+      "loan_package_id": 1840,
+      "package_name": "RocketX",
+      "borrow_rate_annual": 0.125,
+      "initial_rate": 0.5,
+      "maintenance_rate": 0.4,
+      "liquid_rate": 0.3,
+      "collateral": "all 28 custom30V tickers eligible (Mafee DNSE probe 2026-06-27)",
+      "user_confirmed": "2026-06-27",
+      "note": "DNSE call at maintenance 0.4 = -44.4% PORTFOLIO drop (= -66.7% NAV at 1.5x); force-sell at liquid 0.3 = -52.4% portfolio. Borrow 12.5% (not the backtest 10%) — re-verified: lever net edge SURVIVES (+1.00pp vs leverage-free, ~identical to 10%; carry trivial as lever borrows little+briefly)."
+    },
+    "safety_gates": {
+      "B2_episode_breaker": "Spyros risk_monitor.py: -15% NAV from episode-entry -> BOT_STOP (macro_kill_switches.C_episode_drawdown_breaker). DONE.",
+      "B3_nav_cap": "lever auto-DISABLED above NAV 100B (capacity-bound >~100B per #10). Engine lever_nav_cap (prior-session NAV check per lever-date), pt_v23 LEVER_NAV_CAP_B=100. DONE+verified (@150B gross 1.0).",
+      "B4_pe_freshness": "state-blind lever requires fresh VNINDEX_PE (prior-month present AND feed <=2 months stale); else fail-closed to leverage-free. DONE.",
+      "risk_layering": "Spyros -15% NAV -> S4 internal ~-31% NAV -> DNSE call -66.7% NAV-equiv. System always cuts well before the broker."
+    },
+    "performance_50B": "30.05% CAGR / Sharpe 1.82 / MaxDD -20.1% / Calmar 1.49 / self-check 0 VND, at real borrow 12.5% (lever net +1.00pp vs leverage-free 29.05%).",
+    "live_requires_user_approval": true
+  },
+  "capit_margin_lever": {
+    "_principle": "Margin (borrowed capital) applied to the CAPIT bear-washout sleeve ONLY, on a FIXED leverage factor f, gated on VNINDEX 52-week drawdown <= -20%. DISTINCT from v25_leverage above: that one is state-blind + PE-pctile gated and covers the whole recovery vehicle; this one touches nothing but CAPIT buy orders of the single washout event whose gate fired. Approved scope (user John, 2026-08-03) = exactly what the p1-p5 research chain verified, no wider.",
+    "enabled": true,
+    "status": "ENABLED - user confirmed 2026-08-22 via Discord (thread 1521735922066919515). Wiring complete + rehearsed 2026-08-03 (job Taylor_20260803_122554); vòng 3 (job Taylor_20260803_154258) đóng 2 khe known_limits + thêm CỔNG DUYỆT RIÊNG TỪNG NGÀY CÓ VAY, selfcheck 180/180 PASS trên 5 môi trường TZ. Second human gate required each day with leveraged orders: run approve_margin_day.py to create data/margin_approvals/margin_approval_<acct>_<date>.json.",
+    "f": 1.3,
+    "gate": "dd52<=-0.20",
+    "gate_note": "dd52 = VNINDEX Close / rolling-252d max Close - 1, computed in golive_recommend_v23.py (var dd52_now, in PERCENT: -20.0 == -0.20). Lever arms ONLY when the CAPIT washout signal itself fires (capit_signal_today AND capit_size>0) AND dd52 <= -20%. NOT a valuation gate (rejected p1 4.1: PE-pctile<=0.20 events averaged +6.16% vs +12.26% for the complement), NOT a NEUTRAL-only gate (insufficient evidence p3).",
+    "loan_package_id": 1840,
+    "loan_package_name": "RocketX",
+    "borrow_rate_annual": 0.125,
+    "initial_rate": 0.5,
+    "scope": "capit_only",
+    "accounts": [
+      "SpaceX"
+    ],
+    "account_note": "SpaceX 0002023347 only (has margin). ZaloPay is cash-only and out of scope. Account default package stays 1841 'GD Tien mat' (secrets/trading_bot_accounts.json) — 1840 is a PER-ORDER override for gated CAPIT buys, never an account-level switch.",
+    "enforcement": {
+      "config_declared_here": "this block",
+      "signal_published_by": "deploy_golive_dt5g_v4/golive_recommend_v23.py -> data/golive_v23_status.json key 'capit_lever'",
+      "enforced_one_place": "trading_bot/plan.py :: apply_capit_lever() called from bot_execute.py cascade (filter_excluded -> net -> cap_capit -> cap_lag -> lag_rating -> LEVER -> approval). Same pattern as filter_excluded_tickers/cap_capit_orders (coding_guidelines 7): the plan generator cannot grant leverage and cannot withhold it — the artifact decides, and every non-authorized order is STRIPPED of lever fields.",
+      "broker_layer": "trading_bot/brokers.py :: DNSEBroker.place_order(loan_package_id=...) per-order override, validated against GET /accounts/{acc}/loan-packages?symbol=X. Invalid/unverifiable -> falls back to the account default (UNLEVERED, safe direction) + loud log.",
+      "runtime_guard": "trading_bot/executor.py :: _lever_package_audit() every step() — any broker order carrying package 1840 on a ticker not authorized for leverage pauses that ticker (fail-safe-pause, same path as _ghost_tickers)."
+    },
+    "evidence": {
+      "p1": "Taylor_20260803_070954 — dd52<=-20% is the ONLY monotone axis (N=17 washouts: dd52<=-20% avg +17.62%, p=0.037; dd52>-10% +2.92%, p=0.684). State and breadth axes contradict each other -> not used as gates.",
+      "p2": "Taylor_20260803_073714 — engine-tier S4 gate; exposed that a naive MGE knob borrows only 5-9% (engine spends cash first), which is why p5 needed a forced-borrow knob.",
+      "p3": "Taylor_20260803_082141 — sizing axis (parking -> CAPIT) separated; LOO-by-event discipline established.",
+      "p4_proxy": "Taylor_20260803_091342 — proxy tier, +1.82pp at f=1.3. SUPERSEDED: p5 showed the proxy tier inflates BOTH directions (2.7x on gain, 12x on MaxDD) and must not be a decision basis.",
+      "p5_engine": "Taylor_20260803_101341 (quant-skeptic CONFIRMED-medium, mike/logs/verify_20260803_111110.log) — real engine tier at f=1.3, borrow 12.5%: dCAGR +0.663pp FULL (IS +0.487 / OOS +0.832), dMaxDD worse by only 0.067pp, DSR 1.0000, PBO 0.10-0.14, LOO max single-event share 18.7%, 0 margin calls, self-check 0 VND, control leg reproduces pinned R3 exactly. Peak simultaneous debt 30.55B/50B book, 835 days with debt, interest paid 4.48B.",
+      "capacity": "Mafee_20260803_120648 (mike/agents/Mafee/research/spacex_pp0buy_capit_20260803.md) — SpaceX pp0Buy measured 425,209,429 VND (account-level, identical across 5 CAPIT names); qmaxBuy under 1840 is exactly 2x that of 1841, matching initialRate 0.5 vs 1.0."
+    },
+    "sizing_effect": "When active, the CAPIT capital target is multiplied by f: capit_total_target_vnd_levered = active_nav x w_lag_target x capit_size x f. The base (unlevered) fields keep their exact meaning and value so nothing downstream changes while disabled. The %ADV cap (capit_adv_caps) is NOT scaled by f — market-impact limits are independent of how the purchase is funded; leverage may therefore be partially clipped by liquidity at large NAV. Measured live scale (p5 1.3): heaviest single event borrows 25.9% of NAV (~243.5tr at NAV 938tr), average event 6.8% (~63.6tr) — and those are LOWER BOUNDS (p5 1.3 warning).",
+    "known_limits": [
+      "N = 15 independent events. DSR/PBO computed on 3107 daily NAV points do NOT enlarge that N.",
+      "f* ~ 6.0 from the sleeve-level Kelly calc is NOT a recommendation — it assumes the historical event distribution repeats with no margin call and no liquidation slippage.",
+      "p5 4.2 could not explain why realized/predicted is 0.19x at f=1.1 and 0.41x at f=1.2 (it is 1.08x at f=1.3, 0.90x at f=1.5). f=1.3 was chosen because it is the best-explained level, not because it is optimal.",
+      "The transmission channel is narrow by construction: leverage lands on ~0.272 NAV-book of ONE of two books (~13.6% of total NAV), which is why a +4.52%/yr sleeve effect becomes +0.663pp portfolio-wide. Widening the channel is a DIFFERENT question with a different risk family — not researched, not approved.",
+      "KHE ARTIFACT HAI-TRƯỜNG — ĐÃ THU HẸP, CHƯA ĐÓNG HẲN (đo lại 2026-08-03 vòng 4). Ba lớp offline/online: (1) 3 đẳng thức nội tại `nav_basis_vnd × w_lag_target × capit_size → capit_total_target_vnd → /n_slots`; (2) trần `capit_size`/`w_lag_target` NEO THEO `state`, với `state` chốt bằng nguồn độc lập golive_state_today.json (kiểm cả `as_of` khớp `signal_date`, state ngoài bảng ⇒ từ chối); (3) NEO NAV SỐNG từ sổ broker lúc thực thi, chặn chiều artifact khai NAV > thực tế quá 15%. SỐ ĐO THẬT (arch-reviewer probe, regime HIỆN TẠI state=3 NEUTRAL, w_lag_target=0,50 vì lag_edge_health mean12=0,48% < ngưỡng 4%, capit_size=0,375): trần PHẲNG ban đầu cho lọt 2,67×; trần NEO THEO STATE vẫn cho lọt **2,60×** (sửa w_lag 0,50→0,65 = 1,3× VÀ capit_size 0,375→0,75 = 2,0×), envelope tối đa **63,4% NAV** so với thiết kế 24,4% NAV — KHÔNG phải '≤2×' như bản ghi trước. (`capit_grind` KHÔNG được đọc ở tầng thực thi, đừng coi nó là điều kiện gì.) ⇒ CỔNG THẬT SỰ chặn quy mô là CỔNG NGƯỜI THỨ HAI: Σ VND trong báo cáo 21:00 tính từ LỆNH THẬT (không từ artifact) nên user nhìn thấy đúng số tiền sẽ vay. Đây KHÔNG phải chữ ký số — nó chứng minh 'các con số còn giải thích được lẫn nhau', không chứng minh 'chưa ai sửa file'. Rủi ro chưa hiện thực vì tính năng đang TẮT.",
+      "Sức mua (`ppse` qmaxBuy/pp0Buy) nay được đo THEO ĐÚNG gói vay của lệnh (brokers.get_max_buy_qty/get_buying_power nhận loan_package_id, 2026-08-03 arch-reviewer #2). Trước đó luôn đo bằng gói default 1841 (initialRate 1,0) trong khi lệnh đòn bẩy đi ra bằng 1840 (initialRate 0,5 ⇒ sức mua gấp đôi) — sẽ báo thiếu tiền đúng nửa phần vay và ghi would_block=true GIẢ vào data/plan_buying_power_shadow_log.csv (bộ dữ liệu đang tích luỹ để quyết P0→ACTIVE). Diễn tập paper KHÔNG phủ được tầng này (PaperBroker không có ppse) ⇒ phiên LIVE có đòn bẩy đầu tiên phải kiểm tay pp0Buy@1840 trước khi tin log.",
+      "CỔNG NGƯỜI THỨ HAI (user chốt 2026-08-03): `enabled=true` là điều kiện CẦN, KHÔNG ĐỦ. Mỗi NGÀY plan thực sự có lệnh được cấp đòn bẩy còn cần một bản ghi duyệt riêng `data/margin_approvals/margin_approval_<account>_<date>.json` (ghi bởi mike/bin/approve_margin_day.py khi user xác nhận thật; ràng buộc rổ mã + trần Σ VND + đúng ngày + đúng account). Thiếu/hỏng/không khớp ⇒ GỠ đòn bẩy, lệnh VẪN chạy bằng vốn tự có (fail-safe không bao giờ là chặn lệnh).",
+      "KIỂM TAY pp0Buy@1840 phiên LIVE đầu tiên vẫn là bước NGƯỜI, nhưng nay có lưới TỰ ĐỘNG chạy trước: lever_live_preflight đọc thật get_buying_power(..., loan_package_id=1840) và ghi 1 dòng log đọc được bằng mắt. Đọc KHÔNG được (None/exception) ⇒ GỠ đòn bẩy phiên đó. Đọc được nhưng =0 hoặc < Σ lệnh ⇒ CHỈ cảnh báo, KHÔNG gỡ (gỡ lúc thiếu tiền làm lệnh cần NHIỀU tiền hơn — sai chiều fail-safe).",
+      "HAI LƯỢT CRON CÙNG PHIÊN (09:05 + 13:00 ICT): preflight chỉ GỠ khi phiên CHƯA đặt lệnh nào (đọc exec_<account>_<date>_state.json). Đã đặt rồi thì hạ xuống CẢNH BÁO — ở lượt 13:00, NAV sống/pp0Buy tụt là hệ quả BÌNH THƯỜNG của việc đang giải ngân (availableCash đã trừ tiền giữ cho lệnh treo; đo được −46% ở sizing CRISIS, −14,5% ở NEUTRAL), và gỡ khi đó vừa vô ích vừa làm Executor._lever_package_audit mất tập cấp phép ⇒ treo cả rổ CAPIT cả buổi chiều kèm sự cố NÓI SAI. Sổ plan._lever_authorized giữ 'ai đã được cấp phép hôm nay', tách khỏi 'lệnh này đi ra bằng gói nào'.",
+      "[VÁ 2026-08-23, code-quality finding #2] NAV SỐNG trong lever_live_preflight nay dùng đúng cơ sở `totalCash − totalDebt` (DNSEBroker._cash_totalcash_minus_debt(), §25 'SỞ HỮU'), khớp compute_active_nav.py và NAV chuẩn tắc daily_nav_snapshot.py — dòng ghi trước đây (claim KHÔNG trừ totalDebt) đã LỖI THỜI, xoá theo bản vá này. Fallback duy nhất còn lại: broker không có method này (không phải DNSEBroker) ⇒ rơi về get_cash() (availableCash-family, §25 'TIÊU ĐƯỢC NGAY') — chỉ khiến neo CHẶT hơn (nav_live nhỏ hơn), không nới lỏng."
+    ],
+    "live_requires_user_approval": true
+  },
+  "exclusions": {
+    "_principle": "Risk and reward travel together. We profit from cheapness via CALCULATED risk, not by reflexively avoiding any name with a legal cloud or a price crash. A crisis at a fundamentally REAL/good company is a potential cheap entry. Hard-ban ONLY when value is unknowable/fictitious; everything else gets ASSESSED, not avoided. (User standing principle 2026-06-22.)",
+    "hard_ban": {
+      "tickers": [],
+      "criterion": "value is UNKNOWABLE or FICTITIOUS — confirmed fraud, books under criminal investigation, or fabricated/non-cash earnings you cannot value. NOT for a real business under a legal cloud.",
+      "note": "These are already enforced by the quant gate via data/forensic_flags.csv severity=exclude (rating-cap -> fails gate<=3). PC1 (confirmed fraud, C-suite arrested) is the archetype. Keep them in forensic_flags.csv (single source) — do NOT duplicate here (drift). See also_block_forensic_excludes below."
+    },
+    "legal_review_required": {
+      "tickers": [
+        "DGC"
+      ],
+      "policy": "NOT auto-banned, and NOT auto-traded. The AUTOMATED V2.4 pipeline (DollarBill plan + Mafee execute) EXCLUDES these from automated selection because the bot cannot do legal/risk-reward judgment. They become eligible only for a MANUAL/discretionary position AFTER a documented assessment: (1) Wendy = legal severity + resolution path; (2) Taylor = is the underlying business value intact, and is this small-risk/big-reward or a trap; (3) if approved, size with a calculated haircut. The point is to DO the work, not to avoid it.",
+      "DGC_note": "qualified audit opinion (inventory + criminal case) + leadership indicted + margin cut ~2026-04-09 + diện KIỂM SOÁT 2026-05-13, BUT LNST 2025 +37% YoY on real chemical plants -> possible good-company-in-crisis, not fictitious value. Pending Wendy severity + Taylor risk/reward before any (manual) entry. (Wendy 2026-06-21.)"
+    },
+    "also_block_forensic_excludes": true,
+    "forensic_flags_file": "data/forensic_flags.csv",
+    "forensic_note": "Mafee/DollarBill ALSO treat every data/forensic_flags.csv row severity=='exclude' as hard-banned (defense-in-depth; already rating-capped upstream). Current set (2026-06-22): KSF, VVS, PC1, HHS, L40, KLB, DIG, BFC. Single source = forensic_flags.csv."
+  },
+  "gap_adaptive_fill": {
+    "_status": "PROPOSED (2026-06-29, Taylor) — paper-test first; LIVE needs user approval (real-money execution change). enabled=false until then.",
+    "enabled": false,
+    "_principle": "Layer-3 fill timing becomes gap_z-CONDITIONAL. A buy-list name's alpha call is already made; this only changes WHEN/at-what-price to fill given an ABNORMAL open. Evidence: gap_adaptive_proxy.py (daily, N=408,622, IS+OOS) + gap_path_crosscheck.py (16-name true 1-min). Two-sided intraday overreaction mean-reversion, monotonic in gap_z, IS+OOS-stable.",
+    "down_gap": {
+      "gap_z_threshold": -2.0,
+      "action": "BUY-AT-OPEN: override the early-morning slow-down -> FULL SPEED in the open window 09:15-09:45 to capture the day's cheapest entry.",
+      "why": "On an abnormal down-gap the OPEN is the cheapest price of the day (price vs open is POSITIVE at every later checkpoint: 09:45 +113, 11:15 +101, ATC +181 bps on the 16-name set). Current rule waits to 10:45-11:15 -> pays ~+170-206 bps MORE per fill. Edge holds ALL liquidity tiers (Open->ATC 310-368 bps, t 9-28; ~173-206 bps saved vs 11:15). fwd20 positive every tier -> not a falling knife."
+    },
+    "up_gap": {
+      "note": "NO CHANGE. Current rule (slow early morning, concentrate buys 10:45-11:15) already captures 86% of the up-gap give-back by 11:15. Optional ATC push for last ~14% judged not worth EOD execution risk."
+    },
+    "gap_z_compute": {
+      "formula": "gap_z = (today_open/prior_close - 1) / rvol_20d",
+      "today_open": "first executable price after 09:15 ATO auction (broker quote); compute gap_z ONCE per order at first post-09:15 quote, then cache for the session.",
+      "prior_close": "T-1 adjusted close (from the approved plan or daily feed).",
+      "rvol_20d": "causal trailing-20d std of daily close-to-close returns, as-of T-1 (daily feed; Winston/data or precomputed at plan build)."
+    },
+    "guards": {
+      "corp_action": "if |gap| > 0.15 -> NO override (likely corp-action/adjustment artifact), fall back to current rule.",
+      "rvol_freshness": "rvol_20d missing / <=0 / stale -> NO override (FAIL-SAFE to current rule). Mirrors the B4 PE-freshness fail-closed pattern.",
+      "buy_only": "applies to BUY only; SELL unchanged.",
+      "urgency": "urgency=high already bypasses fill-timing (returns 1.0) -> unaffected.",
+      "live_gate": "gated behind existing fill_timing_live_gate (paper until user disables) AND a NEW gap_adaptive_enabled flag (default false). Both must be on for LIVE."
+    },
+    "ev_blast_radius": {
+      "saving_per_downgap_fill_bps": "~173-206 (vs current 11:15 rule); larger notional applies in stress years",
+      "frequency": "~0.6-0.9% of buy-able days; CONCENTRATES in stress years (2018 1.38 / 2020 1.40 / 2025 1.53 / 2026 1.13%) = exactly when the recovery sleeve deploys most",
+      "portfolio_ev": "modest blended (~10-15 bps/yr) but FREE (pure execution, zero added risk) and concentrated at capitulation/deploy moments where notional is largest; removes the behavioral trap of mis-timing capitulation fills",
+      "verdict": "cheap, robust execution refinement — correctly sized as free-insurance + small edge, NOT a needle-mover"
+    },
+    "executor_spec": {
+      "file": "trading_bot/executor.py :: _fill_timing_mult(), BUY branch",
+      "change": "At top of the BUY branch, BEFORE the early-morning slow-down: if gap_adaptive_enabled AND down-gap override active for this ticker (gap_z<-2, guards pass) -> return 1.0 during 09:15-09:45 (full speed at open). After 09:45 fall through to the normal rule. UP-gap / normal: unchanged.",
+      "data_need": "per-order: prior_close + rvol_20d (T-1). Add to plan schema or a daily sidecar Mafee loads.",
+      "test": "paper-trade first; confirm override fires only on genuine down-gaps and fail-safes when rvol missing."
+    }
+  }
+}

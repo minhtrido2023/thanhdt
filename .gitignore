@@ -13,6 +13,18 @@ google-cloud-sdk/
 # ...but DO keep these non-secret JSONs:
 !**/*.template.json
 !**/bigquery_dictionary.json
+# CẤU HÌNH do người viết, KHÔNG tái tạo được từ BQ hay từ code — mất đĩa là mất hẳn.
+# Thêm 2026-09-09 sau khi phát hiện luật `*.json` phía trên (deny-by-default, đúng thiết kế)
+# đang loại luôn cả file định nghĩa HÀNH VI GIAO DỊCH LIVE khỏi bản backup. Đã soi từng
+# file: không có cặp key:value dạng credential, không có chuỗi dạng token.
+# An toàn secrets KHÔNG phụ thuộc mấy dòng này — `secrets/` + `**/secrets/` ở cuối file (và
+# WorkingClaude/.gitignore) chặn độc lập, nên allow-list ở đây không thể lộ credential.
+# CỐ Ý chỉ liệt kê ĐÍCH DANH, không nới `*.json`: trade_plans/*.json và
+# execution_logs/*_state.json vẫn phải nằm ngoài backup (chi tiết lệnh + tài khoản).
+!WorkingClaude/data/trading_rules.json
+!WorkingClaude/data/corp_actions.json
+!WorkingClaude/data/known_position_discrepancies.json
+!WorkingClaude/config.json
 # Refactored-out secret holder (belt & suspenders; covered by *.json)
 phs_secret.json
 # Other secret material

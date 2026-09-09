@@ -1,0 +1,109 @@
+{
+  "_schema": "corp_actions/v1 — sự kiện doanh nghiệp làm ĐỔI SỐ LƯỢNG cổ phiếu (chia tách / thưởng / cổ tức CP). Đọc bởi mike/bin/corp_actions.py, áp vào sổ lô bởi mike/bin/park_holdings.py::LotBook.corp_action_split. Cổ tức TIỀN MẶT KHÔNG thuộc file này (đi qua mike/bin/dividend_adjusted_return.py, §21 coding_guidelines).",
+  "_rule": "park_holdings CHỈ áp record có _status bắt đầu bằng 'CONFIRMED'. TUYỆT ĐỐI không suy corp action từ việc thấy qty lệch broker — một fill sót journal / GHOST_ORDER / chuyển khoản CK tạo ra ĐÚNG hình dạng lệch đó (§5). Mỗi record phải có >= 2 nguồn bằng chứng ĐỘC LẬP với chính cái lệch đó.",
+  "actions": [
+    {
+      "id": "VHM-2026-08-06-STOCK-DIVIDEND",
+      "ticker": "VHM",
+      "event_type": "STOCK_DIVIDEND",
+      "ratio_text": "cổ tức năm 2025 bằng cổ phiếu, tỉ lệ 100% (1:1) — sở hữu 1cp nhận thêm 1cp",
+      "qty_multiplier": 2.0,
+      "ex_date": "2026-08-06",
+      "record_date": "2026-08-07",
+      "broker_effective_ts": "2026-08-05T12:00:00",
+      "_status": "CONFIRMED — user (chủ tài khoản thật) đã ký duyệt chính thức qua Discord 2026-08-05, sau khi Taylor (agent) xác nhận bằng 3 nguồn độc lập (xem evidence). Muốn thu hồi: đổi _status thành 'REVOKED ...' → sổ lô lập tức quay về số cũ và cổng reconcile chặn lại như trước.",
+      "confirmed_by": "Taylor (agent), ký duyệt chính thức bởi user 2026-08-05",
+      "decided_by": "user",
+      "confirmed_at": "2026-08-05T22:30:00+07:00",
+      "user_signoff_at": "2026-08-05T22:24:41+07:00 (Discord, thread 1522519012066721923)",
+      "evidence": [
+        "NGUỒN 1 — công bố sàn (ĐỘC LẬP HOÀN TOÀN với sổ/broker của ta): HOSE/Vinhomes chốt ngày giao dịch không hưởng quyền 06/08/2026, ngày đăng ký cuối cùng 07/08/2026, phát hành hơn 4,1 tỷ cp trả cổ tức 2025 tỉ lệ 1:1; vốn điều lệ 41.074 tỷ → ~82.148 tỷ (gấp đôi ⇒ xác nhận hệ số ×2 ở tầng vốn, không phải chỉ tầng giá). Nguồn: mekongasean.vn/vinhomes-chot-ngay-tra-co-tuc-bang-co-phieu-ty-le-100-57014.html, cafef.vn/nong-vinhomes-thong-bao-ngay-lan-chot-thuong-vu-phat-hanh-co-phieu-lon-nhat-lich-su-188260704112141384.chn (WebSearch 2026-08-05).",
+        "NGUỒN 2 — giá thị trường BQ tav2_bq.ticker (độc lập với broker): VHM đóng cửa phiên 2026-08-05 tại Close=Price=153.000 (cum-quyền, Volume 10,68tr — phiên giao dịch thật, không phải dòng rỗng). marketPrice broker cùng lúc = 76.500 = ĐÚNG 153.000/2 ⇒ DNSE đã hạ giá tham chiếu theo hệ số 2,0 chuẩn bị cho phiên ex 08-06. Hai con số này đến từ hai hệ thống khác nhau và khớp tuyệt đối.",
+        "NGUỒN 3 — số dư broker DNSE, HAI tài khoản độc lập cùng nhân đúng 2: SpaceX (0002023347) openQuantity 500 → 1.000; ZaloPay (0001743768) 300 → 600. Quan sát cuối còn số cũ 2026-08-04T19:10 (dnse_raw_2026-08-04.jsonl), quan sát đầu đã số mới ~12:10 ngày 2026-08-05 (DollarBill compute_park_trim, bus finding vhm-reconcile-mismatch-zalopay), EOD xác nhận lại 2026-08-05T19:04 (dnse_raw_2026-08-05.jsonl). tradeQuantity (sellable) vẫn 500/300 — phần thưởng CHƯA bán được, bình thường với cp thưởng chưa về tài khoản giao dịch."
+      ],
+      "note": "CHÚ Ý THỨ TỰ NGƯỢC ĐỜI, đã kiểm 3 lần vì nó phản trực giác: broker credit cổ phiếu (2026-08-05) TRƯỚC ex-date sàn (2026-08-06) một phiên. Vì vậy KHÔNG được gộp hai mốc: neo sổ theo ex_date thì hôm nay 08-05 vẫn lệch broker (park-trim tiếp tục BLOCKED oan); neo entitlement theo broker_effective_ts thì lô mua trong phiên 08-05 (vẫn hưởng quyền vì mua trước ex-date) sẽ bị bỏ sót. Thực tế 08-05 KHÔNG có lệnh VHM nào ở cả 2 account (đã grep journal 2026-08-0*), nên cửa sổ xám không kích hoạt lần này — nhưng cơ chế vẫn phải đúng cho lần sau. Giờ 12:00 của broker_effective_ts là ƯỚC LƯỢNG trong khoảng quan sát được [2026-08-04T19:10 còn số cũ, 2026-08-05T12:10 đã số mới]; phút chính xác không quan sát được và KHÔNG ảnh hưởng kết quả lần này. Cổ tức TIỀN MẶT 60% (6.000đ/cp, thanh toán ~22/07/2026) là sự kiện KHÁC, không đi qua file này — nếu nó chưa được cộng lại vào tỉ suất per-position thì đó là việc của §21/dividend_adjusted_return.py.",
+      "verify_against_bq": "PENDING tại thời điểm ghi — BQ mới có tới phiên 2026-08-05 < ex_date 2026-08-06, cú nhảy tỉ số Close/Price chỉ lộ ra ĐÚNG Ở phiên ex. Chạy lại sau 2026-08-06: python3 mike/bin/corp_actions.py --verify VHM-2026-08-06-STOCK-DIVIDEND (kỳ vọng MATCH, bq_factor ≈ 2,0). PENDING KHÔNG phải MATCH — đó là lý do record này đứng trên 3 nguồn khác chứ không đợi BQ."
+    },
+    {
+      "id": "MBB-2026-08-11-STOCK-DIVIDEND",
+      "ticker": "MBB",
+      "event_type": "STOCK_DIVIDEND",
+      "ratio_text": "cổ tức 2025 bằng cổ phiếu tỉ lệ 15% — giữ 100cp nhận thêm 15cp. ĐI KÈM (nhưng KHÔNG thuộc file này) một đợt CHÀO BÁN QUYỀN MUA 10:1 giá 10.000đ cùng ngày GDKHQ: quyền mua KHÔNG tự động làm tăng số lượng (phải nộp tiền thực hiện quyền), nên qty_multiplier chỉ mang phần cổ tức cổ phiếu = 1,15. Đợt quyền mua CHỈ ảnh hưởng GIÁ THAM CHIẾU (xem evidence 2).",
+      "qty_multiplier": 1.15,
+      "ex_date": "2026-08-11",
+      "record_date": "2026-08-12",
+      "broker_effective_ts": "2026-08-10T19:32:49",
+      "_status": "CONFIRMED — Taylor (agent) xác nhận bằng 3 nguồn ĐỘC LẬP với chính cái lệch qty (xem evidence), job Taylor_20260810_183618, 2026-08-11. CHƯA có chữ ký user tại thời điểm ghi (phát hiện lúc 01:30 ICT, ngoài giờ) — khác ca VHM. Muốn thu hồi: đổi _status thành 'REVOKED ...' → sổ lô lập tức quay về số cũ và cổng reconcile chặn lại như trước.",
+      "confirmed_by": "Taylor (agent), job Taylor_20260810_183618",
+      "decided_by": "agent",
+      "confirmed_at": "2026-08-11T02:10:00+07:00",
+      "evidence": [
+        "NGUỒN 1 — công bố sàn / lưu ký (ĐỘC LẬP HOÀN TOÀN với sổ và với broker của ta): ngày GDKHQ 11/08/2026, ngày ĐKCC 12/08/2026; MB phát hành ~1,21 tỷ cp trả cổ tức 2025 tỉ lệ 15% (giữ 100cp nhận thêm 15cp) VÀ chào bán ~805,5 triệu cp cho cổ đông hiện hữu giá 10.000đ/cp, vốn điều lệ dự kiến vượt 100.600 tỷ. Nguồn: vietstock.vn/2026/08/mb-chot-quyen-chia-co-tuc-va-chao-ban-co-phieu-nang-von-dieu-le-len-hon-100600-ty-738-1476203.htm, vsd.vn/vi/ad/185869 (Tổng công ty Lưu ký & Bù trừ — nguồn gốc), vneconomy.vn/mbb-tra-co-tuc-bang-tien-va-co-phieu.htm (WebSearch độc lập 2026-08-11, khác nguồn stockbiz đã dùng ở vòng điều tra trước). Kiểm chéo tỉ lệ bằng số tuyệt đối: 1,21 tỷ / 0,15 ≈ 8,07 tỷ cp đang lưu hành ⇒ 805,5 triệu / 8,07 tỷ ≈ 10,0% ⇒ đúng tỉ lệ quyền mua 10:1.",
+        "NGUỒN 2 — GIÁ THAM CHIẾU CHÍNH THỨC CỦA SÀN qua DNSE secdef (là trường GIÁ, hoàn toàn độc lập với trường số lượng đang lệch): sáng 2026-08-11 secdef trả basicPrice=20,2 / ceilingPrice=21,6 / floorPrice=18,8 (đồng nhất trên cả 7 boardId), trong khi close_price boardId=G1 phiên 2026-08-10 = 24,25 (BQ tav2_bq.ticker cũng cho Close=Price=24.250 ngày 2026-08-10, hai hệ thống khác nhau khớp tuyệt đối). Công thức điều chỉnh chuẩn HOSE cho GỘP cổ tức CP + quyền mua: (24.250 + 10.000×0,10) / (1 + 0,15 + 0,10) = 25.250 / 1,25 = 20.200 — KHỚP CHÍNH XÁC tới đồng. Trần/sàn ±7% quanh 20.200 (21.614→21.6; 18.786→18.8) cũng khớp. Một hệ phương trình một nghiệm: chỉ CẶP (15% cổ tức CP, 10:1 giá 10.000đ) mới cho ra đúng 20.200 từ 24.250 ⇒ xác nhận ĐỒNG THỜI cả hai tỉ lệ, bằng dữ liệu giá.",
+        "NGUỒN 3 — chữ ký KẾ TOÁN của broker: giá vốn bình quân được HẠ theo đúng hệ số, TỔNG giá vốn bất biến — dấu hiệu phân biệt corp action với 'một fill bị sót journal' (fill sót sẽ LÀM TĂNG tổng giá vốn, không giữ nguyên). SpaceX: costPrice 24.850,0000 → 21.608,6957, và 1.100 × 24.850 = 27.335.000 = 1.265 × 21.608,6957 (khớp tới đồng). ZaloPay: 24.597,9129 → 21.417,1483, và 202 × 24.597,9129 = 4.968.778,4 = 232 × 21.417,1483 (khớp tới đồng). Mốc thời gian đọc thẳng từ positions.modifiedDate: 2026-08-10T12:32:49Z = 2026-08-10T19:32:49 ICT (SpaceX) / 12:32:15Z (ZaloPay) — bản đọc cuối còn số cũ 2026-08-10T~19:12 ICT, bản đọc đầu đã số mới 2026-08-11T00:41 ICT, nhất quán."
+      ],
+      "note": "LÀM TRÒN Ở MỨC VỊ THẾ, KHÔNG PHẢI MỨC LÔ — đây là ca đầu tiên tỉ lệ KHÔNG chia hết nên nó lộ ra: ZaloPay giữ 202cp qua 2 lô (100 + 102). 100×1,15=115 nguyên, nhưng 102×1,15=117,3 KHÔNG nguyên. Broker trả 232 = floor(202×1,15) = floor(232,3) — làm tròn XUỐNG một lần trên TỔNG vị thế, rồi hạ giá vốn theo đúng 232 (kiểm bằng nguồn 3: 232 × 21.417,1483 khớp tuyệt đối tổng giá vốn cũ). Bản `corp_action_split` trước 2026-08-11 fail-closed với lô lẻ ⇒ sẽ KHÔNG áp gì và gắn cờ UNVERIFIED cho MBB ở ZaloPay; đã sửa để làm tròn ĐÚNG CHỖ broker làm tròn (mức vị thế) + chia phần dôi theo largest-remainder. SpaceX chia hết (1 lô 1.100 → 1.265) nên không lộ.\n\nQUYỀN MUA 10:1 CHƯA XỬ LÝ VÀ KHÔNG THUỘC FILE NÀY: file này chỉ mô tả sự kiện TỰ ĐỘNG làm tăng số lượng. Quyền mua là một QUYẾT ĐỊNH VỐN (nộp ~10.000đ/cp cho 10% vị thế, thời gian chuyển nhượng quyền 18–26/08/2026) — cần user quyết, và nếu thực hiện thì phần cp mới về là một FILL/nghiệp vụ riêng, không phải multiplier. SpaceX ~110 quyền ≈ 1,10tr đồng, ZaloPay ~20 quyền ≈ 0,20tr đồng (tính trên số cổ phiếu TRƯỚC chia — 1.100/10 và 202/10 làm tròn xuống — vì quyền mua tính trên lượng nắm giữ tại ngày ĐKCC, CÙNG mốc với cổ tức CP, KHÔNG cộng dồn lên nhau. Đây cũng đúng bằng r_quyền=0,10 mà công thức giá tham chiếu ở evidence 2 đã dùng — sửa 2026-08-11 sau khi quant-skeptic bắt được mâu thuẫn: bản đầu ghi 126/23 vì lỡ tính trên số SAU chia).\n\nCỔ PHIẾU THƯỞNG CHƯA BÁN ĐƯỢC: tradeQuantity vẫn giữ số CŨ (SpaceX 1.100, ZaloPay 202) trong khi openQuantity đã là 1.265/232 — giống hệt ca VHM. Bất kỳ lệnh BÁN nào (L1 park-trim, L2 JIT-unpark) phải neo theo lượng BÁN ĐƯỢC, không phải openQuantity.",
+      "verify_against_bq": "PENDING tại thời điểm ghi — BQ mới có tới phiên 2026-08-10 < ex_date 2026-08-11 (đã kiểm thật: MBB Close=Price=24.250 ngày 08-10, tỉ số Close/Price=1,0 suốt từ 07-27), cú nhảy tỉ số chỉ lộ ra ĐÚNG Ở phiên ex. Chạy lại sau khi BQ sync đêm 2026-08-11 (23:45 ICT): python3 mike/bin/corp_actions.py --verify MBB-2026-08-11-STOCK-DIVIDEND. ⚠️ KỲ VỌNG bq_factor ≈ 24.250/20.200 = 1,2005 (hệ số điều chỉnh GIÁ, gộp cả quyền mua) chứ KHÔNG phải 1,15 (hệ số SỐ LƯỢNG) ⇒ verify_against_bq sẽ báo MISMATCH và ĐÓ LÀ ĐÚNG cho ca có quyền mua đi kèm: hàm đó giả định giá và số lượng cùng một hệ số, chỉ đúng khi sự kiện thuần cổ tức CP/chia tách. Đọc MISMATCH ở đây là 'công cụ không áp dụng được', không phải 'sự kiện sai' — bằng chứng số lượng nằm ở nguồn 1 và nguồn 3."
+    },
+    {
+      "id": "BID-2026-08-17-STOCK-BONUS",
+      "ticker": "BID",
+      "event_type": "STOCK_DIVIDEND",
+      "ratio_text": "cổ phiếu thưởng tỉ lệ 6,8433% (exercise_ratio BQ) — giữ 1000cp nhận thêm 68,433cp",
+      "qty_multiplier": 1.068433,
+      "ex_date": "2026-08-17",
+      "record_date": "2026-08-18",
+      "broker_effective_ts": "2026-08-14T19:08:57",
+      "_status": "CONFIRMED — Winston (agent) xác nhận bằng 2 nguồn ĐỘC LẬP với chính cái lệch qty (xem evidence), job Winston_20260814_144602 (dispatch từ Taylor sau khi phát hiện lệch sổ lô 2026-08-14 21:30 ICT). CHƯA có chữ ký user tại thời điểm ghi. Muốn thu hồi: đổi _status thành 'REVOKED ...' → sổ lô lập tức quay về số cũ và cổng reconcile chặn lại như trước.",
+      "confirmed_by": "Winston (agent), job Winston_20260814_144602",
+      "decided_by": "agent",
+      "confirmed_at": "2026-08-14T22:10:00+07:00",
+      "evidence": [
+        "NGUỒN 1 — công bố sàn/vendor (ĐỘC LẬP HOÀN TOÀN với sổ/broker của ta): tav2_bq.corporate_action id=68101caf1e6996338091df26, ticker=BID, event_code=ISS, event_title_vi='Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 6.8%', issue_method_vi='Bonus', exright_date=2026-08-17, record_date=2026-08-18, exercise_ratio=0.068433, event_status='announced', issue_status_vi='Thông báo', public_date=2026-08-12, ingested_at=2026-08-13T15:48:57, source_url=http://fiinpro.com/News/Detail/12115077?lang=vi-vn. Truy vấn lại: bq query --use_legacy_sql=false --project_id=lithe-record-440915-m9 \"SELECT * FROM tav2_bq.corporate_action WHERE ticker='BID' AND event_code='ISS' AND exright_date='2026-08-17'\".",
+        "NGUỒN 2 — chữ ký KẾ TOÁN của broker, HAI tài khoản ĐỘC LẬP, giá vốn hạ ĐÚNG hệ số, TỔNG giá vốn bất biến tới đồng (dấu hiệu phân biệt corp action với fill sót journal — fill sót sẽ LÀM TĂNG tổng giá vốn, không giữ nguyên): SpaceX (0002023347) openQuantity BID 1.100 → 1.175 (1.100×1,068433=1.175,28→floor 1.175 khớp), costPrice 42.269,3675 → 39.571,3228, 1.100×42.269,3675=46.496.304,25 ≈ 1.175×39.571,3228=46.496.304,29 (khớp tới đồng, sai số làm tròn). ZaloPay (0001743768) tổng openQuantity 400 (2 lô: 100+300) → 427 (2 lô: 107+320) — làm tròn Ở MỨC VỊ THẾ giống ca MBB-2026-08-11 (400×1,068433=427,37→floor 427 khớp tổng; lô1 100→107, lô2 300→320, cả hai khớp giá vốn tới đồng: 100×39.550=3.955.000≈107×36.962,6168=3.954.999,998; 300×40.316,6667=12.095.000,01≈320×37.796,875=12.095.000,00). Mốc thời gian đọc thẳng từ positions.modifiedDate (UTC→ICT): SpaceX 2026-08-14T12:08:57Z=19:08:57 ICT, ZaloPay lô1 12:09:00Z=19:09:00 ICT, lô2 12:09:09Z=19:09:09 ICT. Bản đọc cuối còn số cũ: 2026-08-14T19:04:15 ICT (SpaceX)/19:04:00 ICT (ZaloPay) — cùng file data/execution_logs/dnse_raw_2026-08-14.jsonl."
+      ],
+      "note": "CÙNG THỨ TỰ NGƯỢC ĐỜI như VHM/MBB: broker credit cổ phiếu (2026-08-14, thứ Sáu) TRƯỚC exright_date sàn (2026-08-17, thứ Hai) — ở đây khoảng cách là 1 PHIÊN GIAO DỊCH (không phải 1 ngày lịch, vì cuối tuần xen giữa), khớp mẫu hình 'broker credit 1 phiên trước ex-date' đã thấy ở VHM/MBB. Không có lệnh BID nào ở cả 2 account trong ngày 2026-08-14 (kiểm bằng dnse_raw cùng ngày) nên cửa sổ xám (mua sau lúc broker credit, trước ex_date) KHÔNG kích hoạt lần này. tradeQuantity broker vẫn giữ số CŨ (SpaceX 1.100, ZaloPay 400) trong khi openQuantity đã là số mới — cổ phiếu thưởng CHƯA bán được, giống hệt ca VHM/MBB; lệnh BÁN (L1 park-trim/L2 JIT-unpark) phải neo theo lượng BÁN ĐƯỢC, không phải openQuantity. CÂU HỎI (3) trong dispatch (cron corp_action_daily.sh 07:30 có bắt được sự kiện này không): CÓ — chạy data/corp_action_daily/corp_action_daily_2026-08-14.json.upcoming_events_held đã liệt kê BID exright_date=2026-08-17 days_ahead=3 TRƯỚC KHI broker credit xảy ra (cron chạy 07:30, credit xảy ra ~19:08-19:09 ICT cùng ngày) — không phải lỗ hổng của cron, cron làm đúng việc cảnh báo PROACTIVE của nó. Việc còn thiếu là bước XÁC NHẬN thành CONFIRMED trong file này để park_holdings hết báo lệch — record này bù đúng bước đó.",
+      "verify_against_bq": "PENDING tại thời điểm ghi — exright_date=2026-08-17 CHƯA xảy ra (hôm nay 2026-08-14), BQ ticker chưa có phiên ex để lộ cú nhảy tỉ số Close/Price. Chạy lại sau 2026-08-17: python3 mike/bin/corp_actions.py --verify BID-2026-08-17-STOCK-BONUS (kỳ vọng MATCH, bq_factor ≈ 1,068433, thuần cổ tức CP không kèm quyền mua nên không có ca lệch kiểu MBB)."
+    },
+    {
+      "id": "VIX-2026-08-20-STOCK-DIVIDEND",
+      "ticker": "VIX",
+      "event_type": "STOCK_DIVIDEND",
+      "ratio_text": "cổ tức năm 2025 bằng cổ phiếu tỉ lệ 5,0% — giữ 100cp nhận thêm 5cp",
+      "qty_multiplier": 1.05,
+      "ex_date": "2026-08-20",
+      "record_date": "2026-08-21",
+      "broker_effective_ts": "2026-08-19T18:49:04",
+      "_status": "CONFIRMED — user xác nhận trực tiếp qua Discord 2026-08-19 (\"Việc VIX sẽ có GDKHQ vào ngày mai là trong dự tính\", topic 1521183164364754974) sau khi DollarBill mở question 'zalopay-vix-reconcile-blocks-l1l2' báo lệch sổ. Mike xác minh bằng 2 nguồn độc lập với chính cái lệch (xem evidence) trước khi ghi CONFIRMED. Muốn thu hồi: đổi _status thành 'REVOKED ...' → sổ lô lập tức quay về số cũ và cổng reconcile chặn lại như trước.",
+      "confirmed_by": "Mike, xác nhận theo yêu cầu user 2026-08-19 (topic 1521183164364754974)",
+      "decided_by": "user",
+      "confirmed_at": "2026-08-19T12:40:00+07:00",
+      "evidence": [
+        "NGUỒN 1 — công bố sàn/vendor (ĐỘC LẬP HOÀN TOÀN với sổ/broker của ta): tav2_bq.corporate_action id=6a445e55279ac17a86e4cacd, ticker=VIX, event_code=ISS, event_title_vi='Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 5.0%', issue_method_vi='Trả Cổ tức bằng Cổ phiếu', exright_date=2026-08-20, record_date=2026-08-21, exercise_ratio=0.05, event_status='announced', issue_status_vi='Thông báo', public_date=2026-08-13, ingested_at=2026-08-18T15:44:57. Truy vấn lại: bq query --use_legacy_sql=false --project_id=lithe-record-440915-m9 \"SELECT * FROM tav2_bq.corporate_action WHERE ticker='VIX' AND event_code='ISS' AND exright_date='2026-08-20'\".",
+        "NGUỒN 2 — chữ ký KẾ TOÁN của broker, HAI tài khoản ĐỘC LẬP, giá vốn hạ ĐÚNG hệ số, TỔNG giá vốn bất biến tới đồng (dấu hiệu phân biệt corp action với fill sót journal): SpaceX (0002023347) openQuantity VIX 400 → 420 (400×1,05=420 khớp tuyệt đối, không lô lẻ), costPrice 16.237,5 → 15.464,2857, 400×16.237,5=6.495.000 = 420×15.464,2857=6.495.000 (khớp tới đồng). ZaloPay (0001743768) openQuantity 100 → 105 (100×1,05=105 khớp tuyệt đối), costPrice 13.950 → 13.285,7143, 100×13.950=1.395.000 = 105×13.285,7143=1.395.000 (khớp tới đồng). Mốc thời gian đọc thẳng từ positions.modifiedDate (UTC→ICT): SpaceX 2026-08-19T11:49:20Z=18:49:20 ICT, ZaloPay 2026-08-19T11:49:04Z=18:49:04 ICT. Bản đọc cuối còn số cũ: 2026-08-19T~11:xx trước mốc trên (file data/execution_logs/dnse_raw_2026-08-19.jsonl, đọc lúc 19:07/19:06 ICT lần đầu thấy số mới)."
+      ],
+      "note": "CÙNG THỨ TỰ NGƯỢC ĐỜI như VHM/MBB/BID: broker credit cổ phiếu (2026-08-19) TRƯỚC exright_date sàn (2026-08-20) một phiên, đúng mẫu hình 'broker credit 1 phiên trước ex-date' đã thấy lặp lại 3 lần trước đó — KHÔNG phải bất thường lần này. Không có lệnh VIX nào ở cả 2 account ngày 2026-08-19 (grep journal + dnse_raw không thấy fill VIX) nên không có cửa sổ xám (mua sau lúc broker credit, trước ex_date). tradeQuantity broker vẫn giữ số CŨ (SpaceX 400, ZaloPay 100) trong khi openQuantity đã là số mới 420/105 — cổ phiếu thưởng CHƯA bán được, giống hệt VHM/MBB/BID; lệnh BÁN (L1 park-trim/L2 JIT-unpark) phải neo theo lượng BÁN ĐƯỢC (tradeQuantity), không phải openQuantity. Hệ quả thực tế: gỡ BLOCKED_RECONCILE cho VIX ở cả 2 account, cho phép L1/L2 hoạt động lại — bug thật: lệnh BAL VPI (25,08tr) ở ZaloPay từng bị defer vì lý do 'L1/L2_BLOCKED_RECONCILE_VIX', record này xử lý đúng gốc thay vì tiếp tục treo.",
+      "verify_against_bq": "PENDING tại thời điểm ghi — exright_date=2026-08-20 CHƯA xảy ra (hôm nay 2026-08-19), BQ ticker chưa có phiên ex để lộ cú nhảy tỉ số Close/Price. Chạy lại sau 2026-08-20: python3 mike/bin/corp_actions.py --verify VIX-2026-08-20-STOCK-DIVIDEND (kỳ vọng MATCH, bq_factor ≈ 1,05, thuần cổ tức CP không kèm quyền mua)."
+    },
+    {
+      "id": "MSB-2026-08-28-BONUS-ISSUE",
+      "ticker": "MSB",
+      "event_type": "BONUS_ISSUE",
+      "ratio_text": "cổ phiếu thưởng tỉ lệ 20% — giữ 100cp nhận thêm 20cp",
+      "qty_multiplier": 1.2,
+      "ex_date": "2026-08-28",
+      "record_date": "2026-09-03",
+      "broker_effective_ts": "2026-08-27T18:58:15",
+      "_status": "CONFIRMED — Mike (agent) xác nhận bằng 2 nguồn ĐỘC LẬP với chính cái lệch qty (xem evidence). User authorization: 'Nếu có phải fix gap ngay' (Discord thread 1542337717776556062, 2026-08-27 22:01 ICT). Muốn thu hồi: đổi _status thành 'REVOKED ...' → sổ lô lập tức quay về số cũ và cổng reconcile chặn lại như trước.",
+      "confirmed_by": "Mike (agent), authorization by user 2026-08-27",
+      "decided_by": "user",
+      "confirmed_at": "2026-08-27T22:10:00+07:00",
+      "evidence": [
+        "NGUỒN 1 — BQ tav2_bq.corporate_action (ĐỘC LẬP HOÀN TOÀN với sổ/broker của ta): id=69f2a0f6db487120c68d3948, ticker=MSB, event_code=ISS, event_title_vi='Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 20.0%', issue_method_name_vi='Cổ phiếu thưởng', exright_date=2026-08-28, record_date=2026-09-03, exercise_ratio=0.2, issue_status_vi='Thông báo', public_date=2026-08-22, ingested_at=2026-08-26T15:44:59. Truy vấn lại: bq query --use_legacy_sql=false --project_id=lithe-record-440915-m9 \"SELECT * FROM tav2_bq.corporate_action WHERE ticker='MSB' AND event_code='ISS' AND exright_date='2026-08-28'\".",
+        "NGUỒN 2 — chữ ký KẾ TOÁN của broker, HAI tài khoản ĐỘC LẬP, giá vốn hạ ĐÚNG hệ số 1,2, TỔNG giá vốn bất biến tới đồng (dấu hiệu phân biệt corp action với fill sót journal): SpaceX (0002023347) openQuantity MSB 500→600 (500×1,2=600 khớp tuyệt đối), costPrice 16.250→13.541,6667, 500×16.250=8.125.000=600×13.541,6667=8.125.000 (khớp). ZaloPay (0001743768) openQuantity MSB 200→240 (200×1,2=240 khớp tuyệt đối), costPrice 16.250→13.541,6667, 200×16.250=3.250.000=240×13.541,6667=3.250.000 (khớp). modifiedDate từ positions: ZaloPay 2026-08-27T11:58:15.192586Z=18:58:15 ICT; SpaceX 2026-08-27T11:58:25.565081Z=18:58:25 ICT. Bản đọc cuối còn số cũ: 2026-08-27T04:50 ICT; bản đầu đã số mới: 2026-08-27T19:07 ICT (dnse_raw_2026-08-27.jsonl)."
+      ],
+      "note": "Cùng mẫu hình 'broker credit 1 phiên trước ex-date sàn' như VHM/MBB/BID/VIX (4 ca trước đó, tất cả đã CONFIRMED). Corp_action_daily 2026-08-27 đã biết sự kiện này (upcoming_events_held: MSB, days_ahead=1, lookahead_days=10) nhưng chưa thể CONFIRMED vì exright_date là NGÀY MAI (28/08) — không phải lỗ hổng của pipeline, đúng thiết kế. Khe hở thật: DNSE credit cổ phiếu HOA SỚM trước ex-date nên DollarBill lập plan tối 27/08 với ledger cũ (200/500) → BLOCKED_RECONCILE L1+L2 khi bot chạy sáng 28/08. tradeQuantity vẫn giữ số CŨ (SpaceX 500, ZaloPay 200) trong khi openQuantity đã là 600/240 — cổ phiếu thưởng CHƯA bán được, giống hệt VHM/MBB/BID/VIX; lệnh BÁN (L1 park-trim/L2 JIT-unpark) phải neo theo tradeQuantity.",
+      "verify_against_bq": "PENDING tại thời điểm ghi — exright_date=2026-08-28 CHƯA xảy ra (hôm nay 2026-08-27), BQ ticker chưa có phiên ex để lộ cú nhảy tỉ số Close/Price. Chạy lại sau 2026-08-28: python3 mike/bin/corp_actions.py --verify MSB-2026-08-28-BONUS-ISSUE (kỳ vọng MATCH, bq_factor ≈ 1,2, thuần cổ phiếu thưởng không kèm quyền mua)."
+    }
+  ]
+}
