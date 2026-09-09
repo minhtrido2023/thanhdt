@@ -1,0 +1,35 @@
+# ĐỀ XUẤT (Taylor, 2026-09-10, job Taylor_20260909_165335) — chờ Mike duyệt (§13)
+
+Đề xuất THÊM một mục vào `kb/coding_guidelines.md`. Không sửa gì khác trong file gốc.
+
+## 30. Script Nghiên Cứu Ghim Snapshot BQ: GÁN CỨNG `BQ_LOCAL_CACHE`, Không `setdefault` — Và In Ra Cache Đang Dùng
+
+**Quy tắc:** mọi script nghiên cứu cần đọc một **snapshot BQ đã ghim** (`data/bq_cache_asof*`) phải
+gán cứng và in ra:
+
+```python
+os.environ["BQ_LOCAL_CACHE"] = "data/bq_cache_asof20260729_postrestate"   # GÁN CỨNG
+print("[probe] BQ_LOCAL_CACHE =", os.environ["BQ_LOCAL_CACHE"], flush=True)
+```
+
+**Cấm `os.environ.setdefault("BQ_LOCAL_CACHE", ...)`** — `wc_env.sh:7` export
+`BQ_LOCAL_CACHE=data/bq_cache` (cache **SỐNG**, cron ghi đè 23:45 ICT mỗi ngày). Mọi phiên đều
+`source wc_env.sh` trước, nên `setdefault` **luôn no-op**: script tưởng đang đọc snapshot ghim,
+thực tế đọc cache sống — có thể đang bị cron viết dở.
+
+**Vì sao thành luật (đã cắn thật 2026-09-10, `custom30v_placebo_20260910/basket_probe.py`):**
+triệu chứng là **im lặng và dễ bỏ qua** — cùng một chân control cho 3 giá trị level khác nhau ở 3
+lần chạy (33,46 / 32,76 / 36,14) **trong khi** `members`, ADV, tỷ trọng ngành, MaxDD giống hệt nhau
+đến từng chữ số in ra. Nhìn một lần chạy thì không có gì đáng ngờ; chỉ chạy lại đúng cùng chân mới
+lộ. Sau khi gán cứng: 2 lần chạy độc lập cho chuỗi **giống nhau tuyệt đối** (`max|diff| = 0,0`).
+
+Chân chạy qua shell KHÔNG bị (đã kiểm): `run_leg.sh` truyền `env BQ_LOCAL_CACHE=... $DNA_PYEXE ...`
+tường minh trên dòng lệnh, đè được biến của `wc_env.sh`. Lỗ hổng chỉ nằm ở script Python tự set env.
+
+**Hệ quả hành động, ngoài việc gán cứng:**
+- **In ra cache đang dùng** ở đầu mọi script nghiên cứu chạm BQ. Không in = không kiểm được sau này.
+- **Số "gần đúng" mà không tái lập được từng byte thì nghi CACHE trước, đừng nghi mô hình.** Chạy
+  lại đúng cùng chân và diff chuỗi là phép thử rẻ nhất (bổ sung cho §19 `verify-before-done`).
+- Bổ sung cho §8 (đừng ghi output thí nghiệm vào tên file canonical) và §9 (tra `data_registry`
+  trước khi wire nguồn): hai mục đó lo *chọn đúng nguồn*; mục này lo *nguồn đã chọn có thật sự được
+  dùng không*.

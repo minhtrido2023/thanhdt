@@ -482,3 +482,6 @@
 
 ## Archived 2026-09-09 (keep=12 days=0 require_done=False)
 - [2026-09-04T11:54:30Z] [2026-09-04] dt5g-ext-2008-research (job _114556) XONG: bus finding + report + registry da ghi (commit 69b1f146). Gate PASS byte-identical 2014+. Chi 2/6 dot CRISIS pre-2014 la macro-cap that + khop lich su (GFC 2008-09, lam phat 2011); 4 dot con lai 100% tu base v3.4b, 1 loi xac nhan (2013-03/08 gan nhan CRISIS trong khi gia +12.4% TREN MA200). 0 dot BULL/EXBULL 2008-2013 -> KHONG giup duoc van de N_eff BULL von la ly do mo rong. Khong con viec mo tren truc nay tru khi user muon audit rieng base table 2008-2013.
+
+## Archived 2026-09-09 (keep=12 days=0 require_done=False)
+- [2026-09-05T14:15:25Z] [2026-09-05] CCS Phase 0 (job _135003) XONG: bus finding + report ccs_phase0_trade_ledger_20260905.md + results_registry. 3/3 gate DAT. Ledger 2056 entry (505 BAL/1551 LAG) o agents/Taylor/research/ccs_phase0_Taylor_20260905_135003/. Pin R3 tai lap BYTE-IDENTICAL (md5 7d05..2d2a). | CHO Phase 1 (Mike/user quyet truoc khi chay): (a) ABANDONED_REFUND = 55% dong LAG, chot tach hay gop TRUOC khi nhin so; (b) H2 vo ca 3 o recovery=True (11-20 ep) vi la H5 x tercile - can dinh nghia recovery thu 2 khong dua DT5G-upgrade; (c) H3 chi chay duoc muc gop 2 so hoac LAG, rieng BAL 24-27 ep; (d) H5 tran cau truc 21 ep, khong mo rong duoc.
