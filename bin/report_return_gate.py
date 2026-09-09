@@ -502,6 +502,7 @@ def run_gate(report_path: str, tol_pp: float = DEFAULT_TOL_PP, out=sys.stdout) -
         agg[lb] = (tot_pl, tot_cost, tot_pl / tot_cost * 100.0 if tot_cost else 0.0)
 
     fails, checked, unmatched = list(paper_fails), 0, 0
+    fails_no_div = []   # mã lệch mà cổ tức = 0 ⇒ nguyên nhân KHÔNG phải thiếu cổ tức
     print(f"\n{'ma':5}{'KL':>7}{'TK':>9}{'% cong bo':>11}{'% ky vong':>11}{'lech pp':>9}"
           f"{'co tuc GOP':>11}  ket qua", file=out)
     for tk, qty, pct in rows:
@@ -520,6 +521,9 @@ def run_gate(report_path: str, tol_pp: float = DEFAULT_TOL_PP, out=sys.stdout) -
         if not ok:
             fails.append(f"{tk} ({lb}, KL={qty:.0f}): báo cáo {pct:+.2f}% vs kỳ vọng {exp:+.2f}% "
                          f"(lệch {diff:+.2f}pp; cổ tức GỘP {g:,.0f}đ/cp)")
+            # Ghi lại mã nào lệch mà KHÔNG có cổ tức — quyết định câu gợi ý sửa ở cuối.
+            if g <= 0:
+                fails_no_div.append(tk)
         print(f"{tk:5}{qty:>7.0f}{lb:>9}{pct:>11.2f}{exp:>11.2f}{diff:>9.2f}{g:>11,.0f}"
               f"  {'OK' if ok else 'LỆCH'}", file=out)
 
@@ -544,6 +548,9 @@ def run_gate(report_path: str, tol_pp: float = DEFAULT_TOL_PP, out=sys.stdout) -
         shown = " / ".join(f"{p:+.2f}%" for p in pcts)
         fails.append(f"{tk} (văn xuôi, dòng {ln}): báo cáo {shown} không khớp tài khoản nào — "
                      "kỳ vọng " + ", ".join(f"{lb} {e:+.2f}%" for lb, e in cands))
+        if all(expected.get((tk, q), (None, None, None, None, None, 0))[5] <= 0
+               for (t2, q) in expected if t2 == tk):
+            fails_no_div.append(tk)
 
     # ---- TỔNG kỳ vọng của từng tài khoản: cổng KHÔNG tự dò dòng tổng trong văn bản (quá mong
     # manh), nhưng in ra để người soạn đối chiếu tay — không phủ thì phải nói ra, không im lặng.
@@ -570,8 +577,22 @@ def run_gate(report_path: str, tol_pp: float = DEFAULT_TOL_PP, out=sys.stdout) -
         print(f"\n❌ CHẶN — {len(fails)} vấn đề:", file=out)
         for f_ in fails:
             print(f"   • {f_}", file=out)
-        print("\n   Sửa: chạy `mike/bin/dividend_adjusted_return.py --resolve <rổ mã> --from … --to …`,"
-              "\n   cộng cổ tức RÒNG vào TỬ SỐ (giữ giá vốn THÔ ở mẫu số) — coding_guidelines §21.", file=out)
+        # Gợi ý sửa phải theo ĐÚNG nguyên nhân của chính những mã đang lệch, không phát một
+        # câu cố định. Mã lệch mà cổ tức = 0đ/cp thì KHÔNG THỂ là "thiếu cộng cổ tức" — ca
+        # thật SCL 2026-08 (+17,00% vs +17,85%, cổ tức 0đ): nguyên nhân là CƠ SỞ GIÁ, báo cáo
+        # dựng trên `marketPrice` thay vì giá đóng cửa. Câu gợi ý cũ chỉ vào cổ tức sẽ đẩy
+        # người sửa đi sai hướng ngay dòng đầu (§29).
+        if fails_no_div:
+            print(f"\n   Trong đó {', '.join(sorted(set(fails_no_div)))} KHÔNG có cổ tức ⇒ lệch "
+                  f"KHÔNG phải do thiếu cộng cổ tức. Gần như chắc chắn sai CƠ SỞ GIÁ: dùng "
+                  f"`mtm_price` trong `data/execution_logs/verified_snapshot_<acct>_<asof>.json` "
+                  f"(giá đóng cửa đã xác minh), KHÔNG dùng `positions[].marketPrice` — field đó "
+                  f"không phải giá ATC.", file=out)
+        if any(tk not in set(fails_no_div) for tk in [f_.split()[0] for f_ in fails]):
+            print("\n   Với mã CÓ cổ tức: chạy `mike/bin/dividend_adjusted_return.py --resolve "
+                  "<rổ mã> --from … --to …`,"
+                  "\n   cộng cổ tức RÒNG vào TỬ SỐ (giữ giá vốn THÔ ở mẫu số) — coding_guidelines §21.",
+                  file=out)
         return 1
     print("\n✅ PASS — mọi tỉ suất vị thế đang giữ đã khớp kỳ vọng dựng từ sổ broker + cổ tức đã xác minh.",
           file=out)
