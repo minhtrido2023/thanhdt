@@ -1,0 +1,89 @@
+=== C7: CONTROL vs PIN R3 ===
+  control md5 = 7d053e6201c9d107685ff4d1dd9d2d2a  pin = 7d053e6201c9d107685ff4d1dd9d2d2a  -> MATCH
+  ctrl CAGR 28.8627 (pin 28.8627) | NAV 1178.0099B (pin 1178.0099) | Calmar 1.6229 | MaxDD -17.785
+
+=== A/B metrics (C1 nguong +0.385pp / C2 Calmar>=ctrl / C3 IS&OOS cung duong) ===
+ leg    cagr    maxdd  calmar  sharpe   final_B  cagr_IS  cagr_OOS  d_cagr  d_cagr_IS  d_cagr_OOS  d_calmar  d_sharpe  d_maxdd
+ctrl 28.8627 -17.7851  1.6229  1.8316 1178.0099  27.0925   30.4786  0.0000     0.0000      0.0000    0.0000    0.0000   0.0000
+ L1a 29.9300 -16.3268  1.8332  1.9485 1305.5245  27.2893   32.3803  1.0673     0.1968      1.9017    0.2103    0.1169   1.4583
+ L1b 31.4835 -14.9539  2.1054  2.0525 1513.9169  28.5366   34.2267  2.6209     1.4441      3.7481    0.4825    0.2209   2.8312
+  L2 28.9492 -18.0007  1.6082  1.8713 1187.9103  27.8899   29.8815  0.0866     0.7974     -0.5970   -0.0146    0.0397  -0.2156
+  L3 29.1704 -18.3377  1.5907  1.8484 1213.5480  27.3211   30.8620  0.3078     0.2286      0.3834   -0.0321    0.0169  -0.5526
+
+  C1/C2/C3:
+   L1a  C1 dCAGR=+1.067pp PASS | C2 Calmar=1.8332 PASS | C3 IS=+0.20 OOS=+1.90 PASS
+   L1b  C1 dCAGR=+2.621pp PASS | C2 Calmar=2.1054 PASS | C3 IS=+1.44 OOS=+3.75 PASS
+   L2   C1 dCAGR=+0.087pp FAIL | C2 Calmar=1.6082 FAIL | C3 IS=+0.80 OOS=-0.60 FAIL
+   L3   C1 dCAGR=+0.308pp FAIL | C2 Calmar=1.5907 FAIL | C3 IS=+0.23 OOS=+0.38 PASS
+
+=== loi suat theo nam + delta vs ctrl (C4a) ===
+        ctrl     L1a     L1b     L2      L3  d_L1a  d_L1b   d_L2  d_L3
+2014   49.14   50.23   48.47  49.02   49.13   1.09  -0.67  -0.12 -0.01
+2015   26.65   24.05   24.56  25.86   29.32  -2.60  -2.09  -0.79  2.68
+2016   14.45   15.18   21.55  17.36   14.58   0.73   7.11   2.91  0.13
+2017   33.73   33.69   35.57  31.30   33.61  -0.04   1.84  -2.43 -0.12
+2018   28.85   29.28   32.72  29.49   29.22   0.42   3.87   0.64  0.37
+2019   12.95   14.48   11.31  16.71   11.47   1.53  -1.64   3.76 -1.48
+2020   28.15   32.41   32.63  27.33   27.95   4.26   4.48  -0.82 -0.20
+2021  108.95  105.14  117.07  98.12  109.34  -3.81   8.12 -10.83  0.38
+2022   -7.43   -4.71   -4.27  -2.86   -6.58   2.71   3.16   4.57  0.85
+2023   22.56   25.21   28.30  24.83   26.60   2.64   5.73   2.27  4.03
+2024   25.60   26.06   26.61  23.71   24.87   0.46   1.01  -1.89 -0.73
+2025   48.09   48.80   51.57  44.51   45.83   0.71   3.48  -3.58 -2.26
+2026   -0.91    1.15   -0.89  -0.54   -1.07   2.05   0.01   0.37 -0.16
+
+=== delta theo CUA SO regime (C4b) ===
+leg                     L1a     L1b     L2     L3
+total_dlogret_pp     10.278  25.087  0.837  2.972
+pre_first_window_pp  -1.095   5.121  0.098  2.119
+W1_2017-12-26         0.106  -1.852 -0.705  0.223
+W2_2018-03-22         4.645   8.155  3.459 -1.403
+W3_2020-10-06         0.802  -1.115 -0.740  0.007
+W4_2021-03-05         4.322   2.305 -0.982  0.345
+W5_2021-08-23        -1.105  -0.013 -0.357 -0.323
+W6_2021-10-26        -0.743   9.198  3.510  4.285
+W7_2024-01-24         1.613   1.873 -2.057 -2.687
+W8_2025-03-07         0.125  -0.824 -0.013 -0.022
+W9_2025-08-12         0.249   1.546 -1.539  0.483
+W10_2026-01-28        1.358   0.692  0.163 -0.055
+
+=== C4a/C4b tap trung (FAIL neu > 0.50) ===
+  L1a  C4a_nam=   0.42  C4b_cuaso=   0.45   PASS
+  L1b  C4a_nam=   0.24  C4b_cuaso=   0.37   PASS
+  L2   C4a_nam=   1.82  C4b_cuaso=   4.19   FAIL
+  L3   C4a_nam=   1.16  C4b_cuaso=   1.44   FAIL
+
+=== C5a DSR (null = SR ctrl 0.11538/obs; SR0(N=4)=0.00610) ===
+  L1a  DSR_vs_SRctrl=0.655979  DSR_vs_SR0=1.000000  FAIL
+  L1b  DSR_vs_SRctrl=0.778448  DSR_vs_SR0=1.000000  FAIL
+  L2   DSR_vs_SRctrl=0.554894  DSR_vs_SR0=1.000000  FAIL
+  L3   DSR_vs_SRctrl=0.523355  DSR_vs_SR0=1.000000  FAIL
+
+=== C5b PBO (CSCV S=16, 5 config) = 0.0216  PASS ===
+
+=== C6 block bootstrap L=63 B=4000 tren chuoi delta log-return ===
+  L1a  point=+0.825 pp/yr  CI95=[-1.201, +2.747]  P(d>0)=0.795  om 0 -> FAIL
+  L1b  point=+2.013 pp/yr  CI95=[-0.116, +3.984]  P(d>0)=0.969  om 0 -> FAIL
+  L2   point=+0.067 pp/yr  CI95=[-1.102, +1.308]  P(d>0)=0.534  om 0 -> FAIL
+  L3   point=+0.239 pp/yr  CI95=[-0.371, +0.842]  P(d>0)=0.780  om 0 -> FAIL
+
+=== §6.1 EXPOSURE tren phien NEUTRAL (state=3) ===
+      n_neutral  w_stock  w_park  w_equity  d_w_stock  d_w_park  d_w_equity
+leg                                                                        
+ctrl       1895   21.650  51.345    72.995      0.000     0.000       0.000
+L1a        1895   21.129  51.713    72.843     -0.520     0.368      -0.152
+L1b        1895   21.086  51.720    72.806     -0.563     0.375      -0.188
+L2         1895   21.449  51.489    72.938     -0.201     0.144      -0.057
+L3         1895   21.565  51.407    72.972     -0.084     0.062      -0.023
+
+=== §6.2 TY LE TEN TAI CHINH trong ro + §6.4 TURNOVER (tu CUSTOM_MEMBERS) ===
+      n_rebal  fin_name_share  bank_name_share  turnover_pct_q  d_fin_name_share  d_bank_name_share  d_turnover_pct_q
+leg                                                                                                                  
+ctrl       48           33.19            25.28           32.34              0.00               0.00              0.00
+L1a        48           26.88            21.67           35.53             -6.32              -3.61              3.19
+L1b        48           20.76            17.22           38.72            -12.43              -8.06              6.38
+L2         48           30.35            24.31           26.45             -2.85              -0.97             -5.89
+L3         48           33.19            25.28           31.63              0.00               0.00             -0.71
+
+Luat doc chot truoc (PREREG §6): |d_w_equity|>2pp => doi rui ro chu khong phai chon ma;
+  |d_fin_name_share|>5pp => cuoc nganh, phai bao nhu cuoc nganh; turnover>1.5x ctrl => tru chi phi that.

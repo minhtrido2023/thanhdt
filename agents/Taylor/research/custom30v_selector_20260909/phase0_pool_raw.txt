@@ -1,0 +1,9 @@
+## POOL co bi rang buoc khong (pool = 60 ten thanh khoan nhat da qua gate rating<=3)
+So ten qua gate moi ky: TB 192 (min 104, max 328) tren 360 ten co thanh khoan => pool 60 RANG BUOC 100% so ky
+
+## BANK: hieu ung SELECTOR hay UNIVERSE? (so ten trong POOL 60 vs trong RO 30)
+  TOAN KY     BANK trong pool  15.5% -> trong ro  25.3% (khuech dai x1.64) | FIN pool  25.1% -> ro  33.2%
+  IS 2014-19  BANK trong pool   7.7% -> trong ro  10.2% (khuech dai x1.31) | FIN pool  16.6% -> ro  16.5%
+  OOS 2020+   BANK trong pool  22.0% -> trong ro  38.1% (khuech dai x1.73) | FIN pool  32.3% -> ro  47.3%
+
+Ky gan nhat: {'rebal': datetime.date(2026, 5, 5), 'n_liquid': 423, 'n_gated': 226, 'pool_binds': True, 'fin_in_pool': 23, 'bank_in_pool': 13, 'bank_in_basket': 13, 'fin_in_basket': 18, 'bank_rate_pool': 21.666666666666668, 'bank_rate_basket': 43.333333333333336, 'fin_rate_pool': 38.333333333333336, 'fin_rate_basket': 60.0}
