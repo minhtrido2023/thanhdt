@@ -76,6 +76,45 @@ nhiễm của 4 file — **chúng không phải**. Và cửa sổ 19:0x nơi l�
 **Nỗi lo đã bị BÁC BỎ (không cần xử):** false-positive "lô mới mua chưa kịp có giá" — đo trên
 2.604 bản đọc: **0 ca**.
 
+
+## Kết luận điều tra: producer vốn ĐÃ ĐÚNG, báo cáo bỏ qua nó (2026-09-09)
+
+Câu hỏi "sửa hoàn toàn cho kỳ tới" dẫn tới mắt còn thiếu của chuỗi: **không phải producer sai.**
+
+    verified_snapshot_ZaloPay_2026-08-28.json → SCL mtm_price 27.800, pnl_pct 17,8465%
+
+Hub canonical (`verify_account_snapshot`, §6) ghi ĐÚNG con số ngay từ đầu. Báo cáo công bố
+**+17,00%** ⇒ nó **không dựng số từ snapshot canonical** mà lấy `marketPrice` (27.600) từ chỗ
+khác. Và cổng cũ **xác nhận** con số sai đó vì cổng dùng **chung đúng nguồn sai ấy** — nên về
+cấu trúc nó không bao giờ bắt được lớp lỗi này. Lỗi xuất hiện ở **cả** weekly 08-24→28 **và**
+monthly 08 (văn xuôi dòng 109), đúng như kỳ vọng nếu cả hai cùng lấy từ một số sai.
+
+`marketPrice` đứng im 27.600 từ 23:01 đến 23:30 trong khi phiên đóng 27.800 (O 26.800 / H 27.900
+/ L 26.700) — KHÔNG phải trễ đồng bộ, chỉ là field khác. SCL không thuộc UPCOM nên ngoại lệ giá
+bình quân không áp dụng.
+
+### Độ bao phủ cho kỳ tới (đã kiểm, không suy đoán)
+- Cổng chạy cho MỌI cadence công bố tỉ suất; `--skip-validation` chỉ dành cho report HOLD/alert
+  không công bố tỉ suất (`eod_trading_report.sh:63`) — đúng thiết kế, không phải lỗ hổng.
+- Chạy thật monthly 08: **chỉ SCL bị chặn, 9/10 vị thế PASS** ⇒ hiệu chuẩn đúng, không chặn oan.
+- Dung sai 0,15pp bắt được lệch 0,85pp.
+- Câu gợi ý sửa giờ rẽ theo cổ tức THẬT của mã lệch (commit `9645d2bd`): mã cổ tức 0đ được chỉ
+  thẳng vào `mtm_price` của snapshot, không bị dẫn sai sang "thiếu cổ tức".
+
+**User chốt 2026-09-09: KHÔNG hồi tố báo cáo đã gửi; chỉ cần kỳ tới đúng.**
+
+### Bài học test
+Bản vá đầu của câu gợi ý khởi tạo biến SAI SCOPE ⇒ `NameError` ở nhánh văn xuôi. **Selfcheck
+53/53 vẫn PASS** (fixture không chạm nhánh đó); chỉ chạy trên báo cáo THẬT mới lộ. Đúng §19 —
+selfcheck xanh không thay được một lần chạy trên artifact thật.
+
+### Việc 3 vẫn MỞ (không chặn kỳ báo cáo tới)
+`park_holdings.py` → `compute_park_trim/jit_unpark` vẫn định cỡ lệnh bằng `marketPrice`. Chưa
+làm, có lý do: (a) đổi SIZING LỆNH THẬT; (b) `park_holdings.py:562` ghi `§6: KHÔNG BQ` ⇒ nguồn
+đúng là `dnse_close_prices` (DNSE) chứ KHÔNG phải `bq_close_prices`; (c) nhánh jsonl LỊCH SỬ
+không dùng được nguồn live ⇒ cần thiết kế 2 nhánh; (d) phơi nhiễm đo được **0/26 park_trim +
+0/27 jit_unpark**. Nên làm thành đợt riêng có selfcheck, KHÔNG ghép vào đợt này.
+
 ## Nguồn
 - arch-review 2026-09-09 (verdict NEEDS_CHANGES, confidence high) — 7 required_changes
 - `exdate_price_frame_selfcheck.py` chạy thật 4 biến thể TZ: exit 0, output identical
