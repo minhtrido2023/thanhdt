@@ -38,6 +38,56 @@ WC_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file
 EXEC_DIR = os.environ.get("VERIFY_ACCOUNT_EXEC_DIR",
                           os.path.join(WC_ROOT, "data", "execution_logs"))
 BQ_PATH_PREFIX = "/home/trido/google-cloud-sdk/bin"
+KNOWN_DISCREPANCY_PATH = os.environ.get(
+    "VERIFY_ACCOUNT_KNOWN_DISCREPANCIES",
+    os.path.join(WC_ROOT, "data", "known_position_discrepancies.json"))
+
+
+def _load_known_discrepancies(account: str, asof: str) -> dict:
+    """Lệch broker-vs-journal ĐÃ ĐƯỢC GIẢI THÍCH và còn hạn, theo {ticker: bản ghi}.
+
+    Vì sao cần: có lệch ĐÚNG THẬT mà không phải lỗi — vd quyền mua MBB 10:1 đăng ký
+    2026-08-28, tiền đã trả và journal đã ghi 110cp, nhưng broker chưa ghi có vì cổ phiếu
+    mới chưa niêm yết. Không có chỗ nào ghi nhận "đã biết, đang chờ", script kêu WARN +
+    rc=1 mỗi ngày ⇒ dòng cảnh báo đó bị đọc như boilerplate, và khi có lệch THẬT sẽ không
+    ai phân biệt được (đúng cơ chế đã làm hỏng backup 09-06: lỗi thật chìm trong tiếng ồn).
+
+    Hai chốt an toàn, cả hai đều CỐ Ý:
+      · Khớp theo ĐÚNG CẶP SỐ (broker_qty, journal_qty) — kiểm ở call site, không phải ở
+        đây. Lệch đổi số = sự kiện khác = kêu lại.
+      · `expires_at` BẮT BUỘC. Hết hạn ⇒ bản ghi bị bỏ qua ⇒ WARN trở lại. Một ngoại lệ
+        không bao giờ được phép sống vĩnh viễn; nếu tới hạn mà chưa xong thì phải có người
+        nhìn lại và gia hạn có chủ đích.
+
+    FAIL-CLOSED: thiếu file, JSON hỏng, thiếu trường ⇒ trả {} ⇒ mọi lệch đều WARN như
+    trước. Một file khai báo hỏng KHÔNG bao giờ được phép làm im một cảnh báo.
+    """
+    try:
+        with open(KNOWN_DISCREPANCY_PATH, encoding="utf-8") as f:
+            rows = json.load(f).get("discrepancies", [])
+    except FileNotFoundError:
+        return {}
+    except Exception as e:
+        print(f"⚠️  Bỏ qua file khai báo lệch ({KNOWN_DISCREPANCY_PATH}): {e} — "
+              f"mọi lệch sẽ được báo WARN như bình thường.", file=sys.stderr)
+        return {}
+
+    out = {}
+    for r in rows:
+        try:
+            if r["account"] != account:
+                continue
+            if str(r["expires_at"]) < str(asof):      # ISO date, so chuỗi là đủ và đúng
+                continue
+            out[r["ticker"]] = {
+                "qty_delta": float(r["qty_delta"]),   # journal − broker, xem call site
+                "reason": str(r["reason"]),
+                "expires_at": str(r["expires_at"]),
+            }
+        except (KeyError, TypeError, ValueError) as e:
+            print(f"⚠️  Bản ghi khai báo lệch thiếu/sai trường ({e}) — bỏ qua bản ghi này, "
+                  f"lệch tương ứng sẽ báo WARN.", file=sys.stderr)
+    return out
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from corp_actions import load_corp_actions  # noqa: E402
@@ -647,13 +697,29 @@ def main():
         sys.exit(2)
 
     # cross-check dnse_raw vs journal (2 nguồn độc lập) — so KL NET (mua-bán), giá vốn chỉ từ mua
+    acks = _load_known_discrepancies(args.account, args.asof)
+    acked_tickers = set()
     for tk in set(raw_agg) | set(journal_agg):
         rq = raw_agg.get(tk, (0, 0, 0))[0]
         jq = journal_agg.get(tk, (0, 0, 0))[0]
         if rq == 0 and jq == 0:
             continue
         if abs(rq - jq) > 1e-6:
-            warnings.append(f"WARN qty mismatch {tk}: dnse_raw={rq:.0f} journal={jq:.0f}")
+            ack = acks.get(tk)
+            # Khớp theo ĐỘ LỆCH (journal − broker), KHÔNG theo cặp số tuyệt đối. Cái được
+            # giải thích là "N cổ phiếu quyền mua đã trả tiền, broker chưa ghi có" — mệnh
+            # đề đó dự đoán đúng ĐÚNG MỘT thứ: hiệu = +N. Vị thế tuyệt đối thì đổi mỗi lần
+            # mua/bán bình thường (đo thật 2026-09-09: ZaloPay 232→632 sau khi khai báo
+            # 08-28), nên khoá theo cặp tuyệt đối sẽ tự hết tác dụng ngay lần giao dịch kế
+            # và cảnh báo giả quay lại — đúng thứ ta đang đi dẹp.
+            # Hiệu đổi sang số khác = sự kiện KHÁC ⇒ vẫn WARN như thường.
+            if ack and abs(ack["qty_delta"] - (jq - rq)) < 1e-6:
+                warnings.append(
+                    f"INFO qty mismatch {tk} ĐÃ KHAI BÁO (hết hiệu lực {ack['expires_at']}): "
+                    f"dnse_raw={rq:.0f} journal={jq:.0f} — {ack['reason']}")
+                acked_tickers.add(tk)
+            else:
+                warnings.append(f"WARN qty mismatch {tk}: dnse_raw={rq:.0f} journal={jq:.0f}")
         # so giá vốn theo cùng quy ước lô-đang-sống ở CẢ 2 nguồn (so 2 quy ước khác nhau
         # sẽ đẻ ra cảnh báo giả ở đúng những mã đã tất toán rồi mua lại, vd LPB)
         r_avg = raw_books[tk].avg_cost if tk in raw_books else 0
@@ -661,9 +727,14 @@ def main():
         if r_avg and j_avg:
             diff_pct = abs(r_avg - j_avg) / r_avg * 100
             if diff_pct > args.tolerance_pct:
+                # Lệch giá vốn ở mã đã khai báo lệch SỐ LƯỢNG là HỆ QUẢ số học của chính
+                # nó (cùng tổng tiền chia cho 2 số lượng khác nhau), không phải phát hiện
+                # thứ hai độc lập — kêu riêng chỉ nhân đôi tiếng ồn cho cùng một sự việc.
+                _lvl = "INFO" if tk in acked_tickers else "WARN"
+                _sfx = " (hệ quả của lệch SL đã khai báo)" if tk in acked_tickers else ""
                 warnings.append(
-                    f"WARN cost mismatch {tk}: dnse_raw_avg={r_avg:,.0f} "
-                    f"journal_avg={j_avg:,.0f} (diff {diff_pct:.2f}%%)")
+                    f"{_lvl} cost mismatch {tk}: dnse_raw_avg={r_avg:,.0f} "
+                    f"journal_avg={j_avg:,.0f} (diff {diff_pct:.2f}%%){_sfx}")
 
     # cross-check quantities vs an independently-audited broker snapshot, if given
     if args.broker_snapshot and os.path.exists(args.broker_snapshot):
