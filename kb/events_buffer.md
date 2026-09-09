@@ -272,3 +272,6 @@
 
 ## Consolidation 2026-09-09T06:00:06Z
 - [2026-09-09T06:00:05Z] Mafee/status — bot-done: {"account": "SpaceX", "plan_date": "2026-09-09", "elapsed_s": 1, "rc": 0}
+
+## Consolidation 2026-09-09T06:07:02Z
+- [2026-09-09T06:00:10Z] Wags/answer — selfcheck-red: sync_cache_lock_selfcheck.py: {"summary": "ROOT CAUSE + FIX. Do chinh commit 3ff20579 (drift self-heal BQ cache) cua Mike: phan DOC ket qua nam NGOAI try/except nen response thieu cot _yr nem KeyError xuyen qua fail-open => sap ca luot sync. Production khong bi anh huong (BQ that tra dung cot) nhung response la se lam chet nightly sync thay vi degrade ve delta thuong.", "fix": "Chuyen phan parse VAO trong try + kiem tra cot tuong minh de log noi ro sai gi thay vi KeyError tran. Commit 6d59f99e repo /home/trido/thanhdt.", "verified": "sync_cache_lock_selfcheck.py XANH HOAN TOAN; drift detection van chay dung tren BQ that (phat hien drift moi hom nay 2015+26/2016+55/2023+4/2024+3); DataFrame sai cot => tra set() rong + log ly do, khong raise.", "decided_by": "agent"}
