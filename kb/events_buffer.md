@@ -567,3 +567,55 @@
 - [2026-09-09T17:04:37Z] Taylor/heartbeat — Taylor_20260909_165335: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20260909_165335", "source": "watcher"}
 - [2026-09-09T17:05:38Z] Taylor/heartbeat — Taylor_20260909_165335: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20260909_165335", "source": "watcher"}
 - [2026-09-09T17:06:38Z] Taylor/heartbeat — Taylor_20260909_165335: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20260909_165335", "source": "watcher"}
+
+## Consolidation 2026-09-09T17:33:37Z
+- [2026-09-09T17:31:06Z] Mike/heartbeat — Mike_20260909_173005: {"status": "still_running", "elapsed_min": 1, "job_id": "Mike_20260909_173005", "source": "watcher"}
+- [2026-09-09T17:32:06Z] Mike/heartbeat — Mike_20260909_173005: {"status": "still_running", "elapsed_min": 2, "job_id": "Mike_20260909_173005", "source": "watcher"}
+- [2026-09-09T17:33:06Z] Mike/heartbeat — Mike_20260909_173005: {"status": "still_running", "elapsed_min": 3, "job_id": "Mike_20260909_173005", "source": "watcher"}
+- [2026-09-09T17:33:28Z] Mike/question — retro-pattern-recurring-nav-price-xcheck-gate-2-days: {"summary": "Pattern A (retro-2026-09-09): daily_nav_snapshot.py gate PRICE_XCHECK chan sai NAV 2 NGAY LIEN TIEP (09-08, 09-09), moi ngay 1 nguyen nhan KHAC ma ban va hom truoc khong phu toi. 09-08: broker marketPrice tu tre dong bo, da va bang exit-code-4 + cron retry (commit 8711a922/b375d0f1). 09-09: VIB bonus-issue 9.5%% lam broker dieu chinh SOM ca gia VA khoi luong cung luc, nhung gate chi so GIA THUAN nen doc thanh lech 9.5%%, chan NAV ca 2 account (SpaceX+ZaloPay), status hien tai DIAGNOSED_NOT_FIXED (finding nav-price-xcheck-stuck-SpaceX-2026-09-09 / -ZaloPay-2026-09-09).", "root_cause_chung": "Gate kien truc chua tung doi: van so GIA don le, khong nhan khoi luong (gia tri vi the), khong tham chieu corp-action da AUTO_CONFIRMED. Ban va hom qua chi tach exit-code theo NGUYEN NHAN cu the (timing-lag), khong doi kien truc so sanh nen khong bat duoc nguyen nhan moi.", "de_xuat": "Gate nen so GIA x KHOI LUONG (gia tri vi the) thay vi gia tran don le, VA tu dong giam do nhay/bo qua khi co corp-action AUTO_CONFIRMED giai thich dung ty le lech - dung nhu proposed_fix Mike da ghi trong finding goc.", "urgency": "medium", "rollup_of": ["nav-price-xcheck-stuck-SpaceX-2026-09-09", "nav-price-xcheck-stuck-ZaloPay-2026-09-09"], "draft_source": "state/retro_draft_2026-09-09.md"}
+- [2026-09-09T17:33:28Z] Mike/finding — daily-retro-draft-written-2026-09-09: {"file": "state/retro_draft_2026-09-09.md", "n_incidents": 3, "n_patterns": 2, "escalated": ["retro-pattern-recurring-nav-price-xcheck-gate-2-days"], "gaps_flagged": ["nav-price-xcheck VIB chua co kb/incidents/ entry", "bq-cache-manifest-not-updated-by-selfheal chua co kb/incidents/ entry"], "note": "BUOC 1/3 xong - dung theo yeu cau, khong dung kb/incidents/, khong dispatch Wags, khong commit."}
+- [2026-09-09T17:07:38Z] Taylor/heartbeat — Taylor_20260909_165335: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20260909_165335", "source": "watcher"}
+- [2026-09-09T17:08:38Z] Taylor/heartbeat — Taylor_20260909_165335: {"status": "still_running", "elapsed_min": 15, "job_id": "Taylor_20260909_165335", "source": "watcher"}
+- [2026-09-09T17:09:38Z] Taylor/heartbeat — Taylor_20260909_165335: {"status": "still_running", "elapsed_min": 16, "job_id": "Taylor_20260909_165335", "source": "watcher"}
+- [2026-09-09T17:10:39Z] Taylor/heartbeat — Taylor_20260909_165335: {"status": "still_running", "elapsed_min": 17, "job_id": "Taylor_20260909_165335", "source": "watcher"}
+- [2026-09-09T17:11:39Z] Taylor/heartbeat — Taylor_20260909_165335: {"status": "still_running", "elapsed_min": 18, "job_id": "Taylor_20260909_165335", "source": "watcher"}
+- [2026-09-09T17:12:39Z] Taylor/heartbeat — Taylor_20260909_165335: {"status": "still_running", "elapsed_min": 19, "job_id": "Taylor_20260909_165335", "source": "watcher"}
+- [2026-09-09T17:13:24Z] Taylor/heartbeat — Taylor_20260909_165335: {"status": "in_progress", "note": "ctrl md5=pin R3 OK, selfcheck 0 VND. Co che placebo chay dung: P1d n_fin mean 5.980 = dung so cua L1b. Dang chay 3 chan NAV (P1d,P2d,P1r1) + probe trong so 6 chan."}
+- [2026-09-09T17:13:39Z] Taylor/heartbeat — Taylor_20260909_165335: {"status": "still_running", "elapsed_min": 20, "job_id": "Taylor_20260909_165335", "source": "watcher"}
+- [2026-09-09T17:14:39Z] Taylor/heartbeat — Taylor_20260909_165335: {"status": "still_running", "elapsed_min": 21, "job_id": "Taylor_20260909_165335", "source": "watcher"}
+- [2026-09-09T17:15:39Z] Taylor/heartbeat — Taylor_20260909_165335: {"status": "still_running", "elapsed_min": 22, "job_id": "Taylor_20260909_165335", "source": "watcher"}
+- [2026-09-09T17:16:40Z] Taylor/heartbeat — Taylor_20260909_165335: {"status": "still_running", "elapsed_min": 23, "job_id": "Taylor_20260909_165335", "source": "watcher"}
+- [2026-09-09T17:17:40Z] Taylor/heartbeat — Taylor_20260909_165335: {"status": "still_running", "elapsed_min": 24, "job_id": "Taylor_20260909_165335", "source": "watcher"}
+- [2026-09-09T17:18:40Z] Taylor/heartbeat — Taylor_20260909_165335: {"status": "still_running", "elapsed_min": 25, "job_id": "Taylor_20260909_165335", "source": "watcher"}
+- [2026-09-09T17:19:19Z] Taylor/heartbeat — Taylor_20260909_171818: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20260909_171818", "source": "watcher"}
+- [2026-09-09T17:19:40Z] Taylor/heartbeat — Taylor_20260909_165335: {"status": "still_running", "elapsed_min": 26, "job_id": "Taylor_20260909_165335", "source": "watcher"}
+- [2026-09-09T17:20:19Z] Taylor/heartbeat — Taylor_20260909_171818: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20260909_171818", "source": "watcher"}
+- [2026-09-09T17:20:25Z] Taylor/heartbeat — Taylor_20260909_171818: {"status": "in_progress", "note": "root cause tim ra: sync process van dang chay (khong bi kill), race manifest-cu-vs-parquet-moi; da vien 2 fix, dang chay selfcheck"}
+- [2026-09-09T17:20:41Z] Taylor/heartbeat — Taylor_20260909_165335: {"status": "still_running", "elapsed_min": 27, "job_id": "Taylor_20260909_165335", "source": "watcher"}
+- [2026-09-09T17:21:19Z] Taylor/heartbeat — Taylor_20260909_171818: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20260909_171818", "source": "watcher"}
+- [2026-09-09T17:21:41Z] Taylor/heartbeat — Taylor_20260909_165335: {"status": "still_running", "elapsed_min": 28, "job_id": "Taylor_20260909_165335", "source": "watcher"}
+- [2026-09-09T17:22:19Z] Taylor/heartbeat — Taylor_20260909_171818: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20260909_171818", "source": "watcher"}
+- [2026-09-09T17:22:23Z] Taylor/heartbeat — Taylor_20260909_171818: {"status": "in_progress", "note": "root cause xac nhan: ticker+ticker_prune drift nhieu nam (2017-2020, 2015-2016+2023-2024) khien sync chay >35 phut thay vi ~9 phut thuong le; dang doi tien trinh cron that hoan tat de verify fix bang PASS that"}
+- [2026-09-09T17:22:41Z] Taylor/heartbeat — Taylor_20260909_165335: {"status": "still_running", "elapsed_min": 29, "job_id": "Taylor_20260909_165335", "source": "watcher"}
+- [2026-09-09T17:23:20Z] Taylor/heartbeat — Taylor_20260909_171818: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20260909_171818", "source": "watcher"}
+- [2026-09-09T17:23:41Z] Taylor/heartbeat — Taylor_20260909_165335: {"status": "still_running", "elapsed_min": 30, "job_id": "Taylor_20260909_165335", "source": "watcher"}
+- [2026-09-09T17:24:20Z] Taylor/heartbeat — Taylor_20260909_171818: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20260909_171818", "source": "watcher"}
+- [2026-09-09T17:24:42Z] Taylor/heartbeat — Taylor_20260909_165335: {"status": "still_running", "elapsed_min": 31, "job_id": "Taylor_20260909_165335", "source": "watcher"}
+- [2026-09-09T17:25:21Z] Taylor/heartbeat — Taylor_20260909_171818: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20260909_171818", "source": "watcher"}
+- [2026-09-09T17:25:42Z] Taylor/heartbeat — Taylor_20260909_165335: {"status": "still_running", "elapsed_min": 32, "job_id": "Taylor_20260909_165335", "source": "watcher"}
+- [2026-09-09T17:26:21Z] Taylor/heartbeat — Taylor_20260909_171818: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20260909_171818", "source": "watcher"}
+- [2026-09-09T17:26:42Z] Taylor/heartbeat — Taylor_20260909_165335: {"status": "still_running", "elapsed_min": 33, "job_id": "Taylor_20260909_165335", "source": "watcher"}
+- [2026-09-09T17:27:21Z] Taylor/heartbeat — Taylor_20260909_171818: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20260909_171818", "source": "watcher"}
+- [2026-09-09T17:27:42Z] Taylor/heartbeat — Taylor_20260909_165335: {"status": "still_running", "elapsed_min": 34, "job_id": "Taylor_20260909_165335", "source": "watcher"}
+- [2026-09-09T17:28:21Z] Taylor/heartbeat — Taylor_20260909_171818: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20260909_171818", "source": "watcher"}
+- [2026-09-09T17:28:42Z] Taylor/heartbeat — Taylor_20260909_165335: {"status": "still_running", "elapsed_min": 35, "job_id": "Taylor_20260909_165335", "source": "watcher"}
+- [2026-09-09T17:29:22Z] Taylor/heartbeat — Taylor_20260909_171818: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20260909_171818", "source": "watcher"}
+- [2026-09-09T17:29:42Z] Taylor/heartbeat — Taylor_20260909_165335: {"status": "still_running", "elapsed_min": 36, "job_id": "Taylor_20260909_165335", "source": "watcher"}
+- [2026-09-09T17:30:22Z] Taylor/heartbeat — Taylor_20260909_171818: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20260909_171818", "source": "watcher"}
+- [2026-09-09T17:30:42Z] Taylor/heartbeat — Taylor_20260909_165335: {"status": "still_running", "elapsed_min": 37, "job_id": "Taylor_20260909_165335", "source": "watcher"}
+- [2026-09-09T17:31:09Z] Taylor/heartbeat — Taylor_20260909_171818: {"status": "in_progress", "note": "da commit-ready 2 fix + verify doc lap PASS; dang doi tien trinh cron that (44+ phut, dang tai nhieu nam drift cua bang ticker) tu hoan tat de chay preflight that xac nhan PASS"}
+- [2026-09-09T17:31:22Z] Taylor/heartbeat — Taylor_20260909_171818: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20260909_171818", "source": "watcher"}
+- [2026-09-09T17:31:42Z] Taylor/heartbeat — Taylor_20260909_165335: {"status": "still_running", "elapsed_min": 38, "job_id": "Taylor_20260909_165335", "source": "watcher"}
+- [2026-09-09T17:32:22Z] Taylor/heartbeat — Taylor_20260909_171818: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20260909_171818", "source": "watcher"}
+- [2026-09-09T17:32:43Z] Taylor/heartbeat — Taylor_20260909_165335: {"status": "still_running", "elapsed_min": 39, "job_id": "Taylor_20260909_165335", "source": "watcher"}
+- [2026-09-09T17:33:23Z] Taylor/heartbeat — Taylor_20260909_171818: {"status": "still_running", "elapsed_min": 15, "job_id": "Taylor_20260909_171818", "source": "watcher"}
