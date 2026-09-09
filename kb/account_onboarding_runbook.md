@@ -58,6 +58,39 @@ dòng này**, dù mọi bước khác ở trên có thể tự làm không cần
 rebalancing. Cơ chế enforce đã tổng quát sẵn ở `trading_bot/plan.py::filter_excluded_tickers()`
 (gọi từ `bot_execute.py` ngay sau `load_plan()`) — không cần sửa code cho account mới.
 
+## 2b. Cổng NĂNG LỰC theo account — thứ KHÔNG tự động theo `enabled:true` (thêm 2026-09-09)
+
+§0 đúng cho các script cron dùng-chung, nhưng **không phải mọi thứ** đi theo `enabled:true`.
+Dưới đây là toàn bộ chỗ hành vi còn rẽ theo TÊN account — kiểm kê bằng cách đọc code
+2026-09-09 (grep `== "SpaceX"` trong `mike/bin/`, `trading_bot/`, root `*.py|*.sh`: 16 hit, bỏ
+5 hit là giá trị mặc định CLI và 3 hit trong harness selfcheck). Account mới mặc định KHÔNG có
+các năng lực này — phần lớn là fail-closed đúng ý, nhưng **phải biết** thay vì phát hiện muộn.
+
+| Nơi | Mặc định cho account mới | Có nên đưa vào config? |
+|---|---|---|
+| `trading_bot/plan.py:963` `CAPIT_LEVER_APPROVED_ACCOUNTS = ["SpaceX"]` | **KHÔNG** có đòn bẩy CAPIT | **KHÔNG.** Hardcode là CHÍNH CƠ CHẾ KIỂM SOÁT — comment ngay trên đó nói rõ: muốn nới phải sửa CODE để đi qua version control + review. Đưa sang JSON là biến một cổng có review thành một artifact không ai canh. |
+| `mike/bin/discretionary_margin_gate.py:50` `ONLY_ACCOUNT = "SpaceX"` | **KHÔNG** có sleeve margin discretionary | **KHÔNG** — cùng lý do: cổng chính sách cho đòn bẩy thật. |
+| `mike/bin/eod_trading_report.sh:194/236/264` | Văn phong **nội bộ** (không phải investor-facing) | Có thể, nếu sau này có account thứ hai dành cho nhà đầu tư ngoài. Chưa cần. |
+| `mike/bin/ops_health_check.sh` anomaly scan + forensic check | Vẫn chạy (xem dưới) | **ĐÃ SỬA 2026-09-09** — không còn là cổng theo account. |
+
+### Hai check cấp THỊ TRƯỜNG từng neo sai vào tên account (đã sửa)
+
+`anomaly_scan.py` và `forensic_flag_review_check.py` **không nhận `--account`** (đã kiểm: 0 chỗ
+khai) — chúng là check cấp thị trường, chạy 1 lần/ngày là đủ. Trước 2026-09-09 chúng được gác
+bằng `ACCOUNT = "SpaceX"` chỉ để khỏi chạy trùng khi `for_each_live_account.sh` lặp. Hệ quả
+tiềm ẩn: ngày nào SpaceX bị `enabled:false` (hoặc đổi tên) thì **CẢ HAI check biến mất IM
+LẶNG** — không có cảnh báo nào cho "check đã không chạy".
+
+Nay gác bằng `RUNONCE_LABEL`: **ưu tiên SpaceX khi nó còn live** (nên output không đổi chỗ sang
+message của account khác), chỉ rơi về account live đầu tiên khi SpaceX không còn trong danh
+sách. Vẫn đúng "chạy 1 lần", nhưng không còn phụ thuộc một tên cụ thể còn sống.
+
+⚠️ Khi onboard account mới, **đừng** thêm nhánh `ACCOUNT = "<tên mới>"` cho các check cấp thị
+trường — chúng đã chạy 1 lần rồi; thêm nhánh là chạy trùng + alert trùng.
+
+### `run_bot.sh` / `bot_heartbeat.sh` / `pkill` — nhắc lại
+Ba dòng cron này vẫn phải thêm tay cho mỗi account (xem §0 và §8) và **luôn hỏi user trước**.
+
 ## 3. Nếu có `excluded_tickers`: tính NAV khả dụng, KHÔNG dùng tổng NAV
 
 ```bash

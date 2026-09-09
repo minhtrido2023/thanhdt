@@ -40,6 +40,31 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+# ── Mốc "CHẠY MỘT LẦN" cho các check CẤP THỊ TRƯỜNG (không theo account) ─────────────────
+# `anomaly_scan.py` và `forensic_flag_review_check.py` KHÔNG nhận `--account` (đã kiểm: 0 chỗ
+# khai) — chúng là check cấp thị trường, chạy 1 lần là đủ. Trước đây neo vào `ACCOUNT =
+# "SpaceX"` để khỏi chạy trùng khi for_each_live_account lặp qua từng account. Nhược điểm:
+# mốc đó là một TÊN CỤ THỂ, nên ngày nào SpaceX bị disable (hoặc đổi tên) thì CẢ HAI check
+# biến mất IM LẶNG — không ai thấy thiếu, vì không có cảnh báo nào cho "check đã không chạy".
+# Neo theo ACCOUNT ĐẦU TIÊN trong danh sách live thay vì một tên: vẫn chạy đúng 1 lần, nhưng
+# không phụ thuộc account nào cụ thể còn sống.
+# Fail-open: không đọc được danh sách ⇒ trả rỗng ⇒ điều kiện dưới sai ⇒ BỎ QUA check, giống
+# hệt hành vi khi file script không tồn tại (đã có nhánh `-f` cho ca đó).
+# ƯU TIÊN giữ nguyên SpaceX khi nó còn live, để output của 2 check này KHÔNG đổi chỗ sang
+# message của account khác (live_dnse_labels() trả theo thứ tự config = ['ZaloPay','SpaceX'],
+# nên neo thẳng vào phần tử [0] sẽ dời output sang ZaloPay ngay hôm nay — đúng về mặt "chạy 1
+# lần" nhưng là một thay đổi nhìn thấy được mà không ai yêu cầu). Chỉ khi SpaceX KHÔNG còn
+# trong danh sách live thì mới rơi về account đầu tiên — đó chính là ca mà bản cũ lặng lẽ
+# KHÔNG chạy check nào cả.
+_runonce_label() {
+  (cd "$WC_ROOT" && python3 -c "
+from trading_bot.config import live_dnse_labels
+ls = live_dnse_labels()
+print('SpaceX' if 'SpaceX' in ls else (ls[0] if ls else ''))
+" 2>/dev/null) || true
+}
+RUNONCE_LABEL="$(_runonce_label)"
+
 TODAY="$(TZ='Asia/Ho_Chi_Minh' date +%Y-%m-%d)"
 NOW_ICT="$(TZ='Asia/Ho_Chi_Minh' date '+%Y-%m-%d %H:%M ICT')"
 
@@ -1549,7 +1574,7 @@ WARN_COUNT=$(( ${WARN_COUNT:-0} + ${PREFLIGHT_WARN:-0} ))
 ANOMALY_SUMMARY=""
 ANOMALY_WARN=0
 ANOMALY_SCAN="$WC_ROOT/mike/agents/Taylor/anomaly_scan.py"
-if [ "$ACCOUNT" = "SpaceX" ] && [ -f "$ANOMALY_SCAN" ]; then
+if [ -n "$RUNONCE_LABEL" ] && [ "$ACCOUNT" = "$RUNONCE_LABEL" ] && [ -f "$ANOMALY_SCAN" ]; then
   EMIT="/tmp/anomaly_emit_${TODAY}.json"
   timeout 200 python3 "$ANOMALY_SCAN" --status-check --emit-json "$EMIT" >/dev/null 2>&1 \
     || timeout 90 python3 "$ANOMALY_SCAN" --emit-json "$EMIT" >/dev/null 2>&1 || true
@@ -1589,7 +1614,7 @@ WARN_COUNT=$(( ${WARN_COUNT:-0} + ${ANOMALY_WARN:-0} ))
 FORENSIC_SUMMARY=""
 FORENSIC_WARN=0
 FORENSIC_CHECK="$ROOT/bin/forensic_flag_review_check.py"
-if [ "$ACCOUNT" = "SpaceX" ] && [ -f "$FORENSIC_CHECK" ]; then
+if [ -n "$RUNONCE_LABEL" ] && [ "$ACCOUNT" = "$RUNONCE_LABEL" ] && [ -f "$FORENSIC_CHECK" ]; then
   # Bắt stderr LẠI để in ra khi hỏng, không ném vào /dev/null rồi đoán nguyên nhân (§29).
   FORENSIC_OUT="$(timeout 120 python3 "$FORENSIC_CHECK" 2>&1)"; FORENSIC_RC=$?
   if [ "$FORENSIC_RC" -eq 0 ]; then
