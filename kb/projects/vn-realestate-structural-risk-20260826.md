@@ -43,10 +43,24 @@ Nhà nước cần hạ tầng nhanh → giao Vin/Sun/Masterise → chủ đầu
      gần nhất tăng/giảm) · lãi suất huy động Big-4 (`deposit_rate_vn.py`, đã có PIT) · tin tức chính
      sách mới về tín dụng/BĐS nếu có (không đợi đủ 1 quý mới biết SBV có động thái mới hay không).
    - **Ngưỡng escalate lên user NGAY** (không đợi review quý): CPI YoY vượt lại trần 4,5% SAU KHI
-     đã đảo chiều giảm (relapse) · lãi suất huy động Big-4 tăng thêm ≥0,3pp trong 1 tháng · có
+     đã đảo chiều giảm (relapse) — **kèm BỘ PHÂN BIỆT bắt buộc, thêm 2026-09-09 (user chọn
+     phương án B)**: báo cáo escalate PHẢI nêu cả **lạm phát cơ bản** (core, loại xăng dầu/gas/
+     thực phẩm) cùng tháng và phân loại rõ cú sốc là **cost-push** hay **demand-pull**.
+     VÌ SAO: ca 2026-09 cho thấy ngưỡng này một mình KHÔNG phân biệt được hai thứ — CPI chung
+     T8/2026 bật lên 4,89% (relapse thật, vượt trần) nhưng driver là Giao thông +4,09% MoM
+     (diesel +22,15%, xăng +9,53%), trong khi lạm phát cơ bản 4,55% và bình quân 8 tháng 4,24%
+     vẫn DƯỚI trần và tăng chậm hơn CPI chung. Tức ngưỡng kêu ĐÚNG LUẬT nhưng cú sốc nằm NGOÀI
+     trục tín dụng–BĐS–CPI nội sinh mà EP-2026-01 theo dõi. Không có bộ phân biệt này thì mỗi
+     đợt giá nhiên liệu thế giới sẽ kêu một lần, và sau vài lần bị bỏ qua thì ngưỡng mất hiệu
+     lực — đó mới là thiệt hại thật.
+     Quy tắc đọc: core DƯỚI trần + CPI chung vượt trần ⇒ ghi nhận là **cost-push, lệch trục**,
+     escalate để biết NHƯNG mặc định KHÔNG hành động danh mục. Core cũng vượt trần (hoặc tăng
+     nhanh hơn CPI chung) ⇒ đó là tín hiệu **đúng trục**, mới là lúc bàn hành động.
+     ⚠️ Bộ phân biệt này KHÔNG hạ ngưỡng và KHÔNG cho phép tự bỏ qua: vẫn escalate lên user
+     mỗi lần relapse, chỉ là kèm đủ dữ kiện để quyết nhanh · lãi suất huy động Big-4 tăng thêm ≥0,3pp trong 1 tháng · có
      quyết định/thông tư SIẾT MỚI ban hành (đổi hướng so với xu hướng NỚI đã ghi nhận 30/05/2026) ·
      bất kỳ tin NPL/bank-run cụ thể nào ngoài chu kỳ công bố quý thường lệ.
-   - **TỰ ĐỘNG HOÁ XONG 2026-08-31**: cron `20:00 ICT ngày 6 hàng tháng` → `mike/bin/
+   - **TỰ ĐỘNG HOÁ XONG 2026-08-31**: cron `0 20 6 * *` = **20:00 UTC ngày 6** (= **03:00 ICT ngày 7**, host là Etc/UTC; dòng `TZ=` đầu crontab chỉ set env cho script, KHÔNG đổi cách cron parse giờ — chỉ `CRON_TZ=` làm việc đó. Bằng chứng: bus event ts `2026-09-06T20:02:38Z`. Ghi chú cũ "20:00 ICT ngày 6" là SAI, sửa 2026-09-09) → `mike/bin/
      vn_realestate_monthly_check.sh` (chi tiết đầy đủ + 2 bug đã bắt qua test end-to-end thật:
      `kb/cron_registry.md` dòng "20:00 (ngày 6 hàng tháng)"). Dispatch `claude -p --agent
      macro-strategist` headless, KHÔNG-BLIND. **Email LUÔN gửi mỗi tháng** (đúng yêu cầu, không chỉ
