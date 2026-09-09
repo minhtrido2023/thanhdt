@@ -830,6 +830,32 @@ elif os.path.isdir(inbox_dir) and not pending_q_wagsfix and not pending_q_needs_
     # `not pending_q_fresh` cũng BẮT BUỘC: có câu hỏi mới tinh chưa ai trả lời mà in ✅ "không
     # có câu hỏi nào đang chờ" là nói SAI — ân hạn hoãn DISPATCH, không xoá sự tồn tại.
     OK("Không có câu hỏi (question) nào đang chờ xử lý trong 48h qua.")
+# ── DÒNG TÓM TẮT: tách "CẦN NGƯỜI" khỏi "đang trong quy trình tự động" ─────────────────
+# User 2026-09-09: mấy dòng [WARN-ONLY] dưới đây mỗi ngày đều có, nhìn không ra cái nào thật
+# sự cần mình. Chúng VỐN đã được phân loại sẵn trong code (4 biến riêng), chỉ là in ra lẫn
+# nhau nên người đọc phải tự gộp. Thêm đúng MỘT dòng đầu khối, không sửa câu chữ các dòng
+# chi tiết (mỗi dòng mang lý do + cảnh báo riêng đã cân nhắc kỹ).
+#
+# Phân loại CỐ Ý thận trọng:
+#   · "CẦN ANH QUYẾT" = câu hỏi đã TREO >48h — không còn đường tự động nào, đã qua grace và
+#     qua ít nhất 1 vòng triage. Đây là nhóm duy nhất nói chắc được là cần người.
+#   · "đang chờ/tự xử" = vừa đăng (còn trong grace, lượt sau tự vào diện xử lý) + vòng
+#     wags-fix (tự thử lại sau cooldown) + đã triage nhưng CHƯA quá 48h.
+# KHÔNG gộp `selfcheck-red` vào nhóm "tự hết" dù lịch sử cho thấy phần lớn tự đóng khi
+# selfcheck xanh lại: hôm nay có 2 ca đỏ THẬT (1 do chính Mike gây ra), nên coi chúng là
+# "tự hết" là nói quá — để chúng nằm ở nhóm chờ, và khi quá 48h thì tự nổi lên nhóm cần người.
+# Nhãn của aged_q mang hậu tố " (Nd)" (dòng ~728) còn 3 nhóm kia thì KHÔNG (dòng ~707-716)
+# ⇒ phải CẮT hậu tố trước khi trừ tập, nếu không một mục vừa treo >48h vừa nằm trong
+# needs_human sẽ bị đếm ở CẢ HAI nhóm và tổng lớn hơn số câu hỏi thật.
+_strip_age = lambda s: re.sub(r"\s*\(\d+d\)$", "", s)
+_human_now = {_strip_age(lbl) for _, lbl, _w in aged_q}
+_auto_side = (set(pending_q_fresh) | set(pending_q_wagsfix)
+              | set(pending_q_needs_human)) - _human_now
+if _human_now or _auto_side:
+    W(f"{WARN_ONLY} ── PHÂN LOẠI: 🧑 CẦN ANH QUYẾT {len(_human_now)} mục (treo >48h, không còn "
+      f"đường tự động) · 🤖 đang chờ/tự xử {len(_auto_side)} mục (còn grace, hoặc tự thử lại "
+      f"sau cooldown, hoặc đã triage <48h) — chi tiết từng nhóm ở các dòng ngay dưới.")
+
 if pending_q_fresh:
     W(f"{WARN_ONLY} {len(pending_q_fresh)} câu hỏi (question) VỪA ĐĂNG (<{QUESTION_GRACE_MIN}"
       f" phút) chưa có answer — QUÁ MỚI để kết luận bị bỏ rơi, KHÔNG dispatch lượt này; lượt "
