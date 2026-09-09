@@ -467,12 +467,17 @@ def _drifted_years(name: str, config: dict, chunk_dir: str, chunk_years, max_yea
             + ") AS t GROUP BY _yr"
         )
         df = bq_query_to_df(sql, timeout=qtimeout)
+        # Đọc kết quả PHẢI nằm TRONG try: bản đầu để phần này ra ngoài nên một kết quả có
+        # HÌNH DẠNG lạ (thiếu cột `_yr`) ném KeyError xuyên qua fail-open, làm sập cả lượt
+        # sync — đúng thứ fail-open sinh ra để tránh. Bắt được nhờ
+        # `sync_cache_lock_selfcheck.py` (C1 rc=[0,1,1] KeyError '_yr'), không phải nhờ đọc lại.
+        if not {"_yr", "_n"}.issubset(set(df.columns)):
+            raise ValueError(f"kết quả đếm theo năm thiếu cột _yr/_n (có: {list(df.columns)})")
+        bq_by_year = {int(r["_yr"]): int(r["_n"]) for _, r in df.iterrows()
+                      if pd.notna(r["_yr"])}
     except Exception as e:
         log(f"  {name}: drift-check bỏ qua (không đếm được theo năm: {e})")
         return set()
-
-    bq_by_year = {int(r["_yr"]): int(r["_n"]) for _, r in df.iterrows()
-                  if pd.notna(r["_yr"])}
     drifted = set()
     for yr in chunk_years:
         if yr >= max_year:
