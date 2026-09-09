@@ -1,6 +1,7 @@
 # P1 — Giá: 4 consumer đọc `marketPrice` trần (2026-09-09)
 
-**Trạng thái:** thiết kế v2 sau arch-review **NEEDS_CHANGES** (confidence high). Chưa code gì.
+**Trạng thái:** việc 1/2/4 ĐÃ WIRE + verify trên dữ liệu thật (commit `65a6103b`, `3ca7fabd`, `9645d2bd`);
+việc 3 vẫn MỞ có lý do (xem cuối file). Thiết kế v2 sau arch-review **NEEDS_CHANGES** (confidence high).
 Bản v1 của tôi bị bác gần hết — giữ lại phần bị bác ở §"Sai ở đâu" để không ai đi lại đường đó.
 
 ## Kết luận sau phản biện
