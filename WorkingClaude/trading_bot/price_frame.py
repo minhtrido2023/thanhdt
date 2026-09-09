@@ -353,8 +353,8 @@ def check_same_frame(position_rows, ticker):
         info["reason"] = (
             f"TRỘN HAI HỆ QUY CHIẾU: {len(priced)} lô của {tk} trong CÙNG một bản đọc positions "
             f"mang {len(distinct)} giá khác nhau {[f'{p:,.0f}' for p in distinct]} "
-            f"(lệch {hi / lo - 1:+.2%}) — DNSE điều chỉnh theo TỪNG GÓI VAY và cú lật KHÔNG "
-            f"nguyên tử. Mọi phép tính cộng dồn qua các lô này đều sai.")
+            f"(lệch {hi / lo - 1:+.2%}) — bản đọc BỊ CŨ MỘT PHẦN, ít nhất một lô còn là dòng "
+            f"của phiên trước. Mọi phép tính cộng dồn qua các lô này đều sai.")
         return False, info
     info["reason"] = f"{len(priced)} lô cùng một giá {distinct[0]:,.0f}đ — đồng hệ quy chiếu"
     return True, info

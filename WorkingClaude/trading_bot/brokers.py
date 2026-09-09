@@ -608,8 +608,20 @@ class DNSEBroker(BrokerBase):
         gộp đó đúng cho mọi mục đích kế toán, nhưng nó XOÁ đúng bằng chứng mà cổng đồng-hệ
         (`price_frame.check_same_frame`, G4) cần đọc: ngày 2026-08-14 19:10:23, BID có lô
         gói-vay 1826 đã ở hệ quy chiếu MỚI (107cp @35.800) trong khi lô 1258 còn hệ CŨ
-        (300cp @38.850) — TRONG CÙNG MỘT bản đọc. DNSE điều chỉnh theo TỪNG GÓI VAY và cú lật
-        KHÔNG nguyên tử. Nhìn qua bản gộp thì bản đọc đó trông hoàn toàn lành.
+        (300cp @38.850) — TRONG CÙNG MỘT bản đọc. Nhìn qua bản gộp thì nó trông hoàn toàn lành.
+
+        Nguyên nhân là BẢN ĐỌC CŨ MỘT PHẦN (stale read), KHÔNG phải "DNSE điều chỉnh theo từng
+        gói vay không nguyên tử" như bản ghi chú trước đây khẳng định — sửa lại 2026-09-09 sau
+        khi đọc thẳng `modifiedDate` của chính các dòng đó:
+
+            19:10:23 (=12:10:23Z)  pkg 1826  open 107  mp 35.800  modified 12:09:00Z
+            19:10:23               pkg 1258  open 300  mp 38.850  modified 2026-08-13T11:40:20Z
+            20:15:02               pkg 1258  open 320  mp 35.800  modified 12:09:09Z
+
+        Dòng mới của gói 1258 ĐÃ được ghi lúc 12:09:09Z, tức 74 GIÂY TRƯỚC bản đọc — vậy mà
+        bản đọc vẫn trả dòng của phiên 08-13, kèm `openQuantity` cũ 300 thay vì 320. Một cú
+        lật giá theo từng gói không thể làm KHỐI LƯỢNG quay ngược; cả DÒNG bị cũ, không phải
+        riêng trường giá. G4 vẫn đúng và vẫn phải từ chối bản đọc như cũ — chỉ lý do đổi.
 
         Không log lại `_log_raw` (get_positions đã log cùng payload nếu được gọi cùng phiên);
         trả list rỗng khi payload không đúng dạng, caller fail-closed theo ngữ cảnh của nó.
