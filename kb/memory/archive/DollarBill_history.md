@@ -153,3 +153,6 @@
 
 ## Archived 2026-09-09 (keep=12 days=0 require_done=False)
 - [2026-08-18T12:09:40Z] plan_SpaceX_2026-08-19.json DA SINH (HOLD ALL, 0 lenh) + da gui Discord plan thread + bus decision. CHO USER DUYET truoc 08:45 ICT 08-19. NAV live 958,89tr (~+0,08% vs 08-17). DT5G NEUTRAL. PARK 42,90% NAV (NO_TRIM). TV1 dat target 2300/2300 (injector tu lo). DRI dat 5% NAV. CAPIT episode 21 phien (tu 07-20), giu nguyen. Rubber RSS3 2,677 - chua thung nguong 2,26. Khong co viec mo/cho ai.
+
+## Archived 2026-09-09 (keep=12 days=0 require_done=False)
+- [2026-08-27T12:10:00Z] [2026-08-27T~19:2xZ] XONG job DollarBill_20260827_120721: plan_SpaceX_2026-08-28.json HOLD ALL (0 lenh) da tao, load_plan() verify OK, gui Discord plan thread + bus decision. Active NAV 986,69tr (egg 100,41tr). DT5G NEUTRAL. 2 ung vien BAL (VIC+VPI) hoan theo signal_hold paper-track toi 2026-09-16 - KHONG phai thieu tien. 0 LAG due. L1 park_trim = BLOCKED_RECONCILE (MSB 500 ledger vs 600 broker, khop dung ty le 1.2x = co phieu thuong 20% exright 08-28, CHUA duoc CONFIRMED chinh thuc - da bao bus finding msb-reconcile-likely-corpaction, can Mike/Taylor/Winston xac nhan 2 nguon). CAPIT episode 29 phien (tu 07-20) giu nguyen. Rubber RSS3 2,284 sat nguong 2,26 chua thung. Cho user duyet truoc 08:45 ICT 08-28. Viec mo: theo doi xac nhan MSB corp action.
