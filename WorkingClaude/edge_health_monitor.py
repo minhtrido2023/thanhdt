@@ -197,14 +197,32 @@ def refresh_panel():
     """Re-pull the monthly panel from BQ via bash (uses .bashrc-configured bq)."""
     with open(SQLFILE, "w") as f:
         f.write(PANEL_SQL)
+    # ATOMIC (fix 2026-09-10, coding_guidelines §5): ghi ra tmp roi os.replace.
+    # Truoc day redirect thang vao PANEL => shell TRUNCATE file dich TRUOC khi bq chay,
+    # nen bat ky loi bq nao (credential/quota/BQ down) cung de lai panel RONG va khong co
+    # ban sao (file trong .gitignore). Phat hien boi data-ops 2026-09-10.
+    tmp = PANEL + ".tmp"
     cmd = ("bq query --use_legacy_sql=false --project_id=lithe-record-440915-m9 "
            "--format=csv --max_rows=200000 \"$(cat '%s')\" > '%s'"
-           % (SQLFILE.replace('\\', '/'), PANEL.replace('\\', '/')))
+           % (SQLFILE.replace('\\', '/'), tmp.replace('\\', '/')))
     print("[refresh] pulling panel from BQ ...")
     r = subprocess.run(["bash", "-lc", cmd], capture_output=True, text=True)
     if r.returncode != 0:
-        print("[refresh] FAILED:\n", r.stderr[-1500:]); sys.exit(1)
-    print("[refresh] done.")
+        try: os.remove(tmp)
+        except OSError: pass
+        print("[refresh] FAILED (panel cu GIU NGUYEN):\n", r.stderr[-1500:]); sys.exit(1)
+    # bq co the exit 0 ma tra ve rong/chi header -> van la hong, dung ghi de panel that
+    try:
+        with open(tmp) as _f:
+            n_lines = sum(1 for _ in _f)
+    except OSError as e:
+        print("[refresh] FAILED doc tmp (panel cu GIU NGUYEN):", e); sys.exit(1)
+    if n_lines < 2:
+        os.remove(tmp)
+        print("[refresh] FAILED: bq rc=0 nhung tmp chi co %d dong (panel cu GIU NGUYEN)" % n_lines)
+        sys.exit(1)
+    os.replace(tmp, PANEL)
+    print("[refresh] done (%d dong)." % n_lines)
 
 
 def map_sector(icb):
