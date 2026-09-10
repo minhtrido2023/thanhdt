@@ -114,3 +114,41 @@ tử tế nếu đo một mình — đó là lý do cổng này đáng tồn t�
 **Ràng buộc giữ nguyên cho cả 3 job đang chạy:** PAPER-ONLY, prereg trước khi backtest, ngưỡng chốt
 trước không quét grid, N = số sự kiện độc lập, khai trước kỳ vọng ΔCAGR≈0, và KHÔNG wire gì —
 mọi thay đổi production vẫn phải qua quant-skeptic + user duyệt.
+
+## 6. Kết quả job C (#2 market-efficiency gauge) — XONG 2026-09-10, job `Taylor_20260910_131910`
+
+**Câu trả lời: CHU KỲ, không phải cấu trúc** — nhưng có một cải thiện cấu trúc THẬT ở một TẦNG KHÁC.
+Đọc đầy đủ: `agents/Taylor/research/vn_market_efficiency_20260910/KETLUAN_vn_market_efficiency_20260910.md`.
+
+| Tầng | Thước đo | Kết quả |
+|---|---|---|
+| Vi mô (ngày) | AC(1) lợi suất ngày từng mã, trung vị cross-sectional | **CẤU TRÚC** — break 2010, p_perm 0,0017 (rổ cân bằng 45 mã: 0,0007); 0,17-0,25 → ~0,02, chưa từng về lại |
+| Chỉ số | VR(2/5/10) Lo-MacKinlay, Hurst DFA | **Không có break đo được** (p_perm 0,68-0,99) |
+| Trung hạn cross-sectional (**đúng tầng BAL đứng**) | IC mom(6-1) vs fwd-3M | **Không có break** (p_perm 0,216) — chu kỳ rõ, 3 đáy đều hồi |
+
+**Ba điều quan trọng nhất cho quyết định:**
+1. **Không có bằng chứng cho "momentum VN chết vì thị trường hiệu quả lên".** Tầng hiệu quả lên thật
+   (AC ngày) KHÔNG phải tầng BAL khai thác, và tương quan giữa hai tầng là **ÂM** (ρ = −0,696, p=0,001,
+   N=19 năm; t=−2,32 khi kiểm soát vol) — ngược hẳn trực giác AMH thô.
+2. **BAL yếu 2025 giống ĐÁY CHU KỲ hơn giống mục nát.** Đáy 2020-23 (IC −0,027) KHÔNG sâu hơn đáy
+   2007-09 (−0,063); 2024 +0,127, 2026 (T1-T5) +0,139. ⇒ ủng hộ G1 (cần *edge-gate* giảm size ở đáy
+   chu kỳ), KHÔNG ủng hộ việc BỎ BAL.
+3. **Nhãn "FLIPPED" hôm nay đang TRỄ PHA thật — Mike đã kiểm chứng độc lập.** Đọc thẳng
+   `data/edge_health_ic.csv`: mom_200 IC 2026-04 = **−0,060** · 2026-05 = **+0,285** · 2026-06 =
+   **+0,382**. Hai hệ đo độc lập cùng nói momentum đã quay đầu DƯƠNG trong Q2/2026. Nhãn FLIPPED còn
+   treo là độ trễ cửa sổ 12M ⇒ **đừng đọc nhãn FLIPPED như tuyên bố về hiện tại**. Đây chính là G2/G3.
+
+**Dữ liệu hệ sinh thái — trung thực về cái KHÔNG có:** dòng tiền khối ngoại ròng CÓ thật (VNDirect
+finfo, 1.998 phiên từ 2018-08-30). Tỷ lệ retail, dư nợ margin toàn thị trường, tài khoản mở mới —
+**KHÔNG có nguồn chuỗi nào trong tay**, chỉ có điểm rời rạc thứ cấp chưa đối soát. ⚠️ Bẫy tên:
+`data/margin_cycle_detector.csv` KHÔNG phải margin debt (đó là chu kỳ biên lợi nhuận gộp doanh nghiệp).
+
+**Giới hạn phải mang theo khi trích:** N chu kỳ VN ≈ 3 ⇒ "không phát hiện được break" ≠ "chắc chắn
+không có break". `ac1_cs` trước 2010 lẫn cơ học vi cấu trúc (biên độ, giá cũ, universe 160 mã) — không
+tách được "thị trường học được cách định giá" khỏi "thị trường thôi bé tí". Đây là thước đo CHẨN ĐOÁN,
+không phải tín hiệu; không luật giao dịch nào được dẫn xuất từ nó.
+
+**Kiểm chứng của Mike (artifact, không tin self-report):** selfcheck estimator 8/8 PASS đọc từ
+`run_selfcheck.txt`; ba con số mom_200 IC recompute độc lập khớp tuyệt đối; `git status` sạch trên mọi
+`.py` production. **Đã dispatch quant-skeptic** (đang chạy) vì kết luận này sẽ được viện dẫn tại review
+VPI/BAL 09-16 — tức là nó decision-adjacent, dù bản thân nó không đề xuất wire gì.
