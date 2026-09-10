@@ -33,14 +33,27 @@ if git diff --cached --quiet; then
   # returned 0 without ever reaching the push below, and every caller printed success. Real
   # case 2026-09-08: local 3ff20579 vs origin/main 057254e0 unpushed for 8h while the nightly
   # backup reported "already up to date" — the 4th shape of the same silent-failure family.
-  remote_sha="$(git ls-remote origin main 2>/dev/null | awk 'NR==1{print $1}')"
-  if [ -n "$remote_sha" ] && [ "$remote_sha" != "$(git rev-parse HEAD)" ] \
-     && git merge-base --is-ancestor "$remote_sha" HEAD; then
+  # `2>&1` (not `2>/dev/null`) + `||` guard so an unreachable remote (rc=128, e.g. PAT
+  # expired / no network) prints its own error and exits 1 instead of dying silently on
+  # this assignment under `set -e` (arch-review Wags_20260909_012007: this exact line used
+  # to swallow rc=128 with zero output).
+  if ! remote_sha="$(git ls-remote origin main 2>&1)"; then
+    echo "!! không đọc được origin/main (PAT hết hạn / mất mạng): $remote_sha" >&2
+    exit 1
+  fi
+  remote_sha="$(awk 'NR==1{print $1}' <<< "$remote_sha")"
+  local_sha="$(git rev-parse HEAD)"
+  if [ -z "$remote_sha" ] || [ "$remote_sha" = "$local_sha" ]; then
+    echo "Nothing changed — already up to date."
+  elif git merge-base --is-ancestor "$remote_sha" HEAD; then
     echo "==> Nothing new to commit, but origin/main is behind — pushing existing commits…"
     git push -q origin main
     echo "✅ Backup pushed (existing commits): $(git rev-parse --short HEAD)"
   else
-    echo "Nothing changed — already up to date."
+    # Diverged — do NOT auto-merge/force-push (backup_freshness_check.sh's job to alert;
+    # a checker fixing its own alert condition would defeat the point of an independent check).
+    echo "!! CẢNH BÁO: local HEAD ($local_sha) và origin/main ($remote_sha) ĐÃ PHÂN NHÁNH — không tự push, cần xử lý tay." >&2
+    exit 1
   fi
   exit 0
 fi
