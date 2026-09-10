@@ -48,6 +48,17 @@ ERROR_PATTERNS = [
     # text and can't be ack-matched precisely (caught 2026-08-16 triaging the config.py
     # git-stash-conflict-marker false positive — see kb/coding_guidelines_ext.md).
     r"^\s*\w+(Error|Exception):",
+    # Gap found by arch-reviewer (Wags_20260909_012007): the 11-night backup FAIL streak
+    # 2026-08-29..09-08 (gitlink treo mike_paseo/agents/wt-*) printed `fatal: not a git
+    # repository: ...` + `FAIL main backup` on every run, but NONE of the 10 patterns above
+    # matched it — cron_health_check.py would have shown 0 lines, silence exactly where a
+    # real 11-day-old failure sat in the log. Inline (?i:) keeps these two case-insensitive
+    # WITHOUT loosening the other patterns above (which stay case-sensitive on purpose).
+    r"(?i:fatal:)",
+    r"(?im:^\s*FAIL )",
+    # backup_freshness_check.sh writes this literal marker when a notify call (Discord/bus)
+    # itself fails silently — same coord-2026-09-10 fix, same reasoning as the two above.
+    r"NOTIFY_FAILED",
 ]
 ERROR_RE = re.compile("|".join(ERROR_PATTERNS), re.MULTILINE)
 

@@ -16,7 +16,27 @@ if git diff --cached --quiet; then
 fi
 ```
 
-"Không có gì để **COMMIT**" bị coi là "không có gì để **PUSH**". Một commit sinh ra ngoài `backup.sh` (người/phiên khác `git commit` tay) làm working tree sạch ⇒ nhánh này thoát 0, **không bao giờ chạm tới `git push` ở cuối script**, và mọi caller (`fleet_backup.sh`, `kb_nightly.sh`) in ra thành công. Log đêm 09-08 ghi đúng nguyên văn `Nothing changed — already up to date.` trong khi remote thiếu 1 commit.
+"Không có gì để **COMMIT**" bị coi là "không có gì để **PUSH**". Một commit sinh ra ngoài `backup.sh` (người/phiên khác `git commit` tay) làm working tree sạch ⇒ nhánh này thoát 0, **không bao giờ chạm tới `git push` ở cuối script**, và mọi caller (`fleet_backup.sh`, `kb_nightly.sh`) in ra thành công.
+
+> **Đính chính (arch-review Wags_20260909_012007, verdict NEEDS_CHANGES — grep bác bỏ dẫn chứng gốc):**
+> câu cũ ở đây khẳng định "Log đêm 09-08 ghi đúng nguyên văn `Nothing changed — already up to date.`"
+> — SAI. Chuỗi đó lần cuối xuất hiện trong `logs/backup.log` ngày **2026-07-19**, không có ở run
+> 09-08. Run `fleet_backup 2026-09-08T17:00:01Z` thật ra chết ở bước `git add -A`/`git status
+> --porcelain=2` vì gitlink treo `mike_paseo/agents/wt-1521113190405247057/.git` (worktree đã bị
+> gỡ khỏi `mike/.git/worktrees/` nhưng thư mục checkout vẫn còn, trỏ về admin dir không tồn tại).
+> Shape 4 (đoạn dưới) là bug LATENT phát hiện được bằng đọc code, **không phải nguyên nhân của
+> lần miss 09-08** — hai chuyện độc lập bị gộp nhầm khi viết incident lần đầu.
+>
+> **Sự cố ĐANG MỞ lúc đó, giờ đã tự khép**: cùng lỗi gitlink làm `fleet_backup` FAIL **11 đêm
+> liên tiếp 2026-08-29 → 2026-09-08** (`grep -c "FAIL main backup" logs/backup.log` = khớp đúng
+> chuỗi 11 lần liền trong khoảng này), tất cả cùng 2 dòng `fatal:` y hệt. Không cần Wags can
+> thiệp: chính user đã tự sửa cùng ngày 09-08, commit `057254e0` "manual verify after gitlink
+> fix 2026-09-09" (17:12:39Z, TRƯỚC cả commit `3ff20579` 17:48Z) thêm `WorkingClaude/mike_paseo/`
+> vào `.gitignore` — từ đó `mike_paseo` không còn tham gia `git add -A`/`git status` của repo
+> `/home/trido/thanhdt` nữa. Run `fleet_backup 2026-09-09T17:00:01Z` ngay sau đó đã PASS sạch
+> (`✅ Backup pushed: c1721329`), và mọi run từ 09-09 tới nay đều sạch. Thư mục worktree treo vẫn
+> còn trên đĩa (`mike_paseo/agents/wt-1521113190405247057/`) nhưng vô hại vì đã bị `.gitignore`
+> — không cần dọn để backup chạy đúng; dọn hay không là quyết định vệ sinh, không phải rủi ro.
 
 Đây là **shape thứ 4** của cùng một họ sự cố trong 5 tuần — mỗi lần một nguyên nhân kỹ thuật khác nhau, cùng một hậu quả (backup không lên mà không ai biết):
 
@@ -40,7 +60,14 @@ Bốn nguyên nhân độc lập ⇒ **vá theo nguyên nhân không hội tụ*
 - `backup.sh`: test sandbox (repo bare local + clone) — (a) commit chưa push, tree sạch → bản vá PUSH, remote khớp local; (b) **negative control** chạy code CŨ trên đúng state đó → remote vẫn tụt lại (bug tái hiện được); (c) local/remote đã khớp → in "Nothing changed", không push, rc=0; (d) state phân nhánh → không crash, không push.
 - `backup_freshness_check.sh`: chạy thật `BACKUP_FRESHNESS_QUIET=1` → sạch (remote 8h tuổi, 2 nhánh). Negative control `BACKUP_MAX_AGE_H=1` → bắt đúng cả 3 vi phạm, **gồm chính commit `3ff20579` chưa push** ("remote thiếu 1 commit") — tức nếu script này đã tồn tại, nó đã bắt được sự cố hôm nay.
 - `bash -n` sạch cả 3 script; render test dòng `BACKUP_WARN` đứng đầu message.
-- Chưa chạy `backup.sh` thật để đẩy `3ff20579` lên (push ra dịch vụ ngoài bị classifier chặn trong phiên headless) — lượt cron 00:00 ICT tối nay sẽ đẩy, và `backup_freshness_check.sh` 08:35 sẽ xác nhận.
+- ~~Chưa chạy `backup.sh` thật để đẩy `3ff20579` lên...~~ — MOOT: run `fleet_backup 09-09T17:00:01Z` đã tự push `c1721329` (xem đính chính trên), toàn bộ dây chuyền từ 09-09 tới nay xanh liên tục.
+
+**Cập nhật coord-2026-09-10 (round 2 của arch-review, cùng trace):**
+- `backup.sh`: thêm chẩn đoán rõ khi remote không tới được (`git ls-remote` rc≠0 → in lỗi + `exit 1`, thay vì chết im lặng dưới `set -euo pipefail` như review phát hiện) và cảnh báo rõ khi local/remote phân nhánh (không còn lặng lẽ in "Nothing changed").
+- `cron_health_check.py`: thêm `fatal:`, `^\s*FAIL ` (IGNORECASE, scoped bằng `(?i:...)` để không nới các pattern khác) và `NOTIFY_FAILED` vào `ERROR_PATTERNS` — verify bằng cách chạy đúng 3 dòng lỗi thật của run 09-08 qua `ERROR_RE`, cả 3 khớp; dòng `✅ Backup pushed` không khớp (không có false positive).
+- `backup_freshness_check.sh`: thêm bất biến #3 (tuổi commit `auto-backup <ts>` / `fleet backup <ts>` gần nhất trên remote — bắt được ca "HEAD remote tươi nhờ push tay, pipeline tự động đã chết phía sau"); bỏ toàn bộ `2>/dev/null || true` quanh notify, thay bằng `NOTIFY_FAILED: ...` in ra stderr khi notify/append_event thất bại.
+- Selfcheck mới: `bin/backup_push_selfcheck.sh` (6/6 PASS, extract-and-test trực tiếp từ `backup.sh`, gồm 1 negative control tái hiện shape-4 bằng code cũ) và `bin/backup_freshness_check_selfcheck.py` (6/6 PASS, gồm 1 negative control chứng minh check_repo() bản CŨ — trước bất biến #3 — im lặng đúng ở ca "HEAD tươi nhưng pipeline chết"). Cả hai chạy sạch dưới `env -u TZ` và `TZ=Pacific/Kiritimati`.
+- Chạy thật `BACKUP_FRESHNESS_QUIET=1 bin/backup_freshness_check.sh` trên trạng thái hiện tại (2026-09-10) → sạch, không báo động giả từ bất biến #3 mới.
 
 ## Bài học
 
