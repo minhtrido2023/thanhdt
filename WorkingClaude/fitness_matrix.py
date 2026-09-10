@@ -34,8 +34,8 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 WORKDIR = r"/home/trido/thanhdt/WorkingClaude"
-PANEL = WORKDIR + r"\data\edge_panel.csv"
-STATEF = WORKDIR + r"\data\dt5g_vnindex.csv"
+PANEL = WORKDIR + r"/data/edge_panel.csv"
+STATEF = WORKDIR + r"/data/dt5g_vnindex.csv"
 FWD = "fwd_3m"
 QTILE = 0.20            # top/bottom quintile for long-short spread
 MIN_NAMES = 25
@@ -137,8 +137,8 @@ def main():
     for M in (IC, SP, TT, NN):
         M.columns = colnames
 
-    IC.to_csv(WORKDIR + r"\data\fitness_matrix_ic.csv")
-    (SP * 100).round(2).to_csv(WORKDIR + r"\data\fitness_matrix_spread.csv")
+    IC.to_csv(WORKDIR + r"/data/fitness_matrix_ic.csv")
+    (SP * 100).round(2).to_csv(WORKDIR + r"/data/fitness_matrix_spread.csv")
 
     pd.set_option("display.width", 200)
     print("\n=== FITNESS MATRIX — mean fwd-3M IC by (signal x state) ===")
@@ -183,7 +183,7 @@ def main():
         fig.colorbar(im, ax=ax, fraction=0.046)
     fig.suptitle("Fitness Matrix — strategy edge conditioned on DT5G market state (AMH #3)", fontsize=12)
     fig.tight_layout(rect=[0, 0, 1, 0.97])
-    fig.savefig(WORKDIR + r"\fitness_matrix.png", dpi=110)
+    fig.savefig(WORKDIR + r"/fitness_matrix.png", dpi=110)
     print("\nSaved: fitness_matrix.png | data/fitness_matrix_{ic,spread}.csv")
 
 

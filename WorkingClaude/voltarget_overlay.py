@@ -33,7 +33,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 WORKDIR = r"/home/trido/thanhdt/WorkingClaude"
-DATA = WORKDIR + r"\data\dt5g_vnindex.csv"
+DATA = WORKDIR + r"/data/dt5g_vnindex.csv"
 STATE_W = {1: 0.0, 2: 0.2, 3: 0.7, 4: 1.0, 5: 1.3}   # CRISIS/BEAR/NEUTRAL/BULL/EXBULL (BQ codes 1-5)
 TC = 0.001            # 0.1% on traded portion
 VOL_WIN = 20          # realized-vol lookback (trading days)
@@ -182,7 +182,7 @@ def main():
     print(f"State dwell: " + ", ".join(f"{k}:{(df['state']==k).mean()*100:.0f}%" for k in range(5)))
     print()
     res, navs = run_block(df)
-    res.to_csv(WORKDIR + r"\data\voltarget_results.csv", index=False)
+    res.to_csv(WORKDIR + r"/data/voltarget_results.csv", index=False)
 
     # plot a few representative NAV paths + a DD comparison
     pick = ["BASE (DT5G)", "VNINDEX B&H", "VT_valve vt=0.15", "VT_2side vt=0.18"]
@@ -194,7 +194,7 @@ def main():
         ax2.plot(df["time"], dd, lw=1.0, label=name)
     ax1.set_yscale("log"); ax1.set_title("Vol-Target Sizing Layer — NAV (log)"); ax1.legend(fontsize=8); ax1.grid(alpha=0.3)
     ax2.set_title("Drawdown"); ax2.legend(fontsize=8); ax2.grid(alpha=0.3)
-    fig.tight_layout(); fig.savefig(WORKDIR + r"\voltarget_overlay.png", dpi=110)
+    fig.tight_layout(); fig.savefig(WORKDIR + r"/voltarget_overlay.png", dpi=110)
     print("\nSaved: voltarget_overlay.png | data/voltarget_results.csv")
 
 

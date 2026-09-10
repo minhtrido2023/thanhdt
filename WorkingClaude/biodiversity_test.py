@@ -32,8 +32,8 @@ import numpy as np
 import pandas as pd
 
 WORKDIR = r"/home/trido/thanhdt/WorkingClaude"
-PANEL = WORKDIR + r"\data\edge_panel.csv"
-STATEF = WORKDIR + r"\data\dt5g_vnindex.csv"
+PANEL = WORKDIR + r"/data/edge_panel.csv"
+STATEF = WORKDIR + r"/data/dt5g_vnindex.csv"
 FWD = "fwd_1m"          # 1-month holding -> non-overlapping monthly stream
 QTILE = 0.20
 MIN_NAMES = 25
@@ -160,8 +160,8 @@ def main():
     print(bd[["candidate", "corr_inc", "surv_rate", "cand_in_incWorstQ", "sa_Sharpe",
               "dSharpe", "dCalmar", "verdict"]].to_string(index=False))
 
-    bd.to_csv(WORKDIR + r"\data\biodiversity_verdict.csv", index=False)
-    S.to_csv(WORKDIR + r"\data\biodiversity_streams.csv")
+    bd.to_csv(WORKDIR + r"/data/biodiversity_verdict.csv", index=False)
+    S.to_csv(WORKDIR + r"/data/biodiversity_streams.csv")
     print("\nSaved: data/biodiversity_verdict.csv | data/biodiversity_streams.csv")
 
 

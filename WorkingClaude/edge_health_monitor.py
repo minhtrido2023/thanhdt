@@ -378,7 +378,7 @@ def main():
         mom_v = al.loc["mom_200", "verdict"] if "mom_200" in al.index else None
         if mom_v == "FLIPPED":
             block.append("📉 Momentum FLIPPED → không nới slot/size momentum; "
-                         "dormant fix sẵn: EXBULL-suppression (validated +0.3pp FULL, 2025+ +1.6pp, chưa live)")
+                         "EXBULL-suppression ĐÃ LIVE từ 2026-06-11 (pt_v22_dt5g.py:286-294, user duyệt)")
     except Exception:
         pass
     md = "\n".join(block)
