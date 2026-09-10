@@ -254,3 +254,6 @@ BAI HOC 3 (quan trong nhat): them GUARD vao mot script dung chung thi phai chay 
 
 ## Archived 2026-09-07 (keep=6 days=5 require_done=True)
 - [2026-08-27T13:42:35Z] [2026-08-27T13:4x] Batch 7 selfcheck do (job Wags_20260827_132621) HOAN TAT: 2 tu fix (commit_collision_gate 069d6a7f, corp_action_daily ddac5855 - le bu Quoc khanh), 5 escalate Taylor (capit_lever, dc_book_waterfall, universe_pit_quality row-gap, phs_flash 403 ngoai, lag_forensic BAF drift URGENT). Khong con viec treo phia Wags - cho Taylor tra loi cac question tren.
+
+## Archived 2026-09-10 (keep=12 days=0 require_done=False)
+- [2026-08-21T05:21:34Z] BAI HOC GIT (2026-08-21, job Wags_20260821_051049): partial-stage bang 'git apply --cached' BI VO HIEU boi 'git commit -F msg -- <pathspec>' — pathspec commit theo WORKING TREE, bo qua index ⇒ van cuon thay doi phien khac. Cach an toan: stage xong thi 'git commit -F msg' KHONG pathspec; verify bang 'git show HEAD:<file>' chu KHONG phai 'git show --stat'. (Cung ho bay voi bai hoc --amend 2026-08-18.)
