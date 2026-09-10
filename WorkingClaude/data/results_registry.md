@@ -6649,3 +6649,185 @@ cron ghi 23:45 ICT) ⇒ script nghiên cứu dùng `os.environ.setdefault("BQ_LO
 **không ghi đè được** và âm thầm đọc cache sống → cùng một chân ctrl cho 3 level khác nhau ở 3 lần
 chạy. **Phải GÁN CỨNG `os.environ["BQ_LOCAL_CACHE"]` và in ra cache đang dùng.** Chân NAV không bị
 ảnh hưởng (`run_leg.sh` truyền tường minh qua `env`; ctrl trùng pin byte-identical).
+
+## 2026-09-10 — AMH #3 (change-point trên chuỗi IC) + AMH #4 (fitness matrix trục-2 breadth PIT)
+
+Job `Taylor_20260910_131908` · PAPER-ONLY, không wire · báo cáo đầy đủ:
+`mike/agents/Taylor/research/amh_changepoint_fitness_20260910/CONCLUSION.md`
+
+**Môi trường**: `$DNA_PYEXE`; panel `data/edge_panel.csv` (29.687 obs / 438 mã / `ticker_prune`
+liq≥1e9, formation = phiên đầu mỗi tháng, 2014-01→2026-06); IC pin `data/edge_health_ic.csv`;
+breadth `tav2_mike.universe_pit` (CANONICAL); DT5G `tav2_bq.vnindex_5state_dt5g_live` (CANONICAL).
+**Control leg PASS**: dựng lại IC fwd-3M từ panel khớp artifact pin **max|Δ| = 9,97e-17**
+(bắt buộc sao chép cả bước winsorize `fwd_3m` 0,5%/99,5% của `load_panel()`).
+
+**AMH #3 — NO-GO.** CUSUM: 20 alarm, false-alarm 35%, chỉ 5% trùng điểm gãy hindsight, median lag
+6,0 th **vs nhãn 12M hiện tại 4,0 th** ⇒ chậm hơn. BOCPD: 7 alarm, 0% trùng. Không dose-response
+(h=4/5/6 → 56,5%/35,0%/46,7%). Với null **block-permutation** (block=3 = độ trùm fwd-3M) chỉ còn
+**3 điểm gãy có ý nghĩa trên cả 10 signal × 12,5 năm** (null i.i.d. ngây thơ cho 17 — ảo ảnh).
+→ **KHÔNG** thêm dòng `P(regime-shift)` vào `edge_health_block.md`.
+
+**Sản phẩm phụ — lỗi thống kê thật trong production.** Chuỗi IC fwd-3M chồng lấn ⇒ MA(2)
+by-construction: `ac1` 0,33–0,71, `n_eff` 26–75 chứ không phải 150. Cổng `|t|≥2` của
+`edge_health_monitor.py::edge_row()` (dòng 265-271) chia `sqrt(150)` ⇒ **phóng đại ~1,5–2,4×**.
+3/10 signal mất tư cách robust khi dùng `n_eff`: ROIC5Y 3,24→1,46 · ROE_Min5Y 4,03→1,67 ·
+**mom_200 3,68→1,67 ⇒ nhãn `FLIPPED` lẽ ra không được phát.** Đề xuất sửa 1 dòng — **CHƯA sửa**,
+cần `quant-skeptic` CONFIRMED + user duyệt (chạm đầu vào allocator edge-gate).
+
+**AMH #4 — momentum chết ở MỌI ô sau 2020.** Lưới 5×3 chỉ có **30/130 ô (23%) đạt hạng kết luận**
+(n≥18); BEAR/EXBULL không ô nào đọc được. Toàn mẫu: `mom_200` chỉ có 3 ô hạng kết luận, **cả 3 là
+NEUTRAL và đều dương** (+0,087/+0,118/+0,104) ⇒ giả thuyết "chết ở NEUTRAL breadth-thấp" **BÁC BỎ**.
+Nhưng tách IS/OOS: **8/8 phạm vi dương ở IS 2014-19** (ALL +0,135 t=3,91; NEUTRAL +0,164 t=5,09)
+→ **8/8 phạm vi ≈0 ở OOS 2020+, 0/8 có ý nghĩa** (ALL −0,009; NEUTRAL +0,005). LOO theo năm 2020+:
+[−0,027; +0,015], không năm nào cứu. `D_RSI` y hệt. **Vết gãy là THỜI GIAN (~2020), không phải
+regime — không trục điều kiện nào cứu được BAL.**
+
+**Value/quality**: PE **mạnh lên khắp nơi** (IS −0,014 ns → OOS **−0,081\***, LOO [−0,091;−0,070],
+có ý nghĩa OOS ở cả 3 tercile breadth) · ROE_Min5Y **giữ nguyên** (+0,052\*→+0,063) ·
+ROIC5Y suy nhẹ (ô CRISIS +0,087\*) · PB_z **đảo dấu thật** (+0,056→−0,064\*) · FSCORE suy
+(+0,081\*→+0,018, khớp nhãn FADING). ⇒ signal DỰA TRÊN GIÁ sụp ~2020; định giá cơ bản mạnh lên;
+sàn chất lượng giữ.
+
+**Bug trong `fitness_matrix.py` (bản cũ) — đề xuất ARCHIVE, đừng sửa path rồi chạy lại**:
+(1) **look-ahead** — gán state theo MODAL state cả tháng, lệch state-PIT-tại-hình-thành ở
+**24/150 tháng (16%)**; (2) đọc `data/dt5g_vnindex.csv` (lệch **52/3121 phiên** vs bảng live
+canonical, đứng từ 2026-07-09) thay vì `vnindex_5state_dt5g_live`; (3) t-stat thô trên chuỗi
+chồng lấn. Bản thay thế: `fitness2.py` (state PIT, bảng canonical, t Newey-West lag 2).
+
+**Caveat**: panel là `ticker_prune`, `mom_200` thô ≠ `SIGNAL_V11` ⇒ kết luận cấp **SIGNAL**, chưa
+phải cấp NAV; chưa chạy full-engine. Không recommend wire config nào ⇒ DSR/PBO không áp dụng
+(`quant-research` mục 13). `git status` sạch trên mọi `.py` production.
+
+## 2026-09-10 — BAL EDGE-GATE (AMH #1): **NO-GO** — job `Taylor_20260910_131906`
+
+**Câu hỏi (Mike, AMH review 09-10 gap G1):** dựng edge-gate cho book BAL đối xứng với gate `w_LAG`
+đang LIVE.
+
+**KẾT LUẬN: NO-GO, không wire gì.** ⚠️ **KHÔNG trích 29,16% như số mới của R3** — pin R3 giữ nguyên
+**28,86%**. Ba tầng đều bác:
+
+1. **Gate đối xứng LAG BẤT KHẢ THI về cấu trúc.** Mọi buy tier trong `TIER_BAL` yêu cầu
+   `state5 IN (4,5)` (`signal_v11_sql.py`) ⇒ BAL là book BULL-only, 0 phiên BULL trong
+   2014/15/16/19/22/23, cohort tới theo **10 episode**, khoảng trống tới 25 tháng. Đọc NHÂN QUẢ tại
+   lúc mở mỗi cụm: 3/6 cụm `n12_av=0` (staleness 819 và 688 ngày); 3 cụm còn lại xếp hạng NGƯỢC
+   (gate đọc 2,69 → cụm thực +12,49pp; đọc 12,49 → cụm thực −6,22pp).
+2. **Chỉ báo nhanh fwd-1M không mua lại được 3 tháng.** 19 cảnh báo ghép được: **median lead 1,0
+   tháng** trong khi sàn CƠ HỌC do chênh trễ công bố đã là **2 tháng miễn phí** ⇒ theo tháng tín hiệu
+   nó FLIP **muộn hơn 1 tháng**. Giá: 8/27 cảnh báo 1M không bao giờ được 3M xác nhận (30%) + bỏ sót
+   3 cảnh báo 3M thật.
+3. **Backtest bác bằng chính placebo của nó.**
+
+### Bảng 8 chân (snapshot `bq_cache_asof20260729_postrestate`, threads=1, `$DNA_PYEXE`, lệnh pin R3 nguyên văn, `EXP_TAG` mọi chân, self-check **0 VND** cả 8)
+
+| Chân | CAGR | Sharpe | MaxDD | Calmar | Final NAV | ΔCAGR |
+|---|---|---|---|---|---|---|
+| **control = pin R3** | **28,86%** | 1,90 | −17,79% | 1,62 | 1.178,01B | — |
+| inert (bản sao engine, không mask) | 28,86% | 1,90 | −17,79% | 1,62 | 1.178,01B | +0,00pp |
+| **g6 slot 12→6 (CHỐT TRƯỚC)** | 29,16% | 1,92 | −17,79% | 1,64 | 1.212,11B | +0,30pp |
+| g10 12→10 | 29,18% | 1,93 | −17,79% | 1,64 | 1.214,24B | +0,31pp |
+| g8 12→8 | 29,02% | 1,90 | −17,79% | 1,63 | 1.196,23B | +0,16pp |
+| g4 12→4 | 29,22% | 1,96 | −17,79% | 1,64 | 1.219,87B | +0,36pp |
+| g0 12→0 | 25,89% | 1,80 | −17,79% | 1,46 | 881,14B | −2,97pp |
+| **PLACEBO (mask lịch)** | **29,26%** | 1,93 | −17,79% | 1,65 | 1.224,16B | **+0,40pp** |
+
+**Chân control tái lập TUYỆT ĐỐI pin R3 + CSV md5 `7d053e6201c9d107685ff4d1dd9d2d2a`** = đúng md5 đã
+pin 08-03. **Chân inert cho CSV BYTE-IDENTICAL với control** ⇒ bản sao engine nghiên cứu chứng minh
+được là trơ; mọi Δ là do gate.
+
+### 4 căn cứ NO-GO (độc lập nhau)
+1. **MaxDD GIỐNG HỆT TỪNG CHỮ SỐ ở cả 8 chân**: `−0,17785101`, đáy 2018-07-05. Đáy nằm trong cửa sổ
+   gate có **0 ngày active** ⇒ gate không thể chạm vào chính cái drawdown nó sinh ra để bảo hiểm.
+2. **Placebo THẮNG gate thật** (+0,40 vs +0,30pp) và thắng mọi bậc thang liều. Mask lịch không mang
+   một bit thông tin edge nào ⇒ +0,30pp chỉ là "ít slot BAL hơn trong 2020-2024".
+3. **Leave-one-episode-out chỉ 1/4 dương.** Cả 3 episode có cảnh báo FLIPPED thật đều MẤT tiền khi
+   cắt slot (ep6 −0,09 / ep8 −0,01 / ep14 −0,10pp); chỉ ep20 (12 phiên 01/2026) +0,12pp. Sign test
+   p=0,625. 4 episode cộng lại **−0,08pp**; toàn bộ +0,23pp tổng đến từ **+0,31pp RESIDUAL ngoài
+   chúng** (2025 đóng góp +0,032 log dù có 0 ngày gate) = nhiễu đường đi.
+4. **Thang liều KHÔNG đơn điệu**: 10→+0,31 · 8→+0,16 · 6→+0,30 · 4→+0,36 · 0→−2,97.
+
+**N khai trước = 4 episode độc lập** (213/482 phiên BULL). **IS 2014-2019 có 0 episode gate-active ⇒
+walk-forward KHÔNG phân xử được**, đã khai trong prereg và thay bằng LOO. N=4 thì sign test tốt nhất
+p=0,125 — không p-value nào ở đây qua được ngưỡng thường. `N_trials=6`. **DSR/PBO KHÔNG áp dụng**
+(không đề xuất wire cấu hình nào).
+
+### Kết quả GIÁ TRỊ NHẤT lại là cái bác bỏ tiền đề
+`g0` cho thấy **verdict `mom_200` FLIPPED KHÔNG dịch được thành lỗ của book BAL** (chặn hẳn BAL khi
+FLIPPED = −2,97pp CAGR, Calmar 1,62→1,46). Cơ chế: `edge_health_monitor` đo IC cross-sectional trên
+**toàn universe thanh khoản hàng tháng**, còn BAL đã lọc sẵn theo **state (chỉ BULL/EXBULL) + tier +
+EXBULL-suppression** — hai quần thể khác nhau. ⇒ **G1 phải phát biểu lại: BAL KHÔNG thiếu vòng phản
+hồi; nó đã có một vòng theo TRẠNG THÁI, và lớp edge-conditional thứ hai đã đo và bị bác.**
+
+### Phát hiện phụ (chưa sửa, đề xuất job riêng)
+`data/lag_edge_health.csv` key `mean12` theo **entry** trong khi return chỉ biết sau 25 phiên. **LIVE
+vô hại** (file chỉ chứa event đã hoàn thành, asof trễ ~5 tuần). **BACKTEST thì có**: `pt_v23_audit_2014.py`
+reindex chuỗi entry-keyed này trên toàn 2014-2026 ⇒ ngày `d` đọc giá trị cần dữ liệu `d+25` phiên.
+Nằm trong phần validate của edge-conditional allocator. Không phải lý do đổi gate live.
+⚠️ **ĐÃ ĐO XONG 2026-09-10 — xem mục "ĐO LẠI CỔNG EDGE-CONDITIONAL" cuối file.** Con số "+0,60pp"
+viết ở dòng này lúc đầu là **KHÔNG CÓ NGUỒN PIN** trong registry; giá trị đo lại trên pin R3 hiện
+hành là **+0,29pp**. Lỗi khoá-theo-entry KHÔNG giải thích chênh lệch đó (nó chỉ đáng +0,02pp).
+
+**Files:** `mike/agents/Taylor/research/bal_edge_gate_20260910/` (PREREG.md ·
+CONCLUSION_bal_edge_gate_20260910.md · 8 log · analyze_out.txt · gate_mask.csv · bal_edge_health.csv) ·
+CSV `data/v23_golive_audit_2014_now_..._exp_bg_{ctrl,inert,g0,g4,g6,g8,g10,plac}_univpit.csv`.
+Canonical `..._wtnamecap.csv` **KHÔNG bị đụng**. `git status` sạch trên mọi file production.
+
+
+---
+
+## 2026-09-10 — ĐO LẠI CỔNG EDGE-CONDITIONAL `w_LAG` + đóng lỗi khoá-entry của `lag_edge_health.csv` — job `Taylor_20260910_142406` (user duyệt 21:23 ICT) — KHÔNG WIRE, KHÔNG ĐỔI GATE LIVE
+
+**Việc:** trả lời đúng 1 câu — trong phần chênh đã công bố của allocator edge-conditional, bao nhiêu
+còn sống khi `mean12` khoá theo ngày **RA** (lúc return biết được) thay vì ngày **VÀO**?
+
+**Môi trường** (verbatim từ job `Taylor_20260910_131906`): `BQ_LOCAL_CACHE=data/bq_cache_asof20260729_postrestate`,
+`BQ_CACHE_THREADS=1`, `NAV_TOTAL_B=50`, `ETF_LIQ=custompitg`, `BASKET_WT=namecap`,
+`BASKET_SELECT=yieldcombo`, `PARK_STATES=3:0.7`, `AUDIT_END=2026-06-19`, `$DNA_PYEXE`,
+`v23a none postbull 0 edge`, `EXP_TAG` mọi leg.
+
+| leg | CAGR | Sharpe | MaxDD | Calmar | Final NAV | self-check | md5 |
+|---|---|---|---|---|---|---|---|
+| `ekctrl` — pin R3, engine production | 28,86% | 1,90 | −17,79% | 1,62 | 1.178,01B | 0 VND | `7d053e6201c9d107685ff4d1dd9d2d2a` ✅ = md5 pin |
+| `ekinert` — copy research, switch OFF | 28,86% | 1,90 | −17,79% | 1,62 | 1.178,01B | 0 VND | byte-identical ctrl ✅ |
+| `ekexit` — cổng đọc trục ngày RA | **28,88%** | 1,90 | **−17,70%** | **1,63** | 1.180,40B | 0 VND | `c24f39071a400cff5d956a2fc5288af9` |
+| `eknoedge` — allocator, cổng TẮT | 28,58% | 1,87 | −18,56% | 1,54 | 1.145,66B | 0 VND | (chân mẫu số) |
+
+**(1) LỖI KHOÁ-ENTRY: có thật, nhưng VÔ HƯỚNG ⇒ ~107% phần chênh còn sống.**
+Δ điều trị = **+0,021pp CAGR** (28,86 → 28,88), premium so với cổng-tắt đi từ **+0,288pp → +0,309pp**.
+|Δ| nằm **~19 lần bên trong** dải nhiễu ±0,40pp mà một placebo KHÔNG mang thông tin đã làm dịch chuyển
+chính harness này (job `Taylor_20260910_131906` §5) ⇒ **PHẢI trích là "không phân biệt được với 0"**,
+KHÔNG được trích như ước lượng điểm.
+Phân rã theo 15 đợt bất đồng (N=15 run liên tục, KHÔNG phải 300 phiên): gross Σ|run| = 7,234 log-%
+nhưng net chỉ +0,808, dấu chia **7+/8−, sign-test p=0,93**. ⇒ Đọc `mean12` sớm 5 tuần là **tung đồng
+xu** về việc cổng bật hay tắt gần ngưỡng 4%, KHÔNG phải nhìn trộm tin tốt. Từng cửa sổ riêng lệch tới
+±1,2% NAV; triệt tiêu trên 12 năm. **LIVE CHƯA BAO GIỜ BỊ ẢNH HƯỞNG** (file chỉ chứa event đã hoàn tất,
+allocator ffill giá trị cũ-nhưng-thật). **Không đề xuất đổi gate live. Không wire gì.**
+
+**(2) ĐÍNH CHÍNH SỐ — cổng đáng +0,29pp trên pin R3 hiện hành, KHÔNG phải +0,60pp.**
+Đo trực tiếp so với CHÍNH allocator đó với cổng TẮT: **28,86% vs 28,58% = +0,288pp** (entry-keyed,
+tức đúng cấu hình đang công bố), Calmar 1,62 vs 1,54, MaxDD −17,79% vs −18,56%.
+⚠️ **Con số "+0,60pp" KHÔNG CÓ RUN NGUỒN NÀO ĐƯỢC PIN** — grep toàn `data/results_registry.md`,
+`mike/kb/KNOWLEDGE.md`, `mike/kb/events_buffer.md`: chuỗi đó chỉ xuất hiện trong chính các entry
+ngày 2026-09-10 nhắc lại nó, không có mục `## 2026-06-13`, không CSV, không md5. Code chỉ ghi
+"validated walk-forward 2026-06-13" (`pt_v23_audit_2014.py:172`) mà **không nêu con số nào**.
+Cấu hình 06-13 nằm **TRƯỚC** repin `universe_pit` 08-03 và trước snapshot `asof20260729_postrestate`,
+nhiều khả năng khác cả `NAV_TOTAL_B`/`ETF_LIQ`/`BASKET_*`.
+⇒ **Quy tắc trích dẫn từ nay: dùng +0,29pp của pin R3.** Muốn trích +0,60pp thì BẮT BUỘC kèm môi
+trường và nói rõ là số không tái lập được. Giữ nguyên câu chữ cũ ở mục 09-10 phía trên để audit.
+**Lỗi khoá-entry KHÔNG giải thích chênh lệch này** — nó đẩy premium đi NGƯỢC chiều (+0,02pp).
+
+**Kỷ luật phạm vi:** đúng 1 leg điều trị; `eknoedge` là MẪU SỐ (không có nó thì "bao nhiêu pp còn
+sống" không có đơn vị), không phải biến thể. `EDGE_THR=4.0` không hề dịch. `N_trials=1`, khai trong
+PREREG viết TRƯỚC mọi leg. DSR/PBO không chạy (không đề xuất config nào để wire). `data/lag_edge_health.csv`
+**KHÔNG bị đụng** (md5 `f30a5beadde2bc5e117eca47021aabef`). `git status` sạch mọi `.py` production —
+Mike verify độc lập cùng lượt.
+
+**Ba việc cố ý KHÔNG làm (ghi lại thay vì chạy):** (a) exit-keyed tilt nhiều hơn (51,3% vs 47,3%
+phiên) và MaxDD/Calmar nhỉnh hơn — **KHÔNG phải bằng chứng**, 7+/8− p=0,93; (b) cho
+`edge_health_monitor.py` xuất thêm cột exit-keyed để backtest causal by construction — là thay đổi
+production **không có lợi ích đo được** (chính job này là phép đo, và nó không tìm thấy gì);
+(c) truy nguồn +0,60pp — việc khảo cổ registry, không phải việc quant.
+
+**Files:** `mike/agents/Taylor/research/lag_edge_exitkey_20260910/` (PREREG.md ·
+CONCLUSION_lag_edge_exitkey_20260910.md · build_exitkey_series.py · lag_edge_health_exitkey.csv ·
+pt_v23_exitkey.py · analyze_legs.py → analyze_out.txt · 4 log leg) ·
+CSV `data/v23_golive_audit_2014_now_..._exp_{ekctrl,ekinert,ekexit,eknoedge}_univpit.csv`.
