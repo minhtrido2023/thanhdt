@@ -308,3 +308,36 @@ Newey-West (đã dùng ở nơi khác trong fleet), không phải n_eff kiểu A
 - **`data/edge_panel.csv` và `data/bal_edge_health.csv` chưa có entry trong `kb/data_registry/`**
   (§9 coding_guidelines). Đã giao data-ops bổ sung cho `edge_panel.csv`; `bal_edge_health.csv` cố ý
   KHÔNG publish ra `data/`, chỉ là bằng chứng nghiên cứu.
+
+## 12. ĐÓNG mục 11 — A/B exit-keyed XONG (user duyệt 21:23 ICT), job `Taylor_20260910_142406`
+
+**Kết luận: lỗi khoá-entry CÓ THẬT nhưng VÔ HƯỚNG ⇒ ~107% phần chênh còn sống. Không sửa gì.**
+
+| leg | CAGR | MaxDD | Calmar | md5 / self-check |
+|---|---|---|---|---|
+| `ekctrl` pin R3 | 28,86% | −17,79% | 1,62 | md5 khớp pin ✅ · 0 VND |
+| `ekinert` copy, switch OFF | 28,86% | −17,79% | 1,62 | byte-identical ctrl ✅ |
+| `ekexit` trục ngày RA | 28,88% | −17,70% | 1,63 | 0 VND |
+| `eknoedge` cổng TẮT | 28,58% | −18,56% | 1,54 | mẫu số |
+
+Δ điều trị **+0,021pp**, premium **+0,288 → +0,309pp**. |Δ| nằm ~19 lần bên trong dải nhiễu ±0,40pp
+của placebo cùng harness ⇒ **không phân biệt được với 0**. Phân rã 15 đợt bất đồng: gross 7,234 log-%
+nhưng dấu 7+/8−, p=0,93 ⇒ đọc `mean12` sớm 5 tuần là **tung đồng xu**, không phải nhìn trộm tin tốt.
+**LIVE chưa bao giờ bị ảnh hưởng.**
+
+**Phát sinh lớn hơn câu hỏi gốc — Mike đã tự sửa registry (commit `a76b00d7`):** cổng edge-conditional
+đáng **+0,29pp** trên pin R3 hiện hành, **không phải +0,60pp**. Con số +0,60pp **không có run nguồn
+nào được pin** — grep `results_registry.md` + `KNOWLEDGE.md` + `events_buffer.md` chỉ ra chính các
+entry ngày 09-10 nhắc lại nó; code chỉ ghi "validated walk-forward 2026-06-13" mà không nêu số nào.
+Lỗi khoá-entry KHÔNG giải thích chênh lệch đó (nó đẩy premium đi NGƯỢC chiều).
+
+⚠️ **Bài học quy trình cho chính Mike:** tôi đã chuyển tiếp "+0,60pp đã công bố" cho user 2 lượt liền
+mà không grep nguồn. Cùng lớp lỗi với §9 (recompute đúng số học của một công thức sai): **verify
+ARTIFACT trước khi lặp lại một con số, kể cả khi nó đến từ agent đáng tin.**
+
+**Ba việc Taylor cố ý KHÔNG làm** (ghi lại thay vì chạy): exit-keyed nhỉnh hơn về MaxDD/Calmar —
+KHÔNG phải bằng chứng (p=0,93); cho `edge_health_monitor.py` xuất thêm cột exit-keyed — thay đổi
+production không có lợi ích đo được; truy nguồn +0,60pp — khảo cổ registry, không phải việc quant.
+
+⇒ **Mục 11 ĐÓNG. Toàn bộ mạch AMH 2026-09-10 kết thúc: 5 job Taylor + 2 verdict quant-skeptic,
+KHÔNG WIRE GÌ vào production.**
