@@ -380,3 +380,13 @@
 ## Consolidation 2026-09-10T12:07:02Z
 - [2026-09-10T11:11:23Z] Winston/finding — new-listings-daily: {"date": "2026-09-10", "lookback_days": 90, "total_new": 2, "needs_manual_rating": 0, "fresh_ipo": 0, "research_queue": [], "snapshot": "/home/trido/thanhdt/WorkingClaude/data/new_listings.csv", "note": "0 mã mới < 20Q lịch sử → cần 8L manual rating. Taylor flag để đọc bản cáo bạch + tạo override documented reason+expiry."}
 - [2026-09-10T11:40:07Z] Winston/status — corp-action-scan-daily: {"scanned_universe": "tav2_bq.ticker_prune", "candidates_this_run": 0, "fresh_alerts_this_run": 0, "resolved_since_last_run": [], "still_pending_count": 0, "still_pending": [], "stale_pending_over_7d": []}
+
+## Consolidation 2026-09-10T12:09:38Z
+- [2026-09-10T12:08:10Z] DollarBill/heartbeat — DollarBill_20260910_120709: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20260910_120709", "source": "watcher"}
+- [2026-09-10T12:08:12Z] DollarBill/heartbeat — DollarBill_20260910_120711: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20260910_120711", "source": "watcher"}
+- [2026-09-10T12:08:58Z] DollarBill/heartbeat — DollarBill_20260910_120711: {"status": "in_progress", "note": "plan SpaceX 2026-09-11 da tao, verify load_plan OK, chuan bi gui Discord"}
+- [2026-09-10T12:09:11Z] DollarBill/heartbeat — DollarBill_20260910_120709: {"status": "still_running", "elapsed_min": 2, "job_id": "DollarBill_20260910_120709", "source": "watcher"}
+- [2026-09-10T12:09:12Z] DollarBill/heartbeat — DollarBill_20260910_120711: {"status": "still_running", "elapsed_min": 2, "job_id": "DollarBill_20260910_120711", "source": "watcher"}
+- [2026-09-10T12:09:23Z] DollarBill/decision — plan-2026-09-11-SpaceX: {"account": "SpaceX", "plan_date": "2026-09-11", "orders": 0, "decision": "HOLD_ALL", "reason": "BAL VPI hold signal_hold toi 2026-09-16; 0 LAG due; L1 NO_TRIM", "dt5g_state": 3, "dt5g_state_name": "NEUTRAL", "active_nav_vnd": 980777333, "egg_vnd": 100740274, "reconcile_ok": true}
+- [2026-09-10T12:09:31Z] DollarBill/finding — plan-2026-09-11-SpaceX-done: {"job": "DollarBill_20260910_120711", "file": "data/trade_plans/plan_SpaceX_2026-09-11.json", "load_plan_verify": "OK", "orders": 0, "deferred_orders": 1, "discord_sent": true}
+- [2026-09-10T12:09:33Z] DollarBill/heartbeat — DollarBill_20260910_120709: {"status": "in_progress", "note": "plan ZaloPay 2026-09-11 written and verified, sending Discord + bus"}
