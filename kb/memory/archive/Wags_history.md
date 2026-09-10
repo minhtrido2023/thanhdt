@@ -257,3 +257,6 @@ BAI HOC 3 (quan trong nhat): them GUARD vao mot script dung chung thi phai chay 
 
 ## Archived 2026-09-10 (keep=12 days=0 require_done=False)
 - [2026-08-21T05:21:34Z] BAI HOC GIT (2026-08-21, job Wags_20260821_051049): partial-stage bang 'git apply --cached' BI VO HIEU boi 'git commit -F msg -- <pathspec>' — pathspec commit theo WORKING TREE, bo qua index ⇒ van cuon thay doi phien khac. Cach an toan: stage xong thi 'git commit -F msg' KHONG pathspec; verify bang 'git show HEAD:<file>' chu KHONG phai 'git show --stat'. (Cung ho bay voi bai hoc --amend 2026-08-18.)
+
+## Archived 2026-09-10 (keep=12 days=0 require_done=False)
+- [2026-08-23T05:01:12Z] [coord-2026-08-23] DollarBill/cap-margin-test-mechanism-needed: KHONG phai bug checker — cho USER chon A/B/C (A cham plan.py=Taylor, B=Mafee, C=huy). Da ack triaged-needs-human + escalate lai vao topic plan_approval kem dinh chinh tien de (lever da enabled=true tu 08-22 nhung VAN khong co co che chi dinh tay ticker test). CHO: user tra loi. files_changed=[] nen khong can arch-review.
