@@ -491,3 +491,6 @@
 
 ## Archived 2026-09-10 (keep=12 days=0 require_done=False)
 - [2026-09-05T17:23:26Z] [2026-09-06T00:14:00+07:00] 8L Phase0 earnings-quality 4-truc (job _171403) XONG: bus finding + report ccs_phase0_earnings_quality/report_20260906.md. 1/4 song dung nghia = T1 accruals (accr_q, AUC 0.4729, p_BH 1.4e-7, dung dau ky vong) - floor IS-quintile 0.045 loai 19.8% OOS, persist delta 8.15pp, overlap golden-floor chi ~50% (gia tri gia tang that). T2 margin-slope va T4 debt-eq qua co hoc F1/F2/F3 nhung SAI DAU ky vong (khong tinh la song - phat hien phu can dieu tra rieng, co the confound nganh). T3 wc-redflag chet F2+F3. KHONG wire, T1 can R3 backtest truoc khi de xuat - ngoai pham vi Phase 0 nay.
+
+## Archived 2026-09-10 (keep=12 days=0 require_done=False)
+- [2026-09-06T02:05:07Z] 8L Phase 0b (job _015330) XONG: bus finding V1-V4 + report_phase0b_20260906.md. T1 accruals song sot sector-confound (V1: 3 variant 6.1-8.2pp delta, khong chet), liquidity crosscheck (V2: excluded vs kept ADV khong phan biet duoc p=0.145), cluster-robust dung phuong phap (V3: block bootstrap p=3.5e-06, KHAC voi 1-row/ticker subsample p trung vi=0.31 - de xuat block bootstrap lam chuan .proposed). V4: KHONG NO-GO, mang ca variant (a) absolute va (c) sector-demean vao R3. Chua chay R3, chua wire. Khong con viec mo tru khi user/Mike duyet R3 backtest tiep.
