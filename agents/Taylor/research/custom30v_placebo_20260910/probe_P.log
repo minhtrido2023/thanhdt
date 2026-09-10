@@ -1,0 +1,51 @@
+
+===== probe P1d: pool=60 placebo=0:/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/custom30v_placebo_20260910/fincount_L1b.csv mode=top =====
+[BQ_LOCAL_CACHE] ready — 14 tables from /home/trido/thanhdt/WorkingClaude/data/bq_cache
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+  [placebo] mode=top seed=0, count-matched to 50 rebals from fincount_L1b.csv
+  [fincount dump] 50 rebals -> /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/custom30v_placebo_20260910/fincount_probe_P1d.csv | n_fin mean 5.980 min 0 max 16
+[BQ_LOCAL_CACHE] query took 67.9s (589259 rows)
+  [selfcheck trong so] max|sai lech tuong doi| vs lvl build_pit = 2.220e-16 OK
+  [P1d] ADV median 1,329.5B/day -> park 20% = 265.9B/day | fin_w mean 34.18% (OOS 53.52%) | bank_w mean 33.11% | level 25.2418x  CAGR_ro 31.25%
+
+===== probe P2d: pool=120 placebo=0:/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/custom30v_placebo_20260910/fincount_ctrl.csv mode=top =====
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+  [placebo] mode=top seed=0, count-matched to 50 rebals from fincount_ctrl.csv
+  [fincount dump] 50 rebals -> /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/custom30v_placebo_20260910/fincount_probe_P2d.csv | n_fin mean 9.560 min 0 max 18
+[BQ_LOCAL_CACHE] query took 90.8s (787447 rows)
+  [selfcheck trong so] max|sai lech tuong doi| vs lvl build_pit = 2.220e-16 OK
+  [P2d] ADV median 971.8B/day -> park 20% = 194.4B/day | fin_w mean 59.87% (OOS 81.88%) | bank_w mean 52.95% | level 56.9252x  CAGR_ro 40.56%
+
+===== probe P1r1: pool=60 placebo=101:/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/custom30v_placebo_20260910/fincount_L1b.csv mode=random =====
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+  [placebo] mode=random seed=101, count-matched to 50 rebals from fincount_L1b.csv
+  [fincount dump] 50 rebals -> /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/custom30v_placebo_20260910/fincount_probe_P1r1.csv | n_fin mean 5.980 min 0 max 16
+[BQ_LOCAL_CACHE] query took 70.5s (610260 rows)
+  [selfcheck trong so] max|sai lech tuong doi| vs lvl build_pit = 2.220e-16 OK
+  [P1r1] ADV median 1,379.5B/day -> park 20% = 275.9B/day | fin_w mean 33.46% (OOS 51.96%) | bank_w mean 28.08% | level 26.8975x  CAGR_ro 31.96%
+
+===== probe P1r2: pool=60 placebo=202:/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/custom30v_placebo_20260910/fincount_L1b.csv mode=random =====
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+  [placebo] mode=random seed=202, count-matched to 50 rebals from fincount_L1b.csv
+  [fincount dump] 50 rebals -> /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/custom30v_placebo_20260910/fincount_probe_P1r2.csv | n_fin mean 5.980 min 0 max 16
+[BQ_LOCAL_CACHE] query took 69.9s (610260 rows)
+  [selfcheck trong so] max|sai lech tuong doi| vs lvl build_pit = 2.220e-16 OK
+  [P1r2] ADV median 1,345.1B/day -> park 20% = 269.0B/day | fin_w mean 32.74% (OOS 51.53%) | bank_w mean 27.71% | level 22.1811x  CAGR_ro 29.83%
+
+===== probe P2r1: pool=120 placebo=101:/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/custom30v_placebo_20260910/fincount_ctrl.csv mode=random =====
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+  [placebo] mode=random seed=101, count-matched to 50 rebals from fincount_ctrl.csv
+  [fincount dump] 50 rebals -> /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/custom30v_placebo_20260910/fincount_probe_P2r1.csv | n_fin mean 9.560 min 0 max 18
+[BQ_LOCAL_CACHE] query took 89.2s (796601 rows)
+  [selfcheck trong so] max|sai lech tuong doi| vs lvl build_pit = 2.220e-16 OK
+  [P2r1] ADV median 824.1B/day -> park 20% = 164.8B/day | fin_w mean 59.89% (OOS 78.82%) | bank_w mean 45.36% | level 38.2684x  CAGR_ro 35.94%
+
+===== probe P2r2: pool=120 placebo=202:/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/custom30v_placebo_20260910/fincount_ctrl.csv mode=random =====
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+  [placebo] mode=random seed=202, count-matched to 50 rebals from fincount_ctrl.csv
+  [fincount dump] 50 rebals -> /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/custom30v_placebo_20260910/fincount_probe_P2r2.csv | n_fin mean 9.560 min 0 max 18
+[BQ_LOCAL_CACHE] query took 89.7s (805681 rows)
+  [selfcheck trong so] max|sai lech tuong doi| vs lvl build_pit = 2.220e-16 OK
+  [P2r2] ADV median 841.4B/day -> park 20% = 168.3B/day | fin_w mean 59.47% (OOS 78.55%) | bank_w mean 42.58% | level 42.8825x  CAGR_ro 37.25%
+
+PROBE DONE

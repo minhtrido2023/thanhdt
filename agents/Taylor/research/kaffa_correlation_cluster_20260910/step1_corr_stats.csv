@@ -1,0 +1,7 @@
+cluster,split,n_months,corr,t_nw,grade
+PVN-family,FULL,88,-0.3189,-1.8399,CONCLUDE
+PVN-family,IS_pre2020,12,0.275,1.3512,THIN
+PVN-family,OOS_2020p,76,-0.3573,-2.1557,CONCLUDE
+Viettel-family,FULL,78,0.0156,0.1393,CONCLUDE
+Viettel-family,IS_pre2020,3,-0.9554,,TOO-THIN(n<10)
+Viettel-family,OOS_2020p,75,0.0727,0.64,CONCLUDE

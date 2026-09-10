@@ -121,6 +121,23 @@ muốn theo đuổi.
 File: `mike/agents/Taylor/research/kaffa_correlation_cluster_20260910/{PREREG_step1.md,
 step1_backtest.py,STEP1_CONCLUSION.md,step1_corr_stats.csv}`.
 
+## Việc 1/3 (Hit Details) + Monitor — XONG + WIRED (2026-09-10 23:54 ICT)
+
+Taylor build xong `hit_details.py` + `indicator_monitor.py` (job Taylor_20260910_155132, bus
+topic `kaffa-report-tooling-hitdetails-monitor-20260910`), selfcheck khớp production tuyệt đối
+(VPI BAL ta=151.0 CSV vs 151 recompute; PHR/SSI LAG qualify=True khớp). Commit
+`WorkingClaude 47d6e2f5` (2 script) + `mike 83d78bdf` (wrapper cron + registry).
+
+User quyết định (Discord 23:54 ICT):
+- **Wire `hit_details.py` tự động** — cron `mike/bin/hit_details_daily.sh` 19:05 ICT T2-T6 (sau
+  `bq_freshness_check` 19:00, trước `eod_trading_report` 19:10), post 1 dòng + đường dẫn file vào
+  Discord Trading report. Test thật OK (chạy tay, post Discord thành công).
+- **KHÔNG wire `indicator_monitor.py`** — trách nhiệm data-quality đã thuộc Winston/data-ops,
+  không cần thêm công cụ quản lý. Giữ làm script chạy tay khi cần
+  (`python3 indicator_monitor.py [DATE]`).
+
+Còn lại từ danh sách gốc: #4 (headline streak UX) — vẫn ưu tiên thấp, chưa làm.
+
 ## Bước 1 KẾT QUẢ (2026-09-10 23:0x ICT, job Taylor_20260910_152624) — **NO-GO**
 
 Pre-registered TRƯỚC khi chạy (`PREREG_step1.md`): tín hiệu Cluster_RS_200 (200d relative-strength

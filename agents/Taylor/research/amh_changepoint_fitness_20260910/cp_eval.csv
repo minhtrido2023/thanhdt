@@ -1,0 +1,5 @@
+horizon,signal,gt_break,cusum_lag_m,bocpd_lag_m,incumbent_lag_m,gt_thr_t,mean_before,mean_after
+fwd_3m,pb_z,2020-03,8.0,,1.0,4.7,0.0902,-0.1009
+fwd_3m,D_RSI,2015-01,,,,4.46,-0.0163,0.2624
+fwd_3m,D_RSI,2018-03,4.0,,7.0,4.46,0.2077,-0.0193
+fwd_1m,C_L1M,2025-06,,,,3.22,0.0073,-0.1085

@@ -1,0 +1,89 @@
+panel 30,843 rows  2014-01 -> 2026-06
+
+====================================================================================================
+FLIPPED ALARMS ON THE AVAILABILITY CLOCK (when an operator could first have seen them)
+====================================================================================================
+
+--- mom_200 / ALL ---
+  fwd_1m alarms (7): 2019-03..2019-05(3m), 2020-07..2021-04(10m), 2022-02..2022-06(5m), 2022-08..2022-10(3m), 2023-07..2023-07(1m), 2023-10..2024-06(9m), 2025-12..2026-07(8m)
+  fwd_3m alarms (4): 2020-08..2021-04(9m), 2022-04..2023-02(11m), 2023-07..2024-05(11m), 2026-01..2026-09(9m)
+    3m alarm 2020-08  <- 1m first flagged 2020-07  = LEAD 1 months
+    3m alarm 2022-04  <- 1m first flagged 2020-07  = LEAD 21 months
+    3m alarm 2023-07  <- 1m first flagged 2022-08  = LEAD 11 months
+    3m alarm 2026-01  <- 1m first flagged 2025-12  = LEAD 1 months
+    FALSE POSITIVES (1m alarm never confirmed by a 3m alarm within 12m): 2/7 -> 2019-03, 2023-10
+
+--- mom_200 / CYCLICAL ---
+  fwd_1m alarms (9): 2018-07..2018-12(6m), 2019-03..2019-05(3m), 2020-07..2021-04(10m), 2022-03..2022-06(4m), 2022-08..2022-10(3m), 2023-07..2023-07(1m), 2023-10..2024-01(4m), 2024-03..2024-06(4m), 2025-11..2026-03(5m)
+  fwd_3m alarms (5): 2018-10..2018-10(1m), 2020-07..2021-03(9m), 2022-05..2022-12(8m), 2023-07..2024-07(13m), 2025-12..2026-09(10m)
+    3m alarm 2018-10  <- 1m first flagged 2018-07  = LEAD 3 months
+    3m alarm 2020-07  <- 1m first flagged 2020-07  = LEAD 0 months
+    3m alarm 2022-05  <- 1m first flagged 2022-03  = LEAD 2 months
+    3m alarm 2023-07  <- 1m first flagged 2022-08  = LEAD 11 months
+    3m alarm 2025-12  <- 1m first flagged 2025-11  = LEAD 1 months
+    FALSE POSITIVES (1m alarm never confirmed by a 3m alarm within 12m): 3/9 -> 2019-03, 2023-10, 2024-03
+
+--- D_RSI / ALL ---
+  fwd_1m alarms (7): 2019-04..2019-06(3m), 2020-09..2021-04(8m), 2023-07..2023-08(2m), 2024-03..2024-03(1m), 2024-05..2024-06(2m), 2026-02..2026-02(1m), 2026-04..2026-07(4m)
+  fwd_3m alarms (6): 2019-05..2019-05(1m), 2020-08..2020-12(5m), 2021-02..2021-04(3m), 2023-08..2023-10(3m), 2025-12..2025-12(1m), 2026-06..2026-09(4m)
+    3m alarm 2019-05  <- 1m first flagged 2019-04  = LEAD 1 months
+    3m alarm 2020-08  <- 1m first flagged 2020-09  = LEAD -1 months
+    3m alarm 2021-02  <- 1m first flagged 2020-09  = LEAD 5 months
+    3m alarm 2023-08  <- 1m first flagged 2023-07  = LEAD 1 months
+    3m alarm 2025-12  <- NO matching 1m alarm (MISS)
+    3m alarm 2026-06  <- 1m first flagged 2026-02  = LEAD 4 months
+    FALSE POSITIVES (1m alarm never confirmed by a 3m alarm within 12m): 2/7 -> 2024-03, 2024-05
+
+--- D_RSI / CYCLICAL ---
+  fwd_1m alarms (4): 2019-04..2019-06(3m), 2021-03..2021-04(2m), 2023-07..2023-08(2m), 2025-12..2026-07(8m)
+  fwd_3m alarms (7): 2020-07..2020-09(3m), 2020-11..2020-11(1m), 2021-02..2021-03(2m), 2023-08..2023-10(3m), 2025-12..2026-01(2m), 2026-03..2026-03(1m), 2026-05..2026-09(5m)
+    3m alarm 2020-07  <- NO matching 1m alarm (MISS)
+    3m alarm 2020-11  <- NO matching 1m alarm (MISS)
+    3m alarm 2021-02  <- 1m first flagged 2021-03  = LEAD -1 months
+    3m alarm 2023-08  <- 1m first flagged 2023-07  = LEAD 1 months
+    3m alarm 2025-12  <- 1m first flagged 2025-12  = LEAD 0 months
+    3m alarm 2026-03  <- 1m first flagged 2025-12  = LEAD 3 months
+    3m alarm 2026-05  <- 1m first flagged 2025-12  = LEAD 5 months
+    FALSE POSITIVES (1m alarm never confirmed by a 3m alarm within 12m): 1/4 -> 2019-04
+
+====================================================================================================
+LEAD-TIME SUMMARY (months the fwd-1M indicator fired before the fwd-3M one)
+====================================================================================================
+ signal    scope alarm_3m alarm_1m  lead_months
+mom_200      ALL  2020-08  2020-07          1.0
+mom_200      ALL  2022-04  2020-07         21.0
+mom_200      ALL  2023-07  2022-08         11.0
+mom_200      ALL  2026-01  2025-12          1.0
+mom_200 CYCLICAL  2018-10  2018-07          3.0
+mom_200 CYCLICAL  2020-07  2020-07          0.0
+mom_200 CYCLICAL  2022-05  2022-03          2.0
+mom_200 CYCLICAL  2023-07  2022-08         11.0
+mom_200 CYCLICAL  2025-12  2025-11          1.0
+  D_RSI      ALL  2019-05  2019-04          1.0
+  D_RSI      ALL  2020-08  2020-09         -1.0
+  D_RSI      ALL  2021-02  2020-09          5.0
+  D_RSI      ALL  2023-08  2023-07          1.0
+  D_RSI      ALL  2025-12      NaN          NaN
+  D_RSI      ALL  2026-06  2026-02          4.0
+  D_RSI CYCLICAL  2020-07      NaN          NaN
+  D_RSI CYCLICAL  2020-11      NaN          NaN
+  D_RSI CYCLICAL  2021-02  2021-03         -1.0
+  D_RSI CYCLICAL  2023-08  2023-07          1.0
+  D_RSI CYCLICAL  2025-12  2025-12          0.0
+  D_RSI CYCLICAL  2026-03  2025-12          3.0
+  D_RSI CYCLICAL  2026-05  2025-12          5.0
+
+  n matched alarms = 19   median lead = 1.0m   mean = 3.6m   range = [-1, 21]
+  MECHANICAL floor: publication lag differs by 3-1 = 2 months by construction.
+
+====================================================================================================
+LATEST READING (both clocks)
+====================================================================================================
+  mom_200   ALL       fwd_1m: avail=2026-07 sig_month=2026-06 full=+0.0363 recent12=-0.0179 t=+2.24 -> FLIPPED
+  mom_200   ALL       fwd_3m: avail=2026-09 sig_month=2026-06 full=+0.0610 recent12=-0.0205 t=+3.68 -> FLIPPED
+  mom_200   CYCLICAL  fwd_1m: avail=2026-07 sig_month=2026-06 full=+0.0335 recent12=-0.0802 t=+1.82 -> WEAK
+  mom_200   CYCLICAL  fwd_3m: avail=2026-09 sig_month=2026-06 full=+0.0591 recent12=-0.0627 t=+3.21 -> FLIPPED
+  D_RSI     ALL       fwd_1m: avail=2026-07 sig_month=2026-06 full=+0.0356 recent12=-0.0313 t=+2.79 -> FLIPPED
+  D_RSI     ALL       fwd_3m: avail=2026-09 sig_month=2026-06 full=+0.0612 recent12=-0.0395 t=+4.78 -> FLIPPED
+  D_RSI     CYCLICAL  fwd_1m: avail=2026-07 sig_month=2026-06 full=+0.0411 recent12=-0.0691 t=+2.77 -> FLIPPED
+  D_RSI     CYCLICAL  fwd_3m: avail=2026-09 sig_month=2026-06 full=+0.0578 recent12=-0.0731 t=+3.92 -> FLIPPED

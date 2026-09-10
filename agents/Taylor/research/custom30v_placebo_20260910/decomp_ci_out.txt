@@ -1,0 +1,17 @@
+=== BOOTSTRAP CHUNG (block 63 phien, B=4000, cung chi so cho moi chan) — pp/nam ===
+         diem   p2.5    p50  p97.5  P(>0)
+TOT     1.990 -0.095  1.992  4.082  0.968
+dP1     0.487 -0.659  0.461  1.709  0.777
+dP2     1.002 -0.850  1.020  2.754  0.866
+inter   0.501 -1.171  0.460  2.376  0.703
+dP1r    0.041 -1.137  0.046  1.275  0.527
+dP2r    0.003 -1.881  0.020  1.796  0.508
+interR  1.947 -0.591  1.921  4.582  0.934
+
+=== TY LE %TONG (chi tinh tren cac lan bootstrap co TONG > 0.5pp de ty le co nghia) ===
+  CHINH mode=top   n=3681/4000  %P1 med   24.3 CI[  -52.3,  90.5]  %P2 med   53.2 CI[  -46.3, 134.6]  %tuongtac med   22.3
+  PHU mode=random  n=3681/4000  %P1 med    3.0 CI[  -88.6,  70.2]  %P2 med    3.7 CI[ -153.2,  88.7]  %tuongtac med   93.3
+
+=== P(dP2 > dP1) — cau hoi (Y) manh hon (X) hay khong ===
+  mode=top    : 0.718
+  mode=random : 0.489

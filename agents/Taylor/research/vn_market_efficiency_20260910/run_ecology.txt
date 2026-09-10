@@ -1,0 +1,38 @@
+=== Ecology proxies by year (turnover in ty VND/month, constant-2026 VND) ===
+      turnover_real_tyVND   n_names  net_foreign_tyVND_yr  foreign_share  months_fx
+year                                                                               
+2010          105786.6862  344.2500                0.0000            NaN          0
+2011           37804.0567  289.9167                0.0000            NaN          0
+2012           45230.9388  206.1667                0.0000            NaN          0
+2013           52661.9101  170.5000                0.0000            NaN          0
+2014          103490.0518  230.7500                0.0000            NaN          0
+2015           80248.9988  253.9167                0.0000            NaN          0
+2016           89561.8365  288.1667                0.0000            NaN          0
+2017          125904.2297  308.4167                0.0000            NaN          0
+2018          173766.9432  308.7500            11539.9318         0.3235          5
+2019           99053.0403  280.1667             6620.0605         0.4378         12
+2020          183559.8511  290.8333           -15739.7874         0.3119         12
+2021          690251.9936  464.0000           -58092.4094         0.1557         12
+2022          488627.4344  542.9167            26585.2678         0.1777         12
+2023          396446.5248  422.5833           -25169.5046         0.1812         12
+2024          442057.5551  431.9167           -83395.5144         0.2062         12
+2025          588014.0977  431.8333          -122613.8316         0.2348         12
+2026          423331.0561  402.7778           -95265.4342         0.2938          9
+
+=== E1 net foreign flow, annual (ty VND) — REAL DATA, VNDirect finfo, 2018-08-30+ ===
+year
+2018     11540.0
+2019      6620.0
+2020    -15740.0
+2021    -58092.0
+2022     26585.0
+2023    -25170.0
+2024    -83396.0
+2025   -122614.0
+2026    -95265.0
+coverage: 2018-08-30 -> 2026-09-10, 1998 sessions
+
+=== NOT AVAILABLE (checked, not assumed) ===
+  - margin debt toàn thị trường / vốn hoá: KHÔNG có trong tav2_bq, tav2_mike, data/, hay data_registry (dạng chuỗi)
+  - tỷ trọng giao dịch NĐT cá nhân vs tổ chức (CHUỖI theo tháng/năm): KHÔNG có trong tav2_bq, tav2_mike, data/, hay data_registry (dạng chuỗi)
+  - số tài khoản mở mới VSD (CHUỖI): KHÔNG có trong tav2_bq, tav2_mike, data/, hay data_registry (dạng chuỗi)

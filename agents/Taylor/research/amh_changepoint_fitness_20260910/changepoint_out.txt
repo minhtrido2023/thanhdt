@@ -1,0 +1,108 @@
+==============================================================================
+CONTROL LEG — rebuild fwd-3M IC from the panel, must match the pinned artifact
+==============================================================================
+control-leg max |pinned - rebuilt| fwd-3M IC = 9.97e-17   (PASS)
+fwd-3M series: 150 months 2014-01 -> 2026-06
+fwd-1M series: 150 months 2014-01 -> 2026-06
+
+==============================================================================
+N DISCIPLINE — the fwd-3M IC series is OVERLAPPING (MA(2) by construction)
+==============================================================================
+signal       ac1_3m  ac2_3m  n_eff_3m  ac1_1m  n_eff_1m
+pb_z           0.70    0.39        27    0.15       110
+PB             0.68    0.47        29    0.05       135
+PE             0.55    0.29        44    0.03       141
+ROIC5Y         0.66    0.39        31   -0.05       166
+FSCORE         0.49    0.29        52    0.15       111
+ROE_Min5Y      0.71    0.44        26   -0.01       152
+mom_200        0.66    0.44        31    0.23        95
+D_RSI          0.44    0.30        58    0.24        91
+D_CMF          0.42    0.29        62   -0.02       156
+C_L1M          0.33    0.14        75    0.01       146
+  -> the incumbent |t|>=2 gate divides by sqrt(150). At ac1~0.6 the honest divisor is sqrt(~35),
+     i.e. the incumbent t-stat is inflated ~2x. Same caveat applies to every verdict below.
+
+==============================================================================
+HORIZON = fwd_3m
+==============================================================================
+pb_z       gt_breaks=['2020-03']  thr_t=4.70  cusum=3  bocpd=0  P_shift_now=0.11  incumbent=WEAK
+PB         gt_breaks=[]  thr_t=5.52  cusum=3  bocpd=1  P_shift_now=0.07  incumbent=WEAK
+PE         gt_breaks=[]  thr_t=4.59  cusum=3  bocpd=1  P_shift_now=0.05  incumbent=STRENGTH
+ROIC5Y     gt_breaks=[]  thr_t=5.17  cusum=2  bocpd=2  P_shift_now=0.06  incumbent=STRENGTH
+FSCORE     gt_breaks=[]  thr_t=4.80  cusum=2  bocpd=0  P_shift_now=0.06  incumbent=FADING
+ROE_Min5Y  gt_breaks=[]  thr_t=5.24  cusum=1  bocpd=2  P_shift_now=0.04  incumbent=STRENGTH
+mom_200    gt_breaks=[]  thr_t=4.92  cusum=2  bocpd=0  P_shift_now=0.29  incumbent=FLIPPED
+D_RSI      gt_breaks=['2015-01', '2018-03']  thr_t=4.46  cusum=1  bocpd=1  P_shift_now=0.09  incumbent=FLIPPED
+D_CMF      gt_breaks=[]  thr_t=4.30  cusum=2  bocpd=0  P_shift_now=0.13  incumbent=WEAK
+C_L1M      gt_breaks=[]  thr_t=4.02  cusum=1  bocpd=0  P_shift_now=0.07  incumbent=WEAK
+
+==============================================================================
+HORIZON = fwd_1m
+==============================================================================
+pb_z       gt_breaks=[]  thr_t=3.53  cusum=0  bocpd=0  P_shift_now=0.05  incumbent=WEAK
+PB         gt_breaks=[]  thr_t=3.58  cusum=1  bocpd=0  P_shift_now=0.06  incumbent=WEAK
+PE         gt_breaks=[]  thr_t=3.40  cusum=1  bocpd=0  P_shift_now=0.05  incumbent=STRENGTH
+ROIC5Y     gt_breaks=[]  thr_t=3.22  cusum=0  bocpd=0  P_shift_now=0.06  incumbent=WEAK
+FSCORE     gt_breaks=[]  thr_t=3.60  cusum=1  bocpd=0  P_shift_now=0.06  incumbent=DECAYED
+ROE_Min5Y  gt_breaks=[]  thr_t=3.20  cusum=0  bocpd=0  P_shift_now=0.06  incumbent=STRENGTH
+mom_200    gt_breaks=[]  thr_t=3.63  cusum=1  bocpd=0  P_shift_now=0.06  incumbent=FLIPPED
+D_RSI      gt_breaks=[]  thr_t=3.90  cusum=1  bocpd=1  P_shift_now=0.07  incumbent=FLIPPED
+D_CMF      gt_breaks=[]  thr_t=3.16  cusum=0  bocpd=0  P_shift_now=0.07  incumbent=WEAK
+C_L1M      gt_breaks=['2025-06']  thr_t=3.22  cusum=0  bocpd=0  P_shift_now=0.06  incumbent=WEAK
+
+==============================================================================
+SUMMARY — false-alarm rate (detection NOT followed by a sustained 12M mean shift)
+==============================================================================
+fwd_3m CUSUM  n_alarms= 20  false-alarm=35.0%  matched a hindsight break (+/-6m)= 5.0%
+fwd_3m BOCPD  n_alarms=  7  false-alarm=28.6%  matched a hindsight break (+/-6m)= 0.0%
+fwd_1m CUSUM  n_alarms=  5  false-alarm=40.0%  matched a hindsight break (+/-6m)= 0.0%
+fwd_1m BOCPD  n_alarms=  1  false-alarm= 0.0%  matched a hindsight break (+/-6m)= 0.0%
+
+==============================================================================
+SUMMARY — detection LAG vs the hindsight break (months; lower = earlier warning)
+==============================================================================
+
+[fwd_3m]  n_ground_truth_breaks = 3
+  cusum_lag_m        detected  2/ 3  median=6.0  mean=6.0
+  bocpd_lag_m        detected  0/ 3  median=nan  mean=nan
+  incumbent_lag_m    detected  2/ 3  median=4.0  mean=4.0
+  CUSUM vs incumbent on the 2 breaks BOTH caught: median delta = +2.0 months
+
+[fwd_1m]  n_ground_truth_breaks = 1
+  cusum_lag_m        detected  0/ 1  median=nan  mean=nan
+  bocpd_lag_m        detected  0/ 1  median=nan  mean=nan
+  incumbent_lag_m    detected  0/ 1  median=nan  mean=nan
+
+==============================================================================
+LATEST STATE — P(regime shift) as of the last realised month
+==============================================================================
+horizon    signal    asof  P_regime_shift  P_max_last6 cusum_last_alarm incumbent_label  ic_recent12  ic_full  n_gt_breaks
+ fwd_3m      pb_z 2026-06           0.109        0.109          2024-02            WEAK      -0.0216  -0.0069            1
+ fwd_3m        PB 2026-06           0.065        0.169          2024-02            WEAK       0.0385  -0.0203            0
+ fwd_3m        PE 2026-06           0.053        0.054          2025-08        STRENGTH      -0.0750  -0.0533            0
+ fwd_3m    ROIC5Y 2026-06           0.058        0.222          2024-02        STRENGTH       0.0602   0.0307            0
+ fwd_3m    FSCORE 2026-06           0.065        0.098          2023-06          FADING       0.0158   0.0465            0
+ fwd_3m ROE_Min5Y 2026-06           0.040        0.105          2021-01        STRENGTH       0.1455   0.0503            0
+ fwd_3m   mom_200 2026-06           0.292        0.292          2023-06         FLIPPED      -0.0205   0.0610            0
+ fwd_3m     D_RSI 2026-06           0.091        0.174          2018-07         FLIPPED      -0.0395   0.0612            2
+ fwd_3m     D_CMF 2026-06           0.135        0.135          2023-05            WEAK      -0.0307   0.0199            0
+ fwd_3m     C_L1M 2026-06           0.070        0.071          2022-03            WEAK      -0.1104   0.0134            0
+ fwd_1m      pb_z 2026-06           0.050        0.065                             WEAK      -0.0257  -0.0074            0
+ fwd_1m        PB 2026-06           0.056        0.072          2022-02            WEAK       0.0009  -0.0113            0
+ fwd_1m        PE 2026-06           0.053        0.053          2018-01        STRENGTH      -0.0476  -0.0354            0
+ fwd_1m    ROIC5Y 2026-06           0.056        0.068                             WEAK       0.0334   0.0185            0
+ fwd_1m    FSCORE 2026-06           0.062        0.062          2023-07         DECAYED       0.0046   0.0408            0
+ fwd_1m ROE_Min5Y 2026-06           0.056        0.062                         STRENGTH       0.0651   0.0341            0
+ fwd_1m   mom_200 2026-06           0.055        0.067          2018-09         FLIPPED      -0.0179   0.0363            0
+ fwd_1m     D_RSI 2026-06           0.066        0.081          2021-02         FLIPPED      -0.0313   0.0356            0
+ fwd_1m     D_CMF 2026-06           0.067        0.067                             WEAK      -0.0186   0.0055            0
+ fwd_1m     C_L1M 2026-06           0.062        0.065                             WEAK      -0.0924   0.0064            1
+
+==============================================================================
+SENSITIVITY — n_alarms / false-alarm rate under other textbook params (fwd_3m)
+==============================================================================
+  CUSUM h=4: n_alarms= 23  false-alarm=56.5%
+  CUSUM h=5: n_alarms= 20  false-alarm=35.0%
+  CUSUM h=6: n_alarms= 15  false-alarm=46.7%
+  BOCPD lambda=24: n_alarms= 14  false-alarm=14.3%
+  BOCPD lambda=36: n_alarms=  7  false-alarm=28.6%

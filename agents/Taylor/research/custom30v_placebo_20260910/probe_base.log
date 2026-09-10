@@ -1,0 +1,17 @@
+
+===== probe ctrl: pool=60 placebo=None mode=random =====
+[BQ_LOCAL_CACHE] ready — 14 tables from /home/trido/thanhdt/WorkingClaude/data/bq_cache
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+  [fincount dump] 50 rebals -> /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/custom30v_placebo_20260910/fincount_probe_ctrl.csv | n_fin mean 9.560 min 0 max 18
+[BQ_LOCAL_CACHE] query took 67.5s (585845 rows)
+  [selfcheck trong so] max|sai lech tuong doi| vs lvl build_pit = 2.220e-16 OK
+  [ctrl] ADV median 1,743.7B/day -> park 20% = 348.7B/day | fin_w mean 52.81% (OOS 71.36%) | bank_w mean 49.14% | level 33.4614x  CAGR_ro 34.41%
+
+===== probe L1b: pool=120 placebo=None mode=random =====
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+  [fincount dump] 50 rebals -> /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/custom30v_placebo_20260910/fincount_probe_L1b.csv | n_fin mean 5.980 min 0 max 16
+[BQ_LOCAL_CACHE] query took 92.2s (806783 rows)
+  [selfcheck trong so] max|sai lech tuong doi| vs lvl build_pit = 2.220e-16 OK
+  [L1b] ADV median 510.3B/day -> park 20% = 102.1B/day | fin_w mean 39.48% (OOS 63.46%) | bank_w mean 37.13% | level 58.3580x  CAGR_ro 40.85%
+
+PROBE DONE
