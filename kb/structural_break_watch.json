@@ -1,0 +1,14 @@
+{
+  "_doc": "Registry su kien CAU TRUC co the doi he sinh thai thi truong VN. Protocol: kb/projects/amh-structural-break-protocol-20260910.md. Quet lai moi review quy cua Bobby (macro-strategist).",
+  "opened": "2026-09-10",
+  "owner": "Mike",
+  "next_review": "2026-11-26",
+  "events": [
+    {"id": "ftse_msci_upgrade", "label": "Nang hang thi truong (FTSE Advanced Emerging / MSCI EM)", "status": "watching", "effective_date": null, "detection_source": "Bobby quarterly review + tin thi truong", "revalidate": ["DT5G breadth guard PIT", "custom30V pool thanh khoan", "CAPIT %ADV"], "conclusion": null},
+    {"id": "krx_microstructure", "label": "He thong KRX / doi co che khop, bien do, lo", "status": "watching", "effective_date": null, "detection_source": "HOSE/HNX thong bao van hanh", "revalidate": ["fill model tran %ADV/phien", "chase-cap", "fill_timing HYBRID"], "conclusion": null},
+    {"id": "settlement_cycle", "label": "Rut ngan chu ky thanh toan (T+2 -> T+1/T+0)", "status": "watching", "effective_date": null, "detection_source": "VSDC/UBCKNN", "revalidate": ["compute_active_nav", "plan funding gate", "coding_guidelines 25 field tien", "sizing"], "conclusion": null},
+    {"id": "margin_regulation", "label": "Luat margin / room margin toan thi truong doi", "status": "watching", "effective_date": null, "detection_source": "UBCKNN + Wendy (legal-vn)", "revalidate": ["capit_margin_lever", "sleeve discretionary", "mandate margin Loai-2"], "conclusion": null},
+    {"id": "foreign_ownership_room", "label": "Bo/noi gioi han so huu nuoc ngoai", "status": "watching", "effective_date": null, "detection_source": "UBCKNN + Wendy (legal-vn)", "revalidate": ["universe_pit", "8L comp dinh gia", "BAL/LAG pool"], "conclusion": null},
+    {"id": "new_products", "label": "San pham moi quy mo lon (phai sinh mo rong, ETF quy mo, ban khong)", "status": "watching", "effective_date": null, "detection_source": "Bobby quarterly review", "revalidate": ["biodiversity gate", "DT5G", "edge-health toan bo"], "conclusion": null}
+  ]
+}

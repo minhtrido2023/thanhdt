@@ -85,3 +85,32 @@ Thứ tự theo giá trị/chi phí:
   GATE, không phải return-enhancer; kỳ vọng ΔCAGR≈0, mục tiêu là sống qua đổi chế độ.
 - N chu kỳ VN ~2-3 ⇒ dùng causal + judgment (như mandate 08-25), không dùng p-value làm cổng duy nhất.
 - DT5G/8L: đừng để "adapt" thành cớ re-tune theo lịch sử — CLAUDE.md đã cấm, và AMH cũng không đòi điều đó.
+
+## 5. THỰC THI — user duyệt cả 7 hướng, 2026-09-10 20:15 ICT
+
+Thứ tự Mike chốt = (giá trị × ràng buộc thời gian) ÷ chi phí. #7 lên đầu vì nó là điều kiện cần
+của #4 (script chết thì không nghiên cứu được), rẻ, và làm xong ngay trong lượt.
+
+| Thứ tự | Hướng | Trạng thái | Bằng chứng |
+|---|---|---|---|
+| 1 | #7 Fix kỹ thuật | **XONG** | commit `30878a9b` — 3 script đổi `\data\`→`/data/`; `fitness_matrix.py` + `biodiversity_test.py` chạy lại được sau ~3 tháng chết; gỡ dòng "EXBULL-suppression chưa live" (SAI) |
+| 2 | #1 BAL edge-gate | dispatch Taylor `Taylor_20260910_131906` (opus/high) | deadline review VPI/BAL **09-16** |
+| 3 | #3+#4 Change-point + fitness matrix | dispatch Taylor `Taylor_20260910_131908` | gộp 1 job vì cùng `edge_panel.csv`; truc 2 = breadth-tercile PIT theo quy ước 08-22 |
+| 4 | #2 Market-efficiency gauge | dispatch Taylor `Taylor_20260910_131910` | variance ratio / Hurst / autocorr + proxy ecology VN |
+| 5 | #5 Biodiversity gate | **XONG** | `.claude/skills/quant-research/SKILL.md` bước **18** + 1 dòng checklist |
+| 6 | #6 Structural-break protocol | **XONG** | `kb/projects/amh-structural-break-protocol-20260910.md` + `kb/structural_break_watch.json` (6 sự kiện) + con trỏ ở `current_ops.md` § Macro watch |
+
+**Kết quả #4 chạy lần đầu sau khi fix (full-sample, CHƯA phải kết luận):** `fitness_matrix.py` cho
+momentum trong NEUTRAL có IC +0,101 (t=4,75) trên TOÀN mẫu 2014-2026 — trong khi edge-health nói
+`mom_200` FLIPPED từ 04/2026. Hai con số này **không mâu thuẫn**: một cái là trung bình 12 năm, một
+cái là 12 tháng gần nhất. Đó chính xác là lý do #3+#4 tồn tại — phải tách "momentum chết ở mọi
+state" khỏi "momentum chết ở đúng chế độ hiện tại".
+
+**Kết quả #5 chạy thật (incumbent = MOMENTUM, 2026-09-10):** VALUE_PE PASS (corr −0,23; sống sót
+0,79 trong quý xấu nhất của incumbent; ΔSharpe +0,24), QUALITY_ROIC PASS, DT5G_TIMING PASS; RSI
+FAIL (corr 0,60), FLOW_CMF FAIL (ΔSharpe −0,03), PBZ FAIL (corr 0,62). Ba cái FAIL đều là tín hiệu
+tử tế nếu đo một mình — đó là lý do cổng này đáng tồn tại.
+
+**Ràng buộc giữ nguyên cho cả 3 job đang chạy:** PAPER-ONLY, prereg trước khi backtest, ngưỡng chốt
+trước không quét grid, N = số sự kiện độc lập, khai trước kỳ vọng ΔCAGR≈0, và KHÔNG wire gì —
+mọi thay đổi production vẫn phải qua quant-skeptic + user duyệt.
