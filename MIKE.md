@@ -174,6 +174,9 @@ Không khai thì hành vi y như cũ (fail-closed) — vẫn phải tự đăng 
 **Luật khớp topic con của `rollup_of`** (viết đúng nguyên văn topic con; dạng đầy đủ
 `Agent/topic-con` khi con KHÔNG phải của chính bạn; phần tử rỗng ⇒ fail-closed cả tổng) —
 **đọc `MIKE_ext.md` § Luật khớp topic con TRƯỚC KHI viết `rollup_of`**, luật siết 2026-08-16.
+⚠️ Đóng sub-question cuối cùng tự đóng LUÔN cả tổng dù chưa ai quyết (bẫy circular closure,
+2026-09-10) — trước khi đóng 1 sub, đọc mục "Bẫy circular closure" trong `MIKE_ext.md`;
+`bin/close_bus_question.py` tự chặn ca này trừ khi thêm `--ack-rollup-auto-closes`.
 
 ## Routing — khi user hỏi Mike
 1. Tra `kb/KNOWLEDGE.md` + `kb/context_pack.md` + `kb/fleet_status.md` trước.

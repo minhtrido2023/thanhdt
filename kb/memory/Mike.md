@@ -10,14 +10,16 @@
 
 ## Retro 2026-09-09 — XONG (job Mike_20260909_173507)
 File `kb/incidents/retro/retro-2026-09-09.md` (commit fcf63e01), Wags CONFIRMED. 3 sự cố, 2 pattern.
-Pattern A ĐÃ ESCALATE: `Mike/retro-pattern-recurring-nav-price-xcheck-gate-2-days` — gate NAV
-PRICE_XCHECK chặn cả 2 account 2 ngày liên tiếp, 3 nguyên nhân độc lập khác nhau (VHM 08-17,
-timing-lag 09-08, corp-action giá×lượng 09-09). Prevention đề xuất (chưa làm, cần duyệt vì chạm
-NAV): so giá×khối lượng thay vì giá trần đơn lẻ, giảm nhạy khi có corp-action AUTO_CONFIRMED.
+Pattern A đã QUYẾT (2026-09-10): `Wags/nav-price-xcheck-gate-can-quyet-dinh-user-2026-09-10` ĐÃ
+ĐÓNG, user duyệt phương án C qua Discord — Taylor sửa `daily_nav_snapshot.py` tự quy đổi
+qty/giá theo corp-action CONFIRMED khi chạy `--date` lịch sử + bật gate PRICE_XCHECK cho cả
+trường hợp đó (commit `c30e0580`), rồi backfill lại NAV 09-09 bằng kết quả đã sửa. Đề xuất "so
+giá×khối lượng" trong finding gốc SAI tiền đề (đã đính chính trong question trên) — không làm.
 
 ## Bus question đang mở, CHƯA fix (theo dõi tiếp)
-1. `Mafee/nav-price-xcheck-stuck-{SpaceX,ZaloPay}-2026-09-09` — NAV 2 account thiếu bản ghi 09-09,
-   status DIAGNOSED_NOT_FIXED. Escalate ở trên đã mở, không mở question thứ 2.
+1. `Mafee/nav-price-xcheck-stuck-{SpaceX,ZaloPay}-2026-09-09` — status DIAGNOSED_NOT_FIXED lúc
+   viết dòng này; đã có fix (commit `c30e0580`, xem Pattern A ở trên) — kiểm NAV 09-09 đã backfill
+   xong chưa trước khi coi mục này đóng.
 2. `Mike/bq-cache-manifest-not-updated-by-selfheal-2026-09-09` — self-heal `_drifted_years()`
    (commit 3ff20579) refresh bảng nhưng quên rewrite manifest.json → preflight fail giả, mọi
    dispatch BQ đang fallback network. Chưa sửa.

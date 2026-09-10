@@ -37,6 +37,11 @@ def main() -> int:
                     help="different topic where the resolution was originally discussed")
     ap.add_argument("--decided-by-user", action="store_true")
     ap.add_argument("--actor", default="Mike", help="agent writing the closure event")
+    ap.add_argument("--ack-rollup-auto-closes", action="store_true",
+                    help="xác nhận: biết đóng ref này sẽ làm 1 rollup (payload.rollup_of) tự"
+                         " đóng theo mà KHÔNG có resolver độc lập nào trên chính rollup đó."
+                         " Không truyền cờ này thì lệnh bị chặn khi rơi vào ca đó (coord-2026-09-10,"
+                         " tránh cả chùm câu hỏi biến mất im lặng qua rollup_of circular closure)")
     ap.add_argument("--root", type=Path, default=ROOT, help=argparse.SUPPRESS)
     a = ap.parse_args()
 
@@ -52,6 +57,26 @@ def main() -> int:
     if not matches:
         print(f"close_bus_question: ALREADY_CLOSED_OR_UNKNOWN {a.question_ref}")
         return 0
+
+    if not a.ack_rollup_auto_closes:
+        env = dict(os.environ)
+        env["BUS_AUDIT_ROOT"] = str(a.root)
+        run = subprocess.run(
+            [sys.executable, str(ROOT / "bin" / "bus_question_audit.py"),
+             "--rollup-impact", a.question_ref],
+            env=env, capture_output=True, text=True, timeout=30,
+        )
+        try:
+            triggers = json.loads(run.stdout).get("triggers", [])
+        except Exception as exc:
+            raise RuntimeError(f"cannot check rollup impact for {a.question_ref}: {exc}") from exc
+        if triggers:
+            names = ", ".join(f"{t['rollup_agent']}/{t['rollup_topic']}" for t in triggers)
+            print(f"close_bus_question: BLOCKED — đóng {a.question_ref} sẽ tự đóng rollup [{names}]"
+                  f" (mọi topic con khác trong rollup_of đã resolved) mà chưa có resolver độc lập"
+                  f" nào trên chính rollup. Hoặc đóng rollup kèm kết luận riêng, hoặc thêm"
+                  f" --ack-rollup-auto-closes nếu đây là ý muốn.", file=sys.stderr)
+            return 4
 
     payload = {
         "resolution": a.resolution,

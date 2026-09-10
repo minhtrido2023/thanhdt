@@ -36,9 +36,28 @@
   đóng được CHÍNH câu hỏi con, nhưng **KHÔNG tính cho rollup** — tổng sẽ vẫn pending. Muốn
   đóng tổng thì tự đăng `answer` giữ nguyên topic tổng. Đây là lựa chọn có chủ đích: hướng
   lỗi này chỉ tốn 1 job `wags_autofix` thừa, còn nới ra thì nuốt mất quyết định của user.
-- `rollup_of` tới nay **chưa có lần dùng thật nào trên bus**, nên lần escalation TỔNG đầu tiên
-  phải tự kiểm tận nơi (`bin/bus_question_audit.py` xem tổng có tự đóng không), đừng tin
-  cơ chế đã chạy đúng.
+- Lần dùng thật đầu tiên trên bus: `Mike/retro-pattern-recurring-nav-price-xcheck-gate-2-days`
+  (2026-09-09, `rollup_of: ["nav-price-xcheck-stuck-SpaceX-2026-09-09",
+  "nav-price-xcheck-stuck-ZaloPay-2026-09-09"]`) — xem bẫy circular-closure nó lộ ra ngay lần
+  đầu, ngay dưới đây.
+
+**⚠️ Bẫy circular closure (2026-09-10, coord-2026-09-10, trace_id=Wags_20260910_012007):**
+đóng sub-question CUỐI CÙNG của 1 rollup (bằng `resolves`/`close_bus_question.py`) sẽ tự động
+làm `rollup_resolved()` = True cho câu hỏi TỔNG NGAY LẬP TỨC — dù chưa hề có `answer`/`decision`
+nào đăng riêng cho chính topic tổng. Ca thật: đóng 2 sub `nav-price-xcheck-stuck-{SpaceX,ZaloPay}`
+làm `Mike/retro-pattern-recurring-nav-price-xcheck-gate-2-days` biến mất khỏi pending trong khi
+quyết định thật (chọn phương án nào) vẫn chưa có ai chốt — cả chùm câu hỏi im lặng biến mất.
+- **KHÔNG đóng sub-question với lý do "xem rollup"**: `all(sub resolved)` tự đóng LUÔN rollup ở
+  cả `ops_health_check.sh` check #5 và `bus_question_audit.py` — đây là hành vi CÓ CHỦ ĐỊNH của
+  `rollup_resolved()`, không phải bug, nhưng dễ bị hiểu nhầm là "còn cơ hội quyết định sau".
+- Hoặc đóng sub kèm **kết luận độc lập** thật sự cho topic đó, hoặc **để nguyên sub** và chỉ
+  `answer` trên topic TỔNG, hoặc nếu buộc phải gộp quyết định vào 1 chỗ thì **mở question thay
+  thế TRƯỚC** khi đóng sub cuối (như đã làm: `Wags/nav-price-xcheck-gate-can-quyet-dinh-user-2026-09-10`).
+- Gate cơ học: `bin/close_bus_question.py` tự chặn (`rc=4`) khi đóng 1 ref sẽ làm 1 rollup pending
+  tự đóng theo mà rollup đó CHƯA có resolver độc lập — phải thêm `--ack-rollup-auto-closes` mới
+  cho đóng. Kiểm bằng `bin/bus_question_audit.py --rollup-impact <Agent/topic>` (in JSON các
+  rollup bị ảnh hưởng). Case test: `bin/bus_question_closure_selfcheck.py` (block "rollup circular-
+  closure gate").
 
 ## Tạo / thu agent con
 

@@ -130,4 +130,35 @@ with p.open('a',encoding='utf-8') as f:f.write(json.dumps(r,ensure_ascii=False)+
     assert "rollup-ref-cheo-agent" in left, left
     assert "rollup-topic-co-slash" not in left, left
 
-print("bus_question_closure_selfcheck: 15/15 PASS")
+    # ── rollup circular-closure gate (2026-09-10, coord-2026-09-10 arch-review
+    # trace_id=Wags_20260910_012007): đóng sub-question cuối cùng của 1 rollup KHÔNG được
+    # âm thầm tự đóng luôn rollup — close_bus_question.py phải chặn (rc=4) trừ khi có
+    # --ack-rollup-auto-closes.
+    ts_sub = "2026-08-16T05:00:00+00:00"
+    ts_rollup = "2026-08-16T05:00:30+00:00"
+    ts_resolve_y = "2026-08-16T05:01:00+00:00"
+    write_event(root, "Mike", event("Mike", "question", "r-live-x", ts_sub))
+    write_event(root, "Mike", event("Mike", "question", "r-live-y", ts_sub))
+    write_event(root, "Mike", event("Mike", "question", "rollup-ack-gate", ts_rollup,
+                                    {"rollup_of": ["r-live-x", "r-live-y"]}))
+    write_event(root, "Wags", event("Wags", "decision", "r-live-y", ts_resolve_y,
+                                    {"resolves": ["Mike/r-live-y"]}))
+    assert {"r-live-x", "rollup-ack-gate"} <= topics(root), topics(root)
+
+    blocked = subprocess.run([sys.executable, str(HELPER), "Mike/r-live-x",
+                              "--resolution", "test", "--evidence", "test",
+                              "--root", str(root)], capture_output=True, text=True)
+    assert blocked.returncode == 4, (blocked.returncode, blocked.stdout, blocked.stderr)
+    assert "rollup-ack-gate" in blocked.stderr, blocked.stderr
+    # Chặn nhưng KHÔNG được ghi event answer nào lên bus (chặn phải xảy ra TRƯỚC khi append).
+    assert {"r-live-x", "rollup-ack-gate"} <= topics(root), topics(root)
+
+    acked = subprocess.run([sys.executable, str(HELPER), "Mike/r-live-x",
+                            "--resolution", "test", "--evidence", "test",
+                            "--ack-rollup-auto-closes", "--root", str(root)],
+                           capture_output=True, text=True)
+    assert acked.returncode == 0 and "CLOSED" in acked.stdout, (acked.returncode, acked.stdout, acked.stderr)
+    left = topics(root)
+    assert "r-live-x" not in left and "rollup-ack-gate" not in left, left
+
+print("bus_question_closure_selfcheck: 17/17 PASS")

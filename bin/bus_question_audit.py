@@ -72,6 +72,10 @@ def main():
     ap.add_argument("--json", action="store_true", help="output JSON thay vì text")
     ap.add_argument("--provenance-days", type=int, default=14,
                      help="cửa sổ ngày để đếm provenance closure gần đây (mặc định 14)")
+    ap.add_argument("--rollup-impact", default="",
+                     help="Agent/topic sắp đóng — in JSON các rollup pending mà việc đóng ref"
+                          " này sẽ làm TẤT CẢ topic con khớp resolved_exact, tức tự đóng rollup"
+                          " theo (dùng bởi close_bus_question.py, coord-2026-09-10)")
     a = ap.parse_args()
 
     now = dt.datetime.now(dt.timezone.utc)
@@ -189,6 +193,46 @@ def main():
             subs.append(s.strip())
         # Dạng "Agent/topic" xử lý DUY NHẤT trong `split_ref`. Chỗ này KHÔNG tự bóc tiền tố.
         return all(resolved_exact(s, q_ts, q_agent) for s in subs)
+
+    if a.rollup_impact:
+        if "/" not in a.rollup_impact:
+            print(json.dumps({"error": "rollup-impact phải là Agent/topic"}, ensure_ascii=False))
+            return 1
+        triggers = []
+        for p in files:
+            r_agent = agent_of(p)
+            for rec in iter_events(p):
+                if rec.get("event_type") != "question":
+                    continue
+                pl = rec.get("payload")
+                if isinstance(pl, str):
+                    try:
+                        pl = json.loads(pl)
+                    except Exception:
+                        pl = None
+                if not isinstance(pl, dict):
+                    continue
+                raw = pl.get("rollup_of")
+                if not isinstance(raw, list) or not raw:
+                    continue
+                subs = [s.strip() for s in raw if isinstance(s, str) and s.strip()]
+                if len(subs) != len(raw):
+                    continue  # fail-closed như rollup_resolved: phần tử rỗng/sai kiểu ⇒ bỏ qua rollup này
+                if not any(same_ref(s, r_agent, a.rollup_impact) for s in subs):
+                    continue  # ref sắp đóng không phải topic con của rollup này
+                r_topic = rec.get("topic")
+                try:
+                    r_ts = dt.datetime.fromisoformat(rec.get("ts", "").replace("Z", "+00:00"))
+                except Exception:
+                    continue
+                if resolved_exact(r_topic, r_ts, r_agent):
+                    continue  # rollup đã đóng từ trước, không liên quan tới lần đóng này
+                other_subs = [s for s in subs if not same_ref(s, r_agent, a.rollup_impact)]
+                if all(resolved_exact(s, r_ts, r_agent) for s in other_subs):
+                    triggers.append({"rollup_agent": r_agent, "rollup_topic": r_topic,
+                                      "rollup_ts": rec.get("ts"), "rollup_of": subs})
+        print(json.dumps({"triggers": triggers}, ensure_ascii=False))
+        return 0
 
     seen = set()
     pending = []
