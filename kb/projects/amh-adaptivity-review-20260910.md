@@ -210,3 +210,101 @@ phiên SAU ngày hình thành vị thế, **lệch state-PIT ở 24/150 tháng (
 ở lượt trước là từ script này ⇒ **không dùng được**. Đã gắn header SUPERSEDED (commit `66e5ec7e`);
 bản đúng là `fitness2.py`. Sửa path Windows (commit `30878a9b`) làm script CHẠY được, **không**
 làm kết quả của nó ĐÚNG — hai việc khác nhau.
+
+## 8. Kết quả job A (#1 BAL edge-gate) — **NO-GO**, job `Taylor_20260910_131906`
+
+Đọc đầy đủ: `agents/Taylor/research/bal_edge_gate_20260910/CONCLUSION_bal_edge_gate_20260910.md`
+(+ `PREREG.md` viết TRƯỚC mọi leg backtest). **Không wire gì; không có thay đổi production nào cần
+user duyệt.**
+
+### Hai đính chính tiền đề của chính bản rà soát này
+**(a) `lag_edge_health()` KHÔNG đọc fill thật.** Nó dựng lại *cohort vào lệnh* LAG từ cache earnings,
+vào T+5, giữ đúng 25 phiên của sổ, lấy price return thuần — không sizing, không slot, không parking.
+Vì thế nó KHÔNG bao giờ đứng khi sổ đang park. Tiền đề "ledger sẽ đứng vì BAL đang parking" trong
+brief của Mike **SAI**; trở ngại thật khác và nặng hơn.
+
+**(b) BAL là sổ CHỈ-BULL by construction.** Mọi tier mua trong `signal_v11_sql.py` đều đòi
+`state5 IN (4,5)` (Mike verify: dòng 127-134, 3 tier chính). DT5G có **0 phiên BULL/EXBULL** trong
+2014, 2015, 2016, 2019, 2022, 2023 ⇒ **BAL im lặng 6/13 năm**, cohort chỉ đến trong **10 episode**.
+
+⇒ **Cổng đối xứng là bất khả về CẤU TRÚC, không phải vấn đề tinh chỉnh.** Đọc causal tại thời điểm
+mở từng cụm tín hiệu: gate MÙ (`n12=0`) ở 3/6 cụm, và ở phần còn lại nó **xếp hạng NGƯỢC** — sẽ
+chặn cụm tốt nhất (03/2025, +12,49%) và cho qua cụm tệ nhất (08/2025, −6,22%).
+
+### Backtest — 8 leg, harness chứng minh hợp lệ 2 lần độc lập
+`ctrl` tái lập pin R3 tuyệt đối (28,86% / 1,90 / −17,79% / 1,62 / 1.178,01B, self-check **0 VND**),
+**md5 `7d053e6201c9d107685ff4d1dd9d2d2a` — Mike verify khớp pin trong `results_registry.md`**; leg
+`inert` (bản copy engine, chạy không mask) cho CSV byte-identical cùng md5 ⇒ mọi chênh lệch bên dưới
+là do gate và chỉ do gate.
+
+**4 lý do độc lập để NO-GO:**
+1. **MaxDD BIT-IDENTICAL ở cả 8 leg** (−0,17785101, đáy 2018-07-05). Đáy đó nằm trong cửa sổ gate có
+   **0 ngày hoạt động** ⇒ gate không chạm được đúng cái drawdown nó sinh ra để bảo hiểm. Tiêu chí
+   prereg #1 trượt thẳng.
+2. **PLACEBO THẮNG.** Mask theo lịch, không mang thông tin edge-health nào, cho **+0,40pp** so với
+   gate thật **+0,30pp**, và thắng mọi biến thể ladder. ⇒ +0,30pp không phải "gate biết điều gì đó",
+   nó là "giữ ít slot BAL hơn trong 2020-2024".
+3. **Leave-one-episode-out: 1/4.** Ba episode momentum THẬT SỰ bị gắn FLIPPED đều **mất tiền** khi
+   cắt slot (−0,09 / −0,01 / −0,10pp); chỉ episode 01/2026 giúp (+0,12pp). Sign test p=0,625. Bốn
+   episode cộng lại **−0,08pp**; toàn bộ +0,23pp tổng đến từ **residual NGOÀI chúng**.
+4. **Không có dose-response**: 12→10 +0,31 · 12→8 +0,16 · 12→6 +0,30 · 12→4 +0,36 · 12→0 −2,97.
+   Nhiễu quanh +0,3 rồi vực. Ngược hẳn hình dạng của một ngưỡng thật.
+
+### Leg quan trọng nhất là leg BÁC BỎ TIỀN ĐỀ
+`g0` (tắt hẳn BAL mỗi khi `mom_200` đọc FLIPPED) **mất −2,97pp CAGR**, Calmar 1,62 → 1,46. Dashboard
+nói momentum đã lật; **sổ BAL vẫn kiếm tiền qua đúng những cửa sổ đó.**
+
+Cơ chế: **lệch quần thể**. `edge_health_monitor` đo IC cross-sectional trên **toàn universe thanh
+khoản, mọi tháng**; BAL giao dịch một tập con **chỉ BULL/EXBULL, đã lọc tier, đã chặn momentum ở
+EXBULL**. Sign flip ở quần thể thứ nhất KHÔNG kéo theo thua lỗ ở quần thể thứ hai.
+
+> **⇒ SỬA LẠI G1.** BAL **không** thiếu vòng phản hồi thích nghi. Nó CÓ một vòng, và vòng đó chạy
+> theo **TRẠNG THÁI** chứ không theo edge đã thực hiện: tier vào lệnh chỉ-BULL + EXBULL momentum
+> suppression + regime-size. Việc job này xác lập là: thêm một vòng THỨ HAI khoá vào dashboard IC
+> **không** phải cải tiến — đã đo, có placebo đối chứng, **NO-GO**.
+
+## 9. quant-skeptic bác đề xuất t_eff — **REFUTED (confidence high)**, KHÔNG SỬA CODE
+
+Đề xuất ở §7 (đổi t-stat của `edge_row()` sang n_eff) **BỊ BÁC**. Lý do quyết định: công thức
+`n*(1-ac1)/(1+ac1)` là công thức **AR(1)**, áp lên chuỗi mà chính tác giả mô hình hoá là **MA(2)**
+và đo bằng Newey-West lag 2 ở mọi chỗ khác. **Dưới NW/block-bootstrap, |t| của `mom_200` là ~2,5** —
+tức hệ quả được quảng cáo ("nhãn FLIPPED sẽ bị chặn") là **hiện vật của công thức sai**, và nhãn
+AR(1) tự lật trong chính sai số lấy mẫu của nó.
+
+⚠️ **Đính chính điều Mike đã báo user ở lượt trước:** Mike recompute độc lập và khớp tuyệt đối —
+nhưng cái khớp đó chỉ xác nhận **SỐ HỌC của công thức AR(1)**, không xác nhận **công thức đó ĐÚNG
+cho chuỗi này**. Recompute đúng ≠ phương pháp đúng. **Không sửa `edge_health_monitor.py`.**
+
+Ghi nhận: cổng `|t|≥2` trên chuỗi chồng lấn vẫn là câu hỏi mở hợp lệ, nhưng lời giải phải là
+Newey-West (đã dùng ở nơi khác trong fleet), không phải n_eff kiểu AR(1).
+
+## 10. INPUT CHO REVIEW VPI/BAL 2026-09-16 — dùng thẳng mục này
+
+1. **Kênh "edge-health dashboard" là kênh RỖNG cho quyết định BAL.** Đã đo, có placebo đối chứng,
+   NO-GO. Nếu định giảm exposure BAL, lý lẽ **phải đến từ chỗ khác** — không phải từ IC momentum.
+2. **Nhãn `FLIPPED` đang treo KHÔNG mô tả hiện tại.** `mom_200` IC: 04/2026 −0,060 → 05/2026
+   **+0,285** → 06/2026 **+0,382** (Mike đọc thẳng `data/edge_health_ic.csv`). Hai hệ đo độc lập
+   (job B, job C) cùng kết luận momentum đã quay đầu dương trong Q2/2026.
+3. **BAL yếu 2025 giống ĐÁY CHU KỲ hơn giống mục nát** (job C, quant-skeptic CONFIRMED): đáy 2020-23
+   không sâu hơn đáy 2007-09, và đã hồi. Caveat bắt buộc mang theo: N chu kỳ ≈ 3, "không phát hiện
+   được break" ≠ "chắc chắn không có break".
+4. **Nhưng KHÔNG thể cứu BAL bằng một cổng regime/breadth** (job B): momentum chết ở MỌI ô sau 2020,
+   IS 8/8 dương → OOS 8/8 ≈ 0. Vết gãy là THỜI GIAN, không phải chế độ.
+5. **Điều 3 và 4 KHÔNG mâu thuẫn** — chúng đo hai thứ khác nhau: (3) đo `mom(6-1)` thô trên toàn
+   universe (chu kỳ, đang hồi); (4) đo khả năng CỨU bằng cách điều kiện hoá (không cứu được). Và
+   (job A) BAL thật sự giao dịch một quần thể KHÁC CẢ HAI. Đừng gộp ba con số này lại.
+6. **Việc duy nhất cần user quyết ngày 09-16 vẫn là quyết định cũ**: giữ hay gỡ signal_hold VPI/BAL.
+   Bốn job hôm nay **không** cung cấp lý do định lượng để cắt BAL, và cũng **không** cung cấp cơ chế
+   mới để giữ. Chúng thu hẹp không gian lý lẽ, không thay người quyết.
+
+## 11. Việc mở phát sinh (chưa làm, cần user quyết vì là scope MỚI)
+
+- **`data/lag_edge_health.csv` khoá stats theo ngày VÀO trong khi return chỉ biết được sau 25 phiên.**
+  **Live KHÔNG bị ảnh hưởng** (file chỉ chứa event đã hoàn tất; allocator ffill giá trị cũ-nhưng-thật).
+  **Backtest thì có**: `pt_v23_audit_2014.py:770-790` reindex chuỗi entry-keyed qua 2014-2026 ⇒ ngày
+  `d` đọc giá trị cần dữ liệu `d+25`. Độ lớn ~5 tuần. Nó nằm TRONG phần validate +0,60pp đã công bố
+  của allocator edge-conditional. **Không phải lý do đổi gate live.** Việc đúng: 1 A/B một-leg
+  (rebuild exit-keyed) để biết bao nhiêu trong +0,60pp còn sống. Bounded, không phải redesign.
+- **`data/edge_panel.csv` và `data/bal_edge_health.csv` chưa có entry trong `kb/data_registry/`**
+  (§9 coding_guidelines). Đã giao data-ops bổ sung cho `edge_panel.csv`; `bal_edge_health.csv` cố ý
+  KHÔNG publish ra `data/`, chỉ là bằng chứng nghiên cứu.
