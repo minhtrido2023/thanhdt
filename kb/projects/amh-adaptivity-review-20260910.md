@@ -152,3 +152,61 @@ không phải tín hiệu; không luật giao dịch nào được dẫn xuất 
 `run_selfcheck.txt`; ba con số mom_200 IC recompute độc lập khớp tuyệt đối; `git status` sạch trên mọi
 `.py` production. **Đã dispatch quant-skeptic** (đang chạy) vì kết luận này sẽ được viện dẫn tại review
 VPI/BAL 09-16 — tức là nó decision-adjacent, dù bản thân nó không đề xuất wire gì.
+
+## 7. Kết quả job B (#3 change-point + #4 fitness matrix) — XONG, job `Taylor_20260910_131908`
+
+Đọc đầy đủ: `agents/Taylor/research/amh_changepoint_fitness_20260910/CONCLUSION.md`.
+
+### #3 Change-point — **NO-GO**
+CUSUM và BOCPD đều **tệ hơn** nhãn 12M đang có: chậm hơn 2 tháng (median lag 6,0 vs 4,0),
+false-alarm 35%, chỉ 5% alarm trùng điểm gãy thật, và **không có dose-response** (h=4/5/6 →
+56,5%/35,0%/46,7%, không đơn điệu ⇒ nhiễu). Lý do gốc: với null **block-permutation** trung thực
+(block=3, đúng độ trùm fwd-3M), cả 10 signal × 12,5 năm chỉ còn **3 điểm gãy có ý nghĩa** — null
+i.i.d. ngây thơ cho 17, tức 14/17 là ảo ảnh. **Chuỗi IC gần như không có điểm gãy để phát hiện.**
+⇒ KHÔNG thêm dòng `P(regime-shift)` vào `edge_health_block.md`.
+
+### Sản phẩm phụ đáng giá nhất — cổng `|t|≥2` đang PHÓNG ĐẠI 1,5-2,4×
+`edge_health_monitor.py::edge_row()` tính t-stat bằng **n danh nghĩa** (150), trong khi chuỗi IC
+fwd-3M **chồng lấn by construction** (lấy mẫu tháng trên cửa sổ forward 3 tháng ⇒ MA(2); ac1 đo
+được 0,33-0,71). **Mike đã tự recompute độc lập từ `data/edge_health_ic.csv`, khớp tuyệt đối:**
+
+| signal | ac1 | t danh nghĩa | n_eff | t hiệu dụng |
+|---|---|---|---|---|
+| mom_200 | +0,66 | +3,68 | 31 | **+1,67** |
+| ROE_Min5Y | +0,71 | +4,03 | 26 | **+1,67** |
+| PE | +0,55 | −6,20 | 44 | −3,34 |
+| FSCORE | +0,49 | +4,90 | 52 | +2,88 |
+
+⇒ **Nhãn `FLIPPED` của mom_200 lẽ ra đã không được phát ra.** Cộng với dữ liệu 05-06/2026 dương
+mạnh, đây là bằng chứng thứ hai độc lập cho cùng kết luận ở §6. **CHƯA SỬA** — `classify()` là đầu
+vào của allocator edge-gate LIVE ⇒ đã dispatch quant-skeptic (job `verify_20260910_135826`).
+
+### #4 Fitness matrix — momentum chết ở MỌI Ô sau 2020, không trục nào cứu được
+Tách IS(2014-19)/OOS(2020+), mốc pre-registered: `mom_200` **8/8 phạm vi dương ở IS** (6/8 có ý
+nghĩa) và **8/8 phạm vi ≈ 0 ở OOS** (0/8 có ý nghĩa, mọi |t| < 1). NEUTRAL: IS +0,164 (t 5,09) →
+OOS +0,005 (t 0,16). Leave-one-year-out 2020+ chạy trong [−0,027; +0,015] ⇒ **không phải hiệu ứng
+một năm cá biệt**. `D_RSI` giống hệt.
+
+> **Hệ quả cho review VPI/BAL 09-16: KHÔNG thể cứu BAL bằng cách thêm một cổng regime/breadth.**
+> Vết gãy là **THỜI GIAN (~2020)**, không phải chế độ thị trường. Muốn giữ BAL thì lý do phải nằm
+> ở chỗ khác (SIGNAL_V11 ≠ `mom_200` thô, yieldcombo, hoặc vai trò đa dạng hoá) — ủng hộ hướng
+> **G1 edge-gate**, bác hướng regime-conditioning.
+
+Bức tranh AMH gọn: mọi signal **dựa trên GIÁ** (momentum, RSI, CMF, C_L1M) sụp về ~0 quanh 2020;
+**định giá cơ bản** mạnh lên (PE: IS −0,014 ns → OOS **−0,081\***, LOO [−0,091;−0,070], có ý nghĩa
+ở CẢ 3 tercile breadth); **sàn chất lượng giữ nguyên** (ROE_Min5Y +0,052\* → +0,063). PB_z **đảo
+dấu thật** (+0,056 IS → −0,064\* OOS). ⇒ Phần hệ thống đang đứng vững (8L: cổng nhị phân trên sàn
+chất lượng + `1/PE` trục trội) **đúng là phần dữ liệu nói vẫn còn sống**.
+
+Breadth-tercile **tách rất yếu** một khi đã điều kiện hoá theo state (momentum không đơn điệu:
++0,028/+0,083/+0,073). Trục có sức tách thật là DT5G. Chỉ **30/130 ô (23%)** đạt hạng kết luận;
+BEAR và EXBULL không có ô nào đọc được.
+
+### ⚠️ ĐÍNH CHÍNH việc Mike đã làm ở #7 — `fitness_matrix.py` cũ có LOOK-AHEAD
+Job B phát hiện bản cũ gán state cho tháng bằng **modal state của CẢ tháng** (dòng ~73) ⇒ dùng
+phiên SAU ngày hình thành vị thế, **lệch state-PIT ở 24/150 tháng (16%)**; và đọc
+`data/dt5g_vnindex.csv` thay vì bảng canonical (lệch 52/3121 phiên, file đứng từ 07-09).
+**Mike đã verify dòng 73 tồn tại thật.** Con số "momentum NEUTRAL IC +0,101 (t=4,75)" Mike trích
+ở lượt trước là từ script này ⇒ **không dùng được**. Đã gắn header SUPERSEDED (commit `66e5ec7e`);
+bản đúng là `fitness2.py`. Sửa path Windows (commit `30878a9b`) làm script CHẠY được, **không**
+làm kết quả của nó ĐÚNG — hai việc khác nhau.
