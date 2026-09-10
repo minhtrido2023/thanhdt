@@ -63,3 +63,53 @@ thị trường).
 - **Bước 2**: backtest đầy đủ walk-forward IS/OOS + DSR/PBO + quant-skeptic — CHỈ nếu bước 0-1 qua.
 
 Job Taylor bước 0: xem bus topic `kaffa-correlation-cluster-premise-20260910`.
+
+## Bước 0 KẾT QUẢ (2026-09-10 22:15 ICT, job Taylor_20260910_150633)
+
+Tiền đề CÓ THẬT nhưng KHÔNG đồng đều:
+- **Vingroup** (VIC/VHM/VRE): xác nhận MẠNH, ổn định 2 cửa sổ (full-sample corr 0,561 pctl 99,5;
+  recent252d 0,656 pctl 99,2 vs cap-matched control).
+- **Masan** (MSN/MCH/MML/MSR): KHÔNG xác nhận full-sample (pctl 55,8 ≈ ngẫu nhiên), chỉ yếu+gần
+  đây (pctl 87,8, 252 phiên) → premise YẾU, loại khỏi test chính.
+- Quét data-driven toàn universe (352 mã) tìm ra 2 cụm MỚI mạnh hơn cả ví dụ user nêu:
+  **Viettel-family** (CTR/VGI/VTP, pctl 97-99,5) và **PVN-family** (9 mã: BSR/GAS/OIL/PLX/PVB/
+  PVC/PVD/PVS/PVT, pctl 99,9 — mạnh nhất, bền suốt 8 năm).
+- 2 cụm khác = **method artifact** (không phải phát hiện thật): "financial beta chain" = Banks+
+  Financial Services đã biết, bị tách 2 mã ICB trong data; "KCN real estate" = lỗi phân loại ICB
+  (VGC gắn nhãn sai), không phải sở hữu chéo mới.
+- So với sector sweep #20 (holding SOTP, đã đóng): KHÔNG trùng phương pháp, nhưng #20 đã cảnh báo
+  TRƯỚC đúng các tên gần giống bằng cách khác — "discount KHÔNG mean-revert, LÀ TRAP, LENS-NOT-
+  BOOK". Rule 3 giữ vững 20/20 sweep trước — base rate mạnh phải neo trước bước 1.
+
+File đầy đủ: `mike/agents/Taylor/research/kaffa_correlation_cluster_20260910/`.
+
+## User duyệt bước 1 (2026-09-10 22:25 ICT)
+
+User xác nhận đã biết nhóm Viettel/dầu khí tương quan mạnh (quên nêu ví dụ ban đầu), và cho biết
+hệ thống Kaffa cũ có ý định đánh giá lại tương quan ĐỊNH KỲ HÀNG THÁNG để tìm tín hiệu mới —
+**ý hay, ghi lại làm việc CÂN NHẮC SAU** (không build cron ngay — chỉ đáng làm nếu bước 1/2 chứng
+minh cluster-RS có alpha thật; xây lịch định kỳ cho một lens chưa chứng minh là early-optimize).
+
+Bước 1 dispatch: chỉ PVN-family + Viettel-family (loại Masan + 2 cụm artifact). Pre-register
+hypothesis + methodology TRƯỚC khi tính return (khoá thiết kế signal trước, tránh overfitting/
+multiple-testing). Rào chắn bắt buộc: phải sinh alpha OOS hậu-2020 thật (không chỉ IS) — khớp
+đúng thanh chắn AMH vừa tìm ra cùng ngày (momentum cá lẻ chết cấu trúc sau 2020 mọi ô test).
+N=2 cụm — quá nhỏ cho công cụ thống kê thường, phải nói rõ giới hạn, dựa vào walk-forward +
+lý luận nhân quả (sở hữu chung/dòng vốn) hơn là p-value đơn thuần.
+
+## Bước 1 KẾT QUẢ (2026-09-10 23:0x ICT, job Taylor_20260910_152624) — **NO-GO**
+
+Pre-registered TRƯỚC khi chạy (`PREREG_step1.md`): tín hiệu Cluster_RS_200 (200d relative-strength
+cấp cụm vs VNINDEX, tái dùng nguyên lookback `mom_200` từ AMH cùng ngày — không grid-search), giả
+thuyết A (continuation: RS cao → fwd_3M cụm cao), mẫu hàng tháng, NW lag=12, quyết định GO cần CẢ
+HAI cụm OOS corr dương + sign-consistent ≥5/7 năm.
+
+Kết quả OOS (2020-2026): **PVN-family corr −0,357 (n=76, t_nw=−2,16, CÓ Ý NGHĨA nhưng SAI CHIỀU —
+mean-reversion chứ không phải continuation)**; **Viettel-family corr +0,073 (n=75, t_nw=0,64,
+không đáng kể, sign chỉ 2/7 năm ổn định)**. → **NO-GO, dừng, không bước 2.** Cluster-level
+momentum cùng số phận với momentum cá lẻ đã chết cấu trúc hậu-2020 (AMH cùng ngày) — không có bằng
+chứng cơ chế dòng vốn/sở hữu chung tạo continuation edge độc lập với price momentum thuần.
+
+File đầy đủ: `mike/agents/Taylor/research/kaffa_correlation_cluster_20260910/STEP1_CONCLUSION.md`.
+Hướng còn mở (chưa làm, chưa duyệt): within-cluster mean-reversion (giả thuyết B, bị loại khỏi
+scope bước 1 để tránh multiple-testing) — nếu user muốn tiếp tục cần pre-reg mới riêng.
