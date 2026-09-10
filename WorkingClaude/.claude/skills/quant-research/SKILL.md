@@ -176,6 +176,31 @@ not just the conclusion.**
 The bus finding is for the fleet-wide feed; the KB project-file note is what a future agent or
 Mike reads six months later — it needs the mechanism and the "why," not just "keep as-is."
 
+**18. A NEW strategy/sleeve candidate must prove ORTHOGONALITY to the incumbent book, not just
+standalone profitability (biodiversity gate, added 2026-09-10).**
+Adapted from Lo's AMH: a book of strategies survives the way an ecosystem does — through
+diversity. A candidate that is profitable but rides the same driver as the incumbent adds
+correlated risk, not resilience; it looks like diversification in a backtest and behaves like
+leverage in a drawdown. Applies to any NEW sleeve/strategy/signal family (a mania indicator, a
+new fear-buy screen, a new book). Does NOT apply to a parameter tweak inside an existing book.
+
+Run `biodiversity_test.py` (repo root; Windows paths fixed 2026-09-10, commit `30878a9b`) or
+reproduce its three tests against whatever the real incumbent is:
+- **Orthogonality** — |corr| with the incumbent's return stream < 0.30 (monthly, non-overlapping).
+- **Survives where the incumbent dies** — positive mean return in the incumbent's worst quartile
+  of months. This is the test that matters most and the one a Sharpe comparison hides.
+- **Improves the book** — ΔSharpe and ΔCalmar of incumbent+candidate vs incumbent alone.
+PASS requires all three; two of three is PARTIAL and needs an explicit argument, not a shrug.
+
+Real output on the current book (incumbent = MOMENTUM, run 2026-09-10): VALUE_PE PASS
+(corr −0.23, survival 0.79, ΔSharpe +0.24), DT5G_TIMING PASS, QUALITY_ROIC PASS; RSI FAIL
+(corr 0.60), FLOW_CMF FAIL (ΔSharpe −0.03), PBZ FAIL (corr 0.62). The FAILs are the point: all
+three are individually respectable signals that would have passed a standalone backtest.
+
+Historical precedent this encodes: the F-system was rejected as redundant with DT5G ("cùng cò
+súng") while ORB intraday passed as genuinely orthogonal — both decisions made by this reasoning
+before it was written down.
+
 ## Compact checklist (paste into a dispatch prompt or a self-review)
 
 - [ ] Read the real code/SQL first — don't design a test from a description
@@ -196,4 +221,5 @@ Mike reads six months later — it needs the mechanism and the "why," not just "
 - [ ] `git diff` clean on production files
 - [ ] quant-skeptic dispatched if recommending any production change
 - [ ] Artifact independently verified (logs/CSVs opened, not just the summary trusted)
+- [ ] NEW sleeve/strategy candidate: biodiversity gate run (orthogonality + survives-incumbent's-worst + ΔSharpe/ΔCalmar)
 - [ ] Bus finding written with trace_id + durable KB note with the reasoning
