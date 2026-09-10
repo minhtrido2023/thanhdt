@@ -1,4 +1,15 @@
 """
+⚠️ SUPERSEDED 2026-09-10 — ĐỪNG DÙNG CHO NGHIÊN CỨU MỚI.
+Bản thay thế: mike/agents/Taylor/research/amh_changepoint_fitness_20260910/fitness2.py
+Hai lỗi đo được trong file này (job Taylor_20260910_131908):
+  1. LOOK-AHEAD: gán state cho tháng bằng modal state của CẢ tháng (dòng ~73) ⇒ dùng phiên SAU
+     ngày hình thành vị thế. Lệch state-PIT ở 24/150 tháng (16%).
+  2. Đọc data/dt5g_vnindex.csv thay vì bảng canonical tav2_bq.vnindex_5state_dt5g_live
+     (lệch 52/3121 phiên, file đứng từ 2026-07-09).
+Giữ lại để audit lịch sử. Path Windows đã sửa 2026-09-10 (commit 30878a9b) TRƯỚC khi biết 2 lỗi
+trên — việc sửa path không hợp thức hoá kết quả của nó.
+"""
+"""
 Fitness Matrix (AMH proposal #3)  —  signal/strategy x DT5G-state
 =================================================================
 AMH: a strategy's profitability is environment-dependent. This builds the living
