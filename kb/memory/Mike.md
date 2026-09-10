@@ -1,55 +1,45 @@
 # Working memory — Mike
 > Cập nhật mỗi khi đổi mạch việc. Bơm vào đầu phiên của Mike.
 
-# Working memory — Mike
-> Cập nhật mỗi khi đổi mạch việc. Bơm vào đầu phiên của Mike.
-
 ## Ưu tiên hiện tại
 - Go-live V2.4 lever LIVE từ 08-24: capit_margin_lever.enabled=TRUE. Ngày có CAPIT margin phải chạy approve_margin_day.py TRƯỚC bot.
-- VPI/BAL signal HOLD đến 2026-09-16 — HOLD_ALL theo VPI.
+- VPI/BAL signal HOLD đến review 2026-09-16 — HOLD_ALL theo VPI.
 
-## Retro 2026-09-09 — XONG (job Mike_20260909_173507)
-File `kb/incidents/retro/retro-2026-09-09.md` (commit fcf63e01), Wags CONFIRMED. 3 sự cố, 2 pattern.
-Pattern A đã QUYẾT (2026-09-10): `Wags/nav-price-xcheck-gate-can-quyet-dinh-user-2026-09-10` ĐÃ
-ĐÓNG, user duyệt phương án C qua Discord — Taylor sửa `daily_nav_snapshot.py` tự quy đổi
-qty/giá theo corp-action CONFIRMED khi chạy `--date` lịch sử + bật gate PRICE_XCHECK cho cả
-trường hợp đó (commit `c30e0580`), rồi backfill lại NAV 09-09 bằng kết quả đã sửa. Đề xuất "so
-giá×khối lượng" trong finding gốc SAI tiền đề (đã đính chính trong question trên) — không làm.
+## AMH (Adaptive Market Hypothesis) — TRỌN VẸN 7 HƯỚNG, XONG 2026-09-10
+File tổng: `kb/projects/amh-adaptivity-review-20260910.md` (mục 10 = INPUT DÙNG THẲNG cho review VPI/BAL 09-16).
+Kết quả: 4 job Taylor + 2 verdict quant-skeptic. **KHÔNG WIRE GÌ.**
+- Job A (BAL edge-gate, Taylor_20260910_131906): **NO-GO**. Cổng đối xứng BẤT KHẢ về CẤU TRÚC (BAL chỉ-BULL,
+  im 6/13 năm, gate mù 3/6 cụm + xếp hạng NGƯỢC ở phần còn lại). Backtest 8 leg: MaxDD bit-identical,
+  PLACEBO THẮNG (+0,40 vs +0,30), LOO 1/4, không dose-response. Leg g0 bác tiền đề: tắt BAL khi FLIPPED
+  mất −2,97pp. ⇒ **SỬA G1: BAL ĐÃ CÓ vòng phản hồi theo TRẠNG THÁI, không thiếu.**
+- Job B (change-point + fitness matrix): change-point NO-GO. Momentum chết ở MỌI ô sau 2020 (IS 8/8 dương
+  → OOS 8/8 ≈0, LOO không cứu) ⇒ không cứu BAL bằng cổng regime/breadth.
+- Job C (market-efficiency gauge): CHU KỲ không phải cấu trúc, quant-skeptic CONFIRMED medium.
+- Đề xuất t_eff (sửa edge_health_monitor.py): **REFUTED high** — công thức AR(1) áp lên chuỗi MA(2);
+  dưới Newey-West |t| mom_200 ~2,5. KHÔNG SỬA. Bài học: recompute ĐÚNG SỐ ≠ phương pháp đúng.
+- Mike tự làm xong: #7 fix path (30878a9b), #5 biodiversity gate vào skill quant-research (5432519b),
+  #6 structural-break protocol + kb/structural_break_watch.json (5d9d4686, gộp review quý Bobby 11-26).
+- Đính chính đã ghi: fitness_matrix.py cũ có look-ahead 16% số tháng → SUPERSEDED (66e5ec7e), dùng fitness2.py.
+- Phụ phẩm: data_registry entry edge_panel.csv (a808687b) + fix ghi ATOMIC edge_panel (492b7637, test 3 đường).
+
+## VIỆC MỞ phát sinh từ AMH — CHỜ USER QUYẾT (scope MỚI, chưa dispatch)
+`data/lag_edge_health.csv` khoá stats theo ngày VÀO trong khi return chỉ biết sau 25 phiên.
+LIVE KHÔNG ảnh hưởng. BACKTEST thì có: pt_v23_audit_2014.py:770-790 reindex chuỗi entry-keyed
+⇒ ngày d đọc giá trị cần dữ liệu d+25 (~5 tuần). Nằm TRONG validate +0,60pp đã công bố của
+allocator edge-conditional. Việc đúng = 1 A/B một-leg rebuild exit-keyed. KHÔNG phải lý do đổi gate live.
 
 ## Bus question đang mở, CHƯA fix (theo dõi tiếp)
-1. `Mafee/nav-price-xcheck-stuck-{SpaceX,ZaloPay}-2026-09-09` — status DIAGNOSED_NOT_FIXED lúc
-   viết dòng này; đã có fix (commit `c30e0580`, xem Pattern A ở trên) — kiểm NAV 09-09 đã backfill
-   xong chưa trước khi coi mục này đóng.
-2. `Mike/bq-cache-manifest-not-updated-by-selfheal-2026-09-09` — self-heal `_drifted_years()`
-   (commit 3ff20579) refresh bảng nhưng quên rewrite manifest.json → preflight fail giả, mọi
-   dispatch BQ đang fallback network. Chưa sửa.
+1. `Mafee/nav-price-xcheck-stuck-{SpaceX,ZaloPay}-2026-09-09` — đã có fix (c30e0580); kiểm NAV 09-09 backfill xong chưa.
+2. `Mike/bq-cache-manifest-not-updated-by-selfheal-2026-09-09` — self-heal quên rewrite manifest.json. Chưa sửa.
 3. `Wags/wags-fix-not-confirmed: coord-2026-09-07` — doc drift cron vn_realestate_monthly_check.sh.
-   Cửa sổ theo dõi: trước cron chạy lại ~10-06.
 4. `macro-strategist/vn-realestate-monthly-check-2026-09` — chờ user chọn A/B/C.
 
-## Retro 2026-09-08 — XONG, backup silent-failure (lần 4, đã fix hoàn chỉnh) + BQ cache
-ticker_prune lệch (sự cố gốc dẫn tới commit 3ff20579 ở trên) — xem file retro nếu cần chi tiết.
-
-## Margin đơn mã discretionary — LIVE, PB-adaptive WIRED (đóng hoàn toàn)
-- Per-name 5% / sleeve 10% NAV, f≤1.3, %ADV≤10%, exit -20%. Commit 022c48e7.
-- Phễu candidate WIRE (cutoff=70%, trần=1.2), commit 714b5889. TV1/DGC lọt nhưng marginable=NO qua DNSE hiện tại.
-
-## CCS/8L accruals R&D — ĐÓNG HẲN 2026-09-06
-Phase 0→0b→R3→Phase2-NARROW, tất cả NO-GO (lần thứ 3). Mở lại chỉ khi có dữ liệu ngoài mẫu 2014-2026.
-
-## BAL/custom30V R&D — ĐÓNG HẲN 2026-09-09, 5 vòng đều NO-GO
-BAL vòng 1-3 (attribution, adaptive-exit, gate NEUTRAL) + custom30V vòng 4-5 (selector, placebo
-overweight-bank) — tất cả NO-GO, không wire gì. Input đầy đủ cho review VPI/BAL 09-16.
-User chốt (decided_by=user): overweight bank trong custom30V (49,1%/67,5%/93,3%) là TÁC DỤNG PHỤ
-của pool định nghĩa bằng thanh khoản, không phải chủ ý — giảm tỷ trọng bank là mục tiêu hợp lệ.
-Placebo vòng 5 (P1/P2 tách nguồn +2,62pp) đang chạy, output tại
-agents/Taylor/research/custom30v_placebo_20260910/.
+## R&D đã ĐÓNG HẲN (đừng mở lại nếu không có dữ liệu ngoài mẫu mới)
+- CCS/8L accruals (09-06, NO-GO lần 3) · BAL/custom30V 5 vòng (09-09, tất cả NO-GO).
+- custom30V: user chốt overweight bank là TÁC DỤNG PHỤ của pool thanh khoản; cắt 16pp bank tốn ~0 CAGR
+  nhưng LUÔN trả bằng ADV (−23,8% giữ pool 60 / −70,7% nới pool).
 
 ## Sát ngưỡng OKF
-kb/coding_guidelines.md 37,9KB/40KB, còn ~2,0KB đệm. §-mới tiếp theo gần như chắc chắn chạm
-ngưỡng → tách sang _ext.md khi đó.
+kb/coding_guidelines.md 37,9KB/40KB, còn ~2,0KB đệm → §-mới tiếp theo phải tách sang _ext.md.
 
-- [2026-09-09T18:04:00Z] VÒNG 5 placebo XONG (job Taylor_20260909_165335, done). KẾT LUẬN: (Y) THÊM TÊN RẺ chiếm ưu thế, (X) pha loãng ngành ÂM ở cấp rổ. Cấp NAV: TỔNG +2,621pp = ΔP1 +0,622 (23,7%) + ΔP2 +1,303 (49,7%) + tương tác +0,695 → luật chốt trước = HỖN HỢP (không đạt ngưỡng 60% để gán nhãn). Cấp rổ gross: ΔP1 −3,064pp (âm!), ΔP2 +5,731pp — ΔP2 là thành phần DUY NHẤT có CI95 loại trừ 0 [+0,05;+8,30], P(ΔP2>ΔP1)=0,996. ⇒ nguồn thật của +2,62pp là 132 tên đã qua cổng chất lượng chưa từng được chấm điểm định giá, KHÔNG phải ít ngân hàng hơn. Tỷ lệ phân rã KHÔNG đo chính xác được (%ΔP1 CI [−52%;+91%]) — đừng trích 23,7%/49,7% như số đã xác lập. PHÁT HIỆN QUAN TRỌNG NHẤT CHO CHÍNH SÁCH USER: ngân hàng CHÍNH LÀ nguồn thanh khoản — cắt 16pp trọng số bank tốn gần như KHÔNG GÌ về CAGR (+0,62pp, không phân biệt được với 0) nhưng LUÔN trả bằng ADV: giữ pool 60 ép đếm −23,8% ADV, nới pool −70,7%. Khác hẳn fincap (cắt trọng số cùng tập tên) = mất tiền thật −0,32..−0,84pp. Prior SAI đã ghi: thứ hạng yieldcombo TRONG nhóm tài chính CÓ thông tin (mode=random xoá sạch cả 2 hiệu ứng, 97,8% rơi vào số dư). Đề xuất luật cho vòng sau (CHƯA backtest, cần prereg MỚI): trần theo SỐ TÊN tài chính trong top-30 (k≈6), giữ pool 60, giữ yieldcombo chọn tên điểm cao nhất — 3 điều kiện: giữ thứ hạng, k chốt trước không quét, khai trước kỳ vọng ΔCAGR≈0 mục tiêu là hồ sơ tập trung ngành. Bài học harness (đề xuất thành luật coding_guidelines): script nghiên cứu ghim snapshot BQ phải GÁN CỨNG os.environ['BQ_LOCAL_CACHE'], KHÔNG dùng setdefault vì wc_env.sh luôn export trước → probe âm thầm đọc cache sống. Không wire gì.
-- [2026-09-10T12:59:13Z] 2026-09-10 AMH review (user hỏi, topic 1547589883999158363): viết kb/projects/amh-adaptivity-review-20260910.md — edge_health SỐNG + wired (w_LAG gate đang kích hoạt 0.50; EXBULL-suppress live), ecology REFUTED, fitness/biodiversity chết path Windows. 8 gap, 7 hướng; ưu tiên #1 BAL edge-gate đối xứng LAG. CHƯA dispatch — chờ user chọn hướng.
-- [2026-09-10T13:22:13Z] 2026-09-10 AMH: user DUYET ca 7 huong. XONG #7 (commit 30878a9b, fitness_matrix+biodiversity_test song lai), #5 (skill quant-research buoc 18 biodiversity gate, commit outer repo), #6 (kb/projects/amh-structural-break-protocol-20260910.md + kb/structural_break_watch.json, gop vao review quy Bobby 11-26; commit 5d9d4686). DANG CHAY 3 job Taylor opus/high: A=Taylor_20260910_131906 BAL edge-gate (DEADLINE 09-16, input cho review VPI/BAL), B=Taylor_20260910_131908 change-point+fitness matrix, C=Taylor_20260910_131910 market-efficiency gauge. Buoc ke tiep cua Mike: doc ket qua 3 job -> tong hop -> quyet co dispatch quant-skeptic khong. Wakeup turn PHAI bat dau bang jobs.sh claim-reply tung job.
-- [2026-09-10T14:00:15Z] 2026-09-10 AMH ket qua: job C XONG (chu ky khong phai cau truc, quant-skeptic CONFIRMED medium - caveat: dung doc thanh 'da chung minh la chu ky'). Job B XONG: change-point NO-GO; momentum chet o MOI o sau 2020 (IS 8/8 duong, OOS 8/8 ~0, LOO khong cuu) => KHONG the cuu BAL bang cong regime/breadth, ung ho G1 edge-gate. Phat hien phu QUAN TRONG: edge_health_monitor.py::edge_row() tinh t-stat bang n danh nghia tren chuoi IC fwd-3M chong lap => phong dai 1.5-2.4x; mom_200 t 3.68->1.67 => nhan FLIPPED le ra khong duoc phat. Mike tu recompute KHOP tuyet doi. Da dispatch quant-skeptic verify_20260910_135826 vi classify() la dau vao allocator LIVE. DINH CHINH: fitness_matrix.py cu co look-ahead 16% so thang - so +0.101/t=4.75 Mike trich luot truoc KHONG dung duoc, da gan SUPERSEDED (66e5ec7e). CON LAI: job A Taylor_20260910_131906 (BAL edge-gate) van running.
+- [2026-09-10T14:24:32Z] 2026-09-10 21:23 USER DUYET A/B mot leg exit-keyed. Dispatch Taylor_20260910_142406 (opus/high, timeout 5400). Cau hoi duy nhat: trong +0,60pp da cong bo cua allocator edge-conditional, bao nhieu con song khi mean12 khoa theo ngay RA. Rang buoc: 1 leg duy nhat, khong quet grid, khong sua lag_edge_health.csv (hop dong production), control phai tai lap md5 7d053e6201c9d107685ff4d1dd9d2d2a + self-check 0 VND neu khong thi DUNG. Gate LIVE khong bi anh huong boi loi nay. Buoc ke tiep cua Mike: doc ket qua -> quyet co can dinh chinh cau chu +0,60pp trong data/results_registry.md khong (Mike sua registry, KHONG de Taylor tu sua). Wakeup turn PHAI bat dau bang jobs.sh claim-reply.
