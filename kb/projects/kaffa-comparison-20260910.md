@@ -97,6 +97,30 @@ multiple-testing). Rào chắn bắt buộc: phải sinh alpha OOS hậu-2020 th
 N=2 cụm — quá nhỏ cho công cụ thống kê thường, phải nói rõ giới hạn, dựa vào walk-forward +
 lý luận nhân quả (sở hữu chung/dòng vốn) hơn là p-value đơn thuần.
 
+## Bước 1 KẾT QUẢ — NO-GO (2026-09-10 22:32 ICT, job Taylor_20260910_152624)
+
+Pre-reg: `Cluster_RS_200` (200d relative-strength vs VNINDEX) có dự báo fwd_3M CHÍNH cụm đó
+(giả thuyết A: continuation)? GO cần CẢ HAI cụm: OOS corr dương + sign-consistent ≥5/7 năm.
+
+- **PVN-family**: OOS corr **−0,357**, t(NW)=−2,16 (có ý nghĩa), sign-consistency 5/7 năm —
+  nhưng **SAI CHIỀU**: âm = mean-reversion, không phải continuation đã pre-register. Giả thuyết
+  B (mean-reversion) đã loại khỏi scope trước — Taylor KHÔNG tự mở rộng test đuổi theo (đúng kỷ
+  luật, tránh multiple-testing bias).
+- **Viettel-family**: OOS corr +0,073, t=0,64 (không ý nghĩa), sign-consistency chỉ 2/7 năm.
+
+**Verdict: NO-GO, dừng, không làm bước 2.** Cả 2 cụm không đạt điều kiện GO. Ý nghĩa: momentum
+cấp-cụm cùng số phận với momentum cá lẻ đã chết cấu trúc hậu-2020 (khớp AMH cùng ngày) — không
+có bằng chứng dòng vốn/sở hữu chung tạo continuation edge độc lập với price momentum thuần. Khớp
+đúng tiền lệ Rule 3 (20/20 sector sweep: grouping chỉ là LENS, không phải BOOK).
+
+**Đóng nghiên cứu correlation-cluster tại đây** (đề xuất của Taylor, Mike đồng ý). Hướng còn mở
+(chưa duyệt, kỳ vọng thấp — cùng nhóm rủi ro LENS-not-BOOK): within-cluster mean-reversion (giả
+thuyết B — PVN có t-stat đáng kể đúng chiều mean-reversion) — cần pre-reg riêng + user duyệt nếu
+muốn theo đuổi.
+
+File: `mike/agents/Taylor/research/kaffa_correlation_cluster_20260910/{PREREG_step1.md,
+step1_backtest.py,STEP1_CONCLUSION.md,step1_corr_stats.csv}`.
+
 ## Bước 1 KẾT QUẢ (2026-09-10 23:0x ICT, job Taylor_20260910_152624) — **NO-GO**
 
 Pre-registered TRƯỚC khi chạy (`PREREG_step1.md`): tín hiệu Cluster_RS_200 (200d relative-strength
