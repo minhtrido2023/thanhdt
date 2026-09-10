@@ -30,6 +30,36 @@ WC_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file
 EXEC_DIR = os.path.join(WC_ROOT, "data", "execution_logs")
 MIKE_BIN = os.path.dirname(os.path.abspath(__file__))
 HISTORY_FILE_TMPL = os.path.join(EXEC_DIR, "nav_history_{account}.csv")
+CORP_ACTIONS_FILE = os.path.join(WC_ROOT, "data", "corp_actions.json")
+
+
+def confirmed_qty_multiplier_after(ticker, asof_date):
+    """Tích các `qty_multiplier` CONFIRMED trong corp_actions.json cho `ticker` có `ex_date`
+    SAU `asof_date`. Trả 1.0 nếu không có sự kiện nào áp dụng.
+
+    Dùng để quy đổi NGƯỢC vị thế broker LIVE (đã phản ánh sự kiện) về vị thế tại `asof_date`
+    (trước sự kiện) — broker_positions() luôn trả ảnh chụp HIỆN TẠI bất kể --date, và DNSE
+    credit cổ phiếu sớm hơn ex_date 1 phiên (mẫu hình VHM/MBB/BID/VIX/MSB/VIB, xem
+    corp_action_auto_confirm.py), nên vị thế LIVE hôm nay có thể đã lớn hơn vị thế thật tại
+    một --date lịch sử gần đây dù ex_date ghi sau ngày đó.
+    """
+    if not os.path.exists(CORP_ACTIONS_FILE):
+        return 1.0
+    with open(CORP_ACTIONS_FILE, encoding="utf-8") as f:
+        actions = json.load(f).get("actions") or []
+    mult = 1.0
+    for a in actions:
+        if str(a.get("ticker", "")).upper() != ticker.upper():
+            continue
+        if not str(a.get("_status", "")).upper().startswith("CONFIRMED"):
+            continue
+        ex_date = str(a.get("ex_date") or "")[:10]
+        if ex_date and ex_date > asof_date:
+            try:
+                mult *= float(a.get("qty_multiplier") or 1.0)
+            except (TypeError, ValueError):
+                pass
+    return mult
 
 
 def trading_dates_with_fills(account, upto_date):
@@ -373,6 +403,19 @@ def main():
     import datetime as _dt
     tickers = sorted(positions)
     is_today = args.date == _dt.date.today().isoformat()
+
+    # Quy đổi NGƯỢC vị thế broker LIVE về đúng --date lịch sử cho các mã đã dính corp-action
+    # CONFIRMED có ex_date SAU --date (xem docstring confirmed_qty_multiplier_after — bug
+    # 2026-09-10: VIB bonus issue credit sớm 1 phiên trước ex_date). Không áp khi is_today vì
+    # khi đó vị thế LIVE đúng là vị thế thật của chính args.date, không cần quy đổi.
+    corp_action_adj = {}
+    if not is_today:
+        for t in tickers:
+            mult = confirmed_qty_multiplier_after(t, args.date)
+            if mult != 1.0:
+                corp_action_adj[t] = mult
+                positions[t]["qty"] = positions[t]["qty"] / mult
+
     if is_today:
         prices = dnse_close_prices(tickers)
     else:
@@ -397,8 +440,8 @@ def main():
     # (khác rc=2 "thiếu dữ liệu") để caller (`nav_sync_retry.sh`) biết đây là case ĐÁNG
     # RETRY tự động trong 1 cửa sổ ngắn, thay vì escalate ngay như (a).
     PRICE_XCHECK_TOLERANCE_PCT = 5.0
+    mismatched = []
     if is_today:
-        mismatched = []
         for t in tickers:
             mp = (positions[t] or {}).get("marketPrice")
             cp = prices.get(t)
@@ -407,16 +450,33 @@ def main():
             diff_pct = abs(cp - mp) / mp * 100
             if diff_pct > PRICE_XCHECK_TOLERANCE_PCT:
                 mismatched.append((t, cp, mp, diff_pct))
-        if mismatched:
-            detail = "; ".join(f"{t}: close_price={cp:,.0f} vs vị thế broker marketPrice={mp:,.0f} "
-                               f"(lệch {d:.1f}%)" for t, cp, mp, d in mismatched)
-            print(f"❌ [{args.date}] Giá close_price(G1) và marketPrice của vị thế broker LỆCH "
-                  f">{PRICE_XCHECK_TOLERANCE_PCT:.0f}% cho {len(mismatched)} mã — KHÔNG tính NAV "
-                  f"(broker chưa đồng bộ hết nguồn giá — corp-action hoặc trễ marketPrice EOD, "
-                  f"xem VHM 2026-08-05 / PVT 2026-09-08): "
-                  f"{detail}. Sẽ tự retry trong cửa sổ ngắn; nếu vẫn lệch sau đó cần kiểm tra thủ công.",
-                  file=sys.stderr)
-            return 4
+    else:
+        # Lịch sử: CHỈ đối chiếu các mã VỪA bị quy đổi corp-action ở trên. So trực tiếp
+        # close_price lịch sử (trước sự kiện) với marketPrice LIVE (sau sự kiện) của mã
+        # KHÔNG có corp-action sẽ luôn lệch do biến động giá bình thường qua thời gian —
+        # không phải bug, nên nhóm đó giữ nguyên hành vi cũ (bỏ qua, không gate). Với mã CÓ
+        # corp-action, quy đổi close_price lịch sử về cùng cơ sở với marketPrice hiện tại
+        # (chia cho đúng multiplier đã dùng để quy đổi qty) rồi mới so — lệch còn lại sau khi
+        # đã trừ phần corp-action là dấu hiệu bug KHÁC (multiplier sai, thiếu sự kiện...).
+        for t, mult in corp_action_adj.items():
+            mp = (positions[t] or {}).get("marketPrice")
+            cp = prices.get(t)
+            if not mp or not cp:
+                continue
+            cp_adj = cp / mult
+            diff_pct = abs(cp_adj - mp) / mp * 100
+            if diff_pct > PRICE_XCHECK_TOLERANCE_PCT:
+                mismatched.append((t, cp_adj, mp, diff_pct))
+    if mismatched:
+        detail = "; ".join(f"{t}: close_price={cp:,.0f} vs vị thế broker marketPrice={mp:,.0f} "
+                           f"(lệch {d:.1f}%)" for t, cp, mp, d in mismatched)
+        print(f"❌ [{args.date}] Giá close_price(G1) và marketPrice của vị thế broker LỆCH "
+              f">{PRICE_XCHECK_TOLERANCE_PCT:.0f}% cho {len(mismatched)} mã — KHÔNG tính NAV "
+              f"(broker chưa đồng bộ hết nguồn giá — corp-action hoặc trễ marketPrice EOD, "
+              f"xem VHM 2026-08-05 / PVT 2026-09-08): "
+              f"{detail}. Sẽ tự retry trong cửa sổ ngắn; nếu vẫn lệch sau đó cần kiểm tra thủ công.",
+              file=sys.stderr)
+        return 4
 
     mtm_stock = sum(pos["qty"] * prices[t] for t, pos in positions.items())
 
