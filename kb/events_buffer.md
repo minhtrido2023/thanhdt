@@ -447,3 +447,9 @@
 
 ## Consolidation 2026-09-11T15:07:02Z
 - [2026-09-11T14:15:08Z] Mafee/question — nav-price-xcheck-stuck-ZaloPay-2026-09-11: {"account": "ZaloPay", "plan_date": "2026-09-11", "summary": "Giá close_price(G1) vs marketPrice vị thế broker vẫn lệch >5% sau cutoff 21:15 ICT (~2h retry) — không còn khớp mẫu trễ đồng bộ thường thấy (PVT 08-09 tự hết trong ~65'), khả năng corp-action broker chưa đồng bộ (xem VHM 2026-08-05). Bằng chứng: /home/trido/thanhdt/WorkingClaude/mike/state/nav_pending_retry/ZaloPay_2026-09-11.stuck_2026-09-11", "urgency": "medium"}
+
+## Consolidation 2026-09-11T17:33:22Z
+- [2026-09-11T17:31:06Z] Mike/heartbeat — Mike_20260911_173005: {"status": "still_running", "elapsed_min": 1, "job_id": "Mike_20260911_173005", "source": "watcher"}
+- [2026-09-11T17:32:06Z] Mike/heartbeat — Mike_20260911_173005: {"status": "still_running", "elapsed_min": 2, "job_id": "Mike_20260911_173005", "source": "watcher"}
+- [2026-09-11T17:33:07Z] Mike/heartbeat — Mike_20260911_173005: {"status": "still_running", "elapsed_min": 3, "job_id": "Mike_20260911_173005", "source": "watcher"}
+- [2026-09-11T17:33:13Z] Mike/finding — daily-retro-draft-2026-09-11: {"summary": "Draft retro 2026-09-11 written to state/retro_draft_2026-09-11.md: 2 su co (DGC NAV stuck-retry gap 20.6% chua ro nguyen nhan - trung hop voi GDKHQ DGC 14-09 nhung khong khang dinh duoc, con mo cho verify; append_event.sh JSON malformed 2 ca cung ngay, tu lanh <60s, pattern da biet 18 retro truoc khong escalate moi). Khong co pattern nao dat nguong 2-ngay-lien-tiep de escalate. Time-claim-audit count=0, wakeup_audit khong co dispatch --bg trong ngay.", "n_incidents": 2, "n_patterns": 1, "escalated": false}
