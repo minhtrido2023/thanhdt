@@ -32,6 +32,17 @@ ROOT = "/home/trido/thanhdt/WorkingClaude/mike"
 NOW = time.time()
 
 ERROR_PATTERNS = [
+    # Dấu hiệu THẤT BẠI do CHÍNH script fleet tự in ra, không phải do runtime/OS. Thêm
+    # 2026-09-12 (weekly ops audit, job Mike_20260911_204825) sau khi phát hiện bộ này MÙ hoàn
+    # toàn với quy ước báo lỗi phổ biến nhất của fleet: 9/72 log target đang có dòng mở đầu
+    # bằng "❌" và KHÔNG cái nào bị bắt — gồm cả `investor_weekly_report.log` ("Cổng tỉ suất
+    # KHÔNG chạy được", cổng §21 của báo cáo GỬI NHÀ ĐẦU TƯ) và `hit_details_daily.log` (hỏng
+    # 100% số lần chạy kể từ khi cài 09-10). Neo vào ĐẦU DÒNG là điều bắt buộc: "❌" trần xuất
+    # hiện 31 log, gần như toàn bộ là ô bảng markdown trong transcript dispatch của Taylor
+    # ("| 08-04 | ❌ | rotation |") — pattern không neo sẽ là máy sinh báo động giả.
+    # Đo trước khi bật (theo §Enforcement policy của coding_guidelines): trên đúng 72 log target
+    # thật, 9 hit / 9 đều là thất bại thật, 0 false-positive.
+    r"^\s*❌",
     r"Traceback \(most recent call last\)",
     r": line \d+: .+: (No such file or directory|Permission denied|command not found|unbound variable)",
     r"syntax error",
