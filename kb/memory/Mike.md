@@ -41,3 +41,4 @@ chỉ đáng xem lại nếu ≥2 ca CÙNG PHÁT SINH thật trong 1 ngày liên
 kb/coding_guidelines.md 37,9KB/40KB, còn ~2,0KB đệm → §-mới tiếp theo phải tách sang _ext.md.
 
 - [2026-09-11T21:10:50Z] weekly ops audit 2026-09-12 XONG (job Mike_20260911_204825): 3 bug that, 2 commit (9becc1b3 mike_paseo+ack fail-open, 97a60151 pattern ❌), 3 escalate. QUAN TRONG NHAT dang cho nguoi: 'Mike/report-return-gate-worktree-root-chan-bao-cao-nha-dau-tu' — report_return_gate.py:55 tinh ROOT sai trong worktree => cong ti suat §21 fail-closed => BAO CAO NHA DAU TU khong gui duoc (5 ca da xay ra). Bus question PENDING nay la 5.
+- [2026-09-11T21:22:18Z] weekly ops audit 2026-09-12: bao cao da post day du vao Architecture o resume #1 (luot goc het max-turns truoc buoc post). 5 bus question PENDING, uu tien: report_return_gate worktree ROOT (client-facing) > DGC NAV gap ZaloPay (truoc 14/09) > hit_details_daily lech gio cron.
