@@ -463,3 +463,6 @@
 ## Consolidation 2026-09-11T17:38:29Z
 - [2026-09-11T17:37:08Z] Mike/heartbeat — Mike_20260911_173607: {"status": "still_running", "elapsed_min": 1, "job_id": "Mike_20260911_173607", "source": "watcher"}
 - [2026-09-11T17:38:08Z] Mike/heartbeat — Mike_20260911_173607: {"status": "still_running", "elapsed_min": 2, "job_id": "Mike_20260911_173607", "source": "watcher"}
+
+## Consolidation 2026-09-11T17:38:59Z
+- [2026-09-11T17:38:52Z] Mike/finding — daily-retro-finalized-2026-09-11: {"summary": "Retro 2026-09-11 finalized: 2 su co (DGC NAV ZaloPay stuck-retry gap 20.6% CON MO, cho verify DNSE truoc phien 14/09; append_event JSON isolation pattern da biet khong escalate), 1 pattern moi trong ho gate PRICE_XCHECK (nguyen nhan thu 5, forward corp-action, chua ket luan). Verified by Wags: GAPS FOUND and fixed (sai so dem ca + sai index sidecar, khong doi ket luan). Entry: kb/incidents/retro/retro-2026-09-11.md. Working memory Mike da don gon cuoi ngay. consolidate.sh chay xong (KB v2930).", "entry_file": "kb/incidents/retro/retro-2026-09-11.md", "commit": "623741e4"}
