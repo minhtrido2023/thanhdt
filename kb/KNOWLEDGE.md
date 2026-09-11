@@ -3,7 +3,7 @@
 > **Nguồn sự thật của toàn đội — canonical-only, Mike biên tập thủ công.**
 > Consolidator KHÔNG ghi vào đây (raw events → `kb/events_buffer.md`). File này ổn định.
 > Agent đọc `context_pack.md` (~8KB, distilled). File này dành cho tra cứu sâu và weekly editorial.
-> Raw event log: `kb/events_buffer.md` (hot, 7 ngày) + `kb/archive/` (lịch sử). **Curated: 2026-08-29 (Mike, weekly editorial).**
+> Raw event log: `kb/events_buffer.md` (hot, 7 ngày) + `kb/archive/` (lịch sử). **Curated: 2026-09-12 (Mike, weekly editorial).**
 
 ---
 
@@ -80,6 +80,10 @@
 - Technical-stabilization filter trên WATCH universe: REFUTED làm return filter (research-only).
 - Wave1/H8a-tiebreaker (LAG within-tier d_NPR fill-reorder): CONDITIONAL PASS ban đầu nhưng **leave-one-out xác nhận LUMPY — DO NOT WIRE** (toàn bộ gain đến từ 1-2 năm cụ thể, không phải signal bền — bài học multiple-testing discipline).
 - gq_score growth gate, pbcombo dual-vehicle, liq-tilt custom30, deep-discount sleeve (PARKED): giữ nguyên trạng thái cũ, chưa thay đổi.
+- **CCS (Conditional Conviction Sizing) Phase 0-2** (2026-09-05/06): 0/7 đề cử qua Phase 1, Phase 2-NARROW cũng NO-GO. Đóng hẳn.
+- **BAL 5 vòng nghiên cứu** (2026-09-09, exit/re-entry adaptive, edge-gate, diagnosis): tất cả NO-GO — không có gate/sizing mới nào wire vào book BAL.
+- **custom30V 5 vòng nghiên cứu** (2026-09-09, sector lens + rổ mở rộng + phân rã placebo): tất cả NO-GO. Overweight ngân hàng xác nhận là TÁC DỤNG PHỤ của pool thanh khoản (không phải lỗi chọn lọc) — cắt giảm tốn ADV mà gần như không đổi CAGR.
+- **AMH (Adaptive Market Hypothesis) 7 hướng** (2026-09-10, edge-gate BAL, market-efficiency gauge, correlation-cluster): ĐÓNG HẲN 2026-09-10, KHÔNG WIRE gì. Kết luận dùng làm input cho review VPI/BAL 2026-09-16. Chi tiết: `kb/projects/amh-adaptivity-review-20260910.md`.
 
 **V2.5 (tương lai):** R&D-complete, DISABLED. Reminder go-ahead fired 2026-07-07 — **user vẫn CHƯA quyết** (treo, không phải đã bỏ qua). = V2.4 + leverage layer (deep-cheap gate, MGE=1.5, ~2 episodes/decade).
 
@@ -310,6 +314,8 @@ sleeve (Bobby real-time-blind + PIT filter + overreaction indicator, 3 điều k
 
 **Macro/khác:** ACB OShares stale ex-date (2026-06-22, PE thực 8.87). DRI Q3'26 nowcast ~40-42B NP. HVN routing bug (ICB 5751 rơi vào COMPOUNDER route sai, fix scheduled post-go-live — **chưa xác nhận đã fix, cần kiểm lại**). SBV TT25/2026 nới trần vốn ngắn hạn 30→40% hiệu lực 07-01, credit easing chưa kích hoạt DT5G.
 
+**Quy ước phân tích conditional — trục 2 mặc định (chốt 2026-08-22, user duyệt):** breadth-tercile PIT (nguồn `tav2_mike.universe_pit`, breadth_t = %mã Close>MA200 trong universe, phân loại phiên bằng breadth_{t-1} PIT, tercile theo phân vị rolling 252 phiên) THAY Value Radar zone làm trục 2 mặc định cho mọi phân tích conditional mới — radar zone ≈ kỷ nguyên nên n_effective quá thấp (54% số năm bị 1 nhãn chiếm ≥90% phiên). Value Radar (`value_radar.py`) vẫn giữ vai trò DISPLAY-ONLY trong báo cáo, KHÔNG wire vào sizing. Chi tiết: `context_pack.md` cùng mục.
+
 ---
 
 ## 8. Incidents & Lessons Learned
@@ -340,6 +346,8 @@ sleeve (Bobby real-time-blind + PIT filter + overreaction indicator, 3 điều k
 
 **Pattern đang mở (chưa đóng hẳn):** "code âm thầm đọc/dùng dữ liệu chưa sẵn sàng, che giấu bởi tolerance/giả định lịch trình rộng" — đã vá 1 lát cắt hẹp (BQ-vs-DNSE, 07-09) và 1 lát cắt khác lộ ra ngay sau đó dưới dạng khác (DT5G cron-order + chain freshness, 07-10). Bus question `retro-pattern-recurring-dataprovenance-2` đề xuất tổng quát hoá quy tắc freshness-check cho MỌI cặp pipeline producer→consumer nội bộ — **vẫn chờ user/Mike xác nhận hướng**, chưa tới ngưỡng escalate mức cao hơn.
 
+**2026-09-11 — DGC NAV ZaloPay stuck-retry, CÒN MỞ:** gap 20.6% giữa `close_price` BQ (46.750) vs `marketPrice` broker (38.750), quá cutoff 21:15 ICT. Trùng thời điểm DGC GDKHQ cổ tức 8.000đ/cp hiệu lực 2026-09-14 nhưng CHƯA qua ex-date lúc phát hiện — nguyên nhân gốc CHƯA xác định (nguyên nhân gốc thứ 5 khác 4 nguyên nhân đã đóng bằng commit `c30e0580` 09-10). Cần Winston/Mafee verify DNSE trực tiếp trước phiên 2026-09-14. Topic bus: `Mafee/nav-price-xcheck-stuck-ZaloPay-2026-09-11`. Chi tiết: `kb/incidents/retro/retro-2026-09-11.md`.
+
 ---
 
 ## 9. Quy Ước & Tra Cứu Nhanh
@@ -364,10 +372,13 @@ sleeve (Bobby real-time-blind + PIT filter + overreaction indicator, 3 điều k
 - `kb/paper_programs_registry.json` — 9 chương trình paper-trading chính thức (bao gồm `pt_v22_dt5g` = production signal book, KHÔNG phải paper mirror).
 - `kb/archive/` — raw consolidation blocks cũ (không cần đọc thường xuyên).
 
-**Cron quan trọng (ICT)** — *nguồn sống là `kb/ops_runbook.md` (bảng timeline) + `crontab -l`; bảng dưới chỉ là bản tóm, đã đối chiếu 2026-09-05:*
+**Cron quan trọng (ICT)** — *nguồn sống là `kb/ops_runbook.md` (bảng timeline) + `crontab -l`; bảng dưới chỉ là bản tóm, đã đối chiếu 2026-09-12:*
 - 19:00 T2-T6: `bq_freshness_check.sh` → DollarBill lập plan T+1 *(đổi từ 17:30, 2026-07-10)*.
+- 19:05 T2-T6: `hit_details_daily.sh` (thêm 2026-09-10) — audit thuần cho mã BAL/LAG hôm nay (công thức + giá trị thật), sau `bq_freshness_check` 19:00, trước `eod_trading_report` 19:10.
 - 21:00 T2-T6: `send_plan_report.sh` → gửi plan qua Telegram + Discord *(đổi từ 19:30, 2026-07-10; thêm 23:00 `--second-chance` từ 2026-07-13)*.
+- 21:45 T2-T6: `late_plan_catchup.sh` (thêm sau `send_plan_report` 21:00 — lần 1 catch-up plan trễ).
 - 08:20 & 12:45 T2-T6: `ops_health_check.sh` — tự kiểm vận hành, post Trading Daily.
+- 08:35 daily: `backup_freshness_check.sh` (thêm 2026-09-09, Wags — kiểm ĐỘC LẬP tuổi bản backup GitHub qua remote ref, không tin exit code của `fleet_backup.sh`; sau backup 00:00 + `kb_nightly` 02:00 + `cron_health_check` 08:25).
 - 08:45 T2-T6: `preflight_check.sh`.
 - 09:05 & 13:00 (sau nghỉ trưa) T2-T6: `run_bot.sh --auto-otp`.
 - 20:30 T2-T6: `inject_discretionary_orders.sh` (chèn lệnh gom DISCRETIONARY_SPECIAL, thêm 2026-07-24).
@@ -387,7 +398,7 @@ sleeve (Bobby real-time-blind + PIT filter + overreaction indicator, 3 điều k
   cron riêng thêm cùng đợt 08-31, KHÔNG trùng job 08:30 ở trên).
 - 09:00 ngày 1 hàng tháng: `check_report_cadence.sh --scheduled-monthly` (báo cáo tháng investor-grade).
 - 00:00 daily: `fleet_backup.sh` → GitHub.
-- *(Nguồn đầy đủ nhất, luôn tra khi nghi ngờ: `kb/cron_registry.md` + `crontab -l` — bảng trên chỉ tóm các cron chạm tiền thật/vận hành sống, không liệt kê paper-trading `main` account. Đối chiếu lần gần nhất: 2026-09-05.)*
+- *(Nguồn đầy đủ nhất, luôn tra khi nghi ngờ: `kb/cron_registry.md` + `crontab -l` — bảng trên chỉ tóm các cron chạm tiền thật/vận hành sống, không liệt kê paper-trading `main` account. Đối chiếu lần gần nhất: 2026-09-12.)*
 
 ---
 
