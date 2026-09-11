@@ -70,6 +70,26 @@ Selfcheck phạm vi money-path (§23): `compute_active_nav_selfcheck` ALL PASS �
 `nav_scripts_2account` PASS · `snapshot_corp_action` 43/43.
 
 ## Còn mở (KHÔNG tự xử — cần người quyết)
+
+> **Cập nhật 2026-09-12 (weekly ops audit, job `Mike_20260911_204825`) — mục này KHÔNG còn đúng
+> hiện trạng, và việc đã xảy ra theo hướng mục này đề nghị hỏi user trước.** Đo thật bằng
+> `tav2_pin.__TABLES__`: **cả hai** họ pin đã được tạo, TẤT CẢ trong một đợt ngày **2026-09-05**
+> (`*_pin_202608` lúc 03:22–03:33 ICT, `*_pin_202609` lúc 03:36–03:43 ICT; 11 bảng mỗi họ).
+> Metadata BQ ghi rõ `snapshotTime = 2026-09-05T03:32:09.740Z` cho `vnindex_5state_dt5g_live_pin_202608`.
+>
+> Hệ quả cần người quyết, KHÔNG tự xử (xoá bảng BQ = ngoài ranh giới tự sửa):
+> `bq_monthly_pin.py` tự khai quy ước nhãn ở docstring dòng 32 — *"YYYYMM là tháng ICT mà pin được
+> **TAKEN**"*. Theo đúng quy ước đó, `*_pin_202608` chụp ngày 09-05 là **nhãn lệch 5 tuần**: nó
+> KHÔNG phải ảnh trạng thái đầu tháng 8 (cửa sổ time-travel của BQ chỉ 7 ngày, trạng thái 08-01 đã
+> trôi — chính mục này đã nói vậy). Giảm nhẹ: drift **được ghi công khai** trong `snapshotTime`,
+> không phải hỏng ngầm — ai kiểm chứng metadata sẽ thấy. Rủi ro thật là người dùng sau này đọc
+> TÊN bảng mà không đọc `snapshotTime`, rồi dùng `pin_202608` làm mốc "trạng thái 2026-08-01" cho
+> một cuộc soát restate.
+>
+> Escalate: bus question `Mike/bq-pin-202608-nhan-lech-tao-ngay-0905`. Lựa chọn cho user: (a) giữ
+> nguyên + thêm ghi chú vào `kb/data_registry/config-meta/bq_pin_snapshots.md`; (b) đổi tên thành
+> một nhãn nói đúng sự thật; (c) xoá `*_pin_202608`. Cả 3 đều cần user quyết.
+
 **Thiếu pin `202608` và `202609`.** Dữ liệu tháng 8 đã trôi, không tái tạo được. Chạy pin 202609 lúc
 này (09-05) sẽ tạo artifact mang nhãn tháng 9 nhưng chụp trạng thái 09-05 chứ không phải 09-01 —
 đúng loại nhãn lệch mà chính job này sinh ra để phát hiện. Để user quyết có chạy bù hay bỏ qua.

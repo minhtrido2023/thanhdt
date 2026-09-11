@@ -268,9 +268,13 @@ def main():
             rows.append({
                 "script": script, "schedule": j["schedule"], "bucket": bucket,
                 "status": "ACKED",
-                "detail": f"{len(errs)} dòng đã xác nhận-đã-sửa (ack {job_ack['acked_by']} "
-                          f"{job_ack['acked_at'][:10]}, hết hạn {job_ack.get('expires_days', 14)}d): "
-                          f"{job_ack['note'][:180]}",
+                # .get() cho MỌI trường mô tả: một ack viết tay thiếu/gõ sai 1 khoá phụ từng
+                # làm CHÍNH bộ kiểm tra sức khoẻ cron chết bằng KeyError (đo thật 2026-09-12,
+                # weekly ops audit) — tức là một lỗi chính tả trong file ack làm mù toàn bộ 90 job.
+                # Ack là dữ liệu người nhập; đọc nó phải fail-open, không fail-hard.
+                "detail": f"{len(errs)} dòng đã xác nhận-đã-sửa (ack {job_ack.get('acked_by', '?')} "
+                          f"{str(job_ack.get('acked_at', ''))[:10]}, hết hạn {job_ack.get('expires_days', 14)}d): "
+                          f"{str(job_ack.get('note', '(không có ghi chú)'))[:180]}",
             })
         else:
             rows.append({

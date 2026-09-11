@@ -48,14 +48,24 @@ mkdir -p "$MIKE/state"
 #       và CHÍNH file này. Bộ dò ngày tránh được vì neo HẬU TỐ `*_selfcheck.{py,sh}`; ở đây phải
 #       loại đích danh vì vẫn cố ý giữ dạng tiền tố `selfcheck_*.py` của 3 study R&D Taylor.
 #   Đo sau khi vá: 236 -> 155 file (bỏ 77 worktree + 4 harness), KHÔNG file hợp lệ nào bị mất.
+# BỔ SUNG 2026-09-12 (weekly ops audit, job Mike_20260911_204825) — loại `mike_paseo/`:
+#   ảnh chụp ĐÓNG BĂNG của `mike/` tại 2026-08-28 (git HEAD `0e29acb8`, KB v2611 vs mike v2932),
+#   user đã đưa vào `.gitignore` của repo ngoài 2026-09-08 sau sự cố gitlink treo. Không dòng
+#   crontab nào trỏ tới nó; file duy nhất "mới" trong cây là artifact do CHÍNH bộ quét này ghi ra.
+#   Nó chiếm 84/248 file (34%) và đóng góp 3/6 FAIL của lượt 09-12 — trong đó
+#   `daily_retro_wake_metrics_selfcheck.sh` đã bị RETIRE khỏi mike/ ở commit `30648b51` (khối nó
+#   gác bị gỡ khỏi daily_retro.sh, `13f7bd59`) ⇒ đỏ ZOMBIE, gác một thứ không còn tồn tại.
+#   Đây đúng tiêu chí "không phải production HEAD" mà 2 lần vá trước (08-15, 08-22) đã dùng.
+#   Muốn bật lại: xoá đúng 1 dòng `grep -vE "^\./mike_paseo/"` dưới đây.
 mapfile -t FILES < <(cd "$WC_ROOT" && find . \( -iname "*selfcheck*.py" -o -iname "*selfcheck*.sh" \) \
   2>/dev/null | grep -v node_modules | grep -v __pycache__ \
   | grep -vE "/exp_|/job_2026|v4final_exp|/data/fscore_c30v" \
   | grep -vE "(^|/)wt-|(^|/)pending_|/\.claude/worktrees/" \
+  | grep -vE "^\./mike_paseo/" \
   | grep -vE "/(run_selfchecks\.sh|selfcheck_baseline_diff\.py|selfcheck_scope_map\.sh|selfcheck_weekly_baseline_check\.sh)$" \
   | sed 's|^\./||' | sort)
 
-echo "Tìm thấy ${#FILES[@]} selfcheck (đã loại exp_*/job_2026*/v4final_exp + wt-*/pending_*/.claude/worktrees/* + 4 harness — không phải production HEAD)."
+echo "Tìm thấy ${#FILES[@]} selfcheck (đã loại exp_*/job_2026*/v4final_exp + wt-*/pending_*/.claude/worktrees/* + mike_paseo/ + 4 harness — không phải production HEAD)."
 
 # 2) Phân loại tier — grep heuristic. LẦN ĐẦU CHẠY THẬT (2026-08-01) bắt được chính heuristic
 # này thiếu: chỉ khớp literal "bq query"/"bq show" bỏ sót MỌI script gọi qua wrapper
