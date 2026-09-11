@@ -40,3 +40,4 @@ chỉ đáng xem lại nếu ≥2 ca CÙNG PHÁT SINH thật trong 1 ngày liên
 ## Sát ngưỡng OKF
 kb/coding_guidelines.md 37,9KB/40KB, còn ~2,0KB đệm → §-mới tiếp theo phải tách sang _ext.md.
 
+- [2026-09-11T21:10:50Z] weekly ops audit 2026-09-12 XONG (job Mike_20260911_204825): 3 bug that, 2 commit (9becc1b3 mike_paseo+ack fail-open, 97a60151 pattern ❌), 3 escalate. QUAN TRONG NHAT dang cho nguoi: 'Mike/report-return-gate-worktree-root-chan-bao-cao-nha-dau-tu' — report_return_gate.py:55 tinh ROOT sai trong worktree => cong ti suat §21 fail-closed => BAO CAO NHA DAU TU khong gui duoc (5 ca da xay ra). Bus question PENDING nay la 5.
