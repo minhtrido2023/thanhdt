@@ -3,7 +3,7 @@ kind: local-file
 status: CANONICAL
 source: data/oni_index.csv
 group: feeds
-cadence: THÁNG (~ giữa tháng theo lịch publish CPC) — cron ĐỀ XUẤT, CHƯA cài (xem "Bẫy" #3)
+cadence: THÁNG (~ giữa tháng theo lịch publish CPC) — cron ĐÃ CÀI 2026-09-12 (xem "Bẫy" #3)
 writer: oni_index_feed.py
 ---
 
@@ -32,7 +32,7 @@ python3 /home/trido/thanhdt/WorkingClaude/oni_index_feed.py            # full hi
 python3 /home/trido/thanhdt/WorkingClaude/oni_index_feed.py --since 2006  # lọc năm >= 2006
 ```
 
-**Cron: ĐỀ XUẤT, CHƯA CÀI** — xem Bẫy #3.
+**Cron: ĐÃ CÀI 2026-09-12** — xem Bẫy #3.
 
 ## Bẫy
 
@@ -50,15 +50,16 @@ backtest coi như đã kết thúc.** JJA 2026 ANOM=1.80 đã verify khớp ENSO
 2026-09-10 ("Niño-3.4 reached +1.8°C in August"). Dùng ONI trễ ≥2 quý so với thời điểm cần dự đoán
 là đủ an toàn khỏi look-ahead (memo hydro §2) — GIỮ NGUYÊN caveat này từ bản cũ.
 
-**3. [MỚI] Cron CHƯA cài — sandbox agent bị permission classifier chặn thao tác `crontab` (thay
-đổi hệ thống dùng chung, cần xác nhận tương tác).** Dòng đề xuất (theo đúng pattern
-`hog_price_feed.py`, đã ghi vào `kb/cron_registry.md`):
+**3. [ĐÃ CÀI 2026-09-12]** Ban đầu sandbox Taylor bị permission classifier chặn thao tác `crontab`
+(thay đổi hệ thống dùng chung) — Mike cài tay sau khi user duyệt. Dòng thật đang chạy (theo đúng
+pattern `hog_price_feed.py`, khớp `kb/cron_registry.md`):
 ```
 0 2 20 * * /usr/bin/python3 /home/trido/thanhdt/WorkingClaude/oni_index_feed.py >> /home/trido/thanhdt/WorkingClaude/logs/oni_index_feed.log 2>&1
 ```
-= 09:00 ICT ngày 20 hàng tháng (NOAA CPC publish ONI update quanh giữa tháng — không có ngày cố
-định công bố chính thức, ngày 20 là biên an toàn sau mốc publish thường gặp). Ai cài (Mike/user
-qua `crontab -e`) nhớ verify chạy tay 1 lần trước, và note lại mtime thật vào đây.
+= 09:00 ICT ngày 20 hàng tháng (host cron chạy UTC — `0 2` UTC = 09:00 ICT; NOAA CPC publish ONI
+update quanh giữa tháng, ngày 20 là biên an toàn sau mốc publish thường gặp). Verify tay trước khi
+cài: chạy `python3 oni_index_feed.py` 2026-09-12 08:44 ICT — exit 0, 919 dòng, latest JJA 2026
+ANOM=1.8 (khớp lần fetch trước của Taylor).
 
 **4. Không phải cron TỰ ĐỘNG chưa cài thì dữ liệu cũ.** File `data/oni_index.csv` đã fetch tay
 thành công 2026-09-12 (919 dòng, latest JJA 2026). Chạy lại tay bất kỳ lúc nào cần dữ liệu mới hơn,
