@@ -141,3 +141,14 @@ Cách tính breadth chuẩn:
 Value Radar vẫn giữ vai trò DISPLAY-ONLY trong báo cáo (§6b coding_guidelines). Không wire vào sizing.
 
 Kết quả dẫn tới quyết định: breadth-vs-radar-matrix-20260822 (Taylor, B2) + user confirm 2026-08-22.
+
+## QUY TẮC — DNSE điều chỉnh giá vị thế TỐI TRƯỚC ngày ex-date (user chốt 2026-09-12, bài học lặp ≥3 lần)
+**Sự thật broker:** DNSE cập nhật `marketPrice` của vị thế theo giá đã điều chỉnh corp-action vào
+**tối hôm trước ex-date** (T−1 evening), trong khi `close_price` BQ tới lúc đó vẫn là giá CHƯA
+điều chỉnh. ⇒ xcheck NAV lệch đúng bằng cổ tức tiền (hoặc theo tỉ lệ với cổ tức cổ phiếu/tách)
+là **KỲ VỌNG, không phải stuck, không cần verify DNSE, không escalate**. Ca chuẩn: DGC 11/09/2026
+tối T6 — BQ 46.750 vs broker 38.750, cổ tức 8.000đ ex-date T2 14/09 ⇒ 46.750−8.000 = 38.750 khớp
+chính xác. Trước đó cùng lớp: VHM 08-05, MBB 08-11 (đều "nghi corp-action" rồi mới nhận ra).
+**Cách xử lý khi gặp:** tra ex-date mã đó (`tav2_bq.corporate_action` / `corp_action_pending.md`);
+ex-date == phiên kế tiếp VÀ số khớp ⇒ đóng ngay, dùng giá broker. Cơ chế tự nhận diện trong
+`nav_sync_retry.sh` đang được wire (Wags_20260912_052122, VIỆC 3) để không phải hỏi lại.
