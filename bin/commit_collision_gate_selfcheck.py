@@ -8,9 +8,14 @@ word — a fixture that only writes status=running would make the tests pass on 
 never looks at /proc at all. That is the same fixture trap that made the job-cancel guard
 go green on broken code (round 9: started_at=1000 short-circuited the branch under test).
 
-Case 12 replays the incident this gate was written for: the real job record
-Wags_20260812_035748 (write_scope='') and the real file list of commit f827f6df, plus the
-RED counterfactual proving the SHIPPED --write-scope gate is blind to it.
+Case 12 replays the incident this gate was written for: job record Wags_20260812_035748
+(from=Mike to=Wags, write_scope='') colliding with the 9-file commit f827f6df, plus the RED
+counterfactual proving the SHIPPED --write-scope gate is blind to it. The fixture is
+SELF-CONTAINED (constants below, rebuilt in a tmpdir): the live bus record was rotated to
+bus/jobs/archive/ on 2026-09-xx and case 12 started failing on a gate that was never broken
+(43/44). A regression test that depends on mutable live state tests the janitor, not the gate.
+When commit f827f6df is still reachable, case 12z re-derives its file list and asserts the
+constant has not drifted — evidence stays honest without the test depending on it.
 
 Usage: bin/commit_collision_gate_selfcheck.py     (exit 0 = all pass)
 """
@@ -26,6 +31,20 @@ import time
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MJ = os.path.join(ROOT, "bin", "mike_json.py")
 GATE = os.path.join(ROOT, "bin", "repo_commit_gate.sh")
+
+# --- frozen 2026-08-12 incident facts (see docstring; do NOT re-derive from live bus) ---
+INCIDENT_JOB = {"job_id": "Wags_20260812_035748", "from": "Mike", "to": "Wags",
+                "write_scope": ""}
+INCIDENT_FILES = ["bin/dispatch.sh",
+                  "bin/mike_json_has_event_prefix_selfcheck.py",
+                  "bin/ops_health_check.sh",
+                  "bin/ops_health_check_selfcheck.py",
+                  "bin/wags_autofix.sh",
+                  "bin/wags_bus_verdict_selfcheck.py",
+                  "bin/watcher_slow_threshold.py",
+                  "bin/watcher_slow_threshold_selfcheck.py",
+                  "kb/ops_runbook.md"]
+INCIDENT_COMMIT = "f827f6df"
 
 PASS, FAIL = [], []
 _procs = []
@@ -156,49 +175,48 @@ def main():
               verdicts(rows) == [("BLOCK", "Wags_envself")], str(rows))
 
         # ---------- D. replay of the real 2026-08-12 collision ----------
-        real = os.path.join(ROOT, "bus", "jobs", "Wags_20260812_035748.json")
-        if os.path.exists(real):
-            d = os.path.join(tmp, "g")
-            os.makedirs(d)
-            with open(real, encoding="utf-8") as f:
-                rec = json.load(f)
-            live = sleeper()
-            rec.update({"status": "running", "pid": str(live), "logfile": "",
-                        "started_at": str(int(time.time()) - 840)})   # commit landed 840s in
-            rec.pop("ended_at", None)
-            rec.pop("exit_code", None)
-            rec.pop("logfile_ino", None)
-            rec.pop("logfile_err_ino", None)
-            with open(os.path.join(d, rec["job_id"] + ".json"), "w", encoding="utf-8") as f:
-                json.dump(rec, f)
-            staged = subprocess.run(["git", "show", "--pretty=", "--name-only", "f827f6df"],
-                                    cwd=ROOT, capture_output=True, text=True).stdout.split()
-            check("12a incident fixture intact (9 files, write_scope empty)",
-                  len(staged) == 9 and rec.get("write_scope", "") == "",
-                  "files=%d scope=%r" % (len(staged), rec.get("write_scope")))
-            rc, rows = run_gate(d, staged)
-            check("12b REPLAY 2026-08-12: Mike committing f827f6df during live "
-                  "Wags_20260812_035748 -> BLOCK",
-                  verdicts(rows) == [("BLOCK", "Wags_20260812_035748")], str(rows))
-            check("12c BLOCK lists the 8 bin/ files, not kb/ops_runbook.md",
-                  rows and rows[0][6].count(",") == 7 and "ops_runbook" not in rows[0][6],
-                  str(rows))
-            # RED counterfactual: the gate that WAS shipped (f58bd88a, --write-scope) is blind.
-            r = subprocess.run([sys.executable, MJ, "job-write-scope-conflict", d,
-                                ",".join(staged)], capture_output=True, text=True)
-            check("12d RED: shipped --write-scope gate sees NOTHING here (both sides declared "
-                  "no scope) -> this tier is new coverage, not a restatement",
-                  r.returncode == 1 and not r.stdout.strip(), r.stdout)
-            # And the same job, if it HAD declared a scope, is caught by tier 1 too.
-            rec["write_scope"] = "bin/dispatch.sh"
-            rec["to"] = "Taylor"      # strip the charter presumption, leave only the declaration
-            with open(os.path.join(d, rec["job_id"] + ".json"), "w", encoding="utf-8") as f:
-                json.dump(rec, f)
-            rc, rows = run_gate(d, staged)
-            check("12e same replay with a DECLARED scope and a non-charter agent -> BLOCK via tier 1",
-                  verdicts(rows) == [("BLOCK", "Wags_20260812_035748")], str(rows))
+        d = os.path.join(tmp, "g")
+        os.makedirs(d)
+        rec = dict(INCIDENT_JOB)
+        live = sleeper()
+        rec.update({"status": "running", "pid": str(live), "logfile": "",
+                    "started_at": str(int(time.time()) - 840)})   # commit landed 840s in
+        with open(os.path.join(d, rec["job_id"] + ".json"), "w", encoding="utf-8") as f:
+            json.dump(rec, f)
+        staged = list(INCIDENT_FILES)
+        check("12a incident fixture intact (9 files, write_scope empty)",
+              len(staged) == 9 and rec.get("write_scope", "") == "",
+              "files=%d scope=%r" % (len(staged), rec.get("write_scope")))
+        rc, rows = run_gate(d, staged)
+        check("12b REPLAY 2026-08-12: Mike committing f827f6df during live "
+              "Wags_20260812_035748 -> BLOCK",
+              verdicts(rows) == [("BLOCK", "Wags_20260812_035748")], str(rows))
+        check("12c BLOCK lists the 8 bin/ files, not kb/ops_runbook.md",
+              rows and rows[0][6].count(",") == 7 and "ops_runbook" not in rows[0][6],
+              str(rows))
+        # RED counterfactual: the gate that WAS shipped (f58bd88a, --write-scope) is blind.
+        r = subprocess.run([sys.executable, MJ, "job-write-scope-conflict", d,
+                            ",".join(staged)], capture_output=True, text=True)
+        check("12d RED: shipped --write-scope gate sees NOTHING here (both sides declared "
+              "no scope) -> this tier is new coverage, not a restatement",
+              r.returncode == 1 and not r.stdout.strip(), r.stdout)
+        # And the same job, if it HAD declared a scope, is caught by tier 1 too.
+        rec["write_scope"] = "bin/dispatch.sh"
+        rec["to"] = "Taylor"      # strip the charter presumption, leave only the declaration
+        with open(os.path.join(d, rec["job_id"] + ".json"), "w", encoding="utf-8") as f:
+            json.dump(rec, f)
+        rc, rows = run_gate(d, staged)
+        check("12e same replay with a DECLARED scope and a non-charter agent -> BLOCK via tier 1",
+              verdicts(rows) == [("BLOCK", "Wags_20260812_035748")], str(rows))
+        # Drift check: only when the commit is still reachable. Skipped, never failed, if the
+        # history is gone -- the cases above must not depend on it (that was the 2026-09 bug).
+        r = subprocess.run(["git", "show", "--pretty=", "--name-only", INCIDENT_COMMIT],
+                           cwd=ROOT, capture_output=True, text=True)
+        if r.returncode == 0:
+            check("12z INCIDENT_FILES still matches commit %s" % INCIDENT_COMMIT,
+                  sorted(r.stdout.split()) == sorted(INCIDENT_FILES), r.stdout)
         else:
-            check("12 incident record present for replay", False, real + " missing")
+            print("  SKIP 12z: commit %s unreachable (constant frozen in source)" % INCIDENT_COMMIT)
 
         # ---------- E. wrapper policy (modes, fail-open, path matching) ----------
         d = os.path.join(tmp, "h")
