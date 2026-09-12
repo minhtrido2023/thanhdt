@@ -25,13 +25,23 @@
     }
   },
   "known_red": {
-    "mike/bin/commit_collision_gate_selfcheck.py": {
+    "mike/bin/check_report_cadence_selfcheck.py": {
       "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
-      "since": "2026-09-11T19:32:29Z",
+      "since": "2026-09-12T22:01:04Z",
       "status": "FAIL",
       "auto": true,
-      "topic": "selfcheck-red: mike/bin/commit_collision_gate_selfcheck.py",
-      "escalated_utc": "2026-09-11T19:32:29Z",
+      "topic": "selfcheck-red: mike/bin/check_report_cadence_selfcheck.py",
+      "escalated_utc": "2026-09-12T22:01:04Z",
+      "ack_pending": false,
+      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
+    },
+    "mike/bin/report_return_gate_selfcheck.py": {
+      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
+      "since": "2026-09-12T22:01:04Z",
+      "status": "TIMEOUT",
+      "auto": true,
+      "topic": "selfcheck-red: mike/bin/report_return_gate_selfcheck.py",
+      "escalated_utc": "2026-09-12T22:01:04Z",
       "ack_pending": false,
       "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
     }
