@@ -19,7 +19,19 @@ import sys
 import tempfile
 
 
-ROOT = Path(__file__).resolve().parent.parent
+# Gốc CANONICAL, KHÔNG phải cây đang chạy. `state/` bị gitignore nên mỗi worktree/clone chạy
+# bản sao script này sẽ giữ một SỔ GIAO HÀNG RIÊNG, trong khi `check_report_cadence.sh:44` chỉ
+# đọc sổ canonical ⇒ lần giao hàng từ cây phụ là vô hình với cadence check ⇒ GỬI TRÙNG báo cáo
+# cho nhà đầu tư (đã xảy ra thật: monthly 2026-08 gửi 28/08 từ `mike_paseo`, gửi lại 02/09 từ
+# canonical). Lock file bám theo state_path nên cũng tự về canonical ⇒ hai cây loại trừ nhau.
+# Ba script con bên dưới (return gate, notify, email) CỐ Ý cũng chạy bản canonical: 17 worktree
+# đang giữ bản TIỀN-VÁ của `report_return_gate.py` (sự cố 2026-09-12) và giao hàng từ đó sẽ tái
+# hiện lỗi. Đánh đổi: muốn thử bản SỬA ĐỔI từ worktree thì phải chỉ định tường minh
+# (`--notify-script` / `--email-script`), hoặc chạy thẳng `report_return_gate.py` như selfcheck.
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from wc_paths import find_mike_canonical_root  # noqa: E402
+
+ROOT = Path(find_mike_canonical_root(__file__))
 DEFAULT_STATE = ROOT / "state" / "report_delivery.json"
 LEGACY_EMAIL_STATE = ROOT / "state" / "report_emailed.json"
 # Standalone cron/Discord sessions do not always source wc_env.sh.

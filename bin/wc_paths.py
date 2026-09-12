@@ -37,19 +37,79 @@ def find_wc_root(start: str) -> str:
     Fallback cuối KHÔNG ném lỗi ở import-time: script gọi nó vẫn phải chạy được trong môi
     trường test/CI không có cây thật, và lỗi "thiếu dữ liệu" ở dưới dễ đọc hơn ImportError.
     """
+    walked = _walk_to_marker(start)
     env = os.environ.get("WC_ROOT")
     if env:
         env = os.path.abspath(env)
         if os.path.isfile(os.path.join(env, MARKER)):
+            if walked and os.path.realpath(walked) != os.path.realpath(env):
+                # Env hợp lệ nhưng trỏ cây KHÁC cây chứa script (vd một `WorkingClaude` anh em
+                # có marker nhưng `data/` rỗng). Không đổi hành vi — override tường minh vẫn
+                # thắng — nhưng phải nhìn thấy được: rủi ro ở đây là GHI vào nhầm cây
+                # (`nav_history_*.csv`), thứ không tự báo lỗi như đọc thiếu dữ liệu.
+                print(f"⚠️  WC_ROOT={env!r} khác cây chứa script ({walked!r}) — vẫn dùng "
+                      f"WC_ROOT theo override; kiểm tra nếu script này GHI dữ liệu",
+                      file=sys.stderr)
             return env
         print(f"⚠️  bỏ qua WC_ROOT={env!r} — không có {MARKER} ở đó (dispatch.sh tính biến này "
               f"bằng đếm cấp, sai khi chạy từ worktree); tự tìm marker thay thế", file=sys.stderr)
+    if walked:
+        return walked
+    return os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(start))))
+
+
+def _walk_to_marker(start: str):
+    """Thư mục gần nhất đi LÊN từ `start` có `wc_env.sh`; None nếu chạm "/" mà không thấy."""
     d = os.path.dirname(os.path.abspath(start))
     while True:
         if os.path.isfile(os.path.join(d, MARKER)):
             return d
         parent = os.path.dirname(d)
         if parent == d:                      # chạm "/" mà không thấy marker
-            break
+            return None
         d = parent
-    return os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(start))))
+
+
+MIKE_MARKER = "MIKE.md"
+
+
+def find_mike_canonical_root(start: str) -> str:
+    """Gốc CANONICAL của checkout `mike` — cây giữ SỔ dùng chung, không phải cây đang chạy.
+
+    Khác `find_wc_root()` ở mục đích: `find_wc_root` trả về "cây CỦA TÔI" (đúng cho dữ liệu
+    đọc-theo-cây như `data/execution_logs`). Hàm này trả về "cây của CẢ FLEET" — dùng cho state
+    dùng chung mà `.gitignore` không đồng bộ, cụ thể `state/report_delivery.json`: sổ giao hàng
+    báo cáo nhà đầu tư. Sổ phân mảnh = một lần giao hàng từ worktree là VÔ HÌNH với
+    `check_report_cadence.sh` ⇒ gửi TRÙNG cho nhà đầu tư (đã xảy ra: monthly 2026-08 gửi
+    2026-08-28 từ `mike_paseo` rồi gửi lại 2026-09-02 từ canonical — sổ canonical không hề biết
+    lần đầu).
+
+    Quy tắc: `<find_wc_root()>/mike` (có `MIKE.md`). KHÔNG dùng heuristic "`.git` là THƯ MỤC thì
+    là canonical, là FILE thì là worktree" — nghe hợp lý nhưng SAI trên chính máy này:
+    `WorkingClaude/mike_paseo/.git` là thư mục thật (clone riêng) mà vẫn là cây phụ, và chính nó
+    là cây đã ghi 32 entry vào sổ lạc. Neo theo ĐƯỜNG DẪN quy ước thì cả worktree
+    (`mike/agents/wt-*`, `WorkingClaude/wt-*`), clone phụ (`mike_paseo`) lẫn bản sao tạm cùng
+    độ sâu đều quy về một sổ.
+
+    Cây `WorkingClaude` ANH EM (`thanhdt/wt-*/WorkingClaude/`) vẫn neo vào `mike` của CHÍNH nó —
+    cố ý, giống `find_wc_root`: đó là fleet khác, không phải worktree của fleet này.
+
+    Override: env `MIKE_ROOT` **chỉ khi** thư mục đó có `MIKE.md` (cùng kỷ luật "env được kiểm
+    chứng, không tin mù" của `find_wc_root`).
+    Fallback khi không dựng được (bản sao rời, không có `wc_env.sh` ở bất kỳ cấp nào): trả về
+    hành vi cũ `dirname×2(start)` — không ném lỗi, để test/CI vẫn chạy được.
+    """
+    env = os.environ.get("MIKE_ROOT")
+    if env:
+        env = os.path.abspath(env)
+        if os.path.isfile(os.path.join(env, MIKE_MARKER)):
+            return env
+        print(f"⚠️  bỏ qua MIKE_ROOT={env!r} — không có {MIKE_MARKER} ở đó; tự tìm cây canonical",
+              file=sys.stderr)
+    canonical = os.path.join(find_wc_root(start), "mike")
+    if os.path.isfile(os.path.join(canonical, MIKE_MARKER)):
+        return canonical
+    running = os.path.dirname(os.path.dirname(os.path.abspath(start)))
+    print(f"⚠️  không tìm thấy checkout mike canonical (thử {canonical!r}) — dùng cây đang chạy "
+          f"{running!r}; state dùng chung có thể bị phân mảnh", file=sys.stderr)
+    return running
