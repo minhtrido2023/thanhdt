@@ -16,6 +16,7 @@ title: Feeds hàng hóa / FX / khác (Winston — Data Ops)
 | [`foreign_flow_vndirect.md`](foreign_flow_vndirect.md) — Khối ngoại (foreign flow) — VNDirect finfo | CANDIDATE-FEASIBLE |
 | [`hog_price_vn.md`](hog_price_vn.md) — data/hog_price_vn.csv | CANONICAL |
 | [`new_listings_queue.md`](new_listings_queue.md) — New-listings queue | CANONICAL |
+| [`oni_enso_index.md`](oni_enso_index.md) — ONI (El Niño/La Niña proxy) | CANDIDATE-PARTIAL |
 | [`rubber_alert_state.md`](rubber_alert_state.md) — data/rubber_alert_state.json | CANONICAL |
 | [`rubber_weekly_series.md`](rubber_weekly_series.md) — data/rubber_weekly.csv | CANONICAL |
 | [`vcb_fx_rate.md`](vcb_fx_rate.md) — data/vcb_fx_rate.csv | CANONICAL |

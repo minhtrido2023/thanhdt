@@ -3,43 +3,38 @@
 
 ## Ưu tiên hiện tại
 - Go-live V2.4 lever LIVE từ 08-24: capit_margin_lever.enabled=TRUE. Ngày có CAPIT margin phải chạy approve_margin_day.py TRƯỚC bot.
-- VPI/BAL signal HOLD đến review 2026-09-16 — HOLD_ALL theo VPI. Plan T+1 2026-09-14 (cả SpaceX+ZaloPay) đã HOLD_ALL đúng.
+- VPI/BAL signal HOLD đến review 2026-09-16 — HOLD_ALL theo VPI. Plan T+1 2026-09-14 đã HOLD_ALL đúng.
+- T2 14/09 = ex-date DGC cổ tức tiền 8.000đ (ZaloPay). xcheck NAV tối 14/09 có thể vẫn CHẶN (cơ chế tự
+  nhận diện KHÔNG ship) → xử lý TAY theo kb/ops_runbook.md § PRICE_XCHECK (kiểm bất biến §21 trước khi
+  bỏ qua cổng). KHÔNG escalate hỏi user lại — quy tắc đã chốt 09-12.
 
-## CẦN THEO DÕI — DGC NAV ZaloPay stuck (2026-09-11, CÒN MỞ)
-`Mafee/nav-price-xcheck-stuck-ZaloPay-2026-09-11` — gap 20,6% (close_price BQ 46.750 vs marketPrice
-broker 38.750), quá cutoff 21:15 ICT. Trùng thời điểm DGC GDKHQ cổ tức 8.000đ/cp hiệu lực 14/09
-(3 phiên sau, CHƯA qua ex-date) — KHÔNG kết luận nguyên nhân, cần Winston/Mafee verify DNSE trực
-tiếp trước phiên 14/09. Nguyên nhân gốc thứ 5 (khác 4 nguyên nhân đã đóng bằng c30e0580 09-10).
-Retro: `kb/incidents/retro/retro-2026-09-11.md`.
+## 5 việc user chốt 12/09 12:18 — XONG HẾT (verify artifact thật 13:35 ICT)
+1. report_return_gate worktree ROOT: FIXED (dd2c0d28/e67e2abf/f28008ed, bin/wc_paths.py marker wc_env.sh,
+   arch-review 2 vòng CONFIRMED). Selfcheck 11/11 — CHỈ pass khi source wc_env.sh (chạm BQ, cần
+   CLOUDSDK_CONFIG); chạy trần python3 sẽ FAIL giả 1 test (gcloud auth). Runner cron có source nên OK.
+2. DGC NAV gap = ex-date adj: đóng, quy tắc trong kb/canonical.md (bản SỬA tách cash vs stock dividend).
+3. commit_collision_gate selfcheck: fixture tự chứa (ac5b636f), 49/49.
+4. hit_details cron 19:05→19:12 + bin/wait_for_artifact.sh (fe6b0ccc, 19/19) + luật §14b ext + registry
+   ghi INPUT/PRODUCER.
+5. bq pin 202608 nhãn lệch: (a) giữ + cảnh báo registry (d02bb546).
+- VIỆC 3 (xcheck tự nhận ex-date): DỪNG đúng luật 2 vòng — KHÔNG ship. Bản nháp cất
+  agents/Wags/research/nav_exdate_xcheck_wip_20260912.patch. Lý do: cổng kiểm proxy không kiểm bất biến
+  §21, nhánh delta<=0 im lặng ⇒ có thể đếm 2 lần 80tr (+8,15% NAV lọt sanity ±15%).
 
-## Selfcheck đỏ MỚI — commit_collision_gate_selfcheck.py (2026-09-11, CÒN MỞ)
-Wags tự phát hiện + triaged-needs-human (suppress 14d). Root cause đã xác định qua review
-2026-09-12: test #12 "incident record present for replay" tham chiếu cứng 1 job file cụ thể
-(`bus/jobs/Wags_20260812_035748.json`) đã bị dọn/rotate khỏi đĩa — fixture fragile phụ thuộc
-state bên ngoài, KHÔNG phải production logic hỏng (43/44 test khác PASS). Cần Wags (chủ sở hữu)
-tự sửa test dùng fixture tự chứa thay vì tham chiếu job thật có thể bị rotate.
+## Bus question đang mở (1) — CHỜ USER
+- Wags/nav-xcheck-exdate-tu-dong-hoa-vong-3-hay-giu-tay-2026-09-12 — Wags + Mike khuyến nghị (a) GIỮ TAY.
 
-## AMH (Adaptive Market Hypothesis) — ĐÓNG HẲN 2026-09-10
-`kb/projects/amh-adaptivity-review-20260910.md` (mục 10 = INPUT cho review VPI/BAL 09-16).
-KHÔNG WIRE GÌ. Đóng, đừng mở lại nếu không có dữ liệu ngoài mẫu mới.
+## Việc treo mới từ job 052043 (ghi kb/incidents/2026-09/2026-09-12-report-return-gate-worktree-root.md)
+1. 17 worktree vẫn chạy bản tiền-vá của report_return_gate.
+2. ⚠️ state/report_delivery.json fork theo worktree ⇒ giao hàng từ worktree vô hình với check_report_cadence
+   ⇒ NGUY CƠ GỬI TRÙNG báo cáo nhà đầu tư (cổng cũ vô tình chặn, vá xong thì thông). Cần việc riêng.
+3. dispatch.sh --add-dir sandbox codex rộng hơn khi dispatch từ worktree.
+4. ~28 file bin/*.py cùng lớp dirname-x3 (chỉ liệt kê, chưa sửa — chỉ cắn khi chạy từ worktree).
+5. Pattern 2 tái diễn: 2 job Wags song song đụng daily_nav_snapshot.py ngoài --write-scope; job A nuốt hunk
+   của B rồi tự trả lại. Consolidator git add -A làm commit quét nhầm 15 file KB (đã reset).
 
-## Bus question đang mở, CHỜ NGƯỜI (audit 2026-09-12, chỉ còn 2 — 3 mục cũ đã đóng 09-09)
-1. `Mafee/nav-price-xcheck-stuck-ZaloPay-2026-09-11` — xem mục trên.
-2. `Wags/selfcheck-red: mike/bin/commit_collision_gate_selfcheck.py` — xem mục trên.
+## R&D đã ĐÓNG HẲN tuần 09-05→09-11: AMH · CCS Phase 0-2 · BAL 5 vòng · custom30V 5 vòng · CCS/8L accruals.
+## append_event.sh JSON isolation — pattern đã biết, không escalate (18+ lần, 0 mất dữ liệu).
+## Sát ngưỡng OKF: kb/coding_guidelines.md 39,5KB/40KB — §-mới PHẢI tách _ext.md.
 
-## R&D đã ĐÓNG HẲN tuần 09-05→09-11 (đừng mở lại nếu không có dữ liệu ngoài mẫu mới)
-- AMH 7 hướng (09-10) · CCS Phase 0-2 (09-05/06, 0/7 qua Phase 1) · BAL 5 vòng (09-09, NO-GO) ·
-  custom30V 5 vòng (09-09, NO-GO — overweight bank = tác dụng phụ pool thanh khoản).
-- CCS/8L accruals (09-06, NO-GO lần 3).
-
-## append_event.sh JSON isolation — pattern lâu dài đã biết, KHÔNG escalate (18+ lần từ 07-11)
-0 mất dữ liệu, agent luôn tự lành <60s, sidecar `bus/_rejected_resolved.jsonl` khử báo động giả.
-Căn nguyên cấu trúc (Bash ad-hoc không lint được) vẫn hở nhưng chấp nhận được — theo dõi tần suất,
-chỉ đáng xem lại nếu ≥2 ca CÙNG PHÁT SINH thật trong 1 ngày liên tục vài ngày.
-
-## Sát ngưỡng OKF
-kb/coding_guidelines.md 37,9KB/40KB, còn ~2,0KB đệm → §-mới tiếp theo phải tách sang _ext.md.
-
-- [2026-09-11T21:10:50Z] weekly ops audit 2026-09-12 XONG (job Mike_20260911_204825): 3 bug that, 2 commit (9becc1b3 mike_paseo+ack fail-open, 97a60151 pattern ❌), 3 escalate. QUAN TRONG NHAT dang cho nguoi: 'Mike/report-return-gate-worktree-root-chan-bao-cao-nha-dau-tu' — report_return_gate.py:55 tinh ROOT sai trong worktree => cong ti suat §21 fail-closed => BAO CAO NHA DAU TU khong gui duoc (5 ca da xay ra). Bus question PENDING nay la 5.
-- [2026-09-11T21:22:18Z] weekly ops audit 2026-09-12: bao cao da post day du vao Architecture o resume #1 (luot goc het max-turns truoc buoc post). 5 bus question PENDING, uu tien: report_return_gate worktree ROOT (client-facing) > DGC NAV gap ZaloPay (truoc 14/09) > hit_details_daily lech gio cron.
-- [2026-09-12T05:21:53Z] 12/09 12:25: user chốt 5 việc. ĐÃ XONG tay: #2 DGC NAV gap = ex-date adj (đóng, quy tắc ghi kb/canonical.md), #5 pin nhãn (a) giữ + cảnh báo registry (d02bb546). ĐANG CHẠY: Wags_20260912_052043 = #1 report_return_gate worktree ROOT (max 2 vòng review); Wags_20260912_052122 = #3 selfcheck fixture + #4 cron 19:12 + wait-for-artifact guard + luật §14 ext + #2 xcheck tự nhận ex-date (1 vòng review). Câu hỏi user #4 'sao có §11 vẫn sai thứ tự' → trả lời: registry ghi giờ BẮT ĐẦU, đồng hồ không phải cơ chế sync; fix = consumer chờ artifact.
+- [2026-09-12T07:24:18Z] 12/09 14:25: user chốt (a) GIỮ TAY xcheck ex-date (question đã đóng decided_by=user) + duyệt giải quyết 3 việc treo incident report-return-gate. Dispatch Wags 1 job gộp: A=pin report_delivery.json+lock về canonical (wc_paths.find_mike_canonical_root) + gộp 2 sổ lạc + selfcheck, arch-review max 2 vòng; B=checker worktree chạy bản tiền-vá (WARN, không tự rebase); C=xác nhận --add-dir là khôi phục ngữ nghĩa 08-10, chỉ sửa comment. Bus pending hiện = 0.
