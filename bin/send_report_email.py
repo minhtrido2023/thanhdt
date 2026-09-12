@@ -32,14 +32,17 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
-WC_ROOT = os.path.abspath(os.path.join(ROOT, "..", ".."))
+sys.path.insert(0, ROOT)
+import wc_paths  # noqa: E402
+# gốc cây neo theo marker `wc_env.sh` (wc_paths) — đếm cấp dirname SAI khi script chạy
+# từ worktree `mike/agents/wt-*/bin/` (sự cố 2026-09-12, chặn báo cáo nhà đầu tư).
+WC_ROOT = wc_paths.find_wc_root(__file__)
 SECRETS_PATH = (
     os.environ.get("SEND_REPORT_SMTP_SECRET")
     or os.environ.get("REPORT_SMTP_SECRET_PATH")
     or os.path.join(WC_ROOT, "secrets", "gmail_smtp_app_password.json")
 )
 
-sys.path.insert(0, ROOT)
 from render_report_html import render_html  # noqa: E402
 
 

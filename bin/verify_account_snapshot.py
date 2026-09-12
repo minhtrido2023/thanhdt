@@ -34,7 +34,12 @@ import subprocess
 import sys
 from collections import defaultdict
 
-WC_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import wc_paths  # noqa: E402
+
+# gốc cây neo theo marker `wc_env.sh` (wc_paths) — đếm cấp dirname SAI khi script chạy
+# từ worktree `mike/agents/wt-*/bin/` (sự cố 2026-09-12, chặn báo cáo nhà đầu tư).
+WC_ROOT = wc_paths.find_wc_root(__file__)
 EXEC_DIR = os.environ.get("VERIFY_ACCOUNT_EXEC_DIR",
                           os.path.join(WC_ROOT, "data", "execution_logs"))
 BQ_PATH_PREFIX = "/home/trido/google-cloud-sdk/bin"

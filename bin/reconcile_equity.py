@@ -87,7 +87,9 @@ def main():
     account_no = args.account_no
     if not account_no:
         import os
-        WC_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import wc_paths
+        WC_ROOT = wc_paths.find_wc_root(__file__)   # marker `wc_env.sh`, xem wc_paths
         sys.path.insert(0, WC_ROOT)
         from trading_bot.config import load_config, load_accounts
         _match = next((p for p in load_accounts(load_config()) if p["label"] == args.account), None)
