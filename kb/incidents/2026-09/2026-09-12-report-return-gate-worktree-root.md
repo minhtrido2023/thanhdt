@@ -54,7 +54,20 @@ biến RED control thành bản đã vá). Chạy dưới `env -u TZ` và bỏ `
    ⇒ rủi ro trùng-gửi từ latent thành với tới được. Quyết định cố ý KHÔNG sửa `report_delivery_gate.py`
    trong commit này (§3 surgical, nó không thuộc lớp lỗi "đường dẫn không tồn tại"); cần một việc
    riêng: pin `DEFAULT_STATE` về cây canonical hoặc gộp sổ.
-3. **~28 file `bin/*.py` khác cùng lớp lỗi** (đếm cấp ra gốc cây) — chỉ liệt kê, không sửa vì không
+3. **Bề mặt quyền của sandbox codex nới rộng khi dispatch phát TỪ worktree** (arch-review vòng 2).
+   `dispatch.sh:1063` dùng `--add-dir "$WC_ROOT"` làm writable root cho nhánh `codex`, và chú thích
+   :1052-1060 nói rõ cấp cả cây thì `secrets/` + `data/trading_rules.json` ghi được. Trước bản vá,
+   dispatch phát từ bản sao worktree có `WC_ROOT=.../mike/agents` ⇒ sandbox hẹp (và vốn đã hỏng:
+   không ghi nổi bus); sau bản vá nó là cả cây `WorkingClaude` — tức KHÔI PHỤC đúng ngữ nghĩa user
+   chốt 2026-08-10, không phải lỗ hổng mới. Nhưng câu "giữ nguyên hành vi từng byte" chỉ đúng cho
+   đường canonical, nên ghi lại ở đây.
+4. **Gợi ý rẻ chưa làm**: khi env `WC_ROOT` hợp lệ (có `wc_env.sh`) nhưng KHÁC gốc suy từ
+   `__file__` — vd trỏ vào một cây `WorkingClaude` ANH EM có marker nhưng `data/` rỗng — hiện guard
+   cho qua im lặng. Không tệ hơn hiện trạng (trước guard cũng nhận, và `dirname×3` từ trong cây anh
+   em cũng ra đúng cây đó; các cây đó có 0 `dnse_raw_*` nên cổng vẫn fail-closed chứ không PASS
+   trên số liệu rác). Rủi ro còn lại là GHI sai đích (vd `nav_history_*.csv`). Một dòng cảnh báo
+   stderr là đủ — làm khi có việc đụng tới.
+5. **~28 file `bin/*.py` khác cùng lớp lỗi** (đếm cấp ra gốc cây) — chỉ liệt kê, không sửa vì không
    nằm trên đường báo cáo: `compute_active_nav.py`, `compute_jit_unpark.py`, `compute_park_trim.py`,
    `corp_actions.py`, `corp_action_auto_confirm.py`, `park_holdings.py`, `merge_park_orders.py`,
    `marginability_check.py`, `approve_margin_day.py`, `discretionary_{margin_gate,candidate_funnel,
