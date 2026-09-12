@@ -109,6 +109,21 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # WC_ROOT = cay du an (WorkingClaude), CHA cua mike/. Dung lam writable root cua sandbox codex
 # — xem _build_argv nhanh `codex`. Tach bien rieng de khong rai "$ROOT/.." khap noi.
 WC_ROOT="$(cd "$ROOT/.." && pwd)"
+# Neo theo marker `wc_env.sh` thay vi tin phep DEM CAP: ban sao dispatch.sh trong worktree
+# (mike/agents/wt-*/bin/) cho "$ROOT/.." = .../mike/agents — goc SAI. Bien nay duoc EXPORT xuong
+# phien agent con, nen goc sai lan ra moi script doc WC_ROOT (su co 2026-09-12: cong ti suat
+# fail-closed ⇒ bao cao nha dau tu khong gui duoc). Chi di len khi cho dem ra KHONG co marker ⇒
+# duong chay binh thuong giu nguyen hanh vi tung byte.
+if [ ! -f "$WC_ROOT/wc_env.sh" ]; then
+  _wc_probe="$WC_ROOT"
+  while [ "$_wc_probe" != "/" ] && [ ! -f "$_wc_probe/wc_env.sh" ]; do
+    _wc_probe="$(dirname "$_wc_probe")"
+  done
+  if [ -f "$_wc_probe/wc_env.sh" ]; then
+    WC_ROOT="$_wc_probe"
+  fi
+  unset _wc_probe
+fi
 # Shared usage-limit phrase list (single source of truth, also used by daily_retro.sh).
 source "$ROOT/bin/usage_limit_phrases.sh"
 # Override only for tests; production always uses the real CLI.

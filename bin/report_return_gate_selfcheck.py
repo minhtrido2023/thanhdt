@@ -64,8 +64,9 @@ def child_env() -> dict:
 def make_fake_worktree(source_text: str) -> str:
     """`mike/agents/wt-fake-XXXX/bin/` — ĐÚNG độ sâu của worktree thật (nơi bug cắn).
 
-    Các file bin khác symlink về bản thật (worktree git thật cũng có đủ chúng); chỉ chính
-    script cần kiểm là bản sao ĐỘC LẬP để RED/GREEN dùng nội dung khác nhau.
+    Các file bin khác được COPY (không symlink) — worktree git thật cũng là file thật. Symlink
+    hôm nay vô hại (không module nào trong đường này dùng `.resolve()`), nhưng
+    `report_delivery_gate.py:22` CÓ dùng — mai mở selfcheck sang đó thì symlink sẽ cho XANH GIẢ.
     """
     root = tempfile.mkdtemp(prefix="wt-fake-", dir=AGENTS_DIR)
     fake_bin = os.path.join(root, "bin")
@@ -74,10 +75,9 @@ def make_fake_worktree(source_text: str) -> str:
         src = os.path.join(REAL_BIN, name)
         if not os.path.isfile(src):
             continue
-        dst = os.path.join(fake_bin, name)
         if name == SCRIPT:
             continue
-        os.symlink(src, dst)
+        shutil.copy2(src, os.path.join(fake_bin, name))
     with open(os.path.join(fake_bin, SCRIPT), "w", encoding="utf-8") as f:
         f.write(source_text)
     return root
@@ -99,14 +99,16 @@ def old_source() -> tuple:
     raise SystemExit("❌ không tìm được bản cũ (dirname×3) trong lịch sử git — RED control vô nghĩa")
 
 
-def probe_root(worktree: str) -> tuple:
+def probe_root(worktree: str, extra_env: dict = None) -> tuple:
     """(ROOT, EXEC_DIR, EXEC_DIR có tồn tại) mà bản sao trong worktree giả tự tính ra."""
     code = ("import sys, os, json;"
             f"sys.path.insert(0, {os.path.join(worktree, 'bin')!r});"
             "import report_return_gate as g;"
             "print(json.dumps([g.ROOT, g.EXEC_DIR, os.path.isdir(g.EXEC_DIR)]))")
+    env = child_env()
+    env.update(extra_env or {})
     p = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True,
-                       env=child_env(), cwd=worktree)
+                       env=env, cwd=worktree)
     if p.returncode != 0:
         return ("<crash>", p.stderr.strip().splitlines()[-1] if p.stderr else "", False)
     import json
@@ -146,6 +148,19 @@ def main() -> int:
               root_o, os.path.join(WC, "mike", "agents"))
         check("RED control · bản CŨ: EXEC_DIR KHÔNG tồn tại ⇒ cổng fail-closed", exists_o, False)
 
+        # 3 env `WC_ROOT` ĐỘC HẠI — nhánh ưu tiên CAO NHẤT, arch-reviewer vòng 1 bắt được:
+        # `bin/dispatch.sh` tự tính WC_ROOT bằng ĐÚNG phép đếm cấp đang bị vá rồi export xuống
+        # phiên agent. Bản sao dispatch.sh trong worktree export `WC_ROOT=.../mike/agents`; nếu
+        # find_wc_root tin env mù thì bản ĐÃ VÁ tái hiện sự cố 1:1. Test này (chứ không phải
+        # test marker) mới là test của đường chạy THẬT trong fleet.
+        poisoned = os.path.join(WC, "mike", "agents")
+        root_p, exec_p, exists_p = probe_root(wt_new, {"WC_ROOT": poisoned})
+        check("env WC_ROOT độc hại (=mike/agents, y hệt dispatch.sh trong worktree): bị BỎ QUA",
+              root_p, WC)
+        check("env WC_ROOT độc hại: EXEC_DIR vẫn trỏ thư mục CÓ THẬT", exists_p, True)
+        root_v, _, _ = probe_root(wt_new, {"WC_ROOT": WC})
+        check("env WC_ROOT HỢP LỆ vẫn được tôn trọng (không vô hiệu hoá override)", root_v, WC)
+
         if args.root_only:
             print("\n(--root-only: bỏ qua 2 test chạy cổng thật)")
         else:
@@ -160,9 +175,9 @@ def main() -> int:
 
             rc_old, out_old = run_gate(wt_old, args.report)
             check("RED control · bản CŨ: cổng KHÔNG PASS trên cùng báo cáo đó", rc_old != 0, True)
-            check("RED control · bản CŨ: fail đúng vì thiếu execution_logs (không phải lỗi khác)",
-                  ("mike/agents/data/execution_logs" in out_old
-                   or "execution_logs" in out_old), True)
+            check("RED control · bản CŨ: fail đúng vì trỏ execution_logs vào mike/agents "
+                  "(đúng chữ ký sự cố, không phải lỗi khác)",
+                  os.path.join(WC, "mike", "agents", "data", "execution_logs") in out_old, True)
     finally:
         shutil.rmtree(wt_new, ignore_errors=True)
         shutil.rmtree(wt_old, ignore_errors=True)

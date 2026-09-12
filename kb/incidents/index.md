@@ -4,7 +4,7 @@ title: Incidents — Mike fleet (sổ postmortem, cấu trúc OKF)
 owner: Mike fleet (mọi agent ghi; daily_retro.sh ghi entry RETRO hằng đêm)
 format: OKF (Open Knowledge Format) — markdown + YAML frontmatter, 1 sự cố = 1 file
 migrated_from: kb/INCIDENTS.md (single-file 408KB, migrate → OKF 2026-07-30 job Winston_20260730_144031)
-entries: 154 file (93 sự cố + 60 RETRO + 1 mục open-items chung)
+entries: 157 file (95 sự cố + 61 RETRO + 1 mục open-items chung)
 ---
 
 # Incidents — Mike fleet
@@ -77,6 +77,8 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 
 | Ngày | Sự cố | status |
 |---|---|---|
+| 2026-09-12 | [2026-09/2026-09-12-selfcheck-sweep-includes-frozen-mike-paseo.md](2026-09/2026-09-12-selfcheck-sweep-includes-frozen-mike-paseo.md) | ? |
+| 2026-09-12 | [2026-09/2026-09-12-report-return-gate-worktree-root.md](2026-09/2026-09-12-report-return-gate-worktree-root.md) | ? |
 | 2026-09-05 | [2026-09/2026-09-05-bq-auth-cron-watchdog-false-healthy.md](2026-09/2026-09-05-bq-auth-cron-watchdog-false-healthy.md) | ? |
 | 2026-09-04 | [2026-09/2026-09-04-macro-health-failed-holiday-tdays.md](2026-09/2026-09-04-macro-health-failed-holiday-tdays.md) | ? |
 | 2026-09-03 | [2026-09/2026-09-03-preflight-prune-lag-false-alarm-holiday.md](2026-09/2026-09-03-preflight-prune-lag-false-alarm-holiday.md) | ? |
@@ -87,6 +89,7 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 
 | Ngày | Sự cố | status |
 |---|---|---|
+| 2026-08-04 | [2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md](2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md) | fixed (monitoring); production-code fix in progress (Taylor job Taylor_20260804_094514) |
 | 2026-08-04 | [2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md](2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md) | fixed (monitoring); production-code fix in progress (Taylor job Taylor_20260804_094514) |
 | 2026-08-04 | [2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md](2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md) | fixed (monitoring); production-code fix in progress (Taylor job Taylor_20260804_094514) |
 | 2026-08-04 | [2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md](2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md) | fixed (monitoring); production-code fix in progress (Taylor job Taylor_20260804_094514) |
