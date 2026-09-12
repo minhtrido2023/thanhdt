@@ -423,3 +423,38 @@
 - [2026-09-12T02:05:05Z] Taylor/heartbeat — Taylor_20260912_020003: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20260912_020003", "source": "watcher"}
 - [2026-09-12T02:06:05Z] Taylor/heartbeat — Taylor_20260912_020003: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20260912_020003", "source": "watcher"}
 - [2026-09-12T01:31:03Z] Winston/status — fa_ratings_8l-refresh-ok: {"rows": 53642}
+
+## Consolidation 2026-09-12T02:35:06Z
+- [2026-09-12T02:07:05Z] Taylor/heartbeat — Taylor_20260912_020003: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20260912_020003", "source": "watcher"}
+- [2026-09-12T02:08:06Z] Taylor/heartbeat — Taylor_20260912_020003: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20260912_020003", "source": "watcher"}
+- [2026-09-12T02:09:06Z] Taylor/heartbeat — Taylor_20260912_020003: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20260912_020003", "source": "watcher"}
+- [2026-09-12T02:10:06Z] Taylor/heartbeat — Taylor_20260912_020003: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20260912_020003", "source": "watcher"}
+- [2026-09-12T02:11:07Z] Taylor/heartbeat — Taylor_20260912_020003: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20260912_020003", "source": "watcher"}
+- [2026-09-12T02:12:07Z] Taylor/heartbeat — Taylor_20260912_020003: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20260912_020003", "source": "watcher"}
+- [2026-09-12T02:13:07Z] Taylor/heartbeat — Taylor_20260912_020003: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20260912_020003", "source": "watcher"}
+- [2026-09-12T02:13:59Z] Taylor/heartbeat — Taylor_20260912_020003: {"status": "in_progress", "note": "da tinh xong %tisuat da cong co tuc dung cong thuc cua report_return_gate.py cho ca 27 vi the SpaceX + 27 vi the ZaloPay (bao gom DGC/VPB legacy), khop chinh xac mtm_stock trong nav_history; dang viet 2 file .md"}
+- [2026-09-12T02:14:07Z] Taylor/heartbeat — Taylor_20260912_020003: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20260912_020003", "source": "watcher"}
+- [2026-09-12T02:15:09Z] Taylor/heartbeat — Taylor_20260912_020003: {"status": "still_running", "elapsed_min": 15, "job_id": "Taylor_20260912_020003", "source": "watcher"}
+- [2026-09-12T02:15:47Z] Taylor/status — fa_ratings-refresh-ok: {"rows": 12713}
+- [2026-09-12T02:16:09Z] Taylor/heartbeat — Taylor_20260912_020003: {"status": "still_running", "elapsed_min": 16, "job_id": "Taylor_20260912_020003", "source": "watcher"}
+- [2026-09-12T02:17:09Z] Taylor/heartbeat — Taylor_20260912_020003: {"status": "still_running", "elapsed_min": 17, "job_id": "Taylor_20260912_020003", "source": "watcher"}
+- [2026-09-12T02:18:09Z] Taylor/heartbeat — Taylor_20260912_020003: {"status": "still_running", "elapsed_min": 18, "job_id": "Taylor_20260912_020003", "source": "watcher"}
+- [2026-09-12T02:19:09Z] Taylor/heartbeat — Taylor_20260912_020003: {"status": "still_running", "elapsed_min": 19, "job_id": "Taylor_20260912_020003", "source": "watcher"}
+- [2026-09-12T02:20:09Z] Taylor/heartbeat — Taylor_20260912_020003: {"status": "still_running", "elapsed_min": 20, "job_id": "Taylor_20260912_020003", "source": "watcher"}
+- [2026-09-12T02:21:09Z] Taylor/heartbeat — Taylor_20260912_020003: {"status": "still_running", "elapsed_min": 21, "job_id": "Taylor_20260912_020003", "source": "watcher"}
+- [2026-09-12T02:22:09Z] Taylor/heartbeat — Taylor_20260912_020003: {"status": "still_running", "elapsed_min": 22, "job_id": "Taylor_20260912_020003", "source": "watcher"}
+- [2026-09-12T02:23:10Z] Taylor/heartbeat — Taylor_20260912_020003: {"status": "still_running", "elapsed_min": 23, "job_id": "Taylor_20260912_020003", "source": "watcher"}
+- [2026-09-12T02:24:10Z] Taylor/heartbeat — Taylor_20260912_020003: {"status": "still_running", "elapsed_min": 24, "job_id": "Taylor_20260912_020003", "source": "watcher"}
+- [2026-09-12T02:25:10Z] Taylor/heartbeat — Taylor_20260912_020003: {"status": "still_running", "elapsed_min": 25, "job_id": "Taylor_20260912_020003", "source": "watcher"}
+- [2026-09-12T02:26:10Z] Taylor/heartbeat — Taylor_20260912_020003: {"status": "still_running", "elapsed_min": 26, "job_id": "Taylor_20260912_020003", "source": "watcher"}
+- [2026-09-12T02:26:44Z] Taylor/heartbeat — Taylor_20260912_020003: {"status": "in_progress", "note": "Da viet xong ZaloPay report (day du, co disclosure su co gia DGC dang mo), SpaceX report da co san tu attempt truoc. Chuan bi chay return-gate + delivery-gate cho ca 2 file."}
+- [2026-09-12T02:27:10Z] Taylor/heartbeat — Taylor_20260912_020003: {"status": "still_running", "elapsed_min": 27, "job_id": "Taylor_20260912_020003", "source": "watcher"}
+- [2026-09-12T02:28:10Z] Taylor/heartbeat — Taylor_20260912_020003: {"status": "still_running", "elapsed_min": 28, "job_id": "Taylor_20260912_020003", "source": "watcher"}
+- [2026-09-12T02:29:10Z] Taylor/heartbeat — Taylor_20260912_020003: {"status": "still_running", "elapsed_min": 29, "job_id": "Taylor_20260912_020003", "source": "watcher"}
+- [2026-09-12T02:30:10Z] Taylor/heartbeat — Taylor_20260912_020003: {"status": "still_running", "elapsed_min": 30, "job_id": "Taylor_20260912_020003", "source": "watcher"}
+- [2026-09-12T02:31:11Z] Taylor/heartbeat — Taylor_20260912_020003: {"status": "still_running", "elapsed_min": 31, "job_id": "Taylor_20260912_020003", "source": "watcher"}
+- [2026-09-12T02:31:31Z] Taylor/heartbeat — Taylor_20260912_020003: {"status": "in_progress", "note": "SpaceX report delivery gate COMPLETE (Discord+email, sha256 fe41dc1f...). Dang cho ZaloPay report delivery gate chay xong (co the mat vai phut do co return-gate/dividend cross-check)."}
+- [2026-09-12T02:32:11Z] Taylor/heartbeat — Taylor_20260912_020003: {"status": "still_running", "elapsed_min": 32, "job_id": "Taylor_20260912_020003", "source": "watcher"}
+- [2026-09-12T02:33:11Z] Taylor/heartbeat — Taylor_20260912_020003: {"status": "still_running", "elapsed_min": 33, "job_id": "Taylor_20260912_020003", "source": "watcher"}
+- [2026-09-12T02:34:12Z] Taylor/heartbeat — Taylor_20260912_020003: {"status": "still_running", "elapsed_min": 34, "job_id": "Taylor_20260912_020003", "source": "watcher"}
+- [2026-09-12T02:34:47Z] Taylor/finding — weekly-report-2026-09-07-to-2026-09-11-split-delivered: {"period": "2026-09-07 to 2026-09-11", "files": {"SpaceX": {"path": "mike/reports/SpaceX_weekly_report_2026-09-07_to_2026-09-11.md", "sha256": "fe41dc1f518cc7339ca8c1c540a0487ef0b4f7517d068fe953457da859a2d5f1", "delivery_gate": "COMPLETE", "nav_start": 980696423, "nav_end": 968286290, "pct_change": "-1.27%", "vs_vnindex": "-3.12%", "client_facing": true, "gap_or_error": "none"}, "ZaloPay": {"path": "mike/reports/ZaloPay_weekly_report_2026-09-07_to_2026-09-11.md", "sha256": "40cb8cf90d7e7ea314e0f4b6386e3049e7d7a0b6c23599bb048864e72e4b15ec", "delivery_gate": "COMPLETE", "nav_start": 991380088, "nav_end": 981012771, "pct_change": "-1.05%", "vs_vnindex": "-3.12%", "internal_only": true, "gap_or_error": "DGC price data quality issue phien 11-09 CON MO, bus question nav-price-xcheck-stuck-ZaloPay-2026-09-11 chua duoc Winston Mafee xac minh. Gate PRICE_XCHECK bat DGC close_price 46750 vs broker marketPrice 38750 lech 20.6 phan tram, NAV van duoc ghi khong bi block nhung co the bi underestimate toi 82.5tr. Bang chi tiet vi the Muc 3.3 co residual 185.58tr chua giai thich het, da disclose day du trong file ZaloPay, KHONG dua vao file SpaceX vi SpaceX khong giu DGC."}, "note": "Tiep tuc chuan tach 08-24: SpaceX la client facing khong noi dung van hanh loi he thong, ZaloPay la ban day du noi bo theo coding_guidelines section 6"}}
