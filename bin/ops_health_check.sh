@@ -1655,6 +1655,17 @@ if [ -n "$RUNONCE_LABEL" ] && [ "$ACCOUNT" = "$RUNONCE_LABEL" ] && [ -f "$FORENS
 fi
 WARN_COUNT=$(( ${WARN_COUNT:-0} + ${FORENSIC_WARN:-0} ))
 
+# 14. Worktree chạy bản TIỀN-VÁ script giao hàng báo cáo + sổ giao hàng LẠC (Wags 2026-09-12,
+#     incident report-return-gate-worktree-root mục "Còn treo" #1/#2). Fleet-wide ⇒ chỉ lượt
+#     ACCOUNT đầu (cùng lý do ANOMALY_SCAN). Checker TỰ IM khi không có gì để nói: chỉ kể cây
+#     còn được dùng <14 ngày, và chỉ kể sổ lạc có báo cáo ĐÃ GỬI mà sổ canonical không biết.
+#     [WARN-ONLY] có chủ đích: worktree thuộc phiên/agent KHÁC — Wags/Winston không rebase hộ
+#     được, auto-dispatch chỉ đốt token. Không tính vào WARN_COUNT vì lý do đó.
+WORKTREE_STALE=""
+if [ -n "$RUNONCE_LABEL" ] && [ "$ACCOUNT" = "$RUNONCE_LABEL" ]; then
+  WORKTREE_STALE="$(timeout 60 python3 "$ROOT/bin/worktree_stale_check.py" 2>&1 || true)"
+fi
+
 MSG="🩺 **${ACCOUNT} — ${LABEL} — kiểm tra vận hành ${NOW_ICT}**
 ${REPORT_BODY}"
 if [ -n "$PREFLIGHT_TAIL" ]; then
@@ -1668,6 +1679,12 @@ if [ -n "$ANOMALY_SUMMARY" ]; then
 
 Quét bất thường (anomaly scan — cảnh báo sớm giá/khối lượng + theo dõi trạng thái sàn):
 ${ANOMALY_SUMMARY}"
+fi
+if [ -n "$WORKTREE_STALE" ]; then
+  MSG="${MSG}
+
+Worktree/sổ giao hàng lệch bản (không chặn giao hàng tự động — xem bin/worktree_stale_check.py):
+${WORKTREE_STALE}"
 fi
 if [ -n "$FORENSIC_SUMMARY" ]; then
   MSG="${MSG}
