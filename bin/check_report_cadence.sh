@@ -27,6 +27,18 @@ case "${1:-}" in
   *) echo "Usage: $0 [--scheduled-weekly|--scheduled-monthly]" >&2; exit 2 ;;
 esac
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# ROOT phải là cây CANONICAL, không phải cây đang chạy. Đây là nơi RA QUYẾT ĐỊNH "kỳ này đã có
+# báo cáo chưa": chạy từ worktree/clone thì DELIVERY_STATE + reports/ đều trỏ cây phụ ⇒ đọc sổ
+# rỗng ⇒ dispatch soạn LẠI ⇒ artifact sha mới ⇒ delivery gate giao như bản hợp lệ ⇒ nhà đầu tư
+# nhận báo cáo TRÙNG (ghim hash không cứu được, vì hash khác thật). Cùng một luật "sổ nằm ở
+# đâu" với report_delivery_gate.py — vá một đầu là chưa vá (arch-review 2026-09-12).
+# Fallback im lặng về cây đang chạy nếu bản sao này chưa có wc_paths.py (worktree tiền-vá):
+# giữ nguyên hành vi cũ, không làm script chết.
+CANONICAL_ROOT="$(python3 "$ROOT/bin/wc_paths.py" --mike-canonical 2>/dev/null || true)"
+if [ -n "$CANONICAL_ROOT" ] && [ -f "$CANONICAL_ROOT/MIKE.md" ] && [ "$CANONICAL_ROOT" != "$ROOT" ]; then
+  echo "ℹ️  check_report_cadence: chạy từ $ROOT nhưng dùng sổ/báo cáo của cây canonical $CANONICAL_ROOT" >&2
+  ROOT="$CANONICAL_ROOT"
+fi
 WC_ROOT="$(cd "$ROOT/.." && pwd)"
 if [ -f "$WC_ROOT/wc_env.sh" ]; then
   # shellcheck source=/dev/null

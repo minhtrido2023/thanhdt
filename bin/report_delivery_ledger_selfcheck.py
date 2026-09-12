@@ -28,15 +28,24 @@ import tempfile
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import wc_paths  # noqa: E402
 
-MIKE = wc_paths.find_mike_canonical_root(__file__)
+# Cây ĐANG TEST = cây chứa CHÍNH file này, tính không qua env. `dispatch.sh` export `WC_ROOT`
+# vào mọi phiên agent; nếu để nó thắng thì selfcheck chạy từ worktree sẽ lặng lẽ đi test bản
+# gate CANONICAL và báo PASS cho code mình vừa sửa nhưng KHÔNG chạy — đúng cơ chế đã làm lọt bug
+# TZ 2026-07-31. `child_env()` đã pop cho tiến trình con; dòng này pop cho chính nó.
+for _k in ("WC_ROOT", "MIKE_ROOT"):
+    os.environ.pop(_k, None)
+MIKE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 REAL_BIN = os.path.join(MIKE, "bin")
 GATE = "report_delivery_gate.py"
 OLD_MARKER = "ROOT = Path(__file__).resolve().parent.parent"
 
 _fails: list = []
+_ran = 0
 
 
 def check(name, got, want):
+    global _ran
+    _ran += 1
     ok = got == want
     print(("✅ " if ok else "❌ ") + name + ("" if ok else f"\n     got={got!r}\n     want={want!r}"))
     if not ok:
@@ -139,7 +148,7 @@ def ledger_keys(path: str) -> list:
 
 def main() -> int:
     sha_old, src_old = old_source()
-    print(f"canonical mike: {MIKE}")
+    print(f"cây ĐANG TEST (không qua env): {MIKE}")
     print(f"RED control = bản cũ {sha_old[:8]} (ROOT = parent.parent), lấy từ git\n")
 
     # --- 1. GREEN: gate MỚI chạy TỪ worktree giả ------------------------------------------
@@ -244,10 +253,60 @@ def main() -> int:
                             env=child_env(WC_ROOT=wc_paths.find_wc_root(__file__)))
         check("… env trỏ ĐÚNG cây thì KHÔNG cảnh báo (không gây nhiễu cho đường chạy thật)",
               "khác cây chứa script" in p3.stderr, False)
+
+        # env MIKE_ROOT: override MỚI trên đường client-facing ⇒ phải có lưới, không để 0%
+        # coverage (mutation "tin MIKE_ROOT mù" từng sống sót toàn bộ selfcheck này).
+        bad = os.path.join(s["sb"], "khong-phai-mike")
+        os.makedirs(bad, exist_ok=True)
+        pb = subprocess.run([sys.executable, "-c", probe], capture_output=True, text=True,
+                            env=child_env(MIKE_ROOT=bad))
+        check("MIKE_ROOT KHÔNG có MIKE.md: bị từ chối, tự tìm cây canonical",
+              json.loads(pb.stdout.strip()), s["mike"])
+        check("… và có cảnh báo stderr cho lần từ chối đó", "bỏ qua MIKE_ROOT" in pb.stderr, True)
+        pg = subprocess.run([sys.executable, "-c", probe], capture_output=True, text=True,
+                            env=child_env(MIKE_ROOT=s["mike"]))
+        check("MIKE_ROOT hợp lệ (có MIKE.md) vẫn được tôn trọng",
+              json.loads(pg.stdout.strip()), s["mike"])
+
+        cli = subprocess.run([sys.executable, os.path.join(s["wt"], "bin", "wc_paths.py"),
+                              "--mike-canonical"], capture_output=True, text=True,
+                             env=child_env())
+        check("CLI wc_paths --mike-canonical chạy TỪ worktree ⇒ in ra cây canonical",
+              cli.stdout.strip(), s["mike"])
     finally:
         shutil.rmtree(s["sb"], ignore_errors=True)
 
-    print()
+    # --- 5. Hai script BASH quyết định có gửi hay không cũng phải neo canonical -------------
+    # Chạy nguyên script trong selfcheck là dispatch + gửi thật, nên chỉ chạy ĐOẠN ĐẦU (tới hết
+    # khối tính gốc cây) — vẫn là đo HÀNH VI, không phải so chuỗi. Cắt theo mẫu `^fi$` chứ không
+    # theo số dòng, để một lần sửa phía trên không làm test lặng lẽ đo nhầm đoạn.
+    for script in ("check_report_cadence.sh", "paper_programs_daily_report.sh"):
+        for wc_paths_present in (True, False):
+            wt = tempfile.mkdtemp(prefix="wt-fake-cadence-", dir=os.path.join(MIKE, "agents"))
+            try:
+                os.mkdir(os.path.join(wt, "bin"))
+                if wc_paths_present:
+                    shutil.copy2(os.path.join(REAL_BIN, "wc_paths.py"),
+                                 os.path.join(wt, "bin", "wc_paths.py"))
+                src = open(os.path.join(REAL_BIN, script), encoding="utf-8").read()
+                head, sep, _ = src.partition("\nfi\n")
+                if not sep:
+                    check(f"{script}: cắt được đoạn tính gốc cây", bool(sep), True)
+                    continue
+                frag = os.path.join(wt, "bin", "head_probe.sh")
+                _write(frag, head + "\nfi\necho \"ROOT=$ROOT\"\n")
+                out = subprocess.run(["bash", frag], capture_output=True, text=True,
+                                     env=child_env()).stdout
+                got = [ln[5:] for ln in out.splitlines() if ln.startswith("ROOT=")]
+                if wc_paths_present:
+                    check(f"{script} chạy từ worktree ⇒ ROOT = cây canonical", got, [MIKE])
+                else:
+                    check(f"RED · {script} KHÔNG có wc_paths.py (worktree tiền-vá) ⇒ ROOT vẫn "
+                          f"lệch về cây phụ", got, [wt])
+            finally:
+                shutil.rmtree(wt, ignore_errors=True)
+
+    print(f"\n{_ran - len(_fails)}/{_ran} check")
     if _fails:
         print(f"❌ SELFCHECK FAIL — {len(_fails)} test: " + "; ".join(_fails))
         return 1

@@ -24,14 +24,22 @@ import tempfile
 # đọc sổ canonical ⇒ lần giao hàng từ cây phụ là vô hình với cadence check ⇒ GỬI TRÙNG báo cáo
 # cho nhà đầu tư (đã xảy ra thật: monthly 2026-08 gửi 28/08 từ `mike_paseo`, gửi lại 02/09 từ
 # canonical). Lock file bám theo state_path nên cũng tự về canonical ⇒ hai cây loại trừ nhau.
-# Ba script con bên dưới (return gate, notify, email) CỐ Ý cũng chạy bản canonical: 17 worktree
+# Ba script con bên dưới (return gate, notify, email) CỐ Ý cũng chạy bản canonical: 14 worktree
 # đang giữ bản TIỀN-VÁ của `report_return_gate.py` (sự cố 2026-09-12) và giao hàng từ đó sẽ tái
-# hiện lỗi. Đánh đổi: muốn thử bản SỬA ĐỔI từ worktree thì phải chỉ định tường minh
-# (`--notify-script` / `--email-script`), hoặc chạy thẳng `report_return_gate.py` như selfcheck.
+# hiện lỗi. Đánh đổi, nói đúng phạm vi: notify/email có cờ override (`--notify-script`,
+# `--email-script`); RETURN GATE thì KHÔNG — muốn thử bản sửa đổi của nó thì chạy thẳng
+# `bin/report_return_gate.py --report <file>`, như `report_return_gate_selfcheck.py` vẫn làm.
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from wc_paths import find_mike_canonical_root  # noqa: E402
 
 ROOT = Path(find_mike_canonical_root(__file__))
+RUNNING_TREE = Path(__file__).resolve().parent.parent
+if RUNNING_TREE != ROOT:
+    # Hệ quả của việc ghim: sổ canonical giờ là sổ SẢN XUẤT với MỌI cây, nên một lần "chạy thử"
+    # từ worktree cũng đóng dấu "đã gửi" vào đó. Đã có tiền lệ đúng lớp này: entry stub
+    # `SpaceX_daily_report_not-a-date.md` (discord+email delivered) trong sổ lạc của một worktree.
+    print(f"⚠️  report_delivery_gate: chạy từ {RUNNING_TREE} nhưng GHI SỔ THẬT + gọi script con "
+          f"của cây canonical {ROOT} — đây không phải sandbox", file=sys.stderr)
 DEFAULT_STATE = ROOT / "state" / "report_delivery.json"
 LEGACY_EMAIL_STATE = ROOT / "state" / "report_emailed.json"
 # Standalone cron/Discord sessions do not always source wc_env.sh.
@@ -116,7 +124,10 @@ def deliver(report: Path, state_path: Path, topic: str, notify_script: Path,
             key = report.name
             record = reports.get(key, {})
             if not isinstance(record, dict) or record.get("sha256") != sha:
-                record = {"path": str(report), "sha256": sha, "created_at": now()}
+                record = {"path": str(report), "sha256": sha, "created_at": now(),
+                          # cây nào đã giao — sổ dùng chung thì provenance phải nằm trong entry,
+                          # không suy lại được từ trạng thái đĩa về sau
+                          "delivered_by_tree": str(RUNNING_TREE)}
                 reports[key] = record
 
             if complete(record, sha):

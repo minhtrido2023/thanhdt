@@ -7,6 +7,13 @@
 # Luôn exit 0 khi render được report (kể cả có sleeve lỗi) — chỉ exit ≠0 khi python chết hẳn.
 set -uo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# Cây CANONICAL (xem check_report_cadence.sh): script này ghi artifact vào reports/ và email
+# proof vào state/report_delivery.json — cả hai phải nằm đúng nơi cadence sweep đọc, nếu không
+# sweep sẽ coi là chưa gửi và gửi lại. Fallback im lặng nếu thiếu wc_paths.py.
+CANONICAL_ROOT="$(python3 "$ROOT/bin/wc_paths.py" --mike-canonical 2>/dev/null || true)"
+if [ -n "$CANONICAL_ROOT" ] && [ -f "$CANONICAL_ROOT/MIKE.md" ]; then
+  ROOT="$CANONICAL_ROOT"
+fi
 export TZ="Asia/Ho_Chi_Minh"
 
 TRADING_REPORT_TOPIC="trading_report"

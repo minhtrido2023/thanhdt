@@ -113,3 +113,21 @@ def find_mike_canonical_root(start: str) -> str:
     print(f"⚠️  không tìm thấy checkout mike canonical (thử {canonical!r}) — dùng cây đang chạy "
           f"{running!r}; state dùng chung có thể bị phân mảnh", file=sys.stderr)
     return running
+
+
+def _cli(argv: list) -> int:
+    """CLI cho script BASH tái dùng đúng một định nghĩa gốc cây (đừng chép phép đếm cấp).
+
+        ROOT="$(python3 bin/wc_paths.py --mike-canonical)"   # cây mike canonical
+        WC="$(python3 bin/wc_paths.py --wc-root)"            # cây WorkingClaude của tôi
+    """
+    if len(argv) != 1 or argv[0] not in ("--mike-canonical", "--wc-root"):
+        print("usage: wc_paths.py {--mike-canonical|--wc-root}", file=sys.stderr)
+        return 2
+    print(find_mike_canonical_root(__file__) if argv[0] == "--mike-canonical"
+          else find_wc_root(__file__))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(_cli(sys.argv[1:]))
