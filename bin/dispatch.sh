@@ -1060,6 +1060,11 @@ _build_argv() {
       #    cua codex (co ton tai: permissionDecision=deny) — CHUA LAM.
       # VAN KHONG dung --dangerously-bypass-approvals-and-sandbox (arch-reviewer #6c): sandbox
       # van bat, chi la writable root rong ra; he thong ngoai du an (~/.ssh, /etc) van duoc chan.
+      # ⚠️ Doc them (Wags 2026-09-12, da XAC NHAN, khong phai lo hong moi): tu khi WC_ROOT duoc
+      # neo theo marker o :111-126, dispatch phat TU WORKTREE cung cap ca cay WorkingClaude —
+      # tuc DUNG ngu nghia user chot 2026-08-10 (dong argv :1063 khong doi tu commit ae3aaab1).
+      # Truoc ban va, ban sao worktree cho WC_ROOT=.../mike/agents => sandbox HEP hon nhung VON
+      # DA HONG (khong ghi noi bus, dung kieu that-bai-im-lang o tren). Khong tu doi sandbox.
       CLI_ARGV=( "$CLI_BIN" exec --skip-git-repo-check -C "$AGENT_DIR" -s workspace-write --add-dir "$WC_ROOT" )
       if [ -n "$MODEL" ]; then CLI_ARGV+=( -m "$MODEL" ); fi
       if [ -n "$EFFORT" ]; then CLI_ARGV+=( -c "model_reasoning_effort=\"$EFFORT\"" ); fi
