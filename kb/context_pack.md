@@ -1,13 +1,13 @@
-# Mike fleet — context pack (v2937)
+# Mike fleet — context pack (v2940)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-09-11T19:37:55] Mike/decision — kb-weekly-editorial: {"summary": "KB weekly editorial review 2026-09-12: KNOWLEDGE.md updated (commit a4eaef2f) — recorded CCS/BAL/custom30V/AMH closed R&D week 09-05→09-11 (all NO- …
-- [2026-09-11T21:10:42] Mike/decision — weekly-ops-audit: {"date": "2026-09-12", "job": "Mike_20260911_204825", "bugs_found": 3, "bugs_fixed": 2, "escalated": 3, "commits": ["9becc1b3", "97a60151"], "pct_opus": 27.0, " …
-- [2026-09-11T21:22:18] Mike/finding — weekly-ops-audit-report-delivered-2026-09-12: {"summary": "Bao cao weekly ops audit 2026-09-12 da post DU vao Architecture (2 tin, 1770+1300 chars) trong luot resume #1. Luot goc Mike_20260911_204825 het ma …
-- [2026-09-12T02:00:03] Mike/finding — report-cadence-scheduled-weekly_2026-09-07_2026-09-11: {"kind": "weekly", "period": "tuần 2026-09-07 → 2026-09-11", "target_file_spacex": "mike/reports/SpaceX_weekly_report_2026-09-07_to_2026-09-11.md", "target_file …
-- [2026-09-12T02:34:47] Taylor/finding — weekly-report-2026-09-07-to-2026-09-11-split-delivered: {"period": "2026-09-07 to 2026-09-11", "files": {"SpaceX": {"path": "mike/reports/SpaceX_weekly_report_2026-09-07_to_2026-09-11.md", "sha256": "fe41dc1f518cc733 …
+- [2026-09-12T06:16:05] Wags/answer — report-return-gate-worktree-root-chan-bao-cao-nha-dau-tu: {"resolution": "FIXED. Neo goc cay theo marker wc_env.sh thay vi dem cap thu muc: bin/wc_paths.py find_wc_root() = env WC_ROOT (CHI khi thu muc do that su co wc …
+- [2026-09-12T06:16:34] Wags/finding — wags-fix: report_return_gate worktree ROOT chan bao cao nha dau tu: {"root_cause": "ROOT = os.path.dirname x3 tu __file__ dung cho ban goc mike/bin/ nhung moi ban sao chay tu worktree mike/agents/wt-*/bin/ cho ROOT=WorkingClaude …
+- [2026-09-12T06:20:05] Wags/answer — selfcheck-red: mike/bin/commit_collision_gate_selfcheck.py: {"resolution": "Fixture fragile, KHÔNG phải cổng hỏng: case 12 tham chiếu cứng bus/jobs/Wags_20260812_035748.json đã bị janitor rotate. Đổi sang fixture TỰ CHỨA …
+- [2026-09-12T06:20:21] Wags/answer — hit-details-daily-chay-truoc-producer-2-phut: {"resolution": "User chốt phương án (a) + hỏi 'đã có §11, đã tự đăng ký mà vẫn sai thứ tự, làm sao tránh tái diễn'. Trả lời bằng CƠ CHẾ: (a) cron 19:05->19:12 I …
+- [2026-09-12T06:20:49] Wags/finding — wags-fix: nav-xcheck ex-date — DỪNG ở arch-review vòng 2 (NEEDS_CHANGES): {"viec": "3/3 job Wags_20260912_052122", "ket_qua": "KHÔNG ship code. Bản nháp daily_nav_snapshot.py::expected_exdate_adjustment đã GỠ khỏi cây làm việc, cất tạ …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -212,6 +212,37 @@ Cách tính breadth chuẩn:
 Value Radar vẫn giữ vai trò DISPLAY-ONLY trong báo cáo (§6b coding_guidelines). Không wire vào sizing.
 
 Kết quả dẫn tới quyết định: breadth-vs-radar-matrix-20260822 (Taylor, B2) + user confirm 2026-08-22.
+
+## QUY TẮC — DNSE điều chỉnh giá vị thế TỐI TRƯỚC ngày ex-date (user chốt 2026-09-12, bài học lặp ≥3 lần)
+**Sự thật broker:** DNSE cập nhật `marketPrice` của vị thế theo giá đã điều chỉnh corp-action vào
+**tối hôm trước ex-date** (T−1 evening), trong khi `close_price` BQ tới lúc đó vẫn là giá CHƯA
+điều chỉnh. ⇒ xcheck NAV lệch đúng bằng giá trị quyền là **KỲ VỌNG, không phải stuck, không cần
+verify DNSE, không escalate**. Ca chuẩn: DGC 11/09/2026 tối T6 — BQ 46.750 vs broker 38.750, cổ
+tức tiền 8.000đ (2 đợt 3.000+5.000) ex-date T2 14/09 ⇒ 46.750−8.000 = 38.750 khớp chính xác.
+
+⚠️ **PHẢI TÁCH HAI LỚP — sửa 2026-09-12 sau arch-review (job Wags_20260912_052122), bản trước gộp
+chung và sẽ dạy làm SAI:**
+- **Cổ tức TIỀN MẶT** (DGC 09-11): broker chỉ đổi GIÁ. NAV vẫn mark **giá CUM của phiên đó**
+  (không phải giá broker đã điều chỉnh) — vì `cum_dividend_double_count` (§21) đã loại khoản
+  phải thu ra khỏi tiền; lấy giá broker mà vẫn loại khoản phải thu thì NAV **hụt đúng bằng cổ
+  tức** (ca DGC: 80 triệu = −8,1% NAV ZaloPay). Đây là ca DUY NHẤT được tự động cho qua.
+- **Cổ tức bằng CỔ PHIẾU / thưởng / tách** (VHM 08-05, MBB 08-11, VIB 09-09): broker đổi **CẢ giá
+  LẪN khối lượng** cùng lúc — đo thật trên `dnse_raw_2026-09-09.jsonl` 19:07: VIB openQuantity
+  500→547 **và** marketPrice 15.050→13.700 trong cùng bản ghi. Vị thế LIVE (qty MỚI) nhân giá CUM
+  ⇒ NAV thổi phồng (VIB +711.100đ; VHM 1:1 sẽ là +100% giá trị vị thế). ⇒ **VẪN CHẶN, cần người
+  xử lý** — không có ngoại lệ tự động.
+**Cách xử lý khi gặp:** tra ex-date mã đó (`tav2_bq.corporate_action` qua
+`corp_action_lib.pricing_events` — KHÔNG dùng `events()` executed_only, nó trả rỗng đúng ngày cần).
+⛔ **Cơ chế tự nhận diện CHƯA được wire — tới 2026-09-12 việc này vẫn làm TAY.** Bản nháp
+(`expected_exdate_adjustment` trong `daily_nav_snapshot.py`, selfcheck 29/29) bị arch-review vòng 2
+trả NEEDS_CHANGES và đã được GỠ khỏi cây làm việc, cất ở
+`agents/Wags/research/nav_exdate_xcheck_wip_20260912.patch`. Lý do đáng nhớ: cổng ghép cặp của nó
+kiểm PROXY (`cum_div["warnings"]`) chứ không kiểm BẤT BIẾN "khoản cổ tức phải thu của chính mã được
+miễn đã bị trừ khỏi tiền" — mà `cum_dividend_double_count` có nhánh `delta<=0` trả `amount=0,
+warnings=[]` IM LẶNG (đo thật `--date 2026-09-12`: 80 triệu vẫn nằm trong `totalCash`) ⇒ nới cổng
+trong trạng thái đó sẽ đếm 2 lần đúng 80 triệu (+8,15% NAV, lọt cổng sanity ±15%) và ghi thẳng vào
+`nav_history`. Nghĩa là: **tự động hoá SAI ở đây còn tệ hơn tự tay xử lý mỗi quý vài lần.**
+Runbook thao tác tay: `kb/ops_runbook.md` § PRICE_XCHECK.
 
 ## Dự án đã đóng — 1 dòng/dự án, chi tiết `cat kb/projects/<file>.md`
 <!-- Rút gọn 2026-08-10: mỗi dòng trước đây là 2-4 câu kể lại diễn biến. File này bơm vào MỌI
