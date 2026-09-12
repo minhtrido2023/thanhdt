@@ -21,6 +21,30 @@ preserve_verbatim: >
 
 # Log thay đổi Cron Registry
 
+- 2026-09-12 (Wags, job `Wags_20260912_052122`, user duyệt 12:18 ICT): **ĐỔI GIỜ**
+  `hit_details_daily.sh` **19:05 → 19:12 ICT** (`5 12` → `12 12`, T2-T6). Backup crontab trước:
+  `logs/crontab_backup_20260912_122726.txt` (140 dòng, không đổi số dòng sau khi cài).
+  Root cause: dòng 19:05 được chọn theo giờ BẮT ĐẦU của producer ("sau `bq_freshness_check` 19:00"),
+  nhưng artifact `deploy_golive_dt5g_v4/out/golive_v23_recommendations_<date>.csv` thật sự có mtime
+  **19:06-19:07** (đo `ls -l` 3 phiên: 09-09 19:06, 09-10 19:06, 09-11 19:07) ⇒ lần chạy cron ĐẦU
+  TIÊN (2026-09-11) chết với `Không thấy .../golive_v23_recommendations_2026-09-11.csv`, exit 1,
+  không post Discord, không sinh artifact; lỗi chỉ nằm trong `logs/hit_details_daily.log`
+  (2 dòng, 1/1 lần chạy hỏng) nên không ai thấy. Bus: `Mike/hit-details-daily-chay-truoc-producer-2-phut`.
+  **Fix lớp lỗi, không chỉ fix dòng cron**: `bin/wait_for_artifact.sh` (MỚI) — consumer CHỜ artifact
+  có mtime hôm nay (poll 30s, trần 10', hết trần fail LOUD nêu đã chờ bao lâu + file + producer,
+  KHÔNG chạy trên dữ liệu cũ); uỷ quyền phép so ngày cho `bin/csv_fresh_today.sh` (đã neo TZ).
+  Selfcheck `bin/wait_for_artifact_selfcheck.py` **19/19 PASS** dưới `env -u TZ`: producer trễ ⇒
+  consumer vẫn đúng; producer không tới ⇒ fail loud đúng ở trần; file mtime hôm qua ⇒ vẫn fail
+  (chính ca gây sự cố); + kiểm wiring (vòng chờ nằm TRƯỚC `hit_details.py`) + kiểm dòng crontab.
+  Giờ 19:12 từ nay chỉ là **thắt lưng an toàn**, không phải cơ chế đồng bộ.
+  4 câu hỏi §11: (1) đọc recs CSV local (producer `golive_recommend_v23` ghi) + BQ live cho raw
+  factor; (2) tươi khi artifact có mtime hôm nay — *đo bằng mtime, không suy từ giờ cron*;
+  (3) cần T (audit tín hiệu hôm nay); (4) consumer = người đọc topic `trading_daily`, không có
+  downstream máy nào ⇒ trễ vài phút vô hại, đọc nhầm phiên trước thì KHÔNG.
+  Luật rút ra: `kb/coding_guidelines_ext.md` §14b (+ sửa mốc "tươi" trong
+  `_adding-cron-policy.md` câu hỏi 2 thành giờ ARTIFACT SẴN SÀNG, và bắt buộc ghi INPUT+PRODUCER
+  khi đăng ký cron).
+
 - 2026-08-20 (Wags, user duyệt tường minh ~11:17 ICT — đề xuất
   `agents/Mike/research/wakeup_architecture_redesign_20260820.md` Phase 1): **THÊM cron `*/5`**
   `/usr/bin/python3 /home/trido/thanhdt/WorkingClaude/mike/bin/wakeup_reconcile.py >>

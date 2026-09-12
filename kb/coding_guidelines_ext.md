@@ -153,6 +153,38 @@ cron pair (§11); a periodic sweep of *existing* pairs is Friday KB editorial re
 
 *→ rationale §14.*
 
+### 14b. Consumer cron KHÔNG được đồng bộ với producer bằng ĐỒNG HỒ — phải CHỜ ARTIFACT, có trần, fail loud
+
+**Luật:** một consumer chạy theo cron riêng **không được** dựa vào thứ tự giờ với producer
+("producer 19:00, mình 19:05 là xong"). Nó phải **chờ artifact**: file tồn tại + `mtime` = hôm nay
+(giờ VN), poll định kỳ, có **trần thời gian**, hết trần thì **fail LOUD** (nêu rõ đã chờ bao lâu,
+trần bao nhiêu, file nào, producer nào — §29), **không** âm thầm chạy trên dữ liệu phiên trước.
+Cơ chế dùng sẵn: `bin/wait_for_artifact.sh <file> "<producer hint>"` (mặc định poll 30s, trần 10
+phút; uỷ quyền phép so ngày cho `bin/csv_fresh_today.sh` đã neo TZ). Giờ cron vẫn đặt sau producer
+— nhưng chỉ là **thắt lưng an toàn**, không phải cơ chế đồng bộ.
+
+**Khi đăng ký cron (§11) phải ghi vào `kb/cron_registry.md`: INPUT file cụ thể + PRODUCER job nào
+ghi ra nó.** Không viết được 2 thứ đó ⇒ chưa đủ hiểu để chọn giờ.
+
+**Vì sao §14 (văn xuôi, có từ 2026-08) KHÔNG ngăn được sự cố 2026-09-12** — đây mới là phần đáng nhớ:
+`hit_details_daily.sh` được đăng ký 19:05 "sau `bq_freshness_check` 19:00", trong khi producer thật
+sự ghi `golive_v23_recommendations_<date>.csv` lúc **19:06-19:07**. Hậu quả ĐO ĐƯỢC (không suy đoán):
+lần chạy cron đầu tiên 2026-09-11 chết với `Không thấy .../golive_v23_recommendations_2026-09-11.csv`,
+exit 1 — **không post Discord, không sinh artifact**, thất bại chỉ nằm trong `logs/hit_details_daily.log`
+mà không checker nào đọc ⇒ với người dùng, job đơn giản là *không tồn tại*. (Consumer này hỏi file
+theo NGÀY TƯỜNG MINH nên chết to; một consumer lấy "file mới nhất" bằng glob — như chính nhánh default
+của `hit_details.py` — sẽ âm thầm chạy trên PHIÊN TRƯỚC và ra số sai mà không ai biết. Cả hai đều là
+cùng một lỗi gốc.) Người đăng ký đã đọc §11 và §14. Ba lỗ hổng cơ chế, đã vá:
+1. Registry + policy chỉ ghi giờ **BẮT ĐẦU** của producer ("recommendations tươi sau pipeline
+   19:00"). Giờ bắt đầu không phải mốc tươi. Đã sửa mốc trong
+   `kb/cron_registry/_adding-cron-policy.md` thành giờ **artifact sẵn sàng** (đo bằng `mtime` thật).
+2. "Thêm freshness precheck" là việc phải TỰ NGHĨ RA mỗi lần ⇒ bỏ qua vì tưởng giờ cron đã đủ. Giờ
+   là một dòng gọi script có sẵn + selfcheck (`bin/wait_for_artifact_selfcheck.py`).
+3. Ước lượng runtime của producer bằng cảm tính, không ai đo. Vòng chờ artifact làm phép ước lượng
+   đó **không còn load-bearing**: producer chậm 60s hay 6 phút, consumer vẫn đúng.
+
+*Sự cố: job `Wags_20260912_052122`, bus `Mike/hit-details-daily-chay-truoc-producer-2-phut`.*
+
 ## 15. Bash Strings Doubling as LLM Prompts: Escape `"`/`` ` ``, Then Verify by Running, Not Reading
 
 Both `"` and `` ` `` are live bash metacharacters even inside double quotes (unlike single quotes) —
