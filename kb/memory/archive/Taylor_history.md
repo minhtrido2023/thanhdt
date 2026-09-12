@@ -500,3 +500,6 @@
 
 ## Archived 2026-09-11 (keep=12 days=0 require_done=False)
 - [2026-09-06T14:50:33Z] [2026-09-06T14:xx] paper-review-extension job _144656 XONG: 2 finding tren bus. expvol_pacing N=1 order-day/11 phien (chi 1 dot TV1 08-17, 0 tu do - CAU TRUC/campaign-driven khong phai bug), de xuat doi 09-15 tu deadline cuoi thanh checkpoint 4-tuan lap lai toi 25 order-day hoac tran an toan 2027-02-17. order_book_execution_shadow sessions=10/11 phien that (90.9%), de xuat review 09-16->09-23; ERROR=6 xac nhan KHONG tang (cu, da giai thich). Ca 2 CHUA GHI vao registry, cho Mike/user duyet.
+
+## Archived 2026-09-12 (keep=6 days=5 require_done=True)
+- [2026-09-06T16:01:59Z] [2026-09-06] CCS Phase 2-NARROW (job _153255) XONG: bus finding + report ccs_phase2_narrow_trim_bottom_20260906.md + results_registry. VERDICT NO-GO. Buoc 0 QUA (redeploy 0.913 - von cat ra KHONG nam im, hap thu qua KICH CO vi the + parking custom30V; gia thuyet Phase1 6.2 BI BAC). A/B: dCAGR +0.910pp, Calmar 1.623->1.790, C1-C4+C5b PASS, C5a DSR=0.0012 (N=8) FAIL -> NO-GO. DSR truot khong do quy uoc: unadjusted P=0.602, boot CI om 0 moi cua so. PHAT HIEN CAU TRUC: BOTTOM tercile ~= tier _W (BAL 78%) + LAG_LO (LAG 99.4%), ta hang so 400 tren panel LAG -> khong phai truc conviction moi ma la re-tune tier weight. TRUC CCS DONG - khong de xuat bien the tiep.
