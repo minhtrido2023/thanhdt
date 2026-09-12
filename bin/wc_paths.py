@@ -94,20 +94,21 @@ def find_mike_canonical_root(start: str) -> str:
     Cây `WorkingClaude` ANH EM (`thanhdt/wt-*/WorkingClaude/`) vẫn neo vào `mike` của CHÍNH nó —
     cố ý, giống `find_wc_root`: đó là fleet khác, không phải worktree của fleet này.
 
-    Override: env `MIKE_ROOT` **chỉ khi** thư mục đó có `MIKE.md` (cùng kỷ luật "env được kiểm
-    chứng, không tin mù" của `find_wc_root`).
+    KHÔNG nhận override qua biến môi trường — khác `find_wc_root()` một cách có chủ ý. "Cây của
+    tôi" thì hợp lý để override; SỔ DÙNG CHUNG thì không: chỉ cần một biến env trỏ cây khác là
+    sổ lại phân mảnh đúng như sự cố vừa vá, mà lần này không ai nhìn thấy.
     Fallback khi không dựng được (bản sao rời, không có `wc_env.sh` ở bất kỳ cấp nào): trả về
     hành vi cũ `dirname×2(start)` — không ném lỗi, để test/CI vẫn chạy được.
     """
-    env = os.environ.get("MIKE_ROOT")
-    if env:
-        env = os.path.abspath(env)
-        if os.path.isfile(os.path.join(env, MIKE_MARKER)):
-            return env
-        print(f"⚠️  bỏ qua MIKE_ROOT={env!r} — không có {MIKE_MARKER} ở đó; tự tìm cây canonical",
-              file=sys.stderr)
-    canonical = os.path.join(find_wc_root(start), "mike")
-    if os.path.isfile(os.path.join(canonical, MIKE_MARKER)):
+    # KHÔNG có env override ở đây, và CỐ Ý KHÔNG đi qua `find_wc_root()`: hàm đó nhận env `WC_ROOT`, mà `dispatch.sh` export
+    # `WC_ROOT` của CÂY NÓ ĐANG CHẠY vào mọi phiên agent. Sổ giao hàng là SINGLETON của fleet,
+    # không phải "cây của tôi": nhận env ở đây nghĩa là một phiên neo ở cây `WorkingClaude` anh
+    # em (trên máy này có 2 cây như vậy, mỗi cây một sổ 56KB) sẽ ghi sổ vào đó — tái hiện đúng
+    # phân mảnh vừa vá, lần này qua env (arch-review vòng 2, 2026-09-12). Neo THUẦN theo vị trí
+    # file: tất định, không phụ thuộc ai gọi mình.
+    walked = _walk_to_marker(start)
+    canonical = os.path.join(walked, "mike") if walked else ""
+    if canonical and os.path.isfile(os.path.join(canonical, MIKE_MARKER)):
         return canonical
     running = os.path.dirname(os.path.dirname(os.path.abspath(start)))
     print(f"⚠️  không tìm thấy checkout mike canonical (thử {canonical!r}) — dùng cây đang chạy "

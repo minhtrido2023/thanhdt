@@ -34,7 +34,9 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # đâu" với report_delivery_gate.py — vá một đầu là chưa vá (arch-review 2026-09-12).
 # Fallback im lặng về cây đang chạy nếu bản sao này chưa có wc_paths.py (worktree tiền-vá):
 # giữ nguyên hành vi cũ, không làm script chết.
-CANONICAL_ROOT="$(python3 "$ROOT/bin/wc_paths.py" --mike-canonical 2>/dev/null || true)"
+# KHÔNG `2>/dev/null`: đúng những cảnh báo cần thấy nhất (env lệch cây, không tìm thấy
+# canonical, lỗi python thật) đều đi ra stderr.
+CANONICAL_ROOT="$(python3 "$ROOT/bin/wc_paths.py" --mike-canonical || true)"
 if [ -n "$CANONICAL_ROOT" ] && [ -f "$CANONICAL_ROOT/MIKE.md" ] && [ "$CANONICAL_ROOT" != "$ROOT" ]; then
   echo "ℹ️  check_report_cadence: chạy từ $ROOT nhưng dùng sổ/báo cáo của cây canonical $CANONICAL_ROOT" >&2
   ROOT="$CANONICAL_ROOT"
@@ -299,12 +301,15 @@ for last_monday in candidate_mondays:
     last_friday = last_monday + timedelta(days=4)
     period_key = f"weekly_{last_monday.isoformat()}_{last_friday.isoformat()}"
     if state.get(period_key) != today_s:
+        # Đường TUYỆT ĐỐI canonical: nửa còn lại của cùng một luật "sổ nằm ở đâu". Sổ đã ghim
+        # nhưng nếu agent soạn artifact vào `mike/reports/` TƯƠNG ĐỐI với cwd của nó (worktree)
+        # thì sweep không thấy file/hash ⇒ vẫn coi là quá hạn ⇒ dispatch lại ⇒ gửi trùng.
         sx_f, zp_f = weekly_filenames(last_monday, last_friday)
         actions.append({
             "kind": "weekly", "period_key": period_key,
             "desc": f"tuần {last_monday.isoformat()} → {last_friday.isoformat()}",
-            "target_file_spacex": f"mike/reports/{sx_f}",
-            "target_file_zalopay": f"mike/reports/{zp_f}",
+            "target_file_spacex": os.path.join(reports_dir, sx_f),
+            "target_file_zalopay": os.path.join(reports_dir, zp_f),
             "most_recent": most_recent_weekly.isoformat() if most_recent_weekly else "CHƯA CÓ",
             # scheduled_kind=="weekly" -> lượt cron 09:00 T7 ĐÚNG LỊCH (this_monday luôn là tuần
             # vừa đóng), không phải watchdog phát hiện quá hạn -> không được gắn nhãn "overdue".
@@ -333,8 +338,8 @@ if today.day >= 5 or scheduled_kind == "monthly":
                 actions.append({
                     "kind": "monthly", "period_key": period_key,
                     "desc": f"tháng {last_month_str}",
-                    "target_file_spacex": f"mike/reports/{sx_f}",
-                    "target_file_zalopay": f"mike/reports/{zp_f}",
+                    "target_file_spacex": os.path.join(reports_dir, sx_f),
+                    "target_file_zalopay": os.path.join(reports_dir, zp_f),
                     "most_recent": "CHƯA CÓ" if not monthly_files else "có tháng khác, thiếu tháng này",
                     "overdue": scheduled_kind == "",
                 })
@@ -425,7 +430,7 @@ for a in json.load(sys.stdin)['actions']:
   "$ROOT/bin/append_event.sh" Mike "$EVENT_TYPE" "${TOPIC_PREFIX}${PKEY}" "$EVENT_PAYLOAD" \
     2>/dev/null || true
 
-  EMAIL_STEP="Sau khi tạo CẢ HAI artifact, BẮT BUỘC chạy return gate rồi delivery gate cho TỪNG file riêng (không phải 1 lệnh gộp): python3 mike/bin/report_delivery_gate.py ${TFILE_SX} --topic ${TRADING_REPORT_THREAD} VÀ python3 mike/bin/report_delivery_gate.py ${TFILE_ZP} --topic ${TRADING_REPORT_THREAD}. File tồn tại, maxturns_pending hay gửi một kênh đều CHƯA hoàn tất; chỉ báo xong khi CẢ HAI lệnh in COMPLETE."
+  EMAIL_STEP="Sau khi tạo CẢ HAI artifact, BẮT BUỘC chạy return gate rồi delivery gate cho TỪNG file riêng (không phải 1 lệnh gộp): python3 $ROOT/bin/report_delivery_gate.py ${TFILE_SX} --topic ${TRADING_REPORT_THREAD} VÀ python3 $ROOT/bin/report_delivery_gate.py ${TFILE_ZP} --topic ${TRADING_REPORT_THREAD}. File tồn tại, maxturns_pending hay gửi một kênh đều CHƯA hoàn tất; chỉ báo xong khi CẢ HAI lệnh in COMPLETE."
 
   # Delegate step (thêm 2026-08-04, user mandate — tiết kiệm chi phí): phần NGHĨ/VIẾT văn xuôi
   # (narrative/nhận định, không cần chạy script/broker data) có thể peer-dispatch cho Winston

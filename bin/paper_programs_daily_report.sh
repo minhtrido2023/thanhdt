@@ -10,8 +10,10 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # Cây CANONICAL (xem check_report_cadence.sh): script này ghi artifact vào reports/ và email
 # proof vào state/report_delivery.json — cả hai phải nằm đúng nơi cadence sweep đọc, nếu không
 # sweep sẽ coi là chưa gửi và gửi lại. Fallback im lặng nếu thiếu wc_paths.py.
-CANONICAL_ROOT="$(python3 "$ROOT/bin/wc_paths.py" --mike-canonical 2>/dev/null || true)"
-if [ -n "$CANONICAL_ROOT" ] && [ -f "$CANONICAL_ROOT/MIKE.md" ]; then
+CANONICAL_ROOT="$(python3 "$ROOT/bin/wc_paths.py" --mike-canonical || true)"
+if [ -n "$CANONICAL_ROOT" ] && [ -f "$CANONICAL_ROOT/MIKE.md" ] && [ "$CANONICAL_ROOT" != "$ROOT" ]; then
+  # Script này POST Discord + gửi email nhà đầu tư — đổi cây mà im lặng là không chấp nhận được.
+  echo "ℹ️  paper_programs: chạy từ $ROOT nhưng dùng reports/ + state/ của cây canonical $CANONICAL_ROOT" >&2
   ROOT="$CANONICAL_ROOT"
 fi
 export TZ="Asia/Ho_Chi_Minh"
