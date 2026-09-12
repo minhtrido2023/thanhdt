@@ -145,10 +145,30 @@ Kết quả dẫn tới quyết định: breadth-vs-radar-matrix-20260822 (Taylo
 ## QUY TẮC — DNSE điều chỉnh giá vị thế TỐI TRƯỚC ngày ex-date (user chốt 2026-09-12, bài học lặp ≥3 lần)
 **Sự thật broker:** DNSE cập nhật `marketPrice` của vị thế theo giá đã điều chỉnh corp-action vào
 **tối hôm trước ex-date** (T−1 evening), trong khi `close_price` BQ tới lúc đó vẫn là giá CHƯA
-điều chỉnh. ⇒ xcheck NAV lệch đúng bằng cổ tức tiền (hoặc theo tỉ lệ với cổ tức cổ phiếu/tách)
-là **KỲ VỌNG, không phải stuck, không cần verify DNSE, không escalate**. Ca chuẩn: DGC 11/09/2026
-tối T6 — BQ 46.750 vs broker 38.750, cổ tức 8.000đ ex-date T2 14/09 ⇒ 46.750−8.000 = 38.750 khớp
-chính xác. Trước đó cùng lớp: VHM 08-05, MBB 08-11 (đều "nghi corp-action" rồi mới nhận ra).
-**Cách xử lý khi gặp:** tra ex-date mã đó (`tav2_bq.corporate_action` / `corp_action_pending.md`);
-ex-date == phiên kế tiếp VÀ số khớp ⇒ đóng ngay, dùng giá broker. Cơ chế tự nhận diện trong
-`nav_sync_retry.sh` đang được wire (Wags_20260912_052122, VIỆC 3) để không phải hỏi lại.
+điều chỉnh. ⇒ xcheck NAV lệch đúng bằng giá trị quyền là **KỲ VỌNG, không phải stuck, không cần
+verify DNSE, không escalate**. Ca chuẩn: DGC 11/09/2026 tối T6 — BQ 46.750 vs broker 38.750, cổ
+tức tiền 8.000đ (2 đợt 3.000+5.000) ex-date T2 14/09 ⇒ 46.750−8.000 = 38.750 khớp chính xác.
+
+⚠️ **PHẢI TÁCH HAI LỚP — sửa 2026-09-12 sau arch-review (job Wags_20260912_052122), bản trước gộp
+chung và sẽ dạy làm SAI:**
+- **Cổ tức TIỀN MẶT** (DGC 09-11): broker chỉ đổi GIÁ. NAV vẫn mark **giá CUM của phiên đó**
+  (không phải giá broker đã điều chỉnh) — vì `cum_dividend_double_count` (§21) đã loại khoản
+  phải thu ra khỏi tiền; lấy giá broker mà vẫn loại khoản phải thu thì NAV **hụt đúng bằng cổ
+  tức** (ca DGC: 80 triệu = −8,1% NAV ZaloPay). Đây là ca DUY NHẤT được tự động cho qua.
+- **Cổ tức bằng CỔ PHIẾU / thưởng / tách** (VHM 08-05, MBB 08-11, VIB 09-09): broker đổi **CẢ giá
+  LẪN khối lượng** cùng lúc — đo thật trên `dnse_raw_2026-09-09.jsonl` 19:07: VIB openQuantity
+  500→547 **và** marketPrice 15.050→13.700 trong cùng bản ghi. Vị thế LIVE (qty MỚI) nhân giá CUM
+  ⇒ NAV thổi phồng (VIB +711.100đ; VHM 1:1 sẽ là +100% giá trị vị thế). ⇒ **VẪN CHẶN, cần người
+  xử lý** — không có ngoại lệ tự động.
+**Cách xử lý khi gặp:** tra ex-date mã đó (`tav2_bq.corporate_action` qua
+`corp_action_lib.pricing_events` — KHÔNG dùng `events()` executed_only, nó trả rỗng đúng ngày cần).
+⛔ **Cơ chế tự nhận diện CHƯA được wire — tới 2026-09-12 việc này vẫn làm TAY.** Bản nháp
+(`expected_exdate_adjustment` trong `daily_nav_snapshot.py`, selfcheck 29/29) bị arch-review vòng 2
+trả NEEDS_CHANGES và đã được GỠ khỏi cây làm việc, cất ở
+`agents/Wags/research/nav_exdate_xcheck_wip_20260912.patch`. Lý do đáng nhớ: cổng ghép cặp của nó
+kiểm PROXY (`cum_div["warnings"]`) chứ không kiểm BẤT BIẾN "khoản cổ tức phải thu của chính mã được
+miễn đã bị trừ khỏi tiền" — mà `cum_dividend_double_count` có nhánh `delta<=0` trả `amount=0,
+warnings=[]` IM LẶNG (đo thật `--date 2026-09-12`: 80 triệu vẫn nằm trong `totalCash`) ⇒ nới cổng
+trong trạng thái đó sẽ đếm 2 lần đúng 80 triệu (+8,15% NAV, lọt cổng sanity ±15%) và ghi thẳng vào
+`nav_history`. Nghĩa là: **tự động hoá SAI ở đây còn tệ hơn tự tay xử lý mỗi quý vài lần.**
+Runbook thao tác tay: `kb/ops_runbook.md` § PRICE_XCHECK.

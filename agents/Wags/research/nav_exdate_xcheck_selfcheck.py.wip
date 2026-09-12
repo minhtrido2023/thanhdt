@@ -1,0 +1,189 @@
+#!/usr/bin/env python3
+"""Selfcheck cho `daily_nav_snapshot.expected_exdate_adjustment` — nhận diện ca ex-date
+trong cổng PRICE_XCHECK của NAV.
+
+Bài học lặp nhiều lần (user 2026-09-12 12:18 ICT): mỗi lần một mã sắp vào ngày ex, gate
+PRICE_XCHECK lại chặn NAV, `nav_sync_retry.sh` retry cả buổi tối rồi escalate bus question,
+và người phải ngồi tính tay `close − cổ tức` để kết luận "không có gì hỏng". Ca gần nhất:
+`Mafee/nav-price-xcheck-stuck-ZaloPay-2026-09-11` (DGC 46.750 vs 38.750, cổ tức 8.000đ
+ex 2026-09-14).
+
+Ba câu hỏi test phải trả lời — hai câu sau quan trọng hơn câu đầu:
+  A. ca thật có được nhận diện không (đúng số, đúng ngày)?
+  B. cái gì KHÔNG phải ex-date có bị nới lỏng theo không? (control âm — nếu mất, ta vừa
+     biến một cổng an toàn thành cổng luôn mở)
+  C. ex-date đúng nhưng SỐ không khớp thì sao? (đó mới là bug thật: multiplier sai, thiếu
+     một đợt, broker điều chỉnh nhầm)
+
+Usage: bin/nav_exdate_xcheck_selfcheck.py [--live]   (--live chạy thêm 1 truy vấn BQ thật)
+"""
+import os
+import sys
+
+MIKE_BIN = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, MIKE_BIN)
+import daily_nav_snapshot as D                                    # noqa: E402
+
+PASS, FAIL = [], []
+
+
+def check(name, ok, detail=""):
+    (PASS if ok else FAIL).append(name)
+    print(("  ok   " if ok else "  FAIL ") + name + ("" if ok else "  <- " + str(detail)))
+
+
+def div(ex, vps):
+    return {"ticker": "X", "event_code": "DIV", "exright_date": ex, "event_status": "announced",
+            "value_per_share": str(vps), "exercise_ratio": None, "issue_method_name_vi": None}
+
+
+def iss(ex, ratio, method="Trả Cổ tức bằng Cổ phiếu"):
+    return {"ticker": "X", "event_code": "ISS", "exright_date": ex, "event_status": "announced",
+            "value_per_share": None, "exercise_ratio": str(ratio),
+            "issue_method_name_vi": method}
+
+
+def main():
+    f = D.expected_exdate_adjustment
+
+    # ── 0. tiền đề: phiên kế tiếp sau T6 11/09 là T2 14/09 (không phải 12/09) ──
+    sys.path.insert(0, D.WC_ROOT)
+    from trading_bot.vn_market import next_trading_day
+    import datetime as dt
+    check("0 phiên kế tiếp sau 2026-09-11 (T6) = 2026-09-14 (T2), không phải ngày lịch +1",
+          next_trading_day(dt.date(2026, 9, 11)).isoformat() == "2026-09-14",
+          next_trading_day(dt.date(2026, 9, 11)).isoformat())
+
+    # ── A. ca thật DGC: HAI đợt cổ tức cùng ex-date, tổng 8.000đ ──
+    dgc = [div("2026-09-14", 3000), div("2026-09-14", 5000)]
+    ok, why = f("DGC", "2026-09-11", 46750, 38750, events=dgc)
+    check("1 DGC 2026-09-11 (46.750 vs 38.750, cổ tức 3.000+5.000 ex 09-14) -> EXPECTED", ok, why)
+    check("1b giải thích in ra ĐỦ công thức + số (người đọc log kiểm lại được)",
+          all(x in why for x in ("46,750", "8,000", "38,750", "2026-09-14")), why)
+
+    # CHỈ MỘT đợt (bug "lấy dòng đầu tiên") -> phải KHÔNG khớp, không được nới tay
+    ok, why = f("DGC", "2026-09-11", 46750, 38750, events=[div("2026-09-14", 5000)])
+    check("2 chỉ đếm 1/2 đợt cổ tức -> KHÔNG khớp (số còn lệch 3.000đ) -> vẫn chặn",
+          not ok, why)
+
+    # ── B. control âm: không có corp-action nào ──
+    ok, why = f("PVT", "2026-09-08", 25000, 20000, events=[])
+    check("3 lệch 20% mà KHÔNG có corp-action -> vẫn chặn (ca PVT 2026-09-08)", not ok, why)
+
+    # ex-date có thật nhưng KHÔNG phải phiên kế tiếp
+    ok, why = f("DGC", "2026-09-11", 46750, 38750, events=[div("2026-09-16", 8000)])
+    check("4 có cổ tức nhưng ex-date 09-16 (không phải phiên kế tiếp) -> vẫn chặn", not ok, why)
+
+    # ex-date đúng nhưng SỐ lệch xa
+    ok, why = f("DGC", "2026-09-11", 46750, 36000, events=dgc)
+    check("5 ex-date khớp nhưng marketPrice lệch 2.750đ so với công thức -> vẫn chặn",
+          not ok, why)
+    check("5b báo rõ 'số KHÔNG khớp' kèm công thức, không im lặng",
+          why.startswith("số KHÔNG khớp"), why)
+
+    # ── C. sự kiện CỔ PHIẾU: giá khớp KHÔNG có nghĩa NAV khớp -> PHẢI vẫn chặn ──
+    # Broker credit qty cùng lúc hạ giá (VIB tối 2026-09-09 19:07: 500 -> 547 VÀ 15.050 ->
+    # 13.700 trong cùng bản ghi dnse_raw), nhưng nhánh is_today không quy đổi ngược qty ⇒ nới
+    # cổng ở đây = NAV qty MỚI × giá CUM. Đây là ca cổng PRICE_XCHECK sinh ra để chặn.
+    ok, why = f("VIB", "2026-09-09", 15000, 13700, events=[iss("2026-09-10", 0.095, "Cổ phiếu thưởng")])
+    check("6 VIB 2026-09-09 (ca THẬT): giá khớp 15.000/1,095 = 13.699 nhưng qty đã 500->547 "
+          "-> VẪN CHẶN", not ok, why)
+    check("6b lý do nói rõ vấn đề là KHỐI LƯỢNG, không phải giá",
+          "qty" in why and "CỔ PHIẾU" in why, why)
+    ok, why = f("VHM", "2026-08-05", 153000, 76500, events=[iss("2026-08-06", 1.0)])
+    check("7 VHM 1:1 (sai số sẽ là 100% giá trị vị thế) -> VẪN CHẶN", not ok, why)
+
+    # ISS KHÔNG trao quyền cho cổ đông hiện hữu (ESOP) -> giá KHÔNG điều chỉnh -> vẫn chặn,
+    # và phải chặn vì ĐÚNG LÝ DO (không có sự kiện điều chỉnh giá), không phải tình cờ lệch số.
+    ok, why = f("HAH", "2026-07-27", 50000, 40000, events=[iss("2026-07-28", 0.0186, "Phát hành cho CBCNV")])
+    check("8 ESOP (không trao quyền cổ đông) -> KHÔNG phải điều chỉnh giá -> vẫn chặn",
+          not ok, why)
+    check("8b chặn vì taxonomy (không có sự kiện điều chỉnh giá), KHÔNG phải vì số lệch",
+          "không có sự kiện điều chỉnh giá" in why, why)
+
+    # kết hợp tiền + cổ phiếu cùng ex-date -> có phần cổ phiếu thì vẫn chặn
+    ok, why = f("Z", "2026-09-11", 46750, int((46750 - 8000) / 1.2),
+                events=dgc + [iss("2026-09-14", 0.2, "Cổ phiếu thưởng")])
+    check("9 cùng ex-date có CẢ cổ phiếu -> vẫn chặn (phần qty vẫn lệch cơ sở)", not ok, why)
+
+    # ── D. biên dung sai ──
+    ok, _ = f("DGC", "2026-09-11", 46750, 38650, events=dgc)     # lệch đúng 100đ
+    check("10 lệch đúng 1 bước giá (100đ) -> vẫn coi là khớp (broker làm tròn)", ok)
+    ok, _ = f("DGC", "2026-09-11", 46750, 38550, events=dgc)     # lệch 200đ
+    check("10b lệch 200đ -> KHÔNG khớp (dung sai chặt, không phải 5%)", not ok)
+
+    # ── E. fail-safe: lỗi/thiếu dữ liệu KHÔNG được thành 'đã giải thích' ──
+    class Boom(list):
+        def __iter__(self):
+            raise RuntimeError("BQ chết")
+
+    try:
+        ok, why = f("DGC", "2026-09-11", 46750, 38750, events=Boom())
+        crashed = False
+    except RuntimeError:
+        ok, crashed = False, True
+    check("11 lỗi khi duyệt sự kiện -> KHÔNG trả EXPECTED (chặn, hoặc ném lên caller)",
+          not ok, "ok=%s crashed=%s" % (ok, crashed))
+    ok, why = f("DGC", "2026-09-11", 0, 38750, events=dgc)
+    check("11b thiếu close_price -> vẫn chặn", not ok, why)
+    ok, why = f("DGC", "2026-09-11", 46750, 0, events=dgc)
+    check("11c marketPrice = 0 -> vẫn chặn (không chia cho 0, không đoán)", not ok, why)
+
+    # Đường ĐỌC BQ (không truyền events=) hỏng -> phải chặn, KHÔNG được fail-OPEN.
+    # (arch-reviewer BLOCKER 4: mutation "except -> return True" trước đây lọt 22/22 vì mọi
+    # fixture đều bơm events=, không test nào đi qua nhánh này.)
+    sys.path.insert(0, D.WC_ROOT)
+    import corp_action_lib as CAL
+    _real = CAL.pricing_events
+
+    def _boom(*a, **kw):
+        raise RuntimeError("BQ chết giữa chừng")
+
+    CAL.pricing_events = _boom
+    try:
+        ok, why = f("DGC", "2026-09-11", 46750, 38750)
+    finally:
+        CAL.pricing_events = _real
+    check("11d BQ lỗi khi đọc lịch corp-action -> vẫn chặn (fail-safe, không fail-OPEN)",
+          not ok, why)
+    check("11e báo rõ là lỗi đọc BQ, không nuốt (§29)", "không đọc được lịch corp-action" in why, why)
+
+    # ── F. wiring trong cổng PRICE_XCHECK ──
+    with open(os.path.join(MIKE_BIN, "daily_nav_snapshot.py"), encoding="utf-8") as fh:
+        src = fh.read()
+    i_call = src.find("expected_exdate_adjustment(t, args.date, cp, mp)")
+    i_gate = src.find("if mismatched:\n        detail =")
+    check("12 cổng gọi classifier", i_call > 0, "không thấy call site")
+    check("12b gọi TRƯỚC khi phát rc=4 (gọi sau thì vô nghĩa)", 0 < i_call < i_gate,
+          "call@%d gate@%d" % (i_call, i_gate))
+    check("12c chỉ áp cho is_today (nhánh lịch sử giữ nguyên hành vi cũ)",
+          "if mismatched and is_today:" in src, "không thấy guard is_today")
+    check("12d mã được giải thích thì BỎ khỏi `mismatched` (NAV chạy tiếp, không rc=4)",
+          "mismatched = [row for row, _ in still_stuck]" in src, "không thấy")
+    check("12e NAV vẫn mark bằng close_price cum (`prices`), KHÔNG thay bằng marketPrice",
+          "mtm_stock = sum(pos[\"qty\"] * prices[t] for t, pos in positions.items())" in src,
+          "công thức mtm_stock đã bị đổi — xem lại §21/cum_dividend_double_count")
+    check("12f ngoại lệ GHÉP CỨNG với cum_dividend_double_count: hàm đó không kết luận được "
+          "(có warning) thì KHÔNG ghi NAV",
+          "if xcheck_exceptions and cum_div.get(\"warnings\"):" in src, "thiếu guard ghép cặp")
+    i_guard = src.find("if xcheck_exceptions and cum_div.get")
+    i_nav = src.find("nav = mtm_stock + cash - debt")
+    check("12g guard đó nằm TRƯỚC lúc tính NAV", 0 < i_guard < i_nav,
+          "guard@%d nav@%d" % (i_guard, i_nav))
+    check("12h dòng NAV đi qua ngoại lệ TỰ KHAI trong snapshot JSON (truy vết được về sau)",
+          '"price_xcheck_exceptions": xcheck_exceptions,' in src, "không ghi dấu vết")
+
+    # ── G. (tuỳ chọn) đường đọc BQ thật ──
+    if "--live" in sys.argv:
+        ok, why = f("DGC", "2026-09-11", 46750, 38750)
+        check("13 LIVE: đọc corp_action_lib.pricing_events thật -> DGC 09-11 EXPECTED", ok, why)
+
+    print("\n%d/%d PASS" % (len(PASS), len(PASS) + len(FAIL)))
+    if FAIL:
+        print("FAILED: " + "; ".join(FAIL))
+        return 2
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

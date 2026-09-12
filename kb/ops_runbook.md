@@ -133,6 +133,31 @@ tái tạo bằng cách chạy lại chính bộ dispatcher.
 | 19:10 | `eod_trading_report.sh` (per account) | Report khớp lệnh + NAV verify-pipeline + đối soát broker≠state | Crash → autofix; kênh Discord hỏng → ĐÃ CÓ fallback Telegram+Trading Daily tự động |
 | Mỗi 10' | `watchdog.sh` | Session Mike sống, macro_health staleness (`staleness_watch.py`) | Tự restart/clear-bridge (có sẵn) |
 
+### NAV bị chặn bởi cổng PRICE_XCHECK (rc=4) — trước khi coi là sự cố
+
+1. Gap `close_price` vs `marketPrice` vị thế **ĐÚNG BẰNG giá trị quyền** của một corp-action có
+   ex-date = **phiên giao dịch KẾ TIẾP** ⇒ là **KỲ VỌNG**, không phải broker stuck: DNSE hạ giá
+   tham chiếu vị thế vào TỐI TRƯỚC ngày ex, BQ/close thì chưa. Ca chuẩn: DGC tối T6 2026-09-11,
+   46.750 vs 38.750, cổ tức tiền 2 đợt (3.000+5.000) ex T2 2026-09-14 — khớp từng đồng.
+2. ⛔ **KHÔNG có tự động — làm TAY, theo thứ tự này** (bản nháp tự nhận diện bị arch-review vòng 2
+   trả NEEDS_CHANGES 2026-09-12, đã gỡ; xem `kb/canonical.md` § DNSE ex-date):
+   a. tra ex-date + giá trị quyền: `tav2_bq.corporate_action` (qua `corp_action_lib.pricing_events`,
+      KHÔNG dùng `events()` executed_only — nó trả RỖNG đúng ngày cần) hoặc
+      `kb/data_registry/price-volume/corp_action_pending.md`;
+   b. **chỉ khi là cổ tức TIỀN MẶT** và `close − Σ cổ tức = marketPrice` (khớp trong 1 bước giá):
+      đây là ca kỳ vọng, không phải sự cố;
+   c. trước khi bỏ qua cổng, PHẢI kiểm bằng tay bất biến của §21: khoản phải thu ĐÃ bị trừ khỏi
+      tiền chưa — `cum_dividend_excl.amount` trong `nav_snapshot_<account>_<date>.json` phải ≈
+      `qty × cổ tức/cp` (ca DGC 09-11: 10.000 × 8.000 = 80.000.000 ✔). Nếu `amount=0` mà
+      `cashDividendReceiving` của broker vẫn còn khoản đó ⇒ **đừng bỏ qua cổng**: NAV sẽ đếm 2 lần
+      đúng bằng cổ tức. NAV đúng mark **giá CUM của phiên đó**, không phải giá broker đã điều chỉnh.
+3. **Sự kiện CỔ PHIẾU (thưởng/trả cổ tức bằng cp/tách): KHÔNG BAO GIỜ bỏ qua cổng.** Broker credit
+   KHỐI LƯỢNG cùng lúc hạ giá (VIB 2026-09-09 19:07: 500→547 và 15.050→13.700), mà nhánh `is_today`
+   không quy đổi ngược qty ⇒ bỏ qua sẽ thổi phồng NAV (VIB +711.100đ, VHM 1:1 +100% vị thế).
+   ⚠️ Lỗ hổng CŨ chưa đóng: sự kiện cổ phiếu tỉ lệ NHỎ (thực đo min 1,03%) làm giá rơi <5% nên cổng
+   PRICE_XCHECK **không bật** — qty credit sớm vẫn thổi NAV mà không ai được cảnh báo.
+4. Mọi ca còn lại xử lý như cũ: `nav_sync_retry.sh` retry tới 21:15 ICT rồi escalate bus question.
+
 ## Nơi kết quả đổ về (đọc mỗi sáng, KHÔNG cần user nhắc)
 
 - **Trading Daily** (1521470705563340910): mọi alert vận hành sống + báo cáo autofix.
