@@ -951,7 +951,8 @@
     "cron `45 5 * * 1-5` ops_health_check.sh",
     "cron `46 3 * * 2,4` bot_execute.py",
     "cron `5 2 * * 1-5` run_bot.sh",
-    "cron `5 6 * * 1-5` bot_execute.py"
+    "cron `5 6 * * 1-5` bot_execute.py",
+    "cron `50 12 * * 1-5` nav_snapshot_daily.sh"
    ],
    "tier": "T0",
    "tier_parent": "trading_bot/brokers.py",
@@ -1307,7 +1308,8 @@
     "cron `45 5 * * 1-5` ops_health_check.sh",
     "cron `46 3 * * 2,4` bot_execute.py",
     "cron `5 2 * * 1-5` run_bot.sh",
-    "cron `5 6 * * 1-5` bot_execute.py"
+    "cron `5 6 * * 1-5` bot_execute.py",
+    "cron `50 12 * * 1-5` nav_snapshot_daily.sh"
    ],
    "tier": "T0",
    "tier_parent": "trading_bot/brokers.py",
@@ -2295,7 +2297,8 @@
     "cron `45 5 * * 1-5` ops_health_check.sh",
     "cron `46 3 * * 2,4` bot_execute.py",
     "cron `5 2 * * 1-5` run_bot.sh",
-    "cron `5 6 * * 1-5` bot_execute.py"
+    "cron `5 6 * * 1-5` bot_execute.py",
+    "cron `50 12 * * 1-5` nav_snapshot_daily.sh"
    ],
    "tier": "T0",
    "tier_parent": "mike/bin/compute_active_nav_all.sh",
@@ -2515,7 +2518,8 @@
     "cron `45 5 * * 1-5` ops_health_check.sh",
     "cron `46 3 * * 2,4` bot_execute.py",
     "cron `5 2 * * 1-5` run_bot.sh",
-    "cron `5 6 * * 1-5` bot_execute.py"
+    "cron `5 6 * * 1-5` bot_execute.py",
+    "cron `50 12 * * 1-5` nav_snapshot_daily.sh"
    ],
    "tier": "T0",
    "tier_parent": "mike/bin/park_holdings.py",
@@ -2601,7 +2605,8 @@
    "parent": "mike/bin/eod_trading_report.sh",
    "roots": [
     "cron `*/15 12-14 * * 1-5` nav_sync_retry.sh",
-    "cron `10 12 * * 1-5` eod_trading_report.sh"
+    "cron `10 12 * * 1-5` eod_trading_report.sh",
+    "cron `50 12 * * 1-5` nav_snapshot_daily.sh"
    ],
    "tier": "T0",
    "tier_parent": "mike/bin/eod_trading_report.sh",
@@ -2702,6 +2707,7 @@
     "cron `5 2 * * 1-5` run_bot.sh",
     "cron `5 6 * * 1-5` bot_execute.py",
     "cron `5 9 * * 1-5` custom30v_rebalance_watch.sh",
+    "cron `50 12 * * 1-5` nav_snapshot_daily.sh",
     "cron `50 7 * * 1-5` session_announce.sh",
     "cron `7 * * * *` consolidate.sh",
     "hook `SessionStart` session_start.sh"
@@ -2927,7 +2933,8 @@
     "cron `45 5 * * 1-5` ops_health_check.sh",
     "cron `46 3 * * 2,4` bot_execute.py",
     "cron `5 2 * * 1-5` run_bot.sh",
-    "cron `5 6 * * 1-5` bot_execute.py"
+    "cron `5 6 * * 1-5` bot_execute.py",
+    "cron `50 12 * * 1-5` nav_snapshot_daily.sh"
    ],
    "tier": "T0",
    "tier_parent": "mike/bin/corp_actions.py",
@@ -3531,6 +3538,39 @@
    "tier_root": null,
    "via": "selfcheck"
   },
+  "mike/bin/nav_snapshot_daily.sh": {
+   "blast_tier": "T0",
+   "depth": 0,
+   "parent": "(root)",
+   "roots": [
+    "cron `50 12 * * 1-5` nav_snapshot_daily.sh"
+   ],
+   "tier": "T0",
+   "tier_parent": "(root)",
+   "tier_root": "cron `50 12 * * 1-5` nav_snapshot_daily.sh",
+   "via": "exec"
+  },
+  "mike/bin/nav_snapshot_daily_selfcheck.sh": {
+   "blast_tier": "T3",
+   "covers": [
+    "mike/bin/daily_nav_snapshot.py",
+    "mike/bin/eod_trading_report.sh",
+    "mike/bin/for_each_live_account.sh",
+    "mike/bin/nav_snapshot_daily.sh",
+    "mike/bin/notify_thread.sh",
+    "trading_bot/__init__.py",
+    "trading_bot/config.py",
+    "trading_bot/vn_market.py",
+    "wc_env.sh"
+   ],
+   "depth": null,
+   "parent": "mike/bin/daily_nav_snapshot.py",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
+  },
   "mike/bin/nav_sync_retry.sh": {
    "blast_tier": "T0",
    "depth": 0,
@@ -3684,6 +3724,7 @@
     "cron `5 2 * * 1-5` run_bot.sh",
     "cron `5 6 * * 1-5` bot_execute.py",
     "cron `5 9 * * 1-5` custom30v_rebalance_watch.sh",
+    "cron `50 12 * * 1-5` nav_snapshot_daily.sh",
     "cron `50 7 * * 1-5` session_announce.sh",
     "hook `SessionStart` session_start.sh"
    ],
@@ -3922,7 +3963,8 @@
     "cron `45 5 * * 1-5` ops_health_check.sh",
     "cron `46 3 * * 2,4` bot_execute.py",
     "cron `5 2 * * 1-5` run_bot.sh",
-    "cron `5 6 * * 1-5` bot_execute.py"
+    "cron `5 6 * * 1-5` bot_execute.py",
+    "cron `50 12 * * 1-5` nav_snapshot_daily.sh"
    ],
    "tier": "T0",
    "tier_parent": "mike/bin/compute_active_nav.py",
@@ -4627,7 +4669,8 @@
     "cron `45 5 * * 1-5` ops_health_check.sh",
     "cron `46 3 * * 2,4` bot_execute.py",
     "cron `5 2 * * 1-5` run_bot.sh",
-    "cron `5 6 * * 1-5` bot_execute.py"
+    "cron `5 6 * * 1-5` bot_execute.py",
+    "cron `50 12 * * 1-5` nav_snapshot_daily.sh"
    ],
    "tier": "T0",
    "tier_parent": "mike/bin/compute_active_nav.py",
@@ -4948,7 +4991,8 @@
     "cron `45 5 * * 1-5` ops_health_check.sh",
     "cron `46 3 * * 2,4` bot_execute.py",
     "cron `5 2 * * 1-5` run_bot.sh",
-    "cron `5 6 * * 1-5` bot_execute.py"
+    "cron `5 6 * * 1-5` bot_execute.py",
+    "cron `50 12 * * 1-5` nav_snapshot_daily.sh"
    ],
    "tier": "T0",
    "tier_parent": "mike/bin/verify_account_snapshot.py",
@@ -5410,7 +5454,8 @@
     "cron `45 5 * * 1-5` ops_health_check.sh",
     "cron `46 3 * * 2,4` bot_execute.py",
     "cron `5 2 * * 1-5` run_bot.sh",
-    "cron `5 6 * * 1-5` bot_execute.py"
+    "cron `5 6 * * 1-5` bot_execute.py",
+    "cron `50 12 * * 1-5` nav_snapshot_daily.sh"
    ],
    "tier": "T0",
    "tier_parent": "trading_bot/brokers.py",
@@ -5462,7 +5507,8 @@
     "cron `45 5 * * 1-5` ops_health_check.sh",
     "cron `46 3 * * 2,4` bot_execute.py",
     "cron `5 2 * * 1-5` run_bot.sh",
-    "cron `5 6 * * 1-5` bot_execute.py"
+    "cron `5 6 * * 1-5` bot_execute.py",
+    "cron `50 12 * * 1-5` nav_snapshot_daily.sh"
    ],
    "tier": "T0",
    "tier_parent": "trading_bot/brokers.py",
@@ -6199,6 +6245,7 @@
     "cron `5 13 * * 1-5` paper_late_feeds.sh",
     "cron `5 2 * * 1-5` run_bot.sh",
     "cron `5 6 * * 1-5` bot_execute.py",
+    "cron `50 12 * * 1-5` nav_snapshot_daily.sh",
     "cron `50 7 * * 1-5` session_announce.sh",
     "cron `52 1 * * 1-5` paper_main_probe_plan.py"
    ],
@@ -6237,7 +6284,8 @@
     "cron `45 5 * * 1-5` ops_health_check.sh",
     "cron `46 3 * * 2,4` bot_execute.py",
     "cron `5 2 * * 1-5` run_bot.sh",
-    "cron `5 6 * * 1-5` bot_execute.py"
+    "cron `5 6 * * 1-5` bot_execute.py",
+    "cron `50 12 * * 1-5` nav_snapshot_daily.sh"
    ],
    "tier": "T0",
    "tier_parent": "mike/bin/compute_active_nav.py",
@@ -6293,6 +6341,7 @@
     "cron `5 13 * * 1-5` paper_late_feeds.sh",
     "cron `5 2 * * 1-5` run_bot.sh",
     "cron `5 6 * * 1-5` bot_execute.py",
+    "cron `50 12 * * 1-5` nav_snapshot_daily.sh",
     "cron `50 7 * * 1-5` session_announce.sh",
     "cron `52 1 * * 1-5` paper_main_probe_plan.py"
    ],
@@ -6589,6 +6638,7 @@
     "cron `46 3 * * 2,4` bot_execute.py",
     "cron `5 2 * * 1-5` run_bot.sh",
     "cron `5 6 * * 1-5` bot_execute.py",
+    "cron `50 12 * * 1-5` nav_snapshot_daily.sh",
     "cron `52 1 * * 1-5` paper_main_probe_plan.py"
    ],
    "tier": "T0",
@@ -6814,6 +6864,7 @@
     "cron `5 2 * * 1-5` run_bot.sh",
     "cron `5 6 * * 1-5` bot_execute.py",
     "cron `5 9 * * 1-5` custom30v_rebalance_watch.sh",
+    "cron `50 12 * * 1-5` nav_snapshot_daily.sh",
     "cron `50 23 * * *` snapshot_corp_action_daily.py"
    ],
    "tier": "T0",
@@ -6822,7 +6873,7 @@
    "via": "exec"
   }
  },
- "generated_at": "2026-09-13T06:16:34Z",
+ "generated_at": "2026-09-13T07:32:58Z",
  "generated_by": "python3 mike/bin/production_manifest.py",
  "roots": [
   {
@@ -7720,6 +7771,16 @@
    "kind": "cron",
    "schedule": "*/15 12-14 * * 1-5",
    "script": "nav_sync_retry.sh",
+   "tier": "T0"
+  },
+  {
+   "command": "/home/trido/thanhdt/WorkingClaude/mike/bin/nav_snapshot_daily.sh >> /home/trido/thanhdt/WorkingClaude/mike/logs/nav_snapshot_daily.log 2>&1",
+   "in_repo_files": [
+    "mike/bin/nav_snapshot_daily.sh"
+   ],
+   "kind": "cron",
+   "schedule": "50 12 * * 1-5",
+   "script": "nav_snapshot_daily.sh",
    "tier": "T0"
   },
   {
