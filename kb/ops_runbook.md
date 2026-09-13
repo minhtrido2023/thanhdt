@@ -133,6 +133,14 @@ tái tạo bằng cách chạy lại chính bộ dispatcher.
 | 19:10 | `eod_trading_report.sh` (per account) | Report khớp lệnh + NAV verify-pipeline + đối soát broker≠state | Crash → autofix; kênh Discord hỏng → ĐÃ CÓ fallback Telegram+Trading Daily tự động |
 | Mỗi 10' | `watchdog.sh` | Session Mike sống, macro_health staleness (`staleness_watch.py`) | Tự restart/clear-bridge (có sẵn) |
 
+### `compute_active_nav.py` exit 5 — account về 0 vị thế (thêm 2026-09-13, commit c9edd4c6)
+Hôm trước có cổ phiếu, hôm nay feed trả 0 vị thế ⇒ script **cố ý dừng exit 5, KHÔNG ghi**
+`active_nav_<account>.json` (file cũ giữ nguyên) — chống feed DNSE rỗng tạm thời ghi NAV thấp giả
+(chỉ tiền+egg, thiếu ~9 lần). Cron `compute_active_nav_all.sh` sẽ log rc=1 cho account đó.
+1. Kiểm `positions` trong `dnse_raw_<hôm nay>.jsonl` mới nhất (lọc account_no, §12).
+2. Feed rỗng tạm ⇒ chạy lại sau vài phút, KHÔNG thêm cờ.
+3. Account THẬT đã bán sạch (đối chiếu fill thật §27) ⇒ `python3 mike/bin/compute_active_nav.py --account <X> --confirm-flat`.
+
 ### NAV bị chặn bởi cổng PRICE_XCHECK (rc=4) — trước khi coi là sự cố
 
 1. Gap `close_price` vs `marketPrice` vị thế **ĐÚNG BẰNG giá trị quyền** của một corp-action có
