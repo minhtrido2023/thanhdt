@@ -550,7 +550,7 @@ kích hoạt gate `dd52≤−20%` trong tháng 9 phụ thuộc diễn biến gi�
 | 2 | Verify fill thật capit_margin_lever lần đầu (sau khi CAPIT signal kích hoạt) | **Spyros** | Khi có fill |
 | 3 | Audit lại §4 chỉ số rủi ro (Taylor tính tạm, chưa qua Spyros) | **Spyros** | 05/09/2026 |
 | 4 | Điều tra nguyên nhân khoảng trống `nav_history` 06,10,27/08 (chưa xác định) | **Winston** | 10/09/2026 |
-| 5 | Bổ sung realized P&L vào `reconcile_equity.py` (residual +2,41% SpaceX hiện tại) | **Taylor** | trước báo cáo tháng 9 |
+| 5 | Bổ sung realized P&L vào `reconcile_equity.py` (residual +2,41% SpaceX hiện tại) — **ĐÃ XONG 2026-09-13** commit `706dec56`, quant-skeptic CONFIRMED (high): residual SpaceX 2,42% → 0,41% NAV; ZaloPay chưa reconcile được (vốn đầu kỳ placeholder, việc riêng) | **Taylor** | trước báo cáo tháng 9 |
 
 ---
 
