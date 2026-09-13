@@ -19,6 +19,9 @@ preserve_verbatim: >
   formula — load-bearing, không phải fluff. Chỉ thêm pointer kb/incidents/, giữ nguyên nội dung.
 ---
 
+## 2026-09-13 — THÊM `50 12 * * 1-5 nav_snapshot_daily.sh` (19:50 ICT) — aria-G, Wags_20260913_064538
+User duyệt 13/09 13:44 ICT. Tách ghi NAV khỏi EOD wrapper: `eod_trading_report.sh` thoát sớm ở case 1 (không plan, `exit $?` ~dòng 243) và case 3 (plan có lệnh, không state, ~dòng 271) trước khi gọi `daily_nav_snapshot.py` (chỉ gọi ở ~249 HOLD và ~595 render đầy đủ) + rc=2 không retry ⇒ 5 phiên thiếu `nav_history` (Taylor aria-A2). §11: (1) đọc DNSE live qua daily_nav_snapshot (ghi hôm nay) + nav_history/marker; (2) nguồn tươi: EOD ghi dòng 19:10:06-40 (8 phiên đo), balances sau đóng cửa có từ 19:07; (3) cần T; (4) consumer = weekly/monthly report, không có deadline tối. Giờ 19:50: 19:35 (telegram_run_daily) và 19:40 (jit_unpark, gọi DNSE) đã chiếm; xong muộn nhất ~20:02 trước compute_active_nav 20:15. EOD giữ nguyên lệnh gọi; idempotency ở wrapper (có dòng ⇒ bỏ qua).
+
 # Log thay đổi Cron Registry
 
 - 2026-09-12 (Wags, job `Wags_20260912_052122`, user duyệt 12:18 ICT): **ĐỔI GIỜ**

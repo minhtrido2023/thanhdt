@@ -131,7 +131,15 @@ tái tạo bằng cách chạy lại chính bộ dispatcher.
 | ~14:50 | phiên đóng (ATC) | Bot tự cancel lệnh treo, ghi `exec_*_report.md` | — (thực thi thật, autofix KHÔNG đụng) |
 | 15:05 | `dc_book_waterfall_paper.py --update` | Paper sleeve DC-book cập nhật | Lỗi → autofix (paper, không chạm tiền thật) |
 | 19:10 | `eod_trading_report.sh` (per account) | Report khớp lệnh + NAV verify-pipeline + đối soát broker≠state | Crash → autofix; kênh Discord hỏng → ĐÃ CÓ fallback Telegram+Trading Daily tự động |
+| 19:50 | `nav_snapshot_daily.sh` (mọi account live) | Đường ghi NAV thứ 2, độc lập EOD: chưa có dòng `nav_history` hôm nay ⇒ gọi `daily_nav_snapshot.py`; có rồi ⇒ bỏ qua | rc=2 tự retry 2×5'; rc=4 ⇒ marker cho `nav_sync_retry`; rc=2 hết retry / rc=3 ⇒ 🔴 Trading Daily, xử lý TAY (xem § NAV thiếu dòng) |
 | Mỗi 10' | `watchdog.sh` | Session Mike sống, macro_health staleness (`staleness_watch.py`) | Tự restart/clear-bridge (có sẵn) |
+
+### NAV thiếu dòng `nav_history` — 2 đường ghi (aria-G, 2026-09-13)
+Đường 1 = `eod_trading_report.sh` 19:10 (chỉ ở case HOLD / render đầy đủ — case không-plan và không-state thoát sớm, KHÔNG ghi NAV). Đường 2 = `nav_snapshot_daily.sh` 19:50: có dòng hôm nay ⇒ bỏ qua; có marker `state/nav_pending_retry/<acct>_<date>.*` ⇒ nhường `nav_sync_retry.sh`. Tin 🔴 từ đường 2:
+1. `rc=2` sau 2 lần retry: đọc `logs/nav_snapshot_daily.log` (thiếu balances/vị thế/giá). Còn trong tối ⇒ chạy tay `mike/bin/nav_snapshot_daily.sh` (idempotent, an toàn chạy lại).
+2. `rc=3` (sanity ±15%): nạp/rút tiền thật? ⇒ xác nhận rồi mới chạy lại với `NAV_SANITY_MAX_PCT` lớn hơn; không thì là lỗi dữ liệu.
+3. ⛔ Sang NGÀY SAU mới phát hiện thiếu ⇒ KHÔNG chạy wrapper/`daily_nav_snapshot.py --date <ngày cũ>` đường live (vị thế broker LIVE ≠ vị thế ngày đó, ghi số sai âm thầm) — backfill bằng `--from-raw` (ghi `nav_is_estimate=True`).
+4. Chạy tay `eod_trading_report.sh` SAU khi đường 2 đã ghi sẽ ghi đè dòng bằng bản đọc mới hơn (đường 1 không có guard, cố ý giữ nguyên) — sau 19:10 dữ liệu đóng cửa đã ổn định nên số phải trùng; lệch ⇒ soi `balance_ts` 2 lần đọc.
 
 ### `compute_active_nav.py` exit 5 — account về 0 vị thế (thêm 2026-09-13, commit c9edd4c6)
 Hôm trước có cổ phiếu, hôm nay feed trả 0 vị thế ⇒ script **cố ý dừng exit 5, KHÔNG ghi**
