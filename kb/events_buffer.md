@@ -903,3 +903,71 @@
 - [2026-09-13T08:04:52Z] Wags/heartbeat — Wags_20260913_075550: {"status": "still_running", "elapsed_min": 9, "job_id": "Wags_20260913_075550", "source": "watcher"}
 - [2026-09-13T08:05:52Z] Wags/heartbeat — Wags_20260913_075550: {"status": "still_running", "elapsed_min": 10, "job_id": "Wags_20260913_075550", "source": "watcher"}
 - [2026-09-13T08:06:53Z] Wags/heartbeat — Wags_20260913_075550: {"status": "still_running", "elapsed_min": 11, "job_id": "Wags_20260913_075550", "source": "watcher"}
+
+## Consolidation 2026-09-13T08:33:45Z
+- [2026-09-13T08:07:51Z] Taylor/heartbeat — Taylor_20260913_075547: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20260913_075547", "source": "watcher"}
+- [2026-09-13T08:08:16Z] Taylor/heartbeat — Taylor_20260913_075547: {"status": "in_progress", "note": "B: replay 12 plan 0 FLIP; selfcheck dong bo viet xong (PASS vá / FAIL chưa vá); dang quet rong §23"}
+- [2026-09-13T08:08:51Z] Taylor/heartbeat — Taylor_20260913_075547: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20260913_075547", "source": "watcher"}
+- [2026-09-13T08:09:51Z] Taylor/heartbeat — Taylor_20260913_075547: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20260913_075547", "source": "watcher"}
+- [2026-09-13T08:10:30Z] Taylor/heartbeat — Taylor_20260913_075547: {"status": "in_progress", "note": "B: sua 2 selfcheck hardcode phi (plan_funding_gate 103/103, plan_cash_commitment 65/65 ca 2 muc phi); dang quet rong §23 trong worktree"}
+- [2026-09-13T08:10:51Z] Taylor/heartbeat — Taylor_20260913_075547: {"status": "still_running", "elapsed_min": 15, "job_id": "Taylor_20260913_075547", "source": "watcher"}
+- [2026-09-13T08:11:51Z] Taylor/heartbeat — Taylor_20260913_075547: {"status": "still_running", "elapsed_min": 16, "job_id": "Taylor_20260913_075547", "source": "watcher"}
+- [2026-09-13T08:12:51Z] Taylor/heartbeat — Taylor_20260913_075547: {"status": "still_running", "elapsed_min": 17, "job_id": "Taylor_20260913_075547", "source": "watcher"}
+- [2026-09-13T08:12:51Z] Taylor/heartbeat — Taylor_20260913_075547: {"status": "in_progress", "note": "B: quet rong 51 selfcheck base vs va trong worktree: 0 khac biet do va (rc + output); dang kiem git apply 2 thu tu"}
+- [2026-09-13T08:13:52Z] Taylor/heartbeat — Taylor_20260913_075547: {"status": "still_running", "elapsed_min": 18, "job_id": "Taylor_20260913_075547", "source": "watcher"}
+- [2026-09-13T08:14:24Z] Taylor/heartbeat — Taylor_20260913_075547: {"status": "in_progress", "note": "attempt2: A da commit 3d6f4265; dang hoan tat patch B"}
+- [2026-09-13T08:14:52Z] Taylor/heartbeat — Taylor_20260913_075547: {"status": "still_running", "elapsed_min": 19, "job_id": "Taylor_20260913_075547", "source": "watcher"}
+- [2026-09-13T08:15:52Z] Taylor/heartbeat — Taylor_20260913_075547: {"status": "still_running", "elapsed_min": 20, "job_id": "Taylor_20260913_075547", "source": "watcher"}
+- [2026-09-13T08:16:52Z] Taylor/heartbeat — Taylor_20260913_075547: {"status": "still_running", "elapsed_min": 21, "job_id": "Taylor_20260913_075547", "source": "watcher"}
+- [2026-09-13T08:17:52Z] Taylor/heartbeat — Taylor_20260913_075547: {"status": "still_running", "elapsed_min": 22, "job_id": "Taylor_20260913_075547", "source": "watcher"}
+- [2026-09-13T08:18:53Z] Taylor/heartbeat — Taylor_20260913_075547: {"status": "still_running", "elapsed_min": 23, "job_id": "Taylor_20260913_075547", "source": "watcher"}
+- [2026-09-13T08:19:53Z] Taylor/heartbeat — Taylor_20260913_075547: {"status": "still_running", "elapsed_min": 24, "job_id": "Taylor_20260913_075547", "source": "watcher"}
+- [2026-09-13T08:20:53Z] Taylor/heartbeat — Taylor_20260913_075547: {"status": "still_running", "elapsed_min": 25, "job_id": "Taylor_20260913_075547", "source": "watcher"}
+- [2026-09-13T08:21:53Z] Taylor/heartbeat — Taylor_20260913_075547: {"status": "still_running", "elapsed_min": 26, "job_id": "Taylor_20260913_075547", "source": "watcher"}
+- [2026-09-13T08:22:54Z] Taylor/heartbeat — Taylor_20260913_075547: {"status": "still_running", "elapsed_min": 27, "job_id": "Taylor_20260913_075547", "source": "watcher"}
+- [2026-09-13T08:23:54Z] Taylor/heartbeat — Taylor_20260913_075547: {"status": "still_running", "elapsed_min": 28, "job_id": "Taylor_20260913_075547", "source": "watcher"}
+- [2026-09-13T08:24:54Z] Taylor/heartbeat — Taylor_20260913_075547: {"status": "still_running", "elapsed_min": 29, "job_id": "Taylor_20260913_075547", "source": "watcher"}
+- [2026-09-13T08:25:54Z] Taylor/heartbeat — Taylor_20260913_075547: {"status": "still_running", "elapsed_min": 30, "job_id": "Taylor_20260913_075547", "source": "watcher"}
+- [2026-09-13T08:26:55Z] Taylor/heartbeat — Taylor_20260913_075547: {"status": "still_running", "elapsed_min": 31, "job_id": "Taylor_20260913_075547", "source": "watcher"}
+- [2026-09-13T08:27:55Z] Taylor/heartbeat — Taylor_20260913_075547: {"status": "still_running", "elapsed_min": 32, "job_id": "Taylor_20260913_075547", "source": "watcher"}
+- [2026-09-13T08:28:55Z] Taylor/heartbeat — Taylor_20260913_075547: {"status": "still_running", "elapsed_min": 33, "job_id": "Taylor_20260913_075547", "source": "watcher"}
+- [2026-09-13T08:29:45Z] Taylor/heartbeat — Taylor_20260913_075547: {"status": "in_progress", "note": "B: sweep base vs patched 0 regression; dang dong goi patch + apply --check 2 thu tu"}
+- [2026-09-13T08:29:55Z] Taylor/heartbeat — Taylor_20260913_075547: {"status": "still_running", "elapsed_min": 34, "job_id": "Taylor_20260913_075547", "source": "watcher"}
+- [2026-09-13T08:30:55Z] Taylor/heartbeat — Taylor_20260913_075547: {"status": "still_running", "elapsed_min": 35, "job_id": "Taylor_20260913_075547", "source": "watcher"}
+- [2026-09-13T08:31:55Z] Taylor/heartbeat — Taylor_20260913_075547: {"status": "still_running", "elapsed_min": 36, "job_id": "Taylor_20260913_075547", "source": "watcher"}
+- [2026-09-13T08:32:56Z] Taylor/heartbeat — Taylor_20260913_075547: {"status": "still_running", "elapsed_min": 37, "job_id": "Taylor_20260913_075547", "source": "watcher"}
+- [2026-09-13T08:33:11Z] Taylor/finding — aria-H-exec-fee-sync: {"job": "Taylor_20260913_075547", "status": "done", "A": {"commit_mike": "3d6f4265", "files": ["bin/merge_park_orders.py fee_est_vnd = proceeds x FEE_RATE_SELL_PCT (import dnse_fee_rates)", "bin/bq_freshness_check.sh prompt DollarBill in so phi tu hang so", "bin/merge_park_orders_selfcheck.py R1-fee (mutation 0.00075 bi giet)"], "selfcheck": "merge_park_orders 121 PASS, approve_plan_with_jit, preflight_order_invariants 16/16, compute_jit_unpark, exdate_price_frame; bash -n OK; shellcheck khong them canh bao"}, "B": {"patch": "agents/Taylor/research/aria_H_20260913/plan_funding_gate_fee.patch", "landed": false, "change": "FEE_RATE 0.00075->0.00097 + comment nguon; plan_cash_commitment docstring; 2 selfcheck neo so theo FEE_RATE", "apply_check": {"HEAD_24df0f76": "OK", "after_v2_then_remove_v23": "OK", "B_first_then_v2_then_remove": "OK"}, "sync_selfcheck": "research/aria_H_20260913/plan_funding_gate_fee_sync_selfcheck.py -> copy vao mike/bin KHI land (tren HEAD chua va FAIL 3/3, co y chua dat vao mike/bin de run_selfchecks khong do)", "selfcheck_after_patch": "plan_funding_gate 103/0 (no-TZ,UTC,NY), plan_cash_commitment 65/0, sync 3/3", "sweep_s23": "74 selfcheck goc WC, HEAD vs HEAD+patch cung moi truong: 0 doi ket qua (FAIL co san 2 phia do worktree thieu secrets/data)", "replay_plan_table": [["SpaceX", "2026-08-17", "OK->OK", "2.4%"], ["SpaceX", "2026-08-14", "OK->OK", "5.7%"], ["SpaceX", "2026-08-13", "OK->OK", "8.1%"], ["SpaceX", "2026-08-12", "OK->OK", "8.5%"], ["SpaceX", "2026-08-11", "OK->OK", "41.6%"], ["SpaceX", "2026-08-10", "OK->OK", "23.1%"], ["ZaloPay", "2026-09-14", "OK->OK", "66.9% need 3,983,861 / pp0Buy 5,956,996 (ppse 09-11)"], ["ZaloPay", "2026-08-14", "OK->OK", "24.2%"], ["ZaloPay", "2026-08-13", "OK->OK", "44.5%"], ["ZaloPay", "2026-08-12", "OK->OK", "38.3->38.4%"], ["ZaloPay", "2026-08-11", "BLOCK->BLOCK", "178.7% khop log that"], ["ZaloPay", "2026-08-10", "OK->OK", "52.8%"]], "flip": "0/12 (6 plan co lenh MUA gan nhat moi account; plan 0 lenh mua PASS hien nhien)", "apply_instructions": "khoi header dau file patch: apply + selfcheck + commit message rieng sau v2/remove"}, "side_note": "immutable_publish_selfcheck.py lot bo loc LIVE trong sweep, chay tren sandbox tav2_bq._ipsc_* (con bang _ipsc_base) - khong phai production, khong lien quan patch", "untouched": "crontab, plan file, trading_rules.json"}
+- [2026-09-13T08:07:14Z] Wags/heartbeat — Wags_20260913_075550: {"status": "in_progress", "note": "mutation 9 ca: 8 KILLED + 1 tuong duong (M8 git log check=False, rev-parse van chan). Dang dry-run that"}
+- [2026-09-13T08:07:53Z] Wags/heartbeat — Wags_20260913_075550: {"status": "still_running", "elapsed_min": 12, "job_id": "Wags_20260913_075550", "source": "watcher"}
+- [2026-09-13T08:08:53Z] Wags/heartbeat — Wags_20260913_075550: {"status": "still_running", "elapsed_min": 13, "job_id": "Wags_20260913_075550", "source": "watcher"}
+- [2026-09-13T08:09:39Z] Wags/heartbeat — Wags_20260913_075550: {"status": "in_progress", "note": "doi gate: goi production_manifest.py --check HEAD thay exec selfcheck (tranh canh gia score_live_signals.py T2)"}
+- [2026-09-13T08:09:53Z] Wags/heartbeat — Wags_20260913_075550: {"status": "still_running", "elapsed_min": 14, "job_id": "Wags_20260913_075550", "source": "watcher"}
+- [2026-09-13T08:10:53Z] Wags/heartbeat — Wags_20260913_075550: {"status": "still_running", "elapsed_min": 15, "job_id": "Wags_20260913_075550", "source": "watcher"}
+- [2026-09-13T08:11:03Z] Wags/heartbeat — Wags_20260913_075550: {"status": "in_progress", "note": "selfcheck 16/16 PASS sau doi gate; chay lai mutation"}
+- [2026-09-13T08:11:53Z] Wags/heartbeat — Wags_20260913_075550: {"status": "still_running", "elapsed_min": 16, "job_id": "Wags_20260913_075550", "source": "watcher"}
+- [2026-09-13T08:12:35Z] Wags/heartbeat — Wags_20260913_075550: {"status": "in_progress", "note": "commit aria-J xong, chay dry-run that + arch-review"}
+- [2026-09-13T08:12:53Z] Wags/heartbeat — Wags_20260913_075550: {"status": "still_running", "elapsed_min": 17, "job_id": "Wags_20260913_075550", "source": "watcher"}
+- [2026-09-13T08:13:54Z] Wags/heartbeat — Wags_20260913_075550: {"status": "still_running", "elapsed_min": 18, "job_id": "Wags_20260913_075550", "source": "watcher"}
+- [2026-09-13T08:14:54Z] Wags/heartbeat — Wags_20260913_075550: {"status": "still_running", "elapsed_min": 19, "job_id": "Wags_20260913_075550", "source": "watcher"}
+- [2026-09-13T08:15:54Z] Wags/heartbeat — Wags_20260913_075550: {"status": "still_running", "elapsed_min": 20, "job_id": "Wags_20260913_075550", "source": "watcher"}
+- [2026-09-13T08:16:54Z] Wags/heartbeat — Wags_20260913_075550: {"status": "still_running", "elapsed_min": 21, "job_id": "Wags_20260913_075550", "source": "watcher"}
+- [2026-09-13T08:17:55Z] Wags/heartbeat — Wags_20260913_075550: {"status": "still_running", "elapsed_min": 22, "job_id": "Wags_20260913_075550", "source": "watcher"}
+- [2026-09-13T08:18:55Z] Wags/heartbeat — Wags_20260913_075550: {"status": "still_running", "elapsed_min": 23, "job_id": "Wags_20260913_075550", "source": "watcher"}
+- [2026-09-13T08:19:55Z] Wags/heartbeat — Wags_20260913_075550: {"status": "still_running", "elapsed_min": 24, "job_id": "Wags_20260913_075550", "source": "watcher"}
+- [2026-09-13T08:20:07Z] Wags/heartbeat — Wags_20260913_075550: {"status": "in_progress", "note": "arch-review vong 1 NEEDS_CHANGES (5 diem); dang sua vong 2"}
+- [2026-09-13T08:20:55Z] Wags/heartbeat — Wags_20260913_075550: {"status": "still_running", "elapsed_min": 25, "job_id": "Wags_20260913_075550", "source": "watcher"}
+- [2026-09-13T08:21:55Z] Wags/heartbeat — Wags_20260913_075550: {"status": "still_running", "elapsed_min": 26, "job_id": "Wags_20260913_075550", "source": "watcher"}
+- [2026-09-13T08:22:55Z] Wags/heartbeat — Wags_20260913_075550: {"status": "still_running", "elapsed_min": 27, "job_id": "Wags_20260913_075550", "source": "watcher"}
+- [2026-09-13T08:23:55Z] Wags/heartbeat — Wags_20260913_075550: {"status": "still_running", "elapsed_min": 28, "job_id": "Wags_20260913_075550", "source": "watcher"}
+- [2026-09-13T08:24:26Z] Wags/heartbeat — Wags_20260913_075550: {"status": "in_progress", "note": "vong 2: selfcheck 20/20 PASS (outer repo, pin, WARN-truoc-DRIFT, E7 chay that fallback). Mutation"}
+- [2026-09-13T08:24:55Z] Wags/heartbeat — Wags_20260913_075550: {"status": "still_running", "elapsed_min": 29, "job_id": "Wags_20260913_075550", "source": "watcher"}
+- [2026-09-13T08:25:56Z] Wags/heartbeat — Wags_20260913_075550: {"status": "still_running", "elapsed_min": 30, "job_id": "Wags_20260913_075550", "source": "watcher"}
+- [2026-09-13T08:26:57Z] Wags/heartbeat — Wags_20260913_075550: {"status": "still_running", "elapsed_min": 31, "job_id": "Wags_20260913_075550", "source": "watcher"}
+- [2026-09-13T08:27:57Z] Wags/heartbeat — Wags_20260913_075550: {"status": "still_running", "elapsed_min": 32, "job_id": "Wags_20260913_075550", "source": "watcher"}
+- [2026-09-13T08:28:57Z] Wags/heartbeat — Wags_20260913_075550: {"status": "still_running", "elapsed_min": 33, "job_id": "Wags_20260913_075550", "source": "watcher"}
+- [2026-09-13T08:29:57Z] Wags/heartbeat — Wags_20260913_075550: {"status": "still_running", "elapsed_min": 34, "job_id": "Wags_20260913_075550", "source": "watcher"}
+- [2026-09-13T08:30:55Z] Wags/heartbeat — Wags_20260913_075550: {"status": "in_progress", "note": "arch-review vong 2 NEEDS_CHANGES (2 diem: fallback set -e chet im khi file cuoi bi xoa/diff rong; chot CQ_CLAUDE). Dang va, khong co vong 3"}
+- [2026-09-13T08:30:58Z] Wags/heartbeat — Wags_20260913_075550: {"status": "still_running", "elapsed_min": 35, "job_id": "Wags_20260913_075550", "source": "watcher"}
+- [2026-09-13T08:31:58Z] Wags/heartbeat — Wags_20260913_075550: {"status": "still_running", "elapsed_min": 36, "job_id": "Wags_20260913_075550", "source": "watcher"}
+- [2026-09-13T08:32:13Z] Wags/heartbeat — Wags_20260913_075550: {"status": "in_progress", "note": "vong 2 va xong, selfcheck 21/21 PASS; mutation cac fix moi"}
+- [2026-09-13T08:32:58Z] Wags/heartbeat — Wags_20260913_075550: {"status": "still_running", "elapsed_min": 37, "job_id": "Wags_20260913_075550", "source": "watcher"}
