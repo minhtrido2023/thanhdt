@@ -182,7 +182,7 @@ if [ "${MIKE_ALLOW_TINY_PROMPT:-0}" != "1" ] && [ "${_prompt_len:-0}" -lt 8 ]; t
   # được viện dẫn ở trên) vẫn luôn mkdir trước khi ghi; nhánh này ban đầu bỏ sót.
   mkdir -p "$(dirname "$_rejlog")" 2>/dev/null || true
   printf '%s\tto=%s\tfrom=%s\tbytes=%s\tprompt=%s\n' \
-    "$(date -Iseconds)" "$id" "${DISPATCH_FROM:-Mike}" "$_prompt_len" "$prompt" \
+    "$(TZ='Asia/Ho_Chi_Minh' date -Iseconds)" "$id" "${DISPATCH_FROM:-Mike}" "$_prompt_len" "$prompt" \
     >> "$_rejlog" 2>/dev/null || true
   exit 1
 fi
@@ -315,7 +315,6 @@ if ! _eff_clamped="$("$ROOT/bin/cli_provider.sh" validate "$PROVIDER" "$id" "$MO
   exit 1
 fi
 [ -n "$_eff_clamped" ] && EFFORT="$_eff_clamped"
-EFFORT_FLAG="--effort $EFFORT"
 
 # Soft nudge, ĐỘNG theo lịch sử (2026-08-10, token-usage audit item #2). Khác nudge fable/
 # smoke-test (tĩnh, in mỗi lần) — nudge tĩnh cho effort=high sẽ bị lờn vì nhiều agent (Taylor)
@@ -1144,9 +1143,9 @@ if [ "$CLI_PROFILE" = "prompt-inline" ]; then
 fi
 
 # Source wc_env.sh so google-cloud-sdk/bin is in PATH (needed by bq CLI + sync_bq_cache verify)
-[ -f "$ROOT/../wc_env.sh" ] && source "$ROOT/../wc_env.sh" 2>/dev/null || true
+[ -f "$WC_ROOT/wc_env.sh" ] && source "$WC_ROOT/wc_env.sh" 2>/dev/null || true
 export BQ_LOCAL_CACHE=data/bq_cache
-if ! python3 "$ROOT/../preflight_bq_cache.py" --offline >/dev/null 2>&1; then
+if ! python3 "$WC_ROOT/preflight_bq_cache.py" --offline >/dev/null 2>&1; then
   echo "WARNING: BQ cache preflight failed — queries will fall back to BQ network" >&2
   unset BQ_LOCAL_CACHE
 fi
@@ -1194,7 +1193,7 @@ if ! _dtid0="${FORCE_TID:-$(_ambient_thread "$id")}"; then
   echo "dispatch: registry Discord hỏng cho override của '$id' — job VẪN CHẠY nhưng KHÔNG có topic Discord (không đoán). Đã ghi logs/notify_thread_errors.log (ops_health_check sẽ báo)." >&2
   mkdir -p "$ROOT/logs"
   printf '%s dispatch: registry Discord HONG cho override cua %q (job cho %s) — job VAN CHAY nhung KHONG co topic, moi thong bao Discord cua job nay bi MAT.\n' \
-    "$(date -Iseconds)" "$id" "${job_id:-<chua-tao>}" >> "$ROOT/logs/notify_thread_errors.log" 2>/dev/null || true
+    "$(TZ='Asia/Ho_Chi_Minh' date -Iseconds)" "$id" "${job_id:-<chua-tao>}" >> "$ROOT/logs/notify_thread_errors.log" 2>/dev/null || true
   _dtid0=""
 fi
 # `--thread` chấp nhận TÊN trong kb/discord_channels.json (vd `--thread architecture`) ngoài
@@ -1528,7 +1527,7 @@ làm lại có chủ đích, đừng âm thầm ghi đè mất công sức cũ m
             _current_maxturns_resume_count _build_argv _emit_full_prompt
   # Chi export SCALAR (bash khong export duoc array — do la ly do _build_argv chay trong con).
   export ROOT WC_ROOT JOBS_DIR job_id from id ts TIMEOUT RETRIES CLAUDE dispatch_prompt logfile prompt \
-         CIRCUIT_DIR CIRCUIT_THRESHOLD CIRCUIT_COOLDOWN MODEL_FLAG EFFORT_FLAG MAX_EXT HB_FRESH_S \
+         CIRCUIT_DIR CIRCUIT_THRESHOLD CIRCUIT_COOLDOWN MAX_EXT HB_FRESH_S \
          MAX_TURNS MAXTURNS_CEILING MODEL EFFORT \
          PROVIDER CLI_BIN AGENT_DIR CLI_SUPPORTS_TURNS CLI_USAGE_PROBE CLI_MAXTURNS_PAT CIRCUIT_KEY CLI_PROFILE \
          PROFILE_PROMPT_FILE
