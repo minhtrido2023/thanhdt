@@ -64,7 +64,7 @@ ROOT_TIER = {
     "compute_active_nav_all.sh": T0, "inject_discretionary_orders.sh": T0,
     "send_plan_report.sh": T0, "preflight_check.sh": T0, "eod_trading_report.sh": T0,
     "park_trim_daily.sh": T0, "jit_unpark_daily.sh": T0, "merge_park_daily.sh": T0,
-    "late_plan_catchup.sh": T0, "nav_sync_retry.sh": T0, "check_report_cadence.sh": T0,
+    "late_plan_catchup.sh": T0, "nav_sync_retry.sh": T0, "nav_snapshot_daily.sh": T0, "check_report_cadence.sh": T0,
     "corp_action_auto_confirm.py": T0, "discretionary_margin_check_exits_daily.sh": T0,
     "bq_freshness_check.sh": T0,  # EOD pipeline + dispatch lập plan
     # T1 — pipeline dữ liệu / regime / feed / paper
