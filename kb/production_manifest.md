@@ -2,14 +2,14 @@
 kind: reference
 title: Production manifest ARIA — tự sinh, ĐỪNG sửa tay
 generated_by: python3 mike/bin/production_manifest.py
-generated_at: 2026-09-13T07:32:58Z
+generated_at: 2026-09-13T08:11:53Z
 ---
 
 # Production manifest (auto-generated — sửa `mike/bin/production_manifest.py`, không sửa file này)
 
 Tái sinh: `cd /home/trido/thanhdt/WorkingClaude && python3 mike/bin/production_manifest.py` · Kiểm drift: `bash mike/bin/production_manifest_selfcheck.sh` (lệch bản commit = FAIL).
 
-**423 file** — T0 money-path **106** · T1 dữ liệu/regime/paper **101** · T2 fleet-ops **65** · T3 selfcheck **151** · gốc: 98 (systemd: ok).
+**427 file** — T0 money-path **107** · T1 dữ liệu/regime/paper **101** · T2 fleet-ops **67** · T3 selfcheck **152** · gốc: 98 (systemd: ok).
 
 Phương pháp: gốc = `crontab -l` + systemd user units + hook `.claude/settings*.json`; đóng bao AST import + tham chiếu exec `*.py|*.sh` resolve ra file có thật, lặp tới điểm bất động. Tầng = nhỏ nhất theo các gốc với tới, KHÔNG đi xuyên entry script của gốc khác (và dispatch.sh với gốc ngoài T2) — tầng blast radius thuần nằm ở `blast_tier` trong JSON. T3 = selfcheck ngoài bao đóng import/exec trực tiếp file T0–T2. Loại trừ: mike_paseo/, wt-*/ (mọi worktree), .claude/worktrees/, venv/__pycache__/node_modules.
 
@@ -66,6 +66,7 @@ Phương pháp: gốc = `crontab -l` + systemd user units + hook `.claude/settin
 | `mike/bin/discretionary_margin_gate.py` | T0 | 1 | exec | cron `20 8 * * 1-5` discretionary_margin_check_exits_daily.sh (+2) |
 | `mike/bin/dispatch.sh` | T0 | 1 | exec | cron `0 12 * * 1-5` bq_freshness_check.sh (+18) |
 | `mike/bin/dividend_adjusted_return.py` | T0 | 2 | import | cron `15 13 * * 1-5` compute_active_nav_all.sh (+27) |
+| `mike/bin/dnse_fee_rates.py` | T0 | 1 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+1) |
 | `mike/bin/dt5g_writer_watch.py` | T0 | 1 | exec | cron `0 12 * * 1-5` bq_freshness_check.sh (+1) |
 | `mike/bin/eod_trading_report.sh` | T0 | 0 | exec | cron `10 12 * * 1-5` eod_trading_report.sh |
 | `mike/bin/extreme_regime_dd_alert.sh` | T0 | 1 | exec | cron `5 2 * * 1-5` run_bot.sh (+1) |
@@ -233,6 +234,7 @@ Phương pháp: gốc = `crontab -l` + systemd user units + hook `.claude/settin
 | `mike/bin/bus_question_housekeeping.py` | T2 | 1 | exec | cron `0 19 * * *` kb_nightly.sh |
 | `mike/bin/ccdb_bridge_drift_check.sh` | T2 | 1 | exec | cron `25 1 * * 1-5` cron_health_check_daily.sh |
 | `mike/bin/cli_provider.sh` | T2 | 2 | exec | cron `*/10 * * * *` resume_pending.py (+7) |
+| `mike/bin/code_quality_scope.py` | T2 | 1 | exec | cron `0 3 * * 0` code_quality_weekly.sh |
 | `mike/bin/code_quality_weekly.sh` | T2 | 0 | exec | cron `0 3 * * 0` code_quality_weekly.sh |
 | `mike/bin/compact_done_watcher.sh` | T2 | 1 | exec | hook `SessionStart` session_start.sh |
 | `mike/bin/consolidate.sh` | T2 | 0 | exec | cron `7 * * * *` consolidate.sh |
@@ -259,6 +261,7 @@ Phương pháp: gốc = `crontab -l` + systemd user units + hook `.claude/settin
 | `mike/bin/ops_health_check.sh` | T2 | 0 | exec | cron `20 1 * * 1-5` ops_health_check.sh (+1) |
 | `mike/bin/ops_health_check_selfcheck.py` | T2 | 1 | exec | cron `0 19 * * *` kb_nightly.sh |
 | `mike/bin/paper_checkpoint_escalation.sh` | T2 | 0 | exec | cron `40 0 * * 2-6` paper_checkpoint_escalation.sh |
+| `mike/bin/production_manifest.py` | T2 | 1 | exec | cron `0 3 * * 0` code_quality_weekly.sh |
 | `mike/bin/publish_context.sh` | T2 | 1 | exec | cron `7 * * * *` consolidate.sh (+1) |
 | `mike/bin/rebuild_context_mini.py` | T2 | 1 | exec | cron `7 * * * *` consolidate.sh |
 | `mike/bin/recap_prev.py` | T2 | 1 | exec | hook `SessionStart` session_start.sh |
@@ -352,6 +355,7 @@ Phương pháp: gốc = `crontab -l` + systemd user units + hook `.claude/settin
 | `mike/bin/circuit_expiry_selfcheck.py` | T3 | - | selfcheck | phủ: mike/bin/dispatch.sh, mike/bin/mike_json.py |
 | `mike/bin/claim_reply_selfcheck.sh` | T3 | - | selfcheck | phủ: mike/bin/jobs.sh, mike/bin/mike_json.py |
 | `mike/bin/cli_provider_selfcheck.sh` | T3 | - | selfcheck | phủ: mike/bin/append_event.sh, mike/bin/consolidate.sh (+4) |
+| `mike/bin/code_quality_weekly_scope_selfcheck.sh` | T3 | - | selfcheck | phủ: mike/bin/code_quality_scope.py, mike/bin/code_quality_weekly.sh (+1) |
 | `mike/bin/commit_collision_gate_selfcheck.py` | T3 | - | selfcheck | phủ: mike/bin/consolidate.sh, mike/bin/cron_health_check_daily.sh (+11) |
 | `mike/bin/compute_active_nav_selfcheck.py` | T3 | - | selfcheck | phủ: mike/bin/compute_active_nav.py, mike/bin/compute_jit_unpark.py (+2) |
 | `mike/bin/compute_jit_unpark_selfcheck.py` | T3 | - | selfcheck | phủ: mike/bin/compute_jit_unpark.py, mike/bin/park_holdings.py |
@@ -375,7 +379,7 @@ Phương pháp: gốc = `crontab -l` + systemd user units + hook `.claude/settin
 | `mike/bin/kb_nightly_backup_selfcheck.py` | T3 | - | selfcheck | phủ: mike/bin/kb_nightly.sh |
 | `mike/bin/kb_nightly_ctxbloat_split_selfcheck.py` | T3 | - | selfcheck | phủ: mike/bin/ctxbloat_fact_check.py, mike/bin/dispatch.sh (+1) |
 | `mike/bin/kb_nightly_phase1_atomic_selfcheck.py` | T3 | - | selfcheck | phủ: mike/bin/kb_nightly.sh |
-| `mike/bin/merge_park_orders_selfcheck.py` | T3 | - | selfcheck | phủ: mike/bin/merge_park_orders.py |
+| `mike/bin/merge_park_orders_selfcheck.py` | T3 | - | selfcheck | phủ: mike/bin/dnse_fee_rates.py, mike/bin/merge_park_orders.py |
 | `mike/bin/mike_json_archive_selfcheck.py` | T3 | - | selfcheck | phủ: mike/bin/mike_json.py |
 | `mike/bin/mike_json_has_event_prefix_selfcheck.py` | T3 | - | selfcheck | phủ: mike/bin/mike_json.py |
 | `mike/bin/nav_cum_dividend_selfcheck.py` | T3 | - | selfcheck | phủ: mike/bin/daily_nav_snapshot.py |
@@ -388,7 +392,7 @@ Phương pháp: gốc = `crontab -l` + systemd user units + hook `.claude/settin
 | `mike/bin/paper_report_render_selfcheck.py` | T3 | - | selfcheck | phủ: mike/bin/paper_programs_daily_report.py |
 | `mike/bin/preempt_wakeup_selfcheck.sh` | T3 | - | selfcheck | phủ: mike/bin/dispatch.sh |
 | `mike/bin/preflight_order_invariants_selfcheck.py` | T3 | - | selfcheck | phủ: mike/bin/preflight_check.sh |
-| `mike/bin/production_manifest_selfcheck.sh` | T3 | - | selfcheck | phủ: mike/bin/jobs.sh |
+| `mike/bin/production_manifest_selfcheck.sh` | T3 | - | selfcheck | phủ: mike/bin/jobs.sh, mike/bin/production_manifest.py |
 | `mike/bin/reconcile_equity_realized_selfcheck.py` | T3 | - | selfcheck | phủ: mike/bin/dividend_adjusted_return.py, mike/bin/verify_account_snapshot.py |
 | `mike/bin/report_delivery_gate_selfcheck.py` | T3 | - | selfcheck | phủ: mike/bin/report_delivery_gate.py |
 | `mike/bin/report_delivery_ledger_selfcheck.py` | T3 | - | selfcheck | phủ: mike/bin/notify_thread.sh, mike/bin/report_delivery_gate.py (+4) |

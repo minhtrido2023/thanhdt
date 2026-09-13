@@ -2218,6 +2218,18 @@
    "tier_root": null,
    "via": "selfcheck"
   },
+  "mike/bin/code_quality_scope.py": {
+   "blast_tier": "T2",
+   "depth": 1,
+   "parent": "mike/bin/code_quality_weekly.sh",
+   "roots": [
+    "cron `0 3 * * 0` code_quality_weekly.sh"
+   ],
+   "tier": "T2",
+   "tier_parent": "mike/bin/code_quality_weekly.sh",
+   "tier_root": "cron `0 3 * * 0` code_quality_weekly.sh",
+   "via": "exec"
+  },
   "mike/bin/code_quality_weekly.sh": {
    "blast_tier": "T2",
    "depth": 0,
@@ -2229,6 +2241,21 @@
    "tier_parent": "(root)",
    "tier_root": "cron `0 3 * * 0` code_quality_weekly.sh",
    "via": "exec"
+  },
+  "mike/bin/code_quality_weekly_scope_selfcheck.sh": {
+   "blast_tier": "T3",
+   "covers": [
+    "mike/bin/code_quality_scope.py",
+    "mike/bin/code_quality_weekly.sh",
+    "mike/bin/production_manifest.py"
+   ],
+   "depth": null,
+   "parent": "mike/bin/code_quality_scope.py",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
   },
   "mike/bin/commit_collision_gate_selfcheck.py": {
    "blast_tier": "T3",
@@ -2941,6 +2968,19 @@
    "tier_root": "cron `15 13 * * 1-5` compute_active_nav_all.sh",
    "via": "import"
   },
+  "mike/bin/dnse_fee_rates.py": {
+   "blast_tier": "T0",
+   "depth": 1,
+   "parent": "mike/bin/bq_freshness_check.sh",
+   "roots": [
+    "cron `0 12 * * 1-5` bq_freshness_check.sh",
+    "cron `20 13 * * 1-5` merge_park_daily.sh"
+   ],
+   "tier": "T0",
+   "tier_parent": "mike/bin/bq_freshness_check.sh",
+   "tier_root": "cron `0 12 * * 1-5` bq_freshness_check.sh",
+   "via": "import"
+  },
   "mike/bin/dt5g_publisher_gate_selfcheck.sh": {
    "blast_tier": "T3",
    "covers": [
@@ -3408,10 +3448,11 @@
   "mike/bin/merge_park_orders_selfcheck.py": {
    "blast_tier": "T3",
    "covers": [
+    "mike/bin/dnse_fee_rates.py",
     "mike/bin/merge_park_orders.py"
    ],
    "depth": null,
-   "parent": "mike/bin/merge_park_orders.py",
+   "parent": "mike/bin/dnse_fee_rates.py",
    "roots": [],
    "tier": "T3",
    "tier_parent": null,
@@ -4021,10 +4062,23 @@
    "tier_root": null,
    "via": "selfcheck"
   },
+  "mike/bin/production_manifest.py": {
+   "blast_tier": "T2",
+   "depth": 1,
+   "parent": "mike/bin/code_quality_weekly.sh",
+   "roots": [
+    "cron `0 3 * * 0` code_quality_weekly.sh"
+   ],
+   "tier": "T2",
+   "tier_parent": "mike/bin/code_quality_weekly.sh",
+   "tier_root": "cron `0 3 * * 0` code_quality_weekly.sh",
+   "via": "exec"
+  },
   "mike/bin/production_manifest_selfcheck.sh": {
    "blast_tier": "T3",
    "covers": [
-    "mike/bin/jobs.sh"
+    "mike/bin/jobs.sh",
+    "mike/bin/production_manifest.py"
    ],
    "depth": null,
    "parent": "mike/bin/jobs.sh",
@@ -6873,7 +6927,7 @@
    "via": "exec"
   }
  },
- "generated_at": "2026-09-13T07:32:58Z",
+ "generated_at": "2026-09-13T08:11:53Z",
  "generated_by": "python3 mike/bin/production_manifest.py",
  "roots": [
   {

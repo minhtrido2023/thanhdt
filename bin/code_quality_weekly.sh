@@ -11,10 +11,13 @@
 # Usage:
 #   code_quality_weekly.sh              # chạy thật
 #   code_quality_weekly.sh --dry-run    # in scope + prompt, KHÔNG gọi claude
+#
+# Scope (việc J ARIA 2026-09-13): file T0-T2 của kb/production_manifest.json có commit 7 ngày
+# (bin/code_quality_scope.py); manifest HEAD lệch thực tế/không đọc được ⇒ WARN + fallback diff 7 ngày + HOT_CORE.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-WORKDIR="/home/trido/thanhdt/WorkingClaude"
+WORKDIR="$(cd "$ROOT/.." && pwd)"  # = /home/trido/thanhdt/WorkingClaude; suy từ ROOT để selfcheck dựng sandbox
 CLAUDE="/home/trido/.local/bin/claude"
 AGENT_DEF="$HOME/.claude/agents/code-reviewer.md"
 REVIEWER_ID="code-reviewer"
@@ -37,6 +40,47 @@ LOG="$ROOT/logs/code_quality_weekly_${TODAY}.log"
 log() { echo "[$(TZ='Asia/Ho_Chi_Minh' date +%Y-%m-%dT%H:%M:%S%z)] $*" | tee -a "$LOG"; }
 log "=== code_quality_weekly START ($TODAY) ==="
 
+# JSON trung gian đi qua file tạm (xem ghi chú §15 ở bước 4) — tạo sớm vì bước scope cũng dùng.
+TMPDIR_CQ="$(mktemp -d)"
+trap 'rm -rf "$TMPDIR_CQ"' EXIT
+
+# --- 0. Nguồn scope: kb/production_manifest.json (việc J ARIA, job Wags_20260913_075550) ---
+# Chỉ dùng bản HEAD của manifest khi nó còn khớp thực tế — đúng phép so bước (3) của
+# production_manifest_selfcheck.sh: tái sinh từ crontab thật rồi `--check` với HEAD (khớp = rc 0).
+# Gọi thẳng generator, KHÔNG exec selfcheck: selfcheck chèn dòng cron giả trỏ score_live_signals.py,
+# nên khi nó với tới được từ gốc cron này thì generator ghi file R&D đó thành T2 production. Probe
+# tự-chứng-minh của selfcheck vẫn chạy ở run_selfchecks.sh. Mọi lỗi ⇒ fail-closed về scope cũ
+# (diff 7 ngày + hot-core round-robin) kèm WARN nêu lý do — không bao giờ im lặng đổi nguồn.
+scope_source="fallback"; scope_reason=""
+hot_file=""; dropped=""
+manifest_f="$TMPDIR_CQ/production_manifest.json"
+check_log="$TMPDIR_CQ/manifest_check.log"
+if ! crontab -l >"$TMPDIR_CQ/crontab" 2>/dev/null; then
+  scope_reason="không đọc được crontab -l — không kiểm được manifest lệch HEAD"
+elif ! git -C "$ROOT" show HEAD:kb/production_manifest.json >"$manifest_f" 2>/dev/null; then
+  scope_reason="không đọc được HEAD:kb/production_manifest.json ở repo mike"
+elif ! (cd "$WORKDIR" && python3 "$ROOT/bin/production_manifest.py" --crontab "$TMPDIR_CQ/crontab" \
+      --check "$manifest_f") >"$check_log" 2>&1; then
+  scope_reason="manifest HEAD lệch thực tế (production_manifest.py --check): $(head -n2 "$check_log" | paste -sd' ' -)"
+elif manifest_scope="$(python3 "$ROOT/bin/code_quality_scope.py" --manifest "$manifest_f" \
+      --wc-root "$WORKDIR" --repo "$WORKDIR" --repo "$ROOT" --since "7 days ago" \
+      --max-files "$MAX_FILES" --dropped-out "$TMPDIR_CQ/manifest_dropped.txt" 2>"$TMPDIR_CQ/scope.err")"; then
+  scope_source="manifest"
+else
+  scope_reason="code_quality_scope.py lỗi: $(tail -n1 "$TMPDIR_CQ/scope.err")"
+fi
+
+if [ "$scope_source" = "manifest" ]; then
+  log "Nguồn scope: MANIFEST (HEAD kb/production_manifest.json, T0-T2 có commit 7 ngày, T0 trước). $(cat "$TMPDIR_CQ/scope.err")"
+  full_scope="$manifest_scope"
+  dropped="$(cat "$TMPDIR_CQ/manifest_dropped.txt")"
+  if [ -n "$dropped" ]; then
+    log "TRẦN $MAX_FILES FILE VƯỢT — file bị rớt (KHÔNG bị quét tuần này):"
+    printf '%s\n' "$dropped" | while read -r f; do [ -n "$f" ] && log "  DROPPED: $f"; done
+  fi
+else
+  log "WARN: nguồn scope = FALLBACK danh sách cũ (diff 7 ngày + HOT_CORE) — $scope_reason"
+# (nhánh fallback = logic scope cũ, giữ nguyên không thụt lề để diff/blame còn đọc được)
 # --- 1. Scope: diff 7 ngày (2 repo), lọc .py/.sh, trừ danh sách loại trừ (khớp pyproject.toml
 # §3 của plan) ---
 EXCLUDE_RE='(^|/)test_[^/]*\.py$|(^|/)(exp|probe|stress)_[^/]*\.py$|(^|/)agents/[^/]*/research/|(^|/)archive/|(^|/)wc_venv/'
@@ -104,15 +148,28 @@ if [ "$n_total" -gt "$MAX_FILES" ]; then
   log "TRẦN $MAX_FILES FILE VƯỢT — $((n_total - MAX_FILES)) file bị rớt (KHÔNG bị quét tuần này):"
   printf '%s\n' "$dropped" | while read -r f; do [ -n "$f" ] && log "  DROPPED: $f"; done
 fi
+fi  # hết nhánh fallback
 
 n_scoped=$(printf '%s\n' "$full_scope" | grep -c . || true)
-log "Scope tuần này: $n_scoped file (hot-core round-robin: $hot_file)"
-printf '%s\n' "$full_scope" | while read -r f; do [ -n "$f" ] && log "  - $f"; done
+if [ "$scope_source" = "manifest" ]; then
+  scope_label="nguồn manifest T0-T2, T0 xếp đầu"
+  focus_line="Danh sách đã xếp theo tầng production (T0 money-path trước) — xem kỹ nhất các file đầu danh sách."
+else
+  scope_label="nguồn FALLBACK diff 7 ngày ($scope_reason); hot-core round-robin: $hot_file"
+  focus_line="File hot-core được chọn round-robin tuần này (xem kỹ hơn các file khác): $hot_file"
+fi
+log "Scope tuần này: $n_scoped file ($scope_label)"
+# `[ -z ] ||` chứ không `[ -n ] &&`: scope rỗng (hợp lệ ở nguồn manifest) ⇒ vòng trả 1 ⇒ set -e giết script
+printf '%s\n' "$full_scope" | while read -r f; do [ -z "$f" ] || log "  - $f"; done
 
 if [ "$n_scoped" -eq 0 ]; then
-  log "0 file trong scope (không có thay đổi 7 ngày qua, hot-core rỗng lạ) — thoát, không gọi claude."
+  log "0 file trong scope ($scope_label) — thoát, không gọi claude."
+  # nguồn manifest: tuần không có commit T0-T2 là hợp lệ; fallback luôn có hot-core nên rỗng = lạ
+  [ -n "$dry" ] && exit 0
+  empty_note="không có file T0-T2 nào có commit 7 ngày qua"
+  [ "$scope_source" = "manifest" ] || empty_note="scope rỗng bất thường, kiểm lại _diff_files"
   "$ROOT/bin/append_event.sh" "$REVIEWER_ID" status "code-quality-weekly-$TODAY" \
-    "{\"n_files_scanned\":0,\"n_findings\":0,\"note\":\"scope rỗng bất thường, kiểm lại _diff_files\"}" >/dev/null
+    "{\"n_files_scanned\":0,\"n_findings\":0,\"note\":\"$empty_note\"}" >/dev/null
   exit 0
 fi
 
@@ -126,8 +183,7 @@ $agent_body
 ## Nhiệm vụ lượt này (code_quality_weekly.sh, tự động, $TODAY)
 
 Review đúng $n_scoped file dưới đây. Với MỖI file, đọc thật (Read tool), áp toàn bộ method +
-4 check chuyên biệt ở trên. File hot-core được chọn round-robin tuần này (xem kỹ hơn các file
-khác): $hot_file
+4 check chuyên biệt ở trên. $focus_line
 
 Danh sách file:
 $full_scope
@@ -191,8 +247,6 @@ PY
 # Toàn bộ JSON trung gian đi qua FILE TẠM, không nhúng qua bash string interpolation vào
 # python -c (bài học §15/dispatch-prompt-heredoc: JSON thật có thể chứa ', ", `, và có thể
 # vượt ARG_MAX — file + argv path luôn an toàn, interpolation không bao giờ an toàn).
-TMPDIR_CQ="$(mktemp -d)"
-trap 'rm -rf "$TMPDIR_CQ"' EXIT
 findings_raw_f="$TMPDIR_CQ/findings_raw.json"
 printf '%s' "$findings_json" > "$findings_raw_f"
 
@@ -281,13 +335,13 @@ log "Sau verify: $n_final finding còn lại (từ $n_findings thô)."
 
 # --- 6. Ghi báo cáo + bus + Discord ---
 report_file="$REPORT_DIR/code_quality_${TODAY}.md"
-python3 - "$verified_f" "$report_file" "$TODAY" "$n_scoped" "$hot_file" <<'PY'
+python3 - "$verified_f" "$report_file" "$TODAY" "$n_scoped" "$scope_label" <<'PY'
 import json, sys
-data_f, out, today, n_scoped, hot_file = sys.argv[1:6]
+data_f, out, today, n_scoped, scope_label = sys.argv[1:6]
 d = json.load(open(data_f))
 findings = d.get("findings", [])
 lines = [f"# Code quality weekly — {today}", "",
-         f"File đã quét: {n_scoped} (hot-core tuần này: `{hot_file}`)",
+         f"File đã quét: {n_scoped} ({scope_label})",
          f"Finding: {len(findings)}" + (f" (từ {d.get('n_before_verify')} trước verify)" if d.get("n_before_verify") else ""),
          ""]
 if not findings:
@@ -311,14 +365,15 @@ log "Báo cáo: $report_file"
 
 dropped_f="$TMPDIR_CQ/dropped.txt"
 printf '%s\n' "$dropped" > "$dropped_f"
-event_payload="$(python3 - "$verified_f" "$n_scoped" "$hot_file" "$report_file" "$dropped_f" <<'PY'
+event_payload="$(python3 - "$verified_f" "$n_scoped" "$hot_file" "$report_file" "$dropped_f" "$scope_source" "$scope_reason" <<'PY'
 import json, sys
-verified_f, n_scoped, hot_file, report_file, dropped_f = sys.argv[1:6]
+verified_f, n_scoped, hot_file, report_file, dropped_f, scope_source, scope_reason = sys.argv[1:8]
 d = json.load(open(verified_f))
 dropped_list = [l for l in open(dropped_f, encoding="utf-8").read().splitlines() if l]
 print(json.dumps({
     "n_files_scanned": int(n_scoped), "n_findings": len(d.get("findings", [])),
-    "n_before_verify": d.get("n_before_verify"), "hot_core_this_week": hot_file,
+    "n_before_verify": d.get("n_before_verify"), "hot_core_this_week": hot_file or None,
+    "scope_source": scope_source, "scope_fallback_reason": scope_reason or None,
     "report_file": report_file, "dropped_from_scope": dropped_list,
 }, ensure_ascii=False))
 PY
