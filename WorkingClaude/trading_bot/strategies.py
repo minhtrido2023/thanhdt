@@ -389,6 +389,8 @@ class V23Strategy(StrategyBase):
 
         # NAV thật & scale
         account_nav = broker.get_nav()
+        if getattr(broker, "nav_basis_note", None):
+            notes.append(broker.nav_basis_note)
         real_pos = broker.get_positions()
         scale = account_nav / paper["nav"] if paper["nav"] > 0 else 0.0
         # Field CSV đổi tên 2026-07-11 (audit Taylor_20260711_031821 F2): giá BQ của ngày
