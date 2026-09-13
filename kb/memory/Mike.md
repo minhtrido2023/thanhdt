@@ -36,3 +36,4 @@ selfcheck bền c/e, job_cancel_guard SKIP khi không có user bus). Hạn commi
 ## append_event.sh JSON isolation — pattern đã biết, không escalate.
 ## Sát ngưỡng OKF: kb/coding_guidelines.md 39,5KB/40KB — §-mới PHẢI tách _ext.md.
 
+- [2026-09-13T05:28:26Z] 13/09 review ARIA (user gửi): đã đối chiếu, file agents/Mike/research/aria_review_response_20260913.md. 2 gap số liệu CHƯA ai theo dõi: reconcile_equity.py thiếu realized P&L (residual +2,41% SpaceX) + nav_history thiếu SpaceX 6 phiên/ZaloPay 5 phiên. Chờ user chọn A-E.
