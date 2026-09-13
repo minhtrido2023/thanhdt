@@ -21,7 +21,6 @@
     "deploy_v2g_pe3c_s3.py": 1,
     "dt4_decision_review.py": 1,
     "eod_monitor.py": 1,
-    "fetch_new_listings.py": 2,
     "freshness_ops_selfcheck.py": 3,
     "lag_liq_signal_filter_selfcheck.py": 1,
     "lag_live_schedule_selfcheck.py": 1,
