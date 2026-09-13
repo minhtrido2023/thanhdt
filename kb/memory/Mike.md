@@ -21,11 +21,18 @@ Batch 1: #3+#2 ĐÃ COMMIT WC 24df0f76 (cờ nav_include_egg_offbook OFF). Worki
      v2 = v1 (bỏ ghi gói lên client dùng chung) + fix gốc _profile_default_lp (broker không truyền gói ⇒ tra
      profile theo account_id; SpaceX 1841, ZaloPay giữ 1258 từng byte). arch-review 2 vòng APPROVE.
      Rollback: v1 = cq20260913_batch1_item1.patch (vẫn apply --check OK).
-  1b) SAU v2: apply agents/Taylor/research/cq20260913_remove_v23.patch (user duyệt GỠ HẲN v23 13:46 13/09,
-      job Taylor_20260913_064725 đang soạn, patch-only). Gỡ bot_prepare_plan.py (archive/) + V23Strategy +
-      get_nav shadow #2 + key nav_include_egg_offbook. Làm theo khối cuối patch (có git mv archive tay).
-      Lý do: bot_prepare_plan không --account GHI ĐÈ plan live SpaceX/ZaloPay bằng plan vô nghĩa.
-      Đóng luôn mục retro 08-19 'bot_prepare_plan bug2 plan phantom'. Patch không đạt ⇒ chỉ apply v2.
+  1b) SAU v2 — PATCH GỠ v23 SẴN SÀNG (Taylor_20260913_064725, mike 2a067741, arch-review 2 vòng APPROVE,
+      Mike verify 14:22: apply v2 → remove_v23 --check OK trên worktree tạm; working tree thật SẠCH):
+      a) `git -C /home/trido/thanhdt apply --index <.../cq20260913_remove_v23.patch>` — BẮT BUỘC --index (2 rename
+         archive/: bot_prepare_plan.py, capit_exit_floor_selfcheck.py). Selfcheck + commit theo khối cuối patch.
+      b) apply agents/Taylor/research/cq20260913_remove_v23_mike_docs.patch vào mike repo (DollarBill/CLAUDE.md
+         82+86, MIKE_ext.md:90, kb/coding_guidelines_ext.md:27 — chỉ text).
+      c) chạy mike/bin/production_manifest.py cho mất entry capit_exit_floor_selfcheck (hiện chỉ WARN).
+      Mike đã soi: bot_execute.py chỉ đổi 1 thông điệp + 1 comment (không logic); capit_exit_floor guard CHỈ
+      nằm trong V23Strategy.build_plan diff step (strategies.py:485/495) ⇒ gỡ cùng đường chết, không mất
+      coverage live. test_trading_bot.py FAIL giống hệt trước/sau (có sẵn). Gỡ xong ⇒ đóng retro 08-19 bug2.
+      Câu hỏi mở KHÔNG chặn: plan V2.4 DollarBill có tránh bán nhầm phần custom30V khi đóng CAPIT cùng mã
+      không (guard cũ chưa bao giờ bảo vệ plan live) — cân nhắc kiểm sau.
   2) dispatch Wags quét ~28 file bin/*.py dirname×3 → wc_paths.
 Rò 1258 SpaceX (Taylor_20260913_055125, Mike đếm lại): KHÔNG ảnh hưởng tiền — 160 lệnh SpaceX 07→09 =
 {1841:78, 1122:82}, 0 lệnh/ppse 1258; nguồn discretionary_accumulation_inject.py:116. v2 đóng ca này.

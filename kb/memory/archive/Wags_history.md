@@ -276,3 +276,6 @@ BAI HOC 2: dang DINH CHINH mot question dang mo phai dung event_type=finding —
 
 ## Archived 2026-09-13 (keep=12 days=0 require_done=False)
 - [2026-08-28T01:26:40Z] [2026-08-28] coord-2026-08-28: 4 question '-needs-taylor' (08-27) nam im 19h vi checker chi biet dispatch Wags. Da dispatch Taylor_20260828_012307 (4 muc, BAF urgent) + commit 790bb1a9 them dong owner-hint [WARN-ONLY] vao ops_health_check.sh. DANG CHO: Taylor post 4 event answer giu nguyen topic goc. NEXT: neu Taylor xong ma cau hoi chua dong -> tu dong bang answer/close_bus_question.py.
+
+## Archived 2026-09-13 (keep=12 days=0 require_done=False)
+- [2026-08-28T01:51:46Z] [2026-08-28] coord Taylor batch-triage 08-27: 4/4 questions dong (2 FIXED full, 2 partial). CHO USER: (a) BAF universe_pit_quality retro-update DML 1119 dong - option A/B/C; (b) capit-lever 2 FAIL con lai can mo permission classifier. Khong con viec Wags phai lam tiep, chi cho quyet dinh user.
