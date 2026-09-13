@@ -15,11 +15,9 @@ calls) — no re-derivation, so no duplicate-formula risk on that side.
 Usage: python3 hit_details.py [DATE]   (default: latest golive_v23_recommendations_*.csv)
 Output: data/hit_details_<DATE>.md
 """
-import os, sys, glob, json
+import os, sys, glob
 from datetime import datetime, timedelta
-from zoneinfo import ZoneInfo
 
-_ICT = ZoneInfo("Asia/Ho_Chi_Minh")
 WORKDIR = "/home/trido/thanhdt/WorkingClaude"
 os.chdir(WORKDIR); sys.path.insert(0, WORKDIR)
 os.environ.pop("BQ_LOCAL_CACHE", None)   # same reasoning as golive_recommend_v23.py: read live

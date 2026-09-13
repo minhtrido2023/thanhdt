@@ -17,6 +17,7 @@ Usage: python3 indicator_monitor.py [DATE]  (DATE optional, informational only �
 always reads the LATEST row per table, since that's what live screening reads)
 Output: data/indicator_monitor_<DATE>.md
 """
+import ast
 import os, sys
 from datetime import datetime
 from zoneinfo import ZoneInfo
@@ -31,10 +32,32 @@ from simulate_holistic_nav import bq
 
 DATADIR = os.path.join(WORKDIR, "data")
 
-# same column list as hit_details.py's BAL_COLS (signal_v11_sql.py `ta` inputs)
+# same column list as hit_details.py's BAL_COLS (signal_v11_sql.py `ta` inputs) — checked for
+# drift below (_check_bal_cols_in_sync) by parsing hit_details.py's source, without importing
+# it (importing would pull in its BQ/lag_live_schedule pipeline).
 BAL_COLS = ["Close", "D_RSI", "MA20", "MA50", "MA200", "MA50_T1", "Close_T1", "Volume",
             "Volume_3M_P50", "D_MACDdiff", "D_RSI_Max1W", "HI_3M_T1", "ID_HI_3Y",
             "PE", "PE_MA5Y", "PE_SD5Y", "FSCORE", "NP_P0", "NP_P1", "NP_P4", "ICB_Code"]
+
+
+def _check_bal_cols_in_sync():
+    hit_details_path = os.path.join(WORKDIR, "hit_details.py")
+    tree = ast.parse(open(hit_details_path, encoding="utf-8").read())
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Assign) and any(
+            isinstance(t, ast.Name) and t.id == "BAL_COLS" for t in node.targets
+        ):
+            other = ast.literal_eval(node.value)
+            if other != BAL_COLS:
+                sys.exit(
+                    "BAL_COLS lệch giữa indicator_monitor.py và hit_details.py — "
+                    "cập nhật cả hai file cho khớp trước khi chạy tiếp."
+                )
+            return
+    sys.exit(f"Không tìm thấy BAL_COLS trong {hit_details_path} — kiểm tra lại tên biến.")
+
+
+_check_bal_cols_in_sync()
 
 # rating_8l.py MAIN_SQL columns (ticker_1m, latest date) — golden-floor half = ROE_Min3Y
 RATING_MAIN_COLS = ["ROIC3Y", "ROIC_Min3Y", "ROE_Min3Y", "ROIC_Trailing", "ROIC5Y",
@@ -81,7 +104,6 @@ def main():
     uni = fetch_universe_and_bal()
     if uni.empty:
         sys.exit("Universe (ticker_1m latest date, liq>=1e9) rỗng — kiểm tra freshness BQ trước.")
-    asof = None  # informational only
 
     fin = fetch_rating_fin(uni["ticker"].tolist())
     fin_idx = fin.set_index("ticker") if len(fin) else pd.DataFrame()

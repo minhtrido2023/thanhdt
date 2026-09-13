@@ -3,7 +3,9 @@ fetch_new_listings.py — Winston daily feed: new listings on HOSE/HNX/UPCOM
 
 Output:
   data/new_listings.csv          — all new listings since LOOKBACK_DAYS, with 8L research flag
-  data/new_listings_history.csv  — append-only running log
+  data/new_listings_history.csv  — running log, deduped by (ticker, listing_date); a re-fetch
+                                    overwrites fetched_date/exchange/etc. for an existing pair,
+                                    it does not keep every historical fetch as a separate row
 
 Cron: runs daily after market close (18:30 ICT) via crontab managed by Winston.
 Bus: posts findings to mike-fleet event bus via append_event.sh.
@@ -15,7 +17,8 @@ import os
 import json
 import logging
 import warnings
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
+from zoneinfo import ZoneInfo
 
 import pandas as pd
 
@@ -37,6 +40,8 @@ warnings.filterwarnings("ignore")
 # vốn trùng lặp với chẩn đoán do chính ta phát ra.
 for _lg in ("vnstock", "vnstock.core.utils.client", "vnstock.explorer"):
     logging.getLogger(_lg).setLevel(logging.CRITICAL)
+
+_ICT = ZoneInfo("Asia/Ho_Chi_Minh")
 
 BQ_PROJECT = "lithe-record-440915-m9"
 
@@ -61,11 +66,12 @@ def bq(sql: str) -> pd.DataFrame:
 
 def get_new_tickers_from_bq(lookback_days: int) -> pd.DataFrame:
     """Find tickers whose first BQ data date is within lookback_days from today."""
-    cutoff = (date.today() - timedelta(days=lookback_days)).isoformat()
+    cutoff = (datetime.now(_ICT).date() - timedelta(days=lookback_days)).isoformat()
     sql = f"""
-SELECT t.ticker, MIN(t.time) AS listing_date, t.ICB_Code
+SELECT t.ticker, MIN(t.time) AS listing_date,
+  ARRAY_AGG(t.ICB_Code ORDER BY t.time DESC LIMIT 1)[OFFSET(0)] AS ICB_Code
 FROM `tav2_bq.ticker` AS t
-GROUP BY t.ticker, t.ICB_Code
+GROUP BY t.ticker
 HAVING MIN(t.time) >= "{cutoff}"
 ORDER BY MIN(t.time) DESC
 """
@@ -159,15 +165,17 @@ def prospectus_search_url(ticker: str, exchange) -> str:
 def append_event(event_type: str, subject: str, payload: dict) -> None:
     """Post event to fleet bus."""
     payload_str = json.dumps(payload, ensure_ascii=False)
-    subprocess.run(
+    r = subprocess.run(
         [APPEND_EVENT, "Winston", event_type, subject, payload_str],
         capture_output=True,
         text=True,
     )
+    if r.returncode != 0:
+        print(f"[WARN] append_event.sh returncode={r.returncode}: {r.stderr.strip()}", file=sys.stderr)
 
 
 def main():
-    today_str = date.today().isoformat()
+    today_str = datetime.now(_ICT).date().isoformat()
     print(f"[fetch_new_listings] {today_str} — lookback {LOOKBACK_DAYS} days")
 
     # --- 1. Detect new tickers from BQ ---

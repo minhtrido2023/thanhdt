@@ -97,7 +97,8 @@ def capit_edge_health(k_recent=4):
     MAX capit carve. The allocator should not raise capit carve above this until edge confirms."""
     try:
         ev = pd.read_csv(CAPF)
-    except Exception:
+    except Exception as e:
+        print(f"[capit-edge] skipped: {e}")
         return None
     r = ev["FIX60_ret"].astype(float)
     full_mean = r.mean(); full_hit = (r > 0).mean()
