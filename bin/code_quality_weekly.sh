@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 # code_quality_weekly.sh — Tầng 2 của kb/projects/code-quality-review-plan-20260823.md.
 #
-# READ-ONLY, 1 lần/tuần (dự kiến cron Chủ Nhật 10:00 ICT — CHƯA bật, chạy tay tuần đầu theo
-# plan §8 tuần 2). Tính scope BẰNG MÁY (diff 7 ngày + 1 hot-core file round-robin, trần 25
+# READ-ONLY, 1 lần/tuần (cron Chủ Nhật 10:00 ICT = `0 3 * * 0` UTC). Tính scope BẰNG MÁY (diff 7 ngày + 1 hot-core file round-robin, trần 25
 # file), gọi native agent `code-reviewer` (headless, giống cơ chế verify_finding.sh gọi
 # quant-skeptic — claude -p trực tiếp, KHÔNG qua dispatch.sh vì code-reviewer không có
 # agents/<id>/ home dir), rồi 1 lượt phản biện độc lập cho finding severity >= medium trước
@@ -92,7 +91,8 @@ elif ! (cd "$WORKDIR" && python3 "$ROOT/bin/production_manifest.py" --crontab "$
       --check "$manifest_f") >"$check_log" 2>&1; then
   # bỏ dòng WARN (T3 vào/rời) generator in TRƯỚC khối DRIFT — không thì lý do thật bị che. awk chứ
   # không `grep -v | head`: grep rc=1 (toàn WARN) / SIGPIPE + pipefail trong phép gán ⇒ set -e giết script
-  scope_reason="manifest HEAD lệch thực tế (production_manifest.py --check): $(awk '!/^WARN/ && n<3 {print; n++}' "$check_log" | paste -sd' ' -)"
+  detail="$(awk '!/^WARN/ && n<3 {print; n++}' "$check_log" | paste -sd' ' -)"
+  scope_reason="manifest HEAD lệch thực tế (production_manifest.py --check): ${detail:-rc≠0, chỉ có dòng WARN}"
 elif manifest_scope="$(python3 "$ROOT/bin/code_quality_scope.py" --manifest "$manifest_f" \
       --wc-root "$WORKDIR" --repo "$WORKDIR" --repo "$ROOT" --since "7 days ago" \
       --max-files "$MAX_FILES" --dropped-out "$TMPDIR_CQ/manifest_dropped.txt" --pin "$hot_file" \
@@ -128,14 +128,17 @@ _diff_files() {
   # `-- .` khoá pathspec vào $repo: nếu $repo là thư mục con của 1 toplevel lớn hơn (đúng ca
   # WorkingClaude/ ⊂ toplevel /home/trido/thanhdt), `git log` KHÔNG có pathspec sẽ quét commit
   # chạm bất kỳ đâu trong toplevel, không chỉ $repo.
+  # arch-review aria-J vòng 2: grep rc=1 (diff rỗng/toàn file loại trừ) và `[ -f ] && echo` là lệnh
+  # cuối vòng (file cuối theo sort đã bị xoá/đổi tên) + pipefail trong phép gán ⇒ set -e giết script
+  # IM sau dòng WARN, trước bus/Discord. Nhánh này chạy đúng lúc manifest lệch nên phải sống.
   (cd "$repo" && git log --since="7 days ago" --name-only --pretty=format: -- . 2>/dev/null \
-    | grep -E '\.(py|sh)$' | grep -vE "$EXCLUDE_RE" | sort -u \
-    | while read -r f; do [ -f "$toplevel/$f" ] && echo "$toplevel/$f"; done)
+    | { grep -E '\.(py|sh)$' || true; } | { grep -vE "$EXCLUDE_RE" || true; } | sort -u \
+    | while read -r f; do [ ! -f "$toplevel/$f" ] || echo "$toplevel/$f"; done)
 }
 
 diff_wc="$(_diff_files "$WORKDIR")"
 diff_mike="$(_diff_files "$ROOT")"
-scope_files="$(printf '%s\n%s\n' "$diff_wc" "$diff_mike" | grep -v '^$' | sort -u)"
+scope_files="$(printf '%s\n%s\n' "$diff_wc" "$diff_mike" | { grep -v '^$' || true; } | sort -u)"
 
 full_scope="$(printf '%s\n%s\n' "$scope_files" "$hot_file" | grep -v '^$' | sort -u)"
 n_total=$(printf '%s\n' "$full_scope" | grep -c . || true)

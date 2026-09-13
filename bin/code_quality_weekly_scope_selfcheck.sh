@@ -9,7 +9,8 @@
 #        hot-core, T3/T? bị loại, map path WC-là-thư-mục-con, manifest/git hỏng ⇒ exit 3.
 #   E* = bản sao code_quality_weekly.sh: --check khớp ⇒ nguồn manifest (+hot-core); lệch (kể cả
 #        WARN in trước DRIFT)/crontab lỗi/HEAD thiếu/HEAD hỏng ⇒ WARN + fallback danh sách cũ; scope
-#        rỗng hợp lệ; chạy thật nhánh fallback ⇒ dòng Discord gắn cờ FALLBACK; dry-run không ghi bus.
+#        rỗng hợp lệ; chạy thật nhánh fallback ⇒ dòng Discord gắn cờ FALLBACK (kể cả khi file cuối
+#        theo sort đã bị xoá / diff 1 repo toàn file loại trừ); dry-run không ghi bus.
 # Tự chứng minh harness còn sống (bài học 2026-08-29): bản sao phải trùng byte bản thật, generator
 # giả phải thật sự được gọi, nới cửa sổ thì file cũ PHẢI xuất hiện, claude giả phải được gọi ở ca
 # chạy thật (và KHÔNG ở ca scope rỗng).
@@ -37,6 +38,10 @@ g "$OUT" add -A; commit_at "$OUT" 10 old
 for f in a_t0.py z_t0.py b_t1.py c_t2.sh d_selfcheck.py e_unk.py research_x.py; do echo x >"$WC/$f"; done
 echo x >"$OUT/outside_wc.py"   # commit mới NGOÀI WC — không được lọt scope
 g "$OUT" add -A; commit_at "$OUT" 1 recent
+# file đứng CUỐI theo sort có commit trong cửa sổ nhưng đã bị xoá — ca A arch-review vòng 2: nhánh
+# fallback cũ chết im dưới set -e (`[ -f ] && echo` là lệnh cuối vòng). Mọi lượt fallback đi qua ca này.
+echo x >"$WC/zzz_gone.py"; g "$OUT" add -A; commit_at "$OUT" 1 gone-add
+g "$OUT" rm -q WC/zzz_gone.py; commit_at "$OUT" 1 gone-rm
 
 cp "$MIKE/bin/code_quality_weekly.sh" "$MIKE/bin/code_quality_scope.py" "$M/bin/"
 # generator giả chỉ đóng vai `--check`, điều khiển bằng $M/sc_mode: pass=khớp; fail=WARN in TRƯỚC khối
@@ -68,12 +73,18 @@ cat >"$M/kb/production_manifest.json" <<'EOF'
  "trading_bot/plan.py": {"tier": "T0"}}}
 EOF
 g "$M" add -A; commit_at "$M" 10 base
+MBASE="$(git -C "$M" rev-parse HEAD)"
 echo x >"$M/bin/g_t0.sh"; g "$M" add -A; commit_at "$M" 1 recent
 
 cmp -s "$M/bin/code_quality_weekly.sh" "$MIKE/bin/code_quality_weekly.sh" \
   && cmp -s "$M/bin/code_quality_scope.py" "$MIKE/bin/code_quality_scope.py" \
   || bad "harness: bản sao sandbox lệch bản thật"
 [ "$(git -C "$WC" rev-parse --show-toplevel)" = "$OUT" ] || bad "harness: WC không phải thư mục con của toplevel ngoài"
+# các lượt chạy THẬT (E5/E7/E8) chỉ an toàn nhờ override CQ_CLAUDE — mất nó thì selfcheck chạy tự động
+# hằng ngày sẽ gọi LLM thật ⇒ dừng hẳn trước mọi lượt chạy
+# shellcheck disable=SC2016  # chuỗi nguyên văn cần tìm
+grep -qF 'CLAUDE="${CQ_CLAUDE:-' "$M/bin/code_quality_weekly.sh" \
+  || { bad "harness: code_quality_weekly.sh mất override CQ_CLAUDE — DỪNG, không chạy thật với claude thật"; exit 1; }
 
 scope() {  # scope <max> <since> [manifest] [repo2] [pin] — stdout = scope, $SB/dropped, rc
   python3 "$M/bin/code_quality_scope.py" --manifest "${3:-$M/kb/production_manifest.json}" \
@@ -145,7 +156,7 @@ for mode in fail warnonly skip; do
   got="$(run "$mode")"
   case "$mode" in
     fail) why="manifest HEAD lệch thực tế.*DRIFT 1 dòng.*+ x.py";;
-    warnonly) why="manifest HEAD lệch thực tế";;
+    warnonly) why="manifest HEAD lệch thực tế.*chỉ có dòng WARN";;
     skip) why="không đọc được crontab -l";;
   esac
   # fallback = danh sách cũ: hot-core round-robin + file R&D ngoài manifest (research_x.py)
@@ -186,6 +197,15 @@ grep -q "WARN: nguồn scope = FALLBACK.*không đọc được HEAD:kb/producti
   && ok "E4 HEAD thiếu manifest ⇒ WARN + fallback" || bad "E4: $(grep -m1 'scope' "$SB/out")"
 
 [ ! -s "$M/bus_calls" ] && ok "E6 các lượt dry-run E3/E4 không ghi bus" || bad "E6 dry-run gọi append_event: $(cat "$M/bus_calls")"
+
+# E8 ca B arch-review vòng 2: repo mike có commit 7 ngày nhưng TOÀN file bị loại trừ (research) ⇒
+# nhánh fallback vẫn phải chạy tới claude + Discord, không chết im vì grep rc=1
+g "$M" reset -q --hard "$MBASE"
+mkdir -p "$M/agents/X/research"; echo x >"$M/agents/X/research/r.py"; g "$M" add -A; commit_at "$M" 1 research-only
+echo fail >"$M/sc_mode"; : >"$M/claude_calls"; : >"$M/discord_calls"; wk
+if [ -s "$M/claude_calls" ] && grep -q "SCOPE FALLBACK" "$M/discord_calls" 2>/dev/null; then
+  ok "E8 fallback sống khi diff 1 repo toàn file loại trừ"
+else bad "E8 claude_calls=$(grep -c . "$M/claude_calls") $(tail -3 "$SB/out")"; fi
 
 [ "$fail" -eq 0 ] && echo "PASS code_quality_weekly_scope_selfcheck" || echo "FAIL code_quality_weekly_scope_selfcheck"
 exit "$fail"
