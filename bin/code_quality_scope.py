@@ -4,7 +4,8 @@
 Việc J review ARIA (job Wags_20260913_075550). Scope = mọi path tầng T0-T2 trong manifest có
 commit trong cửa sổ `--since` ở BẤT KỲ repo nào truyền qua `--repo` (WorkingClaude + mike),
 xếp T0 trước rồi T1, T2 (cùng tầng: theo path), cắt tại `--max-files`. T3 (selfcheck) và T?
-(chưa phân loại) KHÔNG vào scope. Path trong manifest tương đối `--wc-root`.
+(chưa phân loại) KHÔNG vào scope. Path trong manifest tương đối `--wc-root`. `--pin` (file hot-core
+round-robin của plan §4 mục 2, review dù không đổi) đứng ĐẦU danh sách và tính vào trần.
 
 Kiểm tra HEAD-khớp (production_manifest.py --check) KHÔNG ở đây — code_quality_weekly.sh làm
 trước khi gọi; file này chỉ fail-closed khi manifest/git không đọc được.
@@ -40,6 +41,7 @@ def main():
     ap.add_argument("--since", default="7 days ago")
     ap.add_argument("--max-files", type=int, required=True)
     ap.add_argument("--dropped-out", required=True)
+    ap.add_argument("--pin", default="", help="path tuyệt đối luôn giữ ở đầu scope (bỏ qua nếu không tồn tại)")
     a = ap.parse_args()
 
     try:
@@ -65,16 +67,18 @@ def main():
     eligible = sorted((p for p, t in tiers.items()
                        if t in TIERS and p in hit_rel and os.path.isfile(os.path.join(wc, p))),
                       key=lambda p: (TIERS.index(tiers[p]), p))
-    kept, dropped = eligible[:a.max_files], eligible[a.max_files:]
+    pin = os.path.relpath(os.path.realpath(a.pin), wc) if a.pin and os.path.isfile(a.pin) else ""
+    ordered = ([pin] if pin else []) + [p for p in eligible if p != pin]
+    kept, dropped = ordered[:a.max_files], ordered[a.max_files:]
     n_t3 = sum(1 for p, t in tiers.items() if t not in TIERS and p in hit_rel)
 
     for p in kept:
         print(os.path.join(wc, p))
     with open(a.dropped_out, "w", encoding="utf-8") as fh:
         fh.writelines(os.path.join(wc, p) + "\n" for p in dropped)
-    cnt = {t: sum(1 for p in kept if tiers[p] == t) for t in TIERS}
+    cnt = {t: sum(1 for p in kept if p != pin and tiers.get(p) == t) for t in TIERS}
     print(f"manifest-scope: {len(eligible)} file T0-T2 có commit ({a.since}) — giữ {len(kept)} "
-          f"(T0={cnt['T0']} T1={cnt['T1']} T2={cnt['T2']}), trần cắt {len(dropped)}, "
+          f"(pin={pin or '-'} T0={cnt['T0']} T1={cnt['T1']} T2={cnt['T2']}), trần cắt {len(dropped)}, "
           f"loại {n_t3} file T3/T? có commit", file=sys.stderr)
     return 0
 

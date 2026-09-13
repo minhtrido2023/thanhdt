@@ -18,7 +18,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 WORKDIR="$(cd "$ROOT/.." && pwd)"  # = /home/trido/thanhdt/WorkingClaude; suy từ ROOT để selfcheck dựng sandbox
-CLAUDE="/home/trido/.local/bin/claude"
+CLAUDE="${CQ_CLAUDE:-/home/trido/.local/bin/claude}"  # override CHỈ để selfcheck chặn gọi LLM thật
 AGENT_DEF="$HOME/.claude/agents/code-reviewer.md"
 REVIEWER_ID="code-reviewer"
 ROTATION_STATE="$ROOT/state/code_quality_weekly_rotation.json"
@@ -44,6 +44,35 @@ log "=== code_quality_weekly START ($TODAY) ==="
 TMPDIR_CQ="$(mktemp -d)"
 trap 'rm -rf "$TMPDIR_CQ"' EXIT
 
+# --- Hot-core round-robin: 1 file/tuần dù không đổi (plan §4 mục 2) — dùng cho CẢ 2 nguồn scope ---
+HOT_CORE=(
+  "$WORKDIR/trading_bot/plan.py"
+  "$WORKDIR/trading_bot/executor.py"
+  "$WORKDIR/trading_bot/brokers.py"
+  "$WORKDIR/trading_bot/config.py"
+  "$WORKDIR/trading_bot/plan_funding_gate.py"
+  "$WORKDIR/bot_execute.py"
+  "$ROOT/bin/dispatch.sh"
+  "$ROOT/bin/ops_health_check.sh"
+  "$ROOT/bin/wags_autofix.sh"
+  "$ROOT/bin/ops_autofix.sh"
+)
+N_HOT=${#HOT_CORE[@]}
+idx=0
+if [ -f "$ROTATION_STATE" ]; then
+  idx="$(python3 -c "import json; print(json.load(open('$ROTATION_STATE')).get('next_idx',0))" 2>/dev/null || echo 0)"
+fi
+idx=$(( idx % N_HOT ))
+hot_file="${HOT_CORE[$idx]}"
+next_idx=$(( (idx + 1) % N_HOT ))
+
+if [ -z "$dry" ]; then
+  python3 -c "
+import json
+json.dump({'next_idx': $next_idx, 'last_picked': '$hot_file', 'last_run': '$TODAY'}, open('$ROTATION_STATE.tmp','w'), ensure_ascii=False, indent=2)
+" && mv "$ROTATION_STATE.tmp" "$ROTATION_STATE"
+fi
+
 # --- 0. Nguồn scope: kb/production_manifest.json (việc J ARIA, job Wags_20260913_075550) ---
 # Chỉ dùng bản HEAD của manifest khi nó còn khớp thực tế — đúng phép so bước (3) của
 # production_manifest_selfcheck.sh: tái sinh từ crontab thật rồi `--check` với HEAD (khớp = rc 0).
@@ -52,7 +81,7 @@ trap 'rm -rf "$TMPDIR_CQ"' EXIT
 # tự-chứng-minh của selfcheck vẫn chạy ở run_selfchecks.sh. Mọi lỗi ⇒ fail-closed về scope cũ
 # (diff 7 ngày + hot-core round-robin) kèm WARN nêu lý do — không bao giờ im lặng đổi nguồn.
 scope_source="fallback"; scope_reason=""
-hot_file=""; dropped=""
+dropped=""
 manifest_f="$TMPDIR_CQ/production_manifest.json"
 check_log="$TMPDIR_CQ/manifest_check.log"
 if ! crontab -l >"$TMPDIR_CQ/crontab" 2>/dev/null; then
@@ -61,17 +90,20 @@ elif ! git -C "$ROOT" show HEAD:kb/production_manifest.json >"$manifest_f" 2>/de
   scope_reason="không đọc được HEAD:kb/production_manifest.json ở repo mike"
 elif ! (cd "$WORKDIR" && python3 "$ROOT/bin/production_manifest.py" --crontab "$TMPDIR_CQ/crontab" \
       --check "$manifest_f") >"$check_log" 2>&1; then
-  scope_reason="manifest HEAD lệch thực tế (production_manifest.py --check): $(head -n2 "$check_log" | paste -sd' ' -)"
+  # bỏ dòng WARN (T3 vào/rời) generator in TRƯỚC khối DRIFT — không thì lý do thật bị che. awk chứ
+  # không `grep -v | head`: grep rc=1 (toàn WARN) / SIGPIPE + pipefail trong phép gán ⇒ set -e giết script
+  scope_reason="manifest HEAD lệch thực tế (production_manifest.py --check): $(awk '!/^WARN/ && n<3 {print; n++}' "$check_log" | paste -sd' ' -)"
 elif manifest_scope="$(python3 "$ROOT/bin/code_quality_scope.py" --manifest "$manifest_f" \
       --wc-root "$WORKDIR" --repo "$WORKDIR" --repo "$ROOT" --since "7 days ago" \
-      --max-files "$MAX_FILES" --dropped-out "$TMPDIR_CQ/manifest_dropped.txt" 2>"$TMPDIR_CQ/scope.err")"; then
+      --max-files "$MAX_FILES" --dropped-out "$TMPDIR_CQ/manifest_dropped.txt" --pin "$hot_file" \
+      2>"$TMPDIR_CQ/scope.err")"; then
   scope_source="manifest"
 else
   scope_reason="code_quality_scope.py lỗi: $(tail -n1 "$TMPDIR_CQ/scope.err")"
 fi
 
 if [ "$scope_source" = "manifest" ]; then
-  log "Nguồn scope: MANIFEST (HEAD kb/production_manifest.json, T0-T2 có commit 7 ngày, T0 trước). $(cat "$TMPDIR_CQ/scope.err")"
+  log "Nguồn scope: MANIFEST (HEAD kb/production_manifest.json, hot-core đầu rồi T0-T2 có commit 7 ngày, T0 trước). $(cat "$TMPDIR_CQ/scope.err")"
   full_scope="$manifest_scope"
   dropped="$(cat "$TMPDIR_CQ/manifest_dropped.txt")"
   if [ -n "$dropped" ]; then
@@ -105,35 +137,6 @@ diff_wc="$(_diff_files "$WORKDIR")"
 diff_mike="$(_diff_files "$ROOT")"
 scope_files="$(printf '%s\n%s\n' "$diff_wc" "$diff_mike" | grep -v '^$' | sort -u)"
 
-# --- 2. Hot-core round-robin: 1 file/tuần dù không đổi ---
-HOT_CORE=(
-  "$WORKDIR/trading_bot/plan.py"
-  "$WORKDIR/trading_bot/executor.py"
-  "$WORKDIR/trading_bot/brokers.py"
-  "$WORKDIR/trading_bot/config.py"
-  "$WORKDIR/trading_bot/plan_funding_gate.py"
-  "$WORKDIR/bot_execute.py"
-  "$ROOT/bin/dispatch.sh"
-  "$ROOT/bin/ops_health_check.sh"
-  "$ROOT/bin/wags_autofix.sh"
-  "$ROOT/bin/ops_autofix.sh"
-)
-N_HOT=${#HOT_CORE[@]}
-idx=0
-if [ -f "$ROTATION_STATE" ]; then
-  idx="$(python3 -c "import json; print(json.load(open('$ROTATION_STATE')).get('next_idx',0))" 2>/dev/null || echo 0)"
-fi
-idx=$(( idx % N_HOT ))
-hot_file="${HOT_CORE[$idx]}"
-next_idx=$(( (idx + 1) % N_HOT ))
-
-if [ -z "$dry" ]; then
-  python3 -c "
-import json
-json.dump({'next_idx': $next_idx, 'last_picked': '$hot_file', 'last_run': '$TODAY'}, open('$ROTATION_STATE.tmp','w'), ensure_ascii=False, indent=2)
-" && mv "$ROTATION_STATE.tmp" "$ROTATION_STATE"
-fi
-
 full_scope="$(printf '%s\n%s\n' "$scope_files" "$hot_file" | grep -v '^$' | sort -u)"
 n_total=$(printf '%s\n' "$full_scope" | grep -c . || true)
 
@@ -152,8 +155,8 @@ fi  # hết nhánh fallback
 
 n_scoped=$(printf '%s\n' "$full_scope" | grep -c . || true)
 if [ "$scope_source" = "manifest" ]; then
-  scope_label="nguồn manifest T0-T2, T0 xếp đầu"
-  focus_line="Danh sách đã xếp theo tầng production (T0 money-path trước) — xem kỹ nhất các file đầu danh sách."
+  scope_label="nguồn manifest T0-T2, T0 xếp đầu; hot-core round-robin: $hot_file"
+  focus_line="File hot-core được chọn round-robin tuần này (xem kỹ hơn các file khác): $hot_file. Phần còn lại đã xếp theo tầng production (T0 money-path trước)."
 else
   scope_label="nguồn FALLBACK diff 7 ngày ($scope_reason); hot-core round-robin: $hot_file"
   focus_line="File hot-core được chọn round-robin tuần này (xem kỹ hơn các file khác): $hot_file"
@@ -164,7 +167,7 @@ printf '%s\n' "$full_scope" | while read -r f; do [ -z "$f" ] || log "  - $f"; d
 
 if [ "$n_scoped" -eq 0 ]; then
   log "0 file trong scope ($scope_label) — thoát, không gọi claude."
-  # nguồn manifest: tuần không có commit T0-T2 là hợp lệ; fallback luôn có hot-core nên rỗng = lạ
+  # nguồn manifest: rỗng chỉ khi không có commit T0-T2 VÀ file hot-core tuần này không tồn tại
   [ -n "$dry" ] && exit 0
   empty_note="không có file T0-T2 nào có commit 7 ngày qua"
   [ "$scope_source" = "manifest" ] || empty_note="scope rỗng bất thường, kiểm lại _diff_files"
@@ -382,6 +385,7 @@ PY
 
 summary_line="✅ code-quality-weekly ($TODAY): $n_scoped file quét, $n_final finding (sau verify)."
 [ "$n_final" -eq 0 ] && summary_line="✅ code-quality-weekly ($TODAY): $n_scoped file quét, 0 finding — sạch."
+[ "$scope_source" = "manifest" ] || summary_line="$summary_line ⚠️ SCOPE FALLBACK (không dùng production manifest): $scope_reason"
 
 ARCH_TID="$("$ROOT/bin/discord_channel.sh" "$ARCH_THREAD_NAME" 2>/dev/null || true)"
 if [ -n "$ARCH_TID" ]; then
