@@ -23,10 +23,95 @@ thật, ước tính chỉ nằm ở phần diễn giải).
 
 Nếu 2 vế (dùng số THẬT) không khớp trong ngưỡng dung sai (mặc định 0.05% NAV) -> in cảnh báo rõ
 ràng, KHÔNG tự làm tròn/che giấu chênh lệch.
+
+BỔ SUNG 2026-09-13 (aria-A1, job Taylor_20260913_053329) — vế trái cộng thêm 2 cấu phần THẬT:
+  + Lãi/lỗ ĐÃ THỰC HIỆN: replay đúng các fill `dnse_fill_events()` của CHÍNH các ngày
+    `dates_included` trong snapshot (cùng nguồn + cùng quy ước lô-đang-sống `CostBook` với
+    unrealized ⇒ realized + unrealized = Σbán − Σmua + MTM). Phần bán VƯỢT KL trace được (vị
+    thế legacy mua trước bot) không có giá vốn ⇒ KHÔNG cộng, in riêng `untraced_sell_proceeds`.
+  + Cổ tức tiền mặt đã ghi nhận: delta dương `cashDividendReceiving` (tầng 2 của
+    `dividend_adjusted_return.py`, §21) — số GỘP đã vào `totalCash`; trừ thuế TNCN 5% trên phần
+    ĐÃ chi trả (phần còn phải thu vẫn ghi gộp trong totalCash).
+Bản cũ thiếu 2 cấu phần này ⇒ residual +23,7tr (+2,41% NAV) SpaceX 2026-08-28. Công thức
+unrealized/fee giữ nguyên; `--no-realized` tái lập đúng số của bản cũ.
+Phần DIỄN GIẢI residual thêm: phí 0,075% trên TỔNG giá trị khớp mua+bán (vế trái chỉ trừ trên
+giá vốn đang giữ), thuế TNCN 0,1% giá trị bán, lãi margin ước 12,5%/năm tích luỹ theo dư nợ
+từng ngày. Còn dư >0,3% NAV sau diễn giải ⇒ in rõ "CHƯA GIẢI THÍCH ĐƯỢC", không ép về 0.
 """
 import argparse
 import json
+import os
 import sys
+from collections import defaultdict
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+SELL_TAX_RATE = 0.001        # thuế TNCN 0,1% giá trị bán — đo đúng 0,100% trên sao kê DNSE 6 phiên T8
+UNEXPLAINED_WARN_PCT = 0.3   # dư sau diễn giải vượt ngưỡng này (% NAV) ⇒ báo chưa giải thích được
+
+
+def realized_pnl_from_events(events_by_date, asof, corp_actions):
+    """Lãi/lỗ đã thực hiện theo lô-đang-sống, replay y hệt `build_cost_books()`.
+
+    Trả dict: realized (tổng), by_ticker, untraced_sell_proceeds (tiền bán phần KL không trace
+    được giá vốn — legacy), buy_value, sell_value (tổng giá trị khớp, dùng cho diễn giải phí).
+    Pure — không đọc file, để selfcheck khoá được bằng fixture.
+    """
+    from verify_account_snapshot import CostBook, corp_action_multiplier
+    books = defaultdict(CostBook)
+    by_tk = defaultdict(float)
+    untraced = defaultdict(float)
+    buy_value = sell_value = 0.0
+    for date in sorted(events_by_date):
+        for _ts, _key, tk, side, qty, price in events_by_date[date]:
+            m = corp_action_multiplier(tk, date, asof, corp_actions)
+            book = books[tk]
+            value = qty * price
+            if side != "sell":
+                buy_value += value
+                book.buy(qty * m, value, date)
+                continue
+            sell_value += value
+            q = qty * m
+            covered = min(q, book.qty) if book.qty > 0 else 0.0
+            if covered > 0:
+                basis_out = book.basis * covered / book.qty
+                by_tk[tk] += value * covered / q - basis_out
+            if q > covered:
+                untraced[tk] += value * (q - covered) / q
+            book.sell(q, date)
+    return {"realized": sum(by_tk.values()), "by_ticker": dict(by_tk),
+            "untraced_sell_proceeds": sum(untraced.values()),
+            "untraced_by_ticker": dict(untraced),
+            "buy_value": buy_value, "sell_value": sell_value}
+
+
+def net_cash_dividends(gross_deltas, receivable_asof, start, asof, tax_rate):
+    """Cổ tức tiền mặt RÒNG đã vào `totalCash` trong [start, asof].
+
+    gross_deltas: {ngày: delta dương cashDividendReceiving} (`broker_cash_deltas()`).
+    Phần đã chi trả = gộp ghi nhận − còn phải thu tại asof; thuế chỉ trừ trên phần đã chi trả
+    (DNSE ghi phải thu GỘP, trừ thuế lúc chi trả thật — docstring TẦNG 4 dividend_adjusted_return).
+    """
+    gross = sum(v for d, v in gross_deltas.items() if start <= d <= asof)
+    paid = max(gross - receivable_asof, 0.0)
+    tax = paid * tax_rate
+    return {"gross": gross, "receivable_asof": receivable_asof, "paid": paid,
+            "tax": tax, "net": gross - tax}
+
+
+def margin_interest_estimate(daily_debt, start, asof, rate_annual):
+    """Lãi margin ƯỚC TÍNH cộng dồn theo NGÀY LỊCH: dư nợ cuối ngày gần nhất (carry-forward)
+    × rate/365. daily_debt: {ngày ISO: totalDebt}. Ngày trước bản ghi đầu tiên = 0."""
+    import datetime as _dt
+    d = _dt.date.fromisoformat(start)
+    end = _dt.date.fromisoformat(asof)
+    debt, total = 0.0, 0.0
+    while d <= end:
+        debt = daily_debt.get(d.isoformat(), debt)
+        total += debt * rate_annual / 365.0
+        d += _dt.timedelta(days=1)
+    return total
 
 
 def latest_balance(raw_path, account_no=None):
@@ -82,6 +167,10 @@ def main():
                           "asof ngày --balance-raw — cộng vào vế phải để KHÔNG báo residual giả "
                           "khi user đã chuyển tiền rảnh ra ngoài tài khoản giao dịch. Lấy số này "
                           "từ manual_offbook_assets_vnd trong secrets/trading_bot_accounts.json.")
+    ap.add_argument("--no-realized", action="store_true",
+                     help="bỏ realized P&L + cổ tức khỏi vế trái — tái lập đúng bản trước 2026-09-13")
+    ap.add_argument("--div-tax-rate", type=float, default=0.05,
+                     help="thuế TNCN cổ tức tiền mặt trên phần đã chi trả (cá nhân cư trú 5%%)")
     args = ap.parse_args()
 
     account_no = args.account_no
@@ -118,8 +207,39 @@ def main():
 
     fees = args.trading_fees if args.trading_fees is not None else true_cost_basis * args.fee_rate_pct / 100.0
 
+    # Realized + cổ tức (aria-A1): cùng ngày fill + cùng asof với snapshot unrealized.
+    asof = snap["asof"]
+    dates = snap.get("dates_included") or []
+    start = dates[0] if dates else asof
+    from verify_account_snapshot import dnse_fill_events
+    from corp_actions import load_corp_actions
+    from dividend_adjusted_return import broker_cash_deltas, _broker_records
+    events_by_date = {}
+    for d in dates:
+        ev, err = dnse_fill_events(account_no, d)
+        if ev is None:
+            print(f"❌ {err} — snapshot dùng ngày {d} nhưng không đọc lại được fill, "
+                  f"KHÔNG tính realized thiếu ngày.", file=sys.stderr)
+            sys.exit(2)
+        events_by_date[d] = ev
+    rz = realized_pnl_from_events(events_by_date, asof, load_corp_actions())
+    daily_debt = {}
+    for rec in sorted(_broker_records("balances", account_no), key=lambda r: r.get("ts") or ""):
+        ts = rec.get("ts") or ""
+        if ts > bal_ts:
+            break
+        st = rec.get("payload", {}).get("stock") or {}
+        if all((st.get(k) or 0) == 0 for k in ("totalCash", "availableCash", "totalDebt")):
+            continue   # khối stock toàn 0 — lỗi API tạm thời đã biết của DNSE
+        daily_debt[ts[:10]] = float(st.get("totalDebt") or 0)
+    receivable_asof = float(stock.get("cashDividendReceiving") or 0)
+    div = net_cash_dividends(broker_cash_deltas(account_no), receivable_asof, start,
+                             bal_ts[:10], args.div_tax_rate)
+    realized = 0.0 if args.no_realized else rz["realized"]
+    dividends_net = 0.0 if args.no_realized else div["net"]
+
     # Vế trái: đường P&L — CHỈ dùng số THẬT (fee-rate xác nhận + depositFeeAmount thật từ API)
-    lhs = args.starting_capital + unrealized_pnl - fees - accrued_fee
+    lhs = args.starting_capital + unrealized_pnl + realized + dividends_net - fees - accrued_fee
     # Vế phải: đường bảng cân đối (số dư THẬT từ broker) + offbook (user tự báo, vd Trứng vàng —
     # tiền vẫn của user, chỉ ngoài phạm vi balances() API, xem --offbook-assets ở trên)
     rhs = mtm_stock + cash - debt + args.offbook_assets
@@ -131,6 +251,16 @@ def main():
     daily_margin_interest_est = debt * args.margin_rate_annual / 365.0
     days_implied = residual / daily_margin_interest_est if daily_margin_interest_est else None
 
+    # Diễn giải residual (ƯỚC TÍNH) — dương = vế trái cao hơn tiền thật ⇒ chi phí chưa trừ đủ.
+    turnover = rz["buy_value"] + rz["sell_value"]
+    fee_gap_est = turnover * args.fee_rate_pct / 100.0 - fees
+    sell_tax_est = rz["sell_value"] * SELL_TAX_RATE
+    margin_cum_est = margin_interest_estimate(daily_debt, start, bal_ts[:10], args.margin_rate_annual)
+    margin_gap_est = max(margin_cum_est - accrued_fee, 0.0)
+    explained_est = fee_gap_est + sell_tax_est + margin_gap_est
+    unexplained = residual - explained_est
+    unexplained_pct = unexplained / rhs * 100
+
     print(f"== Reconcile equity — {args.account} ==")
     print(f"Nguồn balance THẬT: {args.balance_raw} (ts={bal_ts}, kind=balances)")
     print(f"Nguồn P&L THẬT: {args.snapshot}")
@@ -138,6 +268,14 @@ def main():
     print(f"VẾ TRÁI  (Vốn ban đầu + Lãi/lỗ - phí - lãi vay, TOÀN BỘ SỐ THẬT):")
     print(f"  Vốn ban đầu:           {args.starting_capital:>16,.0f}")
     print(f"  + Lãi/lỗ chưa thực hiện:{unrealized_pnl:>+16,.0f}")
+    if args.no_realized:
+        print(f"  (--no-realized: BỎ realized {rz['realized']:+,.0f} + cổ tức {div['net']:+,.0f})")
+    else:
+        print(f"  + Lãi/lỗ ĐÃ thực hiện (fill thật, lô-đang-sống): {realized:>+16,.0f}")
+        print(f"  + Cổ tức tiền mặt ròng (gộp {div['gross']:,.0f} − thuế {div['tax']:,.0f}): {dividends_net:>+12,.0f}")
+    if rz["untraced_sell_proceeds"]:
+        print(f"  (KHÔNG cộng: tiền bán vị thế legacy không có giá vốn {rz['untraced_sell_proceeds']:,.0f} "
+              f"— {sorted(rz['untraced_by_ticker'])})")
     print(f"  - Phí giao dịch ({args.fee_rate_pct}% x giá vốn thật): {-fees:>16,.0f}")
     print(f"  - Phí/lãi margin đã POST (depositFeeAmount, API thật): {-accrued_fee:>12,.0f}")
     print(f"  = VẾ TRÁI:             {lhs:>16,.0f}")
@@ -159,10 +297,21 @@ def main():
     if days_implied is not None:
         print(f"  Residual {residual:+,.0f} tương đương ~{days_implied:.2f} ngày lãi margin tích lũy CHƯA post vào depositFeeAmount")
     print(f"  (depositFeeAmount hiện tại chỉ {accrued_fee:,.0f}đ — có thể lãi margin post theo chu kỳ, không phải hàng ngày; cần đối chiếu sao kê DNSE để xác nhận chính xác)")
+    print(f"  Phí {args.fee_rate_pct}% trên TỔNG khớp mua+bán {turnover:,.0f} (vế trái mới trừ trên giá vốn đang giữ): {fee_gap_est:>+14,.0f}")
+    print(f"  Thuế TNCN {SELL_TAX_RATE*100:.1f}% giá trị bán {rz['sell_value']:,.0f}:            {sell_tax_est:>+14,.0f}")
+    print(f"  Lãi margin ước {args.margin_rate_annual*100:.1f}%/năm cộng dồn {start}→{bal_ts[:10]} (trừ phần đã post): {margin_gap_est:>+14,.0f}")
+    print(f"  = Giải thích được (ước):  {explained_est:>+16,.0f}")
+    print(f"  DƯ SAU DIỄN GIẢI:         {unexplained:>+16,.0f}  ({unexplained_pct:+.4f}% NAV) — "
+          f"{'trong ±' + str(UNEXPLAINED_WARN_PCT) + '% NAV' if abs(unexplained_pct) <= UNEXPLAINED_WARN_PCT else '⚠️ CHƯA GIẢI THÍCH ĐƯỢC (>' + str(UNEXPLAINED_WARN_PCT) + '% NAV)'}")
 
     result = {
         "account": args.account, "balance_ts": bal_ts,
         "starting_capital": args.starting_capital, "unrealized_pnl": unrealized_pnl,
+        "realized_included": not args.no_realized, "realized_pnl": rz["realized"],
+        "realized_by_ticker": rz["by_ticker"],
+        "untraced_sell_proceeds": rz["untraced_sell_proceeds"],
+        "untraced_by_ticker": rz["untraced_by_ticker"],
+        "cash_dividends": div, "fill_buy_value": rz["buy_value"], "fill_sell_value": rz["sell_value"],
         "fee_rate_pct_used": args.fee_rate_pct, "trading_fees_used": fees,
         "accrued_margin_fee_real": accrued_fee,
         "lhs_pnl_path": lhs, "mtm_stock": mtm_stock, "cash": cash, "margin_debt": debt,
@@ -172,6 +321,9 @@ def main():
         "margin_rate_annual_estimate": args.margin_rate_annual,
         "daily_margin_interest_estimate": daily_margin_interest_est,
         "residual_implied_days_of_margin_interest": days_implied,
+        "explain_fee_on_turnover_gap_est": fee_gap_est, "explain_sell_tax_est": sell_tax_est,
+        "explain_margin_interest_cum_est": margin_cum_est, "explain_margin_gap_est": margin_gap_est,
+        "unexplained_after_estimates": unexplained, "unexplained_pct_of_rhs": unexplained_pct,
     }
     out_path = args.snapshot.replace("verified_snapshot", "reconcile_equity")
     with open(out_path, "w", encoding="utf-8") as f:
