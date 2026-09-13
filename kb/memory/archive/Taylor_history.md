@@ -503,3 +503,6 @@
 
 ## Archived 2026-09-12 (keep=6 days=5 require_done=True)
 - [2026-09-06T16:01:59Z] [2026-09-06] CCS Phase 2-NARROW (job _153255) XONG: bus finding + report ccs_phase2_narrow_trim_bottom_20260906.md + results_registry. VERDICT NO-GO. Buoc 0 QUA (redeploy 0.913 - von cat ra KHONG nam im, hap thu qua KICH CO vi the + parking custom30V; gia thuyet Phase1 6.2 BI BAC). A/B: dCAGR +0.910pp, Calmar 1.623->1.790, C1-C4+C5b PASS, C5a DSR=0.0012 (N=8) FAIL -> NO-GO. DSR truot khong do quy uoc: unadjusted P=0.602, boot CI om 0 moi cua so. PHAT HIEN CAU TRUC: BOTTOM tercile ~= tier _W (BAL 78%) + LAG_LO (LAG 99.4%), ta hang so 400 tren panel LAG -> khong phai truc conviction moi ma la re-tune tier weight. TRUC CCS DONG - khong de xuat bien the tiep.
+
+## Archived 2026-09-13 (keep=12 days=0 require_done=False)
+- [2026-09-07T01:07:31Z] [2026-09-07] fearbuy Monday scan (job _010002) XONG: 0 QUALIFY, 0 case moi, 2 khong-phai-case (SSB ESOP-unlock/index-flow, VNE lo+IntCov0), 0 lenh mua ca 3 kenh cho 07/09. CAN THEO: (a) DGC co tuc tien 80% record 15/09 tra 25/09 -> GDKHQ ~12/09, ZaloPay 10.000cp ~80tr d, phai gan corp-action (Winston/Mafee); (b) VIX phat hanh 122tr cp tra co tuc -> dieu chinh; (c) TV1 SpaceX nay DEADBAND thieu 100cp, giam them ~3% la he tu mua (la chan manual_only); (d) ICG ung vien ha NON o quet tuan ke neu 2 cong van im (qua han tuan 5/tuan 3).

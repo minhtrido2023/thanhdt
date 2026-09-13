@@ -9,15 +9,21 @@
   (46.750−8.000=38.750). Xử TAY theo kb/ops_runbook.md § PRICE_XCHECK, KHÔNG hỏi lại user.
   Cổ tức TIỀN = kỳ vọng (mark giá CUM); cổ tức CỔ PHIẾU/thưởng/tách = VẪN CHẶN, cần người.
 
-## ⏰ VIỆC CỦA MIKE CHIỀU T2 14/09 ≥15:00 ICT — KHÔNG CÓ SCHEDULER, PHẢI TỰ NHỚ (đổi 13/09 12:10)
-Batch 1 ĐANG làm hôm nay 13/09 (Taylor_20260913_050827): #3 PHS + #2 get_nav cờ OFF/shadow được commit
-hôm nay; #1 loan_package làm+review hôm nay nhưng XUẤT PATCH, KHÔNG để trong working tree qua đêm vì lệnh
-thật duy nhất T2 (ZaloPay TV1 buy 200 cash_only, no loan pkg) đi đúng đường #1 sửa. Chiều T2 ≥15:00:
-  1) apply agents/Taylor/research/cq20260913_batch1_item1.patch, chạy lại selfcheck ghi cuối patch, commit.
-  2) dispatch Wags quét ~28 file bin/*.py dirname×3 → wc_paths (hoãn vì nằm đường plan/park/margin cron T2).
-  3) nhắc user bảng A/B #2 (bật cờ nav_include_egg_offbook hay không) nếu chưa quyết.
-Song song hôm nay: Wags_20260913_050903 = việc tồn (verify_account_snapshot:390, .gitignore tmp,
-selfcheck bền c/e, job_cancel_guard SKIP khi không có user bus). Hạn commit cả 2 job 21:00 ICT 13/09.
+## ⏰ VIỆC CỦA MIKE CHIỀU T2 14/09 ≥15:00 ICT — KHÔNG CÓ SCHEDULER, PHẢI TỰ NHỚ (cập nhật 13/09 12:55)
+Batch 1: #3+#2 ĐÃ COMMIT WC 24df0f76 (cờ nav_include_egg_offbook OFF, arch APPROVE, quant-skeptic
+CONFIRMED). Working tree trading_bot SẠCH (Mike verify). Chiều T2 sau phiên:
+  1) apply /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/cq20260913_batch1_item1.patch
+     (`git -C /home/trido/thanhdt apply <patch>`; apply --check OK trên 24df0f76 lúc 12:52). Chạy lại
+     selfcheck ghi CUỐI patch (loan_package_multi_account 24/24 + quét rộng 50 file, test_trading_bot.py
+     FAIL 'quota AAA' là có sẵn). Commit theo lệnh cuối patch. Hạn 21:00 T2.
+  2) dispatch Wags quét ~28 file bin/*.py dirname×3 → wc_paths.
+  3) xem kết quả Taylor điều tra rò 1258 SpaceX (job dispatch 13/09 ~12:55, read-only) — nếu có
+     script gọi broker thiếu loan_package_id ⇒ fix cùng lúc apply patch #1.
+ĐÍNH CHÍNH ĐÃ BÁO USER: (a) #2 get_nav là ĐƯỜNG CHẾT (strategy v23, 0/148 plan 2026) — không ảnh hưởng
+sizing thật, Mike từng nói sai '~10%'; (b) ZaloPay loan_package None = default creds 1258, lệnh TV1
+thật MANG 1258 (thiếu = HTTP 400). Rò thật đã xảy ra 08-11: ZaloPay tra gói theo 1841 của SpaceX 13
+lần (bot_execute nhiều account 1 tiến trình); SpaceX 08-11→14 tra theo 1258 (chưa rõ nguồn).
+Chờ user: giữ cờ #2 OFF (Taylor+Mike khuyến nghị) hay gỡ hẳn đường v23/get_nav.
 
 ## Code-quality 09-13 — Batch 2+3 XONG, Mike verify 11:40 ICT
 - Batch 3 (Taylor): WC b53d26b4 + mike 9a5a2723. fetch_new_listings loại false-positive thật DIH/VNH/HDG.
