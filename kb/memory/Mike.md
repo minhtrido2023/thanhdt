@@ -1,32 +1,38 @@
 # Working memory — Mike
 > Cập nhật mỗi khi đổi mạch việc. Bơm vào đầu phiên của Mike.
 
-# Working memory — Mike
-> Cập nhật mỗi khi đổi mạch việc. Bơm vào đầu phiên của Mike.
-
 ## Ưu tiên hiện tại
 - Go-live V2.4 lever LIVE từ 08-24: capit_margin_lever.enabled=TRUE. Ngày có CAPIT margin phải chạy
   approve_margin_day.py TRƯỚC bot.
-- VPI/BAL signal HOLD đến review 2026-09-16 — HOLD_ALL theo VPI. Plan T+1 2026-09-14 đã HOLD_ALL đúng.
+- VPI/BAL signal HOLD đến review 2026-09-16 — HOLD_ALL theo VPI.
 - T2 14/09 = ex-date DGC cổ tức tiền 8.000đ (ZaloPay). xcheck NAV tối 14/09 SẼ chặn theo kỳ vọng
-  (46.750−8.000=38.750 khớp broker) — quy tắc mới đã ghi kb/current_ops.md/MIKE.md (2026-09-12,
-  commit e5d860d9). Xử TAY theo kb/ops_runbook.md § PRICE_XCHECK, KHÔNG hỏi lại user, KHÔNG escalate.
-  Phân biệt: cổ tức TIỀN (DGC) = cho qua tự động theo quy tắc; cổ tức CỔ PHIẾU/thưởng/tách
-  (đổi cả giá lẫn khối lượng) = VẪN CHẶN, cần người xử lý, không có ngoại lệ.
+  (46.750−8.000=38.750). Xử TAY theo kb/ops_runbook.md § PRICE_XCHECK, KHÔNG hỏi lại user.
+  Cổ tức TIỀN = kỳ vọng (mark giá CUM); cổ tức CỔ PHIẾU/thưởng/tách = VẪN CHẶN, cần người.
 
-## 09-12 — retro đã đóng (commit 50f7cb2a), toàn bộ việc user chốt 12:18+14:22 đã XONG
-Chi tiết: kb/incidents/retro/retro-2026-09-12.md + kb/incidents/2026-09/2026-09-12-report-return-gate-worktree-root.md.
-- Pattern 1 (worktree/bản sao lệch cây canonical) TÁI DIỄN LẦN 3, đề xuất checker chung (git log -1
-  vs canonical cho MỌI cây bản sao) — CHƯA làm, chưa tới ngưỡng escalate tự động (retro-09-11 chưa
-  nêu pattern này). Nếu retro-09-13 gặp lại cùng hình dạng → escalate.
-- Còn mở có chủ đích (không khẩn): ~28 file bin/*.py cùng lớp dirname-x3 ngoài đường báo cáo;
-  job_cancel_guard_selfcheck.py nhánh systemd-run luôn đỏ dưới cron (cần Wags quyết định); 4
-  worktree đang dùng chưa rebase (WARN-ONLY); dọn state/*.bak-*.
-- NAV exdate tự động hoá: user chốt GIỮ TAY (không làm vòng 3), bản vá cất ở
-  agents/Wags/research/nav_exdate_xcheck_wip_20260912.patch.
+## ⏰ VIỆC CỦA MIKE CHIỀU T2 14/09 ≥15:00 ICT — KHÔNG CÓ SCHEDULER, PHẢI TỰ NHỚ (đổi 13/09 12:10)
+Batch 1 ĐANG làm hôm nay 13/09 (Taylor_20260913_050827): #3 PHS + #2 get_nav cờ OFF/shadow được commit
+hôm nay; #1 loan_package làm+review hôm nay nhưng XUẤT PATCH, KHÔNG để trong working tree qua đêm vì lệnh
+thật duy nhất T2 (ZaloPay TV1 buy 200 cash_only, no loan pkg) đi đúng đường #1 sửa. Chiều T2 ≥15:00:
+  1) apply agents/Taylor/research/cq20260913_batch1_item1.patch, chạy lại selfcheck ghi cuối patch, commit.
+  2) dispatch Wags quét ~28 file bin/*.py dirname×3 → wc_paths (hoãn vì nằm đường plan/park/margin cron T2).
+  3) nhắc user bảng A/B #2 (bật cờ nav_include_egg_offbook hay không) nếu chưa quyết.
+Song song hôm nay: Wags_20260913_050903 = việc tồn (verify_account_snapshot:390, .gitignore tmp,
+selfcheck bền c/e, job_cancel_guard SKIP khi không có user bus). Hạn commit cả 2 job 21:00 ICT 13/09.
 
-## R&D đã ĐÓNG HẲN tuần 09-05→09-11: AMH · CCS Phase 0-2 · BAL 5 vòng · custom30V 5 vòng · CCS/8L accruals.
-## append_event.sh JSON isolation — pattern đã biết, không escalate (18+ lần, 0 mất dữ liệu).
+## Code-quality 09-13 — Batch 2+3 XONG, Mike verify 11:40 ICT
+- Batch 3 (Taylor): WC b53d26b4 + mike 9a5a2723. fetch_new_listings loại false-positive thật DIH/VNH/HDG.
+- Batch 2 (Wags): c9edd4c6 (NAV/report, arch-review 2 vòng) · 136a90d0 (dispatch.sh) · 767deb0e
+  (selfchecks). Mike chạy lại: compute_active_nav ALL PASS, closure 19/19, park_trim 72/0, dispatch
+  topic 42/42 + tiny 25/25 + hint 16/16, bash -n 3 script OK, $ROOT/.. đã hết trong dispatch.sh.
+- HÀNH VI MỚI cần biết: compute_active_nav.py account 0 vị thế mà hôm trước có cổ phiếu ⇒ exit 5,
+  KHÔNG ghi file (chống feed rỗng tạm thời ghi NAV thấp giả). Bán sạch THẬT ⇒ chạy tay --confirm-flat.
+  Cron compute_active_nav_all.sh 20:15 ICT sẽ log rc=1 trong ca đó — không phải lỗi, là guard.
+- Tồn nhỏ Wags ghi nhận: verify_account_snapshot.py:390 cùng lỗi ngày giá mã đầu alphabet;
+  kb/events_buffer.md.tmp chưa .gitignore; ops_runbook chưa ghi --confirm-flat; c/e mới harness chưa
+  selfcheck bền.
+
+## Retro 09-12 đóng (50f7cb2a). Pattern worktree lệch canonical TÁI DIỄN LẦN 3 — gặp lại ⇒ escalate.
+## Còn mở không khẩn: ~28 file bin/*.py dirname-x3; job_cancel_guard nhánh systemd luôn đỏ dưới cron.
+## append_event.sh JSON isolation — pattern đã biết, không escalate.
 ## Sát ngưỡng OKF: kb/coding_guidelines.md 39,5KB/40KB — §-mới PHẢI tách _ext.md.
 
-- [2026-09-13T03:51:01Z] 13/09 10:50: user duyệt Batch 1+2+3 code-quality 09-13, Mike xếp thứ tự. ĐANG CHẠY song song: Wags_20260913_034952 (Batch 2, mike repo, hạn commit 21:00 hôm nay) + Taylor_20260913_035014 (Batch 3, WC script gốc). CHỜ: Batch 1 brokers.py (đường tiền) — dispatch SAU phiên T2 14/09 đóng cửa ≥15:00 ICT và sau khi Batch 3 xong; prompt đã soạn sẵn agents/Mike/research/cq_20260913_batch1_prompt.md (Taylor opus/high, #2 get_nav sau cờ OFF + shadow A/B, user quyết bật). Lý do hoãn: 14/09 là ex-date DGC + bot chạy từ working tree 09:05. KHÔNG có scheduler bền (atd inactive) ⇒ Mike tự nhớ dispatch chiều T2.
