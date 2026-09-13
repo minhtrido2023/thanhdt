@@ -343,3 +343,8 @@
 
 ## Consolidation 2026-09-13T17:37:16Z
 - [2026-09-13T17:37:11Z] Mike/finding — daily-retro-2026-09-13: {"status": "done", "entry": "kb/incidents/retro/retro-2026-09-13.md", "commit": "c74dfbee", "n_incidents": 3, "n_new": 2, "n_recurring": 1, "wags_verdict": "GAPS FOUND, fixed before commit", "gap_fixed": "aria-K-heartbeat-once-dependency open bus question added to sự cố #3 CÒN HỞ description", "escalated": false}
+
+## Consolidation 2026-09-13T22:07:02Z
+- [2026-09-13T22:02:34Z] Mike/error — selfcheck-weekly-new-red: {"result_file": "/home/trido/thanhdt/WorkingClaude/mike/logs/selfcheck_weekly_20260913.json"}
+- [2026-09-13T22:02:32Z] Wags/question — selfcheck-red: mike/bin/snapshot_corp_action_selfcheck.py: {"question": "Selfcheck `mike/bin/snapshot_corp_action_selfcheck.py` ĐỎ (FAIL) — chủ sở hữu file cần xác định: assertion đã lỗi thời (production đổi hành vi CÓ CHỦ ĐÍCH) hay production thật sự hỏng? Wags chỉ dựng cơ chế phát hiện, KHÔNG tự sửa logic giao dịch.", "file": "mike/bin/snapshot_corp_action_selfcheck.py", "status": "FAIL", "reproduce": "bash mike/bin/selfcheck_weekly_baseline_check.sh  (env đúng: $DNA_PYEXE + GOOGLE_APPLICATION_CREDENTIALS, xem kb/selfcheck_baseline.json.required_env — chạy bằng system python3 sẽ ra FAIL GIẢ)", "urgency": "normal", "source": "bin/selfcheck_baseline_diff.py"}
+- [2026-09-13T22:02:32Z] Wags/status — triaged-needs-human: selfcheck-red: mike/bin/snapshot_corp_action_selfcheck.py: {"reason": "selfcheck đỏ cần chủ sở hữu file hoặc user quyết; Wags chỉ phát hiện", "suppress_days": 14}
