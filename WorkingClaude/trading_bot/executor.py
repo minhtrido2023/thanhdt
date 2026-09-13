@@ -79,7 +79,7 @@ def _publish_bot_event(event_type: str, topic: str, payload: dict) -> None:
     except Exception:
         pass
 from .vn_market import (session_phase, tick_size, round_price, round_lot, LOT, now_ict,
-                        normalize_price_vnd)
+                        normalize_price_vnd, is_holiday, SESSIONS)
 from .brokers import qget
 from .no_chase_ceiling import rule_a_in_force, check_ref_vs_live, RULE_A_REF_TOL_DEFAULT
 
@@ -88,6 +88,12 @@ from .no_chase_ceiling import rule_a_in_force, check_ref_vs_live, RULE_A_REF_TOL
 ICT_TZ = ZoneInfo("Asia/Ho_Chi_Minh")
 
 _GAP_Z_DOWN_THRESHOLD = -2.0  # gap_z < this on a BUY → full-speed 09:15-09:45
+
+# Chờ kết quả đấu giá ATC sau khi vào CLOSED (aria-K) — xem `_await_postclose_fills`. Giờ ICT,
+# so với `now_ict()` (naive ICT) ⇒ không phụ thuộc TZ của process (§16).
+ATC_POSTCLOSE_DEADLINE = dt.time(14, 55)
+ATC_POSTCLOSE_POLL_SEC = 15
+SESSIONS_CLOSE = next(st for name, st, _end, _cont in SESSIONS if name == "CLOSED")  # 14:45
 
 
 def _parse_hhmm(s):
@@ -1989,7 +1995,18 @@ class Executor:
                     self._release_child(o.ticker, c)
                     self._journal("CANCEL", o, c["oid"], note=reason)
                 except Exception as e:
+                    if "closed session" in str(e).lower():
+                        # Sàn đã đóng ⇒ lệnh vẫn nằm trên sổ sàn và CÓ THỂ đã khớp trong đấu giá
+                        # ATC (kết quả công bố sau 14:45). Giữ `open` + đánh dấu để run_session
+                        # poll lại, KHÔNG coi là xong (aria-K, ZaloPay VHC 2026-07-10).
+                        c["await_atc"] = True
                     self._journal("CANCEL_FAIL", o, c["oid"], note=str(e))
+
+    def _postclose_pending(self):
+        """[(order, child)] còn `open` ở parent chưa xong — cùng phạm vi `_sync_fills` đọc."""
+        return [(o, c) for o in self.plan.orders
+                if not self.state["parents"][o.id]["done"]
+                for c in self.state["parents"][o.id]["children"] if c["status"] == "open"]
 
     # ------------------------------------------------------------ một chu kỳ
 
@@ -2111,6 +2128,118 @@ class Executor:
 
 # ================================================================ session loop
 
+def _await_postclose_fills(executors, deadline=ATC_POSTCLOSE_DEADLINE,
+                           poll_sec=ATC_POSTCLOSE_POLL_SEC):
+    """Sau khi vào CLOSED: poll lại sổ lệnh tới khi mọi child còn `open` về trạng thái cuối
+    (`OrderUpdate.is_dead`: Filled/Canceled/Rejected/Expired) hoặc tới `deadline` giờ ICT.
+
+    Vì sao: lệnh còn treo khi vào đấu giá ATC (child `_atc_sweep`, hoặc LO chưa khớp — LO cũng
+    tham gia ATC) có kết quả công bố SAU 14:45. Trước đây bot poll lần cuối 14:45:05 (lệnh còn
+    `New`), huỷ lỗi "closed session" rồi thoát ⇒ ZaloPay 2026-07-10 VHC oid 502431 khớp 600cp
+    @57.500 mà state/journal/dnse_raw không bao giờ thấy (Winston aria-I).
+
+    Chỉ chờ khi: hôm nay (ICT) là ngày giao dịch, plan_date == hôm nay, và 14:45 ≤ now < deadline.
+    Ngoài cửa sổ (chạy lại tay cuối tuần/lễ/sau deadline — `session_phase` trả CLOSED CẢ NGÀY) ⇒
+    journal ATC_POSTCLOSE_SKIP, không chờ: poll của `step()` vừa chạy đã đồng bộ fill.
+
+    Mỗi vòng chỉ ĐỌC: poll_orders() (DNSEBroker tự ghi dnse_raw kind=orders ⇒ EOD leg 2 thấy
+    fill) → _sync_fills() (FILL.qty LUỸ KẾ theo child, chỉ ghi khi tăng ⇒ kill giữa chừng rồi chạy
+    lại không nhân đôi) → _save_state() (atomic). Không đặt/huỷ lệnh. Có fill mới trong lúc chờ ⇒
+    đọc positions + cash 1 lần (ghi dnse_raw MỚI HƠN fill, invariant của daily_nav_snapshot).
+    Không child mở (ngày thường) ⇒ return ngay: 0 poll, 0 sleep. Quá hạn ⇒ journal
+    ATC_POSTCLOSE_TIMEOUT từng child + 1 bus event/account. BOT_STOP ⇒ ngừng chờ.
+    """
+    waiting = [e for e in executors if e._postclose_pending()]
+    if not waiting:
+        return
+    start = now_ict()
+    today = start.date()
+    trading_day = today.weekday() < 5 and not is_holiday(today)
+    in_window = SESSIONS_CLOSE <= start.time() < deadline
+    for e in list(waiting):
+        if not (trading_day and in_window and str(e.plan.plan_date) == today.isoformat()):
+            e._journal("ATC_POSTCLOSE_SKIP", note=(
+                f"{len(e._postclose_pending())} child còn open nhưng không chờ: ngày giao dịch="
+                f"{trading_day}, giờ {start:%H:%M:%S} trong [{SESSIONS_CLOSE:%H:%M}, {deadline:%H:%M})="
+                f"{in_window}, plan_date {e.plan.plan_date} == {today}={str(e.plan.plan_date) == today.isoformat()}"))
+            waiting.remove(e)
+    if not waiting:
+        return
+    end = dt.datetime.combine(today, deadline)
+    seen = {e.label: {} for e in waiting}       # oid -> (status, HH:MM:SS) của poll THÀNH CÔNG gần nhất
+    ok_ts = {e.label: None for e in waiting}    # giờ poll thành công gần nhất
+    err = {e.label: None for e in waiting}      # lỗi poll gần nhất (nguyên văn)
+    filled0 = {e.label: sum(ps["filled"] for ps in e.state["parents"].values()) for e in waiting}
+    for e in waiting:
+        for o, c in e._postclose_pending():
+            e._journal("ATC_POSTCLOSE_WAIT", o, c["oid"], c["qty"],
+                       note=f"chờ kết quả ATC tới {deadline:%H:%M} ICT"
+                            + (" (huỷ lỗi closed session)" if c.get("await_atc") else ""))
+    print(f"[exec] chờ kết quả ATC tới {deadline:%H:%M} ICT: "
+          + ", ".join(f"{e.label}={len(e._postclose_pending())} child" for e in waiting))
+    aborted = False
+    while waiting:
+        now = now_ict()
+        if os.path.exists(STOP_FILE):
+            for e in waiting:
+                e._journal("ATC_POSTCLOSE_ABORT", note="BOT_STOP — ngừng chờ kết quả ATC")
+            aborted = True
+            break
+        if now >= end:
+            break
+        time.sleep(min(poll_sec, (end - now).total_seconds()))
+        for e in waiting:
+            try:
+                updates = e.broker.poll_orders()
+                t = now_ict().strftime("%H:%M:%S")
+                ok_ts[e.label] = t
+                seen[e.label] = {oid: (u.status, t) for oid, u in updates.items()}
+                e._sync_fills(updates)
+            except Exception as ex:
+                err[e.label] = f"{now_ict():%H:%M:%S} {ex}"
+                e._journal("POLL_FAIL", note=f"postclose: {ex}")
+            e._save_state()
+        done = [e for e in waiting if not e._postclose_pending()]
+        for e in done:
+            e._journal("ATC_POSTCLOSE_DONE",
+                       note=f"mọi child về trạng thái cuối sau {(now_ict() - start).seconds}s")
+        waiting = [e for e in waiting if e not in done]
+    for e in executors:
+        if e.label in filled0 and sum(ps["filled"] for ps in e.state["parents"].values()) > filled0[e.label]:
+            try:
+                e.broker.get_positions()
+                e.broker.get_cash()
+            except Exception as ex:
+                e._journal("POSITIONS_FAIL", note=f"postclose: {ex}")
+    if aborted:
+        return
+    for e in waiting:
+        rows = []
+        for o, c in e._postclose_pending():
+            s = seen[e.label].get(c["oid"])
+            if s:
+                why = f"poll {s[1]} lệnh vẫn {s[0]}"
+            elif ok_ts[e.label]:
+                why = f"poll thành công {ok_ts[e.label]} KHÔNG có oid này trong sổ lệnh"
+            else:
+                why = "chưa poll thành công lần nào sau đóng cửa"
+            if err[e.label]:
+                why += f"; lỗi poll gần nhất {err[e.label]}"
+            rows.append({"order_id": o.id, "ticker": o.ticker, "side": o.side, "oid": c["oid"],
+                         "qty": c["qty"], "filled": c.get("filled", 0), "last_seen": why})
+            e._journal("ATC_POSTCLOSE_TIMEOUT", o, c["oid"], c["qty"],
+                       note=f"quá {deadline:%H:%M} ICT: {why} — đối soát email khớp lệnh")
+        if not e.state.get("_atc_postclose_timeout"):
+            _publish_bot_event("status", "ATC_POSTCLOSE_TIMEOUT", {
+                "account": e.label, "plan_date": e.plan.plan_date, "children": rows,
+                "note": f"Quá {deadline:%H:%M} ICT vẫn còn lệnh chưa về trạng thái cuối — state/"
+                        "journal CÓ THỂ thiếu fill ATC. Đối soát email khớp lệnh DNSE (EOD leg 3)."})
+            # Ghi cờ NGAY SAU lời gọi ngoài (§5): kill đúng giữa 2 dòng ⇒ chạy lại bắn thêm 1 event
+            # (at-least-once, chấp nhận — mất cảnh báo tệ hơn trùng cảnh báo).
+            e.state["_atc_postclose_timeout"] = now_ict().isoformat(timespec="seconds")
+            e._save_state()
+
+
 def run_session(executors, once=False, max_cycles=None, force_phase=None):
     """Vòng lặp xuyên phiên cho 1..N account. Sổ participation dùng chung —
     truyền cùng 1 dict `shared` khi tạo các Executor (run_accounts lo việc này)."""
@@ -2176,6 +2305,20 @@ def run_session(executors, once=False, max_cycles=None, force_phase=None):
             for e in executors:
                 e.cancel_all_open("EOD")
                 e._save_state()
+            try:
+                _await_postclose_fills(executors)
+            except Exception as ex:   # chờ ATC là bổ trợ — không được chặn write_report/_reconcile_net_fills
+                print(f"[exec] ⚠ lỗi khi chờ kết quả ATC: {ex}")
+                for e in executors:
+                    try:
+                        e._journal("ATC_POSTCLOSE_ERROR", note=str(ex))
+                        e._save_state()
+                    except Exception:
+                        pass
+                _publish_bot_event("error", "ATC_POSTCLOSE_ERROR", {
+                    "accounts": [e.label for e in executors], "error": str(ex),
+                    "note": "Lỗi trong vòng chờ kết quả ATC sau đóng cửa — state/journal CÓ THỂ "
+                            "thiếu fill ATC. Đối soát email khớp lệnh DNSE (EOD leg 3)."})
             break
 
         if once or (max_cycles and cycles >= max_cycles):
