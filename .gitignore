@@ -48,3 +48,7 @@ agents/Taylor/probe_fa_rebuild/fundamental_rating_probe.csv
 #      GitHub backup for 3+ days. Work always lands on master before cleanup, so
 #      nothing of value is lost by never tracking them.
 agents/wt-*/
+
+# Phase 1 kb_nightly.sh ghi events_buffer atomic: tmp + os.replace (c9edd4c6). Bị kill giữa
+# chừng thì file tạm này nằm lại — không bao giờ commit.
+kb/events_buffer.md.tmp
