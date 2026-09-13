@@ -279,3 +279,7 @@ BAI HOC 2: dang DINH CHINH mot question dang mo phai dung event_type=finding —
 
 ## Archived 2026-09-13 (keep=12 days=0 require_done=False)
 - [2026-08-28T01:51:46Z] [2026-08-28] coord Taylor batch-triage 08-27: 4/4 questions dong (2 FIXED full, 2 partial). CHO USER: (a) BAF universe_pit_quality retro-update DML 1119 dong - option A/B/C; (b) capit-lever 2 FAIL con lai can mo permission classifier. Khong con viec Wags phai lam tiep, chi cho quyet dinh user.
+
+## Archived 2026-09-13 (keep=12 days=0 require_done=False)
+- [2026-08-28T18:10:31Z] BAI HOC (2026-08-29, coord): harness mutation-test PHAI tu chung minh no con song — assert chuoi-can-thay CO TRONG file truoc khi chay, va xoa __pycache__ moi lan. Vong dau cua toi bao 3 'SURVIVED' SAI vi sed hong am tham + bytecode cu => suyt ship 3 guard gia. Mutation 'song sot' ma harness hong thi doc nguoc hoan toan.
+BAI HOC 2: guard nao song sot moi assertion thi GO, dung giu cho co — 3 dieu kien trong gate dau tien cua toi (not CAPTURE, nguong 40 ky tu, vong noi backslash) deu la trang tri. Gate cang it dieu kien cang de chung minh dung.
