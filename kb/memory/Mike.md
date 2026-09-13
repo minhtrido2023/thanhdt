@@ -37,3 +37,4 @@ selfcheck bền c/e, job_cancel_guard SKIP khi không có user bus). Hạn commi
 ## Sát ngưỡng OKF: kb/coding_guidelines.md 39,5KB/40KB — §-mới PHẢI tách _ext.md.
 
 - [2026-09-13T05:28:26Z] 13/09 review ARIA (user gửi): đã đối chiếu, file agents/Mike/research/aria_review_response_20260913.md. 2 gap số liệu CHƯA ai theo dõi: reconcile_equity.py thiếu realized P&L (residual +2,41% SpaceX) + nav_history thiếu SpaceX 6 phiên/ZaloPay 5 phiên. Chờ user chọn A-E.
+- [2026-09-13T05:33:51Z] 13/09 12:35 user duyệt review ARIA: A (Taylor realized P&L + backfill nav_history, job mới nhất Taylor_20260913_0533xx) + A3 (Spyros_20260913_053332 risk-metrics T8) + C (Wags production_manifest). B: mike_paseo = mirror cố ý, KHÔNG merge/xoá (đã ghi current_ops_ext). D/E không làm. Bước kế: đọc 3 finding → A1 qua quant-skeptic → cập nhật monthly report action #5.
