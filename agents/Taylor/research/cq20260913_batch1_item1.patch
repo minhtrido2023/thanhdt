@@ -1,0 +1,444 @@
+diff --git a/WorkingClaude/loan_package_multi_account_selfcheck.py b/WorkingClaude/loan_package_multi_account_selfcheck.py
+new file mode 100644
+index 00000000..9c8d4261
+--- /dev/null
++++ b/WorkingClaude/loan_package_multi_account_selfcheck.py
+@@ -0,0 +1,242 @@
++#!/usr/bin/env python3
++"""Selfcheck — cq-20260913 batch1 #1: gói vay default KHÔNG được rò giữa các account dùng chung
++MỘT DNSEClient (`_DNSE_POOL` theo credentials_file; ZaloPay/SpaceX/RocketX cùng credentials=None).
++
++Bug (brokers.py connect() cũ): `self.client.loan_package_id = self._loan_package_id` ⇒ account
++connect sau đè default của account trước; `_resolve_loan_package_id`/`_validate_lever_package`
++và dnse_api `place_order`/`ppse` (`lp = loan_package_id or self.loan_package_id`) đọc lại giá trị
++đã bị đè. Đã xảy ra thật: dnse_raw 2026-08-11 ZaloPay resolve default=1841.
++
++Dựng payload bằng CODE THẬT: `dnse_api.DNSEClient` thật (place_order/ppse/loan_packages thật),
++chỉ `_request` bị thay bằng bộ ghi (không mạng). Danh sách gói theo account lấy từ dnse_raw thật
++(SpaceX mainboard [1841 N, 1840 M], UPCOM [1122]; ZaloPay mainboard [1826, 1769], UPCOM [1258];
++credentials default 1258).
++
++Kiểm:
++  A. Tiến trình NHIỀU account (connect SpaceX→RocketX→ZaloPay, gọi xen kẽ): mỗi account ra đúng
++     gói của CHÍNH nó; ca lệnh T2 14/09 ZaloPay TV1 buy 200 cash_only ⇒ loanPackageId 1258.
++  B. Tiến trình MỘT account: payload bản mới == bản base (git) TỪNG BYTE, cho cả 3 account
++     — tức sửa lỗi rò KHÔNG đổi hành vi cron hiện tại (1 account/tiến trình).
++  C. Tiến trình nhiều account == tiến trình một account (bản mới).
++  D. RED control: bản base ở tiến trình nhiều account CHO RA gói sai (SpaceX bán ra 1122).
++
++Chạy: source wc_env.sh && env -u TZ MIKE_BOT_TEST_MODE=1 $DNA_PYEXE loan_package_multi_account_selfcheck.py
++"""
++import importlib.util
++import json
++import os
++import subprocess
++import sys
++import tempfile
++
++os.environ.setdefault("MIKE_BOT_TEST_MODE", "1")
++WC = os.path.dirname(os.path.abspath(__file__))
++sys.path.insert(0, WC)
++
++import dnse_api                                        # noqa: E402
++import trading_bot.brokers as B                        # noqa: E402
++
++# Base = commit repo ngoài NGAY TRƯỚC bản vá #1 (GHIM CỐ Ý: hợp đồng "1 account từng byte").
++BASE_REF = os.environ.get("LOANPKG_SELFCHECK_BASE_REF", "24df0f76")
++CRED_DEFAULT = 1258
++ACC = {"SpaceX": ("0002023347", 1841), "RocketX": ("000ROCKETX", 1122),
++       "ZaloPay": ("0001743768", None)}
++UPCOM = {"TV1", "DRI"}
++# SAB: gói N lạ đứng TRƯỚC gói default ⇒ chỉ resolver đọc ĐÚNG default account mới giữ default
++ODD = {"SAB": {"0002023347": [(9999, "N"), (1841, "N"), (1840, "M")],
++               "000ROCKETX": [(9999, "N"), (1122, "N")],
++               "0001743768": [(9999, "N"), (1258, "N")]}}
++PKGS = {  # account_id -> (mainboard list, upcom list) — (id, type)
++    "0002023347": ([(1841, "N"), (1840, "M")], [(1122, "N")]),
++    "000ROCKETX": ([(1122, "N")], [(1122, "N")]),
++    "0001743768": ([(1826, "N"), (1769, "M")], [(1258, "N")]),
++}
++FAILS, N = [], 0
++
++
++def check(name, cond, detail=""):
++    global N
++    N += 1
++    print(f"  {'PASS' if cond else 'FAIL'}  {name}{(' — ' + str(detail)) if detail else ''}")
++    if not cond:
++        FAILS.append(name)
++
++
++def load_base():
++    top = subprocess.run(["git", "-C", WC, "rev-parse", "--show-toplevel"],
++                         capture_output=True, text=True, check=True).stdout.strip()
++    rel = os.path.relpath(os.path.join(WC, "trading_bot", "brokers.py"), top)
++    src = subprocess.run(["git", "-C", top, "show", f"{BASE_REF}:{rel}"],
++                         capture_output=True, text=True, check=True).stdout
++    with tempfile.TemporaryDirectory(prefix="loanpkg_base_") as d:
++        path = os.path.join(d, "brokers_base.py")
++        open(path, "w", encoding="utf-8").write(src)
++        spec = importlib.util.spec_from_file_location("trading_bot._brokers_base_lp", path)
++        mod = importlib.util.module_from_spec(spec)
++        spec.loader.exec_module(mod)
++    return mod
++
++
++def real_client(sent, tmp):
++    c = dnse_api.DNSEClient(api_key="k", api_secret="s", otp_type="email_otp",
++                            loan_package_id=CRED_DEFAULT,
++                            token_cache=os.path.join(tmp, "no_token.json"))
++    c.trading_token, c.token_expiry = "fake", 4102444800   # has_trading_token() True, không mạng
++
++    def _request(method, path, query=None, body=None, trading=False):
++        if path.endswith("/loan-packages"):
++            acc = path.split("/")[2]
++            main, up = PKGS[acc]
++            sym = (query or {}).get("symbol")
++            lst = ODD[sym][acc] if sym in ODD else (up if sym in UPCOM else main)
++            return {"loanPackages": [{"id": i, "type": t} for i, t in lst]}
++        if path == "/accounts/orders":
++            sent.append(("order", body["accountNo"], json.dumps(body, sort_keys=True)))
++            return {"id": len(sent)}
++        if path.endswith("/ppse"):
++            sent.append(("ppse", path.split("/")[2], json.dumps(query, sort_keys=True)))
++            return {"qmaxBuy": 1000, "pp0Buy": 1e8}
++        raise AssertionError(f"request không mong đợi: {method} {path}")
++    c._request = _request
++    return c
++
++
++def brokers_for(mod, labels, tmp):
++    """Dựng + connect THẬT (connect() của module) các broker dùng chung MỘT client pool."""
++    sent = []
++    client = real_client(sent, tmp)
++    mod._DNSE_POOL.clear()
++    mod._DNSE_POOL[os.path.abspath(mod.DEFAULT_DNSE_CREDENTIALS)] = client
++    out = {}
++    for lb in labels:
++        acc, lp = ACC[lb]
++        b = mod.DNSEBroker(account_id=acc, label=lb, loan_package_id=lp)
++        b._raw_log = None
++        b.connect()
++        out[lb] = b
++    return out, sent
++
++
++def script(b):
++    """Chuỗi thao tác cố định cho 1 account; trả index để cắt `sent` theo account."""
++    b.place_order("HPG", 100, "buy", price=25000)
++    b.place_order("HPG", 100, "sell", price=25000)
++    b.place_order("TV1", 200, "buy", price=20000, cash_only=True)
++    b.place_order("VNM", 100, "buy", price=60000, loan_package_id=1840)
++    b.place_order("TV1", 100, "buy", price=20000, loan_package_id=1840)
++    b.get_max_buy_qty("HPG", 25000)
++    b.get_buying_power("TV1", 20000)
++    b.get_buying_power("VNM", 60000, loan_package_id=1840)
++    b.place_order("SAB", 100, "buy", price=50000)
++    b.place_order("SAB", 100, "buy", price=50000, loan_package_id=7777)
++
++
++def by_account(sent):
++    d = {}
++    for kind, acc, payload in sent:
++        d.setdefault(acc, []).append((kind, payload))
++    return d
++
++
++def lp_of(entry):
++    kind, payload = entry
++    p = json.loads(payload)
++    return p.get("loanPackageId", "<KHÔNG CÓ KEY>")
++
++
++def main():
++    base = load_base()
++    print(f"[base = {BASE_REF}:trading_bot/brokers.py]")
++    tmp = tempfile.mkdtemp(prefix="loanpkg_sc_")
++    order3 = ["SpaceX", "RocketX", "ZaloPay"]
++
++    print("\nA. nhiều account, bản mới — connect SpaceX→RocketX→ZaloPay, gọi xen kẽ")
++    bs, sent = brokers_for(B, order3, tmp)
++    for lb in order3:
++        script(bs[lb])
++    multi_new = by_account(sent)
++    sp, rx, zp = (multi_new[ACC[x][0]] for x in order3)
++    check("client dùng chung KHÔNG bị ghi đè (vẫn gói credentials)",
++          bs["ZaloPay"].client.loan_package_id == CRED_DEFAULT, bs["ZaloPay"].client.loan_package_id)
++    exp = {  # (SpaceX, RocketX, ZaloPay) theo thứ tự script()
++        0: ("buy HPG", 1841, 1122, 1826),
++        1: ("sell HPG", 1841, 1122, 1258),
++        2: ("buy TV1 cash_only", 1122, 1122, 1258),
++        3: ("buy VNM lever 1840 (ZaloPay/RocketX không hợp lệ ⇒ default account)", 1840, 1122, 1258),
++        4: ("buy TV1 lever 1840 (không hợp lệ ⇒ default account)", 1841, 1122, 1258),
++        5: ("ppse qmax HPG", "1841", "1122", "1258"),
++        6: ("ppse pp0 TV1 (không truyền gói)", "1841", "1122", "1258"),
++        7: ("ppse pp0 VNM lever 1840", "1840", "1840", "1840"),
++        8: ("buy SAB (default hợp lệ nhưng không đứng đầu)", 1841, 1122, 1258),
++        9: ("buy SAB lever 7777 (không hợp lệ ⇒ default account)", 1841, 1122, 1258),
++    }
++    for i, (nm, e_sp, e_rx, e_zp) in exp.items():
++        got = (lp_of(sp[i]), lp_of(rx[i]), lp_of(zp[i]))
++        check(f"[{nm}] SpaceX/RocketX/ZaloPay = {e_sp}/{e_rx}/{e_zp}", got == (e_sp, e_rx, e_zp), got)
++    zp_tv1 = json.loads(zp[2][1])
++    check("ca T2 14/09: ZaloPay TV1 buy 200 cash_only ⇒ loanPackageId 1258 (= lệnh thật 08-11→14)",
++          zp_tv1.get("loanPackageId") == 1258 and zp_tv1["quantity"] == 200
++          and zp_tv1["symbol"] == "TV1" and zp_tv1["side"] == "NB", zp_tv1)
++
++    print("\nB. một account/tiến trình: bản mới == base TỪNG BYTE")
++    single_new = {}
++    for lb in order3:
++        for mod, tag in ((B, "new"), (base, "base")):
++            bs1, s1 = brokers_for(mod, [lb], tmp)
++            script(bs1[lb])
++            single_new.setdefault(lb, {})[tag] = s1
++        check(f"[{lb}] payload new == base ({len(single_new[lb]['new'])} request)",
++              single_new[lb]["new"] == single_new[lb]["base"])
++
++    print("\nC. nhiều account (bản mới) == một account (bản mới)")
++    for lb in order3:
++        acc = ACC[lb][0]
++        one = [(k, p) for k, _a, p in single_new[lb]["new"]]
++        check(f"[{lb}] multi == single", multi_new[acc] == one)
++
++    print("\nD. RED control: base ở tiến trình nhiều account rò gói")
++    bsb, sentb = brokers_for(base, order3, tmp)
++    for lb in order3:
++        script(bsb[lb])
++    mb = by_account(sentb)
++    got_sp_sell = lp_of(mb[ACC["SpaceX"][0]][1])
++    got_zp_sell = lp_of(mb[ACC["ZaloPay"][0]][1])
++    check("base: SpaceX sell ra 1122 (gói RocketX) — bug tái hiện", got_sp_sell == 1122, got_sp_sell)
++    check("base: ZaloPay sell ra 1122 (không phải 1258) — bug tái hiện", got_zp_sell == 1122, got_zp_sell)
++    check("base: multi ≠ single cho SpaceX (bằng chứng bug có thật trong harness)",
++          mb[ACC["SpaceX"][0]] != [(k, p) for k, _a, p in single_new["SpaceX"]["base"]])
++
++    print("\nE. plan_funding_gate._effective_loan_package nhánh lever:unvalidated ⇒ default CỦA account")
++    from trading_bot.plan_funding_gate import _effective_loan_package
++
++    class _O:
++        ticker, side, cash_only, loan_package_id = "VNM", "buy", False, 1840
++    for mod, tag, exp_lp in ((B, "new", 1841), (base, "base", 1841)):
++        bs1, _ = brokers_for(mod, ["SpaceX", "RocketX"], tmp)   # client dùng chung, SpaceX trước
++        sb = bs1["SpaceX"]
++        sb._validate_lever_package = lambda *a: 1 / 0            # ép nhánh không kiểm được
++        eff, src = _effective_loan_package(_O(), sb)
++        sent0 = len(_)
++        sb.__dict__.pop("_validate_lever_package")
++        sb.place_order("VNM", 100, "buy", price=60000, loan_package_id=7777)  # invalid ⇒ default
++        wire = json.loads(_[sent0][2])["loanPackageId"]
++        if tag == "new":
++            check(f"[{tag}] gate đo gói {eff} == gói lệnh đi ra {wire} == 1841 ({src})",
++                  eff == wire == exp_lp, (eff, wire))
++            old_gate = getattr(sb.client, "loan_package_id", None)   # _account_default_package cũ
++            check(f"[{tag}] RED: gate CŨ (đọc client) trên broker mới đo gói {old_gate} ≠ {wire}",
++                  old_gate != wire, (old_gate, wire))
++        else:
++            check(f"[{tag}] RED: base gate/lệnh lệch hoặc sai gói ({eff}, {wire})",
++                  not (eff == wire == exp_lp), (eff, wire))
++
++    print(f"\n{N - len(FAILS)}/{N} PASS")
++    if FAILS:
++        print("FAIL:", FAILS)
++        return 1
++    print("ALL PASS")
++    return 0
++
++
++if __name__ == "__main__":
++    sys.exit(main())
+diff --git a/WorkingClaude/loan_package_resolution_selfcheck.py b/WorkingClaude/loan_package_resolution_selfcheck.py
+index c1b288b0..82a68ba1 100644
+--- a/WorkingClaude/loan_package_resolution_selfcheck.py
++++ b/WorkingClaude/loan_package_resolution_selfcheck.py
+@@ -164,12 +164,16 @@ def main():
+                 and 'getattr(o, "loan_package_id"' not in qmax_call, qmax_call.strip())
+ 
+     # ── 8. Lệnh BÁN không cash_only ⇒ place_order KHÔNG resolve theo mã (bug 08-10) ──────
+-    print("[8] Lệnh BÁN (không cash_only, không đòn bẩy) — place_order phải gửi lp=None")
++    # cq-20260913 #1: broker nay truyền TƯỜNG MINH gói default CỦA account (trước đây gửi None
++    # và dnse_api tự rơi về client.loan_package_id dùng chung giữa các account) ⇒ trên dây
++    # y hệt bản cũ trong tiến trình 1 account. Điều bug 08-10 cấm là RESOLVE THEO MÃ cho lệnh
++    # bán (gói UPCOM/1826 ⇒ "deal not found"), không phải gói default.
++    print("[8] Lệnh BÁN (không cash_only, không đòn bẩy) — gói default account, KHÔNG resolve theo mã")
+     b = make_broker([UPCOM_PKG])
+     b.place_order("BID", 600, "sell", price=18000, cash_only=False, loan_package_id=None)
+     sent = b.client.sent[-1][1]
+-    ok &= check("place_order gửi lp=None cho lệnh BÁN (DNSE tự chọn deal)", sent is None,
+-                f"sent={sent}")
++    ok &= check("place_order gửi gói DEFAULT account cho lệnh BÁN (không resolve theo mã)",
++                sent == ACCOUNT_DEFAULT and sent != UPCOM_PKG, f"sent={sent}")
+ 
+     # ── 9. Lệnh MUA vẫn resolve theo mã như [1]/[2] (không hồi quy khi vá #8) ───────────
+     print("[9] Lệnh MUA UPCOM sau khi vá #8 — vẫn resolve như trước (không hồi quy)")
+diff --git a/WorkingClaude/trading_bot/brokers.py b/WorkingClaude/trading_bot/brokers.py
+index 40ed76e0..76cedf38 100644
+--- a/WorkingClaude/trading_bot/brokers.py
++++ b/WorkingClaude/trading_bot/brokers.py
+@@ -486,7 +486,7 @@ class DNSEBroker(BrokerBase):
+         self._auto_otp = auto_otp
+         self.quote_only = quote_only
+         self.credentials_file = credentials_file
+-        self._loan_package_id = loan_package_id  # per-account override; applied after connect()
++        self._loan_package_id = loan_package_id  # per-account; KHÔNG ghi lên client dùng chung — xem _account_default_lp
+         self.client = None
+         self._quote_cache = {}      # symbol -> (ts, Quote)
+         self._secdef_cache = {}     # symbol -> dict (trần/sàn/ref — tĩnh trong ngày)
+@@ -531,8 +531,6 @@ class DNSEBroker(BrokerBase):
+             otp = fetch_dnse_otp(timeout=120, sent_after=send_ts)
+             self.client.create_trading_token(otp)
+             print(f"[dnse] auto-OTP: trading-token OK ({self.label}, hạn 8h)")
+-        if self._loan_package_id is not None:
+-            self.client.loan_package_id = self._loan_package_id
+         if not self.client.has_trading_token():
+             print(f"[dnse] ⚠ chưa có trading-token ({self.label}) — inquiry OK, "
+                   f"đặt lệnh sẽ bị từ chối (cần --otp; email_otp: gửi mã bằng "
+@@ -540,6 +538,22 @@ class DNSEBroker(BrokerBase):
+         print(f"[dnse] kết nối OK [{self.label}] tiểu khoản {self.account_id}")
+         return self
+ 
++    def _account_default_lp(self):
++        """Gói vay DEFAULT của CHÍNH account này: `loan_package_id` của profile nếu có, không thì
++        gói trong credentials file (`client.loan_package_id` — broker không còn ghi đè nó).
++
++        Trước cq-20260913 #1, connect() GHI gói profile lên `self.client`, mà `_DNSE_POOL` cache
++        MỘT DNSEClient cho mỗi credentials_file và ZaloPay/SpaceX/RocketX dùng chung
++        credentials_file=None ⇒ account connect sau đè default của account trước. Đã xảy ra
++        thật: dnse_raw 2026-08-11 ZaloPay `loan_packages_resolve` default=1841 (gói SpaceX,
++        bot_execute.py lặp mọi profile trong 1 tiến trình). Mọi call place_order/ppse của broker nay truyền giá trị
++        này TƯỜNG MINH; ngữ nghĩa trong tiến trình 1 account giữ nguyên từng byte (ZaloPay
++        profile None ⇒ gói credentials 1258, đúng như các lệnh TV1 thật 08-11→14)."""
++        lp = getattr(self, "_loan_package_id", None)   # getattr: selfcheck dựng qua __new__
++        if lp is not None:
++            return lp
++        return getattr(self.client, "loan_package_id", None)
++
+     def get_cash(self):
+         bal = self.client.balances(self.account_id)
+         self._log_raw("balances", bal)
+@@ -638,10 +652,13 @@ class DNSEBroker(BrokerBase):
+         cả tiền bán chờ về T+0 — availableCash thì chưa (xem BrokerBase docstring). Mọi
+         lỗi → None (caller rơi về check get_cash cũ, không nới lỏng khi không chắc)."""
+         try:
++            lp_sent = (loan_package_id if loan_package_id is not None
++                       else self._account_default_lp())
+             r = self.client.ppse(self.account_id, symbol, int(price),
+-                                 loan_package_id=loan_package_id)
++                                 loan_package_id=lp_sent)
+             self._log_raw("ppse", {"symbol": symbol, "price": price,
+-                                   "loan_package_id": loan_package_id, "resp": r})
++                                   "loan_package_id": loan_package_id,
++                                   "loan_package_id_sent": lp_sent, "resp": r})
+             v = _fnum(qget(r, "qmaxBuy", "qmaxbuy"))
+             return int(v) if v is not None and v >= 0 else None
+         except Exception:
+@@ -653,10 +670,13 @@ class DNSEBroker(BrokerBase):
+         loanPackageId đang dùng (đo được 2026-07-28 ZaloPay cash-only: pp0Buy 25,54M trong
+         khi availableCash chỉ 5,68M). Mọi lỗi → None, KHÔNG suy ra từ get_cash()."""
+         try:
++            lp_sent = (loan_package_id if loan_package_id is not None
++                       else self._account_default_lp())
+             r = self.client.ppse(self.account_id, symbol, int(price),
+-                                 loan_package_id=loan_package_id)
++                                 loan_package_id=lp_sent)
+             self._log_raw("ppse", {"symbol": symbol, "price": price,
+-                                   "loan_package_id": loan_package_id, "resp": r})
++                                   "loan_package_id": loan_package_id,
++                                   "loan_package_id_sent": lp_sent, "resp": r})
+             v = _fnum(qget(r, "pp0Buy", "pp0buy"))
+             return float(v) if v is not None and v >= 0 else None
+         except Exception:
+@@ -913,7 +933,7 @@ class DNSEBroker(BrokerBase):
+         reject. Fix cũ ("bỏ trường") cũng sai: DNSE bắt buộc loanPackageId → HTTP 400.
+ 
+         Chọn ID (query GET /accounts/{acc}/loan-packages?symbol=X):
+-          - default account (self.client.loan_package_id) CÓ trong danh sách gói hợp lệ
++          - default account (_account_default_lp()) CÓ trong danh sách gói hợp lệ
+             của symbol → dùng default (BAL/LAG/CAPIT mainboard KHÔNG đổi hành vi).
+           - default KHÔNG có (như TV1) → ưu tiên gói type='N' (thuần tiền mặt) trước
+             type='M' (margin), rồi tới gói đầu tiên trong danh sách.
+@@ -923,7 +943,7 @@ class DNSEBroker(BrokerBase):
+         restart mỗi phiên sáng/chiều → cache tự làm mới)."""
+         if symbol in self._loan_pkg_cache:
+             return self._loan_pkg_cache[symbol]
+-        default = getattr(self.client, "loan_package_id", None)
++        default = self._account_default_lp()
+         resolved = default
+         try:
+             raw = self.client.loan_packages(self.account_id, symbol=symbol)
+@@ -962,7 +982,7 @@ class DNSEBroker(BrokerBase):
+         key = (symbol, str(want))
+         if key in cache:
+             return cache[key]
+-        default = getattr(self.client, "loan_package_id", None)
++        default = self._account_default_lp()
+         try:
+             pkgs = self._extract_loan_pkgs(
+                 self.client.loan_packages(self.account_id, symbol=symbol))
+@@ -1006,11 +1026,15 @@ class DNSEBroker(BrokerBase):
+             # gói vay đó, và deal PARK/vị thế cũ thường không nằm trong gói đó → HTTP 400
+             # "deal not found" (bug 2026-08-10, 08-07→c22bd1c mở rộng nhầm sang cả BÁN).
+             lp = None
++        # lp None (lệnh BÁN) ⇒ gói default CỦA account này, tường minh — trước đây dnse_api tự
++        # rơi về client.loan_package_id (dùng chung giữa account, xem _account_default_lp).
++        lp_sent = lp if lp is not None else self._account_default_lp()
+         r = self.client.place_order(self.account_id, symbol, qty=int(qty),
+                                     side=side, order_type=order_type, price=price,
+-                                    loan_package_id=lp)
++                                    loan_package_id=lp_sent)
+         self._log_raw("place_order", {"req": [symbol, qty, side, price, order_type],
+                                       "cash_only": cash_only, "loan_package_id": lp,
++                                      "loan_package_id_sent": lp_sent,
+                                       "lever_requested": loan_package_id,
+                                       "lever_applied": lever_ok, "lever_note": lever_note,
+                                       "resp": r})
+diff --git a/WorkingClaude/trading_bot/plan_funding_gate.py b/WorkingClaude/trading_bot/plan_funding_gate.py
+index 3f95c9f3..d024a77f 100644
+--- a/WorkingClaude/trading_bot/plan_funding_gate.py
++++ b/WorkingClaude/trading_bot/plan_funding_gate.py
+@@ -128,7 +128,13 @@ _EPS = 1e-9
+ 
+ def _account_default_package(broker):
+     """Gói vay mặc định của account — ĐÚNG giá trị `DNSEBroker._validate_lever_package` trả về
+-    khi gói chỉ định không dùng được (`self.client.loan_package_id`)."""
++    khi gói chỉ định không dùng được (`DNSEBroker._account_default_lp()`: gói profile, không thì
++    gói credentials). KHÔNG đọc thẳng `broker.client.loan_package_id`: client dùng chung giữa
++    các account cùng credentials (cq-20260913 #1) ⇒ SpaceX sẽ đo bằng gói credentials 1258
++    trong khi lệnh đi ra bằng 1841. Broker không có hàm đó (paper/test) ⇒ đọc client như cũ."""
++    fn = getattr(broker, "_account_default_lp", None)
++    if callable(fn):
++        return fn()
+     return getattr(getattr(broker, "client", None), "loan_package_id", None)
+ 
+ 
+
+# ============================================================================================
+# cq-20260913 batch1 #1 — _DNSE_POOL loan_package_id cross-account leak (job Taylor_20260913_050827)
+# Base: repo ngoài /home/trido/thanhdt @ 24df0f76. arch-reviewer vòng 1 NEEDS_CHANGES → đã sửa,
+# vòng 2 APPROVE. KHÔNG apply trước 15:00 T2 14/09 (bot 09:05 chạy thẳng từ working tree).
+#
+# ÁP DỤNG (Mike, sau 15:00 T2):
+#   cd /home/trido/thanhdt
+#   git apply --check /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/cq20260913_batch1_item1.patch
+#   git apply        /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/cq20260913_batch1_item1.patch
+#
+# SELFCHECK BẮT BUỘC chạy lại (§23 brokers.py + plan_funding_gate.py là lõi; §5b):
+#   source /home/trido/thanhdt/WorkingClaude/wc_env.sh && cd /home/trido/thanhdt/WorkingClaude
+#   for f in loan_package_multi_account_selfcheck.py loan_package_resolution_selfcheck.py \
+#            cash_only_loan_package_selfcheck.py capit_lever_selfcheck.py \
+#            plan_funding_gate_selfcheck.py plan_cash_commitment_selfcheck.py; do
+#     env -u TZ MIKE_BOT_TEST_MODE=1 $DNA_PYEXE /home/trido/thanhdt/WorkingClaude/$f >/tmp/sc_$f.log 2>&1; echo "$? $f"
+#   done            # kỳ vọng: tất cả 0; loan_package_multi_account = 24/24
+#   Quét rộng: hợp các file từ mike/bin/selfcheck_scope_map.sh cho trading_bot/{brokers,strategies,
+#   config,plan_funding_gate,executor,plan}.py (50 file, đo 2026-09-13: 49 rc=0; test_trading_bot.py
+#   FAIL "quota AAA" CÓ SẴN ở commit sạch b53d26b4 — không do bản vá).
+#
+# COMMIT:
+#   cd /home/trido/thanhdt/WorkingClaude && git add loan_package_multi_account_selfcheck.py && \
+#   git commit -- trading_bot/brokers.py trading_bot/plan_funding_gate.py \
+#     loan_package_resolution_selfcheck.py loan_package_multi_account_selfcheck.py
+#
+# HỢP ĐỒNG: tiến trình 1 account (cron run_bot.sh --account X) ⇒ payload place_order/ppse TỪNG
+# BYTE như 24df0f76 (selfcheck mục B). Lệnh T2 ZaloPay TV1 buy 200 cash_only ⇒ loanPackageId 1258
+# (không phải "không có key" như dispatch giả định — log thật 08-11→14 ZaloPay TV1 đi 1258; thiếu
+# trường = HTTP 400 "loanPackageId is required", incident 07-28).
+# ============================================================================================
