@@ -8,6 +8,16 @@ monthly report đều đọc từ MỘT nguồn duy nhất, nhất quán.
 
 In ra 1 đoạn tóm tắt ngắn (dùng cho daily report — đơn giản, chỉ NAV + biến động) và ghi
 JSON chi tiết ra `data/execution_logs/nav_snapshot_{account}_{date}.json`.
+
+`--from-raw` (aria-A2, 2026-09-13): tính lại NAV cho một --date QUÁ KHỨ bị thiếu dòng, CHỈ từ
+bản ghi positions + balances cuối ngày của đúng account trong `dnse_raw_{date}.jsonl` — không gọi
+broker (đường thường luôn lấy vị thế LIVE, sai với ngày cũ đã có giao dịch sau đó). Giá = cột
+`Price` (THÔ) của BQ, KHÔNG phải `Close`: `Close` điều chỉnh hồi tố từ hôm nay ⇒ với ngày trước
+một corp-action nó lệch giá bảng điện (đo thật VHM 21/07: Close 68.200, broker 136.900). Dòng
+ghi `nav_is_estimate=True` + `nav_source`. Giá BQ lệch `marketPrice` của vị thế >5% chỉ được
+chấp nhận khi có bằng chứng cơ khí: marketPrice = giá phiên TRƯỚC (feed trễ, ca PVT/TCB 10/08)
+hoặc corp-action CONFIRMED ex_date sau --date mà Price/mult khớp (broker ghi có sớm, ca MSB
+27/08 ⇒ quy KL về trước sự kiện). Còn lại ⇒ rc=4, không ghi, không đoán.
 """
 import argparse
 import csv
@@ -95,6 +105,100 @@ def today_sell_value(account, date):
                 latest_by_child[child_oid] = (ts, float(row.get("qty") or 0),
                                                float(row.get("price") or 0))
     return sum(qty * price for _, qty, price in latest_by_child.values())
+
+
+RAW_PRICE_PREV_MATCH_PCT = 0.5   # marketPrice coi là "giá phiên trước" khi lệch ≤ ngưỡng này
+
+
+def raw_positions(account_no, date):
+    """({sym: {"qty", "marketPrice"}}, ts) từ bản ghi positions CUỐI CÙNG của account trong
+    dnse_raw_{date}.jsonl. Cùng quy tắc với `verify_account_snapshot.broker_positions_from_raw`
+    (lọc account tuyệt đối §12, gộp loan package theo mã) — thêm `ts` để kiểm bất biến
+    "vị thế mới hơn cú khớp cuối" giống balance. Không có bản ghi ⇒ (None, None)."""
+    path = os.path.join(EXEC_DIR, f"dnse_raw_{date}.jsonl")
+    if not os.path.exists(path):
+        return None, None
+    latest, latest_ts = None, None
+    with open(path, encoding="utf-8") as f:
+        for line in f:
+            try:
+                rec = json.loads(line)
+            except (json.JSONDecodeError, UnicodeDecodeError):
+                continue
+            if rec.get("kind") != "positions" or rec.get("account_no") != account_no:
+                continue
+            latest, latest_ts = rec.get("payload", {}).get("positions") or [], rec.get("ts")
+    if latest is None:
+        return None, None
+    out = {}
+    for p in latest:
+        qty = float(p.get("openQuantity") or 0)
+        if qty <= 0:
+            continue
+        row = out.setdefault(p.get("symbol"), {"qty": 0.0, "marketPrice": p.get("marketPrice")})
+        row["qty"] += qty
+    return out, latest_ts
+
+
+def bq_raw_prices(tickers, date):
+    """({tk: Price}, {tk: Price phiên trước}, lỗi) — cột `Price` THÔ đúng phiên --date (không
+    lấy phiên cũ hơn: thiếu dòng đúng ngày ⇒ mã đó thiếu giá, main() từ chối)."""
+    from verify_account_snapshot import BQ_PATH_PREFIX
+    tick_list = ",".join(f"'{t}'" for t in sorted(tickers))
+    sql = f"""
+    SELECT ticker, Price, prev_price FROM (
+      SELECT t.ticker, t.time, t.Price,
+             LAG(t.Price) OVER (PARTITION BY t.ticker ORDER BY t.time) AS prev_price
+      FROM tav2_bq.ticker AS t
+      WHERE t.ticker IN ({tick_list})
+        AND t.time BETWEEN DATE_SUB(DATE '{date}', INTERVAL 20 DAY) AND DATE '{date}')
+    WHERE time = DATE '{date}'
+    """
+    env = dict(os.environ)
+    env["PATH"] = BQ_PATH_PREFIX + ":" + env.get("PATH", "")
+    out = subprocess.run(["bq", "query", "--use_legacy_sql=false",
+                          "--project_id=lithe-record-440915-m9", "--format=json",
+                          "--max_rows=5000", sql], capture_output=True, text=True, env=env)
+    if out.returncode != 0:
+        return None, None, (out.stderr.strip() or out.stdout.strip())
+    rows = json.loads(out.stdout)
+    prices = {r["ticker"]: float(r["Price"]) for r in rows if r.get("Price") is not None}
+    prev = {r["ticker"]: float(r["prev_price"]) for r in rows if r.get("prev_price") is not None}
+    return prices, prev, None
+
+
+def classify_raw_price_gap(ticker, date, price, prev_price, market_price, tol_pct, actions=None):
+    """Giải thích lệch giữa BQ `Price` và `marketPrice` của vị thế trong dnse_raw — PURE.
+
+    Trả ("ok", None) nếu lệch ≤ tol; ("stale_market_price", None) nếu marketPrice = giá phiên
+    trước (≤RAW_PRICE_PREV_MATCH_PCT); ("early_credit", mult) nếu một corp-action CONFIRMED có
+    ex_date > date và price/mult khớp marketPrice trong tol; ngược lại ("unexplained", None).
+    """
+    if not market_price or not price:
+        return "ok", None
+    if abs(price - market_price) / market_price * 100 <= tol_pct:
+        return "ok", None
+    if prev_price and abs(prev_price - market_price) / market_price * 100 <= RAW_PRICE_PREV_MATCH_PCT:
+        return "stale_market_price", None
+    if actions is None:
+        actions = []
+        if os.path.exists(CORP_ACTIONS_FILE):
+            with open(CORP_ACTIONS_FILE, encoding="utf-8") as f:
+                actions = json.load(f).get("actions") or []
+    for a in actions:
+        if str(a.get("ticker", "")).upper() != ticker.upper():
+            continue
+        if not str(a.get("_status", "")).upper().startswith("CONFIRMED"):
+            continue
+        if str(a.get("ex_date") or "")[:10] <= date:
+            continue
+        try:
+            mult = float(a.get("qty_multiplier") or 1.0)
+        except (TypeError, ValueError):
+            continue
+        if mult != 1.0 and abs(price / mult - market_price) / market_price * 100 <= tol_pct:
+            return "early_credit", mult
+    return "unexplained", None
 
 
 def broker_positions(account_label, account_no):
@@ -291,7 +395,12 @@ def cum_dividend_double_count(account_no, date, positions, cur_bal, prev_bal,
     res["amount"] = res["delta"]
     res["tickers"] = sorted({a.ticker for a in pending})
     if pending:
-        res["expected_bq"] = sum(positions.get(a.ticker, 0) * a.per_share for a in pending)
+        # main() truyền {mã: {"qty", "marketPrice"}} (từ 2026-08-05), selfcheck truyền {mã: qty} —
+        # bản cũ nhân thẳng dict × float ⇒ TypeError ngay khi `pending` khác rỗng (lộ ra lúc
+        # backfill 22/07, aria-A2; đường live 19:10 hiếm khi có pending nên chưa từng nổ).
+        def _qty(v):
+            return float(v.get("qty") or 0) if isinstance(v, dict) else float(v or 0)
+        res["expected_bq"] = sum(_qty(positions.get(a.ticker, 0)) * a.per_share for a in pending)
         tol = max(10.0, res["delta"] * 0.005)
         if abs(res["expected_bq"] - res["delta"]) > tol:
             res["warnings"].append(
@@ -341,6 +450,9 @@ def main():
     ap.add_argument("--account-no", default=None)
     ap.add_argument("--date", required=True)
     ap.add_argument("--starting-capital", type=float, default=1_000_000_000)
+    ap.add_argument("--from-raw", action="store_true",
+                    help="backfill ngày QUÁ KHỨ chỉ từ dnse_raw_{date}.jsonl (positions+balances cuối "
+                         "ngày) + BQ Price thô, không gọi broker; ghi nav_is_estimate=True")
     args = ap.parse_args()
 
     # account_no: dùng --account-no nếu có, else tự tra secrets/trading_bot_accounts.json
@@ -385,44 +497,66 @@ def main():
 
     # verify_account_snapshot: giờ chỉ là CROSS-CHECK advisory (cost-basis/đối soát journal)
     # — NAV không còn phụ thuộc nó (xem docstring broker_positions về bug 2026-07-07).
-    snapshot_out = os.path.join(EXEC_DIR, f"verified_snapshot_{args.account}_{args.date}.json")
-    cmd = [sys.executable, os.path.join(MIKE_BIN, "verify_account_snapshot.py"),
-           "--account", args.account, "--dates", ",".join(dates), "--asof", args.date,
-           "--out", snapshot_out]
-    if account_no:
-        cmd += ["--account-no", account_no]
-    r = subprocess.run(cmd, capture_output=True, text=True)
+    import datetime as _dt
+    today_iso = _dt.date.today().isoformat()   # TZ đã ép Asia/Ho_Chi_Minh ở đầu module
+    is_today = args.date == today_iso
+    if args.from_raw and args.date >= today_iso:
+        print(f"❌ [{args.date}] --from-raw chỉ dành cho ngày QUÁ KHỨ — hôm nay dùng đường live.",
+              file=sys.stderr)
+        return 2
+
     verify_warning = None
-    if r.returncode not in (0,):
-        verify_warning = (f"verify_account_snapshot (cross-check journal) rc={r.returncode} — "
-                          f"NAV vẫn tính từ vị thế broker thật; cần xem cost-basis/đối soát riêng.")
+    if args.from_raw:
+        # verify_account_snapshot chỉ là cross-check advisory và dùng BQ `Close` điều chỉnh —
+        # chạy lại cho ngày cũ vừa sai giá vừa ghi đè file của ngày đó. Bỏ qua có chủ đích.
+        verify_warning = "from-raw: bỏ cross-check verify_account_snapshot (advisory, không vào NAV)."
+    else:
+        snapshot_out = os.path.join(EXEC_DIR, f"verified_snapshot_{args.account}_{args.date}.json")
+        cmd = [sys.executable, os.path.join(MIKE_BIN, "verify_account_snapshot.py"),
+               "--account", args.account, "--dates", ",".join(dates), "--asof", args.date,
+               "--out", snapshot_out]
+        if account_no:
+            cmd += ["--account-no", account_no]
+        r = subprocess.run(cmd, capture_output=True, text=True)
+        if r.returncode not in (0,):
+            verify_warning = (f"verify_account_snapshot (cross-check journal) rc={r.returncode} — "
+                              f"NAV vẫn tính từ vị thế broker thật; cần xem cost-basis/đối soát riêng.")
 
     # ── mtm_stock = vị thế BROKER THẬT × giá đóng cửa verified ──
-    positions = broker_positions(args.account, account_no)
+    positions_ts = None
+    if args.from_raw:
+        positions, positions_ts = raw_positions(account_no, args.date)
+    else:
+        positions = broker_positions(args.account, account_no)
     if not positions:
-        print(f"❌ [{args.date}] Không lấy được vị thế broker — KHÔNG tính NAV "
-              f"(tránh đăng số thiếu vị thế).", file=sys.stderr)
+        print(f"❌ [{args.date}] Không lấy được vị thế broker"
+              f"{' (không có bản ghi positions của account trong dnse_raw ngày này)' if args.from_raw else ''}"
+              f" — KHÔNG tính NAV (tránh đăng số thiếu vị thế).", file=sys.stderr)
         return 2
     sys.path.insert(0, MIKE_BIN)
     from verify_account_snapshot import dnse_close_prices, bq_close_prices
-    import datetime as _dt
     tickers = sorted(positions)
-    is_today = args.date == _dt.date.today().isoformat()
 
     # Quy đổi NGƯỢC vị thế broker LIVE về đúng --date lịch sử cho các mã đã dính corp-action
     # CONFIRMED có ex_date SAU --date (xem docstring confirmed_qty_multiplier_after — bug
     # 2026-09-10: VIB bonus issue credit sớm 1 phiên trước ex_date). Không áp khi is_today vì
     # khi đó vị thế LIVE đúng là vị thế thật của chính args.date, không cần quy đổi.
     corp_action_adj = {}
-    if not is_today:
+    if not is_today and not args.from_raw:   # vị thế raw là của CHÍNH --date, xem xcheck from-raw
         for t in tickers:
             mult = confirmed_qty_multiplier_after(t, args.date)
             if mult != 1.0:
                 corp_action_adj[t] = mult
                 positions[t]["qty"] = positions[t]["qty"] / mult
 
+    prev_prices = {}
     if is_today:
         prices = dnse_close_prices(tickers)
+    elif args.from_raw:
+        prices, prev_prices, _perr = bq_raw_prices(tickers, args.date)
+        if prices is None:
+            print(f"❌ [{args.date}] Không lấy được giá BQ Price: {_perr}", file=sys.stderr)
+            return 2
     else:
         prices, _perr = bq_close_prices(tickers, args.date)
         prices = prices or {}
@@ -446,7 +580,24 @@ def main():
     # RETRY tự động trong 1 cửa sổ ngắn, thay vì escalate ngay như (a).
     PRICE_XCHECK_TOLERANCE_PCT = 5.0
     mismatched = []
-    if is_today:
+    raw_price_notes = []
+    if args.from_raw:
+        for t in tickers:
+            kind, mult = classify_raw_price_gap(t, args.date, prices.get(t), prev_prices.get(t),
+                                                (positions[t] or {}).get("marketPrice"),
+                                                PRICE_XCHECK_TOLERANCE_PCT)
+            mp, cp = (positions[t] or {}).get("marketPrice"), prices.get(t)
+            if kind == "stale_market_price":
+                raw_price_notes.append(f"{t}: marketPrice {mp:,.0f} = giá phiên trước "
+                                       f"{prev_prices[t]:,.0f} (feed trễ) — dùng BQ Price {cp:,.0f}")
+            elif kind == "early_credit":
+                corp_action_adj[t] = mult
+                positions[t]["qty"] = positions[t]["qty"] / mult
+                raw_price_notes.append(f"{t}: broker ghi có corp-action sớm (Price {cp:,.0f}/{mult} ≈ "
+                                       f"marketPrice {mp:,.0f}) — quy KL về trước sự kiện")
+            elif kind == "unexplained":
+                mismatched.append((t, cp, mp, abs(cp - mp) / mp * 100))
+    elif is_today:
         for t in tickers:
             mp = (positions[t] or {}).get("marketPrice")
             cp = prices.get(t)
@@ -534,6 +685,11 @@ def main():
             for row in csv.DictReader(f):
                 if row.get("event") == "FILL" and row.get("ts", "") > last_fill_ts:
                     last_fill_ts = row["ts"]
+    if args.from_raw and last_fill_ts and (positions_ts or "") <= last_fill_ts:
+        print(f"❌ [{args.date}] Bản ghi positions trong dnse_raw ({positions_ts}) CŨ HƠN cú khớp "
+              f"cuối cùng ({last_fill_ts}) — vị thế chưa phản ánh đủ lệnh, KHÔNG backfill.",
+              file=sys.stderr)
+        return 2
     if last_fill_ts and bal.get("ts", "") <= last_fill_ts:
         print(f"❌ [{args.date}] Balance record ({bal.get('ts')}) CŨ HƠN cú khớp cuối cùng "
               f"({last_fill_ts}) — tiền chưa phản ánh đủ lệnh đã khớp, KHÔNG tính NAV. "
@@ -601,12 +757,15 @@ def main():
                        "cash": f"{cash:.0f}", "margin_debt": f"{debt:.0f}",
                        "offbook_assets": f"{offbook:.0f}", "egg_assets": f"{egg_value:.0f}",
                        "balance_ts": bal["ts"],
-                       "cum_dividend_excl": f"{cum_div['amount']:.0f}"})
+                       "cum_dividend_excl": f"{cum_div['amount']:.0f}",
+                       "nav_is_estimate": "True" if args.from_raw else "False",
+                       "nav_source": (f"backfill dnse_raw positions@{positions_ts} balances@{bal['ts']} "
+                                      f"+ BQ Price" if args.from_raw else "live")})
     hist_rows.sort(key=lambda r: r["date"])
     # `cash` = tiền THẬT của broker TRỪ cổ tức phải thu chưa qua ex-date (cum_dividend_excl),
     # để bất biến nav = mtm_stock + cash − margin_debt + offbook_assets luôn đúng trên mọi dòng.
     fieldnames = ["date", "nav", "mtm_stock", "cash", "margin_debt", "offbook_assets",
-                  "egg_assets", "balance_ts", "cum_dividend_excl"]
+                  "egg_assets", "balance_ts", "cum_dividend_excl", "nav_is_estimate", "nav_source"]
     _write_nav_history(hist_path, hist_rows, fieldnames)
 
     since_inception = nav - args.starting_capital
@@ -636,6 +795,11 @@ def main():
         lines.append(f"   ⚠️ {stale_warning}")
     if verify_warning:
         lines.append(f"   ℹ️ {verify_warning}")
+    if args.from_raw:
+        lines.append(f"   ℹ️ BACKFILL ƯỚC TÍNH (nav_is_estimate=True): positions {positions_ts}, "
+                     f"balances {bal['ts']}, giá BQ Price thô")
+        for n in raw_price_notes:
+            lines.append(f"   ℹ️ {n}")
     print("\n".join(lines))
 
     out = {"account": args.account, "date": args.date, "nav": nav,
@@ -647,6 +811,8 @@ def main():
            "stale_warning": stale_warning, "prev_nav": prev_nav, "day_change": day_change,
            "day_change_pct": day_change_pct, "since_inception": since_inception,
            "since_inception_pct": since_inception_pct, "balance_ts": bal["ts"],
+           "nav_is_estimate": bool(args.from_raw), "positions_ts": positions_ts,
+           "raw_price_notes": raw_price_notes, "corp_action_qty_adj": corp_action_adj,
            "source": "verify_account_snapshot.py (fills) + dnse_raw balances (real broker API, "
                      "chọn bản GHI CUỐI CÙNG trong ngày — balance có thể cần thời gian đối soát "
                      "cuối phiên mới phản ánh đúng, xem cảnh báo staleness nếu có) + "
