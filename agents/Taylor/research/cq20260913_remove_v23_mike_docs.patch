@@ -1,0 +1,44 @@
+diff --git a/MIKE_ext.md b/MIKE_ext.md
+index d7d347b..75c9f14 100644
+--- a/MIKE_ext.md
++++ b/MIKE_ext.md
+@@ -87,7 +87,7 @@ y hệt `context_pack.md` toàn bộ domain — tốn token vô ích; chi tiết
+ | Agent | File(s) import (qua CLAUDE.md, KHÔNG qua hook nữa — xem cost-opt #1b) | Vì sao |
+ |---|---|---|
+ | Taylor | `kb/context_pack.md` (full) + `coding_guidelines.md` | R&D xuyên domain, cắt sẽ mất thông tin; viết backtest/script thường xuyên |
+-| DollarBill | `context_safety_core.md` + `context_planning_mini.md` + `coding_guidelines.md` | Lập plan T+1 (KHÔNG cần backtest); sở hữu `bot_prepare_plan.py`/`golive_recommend_v23.py` nên cần guideline khi sửa |
++| DollarBill | `context_safety_core.md` + `context_planning_mini.md` + `coding_guidelines.md` | Lập plan T+1 (KHÔNG cần backtest); sở hữu `golive_recommend_v23.py` (bot_prepare_plan.py đã gỡ 2026-09-13) nên cần guideline khi sửa |
+ | Mafee | `context_safety_core.md` + `context_execution_mini.md` + `coding_guidelines.md` | Thực thi plan-bound (KHÔNG cần chiến lược/backtest); sở hữu `trading_bot/{executor,brokers,...}.py` — §5 Idempotent Side Effects trích dẫn TRỰC TIẾP `executor.py` làm ví dụ chuẩn |
+ | Winston | `context_safety_core.md` + `context_dataops_mini.md` + `coding_guidelines.md` | Data-ops: cần bảng BQ/registry/DT5G-trap; thêm guideline 2026-08-01 sau khi Winston viết đúng bug TZ-assumption mà §16 dạy (`dt5g_writer_watch.py`) |
+ | Spyros | `context_safety_core.md` + `context_mini.md` | Risk-audit tần suất thấp: cần kill-switch + BQ cơ bản, không cần bespoke file |
+diff --git a/agents/DollarBill/CLAUDE.md b/agents/DollarBill/CLAUDE.md
+index 2c7abba..de41d56 100644
+--- a/agents/DollarBill/CLAUDE.md
++++ b/agents/DollarBill/CLAUDE.md
+@@ -79,11 +79,11 @@ Nếu việc ĐANG DỞ mà có nguy cơ bị cắt → ghi NGAY:
+ ## Phạm vi & quy tắc riêng — Dollar Bill (Portfolio Manager)
+ **Codebase giao dịch** ở `/home/trido/thanhdt/WorkingClaude` (đường dẫn tuyệt đối; CLAUDE.md gốc tự load).
+ 
+-**File sở hữu:** `bot_prepare_plan.py`, allocator/parking V2.4, `golive_recommend_v23.py`, đối soát vị thế.
++**File sở hữu:** allocator/parking V2.4, `golive_recommend_v23.py`, đối soát vị thế.
+ 
+ **Quy trình cuối ngày (chỉ chạy ngày có giao dịch T2–T6):**
+ 1. Đọc `data/eod_account_<date>.json` (từ Mafee) + DT5G state (từ Winston) + recommendations (`golive_recommend_v23.py`).
+-2. Lập **plan ngày kế** `data/trade_plans/plan_SpaceX_<T+1>.json` (qua `bot_prepare_plan.py`), tối ưu theo **production V2.4**, **trong rule của Taylor** (`data/trading_rules.json`).
++2. Lập **plan ngày kế** `data/trade_plans/plan_SpaceX_<T+1>.json` (ghi JSON trực tiếp theo schema `trading_bot/plan.py::TradePlan` — `bot_prepare_plan.py`/V23Strategy đã GỠ 2026-09-13), tối ưu theo **production V2.4**, **trong rule của Taylor** (`data/trading_rules.json`).
+ 3. Ghi `append_event.sh DollarBill decision "plan-<T+1>" '<tóm tắt plan>'`.
+ 4. **Gửi daily report vào Discord thread `state/plan_thread_id`** (topic nhận plan hàng ngày):
+    ```bash
+diff --git a/kb/coding_guidelines_ext.md b/kb/coding_guidelines_ext.md
+index 2886444..990ab64 100644
+--- a/kb/coding_guidelines_ext.md
++++ b/kb/coding_guidelines_ext.md
+@@ -24,7 +24,7 @@ general mechanism; more accounts of this shape are expected:
+    `secrets/trading_bot_accounts.json` (`ACCOUNT_DEFAULTS` in `trading_bot/config.py`).
+ 2. **Enforcement in ONE place**: `trading_bot.plan.filter_excluded_tickers()`, called from
+    `bot_execute.py` right after `load_plan()` — applies however the plan was generated
+-   (DollarBill's LLM JSON, `bot_prepare_plan.py`'s template, a hand-edited file), so a plan
++   (DollarBill's LLM JSON or a hand-edited file; `bot_prepare_plan.py`'s template was removed 2026-09-13), so a plan
+    generator forgetting the exclusion can never place a forbidden order.
+ 3. **Size against `active_nav`, not total NAV**: `bin/compute_active_nav.py --account <label>`
+    computes `total_nav − market_value(excluded_tickers)` from LIVE broker positions/prices — no

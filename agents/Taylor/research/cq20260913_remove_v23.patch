@@ -1,0 +1,1234 @@
+diff --git a/WorkingClaude/bot_prepare_plan.py b/WorkingClaude/archive/bot_prepare_plan.py
+similarity index 100%
+rename from WorkingClaude/bot_prepare_plan.py
+rename to WorkingClaude/archive/bot_prepare_plan.py
+diff --git a/WorkingClaude/capit_exit_floor_selfcheck.py b/WorkingClaude/archive/capit_exit_floor_selfcheck.py
+similarity index 100%
+rename from WorkingClaude/capit_exit_floor_selfcheck.py
+rename to WorkingClaude/archive/capit_exit_floor_selfcheck.py
+diff --git a/WorkingClaude/bot_execute.py b/WorkingClaude/bot_execute.py
+index 4a4ec213..d23b8e23 100644
+--- a/WorkingClaude/bot_execute.py
++++ b/WorkingClaude/bot_execute.py
+@@ -598,7 +598,7 @@ def main():
+         plan = load_plan(plan_date, account=p["label"])
+         if plan is None:
+             print(f"[{p['label']}] không có plan cho {plan_date} — bỏ qua "
+-                  f"(chạy bot_prepare_plan.py trước)")
++                  f"(plan do DollarBill lập — kiểm data/trade_plans/plan_{p['label']}_{plan_date}.json)")
+             continue
+         before = len(plan.orders)
+         plan, blocked = filter_excluded_tickers(plan, p.get("excluded_tickers"))
+@@ -624,7 +624,7 @@ def main():
+         # → 1 lệnh NET ra broker; phần bù trừ là chuyển nội bộ giữa book (0 phí/spread). ĐẶT
+         # SAU filter_excluded, TRƯỚC các trần %ADV — CHỦ ĐÍCH: trần đo tác động THỊ TRƯỜNG, mà
+         # chỉ phần NET mới thật chạm thị trường (xem docstring net_offsetting_orders). Lưới an
+-        # toàn tầng chuẩn hoá plan: V23Strategy tự net sẵn, case cần gộp đến từ plan LLM-authored
++        # toàn tầng chuẩn hoá plan: case cần gộp đến từ plan LLM-authored
+         # của DollarBill. ref_price trước-net + adj giữ lại để reconcile post-fill (netting_recon).
+         pre_net_refs[p["label"]] = {o.ticker: o.ref_price for o in plan.orders}
+         plan, net_adj = net_offsetting_orders(plan)
+diff --git a/WorkingClaude/brokers_nav_shadow_selfcheck.py b/WorkingClaude/brokers_nav_shadow_selfcheck.py
+index e0641aad..1d7abf6d 100644
+--- a/WorkingClaude/brokers_nav_shadow_selfcheck.py
++++ b/WorkingClaude/brokers_nav_shadow_selfcheck.py
+@@ -3,14 +3,12 @@
+ 
+ #3 make_broker() nhánh live truyền `loan_package_id=` cho mọi BROKER_CLASSES ⇒ PHSBroker phải
+    nhận tham số (trước đây TypeError). RED control: bản brokers.py ở base (git) PHẢI ném.
+-#2 DNSEBroker.get_nav(): cờ `nav_include_egg_offbook` OFF ⇒ trả ĐÚNG TỪNG BYTE giá trị của
+-   bản trước sửa (so với module nạp từ git, cùng client giả); shadow (+egg +offbook, bộ 3 guard
+-   canonical) ghi `nav_basis_note`; shadow ném exception ⇒ get_nav vẫn trả giá trị cũ (cả OFF
+-   lẫn ON); ON + guard feed-0 từ chối ⇒ giá trị cũ; sys.path không bị đổi.
+-
+-Base so sánh = `b53d26b4` (repo ngoài, trước bản vá) — GHIM CỐ Ý: hợp đồng "OFF từng byte" là so
+-với code TRƯỚC cq-20260913. Ai cố ý đổi nhánh OFF của get_nav sau này thì cập nhật ref/assert.
+-Không kết nối DNSE/PHS thật: client giả, `_raw_log=None` (không ghi dnse_raw thật).
++
++Phần #2 (DNSEBroker.get_nav() shadow NAV_BASIS + cờ `nav_include_egg_offbook`) đã GỠ 2026-09-13
++cùng get_nav()/V23Strategy (cq-20260913-remove-v23, user duyệt "gỡ hẳn") — caller duy nhất là
++V23Strategy.build_plan, 0/148 plan 2026 dùng. Tên file giữ nguyên để không lệch production_manifest.
++
++Base so sánh = `b53d26b4` (repo ngoài, trước bản vá #3). Không kết nối PHS thật.
+ Chạy: source wc_env.sh && env -u TZ MIKE_BOT_TEST_MODE=1 $DNA_PYEXE brokers_nav_shadow_selfcheck.py
+ """
+ import importlib.util
+@@ -18,7 +16,6 @@ import os
+ import subprocess
+ import sys
+ import tempfile
+-import types
+ 
+ os.environ.setdefault("MIKE_BOT_TEST_MODE", "1")
+ WC = os.path.dirname(os.path.abspath(__file__))
+@@ -55,45 +52,6 @@ def load_base_brokers():
+     return mod, ref
+ 
+ 
+-class FakeClient:
+-    def __init__(self, bal):
+-        self.bal = bal
+-        self.loan_package_id = 1258
+-
+-    def balances(self, account_id):
+-        return self.bal
+-
+-
+-def dnse(mod, bal, label="SpaceX", flag=False):
+-    b = mod.DNSEBroker(account_id="000TEST", label=label)
+-    b.client = FakeClient(bal)
+-    b._raw_log = None
+-    b.get_positions = lambda: {"AAA": {"total": 1000, "sellable": 1000},
+-                               "BBB": {"total": 300, "sellable": 0}}
+-    px = {"AAA": 23456.0, "BBB": 101300.0}
+-    b.get_quote = lambda s: mod.Quote({"symbol": s, "lastPrice": px[s], "refPrice": px[s]})
+-    b.get_cash = lambda: 7_777_777.0
+-    if flag:
+-        b.nav_include_egg_offbook = True
+-    return b
+-
+-
+-MV = 1000 * 23456.0 + 300 * 101300.0
+-PAYLOADS = {
+-    "normal+egg": {"stock": {"totalCash": 203_656_265, "totalDebt": 50_000_000,
+-                             "availableCash": 4_821_143, "depositInterest": 12},
+-                   "egg": {"totalValue": 100_200_000}},
+-    "no-egg": {"stock": {"totalCash": 12_272_672, "totalDebt": 0, "availableCash": 5_818_854,
+-                         "depositInterest": 318}},
+-    "totalCash0<avail (T18p)": {"stock": {"totalCash": 0, "totalDebt": 0,
+-                                          "availableCash": 5_000_000, "depositInterest": 3},
+-                                "egg": {"totalValue": 1_000_000}},
+-    "block all-zero": {"stock": {"totalCash": 0, "totalDebt": 0, "availableCash": 0,
+-                                 "depositInterest": 0}, "egg": {"totalValue": 0}},
+-    "missing totalDebt": {"stock": {"totalCash": 9_000_000, "availableCash": 1_000_000}},
+-}
+-
+-
+ def main():
+     base, ref = load_base_brokers()
+     print(f"[base = {ref}:trading_bot/brokers.py]")
+@@ -116,77 +74,6 @@ def main():
+         check("RED control: bản base PHẢI TypeError", False, "không ném")
+     except TypeError as e:
+         check("RED control: bản base TypeError", "loan_package_id" in str(e), e)
+-    bd = B.make_broker(dict(cfg, nav_include_egg_offbook=True),
+-                       profile=dict(prof, broker="dnse", label="dnse_t"))
+-    check("make_broker dnse live gán cờ từ cfg", bd.nav_include_egg_offbook is True)
+-    bd2 = B.make_broker(cfg, profile=dict(prof, broker="dnse", label="dnse_t"))
+-    check("make_broker dnse live cờ mặc định OFF", bd2.nav_include_egg_offbook is False)
+-
+-    print("\n#2 get_nav OFF == base từng byte, shadow note, fail-safe")
+-    for name, bal in PAYLOADS.items():
+-        old = dnse(base, bal).get_nav()
+-        path_before = list(sys.path)
+-        nb = dnse(B, bal)
+-        v = nb.get_nav()
+-        check(f"[{name}] OFF == base ({old!r})", v == old and repr(v) == repr(old)
+-              and type(v) is type(old), f"new={v!r}")
+-        check(f"[{name}] sys.path không đổi", sys.path == path_before)
+-        check(f"[{name}] note NAV_BASIS old=", (nb.nav_basis_note or "").startswith(
+-            f"NAV_BASIS old={old:.0f} "), nb.nav_basis_note)
+-        nb_on = dnse(B, bal, flag=True)
+-        on = nb_on.get_nav()
+-        egg = float((bal.get("egg") or {}).get("totalValue") or 0)
+-        st = bal["stock"]
+-        guard = (all(not v for v in st.values()) or
+-                 (st.get("totalCash") is not None and st.get("availableCash") is not None
+-                  and st["totalCash"] < st["availableCash"]) or
+-                 st.get("totalDebt") is None)
+-        if guard:
+-            check(f"[{name}] ON + guard canonical từ chối ⇒ old", on == old and "new=None" in
+-                  nb_on.nav_basis_note and nb_on.nav_basis_note.endswith("=ON"),
+-                  nb_on.nav_basis_note)
+-        else:
+-            exp = st["totalCash"] - st["totalDebt"] + MV + egg + 0.0   # SpaceX offbook=0
+-            check(f"[{name}] ON = cash_basis+mv+egg+offbook ({exp:,.0f})", on == exp, on)
+-            check(f"[{name}] ON − OFF == egg+offbook", on - old == egg, on - old)
+-
+-    bal = PAYLOADS["normal+egg"]
+-    old = dnse(base, bal).get_nav()
+-
+-    def boom(self, *a, **k):
+-        raise RuntimeError("shadow nổ cố ý")
+-    for flag in (False, True):
+-        nb = dnse(B, bal, flag=flag)
+-        nb._nav_owned_shadow = types.MethodType(boom, nb)
+-        v = nb.get_nav()
+-        check(f"shadow ném, cờ={'ON' if flag else 'OFF'} ⇒ trả old", v == old, v)
+-        check(f"shadow ném, cờ={'ON' if flag else 'OFF'} ⇒ note nguyên văn lỗi",
+-              "RuntimeError: shadow nổ cố ý" in nb.nav_basis_note, nb.nav_basis_note)
+-    # Loader canonical hỏng (file mất / import lỗi) ⇒ vẫn old
+-    real_loader = B._load_compute_active_nav
+-    try:
+-        B._load_compute_active_nav = lambda: (_ for _ in ()).throw(FileNotFoundError("mất file"))
+-        nb = dnse(B, bal, flag=True)
+-        v = nb.get_nav()
+-        check("loader canonical lỗi, cờ ON ⇒ old + note lỗi", v == old and
+-              "FileNotFoundError" in nb.nav_basis_note, nb.nav_basis_note)
+-        # offbook: profile có manual_offbook ⇒ cộng vào (dùng cash_basis THẬT)
+-        can = real_loader()
+-        stub = types.SimpleNamespace(cash_basis=can.cash_basis,
+-                                     get_account_profile=lambda lb: {"manual_offbook_assets_vnd": 5_000_000})
+-        B._load_compute_active_nav = lambda: stub
+-        nb = dnse(B, bal, flag=True)
+-        v = nb.get_nav()
+-        check("offbook profile 5tr cộng vào ON", v == old + 100_200_000 + 5_000_000, v - old)
+-    finally:
+-        B._load_compute_active_nav = real_loader
+-    # nhánh OFF không gọi thêm API balances nào (shadow dùng lại cùng bản đọc)
+-    calls = []
+-    nb = dnse(B, bal)
+-    orig = nb.client.balances
+-    nb.client.balances = lambda a: (calls.append(a), orig(a))[1]
+-    nb.get_nav()
+-    check("get_nav chỉ gọi balances 1 lần (như base)", len(calls) == 1, calls)
+ 
+     print(f"\n{N - len(FAILS)}/{N} PASS")
+     if FAILS:
+diff --git a/WorkingClaude/dcf_check_selfcheck.py b/WorkingClaude/dcf_check_selfcheck.py
+index f7040dd9..c8aeea5c 100644
+--- a/WorkingClaude/dcf_check_selfcheck.py
++++ b/WorkingClaude/dcf_check_selfcheck.py
+@@ -413,7 +413,7 @@ class TestDcfHistoryLog(unittest.TestCase):
+         print("  [19] path không ghi được → nuốt lỗi, không raise: OK")
+ 
+     def test_20_v23strategy_path_does_not_log(self):
+-        """Chỉ đường REPORT ghi lịch sử — _dcf_check_for_order (V23Strategy dùng) KHÔNG tự ghi."""
++        """Chỉ đường REPORT ghi lịch sử — _dcf_check_for_order (caller: report/due_diligence) KHÔNG tự ghi."""
+         from trading_bot.strategies import _dcf_check_for_order
+         with tempfile.TemporaryDirectory() as tmp:
+             path = os.path.join(tmp, "h.csv")
+diff --git a/WorkingClaude/excluded_tickers_selfcheck.py b/WorkingClaude/excluded_tickers_selfcheck.py
+index 36d7e513..773100cc 100644
+--- a/WorkingClaude/excluded_tickers_selfcheck.py
++++ b/WorkingClaude/excluded_tickers_selfcheck.py
+@@ -9,8 +9,8 @@ touch). Rather than a one-off hack, `excluded_tickers` is a general per-account
+ (trading_bot/config.py ACCOUNT_DEFAULTS) enforced in ONE place —
+ `trading_bot.plan.filter_excluded_tickers()`, called from `bot_execute.py` right after
+ `load_plan()` — so it works uniformly for any future account with this field set, regardless
+-of how its plan was generated (DollarBill's LLM-authored JSON, bot_prepare_plan.py's
+-templated strategy.build_plan(), or hand-edited).
++of how its plan was generated (DollarBill's LLM-authored JSON or hand-edited; the templated
++bot_prepare_plan.py/strategy.build_plan() path was removed 2026-09-13).
+ 
+ Run: python excluded_tickers_selfcheck.py   (exit 0 = all pass)
+ """
+diff --git a/WorkingClaude/exdate_price_frame_selfcheck.py b/WorkingClaude/exdate_price_frame_selfcheck.py
+index 8adf8bb4..9ed85dc5 100644
+--- a/WorkingClaude/exdate_price_frame_selfcheck.py
++++ b/WorkingClaude/exdate_price_frame_selfcheck.py
+@@ -3,7 +3,7 @@
+ """Selfcheck cho cổng GDKHQ (ngày giao dịch không hưởng quyền) — D1/D2/D3.
+ 
+ Thiết kế: `mike/agents/Taylor/research/exdate_order_pipeline_20260815/README.md` §8-§9.
+-Code: `trading_bot/price_frame.py` (D1), `trading_bot/exdate_gate.py` (D2), 3 chỗ D3.
++Code: `trading_bot/price_frame.py` (D1), `trading_bot/exdate_gate.py` (D2), D3 (#1 gỡ 2026-09-13 cùng V23Strategy).
+ 
+ HAI CA CHỨNG MINH NGƯỢC (README §9.1) là lý do file này tồn tại — chúng KHÔNG phải test tổng
+ hợp mà là **hai sự cố có thật, dựng lại từ artifact nguyên bản trên đĩa**:
+@@ -555,28 +555,10 @@ check("cửa sổ sự kiện phủ được cả khe CUỐI TUẦN T-1(T6 08-14
+                                      "BID", "2026-08-01")[0])
+ 
+ # ══════════════════════════════════════════════════════════════════════════════════════
+-print("\n── 8. D3 — ba chỗ đã đóng, kiểm bằng HÀNH VI chứ không phải bằng grep ──")
++print("\n── 8. D3 — các chỗ đã đóng, kiểm bằng HÀNH VI chứ không phải bằng grep ──")
+ # ══════════════════════════════════════════════════════════════════════════════════════
+-from trading_bot.strategies import V23Strategy                      # noqa: E402
+-
+-
+-class DumbQuoteBroker:
+-    def get_quote(self, tk):
+-        class Q:
+-            ref = last = None
+-
+-            def ok(self):
+-                return False
+-        return Q()
+-
+-
+-s = V23Strategy.__new__(V23Strategy)
+-notes = []
+-px = V23Strategy._price(s, DumbQuoteBroker(), "MBB", 24250.0, notes, ex_tickers={"MBB"})
+-check("D3#1 strategies._price(): quote câm + GDKHQ ⇒ TỪ CHỐI fallback `recs_close` hệ cũ",
+-      px is None and any("TỪ CHỐI fallback" in n for n in notes))
+-px2 = V23Strategy._price(s, DumbQuoteBroker(), "FPT", 73200.0, [], ex_tickers={"MBB"})
+-check("D3#1 ngày thường/mã thường: fallback `recs_close` GIỮ NGUYÊN hành vi cũ", px2 == 73200.0)
++# D3#1 (`strategies.V23Strategy._price` từ chối fallback `recs_close` khi GDKHQ) — case đã GỠ
++# 2026-09-13 cùng V23Strategy (cq-20260913-remove-v23): code được test không còn tồn tại.
+ 
+ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "mike", "bin"))
+ import merge_park_orders as mpo                                     # noqa: E402
+diff --git a/WorkingClaude/money_path_freshness_selfcheck.py b/WorkingClaude/money_path_freshness_selfcheck.py
+index 9c0c8bf2..5f86d663 100644
+--- a/WorkingClaude/money_path_freshness_selfcheck.py
++++ b/WorkingClaude/money_path_freshness_selfcheck.py
+@@ -16,7 +16,7 @@ report) still had spots reading stale-by-construction data or failing silently:
+      does not stop an LLM plan generator from grabbing a handy 'close' as ref_price; after
+      the rename there is NO field called 'close' left in the plan context to grab.
+      Downstream: Mafee's BQ pusher parses new+old header (BQ column stays 'close' — stable
+-     audit schema); trading_bot strategies reads new name with old-name fallback.
++     audit schema). (The trading_bot/strategies.py reader was removed 2026-09-13.)
+   C. F5  bq_freshness_check.sh — gate checks the BQ table but DollarBill reads FILES
+      (golive_state_today.json + recommendations CSV) written by pipeline steps that only
+      WARN on failure. The REAL _assert_fresh_artifact() (extracted from the script) must
+@@ -178,9 +178,8 @@ check("B3 Mafee pusher: new-header CSV → BQ column close=121.5, renamed col no
+ check("B4 Mafee pusher: old-header CSV (pre-rename archive) still parses close=24.8",
+       ro[0]["close"] == 24.8, f"row={ro[0]}")
+ 
+-st_src = read(os.path.join(WC, "trading_bot", "strategies.py"))
+-check("B5 strategies.py paper-mirror reads renamed field (with old-name fallback for archives)",
+-      RENAMED in st_src and 'r.get("close")' in st_src)
++# B5 (trading_bot/strategies.py V23Strategy paper-mirror reads renamed field) — REMOVED
++# 2026-09-13 together with V23Strategy (cq-20260913-remove-v23): the reader no longer exists.
+ 
+ # ══════════════════════════════════════════════════════════════════════════════
+ print("C. F5 — bq_freshness_check.sh: artifact mtime assertion dies BEFORE DollarBill dispatch")
+diff --git a/WorkingClaude/test_trading_bot.py b/WorkingClaude/test_trading_bot.py
+index ca846cf3..6adc457a 100644
+--- a/WorkingClaude/test_trading_bot.py
++++ b/WorkingClaude/test_trading_bot.py
+@@ -1,15 +1,18 @@
+ # -*- coding: utf-8 -*-
+ """Smoke test offline cho trading_bot — fixture giả lập, không chạm PHS/BQ.
+ 
+-Cover: build plan (mirror/recs/ETF/sell-sync/HALF_SIZE/LAG T+1) + executor
+-slicing/fill/journal/report + ĐA TÀI KHOẢN (plan riêng từng account, chạy chung
+-1 session, quota participation tính gộp fleet).
++Cover: executor slicing/fill/journal/report + ĐA TÀI KHOẢN (plan riêng từng account, chạy
++chung 1 session, quota participation tính gộp fleet) + DNSE mapping + gap-adaptive timing.
++
++Phần "build plan" (V23Strategy mirror/recs/ETF/sell-sync/HALF_SIZE/LAG T+1) đã GỠ 2026-09-13
++cùng V23Strategy (cq-20260913-remove-v23): plan cho run_session nay là fixture dựng tay, cùng
++qty/giá/thứ tự ưu tiên mà V23Strategy sinh ra ở 24df0f76 (bỏ dcf_check/dd_check thông tin —
++executor không dùng chúng để chặn, và chúng đọc bq_cache thật nên làm test không kín).
+ 
+   python test_trading_bot.py
+ """
+ 
+ import datetime as dt
+-import json
+ import os
+ import shutil
+ import sys
+@@ -21,26 +24,17 @@ os.environ.setdefault("MIKE_BOT_TEST_MODE", "1")
+ if hasattr(sys.stdout, "reconfigure"):
+     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+ 
+-import pandas as pd
+-
+ from trading_bot import config as cfgmod
+-from trading_bot import strategies as strat
+ from trading_bot import brokers as brk
+ from trading_bot import plan as planmod
+ from trading_bot import executor as execmod
+ from trading_bot.brokers import PaperBroker
+ from trading_bot.executor import Executor, run_session
+-from trading_bot.strategies import V23Strategy
+ 
+ TMP = tempfile.mkdtemp(prefix="bot_test_")
+ print(f"fixture dir: {TMP}")
+ 
+ # --- chuyển hướng mọi path sang TMP ---
+-strat.STATUS_FILE = os.path.join(TMP, "status.json")
+-strat.PT_LOGS = os.path.join(TMP, "logs.csv")
+-strat.PT_POSITIONS = os.path.join(TMP, "positions.csv")
+-strat.PT_TRANSACTIONS = os.path.join(TMP, "tx.csv")
+-strat.GOLIVE_OUT = TMP
+ planmod.PLAN_DIR = os.path.join(TMP, "plans")
+ execmod.EXEC_DIR = os.path.join(TMP, "exec")
+ execmod.STOP_FILE = os.path.join(TMP, "BOT_STOP")
+@@ -49,34 +43,6 @@ brk.EXEC_DIR = os.path.join(TMP, "exec")
+ brk.PAPER_STATE_FILE = os.path.join(TMP, "paper_main.json")
+ 
+ # --- fixtures ---
+-SIG = "2026-06-11"
+-json.dump({"date": SIG, "signal_date": SIG, "state": 3, "state_name": "NEUTRAL",
+-           "capit_signal_today": False, "n_capit_basket": 0},
+-          open(strat.STATUS_FILE, "w", encoding="utf-8"))
+-
+-pd.DataFrame([
+-    ["BAL", "AAA", "MOMENTUM", 80.0, 10_000, 3, 10.0, "FULL"],
+-    ["BAL", "BBB", "MEGA", 70.0, 50_000, 8, 10.0, "HALF_SIZE"],
+-    ["LAG", "CCC", "LAG_HI", None, 20_000, 5, 10.0, "UPCOMING T+1 phiên tới"],
+-    ["LAG", "DDD", "LAG_LO", None, 30_000, 5, 8.0, "UPCOMING T+5 phiên tới"],  # loại
+-], columns=["book", "ticker", "play_type", "ta", "close", "sector",
+-            "weight_pct", "status"]).to_csv(
+-    os.path.join(TMP, f"golive_v23_recommendations_{SIG}.csv"), index=False)
+-
+-pd.DataFrame([{
+-    "ymd": SIG, "nav": 50e9, "BAL_cash": 20e9, "BAL_stocks": 4e9, "BAL_etf": 1e9,
+-    "SECOND_cash": 25e9, "SECOND_stocks": 0.0, "SECOND_etf": 0.0,
+-    "cash": 45e9, "cash_etf": 1e9, "stocks_mv": 4e9, "num_holdings": 1,
+-    "num_transactions": 1, "state": 3, "active_leg": "LAG_ALLOC", "ens_signal": 0,
+-}]).to_csv(strat.PT_LOGS, index=False)
+-pd.DataFrame([{"ticker": "XYZ", "holding_id": "h1", "shares": 100_000, "book": "BAL"}]
+-             ).to_csv(strat.PT_POSITIONS, index=False)
+-pd.DataFrame([{"ymd": SIG, "ticker": "XYZ", "action": "buy", "buy_amount": 4e9,
+-               "sell_amount": 0, "fee": 0, "adj_price": 40_000, "shares": 100_000,
+-               "holding_id": "h1", "play_type": "MOMENTUM", "cash_after": 0,
+-               "reason": "SIGNAL_ENTRY", "book": "BAL"}]).to_csv(
+-    strat.PT_TRANSACTIONS, index=False)
+-
+ REFS = {"AAA": 10_000, "BBB": 50_000, "CCC": 20_000, "DDD": 30_000,
+         "XYZ": 40_000, "OLD": 12_000, "E1VFVN30": 25_000}
+ AAA_DAY_VOL = 20_000          # KL ngày nhỏ → test quota participation gộp fleet
+@@ -111,11 +77,26 @@ brokerA._save()
+ brokerB = PaperBroker(init_cash=500_000_000, fee_rate=cfg["paper_fee_rate"],
+                       quote_source=fq, label="testB").connect()
+ 
+-# ============ 1) build plan từng account (scale theo NAV riêng) ============
+-planA = V23Strategy().build_plan(cfg, brokerA)
+-planA.account = "testA"
+-planB = V23Strategy().build_plan(cfg, brokerB)
+-planB.account = "testB"
++# ============ 1) plan fixture từng account (qty = đầu ra V23Strategy cũ, NAV A 1.060M / B 500M) ============
++def _fixture_plan(account, orders):
++    return planmod.TradePlan(
++        plan_date="2026-06-12", signal_date="2026-06-11", strategy="test",
++        strategy_version="1", state=3, state_name="NEUTRAL", nav_basis={}, account=account,
++        orders=[planmod.PlannedOrder(id=i, ticker=t, side=sd, qty=q, ref_price=float(REFS[t]),
++                                     book=bk, play_type=pt, priority=pr,
++                                     urgency="high" if sd == "sell" else "normal")
++                for i, t, sd, q, bk, pt, pr in orders])
++
++
++_BUYS = lambda xyz, aaa, ccc, bbb, etf: [
++    ("BUY-XYZ-01", "XYZ", "buy", xyz, "MIRROR", "", 2),
++    ("BUY-AAA-02", "AAA", "buy", aaa, "BAL", "MOMENTUM", 3),
++    ("BUY-CCC-03", "CCC", "buy", ccc, "LAG", "LAG_HI", 4),
++    ("BUY-BBB-04", "BBB", "buy", bbb, "BAL", "MEGA", 5),
++    ("BUY-E1VFVN30-05", "E1VFVN30", "buy", etf, "ETF", "ETF_PARK", 6)]
++planA = _fixture_plan("testA", [("SELL-OLD-01", "OLD", "sell", 5_000, "SYNC", "", 1)]
++                      + _BUYS(2_100, 5_300, 2_600, 500, 800))
++planB = _fixture_plan("testB", _BUYS(1_000, 2_500, 1_200, 200, 400))
+ print()
+ print(planA.summary())
+ print()
+@@ -124,22 +105,10 @@ pA, pB = planA.save(), planB.save()
+ assert pA != pB and "testA" in pA and "testB" in pB, "plan phải namespace theo account"
+ assert os.path.exists(brokerA.state_file) and os.path.exists(brokerB.state_file)
+ assert brokerA.state_file != brokerB.state_file, "paper state phải tách theo account"
+-
+-osides = {(o.ticker, o.side) for o in planA.orders}
+-assert ("OLD", "sell") in osides, "thiếu lệnh SELL sync OLD"
+-assert {("AAA", "buy"), ("BBB", "buy"), ("CCC", "buy"), ("XYZ", "buy"),
+-        ("E1VFVN30", "buy")} <= osides
+-assert not any(o.ticker == "DDD" for o in planA.orders), "DDD (T+5) phải bị loại"
+-assert ("OLD", "sell") not in {(o.ticker, o.side) for o in planB.orders}
+-
+-scaleA = planA.nav_basis["scale"]
+ aaaA = next(o for o in planA.orders if o.ticker == "AAA")
+-bbbA = next(o for o in planA.orders if o.ticker == "BBB")
+-exp_aaa = int(25e9 * scaleA * 0.10 / 10_000 // 100) * 100
+-assert abs(aaaA.qty - exp_aaa) <= 100, f"AAA qty {aaaA.qty} ≠ ~{exp_aaa}"
+-assert abs(bbbA.qty - exp_aaa * (10_000 / 50_000) * 0.5) <= 100, "BBB phải HALF_SIZE"
+ aaaB = next(o for o in planB.orders if o.ticker == "AAA")
+-assert aaaB.qty < aaaA.qty, "account B NAV nhỏ hơn → qty nhỏ hơn"
++# fixture phải đủ lớn để quota fleet AAA thật sự CẮN (nếu không, mục 2 thành vô nghĩa)
++assert aaaA.qty + aaaB.qty > int(cfg["max_participation"] * AAA_DAY_VOL)
+ 
+ # ============ 2) run_session đa tài khoản, quota participation gộp ============
+ loadA = planmod.load_plan(planA.plan_date, account="testA")
+diff --git a/WorkingClaude/trading_bot/README.md b/WorkingClaude/trading_bot/README.md
+index e9808e4f..ee72ad62 100644
+--- a/WorkingClaude/trading_bot/README.md
++++ b/WorkingClaude/trading_bot/README.md
+@@ -3,44 +3,37 @@
+ Bot 2 bước, tách **chuẩn bị plan** (EOD) khỏi **thực thi** (trong phiên):
+ 
+ ```
+-EOD ngày T  (sau golive_recommend_v23.py + pt_v22_dt5g.py):
+-    python bot_prepare_plan.py          →  data/trade_plans/plan_<T+1>.json
++EOD ngày T:  plan_<account>_<T+1>.json trong data/trade_plans/ do DollarBill lập
++             (strategy "V2.4", có duyệt user) — repo này KHÔNG còn entry script dựng plan.
+ 
+ Sáng ngày T+1 (trước 09:15, để chạy cả ngày):
+     python bot_execute.py               →  cắt lệnh nhỏ, đặt/đuổi/hủy, journal, report
+ ```
+ 
++> `bot_prepare_plan.py` + `V23Strategy`/`strategies.REGISTRY` (mirror paper book V2.3) đã
++> **gỡ 2026-09-13** (cq-20260913-remove-v23, user duyệt): 0/148 plan 2026 dùng, và chạy nó
++> không `--account` ghi đè plan đã duyệt của mọi account enabled. Bản cũ:
++> `archive/bot_prepare_plan.py` + git history của `trading_bot/strategies.py`.
++
+ ## Kiến trúc
+ 
+ | File | Vai trò |
+ |---|---|
+ | `trading_bot/config.py` | cấu hình — `data/trading_bot_config.json` (tự tạo mặc định) |
+-| `trading_bot/strategies.py` | **strategy registry** — mỗi version chiến lược 1 class |
++| `trading_bot/strategies.py` | helper DCF lens dùng chung cho report/due-diligence (lớp strategy V23 đã gỡ) |
+ | `trading_bot/plan.py` | schema TradePlan/PlannedOrder + lưu/đọc JSON |
+ | `trading_bot/brokers.py` | broker interface + `PHSBroker` + `DNSEBroker` + `PaperBroker` |
+ | `dnse_api.py` (workspace root) | wrapper DNSE OpenAPI v2 (HMAC sign, ký giống SDK chính thức) |
+ | `trading_bot/executor.py` | vòng lặp xuyên phiên: slicing, chase giá, ATC sweep, resume |
+ | `trading_bot/vn_market.py` | phiên HOSE, lô 100, bước giá, biên độ |
+-| `bot_prepare_plan.py` / `bot_execute.py` | entry scripts |
++| `bot_execute.py` | entry script |
+ | `test_trading_bot.py` | smoke test offline (fixture giả, không chạm PHS/BQ) |
+ 
+-## 1. Strategy versioning
+-
+-`strategies.REGISTRY` ánh xạ tên → class. Ra version mới = viết class mới
+-(vd `V24Strategy`), đăng ký, đổi `"strategy"` trong config. Plan/journal cũ
+-không bị ảnh hưởng (mỗi plan ghi kèm `strategy` + `strategy_version`).
+-
+-**V23Strategy** (hiện tại): *mirror* paper book V2.3 sang tài khoản thật, scale
+-theo NAV (`scale = NAV_thật / NAV_paper`):
++## 1. Strategy versioning — ĐÃ GỠ
+ 
+-- target = vị thế paper (`pt_v22_dt5g_open_positions.csv`) ∪ khuyến nghị vào
+-  lệnh T+1 (`golive_v23_recommendations_<date>.csv`: BAL FULL/HALF_SIZE, LAG
+-  "UPCOMING T+1", CAPIT khi `capit_fired`) ∪ park ETF (E1VFVN30, theo giá trị
+-  `BAL_etf + SECOND_etf` trong logs).
+-- lệnh = chênh lệch target − danh mục thật (mã thừa → SELL sync, ưu tiên 1).
+-- giá: quote PHS → close trong recs → transactions paper (fallback).
+-- **Trễ chấp nhận ở v1**: exit paper ngày T+1 được sync ở plan T+2 (exit V2.3
+-  là hold-expiry/stop, không gấp). Double-count tránh bằng `max(mirror, recs)`.
++Lớp `StrategyBase`/`V23Strategy`/`REGISTRY` (mirror paper book V2.3, scale theo NAV) đã gỡ
++2026-09-13 (cq-20260913-remove-v23). Mỗi plan vẫn ghi kèm `strategy` + `strategy_version`
++(plan live: `"V2.4"`); khoá config `"strategy"` còn lại chỉ là di sản, không có reader.
+ 
+ ## 2. Executor — slicing & chống impact
+ 
+@@ -104,7 +97,7 @@ Khai báo trong `data/trading_bot_accounts.json` (tự tạo template lần đ
+ - Mỗi account: plan riêng (`plan_<label>_<date>.json`), paper state riêng
+   (`bot_paper_<label>.json`), exec state/journal/report riêng
+   (`exec_<label>_<date>_*`), config riêng qua `overrides`.
+-- `bot_prepare_plan.py` / `bot_execute.py` mặc định chạy MỌI account `enabled`;
++- `bot_execute.py` mặc định chạy MỌI account `enabled`;
+   giới hạn bằng `--account <label>` (lặp lại được).
+ - **Điều phối fleet**: mọi account chạy trong MỘT vòng lặp `run_session()`,
+   dùng chung sổ participation — tổng KL (đã khớp + đang treo) của TOÀN BỘ
+@@ -137,8 +130,6 @@ chung `"broker": "phs"`). Executor/strategy không đổi — chỉ adapter khá
+ ## 5. Lệnh thường dùng
+ 
+ ```bash
+-python bot_prepare_plan.py --dry          # xem plan không ghi file
+-python bot_prepare_plan.py                # ghi plan cho phiên kế tiếp
+ python bot_execute.py                     # thực thi plan hôm nay (paper)
+ python bot_execute.py --once              # 1 vòng debug
+ python bot_execute.py --force-phase MORNING   # test ngoài giờ
+diff --git a/WorkingClaude/trading_bot/__init__.py b/WorkingClaude/trading_bot/__init__.py
+index 19634961..2f5fb576 100644
+--- a/WorkingClaude/trading_bot/__init__.py
++++ b/WorkingClaude/trading_bot/__init__.py
+@@ -2,8 +2,8 @@
+ """trading_bot — bot giao dịch theo plan V2.3, broker PHS FLEX (DNSE sau này).
+ 
+ Pipeline:
+-  1. EOD (sau khi golive_recommend_v23 + pt_v22_dt5g chạy xong):
+-         python bot_prepare_plan.py            → data/trade_plans/plan_<T+1>.json
++  1. EOD: data/trade_plans/plan_<account>_<T+1>.json do DollarBill lập (strategy "V2.4").
++         (bot_prepare_plan.py + V23Strategy đã gỡ 2026-09-13, cq-20260913-remove-v23.)
+   2. Trong phiên T+1:
+          python bot_execute.py                 → cắt lệnh nhỏ, đặt/đuổi/hủy, journal
+ 
+diff --git a/WorkingClaude/trading_bot/brokers.py b/WorkingClaude/trading_bot/brokers.py
+index 1268de8f..69be80c7 100644
+--- a/WorkingClaude/trading_bot/brokers.py
++++ b/WorkingClaude/trading_bot/brokers.py
+@@ -56,18 +56,6 @@ def get_flex_client(credentials_file=None):
+     return c
+ 
+ 
+-def _load_compute_active_nav():
+-    """Nạp `mike/bin/compute_active_nav.py` theo file-path (cùng cách plan._signal_holds_matcher)
+-    — nguồn canonical của cơ sở tiền NAV §25, dùng cho shadow DNSEBroker.get_nav()."""
+-    import importlib.util
+-    mod_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+-                            "..", "mike", "bin", "compute_active_nav.py")
+-    spec = importlib.util.spec_from_file_location("_can_compute_active_nav", mod_path)
+-    mod = importlib.util.module_from_spec(spec)
+-    spec.loader.exec_module(mod)
+-    return mod
+-
+-
+ # Pool DNSEClient theo credentials file (api_key/secret + trading-token cache chung)
+ _DNSE_POOL = {}
+ 
+@@ -274,16 +262,6 @@ class BrokerBase:
+         """→ Quote | None."""
+         raise NotImplementedError
+ 
+-    def get_nav(self):
+-        cash = self.get_cash()
+-        pos = self.get_positions()
+-        mv = 0.0
+-        for sym, p in pos.items():
+-            q = self.get_quote(sym)
+-            px = (q.last or q.ref) if q and q.ok() else 0
+-            mv += p["total"] * (px or 0)
+-        return cash + mv
+-
+     def place_order(self, symbol, qty, side, price=None, order_type="LO",
+                     cash_only=False, loan_package_id=None):
+         """→ order_id (str). cash_only=True: lệnh tiền mặt thuần — chọn gói vay HỢP LỆ
+@@ -474,8 +452,6 @@ class DNSEBroker(BrokerBase):
+ 
+     name = "dnse"
+     can_trade_live = True
+-    nav_include_egg_offbook = False     # make_broker() gán từ cfg; xem get_nav()
+-    nav_basis_note = None
+ 
+     def __init__(self, account_id=None, otp=None, quote_only=False,
+                  credentials_file=None, label="main", auto_otp=False,
+@@ -610,14 +586,13 @@ class DNSEBroker(BrokerBase):
+ 
+     def _cash_totalcash_minus_debt(self):
+         """`totalCash − totalDebt` (§25 "SỞ HỮU") từ payload `balances` thô — cơ sở đúng cho
+-        NAV/get_nav(), KHÁC get_cash() (§25 "TIÊU ĐƯỢC NGAY" — availableCash-family, thiếu
++        NAV (caller: plan.py nav_live), KHÁC get_cash() (§25 "TIÊU ĐƯỢC NGAY" — availableCash-family, thiếu
+         tiền bán chờ về/cổ tức phải thu). None nếu DNSE không trả đủ hai field, HOẶC nếu cả
+         ba field tiền (totalCash/totalDebt/availableCash) đều = 0 (bẫy fail-closed §25/
+         `park_holdings._cash_fields_all_zero` — DNSE thỉnh thoảng trả block toàn 0 do lỗi
+         API tạm thời, sự cố thật 2026-07-27, KHÔNG phải tiền về 0 thật)."""
+         bal = self.client.balances(self.account_id)
+         self._log_raw("balances", bal)
+-        self._last_balances = bal       # cùng bản đọc cho nhánh shadow của get_nav()
+         row = bal[0] if isinstance(bal, list) and bal else bal
+         if isinstance(row, dict) and isinstance(row.get("stock"), dict):
+             row = row["stock"]
+@@ -630,66 +605,6 @@ class DNSEBroker(BrokerBase):
+             return None
+         return tc - td
+ 
+-    def get_nav(self):
+-        """NAV = totalCash−totalDebt (§25 cơ sở "SỞ HỮU") + market value vị thế — KHÔNG dùng
+-        `get_cash()` làm cơ sở NAV (đó là sức mua tức thời, coding_guidelines.md §25). Field
+-        tiền thiếu ⇒ rơi về `get_cash()` (hành vi cũ) thay vì raise, vì get_nav() không có
+-        hợp đồng fail-closed như compute_active_nav.py.
+-
+-        Cờ `nav_include_egg_offbook` (config, mặc định OFF — cq-20260913): OFF trả đúng giá
+-        trị cũ; LUÔN tính thêm bản "SỞ HỮU" đầy đủ (+ egg.totalValue + manual_offbook) làm
+-        SHADOW, ghi `self.nav_basis_note` (`NAV_BASIS old=… new=… diff=…`). Shadow lỗi/không
+-        dựng được ⇒ note mang nguyên văn lỗi + trả giá trị cũ, kể cả khi cờ ON."""
+-        cash = self._cash_totalcash_minus_debt()
+-        if cash is None:
+-            cash = self.get_cash()
+-        pos = self.get_positions()
+-        mv = 0.0
+-        for sym, p in pos.items():
+-            q = self.get_quote(sym)
+-            px = (q.last or q.ref) if q and q.ok() else 0
+-            mv += p["total"] * (px or 0)
+-        old = cash + mv
+-        new = None
+-        try:
+-            new, why = self._nav_owned_shadow(getattr(self, "_last_balances", None), mv)
+-            if new is None:
+-                self.nav_basis_note = f"NAV_BASIS old={old:.0f} new=None diff=n/a ({why}) → dùng old"
+-            else:
+-                diff = f"{(new - old) / old * 100:+.2f}%" if old else "n/a"
+-                self.nav_basis_note = f"NAV_BASIS old={old:.0f} new={new:.0f} diff={diff} ({why})"
+-        except Exception as e:
+-            new = None
+-            self.nav_basis_note = (f"NAV_BASIS old={old:.0f} new=LỖI diff=n/a "
+-                                   f"({type(e).__name__}: {e}) → dùng old")
+-        self.nav_basis_note += (" · cờ nav_include_egg_offbook="
+-                                f"{'ON' if self.nav_include_egg_offbook else 'OFF'}")
+-        print(f"[dnse:{self.label}] {self.nav_basis_note}")
+-        if self.nav_include_egg_offbook and new is not None:
+-            return new
+-        return old
+-
+-    def _nav_owned_shadow(self, bal, mv):
+-        """NAV "SỞ HỮU" đầy đủ (§25) = cash_basis + mv + egg.totalValue + manual_offbook →
+-        (VND|None, lý do). Cơ sở tiền + bộ 3 guard feed-0 lấy từ helper canonical
+-        `mike/bin/compute_active_nav.cash_basis` (không chép lại); offbook đọc profile qua
+-        `compute_active_nav.get_account_profile`, cùng nguồn với NAV plan V2.4."""
+-        if bal is None:
+-            return None, "không có bản đọc balances"
+-        saved_path = list(sys.path)     # module + cash_basis tự chèn sys.path — trả lại nguyên
+-        try:
+-            can = _load_compute_active_nav()
+-            cash, detail = can.cash_basis(bal)
+-            profile = can.get_account_profile(self.label) or {}
+-        finally:
+-            sys.path[:] = saved_path
+-        if cash is None:
+-            return None, f"cash_basis từ chối: {detail.get('reason')}"
+-        row = bal[0] if isinstance(bal, list) and bal else bal
+-        egg = float(((row or {}).get("egg") or {}).get("totalValue") or 0)
+-        offbook = float(profile.get("manual_offbook_assets_vnd") or 0)
+-        return cash + mv + egg + offbook, f"egg={egg:.0f} offbook={offbook:.0f}"
+-
+     def get_max_buy_qty(self, symbol, price, loan_package_id=None):
+         """Sức mua tối đa theo mã+giá qua GET /accounts/{acc}/ppse (qmaxBuy). ppse đã tính
+         cả tiền bán chờ về T+0 — availableCash thì chưa (xem BrokerBase docstring). Mọi
+@@ -1599,13 +1514,10 @@ def make_broker(cfg, otp=None, need_quotes=True, profile=None, quote_src=None):
+     if btype not in BROKER_CLASSES:
+         raise KeyError(f"broker '{btype}' không hỗ trợ — có: {sorted(BROKER_CLASSES)}")
+     if cfg["mode"] == "live":
+-        b = BROKER_CLASSES[btype](account_id=p.get("account_id"), otp=otp,
+-                                  credentials_file=p.get("credentials_file"),
+-                                  label=p["label"],
+-                                  loan_package_id=p.get("loan_package_id"))
+-        if btype == "dnse":
+-            b.nav_include_egg_offbook = bool(cfg.get("nav_include_egg_offbook", False))
+-        return b
++        return BROKER_CLASSES[btype](account_id=p.get("account_id"), otp=otp,
++                                     credentials_file=p.get("credentials_file"),
++                                     label=p["label"],
++                                     loan_package_id=p.get("loan_package_id"))
+     if quote_src is None and need_quotes:
+         quote_src = get_quote_source(btype, p.get("credentials_file"))
+     return PaperBroker(init_cash=cfg["paper_init_cash"],
+diff --git a/WorkingClaude/trading_bot/config.py b/WorkingClaude/trading_bot/config.py
+index 4c07b372..be8cad8e 100644
+--- a/WorkingClaude/trading_bot/config.py
++++ b/WorkingClaude/trading_bot/config.py
+@@ -21,7 +21,8 @@ DEFAULTS = {
+     # --- chung ---
+     "mode": "paper",                  # "paper" | "live"
+     "broker": "phs",                  # "phs" | "dnse" (per-account override được)
+-    "strategy": "v23",                # key trong strategies.REGISTRY
++    "strategy": "v23",                # di sản: không còn reader (lớp strategy v23 + bot_prepare_plan
++                                      #   gỡ 2026-09-13); giữ khoá vì secrets config còn ghi nó
+     "account_id": None,               # None → tiểu khoản đầu tiên từ PHS
+     "etf_symbol": "E1VFVN30",
+     "include_etf_park": True,         # mirror cả phần park ETF của paper book
+@@ -30,11 +31,6 @@ DEFAULTS = {
+     "paper_init_cash": 1_000_000_000, # tiền ảo khởi tạo cho PaperBroker (VND)
+     "min_order_value": 5_000_000,     # bỏ qua lệnh < 5M VND (dust)
+     "qty_tolerance_pct": 0.05,        # |lệch| < 5% target → không phát lệnh sync
+-    "nav_include_egg_offbook": False, # DNSEBroker.get_nav() cộng egg.totalValue + manual_offbook
+-                                      #   (§25 "SỞ HỮU" đủ). OFF = giá trị cũ; bản mới luôn chạy
+-                                      #   shadow → notes `NAV_BASIS`. Bật = USER quyết (cq-20260913).
+-                                      #   ON KHÔNG fail-closed: guard canonical từ chối ⇒ trả old;
+-                                      #   tc=td=0 thiếu availableCash ⇒ ON có thể < OFF.
+ 
+     # --- slicing / execution ---
+     "max_child_value": 200_000_000,   # VND tối đa mỗi lệnh con
+diff --git a/WorkingClaude/trading_bot/executor.py b/WorkingClaude/trading_bot/executor.py
+index 60e5f226..57e51cb9 100644
+--- a/WorkingClaude/trading_bot/executor.py
++++ b/WorkingClaude/trading_bot/executor.py
+@@ -103,7 +103,7 @@ class Executor:
+         # Lớp phòng thủ THỨ HAI cho field check sai kiểu (sự cố POLL_FAIL 1:1-với-FILL
+         # 2026-08-11→08-14 — xem trading_bot/plan.py::normalize_check_field). `load_plan()` đã
+         # chuẩn hoá ở ranh giới nạp file, nhưng KHÔNG phải TradePlan nào cũng đi qua đó:
+-        # `bot_prepare_plan`/`V23Strategy`/selfcheck dựng PlannedOrder thẳng trong bộ nhớ. Chuẩn
++        # selfcheck (trước 2026-09-13 cả `bot_prepare_plan`/`V23Strategy`) dựng PlannedOrder thẳng trong bộ nhớ. Chuẩn
+         # hoá MỘT LẦN tại đây (không phải mỗi lần đọc trong `_sync_fills`, chạy mỗi 20s) ⇒ mọi
+         # chỗ sau đó — kể cả audit trail `state["parents"][id]["dcf_check"]` — thấy cùng một
+         # kiểu. Idempotent + không mất thông tin nên gọi lại trên plan đã chuẩn hoá là vô hại.
+diff --git a/WorkingClaude/trading_bot/plan.py b/WorkingClaude/trading_bot/plan.py
+index e0850939..9ac33162 100644
+--- a/WorkingClaude/trading_bot/plan.py
++++ b/WorkingClaude/trading_bot/plan.py
+@@ -1,5 +1,5 @@
+ # -*- coding: utf-8 -*-
+-"""TradePlan — sản phẩm của bot_prepare_plan, đầu vào của bot_execute.
++"""TradePlan — sản phẩm của plan generator (DollarBill, strategy V2.4), đầu vào của bot_execute.
+ 
+ File: data/trade_plans/plan_<account>_<YYYY-MM-DD>.json
+ (ngày = ngày THỰC THI, T+1 của signal; mỗi account 1 plan riêng).
+@@ -269,7 +269,7 @@ def load_plan(plan_date, account="main"):
+ def filter_excluded_tickers(plan, excluded_tickers):
+     """Loại bỏ mọi order cho mã trong `excluded_tickers` (legacy/special-situation holding
+     ngoài rebalancing tự động — xem ACCOUNT_DEFAULTS trong config.py). Enforce cứng ở tầng
+-    này — không phụ thuộc vào việc plan generator (DollarBill/bot_prepare_plan.py) có nhớ
++    này — không phụ thuộc vào việc plan generator (DollarBill; trước 2026-09-13 cả bot_prepare_plan.py) có nhớ
+     loại trừ đúng hay không, để account nào cũng an toàn dù plan tạo ra thế nào.
+ 
+     Trả về (plan đã lọc, list order đã bị chặn) — KHÔNG sửa plan tại chỗ, để caller tự log/báo.
+@@ -577,7 +577,9 @@ def cap_lag_orders(plan, account_label, asof=None, live_labels=None, account_mod
+     Cắt (TRIM) chứ không chặn khi vượt trần: phần dư tự động được mua tiếp các phiên sau,
+     KHÔNG cần cơ chế carry-over mới — plan sinh lại mỗi ngày theo diff target-vs-thật
+     (`strategies.py`: `target[t]` từ paper book mirror, orders = target − real_pos), nên
+-    phần chưa khớp hôm nay tự xuất hiện lại trong plan hôm sau. Executor cũng đã
++    phần chưa khớp hôm nay tự xuất hiện lại trong plan hôm sau. [2026-09-13: đường
++    `strategies.py` đã GỠ (cq-20260913-remove-v23) — giả định "tự xuất hiện lại" nay phụ
++    thuộc plan V2.4 của DollarBill, CHƯA verify lại.] Executor cũng đã
+     `cancel_all_open("EOD")` cuối phiên nên không có lệnh treo qua đêm.
+ 
+     FAIL-CLOSED (mirror cap_capit_orders): không đọc được cache / không có mã trong cache /
+diff --git a/WorkingClaude/trading_bot/strategies.py b/WorkingClaude/trading_bot/strategies.py
+index 5d486608..4041dbbd 100644
+--- a/WorkingClaude/trading_bot/strategies.py
++++ b/WorkingClaude/trading_bot/strategies.py
+@@ -1,28 +1,21 @@
+ # -*- coding: utf-8 -*-
+-"""Strategy layer — mỗi version chiến lược là 1 class, đăng ký trong REGISTRY.
++"""Helper DCF lens dùng chung cho đường REPORT/due-diligence (Pha 2, 2026-07-14).
+ 
+-Nâng cấp chiến lược = thêm class mới (vd V24Strategy) + đăng ký + đổi
+-config "strategy". Plan cũ/journal cũ không bị ảnh hưởng.
++`_dcf_check_for_order` / `format_dcf_check` / `log_dcf_history` — caller: send_plan_report.sh,
++eod_trading_report.sh, trading_bot/due_diligence.py, dc_book_waterfall_paper.py.
+ 
+-V23Strategy (production): MIRROR paper book V2.3 sang tài khoản thật, scale theo
+-NAV. Target = vị thế paper hiện có (pt_v22_dt5g_open_positions) ∪ khuyến nghị
+-vào lệnh T+1 (golive_v23_recommendations) ∪ phần park ETF. Lệnh = chênh lệch
+-target − danh mục thật. Exit của paper ngày T+1 sẽ được sync ở plan T+2
+-(trễ 1 phiên — chấp nhận ở v1, vì exit V2.3 là hold-expiry/stop không gấp).
++Lớp strategy V2.3 cũ (StrategyBase/V23Strategy/REGISTRY/get_strategy, entry bot_prepare_plan.py)
++đã GỠ 2026-09-13 (cq-20260913-remove-v23, user duyệt): 0/148 plan 2026 dùng đường đó, và chạy
++bot_prepare_plan.py không --account ghi đè plan đã duyệt của SpaceX/ZaloPay. Bản cũ nằm trong
++git history; plan live do DollarBill lập (strategy "V2.4").
+ """
+ 
+ import csv
+ import datetime as dt
+-import json
+ import os
+-import re
+ import logging
+ 
+-import pandas as pd
+-
+-from .config import WORKDIR, DATA_DIR
+-from .plan import TradePlan, PlannedOrder
+-from .vn_market import next_trading_day, round_lot, LOT
++from .config import WORKDIR
+ 
+ _log = logging.getLogger(__name__)
+ 
+@@ -119,57 +112,6 @@ def _dcf_check_for_order(ticker, price, asof):
+                 "robust": False, "reason": f"dcf_error: {str(exc)[:80]}",
+                 "conglomerate": _dcf_is_conglomerate(ticker), "as_of": str(asof)[:10]}
+ 
+-def _dd_check_for_order(ticker, book, asof, est_value_vnd=None):
+-    """dd_check dict cho 1 BUY order — wrapper fail-safe quanh due_diligence.dd_check_for_order.
+-
+-    Tách ra để (a) self-check monkeypatch được, (b) một sự cố bq_cache/BQ không bao giờ làm
+-    hỏng việc dựng plan (trả None → order không có dd_check, y như trước khi có cơ chế này).
+-    """
+-    try:
+-        from .due_diligence import dd_check_for_order
+-        return dd_check_for_order(ticker, book, asof, est_value_vnd)
+-    except Exception as exc:
+-        _log.warning("DD check lỗi cho %s: %s", ticker, exc)
+-        return None
+-
+-
+-def _capit_qty_per_ticker(account_label):
+-    """{ticker: qty CAPIT thật (fill broker)} của account, CHỈ khi có episode CAPIT đang mở.
+-
+-    Dùng để floor sell qty trong diff step: KHÔNG bán phần custom30V parking chỉ vì episode
+-    CAPIT đóng ở paper (PVT/SIP có thể vừa là CAPIT vừa là parking — capit_episode.py §GIỚI HẠN
+-    ĐÃ BIẾT). Fail-safe: import/đọc lỗi hoặc không có episode mở → {} (guard không kích hoạt,
+-    hành vi y như trước khi có cơ chế này — bán toàn bộ diff).
+-    """
+-    try:
+-        import sys as _sys
+-        if WORKDIR not in _sys.path:
+-            _sys.path.insert(0, WORKDIR)
+-        import capit_episode as _ce
+-        ep = _ce._open_episode(_ce._load(_ce.LEDGER_PATH))
+-        if not ep:
+-            return {}
+-        return dict((ep.get("qty_per_account") or {}).get(account_label) or {})
+-    except Exception as exc:
+-        _log.warning("capit_episode qty_per_account lỗi (%s): %s", account_label, exc)
+-        return {}
+-
+-
+-def _capit_floor_diff(diff, tgt, have, capit_qty):
+-    """Floor 1 lệnh SELL trong diff step để không bán quá phần CAPIT (guard §CAPIT exit floor).
+-
+-    `capit_qty` = qty CAPIT thật (fill broker) của MÃ NÀY trong episode đang mở, hoặc None nếu
+-    mã không nằm trong episode (guard không áp). Chỉ tác động khi diff<0 (SELL). Trả về
+-    (diff_mới, non_capit_have) — non_capit_have chỉ có nghĩa khi guard có áp (để ghi note).
+-    """
+-    if diff >= 0 or capit_qty is None:
+-        return diff, None
+-    capit_qty = max(0.0, capit_qty)
+-    non_capit_have = max(0.0, have - capit_qty)
+-    eff_tgt = max(tgt, non_capit_have)
+-    return eff_tgt - have, non_capit_have
+-
+-
+ def _format_alt_lens(ticker):
+     """Lăng kính định giá thay thế khi DCF NOT_COMPUTED. Fail-safe: import/lỗi → ""."""
+     if not ticker:
+@@ -227,7 +169,7 @@ def log_dcf_history(ticker, dcf, source, asof=None):
+     không. Đây thuần là BƯỚC GHI DỮ LIỆU — không phân tích, không quyết định gì.
+ 
+     Chỉ gọi từ đường REPORT (send_plan_report / eod_trading_report / dc_book_waterfall_paper),
+-    KHÔNG từ V23Strategy: plan đã duyệt không được ghi ngược (rủi ro, theo dispatch).
++    KHÔNG từ đường dựng plan: plan đã duyệt không được ghi ngược (rủi ro, theo dispatch).
+     Fail-safe: mọi lỗi → bỏ qua im lặng (log warning), report không bao giờ vì dòng này mà hỏng.
+     """
+     try:
+@@ -254,323 +196,3 @@ def log_dcf_history(ticker, dcf, source, asof=None):
+             w.writerow(row)
+     except Exception as exc:
+         _log.warning("log_dcf_history lỗi cho %s: %s", ticker, exc)
+-
+-
+-GOLIVE_OUT = os.path.join(WORKDIR, "deploy_golive_dt5g_v4", "out")
+-STATUS_FILE = os.path.join(DATA_DIR, "golive_v23_status.json")
+-PT_LOGS = os.path.join(DATA_DIR, "pt_v22_dt5g_logs.csv")
+-PT_POSITIONS = os.path.join(DATA_DIR, "pt_v22_dt5g_open_positions.csv")
+-PT_TRANSACTIONS = os.path.join(DATA_DIR, "pt_v22_dt5g_transactions.csv")
+-
+-
+-class StrategyBase:
+-    name = "base"
+-    version = "0"
+-
+-    def build_plan(self, cfg, broker, signal_date=None):
+-        """→ TradePlan (chưa save)."""
+-        raise NotImplementedError
+-
+-
+-class V23Strategy(StrategyBase):
+-    name = "v23"
+-    version = "2.3"
+-
+-    # ----- data loading -----
+-
+-    def _load_status(self):
+-        with open(STATUS_FILE, encoding="utf-8") as f:
+-            st = json.load(f)
+-        # `capit_fired` đổi tên -> `capit_signal_today` (2026-07-31, job Taylor_20260731_031434):
+-        # tên cũ bị đọc nhầm thành "đang giữ CAPIT" trong khi nó chỉ là gate breadth CỦA NGÀY CHẠY.
+-        # Fallback vì file này có thể là bản chạy TRƯỚC lần đổi tên (chỉ có key cũ).
+-        if "capit_signal_today" not in st and "capit_fired" in st:
+-            st["capit_signal_today"] = st["capit_fired"]
+-        return st
+-
+-    def _load_recs(self, signal_date):
+-        path = os.path.join(GOLIVE_OUT, f"golive_v23_recommendations_{signal_date}.csv")
+-        if not os.path.exists(path):
+-            return None, path
+-        return pd.read_csv(path), path
+-
+-    def _load_paper_book(self):
+-        logs = pd.read_csv(PT_LOGS)
+-        last = logs.iloc[-1]
+-        nav = float(last["nav"])
+-        bal_nav = float(last["BAL_cash"] + last["BAL_stocks"] + last["BAL_etf"])
+-        lag_nav = float(last["SECOND_cash"] + last["SECOND_stocks"] + last["SECOND_etf"])
+-        etf_value = float(last["BAL_etf"] + last["SECOND_etf"])
+-        pos = pd.DataFrame(columns=["ticker", "shares"])
+-        if os.path.exists(PT_POSITIONS):
+-            p = pd.read_csv(PT_POSITIONS)
+-            if len(p):
+-                pos = p.groupby("ticker", as_index=False)["shares"].sum()
+-        return {"nav": nav, "bal_nav": bal_nav, "lag_nav": lag_nav,
+-                "etf_value": etf_value, "ymd": str(last["ymd"]), "positions": pos}
+-
+-    def _last_tx_price(self, ticker):
+-        """Giá gần nhất của ticker trong transactions paper (fallback cuối)."""
+-        if not os.path.exists(PT_TRANSACTIONS):
+-            return None
+-        try:
+-            tx = pd.read_csv(PT_TRANSACTIONS)
+-            rows = tx[tx["ticker"] == ticker]
+-            if len(rows):
+-                return float(rows.iloc[-1]["adj_price"])
+-        except Exception:
+-            pass
+-        return None
+-
+-    def _price(self, broker, ticker, recs_close=None, notes=None, ex_tickers=None):
+-        """Chuỗi fallback giá: quote PHS → close trong recs → transactions paper.
+-
+-        ⚠️ `ex_tickers` = tập mã có GDKHQ đúng phiên đang lập plan. Với các mã đó, **CẢ HAI
+-        fallback LỊCH SỬ đều bị chặn** (README §8-D3 mục 1, job Taylor_20260815_054822): cả
+-        `recs_close` (giá đóng BQ ngày signal) lẫn giá giao dịch paper gần nhất đều thuộc hệ
+-        quy chiếu CŨ, còn khối lượng và mọi số khác của phiên đã ở hệ MỚI. Trộn hai hệ là
+-        đúng cách hỏng đã đo được: median 5,46%, max 50,0% (VHM 2026-08-06). Thà KHÔNG có giá
+-        (mã rơi khỏi plan) còn hơn một con số sai hệ đi tiếp mà không ai thấy — quote sống câm
+-        đúng vào ngày GDKHQ là ca hiếm, sai hệ quy chiếu thì không hiếm (≈1 sự kiện/2,4 phiên).
+-        """
+-        q = broker.get_quote(ticker)
+-        if q is not None and q.ok():
+-            return q.last or q.ref
+-        if ticker in (ex_tickers or ()):
+-            if notes is not None:
+-                notes.append(f"{ticker}: GDKHQ hôm nay + quote sống câm ⇒ TỪ CHỐI fallback giá "
+-                             f"LỊCH SỬ (hệ quy chiếu cũ) — bỏ mã khỏi plan")
+-            return None
+-        if recs_close and recs_close > 0:
+-            return float(recs_close)
+-        p = self._last_tx_price(ticker)
+-        if p:
+-            return p
+-        if notes is not None:
+-            notes.append(f"không có giá cho {ticker} — bỏ qua")
+-        return None
+-
+-    @staticmethod
+-    def _ex_tickers_for(tickers, plan_date, notes=None):
+-        """Mã có GDKHQ đúng `plan_date` → set. FAIL-OPEN (set rỗng) + ghi note khi tra hỏng.
+-
+-        Fail-open ở đây đúng cùng lý lẽ với `exdate_gate.apply_exdate_gate` (đọc docstring hàm
+-        đó): nguồn lịch là BigQuery, một hệ THỨ BA ngoài đường đặt lệnh; cho nó quyền làm hỏng
+-        cả phiên là rủi ro lớn hơn thứ nó chặn. Lưới thật nằm ở cascade bot_execute.py.
+-        """
+-        try:
+-            from .price_frame import pricing_events, events_by_ticker_date, events_on
+-            d = dt.date.fromisoformat(str(plan_date)[:10])
+-            m = events_by_ticker_date(pricing_events(
+-                tickers, since=(d - dt.timedelta(days=1)).isoformat(), until=d.isoformat()))
+-            return {t for t in tickers if events_on(m, t, d.isoformat())}
+-        except Exception as exc:                                    # noqa: BLE001
+-            if notes is not None:
+-                notes.append(f"KHÔNG tra được lịch GDKHQ ({type(exc).__name__}: {exc}) — "
+-                             f"fallback giá lịch sử KHÔNG bị chặn phiên này")
+-            return set()
+-
+-    # ----- plan building -----
+-
+-    def build_plan(self, cfg, broker, signal_date=None):
+-        notes = []
+-        status = self._load_status()
+-        signal_date = signal_date or status.get("signal_date") or status.get("date")
+-        recs, recs_path = self._load_recs(signal_date)
+-        if recs is None:
+-            notes.append(f"KHÔNG thấy file khuyến nghị {recs_path} — plan chỉ sync mirror")
+-            recs = pd.DataFrame(columns=["book", "ticker", "play_type", "ta",
+-                                         "close_bq_stale_DO_NOT_USE_AS_REFPRICE",
+-                                         "sector", "weight_pct", "status"])
+-        paper = self._load_paper_book()
+-        if str(paper["ymd"])[:10] != str(signal_date)[:10]:
+-            notes.append(f"paper logs ymd={paper['ymd']} ≠ signal_date={signal_date} "
+-                         f"(pt_v22 chưa chạy hôm nay?)")
+-
+-        # NAV thật & scale
+-        account_nav = broker.get_nav()
+-        if getattr(broker, "nav_basis_note", None):
+-            notes.append(broker.nav_basis_note)
+-        real_pos = broker.get_positions()
+-        scale = account_nav / paper["nav"] if paper["nav"] > 0 else 0.0
+-        # Field CSV đổi tên 2026-07-11 (audit Taylor_20260711_031821 F2): giá BQ của ngày
+-        # signal — ở ĐÂY dùng hợp lệ vì chỉ là fallback bậc 2 SAU quote live trong _price()
+-        # (paper-mirror), không phải ref_price plan live. Fallback tên cũ cho CSV cũ.
+-        _cl = "close_bq_stale_DO_NOT_USE_AS_REFPRICE"
+-        recs_close = {str(r["ticker"]): (r.get(_cl) if pd.notna(r.get(_cl)) else r.get("close"))
+-                      for _, r in recs.iterrows()
+-                      if pd.notna(r.get(_cl)) or pd.notna(r.get("close"))}
+-
+-        # ---------- target portfolio (số CP, đã scale) ----------
+-        target = {}      # ticker -> qty
+-        ref_px = {}      # ticker -> giá dùng để tính/đặt lệnh
+-        meta = {}        # ticker -> (book, play_type)
+-
+-        # Mã có GDKHQ đúng phiên plan này thực thi ⇒ mọi fallback giá LỊCH SỬ trong _price()
+-        # bị chặn cho riêng chúng (README §8-D3 mục 1). Tra MỘT lần cho toàn bộ mã ứng viên.
+-        _sig_date = dt.datetime.strptime(str(signal_date)[:10], "%Y-%m-%d").date()
+-        _plan_date = next_trading_day(_sig_date).strftime("%Y-%m-%d")
+-        _ex = self._ex_tickers_for(
+-            sorted({str(t) for t in paper["positions"]["ticker"]}
+-                   | {str(r["ticker"]) for _, r in recs.iterrows()}),
+-            _plan_date, notes)
+-        if _ex:
+-            notes.append(f"GDKHQ {_plan_date}: {sorted(_ex)} — cấm fallback giá lịch sử cho các mã này")
+-
+-        # 1) mirror vị thế paper hiện có
+-        for _, r in paper["positions"].iterrows():
+-            t = str(r["ticker"])
+-            px = self._price(broker, t, recs_close.get(t), notes, ex_tickers=_ex)
+-            if px is None:
+-                continue
+-            target[t] = target.get(t, 0) + float(r["shares"]) * scale
+-            ref_px[t] = px
+-            meta.setdefault(t, ("MIRROR", ""))
+-
+-        # 2) khuyến nghị vào lệnh T+1 (BAL FULL/HALF, LAG sắp đến hạn, CAPIT nếu fired)
+-        for _, r in recs.iterrows():
+-            t, book = str(r["ticker"]), str(r["book"])
+-            st = str(r.get("status", ""))
+-            w = float(r.get("weight_pct", 0) or 0) / 100.0
+-            if w <= 0:
+-                continue
+-            if book == "BAL":
+-                if st not in ("FULL", "HALF_SIZE"):
+-                    continue
+-                book_nav = paper["bal_nav"] * scale
+-                if st == "HALF_SIZE":
+-                    w *= 0.5
+-            elif book == "LAG":
+-                m = re.search(r"T\+(\d+)", st)
+-                if not (m and int(m.group(1)) <= 1):
+-                    continue           # chỉ vào lệnh LAG đến hạn phiên tới
+-                book_nav = paper["lag_nav"] * scale
+-            elif book == "CAPIT":
+-                # Vào lệnh CAPIT MỚI chỉ khi gate fire ĐÚNG NGÀY CHẠY — đây là đúng chỗ dùng
+-                # capit_signal_today (không phải capit_episode_open: episode đang mở nghĩa là
+-                # ĐANG GIỮ, không phải được mua thêm).
+-                if not status.get("capit_signal_today"):
+-                    continue
+-                book_nav = paper["lag_nav"] * scale * float(status.get("capit_size", 0))
+-                w = w if w > 0 else 1.0 / max(1, int(status.get("n_capit_basket", 1)))
+-            else:
+-                continue
+-            px = self._price(broker, t, recs_close.get(t), notes, ex_tickers=_ex)
+-            if px is None:
+-                continue
+-            qty_rec = book_nav * w / px
+-            # tránh double-count khi mã vừa có trong paper positions vừa trong recs
+-            target[t] = max(target.get(t, 0), qty_rec)
+-            ref_px[t] = px
+-            meta[t] = (book, str(r.get("play_type", "")))
+-
+-        # 3) ETF park (giá trị ETF của 2 book trong logs)
+-        etf = cfg["etf_symbol"]
+-        if cfg["include_etf_park"] and etf not in target:
+-            etf_val = paper["etf_value"] * scale
+-            if etf_val > cfg["min_order_value"]:
+-                px = self._price(broker, etf, None, notes, ex_tickers=_ex)
+-                if px:
+-                    target[etf] = etf_val / px
+-                    ref_px[etf] = px
+-                    meta[etf] = ("ETF", "ETF_PARK")
+-
+-        # ---------- diff target vs danh mục thật → orders ----------
+-        orders = []
+-        tol = cfg["qty_tolerance_pct"]
+-        all_syms = sorted(set(target) | set(real_pos))
+-        # CAPIT exit floor (2026-08-21): khi episode CAPIT đang mở, phần custom30V parking
+-        # nằm chung mã với rổ CAPIT (vd PVT/SIP) KHÔNG được bán chỉ vì paper-row CAPIT đóng
+-        # (60 phiên). {} khi không có episode mở ⇒ guard không kích hoạt, hành vi y như trước.
+-        _capit_qty = _capit_qty_per_ticker(getattr(broker, "label", None))
+-        for t in all_syms:
+-            tgt = target.get(t, 0.0)
+-            have = real_pos.get(t, {}).get("total", 0)
+-            sellable = real_pos.get(t, {}).get("sellable", have)
+-            px = ref_px.get(t) or self._price(broker, t, recs_close.get(t), notes,
+-                                                ex_tickers=_ex)
+-            if px is None:
+-                continue
+-            diff_raw = tgt - have
+-            diff, non_capit_have = _capit_floor_diff(diff_raw, tgt, have, _capit_qty.get(t))
+-            if diff > diff_raw + 1e-9:
+-                notes.append(f"CAPIT exit floor: {t} giữ lại {non_capit_have:.0f}cp "
+-                             f"(ngoài CAPIT), chỉ bán phần CAPIT")
+-            if tgt > 0 and abs(diff) < tol * tgt:
+-                continue
+-            if abs(diff) * px < cfg["min_order_value"]:
+-                continue
+-            book, play = meta.get(t, ("SYNC", ""))
+-            if diff > 0:
+-                qty = round_lot(diff)
+-                if qty >= LOT:
+-                    dcf = _dcf_check_for_order(t, px, str(signal_date)[:10])
+-                    dcf_warn = (
+-                        dcf.get("status") == "RICH" and dcf.get("robust")
+-                    )
+-                    if dcf_warn:
+-                        notes.append(
+-                            f"⚠ DCF: {t} RICH & robust (MoS={dcf.get('margin_of_safety',0):.1%}) "
+-                            f"— ghi dcf_override_reason nếu vẫn mua"
+-                        )
+-                    # Due-diligence cờ đỏ (2026-08-03, case DHD): cùng cơ chế WARN với DCF ngay
+-                    # trên — thông tin, KHÔNG loại lệnh, KHÔNG đổi qty.
+-                    dd = _dd_check_for_order(t, book, str(signal_date)[:10], qty * px)
+-                    if dd and dd.get("has_red_flag"):
+-                        notes.append(
+-                            f"⚠ DD: {t} cờ đỏ [{', '.join(dd.get('red_flags') or [])}] "
+-                            f"— ghi dd_override_reason nếu vẫn mua"
+-                        )
+-                    orders.append(PlannedOrder(
+-                        id="", ticker=t, side="buy", qty=qty, ref_price=px,
+-                        book=book, play_type=play, dcf_check=dcf, dd_check=dd))
+-            else:
+-                qty = min(round_lot(-diff), sellable)
+-                if qty >= LOT:
+-                    note = "" if tgt > 0 else "không còn trong book paper"
+-                    orders.append(PlannedOrder(
+-                        id="", ticker=t, side="sell", qty=qty, ref_price=px,
+-                        book=book, play_type=play, urgency="high", note=note))
+-
+-        # priority: sell trước (giải phóng tiền), buy theo giá trị giảm dần
+-        sells = sorted([o for o in orders if o.side == "sell"],
+-                       key=lambda o: -o.value)
+-        buys = sorted([o for o in orders if o.side == "buy"],
+-                      key=lambda o: -o.value)
+-        for i, o in enumerate(sells):
+-            o.priority, o.id = 1, f"SELL-{o.ticker}-{i+1:02d}"
+-        for i, o in enumerate(buys):
+-            o.priority, o.id = 2 + i, f"BUY-{o.ticker}-{i+1:02d}"
+-        orders = sells + buys
+-
+-        if len(orders) > cfg["max_orders_per_day"]:
+-            notes.append(f"cắt bớt {len(orders) - cfg['max_orders_per_day']} lệnh "
+-                         f"(max_orders_per_day={cfg['max_orders_per_day']})")
+-            orders = orders[:cfg["max_orders_per_day"]]
+-        gross = sum(o.value for o in orders)
+-        if gross > cfg["max_daily_gross_value"]:
+-            notes.append(f"⚠ gross {gross/1e9:.1f}B vượt trần "
+-                         f"{cfg['max_daily_gross_value']/1e9:.1f}B — KIỂM TRA plan!")
+-
+-        sig = dt.datetime.strptime(str(signal_date)[:10], "%Y-%m-%d").date()
+-        return TradePlan(
+-            plan_date=next_trading_day(sig).strftime("%Y-%m-%d"),
+-            signal_date=str(signal_date)[:10],
+-            strategy=self.name, strategy_version=self.version,
+-            state=int(status.get("state", 0)),
+-            state_name=str(status.get("state_name", "?")),
+-            nav_basis={"account_nav": round(account_nav),
+-                       "paper_nav": round(paper["nav"]),
+-                       "scale": scale},
+-            orders=orders, notes=notes)
+-
+-
+-REGISTRY = {
+-    V23Strategy.name: V23Strategy,
+-}
+-
+-
+-def get_strategy(name):
+-    if name not in REGISTRY:
+-        raise KeyError(f"strategy '{name}' chưa đăng ký — có: {sorted(REGISTRY)}")
+-    return REGISTRY[name]()
+# ============================================================================================
+# cq-20260913-remove-v23 — GỠ ĐƯỜNG CODE CHẾT v23 (job Taylor_20260913_064725, user duyệt "gỡ hẳn" 2026-09-13 13:46 ICT)
+# Diff so với "24df0f76 + cq20260913_batch1_item1_v2.patch" — KHÔNG gồm v2. arch-reviewer: vòng 1 NEEDS_CHANGES
+# (2 chỗ văn bản, đã sửa), vòng 2 APPROVE/CONFIRMED high — 0 symbol bị gỡ còn được đường live dùng.
+#
+# GỠ: bot_prepare_plan.py + capit_exit_floor_selfcheck.py → archive/ (rename trong patch) ·
+#   strategies.py: StrategyBase/V23Strategy/REGISTRY/get_strategy/_dd_check_for_order/_capit_qty_per_ticker/
+#   _capit_floor_diff/GOLIVE_OUT/STATUS_FILE/PT_* (GIỮ helper DCF: _dcf_check_for_order/format_dcf_check/
+#   log_dcf_history — caller send_plan_report.sh, eod_trading_report.sh, due_diligence.py, dc_book_waterfall_paper.py) ·
+#   brokers.py: BrokerBase.get_nav + DNSEBroker.get_nav/_nav_owned_shadow/_load_compute_active_nav/cờ
+#   nav_include_egg_offbook/nav_basis_note/_last_balances (GIỮ _cash_totalcash_minus_debt — plan.py dùng; GIỮ #3 PHS) ·
+#   config.py: khoá nav_include_egg_offbook (khoá "strategy" giữ, chỉ đổi comment — secrets config còn ghi nó).
+#   Selfcheck: test_trading_bot mục 1 = plan fixture tay cùng qty/giá/priority V23 sinh (mục 2 "FLEET executed 345M
+#   (86%)" giống hệt); exdate_price_frame gỡ D3#1 (−2 check); brokers_nav_shadow giữ #3 (34→3 check, giữ tên file vì
+#   production_manifest); money_path_freshness gỡ B5. Doc/comment: README, __init__, plan.py, executor.py,
+#   bot_execute.py (+ thông báo thiếu plan), excluded_tickers/dcf_check selfcheck.
+#   ⇒ Cờ nav_include_egg_offbook KHÔNG còn tồn tại: câu hỏi user "bật cờ?" ĐÓNG theo hướng gỡ.
+#
+# ÁP DỤNG (Mike, T2 14/09 sau 15:00, SAU KHI v2 đã apply + commit theo footer của v2):
+#   cd /home/trido/thanhdt
+#   git apply --check --index WorkingClaude/mike/agents/Taylor/research/cq20260913_remove_v23.patch
+#   git apply --index        WorkingClaude/mike/agents/Taylor/research/cq20260913_remove_v23.patch
+#   (--index BẮT BUỘC: patch có "rename from/to" ⇒ git ghi nhận là git mv. Nếu lỡ apply không --index:
+#    git add -A WorkingClaude/bot_prepare_plan.py WorkingClaude/archive/bot_prepare_plan.py \
+#      WorkingClaude/capit_exit_floor_selfcheck.py WorkingClaude/archive/capit_exit_floor_selfcheck.py)
+#   Docs repo mike (patch riêng, file DollarBill/CLAUDE.md + MIKE_ext.md + kb/coding_guidelines_ext.md — §13 Mike duyệt):
+#   git -C /home/trido/thanhdt/WorkingClaude/mike apply --check /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/cq20260913_remove_v23_mike_docs.patch
+#   git -C /home/trido/thanhdt/WorkingClaude/mike apply         /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/cq20260913_remove_v23_mike_docs.patch
+#
+# SELFCHECK (§23 quét rộng — strategies/brokers/config/plan/executor là lõi):
+#   source /home/trido/thanhdt/WorkingClaude/wc_env.sh && cd /home/trido/thanhdt/WorkingClaude
+#   python3 -c "import trading_bot.executor, trading_bot.plan, trading_bot.strategies, trading_bot.brokers, trading_bot.due_diligence, bot_execute" && \
+#   env -u TZ python3 bot_execute.py --help >/dev/null && echo IMPORT+HELP OK
+#   for f in approval_gate_selfcheck.py book_tagging_selfcheck.py brokers_nav_shadow_selfcheck.py capit_lever_selfcheck.py capit_participation_cap_selfcheck.py cash_only_loan_package_selfcheck.py churn_guard_selfcheck.py concurrent_lock_selfcheck.py dc_book_waterfall_selfcheck.py dcf_check_selfcheck.py dcf_selector_selfcheck.py discretionary_accumulation_selfcheck.py discretionary_participation_cap_selfcheck.py discretionary_target_pct_selfcheck.py due_diligence_selfcheck.py dynamic_no_chase_ceiling_selfcheck.py excluded_tickers_selfcheck.py exdate_price_frame_selfcheck.py expected_volume_pacing_selfcheck.py extreme_regime_selfcheck.py gdkhq_rollout_selfcheck.py ghost_order_selfcheck.py hard_no_chase_ceiling_selfcheck.py hybrid_fill_timing_selfcheck.py lag_adv_cap_selfcheck.py lag_governance_order_gate_selfcheck.py lag_rating_order_gate_selfcheck.py loan_package_multi_account_selfcheck.py loan_package_resolution_selfcheck.py mike/bin/compute_active_nav_selfcheck.py mike/bin/discretionary_margin_gate_selfcheck.py money_path_freshness_selfcheck.py net_offsetting_orders_selfcheck.py netting_recon_selfcheck.py order_book_shadow_selfcheck.py pacing_horizon_note_selfcheck.py paper_main_window_selfcheck.py paper_probe_netting_selfcheck.py phs_flash_api_selfcheck.py plan_check_field_schema_selfcheck.py probe_linger_selfcheck.py quote_l2_logging_selfcheck.py refresh_skip_participation_selfcheck.py rule_a_ceiling_selfcheck.py rule_a_ref_guard_selfcheck.py t2_settlement_selfcheck.py test_trading_bot.py tick_retry_selfcheck.py ; do
+#     (cd "$(dirname $f)" && env -u TZ MIKE_BOT_TEST_MODE=1 $DNA_PYEXE "$(basename $f)" >/tmp/sc_$(basename $f).log 2>&1); echo "$? $f"
+#   done
+#   Đo 2026-09-13 ~14:00 ICT (48 file): TRƯỚC gỡ (24df0f76+v2, tập có capit_exit_floor thay money_path) 47 rc=0;
+#   SAU gỡ 47 rc=0. test_trading_bot.py rc=1 TRƯỚC VÀ SAU y hệt: mục 4 gap-adaptive "sell in 09:15-09:45 should be 1.0
+#   (sell window), got 1.875" — có sẵn, không do bản vá. arch-reviewer tái lập độc lập cùng kết quả.
+#   ⚠ Caveat (arch INFO): mục 2 test_trading_bot có thể phụ thuộc GIỜ THẬT (run_session truyền now_ict()); commit 24df0f76
+#   ghi FAIL "quota AAA" lúc ~12:30 — nếu chạy giờ khác thấy fail quota ở CẢ bản trước lẫn sau thì không phải do gỡ.
+#   Sau land: python3 mike/bin/production_manifest.py (tái sinh, bỏ mục capit_exit_floor_selfcheck.py; hiện chỉ WARN T3).
+#
+# COMMIT (repo ngoài):
+#   cd /home/trido/thanhdt && git commit -m "refactor(cq-20260913-remove-v23): gỡ đường chết bot_prepare_plan/V23Strategy/get_nav + shadow NAV_BASIS" \
+#     -- WorkingClaude/bot_prepare_plan.py WorkingClaude/archive/bot_prepare_plan.py WorkingClaude/capit_exit_floor_selfcheck.py \
+#        WorkingClaude/archive/capit_exit_floor_selfcheck.py WorkingClaude/bot_execute.py WorkingClaude/brokers_nav_shadow_selfcheck.py \
+#        WorkingClaude/dcf_check_selfcheck.py WorkingClaude/excluded_tickers_selfcheck.py WorkingClaude/exdate_price_frame_selfcheck.py \
+#        WorkingClaude/money_path_freshness_selfcheck.py WorkingClaude/test_trading_bot.py WorkingClaude/trading_bot/README.md \
+#        WorkingClaude/trading_bot/__init__.py WorkingClaude/trading_bot/brokers.py WorkingClaude/trading_bot/config.py \
+#        WorkingClaude/trading_bot/executor.py WorkingClaude/trading_bot/plan.py WorkingClaude/trading_bot/strategies.py
+#   Repo mike: git -C .../mike commit -- agents/DollarBill/CLAUDE.md MIKE_ext.md kb/coding_guidelines_ext.md
+#
+# ROLLBACK: git revert <commit> (archive/ trả về chỗ cũ). KHÔNG sửa: kb/incidents, data/results_registry.md,
+#   kb/paper_programs_registry.json (text lịch sử nhắc strategies.py), research/cq20260913_batch1_ab_nav.py (A/B cũ, sẽ ImportError).
+# ============================================================================================
