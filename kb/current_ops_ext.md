@@ -57,3 +57,9 @@ Remote-control daemon `mike@Mike.service` tắt hẳn từ 07-07 (user chỉ dù
 ## Sự cố đã đóng
 Audit cron C1/H2 (07-12), BQ cache monolith (07-13), cross-account contamination (07-19), 3 bug quoting silent-fail + full crontab audit (08-01) — tất cả FIXED+VERIFIED. Chi tiết: `kb/incidents/index.md`.
 **Còn treo** (ưu tiên thấp): dọn crontab paper-trading lạc hậu (`Winston_20260712_151206`).
+
+## `mike_paseo/` — MIRROR CỐ Ý của user, KHÔNG phải production (user chốt 2026-09-13)
+`WorkingClaude/mike_paseo/` là bản mirror user dùng để kiểm tra hệ thống ARIA đang chạy (agent paseo
+"Research OpenCode" đọc từ đó). KHÔNG merge, KHÔNG xoá, KHÔNG đồng bộ về master, KHÔNG dispatch/cron
+từ đó. Đã loại khỏi `run_selfchecks.sh` (incident 2026-09-12) và `.gitignore` repo ngoài (09-08). Ai
+thấy nó "tụt commit" hay "git hỏng" ⇒ đó là trạng thái mong đợi, không phải việc cần sửa.
