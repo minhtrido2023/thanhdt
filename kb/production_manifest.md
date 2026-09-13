@@ -2,14 +2,14 @@
 kind: reference
 title: Production manifest ARIA — tự sinh, ĐỪNG sửa tay
 generated_by: python3 mike/bin/production_manifest.py
-generated_at: 2026-09-13T06:08:05Z
+generated_at: 2026-09-13T06:16:34Z
 ---
 
 # Production manifest (auto-generated — sửa `mike/bin/production_manifest.py`, không sửa file này)
 
 Tái sinh: `cd /home/trido/thanhdt/WorkingClaude && python3 mike/bin/production_manifest.py` · Kiểm drift: `bash mike/bin/production_manifest_selfcheck.sh` (lệch bản commit = FAIL).
 
-**422 file** — T0 money-path **104** · T1 dữ liệu/regime/paper **102** · T2 fleet-ops **66** · T3 selfcheck **150** · gốc: 97 (systemd: ok).
+**421 file** — T0 money-path **105** · T1 dữ liệu/regime/paper **101** · T2 fleet-ops **65** · T3 selfcheck **150** · gốc: 97 (systemd: ok).
 
 Phương pháp: gốc = `crontab -l` + systemd user units + hook `.claude/settings*.json`; đóng bao AST import + tham chiếu exec `*.py|*.sh` resolve ra file có thật, lặp tới điểm bất động. Tầng = nhỏ nhất theo các gốc với tới, KHÔNG đi xuyên entry script của gốc khác (và dispatch.sh với gốc ngoài T2) — tầng blast radius thuần nằm ở `blast_tier` trong JSON. T3 = selfcheck ngoài bao đóng import/exec trực tiếp file T0–T2. Loại trừ: mike_paseo/, wt-*/ (mọi worktree), .claude/worktrees/, venv/__pycache__/node_modules.
 
@@ -34,6 +34,7 @@ Phương pháp: gốc = `crontab -l` + systemd user units + hook `.claude/settin
 | `deposit_rate_vn.py` | T0 | 1 | exec | cron `0 12 * * 1-5` bq_freshness_check.sh (+22) |
 | `dna_report.py` | T0 | 1 | import | cron `0 14 * * 1-5` send_plan_report.sh (+3) |
 | `dnse_api.py` | T0 | 2 | import | cron `15 13 * * 1-5` compute_active_nav_all.sh (+26) |
+| `dt5g_freshness.py` | T0 | 1 | exec | cron `10 12 * * 1-5` eod_trading_report.sh (+1) |
 | `fetch_dnse_khoplenh_email.py` | T0 | 2 | exec | cron `10 12 * * 1-5` eod_trading_report.sh |
 | `gdp_growth_vn.py` | T0 | 2 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+18) |
 | `gmail_otp_reader.py` | T0 | 1 | import | cron `15 13 * * 1-5` compute_active_nav_all.sh (+25) |
@@ -105,9 +106,9 @@ Phương pháp: gốc = `crontab -l` + systemd user units + hook `.claude/settin
 | `simulate_holistic_nav.py` | T0 | 2 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+19) |
 | `state_publish_immutable.py` | T0 | 1 | exec | cron `0 12 * * 1-5` bq_freshness_check.sh (+2) |
 | `telegram_recommend.py` | T0 | 1 | exec | cron `10 2 * * 1,3,5` bot_execute.py (+12) |
-| `trading_bot/__init__.py` | T0 | 1 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+37) |
+| `trading_bot/__init__.py` | T0 | 1 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+48) |
 | `trading_bot/brokers.py` | T0 | 1 | import | cron `15 13 * * 1-5` compute_active_nav_all.sh (+25) |
-| `trading_bot/config.py` | T0 | 1 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+34) |
+| `trading_bot/config.py` | T0 | 1 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+45) |
 | `trading_bot/discretionary_accumulation.py` | T0 | 2 | import | cron `30 13 * * 1-5` inject_discretionary_orders.sh |
 | `trading_bot/due_diligence.py` | T0 | 1 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+16) |
 | `trading_bot/exdate_gate.py` | T0 | 1 | import | cron `10 2 * * 1,3,5` bot_execute.py (+2) |
@@ -120,7 +121,7 @@ Phương pháp: gốc = `crontab -l` + systemd user units + hook `.claude/settin
 | `trading_bot/plan_funding_gate.py` | T0 | 1 | import | cron `30 13 * * 1-5` inject_discretionary_orders.sh (+5) |
 | `trading_bot/price_frame.py` | T0 | 1 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+17) |
 | `trading_bot/strategies.py` | T0 | 1 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+16) |
-| `trading_bot/vn_market.py` | T0 | 1 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+35) |
+| `trading_bot/vn_market.py` | T0 | 1 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+41) |
 | `value_radar.py` | T0 | 2 | import | cron `0 14 * * 1-5` send_plan_report.sh (+3) |
 | `wc_env.sh` | T0 | 0 | exec | cron `0 12 * * 1-5` bq_freshness_check.sh (+58) |
 | `alphalens_report.py` | T1 | 1 | import | cron `0 23 * * 0-4` newdeals_daily_report.py |
@@ -142,7 +143,6 @@ Phương pháp: gốc = `crontab -l` + systemd user units + hook `.claude/settin
 | `deploy_v3_4b_package/build_v3_1_clean.py` | T1 | 1 | exec | cron `30 11 * * 1-5` daily_refresh_v34b_linux.sh |
 | `deploy_v3_4b_package/build_v3_4_bull_aware.py` | T1 | 1 | exec | cron `30 11 * * 1-5` daily_refresh_v34b_linux.sh |
 | `dna_card.py` | T1 | 1 | exec | cron `20 12 * * 1-5` pt_8l_daily.sh |
-| `dt5g_freshness.py` | T1 | 1 | exec | cron `20 12 * * 1-5` pt_8l_daily.sh |
 | `edge_health_monitor.py` | T1 | 1 | exec | cron `30 8 * * 1-5` papertrade_daily.sh |
 | `fetch_bdi_daily.py` | T1 | 1 | exec | cron `30 8 * * 1-5` papertrade_daily.sh (+1) |
 | `fetch_new_listings.py` | T1 | 1 | exec | cron `10 11 * * 1-5` fetch_new_listings_daily.sh |
@@ -250,7 +250,7 @@ Phương pháp: gốc = `crontab -l` + systemd user units + hook `.claude/settin
 | `mike/bin/heartbeat.sh` | T2 | 1 | exec | hook `Stop` stop.sh |
 | `mike/bin/incidents_index_sync.py` | T2 | 1 | exec | cron `25 1 * * 1-5` cron_health_check_daily.sh |
 | `mike/bin/is_serving.py` | T2 | 1 | exec | cron `*/10 * * * *` watchdog.sh |
-| `mike/bin/jobs.sh` | T2 | 1 | exec | cron `*/10 * * * *` resume_pending.py (+7) |
+| `mike/bin/jobs.sh` | T2 | 2 | exec | cron `*/10 * * * *` resume_pending.py (+7) |
 | `mike/bin/kb_nightly.sh` | T2 | 0 | exec | cron `0 19 * * *` kb_nightly.sh |
 | `mike/bin/model_config_watch.py` | T2 | 1 | exec | cron `*/10 * * * *` watchdog.sh |
 | `mike/bin/notify_telegram.sh` | T2 | 1 | exec | cron `20 1 * * 1-5` ops_health_check.sh (+1) |
@@ -272,7 +272,6 @@ Phương pháp: gốc = `crontab -l` + systemd user units + hook `.claude/settin
 | `mike/bin/staleness_watch.py` | T2 | 1 | exec | cron `*/10 * * * *` watchdog.sh |
 | `mike/bin/sync_native_agents.sh` | T2 | 1 | exec | cron `0 17 * * *` fleet_backup.sh |
 | `mike/bin/time_claim_audit.py` | T2 | 1 | exec | cron `30 17 * * *` daily_retro.sh |
-| `mike/bin/trace.sh` | T2 | 2 | exec | cron `20 1 * * 1-5` ops_health_check.sh (+3) |
 | `mike/bin/usage_limit_phrases.sh` | T2 | 1 | exec | cron `*/10 * * * *` resume_pending.py (+7) |
 | `mike/bin/usage_watch.py` | T2 | 1 | exec | cron `*/10 * * * *` watchdog.sh |
 | `mike/bin/wags_autofix.sh` | T2 | 1 | exec | cron `20 1 * * 1-5` ops_health_check.sh (+3) |

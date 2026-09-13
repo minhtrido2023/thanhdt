@@ -246,6 +246,18 @@ def scan_sh_line(line, st):
             continue
         if ch == "#" and (i == 0 or line[i - 1] in " \t;"):
             break
+        if ch == '"' and line.startswith("$(", i + 1):
+            # "$(…)" = command substitution: ngoặc kép bọc ngoài KHÔNG phải chuỗi văn bản — quét bên trong
+            # như lệnh thường để `python3 -c "…"`/heredoc lồng trong nó được nhận (arch-review vòng 2 N1:
+            # session_announce.sh:21 PROGRESS="$(cd "$WC_ROOT" && python3 - … << 'PYEOF').
+            st["dq_subst"] += 1
+            i += 1
+            continue
+        if ch == ")" and st["dq_subst"] and line.startswith('"', i + 1):
+            st["dq_subst"] -= 1
+            out.append(")")
+            i += 2
+            continue
         if ch in "'\"":
             before = "".join(out)
             dc = None
@@ -319,7 +331,9 @@ NON_EXEC_CALLS = {"print", "log", "warn", "warning", "info", "error", "debug", "
                   "format", "startswith", "endswith", "find", "replace", "search", "match", "fail", "ok"}
 
 
-SELFTEST_FN = re.compile(r"self_?(check|test)", re.I)
+# Chỉ tên đúng dạng hàm tự-kiểm (`_selfcheck`, `selftest`) — KHÔNG nuốt cổng production như
+# corp_action_daily.py `gate_selfcheck()` (arch-review vòng 2 N2).
+SELFTEST_FN = re.compile(r"^_?self_?(check|test)$", re.I)
 
 
 def in_selftest(node, parent):
@@ -356,7 +370,7 @@ def edges_shell_src(src, path_dir, _depth=0):
     lines = src.splitlines()
     i = 0
     in_array = False
-    st = {"q": None, "seg": [], "dash_c": None, "pysrc": [], "shsrc": []}
+    st = {"q": None, "seg": [], "dash_c": None, "pysrc": [], "shsrc": [], "dq_subst": 0}
     while i < len(lines):
         q_start = st["q"]
         line = scan_sh_line(lines[i], st)
@@ -608,6 +622,7 @@ def build(crontab_text):
         if not e["roots"]:
             e.update(tier=e["blast_tier"], via="via-barrier", parent="?")
 
+    root_untracked = sorted(UNTRACKED_HITS)  # chụp TRƯỚC khi quét ứng viên T3 (glob gồm cả WIP)
     # T3: selfcheck không với tới từ gốc, import/exec trực tiếp file T0-T2
     reached = set(files)
     cands = set()
@@ -642,8 +657,8 @@ def build(crontab_text):
         "exclusions": ["mike_paseo/", "wt-*/ (mọi worktree)", ".claude/worktrees/", "venv/__pycache__/node_modules"],
         "roots": out_roots,
         "files": out_files,
-        # tham khảo, KHÔNG diff: file có thật được tham chiếu nhưng chưa track git (WIP hoặc production ngoài git)
-        "untracked_refs": sorted(UNTRACKED_HITS),
+        # tham khảo, KHÔNG diff: file có thật được tham chiếu TỪ BAO ĐÓNG GỐC nhưng chưa track git
+        "untracked_refs": root_untracked,
     }
 
 
@@ -701,11 +716,13 @@ def diff_manifests(old, new):
     out = []
     of, nf = old.get("files", {}), new.get("files", {})
     for p in sorted(set(nf) - set(of)):
-        out.append(f"+ {p} [{nf[p]['tier']}] (mới vào production, từ {nf[p]['parent']})")
+        w = "WARN " if nf[p]["tier"] == "T3" else ""
+        out.append(f"{w}+ {p} [{nf[p]['tier']}] (mới vào production, từ {nf[p]['parent']})")
     for p in sorted(set(of) - set(nf)):
-        out.append(f"- {p} [{of[p]['tier']}] (rời production)")
+        w = "WARN " if of[p]["tier"] == "T3" else ""
+        out.append(f"{w}- {p} [{of[p]['tier']}] (rời production)")
     for p in sorted(set(of) & set(nf)):
-        if of[p]["tier"] != nf[p]["tier"]:
+        if of[p]["tier"] != nf[p]["tier"]:  # kể cả T3 <-> T0-T2: đổi vai trò thật, vẫn FAIL
             out.append(f"~ {p} tầng {of[p]['tier']} -> {nf[p]['tier']}")
     units_ok = old.get("units_status") == "ok" and new.get("units_status") == "ok"
     key = lambda r: (r["kind"], r["schedule"], r["script"], r["tier"])
@@ -734,7 +751,13 @@ def main():
         text = subprocess.run(["crontab", "-l"], capture_output=True, text=True, check=True).stdout
     m = build(text)
     if a.check:
-        d = diff_manifests(json.load(open(a.check, encoding="utf-8")), m)
+        alld = diff_manifests(json.load(open(a.check, encoding="utf-8")), m)
+        d = [x for x in alld if not x.startswith("WARN ")]
+        warns = [x for x in alld if x.startswith("WARN ")]
+        if warns:
+            # T3 (selfcheck) thêm/bớt gần như mỗi ngày — chỉ nhắc, không FAIL (arch-review vòng 2 N3)
+            print(f"WARN {len(warns)} selfcheck T3 vào/rời — tái sinh khi tiện:")
+            print("\n".join(warns[:30]))
         if d:
             print(f"DRIFT {len(d)} dòng — manifest commit lệch thực tế. Nếu thay đổi là CỐ Ý: chạy "
                   f"`{REGEN_CMD}` rồi commit kb/production_manifest.{{json,md}}.")

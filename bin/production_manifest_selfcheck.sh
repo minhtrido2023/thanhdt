@@ -48,7 +48,12 @@ cases = [
   ("sh", 'setsid bash -c \'\n  ROOT="\'"$ROOT"\'"; L=\'"$(printf %q "$L")"\'\n  "$ROOT/bin/jobs.sh" list\n\' &', "jobs.sh", "exec"),
   # heredoc mở bên trong "$(…" (eod_trading_report.sh:275)
   ("sh", 'R="$(python3 - "$A" << \'PYEOF\'\nimport mike_json\nPYEOF\n)"', "mike_json.py", "import"),
+  # vòng 2 N1: python3 -c / heredoc lồng trong "$(cd "$W" && …)"
+  ("sh", 'X="$(cd "$W" && python3 -c "import mike_json")"', "mike_json.py", "import"),
+  ("sh", 'P="$(cd "$W" && python3 - "$T" << \'PYEOF\'\nimport mike_json\nPYEOF\n)"', "mike_json.py", "import"),
+  ("sh", "python3 -c 'import mike_json'", "mike_json.py", "import"),
   ("py", 'import subprocess\nsubprocess.run([str(ROOT / "bin" / "jobs.sh")])', "jobs.sh", "exec"),
+  ("py", 'def gate_selfcheck():\n    import mike_json\n', "mike_json.py", "import"),
   ("py", 'ok = "jobs.sh" in text', "jobs.sh", "none"),
   ("py", 'print("xem jobs.sh")', "jobs.sh", "none"),
   # F4: import trong hàm tự-kiểm nội tuyến không phải đường production
