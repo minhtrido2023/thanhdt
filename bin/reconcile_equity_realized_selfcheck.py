@@ -133,7 +133,7 @@ with tempfile.TemporaryDirectory() as tmp:
     realized_true = 600 * 5_000
     div_gross = 1_000_000
     cost_left = 400 * 50_000 + 500 * 40_000
-    fees = cost_left * 0.075 / 100
+    fees = cost_left * RE.FEE_RATE_BUY_PCT / 100
     cash_d2 = capital - 70_000_000 + 600 * 55_000 + div_gross
     # Tiền mặt dựng sao cho đẳng thức MỚI đóng đúng 0: trừ phí theo đúng công thức vế trái.
     cash_d2 -= fees
@@ -187,9 +187,15 @@ with tempfile.TemporaryDirectory() as tmp:
           and near(a["trading_fees_used"], fees), (b["trading_fees_used"], fees))
     check("diễn giải: phí trên doanh số + thuế bán được in",
           "TỔNG khớp mua+bán" in txt_a and "Thuế TNCN" in txt_a and "DƯ SAU DIỄN GIẢI" in txt_a)
-    check("diễn giải: phí 0,075%×103tr − phí vế trái; thuế 0,1%×33tr",
-          near(a["explain_fee_on_turnover_gap_est"], 103_000_000 * 0.00075 - fees)
+    check("diễn giải: phí thật mua×70tr + bán×33tr − phí vế trái; thuế 0,1%×33tr",
+          near(a["explain_fee_on_turnover_gap_est"],
+               (70_000_000 * RE.FEE_RATE_BUY_PCT + 33_000_000 * RE.FEE_RATE_SELL_PCT) / 100 - fees)
           and near(a["explain_sell_tax_est"], 33_000), (a["explain_fee_on_turnover_gap_est"], a["explain_sell_tax_est"]))
+
+print("8. phí thật (aria-F1)")
+check("phí thật dnse_fee_rates: mua/bán 0,097% (không còn 0,075%)",
+      near(RE.FEE_RATE_BUY_PCT, 0.097, 1e-9) and near(RE.FEE_RATE_SELL_PCT, 0.097, 1e-9),
+      (RE.FEE_RATE_BUY_PCT, RE.FEE_RATE_SELL_PCT))
 
 print(f"\n{len(PASS)} PASS, {len(FAIL)} FAIL")
 sys.exit(1 if FAIL else 0)

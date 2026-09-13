@@ -12,8 +12,8 @@ Vế trái tính từ đường P&L (giá vốn thật x khối lượng, xem ve
 Vế phải tính từ đường bảng cân đối (số dư THẬT đọc trực tiếp từ balances API của DNSE,
 trong dnse_raw_*.jsonl, kind=balances — không phải file tóm tắt trung gian).
 
-Phí giao dịch (--fee-rate-pct, mặc định 0.075%, xác nhận bởi user 2026-07-03) tự tính từ
-tổng giá vốn thật trong snapshot — không cần nhập tay --trading-fees nữa (vẫn có thể override).
+Phí giao dịch tự tính từ tổng giá vốn thật trong snapshot × phí MUA thật (`dnse_fee_rates.py`,
+0,097% đo trên email khớp lệnh DNSE 2026-09-13 — thay 0,075% cũ; --fee-rate-pct ép cả 2 chiều) — không cần nhập tay --trading-fees nữa (vẫn có thể override).
 Lãi vay margin THẬT lấy từ field depositFeeAmount của balances API (số đã ghi nhận chính thức).
 Phần dư (residual) còn lại sau khi trừ phí+lãi thật được so sánh với MỘT ƯỚC TÍNH lãi margin
 tích lũy nhưng CHƯA post vào depositFeeAmount (--margin-rate-annual, mặc định 12.5%/năm theo
@@ -34,7 +34,7 @@ BỔ SUNG 2026-09-13 (aria-A1, job Taylor_20260913_053329) — vế trái cộng
     ĐÃ chi trả (phần còn phải thu vẫn ghi gộp trong totalCash).
 Bản cũ thiếu 2 cấu phần này ⇒ residual +23,7tr (+2,41% NAV) SpaceX 2026-08-28. Công thức
 unrealized/fee giữ nguyên; `--no-realized` tái lập đúng số của bản cũ.
-Phần DIỄN GIẢI residual thêm: phí 0,075% trên TỔNG giá trị khớp mua+bán (vế trái chỉ trừ trên
+Phần DIỄN GIẢI residual thêm: phí thật theo chiều (mua/bán) trên TỔNG giá trị khớp (vế trái chỉ trừ trên
 giá vốn đang giữ), thuế TNCN 0,1% giá trị bán, lãi margin ước 12,5%/năm tích luỹ theo dư nợ
 từng ngày. Còn dư >0,3% NAV sau diễn giải ⇒ in rõ "CHƯA GIẢI THÍCH ĐƯỢC", không ép về 0.
 """
@@ -46,7 +46,7 @@ from collections import defaultdict
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-SELL_TAX_RATE = 0.001        # thuế TNCN 0,1% giá trị bán — đo đúng 0,100% trên sao kê DNSE 6 phiên T8
+from dnse_fee_rates import FEE_RATE_BUY_PCT, FEE_RATE_SELL_PCT, SELL_TAX_RATE  # noqa: E402
 UNEXPLAINED_WARN_PCT = 0.3   # dư sau diễn giải vượt ngưỡng này (% NAV) ⇒ báo chưa giải thích được
 
 
@@ -155,8 +155,9 @@ def main():
                      help="dnse_raw_*.jsonl containing a fresh kind=balances record")
     ap.add_argument("--trading-fees", type=float, default=None,
                      help="tổng phí giao dịch thật nếu đã biết; bỏ trống = tự tính theo --fee-rate-pct")
-    ap.add_argument("--fee-rate-pct", type=float, default=0.075,
-                     help="phí giao dịch %% trên tổng giá vốn (mặc định 0.075%%, xác nhận 2026-07-03)")
+    ap.add_argument("--fee-rate-pct", type=float, default=None,
+                     help="ép phí %% CẢ 2 chiều; bỏ trống = phí thật dnse_fee_rates.py "
+                          f"(mua {FEE_RATE_BUY_PCT:g}%%, bán {FEE_RATE_SELL_PCT:g}%%, đo 2026-09-13)")
     ap.add_argument("--margin-rate-annual", type=float, default=0.125,
                      help="lãi suất margin ước tính %%/năm (mặc định 12.5%%, do user cung cấp — "
                           "CHƯA xác minh với DNSE, chỉ dùng để DIỄN GIẢI residual)")
@@ -172,6 +173,9 @@ def main():
     ap.add_argument("--div-tax-rate", type=float, default=0.05,
                      help="thuế TNCN cổ tức tiền mặt trên phần đã chi trả (cá nhân cư trú 5%%)")
     args = ap.parse_args()
+
+    fee_buy_pct = FEE_RATE_BUY_PCT if args.fee_rate_pct is None else args.fee_rate_pct
+    fee_sell_pct = FEE_RATE_SELL_PCT if args.fee_rate_pct is None else args.fee_rate_pct
 
     account_no = args.account_no
     if not account_no:
@@ -205,7 +209,7 @@ def main():
     mtm_stock = snap["total_mtm_value"]
     true_cost_basis = snap["total_cost_value"]
 
-    fees = args.trading_fees if args.trading_fees is not None else true_cost_basis * args.fee_rate_pct / 100.0
+    fees = args.trading_fees if args.trading_fees is not None else true_cost_basis * fee_buy_pct / 100.0
 
     # Realized + cổ tức (aria-A1): cùng ngày fill + cùng asof với snapshot unrealized.
     asof = snap["asof"]
@@ -253,7 +257,7 @@ def main():
 
     # Diễn giải residual (ƯỚC TÍNH) — dương = vế trái cao hơn tiền thật ⇒ chi phí chưa trừ đủ.
     turnover = rz["buy_value"] + rz["sell_value"]
-    fee_gap_est = turnover * args.fee_rate_pct / 100.0 - fees
+    fee_gap_est = (rz["buy_value"] * fee_buy_pct + rz["sell_value"] * fee_sell_pct) / 100.0 - fees
     sell_tax_est = rz["sell_value"] * SELL_TAX_RATE
     margin_cum_est = margin_interest_estimate(daily_debt, start, bal_ts[:10], args.margin_rate_annual)
     margin_gap_est = max(margin_cum_est - accrued_fee, 0.0)
@@ -276,7 +280,7 @@ def main():
     if rz["untraced_sell_proceeds"]:
         print(f"  (KHÔNG cộng: tiền bán vị thế legacy không có giá vốn {rz['untraced_sell_proceeds']:,.0f} "
               f"— {sorted(rz['untraced_by_ticker'])})")
-    print(f"  - Phí giao dịch ({args.fee_rate_pct}% x giá vốn thật): {-fees:>16,.0f}")
+    print(f"  - Phí giao dịch ({fee_buy_pct:g}% x giá vốn thật): {-fees:>16,.0f}")
     print(f"  - Phí/lãi margin đã POST (depositFeeAmount, API thật): {-accrued_fee:>12,.0f}")
     print(f"  = VẾ TRÁI:             {lhs:>16,.0f}")
     print()
@@ -297,7 +301,7 @@ def main():
     if days_implied is not None:
         print(f"  Residual {residual:+,.0f} tương đương ~{days_implied:.2f} ngày lãi margin tích lũy CHƯA post vào depositFeeAmount")
     print(f"  (depositFeeAmount hiện tại chỉ {accrued_fee:,.0f}đ — có thể lãi margin post theo chu kỳ, không phải hàng ngày; cần đối chiếu sao kê DNSE để xác nhận chính xác)")
-    print(f"  Phí {args.fee_rate_pct}% trên TỔNG khớp mua+bán {turnover:,.0f} (vế trái mới trừ trên giá vốn đang giữ): {fee_gap_est:>+14,.0f}")
+    print(f"  Phí mua {fee_buy_pct:g}%/bán {fee_sell_pct:g}% trên TỔNG khớp mua+bán {turnover:,.0f} (vế trái mới trừ trên giá vốn đang giữ): {fee_gap_est:>+14,.0f}")
     print(f"  Thuế TNCN {SELL_TAX_RATE*100:.1f}% giá trị bán {rz['sell_value']:,.0f}:            {sell_tax_est:>+14,.0f}")
     print(f"  Lãi margin ước {args.margin_rate_annual*100:.1f}%/năm cộng dồn {start}→{bal_ts[:10]} (trừ phần đã post): {margin_gap_est:>+14,.0f}")
     print(f"  = Giải thích được (ước):  {explained_est:>+16,.0f}")
@@ -312,7 +316,7 @@ def main():
         "untraced_sell_proceeds": rz["untraced_sell_proceeds"],
         "untraced_by_ticker": rz["untraced_by_ticker"],
         "cash_dividends": div, "fill_buy_value": rz["buy_value"], "fill_sell_value": rz["sell_value"],
-        "fee_rate_pct_used": args.fee_rate_pct, "trading_fees_used": fees,
+        "fee_rate_pct_used": fee_buy_pct, "fee_rate_sell_pct_used": fee_sell_pct, "trading_fees_used": fees,
         "accrued_margin_fee_real": accrued_fee,
         "lhs_pnl_path": lhs, "mtm_stock": mtm_stock, "cash": cash, "margin_debt": debt,
         "offbook_assets_used": args.offbook_assets,

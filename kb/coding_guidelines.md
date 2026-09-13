@@ -162,8 +162,8 @@ report (daily/weekly/monthly, or any client-facing artifact):
 2. `bin/daily_nav_snapshot.py` — true NAV/date (MTM stock + real cash − margin debt from a fresh
    `dnse_raw_*.jsonl` `balances` record), appended to `nav_history_{account}.csv`.
 3. `bin/reconcile_equity.py` — identity check (`starting_capital + unrealized_P&L − fees −
-   margin_interest == market_value + cash − margin_debt`); fee rate **0.075%** of true cost basis
-   (not 0.1%, corrected 2026-07-03); residual checked against *estimated* margin accrual
+   margin_interest == market_value + cash − margin_debt`); fee rate **0.097%** buy/sell (`bin/dnse_fee_rates.py`,
+   DNSE fill emails 2026-09-13); residual checked against *estimated* margin accrual
    (`--margin-rate-annual`, 12.5%/yr per user, unverified against DNSE's contract) before calling
    it "unexplained."
 4. Can't trace a number through this pipeline → don't put it in the report, say what's missing.
