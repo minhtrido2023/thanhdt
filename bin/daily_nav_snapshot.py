@@ -507,8 +507,7 @@ def main():
     # Tài khoản live có cổ phiếu thì depositInterest/depositFeeAmount gần như không bao giờ
     # đồng loạt bằng 0 → toàn-0 = dấu hiệu lỗi feed rõ ràng. FAIL-SAFE: từ chối ghi, KHÔNG
     # tự đoán số đúng (người chạy lại script/lấy bản đọc tươi hôm sau mới là nguồn thật).
-    numeric = [v for v in stock.values() if isinstance(v, (int, float)) and not isinstance(v, bool)]
-    if numeric and not any(numeric):
+    if _stock_all_zero(stock):
         print(f"❌ [{args.date}] Balance record ({bal.get('ts')}) trả về TOÀN SỐ 0 "
               f"(totalCash=0, totalDebt=0, và mọi field số khác =0) — đây là lỗi API tạm "
               f"thời của DNSE, KHÔNG phải NAV thật về 0. KHÔNG tính NAV để tránh ghi số sai "

@@ -159,18 +159,36 @@ def live_balance_and_positions(account_id, label):
     return cash, positions, cash_detail, egg_value
 
 
+def bq_close_sql(tickers, as_of_date=None):
+    """Giá Close của phiên MỚI NHẤT (≤ as_of_date) THEO TỪNG MÃ.
+
+    Trước 2026-09-13 ngày giá = MAX(time) của mã đầu alphabet, áp cho cả danh mục ⇒ mã đó
+    ngừng giao dịch/thiếu dòng thì mọi mã khác cũng lấy giá cũ (code-quality 2026-09-13).
+    """
+    tick_list = ",".join(f"'{t}'" for t in sorted(tickers))
+    date_clause = (f"t.time <= '{as_of_date}'" if as_of_date else "TRUE")
+    return f"""
+    SELECT t.ticker, t.Close, CAST(t.time AS STRING) AS time
+    FROM tav2_bq.ticker AS t
+    WHERE t.ticker IN ({tick_list}) AND {date_clause}
+    QUALIFY ROW_NUMBER() OVER (PARTITION BY t.ticker ORDER BY t.time DESC) = 1
+    """
+
+
+def parse_close_rows(rows):
+    """rows BQ → ({tk: Close}, {tk: ngày giá} của các mã có ngày giá CŨ HƠN ngày mới nhất
+    trong danh mục). Mã tụt ngày không bị bỏ — chỉ bị gọi tên để người vận hành thấy."""
+    prices = {r["ticker"]: float(r["Close"]) for r in rows}
+    dates = {r["ticker"]: str(r["time"]) for r in rows}
+    newest = max(dates.values()) if dates else None
+    lagging = {tk: d for tk, d in sorted(dates.items()) if d != newest}
+    return prices, lagging, newest
+
+
 def bq_close_prices(tickers, as_of_date=None):
     env = dict(os.environ)
     env["PATH"] = BQ_PATH_PREFIX + ":" + env.get("PATH", "")
-    tick_list = ",".join(f"'{t}'" for t in sorted(tickers))
-    date_clause = (f"t2.time <= '{as_of_date}'" if as_of_date else "TRUE")
-    sql = f"""
-    SELECT t.ticker, t.Close
-    FROM tav2_bq.ticker AS t
-    WHERE t.ticker IN ({tick_list})
-    AND t.time = (SELECT MAX(t2.time) FROM tav2_bq.ticker AS t2
-                  WHERE t2.ticker = '{sorted(tickers)[0]}' AND {date_clause})
-    """
+    sql = bq_close_sql(tickers, as_of_date)
     cmd = ["bq", "query", "--use_legacy_sql=false",
            "--project_id=lithe-record-440915-m9", "--format=json",
            "--max_rows=5000", sql]
@@ -180,8 +198,11 @@ def bq_close_prices(tickers, as_of_date=None):
         # 2026-08-29-bq-error-on-stdout-empty-diagnosis.md) — chỉ đọc stderr thì
         # người vận hành nhận chuỗi RỖNG. Không đổi luồng, chỉ đổi chuỗi chẩn đoán.
         return None, (out.stderr.strip() or out.stdout.strip())
-    rows = json.loads(out.stdout)
-    return {r["ticker"]: float(r["Close"]) for r in rows}, None
+    prices, lagging, newest = parse_close_rows(json.loads(out.stdout))
+    if lagging:
+        print(f"⚠️ BQ: các mã có phiên giá cũ hơn {newest} (dùng giá phiên gần nhất của CHÍNH "
+              f"mã đó — kiểm tra ngừng giao dịch/thiếu dòng): {lagging}", file=sys.stderr)
+    return prices, None
 
 
 def resolve_prices(tickers, asof):
@@ -219,6 +240,15 @@ def resolve_prices(tickers, asof):
     return prices, {tk: "bq_close" for tk in prices}, None
 
 
+def previous_stock_value(path):
+    """total_stock_value của file active_nav lần trước; không có/đọc lỗi ⇒ 0 (account mới)."""
+    try:
+        with open(path, encoding="utf-8") as f:
+            return float(json.load(f).get("total_stock_value") or 0)
+    except (OSError, ValueError, AttributeError):
+        return 0.0
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--account", required=True, help="label trong trading_bot_accounts.json")
@@ -226,7 +256,12 @@ def main():
     ap.add_argument("--asof", default=None,
                     help="ngày giá đóng cửa (mặc định/hôm nay: DNSE live; ngày quá khứ: BQ)")
     ap.add_argument("--out", default=None)
+    ap.add_argument("--confirm-flat", action="store_true",
+                    help="xác nhận account ĐÃ bán sạch thật — cho ghi positions rỗng dù file "
+                         "active_nav trước còn cổ phiếu")
     args = ap.parse_args()
+    out_path = args.out or os.path.join(
+        WC_ROOT, "data", "execution_logs", f"active_nav_{args.account}.json")
 
     profile = get_account_profile(args.account)
     if profile is None:
@@ -267,15 +302,27 @@ def main():
         sys.exit(4)
     tickers = list(positions.keys())
     if not tickers:
+        # DNSE CÓ trả positions rỗng TẠM THỜI (dnse_raw_2026-08-20 SpaceX: 19:06:46 27 mã →
+        # 19:07:16 0 mã → 19:07:46 27 mã). File trước còn cổ phiếu ⇒ coi là lỗi feed, FAIL-CLOSED
+        # (không ghi NAV = cash+egg khai thiếu ~9 lần); bán sạch thật thì chạy lại với --confirm-flat.
+        prev_stock = previous_stock_value(out_path)
+        if prev_stock > 0 and not args.confirm_flat:
+            print(f"❌ {args.account}: DNSE trả 0 vị thế nhưng {out_path} (lần trước) còn "
+                  f"{prev_stock:,.0f}đ cổ phiếu ⇒ nghi lỗi feed tạm thời, KHÔNG ghi active_nav. "
+                  f"Chạy lại; nếu account THẬT SỰ đã bán sạch: thêm --confirm-flat.",
+                  file=sys.stderr)
+            sys.exit(5)
+        # VẪN ghi file (positions rỗng): return sớm để lại active_nav_{account}.json CŨ sống
+        # tới 5 ngày ở consumer (ca account mới mở / sau PARK bán sạch — code-quality 2026-09-13).
         print(f"⚠️ Account {args.account} không có vị thế nào — "
               f"active_nav = cash + egg + offbook = {cash + egg_value + offbook:,.0f} "
               f"(cash {cash:,.0f}, egg {egg_value:,.0f}, offbook {offbook:,.0f})")
-        return
-
-    prices, price_source, err = resolve_prices(tickers, args.asof)
-    if prices is None:
-        print(f"❌ Không lấy được giá BQ: {err}", file=sys.stderr)
-        sys.exit(3)
+        prices, price_source = {}, {}
+    else:
+        prices, price_source, err = resolve_prices(tickers, args.asof)
+        if prices is None:
+            print(f"❌ Không lấy được giá BQ: {err}", file=sys.stderr)
+            sys.exit(3)
 
     rows = []
     total_mv = 0.0
@@ -330,7 +377,7 @@ def main():
     # quy mô lệnh; không tự hiệu chỉnh (cần ex-date từ BQ, ngoài phạm vi script này).
     div_recv = cash_detail.get("cash_dividend_receiving_vnd") or 0
     div_warning = None
-    if div_recv > 0.005 * active_nav:
+    if active_nav > 0 and div_recv > 0.005 * active_nav:
         div_warning = (
             f"cổ tức phải thu {div_recv:,.0f}đ ({div_recv / active_nav:.2%} active_nav) đã nằm "
             f"trong totalCash — nếu cổ phiếu CHƯA qua ex-date thì NAV đang đếm 2 lần khoản này "
@@ -362,8 +409,6 @@ def main():
                         "price_source": price_source.get(tk, "?")}
                        for tk, qty, px, mv, is_excl in rows],
     }
-    out_path = args.out or os.path.join(
-        WC_ROOT, "data", "execution_logs", f"active_nav_{args.account}.json")
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(result, f, indent=2, ensure_ascii=False)
     print(f"\nGhi ra: {out_path}")

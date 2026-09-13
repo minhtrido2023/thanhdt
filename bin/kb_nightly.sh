@@ -254,7 +254,7 @@ ARCHIVE_DATE=$(date -u +%Y-%m-%d)
 ARCHIVE_FILE="$ROOT/kb/archive/${ARCHIVE_DATE}-nightly.md"
 
 python3 - "$EVENTS_BUFFER" "$CUTOFF" "$ARCHIVE_FILE" <<'PYEOF'
-import sys, re, pathlib, datetime
+import sys, re, pathlib, datetime, os
 
 knowledge_path = pathlib.Path(sys.argv[1])
 cutoff = sys.argv[2]         # YYYY-MM-DD
@@ -270,27 +270,19 @@ EVENT_RE = re.compile(r'^- \[(\d{4}-\d{2}-\d{2})')
 canonical = []
 to_keep = []     # recent events (< KEEP_DAYS)
 to_archive = []  # old events
-in_events = False
+last_bucket = None  # bucket của event GẦN NHẤT — None = chưa tới event nào (canonical)
 
 for line in lines:
     m = EVENT_RE.match(line)
     if m:
-        in_events = True
-        event_date = m.group(1)
-        if event_date < cutoff:
-            to_archive.append(line)
-        else:
-            to_keep.append(line)
+        last_bucket = to_archive if m.group(1) < cutoff else to_keep
+        last_bucket.append(line)
+    elif last_bucket is not None:
+        # non-event line after events started = continuation or blank between events
+        # attach to whichever bucket the last event went to (buffer có thể xen kẽ cũ/mới)
+        last_bucket.append(line)
     else:
-        if in_events:
-            # non-event line after events started = continuation or blank between events
-            # attach to whichever bucket the last event went to
-            if to_archive and not to_keep:
-                to_archive.append(line)
-            else:
-                to_keep.append(line)
-        else:
-            canonical.append(line)
+        canonical.append(line)
 
 archived_count = len([l for l in to_archive if EVENT_RE.match(l)])
 if archived_count == 0:
@@ -303,9 +295,16 @@ with archive_path.open('a', encoding='utf-8') as f:
     if archive_path.stat().st_size == 0 if archive_path.exists() else True:
         f.write(f"# KB nightly archive — {cutoff} cutoff\n\n")
     f.writelines(to_archive)
+    f.flush()
+    os.fsync(f.fileno())
 
-# Rewrite KNOWLEDGE.md without archived events
-knowledge_path.write_text(''.join(canonical + to_keep), encoding='utf-8')
+# Rewrite events_buffer.md without archived events — tmp+os.replace như Phase 1a (§5).
+# Thứ tự archive-TRƯỚC-buffer-SAU là cố ý: kill giữa 2 bước ⇒ đêm sau archive TRÙNG (vô hại);
+# đảo lại ⇒ mất to_archive. Kill giữa lúc ghi tmp ⇒ buffer gốc còn nguyên, không mất to_keep.
+tmp = str(knowledge_path) + '.tmp'
+with open(tmp, 'w', encoding='utf-8') as fh:
+    fh.write(''.join(canonical + to_keep))
+os.replace(tmp, knowledge_path)
 print(f"ARCHIVED: {archived_count} events → {archive_path.name}")
 PYEOF
 
@@ -588,9 +587,6 @@ if [ -n "$STALE_PROPOSED" ]; then
 fi
 
 # ── Phase 3: commit if changed ────────────────────────────────────────────────
-if git -C "$ROOT" diff --quiet && git -C "$ROOT" status --porcelain | grep -q .; then
-    :  # new untracked files
-fi
 CHANGED=$(git -C "$ROOT" status --porcelain kb/ | wc -l)
 if [ "$CHANGED" -gt 0 ]; then
     git -C "$ROOT" add kb/

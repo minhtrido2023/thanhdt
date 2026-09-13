@@ -190,6 +190,96 @@ check("G2 tính age_days cho off-book asof KHÔNG NameError (compute_active_nav.
       _g2_ok, _g2_detail)
 
 print()
+print("H. Account KHÔNG vị thế VẪN ghi file (code-quality 2026-09-13 compute_active_nav.py:269)")
+# Chạy main() THẬT với DNSE/profile giả + --out file tạm. Trước vá: `return` sớm ⇒ không có
+# file ⇒ active_nav_{account}.json CŨ sống tiếp tới 5 ngày ở consumer. Nhưng DNSE CÓ trả
+# positions rỗng tạm thời (arch-review 2026-09-13) ⇒ file trước còn cổ phiếu thì phải chặn.
+import json as _json  # noqa: E402
+import shutil as _shutil  # noqa: E402
+import tempfile as _tempfile  # noqa: E402
+_h_tmp = _tempfile.mkdtemp(prefix="can_sc_")
+_h_out = os.path.join(_h_tmp, "active_nav_SELFCHK.json")
+_h_cash, _h_detail = can.cash_basis(stock(totalCash=100_000_000, totalDebt=0,
+                                          availableCash=100_000_000, depositInterest=1))
+
+
+def _h_no_prices(*a, **k):
+    raise AssertionError("resolve_prices bị gọi với danh mục rỗng")
+
+
+def _h_run(prev=None, extra=()):
+    """Chạy main() với 0 vị thế; prev = nội dung file active_nav lần trước (None = chưa có).
+    Trả (file sau khi chạy hoặc None, mã exit hoặc None, lỗi khác)."""
+    if os.path.exists(_h_out):
+        os.remove(_h_out)
+    if prev is not None:
+        _json.dump(prev, open(_h_out, "w", encoding="utf-8"))
+    saved = (can.get_account_profile, can.live_balance_and_positions, can.resolve_prices, sys.argv)
+    can.get_account_profile = lambda label: {"account_id": "SC", "manual_offbook_assets_vnd": 7_000_000}
+    can.live_balance_and_positions = lambda aid, label: (_h_cash, {}, _h_detail, 5_000_000.0)
+    can.resolve_prices = _h_no_prices
+    sys.argv = ["compute_active_nav.py", "--account", "SELFCHK", "--out", _h_out, *extra]
+    code, err = None, None
+    try:
+        can.main()
+    except SystemExit as e:
+        code = e.code
+    except BaseException as e:  # noqa: BLE001 — lỗi nào cũng phải thành FAIL có tên
+        err = f"{type(e).__name__}: {e}"
+    finally:
+        (can.get_account_profile, can.live_balance_and_positions, can.resolve_prices,
+         sys.argv) = saved
+    res = _json.load(open(_h_out, encoding="utf-8")) if os.path.exists(_h_out) else None
+    return res, code, err
+
+
+try:
+    _h_res, _h_code, _h_err = _h_run()
+    check("H1 0 vị thế, chưa có file trước (account mới) ⇒ main() GHI file, không exit/exception",
+          _h_res is not None and _h_code is None and _h_err is None, f"code={_h_code} err={_h_err}")
+    check("H2 total_nav = active_nav = cash 100tr + egg 5tr + offbook 7tr = 112tr, positions rỗng",
+          bool(_h_res) and _h_res["total_nav"] == 112_000_000 and _h_res["active_nav"] == 112_000_000
+          and _h_res["positions"] == [] and _h_res["total_stock_value"] == 0,
+          f"res={ {k: _h_res.get(k) for k in ('total_nav', 'active_nav', 'positions')} if _h_res else None}")
+    check("H3 computed_at = hôm nay ICT (consumer kiểm tươi theo nội dung)",
+          bool(_h_res) and _h_res["computed_at"] == can.today_ict().isoformat())
+
+    _h_prev = {"computed_at": "2026-09-11", "total_stock_value": 900_000_000.0, "active_nav": 1e9}
+    _h_res, _h_code, _h_err = _h_run(prev=_h_prev)
+    check("H4 0 vị thế nhưng file trước còn 900tr cổ phiếu (DNSE trả rỗng tạm thời) ⇒ exit 5, "
+          "file cũ GIỮ NGUYÊN", _h_code == 5 and _h_res == _h_prev and _h_err is None,
+          f"code={_h_code} err={_h_err}")
+    _h_res, _h_code, _h_err = _h_run(prev=_h_prev, extra=("--confirm-flat",))
+    check("H5 CHỨNG MINH NGƯỢC H4: cùng file trước + --confirm-flat ⇒ ghi 112tr (bán sạch thật)",
+          _h_code is None and bool(_h_res) and _h_res["total_nav"] == 112_000_000,
+          f"code={_h_code} err={_h_err}")
+    _h_res, _h_code, _h_err = _h_run(prev={"computed_at": "2026-09-11", "total_stock_value": 0})
+    check("H6 file trước cũng 0 cổ phiếu ⇒ ghi bình thường, không đòi --confirm-flat",
+          _h_code is None and bool(_h_res) and _h_res["total_nav"] == 112_000_000,
+          f"code={_h_code} err={_h_err}")
+finally:
+    _shutil.rmtree(_h_tmp, ignore_errors=True)
+
+print()
+print("I. Giá BQ theo NGÀY CỦA TỪNG MÃ (code-quality 2026-09-13 compute_active_nav.py:171)")
+_i_sql = can.bq_close_sql(["HPG", "AAA", "FPT"], "2026-09-11")
+check("I1 SQL chọn phiên mới nhất THEO TỪNG MÃ, không còn subquery MAX của mã đầu alphabet",
+      "PARTITION BY t.ticker" in _i_sql and "t2." not in _i_sql and "'AAA' AND" not in _i_sql,
+      _i_sql.strip().replace("\n", " "))
+check("I2 --asof giữ nguyên: lọc t.time <= asof", "t.time <= '2026-09-11'" in _i_sql)
+check("I3 không --asof ⇒ không lọc ngày", "t.time <=" not in can.bq_close_sql(["FPT"]))
+# Mã ĐẦU alphabet (AAA) ngừng giao dịch từ 09-05: trước vá cả danh mục lấy giá 09-05.
+_i_px, _i_lag, _i_new = can.parse_close_rows([
+    {"ticker": "AAA", "Close": "9000", "time": "2026-09-05"},
+    {"ticker": "FPT", "Close": "72700", "time": "2026-09-11"},
+    {"ticker": "HPG", "Close": "21300", "time": "2026-09-11"}])
+check("I4 mỗi mã giữ giá của CHÍNH nó; AAA tụt ngày bị gọi tên, không bị bỏ",
+      _i_px == {"AAA": 9000.0, "FPT": 72700.0, "HPG": 21300.0}
+      and _i_lag == {"AAA": "2026-09-05"} and _i_new == "2026-09-11",
+      f"px={_i_px} lag={_i_lag}")
+check("I5 rows rỗng ⇒ không nổ", can.parse_close_rows([]) == ({}, {}, None))
+
+print()
 if fails:
     print(f"❌ {len(fails)} FAILED: {fails}")
     sys.exit(1)

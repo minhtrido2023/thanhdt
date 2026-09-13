@@ -355,8 +355,11 @@ plan_tickers = {o.get('ticker') for o in plan.get('orders', [])}
 dnse_raw_file = os.path.join(wc_root, 'data', 'execution_logs', f'dnse_raw_{plan_date}.jsonl')
 real_filled_by_ticker = {}
 reconciled = False
-# Lấy account_no cho account này để filter dnse_raw (file chung cả SpaceX+ZaloPay)
+# Lấy account_no cho account này để filter dnse_raw (file chung cả SpaceX+ZaloPay).
+# FAIL-CLOSED (§12, code-quality 2026-09-13): không tra được account ⇒ BỎ đối soát và nói rõ lỗi;
+# trước đây `except: pass` + lọc có điều kiện ⇒ gộp order của MỌI account ⇒ lệch giả/che lệch thật.
 _target_account_no = None
+_target_account_err = None
 try:
     _secrets_file = os.path.join(wc_root, 'secrets', 'trading_bot_accounts.json')
     with open(_secrets_file, encoding='utf-8') as _sf:
@@ -369,9 +372,22 @@ try:
     elif isinstance(_accts_list, dict):
         _acct = _accts_list.get(account) or {}
         _target_account_no = _acct.get('account_id') or _acct.get('account_no')
-except Exception:
-    pass
-if os.path.exists(dnse_raw_file):
+    if not _target_account_no:
+        _target_account_err = (f"không có account_id cho label '{account}' trong "
+                               f"secrets/trading_bot_accounts.json")
+except Exception as _e:
+    _target_account_err = f"đọc secrets/trading_bot_accounts.json lỗi: {type(_e).__name__}: {_e}"
+if os.path.exists(dnse_raw_file) and _target_account_err:
+    # Chi tiết lỗi (path/exception) CHỈ đi kênh ops — báo cáo gửi nhà đầu tư chỉ nhận câu trung tính.
+    _skip_msg = f"eod_trading_report: BỎ đối soát FILL-vs-STATE ({account} {plan_date}): {_target_account_err}"
+    print(_skip_msg, file=sys.stderr)
+    try:
+        import subprocess
+        subprocess.run([os.path.join(wc_root, 'mike', 'bin', 'notify.sh'), '🟡 ' + _skip_msg],
+                       timeout=60, capture_output=True)
+    except Exception as _ne:
+        print(f"eod_trading_report: notify.sh lỗi: {type(_ne).__name__}: {_ne}", file=sys.stderr)
+elif os.path.exists(dnse_raw_file):
     reconciled = True
     latest_by_oid = {}
     with open(dnse_raw_file, encoding='utf-8') as f:
@@ -380,8 +396,8 @@ if os.path.exists(dnse_raw_file):
                 rec = json.loads(line)
             except json.JSONDecodeError:
                 continue
-            # Bỏ qua records của account khác (fix: dnse_raw chứa cả SpaceX+ZaloPay)
-            if _target_account_no and rec.get('account_no') and rec.get('account_no') != _target_account_no:
+            # Chỉ giữ record CỦA account này (dnse_raw chứa cả SpaceX+ZaloPay); thiếu account_no ⇒ loại
+            if str(rec.get('account_no') or '') != str(_target_account_no):
                 continue
             kind = rec.get('kind')
             seen = []
@@ -517,6 +533,10 @@ if mismatches:
     lines.append("")
 elif reconciled:
     lines.append("✅ Đối soát broker: fill thật khớp đúng state nội bộ, không lệch.")
+    lines.append("")
+elif os.path.exists(dnse_raw_file) and _target_account_err:
+    lines.append("⚠️ Chưa đối chiếu được số liệu khớp lệnh hôm nay với công ty chứng khoán — "
+                 "đội vận hành đang kiểm tra.")
     lines.append("")
 else:
     lines.append("ℹ️ Không đối soát được (không có dnse_raw log — bình thường nếu account paper).")
