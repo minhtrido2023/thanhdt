@@ -192,10 +192,85 @@ with tempfile.TemporaryDirectory() as tmp:
                (70_000_000 * RE.FEE_RATE_BUY_PCT + 33_000_000 * RE.FEE_RATE_SELL_PCT) / 100 - fees)
           and near(a["explain_sell_tax_est"], 33_000), (a["explain_fee_on_turnover_gap_est"], a["explain_sell_tax_est"]))
 
-print("8. phí thật (aria-F1)")
+print("8. vốn seed + lô legacy (aria-F2): account_seed_capital.json, fill broker xác nhận dnse_raw thiếu")
 check("phí thật dnse_fee_rates: mua/bán 0,097% (không còn 0,075%)",
       near(RE.FEE_RATE_BUY_PCT, 0.097, 1e-9) and near(RE.FEE_RATE_SELL_PCT, 0.097, 1e-9),
       (RE.FEE_RATE_BUY_PCT, RE.FEE_RATE_SELL_PCT))
+with tempfile.TemporaryDirectory() as tmp:
+    # Seed 06-30: tiền 5tr + legacy LLL 1.000cp @30.000 (MTM = giá vốn giả định). 07-01: bán 400 @32.000
+    # thấy trong dnse_raw + 100 @33.000 CHỈ broker xác nhận (ca VHC 07-10). Asof broker còn 500 @31.000.
+    seed_path = os.path.join(tmp, "seed.json")
+    seed = {"FIX": {"account_no": ACC, "date": "2026-06-30", "nav": 35_000_000,
+                    "legacy_positions": {"LLL": {"qty": 1000, "price": 30_000}},
+                    "missing_fills_broker_confirmed": [
+                        {"date": "2026-07-01", "ticker": "LLL", "side": "sell", "qty": 100,
+                         "price": 33_000, "evidence": "fixture"}]}}
+    cash = 5_000_000 + 400 * 32_000 + 100 * 33_000
+    snap = {"account": "FIX", "asof": "2026-07-01", "dates_included": ["2026-07-01"], "positions": [],
+            "legacy_positions_excluded_from_pnl": ["LLL"],
+            "total_unrealized_pnl": 0.0, "total_mtm_value": 0.0, "total_cost_value": 0.0}
+
+    def run8(tag, seed_obj, extra):
+        json.dump(seed_obj, open(seed_path, "w"))
+        with open(os.path.join(tmp, "dnse_raw_2026-07-01.jsonl"), "w", encoding="utf-8") as f:
+            for rec in [
+                {"kind": "orders", "payload": {"orders": [
+                    {"id": 1, "accountNo": ACC, "symbol": "LLL", "side": "NS", "fillQuantity": 400,
+                     "averagePrice": 32_000, "modifiedDate": "2026-07-01T10:00"}]}},
+                {"kind": "positions", "account_no": ACC, "ts": "2026-07-01T20:00", "payload": {"positions": [
+                    {"symbol": "LLL", "openQuantity": 500, "marketPrice": 31_000}]}},
+                {"kind": "positions", "account_no": OTHER, "ts": "2026-07-01T20:01", "payload": {"positions": [
+                    {"symbol": "LLL", "openQuantity": 9_999, "marketPrice": 99_000}]}},
+                {"kind": "balances", "ts": "2026-07-01T20:00", "account_no": ACC,
+                 "payload": {"stock": {"totalCash": cash, "availableCash": cash, "totalDebt": 0,
+                                       "depositFeeAmount": 0, "cashDividendReceiving": 0}}}]:
+                f.write(json.dumps(rec) + "\n")
+        sp = os.path.join(tmp, f"verified_snapshot_FIX_{tag}.json")
+        json.dump(snap, open(sp, "w"))
+        argv = ["reconcile_equity.py", "--account", "FIX", "--account-no", ACC, "--snapshot", sp,
+                "--seed-file", seed_path, "--balance-raw",
+                os.path.join(tmp, "dnse_raw_2026-07-01.jsonl")] + extra
+        old_argv, sys.argv = sys.argv, argv
+        buf = io.StringIO()
+        old_vas, old_dar = VAS.EXEC_DIR, DAR.EXEC_LOG_DIR
+        VAS.EXEC_DIR, DAR.EXEC_LOG_DIR = tmp, tmp
+        try:
+            with redirect_stdout(buf), redirect_stderr(buf):
+                RE.main()
+            rc = 0
+        except SystemExit as e:
+            rc = e.code or 0
+        finally:
+            sys.argv = old_argv
+            VAS.EXEC_DIR, DAR.EXEC_LOG_DIR = old_vas, old_dar
+        out = sp.replace("verified_snapshot", "reconcile_equity")
+        return rc, (json.load(open(out)) if os.path.exists(out) else None), buf.getvalue()
+
+    rc, s8, txt = run8("seed", seed, [])
+    check("vốn đầu kỳ = nav seed 35tr", s8 and near(s8["starting_capital"], 35_000_000), s8 and s8["starting_capital"])
+    check("realized legacy theo giá vốn MTM-seed: 400×2.000 + 100×3.000 = 1.100.000, untraced 0",
+          s8 and near(s8["realized_pnl"], 1_100_000) and s8["untraced_sell_proceeds"] == 0,
+          s8 and (s8["realized_pnl"], s8["untraced_sell_proceeds"]))
+    check("legacy còn giữ: MTM 500×31.000 (broker ĐÚNG account), unrealized +500.000",
+          s8 and near(s8["legacy_mtm_added"], 15_500_000) and near(s8["legacy_unrealized_added"], 500_000),
+          s8 and (s8["legacy_mtm_added"], s8["legacy_unrealized_added"]))
+    check("đẳng thức đóng 0, rc=0", s8 and near(s8["residual"], 0, 1.0) and rc == 0, s8 and (s8["residual"], rc))
+    no_fix = json.loads(json.dumps(seed))
+    no_fix["FIX"]["missing_fills_broker_confirmed"] = []
+    rc, s8b, txt = run8("nofix", no_fix, [])
+    check("CHỨNG MINH NGƯỢC: thiếu fill broker xác nhận ⇒ cảnh báo KL + residual = −(tiền bán 100×33.000 − MTM 100×31.000)",
+          s8b and "KL replay 600.00 ≠ broker 500.00" in txt and near(s8b["residual"], -(100 * 33_000 - 100 * 31_000), 1.0),
+          s8b and s8b["residual"])
+    rc, s8c, txt = run8("cli", seed, ["--starting-capital", "35000000"])
+    check("truyền --starting-capital ⇒ BỎ QUA seed (hành vi cũ): legacy untraced, không cộng MTM legacy",
+          s8c and s8c["seed_capital_used"] is None and near(s8c["untraced_sell_proceeds"], 12_800_000)
+          and near(s8c["legacy_mtm_added"], 0), s8c and (s8c["seed_capital_used"], s8c["untraced_sell_proceeds"]))
+    bad = json.loads(json.dumps(seed))
+    bad["FIX"]["account_no"] = OTHER
+    rc, _, txt = run8("badacc", bad, [])
+    check("seed account_no lệch ⇒ từ chối rc=2 (§12)", rc == 2 and "seed account_no" in txt, (rc, txt[-200:]))
+    rc, _, txt = run8("noentry", {}, [])
+    check("không --starting-capital và seed không có entry ⇒ rc=2", rc == 2, rc)
 
 print(f"\n{len(PASS)} PASS, {len(FAIL)} FAIL")
 sys.exit(1 if FAIL else 0)

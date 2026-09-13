@@ -1,0 +1,63 @@
+{
+  "_doc": "Vốn đầu kỳ reconcile_equity.py (aria-F2, job Taylor_20260913_064536). nav = totalCash − totalDebt + Σ qty×giá, ngày go-live. Lô legacy: giá vốn GIẢ ĐỊNH = MTM ngày seed (không có giá vốn mua thật trước bot). Account không có entry ⇒ phải truyền --starting-capital (SpaceX giữ hành vi cũ). Nguồn + kiểm chứng: mike/agents/Taylor/research/aria_F_20260913/F2_zalopay_seed.md",
+  "ZaloPay": {
+    "account_no": "0001743768",
+    "date": "2026-07-06",
+    "nav": 987865567,
+    "breakdown": {
+      "cash": 4919567,
+      "debt": 0,
+      "mtm_stock": 982946000,
+      "cash_source": "dnse_raw_2026-07-06.jsonl balances ts=2026-07-06T21:45:43 (lọc account_no)",
+      "positions_source": "dnse_raw_2026-07-06.jsonl positions ts=2026-07-06T21:45:43 (lọc account_no)",
+      "price_source": "BQ tav2_bq.ticker.Price (KHÔNG điều chỉnh) 2026-07-06 — trùng 7/7 với DNSE marketPrice cùng bản ghi"
+    },
+    "legacy_positions": {
+      "DGC": {
+        "qty": 10000,
+        "price": 46250,
+        "mtm": 462500000
+      },
+      "MSH": {
+        "qty": 200,
+        "price": 32700,
+        "mtm": 6540000
+      },
+      "TCM": {
+        "qty": 2310,
+        "price": 20100,
+        "mtm": 46431000
+      },
+      "TLG": {
+        "qty": 200,
+        "price": 49000,
+        "mtm": 9800000
+      },
+      "VHC": {
+        "qty": 1800,
+        "price": 57600,
+        "mtm": 103680000
+      },
+      "VIB": {
+        "qty": 9200,
+        "price": 16100,
+        "mtm": 148120000
+      },
+      "VPB": {
+        "qty": 7500,
+        "price": 27450,
+        "mtm": 205875000
+      }
+    },
+    "missing_fills_broker_confirmed": [
+      {
+        "date": "2026-07-10",
+        "ticker": "VHC",
+        "side": "sell",
+        "qty": 600,
+        "price": 57500,
+        "evidence": "email khớp lệnh DNSE msg 19f4b4977cc2786e (100+500 @57.500) + sao kê T07 (11 dòng bán VHC 10/07 = 1.800cp); dnse_raw/journal chỉ có 1.200cp"
+      }
+    ]
+  }
+}

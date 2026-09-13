@@ -37,6 +37,12 @@ unrealized/fee giữ nguyên; `--no-realized` tái lập đúng số của bản
 Phần DIỄN GIẢI residual thêm: phí thật theo chiều (mua/bán) trên TỔNG giá trị khớp (vế trái chỉ trừ trên
 giá vốn đang giữ), thuế TNCN 0,1% giá trị bán, lãi margin ước 12,5%/năm tích luỹ theo dư nợ
 từng ngày. Còn dư >0,3% NAV sau diễn giải ⇒ in rõ "CHƯA GIẢI THÍCH ĐƯỢC", không ép về 0.
+
+BỔ SUNG 2026-09-13 (aria-F2) — account có vị thế LEGACY lúc go-live (ZaloPay): bỏ --starting-capital
+⇒ đọc `data/account_seed_capital.json`: vốn đầu kỳ = NAV thật ngày go-live (tiền + MTM toàn bộ vị
+thế), lô legacy lấy MTM ngày đó làm GIÁ VỐN GIẢ ĐỊNH (nạp trước khi replay fill) ⇒ bán legacy có
+realized, legacy còn giữ có unrealized + MTM; fill broker xác nhận (email/sao kê) mà dnse_raw thiếu
+được cộng vào replay. Truyền --starting-capital ⇒ bỏ qua file, hành vi cũ y nguyên (SpaceX).
 """
 import argparse
 import json
@@ -50,11 +56,13 @@ from dnse_fee_rates import FEE_RATE_BUY_PCT, FEE_RATE_SELL_PCT, SELL_TAX_RATE  #
 UNEXPLAINED_WARN_PCT = 0.3   # dư sau diễn giải vượt ngưỡng này (% NAV) ⇒ báo chưa giải thích được
 
 
-def realized_pnl_from_events(events_by_date, asof, corp_actions):
+def realized_pnl_from_events(events_by_date, asof, corp_actions, seed_lots=None):
     """Lãi/lỗ đã thực hiện theo lô-đang-sống, replay y hệt `build_cost_books()`.
 
     Trả dict: realized (tổng), by_ticker, untraced_sell_proceeds (tiền bán phần KL không trace
     được giá vốn — legacy), buy_value, sell_value (tổng giá trị khớp, dùng cho diễn giải phí).
+    seed_lots: {ticker: (qty, price, date)} lô legacy nạp TRƯỚC replay (giá vốn giả định = MTM
+    ngày seed, KHÔNG tính vào buy_value). Trả thêm `books` {ticker: (qty, basis)} tại asof.
     Pure — không đọc file, để selfcheck khoá được bằng fixture.
     """
     from verify_account_snapshot import CostBook, corp_action_multiplier
@@ -62,6 +70,8 @@ def realized_pnl_from_events(events_by_date, asof, corp_actions):
     by_tk = defaultdict(float)
     untraced = defaultdict(float)
     buy_value = sell_value = 0.0
+    for tk, (qty, price, date) in (seed_lots or {}).items():
+        books[tk].buy(qty * corp_action_multiplier(tk, date, asof, corp_actions), qty * price, date)
     for date in sorted(events_by_date):
         for _ts, _key, tk, side, qty, price in events_by_date[date]:
             m = corp_action_multiplier(tk, date, asof, corp_actions)
@@ -83,7 +93,8 @@ def realized_pnl_from_events(events_by_date, asof, corp_actions):
     return {"realized": sum(by_tk.values()), "by_ticker": dict(by_tk),
             "untraced_sell_proceeds": sum(untraced.values()),
             "untraced_by_ticker": dict(untraced),
-            "buy_value": buy_value, "sell_value": sell_value}
+            "buy_value": buy_value, "sell_value": sell_value,
+            "books": {tk: (b.qty, b.basis) for tk, b in books.items()}}
 
 
 def net_cash_dividends(gross_deltas, receivable_asof, start, asof, tax_rate):
@@ -148,7 +159,10 @@ def main():
                      help="account_id thật (vd 0002023347) — BẮT BUỘC truyền hoặc để script tự "
                           "tra secrets/trading_bot_accounts.json theo --account, vì "
                           "--balance-raw dùng CHUNG cho mọi account cùng ngày.")
-    ap.add_argument("--starting-capital", type=float, required=True)
+    ap.add_argument("--starting-capital", type=float, default=None,
+                     help="bỏ trống ⇒ đọc data/account_seed_capital.json (NAV go-live + lô legacy)")
+    ap.add_argument("--seed-file", default=None,
+                     help="mặc định <WC_ROOT>/data/account_seed_capital.json")
     ap.add_argument("--snapshot", required=True,
                      help="output file of verify_account_snapshot.py")
     ap.add_argument("--balance-raw", required=True,
@@ -176,13 +190,21 @@ def main():
 
     fee_buy_pct = FEE_RATE_BUY_PCT if args.fee_rate_pct is None else args.fee_rate_pct
     fee_sell_pct = FEE_RATE_SELL_PCT if args.fee_rate_pct is None else args.fee_rate_pct
+    import wc_paths
+    WC_ROOT = wc_paths.find_wc_root(__file__)   # marker `wc_env.sh`, xem wc_paths
+
+    seed = None
+    if args.starting_capital is None:
+        seed_path = args.seed_file or os.path.join(WC_ROOT, "data", "account_seed_capital.json")
+        seed = (json.load(open(seed_path, encoding="utf-8")) if os.path.exists(seed_path) else {}).get(args.account)
+        if seed is None:
+            print(f"❌ Không có --starting-capital và {seed_path} không có entry '{args.account}'.",
+                  file=sys.stderr)
+            sys.exit(2)
+        args.starting_capital = float(seed["nav"])
 
     account_no = args.account_no
     if not account_no:
-        import os
-        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-        import wc_paths
-        WC_ROOT = wc_paths.find_wc_root(__file__)   # marker `wc_env.sh`, xem wc_paths
         sys.path.insert(0, WC_ROOT)
         from trading_bot.config import load_config, load_accounts
         _match = next((p for p in load_accounts(load_config()) if p["label"] == args.account), None)
@@ -215,6 +237,12 @@ def main():
     asof = snap["asof"]
     dates = snap.get("dates_included") or []
     start = dates[0] if dates else asof
+    if seed:
+        import datetime as _dt
+        if seed.get("account_no") and seed["account_no"] != account_no:
+            print(f"❌ seed account_no {seed['account_no']} ≠ {account_no}", file=sys.stderr)
+            sys.exit(2)
+        start = (_dt.date.fromisoformat(seed["date"]) + _dt.timedelta(days=1)).isoformat()
     from verify_account_snapshot import dnse_fill_events
     from corp_actions import load_corp_actions
     from dividend_adjusted_return import broker_cash_deltas, _broker_records
@@ -225,8 +253,44 @@ def main():
             print(f"❌ {err} — snapshot dùng ngày {d} nhưng không đọc lại được fill, "
                   f"KHÔNG tính realized thiếu ngày.", file=sys.stderr)
             sys.exit(2)
-        events_by_date[d] = ev
-    rz = realized_pnl_from_events(events_by_date, asof, load_corp_actions())
+        events_by_date[d] = list(ev)
+    seed_lots, legacy_mtm, legacy_unreal, legacy_lines = None, 0.0, 0.0, []
+    if seed:
+        for fx in seed.get("missing_fills_broker_confirmed", []):
+            if fx["date"] <= asof:
+                events_by_date.setdefault(fx["date"], []).append(
+                    (fx["date"] + "T23:59:59", "broker-confirmed", fx["ticker"], fx["side"],
+                     float(fx["qty"]), float(fx["price"])))
+        for d in events_by_date:
+            events_by_date[d].sort(key=lambda e: e[0])
+        seed_lots = {tk: (float(p["qty"]), float(p["price"]), seed["date"])
+                     for tk, p in seed["legacy_positions"].items()}
+    corp = load_corp_actions()
+    rz = realized_pnl_from_events(events_by_date, asof, corp, seed_lots=seed_lots)
+    if seed:
+        # Legacy mà snapshot đã LOẠI khỏi P&L (không có lịch sử mua) ⇒ lấy từ lô seed đã replay.
+        # Mã legacy snapshot VẪN giữ (vd lô mới sau khi bán sạch legacy) ⇒ đã nằm trong snapshot.
+        from verify_account_snapshot import broker_positions_from_raw
+        broker_pos = broker_positions_from_raw(account_no, asof) or {}
+        in_snap = {p["ticker"] for p in snap.get("positions", [])}
+        for tk in sorted(seed_lots):
+            if tk in in_snap:
+                continue
+            bq, basis = rz["books"].get(tk, (0.0, 0.0))
+            bp = broker_pos.get(tk)
+            if bq <= 1e-9 and not bp:
+                continue
+            if not bp or abs(bq - bp["qty"]) > 0.5:
+                print(f"⚠️ legacy {tk}: KL replay {bq:,.2f} ≠ broker {bp['qty'] if bp else 0:,.2f} "
+                      f"({asof}) — thiếu fill/corp-action, residual sẽ lộ phần này", file=sys.stderr)
+            if not bp:
+                continue
+            px = float(bp["marketPrice"])
+            legacy_mtm += bp["qty"] * px
+            legacy_unreal += bq * px - basis
+            legacy_lines.append((tk, bp["qty"], bq, px, basis))
+        mtm_stock += legacy_mtm
+        unrealized_pnl += legacy_unreal
     daily_debt = {}
     for rec in sorted(_broker_records("balances", account_no), key=lambda r: r.get("ts") or ""):
         ts = rec.get("ts") or ""
@@ -270,7 +334,14 @@ def main():
     print(f"Nguồn P&L THẬT: {args.snapshot}")
     print()
     print(f"VẾ TRÁI  (Vốn ban đầu + Lãi/lỗ - phí - lãi vay, TOÀN BỘ SỐ THẬT):")
-    print(f"  Vốn ban đầu:           {args.starting_capital:>16,.0f}")
+    print(f"  Vốn ban đầu:           {args.starting_capital:>16,.0f}"
+          + (f"  (NAV thật {seed['date']} từ account_seed_capital.json)" if seed else ""))
+    for tk, bqty, rqty, px, basis in legacy_lines:
+        print(f"    legacy {tk}: broker {bqty:,.0f}cp (replay {rqty:,.0f}) × {px:,.0f} − giá vốn "
+              f"MTM-seed {basis:,.0f} ⇒ đã cộng vào unrealized + MTM")
+    for fx in (seed or {}).get("missing_fills_broker_confirmed", []):
+        print(f"    + fill broker xác nhận dnse_raw thiếu: {fx['date']} {fx['side']} {fx['qty']} "
+              f"{fx['ticker']} @{fx['price']:,} ({fx['evidence']})")
     print(f"  + Lãi/lỗ chưa thực hiện:{unrealized_pnl:>+16,.0f}")
     if args.no_realized:
         print(f"  (--no-realized: BỎ realized {rz['realized']:+,.0f} + cổ tức {div['net']:+,.0f})")
@@ -317,6 +388,7 @@ def main():
         "untraced_by_ticker": rz["untraced_by_ticker"],
         "cash_dividends": div, "fill_buy_value": rz["buy_value"], "fill_sell_value": rz["sell_value"],
         "fee_rate_pct_used": fee_buy_pct, "fee_rate_sell_pct_used": fee_sell_pct, "trading_fees_used": fees,
+        "seed_capital_used": seed, "legacy_mtm_added": legacy_mtm, "legacy_unrealized_added": legacy_unreal,
         "accrued_margin_fee_real": accrued_fee,
         "lhs_pnl_path": lhs, "mtm_stock": mtm_stock, "cash": cash, "margin_debt": debt,
         "offbook_assets_used": args.offbook_assets,
