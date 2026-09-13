@@ -17,8 +17,12 @@ CONFIRMED). Working tree trading_bot SẠCH (Mike verify). Chiều T2 sau phiên
      selfcheck ghi CUỐI patch (loan_package_multi_account 24/24 + quét rộng 50 file, test_trading_bot.py
      FAIL 'quota AAA' là có sẵn). Commit theo lệnh cuối patch. Hạn 21:00 T2.
   2) dispatch Wags quét ~28 file bin/*.py dirname×3 → wc_paths.
-  3) xem kết quả Taylor điều tra rò 1258 SpaceX (job dispatch 13/09 ~12:55, read-only) — nếu có
-     script gọi broker thiếu loan_package_id ⇒ fix cùng lúc apply patch #1.
+  3) Rò 1258 SpaceX ĐÃ ĐIỀU TRA (Taylor_20260913_055125, Mike verify đếm lại): KHÔNG ảnh hưởng tiền —
+     160 lệnh SpaceX 07→09 = {1841:78, 1122:82}, 0 lệnh 1258, 0 ppse 1258; 49 record resolve default 1258
+     do discretionary_accumulation_inject.py:116 dựng DNSEBroker không truyền gói (cron 20:30) + tiến trình
+     tay 08-11. Patch #1 v1 KHÔNG đóng ca này. Đang làm v2 = v1 + fix gốc _account_default_lp() tra profile
+     theo account_id (Taylor, patch-only, hạn 20:30 13/09). CHIỀU T2: apply v2 nếu v2 đạt arch-review, không
+     thì apply v1. File: agents/Taylor/research/cq20260913_batch1_item1_v2.patch.
 ĐÍNH CHÍNH ĐÃ BÁO USER: (a) #2 get_nav là ĐƯỜNG CHẾT (strategy v23, 0/148 plan 2026) — không ảnh hưởng
 sizing thật, Mike từng nói sai '~10%'; (b) ZaloPay loan_package None = default creds 1258, lệnh TV1
 thật MANG 1258 (thiếu = HTTP 400). Rò thật đã xảy ra 08-11: ZaloPay tra gói theo 1841 của SpaceX 13
