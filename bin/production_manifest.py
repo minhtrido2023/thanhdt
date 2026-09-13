@@ -114,11 +114,34 @@ def rel(p):
     return os.path.relpath(p, WC)
 
 
+_TRACKED = None
+UNTRACKED_HITS = set()
+
+
+def tracked():
+    """File đã track trong git (repo WorkingClaude + repo lồng mike). Arch-review 2026-09-13 F1: quét
+    filesystem thì bắt cả WIP untracked của job song song (loan_package_multi_account_selfcheck.py
+    của Taylor_20260913_050827) => manifest commit lệch ngay khi job kia dọn file."""
+    global _TRACKED
+    if _TRACKED is None:
+        _TRACKED = set()
+        for repo, prefix in ((WC, ""), (MIKE, "mike/")):
+            r = subprocess.run(["git", "-C", repo, "ls-files", "-z"], capture_output=True, text=True, check=True)
+            _TRACKED.update(prefix + x for x in r.stdout.split("\0") if x)
+    return _TRACKED
+
+
 def in_scope(p):
     p = os.path.realpath(p)
     if not p.startswith(WC + os.sep) or not os.path.isfile(p):
         return False
-    return not any(EXCLUDE_PART.match(part) for part in rel(p).split(os.sep)[:-1])
+    rp = rel(p)
+    if any(EXCLUDE_PART.match(part) for part in rp.split(os.sep)[:-1]):
+        return False
+    if rp not in tracked():
+        UNTRACKED_HITS.add(rp)
+        return False
+    return True
 
 
 def resolve_ref(token, ctx_dirs):
@@ -177,20 +200,68 @@ def resolve_module(mod, level, file_dir, names=()):
     return out
 
 
-def strip_sh_comment(line):
-    s = line.lstrip()
-    if s.startswith("#"):
+def scan_sh_line(line, st):
+    """Quét 1 dòng bash, MANG trạng thái ngoặc sang dòng sau (arch-review 2026-09-13 F2: prompt nhiều
+    dòng gửi agent — ops_autofix.sh:172, refresh_deposit_rate_vn.sh:82 — trước bị coi là lệnh).
+    Trả dòng đã: bỏ comment; thay chuỗi trong ngoặc CÓ khoảng trắng (thông điệp/prompt) bằng ' ';
+    giữ chuỗi không khoảng trắng ("$ROOT/bin/x.sh"), chuỗi chứa `$(` và đối số của `bash -c`.
+    Thân `python3 -c '…'` được đẩy vào st["pysrc"] để parse như Python."""
+    out, i, n = [], 0, len(line)
+    if st["q"] is None and line.lstrip().startswith("#"):
         return ""
-    q = None
-    for i, ch in enumerate(line):
-        if q:
-            if ch == q:
-                q = None
-        elif ch in "'\"":
-            q = ch
-        elif ch == "#" and i > 0 and line[i - 1] in " \t;":
-            return line[:i]
-    return line
+    while i < n:
+        ch = line[i]
+        if st["q"]:
+            if ch == "\\" and st["q"] == '"' and i + 1 < n:
+                st["seg"].append(line[i:i + 2])
+                i += 2
+                continue
+            if ch == "'" and st["q"] == "'":
+                # idiom nối biến vào thân single-quote: '…'"$ROOT"'…' — vẫn là CÙNG một chuỗi
+                m = re.match(r"'\".*?\"'", line[i:])
+                if m:
+                    st["seg"].append(m.group(0)[1:-1].strip('"'))
+                    i += m.end()
+                    continue
+            if ch == st["q"]:
+                seg = "".join(st["seg"])
+                if st["dash_c"] == "py":
+                    st["pysrc"].append(seg)
+                    out.append(" ")
+                elif st["dash_c"] == "sh":
+                    st["shsrc"].append(seg)
+                    out.append(" ")
+                elif not re.search(r"\s", seg) or (st["q"] == '"' and "$(" in seg):
+                    out.append(seg)
+                else:
+                    out.append(" ")
+                st.update(q=None, seg=[], dash_c=None)
+            else:
+                st["seg"].append(ch)
+            i += 1
+            continue
+        if ch == "\\" and i + 1 < n:
+            out.append(line[i + 1])
+            i += 2
+            continue
+        if ch == "#" and (i == 0 or line[i - 1] in " \t;"):
+            break
+        if ch in "'\"":
+            before = "".join(out)
+            dc = None
+            if re.search(r"(^|\s)-c\s*$", before):
+                dc = "py" if re.search(r"python3?\S*(\s+-\S+)*\s+-c\s*$", before) else "sh"
+            st.update(q=ch, seg=[], dash_c=dc)
+            i += 1
+            continue
+        out.append(ch)
+        i += 1
+    if st["q"]:
+        st["seg"].append("\n")
+    return "".join(out)
+
+
+NON_CMD_SEG = re.compile(r"^\s*(?:\w+=)?[$({\s]*(?:echo|printf|log|say|warn|info)\b")
 
 
 def edges_python_src(src, path_dir):
@@ -217,6 +288,8 @@ def edges_python_src(src, path_dir):
         for ch in ast.iter_child_nodes(node):
             parent[ch] = node
     for node in ast.walk(tree):
+        if in_selftest(node, parent):
+            continue
         if isinstance(node, ast.Import):
             for a in node.names:
                 for f in resolve_module(a.name, 0, path_dir):
@@ -246,6 +319,21 @@ NON_EXEC_CALLS = {"print", "log", "warn", "warning", "info", "error", "debug", "
                   "format", "startswith", "endswith", "find", "replace", "search", "match", "fail", "ok"}
 
 
+SELFTEST_FN = re.compile(r"self_?(check|test)", re.I)
+
+
+def in_selftest(node, parent):
+    """Import/chuỗi nằm trong hàm tự-kiểm nội tuyến (`def _selfcheck()`) là phụ thuộc của TEST, không
+    phải đường chạy production. Arch-review 2026-09-13 F4: report_return_gate.py `_selfcheck()` import
+    newdeals_daily_report kéo nó lên T0."""
+    p = parent.get(node)
+    while p is not None:
+        if isinstance(p, (ast.FunctionDef, ast.AsyncFunctionDef)) and SELFTEST_FN.search(p.name):
+            return True
+        p = parent.get(p)
+    return False
+
+
 def path_context(node, parent):
     """Chuỗi hằng chỉ tính là cạnh exec khi nằm trong ngữ cảnh DỰNG ĐƯỜNG DẪN/LỆNH: Path / "x.py",
     đối số hàm (os.path.join, subprocess), phần tử list/tuple lệnh, gán biến. Loại so sánh
@@ -263,35 +351,24 @@ def path_context(node, parent):
     return isinstance(p, (ast.BinOp, ast.Assign, ast.AnnAssign, ast.keyword, ast.Return))
 
 
-def mask_quoted_text(line):
-    """Bỏ chuỗi trong ngoặc CÓ khoảng trắng (thông điệp notify/log) — quét tuần tự từng cặp ngoặc.
-    Giữ lại chuỗi không khoảng trắng ("$ROOT/bin/x.sh") và chuỗi chứa `$(` (lệnh con)."""
-    out, i, n = [], 0, len(line)
-    while i < n:
-        ch = line[i]
-        if ch in "'\"":
-            j = i + 1
-            while j < n and (line[j] != ch or (ch == '"' and line[j - 1] == "\\")):
-                j += 1
-            seg = line[i + 1:j]
-            keep = not re.search(r"\s", seg) or (ch == '"' and "$(" in seg)
-            out.append(seg if keep else " ")
-            i = j + 1
-        else:
-            out.append(ch)
-            i += 1
-    return "".join(out)
-
-
-def edges_shell_src(src, path_dir):
+def edges_shell_src(src, path_dir, _depth=0):
     out = []
     lines = src.splitlines()
     i = 0
     in_array = False
+    st = {"q": None, "seg": [], "dash_c": None, "pysrc": [], "shsrc": []}
     while i < len(lines):
-        raw = lines[i]
-        line = strip_sh_comment(raw)
-        hd = HEREDOC.search(line)
+        q_start = st["q"]
+        line = scan_sh_line(lines[i], st)
+        hd = HEREDOC.search(line) if st["q"] is None else None
+        if hd is None and q_start is None and st["q"] == '"' and re.search(r"\$\(.*<<", lines[i]):
+            # heredoc mở BÊN TRONG "$(… <<'PY'" — REPORT="$(python3 - … <<'PYEOF'" (eod_trading_report.sh:275)
+            seg = "".join(st["seg"])
+            hd = HEREDOC.search(seg)
+            if hd:
+                st["seg"] = [seg[: hd.start()]]
+                line = line + " " + seg.rstrip("\n")
+                hd = HEREDOC.search(line)
         if hd:
             tag = hd.group(1)
             body = []
@@ -303,9 +380,10 @@ def edges_shell_src(src, path_dir):
                 out += edges_python_src("\n".join(body), path_dir)
             line = line[: hd.start()]
             i = j
-        s = re.split(r"(?:^|[;&|({]\s*)(?:echo|printf|log|say|warn|info)\b", line.strip(), maxsplit=1)[0]
-        s = mask_quoted_text(s).strip()
-        s = re.sub(r"^[^\s()]*[*|][^\s()]*\)", " ", s)  # nhánh `case` (*x.py|*y.py)) là mẫu khớp, không phải lệnh
+        s = re.sub(r"^\s*[^\s()]*[*|][^\s()]*\)", " ", line)  # nhánh `case` (*x.py|*y.py)) là mẫu khớp
+        # Bỏ đúng ĐOẠN lệnh echo/printf/log trong pipeline, giữ vế sau `|` (F3: `printf … | python3
+        # "$ROOT/bin/dispatch_question_hint.py"` ở dispatch.sh:1612 trước bị mất cả dòng).
+        s = " ; ".join(seg for seg in re.split(r"\|\||&&|[|;\n]", s) if not NON_CMD_SEG.match(seg)).strip(" ;")
         if s:
             cds = [os.path.join(path_dir, d) for d in re.findall(r"\bcd\s+([^\s;&|]+)", s)]
             cds = [resolve_dir(d) for d in cds]
@@ -325,6 +403,12 @@ def edges_shell_src(src, path_dir):
             for m in PY_MOD_FLAG.finditer(s):
                 for f in resolve_module(m.group(1), 0, ctx[0]):
                     out.append((f, "exec"))
+        for code in st["pysrc"]:
+            out += edges_python_src(code, path_dir)
+        if _depth < 3:
+            for code in st["shsrc"]:
+                out += edges_shell_src(code, path_dir, _depth + 1)
+        st["pysrc"], st["shsrc"] = [], []
         i += 1
     return out
 
@@ -365,6 +449,20 @@ def command_edges(cmd):
 
 
 # ---------------------------------------------------------------- gốc
+def strip_sh_comment(line):
+    """Bỏ comment cuối 1 dòng lệnh cron, giữ nguyên ngoặc (lệnh còn được quét lại bởi edges_shell_src)."""
+    q = None
+    for i, ch in enumerate(line):
+        if q:
+            if ch == q:
+                q = None
+        elif ch in "'\"":
+            q = ch
+        elif ch == "#" and i > 0 and line[i - 1] in " \t;":
+            return line[:i]
+    return line
+
+
 def cron_roots(crontab_text):
     roots = []
     for line in crontab_text.splitlines():
@@ -411,7 +509,8 @@ def hook_roots():
                    + glob.glob(os.path.join(MIKE, ".claude", "settings*.json"))
                    + glob.glob(os.path.join(MIKE, "agents", "*", ".claude", "settings*.json")))
     for fp in files:
-        if not in_scope(fp):
+        # settings.local.json KHÔNG track git nhưng Claude Code vẫn nạp hook từ nó => đọc thẳng
+        if any(EXCLUDE_PART.match(part) for part in rel(fp).split(os.sep)[:-1]):
             continue
         try:
             hooks = json.load(open(fp)).get("hooks", {})
@@ -462,14 +561,15 @@ def build(crontab_text):
         r["label"] = root_label(r)
         r["start"] = command_edges(r["command"])
         r["in_repo_files"] = sorted({rel(f) for f, _ in r["start"]})
-    # Entry script của MỖI gốc = rào: gốc khác đi tới nó thì dừng, file đó (và bao đóng của nó) lấy
-    # tầng từ CHÍNH gốc của nó. Đo 2026-09-13: run_bot.sh -> ops_autofix.sh -> ops_health_check.sh
+    # Entry script của MỖI gốc = rào: gốc khác đi tới nó thì KHÔNG thêm nó vào bao đóng của mình —
+    # file đó (và bao đóng của nó) lấy tầng từ CHÍNH gốc của nó. Đo 2026-09-13: run_bot.sh -> ops_autofix.sh -> ops_health_check.sh
     # -> wags_autofix.sh …, run_bot.sh -> consolidate.sh là cạnh THẬT (gọi khi lỗi/sau việc) nhưng
     # kéo toàn bộ fleet-ops lên T0 nếu tính blast radius thuần. Blast radius vẫn ghi ở `blast_tier`.
     entries = {f for r in roots for f, _ in r["start"]
                if os.path.basename(f) == r["script"] and os.path.basename(f) not in WRAPPERS}
 
     def walk(r, barrier):
+        own = {f for f, _ in r["start"]}
         seen = {}
         q = deque()
         for f, kind in r["start"]:
@@ -478,12 +578,12 @@ def build(crontab_text):
                 q.append(f)
         while q:
             f = q.popleft()
-            if barrier and seen[f][0] > 0 and f in entries:
-                continue
             if barrier and rel(f) in DISPATCH_BARRIER and r["tier"] != T2:
                 continue  # bàn giao cho agent — không kế thừa tầng người gọi (xem DISPATCH_BARRIER)
             d = seen[f][0]
             for g, k in cached_edges(f):
+                if barrier and g in entries and g not in own:
+                    continue  # entry của gốc khác: nó (và bao đóng) lấy tầng từ chính gốc của nó
                 if g != f and g not in seen:
                     seen[g] = (d + 1, k, rel(f))
                     q.append(g)
@@ -502,7 +602,7 @@ def build(crontab_text):
             if e["depth"] is None or d < e["depth"]:
                 e.update(depth=d, via=k, parent=par)
             if not e["roots"] or TIER_ORDER[r["tier"]] < TIER_ORDER[e["tier"]]:
-                e["tier"] = r["tier"]
+                e.update(tier=r["tier"], tier_root=r["label"], tier_parent=par)
             e["roots"].add(r["label"])
     for f, e in files.items():  # chỉ với tới qua rào (không gốc nào đi thẳng tới) -> tầng blast
         if not e["roots"]:
@@ -527,7 +627,8 @@ def build(crontab_text):
 
     out_files = {}
     for f, e in sorted(files.items(), key=lambda kv: rel(kv[0])):
-        d = {"tier": e["tier"], "blast_tier": e.get("blast_tier", e["tier"]), "depth": e["depth"], "via": e["via"], "parent": e["parent"],
+        d = {"tier": e["tier"], "blast_tier": e.get("blast_tier", e["tier"]), "depth": e["depth"],
+             "tier_root": e.get("tier_root"), "tier_parent": e.get("tier_parent"), "via": e["via"], "parent": e["parent"],
              "roots": sorted(e["roots"])}
         if "covers" in e:
             d["covers"] = e["covers"]
@@ -541,6 +642,8 @@ def build(crontab_text):
         "exclusions": ["mike_paseo/", "wt-*/ (mọi worktree)", ".claude/worktrees/", "venv/__pycache__/node_modules"],
         "roots": out_roots,
         "files": out_files,
+        # tham khảo, KHÔNG diff: file có thật được tham chiếu nhưng chưa track git (WIP hoặc production ngoài git)
+        "untracked_refs": sorted(UNTRACKED_HITS),
     }
 
 
@@ -563,18 +666,23 @@ def render_md(m):
         "với gốc ngoài T2) — tầng blast radius thuần nằm ở `blast_tier` trong JSON. T3 = selfcheck ngoài bao đóng import/exec "
         "trực tiếp file T0–T2. Loại trừ: " + ", ".join(m["exclusions"]) + ".", "",
         "**Giới hạn (không thấy được cơ học):** script do agent tự chọn khi được dispatch, kể cả script "
-        "được NÊU TÊN trong prompt gửi agent (vd kb_nightly.sh bảo agent chạy data_registry_audit.sh); "
-        "chuỗi `python3 -c '…'` nhiều dòng; đường dẫn ghép từ biến runtime; importlib theo chuỗi tính; "
-        "file config/dữ liệu (.json). Cạnh `ref` = đường dẫn nằm trong mảng bash (danh sách, không phải lệnh). File không có ở đây "
+        "được NÊU TÊN trong prompt gửi agent (vd kb_nightly.sh bảo agent chạy data_registry_audit.sh, "
+        "daily_retro.sh bảo chạy wakeup_audit.py); lệnh nằm trong chuỗi có khoảng trắng không phải "
+        "`bash -c`/`python3 -c`; đường dẫn ghép từ biến runtime; `importlib.import_module`; import trong "
+        "hàm tự-kiểm nội tuyến (`def _selfcheck`) CỐ Ý bỏ; file chưa track git CỐ Ý bỏ (liệt kê ở "
+        "`untracked_refs` trong JSON); file config/dữ liệu (.json). Cạnh `ref` = đường dẫn trong mảng bash.", "",
+        "**Chủ sở hữu + nhịp:** Wags. Lệch = FAIL của `production_manifest_selfcheck.sh` trong "
+        "`run_selfchecks.sh` ⇒ `weekly_ops_audit.sh` thấy MỖI TUẦN (bộ dò đỏ hằng ngày chỉ báo 1 lần/file "
+        "vì `known_red`). Thay đổi cố ý (thêm/đổi cron, import mới) ⇒ tái sinh + commit cùng lúc. File không có ở đây "
         "KHÔNG chắc chắn là research — manifest là cận dưới của production.", "",
-        "| path | tầng | depth | cách vào | gốc kích hoạt |", "|---|---|---|---|---|",
+        "| path | tầng | depth | cách vào | gốc quyết định tầng (+ số gốc khác) |", "|---|---|---|---|---|",
     ]
     for t in ("T0", "T1", "T2", "T?", "T3"):
         for p, v in files.items():
             if v["tier"] != t:
                 continue
             rs = v["roots"]
-            rtxt = (rs[0] if rs else "") + (f" (+{len(rs) - 1})" if len(rs) > 1 else "")
+            rtxt = (v.get("tier_root") or (rs[0] if rs else "")) + (f" (+{len(rs) - 1})" if len(rs) > 1 else "")
             if t == "T3":
                 rtxt = "phủ: " + ", ".join(v["covers"][:2]) + (f" (+{len(v['covers']) - 2})" if len(v["covers"]) > 2 else "")
             dep = "-" if v["depth"] is None else str(v["depth"])

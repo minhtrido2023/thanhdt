@@ -25,37 +25,52 @@ if ! git -C "$MIKE" show HEAD:kb/production_manifest.json >"$TMP/committed.json"
   exit 1
 fi
 
-# (1) ca parse — mỗi ca: loại file | nội dung | file đích | kind mong đợi ("none" = không được có cạnh)
+# (1) ca parse — (loại, nội dung, file đích (basename), kind mong đợi; "none" = không được có cạnh)
 cd "$WC" && python3 - "$GEN" <<'PY' || fail=1
-import sys, os, importlib.util
+import sys, os, tempfile, importlib.util
 spec = importlib.util.spec_from_file_location("pm", sys.argv[1]); pm = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(pm)
-J = os.path.join(pm.WC, "mike/bin/jobs.sh")
 cases = [
-  ("sh", '"$ROOT/bin/jobs.sh" status x', "exec"),
-  ("sh", 'echo "chạy mike/bin/jobs.sh để xem"', "none"),
-  ("sh", 'notify "🟡 lỗi — xem mike/bin/jobs.sh" || true', "none"),
-  ("sh", '# comment mike/bin/jobs.sh', "none"),
-  ("sh", 'case "$f" in\n  *jobs.sh|*x.py) t=1 ;;\nesac', "none"),
-  ("sh", 'FILES=(\n  "$ROOT/bin/jobs.sh"\n)', "ref"),
-  ("sh", 'python3 - <<\'PY\'\nimport mike_json\nPY', None),   # heredoc python -> import mike_json
-  ("py", 'import subprocess\nsubprocess.run([str(ROOT / "bin" / "jobs.sh")])', "exec"),
-  ("py", 'ok = "jobs.sh" in text', "none"),
-  ("py", 'print("xem jobs.sh")', "none"),
+  ("sh", '"$ROOT/bin/jobs.sh" status x', "jobs.sh", "exec"),
+  ("sh", 'echo "chạy mike/bin/jobs.sh để xem"', "jobs.sh", "none"),
+  ("sh", 'echo xem mike/bin/jobs.sh >&2; "$ROOT/bin/mike_json.py" get', "jobs.sh", "none"),
+  ("sh", 'notify "🟡 lỗi — xem mike/bin/jobs.sh" || true', "jobs.sh", "none"),
+  ("sh", '# comment mike/bin/jobs.sh', "jobs.sh", "none"),
+  ("sh", 'case "$f" in\n  *jobs.sh|*x.py) t=1 ;;\nesac', "jobs.sh", "none"),
+  ("sh", 'FILES=(\n  "$ROOT/bin/jobs.sh"\n)', "jobs.sh", "ref"),
+  ("sh", "python3 - <<'PY'\nimport mike_json\nPY", "mike_json.py", "import"),
+  # arch-review 2026-09-13 F2: prompt NHIỀU DÒNG gửi agent không phải lệnh
+  ("sh", 'dispatch.sh Winston "sửa lỗi điều phối\n  chạy mike/bin/jobs.sh list\n  rồi báo lại" --bg', "jobs.sh", "none"),
+  # F3: printf … | script — giữ vế sau pipe
+  ("sh", 'printf \'%s\' "$p" | timeout 25 python3 "$ROOT/bin/jobs.sh"', "jobs.sh", "exec"),
+  ("sh", 'out=$(echo "$j" | python3 "$ROOT/bin/mike_json.py" get)', "mike_json.py", "exec"),
+  # thân bash -c '…' nhiều dòng có idiom '"$VAR"' vẫn là lệnh (wags_autofix.sh:147)
+  ("sh", 'setsid bash -c \'\n  ROOT="\'"$ROOT"\'"; L=\'"$(printf %q "$L")"\'\n  "$ROOT/bin/jobs.sh" list\n\' &', "jobs.sh", "exec"),
+  # heredoc mở bên trong "$(…" (eod_trading_report.sh:275)
+  ("sh", 'R="$(python3 - "$A" << \'PYEOF\'\nimport mike_json\nPYEOF\n)"', "mike_json.py", "import"),
+  ("py", 'import subprocess\nsubprocess.run([str(ROOT / "bin" / "jobs.sh")])', "jobs.sh", "exec"),
+  ("py", 'ok = "jobs.sh" in text', "jobs.sh", "none"),
+  ("py", 'print("xem jobs.sh")', "jobs.sh", "none"),
+  # F4: import trong hàm tự-kiểm nội tuyến không phải đường production
+  ("py", 'def _selfcheck():\n    import mike_json\n', "mike_json.py", "none"),
 ]
 bad = 0
-for lang, src, want in cases:
-    d = os.path.join(pm.MIKE, "bin")
+d = os.path.join(pm.MIKE, "bin")
+for lang, src, tgt, want in cases:
     e = pm.edges_python_src(src, d) if lang == "py" else pm.edges_shell_src(src, d)
-    if want is None:
-        got_ok = any(os.path.basename(f) == "mike_json.py" and k == "import" for f, k in e)
-    else:
-        kinds = {k for f, k in e if f == J}
-        got_ok = (not kinds) if want == "none" else (kinds == {want})
-    if not got_ok:
+    kinds = {k for f, k in e if os.path.basename(f) == tgt}
+    ok = (not kinds) if want == "none" else (kinds == {want})
+    if not ok:
         bad += 1
-        print(f"FAIL parse-case [{lang}] {src!r}: mong {want}, được {[(pm.rel(f), k) for f, k in e]}")
-print(f"parse-cases: {len(cases) - bad}/{len(cases)} PASS")
+        print(f"FAIL parse-case [{lang}] {src!r}: mong {tgt}:{want}, được {[(pm.rel(f), k) for f, k in e]}")
+# F1: file có thật nhưng CHƯA track git không được vào manifest; file đã track thì được
+with tempfile.NamedTemporaryFile(dir=os.path.join(pm.MIKE, "logs"), prefix=".pm_untracked_probe_", suffix=".py") as t:
+    if pm.in_scope(t.name):
+        bad += 1; print(f"FAIL untracked-probe: {pm.rel(t.name)} (untracked) lọt in_scope")
+if not pm.in_scope(os.path.join(d, "jobs.sh")):
+    bad += 1; print("FAIL tracked-probe: mike/bin/jobs.sh (tracked) bị in_scope loại")
+n = len(cases) + 2
+print(f"parse-cases: {n - bad}/{n} PASS")
 sys.exit(1 if bad else 0)
 PY
 
@@ -74,6 +89,24 @@ if [ -f "$PROBE" ]; then
   fi
 else
   echo "FAIL drift-probe: thiếu file dò $PROBE — chọn file research khác cho probe"; fail=1
+fi
+
+# (2b) bộ so phải BẮT được lệch TẦNG và lệch GỐC (arch-review F5: tắt so tầng/gốc mà probe (2) vẫn PASS):
+# sửa bản committed tạm — hạ run_bot.sh T0->T2, đổi lịch 1 gốc cron — --check phải báo '~' và '+/- gốc'.
+python3 - "$TMP/committed.json" "$TMP/committed_mut.json" <<'PY' || fail=1
+import json, sys
+m = json.load(open(sys.argv[1]))
+m["files"]["mike/bin/run_bot.sh"]["tier"] = "T2"
+r = next(r for r in m["roots"] if r["kind"] == "cron")
+r["schedule"] = "9 9 9 9 9"
+json.dump(m, open(sys.argv[2], "w"))
+PY
+out="$(cd "$WC" && python3 "$GEN" --crontab "$TMP/crontab" --check "$TMP/committed_mut.json" 2>&1)"; rc=$?
+if [ "$rc" -eq 1 ] && grep -q "^~ mike/bin/run_bot.sh tầng T2 -> T0" <<<"$out" \
+   && grep -q "^+ gốc" <<<"$out" && grep -q "^- gốc ('cron', '9 9 9 9 9'" <<<"$out"; then
+  echo "tier/root-probe: PASS (bộ so bắt được lệch tầng + lệch gốc)"
+else
+  echo "FAIL tier/root-probe (rc=$rc) — bộ so không bắt lệch tầng/gốc"; echo "$out" | head -6; fail=1
 fi
 
 # (3) so thật

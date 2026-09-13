@@ -6808,7 +6808,7 @@
    "via": "exec"
   }
  },
- "generated_at": "2026-09-13T06:04:12Z",
+ "generated_at": "2026-09-13T06:08:05Z",
  "generated_by": "python3 mike/bin/production_manifest.py",
  "roots": [
   {
@@ -7776,5 +7776,7 @@
   }
  ],
  "units_status": "ok",
- "untracked_refs": []
+ "untracked_refs": [
+  "loan_package_multi_account_selfcheck.py"
+ ]
 }
