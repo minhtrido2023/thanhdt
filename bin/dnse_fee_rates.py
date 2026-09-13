@@ -11,8 +11,10 @@ ZaloPay có fill trong dnse_raw), đối chiếu chéo sao kê tiền tháng 07/
 Hằng số theo chiều = phí DNSE + phí sở HOSE (sàn chiếm 100% doanh số bán, 75,6% số fill mua).
 Bằng chứng + script tái lập: agents/Taylor/research/aria_F_20260913/.
 
-KHÔNG phủ đường THỰC THI: trading_bot/plan_funding_gate.py FEE_RATE và
-bin/merge_park_orders.py fee_est_vnd vẫn 0,075% — đổi cần user duyệt (chạm gate tiền lệnh thật).
+Đường THỰC THI (aria-H, user duyệt 2026-09-13 14:54 ICT): bin/merge_park_orders.py fee_est_vnd và
+prompt DollarBill trong bin/bq_freshness_check.sh import trực tiếp từ đây. trading_bot/plan_funding_gate.py
+FEE_RATE KHÔNG import được (ranh giới repo) ⇒ hardcode cùng giá trị, đồng bộ bằng selfcheck đối chiếu —
+đổi hằng số ở đây là PHẢI đổi cả FEE_RATE bên đó.
 """
 
 BROKER_FEE_PCT = 0.070

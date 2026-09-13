@@ -123,6 +123,16 @@ check("R1 lệnh JIT gốc di sản đã bị NHẬN NUÔI + xoá",
       not any(o["id"] == "SELL-JIT-PARK-VHM-01" for o in fixed["orders"]))
 check("R1 lệnh gộp di sản (id cũ) cũng bị xoá",
       not any(o["id"] == "SELL-VHM-PARK-07" for o in fixed["orders"]))
+
+# ── R1-fee (aria-H 2026-09-13): fee_est_vnd phải theo phí THẬT ở dnse_fee_rates, không hardcode ──
+import dnse_fee_rates  # noqa: E402
+_gen = [o for o in fixed["orders"] if o.get("merge_owner") == OWNER]
+check("R1-fee fee_est_vnd = proceeds × dnse_fee_rates.FEE_RATE_SELL_PCT (0,097%) trên MỌI lệnh gộp",
+      bool(_gen) and all(o["fee_est_vnd"] == int(round(o["estimated_proceeds_vnd"]
+                                                     * dnse_fee_rates.FEE_RATE_SELL_PCT / 100))
+                         for o in _gen)
+      and abs(dnse_fee_rates.FEE_RATE_SELL_PCT - 0.097) < 1e-9,
+      str([(o["id"], o["estimated_proceeds_vnd"], o["fee_est_vnd"]) for o in _gen]))
 check("R1 lệnh MUA giữ nguyên qty",
       [o for o in fixed["orders"] if o["side"] == "buy"][0]["qty"] == 1800)
 check("R1 báo cáo ghi rõ 2 lệnh di sản đã bị xoá",

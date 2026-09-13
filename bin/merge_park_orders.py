@@ -87,6 +87,13 @@ import json
 import os
 import sys
 
+# Tự neo thư mục bin/ trước khi import hằng số phí: exdate_price_frame_selfcheck.py nạp file này bằng
+# spec_from_file_location từ cwd=/tmp (sys.path không có bin/) ⇒ import trần sẽ ImportError.
+_BIN_DIR = os.path.dirname(os.path.abspath(__file__))
+if _BIN_DIR not in sys.path:
+    sys.path.insert(0, _BIN_DIR)
+from dnse_fee_rates import FEE_RATE_SELL_PCT  # noqa: E402  phí bán THẬT 0,097% (aria-F1 CONFIRMED)
+
 LOT = 100
 OWNER = "park_merge_v1"
 LEGACY_PLAY_TYPES = {"PARK_TRIM", "JIT_UNPARK", "PARK_TRIM+JIT_UNPARK"}
@@ -548,7 +555,7 @@ def merge_park_orders(plan, l1=None, l2=None, *, allow_approved=False, ex_map=No
             "order_type": "LO", "book": "PARK", "play_type": ptype,
             "priority": sell_pri, "urgency": "normal",
             "estimated_proceeds_vnd": val,
-            "fee_est_vnd": int(round(val * 0.00075)),
+            "fee_est_vnd": int(round(val * FEE_RATE_SELL_PCT / 100)),
             "sellable": d["sellable"],
             # ── dấu SỞ HỮU: mọi lần chạy sau sẽ xoá đúng các lệnh này rồi dựng lại ───
             "merge_owner": OWNER,
