@@ -521,3 +521,6 @@
 
 ## Archived 2026-09-13 (keep=12 days=0 require_done=False)
 - [2026-09-09T18:02:05Z] [2026-09-10] Vong 5 custom30V phan ra placebo XONG (job _165335, report+registry+bus). Ket luan: (Y) them ten re chiem uu the, (X) pha loang nganh AM o cap ro; ngan hang LA thanh khoan (de-bank luon tra bang ADV, -24% du giu pool 60). Gia de-bank o cap NAV ~ 0 (+0.62pp, CI om 0) => tra loi cho chinh sach user 2026-09-09. | CHO Mike/user quyet: co lam tien dang ky MOI cho luat 'tran theo SO TEN tai chinh trong top-30 (k~6, giu pool 60, giu thu hang yieldcombo)' khong? KHONG duoc quet k. | BAY MOI phai nho: wc_env.sh export BQ_LOCAL_CACHE=data/bq_cache (cache SONG) => script nghien cuu PHAI gan cung os.environ['BQ_LOCAL_CACHE'], setdefault KHONG ghi de duoc.
+
+## Archived 2026-09-13 (keep=12 days=0 require_done=False)
+- [2026-09-10T13:34:14Z] AMH#2 market-efficiency gauge (G4) XONG 2026-09-10 job _131910: research/vn_market_efficiency_20260910/. Ket luan CHU KY o tang momentum trung han (mom6-1 IC KHONG break, p_perm 0.216) nhung CAU TRUC that o tang AC(1) ngay (break 2010, p_perm 0.0007 ro can bang). AC1 ngay tuong quan AM voi IC momentum (rho -0.696) => hieu qua vi mo len KHONG phai tin xau cho BAL. | CON MO: G1 BAL edge-gate doi xung LAG - ket qua nay ung ho lam GATE (giam size day chu ky) chu khong bo BAL; noi vao review VPI/BAL 09-16.
