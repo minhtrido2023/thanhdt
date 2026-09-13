@@ -1,0 +1,1 @@
+❌ [2026-08-06] Giá close_price(G1) và marketPrice của vị thế broker LỆCH >5% cho 1 mã — KHÔNG tính NAV (broker chưa đồng bộ hết nguồn giá — corp-action hoặc trễ marketPrice EOD, xem VHM 2026-08-05 / PVT 2026-09-08): VHM: close_price=153,000 vs vị thế broker marketPrice=76,500 (lệch 100.0%). Sẽ tự retry trong cửa sổ ngắn; nếu vẫn lệch sau đó cần kiểm tra thủ công.

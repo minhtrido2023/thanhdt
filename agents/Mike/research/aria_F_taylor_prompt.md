@@ -1,0 +1,16 @@
+Việc F (user duyệt 13/09 13:44 ICT) — 2 hạng mục dùng CÙNG bằng chứng: email "Báo cáo giao dịch khớp lệnh" DNSE hằng ngày (tool có sẵn: WorkingClaude/fetch_dnse_khoplenh_email.py, skill ~/.claude/skills/dnse-fill-reconciliation/, registry kb/data_registry/trading-bot/dnse_khoplenh_broker_email.md). Ghi bus finding RIÊNG từng hạng mục. Tuân thủ §6/§12/§16/§19/§23.
+
+F1. Phí giao dịch thật (thay 0,075% nếu đủ bằng chứng). Chỉ đạo user nguyên văn: "dùng email báo cáo giao dịch ngày của DNSE làm chứng cứ. Nếu có đủ dữ liệu thì đồng ý đổi sang phí giao dịch thật."
+  a) Tải TOÀN BỘ email khớp lệnh từ go-live 2026-07-01 tới 2026-09-12 cho CẢ 2 account (SpaceX 0002023347, ZaloPay 0001743768) — không chỉ 6 phiên T8 đã có. Ghi số phiên có email / số phiên giao dịch thật (fill trong dnse_raw) → coverage.
+  b) Với MỖI fill: phí/doanh số theo chiều mua/bán, theo account, theo tháng. Báo phân phối (min/median/max, N fill, N phiên). Kiểm đồng nhất: nếu ≥95% fill cùng 1 tỷ lệ (±0,002pp) mỗi chiều ⇒ ĐỦ bằng chứng. Tách riêng thuế bán 0,1% (không gộp vào phí). Nếu email có cột phí margin/lãi vay thì ghi luôn.
+  c) ĐỦ bằng chứng ⇒ đổi hằng số phí ở MỌI nơi đang dùng 0,075%: grep -rn "0\.075\|0,075\|FEE_RATE\|fee_rate" trong mike/bin/*.py và WorkingClaude/*.py đường production (reconcile_equity.py, verify_account_snapshot.py, report_return_gate.py, dividend_adjusted_return.py, eod_trading_report.sh...) — liệt kê từng file:dòng trước khi sửa, sửa thành 1 hằng số dùng chung (buy/sell tách) có nguồn + ngày đo trong comment. Chạy lại reconcile_equity.py SpaceX 08-28 và 09-11: residual TRƯỚC/SAU. Selfcheck hiện có phải PASS lại (reconcile_equity_realized_selfcheck 23, nav_cum_dividend_selfcheck). KHÔNG đủ bằng chứng ⇒ KHÔNG đổi, báo thiếu gì.
+  d) Cập nhật mike/kb/coding_guidelines.md §6 mục 3 (dòng "fee rate 0.075%") NẾU đổi — file sát 40KB, chỉ sửa số + nguồn, không thêm đoạn.
+  Commit message có "aria-F1". Bus finding topic "aria-F1-real-fee-rate".
+
+F2. ZaloPay reconcile — seed vốn đầu kỳ + giải thích +34,33tr ngày 2026-07-10.
+  a) Vốn đầu kỳ ZaloPay = NAV thật ngày go-live 07-06 (tiền + MTM toàn bộ vị thế lúc đó, GỒM legacy DGC/VPB/MSH/TLG/TCM/VHC/VIB...) từ dnse_raw_2026-07-06.jsonl (balances+positions lọc accountNo) + giá BQ. Ghi vào 1 file cấu hình đọc được (vd data/account_seed_capital.json {account, date, nav, breakdown}) — reconcile_equity.py đọc từ đó thay vì --starting-capital placeholder 1B; SpaceX giữ nguyên hành vi hiện tại (chỉ thêm đường đọc file, không đổi số SpaceX).
+  b) Legacy bán ra không có giá vốn: dùng MTM 07-06 làm giá vốn cơ sở (nêu rõ giả định).
+  c) +34,33tr ngày 07-10: đối chiếu email khớp lệnh 07-07..07-10 (có fill nào bot không thấy?), cổ tức về (corp_action), nộp tiền. Email khớp lệnh CHỈ có fill — nếu không giải thích được bằng fill/cổ tức thì kết luận "nghi nộp tiền/chuyển khoản, cần sao kê tiền DNSE" và ghi khoản đó thành dòng "external cash flow 07-10" có cờ UNVERIFIED trong reconcile, KHÔNG ép về 0.
+  d) Chạy reconcile ZaloPay 08-28 + 09-11: residual TRƯỚC/SAU, phần còn lại giải thích bằng gì.
+  Commit "aria-F2". Bus finding "aria-F2-zalopay-seed-capital".
+Ràng buộc: KHÔNG chạm trading_bot/, config.py, trading_rules.json, plan, crontab. Wags đang làm song song việc tách daily_nav_snapshot khỏi EOD wrapper — KHÔNG sửa eod_trading_report.sh/crontab. Cuối: bus finding tổng "aria-F-done".

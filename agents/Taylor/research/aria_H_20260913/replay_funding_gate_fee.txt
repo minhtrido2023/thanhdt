@@ -1,0 +1,15 @@
+gate module: /tmp/ariaH_wt/WorkingClaude/trading_bot/plan_funding_gate.py
+acct     plan       buy/sell        pp0Buy    need@0,075    need@0,097   U old   U new old→new  nguồn pp0Buy
+SpaceX   2026-08-17   1/0      425,701,185    10,327,740    10,330,010    2.4%    2.4% OK→OK  log:run_bot_SpaceX_2026-08-17.log (log need 10,327,740)
+SpaceX   2026-08-14   1/0      432,259,086    24,686,901    24,692,328    5.7%    5.7% OK→OK  log:run_bot_SpaceX_2026-08-14.log (log need 12,343,451)
+SpaceX   2026-08-13   1/0      450,891,720    36,736,732    36,744,808    8.1%    8.1% OK→OK  log:run_bot_SpaceX_2026-08-13.log (log need 30,613,943)
+SpaceX   2026-08-12   1/0      453,354,631    38,408,785    38,417,229    8.5%    8.5% OK→OK  log:run_bot_SpaceX_2026-08-12.log (log need 38,408,785)
+SpaceX   2026-08-11  17/0      471,506,356   196,202,041   196,245,173   41.6%   41.6% OK→OK  log:run_bot_SpaceX_2026-08-11.log (log need 196,202,041)
+SpaceX   2026-08-10   4/13     473,001,664   140,965,645   140,996,634   23.1%   23.1% OK→OK  log:run_bot_SpaceX_2026-08-10.log (log need 140,965,645)
+ZaloPay  2026-09-14   1/0        5,956,996     3,982,985     3,983,861   66.9%   66.9% OK→OK  ppse:dnse_raw_2026-09-11.jsonl@2026-09-11T20:30:01
+ZaloPay  2026-08-14   1/0       51,014,130    12,343,451    12,346,164   24.2%   24.2% OK→OK  log:run_bot_ZaloPay_autoheal_20260814_091001.log (log need 12,343,451)
+ZaloPay  2026-08-13   1/0       55,097,717    24,491,155    24,496,539   44.5%   44.5% OK→OK  log:run_bot_ZaloPay_2026-08-13.log (log need 18,368,366)
+ZaloPay  2026-08-12   1/0       63,264,900    24,258,180    24,263,513   38.3%   38.4% OK→OK  log:run_bot_ZaloPay_2026-08-12.log (log need 24,258,180)
+ZaloPay  2026-08-11  13/0       60,570,877   108,211,098   108,234,886  178.7%  178.7% BLOCK→BLOCK  log:run_bot_ZaloPay_2026-08-11.log (log need 108,211,098)
+ZaloPay  2026-08-10   4/8       11,637,708    92,649,435    92,669,803   52.8%   52.8% OK→OK  log:run_bot_ZaloPay_2026-08-10.log (log need 92,649,435)
+FLIP: 0 / 12

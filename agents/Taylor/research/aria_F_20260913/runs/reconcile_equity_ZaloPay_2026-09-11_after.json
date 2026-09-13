@@ -4,12 +4,12 @@
   "starting_capital": 987865567.0,
   "unrealized_pnl": -71270791.98916799,
   "realized_included": true,
-  "realized_pnl": -20092497.09083203,
+  "realized_pnl": -20032497.09083203,
   "realized_by_ticker": {
     "MSH": -40000.0,
     "TLG": 0.0,
     "TCM": -347000.0,
-    "VHC": 170000.0,
+    "VHC": 230000.0,
     "VIB": -2485000.0,
     "VPB": -13348888.888888888,
     "BID": -790000.0,
@@ -30,7 +30,7 @@
     "net": 86130825.0
   },
   "fill_buy_value": 603058300.0,
-  "fill_sell_value": 638939000.0,
+  "fill_sell_value": 604439000.0,
   "fee_rate_pct_used": 0.097,
   "fee_rate_sell_pct_used": 0.097,
   "trading_fees_used": 417150.1410441152,
@@ -83,36 +83,27 @@
         "mtm": 205875000
       }
     },
-    "missing_fills_broker_confirmed": [
-      {
-        "date": "2026-07-10",
-        "ticker": "VHC",
-        "side": "sell",
-        "qty": 600,
-        "price": 57500,
-        "evidence": "email khớp lệnh DNSE msg 19f4b4977cc2786e (100+500 @57.500) + sao kê T07 (11 dòng bán VHC 10/07 = 1.800cp); dnse_raw/journal chỉ có 1.200cp"
-      }
-    ]
+    "missing_fills_broker_confirmed": []
   },
   "legacy_mtm_added": 422535000.0,
   "legacy_unrealized_added": -74386111.1111111,
   "accrued_margin_fee_real": 3016,
-  "lhs_pnl_path": 982212936.7789559,
+  "lhs_pnl_path": 982272936.7789559,
   "mtm_stock": 855702010.9200001,
   "cash": 85957550,
   "margin_debt": 0,
   "offbook_assets_used": 38977421.0,
   "rhs_balance_sheet_path": 980636981.9200001,
-  "residual": 1575954.8589558601,
-  "residual_pct_of_rhs": 0.16070726354519901,
+  "residual": 1635954.8589558601,
+  "residual_pct_of_rhs": 0.16682573563081476,
   "within_tolerance": true,
   "margin_rate_annual_estimate": 0.125,
   "daily_margin_interest_estimate": 0.0,
   "residual_implied_days_of_margin_interest": null,
-  "explain_fee_on_turnover_gap_est": 787587.2399558849,
-  "explain_sell_tax_est": 638939.0,
+  "explain_fee_on_turnover_gap_est": 754122.2399558849,
+  "explain_sell_tax_est": 604439.0,
   "explain_margin_interest_cum_est": 21.45205479452055,
   "explain_margin_gap_est": 0.0,
-  "unexplained_after_estimates": 149428.61899997527,
-  "unexplained_pct_of_rhs": 0.015237913902391008
+  "unexplained_after_estimates": 277393.61899997527,
+  "unexplained_pct_of_rhs": 0.028287085242988
 }
