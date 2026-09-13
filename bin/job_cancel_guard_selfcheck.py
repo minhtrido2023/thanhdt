@@ -44,6 +44,7 @@ JOBS_SH = os.path.join(ROOT, "bin", "jobs.sh")
 
 PASS = 0
 FAIL = 0
+SKIP = 0
 SPAWNED = []
 # Sandboxes this run created, removed by cleanup() once the workers are dead (round 6, NICE 9).
 TMPDIRS = []
@@ -60,6 +61,32 @@ def check(name, cond, detail=""):
     else:
         FAIL += 1
         print("  FAIL %s%s" % (name, ("  -- " + detail) if detail else ""))
+
+
+def skip(name, reason):
+    """Case không chạy được TRÊN MÁY NÀY vì thiếu điều kiện môi trường đo cơ học được — không
+    tính vào PASS lẫn FAIL, in nguyên văn lý do (§29)."""
+    global SKIP
+    SKIP += 1
+    print("  SKIP %s  -- %s" % (name, reason))
+
+
+def no_user_bus():
+    """Lý do nguyên văn nếu KHÔNG có D-Bus user session (cron: DBUS_SESSION_BUS_ADDRESS rỗng VÀ
+    `systemctl --user show-environment` lỗi), None nếu có. Cả hai điều kiện phải cùng đúng: có
+    một trong hai là còn đường nói chuyện với systemd --user ⇒ chạy thật, hỏng thì FAIL."""
+    if os.environ.get("DBUS_SESSION_BUS_ADDRESS"):
+        return None
+    try:
+        p = subprocess.run(["systemctl", "--user", "show-environment"],
+                           capture_output=True, text=True, timeout=10)
+        rc, msg = p.returncode, (p.stderr.strip() or p.stdout.strip())
+    except (OSError, subprocess.TimeoutExpired) as e:
+        rc, msg = -1, "%s: %s" % (type(e).__name__, e)
+    if rc == 0:
+        return None
+    return ("DBUS_SESSION_BUS_ADDRESS rỗng; `systemctl --user show-environment` rc=%d: %s"
+            % (rc, msg))
 
 
 def run(args, **kw):
@@ -574,8 +601,13 @@ def main():
     # the wrapper out of mike_json's ancestor chain, EVERY --bg job would be refused its own
     # finalize and hang at status=running forever. That is the highest-risk failure mode of
     # this guard, so it is tested against the real spawner, not just plain `bash -c`.
-    scope_ok = run(["systemd-run", "--user", "--scope", "--quiet", "--collect",
-                    "/bin/true"])[0] == 0
+    # Cron không có D-Bus user session ⇒ `systemd-run --user --scope` KHÔNG THỂ chạy, case này
+    # đỏ mỗi lượt quét (262/263) mà không phải hồi quy. Không có user bus (kiểm cơ học) ⇒ SKIP có
+    # lý do nguyên văn; có user bus ⇒ chạy thật, hỏng thì FAIL như cũ (không PASS giả).
+    bus_missing = no_user_bus()
+    scope_rc, _, scope_err = (1, "", "") if bus_missing else run(
+        ["systemd-run", "--user", "--scope", "--quiet", "--collect", "/bin/true"])
+    scope_ok = not bus_missing and scope_rc == 0
     modes = [("plain &", []), ("setsid", ["setsid"])]
     if scope_ok:
         modes.append(("systemd-run --user --scope",
@@ -590,8 +622,12 @@ def main():
         check("owner finalize works under %s" % label,
               read_job(jobs, jid)["status"] == "done",
               "status=%s rc=%d %s" % (read_job(jobs, jid)["status"], rc, err[:150]))
-    check("systemd-run scope path was actually exercised", scope_ok,
-          "systemd-run --user --scope unavailable here — production path UNTESTED on this host")
+    if bus_missing:
+        skip("systemd-run scope path was actually exercised", "no user bus: " + bus_missing)
+    else:
+        check("systemd-run scope path was actually exercised", scope_ok,
+              "systemd-run --user --scope rc=%d: %s — production path UNTESTED on this host"
+              % (scope_rc, scope_err.strip()[:200]))
 
     # ----------------------------------------------------- F: prove the ORIGINAL bug real
     print("\nF. PROVE-THE-BUG — `kill <recorded pid>` does NOT stop the worker "
@@ -1693,7 +1729,7 @@ def main():
     check("py_compile bin/mike_json.py", rc == 0, err[:200])
 
     cleanup()
-    print("\n%d/%d PASS%s" % (PASS, PASS + FAIL, "" if not FAIL else "  — %d FAILED" % FAIL))
+    print("\n%d PASS / %d FAIL%s" % (PASS, FAIL, " / %d SKIP (no user bus)" % SKIP if SKIP else ""))
     return 1 if FAIL else 0
 
 
