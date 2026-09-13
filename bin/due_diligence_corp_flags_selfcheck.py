@@ -75,8 +75,14 @@ def find_fixtures(today):
             # Không lọc được ⇒ KHÔNG đoán: để rỗng, nhánh A tự báo "BỎ QUA" thay vì đỏ oan.
             print(f"  (fixture) không lọc được universe: {_e} — bỏ qua nhánh A")
             with_ex = []
-    # mã KHÔNG có sự kiện: lấy từ danh sách mã lớn, trừ đi tập trên (cũng verify lại bằng query)
-    no_ex = [t for t in ("FPT", "ACB", "MBB", "VNM", "HPG", "VCB") if t not in with_ex]
+    # mã KHÔNG có sự kiện: hỏi TƯỜNG MINH cho chính 6 mã lớn bằng đúng reader + điều kiện của
+    # DD._get_upcoming_exdate — KHÔNG trừ đi `with_ex` (chỉ là top-50 theo ex-date, mùa cổ tức
+    # FPT/ACB có ex-date nhưng đứng ngoài top-50 ⇒ B1 đỏ oan; code-quality 2026-09-13).
+    _big = ("FPT", "ACB", "MBB", "VNM", "HPG", "VCB")
+    _has_ex = {r["ticker"] for r in corp_action_lib.pricing_events(
+        list(_big), since=today.isoformat(), until=until, codes=("DIV",))
+        if r.get("exright_date") and r.get("value_per_share") not in (None, "")}
+    no_ex = [t for t in _big if t not in _has_ex]
     scan = DD._insider_scan(today) or {}
     return (with_ex[0] if with_ex else None), (no_ex[0] if no_ex else None), sorted(scan)
 

@@ -145,7 +145,8 @@ DATE_RE = re.compile(r"(20\d\d-\d\d-\d\d)")
 RECENT_DAYS = 10  # a hit whose nearest surrounding datestamp is older than this = historical noise
 
 
-def scan_errors(path, since_ts):
+def scan_errors(path):
+    """Lỗi gần đây trong đuôi log — cửa sổ DUY NHẤT là RECENT_DAYS (theo datestamp gần nhất)."""
     try:
         with open(path, encoding="utf-8", errors="replace") as f:
             content = f.read()
@@ -261,7 +262,7 @@ def main():
         p = paths[0]
         age_s = NOW - os.path.getmtime(p)
         age_days = age_s / 86400
-        errs = scan_errors(p, NOW - 7 * 86400)
+        errs = scan_errors(p)
         job_ack = find_job_ack(script, errs, acks) if errs else None
         if age_s > max_age:
             rows.append({

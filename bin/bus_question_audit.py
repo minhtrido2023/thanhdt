@@ -14,8 +14,9 @@ luôn nơi kia (xem comment "resolvers"/"_resolved" ở bin/ops_health_check.sh 
 
 Output: mỗi dòng PENDING = 1 câu hỏi, cũ nhất trước, KHÔNG cắt bớt (đây là điểm khác
 AGED_SHOWN=5 của check #5 — báo cáo tuần cần thấy hết, không phải digest hàng ngày).
-Exit code: số lượng PENDING (0 = sạch, không dùng exit>0 làm "lỗi" theo nghĩa thường —
-đây là audit, không phải health-gate).
+Exit code: số lượng PENDING, CHẶN ở 255 (shell cắt exit mod 256 — 256 pending mà trả thẳng
+sẽ thành 0 = "sạch"); cần số chính xác thì đọc `--json`. 0 = sạch, không dùng exit>0 làm "lỗi"
+theo nghĩa thường — đây là audit, không phải health-gate).
 
 Thêm 2026-08-01 (saga "coord-" round-5/6, arch-reviewer killer_objection): PROVENANCE của
 closure — bao nhiêu câu hỏi đóng gần đây có `decided_by=user` (quyết định NGƯỜI thật, real-
@@ -279,7 +280,7 @@ def main():
             if db != "user":
                 print(f"    {ts.strftime('%Y-%m-%d')}  {agent}/{topic}")
 
-    return len(pending)
+    return min(len(pending), 255)
 
 
 if __name__ == "__main__":

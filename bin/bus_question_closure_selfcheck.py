@@ -161,4 +161,10 @@ with p.open('a',encoding='utf-8') as f:f.write(json.dumps(r,ensure_ascii=False)+
     left = topics(root)
     assert "r-live-x" not in left and "rollup-ack-gate" not in left, left
 
-print("bus_question_closure_selfcheck: 17/17 PASS")
+# Tự đếm (§16), không chép số tay: mọi `assert` của file nằm trên luồng không rẽ nhánh nên tới
+# được dòng này = tất cả đã chạy và qua. `python -O` gỡ assert ⇒ không được in PASS.
+import ast  # noqa: E402
+if not __debug__:
+    sys.exit("bus_question_closure_selfcheck: chạy với -O ⇒ assert bị gỡ, KHÔNG kết luận được")
+_n = sum(isinstance(x, ast.Assert) for x in ast.walk(ast.parse(Path(__file__).read_text(encoding="utf-8"))))
+print(f"bus_question_closure_selfcheck: {_n}/{_n} PASS")

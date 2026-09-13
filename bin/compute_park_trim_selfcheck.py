@@ -462,9 +462,31 @@ check("T18p ca vòng 3: totalCash=0 & totalDebt=0 nhưng availableCash=5tr (feed
       "⇒ BLOCKED_CASH_BASIS, 0 lệnh — KHÔNG bán sạch sổ",
       r18p["decision"] == "BLOCKED_CASH_BASIS" and not r18p["orders"],
       f"{r18p['decision']} n_orders={len(r18p['orders'])}")
-check("T18q CHỨNG MINH NGƯỢC — bỏ bất biến đi thì chính sổ đó cho pool = park_mv (PARK 100%) "
-      "⇒ mức bán = toàn bộ phần vượt trần 200tr",
-      close(1_000e6 - 0.80 * (0.0 + 1_000e6), 200e6, 1))
+# T18q CHỨNG MINH NGƯỢC bằng compute_trim THẬT: nạp bản sao module với ĐÚNG dòng bất biến bị gỡ
+# (bản trước chỉ tính tay 1.000tr − 0,80×1.000tr ⇒ luôn PASS dù code thế nào; code-quality
+# 2026-09-13). Chuỗi bất biến phải có ĐÚNG 1 lần trong source — không thấy ⇒ FAIL, không để harness
+# hỏng âm thầm biến mutant thành bản gốc.
+import types as _types                                          # noqa: E402
+_INV = 'if float(h["cash_total_vnd"]) < float(h.get("cash_available_vnd") or 0):'
+with open(cpt.__file__, encoding="utf-8") as _f:
+    _src = _f.read()
+_r18q, _sold_q = None, 0.0
+if _src.count(_INV) == 1:
+    _mut = _types.ModuleType("compute_park_trim_no_invariant")
+    _mut.__file__ = cpt.__file__
+    exec(compile(_src.replace(_INV, "if False:"), cpt.__file__, "exec"), _mut.__dict__)
+    _cpt_real, cpt = cpt, _mut                                  # run() đọc `cpt` toàn cục
+    try:
+        _r18q = run(holdings(BASE_LOTS, cash=5e6, total_cash=0.0, debt=0.0))
+    finally:
+        cpt = _cpt_real
+    _sold_q = sum(o["qty"] * PX[o["ticker"]] for o in _r18q["orders"])
+check("T18q CHỨNG MINH NGƯỢC — compute_trim THẬT với bất biến bị gỡ: chính sổ T18p ⇒ TRIM bán "
+      "≥190tr (thực tế ≈296tr = Σ(mv−tgt) các mã vượt target, gồm SHS ngoài rổ); đó chính là thứ "
+      "T18p chặn",
+      _r18q is not None and _r18q["decision"] == "TRIM" and _sold_q >= 190e6,
+      "không tìm thấy đúng 1 dòng bất biến trong compute_park_trim.py" if _r18q is None
+      else f"{_r18q['decision']} bán {_sold_q:,.0f}")
 check("T18r bất biến KHÔNG chặn nhầm ca thường: totalCash 420tr > availableCash 20tr ⇒ chạy bình "
       "thường (đây là hình dạng SpaceX 08-07 thật)",
       run(holdings(BASE_LOTS, cash=20e6, total_cash=420e6))["decision"] in ("TRIM", "NO_TRIM"))
