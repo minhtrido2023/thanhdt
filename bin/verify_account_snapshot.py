@@ -379,17 +379,37 @@ def true_fills_from_journal(account, date):
     return aggregate_events(events), None
 
 
+def bq_close_sql(tickers, as_of_date):
+    """Giá Close của phiên MỚI NHẤT (≤ as_of_date) THEO TỪNG MÃ.
+
+    Trước 2026-09-13 ngày giá = MAX(time) của mã đầu alphabet, áp cho cả danh mục ⇒ mã đó
+    ngừng giao dịch/thiếu dòng thì mọi mã khác cũng lấy giá cũ (hoặc mất giá). Cùng bản vá
+    compute_active_nav.bq_close_sql (c9edd4c6); chép chứ không import vì compute_active_nav
+    import ngược module này.
+    """
+    tick_list = ",".join(f"'{t}'" for t in sorted(tickers))
+    return f"""
+    SELECT t.ticker, t.Close, CAST(t.time AS STRING) AS time
+    FROM tav2_bq.ticker AS t
+    WHERE t.ticker IN ({tick_list}) AND t.time <= '{as_of_date}'
+    QUALIFY ROW_NUMBER() OVER (PARTITION BY t.ticker ORDER BY t.time DESC) = 1
+    """
+
+
+def parse_close_rows(rows):
+    """rows BQ → ({tk: Close}, {tk: ngày giá} của các mã có ngày giá CŨ HƠN ngày mới nhất
+    trong danh mục, ngày mới nhất). Mã tụt ngày không bị bỏ — chỉ bị gọi tên."""
+    prices = {r["ticker"]: float(r["Close"]) for r in rows}
+    dates = {r["ticker"]: str(r["time"]) for r in rows}
+    newest = max(dates.values()) if dates else None
+    lagging = {tk: d for tk, d in sorted(dates.items()) if d != newest}
+    return prices, lagging, newest
+
+
 def bq_close_prices(tickers, as_of_date):
     env = dict(os.environ)
     env["PATH"] = BQ_PATH_PREFIX + ":" + env.get("PATH", "")
-    tick_list = ",".join(f"'{t}'" for t in sorted(tickers))
-    sql = f"""
-    SELECT t.ticker, t.Close
-    FROM tav2_bq.ticker AS t
-    WHERE t.ticker IN ({tick_list})
-    AND t.time = (SELECT MAX(t2.time) FROM tav2_bq.ticker AS t2
-                  WHERE t2.ticker = '{sorted(tickers)[0]}' AND t2.time <= '{as_of_date}')
-    """
+    sql = bq_close_sql(tickers, as_of_date)
     cmd = ["bq", "query", "--use_legacy_sql=false",
            "--project_id=lithe-record-440915-m9", "--format=json",
            "--max_rows=5000", sql]
@@ -399,8 +419,11 @@ def bq_close_prices(tickers, as_of_date):
         # 2026-08-29-bq-error-on-stdout-empty-diagnosis.md) — chỉ đọc stderr thì
         # người vận hành nhận chuỗi RỖNG. Không đổi luồng, chỉ đổi chuỗi chẩn đoán.
         return None, (out.stderr.strip() or out.stdout.strip())
-    rows = json.loads(out.stdout)
-    return {r["ticker"]: float(r["Close"]) for r in rows}, None
+    prices, lagging, newest = parse_close_rows(json.loads(out.stdout))
+    if lagging:
+        print(f"⚠️ BQ: các mã có phiên giá cũ hơn {newest} (dùng giá phiên gần nhất của CHÍNH "
+              f"mã đó — kiểm tra ngừng giao dịch/thiếu dòng): {lagging}", file=sys.stderr)
+    return prices, None
 
 
 def dnse_close_prices(tickers, with_source=False):
