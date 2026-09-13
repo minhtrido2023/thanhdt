@@ -29,3 +29,4 @@ Chi tiết: kb/incidents/retro/retro-2026-09-12.md + kb/incidents/2026-09/2026-0
 ## append_event.sh JSON isolation — pattern đã biết, không escalate (18+ lần, 0 mất dữ liệu).
 ## Sát ngưỡng OKF: kb/coding_guidelines.md 39,5KB/40KB — §-mới PHẢI tách _ext.md.
 
+- [2026-09-13T03:51:01Z] 13/09 10:50: user duyệt Batch 1+2+3 code-quality 09-13, Mike xếp thứ tự. ĐANG CHẠY song song: Wags_20260913_034952 (Batch 2, mike repo, hạn commit 21:00 hôm nay) + Taylor_20260913_035014 (Batch 3, WC script gốc). CHỜ: Batch 1 brokers.py (đường tiền) — dispatch SAU phiên T2 14/09 đóng cửa ≥15:00 ICT và sau khi Batch 3 xong; prompt đã soạn sẵn agents/Mike/research/cq_20260913_batch1_prompt.md (Taylor opus/high, #2 get_nav sau cờ OFF + shadow A/B, user quyết bật). Lý do hoãn: 14/09 là ex-date DGC + bot chạy từ working tree 09:05. KHÔNG có scheduler bền (atd inactive) ⇒ Mike tự nhớ dispatch chiều T2.
