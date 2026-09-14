@@ -91,11 +91,12 @@ file excel". Luật:
   8/9 mã; NPL cao hơn OCR +1-2% tương đối. CAR theo quý không có (chỉ năm). Registry
   `fundamentals/fiinprox_bank_ratios_quarterly.md`. Kỹ thuật rút ra: `get_fundamental_data` trả JSON
   ~150 token/dòng ⇒ dùng sandbox in CSV nén (~12 token/dòng).
-- **P3 ⏳ 14/09 18:1x — CHỜ sandbox** — phạm vi chốt: chỉ phần không nguồn nào có ((a) fb/fs/fn VNINDEX+HNX
-  2009-06→2018-08, VNDirect đã phủ từ 2018-08-30; (b) `get_value_by_investor` ròng 5 nhóm 2014→nay). Lệnh trực
-  tiếp `fetch_trading_data` ~70 token/dòng (2.300 dòng/chỉ số ≈160K token) ⇒ bắt buộc sandbox in CSV nén, nhưng
-  `execute_api` lỗi `[Errno 28]` 4 lần liên tiếp 18:0x-18:1x. Probe trực tiếp xác nhận: fb VNINDEX 2018-05-18 =
-  29.329 tỷ (lô thoả thuận Vinhomes nằm TRONG fb/fs ⇒ phải dùng value_by_investor để tách deal).
+- **P3 (b) ✅ 14/09 19:4x** — `data/fiinprox_vnindex_investor_flow_daily_20260914.csv` (3.165 phiên, 2014→2026-09-14,
+  13 lệnh 1 năm/lệnh, ~50% lệnh lỗi `[Errno 28]` → thử lại là qua). Ngoại ròng khớp VNDirect 2024-2025 median
+  1,9 tỷ/phiên; FiinPro lấp các phiên VNDirect trả 0. Registry `feeds/fiinprox_vnindex_investor_flow_daily.md`.
+- **P3 (a) ⏳** — khối ngoại VNINDEX fb/fs + HNX fn: ✅ 2009-06→2012-12 (901 phiên);
+  2013-01→2018-08 CHƯA (sandbox lỗi 3 lần liên tiếp 19:5x). VNINDEX 2014+ đã có ròng ở file (b) ⇒ phần
+  còn thiếu thật sự: VNINDEX 2013 + HNX 2013→2018-08.
 
 ## 3. Phân vai
 - **Mike:** gọi MCP + lưu CSV + registry UNVERIFIED (chỉ phiên này làm được).

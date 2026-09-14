@@ -8,6 +8,8 @@ title: Feeds hàng hóa / FX / khác (Winston — Data Ops)
 
 | Nguồn (file) | Status |
 |---|---|
+| [`fiinprox_vnindex_investor_flow_daily.md`](fiinprox_vnindex_investor_flow_daily.md) — ròng 5 nhóm NĐT VNINDEX (ngoại khớp/thoả thuận, tự doanh, tổ chức, cá nhân) 2014→2026-09 | **DERIVED** ngoại ròng (khớp VNDirect median 1,9 tỷ); nhóm trong nước UNVERIFIED |
+| [`fiinprox_foreign_flow_index_daily.md`](fiinprox_foreign_flow_index_daily.md) — khối ngoại mua/bán VNINDEX + ròng HNX 2009-06→2012 (đang bổ sung tới 2018-08) | UNVERIFIED |
 | [`bdi_daily.md`](bdi_daily.md) — data/bdi_daily_real.csv | CANONICAL |
 | [`commodity_wb_cmo.md`](commodity_wb_cmo.md) — data/<commodity>_monthly.csv (6 file WB CMO) | CANONICAL |
 | [`foreign_flow_cafef.md`](foreign_flow_cafef.md) — Khối ngoại — cafef GDKhoiNgoai.ashx | CANDIDATE-PARTIAL |
