@@ -86,6 +86,11 @@ file excel". Luật:
   `execute_api` (có `time_frequency=Monthly`, 12 điểm/năm) chạy được 1 lần rồi lỗi `[Errno 28]` hết đĩa
   sandbox FiinX 3 lần liên tiếp. Thử lại execute_api 1 lệnh/năm vào 15/09; nếu vẫn lỗi ⇒ bỏ (gap LOW,
   đã có `vcb_fx_feed.py`). Bonus nếu lấy được: giá USD thị trường tự do từ 2013.
+- **P2 ngân hàng theo quý ✅ 14/09** — `data/fiinprox_bank_ratios_quarterly_20260914.csv` (27 mã, 1.392 dòng,
+  6 lệnh `execute_api` 4-7 mã/lệnh; 1 lần lỗi `[Errno 28]` ở lô 7 mã → chia nhỏ là qua). Coverage khớp OCR
+  8/9 mã; NPL cao hơn OCR +1-2% tương đối. CAR theo quý không có (chỉ năm). Registry
+  `fundamentals/fiinprox_bank_ratios_quarterly.md`. Kỹ thuật rút ra: `get_fundamental_data` trả JSON
+  ~150 token/dòng ⇒ dùng sandbox in CSV nén (~12 token/dòng).
 
 ## 3. Phân vai
 - **Mike:** gọi MCP + lưu CSV + registry UNVERIFIED (chỉ phiên này làm được).
