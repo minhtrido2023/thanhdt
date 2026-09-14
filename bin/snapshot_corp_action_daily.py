@@ -19,7 +19,7 @@ CƠ CHẾ
     `row_sha256` (hash nội dung để dò amendment sau này). Ghi bằng ĐÚNG MỘT câu `INSERT ... SELECT`
     ⇒ nguyên tử ở tầng BQ, không thể partial-write (§5 coding_guidelines).
 
-    `row_sha256` = TO_HEX(SHA256(TO_JSON_STRING(STRUCT(<mọi cột nguồn TRỪ ingested_at>)))).
+    `row_sha256` = TO_HEX(SHA256(TO_JSON_STRING(STRUCT(<mọi cột nguồn TRỪ HASH_EXCLUDE>)))).
     LOẠI `ingested_at` khỏi hash CÓ CHỦ ĐÍCH: nó là dấu vết pipeline, không phải nội dung sự kiện.
     Đo thật: vendor chỉ chạm ~1.3k dòng/lần refresh (không rewrite cả bảng) nên `ingested_at`
     CÓ tương quan với thay đổi thật — nhưng nếu vendor rewrite 1 dòng với nội dung y hệt thì hash
@@ -43,7 +43,10 @@ CHẠY
     python3 mike/bin/snapshot_corp_action_daily.py --date 2026-08-17
 
 EXIT CODE
-    0 = OK (kể cả SKIP vì hôm nay đã snapshot) · 1 = lỗi bất kỳ (fail-closed, KHÔNG ghi một phần)
+    0 = OK (kể cả SKIP vì hôm nay đã snapshot) · 1 = ít nhất 1 bảng lỗi (fail-closed, KHÔNG ghi một
+    phần). Mỗi bảng chạy CÔ LẬP: lỗi bảng này không chặn bảng kia (2 bảng độc lập, mỗi bảng ghi
+    đúng 1 câu DML). Có bảng lỗi + không phải --dry-run ⇒ post Discord topic `architecture` kèm
+    exception thật (§29) — trước 2026-09-15 lỗi chỉ nằm trong log cron, không ai đọc.
 
 Design doc: mike/agents/Taylor/research/corp_action_snapshot_pipeline_design_20260817.md
 """
@@ -54,6 +57,7 @@ os.environ.pop("BQ_LOCAL_CACHE", None)
 
 import argparse
 import datetime as dt
+import subprocess
 import sys
 import traceback
 from zoneinfo import ZoneInfo
@@ -73,8 +77,16 @@ SNAPSHOT_DATASET = os.environ.get("SNAPSHOT_DATASET", "tav2_mike")
 
 ICT = ZoneInfo("Asia/Ho_Chi_Minh")          # §16: neo timezone tường minh, không tin TZ của host
 
-# Cột KHÔNG vào hash nội dung (dấu vết pipeline, không phải nội dung sự kiện). Vẫn được LƯU.
-HASH_EXCLUDE = ("ingested_at",)
+# Cột KHÔNG vào hash nội dung. Vẫn được LƯU nguyên trong bảng snapshot.
+#   - ingested_at: dấu vết pipeline, không phải nội dung sự kiện (docstring đầu file).
+#   - source_news_id, first_disclosure_datetime: vendor THÊM vào corporate_action ~2026-09-13
+#     (vị trí 34-35, trước ingested_at). Loại khỏi hash để `row_sha256` SO ĐƯỢC LIÊN TỤC qua mốc
+#     schema đổi: hash vintage ≤09-13 phủ đúng 34 cột cũ; nếu 2 cột mới vào hash thì MỌI dòng
+#     (~36k) sẽ trông như "vừa amend" ở vintage đầu tiên sau mốc — đúng loại amendment giả bảng
+#     này sinh ra để tránh. Revision của 2 cột này vẫn dò được bằng LAG() trên chính cột đã lưu.
+#     Bảng không có cột này (insider_transaction) thì exclude là no-op.
+#     Quyết định A′ — bus question corp-action-snapshot-schema-drift-20260914.
+HASH_EXCLUDE = ("ingested_at", "source_news_id", "first_disclosure_datetime")
 META_COLS = ("snapshot_date", "row_sha256")
 
 # Cổng chống chụp giữa lúc vendor TRUNCATE+INSERT: nguồn co dưới tỉ lệ này so với snapshot gần
@@ -90,6 +102,10 @@ SPECS = [
     {"src": "corporate_action", "snap": "corporate_action_snapshots"},
     {"src": "insider_transaction", "snap": "insider_transaction_snapshots"},
 ]
+
+# Topic lỗi theo TÊN (registry kb/discord_channels.json) — cùng topic với corp_action_feed_canary.
+NOTIFY_TOPIC = "architecture"
+HERE = os.path.dirname(os.path.abspath(__file__))
 
 
 def log(msg):
@@ -151,7 +167,7 @@ def snapshot_schema(src_schema):
         SchemaField("snapshot_date", "DATE", mode="REQUIRED",
                     description="Ngay ICT quan sat trang thai bang nguon (khong phai ngay su kien)"),
         SchemaField("row_sha256", "STRING", mode="REQUIRED",
-                    description="SHA256 noi dung dong (moi cot nguon TRU ingested_at)"),
+                    description=f"SHA256 noi dung dong (moi cot nguon TRU {', '.join(HASH_EXCLUDE)})"),
     ]
 
 
@@ -179,30 +195,33 @@ def ensure_snapshot_table(client, snap_ref, src_schema, dry_run):
 
 
 def schema_problems(src_schema, snap_table):
-    """So khớp schema nguồn vs bảng snapshot. Trả list mô tả lệch (rỗng = khớp).
+    """So khớp schema nguồn vs bảng snapshot theo TÊN→KIỂU. Trả list mô tả lệch (rỗng = khớp).
 
     CỐ Ý fail-closed thay vì tự evolve schema: thêm/bớt cột nguồn làm ĐỔI TẬP CỘT VÀO HASH ⇒ mọi
     dòng sẽ trông như "vừa bị amend" ở snapshot kế tiếp, làm hỏng chính thứ bảng này sinh ra để đo.
-    Lệch schema là quyết định của người, không phải của cron.
+    Lệch schema là quyết định của người, không phải của cron. Vẫn báo: thiếu cột, thừa cột, lệch
+    kiểu, thiếu cột meta.
+
+    BỎ QUA THỨ TỰ cột (A′, 2026-09-15): `ALTER TABLE ADD COLUMN` chỉ nối được vào CUỐI bảng (sau
+    snapshot_date/row_sha256), còn vendor chèn cột mới vào GIỮA ⇒ so thứ tự nghiêm ngặt khiến
+    không có đường DDL nào qua được cổng. Thứ tự không ảnh hưởng tính đúng: `insert_sql` gọi tên
+    cột tường minh, và hash lấy thứ tự từ bảng NGUỒN (`hash_columns(src_cols)`), không từ bảng
+    snapshot.
     """
-    src = [(f.name, f.field_type) for f in src_schema]
-    snap_all = [(f.name, f.field_type) for f in snap_table.schema]
-    snap_meta = [n for n, _ in snap_all if n in META_COLS]
-    snap_src = [x for x in snap_all if x[0] not in META_COLS]
+    src = {f.name: f.field_type for f in src_schema}
+    snap = {f.name: f.field_type for f in snap_table.schema if f.name not in META_COLS}
+    snap_meta = {f.name for f in snap_table.schema if f.name in META_COLS}
 
     probs = []
-    if snap_src != src:
-        src_names = [n for n, _ in src]
-        snap_names = [n for n, _ in snap_src]
-        missing = [n for n in src_names if n not in snap_names]
-        extra = [n for n in snap_names if n not in src_names]
-        if missing:
-            probs.append(f"cot CO o nguon nhung THIEU o snapshot: {missing}")
-        if extra:
-            probs.append(f"cot CO o snapshot nhung KHONG con o nguon: {extra}")
-        if not missing and not extra:
-            probs.append("cung tap cot nhung LECH THU TU hoac LECH KIEU: "
-                         f"nguon={src} snapshot={snap_src}")
+    missing = [n for n in src if n not in snap]
+    extra = [n for n in snap if n not in src]
+    retyped = [f"{n}: nguon={src[n]} snapshot={snap[n]}" for n in src if n in snap and src[n] != snap[n]]
+    if missing:
+        probs.append(f"cot CO o nguon nhung THIEU o snapshot: {missing}")
+    if extra:
+        probs.append(f"cot CO o snapshot nhung KHONG con o nguon: {extra}")
+    if retyped:
+        probs.append(f"cot LECH KIEU: {retyped}")
     for m in META_COLS:
         if m not in snap_meta:
             probs.append(f"thieu cot meta `{m}`")
@@ -235,7 +254,7 @@ def run_one(client, spec, snapshot_date, dry_run):
                 "vua amend). Can nguoi quyet dinh: hoac them cot vao bang snapshot va ghi ro "
                 "vintage doi hash trong data_registry, hoac dung pipeline."
             )
-        log("  schema       : KHOP (cot nguon trung khop + du 2 cot meta)")
+        log("  schema       : KHOP (cot nguon trung khop ten+kieu + du 2 cot meta; thu tu khong so)")
 
     # ── idempotency: hôm nay đã có dòng nào chưa
     already = 0
@@ -313,7 +332,31 @@ def run_one(client, spec, snapshot_date, dry_run):
 
 
 # ── main ─────────────────────────────────────────────────────────────────────
-def main(argv=None):
+def default_notifier(msg):
+    """(ok, detail). Topic theo TÊN qua registry `kb/discord_channels.json`."""
+    try:
+        p = subprocess.run([os.path.join(HERE, "notify_thread.sh"), msg, NOTIFY_TOPIC],
+                           capture_output=True, text=True, timeout=90)
+    except Exception as e:
+        return False, f"{type(e).__name__}: {e}"
+    return p.returncode == 0, f"rc={p.returncode} stderr={p.stderr.strip()[-300:]}"
+
+
+def failure_message(snapshot_date, failures, results):
+    """Tin lỗi cho người. Chỉ trích exception THẬT đã bắt được (§29) — không đoán nguyên nhân."""
+    lines = [f"🛠️ snapshot_corp_action_daily FAIL · snapshot_date={snapshot_date} (ICT) · "
+             f"{len(failures)} bang loi, {len(results)} bang OK"]
+    for f in failures:
+        lines.append(f"❌ {f['table']}: {f['error'][:700]}")
+    for r in results:
+        lines.append(f"✅ {r['table']}: {r['action']} {r['rows']:,} dong")
+    lines.append("Vintage bang loi CHUA ghi — bang nguon bi upsert in-place nen moi ngay khong ghi la mat "
+                 "vinh vien. Chay lai KHONG kem --date (--date ngay cu se dong dau trang thai HIEN TAI "
+                 "voi nhan ngay cu). Log: mike/logs/snapshot_corp_action_YYYYMM.log")
+    return "\n".join(lines)
+
+
+def main(argv=None, client_factory=None, notifier=default_notifier):
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[1],
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--dry-run", action="store_true",
@@ -328,19 +371,41 @@ def main(argv=None):
     log(f"snapshot_corp_action_daily · snapshot_date={snapshot_date} (ICT) · "
         f"dataset={SNAPSHOT_DATASET} · dry_run={args.dry_run}")
 
+    results, failures = [], []
     try:
-        client = get_client()
-        results = [run_one(client, s, snapshot_date, args.dry_run) for s in specs]
+        client = (client_factory or get_client)()
     except Exception as e:
-        log(f"\nFAIL (fail-closed, khong ghi mot phan): {e}")
+        client = None
+        log(f"\nFAIL tao BQ client: {type(e).__name__}: {e}")
         traceback.print_exc()
-        return 1
+        failures = [{"table": s["src"], "error": f"tao BQ client: {type(e).__name__}: {e}"} for s in specs]
+
+    # Cô lập từng bảng: 2 bảng độc lập, mỗi bảng đúng 1 DML ⇒ lỗi bảng này không được giết vintage
+    # của bảng kia (run 2026-09-14: corporate_action lệch schema kéo insider_transaction chết theo).
+    for s in specs if client is not None else []:
+        try:
+            results.append(run_one(client, s, snapshot_date, args.dry_run))
+        except Exception as e:
+            log(f"\nFAIL {s['src']} (fail-closed, khong ghi mot phan): {type(e).__name__}: {e}")
+            traceback.print_exc()
+            failures.append({"table": s["src"], "error": f"{type(e).__name__}: {e}"})
 
     log("\n--- tong ket ---")
     for r in results:
         log(f"  {r['table']:<22} {r['action']:<8} {r['rows']:>8,} dong  "
             f"quet {r['bytes_scanned']/1e6:.1f} MB")
-    return 0
+    for f in failures:
+        log(f"  {f['table']:<22} FAIL")
+    if not failures:
+        return 0
+
+    if args.dry_run:
+        log("(dry-run: khong post Discord)")
+        return 1
+    ok, detail = notifier(failure_message(snapshot_date, failures, results))
+    if not ok:
+        log(f"NOTIFY_FAILED topic={NOTIFY_TOPIC} {detail}")
+    return 1
 
 
 if __name__ == "__main__":

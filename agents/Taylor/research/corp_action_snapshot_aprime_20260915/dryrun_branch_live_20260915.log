@@ -1,0 +1,33 @@
+snapshot_corp_action_daily · snapshot_date=2026-09-15 (ICT) · dataset=tav2_mike · dry_run=True
+
+=== corporate_action -> tav2_mike.corporate_action_snapshots ===
+  nguon        : 36,352 dong · 15.0 MB · 37 cot
+  hash phu     : 34 cot (loai: ingested_at, source_news_id, first_disclosure_datetime)
+
+FAIL corporate_action (fail-closed, khong ghi mot phan): RuntimeError: SCHEMA LECH giua lithe-record-440915-m9.tav2_bq.corporate_action va lithe-record-440915-m9.tav2_mike.corporate_action_snapshots:
+    - cot CO o nguon nhung THIEU o snapshot: ['source_news_id', 'first_disclosure_datetime']
+  KHONG tu dong evolve (doi tap cot = doi tap cot vao hash = moi dong trong nhu vua amend). Can nguoi quyet dinh: hoac them cot vao bang snapshot va ghi ro vintage doi hash trong data_registry, hoac dung pipeline.
+Traceback (most recent call last):
+  File "/home/trido/thanhdt/WorkingClaude/mike/agents/wt-corp-snapshot-aprime/bin/snapshot_corp_action_daily.py", line 387, in main
+    results.append(run_one(client, s, snapshot_date, args.dry_run))
+  File "/home/trido/thanhdt/WorkingClaude/mike/agents/wt-corp-snapshot-aprime/bin/snapshot_corp_action_daily.py", line 251, in run_one
+    raise RuntimeError(
+RuntimeError: SCHEMA LECH giua lithe-record-440915-m9.tav2_bq.corporate_action va lithe-record-440915-m9.tav2_mike.corporate_action_snapshots:
+    - cot CO o nguon nhung THIEU o snapshot: ['source_news_id', 'first_disclosure_datetime']
+  KHONG tu dong evolve (doi tap cot = doi tap cot vao hash = moi dong trong nhu vua amend). Can nguoi quyet dinh: hoac them cot vao bang snapshot va ghi ro vintage doi hash trong data_registry, hoac dung pipeline.
+
+=== insider_transaction -> tav2_mike.insider_transaction_snapshots ===
+  nguon        : 52,922 dong · 19.7 MB · 25 cot
+  hash phu     : 24 cot (loai: ingested_at, source_news_id, first_disclosure_datetime)
+  schema       : KHOP (cot nguon trung khop ten+kieu + du 2 cot meta; thu tu khong so)
+  snapshot truoc: 2026-09-13 · 52,922 dong
+  row-depth    : 100.0% so voi snapshot truoc (nguong 90%) OK
+  [dry-run] se append : 52,922 dong vao snapshot_date=2026-09-15
+  [dry-run] quet      : 19.7 MB (do bang dry-run DML that) ~ $0.00012/lan
+  [dry-run] storage   : +19.7 MB/ngay ~ 7.18 GB/nam ~ $0.86/nam dau (logical, trung binh tich luy)
+  [dry-run] KHONG ghi gi.
+
+--- tong ket ---
+  insider_transaction    dry-run    52,922 dong  quet 19.7 MB
+  corporate_action       FAIL
+(dry-run: khong post Discord)
