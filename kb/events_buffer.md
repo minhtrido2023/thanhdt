@@ -467,3 +467,7 @@
 ## Consolidation 2026-09-14T13:07:02Z
 - [2026-09-14T12:14:26Z] Mafee/status — eod-trading-report: {"account": "ZaloPay", "plan_date": "2026-09-14", "delivered_via": "report_delivery_gate", "artifact": "ZaloPay_daily_report_2026-09-14.md"}
 - [2026-09-14T12:14:52Z] Mafee/status — eod-trading-report: {"account": "SpaceX", "plan_date": "2026-09-14", "delivered_via": "report_delivery_gate", "artifact": "SpaceX_daily_report_2026-09-14.md"}
+
+## Consolidation 2026-09-14T14:07:01Z
+- [2026-09-14T14:00:03Z] Mike/question — plan-t1-not-ready-ZaloPay: {"reason": "plan_date_stale", "detail": "File mới nhất (/home/trido/thanhdt/WorkingClaude/data/trade_plans/plan_ZaloPay_2026-09-14.json) có plan_date='2026-09-14', kỳ vọng '2026-09-15' (T+1 từ hôm nay 2026-09-14). DollarBill có thể chưa chạy hoặc bị lỗi chiều nay.", "expected_date": "2026-09-15", "account": "ZaloPay", "second_chance": 0, "checked_at": "2026-09-14 21:00 ICT"}
+- [2026-09-14T14:00:05Z] Mike/question — plan-t1-not-ready-SpaceX: {"reason": "plan_date_stale", "detail": "File mới nhất (/home/trido/thanhdt/WorkingClaude/data/trade_plans/plan_SpaceX_2026-09-14.json) có plan_date='2026-09-14', kỳ vọng '2026-09-15' (T+1 từ hôm nay 2026-09-14). DollarBill có thể chưa chạy hoặc bị lỗi chiều nay.", "expected_date": "2026-09-15", "account": "SpaceX", "second_chance": 0, "checked_at": "2026-09-14 21:00 ICT"}
