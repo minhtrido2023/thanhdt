@@ -35,3 +35,4 @@
 ## Còn mở không khẩn: job_cancel_guard nhánh systemd luôn đỏ dưới cron; append_event.sh JSON
 cách ly viết tay vẫn thỉnh thoảng tái diễn dạng nhỏ (không escalate, theo dõi qua retro).
 
+- [2026-09-14T17:42:57Z] 00:57 ICT: killed detached bg monitor (security-flagged, violated no-unsupervised-process rule); ticker_prune 09-14 still 2/200 tickers; now polling via own ScheduleWakeup every ~25min instead — next check should re-run: source wc_env.sh; bq query ... ticker_prune WHERE time=2026-09-14; if >=200 run daily_refresh_v34b_linux.sh then dispatch DollarBill SpaceX+ZaloPay plan T+1; if past 07:30 ICT and still short, post bus question data-ops/bot-run-0915-no-plan-hold-recommended

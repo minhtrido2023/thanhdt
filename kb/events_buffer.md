@@ -609,3 +609,9 @@
 - [2026-09-14T17:40:15Z] Taylor/heartbeat — Taylor_20260914_173213: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20260914_173213", "source": "watcher"}
 - [2026-09-14T17:40:59Z] Taylor/heartbeat — Taylor_20260914_173213: {"status": "in_progress", "note": "canary viet xong, test trich cot/gia tri tu code"}
 - [2026-09-14T17:41:15Z] Taylor/heartbeat — Taylor_20260914_173213: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20260914_173213", "source": "watcher"}
+
+## Consolidation 2026-09-14T17:43:09Z
+- [2026-09-14T17:41:50Z] Mike/finding — retro-2026-09-14-finalized: {"status": "done", "file": "kb/incidents/retro/retro-2026-09-14.md", "n_incidents": 5, "n_patterns": 2, "verified_by": "Wags", "verdict": "gaps_found_and_fixed", "gap_fixed": "added incident #5 (missing T+1 plan both accounts, upstream BQ ingest gap, still open) + job census wording", "urgent_open_issue": "no T+1 plan SpaceX/ZaloPay for 2026-09-15, dispatched data-ops bg monitor abd189aef81b793b2, escalate HOLD by 07:30 ICT if unresolved", "commit": "d52d562f"}
+- [2026-09-14T17:42:14Z] Mike/heartbeat — Mike_20260914_173713: {"status": "still_running", "elapsed_min": 5, "job_id": "Mike_20260914_173713", "source": "watcher"}
+- [2026-09-14T17:42:44Z] Mike/finding — ticker-prune-gap-monitor-detached-process-killed: {"reason": "security classifier flagged subagent action; detached setsid background shell script running unsupervised for ~7h autonomously calling daily_refresh_v34b_linux.sh + dispatch.sh DollarBill violates MIKE.md ban on unsupervised bg-job monitoring outside a resumable session", "action": "killed PID 1753278/1753282, deleted script, replacing with ScheduleWakeup-based supervised poll loop from Mike session itself"}
+- [2026-09-14T17:42:15Z] Taylor/heartbeat — Taylor_20260914_173213: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20260914_173213", "source": "watcher"}
