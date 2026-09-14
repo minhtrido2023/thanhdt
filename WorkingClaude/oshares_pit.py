@@ -520,6 +520,23 @@ def _selfcheck() -> int:                                    # noqa: C901 — a f
     check("S3. tổng các nhánh == n (không mã nào rơi ra ngoài phân loại)",
           s["n_live"] + s["n_fallback_diverge"] + s["n_fallback_implausible"]
           + s["n_fallback_declined"] + s["n_fallback_other"] + s["n_no_value"] == s["n"], str(s))
+    # FIN_ABSORPTION_AMBIGUOUS (2026-09-14) là câu trả lời TỪ CHỐI như UNKNOWN_RATIO ⇒ phải rơi vào
+    # cột `declined`, không phải `other`. Đi qua `oshares_reconciled` thật (không dựng tay bản ghi)
+    # ⇒ kiểm luôn việc adapter giữ nguyên `method` của live trên bản ghi fallback.
+    M.oshares_at = lambda tks, asof, _cache=None: {
+        t: {"ticker": t, "value": None, "method": "FIN_ABSORPTION_AMBIGUOUS"} for t in tks}
+    try:
+        fa = M.oshares_reconciled(["FWDAMB"], "2026-09-14", {"FWDAMB": 62_186_518.0},
+                                  cache=NOCACHE)
+    finally:
+        M.oshares_at = real
+    s_fa = summarize(fa)
+    check("S4. live FIN_ABSORPTION_AMBIGUOUS ⇒ giữ số nền VÀ đếm vào n_fallback_declined "
+          "(không lọt sang n_fallback_other)",
+          "FIN_ABSORPTION_AMBIGUOUS" in _DECLINED
+          and fa["FWDAMB"]["value"] == 62_186_518.0
+          and fa["FWDAMB"]["source"] == "ticker_financial"
+          and s_fa["n_fallback_declined"] == 1 and s_fa["n_fallback_other"] == 0, str(s_fa))
 
     # ── Phần 2: TOÀN PHẦN. Đây là bất biến sống còn — report không bao giờ được chết vì module này.
     print("== Bất biến TOÀN PHẦN: hỏng thế nào cũng không được ném lỗi ==")

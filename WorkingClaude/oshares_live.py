@@ -1158,11 +1158,18 @@ def oshares_at(tickers, asof, _cache=None, live=False):
 
     Each value carries `value`, `method`, `anchor_date`, `anchor_value`, `anchor_source` and the
     list of ISS events applied, so any number can be re-derived by hand from the output alone.
-    `value is None` whenever the method is `UNKNOWN_RATIO`, `NO_ANCHOR` or `AIS_UNCERTIFIED` —
-    callers MUST handle that; there is no "best effort" number behind it.
+    `value is None` whenever the method is `UNKNOWN_RATIO`, `NO_ANCHOR`, `AIS_UNCERTIFIED` or
+    `FIN_ABSORPTION_AMBIGUOUS` (selfcheck check 10 asserts exactly this set) — callers MUST handle
+    that; there is no "best effort" number behind it.
 
-    `live=False` (mặc định) = nhánh POINT-IN-TIME, dùng cho backtest/`oshares_pit`: không đổi một
-    số nào so với trước 2026-08-20. `live=True` = nhánh PHỤC VỤ HÔM NAY: nới ĐÚNG MỘT điều kiện —
+    `live=False` (mặc định) = nhánh POINT-IN-TIME, dùng cho backtest/`oshares_pit`: không nhận nới
+    nào của nhánh LIVE dưới đây (2026-08-20). ⚠️ Nhưng từ 2026-09-14 PIT KHÔNG còn "y hệt trước":
+    `_forward_absorption_test` chạy ở CẢ HAI nhánh, nên mọi neo dòng quý đã gồm sẵn một ISS ex SAU
+    nó thôi bị lăn lại ⇒ số PIT đổi. Đó là SỬA LỖI đếm hai lần, không phải nới look-ahead: phép
+    thử chỉ đọc dữ liệu <= asof, và số cũ sai có đối chứng độc lập — HAH 2026-03-13 PIT
+    202.819.590 → 185.840.401 (AIS 2026-05-27 xác nhận; check H4/2026-03-13), KHP 2026-09-14
+    63.996.290 → 62.186.518 (AIS 2026-09-14 = 62.215.739; check K1c).
+    `live=True` = nhánh PHỤC VỤ HÔM NAY: nới ĐÚNG MỘT điều kiện —
     neo AIS chưa chứng nhận không còn chặn được một dòng BCTC MỚI HƠN nó (xem §NHÁNH LIVE trong
     `_stale_fallback_verdict`). Nới ở đây là nhận thêm look-ahead để đổi lấy độ phủ, nên nó CHỈ
     hợp lệ khi câu hỏi là "hôm nay có bao nhiêu CP" — không bao giờ hợp lệ trong một backtest.
@@ -1773,10 +1780,10 @@ def _selfcheck() -> int:
                 "issue_volumn": None, "listing_date": None, "shares_total_after": total,
                 "title": f"AIS {tk} {eff}"}
 
-    def _I(tk, ex, vol=None, ratio=None, method="Trả Cổ tức bằng Cổ phiếu"):
+    def _I(tk, ex, vol=None, ratio=None, method="Trả Cổ tức bằng Cổ phiếu", listing=None):
         return {"ticker": tk, "event_code": "ISS", "exright_date": ex, "effective_date": None,
                 "exercise_ratio": ratio, "issue_method_name_vi": method, "shares_delta": None,
-                "issue_volumn": vol, "listing_date": None, "shares_total_after": None,
+                "issue_volumn": vol, "listing_date": listing, "shares_total_after": None,
                 "title": f"ISS {tk} {ex}"}
 
     def _Q(tk, t, sh):
@@ -2262,8 +2269,48 @@ def _selfcheck() -> int:
 
     # ── FORWARD ABSORPTION (2026-09-14, job Taylor_20260914_151805) ─────────────────────────
     print("== Dòng quý ĐÃ gồm ISS ex SAU nó ⇒ không lăn lại (đếm hai lần) ==")
-    khp = oshares_at(["KHP"], "2026-09-14", live=True)["KHP"]
-    khp_pit = oshares_at(["KHP"], "2026-09-14", live=False)["KHP"]
+    # HERMETIC (vòng 2, job Taylor_20260914_160309). Bản đầu K1-K3 hỏi BQ SỐNG và đỏ ngay trong
+    # ngày: BQ về AIS 2026-09-14 của KHP (62.215.739) ⇒ KHP ra AIS_EXACT, không còn đi qua nhánh
+    # dòng quý nữa. Luật không được rot theo feed (§23 hệ luận 1), và `corp_action_daily.py` chạy
+    # selfcheck này làm CỔNG trước khi publish ⇒ một check sống đỏ = cả ngày không publish.
+    # Số dưới ĐÓNG BĂNG từ `_fetch` 2026-09-14 (cửa sổ gần nhất, không cắt tỉa tay): đã đối chiếu
+    # cả value/method/verdict/events ở LIVE, PIT và khi TẮT phép thử đều trùng khít bản BQ đầy đủ
+    # (KHP: bỏ riêng AIS 09-14 để giữ ca dòng quý; ca có AIS nằm ở K1c).
+    KHP_C = ([_Q("KHP", "2025-04-21", 60_376_746.0), _Q("KHP", "2025-07-18", 60_376_746.0),
+              _Q("KHP", "2025-10-16", 60_376_746.0), _Q("KHP", "2026-01-21", 60_376_746.0),
+              _Q("KHP", "2026-04-21", 60_376_746.0), _Q("KHP", "2026-07-20", 62_186_518.0)],
+             [_I("KHP", "2020-08-19", vol=16_019_720.0, ratio=0.4, method="Cổ phiếu thưởng",
+                 listing="2020-10-08"),
+              _A("KHP", "2020-10-08", 57_571_016.0, delta=16_019_720.0),
+              _I("KHP", "2021-12-14", vol=1_400_426.0, ratio=0.025, listing="2022-01-24"),
+              _A("KHP", "2022-01-24", 58_971_442.0, delta=1_400_426.0),
+              _I("KHP", "2022-05-24", vol=1_434_525.0, ratio=0.025, listing="2022-06-28"),
+              _A("KHP", "2022-06-28", 60_405_967.0, delta=1_434_525.0),
+              _I("KHP", "2026-07-30", vol=1_809_772.0, ratio=0.03, listing="2026-09-14")])
+    ASM_C = ([_Q("ASM", "2024-05-02", 336_526_752.0), _Q("ASM", "2024-07-31", 370_178_250.0),
+              _Q("ASM", "2024-10-31", 370_178_250.0), _Q("ASM", "2025-02-03", 370_178_250.0),
+              _Q("ASM", "2025-05-05", 370_178_250.0), _Q("ASM", "2025-07-31", 370_178_250.0)],
+             [_I("ASM", "2024-07-15", vol=33_651_498.0, ratio=0.1, listing="2024-08-22"),
+              _A("ASM", "2024-08-22", 370_178_250.0, delta=33_651_498.0),
+              _I("ASM", "2025-10-07", vol=37_015_933.0, ratio=0.1, listing="2025-11-28")])
+    MCH_C = ([_Q("MCH", "2025-01-24", 724_637_791.0), _Q("MCH", "2025-04-24", 1_051_449_434.0),
+              _Q("MCH", "2025-07-28", 1_056_705_358.0), _Q("MCH", "2025-10-27", 1_056_705_358.0),
+              _Q("MCH", "2026-01-29", 1_294_460_962.0), _Q("MCH", "2026-04-28", 1_307_404_949.0)],
+             [_A("MCH", "2025-01-15", 728_422_544.0, delta=960_665.0),
+              _I("MCH", "2025-02-11", vol=326_811_643.0, ratio=0.451,
+                 method="Quyền mua CP cho Cổ đông hiện hữu", listing="2025-04-22"),
+              _A("MCH", "2025-04-15", 1_062_364_822.0, delta=326_811_643.0),
+              _I("MCH", "2025-07-28", vol=5_255_924.0, ratio=0.004999,
+                 method="Phát hành cho CBCNV", listing="2026-07-28"),
+              _A("MCH", "2025-09-05", 735_553_179.0, delta=7_130_635.0),
+              _I("MCH", "2026-01-09", vol=0.0, ratio=0.0103, method="Cổ phiếu thưởng"),
+              _I("MCH", "2026-01-09", vol=226_872_799.0, ratio=0.2147, method="Cổ phiếu thưởng",
+                 listing="2026-02-13"),
+              _A("MCH", "2026-02-13", 1_294_493_545.0, delta=226_872_799.0),
+              _I("MCH", "2026-06-23", vol=12_911_404.0, ratio=0.01000025,
+                 method="Phát hành cho CBCNV", listing="2027-06-23")])
+    khp = oshares_at(["KHP"], "2026-09-14", _cache=KHP_C, live=True)["KHP"]
+    khp_pit = oshares_at(["KHP"], "2026-09-14", _cache=KHP_C, live=False)["KHP"]
     check("K1. KHP 2026-09-14: dòng 2026Q2 (07-20) = 62.186.518 = Q1 60.376.746 + cổ tức CP 3% "
           "1.809.772 (ex 07-30) ⇒ phục vụ 62.186.518, KHÔNG phải 63.996.290 — cả LIVE lẫn PIT",
           khp["value"] == 62_186_518.0 and khp_pit["value"] == 62_186_518.0
@@ -2273,30 +2320,116 @@ def _selfcheck() -> int:
     _real_fwd = globals()["_forward_absorption_test"]
     globals()["_forward_absorption_test"] = lambda *a, **k: ([], None)
     try:
-        khp_off = oshares_at(["KHP"], "2026-09-14", live=True)["KHP"]
+        khp_off = oshares_at(["KHP"], "2026-09-14", _cache=KHP_C, live=True)["KHP"]
+        khp_off_pit = oshares_at(["KHP"], "2026-09-14", _cache=KHP_C, live=False)["KHP"]
     finally:
         globals()["_forward_absorption_test"] = _real_fwd
-    check("K1b. CHỨNG MINH NGƯỢC: tắt phép thử ⇒ KHP quay lại ĐÚNG số đếm hai lần 63.996.290",
-          khp_off["value"] == 63_996_290.0, fmt(khp_off["value"]))
-    asm = oshares_at(["ASM"], "2025-10-29", live=True)["ASM"]
+    check("K1b. CHỨNG MINH NGƯỢC: tắt phép thử ⇒ KHP quay lại ĐÚNG số đếm hai lần 63.996.290 "
+          "(cả LIVE lẫn PIT, cùng fixture)",
+          khp_off["value"] == 63_996_290.0 and khp_off_pit["value"] == 63_996_290.0
+          and [e["exright_date"] for e in khp_off["events_applied"]] == ["2026-07-30"],
+          f"LIVE {fmt(khp_off['value'])} · PIT {fmt(khp_off_pit['value'])}")
+    # Kiểm chứng ĐỘC LẬP về sau: AIS niêm yết bổ sung 2026-09-14 = 62.215.739 (BQ về sau lượt
+    # chạy đầu). 62.186.518 lệch −0,05%, số đếm hai lần 63.996.290 lệch +2,86%. Khi AIS có mặt
+    # thì neo AIS thắng và phép thử KHÔNG chạy — ghim để một thay đổi sau đảo thứ tự neo thấy ngay.
+    khp_ais = oshares_at(["KHP"], "2026-09-14", live=True, _cache=(
+        KHP_C[0], KHP_C[1] + [_A("KHP", "2026-09-14", 62_215_739.0, delta=1_809_772.0)]))["KHP"]
+    check("K1c. KHP + AIS 2026-09-14 (62.215.739) ⇒ AIS_EXACT, không `forward_absorption`; số K1 "
+          "lệch AIS trong EXPLAIN_TOL, số đếm hai lần thì không",
+          khp_ais["value"] == 62_215_739.0 and khp_ais["method"] == "AIS_EXACT"
+          and "forward_absorption" not in khp_ais
+          and abs(62_186_518.0 / 62_215_739.0 - 1) < EXPLAIN_TOL
+          and abs(63_996_290.0 / 62_215_739.0 - 1) > EXPLAIN_TOL,
+          f"{fmt(khp_ais['value'])} [{khp_ais['method']}]")
+    asm = oshares_at(["ASM"], "2025-10-29", _cache=ASM_C, live=True)["ASM"]
     check("K2. ĐỐI CHỨNG: ASM 2025-10-29 — dòng quý 07-31 KHÔNG nhảy (370.178.250) ⇒ vẫn lăn ISS "
           "ex 10-07 ⇒ 407.194.183 (dòng quý 10-30 xác nhận)",
           asm["value"] == 407_194_183.0
           and asm["forward_absorption"]["verdict"] == "FWD_NOT_ABSORBED",
           f"{fmt(asm['value'])} [{asm['method']}]")
-    mch = oshares_at(["MCH"], "2026-07-26", live=True)["MCH"]
+    mch = oshares_at(["MCH"], "2026-07-26", _cache=MCH_C, live=True)["MCH"]
     check("K3. FAIL-CLOSED: MCH 2026-07-26 — bước nhảy 12.943.987 đủ chứa ISS 12.911.404 nhưng "
           "không khớp trong 0,1% ⇒ FIN_ABSORPTION_AMBIGUOUS, value=None, số lăn giữ để log",
           mch["value"] is None and mch["method"] == "FIN_ABSORPTION_AMBIGUOUS"
-          and mch.get("ambiguous_value_if_rolled") is not None,
+          and mch.get("ambiguous_value_if_rolled") == 1_320_316_353.0,
           f"{fmt(mch['value'])} [{mch['method']}] rolled={fmt(mch.get('ambiguous_value_if_rolled'))}")
+
+    print("== _forward_absorption_test: từng nhánh quyết định (hermetic, gọi thẳng hàm) ==")
+    # Mỗi nhánh một cặp: ca kích hoạt + ĐỐI CHỨNG chỉ khác đúng một yếu tố. Tắt/sửa nhánh thì ca
+    # kích hoạt đỏ; nhánh luôn-bật (hay luôn-tắt) thì đối chứng đỏ.
+    FQ = [_Q("FWX", "2026-04-20", 500_000_000.0), _Q("FWX", "2026-07-20", 510_000_000.0)]
+    f10 = _I("FWX", "2026-07-30", vol=10_000_000.0, ratio=0.02)
+    b10 = _I("FWX", "2026-06-10", vol=10_000_000.0, ratio=0.02, method="Cổ phiếu thưởng")
+
+    def _fwd(qs=FQ, ais=(), iss=(), fwd=(f10,), not_absorbed=(), row=("2026-07-20", 510_000_000.0)):
+        return _forward_absorption_test(qs, list(ais), row[0], row[1], list(iss), list(fwd),
+                                        not_absorbed)
+
+    ab, rp = _fwd(iss=[b10])
+    check("FA1. [len(fparts)>1] bước nhảy +10.000.000 giải thích được bằng ISS CŨ ex 06-10 HOẶC "
+          "ISS ex 07-30 sau dòng quý ⇒ FWD_AMBIGUOUS (không chọn hộ)",
+          ab is None and rp["verdict"] == "FWD_AMBIGUOUS" and "cách giải thích" in rp["note"],
+          f"{rp['verdict']} — {rp.get('note', '')[-70:]}")
+    ab, rp = _fwd()
+    check("FA1b. ĐỐI CHỨNG: bỏ ISS cũ ⇒ chỉ còn một cách giải thích ⇒ FWD_ABSORBED đúng ISS 07-30",
+          rp["verdict"] == "FWD_ABSORBED" and ab == [f10], rp["verdict"])
+    ab, rp = _fwd(iss=[b10], not_absorbed=[b10])
+    check("FA2. [not_absorbed] cùng ca FA1 nhưng ISS 06-10 đã được `_absorption_test` kết luận SẼ "
+          "LĂN ⇒ loại khỏi pool ⇒ FWD_ABSORBED (không vừa lăn vừa dùng giải thích bước nhảy)",
+          rp["verdict"] == "FWD_ABSORBED" and ab == [f10] and rp["back_events"] == [],
+          f"{rp['verdict']} back={len(rp.get('back_events') or [])}")
+    # khớp theo DANH TÍNH (id), không theo nội dung: một bản sao cùng trường không được loại nhầm
+    ab, rp = _fwd(iss=[b10], not_absorbed=[dict(b10)])
+    check("FA2b. ĐỐI CHỨNG: truyền BẢN SAO của ISS 06-10 (khác object) ⇒ không loại ⇒ quay lại "
+          "FWD_AMBIGUOUS như FA1",
+          rp["verdict"] == "FWD_AMBIGUOUS", rp["verdict"])
+    bnos = _I("FWX", "2026-06-10", method="Cổ phiếu thưởng")          # không cỡ nào
+    ab, rp = _fwd(iss=[bnos])
+    check("FA3. [ISS cũ KHÔNG định cỡ được] phần sau-dòng-quý khớp, nhưng ISS 06-10 không cỡ có "
+          "thể CHÍNH NÓ là bước nhảy ⇒ FWD_AMBIGUOUS",
+          ab is None and rp["verdict"] == "FWD_AMBIGUOUS" and "không định cỡ được" in rp["note"],
+          f"{rp['verdict']} — {rp.get('note', '')[-60:]}")
+    ab, rp = _fwd(iss=[_I("FWX", "2026-06-10", vol=3_000_000.0, method="Cổ phiếu thưởng")])
+    check("FA3b. ĐỐI CHỨNG: ISS 06-10 CÓ cỡ (3.000.000, không khớp bước nhảy) ⇒ FWD_ABSORBED",
+          rp["verdict"] == "FWD_ABSORBED" and ab == [f10], rp["verdict"])
+    fnos = _I("FWX", "2026-07-30")
+    ab, rp = _fwd(fwd=[fnos])
+    fnos_full = oshares_at(["FWX"], "2026-08-20", live=True, _cache=(FQ, [
+        _A("FWX", "2026-04-01", 500_000_000.0), fnos]))["FWX"]
+    check("FA4. [SKIPPED_UNSIZABLE] ISS ex sau dòng quý không định cỡ được ⇒ không thử, trả [] "
+          "để `_roll` chặn ⇒ qua oshares_at ra UNKNOWN_RATIO (KHÔNG phải FIN_ABSORPTION_AMBIGUOUS)",
+          ab == [] and rp["verdict"] == "SKIPPED_UNSIZABLE"
+          and fnos_full["method"] == "UNKNOWN_RATIO" and fnos_full["value"] is None,
+          f"{rp['verdict']} · oshares_at [{fnos_full['method']}]")
+    ab, rp = _fwd(fwd=[_I("FWX", "2026-07-30", ratio=0.02)])
+    check("FA4b. ĐỐI CHỨNG: cùng ISS nhưng có exercise_ratio 2% ⇒ định cỡ 10.000.000 trên dòng "
+          "trước ⇒ FWD_ABSORBED",
+          rp["verdict"] == "FWD_ABSORBED" and len(ab) == 1, rp["verdict"])
+    many = [_I("FWX", f"2026-08-{d:02d}", vol=1_000_000.0, method=f"đợt {d}") for d in range(1, 16)]
+    ab, rp = _fwd(fwd=many, row=("2026-07-20", 515_000_000.0))
+    check("FA5. [trần pool>14] 15 ISS, bước nhảy khớp đúng tổng 15 ⇒ không duyệt 2^15 tập ⇒ "
+          "FWD_AMBIGUOUS",
+          ab is None and rp["verdict"] == "FWD_AMBIGUOUS" and "quá trần" in rp["note"],
+          f"{rp['verdict']} — {rp.get('note', '')[-50:]}")
+    ab, rp = _fwd(fwd=many[:14], row=("2026-07-20", 514_000_000.0))
+    check("FA5b. ĐỐI CHỨNG: 14 ISS (đúng trần), bước nhảy = tổng 14 ⇒ duyệt được ⇒ FWD_ABSORBED cả 14",
+          rp["verdict"] == "FWD_ABSORBED" and len(ab) == 14, rp["verdict"])
+    ab, rp = _fwd(qs=FQ[1:])
+    check("FA6. [(d) không mốc đo] không dòng quý liền trước lẫn AIS <= dòng quý ⇒ FWD_AMBIGUOUS",
+          ab is None and rp["verdict"] == "FWD_AMBIGUOUS" and "không có dòng quý liền trước" in rp["note"],
+          rp["verdict"])
+    ab, rp = _fwd(qs=FQ[1:], ais=[_A("FWX", "2026-04-01", 500_000_000.0)])
+    check("FA6b. ĐỐI CHỨNG: có AIS 04-01 = 500.000.000 làm mốc ⇒ đo được ⇒ FWD_ABSORBED, mốc ghi "
+          "rõ nguồn AIS",
+          rp["verdict"] == "FWD_ABSORBED" and rp["prev_source"] == "corporate_action.AIS", rp["verdict"])
 
     print("== Bất biến chung: value is None ⟺ method ∈ {UNKNOWN_RATIO, NO_ANCHOR, AIS_UNCERTIFIED, "
           "FIN_ABSORPTION_AMBIGUOUS} ==")
     every = [h, m, idc, fpt5, tcb_boom, vre, vre_off, na, cc1,
              h5, h5b, hh1, hh2, kbc, kbc_pit, lb1, lb2, lb6, vci,
              hhv, amb, nor, two, old, inn, *qe.values(),
-             *cost.values(), *ctrl.values(), *series.values(), khp, khp_pit, asm, mch, r2c]
+             *cost.values(), *ctrl.values(), *series.values(), khp, khp_pit, khp_off, khp_off_pit,
+             khp_ais, asm, mch, r2c, fnos_full]
     check("10. không bao giờ trả số kèm nhãn 'không biết', và ngược lại",
           all((r["value"] is None)
               == (r["method"] in ("UNKNOWN_RATIO", "NO_ANCHOR", "AIS_UNCERTIFIED",
