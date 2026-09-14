@@ -78,7 +78,14 @@ file excel". Luật:
 - **P1 CPI ✅ 14/09** — `data/fiinprox_cpi_monthly_20260914.csv` (224 tháng, 2 lệnh), registry
   `macro/fiinprox_cpi_monthly.md` DERIVED. T2 nội suy `cpi_vn.py` lệch tới 2,51pp (2019-09),
   T3 backfill tới 3,01pp (2009-10); `NSO_CPI_YOY_AVG_REAL` thực chất là lạm phát cơ bản.
-- P1 tín dụng/M2, tỷ giá, GDP — CHƯA: FiinXMCP cần xác thực lại (phiên restart 17:2x 14/09).
+- **P1 tín dụng/M2 ✅ 14/09** — `data/fiinprox_money_credit_monthly_20260914.csv` (161 tháng, 2 lệnh). Tín dụng
+  cuối năm khớp NHNN. Bẫy: tiền gửi TCKT/dân cư gãy chuỗi 10/2025 (đổi phân loại).
+- **P1 GDP danh nghĩa ✅ 14/09** — `data/fiinprox_gdp_nominal_quarterly_20260914.csv` (4 lệnh, 1/quý vì provider
+  không cross-join year×quarter). Tổng năm khớp GSO; gãy chuỗi 2020→2021 (đánh giá lại GDP).
+- **P1 tỷ giá ⏸ HOÃN** — `get_economy` exchange_rate chỉ trả ~2 tháng/lệnh (14 năm = ~85 lệnh, quá tốn);
+  `execute_api` (có `time_frequency=Monthly`, 12 điểm/năm) chạy được 1 lần rồi lỗi `[Errno 28]` hết đĩa
+  sandbox FiinX 3 lần liên tiếp. Thử lại execute_api 1 lệnh/năm vào 15/09; nếu vẫn lỗi ⇒ bỏ (gap LOW,
+  đã có `vcb_fx_feed.py`). Bonus nếu lấy được: giá USD thị trường tự do từ 2013.
 
 ## 3. Phân vai
 - **Mike:** gọi MCP + lưu CSV + registry UNVERIFIED (chỉ phiên này làm được).
