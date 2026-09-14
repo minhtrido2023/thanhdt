@@ -1,5 +1,5 @@
 🛰️ V2.3 (DT5G) REPORT — 2026-09-11
-Sent: 2026-09-11 19:35 (next session T+1 entry)
+Sent: 2026-09-14 19:35 (next session T+1 entry)
 Market regime (DT5G): 🟡 NEUTRAL (state=3)
 Strategy: V2.3 = BAL | LAG static (always-on, no ensemble switch) + allocator + CAPIT v2
 BAL: max=12 · 10%/pos (book) · hold 45d · stop -20% · Fin/RE cap 4 · 8L≥4 half-size in BEAR/CRISIS

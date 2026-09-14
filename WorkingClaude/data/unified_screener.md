@@ -1,6 +1,6 @@
 # Unified screener — auto-routed by company type (4 sector lenses)
 universe 150 | BANK 18 · POWER 49 · CYCLICAL 17 · SUGAR 5 · COMPOUNDER 61
-commodity regimes: rubber=0.97GOOD, caustic_soda=0.67GOOD, iron_ore=0.10WEAK, dap=0.93GOOD, urea=0.42WEAK
+commodity regimes: caustic_soda=0.67GOOD, iron_ore=0.10WEAK, rubber=0.97GOOD, dap=0.93GOOD, urea=0.42WEAK
 
 ## COMPOUNDER  (61)
 tkr   R  grade verdict        engine        action                  liqB  detail
@@ -39,7 +39,7 @@ SIP   2  IG    CHEAP_QUALITY  COMPOUNDER ASSET_PLAY→NAVBUY-zone               
 TCL   1  IG    CHEAP_QUALITY  COMPOUNDER    BUY-zone                   0  PE5.3 pe_z-1.9 PEG1.10(ttmg+5%) ROE23% dd-13% PB1.24 pb_z-2.1 | ⬆ liq RISING (1M 0.3B vs 3M-med 0.2B) 
 TIP   3  IG    CHEAP_QUALITY  LOWROIC_GROWTH ASSET_PLAY→NAVBUY-zone                   0  PE4.8 pe_z-0.9 PEG0.20(ttmg+24%) ROE12% dd-14% PB0.53 pb_z-0.8 CFOyld+4%/FCFyld+4% | ASSET_PLAY: value on NAV/SOTP (lumpy non-op NP, asset-heavy) | backlog UnRev/MV 17% (YoY-4%) 
 VNM   1  IG    CHEAP_QUALITY  -             BUY-zone                 201  PE11.4 pe_z-2.0 PEG0.41(ttmg+28%) ROE29% dd-16% PB3.51 pb_z-1.0 CFOyld+7%/FCFyld+5% 
-VSA   3  IG    CHEAP_QUALITY                BUY-zone                   0  PE9.9 pe_z-0.1 PEG0.55(ttmg+18%) ROE9% dd-14% PB0.76 pb_z-1.4 CFOyld+10%/FCFyld+9% | 🚢 FREIGHT[DRY_BULK·BDI·NP~+0.00] tín hiệu yếu/nhiễu (thanh khoản nhỏ); danh nghĩa bulk | BDI now 3521(real) 
+VSA   3  IG    CHEAP_QUALITY                BUY-zone                   0  PE9.9 pe_z-0.1 PEG0.55(ttmg+18%) ROE9% dd-13% PB0.76 pb_z-1.4 CFOyld+10%/FCFyld+9% | 🚢 FREIGHT[DRY_BULK·BDI·NP~+0.00] tín hiệu yếu/nhiễu (thanh khoản nhỏ); danh nghĩa bulk | BDI now 3507(real) 
 BIC   2  IG    NOT_CHEAP      LOWROIC_GROWTH ASSET_PLAY→NAVWATCH                      0  PE10.0 pe_z+0.8 (g-22%) ROE16% dd-24% PB1.21 pb_z-0.9 CFOyld-0%/FCFyld-1% | ⚠ CFO-watch: TTM operating CF -21bn<0 (working-capital drain; CR 1.18) | ASSET_PLAY: value on NAV/SOTP (lumpy non-op NP, asset-heavy) ⚠⚠
 D2D   2  IG    NOT_CHEAP      - ASSET_PLAY→NAVWATCH                      1  PE27.8 pe_z+0.1 (g-89%) ROE14% dd-21% PB1.25 pb_z+0.0 | ASSET_PLAY: value on NAV/SOTP (lumpy non-op NP, asset-heavy) | backlog UnRev/MV 66% (YoY-4%) ⚠
 DHG   1  IG    CHEAP_1lens    -             WATCH                      1  PE13.0 pe_z-1.1 PEG1.13(ttmg+12%) ROE22% dd-7% PB3.65 pb_z+1.2 CFOyld+6%/FCFyld+5% 
@@ -61,8 +61,8 @@ PGD   -        VALUE_TRAP                   EVENT_CHECK (verify: structural vs o
 SAB   2  IG    CHEAP_QUALITY  -             WATCH (margin-peak: cyclically-inflated EPS)    29  PE11.8 pe_z-1.5 PEG0.70(ttmg+17%) ROE19% dd-13% PB2.62 pb_z-0.9 CFOyld+6%/FCFyld+5% | ⚠ L5 MARGIN_PEAK (GPM pctile0.95): low PE on peak-cycle EPS = compress risk ⚠
 VCS   2  IG    VALUE_TRAP     -             EVENT_CHECK (verify: structural vs one-off?)     1  PE8.7 pe_z-0.6 (g-21%) ROE22% dd-35% PB0.98 pb_z-1.4 | ⬆ liq RISING (1M 1.4B vs 3M-med 1.0B) | ★ L5 MARGIN_BOTTOM (GPM pctile0.16): margin crushed→revert↑ (buy if brand) ⚠
 VIP   4  SPEC  VALUE_TRAP                   EVENT_CHECK (verify: structural vs one-off?)     0  PE12.5 pe_z+0.2 (g-54%) ROE8% dd-25% PB0.54 pb_z-0.9 CFOyld+7%/FCFyld+2% | ⛽ OIL[TANKER·FREIGHT_NOT_OIL] cước tanker/xăng dầu; không theo giá dầu | 🚢 FREIGHT[TANKER·BDTI·NP~+0.53] tanker xăng dầu; nhạy cước hơn PVT ⚠⛽
-VNA   -        CHEAP_QUALITY                WATCH (margin-peak: cyclically-inflated EPS)     0  PE3.6 pe_z-1.0 PEG0.02(ttmg+237%) ROE42% dd-31% PB0.69 pb_z-0.9 CFOyld+13%/FCFyld-91% | 🚢 FREIGHT[DRY_BULK·BDI·NP~+0.59] bám BDI sát như VOS (NP~BDI +0.59); bulk thuần, biến động mạnh | BDI now 3521(real) | ⚠ L5 MARGIN_PEAK (GPM pctile0.89): low PE on peak-cycle EPS = compress risk ⚠
-VOS   4  SPEC  VALUE_TRAP                   EVENT_CHECK (verify: structural vs one-off?)     4  PE4.1 pe_z-0.2 (g-693%) ROE28% dd-38% PB0.80 pb_z-0.8 CFOyld-5%/FCFyld-36% | ⚠ CFO-watch: TTM operating CF -85bn<0 (working-capital drain; CR 1.99) | 🚢 FREIGHT[DRY_BULK·BDI·NP~+0.55] thuần BDI (NP~BDI +0.55, NPM +0.58): LỖ ở đáy cước, lãi khi BDI  | BDI now 3521(real) ⚠⚠
+VNA   -        CHEAP_QUALITY                WATCH (margin-peak: cyclically-inflated EPS)     0  PE3.6 pe_z-1.0 PEG0.02(ttmg+237%) ROE42% dd-31% PB0.69 pb_z-0.9 CFOyld+13%/FCFyld-91% | 🚢 FREIGHT[DRY_BULK·BDI·NP~+0.59] bám BDI sát như VOS (NP~BDI +0.59); bulk thuần, biến động mạnh | BDI now 3507(real) | ⚠ L5 MARGIN_PEAK (GPM pctile0.89): low PE on peak-cycle EPS = compress risk ⚠
+VOS   4  SPEC  VALUE_TRAP                   EVENT_CHECK (verify: structural vs one-off?)     4  PE4.1 pe_z-0.2 (g-693%) ROE28% dd-38% PB0.80 pb_z-0.8 CFOyld-5%/FCFyld-36% | ⚠ CFO-watch: TTM operating CF -85bn<0 (working-capital drain; CR 1.99) | 🚢 FREIGHT[DRY_BULK·BDI·NP~+0.55] thuần BDI (NP~BDI +0.55, NPM +0.58): LỖ ở đáy cước, lãi khi BDI  | BDI now 3507(real) ⚠⚠
 VSC   3  IG    VALUE_TRAP                   EVENT_CHECK (verify: structural vs one-off?)   138  PE14.2 pe_z-0.7 (g-18%) ROE9% dd-60% PB0.67 pb_z-2.0 CFOyld+23%/FCFyld-23% | 🚢 FREIGHT[PORT·THROUGHPUT·NP~+0.43] cảng; corr +0.43 chỉ do co-move chu kỳ thương mại 2021-22, KHÔNG | ⬆ liq RISING (1M 138.2B vs 3M-med 96.7B) ⚠
 VTO   2  IG    CHEAP_QUALITY  - ASSET_PLAY→NAVWATCH (margin-peak: cyclically-inflated EPS)     1  PE4.6 pe_z-2.0 PEG0.10(ttmg+45%) ROE8% dd-17% PB0.70 pb_z-0.5 CFOyld+25%/FCFyld+24% | ⛽ OIL[TANKER·FREIGHT_NOT_OIL] cước tanker + charter; không theo giá dầu trực tiếp | 🚢 FREIGHT[TANKER·BDTI·NP~+0.06] hợp đồng cố định gần như hoàn toàn → ~0 theo spot | ASSET_PLAY: value on NAV/SOTP (lumpy non-op NP, asset-heavy) | ⚠ L5 MARGIN_PEAK (GPM pctile0.97): low PE on peak-cycle EPS = compress risk ⛽⚠
 
@@ -134,7 +134,7 @@ DRI   2  IG    ELEVATED-SUPPORTED(DEFICIT)              HOLD/selective (not avoi
 GVR   2  IG    ELEVATED-SUPPORTED(DEFICIT)              HOLD/selective (not avoid)    76  rubber pctile0.97 [DEFICIT] | stock dd-34% PB1.8 | ⬆ liq RISING (1M 75.5B vs 3M-med 53.5B) 
 HRC   3  IG    ELEVATED-SUPPORTED(DEFICIT)              HOLD/selective (not avoid)     0  rubber pctile0.97 [DEFICIT] | stock dd-67% PB1.43 
 LAS   4  SPEC  cmdty_PEAK(BALANCED)              AVOID-new (reverts)        2  dap pctile0.93 [BALANCED] | stock dd-42% PB0.88 | ⚠ CFO-watch: TTM operating CF -260bn<0 (working-capital drain; CR 1.72) ⚠
-PHR   3  IG    ELEVATED-SUPPORTED(DEFICIT)ASSET_PLAY→NAVHOLD/selective (not avoid)    14  rubber pctile0.97 [DEFICIT] | stock dd-15% PB0.91 | ⬆ liq RISING (1M 14.4B vs 3M-med 10.1B) | ASSET_PLAY: value on NAV/SOTP (lumpy non-op NP, asset-heavy) | backlog UnRev/MV 29% (YoY-3%) 
+PHR   3  IG    ELEVATED-SUPPORTED(DEFICIT)ASSET_PLAY→NAVHOLD/selective (not avoid)    14  rubber pctile0.97 [DEFICIT] | stock dd-15% PB1.65 | ⬆ liq RISING (1M 14.4B vs 3M-med 10.1B) | ASSET_PLAY: value on NAV/SOTP (lumpy non-op NP, asset-heavy) | backlog UnRev/MV 29% (YoY-3%) 
 POM   5  AVOID DISTRESSED                   AVOID (insolvency/falling-knife)     6  iron_ore pctile0.10 [RESPONSIVE] | stock dd-56% PB0.0 | ☠ SOLVENCY: PB<=0 (equity destroyed/negative) ☠
 TRC   4  SPEC  ELEVATED-SUPPORTED(DEFICIT)              HOLD/selective (not avoid)    11  rubber pctile0.97 [DEFICIT] | stock dd-7% PB1.09 | ⬆ liq RISING (1M 11.0B vs 3M-med 4.8B) 
 

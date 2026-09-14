@@ -317,7 +317,7 @@ ROUTE(ICB)·VALUATION·ENGINE(runway×ROIC)·CASH◆·MOAT·MARGIN-CYCLE·RUNWAY
 ━━ VSA [COMPOUNDER]  CHEAP_QUALITY  (PE9.9 pe_z-0.1 PEG0.23 dd-19%)
    Engine: -  (ROIC 5%, asset-growth -7%, dilut3y +0%)
    Moat:   WEAK/commodity []  (GPM 8%, ROE 9%)
-   🚢 FREIGHT[DRY_BULK·BDI·NP~+0.00]  (BDI now 3521,real): tín hiệu yếu/nhiễu (thanh khoản nhỏ); danh nghĩa bulk
+   🚢 FREIGHT[DRY_BULK·BDI·NP~+0.00]  (BDI now 3507,real): tín hiệu yếu/nhiễu (thanh khoản nhỏ); danh nghĩa bulk
    Margin-cycle: MID (GPM pctile 0.52)
    Runway/TAM:   MODERATE [DOMESTIC]  (rev CAGR -4% vs prior +13%)
 
@@ -474,14 +474,14 @@ ROUTE(ICB)·VALUATION·ENGINE(runway×ROIC)·CASH◆·MOAT·MARGIN-CYCLE·RUNWAY
 ━━ VNA [COMPOUNDER]  CHEAP_QUALITY  (PE3.6 pe_z-1.0 PEG0.00 dd-32%)
    Engine: LOWROIC_GROWTH  (ROIC 11%, asset-growth +11%, dilut3y +70%)
    Moat:   WEAK/commodity []  (GPM 7%, ROE 42%)
-   🚢 FREIGHT[DRY_BULK·BDI·NP~+0.59]  (BDI now 3521,real): bám BDI sát như VOS (NP~BDI +0.59); bulk thuần, biến động mạnh
+   🚢 FREIGHT[DRY_BULK·BDI·NP~+0.59]  (BDI now 3507,real): bám BDI sát như VOS (NP~BDI +0.59); bulk thuần, biến động mạnh
    Margin-cycle: MID (GPM pctile 0.70)
    Runway/TAM:   MODERATE [DOMESTIC]  (rev CAGR -12% vs prior +12%)
 
 ━━ VOS [COMPOUNDER]  CHEAP_QUALITY  (PE4.1 pe_z-0.2 PEG0.01 dd-38%)
    Engine: LOWROIC_GROWTH  (ROIC 10%, asset-growth +8%, dilut3y +0%)
    Moat:   WEAK/commodity []  (GPM 10%, ROE 28%)
-   🚢 FREIGHT[DRY_BULK·BDI·NP~+0.55]  (BDI now 3521,real): thuần BDI (NP~BDI +0.55, NPM +0.58): LỖ ở đáy cước, lãi khi BDI vọt. ⚠ bẫy đỉnh-cước rõ nhất nhóm
+   🚢 FREIGHT[DRY_BULK·BDI·NP~+0.55]  (BDI now 3507,real): thuần BDI (NP~BDI +0.55, NPM +0.58): LỖ ở đáy cước, lãi khi BDI vọt. ⚠ bẫy đỉnh-cước rõ nhất nhóm
    Margin-cycle: MARGIN_PEAK (GPM pctile 0.78)
    Runway/TAM:   SATURATING [DOMESTIC]  (rev CAGR +6% vs prior +28%)
 
@@ -592,7 +592,7 @@ ROUTE(ICB)·VALUATION·ENGINE(runway×ROIC)·CASH◆·MOAT·MARGIN-CYCLE·RUNWAY
    Margin-cycle: MARGIN_BOTTOM (GPM pctile 0.10)
    Runway/TAM:   MODERATE [DOMESTIC]  (rev CAGR -1% vs prior +11%)
 
-━━ PHR [CYCLICAL]  CHEAP_QUALITY ASSET_PLAY→NAV  (PE4.8 pe_z-1.9 PEG0.02 dd-15%)  | rubber pctile0.97 [DEFICIT] → ELEVATED-SUPPORTED 
+━━ PHR [CYCLICAL]  CHEAP_QUALITY ASSET_PLAY→NAV  (PE8.6 pe_z-1.0 PEG0.03 dd-15%)  | rubber pctile0.97 [DEFICIT] → ELEVATED-SUPPORTED 
    Engine: LOWROIC_GROWTH  (ROIC 7%, asset-growth +4%, dilut3y +0%)
    Moat:   MODERATE []  (GPM 28%, ROE 18%)
    ⚑ ASSET-PLAY: value on NAV/SOTP (lumpy non-operating NP, asset-heavy) — PE/PEG misleading
