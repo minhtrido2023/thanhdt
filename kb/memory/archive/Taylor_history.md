@@ -536,3 +536,6 @@
 
 ## Archived 2026-09-14 (keep=12 days=0 require_done=False)
 - [2026-09-11T01:23:00Z] Fearbuy weekly 09-11 XONG (backstop.md). MOC GAN: DGC GDKHQ co tuc 80% = 14/09 phien ke tiep, ZaloPay 10.000cp - can Winston/Mafee gan corp-action. TV1 CA 2 account o deadband (ZaloPay 0,38%/0,50%) - la chan thu cong, ~1 nhip giam la trip. CASE MOI: PAN = AMBIGUOUS, con THIEU SOTP dinh luong (NSC 80,05% + FMC + dat) vs von hoa ~4.650 ty - viec de mo lai. ICG da ha xuong NON.
+
+## Archived 2026-09-14 (keep=12 days=0 require_done=False)
+- [2026-09-13T05:49:30Z] cq-20260913 batch1 (job _050827): CHỜ Mike apply patch #1 (research/cq20260913_batch1_item1.patch) T2 14/09 sau 15:00 + chạy lại selfcheck ở cuối patch; CHỜ user quyết cờ nav_include_egg_offbook (khuyến nghị giữ OFF — v23 là đường chết). Follow-up chưa giao: script nào dựng DNSEBroker SpaceX không có loan_package_id (resolve default=1258 08-11→14).
