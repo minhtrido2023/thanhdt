@@ -388,7 +388,32 @@ def append_log(consumer, asof, summary, path=LOG_PATH):
         return None
 
 
-def _selfcheck() -> int:                                    # noqa: C901 — a flat list of cases
+def _selfcheck() -> int:
+    """HERMETIC — không check nào chạm BQ (2026-09-14, job Taylor_20260914_164512; cùng lý do
+    `oshares_live._selfcheck`). Dữ liệu thật ở Phần 3 là feed ĐÓNG BĂNG
+    `oshares_selfcheck_fixture.frozen()`; `_fetch`/`bq` bị thay bằng hàm NÉM LỖI ở CẢ BA bản
+    module có thể giữ tên đó (module đang chạy — `__main__` khi gọi thẳng file —, `oshares_pit`
+    import lại, và `oshares_live`) ⇒ check nào quên cache sẽ lộ ra thay vì lặng lẽ đọc BQ."""
+    import oshares_live as L
+    import oshares_pit as M
+
+    def _no_bq(*_a, **_k):
+        raise RuntimeError("selfcheck HERMETIC: không được chạm BQ — truyền cache=frozen([...])")
+
+    spots = [(globals(), "_fetch"), (vars(M), "_fetch"), (vars(L), "_fetch"), (vars(L), "bq")]
+    keep = [(ns, k, ns[k]) for ns, k in spots]
+    for ns, k in spots:
+        ns[k] = _no_bq
+    try:
+        return _selfcheck_body()
+    finally:
+        for ns, k, v in reversed(keep):
+            ns[k] = v
+
+
+def _selfcheck_body() -> int:                               # noqa: C901 — a flat list of cases
+    from oshares_selfcheck_fixture import frozen
+
     fails, ran = [], []
 
     def check(name, cond, detail=""):
@@ -556,8 +581,8 @@ def _selfcheck() -> int:                                    # noqa: C901 — a f
     check("T2. lỗi cũng không làm PIT chết; PIT rơi về đúng số nền",
           set(crashed_pit) == set(TK)
           and all(crashed_pit[t]["value"] == FB[t] for t in TK if FB[t] is not None))
-    # "not-a-date" là lỗi cú pháp BQ tất định ⇒ đây là khẳng định THẬT (`is None`), không phải
-    # ca rỗng đội lốt PASS.
+    # `_fetch` đang bị thay bằng hàm NÉM LỖI (hermetic) ⇒ lỗi tất định, không cần BQ ⇒ đây là
+    # khẳng định THẬT (`is None`), không phải ca rỗng đội lốt PASS.
     check("T3. fetch_cache nuốt lỗi và trả None thay vì ném",
           fetch_cache(["KHONG_TON_TAI_XYZ"], "not-a-date") is None)
 
@@ -579,28 +604,30 @@ def _selfcheck() -> int:                                    # noqa: C901 — a f
     check("T5. số nền là NaN ⇒ coi như THIẾU (không sinh rel_diff = nan rồi lọt cổng so sánh)",
           nanr["AGREE"]["value"] is None and nanr["AGREE"]["source"] == "none")
 
-    # ── Phần 3: dữ liệu THẬT. Ít ca, nhưng phải có — Phần 1 mù hoàn toàn với việc BQ đổi shape.
-    print("== Dữ liệu THẬT (BQ) ==")
+    # ── Phần 3: dữ liệu THẬT, ĐÓNG BĂNG 2026-09-14 (`oshares_selfcheck_fixture`). Ít ca, nhưng
+    # phải có — Phần 1 dựng tay. Cái giá của đóng băng: bộ này KHÔNG còn bắt được BQ đổi shape.
+    print("== Dữ liệu THẬT (feed BQ đóng băng 2026-09-14) ==")
     try:
-        live_real = real(["FPT", "MBB"], "2026-08-12")
+        live_real = real(["FPT", "MBB"], "2026-08-12", _cache=frozen(["FPT", "MBB"]))
         # MBB: số nền = số live chia 1,15 — mô phỏng ĐÚNG ca đang thật hôm nay (cổ tức CP 15% đã
         # ex 2026-08-11, dòng quý chưa kịp cập nhật). Lệch 15% là HỢP LÝ, không phải lỗi dữ liệu:
         # đây là ca duy nhất phân biệt được hai chính sách trên dữ liệu thật.
         fb_real = {"FPT": live_real["FPT"]["value"], "MBB": live_real["MBB"]["value"] / 1.15}
-        rr = oshares_reconciled(["FPT", "MBB"], "2026-08-12", fb_real)
+        rr = oshares_reconciled(["FPT", "MBB"], "2026-08-12", fb_real,
+                                cache=frozen(["FPT", "MBB"]))
         check("L1. FPT: số nền == live ⇒ nhận live, nguồn = oshares_live",
               rr["FPT"]["source"] == "oshares_live", f"{rr['FPT']['value']:,.0f}")
         check("L2. MBB lệch 15% (hợp lý) ⇒ LIVE giữ số cũ, và lý do là LỆCH chứ không phải lỗi DL",
               rr["MBB"]["value"] == fb_real["MBB"]
               and rr["MBB"]["source"] == "ticker_financial"
               and rr["MBB"]["reason"].startswith("LỆCH"), rr["MBB"]["reason"])
-        pr = oshares_pit(["MBB"], "2026-08-12", fb_real)
+        pr = oshares_pit(["MBB"], "2026-08-12", fb_real, cache=frozen(["MBB"]))
         check("L3. CÙNG dữ liệu đó, PIT lấy live — hai chính sách thật sự rẽ khác nhau",
               pr["MBB"]["source"] == "oshares_live"
               and pr["MBB"]["value"] == live_real["MBB"]["value"],
               f"{pr['MBB']['value']:,.0f} vs nền {fb_real['MBB']:,.0f}")
-        # ca IDC THẬT — cổng hợp lý chạy trên dữ liệu sống, không chỉ trên fixture dựng tay
-        idc = oshares_pit(["IDC"], "2021-02-05", {"IDC": 300_000_000.0})
+        # ca IDC THẬT — cổng hợp lý chạy trên feed vendor thật (đóng băng), không phải dựng tay
+        idc = oshares_pit(["IDC"], "2021-02-05", {"IDC": 300_000_000.0}, cache=frozen(["IDC"]))
         # ⚠️ HÌNH DẠNG ĐỔI 2026-08-20 (cửa sổ nhìn lùi, job `Taylor_20260820_062330`), GIÁ TRỊ
         # THÌ KHÔNG. Trước: neo AIS 3 tỷ trượt cổng ⇒ `oshares_live` câm ⇒ adapter giữ số nền
         # (`source="ticker_financial"`, `live_value=3e9` = số bị từ chối). Nay: dòng AIS 3 tỷ VẪN
@@ -617,7 +644,7 @@ def _selfcheck() -> int:                                    # noqa: C901 — a f
               f"(live={idc['IDC']['live_value']}, rel_diff={idc['IDC']['rel_diff']})")
 
         print("== Cổng CHỨNG NHẬN neo AIS trên dữ liệu THẬT ==")
-        cc = fetch_cache(["IDC", "AAA", "FPT", "VNM"], "2026-06-16")
+        cc = frozen(["IDC", "AAA", "FPT", "VNM"])
         vd = {t: _ais_verdicts(cc[1], t, "2026-06-16") for t in ("IDC", "AAA", "FPT", "VNM")}
 
         def _served(t, d):
@@ -675,7 +702,7 @@ def _selfcheck() -> int:                                    # noqa: C901 — a f
 
         # ── HỒI QUY VÒNG 3 — ca quant-skeptic dùng để BÁC BỎ bản trước (job Taylor_20260813_142812)
         print("== HỒI QUY: ca REFUTED của quant-skeptic (FPT chuỗi AIS đan xen) ==")
-        fcc = fetch_cache(["FPT"], "2026-06-16")
+        fcc = frozen(["FPT"])
         # FPT 2020-05-05: bản trước trả 461.723.054 ở nhãn AIS_EXACT vì ESOP 2020-03-26 (tỉ lệ 0)
         # là _roll blocker ⇒ `continue` ⇒ dòng đi qua KHÔNG kiểm chứng. Sự thật = 681.668.102, xác
         # nhận độc lập 2 nguồn (2 quý liên tiếp ticker_financial; AIS kế 783.987.486 = ×1,15 sau
@@ -750,14 +777,15 @@ def _selfcheck() -> int:                                    # noqa: C901 — a f
               and _uncertified({"method": "UNKNOWN_RATIO", "value": None}) is None
               and _uncertified(None) is None)
         # neo dòng quý: cổng AIS không đụng tới (nó có cổng RESTATE riêng trong `oshares_live`)
-        dhg_live = oshares_at(["DHG"], "2026-08-12")["DHG"]
-        dhg = oshares_pit(["DHG"], "2026-08-12", {"DHG": dhg_live["value"]})["DHG"]
+        dhg_live = oshares_at(["DHG"], "2026-08-12", _cache=frozen(["DHG"]))["DHG"]
+        dhg = oshares_pit(["DHG"], "2026-08-12", {"DHG": dhg_live["value"]},
+                          cache=frozen(["DHG"]))["DHG"]
         check("A15. neo KHÔNG phải AIS (dòng quý) ⇒ cổng AIS không can thiệp, vẫn phục vụ",
               dhg_live["anchor_source"] == "ticker_financial"
               and dhg["source"] == "oshares_live",
               f"{dhg_live['method']} · {dhg['source']}")
     except Exception as e:                                  # noqa: BLE001
-        check("L1-L3. gọi được BQ", False, f"{type(e).__name__}: {e}")
+        check("L1-L3. Phần 3 chạy hết trên feed đóng băng", False, f"{type(e).__name__}: {e}")
 
     print()
     if fails:

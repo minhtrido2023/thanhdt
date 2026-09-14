@@ -1358,6 +1358,27 @@ def oshares_at(tickers, asof, _cache=None, live=False):
 
 
 def _selfcheck() -> int:
+    """HERMETIC — không một check nào được chạm BQ (2026-09-14, job Taylor_20260914_164512).
+
+    `corp_action_daily.gate_selfcheck` chạy file này làm CỔNG trước khi publish: một check đọc BQ
+    sống đỏ vì feed đổi (ca thật: AIS KHP 2026-09-14) = cả ngày không publish. Mọi feed thật dùng
+    ở đây là bản ĐÓNG BĂNG `oshares_selfcheck_fixture.frozen()`. `_fetch`/`bq` bị thay bằng hàm
+    NÉM LỖI trong lúc chạy ⇒ check nào quên `_cache=` sẽ đỏ ngay, không lặng lẽ đọc BQ.
+    """
+    def _no_bq(*_a, **_k):
+        raise RuntimeError("selfcheck HERMETIC: không được chạm BQ — truyền `_cache=frozen([...])`")
+
+    keep = {k: globals()[k] for k in ("_fetch", "bq")}
+    globals().update(_fetch=_no_bq, bq=_no_bq)
+    try:
+        return _selfcheck_body()
+    finally:
+        globals().update(keep)
+
+
+def _selfcheck_body() -> int:
+    from oshares_selfcheck_fixture import frozen
+
     fails, ran = [], []
 
     # counted, never typed: the previous version's summary line said "11/11" while the file
@@ -1375,7 +1396,7 @@ def _selfcheck() -> int:
     AIS_TRUTH = 1_703_507_121
     PRE = 1_481_330_122          # AIS 2025-06-19, ground truth trước sự kiện
 
-    cache = _fetch(["FPT"], "2026-08-13")
+    cache = frozen(["FPT"])
     series = {}
     for d in ["2025-07-18", "2025-07-20", "2025-07-21", "2025-07-22",
               "2025-08-15", "2025-09-11", "2025-09-12", "2025-10-01"]:
@@ -1437,7 +1458,7 @@ def _selfcheck() -> int:
 
     # ------------------------------------------------------------------ HỒI QUY: 2 lỗi đã đo
     print("== HỒI QUY VIỆC B — HAH: số quý RESTATE + ISS không có tỉ lệ ==")
-    hcache = _fetch(["HAH"], "2026-08-19")
+    hcache = frozen(["HAH"])
 
     # (1) look-ahead: the 2026-02-02 quarterly row already carries 185.840.401, a count created by
     # the 2026-03-12 conversion + 2026-04-17 ESOP and only listed by the AIS of 2026-05-27.
@@ -1511,22 +1532,23 @@ def _selfcheck() -> int:
           f"{fmt(h5b['value'])} [{h5b['method']}]")
 
     print("== HỒI QUY VIỆC B — 'Phát hành riêng lẻ' (2.187/2.280 dòng ratio 0/NULL) ==")
-    pp = bq(f"""
-        SELECT ticker, CAST(exright_date AS STRING) exright_date
-        FROM `{TABLE}`
-        WHERE event_code = "ISS" AND event_status = "executed"
-          AND issue_method_name_vi = "Phát hành riêng lẻ"
-          AND (exercise_ratio IS NULL OR exercise_ratio = 0) AND shares_delta IS NULL
-          AND exright_date BETWEEN DATE "2025-01-01" AND DATE "2026-06-30"
-        ORDER BY exright_date DESC LIMIT 1
-    """)
+    # ĐÓNG BĂNG 2026-09-14: truy vấn chọn ca (ISS "Phát hành riêng lẻ" executed, ratio 0/NULL, không
+    # shares_delta, ex 2025-01-01→2026-06-30, mới nhất) trả NAF 2026-01-05. Cùng tiêu chí đó giờ
+    # áp lên feed NAF đã chụp ⇒ P0 vẫn khẳng định "ca thật có trong dữ liệu", không phải hằng số.
+    pp = sorted(({"exright_date": r["exright_date"], "ticker": r["ticker"]}
+                 for r in frozen(["NAF"])[1]
+                 if r["event_code"] == "ISS" and r["issue_method_name_vi"] == "Phát hành riêng lẻ"
+                 and (r["exercise_ratio"] is None or float(r["exercise_ratio"]) == 0)
+                 and r["shares_delta"] is None
+                 and "2025-01-01" <= (r["exright_date"] or "") <= "2026-06-30"),
+                key=lambda r: r["exright_date"], reverse=True)[:1]
     check("P0. tìm được ít nhất 1 ca 'Phát hành riêng lẻ' thật để kiểm (test không rỗng)",
           bool(pp), str(pp))
     if pp:
         tkp, exrp = pp[0]["ticker"], pp[0]["exright_date"]
         after = (__import__("datetime").date.fromisoformat(exrp)
                  + __import__("datetime").timedelta(days=1)).isoformat()
-        p = oshares_at([tkp], after)[tkp]
+        p = oshares_at([tkp], after, _cache=frozen([tkp]))[tkp]
         print(f"  {tkp} {after}: {fmt(p['value'])} [{p['method']}] "
               f"blocking={[b['exright_date'] for b in p.get('blocking_events', [])]}")
         check(f"P1. {tkp} ngay sau phát hành riêng lẻ {exrp} ⇒ UNKNOWN_RATIO, value=None",
@@ -1535,7 +1557,8 @@ def _selfcheck() -> int:
               f"value={fmt(p['value'])} method={p['method']}")
 
     print("== Ca đối chứng: không có sự kiện sau anchor ⇒ KHÔNG được đụng vào số anchor ==")
-    ctrl = oshares_at(["DHG", "PVT", "TCB", "ACB", "HDB"], "2026-08-12")
+    ctrl = oshares_at(["DHG", "PVT", "TCB", "ACB", "HDB"], "2026-08-12",
+                      _cache=frozen(["DHG", "PVT", "TCB", "ACB", "HDB"]))
     for tk, r in sorted(ctrl.items()):
         print(f"  {tk}: {fmt(r['value']):>15} [{r['method']:17s}] anchor={r['anchor_date']}"
               f" ({r['anchor_source']}) +{len(r.get('events_applied', []))} ISS")
@@ -1556,7 +1579,9 @@ def _selfcheck() -> int:
     # regression: the bq CLI truncates at 100 rows by default; batching several tickers used to
     # silently drop the newest quarters and fall back to a year-old anchor (fixed in
     # corp_action_lib.bq via --max_rows). Batched must equal one-at-a-time, always.
-    solo = {t: oshares_at([t], "2026-08-12")[t] for t in ctrl}
+    # Hermetic từ 2026-09-14: ở đây chỉ còn kiểm việc tách mã trong một cache LÔ; chính cờ
+    # --max_rows của bq() được kiểm (không BQ) ở corp_action_lib selfcheck check 8.
+    solo = {t: oshares_at([t], "2026-08-12", _cache=frozen([t]))[t] for t in ctrl}
     check("8c. gọi theo LÔ == gọi từng mã (không bị bq cắt 100 dòng)",
           all(ctrl[t]["value"] == solo[t]["value"]
               and ctrl[t].get("anchor_date") == solo[t].get("anchor_date") for t in ctrl),
@@ -1565,7 +1590,7 @@ def _selfcheck() -> int:
           or "khớp hết")
 
     print("== MBB: 2 đợt CÙNG NGÀY 2026-08-11 (quyền mua 10% + cổ tức CP 15%) ==")
-    m = oshares_at(["MBB"], "2026-08-12")["MBB"]
+    m = oshares_at(["MBB"], "2026-08-12", _cache=frozen(["MBB"]))["MBB"]
     print(f"  {fmt(m['value'])} [{m['method']}] anchor={m['anchor_date']} "
           f"({m['anchor_source']}) events="
           f"{[(e['exright_date'], e.get('applied_size')) for e in m.get('events_applied', [])]}")
@@ -1588,7 +1613,7 @@ def _selfcheck() -> int:
     # Kiểm ở tầng VERDICT chứ không chỉ ở tầng `method`: `method` đổi khi neo khác thắng, verdict
     # thì phát biểu đúng cái cổng này chịu trách nhiệm. Một test chỉ đọc `method` sẽ đọc "trả số
     # đúng" thành "cổng thủng".
-    icache4 = _fetch(["IDC"], "2021-02-05")
+    icache4 = frozen(["IDC"])
     idc = oshares_at(["IDC"], "2021-02-05", _cache=icache4)["IDC"]
     idc_v = _ais_verdicts(icache4[1], "IDC", "2021-02-05")
     print(f"  IDC 2021-02-05: {fmt(idc['value'])} [{idc['method']}] anchor={idc['anchor_date']} "
@@ -1603,7 +1628,7 @@ def _selfcheck() -> int:
           f"value={fmt(idc['value'])} method={idc['method']} anchor={idc['anchor_source']}")
     # nạp một lần ở mốc MUỘN rồi cắt lại bằng `asof` trong từng lời gọi — `oshares_at` và
     # `_ais_verdicts` đều tự lọc theo `asof`, nên một cache dùng được cho cả ca 2020 lẫn ca 2021.
-    fcache4 = _fetch(["FPT"], "2026-08-13")
+    fcache4 = frozen(["FPT"])
     fpt5 = oshares_at(["FPT"], "2020-05-05", _cache=fcache4)["FPT"]
     fpt_v = _ais_verdicts(fcache4[1], "FPT", "2020-05-05")
     fpt_v21 = _ais_verdicts(fcache4[1], "FPT", "2021-01-01")
@@ -1634,10 +1659,10 @@ def _selfcheck() -> int:
     _keep_age = FIN_FALLBACK_MAX_AIS_AGE_DAYS
     globals()["_SERVE_AIS_VERDICTS"] = ("OK", "NO_PRIOR", "UNVERIFIED")
     try:
-        idc_half = oshares_at(["IDC"], "2021-02-05")["IDC"]     # chỉ mở cổng chứng nhận
+        idc_half = oshares_at(["IDC"], "2021-02-05", _cache=icache4)["IDC"]  # chỉ mở cổng chứng nhận
         globals()["FIN_FALLBACK_MAX_AIS_AGE_DAYS"] = 10 ** 9    # …rồi tắt luôn fallback
-        idc_no = oshares_at(["IDC"], "2021-02-05")["IDC"]
-        fpt_no = oshares_at(["FPT"], "2020-05-05")["FPT"]
+        idc_no = oshares_at(["IDC"], "2021-02-05", _cache=icache4)["IDC"]
+        fpt_no = oshares_at(["FPT"], "2020-05-05", _cache=fcache4)["FPT"]
     finally:
         globals()["_SERVE_AIS_VERDICTS"] = _keep_serve
         globals()["FIN_FALLBACK_MAX_AIS_AGE_DAYS"] = _keep_age
@@ -1657,7 +1682,7 @@ def _selfcheck() -> int:
 
     globals()["_ais_verdicts"] = _boom_verdicts
     try:
-        tcb_boom = oshares_at(["TCB"], "2026-08-12")["TCB"]
+        tcb_boom = oshares_at(["TCB"], "2026-08-12", _cache=frozen(["TCB"]))["TCB"]
     finally:
         globals()["_ais_verdicts"] = _keep_v
     check("N4. FAIL-CLOSED: `_ais_verdicts` NÉM LỖI ⇒ neo AIS coi như CHƯA chứng nhận",
@@ -1667,7 +1692,7 @@ def _selfcheck() -> int:
     # "chặn tất cả", một cổng vô dụng cũng PASS được.
     # TCB 2026-08-12 không còn dùng được (AIS 2026-08-05 mới vào BQ với verdict UNVERIFIED).
     # Dùng 2025-12-05: AIS 2025-12-01 (OK, 4 ngày) — case sạch, neo ổn định hơn.
-    ctrl_tcb_ais = oshares_at(["TCB"], "2025-12-05")["TCB"]
+    ctrl_tcb_ais = oshares_at(["TCB"], "2025-12-05", _cache=frozen(["TCB"]))["TCB"]
     check("N5. ĐỐI CHỨNG: TCB 2025-12-05 (neo AIS chứng nhận được) VẪN phục vụ AIS_EXACT",
           ctrl_tcb_ais["value"] is not None and ctrl_tcb_ais["method"] == "AIS_EXACT",
           f"{fmt(ctrl_tcb_ais['value'])} [{ctrl_tcb_ais['method']}]")
@@ -1677,13 +1702,13 @@ def _selfcheck() -> int:
               for t in ("ACB", "DHG", "HDB", "PVT")),
           str({t: ctrl[t]["method"] for t in ("ACB", "DHG", "HDB", "PVT")}))
     # NO_PRIOR = AIS đầu tiên của mã: được phục vụ có chủ đích (xem `_SERVE_AIS_VERDICTS`)
-    fcache = _fetch(["FPT"], "2026-08-13")
+    fcache = frozen(["FPT"])
     check("N7. verdict NO_PRIOR (FPT 2017-07-03, AIS đầu tiên) ⇒ được phục vụ",
           _ais_verdicts(fcache[1], "FPT", "2017-08-01").get("2017-07-03") == "NO_PRIOR"
           and oshares_at(["FPT"], "2017-07-03", _cache=fcache)["FPT"]["value"] == 530_961_105,
           str(oshares_at(["FPT"], "2017-07-03", _cache=fcache)["FPT"]["method"]))
     # POINT-IN-TIME: một AIS của tương lai không được bác câu trả lời của quá khứ
-    icache = _fetch(["IDC"], "2026-08-13")
+    icache = frozen(["IDC"])
     check("N8. PIT: xét tại 2020-01-01 thì AIS 2022-09-05 chưa tồn tại ⇒ không có verdict",
           "2022-09-05" not in _ais_verdicts(icache[1], "IDC", "2020-01-01"),
           str(sorted(_ais_verdicts(icache[1], "IDC", "2020-01-01"))))
@@ -1692,7 +1717,7 @@ def _selfcheck() -> int:
     # Chính sách user chốt 2026-08-19. VRE là ca buộc phải có: AIS duy nhất 2018-12-26, đợt mua
     # cổ phiếu quỹ 2019 KHÔNG sinh dòng corp-action nào, và dòng quý mang số đúng từ 2019-10-29.
     print("== FIN_FALLBACK — VRE: AIS 2018 đứng im, mua CP quỹ 2019 không có sự kiện ==")
-    vre = oshares_at(["VRE"], "2026-08-19")["VRE"]
+    vre = oshares_at(["VRE"], "2026-08-19", _cache=frozen(["VRE"]))["VRE"]
     print(f"  VRE 2026-08-19: {fmt(vre['value'])} [{vre['method']}] anchor={vre['anchor_date']} "
           f"({vre['anchor_source']}) AIS {vre.get('ais_anchor_date')} cũ "
           f"{vre.get('ais_age_days')} ngày")
@@ -1708,7 +1733,7 @@ def _selfcheck() -> int:
     _keep_age = FIN_FALLBACK_MAX_AIS_AGE_DAYS
     globals()["FIN_FALLBACK_MAX_AIS_AGE_DAYS"] = 10 ** 9
     try:
-        vre_off = oshares_at(["VRE"], "2026-08-19")["VRE"]
+        vre_off = oshares_at(["VRE"], "2026-08-19", _cache=frozen(["VRE"]))["VRE"]
     finally:
         globals()["FIN_FALLBACK_MAX_AIS_AGE_DAYS"] = _keep_age
     check("F1c. CHỨNG MINH NGƯỢC: tắt fallback ⇒ VRE quay lại ĐÚNG con số sai 2.328.818.410 "
@@ -1725,7 +1750,7 @@ def _selfcheck() -> int:
           and ctrl_tcb_ais["method"] == "AIS_EXACT" and "fin_fallback" not in ctrl_tcb_ais,
           f"{ctrl_tcb_ais['method']} tuổi={tcb_age}")
     # (b) không có cả AIS lẫn dòng quý: NO_ANCHOR như cũ, không bịa số
-    na = oshares_at(["FPT"], "2001-01-01")["FPT"]
+    na = oshares_at(["FPT"], "2001-01-01", _cache=frozen(["FPT"]))["FPT"]
     check("F3. không có AIS lẫn dòng quý ⇒ NO_ANCHOR, value=None (fallback không bịa số)",
           na["value"] is None and na["method"] == "NO_ANCHOR", f"{na['method']}")
     # (c) BA điều kiện còn lại phải thật sự chặn — thử THẲNG vào `_stale_fallback_verdict` với
@@ -1752,7 +1777,7 @@ def _selfcheck() -> int:
     # Với _unabsorbed_iss: ISS 2026-06-17 exright > AIS 2025-08-06 → nằm trong "after" →
     # _explain_quarterly tính expected = 397.906.100 + 76.750.000 = 474.656.100 = actual → OK,
     # verified=True → quarterly được nhận trực tiếp (ANCHOR_ONLY), không cần FIN_FALLBACK cứu.
-    cc1 = oshares_at(["CC1"], "2026-08-19")["CC1"]
+    cc1 = oshares_at(["CC1"], "2026-08-19", _cache=frozen(["CC1"]))["CC1"]
     print(f"  CC1 2026-08-19: {fmt(cc1['value'])} [{cc1['method']}] anchor={cc1.get('anchor_date')} "
           f"verified={cc1.get('anchor_verified')} +{len(cc1.get('events_applied', []))} ISS")
     check("F5. CC1 2026-08-19 = 474.656.100 — quarterly Q2/2026 xác nhận được bằng accounting "
@@ -1924,10 +1949,10 @@ def _selfcheck() -> int:
     # không có gì bảo đảm) ⇒ quyết bằng SỐ HỌC `B = issue_volumn / exercise_ratio`, không bằng
     # một luật cắt-ngày thứ hai. Xem `_absorption_test`.
 
-    # (a) CA THẬT, dữ liệu SỐNG — HHV: dòng quý 2026-07-31 ĐÃ gồm cổ tức CP 5% ex 2026-07-09.
-    # Đây là ca duy nhất của khối này chạm BQ, cố ý: luật thì hermetic, còn "vendor thật sự có
-    # hành xử như thế không" thì phải hỏi dữ liệu thật.
-    hhv = oshares_at(["HHV"], "2026-08-19", live=True)["HHV"]
+    # (a) CA THẬT — HHV: dòng quý 2026-07-31 ĐÃ gồm cổ tức CP 5% ex 2026-07-09. Dữ liệu vendor
+    # thật nhưng ĐÓNG BĂNG ngày 2026-09-14 (trước đó ca này hỏi BQ sống, và vì thế có thể làm cổng
+    # publish đỏ khi feed đổi — §23 hệ luận 1).
+    hhv = oshares_at(["HHV"], "2026-08-19", live=True, _cache=frozen(["HHV"]))["HHV"]
     ab = hhv.get("absorption_test") or {}
     print(f"  HHV 2026-08-19 [live]: {fmt(hhv['value'])} [{hhv['method']}] "
           f"absorption={ab.get('verdict')} rolled={len(ab.get('rolled') or [])}")
@@ -1957,7 +1982,7 @@ def _selfcheck() -> int:
     # xuống chỉ còn fixture và không ai biết vendor ngoài đời có hành xử như thế không nữa.
     # VCI @2026-03-01: phát hành riêng lẻ 17,6% ex 2025-12-16 (127.500.000 CP, `listing_date`
     # 2026-12-17 — một năm sau), dòng quý 2026-02-02 = 850.100.000 ĐÃ gồm nó.
-    vci = oshares_at(["VCI"], "2026-03-01", live=True)["VCI"]
+    vci = oshares_at(["VCI"], "2026-03-01", live=True, _cache=frozen(["VCI"]))["VCI"]
     ab_r = vci.get("absorption_test") or {}
     hyp = {h["absorbed_count"]: h for h in ab_r.get("hypotheses", [])}
     print(f"  VCI 2026-03-01 [live]: {fmt(vci['value'])} [{vci['method']}] "
@@ -2245,7 +2270,7 @@ def _selfcheck() -> int:
     # Đo 2026-08-19 trên 246 mã ticker_prune tại asof=2026-03-01 (có 5,5 tháng tương lai để đối
     # chiếu): 12 mã đổi số, 3 mã mang chữ ký RESTATE — giá trị phục vụ trùng KHÍT một AIS chỉ có
     # hiệu lực SAU đó. Ghim ở đây để một thay đổi sau này "sửa" được nó thì thấy ngay.
-    cost = oshares_at(["ABB", "NVL"], "2026-03-01")
+    cost = oshares_at(["ABB", "NVL"], "2026-03-01", _cache=frozen(["ABB", "NVL"]))
     for t in ("ABB", "NVL"):
         print(f"  {t} 2026-03-01: {fmt(cost[t]['value'])} [{cost[t]['method']}]")
     check("F6. [CÁI GIÁ] ABB 1.397.208.685 (AIS 2026-06-19) và NVL 2.234.496.474 (AIS "
@@ -2257,8 +2282,8 @@ def _selfcheck() -> int:
 
     # Sau commit 8ad317b3: KBC 2026-03-01 tìm được anchor từ ticker_financial Q4/2025
     # (2026-02-02) ở cả PIT lẫn LIVE — không còn look-ahead gap, ra khỏi tập CÁI GIÁ.
-    kbc = oshares_at(["KBC"], "2026-03-01", live=True)["KBC"]
-    kbc_pit = oshares_at(["KBC"], "2026-03-01", live=False)["KBC"]
+    kbc = oshares_at(["KBC"], "2026-03-01", live=True, _cache=frozen(["KBC"]))["KBC"]
+    kbc_pit = oshares_at(["KBC"], "2026-03-01", live=False, _cache=frozen(["KBC"]))["KBC"]
     check("F6b. KBC 2026-03-01 (sau fix 8ad317b3): cả PIT và LIVE đồng thuận 941.754.759 "
           "[ANCHOR_ONLY] từ ticker_financial Q4/2025 (anchor 2026-02-02) — KHÔNG còn "
           "look-ahead gap PIT/LIVE cho mã này",
@@ -2437,13 +2462,14 @@ def _selfcheck() -> int:
               for r in every))
     served_ais = [r for r in every
                   if r["value"] is not None and r.get("anchor_source") == "corporate_action.AIS"]
-    # gieo sẵn feed HERMETIC: `_corp_of` đi hỏi BQ, mà `HHVX` là mã fixture nên không có ở đó.
-    # Gieo bằng CHÍNH feed đã dựng ⇒ bất biến 10b vẫn kiểm thật ca này, không phải miễn trừ nó.
+    # `HHVX` là mã dựng tay nên không có trong feed đóng băng ⇒ gieo bằng CHÍNH feed đã dựng: bất
+    # biến 10b vẫn kiểm thật ca này, không phải miễn trừ nó. Mã thật đọc `frozen()` (KHP gồm cả
+    # AIS 2026-09-14 mà khối K1c phục vụ).
     _corp_memo = {"HHVX": HHV_FEED}
 
     def _corp_of(tk):
         if tk not in _corp_memo:
-            _corp_memo[tk] = _fetch([tk], "2026-08-13")[1]
+            _corp_memo[tk] = frozen([tk])[1]
         return _corp_memo[tk]
 
     check("10b. mọi câu trả lời neo AIS ĐƯỢC PHỤC VỤ đều có verdict trong _SERVE_AIS_VERDICTS "
