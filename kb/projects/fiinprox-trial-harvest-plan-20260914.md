@@ -1,8 +1,8 @@
 # FiinPro-X trial — kế hoạch khai thác + đối chiếu lấp lỗ hổng dữ liệu (mở 2026-09-14)
 
 **Hạn cứng: trial hết 2026-09-28.** Sau đó không gọi lại được FiinXMCP trừ khi mua.
-**Ràng buộc kỹ thuật:** MCP tool CHỈ gọi được trong phiên Mike tương tác (OAuth), KHÔNG qua
-`bin/dispatch.sh` headless ⇒ Mike tự harvest; Taylor đối chiếu trên CSV đã lưu.
+**Ràng buộc kỹ thuật (ĐÍNH CHÍNH 2026-09-14 22:3x):** headless `claude -p` CŨNG gọi được FiinXMCP (connector
+claude.ai của account, test thật) ⇒ harvest cơ khí chạy TỰ ĐỘNG qua cron (§2c); Mike chỉ dựng CSV/đối chiếu.
 **Phạm vi:** chỉ lấy dữ liệu + đối chiếu + đăng ký `kb/data_registry/`. KHÔNG wire production trong
 kế hoạch này — mọi thay đổi consumer (rating_8l, DT5G, deposit tilt...) là quyết định riêng sau,
 qua quant-skeptic như thường lệ.
@@ -73,6 +73,16 @@ file excel". Luật:
 5. Ưu tiên tool trực tiếp (`get_economy`, `fetch_trading_data`) hơn `execute_api` (sandbox FiinX
    từng hết đĩa `[Errno 28]` 14/09). Không tải Excel/ảnh qua web UI.
 6. Chuỗi ngày dài (khối ngoại, outstanding_share) ⇒ lấy theo năm; outstanding_share lưu event-only.
+
+## 2c. Harvest tự động (user yêu cầu 2026-09-14 22:28, không nhập tay)
+- Cron `7,27,47 * * * *` → `bin/fiinprox_harvest_tick.sh tick`: mỗi tick 1 task trong `state/fiinprox_harvest/queue.json`.
+- Headless `claude -p --model sonnet --allowedTools mcp__claude_ai_FiinXMCP__execute_api --output-format stream-json`;
+  dữ liệu đọc NGUYÊN VĂN từ tool_result (model không chép số) → validate → ghi raw atomic.
+- Hàng đợi hiện tại: 30 lô OShares (20 mã/lô, từ index 70) + 15 năm tỷ giá USD tháng 2012-2026.
+- Luật: 429 → cooldown 65′; [Errno 28] → thử lại tick sau (tối đa 3 lần gọi/tick, không làm failed); 504 → tách
+  lô; lỗi khác ≥6 → failed + báo; usage ≥85% → bỏ tick; tự dừng sau 2026-09-27. Báo `vn_macro_watch` khi xong nhóm/failed.
+- Chi phí đo: ~0,13 USD/tick (5 turn). Thêm task mới: sửa `cmd_init` rồi `fiinprox_harvest_tick.py init` (idempotent).
+- Việc KHÔNG tự động: dựng CSV/đối chiếu/registry (cần phán đoán) — Mike làm khi được báo.
 
 ## 5. Nhật ký tiến độ
 - **P1 CPI ✅ 14/09** — `data/fiinprox_cpi_monthly_20260914.csv` (224 tháng, 2 lệnh), registry
