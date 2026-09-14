@@ -18,7 +18,9 @@ MỖI CA CHẶN ĐỀU CÓ CA CHỨNG MINH NGƯỢC. "Cổng bắt được X" m
 lọt vs INV2 chặn), và ca INV3 chứng minh rằng nếu KHÔNG đổi tên khoá sự kiện thì cổng bất biến
 sẽ mù hoàn toàn — đó là một bug thật đã tồn tại trong bản nháp của chính file này.
 
-Usage: python3 mike/bin/corp_action_daily_selfcheck.py [--no-subprocess]
+Usage: python3 mike/bin/corp_action_daily_selfcheck.py [--live]
+  (không cờ nào chạy cổng selfcheck THẬT: `gate_selfcheck` LUÔN được giả lập qua `runner=`.
+   `--live` chỉ thêm tầng `t_query_shape_live` — chạy mệnh đề WHERE trên BQ thật, nghiệm thu tay.)
 """
 from __future__ import annotations
 
