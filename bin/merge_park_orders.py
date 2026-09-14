@@ -93,6 +93,7 @@ _BIN_DIR = os.path.dirname(os.path.abspath(__file__))
 if _BIN_DIR not in sys.path:
     sys.path.insert(0, _BIN_DIR)
 from dnse_fee_rates import FEE_RATE_SELL_PCT  # noqa: E402  phí bán THẬT 0,097% (aria-F1 CONFIRMED)
+import wc_paths  # noqa: E402
 
 LOT = 100
 OWNER = "park_merge_v1"
@@ -127,9 +128,9 @@ _APPROVAL_KEYS = ("approved_by", "approved_by_user")
 
 DEFAULT_PLAN_DIR = "/home/trido/thanhdt/WorkingClaude/data/trade_plans"
 
-# Repo root, suy từ vị trí CHÍNH FILE NÀY (mike/bin/x.py → lên 3 cấp) chứ không chép cứng:
-# file này chạy từ cron, từ worktree, và từ selfcheck ở các cwd khác nhau.
-_WC_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Repo root, suy từ vị trí CHÍNH FILE NÀY qua wc_paths (đi lên tìm marker `wc_env.sh`, không
+# đếm cấp): file này chạy từ cron, từ worktree, và từ selfcheck ở các cwd khác nhau.
+_WC_ROOT = wc_paths.find_wc_root(__file__)
 
 # Ngưỡng phân biệt "nhiễu giá thường giữa hai lần chạy L1/L2" với "cú LẬT HỆ QUY CHIẾU" —
 # xem khối chú thích ở bước 2b. Chọn 1,0%: nhỏ nhất trong 22 ngày-mã GDKHQ đo được (README §4

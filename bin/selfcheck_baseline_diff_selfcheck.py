@@ -23,8 +23,10 @@ import tempfile
 import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-MIKE = os.path.dirname(HERE)
-WC = os.path.dirname(MIKE)
+sys.path.insert(0, HERE)
+import wc_paths  # noqa: E402
+
+WC = wc_paths.find_wc_root(__file__)
 RUNNER = os.path.join(HERE, "selfcheck_weekly_baseline_check.sh")
 
 _spec = importlib.util.spec_from_file_location("scbd", os.path.join(HERE, "selfcheck_baseline_diff.py"))

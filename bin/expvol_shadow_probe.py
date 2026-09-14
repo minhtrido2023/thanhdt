@@ -22,10 +22,14 @@ import csv
 import glob
 import os
 import statistics as st
+import sys
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
-WC_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import wc_paths  # noqa: E402
+
+WC_ROOT = wc_paths.find_wc_root(__file__)
 LIVE_ACCOUNTS = ("SpaceX", "ZaloPay", "RocketX")
 CLAMP = 0.50          # `expected_volume_tape_clamp` — trần đuôi mà P2 tự áp
 ICT = ZoneInfo("Asia/Ho_Chi_Minh")

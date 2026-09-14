@@ -58,7 +58,10 @@ import json
 import os
 import sys
 
-WC_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import wc_paths  # noqa: E402
+
+WC_ROOT = wc_paths.find_wc_root(__file__)
 REGISTRY = os.path.join(WC_ROOT, "data", "corp_actions.json")
 
 # Chỉ các loại sự kiện làm ĐỔI SỐ LƯỢNG. Cổ tức TIỀN MẶT không thuộc file này — nó đi qua

@@ -46,10 +46,17 @@ from zoneinfo import ZoneInfo
 
 _ICT = ZoneInfo("Asia/Ho_Chi_Minh")  # §16: neo TZ tường minh, không tin TZ của host
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+try:
+    import wc_paths  # noqa: E402
+
+    _WC_ROOT_DEFAULT = wc_paths.find_wc_root(__file__)
+except ImportError:
+    # selfcheck chạy bản copy trong tmpdir tách rời khỏi bin/ (không có wc_paths.py cạnh nó)
+    _WC_ROOT_DEFAULT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 SOON_DAYS = 14
-WC_ROOT = os.environ.get(
-    "WC_ROOT", os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-)
+WC_ROOT = os.environ.get("WC_ROOT", _WC_ROOT_DEFAULT)
 MIKE_ROOT = os.path.join(WC_ROOT, "mike")
 CSV_PATH = os.path.join(WC_ROOT, "data", "forensic_flags.csv")
 BUS_DIR = os.path.join(MIKE_ROOT, "bus")

@@ -55,9 +55,10 @@ from zoneinfo import ZoneInfo
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from corp_actions import load_corp_actions, validate as validate_action   # noqa: E402
+import wc_paths  # noqa: E402
 
 ICT = ZoneInfo("Asia/Ho_Chi_Minh")          # §16: neo TZ tường minh, không tin TZ của process
-WC_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+WC_ROOT = wc_paths.find_wc_root(__file__)
 EXEC_DIR = os.path.join(WC_ROOT, "data", "execution_logs")
 PLAN_DIR = os.path.join(WC_ROOT, "data", "trade_plans")
 

@@ -49,7 +49,9 @@ from zoneinfo import ZoneInfo
 
 import pandas as pd
 
-WC_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import wc_paths  # noqa: E402
+WC_ROOT = wc_paths.find_wc_root(__file__)
 sys.path.insert(0, WC_ROOT)
 
 ICT = ZoneInfo("Asia/Ho_Chi_Minh")  # §16: neo múi giờ tường minh

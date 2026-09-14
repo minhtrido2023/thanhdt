@@ -47,12 +47,13 @@ import os
 import re
 import sys
 
-WC_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import wc_paths  # noqa: E402
+WC_ROOT = wc_paths.find_wc_root(__file__)
 sys.path.insert(0, WC_ROOT)
 
 from trading_bot.vn_market import next_trading_day, today_ict   # noqa: E402
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import lag_entry_anchor as anchor_mod                           # noqa: E402
 
 RECS_DIR = os.path.join(WC_ROOT, "deploy_golive_dt5g_v4", "out")

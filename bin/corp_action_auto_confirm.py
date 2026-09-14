@@ -25,14 +25,16 @@ import sys
 
 # ── Paths ──────────────────────────────────────────────────────────────────
 MIKE_BIN = os.path.dirname(os.path.abspath(__file__))
-MIKE_ROOT = os.path.dirname(MIKE_BIN)
-WC_ROOT = os.path.dirname(MIKE_ROOT)
+sys.path.insert(0, MIKE_BIN)
+import wc_paths  # noqa: E402
+
+WC_ROOT = wc_paths.find_wc_root(__file__)
+MIKE_ROOT = os.path.join(WC_ROOT, "mike")
 
 CORP_ACTIONS_FILE  = os.path.join(WC_ROOT, "data", "corp_actions.json")
 CA_DAILY_DIR       = os.path.join(WC_ROOT, "data", "corp_action_daily")
 EXEC_DIR           = os.path.join(WC_ROOT, "data", "execution_logs")
 
-sys.path.insert(0, MIKE_BIN)
 sys.path.insert(0, MIKE_ROOT)
 
 # ── Constants ──────────────────────────────────────────────────────────────

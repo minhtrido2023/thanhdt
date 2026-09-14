@@ -83,7 +83,10 @@ import subprocess
 import sys
 
 BQ_PATH_PREFIX = "/home/trido/google-cloud-sdk/bin"
-WC_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import wc_paths  # noqa: E402
+
+WC_ROOT = wc_paths.find_wc_root(__file__)
 
 sys.path.insert(0, WC_ROOT)
 from trading_bot.vn_market import today_ict  # noqa: E402 — ICT thật, không phụ thuộc TZ host (§16)

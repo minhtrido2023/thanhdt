@@ -118,8 +118,9 @@ def _drop_pairs_crossing_exdate(pairs, plan_date):
     """
     if plan_date is None or not pairs:
         return pairs, []
-    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(
-        os.path.abspath(__file__)))))
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import wc_paths
+    sys.path.insert(0, wc_paths.find_wc_root(__file__))
     from corp_action_lib import pricing_events, is_price_adjusting
 
     lo = min(d for _, d in pairs)

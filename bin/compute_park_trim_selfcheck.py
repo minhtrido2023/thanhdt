@@ -23,7 +23,8 @@ import sys
 import tempfile
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-WC = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import wc_paths  # noqa: E402
+WC = wc_paths.find_wc_root(__file__)
 sys.path.insert(0, WC)
 
 import compute_park_trim as cpt                                  # noqa: E402
