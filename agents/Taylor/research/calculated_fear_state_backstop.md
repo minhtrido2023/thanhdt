@@ -2461,3 +2461,116 @@ Nguồn lượt này:
 [vietstock — Danh sách chứng khoán bị cắt margin trên HOSE thu hẹp còn 59 mã (nền, 05/07; BCG+TCD huỷ niêm yết)](https://vietstock.vn/2026/07/danh-sach-chung-khoan-bi-cat-margin-tren-hose-thu-hep-con-59-ma-830-1463350.htm)
 
 ---
+
+### 2026-09-14 — QUÉT SÁNG THỨ HAI (job `Taylor_20260914_010002`, mục đích: BẢO VỆ PHÍA MUA trước 09:00) — **0 QUALIFY · 0 case mới · 5 không-phải-case (HBC, HHS, CII, VCI, CEO) · 29 mã gác rà qua** · ★★ **CÓ 1 LỆNH MUA trên kênh discretionary: ZaloPay TV1 200cp @19.900 — deadband ĐÃ TRIP, nhưng KHÔNG phải do giá: do cổ tức DGC 80tr (mã BỊ LOẠI) được cộng vào active_nav** · ★ **TV1: thua phúc thẩm 17,6 tỷ + kiểm toán An Việt NHẤN MẠNH khoản nợ 127,6 tỷ với 2 cá nhân (tin 08/09, lượt 09-11 bỏ sót)** · ★ **Đại án ngành điện mở rộng lên PHÍA KHÁCH HÀNG: khởi tố cựu Chủ tịch EVNNPT (13/09) — vẫn chỉ cá nhân, không pháp nhân**
+
+Cửa sổ tin **sau phiên 11/09 → sáng 14/09** (1 phiên: 11/09). Danh mục đang gác **29 mã** (13 NH + 16 ngoài NH).
+**Watchlist TƯƠI** (`active_nav` computed_at **2026-09-11** = phiên cuối) ⇒ **KHÔNG có cảnh báo quá hạn**.
+
+**Bối cảnh phiên 11/09 — phiên giảm diện rộng, không phải sự kiện riêng lẻ**: VNINDEX **1.795,21 (−1,86%,
+−34đ)**, mất mốc 1.800, mạnh nhất gần 1 tháng; 28/30 VN30 giảm; ngoại **bán ròng ~867 tỷ HOSE** (STB 229 tỷ,
+MBB/VPB 130–140 tỷ); tuần 07–11/09 **−3,12%**. Nhóm chứng khoán giảm đồng loạt (VCI −5,87 · VND −4,42 · VIX
+−3,99 · SSI −3,33%). ⚠️ Với mret −1,86%, `idio` bị kéo lên ⇒ mã nào trip IDIOCRASH là riêng lẻ thật; mã giảm
+4–6% mà không trip = beta nhóm.
+
+**Phần 1 — anomaly_scan** (`--backfill-days 1`, phiên 11/09): universe **253 mã** (H:29 / W:242). **0 IDIOCRASH ·
+0 FLOOR2 · 0 CEIL2 · 0 VOLSPIKE.** Cờ gần nhất vẫn là VGR 08/09 (CEIL2).
+Trong 29 mã gác, mã giảm sâu nhất là **VND −4,42% · VIX −3,99%** (idio ≈ −2,1..−2,6%, beta nhóm chứng khoán)
+— không mã nào đạt ngưỡng.
+
+**Phần 2 — quét RỘNG** `bq_cache/ticker/2026.parquet` (phiên 11/09, chỉ số từ `ticker='VNINDEX'`):
+**627 mã** qua sàn thanh khoản. IDIOCRASH cứng → **17 mã**, **14/17 loại ở ADV3M <1 tỷ** (ACM, BPC, CCC, FID,
+HHG, ILC, MKV, ONE, PLP, PVE, SGT *(đã NON 08-21)*, TCD *(huỷ niêm yết, 09-11)*, VKC, VMC); 3 mã còn lại
+**không ở vùng sợ hãi**: DST (+67,5% trên đáy 52T, PE 78) · HSL (+100% trên đáy, PE 118; đang thay HĐQT) ·
+SHN (+94% trên đáy, PE âm). Nới mềm (ret ≤ −4 ∧ idio ≤ −3,5) có thanh khoản:
+
+| Mã | Số liệu (11/09) | Kết luận |
+|---|---|---|
+| **HBC** (Hoà Bình, ADV3M 2,87 tỷ) | 3.500 = **đúng đáy 52T** (dd52 −47%) · PB 0,60 · **Debt_Eq 7,37 · IntCov 1,52** | **Không phải case** — §2.5#2 sống sót qua đáy FAIL (đòn bẩy 7,4×); cùng họ VNE/PVX |
+| **HHS** (Hoàng Huy, ADV3M 11,5 tỷ) | 10.000, +6,4% trên đáy · **PE 196** · CF_OA_P0 −1.359 tỷ | **Không phải case** — §2#5 không có sàn LN, CF_OA âm lớn |
+| **CII** (ADV3M 144 tỷ) | 13.250, +4,7% trên đáy · **PE 81 · Debt_Eq 2,36 · CF_OA_P0 −717 tỷ · FS 1** | **Không phải case** — §2#3/§2#4 |
+| **CEO** (ADV3M 75 tỷ) | 11.900 · PE 37 · CF_OA_P0 −1.270 tỷ · FS 1 | **Không phải case** — §2#3/§2#5 |
+| **VCI** (Vietcap, ADV3M 198 tỷ) | 20.050, +8,7% trên đáy · PB 1,35 · PE 15,9 | **Không phải case** — beta nhóm CK (cả nhóm −3..−6%) + quỹ Yuanta thoái hết VCI (dòng vốn, không phải sự kiện lõi). Không ở vùng sợ hãi |
+
+**Phần 3 — WebSearch theo BỘ TỪ KHOÁ NHÓM (12 truy vấn + 5 WebFetch):**
+- **Chung**: **1 sự kiện liên quan mã đang giữ, đọc kỹ ở Phần 5 (TV1)**. HOSE cập nhật **72 mã cắt margin
+  tháng 9** (10/09) — **0/29 mã gác nằm trong đó** ngoài DGC (đã biết, hạn chế GD). 3 DN bị phạt CBTT 340tr —
+  không mã gác.
+- **Ngân hàng (13 mã)**: **0 sự kiện rủi ro.** Corp-action (nền, không phải trigger): **VPB chốt quyền cổ tức
+  CỔ PHIẾU 26,04%, record 25/09** (vốn lên ~100.000 tỷ) · **TPB duyệt tăng vốn lên 31.901 tỷ**. ⇒ Winston/Mafee
+  gắn corp-action VPB trước GDKHQ (~24/09).
+- **BĐS/hạ tầng — họ Vin (VHM, VRE, VIC/VPI phía mua)**: **0 sự kiện tín dụng XẤU** (không chậm trả TPDN, không
+  hạ bậc, không giải chấp/call margin). **Dữ kiện quản trị 12/09**: ông Phạm Nhật Vượng + bà Phạm Thu Hương
+  chuyển giao vai trò CEO/Chủ tịch **VinFast & GSM** cho thế hệ sau (ông Vượng vẫn trong HĐQT VinFast) — là
+  **chuyển giao điều hành, không phải sự kiện tín dụng/pháp lý** ⇒ không đổi phân loại. VIC/VHM là lực kéo giảm
+  chỉ số 11/09 nhưng không có tin nguyên nhân cụ thể.
+- **Ngoài NH (16 mã)**: 0 tai nạn/thu hồi SP/mất giấy phép/kê biên/tranh chấp lãnh đạo. Dòng vốn thụ động:
+  **MarketVector Vietnam (VNM ETF) loại VNM**, thêm SSB — áp lực bán kỹ thuật, không phải sự kiện lõi.
+
+**Phần 4 — PHÍA MUA: 1 LỆNH MUA trên 3 kênh cho phiên 14/09 — KHÔNG luận điểm nào gãy, NHƯNG lệnh duy nhất
+được sinh ra bởi một hiệu ứng kế toán chứ không phải bởi giá.**
+
+| Kênh | Trạng thái phiên 14/09 | Bằng chứng |
+|---|---|---|
+| **V2.4 BAL** | `orders` = **0** cả 2 account; `deferred_orders` = **0** (VPI đã rơi khỏi deferred; signal_hold vẫn ghi tới 16/09 trong notes) | `plan_{SpaceX,ZaloPay}_2026-09-14.json` |
+| **V2.4 LAG** | **0 đến hạn**, 0 upcoming, cổng lịch PASS (11/09 → 14/09) | `filter_lag_entry_window.py --plan-date 2026-09-14 --json` |
+| **TV1 DISCRETIONARY** | **SpaceX: SKIP** (deadband thiếu 100cp = 0,21%) · ★ **ZaloPay: AUTO-INJECT `BUY-TV1-DISC-2026-09-14` 200cp LO 19.900, trần no-chase 20.000, 3,98tr** (cash gate PASS, headroom 5,96tr) | `orders[]` plan ZaloPay + `ledger` `state_TV1_ZaloPay.json` (at 2026-09-11T20:30) |
+
+★★ **Nguyên nhân trip — đo, không suy đoán**: target = 5% × active_nav ÷ giá. `active_nav_ZaloPay.json`
+(computed 11/09) = **593.512.771đ**, trong đó **`cash_dividend_receiving_vnd` = 80.000.000đ = cổ tức 80% của
+10.000cp DGC** — mà **DGC là `excluded_tickers`**. File tự in `cash_dividend_double_count_warning` (13,48%
+active_nav). Phản thực tế: bỏ 80tr ⇒ active_nav 513,5tr ⇒ target 1.290cp ⇒ làm tròn **1.200 = đúng số đang
+giữ ⇒ 0 lệnh**. Tức **toàn bộ 200cp đến từ khoản phải thu cổ tức của mã bị loại**, không phải từ giá TV1 giảm
+(20.000 → 19.900 một mình không trip). Hai cách đọc, **không tự chọn**: (a) sau 25/09 80tr là tiền thật
+trong account ⇒ target 1.400cp là hợp lệ, chỉ là *đến sớm 2 tuần*; (b) cổ tức của vị thế BỊ LOẠI không nên
+nâng quy mô sleeve discretionary (§7 tinh thần excluded_tickers) ⇒ lệnh là artifact. Quy mô nhỏ (3,98tr ≈
+0,4% tổng NAV ZaloPay), **không chạm vốn an toàn**, nhưng đây đúng lối "hệ tự mua thêm mà không ai duyệt"
+đã cảnh báo 4 lượt — lần này qua cửa active_nav chứ không qua cửa giá.
+⚠️ **Plan ZaloPay 14/09: `requires_user_approval=true`, `approved_by=null`** (đọc lúc ~08:10) ⇒ nếu không ai
+duyệt trước 09:05, `approval_block_reason()` chặn lệnh này. **Người duyệt cần biết nguồn gốc 200cp ở trên.**
+
+**Phần 5 — read-through case đang theo dõi**
+- ★ **TV1** (QUALIFY — SpaceX 2.300cp + ZaloPay 1.200cp): **19.900 (11/09, −0,50%)**, PE 3,45 · PB 1,05 ·
+  BVPS 18.911, CF_OA_P0 24,3 tỷ vs NP_P0 31,3 tỷ. **Tin 08/09 (nguoiquansat — nguồn đơn, chép từ BCTC soát xét
+  bán niên; lượt 09-11 bỏ sót)**: (1) BCTC **soát xét bán niên 2026 do Kiểm toán An Việt** thực hiện, ý kiến
+  dạng **NHẤN MẠNH VẤN ĐỀ, không ngoại trừ/từ chối**, về **số dư nợ vay + lãi phải trả 127,6 tỷ cho 2 cá nhân**
+  (Lê Phi Long, Nguyễn Thị Ngải) tại 30/06/2026; (2) tòa **phúc thẩm 26/08/2026 giữ nguyên** án sơ thẩm
+  12/12/2025: **8 giấy nhận nợ PECC1–bà Ngải vô hiệu, PECC1 hoàn trả + bồi thường 17,6 tỷ** (chưa chi, chờ bản
+  án văn bản); vụ ông Long còn treo. H1/2026: DT 279 tỷ (+16%), LN 58 tỷ (giảm nhẹ). Đo độ lớn: vốn chủ ≈
+  BVPS × ~26,7tr cp ≈ **505 tỷ** ⇒ 17,6 tỷ ≈ **3,5% vốn chủ / ~11% LN 4 quý** (và một phần là HOÀN TRẢ gốc đã
+  nằm trong 127,6 tỷ nợ sổ sách ⇒ tác động LN ròng < 17,6 tỷ); 127,6 tỷ **đã ghi nhận là nợ phải trả**, không
+  phải nợ ngoài sổ. **Áp §2 trục quyết định**: đây là **tiền lan vào pháp nhân nhưng KHÔNG chạm tài sản lõi**
+  (thuỷ điện Sông Bung 5/hợp đồng tư vấn EVN) và quy mô chịu được ⇒ **không gãy QUALIFY**. `hard_expiry` **KHÔNG
+  kích hoạt** (điều kiện là kiểm toán FY2026 ngoại trừ/từ chối; đây là soát xét H1 + nhấn mạnh). **Dữ kiện
+  DƯƠNG phụ**: đã có đơn vị soát xét H1 (An Việt) ⇒ cổng "chọn kiểm toán" (quá hạn 31 ngày ở lượt 09-11) nay
+  có bằng chứng gián tiếp đã giải — **cần xác nhận An Việt cũng được chọn cho kiểm toán FY2026**. Cổ tức 15%:
+  vẫn 0 công bố thanh toán. **Đại án ngành điện 13/09**: khởi tố **cựu Chủ tịch HĐTV EVNNPT Đặng Phan Tường**
+  (vụ đường dây 500kV mạch 3; 47 bị can; phong toả TK chứng khoán ~1.756 tỷ) — **bài không nêu pháp nhân nào bị
+  khởi tố**, PECC1–4 chỉ ở mức lãnh đạo cá nhân (đã biết từ 07/05) ⇒ mở rộng lên phía CHỦ ĐẦU TƯ, không lan vào
+  pháp nhân TV1. **Không đổi QUALIFY.**
+- **DGC** (AMBIGUOUS-nghiêng-constructive, ZaloPay 10.000cp excluded): **46.750 (11/09, −0,53%)**. **GDKHQ HÔM
+  NAY 14/09** — `corp_action_daily_2026-09-14.json` đã có DGC trong `triggers.exright_today` ⇒ pipeline corp-action
+  đã bắt, đóng mối lo từ 09-07/09-11. Tin 10/09: dự án Nghi Sơn (~12.000 tỷ) lùi mục tiêu vận hành sang **Q4/2026**
+  (kế hoạch gốc Q1/2026) — trễ tiến độ, không phải sự kiện lõi hỏng. Không đổi.
+- **PNJ** 37.300 (−2,36%) · **VCS** 31.000 (−1,90%, sát đáy 52T) · **PAN** 18.200 (−1,62%, PB 0,50, dưới đáy
+  52T cũ 18.500) · **TV4 / ICG(NON) / OGC / các mã không-phải-case**: **0 tin mới**, giảm theo thị trường. Không đổi.
+
+**Tổng kết lượt**: **29 mã gác** · 253 mã (anomaly_scan) + 627 mã (quét rộng) + 12 truy vấn + 5 WebFetch ·
+**0 QUALIFY · 0 case mới · 5 không-phải-case** · watchlist **KHÔNG quá hạn** · **1 lệnh mua (ZaloPay TV1 200cp)
+— luận điểm KHÔNG gãy, nhưng size đến từ cổ tức DGC phải thu trong active_nav ⇒ escalate cho người duyệt plan.**
+**Mốc gần → xa: ★ ZaloPay TV1 200cp chờ duyệt trước 09:05 hôm nay → checkpoint BAL 16/09 → FTSE đợt 1 21/09 → VPB
+GDKHQ cổ tức cp ~24/09 → DGC trả tiền 25/09 (từ đó target 1.400cp TV1 ZaloPay thành hợp lệ theo cách đọc (a)) → TV1
+bản án văn bản 17,6 tỷ + xác nhận kiểm toán FY2026 + cổ tức 15% → PNJ/VCS/PAN Q3 (~cuối 10/2026).**
+
+Nguồn lượt này:
+[vnexpress — Chứng khoán 11/9: VN-Index giảm mạnh nhất gần một tháng](https://vnexpress.net/chung-khoan-giam-manh-nhat-gan-mot-thang-5119262.html) ·
+[investing/Vietstock — Chứng khoán tuần 07-11/09/2026: Rủi ro gia tăng](https://vn.investing.com/news/stock-market-news/chung-khoan-tuan-0711092026-rui-ro-gia-tang-2710908) ·
+[investing/Vietstock — 14/09: Đọc gì trước giờ giao dịch](https://vn.investing.com/news/stock-market-news/1409-doc-gi-truoc-gio-giao-dich-chung-khoan-2711490) ·
+[nguoiquansat — Chủ tịch bị bắt, doanh nghiệp điện thuộc EVN tiếp tục thua kiện (TV1, 08/09)](https://nguoiquansat.vn/chu-tich-bi-bat-doanh-nghiep-dien-thuoc-evn-tiep-tuc-thua-kien-phai-boi-thuong-hang-chuc-ty-dong-314955.html) ·
+[nguoiquansat — Đại án ngành điện: khởi tố cựu chủ tịch EVNNPT (13/09)](https://nguoiquansat.vn/dai-an-nganh-dien-tiep-tuc-nong-khoi-to-cuu-chu-tich-doanh-nghiep-quy-mo-117-000-ty-dong-315925.html) ·
+[vnexpress — Cựu chủ tịch HĐTV EVNNPT bị khởi tố](https://vnexpress.net/cuu-chu-tich-hdtv-tong-cong-ty-truyen-tai-dien-quoc-gia-bi-khoi-to-5119762.html) ·
+[dantri — Tỷ phú Phạm Nhật Vượng chuyển giao vị trí TGĐ VinFast toàn cầu (12/09)](https://dantri.com.vn/kinh-doanh/ty-phu-pham-nhat-vuong-chuyen-giao-vi-tri-tong-giam-doc-vinfast-toan-cau-20260912085716519.htm) ·
+[cafef — HOSE công bố 72 mã cổ phiếu bị cắt margin tháng 9](https://cafef.vn/hose-cong-bo-72-ma-co-phieu-bi-cat-margin-thang-9-18826091116435351.chn) ·
+[nguoiquansat — DGC chốt thời gian vận hành Nghi Sơn Q4/2026 (10/09)](https://nguoiquansat.vn/nhieu-lan-lui-tien-do-hoa-chat-duc-giang-dgc-chot-thoi-gian-van-hanh-at-chu-bai-12-000-ty-dong-315473.html)
+
+---
