@@ -96,6 +96,14 @@ file excel". Luật:
   1,9 tỷ/phiên; FiinPro lấp các phiên VNDirect trả 0. Registry `feeds/fiinprox_vnindex_investor_flow_daily.md`.
 - **P3 (a) ✅ 14/09 22:0x** — `data/fiinprox_foreign_flow_index_daily_20260914.csv` 2.313 phiên 2009-06→2018-08
   (VNINDEX mua/bán tới 2015, HNX ròng tới 2018-08). Nhất quán nội bộ 2014-2015 495/495 ≤1 tỷ. **P3 ĐÓNG.**
+- **P4 ⏸ 14/09 22:4x — CHẠM HẠN MỨC GIỜ** — `get_freefloat` (`client.PriceStatistics()`) cho 655 mã có ≥250 phiên
+  `universe_pit` từ 2013 (danh sách `data/fiinprox_oshares_raw/tickers.txt`, sắp mã còn sống trước). Đã lưu **70/655**
+  (`data/fiinprox_oshares_raw/b000..b050.txt`, chỉ mốc đổi số CP, đã lọc 'nháy' ≤5 phiên quay về giá trị cũ).
+  Lỗi thật đo được: lô 30 mã → 504 gateway timeout; lô 20 mã chạy được; sau ~6 lô thành công →
+  **429 'You have reached the hourly request limit'** trên `apigw.fiingroup.vn/FXMA/TradingData/...`. Nguyên nhân khả dĩ:
+  API phân trang theo từng mã × trang (13 năm/mã) ⇒ mỗi lô 20 mã = hàng chục request. Theo luật 2b.4: DỪNG ngay.
+  Tiếp tục 15/09: ≤4 lô/giờ (80 mã/giờ), giãn cách; còn 585 mã ≈ 7-8 giờ đồng hồ trải qua 2 ngày. Có thể cần thu hẹp
+  về 448 mã còn niêm yết 2026 nếu hạn mức chặt.
 
 ## 3. Phân vai
 - **Mike:** gọi MCP + lưu CSV + registry UNVERIFIED (chỉ phiên này làm được).
