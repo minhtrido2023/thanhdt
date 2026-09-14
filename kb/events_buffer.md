@@ -557,3 +557,15 @@
 - [2026-09-14T16:57:31Z] Taylor/heartbeat — Taylor_20260914_164512: {"status": "in_progress", "note": "fixture cua so toi thieu 19 ma, replay 75 loi goi trung khit BQ song; dang sua selfcheck"}
 - [2026-09-14T16:58:15Z] Taylor/heartbeat — Taylor_20260914_164512: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20260914_164512", "source": "watcher"}
 - [2026-09-14T16:59:16Z] Taylor/heartbeat — Taylor_20260914_164512: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20260914_164512", "source": "watcher"}
+
+## Consolidation 2026-09-14T17:07:02Z
+- [2026-09-14T17:00:16Z] Taylor/heartbeat — Taylor_20260914_164512: {"status": "still_running", "elapsed_min": 15, "job_id": "Taylor_20260914_164512", "source": "watcher"}
+- [2026-09-14T17:00:59Z] Taylor/heartbeat — Taylor_20260914_164512: {"status": "in_progress", "note": "oshares_live 102/102 + oshares_pit 49/49 tren fixture voi BQ bi chan; 96+30 loi goi trung khit baseline BQ song. Tiep: corp_action_lib check --max_rows, mutation, verify TZ"}
+- [2026-09-14T17:01:16Z] Taylor/heartbeat — Taylor_20260914_164512: {"status": "still_running", "elapsed_min": 16, "job_id": "Taylor_20260914_164512", "source": "watcher"}
+- [2026-09-14T17:02:16Z] Taylor/heartbeat — Taylor_20260914_164512: {"status": "still_running", "elapsed_min": 17, "job_id": "Taylor_20260914_164512", "source": "watcher"}
+- [2026-09-14T17:03:16Z] Taylor/heartbeat — Taylor_20260914_164512: {"status": "still_running", "elapsed_min": 18, "job_id": "Taylor_20260914_164512", "source": "watcher"}
+- [2026-09-14T17:03:55Z] Taylor/heartbeat — Taylor_20260914_164512: {"status": "in_progress", "note": "mutation 22/22 bi giet (20 fixture + 2 leak guard). Tiep: sua usage corp_action_daily_selfcheck, verify TZ + gate that, commit"}
+- [2026-09-14T17:04:17Z] Taylor/heartbeat — Taylor_20260914_164512: {"status": "still_running", "elapsed_min": 19, "job_id": "Taylor_20260914_164512", "source": "watcher"}
+- [2026-09-14T17:05:17Z] Taylor/heartbeat — Taylor_20260914_164512: {"status": "still_running", "elapsed_min": 20, "job_id": "Taylor_20260914_164512", "source": "watcher"}
+- [2026-09-14T17:06:17Z] Taylor/heartbeat — Taylor_20260914_164512: {"status": "still_running", "elapsed_min": 21, "job_id": "Taylor_20260914_164512", "source": "watcher"}
+- [2026-09-14T17:06:49Z] Taylor/heartbeat — Taylor_20260914_164512: {"status": "in_progress", "note": "verify matrix xanh 2 TZ x chan BQ (SC2 do ten worktree chua chu oshares - artifact, 201/201 qua symlink). mike commit 5c931f08. Tiep: bang tuong duong + commit branch"}
