@@ -2,8 +2,8 @@
 """trading_bot — bot giao dịch theo plan V2.3, broker PHS FLEX (DNSE sau này).
 
 Pipeline:
-  1. EOD (sau khi golive_recommend_v23 + pt_v22_dt5g chạy xong):
-         python bot_prepare_plan.py            → data/trade_plans/plan_<T+1>.json
+  1. EOD: data/trade_plans/plan_<account>_<T+1>.json do DollarBill lập (strategy "V2.4").
+         (bot_prepare_plan.py + V23Strategy đã gỡ 2026-09-13, cq-20260913-remove-v23.)
   2. Trong phiên T+1:
          python bot_execute.py                 → cắt lệnh nhỏ, đặt/đuổi/hủy, journal
 

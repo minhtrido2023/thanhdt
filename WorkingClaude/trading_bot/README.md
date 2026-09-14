@@ -3,44 +3,37 @@
 Bot 2 bước, tách **chuẩn bị plan** (EOD) khỏi **thực thi** (trong phiên):
 
 ```
-EOD ngày T  (sau golive_recommend_v23.py + pt_v22_dt5g.py):
-    python bot_prepare_plan.py          →  data/trade_plans/plan_<T+1>.json
+EOD ngày T:  plan_<account>_<T+1>.json trong data/trade_plans/ do DollarBill lập
+             (strategy "V2.4", có duyệt user) — repo này KHÔNG còn entry script dựng plan.
 
 Sáng ngày T+1 (trước 09:15, để chạy cả ngày):
     python bot_execute.py               →  cắt lệnh nhỏ, đặt/đuổi/hủy, journal, report
 ```
+
+> `bot_prepare_plan.py` + `V23Strategy`/`strategies.REGISTRY` (mirror paper book V2.3) đã
+> **gỡ 2026-09-13** (cq-20260913-remove-v23, user duyệt): 0/148 plan 2026 dùng, và chạy nó
+> không `--account` ghi đè plan đã duyệt của mọi account enabled. Bản cũ:
+> `archive/bot_prepare_plan.py` + git history của `trading_bot/strategies.py`.
 
 ## Kiến trúc
 
 | File | Vai trò |
 |---|---|
 | `trading_bot/config.py` | cấu hình — `data/trading_bot_config.json` (tự tạo mặc định) |
-| `trading_bot/strategies.py` | **strategy registry** — mỗi version chiến lược 1 class |
+| `trading_bot/strategies.py` | helper DCF lens dùng chung cho report/due-diligence (lớp strategy V23 đã gỡ) |
 | `trading_bot/plan.py` | schema TradePlan/PlannedOrder + lưu/đọc JSON |
 | `trading_bot/brokers.py` | broker interface + `PHSBroker` + `DNSEBroker` + `PaperBroker` |
 | `dnse_api.py` (workspace root) | wrapper DNSE OpenAPI v2 (HMAC sign, ký giống SDK chính thức) |
 | `trading_bot/executor.py` | vòng lặp xuyên phiên: slicing, chase giá, ATC sweep, resume |
 | `trading_bot/vn_market.py` | phiên HOSE, lô 100, bước giá, biên độ |
-| `bot_prepare_plan.py` / `bot_execute.py` | entry scripts |
+| `bot_execute.py` | entry script |
 | `test_trading_bot.py` | smoke test offline (fixture giả, không chạm PHS/BQ) |
 
-## 1. Strategy versioning
+## 1. Strategy versioning — ĐÃ GỠ
 
-`strategies.REGISTRY` ánh xạ tên → class. Ra version mới = viết class mới
-(vd `V24Strategy`), đăng ký, đổi `"strategy"` trong config. Plan/journal cũ
-không bị ảnh hưởng (mỗi plan ghi kèm `strategy` + `strategy_version`).
-
-**V23Strategy** (hiện tại): *mirror* paper book V2.3 sang tài khoản thật, scale
-theo NAV (`scale = NAV_thật / NAV_paper`):
-
-- target = vị thế paper (`pt_v22_dt5g_open_positions.csv`) ∪ khuyến nghị vào
-  lệnh T+1 (`golive_v23_recommendations_<date>.csv`: BAL FULL/HALF_SIZE, LAG
-  "UPCOMING T+1", CAPIT khi `capit_fired`) ∪ park ETF (E1VFVN30, theo giá trị
-  `BAL_etf + SECOND_etf` trong logs).
-- lệnh = chênh lệch target − danh mục thật (mã thừa → SELL sync, ưu tiên 1).
-- giá: quote PHS → close trong recs → transactions paper (fallback).
-- **Trễ chấp nhận ở v1**: exit paper ngày T+1 được sync ở plan T+2 (exit V2.3
-  là hold-expiry/stop, không gấp). Double-count tránh bằng `max(mirror, recs)`.
+Lớp `StrategyBase`/`V23Strategy`/`REGISTRY` (mirror paper book V2.3, scale theo NAV) đã gỡ
+2026-09-13 (cq-20260913-remove-v23). Mỗi plan vẫn ghi kèm `strategy` + `strategy_version`
+(plan live: `"V2.4"`); khoá config `"strategy"` còn lại chỉ là di sản, không có reader.
 
 ## 2. Executor — slicing & chống impact
 
@@ -104,7 +97,7 @@ Khai báo trong `data/trading_bot_accounts.json` (tự tạo template lần đ�
 - Mỗi account: plan riêng (`plan_<label>_<date>.json`), paper state riêng
   (`bot_paper_<label>.json`), exec state/journal/report riêng
   (`exec_<label>_<date>_*`), config riêng qua `overrides`.
-- `bot_prepare_plan.py` / `bot_execute.py` mặc định chạy MỌI account `enabled`;
+- `bot_execute.py` mặc định chạy MỌI account `enabled`;
   giới hạn bằng `--account <label>` (lặp lại được).
 - **Điều phối fleet**: mọi account chạy trong MỘT vòng lặp `run_session()`,
   dùng chung sổ participation — tổng KL (đã khớp + đang treo) của TOÀN BỘ
@@ -137,8 +130,6 @@ chung `"broker": "phs"`). Executor/strategy không đổi — chỉ adapter khá
 ## 5. Lệnh thường dùng
 
 ```bash
-python bot_prepare_plan.py --dry          # xem plan không ghi file
-python bot_prepare_plan.py                # ghi plan cho phiên kế tiếp
 python bot_execute.py                     # thực thi plan hôm nay (paper)
 python bot_execute.py --once              # 1 vòng debug
 python bot_execute.py --force-phase MORNING   # test ngoài giờ

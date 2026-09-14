@@ -56,18 +56,6 @@ def get_flex_client(credentials_file=None):
     return c
 
 
-def _load_compute_active_nav():
-    """Nạp `mike/bin/compute_active_nav.py` theo file-path (cùng cách plan._signal_holds_matcher)
-    — nguồn canonical của cơ sở tiền NAV §25, dùng cho shadow DNSEBroker.get_nav()."""
-    import importlib.util
-    mod_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                            "..", "mike", "bin", "compute_active_nav.py")
-    spec = importlib.util.spec_from_file_location("_can_compute_active_nav", mod_path)
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
-    return mod
-
-
 # Pool DNSEClient theo credentials file (api_key/secret + trading-token cache chung)
 _DNSE_POOL = {}
 
@@ -274,16 +262,6 @@ class BrokerBase:
         """→ Quote | None."""
         raise NotImplementedError
 
-    def get_nav(self):
-        cash = self.get_cash()
-        pos = self.get_positions()
-        mv = 0.0
-        for sym, p in pos.items():
-            q = self.get_quote(sym)
-            px = (q.last or q.ref) if q and q.ok() else 0
-            mv += p["total"] * (px or 0)
-        return cash + mv
-
     def place_order(self, symbol, qty, side, price=None, order_type="LO",
                     cash_only=False, loan_package_id=None):
         """→ order_id (str). cash_only=True: lệnh tiền mặt thuần — chọn gói vay HỢP LỆ
@@ -474,8 +452,6 @@ class DNSEBroker(BrokerBase):
 
     name = "dnse"
     can_trade_live = True
-    nav_include_egg_offbook = False     # make_broker() gán từ cfg; xem get_nav()
-    nav_basis_note = None
 
     def __init__(self, account_id=None, otp=None, quote_only=False,
                  credentials_file=None, label="main", auto_otp=False,
@@ -610,14 +586,13 @@ class DNSEBroker(BrokerBase):
 
     def _cash_totalcash_minus_debt(self):
         """`totalCash − totalDebt` (§25 "SỞ HỮU") từ payload `balances` thô — cơ sở đúng cho
-        NAV/get_nav(), KHÁC get_cash() (§25 "TIÊU ĐƯỢC NGAY" — availableCash-family, thiếu
+        NAV (caller: plan.py nav_live), KHÁC get_cash() (§25 "TIÊU ĐƯỢC NGAY" — availableCash-family, thiếu
         tiền bán chờ về/cổ tức phải thu). None nếu DNSE không trả đủ hai field, HOẶC nếu cả
         ba field tiền (totalCash/totalDebt/availableCash) đều = 0 (bẫy fail-closed §25/
         `park_holdings._cash_fields_all_zero` — DNSE thỉnh thoảng trả block toàn 0 do lỗi
         API tạm thời, sự cố thật 2026-07-27, KHÔNG phải tiền về 0 thật)."""
         bal = self.client.balances(self.account_id)
         self._log_raw("balances", bal)
-        self._last_balances = bal       # cùng bản đọc cho nhánh shadow của get_nav()
         row = bal[0] if isinstance(bal, list) and bal else bal
         if isinstance(row, dict) and isinstance(row.get("stock"), dict):
             row = row["stock"]
@@ -629,66 +604,6 @@ class DNSEBroker(BrokerBase):
         if tc == 0 and td == 0 and (av is None or av == 0):
             return None
         return tc - td
-
-    def get_nav(self):
-        """NAV = totalCash−totalDebt (§25 cơ sở "SỞ HỮU") + market value vị thế — KHÔNG dùng
-        `get_cash()` làm cơ sở NAV (đó là sức mua tức thời, coding_guidelines.md §25). Field
-        tiền thiếu ⇒ rơi về `get_cash()` (hành vi cũ) thay vì raise, vì get_nav() không có
-        hợp đồng fail-closed như compute_active_nav.py.
-
-        Cờ `nav_include_egg_offbook` (config, mặc định OFF — cq-20260913): OFF trả đúng giá
-        trị cũ; LUÔN tính thêm bản "SỞ HỮU" đầy đủ (+ egg.totalValue + manual_offbook) làm
-        SHADOW, ghi `self.nav_basis_note` (`NAV_BASIS old=… new=… diff=…`). Shadow lỗi/không
-        dựng được ⇒ note mang nguyên văn lỗi + trả giá trị cũ, kể cả khi cờ ON."""
-        cash = self._cash_totalcash_minus_debt()
-        if cash is None:
-            cash = self.get_cash()
-        pos = self.get_positions()
-        mv = 0.0
-        for sym, p in pos.items():
-            q = self.get_quote(sym)
-            px = (q.last or q.ref) if q and q.ok() else 0
-            mv += p["total"] * (px or 0)
-        old = cash + mv
-        new = None
-        try:
-            new, why = self._nav_owned_shadow(getattr(self, "_last_balances", None), mv)
-            if new is None:
-                self.nav_basis_note = f"NAV_BASIS old={old:.0f} new=None diff=n/a ({why}) → dùng old"
-            else:
-                diff = f"{(new - old) / old * 100:+.2f}%" if old else "n/a"
-                self.nav_basis_note = f"NAV_BASIS old={old:.0f} new={new:.0f} diff={diff} ({why})"
-        except Exception as e:
-            new = None
-            self.nav_basis_note = (f"NAV_BASIS old={old:.0f} new=LỖI diff=n/a "
-                                   f"({type(e).__name__}: {e}) → dùng old")
-        self.nav_basis_note += (" · cờ nav_include_egg_offbook="
-                                f"{'ON' if self.nav_include_egg_offbook else 'OFF'}")
-        print(f"[dnse:{self.label}] {self.nav_basis_note}")
-        if self.nav_include_egg_offbook and new is not None:
-            return new
-        return old
-
-    def _nav_owned_shadow(self, bal, mv):
-        """NAV "SỞ HỮU" đầy đủ (§25) = cash_basis + mv + egg.totalValue + manual_offbook →
-        (VND|None, lý do). Cơ sở tiền + bộ 3 guard feed-0 lấy từ helper canonical
-        `mike/bin/compute_active_nav.cash_basis` (không chép lại); offbook đọc profile qua
-        `compute_active_nav.get_account_profile`, cùng nguồn với NAV plan V2.4."""
-        if bal is None:
-            return None, "không có bản đọc balances"
-        saved_path = list(sys.path)     # module + cash_basis tự chèn sys.path — trả lại nguyên
-        try:
-            can = _load_compute_active_nav()
-            cash, detail = can.cash_basis(bal)
-            profile = can.get_account_profile(self.label) or {}
-        finally:
-            sys.path[:] = saved_path
-        if cash is None:
-            return None, f"cash_basis từ chối: {detail.get('reason')}"
-        row = bal[0] if isinstance(bal, list) and bal else bal
-        egg = float(((row or {}).get("egg") or {}).get("totalValue") or 0)
-        offbook = float(profile.get("manual_offbook_assets_vnd") or 0)
-        return cash + mv + egg + offbook, f"egg={egg:.0f} offbook={offbook:.0f}"
 
     def get_max_buy_qty(self, symbol, price, loan_package_id=None):
         """Sức mua tối đa theo mã+giá qua GET /accounts/{acc}/ppse (qmaxBuy). ppse đã tính
@@ -1599,13 +1514,10 @@ def make_broker(cfg, otp=None, need_quotes=True, profile=None, quote_src=None):
     if btype not in BROKER_CLASSES:
         raise KeyError(f"broker '{btype}' không hỗ trợ — có: {sorted(BROKER_CLASSES)}")
     if cfg["mode"] == "live":
-        b = BROKER_CLASSES[btype](account_id=p.get("account_id"), otp=otp,
-                                  credentials_file=p.get("credentials_file"),
-                                  label=p["label"],
-                                  loan_package_id=p.get("loan_package_id"))
-        if btype == "dnse":
-            b.nav_include_egg_offbook = bool(cfg.get("nav_include_egg_offbook", False))
-        return b
+        return BROKER_CLASSES[btype](account_id=p.get("account_id"), otp=otp,
+                                     credentials_file=p.get("credentials_file"),
+                                     label=p["label"],
+                                     loan_package_id=p.get("loan_package_id"))
     if quote_src is None and need_quotes:
         quote_src = get_quote_source(btype, p.get("credentials_file"))
     return PaperBroker(init_cash=cfg["paper_init_cash"],

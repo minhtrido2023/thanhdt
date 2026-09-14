@@ -9,8 +9,8 @@ touch). Rather than a one-off hack, `excluded_tickers` is a general per-account 
 (trading_bot/config.py ACCOUNT_DEFAULTS) enforced in ONE place —
 `trading_bot.plan.filter_excluded_tickers()`, called from `bot_execute.py` right after
 `load_plan()` — so it works uniformly for any future account with this field set, regardless
-of how its plan was generated (DollarBill's LLM-authored JSON, bot_prepare_plan.py's
-templated strategy.build_plan(), or hand-edited).
+of how its plan was generated (DollarBill's LLM-authored JSON or hand-edited; the templated
+bot_prepare_plan.py/strategy.build_plan() path was removed 2026-09-13).
 
 Run: python excluded_tickers_selfcheck.py   (exit 0 = all pass)
 """

@@ -21,7 +21,8 @@ DEFAULTS = {
     # --- chung ---
     "mode": "paper",                  # "paper" | "live"
     "broker": "phs",                  # "phs" | "dnse" (per-account override được)
-    "strategy": "v23",                # key trong strategies.REGISTRY
+    "strategy": "v23",                # di sản: không còn reader (lớp strategy v23 + bot_prepare_plan
+                                      #   gỡ 2026-09-13); giữ khoá vì secrets config còn ghi nó
     "account_id": None,               # None → tiểu khoản đầu tiên từ PHS
     "etf_symbol": "E1VFVN30",
     "include_etf_park": True,         # mirror cả phần park ETF của paper book
@@ -30,11 +31,6 @@ DEFAULTS = {
     "paper_init_cash": 1_000_000_000, # tiền ảo khởi tạo cho PaperBroker (VND)
     "min_order_value": 5_000_000,     # bỏ qua lệnh < 5M VND (dust)
     "qty_tolerance_pct": 0.05,        # |lệch| < 5% target → không phát lệnh sync
-    "nav_include_egg_offbook": False, # DNSEBroker.get_nav() cộng egg.totalValue + manual_offbook
-                                      #   (§25 "SỞ HỮU" đủ). OFF = giá trị cũ; bản mới luôn chạy
-                                      #   shadow → notes `NAV_BASIS`. Bật = USER quyết (cq-20260913).
-                                      #   ON KHÔNG fail-closed: guard canonical từ chối ⇒ trả old;
-                                      #   tc=td=0 thiếu availableCash ⇒ ON có thể < OFF.
 
     # --- slicing / execution ---
     "max_child_value": 200_000_000,   # VND tối đa mỗi lệnh con

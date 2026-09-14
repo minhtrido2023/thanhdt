@@ -109,7 +109,7 @@ class Executor:
         # Lớp phòng thủ THỨ HAI cho field check sai kiểu (sự cố POLL_FAIL 1:1-với-FILL
         # 2026-08-11→08-14 — xem trading_bot/plan.py::normalize_check_field). `load_plan()` đã
         # chuẩn hoá ở ranh giới nạp file, nhưng KHÔNG phải TradePlan nào cũng đi qua đó:
-        # `bot_prepare_plan`/`V23Strategy`/selfcheck dựng PlannedOrder thẳng trong bộ nhớ. Chuẩn
+        # selfcheck (trước 2026-09-13 cả `bot_prepare_plan`/`V23Strategy`) dựng PlannedOrder thẳng trong bộ nhớ. Chuẩn
         # hoá MỘT LẦN tại đây (không phải mỗi lần đọc trong `_sync_fills`, chạy mỗi 20s) ⇒ mọi
         # chỗ sau đó — kể cả audit trail `state["parents"][id]["dcf_check"]` — thấy cùng một
         # kiểu. Idempotent + không mất thông tin nên gọi lại trên plan đã chuẩn hoá là vô hại.

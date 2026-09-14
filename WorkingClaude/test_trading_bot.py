@@ -1,15 +1,18 @@
 # -*- coding: utf-8 -*-
 """Smoke test offline cho trading_bot — fixture giả lập, không chạm PHS/BQ.
 
-Cover: build plan (mirror/recs/ETF/sell-sync/HALF_SIZE/LAG T+1) + executor
-slicing/fill/journal/report + ĐA TÀI KHOẢN (plan riêng từng account, chạy chung
-1 session, quota participation tính gộp fleet).
+Cover: executor slicing/fill/journal/report + ĐA TÀI KHOẢN (plan riêng từng account, chạy
+chung 1 session, quota participation tính gộp fleet) + DNSE mapping + gap-adaptive timing.
+
+Phần "build plan" (V23Strategy mirror/recs/ETF/sell-sync/HALF_SIZE/LAG T+1) đã GỠ 2026-09-13
+cùng V23Strategy (cq-20260913-remove-v23): plan cho run_session nay là fixture dựng tay, cùng
+qty/giá/thứ tự ưu tiên mà V23Strategy sinh ra ở 24df0f76 (bỏ dcf_check/dd_check thông tin —
+executor không dùng chúng để chặn, và chúng đọc bq_cache thật nên làm test không kín).
 
   python test_trading_bot.py
 """
 
 import datetime as dt
-import json
 import os
 import shutil
 import sys
@@ -21,26 +24,17 @@ os.environ.setdefault("MIKE_BOT_TEST_MODE", "1")
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-import pandas as pd
-
 from trading_bot import config as cfgmod
-from trading_bot import strategies as strat
 from trading_bot import brokers as brk
 from trading_bot import plan as planmod
 from trading_bot import executor as execmod
 from trading_bot.brokers import PaperBroker
 from trading_bot.executor import Executor, run_session
-from trading_bot.strategies import V23Strategy
 
 TMP = tempfile.mkdtemp(prefix="bot_test_")
 print(f"fixture dir: {TMP}")
 
 # --- chuyển hướng mọi path sang TMP ---
-strat.STATUS_FILE = os.path.join(TMP, "status.json")
-strat.PT_LOGS = os.path.join(TMP, "logs.csv")
-strat.PT_POSITIONS = os.path.join(TMP, "positions.csv")
-strat.PT_TRANSACTIONS = os.path.join(TMP, "tx.csv")
-strat.GOLIVE_OUT = TMP
 planmod.PLAN_DIR = os.path.join(TMP, "plans")
 execmod.EXEC_DIR = os.path.join(TMP, "exec")
 execmod.STOP_FILE = os.path.join(TMP, "BOT_STOP")
@@ -49,34 +43,6 @@ brk.EXEC_DIR = os.path.join(TMP, "exec")
 brk.PAPER_STATE_FILE = os.path.join(TMP, "paper_main.json")
 
 # --- fixtures ---
-SIG = "2026-06-11"
-json.dump({"date": SIG, "signal_date": SIG, "state": 3, "state_name": "NEUTRAL",
-           "capit_signal_today": False, "n_capit_basket": 0},
-          open(strat.STATUS_FILE, "w", encoding="utf-8"))
-
-pd.DataFrame([
-    ["BAL", "AAA", "MOMENTUM", 80.0, 10_000, 3, 10.0, "FULL"],
-    ["BAL", "BBB", "MEGA", 70.0, 50_000, 8, 10.0, "HALF_SIZE"],
-    ["LAG", "CCC", "LAG_HI", None, 20_000, 5, 10.0, "UPCOMING T+1 phiên tới"],
-    ["LAG", "DDD", "LAG_LO", None, 30_000, 5, 8.0, "UPCOMING T+5 phiên tới"],  # loại
-], columns=["book", "ticker", "play_type", "ta", "close", "sector",
-            "weight_pct", "status"]).to_csv(
-    os.path.join(TMP, f"golive_v23_recommendations_{SIG}.csv"), index=False)
-
-pd.DataFrame([{
-    "ymd": SIG, "nav": 50e9, "BAL_cash": 20e9, "BAL_stocks": 4e9, "BAL_etf": 1e9,
-    "SECOND_cash": 25e9, "SECOND_stocks": 0.0, "SECOND_etf": 0.0,
-    "cash": 45e9, "cash_etf": 1e9, "stocks_mv": 4e9, "num_holdings": 1,
-    "num_transactions": 1, "state": 3, "active_leg": "LAG_ALLOC", "ens_signal": 0,
-}]).to_csv(strat.PT_LOGS, index=False)
-pd.DataFrame([{"ticker": "XYZ", "holding_id": "h1", "shares": 100_000, "book": "BAL"}]
-             ).to_csv(strat.PT_POSITIONS, index=False)
-pd.DataFrame([{"ymd": SIG, "ticker": "XYZ", "action": "buy", "buy_amount": 4e9,
-               "sell_amount": 0, "fee": 0, "adj_price": 40_000, "shares": 100_000,
-               "holding_id": "h1", "play_type": "MOMENTUM", "cash_after": 0,
-               "reason": "SIGNAL_ENTRY", "book": "BAL"}]).to_csv(
-    strat.PT_TRANSACTIONS, index=False)
-
 REFS = {"AAA": 10_000, "BBB": 50_000, "CCC": 20_000, "DDD": 30_000,
         "XYZ": 40_000, "OLD": 12_000, "E1VFVN30": 25_000}
 AAA_DAY_VOL = 20_000          # KL ngày nhỏ → test quota participation gộp fleet
@@ -111,11 +77,26 @@ brokerA._save()
 brokerB = PaperBroker(init_cash=500_000_000, fee_rate=cfg["paper_fee_rate"],
                       quote_source=fq, label="testB").connect()
 
-# ============ 1) build plan từng account (scale theo NAV riêng) ============
-planA = V23Strategy().build_plan(cfg, brokerA)
-planA.account = "testA"
-planB = V23Strategy().build_plan(cfg, brokerB)
-planB.account = "testB"
+# ============ 1) plan fixture từng account (qty = đầu ra V23Strategy cũ, NAV A 1.060M / B 500M) ============
+def _fixture_plan(account, orders):
+    return planmod.TradePlan(
+        plan_date="2026-06-12", signal_date="2026-06-11", strategy="test",
+        strategy_version="1", state=3, state_name="NEUTRAL", nav_basis={}, account=account,
+        orders=[planmod.PlannedOrder(id=i, ticker=t, side=sd, qty=q, ref_price=float(REFS[t]),
+                                     book=bk, play_type=pt, priority=pr,
+                                     urgency="high" if sd == "sell" else "normal")
+                for i, t, sd, q, bk, pt, pr in orders])
+
+
+_BUYS = lambda xyz, aaa, ccc, bbb, etf: [
+    ("BUY-XYZ-01", "XYZ", "buy", xyz, "MIRROR", "", 2),
+    ("BUY-AAA-02", "AAA", "buy", aaa, "BAL", "MOMENTUM", 3),
+    ("BUY-CCC-03", "CCC", "buy", ccc, "LAG", "LAG_HI", 4),
+    ("BUY-BBB-04", "BBB", "buy", bbb, "BAL", "MEGA", 5),
+    ("BUY-E1VFVN30-05", "E1VFVN30", "buy", etf, "ETF", "ETF_PARK", 6)]
+planA = _fixture_plan("testA", [("SELL-OLD-01", "OLD", "sell", 5_000, "SYNC", "", 1)]
+                      + _BUYS(2_100, 5_300, 2_600, 500, 800))
+planB = _fixture_plan("testB", _BUYS(1_000, 2_500, 1_200, 200, 400))
 print()
 print(planA.summary())
 print()
@@ -124,22 +105,10 @@ pA, pB = planA.save(), planB.save()
 assert pA != pB and "testA" in pA and "testB" in pB, "plan phải namespace theo account"
 assert os.path.exists(brokerA.state_file) and os.path.exists(brokerB.state_file)
 assert brokerA.state_file != brokerB.state_file, "paper state phải tách theo account"
-
-osides = {(o.ticker, o.side) for o in planA.orders}
-assert ("OLD", "sell") in osides, "thiếu lệnh SELL sync OLD"
-assert {("AAA", "buy"), ("BBB", "buy"), ("CCC", "buy"), ("XYZ", "buy"),
-        ("E1VFVN30", "buy")} <= osides
-assert not any(o.ticker == "DDD" for o in planA.orders), "DDD (T+5) phải bị loại"
-assert ("OLD", "sell") not in {(o.ticker, o.side) for o in planB.orders}
-
-scaleA = planA.nav_basis["scale"]
 aaaA = next(o for o in planA.orders if o.ticker == "AAA")
-bbbA = next(o for o in planA.orders if o.ticker == "BBB")
-exp_aaa = int(25e9 * scaleA * 0.10 / 10_000 // 100) * 100
-assert abs(aaaA.qty - exp_aaa) <= 100, f"AAA qty {aaaA.qty} ≠ ~{exp_aaa}"
-assert abs(bbbA.qty - exp_aaa * (10_000 / 50_000) * 0.5) <= 100, "BBB phải HALF_SIZE"
 aaaB = next(o for o in planB.orders if o.ticker == "AAA")
-assert aaaB.qty < aaaA.qty, "account B NAV nhỏ hơn → qty nhỏ hơn"
+# fixture phải đủ lớn để quota fleet AAA thật sự CẮN (nếu không, mục 2 thành vô nghĩa)
+assert aaaA.qty + aaaB.qty > int(cfg["max_participation"] * AAA_DAY_VOL)
 
 # ============ 2) run_session đa tài khoản, quota participation gộp ============
 loadA = planmod.load_plan(planA.plan_date, account="testA")

@@ -413,7 +413,7 @@ class TestDcfHistoryLog(unittest.TestCase):
         print("  [19] path không ghi được → nuốt lỗi, không raise: OK")
 
     def test_20_v23strategy_path_does_not_log(self):
-        """Chỉ đường REPORT ghi lịch sử — _dcf_check_for_order (V23Strategy dùng) KHÔNG tự ghi."""
+        """Chỉ đường REPORT ghi lịch sử — _dcf_check_for_order (caller: report/due_diligence) KHÔNG tự ghi."""
         from trading_bot.strategies import _dcf_check_for_order
         with tempfile.TemporaryDirectory() as tmp:
             path = os.path.join(tmp, "h.csv")

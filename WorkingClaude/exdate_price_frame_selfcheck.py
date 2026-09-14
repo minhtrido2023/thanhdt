@@ -3,7 +3,7 @@
 """Selfcheck cho cổng GDKHQ (ngày giao dịch không hưởng quyền) — D1/D2/D3.
 
 Thiết kế: `mike/agents/Taylor/research/exdate_order_pipeline_20260815/README.md` §8-§9.
-Code: `trading_bot/price_frame.py` (D1), `trading_bot/exdate_gate.py` (D2), 3 chỗ D3.
+Code: `trading_bot/price_frame.py` (D1), `trading_bot/exdate_gate.py` (D2), D3 (#1 gỡ 2026-09-13 cùng V23Strategy).
 
 HAI CA CHỨNG MINH NGƯỢC (README §9.1) là lý do file này tồn tại — chúng KHÔNG phải test tổng
 hợp mà là **hai sự cố có thật, dựng lại từ artifact nguyên bản trên đĩa**:
@@ -555,28 +555,10 @@ check("cửa sổ sự kiện phủ được cả khe CUỐI TUẦN T-1(T6 08-14
                                      "BID", "2026-08-01")[0])
 
 # ══════════════════════════════════════════════════════════════════════════════════════
-print("\n── 8. D3 — ba chỗ đã đóng, kiểm bằng HÀNH VI chứ không phải bằng grep ──")
+print("\n── 8. D3 — các chỗ đã đóng, kiểm bằng HÀNH VI chứ không phải bằng grep ──")
 # ══════════════════════════════════════════════════════════════════════════════════════
-from trading_bot.strategies import V23Strategy                      # noqa: E402
-
-
-class DumbQuoteBroker:
-    def get_quote(self, tk):
-        class Q:
-            ref = last = None
-
-            def ok(self):
-                return False
-        return Q()
-
-
-s = V23Strategy.__new__(V23Strategy)
-notes = []
-px = V23Strategy._price(s, DumbQuoteBroker(), "MBB", 24250.0, notes, ex_tickers={"MBB"})
-check("D3#1 strategies._price(): quote câm + GDKHQ ⇒ TỪ CHỐI fallback `recs_close` hệ cũ",
-      px is None and any("TỪ CHỐI fallback" in n for n in notes))
-px2 = V23Strategy._price(s, DumbQuoteBroker(), "FPT", 73200.0, [], ex_tickers={"MBB"})
-check("D3#1 ngày thường/mã thường: fallback `recs_close` GIỮ NGUYÊN hành vi cũ", px2 == 73200.0)
+# D3#1 (`strategies.V23Strategy._price` từ chối fallback `recs_close` khi GDKHQ) — case đã GỠ
+# 2026-09-13 cùng V23Strategy (cq-20260913-remove-v23): code được test không còn tồn tại.
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "mike", "bin"))
 import merge_park_orders as mpo                                     # noqa: E402

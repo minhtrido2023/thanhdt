@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""TradePlan — sản phẩm của bot_prepare_plan, đầu vào của bot_execute.
+"""TradePlan — sản phẩm của plan generator (DollarBill, strategy V2.4), đầu vào của bot_execute.
 
 File: data/trade_plans/plan_<account>_<YYYY-MM-DD>.json
 (ngày = ngày THỰC THI, T+1 của signal; mỗi account 1 plan riêng).
@@ -269,7 +269,7 @@ def load_plan(plan_date, account="main"):
 def filter_excluded_tickers(plan, excluded_tickers):
     """Loại bỏ mọi order cho mã trong `excluded_tickers` (legacy/special-situation holding
     ngoài rebalancing tự động — xem ACCOUNT_DEFAULTS trong config.py). Enforce cứng ở tầng
-    này — không phụ thuộc vào việc plan generator (DollarBill/bot_prepare_plan.py) có nhớ
+    này — không phụ thuộc vào việc plan generator (DollarBill; trước 2026-09-13 cả bot_prepare_plan.py) có nhớ
     loại trừ đúng hay không, để account nào cũng an toàn dù plan tạo ra thế nào.
 
     Trả về (plan đã lọc, list order đã bị chặn) — KHÔNG sửa plan tại chỗ, để caller tự log/báo.
@@ -577,7 +577,9 @@ def cap_lag_orders(plan, account_label, asof=None, live_labels=None, account_mod
     Cắt (TRIM) chứ không chặn khi vượt trần: phần dư tự động được mua tiếp các phiên sau,
     KHÔNG cần cơ chế carry-over mới — plan sinh lại mỗi ngày theo diff target-vs-thật
     (`strategies.py`: `target[t]` từ paper book mirror, orders = target − real_pos), nên
-    phần chưa khớp hôm nay tự xuất hiện lại trong plan hôm sau. Executor cũng đã
+    phần chưa khớp hôm nay tự xuất hiện lại trong plan hôm sau. [2026-09-13: đường
+    `strategies.py` đã GỠ (cq-20260913-remove-v23) — giả định "tự xuất hiện lại" nay phụ
+    thuộc plan V2.4 của DollarBill, CHƯA verify lại.] Executor cũng đã
     `cancel_all_open("EOD")` cuối phiên nên không có lệnh treo qua đêm.
 
     FAIL-CLOSED (mirror cap_capit_orders): không đọc được cache / không có mã trong cache /

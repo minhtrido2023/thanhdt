@@ -16,7 +16,7 @@ report) still had spots reading stale-by-construction data or failing silently:
      does not stop an LLM plan generator from grabbing a handy 'close' as ref_price; after
      the rename there is NO field called 'close' left in the plan context to grab.
      Downstream: Mafee's BQ pusher parses new+old header (BQ column stays 'close' — stable
-     audit schema); trading_bot strategies reads new name with old-name fallback.
+     audit schema). (The trading_bot/strategies.py reader was removed 2026-09-13.)
   C. F5  bq_freshness_check.sh — gate checks the BQ table but DollarBill reads FILES
      (golive_state_today.json + recommendations CSV) written by pipeline steps that only
      WARN on failure. The REAL _assert_fresh_artifact() (extracted from the script) must
@@ -178,9 +178,8 @@ check("B3 Mafee pusher: new-header CSV → BQ column close=121.5, renamed col no
 check("B4 Mafee pusher: old-header CSV (pre-rename archive) still parses close=24.8",
       ro[0]["close"] == 24.8, f"row={ro[0]}")
 
-st_src = read(os.path.join(WC, "trading_bot", "strategies.py"))
-check("B5 strategies.py paper-mirror reads renamed field (with old-name fallback for archives)",
-      RENAMED in st_src and 'r.get("close")' in st_src)
+# B5 (trading_bot/strategies.py V23Strategy paper-mirror reads renamed field) — REMOVED
+# 2026-09-13 together with V23Strategy (cq-20260913-remove-v23): the reader no longer exists.
 
 # ══════════════════════════════════════════════════════════════════════════════
 print("C. F5 — bq_freshness_check.sh: artifact mtime assertion dies BEFORE DollarBill dispatch")

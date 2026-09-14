@@ -598,7 +598,7 @@ def main():
         plan = load_plan(plan_date, account=p["label"])
         if plan is None:
             print(f"[{p['label']}] không có plan cho {plan_date} — bỏ qua "
-                  f"(chạy bot_prepare_plan.py trước)")
+                  f"(plan do DollarBill lập — kiểm data/trade_plans/plan_{p['label']}_{plan_date}.json)")
             continue
         before = len(plan.orders)
         plan, blocked = filter_excluded_tickers(plan, p.get("excluded_tickers"))
@@ -624,7 +624,7 @@ def main():
         # → 1 lệnh NET ra broker; phần bù trừ là chuyển nội bộ giữa book (0 phí/spread). ĐẶT
         # SAU filter_excluded, TRƯỚC các trần %ADV — CHỦ ĐÍCH: trần đo tác động THỊ TRƯỜNG, mà
         # chỉ phần NET mới thật chạm thị trường (xem docstring net_offsetting_orders). Lưới an
-        # toàn tầng chuẩn hoá plan: V23Strategy tự net sẵn, case cần gộp đến từ plan LLM-authored
+        # toàn tầng chuẩn hoá plan: case cần gộp đến từ plan LLM-authored
         # của DollarBill. ref_price trước-net + adj giữ lại để reconcile post-fill (netting_recon).
         pre_net_refs[p["label"]] = {o.ticker: o.ref_price for o in plan.orders}
         plan, net_adj = net_offsetting_orders(plan)
