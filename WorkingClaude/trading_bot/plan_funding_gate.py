@@ -128,7 +128,13 @@ _EPS = 1e-9
 
 def _account_default_package(broker):
     """Gói vay mặc định của account — ĐÚNG giá trị `DNSEBroker._validate_lever_package` trả về
-    khi gói chỉ định không dùng được (`self.client.loan_package_id`)."""
+    khi gói chỉ định không dùng được (`DNSEBroker._account_default_lp()`: gói profile, không thì
+    gói credentials). KHÔNG đọc thẳng `broker.client.loan_package_id`: client dùng chung giữa
+    các account cùng credentials (cq-20260913 #1) ⇒ SpaceX sẽ đo bằng gói credentials 1258
+    trong khi lệnh đi ra bằng 1841. Broker không có hàm đó (paper/test) ⇒ đọc client như cũ."""
+    fn = getattr(broker, "_account_default_lp", None)
+    if callable(fn):
+        return fn()
     return getattr(getattr(broker, "client", None), "loan_package_id", None)
 
 

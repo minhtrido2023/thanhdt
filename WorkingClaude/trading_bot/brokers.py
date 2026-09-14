@@ -486,7 +486,7 @@ class DNSEBroker(BrokerBase):
         self._auto_otp = auto_otp
         self.quote_only = quote_only
         self.credentials_file = credentials_file
-        self._loan_package_id = loan_package_id  # per-account override; applied after connect()
+        self._loan_package_id = loan_package_id  # per-account; KHÔNG ghi lên client dùng chung — xem _account_default_lp
         self.client = None
         self._quote_cache = {}      # symbol -> (ts, Quote)
         self._secdef_cache = {}     # symbol -> dict (trần/sàn/ref — tĩnh trong ngày)
@@ -531,14 +531,71 @@ class DNSEBroker(BrokerBase):
             otp = fetch_dnse_otp(timeout=120, sent_after=send_ts)
             self.client.create_trading_token(otp)
             print(f"[dnse] auto-OTP: trading-token OK ({self.label}, hạn 8h)")
-        if self._loan_package_id is not None:
-            self.client.loan_package_id = self._loan_package_id
         if not self.client.has_trading_token():
             print(f"[dnse] ⚠ chưa có trading-token ({self.label}) — inquiry OK, "
                   f"đặt lệnh sẽ bị từ chối (cần --otp; email_otp: gửi mã bằng "
                   f"--send-otp trước)")
         print(f"[dnse] kết nối OK [{self.label}] tiểu khoản {self.account_id}")
         return self
+
+    def _account_default_lp(self):
+        """Gói vay DEFAULT của CHÍNH account này: `loan_package_id` của profile nếu có, không thì
+        gói trong credentials file (`client.loan_package_id` — broker không còn ghi đè nó).
+
+        Trước cq-20260913 #1, connect() GHI gói profile lên `self.client`, mà `_DNSE_POOL` cache
+        MỘT DNSEClient cho mỗi credentials_file và ZaloPay/SpaceX/RocketX dùng chung
+        credentials_file=None ⇒ account connect sau đè default của account trước. Đã xảy ra
+        thật: dnse_raw 2026-08-11 ZaloPay `loan_packages_resolve` default=1841 (gói SpaceX,
+        bot_execute.py lặp mọi profile trong 1 tiến trình). Mọi call place_order/ppse của broker nay truyền giá trị
+        này TƯỜNG MINH; ngữ nghĩa trong tiến trình 1 account giữ nguyên từng byte (ZaloPay
+        profile None ⇒ gói credentials 1258, đúng như các lệnh TV1 thật 08-11→14).
+
+        Broker dựng KHÔNG truyền gói (vd `discretionary_accumulation_inject.py`
+        `DNSEBroker(account_id=…, label=…)`) ⇒ tra profile theo `account_id`
+        (`_profile_default_lp`) — trước đây SpaceX đo/resolve bằng gói credentials 1258
+        thay vì 1841 (cq-20260913 follow-up 1258)."""
+        lp = getattr(self, "_loan_package_id", None)   # getattr: selfcheck dựng qua __new__
+        if lp is not None:
+            return lp
+        lp = self._profile_default_lp()
+        if lp is not None:
+            return lp
+        return getattr(self.client, "loan_package_id", None)
+
+    def _profile_default_lp(self):
+        """`loan_package_id` của profile có CÙNG `account_id` trong ACCOUNTS_FILE; None nếu không
+        có account_id / không profile nào khớp có gói (ZaloPay) / nhiều gói khác nhau / đọc lỗi —
+        caller rơi về gói credentials như cũ. Tra 1 lần/instance (chưa có account_id — trước
+        connect() — thì KHÔNG memo). Mọi lỗi/không khớp: log nguyên văn, KHÔNG ném (broker vẫn
+        phải chạy được như trước khi có tra cứu này)."""
+        cached = getattr(self, "_profile_lp_cache", None)
+        if cached is not None:
+            return cached[0]
+        account_id = getattr(self, "account_id", None)
+        if account_id is None:
+            return None
+        lp, label, path = None, getattr(self, "label", "?"), None
+        try:
+            from . import config as _config
+            path = _config.ACCOUNTS_FILE
+            if not os.path.exists(path):   # load_accounts GHI template khi file thiếu — không để nó chạy
+                raise FileNotFoundError(f"không có file {path}")
+            matched = [p for p in _config.load_accounts({"mode": None}, path=path)
+                       if str(p.get("account_id")).strip() == str(account_id).strip()]
+            ids = {p.get("loan_package_id") for p in matched} - {None}
+            if len(ids) == 1:
+                lp = ids.pop()
+            elif ids:
+                print(f"[dnse] ⚠ {label}: nhiều profile account_id {account_id} khác gói "
+                      f"{sorted(ids, key=str)} trong {path} — dùng gói credentials")
+            elif not matched:
+                print(f"[dnse] ⚠ {label}: không profile nào có account_id {account_id!r} trong "
+                      f"{path} — dùng gói credentials")
+        except Exception as exc:
+            print(f"[dnse] ⚠ {label}: không tra được gói profile account_id {account_id} "
+                  f"({path}) — dùng gói credentials. Lỗi thật: {type(exc).__name__}: {exc}")
+        self._profile_lp_cache = (lp,)
+        return lp
 
     def get_cash(self):
         bal = self.client.balances(self.account_id)
@@ -638,10 +695,13 @@ class DNSEBroker(BrokerBase):
         cả tiền bán chờ về T+0 — availableCash thì chưa (xem BrokerBase docstring). Mọi
         lỗi → None (caller rơi về check get_cash cũ, không nới lỏng khi không chắc)."""
         try:
+            lp_sent = (loan_package_id if loan_package_id is not None
+                       else self._account_default_lp())
             r = self.client.ppse(self.account_id, symbol, int(price),
-                                 loan_package_id=loan_package_id)
+                                 loan_package_id=lp_sent)
             self._log_raw("ppse", {"symbol": symbol, "price": price,
-                                   "loan_package_id": loan_package_id, "resp": r})
+                                   "loan_package_id": loan_package_id,
+                                   "loan_package_id_sent": lp_sent, "resp": r})
             v = _fnum(qget(r, "qmaxBuy", "qmaxbuy"))
             return int(v) if v is not None and v >= 0 else None
         except Exception:
@@ -653,10 +713,13 @@ class DNSEBroker(BrokerBase):
         loanPackageId đang dùng (đo được 2026-07-28 ZaloPay cash-only: pp0Buy 25,54M trong
         khi availableCash chỉ 5,68M). Mọi lỗi → None, KHÔNG suy ra từ get_cash()."""
         try:
+            lp_sent = (loan_package_id if loan_package_id is not None
+                       else self._account_default_lp())
             r = self.client.ppse(self.account_id, symbol, int(price),
-                                 loan_package_id=loan_package_id)
+                                 loan_package_id=lp_sent)
             self._log_raw("ppse", {"symbol": symbol, "price": price,
-                                   "loan_package_id": loan_package_id, "resp": r})
+                                   "loan_package_id": loan_package_id,
+                                   "loan_package_id_sent": lp_sent, "resp": r})
             v = _fnum(qget(r, "pp0Buy", "pp0buy"))
             return float(v) if v is not None and v >= 0 else None
         except Exception:
@@ -913,7 +976,7 @@ class DNSEBroker(BrokerBase):
         reject. Fix cũ ("bỏ trường") cũng sai: DNSE bắt buộc loanPackageId → HTTP 400.
 
         Chọn ID (query GET /accounts/{acc}/loan-packages?symbol=X):
-          - default account (self.client.loan_package_id) CÓ trong danh sách gói hợp lệ
+          - default account (_account_default_lp()) CÓ trong danh sách gói hợp lệ
             của symbol → dùng default (BAL/LAG/CAPIT mainboard KHÔNG đổi hành vi).
           - default KHÔNG có (như TV1) → ưu tiên gói type='N' (thuần tiền mặt) trước
             type='M' (margin), rồi tới gói đầu tiên trong danh sách.
@@ -923,7 +986,7 @@ class DNSEBroker(BrokerBase):
         restart mỗi phiên sáng/chiều → cache tự làm mới)."""
         if symbol in self._loan_pkg_cache:
             return self._loan_pkg_cache[symbol]
-        default = getattr(self.client, "loan_package_id", None)
+        default = self._account_default_lp()
         resolved = default
         try:
             raw = self.client.loan_packages(self.account_id, symbol=symbol)
@@ -962,7 +1025,7 @@ class DNSEBroker(BrokerBase):
         key = (symbol, str(want))
         if key in cache:
             return cache[key]
-        default = getattr(self.client, "loan_package_id", None)
+        default = self._account_default_lp()
         try:
             pkgs = self._extract_loan_pkgs(
                 self.client.loan_packages(self.account_id, symbol=symbol))
@@ -1006,11 +1069,15 @@ class DNSEBroker(BrokerBase):
             # gói vay đó, và deal PARK/vị thế cũ thường không nằm trong gói đó → HTTP 400
             # "deal not found" (bug 2026-08-10, 08-07→c22bd1c mở rộng nhầm sang cả BÁN).
             lp = None
+        # lp None (lệnh BÁN) ⇒ gói default CỦA account này, tường minh — trước đây dnse_api tự
+        # rơi về client.loan_package_id (dùng chung giữa account, xem _account_default_lp).
+        lp_sent = lp if lp is not None else self._account_default_lp()
         r = self.client.place_order(self.account_id, symbol, qty=int(qty),
                                     side=side, order_type=order_type, price=price,
-                                    loan_package_id=lp)
+                                    loan_package_id=lp_sent)
         self._log_raw("place_order", {"req": [symbol, qty, side, price, order_type],
                                       "cash_only": cash_only, "loan_package_id": lp,
+                                      "loan_package_id_sent": lp_sent,
                                       "lever_requested": loan_package_id,
                                       "lever_applied": lever_ok, "lever_note": lever_note,
                                       "resp": r})

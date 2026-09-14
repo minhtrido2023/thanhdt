@@ -164,12 +164,16 @@ def main():
                 and 'getattr(o, "loan_package_id"' not in qmax_call, qmax_call.strip())
 
     # ── 8. Lệnh BÁN không cash_only ⇒ place_order KHÔNG resolve theo mã (bug 08-10) ──────
-    print("[8] Lệnh BÁN (không cash_only, không đòn bẩy) — place_order phải gửi lp=None")
+    # cq-20260913 #1: broker nay truyền TƯỜNG MINH gói default CỦA account (trước đây gửi None
+    # và dnse_api tự rơi về client.loan_package_id dùng chung giữa các account) ⇒ trên dây
+    # y hệt bản cũ trong tiến trình 1 account. Điều bug 08-10 cấm là RESOLVE THEO MÃ cho lệnh
+    # bán (gói UPCOM/1826 ⇒ "deal not found"), không phải gói default.
+    print("[8] Lệnh BÁN (không cash_only, không đòn bẩy) — gói default account, KHÔNG resolve theo mã")
     b = make_broker([UPCOM_PKG])
     b.place_order("BID", 600, "sell", price=18000, cash_only=False, loan_package_id=None)
     sent = b.client.sent[-1][1]
-    ok &= check("place_order gửi lp=None cho lệnh BÁN (DNSE tự chọn deal)", sent is None,
-                f"sent={sent}")
+    ok &= check("place_order gửi gói DEFAULT account cho lệnh BÁN (không resolve theo mã)",
+                sent == ACCOUNT_DEFAULT and sent != UPCOM_PKG, f"sent={sent}")
 
     # ── 9. Lệnh MUA vẫn resolve theo mã như [1]/[2] (không hồi quy khi vá #8) ───────────
     print("[9] Lệnh MUA UPCOM sau khi vá #8 — vẫn resolve như trước (không hồi quy)")
