@@ -112,6 +112,11 @@ ACCURACY, STATED HONESTLY
                    False — the gate never cleared it. See the policy note below, which includes
                    the look-ahead this label knowingly re-admits.
 `NO_ANCHOR`      — nothing admissible at or before D.
+`FIN_ABSORPTION_AMBIGUOUS` — (2026-09-14) the anchor is a quarterly row, an ISS went ex AFTER it,
+                   and the row's own step from the previous row can neither prove nor rule out
+                   that it already contains that ISS (`_forward_absorption_test`). **`value is
+                   None`**; the number rolling would have given is kept in
+                   `ambiguous_value_if_rolled` for the log.
 
 STALE-AIS FALLBACK TO `ticker_financial` (policy, user-approved 2026-08-19)
 ---------------------------------------------------------------------------
@@ -500,6 +505,120 @@ def _absorption_test(row_time, row_value, ais, iss):
            f"LĂN {len(extra)} sự kiện chưa được phản ánh: "
            + ", ".join(f"{e['exright_date']} +{_size_hint(e)}" for e in extra)))
     return extra, rep
+
+
+def _fwd_size(e, base):
+    """Cỡ (số CP) của `e` cho phép thử hấp thụ TIẾN, theo đúng thứ tự fallback của `_roll`; tỉ lệ
+    quy ra số CP trên `base`. None = không định cỡ được."""
+    for f in ("shares_delta", "issue_volumn"):
+        v = e.get(f)
+        if v is not None and float(v) > 0.0:
+            return float(v)
+    r = e.get("exercise_ratio")
+    return float(r) * base if (r is not None and float(r) > 0.0) else None
+
+
+def _forward_absorption_test(qs, ais, row_time, row_value, iss, fwd, not_absorbed=()):
+    """(absorbed, report) — dòng quý `row_time` ĐÃ nuốt những ISS nào có exright SAU chính nó?
+
+    ⚠️ THÊM 2026-09-14 (job `Taylor_20260914_151805`, user duyệt). Lỗ hổng: neo dòng quý
+    (`FIN_FALLBACK` / `ANCHOR_ONLY` / `ANCHOR_UNVERIFIED`) lăn MỌI ISS có `exright_date > ngày dòng
+    quý` (`_pending_iss`), tức mặc định "BCTC chưa gồm sự kiện chưa ex". Sai khi vendor ghi nhận
+    sự kiện vào dòng quý TRƯỚC ex-date. Ca gốc **KHP**: dòng 2026Q2 (2026-07-20) = 62.186.518 =
+    Q1 60.376.746 + cổ tức CP 3% 1.809.772 (ex 2026-07-30) TUYỆT ĐỐI ⇒ phục vụ 63.996.290 (+2,9%).
+    Quét 312 mã có ISS trong 12 tháng tới 2026-09-14: 61/259 cặp (neo dòng quý × ISS ex sau nó)
+    khớp tuyệt đối kiểu này — gồm `HAH` 2026-02-02 (chuyển đổi TP ex 03-12) và cả `ANCHOR_ONLY`
+    (`MSR`), nên đây không phải lỗi riêng của `FIN_FALLBACK` và không riêng nhánh LIVE.
+
+    KHÔNG QUYẾT BẰNG NGÀY (ngày công bố ≠ ngày ghi nhận vào BCTC). Quyết bằng BƯỚC NHẢY của chính
+    dòng quý: `delta = row_value − dòng quý liền trước`. Tìm các tập con của
+        pool = ISS có exright trong (dòng trước, dòng này]  ∪  `fwd` (ISS ex sau dòng này)
+    có tổng cỡ khớp `delta` trong `tol = max(1, EXPLAIN_TOL × cỡ nhỏ nhất của fwd)` (0,1% của cái
+    cần phân biệt; tập rỗng khớp khi `|delta| <= tol`). Rồi:
+      (a) mọi tập khớp CÙNG phần-`fwd` ⇒ phần đó ĐÃ hấp thụ (bỏ khỏi lăn); rỗng ⇒ lăn như cũ.
+      (b) các tập khớp KHÁC phần-`fwd`, hoặc phần-`fwd` khớp nhưng pool có ISS cũ không định cỡ
+          được (có thể chính nó giải thích bước nhảy) ⇒ `FWD_AMBIGUOUS`.
+      (c) không tập nào khớp: `delta + tol >= cỡ fwd nhỏ nhất` (dòng quý tăng đủ để CHỨA ít nhất
+          một sự kiện, nhưng số học không đóng — khớp một phần/chồng sự kiện) ⇒ `FWD_AMBIGUOUS`;
+          ngược lại dòng quý không thể chứa sự kiện nào ⇒ lăn như cũ.
+      (d) không có dòng quý liền trước ⇒ mốc đo là AIS gần nhất <= ngày dòng quý (cũng là một phát
+          biểu về số CP trước dòng quý); không có cả AIS ⇒ không đo được ⇒ `FWD_AMBIGUOUS`.
+    `FWD_AMBIGUOUS` ⇒ caller trả `value=None` (method `FIN_ABSORPTION_AMBIGUOUS`): ở đây KHÔNG có
+    phía "an toàn" để nghiêng — lăn thì có thể đếm hai lần, không lăn thì có thể thiếu.
+
+    `not_absorbed` = các ISS mà `_absorption_test` đã kết luận CHƯA nằm trong dòng quý (sẽ lăn) —
+    loại khỏi pool để một sự kiện không vừa bị lăn vừa được dùng giải thích bước nhảy.
+
+    GIỚI HẠN ĐÃ BIẾT: chỉ so với dòng quý LIỀN TRƯỚC. Nếu một dòng quý CŨ HƠN đã nuốt sự kiện rồi
+    dòng sau chép nguyên số, `delta` = 0 ⇒ lăn như cũ. Đo 2026-09-14 trên 184 ca `delta` = 0 của
+    cùng rổ: 0 ca có bước nhảy sớm hơn (từ 2024-06) khớp sự kiện — không mở rộng cho ca chưa gặp.
+    """
+    fwd = list(fwd)
+    if not fwd:
+        return [], None
+    prev = [q for q in qs if q["time"] < row_time]
+    rep = {"row_time": row_time, "row_value": row_value,
+           "fwd_events": [_event_dict(e) for e in fwd]}
+
+    def _amb(why):
+        rep["verdict"], rep["absorbed"] = "FWD_AMBIGUOUS", None
+        rep["note"] = (f"dòng quý {row_time} = {row_value:,.0f}: KHÔNG quyết được đã gồm "
+                       f"{len(fwd)} ISS ex sau nó hay chưa ({why}) ⇒ fail-closed")
+        return None, rep
+
+    if prev:
+        p = max(prev, key=lambda q: q["time"])
+        p_time, base, p_src = p["time"], float(p["OShares"]), "ticker_financial"
+    else:
+        prior_ais = [a for a in ais if a["effective_date"] <= row_time]
+        if not prior_ais:
+            return _amb("không có dòng quý liền trước lẫn AIS nào <= dòng quý để đo bước nhảy")
+        a = max(prior_ais, key=lambda r: r["effective_date"])
+        p_time, base, p_src = a["effective_date"], float(a["shares_total_after"]), "corporate_action.AIS"
+    delta = row_value - base
+    fsz = [_fwd_size(e, base) for e in fwd]
+    if any(s is None for s in fsz):
+        rep["verdict"], rep["absorbed"] = "SKIPPED_UNSIZABLE", []
+        rep["note"] = "có ISS ex sau dòng quý không định cỡ được ⇒ `_roll` sẽ chặn (UNKNOWN_RATIO)"
+        return [], rep
+    skip = {id(e) for e in not_absorbed}
+    back = [e for e in _dedup_iss([e for e in iss if p_time < e["exright_date"] <= row_time])
+            if id(e) not in skip]
+    bsz = [_fwd_size(e, base) for e in back]
+    pool = [(("b", i), s) for i, s in enumerate(bsz) if s is not None] + \
+           [(("f", i), s) for i, s in enumerate(fsz)]
+    tol = max(1.0, EXPLAIN_TOL * min(fsz))
+    rep.update({"prev_time": p_time, "prev_source": p_src, "prev_value": base, "delta": delta, "tol": tol,
+                "back_events": [_event_dict(e) for e in back]})
+    if len(pool) > 14:
+        return _amb(f"{len(pool)} sự kiện trong pool, quá trần tìm tập con")
+    fparts = set()
+    for k in range(len(pool) + 1):
+        for combo in itertools.combinations(pool, k):
+            if abs(delta - sum(s for _i, s in combo)) <= tol:
+                fparts.add(frozenset(i for (kind, i), _s in combo if kind == "f"))
+    if len(fparts) > 1:
+        return _amb(f"{len(fparts)} cách giải thích bước nhảy {delta:+,.0f} khác nhau về phần "
+                    f"sự kiện ex sau dòng quý")
+    if not fparts:
+        if delta + tol >= min(fsz):
+            return _amb(f"bước nhảy {delta:+,.0f} đủ chứa sự kiện (nhỏ nhất {min(fsz):,.0f}) "
+                        f"nhưng không tổ hợp nào khớp trong {tol:,.0f} CP")
+        rep["verdict"], rep["absorbed"] = "FWD_NOT_ABSORBED", []
+        rep["note"] = (f"bước nhảy {delta:+,.0f} < sự kiện nhỏ nhất {min(fsz):,.0f} ⇒ dòng quý "
+                       f"không thể đã gồm ⇒ lăn như cũ")
+        return [], rep
+    fp = next(iter(fparts))
+    if fp and any(s is None for s in bsz):
+        return _amb("phần sự kiện ex sau khớp, nhưng có ISS trước đó không định cỡ được")
+    absorbed = [fwd[i] for i in sorted(fp)]
+    rep["verdict"] = "FWD_ABSORBED" if absorbed else "FWD_NOT_ABSORBED"
+    rep["absorbed"] = [_event_dict(e) for e in absorbed]
+    rep["note"] = (f"bước nhảy {p_time}→{row_time} = {delta:+,.0f} khớp duy nhất tổ hợp gồm "
+                   f"{len(absorbed)} ISS ex sau dòng quý"
+                   + ("" if not absorbed else " ⇒ KHÔNG lăn lại: "
+                      + ", ".join(f"{e['exright_date']} +{_size_hint(e)}" for e in absorbed)))
+    return absorbed, rep
 
 
 def _pending_iss(ais_rows, iss, anchor_date, anchor_source, asof, verdicts=None):
@@ -1142,6 +1261,18 @@ def oshares_at(tickers, asof, _cache=None, live=False):
             extra, absorb = _absorption_test(anchor_date, anchor_value, ais, iss)
 
         pending = _pending_iss(ais, iss, anchor_date, anchor_src, asof, verdicts) + extra
+
+        # ── FORWARD ABSORPTION (2026-09-14) ─────────────────────────────────────────────────
+        # MỌI neo dòng quý, CẢ HAI nhánh: đếm hai lần là sai ở PIT y như ở LIVE, và phép thử chỉ
+        # đọc dữ liệu <= asof. Xem `_forward_absorption_test`.
+        fwd_absorb = None
+        if anchor_src == "ticker_financial":
+            absorbed, fwd_absorb = _forward_absorption_test(
+                qs, ais, anchor_date, anchor_value, iss,
+                [e for e in pending if e["exright_date"] > anchor_date], extra)
+            if absorbed:
+                drop = {id(e) for e in absorbed}
+                pending = [e for e in pending if id(e) not in drop]
         value, applied, blockers = _roll(anchor_value, pending)
 
         anchor_verified = not (unverified and anchor_src == "ticker_financial")
@@ -1159,6 +1290,13 @@ def oshares_at(tickers, asof, _cache=None, live=False):
             and anchor_date == fin_fallback["fin_quarter"]
         if fin_served:
             base.update(fin_fallback)
+        if fwd_absorb:
+            base["forward_absorption"] = fwd_absorb
+        if fwd_absorb and fwd_absorb["verdict"] == "FWD_AMBIGUOUS":
+            out[tk] = {**base, "value": None, "method": "FIN_ABSORPTION_AMBIGUOUS",
+                       "ambiguous_value_if_rolled": value,
+                       "events_applied": [], "note": fwd_absorb["note"]}
+            continue
 
         if blockers:
             out[tk] = {**base, "value": None, "method": "UNKNOWN_RATIO",
@@ -1333,9 +1471,12 @@ def _selfcheck() -> int:
           f"value={fmt(hh1['value'])} method={hh1['method']}")
     hh2 = oshares_at(["HAH"], "2026-03-13", _cache=hcache)["HAH"]
     print(f"  2026-03-13: {fmt(hh2['value'])} [{hh2['method']}] anchor={hh2['anchor_date']}")
-    check("H4/2026-03-13. chuyển đổi TP 2026-03-12 (issue_volumn=16.979.189) ⇒ FIN_FALLBACK "
-          "202.819.590 (neo Q4/2025 185.840.401 + TRANS 16.979.189)",
-          hh2["value"] == 202_819_590 and hh2["method"] == "FIN_FALLBACK",
+    # PIN CŨ 202.819.590 = 185.840.401 + 16.979.189 là ĐẾM HAI LẦN: dòng quý 2026-02-02 đã nhảy
+    # đúng +16.979.189 từ dòng 2025-10-30 (168.861.212), tức ĐÃ gồm đợt chuyển đổi này. AIS
+    # 2026-05-27 xác nhận 185.840.401. Sửa pin 2026-09-14 (`_forward_absorption_test`).
+    check("H4/2026-03-13. chuyển đổi TP 2026-03-12 (issue_volumn=16.979.189) ĐÃ nằm trong neo "
+          "Q4/2025 185.840.401 ⇒ FIN_FALLBACK 185.840.401, không lăn lại (AIS 2026-05-27 xác nhận)",
+          hh2["value"] == 185_840_401 and hh2["method"] == "FIN_FALLBACK",
           f"value={fmt(hh2['value'])} method={hh2['method']}")
 
     # (3) NEW: ESOP tranches — no GDKHQ, no price adjustment, but shares are real and dilutive.
@@ -1678,12 +1819,23 @@ def _selfcheck() -> int:
           "trị đúng bằng dòng quý 574.511.888, KHÔNG phải 601.857.480",
           r["value"] == 574_511_888.0 and r["events_applied"] == [],
           f"{fmt(r['value'])} +{len(r['events_applied'])} ISS")
-    HHV_C2 = (HHV_C[0], HHV_C[1] + [_I("HHVX", "2026-08-14", vol=5_000_000.0)])
+    # 2026-09-14 (`_forward_absorption_test`): "lăn ISS ex SAU neo" giờ cần BẰNG CHỨNG dòng quý
+    # chưa gồm nó ⇒ fixture thêm dòng quý 04-29 = 547.166.296, bước nhảy tới 07-31 đúng bằng ISS
+    # 07-09 (27.345.592) ⇒ ISS 08-14 KHÔNG thể nằm trong neo ⇒ phải lăn. Không có dòng 04-29 thì
+    # mốc đo là AIS 05-07 (uncertified), bước nhảy +100.756.360 không tổ hợp nào giải thích mà đủ
+    # chứa 5.000.000 ⇒ không quyết được ⇒ fail-closed (LV2c).
+    HHV_C2 = (HHV_C[0] + [_Q("HHVX", "2026-04-29", 547_166_296.0)],
+              HHV_C[1] + [_I("HHVX", "2026-08-14", vol=5_000_000.0)])
     r2 = oshares_at(["HHVX"], LV_ASOF, _cache=HHV_C2, live=True)["HHVX"]
-    check("LV2b. CHỨNG MINH NGƯỢC cho LV2 — ISS ex 08-14 nằm SAU neo BCTC 07-31 thì PHẢI được "
-          "lăn (nếu không, LV2 xanh chỉ vì hàm không bao giờ lăn gì)",
+    check("LV2b. CHỨNG MINH NGƯỢC cho LV2 — ISS ex 08-14 nằm SAU neo BCTC 07-31 (và bước nhảy "
+          "của dòng quý đã được ISS 07-09 giải thích hết) thì PHẢI được lăn",
           r2["value"] == 579_511_888.0 and len(r2["events_applied"]) == 1,
           f"{fmt(r2['value'])} +{len(r2['events_applied'])} ISS")
+    r2c = oshares_at(["HHVX"], LV_ASOF, _cache=(HHV_C[0], HHV_C2[1]), live=True)["HHVX"]
+    check("LV2c. cùng feed nhưng KHÔNG có dòng quý trước ⇒ bước nhảy từ AIS không giải thích được "
+          "⇒ FIN_ABSORPTION_AMBIGUOUS, value=None (không đoán lăn hay không)",
+          r2c["value"] is None and r2c["method"] == "FIN_ABSORPTION_AMBIGUOUS",
+          f"{fmt(r2c['value'])} [{r2c['method']}]")
 
     #   TCB: neo AIS uncertified nhưng CÒN TƯƠI (15 ngày) ⇒ điều kiện 2 vẫn chặn ở CẢ HAI nhánh.
     TCB_C = ([_Q("TCBX", "2026-07-21", 7_086_240_414.0)],
@@ -2108,14 +2260,47 @@ def _selfcheck() -> int:
           f"PIT {fmt(kbc_pit['value'])} [{kbc_pit['method']}] · "
           f"LIVE {fmt(kbc['value'])} [{kbc['method']}]")
 
-    print("== Bất biến chung: value is None ⟺ method ∈ {UNKNOWN_RATIO, NO_ANCHOR, AIS_UNCERTIFIED} ==")
+    # ── FORWARD ABSORPTION (2026-09-14, job Taylor_20260914_151805) ─────────────────────────
+    print("== Dòng quý ĐÃ gồm ISS ex SAU nó ⇒ không lăn lại (đếm hai lần) ==")
+    khp = oshares_at(["KHP"], "2026-09-14", live=True)["KHP"]
+    khp_pit = oshares_at(["KHP"], "2026-09-14", live=False)["KHP"]
+    check("K1. KHP 2026-09-14: dòng 2026Q2 (07-20) = 62.186.518 = Q1 60.376.746 + cổ tức CP 3% "
+          "1.809.772 (ex 07-30) ⇒ phục vụ 62.186.518, KHÔNG phải 63.996.290 — cả LIVE lẫn PIT",
+          khp["value"] == 62_186_518.0 and khp_pit["value"] == 62_186_518.0
+          and khp["method"] == "FIN_FALLBACK" and khp["events_applied"] == []
+          and khp["forward_absorption"]["verdict"] == "FWD_ABSORBED",
+          f"LIVE {fmt(khp['value'])} [{khp['method']}] · PIT {fmt(khp_pit['value'])}")
+    _real_fwd = globals()["_forward_absorption_test"]
+    globals()["_forward_absorption_test"] = lambda *a, **k: ([], None)
+    try:
+        khp_off = oshares_at(["KHP"], "2026-09-14", live=True)["KHP"]
+    finally:
+        globals()["_forward_absorption_test"] = _real_fwd
+    check("K1b. CHỨNG MINH NGƯỢC: tắt phép thử ⇒ KHP quay lại ĐÚNG số đếm hai lần 63.996.290",
+          khp_off["value"] == 63_996_290.0, fmt(khp_off["value"]))
+    asm = oshares_at(["ASM"], "2025-10-29", live=True)["ASM"]
+    check("K2. ĐỐI CHỨNG: ASM 2025-10-29 — dòng quý 07-31 KHÔNG nhảy (370.178.250) ⇒ vẫn lăn ISS "
+          "ex 10-07 ⇒ 407.194.183 (dòng quý 10-30 xác nhận)",
+          asm["value"] == 407_194_183.0
+          and asm["forward_absorption"]["verdict"] == "FWD_NOT_ABSORBED",
+          f"{fmt(asm['value'])} [{asm['method']}]")
+    mch = oshares_at(["MCH"], "2026-07-26", live=True)["MCH"]
+    check("K3. FAIL-CLOSED: MCH 2026-07-26 — bước nhảy 12.943.987 đủ chứa ISS 12.911.404 nhưng "
+          "không khớp trong 0,1% ⇒ FIN_ABSORPTION_AMBIGUOUS, value=None, số lăn giữ để log",
+          mch["value"] is None and mch["method"] == "FIN_ABSORPTION_AMBIGUOUS"
+          and mch.get("ambiguous_value_if_rolled") is not None,
+          f"{fmt(mch['value'])} [{mch['method']}] rolled={fmt(mch.get('ambiguous_value_if_rolled'))}")
+
+    print("== Bất biến chung: value is None ⟺ method ∈ {UNKNOWN_RATIO, NO_ANCHOR, AIS_UNCERTIFIED, "
+          "FIN_ABSORPTION_AMBIGUOUS} ==")
     every = [h, m, idc, fpt5, tcb_boom, vre, vre_off, na, cc1,
              h5, h5b, hh1, hh2, kbc, kbc_pit, lb1, lb2, lb6, vci,
              hhv, amb, nor, two, old, inn, *qe.values(),
-             *cost.values(), *ctrl.values(), *series.values()]
+             *cost.values(), *ctrl.values(), *series.values(), khp, khp_pit, asm, mch, r2c]
     check("10. không bao giờ trả số kèm nhãn 'không biết', và ngược lại",
           all((r["value"] is None)
-              == (r["method"] in ("UNKNOWN_RATIO", "NO_ANCHOR", "AIS_UNCERTIFIED"))
+              == (r["method"] in ("UNKNOWN_RATIO", "NO_ANCHOR", "AIS_UNCERTIFIED",
+                                  "FIN_ABSORPTION_AMBIGUOUS"))
               for r in every))
     served_ais = [r for r in every
                   if r["value"] is not None and r.get("anchor_source") == "corporate_action.AIS"]
