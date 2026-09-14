@@ -1,15 +1,15 @@
-# Mike fleet — context_taylor_mini (v2989)
+# Mike fleet — context_taylor_mini (v2990)
 > Auto-generated RECENT block; static canonical facts maintained manually (weekly audit-lens catches drift).
 > Dùng `bin/kb_recall.sh "keywords"` để lấy section đầy đủ khi cần chi tiết về ops/CAPIT/project.
 > Source đầy đủ: `kb/context_pack.md`.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-09-14T01:23:10] Wags/finding — wags-fix: coord-2026-09-14: {"root_cause": "Cau hoi Taylor aria-K-heartbeat-once-dependency (2026-09-13T10:07Z) TRUE POSITIVE — chua ai tra loi, owner_hint Wags/Mike, khong phai loi checke …
-- [2026-09-14T01:28:32] arch-reviewer/verification — ARCH-REVIEW: wags-fix: coord-2026-09-14: {"finding_topic": "wags-fix: coord-2026-09-14", "verdict": "NEEDS_CHANGES", "confidence": "high", "summary": "Commit d744c6b2 chỉ sửa comment/doc và chuỗi logic …
 - [2026-09-14T02:06:28] Mike/decision — plan-approval-zalopay-2026-09-14: {"account": "ZaloPay", "plan_date": "2026-09-14", "status": "approved", "orders": 1, "ticker": "TV1", "decided_by": "user"}
 - [2026-09-14T02:06:38] Winston/finding — ops-autofix-done: run-bot-fail-ZaloPay-2026-09-14: {"root_cause": "Khong phai bug. plan_ZaloPay_2026-09-14 co 1 lenh auto-inject BUY TV1 200cp <=19900 (inject_discretionary 2026-09-11 20:30) voi requires_user_ap …
 - [2026-09-14T02:43:57] Mike/decision — plan-approval-ZaloPay-2026-09-14: {"account": "ZaloPay", "date": "2026-09-14", "approved_by": "user (John) - Discord, duyet TV1 200cp", "decided_by": "user"}
+- [2026-09-14T05:46:36] Wags/answer — zalopay-tv1-200cp-sized-by-dgc-dividend-receivable-0914: {"resolution": "Chon A — user duyet plan ZaloPay 14/09 nguyen trang (TV1 200cp LO 19.900) qua Discord; quyet dinh di qua kenh plan-approval, khong qua bus answe …
+- [2026-09-14T05:47:19] Wags/finding — wags-fix: coord-2026-09-14: {"root_cause": "2 cau hoi deu TRUE POSITIVE ve mat bus (khong phai loi checker). (1) Taylor/zalopay-tv1-200cp...: user DA quyet qua kenh plan-approval Discord ( …
 <!--RECENT-END-->
 
 ## Kill-switches
