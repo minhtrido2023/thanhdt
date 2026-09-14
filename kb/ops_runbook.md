@@ -124,7 +124,7 @@ tái tạo bằng cách chạy lại chính bộ dispatcher.
 | 08:20 | `ops_health_check.sh` (per account) | BOT_STOP, xung đột file plan, lỗi lặp journal, circuit breaker, question tồn, đối chiếu preflight | WARN > 0 → **autofix tự động** (wire 2026-07-07) + vẫn post cảnh báo như cũ |
 | 08:45 | `preflight_check.sh` (per account) | Plan hôm nay tồn tại + approved + macro_health + Gmail OTP + BQ lag | RED vì plan thiếu/chưa duyệt → USER phải xử lý (không autofix); RED vì hạ tầng → autofix |
 | 09:05 | `run_bot.sh` (per account) | Bot chạy, đặt lệnh theo plan | — (thực thi thật, autofix KHÔNG đụng) |
-| 09:00–14:55 | `bot_heartbeat.sh` /5' (per account) | Bot sống, có tiến triển fill | Chết → TỰ RESTART; restart fail → Telegram khẩn (có sẵn) |
+| 09:00–14:55 | `bot_heartbeat.sh` /5' (per account) | Bot sống, có tiến triển fill | Chết → TỰ RESTART; restart fail → Telegram khẩn (có sẵn) ⚠ Restart KHÔNG `--once` là CỐ Ý: bot `--once` (run_bot.sh) exit trước 14:45, chỉ bot restart chạy loop mới vào CLOSED ⇒ chờ ATC (aria-K). Đừng thêm `--once` vào `_restart_bot`. |
 | 11:30 | lunch pkill (per account) | Bot dừng nghỉ trưa | pkill fail vô hại (session_phase tự idle) |
 | 12:45 | `ops_health_check.sh` lần 2 | Như 08:20 + bắt vấn đề phát sinh phiên sáng | Như 08:20 |
 | 13:00 | `run_bot.sh` resume (per account) | Resume state, chạy phiên chiều | Như 09:05 |

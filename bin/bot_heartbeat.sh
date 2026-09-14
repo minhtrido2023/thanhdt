@@ -41,6 +41,8 @@ _notify() {
   "$ROOT/bin/notify_thread.sh" "$1" "$THREAD_ID" 2>/dev/null || true
 }
 
+# KHÔNG thêm --once (cố ý): run_bot.sh chạy --once nên tự exit trước 14:45; chỉ bot restart ở
+# chế độ loop mới vào CLOSED ⇒ _await_postclose_fills (aria-K) chờ kết quả ATC. Xem ops_runbook.
 _restart_bot() {
   local rlog="$ROOT/logs/run_bot_${ACCOUNT}_autoheal_$(TZ=Asia/Ho_Chi_Minh date +%Y%m%d_%H%M%S).log"
   ( cd "$WC_ROOT" && setsid env TZ=Asia/Ho_Chi_Minh python3 -u bot_execute.py \
