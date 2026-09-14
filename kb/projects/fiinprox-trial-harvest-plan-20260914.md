@@ -94,9 +94,8 @@ file excel". Luật:
 - **P3 (b) ✅ 14/09 19:4x** — `data/fiinprox_vnindex_investor_flow_daily_20260914.csv` (3.165 phiên, 2014→2026-09-14,
   13 lệnh 1 năm/lệnh, ~50% lệnh lỗi `[Errno 28]` → thử lại là qua). Ngoại ròng khớp VNDirect 2024-2025 median
   1,9 tỷ/phiên; FiinPro lấp các phiên VNDirect trả 0. Registry `feeds/fiinprox_vnindex_investor_flow_daily.md`.
-- **P3 (a) ⏳** — khối ngoại VNINDEX fb/fs + HNX fn: ✅ 2009-06→2012-12 (901 phiên);
-  2013-01→2018-08 CHƯA (sandbox lỗi 3 lần liên tiếp 19:5x). VNINDEX 2014+ đã có ròng ở file (b) ⇒ phần
-  còn thiếu thật sự: VNINDEX 2013 + HNX 2013→2018-08.
+- **P3 (a) ✅ 14/09 22:0x** — `data/fiinprox_foreign_flow_index_daily_20260914.csv` 2.313 phiên 2009-06→2018-08
+  (VNINDEX mua/bán tới 2015, HNX ròng tới 2018-08). Nhất quán nội bộ 2014-2015 495/495 ≤1 tỷ. **P3 ĐÓNG.**
 
 ## 3. Phân vai
 - **Mike:** gọi MCP + lưu CSV + registry UNVERIFIED (chỉ phiên này làm được).
