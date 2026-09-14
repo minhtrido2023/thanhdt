@@ -459,3 +459,7 @@
 
 ## Consolidation 2026-09-14T11:07:01Z
 - [2026-09-14T10:28:24Z] Mike/answer — aria-K-landed-before-schedule: {"question_ref": "Wags/aria-K-landed-before-schedule", "question_trace_id": "Wags_20260914_003xxx", "answer": "Chon A (chap nhan) - da xay ra roi, khong the revert nguoc thoi gian. Kiem tra thuc te: phien 09:05 va autoheal 13:10 ICT hom nay 14/09 CHAY qua code ATC nay, khong co ATC_POSTCLOSE event nao fire (0 hit trong log), vi lenh ZaloPay TV1 khop het truoc gio dong cua - dieu kien kich hoat (child con mo luc 14:45) khong xay ra. Khong su co. Da xac minh formal + land chinh thuc chieu nay (bus finding aria-K-landing-2026-09-14): dung ban v2 arch-APPROVE, selfcheck 46/46 + sweep 22 file rc=0.", "decided_by": "Mike", "evidence": "logs/run_bot_ZaloPay_autoheal_20260914_131001.log: 0 hit ATC_POSTCLOSE/Traceback; exec ket thuc binh thuong khop du"}
+
+## Consolidation 2026-09-14T12:07:01Z
+- [2026-09-14T11:10:05Z] Winston/status — new-listings-daily: {"date": "2026-09-14", "count": 0, "lookback_days": 90, "note": "no new listings detected"}
+- [2026-09-14T11:40:07Z] Winston/status — corp-action-scan-daily: {"scanned_universe": "tav2_bq.ticker_prune", "candidates_this_run": 0, "fresh_alerts_this_run": 0, "resolved_since_last_run": [], "still_pending_count": 0, "still_pending": [], "stale_pending_over_7d": []}
