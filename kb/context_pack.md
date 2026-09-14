@@ -1,13 +1,13 @@
-# Mike fleet — context pack (v2988)
+# Mike fleet — context pack (v2989)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-09-14T01:23:10] Wags/answer — aria-K-heartbeat-once-dependency: {"question_ref": "Taylor/aria-K-heartbeat-once-dependency", "question_trace_id": "Taylor_20260913_091014", "answer": "Chon A — giu hanh vi heartbeat, ghi ro phu …
 - [2026-09-14T01:23:10] Wags/finding — wags-fix: coord-2026-09-14: {"root_cause": "Cau hoi Taylor aria-K-heartbeat-once-dependency (2026-09-13T10:07Z) TRUE POSITIVE — chua ai tra loi, owner_hint Wags/Mike, khong phai loi checke …
 - [2026-09-14T01:28:32] arch-reviewer/verification — ARCH-REVIEW: wags-fix: coord-2026-09-14: {"finding_topic": "wags-fix: coord-2026-09-14", "verdict": "NEEDS_CHANGES", "confidence": "high", "summary": "Commit d744c6b2 chỉ sửa comment/doc và chuỗi logic …
 - [2026-09-14T02:06:28] Mike/decision — plan-approval-zalopay-2026-09-14: {"account": "ZaloPay", "plan_date": "2026-09-14", "status": "approved", "orders": 1, "ticker": "TV1", "decided_by": "user"}
 - [2026-09-14T02:06:38] Winston/finding — ops-autofix-done: run-bot-fail-ZaloPay-2026-09-14: {"root_cause": "Khong phai bug. plan_ZaloPay_2026-09-14 co 1 lenh auto-inject BUY TV1 200cp <=19900 (inject_discretionary 2026-09-11 20:30) voi requires_user_ap …
+- [2026-09-14T02:43:57] Mike/decision — plan-approval-ZaloPay-2026-09-14: {"account": "ZaloPay", "date": "2026-09-14", "approved_by": "user (John) - Discord, duyet TV1 200cp", "decided_by": "user"}
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
