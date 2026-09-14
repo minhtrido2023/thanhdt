@@ -396,3 +396,9 @@
 
 ## Consolidation 2026-09-14T02:05:19Z
 - [2026-09-14T02:05:17Z] Mafee/error — bot-fail: {"account": "ZaloPay", "plan_date": "2026-09-14", "elapsed_s": 15, "rc": 2, "log": "/home/trido/thanhdt/WorkingClaude/mike/logs/run_bot_ZaloPay_2026-09-14.log"}
+
+## Consolidation 2026-09-14T02:06:48Z
+- [2026-09-14T02:06:28Z] Mike/decision — plan-approval-zalopay-2026-09-14: {"account": "ZaloPay", "plan_date": "2026-09-14", "status": "approved", "orders": 1, "ticker": "TV1", "decided_by": "user"}
+- [2026-09-14T02:06:18Z] Winston/heartbeat — Winston_20260914_020517: {"status": "still_running", "elapsed_min": 1, "job_id": "Winston_20260914_020517", "source": "watcher"}
+- [2026-09-14T02:06:37Z] Winston/heartbeat — Winston_20260914_020517: {"status": "in_progress", "note": "chan doan xong: approval gate dung thiet ke, dang bao cao"}
+- [2026-09-14T02:06:38Z] Winston/finding — ops-autofix-done: run-bot-fail-ZaloPay-2026-09-14: {"root_cause": "Khong phai bug. plan_ZaloPay_2026-09-14 co 1 lenh auto-inject BUY TV1 200cp <=19900 (inject_discretionary 2026-09-11 20:30) voi requires_user_approval=true, approved_by=null. approval gate trong run_bot chan dung thiet ke -> exit 2. Plan report 21:00 da gui kem CHO DUYET (marker md5 5bdcb51e); preflight 01:20Z/01:45Z RED NOT_APPROVED. Dong log lap doi (2x gui OTP) co tu 09-10/09-11, khong moi.", "fix": "Khong sua gi — duyet plan la quyen user, Winston cam sua trade plan. Da bao thread trading_daily cach xu ly neu user muon mua TV1 hom nay (duyet qua Mike roi chay lai run_bot.sh --account ZaloPay --auto-otp).", "verify": "SpaceX log 09-14: 0 lenh, bot-done binh thuong. Khong co run_bot_ZaloPay_autoheal_20260914_*, khong co exec_ZaloPay_2026-09-14_journal (khong lenh nao dat -> khong lenh ket). Cac plan TV1 truoc (08-11..08-14) deu co approved_by user -> co che duyet tung plan la ky vong.", "needs_user": "Duyet hoac bo qua lenh TV1 200cp ZaloPay 2026-09-14"}
