@@ -24,7 +24,7 @@ general mechanism; more accounts of this shape are expected:
    `secrets/trading_bot_accounts.json` (`ACCOUNT_DEFAULTS` in `trading_bot/config.py`).
 2. **Enforcement in ONE place**: `trading_bot.plan.filter_excluded_tickers()`, called from
    `bot_execute.py` right after `load_plan()` — applies however the plan was generated
-   (DollarBill's LLM JSON, `bot_prepare_plan.py`'s template, a hand-edited file), so a plan
+   (DollarBill's LLM JSON or a hand-edited file; `bot_prepare_plan.py`'s template was removed 2026-09-13), so a plan
    generator forgetting the exclusion can never place a forbidden order.
 3. **Size against `active_nav`, not total NAV**: `bin/compute_active_nav.py --account <label>`
    computes `total_nav − market_value(excluded_tickers)` from LIVE broker positions/prices — no

@@ -87,7 +87,7 @@ y hệt `context_pack.md` toàn bộ domain — tốn token vô ích; chi tiết
 | Agent | File(s) import (qua CLAUDE.md, KHÔNG qua hook nữa — xem cost-opt #1b) | Vì sao |
 |---|---|---|
 | Taylor | `kb/context_pack.md` (full) + `coding_guidelines.md` | R&D xuyên domain, cắt sẽ mất thông tin; viết backtest/script thường xuyên |
-| DollarBill | `context_safety_core.md` + `context_planning_mini.md` + `coding_guidelines.md` | Lập plan T+1 (KHÔNG cần backtest); sở hữu `bot_prepare_plan.py`/`golive_recommend_v23.py` nên cần guideline khi sửa |
+| DollarBill | `context_safety_core.md` + `context_planning_mini.md` + `coding_guidelines.md` | Lập plan T+1 (KHÔNG cần backtest); sở hữu `golive_recommend_v23.py` (bot_prepare_plan.py đã gỡ 2026-09-13) nên cần guideline khi sửa |
 | Mafee | `context_safety_core.md` + `context_execution_mini.md` + `coding_guidelines.md` | Thực thi plan-bound (KHÔNG cần chiến lược/backtest); sở hữu `trading_bot/{executor,brokers,...}.py` — §5 Idempotent Side Effects trích dẫn TRỰC TIẾP `executor.py` làm ví dụ chuẩn |
 | Winston | `context_safety_core.md` + `context_dataops_mini.md` + `coding_guidelines.md` | Data-ops: cần bảng BQ/registry/DT5G-trap; thêm guideline 2026-08-01 sau khi Winston viết đúng bug TZ-assumption mà §16 dạy (`dt5g_writer_watch.py`) |
 | Spyros | `context_safety_core.md` + `context_mini.md` | Risk-audit tần suất thấp: cần kill-switch + BQ cơ bản, không cần bespoke file |

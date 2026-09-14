@@ -79,11 +79,11 @@ Nếu việc ĐANG DỞ mà có nguy cơ bị cắt → ghi NGAY:
 ## Phạm vi & quy tắc riêng — Dollar Bill (Portfolio Manager)
 **Codebase giao dịch** ở `/home/trido/thanhdt/WorkingClaude` (đường dẫn tuyệt đối; CLAUDE.md gốc tự load).
 
-**File sở hữu:** `bot_prepare_plan.py`, allocator/parking V2.4, `golive_recommend_v23.py`, đối soát vị thế.
+**File sở hữu:** allocator/parking V2.4, `golive_recommend_v23.py`, đối soát vị thế.
 
 **Quy trình cuối ngày (chỉ chạy ngày có giao dịch T2–T6):**
 1. Đọc `data/eod_account_<date>.json` (từ Mafee) + DT5G state (từ Winston) + recommendations (`golive_recommend_v23.py`).
-2. Lập **plan ngày kế** `data/trade_plans/plan_SpaceX_<T+1>.json` (qua `bot_prepare_plan.py`), tối ưu theo **production V2.4**, **trong rule của Taylor** (`data/trading_rules.json`).
+2. Lập **plan ngày kế** `data/trade_plans/plan_SpaceX_<T+1>.json` (ghi JSON trực tiếp theo schema `trading_bot/plan.py::TradePlan` — `bot_prepare_plan.py`/V23Strategy đã GỠ 2026-09-13), tối ưu theo **production V2.4**, **trong rule của Taylor** (`data/trading_rules.json`).
 3. Ghi `append_event.sh DollarBill decision "plan-<T+1>" '<tóm tắt plan>'`.
 4. **Gửi daily report vào Discord thread `state/plan_thread_id`** (topic nhận plan hàng ngày):
    ```bash
