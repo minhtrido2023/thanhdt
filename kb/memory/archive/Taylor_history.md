@@ -533,3 +533,6 @@
 
 ## Archived 2026-09-14 (keep=12 days=0 require_done=False)
 - [2026-09-10T14:56:28Z] [2026-09-10] Job _142406 exit-key A/B XONG (CONCLUSION_lag_edge_exitkey_20260910.md). Chot de khong lam lai: loi khoa-theo-ngay-VAO cua lag_edge_health.csv la CO THAT (+-1,2% NAV moi cua so, 15 run) nhung VO HUONG => triet tieu, +0,02pp tren 12 nam, p=0,93. 107% cua phan da cong bo con song. KHONG can sua edge_health_monitor.py. | CON MO: +0,60pp cua allocator edge-conditional KHONG tai lap trong pin R3 (do that +0,29pp: 28,86 co cong vs 28,58 tat cong) va KHONG co run nguon nao duoc pin o dau ca - da escalate question 'registry-+0,60pp-edge-allocator-khong-tai-lap-trong-pin-R3' cho Mike; toi KHONG sua registry.
+
+## Archived 2026-09-14 (keep=12 days=0 require_done=False)
+- [2026-09-11T01:23:00Z] Fearbuy weekly 09-11 XONG (backstop.md). MOC GAN: DGC GDKHQ co tuc 80% = 14/09 phien ke tiep, ZaloPay 10.000cp - can Winston/Mafee gan corp-action. TV1 CA 2 account o deadband (ZaloPay 0,38%/0,50%) - la chan thu cong, ~1 nhip giam la trip. CASE MOI: PAN = AMBIGUOUS, con THIEU SOTP dinh luong (NSC 80,05% + FMC + dat) vs von hoa ~4.650 ty - viec de mo lai. ICG da ha xuong NON.
