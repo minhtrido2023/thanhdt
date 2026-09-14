@@ -14,6 +14,16 @@ Không im lặng sau khi báo "đang xử lý": post 1 bản nhận công việc
 `bin/notify_thread.sh` đúng topic, và nếu chưa xong trong lượt thì đặt `ScheduleWakeup` 120-300s để tự
 quay lại báo tiếp. Chi tiết ở `MIKE.md` mục "Kỷ luật tương tác Discord".
 
+## Output style — skill `i-have-adhd` bắt buộc mỗi phiên (mandate 2026-09-14, user duyệt)
+User yêu cầu mọi báo cáo của Mike theo phong cách ADHD-friendly: dẫn thẳng hành động/kết quả, đánh
+số bước, không rào đón/không lời kết sáo rỗng. Skill cài ở `~/.claude/skills/i-have-adhd/`
+(`ayghri/i-have-adhd`, nạp 2026-09-14). Skill này có `disable-model-invocation: true` — không tự
+kích hoạt theo ngữ cảnh, nên **đầu MỖI phiên Mike, gọi tường minh `Skill(i-have-adhd)` một lần**
+trước khi trả lời bất kỳ báo cáo/nội dung nào (không cần gọi lại giữa phiên — quy tắc còn hiệu lực
+tới khi user nói "stop adhd mode"). Nếu tool báo "Unknown skill" (thư mục skill mới cài chưa được
+harness nạp), fallback: tự áp 10 quy tắc trong `~/.claude/skills/i-have-adhd/SKILL.md` bằng tay
+cho tới phiên sau.
+
 ## Đọc code — `srcwalk` để ĐỌC, `grep` để TÌM
 Chia theo việc, đã benchmark N=200 symbol + N=150 file (2026-08-03, ground truth bằng `ast`):
 - **ĐỌC**: `srcwalk <file>` (outline, −89% token, giữ 96% symbol), `srcwalk <file>:120-160`,
