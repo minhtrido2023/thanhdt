@@ -62,6 +62,24 @@ review tháng BĐS); `other_bank_interest_rates` độ sâu (#5); retry TPCP/ref
 
 **28/09:** đệm + tổng kết: bảng "đã lấy / đã verify / còn thiếu" + khuyến nghị mua/không mua cập nhật.
 
+## 2b. Chống giới hạn tải (user duyệt plan 2026-09-14 kèm yêu cầu này)
+FiinX không công bố hạn mức ⇒ giả định có trần theo lượt + dung lượng, và trial "hạn chế tải
+file excel". Luật:
+1. **Tuần tự, không song song** — 1 lệnh MCP một lúc.
+2. **Chunk ≤10 năm / lệnh**, filter + `fields` server-side (vd CPI: lọc 4 `type_name` thay 11 nhóm).
+3. **Không tải lại**: CSV đã có trong `data/fiinprox_*` ⇒ bỏ qua; ghi CSV NGAY sau mỗi chunk
+   (atomic) để dừng giữa chừng không mất.
+4. **Gặp lỗi quota/429/"limit" ⇒ DỪNG pha đó ngay**, ghi mốc dừng vào mục 5 dưới, sang ngày.
+5. Ưu tiên tool trực tiếp (`get_economy`, `fetch_trading_data`) hơn `execute_api` (sandbox FiinX
+   từng hết đĩa `[Errno 28]` 14/09). Không tải Excel/ảnh qua web UI.
+6. Chuỗi ngày dài (khối ngoại, outstanding_share) ⇒ lấy theo năm; outstanding_share lưu event-only.
+
+## 5. Nhật ký tiến độ
+- **P1 CPI ✅ 14/09** — `data/fiinprox_cpi_monthly_20260914.csv` (224 tháng, 2 lệnh), registry
+  `macro/fiinprox_cpi_monthly.md` DERIVED. T2 nội suy `cpi_vn.py` lệch tới 2,51pp (2019-09),
+  T3 backfill tới 3,01pp (2009-10); `NSO_CPI_YOY_AVG_REAL` thực chất là lạm phát cơ bản.
+- P1 tín dụng/M2, tỷ giá, GDP — CHƯA: FiinXMCP cần xác thực lại (phiên restart 17:2x 14/09).
+
 ## 3. Phân vai
 - **Mike:** gọi MCP + lưu CSV + registry UNVERIFIED (chỉ phiên này làm được).
 - **Taylor (dispatch):** đối chiếu trên CSV đã lưu, nâng/hạ status, viết finding.
