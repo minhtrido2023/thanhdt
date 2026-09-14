@@ -1,0 +1,26 @@
+ sự kiện) — KHÔNG HỢP LÝ: live 3,000,000,000 lệch 10.0× số quý 300,000,000 (> 3×) ⇒ nghi lỗi dữ liệu, giữ số quý
+  PASS  G2. PIT: đúng BIÊN ×3,0 ⇒ VẪN nhận (cổng không nuốt sự kiện thật)
+  PASS  G3. đối xứng: nhỏ hơn 1/3 lần cũng bị chặn
+  PASS  G4. LIVE: cùng ca đó, `reconciled` cũng giữ số cũ nhưng ghi RIÊNG lý do (lỗi dữ liệu ≠ hai nguồn lệch nhau)
+  PASS  G5. không có số nền ⇒ cổng KHÔNG chặn (không có gì để so, và chặn thì mất phủ)
+  PASS  G6. CHỨNG MINH NGƯỢC: tắt cổng ⇒ 3 tỷ THẬT SỰ lọt vào (cổng đang chặn thật, không phải ca rỗng) — 3,000,000,000 từ oshares_live
+== Tổng hợp đếm được ==
+  PASS  S1. tách ĐÚNG hai nguyên nhân: LỆCH = 3 ca, KHÔNG HỢP LÝ = 1 ca (INSANE) — {'n': 9, 'n_live': 2, 'n_fallback_implausible': 1, 'implausible_tickers': 'INSANE', 'n_fallback_diverge': 3, 'n_fallback_declined': 1, 'n_fallback_other': 0, 'n_no_value': 2, 'n_live_only': 1, 'worst_ticker': 'INSANE', 'worst_rel_diff': 9.0, 'diverged_tickers': 'DIVERGE,EDGE_OUT,SANE_EDGE'}
+  PASS  S2. đếm đúng phủ bị bỏ lại (NOFB: có live mà không dùng) — {'n': 9, 'n_live': 2, 'n_fallback_implausible': 1, 'implausible_tickers': 'INSANE', 'n_fallback_diverge': 3, 'n_fallback_declined': 1, 'n_fallback_other': 0, 'n_no_value': 2, 'n_live_only': 1, 'worst_ticker': 'INSANE', 'worst_rel_diff': 9.0, 'diverged_tickers': 'DIVERGE,EDGE_OUT,SANE_EDGE'}
+  PASS  S3. tổng các nhánh == n (không mã nào rơi ra ngoài phân loại) — {'n': 9, 'n_live': 2, 'n_fallback_implausible': 1, 'implausible_tickers': 'INSANE', 'n_fallback_diverge': 3, 'n_fallback_declined': 1, 'n_fallback_other': 0, 'n_no_value': 2, 'n_live_only': 1, 'worst_ticker': 'INSANE', 'worst_rel_diff': 9.0, 'diverged_tickers': 'DIVERGE,EDGE_OUT,SANE_EDGE'}
+  PASS  S4. live FIN_ABSORPTION_AMBIGUOUS ⇒ giữ số nền VÀ đếm vào n_fallback_declined (không lọt sang n_fallback_other) — {'n': 1, 'n_live': 0, 'n_fallback_implausible': 0, 'implausible_tickers': '', 'n_fallback_diverge': 0, 'n_fallback_declined': 1, 'n_fallback_other': 0, 'n_no_value': 0, 'n_live_only': 0, 'worst_ticker': '', 'worst_rel_diff': 0.0, 'diverged_tickers': ''}
+== Bất biến TOÀN PHẦN: hỏng thế nào cũng không được ném lỗi ==
+[oshares_pit] oshares_at(2026-08-13) FAILED (RuntimeError: BQ sập giả lập) -> mọi mã dùng số dự phòng
+[oshares_pit] oshares_at(2026-08-13) FAILED (RuntimeError: BQ sập giả lập) -> mọi mã dùng số dự phòng
+  PASS  T1. oshares_at NÉM LỖI ⇒ vẫn trả đủ mã, mọi giá trị == số nền
+  PASS  T2. lỗi cũng không làm PIT chết; PIT rơi về đúng số nền
+[oshares_pit] fetch_cache FAILED (RuntimeError: BQ BLOCKED by capture.py (hermetic proof)) -> mọi mã sẽ dùng số dự phòng (ticker_financial)
+  PASS  T3. fetch_cache nuốt lỗi và trả None thay vì ném
+  PASS  T4. oshares_at trả RỖNG (im lặng) ⇒ vẫn fallback đủ, không KeyError
+  PASS  T5. số nền là NaN ⇒ coi như THIẾU (không sinh rel_diff = nan rồi lọt cổng so sánh)
+== Dữ liệu THẬT (BQ) ==
+  FAIL  L1-L3. gọi được BQ — RuntimeError: RuntimeError: BQ BLOCKED by capture.py (hermetic proof)
+
+FAILED 1/29: ['L1-L3. gọi được BQ']
+
+[capture] which=pit mode=blocked rc=1 bq_calls=2 calls=10 blocked=2

@@ -1,0 +1,23 @@
+9-14 (62.215.739) ⇒ AIS_EXACT, không `forward_absorption`; số K1 lệch AIS trong EXPLAIN_TOL, số đếm hai lần thì không — 62,215,739 [AIS_EXACT]
+  PASS  K2. ĐỐI CHỨNG: ASM 2025-10-29 — dòng quý 07-31 KHÔNG nhảy (370.178.250) ⇒ vẫn lăn ISS ex 10-07 ⇒ 407.194.183 (dòng quý 10-30 xác nhận) — 407,194,183 [ANCHOR_ONLY]
+  PASS  K3. FAIL-CLOSED: MCH 2026-07-26 — bước nhảy 12.943.987 đủ chứa ISS 12.911.404 nhưng không khớp trong 0,1% ⇒ FIN_ABSORPTION_AMBIGUOUS, value=None, số lăn giữ để log — None [FIN_ABSORPTION_AMBIGUOUS] rolled=1,320,316,353
+== _forward_absorption_test: từng nhánh quyết định (hermetic, gọi thẳng hàm) ==
+  PASS  FA1. [len(fparts)>1] bước nhảy +10.000.000 giải thích được bằng ISS CŨ ex 06-10 HOẶC ISS ex 07-30 sau dòng quý ⇒ FWD_AMBIGUOUS (không chọn hộ) — FWD_AMBIGUOUS — y +10,000,000 khác nhau về phần sự kiện ex sau dòng quý) ⇒ fail-closed
+  PASS  FA1b. ĐỐI CHỨNG: bỏ ISS cũ ⇒ chỉ còn một cách giải thích ⇒ FWD_ABSORBED đúng ISS 07-30 — FWD_ABSORBED
+  PASS  FA2. [not_absorbed] cùng ca FA1 nhưng ISS 06-10 đã được `_absorption_test` kết luận SẼ LĂN ⇒ loại khỏi pool ⇒ FWD_ABSORBED (không vừa lăn vừa dùng giải thích bước nhảy) — FWD_ABSORBED back=0
+  PASS  FA2b. ĐỐI CHỨNG: truyền BẢN SAO của ISS 06-10 (khác object) ⇒ không loại ⇒ quay lại FWD_AMBIGUOUS như FA1 — FWD_AMBIGUOUS
+  PASS  FA3. [ISS cũ KHÔNG định cỡ được] phần sau-dòng-quý khớp, nhưng ISS 06-10 không cỡ có thể CHÍNH NÓ là bước nhảy ⇒ FWD_AMBIGUOUS — FWD_AMBIGUOUS — hớp, nhưng có ISS trước đó không định cỡ được) ⇒ fail-closed
+  PASS  FA3b. ĐỐI CHỨNG: ISS 06-10 CÓ cỡ (3.000.000, không khớp bước nhảy) ⇒ FWD_ABSORBED — FWD_ABSORBED
+  PASS  FA4. [SKIPPED_UNSIZABLE] ISS ex sau dòng quý không định cỡ được ⇒ không thử, trả [] để `_roll` chặn ⇒ qua oshares_at ra UNKNOWN_RATIO (KHÔNG phải FIN_ABSORPTION_AMBIGUOUS) — SKIPPED_UNSIZABLE · oshares_at [UNKNOWN_RATIO]
+  PASS  FA4b. ĐỐI CHỨNG: cùng ISS nhưng có exercise_ratio 2% ⇒ định cỡ 10.000.000 trên dòng trước ⇒ FWD_ABSORBED — FWD_ABSORBED
+  PASS  FA5. [trần pool>14] 15 ISS, bước nhảy khớp đúng tổng 15 ⇒ không duyệt 2^15 tập ⇒ FWD_AMBIGUOUS — FWD_AMBIGUOUS — ện trong pool, quá trần tìm tập con) ⇒ fail-closed
+  PASS  FA5b. ĐỐI CHỨNG: 14 ISS (đúng trần), bước nhảy = tổng 14 ⇒ duyệt được ⇒ FWD_ABSORBED cả 14 — FWD_ABSORBED
+  PASS  FA6. [(d) không mốc đo] không dòng quý liền trước lẫn AIS <= dòng quý ⇒ FWD_AMBIGUOUS — FWD_AMBIGUOUS
+  PASS  FA6b. ĐỐI CHỨNG: có AIS 04-01 = 500.000.000 làm mốc ⇒ đo được ⇒ FWD_ABSORBED, mốc ghi rõ nguồn AIS — FWD_ABSORBED
+== Bất biến chung: value is None ⟺ method ∈ {UNKNOWN_RATIO, NO_ANCHOR, AIS_UNCERTIFIED, FIN_ABSORPTION_AMBIGUOUS} ==
+  PASS  10. không bao giờ trả số kèm nhãn 'không biết', và ngược lại
+  PASS  10b. mọi câu trả lời neo AIS ĐƯỢC PHỤC VỤ đều có verdict trong _SERVE_AIS_VERDICTS (bất biến trên rổ, không chỉ trên 2 ca đã biết) — 9 ca neo AIS được phục vụ: ['FPT@2025-06-19', 'FPT@2025-09-12', 'HAH@2026-05-27', 'HHVX@2026-08-20', 'KHP@2026-09-14', 'VRE@2018-12-26']
+
+OK — oshares_live selfcheck PASS 102/102
+
+[capture] which=live mode=blocked rc=0 bq_calls=0 calls=96 blocked=0
