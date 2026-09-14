@@ -539,3 +539,6 @@
 
 ## Archived 2026-09-14 (keep=12 days=0 require_done=False)
 - [2026-09-13T05:49:30Z] cq-20260913 batch1 (job _050827): CHỜ Mike apply patch #1 (research/cq20260913_batch1_item1.patch) T2 14/09 sau 15:00 + chạy lại selfcheck ở cuối patch; CHỜ user quyết cờ nav_include_egg_offbook (khuyến nghị giữ OFF — v23 là đường chết). Follow-up chưa giao: script nào dựng DNSEBroker SpaceX không có loan_package_id (resolve default=1258 08-11→14).
+
+## Archived 2026-09-14 (keep=12 days=0 require_done=False)
+- [2026-09-13T06:00:10Z] [2026-09-13] aria-A (job _053329) XONG: A1 706dec56 realized+co tuc vao reconcile_equity (SpaceX 2,42%->0,41%), A2 a6e1abb8 --from-raw backfill 9/11. CON MO: (1) ZaloPay reconcile chua dong — legacy + dong tien +34,3tr 07-10 can sao ke; (2) phi DNSE that 0,092-0,097% vs 0,075%; (3) 06/08 trong ca 2 account do gia VHM. BAY: BQ Close la gia dieu chinh hoi to, MTM ngay cu phai dung Price.
