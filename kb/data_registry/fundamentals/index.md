@@ -9,6 +9,7 @@ title: Fundamentals / tài chính
 | Nguồn (file) | Status |
 |---|---|
 | [`bank_casa_ldr.md`](bank_casa_ldr.md) — CASA + LDR rổ 13 NH đang nắm giữ (`data/bank_casa_ldr_*.csv` LDR · `data/bank_casa_primary_*.csv` CASA; vnstock/VCI + thuyết minh BCTC gốc) | **DERIVED** cả 2 chân — LDR verify chéo 5/5; CASA 13/13 mã từ BCTC gốc, 3 chân verify. Chỉ **1 kỳ** (Q2/2026), 3 cột CASA khác định nghĩa — đọc bẫy trước khi trích |
+| [`fiinprox_bank_ratios.md`](fiinprox_bank_ratios.md) — CAR/CASA/NIM/NPL/LLR 9 NH, 2018-2025 (`data/fiinprox_bank_ratios_20260914.csv`; FiinXMCP trial, hết hạn 2026-09-28) | **UNVERIFIED** (1 nguồn) — 3/9 mã khớp sát audit độc lập cũ (VCB/ACB/TCB), CASA CHƯA đối chiếu công thức với `bank_casa_ldr.md` |
 | [`insider_transaction.md`](insider_transaction.md) — tav2_bq.insider_transaction (giao dịch nội bộ TT96/2020) | CANONICAL (4 bẫy PIT — đọc trước khi dùng) |
 | [`insider_transaction_snapshots.md`](insider_transaction_snapshots.md) — lithe-record-440915-m9.tav2_mike.insider_transaction_snapshots (snapshot tiến-tới; đường DUY NHẤT lấy lại ngày công bố ĐĂNG KÝ, từ 2026-08-17) | CANONICAL (2 bẫy PIT riêng + mọi bẫy bảng nguồn) |
 | [`risk_rating.md`](risk_rating.md) — tav2_bq.risk_rating | CANONICAL |
