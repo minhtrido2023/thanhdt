@@ -81,7 +81,7 @@ def _get(order, name, default=None):
 
 
 def order_cost_vnd(order):
-    """Chi phí TIỀN của một lệnh mua, đã gồm phí 0,075%. Trả `None` nếu thiếu giá/KL —
+    """Chi phí TIỀN của một lệnh mua, đã gồm phí FEE_RATE (0,097%, xem plan_funding_gate.py). Trả `None` nếu thiếu giá/KL —
     KHÔNG trả 0 (xem `_UNKNOWN`)."""
     qty = _get(order, "qty")
     px = _get(order, "ref_price")

@@ -9,7 +9,7 @@ Phủ (theo skill verify-before-done — nêu rõ phụ thuộc môi trường, 
   B. plan HỢP LỆ  (Σ mua < sức mua)            → OK, gate không cản trở gì
   C. BIÊN: Σ mua == ĐÚNG BẰNG sức mua          → OK  (luật là `≤`, không phải `<`)
   D. BIÊN: Σ mua vượt sức mua đúng 1 đồng      → BLOCK
-  E. phí 0,075% được TÍNH vào Σ                → BLOCK khi chỉ vượt nhờ phần phí
+  E. phí FEE_RATE được TÍNH vào Σ               → BLOCK khi chỉ vượt nhờ phần phí
   F. nhiều gói vay (cash_only + default)       → đo per-nhóm, cộng tỉ lệ tiêu thụ
   G. ca TV1 2026-07-29 THẬT (gói default sai)  → gate KHÔNG chặn oan (naive gate thì chặn)
   H. pp0Buy không đo được + Σ trong cận ngoài  → UNVERIFIED (không chặn)
@@ -125,7 +125,7 @@ v = check_plan_funding(p, StubBroker({None: 20_000_000}, cash=20_000_000), "live
 check("action == BLOCK", v["action"] == "BLOCK", v["action"])
 check("funding_block_reason trả chuỗi (caller sẽ chặn)",
       isinstance(funding_block_reason(p, StubBroker({None: 20_000_000}), "live"), str))
-check("reason nêu đúng cả 2 số", "100,075,000" in v["reason"] and "20,000,000" in v["reason"],
+check("reason nêu đúng cả 2 số", f"{100_000_000 * (1 + FEE_RATE):,.0f}" in v["reason"] and "20,000,000" in v["reason"],
       v["reason"])
 
 # ── B. plan HỢP LỆ ────────────────────────────────────────────────────────────────────────
@@ -149,7 +149,7 @@ v = check_plan_funding(plan([order("FPT", 1000, 100_000)]),
 check("action == BLOCK khi thiếu 1đ", v["action"] == "BLOCK", v["action"])
 
 # ── E. phí có được tính không ─────────────────────────────────────────────────────────────
-print("\n[E] phí 0,075%: sức mua = ĐÚNG giá trị lệnh (chưa phí) → phải CHẶN vì thiếu phần phí")
+print(f"\n[E] phí {FEE_RATE*100:g}%: sức mua = ĐÚNG giá trị lệnh (chưa phí) → phải CHẶN vì thiếu phần phí")
 gross = 1000 * 100_000
 v = check_plan_funding(plan([order("FPT", 1000, 100_000)]),
                        StubBroker({None: gross}, cash=gross), "live")
@@ -164,7 +164,7 @@ o1 = order("FPT", 600, 100_000)                       # 60,045M / 100M = 0,60
 o2 = order("TV1", 1500, 20_000, cash_only=True)       # 30,0225M / 50M = 0,60
 v = check_plan_funding(plan([o1, o2]), b, "live")
 check("action == BLOCK (0,60 + 0,60 = 1,20)", v["action"] == "BLOCK", v["action"])
-check("utilization ≈ 1,20", abs(v["utilization"] - 1.2) < 1e-3, v["utilization"])
+check("utilization = 1,20 × (1+phí)", abs(v["utilization"] - 1.2 * (1 + FEE_RATE)) < 1e-9, v["utilization"])
 check("2 nhóm gói vay được tách", len(v["groups"]) == 2, v["groups"])
 check("nhóm cash_only được đo bằng gói ĐÃ GIẢI (1122), không phải default",
       (("TV1", 20000, 1122) in b.calls), b.calls)
@@ -183,7 +183,7 @@ st = state_for(p, {"buy-AAA": 900, "buy-BBB": 1000, "sell-CCC": 1000})
 v = check_plan_funding(p, StubBroker({None: 20_000_000}, cash=20_000_000), "live", st)
 check("resume dùng state đầy đủ", v["action"] == "OK", v["reason"])
 check("state được đánh dấu đã dùng", v["state_used"] is True, v.get("state_note"))
-check("chỉ tính BUY còn 100cp + phí", abs(v["need_vnd"] - 10_007_500) < 1e-6, v["need_vnd"])
+check("chỉ tính BUY còn 100cp + phí", abs(v["need_vnd"] - 10_000_000 * (1 + FEE_RATE)) < 1e-6, v["need_vnd"])
 check("SELL đã fill không được cộng JIT lần hai", v["jit_sell_credit_vnd"] == 0, v["jit_sell_credit_vnd"])
 bad = {"plan_date": p.plan_date, "parents": {"buy-AAA": {"filled": 900}}}
 v = check_plan_funding(p, StubBroker({None: 20_000_000}, cash=20_000_000), "live", bad)
@@ -386,7 +386,7 @@ zp = plan([order(t, q, px, side="sell", priority=0) for t, q, px in ZP_SELLS]
 ZP_GROSS = sum(q * px for _, q, px in ZP_SELLS)                      # 98.680.000đ
 v = check_plan_funding(zp, StubBroker({None: 5_000_000}, cash=5_000_000), "live")
 check("Σ tiền bán gộp = 98.680.000đ", abs(ZP_GROSS - 98_680_000) < 1, ZP_GROSS)
-check("tín dụng JIT = 98.680.000 × (1−0,075%)",
+check("tín dụng JIT = 98.680.000 × (1−phí)",
       abs(v["jit_sell_credit_vnd"] - ZP_GROSS * (1 - FEE_RATE)) < 1, v["jit_sell_credit_vnd"])
 check("đếm đủ 8 lệnh bán", v["jit_sell_orders"] == 8, v["jit_sell_orders"])
 check("action == OK — plan TỰ CẤP VỐN không còn bị chặn oan", v["action"] == "OK",
@@ -420,7 +420,7 @@ check("nhóm B util(thô) ≈ 0 nhưng KHÔNG gánh hộ được cho A", gB["ut
       gB["utilization"])
 check("hũ chung = min pp0Buy = 10tr (KHÔNG phải 10tr + 1.000tr)",
       v["shared_pot_vnd"] == 10_000_000, v["shared_pot_vnd"])
-check("Σ tỉ lệ thô ≈ 10,0085 (A 10,0075 + B 0,001)", abs(v["raw_utilization"] - 10.0085) < 1e-3,
+check("Σ tỉ lệ thô = (A 10 + B 0,001) × (1+phí)", abs(v["raw_utilization"] - 10.001 * (1 + FEE_RATE)) < 1e-9,
       v["raw_utilization"])
 check("kể cả sau khi cộng TOÀN BỘ tín dụng JIT vào trần vẫn CHẶN",
       v["utilization"] > 1.0, (v["utilization"], v["headroom_ratio"]))
@@ -467,15 +467,15 @@ def zp10_broker():
 print("\n[Q1] ★★ REPLAY THẬT — 4 lệnh mua tách 2 nhóm (1258/1826) CÙNG pp0Buy 5.818.854đ,")
 print("     8 lệnh bán PARK prio 0 cấp 163,86tr ⇒ tiêu thụ THẬT 54,6% ⇒ PHẢI KHÔNG CHẶN")
 v = check_plan_funding(zp10_plan(), zp10_broker(), "live")
-check("Σ need = 92.649.435đ", abs(v["need_vnd"] - 92_649_435) < 1, v["need_vnd"])
-check("tín dụng JIT = 163.862.011đ", abs(v["jit_sell_credit_vnd"] - 163_862_011.25) < 1,
+check("Σ need = 92.580.000đ gộp × (1+phí)", abs(v["need_vnd"] - 92_580_000 * (1 + FEE_RATE)) < 1, v["need_vnd"])
+check("tín dụng JIT = 163.985.000đ gộp × (1−phí)", abs(v["jit_sell_credit_vnd"] - 163_985_000 * (1 - FEE_RATE)) < 1,
       v["jit_sell_credit_vnd"])
 check("tách đúng 2 nhóm gói vay", len(v["groups"]) == 2,
       [(g["loan_package_id"], g["need_vnd"]) for g in v["groups"]])
-check("nhóm 1258 need 48.936.675đ (DRI+SCL)",
-      abs([g for g in v["groups"] if g["loan_package_id"] == 1258][0]["need_vnd"] - 48_936_675) < 1)
-check("nhóm 1826 need 43.712.760đ (POW+SSI)",
-      abs([g for g in v["groups"] if g["loan_package_id"] == 1826][0]["need_vnd"] - 43_712_760) < 1)
+check("nhóm 1258 need 48.900.000đ × (1+phí) (DRI+SCL)",
+      abs([g for g in v["groups"] if g["loan_package_id"] == 1258][0]["need_vnd"] - 48_900_000 * (1 + FEE_RATE)) < 1)
+check("nhóm 1826 need 43.680.000đ × (1+phí) (POW+SSI)",
+      abs([g for g in v["groups"] if g["loan_package_id"] == 1826][0]["need_vnd"] - 43_680_000 * (1 + FEE_RATE)) < 1)
 check("★ action == OK (bản 08-07: BLOCK OAN)", v["action"] == "OK", f"{v['action']}: {v['reason']}")
 check("★ util == tỉ lệ THẬT cấp plan 54,6% (bản 08-07 ra 105,6%)",
       abs(v["utilization"] - ZP10_NEED / (PP0 + ZP10_JIT)) < 1e-12

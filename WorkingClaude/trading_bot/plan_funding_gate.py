@@ -113,9 +113,13 @@ Gate này READ-ONLY (mỗi nhóm gói vay 1 lần gọi `ppse`), không side-eff
 
 import math
 
-# Phí giao dịch thật của SpaceX/ZaloPay tại DNSE = 0,075% (KHÔNG phải 0,1% — xác nhận 2026-07-03,
-# dùng thống nhất với bin/reconcile_equity.py). Đây là phần "fee_est_vnd" trong Σ.
-FEE_RATE = 0.00075
+# Phí giao dịch thật của SpaceX/ZaloPay tại DNSE = 0,097%/chiều = phí DNSE 0,070% + phí sở HOSE 0,027%
+# (đo 2026-09-13 trên 400 fill email khớp lệnh DNSE 01/07→17/08, aria-F1, quant-skeptic CONFIRMED;
+# thay 0,075% ghi nhận 2026-07-03). Nguồn chuẩn: mike/bin/dnse_fee_rates.py FEE_RATE_BUY_PCT/_SELL_PCT —
+# KHÔNG import được từ trading_bot/ (ranh giới repo) nên hardcode; đồng bộ khoá bằng
+# mike/bin/plan_funding_gate_fee_sync_selfcheck.py. UPCOM 0,088% < 0,097% ⇒ dùng HOSE là cận trên, an toàn
+# cho gate. Thuế TNCN bán 0,1% KHÔNG nằm trong số này. Đây là phần "fee_est_vnd" trong Σ.
+FEE_RATE = 0.00097
 
 # Cận ngoài khi không đo được pp0Buy: bội số của (cash + tiền bán trong plan). Đòn bẩy tối đa
 # thực tế của account margin là 2× vốn tự có (initialRate 0,5) ⇒ 3,0 để lại ~50% biên an toàn,
@@ -222,7 +226,7 @@ def _jit_sell_credit(plan, buys, remaining_qty=None):
     Bán priority BẰNG hoặc LỚN HƠN ⇒ chưa giải phóng gì lúc lệnh mua chạy ⇒ cộng vào chính là
     tái lập bug "list lệnh rồi đợi tiền" mà module này sinh ra để chặn (3 sự cố/15 ngày).
 
-    NET PHÍ, KHÔNG haircut thêm: `(1 - FEE_RATE)` là số học chắc chắn (phí bán 0,075% chắc chắn
+    NET PHÍ, KHÔNG haircut thêm: `(1 - FEE_RATE)` là số học chắc chắn (phí bán 0,097% chắc chắn
     bị trừ), không phải đệm rủi ro. KHÔNG thêm haircut cho rủi ro khớp lệnh vì (a) không có dữ
     liệu neo hệ số ⇒ sẽ là tham số bịa, (b) lệnh bán không khớp KHÔNG gây thấu chi: tầng 3
     (`executor.py` `get_cash() < need` → `WAIT_CASH`, retry chu kỳ sau) vẫn nguyên vẹn, hậu quả

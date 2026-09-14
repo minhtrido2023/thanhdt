@@ -21,7 +21,7 @@ Phủ:
   F. headroom dư                            → PASS, qty nguyên vẹn
   G. BIÊN: headroom == ĐÚNG chi phí lệnh    → PASS (luật `≤`)
   H. BIÊN: thiếu đúng 1 đồng                → SHRINK/SKIP, không PASS
-  I. phí 0,075% được tính vào chi phí       → chặn khi chỉ vượt nhờ phần phí
+  I. phí FEE_RATE được tính vào chi phí      → chặn khi chỉ vượt nhờ phần phí
   J. pp0Buy không đo được                   → cận TIỀN MẶT, KHÔNG nhân đòn bẩy
   K. broker chết hoàn toàn                  → headroom None → SKIP (fail-safe, KHÔNG chèn)
   L. lệnh mua thiếu giá trong plan          → headroom None (không coi là chi phí 0)
@@ -32,6 +32,7 @@ Phủ:
   Q. re-plan nuốt mất tranche đã chèn       → replan_dropped_injection = True
   R. bất biến TZ (chạy lại dưới 3 TZ)
 """
+import math
 import os
 import subprocess
 import sys
@@ -154,13 +155,14 @@ def run():
     check("qty đã ghi vào order dict", o["qty"] == 100 if o else False, o)
     # kiểm chứng số học sự cố: nếu KHÔNG có gate, tổng vượt cash đúng ~0,78M
     # Con số sự cố "~0,78M" trong báo cáo là phần vượt TRƯỚC phí (754.837đ); cộng phí
-    # 0,075% của cả hai chân thành 792.247đ. Neo cả hai để không ai đọc lệch cơ sở.
+    # FEE_RATE của cả hai chân (49,88tr gộp × phí; 792.247đ ở 0,075%, 803.221đ ở 0,097%). Neo cả hai.
     gross_no_gate = 45_900_000 + 200 * 19900
     total_no_gate = committed + DISC_COST
     check("không gate ⇒ vượt cash 754.837đ (trước phí, = '~0,78M' của báo cáo)",
           abs((gross_no_gate - 49_125_163) - 754_837) < 1, gross_no_gate - 49_125_163)
-    check("không gate ⇒ vượt cash 792.247đ (sau phí 0,075%)",
-          abs((total_no_gate - 49_125_163) - 792_247) < 1, total_no_gate - 49_125_163)
+    check(f"không gate ⇒ vượt cash 754.837đ + phí {FEE_RATE*100:g}% hai chân",
+          abs((total_no_gate - 49_125_163) - (754_837 + 49_880_000 * FEE_RATE)) < 1,
+          total_no_gate - 49_125_163)
 
     # D. headroom < 1 lô → SKIP
     print("\n[D] headroom 1,0M < 1 lô (≈1,99M) → SKIP_NO_CASH")
@@ -188,16 +190,18 @@ def run():
 
     # G/H/I. biên + phí
     print("\n[G/H/I] biên bằng đúng chi phí / thiếu 1 đồng / phần phí")
-    b = Broker(pp_by_package={}, cash=DISC_COST, resolve={"TV1": 1122})
+    # Tiền broker là số NGUYÊN đồng ⇒ "đủ đúng chi phí" = làm tròn LÊN. Để cash = DISC_COST thô (float lẻ)
+    # thì ở 0,097% `headroom // unit` ra 199,999… (sai số dấu phẩy động) — biên không tồn tại ngoài đời.
+    b = Broker(pp_by_package={}, cash=math.ceil(DISC_COST), resolve={"TV1": 1122})
     o, rec = gate_injected_order(dict(DISC), plan([]), b, "live", LOT)
-    check("G: headroom == đúng chi phí → PASS 200cp", rec["action"] == "PASS", rec)
-    b = Broker(pp_by_package={}, cash=DISC_COST - 1, resolve={"TV1": 1122})
+    check("G: headroom == đúng chi phí (tròn lên đồng) → PASS 200cp", rec["action"] == "PASS", rec)
+    b = Broker(pp_by_package={}, cash=math.ceil(DISC_COST) - 1, resolve={"TV1": 1122})
     o, rec = gate_injected_order(dict(DISC), plan([]), b, "live", LOT)
     check("H: thiếu 1đ → KHÔNG PASS 200cp", rec["qty_after"] == 100, rec)
     # I: đủ tiền cho giá gốc nhưng KHÔNG đủ khi cộng phí
     b = Broker(pp_by_package={}, cash=200 * 19900, resolve={"TV1": 1122})
     o, rec = gate_injected_order(dict(DISC), plan([]), b, "live", LOT)
-    check("I: phí 0,075% được tính (3.980.000đ không đủ)", rec["qty_after"] == 100, rec)
+    check("I: phí được tính (3.980.000đ không đủ)", rec["qty_after"] == 100, rec)
     check("I: order_cost_vnd gồm phí", abs(order_cost_vnd(DISC) - DISC_COST) < 1e-6,
           order_cost_vnd(DISC))
 
