@@ -14,21 +14,11 @@ Không im lặng sau khi báo "đang xử lý": post 1 bản nhận công việc
 `bin/notify_thread.sh` đúng topic, và nếu chưa xong trong lượt thì đặt `ScheduleWakeup` 120-300s để tự
 quay lại báo tiếp. Chi tiết ở `MIKE.md` mục "Kỷ luật tương tác Discord".
 
-## Output style — skill `i-have-adhd` bắt buộc mỗi phiên (mandate 2026-09-14, user duyệt)
-User yêu cầu mọi báo cáo của Mike theo phong cách ADHD-friendly: dẫn thẳng hành động/kết quả, đánh
-số bước, không rào đón/không lời kết sáo rỗng. Skill cài ở `~/.claude/skills/i-have-adhd/`
-(`ayghri/i-have-adhd`, nạp 2026-09-14, giữ nguyên bản gốc tiếng Anh — KHÔNG dịch file skill, xem
-đính chính 2026-09-14). Skill này có `disable-model-invocation: true` — không tự kích hoạt theo
-ngữ cảnh, nên **đầu MỖI phiên Mike, gọi tường minh `Skill(i-have-adhd)` một lần** trước khi trả
-lời bất kỳ báo cáo/nội dung nào (không cần gọi lại giữa phiên — quy tắc còn hiệu lực tới khi user
-nói "stop adhd mode"). Nếu tool báo "Unknown skill" (thư mục skill mới cài chưa được harness nạp),
-fallback: tự áp 10 quy tắc trong `~/.claude/skills/i-have-adhd/SKILL.md` bằng tay cho tới phiên
-sau.
-
-⚠️ **Đính chính 2026-09-14 (user làm rõ):** "10 quy tắc" của skill là về CẤU TRÚC câu trả lời
-(mở đầu bằng hành động, đánh số bước, không rào đón...), KHÔNG phải yêu cầu đổi ngôn ngữ. **Ngôn
-ngữ trả lời với user LUÔN LÀ TIẾNG VIỆT** như thường lệ — áp cấu trúc ADHD-friendly nhưng viết
-bằng tiếng Việt, không lẫn nhãn/khung tiếng Anh kiểu "Bad:/Good:/Next:" từ ví dụ trong skill.
+## Output style — skill `i-have-adhd` TẮT (user tắt 2026-09-15)
+Mandate 2026-09-14 (auto-gọi `Skill(i-have-adhd)` đầu mỗi phiên) đã **TẮT theo yêu cầu user
+2026-09-15**. Quay lại phong cách mặc định (Concise output style của harness), không áp cấu trúc
+ADHD-friendly nữa. Skill vẫn còn cài ở `~/.claude/skills/i-have-adhd/` (không xoá) — chỉ không
+tự gọi. Muốn bật lại: user yêu cầu tường minh, hoặc gõ `/i-have-adhd` thủ công trong phiên.
 
 ## Đọc code — `srcwalk` để ĐỌC, `grep` để TÌM
 Chia theo việc, đã benchmark N=200 symbol + N=150 file (2026-08-03, ground truth bằng `ast`):
