@@ -190,6 +190,41 @@ def _selfcheck() -> int:
     check("7. hai tập phân loại không giao nhau",
           not (PRICE_ADJUSTING_ISS & NON_ACCRUING_ISS))
 
+    # Thay cho ca "gọi theo LÔ == gọi từng mã" từng chạy trên BQ sống ở oshares_live (8c, đóng
+    # băng 2026-09-14): kiểm THẲNG cờ chống cắt 100 dòng của bq CLI, giả lập subprocess — không BQ.
+    # trần hạ tạm về 3 cho lượt thứ hai: kiểm luật "chạm trần ⇒ ném" mà không dựng 1 triệu dòng.
+    argv, fake_rows = [], [[{"x": 1}], [{"x": 1}] * 3]
+
+    class _Done:
+        returncode, stderr = 0, ""
+
+        def __init__(self, rows):
+            self.stdout = json.dumps(rows)
+
+    def _fake_run(cmd, **_k):
+        argv.append(list(cmd))
+        return _Done(fake_rows.pop(0))
+
+    _keep_run, _keep_max = subprocess.run, MAX_ROWS
+    subprocess.run = _fake_run
+    try:
+        small = bq("SELECT 1")
+        globals()["MAX_ROWS"] = 3
+        try:
+            bq("SELECT 2")
+            capped = False
+        except RuntimeError:
+            capped = True
+    finally:
+        subprocess.run = _keep_run
+        globals()["MAX_ROWS"] = _keep_max
+    check("8. bq() luôn gửi --max_rows=MAX_ROWS (bq CLI mặc định cắt ÂM THẦM ở 100 dòng) và NÉM "
+          "LỖI khi kết quả chạm trần — hermetic, subprocess giả lập",
+          small == [{"x": 1}] and capped
+          and len(argv) == 2 and f"--max_rows={MAX_ROWS}" in argv[0]
+          and "--max_rows=3" in argv[1],
+          f"argv[0]={argv[0][:6] if argv else None} capped={capped}")
+
     print()
     if fails:
         print(f"FAILED {len(fails)}: {fails}")
