@@ -120,6 +120,15 @@ file excel". Luật:
   '429'/'504' trong CẢ stdout dữ liệu ⇒ số CP chứa '429' có thể bị coi là rate limit. Vá 15/09 11:2x: kiểm OK trước,
   khớp '429, message'/'Too Many Requests'; nhánh AUTH; lô 10 mã; prompt ghi rõ tác vụ đã duyệt (model từng ngần ngại);
   reset failed. User đăng nhập lại 11:2x ⇒ tick đầu `oshares_b070_0` OK.
+- **Harvest tự động 15/09 chiều — 2 phát hiện.** (1) BUG thật: `tool_results()` gom mọi tool_result
+  kể cả Bash/Read model tự gọi thêm (không bị `--allowedTools` chặn cứng) — 1 lần model tự đọc file
+  kế hoạch này (có sẵn chữ '429'/'request limit' trong đoạn mô tả luật) bị hiểu nhầm là RATE_LIMIT thật,
+  tốn oan 1 lần cooldown 65'. Đã lọc theo `tool_use_id` khớp đúng tool `execute_api` + thêm
+  `--disallowedTools Bash,Read,Grep,Glob,WebSearch,WebFetch,Task`. (2) PHÁT HIỆN: 15:27 gặp 429
+  '**daily** request limit' lần đầu (mọi lần trước là 'hourly') — cooldown 65' vô nghĩa với trần ngày;
+  đã sửa: gặp daily → chờ tới 00:20 ICT hôm sau. Tiến độ thật tới 16:3x: 4/59 lô oshares mới (40/585 mã,
+  cộng 4 lô cũ 14/09 = 8/63 tổng), 0/15 fx. Nếu trần ngày là thật, tốc độ thực tế sẽ chậm hơn nhiều so
+  với ước tính ban đầu (~60 mã/giờ) — theo dõi đêm nay xem có bao nhiêu lô lọt qua sau 00:20.
 
 ## 3. Phân vai
 - **Mike:** gọi MCP + lưu CSV + registry UNVERIFIED (chỉ phiên này làm được).
