@@ -505,3 +505,10 @@
 - [2026-09-15T12:10:51Z] DollarBill/finding — job-complete-plan-SpaceX-2026-09-16: {"job": "DollarBill_20260915_120734", "result": "plan_SpaceX_2026-09-16.json written to data/trade_plans/, load_plan() verified OK, Discord plan thread sent", "orders": 0, "deferred": 1, "discord": "sent"}
 - [2026-09-15T12:10:34Z] Mafee/status — eod-trading-report: {"account": "ZaloPay", "plan_date": "2026-09-15", "delivered_via": "report_delivery_gate", "artifact": "ZaloPay_daily_report_2026-09-15.md"}
 - [2026-09-15T12:11:00Z] Mafee/status — eod-trading-report: {"account": "SpaceX", "plan_date": "2026-09-15", "delivered_via": "report_delivery_gate", "artifact": "SpaceX_daily_report_2026-09-15.md"}
+
+## Consolidation 2026-09-15T17:34:21Z
+- [2026-09-15T17:31:06Z] Mike/heartbeat — Mike_20260915_173005: {"status": "still_running", "elapsed_min": 1, "job_id": "Mike_20260915_173005", "source": "watcher"}
+- [2026-09-15T17:32:06Z] Mike/heartbeat — Mike_20260915_173005: {"status": "still_running", "elapsed_min": 2, "job_id": "Mike_20260915_173005", "source": "watcher"}
+- [2026-09-15T17:33:06Z] Mike/heartbeat — Mike_20260915_173005: {"status": "still_running", "elapsed_min": 3, "job_id": "Mike_20260915_173005", "source": "watcher"}
+- [2026-09-15T17:34:06Z] Mike/heartbeat — Mike_20260915_173005: {"status": "still_running", "elapsed_min": 4, "job_id": "Mike_20260915_173005", "source": "watcher"}
+- [2026-09-15T17:34:08Z] Mike/finding — retro-draft-2026-09-15: {"status": "draft_written", "file": "state/retro_draft_2026-09-15.md", "n_incidents": 4, "n_patterns": 2, "summary": "4 su co (1 tiep noi ingest-gap 09-14 da tu phuc hoi truoc gio bot, 1 he qua phai sinh anomaly-flags-stale, 1 bug MOI FiinPro harvest tool_results/cooldown chua tung ghi bus, 1 gap process TV1 con ho 2 ngay chua ai xu ly); pattern 1 = tool_results khong loc dung nguon (MOI); pattern 2 = retro action item khong co co che ep thuc thi hom sau (MOI, lien quan gap ghi chep 4 ngay lien tiep); khong du nguong escalate bus tu dong buoc 6 (khong pattern nao trung voi retro-09-14)"}
