@@ -22,7 +22,7 @@ Partition `snapshot_date` (DAY), cluster `ticker, id`, **không có partition ex
 | Cột meta | Nghĩa |
 |---|---|
 | `snapshot_date` DATE | Ngày **ICT quan sát** trạng thái bảng nguồn — KHÔNG phải ngày sự kiện, KHÔNG phải ngày vendor ghi |
-| `row_sha256` STRING | `TO_HEX(SHA256(TO_JSON_STRING(STRUCT(<34 cột nguồn TRỪ ingested_at>))))` — hash đổi ⟺ nội dung đổi |
+| `row_sha256` STRING | `TO_HEX(SHA256(TO_JSON_STRING(STRUCT(<34 cột nguồn TRỪ HASH_EXCLUDE = ingested_at, source_news_id, first_disclosure_datetime>))))` (từ 2026-09-15, xem Bẫy 5) — hash đổi ⟺ nội dung đổi |
 
 ## Vì sao tồn tại
 
@@ -60,6 +60,24 @@ Thêm/bớt cột nguồn ⇒ đổi tập cột vào hash ⇒ ở snapshot kế
 Script fail-closed (`RuntimeError: SCHEMA LECH`) và cron sẽ đỏ mỗi ngày cho tới khi có người xử lý.
 Xử lý đúng = thêm cột vào bảng snapshot **và ghi vintage đổi hash vào file này**, để phân tích sau
 biết chỗ đứt.
+
+## Bẫy (5) — schema drift 2026-09-14: 2 cột mới, vintage 09-14 MẤT, hash giờ loại 3 cột
+Vendor thêm `source_news_id` (STRING) + `first_disclosure_datetime` (TIMESTAMP) vào
+`tav2_bq.corporate_action` (vị trí 34-35, trước `ingested_at`) ⇒ run 2026-09-14 fail-closed đúng
+thiết kế Bẫy (4) ⇒ **vintage 2026-09-14 của CẢ 2 bảng (corporate_action + insider_transaction) MẤT
+VĨNH VIỄN** (nguồn upsert in-place; KHÔNG backfill `--date 2026-09-14` — sẽ gắn nhãn trạng thái sau
+thành 09-14). Xử lý A′ 2026-09-15 (user duyệt, mike `dd77553f`, arch-reviewer APPROVED):
+- `ALTER TABLE ... ADD COLUMN` 2 cột NULLABLE (bảng 37→39 cột, cột mới nằm CUỐI bảng snapshot).
+  ⇒ **vintage ≤ 2026-09-13 có 2 cột này = NULL** (không phải "vendor không có giá trị").
+- `schema_problems` so theo TÊN→KIỂU, bỏ qua thứ tự (vẫn báo thiếu/thừa/lệch kiểu/thiếu meta).
+- `HASH_EXCLUDE` = `ingested_at`, `source_news_id`, `first_disclosure_datetime` ⇒ `row_sha256` vẫn
+  phủ đúng 34 cột cũ, SO ĐƯỢC LIÊN TỤC qua mốc (đo: 09-13→09-15 chỉ 46 dòng lệch hash = sửa nội dung
+  thật, + 16 id mới). Revision của 2 cột mới phải dò bằng `LAG()` trên CHÍNH cột đó, không qua hash.
+- Mỗi bảng chạy cô lập; lỗi post Discord `architecture` kèm exception thật.
+- `first_disclosure_datetime` = mốc công bố gốc (15.823/36.352 dòng non-null ở vintage 09-15, trải
+  2015-03→2026-09) — nguồn PIT tiềm năng cho nghiên cứu announcement (sprint cổ tức 04/09 bị chặn vì
+  thiếu), nhưng chỉ có vintage từ 09-15 ⇒ vẫn là giá trị vendor HIỆN TẠI cho sự kiện cũ, chưa phải PIT.
+- Cron chạy thật **06:50 ICT** (`50 23` giờ UTC), không phải 23:50 ICT.
 
 ## Truy vấn tiêu chuẩn
 
