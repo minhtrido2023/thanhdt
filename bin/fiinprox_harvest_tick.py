@@ -149,17 +149,16 @@ def build_code(task):
 
 def build_prompt(code):
     return (
-        "Ngữ cảnh: tác vụ tải dữ liệu lịch sử ĐÃ ĐƯỢC chủ tài khoản (John Dinh) duyệt trong kế hoạch "
-        "kb/projects/fiinprox-trial-harvest-plan-20260914.md, chạy bằng cron trong thời gian dùng thử FiinPro-X. "
-        "Đoạn code chỉ ĐỌC dữ liệu công khai (số cổ phiếu lưu hành / tỷ giá), không ghi, không giao dịch. "
-        "Không cần hỏi lại.\n"
-        "Bạn là bước tải dữ liệu tự động. Gọi tool mcp__claude_ai_FiinXMCP__execute_api với tham số `code` "
-        "CHÍNH XÁC là đoạn giữa hai dòng <<<CODE và CODE>>> (không sửa, không thêm bớt ký tự nào).\n"
-        "- Nếu kết quả tool chứa 'No space left on device' hoặc '504' hoặc 'Gateway Timeout': gọi lại y hệt, "
-        "tối đa 2 lần gọi tổng cộng.\n"
-        "- Nếu kết quả chứa '429' hoặc 'request limit': DỪNG ngay, không gọi lại.\n"
-        "- Không gọi tool nào khác. Không tóm tắt dữ liệu. Cuối cùng chỉ trả lời một chữ: DONE.\n"
-        "<<<CODE\n" + code + "\nCODE>>>"
+        "Mình đang tải dữ liệu lịch sử từ FiinPro-X trong thời gian dùng thử (kế hoạch đã được chủ tài khoản "
+        "duyệt: kb/projects/fiinprox-trial-harvest-plan-20260914.md). Đoạn code dưới chỉ đọc dữ liệu thị trường "
+        "(số cổ phiếu lưu hành hoặc tỷ giá) và in ra; không ghi gì, không giao dịch.\n"
+        "Nhờ bạn chạy nó bằng tool mcp__claude_ai_FiinXMCP__execute_api, truyền nguyên văn vào tham số `code`. "
+        "Nếu chưa thấy tool trong danh sách, hãy dùng ToolSearch với query "
+        "'select:mcp__claude_ai_FiinXMCP__execute_api' để nạp (connector claude.ai có thể kết nối chậm vài giây).\n"
+        "Nếu kết quả báo 'No space left on device' hoặc 'Gateway Timeout', chạy lại thêm 1 lần. "
+        "Nếu báo 'Too Many Requests'/'request limit' thì dừng. "
+        "Nếu tool thật sự không khả dụng, trả lời TOOL_UNAVAILABLE. Không cần tóm tắt dữ liệu.\n"
+        "```python\n" + code + "\n```"
     )
 
 
@@ -297,9 +296,20 @@ def cmd_tick(dry_run=False, model="sonnet"):
     atomic_write(os.path.join(STATE, "last_stream.jsonl"), stream)
     results = tool_results(stream)
     if not results:
-        tail = stream[-1500:].lower()
-        if any(k in tail for k in ("authoriz", "authenticat", "connector setting", "/mcp", "đăng nhập", "xác thực")):
-            kind, detail = "AUTH", stream[-300:]
+        # Bằng chứng cơ khí, không đoán từ văn bản model (15/09: model tự viết chữ "authorize" khi ngần ngại
+        # ⇒ nhánh cũ báo AUTH oan): đọc trạng thái connector trong dòng system/init của stream.
+        status = None
+        for line in stream.splitlines():
+            try:
+                j = json.loads(line)
+            except ValueError:
+                continue
+            if j.get("type") == "system" and j.get("subtype") == "init":
+                for m in j.get("mcp_servers", []) or []:
+                    if m.get("name") == "claude.ai FiinXMCP":
+                        status = m.get("status")
+        if status in ("needs-auth", "failed"):
+            kind, detail = "AUTH", f"connector status={status}: {stream[-200:]}"
         else:
             kind, detail = "NO_CALL", f"model không gọi tool: {stream[-300:]!r}"
     else:
