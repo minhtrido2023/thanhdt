@@ -1,0 +1,246 @@
+[
+ {
+  "id": "FPT",
+  "module": "live",
+  "mutation": "C.FPT[2025-09-12].col8: 1703507121 -> 1703507122.0",
+  "expect_red": "4.",
+  "rc": 1,
+  "fails": [
+   "4. sau AIS hiệu lực: KHỚP TUYỆT ĐỐI shares_total_after = 1.703.507.121 — 1,703,507,122"
+  ],
+  "killed": true
+ },
+ {
+  "id": "HAH",
+  "module": "live",
+  "mutation": "Q.HAH[2026-07-30].col1: 1.91840401E8 -> 191840402.0",
+  "expect_red": "H5.",
+  "rc": 1,
+  "fails": [
+   "H5. HAH 2026-08-19 = 191.840.401 (AIS 185.840.401 + ESOP1 2.500.000 + ESOP2 3.500.000) — 191,840,402 [ANCHOR_ONLY]"
+  ],
+  "killed": true
+ },
+ {
+  "id": "NAF",
+  "module": "live",
+  "mutation": "C.NAF[2026-01-05].col5: -7083933 -> 7083933",
+  "expect_red": "P1.",
+  "rc": 1,
+  "fails": [
+   "P1. NAF ngay sau phát hành riêng lẻ 2026-01-05 ⇒ UNKNOWN_RATIO, value=None — value=68,265,987 method=AIS_EXACT"
+  ],
+  "killed": true
+ },
+ {
+  "id": "DHG",
+  "module": "live",
+  "mutation": "Q.DHG[2026-07-20].col0: 2026-07-20 -> 2026-08-13",
+  "expect_red": "8d.",
+  "rc": 1,
+  "fails": [
+   "8d. mã không có AIS nào ⇒ vẫn trả số nhưng gắn nhãn ANCHOR_UNVERIFIED — None [NO_ANCHOR]",
+   "N6. neo dòng quý KHÔNG bị cổng AIS đụng tới (đã có cổng RESTATE riêng) — {'ACB': 'ANCHOR_ONLY', 'DHG': 'NO_ANCHOR', 'HDB': 'ANCHOR_ONLY', 'PVT': 'ANCHOR_ONLY'}"
+  ],
+  "killed": true
+ },
+ {
+  "id": "PVT",
+  "module": "live",
+  "mutation": "Q.PVT[2026-07-29].col1: 5.16918938E8 -> 517918938.0",
+  "expect_red": "N6.",
+  "rc": 1,
+  "fails": [
+   "N6. neo dòng quý KHÔNG bị cổng AIS đụng tới (đã có cổng RESTATE riêng) — {'ACB': 'ANCHOR_ONLY', 'DHG': 'ANCHOR_UNVERIFIED', 'HDB': 'ANCHOR_ONLY', 'PVT': 'FIN_FALLBACK'}"
+  ],
+  "killed": true
+ },
+ {
+  "id": "ACB",
+  "module": "live",
+  "mutation": "Q.ACB[2026-07-22].col1: 5.804421957E9 -> 5904421957.0",
+  "expect_red": "N6.",
+  "rc": 1,
+  "fails": [
+   "N6. neo dòng quý KHÔNG bị cổng AIS đụng tới (đã có cổng RESTATE riêng) — {'ACB': 'AIS_EXACT', 'DHG': 'ANCHOR_UNVERIFIED', 'HDB': 'ANCHOR_ONLY', 'PVT': 'ANCHOR_ONLY'}"
+  ],
+  "killed": true
+ },
+ {
+  "id": "HDB",
+  "module": "live",
+  "mutation": "Q.HDB[2026-07-31].col1: 5.005276323E9 -> 5105276323.0",
+  "expect_red": "N6.",
+  "rc": 1,
+  "fails": [
+   "N6. neo dòng quý KHÔNG bị cổng AIS đụng tới (đã có cổng RESTATE riêng) — {'ACB': 'ANCHOR_ONLY', 'DHG': 'ANCHOR_UNVERIFIED', 'HDB': 'FIN_FALLBACK', 'PVT': 'ANCHOR_ONLY'}"
+  ],
+  "killed": true
+ },
+ {
+  "id": "TCB",
+  "module": "live",
+  "mutation": "C.TCB[2025-12-01].col8: 7064851739 -> 7164851739.0",
+  "expect_red": "N5.",
+  "rc": 1,
+  "fails": [
+   "N5. ĐỐI CHỨNG: TCB 2025-12-05 (neo AIS chứng nhận được) VẪN phục vụ AIS_EXACT — None [AIS_UNCERTIFIED]",
+   "F2. AIS còn tươi (4 ngày <= 90) ⇒ TCB vẫn AIS_EXACT, nhãn KHÔNG đổi — AIS_UNCERTIFIED tuổi=4"
+  ],
+  "killed": true
+ },
+ {
+  "id": "MBB",
+  "module": "live",
+  "mutation": "C.MBB[805499990].col5: 805499990 -> 805499991.0",
+  "expect_red": "9.",
+  "rc": 1,
+  "fails": [
+   "9. cộng CẢ HAI đợt cùng ngày (quyền mua 10% + cổ tức CP 15%), applied_size = số cổ phần chính xác từ issue_volumn"
+  ],
+  "killed": true
+ },
+ {
+  "id": "IDC",
+  "module": "live",
+  "mutation": "C.IDC[2020-05-28].col7: 108000000 -> 2700000000",
+  "expect_red": "N1.",
+  "rc": 1,
+  "fails": [
+   "N1. IDC: dòng AIS 2020-05-28 (3.000.000.000) VẪN không chứng nhận được, kể cả với cửa sổ nhìn lùi — mắt xích liền trước của nó (2019-06-13) LÀNH nên không được phép đi lùi — {'2019-04-16': 'NO_PRIOR', '2019-06-13': 'OK', '2020-05-28': 'OK'}"
+  ],
+  "killed": true
+ },
+ {
+  "id": "VRE",
+  "module": "live",
+  "mutation": "Q.VRE[2026-07-29].col1: 2.27231841E9 -> 2272318411.0",
+  "expect_red": "F1.",
+  "rc": 1,
+  "fails": [
+   "F1. VRE 2026-08-19 ⇒ FIN_FALLBACK = 2.272.318.410 (số BCTC), KHÔNG phải AIS 2018 — 2,272,318,411 [FIN_FALLBACK]"
+  ],
+  "killed": true
+ },
+ {
+  "id": "CC1",
+  "module": "live",
+  "mutation": "Q.CC1[2026-07-31].col1: 4.746561E8 -> 474656101.0",
+  "expect_red": "F5.",
+  "rc": 1,
+  "fails": [
+   "F5. CC1 2026-08-19 = 474.656.100 — quarterly Q2/2026 xác nhận được bằng accounting (ISS 76.750.000 unabsorbed từ AIS, expected khớp ĐÚNG dòng quý) — 474,656,101 [ANCHOR_ONLY] verified=True"
+  ],
+  "killed": true
+ },
+ {
+  "id": "HHV",
+  "module": "live",
+  "mutation": "Q.HHV[2026-07-31].col1: 5.74511888E8 -> 574511889.0",
+  "expect_red": "AB1.",
+  "rc": 1,
+  "fails": [
+   "AB1. [THẬT] HHV 2026-08-19 = 574.511.888 và ISS ex 07-09 KHÔNG bị lăn lại — cắt theo quý-end sẽ ra 601.857.480 (+4,76%), đếm hai lần — 574,511,889 [ANCHOR_ONLY] +0 ISS"
+  ],
+  "killed": true
+ },
+ {
+  "id": "VCI",
+  "module": "live",
+  "mutation": "Q.VCI[2026-02-02].col1: 8.501E8 -> 722600000.0",
+  "expect_red": "AB1c.",
+  "rc": 1,
+  "fails": [
+   "AB1c. [THẬT, (a) ĐÃ GỒM] VCI 2026-03-01: dòng quý 850.100.000 khớp giả thuyết 'đã gồm 1/1' trong EXPLAIN_TOL còn giả thuyết 'chưa gồm' lệch ~17,6% ⇒ ABSORBED, không lăn lại 127,5 triệu CP. Kiểm QUAN HỆ giữa hai giả thuyết, không chép cứng float của vendor — 850,100,000 verdict=ROLLED rel_diff 0/1 = -9.443137254372402e-07 / -0.14998303731214635"
+  ],
+  "killed": true
+ },
+ {
+  "id": "ABB",
+  "module": "live",
+  "mutation": "Q.ABB[2026-02-02].col1: 1.397208685E9 -> 1397208686.0",
+  "expect_red": "F6.",
+  "rc": 1,
+  "fails": [
+   "F6. [CÁI GIÁ] ABB 1.397.208.685 (AIS 2026-06-19) và NVL 2.234.496.474 (AIS 2026-05-29) — cùng HAH ở H1 là 3/12 ca look-ahead đã đo, KHÔNG phải hành vi mong muốn — ABB 1,397,208,686 [FIN_FALLBACK] · NVL 2,234,496,474 [FIN_FALLBACK]"
+  ],
+  "killed": true
+ },
+ {
+  "id": "NVL",
+  "module": "live",
+  "mutation": "Q.NVL[2026-02-02].col1: 2.234496474E9 -> 2234496475.0",
+  "expect_red": "F6.",
+  "rc": 1,
+  "fails": [
+   "F6. [CÁI GIÁ] ABB 1.397.208.685 (AIS 2026-06-19) và NVL 2.234.496.474 (AIS 2026-05-29) — cùng HAH ở H1 là 3/12 ca look-ahead đã đo, KHÔNG phải hành vi mong muốn — ABB 1,397,208,685 [FIN_FALLBACK] · NVL 2,234,496,475 [FIN_FALLBACK]"
+  ],
+  "killed": true
+ },
+ {
+  "id": "KBC",
+  "module": "live",
+  "mutation": "Q.KBC[2026-02-02].col1: 9.41754759E8 -> 941754760.0",
+  "expect_red": "F6b.",
+  "rc": 1,
+  "fails": [
+   "F6b. KBC 2026-03-01 (sau fix 8ad317b3): cả PIT và LIVE đồng thuận 941.754.759 [ANCHOR_ONLY] từ ticker_financial Q4/2025 (anchor 2026-02-02) — KHÔNG còn look-ahead gap PIT/LIVE cho mã này — PIT 941,754,760 [ANCHOR_ONLY] · LIVE 941,754,760 [ANCHOR_ONLY]"
+  ],
+  "killed": true
+ },
+ {
+  "id": "KHP",
+  "module": "live",
+  "mutation": "C.KHP[2026-09-14].col8: 62215739 -> 72215739.0",
+  "expect_red": "10b.",
+  "rc": 1,
+  "fails": [
+   "10b. mọi câu trả lời neo AIS ĐƯỢC PHỤC VỤ đều có verdict trong _SERVE_AIS_VERDICTS (bất biến trên rổ, không chỉ trên 2 ca đã biết) — 9 ca neo AIS được phục vụ: ['FPT@2025-06-19', 'FPT@2025-09-12', 'HAH@2026-05-27', 'HHVX@2026-08-20', 'KHP@2026-09-14', 'VRE@2018-12-26']"
+  ],
+  "killed": true
+ },
+ {
+  "id": "AAA",
+  "module": "pit",
+  "mutation": "C.AAA[2019-06-03].col8: 58664988 -> 58664989.0",
+  "expect_red": "A6.",
+  "rc": 1,
+  "fails": [
+   "A6. CHỨNG MINH NGƯỢC: tắt cổng chứng nhận ⇒ AAA nhận 58.664.988 (sai −65,7%) — 58,664,989 từ oshares_live"
+  ],
+  "killed": true
+ },
+ {
+  "id": "VNM",
+  "module": "pit",
+  "mutation": "C.VNM[2016-07-11].col5: 8887731 -> 0",
+  "expect_red": "A4b.",
+  "rc": 1,
+  "fails": [
+   "A4b. [ĐÃ ĐÓNG] VNM 2016-09-20 nay CHỨNG NHẬN ĐƯỢC: ESOP 2016-07-11 tỉ lệ 0,0 có `issue_volumn` 8.887.731 (thêm vào `_roll` 2026-08-19) ⇒ ứng viên (a) dựng ra ĐÚNG 1.451.453.429. Ca này đã ĐỎ trên `main` trước bản vá 2026-08-20 — verdict=UNVERIFIED"
+  ],
+  "killed": true
+ },
+ {
+  "id": "LEAK_no_cache_CC1",
+  "module": "live",
+  "mutation": "bỏ _cache= ở F5 (CC1)",
+  "expect_red": "hermetic guard",
+  "rc": 98,
+  "fails": [],
+  "tail": "CRASH RuntimeError: selfcheck HERMETIC: không được chạm BQ — truyền `_cache=frozen([...])`",
+  "killed": true
+ },
+ {
+  "id": "LEAK_no_cache_DHG_pit",
+  "module": "pit",
+  "mutation": "bỏ _cache= ở A15 (DHG)",
+  "expect_red": "L1-L3",
+  "rc": 1,
+  "fails": [
+   "L1-L3. Phần 3 chạy hết trên feed đóng băng — RuntimeError: selfcheck HERMETIC: không được chạm BQ — truyền cache=frozen([...])"
+  ],
+  "tail": "FAILED 1/49: ['L1-L3. Phần 3 chạy hết trên feed đóng băng']",
+  "killed": true
+ }
+]

@@ -1,4 +1,0 @@
-== FPT 2025: thưởng CP 15% ex 2025-07-21 → AIS hiệu lực 2025-09-12 ==
-SELFCHECK CRASH RuntimeError: BQ BLOCKED by capture.py (hermetic proof)
-
-[capture] which=live mode=blocked rc=98 bq_calls=1 calls=0 blocked=1

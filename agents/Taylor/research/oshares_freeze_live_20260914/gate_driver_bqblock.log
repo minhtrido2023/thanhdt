@@ -1,0 +1,20 @@
+model files: [('corp_action_lib', '/home/trido/thanhdt-wt-oshares-freeze-live/WorkingClaude/corp_action_lib.py'), ('oshares_live', '/home/trido/thanhdt-wt-oshares-freeze-live/WorkingClaude/oshares_live.py')]
+{
+ "ok": true,
+ "detail": [
+  {
+   "module": "corp_action_lib",
+   "rc": 0,
+   "tail": [
+    "OK — corp_action_lib selfcheck PASS"
+   ]
+  },
+  {
+   "module": "oshares_live",
+   "rc": 0,
+   "tail": [
+    "OK — oshares_live selfcheck PASS 102/102"
+   ]
+  }
+ ]
+}

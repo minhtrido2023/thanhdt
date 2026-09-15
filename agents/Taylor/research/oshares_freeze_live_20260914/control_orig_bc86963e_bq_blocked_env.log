@@ -1,0 +1,27 @@
+== FPT 2025: thưởng CP 15% ex 2025-07-21 → AIS hiệu lực 2025-09-12 ==
+Traceback (most recent call last):
+  File "/tmp/osh_orig/oshares_live.py", line 2476, in <module>
+    raise SystemExit(_selfcheck())
+                     ^^^^^^^^^^^^
+  File "/tmp/osh_orig/oshares_live.py", line 1378, in _selfcheck
+    cache = _fetch(["FPT"], "2026-08-13")
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/osh_orig/oshares_live.py", line 702, in _fetch
+    quarters = bq(f"""
+               ^^^^^^^
+  File "/tmp/osh_orig/corp_action_lib.py", line 93, in bq
+    raise RuntimeError(f"bq failed: {out.stderr[-400:]}")
+RuntimeError: bq failed: WARNING: Could not open the configuration file: [/tmp/no_gcloud_cfg_x/configurations/config_default].
+ERROR: (bq) You do not currently have an active account selected.
+Please run:
+
+  $ gcloud auth login
+
+to obtain new credentials.
+
+If you have already logged in with a different account, run:
+
+  $ gcloud config set account ACCOUNT
+
+to select an already authenticated account to use.
+
