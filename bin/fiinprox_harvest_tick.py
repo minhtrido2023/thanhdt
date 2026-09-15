@@ -286,7 +286,7 @@ def cmd_tick(dry_run=False, model="sonnet"):
     try:
         r = subprocess.run(
             ["claude", "-p", prompt, "--model", model,
-             "--allowedTools", "mcp__claude_ai_FiinXMCP__execute_api",
+             "--allowedTools", "mcp__claude_ai_FiinXMCP__execute_api", "--max-turns", "4",
              "--output-format", "stream-json", "--verbose"],
             capture_output=True, text=True, timeout=900, stdin=subprocess.DEVNULL, cwd=STATE)
         stream = r.stdout
