@@ -78,8 +78,9 @@ file excel". Luật:
 - Cron `7,27,47 * * * *` → `bin/fiinprox_harvest_tick.sh tick`: mỗi tick 1 task trong `state/fiinprox_harvest/queue.json`.
 - Headless `claude -p --model sonnet --allowedTools mcp__claude_ai_FiinXMCP__execute_api --output-format stream-json`;
   dữ liệu đọc NGUYÊN VĂN từ tool_result (model không chép số) → validate → ghi raw atomic.
-- Hàng đợi hiện tại: 30 lô OShares (20 mã/lô, từ index 70) + 15 năm tỷ giá USD tháng 2012-2026.
-- Luật: 429 → cooldown 65′; [Errno 28] → thử lại tick sau (tối đa 3 lần gọi/tick, không làm failed); 504 → tách
+- Hàng đợi (sửa 15/09 11:2x): 59 lô OShares (10 mã/lô, từ index 70) + 15 năm tỷ giá USD tháng 2012-2026.
+- Luật: 429 → cooldown 65′; [Errno 28] → thử lại tick sau (≤2 lần gọi/tick, không làm failed); mất đăng nhập connector
+  → không tính attempt, báo thread ≤1 lần/6h; 504 → tách
   lô; lỗi khác ≥6 → failed + báo; usage ≥85% → bỏ tick; tự dừng sau 2026-09-27. Báo `vn_macro_watch` khi xong nhóm/failed.
 - Chi phí đo: ~0,13 USD/tick (5 turn). Thêm task mới: sửa `cmd_init` rồi `fiinprox_harvest_tick.py init` (idempotent).
 - Việc KHÔNG tự động: dựng CSV/đối chiếu/registry (cần phán đoán) — Mike làm khi được báo.
@@ -114,6 +115,11 @@ file excel". Luật:
   API phân trang theo từng mã × trang (13 năm/mã) ⇒ mỗi lô 20 mã = hàng chục request. Theo luật 2b.4: DỪNG ngay.
   Tiếp tục 15/09: ≤4 lô/giờ (80 mã/giờ), giãn cách; còn 585 mã ≈ 7-8 giờ đồng hồ trải qua 2 ngày. Có thể cần thu hẹp
   về 448 mã còn niêm yết 2026 nếu hạn mức chặt.
+- **Harvest tự động — đêm 14→15/09: 0 lô thành công.** 01:07→11:07 connector FiinXMCP hết đăng nhập (script coi là
+  lỗi task ⇒ 3 task failed oan); 5 lỗi đĩa sandbox; 4 lần 429 (lỗi đĩa vẫn tiêu quota). Thêm BUG: `classify()` tìm chuỗi
+  '429'/'504' trong CẢ stdout dữ liệu ⇒ số CP chứa '429' có thể bị coi là rate limit. Vá 15/09 11:2x: kiểm OK trước,
+  khớp '429, message'/'Too Many Requests'; nhánh AUTH; lô 10 mã; prompt ghi rõ tác vụ đã duyệt (model từng ngần ngại);
+  reset failed. User đăng nhập lại 11:2x ⇒ tick đầu `oshares_b070_0` OK.
 
 ## 3. Phân vai
 - **Mike:** gọi MCP + lưu CSV + registry UNVERIFIED (chỉ phiên này làm được).

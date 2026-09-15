@@ -7,11 +7,12 @@ Mỗi tick lấy ĐÚNG 1 task pending trong `state/fiinprox_harvest/queue.json`
 rồi ghi file raw atomic. Kế hoạch + nhật ký: kb/projects/fiinprox-trial-harvest-plan-20260914.md.
 
 Chống giới hạn (đo thật 14/09): lô 30 mã get_freefloat → 504; lô 20 mã OK; ~6-7 lô/giờ → 429
-"hourly request limit". Nhịp 1 lô/tick × 3 tick/giờ = 60 mã/giờ, dưới ngưỡng.
+"hourly request limit". Đêm 14→15/09 lô 20 vẫn chạm 429 mỗi ~2h (lỗi đĩa cũng tiêu quota) ⇒ hạ lô 10 mã, thử lại ≤2 lần/tick.
 - 429 / "request limit"  → cooldown 65 phút, task giữ pending (không tính attempt).
 - [Errno 28] sandbox đầy → thử lại tick sau (model tự thử tối đa 3 lần/tick); KHÔNG làm task failed.
 - 504 / Gateway Timeout   → tách lô làm đôi.
-- lỗi khác (validate, ERROR) ≥ 6 lần → failed + báo thread.
+- mất đăng nhập connector (AUTH) → không tính attempt, báo thread ≤1 lần/6h.
+- lỗi khác (validate, ERROR, NO_CALL) ≥ 6 lần → failed + báo thread.
 - Sau 2026-09-27 23:59 ICT (trial hết 28/09) → không chạy nữa.
 
 Dùng:
@@ -42,7 +43,7 @@ DEADLINE = datetime(2026, 9, 27, 23, 59, tzinfo=ICT)
 MAX_ATTEMPTS = 6
 USAGE_SKIP_PCT = 85
 OSHARES_START = 70      # 0..69 đã harvest tay 14/09 (b000..b050)
-OSHARES_BATCH = 20
+OSHARES_BATCH = 10
 
 CODE_OSHARES = '''TICKERS=__TICKERS__
 d=pd.DataFrame(client.PriceStatistics().get_freefloat(tickers=TICKERS, from_date="2013-01-01", to_date="__TO__"))
@@ -148,10 +149,14 @@ def build_code(task):
 
 def build_prompt(code):
     return (
+        "Ngữ cảnh: tác vụ tải dữ liệu lịch sử ĐÃ ĐƯỢC chủ tài khoản (John Dinh) duyệt trong kế hoạch "
+        "kb/projects/fiinprox-trial-harvest-plan-20260914.md, chạy bằng cron trong thời gian dùng thử FiinPro-X. "
+        "Đoạn code chỉ ĐỌC dữ liệu công khai (số cổ phiếu lưu hành / tỷ giá), không ghi, không giao dịch. "
+        "Không cần hỏi lại.\n"
         "Bạn là bước tải dữ liệu tự động. Gọi tool mcp__claude_ai_FiinXMCP__execute_api với tham số `code` "
         "CHÍNH XÁC là đoạn giữa hai dòng <<<CODE và CODE>>> (không sửa, không thêm bớt ký tự nào).\n"
         "- Nếu kết quả tool chứa 'No space left on device' hoặc '504' hoặc 'Gateway Timeout': gọi lại y hệt, "
-        "tối đa 3 lần gọi tổng cộng.\n"
+        "tối đa 2 lần gọi tổng cộng.\n"
         "- Nếu kết quả chứa '429' hoặc 'request limit': DỪNG ngay, không gọi lại.\n"
         "- Không gọi tool nào khác. Không tóm tắt dữ liệu. Cuối cùng chỉ trả lời một chữ: DONE.\n"
         "<<<CODE\n" + code + "\nCODE>>>"
@@ -192,16 +197,17 @@ def classify(raw):
     except ValueError:
         pass
     low = txt.lower()
-    if "429" in txt or "request limit" in low:
-        return "RATE_LIMIT", txt[-300:]
-    if "no space left on device" in low:
-        return "DISK", txt[-200:]
-    if "504" in txt or "gateway timeout" in low:
-        return "TIMEOUT", txt[-200:]
+    # OK kiểm TRƯỚC: stdout là số CP, có thể chứa chuỗi "429"/"504" (bug thật đêm 14→15/09).
     if "Success: True" in txt and "Stdout:" in txt:
         out = txt.split("Stdout:", 1)[1]
         out = out.split("\n\nStderr:", 1)[0]
         return "OK", out.strip("\n")
+    if "too many requests" in low or "request limit" in low or "429, message" in low:
+        return "RATE_LIMIT", txt[-300:]
+    if "no space left on device" in low:
+        return "DISK", txt[-200:]
+    if "gateway timeout" in low or "504, message" in low:
+        return "TIMEOUT", txt[-200:]
     return "ERROR", txt[-400:]
 
 
@@ -291,7 +297,11 @@ def cmd_tick(dry_run=False, model="sonnet"):
     atomic_write(os.path.join(STATE, "last_stream.jsonl"), stream)
     results = tool_results(stream)
     if not results:
-        kind, detail = "ERROR", f"không có tool_result (claude rc/stderr: {stream[-300:]!r})"
+        tail = stream[-1500:].lower()
+        if any(k in tail for k in ("authoriz", "authenticat", "connector setting", "/mcp", "đăng nhập", "xác thực")):
+            kind, detail = "AUTH", stream[-300:]
+        else:
+            kind, detail = "NO_CALL", f"model không gọi tool: {stream[-300:]!r}"
     else:
         # ưu tiên kết quả OK nếu có trong các lần thử
         classified = [classify(x) for x in results]
@@ -313,6 +323,17 @@ def cmd_tick(dry_run=False, model="sonnet"):
                        f"Còn {left} task nhóm khác.")
             print(f"OK {task['id']}")
             return 0
+    if kind == "AUTH":
+        flag = os.path.join(STATE, "auth_notified")
+        if not os.path.exists(flag) or now() - datetime.fromisoformat(open(flag).read().strip()) > timedelta(hours=6):
+            notify("FiinPro harvest tự động: kết nối FiinXMCP MẤT ĐĂNG NHẬP — mọi lượt đang bị chặn. "
+                   "Anh đăng nhập lại connector FiinXMCP trên claude.ai; hàng đợi tự chạy tiếp, không cần gõ gì.")
+            atomic_write(flag, now().isoformat(timespec="seconds"))
+        log("auth", task=task["id"], detail=detail[-200:])
+        print("AUTH — chờ user đăng nhập lại connector")
+        return 0
+    if os.path.exists(os.path.join(STATE, "auth_notified")) and results:
+        os.remove(os.path.join(STATE, "auth_notified"))
     if kind == "RATE_LIMIT":
         until = now() + timedelta(minutes=65)
         atomic_write(COOLDOWN, until.isoformat(timespec="seconds"))
