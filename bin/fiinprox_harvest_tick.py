@@ -162,8 +162,30 @@ def build_prompt(code):
     )
 
 
+EXECUTE_API_TOOL = "mcp__claude_ai_FiinXMCP__execute_api"
+
+
 def tool_results(stream_text):
-    """Trả list chuỗi tool_result của execute_api, theo thứ tự."""
+    """Trả list chuỗi tool_result CỦA RIÊNG execute_api, theo thứ tự.
+
+    ⚠️ Đo thật 15/09: dù --allowedTools chỉ khai execute_api, model vẫn tự gọi được
+    Bash/Read/ToolSearch (không bị --allowedTools chặn cứng trong phiên headless này).
+    Một lần model tự Read chính file kế hoạch của mình (chứa sẵn chữ "429"/"request limit"
+    trong phần mô tả luật chống giới hạn) ⇒ nếu gom TẤT CẢ tool_result mà không lọc theo
+    tool, chuỗi đó bị hiểu nhầm thành RATE_LIMIT thật, tốn oan 65' cooldown. Phải khớp
+    tool_use_id với đúng tool_use có name=execute_api trước khi đưa vào classify().
+    """
+    execute_ids = set()
+    for line in stream_text.splitlines():
+        try:
+            j = json.loads(line)
+        except ValueError:
+            continue
+        if j.get("type") != "assistant":
+            continue
+        for c in j.get("message", {}).get("content", []) or []:
+            if isinstance(c, dict) and c.get("type") == "tool_use" and c.get("name") == EXECUTE_API_TOOL:
+                execute_ids.add(c.get("id"))
     res = []
     for line in stream_text.splitlines():
         try:
@@ -175,11 +197,13 @@ def tool_results(stream_text):
         for c in j.get("message", {}).get("content", []) or []:
             if not isinstance(c, dict) or c.get("type") != "tool_result":
                 continue
+            if c.get("tool_use_id") not in execute_ids:
+                continue  # Bash/Read/ToolSearch — không phải kết quả FiinX thật
             content = c.get("content")
             if isinstance(content, list):
                 texts = [x.get("text", "") for x in content if isinstance(x, dict) and x.get("type") == "text"]
                 if not texts:
-                    continue  # tool_reference (ToolSearch), bỏ qua
+                    continue
                 content = "\n".join(texts)
             if isinstance(content, str):
                 res.append(content)
@@ -286,8 +310,9 @@ def cmd_tick(dry_run=False, model="sonnet"):
     try:
         r = subprocess.run(
             ["claude", "-p", prompt, "--model", model,
-             "--allowedTools", "mcp__claude_ai_FiinXMCP__execute_api", "--max-turns", "4",
-             "--output-format", "stream-json", "--verbose"],
+             "--allowedTools", "mcp__claude_ai_FiinXMCP__execute_api",
+             "--disallowedTools", "Bash,Read,Grep,Glob,WebSearch,WebFetch,Task",
+             "--max-turns", "4", "--output-format", "stream-json", "--verbose"],
             capture_output=True, text=True, timeout=900, stdin=subprocess.DEVNULL, cwd=STATE)
         stream = r.stdout
     except subprocess.TimeoutExpired as e:
@@ -345,10 +370,19 @@ def cmd_tick(dry_run=False, model="sonnet"):
     if os.path.exists(os.path.join(STATE, "auth_notified")) and results:
         os.remove(os.path.join(STATE, "auth_notified"))
     if kind == "RATE_LIMIT":
-        until = now() + timedelta(minutes=65)
+        # 15/09 15:27: gặp lần đầu "You have reached the DAILY request limit" (khác "hourly" mọi lần
+        # trước) — cooldown 65' vô nghĩa với trần ngày, mỗi tick tiếp chỉ đốt thêm 1 lần gọi rồi 429 lại.
+        is_daily = "daily" in detail.lower()
+        if is_daily:
+            until = (now() + timedelta(days=1)).replace(hour=0, minute=20, second=0, microsecond=0)
+            notify(f"FiinPro harvest tự động: CHẠM TRẦN NGÀY (daily request limit), không phải trần giờ. "
+                   f"Dừng tới {until.isoformat(timespec='minutes')} — cooldown cũ 65' không đủ, đã chỉnh. "
+                   "Không cần làm gì, tự chạy lại vào mốc trên.")
+        else:
+            until = now() + timedelta(minutes=65)
         atomic_write(COOLDOWN, until.isoformat(timespec="seconds"))
-        log("rate_limit", task=task["id"], until=until.isoformat(timespec="minutes"), detail=detail)
-        print(f"429 — cooldown tới {until.isoformat(timespec='minutes')}")
+        log("rate_limit", task=task["id"], daily=is_daily, until=until.isoformat(timespec="minutes"), detail=detail)
+        print(f"429{' (DAILY)' if is_daily else ''} — cooldown tới {until.isoformat(timespec='minutes')}")
         return 0
     if kind == "TIMEOUT" and task["kind"] == "oshares" and len(task["tickers"]) > 5:
         half = len(task["tickers"]) // 2
