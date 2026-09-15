@@ -1,47 +1,37 @@
 # Working memory — Mike
 > Cập nhật mỗi khi đổi mạch việc. Bơm vào đầu phiên của Mike.
 
-# Working memory — Mike
-> Cập nhật mỗi khi đổi mạch việc. Bơm vào đầu phiên của Mike.
-
 ## Ưu tiên hiện tại
 - Go-live V2.4 lever LIVE từ 08-24: capit_margin_lever.enabled=TRUE. Ngày có CAPIT margin phải chạy
   approve_margin_day.py TRƯỚC bot.
-- VPI/BAL signal HOLD đến review 2026-09-16 — HOLD_ALL theo VPI.
+- **VPI/BAL signal HOLD hết hạn HÔM NAY 2026-09-16** — review đến hẹn, cần quyết có gỡ HOLD hay
+  gia hạn. Chưa xử lý.
 
-## 🚨 KHẨN — kiểm tra NGAY đầu phiên 09-15
-1. **Trade plan T+1 (15/09) cho SpaceX + ZaloPay** — CHƯA CÓ lúc 00:50 ICT, root cause = ingest BQ
-   ngoài (`tav2_bq.ticker`/`ticker_prune` phiên 14/09 thiếu nghiêm trọng). Đã dispatch `data-ops`
-   nền (agentId abd189aef81b793b2) poll BQ mỗi 20-30', tự chạy lại `daily_refresh_v34b_linux.sh`
-   khi đủ ngưỡng, tự dispatch DollarBill lập plan. Nếu tới 07:30 ICT chưa unblock → data-ops tự mở
-   bus question đề xuất HOLD (không tự quyết). **Việc đầu tiên đầu phiên**: đọc kết quả agent này
-   (hoặc bus event `ticker-prune-ingest-gap-0914-followup`), xác nhận plan đã có/HOLD đã quyết
-   trước 09:05 ICT.
-2. **Bus-question TV1 (`zalopay-tv1-200cp-sized-by-dgc-dividend-receivable-0914`)** — Wags đóng sai
-   `decided_by:user` (arch-review NEEDS_CHANGES 2 vòng 09-14, CÒN HỞ qua đêm). Kiểm tra
-   `mike_json.py has-event` xem đã đính chính chưa; nếu chưa, tự đóng đúng cách (không giao lại
-   Wags vòng 3 không gate). "Phương án C" (active_nav cộng nhầm dividend excluded_tickers) cũng
-   chưa ai quyết — vẫn sống tới 2026-09-25.
+## 🚨 CẦN XỬ LÝ NGAY đầu phiên 09-16
+1. **VPI/BAL review đến hẹn 09-16** — quyết định gỡ HOLD hay gia hạn, cập nhật `kb/current_ops.md`.
+2. **Bus-question TV1 (`zalopay-tv1-200cp-sized-by-dgc-dividend-receivable-0914`) CÒN HỞ 2 NGÀY
+   LIÊN TIẾP** (09-14 → 09-15, không ai xử lý) — Wags đóng sai `decided_by:user`, arch-review
+   NEEDS_CHANGES 2 vòng. Đọc `mike_json.py has-event-prefix` cho topic gốc, tự đóng đúng cách
+   (không giao Wags vòng 3 không gate). "Phương án C" (active_nav cộng nhầm dividend
+   excluded_tickers) cũng chưa ai quyết.
+3. **FiinPro/OShares harvest**: kiểm tiến độ thật (lúc dừng 09-15 16:3x: 4/59 lô oshares (40/585
+   mã), 0/15 fx, cooldown daily-limit đặt tới 00:20 ICT 09-16 — nên đã hết hạn, có thể chạy lại).
+   2 bug vá TRONG PHIÊN (lọc `tool_use_id`, cooldown hourly/daily) KHÔNG có selfcheck/commit xác
+   nhận — code chỉ sống trong logic phiên headless, có thể mất nếu không port thành file thật.
 
-## Retro 09-14 đã đóng (`d52d562f`) — 5 sự cố, 2 pattern:
-- Pattern 1 (tái diễn, không cần sửa): discretionary auto-inject approval đến sau giờ bot 09:05.
-- Pattern 2 (MỚI, theo dõi — escalate nếu lặp lại): Wags tự suy diễn quyết định user khi đóng bus-
-  question, bị arch-review NEEDS_CHANGES 2 vòng cùng ngày. Nếu tái diễn ở retro 09-15 →
-  escalate `retro-pattern-recurring-wags-decision-overreach-2-days`.
-- aria-K (ATC post-close) đã LAND chính thức chiều 09-14 nhưng lộ ra Taylor test patch trên
-  working tree thật (không worktree riêng) khiến cron auto-backup cuốn code chưa duyệt vào SXX
-  từ 00:03 ICT — may mắn không thiệt hại, nhắc Taylor tránh lặp lại (chưa có rào cản cơ học).
+## Retro 09-15 đã đóng (`ab6af586`) — 5 sự cố, 2 pattern:
+- Sự cố #1/#2: tiếp nối ingest BQ 09-14, tự phục hồi trước giờ bot — HOÀN CHỈNH, đóng vòng.
+- Sự cố #3 (Pattern 1 MỚI, theo dõi): FiinPro/OShares connector 2 bug thật (false rate-limit từ
+  `tool_results()` quét nhầm Bash/Read; cooldown sai loại hourly/daily) — đã vá TRONG PHIÊN,
+  KHÔNG có selfcheck/commit. Nếu tái diễn ở script khác đọc `tool_results()` → áp bài học ngay.
+- Sự cố #4 (Pattern 2 MỚI): action item retro (TV1) không được thực thi hôm sau — GAP QUY TRÌNH,
+  đề xuất chưa làm: mở kèm bus `question` tự động cho mọi mục "CÒN HỞ" trong retro để đi qua
+  `ops_health_check.sh` §5 (câu hỏi treo >48h) thay vì chỉ nằm trong file draft tĩnh.
+- Sự cố #5: Wags verify độc lập bắt draft ban đầu bỏ sót KHP double-count fix + canary feed
+  (đã land 01:27-01:30Z, HOÀN CHỈNH) — đã bổ sung vào entry.
 
-## Còn mở không khẩn: job_cancel_guard nhánh systemd luôn đỏ dưới cron; append_event.sh JSON
-cách ly viết tay vẫn thỉnh thoảng tái diễn dạng nhỏ (không escalate, theo dõi qua retro).
-
-- [2026-09-14T17:42:57Z] 00:57 ICT: killed detached bg monitor (security-flagged, violated no-unsupervised-process rule); ticker_prune 09-14 still 2/200 tickers; now polling via own ScheduleWakeup every ~25min instead — next check should re-run: source wc_env.sh; bq query ... ticker_prune WHERE time=2026-09-14; if >=200 run daily_refresh_v34b_linux.sh then dispatch DollarBill SpaceX+ZaloPay plan T+1; if past 07:30 ICT and still short, post bus question data-ops/bot-run-0915-no-plan-hold-recommended
-- [2026-09-14T17:55:58Z] 15/09 01:0x: canary feed corp_action arch APPROVED (branch feat/corp-action-feed-canary @ 2465a35c, worktree mike/agents/wt-corp-feed-canary). Landing: merge mike master + selfcheck --all 33/33 + promote cron_registry.md.proposed (§13, sửa luôn snapshot chạy 06:50 ICT không phải 23:50) + cài cron '5 0 * * 1-5' 07:05 ICT — chờ user duyệt dòng cron; làm SAU land OShares 08:04. KHẨN: snapshot_corp_action_daily FAIL 09-14 (vendor thêm source_news_id + first_disclosure_datetime), run 06:50 ICT sẽ fail lại, mất vintage cả 2 bảng. arch khuyến nghị A′ (ALTER ADD 2 cột + schema_problems không xét thứ tự + HASH_EXCLUDE 2 cột + cô lập bảng + notify lỗi); B mất vĩnh viễn first_disclosure_datetime; CẤM backfill --date 2026-09-14. Dispatch Taylor chuẩn bị A′ (không DDL, không merge). CHỜ USER DUYỆT áp dụng trước 06:50.
-- [2026-09-14T18:03:54Z] 15/09 01:03 ICT USER DUYỆT (decided_by user): (1) vá snapshot_corp_action_daily theo A′ (ALTER ADD 2 cột source_news_id/first_disclosure_datetime + schema_problems bỏ xét thứ tự + HASH_EXCLUDE + cô lập bảng + notify lỗi), ÁP TRƯỚC 06:50 ICT sau khi Mike review + arch APPROVED bản chuẩn bị của Taylor_20260914_175556; (2) cài cron canary '5 0 * * 1-5' (07:05 ICT) — merge feat/corp-action-feed-canary + promote cron_registry.md.proposed rồi cài, làm SAU land OShares 08:04 (hoặc trước 07:05 16/09 nếu sáng nay trễ). Trả lời bus question corp-action-snapshot-schema-drift-20260914 với decided_by:user khi áp xong.
-- [2026-09-14T18:10:07Z] 15/09 01:3x: SNAPSHOT A′ ĐÃ ÁP XONG (user duyệt 01:03). merge mike dd77553f; ALTER ADD 2 cột (37→39); dry-run rc=0; selfcheck 68/68; chạy thật rc=0 vintage 2026-09-15: corp_action 36.352 (first_disclosure_datetime 15.823 non-null), insider 52.922; hash diff vs 09-13 = 46 + 16 id mới. Cron 06:50 sẽ SKIP. Bus question đã đóng decided_by user. Việc non-blocking còn lại: ghi chú corporate_action_snapshots.md (2 cột thêm 09-15 NULL ở vintage cũ, hash exclude 3 cột, 09-14 mất) + sửa cron_registry snapshot giờ thật 06:50 ICT — gộp khi promote cron_registry.md.proposed của canary. Còn chờ: land OShares 08:04 (cron 141ea337) → rồi merge canary + cài cron 07:05 (user đã duyệt).
-- [2026-09-14T18:10:51Z] 15/09 01:4x: CronCreate 141ea337 ĐÃ XOÁ, thay bằng 3a6145a4 (08:04 ICT 15/09, SESSION-ONLY): Phần 1 land OShares (bản vá + đóng băng) + docstring gate_selfcheck + promote registry oshares; Phần 2 merge canary 2465a35c + selfcheck --all + promote cron_registry.md.proposed (sửa giờ snapshot 06:50) + backup crontab + cài dòng '5 0 * * 1-5 ... corp_action_feed_canary.py' + ghi chú corporate_action_snapshots.md; Phần 3 remember kiểm 16/09. Phiên restart = mất cron → làm tay theo đúng các bước này.
-- [2026-09-15T01:15:57Z] 15/09 08:2x: PHIÊN RESTART → CronCreate 3a6145a4 (land 08:04) ĐÃ MẤT, chưa merge gì. Trạng thái: corp_action_daily 15/09 OK usable 07:30; snapshot A′ đã áp đêm qua; OShares 2 branch (bc86963e, ce123789) + canary 2465a35c CHƯA merge, cron canary CHƯA cài. Plan 15/09 đang được session khác catch-up (DollarBill_20260915_011449, topic plan) — rating_8l import oshares ⇒ HOÃN land OShares tới khi job plan xong, rồi làm tay theo các bước của 3a6145a4.
-- [2026-09-15T01:30:06Z] 15/09 08:4x LAND XONG TOÀN BỘ: WC 422eb99a (OShares bản vá) + 1bcee08b (đóng băng selfcheck) — selfcheck main chặn BQ 102/102, 49/49, corp_action_lib PASS, corp_action_daily_selfcheck 201/201; mike 68b3384b (docstring gate + registry oshares); mike 7296f332 canary + d00d0a8d (cron_registry, snapshot registry Bẫy 5, crontab backup); CRON canary '5 0 * * 1-5' ĐÃ CÀI. KIỂM SÁNG 16/09: (a) mike/logs/corp_action_feed_canary.log có dòng 07:05 PASS/WARN; (b) data/corp_action_daily/corp_action_daily_2026-09-16.json status OK usable=true, model_version đổi 1 lần, MODEL_REBASE chỉ mã bản vá đổi (KHP 63.996.290→62.215.739), VIB publish 3.727.386.252, không invariants_systemic. Việc treo non-blocking: SC2 basename; canary check (e) so toàn bộ 37 cột; notify rc=3 chỉ vào log; WARN không de-dup.
-- [2026-09-15T04:27:56Z] 15/09 11:3x: harvest FiinPro tự động vá xong (classify OK trước, AUTH branch, lô 10, prompt duyệt rõ) — đêm qua 0 lô do connector hết đăng nhập 01:07-11:07. User đăng nhập lại 11:2x, tick oshares_b070_0 OK. Queue 59 lô OShares + 15 FX, cron 7,27,47. Kiểm lại status chiều 15/09.
-- [2026-09-15T05:12:45Z] 15/09 12:1x: harvest FiinPro — 'mất đăng nhập' 11:47/12:07 thực chất là (a) connector claude.ai 'pending' lúc init + (b) model coi prompt cũ là injection, chứ chưa chắc token hết hạn. Đã: xoá server local FiinXMCP cũ (needs-auth, tạo 11/09), prompt mới gợi ToolSearch, AUTH chỉ theo status init. Tick 12:12 gọi tool OK nhưng FiinX lỗi đĩa. Commit 30d?.
-- [2026-09-15T09:30:28Z] 15/09 16:3x: harvest FiinPro — BUG THẬT tìm ra: tool_results() gom mọi tool_result kể cả Bash/Read (model tự đọc file plan có sẵn chữ '429' -> false RATE_LIMIT tốn oan cooldown 13:27). Đã lọc theo tool_use_id=execute_api + disallow Bash/Read/Grep/Glob/WebSearch/WebFetch/Task. PHÁT HIỆN: 15:27 gặp 'daily request limit' lần đầu (trước toàn 'hourly') -> cooldown cũ 65' vô nghĩa, đã sửa chờ tới 00:20 ICT hôm sau khi gặp daily. Tiến độ thật: 4/59 lô oshares (40/585 mã), 0/15 fx. Cooldown hiện đặt tới 16/09 00:20.
+## Còn mở không khẩn
+- `job_cancel_guard` nhánh systemd luôn đỏ dưới cron (theo dõi, không escalate).
+- `append_event.sh` JSON cách ly viết tay vẫn thỉnh thoảng tái diễn dạng nhỏ (theo dõi qua retro).
+- Canary feed corp-action: cron `5 0 * * 1-5` đã cài (mike `7296f332`/`d00d0a8d`), việc non-blocking
+  còn lại: SC2 basename, canary check so toàn bộ 37 cột, notify rc=3 chỉ log, WARN không de-dup.
