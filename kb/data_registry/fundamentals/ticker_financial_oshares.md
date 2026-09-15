@@ -121,6 +121,26 @@ lập được, và so hai con số trên hai rổ là so hai thứ khác nhau.
 Bản ghi phục vụ qua nhánh LIVE mang `anchor_verified=False`, `fin_anchor_ais_certified=False`,
 `fin_branch_live=True`. Backtest cần số đã kiểm chứng ⇒ coi `method == "FIN_FALLBACK"` là miss.
 
+## Bẫy (3) — dòng quý ĐÃ GỒM sự kiện chưa ex ⇒ neo dòng quý rồi lăn lại = ĐẾM HAI LẦN
+*(LAND 2026-09-15 — merge WorkingClaude `422eb99a` (bản vá, job `Taylor_20260914_151805`/`_160309`)
++ `1bcee08b` (selfcheck hermetic, job `Taylor_20260914_164512`); arch-reviewer APPROVED high; user duyệt.)*
+
+Khi dòng `ticker_financial` làm NEO (`FIN_FALLBACK`/`ANCHOR_ONLY`/`ANCHOR_UNVERIFIED`), mọi ISS có
+`exright_date` > ngày dòng quý bị lăn cộng thêm. Vendor lại hay ghi nhận sự kiện vào dòng quý
+TRƯỚC ex-date ⇒ cộng hai lần. Ca gốc **KHP**: dòng 2026Q2 (07-20) = 62.186.518 = Q1 60.376.746 +
+cổ tức CP 3% 1.809.772 (ex 07-30) tuyệt đối ⇒ `oshares_at` phục vụ 63.996.290 (+2,91%).
+
+Quy mô, đo 2026-09-14 (312 mã có ISS trong 12 tháng, 803 cặp dòng quý × sự kiện, 259 cặp neo dòng
+quý thật): **64 câu trả lời LIVE đếm hai lần** (lệch +0,01% → +90,8%), 4 câu không quyết được. Đối
+chiếu dòng quý kế tiếp: số sau vá gần sự thật hơn 55/55, số cũ 0/55. Cả `ANCHOR_ONLY` (MSR) và
+nhánh PIT cũng dính — không riêng `FIN_FALLBACK`/LIVE.
+
+Không phân biệt được bằng NGÀY (công bố ≠ ghi nhận). Cách phân biệt: **bước nhảy** dòng quý so với
+dòng liền trước phải khớp (0,1% của sự kiện nhỏ nhất) một tổ hợp ISS duy nhất; phần khớp thuộc ISS
+ex SAU dòng quý = đã hấp thụ. Mơ hồ ⇒ `value=None`, method **`FIN_ABSORPTION_AMBIGUOUS`** (consumer
+coi như miss; `oshares_pit._DECLINED`). Giới hạn: chỉ so dòng LIỀN TRƯỚC (0/184 ca delta=0 có bước
+nhảy sớm hơn khớp sự kiện).
+
 ## Giới hạn còn lại (không đóng được từ phía này)
 
 Cổng "tự giải thích" chỉ loại được restatement khi nó **mâu thuẫn với sự kiện feed đã có**. Một

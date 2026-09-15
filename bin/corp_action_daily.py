@@ -306,9 +306,16 @@ def gate_selfcheck(runner=None):
     "cái gì được kiểm trước khi publish" và "cái gì định nghĩa phiên bản mô hình" phải là một
     tập, nếu không sẽ có file đổi mà chữ ký không đổi.
 
-    Vì sao chạy như tiến trình con chứ không import hàm `_selfcheck`: bộ hồi quy đó truy vấn BQ
-    thật. Chạy nó ở đây biến "BQ trả lời đúng như hôm nghiệm thu" thành ĐIỀU KIỆN để publish —
-    một thay đổi lược đồ/dữ liệu phía vendor sẽ làm cổng đỏ, thay vì âm thầm chảy vào snapshot.
+    Vì sao chạy như tiến trình con chứ không import hàm `_selfcheck`: cô lập stub/monkeypatch
+    của bộ hồi quy khỏi tiến trình publish.
+
+    Từ 2026-09-15 bộ hồi quy HERMETIC (fixture `oshares_selfcheck_fixture.py`, `_fetch`/`bq` bị
+    stub ném lỗi trong lúc chạy) — cổng này KHÔNG còn đọc BQ, nên KHÔNG bắt drift phía vendor nữa.
+    Drift vendor được bắt ở chỗ khác: đổi CẤU TRÚC (cột mất/đổi tên/đổi kiểu) làm `bq()` raise lúc
+    chạy thật ⇒ `main()` rc=5 + Telegram; feed đứng ⇒ cổng freshness rc=3; đổi độ lớn ⇒ cổng
+    invariant/retro withhold; drift GIÁ TRỊ (`event_code`/`event_status` đổi tên) ⇒
+    `corp_action_feed_canary.py` (warn-only, không chặn publish). Trước đó bộ này đọc BQ sống và
+    đỏ oan mỗi khi feed có dòng mới (ca KHP 2026-09-14) — xem arch-review oshares-selfcheck-freeze.
     `runner` chỉ để selfcheck của chính file này bơm kết quả giả vào; production để None.
     """
     targets = _model_files()
