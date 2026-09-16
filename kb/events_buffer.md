@@ -395,3 +395,12 @@
 ## Consolidation 2026-09-16T12:07:02Z
 - [2026-09-16T11:10:06Z] Winston/status — new-listings-daily: {"date": "2026-09-16", "count": 0, "lookback_days": 90, "note": "no new listings detected"}
 - [2026-09-16T11:40:09Z] Winston/status — corp-action-scan-daily: {"scanned_universe": "tav2_bq.ticker_prune", "candidates_this_run": 1, "fresh_alerts_this_run": 0, "resolved_since_last_run": [], "still_pending_count": 1, "still_pending": [{"ticker": "PHR", "ex_date": "2026-09-14", "alerted_week": "2026-W38", "days_since_ex_date": 2}], "stale_pending_over_7d": []}
+
+## Consolidation 2026-09-16T12:10:24Z
+- [2026-09-16T12:08:23Z] DollarBill/heartbeat — DollarBill_20260916_120754: {"status": "in_progress", "note": "da doc DT5G NEUTRAL, dang doc golive status + active_nav SpaceX"}
+- [2026-09-16T12:08:53Z] DollarBill/heartbeat — DollarBill_20260916_120752: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20260916_120752", "source": "watcher"}
+- [2026-09-16T12:08:55Z] DollarBill/heartbeat — DollarBill_20260916_120754: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20260916_120754", "source": "watcher"}
+- [2026-09-16T12:09:54Z] DollarBill/heartbeat — DollarBill_20260916_120752: {"status": "still_running", "elapsed_min": 2, "job_id": "DollarBill_20260916_120752", "source": "watcher"}
+- [2026-09-16T12:09:55Z] DollarBill/heartbeat — DollarBill_20260916_120754: {"status": "still_running", "elapsed_min": 2, "job_id": "DollarBill_20260916_120754", "source": "watcher"}
+- [2026-09-16T12:10:05Z] DollarBill/decision — plan-2026-09-17-ZaloPay: {"account": "ZaloPay", "plan_date": "2026-09-17", "orders": 0, "action": "HOLD_ALL", "dt5g_state": "NEUTRAL", "reason": "VPI(BAL) sole candidate blocked by signal_hold checkpoint due today 09-16, awaiting user resume confirmation; 0 LAG due; L1 park_trim NO_TRIM; reconcile clean 0 mismatch", "active_nav_vnd": 598338649, "egg_vnd": 39022818, "file": "data/trade_plans/plan_ZaloPay_2026-09-17.json"}
+- [2026-09-16T12:10:07Z] DollarBill/finding — vpi-bal-signal-hold-checkpoint-due: {"ticker": "VPI", "book": "BAL", "hold_expiry": "2026-09-16", "plan_signal_date": "2026-09-16", "note": "Signal-hold checkpoint tới hạn đúng ngày dispatch job này (09-16), nhưng dispatch prompt vẫn liệt kê hold là bắt buộc tuân thủ và không có bằng chứng user đã confirm resume. VPI tiếp tục deferred trong plan 2026-09-17. Cần Mike/user xác nhận rõ ràng resume hay tiếp tục hold trước plan T+1 kế tiếp."}
