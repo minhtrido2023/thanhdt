@@ -391,3 +391,7 @@
 
 ## Consolidation 2026-09-16T06:07:01Z
 - [2026-09-16T06:00:03Z] Mafee/status — bot-done: {"account": "SpaceX", "plan_date": "2026-09-16", "elapsed_s": 2, "rc": 0}
+
+## Consolidation 2026-09-16T12:07:02Z
+- [2026-09-16T11:10:06Z] Winston/status — new-listings-daily: {"date": "2026-09-16", "count": 0, "lookback_days": 90, "note": "no new listings detected"}
+- [2026-09-16T11:40:09Z] Winston/status — corp-action-scan-daily: {"scanned_universe": "tav2_bq.ticker_prune", "candidates_this_run": 1, "fresh_alerts_this_run": 0, "resolved_since_last_run": [], "still_pending_count": 1, "still_pending": [{"ticker": "PHR", "ex_date": "2026-09-14", "alerted_week": "2026-W38", "days_since_ex_date": 2}], "stale_pending_over_7d": []}
