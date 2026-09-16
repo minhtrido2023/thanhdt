@@ -1,13 +1,13 @@
-# Mike fleet — context pack (v3033)
+# Mike fleet — context pack (v3034)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-09-16T00:44:51] Taylor/finding — paper-program checkpoint expvol_pacing 2026-09-16: {"program_id": "expvol_pacing", "checkpoint": "2026-09-16", "commit": "d2b848ec", "order_day_N": 2, "order_day_target": 25, "slices": 76, "gate1_an_toan": "PASS …
-- [2026-09-16T12:10:05] DollarBill/decision — plan-2026-09-17-ZaloPay: {"account": "ZaloPay", "plan_date": "2026-09-17", "orders": 0, "action": "HOLD_ALL", "dt5g_state": "NEUTRAL", "reason": "VPI(BAL) sole candidate blocked by sign …
-- [2026-09-16T12:10:07] DollarBill/finding — vpi-bal-signal-hold-checkpoint-due: {"ticker": "VPI", "book": "BAL", "hold_expiry": "2026-09-16", "plan_signal_date": "2026-09-16", "note": "Signal-hold checkpoint tới hạn đúng ngày dispatch job n …
-- [2026-09-16T12:10:41] DollarBill/decision — plan-2026-09-17: {"account": "SpaceX", "plan_date": "2026-09-17", "action": "HOLD_ALL", "n_orders": 0, "active_nav_vnd": 977178384, "egg_vnd": 100881103, "dt5g_state": "NEUTRAL" …
 - [2026-09-16T12:10:52] DollarBill/finding — plan-2026-09-17-done: {"job": "DollarBill_20260916_120754", "account": "SpaceX", "result": "plan_SpaceX_2026-09-17.json HOLD ALL 0 lenh, load_plan() verify OK, gui Discord plan threa …
+- [2026-09-16T16:33:22] DollarBill/decision — plan-2026-09-17-regen-spacex: {"account": "SpaceX", "plan_date": "2026-09-17", "action": "BUY", "n_orders": 1, "order": "BUY-VPI-BAL-SpaceX-01 qty=800 @62000 (5% active_nav)", "active_nav_vn …
+- [2026-09-16T16:33:22] DollarBill/decision — plan-2026-09-17-regen-zalopay: {"account": "ZaloPay", "plan_date": "2026-09-17", "action": "BUY", "n_orders": 1, "order": "BUY-VPI-BAL-ZaloPay-01 qty=500 @62000 (5% active_nav)", "active_nav_ …
+- [2026-09-16T16:33:22] DollarBill/finding — vpi-bal-first-live-order-egg-funding-dependency: {"summary": "VPI/BAL resumed both plans regenerated with BUY orders (first-ever live BAL fire). Both accounts funding depends on egg (Trung vang) redemption - a …
+- [2026-09-16T16:20:28] Mike/answer — bal-vpi-checkpoint-resume-decision: {"resolution": "User duyệt RESUME: tiếp tục mua VPI/BAL theo đúng chiến lược production đã duyệt (8L rating gate + BAL SIGNAL_V11 momentum + yieldcombo), không  …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -27,10 +27,8 @@
 - **AlphaLens Paper**: FPT/ACB/MBB/HDB, tracking đến 2026-09-30. DollarBill phụ trách.
 - **Trứng vàng** (`egg.totalValue`): SpaceX ~100,2tr / ZaloPay ~38,8tr (đo 08-19), đã cộng NAV tự động — KHÔNG phải `availableCash`, cần rút T+1. `manual_offbook_assets_vnd` ĐÃ ĐÓNG vĩnh viễn 07-23.
 
-## Signal holds — KHÔNG tự thay đổi trước checkpoint
-- **VPI/BAL**: HOLD đến review **2026-09-16**. Lý do: hiệu suất BAL gần đây chưa tốt, chưa phải thiếu tiền. Quyết định user 08-19 (`decided_by: user`). Tín hiệu BAL mới → escalate hỏi, không tự mua hay tự hold theo logic cũ.
-- **SpaceX plan 2026-08-21**: HOLD_ALL (VPI signal_hold đến 09-16).
-- **ZaloPay plan 2026-08-21**: HOLD_ALL (VPI signal_hold đến 09-16).
+## Signal holds
+- **VPI/BAL**: signal_hold 08-19→09-16 ĐÃ GỠ 2026-09-16. Review dựa trên `amh-adaptivity-review-20260910.md` (Taylor job A/B/C + quant-skeptic): lý do gốc của HOLD (edge-health dashboard báo mom_200 FLIPPED) đã bị bác — kênh đó REFUTED cho quyết định BAL; mom_200 IC hồi phục dương Q2/2026. User duyệt RESUME 2026-09-16 23:19 ICT: "tuân theo chiến lược production đã duyệt, không cần điều chỉnh gì" (`decided_by: user`, bus `answer/bal-vpi-checkpoint-resume-decision`). VPI/BAL trở lại logic bình thường từ plan kế tiếp — không còn escalate riêng.
 
 ## CAPIT — vị thế THẬT đang giữ (`capit_fired` ≠ "đang giữ")
 ⚠️ `capit_fired` tính lại mỗi phiên, KHÔNG phải cờ vị thế. Đọc `data/golive_v23_status.json` (`n_capit_basket`, `capit_adv_caps`). **PNJ EXCLUDED** (due-diligence gate, 07-20, TTL ~08-23). Chi tiết: `kb/current_ops_ext.md § CAPIT`.

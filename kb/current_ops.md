@@ -15,10 +15,8 @@
 - **AlphaLens Paper**: FPT/ACB/MBB/HDB, tracking đến 2026-09-30. DollarBill phụ trách.
 - **Trứng vàng** (`egg.totalValue`): SpaceX ~100,2tr / ZaloPay ~38,8tr (đo 08-19), đã cộng NAV tự động — KHÔNG phải `availableCash`, cần rút T+1. `manual_offbook_assets_vnd` ĐÃ ĐÓNG vĩnh viễn 07-23.
 
-## Signal holds — KHÔNG tự thay đổi trước checkpoint
-- **VPI/BAL**: HOLD đến review **2026-09-16**. Lý do: hiệu suất BAL gần đây chưa tốt, chưa phải thiếu tiền. Quyết định user 08-19 (`decided_by: user`). Tín hiệu BAL mới → escalate hỏi, không tự mua hay tự hold theo logic cũ.
-- **SpaceX plan 2026-08-21**: HOLD_ALL (VPI signal_hold đến 09-16).
-- **ZaloPay plan 2026-08-21**: HOLD_ALL (VPI signal_hold đến 09-16).
+## Signal holds
+- **VPI/BAL**: signal_hold 08-19→09-16 ĐÃ GỠ 2026-09-16. Review dựa trên `amh-adaptivity-review-20260910.md` (Taylor job A/B/C + quant-skeptic): lý do gốc của HOLD (edge-health dashboard báo mom_200 FLIPPED) đã bị bác — kênh đó REFUTED cho quyết định BAL; mom_200 IC hồi phục dương Q2/2026. User duyệt RESUME 2026-09-16 23:19 ICT: "tuân theo chiến lược production đã duyệt, không cần điều chỉnh gì" (`decided_by: user`, bus `answer/bal-vpi-checkpoint-resume-decision`). VPI/BAL trở lại logic bình thường từ plan kế tiếp — không còn escalate riêng.
 
 ## CAPIT — vị thế THẬT đang giữ (`capit_fired` ≠ "đang giữ")
 ⚠️ `capit_fired` tính lại mỗi phiên, KHÔNG phải cờ vị thế. Đọc `data/golive_v23_status.json` (`n_capit_basket`, `capit_adv_caps`). **PNJ EXCLUDED** (due-diligence gate, 07-20, TTL ~08-23). Chi tiết: `kb/current_ops_ext.md § CAPIT`.
