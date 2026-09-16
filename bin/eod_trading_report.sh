@@ -183,6 +183,26 @@ _dt_gate_block() {
   [ -n "$out" ] && printf '\n%s' "$out"
 }
 
+# --- Hit Details (nội bộ, CHỈ ZaloPay — user duyệt phương án A, 2026-09-16) --------------
+# Nhúng nguyên văn data/hit_details_<date>.md (đã tính sẵn bởi hit_details_daily.sh) vào cuối
+# báo cáo ZaloPay để tiện quan sát 1 nơi, không cần mở file riêng. Cron hit_details_daily.sh
+# ĐÃ dời sang 19:00 ICT (cùng lúc bq_freshness_check khởi động, tự chờ artifact bên trong nó)
+# để chạy XONG trước 19:10 khi report này khởi động — xem kb/cron_registry.md.
+# CHỈ ZaloPay: SpaceX là account nhà đầu tư ngoài, hit_details lộ công thức + ngưỡng điểm
+# sống của chiến lược (nặng hơn Value Radar/CAP_SIGNAL) — giữ nguyên tinh thần quyết định
+# 2026-09-11 (không đưa audit detail vào báo cáo investor-facing), chỉ nới cho ZaloPay
+# (account vận hành nội bộ) theo yêu cầu mới của user.
+# Freshness theo NỘI DUNG (dòng đầu file phải khớp PLAN_DATE), không chỉ theo file tồn tại —
+# đúng pattern coding_guidelines §14 (producer chậm/lỗi thì bỏ qua lặng lẽ, không hiện số cũ).
+_hit_details_block() {
+  [ "$ACCOUNT" = "ZaloPay" ] || return 0
+  local f="$WC_ROOT/data/hit_details_${PLAN_DATE}.md"
+  [ -f "$f" ] || return 0
+  head -1 "$f" | grep -qF "# Hit Details — ${PLAN_DATE}" || return 0
+  printf '\n\n📋 **Hit Details (nội bộ, %s)** — công thức + giá trị factor thật đằng sau mỗi tín hiệu BAL/LAG hôm nay:\n' "$PLAN_DATE"
+  cat "$f"
+}
+
 # --- Văn phong investor-facing cho SpaceX (job Taylor_20260903_144623) -------------------
 # SpaceX = tài khoản dành cho nhà đầu tư ngoài; ZaloPay giữ nguyên văn phong vận hành nội bộ
 # hiện có (không đổi). Hàm này CHỈ đổi CÁCH TRÌNH BÀY của chuỗi văn bản cuối cùng — không
@@ -253,7 +273,7 @@ elif [ "$N_ORDERS_TODAY" = "0" ]; then
 }📊 **EOD Trading Report — $ACCOUNT ($PLAN_DATE)**
 ✅ HOLD — kế hoạch hôm nay không có lệnh nào (đúng thiết kế, không phải lỗi). Bot đã trực phiên đồng bộ trạng thái.
 
-$NAV_SECTION$(_dt_gate_block)"
+$NAV_SECTION$(_dt_gate_block)$(_hit_details_block)"
   MSG="$(printf '%s' "$MSG" | _investor_polish)"
   echo "$MSG"
   _deliver_eod "$MSG" not_applicable
@@ -604,7 +624,7 @@ FULL_REPORT="${DT5G_WARN:+$DT5G_WARN
 
 }$REPORT
 
-$NAV_SECTION$(_dt_gate_block)"
+$NAV_SECTION$(_dt_gate_block)$(_hit_details_block)"
 FULL_REPORT="$(printf '%s' "$FULL_REPORT" | _investor_polish)"
 
 echo "$FULL_REPORT"

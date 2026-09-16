@@ -9,6 +9,10 @@
 # ⚠️ Post vào `trading_daily` (nội bộ), KHÔNG post vào `trading_report` (kênh DUY NHẤT cho báo cáo
 # tổng hợp — user chỉ đạo 2026-09-11 00:00 ICT: chi tiết công thức/factor là nội bộ, báo cáo cho
 # outsider giữ nguyên như cũ, không lẫn audit detail vào).
+# Từ 2026-09-16: eod_trading_report.sh (`_hit_details_block()`) ĐỌC LẠI file data/hit_details_
+# <date>.md do script này ghi và nhúng nguyên văn vào cuối báo cáo ZaloPay (account nội bộ) —
+# KHÔNG áp cho SpaceX (account nhà đầu tư ngoài). Đây là user duyệt riêng cho ZaloPay, không
+# đổi quyết định 2026-09-11 ở trên (kênh trading_report chung/SpaceX vẫn không có audit detail).
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 MIKE_BIN="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -20,8 +24,12 @@ cd "$ROOT"
 
 # --- Đồng bộ theo ARTIFACT, không theo đồng hồ (kb/coding_guidelines_ext.md §14) ---
 # hit_details.py đọc recs CSV của HÔM NAY. Cron này từng đặt 19:05 vì "producer chạy 19:00",
-# nhưng producer ghi file lúc 19:06-19:07 ⇒ đọc nhầm file phiên trước, im lặng. Giờ đã dời
-# sang 19:12, và vòng chờ dưới đây là thứ bảo đảm thứ tự — kể cả khi producer chậm bất thường.
+# nhưng producer ghi file lúc 19:06-19:07 ⇒ đọc nhầm file phiên trước, im lặng (sự cố
+# 2026-09-12, xem wait_for_artifact.sh). Đổi sang 19:12 để có thắt lưng an toàn, rồi 2026-09-16
+# đổi LẠI về 19:00 (cùng phút producer) vì eod_trading_report.sh (19:10) giờ nhúng file này
+# vào báo cáo ZaloPay — cần xong TRƯỚC 19:10. An toàn vì vòng chờ dưới đây (wait_for_artifact.sh)
+# tự bảo đảm thứ tự đúng bất kể giờ trigger, không phụ thuộc đồng hồ — trigger sớm chỉ tốn thêm
+# vài phút polling, không đọc nhầm file cũ (xem kb/cron_registry.md).
 _recs="$ROOT/deploy_golive_dt5g_v4/out/golive_v23_recommendations_${DATE}.csv"
 "$MIKE_BIN/wait_for_artifact.sh" "$_recs" \
   "golive_recommend_v23 (trong bin/bq_freshness_check.sh, cron 19:00 ICT T2-T6)" || {
