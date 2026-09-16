@@ -561,28 +561,28 @@
       "gate_criteria": [
         {
           "text": "AN TOÀN: 0 vi phạm trần 50% tape thật (recompute ĐỘC LẬP từ journal, không tin field đã ghi) và 0 dòng EXPVOL_SHADOW_ERR trong suốt trial",
-          "status": "pending",
-          "note": "Đây là gate CHẶN: 1 vi phạm = dừng trial, không đàm phán. Cơ chế đo: bin/expvol_shadow_probe.py tính lại (F+X)/(V+X) ≤ 0,50 từ chính số đã log."
+          "status": "pass",
+          "note": "Đây là gate CHẶN: 1 vi phạm = dừng trial, không đàm phán. Cơ chế đo: bin/expvol_shadow_probe.py tính lại (F+X)/(V+X) ≤ 0,50 từ chính số đã log. CHECKPOINT 2026-09-16 (job Taylor_20260916_004003): PASS tính tới hôm nay — 76/76 slice EXPVOL_SHADOW trên 2 order-day (SpaceX 08-17, ZaloPay 09-14), 0 dòng EXPVOL_SHADOW_ERR, 0 vi phạm clamp. Recompute ĐỘC LẬP (script riêng parse thẳng note của journal, không dùng probe) khớp probe: %tape tối đa = 0,5000 đúng bằng trần, không vượt. 2 selfcheck xanh toàn bộ (expected_volume_pacing_selfcheck.py 59 ca; expvol_shadow_probe_selfcheck.py có ca C1 chứng minh ngược — probe BẮT được vi phạm khi bơm dữ liệu phá trần). Gate liên tục ⇒ đánh giá lại ở MỖI checkpoint, pass này chỉ tính tới 2026-09-16."
         },
         {
           "text": "LIVE KHÔNG ĐỔI HÀNH VI trong suốt trial: 0 dòng EXPVOL_PACING trong journal của MỌI account live, và `_expvol_active()` = False trên SpaceX/ZaloPay/RocketX",
-          "status": "pending",
-          "note": "Xác minh 2026-08-14 tại thời điểm wire: 3/3 account live cho _expvol_active()=False, 3/3 paper (main/ab_cross/ab_dip) cho True. Phải kiểm lại tại review — cấu hình có thể bị đổi giữa chừng."
+          "status": "pass",
+          "note": "Xác minh 2026-08-14 tại thời điểm wire: 3/3 account live cho _expvol_active()=False, 3/3 paper (main/ab_cross/ab_dip) cho True. KIỂM LẠI 2026-09-16 (job Taylor_20260916_004003): PASS — (a) 0 dòng EXPVOL_PACING trong TOÀN BỘ data/execution_logs/*journal*.csv (chỉ có 76 dòng EXPVOL_SHADOW); (b) đọc cấu hình THẬT (config.json qua load_config+load_accounts, gồm cả khối cfg lồng theo account): SpaceX/ZaloPay/RocketX đều mode=live, enabled=True, live_gate=True ⇒ _expvol_active()=False; main/ab_cross/ab_dip mode=paper ⇒ True. Đúng như 08-14, cấu hình KHÔNG bị đổi giữa chừng; (c) mục L của expected_volume_pacing_selfcheck.py xanh 6/6 gồm L2 ca chứng minh ngược (paper 14/30 ô KL khác ⇒ gate không phải no-op trá hình) và L4 (flip gate là cánh cửa duy nhất). Gate liên tục ⇒ kiểm lại mỗi checkpoint."
         },
         {
           "text": "CƠ HỘI CÓ THẬT: ≥10% số slice quan sát có bind=ceil, VÀ trung vị delta allowance trên nhóm đó > 0 (đo trên ≥25 order-day)",
           "status": "pending",
-          "note": "NO-GO nếu trượt VỚI ĐỦ MẪU (≥25 order-day). SỬA 2026-09-06 (gia hạn): nếu chưa đạt 25 order-day tại checkpoint (kể cả 09-15 và các lần lặp lại sau), đây là THIẾU MẪU — KHÔNG tự quy kết NO-GO. Chỉ kết luận NO-GO khi ĐÃ đạt ≥25 order-day mà vẫn trượt tiêu chí, hoặc khi chạm safety_ceiling 2027-02-17 vẫn <25 (đóng vì thiếu cơ hội, không phải NO-GO trên edge)."
+          "note": "NO-GO nếu trượt VỚI ĐỦ MẪU (≥25 order-day). SỬA 2026-09-06 (gia hạn): nếu chưa đạt 25 order-day tại checkpoint (kể cả 09-15 và các lần lặp lại sau), đây là THIẾU MẪU — KHÔNG tự quy kết NO-GO. Chỉ kết luận NO-GO khi ĐÃ đạt ≥25 order-day mà vẫn trượt tiêu chí, hoặc khi chạm safety_ceiling 2027-02-17 vẫn <25 (đóng vì thiếu cơ hội, không phải NO-GO trên edge). CHECKPOINT 2026-09-16 (job Taylor_20260916_004003): THIẾU MẪU — N=2 order-day/25 (08-17 SpaceX TV1, 09-14 ZaloPay TV1; +1 order-day so với probe 09-06). Số liệu ĐANG CÓ chỉ để tham khảo, KHÔNG dùng kết luận: bind=ceil 76/76 (100%) ≫ ngưỡng 10%, trung vị delta allowance +28cp (tb +58, max +418, 75/76 slice có delta>0) > 0 ⇒ hướng thuận tiêu chí nhưng N=2 không đủ sức nặng thống kê và 2/2 order-day đều là TV1 (không có đa dạng mã). Giữ pending."
         },
         {
           "text": "CẬN TRÊN CƠ HỘI (ghép cặp, KHÔNG phải edge đã chứng minh): trên nhóm slice bind=ceil, KL khớp thật tới slice kế tiếp VƯỢT allowance nền ở ≥1/3 số order-day",
           "status": "pending",
-          "note": "Diễn giải bắt buộc mang theo: κ (phần tape mà lệnh nằm chờ giành được) KHÔNG neo được từ dữ liệu ta có (README §6.2) ⇒ đây là CẬN TRÊN của phần bị bỏ lỡ, không phải fill sẽ thu thêm. Nếu tape sẵn có luôn nhỏ hơn allowance nền thì trần không bóp gì thật và P2 vô nghĩa dù gate 3 đạt. SỬA 2026-09-06 (gia hạn): cùng nguyên tắc thiếu-mẫu như gate 3 — không đánh giá gate này khi order-day <25."
+          "note": "Diễn giải bắt buộc mang theo: κ (phần tape mà lệnh nằm chờ giành được) KHÔNG neo được từ dữ liệu ta có (README §6.2) ⇒ đây là CẬN TRÊN của phần bị bỏ lỡ, không phải fill sẽ thu thêm. Nếu tape sẵn có luôn nhỏ hơn allowance nền thì trần không bóp gì thật và P2 vô nghĩa dù gate 3 đạt. SỬA 2026-09-06 (gia hạn): cùng nguyên tắc thiếu-mẫu như gate 3 — không đánh giá gate này khi order-day <25. CHECKPOINT 2026-09-16 (job Taylor_20260916_004003): KHÔNG ĐÁNH GIÁ — order-day N=2 < 25, áp đúng nguyên tắc thiếu-mẫu như gate 3. Giữ pending."
         },
         {
           "text": "quant-skeptic CONFIRMED trên bằng chứng của trial → user sign-off RIÊNG mới flip `expected_volume_pacing_live_gate` sang False",
           "status": "pending",
-          "note": "Flip gate là cánh cửa DUY NHẤT đưa P2 lên tiền thật (selfcheck L4 khoá đúng bất biến này). Cờ `expected_volume_pacing_enabled` một mình KHÔNG đủ."
+          "note": "Flip gate là cánh cửa DUY NHẤT đưa P2 lên tiền thật (selfcheck L4 khoá đúng bất biến này). Cờ `expected_volume_pacing_enabled` một mình KHÔNG đủ. CHECKPOINT 2026-09-16: CHƯA ĐỦ ĐIỀU KIỆN chạy quant-skeptic — gate 3/4 còn thiếu mẫu (N=2/25), không có bằng chứng trial để skeptic công kích. Giữ pending; KHÔNG đề xuất flip gate."
         }
       ],
       "probe": {
@@ -596,12 +596,12 @@
       },
       "data_sources": [
         "data/execution_logs/exec_{SpaceX,ZaloPay,RocketX}_*_journal.csv — event EXPVOL_SHADOW / EXPVOL_SHADOW_ERR",
-        "mike/bin/expvol_shadow_probe.py (+ expvol_shadow_probe_selfcheck.py, 13 ca)",
+        "mike/bin/expvol_shadow_probe.py (+ expvol_shadow_probe_selfcheck.py — nằm ở ROOT WorkingClaude/, KHÔNG phải mike/bin/; 13 ca)",
         "expected_volume_pacing_selfcheck.py (59 ca, gồm mục L cổng LIVE + M đối chứng shadow)",
         "mike/agents/Taylor/research/thin_exec_20260812/README.md §P2 (nghiên cứu gốc, N=1.840 phiên-mã)"
       ],
       "notes": "PHẠM VI THẬT — hẹp hơn mô tả trong dispatch, đọc từ code chứ không từ mô tả: nhánh ADV20-paced chỉ nhận CAPIT buy ∪ DISCRETIONARY_SPECIAL buy (`executor.py::_adv20_basis_for`). Lệnh BAL/LAG đi nhánh `max_participation × day_volume` KHÁC, P2 KHÔNG chạm. Trong phạm vi đó thì đúng là MỌI mã, không riêng TV1. || NGUỒN SỐ CỦA TRIAL LÀ JOURNAL LIVE, KHÔNG PHẢI PAPER — và đây là điều kiện thiết kế, không phải sự tiện tay: account paper `main` từ trước tới nay chỉ phát sinh lệnh `book=\"PROBE\"` (342/342 lệnh), mà PROBE không vào nhánh ADV20-paced ⇒ bật cờ trên paper một mình sẽ đo được ĐÚNG SỐ 0. Cơ chế đo thật là `EXPVOL_SHADOW`: log-only trên account LIVE, ghi allowance mà P2 SẼ cho ở cùng lệnh/cùng tape/cùng phút, hành vi đặt lệnh KHÔNG đổi (mẫu ghép cặp hoàn hảo — cùng order, cùng tape, cùng giây). Cờ paper vẫn bật để đường thật được chạy end-to-end nếu sau này có plan paper phát sinh CAPIT/DISC. || CAVEAT MANG THEO TỪ VÒNG VERIFY 08-12 (commit 49c819e): công thức clamp đã deploy KHÁC bản đo trong nghiên cứu ⇒ lợi ích kỳ vọng thật là +4,6pp fill, KHÔNG phải +7,7pp như bảng §4 của README. An toàn không đổi. || ĐỘC LẬP HOÀN TOÀN với chương trình `order_book_execution_shadow` (P5, log L2 depth, bắt đầu 18/08): hai track song song, không chặn nhau, không dùng chung nguồn số. ⚠️ Tại 2026-08-14 entry của order_book MỚI CHỈ NẰM TRÊN NHÁNH `session/1521113190405247057` (commit f4e96f28), CHƯA merge vào master — người merge sẽ phải giải quyết xung đột JSON ở mảng `programs` (2 entry cùng thêm vào cuối). || P1 (trần no-chase động) đã LIVE từ 08-13 và KHÔNG thuộc phạm vi trial này.",
-      "review_short": "Bắt đầu 2026-08-17 · checkpoint LẶP LẠI ~4 tuần (09-15, 10-13, 11-10, ...) tới khi ≥25 order-day HOẶC safety_ceiling 2027-02-17 (xem end_or_trigger). Đang chạy SHADOW log-only trên live; LIVE chưa đổi hành vi, flip gate cần quant-skeptic + user sign-off",
+      "review_short": "Bắt đầu 2026-08-17 · checkpoint LẶP LẠI ~4 tuần (09-15✔, 10-13, 11-10, ...) tới khi ≥25 order-day HOẶC safety_ceiling 2027-02-17 (xem end_or_trigger). CHECKPOINT 2026-09-16: gate an toàn (1) và gate LIVE-không-đổi (2) = PASS (đo thật, recompute độc lập + 2 selfcheck xanh); gate 3/4 THIẾU MẪU N=2/25 order-day, gate 5 chưa đủ điều kiện. Nhịp thực tế ~1 order-day/15 phiên ⇒ nếu giữ nhịp này cần ~370 phiên để đạt 25 — nhiều khả năng chạm safety_ceiling trước. Không flip gate, không tạo lệnh giả. Checkpoint kế: 2026-10-13.",
       "headline": {
         "regex": "order-day N=\\*\\*(\\d+)\\*\\*",
         "template": "order-day N={0}"
