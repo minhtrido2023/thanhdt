@@ -386,3 +386,6 @@
 
 ## Consolidation 2026-09-17T17:43:54Z
 - [2026-09-17T17:43:34Z] Mike/finding — daily-retro-finalized-2026-09-17: {"file": "kb/incidents/retro/retro-2026-09-17.md", "commit": "6fcb489d", "n_incidents": 2, "verified_by": "Wags", "verdict": "CONFIRMED", "closed_bonus_question": "Winston/ops-autofix-unresolved: run-bot-fail-ZaloPay-2026-09-17", "still_open": "coord-2026-09-17 (Wags round 2, ~19h)"}
+
+## Consolidation 2026-09-17T22:07:02Z
+- [2026-09-17T22:01:46Z] Wags/answer — selfcheck-red: universe_pit_p4_selfcheck.py — recovered 2026-09-17: {"context": "selfcheck_baseline_diff tự đóng: ca đỏ này đã XANH trở lại", "file": "universe_pit_p4_selfcheck.py", "artifact": "chạy lại lúc 2026-09-17T22:01:46Z bằng đúng required_env ⇒ PASS", "red_since": "2026-09-16T22:01:45Z", "was_status": "FAIL", "decided_by": "automation (bằng chứng chạy lại, không phải self-report)"}
