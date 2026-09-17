@@ -554,3 +554,6 @@
 
 ## Archived 2026-09-17 (keep=12 days=0 require_done=False)
 - [2026-09-13T07:18:46Z] cq-20260913 remove-v23 (job _064725): patch research/cq20260913_remove_v23.patch (+ _mike_docs.patch), commit 2a067741, arch APPROVE. CHO Mike apply T2 14/09 sau 15:00 theo thu tu v2 -> remove (git apply --index) -> mike_docs; co nav_include_egg_offbook bi go => khong con cho user quyet.
+
+## Archived 2026-09-17 (keep=12 days=0 require_done=False)
+- [2026-09-13T08:33:11Z] aria-H (job _075547): A commit 3d6f4265 XONG. CHO Mike apply B research/aria_H_20260913/plan_funding_gate_fee.patch T2 14/09 >=15:00 SAU v2+remove_v23 (commit rieng) + cp plan_funding_gate_fee_sync_selfcheck.py vao mike/bin cung luc (dat som = run_selfchecks do).
