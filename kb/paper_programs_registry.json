@@ -662,19 +662,23 @@
       "gate_criteria": [
         {
           "text": "Tối thiểu 3 tín hiệu BAL FULL/HALF_SIZE mới xuất hiện trong cửa sổ quan sát (đếm qua bal_shadow_paper.py ledger) — nếu <3 tới mốc 2026-09-16 thì gate này KHÔNG đạt được vì thiếu mẫu, không phải vì hiệu suất xấu; phải nêu rõ trong checkpoint, không tự quy kết",
-          "status": "pending"
+          "status": "fail",
+          "note": "CHECKPOINT 2026-09-17 (job Taylor_20260917_004003): KHÔNG ĐẠT vì THIẾU MẪU, không phải vì hiệu suất xấu. Quét độc lập 16 recommendations CSV 2026-08-19→09-16 (book==BAL, status FULL/HALF_SIZE): chỉ 2 mã riêng biệt — VPI (FULL, 12 file, lần đầu 08-19) và VIC (FULL, 6 file, 08-25→09-08), 0 HALF_SIZE. 2 < 3."
         },
         {
           "text": "Shadow return bình quân (giá hiện tại vs entry Close ngày signal, bal_shadow_paper.py) so với kỳ vọng backtest SIGNAL_V11 (BAL book, R3 NEUTRAL CAGR 28.86%/Sharpe 1.90 — kb v2370) — không yêu cầu khớp tuyệt đối (mẫu quá nhỏ để test thống kê), chỉ cần NÊU RÕ shadow đang cùng chiều hay ngược chiều kỳ vọng, kèm regime context",
-          "status": "pending"
+          "status": "pass",
+          "note": "CHECKPOINT 2026-09-17 (job Taylor_20260917_004003): CÙNG CHIỀU kỳ vọng (mô tả, n=2, KHÔNG có ý nghĩa thống kê). ⚠️ Probe/ledger in 'bình quân −2,99%, 0/2 dương' là SAI do 2 lỗi đo của bal_shadow_paper.py: (a) VPI entry_close=62.100 là giá CHƯA điều chỉnh (Close lúc ghi = Price 08-18, cache trễ 1 ngày); VPI có sự kiện quyền ex 09-07 (Price/Close 08-18 = 1,1007) nên so 62.100 với 62.000 bỏ sót ~9%. Theo Close điều chỉnh BQ: 56.420 (08-18) → 62.000 (09-16) = +9,89%. (b) VIC ledger ghi 09-04 @256.100 vì script không chạy mỗi ngày (update() chỉ đọc CSV MỚI NHẤT) — tín hiệu FULL thật đầu tiên 08-25 @220.500 → 241.200 = +9,39% (không có corp-action trong cửa sổ, Close≡Price). Đúng: bình quân +9,6%, 2/2 dương; VNINDEX cùng cửa sổ: 1.732,02→1.810,11 = +4,51% (từ 08-18) và 1.791,41→1.810,11 = +1,04% (từ 08-25) ⇒ excess ~+5,4pp/+8,3pp. Theo cách ledger (VIC từ 09-04): −5,82% vs VNINDEX −2,32%. Kết luận chỉ là 'không có bằng chứng BAL đang hỏng', không phải 'BAL tốt'."
         },
         {
           "text": "Đối chiếu regime: DT5G state (get_gated_state()) tại các ngày tín hiệu BAL fire trong cửa sổ — regime có đang bất lợi hệ thống (BEAR/CRISIS) hay chỉ NEUTRAL bình thường? Trả lời câu hỏi này bằng dữ liệu, không suy đoán",
-          "status": "pending"
+          "status": "pass",
+          "note": "CHECKPOINT 2026-09-17 (job Taylor_20260917_004003): tra bảng canonical tav2_bq.vnindex_5state_dt5g_live 2026-08-18→09-16: state=3 (NEUTRAL) cả 19/19 phiên, 0 transition; get_gated_state('2026-08-01','2026-09-17') cho NEUTRAL 30/30 phiên (health=HEALTHY). Mọi ngày fire (08-19, 08-25, 09-04) đều NEUTRAL — regime KHÔNG bất lợi hệ thống. Ghi chú phụ: khi gọi get_gated_state local log 'breadth guard inactive (universe_pit does not exist, did you mean universe_pit_q)' → US pillar ungated (hướng fail-safe), không đổi state trong cửa sổ."
         },
         {
           "text": "User xem lại checkpoint 2026-09-16 và quyết định resume/tiếp tục quan sát/dừng hẳn tín hiệu BAL — Taylor KHÔNG tự resume mua thật",
-          "status": "pending"
+          "status": "pass",
+          "note": "User ĐÃ quyết RESUME 2026-09-16 23:19 ICT (Discord, bus Mike/answer topic bal-vpi-checkpoint-resume-decision, decided_by=user): tiếp tục mua VPI/BAL theo đúng production đã duyệt, không thêm gate; signal_hold 08-19→09-16 gỡ bỏ. Căn cứ user dùng là amh-adaptivity-review-20260910.md (mom_200 IC hồi phục Q2/2026), không phải shadow ledger này — dữ liệu shadow đã sửa (gate 2) KHÔNG mâu thuẫn quyết định đó. Taylor không tự bật gì."
         }
       ],
       "feature_flag": "N/A — không đổi hành vi live/paper nào; bal_shadow_paper.py là script R&D độc lập, không chạm plan/executor/BAL book thật",
@@ -702,7 +706,8 @@
         "date_col": "entry_date"
       },
       "notes": "Đăng ký 2026-08-19 (job Taylor_20260819_124845), dispatch từ Mike theo quyết định user (decided_by=user, Discord topic 1521183164364754974). Script mới bal_shadow_paper.py (WC_ROOT root, ~140 dòng): mỗi lần chạy đọc rec CSV mới nhất, thêm entry mới nếu ticker BAL FULL/HALF_SIZE chưa có trong ledger (dedupe theo ticker — không log lại tín hiệu cũ), entry price = BQ Close ngày signal (quy ước MTM giống dc_book_waterfall_paper.py, đây là shadow R&D không phải lệnh thật nên không cần giá DNSE live theo §6). Test thật 2026-08-19: thêm VPI (entry 62.100đ 2026-08-19) thành công, idempotent khi chạy lại. ⚠️ GIỚI HẠN ĐÃ BIẾT: (1) mẫu sẽ RẤT NHỎ trong 4 tuần (book vừa rỗng, tín hiệu BAL không fire mỗi ngày) — checkpoint 2026-09-16 nhiều khả năng chỉ có 1-3 entry, không đủ để test thống kê, chỉ đủ để MÔ TẢ xu hướng + đối chiếu regime, ĐỪNG kết luận 'BAL tốt/xấu' từ mẫu này; (2) chỉ log tín hiệu MỞ MỚI (status FULL/HALF_SIZE) — không mirror vị thế BAL cũ vì book đang rỗng, nếu sau này book có vị thế từ nguồn khác (vd resume sớm) cần mở rộng ledger để không bỏ sót; (3) BQ Close trễ 1 ngày so với phiên thật (sync 23:45 ICT) — MTM hiển thị luôn lệch 1 ngày, không phải bug.",
-      "review_short": "2026-09-16: đủ mẫu shadow BAL chưa (mục tiêu ≥3 tín hiệu), shadow return cùng/ngược kỳ vọng backtest, regime tại các ngày fire là gì → trình user quyết resume/tiếp tục quan sát/dừng."
+      "review_short": "ĐÓNG 2026-09-17: user đã RESUME BAL (09-16). Gate1 FAIL thiếu mẫu (2 tín hiệu VPI+VIC <3), gate2 cùng chiều (+9,6% bq đã điều chỉnh quyền, vs VNINDEX +1–4,5%; probe −2,99% là lỗi đo), gate3 NEUTRAL 100% phiên. Không cần theo dõi tiếp; bal_shadow_paper.py còn 2 lỗi đo nếu tái dùng.",
+      "status": "closed 2026-09-17 — user RESUME BAL 2026-09-16"
     }
   ]
 }
