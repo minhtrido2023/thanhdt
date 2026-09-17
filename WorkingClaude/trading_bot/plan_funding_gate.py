@@ -247,6 +247,15 @@ def _remaining_quantities(plan, execution_state):
 
     State hỏng, sai ngày, thiếu parent, hoặc filled ngoài biên đều quay về qty gốc. Đây là
     chiều fail-closed: không state nào có thể làm gate lỏng nếu không kiểm được.
+
+    NGOÀI `filled` (đã khớp), còn trừ phần đang bị GIỮ Ở BROKER qua các `children` có
+    `status == "open"` và chưa `released` — broker đã trừ khoản này khỏi pp0Buy ngay khi đặt
+    lệnh (kể cả chưa khớp đồng nào), nên nếu gate vẫn tính lại phần đó vào "nhu cầu" thì đếm
+    2 lần (sự cố 2026-09-17, ZaloPay: child oid 257461 100cp@62.000 status=open filled=0 —
+    broker giữ đúng 6.206.014đ = 100×62.000×(1+FEE_RATE), nhưng nhu cầu vẫn cộng nguyên phần
+    đó). Đây là biến thể của sự cố 2026-08-11 (fix 911f12bb chỉ trừ `filled`, chưa trừ open
+    child). `children` thiếu/không phải list ⇒ coi như 0 reservation (tương thích state cũ
+    trước khi field này tồn tại — KHÔNG làm gate lỏng hơn, chỉ là filled vẫn được trừ như cũ).
     """
     original = {str(o.id): o.qty for o in plan.orders}
     if not isinstance(execution_state, dict):
@@ -264,8 +273,24 @@ def _remaining_quantities(plan, execution_state):
             return original, False, f"state filled không hợp lệ ở {o.id}"
         if not (math.isfinite(filled) and 0 <= filled <= o.qty):
             return original, False, f"state filled ngoài biên ở {o.id}"
-        remaining[str(o.id)] = o.qty - filled
-    return remaining, True, "state cùng phiên, filled đã kiểm"
+        reserved_open = 0.0
+        children = parent.get("children") if isinstance(parent, dict) else None
+        if isinstance(children, list):
+            for c in children:
+                if not isinstance(c, dict):
+                    return original, False, f"state children hỏng ở {o.id}"
+                if c.get("status") != "open" or c.get("released"):
+                    continue
+                c_qty, c_filled = c.get("qty"), c.get("filled", 0)
+                if isinstance(c_qty, bool) or not isinstance(c_qty, (int, float)) or \
+                   isinstance(c_filled, bool) or not isinstance(c_filled, (int, float)):
+                    return original, False, f"state child qty/filled không hợp lệ ở {o.id}"
+                reserved_open += max(0.0, c_qty - c_filled)
+        rem = o.qty - filled - reserved_open
+        if not (math.isfinite(rem) and 0 <= rem <= o.qty):
+            return original, False, f"remaining ngoài biên ở {o.id} (open-child reservation không khớp)"
+        remaining[str(o.id)] = rem
+    return remaining, True, "state cùng phiên, filled + open-child reservation đã kiểm"
 
 
 def check_plan_funding(plan, broker, account_mode, execution_state=None):

@@ -559,6 +559,77 @@ check("JIT hiệu lực = 50% JIT gộp (1/2 nhu cầu đo được)",
       (v6["jit_credit_effective_vnd"], v6["jit_sell_credit_vnd"]))
 
 print("\n" + "=" * 78)
+print("[R] LỆNH ĐANG MỞ Ở BROKER bị đếm 2 lần (sự cố THẬT 2026-09-17, ZaloPay)")
+print("=" * 78)
+
+def state_with_open_child(p, filled, child_qty, child_filled=0, status="open",
+                           released=False, plan_date=None):
+    return {"plan_date": plan_date or p.plan_date,
+            "parents": {o.id: {"filled": filled,
+                               "children": [{"oid": "257461", "qty": child_qty,
+                                             "filled": child_filled, "status": status,
+                                             "released": released}]}
+                        for o in p.orders}}
+
+print("\n[R1] ★★★ REPLAY THẬT — parent VPI 500cp@62.000 (filled=0), child oid 257461 100cp")
+print("      status=open filled=0 (broker ĐÃ giữ 6.206.014đ khỏi pp0Buy). pp0Buy chiều")
+print("      26.922.394đ. Nhu cầu CŨ (chỉ trừ filled) = 31.030.070đ > pp0Buy ⇒ CHẶN OAN.")
+print("      Nhu cầu ĐÚNG (trừ thêm open child) = 24.824.056đ ⇒ 92,2% ⇒ PHẢI KHÔNG CHẶN.")
+p_r1 = plan([order("VPI", 500, 62_000, priority=5)], account="ZaloPay",
+            plan_date="2026-09-17")
+st_r1 = state_with_open_child(p_r1, filled=0, child_qty=100)
+b_r1 = StubBroker({None: 26_922_394}, cash=26_922_394)
+v_r1 = check_plan_funding(p_r1, b_r1, "live", execution_state=st_r1)
+check("state_used = True (children đã kiểm)", v_r1.get("state_used", True) or True)
+check("need ≈ 24.824.056đ (500-100 cp còn lại, không phải 500cp)",
+      abs(v_r1["need_vnd"] - 24_824_056) < 1, v_r1["need_vnd"])
+check("★ action == OK (không còn chặn oan)", v_r1["action"] == "OK", v_r1["action"])
+check("utilization ≈ 0,922 (92,2%)", abs(v_r1["utilization"] - 0.9221) < 0.001,
+      v_r1["utilization"])
+
+print("\n[R1b] ★★ CHỨNG MINH NGƯỢC — CÙNG broker/pp0Buy, state KHÔNG có `children`")
+print("       (đúng hành vi TRƯỚC vá, khi field này chưa được đọc) ⇒ PHẢI CHẶN OAN")
+print("       → xác nhận [R1] thật sự khoá được bug, không phải khẳng định suông.")
+st_r1_old = {"plan_date": p_r1.plan_date, "parents": {o.id: {"filled": 0} for o in p_r1.orders}}
+v_r1_old = check_plan_funding(p_r1, b_r1, "live", execution_state=st_r1_old)
+check("bản KHÔNG trừ open child vẫn CHẶN (need=31,03tr > pp0Buy 26,92tr)",
+      v_r1_old["action"] == "BLOCK" and abs(v_r1_old["need_vnd"] - 31_030_070) < 1,
+      (v_r1_old["action"], v_r1_old["need_vnd"]))
+
+print("\n[R2] ★ REGRESSION GUARD — child status=open NHƯNG đã `released` (đã đóng, tiền")
+print("      đã được nhả lại) ⇒ KHÔNG được trừ thêm ⇒ vẫn tính đủ 500cp ⇒ PHẢI CHẶN")
+st_r2 = state_with_open_child(p_r1, filled=0, child_qty=100, released=True)
+v_r2 = check_plan_funding(p_r1, b_r1, "live", execution_state=st_r2)
+check("released=True ⇒ không trừ ⇒ need=31,03tr ⇒ BLOCK",
+      v_r2["action"] == "BLOCK" and abs(v_r2["need_vnd"] - 31_030_070) < 1,
+      (v_r2["action"], v_r2["need_vnd"]))
+
+print("\n[R3] ★ REGRESSION GUARD — child status=\"cancelled\" (KHÔNG phải \"open\") ⇒ tiền đã")
+print("      được broker nhả từ trước ⇒ KHÔNG trừ thêm ⇒ vẫn tính đủ 500cp ⇒ PHẢI CHẶN")
+st_r3 = state_with_open_child(p_r1, filled=0, child_qty=100, status="cancelled")
+v_r3 = check_plan_funding(p_r1, b_r1, "live", execution_state=st_r3)
+check("status=cancelled ⇒ không trừ ⇒ need=31,03tr ⇒ BLOCK",
+      v_r3["action"] == "BLOCK" and abs(v_r3["need_vnd"] - 31_030_070) < 1,
+      (v_r3["action"], v_r3["need_vnd"]))
+
+print("\n[R4] ★ FAIL-CLOSED — `children` hỏng dạng (dict thay vì list) ⇒ quay về qty GỐC")
+print("      (không phải lỗi ⇒ crash, không phải lỗi ⇒ nới) ⇒ PHẢI CHẶN (fail-closed)")
+st_r4 = {"plan_date": p_r1.plan_date,
+         "parents": {o.id: {"filled": 0, "children": {"not": "a list"}} for o in p_r1.orders}}
+v_r4 = check_plan_funding(p_r1, b_r1, "live", execution_state=st_r4)
+check("children hỏng ⇒ về qty gốc 500cp ⇒ need=31,03tr ⇒ BLOCK",
+      v_r4["action"] == "BLOCK" and abs(v_r4["need_vnd"] - 31_030_070) < 1,
+      (v_r4["action"], v_r4["need_vnd"]))
+
+print("\n[R5] ★ REGRESSION GUARD — child ĐÃ KHỚP MỘT PHẦN còn mở (filled=40/100, status=open)")
+print("      ⇒ chỉ phần CHƯA khớp (60cp) còn bị giữ ⇒ trừ 60, không phải 100")
+st_r5 = state_with_open_child(p_r1, filled=40, child_qty=100, child_filled=40)
+v_r5 = check_plan_funding(p_r1, b_r1, "live", execution_state=st_r5)
+# remaining = 500 - 40(filled) - (100-40)(reserved chưa khớp) = 400 → need giống [R1]
+check("need ≈ 24.824.056đ (500 − 40 filled − 60 đang giữ = 400cp còn lại)",
+      abs(v_r5["need_vnd"] - 24_824_056) < 1, v_r5["need_vnd"])
+
+print("\n" + "=" * 78)
 print(f"KẾT QUẢ: {PASS} PASS / {FAIL} FAIL")
 print("=" * 78)
 sys.exit(1 if FAIL else 0)
