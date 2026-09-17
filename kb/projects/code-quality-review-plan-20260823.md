@@ -22,13 +22,24 @@ Thực thi lần đầu (báo cáo `code_quality_2026-09-13.md`, 25 finding): di
 `Taylor_20260917_152759` (8 finding brokers.py-non-order-placement + root script, arch-reviewer
 cho phần correctness) — 2 finding brokers.py:518/559 escalate riêng, chưa dispatch.
 
-**Việc CÒN THIẾU (chưa làm)**: `bin/code_quality_weekly.sh` (cron Chủ Nhật 03:00 UTC) hiện CHỈ
-sinh báo cáo, CHƯA tự gọi dispatch owner — lượt này Mike làm bằng tay ngay sau khi đọc báo cáo
-trong phiên sống. Muốn cron tuần sau tự làm được bước dispatch mà không cần Mike ngồi đọc report
-thủ công thì phải sửa script (thêm bước dispatch cuối `code_quality_weekly.sh`, tự phân loại
-hard-boundary bằng regex đường dẫn/category rồi escalate thay vì dispatch) — CHƯA làm, cần user
-xác nhận có muốn tự động hoá tới mức đó không (rủi ro: cron 03:00 sáng Chủ Nhật tự sửa code +
-xin arch-review không có ai giám sát trực tiếp).
+**WIRE XONG 2026-09-17 (user duyệt "wire auto-dispatch")**: `bin/code_quality_weekly.sh` giờ có
+bước 7 gọi `bin/code_quality_autodispatch.py` NGAY sau khi ghi báo cáo — không cần Mike đọc report
+thủ công nữa. Cơ chế:
+- Phân loại BẰNG MÁY (không LLM): finding chạm file hot-core tiền thật
+  (`trading_bot/{plan,executor,brokers,config,plan_funding_gate}.py`, `bot_execute.py`) VỚI
+  severity medium/high, HOẶC owner không phải Taylor/Wags (rỗng/"Mike"/lạ) → **ESCALATE** (bus
+  `question` topic `cq-<date>-hard-boundary` + Discord `architecture`), KHÔNG dispatch. Còn lại
+  → **dispatch --bg** thẳng Taylor/Wags (arch-reviewer/quant-skeptic vẫn bắt buộc theo bảng §6,
+  nhắc lại trong chính prompt dispatch).
+- Cùng file vừa có finding escalate vừa có finding dispatch (ca thật hôm nay: `brokers.py` có cả
+  2 loại) → prompt dispatch tự nhắc rõ vùng KHÔNG được động tới.
+- Idempotency: `state/code_quality_weekly_dispatch_<date>.json` — script tự chạy 2 lần cùng
+  ngày thì lần 2 tự skip (không dispatch trùng).
+- Selfcheck `bin/code_quality_autodispatch_selfcheck.sh`: 8/8 PASS, mutation-verified (gate
+  severity bị sửa sai → 2/8 test bắt được ngay).
+- **CHƯA qua arch-reviewer** (đang xin ngay sau khi ghi note này) — coi là DRAFT tới khi có
+  APPROVE, dù đã nằm trong crontab (chạy Chủ Nhật kế tiếp 2026-09-20 03:00 UTC nếu chưa kịp
+  arch-review thì vẫn chạy — cân nhắc tạm `MIKE_DIAG_GATE`-kiểu override nếu cần trì hoãn).
 
 **Kết quả thực thi lần đầu (đo thật cùng ngày)** — 2 bài học bắt buộc áp dụng từ lần dispatch kế
 tiếp:

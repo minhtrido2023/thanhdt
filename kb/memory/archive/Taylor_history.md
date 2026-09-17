@@ -548,3 +548,6 @@
 
 ## Archived 2026-09-17 (keep=12 days=0 require_done=False)
 - [2026-09-13T06:27:23Z] cq-20260913 #1: patch v2 (research/cq20260913_batch1_item1_v2.patch, commit 063dd83f) = v1 + fix goc profile-lp, 2 vong arch APPROVE. CHO Mike apply v2 THAY v1 T2 14/09 sau 15:00 + chay selfcheck cuoi patch. Van CHO user quyet co nav_include_egg_offbook (khuyen nghi OFF).
+
+## Archived 2026-09-17 (keep=12 days=0 require_done=False)
+- [2026-09-13T07:10:15Z] [2026-09-13] aria-F XONG (F1 5f8c3ba2, F2 4a02f23a). CHO user: dong bo phi 0,097% vao duong thuc thi (trading_bot/plan_funding_gate.py FEE_RATE + merge_park_orders.py fee_est_vnd + prompt bq_freshness_check.sh) cung luc. CHO Mafee/Winston: dnse_raw+journal ZaloPay 07-10 thieu order VHC 600cp. BAY: commit o mike repo khi co job song song -> index bi git add lan; dung GIT_INDEX_FILE tam + commit-tree voi danh sach file tuong minh.
