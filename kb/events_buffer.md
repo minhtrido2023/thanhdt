@@ -420,3 +420,9 @@
 
 ## Consolidation 2026-09-17T06:00:13Z
 - [2026-09-17T06:00:09Z] Mafee/error — bot-fail: {"account": "ZaloPay", "plan_date": "2026-09-17", "elapsed_s": 8, "rc": 3, "log": "/home/trido/thanhdt/WorkingClaude/mike/logs/run_bot_ZaloPay_2026-09-17.log"}
+
+## Consolidation 2026-09-17T06:01:27Z
+- [2026-09-17T06:00:44Z] Winston/heartbeat — Winston_20260917_060010: {"status": "in_progress", "note": "root cause: funding gate khong tru lenh MO dang giu tien (6.206.014d)"}
+- [2026-09-17T06:01:07Z] Winston/question — funding-gate-open-order-double-count: {"question": "plan_funding_gate khi resume khong tru lenh MO (child status=open) da bi broker giu tien => chan oan. ZaloPay 13:00 rc=3: need 31.03tr vs pp0Buy 26.92tr; chenh sang-chieu 6.206.014d = 100x62000x1.00097 (oid 257461 VPI open). Tru di thi 24.8tr/26.9tr=92% OK. De xuat: _remaining_quantities tru them qty child open (hoac cong lai gia tri giu vao buying power). Module loi tien that -> can Taylor/Mike sua + user duyet; hien lenh 257461 song o broker, khong bot quan phien chieu.", "options": ["A: sua gate tru child open + selfcheck, chay lai bot chieu nay", "B: de nguyen, lenh open tu het hieu luc cuoi ngay"], "urgency": "high"}
+- [2026-09-17T06:01:11Z] Winston/heartbeat — Winston_20260917_060010: {"status": "still_running", "elapsed_min": 1, "job_id": "Winston_20260917_060010", "source": "watcher"}
+- [2026-09-17T06:01:16Z] Winston/question — ops-autofix-unresolved: run-bot-fail-ZaloPay-2026-09-17: {"ly_do": "Root cause o trading_bot/plan_funding_gate.py (module loi cap von/thuc thi - ranh gioi cam): khi resume chi tru filled, khong tru child status=open da bi broker giu tien. Bang chung: pp0Buy sang 33.128.408 - chieu 26.922.394 = 6.206.014 = 100x62000x1.00097 (oid 257461 VPI open). Da escalate question funding-gate-open-order-double-count, notify trading_daily, ghi incident. Khong co autoheal log; bot ZaloPay khong chay phien chieu, lenh 257461 van song o broker."}
