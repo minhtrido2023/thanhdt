@@ -72,20 +72,30 @@ EXEC_HARD_BOUNDARY_EXACT = (
 VALID_SEVERITIES = {"low", "medium", "high"}
 
 
-def load_manifest_t0(root: Path) -> set[str]:
+def load_manifest_t0(root: Path) -> tuple[set[str], str | None]:
     """Đọc thêm `kb/production_manifest.json` (đã tồn tại, do `production_manifest.py` sinh CƠ
     HỌC từ crontab thật — xem docstring file đó) làm NGUỒN THỨ 2, HỢP (union) với
     EXEC_HARD_BOUNDARY_* thay vì thay thế — arch-review round 3 killer objection: danh sách tay
     chỉ phủ 10/34 file T0 có commit trong scope tuần đo thật (bỏ sót mike/bin/merge_park_orders.py
-    — ghi thẳng orders[] vào plan — và tương tự). Lỗi đọc bất kỳ (thiếu file/JSON hỏng/thiếu
-    field) ⇒ trả set RỖNG, KHÔNG throw — vì đây là union thêm an toàn, không phải nguồn duy nhất;
-    manifest hỏng chỉ làm mất PHẦN THÊM đó, EXEC_HARD_BOUNDARY_* tay vẫn còn nguyên làm nền."""
+    — ghi thẳng orders[] vào plan — và tương tự).
+
+    Trả (set, warning). Lỗi đọc bất kỳ (thiếu file/JSON hỏng/thiếu field) ⇒ set RỖNG + warning nêu
+    ĐÚNG lý do đọc được (không đoán, §29) — arch-review round 4 killer objection: bản trước nuốt
+    exception thành set() IM LẶNG, không log/không Discord, khiến "gate đang bảo vệ" và "gate đã
+    tắt" không phân biệt được từ output. Caller BẮT BUỘC đưa warning này vào summary + Discord."""
+    manifest_path = root / "kb" / "production_manifest.json"
     try:
-        data = json.loads((root / "kb" / "production_manifest.json").read_text(encoding="utf-8"))
-        files = data.get("files") or {}
-        return {rel for rel, meta in files.items() if isinstance(meta, dict) and meta.get("tier") == "T0"}
-    except Exception:
-        return set()
+        raw = manifest_path.read_text(encoding="utf-8")
+    except OSError as e:
+        return set(), f"không đọc được {manifest_path}: {e}"
+    try:
+        data = json.loads(raw)
+    except json.JSONDecodeError as e:
+        return set(), f"JSON hỏng ở {manifest_path}: {e}"
+    files = data.get("files")
+    if not isinstance(files, dict):
+        return set(), f"{manifest_path} thiếu field 'files' hợp lệ (schema đổi?)"
+    return {rel for rel, meta in files.items() if isinstance(meta, dict) and meta.get("tier") == "T0"}, None
 
 
 def to_repo_relative(file_abs: str, wc_root: Path) -> str:
@@ -332,10 +342,16 @@ def notify_failure(root: Path, arch_thread: str | None, err: str, dry_run: bool)
 def write_scope_variants(rel: str) -> list[str]:
     """1 file có thể cần khai theo NHIỀU dạng để khớp guard của fleet — arch-review round 3: đo
     thật trên `bus/jobs/*.json` cho thấy 98 giá trị --write-scope khác nhau (bin/…, mike/…, ../…,
-    tuyệt đối); `mike/` là git repo RIÊNG lồng trong WorkingClaude nên staged-diff của NÓ tính từ
-    toplevel `mike/` (vd `bin/foo.py`), không phải từ WC (`mike/bin/foo.py`). Trả cả 2 dạng cho
-    file dưới `mike/` để tăng xác suất khớp `_path_overlaps` bất kể job khác khai kiểu nào; file
-    ngoài `mike/` (WC là toplevel của chính nó) chỉ có 1 dạng đúng, không đoán thêm."""
+    tuyệt đối); `mike/` là git repo RIÊNG lồng trong WorkingClaude nên staged-diff của NÓ (đọc bởi
+    `bin/repo_commit_gate.sh`, hook CHỈ cài ở repo `mike/`) tính từ toplevel `mike/` (vd
+    `bin/foo.py`), không phải từ WC (`mike/bin/foo.py`). Trả cả 2 dạng cho file dưới `mike/` để
+    khớp cả `job-write-scope-conflict` (so chuỗi khai báo, không quan tâm toplevel) lẫn
+    `repo_commit_gate.sh` (so staged-diff CỦA REPO mike). File ngoài `mike/` — arch-review round 4
+    đo lại: `WorkingClaude` KHÔNG PHẢI git toplevel của chính nó (`git rev-parse --show-toplevel`
+    ở đó trả `/home/trido/thanhdt`, staged path thật dạng `WorkingClaude/foo.py`) nên câu "WC là
+    toplevel của chính nó" ở bản trước SAI — nhưng vô hại vì `repo_commit_gate.sh` không cài hook
+    ở repo ngoài `mike/`, `job-write-scope-conflict` không quan tâm toplevel git; KHÔNG thêm biến
+    thể `WorkingClaude/<rel>` vì chưa đo được lợi ích thật, chỉ sửa lại câu khẳng định cho đúng."""
     if rel.startswith("mike/"):
         return [rel, rel[len("mike/"):]]
     return [rel]
@@ -344,7 +360,7 @@ def write_scope_variants(rel: str) -> list[str]:
 def run(args) -> dict:
     root = Path(args.root)
     wc_root = Path(args.wc_root) if args.wc_root else Path(args.root).parent
-    manifest_t0 = load_manifest_t0(root)
+    manifest_t0, manifest_warning = load_manifest_t0(root)
     dispatch_bin = Path(args.dispatch_bin) if args.dispatch_bin else root / "bin" / "dispatch.sh"
     state_file = Path(args.state_file) if args.state_file else root / "state" / f"code_quality_weekly_dispatch_{args.date}.json"
     rerun_cmd = (f"python3 {root}/bin/code_quality_autodispatch.py --verified {args.verified} "
@@ -422,6 +438,8 @@ def run(args) -> dict:
         "n_escalate": len(escalate),
         "n_taylor": len(taylor_f),
         "n_wags": len(wags_f),
+        "n_manifest_t0": len(manifest_t0),
+        "manifest_warning": manifest_warning,
         "escalate_failed": escalate_failed,
         "results": results,
         "generated_at": now_ict_iso(),
@@ -429,6 +447,19 @@ def run(args) -> dict:
 
     if not args.dry_run:
         dispatch_msg_lines = [f"**Code review auto-dispatch ({args.date})** — báo cáo `{args.report_file}`:"]
+        if manifest_warning:
+            # arch-review round 4 killer objection: gate hard-boundary phải QUAN SÁT ĐƯỢC khi
+            # phần manifest-union không đọc được — trước đó im lặng trả set rỗng, không ai biết
+            # "gate đang bảo vệ" hay "gate đã tắt" từ output.
+            dispatch_msg_lines.append(
+                f"⚠️ Không đọc được kb/production_manifest.json ({manifest_warning}) — tuần này "
+                f"ranh giới cứng CHỈ dùng danh sách tay (EXEC_HARD_BOUNDARY_*), KHÔNG có phần bổ "
+                f"sung từ manifest T0. Danh sách tay vẫn đứng nguyên, không tắt hẳn."
+            )
+        dispatch_msg_lines.append(
+            f"Phân loại: {len(escalate)} escalate / {len(taylor_f)} Taylor / {len(wags_f)} Wags "
+            f"(manifest T0 đang có {len(manifest_t0)} file)."
+        )
         any_fail = escalate_failed
         for owner, res in results.items():
             if res.get("skipped_already_done"):

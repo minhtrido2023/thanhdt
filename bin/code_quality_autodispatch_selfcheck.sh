@@ -322,5 +322,20 @@ else
   bad "T14" "out=$OUT dispatch_log=$(cat "$SANDBOX_DISPATCH_LOG")"
 fi
 
+# --- T15: kb/production_manifest.json THIẾU (không tồn tại) -> cảnh báo THẤY ĐƯỢC trong summary
+# JSON lẫn Discord, KHÔNG im lặng trả set rỗng (arch-review round 4 killer objection: bản trước
+# nuốt exception, "gate đang bảo vệ" và "gate đã tắt" không phân biệt được từ output) ---
+rm -f "$SANDBOX/kb/production_manifest.json"
+cat > "$SANDBOX/t15.json" <<'EOF'
+{"findings": [{"file": "/x/mike/bin/harmless_tool.py", "line": 1, "category": "dead-code", "severity": "low", "summary": "s15", "evidence": "e15", "owner": "Wags"}]}
+EOF
+run "$SANDBOX/t15.json" 2099-01-15
+if [ "$LAST_RC" -eq 0 ] && echo "$OUT" | grep -q '"n_manifest_t0": 0' && echo "$OUT" | grep -qF '"manifest_warning": "không đọc được' \
+   && grep -q "Không đọc được kb/production_manifest.json" "$SANDBOX_NOTIFY_LOG"; then
+  ok "T15 manifest thiếu -> warning THẤY ĐƯỢC trong summary JSON + Discord (không im lặng như round 4 killer)"
+else
+  bad "T15" "out=$OUT notify_log=$(cat "$SANDBOX_NOTIFY_LOG")"
+fi
+
 echo "=== $PASS PASS / $FAIL FAIL ==="
 [ "$FAIL" -eq 0 ]
