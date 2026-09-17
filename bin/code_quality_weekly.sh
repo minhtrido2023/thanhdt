@@ -378,8 +378,11 @@ log "Báo cáo: $report_file"
 # $TMPDIR_CQ bị `trap rm -rf EXIT` xoá khi script này thoát, nên nếu bước 7 dispatch fail và cần
 # rerun tay sau đó, input phải còn tồn tại để đọc lại (không thì "rerun" chỉ là câu nói suông).
 verified_durable="$REPORT_DIR/verified_${TODAY}.json"
-cp "$verified_f" "$verified_durable"
-verified_f="$verified_durable"
+if cp "$verified_f" "$verified_durable"; then
+  verified_f="$verified_durable"
+else
+  log "WARN: copy verified.json ra $verified_durable THẤT BẠI — bước 7 auto-dispatch sẽ dùng bản tạm (mất khi script thoát, rerun tay sau này sẽ không đọc lại được). Tiếp tục bằng bản tạm."
+fi
 
 dropped_f="$TMPDIR_CQ/dropped.txt"
 printf '%s\n' "$dropped" > "$dropped_f"

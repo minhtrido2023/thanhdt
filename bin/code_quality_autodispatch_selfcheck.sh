@@ -169,11 +169,15 @@ cat > "$SANDBOX/t6.json" <<'EOF'
 EOF
 run "$SANDBOX/t6.json" 2099-01-06
 n_dispatch_calls="$(grep -cE '^(Taylor|Wags) Xử lý ' "$SANDBOX_DISPATCH_LOG" || true)"
+# File dưới mike/ khai CẢ 2 dạng (mike/bin/bar.sh VÀ bin/bar.sh, write_scope_variants() — arch-review
+# round 3): assert cả 2 dạng có mặt trong --write-scope của Wags, dạng ngoài mike/ (hit_details.py)
+# chỉ có 1 dạng.
 if [ "$LAST_RC" -eq 0 ] && echo "$OUT" | grep -q '"n_taylor": 1' && echo "$OUT" | grep -q '"n_wags": 1' && [ "$n_dispatch_calls" -eq 2 ] \
    && grep -qF -- "--write-scope hit_details.py" "$SANDBOX_DISPATCH_LOG" \
-   && grep -qF -- "--write-scope mike/bin/bar.sh" "$SANDBOX_DISPATCH_LOG" \
+   && grep -qE -- "--write-scope [^ ]*mike/bin/bar\.sh" "$SANDBOX_DISPATCH_LOG" \
+   && grep -qE -- "--write-scope [^ ]*bin/bar\.sh,mike/bin/bar\.sh" "$SANDBOX_DISPATCH_LOG" \
    && ! grep -qF -- "--write-scope /x/" "$SANDBOX_DISPATCH_LOG"; then
-  ok "T6 mix Taylor+Wags -> --write-scope REPO-RELATIVE (không còn path tuyệt đối /x/...)"
+  ok "T6 mix Taylor+Wags -> --write-scope REPO-RELATIVE (không còn /x/...), file dưới mike/ khai CẢ 2 dạng"
 else
   bad "T6" "out=$OUT dispatch_log=$(cat "$SANDBOX_DISPATCH_LOG")"
 fi
@@ -277,6 +281,45 @@ if [ "$LAST_RC" -ne 0 ] && grep -q "CRASH\|THẤT BẠI" "$SANDBOX_NOTIFY_LOG" &
   ok "T12 escalation post FAIL -> notify_failure() gọi, rc≠0, KHÔNG ghi state (không im lặng như round 1)"
 else
   bad "T12" "rc=$LAST_RC state=$state_content notify_log=$(cat "$SANDBOX_NOTIFY_LOG")"
+fi
+
+# --- T13: file KHÔNG nằm trong danh sách tay nhưng có tier=T0 trong kb/production_manifest.json
+# giả -> escalate (arch-review round 3 killer objection: danh sách tay bỏ sót merge_park_orders.py
+# vì nó không "nghe tên" nguy hiểm — nguồn manifest cơ học phải bắt được ca này) ---
+mkdir -p "$SANDBOX/kb"
+python3 -c "
+import json
+json.dump({'files': {'mike/bin/merge_park_orders_fake.py': {'tier': 'T0'}, 'some_harmless.py': {'tier': 'T1'}}},
+          open('$SANDBOX/kb/production_manifest.json', 'w'))
+"
+cat > "$SANDBOX/t13.json" <<'EOF'
+{"findings": [{"file": "/x/mike/bin/merge_park_orders_fake.py", "line": 1, "category": "correctness", "severity": "low", "summary": "s13", "evidence": "e13", "owner": "Wags"}]}
+EOF
+run "$SANDBOX/t13.json" 2099-01-13
+if [ "$LAST_RC" -eq 0 ] && echo "$OUT" | grep -q '"n_escalate": 1' && [ ! -s "$SANDBOX_DISPATCH_LOG" ] \
+   && grep -q "hard_boundary_manifest_t0" "$SANDBOX_EVENT_LOG"; then
+  ok "T13 file KHÔNG trong danh sách tay nhưng tier=T0 trong production_manifest.json -> escalate (manifest union)"
+else
+  bad "T13" "out=$OUT event=$(cat "$SANDBOX_EVENT_LOG")"
+fi
+rm -f "$SANDBOX/kb/production_manifest.json"
+
+# --- T14: cùng file vừa có finding escalate (owner lạ) vừa có finding dispatch (owner Taylor) ->
+# prompt Taylor PHẢI chứa cảnh báo "CÙNG FILE ... ESCALATE" nêu đúng tên file (arch-review round 3:
+# bản trước so _rel với path thô nên cảnh báo này là code chết, không bao giờ bắn) ---
+cat > "$SANDBOX/t14.json" <<'EOF'
+{"findings": [
+  {"file": "/x/shared_file.py", "line": 1, "category": "dead-code", "severity": "low", "summary": "owner la", "evidence": "e", "owner": "unknown-owner"},
+  {"file": "/x/shared_file.py", "line": 2, "category": "correctness", "severity": "low", "summary": "owner ro", "evidence": "e", "owner": "Taylor"}
+]}
+EOF
+run "$SANDBOX/t14.json" 2099-01-14
+if [ "$LAST_RC" -eq 0 ] && echo "$OUT" | grep -q '"n_escalate": 1' && echo "$OUT" | grep -q '"n_taylor": 1' \
+   && grep -q "CÙNG FILE có finding khác đang ESCALATE" "$SANDBOX_DISPATCH_LOG" \
+   && grep -qF "shared_file.py" "$SANDBOX_DISPATCH_LOG"; then
+  ok "T14 cùng file escalate+dispatch -> cảnh báo THẬT SỰ xuất hiện trong prompt (regression round 3 đã vá)"
+else
+  bad "T14" "out=$OUT dispatch_log=$(cat "$SANDBOX_DISPATCH_LOG")"
 fi
 
 echo "=== $PASS PASS / $FAIL FAIL ==="

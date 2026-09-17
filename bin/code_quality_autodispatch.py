@@ -6,21 +6,28 @@ kb/projects/code-quality-review-plan-20260823.md § CẬP NHẬT 2026-09-17).
   - ESCALATE: finding chạm file "hot-core tiền thật" — MỌI severity escalate (không tin severity
     LLM tự khai làm cổng cho code chạm tiền thật/NAV sống — arch-review round 2 bác bỏ việc tách
     riêng 1 tầng "NAV-scale chỉ escalate medium/high", vì boundary gốc trong MIKE.md/current_ops.md
-    ("KHÔNG tự sửa logic đặt lệnh") không hề có ngoại lệ theo severity):
-      - mọi path dưới thư mục `trading_bot/` (prefix, không phải liệt kê tên file — tránh trôi
-        mỗi lần thêm module mới, đúng góp ý arch-review round 2)
-      - `bot_execute.py`, `dnse_api.py` (gọi place_order/ppse trực tiếp)
-      - `mike/bin/run_bot.sh`, `mike/bin/compute_jit_unpark.py`,
-        `mike/bin/discretionary_margin_gate.py`, `mike/bin/compute_active_nav.py`,
-        `mike/bin/daily_nav_snapshot.py`
+    ("KHÔNG tự sửa logic đặt lệnh") không hề có ngoại lệ theo severity). Nguồn hard-boundary = HỢP
+    (union) 2 nguồn, không nguồn nào thay thế nguồn kia:
+      (1) Danh sách tay `EXEC_HARD_BOUNDARY_PREFIXES`/`_EXACT` — prefix `trading_bot/` (mọi file
+          dưới thư mục này, không liệt tên — tránh trôi khi thêm module mới) + vài file cụ thể
+          ngoài đó (`bot_execute.py`, `dnse_api.py`, `mike/bin/run_bot.sh`, ...).
+      (2) `kb/production_manifest.json` tier T0 (`load_manifest_t0()`) — nguồn CƠ HỌC sinh từ
+          crontab thật (`production_manifest.py`), bắt được cả file KHÔNG có trong danh sách tay
+          — arch-review round 3 killer objection: danh sách tay chỉ phủ 10/34 file T0 có commit
+          trong 1 tuần đo thật, bỏ sót `mike/bin/merge_park_orders.py` (ghi thẳng orders[] vào
+          plan) vì nó không "nghe tên" nguy hiểm như các file đã liệt. Manifest đọc lỗi/thiếu ⇒
+          rơi về set rỗng (KHÔNG throw), danh sách tay (1) vẫn là nền — không có kịch bản nào
+          escalation bị GIẢM so với chỉ dùng (1) một mình.
     HOẶC owner không phải Taylor/Wags (rỗng/"Mike"/lạ) — fail-safe khi không rõ owner.
     KHÔNG dispatch — ghi bus question + ack `triaged-needs-human:` (khỏi bị wags_autofix đốt
     job vô ích, xem arch-review round 1 "Long-term ops") + Discord.
   - Taylor / Wags: dispatch --bg với prompt build từ chính finding (surgical, ràng buộc ranh
     giới cứng + kỷ luật git add, selfcheck theo phạm vi, arch-reviewer/quant-skeptic bắt buộc).
-    `--write-scope` truyền theo đường dẫn REPO-RELATIVE (so với WC_ROOT) — arch-review round 2:
-    truyền path TUYỆT ĐỐI làm vô hiệu cả job-write-scope-conflict lẫn commit-collision-gate vì
-    toàn fleet khai write-scope theo dạng tương đối.
+    `--write-scope` truyền theo đường dẫn REPO-RELATIVE (so với `--wc-root`) — arch-review round 2:
+    path TUYỆT ĐỐI làm vô hiệu cả job-write-scope-conflict lẫn commit-collision-gate. File dưới
+    `mike/` (git repo RIÊNG lồng trong WorkingClaude) khai CẢ 2 dạng (`mike/bin/x.py` VÀ
+    `bin/x.py`, xem `write_scope_variants()`) — arch-review round 3: đo thật fleet dùng lẫn lộn cả
+    2 quy ước, khai 1 dạng duy nhất bỏ lỡ phần lớn khả năng khớp thật.
 
 Bài học 2026-09-17 (lượt dispatch tay đầu tiên, xem plan doc): script này CHÍNH LÀ nơi duy nhất
 tự động dispatch cho 1 báo cáo — không có tác nhân nào khác chạy song song cho cùng report_date,
