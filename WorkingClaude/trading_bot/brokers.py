@@ -343,9 +343,8 @@ class PHSBroker(BrokerBase):
         return out
 
     def get_quote(self, symbol):
-        import time as _t
         hit = self._quote_cache.get(symbol)
-        if hit and _t.time() - hit[0] < self._quote_ttl:
+        if hit and time.time() - hit[0] < self._quote_ttl:
             return hit[1]
         try:
             rows = self.client.instruments(symbols=symbol)
@@ -358,7 +357,7 @@ class PHSBroker(BrokerBase):
             if not q.ok():
                 self._log_raw("quote_unmapped", row)
             q.l2_snapshot = self._phs_l2_snapshot(symbol, row) if isinstance(row, dict) else None
-        self._quote_cache[symbol] = (_t.time(), q)
+        self._quote_cache[symbol] = (time.time(), q)
         return q
 
     @staticmethod
@@ -366,9 +365,8 @@ class PHSBroker(BrokerBase):
         """Build orderbook_l2_v1 snapshot từ PHS flat bid/ask fields (3 mức).
         Trả None nếu không có data. Không raise — nằm trên đường đặt lệnh."""
         try:
-            import time as _t
             captured = now_ict()
-            captured_epoch_ms = int(_t.time() * 1000)
+            captured_epoch_ms = int(time.time() * 1000)
             bids, offers = [], []
             for i in (1, 2, 3):
                 p = normalize_price_vnd(_fnum(row.get(f"bidPrice{i}")))
@@ -489,7 +487,6 @@ class DNSEBroker(BrokerBase):
             self.client.create_trading_token(self._otp)
             print(f"[dnse] trading-token đã tạo ({self.label}, hạn 8h)")
         if self._auto_otp and not self.client.has_trading_token():
-            import time as _time
             from gmail_otp_reader import fetch_dnse_otp, _build_gmail_service, _save_last_id
             print(f"[dnse] auto-OTP: pre-mark latest OTP email ({self.label})...")
             try:
@@ -502,7 +499,7 @@ class DNSEBroker(BrokerBase):
             except Exception:
                 pass
             print(f"[dnse] auto-OTP: gửi email OTP ({self.label})...")
-            send_ts = _time.time()
+            send_ts = time.time()
             self.client.send_email_otp()
             otp = fetch_dnse_otp(timeout=120, sent_after=send_ts)
             self.client.create_trading_token(otp)
@@ -820,9 +817,8 @@ class DNSEBroker(BrokerBase):
             return None
 
     def get_quote(self, symbol):
-        import time as _t
         hit = self._quote_cache.get(symbol)
-        if hit and _t.time() - hit[0] < self._quote_ttl:
+        if hit and time.time() - hit[0] < self._quote_ttl:
             return hit[1]
         raw = {"symbol": symbol}
         # 1) secdef (trần/sàn/tham chiếu theo board) — tĩnh, cache cả phiên
@@ -868,7 +864,7 @@ class DNSEBroker(BrokerBase):
         q.l2_snapshot = l2_snapshot
         if not q.ok():
             self._log_raw("quote_unmapped", raw)
-        self._quote_cache[symbol] = (_t.time(), q)
+        self._quote_cache[symbol] = (time.time(), q)
         return q
 
     @staticmethod
@@ -936,7 +932,7 @@ class DNSEBroker(BrokerBase):
         đòn bẩy hơn duyệt là rủi ro margin call bằng tiền thật. Đối xứng với
         _resolve_loan_package_id: không bao giờ BỎ trường (thiếu = HTTP 400, bug TV1 07-28).
         Cache theo (symbol, want) trong phiên."""
-        cache = self.__dict__.setdefault("_lever_pkg_cache", {})
+        cache = self._lever_pkg_cache   # selfcheck dựng qua __new__ phải tự gán _lever_pkg_cache = {}
         key = (symbol, str(want))
         if key in cache:
             return cache[key]
@@ -1029,8 +1025,7 @@ class DNSEBroker(BrokerBase):
                     "req": [order_id, qty, price],
                     "quirk": "HTTP 500 but success expected — re-polling",
                     "old_oid": order_id})
-                import time as _time
-                _time.sleep(1)
+                time.sleep(1)
                 updates = self.poll_orders()
                 old = updates.get(str(order_id))
                 if old and not old.is_dead:
@@ -1207,9 +1202,8 @@ class PHSFlashBroker(BrokerBase):
     # ------------------------------------------------------------- bảng giá
 
     def get_quote(self, symbol):
-        import time as _t
         hit = self._quote_cache.get(symbol)
-        if hit and _t.time() - hit[0] < self._quote_ttl:
+        if hit and time.time() - hit[0] < self._quote_ttl:
             return hit[1]
         try:
             rows = self.client.get_quote(symbol)
@@ -1235,7 +1229,7 @@ class PHSFlashBroker(BrokerBase):
             # KHÔNG dựng l2_snapshot: symbol-latest-data chỉ có 3 mức LÔ LẺ (bbOd/boOd),
             # không phải sổ lệnh lô chẵn — dựng L2 từ đó là bịa thanh khoản.
             q.l2_snapshot = None
-        self._quote_cache[symbol] = (_t.time(), q)
+        self._quote_cache[symbol] = (time.time(), q)
         return q
 
     @staticmethod
