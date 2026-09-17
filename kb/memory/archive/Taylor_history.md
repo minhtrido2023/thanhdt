@@ -551,3 +551,6 @@
 
 ## Archived 2026-09-17 (keep=12 days=0 require_done=False)
 - [2026-09-13T07:10:15Z] [2026-09-13] aria-F XONG (F1 5f8c3ba2, F2 4a02f23a). CHO user: dong bo phi 0,097% vao duong thuc thi (trading_bot/plan_funding_gate.py FEE_RATE + merge_park_orders.py fee_est_vnd + prompt bq_freshness_check.sh) cung luc. CHO Mafee/Winston: dnse_raw+journal ZaloPay 07-10 thieu order VHC 600cp. BAY: commit o mike repo khi co job song song -> index bi git add lan; dung GIT_INDEX_FILE tam + commit-tree voi danh sach file tuong minh.
+
+## Archived 2026-09-17 (keep=12 days=0 require_done=False)
+- [2026-09-13T07:18:46Z] cq-20260913 remove-v23 (job _064725): patch research/cq20260913_remove_v23.patch (+ _mike_docs.patch), commit 2a067741, arch APPROVE. CHO Mike apply T2 14/09 sau 15:00 theo thu tu v2 -> remove (git apply --index) -> mike_docs; co nav_include_egg_offbook bi go => khong con cho user quyet.
