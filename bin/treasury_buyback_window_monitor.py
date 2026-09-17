@@ -45,10 +45,15 @@ NGƯỠNG `MATCH_MAX_DAYS` = 365 ngày là PHÁN ĐOÁN, KHÔNG phải khoảng 
 Đo lại 2026-09-17 (step-down đầu tiên sau buy_done, không trần): đuôi LIÊN TỤC 277, 320, 369, 374,
 375, 395, 402, 405, 411, 427, 428, 436, 516, 557, 585, 684... ⇒ 365 cắt giữa đuôi. Hệ quả: MWG
 2023-05-31 (+369d), 2021-07-30 (+374d), 2024-12-27 (+375d) có step-down nhưng bị gắn STALE.
-Không nâng lên 380 vì: (i) 380 cũng không rơi vào khoảng trống (kế tiếp 395); (ii) MỌI lag >320
-đo được đều trỏ vào một step-down ĐÃ đóng một đợt mua GẦN hơn (MWG 2024-06-03 đóng lag
-90/187/320/369; 2022-08-08 đóng 76/255/374/405; 2026-01-06 đóng 22/169/196/375/557) ⇒ đúng dạng
-(H2), bằng chứng đóng của chúng yếu; nâng ngưỡng chỉ thêm ghép chung, không thêm bằng chứng mới.
+Không nâng lên 380 vì: (i) 380 cũng không rơi vào khoảng trống (kế tiếp 395); (ii) CHỈ 3 lag trong
+(365, 380] — 369/374/375, đúng 3 sự kiện MWG trên — là khớp CÓ step-down gần hơn đã đóng một đợt mua
+GẦN hơn (MWG 2024-06-03 đóng lag 90/187/320/369; 2022-08-08 đóng 76/255/374/405; 2026-01-06 đóng
+22/169/196/375/557) ⇒ đúng dạng (H2), nhãn "closed" của chúng là bằng chứng YẾU (có thể khớp nhầm
+sang đợt mua sau). Câu này KHÔNG nói gì về các lag ≥436: PWS 436, CTD 516, PNJ 695, PAN 913,
+VTR 1132, CIA 1713 là khớp DUY NHẤT (không có step-down gần hơn) = bằng chứng thật; nâng ngưỡng lên
+số lớn hơn nhiều là câu hỏi RIÊNG có bằng chứng, không bị đoạn này loại trừ. Tác dụng phụ nếu nâng
+lên 380 (evaluate() thật trên BQ, arch-review vòng 2): 3 MWG stale→closed VÀ SGN 2025-09-15 (367d)
+stale→warn = 1 WARN mới.
 Cả 3 ca đều tuổi >365 ⇒ STALE chỉ vào log, không vào WARN — nhãn sai không sinh cảnh báo.
 
 HẠN CHẾ ĐÃ BIẾT (nói thẳng, không che)
