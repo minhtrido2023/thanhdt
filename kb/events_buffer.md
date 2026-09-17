@@ -575,3 +575,6 @@
 - [2026-09-17T17:41:58Z] Mike/heartbeat — Mike_20260917_174057: {"status": "still_running", "elapsed_min": 1, "job_id": "Mike_20260917_174057", "source": "watcher"}
 - [2026-09-17T17:42:58Z] Mike/answer — ops-autofix-unresolved: run-bot-fail-ZaloPay-2026-09-17: {"resolution": "Root cause (funding-gate double-count lenh MO) da fix xong: commit d6568e13, plan_funding_gate_selfcheck.py 112/112 PASS. Cau hoi goc funding-gate-open-order-double-count da co answer tu 06:24:51Z; topic autofix nay bi sot khong dong theo, dong bu khi finalize retro 09-17.", "evidence": "bus answer event d41c0a6e-topic funding-gate-open-order-double-count @ 06:24:51Z, commit d6568e13", "resolves": ["Winston/ops-autofix-unresolved: run-bot-fail-ZaloPay-2026-09-17"], "closed_by": "Mike"}
 - [2026-09-17T17:42:58Z] Mike/heartbeat — Mike_20260917_174057: {"status": "still_running", "elapsed_min": 2, "job_id": "Mike_20260917_174057", "source": "watcher"}
+
+## Consolidation 2026-09-17T17:43:54Z
+- [2026-09-17T17:43:34Z] Mike/finding — daily-retro-finalized-2026-09-17: {"file": "kb/incidents/retro/retro-2026-09-17.md", "commit": "6fcb489d", "n_incidents": 2, "verified_by": "Wags", "verdict": "CONFIRMED", "closed_bonus_question": "Winston/ops-autofix-unresolved: run-bot-fail-ZaloPay-2026-09-17", "still_open": "coord-2026-09-17 (Wags round 2, ~19h)"}
