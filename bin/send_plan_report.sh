@@ -693,8 +693,10 @@ if orders:
                      f"xem 2 mục riêng ở cuối, CẦN DUYỆT.")
     if pt_merged or jit_merged:
         _which = " + ".join(x for x, ok in (("L1 trim", pt_merged), ("L2 JIT", jit_merged)) if ok)
-        lines.append(f"   ✅ Lệnh BÁN PARK {_which} đã nằm trong {len(orders)} lệnh ở trên — "
-                     "chỉ hiển thị một lần; proposal giữ trong JSON để kiểm toán.")
+        lines.append(f"   ✅ Lệnh BÁN PARK {_which} là LỆNH THẬT, đã gộp vào {len(orders)} lệnh ở trên "
+                     "(không liệt kê riêng để tránh đếm 2 lần) — sẽ đặt cùng lúc với lệnh mua, "
+                     "ĐỘC LẬP về lý do (tuân thủ trần PARK, không phải nguồn tiền cho lệnh mua "
+                     "trừ khi dòng 'Tiền đâu ra' bên dưới ghi rõ FUNDED_BY_JIT).")
     if price_verify_note:
         lines.append(f"   {price_verify_note}")
     if capit_note:
@@ -711,6 +713,13 @@ if orders:
         note = o.get("note", "")
         note_s = f" — {note[:90]}" if note else ""
         lines.append(f"  • {side_vn} {ticker} {qty}cp @ {px}{val_s}{note_s}")
+        # Lý do bán PARK_TRIM là ĐỘC LẬP với bất kỳ lệnh mua nào trong cùng plan (park-target
+        # compliance, không phải tài trợ) — nói rõ ngay tại lệnh bán, đừng để user tự suy diễn
+        # từ dòng "Tiền đâu ra" của lệnh mua bên dưới (user 2026-09-17: đọc 2 dòng liền nhau
+        # tưởng mâu thuẫn "bán PARK" rồi "không cần bán PARK").
+        if not is_buy and str(o.get("play_type", "")).upper() == "PARK_TRIM":
+            lines.append("      ↳ ℹ️ Lý do: tuân thủ trần PARK 80% (park-trim), KHÔNG liên quan "
+                          "tới việc tài trợ lệnh mua trong plan này.")
         # Funding note NGAY CẠNH lệnh mua — user đọc lệnh mua riêng lẻ không được phép hoảng
         # vì tưởng thiếu tiền (SSI 75,3tr vs cash 4,8tr, plan 08-07).
         if is_buy:
