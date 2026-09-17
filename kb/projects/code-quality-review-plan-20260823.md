@@ -37,9 +37,27 @@ thủ công nữa. Cơ chế:
   ngày thì lần 2 tự skip (không dispatch trùng).
 - Selfcheck `bin/code_quality_autodispatch_selfcheck.sh`: 8/8 PASS, mutation-verified (gate
   severity bị sửa sai → 2/8 test bắt được ngay).
-- **CHƯA qua arch-reviewer** (đang xin ngay sau khi ghi note này) — coi là DRAFT tới khi có
-  APPROVE, dù đã nằm trong crontab (chạy Chủ Nhật kế tiếp 2026-09-20 03:00 UTC nếu chưa kịp
-  arch-review thì vẫn chạy — cân nhắc tạm `MIKE_DIAG_GATE`-kiểu override nếu cần trì hoãn).
+- **arch-reviewer CONFIRMED sau 5 vòng (2026-09-17→18)** — chi tiết đầy đủ 5 vòng + fix từng
+  killer nằm trong commit message (`0c263698` → `afae4e85` → `ca11bf63` → `ae024f6f`), tóm tắt:
+  1. job_id parse sai stream (dispatch.sh in JOB ra stderr, script chỉ đọc stdout) → mọi dispatch
+     THÀNH CÔNG báo "DISPATCH LỖI".
+  2. `verified.json` nằm trong `mktemp -d` bị xoá trước khi có thể rerun → cơ chế "chỉ retry
+     nhóm chưa xong" không thể chạy; vá bằng copy ra `reports/code_quality/verified_<date>.json`.
+  3. Ranh giới cứng chỉ liệt tay 10/34 file T0 có commit trong tuần đo thật (bỏ sót
+     `mike/bin/merge_park_orders.py` — ghi thẳng orders[] vào plan) → thêm union với
+     `kb/production_manifest.json` tier T0 (`load_manifest_t0()`).
+  4. Union manifest fail-open IM LẶNG khi file mất/hỏng (không phân biệt được "gate đang bảo vệ"
+     hay "đã tắt" từ output) → giờ trả `(set, warning)`, warning vào cả summary JSON lẫn dòng đầu
+     Discord mỗi tuần.
+  Đo thật trên báo cáo 09-13 (25 finding): **12 escalate / 6 Taylor / 7 Wags**, 4 ca escalate CHỈ
+  manifest union bắt được (`dispatch.sh`, `eod_trading_report.sh`, `bus_question_audit.py`).
+  **Backlog KHÔNG chặn** (đưa user quyết, không tự ý đổi gate): throughput escalate/dispatch dao
+  động mạnh theo tuần (manifest T0 hiện có 107 file) — đã làm QUAN SÁT ĐƯỢC qua dòng tỉ lệ trong
+  Discord mỗi tuần, chưa quyết có cần thu hẹp gate để tăng % dispatch được hay chấp nhận "Tầng 3 =
+  chủ yếu escalation packager cho phần lớn finding chạm production core". Nợ nhỏ khác: chưa có
+  cron dọn `state/code_quality_weekly_dispatch_<date>.json` + `reports/code_quality/verified_
+  <date>.json` (~52 file nhỏ/năm mỗi loại); `notify_thread.sh` gọi `check=False` (lỗi gửi Discord
+  không tự ghi lại, nhưng bus question vẫn sống + hiện WARN-ONLY trong ops health hằng ngày).
 
 **Kết quả thực thi lần đầu (đo thật cùng ngày)** — 2 bài học bắt buộc áp dụng từ lần dispatch kế
 tiếp:
