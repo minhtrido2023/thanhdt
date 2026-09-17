@@ -1,0 +1,8 @@
+event_code,n_sid,n_join,n_join_same_ticker,n_join_fd,fd_date_eq_news_date
+ISS,3848,2373,2370,2245,288
+AIS,3136,518,518,517,38
+SUSP,498,165,164,165,61
+DIV,9149,8787,8776,8784,3356
+MA,7,1,1,1,1
+NLIS,624,2,2,2,2
+MOVE,288,0,0,0,0

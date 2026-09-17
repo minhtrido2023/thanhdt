@@ -1,0 +1,17 @@
+rel,ticker,id,exright_date,public_date,fd,news_pdt,title_vi,news_title,news_mec
+eq,TQN,6708f3e70ec61045ab7fd13c,2021-05-11,2021-05-04,2021-05-04 11:32:00,2021-05-04 11:32:00,"Trả cổ tức bằng tiền mặt - Cả năm 2020 - 2,228 VND",TQN: Ngày đăng ký cuối cùng trả cổ tức bằng tiền mặt,DIV
+eq,ICN,676212f916bfba1b8a957c1d,2024-12-31,2024-12-24,2024-12-24 09:00:00,2024-12-24 09:00:00,"Trả cổ tức bằng tiền mặt - Đợt 1 2024 - 2,000 VND",ICN: Ngày đăng ký cuối cùng trả cổ tức bằng tiền mặt,DIV
+eq,LMI,6708f3e80ec61045ab7fd4a0,2021-12-17,2021-12-15,2021-12-15 15:29:00,2021-12-15 15:29:00,Trả cổ tức bằng tiền mặt - Cả năm 2020 - 600 VND,LMI: Ngày đăng ký cuối cùng trả cổ tức bằng tiền mặt,DIV
+eq,FIC,6708f3e70ec61045ab7fcf69,2020-11-02,2020-10-26,2020-10-26 09:57:00,2020-10-26 09:57:00,Trả cổ tức bằng tiền mặt - Cả năm 2019 - 250 VND,FIC: Ngày đăng ký cuối cùng trả cổ tức bằng tiền mặt,DIV
+eq,MCM,6708f3e90ec61045ab7fd851,2022-11-29,2022-10-31,2022-10-31 14:27:00,2022-10-31 14:27:00,"Trả cổ tức bằng tiền mặt - Đợt 1 2022 - 1,000 VND",MCM: Ngày đăng ký cuối cùng trả cổ tức bằng tiền mặt,DIV
+eq,CLW,681aa86d86e9541d8ab67a1c,2025-06-05,2025-05-09,2025-05-09 10:11:04,2025-05-09 10:11:04,"Trả cổ tức bằng tiền mặt - Đợt 1 2024 - 1,600 VND",CLW: Thông báo ngày ĐKCC chi trả cổ tức đợt 1 năm 2024 bằng tiền,DIV
+eq,TTL,6708f3e70ec61045ab7fcfde,2020-12-14,2020-11-27,2020-11-27 16:26:00,2020-11-27 16:26:00,Trả cổ tức bằng tiền mặt - Cả năm 2019 - 300 VND,TTL: Ngày đăng ký cuối cùng trả cổ tức bằng tiền mặt,DIV
+eq,VIP,69fa8a04db487120c698f1e9,2026-06-29,2026-05-08,2026-05-08 09:42:57,2026-05-08 09:42:57,"Trả cổ tức bằng tiền mặt - Cả năm 2025 - 1,000 VND",VIP: Thông báo ngày ĐKCC thanh toán cổ tức năm 2025 bằng tiền,DIV
+news_after_fd,DHG,6708f3e20ec61045ab7fbd5e,2017-05-04,2017-04-24,2017-03-27 14:32:45,2017-04-25 11:02:40,"Trả cổ tức bằng tiền mặt - Cả năm 2016 - 3,500 VND",DHG: 4/5 GDKHQ trả cổ tức năm 2016,DIV
+news_after_fd,VNA,68671f786cc7f571c1b992c4,2025-07-14,2025-07-09,2025-07-03 11:17:00,2025-07-09 08:14:00,Trả cổ tức bằng tiền mặt - Cả năm 2024 - 600 VND,"VNA: Ngày đăng ký cuối cùng lấy ý kiến cổ đông bằng văn bản, trả cổ tức bằng tiền mặt",DIV
+news_after_fd,BDT,6708f3e70ec61045ab7fcdf2,2020-07-27,2020-07-14,2020-07-08 09:36:00,2020-07-14 14:37:00,"Trả cổ tức bằng tiền mặt - Cả năm 2019 - 1,481 VND",BDT: Ngày đăng ký cuối cùng trả cổ tức bằng tiền mặt,DIV
+news_after_fd,HVH,675a2a3816bfba1b8a8ba15f,2024-12-25,2024-12-20,2024-12-11 17:24:00,2024-12-20 08:24:00,Trả cổ tức bằng tiền mặt - Đợt 1 2024 - 300 VND,HVH: Thông báo về ngày đăng ký cuối cùng tạm ứng cổ tức năm 2024 bằng tiền,DIV
+news_after_fd,VRG,6865cdff6cc7f571c1b75c39,2025-07-10,2025-07-04,2025-07-01 11:16:00,2025-07-04 15:28:00,"Trả cổ tức bằng tiền mặt - Cả năm 2024 - 3,500 VND",VRG: Ngày đăng ký cuối cùng trả cổ tức bằng tiền mặt,DIV
+news_after_fd,PJC,6708f3e70ec61045ab7fd0b6,2021-03-18,2021-03-09,2021-02-24 18:12:26,2021-03-09 16:38:00,"Trả cổ tức bằng tiền mặt - Đợt 1 2020 - 1,500 VND","PJC: Ngày đăng ký cuối cùng Đại hội đồng cổ đông thường niên năm 2021, trả cổ tức bằng tiền mặt",DIV
+news_after_fd,THG,6708f3e80ec61045ab7fd429,2021-11-18,2021-11-12,2021-11-01 19:03:00,2021-11-12 14:42:00,"Trả cổ tức bằng tiền mặt - Đợt 1 2021 - 1,000 VND",THG: Thông báo ngày ĐKCC tạm ứng cổ tức đợt 1 năm 2021 bằng tiền,DIV
+news_after_fd,SAF,6708f3e50ec61045ab7fc77b,2019-03-28,2019-03-22,2019-03-19 15:34:00,2019-03-22 10:47:00,"Trả cổ tức bằng tiền mặt - Đợt 1 2018 - 3,000 VND",SAF: Ngày đăng ký cuối cùng trả cổ tức bằng tiền mặt,DIV
