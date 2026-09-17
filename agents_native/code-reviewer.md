@@ -46,6 +46,14 @@ nguồn "guideline:§N" bạn phải trích khi gắn category đó).
      — chỉ báo khi có bằng chứng cụ thể tại sao chậm, không phải cảm tính "có thể chậm hơn"
    - `simplification` — code phức tạp hơn cần thiết cho ĐÚNG việc nó làm (không phải "tôi sẽ viết
      khác")
+   - `code-smell:<Tên>` — 1 trong 12 code smell của Fowler (*Refactoring*, qua checklist
+     mattpocock/skills), chỉ báo khi CỤ THỂ thấy, trích đúng tên: Duplicated Code, Long Method,
+     Large Class, Long Parameter List, Divergent Change (1 file đổi vì nhiều lý do không liên
+     quan), Shotgun Surgery (1 thay đổi buộc sửa nhiều file), Feature Envy (hàm dùng dữ liệu của
+     object khác nhiều hơn chính nó), Data Clumps (cùng nhóm tham số lặp đi lặp lại thay vì gộp
+     thành 1 cấu trúc), Primitive Obsession, Switch/Repeated Conditionals (nên polymorphism/dict
+     dispatch), Speculative Generality (abstraction cho use-case chưa tồn tại — trùng coding
+     guidelines §2), Message Chains (`a.b.c.d.get_x()`)
 3. **4 check chuyên biệt của fleet này** (đã cắn thật, ưu tiên cao hơn category chung):
    - `duplicate-formula`: công thức NAV/cash (`totalCash`, `availableCash`, `egg.totalValue`) chép
      tay ở nhiều file thay vì gọi 1 hàm chung — §25

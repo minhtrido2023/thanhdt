@@ -48,7 +48,6 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parent.parent  # mike/
-WC_ROOT_DEFAULT = ROOT.parent  # WorkingClaude/
 ICT = ZoneInfo("Asia/Ho_Chi_Minh")
 
 # Hot-core tiền thật — MỌI severity escalate (arch-review round 2: severity là nhãn LLM tự khai,
@@ -64,6 +63,22 @@ EXEC_HARD_BOUNDARY_EXACT = (
     "mike/bin/daily_nav_snapshot.py",
 )
 VALID_SEVERITIES = {"low", "medium", "high"}
+
+
+def load_manifest_t0(root: Path) -> set[str]:
+    """Đọc thêm `kb/production_manifest.json` (đã tồn tại, do `production_manifest.py` sinh CƠ
+    HỌC từ crontab thật — xem docstring file đó) làm NGUỒN THỨ 2, HỢP (union) với
+    EXEC_HARD_BOUNDARY_* thay vì thay thế — arch-review round 3 killer objection: danh sách tay
+    chỉ phủ 10/34 file T0 có commit trong scope tuần đo thật (bỏ sót mike/bin/merge_park_orders.py
+    — ghi thẳng orders[] vào plan — và tương tự). Lỗi đọc bất kỳ (thiếu file/JSON hỏng/thiếu
+    field) ⇒ trả set RỖNG, KHÔNG throw — vì đây là union thêm an toàn, không phải nguồn duy nhất;
+    manifest hỏng chỉ làm mất PHẦN THÊM đó, EXEC_HARD_BOUNDARY_* tay vẫn còn nguyên làm nền."""
+    try:
+        data = json.loads((root / "kb" / "production_manifest.json").read_text(encoding="utf-8"))
+        files = data.get("files") or {}
+        return {rel for rel, meta in files.items() if isinstance(meta, dict) and meta.get("tier") == "T0"}
+    except Exception:
+        return set()
 
 
 def to_repo_relative(file_abs: str, wc_root: Path) -> str:
@@ -118,14 +133,20 @@ def sanitize_findings(raw: list) -> tuple[list[dict], list[dict]]:
     return ok, invalid
 
 
-def classify(findings: list[dict], wc_root: Path) -> dict[str, list[dict]]:
+def classify(findings: list[dict], wc_root: Path, manifest_t0: set[str] | None = None) -> dict[str, list[dict]]:
+    manifest_t0 = manifest_t0 or set()
     groups: dict[str, list[dict]] = {"escalate": [], "taylor": [], "wags": []}
     for f in findings:
         rel = to_repo_relative(str(f.get("file") or ""), wc_root)
         owner = str(f.get("owner") or "").strip().lower()
-        is_exec_hard = rel.startswith(EXEC_HARD_BOUNDARY_PREFIXES) or rel in EXEC_HARD_BOUNDARY_EXACT
+        is_exec_hard = (
+            rel.startswith(EXEC_HARD_BOUNDARY_PREFIXES)
+            or rel in EXEC_HARD_BOUNDARY_EXACT
+            or rel in manifest_t0
+        )
         if is_exec_hard:
-            groups["escalate"].append({**f, "_escalate_reason": "hard_boundary_tien_that", "_rel": rel})
+            reason = "hard_boundary_manifest_t0" if rel in manifest_t0 and rel not in EXEC_HARD_BOUNDARY_EXACT and not rel.startswith(EXEC_HARD_BOUNDARY_PREFIXES) else "hard_boundary_tien_that"
+            groups["escalate"].append({**f, "_escalate_reason": reason, "_rel": rel})
         elif owner == "taylor":
             groups["taylor"].append({**f, "_rel": rel})
         elif owner == "wags":
@@ -150,11 +171,14 @@ def _finding_block(f: dict) -> str:
     return "\n".join(lines)
 
 
-def build_prompt(owner: str, findings: list[dict], report_date: str, report_file: str, escalate_files: set[str]) -> str:
+def build_prompt(owner: str, findings: list[dict], report_date: str, report_file: str, escalate_files_rel: set[str]) -> str:
     n = len(findings)
     blocks = "\n\n".join(_finding_block(f) for f in findings)
     no_touch = ""
-    same_file_escalate = sorted(escalate_files & {f.get("file") for f in findings})
+    # So trên "_rel" (đã chuẩn hoá) CẢ HAI VẾ — arch-review round 3: bản trước so escalate_files_rel
+    # (đã chuẩn hoá ở run()) với f.get("file") (path THÔ, thường tuyệt đối) ⇒ luôn rỗng, cảnh báo
+    # "cùng file đang escalate" thành code chết (§28: chuẩn hoá cả 2 vế trước khi so).
+    same_file_escalate = sorted(escalate_files_rel & {f.get("_rel") for f in findings})
     if same_file_escalate:
         no_touch = (
             "\n\n⚠️ CÙNG FILE có finding khác đang ESCALATE (chờ user/Mike quyết, KHÔNG thuộc việc này): "
@@ -298,9 +322,22 @@ def notify_failure(root: Path, arch_thread: str | None, err: str, dry_run: bool)
     )
 
 
+def write_scope_variants(rel: str) -> list[str]:
+    """1 file có thể cần khai theo NHIỀU dạng để khớp guard của fleet — arch-review round 3: đo
+    thật trên `bus/jobs/*.json` cho thấy 98 giá trị --write-scope khác nhau (bin/…, mike/…, ../…,
+    tuyệt đối); `mike/` là git repo RIÊNG lồng trong WorkingClaude nên staged-diff của NÓ tính từ
+    toplevel `mike/` (vd `bin/foo.py`), không phải từ WC (`mike/bin/foo.py`). Trả cả 2 dạng cho
+    file dưới `mike/` để tăng xác suất khớp `_path_overlaps` bất kể job khác khai kiểu nào; file
+    ngoài `mike/` (WC là toplevel của chính nó) chỉ có 1 dạng đúng, không đoán thêm."""
+    if rel.startswith("mike/"):
+        return [rel, rel[len("mike/"):]]
+    return [rel]
+
+
 def run(args) -> dict:
     root = Path(args.root)
-    wc_root = Path(args.wc_root) if args.wc_root else WC_ROOT_DEFAULT
+    wc_root = Path(args.wc_root) if args.wc_root else Path(args.root).parent
+    manifest_t0 = load_manifest_t0(root)
     dispatch_bin = Path(args.dispatch_bin) if args.dispatch_bin else root / "bin" / "dispatch.sh"
     state_file = Path(args.state_file) if args.state_file else root / "state" / f"code_quality_weekly_dispatch_{args.date}.json"
     rerun_cmd = (f"python3 {root}/bin/code_quality_autodispatch.py --verified {args.verified} "
@@ -319,7 +356,7 @@ def run(args) -> dict:
         return {"n_escalate": 0, "n_taylor": 0, "n_wags": 0, "note": "0 finding, không có gì để dispatch"}
 
     valid, invalid = sanitize_findings(raw_findings)
-    groups = classify(valid, wc_root)
+    groups = classify(valid, wc_root, manifest_t0)
     escalate = groups["escalate"] + invalid
     taylor_f, wags_f = groups["taylor"], groups["wags"]
     escalate_files_rel = {f.get("_rel") for f in escalate if f.get("_rel")}
@@ -356,7 +393,11 @@ def run(args) -> dict:
                 results[owner] = {**state[key], "skipped_already_done": True}
             continue
         prompt = build_prompt(owner, flist, args.date, args.report_file, escalate_files_rel)
-        write_scope = ",".join(sorted({f.get("_rel", "") for f in flist if f.get("_rel")}))
+        write_scope_set: set[str] = set()
+        for f in flist:
+            if f.get("_rel"):
+                write_scope_set.update(write_scope_variants(f["_rel"]))
+        write_scope = ",".join(sorted(write_scope_set))
         thread_id = args.arch_thread or "architecture"
         res = dispatch(dispatch_bin, owner, prompt, thread_id, write_scope, args.timeout, args.dry_run)
         res["n_findings"] = len(flist)
@@ -435,6 +476,11 @@ def main() -> int:
         return 1
 
     print(json.dumps(summary, ensure_ascii=False))
+    if args.dry_run:
+        # --dry-run không dispatch/escalate gì thật ⇒ "kết quả" luôn là preview thành công, không
+        # có khái niệm rc≠0 ở đây (arch-review round 3: bản trước rơi vào nhánh "any dispatch fail"
+        # vì kết quả dry-run không có job_id/returncode, khiến preview THÀNH CÔNG vẫn báo rc=1).
+        return 0
     # rc≠0 khi có bất kỳ side-effect quan trọng nào lỗi — code_quality_weekly.sh log WARN thay vì
     # "Auto-dispatch xong" (arch-review round 2: trước đây rc luôn 0 kể cả khi escalation/dispatch
     # thất bại hoàn toàn, không phân biệt được với thành công ở log cron).
