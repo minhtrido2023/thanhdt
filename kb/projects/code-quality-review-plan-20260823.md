@@ -3,6 +3,33 @@
 > Trạng thái: **ĐỀ XUẤT** — chưa cài gì. Người duyệt: user. Chủ triển khai: Mike (điều phối),
 > Wags (tooling mike/bin), Taylor (fix trong trading_bot/ khi có finding được duyệt).
 
+## CẬP NHẬT 2026-09-17 (user chốt qua Discord, topic Code review) — đổi Tầng 3 từ "report-only" sang "auto-dispatch ngay"
+
+Thay đổi quyết định nền §0 ("Model = REPORT-ONLY + người quyết"): **từ báo cáo tuần kế tiếp trở
+đi, Mike tự dispatch owner (Taylor/Wags) xử lý MỌI finding NGAY sau khi báo cáo được gửi**, không
+còn chờ user duyệt từng finding — vẫn giữ nguyên bảng owner + reviewer bắt buộc ở §6 (arch-reviewer
+cho `mike/bin/*` và `trading_bot/*`, quant-skeptic thêm nếu đổi sizing/tín hiệu).
+
+**Ngoại lệ BẮT BUỘC — ranh giới cứng KHÔNG tự động fix, phải escalate xin xác nhận trước:**
+finding nào chạm trực tiếp **logic đặt lệnh** hoặc **công thức NAV dùng để scale vốn sống** (đúng
+2 hạng mục "KHÔNG tự sửa" trong mandate 2026-07-07, MIKE.md/current_ops) — ca đầu tiên áp dụng
+luật này: `trading_bot/brokers.py:518` (loan_package_id cross-account) và `:559` (NAV
+duplicate-formula, caller `strategies.py:391` dùng để scale paper→real). Mike escalate 2 finding
+này lên user thay vì tự dispatch Taylor sửa.
+
+Thực thi lần đầu (báo cáo `code_quality_2026-09-13.md`, 25 finding): dispatch
+`Wags_20260917_152645` (15 finding mike/bin, arch-reviewer bắt buộc) +
+`Taylor_20260917_152759` (8 finding brokers.py-non-order-placement + root script, arch-reviewer
+cho phần correctness) — 2 finding brokers.py:518/559 escalate riêng, chưa dispatch.
+
+**Việc CÒN THIẾU (chưa làm)**: `bin/code_quality_weekly.sh` (cron Chủ Nhật 03:00 UTC) hiện CHỈ
+sinh báo cáo, CHƯA tự gọi dispatch owner — lượt này Mike làm bằng tay ngay sau khi đọc báo cáo
+trong phiên sống. Muốn cron tuần sau tự làm được bước dispatch mà không cần Mike ngồi đọc report
+thủ công thì phải sửa script (thêm bước dispatch cuối `code_quality_weekly.sh`, tự phân loại
+hard-boundary bằng regex đường dẫn/category rồi escalate thay vì dispatch) — CHƯA làm, cần user
+xác nhận có muốn tự động hoá tới mức đó không (rủi ro: cron 03:00 sáng Chủ Nhật tự sửa code +
+xin arch-review không có ai giám sát trực tiếp).
+
 ## 0. Quyết định nền đã chốt trong hội thoại 13:20 ICT 2026-08-23
 
 - **KHÔNG tạo daemon/agent thường trực tự sửa code.** Một agent "dọn rác" tự động sẽ false-positive
