@@ -374,6 +374,13 @@ open(out, "w", encoding="utf-8").write("\n".join(lines))
 PY
 log "Báo cáo: $report_file"
 
+# Copy verified.json ra chỗ BỀN (cạnh report .md) — arch-review round 2 code_quality_autodispatch:
+# $TMPDIR_CQ bị `trap rm -rf EXIT` xoá khi script này thoát, nên nếu bước 7 dispatch fail và cần
+# rerun tay sau đó, input phải còn tồn tại để đọc lại (không thì "rerun" chỉ là câu nói suông).
+verified_durable="$REPORT_DIR/verified_${TODAY}.json"
+cp "$verified_f" "$verified_durable"
+verified_f="$verified_durable"
+
 dropped_f="$TMPDIR_CQ/dropped.txt"
 printf '%s\n' "$dropped" > "$dropped_f"
 event_payload="$(python3 - "$verified_f" "$n_scoped" "$hot_file" "$report_file" "$dropped_f" "$scope_source" "$scope_reason" <<'PY'
@@ -410,7 +417,7 @@ if [ "$n_final" -gt 0 ]; then
   set +e
   autodispatch_out="$(python3 "$ROOT/bin/code_quality_autodispatch.py" \
     --verified "$verified_f" --date "$TODAY" --report-file "$report_file" --root "$ROOT" \
-    ${ARCH_TID:+--arch-thread "$ARCH_TID"})"
+    --wc-root "$WORKDIR" ${ARCH_TID:+--arch-thread "$ARCH_TID"})"
   _ad_rc=$?
   set -e
   if [ $_ad_rc -eq 0 ]; then

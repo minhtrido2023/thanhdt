@@ -1,14 +1,17 @@
 #!/usr/bin/env bash
 # Selfcheck cho bin/code_quality_autodispatch.py (Tầng 3 auto-dispatch, code-quality-review-plan
-# §CẬP NHẬT 2026-09-17, v2 sau arch-review round 1 NEEDS_CHANGES). Sandbox hoá: --root trỏ vào
-# thư mục tạm có bin/{append_event,notify_thread}.sh giả (no-op, chỉ ghi log để assert) +
-# --dispatch-bin giả — KHÔNG BAO GIỜ gọi dispatch.sh/append_event.sh/notify_thread.sh thật.
+# §CẬP NHẬT 2026-09-17, v3 sau arch-review round 2 NEEDS_CHANGES). Sandbox hoá: --root/--wc-root
+# trỏ vào thư mục tạm có bin/{append_event,notify_thread}.sh giả (no-op, ghi log để assert) +
+# --dispatch-bin giả — KHÔNG BAO GIỜ gọi script thật (sẽ ghi bus/Discord thật).
 #
-# Fake dispatch.sh in "JOB <id>" ra STDERR (khớp CONTRACT THẬT của bin/dispatch.sh:1154) — bản
-# v1 in ra stdout, che mất bug job_id luôn None (arch-review round 1 killer objection).
+# Fixture dùng path "/x/..." và --wc-root "/x" — relpath("/x/trading_bot/brokers.py", "/x") =
+# "trading_bot/brokers.py", đúng dạng repo-relative mà gate hot-core VÀ --write-scope đều cần
+# (arch-review round 2: bản trước dùng path tuyệt đối làm vô hiệu job-write-scope-conflict +
+# commit-collision-gate).
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SCRIPT="$ROOT/bin/code_quality_autodispatch.py"
+WC_ROOT_FAKE="/x"
 
 PASS=0; FAIL=0
 ok() { PASS=$((PASS+1)); echo "PASS $1"; }
@@ -18,7 +21,6 @@ SANDBOX="$(mktemp -d)"
 trap 'rm -rf "$SANDBOX"' EXIT
 mkdir -p "$SANDBOX/bin" "$SANDBOX/state"
 
-# Fake dispatch.sh THÀNH CÔNG: JOB id ra STDERR (đúng contract thật), 1 dòng vô hại ra stdout.
 cat > "$SANDBOX/bin/dispatch_ok.sh" <<'EOF'
 #!/usr/bin/env bash
 echo "$*" >> "$SANDBOX_DISPATCH_LOG"
@@ -28,7 +30,6 @@ exit 0
 EOF
 chmod +x "$SANDBOX/bin/dispatch_ok.sh"
 
-# Fake dispatch.sh THẤT BẠI (vd circuit breaker exit 4): không có dòng JOB nào.
 cat > "$SANDBOX/bin/dispatch_fail.sh" <<'EOF'
 #!/usr/bin/env bash
 echo "$*" >> "$SANDBOX_DISPATCH_LOG"
@@ -37,7 +38,6 @@ exit 4
 EOF
 chmod +x "$SANDBOX/bin/dispatch_fail.sh"
 
-# Fake dispatch.sh CÓ ĐIỀU KIỆN theo tên agent (T-retry-partial): Wags fail, Taylor ok.
 cat > "$SANDBOX/bin/dispatch_wags_fails.sh" <<'EOF'
 #!/usr/bin/env bash
 echo "$*" >> "$SANDBOX_DISPATCH_LOG"
@@ -50,12 +50,19 @@ exit 0
 EOF
 chmod +x "$SANDBOX/bin/dispatch_wags_fails.sh"
 
-cat > "$SANDBOX/bin/append_event.sh" <<'EOF'
+cat > "$SANDBOX/bin/append_event_ok.sh" <<'EOF'
 #!/usr/bin/env bash
 echo "$*" >> "$SANDBOX_EVENT_LOG"
 exit 0
 EOF
-chmod +x "$SANDBOX/bin/append_event.sh"
+chmod +x "$SANDBOX/bin/append_event_ok.sh"
+
+cat > "$SANDBOX/bin/append_event_fail.sh" <<'EOF'
+#!/usr/bin/env bash
+echo "$*" >> "$SANDBOX_EVENT_LOG"
+exit 1
+EOF
+chmod +x "$SANDBOX/bin/append_event_fail.sh"
 
 cat > "$SANDBOX/bin/notify_thread.sh" <<'EOF'
 #!/usr/bin/env bash
@@ -68,218 +75,209 @@ export SANDBOX_DISPATCH_LOG="$SANDBOX/dispatch.log"
 export SANDBOX_EVENT_LOG="$SANDBOX/event.log"
 export SANDBOX_NOTIFY_LOG="$SANDBOX/notify.log"
 
+use_append_event() { cp "$SANDBOX/bin/append_event_$1.sh" "$SANDBOX/bin/append_event.sh"; chmod +x "$SANDBOX/bin/append_event.sh"; }
+use_append_event ok  # mặc định OK, T-fail tự đổi rồi đổi lại
+
 reset_logs() { : > "$SANDBOX_DISPATCH_LOG"; : > "$SANDBOX_EVENT_LOG"; : > "$SANDBOX_NOTIFY_LOG"; }
 
+# run()/run_keep_state() ghi kết quả vào 2 biến TOÀN CỤC (OUT/LAST_RC) thay vì echo qua command
+# substitution — gọi qua $(run ...) sẽ chạy hàm trong SUBSHELL, khiến LAST_RC=$? bên trong không
+# bao giờ thoát ra được biến cha (bài học tự bắt lúc viết selfcheck này: `set -u` báo "unbound").
 run() {
   local fixture="$1" date_="$2" dispatch_bin="${3:-$SANDBOX/bin/dispatch_ok.sh}"
   reset_logs
-  python3 "$SCRIPT" --verified "$fixture" --date "$date_" --report-file "/tmp/r.md" \
-    --root "$SANDBOX" --dispatch-bin "$dispatch_bin"
+  rm -f "$SANDBOX/state/code_quality_weekly_dispatch_${date_}.json"
+  set +e
+  OUT="$(python3 "$SCRIPT" --verified "$fixture" --date "$date_" --report-file "/tmp/r.md" \
+    --root "$SANDBOX" --wc-root "$WC_ROOT_FAKE" --dispatch-bin "$dispatch_bin" 2>&1)"
+  LAST_RC=$?
+  set -e
 }
 run_keep_state() {
-  # Như run() nhưng KHÔNG xoá state trước — dùng cho test rerun/idempotency.
   local fixture="$1" date_="$2" dispatch_bin="${3:-$SANDBOX/bin/dispatch_ok.sh}"
   reset_logs
-  python3 "$SCRIPT" --verified "$fixture" --date "$date_" --report-file "/tmp/r.md" \
-    --root "$SANDBOX" --dispatch-bin "$dispatch_bin"
+  set +e
+  OUT="$(python3 "$SCRIPT" --verified "$fixture" --date "$date_" --report-file "/tmp/r.md" \
+    --root "$SANDBOX" --wc-root "$WC_ROOT_FAKE" --dispatch-bin "$dispatch_bin" 2>&1)"
+  LAST_RC=$?
+  set -e
 }
 
-# --- T1: rỗng — không dispatch, không escalate ---
+# --- T1: rỗng ---
 echo '{"findings": []}' > "$SANDBOX/t1.json"
-rm -f "$SANDBOX/state/code_quality_weekly_dispatch_2099-01-01.json"
-out="$(run "$SANDBOX/t1.json" 2099-01-01)"
-if echo "$out" | grep -q '"n_escalate": 0' && [ ! -s "$SANDBOX_DISPATCH_LOG" ] && [ ! -s "$SANDBOX_EVENT_LOG" ]; then
-  ok "T1 rỗng: không dispatch, không escalate"
-else
-  bad "T1" "out=$out"
-fi
+run "$SANDBOX/t1.json" 2099-01-01
+[ "$LAST_RC" -eq 0 ] && echo "$OUT" | grep -q '"n_escalate": 0' && [ ! -s "$SANDBOX_DISPATCH_LOG" ] \
+  && ok "T1 rỗng: không dispatch, không escalate, rc=0" || bad "T1" "rc=$LAST_RC out=$OUT"
 
-# --- T2: EXEC hard-boundary (brokers.py, MỌI severity kể cả low) -> escalate, KHÔNG dispatch ---
-rm -f "$SANDBOX/state/code_quality_weekly_dispatch_2099-01-02.json"
+# --- T2: mọi file dưới trading_bot/ (PREFIX, không phải tên cụ thể) -> escalate MỌI severity ---
 cat > "$SANDBOX/t2.json" <<'EOF'
 {"findings": [
-  {"file": "/x/trading_bot/brokers.py", "line": 1474, "category": "correctness", "severity": "low", "summary": "s1", "evidence": "e1", "owner": "Taylor"}
+  {"file": "/x/trading_bot/some_new_module_never_listed.py", "line": 1, "category": "correctness", "severity": "low", "summary": "s1", "evidence": "e1", "owner": "Taylor"}
 ]}
 EOF
-out="$(run "$SANDBOX/t2.json" 2099-01-02)"
-if echo "$out" | grep -q '"n_escalate": 1' && [ ! -s "$SANDBOX_DISPATCH_LOG" ] && grep -q "hard-boundary" "$SANDBOX_EVENT_LOG" \
-   && grep -q "triaged-needs-human" "$SANDBOX_EVENT_LOG"; then
-  ok "T2 EXEC hard-boundary (kể cả severity=low) -> escalate + ack triaged-needs-human, không dispatch"
+run "$SANDBOX/t2.json" 2099-01-02
+if [ "$LAST_RC" -eq 0 ] && echo "$OUT" | grep -q '"n_escalate": 1' && [ ! -s "$SANDBOX_DISPATCH_LOG" ] \
+   && grep -q "hard-boundary" "$SANDBOX_EVENT_LOG" && grep -q "triaged-needs-human" "$SANDBOX_EVENT_LOG"; then
+  ok "T2 prefix trading_bot/ bắt được module CHƯA TỪNG liệt tên -> escalate + ack, severity=low vẫn escalate"
 else
-  bad "T2" "out=$out event_log=$(cat "$SANDBOX_EVENT_LOG")"
+  bad "T2" "rc=$LAST_RC out=$OUT event=$(cat "$SANDBOX_EVENT_LOG")"
 fi
 
-# --- T3: NAV-scale file (compute_active_nav.py) severity=low -> KHÔNG escalate, dispatch bình thường ---
-rm -f "$SANDBOX/state/code_quality_weekly_dispatch_2099-01-03.json"
+# --- T3: file exact-match ngoài trading_bot/ (dnse_api.py, run_bot.sh) -> escalate MỌI severity ---
 cat > "$SANDBOX/t3.json" <<'EOF'
 {"findings": [
-  {"file": "/x/mike/bin/compute_active_nav.py", "line": 269, "category": "correctness", "severity": "low", "summary": "s2", "evidence": "e2", "owner": "Wags"}
+  {"file": "/x/dnse_api.py", "line": 1, "category": "correctness", "severity": "low", "summary": "s2", "evidence": "e2", "owner": "Taylor"},
+  {"file": "/x/mike/bin/run_bot.sh", "line": 2, "category": "correctness", "severity": "low", "summary": "s3", "evidence": "e3", "owner": "Wags"}
 ]}
 EOF
-out="$(run "$SANDBOX/t3.json" 2099-01-03)"
-job_id="$(echo "$out" | python3 -c 'import json,sys; d=json.load(sys.stdin); print(d["results"]["Wags"]["job_id"])')"
-if echo "$out" | grep -q '"n_escalate": 0' && echo "$out" | grep -q '"n_wags": 1' && [ -n "$job_id" ] && [ "$job_id" != "None" ]; then
-  ok "T3 NAV-scale file severity=low -> dispatch bình thường, job_id parse ĐÚNG (từ stderr)"
+run "$SANDBOX/t3.json" 2099-01-03
+if [ "$LAST_RC" -eq 0 ] && echo "$OUT" | grep -q '"n_escalate": 2' && [ ! -s "$SANDBOX_DISPATCH_LOG" ]; then
+  ok "T3 exact-match dnse_api.py + mike/bin/run_bot.sh -> escalate dù severity=low"
 else
-  bad "T3" "out=$out job_id=$job_id"
+  bad "T3" "rc=$LAST_RC out=$OUT"
 fi
 
-# --- T3b: NAV-scale file severity=medium -> escalate ---
-rm -f "$SANDBOX/state/code_quality_weekly_dispatch_2099-01-03b.json"
-cat > "$SANDBOX/t3b.json" <<'EOF'
-{"findings": [
-  {"file": "/x/trading_bot/strategies.py", "line": 391, "category": "duplicate-formula", "severity": "medium", "summary": "s2b", "evidence": "e2b", "owner": "Taylor"}
-]}
-EOF
-out="$(run "$SANDBOX/t3b.json" 2099-01-03b)"
-if echo "$out" | grep -q '"n_escalate": 1' && [ ! -s "$SANDBOX_DISPATCH_LOG" ]; then
-  ok "T3b NAV-scale file severity=medium -> escalate"
-else
-  bad "T3b" "out=$out"
-fi
-
-# --- T4: owner rỗng/lạ -> escalate (fail-safe) ---
-rm -f "$SANDBOX/state/code_quality_weekly_dispatch_2099-01-04.json"
+# --- T4: file NGOÀI mọi boundary (kể cả owner Wags, mike/bin nhưng không phải file nhạy cảm) -> dispatch bình thường ---
 cat > "$SANDBOX/t4.json" <<'EOF'
-{"findings": [
-  {"file": "/x/foo.py", "line": 1, "category": "dead-code", "severity": "low", "summary": "s3", "evidence": "e3", "owner": "someone-else"},
-  {"file": "/x/bar.py", "line": 2, "category": "dead-code", "severity": "low", "summary": "s4", "evidence": "e4"}
-]}
+{"findings": [{"file": "/x/mike/bin/some_random_tool.py", "line": 1, "category": "dead-code", "severity": "high", "summary": "s4", "evidence": "e4", "owner": "Wags"}]}
 EOF
-out="$(run "$SANDBOX/t4.json" 2099-01-04)"
-if echo "$out" | grep -q '"n_escalate": 2' && [ ! -s "$SANDBOX_DISPATCH_LOG" ]; then
-  ok "T4 owner lạ/thiếu -> escalate cả 2, không dispatch"
+run "$SANDBOX/t4.json" 2099-01-04
+job_id="$(echo "$OUT" | python3 -c 'import json,sys; d=json.load(sys.stdin); print(d["results"]["Wags"]["job_id"])' 2>/dev/null || echo "PARSE_FAIL")"
+if [ "$LAST_RC" -eq 0 ] && echo "$OUT" | grep -q '"n_escalate": 0' && [ -n "$job_id" ] && [ "$job_id" != "None" ] && [ "$job_id" != "PARSE_FAIL" ]; then
+  ok "T4 file KHÔNG nhạy cảm (kể cả severity=high) -> dispatch bình thường, job_id parse ĐÚNG từ stderr"
 else
-  bad "T4" "out=$out"
+  bad "T4" "rc=$LAST_RC out=$OUT job_id=$job_id"
 fi
 
-# --- T5: mix Taylor + Wags -> 2 dispatch riêng, đúng owner, --write-scope có trong argv ---
-rm -f "$SANDBOX/state/code_quality_weekly_dispatch_2099-01-05.json"
+# --- T5: owner rỗng/lạ -> escalate (fail-safe) ---
 cat > "$SANDBOX/t5.json" <<'EOF'
 {"findings": [
-  {"file": "/x/trading_bot/foo.py", "line": 1, "category": "dead-code", "severity": "low", "summary": "s5", "evidence": "e5", "owner": "Taylor"},
-  {"file": "/x/mike/bin/bar.sh", "line": 2, "category": "dead-code", "severity": "low", "summary": "s6", "evidence": "e6", "owner": "Wags"}
+  {"file": "/x/foo.py", "line": 1, "category": "dead-code", "severity": "low", "summary": "s5", "evidence": "e5", "owner": "someone-else"},
+  {"file": "/x/bar.py", "line": 2, "category": "dead-code", "severity": "low", "summary": "s6", "evidence": "e6"}
 ]}
 EOF
-out="$(run "$SANDBOX/t5.json" 2099-01-05)"
+run "$SANDBOX/t5.json" 2099-01-05
+[ "$LAST_RC" -eq 0 ] && echo "$OUT" | grep -q '"n_escalate": 2' && [ ! -s "$SANDBOX_DISPATCH_LOG" ] \
+  && ok "T5 owner lạ/thiếu -> escalate cả 2" || bad "T5" "rc=$LAST_RC out=$OUT"
+
+# --- T6: mix Taylor(hit_details.py, root R&D) + Wags(mike/bin/bar.sh) -> 2 dispatch, --write-scope RELATIVE ---
+cat > "$SANDBOX/t6.json" <<'EOF'
+{"findings": [
+  {"file": "/x/hit_details.py", "line": 1, "category": "dead-code", "severity": "low", "summary": "s7", "evidence": "e7", "owner": "Taylor"},
+  {"file": "/x/mike/bin/bar.sh", "line": 2, "category": "dead-code", "severity": "low", "summary": "s8", "evidence": "e8", "owner": "Wags"}
+]}
+EOF
+run "$SANDBOX/t6.json" 2099-01-06
 n_dispatch_calls="$(grep -cE '^(Taylor|Wags) Xử lý ' "$SANDBOX_DISPATCH_LOG" || true)"
-if echo "$out" | grep -q '"n_taylor": 1' && echo "$out" | grep -q '"n_wags": 1' && [ "$n_dispatch_calls" -eq 2 ] \
-   && grep -q "^Taylor " "$SANDBOX_DISPATCH_LOG" && grep -q "^Wags " "$SANDBOX_DISPATCH_LOG" \
-   && grep -q -- "--write-scope /x/trading_bot/foo.py" "$SANDBOX_DISPATCH_LOG" \
-   && grep -q -- "--write-scope /x/mike/bin/bar.sh" "$SANDBOX_DISPATCH_LOG"; then
-  ok "T5 mix Taylor+Wags -> 2 dispatch call riêng biệt, --write-scope đúng file"
+if [ "$LAST_RC" -eq 0 ] && echo "$OUT" | grep -q '"n_taylor": 1' && echo "$OUT" | grep -q '"n_wags": 1' && [ "$n_dispatch_calls" -eq 2 ] \
+   && grep -qF -- "--write-scope hit_details.py" "$SANDBOX_DISPATCH_LOG" \
+   && grep -qF -- "--write-scope mike/bin/bar.sh" "$SANDBOX_DISPATCH_LOG" \
+   && ! grep -qF -- "--write-scope /x/" "$SANDBOX_DISPATCH_LOG"; then
+  ok "T6 mix Taylor+Wags -> --write-scope REPO-RELATIVE (không còn path tuyệt đối /x/...)"
 else
-  bad "T5" "out=$out dispatch_log=$(cat "$SANDBOX_DISPATCH_LOG")"
+  bad "T6" "out=$OUT dispatch_log=$(cat "$SANDBOX_DISPATCH_LOG")"
 fi
 
-# --- T6: idempotency guard — MỌI nhóm đã có trong state -> skip sạch ---
-rm -f "$SANDBOX/state/code_quality_weekly_dispatch_2099-01-06.json"
-cat > "$SANDBOX/t6.json" <<'EOF'
+# --- T7: idempotency — mọi nhóm đã có trong state -> skip sạch ---
+cat > "$SANDBOX/t7.json" <<'EOF'
 {"findings": [{"file": "/x/foo.py", "line": 1, "category": "dead-code", "severity": "low", "summary": "s", "evidence": "e", "owner": "Taylor"}]}
 EOF
-python3 -c "
-import json
-json.dump({'taylor': {'job_id': 'fake_prev', 'n_findings': 1}}, open('$SANDBOX/state/code_quality_weekly_dispatch_2099-01-06.json', 'w'))
-"
-out="$(run_keep_state "$SANDBOX/t6.json" 2099-01-06)"
-if echo "$out" | grep -q '"skipped": true' && [ ! -s "$SANDBOX_DISPATCH_LOG" ]; then
-  ok "T6 idempotency: mọi nhóm đã có trong state -> skip sạch, không dispatch lại"
-else
-  bad "T6" "out=$out"
-fi
-rm -f "$SANDBOX/state/code_quality_weekly_dispatch_2099-01-06.json"
-
-# --- T7: --dry-run KHÔNG gọi dispatch.sh/append_event.sh/notify_thread.sh thật ---
+python3 -c "import json; json.dump({'taylor': {'job_id': 'fake_prev', 'n_findings': 1}}, open('$SANDBOX/state/code_quality_weekly_dispatch_2099-01-07.json','w'))"
+run_keep_state "$SANDBOX/t7.json" 2099-01-07
+[ "$LAST_RC" -eq 0 ] && echo "$OUT" | grep -q '"skipped": true' && [ ! -s "$SANDBOX_DISPATCH_LOG" ] \
+  && ok "T7 idempotency: mọi nhóm đã có trong state -> skip sạch" || bad "T7" "rc=$LAST_RC out=$OUT"
 rm -f "$SANDBOX/state/code_quality_weekly_dispatch_2099-01-07.json"
+
+# --- T8: --dry-run không đụng gì thật ---
 reset_logs
-out="$(python3 "$SCRIPT" --verified "$SANDBOX/t5.json" --date 2099-01-07 --report-file "/tmp/r.md" \
-  --root "$SANDBOX" --dispatch-bin "$SANDBOX/bin/dispatch_ok.sh" --dry-run)"
-if [ ! -s "$SANDBOX_DISPATCH_LOG" ] && [ ! -s "$SANDBOX_EVENT_LOG" ] && [ ! -s "$SANDBOX_NOTIFY_LOG" ] \
-   && echo "$out" | grep -q '"dry_run": true'; then
-  ok "T7 --dry-run không đụng dispatch/event/notify thật"
-else
-  bad "T7" "out=$out"
-fi
-
-# --- T8: cùng file vừa có escalate (medium) vừa có dispatch (low) -> prompt cảnh báo ---
 rm -f "$SANDBOX/state/code_quality_weekly_dispatch_2099-01-08.json"
-cat > "$SANDBOX/t8.json" <<'EOF'
-{"findings": [
-  {"file": "/x/trading_bot/brokers.py", "line": 518, "category": "correctness", "severity": "medium", "summary": "hard one", "evidence": "e1", "owner": "Taylor"}
-]}
-EOF
-out="$(run "$SANDBOX/t8.json" 2099-01-08)"
-if echo "$out" | grep -q '"n_escalate": 1'; then
-  ok "T8 EXEC hard-boundary medium -> escalate (đường cũ vẫn đúng)"
+set +e
+OUT="$(python3 "$SCRIPT" --verified "$SANDBOX/t6.json" --date 2099-01-08 --report-file "/tmp/r.md" \
+  --root "$SANDBOX" --wc-root "$WC_ROOT_FAKE" --dispatch-bin "$SANDBOX/bin/dispatch_ok.sh" --dry-run)"
+LAST_RC=$?
+set -e
+if [ ! -s "$SANDBOX_DISPATCH_LOG" ] && [ ! -s "$SANDBOX_EVENT_LOG" ] && [ ! -s "$SANDBOX_NOTIFY_LOG" ] \
+   && echo "$OUT" | grep -q '"dry_run": true' && echo "$OUT" | grep -q -- '--bg'; then
+  ok "T8 --dry-run không đụng dispatch/event/notify thật, cmd_preview còn --bg (bug preview cũ đã vá)"
 else
-  bad "T8" "out=$out"
+  bad "T8" "rc=$LAST_RC out=$OUT"
 fi
 
-# --- T9: finding thiếu field 'file' -> escalate, KHÔNG crash ---
-rm -f "$SANDBOX/state/code_quality_weekly_dispatch_2099-01-09.json"
+# --- T9: finding thiếu 'file' -> escalate, KHÔNG crash ---
 cat > "$SANDBOX/t9.json" <<'EOF'
 {"findings": [
   {"line": 1, "category": "dead-code", "severity": "low", "summary": "thiếu file", "evidence": "e", "owner": "Taylor"},
   {"file": "/x/ok.py", "line": 2, "category": "dead-code", "severity": "low", "summary": "hợp lệ", "evidence": "e", "owner": "Taylor"}
 ]}
 EOF
-if out="$(run "$SANDBOX/t9.json" 2099-01-09)"; then
-  if echo "$out" | grep -q '"n_escalate": 1' && echo "$out" | grep -q '"n_taylor": 1'; then
-    ok "T9 finding thiếu 'file' -> escalate riêng, không crash, finding hợp lệ khác vẫn dispatch"
-  else
-    bad "T9" "out=$out"
-  fi
+run "$SANDBOX/t9.json" 2099-01-09
+if [ "$LAST_RC" -eq 0 ] && echo "$OUT" | grep -q '"n_escalate": 1' && echo "$OUT" | grep -q '"n_taylor": 1'; then
+  ok "T9 finding thiếu 'file' -> escalate riêng, không crash"
 else
-  bad "T9" "script CRASH (rc≠0) thay vì fail-safe escalate — out=$out"
+  bad "T9" "rc=$LAST_RC out=$OUT"
 fi
 
-# --- T9b: severity không hợp lệ (typo "Med") -> escalate, không tự đoán ---
-rm -f "$SANDBOX/state/code_quality_weekly_dispatch_2099-01-09b.json"
+# --- T9b: severity không hợp lệ / có khoảng trắng thừa -> escalate hoặc chuẩn hoá đúng, không tự đoán ---
 cat > "$SANDBOX/t9b.json" <<'EOF'
 {"findings": [{"file": "/x/ok.py", "line": 1, "category": "dead-code", "severity": "Med", "summary": "s", "evidence": "e", "owner": "Taylor"}]}
 EOF
-out="$(run "$SANDBOX/t9b.json" 2099-01-09b)"
-if echo "$out" | grep -q '"n_escalate": 1' && [ ! -s "$SANDBOX_DISPATCH_LOG" ]; then
-  ok "T9b severity không hợp lệ -> escalate (fail-safe), không tự đoán medium/low"
-else
-  bad "T9b" "out=$out"
-fi
+run "$SANDBOX/t9b.json" 2099-01-09b
+[ "$LAST_RC" -eq 0 ] && echo "$OUT" | grep -q '"n_escalate": 1' && [ ! -s "$SANDBOX_DISPATCH_LOG" ] \
+  && ok "T9b severity không hợp lệ ('Med') -> escalate fail-safe" || bad "T9b" "rc=$LAST_RC out=$OUT"
 
-# --- T10: dispatch rc≠0 (circuit breaker) -> KHÔNG ghi state cho nhóm đó (rerun sẽ thử lại) ---
-rm -f "$SANDBOX/state/code_quality_weekly_dispatch_2099-01-10.json"
+# --- T9c: severity NAV-hard-boundary trước đây với khoảng trắng thừa " medium " trên file exact-match -> vẫn escalate đúng (bug chuẩn hoá vòng 2 đã vá) ---
+cat > "$SANDBOX/t9c.json" <<'EOF'
+{"findings": [{"file": "/x/dnse_api.py", "line": 1, "category": "correctness", "severity": " medium ", "summary": "s", "evidence": "e", "owner": "Taylor"}]}
+EOF
+run "$SANDBOX/t9c.json" 2099-01-09c
+[ "$LAST_RC" -eq 0 ] && echo "$OUT" | grep -q '"n_escalate": 1' && [ ! -s "$SANDBOX_DISPATCH_LOG" ] \
+  && ok "T9c severity ' medium ' (khoảng trắng thừa) chuẩn hoá đúng -> vẫn escalate" || bad "T9c" "rc=$LAST_RC out=$OUT"
+
+# --- T10: dispatch rc≠0 -> KHÔNG ghi state, script trả rc≠0 (không còn báo 'Auto-dispatch xong' giả) ---
 cat > "$SANDBOX/t10.json" <<'EOF'
 {"findings": [{"file": "/x/foo.py", "line": 1, "category": "dead-code", "severity": "low", "summary": "s", "evidence": "e", "owner": "Taylor"}]}
 EOF
-out="$(run "$SANDBOX/t10.json" 2099-01-10 "$SANDBOX/bin/dispatch_fail.sh")"
+run "$SANDBOX/t10.json" 2099-01-10 "$SANDBOX/bin/dispatch_fail.sh"
 state_content="$(cat "$SANDBOX/state/code_quality_weekly_dispatch_2099-01-10.json" 2>/dev/null || echo '{}')"
-if echo "$out" | grep -q '"n_taylor": 1' && ! echo "$state_content" | grep -q '"taylor"'; then
-  ok "T10 dispatch rc≠0 -> KHÔNG ghi state cho nhóm đó (retryable)"
+if [ "$LAST_RC" -ne 0 ] && echo "$OUT" | grep -q '"n_taylor": 1' && ! echo "$state_content" | grep -q '"taylor"' \
+   && grep -q "CẦN RERUN TAY" "$SANDBOX_NOTIFY_LOG"; then
+  ok "T10 dispatch rc≠0 -> KHÔNG ghi state, script rc≠0, Discord có lệnh rerun tay (không hứa suông)"
 else
-  bad "T10" "out=$out state=$state_content"
+  bad "T10" "rc=$LAST_RC out=$OUT state=$state_content"
 fi
 
-# --- T11: rerun sau khi 1 nhóm fail — chỉ retry nhóm CHƯA thành công, không dispatch lại nhóm đã xong ---
-rm -f "$SANDBOX/state/code_quality_weekly_dispatch_2099-01-11.json"
+# --- T11: rerun sau khi 1 nhóm fail — chỉ retry nhóm CHƯA thành công ---
 cat > "$SANDBOX/t11.json" <<'EOF'
 {"findings": [
   {"file": "/x/foo.py", "line": 1, "category": "dead-code", "severity": "low", "summary": "s", "evidence": "e", "owner": "Taylor"},
   {"file": "/x/bar.sh", "line": 2, "category": "dead-code", "severity": "low", "summary": "s2", "evidence": "e2", "owner": "Wags"}
 ]}
 EOF
-# Lượt 1: Wags fail, Taylor ok.
-out1="$(run "$SANDBOX/t11.json" 2099-01-11 "$SANDBOX/bin/dispatch_wags_fails.sh")"
+run "$SANDBOX/t11.json" 2099-01-11 "$SANDBOX/bin/dispatch_wags_fails.sh"
 state1="$(cat "$SANDBOX/state/code_quality_weekly_dispatch_2099-01-11.json" 2>/dev/null || echo '{}')"
-# Lượt 2 (rerun cùng ngày, KHÔNG xoá state) — đổi sang dispatch_ok để Wags giờ thành công.
-out2="$(run_keep_state "$SANDBOX/t11.json" 2099-01-11 "$SANDBOX/bin/dispatch_ok.sh")"
-n_taylor_calls_total="$(grep -cE '^Taylor Xử lý ' "$SANDBOX_DISPATCH_LOG" || true)"  # log bị reset đầu lượt 2, chỉ đếm lượt 2
-if echo "$state1" | grep -q '"taylor"' && ! echo "$state1" | grep -q '"wags"' \
-   && echo "$out2" | grep -q '"skipped_already_done": true' \
-   && [ "$n_taylor_calls_total" -eq 0 ] && grep -qE '^Wags Xử lý ' "$SANDBOX_DISPATCH_LOG"; then
-  ok "T11 rerun chỉ retry nhóm chưa xong (Wags), KHÔNG dispatch lại Taylor đã thành công"
+run_keep_state "$SANDBOX/t11.json" 2099-01-11 "$SANDBOX/bin/dispatch_ok.sh"
+if [ "$LAST_RC" -eq 0 ] && echo "$state1" | grep -q '"taylor"' && ! echo "$state1" | grep -q '"wags"' \
+   && echo "$OUT" | grep -q '"skipped_already_done": true' \
+   && ! grep -qE '^Taylor Xử lý ' "$SANDBOX_DISPATCH_LOG" && grep -qE '^Wags Xử lý ' "$SANDBOX_DISPATCH_LOG"; then
+  ok "T11 rerun chỉ retry nhóm chưa xong (Wags), không dispatch lại Taylor, lần 2 rc=0"
 else
-  bad "T11" "state1=$state1 out2=$out2 dispatch_log_lan2=$(cat "$SANDBOX_DISPATCH_LOG")"
+  bad "T11" "state1=$state1 out2=$OUT rc=$LAST_RC dispatch_log_lan2=$(cat "$SANDBOX_DISPATCH_LOG")"
 fi
 rm -f "$SANDBOX/state/code_quality_weekly_dispatch_2099-01-11.json"
+
+# --- T12: escalation FAIL (append_event.sh lỗi) -> notify_failure() được gọi, script trả rc≠0, KHÔNG ghi state["escalate"] ---
+use_append_event fail
+cat > "$SANDBOX/t12.json" <<'EOF'
+{"findings": [{"file": "/x/dnse_api.py", "line": 1, "category": "correctness", "severity": "high", "summary": "s", "evidence": "e", "owner": "Taylor"}]}
+EOF
+run "$SANDBOX/t12.json" 2099-01-12
+state_content="$(cat "$SANDBOX/state/code_quality_weekly_dispatch_2099-01-12.json" 2>/dev/null || echo '{}')"
+use_append_event ok
+if [ "$LAST_RC" -ne 0 ] && grep -q "CRASH\|THẤT BẠI" "$SANDBOX_NOTIFY_LOG" && ! echo "$state_content" | grep -q '"escalate"'; then
+  ok "T12 escalation post FAIL -> notify_failure() gọi, rc≠0, KHÔNG ghi state (không im lặng như round 1)"
+else
+  bad "T12" "rc=$LAST_RC state=$state_content notify_log=$(cat "$SANDBOX_NOTIFY_LOG")"
+fi
 
 echo "=== $PASS PASS / $FAIL FAIL ==="
 [ "$FAIL" -eq 0 ]
