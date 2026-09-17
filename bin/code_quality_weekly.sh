@@ -197,12 +197,15 @@ $full_scope
 Trả về DUY NHẤT 1 khối JSON, không thêm chữ nào khác, giữa 2 dòng đánh dấu:
 <<<FINDINGS_JSON>>>
 {"findings": [{"file": "...", "line": 0, "category": "...", "severity": "low|medium|high",
-"summary": "...", "evidence": "...", "owner": "Taylor|Wags|Mike"}], "files_reviewed": $n_scoped,
-"files_clean": ["..."]}
+"summary": "...", "evidence": "...", "owner": "Taylor|Wags|Mike", "suggested_fix": "..."}],
+"files_reviewed": $n_scoped, "files_clean": ["..."]}
 <<<END_FINDINGS>>>
 
 "findings" RỖNG là kết quả hợp lệ nếu thật sự không thấy gì đáng báo — đừng bịa finding để có
-nội dung. "files_clean" liệt kê file đã đọc kỹ và không thấy vấn đề gì.
+nội dung. "files_clean" liệt kê file đã đọc kỹ và không thấy vấn đề gì. "suggested_fix" (tuỳ
+chọn nhưng NÊN có): 1-2 câu hướng sửa cụ thể — báo cáo này giờ có thể được dispatch TỰ ĐỘNG cho
+Taylor/Wags xử lý ngay (Tầng 3, xem plan §CẬP NHẬT 2026-09-17), "suggested_fix" giúp họ không
+phải tự đoán ý định sửa từ đầu.
 PROMPT_EOF
 )"
 
@@ -357,6 +360,8 @@ for f in findings:
     lines.append(f"- Owner đề xuất: {f.get('owner','?')}")
     lines.append(f"- {f.get('summary','')}")
     lines.append(f"- Bằng chứng: {f.get('evidence','')}")
+    if f.get("suggested_fix"):
+        lines.append(f"- Hướng sửa đề xuất: {f.get('suggested_fix')}")
     if f.get("verified"):
         lines.append("- Đã qua verify độc lập: sống sót phản biện.")
     lines.append("")
@@ -395,6 +400,26 @@ if [ -n "$ARCH_TID" ]; then
   "$ROOT/bin/notify_thread.sh" "$summary_line Báo cáo: $report_file" "$ARCH_TID" 2>/dev/null || true
 else
   log "WARN: không resolve được topic '$ARCH_THREAD_NAME' từ discord_channels.json — không gửi Discord."
+fi
+
+# --- 7. Tầng 3 auto-dispatch (user chốt 2026-09-17, plan §CẬP NHẬT 2026-09-17) ---
+# Dispatch owner (Taylor/Wags) xử lý NGAY finding không chạm ranh giới cứng; escalate (bus
+# question + Discord, KHÔNG dispatch) finding chạm logic đặt lệnh/NAV sống hoặc owner không rõ.
+if [ "$n_final" -gt 0 ]; then
+  log "Auto-dispatch (Tầng 3): $n_final finding → phân loại escalate/Taylor/Wags..."
+  set +e
+  autodispatch_out="$(python3 "$ROOT/bin/code_quality_autodispatch.py" \
+    --verified "$verified_f" --date "$TODAY" --report-file "$report_file" --root "$ROOT" \
+    ${ARCH_TID:+--arch-thread "$ARCH_TID"})"
+  _ad_rc=$?
+  set -e
+  if [ $_ad_rc -eq 0 ]; then
+    log "Auto-dispatch xong: $autodispatch_out"
+  else
+    log "WARN: code_quality_autodispatch.py rc=$_ad_rc — không dispatch được, xem log/kiểm tay. Output: $autodispatch_out"
+  fi
+else
+  log "0 finding sau verify — không có gì để auto-dispatch."
 fi
 
 # Gửi email (credential: WC_ROOT/secrets/gmail_smtp_app_password.json)
