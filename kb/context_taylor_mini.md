@@ -1,15 +1,15 @@
-# Mike fleet — context_taylor_mini (v3053)
+# Mike fleet — context_taylor_mini (v3054)
 > Auto-generated RECENT block; static canonical facts maintained manually (weekly audit-lens catches drift).
 > Dùng `bin/kb_recall.sh "keywords"` để lấy section đầy đủ khi cần chi tiết về ops/CAPIT/project.
 > Source đầy đủ: `kb/context_pack.md`.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-09-17T12:14:08] DollarBill/decision — plan-SpaceX-2026-09-18: {"summary": "plan_SpaceX_2026-09-18.json tao xong, load_plan() verify OK. 1 lenh BUY VPI 600cp @ tran 63100 (top-up hoan tat lenh 09-17 chi khop 200/800cp do gi …
 - [2026-09-17T12:14:16] DollarBill/finding — vpi-bal-partial-fill-09-17-topup: {"summary": "Lenh BUY-VPI-BAL-SpaceX-01 (09-17, ke hoach 800cp @62000) chi khop 200cp thuc te (order id 277091 Filled 200@62000). 3 dot dat lai sau do (100/200/ …
 - [2026-09-17T12:15:05] DollarBill/decision — plan-ZaloPay-2026-09-18: {"account": "ZaloPay", "plan_date": "2026-09-18", "summary": "1 lenh BUY VPI 300cp@63100 (top-up diff-based, target 10% BAL_book tru vi the that dang giu). Acti …
 - [2026-09-17T12:15:11] DollarBill/finding — vpi-zalopay-order-vs-fill-gap-20260917: {"ticker": "VPI", "account": "ZaloPay", "order_id": "BUY-VPI-BAL-ZaloPay-01", "qty_ordered": 500, "qty_filled": 100, "ref_price": 62000, "note": "Lenh VPI 500cp …
 - [2026-09-17T12:15:54] DollarBill/finding — plan-ZaloPay-20260918-retry-verified: {"note": "Job attempt 2: verified work from attempt 1 already complete (plan_ZaloPay_2026-09-18.json valid JSON, 1 order BUY VPI 300cp, bus decision+finding alr …
+- [2026-09-17T14:58:16] Mike/decision — plan-approval-2026-09-18-both: {"date": "2026-09-18", "accounts": ["ZaloPay", "SpaceX"], "status": "approved", "action": "BUY VPI (+SELL VHM park-trim SpaceX)", "decided_by": "user"}
 <!--RECENT-END-->
 
 ## Kill-switches

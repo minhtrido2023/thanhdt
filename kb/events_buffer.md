@@ -467,3 +467,6 @@
 
 ## Consolidation 2026-09-17T13:07:02Z
 - [2026-09-17T12:18:43Z] Mafee/status — eod-trading-report: {"account": "SpaceX", "plan_date": "2026-09-17", "delivered_via": "report_delivery_gate", "artifact": "SpaceX_daily_report_2026-09-17.md"}
+
+## Consolidation 2026-09-17T15:07:02Z
+- [2026-09-17T14:58:16Z] Mike/decision — plan-approval-2026-09-18-both: {"date": "2026-09-18", "accounts": ["ZaloPay", "SpaceX"], "status": "approved", "action": "BUY VPI (+SELL VHM park-trim SpaceX)", "decided_by": "user"}
