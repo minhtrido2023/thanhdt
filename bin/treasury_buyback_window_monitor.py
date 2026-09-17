@@ -41,6 +41,16 @@ NGƯỠNG `CLOSE_WINDOW_DAYS` = 45 ngày lịch (đề xuất trong dispatch: 10
 320 — chỉ 6/29 ≤45, 16/29 ≤90, 23/29 ≤180. Tức ở 45 ngày phần lớn WARN là "đang chờ sở cập nhật",
 không phải gap treo; chọn giá trị là quyết định của Mike/user. Chỉnh hằng số này, không rải số.
 
+NGƯỠNG `MATCH_MAX_DAYS` = 365 ngày là PHÁN ĐOÁN, KHÔNG phải khoảng trống tự nhiên của dữ liệu.
+Đo lại 2026-09-17 (step-down đầu tiên sau buy_done, không trần): đuôi LIÊN TỤC 277, 320, 369, 374,
+375, 395, 402, 405, 411, 427, 428, 436, 516, 557, 585, 684... ⇒ 365 cắt giữa đuôi. Hệ quả: MWG
+2023-05-31 (+369d), 2021-07-30 (+374d), 2024-12-27 (+375d) có step-down nhưng bị gắn STALE.
+Không nâng lên 380 vì: (i) 380 cũng không rơi vào khoảng trống (kế tiếp 395); (ii) MỌI lag >320
+đo được đều trỏ vào một step-down ĐÃ đóng một đợt mua GẦN hơn (MWG 2024-06-03 đóng lag
+90/187/320/369; 2022-08-08 đóng 76/255/374/405; 2026-01-06 đóng 22/169/196/375/557) ⇒ đúng dạng
+(H2), bằng chứng đóng của chúng yếu; nâng ngưỡng chỉ thêm ghép chung, không thêm bằng chứng mới.
+Cả 3 ca đều tuổi >365 ⇒ STALE chỉ vào log, không vào WARN — nhãn sai không sinh cảnh báo.
+
 HẠN CHẾ ĐÃ BIẾT (nói thẳng, không che)
 --------------------------------------
 (H1) ESOP KHÔNG phân biệt được bằng DỮ LIỆU CÓ CẤU TRÚC: `treasury_news` không có cột nguồn gốc
@@ -92,8 +102,8 @@ NOTIFY_TOPIC = "architecture"
 
 SCOPE_START = dt.date(2021, 1, 1)   # hiệu lực Luật DN 2020 + Luật CK 2019
 CLOSE_WINDOW_DAYS = 45              # 10 ngày luật định + đệm độ trễ niêm yết/vendor
-MATCH_MAX_DAYS = 365                # step-down xa hơn coi là không thuộc đợt mua này (đo: lag
-                                    # ≤365 ngày dày tới 320, sau đó nhảy 395/402/913/1713)
+MATCH_MAX_DAYS = 365                # NGƯỠNG PHÁN ĐOÁN, không phải khoảng trống tự nhiên — xem
+                                    # đoạn MATCH_MAX_DAYS trong docstring module
 ORIGIN_HINT_RE = re.compile(
     r"esop|người lao động|cbnv|cbcnv|cán bộ|nhân viên|nghỉ việc|thu hồi|ưu đãi|cổ phiếu lẻ"
     r"|phát sinh từ",

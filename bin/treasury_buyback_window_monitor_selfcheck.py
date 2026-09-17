@@ -90,11 +90,11 @@ def run_cases(c):
     print(f"TARGET={os.path.relpath(c.__file__, HERE)} W={W} M={M} TZ={os.environ.get('TZ', '<unset>')}")
 
     # A. Đóng / mở / biên
-    r = c.evaluate(TODAY, [ev("AAA", W + 30)], [ais("AAA", 400, 1000, 10_000),
+    r = c.evaluate(TODAY, [ev("AAA", W + 30)], [ais("AAA", W + 400, 1000, 10_000),
                                                 ais("AAA", W + 10, -500, 9_500)])
     check("A1. step-down Δ<0 sau buy_done ⇒ closed, không WARN",
           len(r["closed"]) == 1 and not r["warn"] and r["closed"][0]["lag"] == 20, r)
-    r = c.evaluate(TODAY, [ev("AAA", W + 1)], [ais("AAA", 400, 1000, 10_000)])
+    r = c.evaluate(TODAY, [ev("AAA", W + 1)], [ais("AAA", W + 400, 1000, 10_000)])
     check("A2. chưa step-down, tuổi W+1 ⇒ WARN", len(r["warn"]) == 1, r)
     r = c.evaluate(TODAY, [ev("AAA", W)], [])
     check("A3. biên: tuổi đúng W ⇒ trong cửa sổ, không WARN",
@@ -106,20 +106,20 @@ def run_cases(c):
     check("A5. biên: tuổi đúng M ⇒ vẫn WARN", len(r["warn"]) == 1 and not r["stale"], r)
 
     # B. Định nghĩa step-down
-    r = c.evaluate(TODAY, [ev("ELC", 250)], [ais("ELC", 300, 4_163_848, 87_453_925),
-                                             ais("ELC", 200, 1_000_000, 83_290_077)])
+    r = c.evaluate(TODAY, [ev("ELC", W + 60)], [ais("ELC", W + 110, 4_163_848, 87_453_925),
+                                             ais("ELC", W + 10, 1_000_000, 83_290_077)])
     check("B1. ca ELC thật: tổng giảm nhưng Δ dương ⇒ KHÔNG đóng (WARN)", len(r["warn"]) == 1, r)
-    r = c.evaluate(TODAY, [ev("VHM", 200)], [ais("VHM", 900, 1_004_853_570, 4_354_367),
-                                             ais("VHM", 160, -246_955_484, 4_107_412_004)])
+    r = c.evaluate(TODAY, [ev("VHM", W + 60)], [ais("VHM", W + 760, 1_004_853_570, 4_354_367),
+                                             ais("VHM", W + 20, -246_955_484, 4_107_412_004)])
     check("B2. ca VHM thật: Δ âm nhưng tổng trước sai đơn vị ⇒ VẪN đóng", len(r["closed"]) == 1, r)
-    r = c.evaluate(TODAY, [ev("NUL", 100)], [ais("NUL", 60, None, None, "NUL - Giảm niêm yết 5.000 cổ phiếu")])
+    r = c.evaluate(TODAY, [ev("NUL", W + 55)], [ais("NUL", W + 15, None, None, "NUL - Giảm niêm yết 5.000 cổ phiếu")])
     check("B3. Δ NULL + tiêu đề 'Giảm niêm yết' ⇒ đóng", len(r["closed"]) == 1, r)
-    r = c.evaluate(TODAY, [ev("NUL", 100)], [ais("NUL", 60, None, None, "NUL - Niêm yết bổ sung")])
+    r = c.evaluate(TODAY, [ev("NUL", W + 55)], [ais("NUL", W + 15, None, None, "NUL - Niêm yết bổ sung")])
     check("B4. Δ NULL + tiêu đề bổ sung ⇒ không đóng", len(r["warn"]) == 1, r)
-    r = c.evaluate(TODAY, [ev("BEF", 100)], [ais("BEF", 101, -10, 90)])
+    r = c.evaluate(TODAY, [ev("BEF", W + 55)], [ais("BEF", W + 56, -10, 90)])
     check("B5. step-down TRƯỚC ngày buy_done ⇒ không đóng, nhưng hiện ở 'AIS trước'",
           len(r["warn"]) == 1 and r["warn"][0]["ais_before"]["step_down"], r)
-    r = c.evaluate(TODAY, [ev("SAM", 100)], [ais("SAM", 100, -10, 90)])
+    r = c.evaluate(TODAY, [ev("SAM", W + 55)], [ais("SAM", W + 55, -10, 90)])
     check("B6. step-down CÙNG ngày buy_done ⇒ đóng (lag 0)",
           len(r["closed"]) == 1 and r["closed"][0]["lag"] == 0, r)
     r = c.evaluate(TODAY, [ev("FAR", M + 50)], [ais("FAR", 49, -10, 90)])
@@ -133,12 +133,12 @@ def run_cases(c):
                            {"ticker": "NEW", "d": "2021-01-01", "id": "z", "title": "", "short_content": ""}], [])
     check("C1. pre-2021 bị loại kể cả khi SQL trả về; 2021-01-01 giữ",
           r["scope_events"] == 1 and r["stale"][0]["ticker"] == "NEW", r)
-    r = c.evaluate(TODAY, [ev("DUP", 80), ev("DUP", 80, "Tin khác"), ev("DUP", 81)], [])
+    r = c.evaluate(TODAY, [ev("DUP", W + 35), ev("DUP", W + 35, "Tin khác"), ev("DUP", W + 36)], [])
     check("C2. gộp theo (ticker, public_date): 3 dòng ⇒ 2 sự kiện, n_news=2",
           r["scope_events"] == 2 and sorted(i["n_news"] for i in r["warn"]) == [1, 2], r)
-    r = c.evaluate(TODAY, [ev("ESO", 80, "Báo cáo kết quả mua lại cổ phiếu ESOP đợt 2"),
-                           ev("LAO", 80, "BC mua lại", "cổ phiếu của Người lao động nghỉ việc"),
-                           ev("PLN", 80)], [])
+    r = c.evaluate(TODAY, [ev("ESO", W + 35, "Báo cáo kết quả mua lại cổ phiếu ESOP đợt 2"),
+                           ev("LAO", W + 35, "BC mua lại", "cổ phiếu của Người lao động nghỉ việc"),
+                           ev("PLN", W + 35)], [])
     hints = {i["ticker"]: i["hint"] for i in r["warn"]}
     check("C3. cờ ESOP (tiêu đề + short_content, không phân biệt hoa thường) nhưng KHÔNG loại trừ",
           len(r["warn"]) == 3 and hints["ESO"] and hints["LAO"] and hints["PLN"] is None, hints)
@@ -150,26 +150,26 @@ def run_cases(c):
           all(s in q for s in ("event_code = 'AIS'", "event_status = 'executed'", f"<= DATE '{TODAY}'")), q)
 
     # D. Nội dung WARN (§29: sự kiện + số liệu, không kết luận)
-    rc, out, sent = run_main(c, [ev("KDC", 73)], [ais("KDC", 650, 10_064_960, 289_806_316)],
+    rc, out, sent = run_main(c, [ev("KDC", W + 28)], [ais("KDC", M + 285, 10_064_960, 289_806_316)],
                              argv=())
     msg = sent[0] if sent else ""
     check("D1. WARN ⇒ rc=1 + post 1 lần", rc == 1 and len(sent) == 1, (rc, sent))
     check("D2. WARN nêu ticker, ngày, số ngày, ngưỡng, AIS trước",
-          all(s in msg for s in ("KDC", ago(73), "73 ngày", f"ngưỡng {W}", "289,806,316")), msg)
+          all(s in msg for s in ("KDC", ago(W + 28), f"{W + 28} ngày", f"ngưỡng {W}", "289,806,316")), msg)
     check("D3. không kết luận 'vi phạm'", not re.search(r"vi phạm|violat", msg, re.I), msg)
-    rc, out, sent = run_main(c, [ev("OK", 80)], [ais("OK", 60, -5, 5)], argv=())
+    rc, out, sent = run_main(c, [ev("OK", W + 35)], [ais("OK", W + 15, -5, 5)], argv=())
     check("D4. không WARN ⇒ rc=0, không post", rc == 0 and not sent, (rc, sent, out))
     rc, out, sent = run_main(c, [ev("OLD", M + 10)], [], argv=())
     check("D5. chỉ STALE ⇒ rc=0, không post, nhưng có trong log",
           rc == 0 and not sent and "STALE OLD" in out, (rc, sent, out))
-    rc, out, sent = run_main(c, [ev("KDC", 73)], [], argv=("--dry-run",))
+    rc, out, sent = run_main(c, [ev("KDC", W + 28)], [], argv=("--dry-run",))
     check("D6. --dry-run ⇒ không post, rc=1", rc == 1 and not sent, (rc, sent))
 
     # E. Lỗi
     rc, out, sent = run_main(c, [], [], argv=(), raise_on="treasury_window:ais")
     check("E1. BQ lỗi ⇒ rc=2, post kèm lỗi THẬT", rc == 2 and sent and "Access Denied" in sent[0],
           (rc, sent))
-    rc, out, sent = run_main(c, [ev("KDC", 73)], [], argv=(), notifier=lambda m: (False, "rc=7"))
+    rc, out, sent = run_main(c, [ev("KDC", W + 28)], [], argv=(), notifier=lambda m: (False, "rc=7"))
     check("E2. post thất bại ⇒ rc=3 + NOTIFY_FAILED", rc == 3 and "NOTIFY_FAILED" in out, (rc, out))
 
     with open(c.__file__, encoding="utf-8") as fh:
