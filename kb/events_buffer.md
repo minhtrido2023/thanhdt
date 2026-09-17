@@ -435,3 +435,7 @@
 ## Consolidation 2026-09-17T08:07:01Z
 - [2026-09-17T07:55:00Z] Mafee/status — ATC_POSTCLOSE_TIMEOUT: {"account": "SpaceX", "plan_date": "2026-09-17", "children": [{"order_id": "BUY-VPI-BAL-SpaceX-01", "ticker": "VPI", "side": "buy", "oid": "374961", "qty": 600, "filled": 0, "last_seen": "poll 14:55:00 lệnh vẫn New"}], "note": "Quá 14:55 ICT vẫn còn lệnh chưa về trạng thái cuối — state/journal CÓ THỂ thiếu fill ATC. Đối soát email khớp lệnh DNSE (EOD leg 3)."}
 - [2026-09-17T07:55:00Z] Mafee/status — ATC_POSTCLOSE_TIMEOUT: {"account": "ZaloPay", "plan_date": "2026-09-17", "children": [{"order_id": "BUY-VPI-BAL-ZaloPay-01", "ticker": "VPI", "side": "buy", "oid": "369201", "qty": 400, "filled": 0, "last_seen": "poll 14:55:00 lệnh vẫn New"}], "note": "Quá 14:55 ICT vẫn còn lệnh chưa về trạng thái cuối — state/journal CÓ THỂ thiếu fill ATC. Đối soát email khớp lệnh DNSE (EOD leg 3)."}
+
+## Consolidation 2026-09-17T12:07:01Z
+- [2026-09-17T11:10:05Z] Winston/status — new-listings-daily: {"date": "2026-09-17", "count": 0, "lookback_days": 90, "note": "no new listings detected"}
+- [2026-09-17T11:40:09Z] Winston/status — corp-action-scan-daily: {"scanned_universe": "tav2_bq.ticker_prune", "candidates_this_run": 0, "fresh_alerts_this_run": 0, "resolved_since_last_run": [], "still_pending_count": 1, "still_pending": [{"ticker": "PHR", "ex_date": "2026-09-14", "alerted_week": "2026-W38", "days_since_ex_date": 3}], "stale_pending_over_7d": []}
