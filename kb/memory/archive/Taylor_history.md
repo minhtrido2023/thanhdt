@@ -545,3 +545,6 @@
 
 ## Archived 2026-09-16 (keep=12 days=0 require_done=False)
 - [2026-09-13T06:01:49Z] cq-20260913 follow-up 1258 XONG (job _055125): nguon = injector:116 khong truyen goi, 0 tac dong tien; patch #1 KHONG dong ca nay. CHO Mike/user duyet fix goc brokers._account_default_lp tra profile theo account_id (hoac sua injector:116).
+
+## Archived 2026-09-17 (keep=12 days=0 require_done=False)
+- [2026-09-13T06:27:23Z] cq-20260913 #1: patch v2 (research/cq20260913_batch1_item1_v2.patch, commit 063dd83f) = v1 + fix goc profile-lp, 2 vong arch APPROVE. CHO Mike apply v2 THAY v1 T2 14/09 sau 15:00 + chay selfcheck cuoi patch. Van CHO user quyet co nav_include_egg_offbook (khuyen nghi OFF).
