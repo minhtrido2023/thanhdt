@@ -30,6 +30,24 @@ hard-boundary bằng regex đường dẫn/category rồi escalate thay vì disp
 xác nhận có muốn tự động hoá tới mức đó không (rủi ro: cron 03:00 sáng Chủ Nhật tự sửa code +
 xin arch-review không có ai giám sát trực tiếp).
 
+**Kết quả thực thi lần đầu (đo thật cùng ngày)** — 2 bài học bắt buộc áp dụng từ lần dispatch kế
+tiếp:
+1. **23/25 finding hoá ra ĐÃ ĐƯỢC FIX 4 NGÀY TRƯỚC** (09-13, job `Wags_20260913_034952`/`050903` +
+   `Taylor_20260913_050827`) bởi một lượt xử lý mà phiên Mike hôm nay không hề biết tới — tức mô
+   hình "auto-dispatch ngay" **đã âm thầm chạy trước cả khi user chốt hôm nay**, có thể qua 1
+   phiên Mike khác hoặc quyết định tạm thời không ghi lại đầy đủ. **BẮT BUỘC từ lần sau**: trước
+   khi dispatch owner xử lý báo cáo tuần, `grep` bus tìm event dạng `cq-<ngày báo cáo>-*` (topic
+   `finding`) của Wags/Taylor — có rồi thì đọc kết quả cũ, KHÔNG dispatch lại nguyên xi.
+2. **2 finding hard-boundary (`brokers.py:518/559`) mà Mike escalate lên user hoá ra ĐÃ FIX từ
+   09-14** (commit `99fd8f6d`/`e802c08c`, dự án "aria-K checklist" không liên quan) — Mike đọc
+   text báo cáo cũ mà không đối chiếu code hiện tại trước khi hỏi user, gây escalate thừa. **BẮT
+   BUỘC**: trước khi escalate 1 finding cụ thể lên user vì lý do "chạm ranh giới cứng", chạy
+   `git log --since=<ngày báo cáo> -- <file>` trên đúng file đó để xác nhận CHƯA có ai xử lý.
+3. Giá trị thật còn lại của lượt dispatch "thừa" này KHÔNG phải zero: Wags phát hiện 2 nhóm
+   commit (`136a90d0`, `767deb0e`) từng fix nhưng **chưa từng qua arch-review** — đóng gap đó
+   (thêm selfcheck `dispatch_wc_root_anchor_selfcheck.sh`, commit `eee6769b`) mới thật sự là việc
+   mới của hôm nay.
+
 ## 0. Quyết định nền đã chốt trong hội thoại 13:20 ICT 2026-08-23
 
 - **KHÔNG tạo daemon/agent thường trực tự sửa code.** Một agent "dọn rác" tự động sẽ false-positive
