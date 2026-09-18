@@ -11,13 +11,25 @@ kb/projects/code-quality-review-plan-20260823.md § CẬP NHẬT 2026-09-17).
       (1) Danh sách tay `EXEC_HARD_BOUNDARY_PREFIXES`/`_EXACT` — prefix `trading_bot/` (mọi file
           dưới thư mục này, không liệt tên — tránh trôi khi thêm module mới) + vài file cụ thể
           ngoài đó (`bot_execute.py`, `dnse_api.py`, `mike/bin/run_bot.sh`, ...).
-      (2) `kb/production_manifest.json` tier T0 (`load_manifest_t0()`) — nguồn CƠ HỌC sinh từ
-          crontab thật (`production_manifest.py`), bắt được cả file KHÔNG có trong danh sách tay
-          — arch-review round 3 killer objection: danh sách tay chỉ phủ 10/34 file T0 có commit
-          trong 1 tuần đo thật, bỏ sót `mike/bin/merge_park_orders.py` (ghi thẳng orders[] vào
-          plan) vì nó không "nghe tên" nguy hiểm như các file đã liệt. Manifest đọc lỗi/thiếu ⇒
-          rơi về set rỗng (KHÔNG throw), danh sách tay (1) vẫn là nền — không có kịch bản nào
-          escalation bị GIẢM so với chỉ dùng (1) một mình.
+      (2) `kb/production_manifest.json`, lọc theo `tier_root` ∈ `ORDER_WRITING_ROOTS`
+          (`load_manifest_order_writing()`) — nguồn CƠ HỌC sinh từ crontab thật
+          (`production_manifest.py`), bắt được file KHÔNG có trong danh sách tay — arch-review
+          round 3 killer objection: danh sách tay chỉ phủ 10/34 file T0 có commit trong 1 tuần đo
+          thật, bỏ sót `mike/bin/merge_park_orders.py` (ghi thẳng orders[] vào plan). Manifest đọc
+          lỗi/thiếu ⇒ rơi về set rỗng + warning (KHÔNG throw, KHÔNG im lặng — xem hàm), danh sách
+          tay (1) vẫn là nền — không có kịch bản nào escalation bị GIẢM so với chỉ dùng (1).
+          ⚠️ **Đổi 2026-09-18 (user chốt: "tăng tỉ lệ tự sửa")**: bản đầu dùng CẢ tier T0 (107
+          file, gồm cả file KHÔNG chạm tiền như `dispatch.sh`/`eod_trading_report.sh` —
+          `tier=T0` trong manifest nghĩa là "với tới được từ MỘT cron gốc gắn nhãn T0", không
+          phải "chính nó ghi lệnh"). Đo thật cho thấy điều đó làm escalate oan nhiều file an
+          toàn, ngược mục tiêu tăng tỉ lệ tự sửa. Đổi sang lọc theo `tier_root` (root DUY NHẤT
+          xác định tier, không phải toàn bộ `roots[]` reachability) ∈ `ORDER_WRITING_ROOTS` — tập
+          root cron TRỰC TIẾP ghi lệnh/vị thế/margin (không gồm root chỉ báo cáo/kiểm tra như
+          `eod_trading_report.sh`, `bq_freshness_check.sh`, `check_report_cadence.sh`). Kết quả
+          đo: 44 file (từ 107), `dispatch.sh`/`eod_trading_report.sh`/`bus_question_audit.py`/
+          `check_report_cadence.sh` không còn bị escalate oan, các file ghi lệnh thật
+          (`merge_park_orders.py`, `discretionary_accumulation_inject.py`,
+          `corp_action_auto_confirm.py`, `park_holdings.py`, `gmail_otp_reader.py`...) vẫn escalate.
     HOẶC owner không phải Taylor/Wags (rỗng/"Mike"/lạ) — fail-safe khi không rõ owner.
     KHÔNG dispatch — ghi bus question + ack `triaged-needs-human:` (khỏi bị wags_autofix đốt
     job vô ích, xem arch-review round 1 "Long-term ops") + Discord.
@@ -71,13 +83,36 @@ EXEC_HARD_BOUNDARY_EXACT = (
 )
 VALID_SEVERITIES = {"low", "medium", "high"}
 
+# Root cron TRỰC TIẾP ghi lệnh/vị thế/margin — dùng để lọc `tier_root` của
+# kb/production_manifest.json (xem load_manifest_order_writing()). KHÔNG gồm root chỉ báo cáo/
+# kiểm tra freshness (eod_trading_report.sh, bq_freshness_check.sh, check_report_cadence.sh,
+# kb_nightly.sh, ops_health_check.sh...) — những root đó khiến `tier=T0` bao trùm cả tooling an
+# toàn để tự sửa (đo thật 2026-09-18: dispatch.sh/bus_question_audit.py lọt vào T0 dù không ghi
+# lệnh gì, chỉ vì "with tới được" từ run_bot.sh qua 1 nhánh gọi phụ). Tên rút từ chính basename
+# trong `production_manifest.py::ROOT_TIER` — đối chiếu lại nếu script đó đổi tên root.
+ORDER_WRITING_ROOTS = frozenset({
+    "run_bot.sh", "bot_execute.py", "merge_park_daily.sh", "inject_discretionary_orders.sh",
+    "park_trim_daily.sh", "jit_unpark_daily.sh", "corp_action_auto_confirm.py",
+    "discretionary_margin_check_exits_daily.sh", "compute_active_nav_all.sh",
+})
 
-def load_manifest_t0(root: Path) -> tuple[set[str], str | None]:
+
+def _root_basename(root_str: str) -> str:
+    """'cron `0 3 * * 0` merge_park_daily.sh' -> 'merge_park_daily.sh'. Chuỗi rỗng/lạ -> ''."""
+    return (root_str or "").rsplit(" ", 1)[-1]
+
+
+def load_manifest_order_writing(root: Path) -> tuple[set[str], str | None]:
     """Đọc thêm `kb/production_manifest.json` (đã tồn tại, do `production_manifest.py` sinh CƠ
     HỌC từ crontab thật — xem docstring file đó) làm NGUỒN THỨ 2, HỢP (union) với
     EXEC_HARD_BOUNDARY_* thay vì thay thế — arch-review round 3 killer objection: danh sách tay
     chỉ phủ 10/34 file T0 có commit trong scope tuần đo thật (bỏ sót mike/bin/merge_park_orders.py
     — ghi thẳng orders[] vào plan — và tương tự).
+
+    Lọc theo `tier_root` (root DUY NHẤT xác định tier của file — không phải toàn bộ `roots[]`, đó
+    là MỌI root với tới được, quá rộng) ∈ ORDER_WRITING_ROOTS — user chốt 2026-09-18 sau khi thấy
+    bản dùng cả tier T0 (107 file) escalate oan cả tooling an toàn, ngược mục tiêu "tăng tỉ lệ
+    tự sửa, giảm việc treo không cần thiết".
 
     Trả (set, warning). Lỗi đọc bất kỳ (thiếu file/JSON hỏng/thiếu field) ⇒ set RỖNG + warning nêu
     ĐÚNG lý do đọc được (không đoán, §29) — arch-review round 4 killer objection: bản trước nuốt
@@ -95,7 +130,10 @@ def load_manifest_t0(root: Path) -> tuple[set[str], str | None]:
     files = data.get("files")
     if not isinstance(files, dict):
         return set(), f"{manifest_path} thiếu field 'files' hợp lệ (schema đổi?)"
-    return {rel for rel, meta in files.items() if isinstance(meta, dict) and meta.get("tier") == "T0"}, None
+    return {
+        rel for rel, meta in files.items()
+        if isinstance(meta, dict) and _root_basename(meta.get("tier_root", "")) in ORDER_WRITING_ROOTS
+    }, None
 
 
 def to_repo_relative(file_abs: str, wc_root: Path) -> str:
@@ -150,8 +188,8 @@ def sanitize_findings(raw: list) -> tuple[list[dict], list[dict]]:
     return ok, invalid
 
 
-def classify(findings: list[dict], wc_root: Path, manifest_t0: set[str] | None = None) -> dict[str, list[dict]]:
-    manifest_t0 = manifest_t0 or set()
+def classify(findings: list[dict], wc_root: Path, manifest_order_writing: set[str] | None = None) -> dict[str, list[dict]]:
+    manifest_order_writing = manifest_order_writing or set()
     groups: dict[str, list[dict]] = {"escalate": [], "taylor": [], "wags": []}
     for f in findings:
         rel = to_repo_relative(str(f.get("file") or ""), wc_root)
@@ -159,10 +197,10 @@ def classify(findings: list[dict], wc_root: Path, manifest_t0: set[str] | None =
         is_exec_hard = (
             rel.startswith(EXEC_HARD_BOUNDARY_PREFIXES)
             or rel in EXEC_HARD_BOUNDARY_EXACT
-            or rel in manifest_t0
+            or rel in manifest_order_writing
         )
         if is_exec_hard:
-            reason = "hard_boundary_manifest_t0" if rel in manifest_t0 and rel not in EXEC_HARD_BOUNDARY_EXACT and not rel.startswith(EXEC_HARD_BOUNDARY_PREFIXES) else "hard_boundary_tien_that"
+            reason = "hard_boundary_manifest_order_writing" if rel in manifest_order_writing and rel not in EXEC_HARD_BOUNDARY_EXACT and not rel.startswith(EXEC_HARD_BOUNDARY_PREFIXES) else "hard_boundary_tien_that"
             groups["escalate"].append({**f, "_escalate_reason": reason, "_rel": rel})
         elif owner == "taylor":
             groups["taylor"].append({**f, "_rel": rel})
@@ -360,7 +398,7 @@ def write_scope_variants(rel: str) -> list[str]:
 def run(args) -> dict:
     root = Path(args.root)
     wc_root = Path(args.wc_root) if args.wc_root else Path(args.root).parent
-    manifest_t0, manifest_warning = load_manifest_t0(root)
+    manifest_order_writing, manifest_warning = load_manifest_order_writing(root)
     dispatch_bin = Path(args.dispatch_bin) if args.dispatch_bin else root / "bin" / "dispatch.sh"
     state_file = Path(args.state_file) if args.state_file else root / "state" / f"code_quality_weekly_dispatch_{args.date}.json"
     rerun_cmd = (f"python3 {root}/bin/code_quality_autodispatch.py --verified {args.verified} "
@@ -379,7 +417,7 @@ def run(args) -> dict:
         return {"n_escalate": 0, "n_taylor": 0, "n_wags": 0, "note": "0 finding, không có gì để dispatch"}
 
     valid, invalid = sanitize_findings(raw_findings)
-    groups = classify(valid, wc_root, manifest_t0)
+    groups = classify(valid, wc_root, manifest_order_writing)
     escalate = groups["escalate"] + invalid
     taylor_f, wags_f = groups["taylor"], groups["wags"]
     escalate_files_rel = {f.get("_rel") for f in escalate if f.get("_rel")}
@@ -438,7 +476,7 @@ def run(args) -> dict:
         "n_escalate": len(escalate),
         "n_taylor": len(taylor_f),
         "n_wags": len(wags_f),
-        "n_manifest_t0": len(manifest_t0),
+        "n_manifest_order_writing": len(manifest_order_writing),
         "manifest_warning": manifest_warning,
         "escalate_failed": escalate_failed,
         "results": results,
@@ -458,7 +496,7 @@ def run(args) -> dict:
             )
         dispatch_msg_lines.append(
             f"Phân loại: {len(escalate)} escalate / {len(taylor_f)} Taylor / {len(wags_f)} Wags "
-            f"(manifest T0 đang có {len(manifest_t0)} file)."
+            f"(danh sách ghi lệnh/vị thế từ manifest đang có {len(manifest_order_writing)} file)."
         )
         any_fail = escalate_failed
         for owner, res in results.items():

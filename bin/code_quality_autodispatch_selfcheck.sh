@@ -283,24 +283,34 @@ else
   bad "T12" "rc=$LAST_RC state=$state_content notify_log=$(cat "$SANDBOX_NOTIFY_LOG")"
 fi
 
-# --- T13: file KHÔNG nằm trong danh sách tay nhưng có tier=T0 trong kb/production_manifest.json
-# giả -> escalate (arch-review round 3 killer objection: danh sách tay bỏ sót merge_park_orders.py
-# vì nó không "nghe tên" nguy hiểm — nguồn manifest cơ học phải bắt được ca này) ---
+# --- T13: file KHÔNG nằm trong danh sách tay nhưng tier_root là 1 root GHI LỆNH
+# (merge_park_daily.sh, trong ORDER_WRITING_ROOTS) trong kb/production_manifest.json giả ->
+# escalate (arch-review round 3 killer objection: danh sách tay bỏ sót merge_park_orders.py vì nó
+# không "nghe tên" nguy hiểm — nguồn manifest cơ học phải bắt được ca này). Ngược lại: file có
+# tier_root là root chỉ BÁO CÁO (eod_trading_report.sh, KHÔNG trong ORDER_WRITING_ROOTS) -> KHÔNG
+# escalate qua manifest (user chốt 2026-09-18 "tăng tỉ lệ tự sửa" — tier=T0 riêng không đủ, phải
+# đúng root ghi lệnh). ---
 mkdir -p "$SANDBOX/kb"
 python3 -c "
 import json
-json.dump({'files': {'mike/bin/merge_park_orders_fake.py': {'tier': 'T0'}, 'some_harmless.py': {'tier': 'T1'}}},
-          open('$SANDBOX/kb/production_manifest.json', 'w'))
+json.dump({'files': {
+    'mike/bin/merge_park_orders_fake.py': {'tier': 'T0', 'tier_root': 'cron \`20 13 * * 1-5\` merge_park_daily.sh'},
+    'mike/bin/harmless_report_tool.py': {'tier': 'T0', 'tier_root': 'cron \`10 12 * * 1-5\` eod_trading_report.sh'},
+}}, open('$SANDBOX/kb/production_manifest.json', 'w'))
 "
 cat > "$SANDBOX/t13.json" <<'EOF'
-{"findings": [{"file": "/x/mike/bin/merge_park_orders_fake.py", "line": 1, "category": "correctness", "severity": "low", "summary": "s13", "evidence": "e13", "owner": "Wags"}]}
+{"findings": [
+  {"file": "/x/mike/bin/merge_park_orders_fake.py", "line": 1, "category": "correctness", "severity": "low", "summary": "s13", "evidence": "e13", "owner": "Wags"},
+  {"file": "/x/mike/bin/harmless_report_tool.py", "line": 1, "category": "dead-code", "severity": "high", "summary": "s13b", "evidence": "e13b", "owner": "Wags"}
+]}
 EOF
 run "$SANDBOX/t13.json" 2099-01-13
-if [ "$LAST_RC" -eq 0 ] && echo "$OUT" | grep -q '"n_escalate": 1' && [ ! -s "$SANDBOX_DISPATCH_LOG" ] \
-   && grep -q "hard_boundary_manifest_t0" "$SANDBOX_EVENT_LOG"; then
-  ok "T13 file KHÔNG trong danh sách tay nhưng tier=T0 trong production_manifest.json -> escalate (manifest union)"
+if [ "$LAST_RC" -eq 0 ] && echo "$OUT" | grep -q '"n_escalate": 1' && echo "$OUT" | grep -q '"n_wags": 1' \
+   && grep -q "hard_boundary_manifest_order_writing" "$SANDBOX_EVENT_LOG" \
+   && grep -qF "mike/bin/harmless_report_tool.py" "$SANDBOX_DISPATCH_LOG"; then
+  ok "T13 tier_root=root GHI LỆNH -> escalate (merge_park_orders_fake.py); tier_root=root BÁO CÁO -> dispatch bình thường dù severity=high (harmless_report_tool.py)"
 else
-  bad "T13" "out=$OUT event=$(cat "$SANDBOX_EVENT_LOG")"
+  bad "T13" "out=$OUT event=$(cat "$SANDBOX_EVENT_LOG") dispatch_log=$(cat "$SANDBOX_DISPATCH_LOG")"
 fi
 rm -f "$SANDBOX/kb/production_manifest.json"
 
@@ -330,7 +340,7 @@ cat > "$SANDBOX/t15.json" <<'EOF'
 {"findings": [{"file": "/x/mike/bin/harmless_tool.py", "line": 1, "category": "dead-code", "severity": "low", "summary": "s15", "evidence": "e15", "owner": "Wags"}]}
 EOF
 run "$SANDBOX/t15.json" 2099-01-15
-if [ "$LAST_RC" -eq 0 ] && echo "$OUT" | grep -q '"n_manifest_t0": 0' && echo "$OUT" | grep -qF '"manifest_warning": "không đọc được' \
+if [ "$LAST_RC" -eq 0 ] && echo "$OUT" | grep -q '"n_manifest_order_writing": 0' && echo "$OUT" | grep -qF '"manifest_warning": "không đọc được' \
    && grep -q "Không đọc được kb/production_manifest.json" "$SANDBOX_NOTIFY_LOG"; then
   ok "T15 manifest thiếu -> warning THẤY ĐƯỢC trong summary JSON + Discord (không im lặng như round 4 killer)"
 else
