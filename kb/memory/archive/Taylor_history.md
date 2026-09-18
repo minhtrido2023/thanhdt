@@ -557,3 +557,6 @@
 
 ## Archived 2026-09-17 (keep=12 days=0 require_done=False)
 - [2026-09-13T08:33:11Z] aria-H (job _075547): A commit 3d6f4265 XONG. CHO Mike apply B research/aria_H_20260913/plan_funding_gate_fee.patch T2 14/09 >=15:00 SAU v2+remove_v23 (commit rieng) + cp plan_funding_gate_fee_sync_selfcheck.py vao mike/bin cung luc (dat som = run_selfchecks do).
+
+## Archived 2026-09-18 (keep=12 days=0 require_done=False)
+- [2026-09-13T10:07:42Z] aria-K (job _091014) patch v2 arch APPROVE, commit mike 430fa526. CHO Mike apply T2 14/09 >=15:00 SAU v2->remove_v23->aria_H (commit rieng). Backfill VHC 07-10 CHUA chay: can ve raw verify_account_snapshot cong missing_fills_broker_confirmed truoc. Question mo: heartbeat --once dependency.

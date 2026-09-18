@@ -12,7 +12,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-09-13T10:07:42Z] aria-K (job _091014) patch v2 arch APPROVE, commit mike 430fa526. CHO Mike apply T2 14/09 >=15:00 SAU v2->remove_v23->aria_H (commit rieng). Backfill VHC 07-10 CHUA chay: can ve raw verify_account_snapshot cong missing_fills_broker_confirmed truoc. Question mo: heartbeat --once dependency.
 - [2026-09-14T01:08:46Z] [2026-09-14] CHO user/Mike: question zalopay-tv1-200cp-sized-by-dgc-dividend-receivable-0914 — lenh TV1 200cp ZaloPay do co tuc DGC 80tr (excluded) trong active_nav; neu chon C thi sua compute_active_nav (can review). TV1: can xac nhan An Viet kiem toan FY2026 + ban an van ban 17,6 ty.
 - [2026-09-14T15:43:10Z] [2026-09-14] oshares forward-absorption (job _151805): branch fix/oshares-finfallback-double-count eded0afe (worktree /home/trido/thanhdt-wt-oshares-finfb-dblcount) CHO Mike+arch-reviewer land; ngay land VIB se publish kem MODEL_REBASE (tac dung phu model_version, khong phai so doi); registry .proposed Bay 3.
 - [2026-09-14T16:20:38Z] [2026-09-14] oshares fwd-absorption vong 2 (job _160309): bc86963e tren branch fix/oshares-finfallback-double-count (chua merge), verify xanh ca cong publish that. CHO Mike+arch-reviewer vong 3 land. De xuat viec rieng: ~20 check song BQ san co trong oshares_live selfcheck (cung lop rui ro cong do).
@@ -24,3 +23,4 @@
 - [2026-09-17T16:14:14Z] [2026-09-17] treasury window monitor (job _160652): 20d153fb branch feat/treasury-buyback-window-monitor (worktree mike/agents/wt-treasury-window) CHUA merge/CHUA cron - CHO Mike+arch-reviewer; Mike/user chon nguong CLOSE_WINDOW_DAYS (do: 6/29 dong <=45d) + gio cron (de xuat T2 07:10 tuan).
 - [2026-09-17T16:25:19Z] [2026-09-17] treasury window monitor: arch B1+B2 vá d25d8b9d (tren 20d153fb, branch feat/treasury-buyback-window-monitor) CHUA merge/cron - CHO arch-reviewer vong 2 + Mike/user chot CLOSE_WINDOW_DAYS (45 vs 90) + gio cron.
 - [2026-09-17T16:33:09Z] [2026-09-17] treasury window monitor: arch vong 2 text-fix a8301c27 (tren d25d8b9d) CHUA merge/cron - CHO arch-reviewer vong 3 + Mike/user chot CLOSE_WINDOW_DAYS (45 vs 90) + gio cron.
+- [2026-09-18T01:21:32Z] [2026-09-18] fearbuy weekly (job _011034) XONG, commit cf8313fd. MO: GEX = AMBIGUOUS-yeu, 2 cong nhi phan (ket luan dieu tra 500kV mach 3 co neu dich danh phap nhan Gelex? + Q3/2026 CF_OA >= NP?) — cua so gia DA DONG, khong actionable. Caveat dd52 pheu lech sang tuan 3 chua ai fix.
