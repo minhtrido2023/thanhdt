@@ -83,6 +83,14 @@ ROOT_TIER = {
     "custom30v_rebalance_watch.sh": T1, "corp_action_daily.sh": T1,
     "snapshot_corp_action_daily.py": T1, "capture_upcom_vwap_eod.sh": T1,
     "c1_shadow_paper.py": T1, "vn_realestate_monthly_check.sh": T1, "oni_index_feed.py": T1,
+    # Thêm 2026-09-19 (weekly ops audit): 4 gốc cron mới 09-15..09-18, cả 4 là feed/monitor
+    # WARN-ONLY — không ghi lệnh/plan/NAV/báo cáo nhà đầu tư, và KHÔNG nằm trong
+    # `code_quality_autodispatch.ORDER_WRITING_ROOTS` (ranh giới tự-sửa là frozenset tường minh
+    # ở file đó, độc lập với bảng này) nên phân T1 không nới ranh giới nào.
+    "corp_action_feed_canary.py": T1,          # canary drift giá trị feed vendor corporate_action
+    "fiinprox_harvest_tick.sh": T1,            # wrapper cron harvest FiinPro-X
+    "fiinprox_harvest_tick.py": T1,            # hàng đợi harvest FiinPro-X (ghi file raw)
+    "treasury_buyback_window_monitor.py": T1,  # monitor cửa sổ tuân thủ mua cổ phiếu quỹ
     # T2 — fleet-ops (dispatch/bus/consolidate/health/backup/audit/hook)
     "consolidate.sh": T2, "watchdog.sh": T2, "discover_sessions.py": T2,
     "resume_pending.py": T2, "fleet_backup.sh": T2, "start.sh": T2,
