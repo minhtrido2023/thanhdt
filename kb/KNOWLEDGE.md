@@ -3,7 +3,7 @@
 > **Nguồn sự thật của toàn đội — canonical-only, Mike biên tập thủ công.**
 > Consolidator KHÔNG ghi vào đây (raw events → `kb/events_buffer.md`). File này ổn định.
 > Agent đọc `context_pack.md` (~8KB, distilled). File này dành cho tra cứu sâu và weekly editorial.
-> Raw event log: `kb/events_buffer.md` (hot, 7 ngày) + `kb/archive/` (lịch sử). **Curated: 2026-09-12 (Mike, weekly editorial).**
+> Raw event log: `kb/events_buffer.md` (hot, 7 ngày) + `kb/archive/` (lịch sử). **Curated: 2026-09-19 (Mike, weekly editorial).**
 
 ---
 
@@ -161,6 +161,21 @@ Taylor 19% từ tuần 08-28 KHÔNG lặp lại, tự hết theo đúng luật "
 drift bền vững". **Spend-trend (item 5): ops_h GIẢM liên tục 3 tuần** (8,1h 08-19 → 7,2h 08-26 →
 2,0h 09-04, cùng lúc research_h ổn định ~13-20h) — ngược hướng lo ngại của mandate item 5 (tăng
 liên tục), không cần đề xuất gì.
+
+**Cập nhật 09-19 (weekly editorial):** opus% tổng tuần mới nhất = **50%** (`spend_report.py
+--days 7`) — nhảy +38pp so với 09-04/05 (12%), thoả điều kiện (b) "tăng ≥20 điểm % so với lần đo
+trước" dù chưa chạm ngưỡng (a) 60%. fable% vẫn 0%. Lấy mẫu dispatch opus gần nhất (Taylor + Wags):
+toàn bộ là code-quality-weekly fixes theo báo cáo 2026-09-13, chuỗi "Việc A-K" user duyệt trực
+tiếp 13/09 (dọn NAV/phí/executor/crontab), R&D treasury-buyback feature, và wags-autofix cho
+`coord-2026-09-14`/`coord-2026-09-17` — genuinely Q2/Q3 (patch nhiều file theo chỉ đạo cụ thể +
+điều tra điều phối), KHÔNG phải phản xạ. **Effort 5d: Taylor 84% high (n=32)** — vẫn dao động
+trong biên độ 55-94% đã quan sát 7 tuần qua, cùng nguyên nhân (đợt "Việc A-K" 09-13 + treasury
+R&D). **Kết luận: KHÔNG lệch, không cần điều chỉnh routing.** **5e routing retro 09-19: không
+agent nào bị flag** (`routing_retrospective.py --days 7`: Taylor fail 3%/retry 9%, Wags fail
+0%/retry 14%, đều dưới ngưỡng). **Spend-trend (item 5): ops_h tăng đột biến 1 tuần** (2,4h 08-29 →
+2,4h 09-12 → **6,2h 09-19**, +3,8h) nhưng KHÔNG đủ ≥3 tuần liên tục tăng (chỉ 1 điểm dữ liệu mới
+nhất nhảy vọt, 2 điểm trước đó phẳng) — theo đúng luật item 5, đây là 1 tuần bất thường, ghi nhận
+không đề xuất gì; theo dõi tiếp tuần sau, nếu 09-26 vẫn ≥6h thì mới coi là xu hướng.
 
 **Model mặc định của chính Mike:** đổi sang Fable 5 (2026-07-06) rồi **ĐẢO NGƯỢC LẠI Sonnet 5** (2026-07-07, user yêu cầu). Phát hiện **3 tầng config** trong bridge Discord (`ccdb-mike`): thread override (DB) > global (DB) > `.env` fallback — sửa `.env` vô tác dụng nếu DB đã có row cũ. Dọn 4 dòng rác sai format (`"Sonnet 5"`/`"sonnet 5"` có dấu cách — CLI từ chối) từng gây lỗi `/model` ở 1 thread. Đã đồng bộ cả 3 nơi.
 
@@ -374,7 +389,11 @@ sleeve (Bobby real-time-blind + PIT filter + overreaction indicator, 3 điều k
 
 **Cron quan trọng (ICT)** — *nguồn sống là `kb/ops_runbook.md` (bảng timeline) + `crontab -l`; bảng dưới chỉ là bản tóm, đã đối chiếu 2026-09-12:*
 - 19:00 T2-T6: `bq_freshness_check.sh` → DollarBill lập plan T+1 *(đổi từ 17:30, 2026-07-10)*.
-- 19:05 T2-T6: `hit_details_daily.sh` (thêm 2026-09-10) — audit thuần cho mã BAL/LAG hôm nay (công thức + giá trị thật), sau `bq_freshness_check` 19:00, trước `eod_trading_report` 19:10.
+- 19:00 T2-T6: `hit_details_daily.sh` (thêm 2026-09-10, **đổi từ 19:05→19:00 ngày 2026-09-16** —
+  user duyệt, kịp nhúng vào báo cáo ZaloPay; chạy cùng giờ `bq_freshness_check` vì tự chờ artifact
+  bên trong qua `wait_for_artifact.sh` trần 10') — audit thuần cho mã BAL/LAG hôm nay (công thức +
+  giá trị thật), trước `eod_trading_report` 19:10. *(Sửa 2026-09-19 weekly editorial — bản trước
+  ghi 19:05, lệch so với crontab thật đã đổi 09-16.)*
 - 21:00 T2-T6: `send_plan_report.sh` → gửi plan qua Telegram + Discord *(đổi từ 19:30, 2026-07-10; thêm 23:00 `--second-chance` từ 2026-07-13)*.
 - 21:45 T2-T6: `late_plan_catchup.sh` (thêm sau `send_plan_report` 21:00 — lần 1 catch-up plan trễ).
 - 08:20 & 12:45 T2-T6: `ops_health_check.sh` — tự kiểm vận hành, post Trading Daily.
@@ -398,7 +417,7 @@ sleeve (Bobby real-time-blind + PIT filter + overreaction indicator, 3 điều k
   cron riêng thêm cùng đợt 08-31, KHÔNG trùng job 08:30 ở trên).
 - 09:00 ngày 1 hàng tháng: `check_report_cadence.sh --scheduled-monthly` (báo cáo tháng investor-grade).
 - 00:00 daily: `fleet_backup.sh` → GitHub.
-- *(Nguồn đầy đủ nhất, luôn tra khi nghi ngờ: `kb/cron_registry.md` + `crontab -l` — bảng trên chỉ tóm các cron chạm tiền thật/vận hành sống, không liệt kê paper-trading `main` account. Đối chiếu lần gần nhất: 2026-09-12.)*
+- *(Nguồn đầy đủ nhất, luôn tra khi nghi ngờ: `kb/cron_registry.md` + `crontab -l` — bảng trên chỉ tóm các cron chạm tiền thật/vận hành sống, không liệt kê paper-trading `main` account. Đối chiếu lần gần nhất: 2026-09-19 — phát hiện+sửa 1 lệch (hit_details_daily 19:05→19:00).)*
 
 ---
 
