@@ -37,7 +37,7 @@ Hình thái thứ **5** của cùng một lớp lỗi "checker tra cứu/so sán
 (hardcode quoting bug), guard JSON 08-28 (đoán nguyên nhân), 5b 08-31 (đọc trace_id ở argv[4]),
 và lần này.
 
-## Fix — commit `<HASH>`
+## Fix — commit `e5825e11`
 
 `bin/ops_health_check.sh` khối 5b: bỏ `break`-ở-ứng-viên-đầu-tiên, đổi thành **chấm điểm rồi lấy
 tốt nhất**; loại thẳng `event_type == "heartbeat"`; topic khớp = 2 điểm (bằng chứng mạnh hơn
