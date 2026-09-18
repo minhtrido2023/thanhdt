@@ -92,6 +92,12 @@ EXEC_HARD_BOUNDARY_EXACT = (
     # manifest bên dưới không tự bắt được — liệt tay (arch-review gate-narrowing round, 2026-09-18).
     "macro_state_live.py",
     "deploy_golive_dt5g_v4/publish_gated_state.py",
+    # Ghi lại orders[] của plan SỐNG qua `signal_holds.py --enforce` (atomic tmp+replace) —
+    # arch-review gate-narrowing round 2 killer cùng lớp: caller thực sự gọi --enforce lên plan,
+    # trong khi callee (mike/bin/signal_holds.py, cũng nạp bởi trading_bot/plan.py) đã được
+    # ORDER_WRITING_ROOTS/roots[] phủ. Không thêm root vì sẽ kéo theo dna_report.py/moat_5f.py/
+    # value_radar.py (display-only, không ghi lệnh) — liệt tay đúng 1 file cho gọn.
+    "mike/bin/send_plan_report.sh",
 )
 VALID_SEVERITIES = {"low", "medium", "high"}
 
@@ -118,6 +124,11 @@ ORDER_WRITING_ROOTS = frozenset({
     "discretionary_margin_check_exits_daily.sh", "compute_active_nav_all.sh",
     "late_plan_catchup.sh",  # chạy park_trim→jit_unpark→merge_park --write→inject_discretionary
     "preflight_check.sh",  # gate HOLD plan chưa duyệt — chính nó quyết có đặt lệnh hay không
+    # Autoheal khởi động lại bot_execute.py --auto-otp (cron */5 giờ giao dịch, CẢ 2 account tiền
+    # thật) — toàn bộ guard chống restart sai thời điểm (plan done/nghỉ trưa/ngoài giờ/pgrep liveness)
+    # nằm TRONG chính file này; nới nhầm 1 điều kiện = chạy trùng bot_execute, đúng lớp sự cố
+    # double-buy 2026-07-02 (arch-review gate-narrowing round 2 killer objection, 2026-09-18).
+    "bot_heartbeat.sh",
 })
 
 # Tooling GENERIC dùng chung mọi nơi (kể cả bởi root ghi lệnh) nhưng KHÔNG tự nó ghi lệnh/vị thế —
@@ -543,11 +554,26 @@ def run(args) -> dict:
             # arch-review round 4 killer objection: gate hard-boundary phải QUAN SÁT ĐƯỢC khi
             # phần manifest-union không đọc được — trước đó im lặng trả set rỗng, không ai biết
             # "gate đang bảo vệ" hay "gate đã tắt" từ output.
-            dispatch_msg_lines.append(
-                f"⚠️ Không đọc được kb/production_manifest.json ({manifest_warning}) — tuần này "
-                f"ranh giới cứng CHỈ dùng danh sách tay (EXEC_HARD_BOUNDARY_*), KHÔNG có phần bổ "
-                f"sung từ manifest T0. Danh sách tay vẫn đứng nguyên, không tắt hẳn."
-            )
+            #
+            # `manifest_warning` giờ mang 2 NGHĨA KHÁC NHAU (arch-review gate-narrowing round 2):
+            # (a) manifest không đọc được/hỏng ⇒ manifest_order_writing RỖNG, union thật sự tắt;
+            # (b) manifest đọc OK nhưng 1 tên trong ORDER_WRITING_ROOTS không khớp root nào (đổi
+            # tên/gõ sai) ⇒ manifest_order_writing VẪN CÓ dữ liệu (có thể thiếu 1 phần, không phải
+            # rỗng). Trước đây in CHUNG 1 câu "KHÔNG có phần bổ sung" cho cả 2 ca — sai với ca (b),
+            # đúng dạng §29 "khẳng định nguyên nhân chưa đọc bằng chứng". Rẽ nhánh theo
+            # len(manifest_order_writing) thay vì đoán loại warning từ text.
+            if manifest_order_writing:
+                dispatch_msg_lines.append(
+                    f"⚠️ {manifest_warning} — union manifest VẪN ĐANG chạy với "
+                    f"{len(manifest_order_writing)} file (có thể THIẾU phần ứng với tên root lệch),"
+                    f" danh sách tay không đổi. Kiểm lại ORDER_WRITING_ROOTS trong code."
+                )
+            else:
+                dispatch_msg_lines.append(
+                    f"⚠️ Không đọc được kb/production_manifest.json ({manifest_warning}) — tuần này "
+                    f"ranh giới cứng CHỈ dùng danh sách tay (EXEC_HARD_BOUNDARY_*), KHÔNG có phần bổ "
+                    f"sung từ manifest. Danh sách tay vẫn đứng nguyên, không tắt hẳn."
+                )
         dispatch_msg_lines.append(
             f"Phân loại: {len(escalate)} escalate / {len(taylor_f)} Taylor / {len(wags_f)} Wags "
             f"(danh sách ghi lệnh/vị thế từ manifest đang có {len(manifest_order_writing)} file)."
