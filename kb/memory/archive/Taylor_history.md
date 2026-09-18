@@ -560,3 +560,6 @@
 
 ## Archived 2026-09-18 (keep=12 days=0 require_done=False)
 - [2026-09-13T10:07:42Z] aria-K (job _091014) patch v2 arch APPROVE, commit mike 430fa526. CHO Mike apply T2 14/09 >=15:00 SAU v2->remove_v23->aria_H (commit rieng). Backfill VHC 07-10 CHUA chay: can ve raw verify_account_snapshot cong missing_fills_broker_confirmed truoc. Question mo: heartbeat --once dependency.
+
+## Archived 2026-09-18 (keep=12 days=0 require_done=False)
+- [2026-09-14T01:08:46Z] [2026-09-14] CHO user/Mike: question zalopay-tv1-200cp-sized-by-dgc-dividend-receivable-0914 — lenh TV1 200cp ZaloPay do co tuc DGC 80tr (excluded) trong active_nav; neu chon C thi sua compute_active_nav (can review). TV1: can xac nhan An Viet kiem toan FY2026 + ban an van ban 17,6 ty.
