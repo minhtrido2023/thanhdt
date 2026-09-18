@@ -108,12 +108,26 @@ for f in "${FILES[@]}"; do
   case "$f" in
     *due_diligence_selfcheck.py|*merge_park_orders_selfcheck.py) t=240 ;;
   esac
+  # Ngoại lệ thứ 2 — ĐO THẬT (weekly ops audit 2026-09-19): report_return_gate_selfcheck.py
+  # tự khai trong docstring "~8-10 phút, chạm BQ" cho bộ 4 test, nên dưới trần 60s nó rc=124
+  # CHẮC CHẮN, mỗi ngày, từ 2026-09-12 (7 ngày đỏ liên tục — không phải regression production,
+  # là lệch giữa chi phí thật của file và trần của runner). `is_live()` không bắt được vì file
+  # gọi `report_return_gate.py` qua subprocess chứ không có literal `bq query` nào.
+  # Không đẩy sang tier live (= SKIP ở lần chạy mặc định = MẤT coverage, đúng lý do đã ghi ở
+  # khối trên): lần mặc định chạy `--root-only` — đo thật 2026-09-19: 4/4 PASS trong ~30s, và
+  # đó CHÍNH LÀ 4 assertion phủ sự cố gốc (ROOT sai trong worktree + RED control bản cũ).
+  # 2 test còn lại (chạy cổng thật, chạm BQ) chỉ chạy ở `--live` với budget 720s.
+  SC_ARGS=()
+  case "$f" in
+    *report_return_gate_selfcheck.py)
+      if [ "$RUN_LIVE" -eq 1 ]; then t=720; else SC_ARGS=(--root-only); t=120; fi ;;
+  esac
   start=$(date +%s)
   if [[ "$f" == *.sh ]]; then
-    ( cd "$WC_ROOT" && timeout "$t" bash "$f" ) >/tmp/rsc_out.$$ 2>&1
+    ( cd "$WC_ROOT" && timeout "$t" bash "$f" "${SC_ARGS[@]+"${SC_ARGS[@]}"}" ) >/tmp/rsc_out.$$ 2>&1
     rc=$?
   else
-    ( cd "$WC_ROOT" && timeout "$t" "$PY" "$f" ) >/tmp/rsc_out.$$ 2>&1
+    ( cd "$WC_ROOT" && timeout "$t" "$PY" "$f" "${SC_ARGS[@]+"${SC_ARGS[@]}"}" ) >/tmp/rsc_out.$$ 2>&1
     rc=$?
   fi
   dur=$(( $(date +%s) - start ))
