@@ -116,10 +116,26 @@ def main():
     cron = subprocess.run(["crontab", "-l"], capture_output=True, text=True).stdout
     lines = [x for x in cron.splitlines() if "hit_details_daily.sh" in x and not x.startswith("#")]
     check("5 crontab có đúng 1 dòng hit_details_daily.sh", len(lines) == 1, str(lines))
-    if lines:
-        mi, hr = lines[0].split()[0], lines[0].split()[1]
-        check("5b giờ chạy 19:12 ICT = 12:12 UTC (sau producer 19:00, artifact ~19:07)",
-              (mi, hr) == ("12", "12"), "%s %s" % (mi, hr))
+    # 5b: KHÔNG neo vào một giờ cụ thể. Giờ trigger đã đổi 19:05 -> 19:12 (2026-09-12) -> 19:00
+    # (2026-09-16, user duyệt: nhúng hit_details vào báo cáo ZaloPay cần file SẴN SÀNG trước 19:10).
+    # Bất biến THẬT chỉ có hai: (a) consumer không được kích hoạt TRƯỚC producer, (b) thứ tự do
+    # wait_for_artifact.sh bảo đảm chứ không do đồng hồ (đã kiểm ở 4/4b/4c/4d). Neo hằng số giờ
+    # vào đây là lặp lại đúng sai lầm mà sự cố gốc dạy: "đồng hồ không phải cơ chế đồng bộ".
+    prod_lines = [x for x in cron.splitlines()
+                  if "bq_freshness_check.sh" in x and not x.lstrip().startswith("#")]
+    check("5c crontab có dòng producer bq_freshness_check.sh để so", len(prod_lines) >= 1,
+          str(prod_lines))
+    if lines and prod_lines:
+        c_mi, c_hr = lines[0].split()[0], lines[0].split()[1]
+        p_mi, p_hr = prod_lines[0].split()[0], prod_lines[0].split()[1]
+        try:
+            ok = (int(c_hr), int(c_mi)) >= (int(p_hr), int(p_mi))
+            detail = "consumer %s:%s UTC vs producer %s:%s UTC" % (c_hr, c_mi, p_hr, p_mi)
+        except ValueError:      # trường cron không phải số thuần (*/5, 1-5, ...) -> không so được
+            ok, detail = False, "không parse được giờ: consumer=%r %r producer=%r %r" % (
+                c_hr, c_mi, p_hr, p_mi)
+        check("5b consumer kích hoạt KHÔNG TRƯỚC producer (thứ tự thật do wait_for_artifact lo)",
+              ok, detail)
 
     print("\n%d/%d PASS" % (len(PASS), len(PASS) + len(FAIL)))
     if FAIL:
