@@ -2574,3 +2574,206 @@ Nguồn lượt này:
 [nguoiquansat — DGC chốt thời gian vận hành Nghi Sơn Q4/2026 (10/09)](https://nguoiquansat.vn/nhieu-lan-lui-tien-do-hoa-chat-duc-giang-dgc-chot-thoi-gian-van-hanh-at-chu-bai-12-000-ty-dong-315473.html)
 
 ---
+
+### 2026-09-18 (job `Taylor_20260918_011034`) — QUÉT TUẦN — **0 QUALIFY mới · 1 AMBIGUOUS-yếu mới (GEX) · 4 không-phải-case (GEE, VGC, PHP, BIC) · 1 không-phải-case-đang-giữ (VRE) · 30 mã gác rà qua** · ★★ **CỤM GELEX giảm sàn 14/09 do khởi tố ông Đặng Phan Tường (TV HĐQT GEE, nguyên Chủ tịch HĐTV EVNNPT) — scandal CÁ NHÂN + hành vi TRƯỚC khi vào Gelex, NHƯNG Cadivi/EEMC là NHÀ THẦU trúng ~217 tỷ + 55–82 tỷ gói thầu CHÍNH dự án 500kV mạch 3 đang bị điều tra tội đấu thầu ⇒ kênh lây CÓ THẬT và CÒN MỞ** · ★★ **CỬA SỔ SỢ HÃI ĐÃ ĐÓNG TRONG 3 PHIÊN: GEE hồi 61.510→57.240→65.000 (CAO HƠN trước sự kiện), GEX hồi 91% cú sập ⇒ không còn điểm vào kể cả nếu phân loại thuận** · ★ **Đại án mở rộng: danh sách 13 pháp nhân có vi phạm (họp báo BCA 02/07) gồm PC1 + "các công ty tư vấn xây dựng điện" — KHÔNG có pháp nhân Gelex, và KHÔNG phải dữ kiện mới tuần này**
+
+Cửa sổ tin **sau phiên 11/09 → sáng 18/09** (4 phiên: 14, 15, 16, 17/09). Danh mục gác **30 mã**
+(13 NH + 17 ngoài NH). **Watchlist TƯƠI** (`active_nav` computed_at **2026-09-17** = đúng phiên cuối)
+⇒ **KHÔNG có cảnh báo quá hạn**.
+
+**Bối cảnh tuần — hồi phục sau cú sập 11/09, không có phiên sợ hãi diện rộng**: VNINDEX 11/09
+**1.795,21 (−1,86%)** → 14/09 **1.788,23 (−0,39%)** → 15/09 **1.811,15 (+1,28%)** → 16/09 **1.810,11
+(−0,06%)** → 17/09 **1.822,77 (+0,70%)**. ⇒ 14/09 mret chỉ −0,39% nên cụm mã giảm 6,6–7,0% cùng phiên
+là **riêng lẻ thật**, không phải beta.
+
+**Phần 1 — anomaly_scan** (chạy từng phiên 11, 12, 15, 16, 17/09): universe **254 mã** (H:30 / W:242).
+**0 IDIOCRASH · 0 FLOOR2 · 0 CEIL2 · 0 VOLSPIKE** ở CẢ 5 phiên. ⚠️ **Cụm GELEX KHÔNG trip anomaly_scan
+vì không mã nào trong cụm nằm trong universe H/W** — đây đúng lý do việc 2 (quét rộng + tin) tồn tại
+song song với scanner; ghi lại để lượt sau không hiểu nhầm "scanner sạch = tuần sạch".
+
+**Phần 2 — quét RỘNG** `bq_cache/ticker/2026.parquet` (phiên cuối 17/09; chuỗi chỉ số từ
+`ticker='VNINDEX'`): 1.276 mã → **704 mã** qua sàn thanh khoản (`max(Close×Volume)` 2026 ≥ 1 tỷ).
+IDIOCRASH cứng (ret ≤ −6% ∧ idio ≤ −5% ∧ val ≥ 1 tỷ) → **15 mã**; nới mềm → thêm 28. **Dấu hiệu quyết
+định của lượt này là một CỤM, không phải mã lẻ**: 4/15 cờ cứng rơi đúng phiên 14/09 và đều thuộc/liên
+quan hệ sinh thái GELEX — **GEX −6,89% (547 tỷ) · GEE −6,94% (160 tỷ) · VGC −6,59% (25 tỷ) · PHP −7,03%
+(31 tỷ)** (GEL sàn −6,91% nhưng dưới sàn thanh khoản của quét này). Các cờ cứng còn lại loại ở ADV3M
+<1 tỷ hoặc không ở vùng sợ hãi: KDM, TCD *(đã huỷ niêm yết, 09-11)*, VNT, DST *(+67,5% trên đáy, 09-14)*,
+PLP, HSL *(+100% trên đáy, 09-14)*, TDP *(không-phải-case 09-11)*, PGC, FIR *(ADV 0,96 — loại 09-11)*,
+AST, TNH *(NP_TTM<0, redflag trong phễu)*.
+
+**Phần 3 — WebSearch tin theo BỘ TỪ KHOÁ NHÓM (8 truy vấn + 2 WebFetch):**
+- **Nhóm chung**: **1 sự kiện lớn — cụm GELEX (Phần 6)**. Ngoài ra 0 sự kiện mới chạm 30 mã gác:
+  không khởi tố/thanh tra/đình chỉ/hạn chế GD/từ chối kiểm toán/chậm BCTC/cắt margin/huỷ niêm yết mới.
+  Nền: DDG nguy cơ huỷ niêm yết sau 3 năm lỗ (không thuộc danh mục gác).
+- **Nhóm ngân hàng (13 mã)** — §4.2 `bank_tailrisk_insurance_design_20260814.md`: **0 sự kiện.** Không
+  kiểm soát đặc biệt mới, không chuyển giao bắt buộc mới, không rút tiền hàng loạt, không khởi tố lãnh
+  đạo NH niêm yết, không cho vay sân sau/thao túng cp NH. Kết quả chỉ trả nền 4 NH đã chuyển giao xong
+  (GPBank, MBV, Vikki, VCBNeo).
+- **Nhóm BĐS đầu ngành/hạ tầng (VHM, VRE — và VPI ở phía mua)** — §6
+  `vic_family_credit_concentration_20260818.md`: **0 sự kiện tín dụng XẤU mới.** Không chậm/vỡ nợ TPDN,
+  không hạ bậc tín nhiệm, không siết TSĐB, không call margin/giải chấp cổ đông lớn. Nền không đổi.
+- **Nhóm ngoài NH (17 mã)**: tai nạn/sự cố nhà máy, thu hồi sản phẩm, mất giấy phép/mỏ, kê biên tài sản,
+  tranh chấp lãnh đạo → **0 sự kiện.**
+
+**Phần 4 — PHÍA MUA: 1 mã mua trên kênh BAL (VPI, cả 2 account) ⇒ KHÔNG có luận điểm mua nào bị gãy.**
+Kiểm **cả ba** kênh, không suy từ một kênh:
+
+| Kênh mua | Trạng thái cho phiên 18/09 | Bằng chứng |
+|---|---|---|
+| **V2.4 BAL** | **`VPI` buy cả 2 account** (SpaceX kèm `VHM` sell) · `deferred_orders` = **0** ⇒ VPI đã ra khỏi `signal_hold` (hạn 16/09) và thành lệnh thật | `orders`/`deferred_orders` trong `plan_{SpaceX,ZaloPay}_2026-09-18.json` |
+| **V2.4 LAG** | **0 mã đến hạn**, 0 upcoming, cổng lịch PASS | `mike/bin/filter_lag_entry_window.py --plan-date 2026-09-18 --json` |
+| **TV1 DISCRETIONARY_SPECIAL** | **SKIP cả 2** — SpaceX deadband thiếu 100cp (2.010.000đ = **0,20%**, ngưỡng 0,50%) · **ZaloPay ĐÃ ĐẠT target: filled 1.400 ≥ target 1.400** | `history_noninject` trong `data/trade_plans/discretionary/state_TV1_{SpaceX,ZaloPay}.json`, at 2026-09-17T21:45 |
+
+**VPI — kiểm luận điểm phía mua (mã DUY NHẤT được mua):** **63.100 (17/09, +1,77%)**, **dd52 = 0,0% =
+ĐÚNG ĐỈNH 52 TUẦN**, +31,0% trên đáy 52T, **trên MA50 (58.044, +8,7%)**, **PE 55,2 · PB 3,88 · DY 0%**,
+CF_OA 4 quý 77,2 tỷ vs NP 4 quý 402,7 tỷ ⇒ **CF/NP 0,19×**, ADV3M 100,4 tỷ. ⇒ Đây là **lệnh MOMENTUM
+của BAL mua vào ĐỈNH, KHÔNG phải case fear-buy** — sleeve này không có ý kiến về nó, và **không được đọc
+ngược thành khuyến nghị**. **Tin trong cửa sổ: 0 sự kiện tín dụng/pháp lý xấu.** Nền §6 **không đổi** và
+đã ghi từ 08-24: dư nợ TPDN **2.900 tỷ = 39% tổng nợ vay** (2.260 tỷ dài hạn + **648 tỷ đáo hạn trong 12
+tháng**), 3 lô mới 2026 (VPI12601/02/03 = 480 tỷ, **có TSĐB**), **tổng nợ phải trả 10.127 tỷ = cao nhất
+lịch sử** (+9% so đầu năm, dư nợ vay tài chính 7.399 tỷ), LN Q1/2026 **−92%** còn 3,5 tỷ. ⇒ **Nền, KHÔNG
+phải sự kiện tuần này ⇒ luận điểm mua KHÔNG gãy theo tiêu chí của khung này.** Điều đáng nói: mã được mua
+đang ở **ĐỈNH 52 tuần với PE 55,2**, tức rủi ro ở đây là rủi ro ĐỊNH GIÁ/momentum, thuộc khung V2.4, không
+thuộc sleeve fear-buy — nêu ra để người duyệt plan thấy, không phải để đổi plan.
+
+**Phần 5 — read-through case đang theo dõi**
+
+- ★ **TV1** (§4/§14, **QUALIFY** — SpaceX 2.300cp + **ZaloPay nay 1.400cp**): **20.100 (17/09, +0,50%)**,
+  PE 3,5 · PB 1,06 · BVPS 18.911, dd52 −49,0% / **+3,6% trên đáy 52T**, dưới MA50 (20.352), CF_OA 4 quý
+  **220,1 tỷ vs NP 154,2 tỷ ⇒ 1,43×** (§2#3 vẫn đạt), ADV3M 0,68 tỷ. **0 công bố mới trong cửa sổ.**
+  **Không đổi QUALIFY.** Hai việc phải ghi:
+  1. **Lệnh ZaloPay 200cp @19.900 (14/09) ĐÃ KHỚP**: ledger `BUY-TV1-DISC-2026-09-14`, `filled_before`
+     1.200 → **filled hiện tại 1.400**. Cảnh báo 09-14 **đã thành hiện thực, không còn là giả định**:
+     target 1.400cp vẫn đang neo vào `active_nav_ZaloPay` = **600.317.076đ**, trong đó
+     **`cash_dividend_receiving_vnd` = 80.000.000đ cổ tức DGC** (mã `excluded`) — file vẫn tự in
+     `cash_dividend_double_count_warning` (13,33% active_nav). DGC đã qua GDKHQ 14/09 nên **khoản này
+     nay là phải thu THẬT, tiền về ~25/09** ⇒ theo cách đọc (a) của 09-14, size này **hợp lệ, chỉ đến
+     sớm ~2 tuần**. Không có việc phải sửa gấp; ghi lại để lượt sau không kết luận lại từ đầu.
+  2. **Đại án ngành điện — làm rõ một điểm 09-14 ghi chưa đủ** (và đây **KHÔNG phải tin mới tuần này**):
+     họp báo BCA **02/07/2026** đã nêu vụ án xảy ra tại **13 đơn vị**, gồm EVNNPT, 2 Ban QLDA điện miền
+     Bắc/Trung, **CTCP Tập đoàn PC1**, Chế tạo cột thép Đông Anh, Khoáng sản Tấn Phát, Sông Đà 11, **"các
+     công ty tư vấn xây dựng điện"** và một số DN liên quan; 47 bị can / 5 nhóm tội (đấu thầu, kế toán,
+     tham ô, đưa–nhận hối lộ); phong toả TKCK ~1.700–1.800 tỷ. ⇒ Câu "**bài không nêu pháp nhân nào bị
+     khởi tố**" ở lượt 09-14 đúng với BÀI ĐÓ nhưng **hẹp hơn hồ sơ vụ án**: nhóm PECC (TV1–TV4) nằm trong
+     mô tả chung "các công ty tư vấn xây dựng điện". **Chưa có pháp nhân TV1 nào bị khởi tố** và mô tả
+     "xảy ra tại" ≠ "pháp nhân bị khởi tố" ⇒ **chưa đủ để gãy §2**, nhưng **cổng phải theo dõi nay rõ
+     hơn: kết luận điều tra có nêu đích danh pháp nhân PECC1 không.** Bằng chứng thị trường ủng hộ đọc
+     "không leo thang": phiên 14/09 **TV1 0,00% · TV2 −0,19% · PC1 −0,74%** trong khi cụm GELEX sàn
+     ⇒ thị trường định giá đây là **sự kiện riêng của GELEX**, không phải tái định giá đại án.
+- ★ **DGC** (§6, AMBIGUOUS-nghiêng-constructive · ZaloPay 10.000cp `excluded`): **35.300 (17/09)** —
+  **con số này ĐÃ TRỪ cổ tức 8.000đ/cp (GDKHQ 14/09)**, đừng đọc nhầm thành sập giá; dd52 −47,4% ·
+  **+18,3% trên đáy 52T** · PE 6,2 · PB 0,83 · **DY 31%** (bị thổi bởi chính đợt 80% vừa chia) ·
+  Debt_Eq 0,19 · IntCov 32,7 · ADV3M 28,2 tỷ. **0 tin mới trong cửa sổ.** Hai cổng không đổi:
+  (a) **vẫn trong diện hạn chế giao dịch** (BCTC kiểm toán 2025 nộp chậm >45 ngày; HOSE 03/09 giữ
+  nguyên sau ý kiến ngoại trừ của UHY trên BCTC soát xét bán niên); (b) tiền cổ tức **80.000.000đ về
+  ~25/09**. **Không đổi phân loại.**
+- **PNJ** (§7, AMBIGUOUS): **36.750 (17/09)**, PB 1,40 · PE 7,7, +19,5% trên đáy 52T, dưới MA50
+  (38.556). **0 tin mới.** Không đổi; không nằm trong kênh mua nào.
+- **PAN** (AMBIGUOUS 09-11): **18.750**, PB **0,52** · PE 3,9 · DY 16,2%, +3,0% trên đáy 52T, dưới MA50
+  (20.304), CF_OA 4 quý 5.560 tỷ / NP 1.193 tỷ = **4,66×**, ADV3M 8,15 tỷ. **0 tin mới.** Cổng
+  **BCTC Q3/2026 (~cuối 10/2026)** + việc còn thiếu **SOTP NSC/FMC/đất** đều không đổi.
+- **VCS** (AMBIGUOUS 09-04): **31.200**, PB 0,99 · PE 8,7 · DY 12,0%, **+1,0% trên đáy 52T**, dưới MA50
+  (32.836), CF_OA/NP 4 quý **0,94×** (sát ngưỡng, chưa vỡ — y như lượt trước). **0 tin mới.** Cổng
+  Q3/2026 không đổi. ADV3M 1,26 tỷ.
+- **TV4** (AMBIGUOUS): **13.000**, PE 5,8 · PB 1,06, dd52 −22,2%. **ADV3M 0,12 tỷ** vẫn chặn mạnh hơn
+  mọi phân loại. **TV2**: 25.750, PB 1,37 — 0 tin. **TV3**: 14.500, ADV3M **0,02 tỷ**.
+- **ICG (NON 09-11)** · **OGC (NON §2)** · **TIN, TSB, MVN, CRE, VSC, BNA, SSB, VNE, PTB, YEG, SKG,
+  HBC, HHS, CII, VCI, CEO** (đã "không phải case"): **0 thay đổi, 0 tin.**
+
+**Phần 6 — CASE MỚI: CỤM GELEX (áp §2 nhóm (a) — scandal cá nhân)**
+
+**Sự kiện (14/09)**: C01 khởi tố bị can **ông Đặng Phan Tường** trong vụ án tại **EVNNPT + CTCP Tập đoàn
+PC1 và các công ty liên quan** (dự án đường dây 500kV mạch 3). Ông Tường là **Chủ tịch HĐTV EVNNPT
+09/2011 → 09/2020** (nghỉ hưu sớm), **gia nhập hệ sinh thái GELEX từ 2021**, giữ ghế **TV HĐQT không điều
+hành** tại **GEE (Điện lực Gelex)**, **EEMC (Thiết bị điện Đông Anh)**, **CADIVI**, và **Chủ tịch HĐQT
+THIBIDI**. Chiều tối 14/09 Gelex công bố: vụ việc **của cá nhân ông Tường, phát sinh giai đoạn TRƯỚC khi
+tham gia Gelex**, không liên quan hoạt động của tập đoàn. HĐQT GEE/Cadivi/Thibidi sau đó **ra nghị quyết
+miễn nhiệm** ông khỏi HĐQT; GEE **triệu tập ĐHĐCĐ bất thường**.
+
+**Phản ứng giá phiên 14/09 (VNINDEX chỉ −0,39%)**: GEE **−6,94%** (57.240) · GEX **−6,89%** (22.300) ·
+GEL −6,91% · VGC **−6,59%** (38.300) · PHP **−7,03%** (42.300). Thanh khoản đột biến: GEX 24,5tr cp /
+547 tỷ, GEE 160 tỷ.
+
+★★ **CỬA SỔ ĐÃ ĐÓNG TRONG 3 PHIÊN — đây là kết luận THỰC DỤNG quan trọng nhất của mục này.** Đến 17/09:
+**GEE 65.000 = CAO HƠN mức trước sự kiện (61.510 ngày 11/09)** — và mức 65.000 này còn là giá **SAU
+GDKHQ tạm ứng cổ tức đợt 2 ngày 17/09**, tức hồi phục thực còn mạnh hơn con số; **GEX 23.500 = hồi 91%
+cú sập** (−1,9% so 11/09); VGC 39.850; PHP 43.100. ⇒ **Không còn điểm vào ở vùng sợ hãi, kể cả nếu phân
+loại có thuận.** Ghi lại vì đây là dạng case **cửa sổ tính bằng NGÀY**, khác hẳn TV1/DGC (cửa sổ tính
+bằng tháng) — nhịp quét TUẦN của khung này **về cấu trúc là quá chậm để bắt loại case này**; muốn bắt
+thì phải là quét NGÀY có tin, không phải chỉnh tiêu chí.
+
+**Áp §2 cho từng mã trong cụm:**
+
+| Mã | Số liệu (17/09, BQ cache) | Áp §2 | Kết luận |
+|---|---|---|---|
+| **GEX** (Tập đoàn Gelex, HOSE, ICB 2737) | **23.500** · dd52 −35,1% · **+15,8% trên đáy 52T** · dưới MA50 (24.607) · **PB 0,89** (BVPS 26.342) · **PE 22,4** (PE_MA5Y 66,5) · DY 0% · **Debt_Eq 1,49 · IntCov 4,15 · FSCORE 2 · ROE_Min3Y ~0** · **CF_OA 4 quý 761 tỷ vs NP 4 quý 1.373 tỷ ⇒ 0,55×** · **ADV3M 302 tỷ** | #1 scandal cá nhân **✓** (hành vi 2011–2020 tại EVNNPT, trước khi vào Gelex 2021; ghế không điều hành; đã miễn nhiệm ngay) · #2 backstop NN/chiến lược **✗** (tư nhân, không có bên nâng đỡ) · #3 **CF_OA ≥ NP ✗ (0,55×)** — đây là test cốt lõi "tiền khó nguỵ tạo" cho DN đang dính điều tra, và nó TRƯỢT · #4 solvent **~** (Debt_Eq 1,49 · IntCov 4,15 · FS 2 — chịu được, không khoẻ) · #5 sàn định giá **✓** (PB 0,89 < 1) | **AMBIGUOUS-yếu** — trượt 2/5 tiêu chí (#2, #3) nên **KHÔNG QUALIFY**; không rơi vào nhánh ❌ nào của §2 nên chưa phải NON. **Cổng nhị phân (2 câu hỏi, cả hai phải sạch): (a) kết luận điều tra / công bố tiếp theo có nêu ĐÍCH DANH pháp nhân nào của Gelex (EEMC/Cadivi/Thibidi) trong nhóm vi phạm đấu thầu không? (b) BCTC Q3/2026 CF_OA có đảo về ≥ NP không?** **Thực dụng: cửa sổ đã đóng (+15,8% trên đáy, hồi 91%) ⇒ không actionable ở giá này.** |
+| **GEE** (Điện lực Gelex) | 65.000 · **PB 4,93** (BVPS 13.187) · PE 11,7 · **CF_OA 4 quý −1.304 tỷ vs NP 3.567 tỷ ⇒ −0,37×** · Debt_Eq 1,32 · FS 3 · ADV3M 101 tỷ | #5 **✗ không có sàn định giá** (PB 4,93) · #3 **✗ CF_OA 4 quý ÂM** | **Không phải case** — gạch bằng 2 lý do độc lập, không cần tới tin. Đây là mã **đắt nhất cụm**, và là mã ông Tường có ghế trực tiếp |
+| **VGC** (Viglacera) | 39.850 · **PB 1,52** · PE 12,6 · +14,2% trên đáy 52T · CF_OA/NP 4 quý **1,98×** · FS 6 | #5 **✗** (PB 1,52 > 1,2) + không ở vùng sợ hãi | **Không phải case** — lõi và dòng tiền ổn, nhưng không có sàn định giá. Giảm theo **liên đới nhóm**, không có cáo buộc riêng |
+| **PHP** (Cảng Hải Phòng) | 43.100 · **PB 1,98** · PE 11,5 · dd52 chỉ −11,1% · **+43,7% TRÊN đáy 52T** · FS **9** · CF_OA/NP 0,80× · ADV3M 8,0 tỷ | #5 **✗** (PB 1,98) + **không ở vùng sợ hãi** (+43,7% trên đáy) | **Không phải case** — mã đang MẠNH bị bán liên đới 1 phiên rồi hồi. Cùng dạng SCL 09-11 |
+
+⚠️ **Rủi ro lây chéo phải ghi rõ, vì nó là trục quyết định của §2 và nó CÒN MỞ**: cáo buộc trung tâm của
+vụ án là **vi phạm quy định về đấu thầu** tại dự án 500kV mạch 3 — và **các công ty con của Gelex là NHÀ
+THẦU TRÚNG THẦU CHÍNH dự án đó**: **CADIVI trúng 4 gói ~217 tỷ** (51–58 tỷ/gói) + các gói đường dây 220kV
+62–118 tỷ/gói; **EEMC trúng hợp đồng máy biến áp 55–82 tỷ** + bảo trì 2–23 tỷ (2025). Tức **người bị khởi
+tố là cựu Chủ tịch của CHỦ ĐẦU TƯ, đồng thời ngồi HĐQT của NHÀ THẦU** — đúng hình dạng quan hệ mà tội danh
+đấu thầu nhắm tới. **Tính đến 17/09 CHƯA có pháp nhân Gelex nào bị khởi tố và Gelex KHÔNG có trong danh
+sách 13 đơn vị của họp báo 02/07** — nên đây **chưa** là căn cứ loại theo nhánh ❌ §2 ("scandal lan vào
+pháp nhân"). Nhưng nó **không phải rủi ro suy đoán**: nó là một kênh cụ thể, có số tiền, có tên gói thầu,
+và **chưa được đóng bởi bất kỳ công bố nào**. Đây chính là lý do GEX dừng ở **AMBIGUOUS-yếu** thay vì được
+đọc như một PNJ-2015 (ở PNJ, lõi bán lẻ trang sức **không có giao dịch nào** với DongABank).
+
+**Phần 7 — PHỄU CANDIDATE HỆ THỐNG (`--mode weekly`), 22 mã FULLY_QUALIFIED → 20 đã có kết luận, 2 mã MỚI**
+
+**20/22 đã có kết luận trong sổ**: VSC (không-phải-case 09-04) · NTL (08-21) · VCS (AMBIGUOUS 09-04) ·
+PTB, YEG, SKG (không-phải-case 09-11) · và 14 mã đã phân giải vào **3 nguyên nhân NHÓM** ở lượt 09-04
+(BĐS-lãi suất: SZC, HDG, DTD, ITC, HPX · xuất khẩu-thuế 301: ANV, DRC, TNG, VGS, HT1, LCG · ngân hàng
+đang giữ: SHB, VIB, TPB). **0 dữ kiện nào trong cửa sổ đổi các kết luận đó.** *(PAN rơi khỏi phễu tuần
+này — đã là AMBIGUOUS trong sổ từ 09-11, theo dõi tiếp ở Phần 5.)*
+
+**2 mã MỚI vào phễu — DD + áp §2/§2.5:**
+
+| Mã | Số liệu (17/09, BQ cache) | Nguyên nhân washout (verify bằng tin) | Kết luận |
+|---|---|---|---|
+| **BIC** (Bảo hiểm BIDV, HOSE, ICB 8536, rating 2, golden_floor Y) | 21.050 · dd52 **−21,3%** · **+3,7% trên đáy 52T** · dưới MA50 (21.531) · PB 1,20 · PE 9,9 (PE_MA5Y 9,0 — **KHÔNG nén so lịch sử**) · **DY 0%** · IntCov 40,2 · **FSCORE 1** · **CF_OA 4 quý −20,7 tỷ vs NP 430 tỷ ⇒ −0,05×** · **ADV3M 0,66 tỷ** | **Không tìm được sự kiện riêng lẻ nào** trong cửa sổ; không có tin xấu về BIC. Giá trôi theo nhóm bảo hiểm | **Không phải case — loại ở BỘ LỌC RẺ NHẤT**: **ADV3M 0,66 tỷ/phiên** = không đầu tư được ở quy mô 2 account (cùng lý do đã loại SKG 0,38 · TV4 0,12 · ICG 0,22). Kể cả bỏ qua thanh khoản vẫn trượt tiếp 2 tầng: **§2#3 CF_OA 4 quý ÂM** và **§2#5 không có sàn định giá** (PB 1,20 ở mép, PE 9,9 **cao hơn** PE_MA5Y 9,0 ⇒ không hề bị nén). FSCORE 1 |
+| **VRE** (Vincom Retail, HOSE, ICB 8633, rating 2 — **VỊ THẾ ĐANG GIỮ**) | **25.800** · dd52 −30,7% nhưng **+21,1% TRÊN đáy 52T** · **TRÊN MA50** (25.019, +3,1%) · PB 1,19 · PE 8,1 · DY 0,04% · Debt_Eq 0,27 · IntCov 10,3 · FS 7 · **ADV3M 145 tỷ** · CF_OA 4 quý **−3.644 tỷ** vs NP 7.250 tỷ ⇒ **−0,50×** | **0 sự kiện** trong cửa sổ (đã quét bộ từ khoá BĐS đầu ngành §6: không chậm/vỡ nợ TPDN, không hạ bậc, không siết TSĐB, không giải chấp/call margin). LN sau thuế Q2/2026 **+30% YoY** | **Không phải case fear-buy** — **không ở vùng sợ hãi**: +21,1% trên đáy 52T và **đã vượt MA50** ⇒ phễu tuyển nó vào cohort "fear" chỉ vì cửa sổ 52 tuần, không vì trạng thái hiện tại (cùng dạng SCL/TDP/TRC/MZG 09-11). **Là vị thế trong sổ ⇒ thuộc khung risk/sizing V2.4, không thuộc sleeve này.** ⚠️ Số CF_OA/NP 4 quý (−0,50×) **chưa dùng để kết luận**: NP 4 quý 7.250 tỷ lệch xa mức LN thường niên đã biết của VRE ⇒ nghi join `ticker_financial` lệch kỳ; **đã đọc tới đây và dừng, chưa xác định nguyên nhân** — kết luận trên đứng độc lập, chỉ dựa vào trạng thái giá |
+
+⚠️ **CAVEAT SỐ LIỆU CỦA PHỄU — SANG TUẦN THỨ 3, VẪN CHƯA GIẢI QUYẾT** (escalate 09-04, nhắc 09-11):
+`washout`/`dd52` phễu in ra vẫn không khớp bản đo lại trên `bq_cache/ticker/2026.parquet` (cửa sổ 370
+ngày tới 17/09). Đo lượt này — phễu vs recompute (Close): **VRE** dd52 −38,5% vs **−30,7%** (lệch 7,8pp) ·
+**BIC** dd52 −25,1% vs **−21,3%** (3,8pp) · **SHB** −35,4% vs −33,x% · **VSC** −58,9% vs −(đo riêng).
+**Chiều lệch nhất quán: phễu LUÔN overstate mức giảm** ở cả 2 mã mới tuần này — khác lượt 09-11 (khi PAN
+đảo chiều), nên **vẫn chưa đủ để gọi là lệch hệ thống một chiều**; đã đọc bằng chứng tới đây và **dừng,
+chưa xác định được nguyên nhân**. Hệ quả nếu overstate: **tuyển THỪA** mã vào cohort "fear" — đúng cái đã
+xảy ra với VRE tuần này (thực tế +21% trên đáy). **Không đổi kết luận lượt này** vì cả 2 mã mới đều được
+xử bằng lý do khác.
+
+**Tổng kết lượt**: **30 mã đang gác** rà qua · 254 mã (anomaly_scan ×5 phiên) + **704 mã** (quét rộng) +
+**22 mã phễu FULLY_QUALIFIED** (20 đã có kết luận + 2 DD mới) + **8 truy vấn tin + 2 WebFetch** ·
+**0 QUALIFY mới** · **1 AMBIGUOUS-yếu mới (GEX, 2 cổng nhị phân)** · **5 không-phải-case (GEE, VGC, PHP,
+BIC, VRE)** · 12 echo · **watchlist KHÔNG quá hạn** (computed_at 2026-09-17 = đúng phiên cuối) ·
+**1 mã mua trên kênh BAL (VPI, cả 2 account) — luận điểm KHÔNG gãy** (0 sự kiện tín dụng/pháp lý mới;
+nền TPDN §6 không đổi; lưu ý VPI đang ở ĐỈNH 52 tuần, PE 55,2 ⇒ rủi ro định giá thuộc khung V2.4).
+**Bài học phương pháp của lượt này**: cụm GELEX **không trip anomaly_scan** (không mã nào trong universe
+H/W) và **cửa sổ sợ hãi đóng trong 3 phiên** ⇒ với case dạng "cụm liên đới một cá nhân", nhịp quét TUẦN
+là **quá chậm về cấu trúc**; muốn bắt thì phải là kênh tin theo NGÀY, không phải nới tiêu chí.
+**Mốc phải theo, gần → xa: FTSE giải ngân đợt 1 21/09 → VPB GDKHQ cổ tức cp ~24/09 → DGC trả cổ tức
+80.000.000đ về ZaloPay 25/09 (từ đó `active_nav` hết lệch) → GEE ĐHĐCĐ bất thường (kiện toàn HĐQT sau
+miễn nhiệm) → kết luận điều tra đại án 500kV mạch 3 (cổng chung cho GEX + TV1: có nêu đích danh pháp
+nhân nào không) → TV1 bản án văn bản 17,6 tỷ + xác nhận An Việt kiểm toán FY2026 + cổ tức 15% →
+PNJ/VCS/PAN/GEX BCTC Q3/2026 (~cuối 10/2026).**
+
+Nguồn lượt này:
+[tuoitre — Cổ phiếu "họ Gelex" đồng loạt giảm kịch sàn (14/09)](https://tuoitre.vn/co-phieu-ho-gelex-dong-loat-giam-kich-san-100260914152736579.htm) ·
+[dnse — Cổ phiếu đồng loạt giảm sàn, Gelex thông tin về vụ việc ông Đặng Phan Tường](https://www.dnse.com.vn/senses/tin-tuc/co-phieu-dong-loat-giam-san-gelex-thong-tin-ve-vu-viec-ong-dang-phan-tuong-35286500) ·
+[tienphong — Gelex lên tiếng về việc nguyên Chủ tịch EVNNPT bị khởi tố](https://tienphong.vn/gelex-len-tieng-ve-viec-nguyen-chu-tich-evnnpt-bi-khoi-to-post1876326.tpo) ·
+[mekongasean — Cổ phiếu đồng loạt giảm sàn, Gelex thông tin (vai trò ông Tường tại EEMC/GEE/Cadivi/Thibidi)](https://mekongasean.vn/co-phieu-dong-loat-giam-san-gelex-thong-tin-ve-vu-viec-ong-dang-phan-tuong-59596.html) ·
+[cafebiz — Ông Đặng Phan Tường bị khởi tố, doanh nghiệp triệu tập họp bất thường (16/09)](https://cafebiz.vn/ong-dang-phan-tuong-bi-khoi-to-doanh-nghiep-trieu-tap-hop-bat-thuong-176260916105504809.chn) ·
+[vietbao — Gelex trúng hàng loạt gói thầu của EVNNPT (Cadivi ~217 tỷ, EEMC 55–82 tỷ)](https://vietbao.vn/gelex-trung-hang-loat-goi-thau-cua-tong-cong-ty-truyen-tai-dien-quoc-gia-607360.html) ·
+[1thegioi — "Bão điện" quét qua TTCK: một mối liên quan, nhiều điểm nối dễ tổn thương](https://1thegioi.vn/bao-dien-lien-tiep-quet-qua-thi-truong-chung-khoan-mot-moi-lien-quan-nhieu-diem-noi-de-ton-thuong-258119.html) ·
+[vnexpress — 47 người bị khởi tố trong vụ án tại EVNNPT (13 đơn vị, 02/07)](https://vnexpress.net/47-nguoi-bi-khoi-to-trong-vu-an-tai-tong-cong-ty-truyen-tai-dien-quoc-gia-5092437.html) ·
+[nhipsongkinhdoanh — Nhóm cổ phiếu "họ GELEX" đồng loạt tăng trở lại](https://nhipsongkinhdoanh.vn/nhom-co-phieu--ho-gelex--dong-loat-tang-tro-lai-32929.htm) ·
+[vietstock — Văn Phú sắp phát hành 32 triệu cp trả cổ tức (nền nợ VPI)](https://vietstock.vn/2026/08/van-phu-sap-phat-hanh-32-trieu-co-phieu-tra-co-tuc-738-1484324.htm) ·
+[vietstock — HOSE gỡ một lý do cảnh báo, DGC vẫn kẹt trong diện hạn chế giao dịch](https://vietstock.vn/2026/08/hose-go-mot-ly-do-canh-bao-co-phieu-dgc-van-ket-trong-dien-han-che-giao-dich-830-1483695.htm) ·
+[tapchikinhtetaichinh — Sự kiện chứng khoán ngày 16/9 (GEE GDKHQ 17/09)](https://tapchikinhtetaichinh.vn/su-kien-chung-khoan-ngay-16-9-167105.html)
+
+---
