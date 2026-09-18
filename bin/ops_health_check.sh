@@ -1075,6 +1075,14 @@ if os.path.exists(_qf):
                     continue
                 _t0 = _dt.datetime.strptime(_ets, "%Y-%m-%dT%H:%M:%SZ")
                 _t1 = (_t0 + _dt.timedelta(minutes=15)).strftime("%Y-%m-%dT%H:%M:%SZ")
+                # Lấy ứng viên TỐT NHẤT trong cửa sổ, không phải ứng viên ĐẦU TIÊN.
+                # heartbeat là NHIỄU có hệ thống: watcher tự phát mỗi ~5 phút với
+                # topic = trace_id ⇒ nó khớp trace_id với MỌI bản ghi bị chặn của cùng job
+                # và thường đến TRƯỚC bản retry thật vài giây. Ca thật 2026-09-17: heartbeat
+                # 17:40:21Z (event 755b7de9) che mất đúng bản retry finding 17:40:28Z
+                # (event 10d9cf98, cùng topic, nội dung khớp) ⇒ dispatch đi tra lại từ đầu.
+                _ty = str(_a[1]) if len(_a) >= 2 else ""
+                _best = None
                 with open(_fp, encoding="utf-8", errors="replace") as _bf:
                     for _bl in _bf:
                         try:
@@ -1082,15 +1090,25 @@ if os.path.exists(_qf):
                             _bts = str(_be.get("ts") or "")
                             if not (_ets < _bts <= _t1):
                                 continue
-                            if not ((_tr and str(_be.get("trace_id") or "") == _tr)
-                                    or (_tp and str(_be.get("topic") or "") == _tp)):
+                            if str(_be.get("event_type") or "") == "heartbeat":
                                 continue
-                            _qcand.append(
-                                f"{_ag}/{_ets} → {_bts} event {str(_be.get('event_id'))[:8]} "
-                                f"topic {str(_be.get('topic'))[:60]}")
-                            break
+                            _tpm = bool(_tp) and str(_be.get("topic") or "") == _tp
+                            _trm = bool(_tr) and str(_be.get("trace_id") or "") == _tr
+                            if not (_tpm or _trm):
+                                continue
+                            # topic khớp = bằng chứng mạnh hơn trace_id (trace_id dùng chung
+                            # cho cả job); cùng event_type là bằng chứng cộng thêm.
+                            _sc = (2 if _tpm else 0) + (
+                                1 if _ty and str(_be.get("event_type") or "") == _ty else 0)
+                            if _best is None or _sc > _best[0]:
+                                _best = (_sc, _bts, _be)
                         except Exception:
                             continue
+                if _best:
+                    _qcand.append(
+                        f"{_ag}/{_ets} → {_best[1]} "
+                        f"event {str(_best[2].get('event_id'))[:8]} "
+                        f"topic {str(_best[2].get('topic'))[:60]}")
         except Exception:
             _qcand = []
         _who = sorted({_q_who(_r) for _r in _q24})
@@ -1106,7 +1124,8 @@ if os.path.exists(_qf):
           f"Agent: {_who}. Lý do: {_why}. "
           f"Xem `tail bus/_rejected.jsonl`; sửa đúng nguyên nhân ở call site rồi ghi LẠI event "
           f"(hàng đợi này là PHÁP Y, không ai tự phát lại — payload hỏng phát lại vẫn hỏng)."
-          + (f" ỨNG VIÊN RETRY đã lên bus (cùng agent + cùng trace_id, ≤15 phút sau): "
+          + (f" ỨNG VIÊN RETRY đã lên bus (cùng agent + cùng topic/trace_id, ≤15 phút sau, "
+             f"đã loại heartbeat): "
              f"{_qcand} — nhiều khả năng agent đã TỰ ghi lại; ĐỐI CHIẾU nội dung rồi đánh dấu "
              f"bằng `bin/bus_rejected_resolve.py --index N --by <ai> --note ...`, đừng bỏ qua "
              f"bước đánh dấu (không đánh dấu = báo động lặp lại suốt 24h)." if _qcand else

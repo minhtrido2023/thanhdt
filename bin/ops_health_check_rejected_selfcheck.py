@@ -250,6 +250,22 @@ def main():
     check("word-split: mất trace_id nhưng TRÙNG topic ⇒ vẫn là ứng viên",
           bool(w) and "ỨNG VIÊN RETRY" in w[0] and "topic999" in w[0], w)
 
+    print("\ncase_heartbeat_khong_duoc_che_mat_retry_that")
+    # Ca THẬT 2026-09-17 (Wags, 17 tham số): watcher phát heartbeat 17:40:21Z với
+    # topic = trace_id ⇒ khớp trace_id và đứng TRƯỚC bản retry finding thật 17:40:28Z.
+    # Bản cũ `break` ở ứng viên ĐẦU TIÊN nên chỉ ra heartbeat, autofix phải tra lại từ đầu.
+    hb_ts = (t0 + dt.timedelta(seconds=17)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    hb = {"event_id": "755b7de9-x", "ts": hb_ts, "agent_id": "Taylor",
+          "event_type": "heartbeat", "topic": "Taylor_20260831_042737",
+          "trace_id": "Taylor_20260831_042737"}
+    w, o, _l, e = run(block, [ws], inbox={"Taylor": [hb, ev_ws]})
+    check("heartbeat đứng TRƯỚC retry thật ⇒ chỉ ra RETRY THẬT, không phải heartbeat",
+          e is None and bool(w) and "2ceafcdb" in w[0] and "755b7de9" not in w[0], w)
+
+    w, o, _l, e = run(block, [ws], inbox={"Taylor": [hb]})
+    check("CHỈ có heartbeat ⇒ KHÔNG coi là ứng viên retry (không đóng báo động oan)",
+          e is None and bool(w) and "KHÔNG tìm thấy ứng viên retry" in w[0], w)
+
     print("\ncase_CONTROL_khong_duoc_keu_oan")
     w, o, _l, e = run(block, [])
     check("CONTROL: file RỖNG ⇒ không W, không OK", not w and not o and e is None,

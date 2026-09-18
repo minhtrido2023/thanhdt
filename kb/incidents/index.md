@@ -77,6 +77,7 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 
 | Ngày | Sự cố | status |
 |---|---|---|
+| 2026-09-18 | [2026-09/2026-09-18-rejected-retry-candidate-heartbeat-shadow.md](2026-09/2026-09-18-rejected-retry-candidate-heartbeat-shadow.md) — bộ dò ỨNG VIÊN RETRY của check 5b `break` ở event khớp ĐẦU TIÊN nên heartbeat watcher (topic = trace_id) che mất bản retry thật; không mất event, fix = chấm điểm + loại heartbeat | fixed |
 | 2026-09-12 | [2026-09/2026-09-12-selfcheck-sweep-includes-frozen-mike-paseo.md](2026-09/2026-09-12-selfcheck-sweep-includes-frozen-mike-paseo.md) | ? |
 | 2026-09-12 | [2026-09/2026-09-12-report-return-gate-worktree-root.md](2026-09/2026-09-12-report-return-gate-worktree-root.md) | ? |
 | 2026-09-05 | [2026-09/2026-09-05-bq-auth-cron-watchdog-false-healthy.md](2026-09/2026-09-05-bq-auth-cron-watchdog-false-healthy.md) | ? |
