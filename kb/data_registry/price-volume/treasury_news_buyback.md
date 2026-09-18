@@ -80,6 +80,10 @@ Chi tiết đầy đủ (thuật toán, self-check, danh sách mã theo 3 nhóm,
 `mike/agents/Taylor/research/treasury_oshares_overlay_20260907/report.md`.
 
 ## Liên quan
+- **Consumer (branch `feat/treasury-buyback-window-monitor`, CHƯA merge)**:
+  `mike/bin/treasury_buyback_window_monitor.py` — WARN-ONLY, buy_done ≥2021-01-01 quá 45 ngày chưa
+  thấy AIS "Giảm niêm yết". Bẫy (5) đo khi viết nó: bảng KHÔNG có field phân biệt ESOP (`category`
+  NULL, `matched_keyword`='BUYBACK' ở 100% buy_done post-2021) — chỉ có từ khoá trong `title`.
 - [`../fundamentals/ticker_financial_oshares.md`](../fundamentals/ticker_financial_oshares.md) —
   bảng đích của overlay này (RESTATE, không PIT thật — bẫy chung gốc).
 - [`corporate_action_bq.md`](corporate_action_bq.md) — bảng corp-action rộng hơn (ISS/AIS/DIV...),
