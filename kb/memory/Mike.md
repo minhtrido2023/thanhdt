@@ -30,3 +30,4 @@
 - job_cancel_guard nhánh systemd luôn đỏ dưới cron (theo dõi, không escalate).
 - append_event.sh JSON cách ly viết tay vẫn thỉnh thoảng tái diễn dạng nhỏ (theo dõi qua retro).
 
+- [2026-09-18T20:59:31Z] weekly-ops-audit 2026-09-19 XONG (job Mike_20260918_204303): 5 fix commit (a7dece49 0643b543 73dfbe54 21734026 41e78500 + incident dd341a2b), 4 selfcheck-red da dong, PENDING 9->5. ESCALATE MO: question/weekly-ops-audit-self-max-turns-4-weeks-silent — audit nay het max-turns 80 bon tuan lien (08-22..09-12), bus decision gan nhat truoc do la 2026-08-15; de xuat A (nang 80->160), cho user quyet. CANH BAO: coding_guidelines.md 39,5KB = 96,5% nguong OKF 40KB — tach _ext.md TRUOC khi viet §rule moi. %opus 50,0% (+36,6 diem/2 tuan), nguon chinh la vong va arch-review chi-sua-text van dung opus.
