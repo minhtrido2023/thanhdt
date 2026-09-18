@@ -4,5 +4,5 @@
 🟢 STRENGTH: PE·ALL(-0.053→-0.077), ROIC5Y·ALL(+0.030→+0.061), ROIC5Y·CONSUMER(+0.036→+0.168), ROE_Min5Y·ALL(+0.050→+0.145), ROE_Min5Y·CYCLICAL(+0.047→+0.113), ROE_Min5Y·CONSUMER(+0.068→+0.172)
 Snapshot: PE -0.077[STRENGTH] | PB +0.038[WEAK] | mom_200 -0.020[FLIPPED] | ROE_Min5Y +0.145[STRENGTH] | FSCORE +0.016[FADING]
 ⚔️ Capit edge: HEALTHY (recent4 +10.0%/hit75% vs full +14.2%/75%, last -1.2%) → max capit carve 70%
-📮 LAG edge: NEGATIVE (12M -0.51%/win 35%, n=575, pctile 6, asof 2026-08-07) → canh bao: ha w_LAG .65->.50 neu keo dai 3 thang
+📮 LAG edge: NEGATIVE (12M -0.60%/win 36%, n=564, pctile 5, asof 2026-08-10) → canh bao: ha w_LAG .65->.50 neu keo dai 3 thang
 📉 Momentum FLIPPED → không nới slot/size momentum; EXBULL-suppression ĐÃ LIVE từ 2026-06-11 (pt_v22_dt5g.py:286-294, user duyệt)
