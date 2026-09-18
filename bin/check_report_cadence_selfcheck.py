@@ -218,8 +218,26 @@ out_a = run_detector([TBD_MONTHLY], [Q_MONTH], today="2026-08-14",
                       content_by_file={TBD_MONTHLY: FULL_CONTENT})
 out_b = run_detector([TBD_MONTHLY], [Q_MONTH], today="2026-08-14",
                       content_by_file={TBD_MONTHLY: FULL_CONTENT})
+# `run_detector` dựng một TemporaryDirectory MỚI mỗi lần gọi, và detector trả về đường dẫn
+# TUYỆT ĐỐI của report đích (`target_file_*`) ⇒ 2 lần chạy không bao giờ bằng nhau theo nghĩa đen,
+# bất kể detector có state ẩn hay không. Chuẩn hoá gốc tmp trước khi so (§28: so GIÁ TRỊ đã chuẩn
+# hoá, đừng so chuỗi thô) — giữ nguyên ý định của ca: không tự trôi / không tự nhân đôi.
+_TD_RE = re.compile(r"/tmp/[^/\s\"']+")
+
+
+def _norm_td(obj):
+    if isinstance(obj, str):
+        return _TD_RE.sub("<TD>", obj)
+    if isinstance(obj, dict):
+        return {k: _norm_td(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [_norm_td(v) for v in obj]
+    return obj
+
+
+_a, _b = _norm_td(out_a), _norm_td(out_b)
 check("#20 chạy 2 lần liên tiếp cùng input ⇒ actions+closable giống hệt nhau (không spam/không giao trùng)",
-      out_a == out_b, f"a={out_a} b={out_b}")
+      _a == _b, f"a={_a} b={_b}")
 
 
 # ── Phần 2: danh sách "còn treo" lấy từ matcher CHÍNH THỐNG (bus_question_audit.py) ─────
