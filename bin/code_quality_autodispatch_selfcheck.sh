@@ -283,32 +283,41 @@ else
   bad "T12" "rc=$LAST_RC state=$state_content notify_log=$(cat "$SANDBOX_NOTIFY_LOG")"
 fi
 
-# --- T13: file KHÔNG nằm trong danh sách tay nhưng tier_root là 1 root GHI LỆNH
-# (merge_park_daily.sh, trong ORDER_WRITING_ROOTS) trong kb/production_manifest.json giả ->
-# escalate (arch-review round 3 killer objection: danh sách tay bỏ sót merge_park_orders.py vì nó
-# không "nghe tên" nguy hiểm — nguồn manifest cơ học phải bắt được ca này). Ngược lại: file có
-# tier_root là root chỉ BÁO CÁO (eod_trading_report.sh, KHÔNG trong ORDER_WRITING_ROOTS) -> KHÔNG
-# escalate qua manifest (user chốt 2026-09-18 "tăng tỉ lệ tự sửa" — tier=T0 riêng không đủ, phải
-# đúng root ghi lệnh). ---
+# --- T13: lọc theo roots[] (KHÔNG PHẢI tier_root, bị bác vì là hiện vật thứ tự dòng crontab —
+# xem docstring load_manifest_order_writing()). 4 ca trong 1 manifest giả:
+#   (a) roots chỉ có root ghi lệnh (merge_park_daily.sh) -> escalate
+#   (b) roots chỉ có root báo cáo (eod_trading_report.sh) -> dispatch bình thường dù severity=high
+#   (c) roots MIX — root báo cáo (dominant) VÀ root ghi lệnh (bot_execute.py) cùng reach 1 file ->
+#       PHẢI escalate (đây đúng hình dạng lỗi mà bản `tier_root` cũ bị bác — file vẫn reachable
+#       từ root ghi lệnh nhưng tier_root lại là root báo cáo do thắng tie-break thứ tự crontab)
+#   (d) file trong SAFE_TOOLING_ALLOWLIST (mike/bin/dispatch.sh) dù roots có root ghi lệnh vẫn
+#       KHÔNG escalate qua manifest (allowlist trừ ra tường minh) ---
 mkdir -p "$SANDBOX/kb"
 python3 -c "
 import json
 json.dump({'files': {
-    'mike/bin/merge_park_orders_fake.py': {'tier': 'T0', 'tier_root': 'cron \`20 13 * * 1-5\` merge_park_daily.sh'},
-    'mike/bin/harmless_report_tool.py': {'tier': 'T0', 'tier_root': 'cron \`10 12 * * 1-5\` eod_trading_report.sh'},
+    'mike/bin/merge_park_orders_fake.py': {'tier': 'T0', 'roots': ['cron \`20 13 * * 1-5\` merge_park_daily.sh']},
+    'mike/bin/harmless_report_tool.py': {'tier': 'T0', 'roots': ['cron \`10 12 * * 1-5\` eod_trading_report.sh']},
+    'mike/bin/signal_holds_fake.py': {'tier': 'T0', 'roots': ['cron \`0 12 * * 1-5\` bq_freshness_check.sh', 'cron \`10 2 * * 1,3,5\` bot_execute.py']},
+    'mike/bin/dispatch.sh': {'tier': 'T0', 'roots': ['cron \`5 6 * * 1-5\` run_bot.sh']},
 }}, open('$SANDBOX/kb/production_manifest.json', 'w'))
 "
 cat > "$SANDBOX/t13.json" <<'EOF'
 {"findings": [
-  {"file": "/x/mike/bin/merge_park_orders_fake.py", "line": 1, "category": "correctness", "severity": "low", "summary": "s13", "evidence": "e13", "owner": "Wags"},
-  {"file": "/x/mike/bin/harmless_report_tool.py", "line": 1, "category": "dead-code", "severity": "high", "summary": "s13b", "evidence": "e13b", "owner": "Wags"}
+  {"file": "/x/mike/bin/merge_park_orders_fake.py", "line": 1, "category": "correctness", "severity": "low", "summary": "s13a", "evidence": "e13a", "owner": "Wags"},
+  {"file": "/x/mike/bin/harmless_report_tool.py", "line": 1, "category": "dead-code", "severity": "high", "summary": "s13b", "evidence": "e13b", "owner": "Wags"},
+  {"file": "/x/mike/bin/signal_holds_fake.py", "line": 1, "category": "correctness", "severity": "low", "summary": "s13c", "evidence": "e13c", "owner": "Wags"},
+  {"file": "/x/mike/bin/dispatch.sh", "line": 1, "category": "dead-code", "severity": "low", "summary": "s13d", "evidence": "e13d", "owner": "Wags"}
 ]}
 EOF
 run "$SANDBOX/t13.json" 2099-01-13
-if [ "$LAST_RC" -eq 0 ] && echo "$OUT" | grep -q '"n_escalate": 1' && echo "$OUT" | grep -q '"n_wags": 1' \
+if [ "$LAST_RC" -eq 0 ] && echo "$OUT" | grep -q '"n_escalate": 2' && echo "$OUT" | grep -q '"n_wags": 2' \
    && grep -q "hard_boundary_manifest_order_writing" "$SANDBOX_EVENT_LOG" \
-   && grep -qF "mike/bin/harmless_report_tool.py" "$SANDBOX_DISPATCH_LOG"; then
-  ok "T13 tier_root=root GHI LỆNH -> escalate (merge_park_orders_fake.py); tier_root=root BÁO CÁO -> dispatch bình thường dù severity=high (harmless_report_tool.py)"
+   && grep -qF "mike/bin/merge_park_orders_fake.py" "$SANDBOX_EVENT_LOG" \
+   && grep -qF "mike/bin/signal_holds_fake.py" "$SANDBOX_EVENT_LOG" \
+   && grep -qF "mike/bin/harmless_report_tool.py" "$SANDBOX_DISPATCH_LOG" \
+   && grep -qF "mike/bin/dispatch.sh" "$SANDBOX_DISPATCH_LOG"; then
+  ok "T13 lọc roots[] đúng cả 4 ca: (a) root ghi lệnh->escalate (b) root báo cáo->dispatch dù severity=high (c) roots MIX (báo cáo+ghi lệnh)->escalate — đúng ca killer tier_root cũ bỏ sót (d) SAFE_TOOLING_ALLOWLIST (dispatch.sh)->dispatch dù roots có root ghi lệnh"
 else
   bad "T13" "out=$OUT event=$(cat "$SANDBOX_EVENT_LOG") dispatch_log=$(cat "$SANDBOX_DISPATCH_LOG")"
 fi

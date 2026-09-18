@@ -11,25 +11,31 @@ kb/projects/code-quality-review-plan-20260823.md § CẬP NHẬT 2026-09-17).
       (1) Danh sách tay `EXEC_HARD_BOUNDARY_PREFIXES`/`_EXACT` — prefix `trading_bot/` (mọi file
           dưới thư mục này, không liệt tên — tránh trôi khi thêm module mới) + vài file cụ thể
           ngoài đó (`bot_execute.py`, `dnse_api.py`, `mike/bin/run_bot.sh`, ...).
-      (2) `kb/production_manifest.json`, lọc theo `tier_root` ∈ `ORDER_WRITING_ROOTS`
+      (2) `kb/production_manifest.json`, lọc theo `roots[]` (MỌI root với tới được, KHÔNG PHẢI
+          `tier_root` — xem lý do dưới) ∈ `ORDER_WRITING_ROOTS`, trừ `SAFE_TOOLING_ALLOWLIST`
           (`load_manifest_order_writing()`) — nguồn CƠ HỌC sinh từ crontab thật
           (`production_manifest.py`), bắt được file KHÔNG có trong danh sách tay — arch-review
           round 3 killer objection: danh sách tay chỉ phủ 10/34 file T0 có commit trong 1 tuần đo
           thật, bỏ sót `mike/bin/merge_park_orders.py` (ghi thẳng orders[] vào plan). Manifest đọc
           lỗi/thiếu ⇒ rơi về set rỗng + warning (KHÔNG throw, KHÔNG im lặng — xem hàm), danh sách
           tay (1) vẫn là nền — không có kịch bản nào escalation bị GIẢM so với chỉ dùng (1).
-          ⚠️ **Đổi 2026-09-18 (user chốt: "tăng tỉ lệ tự sửa")**: bản đầu dùng CẢ tier T0 (107
-          file, gồm cả file KHÔNG chạm tiền như `dispatch.sh`/`eod_trading_report.sh` —
-          `tier=T0` trong manifest nghĩa là "với tới được từ MỘT cron gốc gắn nhãn T0", không
-          phải "chính nó ghi lệnh"). Đo thật cho thấy điều đó làm escalate oan nhiều file an
-          toàn, ngược mục tiêu tăng tỉ lệ tự sửa. Đổi sang lọc theo `tier_root` (root DUY NHẤT
-          xác định tier, không phải toàn bộ `roots[]` reachability) ∈ `ORDER_WRITING_ROOTS` — tập
-          root cron TRỰC TIẾP ghi lệnh/vị thế/margin (không gồm root chỉ báo cáo/kiểm tra như
-          `eod_trading_report.sh`, `bq_freshness_check.sh`, `check_report_cadence.sh`). Kết quả
-          đo: 44 file (từ 107), `dispatch.sh`/`eod_trading_report.sh`/`bus_question_audit.py`/
-          `check_report_cadence.sh` không còn bị escalate oan, các file ghi lệnh thật
-          (`merge_park_orders.py`, `discretionary_accumulation_inject.py`,
-          `corp_action_auto_confirm.py`, `park_holdings.py`, `gmail_otp_reader.py`...) vẫn escalate.
+          ⚠️ **2 lần đổi 2026-09-18 (user chốt: "tăng tỉ lệ tự sửa")**:
+          - Lần 1: bản đầu dùng CẢ tier T0 (107 file, gồm cả file KHÔNG chạm tiền như
+            `dispatch.sh`/`eod_trading_report.sh` — `tier=T0` nghĩa là "với tới được từ MỘT cron
+            gốc gắn nhãn T0", không phải "chính nó ghi lệnh") → đổi sang lọc theo `tier_root`.
+          - Lần 2 (SỬA LỖI lần 1, cùng ngày): `tier_root` hoá ra KHÔNG PHẢI "root chịu trách nhiệm
+            ngữ nghĩa" như tưởng — nó chỉ là tie-break theo THỨ TỰ DÒNG CRONTAB giữa các root
+            CÙNG tier (`production_manifest.py:618`, so sánh chặt `<`). `bq_freshness_check.sh`
+            (T0, dòng 48) đứng trên `run_bot.sh` (dòng 61) nên thắng `tier_root` của 44/107 file
+            T0, làm 20 file VẪN reachable từ root ghi lệnh (`signal_holds.py`,
+            `lag_rating_filter.py` — gate rating≤3 user khoá 07-27, `corp_action_lib.py`,
+            `dnse_fee_rates.py`...) bị rớt khỏi escalation — tái lập đúng killer round 3. Đổi
+            sang lọc `roots[]` (71 file, phục hồi đủ 20 file) + `SAFE_TOOLING_ALLOWLIST` tường
+            minh (`dispatch.sh`, `notify_thread.sh`, `append_event.sh`, `mike_json.py`,
+            `discord_channel.sh`) để vẫn đạt mục tiêu ban đầu (4 file user muốn bỏ escalate oan)
+            mà không dựa vào hiện vật thứ tự crontab. `macro_state_live.py`/
+            `publish_gated_state.py` (DT5G `get_gated_state()`) liệt tay vào (1) vì roots[] của
+            chúng không khớp `ORDER_WRITING_ROOTS`.
     HOẶC owner không phải Taylor/Wags (rỗng/"Mike"/lạ) — fail-safe khi không rõ owner.
     KHÔNG dispatch — ghi bus question + ack `triaged-needs-human:` (khỏi bị wags_autofix đốt
     job vô ích, xem arch-review round 1 "Long-term ops") + Discord.
@@ -80,20 +86,48 @@ EXEC_HARD_BOUNDARY_EXACT = (
     "mike/bin/discretionary_margin_gate.py",
     "mike/bin/compute_active_nav.py",
     "mike/bin/daily_nav_snapshot.py",
+    # DT5G regime gate (`get_gated_state()`) — cap exposure theo trạng thái thị trường, KHÔNG
+    # phải file lệnh trực tiếp nhưng roots[] của nó (bq_freshness_check.sh, check_sbv_weekly.sh,
+    # daily_refresh_v34b_linux.sh, papertrade_daily.sh) không khớp ORDER_WRITING_ROOTS nên cơ chế
+    # manifest bên dưới không tự bắt được — liệt tay (arch-review gate-narrowing round, 2026-09-18).
+    "macro_state_live.py",
+    "deploy_golive_dt5g_v4/publish_gated_state.py",
 )
 VALID_SEVERITIES = {"low", "medium", "high"}
 
-# Root cron TRỰC TIẾP ghi lệnh/vị thế/margin — dùng để lọc `tier_root` của
+# Root cron TRỰC TIẾP ghi lệnh/vị thế/margin — dùng để lọc `roots[]` của
 # kb/production_manifest.json (xem load_manifest_order_writing()). KHÔNG gồm root chỉ báo cáo/
 # kiểm tra freshness (eod_trading_report.sh, bq_freshness_check.sh, check_report_cadence.sh,
 # kb_nightly.sh, ops_health_check.sh...) — những root đó khiến `tier=T0` bao trùm cả tooling an
 # toàn để tự sửa (đo thật 2026-09-18: dispatch.sh/bus_question_audit.py lọt vào T0 dù không ghi
-# lệnh gì, chỉ vì "with tới được" từ run_bot.sh qua 1 nhánh gọi phụ). Tên rút từ chính basename
-# trong `production_manifest.py::ROOT_TIER` — đối chiếu lại nếu script đó đổi tên root.
+# lệnh gì, chỉ vì "với tới được" từ run_bot.sh qua 1 nhánh gọi phụ). Tên rút từ chính basename
+# trong `production_manifest.py::ROOT_TIER` — đối chiếu lại nếu script đó đổi tên root
+# (`load_manifest_order_writing()` tự cảnh báo nếu 1 tên ở đây không khớp root nào trong manifest).
+#
+# ⚠️ LỌC THEO `roots[]` (mọi root với tới được), KHÔNG PHẢI `tier_root` (bản đầu 2026-09-18 dùng
+# `tier_root` — SAI: đó chỉ là tie-break theo THỨ TỰ DÒNG CRONTAB giữa các root CÙNG tier
+# (production_manifest.py:618, so sánh chặt `<`), không phải "root chịu trách nhiệm ngữ nghĩa".
+# bq_freshness_check.sh đứng dòng 48 (trên run_bot.sh dòng 61) nên thắng tier_root của 44/107 file
+# T0, làm 20 file VẪN reachable từ root ghi lệnh (signal_holds.py, lag_rating_filter.py,
+# corp_action_lib.py, dnse_fee_rates.py...) bị rớt khỏi escalation — tái lập đúng killer "bỏ sót
+# file ghi lệnh" mà cơ chế manifest này sinh ra để chặn. Đã đo lại: lọc theo `roots[]` cho 71 file,
+# phục hồi đủ 20 file đó.
 ORDER_WRITING_ROOTS = frozenset({
     "run_bot.sh", "bot_execute.py", "merge_park_daily.sh", "inject_discretionary_orders.sh",
     "park_trim_daily.sh", "jit_unpark_daily.sh", "corp_action_auto_confirm.py",
     "discretionary_margin_check_exits_daily.sh", "compute_active_nav_all.sh",
+    "late_plan_catchup.sh",  # chạy park_trim→jit_unpark→merge_park --write→inject_discretionary
+    "preflight_check.sh",  # gate HOLD plan chưa duyệt — chính nó quyết có đặt lệnh hay không
+})
+
+# Tooling GENERIC dùng chung mọi nơi (kể cả bởi root ghi lệnh) nhưng KHÔNG tự nó ghi lệnh/vị thế —
+# trừ khỏi kết quả `roots[]`-match phía trên để không escalate oan (đây là mục tiêu user 2026-09-18
+# "tăng tỉ lệ tự sửa": lọc theo roots[] rộng hơn tier_root, nên cần allowlist tường minh, review
+# được — thay vì dựa vào hiện vật thứ tự crontab như bản tier_root đã bị bác). File này VẪN qua
+# arch-reviewer bắt buộc như mọi finding khác (bảng owner §6) — chỉ không phải ESCALATE-cho-người.
+SAFE_TOOLING_ALLOWLIST = frozenset({
+    "mike/bin/dispatch.sh", "mike/bin/notify_thread.sh", "mike/bin/append_event.sh",
+    "mike/bin/mike_json.py", "mike/bin/discord_channel.sh",
 })
 
 
@@ -109,15 +143,19 @@ def load_manifest_order_writing(root: Path) -> tuple[set[str], str | None]:
     chỉ phủ 10/34 file T0 có commit trong scope tuần đo thật (bỏ sót mike/bin/merge_park_orders.py
     — ghi thẳng orders[] vào plan — và tương tự).
 
-    Lọc theo `tier_root` (root DUY NHẤT xác định tier của file — không phải toàn bộ `roots[]`, đó
-    là MỌI root với tới được, quá rộng) ∈ ORDER_WRITING_ROOTS — user chốt 2026-09-18 sau khi thấy
-    bản dùng cả tier T0 (107 file) escalate oan cả tooling an toàn, ngược mục tiêu "tăng tỉ lệ
-    tự sửa, giảm việc treo không cần thiết".
+    Lọc theo `roots[]` (MỌI root với tới được file đó) ∈ ORDER_WRITING_ROOTS, trừ đi
+    SAFE_TOOLING_ALLOWLIST — user chốt 2026-09-18 sau khi thấy bản dùng cả tier T0 (107 file)
+    escalate oan cả tooling an toàn, ngược mục tiêu "tăng tỉ lệ tự sửa, giảm việc treo không cần
+    thiết". Bản đầu dùng `tier_root` (root DUY NHẤT gán cho tier) bị arch-review bác vì đó là
+    hiện vật thứ tự dòng crontab (xem comment tại ORDER_WRITING_ROOTS), không phải ngữ nghĩa
+    "chạm tiền" — dùng `roots[]` mới đúng câu hỏi "file này CÓ THỂ bị root ghi lệnh gọi tới không".
 
     Trả (set, warning). Lỗi đọc bất kỳ (thiếu file/JSON hỏng/thiếu field) ⇒ set RỖNG + warning nêu
     ĐÚNG lý do đọc được (không đoán, §29) — arch-review round 4 killer objection: bản trước nuốt
     exception thành set() IM LẶNG, không log/không Discord, khiến "gate đang bảo vệ" và "gate đã
-    tắt" không phân biệt được từ output. Caller BẮT BUỘC đưa warning này vào summary + Discord."""
+    tắt" không phân biệt được từ output. Caller BẮT BUỘC đưa warning này vào summary + Discord.
+    Cũng cảnh báo (cùng field) nếu 1 tên trong ORDER_WRITING_ROOTS không khớp root nào trong
+    manifest — root đổi tên/gõ sai sẽ làm set co lại IM LẶNG nếu không kiểm."""
     manifest_path = root / "kb" / "production_manifest.json"
     try:
         raw = manifest_path.read_text(encoding="utf-8")
@@ -130,10 +168,26 @@ def load_manifest_order_writing(root: Path) -> tuple[set[str], str | None]:
     files = data.get("files")
     if not isinstance(files, dict):
         return set(), f"{manifest_path} thiếu field 'files' hợp lệ (schema đổi?)"
-    return {
-        rel for rel, meta in files.items()
-        if isinstance(meta, dict) and _root_basename(meta.get("tier_root", "")) in ORDER_WRITING_ROOTS
-    }, None
+
+    seen_root_names: set[str] = set()
+    matched: set[str] = set()
+    for rel, meta in files.items():
+        if not isinstance(meta, dict):
+            continue
+        roots = meta.get("roots") or []
+        names = {_root_basename(r) for r in roots if isinstance(r, str)}
+        seen_root_names |= names
+        if names & ORDER_WRITING_ROOTS:
+            matched.add(rel)
+    matched -= SAFE_TOOLING_ALLOWLIST
+
+    unmatched_roots = ORDER_WRITING_ROOTS - seen_root_names
+    if unmatched_roots:
+        return matched, (
+            f"{sorted(unmatched_roots)} trong ORDER_WRITING_ROOTS không khớp root nào trong "
+            f"{manifest_path} (đổi tên/gõ sai?) — set order-writing có thể THIẾU, xem lại code."
+        )
+    return matched, None
 
 
 def to_repo_relative(file_abs: str, wc_root: Path) -> str:

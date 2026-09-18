@@ -45,19 +45,45 @@ thủ công nữa. Cơ chế:
      nhóm chưa xong" không thể chạy; vá bằng copy ra `reports/code_quality/verified_<date>.json`.
   3. Ranh giới cứng chỉ liệt tay 10/34 file T0 có commit trong tuần đo thật (bỏ sót
      `mike/bin/merge_park_orders.py` — ghi thẳng orders[] vào plan) → thêm union với
-     `kb/production_manifest.json` tier T0 (`load_manifest_t0()`).
+     `kb/production_manifest.json` tier T0 (`load_manifest_order_writing()`, ban đầu đặt tên
+     `load_manifest_t0()`).
   4. Union manifest fail-open IM LẶNG khi file mất/hỏng (không phân biệt được "gate đang bảo vệ"
      hay "đã tắt" từ output) → giờ trả `(set, warning)`, warning vào cả summary JSON lẫn dòng đầu
      Discord mỗi tuần.
-  Đo thật trên báo cáo 09-13 (25 finding): **12 escalate / 6 Taylor / 7 Wags**, 4 ca escalate CHỈ
-  manifest union bắt được (`dispatch.sh`, `eod_trading_report.sh`, `bus_question_audit.py`).
-  **Backlog KHÔNG chặn** (đưa user quyết, không tự ý đổi gate): throughput escalate/dispatch dao
-  động mạnh theo tuần (manifest T0 hiện có 107 file) — đã làm QUAN SÁT ĐƯỢC qua dòng tỉ lệ trong
-  Discord mỗi tuần, chưa quyết có cần thu hẹp gate để tăng % dispatch được hay chấp nhận "Tầng 3 =
-  chủ yếu escalation packager cho phần lớn finding chạm production core". Nợ nhỏ khác: chưa có
-  cron dọn `state/code_quality_weekly_dispatch_<date>.json` + `reports/code_quality/verified_
-  <date>.json` (~52 file nhỏ/năm mỗi loại); `notify_thread.sh` gọi `check=False` (lỗi gửi Discord
-  không tự ghi lại, nhưng bus question vẫn sống + hiện WARN-ONLY trong ops health hằng ngày).
+  Đo thật trên báo cáo 09-13 (25 finding, TRƯỚC bản thu hẹp gate 09-18 mục dưới): **12 escalate /
+  6 Taylor / 7 Wags**, 4 ca escalate CHỈ manifest union bắt được (`dispatch.sh`,
+  `eod_trading_report.sh`, `bus_question_audit.py`).
+
+**CẬP NHẬT 2026-09-18 (user chốt "tăng tỉ lệ tự sửa, giảm việc treo không cần thiết") — thu hẹp
+gate manifest, 2 vòng arch-review riêng cho thay đổi này**: bản trên dùng `tier=="T0"` (107 file,
+escalate oan cả tooling an toàn — `dispatch.sh`/`eod_trading_report.sh`/`bus_question_audit.py`/
+`check_report_cadence.sh` không ghi lệnh gì). Sửa 2 lần cùng ngày:
+- Lần 1 (arch-review NEEDS_CHANGES): đổi sang lọc `tier_root` — SAI, đó chỉ là tie-break theo thứ
+  tự dòng crontab giữa các root cùng tier (`production_manifest.py:618`), không phải "root chịu
+  trách nhiệm ngữ nghĩa" — làm rớt oan 20 file vẫn thật sự reachable từ root ghi lệnh
+  (`mike/bin/signal_holds.py`, `lag_rating_filter.py` — gate rating≤3 user khoá 07-27,
+  `corp_action_lib.py`, `mike/bin/dnse_fee_rates.py`...).
+- Lần 2 (arch-review CONFIRMED): đổi sang lọc `roots[]` (mọi root với tới được, không chỉ 1 root
+  tie-break) ∈ `ORDER_WRITING_ROOTS` (11 root: run_bot.sh, bot_execute.py, merge_park_daily.sh,
+  inject_discretionary_orders.sh, park_trim_daily.sh, jit_unpark_daily.sh,
+  corp_action_auto_confirm.py, discretionary_margin_check_exits_daily.sh,
+  compute_active_nav_all.sh, late_plan_catchup.sh, preflight_check.sh), trừ
+  `SAFE_TOOLING_ALLOWLIST` (dispatch.sh, notify_thread.sh, append_event.sh, mike_json.py,
+  discord_channel.sh — tường minh, review được, thay vì dựa vào hiện vật crontab). Thêm tay
+  `macro_state_live.py`/`deploy_golive_dt5g_v4/publish_gated_state.py` (DT5G gate) vào
+  `EXEC_HARD_BOUNDARY_EXACT` vì `roots[]` của chúng không khớp `ORDER_WRITING_ROOTS`.
+  **Kết quả đo trên manifest thật: 71 file** (từ 107 gốc / 44 ở bản `tier_root` sai) —
+  4 file mục tiêu ban đầu của user không còn escalate oan, 20 file bị bản `tier_root` bỏ sót đã
+  phục hồi. Selfcheck 17/17, mutation-test 2 lần (revert `tier_root`, bỏ allowlist) đều bắt được.
+
+**Backlog KHÔNG chặn** (đưa user quyết thêm nếu cần, không tự ý đổi gate lần nữa mà không đo lại):
+throughput escalate/dispatch vẫn có thể dao động theo tuần — đã làm QUAN SÁT ĐƯỢC qua dòng tỉ lệ
+trong Discord mỗi tuần. Nợ nhỏ khác: chưa có cron dọn
+`state/code_quality_weekly_dispatch_<date>.json` + `reports/code_quality/verified_<date>.json`
+(~52 file nhỏ/năm mỗi loại); `notify_thread.sh` gọi `check=False` (lỗi gửi Discord không tự ghi
+lại, nhưng bus question vẫn sống + hiện WARN-ONLY trong ops health hằng ngày); `ORDER_WRITING_ROOTS`
+là danh sách tay cần đối chiếu lại nếu `production_manifest.py::ROOT_TIER` đổi tên root (script tự
+cảnh báo qua `manifest_warning` nếu 1 tên không khớp root nào trong manifest, nhưng không tự sửa).
 
 **Kết quả thực thi lần đầu (đo thật cùng ngày)** — 2 bài học bắt buộc áp dụng từ lần dispatch kế
 tiếp:
