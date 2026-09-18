@@ -566,3 +566,6 @@
 
 ## Archived 2026-09-18 (keep=12 days=0 require_done=False)
 - [2026-09-14T15:43:10Z] [2026-09-14] oshares forward-absorption (job _151805): branch fix/oshares-finfallback-double-count eded0afe (worktree /home/trido/thanhdt-wt-oshares-finfb-dblcount) CHO Mike+arch-reviewer land; ngay land VIB se publish kem MODEL_REBASE (tac dung phu model_version, khong phai so doi); registry .proposed Bay 3.
+
+## Archived 2026-09-18 (keep=12 days=0 require_done=False)
+- [2026-09-14T16:20:38Z] [2026-09-14] oshares fwd-absorption vong 2 (job _160309): bc86963e tren branch fix/oshares-finfallback-double-count (chua merge), verify xanh ca cong publish that. CHO Mike+arch-reviewer vong 3 land. De xuat viec rieng: ~20 check song BQ san co trong oshares_live selfcheck (cung lop rui ro cong do).
