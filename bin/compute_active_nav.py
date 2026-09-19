@@ -74,6 +74,25 @@ Cổ tức phải thu (`cashDividendReceiving`) NẰM TRONG `totalCash` trước
 (`daily_nav_snapshot.cum_dividend_double_count`). Script này KHÔNG hiệu chỉnh (cần lịch sử
 dnse_raw + ex-date từ BQ, ngoài phạm vi bản vá này) mà CÔNG BỐ: in cảnh báo + ghi
 `cash_dividend_receiving_vnd` vào JSON khi khoản đó vượt 0,5% NAV.
+
+§excluded_dividend — cổ tức phải thu của MÃ EXCLUDED bị loại khỏi active_nav tới khi tiền về
+(Option B, user quyết 2026-09-19, bus topic
+`Wags/zalopay-active-nav-excluded-ticker-dividend-receivable-option-c`). Sự cố gốc: ZaloPay
+DGC (excluded) có 80.000.000đ cổ tức receivable nằm trong `totalCash` từ 2026-09-14, làm
+active_nav phồng ~13% ⇒ mọi lệnh mua ZaloPay tính theo active_nav bị phồng theo (VPI 17/09:
+500cp thay vì ~400cp đúng — arch-review Wags_20260917_012008). `cashDividendReceiving` là một
+số TỔNG do DNSE trả (không tách theo mã), nên không thể tự suy ra khoản nào thuộc mã nào —
+nguồn sự thật là entry cấu hình `excluded_dividend_receivable` trong `trading_bot_accounts.json`
+(ticker + amount_vnd + expected_arrival_date), user tự khai, CÙNG kiểu với
+`manual_offbook_assets_vnd`. TÍN HIỆU DỪNG LOẠI là `cash_dividend_receiving_vnd` do DNSE trả tự
+hạ xuống (tiền đã settle thật) — KHÔNG PHẢI `expected_arrival_date` đã qua (arch-review
+2026-09-19, bản đầu dùng ngày làm điều kiện dừng: tiền về TRỄ hơn dự kiến ⇒ code cũ tự ngừng loại
+trong im lặng, tái lập đúng bug đang sửa). `expected_arrival_date` chỉ gắn cờ `overdue` để cảnh
+báo. Vì `cashDividendReceiving` là số TỔNG không tách theo mã, cơ chế kẹp (`min(amt, remaining)`)
+là BẢO THỦ theo một chiều: nếu tiền DGC về sớm ĐÚNG LÚC một mã khác (không-excluded) cũng có
+receivable phát sinh, cap vẫn thấy đủ 80tr và có thể loại NHẦM phần của mã kia — hướng sai luôn là
+UNDER-size (an toàn hơn OVER-size), không phải hướng ngược lại. RETROACTIVE: KHÔNG áp cho plan ĐÃ
+duyệt/đã khớp trước 2026-09-19 (VPI 500cp 17/09 giữ nguyên) — chỉ áp từ lần chạy kế tiếp trở đi.
 """
 import argparse
 import datetime as _dt_stale
@@ -140,6 +159,53 @@ def cash_basis(bal):
     if detail["reason"]:
         return None, detail
     return detail["cash_total_vnd"] - detail["cash_debt_vnd"], detail
+
+
+def excluded_dividend_pending(excluded_tickers, dividend_receivable_config,
+                              cash_dividend_receiving_vnd, asof_ref):
+    """Phần `cash_dividend_receiving_vnd` (đã nằm trong `cash`) thuộc mã trong
+    `excluded_tickers`, CHƯA thật sự về ⇒ phải loại khỏi active_nav (§excluded_dividend).
+
+    TÍN HIỆU DỪNG LOẠI là chính DNSE hạ `cash_dividend_receiving_vnd` (tiền đã settle thật),
+    KHÔNG PHẢI `expected_arrival_date` đã qua. `expected_arrival_date` chỉ dùng để gắn cờ
+    `overdue` (cảnh báo tiền về TRỄ hơn dự kiến) — arch-review 2026-09-19 chỉ ra bản đầu dùng
+    ngày làm điều kiện DỪNG sẽ tự tái lập đúng bug đang sửa nếu tiền về trễ: qua ngày mà DNSE
+    vẫn báo receivable, code cũ ngừng loại trong im lặng, active_nav phồng lại. Bản này không có
+    đường đó — miễn `cash_dividend_receiving_vnd` còn > 0 (kẹp `remaining`) thì còn loại, bất kể
+    ngày nào; nếu đã quá `expected_arrival_date` mà vẫn còn loại thì chỉ khác ở chỗ `overdue=True`
+    trong detail (để caller cảnh báo, KHÔNG đổi hành vi loại/không loại).
+
+    `expected_arrival_date` sai định dạng (không phải ISO `YYYY-MM-DD`) hoặc entry không phải
+    dict ⇒ NỔ lỗi rõ ràng (ValueError) — không đoán, không âm thầm loại vĩnh viễn/bỏ qua (§29).
+
+    Trả (tổng cần trừ khỏi active_nav, chi tiết từng entry còn hiệu lực kèm `overdue`).
+    """
+    remaining = float(cash_dividend_receiving_vnd or 0)
+    asof_date = _dt_stale.date.fromisoformat(asof_ref)
+    pending, detail = 0.0, []
+    for ent in dividend_receivable_config or []:
+        if not isinstance(ent, dict):
+            raise ValueError(f"excluded_dividend_receivable: entry không phải dict: {ent!r}")
+        tk, arrival_raw = ent.get("ticker"), ent.get("expected_arrival_date")
+        amt = float(ent.get("amount_vnd") or 0)
+        if tk not in excluded_tickers or amt <= 0:
+            continue
+        overdue = False
+        if arrival_raw:
+            try:
+                overdue = asof_date >= _dt_stale.date.fromisoformat(arrival_raw)
+            except ValueError as e:
+                raise ValueError(
+                    f"excluded_dividend_receivable[{tk}]: expected_arrival_date không đúng "
+                    f"ISO 'YYYY-MM-DD': {arrival_raw!r} ({e})") from e
+        take = min(amt, remaining)
+        if take <= 0:
+            continue  # DNSE không còn báo receivable nào cho phần này ⇒ coi như tiền đã về
+        pending += take
+        remaining -= take
+        detail.append({"ticker": tk, "amount_vnd": take,
+                       "expected_arrival_date": arrival_raw, "overdue": overdue})
+    return pending, detail
 
 
 def live_balance_and_positions(account_id, label):
@@ -281,8 +347,9 @@ def main():
     offbook = float(profile.get("manual_offbook_assets_vnd") or 0)
     offbook_asof = profile.get("manual_offbook_assets_asof") or ""
     offbook_stale_warning = None
+    asof_ref = args.asof or today_ict().isoformat()
+    excluded_div_config = profile.get("excluded_dividend_receivable") or []
     if offbook and offbook_asof:
-        asof_ref = args.asof or today_ict().isoformat()
         try:
             age_days = (_dt_stale.date.fromisoformat(asof_ref)
                         - _dt_stale.date.fromisoformat(offbook_asof)).days
@@ -346,6 +413,9 @@ def main():
 
     total_nav = cash + total_mv + egg_value + offbook
     active_nav = total_nav - excluded_mv
+    excluded_div_pending_vnd, excluded_div_pending_detail = excluded_dividend_pending(
+        excluded, excluded_div_config, cash_detail.get("cash_dividend_receiving_vnd"), asof_ref)
+    active_nav -= excluded_div_pending_vnd
 
     print(f"== Active NAV — {args.account} (account_id={account_id}) ==")
     print(f"{'Mã':6s} {'KL':>10s} {'Giá':>10s} {'Giá trị':>16s}  {'excluded?'}")
@@ -361,6 +431,13 @@ def main():
           f"(sức mua TỨC THÌ — KHÔNG dùng làm cơ sở NAV, chỉ để đối chiếu)")
     print(f"Tổng giá trị cổ phiếu:    {total_mv:>16,.0f}")
     print(f"  trong đó excluded:      {excluded_mv:>16,.0f}  ({', '.join(sorted(excluded)) or '(none)'})")
+    if excluded_div_pending_vnd:
+        print(f"  − cổ tức phải thu của mã excluded (theo khai báo config, loại khỏi active_nav "
+              f"tới khi tiền về): {excluded_div_pending_vnd:>16,.0f}")
+        for d in excluded_div_pending_detail:
+            flag = "  ⚠️ QUÁ HẠN dự kiến, DNSE vẫn báo receivable — cập nhật config" if d["overdue"] else ""
+            print(f"    · {d['ticker']}: {d['amount_vnd']:,.0f}đ, dự kiến về "
+                  f"{d['expected_arrival_date'] or '(chưa khai)'}{flag}")
     if egg_value:
         print(f"Trứng vàng (tự đọc từ egg.totalValue trong balances API): {egg_value:>16,.0f}")
     if offbook:
@@ -378,12 +455,16 @@ def main():
     # Cổ tức phải thu đã nằm trong totalCash nhưng giá cổ phiếu có thể chưa rơi ex-date ⇒
     # đếm 2 lần, tối đa 1-2 phiên rồi tự triệt tiêu (§cash). Chỉ CÔNG BỐ khi đủ lớn để đổi
     # quy mô lệnh; không tự hiệu chỉnh (cần ex-date từ BQ, ngoài phạm vi script này).
-    div_recv = cash_detail.get("cash_dividend_receiving_vnd") or 0
+    # Trừ phần đã loại khỏi active_nav ở trên (§excluded_dividend) trước khi so ngưỡng — phần đó
+    # KHÔNG còn trong active_nav nên không thể "đếm 2 lần trong active_nav" nữa (R4, arch-review
+    # 2026-09-19: bản trước chia div_recv GỘP cho active_nav ĐÃ TRỪ, cho tỷ lệ vô nghĩa).
+    div_recv_remaining = (cash_detail.get("cash_dividend_receiving_vnd") or 0) - excluded_div_pending_vnd
     div_warning = None
-    if active_nav > 0 and div_recv > 0.005 * active_nav:
+    if active_nav > 0 and div_recv_remaining > 0.005 * active_nav:
         div_warning = (
-            f"cổ tức phải thu {div_recv:,.0f}đ ({div_recv / active_nav:.2%} active_nav) đã nằm "
-            f"trong totalCash — nếu cổ phiếu CHƯA qua ex-date thì NAV đang đếm 2 lần khoản này "
+            f"cổ tức phải thu {div_recv_remaining:,.0f}đ ({div_recv_remaining / active_nav:.2%} "
+            f"active_nav, KHÔNG TÍNH phần mã excluded đã loại ở trên) đã nằm trong totalCash — "
+            f"nếu cổ phiếu CHƯA qua ex-date thì active_nav đang đếm 2 lần khoản này "
             f"(tự triệt tiêu sau 1-2 phiên; xem daily_nav_snapshot.cum_dividend_double_count).")
         print(f"⚠️ {div_warning}")
 
@@ -408,6 +489,8 @@ def main():
         "offbook_assets": offbook, "offbook_assets_asof": offbook_asof,
         "offbook_stale_warning": offbook_stale_warning,
         "excluded_tickers": sorted(excluded), "total_nav": total_nav, "active_nav": active_nav,
+        "excluded_dividend_receivable_pending_vnd": excluded_div_pending_vnd,
+        "excluded_dividend_receivable_detail": excluded_div_pending_detail,
         "positions": [{"ticker": tk, "qty": qty, "price": px, "value": mv, "excluded": is_excl,
                         "price_source": price_source.get(tk, "?")}
                        for tk, qty, px, mv, is_excl in rows],

@@ -280,6 +280,152 @@ check("I4 mỗi mã giữ giá của CHÍNH nó; AAA tụt ngày bị gọi tên
 check("I5 rows rỗng ⇒ không nổ", can.parse_close_rows([]) == ({}, {}, None))
 
 print()
+print("J. §excluded_dividend — cổ tức phải thu mã excluded loại khỏi active_nav tới khi tiền THẬT "
+      "về (Option B, user quyết 2026-09-19, ZaloPay DGC 80tr/2026-09-25; bản vá vòng 2 arch-review "
+      "2026-09-19: tín hiệu dừng loại là cash_dividend_receiving_vnd tự hạ, KHÔNG phải ngày)")
+DGC_CFG = [{"ticker": "DGC", "amount_vnd": 80_000_000, "expected_arrival_date": "2026-09-25"}]
+
+p, d = can.excluded_dividend_pending({"DGC"}, DGC_CFG, 80_000_000, "2026-09-19")
+check("J1 ca thật ZaloPay 09-19: trước ngày dự kiến, còn báo đủ 80tr ⇒ loại đủ, overdue=False",
+      p == 80_000_000 and d == [{"ticker": "DGC", "amount_vnd": 80_000_000,
+                                 "expected_arrival_date": "2026-09-25", "overdue": False}],
+      f"p={p} d={d}")
+
+# J2 — R1 (arch-review 2026-09-19): ĐÚNG/SAU ngày dự kiến mà DNSE VẪN báo đủ 80tr (tiền về TRỄ)
+# ⇒ PHẢI tiếp tục loại (không được tự ý ngừng theo lịch — đó chính là bug bản đầu tái lập).
+p, d = can.excluded_dividend_pending({"DGC"}, DGC_CFG, 80_000_000, "2026-09-25")
+check("J2 ĐÚNG ngày dự kiến nhưng vẫn báo đủ 80tr (tiền CHƯA về thật) ⇒ VẪN loại, overdue=True",
+      p == 80_000_000 and d[0]["overdue"] is True, f"p={p} d={d}")
+
+p, d = can.excluded_dividend_pending({"DGC"}, DGC_CFG, 80_000_000, "2026-09-30")
+check("J3 SAU ngày dự kiến 5 hôm, DNSE VẪN báo đủ 80tr ⇒ VẪN loại — không tái lập bug gốc "
+      "(active_nav không được tự phồng lại chỉ vì qua lịch)", p == 80_000_000 and d[0]["overdue"])
+
+# J4 — CHỨNG MINH NGƯỢC J2/J3: tín hiệu dừng loại là chính remaining tụt xuống 0 (tiền đã settle
+# thật), không phải ngày — dù asof đã qua rất xa expected_arrival_date.
+p, d = can.excluded_dividend_pending({"DGC"}, DGC_CFG, 0, "2026-09-30")
+check("J4 SAU ngày dự kiến VÀ DNSE đã hạ receivable về 0 (tiền đã về thật) ⇒ hết loại, p=0",
+      p == 0 and d == [], f"p={p} d={d}")
+
+p, d = can.excluded_dividend_pending({"DGC"}, DGC_CFG, 80_000_000, "2026-09-01")
+check("J5 rất sớm trước ngày dự kiến vẫn loại đủ 80tr, overdue=False", p == 80_000_000
+      and d[0]["overdue"] is False)
+
+# J6 — KẸP bằng cash_dividend_receiving_vnd thật: tiền đã về MỘT PHẦN (DNSE tự hạ field xuống
+# dưới 80tr) ⇒ không được loại quá số đang thực sự treo (đúng cả trước lẫn sau ngày dự kiến).
+p, d = can.excluded_dividend_pending({"DGC"}, DGC_CFG, 30_000_000, "2026-09-19")
+check("J6 cash_dividend_receiving hiện chỉ còn 30tr (thấp hơn config 80tr) ⇒ kẹp ở 30tr, "
+      "KHÔNG trừ quá số treo thật", p == 30_000_000 and d[0]["amount_vnd"] == 30_000_000,
+      f"p={p} d={d}")
+
+# J7 — mã KHÔNG thuộc excluded_tickers của lần gọi này (vd account khác/scope khác) ⇒ bỏ qua
+# entry đó dù config vẫn còn, tránh loại nhầm dividend của mã đang được quản lý chủ động.
+p, d = can.excluded_dividend_pending(set(), DGC_CFG, 80_000_000, "2026-09-19")
+check("J7 ticker KHÔNG nằm trong excluded_tickers truyền vào ⇒ bỏ qua entry, p=0", p == 0 and d == [])
+
+# J8 — nhiều entry chia sẻ CÙNG một field tổng `remaining` (DNSE không tách theo mã, đúng giới
+# hạn nêu trong docstring): TCM coi như đã settle thật (remaining chỉ còn đúng phần DGC) ⇒ entry
+# DGC (đứng trước trong list) ăn hết remaining, TCM không còn gì để trừ dù vẫn nằm trong config.
+MIXED_CFG = [{"ticker": "DGC", "amount_vnd": 80_000_000, "expected_arrival_date": "2026-09-25"},
+            {"ticker": "TCM", "amount_vnd": 10_000_000, "expected_arrival_date": "2026-09-10"}]
+p, d = can.excluded_dividend_pending({"DGC", "TCM"}, MIXED_CFG, 80_000_000, "2026-09-19")
+check("J8 remaining=80tr (đúng bằng phần DGC) ⇒ DGC ăn hết, TCM không còn gì để trừ dù còn config",
+      p == 80_000_000 and len(d) == 1 and d[0]["ticker"] == "DGC", f"p={p} d={d}")
+
+# J9 — config rỗng/None (SpaceX, RocketX...) ⇒ không đổi hành vi cũ, p luôn 0.
+check("J9 config rỗng ⇒ p=0 (account không khai excluded_dividend_receivable không bị ảnh hưởng)",
+      can.excluded_dividend_pending({"DGC"}, [], 80_000_000, "2026-09-19") == (0.0, [])
+      and can.excluded_dividend_pending({"DGC"}, None, 80_000_000, "2026-09-19") == (0.0, []))
+
+# J10 — R3 (arch-review 2026-09-19): expected_arrival_date sai định dạng PHẢI nổ rõ, không được
+# âm thầm loại vĩnh viễn (đo thật trong review: '25/09/2026'/'2026-9-25'/'tháng 9' đều lọt qua so
+# sánh chuỗi thô của bản đầu và loại 80tr mãi mãi).
+for _bad_date in ("25/09/2026", "2026-9-25", "tháng 9", "9999-99-99"):
+    _bad_cfg = [{"ticker": "DGC", "amount_vnd": 80_000_000, "expected_arrival_date": _bad_date}]
+    try:
+        can.excluded_dividend_pending({"DGC"}, _bad_cfg, 80_000_000, "2026-09-19")
+        check(f"J10 expected_arrival_date sai định dạng {_bad_date!r} PHẢI raise ValueError", False)
+    except ValueError as e:
+        check(f"J10 expected_arrival_date sai định dạng {_bad_date!r} raise ValueError rõ ràng",
+              "expected_arrival_date" in str(e), f"msg={e}")
+
+# J11 — entry không phải dict (config hỏng/tự chế) ⇒ raise rõ, không AttributeError mù.
+try:
+    can.excluded_dividend_pending({"DGC"}, ["DGC"], 80_000_000, "2026-09-19")
+    check("J11 entry không phải dict PHẢI raise ValueError", False)
+except ValueError as e:
+    check("J11 entry không phải dict raise ValueError rõ ràng (không phải AttributeError mù)",
+          "không phải dict" in str(e), f"msg={e}")
+
+# J12 — entry thiếu expected_arrival_date hẳn (None/rỗng) ⇒ vẫn loại được (overdue luôn False,
+# không có ngày để so), không bắt buộc phải khai ngày mới dùng được cơ chế.
+p, d = can.excluded_dividend_pending({"DGC"}, [{"ticker": "DGC", "amount_vnd": 80_000_000}],
+                                     80_000_000, "2026-09-19")
+check("J12 entry không khai expected_arrival_date ⇒ vẫn loại, overdue=False (không có ngày để so)",
+      p == 80_000_000 and d[0]["overdue"] is False and d[0]["expected_arrival_date"] is None,
+      f"p={p} d={d}")
+
+# J13 — end-to-end qua main() thật: 1 vị thế excluded, cash chứa 80tr receivable của mã đó,
+# asof hôm nay < expected_arrival_date ⇒ active_nav phải THIẾU đúng 80tr so với total_nav (trừ
+# excluded_mv); dùng --asof cố định để không phụ thuộc ngày hệ thống chạy selfcheck.
+_j_tmp = _tempfile.mkdtemp(prefix="can_sc_j_")
+_j_out = os.path.join(_j_tmp, "active_nav_JSELFCHK.json")
+_j_cash80, _j_detail80 = can.cash_basis(stock(totalCash=200_000_000, totalDebt=0,
+                                              availableCash=120_000_000, depositInterest=1,
+                                              cashDividendReceiving=80_000_000))
+_j_cash0, _j_detail0 = can.cash_basis(stock(totalCash=200_000_000, totalDebt=0,
+                                            availableCash=120_000_000, depositInterest=1,
+                                            cashDividendReceiving=0))
+try:
+    saved_j = (can.get_account_profile, can.live_balance_and_positions, can.resolve_prices, sys.argv)
+    can.get_account_profile = lambda label: {
+        "account_id": "JSC", "excluded_tickers": ["DGC"],
+        "excluded_dividend_receivable": [{"ticker": "DGC", "amount_vnd": 80_000_000,
+                                          "expected_arrival_date": "2026-09-25"}]}
+    can.resolve_prices = lambda tickers, asof: ({"DGC": 50_000}, {"DGC": "bq_close"}, None)
+
+    can.live_balance_and_positions = lambda aid, label: (
+        _j_cash80, {"DGC": {"total": 1000}}, _j_detail80, 0.0)
+    sys.argv = ["compute_active_nav.py", "--account", "JSELFCHK", "--out", _j_out,
+               "--asof", "2026-09-19"]
+    can.main()
+    _j_res = _json.load(open(_j_out, encoding="utf-8"))
+    # total_nav = cash 200tr + mv(DGC) 1000*50000=50tr = 250tr; excluded_mv = 50tr (DGC excluded)
+    # ⇒ trước bản vá active_nav = 200tr; sau bản vá phải trừ thêm 80tr receivable ⇒ 120tr.
+    check("J13 end-to-end main(): active_nav = 200tr − 80tr receivable = 120tr (KHÔNG phải 200tr)",
+          _j_res["active_nav"] == 120_000_000 and _j_res["total_nav"] == 250_000_000
+          and _j_res["excluded_dividend_receivable_pending_vnd"] == 80_000_000,
+          f"active_nav={_j_res.get('active_nav')} total_nav={_j_res.get('total_nav')}")
+
+    # J14 — R1 end-to-end: asof QUA ngày dự kiến nhưng DNSE VẪN báo đủ 80tr (cash80, không đổi)
+    # ⇒ active_nav PHẢI VẪN 120tr, KHÔNG được tự phồng lại về 200tr chỉ vì qua lịch.
+    sys.argv[-1] = "2026-09-30"
+    can.main()
+    _j_res2 = _json.load(open(_j_out, encoding="utf-8"))
+    check("J14 R1: asof qua ngày dự kiến NHƯNG receivable vẫn 80tr ⇒ active_nav VẪN 120tr "
+          "(không tái lập bug gốc)",
+          _j_res2["active_nav"] == 120_000_000
+          and _j_res2["excluded_dividend_receivable_pending_vnd"] == 80_000_000
+          and _j_res2["excluded_dividend_receivable_detail"][0]["overdue"] is True,
+          f"active_nav={_j_res2.get('active_nav')}")
+
+    # J15 — CHỨNG MINH NGƯỢC J13/J14: tiền THẬT SỰ về (DNSE hạ cashDividendReceiving về 0)
+    # ⇒ hết loại, active_nav = 200tr — không phụ thuộc asof có qua ngày dự kiến hay chưa.
+    can.live_balance_and_positions = lambda aid, label: (
+        _j_cash0, {"DGC": {"total": 1000}}, _j_detail0, 0.0)
+    sys.argv[-1] = "2026-09-25"
+    can.main()
+    _j_res3 = _json.load(open(_j_out, encoding="utf-8"))
+    check("J15 CHỨNG MINH NGƯỢC: DNSE hạ cashDividendReceiving về 0 ⇒ hết loại, active_nav = 200tr",
+          _j_res3["active_nav"] == 200_000_000
+          and _j_res3["excluded_dividend_receivable_pending_vnd"] == 0,
+          f"active_nav={_j_res3.get('active_nav')}")
+finally:
+    (can.get_account_profile, can.live_balance_and_positions, can.resolve_prices,
+     sys.argv) = saved_j
+    _shutil.rmtree(_j_tmp, ignore_errors=True)
+
+print()
 if fails:
     print(f"❌ {len(fails)} FAILED: {fails}")
     sys.exit(1)
