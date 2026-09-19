@@ -152,8 +152,10 @@ PROMPT="$PROMPT
 $SELFCHECK_OUT"
 
 # `--thread architecture` tường minh — xem chú thích cùng ngày trong daily_retro.sh (B1).
+# `--max-turns 160` tường minh (user duyệt A, 2026-09-19, sau khi job này hết mặc định 80
+# (effort=high, MIKE.md §6b) cả 4 tuần liên tiếp 08-22→09-12, chỉ audit được ~60% phạm vi/tuần).
 DISPATCH_FROM=user "$ROOT/bin/dispatch.sh" Mike "$PROMPT" \
-    --thread architecture --model opus --effort high --timeout 3600 >> "$LOG" 2>&1 &
+    --thread architecture --model opus --effort high --max-turns 160 --timeout 3600 >> "$LOG" 2>&1 &
 
 log "Weekly ops audit dispatch launched (background)."
 log "=== weekly_ops_audit DONE (dispatch chạy nền) ==="
