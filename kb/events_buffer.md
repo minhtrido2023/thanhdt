@@ -584,3 +584,11 @@
 
 ## Consolidation 2026-09-19T09:07:01Z
 - [2026-09-19T08:11:27Z] Mike/answer — dgc-zalopay-discretionary-sleeve-cost-basis: {"decided_by": "user", "decision": "DGC trong ZaloPay la vi the discretionary sleeve (khong phai chi tan du legacy cho exclude). Cost-basis: giu nguyen gia von theo du lieu khop lenh DNSE (dnse_raw_*.jsonl), khong dung gia rieng nguoi dung chi dinh. Ty le/quy mo quan ly discretionary sleeve nay do user tu quyet, fleet KHONG tu de xuat dieu chinh.", "context": "tiep noi zalopay-active-nav-excluded-ticker-dividend-receivable-option-c (baf1c51f)"}
+
+## Consolidation 2026-09-19T17:35:30Z
+- [2026-09-19T17:31:04Z] Mike/heartbeat — Mike_20260919_173004: {"status": "still_running", "elapsed_min": 1, "job_id": "Mike_20260919_173004", "source": "watcher"}
+- [2026-09-19T17:32:04Z] Mike/heartbeat — Mike_20260919_173004: {"status": "still_running", "elapsed_min": 2, "job_id": "Mike_20260919_173004", "source": "watcher"}
+- [2026-09-19T17:33:05Z] Mike/heartbeat — Mike_20260919_173004: {"status": "still_running", "elapsed_min": 3, "job_id": "Mike_20260919_173004", "source": "watcher"}
+- [2026-09-19T17:34:05Z] Mike/heartbeat — Mike_20260919_173004: {"status": "still_running", "elapsed_min": 4, "job_id": "Mike_20260919_173004", "source": "watcher"}
+- [2026-09-19T17:35:06Z] Mike/heartbeat — Mike_20260919_173004: {"status": "still_running", "elapsed_min": 5, "job_id": "Mike_20260919_173004", "source": "watcher"}
+- [2026-09-19T17:35:14Z] Mike/finding — daily-retro-draft-2026-09-19: {"status": "draft_written", "file": "state/retro_draft_2026-09-19.md", "n_incidents": 3, "n_patterns": 2, "pattern_A_status": "lap_lai_lan_2_khong_du_nguong_escalate_grep_field_tien_truoc_khi_dong_scope", "pattern_B_status": "DA_DONG_gate_co_hoc_wags_arch_review_round2_thay_the_prevention_van_xuoi", "wakeup_compliance": "3_bg_turns_0_missing", "time_claim_mismatch": 0, "summary": "1) selfcheck-red 4 ca da fix truoc retro nay (khong phai gap). 2) compute_park_trim.py lap lai dung cap file compute_active_nav.py tu 08-19 (thieu grep sibling consumer truoc khi dong scope Option B), bat boi arch-review R2, da fix cung ngay (Option A, tai su dung excluded_dividend_pending()). 3) executor.py van doc ticker_prune (G8.1 violation) - MOI, chua ai ghi kb/incidents truoc retro nay, con PENDING 0d materiality thap. Khong co sự co error nao tren bus ngay 09-19."}
