@@ -569,3 +569,6 @@
 
 ## Archived 2026-09-18 (keep=12 days=0 require_done=False)
 - [2026-09-14T16:20:38Z] [2026-09-14] oshares fwd-absorption vong 2 (job _160309): bc86963e tren branch fix/oshares-finfallback-double-count (chua merge), verify xanh ca cong publish that. CHO Mike+arch-reviewer vong 3 land. De xuat viec rieng: ~20 check song BQ san co trong oshares_live selfcheck (cung lop rui ro cong do).
+
+## Archived 2026-09-19 (keep=12 days=0 require_done=False)
+- [2026-09-14T17:09:16Z] [2026-09-15] oshares freeze live selfcheck (job _164512): ce123789 tren test/oshares-freeze-live-selfchecks (worktree thanhdt-wt-oshares-freeze-live) + mike 5c931f08. CHO Mike+arch-reviewer land SAU double-count; 2 viec Mike quyet: docstring gate_selfcheck con noi cham BQ, SC2 do oan theo ten thu muc.
