@@ -35,3 +35,44 @@ bug). Tài liệu đầy đủ:
 `mike/agents/Taylor/research/ticker_prune_replacement_plan.md` +
 `mike/agents/Winston/universe_pit_ops_feasibility_20260722.md` +
 `mike/agents/Winston/research/ticker_prune_hidden_risk_audit_20260729.md`.
+
+## ✅ G7-G9 ĐÓNG (2026-09-19, dispatch Mike, job `Taylor_20260919_033750`)
+
+Backlog treo 8,4 tuần (escalate qua `kb_nightly.sh` item 12) — user quyết dứt điểm. Cả 3 mục:
+
+- **G7 (rà soát N-trial, đặc biệt `lag_filter_illiquid` chồng lớp B3/B4)** — **đã có câu trả lời
+  đầy đủ hơn phạm vi gốc**, không cần chạy lại: `kb/projects/lag-adv-filter-tracking.md` mục
+  2026-08-25 (Biến thể B) đo chính xác câu hỏi này — sàn 2B tĩnh ≈ percentile 43,1 của
+  `universe_pit`, KHÔNG redundant với B3/B4 (B3/B4 là cổng ELIGIBILITY thô, sàn 2B là cổng
+  KHẢ-THI-THI-HÀNH của riêng book LAG) — **NO-GO cả 3 biến thể động, giữ 2B tĩnh**. TMG/IVS (ứng
+  viên thứ hai §5.3) đã đóng từ 2026-07-28 (`kb/projects/lag-0724-ivs-tmg-trc.md`). Phần theo dõi
+  dài hạn còn lại (fill LAG thật N≥30, mốc **2026-12-15** / **2027-03-31**) là quan sát TÍCH LUỸ
+  THEO LỊCH, không phải việc backlog — giữ nguyên lịch, KHÔNG rút ngắn.
+- **G8 (data_registry + cron_registry + coding_guidelines + universe_ruleset.md v1)** —
+  `data_registry.md` đã xong từ 2026-07-22; **`cron_registry.md` hoá ra ĐÃ XONG cùng ngày**
+  (commit `072dfbd6`, Winston — tracker này chỉ chưa cập nhật) — dòng 19:00 đã ghi rõ
+  `build_universe_pit.py --date $TODAY` + `build_universe_pit_quality.py`; **`universe_ruleset.md`
+  v1 cũng ĐÃ XONG từ G1** (`mike/kb/universe_ruleset.md`, commit `0551adbd`, cùng lúc builder được
+  tạo — bị liệt kê nhầm "chưa làm" trong bảng §9 cũ). Việc thật sự còn thiếu = rule
+  `coding_guidelines.md` cấm dạng `IN (SELECT DISTINCT ticker FROM ticker_prune)` không điều kiện
+  `time` — **đã thêm §9b** (2026-09-19), trỏ về TRAP entry đã có sẵn chi tiết đầy đủ.
+- **G9 (quant-skeptic full review toàn dự án)** — chạy xong 2026-09-19, verdict **REFUTED** (medium
+  confidence) cho mệnh đề gộp "migration đã đóng hoàn toàn, không còn rủi ro live nào" — nhưng
+  **CONFIRMED vững** cho kiến trúc lõi (B1-B8 point-in-time đúng, B8 integrity gate đã FIRE thật
+  trong log production 08-31/09-01/09-02 chứ không chỉ unit test, threshold không bị tune ngầm,
+  P1-P4 cutover byte-identical). Phát hiện MỚI, thật, mà review từng-mảnh không bắt được: **gate
+  cứng G8.1 (cấm bật cờ executor.py trước khi migrate khỏi `ticker_prune`) đã bị VI PHẠM trong thực
+  tế** — `chase_cap_vol_scale_enabled` lên LIVE 2026-08-04 trong khi
+  `executor.py::_load_gap_ref_data()` vẫn đọc cache `ticker_prune`, vì review go-live tính năng đó
+  không đối chiếu tracker migration. Mức độ THẤP (tra giá thuần, fail-safe về hướng chặt hơn,
+  không phải look-ahead/rủi ro vốn) nhưng là vi phạm thật — đã cập nhật vào
+  `kb/data_registry/price-volume/ticker_prune.md` (mục "VI PHẠM ĐÃ XẢY RA THẬT") + escalate bus
+  `question` riêng (`Taylor/executor-chase-cap-still-reads-ticker-prune-20260919`) — **CHƯA SỬA**,
+  cần review riêng vì đụng code thực thi live, không tự ý vá trong job này. Hai điểm còn mở khác
+  G9 xác nhận (không phải mới, nhưng vẫn treo thật): G7's câu hỏi liquidity-overlap (nay đã đóng ở
+  trên) và khoảng hở fidelity R&D (`universe_pit` raw không nằm trong `sync_bq_cache.py`, backtest
+  chạy dưới `BQ_LOCAL_CACHE` không bao giờ chạm breadth-decoupling guard — đã có bus event
+  2026-09-17, không phải phát hiện mới của job này).
+
+**Kết luận đóng backlog**: G7-G9 hoàn tất theo đúng định nghĩa gốc. G9 sinh ra **một** action item
+mới (executor.py chase-cap) — đã tách thành câu hỏi bus riêng, không giữ G7-G9 mở vì nó.

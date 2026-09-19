@@ -258,6 +258,15 @@ CSV/pickle/JSON, published state file) in new code — check `mike/kb/data_regis
 **Ownership**: Winston (data-ops) keeps the registry current ad-hoc; full periodic audit folded into
 the Friday KB editorial review (`kb_nightly.sh`), not a separate cron job.
 
+**§9b. Named anti-pattern — `IN (SELECT DISTINCT ticker FROM ticker_prune)` without a `time`
+condition is look-ahead (1.6-2.6×), not a style nit.** `ticker_prune` is TRAP-status
+(`kb/data_registry/price-volume/ticker_prune.md`) precisely because this query shape ignores
+point-in-time membership and reads the ticker's entire-history universe as of today. Any NEW code
+needing a universe/liquidity filter → `universe_pit`/`universe_pit_quality`
+(`ruleset_version` per `kb/universe_ruleset.md`), never a fresh `ticker_prune` reference. ~496
+existing occurrences predate the 2026-07-22 migration and are legacy debt, not something to mass-fix
+— but a NEW occurrence in code you're writing is the bug this rule exists to catch.
+
 **When dispatching Taylor (or anyone) for new R&D**: state explicitly "tra `mike/kb/data_registry/`
 (index.md) trước khi chọn nguồn dữ liệu, đặc biệt bảng market-state/regime" — same pattern as
 DollarBill's DNSE-vs-BQ rule (§6). A generic "verify your data" reminder doesn't stop an LLM
