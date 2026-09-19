@@ -11,8 +11,10 @@ wags_bus_verdict_selfcheck.py / wags_autofix_postq_selfcheck.py:
   B. Khối WAGS_ROUND2_ESCALATE_BEGIN/END trong wags_autofix.sh — TRÍCH ra chạy trong đúng
      ngữ cảnh `bash -c '…'` mà production dùng (idiom '"$VAR"' nội suy từ shell ngoài),
      với `_post_q`/`_notify_arch` được STUB để quan sát có gọi hay không (đúng call nào),
-     và `mike_json.py has-event-prefix` chạy THẬT trên fixture bus/inbox/Wags.jsonl để dedup
-     round-3+ không bị escalate lặp là hành vi thật, không phải giả định.
+     và `wags_bus_question_pending.py` (qua `bus_question_audit.py` thật) chạy THẬT trên
+     fixture bus/inbox/*.jsonl để dedup round-3+ không bị escalate lặp — VÀ để một cụm MỚI
+     sau khi cụm cũ đã ĐƯỢC ĐÓNG (answer/decision thật, không phải chỉ hết cửa sổ thời gian)
+     vẫn escalate lại — là hành vi thật, không phải giả định.
 
 Chạy: python3 bin/wags_arch_review_round2_selfcheck.py   (exit 0 = PASS, 1 = FAIL)
 """
@@ -30,6 +32,8 @@ ROOT = Path(__file__).resolve().parent.parent
 DETECTOR = ROOT / "bin" / "wags_arch_review_round2.py"
 AUTOFIX_SRC = Path(os.environ.get("WAGS_AUTOFIX_SRC") or (ROOT / "bin" / "wags_autofix.sh"))
 MIKE_JSON = ROOT / "bin" / "mike_json.py"
+PENDING_CHECK = ROOT / "bin" / "wags_bus_question_pending.py"
+BUS_AUDIT = ROOT / "bin" / "bus_question_audit.py"
 
 LABEL = "coord-2026-09-19"
 PREFIX = f"ARCH-REVIEW: wags-fix: {LABEL}"
@@ -262,6 +266,8 @@ def mksandbox(arch_events, wags_events=None):
     os.makedirs(os.path.join(d, "bus", "inbox"))
     shutil.copy2(DETECTOR, os.path.join(d, "bin", "wags_arch_review_round2.py"))
     shutil.copy2(MIKE_JSON, os.path.join(d, "bin", "mike_json.py"))
+    shutil.copy2(PENDING_CHECK, os.path.join(d, "bin", "wags_bus_question_pending.py"))
+    shutil.copy2(BUS_AUDIT, os.path.join(d, "bin", "bus_question_audit.py"))
     with open(os.path.join(d, "bus", "inbox", "arch-reviewer.jsonl"), "w", encoding="utf-8") as f:
         for e in arch_events:
             f.write(json.dumps(e, ensure_ascii=False) + "\n")
@@ -348,7 +354,7 @@ def case_dedup_does_not_reopen():
               "round-3 KHÔNG mở câu hỏi trùng — _post_q không được gọi",
               r and r[2] == "", r and r[2])
         check("có ghi dấu vết KHÔNG-mở-trùng vào pipelog (người đọc log hiểu vì sao im lặng)",
-              r and "da mo tu truoc" in r[4], r and r[4])
+              r and "dang PENDING tu truoc" in r[4], r and r[4])
     finally:
         shutil.rmtree(d, ignore_errors=True)
 
@@ -370,6 +376,12 @@ def case_new_cluster_after_old_closed_escalates_again():
             "topic": f"{LABEL}-arch-review-round2-unresolved",
             "ts": "2026-09-10T05:00:05Z", "payload": {"label": LABEL},
             "event_id": "wags-round2-q-old",
+        }, {
+            "agent_id": "Mike", "event_type": "answer",
+            "topic": f"{LABEL}-arch-review-round2-unresolved",
+            "ts": "2026-09-10T06:00:00Z",
+            "payload": {"decided_by": "user", "resolution": "da xu ly cum cu (fixture: dong that)"},
+            "event_id": "wags-round2-q-old-closed",
         }],
     )
     try:

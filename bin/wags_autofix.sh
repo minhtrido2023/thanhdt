@@ -359,16 +359,29 @@ except Exception: print(\"\")")"
 
   # 3) báo cáo hoàn tất vào topic architecture (user yêu cầu: báo khi issue hoàn tất)
 
-  # Đóng câu hỏi round-2-unresolved bằng BẰNG CHỨNG (round tiếp theo CONFIRMED), không
-  # phải self-report — đúng chính điều kiện (b) ở payload escalate trên. close_bus_question.py
-  # tự no-op an toàn (in ALREADY_CLOSED_OR_UNKNOWN, exit 0) khi không có gì đang pending dưới
-  # ref này, nên gọi vô điều kiện ở đây không tạo nhiễu khi chưa từng escalate.
-  if [ "$verdict" = "CONFIRMED" ]; then
+  # WAGS_ROUND2_CLOSE_BEGIN (marker cho bin/wags_arch_review_round2_selfcheck.py — TRÍCH,
+  # không copy. Đổi/xoá marker ⇒ selfcheck FAIL ngay.)
+  # Đóng câu hỏi round-2-unresolved bằng BẰNG CHỨNG THẬT, không phải self-report (arch-review
+  # coord-2026-09-19 round-2 audit, required_change #2/#3): gate PHẢI là `$bus_verdict`
+  # (đọc thẳng từ bus/inbox/arch-reviewer.jsonl qua wags_bus_verdict.py), KHÔNG phải
+  # `$verdict` (stdout đã hoà giải) — bất biến "chỉ NÂNG, không HẠ" ở WAGS_VERDICT_RECONCILE
+  # phía trên cố ý GIỮ verdict=CONFIRMED ngay cả khi bus nói NEEDS_CHANGES/REFUTED
+  # (xem $verdict_disagree), nên dùng $verdict ở đây sẽ đóng câu hỏi "không được tự đóng
+  # bằng self-report" bằng đúng loại self-report nó được sinh ra để chặn. $bus_verdict rỗng
+  # (bus im lặng, không tìm thấy verification) cũng KHÔNG được đóng — không có bằng chứng
+  # không phải bằng chứng ngược.
+  if [ "$bus_verdict" = "CONFIRMED" ]; then
+    _r2close_rc=0
     python3 "$ROOT/bin/close_bus_question.py" "Wags/$LABEL-arch-review-round2-unresolved" \
-      --resolution "arch-review vong tiep theo tra CONFIRMED cho $LABEL - fix da duoc xac nhan that (khong phai Wags tu dong)" \
-      --evidence "verification bus arch-reviewer topic ARCH-REVIEW: wags-fix: $LABEL + finding wags-fix: $LABEL, pipelog '"$PIPELOG"'" \
-      --actor Wags >>"'"$PIPELOG"'" 2>&1 || true
+      --resolution "bus verification THAT cua arch-reviewer (topic ARCH-REVIEW: wags-fix: $LABEL) = CONFIRMED - fix da duoc xac nhan bang artifact, khong phai Wags tu dong" \
+      --evidence "bus_verdict=CONFIRMED doc tu bus/inbox/arch-reviewer.jsonl (khong phai stdout pipeline), finding wags-fix: $LABEL, pipelog '"$PIPELOG"'" \
+      --actor Wags >>"'"$PIPELOG"'" 2>&1 || _r2close_rc=$?
+    if [ "$_r2close_rc" != 0 ]; then
+      echo "[wags-autofix] close_bus_question.py cho round2-unresolved $LABEL loi exit=$_r2close_rc — xem pipelog, KHONG nuot lang" >> "'"$PIPELOG"'"
+      _notify_arch "🟠 **[wags-autofix] Đóng câu hỏi round2-unresolved '"'"'$LABEL'"'"' THẤT BẠI (exit=$_r2close_rc)** — có thể đang BLOCKED bởi rollup hoặc ghi bus không sạch; câu hỏi có thể VẪN PENDING dù bus_verdict=CONFIRMED. Xem log '"$PIPELOG"'."
+    fi
   fi
+  # WAGS_ROUND2_CLOSE_END
 
   if [ "$verdict" = "CONFIRMED" ] && [ -n "$verdict_disagree" ]; then
     _notify_arch "🟠 **[wags-autofix] Issue '"'"'$LABEL'"'"': CONFIRMED nhưng 2 nguồn LỆCH NHAU** — Wags đã sửa, verdict đọc được: **CONFIRMED** ($summary).$verdict_disagree Log pipeline: '"$PIPELOG"'"
@@ -406,7 +419,8 @@ except Exception: print(\"\")")"
   # call site _post_q đã có — wags_autofix_postq_selfcheck.py khớp theo VỊ TRÍ.
   if [ "$verdict" = "NEEDS_CHANGES" ] || [ "$verdict" = "REFUTED" ]; then
     _r2_prefix="ARCH-REVIEW: wags-fix: $LABEL"
-    _r2="$(python3 "$ROOT/bin/wags_arch_review_round2.py" "$ROOT/bus/inbox/arch-reviewer.jsonl" "$_r2_prefix" 2>>"'"$PIPELOG"'")"
+    _r2_now_iso="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+    _r2="$(python3 "$ROOT/bin/wags_arch_review_round2.py" "$ROOT/bus/inbox/arch-reviewer.jsonl" "$_r2_prefix" 24 "$_r2_now_iso" 2>>"'"$PIPELOG"'")"
     _r2_escalate="false"; _r2_first_ts=""
     read -r _r2_escalate _r2_first_ts <<<"$(printf "%s" "$_r2" | python3 -c "import json,sys
 try:
@@ -417,9 +431,8 @@ except Exception:
     if [ "$_r2_escalate" = "True" ]; then
       [ "$_r2_first_ts" = "-" ] && _r2_first_ts=""
       _r2_topic="$LABEL-arch-review-round2-unresolved"
-      if [ -n "$_r2_first_ts" ] && python3 "$ROOT/bin/mike_json.py" has-event-prefix "$ROOT/bus" Wags "$_r2_first_ts" \
-           "question:$_r2_topic" >>"'"$PIPELOG"'" 2>&1; then
-        echo "[wags-autofix] round-2 escalate $_r2_topic da mo tu truoc (>= $_r2_first_ts) - khong mo trung" >> "'"$PIPELOG"'"
+      if python3 "$ROOT/bin/wags_bus_question_pending.py" "$ROOT" Wags "$_r2_topic" >>"'"$PIPELOG"'" 2>&1; then
+        echo "[wags-autofix] round-2 escalate $_r2_topic dang PENDING tu truoc - khong mo trung" >> "'"$PIPELOG"'"
       else
         _notify_arch "🔴 **[wags-autofix] '"'"'$LABEL'"'"' — arch-review NEEDS_CHANGES/REFUTED 2+ VÒNG LIÊN TIẾP trong ≤24h.** Đây KHÔNG phải câu hỏi round-1 thường — escalate RIÊNG cho Mike/user, KHÔNG đợi Wags tự trả lời lần nữa. Chi tiết vòng: $_r2"
         _post_q "$_r2_topic" \
