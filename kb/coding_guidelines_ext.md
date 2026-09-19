@@ -472,3 +472,60 @@ incident file làm bằng chứng trong `note`. KHÔNG ack dựa trên "nhìn lo
 artifact thật (đúng tinh thần §6/§9/§14/§28).
 
 *→ job `Taylor_20260809_123917`.*
+
+## 27. "Lệnh Đã Đặt" ≠ "Lệnh Đã Khớp" — Đối Soát Fill Thật Trước Khi Báo "Đã Đạt Target", Theo `~/.claude/skills/dnse-fill-reconciliation/`
+
+Trước khi khẳng định 1 lệnh/plan "đã thực thi", "đã mua đủ", "đã đạt X% NAV" — đọc
+`~/.claude/skills/dnse-fill-reconciliation/SKILL.md`. Đọc số lượng trong `orders[]` của plan rồi
+nhân giá để suy ra tỷ trọng là **suy luận trên Ý ĐỊNH, không phải KẾT QUẢ** — với mã thanh khoản
+mỏng (UPCOM, ADV vài tỷ/ngày trở xuống), khoảng cách giữa 2 số có thể là toàn bộ lệnh.
+
+**Case thật (2026-08-11)**: Mike báo "TV1 đã đạt ~5% NAV cả 2 account" theo số lượng ĐẶT trong plan
+đã duyệt. Đối soát bằng email "Báo cáo giao dịch khớp lệnh" DNSE tự gửi (~16:30 ICT, broker-issued,
+độc lập hoàn toàn với `dnse_raw_*.jsonl`) lộ ra: DRI khớp đủ đúng kế hoạch cả 2 account, nhưng TV1
+chỉ khớp **100/2.000cp (SpaceX)** và **0/1.300cp (ZaloPay)** — do ADV quá mỏng (~0,6 tỷ/ngày) không
+hấp thụ hết lô trong 1 phiên. Không phải bug (giá/trần đều đúng) — thị trường không đủ đối ứng.
+
+**Công cụ**: `fetch_dnse_khoplenh_email.py` (root WorkingClaude, dùng chung Gmail OAuth readonly có
+sẵn cho auto-OTP) tải + parse email này thành CSV khớp lệnh sạch theo từng account/mã. Nguồn ghi ở
+`kb/data_registry/trading-bot/dnse_khoplenh_broker_email.md`. Email chỉ có sau ~16:30 ICT — báo cáo
+trong-phiên/cùng ngày trước giờ đó vẫn phải đọc `positions` mới nhất trong `dnse_raw_<date>.jsonl`
+(không đợi được email).
+
+**KHÔNG thay thế pipeline §6 đã chốt** (`verify_account_snapshot.py`/`daily_nav_snapshot.py`/
+`reconcile_equity.py` vẫn CANONICAL cho cost-basis) — đây là lớp đối soát ĐỘC LẬP thêm vào, giá trị
+chính là nó đi qua đường dữ liệu khác (backend DNSE tự phát hành, không phải API client của mình)
+nên bắt được lỗi ở CẢ HAI phía. Fold vào pipeline sinh report tự động là thay đổi lớn hơn — qua
+Taylor + quant-skeptic review trước khi coi là đã wire.
+
+## 31. Bảng "Hiệu suất lũy kế" Báo Cáo SpaceX: BẮT BUỘC Qua `nav_period_returns.py`, KHÔNG Tự Tính Từ `nav_history` Raw
+
+**Quy tắc:** khi soạn dòng WTD/MTD/"Từ khi bắt đầu hoạt động" trong bảng "Hiệu suất lũy kế" (mục
+3.2) của báo cáo SpaceX weekly/monthly, PHẢI chạy:
+
+```bash
+python3 mike/bin/nav_period_returns.py --account SpaceX --report-date <YYYY-MM-DD>
+```
+
+và lấy `return_pct` của từng key (`inception`/`wtd`/`mtd`) trong JSON output làm số đưa vào bảng —
+**KHÔNG** tự viết `(nav_cuối/nav_đầu − 1) × 100` trực tiếp từ `nav_history_SpaceX.csv`.
+
+**Vì sao (đã cắn thật, 2026-09-19):** dòng đầu tiên của `nav_history_SpaceX.csv` (07-02) là snapshot
+SAU phiên giao dịch đầu tiên, không phải vốn khởi điểm thật (1.000.000.000đ nạp ngày 01/07 —
+account clean-slate). Báo cáo tuần 09-14→09-18 dùng thẳng dòng đầu làm baseline, ra "Từ khi bắt đầu
+hoạt động = −1,66%" trong khi số đúng là **−2,177%** (lệch 0,517pp). `nav_period_returns.py` đọc
+`data/account_inception.json` để lấy đúng mốc: SpaceX `starting_capital=1.000.000.000` (dùng THAY
+`nav_history` dòng đầu); ZaloPay `starting_capital=null` (dùng ĐÚNG dòng đầu `nav_history`, vì
+account có vị thế legacy trước go-live, không có mốc "vốn nạp ngày 1" sạch — KHÔNG áp cùng công
+thức 2 account như nhau).
+
+**Cưỡng chế cơ học một phần:** `mike/bin/report_delivery_gate.py::_check_period_returns()` BLOCK
+việc giao báo cáo SpaceX investor-facing (không áp ZaloPay — kênh nội bộ) nếu dòng "Từ khi bắt đầu
+hoạt động" lệch canonical ≥ 0,05pp — nhưng đây là lưới AN TOÀN ở cuối pipeline (chỉ chạy khi *gửi*,
+và fail-open nếu không parse được bảng/thiếu data), không thay được việc dùng đúng nguồn NGAY LÚC
+SOẠN. Cùng tinh thần §6 (verify artifact, không tự ước lượng) và §9 (tra nguồn chuẩn trước khi wire).
+
+*→ commit `mike` 8bbb302c (`nav_period_returns.py`), `20eafe6b` (`report_delivery_gate.py` gate),
+`e4c5ec97` (`report_charts.py` — `--starting-nav` opt-in cho chart cum-return dùng cùng baseline
+khi cần chart "since inception", KHÔNG auto-áp cho chart weekly/monthly theo kỳ vì sẽ làm 2 đường
+NAV/VNINDEX lệch mốc index=100).*

@@ -5,28 +5,26 @@ Behavioral guidelines to reduce common LLM coding mistakes.
 **Tradeoff:** These guidelines bias toward caution over speed. For trivial tasks, use judgment.
 
 **Two-tier structure (split 2026-08-08).** THIS file = the rule, its enforcement mechanism, and
-every number/threshold/path a rule depends on. The originating incident story and the
-considered-then-rejected alternatives live in **`kb/coding_guidelines_rationale.md`** (not
-auto-injected; read it when you need WHY, or before changing/removing a rule) or in the
-`kb/incidents/` entry each section points to. Adding a new lesson: narrative goes straight to the
+every number/threshold/path a rule depends on. Incident story + rejected alternatives live in
+**`kb/coding_guidelines_rationale.md`** (not auto-injected; read before changing/removing a rule)
+or in the `kb/incidents/` entry each section points to. New lesson: narrative goes straight to the
 rationale file — **cut narrative, never cut a fact**.
 
 **Enforcement policy (2026-08-01, user mandate — "đẩy bài học cũ ra công cụ/linter thay vì văn
 xuôi"):** any lesson expressible as a MECHANICAL pattern in code → make it an automated check that
 blocks the commit, not another paragraph; always test a new rule against real files before turning
-it on. Live mechanism, verified by
-a real `git commit`: **`bin/shellcheck_gate.sh`** (pre-commit hook, ShellCheck — caught all 4 real
-quoting incidents 2026-07-17→08-01, see §15 +
-`kb/incidents/2026-08/2026-08-01-shellcheck-precommit-gate.md`). One-time setup per repo (hook shared
-by all worktrees): `pip install --user pre-commit shellcheck-py && pre-commit install`.
-§7, §10, §11, §13 are process/judgment calls with no clean syntactic pattern to lint — prose is the
+it on. Live mechanism, verified by a real `git commit`: **`bin/shellcheck_gate.sh`** (pre-commit
+hook, ShellCheck — caught all 4 real quoting incidents 2026-07-17→08-01, see §15 +
+`kb/incidents/2026-08/2026-08-01-shellcheck-precommit-gate.md`). One-time setup per repo (hook
+shared by all worktrees): `pip install --user pre-commit shellcheck-py && pre-commit install`.
+§7, §10, §11, §13 = process/judgment calls with no clean syntactic pattern to lint — prose is the
 right form for them, not an oversight.
 
 ## Mục đã tách sang `kb/coding_guidelines_ext.md` — đọc khi cần, KHÔNG auto-load
 
-Các mục dưới đây là **luật đầy đủ, còn hiệu lực y nguyên** (không nén, không sửa chữ, giữ nguyên
-số hiệu §) — chỉ chuyển sang file anh em `mike/kb/coding_guidelines_ext.md` vì chúng dùng theo
-TÌNH HUỐNG, không phải mỗi phiên. Gặp đúng tình huống thì `Read` file đó.
+**Luật đầy đủ, còn hiệu lực y nguyên** (không nén, không sửa chữ, giữ nguyên số hiệu §) — chuyển
+sang file anh em `mike/kb/coding_guidelines_ext.md` vì dùng theo TÌNH HUỐNG, không phải mỗi phiên.
+Gặp đúng tình huống thì `Read` file đó.
 
 | Mục | Khi nào phải đọc |
 |---|---|
@@ -43,6 +41,8 @@ TÌNH HUỐNG, không phải mỗi phiên. Gặp đúng tình huống thì `Read
 | **§23** Chạy selfcheck THEO PHẠM VI cái vừa sửa (bản đồ lõi dùng chung + 2 dạng lõi ẩn) | Sắp chạy selfcheck sau khi sửa code; định kết luận "file này ít phụ thuộc, chạy hẹp là đủ" |
 | **§24** Trần giá/hạn mức của plan phải là FIELD RIÊNG cưỡng chế bằng code | Đụng giá đặt lệnh/trần đuổi giá/`PlannedOrder`, thêm field vào plan JSON |
 | **§25** "Tiền" không phải một con số — bảng field cash per-consumer, số neo, ngoại lệ L2 | Viết/sửa BẤT KỲ code nào đọc số dư tiền từ broker (NAV, sizing, gate tiền, park/unpark) |
+| **§27** "Lệnh đã đặt" ≠ "lệnh đã khớp" — đối soát fill thật | Trước khi báo 1 lệnh/plan "đã thực thi"/"đã đạt X% NAV" |
+| **§31** Bảng "Hiệu suất lũy kế" báo cáo SpaceX phải qua `nav_period_returns.py` | Soạn dòng WTD/MTD/"Từ khi bắt đầu hoạt động" trong weekly/monthly SpaceX |
 
 ⚠️ **Con trỏ này CỐ Ý không dùng cú pháp `@`.** `@`-import của Claude Code là **đệ quy** — viết
 `@.../coding_guidelines_ext.md` ở đây sẽ nạp lại toàn bộ file ext vào mọi phiên của cả 5 agent
@@ -68,8 +68,7 @@ Before implementing:
 - No "flexibility" or "configurability" that wasn't requested.
 - No error handling for impossible scenarios.
 - If you write 200 lines and it could be 50, rewrite it.
-
-Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
+- "Would a senior engineer say this is overcomplicated?" If yes, simplify.
 
 ## 3. Surgical Changes
 
@@ -80,10 +79,8 @@ When editing existing code:
 - Don't refactor things that aren't broken.
 - Match existing style, even if you'd do it differently.
 - If you notice unrelated dead code, mention it - don't delete it.
-
-When your changes create orphans:
-- Remove imports/variables/functions that YOUR changes made unused.
-- Don't remove pre-existing dead code unless asked.
+- Orphans YOUR changes created: remove those imports/variables/functions. Don't remove
+  pre-existing dead code unless asked.
 
 The test: Every changed line should trace directly to the user's request.
 
@@ -96,13 +93,7 @@ Transform tasks into verifiable goals:
 - "Fix the bug" → "Write a test that reproduces it, then make it pass"
 - "Refactor X" → "Ensure tests pass before and after"
 
-For multi-step tasks, state a brief plan:
-```
-1. [Step] → verify: [check]
-2. [Step] → verify: [check]
-3. [Step] → verify: [check]
-```
-
+For multi-step tasks, state a brief plan (`1. [Step] → verify: [check]`, one line per step).
 Strong success criteria let you loop independently; weak criteria ("make it work") don't.
 
 ## 5. Idempotent Side Effects
@@ -114,7 +105,7 @@ write a shared file, call a non-idempotent API):
 - Ask: "killed right after the external call succeeds but before local state is saved — what does
   the next run do?" Answer "repeats the action" = a bug, not an edge case.
 - Prefer the external system's own source of truth (broker's live order book, the sent-messages
-  log) over local state — local state can lag reality.
+  log) over local state.
 - Can't tell whether an action already happened → **fail-safe pause and flag for a human**; don't
   guess-and-merge, don't silently proceed.
 - Persist "the action happened" immediately after the external call, not batched at loop end.
@@ -132,8 +123,8 @@ from 6 sites (`GHOST_ORDER_DETECTED`, `LEVER_PACKAGE_UNAUTHORIZED`, `dcf-rich-fi
   `MIKE_BOT_TEST_MODE == "1"` **or** `PYTEST_CURRENT_TEST` is set. `MIKE_BOT_TEST_EVENT_SINK=<path>`
   (optional) writes blocked events to a file so tests can still assert "this should have fired".
 - **Any NEW selfcheck importing `Executor`** → one line at the top of the file, BEFORE any
-  `Executor` is constructed: `os.environ.setdefault("MIKE_BOT_TEST_MODE", "1")`. This is the ONLY
-  prevention against a 5th recurrence — a new selfcheck's author has no way to know otherwise.
+  `Executor` is constructed: `os.environ.setdefault("MIKE_BOT_TEST_MODE", "1")` — the ONLY
+  prevention against a 5th recurrence.
 - **Never infer "this is a test" from an existing field** (`account` label, `plan_date` sentinel
   2099-*, `strategy="selfcheck"`): all 3 were inventoried and all 3 are inconsistent across
   selfcheck files (`capit_lever_selfcheck.py` deliberately uses the REAL labels;
@@ -169,13 +160,13 @@ report (daily/weekly/monthly, or any client-facing artifact):
 4. Can't trace a number through this pipeline → don't put it in the report, say what's missing.
 5. **Gửi email — BẮT BUỘC cho MỌI cadence (daily/weekly/monthly), không chỉ weekly/monthly**
    (mở rộng 2026-08-11, user yêu cầu sau vụ NAV ZaloPay/park-trim — email là cách user tự đối
-   soát để phát hiện + báo lỗi kịp thời, không chỉ dựa vào Discord đã có sẵn): sau khi post
-   Discord xong, chạy `python3 mike/bin/send_report_email.py <report.md>` cho ĐÚNG file vừa gửi.
-   Script tự fail-closed nếu cổng tỉ suất §21 chưa PASS hoặc thiếu credential — đừng `--skip-
-   return-gate` trừ khi đã hiểu rõ vì sao gate lệch. Backstop nếu agent quên bước này:
-   `check_report_cadence.sh` quét lại MỌI report `*_daily_report_*.md` /
-   `*_weekly_report_*.md` / `*_monthly_report_*.md` chưa có proof và gọi delivery gate gửi bù
-   — nhưng đó là lưới AN TOÀN, không thay được việc gửi ngay lúc soạn xong report.
+   soát, không chỉ dựa vào Discord): sau khi post Discord xong, chạy
+   `python3 mike/bin/send_report_email.py <report.md>` cho ĐÚNG file vừa gửi. Script tự
+   fail-closed nếu cổng tỉ suất §21 chưa PASS hoặc thiếu credential — đừng `--skip-return-gate`
+   trừ khi đã hiểu rõ vì sao gate lệch. Backstop nếu agent quên: `check_report_cadence.sh` quét
+   lại MỌI report `*_daily_report_*.md` / `*_weekly_report_*.md` / `*_monthly_report_*.md` chưa
+   có proof và gọi delivery gate gửi bù — lưới AN TOÀN, không thay được việc gửi ngay lúc soạn
+   xong report.
 6. **Delivery closure — file được tạo KHÔNG có nghĩa là báo cáo đã gửi.** Mọi báo cáo tự động
    phải kết thúc bằng `python3 mike/bin/report_delivery_gate.py <report.md> --topic
    trading_report`. Chỉ `COMPLETE` (artifact qua gate + Discord + email đều có bằng chứng
@@ -201,8 +192,8 @@ tables, next-week plan, methodology appendix). **Monthly** = institutional conve
 disclosures, outlook).
 
 **§6b. Weekly/monthly BẮT BUỘC có khối "Market regime context" — tái dùng `dna_report.py`, KHÔNG
-tự tính lại (chốt 2026-08-18, sau khi audit thấy weekly/monthly chỉ có DT5G committed state +
-P/E percentile 2-năm TỰ TÍNH, thiếu cả 2 mảnh sau đã có sẵn trong daily EOD từ 07-30/07-31):**
+tự tính lại (chốt 2026-08-18; weekly/monthly trước đó chỉ có DT5G committed state + P/E percentile
+2-năm TỰ TÍNH, thiếu cả 2 mảnh sau đã có sẵn trong daily EOD từ 07-30/07-31):**
 - **DT gate candidate/streak clock** — `dna_report.build_dt_gate_line()` (đọc `get_dt_gate_clock()`):
   không chỉ state đã COMMIT (`DT5G = NEUTRAL`) mà cả state đang TÍCH LUỸ (vd "candidate BEAR
   6/10, còn 4 phiên để commit") — đây chính là câu trả lời cho "có xu hướng mới đang hình thành
@@ -255,8 +246,8 @@ CSV/pickle/JSON, published state file) in new code — check `mike/kb/data_regis
   against real evidence — crontab, mtime, code that writes it — not guessed from the name) before
   wiring in, or ask Winston/Mike to verify first.
 
-**Ownership**: Winston (data-ops) keeps the registry current ad-hoc; full periodic audit folded into
-the Friday KB editorial review (`kb_nightly.sh`), not a separate cron job.
+**Ownership**: Winston (data-ops) giữ registry tươi ad-hoc; audit định kỳ nằm trong Friday KB
+editorial review (`kb_nightly.sh`), không phải cron riêng.
 
 **§9b. Named anti-pattern — `IN (SELECT DISTINCT ticker FROM ticker_prune)` without a `time`
 condition is look-ahead (1.6-2.6×), not a style nit.** `ticker_prune` is TRAP-status
@@ -269,8 +260,7 @@ existing occurrences predate the 2026-07-22 migration and are legacy debt, not s
 
 **When dispatching Taylor (or anyone) for new R&D**: state explicitly "tra `mike/kb/data_registry/`
 (index.md) trước khi chọn nguồn dữ liệu, đặc biệt bảng market-state/regime" — same pattern as
-DollarBill's DNSE-vs-BQ rule (§6). A generic "verify your data" reminder doesn't stop an LLM
-reaching for the closest-sounding name; naming the registry file does.
+DollarBill's DNSE-vs-BQ rule (§6).
 
 *→ rationale §9.*
 
@@ -293,8 +283,8 @@ Nếu chủ đích là gộp toàn bộ account (báo cáo fleet-wide), phải v
 (`SpaceX` và `ZaloPay`) cùng 1 ngày có giao dịch, xác nhận 2 kết quả KHÁC nhau. Giống hệt nhau = gần
 như chắc chắn đọc chung không lọc — dấu hiệu rẻ nhất, bắt được cả 3 sự cố nếu có ai chạy.
 
-**Grep sweep không đủ nếu chỉ tìm tên file.** Sweep 2026-07-19 grep `dnse_raw` vẫn bỏ sót
-`eod_trading_report.sh` vì file CÓ nhắc tên nhưng lọc thiếu ở 1 nhánh. Sweep đúng = với MỖI hit, đọc
+**Grep sweep không đủ nếu chỉ tìm tên file.** Sweep 2026-07-19 grep `dnse_raw` bỏ sót
+`eod_trading_report.sh` (file CÓ nhắc tên nhưng lọc thiếu ở 1 nhánh). Sweep đúng = với MỖI hit, đọc
 xem record có bị lọc account trước phép tính không (audit 2026-07-22: 4/4 script kế toán đã lọc
 đúng; `execution_quality_review.py` chỉ lọc KHI truyền `--account`, mặc định gộp cả 2 account — chấp
 nhận được cho công cụ review ad-hoc, KHÔNG được dùng làm nguồn số báo cáo).
@@ -315,8 +305,8 @@ Shipped alongside: a `TZ=Asia/Ho_Chi_Minh` crontab export (closes the ambient-en
 (`mike/.pre-commit-config.yaml` + `/home/trido/thanhdt/.pre-commit-config.yaml`). Lý do bật: luật
 văn xuôi này có từ 2026-07 mà code-quality-weekly 2026-08-30 vẫn tìm ra **5 vi phạm cùng lớp trong
 1 tuần** (WC `20bf2f20`, mike `b26008a6`) — tất cả LATENT vì host ở +07 + crontab export che mất.
-Phát hiện bằng **AST** (`datetime.now(tz)` vs `datetime.now()` chỉ khác nhau ở việc CÓ ARGUMENT,
-và argument viết xuống dòng được ⇒ regex đếm sai), **ratchet per-file** so với
+Phát hiện bằng **AST** (regex đếm sai: `datetime.now(tz)` vs `datetime.now()` chỉ khác ở việc CÓ
+ARGUMENT, mà argument viết xuống dòng được), **ratchet per-file** so với
 `kb/tz_anchor_baseline.json` (kiểm kê ngày bật: **157 vi phạm / 87 file**) — nợ cũ không bắt sửa
 ngay, chỉ không được TĂNG. Cho qua: `datetime.now(_ICT)`, `datetime.now(ZoneInfo(...))`,
 `datetime.now(timezone.utc)` (bước 1 của ICT-anchor). CHƯA phủ: `pd.Timestamp.now()`,
@@ -330,14 +320,14 @@ của repo ngoài — gate KÊU ra stderr nhưng không chặn được). Ba l�
 `bin/tz_anchor_gate_selfcheck.py [--mutations|--all-tz]` — **137 assertion, 38/38 mutation bị giết
 (34 trên gate .py + 4 trên shim .sh), đo dưới `$DNA_PYEXE`** (interpreter mà
 `run_selfchecks.sh`/`selfcheck_weekly_baseline_check.sh` dùng thật; selfcheck tự đếm và tự in con
-số nên nó không bao giờ lệch).
+số nên không bao giờ lệch).
 ⚠️ **Hook chạy `python3` (3.10) còn 2 runner selfcheck chạy `$DNA_PYEXE` (3.12) ⇒ 7 file .py của
 repo ngoài chỉ parse được ở 3.12** (f-string PEP 701). Gate phân biệt "không parse được" với
 "sạch": KÊU ra stderr, KHÔNG gate file đó và KHÔNG đụng baseline của nó. Trước bản vá vòng 5 nó
 trả 0 vi phạm im lặng rồi XOÁ key baseline ⇒ commit sau bị hard-block oan. Hệ quả vận hành:
 `--seed-baseline` chạy bằng 3.10 sẽ TỪ CHỐI ghi (kiểm kê thiếu) — re-seed bằng `$DNA_PYEXE`.
 Hook PHẢI có `verbose: true` ở cả 2 config: pre-commit chỉ in output hook khi rc≠0 hoặc verbose,
-mà gate này cố ý fail-open ⇒ thiếu verbose thì mọi cảnh báo bị nuốt, fail-open thành fail-silent.
+mà gate này cố ý fail-open ⇒ thiếu verbose thì fail-open thành fail-silent.
 Ba biến `MIKE_TZ_GATE_ROOT/_BASELINE/_ROOTS` chỉ dành cho sandbox selfcheck và bị TỪ CHỐI nếu
 thiếu `MIKE_TZ_GATE_SELFCHECK=1` (một biến sót lại đủ biến gate thành no-op im lặng).
 
@@ -349,12 +339,12 @@ có tham chiếu `trading_bot.vn_market.is_holiday` (khớp tuyệt đối, per-
 tuổi dữ liệu thật 1 phiên bị đếm thành 4 "trading day" ⇒ `macro_health=FAILED` giả, DT5G tắt qua
 đêm — call-site thứ 3 của CÙNG lớp lỗi trong 2 ngày (`0b83f507`, `81cc0428` ở `mike/bin/`, rồi
 `96ebd124` ở repo ngoài; `kb/incidents/2026-09/2026-09-04-macro-health-failed-holiday-tdays.md`).
-Cố ý KHÔNG quét mù `np.busday_count` hay biến thể tên (`get_tdays`) — đo được cả hai là rủi ro
-false-positive cao (biến thể tên từng tự bắt nhầm chính `tdays_violations()`/`test_*_tdays()` của
-gate/selfcheck khi chạy `--scan` thật lần đầu). ⚠️ Bản đầu ân xá `vn_holidays=` theo CẢ SCOPE
-(không phải per-call) — arch-review vòng 1 phát hiện đây là no-op trên chính file gây sự cố:
-revert dòng vá thật về đúng bug SEV1 gốc vẫn KHÔNG bị bắt vì marker khác trong cùng scope còn
-sống; đã sửa thành per-call trước khi commit. *→ docstring đầu `bin/tz_anchor_gate.py` (RULE 2).*
+Cố ý KHÔNG quét mù `np.busday_count` hay biến thể tên (`get_tdays`) — rủi ro false-positive cao
+(biến thể tên từng tự bắt nhầm chính `tdays_violations()`/`test_*_tdays()` của gate/selfcheck khi
+chạy `--scan` thật lần đầu). ⚠️ Bản đầu ân xá `vn_holidays=` theo CẢ SCOPE (không phải per-call) —
+arch-review vòng 1 phát hiện no-op trên chính file gây sự cố: revert dòng vá thật về đúng bug SEV1
+gốc vẫn KHÔNG bị bắt vì marker khác trong cùng scope còn sống; đã sửa thành per-call trước khi
+commit. *→ docstring đầu `bin/tz_anchor_gate.py` (RULE 2).*
 
 *→ rationale §16.*
 
@@ -362,10 +352,10 @@ sống; đã sửa thành per-call trước khi commit. *→ docstring đầu `b
 
 Before designing/running a backtest, factor-IC test, or production-rule review, read the
 `quant-research` skill (`/home/trido/thanhdt/WorkingClaude/.claude/skills/quant-research/SKILL.md` —
-Skill tool or direct read in headless dispatch); it holds the fixed order of operations. The 5 steps
-most often skipped: declare **N as independent events, not row count** (and match the statistical
-tool to N); `self-check 0 VND` with a control leg reproducing the pinned number; point-in-time joins
-only; DSR/PBO plus the quant-skeptic gate before recommending a wire; verify the artifact, not the
+Skill tool or direct read in headless dispatch) for the fixed order of operations. The 5 steps most
+often skipped: declare **N as independent events, not row count** (and match the statistical tool to
+N); `self-check 0 VND` with a control leg reproducing the pinned number; point-in-time joins only;
+DSR/PBO plus the quant-skeptic gate before recommending a wire; verify the artifact, not the
 self-report, before relaying a conclusion.
 
 ## 19. Any Task With a Selfcheck/Test — Follow `~/.claude/skills/verify-before-done/`
@@ -374,16 +364,16 @@ Before reporting a coding/fix task done with a selfcheck involved, read the `ver
 skill (`/home/trido/.claude/skills/verify-before-done/SKILL.md`, built 2026-08-01). Core habit: run
 the selfcheck for real, name its environment dependencies (TZ tops the list — §16), re-run under a
 stripped/adversarial variant, treat any cross-environment difference as the finding. Applies to the
-author before claiming done AND to anyone re-verifying (baked into `arch-reviewer`'s mandate —
+author AND to anyone re-verifying (baked into `arch-reviewer`'s mandate —
 `~/.claude/agents/arch-reviewer.md`).
 
 ## 20. Mark `decided_by: "user"` When a Real User Confirmed a Closure — Not Just "Seemed Reasonable"
 
 **Rule:** when an `answer`/`decision` closes a money/decision-adjacent `question`, include
-`"decided_by": "user"` in the payload ONLY when the user actually confirmed it in real time. When
-Mike/an agent closes on its own judgment (even well-evidenced) — omit the field, or use
-`"decided_by": "agent"`. Not a quality judgment on the closure — a provenance record, so later
-counting/reporting can separate "confirmed by a person" from "judged, not confirmed."
+`"decided_by": "user"` in the payload ONLY when the user actually confirmed it in real time. Mike/an
+agent closing on its own judgment (even well-evidenced) — omit the field, or use
+`"decided_by": "agent"`. Không phải đánh giá chất lượng — là bản ghi provenance, để về sau tách
+được "confirmed by a person" khỏi "judged, not confirmed."
 
 **Enforced by:** `bin/bus_question_audit.py`'s closure-provenance report — breakdown by `decided_by`
 for the last N days (`--provenance-days`, default 14), always shown, feeding weekly review. A report,
@@ -399,7 +389,7 @@ not a gate — high unmarked-agent-closure counts prompt spot-review, not wrongd
 ex-date). Sự kiện chưa đối soát được với sổ broker bị gắn cờ `UNVERIFIED` và **CẤM** đưa vào báo cáo
 gửi nhà đầu tư — vì `Close/Price` không phân biệt được cổ tức tiền mặt với chia tách cổ phiếu.
 
-Chi tiết cơ chế, 4 cái bẫy cụ thể và cách kiểm chứng 3 nguồn độc lập:
+Chi tiết cơ chế, 4 cái bẫy và cách kiểm chứng 3 nguồn độc lập:
 **`mike/kb/data_registry/price-volume/ticker_close_vs_price_dividend_adj.md`**. Bổ sung cho §6, không
 thay thế: §6 lo "số này lấy từ nguồn có thẩm quyền chưa", §21 lo "công thức có bỏ sót cấu phần lợi
 nhuận nào không".
@@ -425,47 +415,29 @@ nhiêu?" (`ppse.pp0Buy`/`qmaxBuy`). Đụng code đọc tiền từ broker là P
 
 ## 26. Đóng Câu Hỏi Trên Bus NGAY Khi Xử Lý Xong — Theo skill `bus-question-closure`
 
-Khi hành động của bạn giải quyết một `question` trên bus (fix xong, quyết định xong, điều tra ra
-kết luận) — post event đóng (`answer`/`decision`/`finding` phù hợp) **NGAY**, đúng topic string,
-kèm bằng chứng artifact (commit hash, giá trị config đọc lại, output selfcheck thật) — không đợi
-cuối phiên. Đọc `.claude/skills/bus-question-closure/SKILL.md` trước khi sửa/vận hành bất kỳ
-checker/pipeline escalation nào (autofix, health-check, weekly audit). 2 lỗi khác nhau cho cùng
-1 triệu chứng "báo động treo nhiều ngày dù việc đã xong": (A) người xử lý quên đóng — kỷ luật, có
-backstop là auto-close-bằng-artifact trước khi escalate; (B) chính pipeline verify tra topic
-SAI cách (match tuyệt đối trong khi producer luôn thêm hậu tố tự do vào topic) → "không tìm
-thấy" bị lẫn vào cùng nhánh code với "tìm thấy và cần sửa", sinh `NEEDS_CHANGES` giả mỗi ngày.
-Case thật + cách phân biệt A/B/review-thật: xem skill. Bug B cụ thể đã xác định trong
-`bin/wags_autofix.sh` (`has-event ... "finding:wags-fix: $LABEL"` khớp tuyệt đối, trong khi Wags
-luôn ghi topic có hậu tố tự do) — **ĐÃ VÁ 2026-08-11**: `mike_json.py has-event-prefix` (subcommand
-mới, `has-event` giữ nguyên semantics tuyệt đối cho 3 caller cũ) + tách `INCONCLUSIVE` khỏi
-`NEEDS_CHANGES` thành 2 question khác nhau + `bin/wags_bus_verdict.py` lấy verdict từ artifact bus
-thay vì stdout. Luật cho người viết checker: `kb/ops_runbook.md` § "Checker TRA CỨU sai".
+Hành động của bạn giải quyết một `question` trên bus (fix xong, quyết định xong, điều tra ra kết
+luận) → post event đóng (`answer`/`decision`/`finding` phù hợp) **NGAY**, đúng topic string, kèm
+bằng chứng artifact (commit hash, giá trị config đọc lại, output selfcheck thật) — không đợi cuối
+phiên. Đọc `.claude/skills/bus-question-closure/SKILL.md` trước khi sửa/vận hành bất kỳ
+checker/pipeline escalation nào (autofix, health-check, weekly audit). 2 lỗi khác nhau cho cùng 1
+triệu chứng "báo động treo nhiều ngày dù việc đã xong": (A) người xử lý quên đóng — kỷ luật, có
+backstop auto-close-bằng-artifact trước khi escalate; (B) chính pipeline verify tra topic SAI cách
+(match tuyệt đối trong khi producer luôn thêm hậu tố tự do vào topic) → "không tìm thấy" bị lẫn vào
+cùng nhánh code với "tìm thấy và cần sửa", sinh `NEEDS_CHANGES` giả mỗi ngày. Case thật + cách phân
+biệt A/B/review-thật: xem skill. Bug B cụ thể trong `bin/wags_autofix.sh` (`has-event ...
+"finding:wags-fix: $LABEL"` khớp tuyệt đối, trong khi Wags luôn ghi topic có hậu tố tự do) — **ĐÃ
+VÁ 2026-08-11**: `mike_json.py has-event-prefix` (subcommand mới, `has-event` giữ nguyên semantics
+tuyệt đối cho 3 caller cũ) + tách `INCONCLUSIVE` khỏi `NEEDS_CHANGES` thành 2 question khác nhau +
+`bin/wags_bus_verdict.py` lấy verdict từ artifact bus thay vì stdout. Luật cho người viết checker:
+`kb/ops_runbook.md` § "Checker TRA CỨU sai".
 
-## 27. "Lệnh Đã Đặt" ≠ "Lệnh Đã Khớp" — Đối Soát Fill Thật Trước Khi Báo "Đã Đạt Target", Theo `~/.claude/skills/dnse-fill-reconciliation/`
+## 27. "Lệnh Đã Đặt" ≠ "Lệnh Đã Khớp" — Đối Soát Fill Thật Trước Khi Báo "Đã Đạt Target"
 
-Trước khi khẳng định 1 lệnh/plan "đã thực thi", "đã mua đủ", "đã đạt X% NAV" — đọc
-`~/.claude/skills/dnse-fill-reconciliation/SKILL.md`. Đọc số lượng trong `orders[]` của plan rồi
-nhân giá để suy ra tỷ trọng là **suy luận trên Ý ĐỊNH, không phải KẾT QUẢ** — với mã thanh khoản
-mỏng (UPCOM, ADV vài tỷ/ngày trở xuống), khoảng cách giữa 2 số có thể là toàn bộ lệnh.
-
-**Case thật (2026-08-11)**: Mike báo "TV1 đã đạt ~5% NAV cả 2 account" dựa trên số lượng ĐẶT trong
-plan đã duyệt. Đối soát bằng email "Báo cáo giao dịch khớp lệnh" DNSE tự gửi (~16:30 ICT, broker-
-issued, độc lập hoàn toàn với `dnse_raw_*.jsonl`) lộ ra: DRI khớp đủ đúng kế hoạch cả 2 account,
-nhưng TV1 chỉ khớp **100/2.000cp (SpaceX)** và **0/1.300cp (ZaloPay)** — do ADV quá mỏng
-(~0,6 tỷ/ngày) không hấp thụ hết lô trong 1 phiên. Không phải bug (giá/trần đều đúng) — thị trường
-đơn giản không đủ đối ứng.
-
-**Công cụ**: `fetch_dnse_khoplenh_email.py` (root WorkingClaude, dùng chung Gmail OAuth readonly
-có sẵn cho auto-OTP) tải + parse email này thành CSV khớp lệnh sạch theo từng account/mã. Nguồn
-ghi ở `kb/data_registry/trading-bot/dnse_khoplenh_broker_email.md`. Email chỉ có sau ~16:30 ICT —
-báo cáo trong-phiên/cùng ngày trước giờ đó vẫn phải đọc `positions` mới nhất trong
-`dnse_raw_<date>.jsonl` (không đợi được email).
-
-**KHÔNG thay thế pipeline §6 đã chốt** (`verify_account_snapshot.py`/`daily_nav_snapshot.py`/
-`reconcile_equity.py` vẫn CANONICAL cho cost-basis) — đây là lớp đối soát ĐỘC LẬP thêm vào, giá trị
-chính là nó đi qua đường dữ liệu khác (backend DNSE tự phát hành, không phải API client của mình)
-nên bắt được lỗi ở CẢ HAI phía. Fold vào pipeline sinh report tự động là thay đổi lớn hơn — qua
-Taylor + quant-skeptic review trước khi coi là đã wire, như mọi thay đổi khác chạm pipeline §6.
+→ **Luật đầy đủ ở `kb/coding_guidelines_ext.md` § 27** (MOVE nguyên văn 2026-09-20, không nén).
+Chỉ để nhận ra tình huống cần mở: trước khi khẳng định 1 lệnh/plan "đã thực thi"/"đã mua đủ"/"đã
+đạt X% NAV" — đọc `~/.claude/skills/dnse-fill-reconciliation/SKILL.md` và đối soát FILL THẬT; suy
+tỷ trọng từ `orders[]` của plan là suy luận trên Ý ĐỊNH, không phải KẾT QUẢ. Case TV1/DRI
+2026-08-11, công cụ `fetch_dnse_khoplenh_email.py` và quan hệ với pipeline §6: xem § 27 bản ext.
 
 ## 28. Checker So Sánh 2 Nguồn — Chuẩn Hoá GIÁ TRỊ Trước Khi So, Không So Chuỗi Mô Tả Hay Suy Từ Sự Vắng Mặt
 
@@ -478,16 +450,15 @@ vọng, trạng thái A vs B, "quyết định này đã có chưa") — luôn q
 - **Suy diễn từ SỰ VẮNG MẶT của 1 kênh** ("không thấy `answer` trên bus" ⇒ "quyết định chưa có")
   — trong khi quyết định đã được thực thi qua đường khác (code/config đã đổi thật) mà chỉ thiếu
   bước ghi lại lên đúng kênh checker đang nhìn. Vắng mặt trên 1 kênh không phải bằng chứng của sự
-  vắng mặt trong thực tế — phải xác nhận bằng ARTIFACT (giống nguyên tắc §6/§9/§14), không suy diễn.
+  vắng mặt trong thực tế — phải xác nhận bằng ARTIFACT (giống §6/§9/§14), không suy diễn.
 
 **Vì sao thành luật:** tái diễn 4 ngày liên tiếp (2026-08-10→08-13) dưới ≥6 hình dạng khác nhau,
 đều cùng gốc — vá từng call-site cụ thể (đã làm, có test, có commit) chặn đúng ca đó nhưng không
-chặn được ca tiếp theo ở call-site KHÁC vì không có quy tắc chung. Ghi vào đây để mọi checker MỚI
-tự tránh, không lặp lại nhóm lỗi này ở vị trí thứ 7.
+chặn được ca tiếp theo ở call-site KHÁC vì không có quy tắc chung.
 
 *→ retro-2026-08-10 Pattern 1 · retro-2026-08-11 mục 1/4/5 · retro-2026-08-12 Pattern 2 ·
-retro-2026-08-13 Pattern 1 — chi tiết từng ca cụ thể nằm trong các file retro tương ứng
-(`kb/incidents/retro/`), không chép lại ở đây.
+retro-2026-08-13 Pattern 1 — chi tiết từng ca nằm trong file retro tương ứng
+(`kb/incidents/retro/`).
 
 ## 29. Chẩn Đoán Phải Trích Bằng Chứng Đang Cầm Trong Tay — Không Đoán, Không Hardcode Nguyên Nhân
 
@@ -518,37 +489,13 @@ của `git show 55b3f34c^:bin/append_event.sh` (bản đúng lúc lỗi). Bỏ q
 **Nửa còn lại KHÔNG lint được** — dạng thứ hai là văn xuôi, phát hiện nó = đọc hiểu ngôn ngữ tự
 nhiên. Đó là **mục bắt buộc trong review**: với mọi thay đổi chạm checker/guard/alert, hỏi đúng
 một câu — *"dòng này khẳng định nguyên nhân; code đã ĐỌC cái gì để biết điều đó?"* Không trả lời
-được bằng một biến/một lần đọc file cụ thể ⇒ trả lại sửa, đừng đợi tới khi nó gây báo động sai.
+được bằng một biến/một lần đọc file cụ thể ⇒ trả lại sửa.
 
 ## 31. Bảng "Hiệu suất lũy kế" Báo Cáo SpaceX: BẮT BUỘC Qua `nav_period_returns.py`, KHÔNG Tự Tính Từ `nav_history` Raw
 
-**Quy tắc:** khi soạn dòng WTD/MTD/"Từ khi bắt đầu hoạt động" trong bảng "Hiệu suất lũy kế" (mục
-3.2) của báo cáo SpaceX weekly/monthly, PHẢI chạy:
-
-```bash
-python3 mike/bin/nav_period_returns.py --account SpaceX --report-date <YYYY-MM-DD>
-```
-
-và lấy `return_pct` của từng key (`inception`/`wtd`/`mtd`) trong JSON output làm số đưa vào bảng —
-**KHÔNG** tự viết `(nav_cuối/nav_đầu − 1) × 100` trực tiếp từ `nav_history_SpaceX.csv`.
-
-**Vì sao (đã cắn thật, 2026-09-19):** dòng đầu tiên của `nav_history_SpaceX.csv` (07-02) là snapshot
-SAU phiên giao dịch đầu tiên, không phải vốn khởi điểm thật (1.000.000.000đ nạp ngày 01/07 —
-account clean-slate). Báo cáo tuần 09-14→09-18 dùng thẳng dòng đầu làm baseline, ra "Từ khi bắt đầu
-hoạt động = −1,66%" trong khi số đúng là **−2,177%** (lệch 0,517pp). `nav_period_returns.py` đọc
-`data/account_inception.json` để lấy đúng mốc: SpaceX `starting_capital=1.000.000.000` (dùng THAY
-`nav_history` dòng đầu); ZaloPay `starting_capital=null` (dùng ĐÚNG dòng đầu `nav_history`, vì
-account có vị thế legacy trước go-live, không có mốc "vốn nạp ngày 1" sạch — KHÔNG áp cùng công
-thức 2 account như nhau).
-
-**Cưỡng chế cơ học một phần:** `mike/bin/report_delivery_gate.py::_check_period_returns()` BLOCK
-việc giao báo cáo SpaceX investor-facing (không áp ZaloPay — kênh nội bộ) nếu dòng "Từ khi bắt đầu
-hoạt động" lệch canonical ≥ 0,05pp — nhưng đây là lưới AN TOÀN ở cuối pipeline (report_delivery_gate
-chỉ chạy khi *gửi*, và fail-open nếu không parse được bảng/thiếu data), không thay được việc dùng
-đúng nguồn NGAY LÚC SOẠN. Cùng tinh thần §6 (verify artifact, không tự ước lượng) và §9 (tra nguồn
-chuẩn trước khi wire).
-
-*→ commit `mike` 8bbb302c (`nav_period_returns.py`), `20eafe6b` (`report_delivery_gate.py` gate),
-`e4c5ec97` (`report_charts.py` — `--starting-nav` opt-in cho chart cum-return dùng cùng baseline
-khi cần chart "since inception", KHÔNG auto-áp cho chart weekly/monthly theo kỳ vì sẽ làm 2 đường
-NAV/VNINDEX lệch mốc index=100).*
+→ **Luật đầy đủ ở `kb/coding_guidelines_ext.md` § 31** (MOVE nguyên văn 2026-09-20, không nén).
+Chỉ để nhận ra tình huống cần mở: soạn dòng WTD/MTD/"Từ khi bắt đầu hoạt động" (mục 3.2) của báo
+cáo SpaceX weekly/monthly thì PHẢI lấy `return_pct` từ `python3 mike/bin/nav_period_returns.py
+--account SpaceX --report-date <YYYY-MM-DD>`, KHÔNG tự tính từ `nav_history_SpaceX.csv` raw (dòng
+đầu 07-02 không phải vốn khởi điểm) — chi tiết mốc `data/account_inception.json`, sai số thật
+2026-09-19 và gate `report_delivery_gate.py` nằm ở § 31 bản ext.
