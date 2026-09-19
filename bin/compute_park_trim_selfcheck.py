@@ -640,6 +640,40 @@ check("T21g (b) excluded_dividend_receivable_pending_vnd = 0 khi entry config kh
       r21_aaa.get("excluded_dividend_receivable_pending_vnd") == 0.0,
       r21_aaa.get("excluded_dividend_receivable_pending_vnd"))
 
+# T21h — arch-review 078b6174: `overdue` (đã có trong detail) PHẢI lộ ra note người duyệt đọc,
+# cùng cảnh báo compute_active_nav.py:437-440 ("QUÁ HẠN dự kiến — cập nhật config"). Trước bản vá
+# này, note chỉ nói "chưa thật sự về" mà không phân biệt "đúng tiến độ" với "đã trễ so với dự
+# kiến, cần kiểm tay" — người duyệt không biết cần hành động thêm.
+DGC_CFG_OVERDUE = [{"ticker": "XCL", "amount_vnd": 80_000_000,
+                   "expected_arrival_date": "2026-08-01"}]     # asof ASOF=2026-08-07 > hạn ⇒ overdue
+r21_overdue = run(h21, excluded_dividend_config_override=DGC_CFG_OVERDUE)
+check("T21h asof qua expected_arrival_date mà DNSE vẫn báo receivable ⇒ note PHẢI có cảnh báo "
+      "QUÁ HẠN (không chỉ 'chưa thật sự về')",
+      any("QUÁ HẠN" in n and "XCL" in n for n in r21_overdue["notes"]),
+      r21_overdue["notes"])
+check("T21h2 CHỨNG MINH NGƯỢC — ca KHÔNG overdue (T21e, expected 2026-09-25 > asof) không có "
+      "cảnh báo QUÁ HẠN (không báo động giả)",
+      not any("QUÁ HẠN" in n for n in r21_excl["notes"]))
+
+# T21i — RỦI RO ĐÃ BIẾT (arch-review 078b6174, chưa sửa — kẹp KHÔNG tách theo mã, chỉ theo
+# `min(config_amount, remaining)` trên TỔNG cashDividendReceiving). Ca thật: XCL đã settle (không
+# còn receivable) nhưng config `excluded_dividend_receivable` CHƯA được dọn (owner quên xoá entry
+# sau khi tiền về), TRONG KHI một mã KHÔNG excluded (AAA) phát sinh receivable MỚI 3tr cùng lúc.
+# Vì hàm không biết 83tr TỔNG đó thuộc mã nào, nó vẫn kẹp min(80tr config, 3tr remaining)=3tr và
+# loại NHẦM khỏi pool — pool nhỏ giả ⇒ có thể sinh lệnh BÁN THẬT quá mức cần thiết (OVER-trim).
+# PIN LẠI hành vi này (không phải "đã sửa an toàn") để: (a) ai đổi cơ chế sang tách-theo-mã thì
+# test đỏ, biết mà cập nhật; (b) nhắc vận hành PHẢI dọn config `excluded_dividend_receivable` sau
+# khi tiền về (không tự động, không có gate cơ học nào bắt việc quên dọn này).
+h21i = holdings(BASE_LOTS, cash=0.0, total_cash=300e6, debt=0.0,
+               div_recv=3e6, excluded=("XCL",))     # XCL đã settle (0), chỉ còn 3tr của AAA
+r21i = run(h21i, excluded_dividend_config_override=DGC_CFG)   # config CŨ vẫn khai XCL 80tr
+check("T21i RỦI RO ĐÃ BIẾT (chưa sửa): config XCL còn hiệu lực dù XCL đã settle ⇒ kẹp nhầm 3tr "
+      "receivable của AAA (mã KHÔNG excluded) vào phần bị loại — pool nhỏ giả 3tr, có thể OVER-trim. "
+      "Vận hành PHẢI dọn config sau khi tiền về; đây KHÔNG phải hành vi mong muốn, chỉ pin để "
+      "không lặng lẽ đổi mà không ai biết.",
+      r21i.get("excluded_dividend_receivable_pending_vnd") == 3e6,
+      r21i.get("excluded_dividend_receivable_pending_vnd"))
+
 print(f"\n=== {len(PASS)} PASS / {len(FAIL)} FAIL ===")
 if FAIL:
     for f in FAIL:

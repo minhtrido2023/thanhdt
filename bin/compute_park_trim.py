@@ -394,10 +394,15 @@ def compute_trim(account_label, asof=None, target=PARK_TARGET_F1, holdings=None,
     out["excluded_dividend_receivable_pending_vnd"] = excl_div_pending
     out["excluded_dividend_receivable_detail"] = excl_div_detail
     if excl_div_pending:
+        overdue_tks = sorted({d["ticker"] for d in excl_div_detail if d["overdue"]})
         out["notes"].append(
             f"⚠️ pool đã LOẠI {excl_div_pending/1e6:,.1f}tr cổ tức receivable của mã excluded "
             f"({', '.join(sorted({d['ticker'] for d in excl_div_detail}))}) — chưa thật sự về "
-            f"(Option B, cùng cơ chế compute_active_nav.py). CHÉP dòng này vào notes plan.")
+            f"(Option B, cùng cơ chế compute_active_nav.py). CHÉP dòng này vào notes plan."
+            + (f" ⚠️ QUÁ HẠN dự kiến: {', '.join(overdue_tks)} — DNSE vẫn báo receivable dù đã "
+               f"qua ngày dự kiến về, kiểm tiền đã về thật chưa / cập nhật "
+               f"excluded_dividend_receivable trước khi duyệt lệnh bán (cùng cảnh báo "
+               f"compute_active_nav.py)." if overdue_tks else ""))
     pool = cash + egg + park_mv
     target_value = pool * target
     delta = target_value - park_mv
