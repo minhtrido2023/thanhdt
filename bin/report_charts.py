@@ -49,8 +49,9 @@ def chart_nav(dates, navs, account, title_suffix, out_path):
     plt.close(fig)
 
 
-def chart_cum_return(dates, navs, vnindex, account, title_suffix, out_path):
-    nav0, vni0 = navs[0], vnindex[0]
+def chart_cum_return(dates, navs, vnindex, account, title_suffix, out_path, starting_nav=None):
+    nav0 = starting_nav if starting_nav is not None else navs[0]
+    vni0 = vnindex[0]
     nav_idx = [v / nav0 * 100 for v in navs]
     vni_idx = [v / vni0 * 100 for v in vnindex]
     fig, ax = plt.subplots(figsize=(8, 4.2), dpi=150)
@@ -59,9 +60,10 @@ def chart_cum_return(dates, navs, vnindex, account, title_suffix, out_path):
     ax.plot(dates, vni_idx, color=BENCHMARK_COLOR, linewidth=2.0, linestyle="--",
             marker="o", markersize=3, label="VN-Index")
     ax.axhline(100, color=GRID_COLOR, linewidth=1)
+    baseline_label = "vốn khởi điểm" if starting_nav is not None else "đầu kỳ"
     ax.set_title(f"Lợi nhuận lũy kế {account} so với VN-Index — {title_suffix}\n"
-                 f"(chỉ số hóa = 100 tại đầu kỳ)", fontsize=12, fontweight="bold")
-    ax.set_ylabel("Chỉ số (đầu kỳ = 100)")
+                 f"(chỉ số hóa = 100 tại {baseline_label})", fontsize=12, fontweight="bold")
+    ax.set_ylabel(f"Chỉ số ({baseline_label} = 100)")
     ax.legend(frameon=False, loc="best")
     ax.grid(axis="y", color=GRID_COLOR, linewidth=0.8)
     _strip_axes(ax)
@@ -112,6 +114,13 @@ def main() -> int:
     ap.add_argument("--vnindex", required=True, help="JSON list VNINDEX close cùng độ dài --dates")
     ap.add_argument("--allocation", required=True,
                      help='JSON list [["SIP", 8.5], ...] đã sắp xếp, tối đa ~9 dòng')
+    ap.add_argument("--starting-nav", type=float, default=None,
+                     help="Override baseline NAV cho chart cum-return (vd vốn khởi điểm thật "
+                          "của account, đọc từ data/account_inception.json) THAY vì navs[0]. "
+                          "CHỈ dùng khi --dates thật sự bắt đầu TỪ inception (chart 'since "
+                          "inception') — với chart weekly/monthly period, navs[0] mới đúng "
+                          "(mốc so sánh cùng ngày với vnindex[0]); ép starting_nav vào chart "
+                          "period sẽ làm 2 đường NAV/VNINDEX lệch mốc index=100.")
     ap.add_argument("--out-dir",
                      default=os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                                            "reports", "assets"))
@@ -129,7 +138,8 @@ def main() -> int:
     p3 = os.path.join(args.out_dir, f"{args.account}_{args.label}_allocation.png")
 
     chart_nav(dates, navs, args.account, args.title_suffix, p1)
-    chart_cum_return(dates, navs, vni, args.account, args.title_suffix, p2)
+    chart_cum_return(dates, navs, vni, args.account, args.title_suffix, p2,
+                      starting_nav=args.starting_nav)
     chart_allocation(alloc, args.account, args.title_suffix, p3)
 
     for p in (p1, p2, p3):
