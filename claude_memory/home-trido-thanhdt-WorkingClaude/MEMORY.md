@@ -20,7 +20,7 @@
 
 - 📒 **[SỔ QUYẾT ĐỊNH ĐÃ CHỐT — capit/8L-v2/postbull ([REDACTED])](settled_decisions_capit_8l_2026.md)** — ĐỌC TRƯỚC khi chạy lại chuỗi này, KHÔNG relitigate. postbull=cơ chế ĐÚNG (đừng test như overfit); [REDACTED]=marginal optional (default golden); cutloss [REDACTED]=vô ích; prod V2.3@50B≈26.5%/Sh1.83/DD−18.1 (pinned, đừng tái tính); 8L v2 paper-diff gated→06-30.
 
-- 🧩 **[Fix pickle StringDtype không load (pandas 2.3.3) → dựng lại từ BQ ([REDACTED])](lag_pickle_stringdtype_fix_2026.md)** — ba_v11_*/earnings_*/lagged_* pickle lỗi NotImplementedError; `rebuild_lag_caches.py` full-pull (ghi ticker astype object). [REDACTED] regen tươi qua SIGNAL_V11. Full-history harness = `pt_v23_audit_2014.py` (KHÔNG pt_v22_dt5g=live-forward). Baseline V2.3A 21.44%/Sh1.55/DD−25/self-check 0 VND.
+- 🧩 **[Fix pickle StringDtype không load (pandas 2.3.3) → dựng lại từ BQ ([REDACTED])](lag_pickle_stringdtype_fix_2026.md)** — ba_v11_*/earnings_*/lagged_* pickle lỗi NotImplementedError; `rebuild_lag_caches.py` full-pull (ghi ticker astype object). [REDACTED] regen tươi qua SIGNAL_V11. Full-history harness = `pt_v23_audit_2014.py` (KHÔNG pt_v22_dt5g=live-forward). [REDACTED] V2.3A 21.44%/Sh1.55/DD−25/self-check 0 VND.
 
 - 💰 **[DCF cho valuation 8L: full-DCF FAIL, dùng cashflow-YIELD ([REDACTED])](dcf_valuation_ic_test_2026.md)** — IC-test: reverse-DCF margin (cfy+ROIC) yếu (ROIC loãng tín hiệu); **CFO-yield 1/PCF mạnh+robust** (MOAT-36 IC+0.136/t6.4, dương 11/12y kể cả 2022), orthogonal pb_z (+0.115 residual t4.0), MẠNH HƠN trong rổ quality. pb_z linear-DEAD (chỉ conditional). → tilt CFO-yield cho golden-eggs/[REDACTED] nhưng validate book trước. `dcf_ic_test.py`.
 
@@ -188,7 +188,7 @@
 - ❌ **[VNINDEX 5-state v2g — REVERTED after BA-system FAIL](vnindex_5state_v2g.md)** (2026-05-17 swap + 2026-05-12 revert)
   - Script `vnindex_5state_v2g_full.py`. **STATE-MACHINE STANDALONE WIN**: FULL 2000-2026 CAGR 17.16% vs 15.88% baseline (+1.28pp), Sharpe 1.17 vs 1.07, wealth ×59.45 vs ×44.82 (+33%). CRISIS bottom→exit lag median 5 vs 16 phiên.
   - **BUT INTEGRATED-STACK FAIL**: tested with full BA v11 + V6 ETF + F1 stack 2014-2026 50B: CAGR 17.44% (v2g) vs 19.84% (ORIGINAL), -2.40pp ❌. Sharpe -0.18, **MaxDD -6.9pp WORSE** (-23.1% vs -16.2%). v2g's removed smoothing creates state oscillations → BA-system tier classifications flip-flop → 433 trades vs 372, win rate 59% vs 66%.
-  - **ACTION TAKEN 2026-05-12**: BQ table swapped back. `vnindex_5state` ([REDACTED]) = ORIGINAL (smoothed). v2g archived in `tav2_bq.vnindex_5state_v2g_archive_20260512`. Baseline kept in `vnindex_5state_baseline_pre_v2g_20260517_144254`.
+  - **ACTION TAKEN 2026-05-12**: BQ table swapped back. `vnindex_5state` ([REDACTED]) = ORIGINAL (smoothed). v2g archived in `tav2_bq.vnindex_5state_v2g_archive_20260512`. [REDACTED] kept in `vnindex_5state_baseline_pre_v2g_20260517_144254`.
   - LESSON: state-machine optimizations don't transfer to BA-system; smoothing provides stable tier windows. v2g may still be valid for state-conditional sizing (H-system) but not for signal generation downstream.
 
 > ✅ **Pre-2014 stress test for BA V11 COMPLETED (2026-05-16)** — 🟢 GREEN verdict

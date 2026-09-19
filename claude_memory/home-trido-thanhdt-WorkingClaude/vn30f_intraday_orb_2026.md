@@ -18,7 +18,7 @@ metadata:
 **ORB BACKTEST (sign(OR 09:00-09:30) giữ đến đóng phiên, net TC 1.5bps, 669 phiên):**
 - Tất cả ngày: WR 53.8%, +9.05bps/ngày, Sharpe 1.45, cum +77% (2.7y).
 - **|OR30|≥0.2% = sweet spot: WR 55.5%, +14.8bps, Sharpe 2.04.** ≥0.4%: WR 62%/Sharpe 2.08 (n=100 mỏng). **≥0.6% HỎNG (Sharpe 0.33)** = mở quá mạnh→kiệt sức/đảo (khớp MR khung lớn).
-- Cả LONG (Sh1.83) & SHORT (Sh1.11) đều ăn, KHÔNG long-bias artifact. Baseline long open→close chỉ +1.6bps.
+- Cả LONG (Sh1.83) & SHORT (Sh1.11) đều ăn, KHÔNG long-bias artifact. [REDACTED] long open→close chỉ +1.6bps.
 
 **EDGE THẬT nhưng CHƯA validate đủ.** Caveat: (1) TC 1.5bps optimistic — all-in thật 2-4bps (mean +9bps nên còn dương ở 3bps nhưng cần sensitivity); (2) in-sample 1 regime 2023-26, CHƯA walk-forward, lọc ≥0.4% n=100 risk overfit ngưỡng; (3) thực thi bar-based, breakout thật có slippage; (4) giữ đến đóng = phơi vùng ATC biến động → cần stop/thoát sớm.
 

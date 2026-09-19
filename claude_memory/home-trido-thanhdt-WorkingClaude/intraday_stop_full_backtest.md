@@ -6,7 +6,7 @@ originSessionId: 90878235-541c-4207-a725-44398117b136
 ---
 Scripts: `simulate_intraday_stop_compare.py` (driver), modified `simulate_holistic_nav.py` (added `lows` + `stop_mode` params). Cache: `intraday_stop_lows.csv` (1.26M rows, 496 tickers). Outputs: `intraday_stop_compare.csv` + per-strategy `intraday_stop_{nav,trades}_*.csv`.
 
-**Method:** Used daily Low (not synthetic intraday) as proxy for "did price touch stop intraday?". This is the standard daily-resolution approach — no fake data. `stop_mode="INTRADAY_LOW"` fires stop when `Low[D] ≤ entry × (1+stop_loss)` with fill at stop_lvl. Baseline `stop_mode="CLOSE"` fires when `Close[D] ≤ stop` with fill at close.
+**Method:** Used daily Low (not synthetic intraday) as proxy for "did price touch stop intraday?". This is the standard daily-resolution approach — no fake data. `stop_mode="INTRADAY_LOW"` fires stop when `Low[D] ≤ entry × (1+stop_loss)` with fill at stop_lvl. [REDACTED] `stop_mode="CLOSE"` fires when `Close[D] ≤ stop` with fill at close.
 
 **BAL_8pos full 12-year results:**
 

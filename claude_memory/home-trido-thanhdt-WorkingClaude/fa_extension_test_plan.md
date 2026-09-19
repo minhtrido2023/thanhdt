@@ -9,7 +9,7 @@ originSessionId: 762b6179-ddcb-41b7-ac2b-ee8d2f143ccc
 **Started:** 2026-05-12. User asked Claude to test each of the 6 missing FA perspectives identified in conversation and report effectiveness.
 
 ## Evaluation framework
-- Baseline: `fundamental_rating.py` (7-axis, 343 lines)
+- [REDACTED]: `fundamental_rating.py` (7-axis, 343 lines)
 - Metric: forward `profit_3M` median/mean/winrate per tier; tier ordering must rank A > B > C > D > E
 - Universe: same liquidity filter (Volume_3M_P50 × Close ≥ 1B VND)
 - Cohort: Q4-only (canonical), all-quarters as secondary check
@@ -32,7 +32,7 @@ originSessionId: 762b6179-ddcb-41b7-ac2b-ee8d2f143ccc
 - ROIIC ideal needs ΔNOPAT/ΔIC over 5Y but totalAsset_P0 only one snapshot → use ROIC_Trailing vs ROIC5Y as proxy
 
 ## Status
-- [ ] Baseline numbers (current run)
+- [ ] [REDACTED] numbers (current run)
 - [ ] Test 1 Margin trajectory
 - [ ] Test 2 Beneish-lite
 - [ ] Test 3 Working capital

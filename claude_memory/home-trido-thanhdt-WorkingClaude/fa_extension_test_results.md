@@ -63,7 +63,7 @@ Script: `test_fa_t6_refined.py`, `test_fa_t6_sectorrank.py` | Output: `fa_t6_ref
 
 ### Hidden sector bias (lý do T6e/g vẫn đáng giá dù spread thấp hơn)
 
-Baseline (+ NaN=0) bị bias nặng: SECURITIES **0/237 reach A**; INSURANCE A=1 với -22.4%; REIT A=14 với **-1.6%** (inverse).
+[REDACTED] (+ NaN=0) bị bias nặng: SECURITIES **0/237 reach A**; INSURANCE A=1 với -22.4%; REIT A=14 với **-1.6%** (inverse).
 
 T6e_sectorrank fix triệt để: SECURITIES A=29 +7.4%, INSURANCE A=11 +1.3%, REIT A=58 +6.5%.
 

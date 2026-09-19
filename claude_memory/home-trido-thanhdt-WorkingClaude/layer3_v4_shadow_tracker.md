@@ -31,7 +31,7 @@ For each new BA-system pick:
    - Else fallback to T+1 Open
 3. **Sell side**: [REDACTED] T+1 09:00 OPEN/ATO (canonical, not paper-traded — already validated in Phase 5)
 
-Baseline for alpha computation = **T+1 BQ.Open** (the old canonical rule).
+[REDACTED] for alpha computation = **T+1 BQ.Open** (the old canonical rule).
 
 `alpha_vs_open_pp = (p_open - p_applied) / p_open × 100`
 

@@ -10,7 +10,7 @@ Scripts: `layer3_backtest_rules.py` (universe), `layer3_backtest_real_buys.py` (
 
 **Key result — per-trade lift at T+45 (after 0.2% TC, vs E0+X0 baseline):**
 
-| Segment | Baseline | Best combo | Lift |
+| Segment | [REDACTED] | Best combo | Lift |
 |---|---|---|---|
 | TOP30 | +0.137% | E1_T1115_LIM + X1_T0945_LIM | **+0.902pp** |
 | MIDCAP | −3.680% | E1_T1115_LIM + X1_T0945_LIM | **+1.183pp** |
@@ -23,7 +23,7 @@ Scripts: `layer3_backtest_rules.py` (universe), `layer3_backtest_real_buys.py` (
 - Miss rate at T1115 limit: TOP30 0.03%, MIDCAP 0.4%, PENNY 1.6% — limits fill almost [REDACTED]
 
 **On 22 real BA-system BUYs (mostly DEEP_VALUE_RECOVERY plays):**
-- Baseline E0+X0: +11.807%
+- [REDACTED] E0+X0: +11.807%
 - Best: **E3_ATC_MKT + X1_T0945_LIM: +12.741%** (lift +0.934pp)
 - E1_T1115_LIM + X1_T0945_LIM: +12.098% (lift +0.291pp)
 - **DEEP_VALUE plays prefer ATC entry** (buy after intraday selling) over T1115 (lunch dip)

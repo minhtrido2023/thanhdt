@@ -892,7 +892,7 @@ Peak NAV at 2025-09-04 (8.06× wealth multiplier from 12-yr compounding).
 
 | Shock at peak | CAGR | Sharpe | DD |
 |---|---|---|---|
-| Baseline (no shock) | 17.97% | 1.12 | -20.4% |
+| [REDACTED] (no shock) | 17.97% | 1.12 | -20.4% |
 | Shock -25% | 18.15% | 1.15 | -25.0% |
 | Shock -40% | 17.67% | 1.12 | -40.0% |
 | Shock -60% (Black Swan) | 16.98% | 1.04 | -60.0% |
