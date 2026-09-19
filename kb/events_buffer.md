@@ -349,3 +349,12 @@
 - [2026-09-19T19:04:51Z] Mike/heartbeat — Mike_20260919_190206: {"status": "in_progress", "note": "da viet phan 1 (header + §1-§5b) cua coding_guidelines.md.proposed"}
 - [2026-09-19T19:05:07Z] Mike/heartbeat — Mike_20260919_190206: {"status": "still_running", "elapsed_min": 3, "job_id": "Mike_20260919_190206", "source": "watcher"}
 - [2026-09-19T19:06:07Z] Mike/heartbeat — Mike_20260919_190206: {"status": "still_running", "elapsed_min": 4, "job_id": "Mike_20260919_190206", "source": "watcher"}
+
+## Consolidation 2026-09-19T19:12:47Z
+- [2026-09-19T19:07:07Z] Mike/heartbeat — Mike_20260919_190206: {"status": "still_running", "elapsed_min": 5, "job_id": "Mike_20260919_190206", "source": "watcher"}
+- [2026-09-19T19:08:07Z] Mike/heartbeat — Mike_20260919_190206: {"status": "still_running", "elapsed_min": 6, "job_id": "Mike_20260919_190206", "source": "watcher"}
+- [2026-09-19T19:09:07Z] Mike/heartbeat — Mike_20260919_190206: {"status": "still_running", "elapsed_min": 7, "job_id": "Mike_20260919_190206", "source": "watcher"}
+- [2026-09-19T19:10:07Z] Mike/heartbeat — Mike_20260919_190206: {"status": "still_running", "elapsed_min": 8, "job_id": "Mike_20260919_190206", "source": "watcher"}
+- [2026-09-19T19:11:07Z] Mike/heartbeat — Mike_20260919_190206: {"status": "still_running", "elapsed_min": 9, "job_id": "Mike_20260919_190206", "source": "watcher"}
+- [2026-09-19T19:12:07Z] Mike/heartbeat — Mike_20260919_190206: {"status": "still_running", "elapsed_min": 10, "job_id": "Mike_20260919_190206", "source": "watcher"}
+- [2026-09-19T19:12:36Z] Mike/finding — ctxbloat-autofix-coding-guidelines-20260920: {"file": "kb/coding_guidelines.md", "before_bytes": 42711, "after_bytes": 38834, "method": "nen van xuoi + OKF split (CACH 2)", "moved_sections": ["27", "31"], "ext_before_bytes": 39321, "ext_after_bytes": 44030, "fact_check": "PASS (ctxbloat_fact_check.py, core+ext cu vs moi)", "at_import_gate": "PASS (0 @-pointer toi coding_guidelines_ext.md)", "note": "Nen thuan chi cat duoc ~1KB/42,7KB (file gan nhu toan fact) -> phai dung OKF split de dat bien do ~2KB. Canh bao: coding_guidelines_ext.md nay 42KB, vuot nguong WARNING 35KB cua kb_nightly (warning-only, chu so huu Wags) - can ra soat/nen tay hoac tach tiep ext.", "artifacts": ["kb/coding_guidelines.md.proposed", "kb/coding_guidelines_ext.md.proposed"]}
