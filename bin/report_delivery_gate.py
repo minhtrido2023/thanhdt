@@ -7,6 +7,7 @@ destinations must have durable, hash-bound success evidence.
 from __future__ import annotations
 
 import argparse
+import calendar
 import contextlib
 import datetime as dt
 import fcntl
@@ -14,6 +15,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import subprocess
 import sys
 import tempfile
@@ -104,6 +106,109 @@ def run_checked(cmd: list[str]) -> None:
     subprocess.run(cmd, check=True)
 
 
+# Period-return gate (D3, job Taylor_20260919_033902) — chỉ áp báo cáo SpaceX investor-facing.
+# Bug đã xác nhận: weekly 09-14->09-18 báo "Từ khi bắt đầu hoạt động −1,66%" trong khi canonical
+# (nav_period_returns.py, dùng vốn khởi điểm thật 1B thay vì dòng đầu nav_history) = −2,177%.
+# ZaloPay KHÔNG áp (kênh nội bộ, không gửi nhà đầu tư ngoài) — xem coding_guidelines §21/§28.
+PERIOD_RETURN_TOL_PP = 0.05  # điểm % — nhỏ hơn rounding hiển thị (2 chữ số) nhưng đủ rộng cho làm tròn
+
+
+def _is_spacex_investor_report(report: Path) -> bool:
+    name = report.name
+    if "SpaceX" in name and "ZaloPay" not in name:
+        return True
+    try:
+        head = report.read_text(encoding="utf-8", errors="ignore")[:2000]
+    except OSError:
+        return False
+    m = re.search(r"\*\*Đối tượng:\*\*\s*(.+)", head)
+    return bool(m and "nhà đầu tư ngoài" in m.group(1) and "không" not in m.group(1).lower())
+
+
+def _extract_report_date(name: str) -> str | None:
+    """Ngày dùng làm --report-date cho nav_period_returns.py, suy từ TÊN FILE (không đọc BQ)."""
+    full_dates = re.findall(r"\d{4}-\d{2}-\d{2}", name)
+    if full_dates:
+        return max(full_dates)  # weekly "..._to_YYYY-MM-DD": lấy ngày cuối kỳ (so sánh chuỗi ISO OK)
+    ym = re.search(r"(\d{4})-(\d{2})(?!-\d)", name)
+    if ym:
+        year, month = int(ym.group(1)), int(ym.group(2))
+        last_day = calendar.monthrange(year, month)[1]
+        return f"{year:04d}-{month:02d}-{last_day:02d}"
+    return None
+
+
+def _parse_inception_return_pct(text: str) -> float | None:
+    """Đọc dòng 'Từ khi bắt đầu hoạt động' trong bảng '### 3.2 Hiệu suất lũy kế', cột SpaceX
+    (cột thứ 2). Định dạng thật: '| Từ khi bắt đầu hoạt động (01/07 → 18/09) | −1,66% | ... |'
+    (dấu trừ Unicode U+2212, thập phân dấu phẩy)."""
+    for line in text.splitlines():
+        stripped = line.strip()
+        if "Từ khi bắt đầu hoạt động" in stripped and stripped.startswith("|"):
+            cells = [c.strip() for c in stripped.strip("|").split("|")]
+            if len(cells) < 2:
+                return None
+            m = re.search(r"([+\-−]?[\d.,]+)\s*%", cells[1])
+            if not m:
+                return None
+            num = m.group(1).replace("−", "-").replace(",", ".")
+            try:
+                return float(num)
+            except ValueError:
+                return None
+    return None
+
+
+def _check_period_returns(report: Path) -> None:
+    """BLOCK nếu 'Từ khi bắt đầu hoạt động' lệch canonical (nav_period_returns.py) >= tolerance.
+    Mọi trường hợp KHÔNG xác định được (không phải SpaceX investor-facing, không suy được
+    report-date, không parse được bảng, nav_period_returns.py lỗi/thiếu data) → WARN, KHÔNG BLOCK
+    (fail-open — coding_guidelines §28: không suy diễn từ sự vắng mặt/thiếu dữ liệu)."""
+    if not _is_spacex_investor_report(report):
+        return
+
+    report_date = _extract_report_date(report.name)
+    if report_date is None:
+        print(f"report_delivery_gate: WARN period-return check — không suy được report-date từ "
+              f"tên file {report.name}, bỏ qua", file=sys.stderr)
+        return
+
+    try:
+        text = report.read_text(encoding="utf-8")
+    except OSError as exc:
+        print(f"report_delivery_gate: WARN period-return check — không đọc được {report}: {exc}",
+              file=sys.stderr)
+        return
+
+    reported_pct = _parse_inception_return_pct(text)
+    if reported_pct is None:
+        print(f"report_delivery_gate: WARN period-return check — không parse được dòng 'Từ khi "
+              f"bắt đầu hoạt động' trong bảng Hiệu suất lũy kế của {report.name}, bỏ qua",
+              file=sys.stderr)
+        return
+
+    try:
+        proc = subprocess.run(
+            [sys.executable, str(ROOT / "bin" / "nav_period_returns.py"),
+             "--account", "SpaceX", "--report-date", report_date],
+            check=True, capture_output=True, text=True)
+        canonical = json.loads(proc.stdout)["inception"]["return_pct"]
+    except (subprocess.CalledProcessError, json.JSONDecodeError, KeyError) as exc:
+        print(f"report_delivery_gate: WARN period-return check — nav_period_returns.py lỗi/thiếu "
+              f"data ({exc}), bỏ qua (fail-open)", file=sys.stderr)
+        return
+
+    diff = abs(reported_pct - canonical)
+    if diff >= PERIOD_RETURN_TOL_PP:
+        raise RuntimeError(
+            f"period-return BLOCK ({report.name}): bảng ghi 'Từ khi bắt đầu hoạt động' = "
+            f"{reported_pct:+.2f}%, canonical (nav_period_returns.py --account SpaceX "
+            f"--report-date {report_date}) = {canonical:+.3f}% — lệch {diff:.3f}pp >= "
+            f"{PERIOD_RETURN_TOL_PP}pp tolerance")
+    print(f"report_delivery_gate: period-return PASS ({report.name}): {reported_pct:+.2f}% vs "
+          f"canonical {canonical:+.3f}% (lệch {diff:.3f}pp)")
+
+
 def deliver(report: Path, state_path: Path, topic: str, notify_script: Path,
             email_script: Path, skip_validation: bool = False) -> int:
     report = report.resolve()
@@ -138,6 +243,7 @@ def deliver(report: Path, state_path: Path, topic: str, notify_script: Path,
                 if not skip_validation:
                     run_checked([sys.executable, str(ROOT / "bin" / "report_return_gate.py"),
                                  "--report", str(report)])
+                    _check_period_returns(report)
                 record["artifact_validated_at"] = now()
                 save_atomic(state_path, state)
 
