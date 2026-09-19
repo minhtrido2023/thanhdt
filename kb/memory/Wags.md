@@ -1,4 +1,7 @@
 # Working memory — Wags
+> Cập nhật mỗi khi đổi mạch việc. Bơm vào đầu phiên của Wags.
+
+# Working memory — Wags
 > Sổ tay việc ĐANG MỞ. File này bơm vào đầu MỌI phiên/dispatch của Wags ⇒ mỗi dòng thừa là
 > context phải trả tiền lại từ đầu, mỗi lần.
 
@@ -12,7 +15,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Wags_history.md` — không mất, không auto-load.
 
-- [2026-09-07T01:22:30Z] coord-2026-09-07: vn-realestate-monthly-check-2026-09 = escalate THAT (CPI T8 4,89% relapse, driver cost-push xang dau, lam phat co ban 4,55% van duoi tran). Da ack triaged-needs-human suppress_days=7, khong sua file. CHO USER quyet: giu playbook 2026-08-26 / de-risk / tinh chinh nguong. Neu qua 7 ngay chua co answer -> cau hoi da sang aged_q WARN_ONLY, can nhac nhac user thu cong.
 - [2026-09-10T01:24:14Z] [2026-09-10] BAY rollup_of: dong sub-question voi ly do 'xem rollup' se tu dong dong LUON rollup (bus_question_audit.py:168 rollup_resolved) => ca chum bien mat du chua ai quyet. Neu gop, phai mo question thay the TRUOC. | CHO: user tra loi Wags/nav-price-xcheck-gate-can-quyet-dinh-user-2026-09-10 (A/B/C) — NAV 2026-09-09 con thieu, KHONG duoc backfill bang cach chay lai daily_nav_snapshot.py (broker_positions() luon LIVE + gate tat khi --date lich su => ghi so sai am tham).
 - [2026-09-12T06:17:12Z] CÒN TREO (2026-09-12, incident 2026-09-12-report-return-gate-worktree-root.md): state/report_delivery.json fork theo worktree ⇒ nguy cơ GỬI TRÙNG báo cáo nhà đầu tư — cần việc riêng (pin DEFAULT_STATE về cây canonical hoặc gộp sổ); 17 worktree vẫn chạy report_return_gate bản tiền-vá.
 BÀI HỌC: git commit --pathspec KHÔNG bảo vệ khi 2 job cùng sửa 1 file — commit đầu nuốt hunk đang dở của job song song, phải dựng lại tree bằng git commit-tree. Kiểm 'git show --stat HEAD' MỌI lần ship dưới MIKE_COMMIT_GATE=warn.
@@ -29,5 +31,5 @@ BÀI HỌC: generator ghi vào kb/ thì consolidator tự commit bản trung gia
 BÀI HỌC: pre-commit 'Stashing unstaged files' ở repo dùng chung nuốt file đang sửa dở khi job KHÁC commit — sau khi sửa, kiểm lại diff trước khi tin kết quả test. Và wire 1 selfcheck vào đường cron sẽ kéo cả probe giả của nó vào production manifest.
 - [2026-09-14T05:47:19Z] [2026-09-14] coord-2026-09-14 (job 054508): dong Q TV1 (user duyet plan qua Discord). CHO USER: aria-K-landed-before-schedule (A giu/B revert), da notify trading_daily + ack 2 ngay. NEXT: sau 14:55 14/09 kiem journal ZaloPay co ATC_POSTCLOSE_* khong; tripwire fail-loud arch-review yeu cau van CHUA xay.
 - [2026-09-14T08:44:32Z] [2026-09-14] wc-paths-dirname-sweep XONG, commit 8b3ae596 (20 file), arch-review 2 vong APPROVED. Follow-up KHONG lam (out of scope, da ghi bus): 25+ worktree/mike_paseo thieu bin/wc_paths.py (staleness co san tu truoc); 7 selfcheck test-only con dem cap dirname; wc_paths.py chua co selfcheck rieng.
-- [2026-09-17T01:21:31Z] [2026-09-17] coord-2026-09-17: CHO Taylor+user quyet Q zalopay-active-nav-excluded-ticker-dividend-receivable-option-c (active_nav ZaloPay cong 80tr co tuc DGC, han 25/09). Khong sua code sizing.
-- [2026-09-17T05:46:02Z] [2026-09-17 12:5x ICT] coord-2026-09-17 lan 2: Q option-c (active_nav ZaloPay +80tr co tuc DGC) DA notify user trading_daily + ack suppress 8 ngay. CHO user A/B/C; plan moi toi van size phong ~15% cho toi khi quyet.
+- [2026-09-19T04:40:00Z] [2026-09-19] coord-2026-09-19 XONG (4 vong arch-review, commit 1a3596e1/d4727a50/61709c70): gate tu dong escalate khi arch-review NEEDS_CHANGES 2 vong lien tiep cung topic trong 24h (wags_autofix.sh khoi WAGS_ROUND2_ESCALATE/CLOSE) LIVE. coord-2026-09-17 (ZaloPay active_nav dividend) da dong that qua Taylor commit baf1c51f.
+

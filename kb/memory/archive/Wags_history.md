@@ -300,3 +300,6 @@ BAI HOC: va NGUYEN NHAN thu N cua mot ho su co lap lai = dau hieu thieu MOT PHEP
 
 ## Archived 2026-09-16 (keep=6 days=5 require_done=True)
 - [2026-09-10T04:13:28Z] coord-2026-09-10 XONG ca 2 viec (VIEC 1 backup shape-4, VIEC 2 rollup_of circular-closure gate). Commit 2b0e7b67 + d7a123e3 (VIEC1), 9aece3af (VIEC2, gate co hoc trong close_bus_question.py --rollup-impact/--ack-rollup-auto-closes, 17/17 PASS). Da dong ca 2 question wags-fix-not-confirmed:coord-2026-09-09/-10 + notify Architecture. Question rieng nav-price-xcheck-gate-can-quyet-dinh-user-2026-09-10 CUNG DA DONG (user duyet phuong an C, Taylor implement commit c30e0580) - CHO trong entry 09-10T01:24:14Z het hieu luc, khong con viec Wags phai lam tiep tren mach nay.
+
+## Archived 2026-09-19 (keep=12 days=0 require_done=False)
+- [2026-09-07T01:22:30Z] coord-2026-09-07: vn-realestate-monthly-check-2026-09 = escalate THAT (CPI T8 4,89% relapse, driver cost-push xang dau, lam phat co ban 4,55% van duoi tran). Da ack triaged-needs-human suppress_days=7, khong sua file. CHO USER quyet: giu playbook 2026-08-26 / de-risk / tinh chinh nguong. Neu qua 7 ngay chua co answer -> cau hoi da sang aged_q WARN_ONLY, can nhac nhac user thu cong.
