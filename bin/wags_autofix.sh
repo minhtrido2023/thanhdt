@@ -358,6 +358,18 @@ except Exception: print(\"\")")"
   # WAGS_VERDICT_RECONCILE_END
 
   # 3) báo cáo hoàn tất vào topic architecture (user yêu cầu: báo khi issue hoàn tất)
+
+  # Đóng câu hỏi round-2-unresolved bằng BẰNG CHỨNG (round tiếp theo CONFIRMED), không
+  # phải self-report — đúng chính điều kiện (b) ở payload escalate trên. close_bus_question.py
+  # tự no-op an toàn (in ALREADY_CLOSED_OR_UNKNOWN, exit 0) khi không có gì đang pending dưới
+  # ref này, nên gọi vô điều kiện ở đây không tạo nhiễu khi chưa từng escalate.
+  if [ "$verdict" = "CONFIRMED" ]; then
+    python3 "$ROOT/bin/close_bus_question.py" "Wags/$LABEL-arch-review-round2-unresolved" \
+      --resolution "arch-review vong tiep theo tra CONFIRMED cho $LABEL - fix da duoc xac nhan that (khong phai Wags tu dong)" \
+      --evidence "verification bus arch-reviewer topic ARCH-REVIEW: wags-fix: $LABEL + finding wags-fix: $LABEL, pipelog '"$PIPELOG"'" \
+      --actor Wags >>"'"$PIPELOG"'" 2>&1 || true
+  fi
+
   if [ "$verdict" = "CONFIRMED" ] && [ -n "$verdict_disagree" ]; then
     _notify_arch "🟠 **[wags-autofix] Issue '"'"'$LABEL'"'"': CONFIRMED nhưng 2 nguồn LỆCH NHAU** — Wags đã sửa, verdict đọc được: **CONFIRMED** ($summary).$verdict_disagree Log pipeline: '"$PIPELOG"'"
   elif [ "$verdict" = "CONFIRMED" ]; then
@@ -379,6 +391,43 @@ except Exception: print(\"\")")"
     _post_q "wags-arch-review-inconclusive: $LABEL" \
       "{\"verdict\":\"$verdict\",\"verdict_stdout\":\"$verdict_stdout\",\"bus_verdict\":\"$bus_verdict\",\"wags_finding\":\"$_fnd\",\"note\":\"chuoi kiem chung KHONG ra phan quyet — KHONG phai arch-reviewer bac fix\",\"pipelog\":\"'"$PIPELOG"'\"}"
   fi
+
+  # WAGS_ROUND2_ESCALATE_BEGIN (marker cho bin/wags_arch_review_round2_selfcheck.py — nó
+  # TRÍCH đúng khối này ra chạy trên bus giả, KHÔNG copy thuật toán. Đổi/xoá marker ⇒
+  # selfcheck FAIL ngay thay vì im lặng bỏ qua.)
+  # Round-2-liên-tiếp escalation (user mandate 2026-09-19, retro-2026-09-17 +
+  # retro-2026-09-18): 2 verdict NEEDS_CHANGES/REFUTED LIÊN TIẾP cùng topic trong ≤24h là
+  # tín hiệu mạnh RIÊNG NÓ — không đợi checker aged-question 48h của ops_health_check mới
+  # phát hiện (đó là lý do câu hỏi round-2 của coord-2026-09-17 treo ~43h không ai biết:
+  # Wags tự đóng câu hỏi round-1 bằng self-report rồi coi như xong). Đọc THẲNG
+  # bus/inbox/arch-reviewer.jsonl (nguồn thật, không đoán từ stdout pipeline — cùng
+  # nguyên tắc verify-artifact-not-self-report đã áp cho wags_bus_verdict.py). Đặt SAU chuỗi
+  # if/elif/else verdict ở trên (không lồng vào nhánh NEEDS_CHANGES) để không xáo thứ tự 4
+  # call site _post_q đã có — wags_autofix_postq_selfcheck.py khớp theo VỊ TRÍ.
+  if [ "$verdict" = "NEEDS_CHANGES" ] || [ "$verdict" = "REFUTED" ]; then
+    _r2_prefix="ARCH-REVIEW: wags-fix: $LABEL"
+    _r2="$(python3 "$ROOT/bin/wags_arch_review_round2.py" "$ROOT/bus/inbox/arch-reviewer.jsonl" "$_r2_prefix" 2>>"'"$PIPELOG"'")"
+    _r2_escalate="false"; _r2_first_ts=""
+    read -r _r2_escalate _r2_first_ts <<<"$(printf "%s" "$_r2" | python3 -c "import json,sys
+try:
+    o = json.load(sys.stdin)
+    print(bool(o.get(\"escalate\")), o.get(\"first_ts\") or \"-\")
+except Exception:
+    print(\"false -\")" 2>/dev/null || echo "false -")"
+    if [ "$_r2_escalate" = "True" ]; then
+      [ "$_r2_first_ts" = "-" ] && _r2_first_ts=""
+      _r2_topic="$LABEL-arch-review-round2-unresolved"
+      if [ -n "$_r2_first_ts" ] && python3 "$ROOT/bin/mike_json.py" has-event-prefix "$ROOT/bus" Wags "$_r2_first_ts" \
+           "question:$_r2_topic" >>"'"$PIPELOG"'" 2>&1; then
+        echo "[wags-autofix] round-2 escalate $_r2_topic da mo tu truoc (>= $_r2_first_ts) - khong mo trung" >> "'"$PIPELOG"'"
+      else
+        _notify_arch "🔴 **[wags-autofix] '"'"'$LABEL'"'"' — arch-review NEEDS_CHANGES/REFUTED 2+ VÒNG LIÊN TIẾP trong ≤24h.** Đây KHÔNG phải câu hỏi round-1 thường — escalate RIÊNG cho Mike/user, KHÔNG đợi Wags tự trả lời lần nữa. Chi tiết vòng: $_r2"
+        _post_q "$_r2_topic" \
+          "{\"label\":\"$LABEL\",\"note\":\"arch-review NEEDS_CHANGES/REFUTED 2+ vong lien tiep cung topic trong <=24h - CAN NGUOI XU LY THAT, khong phai Wags tu dong bang self-report. Chi dong khi (a) user/Mike quyet qua close_bus_question.py, hoac (b) vong tiep theo cua chinh topic nay tra CONFIRMED (wags_autofix.sh tu doi chieu va tu dong).\",\"detail\":$_r2,\"pipelog\":\"'"$PIPELOG"'\"}"
+      fi
+    fi
+  fi
+  # WAGS_ROUND2_ESCALATE_END
   fi
 ' >> "$PIPELOG" 2>&1 < /dev/null &
 

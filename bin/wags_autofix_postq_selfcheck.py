@@ -122,8 +122,8 @@ def post_q_call_exprs():
     """
     src = SRC.read_text(encoding="utf-8")
     exprs = re.findall(r'^\s*_post_q\s+("[^\n]*?")\s*\\\n\s*("[^\n]*")\s*$', src, re.M)
-    if len(exprs) != 4:
-        print(f"❌ FATAL: cần đúng 4 call site _post_q trong {SRC}, tìm thấy {len(exprs)} — "
+    if len(exprs) != 5:
+        print(f"❌ FATAL: cần đúng 5 call site _post_q trong {SRC}, tìm thấy {len(exprs)} — "
               "hình dạng call site đã đổi, selfcheck VÔ HIỆU.")
         sys.exit(1)
     return exprs
@@ -283,8 +283,9 @@ def case_no_swallowing_call_sites_left():
     check("cấu trúc: KHÔNG còn call site nào ghi question mà nuốt lỗi (`|| true`)",
           not swallow, str(swallow)[:200])
     posts = [ln for ln in src.splitlines() if re.search(r"^\s*_post_q\s", ln)]
-    check("cấu trúc: cả 4 nhánh escalation (review-needed + dispatch-failed + NEEDS_CHANGES + inconclusive) đi qua _post_q",
-          len(posts) == 4, f"{len(posts)} call site: {posts}")
+    check("cấu trúc: cả 5 nhánh escalation (review-needed + dispatch-failed + NEEDS_CHANGES + "
+          "inconclusive + round2-unresolved) đi qua _post_q",
+          len(posts) == 5, f"{len(posts)} call site: {posts}")
     check("cấu trúc: _post_q được định nghĩa TRƯỚC mọi call site",
           src.index("_post_q()") < min(src.index(p) for p in posts) if posts else False)
     check("cấu trúc: _notify_arch (chốt 3) được định nghĩa trước _post_q dùng nó",
