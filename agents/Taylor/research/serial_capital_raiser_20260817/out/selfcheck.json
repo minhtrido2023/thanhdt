@@ -1,6 +1,6 @@
 {
   "offline": false,
-  "pass": 28,
+  "pass": 27,
   "total": 28,
   "results": [
     {
@@ -65,8 +65,8 @@
     },
     {
       "name": "T3c [BQ] survivors + dropped-dups + UNKNOWN = raw rows",
-      "ok": true,
-      "detail": "raw=7318 kept=7301 dup=12 unknown=5 lineage=7301"
+      "ok": false,
+      "detail": "raw=7327 kept=7310 dup=12 unknown=5 lineage=7301"
     },
     {
       "name": "T4a n_raise_3y reproduced by an independent Python recompute",
