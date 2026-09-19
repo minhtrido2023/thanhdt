@@ -372,7 +372,7 @@ except Exception: print(\"\")")"
   # không phải bằng chứng ngược.
   if [ "$bus_verdict" = "CONFIRMED" ]; then
     _r2close_rc=0
-    python3 "$ROOT/bin/close_bus_question.py" "Wags/$LABEL-arch-review-round2-unresolved" \
+    python3 "$ROOT/bin/close_bus_question.py" "Wags/wags-arch-review-round2-unresolved: $LABEL" \
       --resolution "bus verification THAT cua arch-reviewer (topic ARCH-REVIEW: wags-fix: $LABEL) = CONFIRMED - fix da duoc xac nhan bang artifact, khong phai Wags tu dong" \
       --evidence "bus_verdict=CONFIRMED doc tu bus/inbox/arch-reviewer.jsonl (khong phai stdout pipeline), finding wags-fix: $LABEL, pipelog '"$PIPELOG"'" \
       --actor Wags >>"'"$PIPELOG"'" 2>&1 || _r2close_rc=$?
@@ -421,16 +421,14 @@ except Exception: print(\"\")")"
     _r2_prefix="ARCH-REVIEW: wags-fix: $LABEL"
     _r2_now_iso="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
     _r2="$(python3 "$ROOT/bin/wags_arch_review_round2.py" "$ROOT/bus/inbox/arch-reviewer.jsonl" "$_r2_prefix" 24 "$_r2_now_iso" 2>>"'"$PIPELOG"'")"
-    _r2_escalate="false"; _r2_first_ts=""
-    read -r _r2_escalate _r2_first_ts <<<"$(printf "%s" "$_r2" | python3 -c "import json,sys
+    _r2_escalate="$(printf "%s" "$_r2" | python3 -c "import json,sys
 try:
     o = json.load(sys.stdin)
-    print(bool(o.get(\"escalate\")), o.get(\"first_ts\") or \"-\")
+    print(bool(o.get(\"escalate\")))
 except Exception:
-    print(\"false -\")" 2>/dev/null || echo "false -")"
+    print(\"false\")" 2>/dev/null || echo "false")"
     if [ "$_r2_escalate" = "True" ]; then
-      [ "$_r2_first_ts" = "-" ] && _r2_first_ts=""
-      _r2_topic="$LABEL-arch-review-round2-unresolved"
+      _r2_topic="wags-arch-review-round2-unresolved: $LABEL"
       if python3 "$ROOT/bin/wags_bus_question_pending.py" "$ROOT" Wags "$_r2_topic" >>"'"$PIPELOG"'" 2>&1; then
         echo "[wags-autofix] round-2 escalate $_r2_topic dang PENDING tu truoc - khong mo trung" >> "'"$PIPELOG"'"
       else

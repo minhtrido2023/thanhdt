@@ -359,8 +359,15 @@ ACK_MAX_SUPPRESS_DAYS = 14
 # checker nào đọc, tức nợ biến mất im lặng. Giờ đi đường question để người thấy trong báo
 # cáo ops hằng ngày, và nằm trong tuple này để KHÔNG kéo COORD_WARN dispatch lại chính
 # vòng fix vừa dừng (nó đang tự chạy tiếp — re-dispatch là chạy song song với chính nó).
+# THÊM 2026-09-19 (arch-review coord-2026-09-19 round 3, killer objection) — topic round-2-
+# escalation ("wags-arch-review-round2-unresolved: <LABEL>", bin/wags_autofix.sh khối
+# WAGS_ROUND2_ESCALATE) từng dùng dạng "<LABEL>-arch-review-round2-unresolved" (label-trước),
+# KHÔNG khớp startswith() của tuple này ⇒ rơi vào pending_q → COORD_WARN → tự dispatch lại
+# wags_autofix 2 lần/ngày cho tới khi người trả lời — đúng vòng lặp tự nuôi payload của chính
+# câu hỏi đó ghi rõ "KHÔNG đợi Wags tự trả lời lần nữa". Đã đổi topic sang dạng tiền-tố khớp
+# quy ước các nhánh khác VÀ thêm vào đây cùng lúc theo LUẬT ở trên.
 WAGS_SELF_Q_PREFIXES = ("wags-fix-not-confirmed:", "wags-arch-review-inconclusive:",
-                        "wags-autofix-review-needed:")
+                        "wags-autofix-review-needed:", "wags-arch-review-round2-unresolved:")
 # Cửa sổ ÂN HẠN trước khi 1 câu hỏi trở thành ROUTABLE (được phép kéo dispatch wags_autofix).
 # Sự cố THẬT 2026-08-17: Taylor đăng question `hybrid-fill-live-deadline-20260817` lúc
 # 02:01:45Z (đang trả lời chính dispatch mà Mike vừa giao lúc 02:00:06Z); một lần chạy

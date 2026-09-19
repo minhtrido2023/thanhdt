@@ -108,7 +108,10 @@ def case_audit_missing_fails_closed_as_not_pending():
     try:
         rc, err = run(d, "Wags", "foo-topic")
         check("bus_question_audit.py bị thiếu: exit=1 (fail-closed = không pending), không traceback vỡ ra",
-              rc == 1, f"rc={rc} err={err}")
+              rc == 1 and "Traceback" not in err, f"rc={rc} err={err}")
+        check("bus_question_audit.py bị thiếu: CÓ ghi dấu vết AUDIT_UNREADABLE ra stderr (không im "
+              "lặng lẫn với 'đã đóng thật' — arch-review coord-2026-09-19 round 3)",
+              "AUDIT_UNREADABLE" in err, f"err={err}")
     finally:
         shutil.rmtree(d, ignore_errors=True)
 

@@ -18,6 +18,7 @@ wags_bus_verdict_selfcheck.py / wags_autofix_postq_selfcheck.py:
 
 Chạy: python3 bin/wags_arch_review_round2_selfcheck.py   (exit 0 = PASS, 1 = FAIL)
 """
+import datetime as dt
 import json
 import os
 import re
@@ -37,6 +38,16 @@ BUS_AUDIT = ROOT / "bin" / "bus_question_audit.py"
 
 LABEL = "coord-2026-09-19"
 PREFIX = f"ARCH-REVIEW: wags-fix: {LABEL}"
+
+# arch-review coord-2026-09-19 round 3: Part B từng dùng mốc TUYỆT ĐỐI (2026-09-19T…) trong
+# lúc khối WAGS_ROUND2_ESCALATE giờ tính "fresh" bằng `date -u` (giờ CHẠY THẬT) — selfcheck sẽ
+# tự đỏ đúng 24h sau khi mốc tuyệt đối đó già hơn 24h, không liên quan gì tới lỗi thật. Mọi
+# fixture ts trong Part B giờ tính TƯƠNG ĐỐI so với "bây giờ" của chính lần chạy.
+_NOW = dt.datetime.now(dt.timezone.utc)
+
+
+def _iso(hours_ago=0.0):
+    return (_NOW - dt.timedelta(hours=hours_ago)).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 fails = []
 
@@ -63,9 +74,11 @@ def mkinbox(events):
     return d, path
 
 
-def run_detector(path, prefix=PREFIX, window=24):
-    p = subprocess.run([sys.executable, str(DETECTOR), path, prefix, str(window)],
-                        capture_output=True, text=True)
+def run_detector(path, prefix=PREFIX, window=24, now_iso=None):
+    args = [sys.executable, str(DETECTOR), path, prefix, str(window)]
+    if now_iso is not None:
+        args.append(now_iso)
+    p = subprocess.run(args, capture_output=True, text=True)
     try:
         out = json.loads(p.stdout.strip())
     except Exception:
@@ -200,6 +213,52 @@ def case_broken_input_is_safe():
         shutil.rmtree(d2, ignore_errors=True)
 
 
+# ── Ca 7b (required_change #4, arch-review coord-2026-09-19 round 3): streak MẠN TÍNH — mốc
+#    round đầu đã 3 ngày (first->latest > 24h, cửa sổ CŨ sẽ nói escalate=False vĩnh viễn), 2
+#    vòng GẦN NHẤT chỉ cách nhau 1h, now_iso NGAY sau round mới nhất ⇒ PHẢI vẫn escalate=True
+#    (mỏ neo last-two, không phải first->latest).
+def case_last_two_anchor_beats_first_to_latest():
+    now = dt.datetime.now(dt.timezone.utc)
+
+    def iso(hours_ago):
+        return (now - dt.timedelta(hours=hours_ago)).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    d, path = mkinbox([
+        ev(PREFIX, iso(72), {"verdict": "NEEDS_CHANGES"}),
+        ev(PREFIX, iso(2), {"verdict": "NEEDS_CHANGES"}),
+        ev(PREFIX, iso(1), {"verdict": "REFUTED"}),
+    ])
+    try:
+        rc, out, _ = run_detector(path, now_iso=iso(0))
+        check("streak mạn tính (round đầu 72h trước, 2 vòng gần nhất cách 1h): "
+              "escalate=True nhờ mỏ neo LAST-TWO (mỏ neo first->latest cũ sẽ cho False vì 71h>24h)",
+              rc == 0 and out and out.get("escalate") is True
+              and out.get("last_two_gap_hours") == 1.0, f"rc={rc} out={out}")
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+
+# ── Ca 7c: 2 vòng gần nhất SÁT nhau nhưng cả cụm đó đã CŨ so với now_iso thật (vd dữ liệu
+#    tĩnh/đồng bộ trễ) ⇒ KHÔNG escalate — "gần nhau" không đủ, phải "gần nhau VÀ gần NGAY BÂY GIỜ".
+def case_now_iso_staleness_blocks_escalate():
+    now = dt.datetime.now(dt.timezone.utc)
+
+    def iso(hours_ago):
+        return (now - dt.timedelta(hours=hours_ago)).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    d, path = mkinbox([
+        ev(PREFIX, iso(74), {"verdict": "NEEDS_CHANGES"}),
+        ev(PREFIX, iso(73), {"verdict": "REFUTED"}),
+    ])
+    try:
+        rc, out, _ = run_detector(path, now_iso=iso(0))
+        check("2 vòng gần nhau (1h) nhưng CẢ CỤM đã 73h trước 'now' thật: escalate=False, fresh=False",
+              rc == 1 and out and out.get("escalate") is False and out.get("fresh") is False,
+              f"rc={rc} out={out}")
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+
 # ══ Phần B — khối WAGS_ROUND2_ESCALATE trong wags_autofix.sh (trích, không copy) ═════════
 
 def extract_block():
@@ -260,6 +319,78 @@ def run_block(sandbox_root, verdict):
     return p.returncode, p.stderr, postq, notify, log
 
 
+# ══ Phần B2 — khối WAGS_ROUND2_CLOSE trong wags_autofix.sh (trích, không copy) ═══════════
+# arch-review coord-2026-09-19 round 3: bản trước KHÔNG có bất kỳ selfcheck nào chạy khối
+# này — comment ở wags_autofix.sh tự nhận "đổi/xoá marker ⇒ selfcheck FAIL ngay" là SAI (đã
+# xác minh: đổi tên marker mà toàn bộ file vẫn "OK: toàn bộ assertion PASS"). Đây chính là
+# đường mà bug topic-mismatch (close dùng ref khác hẳn topic mà escalate post) lọt qua.
+
+def extract_close_block():
+    src = AUTOFIX_SRC.read_text(encoding="utf-8")
+    m = re.search(r"# WAGS_ROUND2_CLOSE_BEGIN[^\n]*\n(.*?)[ \t]*# WAGS_ROUND2_CLOSE_END",
+                  src, re.S)
+    if not m:
+        return None
+    return m.group(1)
+
+
+_HARNESS_CLOSE = r"""
+ROOT=__ROOT__
+LABEL=__LABEL__
+BUS_VERDICT=__BUS_VERDICT__
+PIPELOG=__PIPELOG__
+NOTIFY_LOG=__NOTIFY_LOG__
+bash -c '
+  ROOT="'"$ROOT"'"; LABEL="'"$LABEL"'"; bus_verdict="'"$BUS_VERDICT"'"
+  NOTIFY_LOG="'"$NOTIFY_LOG"'"
+  _notify_arch() { printf "%s\n" "$1" >> "$NOTIFY_LOG"; }
+__BLOCK__
+'
+"""
+
+
+def run_close_block(sandbox_root, bus_verdict, close_stub_rc=0):
+    """Chạy khối WAGS_ROUND2_CLOSE thật (trích từ wags_autofix.sh) với close_bus_question.py
+    STUB (ghi lại argv, trả exit=close_stub_rc) — trả (rc, stderr, notify_log, pipelog,
+    stub_calls_jsonl)."""
+    block = extract_close_block()
+    if block is None:
+        return None
+    pipelog = os.path.join(sandbox_root, "pipe.log")
+    notify_log = os.path.join(sandbox_root, "notify.log")
+    script = (_HARNESS_CLOSE
+              .replace("__ROOT__", shlex.quote(sandbox_root))
+              .replace("__LABEL__", shlex.quote(LABEL))
+              .replace("__BUS_VERDICT__", shlex.quote(bus_verdict))
+              .replace("__PIPELOG__", shlex.quote(pipelog))
+              .replace("__NOTIFY_LOG__", shlex.quote(notify_log))
+              .replace("__BLOCK__", block))
+    sp = os.path.join(sandbox_root, "run_close.sh")
+    with open(sp, "w", encoding="utf-8") as f:
+        f.write(script)
+    env = dict(os.environ)
+    env["CLOSE_STUB_RC"] = str(close_stub_rc)
+    p = subprocess.run(["bash", sp], capture_output=True, text=True, env=env)
+    notify = Path(notify_log).read_text(encoding="utf-8") if os.path.exists(notify_log) else ""
+    log = Path(pipelog).read_text(encoding="utf-8") if os.path.exists(pipelog) else ""
+    stub_log = os.path.join(sandbox_root, "close_stub_calls.log")
+    calls = Path(stub_log).read_text(encoding="utf-8") if os.path.exists(stub_log) else ""
+    return p.returncode, p.stderr, notify, log, calls
+
+
+# Stub close_bus_question.py — KHÔNG dùng bản thật (bản thật gọi append_event.sh + đọc
+# resolver qua bus_question_audit.py thật, quá nặng để test riêng nhánh gate/error-surfacing
+# của khối CLOSE). Ghi lại argv nó nhận được (để đối chiếu ref byte-identical với topic mà
+# khối ESCALATE post) và trả exit code lấy từ env CLOSE_STUB_RC (mặc định 0 = thành công).
+_CLOSE_STUB = '''#!/usr/bin/env python3
+import json, os, sys
+log = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "close_stub_calls.log")
+with open(log, "a", encoding="utf-8") as f:
+    f.write(json.dumps(sys.argv[1:], ensure_ascii=False) + "\\n")
+sys.exit(int(os.environ.get("CLOSE_STUB_RC", "0")))
+'''
+
+
 def mksandbox(arch_events, wags_events=None):
     d = tempfile.mkdtemp(prefix="wags_round2_block_")
     os.makedirs(os.path.join(d, "bin"))
@@ -268,6 +399,8 @@ def mksandbox(arch_events, wags_events=None):
     shutil.copy2(MIKE_JSON, os.path.join(d, "bin", "mike_json.py"))
     shutil.copy2(PENDING_CHECK, os.path.join(d, "bin", "wags_bus_question_pending.py"))
     shutil.copy2(BUS_AUDIT, os.path.join(d, "bin", "bus_question_audit.py"))
+    with open(os.path.join(d, "bin", "close_bus_question.py"), "w", encoding="utf-8") as f:
+        f.write(_CLOSE_STUB)
     with open(os.path.join(d, "bus", "inbox", "arch-reviewer.jsonl"), "w", encoding="utf-8") as f:
         for e in arch_events:
             f.write(json.dumps(e, ensure_ascii=False) + "\n")
@@ -275,6 +408,68 @@ def mksandbox(arch_events, wags_events=None):
         for e in (wags_events or []):
             f.write(json.dumps(e, ensure_ascii=False) + "\n")
     return d
+
+
+# ── Ca 14: marker CLOSE phải còn ở đó
+def case_close_marker_exists():
+    blk = extract_close_block()
+    check("wags_autofix.sh: còn marker WAGS_ROUND2_CLOSE_BEGIN/END",
+          bool(blk) and "close_bus_question.py" in blk,
+          "không trích được khối — marker bị xoá/đổi tên?")
+
+
+# ── Ca 15: bus_verdict=CONFIRMED ⇒ close ĐƯỢC gọi, đúng ref, KHÔNG báo lỗi
+def case_close_calls_when_bus_confirmed():
+    d = mksandbox([])
+    try:
+        r = run_close_block(d, "CONFIRMED", close_stub_rc=0)
+        check("bus_verdict=CONFIRMED: close_bus_question.py ĐƯỢC gọi", bool(r and r[4].strip()), r and r[4])
+        expected_ref = f"Wags/wags-arch-review-round2-unresolved: {LABEL}"
+        got_ref = None
+        if r and r[4].strip():
+            got_ref = json.loads(r[4].splitlines()[0])[0]
+        check("ref đóng BYTE-IDENTICAL với topic mà khối ESCALATE post đi (chính bug session "
+              "này tìm thấy: 2 chuỗi khác nhau ⇒ close_bus_question.py no-op im lặng)",
+              got_ref == expected_ref, f"got={got_ref!r} expected={expected_ref!r}")
+        check("đóng THÀNH CÔNG: không báo Discord THẤT BẠI", r and "THẤT BẠI" not in r[2], r and r[2])
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+
+# ── Ca 16: bus_verdict=NEEDS_CHANGES ⇒ close KHÔNG được gọi (không tự đóng bằng verdict
+#    chưa xác nhận thật)
+def case_close_not_called_when_bus_needs_changes():
+    d = mksandbox([])
+    try:
+        r = run_close_block(d, "NEEDS_CHANGES", close_stub_rc=0)
+        check("bus_verdict=NEEDS_CHANGES: close_bus_question.py KHÔNG được gọi", r and r[4] == "", r and r[4])
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+
+# ── Ca 17: bus_verdict rỗng (bus im lặng, không tìm thấy verification) ⇒ KHÔNG được đóng —
+#    "không có bằng chứng" không phải "bằng chứng ngược"
+def case_close_not_called_when_bus_empty():
+    d = mksandbox([])
+    try:
+        r = run_close_block(d, "", close_stub_rc=0)
+        check("bus_verdict rỗng: close_bus_question.py KHÔNG được gọi", r and r[4] == "", r and r[4])
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+
+# ── Ca 18: close_bus_question.py thất bại (vd BLOCKED bởi rollup) ⇒ PHẢI thấy được, không
+#    bị nuốt bằng `|| true` (đây chính là điều required_change #2/#3 yêu cầu)
+def case_close_failure_is_surfaced():
+    d = mksandbox([])
+    try:
+        r = run_close_block(d, "CONFIRMED", close_stub_rc=4)
+        check("close_bus_question.py thất bại (exit=4): CÓ ghi dòng lỗi vào pipelog (không nuốt bằng || true)",
+              r and "loi exit=4" in r[3], r and r[3])
+        check("close_bus_question.py thất bại: CÓ báo Discord THẤT BẠI riêng (không im lặng)",
+              r and "THẤT BẠI" in r[2], r and r[2])
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
 
 
 # ── Ca 8: marker phải còn ở đó
@@ -286,17 +481,17 @@ def case_marker_exists():
 
 
 # ── Ca 9: verdict=NEEDS_CHANGES, round 2 vừa xảy ra trong bus, chưa có escalate trước đó
-#    ⇒ _post_q ĐƯỢC gọi với đúng topic "<LABEL>-arch-review-round2-unresolved"
+#    ⇒ _post_q ĐƯỢC gọi với đúng topic "wags-arch-review-round2-unresolved: <LABEL>"
 def case_escalates_when_round2_fresh():
     d = mksandbox([
-        ev(PREFIX, "2026-09-19T01:23:01Z", {"verdict": "NEEDS_CHANGES", "required_changes": ["x"]}),
-        ev(PREFIX, "2026-09-19T05:48:16Z", {"verdict": "NEEDS_CHANGES", "required_changes": ["y"]}),
+        ev(PREFIX, _iso(5), {"verdict": "NEEDS_CHANGES", "required_changes": ["x"]}),
+        ev(PREFIX, _iso(1), {"verdict": "NEEDS_CHANGES", "required_changes": ["y"]}),
     ])
     try:
         r = run_block(d, "NEEDS_CHANGES")
         check("round-2 mới, chưa từng escalate: khối chạy KHÔNG lỗi", r and r[0] == 0, r and r[1])
         check("round-2 mới: _post_q ĐƯỢC gọi với topic round2-unresolved đúng LABEL",
-              r and f"TOPIC={LABEL}-arch-review-round2-unresolved" in r[2], r and r[2])
+              r and f"TOPIC=wags-arch-review-round2-unresolved: {LABEL}" in r[2], r and r[2])
         check("round-2 mới: có báo Discord riêng (khác câu hỏi round-1 thường)",
               r and "2+ VÒNG LIÊN TIẾP" in r[3], r and r[3])
     finally:
@@ -307,7 +502,7 @@ def case_escalates_when_round2_fresh():
 #    (câu hỏi round-1 thường vẫn đi qua _post_q "wags-fix-not-confirmed" ở NHÁNH KHÁC, không
 #    phải khối này — khối này chỉ lo phần round-2-liên-tiếp).
 def case_no_escalate_on_round1_only():
-    d = mksandbox([ev(PREFIX, "2026-09-19T01:23:01Z", {"verdict": "NEEDS_CHANGES"})])
+    d = mksandbox([ev(PREFIX, _iso(1), {"verdict": "NEEDS_CHANGES"})])
     try:
         r = run_block(d, "NEEDS_CHANGES")
         check("chỉ round-1: khối chạy không lỗi", r and r[0] == 0, r and r[1])
@@ -321,8 +516,8 @@ def case_no_escalate_on_round1_only():
 #    `if verdict = NEEDS_CHANGES || REFUTED` chặn ngay từ đầu)
 def case_no_escalate_on_confirmed():
     d = mksandbox([
-        ev(PREFIX, "2026-09-19T01:23:01Z", {"verdict": "NEEDS_CHANGES"}),
-        ev(PREFIX, "2026-09-19T05:48:16Z", {"verdict": "NEEDS_CHANGES"}),
+        ev(PREFIX, _iso(5), {"verdict": "NEEDS_CHANGES"}),
+        ev(PREFIX, _iso(1), {"verdict": "NEEDS_CHANGES"}),
     ])
     try:
         r = run_block(d, "CONFIRMED")
@@ -337,20 +532,20 @@ def case_no_escalate_on_confirmed():
 def case_dedup_does_not_reopen():
     d = mksandbox(
         [
-            ev(PREFIX, "2026-09-19T01:00:00Z", {"verdict": "NEEDS_CHANGES"}),
-            ev(PREFIX, "2026-09-19T05:00:00Z", {"verdict": "NEEDS_CHANGES"}),
-            ev(PREFIX, "2026-09-19T09:00:00Z", {"verdict": "REFUTED"}),  # round 3, vẫn xấu
+            ev(PREFIX, _iso(9), {"verdict": "NEEDS_CHANGES"}),
+            ev(PREFIX, _iso(5), {"verdict": "NEEDS_CHANGES"}),
+            ev(PREFIX, _iso(1), {"verdict": "REFUTED"}),  # round 3, vẫn xấu
         ],
         wags_events=[{
             "agent_id": "Wags", "event_type": "question",
-            "topic": f"{LABEL}-arch-review-round2-unresolved",
-            "ts": "2026-09-19T05:00:05Z", "payload": {"label": LABEL},
+            "topic": f"wags-arch-review-round2-unresolved: {LABEL}",
+            "ts": _iso(4.99), "payload": {"label": LABEL},
             "event_id": "wags-round2-q-1",
         }],
     )
     try:
         r = run_block(d, "REFUTED")
-        check("đã escalate từ round-2 (mở lúc 05:00:05Z, sau first_ts 01:00:00Z của streak): "
+        check("đã escalate từ round-2 (mở ngay sau round 2, trước round 3 REFUTED): "
               "round-3 KHÔNG mở câu hỏi trùng — _post_q không được gọi",
               r and r[2] == "", r and r[2])
         check("có ghi dấu vết KHÔNG-mở-trùng vào pipelog (người đọc log hiểu vì sao im lặng)",
@@ -365,22 +560,21 @@ def case_dedup_does_not_reopen():
 def case_new_cluster_after_old_closed_escalates_again():
     d = mksandbox(
         [
-            ev(PREFIX, "2026-09-10T01:00:00Z", {"verdict": "NEEDS_CHANGES"}),
-            ev(PREFIX, "2026-09-10T05:00:00Z", {"verdict": "NEEDS_CHANGES"}),
-            ev(PREFIX, "2026-09-10T08:00:00Z", {"verdict": "CONFIRMED"}),  # cụm cũ đã đóng, reset streak
-            ev(PREFIX, "2026-09-19T01:00:00Z", {"verdict": "NEEDS_CHANGES"}),  # cụm MỚI
-            ev(PREFIX, "2026-09-19T05:00:00Z", {"verdict": "NEEDS_CHANGES"}),
+            ev(PREFIX, _iso(240), {"verdict": "NEEDS_CHANGES"}),           # cụm cũ, 10 ngày trước
+            ev(PREFIX, _iso(236), {"verdict": "NEEDS_CHANGES"}),
+            ev(PREFIX, _iso(232), {"verdict": "CONFIRMED"}),  # cụm cũ đã đóng, reset streak
+            ev(PREFIX, _iso(5), {"verdict": "NEEDS_CHANGES"}),  # cụm MỚI
+            ev(PREFIX, _iso(1), {"verdict": "NEEDS_CHANGES"}),
         ],
         wags_events=[{
             "agent_id": "Wags", "event_type": "question",
-            "topic": f"{LABEL}-arch-review-round2-unresolved",
-            "ts": "2026-09-10T05:00:05Z", "payload": {"label": LABEL},
+            "topic": f"wags-arch-review-round2-unresolved: {LABEL}",
+            "ts": _iso(235.99), "payload": {"label": LABEL},
             "event_id": "wags-round2-q-old",
         }, {
             "agent_id": "Mike", "event_type": "answer",
-            "topic": f"{LABEL}-arch-review-round2-unresolved",
-            "ts": "2026-09-10T06:00:00Z",
-            "payload": {"decided_by": "user", "resolution": "da xu ly cum cu (fixture: dong that)"},
+            "topic": f"wags-arch-review-round2-unresolved: {LABEL}",
+            "ts": _iso(234), "payload": {"decided_by": "user", "resolution": "da xu ly cum cu (fixture: dong that)"},
             "event_id": "wags-round2-q-old-closed",
         }],
     )
@@ -388,19 +582,23 @@ def case_new_cluster_after_old_closed_escalates_again():
         r = run_block(d, "NEEDS_CHANGES")
         check("cụm cũ đã đóng (CONFIRMED reset streak) + cụm mới xấu 2 vòng: "
               "PHẢI escalate lại (first_ts cụm mới > ts câu hỏi cũ, dedup không chặn oan)",
-              r and f"TOPIC={LABEL}-arch-review-round2-unresolved" in r[2], r and r[2])
+              r and f"TOPIC=wags-arch-review-round2-unresolved: {LABEL}" in r[2], r and r[2])
     finally:
         shutil.rmtree(d, ignore_errors=True)
 
 
 def main():
-    print("wags_arch_review_round2_selfcheck: detector (A) + khối escalate trong wags_autofix.sh (B)")
+    print("wags_arch_review_round2_selfcheck: detector (A) + khối escalate (B) + khối close (B2) trong wags_autofix.sh")
     for fn in (case_two_needs_changes_within_window_escalates, case_single_needs_changes_no_escalate,
                case_two_bad_verdicts_outside_window_no_escalate, case_confirmed_resets_streak,
                case_three_rounds_still_escalates, case_topic_prefix_scope, case_broken_input_is_safe,
+               case_last_two_anchor_beats_first_to_latest, case_now_iso_staleness_blocks_escalate,
                case_marker_exists, case_escalates_when_round2_fresh, case_no_escalate_on_round1_only,
                case_no_escalate_on_confirmed, case_dedup_does_not_reopen,
-               case_new_cluster_after_old_closed_escalates_again):
+               case_new_cluster_after_old_closed_escalates_again,
+               case_close_marker_exists, case_close_calls_when_bus_confirmed,
+               case_close_not_called_when_bus_needs_changes, case_close_not_called_when_bus_empty,
+               case_close_failure_is_surfaced):
         print(f"\n[{fn.__name__}]")
         fn()
     if fails:

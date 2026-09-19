@@ -592,7 +592,7 @@ def case_owner_hint_unmatched_agent_no_dispatch():
 #    dispatch coord-2026-08-12 → INCONCLUSIVE → question coord-2026-08-12). Selfcheck chỉ pin
 #    một mẫu đại diện thì không bắt được lớp lỗi "quên mở rộng danh sách".
 WAGS_SELF_Q_PREFIXES = ("wags-fix-not-confirmed:", "wags-arch-review-inconclusive:",
-                        "wags-autofix-review-needed:")
+                        "wags-autofix-review-needed:", "wags-arch-review-round2-unresolved:")
 
 
 def case_wagsfix_not_confirmed_is_warn_only():

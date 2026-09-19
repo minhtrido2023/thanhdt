@@ -38,11 +38,16 @@ def main():
         r = subprocess.run([sys.executable, audit, "--json"], env=env,
                             capture_output=True, text=True, timeout=30)
         pending = json.loads(r.stdout).get("pending", [])
-    except (OSError, subprocess.SubprocessError, json.JSONDecodeError, ValueError):
+    except (OSError, subprocess.SubprocessError, json.JSONDecodeError, ValueError) as exc:
         # Không đọc được audit ⇒ KHÔNG có bằng chứng "đang pending" ⇒ fail-closed như
         # "không pending" (để caller đi nhánh escalate/mở mới thay vì im lặng nuốt mất một
         # sự cố thật vì audit tạm thời lỗi — cùng nguyên tắc bus im lặng = không có bằng
-        # chứng đã dùng ở WAGS_VERDICT_RECONCILE).
+        # chứng đã dùng ở WAGS_VERDICT_RECONCILE). Nhưng "không đọc được" và "chắc chắn đã
+        # đóng" là 2 sự thật KHÁC nhau — im ru như nhau trong log sẽ khiến audit lỗi thoáng
+        # qua (timeout, bus hỏng tạm) trông y hệt "đã xử lý xong", không ai phát hiện được
+        # nó cứ escalate lặp lại mà không rõ lý do (arch-review coord-2026-09-19 round 3).
+        print(f"wags_bus_question_pending: AUDIT_UNREADABLE ({exc!r}) -> treating as NOT pending",
+              file=sys.stderr)
         return 1
     for q in pending:
         if q.get("agent") == agent and q.get("topic") == topic:
