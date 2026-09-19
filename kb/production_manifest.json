@@ -2048,7 +2048,8 @@
    "blast_tier": "T3",
    "covers": [
     "mike/bin/append_event.sh",
-    "mike/bin/bus_question_audit.py"
+    "mike/bin/bus_question_audit.py",
+    "mike/bin/close_bus_question.py"
    ],
    "depth": null,
    "parent": "mike/bin/append_event.sh",
@@ -2226,6 +2227,21 @@
    "tier_parent": null,
    "tier_root": null,
    "via": "selfcheck"
+  },
+  "mike/bin/close_bus_question.py": {
+   "blast_tier": "T2",
+   "depth": 2,
+   "parent": "mike/bin/wags_autofix.sh",
+   "roots": [
+    "cron `0 19 * * *` kb_nightly.sh",
+    "cron `0 3 * * 0` code_quality_weekly.sh",
+    "cron `20 1 * * 1-5` ops_health_check.sh",
+    "cron `45 5 * * 1-5` ops_health_check.sh"
+   ],
+   "tier": "T2",
+   "tier_parent": "mike/bin/wags_autofix.sh",
+   "tier_root": "cron `20 1 * * 1-5` ops_health_check.sh",
+   "via": "exec"
   },
   "mike/bin/code_quality_autodispatch.py": {
    "blast_tier": "T2",
@@ -3643,6 +3659,23 @@
    "tier_root": null,
    "via": "selfcheck"
   },
+  "mike/bin/nav_period_returns.py": {
+   "blast_tier": "T0",
+   "depth": 2,
+   "parent": "mike/bin/report_delivery_gate.py",
+   "roots": [
+    "cron `0 2 * * 6` check_report_cadence.sh",
+    "cron `0 2 1 * *` check_report_cadence.sh",
+    "cron `10 12 * * 1-5` eod_trading_report.sh",
+    "cron `20 1 * * 1-5` ops_health_check.sh",
+    "cron `30 1 * * *` check_report_cadence.sh",
+    "cron `45 5 * * 1-5` ops_health_check.sh"
+   ],
+   "tier": "T0",
+   "tier_parent": "mike/bin/report_delivery_gate.py",
+   "tier_root": "cron `10 12 * * 1-5` eod_trading_report.sh",
+   "via": "exec"
+  },
   "mike/bin/nav_scripts_2account_selfcheck.py": {
    "blast_tier": "T3",
    "covers": [
@@ -4298,10 +4331,11 @@
   "mike/bin/report_delivery_gate_selfcheck.py": {
    "blast_tier": "T3",
    "covers": [
+    "mike/bin/nav_period_returns.py",
     "mike/bin/report_delivery_gate.py"
    ],
    "depth": null,
-   "parent": "mike/bin/report_delivery_gate.py",
+   "parent": "mike/bin/nav_period_returns.py",
    "roots": [],
    "tier": "T3",
    "tier_parent": null,
@@ -4901,6 +4935,39 @@
    "tier_root": "cron `0 20 6 * *` vn_realestate_monthly_check.sh",
    "via": "exec"
   },
+  "mike/bin/wags_arch_review_round2.py": {
+   "blast_tier": "T2",
+   "depth": 2,
+   "parent": "mike/bin/wags_autofix.sh",
+   "roots": [
+    "cron `0 19 * * *` kb_nightly.sh",
+    "cron `0 3 * * 0` code_quality_weekly.sh",
+    "cron `20 1 * * 1-5` ops_health_check.sh",
+    "cron `45 5 * * 1-5` ops_health_check.sh"
+   ],
+   "tier": "T2",
+   "tier_parent": "mike/bin/wags_autofix.sh",
+   "tier_root": "cron `20 1 * * 1-5` ops_health_check.sh",
+   "via": "exec"
+  },
+  "mike/bin/wags_arch_review_round2_selfcheck.py": {
+   "blast_tier": "T3",
+   "covers": [
+    "mike/bin/bus_question_audit.py",
+    "mike/bin/close_bus_question.py",
+    "mike/bin/mike_json.py",
+    "mike/bin/wags_arch_review_round2.py",
+    "mike/bin/wags_autofix.sh",
+    "mike/bin/wags_bus_question_pending.py"
+   ],
+   "depth": null,
+   "parent": "mike/bin/bus_question_audit.py",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
+  },
   "mike/bin/wags_autofix.sh": {
    "blast_tier": "T2",
    "depth": 1,
@@ -4923,6 +4990,35 @@
    ],
    "depth": null,
    "parent": "mike/bin/wags_autofix.sh",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
+  },
+  "mike/bin/wags_bus_question_pending.py": {
+   "blast_tier": "T2",
+   "depth": 2,
+   "parent": "mike/bin/wags_autofix.sh",
+   "roots": [
+    "cron `0 19 * * *` kb_nightly.sh",
+    "cron `0 3 * * 0` code_quality_weekly.sh",
+    "cron `20 1 * * 1-5` ops_health_check.sh",
+    "cron `45 5 * * 1-5` ops_health_check.sh"
+   ],
+   "tier": "T2",
+   "tier_parent": "mike/bin/wags_autofix.sh",
+   "tier_root": "cron `20 1 * * 1-5` ops_health_check.sh",
+   "via": "exec"
+  },
+  "mike/bin/wags_bus_question_pending_selfcheck.py": {
+   "blast_tier": "T3",
+   "covers": [
+    "mike/bin/bus_question_audit.py",
+    "mike/bin/wags_bus_question_pending.py"
+   ],
+   "depth": null,
+   "parent": "mike/bin/bus_question_audit.py",
    "roots": [],
    "tier": "T3",
    "tier_parent": null,
@@ -7021,7 +7117,7 @@
    "via": "exec"
   }
  },
- "generated_at": "2026-09-18T20:47:24Z",
+ "generated_at": "2026-09-19T04:34:42Z",
  "generated_by": "python3 mike/bin/production_manifest.py",
  "roots": [
   {
@@ -7984,6 +8080,22 @@
    "tier": "T1"
   },
   {
+   "command": "/workspace/claude-code-discord-bridge/.venv/bin/python -m claude_discord.main",
+   "in_repo_files": [],
+   "kind": "unit",
+   "schedule": "ccdb-mike.service",
+   "script": "unit:ccdb-mike.service",
+   "tier": "T2"
+  },
+  {
+   "command": "/home/trido/.nvm/versions/node/v22.23.0/bin/paseo start --foreground",
+   "in_repo_files": [],
+   "kind": "unit",
+   "schedule": "paseo.service",
+   "script": "unit:paseo.service",
+   "tier": "T2"
+  },
+  {
    "command": "/home/trido/thanhdt/WorkingClaude/mike/hooks/session_start.sh",
    "in_repo_files": [
     "mike/hooks/session_start.sh"
@@ -8014,6 +8126,6 @@
    "tier": "T2"
   }
  ],
- "units_status": "unavailable",
+ "units_status": "ok",
  "untracked_refs": []
 }
