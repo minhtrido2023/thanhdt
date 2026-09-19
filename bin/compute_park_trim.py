@@ -81,6 +81,13 @@ dư tiền (không có khái niệm chưa-settle/chưa-về) nên "toàn bộ ti
 hưởng nhỏ và về phía AN TOÀN (mẫu số lớn hơn ⇒ trần PARK lớn hơn ⇒ bán ÍT hơn): SpaceX 68,97% vs
 70,05%, ZaloPay 95,79% vs 97,96% — không đổi quyết định ở cả hai account.
 
+⚠️ Quyết định trên là mặc định cho cổ tức của mã BÌNH THƯỜNG — §pool-excl-div dưới đây SỬA ĐỔI nó
+riêng cho cổ tức của mã trong `excluded_tickers` (khoản đó bị LOẠI khỏi mẫu số, không "giữ nguyên
+như tiền đã thuộc về mình" nữa) vì lý do khác hẳn: mã excluded không tham gia rổ V2.4 nên khoản
+receivable của nó không phải là "tiền engine backtest coi là một số dư" — nó là tiền của một vị thế
+NGOÀI chiến lược đang chờ về, giống hệt lý do `manual_offbook_assets_vnd` không được tính vào sức
+mua thực thi.
+
 NỢ MARGIN bị TRỪ (`− totalDebt`, thêm cùng ngày sau phản biện quant-skeptic). Mẫu số phải là VỐN
 CHỦ SỞ HỮU nhàn rỗi; không trừ thì nó phồng lên đúng bằng tiền đi vay ⇒ trần PARK cao giả ⇒
 UNDER-trim — chế độ hỏng NGƯỢC LẠI với bug vừa sửa, cùng một gốc "quên net một field bảng cân
@@ -111,6 +118,20 @@ khi user làm rõ quy trình vận hành thật (rút Trứng vàng trong giờ 
 không phí) — khác `check_plan_funding()`/`executor.py` (gate thực thi thật) VẪN loại egg, xem
 `kb/coding_guidelines.md` §25 cho ranh giới đầy đủ.
 
+§pool-excl-div — LOẠI cổ tức receivable của mã EXCLUDED khỏi mẫu số (sửa 2026-09-19/09-21, quyết
+định A, bus `Taylor/zalopay-park-trim-pool-same-dgc-dividend-phantom`, dispatch
+`Taylor_20260919_052437`). Sự cố: ZaloPay DGC (excluded) có 80.000.000đ cổ tức receivable nằm
+trong `totalCash` từ 2026-09-14 — §pool-egg-div ở trên CỐ Ý giữ mọi cổ tức receivable trong mẫu số,
+nhưng con số 80tr này LỚN hơn nhiều ví dụ gốc (08-07: ~5,8tr ZaloPay) và LẬT quyết định thật của
+`plan_ZaloPay_2026-09-21.json`: giữ 80tr ảo ⇒ pool=266,2tr, target=213,0tr, delta +42,7tr ⇒
+NO_TRIM; loại 80tr ảo ⇒ pool=186,2tr, target=149,0tr, delta −21,3tr ⇒ TRIM ~21,3tr (vượt ngưỡng
+0,93tr). Cùng gốc bug với active_nav (`compute_active_nav.py` §excluded_dividend, Option B,
+commit `baf1c51f`) — TÁI SỬ DỤNG nguyên hàm `excluded_dividend_pending()` từ đó (không chép lại
+logic): trừ vào `cash` phần cổ tức receivable thuộc mã trong `excluded_tickers`, theo config
+`excluded_dividend_receivable` trong `trading_bot_accounts.json`. Mã KHÔNG bị exclude vẫn giữ
+NGUYÊN hành vi §pool-egg-div gốc (cổ tức receivable CÓ nằm trong mẫu số) — chỉ phần thuộc mã
+excluded mới bị loại.
+
 FAIL-CLOSED per-name (sao chép nguyên `cap_lag_orders._block`): không đo được ADV / ADV cũ
 hơn LAG_ADV_MAX_STALE_DAYS / ADV ≤ 0 / không dựng được danh sách account live ⇒ KHÔNG trim mã
 đó phiên này.
@@ -128,7 +149,8 @@ import wc_paths  # noqa: E402
 WC_ROOT = wc_paths.find_wc_root(__file__)
 sys.path.insert(0, WC_ROOT)
 
-from park_holdings import park_holdings, today_ict          # noqa: E402
+from park_holdings import account_profile, park_holdings, today_ict  # noqa: E402
+from compute_active_nav import excluded_dividend_pending     # noqa: E402
 from trading_bot.plan import (LAG_ADV_PCT, LAG_ADV_MAX_STALE_DAYS,  # noqa: E402
                               _adv_for_gate)
 from trading_bot.vn_market import LOT, round_lot            # noqa: E402
@@ -256,8 +278,14 @@ def live_price_fn(asof):
 
 def compute_trim(account_label, asof=None, target=PARK_TARGET_F1, holdings=None,
                  share_override=None, adv_fn=None, day_cap_override=None,
-                 basket_override=None, price_fn=None):
-    """Trả dict mô tả đầy đủ quyết định. `*_override`/`*_fn` chỉ để selfcheck bơm dữ liệu."""
+                 basket_override=None, price_fn=None, excluded_dividend_config_override=None):
+    """Trả dict mô tả đầy đủ quyết định. `*_override`/`*_fn` chỉ để selfcheck bơm dữ liệu.
+
+    `excluded_dividend_config_override`: bơm thẳng danh sách `excluded_dividend_receivable`
+    (bỏ qua `account_profile(account_label)`) — production để None (account_label THẬT phải
+    tồn tại trong trading_bot_accounts.json); selfcheck dùng account_label giả ("TEST") nên
+    PHẢI bơm qua đây, không thì account_profile() sẽ raise SystemExit (§pool-excl-div).
+    """
     asof = asof or today_ict()
     h = holdings if holdings is not None else park_holdings(account_label, asof)
     adv_fn = adv_fn or _adv_for_gate
@@ -348,10 +376,28 @@ def compute_trim(account_label, asof=None, target=PARK_TARGET_F1, holdings=None,
     # Trứng vàng (§pool-egg) — vốn CHỦ SỞ HỮU thật, chỉ thiếu thanh khoản tức thời (cần rút T+1),
     # nên cộng vào mẫu số "sở hữu bao nhiêu" giống totalCash, KHÔNG giống availableCash của L2.
     egg = float(h.get("egg_assets_vnd") or 0.0)
+    # §pool-excl-div — cổ tức receivable của mã EXCLUDED (vd DGC/ZaloPay) bị loại khỏi pool tới
+    # khi tiền thật về, CÙNG cơ chế `excluded_dividend_pending()` đã wire trong
+    # `compute_active_nav.py` (Option B, user quyết 2026-09-19). §pool-egg-div ở trên vẫn giữ
+    # NGUYÊN cho mã KHÔNG bị exclude — chỉ đây, không phải mọi cổ tức, mới là "chưa về".
+    excl_set = set(h["excluded_tickers"])
+    excl_div_config = (excluded_dividend_config_override if excluded_dividend_config_override
+                       is not None else account_profile(account_label).get(
+                           "excluded_dividend_receivable") or [])
+    excl_div_pending, excl_div_detail = excluded_dividend_pending(
+        excl_set, excl_div_config, h.get("cash_dividend_receiving_vnd"), asof)
+    cash -= excl_div_pending
     out["cash_basis"] = h.get("cash_basis")
     out["cash_dividend_receiving_vnd"] = h.get("cash_dividend_receiving_vnd")
     out["cash_debt_vnd"] = h.get("cash_debt_vnd")
     out["egg_assets_vnd"] = egg
+    out["excluded_dividend_receivable_pending_vnd"] = excl_div_pending
+    out["excluded_dividend_receivable_detail"] = excl_div_detail
+    if excl_div_pending:
+        out["notes"].append(
+            f"⚠️ pool đã LOẠI {excl_div_pending/1e6:,.1f}tr cổ tức receivable của mã excluded "
+            f"({', '.join(sorted({d['ticker'] for d in excl_div_detail}))}) — chưa thật sự về "
+            f"(Option B, cùng cơ chế compute_active_nav.py). CHÉP dòng này vào notes plan.")
     pool = cash + egg + park_mv
     target_value = pool * target
     delta = target_value - park_mv
@@ -601,10 +647,12 @@ def main():
             - (r.get("cash_dividend_receiving_vnd") or 0)
         _debt = r.get("cash_debt_vnd") or 0
         _egg = r.get("egg_assets_vnd") or 0
-        print(f"  pool = cash {((r['cash_total_vnd'] or 0) - _debt)/1e6:,.2f}tr (totalCash: settled "
-              f"{(r['cash_available_vnd'] or 0)/1e6:,.2f} + bán chưa settle {_unset/1e6:,.2f} "
-              f"+ cổ tức chờ {(r.get('cash_dividend_receiving_vnd') or 0)/1e6:,.2f} "
-              f"− nợ margin {_debt/1e6:,.2f}) + Trứng vàng {_egg/1e6:,.2f}tr + PARK "
+        _excl_div = r.get("excluded_dividend_receivable_pending_vnd") or 0
+        print(f"  pool = cash {((r['cash_total_vnd'] or 0) - _debt - _excl_div)/1e6:,.2f}tr "
+              f"(totalCash: settled {(r['cash_available_vnd'] or 0)/1e6:,.2f} + bán chưa settle "
+              f"{_unset/1e6:,.2f} + cổ tức chờ {(r.get('cash_dividend_receiving_vnd') or 0)/1e6:,.2f} "
+              f"− nợ margin {_debt/1e6:,.2f} − cổ tức mã excluded (chưa về) {_excl_div/1e6:,.2f}) "
+              f"+ Trứng vàng {_egg/1e6:,.2f}tr + PARK "
               f"{r['park_mv_vnd']/1e6:,.2f}tr = {r['pool_vnd']/1e6:,.2f}tr")
         print(f"  target {r['target_park']:.0%} = {r['target_park_vnd']/1e6:,.2f}tr  →  "
               f"vượt {max(0, -r['delta_vnd'])/1e6:,.2f}tr "

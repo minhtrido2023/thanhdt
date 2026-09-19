@@ -137,6 +137,9 @@ def run(h, state=None, basket=None, **kw):
         kw.setdefault("day_cap_override", BIG_CAP)
         kw.setdefault("basket_override", BASKET if basket is None else basket)
         kw.setdefault("price_fn", price_fn())
+        # account_label "TEST" không tồn tại trong trading_bot_accounts.json ⇒ PHẢI bơm config
+        # cổ tức mã excluded qua override, không thì account_profile() raise (§pool-excl-div).
+        kw.setdefault("excluded_dividend_config_override", [])
         return cpt.compute_trim("TEST", ASOF, 0.80, holdings=h, **kw)
     finally:
         cpt.STATE_FILE = old
@@ -586,6 +589,56 @@ try:
     check("T20c giá 0 cũng bị coi là THIẾU (không nhân 0 vào park_mv)", False, "không raise")
 except SystemExit:
     check("T20c giá 0 cũng bị coi là THIẾU (không nhân 0 vào park_mv)", True)
+
+# ── T21: §pool-excl-div (2026-09-19/09-21) — cổ tức receivable của mã EXCLUDED bị loại khỏi
+# pool, tái lập ĐÚNG ca thật ZaloPay DGC (80tr) lật quyết định NO_TRIM ⇔ TRIM. Cùng cơ chế
+# excluded_dividend_pending() đã wire trong compute_active_nav.py (Option B, commit baf1c51f) —
+# compute_trim() gọi hàm đó qua compute_park_trim.py, kiểm ở đây qua compute_trim() thật (không
+# cần import trực tiếp — bản thân test này chính là bài kiểm tra tích hợp của hàm đó).
+
+DGC_CFG = [{"ticker": "XCL", "amount_vnd": 80_000_000,
+           "expected_arrival_date": "2026-09-25"}]
+# Sổ: PARK 1.000tr (BASE_LOTS) + XCL (excluded) giữ vị thế legacy, cash_total 300tr trong đó
+# cashDividendReceiving=80tr (toàn bộ là của XCL) ⇒ (a) pool PHẢI loại 80tr đó.
+h21 = holdings(BASE_LOTS, cash=0.0, total_cash=300e6, debt=0.0,
+              div_recv=80e6, excluded=("XCL",))
+r21_no_excl = run(h21, excluded_dividend_config_override=[])
+r21_excl = run(h21, excluded_dividend_config_override=DGC_CFG)
+check("T21a KHÔNG khai excluded_dividend_receivable ⇒ 80tr vẫn CÒN trong pool (hành vi cũ, "
+      "CHỨNG MINH NGƯỢC cho thấy bug thật: pool=1.300tr)",
+      close(r21_no_excl["pool_vnd"], 1_300e6, 1) and r21_no_excl["decision"] == "NO_TRIM",
+      f"{r21_no_excl['decision']} pool={r21_no_excl.get('pool_vnd')}")
+check("T21b (a) khai excluded_dividend_receivable=XCL 80tr ⇒ pool LOẠI đúng 80tr đó "
+      "(pool=1.220tr, KHÔNG PHẢI 1.300tr)",
+      close(r21_excl["pool_vnd"], 1_220e6, 1),
+      f"pool={r21_excl.get('pool_vnd')}")
+check("T21c (a) 80tr bị loại LẬT quyết định NO_TRIM → TRIM (đúng ca thật ZaloPay 2026-09-21: "
+      "giữ 80tr ảo ⇒ NO_TRIM, loại 80tr ảo ⇒ TRIM)",
+      r21_no_excl["decision"] == "NO_TRIM" and r21_excl["decision"] == "TRIM",
+      f"{r21_no_excl['decision']} → {r21_excl['decision']}")
+check("T21d excluded_dividend_receivable_pending_vnd ghi đúng 80tr vào output (audit trail)",
+      r21_excl.get("excluded_dividend_receivable_pending_vnd") == 80e6,
+      r21_excl.get("excluded_dividend_receivable_pending_vnd"))
+check("T21e note cảnh báo LOẠI cổ tức excluded được ghi ra (để chép vào notes plan)",
+      any("cổ tức receivable của mã excluded" in n for n in r21_excl["notes"]),
+      r21_excl["notes"])
+
+# (b) mã KHÔNG bị exclude vẫn giữ NGUYÊN hành vi §pool-egg-div gốc — cổ tức receivable của mã
+# ĐANG GIỮ TRONG RỔ (không excluded) KHÔNG bị loại, dù có khai excluded_dividend_receivable cho
+# một mã KHÁC. Cùng sổ h21 nhưng cấu hình dividend thuộc "AAA" (không phải "XCL") ⇒ AAA không nằm
+# trong excluded_tickers ⇒ excluded_dividend_pending() phải bỏ qua entry đó (§ hàm: `tk not in
+# excluded_tickers ⇒ continue`) — pool phải Y HỆT r21_no_excl (không loại gì).
+AAA_CFG = [{"ticker": "AAA", "amount_vnd": 80_000_000,
+           "expected_arrival_date": "2026-09-25"}]
+r21_aaa = run(h21, excluded_dividend_config_override=AAA_CFG)
+check("T21f (b) cổ tức của mã KHÔNG bị exclude (AAA, dù có entry config) KHÔNG bị loại khỏi pool "
+      "— giữ NGUYÊN thiết kế cũ §pool-egg-div (pool=1.300tr, y hệt T21a)",
+      close(r21_aaa["pool_vnd"], 1_300e6, 1) and r21_aaa["decision"] == "NO_TRIM",
+      f"{r21_aaa['decision']} pool={r21_aaa.get('pool_vnd')}")
+check("T21g (b) excluded_dividend_receivable_pending_vnd = 0 khi entry config không khớp mã "
+      "excluded nào (AAA không trong excluded_tickers)",
+      r21_aaa.get("excluded_dividend_receivable_pending_vnd") == 0.0,
+      r21_aaa.get("excluded_dividend_receivable_pending_vnd"))
 
 print(f"\n=== {len(PASS)} PASS / {len(FAIL)} FAIL ===")
 if FAIL:
