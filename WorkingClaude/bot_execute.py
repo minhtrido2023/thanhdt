@@ -235,22 +235,7 @@ def _alert_approval_block(label, plan_date, reason):
     _publish_bot_event("error", "APPROVAL_GATE_BLOCK", {
         "account": label, "plan_date": plan_date, "reason": reason,
     })
-    notify_thread = os.path.join(_WC_ROOT, "mike", "bin", "notify_thread.sh")
-    if os.path.isfile(notify_thread):
-        try:
-            subprocess.Popen([notify_thread, msg, _TRADING_DAILY_THREAD],
-                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-                             close_fds=True)
-        except Exception:
-            pass
-    try:
-        with open(os.path.join(_WC_ROOT, "secrets", "telegram_config.json"),
-                  encoding="utf-8") as f:
-            tg = json.load(f)
-        from telegram_recommend import send_telegram_text
-        send_telegram_text(tg["bot_token"], tg["chat_id"], msg, parse_mode="")
-    except Exception:
-        pass
+    _notify_trading_daily(msg)
 
 
 def _alert_funding_block(label, plan_date, verdict):
@@ -270,22 +255,7 @@ def _alert_funding_block(label, plan_date, verdict):
         "utilization": verdict["utilization"],
         "fallback_bound_vnd": verdict["fallback_bound_vnd"], "groups": verdict["groups"],
     })
-    notify_thread = os.path.join(_WC_ROOT, "mike", "bin", "notify_thread.sh")
-    if os.path.isfile(notify_thread):
-        try:
-            subprocess.Popen([notify_thread, msg, _TRADING_DAILY_THREAD],
-                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-                             close_fds=True)
-        except Exception:
-            pass
-    try:
-        with open(os.path.join(_WC_ROOT, "secrets", "telegram_config.json"),
-                  encoding="utf-8") as f:
-            tg = json.load(f)
-        from telegram_recommend import send_telegram_text
-        send_telegram_text(tg["bot_token"], tg["chat_id"], msg, parse_mode="")
-    except Exception:
-        pass
+    _notify_trading_daily(msg)
 
 
 def _notify_trading_daily(msg):

@@ -307,8 +307,12 @@ def load_accounts(cfg, path=ACCOUNTS_FILE):
         if p["label"] in seen:
             raise ValueError(f"trùng label account '{p['label']}' trong {path}")
         seen.add(p["label"])
+        overrides = p.get("overrides") or {}
+        unknown = sorted(set(overrides) - set(DEFAULTS))
+        if unknown:
+            print(f"[config] ⚠ khóa lạ trong overrides account '{p['label']}': {unknown}")
         eff = dict(cfg)
-        eff.update(p.get("overrides") or {})
+        eff.update(overrides)
         eff["mode"] = p["mode"] or cfg["mode"]
         eff["account_id"] = p["account_id"]
         p["cfg"] = eff
@@ -338,7 +342,8 @@ def live_dnse_labels(path=ACCOUNTS_FILE):
     cfg = load_config()
     profiles = load_accounts(cfg, path=path)
     return [p["label"] for p in profiles
-            if p["enabled"] and p["cfg"]["mode"] == "live" and p["broker"] == "dnse"]
+            if p["enabled"] and p["cfg"]["mode"] == "live"
+            and (p.get("broker") or p["cfg"].get("broker") or "phs").lower() == "dnse"]
 
 
 def load_config(path=CONFIG_FILE):
