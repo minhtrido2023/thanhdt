@@ -611,6 +611,24 @@ def main(argv=None):
     mark_sent(state_dir, report_date, report_path, subject)
     print("Đã gửi email và ghi sent-state.")
 
+    dispatch_routing_review(report_path, report_date, state_dir)
+
+
+def dispatch_routing_review(report_path, report_date, state_dir):
+    """Vòng feedback tự cải tiến (user mandate 2026-09-20) — xem spend_report_autodispatch.py
+    cho phạm vi/ranh giới đầy đủ. Lỗi ở bước này KHÔNG được làm hỏng việc report đã gửi xong."""
+    cmd = [
+        sys.executable,
+        os.path.join(BIN_DIR, "spend_report_autodispatch.py"),
+        "--report", report_path,
+        "--report-date", report_date.isoformat(),
+        "--state-dir", state_dir,
+    ]
+    try:
+        subprocess.run(cmd, check=True)
+    except subprocess.CalledProcessError as exc:
+        print(f"CẢNH BÁO: dispatch routing-review thất bại (rc={exc.returncode}) — báo cáo vẫn đã gửi bình thường.", file=sys.stderr)
+
 
 if __name__ == "__main__":
     main()
