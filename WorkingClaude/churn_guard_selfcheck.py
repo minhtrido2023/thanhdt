@@ -27,6 +27,8 @@ import glob
 import os
 import sys
 
+os.environ.setdefault("MIKE_BOT_TEST_MODE", "1")  # coding_guidelines §5b — before any Executor()
+
 from trading_bot.config import DEFAULTS, EXEC_DIR
 
 # Fresh journal AND state files each run — the journal path is keyed by account tag +
@@ -45,14 +47,14 @@ from trading_bot.executor import Executor
 from trading_bot.vn_market import round_price
 
 REF = 26_750.0
-CAP = round_price(REF * 1.015, "TST", "HOSE", "down")   # +1.5% chase ceiling (the live-bug price)
+CAP = round_price(REF * 1.015, "ZZZFAKE", "HOSE", "down")   # +1.5% chase ceiling (the live-bug price)
 FLOOR = round(REF * 0.93, -1)
 CEIL = round(REF * 1.07, -1)
 
 
 class FakeQuote:
     def __init__(self, last, bid, ask, floor=FLOOR, ceiling=CEIL, day_volume=5_000_000):
-        self.symbol = "TST"; self.exchange = "HOSE"
+        self.symbol = "ZZZFAKE"; self.exchange = "HOSE"
         self.last = last; self.ref = REF; self.bid = bid; self.ask = ask
         self.floor = floor; self.ceiling = ceiling; self.day_volume = day_volume
 
@@ -98,7 +100,7 @@ def make_exec(cfg_over, orders, quote, tag):
                      strategy_version="0", state=3, state_name="NEUTRAL",
                      nav_basis={}, orders=orders, account=f"selfcheck-{tag}",
                      created_at="2099-01-01T00:00:00")
-    return Executor(plan, FakeBroker({"TST": quote}), cfg), quote
+    return Executor(plan, FakeBroker({"ZZZFAKE": quote}), cfg), quote
 
 
 def journal_topics(ex):
@@ -117,7 +119,7 @@ def check(name, cond, detail=""):
 
 
 now = dt.datetime(2099, 1, 1, 10, 0, 0)
-buy_o = PlannedOrder(id="BUY-TST-01", ticker="TST", side="buy", qty=28_000, ref_price=REF)
+buy_o = PlannedOrder(id="BUY-TST-01", ticker="ZZZFAKE", side="buy", qty=28_000, ref_price=REF)
 
 # ---------------------------------------------------------------- A. the live bug: constant quote
 print("A. Constant quote (gap-up pinned at chase cap) — the live 2026-07-01 bug")
@@ -181,7 +183,7 @@ t = now
 ex_d._place_slices(t, "MORNING")
 check("D0 initial PLACE happened", len(ex_d.broker.placed) == 1)
 # force-arm EXTREME_DOWN on this ticker (as the 2-poll confirm would after a real trigger)
-ex_d._extreme_state["TST"] = {"n": 2,
+ex_d._extreme_state["ZZZFAKE"] = {"n": 2,
     "until": (t + dt.timedelta(minutes=15)).isoformat(timespec="seconds")}
 t = t + dt.timedelta(minutes=8, seconds=1)
 ex_d._cancel_stale(t)
@@ -201,9 +203,9 @@ t_e = t_e + dt.timedelta(minutes=8, seconds=1)
 q_e.last = q_e.floor * 1.01; q_e.bid = q_e.last; q_e.ask = q_e.last + 100
 # one cycle where BOTH callers ask about the same (ticker, now) — must mutate the counter ONCE
 ex_e._would_be_unchanged(buy_o, ex_e.state["parents"][buy_o.id], child_e, t_e)
-n_after_cancel_stale_peek = ex_e._extreme_state["TST"]["n"]
+n_after_cancel_stale_peek = ex_e._extreme_state["ZZZFAKE"]["n"]
 ex_e._extreme_regime(buy_o, q_e, t_e)   # what _place_slices would call next in the same cycle
-n_after_second_call = ex_e._extreme_state["TST"]["n"]
+n_after_second_call = ex_e._extreme_state["ZZZFAKE"]["n"]
 check("E1 poll counter advances by exactly 1 across 2 same-cycle callers (not 2)",
       n_after_cancel_stale_peek == 1 and n_after_second_call == 1,
       f"n_after_1st_call={n_after_cancel_stale_peek} n_after_2nd_call={n_after_second_call}")
@@ -211,7 +213,30 @@ check("E1 poll counter advances by exactly 1 across 2 same-cycle callers (not 2)
 t_e2 = t_e + dt.timedelta(seconds=20)
 ex_e._extreme_regime(buy_o, q_e, t_e2)
 check("E2 a real NEW poll (different `now`) still advances the counter (2nd real poll arms)",
-      ex_e._extreme_state["TST"]["n"] >= 2, f"n={ex_e._extreme_state['TST']['n']}")
+      ex_e._extreme_state["ZZZFAKE"]["n"] >= 2, f"n={ex_e._extreme_state['ZZZFAKE']['n']}")
+
+# ---------------------------------------------------------------- F. gap-ref staleness/contiguity guard
+print("F. Real-but-gappy ticker (TST — excluded from ticker_prune, present but sparse in the "
+      "full ticker superset) must still resolve to the STATIC chase cap: proves the recency/"
+      "contiguity guard in _load_gap_ref_data() blocks an inflated rvol_20d computed from a "
+      "gappy tail(22) instead of silently widening the LIVE chase_cap_vol_scale_enabled cap")
+gappy_o = PlannedOrder(id="BUY-TST-01F", ticker="TST", side="buy", qty=28_000, ref_price=REF)
+cap_tst = round_price(REF * 1.015, "TST", "HOSE", "down")
+plan_f = TradePlan(plan_date="2026-09-19", signal_date="2026-09-19", strategy="tst",
+                    strategy_version="0", state=3, state_name="NEUTRAL",
+                    nav_basis={}, orders=[gappy_o], account="selfcheck-f",
+                    created_at="2026-09-19T00:00:00")
+cfg_f = dict(DEFAULTS); cfg_f.update({"mode": "paper", "slice_interval_min": 8,
+                                       "fill_timing_enabled": False, "extreme_regime_enabled": False})
+q_f = FakeQuote(last=cap_tst + 500, bid=cap_tst + 400, ask=cap_tst + 500)
+q_f.symbol = "TST"
+ex_f = Executor(plan_f, FakeBroker({"TST": q_f}), cfg_f)
+check("F1 TST absent from _gap_ref (gappy/stale history filtered by guard)",
+      "TST" not in ex_f._gap_ref, f"_gap_ref={ex_f._gap_ref}")
+ex_f._place_slices(dt.datetime(2026, 9, 19, 10, 0, 0), "MORNING")
+placed_px_f = ex_f.broker.placed[0]["price"]
+check("F2 placed at the STATIC cap despite chase_cap_vol_scale ON (fail-safe held)",
+      placed_px_f == cap_tst, f"placed={placed_px_f} cap={cap_tst}")
 
 print()
 if fails:

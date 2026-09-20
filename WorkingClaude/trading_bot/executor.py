@@ -1357,9 +1357,10 @@ class Executor:
             "BQ_LOCAL_CACHE",
             os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                          "data", "bq_cache"))
-        # ticker_prune is chunked per-year since 2026-06-26 (the old monolith
-        # ticker_prune.parquet froze at that date — never read it again)
-        chunk_dir = os.path.join(cache_dir, "ticker_prune")
+        # tav2_bq.ticker (superset, not ticker_prune — this is a pure price lookup for
+        # already-selected tickers, no universe/in_universe semantics needed; ticker_prune
+        # is TRAP-status for new code, see kb/data_registry/price-volume/ticker_prune.md)
+        chunk_dir = os.path.join(cache_dir, "ticker")
         chunk_files = sorted(glob.glob(os.path.join(chunk_dir, "*.parquet")))
         if not chunk_files:
             print(f"[exec:{self.label}] gap_adaptive: no chunks in {chunk_dir} — fail-safe")
@@ -1382,6 +1383,16 @@ class Executor:
             for ticker in tickers:
                 tk = df[df["ticker"] == ticker].tail(22)  # need 21 prices → 20 returns
                 if len(tk) < 2:
+                    continue
+                # superset (tav2_bq.ticker) includes illiquid names with gappy trading history —
+                # ticker_prune used to filter those out implicitly. Without a recency/contiguity
+                # check, tail(22) rows spanning months would compute an inflated "rvol_20d" from
+                # sparse returns, silently widening the live chase cap instead of falling back to
+                # the static cap. Recency: last print not stale vs plan_date. Contiguity: 22 rows
+                # should span roughly a trading month, not the accordion of an illiquid name.
+                if (today - tk["time"].iloc[-1]).days > 10:
+                    continue
+                if (tk["time"].iloc[-1] - tk["time"].iloc[0]).days > 40:
                     continue
                 prior_close = float(tk["Close"].iloc[-1])
                 rets = tk["Close"].pct_change().dropna()
