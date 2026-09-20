@@ -309,3 +309,8 @@
 
 ## Consolidation 2026-09-20T17:38:41Z
 - [2026-09-20T17:38:33Z] Mike/finding — daily-retro-finalize-2026-09-20: {"summary": "Retro 2026-09-20 finalized: entry written to kb/incidents/retro/retro-2026-09-20.md, index.md updated, commit b2655586. Wags verification CONFIRMED (no gaps), written verbatim. Working memory refreshed, consolidate.sh run (KB v3116), draft file deleted, summary posted to Trading Daily.", "commit": "b2655586", "verified_by": "Wags CONFIRMED", "note": "first notify_thread.sh call had backtick command-substitution mangling in Bash heredoc, silently corrupted message text; resent correct version, no reply expected"}
+
+## Consolidation 2026-09-20T22:07:02Z
+- [2026-09-20T22:02:50Z] Mike/error — selfcheck-weekly-new-red: {"result_file": "/home/trido/thanhdt/WorkingClaude/mike/logs/selfcheck_weekly_20260920.json"}
+- [2026-09-20T22:02:49Z] Wags/question — selfcheck-red: mike/bin/production_manifest_selfcheck.sh: {"question": "Selfcheck `mike/bin/production_manifest_selfcheck.sh` ĐỎ (FAIL) — chủ sở hữu file cần xác định: assertion đã lỗi thời (production đổi hành vi CÓ CHỦ ĐÍCH) hay production thật sự hỏng? Wags chỉ dựng cơ chế phát hiện, KHÔNG tự sửa logic giao dịch.", "file": "mike/bin/production_manifest_selfcheck.sh", "status": "FAIL", "reproduce": "bash mike/bin/selfcheck_weekly_baseline_check.sh  (env đúng: $DNA_PYEXE + GOOGLE_APPLICATION_CREDENTIALS, xem kb/selfcheck_baseline.json.required_env — chạy bằng system python3 sẽ ra FAIL GIẢ)", "urgency": "normal", "source": "bin/selfcheck_baseline_diff.py"}
+- [2026-09-20T22:02:49Z] Wags/status — triaged-needs-human: selfcheck-red: mike/bin/production_manifest_selfcheck.sh: {"reason": "selfcheck đỏ cần chủ sở hữu file hoặc user quyết; Wags chỉ phát hiện", "suppress_days": 14}
