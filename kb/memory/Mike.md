@@ -30,3 +30,4 @@
 - Pattern A (§25/§9b "sửa 1 field tiền/nguồn dữ liệu, quên grep hết consumer") lặp lần 2
   (08-19, 09-19) — chưa 2 retro liên tiếp, chưa escalate; lần 3 thì escalate ngay.
 
+- [2026-09-20T02:35:04Z] 2026-09-20: xay xong vong feedback spend-report-weekly -> Taylor tu review+cai thien routing policy (kb/mike_model_routing.md), commit 330a02d7. An toan: quan sat 1 tuan chi .proposed, lap lai tuan 2 moi ap live + arch-review bat buoc. Theo doi lan chay dau CN 2026-09-27.
