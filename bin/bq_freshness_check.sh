@@ -44,11 +44,12 @@ set -uo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 WC_ROOT="$(cd "$ROOT/.." && pwd)"
 [ -f "$ROOT/../wc_env.sh" ] && source "$ROOT/../wc_env.sh" 2>/dev/null || true
-# Neo TZ ICT tường minh: host chạy Etc/UTC và cron gọi script này KHÔNG có prefix TZ, nên mọi
-# `$(date ...)` bên dưới (TODAY, tuổi file, mốc log) phụ thuộc hoàn toàn vào TZ mà wc_env.sh
-# export — mà dòng trên lại tha thứ lỗi (`|| true`). Thiếu wc_env ⇒ TODAY lùi 1 ngày sau 17:00
-# ICT. Dòng này giữ nguyên TZ nếu caller đã đặt, chỉ vá trường hợp KHÔNG có (2026-07-31).
-export TZ="${TZ:-Asia/Ho_Chi_Minh}"
+# Neo TZ ICT KHÔNG ĐIỀU KIỆN: script này chỉ có nghĩa ở ICT (mọi mốc ngày — TODAY, tuổi file,
+# next trading day — đều tính theo phiên HOSE giờ ICT). Trước đây chỉ vá khi TZ CHƯA đặt
+# (`${TZ:-...}`), nên caller nào export TZ=UTC (cron khác, shell tay) vẫn được tôn trọng ⇒
+# sau 17:00 ICT, TODAY (và mọi datetime.now()/date.today() phía dưới thừa hưởng TZ này) lùi
+# 1 ngày, gate so as_of/mtime sai ngày (finding code-quality 2026-09-20). Ghi đè vô điều kiện.
+export TZ=Asia/Ho_Chi_Minh
 
 QUIET="${1:-}"
 PROJECT="lithe-record-440915-m9"

@@ -22,6 +22,15 @@ REAL_MIKE="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 REAL_WC="$(cd "$REAL_MIKE/.." && pwd)"
 SRC="$REAL_MIKE/bin/bq_freshness_check.sh"
 
+# TZ anchor guard (code-quality 2026-09-20): mọi mốc ngày mà gate bên dưới dùng (TODAY,
+# as_of, mtime) phụ thuộc TZ được export Ở FILE NGUỒN, không phải trong sandbox này — nếu
+# ai đó lỡ đổi lại thành dạng CÓ ĐIỀU KIỆN (`export TZ="${TZ:-...}"`, đã regress 1 lần
+# 2026-07-31, sống 7 tuần không ai bắt được), gate sẽ âm thầm sai ngày sau 17:00 ICT với
+# caller nào có TZ khác — mà chính selfcheck này (ca PIN sẵn ngày) sẽ vẫn PASS y hệt.
+if ! grep -qE '^export TZ=Asia/Ho_Chi_Minh$' "$SRC" || grep -qE 'export TZ="\$\{TZ:-' "$SRC"; then
+  echo "FATAL: TZ anchor ở $SRC không còn dạng vô điều kiện 'export TZ=Asia/Ho_Chi_Minh' — mốc ngày của gate có thể sai theo TZ caller, sửa lại trước khi tin selfcheck này"; exit 1
+fi
+
 START_MARK='# --- DT5G PUBLISHER-EVIDENCE gate'
 END_MARK='# Giám sát WRITER LẠ'
 s=$(grep -n "$START_MARK" "$SRC" | head -1 | cut -d: -f1)

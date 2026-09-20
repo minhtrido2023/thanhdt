@@ -222,7 +222,7 @@ out_b = run_detector([TBD_MONTHLY], [Q_MONTH], today="2026-08-14",
 # TUYỆT ĐỐI của report đích (`target_file_*`) ⇒ 2 lần chạy không bao giờ bằng nhau theo nghĩa đen,
 # bất kể detector có state ẩn hay không. Chuẩn hoá gốc tmp trước khi so (§28: so GIÁ TRỊ đã chuẩn
 # hoá, đừng so chuỗi thô) — giữ nguyên ý định của ca: không tự trôi / không tự nhân đôi.
-_TD_RE = re.compile(r"/tmp/[^/\s\"']+")
+_TD_RE = re.compile(re.escape(tempfile.gettempdir()) + r"/[^/\s\"']+")
 
 
 def _norm_td(obj):
