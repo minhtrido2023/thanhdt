@@ -10,7 +10,6 @@ Kiểm tra 3 điều:
 TAG = "selfcheck_dcf"  # unique — không dùng chung với selfcheck khác
 """
 
-import dataclasses
 import json
 import os
 import sys
@@ -32,8 +31,7 @@ if os.path.exists(_STATE_FIXTURE):
     os.remove(_STATE_FIXTURE)
 
 from trading_bot.plan import PlannedOrder, TradePlan, load_plan
-from trading_bot.executor import Executor, _publish_bot_event
-from trading_bot.config import EXEC_DIR, PLAN_DIR
+from trading_bot.executor import Executor
 
 
 # ---------------------------------------------------------------------------

@@ -9,9 +9,16 @@ below that floor is excluded from BAL regardless of data completeness, so it is 
 noise here (matches [[dataops-completeness-universe]]: illiquid tail can lag, don't block on it).
 
 Column lists are copied from (not imported from, to avoid triggering their heavy pipelines):
-  - BAL_COLS: hit_details.py (== signal_v11_sql.py SIGNAL_V11 `ta` inputs)
-  - RATING_8L_*_COLS: rating_8l.py MAIN_SQL / FIN_SQL SELECT lists
-Keep these in sync by hand if the source files change their column list.
+  - BAL_COLS: hit_details.py (== signal_v11_sql.py SIGNAL_V11 `ta` inputs) — checked for drift
+    below (_check_bal_cols_in_sync), full parity with hit_details.py's list.
+  - RATING_MAIN_COLS / RATING_FIN_COLS: NOT the full rating_8l.py MAIN_SQL/FIN_SQL SELECT lists —
+    a curated subset of columns rating_8l.py actually consumes downstream in Python scoring
+    (golden floor ROE_Min3Y/CF_OA_3Y, cfo_np/core_score via CF_OA_P0-P3, ps/div_yield via
+    Price/Dividend_Min3Y). Deliberately excludes columns only consumed inside rating_8l's own BQ
+    SQL for a server-side aggregate (GPM_P1-7, Revenue_P1-7, NP_P2/P3/P5-P7 feed the `neg_q`
+    COUNTIF and never reach Python as individual fields) — flagging those as "missing" here would
+    be noise, not a real scoring blind spot. Keep RATING_MAIN_COLS/RATING_FIN_COLS in sync by hand
+    if rating_8l.py starts consuming a new raw column in its Python scoring.
 
 Usage: python3 indicator_monitor.py [DATE]  (DATE optional, informational only — this tool
 always reads the LATEST row per table, since that's what live screening reads)
@@ -59,11 +66,16 @@ def _check_bal_cols_in_sync():
 
 _check_bal_cols_in_sync()
 
-# rating_8l.py MAIN_SQL columns (ticker_1m, latest date) — golden-floor half = ROE_Min3Y
+# rating_8l.py MAIN_SQL columns (ticker_1m, latest date) actually consumed in Python scoring —
+# golden-floor half = ROE_Min3Y; Price/OShares feed ps (sales_yield); Dividend_Min3Y feeds
+# div_yield; CF_OA_P0-P3 feed cfo_np/core_score (see rating_8l.py:614).
 RATING_MAIN_COLS = ["ROIC3Y", "ROIC_Min3Y", "ROE_Min3Y", "ROIC_Trailing", "ROIC5Y",
                      "ROIC_Min5Y", "ROE_Min5Y", "ROE5Y", "Debt_Eq_P0", "FSCORE",
-                     "PB", "PE", "PCF", "EVEB", "Close", "OShares"]
-# rating_8l.py FIN_SQL columns (ticker_financial, latest per ticker) — golden-floor half = CF_OA_3Y
+                     "PB", "PE", "PCF", "EVEB", "Close", "Price", "OShares", "Dividend_Min3Y",
+                     "CF_OA_P0", "CF_OA_P1", "CF_OA_P2", "CF_OA_P3"]
+# rating_8l.py FIN_SQL columns (ticker_financial, latest per ticker) actually consumed in Python
+# scoring — golden-floor half = CF_OA_3Y. GPM_P1-7/Revenue_P1-7/NP_P2-P3/P5-P7 deliberately
+# excluded: only feed the SQL-side `neg_q` COUNTIF, never reach Python individually.
 RATING_FIN_COLS = ["CF_OA_3Y", "CF_OA_5Y", "ROE_Trailing", "ROE3Y", "STLTDebt_Eq_P0",
                     "GPM_P0", "Revenue_P0", "UnearnRev_P0", "totalAsset_P0"]
 GOLDEN_FLOOR_COLS = {"ROE_Min3Y", "CF_OA_3Y"}

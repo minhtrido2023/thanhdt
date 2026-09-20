@@ -30,6 +30,7 @@ import pandas as pd
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from lag_live_schedule import NP_R_MIN, PRIOR_N_MIN, PA_HL3_MIN, LN2, HL
 
 WORKDIR = r"/home/trido/thanhdt/WorkingClaude"
 PANEL = WORKDIR + r"/data/edge_panel.csv"
@@ -141,7 +142,6 @@ def lag_edge_health():
         print(f"[lag-edge] skipped: {e}")
         return None
     ev = ev.sort_values(["ticker", "Release_Date"]).reset_index(drop=True)
-    LN2 = np.log(2); HL = 3.0
     ev["prior_n_good"] = 0; ev["pa_HL3"] = np.nan
     for tk, g in ev.groupby("ticker"):
         hist = []
@@ -152,9 +152,9 @@ def lag_edge_health():
                 da = pd.to_datetime([d for d, _ in hist]); pa = np.array([p for _, p in hist])
                 wts = np.exp(-LN2 * ((cur - da).days.values / 365.25) / HL)
                 ev.at[ri, "pa_HL3"] = (pa * wts).sum() / wts.sum() if wts.sum() > 0 else np.nan
-            if pd.notna(row["NP_R"]) and row["NP_R"] >= 15 and pd.notna(row["post_ret"]):
+            if pd.notna(row["NP_R"]) and row["NP_R"] >= NP_R_MIN and pd.notna(row["post_ret"]):
                 hist.append((cur, row["post_ret"]))
-    e3 = ev[(ev["NP_R"] >= 15) & (ev["prior_n_good"] >= 4) & (ev["pa_HL3"] >= 5)]
+    e3 = ev[(ev["NP_R"] >= NP_R_MIN) & (ev["prior_n_good"] >= PRIOR_N_MIN) & (ev["pa_HL3"] >= PA_HL3_MIN)]
     idx = pxc.index
     rows = []
     for _, r in e3.iterrows():

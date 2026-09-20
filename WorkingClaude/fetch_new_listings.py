@@ -17,7 +17,7 @@ import os
 import json
 import logging
 import warnings
-from datetime import date, timedelta, datetime
+from datetime import timedelta, datetime
 from zoneinfo import ZoneInfo
 
 import pandas as pd
@@ -245,7 +245,7 @@ def main():
     out["fetched_date"] = today_str
     if os.path.exists(history_path):
         hist = pd.read_csv(history_path)
-        # Avoid duplicate entries: deduplicate by ticker + listing_date + fetched_date
+        # Avoid duplicate entries: deduplicate by ticker + listing_date
         combined = pd.concat([hist, out], ignore_index=True)
         combined = combined.drop_duplicates(subset=["ticker", "listing_date"], keep="last")
         combined.to_csv(history_path, index=False)
