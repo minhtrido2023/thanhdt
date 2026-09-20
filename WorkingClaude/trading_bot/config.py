@@ -3,6 +3,7 @@
 
 import json
 import os
+import sys
 
 # Isolated worktrees can execute code against the canonical runtime data/secrets only when the
 # operator opts in explicitly.  Normal bot/cron processes do not set this and retain the exact
@@ -308,9 +309,14 @@ def load_accounts(cfg, path=ACCOUNTS_FILE):
             raise ValueError(f"trùng label account '{p['label']}' trong {path}")
         seen.add(p["label"])
         overrides = p.get("overrides") or {}
-        unknown = sorted(set(overrides) - set(DEFAULTS))
+        unknown = sorted(set(overrides) - set(cfg))
         if unknown:
-            print(f"[config] ⚠ khóa lạ trong overrides account '{p['label']}': {unknown}")
+            # stderr, KHÔNG stdout: live_dnse_labels() (dùng load_accounts()) là nguồn
+            # cho 9 script cron parse trực tiếp stdout thành danh sách account
+            # (for_each_live_account.sh, bq_freshness_check.sh...) — một dòng cảnh báo
+            # lẫn vào đó sẽ bị word-split thành account rác (arch-reviewer 2026-09-20).
+            print(f"[config] ⚠ khóa lạ trong overrides account '{p['label']}': {unknown}",
+                  file=sys.stderr)
         eff = dict(cfg)
         eff.update(overrides)
         eff["mode"] = p["mode"] or cfg["mode"]
@@ -353,7 +359,9 @@ def load_config(path=CONFIG_FILE):
             user = json.load(f)
         unknown = sorted(set(user) - set(DEFAULTS))
         if unknown:
-            print(f"[config] ⚠ khóa lạ trong {os.path.basename(path)}: {unknown}")
+            # stderr — cùng lý do load_accounts() ở trên (cả 2 nguồn nuôi live_dnse_labels()).
+            print(f"[config] ⚠ khóa lạ trong {os.path.basename(path)}: {unknown}",
+                  file=sys.stderr)
         cfg.update(user)
     else:
         os.makedirs(os.path.dirname(path), exist_ok=True)
