@@ -415,6 +415,9 @@ closure_cands = []       # (agent, topic, ts) mọi finding/answer/decision — 
 aged_q = []
 aged_q_meta = []         # (agent, topic, ts) song song aged_q — owner-hint PHẢI phủ cả >48h,
                           # đúng lúc bằng chứng "chưa ai nhận" mạnh nhất (xem khối owner-hint).
+# Khai TRƯỚC nhánh isdir: nhánh else (thiếu inbox) vẫn chạy tới chỗ dùng ở dưới —
+# để trong nhánh if là NameError, selfcheck case_missing_inbox_dir bắt được.
+_approved_but_open = []
 if os.path.isdir(inbox_dir):
     # PHẢI quét CẢ archive: kb_nightly Phase 1b2 (EVENT_KEEP_DAYS=30) chuyển MỌI event cũ
     # hơn 30 ngày khỏi bus/inbox/*.jsonl sang bus/inbox/archive/<id>_<YYYY-MM>.jsonl.gz,
@@ -680,6 +683,42 @@ if os.path.isdir(inbox_dir):
         return any(a in want and
                    ((sd <= 0 and a_ts >= q_ts) or (sd > 0 and a_until >= _now))
                    for a, a_ts, a_until, sd in acks)
+    # ── Câu hỏi "plan chưa duyệt" mà plan ĐÃ ĐƯỢC DUYỆT THẬT ────────────────────
+    # coord-2026-09-21: Winston hỏi 02:07Z, user duyệt 09:10 ICT, bot khớp 3/3 lệnh
+    # 09:15 — nhưng không ai đăng answer nên 12:45 vẫn escalate, đốt 1 job wags_autofix
+    # cho việc đã xong. Đường duyệt KHÔNG đáng tin làm chỗ vá: 8/9 lần duyệt tháng 9
+    # (gồm chính lần 09-21) không chạy qua approve_plan_simple.sh. Nên kiểm ARTIFACT
+    # ngay tại chỗ escalate: plan có `approved_by` ⇒ câu hỏi đã có câu trả lời.
+    # CỐ Ý hẹp: chỉ lớp topic khớp APPROVAL_SHAPE và KHÔNG thuộc `ops-autofix-unresolved:`
+    # (run-bot-fail cùng ngày có thể do funding-gate, và "đã duyệt" chưa chứng minh bot
+    # chạy lại xong) — lớp kia vẫn escalate như cũ.
+    _APPROVAL_SHAPE = re.compile(r"chua[-_ ]?duyet|not[-_ ]?approved", re.IGNORECASE)
+    _plan_dir = os.path.join(wc_root, "data", "trade_plans")
+    def _plan_answered(topic):
+        topic = str(topic or "")
+        if not _APPROVAL_SHAPE.search(topic) or topic.startswith("ops-autofix-unresolved:"):
+            return False
+        m = re.search(r"\d{4}-\d{2}-\d{2}", topic)
+        if not m:
+            return False
+        date = m.group(0)
+        try:
+            names = sorted(os.listdir(_plan_dir))
+        except Exception:
+            return False
+        for name in names:
+            if not (name.startswith("plan_") and name.endswith(f"_{date}.json")):
+                continue
+            acc = name[len("plan_"):-len(f"_{date}.json")]
+            if not acc or acc not in topic:
+                continue
+            try:
+                with open(os.path.join(_plan_dir, name), encoding="utf-8") as fh:
+                    if str((json.load(fh) or {}).get("approved_by") or "").strip():
+                        return True
+            except Exception:
+                return False
+        return False
     seen_q = set()
     for p in files:
         agent = _agent_of(p)
@@ -691,6 +730,11 @@ if os.path.isdir(inbox_dir):
             except Exception:
                 continue
             if _resolved(rec.get("topic"), ts_dt, agent) or _rollup_resolved(rec, ts_dt, agent):
+                continue
+            if _plan_answered(rec.get("topic")):
+                # KHÔNG im lặng bỏ qua: gom lại để đóng THẬT ở dưới, nếu không nó nằm
+                # trong backlog vĩnh viễn mà không dòng WARN nào nhắc.
+                _approved_but_open.append(f"{agent}/{rec.get('topic')}")
                 continue
             # Chống đếm đôi nếu 1 event vừa còn ở hot inbox vừa đã sang archive (kb_nightly
             # bị kill giữa chừng): khoá theo (agent, topic, ts).
@@ -758,6 +802,28 @@ else:
     # được phép đội lốt một kết luận "sạch".
     W(f"KHÔNG tìm thấy thư mục bus/inbox ({inbox_dir}) — backlog câu hỏi (question) KHÔNG "
       f"kiểm tra được lượt này (KHÔNG phải '0 câu hỏi'). Nhiều khả năng wc_root sai.")
+if _approved_but_open:
+    # Đóng THẬT (idempotent; script tự đọc lại plan để tự xác minh, không tin checker).
+    # Best-effort: hỏng thì in ra, KHÔNG làm hỏng lượt health-check.
+    if os.environ.get("OPS_HEALTH_DRY_RUN") == "1":
+        # DRY-RUN phải KHÔNG ghi bus. Khối này nằm TRƯỚC chỗ shell đọc DRY_RUN (cuối file)
+        # nên không được thừa hưởng guard đó — phải tự đọc env, nếu không `--dry-run` sẽ
+        # đóng câu hỏi thật trên bus production.
+        _tail = "(DRY-RUN: không chạy close_plan_approval_questions.py)"
+    else:
+        try:
+            import subprocess, sys   # khối này được exec với ns rút gọn trong selfcheck
+            _r = subprocess.run(
+                [sys.executable, os.path.join(wc_root, "mike", "bin",
+                                              "close_plan_approval_questions.py")],
+                capture_output=True, text=True, timeout=120)
+            _tail = ((_r.stdout or "") + (_r.stderr or "")).strip().replace("\n", " | ")[-400:]
+        except Exception as _exc:
+            _tail = f"chạy lỗi: {_exc}"
+    W(f"{WARN_ONLY} {len(_approved_but_open)} câu hỏi 'plan chưa duyệt' đã có câu trả lời "
+      f"bằng ARTIFACT (plan có approved_by) nên KHÔNG escalate: {_approved_but_open}. "
+      f"Kết quả đóng tự động: {_tail or '(im lặng)'}")
+
 if pending_q:
     W(f"Có {len(pending_q)} câu hỏi (question) trong 48h qua CHƯA thấy answer tương ứng: {pending_q}")
     # Câu hỏi TỔNG khai `rollup_of` mà không đóng được: nói rõ CON NÀO chưa khớp. Không có

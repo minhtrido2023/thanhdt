@@ -2133,6 +2133,87 @@ def case_routing_red_control():
 
 
 
+def _plan_approval_root(tmp, approved, topic="plan-SpaceX-2026-09-21-chua-duyet"):
+    """Bus có 1 câu hỏi 'plan chưa duyệt' + 1 file plan (đã duyệt hay chưa tuỳ `approved`)."""
+    os.makedirs(os.path.join(tmp, "data", "trade_plans"), exist_ok=True)
+    with open(os.path.join(tmp, "data", "trade_plans",
+                           "plan_SpaceX_2026-09-21.json"), "w", encoding="utf-8") as f:
+        json.dump({"approved_by": "user (John) - Discord" if approved else None,
+                   "approved_at": None, "orders": [{"ticker": "MBB"}]}, f)
+    write_events(os.path.join(tmp, "mike", "bus", "inbox", "Winston.jsonl"),
+                 [{"ts": ago(0, 5), "agent_id": "Winston", "event_type": "question",
+                   "topic": topic, "payload": {"question": "x"}}])
+    return tmp
+
+
+def case_c5_plan_da_duyet_that_thi_khong_escalate():
+    """coord-2026-09-21: user duyệt 09:10, bot khớp 3/3 lúc 09:15, không ai đăng answer ⇒
+    checker 12:45 vẫn escalate, đốt 1 job wags_autofix. Nguồn sự thật phải là ARTIFACT
+    (plan.approved_by), vì phần lớn lần duyệt KHÔNG chạy qua approve_plan_simple.sh."""
+    with tempfile.TemporaryDirectory() as tmp:
+        lines, _ = run_check5(_plan_approval_root(tmp, approved=True))
+        pend = [ln for ln in lines
+                if "trong 48h qua CHƯA thấy answer" in ln and "[WARN-ONLY]" not in ln]
+        check("check5: plan ĐÃ có approved_by ⇒ KHÔNG escalate câu hỏi 'chưa duyệt'",
+              not pend, repr(pend))
+        check("check5: vẫn NÓI RA việc bỏ qua (không im lặng nuốt khỏi backlog)",
+              any("ARTIFACT" in ln and "plan-SpaceX-2026-09-21-chua-duyet" in ln
+                  for ln in lines), repr(lines[-3:]))
+
+    # ĐỐI CHỨNG: chưa duyệt thì phải escalate như cũ — nếu không, test trên vô nghĩa.
+    with tempfile.TemporaryDirectory() as tmp:
+        lines, _ = run_check5(_plan_approval_root(tmp, approved=False))
+        pend = [ln for ln in lines
+                if "trong 48h qua CHƯA thấy answer" in ln and "[WARN-ONLY]" not in ln]
+        check("check5 ĐỐI CHỨNG: plan CHƯA duyệt ⇒ vẫn escalate bình thường",
+              any("plan-SpaceX-2026-09-21-chua-duyet" in ln for ln in pend), repr(pend))
+
+    # Lớp ops-autofix-unresolved KHÔNG được miễn: root cause có thể khác hẳn chuyện duyệt.
+    with tempfile.TemporaryDirectory() as tmp:
+        lines, _ = run_check5(_plan_approval_root(
+            tmp, approved=True,
+            topic="ops-autofix-unresolved: plan-SpaceX-2026-09-21-chua-duyet"))
+        pend = [ln for ln in lines
+                if "trong 48h qua CHƯA thấy answer" in ln and "[WARN-ONLY]" not in ln]
+        check("check5: lớp ops-autofix-unresolved VẪN escalate dù plan đã duyệt",
+              any("ops-autofix-unresolved" in ln for ln in pend), repr(pend))
+
+
+def case_c5_dry_run_khong_ghi_bus():
+    """DRY-RUN phải KHÔNG chạy closer: khối auto-close nằm TRƯỚC chỗ shell đọc DRY_RUN nên
+    không thừa hưởng guard đó. Test HÀNH VI (có chạy hay không), không so chuỗi: dựng một
+    closer giả ghi file mốc, rồi kiểm file mốc — bỏ guard env đi là ca này đỏ."""
+    def _run(dry):
+        with tempfile.TemporaryDirectory() as tmp:
+            _plan_approval_root(tmp, approved=True)
+            binp = os.path.join(tmp, "mike", "bin")
+            os.makedirs(binp, exist_ok=True)
+            mark = os.path.join(tmp, "closer_da_chay.mark")
+            with open(os.path.join(binp, "close_plan_approval_questions.py"), "w",
+                      encoding="utf-8") as f:
+                f.write("open(%r,'w').write('x')\nprint('closer gia da chay')\n" % mark)
+            old = os.environ.get("OPS_HEALTH_DRY_RUN")
+            if dry:
+                os.environ["OPS_HEALTH_DRY_RUN"] = "1"
+            else:
+                os.environ.pop("OPS_HEALTH_DRY_RUN", None)
+            try:
+                lines, _ = run_check5(tmp)
+            finally:
+                if old is None:
+                    os.environ.pop("OPS_HEALTH_DRY_RUN", None)
+                else:
+                    os.environ["OPS_HEALTH_DRY_RUN"] = old
+            return lines, os.path.exists(mark)
+
+    lines, ran = _run(dry=True)
+    check("check5 DRY-RUN: KHÔNG chạy closer (không ghi bus production)", not ran,
+          repr(lines[-2:]))
+    lines, ran = _run(dry=False)
+    check("check5 ĐỐI CHỨNG: chạy thật thì CÓ gọi closer (test không vô nghĩa)", ran,
+          repr(lines[-2:]))
+
+
 def main():
     print("ops_health_check_selfcheck: check #5 (backlog question) + check #9 (retro freshness) "
           "+ check #10 (notify_thread) "
@@ -2190,7 +2271,9 @@ def main():
                case_routing_red_control,
                case_deliver_discord_ok_no_telegram,
                case_deliver_discord_fails_falls_back_to_telegram,
-               case_deliver_both_fail_logs_for_check10):
+               case_deliver_both_fail_logs_for_check10,
+               case_c5_plan_da_duyet_that_thi_khong_escalate,
+               case_c5_dry_run_khong_ghi_bus):
         fn()
     if FAILS:
         print(f"\nFAIL: {len(FAILS)} assertion hỏng")
