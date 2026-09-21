@@ -418,3 +418,7 @@
 - [2026-09-21T12:08:18Z] DollarBill/heartbeat — DollarBill_20260921_120717: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20260921_120717", "source": "watcher"}
 - [2026-09-21T12:08:19Z] DollarBill/heartbeat — DollarBill_20260921_120718: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20260921_120718", "source": "watcher"}
 - [2026-09-21T12:09:02Z] DollarBill/decision — plan-2026-09-22: {"account": "SpaceX", "plan_date": "2026-09-22", "orders": 0, "summary": "HOLD ALL. 0 tin hieu BAL/LAG moi. VPI(BAL) da o target. L1 park-trim BLOCKED_ALL_NAMES (13 ma duoi 1 lo sau tran ADV/cau truc, PARK lech +6.86tr). CAPIT 42 phien giu nguyen. Active NAV 978.72tr, egg 51.00tr. DT5G NEUTRAL fresh.", "plan_file": "data/trade_plans/plan_SpaceX_2026-09-22.json"}
+
+## Consolidation 2026-09-21T12:09:34Z
+- [2026-09-21T12:09:18Z] DollarBill/heartbeat — DollarBill_20260921_120717: {"status": "still_running", "elapsed_min": 2, "job_id": "DollarBill_20260921_120717", "source": "watcher"}
+- [2026-09-21T12:09:24Z] DollarBill/decision — plan-2026-09-22-ZaloPay: {"account": "ZaloPay", "plan_date": "2026-09-22", "orders": 3, "summary": "3 lenh BAN park-trim HDB/LPB/VPB 100cp moi ma (~10.21tr), 0 BAL/LAG, CAPIT giu nguyen 42 phien, DT5G NEUTRAL, active_nav=519.40tr, egg=7.82tr", "load_plan_verified": true}
