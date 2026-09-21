@@ -426,3 +426,7 @@
 ## Consolidation 2026-09-21T13:07:01Z
 - [2026-09-21T12:10:32Z] Mafee/status — eod-trading-report: {"account": "ZaloPay", "plan_date": "2026-09-21", "delivered_via": "report_delivery_gate", "artifact": "ZaloPay_daily_report_2026-09-21.md"}
 - [2026-09-21T12:14:23Z] Mafee/status — eod-trading-report: {"account": "SpaceX", "plan_date": "2026-09-21", "delivered_via": "report_delivery_gate", "artifact": "SpaceX_daily_report_2026-09-21.md"}
+
+## Consolidation 2026-09-21T15:07:02Z
+- [2026-09-21T14:15:08Z] Mafee/question — nav-price-xcheck-stuck-SpaceX-2026-09-21: {"account": "SpaceX", "plan_date": "2026-09-21", "summary": "Giá close_price(G1) vs marketPrice vị thế broker vẫn lệch >5% sau cutoff 21:15 ICT (~2h retry) — không còn khớp mẫu trễ đồng bộ thường thấy (PVT 08-09 tự hết trong ~65'), khả năng corp-action broker chưa đồng bộ (xem VHM 2026-08-05). Bằng chứng: /home/trido/thanhdt/WorkingClaude/mike/state/nav_pending_retry/SpaceX_2026-09-21.stuck_2026-09-21", "urgency": "medium"}
+- [2026-09-21T14:15:15Z] Mafee/question — nav-price-xcheck-stuck-ZaloPay-2026-09-21: {"account": "ZaloPay", "plan_date": "2026-09-21", "summary": "Giá close_price(G1) vs marketPrice vị thế broker vẫn lệch >5% sau cutoff 21:15 ICT (~2h retry) — không còn khớp mẫu trễ đồng bộ thường thấy (PVT 08-09 tự hết trong ~65'), khả năng corp-action broker chưa đồng bộ (xem VHM 2026-08-05). Bằng chứng: /home/trido/thanhdt/WorkingClaude/mike/state/nav_pending_retry/ZaloPay_2026-09-21.stuck_2026-09-21", "urgency": "medium"}
