@@ -2777,3 +2777,110 @@ Nguồn lượt này:
 [tapchikinhtetaichinh — Sự kiện chứng khoán ngày 16/9 (GEE GDKHQ 17/09)](https://tapchikinhtetaichinh.vn/su-kien-chung-khoan-ngay-16-9-167105.html)
 
 ---
+
+### 2026-09-21 — QUÉT SÁNG THỨ HAI (job `Taylor_20260921_010001`, mục đích: BẢO VỆ PHÍA MUA trước 09:00) — **0 QUALIFY · 0 case mới · 30 mã gác rà qua** · ★★ **0 lệnh MUA trên mọi kênh cho phiên 21/09 ⇒ không có luận điểm nào để RÚT** · ★ **Sự kiện lớn nhất cửa sổ là CƠ CẤU CHỈ SỐ, không phải sự kiện lõi: FTSE Vietnam Index loại 21 mã hiệu lực HÔM NAY 21/09 — 5 mã đang giữ trong đó (SHB, VRE, VIX, VND, VPI)**
+
+Cửa sổ tin **sau phiên thứ Sáu 18/09 → hết Chủ Nhật 20/09** (0 phiên giao dịch trong cửa sổ; phiên gần
+nhất = 18/09). Danh mục đang gác **30 mã** (13 NH + 17 ngoài NH).
+**Watchlist TƯƠI** — `anomaly_scan` in `watchlist tươi (active_nav computed_at 2026-09-19)` ⇒ **KHÔNG có
+cảnh báo WATCHLIST QUÁ HẠN**.
+
+**Phần 0 — phía MUA (câu hỏi chính của lượt này): KHÔNG CÓ GÌ ĐỂ RÚT.**
+
+| Kênh | Nội dung plan 21/09 | Phía mua |
+|---|---|---|
+| `data/trade_plans/plan_SpaceX_2026-09-21.json` | 3 lệnh, **toàn BÁN PARK**: MBB 100cp @19.900 · VHM 100cp @71.000 · VPB 100cp @27.450 | **0 lệnh mua** |
+| `data/trade_plans/plan_ZaloPay_2026-09-21.json` | `n_orders = 0` | **0 lệnh mua** |
+| Discretionary (TV1 deadband) | không có lệnh phát sinh | **0 lệnh mua** |
+
+⇒ Kể cả nếu tìm được một mã gãy luận điểm trong cửa sổ, **không có lệnh mua nào để rút**. Rủi ro phía mua
+của phiên 21/09 = 0. (3 lệnh bán park nằm NGOÀI phạm vi mandate lượt này — playbook nói rõ không can
+thiệp phía bán.)
+
+**Phần 1 — `anomaly_scan.py --backfill-days 3`** (phiên 18/09): universe **254 mã** (H:30 / W:242).
+**0 IDIOCRASH · 0 FLOOR2 · 0 CEIL2 · 0 VOLSPIKE** — *"Không có tín hiệu giá/khối lượng bất thường."*
+
+**Phần 2 — quét RỘNG** `bq_cache/ticker/2026.parquet` (phiên 18/09, `idio = ret − ret_VNINDEX`;
+VNINDEX 1.815,66, **−0,39%** ⇒ nền thị trường gần phẳng, mã nào trip là riêng lẻ thật). **836 mã**.
+
+- **IDIOCRASH cứng** (ret ≤ −6% ∧ idio ≤ −5%) → **12 mã**, **12/12 LOẠI Ở SÀN THANH KHOẢN** — ADV1M cao
+  nhất trong nhóm là **AGP 0,25 tỷ/phiên**, thấp hơn ngưỡng 1 tỷ một bậc độ lớn: SP2, VNT, PEG, CMM, PTV,
+  CKD, HAS, GTA, VSI, TTS, DTP, AGP. **0 mã liquid trip.**
+- Nới mềm (ret ≤ −4% ∧ idio ≤ −3,5%) **có thanh khoản ≥1 tỷ** → 4 mã, **không mã nào là case**:
+
+| Mã | Số liệu (18/09) | Kết luận |
+|---|---|---|
+| **VPL** (Vinpearl, ADV 85 tỷ) | 81.200 (−5,03%) · **+15,2% trên đáy 52T** · **PE 48,2 · PB 3,21** | **Không phải case** — §2#5 không có sàn định giá; giảm đúng ngày ETF tái cơ cấu (VPL là mã được THÊM vào FTSE VN Index) ⇒ nhiễu dòng vốn |
+| **DCL** (Dược Cửu Long, ADV 47 tỷ) | 40.500 (−4,59%) · **+47,5% trên đáy 52T** · PB 1,94 · ROE_Min3Y 1,3% | **Không phải case** — không ở vùng sợ hãi (cách đáy gần 50%) |
+| **KOS** (ADV 8,9 tỷ) | 30.050 (−4,15%) = đúng đáy 52T nhưng **PE 237 · PB 2,76 · ROE_Min3Y 0,8%** | **Không phải case** — §2#5 FAIL nặng |
+| **DHA** (ADV 1,6 tỷ) | 51.200 (−4,66%) · +22,0% trên đáy · PE 7,1 · PB 1,42 · Debt_Eq 0,11 | **Không phải case** — rẻ và solvent thật, nhưng KHÔNG ở vùng sợ hãi và KHÔNG có sự kiện trigger. Đây là value tilt → việc của BAL/custom30V (§9), không phải sleeve này |
+
+★ Ghi nhận một mã có **hồ sơ đúng nhưng un-investable**: **DTP** (Dược phẩm CPC1 Hà Nội) — 56.000,
+**+1,6% trên đáy 52T, −43,6% từ đỉnh**, PE 8,3 · PB 1,77 · **ROE_Min3Y 26,1%** · CF_OA_P0 +27,3 tỷ ·
+Debt_Eq 0,29. Vừa sợ hãi vừa chất lượng — nhưng **ADV1M 0,108 tỷ/phiên**, dưới sàn thanh khoản ~10×,
+không size được ở quy mô sổ. Ghi lại để không phải tìm lại; **không phải khuyến nghị**.
+
+**Phần 3 — WebSearch theo BỘ TỪ KHOÁ NHÓM (8 truy vấn + 2 WebFetch):**
+
+- **Chung (30/30 mã)**: **0 sự kiện khởi tố/thanh tra/đình chỉ/ngoại trừ/chậm BCTC/huỷ niêm yết nào chạm
+  mã đang gác trong cửa sổ.** Cập nhật cắt margin HOSE tới 10/09 (76 mã) — mã bổ sung là KLB, MHC, STK,
+  FUEPHVNS, **0/30 mã gác**. Sự kiện đình chỉ nổi bật của tháng vẫn là **HBS** (03/09, chậm BCTC + ngoại
+  trừ) — không phải mã gác, không phải case (công ty CK nhỏ, lõi tự hỏng).
+- **Ngân hàng (13 mã)**: **0 sự kiện rủi ro.** Không có kiểm soát đặc biệt / chuyển giao bắt buộc / khởi
+  tố lãnh đạo NH mới trong cửa sổ (4 NH yếu GPBank/MBV/Vikki/VCBNeo đã chuyển giao xong từ trước, không
+  phải tin mới). Nền lãi suất huy động 12T cuối tuần: ACB 7,8% dẫn đầu — bình thường.
+- **BĐS/hạ tầng (VHM, VRE, VPI, SIP)**: **0 sự kiện chạm 4 mã.** Áp lực đáo hạn TPDN nhóm BĐS T8–T12/2026
+  ~79.000 tỷ (riêng T9 ~20.000 tỷ) là **nền ngành đã biết**, không phải tin mới; ca chậm trả được nêu đích
+  danh là **No Va Thảo Điền** (nhóm Novaland — NVL đã BANNED, không giữ). Tỷ lệ thu hồi nợ chậm trả BĐS dân
+  cư cải thiện 29,2% (2024) → 48,8% (2025) → ~58,7% (2026) ⇒ nền ngành đang ĐỠ xấu đi, không xấu thêm.
+- **Ngoài ngân hàng (17 mã)**: **0 tai nạn nhà máy / thu hồi sản phẩm / mất giấy phép-mỏ / kê biên / tranh
+  chấp lãnh đạo.**
+
+**Phần 4 — read-through case cũ (không có gì mới trong cửa sổ):**
+
+| Case | Trạng thái | Có gì mới trong cửa sổ 18→20/09? |
+|---|---|---|
+| **TV1** (QUALIFY, có tail-risk) | Giữ nguyên | **KHÔNG.** Thua phúc thẩm 17,6 tỷ (tin 08/09) + kiểm toán An Việt nhấn mạnh nợ 127,6 tỷ với ông Lê Phi Long/bà Nguyễn Thị Ngải — **đã ghi ở lượt 09-14**, không phải dữ kiện mới. Cổng còn mở: ký hợp đồng kiểm toán BCTC **năm 2026** (An Việt mới chỉ SOÁT XÉT bán niên) |
+| **DGC** (AMBIGUOUS, bị loại khỏi universe) | Giữ nguyên | **KHÔNG.** Vẫn hạn chế giao dịch HOSE (ngoại trừ của UHY vì phối hợp CQĐT); cổ tức tiền mặt 80% đã trả 25/09-plan từ record 15/09. ĐHĐCĐ bất thường liên quan 3 TV HĐQT bị khởi tố — tin cũ |
+| **GEX/GEE** (AMBIGUOUS-yếu, cửa sổ ĐÃ ĐÓNG) | Giữ nguyên | **KHÔNG.** 2 cổng nhị phân (kết luận điều tra 500kV mạch 3 có nêu đích danh pháp nhân Gelex? · Q3/2026 CF_OA ≥ NP?) vẫn chưa đóng. Giá đã hồi vượt trước sự kiện ⇒ không actionable |
+| **PNJ** (AMBIGUOUS) | Giữ nguyên | **KHÔNG.** Cổng xác nhận vẫn là BCTC Q3/2026 |
+
+**Phần 5 — ★ Sự kiện lớn nhất cửa sổ là CƠ CẤU CHỈ SỐ, KHÔNG phải sự kiện lõi (đọc đúng để không phân
+loại nhầm thành "fear"):**
+
+Từ hôm nay **21/09/2026**, VN chính thức mang trạng thái **thị trường mới nổi thứ cấp (FTSE Russell)**.
+Cùng ngày có hiệu lực kỳ rà soát bán niên T9/2026 của **FTSE Vietnam Index** (rổ frontier cũ): **loại 21
+mã** — DXG, GEX, TCH, KDH, KBC, NVL, PVD, DPM, POW, PDR, **SHB, SSI, VPI, VCI, VJC, VCG, EIB, VRE, VIX,
+VND**, VCK; **thêm MCH, TCX, VPL**. Quỹ thụ động đã hoàn tất cơ cấu **trong phiên 18/09**.
+
+**5/30 mã đang gác nằm trong danh sách bị loại: SHB · VRE · VIX · VND · VPI.**
+
+**Phân loại: KHÔNG PHẢI case fear-buy, và KHÔNG phải luận điểm gãy.** Lý do, theo đúng trục §0.5:
+- Đây là **dòng vốn cơ học**, không chạm lõi kinh doanh, không chạm pháp nhân — không thuộc bất kỳ nhóm
+  trigger (a)/(b)/(c)/(d) nào. Trục quyết định của khung ("cáo buộc chạm LÕI hay chạm CÁ NHÂN") **không áp
+  dụng** vì không có cáo buộc nào.
+- Áp lực bán thụ động **đã xảy ra rồi** (18/09), không còn phía trước ⇒ ngay cả đọc theo nhóm (c) vĩ
+  mô/kỹ thuật thì cửa sổ cũng đã đóng, giống hệt bài học GEX ở lượt 09-18.
+- Đọc ngược lại cũng đúng: 8 mã NH vào **FTSE All-Cap** (VPB, VCB, STB, HDB, SHB, SSB, BID, MSB) ⇒ SHB
+  vừa RA rổ frontier vừa VÀO rổ All-Cap — nói "SHB bị loại" mà bỏ vế sau là đọc một chiều.
+
+**Hàm ý duy nhất, và nó thuộc phía VẬN HÀNH chứ không phải phía luận điểm**: phiên 21/09 có thể có biến
+động thanh khoản/giá bất thường ở 5 mã trên do dòng vốn chỉ số, **không phải tín hiệu cơ bản**. Không rút
+lệnh nào (vì không có lệnh mua), không đổi phân loại mã nào.
+
+**Kết luận lượt này:** 30 mã rà qua · **0 case mới** · **0 QUALIFY** · watchlist TƯƠI · **0 lệnh mua để
+bảo vệ**. Lượt sạch.
+
+**Nguồn (cửa sổ 18→20/09/2026):**
+[cafef — FTSE Russell loại 21 cổ phiếu FTSE Vietnam Index, thêm MCH, TCX, VPL](https://cafef.vn/ftse-russell-loai-21-co-phieu-ftse-vietnam-index-them-moi-mch-tcx-va-vpl-188260905100801281.chn) ·
+[dnse — FTSE loại 21 cổ phiếu khỏi FTSE Vietnam Index](https://www.dnse.com.vn/senses/tin-tuc/ftse-loai-21-co-phieu-khoi-ftse-vietnam-index-them-mch-tcx-va-vpl-35283445) ·
+[investing/Vietstock — 21/09: Đọc gì trước giờ giao dịch chứng khoán](https://vn.investing.com/news/stock-market-news/2109-doc-gi-truoc-gio-giao-dich-chung-khoan-2716475) ·
+[cafef — HOSE công bố 72 mã cổ phiếu bị cắt margin tháng 9](https://cafef.vn/hose-cong-bo-72-ma-co-phieu-bi-cat-margin-thang-9-18826091116435351.chn) ·
+[nguoiquansat — HoSE cắt margin thêm 3 cổ phiếu, danh sách tăng lên 72 mã](https://nguoiquansat.vn/hose-cat-margin-them-3-co-phieu-danh-sach-tang-len-72-ma-314855.html) ·
+[vietstock — Gần 33 triệu cp HBS nhận án đình chỉ giao dịch](https://vietstock.vn/2026/08/gan-33-trieu-cp-hbs-nhan-an-dinh-chi-giao-dich-830-1485892.htm) ·
+[dnse — Hơn 91.000 tỷ đồng trái phiếu doanh nghiệp đáo hạn trong 4 tháng cuối năm](https://www.dnse.com.vn/senses/tin-tuc/hon-91000-ty-dong-trai-phieu-doanh-nghiep-se-dao-han-tro-35286254) ·
+[dantri — Hàng loạt doanh nghiệp bất động sản tiếp tục khất nợ trái phiếu](https://dantri.com.vn/bat-dong-san/hang-loat-doanh-nghiep-bat-dong-san-tiep-tuc-khat-no-trai-phieu-20260901182133683.htm) ·
+[nguoiquansat — Chủ tịch bị bắt, doanh nghiệp điện thuộc EVN tiếp tục thua kiện (TV1, 08/09)](https://nguoiquansat.vn/chu-tich-bi-bat-doanh-nghiep-dien-thuoc-evn-tiep-tuc-thua-kien-phai-boi-thuong-hang-chuc-ty-dong-314955.html) ·
+[cafef — Cổ phiếu ngân hàng đồng loạt tăng giá, HDB được khối ngoại gom nhiều nhất](https://cafef.vn/co-phieu-ngan-hang-dong-loat-tang-gia-hdb-duoc-khoi-ngoai-gom-nhieu-nhat-thi-truong-188260917214916743.chn)
+
+---
