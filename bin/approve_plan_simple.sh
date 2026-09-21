@@ -160,6 +160,12 @@ fi
   plan_approval \
   || echo "⚠ notify_thread.sh lỗi — Discord không nhận được, báo lại kênh duyệt plan bằng tay."
 
+# Đóng câu hỏi "plan chưa duyệt" ngay tại đây — decision `plan-approval-*` ở trên mang
+# topic KHÁC topic câu hỏi nên resolver của ops_health_check không khớp (coord-2026-09-21:
+# user duyệt 09:10, checker 12:45 vẫn escalate). Không fail lệnh duyệt nếu bước này lỗi.
+"$MIKE_ROOT/bin/close_plan_approval_questions.py" "$ACCOUNT" "$PLAN_DATE" "$APPROVED_BY" \
+  || echo "⚠ không đóng được câu hỏi 'plan chưa duyệt' — đóng tay bằng bin/close_bus_question.py."
+
 echo "Xong. Bot sẽ tự nhận trong lần retry/khởi động kế tiếp."
 
 # ── Auto-approve margin nếu plan có CAPIT leveraged orders (user chốt 2026-08-22) ────
