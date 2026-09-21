@@ -121,3 +121,6 @@
 
 ## Archived 2026-09-18 (keep=12 days=0 require_done=False)
 - [2026-08-20T01:56:17Z] [2026-08-20T02:0xZ] Xong job Winston_20260820_012008 (ops-autofix ZaloPay, attempt 2/2): retro 08-19 mat vi LOI TRUYEN TAI API (proxy chen cert), khong phai quoting bug. Fix 199a03a3 (lop loi thu 3 + backoff 180s + _fail_cause dung ten) da co tu attempt 1; attempt 2 verify bang log that + don 1 incident TRUNG minh tu tao. Bai hoc: attempt 2 PHAI grep kb/incidents/ theo tu khoa truoc khi viet incident moi, khong chi git status. CON TREO tu truoc: stash@{0} hybrid+refresh_skip_fix 20260810 chua resolve; cron 15:15 capture_upcom_vwap_eod CHUA cai (cho user duyet); 3 question Wags/selfcheck-red (lag_forensic_filter, corp_action_daily, nav_cum_dividend) cho nguoi triage.
+
+## Archived 2026-09-21 (keep=12 days=0 require_done=False)
+- [2026-08-20T02:13:27Z] Xong job Winston_20260820_020453 (attempt 2, tiep tuc tu attempt 1): fix 2/3 selfcheck do (corp_action_daily + nav_cum_dividend, commit 129b063a, ca 2 PASS 100%). lag_forensic_filter_selfcheck.py con FAIL 1/33 (van xuoi kb/context_planning_mini.md khong bold IVS/TMG) -> da viet .proposed + verify thu PASS, cho Mike duyet ap dung (bus question da mo). CON TREO tu truoc: stash@{0} hybrid+refresh_skip_fix 20260810 chua resolve; cron 15:15 capture_upcom_vwap_eod CHUA cai (cho user duyet).
