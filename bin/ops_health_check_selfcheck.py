@@ -2179,6 +2179,40 @@ def case_c5_plan_da_duyet_that_thi_khong_escalate():
               any("ops-autofix-unresolved" in ln for ln in pend), repr(pend))
 
 
+def case_c5_khac_account_van_escalate():
+    """arch-review vòng 2, mutation M4 SỐNG SÓT: bỏ hẳn luật khớp account (`acc not in
+    topic`) mà suite vẫn xanh ⇒ luật đó chưa có test. Ca này: hỏi về ZaloPay, chỉ SpaceX
+    được duyệt ⇒ PHẢI vẫn escalate."""
+    with tempfile.TemporaryDirectory() as tmp:
+        # _plan_approval_root ghi plan SpaceX đã duyệt; câu hỏi lại về ZaloPay.
+        _plan_approval_root(tmp, approved=True,
+                            topic="plan-ZaloPay-2026-09-21-chua-duyet")
+        lines, _ = run_check5(tmp)
+        pend = [ln for ln in lines
+                if "trong 48h qua CHƯA thấy answer" in ln and "[WARN-ONLY]" not in ln]
+        check("check5: plan SpaceX duyệt KHÔNG đóng hộ câu hỏi ZaloPay",
+              any("plan-ZaloPay-2026-09-21-chua-duyet" in ln for ln in pend), repr(lines))
+
+
+def case_c5_approved_by_user_variant():
+    """preflight_check.sh:63 / merge_park_orders.py:127 coi `approved_by_user` cũng là đã
+    duyệt — checker đọc thiếu khoá đó thì plan chạy thật vẫn bị escalate."""
+    with tempfile.TemporaryDirectory() as tmp:
+        _plan_approval_root(tmp, approved=False)
+        pf = os.path.join(tmp, "data", "trade_plans", "plan_SpaceX_2026-09-21.json")
+        with open(pf, encoding="utf-8") as f:
+            plan = json.load(f)
+        plan["approved_by"] = None
+        plan["approved_by_user"] = "user (John) - Discord"
+        with open(pf, "w", encoding="utf-8") as f:
+            json.dump(plan, f)
+        lines, _ = run_check5(tmp)
+        pend = [ln for ln in lines
+                if "trong 48h qua CHƯA thấy answer" in ln and "[WARN-ONLY]" not in ln]
+        check("check5: approved_by_user cũng tính là đã duyệt ⇒ KHÔNG escalate",
+              not pend, repr(pend))
+
+
 def case_c5_dry_run_khong_ghi_bus():
     """DRY-RUN phải KHÔNG chạy closer: khối auto-close nằm TRƯỚC chỗ shell đọc DRY_RUN nên
     không thừa hưởng guard đó. Test HÀNH VI (có chạy hay không), không so chuỗi: dựng một
@@ -2273,7 +2307,9 @@ def main():
                case_deliver_discord_fails_falls_back_to_telegram,
                case_deliver_both_fail_logs_for_check10,
                case_c5_plan_da_duyet_that_thi_khong_escalate,
-               case_c5_dry_run_khong_ghi_bus):
+               case_c5_dry_run_khong_ghi_bus,
+               case_c5_khac_account_van_escalate,
+               case_c5_approved_by_user_variant):
         fn()
     if FAILS:
         print(f"\nFAIL: {len(FAILS)} assertion hỏng")

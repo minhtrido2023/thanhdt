@@ -85,7 +85,11 @@ def approval_evidence(plan_dir: Path, account: str, date: str) -> tuple[str, str
     except Exception as exc:
         print(f"⚠ không đọc được {path} ({exc}) — KHÔNG đóng gì.")
         return None
-    by = str(plan.get("approved_by") or "").strip()
+    # `approved_by_user`: biến thể preflight_check.sh:63 / merge_park_orders.py:127 cũng
+    # coi là đã duyệt — phải khớp cùng luật với checker, nếu không hai bên trôi lệch nhau.
+    by = next((str(plan.get(k) or "").strip()
+               for k in ("approved_by", "approved_by_user")
+               if str(plan.get(k) or "").strip()), "")
     if not by:
         return None
     at = plan.get("approved_at")

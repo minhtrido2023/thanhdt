@@ -714,8 +714,13 @@ if os.path.isdir(inbox_dir):
                 continue
             try:
                 with open(os.path.join(_plan_dir, name), encoding="utf-8") as fh:
-                    if str((json.load(fh) or {}).get("approved_by") or "").strip():
-                        return True
+                    _plan = json.load(fh) or {}
+                # `approved_by_user` là biến thể mà preflight_check.sh:63 và
+                # merge_park_orders.py:127 CŨNG coi là đã duyệt — đọc thiếu nó thì plan
+                # duyệt qua đường đó chạy thật mà vẫn escalate ở đây.
+                if any(str(_plan.get(k) or "").strip()
+                       for k in ("approved_by", "approved_by_user")):
+                    return True
             except Exception:
                 return False
         return False
