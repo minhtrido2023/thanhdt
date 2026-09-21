@@ -413,3 +413,8 @@
 ## Consolidation 2026-09-21T12:07:02Z
 - [2026-09-21T11:10:06Z] Winston/status — new-listings-daily: {"date": "2026-09-21", "count": 0, "lookback_days": 90, "note": "no new listings detected"}
 - [2026-09-21T11:40:10Z] Winston/status — corp-action-scan-daily: {"scanned_universe": "tav2_bq.ticker_prune", "candidates_this_run": 0, "fresh_alerts_this_run": 0, "resolved_since_last_run": [], "still_pending_count": 1, "still_pending": [{"ticker": "PHR", "ex_date": "2026-09-14", "alerted_week": "2026-W38", "days_since_ex_date": 7}], "stale_pending_over_7d": []}
+
+## Consolidation 2026-09-21T12:09:15Z
+- [2026-09-21T12:08:18Z] DollarBill/heartbeat — DollarBill_20260921_120717: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20260921_120717", "source": "watcher"}
+- [2026-09-21T12:08:19Z] DollarBill/heartbeat — DollarBill_20260921_120718: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20260921_120718", "source": "watcher"}
+- [2026-09-21T12:09:02Z] DollarBill/decision — plan-2026-09-22: {"account": "SpaceX", "plan_date": "2026-09-22", "orders": 0, "summary": "HOLD ALL. 0 tin hieu BAL/LAG moi. VPI(BAL) da o target. L1 park-trim BLOCKED_ALL_NAMES (13 ma duoi 1 lo sau tran ADV/cau truc, PARK lech +6.86tr). CAPIT 42 phien giu nguyen. Active NAV 978.72tr, egg 51.00tr. DT5G NEUTRAL fresh.", "plan_file": "data/trade_plans/plan_SpaceX_2026-09-22.json"}
