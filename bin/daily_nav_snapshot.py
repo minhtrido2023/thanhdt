@@ -296,8 +296,16 @@ def _corp_action_gate_status(snap, date):
                   f"feed_status={snap.get('feed_status')!r}")
 
 
-def net_fills_between(account, after_date, upto_date, cache=None):
+def net_fills_between(account, after_date, upto_date, cache=None, missing_out=None):
     """{ticker: KL RÒNG đã khớp THẬT (mua +, bán −)} cho các ngày trong khoảng (after, upto].
+
+    `missing_out` (list, tuỳ chọn) nhận danh sách ngày GIAO DỊCH trong cửa sổ mà journal KHÔNG
+    đọc được — §28/§29 (arch-review vòng 3, mục [N2]): ngày bot CÓ khớp mà journal hỏng/thiếu
+    thì "lệnh khớp thật +0" là suy diễn từ SỰ VẮNG MẶT của một kênh, không phải bằng chứng, và
+    thông điệp gate sẽ đẩy người xử lý sang hướng corp-action sai. Ngày KHÔNG giao dịch thiếu
+    journal là bình thường (42-43/53 ngày) nên chỉ đếm ngày giao dịch.
+    ⚠️ `journal_fill_events` chỉ trả err cho ca "thiếu file", mà vòng lặp dưới chỉ duyệt file CÓ
+    THẬT (glob) ⇒ giữ mỗi `_err` là gần như vô dụng. Phải đối chiếu NGƯỢC với lịch phiên.
 
     ⚠️ BẪY ĐÃ ĐO LẠI (job Taylor_20260922_115410): cột `qty` của dòng FILL trong journal là
     LŨY KẾ theo `child_oid`, KHÔNG phải phần tăng thêm — cộng thẳng mọi dòng sẽ đếm trùng cú
@@ -312,20 +320,37 @@ def net_fills_between(account, after_date, upto_date, cache=None):
     """
     key = (account, after_date, upto_date)
     if cache is not None and key in cache:
-        return cache[key]
+        out, missing = cache[key]
+        if missing_out is not None:
+            missing_out[:] = missing
+        return out
     sys.path.insert(0, MIKE_BIN)
     from verify_account_snapshot import journal_fill_events
     prefix, suffix = f"exec_{account}_", "_journal.csv"
-    out = {}
+    out, missing, seen = {}, [], set()
     for path in sorted(glob.glob(os.path.join(EXEC_DIR, prefix + "*" + suffix))):
         d = os.path.basename(path)[len(prefix):-len(suffix)]
         if not (after_date < d <= upto_date):
             continue
-        events, _err = journal_fill_events(account, d)
+        seen.add(d)
+        events, err = journal_fill_events(account, d)
+        if events is None:
+            missing.append(f"{d}: {err}")
+            continue
         for _ts, _oid, tk, side, qty, _px in events or []:
             out[tk] = out.get(tk, 0.0) + (qty if side == "buy" else -qty)
+    sys.path.insert(0, WC_ROOT)
+    from trading_bot.vn_market import next_trading_day
+    _d, _end = (next_trading_day(datetime.date.fromisoformat(after_date)),
+                datetime.date.fromisoformat(upto_date))
+    while _d <= _end:
+        if _d.isoformat() not in seen:
+            missing.append(f"{_d.isoformat()}: thiếu {prefix}{_d.isoformat()}{suffix}")
+        _d = next_trading_day(_d)
     if cache is not None:
-        cache[key] = out
+        cache[key] = (out, missing)
+    if missing_out is not None:
+        missing_out[:] = missing
     return out
 
 
@@ -394,8 +419,12 @@ def classify_qty_residual(ev, qty_now, qty_prev, net_fill, prev_date):
     đó là tỉ lệ cổ tức trên MỆNH GIÁ (DRI 2026-09-22: 0.1 = 1.000đ/10.000đ), không phải tỉ lệ cổ
     phiếu — dùng nhầm sẽ "giải thích" khống một cú đổi KL 10%.
 
-    qty_prev=None (mã mới mua, hoặc thiếu file ngày trước) ⇒ "ok": KHÔNG có cơ sở so sánh thì
-    KHÔNG chặn (fail-open có chủ đích — gate này chỉ MỞ RỘNG bảo vệ, chưa từng có trước đây).
+    qty_prev=None ⇒ "ok": KHÔNG có cơ sở so sánh thì KHÔNG chặn (fail-open có chủ đích — gate
+    này chỉ MỞ RỘNG bảo vệ, chưa từng có trước đây). ⚠️ Fail-open này chỉ còn phủ ca KHÔNG CÓ
+    BẤT KỲ bản ghi vị thế nào trước `date` (`prev_date is None`). Ca "bản ghi ngày trước CÓ,
+    nhưng vắng mã này" đã được CALLER chuẩn hoá thành qty_prev=0.0 trước khi gọi ([B2],
+    arch-review vòng 3): ở đó "chưa giữ" là SỰ THẬT kiểm chứng được, không phải "không biết" —
+    để None là nuốt đúng lớp L4 (mã mới mua + sự kiện tỉ lệ ~1%, cả hai trục im lặng).
     """
     if qty_prev is None or qty_now is None:
         return "ok", None
@@ -967,24 +996,57 @@ def main():
     cash_div_confirmed = {}
     corp_action_recovered = {}   # --from-raw + corp-action ĐÃ CONFIRMED ⇒ quy ngược KL như cũ
     fill_cache = {}
+    journal_gaps = set()
     if args.from_raw or is_today:
+        sys.path.insert(0, WC_ROOT)   # module chạy từ mike/bin, trading_bot nằm ở WC_ROOT
+        from trading_bot.vn_market import next_trading_day
+        # Phiên GIAO DỊCH kế tiếp `args.date` — ex-date mà broker điều chỉnh ĐÊM NAY. Neo đường
+        # phục hồi vào đây thay vì `(ev or {}).get("date")` (arch-review vòng 3, mục [B1]): lấy
+        # ex-date TỪ LỊCH khiến guard TẮT ĐÚNG LÚC CẦN NHẤT — lịch mất (snapshot chỉ có từ
+        # 2026-08-13 ⇒ mọi backfill cũ hơn chạy KHÔNG guard) thì `ev=None` ⇒ ex_date=None ⇒
+        # `confirmed_share_event_multiplier` nhận BẤT KỲ action CONFIRMED tương lai nào của mã,
+        # kể cả ex-date cách 5 tuần. data/corp_actions.json đang giữ VHM mult 2.0 — dùng nhầm
+        # là lệch 50% giá trị vị thế, ghi thẳng nav_history.
+        nxt_session = next_trading_day(datetime.date.fromisoformat(args.date)).isoformat()
         for t in tickers:
             ev = held_event_next_session(ca_snap, args.date, t)
             qty_now = (positions[t] or {}).get("qty")
             qty_prev, prev_d = previous_raw_qty(account_no, t, args.date)
-            net_fill = (net_fills_between(args.account, prev_d, args.date, fill_cache).get(t)
-                        if prev_d else None)
+            if prev_d is not None and qty_prev is None:
+                # [B2] arch-review vòng 3: bản ghi vị thế ngày `prev_d` CÓ THẬT mà vắng mã này
+                # ⇒ "chưa giữ" là SỰ THẬT kiểm chứng được, qty_prev = 0 chứ không phải "không
+                # biết". Fail-open cũ nuốt đúng lớp L4 mà gate sinh ra để đóng: mã mới mua +
+                # sự kiện tỉ lệ nhỏ (giá rơi 1% < PRICE_XCHECK_TOLERANCE_PCT) ⇒ CẢ HAI TRỤC im
+                # lặng. Đo thật tháng 9: 1/600 ticker-day rơi vào ca này (VPI 09-17, cả 2
+                # account) và phần dư = 0,0 CHÍNH XÁC ⇒ siết lại KHÔNG sinh false-block.
+                # Giữ NGUYÊN fail-open cho prev_d is None (không có BẤT KỲ bản ghi nào trước đó).
+                qty_prev = 0.0
+            _miss = []
+            net_fill = (net_fills_between(args.account, prev_d, args.date, fill_cache,
+                                          missing_out=_miss).get(t) if prev_d else None)
+            journal_gaps.update(_miss)
             qverdict, qdetail = classify_qty_residual(ev, qty_now, qty_prev, net_fill, prev_d)
             if qverdict != "ok":
-                mult = confirmed_share_event_multiplier(t, args.date, (ev or {}).get("date"))
-                if args.from_raw and mult:
+                mult = confirmed_share_event_multiplier(t, args.date, nxt_session)
+                _base = (qty_prev or 0) + (net_fill or 0)
+                _mult_explains = (
+                    bool(mult) and qty_prev is not None and
+                    abs(qty_now / mult - _base) <= max(QTY_RATIO_TOL_SHARES,
+                                                       abs(_base) * QTY_RATIO_TOL_PCT))
+                if args.from_raw and _mult_explains:
                     # ĐƯỜNG PHỤC HỒI (mục [1] arch-review vòng 2) — KHÔI PHỤC hành vi CŨ, không
                     # phải tính năng mới: quy ngược KL về trước sự kiện đúng như vòng lặp
                     # `confirmed_qty_multiplier_after` ở trên vẫn làm cho ngày lịch sử. Cố ý
                     # KHÔNG phó mặc cho `classify_raw_price_gap`/early_credit như bản vòng 1 gợi
                     # ý: nhánh đó chỉ bật khi lệch giá > PRICE_XCHECK_TOLERANCE_PCT, nên sự kiện
                     # tỉ lệ nhỏ sẽ lọt — đúng lỗ hổng L4 mà gate này sinh ra để đóng.
-                    corp_action_recovered[t] = dict(qdetail, qty_multiplier=mult)
+                    # [B1]: điều kiện là mult TÁI TẠO ĐƯỢC KL trước sự kiện, KHÔNG phải mult TỒN
+                    # TẠI. Đường cũ early_credit còn đòi đối chứng giá (`price/mult ≈ market`);
+                    # "có action CONFIRMED" không là bằng chứng nào cả, và §29 dạng 2 cấm nói
+                    # chữ "khớp" khi chưa đọc bằng chứng nào.
+                    corp_action_recovered[t] = dict(qdetail, qty_multiplier=mult,
+                                                    qty_pre_event=qty_now / mult,
+                                                    qty_pre_event_expected=_base)
                     corp_action_adj[t] = mult
                     positions[t]["qty"] = qty_now / mult
                 elif qverdict == "share_event_credit":
@@ -1000,7 +1062,9 @@ def main():
     for t, d in sorted(corp_action_recovered.items()):
         print(f"ℹ️ [{args.date}] {t}: KL {d['qty_prev']:,.0f}→{d['qty_now']:,.0f} (lệnh khớp "
               f"{d['net_fill']:+,.0f}, phần dư {d['residual']:+,.0f}) khớp corp-action ĐÃ CONFIRMED "
-              f"trong data/corp_actions.json (qty_multiplier {d['qty_multiplier']}) — chế độ "
+              f"trong data/corp_actions.json (qty_multiplier {d['qty_multiplier']}, ex-date "
+              f"= phiên kế tiếp; KL quy ngược {d['qty_pre_event']:,.2f} ≈ KL trước sự kiện kỳ "
+              f"vọng {d['qty_pre_event_expected']:,.2f}) — chế độ "
               f"--from-raw: KHÔNG chặn, quy ngược KL về {positions[t]['qty']:,.2f} như hành vi "
               f"trước gate. Chế độ LIVE vẫn chặn.", file=sys.stderr)
     if share_event_blocks or qty_unexplained:
@@ -1025,6 +1089,11 @@ def main():
               f"({len(share_event_blocks)} khớp tỉ lệ sự kiện, {len(qty_unexplained)} chưa giải "
               f"thích được) — KHÔNG tính NAV, CẦN NGƯỜI xử lý: {'; '.join(parts)}. "
               f"[lịch: {ca_gate_note}] "
+              + (f"[⚠️ journal KHÔNG đọc được cho {len(journal_gaps)} ngày GIAO DỊCH trong cửa "
+                 f"sổ ({'; '.join(sorted(journal_gaps))}) ⇒ 'lệnh khớp thật' phía trên có thể "
+                 f"THIẾU; kiểm journal TRƯỚC khi nghi corp-action] "
+                 if journal_gaps else "")
+              +
               f"Đường phục hồi cho mã ĐÃ khớp tỉ lệ: chờ corp_action_auto_confirm.py (cron 19:25) "
               f"ghi _status=CONFIRMED + qty_multiplier vào data/corp_actions.json rồi chạy lại "
               f"`daily_nav_snapshot.py --from-raw --date {args.date}` — CHỈ mã đã CONFIRMED mới "
@@ -1040,6 +1109,7 @@ def main():
              "gate_verdict": "qty_change_block", "rc": 5,
              "corp_action_gate_v2": {
                  "active": ca_gate_active, "note": ca_gate_note,
+                 "journal_gaps": sorted(journal_gaps),
                  "share_event_blocks": [{"ticker": t, "detail": d} for t, d in share_event_blocks],
                  "qty_unexplained": [{"ticker": t, "detail": d} for t, d in qty_unexplained]}})
         return 5
@@ -1237,6 +1307,7 @@ def main():
            "corp_action_gate_v2": {
                "active": ca_gate_active, "note": ca_gate_note,
                "n_tickers_checked": len(tickers) if (args.from_raw or is_today) else 0,
+               "journal_gaps": sorted(journal_gaps),
                "share_event_blocks": [], "qty_unexplained": [],
                "cash_div_confirmed": cash_div_confirmed,
                "corp_action_recovered": corp_action_recovered},

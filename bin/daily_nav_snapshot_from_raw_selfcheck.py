@@ -301,6 +301,31 @@ with tempfile.TemporaryDirectory() as tmp:
         _c = {}
         D.net_fills_between("A1", "2026-08-09", "2026-08-10", _c)
         check("(9e) cache dùng được", ("A1", "2026-08-09", "2026-08-10") in _c, _c)
+        # [N2] arch-review vòng 3 — §28/§29: ngày GIAO DỊCH thiếu journal phải NÓI RA, không
+        # được để "lệnh khớp thật +0" thành suy diễn từ SỰ VẮNG MẶT. `journal_fill_events` chỉ
+        # trả err cho ca thiếu file mà vòng lặp chỉ duyệt file CÓ THẬT (glob) ⇒ giữ mỗi `_err`
+        # là VÔ DỤNG; phải đối chiếu NGƯỢC với lịch phiên.
+        _m = []
+        r = D.net_fills_between("A1", "2026-08-09", "2026-08-11", missing_out=_m)
+        check("(9f) 08-09→08-11 có đủ 2 journal ⇒ KHÔNG báo thiếu ngày nào",
+              r.get("VCB") == -200.0 and _m == [], _m)
+        _m = []
+        # 08-12 (Thứ Tư) là ngày GIAO DỊCH và KHÔNG có journal ⇒ phải lộ ra.
+        r = D.net_fills_between("A1", "2026-08-11", "2026-08-12", missing_out=_m)
+        check("(9g) ngày giao dịch thiếu journal ⇒ liệt kê ra, out vẫn rỗng (không đoán +0)",
+              r == {} and len(_m) == 1 and _m[0].startswith("2026-08-12:")
+              and "exec_A1_2026-08-12_journal.csv" in _m[0], _m)
+        _m = []
+        # 08-15 Thứ Bảy / 08-16 Chủ Nhật KHÔNG phải ngày giao dịch ⇒ thiếu journal là BÌNH
+        # THƯỜNG (42-43/53 ngày), không được báo động giả.
+        D.net_fills_between("A1", "2026-08-14", "2026-08-16", missing_out=_m)
+        check("(9h) cuối tuần thiếu journal ⇒ KHÔNG báo (chỉ đếm ngày giao dịch)", _m == [], _m)
+        _m2 = []
+        _c2 = {}
+        D.net_fills_between("A1", "2026-08-11", "2026-08-12", _c2)
+        D.net_fills_between("A1", "2026-08-11", "2026-08-12", _c2, missing_out=_m2)
+        check("(9i) cache trả lại CẢ danh sách ngày thiếu, không nuốt mất",
+              len(_m2) == 1 and _m2[0].startswith("2026-08-12:"), _m2)
     finally:
         D.EXEC_DIR, V.EXEC_DIR = _oldD, _oldV
 

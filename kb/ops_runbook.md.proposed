@@ -195,6 +195,13 @@ Hôm trước có cổ phiếu, hôm nay feed trả 0 vị thế ⇒ script **c�
    ✅ Lỗ hổng CŨ (sự kiện tỉ lệ NHỎ, thực đo min 1,03%, giá rơi <5% nên cổng PRICE_XCHECK không
    bật) **ĐÃ ĐÓNG** bởi `corp_action_gate_v2`: gate chặn theo bằng chứng KHỐI LƯỢNG (phần dư sau
    khi trừ lệnh khớp thật), độc lập biên độ giá ⇒ rc=5, xem mục 5 § NAV thiếu dòng.
+   ⚠️ **ĐIỀU KIỆN CÒN LẠI — fail-open CÓ CHỦ ĐÍCH, đóng bằng tay:** trục KHỐI LƯỢNG cần một bản
+   ghi vị thế TRƯỚC `date` để so. Khi **KHÔNG có BẤT KỲ bản ghi `dnse_raw_*.jsonl` nào** trước
+   ngày đang tính (account mới, hoặc khoảng trống dữ liệu), `qty_prev = None` ⇒ gate KHÔNG chặn:
+   không có cơ sở so sánh thì chặn là đoán mò. Ca "bản ghi ngày trước CÓ, nhưng VẮNG mã này"
+   thì **KHÔNG** rơi vào đây — nó được quy `qty_prev = 0` (mã mới mua + sự kiện tỉ lệ ~1% vẫn bị
+   chặn; đo thật tháng 9: 1/600 ticker-day, phần dư = 0,0 chính xác ⇒ không có false-block).
+   Ngày đầu tiên có dữ liệu của một account ⇒ đối soát KL bằng tay với sổ broker.
 4. Mọi ca còn lại xử lý như cũ: `nav_sync_retry.sh` retry tới 21:15 ICT rồi escalate bus question.
 
 ## Nơi kết quả đổ về (đọc mỗi sáng, KHÔNG cần user nhắc)

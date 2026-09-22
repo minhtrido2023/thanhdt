@@ -38,14 +38,20 @@ def check(name, cond, detail=""):
 
 
 def build_fixture(tmp, qty_now, qty_prev=500.0, fills=(), event=True, confirmed=True,
-                  mkt=None):
-    """dnse_raw (2 ngày) + journal + corp_actions.json + corp_action_daily snapshot."""
-    def pos(ts, qty):
-        return {"kind": "positions", "ts": ts, "account_no": ACCT_NO, "payload": {"positions": [
-            {"symbol": "VIB", "openQuantity": qty,
-             "marketPrice": PRICE / MULT if mkt is None else mkt}]}}
+                  mkt=None, act_ex_date=None, ratio="0.095", prev_holds=True):
+    """dnse_raw (2 ngày) + journal + corp_actions.json + corp_action_daily snapshot.
+
+    `act_ex_date` — ex_date ghi trong corp_actions.json khi KHÁC ex-date trên lịch (ca [g]).
+    `ratio`       — exercise_ratio của sự kiện trên lịch (ca [i3] dùng 1%).
+    `prev_holds`  — False ⇒ bản ghi vị thế ngày trước CÓ THẬT nhưng KHÔNG chứa VIB (ca [i3]/[i4]).
+    """
+    def pos(ts, qty, holds=True):
+        return {"kind": "positions", "ts": ts, "account_no": ACCT_NO, "payload": {"positions": (
+            [{"symbol": "VIB", "openQuantity": qty,
+              "marketPrice": PRICE / MULT if mkt is None else mkt}] if holds else
+            [{"symbol": "ZZZ", "openQuantity": 10.0, "marketPrice": 1_000.0}])}}
     with open(os.path.join(tmp, f"dnse_raw_{PREV}.jsonl"), "w") as f:
-        f.write(json.dumps(pos(f"{PREV}T19:00:00", qty_prev)) + "\n")
+        f.write(json.dumps(pos(f"{PREV}T19:00:00", qty_prev, prev_holds)) + "\n")
     with open(os.path.join(tmp, f"dnse_raw_{DATE}.jsonl"), "w") as f:
         f.write(json.dumps(pos(f"{DATE}T19:00:00", qty_now)) + "\n")
         f.write(json.dumps({"kind": "balances", "ts": f"{DATE}T19:05:00", "account_no": ACCT_NO,
@@ -55,7 +61,7 @@ def build_fixture(tmp, qty_now, qty_prev=500.0, fills=(), event=True, confirmed=
         f.write(hdr)
         for i, (side, q) in enumerate(fills):
             f.write(f"{DATE}T09:20:0{i},FILL,P{i},VIB,{side},{9000+i},{q},{PRICE},0,BAL,X,\n")
-    acts = {"actions": [{"id": "VIB-TEST", "ticker": "VIB", "ex_date": EX_DATE,
+    acts = {"actions": [{"id": "VIB-TEST", "ticker": "VIB", "ex_date": act_ex_date or EX_DATE,
                          "qty_multiplier": MULT,
                          "_status": ("CONFIRMED — corp_action_auto_confirm.py test"
                                      if confirmed else "PROPOSED — chưa ai ký")}]}
@@ -63,10 +69,24 @@ def build_fixture(tmp, qty_now, qty_prev=500.0, fills=(), event=True, confirmed=
         json.dump(acts, f)
     snap = {"asof": DATE, "status": "OK", "usable": True, "feed_status": "FRESH",
             "upcoming_events_held": ([{"ticker": "VIB", "date": EX_DATE, "event_code": "ISS",
-                                       "price_adjusting": True, "exercise_ratio": "0.095"}]
+                                       "price_adjusting": True, "exercise_ratio": ratio}]
                                      if event else [])}
     with open(os.path.join(tmp, f"corp_action_daily_{DATE}.json"), "w") as f:
         json.dump(snap, f)
+
+
+def load_block(tmp):
+    """corp_action_gate_v2 trong artifact chặn, hoặc {} nếu KHÔNG chặn.
+
+    ⚠️ HARNESS (arch-review vòng 3): `json.load(open(blk))` trần làm cả script CHẾT bằng
+    FileNotFoundError khi một mutation biến rc=5 thành rc=0 — ca đó "fail" nhờ script nổ chứ
+    KHÔNG bằng assertion, và mọi check SAU nó không bao giờ chạy. Trả {} để check kế tiếp vẫn
+    fail đúng chỗ của nó.
+    """
+    blk = os.path.join(tmp, f"nav_gate_block_{ACCT}_{DATE}.json")
+    if not os.path.exists(blk):
+        return {}
+    return json.load(open(blk, encoding="utf-8")).get("corp_action_gate_v2") or {}
 
 
 def run(tmp):
@@ -180,6 +200,77 @@ with tempfile.TemporaryDirectory() as tmp:
     rc, err, snap = run(tmp)
     check("(6c) ngày bình thường vẫn ghi corp_action_gate_v2.active=false vào nav_snapshot",
           rc == 0 and snap["corp_action_gate_v2"]["active"] is False, (rc, (snap or {}).get("corp_action_gate_v2")))
+
+print("7. [B1] arch-review vòng 3 — đường PHỤC HỒI phải có BẰNG CHỨNG mult giải thích phần dư,")
+print("   không chỉ 'có action CONFIRMED tồn tại' (§29 dạng 2: chữ 'khớp' phải đọc bằng chứng)")
+with tempfile.TemporaryDirectory() as tmp:
+    # (g) LỊCH MẤT (snapshot corp_action_daily chỉ có từ 2026-08-13 ⇒ mọi backfill cũ hơn chạy
+    # KHÔNG có ev) + corp_actions.json giữ một action CONFIRMED ex-date CÁCH 5 TUẦN. Bản trước
+    # vá: ex_date=None ⇒ vơ bừa mult 1.095 ⇒ rc=0, KL 547→499,54, mtm=10.490.411 ghi thẳng
+    # nav_history. data/corp_actions.json thật đang giữ VHM mult 2.0 — cùng lớp lỗi = lệch 50%.
+    build_fixture(tmp, qty_now=547.0, confirmed=True, act_ex_date="2026-10-15")
+    os.remove(os.path.join(tmp, f"corp_action_daily_{DATE}.json"))
+    rc, err, snap = run(tmp)
+    check("(g1) lịch mất + CONFIRMED ex-date KHÁC phiên kế tiếp ⇒ rc=5 (KHÔNG vơ bừa mult)",
+          rc == 5, (rc, err[-400:]))
+    check("(g2) KHÔNG ghi NAV — mtm_stock sai 10.490.411 không tồn tại",
+          snap is None and not os.path.exists(os.path.join(tmp, f"nav_history_{ACCT}.csv")),
+          (snap or {}).get("mtm_stock"))
+with tempfile.TemporaryDirectory() as tmp:
+    # (h) ex-date ĐÚNG phiên kế tiếp + CONFIRMED, nhưng KL +200 (kỳ vọng +47,5) ⇒ mult KHÔNG
+    # tái tạo được KL trước sự kiện. Bản trước vá: rc=0, KL 700→639,27, mtm=13.424.657.
+    build_fixture(tmp, qty_now=700.0, confirmed=True)
+    rc, err, snap = run(tmp)
+    check("(h1) ex-date khớp nhưng phần dư KHÔNG khớp mult ⇒ rc=5", rc == 5, (rc, err[-400:]))
+    check("(h2) KHÔNG ghi NAV — mtm_stock sai 13.424.657 không tồn tại",
+          snap is None and not os.path.exists(os.path.join(tmp, f"nav_history_{ACCT}.csv")),
+          (snap or {}).get("mtm_stock"))
+    g = load_block(tmp)
+    check("(h3) artifact chặn ghi đúng phần dư +200 ở nhánh 'chưa giải thích được'",
+          [d["detail"]["residual"] for d in g.get("qty_unexplained") or []] == [200.0],
+          (g.get("qty_unexplained"), os.listdir(tmp)))
+    check("(h4) đường phục hồi KHÔNG chạy (không có corp_action_recovered)",
+          bool(g) and not g.get("corp_action_recovered"), g.get("corp_action_recovered"))
+with tempfile.TemporaryDirectory() as tmp:
+    # Đối chứng KHÔNG-ĐƯỢC-CHẾT: VIB thật KỂ CẢ KHI LỊCH MẤT vẫn phải phục hồi đúng — bản vá
+    # [B1] neo ex-date vào PHIÊN KẾ TIẾP nên guard sống cả khi ev=None, tức CỨU thêm ca backfill
+    # ngày không có snapshot lịch mà (g)/(h) vẫn chặn.
+    build_fixture(tmp, qty_now=547.0, confirmed=True)
+    os.remove(os.path.join(tmp, f"corp_action_daily_{DATE}.json"))
+    rc, err, snap = run(tmp)
+    check("(g3) VIB THẬT + lịch mất + CONFIRMED ex-date = phiên kế tiếp ⇒ rc=0, vẫn phục hồi",
+          rc == 0 and snap is not None
+          and abs(snap["mtm_stock"] - 547.0 / MULT * PRICE) < 1.0,
+          (rc, (snap or {}).get("mtm_stock"), err[-400:]))
+
+print("8. [B2] arch-review vòng 3 — bản ghi ngày trước CÓ nhưng VẮNG mã này ⇒ qty_prev = 0,")
+print("   không phải 'không biết' (fail-open cũ nuốt đúng lớp L4 mà gate sinh ra để đóng)")
+with tempfile.TemporaryDirectory() as tmp:
+    # (i3) mã chưa giữ ở bản ghi ngày trước + mua 500 hôm nay + ISS 1% credit sớm 5 cp.
+    # Giá rơi 1% < PRICE_XCHECK_TOLERANCE_PCT=5% ⇒ trục GIÁ im lặng. Bản trước vá: qty_prev=None
+    # ⇒ trục KL cũng im ⇒ rc=0, mtm = 505 × 21.000 thay vì 500 × 21.000.
+    build_fixture(tmp, qty_now=505.0, fills=[("buy", 500)], confirmed=False, ratio="0.01",
+                  prev_holds=False, mkt=PRICE / 1.01)
+    rc, err, snap = run(tmp)
+    check("(i3a) mã mới + ISS ~1% credit sớm 5cp ⇒ rc=5 (trước vá: rc=0)", rc == 5,
+          (rc, err[-500:]))
+    check("(i3b) KHÔNG ghi NAV — mtm_stock sai 505×21.000 = 10.605.000 không tồn tại",
+          snap is None, (snap or {}).get("mtm_stock"))
+    d = ([x["detail"] for x in load_block(tmp).get("qty_unexplained") or []] or [{}])[0]
+    check("(i3c) bằng chứng ghi đúng: qty_prev=0, lệnh khớp thật +500, phần dư +5",
+          d.get("qty_prev") == 0.0 and d.get("net_fill") == 500.0 and d.get("residual") == 5.0, d)
+with tempfile.TemporaryDirectory() as tmp:
+    # (i4) ĐỐI CHỨNG: mã mới mua BÌNH THƯỜNG (không sự kiện) phải rc=0 — siết [B2] không được
+    # sinh false-block. Đo thật tháng 9: 1/600 ticker-day rơi vào ca này (VPI 09-17), phần dư
+    # = 0,0 CHÍNH XÁC.
+    build_fixture(tmp, qty_now=500.0, fills=[("buy", 500)], event=False, confirmed=False,
+                  prev_holds=False, mkt=PRICE)
+    rc, err, snap = run(tmp)
+    check("(i4a) mã mới mua bình thường ⇒ rc=0 (siết [B2] KHÔNG sinh false-block)", rc == 0,
+          (rc, err[-500:]))
+    check("(i4b) mtm_stock = 500 × 21.000 = 10.500.000 CHÍNH XÁC",
+          snap is not None and abs(snap["mtm_stock"] - 500.0 * PRICE) < 1e-6,
+          (snap or {}).get("mtm_stock"))
 
 print(f"\n{len(PASS)} PASS, {len(FAIL)} FAIL")
 sys.exit(1 if FAIL else 0)
