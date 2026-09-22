@@ -131,7 +131,7 @@ tái tạo bằng cách chạy lại chính bộ dispatcher.
 | ~14:50 | phiên đóng (ATC) | Bot tự cancel lệnh treo, ghi `exec_*_report.md` | — (thực thi thật, autofix KHÔNG đụng) |
 | 15:05 | `dc_book_waterfall_paper.py --update` | Paper sleeve DC-book cập nhật | Lỗi → autofix (paper, không chạm tiền thật) |
 | 19:10 | `eod_trading_report.sh` (per account) | Report khớp lệnh + NAV verify-pipeline + đối soát broker≠state | Crash → autofix; kênh Discord hỏng → ĐÃ CÓ fallback Telegram+Trading Daily tự động |
-| 19:50 | `nav_snapshot_daily.sh` (mọi account live) | Đường ghi NAV thứ 2, độc lập EOD: chưa có dòng `nav_history` hôm nay ⇒ gọi `daily_nav_snapshot.py`; có rồi ⇒ bỏ qua | rc=2/timeout tự retry 2 vòng×5'; rc=4 ⇒ marker cho `nav_sync_retry`; rc=2 hết retry / rc=3 ⇒ 🔴 Trading Daily, xử lý TAY (xem § NAV thiếu dòng) |
+| 19:50 | `nav_snapshot_daily.sh` (mọi account live) | Đường ghi NAV thứ 2, độc lập EOD: chưa có dòng `nav_history` hôm nay ⇒ gọi `daily_nav_snapshot.py`; có rồi ⇒ bỏ qua | rc=2/timeout tự retry 2 vòng×5'; rc=4 ⇒ marker cho `nav_sync_retry`; **rc=5 ⇒ KHÔNG retry, escalate NGAY** (xem § NAV thiếu dòng mục 5); rc=2 hết retry / rc=3 ⇒ 🔴 Trading Daily, xử lý TAY (xem § NAV thiếu dòng) |
 | Mỗi 10' | `watchdog.sh` | Session Mike sống, macro_health staleness (`staleness_watch.py`) | Tự restart/clear-bridge (có sẵn) |
 
 ### NAV thiếu dòng `nav_history` — 2 đường ghi (aria-G, 2026-09-13)
@@ -139,7 +139,25 @@ tái tạo bằng cách chạy lại chính bộ dispatcher.
 1. `rc=2` sau 2 lần retry: đọc `logs/nav_snapshot_daily.log` (thiếu balances/vị thế/giá). Còn trong tối ⇒ chạy tay `mike/bin/nav_snapshot_daily.sh` (idempotent, an toàn chạy lại).
 2. `rc=3` (sanity ±15%): nạp/rút tiền thật? ⇒ xác nhận rồi mới chạy lại với `NAV_SANITY_MAX_PCT` lớn hơn; không thì là lỗi dữ liệu.
 3. ⛔ Sang NGÀY SAU mới phát hiện thiếu ⇒ KHÔNG chạy wrapper/`daily_nav_snapshot.py --date <ngày cũ>` đường live (vị thế broker LIVE ≠ vị thế ngày đó, ghi số sai âm thầm) — backfill bằng `--from-raw` (ghi `nav_is_estimate=True`).
-4. Chạy tay `eod_trading_report.sh` SAU khi đường 2 đã ghi sẽ ghi đè dòng bằng bản đọc mới hơn (đường 1 không có guard, cố ý giữ nguyên) — sau 19:10 dữ liệu đóng cửa đã ổn định nên số phải trùng; lệch ⇒ soi `balance_ts` 2 lần đọc.
+5. **`rc=5` (corp_action_gate_v2 — KHỐI LƯỢNG vị thế đổi ngoài lệnh khớp thật).** Mã MỚI, KHÁC
+   hẳn rc=4: **không** có marker `nav_pending_retry`, **không** được `nav_sync_retry.sh` retry,
+   `nav_snapshot_daily.sh` rơi vào nhánh `*)` ⇒ 🔴 ngay. Cố ý: rc=4 là "giá chưa đồng bộ, chờ là
+   xong"; rc=5 là "KL vị thế đã đổi, chờ KHÔNG bao giờ xong".
+   - Bằng chứng trên đĩa: `data/execution_logs/nav_gate_block_<account>_<date>.json` (KHÔNG phải
+     `nav_snapshot_*` — tách tên cố ý để không đè artifact audit của ngày đã có NAV). Đọc
+     `corp_action_gate_v2.share_event_blocks` / `.qty_unexplained`.
+   - **`share_event_blocks`** = phần dư KL khớp ĐÚNG tỉ lệ thực hiện của sự kiện cổ phiếu có
+     ex-date = phiên kế tiếp ⇒ broker credit sớm thật (mẫu VHM/MBB/BID/VIX/MSB/VIB). Xử lý: chờ
+     `corp_action_auto_confirm.py` (cron 19:25 ICT) ghi `_status=CONFIRMED` + `qty_multiplier` vào
+     `data/corp_actions.json`, rồi backfill `python3 mike/bin/daily_nav_snapshot.py --account <X>
+     --date <ngày> --from-raw`. CHỈ mã đã CONFIRMED mới được quy ngược KL; LIVE vẫn chặn.
+   - **`qty_unexplained`** = KL đổi, lệnh khớp thật không giải thích được, và không khớp tỉ lệ sự
+     kiện nào (kể cả ca lịch corp-action THIẾU sự kiện). ⛔ KHÔNG backfill trước khi có người đối
+     soát KL thật với sổ broker (§27) — chưa biết nguyên nhân thì chưa biết quy ngược bao nhiêu.
+   - Gate có thể đang chạy mà **thiếu lịch**: `corp_action_gate_v2.active=false` trong artifact +
+     dòng ⚠️ trong log = snapshot `corp_action_daily_<date>.json` thiếu/hỏng/lệch `asof`. Trục
+     KHỐI LƯỢNG vẫn bảo vệ; chỉ mất khả năng GÁN tên sự kiện cho phần dư.
+6. Chạy tay `eod_trading_report.sh` SAU khi đường 2 đã ghi sẽ ghi đè dòng bằng bản đọc mới hơn (đường 1 không có guard, cố ý giữ nguyên) — sau 19:10 dữ liệu đóng cửa đã ổn định nên số phải trùng; lệch ⇒ soi `balance_ts` 2 lần đọc.
 
 ### `compute_active_nav.py` exit 5 — account về 0 vị thế (thêm 2026-09-13, commit c9edd4c6)
 Hôm trước có cổ phiếu, hôm nay feed trả 0 vị thế ⇒ script **cố ý dừng exit 5, KHÔNG ghi**
@@ -170,8 +188,16 @@ Hôm trước có cổ phiếu, hôm nay feed trả 0 vị thế ⇒ script **c�
 3. **Sự kiện CỔ PHIẾU (thưởng/trả cổ tức bằng cp/tách): KHÔNG BAO GIỜ bỏ qua cổng.** Broker credit
    KHỐI LƯỢNG cùng lúc hạ giá (VIB 2026-09-09 19:07: 500→547 và 15.050→13.700), mà nhánh `is_today`
    không quy đổi ngược qty ⇒ bỏ qua sẽ thổi phồng NAV (VIB +711.100đ, VHM 1:1 +100% vị thế).
-   ⚠️ Lỗ hổng CŨ chưa đóng: sự kiện cổ phiếu tỉ lệ NHỎ (thực đo min 1,03%) làm giá rơi <5% nên cổng
-   PRICE_XCHECK **không bật** — qty credit sớm vẫn thổi NAV mà không ai được cảnh báo.
+   ✅ Lỗ hổng CŨ (sự kiện tỉ lệ NHỎ, thực đo min 1,03%, giá rơi <5% nên cổng PRICE_XCHECK không
+   bật) **ĐÃ ĐÓNG** bởi `corp_action_gate_v2`: gate chặn theo bằng chứng KHỐI LƯỢNG (phần dư sau
+   khi trừ lệnh khớp thật), độc lập biên độ giá ⇒ rc=5, xem mục 5 § NAV thiếu dòng.
+   ⚠️ **ĐIỀU KIỆN CÒN LẠI — fail-open CÓ CHỦ ĐÍCH, đóng bằng tay:** trục KHỐI LƯỢNG cần một bản
+   ghi vị thế TRƯỚC `date` để so. Khi **KHÔNG có BẤT KỲ bản ghi `dnse_raw_*.jsonl` nào** trước
+   ngày đang tính (account mới, hoặc khoảng trống dữ liệu), `qty_prev = None` ⇒ gate KHÔNG chặn:
+   không có cơ sở so sánh thì chặn là đoán mò. Ca "bản ghi ngày trước CÓ, nhưng VẮNG mã này"
+   thì **KHÔNG** rơi vào đây — nó được quy `qty_prev = 0` (mã mới mua + sự kiện tỉ lệ ~1% vẫn bị
+   chặn; đo thật tháng 9: 1/600 ticker-day, phần dư = 0,0 chính xác ⇒ không có false-block).
+   Ngày đầu tiên có dữ liệu của một account ⇒ đối soát KL bằng tay với sổ broker.
 4. Mọi ca còn lại xử lý như cũ: `nav_sync_retry.sh` retry tới 21:15 ICT rồi escalate bus question.
 
 ## Nơi kết quả đổ về (đọc mỗi sáng, KHÔNG cần user nhắc)
