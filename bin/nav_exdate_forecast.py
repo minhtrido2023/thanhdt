@@ -175,8 +175,8 @@ def _adjust_clause(asof, event_date):
         return ""
     nxt = next_trading_day(datetime.date.fromisoformat(asof)).isoformat()
     if event_date == nxt:
-        return "broker đổi giá/KL TỐI NAY"
-    return f"broker đổi giá/KL vào đêm trước phiên {event_date}"
+        return "Broker đổi giá/KL TỐI NAY"
+    return f"Broker đổi giá/KL vào đêm trước phiên {event_date}"
 
 
 def build_event_line(event, positions_by_account, asof=None):
@@ -206,8 +206,9 @@ def build_event_line(event, positions_by_account, asof=None):
                     break
         pct_txt = f" (~{_fmt_pct(pct)} giá tham chiếu)" if pct is not None else ""
         vps_txt = f"{vps:,.0f}đ/cp" if vps is not None else "(chưa rõ mức cổ tức)"
-        return (f"💰 **{tk}** {when} — cổ tức tiền mặt {vps_txt}{pct_txt}. "
-                f"Tối nay/mai NAV sẽ thấy broker HẠ marketPrice đúng khoản này — ĐÂY LÀ KỲ VỌNG, "
+        clause = f" {adjust_clause}." if adjust_clause else ""
+        return (f"💰 **{tk}** {when} — cổ tức tiền mặt {vps_txt}{pct_txt}.{clause} "
+                f"NAV sẽ thấy broker HẠ marketPrice đúng khoản này — ĐÂY LÀ KỲ VỌNG, "
                 f"không phải lỗi (đường `cum_dividend_double_count`, §21, xử lý tự động). "
                 f"Đang giữ: {who}.")
 

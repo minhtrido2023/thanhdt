@@ -106,6 +106,15 @@ check("DRI: nêu đúng cả 2 account giữ", "SpaceX 3,700cp" in line_dri and 
 check("DRI: gắn nhãn KỲ VỌNG không phải lỗi", "KHÔNG PHẢI LỖI".lower() in line_dri.lower()
       or "kỳ vọng" in line_dri.lower())
 check("DRI (date==asof) → day_word 'HÔM NAY'", "HÔM NAY" in line_dri, line_dri)
+# V1 REGRESSION — nhánh CASH_DIV phải dùng adjust_clause thật, KHÔNG hardcode "Tối nay/mai" cho
+# ca đã diễn ra hôm nay (broker đã hạ giá đêm TRƯỚC hôm nay, không phải "sắp" hạ).
+check("V1 REGRESSION: DRI hôm nay KHÔNG chứa 'Tối nay/mai' (đã điều chỉnh từ đêm trước)",
+      "Tối nay/mai" not in line_dri, line_dri)
+
+_dri_2_sessions = {**DRI_DIV, "date": "2026-09-24"}  # cách ASOF 2 phiên, giống VPB_ISS
+line_dri_2s = m.build_event_line(_dri_2_sessions, POSITIONS, asof=ASOF)
+check("V1 REGRESSION: DIV cách 2 phiên nêu đúng 'đêm trước phiên 2026-09-24' qua adjust_clause",
+      "đêm trước phiên 2026-09-24" in line_dri_2s and "Tối nay/mai" not in line_dri_2s, line_dri_2s)
 
 line_vpb = m.build_event_line(VPB_ISS, POSITIONS, asof=ASOF)
 # ratio=0.2604104 → drop = r/(1+r) = 20.6647...%  → làm tròn 2 chữ số = 20.66%
@@ -197,6 +206,9 @@ try:
     note_spacex = m.prompt_note("SpaceX", asof="2026-09-22", days_ahead_max=1)
     check("prompt_note SpaceX: có nội dung (giữ DRI+VPB)",
           "DRI" in note_spacex and "VPB" in note_spacex, note_spacex)
+    # M13 REGRESSION — prompt_note() PHẢI dùng đơn vị PHIÊN (mutation M13: hardcode "≤1 NGÀY TỚI").
+    check("M13 REGRESSION: prompt_note dùng 'PHIÊN', KHÔNG dùng 'ngày' (case-insensitive)",
+          "PHIÊN" in note_spacex and "ngày" not in note_spacex.lower(), note_spacex)
     # C4/M15 REGRESSION — câu R6d ("KHÔNG đổi quyết định mua/bán") là ranh giới quan trọng cho
     # DollarBill khi đọc note này; xoá mất câu này là hồi quy im lặng, không assertion nào bắt
     # được trước bản vá vòng 3.
@@ -254,6 +266,25 @@ try:
 finally:
     m._read_json, m.read_active_nav_positions, sys.argv = _orig_read_json4, _orig_positions4, _orig_argv2
 
+# M17b REGRESSION — nhánh "KHÔNG có sự kiện" (snapshot tồn tại, cửa sổ rỗng) của main() cũng
+# PHẢI dùng đơn vị PHIÊN. Khối trên chỉ chạy nhánh CÓ sự kiện; mutation đổi riêng dòng "không có
+# sự kiện" (:302-303) về "ngày" vẫn qua 50/0 nếu không có test nào thật sự đi nhánh này.
+_orig_read_json6, _orig_positions6, _orig_argv4 = m._read_json, m.read_active_nav_positions, sys.argv
+try:
+    snap_empty = {"upcoming_events_held": []}
+    m._read_json = lambda path, default=None: snap_empty if "corp_action_daily_2026-09-22" in path else default
+    m.read_active_nav_positions = lambda *a, **k: POSITIONS
+    sys.argv = ["nav_exdate_forecast.py", "--asof", "2026-09-22", "--days-ahead-max", "1"]
+    buf_empty = io.StringIO()
+    with contextlib.redirect_stdout(buf_empty):
+        rc_empty = m.main()
+    out_empty = buf_empty.getvalue()
+    check("M17b REGRESSION: main() rc=0 khi KHÔNG có sự kiện", rc_empty == 0)
+    check("M17b REGRESSION: dòng 'không có sự kiện' dùng 'PHIÊN', KHÔNG dùng 'ngày' (case-insensitive)",
+          "PHIÊN" in out_empty and "ngày" not in out_empty.lower(), out_empty)
+finally:
+    m._read_json, m.read_active_nav_positions, sys.argv = _orig_read_json6, _orig_positions6, _orig_argv4
+
 # R3 — snapshot thiếu + --alert PHẢI notify() (không im lặng, không trông giống "hôm nay yên ả")
 _orig_notify = m.notify
 _notify_calls = []
@@ -283,9 +314,11 @@ _orig_read_json5, _orig_positions5, _orig_notify2, _orig_bus, _orig_argv3 = (
 _bus_calls = []
 with tempfile.TemporaryDirectory() as tmpdir:
     try:
+        snap_next = {"upcoming_events_held": [{**DRI_DIV, "date": "2026-09-23"}]}
         m.ALERT_MARKER = os.path.join(tmpdir, "nav_exdate_forecast_alerted.json")
         m._read_json = lambda path, default=None: (
             snap if "corp_action_daily_2026-09-22" in path
+            else snap_next if "corp_action_daily_2026-09-23" in path
             else (json.load(open(path, encoding="utf-8")) if os.path.exists(path) else default))
         m.read_active_nav_positions = lambda *a, **k: POSITIONS
         m.notify = lambda msg, channel=None: _notify_calls.append((msg, channel))
@@ -298,6 +331,13 @@ with tempfile.TemporaryDirectory() as tmpdir:
               len(_notify_calls) == 1, _notify_calls)
         check("C5: bus() chỉ gọi 1 lần dù --alert chạy 2 lần cùng asof (dedupe theo ngày)",
               len(_bus_calls) == 1, _bus_calls)
+        # C5c MUTATION GUARD — mutant `.get("asof") is not None` (bỏ so khớp asof, coi MỌI marker
+        # là "đã alert") vẫn qua 2 check trên vì cả 2 lượt CÙNG asof. Đổi asof ở lượt thứ 3: code
+        # đúng phải coi đây là ngày MỚI → notify lại (tổng 2); mutant sẽ dừng ở 1 mãi mãi.
+        sys.argv = ["nav_exdate_forecast.py", "--asof", "2026-09-23", "--days-ahead-max", "1", "--alert"]
+        m.main()
+        check("C5c: --alert với asof KHÁC sau đó vẫn notify lại (không bị marker ngày cũ chặn)",
+              len(_notify_calls) == 2, _notify_calls)
     finally:
         (m.ALERT_MARKER, m._read_json, m.read_active_nav_positions, m.notify, m.bus, sys.argv) = (
             _orig_marker, _orig_read_json5, _orig_positions5, _orig_notify2, _orig_bus, _orig_argv3)
