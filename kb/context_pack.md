@@ -1,13 +1,13 @@
-# Mike fleet — context pack (v3161)
+# Mike fleet — context pack (v3162)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-09-22T12:09:22] DollarBill/decision — plan-2026-09-23-zalopay: {"account": "ZaloPay", "plan_date": "2026-09-23", "action": "HOLD_ALL", "n_orders": 0, "reason": "n_bal=0, n_lag=0, L1 park-trim BLOCKED_ALL_NAMES (mọi mã dưới  …
-- [2026-09-22T12:13:49] Taylor/finding — nav-corpaction-gate-v2-vong2-ready-for-arch-review: {"branch": "feat/nav-corpaction-gate-v2", "commit": "66b3309a", "supersedes": "fdc325ff", "worktree": "mike/agents/wt-nav-corpaction-gate-v2", "tree": "clean",  …
-- [2026-09-22T12:39:29] Taylor/finding — nav-corpaction-gate-v2-vong3-ready-for-arch-review: {"branch": "feat/nav-corpaction-gate-v2", "commit": "46aea515", "supersedes": "66b3309a", "worktree": "mike/agents/wt-nav-corpaction-gate-v2", "tree": "clean",  …
 - [2026-09-22T13:01:39] Taylor/finding — nav-corpaction-gate-v2-vong4-ready-for-arch-review: {"branch": "feat/nav-corpaction-gate-v2", "commit": "5893de0e", "supersedes": "46aea515", "worktree": "mike/agents/wt-nav-corpaction-gate-v2", "tree": "clean",  …
 - [2026-09-22T13:20:15] Taylor/finding — nav-corpaction-gate-v2-vong5-ready-for-arch-review: {"branch": "feat/nav-corpaction-gate-v2", "commit": "c11ba9f7", "supersedes": "5893de0e", "worktree": "mike/agents/wt-nav-corpaction-gate-v2", "tree": "clean",  …
+- [2026-09-22T13:31:28] Mike/answer — nav-price-xcheck-stuck-SpaceX-2026-09-21: {"resolution": "ĐÃ GIẢI QUYẾT TẬN GỐC. Nguyên nhân: DRI cổ tức tiền 1.000đ/cp ex-date 09-22 — broker ha marketPrice 14.800 xuong 13.700 toi 09-21 (dung luat chu …
+- [2026-09-22T13:31:29] Mike/answer — nav-price-xcheck-stuck-ZaloPay-2026-09-21: {"resolution": "ĐÃ GIẢI QUYẾT TẬN GỐC. Nguyên nhân: DRI cổ tức tiền 1.000đ/cp ex-date 09-22 — broker ha marketPrice 14.800 xuong 13.700 toi 09-21 (dung luat chu …
+- [2026-09-22T13:31:58] Mike/finding — L2L4-corp-action-gate-v2-LANDED-4dcc3643: {"status": "LANDED", "repo": "mike", "commit": "4dcc3643", "arch_review": "APPROVED high sau 5 vong", "selfcheck_tu_master": "e2e 38/0 + from_raw 64/0 + rc-harn …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -45,6 +45,13 @@
 - **fill_timing HYBRID** (`fill_timing_live_gate=False`, `fill_timing_hybrid_live_gate=False`) — LIVE từ **2026-08-26** (user duyệt option A). BUY blocks: 11:00/11:15/13:00/13:15/13:30. SELL blocks: 09:15/09:30/09:45/10:00. Monitoring: fill-vs-open mỗi ~10 phiên, rollback nếu mean >+22bps. Commit `9be375a4`.
 - **CAPIT margin lever** (`capit_margin_lever.enabled=True`) — LIVE từ **2026-08-24**. Ngày có CAPIT margin phải chạy `approve_margin_day.py` TRƯỚC bot.
 - **Domain-constraint P1** (`filter_lag_rating_orders()`, 8L rating≤3 gate) — LIVE. 14/14+22/22 selfcheck.
+- **NAV corp-action L1 — cảnh báo TRƯỚC ex-date** (`bin/nav_exdate_forecast.py`) — LIVE từ **2026-09-22**, commit `2a7dd54e`. Wire `[pipeline-0]` trong `bq_freshness_check.sh` (TRƯỚC `exit 1` đầu tiên) ⇒ chuỗi 19:00 in cảnh báo corp-action của mã ĐANG GIỮ vào plan report + Discord. Selfcheck 58/58.
+- **NAV corp-action gate v2 (L2-L4)** (`classify_qty_residual` + `_mult_explains` trong `daily_nav_snapshot.py`) — LIVE từ **2026-09-22**, commit `4dcc3643`, **5 vòng arch-review**. Thay tripwire so giá MÙ bằng PHÂN LOẠI:
+  · cổ tức TIỀN có bằng chứng ⇒ mark giá **CUM**, trừ khoản phải thu khỏi tiền (không đếm 2 lần)
+  · sự kiện CỔ PHIẾU ⇒ chặn **rc=5** theo bằng chứng KL credit sớm THẬT (phần dư sau khi trừ FILL trong ngày khớp tỉ lệ sự kiện) — KHÔNG chặn theo lịch, KHÔNG phụ thuộc ngưỡng giá 5% ⇒ đóng lỗ hổng sự kiện tỉ lệ nhỏ
+  · `--from-raw` + corp-action ĐÃ CONFIRMED + multiplier TÁI TẠO được KL trước sự kiện ⇒ quy ngược KL (giữ đường phục hồi cũ)
+  · không giải thích được ⇒ nói THẲNG "chưa giải thích được", không đoán (§29)
+  Selfcheck 38/0 + 64/0 + 8/0 qua 3 TZ. rc=5 là mã MỚI: `eod_trading_report.sh` không ghi marker, `nav_sync_retry.sh` không retry 2h, `nav_snapshot_daily.sh` escalate ngay. Runbook rc=5 ở `kb/ops_runbook.md.proposed` — **CHỜ MIKE DUYỆT ĐỂ ĐƯA LIVE (§13)**.
 
 ## R&D pipeline — PAPER-ONLY, chi tiết `kb/projects/rnd-pipeline-tracker.md`
 Fear-buy quét hàng tuần `bin/fearbuy_weekly_scan.sh` (Friday 08:10 ICT). Recon thuần, KHÔNG tự mua.
