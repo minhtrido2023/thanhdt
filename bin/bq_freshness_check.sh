@@ -498,6 +498,21 @@ fi
 
 [ "$WARNED" -gt 0 ] && echo "NOTE: $WARNED WARN non-blocking (đã post Discord Trading Daily) — pipeline vẫn chạy"
 
+# --- [pipeline-3b] nav_exdate_forecast — cảnh báo TRƯỚC corp-action ≤1 ngày trên mã đang giữ
+# (L1, quyết định user 2026-09-22 sau lớp lỗi "NAV bị PRICE_XCHECK chặn vì corp-action" tái diễn
+# ≥4 lần: PVT 09-08/DGC 09-11/VIB 09-09/VHM 08-05/DRI 09-21 — dữ liệu này đã nằm sẵn trên đĩa từ
+# cron corp_action_daily 07:30 nhưng không ai đọc kịp trước khi NAV chạy ~21h. Đọc LẠI
+# `upcoming_events_held` đã có, KHÔNG tính gì mới. Read-only + notify — lỗi ở đây KHÔNG được
+# chặn pipeline/DollarBill (đây là cảnh báo sớm, không phải gate). CỐ Ý đặt TRƯỚC cổng
+# FAILED/exit dưới đây: nav_exdate_forecast.py KHÔNG đọc BQ (chỉ đọc
+# data/corp_action_daily/<date>.json + data/execution_logs/active_nav_*.json), NAV cũng KHÔNG
+# chạy trong chuỗi này (cron riêng: nav_snapshot_daily.sh/nav_sync_retry.sh) — một ngày BQ
+# stale (đã xảy ra thật 2026-09-14) không được phép nuốt mất cảnh báo corp-action đúng ngày hệ
+# thống đang trục trặc (arch-review vòng 2, Mike, 2026-09-22).
+echo; echo "--- [pipeline-3b] nav_exdate_forecast (corp-action ≤1 ngày, mã đang giữ) ---"
+(cd "$ROOT" && python3 bin/nav_exdate_forecast.py --alert 2>&1) || \
+  echo "  [WARN] nav_exdate_forecast.py lỗi — không chặn pipeline, kiểm tay: mike/bin/nav_exdate_forecast.py"
+
 if [ "$FAILED" -ne 0 ]; then
   STALE_SUMMARY="⛔ BQ STALE $TODAY $NOW_ICT — DollarBill bị BLOCK, không lập plan hôm nay. Kiểm tra: mike/logs/bq_freshness.log"
   "$ROOT/bin/notify_thread.sh" "$STALE_SUMMARY" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
@@ -596,16 +611,6 @@ else
   echo "  [WARN] không đọc được bin/dnse_fee_rates.py — Lỗi thật: $_fee_out"
   FEE_NOTE="theo FEE_RATE_BUY_PCT trong mike/bin/dnse_fee_rates.py"
 fi
-
-# --- [pipeline-3b] nav_exdate_forecast — cảnh báo TRƯỚC corp-action ≤1 ngày trên mã đang giữ
-# (L1, quyết định user 2026-09-22 sau lớp lỗi "NAV bị PRICE_XCHECK chặn vì corp-action" tái diễn
-# ≥4 lần: PVT 09-08/DGC 09-11/VIB 09-09/VHM 08-05/DRI 09-21 — dữ liệu này đã nằm sẵn trên đĩa từ
-# cron corp_action_daily 07:30 nhưng không ai đọc kịp trước khi NAV chạy ~21h. Đọc LẠI
-# `upcoming_events_held` đã có, KHÔNG tính gì mới. Read-only + notify — lỗi ở đây KHÔNG được
-# chặn pipeline/DollarBill (đây là cảnh báo sớm, không phải gate).
-echo; echo "--- [pipeline-3b] nav_exdate_forecast (corp-action ≤1 ngày, mã đang giữ) ---"
-(cd "$ROOT" && python3 bin/nav_exdate_forecast.py --alert 2>&1) || \
-  echo "  [WARN] nav_exdate_forecast.py lỗi — không chặn pipeline, kiểm tay: mike/bin/nav_exdate_forecast.py"
 
 for ACCT in $LIVE_LABELS; do
   echo; echo "--- [pipeline-4] dispatch DollarBill lập plan T+1 cho $ACCT ---"

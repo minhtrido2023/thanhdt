@@ -13,8 +13,10 @@ việc L2/L3 riêng, xem `daily_nav_snapshot.py`). Mutation ở đây nhắm và
 `days_ahead<=N` — sai 1 trong 2 cái này là quay lại đúng lớp lỗi "dữ liệu có sẵn nhưng không ai
 đọc kịp" mà file này tồn tại để chặn.
 """
+import json
 import os
 import sys
+import tempfile
 
 MIKE_BIN = os.path.dirname(os.path.abspath(__file__))
 if MIKE_BIN not in sys.path:
@@ -96,37 +98,61 @@ check("thứ Bảy 08-15 (không phải phiên giao dịch) không nằm trong c
       ev_fri2 == [], ev_fri2)
 
 # ── 3. build_event_line() — số học phải khớp tay ────────────────────────────
-line_dri = m.build_event_line(DRI_DIV, POSITIONS)
+# asof=ASOF luôn truyền TƯỜNG MINH — không dựa vào today_ict() thật (tránh false-pass tình cờ
+# khi selfcheck chạy đúng ngày ASOF, và không lệ thuộc TZ host, §16/§19).
+line_dri = m.build_event_line(DRI_DIV, POSITIONS, asof=ASOF)
 check("DRI: có % giá (~6.71%)", "6.71%" in line_dri, line_dri)
 check("DRI: nêu đúng cả 2 account giữ", "SpaceX 3,700cp" in line_dri and "ZaloPay 1,900cp" in line_dri)
 check("DRI: gắn nhãn KỲ VỌNG không phải lỗi", "KHÔNG PHẢI LỖI".lower() in line_dri.lower()
       or "kỳ vọng" in line_dri.lower())
+check("DRI (date==asof) → day_word 'HÔM NAY'", "HÔM NAY" in line_dri, line_dri)
 
-line_vpb = m.build_event_line(VPB_ISS, POSITIONS)
+line_vpb = m.build_event_line(VPB_ISS, POSITIONS, asof=ASOF)
 # ratio=0.2604104 → drop = r/(1+r) = 20.6647...%  → làm tròn 2 chữ số = 20.66%
 check("VPB: % giá giảm đúng công thức r/(1+r)=20.66%", "20.66%" in line_vpb, line_vpb)
 check("VPB: % KL tăng = ratio*100 = 26.04%", "26.04%" in line_vpb, line_vpb)
-check("VPB: cảnh báo PRICE_XCHECK SẼ CHẶN", "SẼ CHẶN NAV" in line_vpb, line_vpb)
+# VPB_ISS event_status="announced" (chưa executed) → hạ giọng "CÓ THỂ CHẶN" + "DỰ KIẾN", KHÔNG
+# khẳng định tuyệt đối "SẼ" (R6b — upstream giữ nhãn announced vì có thể đổi/huỷ).
+check("VPB (announced): PRICE_XCHECK CÓ THỂ CHẶN, không khẳng định tuyệt đối",
+      "CÓ THỂ CHẶN NAV" in line_vpb and "DỰ KIẾN" in line_vpb, line_vpb)
+_vpb_executed = m.build_event_line({**VPB_ISS, "event_status": "executed"}, POSITIONS, asof=ASOF)
+check("VPB (executed): PRICE_XCHECK SẼ CHẶN khẳng định chắc chắn",
+      "SẼ CHẶN NAV" in _vpb_executed, _vpb_executed)
 
-line_vix = m.build_event_line(VIX_AIS, POSITIONS)
+line_vix = m.build_event_line(VIX_AIS, POSITIONS, asof=ASOF)
 check("VIX (INFO, price_adjusting=False) → None, không tạo dòng cảnh báo NAV", line_vix is None)
 
 # mã không ai giữ → vẫn ra dòng, nhưng ghi rõ "không xác định được vị thế"
-line_orphan = m.build_event_line({**DRI_DIV, "ticker": "ZZZ"}, POSITIONS)
+line_orphan = m.build_event_line({**DRI_DIV, "ticker": "ZZZ"}, POSITIONS, asof=ASOF)
 check("mã không có vị thế nào → nêu rõ, không KeyError/crash",
       "không xác định được vị thế" in line_orphan, line_orphan)
 
 # thiếu giá (price=None) ở TẤT CẢ holder → không tính % (không chia cho None), vẫn ra dòng
 pos_no_price = {"SpaceX": {"DRI": {"qty": 100, "price": None}}}
-line_no_price = m.build_event_line(DRI_DIV, pos_no_price)
+line_no_price = m.build_event_line(DRI_DIV, pos_no_price, asof=ASOF)
 check("thiếu price ở holder → KHÔNG crash, bỏ qua %", "1,000đ/cp" in line_no_price
       and "%" not in line_no_price.split("1,000đ/cp")[1].split(".")[0], line_no_price)
+
+# MUTATION quan trọng nhất R4 — day_word PHẢI suy theo VỊ TRÍ TRONG CỬA SỔ PHIÊN (asof vs
+# event["date"]), KHÔNG theo field days_ahead lịch. Đảo ngược điều kiện `event["date"] == asof`
+# trước đây (dùng `event["days_ahead"] == 0`) đã PASS im lặng trên đúng ca BID (thứ Sáu ->
+# ex-date thứ Hai) — event["days_ahead"] tự khai =1 nhưng thực chất KHÔNG PHẢI hôm nay.
+bid_friday_asof = "2026-08-14"
+bid_monday_event = {**DRI_DIV, "ticker": "BID", "date": "2026-08-17", "days_ahead": 1}
+line_bid = m.build_event_line(bid_monday_event, {"SpaceX": {"BID": {"qty": 100, "price": 40000.0}}},
+                               asof=bid_friday_asof)
+check("REGRESSION day_word: asof=thứ Sáu 08-14, event date=thứ Hai 08-17 (ngày KHÁC asof) "
+      "→ PHẢI là 'PHIÊN KẾ TIẾP', TUYỆT ĐỐI KHÔNG 'HÔM NAY' dù days_ahead tự khai =1",
+      "PHIÊN KẾ TIẾP" in line_bid and "HÔM NAY" not in line_bid, line_bid)
+line_today_explicit = m.build_event_line({**DRI_DIV, "days_ahead": 99}, POSITIONS, asof=ASOF)
+check("REGRESSION day_word: event date==asof → 'HÔM NAY' dù days_ahead tự khai lệch (99)",
+      "HÔM NAY" in line_today_explicit, line_today_explicit)
 
 # ── 4. date_field → verb đúng (ex-right vs hiệu lực) ────────────────────────
 check("DIV/ISS (exright_date) dùng chữ 'ex-right'", "ex-right" in line_dri and "ex-right" in line_vpb)
 vix_effective_forced = {**VIX_AIS, "price_adjusting": True, "event_code": "DIV",
                         "value_per_share": "500"}
-line_eff = m.build_event_line(vix_effective_forced, POSITIONS)
+line_eff = m.build_event_line(vix_effective_forced, POSITIONS, asof=ASOF)
 check("effective_date → dùng chữ 'hiệu lực', KHÔNG 'ex-right'",
       "hiệu lực" in line_eff and "ex-right" not in line_eff, line_eff)
 
@@ -160,6 +186,48 @@ try:
     check("main() với asof không tồn tại → rc=0, không raise", rc == 0)
 finally:
     sys.argv = _orig_argv
+
+# R3 — snapshot thiếu + --alert PHẢI notify() (không im lặng, không trông giống "hôm nay yên ả")
+_orig_notify = m.notify
+_notify_calls = []
+try:
+    m.notify = lambda msg, channel=None: _notify_calls.append((msg, channel))
+    sys.argv = ["nav_exdate_forecast.py", "--asof", "2099-01-01", "--alert"]
+    rc = m.main()
+    check("R3: --alert + snapshot thiếu → rc=0", rc == 0)
+    check("R3: --alert + snapshot thiếu → notify() ĐƯỢC gọi (không im lặng, §14/§28)",
+          len(_notify_calls) == 1, _notify_calls)
+    check("R3: nội dung notify nêu rõ 'KHÔNG có cảnh báo'",
+          _notify_calls and "KHÔNG có cảnh báo" in _notify_calls[0][0], _notify_calls)
+    _notify_calls.clear()
+    sys.argv = ["nav_exdate_forecast.py", "--asof", "2099-01-01"]  # không --alert → không notify
+    m.main()
+    check("R3: KHÔNG --alert + snapshot thiếu → notify() KHÔNG được gọi", len(_notify_calls) == 0)
+finally:
+    m.notify = _orig_notify
+    sys.argv = _orig_argv
+
+# ── 7. R5 — read_active_nav_positions() phải chạm SCHEMA THẬT của active_nav_*.json, không
+# 100% monkeypatch (mutation "bỏ lọc qty<=0" hoặc đọc sai field trước đây không bị bắt).
+with tempfile.TemporaryDirectory() as tmpdir:
+    good_path = os.path.join(tmpdir, "active_nav_SpaceX.json")
+    with open(good_path, "w", encoding="utf-8") as f:
+        json.dump({"account": "SpaceX", "positions": [
+            {"ticker": "DRI", "qty": 3700, "price": 14900.0},
+            {"ticker": "VPB", "qty": 0, "price": 34000.0},      # qty=0 phải bị lọc
+            {"ticker": "ZZZ", "qty": -5, "price": 1000.0},      # qty âm phải bị lọc
+            {"ticker": "", "qty": 100, "price": 1000.0},        # thiếu ticker phải bị lọc
+        ]}, f)
+    bad_path = os.path.join(tmpdir, "active_nav_Broken.json")
+    with open(bad_path, "w", encoding="utf-8") as f:
+        f.write("{not valid json")
+    glob_pat = os.path.join(tmpdir, "active_nav_*.json")
+    real_pos = m.read_active_nav_positions(nav_glob=glob_pat)
+    check("R5: đọc đúng account label từ field 'account'", "SpaceX" in real_pos, real_pos)
+    check("R5: lọc đúng qty<=0 và ticker rỗng, chỉ giữ DRI",
+          real_pos.get("SpaceX") == {"DRI": {"qty": 3700, "price": 14900.0}}, real_pos)
+    check("R5: file JSON hỏng → bỏ qua, không crash toàn hàm",
+          "Broken" not in real_pos, real_pos)
 
 print(f"PASS={len(PASS)} FAIL={len(FAIL)}")
 for f in FAIL:

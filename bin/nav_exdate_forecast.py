@@ -135,11 +135,15 @@ def _fmt_pct(x):
     return f"{x:.2f}%" if x is not None else "?"
 
 
-def build_event_line(event, positions_by_account):
+def build_event_line(event, positions_by_account, asof=None):
     tk = event["ticker"]
     kind = classify(event)
     holders = _holders_for(tk, positions_by_account)
-    day_word = "HÔM NAY" if event["days_ahead"] == 0 else f"NGÀY MAI ({event['date']})"
+    # day_word phải suy theo VỊ TRÍ TRONG CỬA SỔ PHIÊN (asof vs event["date"]), KHÔNG theo
+    # days_ahead lịch — days_ahead lịch nói sai đúng ca R1 sinh ra để cứu (thứ Sáu -> ex-date
+    # thứ Hai: days_ahead=3 nhưng chỉ cách 1 PHIÊN, broker đã hạ giá TỐI THỨ SÁU).
+    asof = asof or today_ict()
+    day_word = "HÔM NAY" if event["date"] == asof else f"PHIÊN KẾ TIẾP ({event['date']}) — broker đổi giá/KL TỐI NAY"
     # date_field phân biệt "chốt quyền/ex-right" (DIV/ISS thường) với "hiệu lực" (AIS chính thức
     # hoá số CP) — dùng đúng field snapshot đã gắn theo từng dòng, không đoán chung một chữ.
     verb = "hiệu lực" if event.get("date_field") == "effective_date" else "ex-right"
@@ -147,14 +151,20 @@ def build_event_line(event, positions_by_account):
     who = ", ".join(f"{lb} {h['qty']:,}cp" for lb, h in holders.items()) or "(không xác định được vị thế)"
 
     if kind == "CASH_DIV":
-        vps = event.get("value_per_share")
+        # value_per_share là TUỲ CHỌN ở producer (corp_action_daily.py:1286) dù
+        # is_price_adjusting trả True cho MỌI DIV (corp_action_lib.py:59-61) — guard, đừng giả
+        # định luôn có (quét 160 dòng DIV thật: 0 ca thiếu, nhưng vẫn không được crash nếu có).
+        vps_raw = event.get("value_per_share")
+        vps = float(vps_raw) if vps_raw is not None else None
         pct = None
-        for h in holders.values():
-            if h.get("price"):
-                pct = float(vps) / float(h["price"]) * 100
-                break
+        if vps is not None:
+            for h in holders.values():
+                if h.get("price"):
+                    pct = vps / float(h["price"]) * 100
+                    break
         pct_txt = f" (~{_fmt_pct(pct)} giá tham chiếu)" if pct is not None else ""
-        return (f"💰 **{tk}** {when} — cổ tức tiền mặt {float(vps):,.0f}đ/cp{pct_txt}. "
+        vps_txt = f"{vps:,.0f}đ/cp" if vps is not None else "(chưa rõ mức cổ tức)"
+        return (f"💰 **{tk}** {when} — cổ tức tiền mặt {vps_txt}{pct_txt}. "
                 f"Tối nay/mai NAV sẽ thấy broker HẠ marketPrice đúng khoản này — ĐÂY LÀ KỲ VỌNG, "
                 f"không phải lỗi (đường `cum_dividend_double_count`, §21, xử lý tự động). "
                 f"Đang giữ: {who}.")
@@ -167,11 +177,19 @@ def build_event_line(event, positions_by_account):
             ratio_txt = f" tỉ lệ {r * 100:.2f}%"
             drop_txt = f" (giá tham chiếu dự kiến giảm ~{_fmt_pct(r / (1 + r) * 100)}, KL tăng ~{_fmt_pct(r * 100)})"
         method = f" — {event['issue_method_vi']}" if event.get("issue_method_vi") else ""
+        # event_status != "executed" (vd "announced") là DỰ KIẾN — upstream cố ý giữ nhãn này
+        # (corp_action_daily.py:1293) vì có thể đổi/huỷ. Đừng khẳng định tuyệt đối "SẼ" cho ca
+        # chưa executed — hạ giọng thành "dự kiến, có thể đổi/huỷ".
+        status = event.get("event_status")
+        is_executed = status == "executed"
+        certainty = ("Broker sẽ đổi CẢ giá LẪN khối lượng cùng lúc" if is_executed else
+                     f"Broker DỰ KIẾN đổi cả giá lẫn khối lượng (trạng thái: {status or 'chưa rõ'}"
+                     f" — có thể đổi/huỷ, không phải chắc chắn)")
+        block_word = "SẼ CHẶN NAV" if is_executed else "CÓ THỂ CHẶN NAV"
         return (f"🚨 **{tk}** {event['event_code']}{method}{ratio_txt}, {when}{drop_txt}. "
-                f"Broker sẽ đổi CẢ giá LẪN khối lượng cùng lúc — `daily_nav_snapshot.py` "
-                f"PRICE_XCHECK **SẼ CHẶN NAV** (đúng thiết kế, không phải bug) cho tới khi broker "
-                f"đồng bộ hoặc người backfill bằng `--from-raw`. CẦN NGƯỜI theo dõi khi chạy NAV "
-                f"{when.lower()}. Đang giữ: {who}.")
+                f"{certainty} — `daily_nav_snapshot.py` PRICE_XCHECK **{block_word}** (đúng "
+                f"thiết kế, không phải bug) cho tới khi broker đồng bộ hoặc người backfill bằng "
+                f"`--from-raw`. CẦN NGƯỜI theo dõi khi chạy NAV {when.lower()}. Đang giữ: {who}.")
 
     return None  # INFO — không tạo dòng cảnh báo NAV (xem docstring)
 
@@ -184,7 +202,7 @@ def build_report(asof=None, days_ahead_max=DAYS_AHEAD_MAX):
         return [], None, []
     events = relevant_events(snap, asof, days_ahead_max)
     positions = read_active_nav_positions()
-    lines = [ln for ln in (build_event_line(e, positions) for e in events) if ln]
+    lines = [ln for ln in (build_event_line(e, positions, asof=asof) for e in events) if ln]
     return lines, snap, events
 
 
@@ -198,14 +216,16 @@ def prompt_note(account, asof=None, days_ahead_max=DAYS_AHEAD_MAX):
     mine = [e for e in events if e["ticker"] in held]
     if not mine:
         return ""
-    bits = [" CẢNH BÁO CORP-ACTION ≤1 NGÀY TỚI trên mã đang giữ (nav_exdate_forecast.py, đọc lại "
-            "corp_action_daily — KHÔNG tự suy diễn thêm, chỉ nhắc để không nhầm biến động giá dự "
+    bits = [f" CẢNH BÁO CORP-ACTION ≤{days_ahead_max} PHIÊN TỚI trên mã đang giữ (nav_exdate_forecast.py, "
+            "đọc lại corp_action_daily — KHÔNG tự suy diễn thêm, chỉ nhắc để không nhầm biến động giá dự "
             "kiến này với tín hiệu thị trường):"]
     for e in mine:
         kind = classify(e)
         tag = "cổ tức tiền mặt (giá giảm dự kiến, bình thường)" if kind == "CASH_DIV" else \
               "sự kiện CỔ PHIẾU (giá+KL đổi, NAV có thể bị chặn tối nay/mai)" if kind == "SHARE_EVENT" else "AIS"
         bits.append(f" • {e['ticker']} {e['event_code']} {e['date']} — {tag}.")
+    bits.append(" KHÔNG đổi quyết định mua/bán vì thông tin này — đây chỉ là thông báo để không "
+                "nhầm biến động giá dự kiến với tín hiệu thị trường.")
     return "".join(bits)
 
 
@@ -225,8 +245,15 @@ def main():
     lines, snap, events = build_report(a.asof, a.days_ahead_max)
     asof = a.asof or today_ict()
     if snap is None:
-        print(f"[nav_exdate_forecast] không có snapshot corp_action_daily cho {asof} — "
-              f"{os.path.relpath(snapshot_path(asof), WC_ROOT)} chưa tồn tại.")
+        # snapshot thiếu/hỏng KHÔNG được phép im lặng trông giống "hôm nay không có sự kiện" —
+        # đó là ca phổ biến nhất (§14/§28) và feature này chết theo cách không ai nhận ra nếu
+        # nhánh --alert không tự lên tiếng khi chính nguồn dữ liệu của nó vắng mặt.
+        warn = (f"⚠️ [nav_exdate_forecast] KHÔNG có snapshot corp_action_daily cho {asof} — "
+                f"{os.path.relpath(snapshot_path(asof), WC_ROOT)} chưa tồn tại/đọc lỗi. "
+                f"KHÔNG có cảnh báo corp-action hôm nay từ pipeline này — kiểm tay.")
+        print(warn)
+        if a.alert:
+            notify(warn, channel=CHANNEL)
         return 0
     if not lines:
         print(f"[nav_exdate_forecast] {asof}: không có sự kiện corp-action nào trong "
