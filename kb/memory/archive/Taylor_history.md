@@ -578,3 +578,6 @@
 
 ## Archived 2026-09-22 (keep=12 days=0 require_done=False)
 - [2026-09-14T18:04:21Z] [2026-09-15] A-prime snapshot_corp_action (job _175556): bbbb9b80 tren fix/corp-action-snapshot-schema-aprime (worktree mike/agents/wt-corp-snapshot-aprime), CHUA DDL/merge — CHO user duyet DDL + Mike merge truoc 06:50 ICT theo APPLY_A_PRIME.md; question schema-drift chua dong.
+
+## Archived 2026-09-22 (keep=12 days=0 require_done=False)
+- [2026-09-16T00:44:57Z] [2026-09-16] expvol_pacing checkpoint 09-16 XONG (job _004003, commit mike d2b848ec): gate1+2 PASS, gate3/4 THIEU MAU N=2/25 order-day. CHO user quyet SOM: nhip ~1 order-day/15 phien => can ~370 phien cho 25, nhieu kha nang cham safety_ceiling 2027-02-17 truoc; chap nhan dong trial 'thieu co hoi' hay ha nguong mau? Checkpoint ke 2026-10-13.
