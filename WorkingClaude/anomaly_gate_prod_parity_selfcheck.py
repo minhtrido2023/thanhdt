@@ -71,6 +71,23 @@ print(f"  diff              : {len(diffs)}")
 for d in diffs:
     print("   ", d)
 
-ok = len(diffs) == 0 and len(days) >= 15 and n_active >= 1 and n_empty >= 1
+# Ca "ngày KHÔNG cờ" trong 60 phiên gần nhất KHÔNG còn đảm bảo tự nhiên (2026-09-22: 13 cờ chồng
+# TTL 30 ngày liên tục từ 2026-06-24 → không có khoảng trống). Thay vì phụ thuộc may rủi dữ liệu
+# thật, thêm 1 ngày probe TẤT ĐỊNH: bất kỳ ngày nào TRƯỚC min(last_alert) của mọi cờ hiện có chắc
+# chắn rỗng (anomaly_excluded chỉ active khi asof >= last_alert — xem anomaly_gate.py:95-99).
+real_flags = {t: f for t, f in flags.items() if not t.startswith("_")}
+earliest = min(date.fromisoformat(f["last_alert"]) for f in real_flags.values())
+probe_day = str(earliest - timedelta(days=1))
+pa, pb = prod(probe_day), shared(probe_day)
+probe_diff = pa != pb
+probe_empty = not pa
+print(f"\nprobe rỗng tất định ({probe_day}, trước mọi last_alert hiện có): "
+      f"prod={sorted(pa)} shared={sorted(pb)} diff={probe_diff}")
+if probe_diff:
+    diffs.append((probe_day, sorted(pa), sorted(pb)))
+if probe_empty:
+    n_empty += 1
+
+ok = len(diffs) == 0 and len(days) >= 15 and n_active >= 1 and n_empty >= 1 and probe_empty
 print(("\nPASS — zero-diff, phủ cả 2 loại ngày" if ok else "\nFAIL"))
 sys.exit(0 if ok else 1)
