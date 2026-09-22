@@ -38,12 +38,14 @@ def check(name, cond, detail=""):
 
 
 def build_fixture(tmp, qty_now, qty_prev=500.0, fills=(), event=True, confirmed=True,
-                  mkt=None, act_ex_date=None, ratio="0.095", prev_holds=True):
+                  mkt=None, act_ex_date=None, ratio="0.095", prev_holds=True, mults=None):
     """dnse_raw (2 ngày) + journal + corp_actions.json + corp_action_daily snapshot.
 
     `act_ex_date` — ex_date ghi trong corp_actions.json khi KHÁC ex-date trên lịch (ca [g]).
     `ratio`       — exercise_ratio của sự kiện trên lịch (ca [i3] dùng 1%).
     `prev_holds`  — False ⇒ bản ghi vị thế ngày trước CÓ THẬT nhưng KHÔNG chứa VIB (ca [i3]/[i4]).
+    `mults`       — danh sách qty_multiplier ghi vào corp_actions.json (mặc định [MULT]). Nhiều
+                    phần tử = NHIỀU action CONFIRMED cùng mã cùng ex-date (ca hỗn hợp [j2]).
     """
     def pos(ts, qty, holds=True):
         return {"kind": "positions", "ts": ts, "account_no": ACCT_NO, "payload": {"positions": (
@@ -61,10 +63,12 @@ def build_fixture(tmp, qty_now, qty_prev=500.0, fills=(), event=True, confirmed=
         f.write(hdr)
         for i, (side, q) in enumerate(fills):
             f.write(f"{DATE}T09:20:0{i},FILL,P{i},VIB,{side},{9000+i},{q},{PRICE},0,BAL,X,\n")
-    acts = {"actions": [{"id": "VIB-TEST", "ticker": "VIB", "ex_date": act_ex_date or EX_DATE,
-                         "qty_multiplier": MULT,
+    acts = {"actions": [{"id": f"VIB-TEST-{i}", "ticker": "VIB",
+                         "ex_date": act_ex_date or EX_DATE,
+                         "qty_multiplier": m,
                          "_status": ("CONFIRMED — corp_action_auto_confirm.py test"
-                                     if confirmed else "PROPOSED — chưa ai ký")}]}
+                                     if confirmed else "PROPOSED — chưa ai ký")}
+                        for i, m in enumerate(mults or [MULT])]}
     with open(os.path.join(tmp, "corp_actions.json"), "w") as f:
         json.dump(acts, f)
     snap = {"asof": DATE, "status": "OK", "usable": True, "feed_status": "FRESH",
@@ -271,6 +275,38 @@ with tempfile.TemporaryDirectory() as tmp:
     check("(i4b) mtm_stock = 500 × 21.000 = 10.500.000 CHÍNH XÁC",
           snap is not None and abs(snap["mtm_stock"] - 500.0 * PRICE) < 1e-6,
           (snap or {}).get("mtm_stock"))
+
+print("9. [C1] arch-review vòng 4 — dung sai tương đối neo vào ĐỘ LỚN SỰ KIỆN, không phải độ")
+print("   lớn vị thế: `qty_multiplier` ghi SAI ≤2% KHÔNG được coi là 'giải thích được' phần dư")
+with tempfile.TemporaryDirectory() as tmp:
+    # (j1) vị thế 10.000 + sự kiện THẬT 26% (credit 2.600) nhưng corp_actions.json ghi mult 1,24
+    # (sai 1,6%). Bản vòng 3: |12.600/1,24 − 10.000| = 161,29 ≤ tol 2%×10.000 = 200 ⇒ rc=0, ghi
+    # nav_history với KL 10.161,29 (lệch +1,61% giá trị vị thế) — lọt cổng sanity ±15%.
+    build_fixture(tmp, qty_now=12_600.0, qty_prev=10_000.0, confirmed=True, ratio="0.26",
+                  mults=[1.24])
+    rc, err, snap = run(tmp)
+    check("(j1a) mult ghi 1,24 cho sự kiện thật 1,26 ⇒ rc=5 (trước vá: rc=0)", rc == 5,
+          (rc, err[-500:]))
+    check("(j1b) KHÔNG ghi NAV — mtm_stock sai 10.161,29 × 21.000 không tồn tại",
+          snap is None and not os.path.exists(os.path.join(tmp, f"nav_history_{ACCT}.csv")),
+          (snap or {}).get("mtm_stock"))
+    check("(j1c) đường phục hồi KHÔNG chạy", not load_block(tmp).get("corp_action_recovered"),
+          load_block(tmp).get("corp_action_recovered"))
+with tempfile.TemporaryDirectory() as tmp:
+    # (j2) ca HỖN HỢP rất phổ biến ở VN: HAI action CONFIRMED cùng mã cùng ex-date (1,10 và
+    # 1,005 ⇒ KL thật ×1,1055). `confirmed_share_event_multiplier` trả action ĐẦU TIÊN có
+    # mult≠1,0 = 1,10. Bản vòng 3: |11.055/1,10 − 10.000| = 50 ≤ tol 200 ⇒ rc=0, KL 10.050
+    # thay vì 10.000 ⇒ NAV +0,50% IM LẶNG. Sau vá: tol = 2%×1.055 = 21,1 ⇒ chặn.
+    build_fixture(tmp, qty_now=11_055.0, qty_prev=10_000.0, confirmed=True, ratio="0.1055",
+                  mults=[1.10, 1.005])
+    rc, err, snap = run(tmp)
+    check("(j2a) 2 action cùng ex-date (1,10 + 1,005), first-match 1,10 ⇒ rc=5 (trước vá: rc=0)",
+          rc == 5, (rc, err[-500:]))
+    check("(j2b) KHÔNG ghi NAV — mtm_stock sai 10.050 × 21.000 = 211.050.000 không tồn tại",
+          snap is None and not os.path.exists(os.path.join(tmp, f"nav_history_{ACCT}.csv")),
+          (snap or {}).get("mtm_stock"))
+    check("(j2c) đường phục hồi KHÔNG chạy", not load_block(tmp).get("corp_action_recovered"),
+          load_block(tmp).get("corp_action_recovered"))
 
 print(f"\n{len(PASS)} PASS, {len(FAIL)} FAIL")
 sys.exit(1 if FAIL else 0)

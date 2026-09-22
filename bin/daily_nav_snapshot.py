@@ -42,6 +42,11 @@ import wc_paths  # noqa: E402
 # gốc cây neo theo marker `wc_env.sh` (wc_paths) — đếm cấp dirname SAI khi script chạy
 # từ worktree `mike/agents/wt-*/bin/` (sự cố 2026-09-12, chặn báo cáo nhà đầu tư).
 WC_ROOT = wc_paths.find_wc_root(__file__)
+# `trading_bot` nằm ở WC_ROOT còn module này chạy từ mike/bin. Chèn MỘT LẦN ở đây thay vì trong
+# từng hàm: 3 call-site do nhánh này thêm nằm trong vòng lặp ticker ⇒ sys.path dài thêm 2 phần
+# tử mỗi lần gọi (đo: 50 lần gọi ⇒ 62→162). Mọi import module-level khác của file là stdlib +
+# `wc_paths` (đã import ở trên) nên không có shadowing mới.
+sys.path.insert(0, WC_ROOT)
 EXEC_DIR = os.path.join(WC_ROOT, "data", "execution_logs")
 MIKE_BIN = os.path.dirname(os.path.abspath(__file__))
 HISTORY_FILE_TMPL = os.path.join(EXEC_DIR, "nav_history_{account}.csv")
@@ -241,7 +246,6 @@ def held_event_next_session(snap, date, ticker):
     hiệu ngày lịch khác hiệu phiên — cùng bẫy `nav_exdate_forecast.trading_day_window`)."""
     if not snap:
         return None
-    sys.path.insert(0, WC_ROOT)   # module này chạy từ mike/bin, trading_bot nằm ở WC_ROOT
     from trading_bot.vn_market import next_trading_day
     nxt = next_trading_day(datetime.date.fromisoformat(date)).isoformat()
     for e in snap.get("upcoming_events_held") or []:
@@ -324,7 +328,6 @@ def net_fills_between(account, after_date, upto_date, cache=None, missing_out=No
         if missing_out is not None:
             missing_out[:] = missing
         return out
-    sys.path.insert(0, MIKE_BIN)
     from verify_account_snapshot import journal_fill_events
     prefix, suffix = f"exec_{account}_", "_journal.csv"
     out, missing, seen = {}, [], set()
@@ -339,7 +342,6 @@ def net_fills_between(account, after_date, upto_date, cache=None, missing_out=No
             continue
         for _ts, _oid, tk, side, qty, _px in events or []:
             out[tk] = out.get(tk, 0.0) + (qty if side == "buy" else -qty)
-    sys.path.insert(0, WC_ROOT)
     from trading_bot.vn_market import next_trading_day
     _d, _end = (next_trading_day(datetime.date.fromisoformat(after_date)),
                 datetime.date.fromisoformat(upto_date))
@@ -397,7 +399,13 @@ def confirmed_share_event_multiplier(ticker, date, ex_date=None, actions=None):
 
 QTY_RESIDUAL_EPS = 1e-6
 QTY_RATIO_TOL_SHARES = 1.0   # broker làm tròn cổ phiếu lẻ: VIB 500 × 0,095 = 47,5 → credit 47
-QTY_RATIO_TOL_PCT = 0.02     # + biên 2% cho lô lớn: BID 1.100 × 0,068433 = 75,28 → credit 75
+QTY_RATIO_TOL_PCT = 0.02     # + biên 2% ĐỘ LỚN SỰ KIỆN (phần dư), KHÔNG phải độ lớn vị thế:
+# BID 1.100 × 0,068433 = 75,28 → credit 75. Cả sai số làm tròn cổ phiếu của broker LẪN sai số
+# độ chính xác của tỉ lệ sự kiện đều tỉ lệ với PHẦN DƯ; áp 2% lên KL trước sự kiện thì một
+# `qty_multiplier` ghi SAI tới 2% vẫn "giải thích" được phần dư (arch-review vòng 4, mục [C1]:
+# vị thế 10.000 + mult ghi 1,24 thay vì 1,26 ⇒ NAV lệch +1,61%, lọt cổng sanity ±15%). Cả hai
+# nơi dùng cặp hằng này (:448 `expected` = credit kỳ vọng, và đường phục hồi --from-raw) vì vậy
+# đều lấy mẫu số là ĐỘ LỚN SỰ KIỆN, không phải độ lớn vị thế.
 
 
 def classify_qty_residual(ev, qty_now, qty_prev, net_fill, prev_date):
@@ -998,7 +1006,6 @@ def main():
     fill_cache = {}
     journal_gaps = set()
     if args.from_raw or is_today:
-        sys.path.insert(0, WC_ROOT)   # module chạy từ mike/bin, trading_bot nằm ở WC_ROOT
         from trading_bot.vn_market import next_trading_day
         # Phiên GIAO DỊCH kế tiếp `args.date` — ex-date mà broker điều chỉnh ĐÊM NAY. Neo đường
         # phục hồi vào đây thay vì `(ev or {}).get("date")` (arch-review vòng 3, mục [B1]): lấy
@@ -1032,7 +1039,7 @@ def main():
                 _mult_explains = (
                     bool(mult) and qty_prev is not None and
                     abs(qty_now / mult - _base) <= max(QTY_RATIO_TOL_SHARES,
-                                                       abs(_base) * QTY_RATIO_TOL_PCT))
+                                                       abs(qty_now - _base) * QTY_RATIO_TOL_PCT))
                 if args.from_raw and _mult_explains:
                     # ĐƯỜNG PHỤC HỒI (mục [1] arch-review vòng 2) — KHÔI PHỤC hành vi CŨ, không
                     # phải tính năng mới: quy ngược KL về trước sự kiện đúng như vòng lặp
@@ -1085,12 +1092,19 @@ def main():
                 f"lệnh khớp thật {d['net_fill']:+,.0f} ⇒ phần dư {d['residual']:+,.0f} CHƯA GIẢI "
                 f"THÍCH ĐƯỢC — {why}")
         n = len(share_event_blocks) + len(qty_unexplained)
+        # §29 — thông điệp phải ĐỌC ĐƯỢC: cửa sổ 100 ngày lịch cho 69 mục = 3.795 ký tự trên
+        # MỘT dòng stderr. Cắt còn 5 mục ĐẦU ở phần IN RA; artifact nav_gate_block_* vẫn giữ ĐỦ.
+        _gaps_sorted = sorted(journal_gaps)
+        _gaps_head = "; ".join(_gaps_sorted[:5])
+        _gaps_tail = (f"; … và {len(_gaps_sorted) - 5} ngày nữa, xem "
+                      f"nav_gate_block_{args.account}_{args.date}.json"
+                      if len(_gaps_sorted) > 5 else "")
         print(f"🚨 [{args.date}] KHỐI LƯỢNG vị thế đổi NGOÀI lệnh khớp thật cho {n} mã "
               f"({len(share_event_blocks)} khớp tỉ lệ sự kiện, {len(qty_unexplained)} chưa giải "
               f"thích được) — KHÔNG tính NAV, CẦN NGƯỜI xử lý: {'; '.join(parts)}. "
               f"[lịch: {ca_gate_note}] "
               + (f"[⚠️ journal KHÔNG đọc được cho {len(journal_gaps)} ngày GIAO DỊCH trong cửa "
-                 f"sổ ({'; '.join(sorted(journal_gaps))}) ⇒ 'lệnh khớp thật' phía trên có thể "
+                 f"sổ ({_gaps_head}{_gaps_tail}) ⇒ 'lệnh khớp thật' phía trên có thể "
                  f"THIẾU; kiểm journal TRƯỚC khi nghi corp-action] "
                  if journal_gaps else "")
               +
