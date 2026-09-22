@@ -584,3 +584,6 @@
 
 ## Archived 2026-09-22 (keep=12 days=0 require_done=False)
 - [2026-09-17T15:23:59Z] [2026-09-17] treasury+first_disclosure (job _150848): A report research/treasury_reconcile_20260917 (6ade95ec) CHO Mike/user chon noi luu (bang rieng de xuat) + one-time/recurring + UNSIZED policy truoc khi code oshares_live; B (ae38f4b6) first_disclosure CHUA UNBLOCK prereg, cho Mike quyet mo sprint descriptive.
+
+## Archived 2026-09-22 (keep=12 days=0 require_done=False)
+- [2026-09-17T16:14:14Z] [2026-09-17] treasury window monitor (job _160652): 20d153fb branch feat/treasury-buyback-window-monitor (worktree mike/agents/wt-treasury-window) CHUA merge/CHUA cron - CHO Mike+arch-reviewer; Mike/user chon nguong CLOSE_WINDOW_DAYS (do: 6/29 dong <=45d) + gio cron (de xuat T2 07:10 tuan).

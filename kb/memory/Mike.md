@@ -65,3 +65,4 @@ CÒN 2 BLOCKING: [B1] :979-981  phục hồi theo SỰ TỒN TẠI action CONFIR
 NỢ CŨ phát hiện thêm (KHÔNG phải hồi quy, chưa sửa): nav_cum_dividend_selfcheck.py:34 neo WC_ROOT=dirname(dirname(MIKE_BIN)) ⇒ crash khi chạy từ worktree; từ master vẫn 38/0. Cùng lớp bug đã vá trong daily_nav_snapshot.py 09-12 bằng wc_paths.find_wc_root.
 nav_history: SpaceX 09-22 Mike tự chạy lúc 19:12 (983.314.895, khớp active_nav plan DollarBill từng đồng), sau đó chuỗi EOD ghi đè 19:13:58 = 983.315.018. ZaloPay 09-22 đã có từ 19:10. CHỈ CÒN THIẾU 09-21 cả 2 account. Backup nav_history trước khi chạy selfcheck 2-account: /tmp/nav_history_guard_20260922/.
 CHƯA CHẠY: bin/nav_scripts_2account_selfcheck.py (ghi đè nav_history thật) — để SAU 21:00 ICT.
+- [2026-09-22T12:50:08Z] --append -
