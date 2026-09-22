@@ -572,3 +572,6 @@
 
 ## Archived 2026-09-19 (keep=12 days=0 require_done=False)
 - [2026-09-14T17:09:16Z] [2026-09-15] oshares freeze live selfcheck (job _164512): ce123789 tren test/oshares-freeze-live-selfchecks (worktree thanhdt-wt-oshares-freeze-live) + mike 5c931f08. CHO Mike+arch-reviewer land SAU double-count; 2 viec Mike quyet: docstring gate_selfcheck con noi cham BQ, SC2 do oan theo ten thu muc.
+
+## Archived 2026-09-22 (keep=12 days=0 require_done=False)
+- [2026-09-14T17:46:47Z] [2026-09-15] corp_action_feed_canary (job _173213): 2465a35c tren feat/corp-action-feed-canary (worktree mike/agents/wt-corp-feed-canary), CHUA merge/CHUA cai cron — CHO Mike+arch-reviewer. Question mo: corp-action-snapshot-schema-drift-20260914 (snapshot fail tu 09-14, vendor them 2 cot).
