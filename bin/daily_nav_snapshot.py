@@ -399,6 +399,10 @@ def confirmed_share_event_multiplier(ticker, date, ex_date=None, actions=None):
 
 QTY_RESIDUAL_EPS = 1e-6
 QTY_RATIO_TOL_SHARES = 1.0   # broker làm tròn cổ phiếu lẻ: VIB 500 × 0,095 = 47,5 → credit 47
+# ⚠️ GIẢ ĐỊNH NỀN của sàn 1,0 (arch-review vòng 5, mục 4): DNSE làm tròn theo ĐƠN VỊ cổ phiếu
+# ⇒ sai số làm tròn δ < 1, và phần dư sau khi quy ngược = δ/m < 1/m ≤ 1,0 với mọi m ≥ 1. Sàn
+# 1,0 vì vậy là BẤT BIẾN chứ không phải số chọn tay. Nếu DNSE đổi sang làm tròn theo LÔ 10/100
+# (δ ≥ 1) thì sự kiện tỉ lệ nhỏ sẽ CHẶN OAN — phải nâng sàn theo đúng lô mới, không nới TOL_PCT.
 QTY_RATIO_TOL_PCT = 0.02     # + biên 2% ĐỘ LỚN SỰ KIỆN (phần dư), KHÔNG phải độ lớn vị thế:
 # BID 1.100 × 0,068433 = 75,28 → credit 75. Cả sai số làm tròn cổ phiếu của broker LẪN sai số
 # độ chính xác của tỉ lệ sự kiện đều tỉ lệ với PHẦN DƯ; áp 2% lên KL trước sự kiện thì một
@@ -1038,8 +1042,15 @@ def main():
                 _base = (qty_prev or 0) + (net_fill or 0)
                 _mult_explains = (
                     bool(mult) and qty_prev is not None and
+                    # GIAO của hai mẫu số (arch-review vòng 5, mục [D1]): residual > base
+                    # ⟺ P(m−1) > P ⟺ m > 2, nên mẫu số "độ lớn sự kiện" của vòng 4 NỚI dung
+                    # sai đúng ở vùng thiệt hại lớn nhất (VHM mult 2,0 đang CONFIRMED thật +
+                    # leg 2,05% ⇒ NAV +2,05% im lặng). min() chặn mọi ca mà một trong hai mẫu
+                    # số chặn; NO-OP trên toàn bộ mult CONFIRMED hiện có (≤ 2,0) và trên nhánh
+                    # reverse-split m<1 (residual < base ⇒ min() = residual).
                     abs(qty_now / mult - _base) <= max(QTY_RATIO_TOL_SHARES,
-                                                       abs(qty_now - _base) * QTY_RATIO_TOL_PCT))
+                                                       min(abs(qty_now - _base),
+                                                           abs(_base)) * QTY_RATIO_TOL_PCT))
                 if args.from_raw and _mult_explains:
                     # ĐƯỜNG PHỤC HỒI (mục [1] arch-review vòng 2) — KHÔI PHỤC hành vi CŨ, không
                     # phải tính năng mới: quy ngược KL về trước sự kiện đúng như vòng lặp

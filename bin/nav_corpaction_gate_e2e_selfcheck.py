@@ -308,5 +308,24 @@ with tempfile.TemporaryDirectory() as tmp:
     check("(j2c) đường phục hồi KHÔNG chạy", not load_block(tmp).get("corp_action_recovered"),
           load_block(tmp).get("corp_action_recovered"))
 
+print("10. [D1] arch-review vòng 5 — dung sai là GIAO của hai mẫu số: mult > 2,0 KHÔNG được")
+print("   NỚI so với vòng 3 (residual > base ⟺ m > 2 ⇒ mẫu số 'độ lớn sự kiện' lớn hơn 'vị thế')")
+with tempfile.TemporaryDirectory() as tmp:
+    # (k1) VHM đang giữ qty_multiplier 2.0 CONFIRMED trong data/corp_actions.json THẬT. Ca hỗn
+    # hợp first-match (cùng cơ chế [j2]): 2,0 + leg 2,05% ⇒ KL thật ×2,041. Bản vòng 4 lấy mẫu
+    # số |qty_now − _base| = 10.410 ⇒ tol 208,2 > dev 205 ⇒ rc=0, KL 10.205 thay vì 10.000 ⇒
+    # NAV +2,05% IM LẶNG — YẾU HƠN vòng 3 (tol 2%×10.000 = 200 đã chặn). GIAO min(residual,
+    # base) giữ tol = 200 ⇒ chặn ở CẢ HAI nhánh.
+    build_fixture(tmp, qty_now=20_410.0, qty_prev=10_000.0, confirmed=True, ratio="1.041",
+                  mults=[2.0, 1.0205])
+    rc, err, snap = run(tmp)
+    check("(k1a) mult > 2 (2,0 + leg 2,05%) ⇒ rc=5 — KHÔNG BAO GIỜ yếu hơn vòng 3", rc == 5,
+          (rc, err[-500:]))
+    check("(k1b) KHÔNG ghi NAV — mtm_stock sai 10.205 × 21.000 = 214.305.000 không tồn tại",
+          snap is None and not os.path.exists(os.path.join(tmp, f"nav_history_{ACCT}.csv")),
+          (snap or {}).get("mtm_stock"))
+    check("(k1c) đường phục hồi KHÔNG chạy", not load_block(tmp).get("corp_action_recovered"),
+          load_block(tmp).get("corp_action_recovered"))
+
 print(f"\n{len(PASS)} PASS, {len(FAIL)} FAIL")
 sys.exit(1 if FAIL else 0)
