@@ -288,6 +288,27 @@ Quy trình: (1) chẩn đoán từ artifact thật (jobs.sh list cột HB_AGE, t
     fi
     # WAGS_DISPATCH_DEAD_END
     _notify_arch "🟡 [wags-autofix] Wags KHÔNG ghi finding '"'"'wags-fix: $LABEL'"'"' sau dispatch (nhưng dispatch exit=0 — agent CÓ chạy, có thể lạc đề). Tiếp tục qua bước phân loại rủi ro (fail-safe mặc định high nếu không tìm thấy)."
+  else
+    # WAGS_DISPATCH_FAILED_CLOSE_BEGIN — vong fix SAU cua CUNG label da ghi finding THAT
+    # => question "wags-autofix-dispatch-failed: $LABEL" cua vong TRUOC (dispatch chet vi
+    # loi ha tang thoang qua: API 529 Overloaded, OAuth het han...) khong con dung nua:
+    # da co ban va roi. Khong co duong tu dong thi muc pending do treo den khi roi khoi
+    # cua so 48h, VA no tu chui vao danh sach pending cua chinh lan dispatch ke tiep —
+    # vong lap tu nuoi, ca that 2026-09-22: job Wags_20260922_054509 nhan 3 question,
+    # 1 trong do la loi 529 cua chinh vong truoc no. Dung luat kb/ops_runbook.md
+    # "may hoi thi may tu dong": dong bang ARTIFACT (finding that tren bus sau moc
+    # dispatch), khong phai self-report. close_bus_question.py idempotent (ALREADY_CLOSED
+    # -> exit 0) nen vong nao khong co question treo cung khong sinh nhieu.
+    _dfclose_rc=0
+    python3 "$ROOT/bin/close_bus_question.py" "Wags/wags-autofix-dispatch-failed: $LABEL" \
+      --resolution "vong wags-autofix sau cua CUNG label da chay duoc va ghi finding that - dispatch chet lan truoc la loi ha tang thoang qua, khong con can nguoi can thiep" \
+      --evidence "bus finding prefix [wags-fix: $LABEL] co that sau moc $DISPATCH_START_ISO (mike_json.py has-event-prefix), pipelog '"$PIPELOG"'" \
+      --actor Wags >>"'"$PIPELOG"'" 2>&1 || _dfclose_rc=$?
+    if [ "$_dfclose_rc" != 0 ]; then
+      echo "[wags-autofix] close_bus_question.py cho dispatch-failed $LABEL loi exit=$_dfclose_rc - KHONG nuot lang" >> "'"$PIPELOG"'"
+      _notify_arch "🟠 **[wags-autofix] Đóng câu hỏi dispatch-failed '"'"'$LABEL'"'"' THẤT BẠI (exit=$_dfclose_rc)** — câu hỏi có thể VẪN PENDING dù vòng fix sau đã chạy xong. Xem log '"$PIPELOG"'."
+    fi
+    # WAGS_DISPATCH_FAILED_CLOSE_END
   fi
 
   # 2) Phân loại rủi ro (cost-opt #2, 2026-07-17): fix chỉ đụng path an toàn tuyệt đối
