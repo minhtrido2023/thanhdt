@@ -498,7 +498,7 @@ fi
 
 [ "$WARNED" -gt 0 ] && echo "NOTE: $WARNED WARN non-blocking (đã post Discord Trading Daily) — pipeline vẫn chạy"
 
-# --- [pipeline-3b] nav_exdate_forecast — cảnh báo TRƯỚC corp-action ≤1 ngày trên mã đang giữ
+# --- [pipeline-0] nav_exdate_forecast — cảnh báo TRƯỚC corp-action ≤1 PHIÊN trên mã đang giữ
 # (L1, quyết định user 2026-09-22 sau lớp lỗi "NAV bị PRICE_XCHECK chặn vì corp-action" tái diễn
 # ≥4 lần: PVT 09-08/DGC 09-11/VIB 09-09/VHM 08-05/DRI 09-21 — dữ liệu này đã nằm sẵn trên đĩa từ
 # cron corp_action_daily 07:30 nhưng không ai đọc kịp trước khi NAV chạy ~21h. Đọc LẠI
@@ -509,7 +509,7 @@ fi
 # chạy trong chuỗi này (cron riêng: nav_snapshot_daily.sh/nav_sync_retry.sh) — một ngày BQ
 # stale (đã xảy ra thật 2026-09-14) không được phép nuốt mất cảnh báo corp-action đúng ngày hệ
 # thống đang trục trặc (arch-review vòng 2, Mike, 2026-09-22).
-echo; echo "--- [pipeline-3b] nav_exdate_forecast (corp-action ≤1 ngày, mã đang giữ) ---"
+echo; echo "--- [pipeline-0] nav_exdate_forecast (corp-action ≤1 PHIÊN, mã đang giữ) ---"
 (cd "$ROOT" && python3 bin/nav_exdate_forecast.py --alert 2>&1) || \
   echo "  [WARN] nav_exdate_forecast.py lỗi — không chặn pipeline, kiểm tay: mike/bin/nav_exdate_forecast.py"
 
@@ -678,7 +678,7 @@ except Exception:
   # Bơm vào prompt để DollarBill biết không mở lệnh vi phạm; gate deterministic (signal_holds.py
   # --check, gọi trong send_plan_report.sh + bot_execute.py) là lớp chặn cứng độc lập.
   HOLDS_NOTE="$(cd "$ROOT" && python3 bin/signal_holds.py --note 2>/dev/null)"
-  # CORP_ACTION_NOTE — cùng nguồn/khuôn với [pipeline-3b] ở trên, lọc riêng cho $ACCT (mã account
+  # CORP_ACTION_NOTE — cùng nguồn/khuôn với [pipeline-0] ở trên, lọc riêng cho $ACCT (mã account
   # này thực sự đang giữ) để DollarBill không nhầm biến động giá dự kiến (ex-date/AIS) với tín
   # hiệu thị trường khi viết plan/summary.
   CORP_ACTION_NOTE="$(cd "$ROOT" && python3 bin/nav_exdate_forecast.py --note "$ACCT" 2>/dev/null)"

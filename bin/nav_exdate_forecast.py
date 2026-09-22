@@ -60,6 +60,7 @@ from trading_bot.vn_market import next_trading_day  # noqa: E402
 
 ACTIVE_NAV_GLOB = os.path.join(WC_ROOT, "data", "execution_logs", "active_nav_*.json")
 CHANNEL = "trading_daily"
+ALERT_MARKER = os.path.join(WC_ROOT, "data", "nav_exdate_forecast_alerted.json")
 DAYS_AHEAD_MAX = 1   # hôm nay (0) hoặc PHIÊN GIAO DỊCH kế tiếp (1) — cùng cửa sổ PRICE_XCHECK sẽ
                      # chạm tối nay/mai. Cố ý dùng khoảng cách PHIÊN, không phải days_ahead lịch
                      # của snapshot (corp_action_daily.py tính bằng hiệu ngày dương lịch thô) —
@@ -68,6 +69,20 @@ DAYS_AHEAD_MAX = 1   # hôm nay (0) hoặc PHIÊN GIAO DỊCH kế tiếp (1) �
                      # nhưng lọc days_ahead<=1 bỏ sót). classify_price_mismatch (L2) đã dùng đúng
                      # cách này (valid_dates = {date, next_trading_day(date)}) — nav_exdate_forecast
                      # phải khớp cùng logic để không "cảnh báo sớm" sai cửa sổ mà cổng NAV áp dụng.
+
+
+def _already_alerted_today(asof, marker=ALERT_MARKER):
+    """True nếu đã notify+bus cho ĐÚNG `asof` này rồi — tránh gửi Discord/bus trùng khi người
+    vận hành chạy lại pipeline-0 cùng ngày sau khi sửa BQ stale (R2 khiến 3b chạy cả ở lần
+    abort, §5 idempotent-side-effects)."""
+    return _read_json(marker, {}).get("asof") == asof
+
+
+def _mark_alerted_today(asof, marker=ALERT_MARKER):
+    tmp = marker + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump({"asof": asof}, f)
+    os.replace(tmp, marker)
 
 
 def _read_json(path, default=None):
@@ -135,15 +150,40 @@ def _fmt_pct(x):
     return f"{x:.2f}%" if x is not None else "?"
 
 
+def _session_word(asof, event_date):
+    """Cụm danh từ THUẦN mô tả vị trí phiên của event_date so với asof — tách khỏi mệnh đề
+    "broker đổi giá/KL TỐI NAY" (xem `_adjust_clause`, C3): hai câu chỉ CÙNG đúng khi event_date
+    là đúng phiên kế tiếp; ghép chung vào day_word khiến event cách ≥2 phiên bị gán nhầm "TỐI
+    NAY" (bug thật: VPB ex-right 2026-09-24 cách asof 2026-09-22 tới 2 phiên)."""
+    if event_date == asof:
+        return "HÔM NAY"
+    d = datetime.date.fromisoformat(asof)
+    n = 0
+    while d.isoformat() != event_date and n <= 30:
+        d = next_trading_day(d)
+        n += 1
+    return f"PHIÊN KẾ TIẾP ({event_date})" if n == 1 else f"{n} PHIÊN TỚI ({event_date})"
+
+
+def _adjust_clause(asof, event_date):
+    """"broker đổi giá/KL TỐI NAY" CHỈ đúng khi event_date == next_trading_day(asof) — broker
+    điều chỉnh vào đêm NGAY TRƯỚC phiên diễn ra sự kiện, không phải đêm của asof khi event còn
+    cách ≥2 phiên. Rỗng khi event_date==asof (đã điều chỉnh từ đêm trước, không còn gì "sắp" xảy ra)."""
+    if event_date == asof:
+        return ""
+    nxt = next_trading_day(datetime.date.fromisoformat(asof)).isoformat()
+    if event_date == nxt:
+        return "broker đổi giá/KL TỐI NAY"
+    return f"broker đổi giá/KL vào đêm trước phiên {event_date}"
+
+
 def build_event_line(event, positions_by_account, asof=None):
     tk = event["ticker"]
     kind = classify(event)
     holders = _holders_for(tk, positions_by_account)
-    # day_word phải suy theo VỊ TRÍ TRONG CỬA SỔ PHIÊN (asof vs event["date"]), KHÔNG theo
-    # days_ahead lịch — days_ahead lịch nói sai đúng ca R1 sinh ra để cứu (thứ Sáu -> ex-date
-    # thứ Hai: days_ahead=3 nhưng chỉ cách 1 PHIÊN, broker đã hạ giá TỐI THỨ SÁU).
     asof = asof or today_ict()
-    day_word = "HÔM NAY" if event["date"] == asof else f"PHIÊN KẾ TIẾP ({event['date']}) — broker đổi giá/KL TỐI NAY"
+    day_word = _session_word(asof, event["date"])
+    adjust_clause = _adjust_clause(asof, event["date"])
     # date_field phân biệt "chốt quyền/ex-right" (DIV/ISS thường) với "hiệu lực" (AIS chính thức
     # hoá số CP) — dùng đúng field snapshot đã gắn theo từng dòng, không đoán chung một chữ.
     verb = "hiệu lực" if event.get("date_field") == "effective_date" else "ex-right"
@@ -177,19 +217,20 @@ def build_event_line(event, positions_by_account, asof=None):
             ratio_txt = f" tỉ lệ {r * 100:.2f}%"
             drop_txt = f" (giá tham chiếu dự kiến giảm ~{_fmt_pct(r / (1 + r) * 100)}, KL tăng ~{_fmt_pct(r * 100)})"
         method = f" — {event['issue_method_vi']}" if event.get("issue_method_vi") else ""
-        # event_status != "executed" (vd "announced") là DỰ KIẾN — upstream cố ý giữ nhãn này
-        # (corp_action_daily.py:1293) vì có thể đổi/huỷ. Đừng khẳng định tuyệt đối "SẼ" cho ca
-        # chưa executed — hạ giọng thành "dự kiến, có thể đổi/huỷ".
+        # KHÔNG có nhánh is_executed: upcoming_events_held nằm ở "announced" cho tới ~22:2x ICT
+        # đêm ex-date tự nó (corp_action_lib.py:121) — với một cảnh báo TRƯỚC ex-date, nhánh
+        # "executed" KHÔNG BAO GIỜ đạt được (đo thật: 43/43 dòng upcoming_events_held đang
+        # "announced", 0 "executed"). Bất định thật nằm ở "sự kiện có bị huỷ/dời không", KHÔNG
+        # nằm ở "broker có điều chỉnh giá không nếu diễn ra" — luật chuẩn tắc của đội (VHM 08-05/
+        # MBB 08-11/VIB 09-09) là sự kiện CỔ PHIẾU vẫn CHẶN NAV, không có ngoại lệ tự động.
         status = event.get("event_status")
-        is_executed = status == "executed"
-        certainty = ("Broker sẽ đổi CẢ giá LẪN khối lượng cùng lúc" if is_executed else
-                     f"Broker DỰ KIẾN đổi cả giá lẫn khối lượng (trạng thái: {status or 'chưa rõ'}"
-                     f" — có thể đổi/huỷ, không phải chắc chắn)")
-        block_word = "SẼ CHẶN NAV" if is_executed else "CÓ THỂ CHẶN NAV"
+        clause = f" {adjust_clause}." if adjust_clause else ""
         return (f"🚨 **{tk}** {event['event_code']}{method}{ratio_txt}, {when}{drop_txt}. "
-                f"{certainty} — `daily_nav_snapshot.py` PRICE_XCHECK **{block_word}** (đúng "
-                f"thiết kế, không phải bug) cho tới khi broker đồng bộ hoặc người backfill bằng "
-                f"`--from-raw`. CẦN NGƯỜI theo dõi khi chạy NAV {when.lower()}. Đang giữ: {who}.")
+                f"Sự kiện đang ở trạng thái `{status or 'chưa rõ'}` (có thể bị huỷ/dời).{clause} "
+                f"NẾU diễn ra, broker SẼ đổi CẢ giá LẪN khối lượng — `daily_nav_snapshot.py` "
+                f"PRICE_XCHECK **SẼ CHẶN NAV** (đúng thiết kế, không phải bug) cho tới khi broker "
+                f"đồng bộ hoặc người backfill bằng `--from-raw`. CẦN NGƯỜI theo dõi khi chạy NAV "
+                f"phiên {event['date']}. Đang giữ: {who}.")
 
     return None  # INFO — không tạo dòng cảnh báo NAV (xem docstring)
 
@@ -257,18 +298,23 @@ def main():
         return 0
     if not lines:
         print(f"[nav_exdate_forecast] {asof}: không có sự kiện corp-action nào trong "
-              f"≤{a.days_ahead_max} ngày tới trên mã đang giữ.")
+              f"≤{a.days_ahead_max} PHIÊN tới trên mã đang giữ.")
         return 0
 
-    header = f"📆 **Corp-action sắp tới ≤{a.days_ahead_max} ngày, mã đang giữ** ({asof}):"
+    header = f"📆 **Corp-action sắp tới ≤{a.days_ahead_max} PHIÊN, mã đang giữ** ({asof}):"
     msg = "\n".join([header] + lines)
     print(msg)
     if a.alert:
-        notify(msg, channel=CHANNEL)
-        bus("finding", f"nav-exdate-forecast {asof}",
-            {"asof": asof, "n_events": len(events),
-             "tickers": sorted({e["ticker"] for e in events}),
-             "kinds": sorted({classify(e) for e in events})}, a.trace)
+        if _already_alerted_today(asof):
+            print(f"[nav_exdate_forecast] {asof}: đã alert Discord/bus rồi hôm nay — bỏ qua lần "
+                  f"chạy lại này (tránh trùng, §5).")
+        else:
+            notify(msg, channel=CHANNEL)
+            bus("finding", f"nav-exdate-forecast {asof}",
+                {"asof": asof, "n_events": len(events),
+                 "tickers": sorted({e["ticker"] for e in events}),
+                 "kinds": sorted({classify(e) for e in events})}, a.trace)
+            _mark_alerted_today(asof)
     return 0
 
 

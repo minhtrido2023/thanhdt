@@ -111,13 +111,37 @@ line_vpb = m.build_event_line(VPB_ISS, POSITIONS, asof=ASOF)
 # ratio=0.2604104 → drop = r/(1+r) = 20.6647...%  → làm tròn 2 chữ số = 20.66%
 check("VPB: % giá giảm đúng công thức r/(1+r)=20.66%", "20.66%" in line_vpb, line_vpb)
 check("VPB: % KL tăng = ratio*100 = 26.04%", "26.04%" in line_vpb, line_vpb)
-# VPB_ISS event_status="announced" (chưa executed) → hạ giọng "CÓ THỂ CHẶN" + "DỰ KIẾN", KHÔNG
-# khẳng định tuyệt đối "SẼ" (R6b — upstream giữ nhãn announced vì có thể đổi/huỷ).
-check("VPB (announced): PRICE_XCHECK CÓ THỂ CHẶN, không khẳng định tuyệt đối",
-      "CÓ THỂ CHẶN NAV" in line_vpb and "DỰ KIẾN" in line_vpb, line_vpb)
+# C1 (vòng 3) — KHÔNG còn nhánh is_executed: upcoming_events_held luôn "announced" trước ex-date
+# thật (corp_action_lib.py:121), "executed" KHÔNG BAO GIỜ đạt được cho use-case cảnh báo TRƯỚC
+# (đo thật: 43/43 dòng announced, 0 executed). Bất định chỉ gắn vào "có huỷ/dời không" — KHÔNG
+# được hạ giọng hệ quả NAV xuống "CÓ THỂ CHẶN" nữa (luật chuẩn tắc: sự kiện CỔ PHIẾU luôn CHẶN).
+check("VPB (announced): trạng thái announced nêu rõ, có thể huỷ/dời",
+      "announced" in line_vpb and "có thể bị huỷ/dời" in line_vpb, line_vpb)
+check("VPB: PRICE_XCHECK khẳng định SẼ CHẶN NAV, KHÔNG hạ giọng 'CÓ THỂ CHẶN'",
+      "SẼ CHẶN NAV" in line_vpb and "CÓ THỂ CHẶN" not in line_vpb, line_vpb)
 _vpb_executed = m.build_event_line({**VPB_ISS, "event_status": "executed"}, POSITIONS, asof=ASOF)
-check("VPB (executed): PRICE_XCHECK SẼ CHẶN khẳng định chắc chắn",
-      "SẼ CHẶN NAV" in _vpb_executed, _vpb_executed)
+check("VPB (executed): cùng khẳng định SẼ CHẶN NAV như announced (không còn nhánh is_executed riêng)",
+      "SẼ CHẶN NAV" in _vpb_executed and "executed" in _vpb_executed, _vpb_executed)
+# C3 (vòng 3) — VPB_ISS date=2026-09-24 cách ASOF=2026-09-22 ĐÚNG 2 PHIÊN (qua 2026-09-23), KHÔNG
+# phải phiên kế tiếp — bug thật đã đo: bản cũ gọi "PHIÊN KẾ TIẾP" + "TỐI NAY" cho ca này (sai đêm,
+# thực tế broker chỉnh tối 09-23 chứ không phải tối asof 09-22).
+check("VPB cách 2 phiên: day_word là '2 PHIÊN TỚI', KHÔNG PHẢI 'PHIÊN KẾ TIẾP'",
+      "2 PHIÊN TỚI" in line_vpb and "PHIÊN KẾ TIẾP" not in line_vpb, line_vpb)
+check("VPB cách 2 phiên: adjust_clause nêu đúng đêm trước phiên 2026-09-24, KHÔNG PHẢI 'TỐI NAY'",
+      "đêm trước phiên 2026-09-24" in line_vpb and "TỐI NAY" not in line_vpb, line_vpb)
+
+_share_next_session = {**VPB_ISS, "ticker": "NEXTSESS", "date": "2026-09-23"}
+line_next = m.build_event_line(_share_next_session, POSITIONS, asof=ASOF)
+check("SHARE_EVENT đúng 1 PHIÊN kế tiếp (không phải 2 như VPB): day_word 'PHIÊN KẾ TIẾP' + "
+      "adjust_clause đúng 'TỐI NAY'", "PHIÊN KẾ TIẾP" in line_next and "TỐI NAY" in line_next, line_next)
+
+# C4/M11 (vòng 3) — DIV thiếu value_per_share KHÔNG được crash (guard pre-existing ở producer
+# nhưng phải giữ nguyên khi revert vô tình xoá) — không có % và ghi rõ "chưa rõ mức cổ tức".
+_dri_no_vps = {**DRI_DIV, "value_per_share": None}
+line_dri_no_vps = m.build_event_line(_dri_no_vps, POSITIONS, asof=ASOF)
+check("M11 REGRESSION: DIV thiếu value_per_share → không crash, 'chưa rõ mức cổ tức', không có %",
+      line_dri_no_vps is not None and "chưa rõ mức cổ tức" in line_dri_no_vps
+      and "giá tham chiếu" not in line_dri_no_vps, line_dri_no_vps)
 
 line_vix = m.build_event_line(VIX_AIS, POSITIONS, asof=ASOF)
 check("VIX (INFO, price_adjusting=False) → None, không tạo dòng cảnh báo NAV", line_vix is None)
@@ -173,8 +197,30 @@ try:
     note_spacex = m.prompt_note("SpaceX", asof="2026-09-22", days_ahead_max=1)
     check("prompt_note SpaceX: có nội dung (giữ DRI+VPB)",
           "DRI" in note_spacex and "VPB" in note_spacex, note_spacex)
+    # C4/M15 REGRESSION — câu R6d ("KHÔNG đổi quyết định mua/bán") là ranh giới quan trọng cho
+    # DollarBill khi đọc note này; xoá mất câu này là hồi quy im lặng, không assertion nào bắt
+    # được trước bản vá vòng 3.
+    check("M15 REGRESSION: prompt_note giữ nguyên câu 'KHÔNG đổi quyết định mua/bán vì thông tin này'",
+          "KHÔNG đổi quyết định mua/bán vì thông tin này" in note_spacex, note_spacex)
     note_ghost = m.prompt_note("KhongTonTai", asof="2026-09-22", days_ahead_max=1)
     check("prompt_note account không giữ gì liên quan → rỗng", note_ghost == "", repr(note_ghost))
+
+    # C4/M14 REGRESSION — build_report() PHẢI truyền asof= xuống build_event_line() (dòng ~205
+    # trước sửa). Dùng FAKE_ASOF khác hẳn ngày thật hệ thống đang chạy: nếu build_report() quên
+    # truyền asof, build_event_line() sẽ tự rơi về today_ict() THẬT — event["date"]==FAKE_ASOF sẽ
+    # KHÔNG khớp today_ict() thật, day_word sẽ không còn là "HÔM NAY" nữa.
+    FAKE_ASOF = "2026-01-15"
+    _orig_read_json_inner = m._read_json
+    m._read_json = lambda path, default=None: (
+        {"upcoming_events_held": [{**DRI_DIV, "date": FAKE_ASOF}]}
+        if f"corp_action_daily_{FAKE_ASOF}" in path else default)
+    try:
+        lines_fake, _snap_fake, _events_fake = m.build_report(asof=FAKE_ASOF, days_ahead_max=1)
+        check("M14 REGRESSION: build_report() truyền asof xuống build_event_line (day_word "
+              "'HÔM NAY' đúng FAKE_ASOF, không rơi về today_ict() thật)",
+              len(lines_fake) == 1 and "HÔM NAY" in lines_fake[0], lines_fake)
+    finally:
+        m._read_json = _orig_read_json_inner
 finally:
     m._read_json, m.read_active_nav_positions = _orig_read_json, _orig_positions
 
@@ -186,6 +232,27 @@ try:
     check("main() với asof không tồn tại → rc=0, không raise", rc == 0)
 finally:
     sys.argv = _orig_argv
+
+# C4/M13+M17 REGRESSION — header/dòng "không có sự kiện" của main() PHẢI dùng đơn vị PHIÊN,
+# KHÔNG PHẢI "ngày" (mutation M13: hardcode lại "≤1 NGÀY TỚI"; M17: đổi header). Bắt bằng cách
+# CHẠY THẬT main() và đọc stdout — grep xanh trên chuỗi nguồn không đủ (đã lọt vòng 2: khác chữ
+# hoa/thường "ngày" vs "NGÀY" khiến grep pass trong khi output thật vẫn in "ngày").
+import contextlib  # noqa: E402
+import io  # noqa: E402
+_orig_read_json4, _orig_positions4, _orig_argv2 = m._read_json, m.read_active_nav_positions, sys.argv
+try:
+    m._read_json = lambda path, default=None: snap if "corp_action_daily_2026-09-22" in path else default
+    m.read_active_nav_positions = lambda *a, **k: POSITIONS
+    sys.argv = ["nav_exdate_forecast.py", "--asof", "2026-09-22", "--days-ahead-max", "1"]
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        rc_main = m.main()
+    out = buf.getvalue()
+    check("M13/M17 REGRESSION: main() rc=0 khi có sự kiện", rc_main == 0)
+    check("M13/M17 REGRESSION: header/stdout dùng 'PHIÊN', KHÔNG dùng 'ngày' (case-insensitive)",
+          "PHIÊN" in out and "ngày" not in out.lower(), out)
+finally:
+    m._read_json, m.read_active_nav_positions, sys.argv = _orig_read_json4, _orig_positions4, _orig_argv2
 
 # R3 — snapshot thiếu + --alert PHẢI notify() (không im lặng, không trông giống "hôm nay yên ả")
 _orig_notify = m.notify
@@ -206,6 +273,34 @@ try:
 finally:
     m.notify = _orig_notify
     sys.argv = _orig_argv
+
+# C5 — dedupe theo NGÀY cho notify+bus: chạy --alert 2 lần liên tiếp cùng asof (có sự kiện thật)
+# chỉ được notify+bus ĐÚNG 1 LẦN — mô phỏng người vận hành sửa BQ stale rồi chạy lại pipeline-0
+# cùng ngày (R2 khiến 3b chạy cả ở lần abort, §5 idempotent-side-effects).
+_orig_marker = m.ALERT_MARKER
+_orig_read_json5, _orig_positions5, _orig_notify2, _orig_bus, _orig_argv3 = (
+    m._read_json, m.read_active_nav_positions, m.notify, m.bus, sys.argv)
+_bus_calls = []
+with tempfile.TemporaryDirectory() as tmpdir:
+    try:
+        m.ALERT_MARKER = os.path.join(tmpdir, "nav_exdate_forecast_alerted.json")
+        m._read_json = lambda path, default=None: (
+            snap if "corp_action_daily_2026-09-22" in path
+            else (json.load(open(path, encoding="utf-8")) if os.path.exists(path) else default))
+        m.read_active_nav_positions = lambda *a, **k: POSITIONS
+        m.notify = lambda msg, channel=None: _notify_calls.append((msg, channel))
+        m.bus = lambda *a, **k: _bus_calls.append(a)
+        sys.argv = ["nav_exdate_forecast.py", "--asof", "2026-09-22", "--days-ahead-max", "1", "--alert"]
+        _notify_calls.clear()
+        m.main()
+        m.main()  # lần chạy lại thứ 2, cùng asof
+        check("C5: notify() chỉ gọi 1 lần dù --alert chạy 2 lần cùng asof (dedupe theo ngày)",
+              len(_notify_calls) == 1, _notify_calls)
+        check("C5: bus() chỉ gọi 1 lần dù --alert chạy 2 lần cùng asof (dedupe theo ngày)",
+              len(_bus_calls) == 1, _bus_calls)
+    finally:
+        (m.ALERT_MARKER, m._read_json, m.read_active_nav_positions, m.notify, m.bus, sys.argv) = (
+            _orig_marker, _orig_read_json5, _orig_positions5, _orig_notify2, _orig_bus, _orig_argv3)
 
 # ── 7. R5 — read_active_nav_positions() phải chạm SCHEMA THẬT của active_nav_*.json, không
 # 100% monkeypatch (mutation "bỏ lọc qty<=0" hoặc đọc sai field trước đây không bị bắt).
