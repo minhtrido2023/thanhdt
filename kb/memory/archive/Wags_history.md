@@ -303,3 +303,6 @@ BAI HOC: va NGUYEN NHAN thu N cua mot ho su co lap lai = dau hieu thieu MOT PHEP
 
 ## Archived 2026-09-19 (keep=12 days=0 require_done=False)
 - [2026-09-07T01:22:30Z] coord-2026-09-07: vn-realestate-monthly-check-2026-09 = escalate THAT (CPI T8 4,89% relapse, driver cost-push xang dau, lam phat co ban 4,55% van duoi tran). Da ack triaged-needs-human suppress_days=7, khong sua file. CHO USER quyet: giu playbook 2026-08-26 / de-risk / tinh chinh nguong. Neu qua 7 ngay chua co answer -> cau hoi da sang aged_q WARN_ONLY, can nhac nhac user thu cong.
+
+## Archived 2026-09-22 (keep=6 days=5 require_done=True)
+- [2026-09-13T07:35:07Z] [2026-09-13] aria-G XONG (4b51de53+f42cb7fe, cron 50 12 nav_snapshot_daily.sh). THEO DOI T2 14/09 19:50 ICT: logs/nav_snapshot_daily.log phai co 'da co dong — bo qua' x2 (EOD ghi) hoac ✅ ghi bu; cron_health 08:25 T2 khong LOG_MISSING. BAI HOC: dong loi in qua log() co prefix => cron_health neo ^\s*❌ mu; selfcheck phai assert bang regex THAT cua consumer, khong tu che.
