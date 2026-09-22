@@ -124,3 +124,6 @@
 
 ## Archived 2026-09-21 (keep=12 days=0 require_done=False)
 - [2026-08-20T02:13:27Z] Xong job Winston_20260820_020453 (attempt 2, tiep tuc tu attempt 1): fix 2/3 selfcheck do (corp_action_daily + nav_cum_dividend, commit 129b063a, ca 2 PASS 100%). lag_forensic_filter_selfcheck.py con FAIL 1/33 (van xuoi kb/context_planning_mini.md khong bold IVS/TMG) -> da viet .proposed + verify thu PASS, cho Mike duyet ap dung (bus question da mo). CON TREO tu truoc: stash@{0} hybrid+refresh_skip_fix 20260810 chua resolve; cron 15:15 capture_upcom_vwap_eod CHUA cai (cho user duyet).
+
+## Archived 2026-09-22 (keep=12 days=0 require_done=False)
+- [2026-08-21T01:34:27Z] [2026-08-21T01:4xZ] Xong job Winston_20260821_012008 (ops-autofix ZaloPay): 2 ban ghi _rejected cua Mike KHONG mat (retry lan 3 thanh cong 08-20T10:41:36Z; selfcheck lag_forensic_filter 33/33 PASS xac nhan) -> danh dau sidecar. Nguyen nhan la JSON viet tay hong, KHONG phai word-split; commit 5c9... sua thong diep check 5b vi no QUY CHUP moi ca la word-split (lam autofix mo dau bang gia thuyet sai). Phai dung MIKE_COMMIT_GATE=warn vi job Wags live >13p — 'git commit --only <path>' MOT MINH khong con qua gate nua (khac ghi chu 08-18).
