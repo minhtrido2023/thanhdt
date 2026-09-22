@@ -107,5 +107,51 @@ r = D.cum_dividend_double_count("A1", "2026-07-22", {"CTG": 2300, "VCB": 1300},
                                 events=events, bq_max_date="2026-07-24")
 check("dạng {mã: qty} của selfcheck cũ vẫn chạy như trước", abs(r["expected_bq"] - 1_620_000) < 1, r)
 
+print("4. classify_corp_action_gap (corp_action_gate_v2, job Taylor_20260922_111128)")
+g = D.classify_corp_action_gap
+
+# (a) FAIL-CLOSED: khoản cổ tức ĐÃ nằm trong tiền (không còn pending) — mã không có trong
+# cum_div_tickers và amount tổng không khớp kỳ vọng của riêng mã này. Đảo `bool(cum_div_amount)`
+# thành hằng True hoặc bỏ check `in_bq_list or magnitude_ok` sẽ làm test này chết.
+ev_div = {"price_adjusting": True, "event_code": "DIV", "value_per_share": 1000.0, "ticker": "DRI"}
+verdict, detail = g(ev_div, qty_now=1000.0, qty_prev=1000.0, price_ref=15_000, mkt_price=14_000,
+                    tol_pct=5.0, cum_div_amount=0, cum_div_tickers=[], cum_div_warnings=[])
+check("(a) cổ tức đã nằm trong tiền (amount=0, không pending) ⇒ unexplained, FAIL-CLOSED",
+      verdict == "unexplained", (verdict, detail))
+verdict2, _ = g(ev_div, qty_now=1000.0, qty_prev=1000.0, price_ref=15_000, mkt_price=14_000,
+                tol_pct=5.0, cum_div_amount=250_000, cum_div_tickers=["OTHER"],
+                cum_div_warnings=[])
+check("(a2) amount thuộc mã KHÁC (không khớp expected, không trong tickers) ⇒ unexplained",
+      verdict2 == "unexplained", verdict2)
+
+# (b) Sự kiện cổ phiếu tỉ lệ NHỎ (~1%, giá rơi <5% nên PRICE_XCHECK cũ không bắt được — lỗ
+# hổng L4 đã biết) vẫn PHẢI bị chặn, vì nhánh 1 dựa KHỐI LƯỢNG, không phụ thuộc biên độ giá.
+ev_share_small = {"price_adjusting": True, "event_code": "ISSUE", "exercise_ratio": "100:1",
+                  "issue_method_vi": "Phát hành thêm", "ticker": "XYZ", "date": "2026-09-23"}
+verdict, detail = g(ev_share_small, qty_now=101_000.0, qty_prev=100_000.0, price_ref=50_000,
+                    mkt_price=49_600, tol_pct=5.0, cum_div_amount=0, cum_div_tickers=[],
+                    cum_div_warnings=[])
+check("(b) sự kiện cổ phiếu ~1% (giá rơi 0,8% <5%) vẫn bị chặn (share_event_block)",
+      verdict == "share_event_block", (verdict, detail))
+
+# (c) qty KHÔNG đổi (qty_moved=False) dù lịch có sự kiện + giá trong dung sai ⇒ KHÔNG được
+# chặn — chống over-block (~10/28 phiên đo thật khi dò theo LỊCH thay vì bằng chứng credit).
+ev_share_noop = {"price_adjusting": True, "event_code": "ISSUE", "exercise_ratio": "100:1",
+                 "ticker": "VPB", "date": "2026-09-24"}
+verdict, detail = g(ev_share_noop, qty_now=100_000.0, qty_prev=100_000.0, price_ref=20_000,
+                    mkt_price=20_000, tol_pct=5.0, cum_div_amount=0, cum_div_tickers=[],
+                    cum_div_warnings=[])
+check("(c) qty_moved=False + lịch có sự kiện + giá trong dung sai ⇒ ok, KHÔNG chặn",
+      verdict == "ok", (verdict, detail))
+
+# Biên kiểm tra thêm: nhánh 2 (cash_div_confirmed) đúng khi bất biến khẳng định DƯƠNG —
+# in_bq_list=True (BQ đã tự xác nhận CHÍNH mã này pending).
+verdict, detail = g(ev_div, qty_now=1000.0, qty_prev=1000.0, price_ref=15_000, mkt_price=14_000,
+                    tol_pct=5.0, cum_div_amount=1_000_000, cum_div_tickers=["DRI"],
+                    cum_div_warnings=["BQ chưa có phiên hôm nay"])
+check("cash_div_confirmed khi in_bq_list=True dù có warning biên độ (net/gross)",
+      verdict == "cash_div_confirmed" and abs(detail["expected_amount"] - 1_000_000) < 1,
+      (verdict, detail))
+
 print(f"\n{len(PASS)} PASS, {len(FAIL)} FAIL")
 sys.exit(1 if FAIL else 0)
