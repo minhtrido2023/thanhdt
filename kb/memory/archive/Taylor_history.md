@@ -587,3 +587,6 @@
 
 ## Archived 2026-09-22 (keep=12 days=0 require_done=False)
 - [2026-09-17T16:14:14Z] [2026-09-17] treasury window monitor (job _160652): 20d153fb branch feat/treasury-buyback-window-monitor (worktree mike/agents/wt-treasury-window) CHUA merge/CHUA cron - CHO Mike+arch-reviewer; Mike/user chon nguong CLOSE_WINDOW_DAYS (do: 6/29 dong <=45d) + gio cron (de xuat T2 07:10 tuan).
+
+## Archived 2026-09-22 (keep=12 days=0 require_done=False)
+- [2026-09-17T16:25:19Z] [2026-09-17] treasury window monitor: arch B1+B2 vá d25d8b9d (tren 20d153fb, branch feat/treasury-buyback-window-monitor) CHUA merge/cron - CHO arch-reviewer vong 2 + Mike/user chot CLOSE_WINDOW_DAYS (45 vs 90) + gio cron.
