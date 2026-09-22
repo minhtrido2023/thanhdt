@@ -32,3 +32,4 @@
 - job_cancel_guard nhánh systemd luôn đỏ dưới cron (theo dõi, không escalate).
 - append_event.sh JSON cách ly viết tay vẫn thỉnh thoảng tái diễn dạng nhỏ (theo dõi qua retro).
 
+- [2026-09-22T02:10:45Z] 22/09 09:xx: nav-price-xcheck-stuck DRI (SpaceX+ZaloPay 09-21) đã CHẨN ĐOÁN xong — cổ tức tiền DRI 1.000đ/cp ex-date 09-22, khớp mẫu DGC nhưng còn dư 100đ/0,7% chưa khớp tuyệt đối. CHƯA vá NAV (manual, hoãn qua giờ ATO). Việc còn lại: patch NAV 09-21 mark giá CUM 14.900 sau khi xác nhận cum_dividend_excl đã trừ đúng khoản phải thu (§21), làm sau khi thị trường ổn định (~10-11h).
