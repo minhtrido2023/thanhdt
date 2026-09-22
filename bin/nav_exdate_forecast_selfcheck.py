@@ -115,6 +115,10 @@ _dri_2_sessions = {**DRI_DIV, "date": "2026-09-24"}  # cách ASOF 2 phiên, gi�
 line_dri_2s = m.build_event_line(_dri_2_sessions, POSITIONS, asof=ASOF)
 check("V1 REGRESSION: DIV cách 2 phiên nêu đúng 'đêm trước phiên 2026-09-24' qua adjust_clause",
       "đêm trước phiên 2026-09-24" in line_dri_2s and "Tối nay/mai" not in line_dri_2s, line_dri_2s)
+# V5 REGRESSION — CASH_DIV KHÔNG được khẳng định broker đổi KL (chỉ đổi giá tham chiếu); vòng 4
+# gộp chung _adjust_clause cho cả 2 lớp sự kiện khiến dòng cổ tức tiền mặt nói sai "đổi giá/KL".
+check("V5 REGRESSION: adjust_clause của CASH_DIV KHÔNG chứa 'KL' (broker chỉ đổi giá)",
+      "KL" not in line_dri_2s, line_dri_2s)
 
 line_vpb = m.build_event_line(VPB_ISS, POSITIONS, asof=ASOF)
 # ratio=0.2604104 → drop = r/(1+r) = 20.6647...%  → làm tròn 2 chữ số = 20.66%
@@ -143,6 +147,9 @@ _share_next_session = {**VPB_ISS, "ticker": "NEXTSESS", "date": "2026-09-23"}
 line_next = m.build_event_line(_share_next_session, POSITIONS, asof=ASOF)
 check("SHARE_EVENT đúng 1 PHIÊN kế tiếp (không phải 2 như VPB): day_word 'PHIÊN KẾ TIẾP' + "
       "adjust_clause đúng 'TỐI NAY'", "PHIÊN KẾ TIẾP" in line_next and "TỐI NAY" in line_next, line_next)
+# V5 REGRESSION — SHARE_EVENT PHẢI giữ nguyên "giá/KL" trong adjust_clause (broker đổi cả 2).
+check("V5 REGRESSION: adjust_clause của SHARE_EVENT có 'giá/KL TỐI NAY'",
+      "giá/KL TỐI NAY" in line_next, line_next)
 
 # C4/M11 (vòng 3) — DIV thiếu value_per_share KHÔNG được crash (guard pre-existing ở producer
 # nhưng phải giữ nguyên khi revert vô tình xoá) — không có % và ghi rõ "chưa rõ mức cổ tức".

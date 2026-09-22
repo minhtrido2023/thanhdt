@@ -167,16 +167,19 @@ def _session_word(asof, event_date):
     return f"PHIÊN KẾ TIẾP ({event_date})" if n == 1 else f"{n} PHIÊN TỚI ({event_date})"
 
 
-def _adjust_clause(asof, event_date):
-    """"broker đổi giá/KL TỐI NAY" CHỈ đúng khi event_date == next_trading_day(asof) — broker
+def _adjust_clause(asof, event_date, what):
+    """"broker đổi {what} TỐI NAY" CHỈ đúng khi event_date == next_trading_day(asof) — broker
     điều chỉnh vào đêm NGAY TRƯỚC phiên diễn ra sự kiện, không phải đêm của asof khi event còn
-    cách ≥2 phiên. Rỗng khi event_date==asof (đã điều chỉnh từ đêm trước, không còn gì "sắp" xảy ra)."""
+    cách ≥2 phiên. Rỗng khi event_date==asof (đã điều chỉnh từ đêm trước, không còn gì "sắp" xảy ra).
+    `what` PHẢI khớp lớp sự kiện gọi hàm: "giá" cho CASH_DIV (broker chỉ đổi giá tham chiếu),
+    "giá/KL" cho SHARE_EVENT (broker đổi cả giá lẫn khối lượng) — dùng chung 1 danh từ cho cả
+    hai từng khiến dòng cổ tức tiền mặt khẳng định sai broker đổi cả khối lượng (vòng 5 arch-review)."""
     if event_date == asof:
         return ""
     nxt = next_trading_day(datetime.date.fromisoformat(asof)).isoformat()
     if event_date == nxt:
-        return "Broker đổi giá/KL TỐI NAY"
-    return f"Broker đổi giá/KL vào đêm trước phiên {event_date}"
+        return f"Broker đổi {what} TỐI NAY"
+    return f"Broker đổi {what} vào đêm trước phiên {event_date}"
 
 
 def build_event_line(event, positions_by_account, asof=None):
@@ -185,7 +188,6 @@ def build_event_line(event, positions_by_account, asof=None):
     holders = _holders_for(tk, positions_by_account)
     asof = asof or today_ict()
     day_word = _session_word(asof, event["date"])
-    adjust_clause = _adjust_clause(asof, event["date"])
     # date_field phân biệt "chốt quyền/ex-right" (DIV/ISS thường) với "hiệu lực" (AIS chính thức
     # hoá số CP) — dùng đúng field snapshot đã gắn theo từng dòng, không đoán chung một chữ.
     verb = "hiệu lực" if event.get("date_field") == "effective_date" else "ex-right"
@@ -206,6 +208,7 @@ def build_event_line(event, positions_by_account, asof=None):
                     break
         pct_txt = f" (~{_fmt_pct(pct)} giá tham chiếu)" if pct is not None else ""
         vps_txt = f"{vps:,.0f}đ/cp" if vps is not None else "(chưa rõ mức cổ tức)"
+        adjust_clause = _adjust_clause(asof, event["date"], "giá")
         clause = f" {adjust_clause}." if adjust_clause else ""
         return (f"💰 **{tk}** {when} — cổ tức tiền mặt {vps_txt}{pct_txt}.{clause} "
                 f"NAV sẽ thấy broker HẠ marketPrice đúng khoản này — ĐÂY LÀ KỲ VỌNG, "
@@ -227,6 +230,7 @@ def build_event_line(event, positions_by_account, asof=None):
         # nằm ở "broker có điều chỉnh giá không nếu diễn ra" — luật chuẩn tắc của đội (VHM 08-05/
         # MBB 08-11/VIB 09-09) là sự kiện CỔ PHIẾU vẫn CHẶN NAV, không có ngoại lệ tự động.
         status = event.get("event_status")
+        adjust_clause = _adjust_clause(asof, event["date"], "giá/KL")
         clause = f" {adjust_clause}." if adjust_clause else ""
         return (f"🚨 **{tk}** {event['event_code']}{method}{ratio_txt}, {when}{drop_txt}. "
                 f"Sự kiện đang ở trạng thái `{status or 'chưa rõ'}` (có thể bị huỷ/dời).{clause} "
