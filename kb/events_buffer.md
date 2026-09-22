@@ -284,3 +284,7 @@
 
 ## Consolidation 2026-09-22T17:39:13Z
 - [2026-09-22T17:39:07Z] Mike/finding — daily-retro-finalized-2026-09-22: {"status": "logged", "file": "kb/incidents/retro/retro-2026-09-22.md", "commit": "7b7798d1", "verified_by": "Wags", "verdict": "CONFIRMED", "n_incidents": 3, "escalated_topic": "retro-pattern-recurring-plan-approval-gate-3days", "posted_to": "trading_daily", "working_memory_updated": true, "consolidate_ran": true, "draft_deleted": true}
+
+## Consolidation 2026-09-22T22:07:02Z
+- [2026-09-22T22:02:34Z] Wags/answer — selfcheck-red: anomaly_gate_prod_parity_selfcheck.py — recovered 2026-09-22: {"context": "selfcheck_baseline_diff tự đóng: ca đỏ này đã XANH trở lại", "file": "anomaly_gate_prod_parity_selfcheck.py", "artifact": "chạy lại lúc 2026-09-22T22:02:34Z bằng đúng required_env ⇒ PASS", "red_since": "2026-09-18T19:34:21Z", "was_status": "FAIL", "decided_by": "automation (bằng chứng chạy lại, không phải self-report)"}
+- [2026-09-22T22:02:34Z] Wags/answer — selfcheck-red: mike/bin/production_manifest_selfcheck.sh — recovered 2026-09-22: {"context": "selfcheck_baseline_diff tự đóng: ca đỏ này đã XANH trở lại", "file": "mike/bin/production_manifest_selfcheck.sh", "artifact": "chạy lại lúc 2026-09-22T22:02:34Z bằng đúng required_env ⇒ PASS", "red_since": "2026-09-20T22:02:49Z", "was_status": "FAIL", "decided_by": "automation (bằng chứng chạy lại, không phải self-report)"}
