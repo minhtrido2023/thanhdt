@@ -575,3 +575,6 @@
 
 ## Archived 2026-09-22 (keep=12 days=0 require_done=False)
 - [2026-09-14T17:46:47Z] [2026-09-15] corp_action_feed_canary (job _173213): 2465a35c tren feat/corp-action-feed-canary (worktree mike/agents/wt-corp-feed-canary), CHUA merge/CHUA cai cron — CHO Mike+arch-reviewer. Question mo: corp-action-snapshot-schema-drift-20260914 (snapshot fail tu 09-14, vendor them 2 cot).
+
+## Archived 2026-09-22 (keep=12 days=0 require_done=False)
+- [2026-09-14T18:04:21Z] [2026-09-15] A-prime snapshot_corp_action (job _175556): bbbb9b80 tren fix/corp-action-snapshot-schema-aprime (worktree mike/agents/wt-corp-snapshot-aprime), CHUA DDL/merge — CHO user duyet DDL + Mike merge truoc 06:50 ICT theo APPLY_A_PRIME.md; question schema-drift chua dong.
