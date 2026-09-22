@@ -596,6 +596,17 @@ else
   echo "  [WARN] không đọc được bin/dnse_fee_rates.py — Lỗi thật: $_fee_out"
   FEE_NOTE="theo FEE_RATE_BUY_PCT trong mike/bin/dnse_fee_rates.py"
 fi
+
+# --- [pipeline-3b] nav_exdate_forecast — cảnh báo TRƯỚC corp-action ≤1 ngày trên mã đang giữ
+# (L1, quyết định user 2026-09-22 sau lớp lỗi "NAV bị PRICE_XCHECK chặn vì corp-action" tái diễn
+# ≥4 lần: PVT 09-08/DGC 09-11/VIB 09-09/VHM 08-05/DRI 09-21 — dữ liệu này đã nằm sẵn trên đĩa từ
+# cron corp_action_daily 07:30 nhưng không ai đọc kịp trước khi NAV chạy ~21h. Đọc LẠI
+# `upcoming_events_held` đã có, KHÔNG tính gì mới. Read-only + notify — lỗi ở đây KHÔNG được
+# chặn pipeline/DollarBill (đây là cảnh báo sớm, không phải gate).
+echo; echo "--- [pipeline-3b] nav_exdate_forecast (corp-action ≤1 ngày, mã đang giữ) ---"
+(cd "$ROOT" && python3 bin/nav_exdate_forecast.py --alert 2>&1) || \
+  echo "  [WARN] nav_exdate_forecast.py lỗi — không chặn pipeline, kiểm tay: mike/bin/nav_exdate_forecast.py"
+
 for ACCT in $LIVE_LABELS; do
   echo; echo "--- [pipeline-4] dispatch DollarBill lập plan T+1 cho $ACCT ---"
   HAS_EXCL="$(cd "$WORKDIR" && python3 -c "
@@ -662,8 +673,12 @@ except Exception:
   # Bơm vào prompt để DollarBill biết không mở lệnh vi phạm; gate deterministic (signal_holds.py
   # --check, gọi trong send_plan_report.sh + bot_execute.py) là lớp chặn cứng độc lập.
   HOLDS_NOTE="$(cd "$ROOT" && python3 bin/signal_holds.py --note 2>/dev/null)"
+  # CORP_ACTION_NOTE — cùng nguồn/khuôn với [pipeline-3b] ở trên, lọc riêng cho $ACCT (mã account
+  # này thực sự đang giữ) để DollarBill không nhầm biến động giá dự kiến (ex-date/AIS) với tín
+  # hiệu thị trường khi viết plan/summary.
+  CORP_ACTION_NOTE="$(cd "$ROOT" && python3 bin/nav_exdate_forecast.py --note "$ACCT" 2>/dev/null)"
   "$ROOT/bin/dispatch.sh" DollarBill \
-    "Lập plan T+1 cho tài khoản $ACCT. Đọc DT5G từ deploy_golive_dt5g_v4/golive_state_today.json và recommend output mới nhất trong data/. Ghi plan vào data/plan_${ACCT}_${NEXT_TRADING_DAY}.json — dùng ĐÚNG NGUYÊN VĂN ngày $NEXT_TRADING_DAY (đã tính sẵn bằng next_trading_day(), bỏ T7/CN/lễ) làm plan_date và tên file, TUYỆT ĐỐI KHÔNG tự suy ra 'ngày mai' bằng cách cộng 1 vào ngày hôm nay (sự cố thật 2026-07-10: dispatch thứ Sáu tự tính '07-11' là ngày mai, nhưng đó là thứ Bảy không phải ngày giao dịch, đúng ra phải là 07-13 thứ Hai). Ngày hôm nay: $TODAY (ICT).${NAV_NOTE}${EGG_NOTE}${CAPIT_NOTE}${HOLDS_NOTE} YÊU CẦU VĂN PHONG (user 2026-07-07): kết thúc final message bằng 3-5 dòng tóm tắt DỄ HIỂU cho người đọc không chuyên — bắt buộc nêu rõ: Account nào · plan ngày nào · hành động chính (HOLD hay mấy lệnh gì) · VÌ SAO 1-2 câu · trạng thái duyệt — vì message này được đăng nguyên văn vào Discord plan channel. Lệnh MUA size bằng tiền bán cùng ngày: trừ phí ${FEE_NOTE} + chừa biên giá, đừng size khít ref price. BẮT BUỘC VỀ GIÁ THAM CHIẾU (user 2026-07-09, tái diễn nhiều lần): mtm_price_ref/ref_price của MỌI mã trong plan phải lấy từ DNSE live quote (dnse_api.py secdef/latest_trade — giá đóng cửa THẬT hôm nay $TODAY) — TUYỆT ĐỐI KHÔNG dùng giá đóng cửa BQ ('ticker'/'ticker_1m' close) làm ref_price, vì BQ cache local chỉ sync đêm 23:45 ICT nên tại giờ bạn chạy (~19:00) BQ cache luôn trễ ít nhất 1 ngày giao dịch — dùng BQ ở đây LUÔN cho ra giá sai/cũ, không phải thỉnh thoảng. Sự cố thật đã xảy ra: plan ZaloPay 07-10 có 2/4 mã (BID, MBB) dùng nhầm 'BQ close 07-08' lệch tới +5.7% so với giá đóng cửa thật 07-09, trong khi 2 mã còn lại dùng đúng DNSE live. Nếu DNSE live quote lỗi/thiếu cho 1 mã nào đó, ghi rõ note 'THIẾU GIÁ LIVE — cần kiểm tra tay' thay vì âm thầm dùng BQ thay thế." \
+    "Lập plan T+1 cho tài khoản $ACCT. Đọc DT5G từ deploy_golive_dt5g_v4/golive_state_today.json và recommend output mới nhất trong data/. Ghi plan vào data/plan_${ACCT}_${NEXT_TRADING_DAY}.json — dùng ĐÚNG NGUYÊN VĂN ngày $NEXT_TRADING_DAY (đã tính sẵn bằng next_trading_day(), bỏ T7/CN/lễ) làm plan_date và tên file, TUYỆT ĐỐI KHÔNG tự suy ra 'ngày mai' bằng cách cộng 1 vào ngày hôm nay (sự cố thật 2026-07-10: dispatch thứ Sáu tự tính '07-11' là ngày mai, nhưng đó là thứ Bảy không phải ngày giao dịch, đúng ra phải là 07-13 thứ Hai). Ngày hôm nay: $TODAY (ICT).${NAV_NOTE}${EGG_NOTE}${CAPIT_NOTE}${HOLDS_NOTE}${CORP_ACTION_NOTE} YÊU CẦU VĂN PHONG (user 2026-07-07): kết thúc final message bằng 3-5 dòng tóm tắt DỄ HIỂU cho người đọc không chuyên — bắt buộc nêu rõ: Account nào · plan ngày nào · hành động chính (HOLD hay mấy lệnh gì) · VÌ SAO 1-2 câu · trạng thái duyệt — vì message này được đăng nguyên văn vào Discord plan channel. Lệnh MUA size bằng tiền bán cùng ngày: trừ phí ${FEE_NOTE} + chừa biên giá, đừng size khít ref price. BẮT BUỘC VỀ GIÁ THAM CHIẾU (user 2026-07-09, tái diễn nhiều lần): mtm_price_ref/ref_price của MỌI mã trong plan phải lấy từ DNSE live quote (dnse_api.py secdef/latest_trade — giá đóng cửa THẬT hôm nay $TODAY) — TUYỆT ĐỐI KHÔNG dùng giá đóng cửa BQ ('ticker'/'ticker_1m' close) làm ref_price, vì BQ cache local chỉ sync đêm 23:45 ICT nên tại giờ bạn chạy (~19:00) BQ cache luôn trễ ít nhất 1 ngày giao dịch — dùng BQ ở đây LUÔN cho ra giá sai/cũ, không phải thỉnh thoảng. Sự cố thật đã xảy ra: plan ZaloPay 07-10 có 2/4 mã (BID, MBB) dùng nhầm 'BQ close 07-08' lệch tới +5.7% so với giá đóng cửa thật 07-09, trong khi 2 mã còn lại dùng đúng DNSE live. Nếu DNSE live quote lỗi/thiếu cho 1 mã nào đó, ghi rõ note 'THIẾU GIÁ LIVE — cần kiểm tra tay' thay vì âm thầm dùng BQ thay thế." \
     --bg 2>/dev/null || echo "  [WARN] dispatch DollarBill cho $ACCT fail — check mike/logs/"
 done
 
