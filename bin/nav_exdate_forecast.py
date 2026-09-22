@@ -71,18 +71,20 @@ DAYS_AHEAD_MAX = 1   # hôm nay (0) hoặc PHIÊN GIAO DỊCH kế tiếp (1) �
                      # phải khớp cùng logic để không "cảnh báo sớm" sai cửa sổ mà cổng NAV áp dụng.
 
 
-def _already_alerted_today(asof, marker=ALERT_MARKER):
+def _already_alerted_today(asof):
     """True nếu đã notify+bus cho ĐÚNG `asof` này rồi — tránh gửi Discord/bus trùng khi người
     vận hành chạy lại pipeline-0 cùng ngày sau khi sửa BQ stale (R2 khiến 3b chạy cả ở lần
-    abort, §5 idempotent-side-effects)."""
-    return _read_json(marker, {}).get("asof") == asof
+    abort, §5 idempotent-side-effects). Đọc `ALERT_MARKER` qua tên module-level (không phải
+    default-arg) để test monkeypatch `m.ALERT_MARKER` có tác dụng thật — default-arg bind giá
+    trị NGAY LÚC ĐỊNH NGHĨA hàm, monkeypatch attribute sau đó sẽ vô hiệu."""
+    return _read_json(ALERT_MARKER, {}).get("asof") == asof
 
 
-def _mark_alerted_today(asof, marker=ALERT_MARKER):
-    tmp = marker + ".tmp"
+def _mark_alerted_today(asof):
+    tmp = ALERT_MARKER + ".tmp"
     with open(tmp, "w", encoding="utf-8") as f:
         json.dump({"asof": asof}, f)
-    os.replace(tmp, marker)
+    os.replace(tmp, ALERT_MARKER)
 
 
 def _read_json(path, default=None):
