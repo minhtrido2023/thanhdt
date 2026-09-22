@@ -60,19 +60,40 @@ _div_not_adj = {**DRI_DIV, "price_adjusting": False}
 check("mutation: DIV+price_adjusting=False → INFO (không phải CASH_DIV)",
       m.classify(_div_not_adj) == "INFO")
 
-# ── 2. relevant_events() cửa sổ days_ahead<=N (biên) ────────────────────────
-snap = {"upcoming_events_held": [DRI_DIV, VPB_ISS, VIX_AIS,
-                                 {**VPB_ISS, "ticker": "FAR", "days_ahead": 2}]}
-ev1 = m.relevant_events(snap, days_ahead_max=1)
-check("days_ahead<=1 giữ đúng 3 sự kiện (loại FAR days_ahead=2)",
-      {e["ticker"] for e in ev1} == {"DRI", "VPB", "VIX"}, sorted(e["ticker"] for e in ev1))
-ev0 = m.relevant_events(snap, days_ahead_max=0)
-check("days_ahead<=0 chỉ giữ VIX (days_ahead=0)",
-      {e["ticker"] for e in ev0} == {"VIX"}, sorted(e["ticker"] for e in ev0))
-check("days_ahead_max âm → rỗng (không lọt sự kiện nào qua biên sai hướng)",
-      m.relevant_events(snap, days_ahead_max=-1) == [])
-check("snapshot rỗng/None → rỗng, không crash", m.relevant_events(None) == [])
-check("thiếu key upcoming_events_held → rỗng, không crash", m.relevant_events({}) == [])
+# ── 2. relevant_events() cửa sổ PHIÊN GIAO DỊCH (không phải days_ahead lịch) ─
+# asof = 2026-09-22 (thứ Ba) — next_trading_day = 2026-09-23 (thứ Tư, xác nhận bằng
+# trading_bot.vn_market.next_trading_day thật, không đoán). Events đặt date SÁT với window
+# thật để bài test phản ánh đúng cách relevant_events() vận hành trên dữ liệu thật, không phải
+# field days_ahead tự khai (đã CHỦ ĐỘNG bỏ dùng field đó — xem lý do ở docstring trading_day_window).
+ASOF = "2026-09-22"
+DRI_TODAY = {**DRI_DIV, "date": ASOF}                       # HÔM NAY — luôn trong cửa sổ
+VPB_NEXT_SESSION = {**VPB_ISS, "date": "2026-09-23"}        # đúng 1 PHIÊN kế tiếp — phải lọt
+FAR_2_SESSIONS = {**VPB_ISS, "ticker": "FAR", "date": "2026-09-24"}  # 2 phiên kế tiếp — phải bị loại
+snap = {"upcoming_events_held": [DRI_TODAY, VPB_NEXT_SESSION, FAR_2_SESSIONS]}
+ev1 = m.relevant_events(snap, ASOF, days_ahead_max=1)
+check("trading-day window<=1: giữ DRI (hôm nay) + VPB (1 phiên sau), loại FAR (2 phiên sau)",
+      {e["ticker"] for e in ev1} == {"DRI", "VPB"}, sorted(e["ticker"] for e in ev1))
+ev0 = m.relevant_events(snap, ASOF, days_ahead_max=0)
+check("window<=0 chỉ giữ sự kiện ĐÚNG hôm nay (DRI)",
+      {e["ticker"] for e in ev0} == {"DRI"}, sorted(e["ticker"] for e in ev0))
+check("days_ahead_max âm → chỉ còn đúng hôm nay (range() rỗng, không mở rộng cửa sổ)",
+      {e["ticker"] for e in m.relevant_events(snap, ASOF, days_ahead_max=-1)} == {"DRI"})
+check("snapshot rỗng/None → rỗng, không crash", m.relevant_events(None, ASOF) == [])
+check("thiếu key upcoming_events_held → rỗng, không crash", m.relevant_events({}, ASOF) == [])
+
+# MUTATION/REGRESSION quan trọng nhất của bản vá này — bug thật đã đo: BID ex-date 2026-08-17
+# là thứ Hai; asof thứ Sáu 2026-08-14 lọc bằng days_ahead<=1 (lịch) sẽ BỎ SÓT vì days_ahead=3.
+# Cửa sổ theo PHIÊN phải bắt được: next_trading_day(2026-08-14 thứ Sáu) == 2026-08-17 thứ Hai.
+bid_monday = {**DRI_DIV, "ticker": "BID", "date": "2026-08-17"}
+snap_fri = {"upcoming_events_held": [bid_monday]}
+ev_fri = m.relevant_events(snap_fri, "2026-08-14", days_ahead_max=1)
+check("REGRESSION BID: thứ Sáu 08-14 vẫn bắt được ex-date thứ Hai 08-17 (1 PHIÊN, 3 ngày lịch)",
+      {e["ticker"] for e in ev_fri} == {"BID"}, sorted(e["ticker"] for e in ev_fri))
+# và ngày lịch<=1 tính từ thứ Sáu (thứ Bảy) thì KHÔNG được lọt (window chỉ gồm 2 phiên: 08-14, 08-17)
+bid_saturday_calendar = {**DRI_DIV, "ticker": "SATFAKE", "date": "2026-08-15"}
+ev_fri2 = m.relevant_events({"upcoming_events_held": [bid_saturday_calendar]}, "2026-08-14", days_ahead_max=1)
+check("thứ Bảy 08-15 (không phải phiên giao dịch) không nằm trong cửa sổ 2 phiên → rỗng",
+      ev_fri2 == [], ev_fri2)
 
 # ── 3. build_event_line() — số học phải khớp tay ────────────────────────────
 line_dri = m.build_event_line(DRI_DIV, POSITIONS)
@@ -115,7 +136,8 @@ try:
     m._read_json = lambda path, default=None: snap if "corp_action_daily_2026-09-22" in path else default
     m.read_active_nav_positions = lambda *a, **k: POSITIONS
     lines, got_snap, events = m.build_report(asof="2026-09-22", days_ahead_max=1)
-    check("build_report: đúng số dòng (DRI+VPB, VIX bị lọc vì INFO)", len(lines) == 2, lines)
+    check("build_report: đúng số dòng (DRI hôm nay + VPB 1 phiên sau, FAR 2 phiên sau bị loại)",
+          len(lines) == 2, lines)
     check("build_report: trả lại snap gốc", got_snap is snap)
 
     lines_missing, snap_missing, events_missing = m.build_report(asof="2099-01-01")

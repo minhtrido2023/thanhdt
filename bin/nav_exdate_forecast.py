@@ -37,6 +37,7 @@ Exit: luôn 0 — đây là cảnh báo sớm, không phải cổng chặn.
 from __future__ import annotations
 
 import argparse
+import datetime
 import glob
 import json
 import os
@@ -55,10 +56,18 @@ for _p in (WC_ROOT, os.path.join(MIKE, "bin")):
         sys.path.insert(0, _p)
 
 from corp_action_daily import notify, bus, snapshot_path, today_ict  # noqa: E402
+from trading_bot.vn_market import next_trading_day  # noqa: E402
 
 ACTIVE_NAV_GLOB = os.path.join(WC_ROOT, "data", "execution_logs", "active_nav_*.json")
 CHANNEL = "trading_daily"
-DAYS_AHEAD_MAX = 1   # hôm nay (0) hoặc ngày mai (1) — cùng cửa sổ PRICE_XCHECK sẽ chạm tối nay/mai
+DAYS_AHEAD_MAX = 1   # hôm nay (0) hoặc PHIÊN GIAO DỊCH kế tiếp (1) — cùng cửa sổ PRICE_XCHECK sẽ
+                     # chạm tối nay/mai. Cố ý dùng khoảng cách PHIÊN, không phải days_ahead lịch
+                     # của snapshot (corp_action_daily.py tính bằng hiệu ngày dương lịch thô) —
+                     # thứ Sáu -> thứ Hai là days_ahead=3 nhưng chỉ cách 1 PHIÊN (bug thật đo trên
+                     # BID ex-date 2026-08-17, một thứ Hai: cảnh báo lẽ ra phải hiện thứ Sáu 08-14
+                     # nhưng lọc days_ahead<=1 bỏ sót). classify_price_mismatch (L2) đã dùng đúng
+                     # cách này (valid_dates = {date, next_trading_day(date)}) — nav_exdate_forecast
+                     # phải khớp cùng logic để không "cảnh báo sớm" sai cửa sổ mà cổng NAV áp dụng.
 
 
 def _read_json(path, default=None):
@@ -89,11 +98,25 @@ def read_active_nav_positions(nav_glob=ACTIVE_NAV_GLOB):
     return out
 
 
-def relevant_events(snap, days_ahead_max=DAYS_AHEAD_MAX):
-    """Sự kiện trong `upcoming_events_held` rơi vào cửa sổ `days_ahead<=days_ahead_max` —
-    CHÍNH XÁC field snapshot đã tính sẵn (Lớp 6 của corp_action_daily.py), không tính lại."""
-    return [e for e in (snap or {}).get("upcoming_events_held") or []
-            if isinstance(e.get("days_ahead"), int) and e["days_ahead"] <= days_ahead_max]
+def trading_day_window(asof, days_ahead_max):
+    """{asof, asof+1 PHIÊN, ..., asof+days_ahead_max PHIÊN} — khoảng cách PHIÊN GIAO DỊCH, không
+    phải ngày lịch. `days_ahead` trong snapshot là hiệu ngày dương lịch thô (corp_action_daily.py
+    dòng ~1273) nên thứ Sáu→thứ Hai = 3, không phải 1 — lọc thẳng bằng field đó bỏ sót cảnh báo
+    sớm cho mọi ex-date rơi vào thứ Hai (bug thật: BID ex-date 2026-08-17)."""
+    dates = {asof}
+    d = datetime.date.fromisoformat(asof)
+    for _ in range(max(days_ahead_max, 0)):
+        d = next_trading_day(d)
+        dates.add(d.isoformat())
+    return dates
+
+
+def relevant_events(snap, asof, days_ahead_max=DAYS_AHEAD_MAX):
+    """Sự kiện trong `upcoming_events_held` có `date` rơi vào cửa sổ PHIÊN GIAO DỊCH kể từ
+    `asof` (xem `trading_day_window`) — KHÔNG dùng thẳng field `days_ahead` của snapshot (đó là
+    khoảng cách NGÀY LỊCH, sai lệch quanh cuối tuần/lễ)."""
+    valid_dates = trading_day_window(asof, days_ahead_max)
+    return [e for e in (snap or {}).get("upcoming_events_held") or [] if e.get("date") in valid_dates]
 
 
 def classify(event):
@@ -159,7 +182,7 @@ def build_report(asof=None, days_ahead_max=DAYS_AHEAD_MAX):
     snap = _read_json(snapshot_path(asof))
     if snap is None:
         return [], None, []
-    events = relevant_events(snap, days_ahead_max)
+    events = relevant_events(snap, asof, days_ahead_max)
     positions = read_active_nav_positions()
     lines = [ln for ln in (build_event_line(e, positions) for e in events) if ln]
     return lines, snap, events
