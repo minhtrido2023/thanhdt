@@ -4,11 +4,18 @@
 #
 # rc=5 là mã MỚI (P1, arch-review lần trước: rc=4 bị TÁI SỬ DỤNG sai — nav_sync_retry.sh sẽ
 # retry 2h rồi báo "lệch giá >5%" cho một lỗi có thể là gap 0,0%). Thiết kế v2 KHÔNG sửa logic
-# nav_sync_retry.sh (nó vẫn chỉ so `[ "$RC" != "4" ]`) mà dựa vào 2 bất biến TĨNH, test này
-# xác nhận CẢ HAI bằng harness thật (không chỉ đọc mã nguồn):
-#   1. eod_trading_report.sh CHỈ ghi marker nav_pending_retry cho rc=4 (`[ "$rc" = "4" ]`
-#      tuyệt đối) — rc=5 không bao giờ có marker để nav_sync_retry.sh nhặt lên.
-#   2. NẾU giả sử có marker (vd tồn dư/bug tương lai), nav_sync_retry.sh với rc=5 phải XOÁ
+# nav_sync_retry.sh (nó vẫn chỉ so `[ "$RC" != "4" ]`) mà dựa vào 2 bất biến TĨNH.
+#
+# ⚠️ PHẠM VI THẬT của test này (sửa 2026-09-22, arch-review vòng 2 mục [7] — header cũ tự khai
+# "xác nhận CẢ HAI bằng harness thật", SAI):
+#   • Bất biến #1 KHÔNG được harness nào chạy. Nó là khẳng định TĨNH, đọc từ mã nguồn
+#     (eod_trading_report.sh: `if [ "$rc" = "4" ]`, so sánh tuyệt đối). Muốn kiểm cơ học thì
+#     phải dựng harness riêng cho eod_trading_report.sh — chưa có.
+#   • Bất biến #2 CÓ chạy thật: harness dưới đây gọi chính `nav_sync_retry.sh` với rc=5.
+#
+#   1. [TĨNH, chưa có harness] eod_trading_report.sh CHỈ ghi marker nav_pending_retry cho rc=4
+#      (`[ "$rc" = "4" ]` tuyệt đối) — rc=5 không bao giờ có marker để nav_sync_retry.sh nhặt lên.
+#   2. [CHẠY THẬT] NẾU giả sử có marker (vd tồn dư/bug tương lai), nav_sync_retry.sh với rc=5 phải XOÁ
 #      marker ngay (nhánh "đổi loại lỗi giữa chừng") — KHÔNG rơi vào nhánh "vẫn rc=4" chờ tới
 #      cutoff 21:15 rồi mới đổi hậu tố .stuck. rc=4 PHẢI escalate .stuck sau cutoff; rc=5 thì
 #      KHÔNG BAO GIỜ được vào nhánh đó (không lệ thuộc giờ chạy).
