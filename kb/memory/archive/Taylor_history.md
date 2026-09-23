@@ -599,3 +599,6 @@
 
 ## Archived 2026-09-23 (keep=12 days=0 require_done=False)
 - [2026-09-18T10:49:23Z] [2026-09-18] treasury_share_events table (job _103820): 8b85f833 tren feat/treasury-share-events-table (worktree mike/agents/wt-treasury-table) — CHUA ghi BQ/CHUA tao bang. 577 dong dry-run, 3 tier tach bach, 33 ca suy luan recompute doc lap 33/33 khop. CHO arch-reviewer + Mike/user duyet DDL schema.sql + data_registry_entry.proposed.md.
+
+## Archived 2026-09-23 (keep=12 days=0 require_done=False)
+- [2026-09-18T11:18:41Z] [2026-09-18] treasury_share_events (job _110145): 52d6ab96 tren feat/treasury-share-events-table (worktree mike/agents/wt-treasury-table) — va B1 dedup dem-2-lan (3 cot dup_group_id/is_canonical/duplicate_of, SUM tho phong 3.008.900 CP) + N1 inferred_window_days + 4 file kb/data_registry/*.proposed. 110 PASS, 32/32 mutation. CHUA ghi BQ/CHUA tao bang/CHUA merge — CHO arch-reviewer vong 2 + Mike/user duyet DDL + 4 file .proposed.
