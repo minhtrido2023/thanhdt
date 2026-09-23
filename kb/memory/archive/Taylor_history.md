@@ -590,3 +590,6 @@
 
 ## Archived 2026-09-22 (keep=12 days=0 require_done=False)
 - [2026-09-17T16:25:19Z] [2026-09-17] treasury window monitor: arch B1+B2 vá d25d8b9d (tren 20d153fb, branch feat/treasury-buyback-window-monitor) CHUA merge/cron - CHO arch-reviewer vong 2 + Mike/user chot CLOSE_WINDOW_DAYS (45 vs 90) + gio cron.
+
+## Archived 2026-09-23 (keep=12 days=0 require_done=False)
+- [2026-09-17T16:33:09Z] [2026-09-17] treasury window monitor: arch vong 2 text-fix a8301c27 (tren d25d8b9d) CHUA merge/cron - CHO arch-reviewer vong 3 + Mike/user chot CLOSE_WINDOW_DAYS (45 vs 90) + gio cron.
