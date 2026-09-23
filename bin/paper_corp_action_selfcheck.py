@@ -195,7 +195,8 @@ def main() -> int:
           f"verdict = {rec['p_ref_anchor']} · lệch {rec['p_ref_anchor_diff']:+,.2f}đ" if rec else why)
 
     print("\n── H. IDEMPOTENT + không áp mù (§5) ──")
-    st = {"cash": 795_684_522.0, "positions": {"FPT": 300}}
+    _fpt_fills = [{"ts": "2026-09-01T09:00:00", "symbol": "FPT", "side": "buy", "qty": 300}]
+    st = {"cash": 795_684_522.0, "positions": {"FPT": 300}, "fills": list(_fpt_fills)}
     r1, _ = P.build_record("FPT", "2026-09-21",
                            [_iss("FPT", "2026-09-21", 0.1, BONUS)], 300, 71700.0, 65180.0)
     s1 = P.apply_records(st, [r1], asof="2026-09-21")
@@ -207,15 +208,16 @@ def main() -> int:
           len(s2["applied"]) == 0 and len(s2["skipped_duplicate"]) == 1
           and st["positions"]["FPT"] == qty1 and st["cash"] == cash1,
           f"FPT = {st['positions']['FPT']}")
-    st_ext = {"cash": 1e9, "positions": {"FPT": 300}}
+    st_ext = {"cash": 1e9, "positions": {"FPT": 300}, "fills": list(_fpt_fills)}
     s2b = P.apply_records(st_ext, [r1], asof="2026-09-21",
                           external=[{"key": "FPT|2026-09-21"}])
     check("khoá chỉ có ở SỔ CÁI NGOÀI (state bị PaperBroker ghi đè xoá mất) ⇒ vẫn KHÔNG áp lại",
           len(s2b["applied"]) == 0 and st_ext["positions"]["FPT"] == 300,
           f"FPT = {st_ext['positions']['FPT']}")
-    st2 = {"cash": 1e9, "positions": {"FPT": 400}}
+    # Sổ ghi 400 nhưng băng fills chỉ giải thích được 300 ⇒ sổ đã TRÔI (PaperBroker ghi đè).
+    st2 = {"cash": 1e9, "positions": {"FPT": 400}, "fills": list(_fpt_fills)}
     s3 = P.apply_records(st2, [r1], asof="2026-09-21")
-    check("KL sổ đã đổi giữa chừng ⇒ TỪ CHỐI áp mù",
+    check("KL sổ KHÔNG khớp băng fills + sự kiện đã áp ⇒ TỪ CHỐI áp mù",
           len(s3["applied"]) == 0 and len(s3["rejected"]) == 1 and st2["positions"]["FPT"] == 400,
           str(s3["rejected"]))
 
@@ -249,7 +251,9 @@ def main() -> int:
                + [_iss("MBB", "2026-08-11", 0.1, RIGHTS), _iss("MBB", "2026-08-11", 0.15, STOCKDIV)])
     pcum = {("MBB", "2026-07-09"): 26000.0, ("MBB", "2026-08-11"): 24250.0}
     closes = {("MBB", "2026-07-09"): 20820.0, ("MBB", "2026-08-11"): 20200.0}
-    st5 = {"cash": 0.0, "positions": {"MBB": 1100}, "fills": [
+    # `positions` = net `fills` (1.200). Vòng 2 để 1.100 ở đây và nhánh cron đọc thẳng
+    # `positions` nên hai con số không bao giờ bị đối chất — chính là lỗ hổng D1.
+    st5 = {"cash": 0.0, "positions": {"MBB": 1200}, "fills": [
         {"ts": "2026-07-01T09:00:00", "symbol": "MBB", "side": "buy", "qty": 1100},
         {"ts": "2026-07-20T09:00:00", "symbol": "MBB", "side": "buy", "qty": 100}]}
     recs2, errs2, edates = P.collect(
@@ -259,9 +263,9 @@ def main() -> int:
         close_fn=lambda tk, d: (closes.get((tk, d)), {"reason": "fixture"}))
     check("collect(): dựng đủ 2 bản ghi, không lỗi", len(recs2) == 2 and not errs2,
           f"{len(recs2)} bản ghi · errors={errs2}")
-    check("collect(): sự kiện 2 NỐI từ KL sau sự kiện 1 (1.100 → 1.100 → ×1,15 = 1.265), "
-          "KHÔNG phải cùng xuất phát 1.100 rồi bị từ chối",
-          len(recs2) == 2 and recs2[1]["qty_before"] == 1100 and recs2[1]["qty_after"] == 1265,
+    check("collect(): sự kiện 2 vào với KL SÁNG 08-11 (1.200 = 1.100 + fill 20/07) ×1,15 = 1.380, "
+          "không phải ảnh chụp đầu cửa sổ",
+          len(recs2) == 2 and recs2[1]["qty_before"] == 1200 and recs2[1]["qty_after"] == 1380,
           f"ev2: {recs2[1]['qty_before']} → {recs2[1]['qty_after']}" if len(recs2) == 2 else "")
     check("collect(): MBB@07-09 CÒN sự kiện 08-11 phía sau ⇒ neo = `skipped-later-events`",
           len(recs2) == 2 and recs2[0]["p_ref_anchor"] == "skipped-later-events",
@@ -270,8 +274,8 @@ def main() -> int:
           len(recs2) == 2 and recs2[1]["p_ref_anchor"] == "ok",
           f"verdict = {recs2[1]['p_ref_anchor']}" if len(recs2) == 2 else "")
     s6 = P.apply_records(st5, recs2, asof="2026-09-23")
-    check("collect()+apply(): áp ĐỦ CẢ 2, sổ không dở dang (MBB = 1.265)",
-          len(s6["applied"]) == 2 and not s6["rejected"] and st5["positions"]["MBB"] == 1265,
+    check("collect()+apply(): áp ĐỦ CẢ 2, sổ không dở dang (MBB = 1.380)",
+          len(s6["applied"]) == 2 and not s6["rejected"] and st5["positions"]["MBB"] == 1380,
           f"MBB = {st5['positions']['MBB']} · rejected={s6['rejected']}")
 
     # HỒI TỐ: KL phải dựng lại từ `fills` theo từng ngày GDKHQ, không dùng KL hiện tại.
@@ -280,11 +284,11 @@ def main() -> int:
         {"ts": "2026-07-20T09:00:00", "symbol": "MBB", "side": "buy", "qty": 100},
         {"ts": "2026-09-01T09:00:00", "symbol": "MBB", "side": "buy", "qty": 300}]}
     recs3, errs3, _ = P.collect(
-        st7, "2026-07-01", "2026-09-23", backfill=True,
+        st7, "2026-07-01", "2026-09-23",
         p_cum_fn=lambda tk, d: (pcum.get((tk, d)), {"reason": "fixture"}),
         events_fn=lambda tks, since, until: evs_all,
         close_fn=lambda tk, d: (closes.get((tk, d)), {"reason": "fixture"}))
-    check("collect(backfill=True): KL lấy theo NGÀY GDKHQ từ băng fills (1.100 và 1.200), "
+    check("collect(): KL lấy theo NGÀY GDKHQ từ băng fills (1.100 và 1.200), "
           "KHÔNG phải 1.500 hôm nay",
           len(recs3) == 2 and recs3[0]["qty_before"] == 1100 and recs3[1]["qty_before"] == 1200,
           f"{[r['qty_before'] for r in recs3]}" if recs3 else f"errors={errs3}")
@@ -315,7 +319,7 @@ def main() -> int:
     st11 = {"cash": 0.0, "positions": {"MBB": 1391}, "fills": [
         {"ts": "2026-07-01T09:00:00", "symbol": "MBB", "side": "buy", "qty": 1100}]}
     recs6, errs6, _ = P.collect(
-        st11, "2026-08-01", "2026-09-23", backfill=True,
+        st11, "2026-08-01", "2026-09-23",
         p_cum_fn=lambda tk, d: ({"2026-08-11": 24250.0}.get(d, 22000.0), {"reason": "fixture"}),
         events_fn=lambda tks, since, until: evs_chain,
         close_fn=lambda tk, d: (None, {"reason": "fixture"}))
@@ -328,15 +332,138 @@ def main() -> int:
     print("\n── L. watermark KHÔNG vượt qua sự kiện còn treo ──")
     # Ca thật sẽ gặp: mọi đợt quyền mua tương lai đều fail-closed (RIGHTS_ISSUE_PRICE chỉ có 1
     # khoá quá khứ). Vòng 1 vẫn đẩy watermark ⇒ sự kiện rơi ra khỏi MỌI cửa sổ về sau, vĩnh viễn.
-    st8 = {"cash": 0.0, "positions": {"ZZZ": 1000}, "fills": []}
+    st8 = {"cash": 0.0, "positions": {"ZZZ": 1000}, "fills": [
+        {"ts": "2026-08-01T09:00:00", "symbol": "ZZZ", "side": "buy", "qty": 1000}]}
     recs4, errs4, edates4 = P.collect(
         st8, "2026-09-01", "2026-09-23",
         p_cum_fn=lambda tk, d: (20000.0, {"reason": "fixture"}),
         events_fn=lambda tks, since, until: [_iss("ZZZ", "2026-09-15", 0.1, RIGHTS)],
         close_fn=lambda tk, d: (None, {"reason": "fixture"}))
     check("đợt quyền mua thiếu giá phát hành ⇒ 0 bản ghi + trả về NGÀY treo để chặn watermark",
-          not recs4 and len(errs4) == 1 and edates4 == ["2026-09-15"],
+          not recs4 and len(errs4) == 1 and edates4 == ["2026-09-15"]
+          and "KL vào ngày GDKHQ" not in errs4[0],
           f"records={len(recs4)} errors={errs4} error_dates={edates4}")
+
+    print("\n── M. quant-skeptic VÒNG 2: gốc KL, thứ tự ghi, cụm tiền+CP ──")
+    # M1 (D1, KILLER) — sổ paper main có THẬT lệnh mua 100 MBB lúc 11:00:06 NGÀY GDKHQ
+    # 2026-08-11. CP mua ngày đó KHÔNG hưởng quyền. Vòng 2 đọc thẳng `positions` ở nhánh cron
+    # ⇒ 1.300→1.495 + 130 quyền thay vì 1.200→1.380 + 120 quyền = ghi dư 2.425.000đ, mà bất
+    # biến bảo toàn (resid 0,0) lẫn neo ngoài (ok) đều MÙ vì cả hai độc lập với KL.
+    st12 = {"cash": 0.0, "positions": {"MBB": 1300}, "fills": [
+        {"ts": "2026-07-01T09:00:00", "symbol": "MBB", "side": "buy", "qty": 1200},
+        {"ts": "2026-08-11T11:00:06", "symbol": "MBB", "side": "buy", "qty": 100}]}
+    recs7, errs7, _ = P.collect(
+        st12, "2026-08-01", "2026-09-23",
+        p_cum_fn=lambda tk, d: (24250.0, {"reason": "fixture"}),
+        events_fn=lambda tks, since, until: [_iss("MBB", "2026-08-11", 0.1, RIGHTS),
+                                             _iss("MBB", "2026-08-11", 0.15, STOCKDIV)],
+        close_fn=lambda tk, d: (20200.0, {"reason": "fixture"}))
+    check("lệnh mua ĐÚNG NGÀY GDKHQ không được hưởng quyền: 1.200→1.380 + 120 quyền "
+          "(KHÔNG phải 1.300→1.495 + 130)",
+          len(recs7) == 1 and recs7[0]["qty_before"] == 1200 and recs7[0]["qty_after"] == 1380
+          and abs(recs7[0]["pending_rights"][0]["shares"] - 120.0) < 1e-9,
+          f"{recs7[0]['qty_before']}→{recs7[0]['qty_after']} · quyền "
+          f"{recs7[0]['pending_rights'][0]['shares']}" if recs7 else f"errors={errs7}")
+
+    # M2 — `fills` chỉ biết lệnh khớp; CP do sự kiện ĐÃ ÁP cộng vào phải được cộng lại, nếu
+    # không sự kiện kế tiếp sẽ vào với KL THIẾU.
+    st13 = {"cash": 0.0, "positions": {"MBB": 1380},
+            "fills": [{"ts": "2026-07-01T09:00:00", "symbol": "MBB", "side": "buy", "qty": 1200}],
+            "corp_actions": {"applied": [{"key": "MBB|2026-08-11", "ticker": "MBB",
+                                          "ex_date": "2026-08-11", "qty_before": 1200,
+                                          "qty_after": 1380}],
+                             "pending_rights": [], "watermark": "2026-08-11"}}
+    check("qty_at_effective CỘNG lại CP của sự kiện đã áp (1.200 fills + 180 = 1.380), "
+          "không chỉ đọc băng fills",
+          P.qty_at_effective(st13, "MBB", "2026-09-15") == 1380
+          and P.qty_at(st13, "MBB", "2026-09-15") == 1200,
+          f"effective={P.qty_at_effective(st13, 'MBB', '2026-09-15')} "
+          f"fills-only={P.qty_at(st13, 'MBB', '2026-09-15')}")
+
+    # M3 — HỒI TỐ một sự kiện QUÁ KHỨ lên sổ đã mua thêm sau đó. Gán `qty_after` (vòng 2) sẽ
+    # XOÁ các lệnh khớp sau ngày GDKHQ; phải CỘNG độ lớn thay đổi.
+    st14 = {"cash": 0.0, "positions": {"MBB": 1500}, "fills": [
+        {"ts": "2026-07-01T09:00:00", "symbol": "MBB", "side": "buy", "qty": 1200},
+        {"ts": "2026-09-01T09:00:00", "symbol": "MBB", "side": "buy", "qty": 300}]}
+    r_past, _ = P.build_record("MBB", "2026-08-11",
+                               [_iss("MBB", "2026-08-11", 0.1, RIGHTS),
+                                _iss("MBB", "2026-08-11", 0.15, STOCKDIV)],
+                               1200, 24250.0, 20200.0)
+    s15 = P.apply_records(st14, [r_past], asof="2026-09-23")
+    check("hồi tố sự kiện QUÁ KHỨ cộng Δ+180 vào sổ hôm nay (1.500→1.680), KHÔNG ghi đè "
+          "thành 1.380 (bốc hơi 120 CP mua sau GDKHQ)",
+          len(s15["applied"]) == 1 and st14["positions"]["MBB"] == 1680,
+          f"MBB = {st14['positions']['MBB']} · rejected={s15['rejected']}")
+
+    # M4 — cụm có CẢ cổ tức TIỀN lẫn tỉ lệ CP (SSI 2026-08-17: tiền 1.000đ + thưởng 20%).
+    # Tiền phải tính trên KL TRƯỚC chia. quant-skeptic vòng 2 đối chiếu BQ: P_ref 19.583,33đ
+    # vs `ticker.Close` phiên cum 19.580đ (trong 1 bước giá).
+    r_ssi, why_ssi = P.build_record("SSI", "2026-08-17",
+                                    [_div("SSI", "2026-08-17", 1000.0),
+                                     _iss("SSI", "2026-08-17", 0.2, BONUS)],
+                                    1000, 24500.0, 19580.0)
+    check("cụm tiền+CP (SSI 08-17): cổ tức tính trên KL TRƯỚC chia = 1.000.000đ, "
+          "P_ref 19.583,33đ khớp Close BQ trong 1 bước giá",
+          r_ssi is not None and abs(r_ssi["cash_dividend_vnd"] - 1_000_000.0) < 1e-6
+          and abs(r_ssi["p_ref"] - 19583.3333) < 0.01 and r_ssi["p_ref_anchor"] == "ok",
+          f"tiền {r_ssi['cash_dividend_vnd']:,.0f}đ · P_ref {r_ssi['p_ref']:,.2f}đ · "
+          f"neo {r_ssi['p_ref_anchor']}" if r_ssi else why_ssi)
+
+    print("\n── N. main() đầu-cuối: watermark clamp + THỨ TỰ ghi state/sổ cái ──")
+    import tempfile, json as _json
+    _sp, _lp = P.state_path, P.ledger_path
+    _argv = sys.argv[:]
+    with tempfile.TemporaryDirectory() as td:
+        spath, lpath = os.path.join(td, "book.json"), os.path.join(td, "led.jsonl")
+        P.state_path = lambda label: spath
+        P.ledger_path = lambda label: lpath
+        try:
+            # N1 — sự kiện còn treo ngày 2026-09-15 ⇒ watermark phải DỪNG ở 09-14.
+            # Vòng 2 có bản vá này nhưng KHÔNG có test nào phủ: xoá sạch clamp vẫn 53/53 PASS
+            # (mutation M3 của quant-skeptic).
+            _json.dump({"cash": 0.0, "positions": {"ZZZ": 1000},
+                        "fills": [{"ts": "2026-08-01T09:00:00", "symbol": "ZZZ",
+                                   "side": "buy", "qty": 1000}]},
+                       open(spath, "w", encoding="utf-8"))
+            P.collect = lambda *a, **k: ([], ["stub: treo"], ["2026-09-15"])
+            sys.argv = ["paper_corp_action.py", "--label", "t", "--date", "2026-09-23"]
+            P.main()
+            wm = _json.load(open(spath, encoding="utf-8"))["corp_actions"]["watermark"]
+            check("main(): sự kiện treo 2026-09-15 ⇒ watermark dừng ở 2026-09-14, "
+                  "KHÔNG nhảy tới ngày chạy", wm == "2026-09-14", f"watermark = {wm}")
+
+            # N2 (D2) — sổ cái ngoài ghi SAU state. Cho `append_external_ledger` ném lỗi =
+            # mô phỏng chết máy giữa hai bước: state PHẢI đã có dấu "đã áp".
+            _json.dump({"cash": 0.0, "positions": {"FPT": 300},
+                        "fills": [{"ts": "2026-09-01T09:00:00", "symbol": "FPT",
+                                   "side": "buy", "qty": 300}]},
+                       open(spath, "w", encoding="utf-8"))
+            r_fpt, _ = P.build_record("FPT", "2026-09-21",
+                                      [_iss("FPT", "2026-09-21", 0.1, BONUS)],
+                                      300, 71700.0, 65180.0)
+            P.collect = lambda *a, **k: ([r_fpt], [], [])
+            _append = P.append_external_ledger
+            P.append_external_ledger = lambda *a, **k: (_ for _ in ()).throw(
+                OSError("SIMULATED KILL sau khi ghi state, trước khi ghi sổ cái"))
+            try:
+                P.main()
+            except OSError:
+                pass
+            finally:
+                P.append_external_ledger = _append
+            st_after = _json.load(open(spath, encoding="utf-8"))
+            keys = [r.get("key") for r in st_after.get("corp_actions", {}).get("applied", [])]
+            check("main(): chết máy giữa 2 bước ghi ⇒ STATE đã có dấu 'đã áp' (không mất im "
+                  "lặng); sổ cái ngoài ghi SAU",
+                  st_after["positions"]["FPT"] == 330 and "FPT|2026-09-21" in keys
+                  and not os.path.exists(lpath),
+                  f"FPT={st_after['positions']['FPT']} keys={keys} "
+                  f"ledger_exists={os.path.exists(lpath)}")
+        finally:
+            P.state_path, P.ledger_path, sys.argv = _sp, _lp, _argv
+            P.collect = P.__dict__["collect"] if "collect" in P.__dict__ else P.collect
+    import importlib
+    importlib.reload(P)
 
     print(f"\n{'='*70}\n{NCHECK - len(FAILS)}/{NCHECK} PASS"
           + (f" · FAIL: {FAILS}" if FAILS else " · không có FAIL"))

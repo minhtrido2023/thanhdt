@@ -377,11 +377,23 @@ def apply_records(state: dict, records, asof: str, external: list = None) -> dic
             continue
         pos = state.setdefault("positions", {})
         cur = int(pos.get(rec["ticker"], 0))
-        if cur != rec["qty_before"]:
+        # Chốt an toàn: sổ phải KHỚP với "băng fills + phần CP các sự kiện ĐÃ ÁP cộng vào". Lệch
+        # = sổ đã trôi (ca thật: `PaperBroker._save()` ghi đè nuốt mất thay đổi) ⇒ TỪ CHỐI TO.
+        # KHÔNG so `cur` với `qty_before`: với sự kiện QUÁ KHỨ, sổ hôm nay đã khác KL sáng GDKHQ
+        # một cách hợp lệ (mua thêm sau đó) — so như vậy sẽ chặn mọi lần hồi tố.
+        expect = qty_at_effective(state, rec["ticker"], "9999-12-31", external=external)
+        if cur != expect:
             summary["rejected"].append(
-                f"{rec['key']}: KL sổ = {cur} ≠ qty_before {rec['qty_before']}")
+                f"{rec['key']}: KL sổ = {cur} ≠ {expect} (băng fills + sự kiện đã áp) — sổ đã "
+                f"trôi, KHÔNG áp")
             continue
-        pos[rec["ticker"]] = rec["qty_after"]
+        delta = int(rec["qty_after"]) - int(rec["qty_before"])
+        if cur + delta < 0:
+            summary["rejected"].append(f"{rec['key']}: áp Δ{delta:+d} vào KL {cur} ⇒ âm")
+            continue
+        # Cộng ĐỘ LỚN thay đổi, không gán `qty_after`: gán sẽ XOÁ mọi lệnh khớp SAU ngày GDKHQ
+        # (hồi tố MBB 08-11 lên sổ hôm nay ⇒ 1.500 bị ghi đè thành 1.380, bốc hơi 120 CP).
+        pos[rec["ticker"]] = cur + delta
         state["cash"] = float(state.get("cash", 0.0)) + rec["cash_delta_vnd"]
         rec = dict(rec, applied_at=now_ict().isoformat(timespec="seconds"), asof=asof)
         led["applied"].append(rec)
@@ -410,6 +422,48 @@ def qty_at(state: dict, ticker: str, on_date: str) -> int:
     return q
 
 
+def _fills_on_or_after(state: dict, ticker: str, on_date: str) -> int:
+    """Số lệnh khớp của `ticker` có ngày >= `on_date` (dùng để PHÂN BIỆT bằng chứng, §29)."""
+    tk = str(ticker).strip().upper()
+    d = str(on_date)[:10]
+    return sum(1 for f in (state.get("fills") or [])
+               if str(f.get("symbol") or "").strip().upper() == tk
+               and str(f.get("ts") or "")[:10] >= d)
+
+
+def applied_records(state: dict, external: list = None) -> list:
+    """HỢP các bản ghi đã áp (state + sổ cái ngoài), khử trùng theo `key`."""
+    out, seen = [], set()
+    for r in list(ledger(state).get("applied", [])) + list(external or []):
+        k = r.get("key")
+        if k and k not in seen:
+            seen.add(k)
+            out.append(r)
+    return out
+
+
+def qty_at_effective(state: dict, ticker: str, on_date: str, external: list = None) -> int:
+    """KL vào SÁNG `on_date` cho MỌI đường chạy (cron lẫn hồi tố).
+
+    `qty_at()` một mình KHÔNG đủ: băng `fills` chỉ biết lệnh khớp, không biết CP mà các sự kiện
+    ĐÃ ÁP trước đó cộng vào sổ ⇒ phải cộng lại phần đó cho các sự kiện có GDKHQ <= `on_date`.
+    Ngược lại, đọc thẳng `positions` (vòng 2 làm thế ở nhánh cron) tính cả lệnh mua ĐÚNG NGÀY
+    GDKHQ — cổ phiếu mua ngày đó KHÔNG được hưởng quyền. Sổ paper main có thật một lệnh mua
+    100 MBB lúc 11:00:06 ngày GDKHQ 2026-08-11 ⇒ nhánh cron ghi dư 2.425.000đ (quant-skeptic
+    vòng 2, D1). Cả bất biến bảo toàn lẫn neo ngoài đều MÙ với lỗi này vì cả hai độc lập với KL.
+    """
+    tk = str(ticker).strip().upper()
+    d = str(on_date)[:10]
+    q = qty_at(state, tk, d)
+    for rec in applied_records(state, external):
+        if str(rec.get("ticker") or "").strip().upper() != tk:
+            continue
+        if str(rec.get("ex_date") or "")[:10] > d:
+            continue
+        q += int(rec.get("qty_after") or 0) - int(rec.get("qty_before") or 0)
+    return q
+
+
 # ───────────────────────────────────────────────────────────────── đường production (có IO)
 
 def _close_at(ticker, ex_date, bq_query=None):
@@ -435,8 +489,12 @@ def _close_at(ticker, ex_date, bq_query=None):
     return (float(px) if px and float(px) > 0 else None), {"reason": f"Close phiên {rows[0].get('d')}"}
 
 
-def collect(state, since, until, p_cum_fn=None, events_fn=None, close_fn=None, backfill=False):
-    """Tra sự kiện trong (since, until] cho mã ĐANG GIỮ → (records, errors, error_dates)."""
+def collect(state, since, until, p_cum_fn=None, events_fn=None, close_fn=None):
+    """Tra sự kiện trong (since, until] cho mã ĐANG GIỮ → (records, errors, error_dates).
+
+    Không còn nhánh `backfill`: cron và hồi tố dùng CHUNG một gốc KL (`qty_at_effective`). Hai
+    nhánh khác nhau chính là lỗi D1 của quant-skeptic vòng 2 — đường sẽ chạy thật là đường sai.
+    """
     from trading_bot.price_frame import events_by_ticker_date, p_cum_from_bq
     from trading_bot.price_frame import pricing_events as pf_pricing_events
 
@@ -449,24 +507,26 @@ def collect(state, since, until, p_cum_fn=None, events_fn=None, close_fn=None, b
     clf = close_fn or (lambda tk, d: _close_at(tk, d))
 
     done = applied_keys(state, read_external_ledger_for(state))
-    # KL chạy theo từng sự kiện: 2 sự kiện đổi KL trên CÙNG mã trong 1 cửa sổ phải nối nhau,
-    # không cùng xuất phát từ ảnh chụp đầu cửa sổ (vòng 1 bị lỗi này — sổ bị áp DỞ DANG).
-    run_qty = dict(held)
+    # KL nối qua từng sự kiện: 2 sự kiện đổi KL trên CÙNG mã trong 1 cửa sổ phải nối nhau, không
+    # cùng xuất phát từ ảnh chụp đầu cửa sổ (vòng 1 bị lỗi này — sổ bị áp DỞ DANG).
     back_mult = {}                      # {mã: tích (1+share_ratio) của sự kiện đã hồi tố trước}
     records, errors, error_dates = [], [], []
     for (tk, d), cluster in sorted(by.items(), key=lambda kv: (kv[0][1], kv[0][0])):
         if tk not in held or event_key(tk, d) in done:
             continue
-        # HỒI TỐ: KL nền dựng từ băng `fills` theo ngày GDKHQ, RỒI nhân tiếp hệ số của các sự
-        # kiện trước đó cũng đang được hồi tố trong chính lần chạy này — `fills` chỉ biết lệnh
-        # khớp, không biết CP thưởng/cổ tức CP mà ta vừa cộng vào ở sự kiện trước.
-        if backfill:
-            qty0 = int(math.floor(qty_at(state, tk, d) * back_mult.get(tk, 1.0) + 1e-9))
-        else:
-            qty0 = run_qty.get(tk, 0)
+        # Gốc KL = băng `fills` cắt theo ngày GDKHQ + phần CP các sự kiện ĐÃ ÁP cộng vào sổ,
+        # RỒI nhân tiếp hệ số của các sự kiện áp trong CHÍNH lần chạy này (chưa vào sổ cái).
+        qty_base = qty_at_effective(state, tk, d, external=read_external_ledger_for(state))
+        qty0 = int(math.floor(qty_base * back_mult.get(tk, 1.0) + 1e-9))
         if qty0 <= 0:
-            errors.append(f"{tk}@{d}: KL vào ngày GDKHQ = {qty0} — không giữ, bỏ qua")
-            error_dates.append(d)
+            # Phân biệt bằng CHỨNG CỨ (§29), không đoán: KL=0 vì toàn bộ vị thế mua VÀO/SAU ngày
+            # GDKHQ là câu trả lời XÁC ĐỊNH ("không hưởng quyền") ⇒ không chặn watermark. KL=0 mà
+            # băng fills cũng không có lệnh nào từ ngày đó trở đi là MÂU THUẪN ⇒ treo, chờ người.
+            bought_on_or_after = _fills_on_or_after(state, tk, d)
+            errors.append(f"{tk}@{d}: KL vào ngày GDKHQ = {qty0} — không hưởng quyền "
+                          f"({bought_on_or_after} lệnh khớp từ ngày đó trở đi)")
+            if not bought_on_or_after:
+                error_dates.append(d)
             continue
         p_cum, pinfo = pcf(tk, d)
         if p_cum is None:
@@ -485,7 +545,6 @@ def collect(state, since, until, p_cum_fn=None, events_fn=None, close_fn=None, b
             errors.append(why)
             error_dates.append(d)
             continue
-        run_qty[tk] = rec["qty_after"]
         back_mult[tk] = back_mult.get(tk, 1.0) * (1.0 + rec["share_ratio"])
         records.append(rec)
     return records, errors, error_dates
@@ -540,8 +599,8 @@ def main() -> int:
             print(f"[paper-ca] lần chạy đầu trên sổ [{args.label}] — watermark = {since}, KHÔNG "
                   f"hồi tố (số liệu cũ là căn cứ của verdict đã chốt).")
 
-        records, errors, error_dates = collect(state, since, date,
-                                               backfill=bool(args.backfill_since))
+        records, errors, error_dates = collect(state, since, date)
+
         for e in errors:
             print(f"[paper-ca] ❌ {e}")
         if not records:
@@ -587,14 +646,19 @@ def main() -> int:
                       f"ngày {stuck}) — lần chạy sau sẽ gặp lại nó.")
             led["watermark"] = new_wm
 
+        # THỨ TỰ CÓ CHỦ ĐÍCH: state TRƯỚC, sổ cái ngoài SAU (quant-skeptic vòng 2, D2).
+        # Ghi sổ cái trước rồi chết máy giữa hai bước để lại dấu "đã áp" trên một sự kiện CHƯA
+        # áp ⇒ lần chạy sau bỏ qua nó và đẩy watermark qua = mất im lặng VĨNH VIỄN. Đảo lại thì
+        # ca xấu nhất (state đã ghi, sổ cái chưa) chỉ dẫn tới một lần áp lại, và chốt
+        # `cur != qty_before` (apply_records) TỪ CHỐI TO thay vì im lặng.
+        state.pop("_external_ledger", None)
+        save_state_atomic(path, state)
         for rec in summary["applied"]:
             append_external_ledger(lpath, {"key": rec["key"], "ticker": rec["ticker"],
                                            "ex_date": rec["ex_date"], "qty_before": rec["qty_before"],
                                            "qty_after": rec["qty_after"],
                                            "cash_delta_vnd": rec["cash_delta_vnd"],
                                            "applied_at": rec["applied_at"], "asof": rec["asof"]})
-        state.pop("_external_ledger", None)
-        save_state_atomic(path, state)
         print(f"[paper-ca] đã áp {len(summary['applied'])} sự kiện · tiền "
               f"{summary['cash_delta_total']:+,.0f}đ · quyền mua chờ "
               f"{len(led['pending_rights'])} khoản · watermark = {led['watermark']}")
