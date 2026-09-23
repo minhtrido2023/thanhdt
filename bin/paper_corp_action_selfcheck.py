@@ -485,6 +485,103 @@ def main() -> int:
     import importlib
     importlib.reload(P)
 
+    print("\n── O. CP corp-action CHƯA bán được (PaperBroker.locked_shares) ──")
+    from trading_bot.brokers import PaperBroker, Quote
+    import tempfile as _tf
+
+    def _broker(positions, pending):
+        b = PaperBroker.__new__(PaperBroker)
+        b.state = {"cash": 0.0, "positions": dict(positions), "open_orders": {},
+                   "fills": [], "next_id": 1, "pending_shares": list(pending)}
+        b.state_file = os.path.join(_tf.gettempdir(), "paper_ca_selfcheck_never_written.json")
+        b.fee_rate, b.quote_source, b.fill_at_ref = 0.0, None, False
+        b._fallback_ref, b.label = {}, "t"
+        return b
+
+    _pend = [{"key": "MBB|2026-08-11", "symbol": "MBB", "qty": 180,
+              "credited_on": "2026-08-11", "sellable_from": None, "reason": ""}]
+    b = _broker({"MBB": 1380}, _pend)
+    pos = b.get_positions()
+    check("180 CP thưởng vào `total` nhưng KHÔNG vào `sellable` (ca THẬT khiến user chặn cron): "
+          "total 1.380 / sellable 1.200",
+          pos["MBB"]["total"] == 1380 and pos["MBB"]["sellable"] == 1200
+          and pos["MBB"]["pending_corp_action"] == 180, str(pos.get("MBB")))
+    pos_fpt = _broker({"FPT": 300}, _pend).get_positions()["FPT"]
+    check("mã KHÔNG có khoản chờ giữ nguyên hành vi cũ: sellable == total, và KHÔNG mọc thêm "
+          "khoá `pending_corp_action` (không phá consumer nào đang đọc get_positions())",
+          pos_fpt == {"total": 300, "sellable": 300}, str(pos_fpt))
+    b2 = _broker({"MBB": 1380}, [dict(_pend[0], sellable_from="2026-09-01")])
+    check("mở khoá theo ngày: sellable_from đã qua ⇒ 1.380 bán được trở lại",
+          b2.get_positions()["MBB"]["sellable"] == 1380,
+          str(b2.get_positions()["MBB"]))
+    b3 = _broker({"MBB": 1380}, [dict(_pend[0], sellable_from="2099-01-01")])
+    check("sellable_from ở TƯƠNG LAI vẫn khoá (so theo NGÀY, không phải có-hay-không trường)",
+          b3.get_positions()["MBB"]["sellable"] == 1200,
+          str(b3.get_positions()["MBB"]))
+
+    # Tầng KHỚP, không chỉ tầng đặt lệnh: Executor cap SELL theo `sellable` nhưng có đường
+    # degrade (executor.py ~2096) ⇒ lệnh lọt qua không được phép khớp.
+    b4 = _broker({"MBB": 1380}, _pend)
+    b4.state["open_orders"]["P1"] = {"symbol": "MBB", "qty": 1380, "side": "sell",
+                                     "price": 20000.0, "type": "LO", "filled": 0,
+                                     "status": "open", "loanPackageId": None,
+                                     "ts": "2026-09-23T10:00:00"}
+    b4.get_quote = lambda sym: Quote({"symbol": sym, "refPrice": 25000.0,
+                                      "lastPrice": 25000.0, "bidPrice1": 25000.0})
+    b4._save = lambda: None
+    b4._try_fill("P1")
+    check("tầng KHỚP cũng chặn: bán 1.380 khi chỉ 1.200 bán được ⇒ rejected_qty, sổ KHÔNG đổi",
+          b4.state["open_orders"]["P1"]["status"] == "rejected_qty"
+          and b4.state["positions"]["MBB"] == 1380 and b4.state["cash"] == 0.0,
+          f"status={b4.state['open_orders']['P1']['status']} MBB={b4.state['positions']['MBB']}")
+    b5 = _broker({"MBB": 1380}, _pend)
+    b5.state["open_orders"]["P1"] = dict(b4.state["open_orders"]["P1"], qty=1200,
+                                         filled=0, status="open")
+    b5.get_quote, b5._save = b4.get_quote, (lambda: None)
+    b5._try_fill("P1")
+    check("bán ĐÚNG 1.200 (phần bán được) vẫn khớp bình thường — không khoá nhầm phần hợp lệ",
+          b5.state["open_orders"]["P1"]["status"] == "filled"
+          and b5.state["positions"]["MBB"] == 180,
+          f"status={b5.state['open_orders']['P1']['status']} MBB={b5.state['positions']['MBB']}")
+
+    # ĐẦU-CUỐI: apply_records PHẢI ghi khoản chờ, nếu không thì mọi check trên đều đúng mà
+    # production vẫn bán được 180 CP chưa về (mutation "bỏ nhánh `if delta > 0`" sống sót
+    # trọn vòng trước — đây chính là test giết nó).
+    st_e2e = {"cash": 0.0, "positions": {"MBB": 1200}, "fills": [
+        {"ts": "2026-07-01T09:00:00", "symbol": "MBB", "side": "buy", "qty": 1200}]}
+    rec_e2e, _w = P.build_record("MBB", "2026-08-11",
+                                 [_iss("MBB", "2026-08-11", 0.1, RIGHTS),
+                                  _iss("MBB", "2026-08-11", 0.15, STOCKDIV)],
+                                 1200, 24250.0, 20200.0)
+    P.apply_records(st_e2e, [rec_e2e], asof="2026-08-11")
+    ps = st_e2e.get("pending_shares") or []
+    b_e2e = _broker(st_e2e["positions"], ps)
+    check("ĐẦU-CUỐI apply_records → PaperBroker: áp sự kiện xong thì 180 CP vừa cộng nằm "
+          "trong `pending_shares` (khoá mở = None) và sellable tụt về 1.200",
+          st_e2e["positions"]["MBB"] == 1380 and len(ps) == 1
+          and ps[0]["qty"] == 180 and ps[0]["sellable_from"] is None
+          and ps[0]["key"] == "MBB|2026-08-11" and ps[0]["credited_on"] == "2026-08-11"
+          and b_e2e.get_positions()["MBB"]["sellable"] == 1200,
+          f"positions={st_e2e['positions']} pending={ps}")
+    # Cổ tức TIỀN không tăng KL ⇒ KHÔNG được sinh khoản chờ rỗng (rác vĩnh viễn trong state).
+    st_cash = {"cash": 0.0, "positions": {"MBB": 1100}, "fills": [
+        {"ts": "2026-07-01T09:00:00", "symbol": "MBB", "side": "buy", "qty": 1100}]}
+    rec_cash, _w2 = P.build_record("MBB", "2026-07-09",
+                                   [_div("MBB", "2026-07-09", 1000.0)], 1100, 26000.0, None)
+    P.apply_records(st_cash, [rec_cash], asof="2026-07-09")
+    check("cổ tức TIỀN (Δ KL = 0) KHÔNG sinh khoản chờ rỗng",
+          not (st_cash.get("pending_shares") or []),
+          str(st_cash.get("pending_shares")))
+
+    st_r = {"positions": {"MBB": 1380}, "pending_shares": [dict(_pend[0])]}
+    hit = P.release_pending(st_r, "MBB|2026-08-11", "2026-10-01")
+    check("release_pending(): mở đúng khoản, ghi sellable_from; gọi lại lần 2 = 0 khoản "
+          "(idempotent, không mở nhầm khoản đã mở)",
+          len(hit) == 1 and st_r["pending_shares"][0]["sellable_from"] == "2026-10-01"
+          and P.release_pending(st_r, "MBB|2026-08-11", "2026-11-01") == []
+          and st_r["pending_shares"][0]["sellable_from"] == "2026-10-01",
+          str(st_r["pending_shares"][0]))
+
     print(f"\n{'='*70}\n{NCHECK - len(FAILS)}/{NCHECK} PASS"
           + (f" · FAIL: {FAILS}" if FAILS else " · không có FAIL"))
     return 1 if FAILS else 0

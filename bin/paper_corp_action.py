@@ -411,6 +411,17 @@ def apply_records(state: dict, records, asof: str, external: list = None) -> dic
         # Cộng ĐỘ LỚN thay đổi, không gán `qty_after`: gán sẽ XOÁ mọi lệnh khớp SAU ngày GDKHQ
         # (hồi tố MBB 08-11 lên sổ hôm nay ⇒ 1.500 bị ghi đè thành 1.380, bốc hơi 120 CP).
         pos[rec["ticker"]] = cur + delta
+        if delta > 0:
+            # CP vừa cộng CHƯA bán được: niêm yết bổ sung còn chưa xong. `sellable_from=None`
+            # = khoá tới khi có người mở tường minh (`--release`) — fail-safe, KHÔNG đoán ngày
+            # về. Bằng chứng cho lựa chọn này ở `PaperBroker.locked_shares()` (MBB 08-11: khớp
+            # DNSE `tradeQuantity` đứng yên 43 ngày). Không có mục này thì sổ paper bán được
+            # ngay sáng GDKHQ thứ tài khoản thật không bán được.
+            state.setdefault("pending_shares", []).append({
+                "key": rec["key"], "symbol": rec["ticker"], "qty": int(delta),
+                "credited_on": rec["ex_date"], "sellable_from": None,
+                "reason": rec.get("reason", ""),
+            })
         state["cash"] = float(state.get("cash", 0.0)) + rec["cash_delta_vnd"]
         rec = dict(rec, applied_at=now_ict().isoformat(timespec="seconds"), asof=asof)
         led["applied"].append(rec)
@@ -419,6 +430,22 @@ def apply_records(state: dict, records, asof: str, external: list = None) -> dic
         summary["applied"].append(rec)
         summary["cash_delta_total"] += rec["cash_delta_vnd"]
     return summary
+
+
+def release_pending(state: dict, key: str, sellable_from: str) -> list:
+    """Mở khoá CP corp-action đang chờ niêm yết bổ sung → danh sách mục đã đổi.
+
+    Gọi khi có BẰNG CHỨNG THẬT là CP đã về (thông báo niêm yết bổ sung, hoặc `tradeQuantity`
+    bên tài khoản thật đã nhảy). KHÔNG có lịch tự động: ngày về do tổ chức phát hành quyết,
+    không suy ra được từ ngày GDKHQ.
+    """
+    dt.date.fromisoformat(sellable_from)          # ném lỗi sớm nếu ngày sai định dạng
+    hit = []
+    for e in state.get("pending_shares") or []:
+        if e.get("key") == key and e.get("sellable_from") is None:
+            e["sellable_from"] = sellable_from
+            hit.append(e)
+    return hit
 
 
 def qty_at(state: dict, ticker: str, on_date: str) -> int:
@@ -578,6 +605,11 @@ def main() -> int:
     ap.add_argument("--dry", action="store_true", help="in ra, không ghi sổ")
     ap.add_argument("--backfill-since", default=None,
                     help="HỒI TỐ: quét từ ngày này, KL dựng lại từ băng fills (không dùng trong cron)")
+    ap.add_argument("--release", metavar="KEY",
+                    help="mở khoá CP corp-action đang chờ về (khoá `TICKER|YYYY-MM-DD`), "
+                         "cần kèm --sellable-from. Chỉ dùng khi ĐÃ có bằng chứng CP về thật.")
+    ap.add_argument("--sellable-from", metavar="YYYY-MM-DD",
+                    help="ngày CP mở khoá bắt đầu bán được (đi cùng --release)")
     ap.add_argument("--selfcheck", action="store_true")
     args = ap.parse_args()
 
@@ -603,6 +635,22 @@ def main() -> int:
             state = json.load(f)
         state["_external_ledger"] = read_external_ledger(lpath)
         led = ledger(state)
+
+        if args.release:
+            if not args.sellable_from:
+                print("[paper-ca] ❌ --release cần đi kèm --sellable-from YYYY-MM-DD")
+                return 2
+            hit = release_pending(state, args.release, args.sellable_from)
+            if not hit:
+                print(f"[paper-ca] ❌ không có khoản chờ nào còn khoá với khoá "
+                      f"`{args.release}` — kiểm lại `pending_shares` trong {path}")
+                return 2
+            state.pop("_external_ledger", None)
+            save_state_atomic(path, state)
+            for e in hit:
+                print(f"[paper-ca] MỞ KHOÁ {e['symbol']} {e['qty']:,}cp (GDKHQ "
+                      f"{e['credited_on']}) — bán được từ {args.sellable_from}")
+            return 0
 
         if args.backfill_since:
             since = args.backfill_since
@@ -680,6 +728,13 @@ def main() -> int:
                                            "cash_dividend_gross_vnd": rec["cash_dividend_vnd"],
                                            "div_tax_vnd": rec["div_tax_vnd"],
                                            "applied_at": rec["applied_at"], "asof": rec["asof"]})
+        locked = [e for e in (state.get("pending_shares") or [])
+                  if e.get("sellable_from") is None]
+        if locked:
+            print(f"[paper-ca] 🔒 {len(locked)} khoản CP chờ niêm yết bổ sung, CHƯA bán được: "
+                  + " · ".join(f"{e['symbol']} {e['qty']:,}cp ({e['credited_on']})"
+                               for e in locked)
+                  + " — mở bằng `--release <khoá> --sellable-from <ngày>` khi có bằng chứng về")
         print(f"[paper-ca] đã áp {len(summary['applied'])} sự kiện · tiền "
               f"{summary['cash_delta_total']:+,.0f}đ · quyền mua chờ "
               f"{len(led['pending_rights'])} khoản · watermark = {led['watermark']}")
