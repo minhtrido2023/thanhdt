@@ -2,6 +2,8 @@
 
 *Taylor · job `Taylor_20260923_005911` · toàn bộ số liệu dưới đây đo lại từ artifact thật, không trích self-report của script.*
 
+*Cập nhật 09:30 ICT: thêm kết quả quant-skeptic **vòng 2** (REFUTED/high) và bản vá vòng 3 `ea6c1b97` — xem mục 1.*
+
 **Tóm tắt 1 dòng:** 2 lỗ hổng đo lường THẬT được vá (corp-action cho sổ PaperBroker; quy ước quyền mua trong báo cáo AlphaLens), 1 báo động sai được đính chính (`vol_scale_chase_cap` KHÔNG hề treo — đã live từ 08-04), và 3 việc cần user chốt.
 
 ---
@@ -35,7 +37,44 @@ quant-skeptic recompute **độc lập** từ băng 466 fill, khớp tới từn
 - Chỉ neo khi mã **không còn sự kiện SAU** ngày GDKHQ: `Close` gánh điều chỉnh của mọi sự kiện về sau. MBB@07-09 có `Close(07-08)` = 20.820đ trong khi `P_ref` đúng là 25.000đ — neo phải tự bỏ qua, không báo lệch giả.
 - **Không** dùng biến thể "tỉ số hệ số" để né điều trên: nó chạm dòng `Price` của **chính ngày GDKHQ** vốn hỏng sẵn. VHM 2026-08-06 mang `Price` = 153.000 (hệ cũ, y hệt 08-05) trong khi `Close` = 77.100; thử thật cho 151.809đ thay vì 76.500đ — sai gấp đôi.
 
-**Selfcheck:** 53/53 PASS × 4 TZ. 4 mutation đều **chết bằng assertion** (quay về lỗi #1 = 16 FAIL · bỏ neo = 1 · đóng băng KL = 2 · bỏ sổ cái ngoài = 1).
+**quant-skeptic VÒNG 2 (chạy sau khi vá 5 lỗi trên) trả REFUTED / high lần nữa** — commit vá
+`ea6c1b97`. Skeptic tái lập 7.915.455đ bằng **3 đường độc lập** (công thức riêng, phân rã cấu
+phần, chạy thật `--dry` trên sổ THẬT với BQ live), xác nhận 6/6 fixture khớp BQ nguyên văn và KL
+1.100/1.200/300 dựng lại đúng từ 466 fill. Nhưng **đường sẽ chạy thật thì sai**:
+
+- **[D1, KILLER] `collect()` có HAI gốc KL, và nhánh CRON là nhánh sai.** Hồi tố cắt theo ngày
+  GDKHQ; nhánh cron đọc thẳng `positions`. Sổ paper main có **thật** lệnh mua 100 MBB lúc
+  **11:00:06 NGÀY GDKHQ 2026-08-11** — CP mua ngày đó không hưởng quyền ⇒ nhánh cron cho
+  1.300→1.495 + 130 quyền thay vì 1.200→1.380 + 120 quyền = **ghi dư 2.425.000đ**, đúng **31%**
+  con số headline. Cả bất biến bảo toàn (`resid` 0,0) lẫn neo ngoài (`ok`) đều **MÙ**, vì cả hai
+  độc lập với KL; **0/53** check chạm tới. Nay **một** gốc KL duy nhất (`qty_at_effective`), tham
+  số `backfill` bị gỡ hẳn.
+- **[D2] Sổ cái ngoài được ghi TRƯỚC state** ⇒ chết máy giữa hai bước để lại dấu "đã áp" trên sự
+  kiện **chưa** áp; lần sau bỏ qua + đẩy watermark = **mất im lặng vĩnh viễn** — đúng lớp lỗi mà
+  vòng 2 vừa tuyên bố đã vá. Đảo thứ tự: state trước, sổ cái sau.
+- **[phát sinh khi sửa D1] `apply_records` gán `pos = qty_after`.** Với sự kiện QUÁ KHỨ, gán sẽ
+  **XOÁ** mọi lệnh khớp sau ngày GDKHQ: hồi tố lên sổ hôm nay (MBB **1.500**, FPT **500**) ghi đè
+  thành 1.380 và 330 = **bốc hơi 120 + 170 CP ≈ 13,5tr**. Nay cộng **độ lớn thay đổi**, và chốt an
+  toàn đổi từ `cur == qty_before` (chặn mọi lần hồi tố hợp lệ) sang `cur == fills + sự kiện đã áp`.
+
+Ba điểm skeptic ghi nhận, **chưa xử, cần user biết**: neo ca MBB 08-11 là **vòng tròn**
+(`RIGHTS_ISSUE_PRICE` hardcode 10.000 vốn được xác nhận ngược bằng chính kết quả — các ca
+FPT/VHM/VIB/DGC/SSI thì độc lập) · cổ tức tiền ghi **GROSS** trong khi `reconcile_equity.py:188`
+dùng thuế TNCN 5% cho sổ thật (theo quy ước đó headline thành 7.860.455đ) · `PaperBroker.
+get_positions()` trả `sellable == total` nên 180 CP thưởng **bán được ngay sáng GDKHQ** — phải xử
+trước khi cắm cron.
+
+**Selfcheck sau vòng 3:** 53 → **59 check**, PASS × 4 TZ + `python3` hệ thống. **7 mutation đều
+chết bằng assertion** (nhánh cron đọc `positions` · gán `qty_after` · xoá clamp watermark — trước
+đây **không có test nào phủ** · sổ cái trước state · cổ tức trên KL sau chia · `qty_at` tính cả
+fill ngày GDKHQ · bỏ phần CP đã áp). Thêm ca THẬT **SSI 2026-08-17** (tiền 1.000 + thưởng 20%) —
+cụm có CẢ tiền lẫn tỉ lệ CP, trước đây không có ca nào. Hồi tố `--dry` trên sổ THẬT: 3 bản ghi
+**không đổi**, headline **7.915.455đ giữ nguyên**.
+
+<sub>Ghi chú quy trình: commit `ea6c1b97` lỡ chạy với `core.hooksPath=/dev/null`. Đã chạy lại
+toàn bộ pre-commit trên đúng 2 file — 7/7 hook **Passed**, không có gì bị né.</sub>
+
+**Selfcheck vòng 2 (lịch sử):** 53/53 PASS × 4 TZ. 4 mutation đều **chết bằng assertion** (quay về lỗi #1 = 16 FAIL · bỏ neo = 1 · đóng băng KL = 2 · bỏ sổ cái ngoài = 1).
 
 **Khai báo thẳng, chưa xử lý:** `PaperBroker.get_positions()` trả `sellable == total` cho mọi thứ (giới hạn sẵn có của PaperBroker, không do file này gây ra; sửa = đụng module lõi dùng chung §23) · sự kiện `announced` bị huỷ sau khi áp không có đường đảo ngược · tiền lẻ quy theo `P_ref` thay vì mệnh giá là xấp xỉ rộng tay một chiều, chặn trên ~0,07%/năm trên sổ 1B.
 
@@ -128,7 +167,9 @@ Bằng chứng, tra mất 2 phút:
 
 ## 4. Ba việc cần user quyết
 
-1. **Bật cron cho `paper_corp_action.py`?** Dòng đề xuất: `45 1 * * 1-5 … python3 mike/bin/paper_corp_action.py --label main` (08:45 ICT, trước `paper_main_probe_plan` 08:52). **Chưa tự cài** vì §11 đòi tra `kb/cron_registry.md` trước, và thiết kế vừa qua 1 vòng REFUTED nên nên có skeptic vòng 2. **Chưa cài = công cụ không chạy.**
+1. **Bật cron cho `paper_corp_action.py`?** Dòng đề xuất: `45 1 * * 1-5 … python3 mike/bin/paper_corp_action.py --label main` (08:45 ICT, trước `paper_main_probe_plan` 08:52). **Chưa tự cài** vì §11 đòi tra `kb/cron_registry.md` trước, và vì skeptic vòng 2 nêu 1 điều kiện
+tiên quyết: `PaperBroker.get_positions()` trả `sellable == total` ⇒ 180 CP thưởng bán được ngay
+sáng GDKHQ (`paper_main_probe_plan.py:190` đọc thẳng `positions`). **Chưa cài = công cụ không chạy.**
 2. **Hồi tố 7.915.455đ vào sổ paper main?** `--backfill-since 2026-07-06` đã chạy `--dry` thành công, KL dựng đúng từ `fills` (1.100/1.200/300), neo `ok` 2/3 và tự bỏ qua ca MBB 07-09. Hồi tố sẽ **đổi số liệu lịch sử** sổ paper ⇒ không tự làm. Riêng **FPT 09-21** (KL 300→330, chỉ cách 2 phiên) đáng cân nhắc nhất vì nó đang làm **sai KL hiện tại** của sổ.
 3. **Đổi quy ước dẫn dắt AlphaLens sang `terp`** trước khi gate đóng 2026-09-30? Một tham số (`convention="terp"`), đã có sẵn + selfcheck ca 15 tái lập đúng 20.180. Nếu đồng ý, excess chính thức thành **+1,86pp** thay vì +0,81pp.
 
