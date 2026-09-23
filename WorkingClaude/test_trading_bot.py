@@ -350,7 +350,10 @@ _cfg = load_config()
 assert _cfg["gap_adaptive_enabled"] is False, "DEFAULTS must stay gap_adaptive_enabled=False"
 _profiles = load_accounts(_cfg)
 _paper_main = next((p for p in _profiles if p["label"] == "main"), None)
-_dnse_live = [p for p in _profiles if p.get("broker") == "dnse" and p.get("mode") == "live"]
+# Hiệu lực nằm ở p["cfg"] (mode/broker raw có thể None nếu account dựa vào default chung —
+# xem config.py::load_accounts). Cùng pattern đã đúng ở config.py::live_dnse_labels().
+_dnse_live = [p for p in _profiles if p["cfg"]["mode"] == "live"
+              and (p.get("broker") or p["cfg"].get("broker") or "phs").lower() == "dnse"]
 assert _paper_main is not None, "[FAIL] 'main' account not found"
 assert _paper_main["cfg"]["gap_adaptive_enabled"] is True, \
     f"[FAIL] main paper: expected gap_adaptive_enabled=True, got {_paper_main['cfg']['gap_adaptive_enabled']}"
