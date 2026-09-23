@@ -608,3 +608,6 @@
 
 ## Archived 2026-09-23 (keep=12 days=0 require_done=False)
 - [2026-09-22T09:51:32Z] [2026-09-22] nav-corpaction-gate (job _090801): L1 feat/nav-exdate-forecast SAN SANG MERGE (commit ef544b1d, arch-review PASS sau 1 vong sua). L2-L4 feat/nav-corpaction-gate (c5bd6e9b) BI arch-review TU CHOI - L3 verify_cash_div_invariant KHONG BAO GIO reachable tren nhanh is_today (BQ khong the xac nhan ticker cung ngay luc 19:10), L4 se chan NAV that VPB 09-23/09-24 vo co. CAN REDESIGN (gan ticker tu corp-action snapshot thay vi doi BQ; L4 dua tren bang chung credit som that). CHO Mike/user quyet ai lam lai + khi nao - KHONG tu lam tiep duoi ap luc deadline.
+
+## Archived 2026-09-23 (keep=12 days=0 require_done=False)
+- [2026-09-22T10:05:17Z] [2026-09-22] nav-exdate-forecast L1 vong 2 XONG (commit 71d253c2, sua R2-R6 theo arch-review doc lap cua Mike): pipeline-3b doi cho truoc cong abort, R3 notify khi thieu snapshot, R4 day_word theo vi tri phien, R5 test hermetic real schema, R6 guard+wording+unit fixes. 39/39 PASS x3 TZ, tree clean. CHO Mike/user merge feat/nav-exdate-forecast. L2-L4 (feat/nav-corpaction-gate) VAN BI TU CHOI rieng, cho redesign.
