@@ -1,13 +1,13 @@
-# Mike fleet — context pack (v3194)
+# Mike fleet — context pack (v3195)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-09-23T17:07:45] Taylor/finding — exdate-price-frame-vong2-R1R5-XONG: {"job": "Taylor_20260923_165842", "status": "XONG_CHUA_LAND", "branch": "fix/exdate-price-frame-active-nav", "worktree": "mike/wt-exdate-price-frame", "commit": …
-- [2026-09-23T17:31:38] Taylor/finding — exdate-price-frame-vong3-F1F5-XONG: {"job": "Taylor_20260923_172145", "status": "XONG_CHUA_LAND", "branch": "fix/exdate-price-frame-active-nav", "worktree": "mike/wt-exdate-price-frame", "commit_c …
 - [2026-09-23T17:34:00] Mike/finding — retro-draft-2026-09-23-done: {"status": "DRAFT_XONG", "file": "state/retro_draft_2026-09-23.md", "n_su_co": 5, "n_pattern": 3, "pattern1_status": "CHOT (escalate 3-ngay approval-gate dong,  …
 - [2026-09-23T17:37:14] Wags/finding — verify-retro-draft-2026-09-23: {"verdict": "GAPS FOUND", "target": "state/retro_draft_2026-09-23.md", "method": "doc-only, khong sua file draft", "gaps": [{"id": 1, "severity": "material", "w …
 - [2026-09-23T17:40:28] Mike/finding — daily-retro-2026-09-23-done: {"status": "XONG", "entry": "kb/incidents/retro/retro-2026-09-23.md", "commit": "6d320fad", "n_su_co": 6, "n_pattern": 3, "pattern1_status": "CHOT (approval-gat …
+- [2026-09-23T17:56:06] DollarBill/decision — plan-2026-09-24-replan-both-accounts: {"is_replan": true, "replaces": "plan gui 21:00 toi 23/09 (approved_by=None, chua chay)", "reason": "NAV phong do GDKHQ VPB ISS 26,04% ex-date 24/09: compute_ac …
+- [2026-09-23T17:52:24] Mike/finding — exdate-price-frame-LANDED-508bb607: {"status": "LANDED", "repo": "mike", "commit": "508bb607", "arch_review": "APPROVED high sau 3 vong", "selfcheck_tu_master": "exdate_frame 59/59 qua 5 TZ + corp …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -51,6 +51,13 @@
   · sự kiện CỔ PHIẾU ⇒ chặn **rc=5** theo bằng chứng KL credit sớm THẬT (phần dư sau khi trừ FILL trong ngày khớp tỉ lệ sự kiện) — KHÔNG chặn theo lịch, KHÔNG phụ thuộc ngưỡng giá 5% ⇒ đóng lỗ hổng sự kiện tỉ lệ nhỏ
   · `--from-raw` + corp-action ĐÃ CONFIRMED + multiplier TÁI TẠO được KL trước sự kiện ⇒ quy ngược KL (giữ đường phục hồi cũ)
   · không giải thích được ⇒ nói THẲNG "chưa giải thích được", không đoán (§29)
+- **Ex-date price-frame — KL và GIÁ phải CÙNG hệ quy chiếu** (`bin/exdate_frame.py` + wire vào `compute_active_nav.py` / `park_holdings.py` / `compute_park_trim.py` / `compute_jit_unpark.py`) — LIVE từ **2026-09-24**, commit `508bb607`, **3 vòng arch-review**. Sự cố gốc: đêm T-1 GDKHQ, DNSE credit KL mới vào `positions` NGAY (VPB 1.100→1.386) trong khi giá đóng cửa G1 phiên T-1 vẫn là giá CÒN QUYỀN ⇒ nhân chéo làm `active_nav` phồng (SpaceX +7.969.500 = +0,80%; ZaloPay +8.694.000 = +1,64%) và plan sinh lệnh PARK_TRIM trên rổ phồng.
+  · mã có bằng chứng credit sớm ⇒ định giá bằng `marketPrice` của CHÍNH bản ghi vị thế, NHƯNG chỉ sau khi nó TÁI TẠO được giá cum qua hệ số sự kiện (KHÔNG tin thẳng `marketPrice` — ca SCL 08-28 đứng im, MBB 08-14 một bản đọc mang đồng thời 2 hệ)
+  · không dựng được giá cùng hệ, hoặc KL đổi chưa giải thích được ⇒ **rc=6, KHÔNG ghi file** (mẫu số sizing: số sai tệ hơn số cũ)
+  · `--asof` ngày khác hôm nay, hoặc `--out` trỏ vào chính file canonical (so bằng `realpath`) ⇒ **rc=7, TỪ CHỐI ghi**
+  · `park_holdings` phát `frame_blocked_tickers` ⇒ `compute_park_trim`/`compute_jit_unpark` trả **BLOCKED_FRAME** thay vì trim trên mẫu số phồng
+  Selfcheck 59/59 qua 5 TZ. Replay 14 account-night corp-action thật: 12/14 tự sửa giá, 2/14 gắn cờ (đều đã bị `BLOCKED_RECONCILE` chặn sẵn) ⇒ **0 báo động mới**.
+  ⚠️ **CÙNG LỚP LỖI CÒN 4 CALL-SITE CHƯA VÁ** (xem `kb/memory/Mike.md`): `dividend_adjusted_return.py:473-478` (chạm SỐ CÔNG BỐ nhà đầu tư §21 — ưu tiên cao nhất), `discretionary_margin_gate.py:335` (sleeve margin tiền thật, latent), `report_return_gate.py` (lỗ hổng phủ im lặng), `discretionary_accumulation_inject.py:124`, + `due_diligence.py:173-202 adv_vnd()` (chiều an toàn). arch-reviewer nói rõ **KHÔNG khẳng định đã quét hết**.
   Selfcheck 38/0 + 64/0 + 8/0 qua 3 TZ. rc=5 là mã MỚI: `eod_trading_report.sh` không ghi marker, `nav_sync_retry.sh` không retry 2h, `nav_snapshot_daily.sh` escalate ngay. Runbook rc=5 ở `kb/ops_runbook.md.proposed` — **CHỜ MIKE DUYỆT ĐỂ ĐƯA LIVE (§13)**.
 
 ## R&D pipeline — PAPER-ONLY, chi tiết `kb/projects/rnd-pipeline-tracker.md`
