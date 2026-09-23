@@ -68,6 +68,10 @@ CORP_ACTIONS = {
                         "phat hanh them 4,1 ty cp (41.074 ty dong menh gia). Cau phan TIEN MAT "
                         "cua cung dot chia da co ex-date rieng cuoi 06/2026 (factor 0.4815->0.5), "
                         "KHONG thuoc ex-date nay -> cash_div_per_share=0")],
+    "PHR": [dict(ex_date="2026-09-14", stock_div_ratio=0.8, cash_div_per_share=1400.0,
+                 source="corp_action_daily snapshot 2026-09-14 (feed CONFIRMED, status executed): "
+                        "ISS Co phieu thuong ti le 80.0% (exercise_ratio 0.8) + DIV tien mat "
+                        "Ca nam 2025 1,400 VND (value_per_share 1400)")],
 }
 WATCHLIST = list(CORP_ACTIONS.keys())
 
@@ -83,7 +87,10 @@ def run_bq(sql, fmt="csv"):
     finally:
         os.unlink(tmp)
     if r.returncode != 0:
-        raise RuntimeError(r.stderr.strip()[:400])
+        # bq puts some errors (e.g. SQL syntax) on stdout, not stderr — raising the
+        # empty stderr turns a real parser message into RuntimeError('') (§29).
+        msg = (r.stderr.strip() or r.stdout.strip() or f"bq exit {r.returncode}, no output")
+        raise RuntimeError(msg[:400])
     return r.stdout
 
 
