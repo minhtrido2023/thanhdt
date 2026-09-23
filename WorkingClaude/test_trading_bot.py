@@ -67,7 +67,15 @@ class FakeQuotes:
 cfg = dict(cfgmod.DEFAULTS)
 cfg.update({"mode": "paper", "max_child_value": 20_000_000,
             "slice_interval_min": 0, "poll_interval_sec": 0,
-            "min_order_value": 1_000_000})
+            "min_order_value": 1_000_000,
+            # Mục 2 test quota participation gộp fleet, KHÔNG test lịch HYBRID (đã có bộ test
+            # riêng ở gcfg/gcfg_j bên dưới, dùng `now` giả lập tường minh). run_session() gọi
+            # now_ict() THẬT (giờ đồng hồ, không phải giờ mô phỏng) — từ khi
+            # fill_timing_hybrid_enabled=True thành default (config.py:165, LIVE 2026-08-10),
+            # mọi lệnh MUA urgency="normal" ở đây bị `_hybrid_defer` hoãn vô thời hạn suốt
+            # 40 cycle nếu giờ chạy test thật KHÔNG rơi đúng 1 trong 5 block 11:00-13:45 →
+            # test flaky theo giờ chạy thật (đã tái lập: shared["AAA"]=0, mọi BUY filled=0).
+            "fill_timing_hybrid_enabled": False})
 
 fq = FakeQuotes()
 brokerA = PaperBroker(init_cash=1_000_000_000, fee_rate=cfg["paper_fee_rate"],
@@ -200,6 +208,15 @@ gcfg.update({
     "mode": "paper",
     "gap_adaptive_enabled": True,
     "fill_timing_enabled": True,
+    # Section này test quy tắc gom-cửa-sổ LEGACY (buy_window/sell_window) + gap-adaptive
+    # override, KHÔNG test lịch HYBRID (grep xác nhận không có test riêng cho HYBRID trong
+    # repo — lỗ hổng coverage khác, ngoài phạm vi sửa ở đây) —
+    # fill_timing_hybrid_enabled=True là default từ config.py:165 (LIVE 2026-08-10), và khi
+    # bật nó THAY hẳn quy tắc legacy (executor.py _fill_timing_mult: "Khi
+    # fill_timing_hybrid_enabled bật, hai quy tắc gom-cửa-sổ trên được THAY bằng lịch
+    # HYBRID"). Không tắt ở đây thì test [4] SELL 09:25 kỳ vọng mult=1.0 (legacy sell
+    # window) nhưng rơi vào _hybrid_mult → 1.875 (15min block / 8min slice_interval).
+    "fill_timing_hybrid_enabled": False,
     "fill_timing_live_gate": True,
     "fill_timing_outside_mult": 4.0,
     "buy_window_start": "10:45",
