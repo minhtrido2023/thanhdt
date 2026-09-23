@@ -269,7 +269,8 @@ def probe_alphalens(probe, prog, today):
     vnindex_now = next(r[2] for r in px.values() if r[2] is not None)
     bench_entry = meta["benchmark_entry"]
     bench_ret = (vnindex_now / bench_entry - 1) * 100
-    lines, port_ret = [], 0.0
+    lines, port_ret, port_ret_terp = [], 0.0, 0.0
+    rights_names = []
     for p in positions:
         t = p["ticker"]
         if t not in px:
@@ -277,6 +278,7 @@ def probe_alphalens(probe, prog, today):
             continue
         close = px[t][1]
         a = adj.get((t, entry_asof[t]))
+        ret_terp = None
         if a is None:
             entry_show, ret = p["entry_price"], (close / p["entry_price"] - 1) * 100
             note = f" [⚠ chưa rebase corp-action: {adj_err}]" if adj_err else ""
@@ -288,15 +290,43 @@ def probe_alphalens(probe, prog, today):
                 note = f" [giá vào {a.entry_price:,.0f}→{a.entry_adj:,.0f} do quyền]"
             else:
                 note = ""
-        port_ret += p.get("weight_paper", 1.0 / len(positions)) * ret
+            # QUYỀN MUA — hai quy ước cho hai giả định KHÁC NHAU về hành vi, phải hiện CẢ HAI.
+            # `accrue_only` (dẫn dắt, mặc định của paper_entry_adjust) giả định quyền BỊ BỎ; nó
+            # được chọn 2026-08-13 với lý do ghi thẳng trong docstring: "A PAPER book has no cash
+            # account, never subscribed". Chỉ đạo user 2026-09-23 lật đúng tiền đề đó — mặc định
+            # THỰC HIỆN 100% quyền, vì không mua = bỏ lỡ giá trị dương thật. `terp` là quy ước
+            # khớp chỉ đạo đó. KHÔNG tự đổi quy ước dẫn dắt (đổi số của một gate sắp tới hạn là
+            # quyết định của user), nhưng GIẤU con số kia thì báo cáo không trung thực.
+            if a.factor_terp and a.entry_price and not a.degraded:
+                entry_terp = a.entry_price * a.factor_terp
+                if entry_terp > 0:
+                    ret_terp = (close / entry_terp - 1) * 100
+                    if getattr(a, "rights_events", ()):
+                        rights_names.append(t)
+                        note += (f" · nếu THỰC HIỆN 100% quyền (TERP): vào "
+                                 f"{entry_terp:,.0f} → **{ret_terp:+.2f}%**")
+        w = p.get("weight_paper", 1.0 / len(positions))
+        port_ret += w * ret
+        port_ret_terp += w * (ret if ret_terp is None else ret_terp)
         lines.append(f"  • {t}: {entry_show:,.0f} → {close:,.0f} = **{ret:+.2f}%** "
                      f"(entry {p['entry_date']}, {p['lens']}){note}")
     excess = port_ret - bench_ret
+    excess_terp = port_ret_terp - bench_ret
+    alt = ""
+    if rights_names:
+        alt = (f"\n- ⚖️ **Hai quy ước quyền mua** ({', '.join(rights_names)} có đợt quyền mua "
+               f"trong cửa sổ). Dẫn dắt ở trên = `accrue_only` (giả định BỎ quyền — tiền đề cũ "
+               f"'sổ paper không có tài khoản tiền'). Theo chỉ đạo user 2026-09-23 (mặc định "
+               f"THỰC HIỆN 100% quyền) thì con số đúng là `terp`: EW **{port_ret_terp:+.2f}%** "
+               f"vs VNINDEX {bench_ret:+.2f}% → **excess {excess_terp:+.2f}pp** "
+               f"(chênh {excess_terp - excess:+.2f}pp). CHƯA đổi quy ước dẫn dắt — cần user chốt.")
     return {"headline": (f"EW **{port_ret:+.2f}%** vs VNINDEX {bench_ret:+.2f}% → "
-                         f"**excess {excess:+.2f}pp** (MTM as-of {asof})"),
+                         f"**excess {excess:+.2f}pp** (MTM as-of {asof})"
+                         + (f" · TERP/thực-hiện-quyền: excess {excess_terp:+.2f}pp"
+                            if rights_names else "")),
             "body": "- Vị thế (MTM as-of " + str(asof) + ", BQ cache close phiên gần nhất):\n"
                     + "\n".join(lines)
-                    + f"\n- VNINDEX {bench_entry:,.2f} → {vnindex_now:,.2f}"}
+                    + f"\n- VNINDEX {bench_entry:,.2f} → {vnindex_now:,.2f}" + alt}
 
 
 PROBES = {
