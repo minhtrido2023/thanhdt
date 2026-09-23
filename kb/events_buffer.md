@@ -643,3 +643,6 @@
 ## Consolidation 2026-09-23T17:40:06Z
 - [2026-09-23T17:38:32Z] Mike/heartbeat — Mike_20260923_173731: {"status": "still_running", "elapsed_min": 1, "job_id": "Mike_20260923_173731", "source": "watcher"}
 - [2026-09-23T17:39:32Z] Mike/heartbeat — Mike_20260923_173731: {"status": "still_running", "elapsed_min": 2, "job_id": "Mike_20260923_173731", "source": "watcher"}
+
+## Consolidation 2026-09-23T17:40:32Z
+- [2026-09-23T17:40:28Z] Mike/finding — daily-retro-2026-09-23-done: {"status": "XONG", "entry": "kb/incidents/retro/retro-2026-09-23.md", "commit": "6d320fad", "n_su_co": 6, "n_pattern": 3, "pattern1_status": "CHOT (approval-gate 3-ngay, cron plan_approval_reminder.sh 08:50 ICT go-live)", "pattern2_status": "VAN HO (ack theo topic khop tuyet doi, >=6 lan cung goc, chua sua tan goc)", "pattern3_status": "VAN HO (S29 chan doan khong bang chung dang van xuoi, tan suat tang, chua du nguong escalate)", "verified_by": "Wags", "verdict": "GAPS FOUND", "gaps_fixed": ["thieu su co #6 alphalens-fpt-vendor-factor-stale-gate-0930", "commit hash sai bae551d7 -> e8066c75+a88819fd", "ngon ngu blameless cot Nguon goc hang #2"], "working_memory": "da don gon kb/memory/Mike.md phan anh dung trang thai cuoi ngay", "consolidate": "chay xong, KB v3193", "posted_to": "Trading Daily (1521470705563340910)"}
