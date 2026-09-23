@@ -238,6 +238,58 @@ placed_px_f = ex_f.broker.placed[0]["price"]
 check("F2 placed at the STATIC cap despite chase_cap_vol_scale ON (fail-safe held)",
       placed_px_f == cap_tst, f"placed={placed_px_f} cap={cap_tst}")
 
+# ---------------------------------------------------------------- G. gap-ref DATA SOURCE pin
+# Section F proves the recency/contiguity guard works, but it does NOT pin WHICH cache dir
+# `_load_gap_ref_data()` reads: its fixture ticker (TST) is absent from BOTH `ticker` and
+# `ticker_prune`, so reverting the source back to the TRAP table still passes F (verified by
+# mutation 2026-09-24, job Taylor_20260923_235320). G closes that hole with a SYNTHETIC
+# two-source cache so the assertion is deterministic and needs no real bq_cache on disk:
+#   bq_cache/ticker/       ZZZSRC @ 20_000  <- the LIVE source (commit fd3f5597)
+#   bq_cache/ticker_prune/ ZZZSRC @ 50_000  <- decoy; reading it yields a WRONG prior_close
+# Reverting chunk_dir to "ticker_prune" therefore dies on an ASSERTION (wrong value), not a crash.
+print("G. gap-ref must read the tav2_bq.ticker cache, not the TRAP ticker_prune cache "
+      "(fd3f5597 / universe_pit migration gate G8.1) — pinned by value with a decoy fixture")
+import tempfile, shutil
+_g_tmp = tempfile.mkdtemp(prefix="gapref_src_")
+_g_prev_cache = os.environ.get("BQ_LOCAL_CACHE")
+try:
+    import pandas as _pd
+    G_PLAN_DATE = "2026-09-24"          # fixed: no now()/TZ dependency
+    _g_days = _pd.bdate_range(end="2026-09-23", periods=22)
+    def _g_write(sub, close):
+        d = os.path.join(_g_tmp, sub); os.makedirs(d, exist_ok=True)
+        # alternating +/-1 tick keeps rvol_20d > 0 (else the loader skips the ticker)
+        px = [close + (100 if i % 2 else 0) for i in range(len(_g_days))]
+        px[-1] = close
+        _pd.DataFrame({"time": _g_days, "ticker": "ZZZSRC", "Close": [float(x) for x in px]}
+                      ).to_parquet(os.path.join(d, "chunk.parquet"), index=False)
+    _g_write("ticker", 20_000.0)         # LIVE source
+    _g_write("ticker_prune", 50_000.0)   # decoy — only reachable if the source is reverted
+    os.environ["BQ_LOCAL_CACHE"] = _g_tmp
+    g_o = PlannedOrder(id="BUY-SRC-01G", ticker="ZZZSRC", side="buy", qty=1_000, ref_price=REF)
+    plan_g = TradePlan(plan_date=G_PLAN_DATE, signal_date=G_PLAN_DATE, strategy="tst",
+                       strategy_version="0", state=3, state_name="NEUTRAL",
+                       nav_basis={}, orders=[g_o], account="selfcheck-g",
+                       created_at=G_PLAN_DATE + "T00:00:00")
+    cfg_g = dict(DEFAULTS); cfg_g.update({"mode": "paper", "slice_interval_min": 8,
+                                          "fill_timing_enabled": False,
+                                          "extreme_regime_enabled": False})
+    q_g = FakeQuote(last=20_000, bid=19_900, ask=20_000); q_g.symbol = "ZZZSRC"
+    ex_g = Executor(plan_g, FakeBroker({"ZZZSRC": q_g}), cfg_g)
+    _g_ref = ex_g._gap_ref.get("ZZZSRC")
+    check("G1 gap-ref resolved from the synthetic cache at all (loader reached a chunk dir)",
+          _g_ref is not None, f"_gap_ref={ex_g._gap_ref}")
+    check("G2 prior_close comes from bq_cache/ticker, NOT the ticker_prune decoy",
+          _g_ref is not None and _g_ref["prior_close"] == 20_000.0,
+          f"prior_close={_g_ref and _g_ref['prior_close']} expected=20000.0 decoy=50000.0")
+finally:
+    if _g_prev_cache is None:
+        os.environ.pop("BQ_LOCAL_CACHE", None)
+    else:
+        os.environ["BQ_LOCAL_CACHE"] = _g_prev_cache
+    shutil.rmtree(_g_tmp, ignore_errors=True)
+
+
 print()
 if fails:
     print(f"FAILED {len(fails)} check(s): {fails}")
