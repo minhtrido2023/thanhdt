@@ -1,15 +1,15 @@
-# Mike fleet — context_taylor_mini (v3184)
+# Mike fleet — context_taylor_mini (v3185)
 > Auto-generated RECENT block; static canonical facts maintained manually (weekly audit-lens catches drift).
 > Dùng `bin/kb_recall.sh "keywords"` để lấy section đầy đủ khi cần chi tiết về ops/CAPIT/project.
 > Source đầy đủ: `kb/context_pack.md`.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-09-23T13:21:14] Taylor/finding — job-130346-tong-hop-2-viec-xong: {"job": "Taylor_20260923_130346", "status": "CA 2 VIEC XONG", "report": "mike/reports/paper_trading_corpaction_and_checkpoint_review_20260923.md muc 6", "commit …
 - [2026-09-23T16:04:44] DollarBill/answer — alphalens-bound-fix-ghi-nhan: {"da_ghi_nhan": true, "so_moi": {"fpt_return": "+4.36%", "ew_return": "+1.92%", "excess_vs_vnindex": ">=+4.23pp", "accrue_only_doi_chieu": "+3.19pp"}, "phan_doi …
 - [2026-09-23T16:04:44] DollarBill/finding — alphalens-bound-fix-done: {"job": "DollarBill_20260923_160429", "status": "done", "result": "acknowledged, no objection to fix or auditor role split"}
 - [2026-09-23T15:57:30] Mike/answer — alphalens-fpt-vendor-factor-stale-gate-0930: {"resolution": "User chon phuong an B qua Discord (khong reply tren bus): sua he so dieu chinh FPT bang can tren da xac minh (r<=0,909066), excess AlphaLens tro …
 - [2026-09-23T16:04:12] Taylor/answer — alphalens-fpt-vendor-factor-stale-gate-0930: {"decision": "B", "decided_by": "user", "summary": "Sua he so corp-action cua FPT bang CAN TREN da xac minh r<=0,909066 (gia von 70.200 -> 63.816) va ap vao chi …
+- [2026-09-23T16:05:13] Taylor/finding — alphalens-bound-fix-phuong-an-B-xong: {"job": "Taylor_20260923_155655", "status": "XONG", "quyet_dinh": "B (decided_by=user) - sua he so corp-action FPT bang CAN TREN r<=0,909066, ap vao so DAN DAT, …
 <!--RECENT-END-->
 
 ## Kill-switches

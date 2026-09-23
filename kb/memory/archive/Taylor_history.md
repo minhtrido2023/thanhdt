@@ -605,3 +605,6 @@
 
 ## Archived 2026-09-23 (keep=12 days=0 require_done=False)
 - [2026-09-18T11:30:52Z] [2026-09-18] treasury_share_events (job _112831): vong 3 text-only 4e7f51d4 tren feat/treasury-share-events-table (worktree mike/agents/wt-treasury-table) — cam MERGE per-row + muc Nap lai. CHUA ghi BQ/CHUA merge. CHO Mike/user duyet DDL schema.sql + 4 file kb/data_registry/*.proposed.
+
+## Archived 2026-09-23 (keep=12 days=0 require_done=False)
+- [2026-09-22T09:51:32Z] [2026-09-22] nav-corpaction-gate (job _090801): L1 feat/nav-exdate-forecast SAN SANG MERGE (commit ef544b1d, arch-review PASS sau 1 vong sua). L2-L4 feat/nav-corpaction-gate (c5bd6e9b) BI arch-review TU CHOI - L3 verify_cash_div_invariant KHONG BAO GIO reachable tren nhanh is_today (BQ khong the xac nhan ticker cung ngay luc 19:10), L4 se chan NAV that VPB 09-23/09-24 vo co. CAN REDESIGN (gan ticker tu corp-action snapshot thay vi doi BQ; L4 dua tren bang chung credit som that). CHO Mike/user quyet ai lam lai + khi nao - KHONG tu lam tiep duoi ap luc deadline.
