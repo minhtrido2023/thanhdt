@@ -89,10 +89,20 @@ def main() -> int:
             continue
         recs[tk + d] = rec
         ok, resid = P.verify_invariant(rec)
-        check(f"{name}: KL×P_cum = KL'×P_ref + Δtiền + quyền chờ", ok,
+        check(f"{name}: KL×P_cum = KL'×P_ref + Δtiền(RÒNG) + thuế + quyền chờ", ok,
               f"dư {resid:+.6f}đ (≤{P.INVARIANT_TOL_VND}đ) · KL {rec['qty_before']:,}→"
-              f"{rec['qty_after']:,} · tiền {rec['cash_delta_vnd']:+,.0f}đ · "
-              f"P_ref {rec['p_ref']:,.2f}đ")
+              f"{rec['qty_after']:,} · tiền {rec['cash_delta_vnd']:+,.0f}đ · thuế "
+              f"{rec['div_tax_vnd']:,.0f}đ · P_ref {rec['p_ref']:,.2f}đ")
+        # Thuế phải là SỐ HẠNG RIÊNG, không được giấu vào phần dư: bỏ nó khỏi vế phải thì
+        # đồng nhất thức PHẢI vỡ đúng bằng số thuế (ca cổ tức tiền). Không có check này thì
+        # một bản vá "cho tiện" đưa cash_delta về GỘP vẫn qua được mọi test ở trên.
+        if rec["div_tax_vnd"] > 0:
+            no_tax = dict(rec, div_tax_vnd=0.0)
+            ok2, resid2 = P.verify_invariant(no_tax)
+            check(f"{name}: thuế là số hạng RIÊNG — bỏ khỏi vế phải ⇒ vỡ đúng "
+                  f"{rec['div_tax_vnd']:,.0f}đ",
+                  (not ok2) and abs(resid2 - rec["div_tax_vnd"]) < 0.5,
+                  f"dư khi bỏ thuế = {resid2:+,.2f}đ")
 
     print("\n── B. NEO NGOÀI (`ticker.Close` phiên cum) — phép kiểm DUY NHẤT ràng buộc kinh tế ──")
     for name, tk, d, _e, _p, _q, close_cum in REAL:
@@ -143,15 +153,24 @@ def main() -> int:
     m = recs.get("MBB2026-07-09")
     check("MBB 07-09: cổ tức TIỀN không đổi KL (1.100 → 1.100)",
           m is not None and m["qty_after"] == 1100, f"{m['qty_after']:,}" if m else "")
-    check("MBB 07-09: tiền CỘNG đúng 1.100×1.000 = 1.100.000đ, MỘT LẦN",
-          m is not None and abs(m["cash_delta_vnd"] - 1_100_000.0) < 0.5,
+    check("MBB 07-09: cổ tức GỘP 1.100×1.000 = 1.100.000đ (con số của SỞ, dùng cho P_ref)",
+          m is not None and abs(m["cash_dividend_vnd"] - 1_100_000.0) < 0.5,
+          f"{m['cash_dividend_vnd']:+,.0f}đ" if m else "")
+    check("MBB 07-09: thuế TNCN 5% = 55.000đ — KHỚP quy ước sổ THẬT reconcile_equity.py",
+          m is not None and abs(m["div_tax_vnd"] - 55_000.0) < 0.5
+          and abs(m["div_tax_rate"] - 0.05) < 1e-12,
+          f"{m['div_tax_vnd']:+,.0f}đ @{m['div_tax_rate']}" if m else "")
+    check("MBB 07-09: tiền VÀO SỔ là RÒNG 1.045.000đ, MỘT LẦN — KHÔNG phải gộp 1.100.000đ",
+          m is not None and abs(m["cash_delta_vnd"] - 1_045_000.0) < 0.5,
           f"{m['cash_delta_vnd']:+,.0f}đ" if m else "")
     check("MBB 07-09: P_ref = 26.000 − 1.000 = 25.000đ",
           m is not None and abs(m["p_ref"] - 25000.0) < 0.5, f"{m['p_ref']:,.2f}đ" if m else "")
     g = recs.get("DGC2026-09-14")
-    check("DGC 09-14: 2 cổ tức tiền cùng ngày phải CỘNG = 8.000đ/CP ⇒ 700×8.000 = 5.600.000đ",
-          g is not None and abs(g["cash_delta_vnd"] - 5_600_000.0) < 0.5,
-          f"{g['cash_delta_vnd']:+,.0f}đ" if g else "")
+    check("DGC 09-14: 2 cổ tức tiền cùng ngày phải CỘNG = 8.000đ/CP ⇒ GỘP 700×8.000 = "
+          "5.600.000đ, RÒNG sau thuế 5% = 5.320.000đ",
+          g is not None and abs(g["cash_dividend_vnd"] - 5_600_000.0) < 0.5
+          and abs(g["cash_delta_vnd"] - 5_320_000.0) < 0.5,
+          f"gộp {g['cash_dividend_vnd']:,.0f}đ · ròng {g['cash_delta_vnd']:+,.0f}đ" if g else "")
     b = recs.get("VIB2026-09-10")
     check("VIB 09-10: 1.000 × 1,095 = 1.095 CP chẵn",
           b is not None and b["qty_after"] == 1095 and abs(b["frac_shares"]) < 1e-9,
@@ -405,6 +424,7 @@ def main() -> int:
     check("cụm tiền+CP (SSI 08-17): cổ tức tính trên KL TRƯỚC chia = 1.000.000đ, "
           "P_ref 19.583,33đ khớp Close BQ trong 1 bước giá",
           r_ssi is not None and abs(r_ssi["cash_dividend_vnd"] - 1_000_000.0) < 1e-6
+          and abs(r_ssi["cash_delta_vnd"] - 950_000.0) < 1e-6
           and abs(r_ssi["p_ref"] - 19583.3333) < 0.01 and r_ssi["p_ref_anchor"] == "ok",
           f"tiền {r_ssi['cash_dividend_vnd']:,.0f}đ · P_ref {r_ssi['p_ref']:,.2f}đ · "
           f"neo {r_ssi['p_ref_anchor']}" if r_ssi else why_ssi)

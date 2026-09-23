@@ -7,7 +7,8 @@ VÌ SAO TỒN TẠI
 `PaperBroker` (`trading_bot/brokers.py`) giữ vị thế là một con số thuần `{mã: KL}` và tiền là
 một con số thuần. Nó khớp lệnh trên QUOTE THẬT — nghĩa là sáng ngày GDKHQ, giá nó nhìn thấy đã
 rơi về hệ quy chiếu mới, trong khi KL nó đang giữ vẫn là KL hệ CŨ. Không ai bù phần chênh. Đo
-trên chính sổ paper `main`: 3 sự kiện thật từ 2026-07-07 làm sổ bỏ lỡ 7.915.455đ = 0,79% NAV.
+trên chính sổ paper `main`: 3 sự kiện thật từ 2026-07-07 làm sổ bỏ lỡ 7.860.455đ = 0,79% NAV
+(cổ tức tiền tính RÒNG sau thuế TNCN 5% — xem `DIV_TAX_RATE`; con số GỘP là 7.915.455đ).
 Sổ paper là NỀN BẰNG CHỨNG của các chương trình R&D ⇒ đây là CÔNG CỤ ĐO, không chạm tiền thật,
 không đi vào đường đặt lệnh.
 
@@ -135,6 +136,13 @@ _ICT = ZoneInfo("Asia/Ho_Chi_Minh")
 # Sai số của ĐỒNG NHẤT THỨC bảo toàn, trên TOÀN CỤM. Mọi số hạng là tích số nguyên × giá VND
 # nên lệch thật chỉ đến từ lỗi công thức, không từ dấu phẩy động.
 INVARIANT_TOL_VND = 1.0
+
+# Thuế TNCN cổ tức TIỀN MẶT, cá nhân cư trú. KHỚP quy ước sổ THẬT: `reconcile_equity.py`
+# (`--div-tax-rate`, mặc định 0,05 → `net_cash_dividends()` trả `net = gross − paid×rate`).
+# Sổ paper ghi tiền ngay ngày GDKHQ (sổ thật nhận sau vài tuần) ⇒ ở đây mọi cổ tức đều coi như
+# ĐÃ CHI TRẢ, tức luôn chịu thuế — khác `net_cash_dividends()` chỗ nó tách phần còn phải thu.
+# Không làm tròn: giống hệt `tax = paid * tax_rate` bên sổ thật.
+DIV_TAX_RATE = 0.05
 
 # Phương thức phát hành KHÔNG làm tăng KL tại GDKHQ (phải nộp tiền mới có CP). Nguồn chuẩn tắc
 # của chuỗi này: `price_frame.RIGHTS_METHOD`, import lại chứ không chép.
@@ -294,8 +302,13 @@ def build_record(ticker, ex_date, events, qty0, p_cum, close_ref=None):
     frac_cash = frac * p_ref
 
     # ─── TIỀN: chỉ cổ tức tiền + tiền lẻ. Tiền mua quyền CHƯA ra (nộp ở ngày quyết toán).
-    cash_div = qty0 * cash_ps
-    cash_delta = cash_div + frac_cash
+    # Cổ tức tiền vào sổ là RÒNG sau thuế TNCN (xem DIV_TAX_RATE). GỘP vẫn được giữ lại vì
+    # đồng nhất thức bảo toàn nói về kinh tế của sự kiện (giá rơi theo cổ tức GỘP); thuế là
+    # khoản chuyển RA NGOÀI hệ, phải là số hạng RIÊNG chứ không được giấu vào phần dư.
+    cash_div_gross = qty0 * cash_ps
+    div_tax = cash_div_gross * DIV_TAX_RATE
+    cash_div_net = cash_div_gross - div_tax
+    cash_delta = cash_div_net + frac_cash
 
     # ─── QUYỀN MUA: khoản CHỜ, có giá trị nội tại, không phải cổ phiếu.
     rights_ratio = sum(r for r, _ in (rights or []))
@@ -321,7 +334,10 @@ def build_record(ticker, ex_date, events, qty0, p_cum, close_ref=None):
         "p_ref_anchor_diff": anchor["diff"],
         "qty_before": int(qty0), "qty_after": qty_new,
         "frac_shares": frac, "frac_cash_vnd": frac_cash,
-        "cash_dividend_vnd": cash_div, "cash_delta_vnd": cash_delta,
+        "cash_dividend_vnd": cash_div_gross,      # GỘP — giữ tên cũ = con số của SỞ
+        "cash_dividend_net_vnd": cash_div_net, "div_tax_vnd": div_tax,
+        "div_tax_rate": DIV_TAX_RATE,
+        "cash_delta_vnd": cash_delta,             # RÒNG + tiền lẻ = đúng số vào sổ
         "pending_rights": pending, "rights_intrinsic_vnd": rights_intrinsic,
         "mv_before_vnd": qty0 * p_cum, "mv_after_vnd": qty_new * p_ref,
     }
@@ -354,13 +370,14 @@ def check_p_ref_against_close(p_ref, close_ref, symbol="", exchange="HOSE"):
 
 
 def verify_invariant(rec) -> tuple:
-    """KL_cũ×P_cum == KL_mới×P_ref + Δtiền + giá trị quyền chờ → (đạt?, phần dư VND).
+    """KL_cũ×P_cum == KL_mới×P_ref + Δtiền + thuế TNCN + giá trị quyền chờ → (đạt?, dư VND).
 
     ⚠️ ĐỒNG NHẤT THỨC BẢO TOÀN, KHÔNG phải bằng chứng kinh tế — xem docstring module. Bắt được
     lỗi số học giữa các nhánh (vd bỏ sót tiền lẻ), KHÔNG bắt được tỉ lệ/cổ tức sai.
     """
     lhs = rec["qty_before"] * rec["p_cum"]
     rhs = (rec["qty_after"] * rec["p_ref"] + rec["cash_delta_vnd"]
+           + rec.get("div_tax_vnd", 0.0)          # rời hệ ra thuế, KHÔNG được nuốt vào phần dư
            + rec.get("rights_intrinsic_vnd", 0.0))
     resid = lhs - rhs
     return abs(resid) <= INVARIANT_TOL_VND, resid
@@ -610,9 +627,11 @@ def main() -> int:
             extra = (f" · quyền mua CHỜ {r['rights_intrinsic_vnd']:+,.0f}đ nội tại "
                      f"({sum(p['shares'] for p in r['pending_rights']):,.0f}cp @ "
                      f"{r['pending_rights'][0]['issue_price']:,.0f}đ)") if r["pending_rights"] else ""
+            tax = (f" (cổ tức gộp {r['cash_dividend_vnd']:,.0f}đ − thuế "
+                   f"{r['div_tax_vnd']:,.0f}đ @{r['div_tax_rate']:.0%})") if r["div_tax_vnd"] else ""
             print(f"[paper-ca] {r['ticker']}@{r['ex_date']}  KL {r['qty_before']:,} → "
                   f"{r['qty_after']:,} (×{1 + r['share_ratio']:.4f}) · tiền "
-                  f"{r['cash_delta_vnd']:+,.0f}đ · P_cum {r['p_cum']:,.0f} → P_ref "
+                  f"{r['cash_delta_vnd']:+,.0f}đ{tax} · P_cum {r['p_cum']:,.0f} → P_ref "
                   f"{r['p_ref']:,.0f} [neo {r['p_ref_anchor']}]{extra} · dư "
                   f"{r['invariant_residual_vnd']:+.4f}đ  [{r['reason']}]")
 
@@ -658,6 +677,8 @@ def main() -> int:
                                            "ex_date": rec["ex_date"], "qty_before": rec["qty_before"],
                                            "qty_after": rec["qty_after"],
                                            "cash_delta_vnd": rec["cash_delta_vnd"],
+                                           "cash_dividend_gross_vnd": rec["cash_dividend_vnd"],
+                                           "div_tax_vnd": rec["div_tax_vnd"],
                                            "applied_at": rec["applied_at"], "asof": rec["asof"]})
         print(f"[paper-ca] đã áp {len(summary['applied'])} sự kiện · tiền "
               f"{summary['cash_delta_total']:+,.0f}đ · quyền mua chờ "
