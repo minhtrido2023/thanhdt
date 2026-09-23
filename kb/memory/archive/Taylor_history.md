@@ -593,3 +593,9 @@
 
 ## Archived 2026-09-23 (keep=12 days=0 require_done=False)
 - [2026-09-17T16:33:09Z] [2026-09-17] treasury window monitor: arch vong 2 text-fix a8301c27 (tren d25d8b9d) CHUA merge/cron - CHO arch-reviewer vong 3 + Mike/user chot CLOSE_WINDOW_DAYS (45 vs 90) + gio cron.
+
+## Archived 2026-09-23 (keep=12 days=0 require_done=False)
+- [2026-09-18T01:21:32Z] [2026-09-18] fearbuy weekly (job _011034) XONG, commit cf8313fd. MO: GEX = AMBIGUOUS-yeu, 2 cong nhi phan (ket luan dieu tra 500kV mach 3 co neu dich danh phap nhan Gelex? + Q3/2026 CF_OA >= NP?) — cua so gia DA DONG, khong actionable. Caveat dd52 pheu lech sang tuan 3 chua ai fix.
+
+## Archived 2026-09-23 (keep=12 days=0 require_done=False)
+- [2026-09-18T10:49:23Z] [2026-09-18] treasury_share_events table (job _103820): 8b85f833 tren feat/treasury-share-events-table (worktree mike/agents/wt-treasury-table) — CHUA ghi BQ/CHUA tao bang. 577 dong dry-run, 3 tier tach bach, 33 ca suy luan recompute doc lap 33/33 khop. CHO arch-reviewer + Mike/user duyet DDL schema.sql + data_registry_entry.proposed.md.
