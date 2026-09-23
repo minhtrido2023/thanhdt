@@ -34,6 +34,16 @@
       "escalated_utc": "2026-09-12T22:01:04Z",
       "ack_pending": false,
       "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
+    },
+    "mike/bin/production_manifest_selfcheck.sh": {
+      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
+      "since": "2026-09-23T22:02:47Z",
+      "status": "FAIL",
+      "auto": true,
+      "topic": "selfcheck-red: mike/bin/production_manifest_selfcheck.sh",
+      "escalated_utc": "2026-09-23T22:02:47Z",
+      "ack_pending": false,
+      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
     }
   }
 }
