@@ -1353,6 +1353,7 @@ class PaperBroker(BrokerBase):
             self._save()
         self.state.setdefault("open_orders", {})
         self.state.setdefault("fills", [])
+        self.state.setdefault("pending_shares", [])
 
     def _save(self):
         os.makedirs(os.path.dirname(self.state_file), exist_ok=True)
@@ -1367,9 +1368,46 @@ class PaperBroker(BrokerBase):
     def get_cash(self):
         return float(self.state["cash"])
 
+    def locked_shares(self, symbol, asof=None):
+        """CP đã vào `positions` qua corp-action nhưng CHƯA giao dịch được, tại ngày `asof`.
+
+        `state["pending_shares"]` = [{"symbol","qty","sellable_from"|None, ...}], do
+        `mike/bin/paper_corp_action.py` ghi khi nó cộng KL vào sổ. `sellable_from = None`
+        ⇒ KHOÁ cho tới khi có người mở tường minh (fail-safe: không đoán ngày về).
+
+        VÌ SAO KHÔNG DÙNG T+2: đo trên `data/execution_logs/dnse_raw_*.jsonl`, tài khoản
+        SpaceX, mã MBB sau GDKHQ 2026-08-11 (cổ tức CP 15%): `openQuantity` nhảy 1.100 →
+        1.265 NGAY, nhưng `tradeQuantity` (= trường DNSEBroker.get_positions() đọc thành
+        `sellable`) đứng ở 1.100 **liên tục 2026-08-11 → 2026-09-23** — 43 ngày, khoảng
+        cách 165 CP chưa từng đóng. Một mô hình T+2 sẽ cho bán sớm 41 ngày.
+        """
+        if asof is None:
+            asof = today_ict().isoformat()
+        sym = str(symbol).upper()
+        n = 0
+        for e in self.state.get("pending_shares") or []:
+            if str(e.get("symbol", "")).upper() != sym:
+                continue
+            sf = e.get("sellable_from")
+            if sf is None or str(sf)[:10] > asof:
+                n += int(e.get("qty") or 0)
+        return n
+
     def get_positions(self):
-        return {s: {"total": int(q), "sellable": int(q)}
-                for s, q in self.state["positions"].items() if q > 0}
+        # `sellable` KHÔNG còn == `total`: CP thưởng/cổ tức CP vào sổ ngay ngày GDKHQ nhưng
+        # chưa niêm yết bổ sung nên chưa bán được (bằng chứng ở `locked_shares`). Executor
+        # đã biết cap SELL theo `sellable` sẵn (executor.py ~1848/1976), nên đây là chỗ
+        # DUY NHẤT cần sửa để sổ paper thôi bán khống phần chưa về.
+        out = {}
+        for s, q in self.state["positions"].items():
+            if q <= 0:
+                continue
+            total = int(q)
+            locked = self.locked_shares(s)
+            out[s] = {"total": total, "sellable": max(total - locked, 0)}
+            if locked:
+                out[s]["pending_corp_action"] = locked
+        return out
 
     def get_quote(self, symbol):
         if self.quote_source is not None:
@@ -1469,7 +1507,12 @@ class PaperBroker(BrokerBase):
                 self.state["positions"].get(o["symbol"], 0) + qty
         else:
             have = self.state["positions"].get(o["symbol"], 0)
-            if have < qty:
+            # Trừ phần corp-action chưa về: cap của Executor là tầng ĐẶT LỆNH và có đường
+            # degrade (executor.py ~2096) ⇒ nếu chỉ cap ở đó, một lệnh lọt qua vẫn khớp và
+            # sổ paper bán được thứ tài khoản thật không bán được. Chặn ở tầng KHỚP.
+            # `have` phải giữ nguyên KL TỔNG — nó là số bị ghi lại vào sổ ở dưới; trừ thẳng
+            # vào nó sẽ XOÁ phần đang khoá (bán 1.200/1.380 ⇒ sổ về 0 thay vì 180).
+            if have - self.locked_shares(o["symbol"]) < qty:
                 o["status"] = "rejected_qty"
                 return
             self.state["cash"] += value - fee
