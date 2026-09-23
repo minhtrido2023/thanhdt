@@ -130,6 +130,10 @@ Chặn thật nằm ở **instrumentation**, và thêm phiên **không** sửa �
 
 `end` dời 09-23 → **2026-10-07**, **chỉ** để có thời gian cho quyết định dưới đây — không phải để gom thêm mẫu.
 
+> ✅ **ĐÃ CHỐT 2026-09-23 — user chọn (A).** Đã thực hiện, và chẩn đoán trong bảng trên bị
+> lật ở cả hai dòng: coverage không phải thiếu mẫu, KEEP 300/301 không phải ngưỡng chặt.
+> **Xem mục 5(4).** Nguyên văn 2 lựa chọn giữ lại bên dưới làm bản ghi.
+>
 > **CẦN USER CHỐT — 1 trong 2 (không go-live dù chọn gì, đúng phạm vi đã khoá):**
 > **(A) SỬA rồi chạy lại** — thêm trường hậu kiểm 1/5/15′ vào schema + nới policy để sinh tỉ lệ khuyến nghị khác-baseline đo được, rồi đặt cửa sổ mới.
 > **(B) DỪNG, ghi nhận KẾT QUẢ NULL** — một policy spread+depth gần như **không bao giờ** bất đồng với baseline qua 301 cơ hội thật là một câu trả lời **hợp lệ**: không có edge execution để hái ở nhịp 60s này.
@@ -156,7 +160,7 @@ Bằng chứng, tra mất 2 phút:
 |---|---|
 | `alphalens` | **2026-09-30** — audit độc lập (Taylor). Xem mục 2: quy ước quyền mua cần chốt TRƯỚC ngày này |
 | `expvol_pacing` | **2026-10-13** — checkpoint đã làm hôm nay (commit `927c72d5`), chu kỳ ~4 tuần |
-| `order_book_execution_shadow` | **2026-10-07** — dời từ 09-23, chờ quyết định (A)/(B) |
+| `order_book_execution_shadow` | **2026-10-21** — user chốt (A), đã áp dụng; tiêu chí đổi sang N≥30 ở tầng REAL. Xem mục 5(4) |
 | `yield_floor_custom30v_observe` | **2027-02-05** |
 | `engine_room_oos` | **2026-12-01** (`end: None`, mốc ghi trong `end_or_trigger`) |
 | `dc_waterfall` | event-anchored — chu kỳ reverse-unwind đầu tiên + settle 4-6 tuần · **trần 2026-10-06** |
@@ -174,3 +178,131 @@ sáng GDKHQ (`paper_main_probe_plan.py:190` đọc thẳng `positions`). **Chưa
 3. **Đổi quy ước dẫn dắt AlphaLens sang `terp`** trước khi gate đóng 2026-09-30? Một tham số (`convention="terp"`), đã có sẵn + selfcheck ca 15 tái lập đúng 20.180. Nếu đồng ý, excess chính thức thành **+1,86pp** thay vì +0,81pp.
 
 Và **1 quyết định ở mục 3(a)**: `order_book_execution_shadow` → (A) sửa instrumentation rồi chạy lại, hay (B) dừng và ghi nhận kết quả null.
+
+> **Cập nhật 2026-09-23:** mục 1, 2 và 3(a) đã được user chốt và áp dụng — xem **mục 5**.
+> Mục 3 (`terp`) và việc hồi tố NAV lịch sử **vẫn chờ user**, chưa tự làm.
+
+---
+
+## 5. Quyết định của user (2026-09-23) và kết quả áp dụng
+
+Job `Taylor_20260923_051148`. User chốt 4 mục; cả 4 đã thực hiện. Hai mục CHƯA quyết
+(hồi tố NAV lịch sử · đổi quy ước dẫn dắt AlphaLens sang `terp`) **giữ nguyên, không tự làm**.
+
+### (1) Cổ tức tiền ghi RÒNG sau thuế TNCN 5% — `a8fa47d6`
+
+Khớp quy ước sổ THẬT (`reconcile_equity.py:188`, `--div-tax-rate` 0,05 → `net_cash_dividends()`).
+Headline sổ paper main: **7.915.455đ GỘP → 7.860.455đ RÒNG** (thuế 55.000đ).
+
+Bản ghi tách **ba** trường thay vì sửa một: `cash_dividend_vnd` GỘP (giữ tên cũ — đó là con số
+của SỞ, và `P_ref` vẫn rơi theo GỘP), `div_tax_vnd`, `cash_delta_vnd` RÒNG. Sổ cái append-only
+ghi cả gộp lẫn thuế: mất là không dựng lại được. Trong `verify_invariant()` thuế là **số hạng
+riêng ở vế phải** — nó là khoản chuyển RA NGOÀI hệ, không được nuốt vào phần dư.
+
+Đo: 63/63 PASS × 4 TZ + `env -u TZ` + `$DNA_PYEXE`; 5/5 mutation chết bằng assertion. Một trong
+5 mutation (`cash_delta` = GỘP) qua được MỌI test cũ — phải thêm check "bỏ thuế khỏi vế phải ⇒
+vỡ đúng số thuế" mới bắt được.
+
+### (2) `PaperBroker.get_positions()`: `sellable ≠ total` — `24e885ac` + `6ca93ac1`
+
+Trước bản vá, sổ paper bán được **ngay sáng GDKHQ** phần CP thưởng/cổ tức CP mà tài khoản THẬT
+không bán được.
+
+**Bằng chứng đo được, không phải mô hình T+2 suy diễn** — `dnse_raw_*.jsonl`, SpaceX, MBB sau
+GDKHQ 2026-08-11 (cổ tức CP 15%): `openQuantity` 1.100 → 1.265 NGAY, nhưng `tradeQuantity`
+(trường `DNSEBroker.get_positions()` đọc thành `sellable`) đứng ở 1.100 **liên tục 08-11 →
+09-23 = 43 ngày**; khoảng cách 165 CP chưa từng đóng. Một mô hình T+2 sẽ cho bán sớm **41 ngày**
+⇒ chọn khoá tới khi có người mở tường minh (`sellable_from=None`, không đoán ngày niêm yết bổ
+sung). Chặn ở **cả hai** tầng: đặt lệnh (Executor) và KHỚP (`_try_fill`).
+
+§23 — đây là module lõi dùng chung: quét rộng 8 selfcheck, tất cả rc=0. 6/6 mutation chết.
+
+### (3) Cron `paper_corp_action.py` — `07487da8`
+
+`40 1 * * 1-5` = **08:40 ICT T2–T6**. Không phải 08:45 như đề xuất: khe `45 1` đã có
+`preflight_check.sh`, `50 1` có `plan_approval_reminder.sh`, `52 1` có probe plan ⇒ lùi về khe
+trống gần nhất theo `_adding-cron-policy.md`. Vị trí đúng trong chuỗi: SAU lô vendor ~22:2x T-1
+và sync BQ 23:45 T-1, TRƯỚC `paper_main_probe_plan` 08:52 (12 phút) và `bot_execute` 09:10.
+
+Xác nhận lại bằng `crontab -l` thật (dòng 148), không tin bước ghi. Runtime đo thật 2,3s /
+`timeout 300`. Backup crontab trước khi sửa: `mike/logs/crontab_backup_paper_corp_action_20260923.txt`.
+**Lượt chạy đầu tiên: T5 2026-09-24 08:40 ICT.**
+
+Lần chạy tay hôm nay (12:1x) **chỉ đặt watermark** `2026-09-23`, `applied=0`, positions/cash
+không đổi (cash 844.381.367,5đ) — đúng chỉ đạo không hồi tố. Muốn hồi tố sau: `--backfill-since`.
+
+### (4) `order_book_execution_shadow` — phương án (A) — `bae551d7` + `e8066c75`
+
+Checkpoint mục 3(a) nêu 2 chặn. **Cả hai chẩn đoán ban đầu đều sai về nguyên nhân**, và sửa
+theo chẩn đoán sai sẽ tốn thêm một cửa sổ thu thập vô ích.
+
+**Chặn 1 — "coverage ~1,6% ⇒ thiếu mẫu": SAI, đó là lỗi ĐỌC THIẾU NGUỒN.**
+
+Đếm lại theo từng nguyên nhân thay vì tổng: **259/265** quan sát đủ điều kiện markout rơi vào
+nhánh *"không có chuỗi giá nào để so"* — chứ không phải *"có chuỗi mà thiếu điểm"*. Gốc cơ học:
+91% mẫu là `account=main`, mà `main` chạy **`broker: "phs"`**, và `PHSBroker.get_quote()` **dựng**
+`l2_snapshot` nhưng **không bao giờ ghi** `quote_l2` — chỉ `DNSEBroker._log_l2()` mới ghi. Bản
+ghi `quote_l2` cuối cùng mang `account_label="main"` là **2026-08-17**, tức TRƯỚC ngày trial bắt
+đầu (08-18). Thêm bao nhiêu phiên cũng **không sinh thêm một điểm markout nào** cho nhánh này.
+
+Chuỗi giá của chính `main` thì vẫn nằm trên đĩa, chỉ ở file khác: `probe_ticks_<account>_<date>.csv`
+(`_probe_tick_log`, cadence 60s, sống thêm `probe_linger_min`=30′ sau khi mọi parent đã khớp —
+đúng bằng cửa sổ 1/5/15′). Cho probe đọc thêm nguồn này:
+
+| | Trước | Sau |
+|---|---|---|
+| coverage 1m / 5m / 15m | 1,5% / 1,5% / 0,8% | **93,2% / 93,2% / 82,3%** |
+| adverse-selection median | 1m +18,4 · 5m +20,6 · 15m +45,7 bps *(N=4)* | 1m **+13,8** · 5m **+8,0** · 15m **−0,0** bps *(N=247/247/218)* |
+
+**Trên đúng mẫu 22 phiên đã có — không thu thêm ngày nào.** Gate 1 ĐẠT. Và hình dạng đổi hẳn:
+số cũ dốc LÊN theo thời gian (dấu hiệu adverse selection dai dẳng); số mới **suy giảm về 0**,
+đúng hình dạng tác động TẠM THỜI. Số cũ dựng trên N=4 là nhiễu, không phải tín hiệu.
+
+⚠️ Hai cơ sở giá **không được trộn im lặng**: `dnse_raw` → **mid**, `probe_ticks` → **last**.
+Mỗi quan sát nay mang `markout_basis` (mẫu hiện tại mid=6 / last=259); so markout giữa 2 basis
+phải tách.
+
+**Chặn 2 — "KEEP 300/301 ⇒ nới ngưỡng ra": SAI, đó là MẪU KHÔNG ĐỒNG NHẤT.**
+
+| Tầng | N hợp lệ | `touch_depth_ratio` | `spread_ticks` | khác-baseline (v1) |
+|---|---|---|---|---|
+| **PROBE** (`main`, churn 100 CP trên 6 mega-cap) | 289 | trung vị **763×** | 1,0 ở 283/298, **không bao giờ >2,0** | 0/289 |
+| **REAL** (lệnh tài khoản thật) | 9 | trung vị **2,2×**, p25 1,3×, min 0,3× | 1,0–2,0 | 1/9 |
+
+Sổ dày gấp **763 lần** lệnh và spread luôn chạm sàn tick ⇒ một policy spread+depth **không thể**
+có gì để phân biệt ở tầng PROBE, và cũng **không nên**. Gộp hai tầng chính là lý do checkpoint
+đọc ra "policy gần như không bao giờ bất đồng với baseline". Mọi số của probe nay tách tầng.
+
+Ngưỡng hiệu chuẩn lại thành **`spread_depth_v2`** (REDUCE: spread ≥1 tick ∧ depth <2,0 ·
+DEFER: spread ≥2 tick ∧ depth <1,0), chọn theo tiêu chí **PHÂN BIỆT** chứ không theo tỉ lệ kêu:
+trên mẫu đã thu cho **4/9 = 44% khác-baseline ở tầng REAL, và vẫn 0/289 ở tầng PROBE**. Một bộ
+ngưỡng kêu cả trên mega-cap là bộ ngưỡng **sai**, không phải bộ ngưỡng nhạy. `v1` giữ nguyên
+trong lịch sử — `policy_version` đóng dấu vào từng bản ghi nên hai thế hệ không lẫn nhau.
+
+Hậu kiểm ghi ra artifact **riêng** `data/execution_logs/orderbook_markout.jsonl` (schema
+`orderbook_markout_v1`, nối bằng `trace_id`, ghi atomic). **Không** sửa bản ghi
+`orderbook_execution_v1` đã nằm trên đĩa: đó là bằng chứng immutable của thời điểm đặt lệnh, và
+321 bản ghi đã thu phải giữ nguyên để còn so được — đúng tinh thần "dựng offline" của charter.
+
+Vẫn **thuần shadow**: `behavior_contract = LOG_ONLY_NO_BROKER_PATH`, không field nào đi vào
+`_child_qty` / `_limit_price` / lịch HYBRID. Gate 4 (user sign-off) chưa đụng tới.
+
+**Cửa sổ review mới: `end` 10-07 → 2026-10-21, và tiêu chí kết thúc đổi ĐƠN VỊ** — từ *số phiên*
+sang **N ≥ 30 quan sát hợp lệ ở tầng REAL**. Lý do phải giải thích rõ (dispatch yêu cầu): mốc
+"20 phiên" đã vượt từ 09-23 và công thức gia hạn Wilson của 2 lần trước **không áp dụng** — nó
+dành cho ca thiếu mẫu. Sau khi tách tầng thì chỗ thiếu không còn là "phiên" mà là *tầng*: PROBE
+đã 295 và thêm nữa vô ích, REAL mới 26 thô / 9 hợp lệ. Nếu tới 10-21 tầng REAL vẫn <30, đó là
+câu trả lời về **tần suất cơ hội** (~1,8 quan sát hợp lệ / phiên có lệnh thật) chứ không phải lý
+do gia hạn lần 4: khi đó chốt kết quả trên mẫu đang có và đóng chương trình.
+
+### Đo lường chung của mục 5
+
+| Selfcheck | Kết quả |
+|---|---|
+| `paper_corp_action_selfcheck.py` | **72/72** × 4 TZ + `env -u TZ` + `$DNA_PYEXE`; 11/11 mutation chết |
+| `order_book_shadow_probe_selfcheck.py` | **21/21** × 4 TZ + `env -u TZ` + `$DNA_PYEXE`; **7/7** mutation chết |
+| `order_book_shadow_selfcheck.py` | PASS × 4 TZ + py3.10 + pandas3; mutation revert ngưỡng về v1 chết |
+| §23 quét rộng (`brokers.py`, `config.py`) | **12** selfcheck, tất cả rc=0 |
+
+⚠️ Bẫy tái phát trong chính phiên này: **chạy mutation trên `.py` phải xoá `__pycache__`** —
+`config.py` sửa rồi mà `DEFAULTS` vẫn trả giá trị cũ, làm 4 lượt TZ báo FAIL giả.
