@@ -48,6 +48,14 @@
   ⚠️ **CÙNG LỚP LỖI CÒN 4 CALL-SITE CHƯA VÁ** (xem `kb/memory/Mike.md`): `dividend_adjusted_return.py:473-478` (chạm SỐ CÔNG BỐ nhà đầu tư §21 — ưu tiên cao nhất), `discretionary_margin_gate.py:335` (sleeve margin tiền thật, latent), `report_return_gate.py` (lỗ hổng phủ im lặng), `discretionary_accumulation_inject.py:124`, + `due_diligence.py:173-202 adv_vnd()` (chiều an toàn). arch-reviewer nói rõ **KHÔNG khẳng định đã quét hết**.
   Selfcheck 38/0 + 64/0 + 8/0 qua 3 TZ. rc=5 là mã MỚI: `eod_trading_report.sh` không ghi marker, `nav_sync_retry.sh` không retry 2h, `nav_snapshot_daily.sh` escalate ngay. Runbook rc=5 ở `kb/ops_runbook.md.proposed` — **CHỜ MIKE DUYỆT ĐỂ ĐƯA LIVE (§13)**.
 
+- **KL hưởng quyền neo bằng BẰNG CHỨNG, không bằng KL cuối ngày cum** (`bin/dividend_adjusted_return.py` — `qty_entitled`/`credit_frame`) — LIVE từ **2026-09-24**, commit `1608a267`, arch-review APPROVED. Call-site **thứ 3** cùng lớp lỗi corp-action, chạm SỐ CÔNG BỐ nhà đầu tư (§21).
+  · `_qty_at` cũ lấy KL từ bản ghi positions CUỐI NGÀY `last_cum_date` = đúng đêm broker credit sớm; lá chắn `STOCK_SUSPECTED` bị vô hiệu vì sau credit sớm thì `qty[last_cum] == qty[ex_date]`
+  · vá: neo theo bằng chứng KHỐI LƯỢNG (`classify_qty_residual`) + bằng chứng GIÁ (`verify_post_event_price`); thiếu bằng chứng ⇒ `status="unknown"` ⇒ **BỎ phương trình** (không coi như 0), fail-closed
+  · ⚠️ hướng "neo theo `broker_effective_ts`" (Mike chỉ đạo) đã BỊ BÁC bằng dữ liệu thật: MBB 10/08 bản ghi cuối 19:12:13 vẫn chưa credit (mốc khai 19:32:49 đúng số nhưng SAI lý do); VPB 23/09 bản ghi duy nhất trước mốc là 04:51 SÁNG ⇒ neo ở đó bỏ mất lệnh khớp trong chính phiên cum (ca thật MBB bán 1.500→1.100 lúc 09:15)
+  · `--selfcheck` 120/0 qua 3 TZ (58 ca cũ giữ nguyên); e2e `--resolve` BYTE-IDENTICAL với master
+  **Q1 — ĐÃ KIỂM, KHÔNG SỐ CÔNG BỐ NÀO BỊ ẢNH HƯỞNG**: 24 sự kiện DIV+ISS cùng ex-date sau go-live 01/07 × 39 mã đã từng nắm giữ ⇒ **giao RỖNG** (Mike tự xác nhận bằng BQ + quét toàn bộ `dnse_raw`). Nhịp thật ~5-7 ca/năm ⇒ không phải ca hiếm, chỉ chưa cắn.
+  ⚠️ **VIỆC LÀM SAU, ưu tiên cao nhất**: `dividend_adjusted_return.py:469-472` `broker_qty()` lấy **LÔ CUỐI** thay vì **TỔNG LÔ** ⇒ thiếu 25% KL thật ở **135 cặp (mã, ngày)** của ZaloPay (BID 14/08: 320 vs 427); `credit_frame` thì gộp lô ĐÚNG ⇒ hai quy ước cùng tồn tại trong một lần giải. Pre-existing + fail-closed, nhưng BID/VCB/MBB trả cổ tức tiền hằng năm nên sẽ cắn.
+
 ## R&D pipeline — PAPER-ONLY, chi tiết `kb/projects/rnd-pipeline-tracker.md`
 Fear-buy quét hàng tuần `bin/fearbuy_weekly_scan.sh` (Friday 08:10 ICT). Recon thuần, KHÔNG tự mua.
 
