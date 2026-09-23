@@ -611,3 +611,6 @@
 
 ## Archived 2026-09-23 (keep=12 days=0 require_done=False)
 - [2026-09-22T10:05:17Z] [2026-09-22] nav-exdate-forecast L1 vong 2 XONG (commit 71d253c2, sua R2-R6 theo arch-review doc lap cua Mike): pipeline-3b doi cho truoc cong abort, R3 notify khi thieu snapshot, R4 day_word theo vi tri phien, R5 test hermetic real schema, R6 guard+wording+unit fixes. 39/39 PASS x3 TZ, tree clean. CHO Mike/user merge feat/nav-exdate-forecast. L2-L4 (feat/nav-corpaction-gate) VAN BI TU CHOI rieng, cho redesign.
+
+## Archived 2026-09-23 (keep=12 days=0 require_done=False)
+- [2026-09-22T11:33:58Z] [2026-09-22] nav-corpaction-gate-v2 (job _111128) XONG, commit fdc325ff tren feat/nav-corpaction-gate-v2 (worktree wt-nav-corpaction-gate-v2), redesign thay the c5bd6e9b bi bac — L3 dua vao corp_action_daily snapshot that (khong doi BQ), L4 chan theo bang chung KHOI LUONG that doi (khong theo lich). 18+8 selfcheck PASS (TZ-independent), acceptance test sandboxed PASS ca 2 account, P1-P4 arch-review cu deu xu ly. CHUA merge — CHO arch-reviewer doc lap + Mike/user duyet.
