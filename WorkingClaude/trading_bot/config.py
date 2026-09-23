@@ -77,11 +77,30 @@ DEFAULTS = {
     # Không field nào dưới đây được đọc vào `_child_qty`, `_limit_price` hay lịch HYBRID.
     "order_book_shadow_enabled": True,
     "order_book_snapshot_max_age_ms": 5_000,
-    "order_book_shadow_policy_version": "spread_depth_v1",
-    "order_book_reduce_spread_ticks": 2.0,
-    "order_book_defer_spread_ticks": 4.0,
-    "order_book_reduce_depth_ratio": 1.0,
-    "order_book_defer_depth_ratio": 0.5,
+    # NGƯỠNG `spread_depth_v2` — hiệu chuẩn 2026-09-23 trên chính 298 quan sát hợp lệ đã thu
+    # (v1 giữ nguyên trong lịch sử; `policy_version` đóng dấu vào từng bản ghi nên hai thế hệ
+    # KHÔNG lẫn vào nhau khi phân tích).
+    #
+    # VÌ SAO ĐỔI — và vì sao KHÔNG phải "nới cho nó chịu kêu": v1 cho KEEP 320/321, và cách
+    # đọc đầu tiên là "policy vô dụng". Đo lại tách theo tầng thì đó là ẢO ẢNH CỦA MẪU:
+    #   · tầng PROBE (295 bản ghi, 91% mẫu — lệnh churn 100 CP trên ACB/FPT/HDB/HPG/MBB/VNM):
+    #     `touch_depth_ratio` trung vị **763×**, `spread_ticks` = 1,0 ở 283/298 và KHÔNG BAO
+    #     GIỜ vượt 2,0. Sổ dày gấp 763 lần lệnh và spread luôn chạm sàn tick ⇒ KHÔNG CÓ
+    #     ngưỡng spread+depth nào phân biệt được gì ở đây, và cũng KHÔNG NÊN có.
+    #   · tầng REAL (lệnh tài khoản thật): trung vị **2,2×**, p25 **1,3×**, min **0,3×** —
+    #     đúng vùng mà policy sinh ra để phục vụ.
+    # v2 chọn theo tiêu chí PHÂN BIỆT, không theo tỉ lệ kêu: trên mẫu đã thu nó cho
+    # **4/9 = 44% khác-baseline ở tầng REAL và vẫn 0/289 ở tầng PROBE**. Một bộ ngưỡng kêu
+    # cả trên mega-cap là bộ ngưỡng SAI, không phải bộ ngưỡng nhạy.
+    #
+    # ⚠️ Vẫn THUẦN SHADOW: `behavior_contract = LOG_ONLY_NO_BROKER_PATH`. Không field nào ở
+    # đây được đọc vào `_child_qty`/`_limit_price`/lịch HYBRID. Đưa khuyến nghị vào đường đặt
+    # lệnh là việc KHÁC, cần user sign-off (gate 4 của charter).
+    "order_book_shadow_policy_version": "spread_depth_v2",
+    "order_book_reduce_spread_ticks": 1.0,
+    "order_book_defer_spread_ticks": 2.0,
+    "order_book_reduce_depth_ratio": 2.0,
+    "order_book_defer_depth_ratio": 1.0,
     # Trần đuôi neo vào TAPE THẬT: fill luỹ kế của fleet ≤ 50% KL khớp thật của phiên.
     # Suy ra allowance: đặt F=fleet đã khớp, V=KL phiên (V ĐÃ gồm F). Fill thêm X vẫn giữ
     # F+X ≤ c(V+X) ⇒ X ≤ (cV−F)/(1−c); với c=0,5 ⇒ **X ≤ V − 2F**. KHÔNG dùng dạng lỏng tay

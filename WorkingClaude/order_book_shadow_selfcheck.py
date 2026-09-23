@@ -117,5 +117,40 @@ with _tf.TemporaryDirectory() as tmp:
     assert row["features"]["bid"] == 20200.0 and row["features"]["ask"] == 20300.0
     os.environ.pop("DNSE_L2_LOG_SEC", None)
 
+# G3 — NGƯỠNG SẢN XUẤT là `spread_depth_v2` (hiệu chuẩn 2026-09-23). Các ca trên cố ý ghim
+# cfg v1 tại chỗ để kiểm CƠ CHẾ; không ca nào chạm DEFAULTS, nên nếu ai sửa ngược ngưỡng về
+# v1 thì mọi thứ vẫn xanh. Ca này neo thẳng vào DEFAULTS.
+from trading_bot.config import DEFAULTS as _D
+
+assert _D["order_book_shadow_policy_version"] == "spread_depth_v2", _D["order_book_shadow_policy_version"]
+assert (_D["order_book_reduce_spread_ticks"], _D["order_book_reduce_depth_ratio"]) == (1.0, 2.0)
+assert (_D["order_book_defer_spread_ticks"], _D["order_book_defer_depth_ratio"]) == (2.0, 1.0)
+
+# G4 — v2 phải PHÂN BIỆT: kêu trên sổ mỏng thật (tầng REAL, touch_depth_ratio trung vị 2,2×)
+# và IM trên mega-cap (tầng PROBE, trung vị 763×). Một bộ ngưỡng kêu cả hai nơi là bộ ngưỡng
+# sai, không phải bộ ngưỡng nhạy — đó chính là lý do v1 bị thay.
+with tempfile.TemporaryDirectory() as tmp2:
+    sink2 = os.path.join(tmp2, "v2.jsonl")
+    os.environ["ORDER_BOOK_TEST_SINK"] = sink2
+    ex2 = object.__new__(Executor)
+    ex2.cfg = {k: _D[k] for k in _D if k.startswith("order_book")}
+    ex2.label = "paper"
+    ex2.plan = SimpleNamespace(plan_date="2026-08-18")
+    ex2.orderbook_file = sink2
+    # qty=1000; touch_qty đặt để depth_ratio rơi đúng 2 phía ngưỡng.
+    v2_cases = [
+        ("P763", snapshot(attempt, 10000, 10100, 763_000), "KEEP"),    # PROBE-like: 763×
+        ("R22", snapshot(attempt, 10000, 10100, 2_200), "KEEP"),       # 2,2× ≥ 2,0 ⇒ vẫn KEEP
+        ("R13", snapshot(attempt, 10000, 10100, 1_300), "REDUCE"),     # 1,3× < 2,0 ⇒ REDUCE
+        ("D03", snapshot(attempt, 10000, 10200, 300), "DEFER"),        # 2 tick + 0,3× ⇒ DEFER
+    ]
+    for oid, snap2, _ in v2_cases:
+        ex2._order_book_shadow(order, SimpleNamespace(l2_snapshot=snap2, exchange="HOSE"),
+                               oid, 1000, 10100, True, "hybrid", attempt)
+    got = [json.loads(x)["shadow"]["recommendation"] for x in open(sink2, encoding="utf-8")]
+    assert got == [c[2] for c in v2_cases], got
+    assert all(json.loads(x)["policy_version"] == "spread_depth_v2"
+               for x in open(sink2, encoding="utf-8"))
+
 print("order_book_shadow_selfcheck: PASS (4 policy/fail-open + trace-key + trial-window + "
-      "broker↔executor e2e với định dạng `time` THẬT của DNSE)")
+      "broker↔executor e2e với định dạng `time` THẬT của DNSE + ngưỡng sản xuất spread_depth_v2)")
