@@ -342,7 +342,7 @@ def probe_alphalens(probe, prog, today):
             continue
         close = px[t][1]
         a = adj.get((t, entry_asof[t]))
-        ret_alt = None
+        ret_alt, b = None, None
         if a is None:
             entry_show, ret = p["entry_price"], (close / p["entry_price"] - 1) * 100
             note = f" [⚠ chưa rebase corp-action: {adj_err}]" if adj_err else ""
@@ -368,17 +368,29 @@ def probe_alphalens(probe, prog, today):
                              f"{b.entry_adj:,.0f} → **{ret_alt:+.2f}%**")
         sf = stale_factor.get((t, entry_asof[t]))
         if sf:
+            # PHƯƠNG ÁN B — user duyệt 2026-09-23 (bus question
+            # `alphalens-fpt-vendor-factor-stale-gate-0930`): ÁP chặn trên của hệ số vào chính
+            # con số DẪN DẮT, rồi chốt gate trên số đã sửa. Lý lẽ: `Close/Price` phải KHÔNG-GIẢM
+            # theo ngày ⇒ hệ số đúng tại ngày vào lệnh ≤ `r_min` quan sát về sau ⇒ giá vốn
+            # rebase ≤ entry_adj × (r_min/r0) ⇒ tỉ suất tính bằng nó là CHẶN DƯỚI của tỉ suất
+            # thật. Cố ý KHÔNG đoán giá trị đúng: vendor hồi tố sâu hơn thì số thật CAO HƠN.
             d_bad, r0, r_min = sf
-            ret_floor = (close / (p["entry_price"] * r_min) - 1) * 100
-            note += " [⚠ HỆ SỐ VENDOR CHƯA HỒI TỐ ĐỦ — xem cảnh báo dưới]"
+            scale = (r_min / r0) if r0 > 0 else 1.0
+            base_adj = a.entry_adj if a is not None else p["entry_price"]
+            ret_before, ret = ret, (close / (base_adj * scale) - 1) * 100
+            if ret_alt is not None and b is not None and b.entry_adj > 0:
+                ret_alt = (close / (b.entry_adj * scale) - 1) * 100
+            note += (f" [⚠ ĐÃ ÁP CHẶN TRÊN hệ số vendor {r_min:.6f}: giá vốn "
+                     f"{base_adj:,.0f}→{base_adj * scale:,.0f} ⇒ số trên là CHẶN DƯỚI]")
             stale_lines.append(
                 f"{t}: `Close/Price` = {r0:.6f} tại {entry_asof[t]} nhưng chỉ còn "
                 f"{r_min:.6f} tại {d_bad} — đại lượng này KHÔNG được phép giảm theo thời gian "
                 f"(nó là tích hệ số của các sự kiện CÒN Ở TƯƠNG LAI). Hệ số tại ngày vào lệnh "
-                f"vì thế QUÁ CAO ⇒ giá vốn rebase THIẾU ⇒ tỉ suất **báo thiếu**: dùng chặn trên "
-                f"{r_min:.6f} thì giá vào {p['entry_price']:,.0f} → "
-                f"{p['entry_price'] * r_min:,.0f} và tỉ suất thật **ít nhất {ret_floor:+.2f}%** "
-                f"(đang báo {ret:+.2f}%)")
+                f"vì thế QUÁ CAO ⇒ giá vốn rebase THIẾU. **ĐÃ ÁP chặn trên {r_min:.6f}** "
+                f"(phương án B, user duyệt 2026-09-23): giá vốn {base_adj:,.0f} → "
+                f"{base_adj * scale:,.0f}, tỉ suất {ret_before:+.2f}% → **{ret:+.2f}%**. Đây là "
+                f"CHẶN DƯỚI, không phải giá trị đúng chính xác — vendor hồi tố sâu hơn thì tỉ "
+                f"suất thật CAO HƠN nữa")
         w = p.get("weight_paper", 1.0 / len(positions))
         port_ret += w * ret
         port_ret_alt += w * (ret if ret_alt is None else ret_alt)
@@ -394,17 +406,21 @@ def probe_alphalens(probe, prog, today):
                f"**{port_ret_alt:+.2f}%** vs VNINDEX {bench_ret:+.2f}% → **excess "
                f"{excess_alt:+.2f}pp** (chênh {excess - excess_alt:+.2f}pp so với số dẫn dắt).")
     if stale_lines:
-        alt += ("\n- 🚨 **Số dẫn dắt ĐANG BÁO THIẾU — lỗi dữ liệu nguồn, không phải quy ước.** "
+        alt += ("\n- 🚨 **Hệ số vendor chưa hồi tố đủ — số dẫn dắt ĐÃ được sửa bằng CHẶN TRÊN.** "
                 + " · ".join(stale_lines)
                 + ". Đã verify thẳng trên `tav2_bq.ticker` (không chỉ cache) — đây là lỗi hồi tố "
-                  "của vendor. **Chưa tự sửa số**: đổi con số chính thức của một gate là quyết "
-                  "định của user.")
+                  "của vendor. Cách xử lý = **phương án B** (user duyệt 2026-09-23, bus question "
+                  "`alphalens-fpt-vendor-factor-stale-gate-0930`): áp chặn trên đã xác minh vào "
+                  "số dẫn dắt ⇒ mọi tỉ suất/excess ở trên là **CHẶN DƯỚI**, giá trị thật có thể "
+                  "CAO HƠN nếu vendor hồi tố sâu hơn.")
     if stale_err:
         alt += f"\n- ⚠️ không chạy được kiểm tra hệ số vendor: {stale_err}"
-    return {"headline": (f"EW **{port_ret:+.2f}%** vs VNINDEX {bench_ret:+.2f}% → "
-                         f"**excess {excess:+.2f}pp** (MTM as-of {asof}, quy ước `terp`)"
-                         + (f" · accrue-only: excess {excess_alt:+.2f}pp" if rights_names else "")
-                         + (" · 🚨 BÁO THIẾU do hệ số vendor chưa hồi tố đủ" if stale_lines else "")),
+    ge = "≥ " if stale_lines else ""
+    return {"headline": (f"EW **{ge}{port_ret:+.2f}%** vs VNINDEX {bench_ret:+.2f}% → "
+                         f"**excess {ge}{excess:+.2f}pp** (MTM as-of {asof}, quy ước `terp`)"
+                         + (f" · accrue-only: excess {ge}{excess_alt:+.2f}pp" if rights_names else "")
+                         + (" · ⚠️ đã áp CHẶN TRÊN hệ số vendor ⇒ số này là CHẶN DƯỚI"
+                            if stale_lines else "")),
             "body": "- Vị thế (MTM as-of " + str(asof) + ", BQ cache close phiên gần nhất):\n"
                     + "\n".join(lines)
                     + f"\n- VNINDEX {bench_entry:,.2f} → {vnindex_now:,.2f}" + alt}

@@ -346,6 +346,53 @@ def main():
     check("E4: ngưỡng nằm GIỮA nền nhiễu và tín hiệu thật đã đo (4,01e-4 < tol < 9,09e-2)",
           4.01e-4 < m._TERP_DROP_TOL < 9.09e-2, m._TERP_DROP_TOL)
 
+    # ---- E5/E6 — PHƯƠNG ÁN B: chặn trên PHẢI được ÁP vào chính số dẫn dắt (2026-09-23) ----
+    # E1-E4 chỉ pin cái NEO (phát hiện). E5 pin cái HÀNH ĐỘNG: sau khi user duyệt phương án B,
+    # tỉ suất dẫn dắt phải tính bằng giá vốn ĐÃ nhân chặn trên, và nhãn phải nói rõ đó là CHẶN
+    # DƯỚI. E6 là ca ĐỐI CHỨNG: mã không lệch hệ số thì tuyệt đối không được đụng vào số.
+    import shutil
+    shutil.copy(os.path.join(os.path.dirname(SRC), "..", "..", "paper_entry_adjust.py"),
+                os.path.join(root, "paper_entry_adjust.py"))
+    _mkcache("data/bq_cache", [("FPT", "2026-06-30", 70200, 70200),
+                               ("FPT", "2026-09-11", 72700, 72700),
+                               ("FPT", "2026-09-18", 65180, 71700),
+                               ("ACB", "2026-06-30", 22650, 22650),
+                               ("ACB", "2026-09-18", 22000, 22000)])
+    write(os.path.join(root, "data/alphalens_e5.json"), json.dumps({
+        "meta": {"benchmark_entry": 1860.01, "entry_price_asof": "2026-06-30"},
+        "positions": [{"ticker": "FPT", "entry_price": 70200.0, "entry_date": "2026-07-01",
+                       "lens": "L", "weight_paper": 1.0}]}, ensure_ascii=False))
+    write(os.path.join(root, "data/alphalens_e6.json"), json.dumps({
+        "meta": {"benchmark_entry": 1860.01, "entry_price_asof": "2026-06-30"},
+        "positions": [{"ticker": "ACB", "entry_price": 22650.0, "entry_date": "2026-07-01",
+                       "lens": "L", "weight_paper": 1.0}]}, ensure_ascii=False))
+    _con = duckdb.connect()
+    _con.execute("COPY (SELECT ticker, time, CAST(Close AS DOUBLE) AS Close, "
+                 "CAST(VNINDEX AS DOUBLE) AS VNINDEX FROM (VALUES "
+                 "('FPT', DATE '2026-09-22', 66600.0, 1816.93), "
+                 "('ACB', DATE '2026-09-22', 22000.0, 1816.93)) "
+                 "AS t(ticker, time, Close, VNINDEX)) TO "
+                 f"'{os.path.join(root, 'data/alphalens_e5_px.parquet')}' (FORMAT PARQUET)")
+    _con.close()
+
+    r_min = 65180 / 71700
+    e5 = m.probe_alphalens({"json_path": "data/alphalens_e5.json",
+                            "prices_parquet": "data/alphalens_e5_px.parquet"}, {}, D)
+    want5 = (66600 / (70200 * r_min) - 1) * 100
+    check("E5: có lệch hệ số ⇒ số DẪN DẮT tính bằng giá vốn đã áp chặn trên (+4,36%, không -5,13%)",
+          f"{want5:+.2f}%" in e5["headline"] and "≥" in e5["headline"]
+          and "CHẶN DƯỚI" in e5["body"] and f"{-5.13:+.2f}%" not in e5["headline"],
+          (want5, e5["headline"]))
+    check("E5b: body nêu rõ giá vốn cũ→mới và giữ nguyên bằng chứng ngày gãy",
+          f"{70200 * r_min:,.0f}" in e5["body"] and "2026-09-18" in e5["body"]
+          and "phương án B" in e5["body"], e5["body"][-400:])
+    e6 = m.probe_alphalens({"json_path": "data/alphalens_e6.json",
+                            "prices_parquet": "data/alphalens_e5_px.parquet"}, {}, D)
+    want6 = (22000 / 22650 - 1) * 100
+    check("E6 (đối chứng): mã hệ số phẳng ⇒ KHÔNG áp chặn, không có nhãn ≥/CHẶN DƯỚI",
+          f"{want6:+.2f}%" in e6["headline"] and "≥" not in e6["headline"]
+          and "CHẶN DƯỚI" not in e6["body"], (want6, e6["headline"]))
+
     n_pass = N_RUN - len(FAILS)
     status = f"ALL PASS ({n_pass}/{N_RUN})" if not FAILS else f"FAILED {len(FAILS)}/{N_RUN}: " + ", ".join(FAILS)
     print(f"\n{status}  (tmp: {root})")
