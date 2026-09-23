@@ -306,3 +306,135 @@ do gia hạn lần 4: khi đó chốt kết quả trên mẫu đang có và đó
 
 ⚠️ Bẫy tái phát trong chính phiên này: **chạy mutation trên `.py` phải xoá `__pycache__`** —
 `config.py` sửa rồi mà `DEFAULTS` vẫn trả giá trị cũ, làm 4 lượt TZ báo FAIL giả.
+
+---
+
+## 6. Hai mục user duyệt nốt (job `Taylor_20260923_130346`, 2026-09-23 20:0x ICT)
+
+Hai mục treo ở cuối mục 5 nay đã được user duyệt và thực hiện. Một **phát hiện ngoài kế hoạch**
+xuất hiện khi verify mục (2) — nó đổi cách đọc con số của gate AlphaLens, nên nằm luôn ở đây.
+
+### (1) Hồi tố corp-action vào sổ paper main — ĐÃ GHI
+
+Chạy đúng bản đã qua 3 vòng quant-skeptic + 2 bản vá của mục 5 (`ea6c1b97` + `a8fa47d6` NET thuế
++ `24e885ac`/`6ca93ac1` sellable):
+
+```
+python3 mike/bin/paper_corp_action.py --label main --backfill-since 2026-07-07
+```
+
+| Sự kiện | KL trước → sau | Tiền | Neo ngoài | Dư bất biến |
+|---|---|---|---|---|
+| MBB@2026-07-09 — cổ tức tiền 1.000đ/CP | 1.100 → 1.100 | **+1.045.000đ** (gộp 1.100.000 − thuế 55.000) | `skipped-later-events` | 0,0000đ |
+| MBB@2026-08-11 — quyền mua 10% + cổ tức CP 15% | 1.200 → 1.380 | 0đ · quyền mua CHỜ 1.224.000đ nội tại (120cp @10.000đ) | `ok` | 0,0000đ |
+| FPT@2026-09-21 — CP thưởng 10% | **300 → 330** | 0đ | `ok` | 0,0000đ |
+
+**Headline RÒNG 7.860.455đ** (gộp 7.915.455đ − thuế 55.000đ) — đúng con số dispatch yêu cầu,
+KHÔNG phải số GROSS cũ.
+
+Sổ sau khi ghi, đọc lại từ file chứ không tin exit code:
+- tiền **844.381.367,5đ → 845.426.367,5đ** (+1.045.000đ, đúng bằng cổ tức ròng)
+- vị thế `FPT 300 → 330` · `MBB 1.100 → 1.280` (+180; ACB/HDB/VNM/HPG không đổi)
+- `pending_shares`: **210 CP đang KHOÁ** (MBB 180 @08-11, FPT 30 @09-21), `sellable_from=null`
+  — đúng theo bản vá `24e885ac`; mở bằng `--release` khi có bằng chứng CP về thật
+- watermark **giữ nguyên 2026-09-23** ⇒ lượt cron đầu T5 24/09 08:40 không áp lại
+- sổ cái ngoài `data/paper_corp_action_ledger_main.jsonl`: 3 dòng append-only
+
+**Ca FPT 09-21 — điểm dispatch dặn chú ý riêng: KL đã đúng 330.**
+
+Kiểm chứng (không chỉ `--dry`):
+- `--dry` chạy LẠI bằng chính bản code hiện tại trước khi ghi: KL nền 1.100/1.200/300 đúng,
+  0 lỗi, 0 neo lệch.
+- Recompute độc lập bất biến 0 VND bằng tay: `1.100×26.000 = 28.600.000 = 1.100×25.000 +
+  1.100.000` · `1.200×24.250 = 29.100.000 = 1.380×20.200 + 1.224.000` · `300×71.700 =
+  21.510.000 = 330×(71.700/1,1)`.
+- **Idempotent**: chạy lại `--backfill-since --dry` → 0 sự kiện; nhánh cron `--dry` → 0 sự kiện.
+- `paper_corp_action_selfcheck.py` **72/72 PASS** × 4 TZ + `env -u TZ`.
+- §23 quét theo phạm vi (state `PaperBroker` là dữ liệu dùng chung): `paper_main_window` ·
+  `paper_probe_netting` · `ghost_order` · `atc_postclose` — tất cả rc=0.
+- Backup trước khi ghi: `mike/logs/bot_paper_account_backup_before_backfill_20260923_200425.json`.
+
+### (2) Quy ước dẫn dắt AlphaLens: `accrue_only` → `terp` — `8ee4a8b4`
+
+Chỉ đạo user *"đúng tinh thần đầu tư không để giá vốn bị ảnh hưởng bởi corp action"* = mặc định
+**THỰC HIỆN 100% quyền** — đúng định nghĩa `terp`. Tiền đề cũ của `accrue_only` ("sổ paper không
+có tài khoản tiền", chọn 2026-08-13) bị chính chỉ đạo đó lật.
+
+| | EW | vs VNINDEX | excess |
+|---|---|---|---|
+| `accrue_only` (cũ, nay là số đối chiếu) | −1,50% | −2,32% | **+0,81pp** |
+| **`terp` (DẪN DẮT từ nay)** | **−0,45%** | −2,32% | **+1,86pp** |
+
+Khớp đúng dự báo +1,86pp vs +0,81pp của finding cũ. **Cả hai số vẫn in trong báo cáo** — hai quy
+ước là hai giả định HÀNH VI khác nhau, giấu một cái đi thì báo cáo không trung thực.
+
+### (3) ⚠️ PHÁT SINH — số của gate AlphaLens đang **BÁO THIẾU**, vì lỗi dữ liệu nguồn
+
+Phát hiện khi đối soát hệ số rebase của từng mã, không phải khi làm mục (2).
+
+**Bất biến bị vi phạm.** `Close/Price` tại ngày *d* = tích hệ số điều chỉnh của MỌI sự kiện có
+GDKHQ **sau** *d* ⇒ nó phải **không-giảm** theo *d*. FPT vi phạm:
+
+| ngày | Close | Price | `Close/Price` |
+|---|---|---|---|
+| 2026-06-30 *(ngày chụp giá vào lệnh)* | 70.200 | 70.200 | **1,000000** |
+| 2026-09-11 | 72.700 | 72.700 | 1,000000 |
+| 2026-09-15 | 66.090 | 72.700 | **0,909078** |
+| 2026-09-18 | 65.180 | 71.700 | 0,909066 |
+| 2026-09-21 *(GDKHQ thưởng 10%)* | 66.400 | 66.400 | 1,000000 |
+
+CP thưởng 10% ngày 09-21 chỉ được hồi tố **đúng 3 phiên** (09-15→09-18) rồi dừng. Verify
+**thẳng trên `tav2_bq.ticker`**, không chỉ trên cache ⇒ lỗi nguồn, không phải lỗi build cache.
+Sự tồn tại của sự kiện được chứng thực **độc lập** bởi chính mục (1) ở trên: `paper_corp_action`
+áp FPT@09-21 thưởng 10%, `P_cum` 71.700 → `P_ref` 65.182.
+
+**Hệ quả**: giá vốn FPT không được rebase ⇒ tỉ suất **báo thiếu**. Dùng chặn trên 0,909066:
+giá vào 70.200 → 63.816 ⇒ tỉ suất thật **ít nhất +4,36%**, đang báo **−5,13%** — lệch **~9,5pp**
+trên 1/4 số EW ⇒ excess danh mục **≥ +4,23pp** thay vì +1,86pp.
+
+**Cơ chế, đã đo chứ không suy đoán — vendor hồi tố CÓ ĐỘ TRỄ, và nó tự lành.** Quét toàn bộ
+mã thanh khoản (median Volume > 100k, > 100 phiên; N=267), đếm **bước giảm** của `Close/Price`:
+
+| Tháng của bước giảm | 01 | 02 | 03 | 04 | 05 | 06 | 07 | 08 | 09 |
+|---|---|---|---|---|---|---|---|---|---|
+| số bước | 261 | 81 | 96 | 79 | 66 | 72 | 0 | 1 | **8** |
+
+Tháng 7–8 gần như SẠCH ⇒ sự kiện cũ **đã** được hồi tố đầy đủ (chính MBB@08-11 là chứng cứ: hệ
+số 0,800794 tại 06-30, đúng). Chỉ cụm tháng 9 còn dở: **FPT** (1,0→0,909078 sau 09-14), **DRI**
+(→0,932215 sau 09-15), **TVN** (→0,967391), **GAS** (→0,971812); hai ca còn lại (VGT/OIL) là
+nhiễu `r>1`. Cụm tháng 1–6 là **lớp lỗi KHÁC** (có cả `r > 1`, tức `Close > Price` — vô nghĩa),
+ngoài phạm vi việc này.
+
+⚠️ **Tự đính chính một con số tôi suýt báo sai:** quét thô cả năm cho "946/1.277 mã vi phạm =
+74%", nghe như bất biến vô dụng. **Sai phạm vi** — cái neo chỉ quét TỪ ngày vào lệnh TRỞ ĐI, nên
+nó không bao giờ nhìn vào cụm rác tháng 1–6. Trong đúng cửa sổ vận hành của nó (từ 2026-06-30),
+tỉ lệ là **6/267 = 2,2%**, và 4/6 là sự kiện thật chưa hồi tố. Con số 74% không mô tả cái neo này.
+
+**Đã làm gì:** thêm neo cơ học `_terp_factor_stale` vào `paper_programs_daily_report.py` — báo
+cáo nay hiện cảnh báo 🚨 kèm **chặn dưới** của tỉ suất, ngay trong mục AlphaLens. Ngưỡng
+`_TERP_DROP_TOL = 5e-3` **đo từ dữ liệu**: trên 4 mã AlphaLens, mức giảm lớn nhất do rung làm
+tròn bước giá là 4,01e-4 (MBB) còn ca hỏng thật là 9,09e-2 (FPT) — cách nhau **227×**; dùng
+`FACTOR_EPS` (1e-6) là SAI, nó báo động giả trên MBB ngay lần chạy đầu. Giới hạn đã biết: sự
+kiện tác động giá < 0,5% sẽ không bị bắt.
+
+**KHÔNG tự sửa số của gate** — đổi con số chính thức của một gate là quyết định của user.
+Đã escalate: bus question `alphalens-fpt-vendor-factor-stale-gate-0930`.
+Gate đóng **2026-09-30**, tức nhiều khả năng **TRƯỚC** khi vendor hồi tố xong ⇒ phải chọn:
+(A) chốt trên +1,86pp nguyên trạng · (B) sửa bằng chặn trên ⇒ ≥ +4,23pp · (C) hoãn chốt tới khi
+chuỗi `Close` của FPT được hồi tố xong. Khuyến nghị **B hoặc C**; (A) là chốt gate trên con số
+đã biết là sai chiều.
+
+**Ngoài phạm vi, cần Winston/Mike biết: `DRI` cũng dính** (1,0 → 0,932215 sau 09-15) — DRI là
+mã đang giữ ở tài khoản thật, và đang là nguyên nhân của 2 bus question `nav-price-xcheck-stuck-*`
+ngày 09-21 còn mở. Rất có thể cùng một gốc.
+
+### Đo lường chung của mục 6
+
+| Kiểm chứng | Kết quả |
+|---|---|
+| `paper_corp_action_selfcheck.py` (sau hồi tố) | **72/72 PASS** × 4 TZ + `env -u TZ` |
+| §23 quét phạm vi sổ paper | 4 selfcheck, rc=0 |
+| `paper_report_render_selfcheck.py` | **41/41 PASS** × 3 TZ + `env -u TZ` (thêm E1–E4) |
+| Mutation trên neo mới | **4/4 chết bằng assertion** — `tol=1e-6`→E2+E4 · `tol=0,5`→E1+E4 · `min→max`→E1 · vô hiệu hoá→E1 |
+| Mutation trên quy ước | revert về `accrue_only` ⇒ số dẫn dắt tụt +1,86→+0,81pp và **trùng** số đối chiếu — quan sát được ngay trên headline |
+| Báo cáo đầy đủ chạy thật | `paper_programs_daily_report.py --no-state` rc=0 |
