@@ -74,8 +74,8 @@ Quét mọi chỗ đọc `openQuantity`/`get_positions()` rồi nhân với giá
 |---|---|---|
 | 1 | `compute_active_nav.py` | **ĐÃ VÁ** — mẫu số sizing. |
 | 2 | `park_holdings.py` | **ĐÃ VÁ** — `park_mv_vnd` là mẫu số cấp tài khoản của `compute_park_trim` (`:330` dùng `park_mv_vnd`, KHÔNG phải `park_mv_verified_vnd`) ⇒ chỉ gắn cờ UNVERIFIED là chưa đủ. |
-| 3 | `report_return_gate.py:126-166` | **CÙNG LỚP, CHƯA VÁ, ngoài phạm vi job này.** qty + `costPrice` từ broker (**cả hai** đã ở hệ SAU), giá từ `bq_close_prices(asof)` = 27.800 (hệ TRƯỚC, BQ đã có dòng 23/09). Đo thật: VPB ra **+26,24% (SpaceX) / +30,97% (ZaloPay)** thay vì +0,13% / +3,88%. Hệ quả thật là **CHẶN OAN**, không phải số sai được công bố: báo cáo lấy % từ `verify_account_snapshot` (đúng, ~+0,1%), cổng tính +26% ⇒ lệch > 0,15pp ⇒ `CHẶN`. Tối nay chưa nổ vì NAV đã bị gate chặn trước nên báo cáo 23/09 không có dòng % của VPB. |
-| 4 | `discretionary_accumulation_inject.py:113-125` | **Cùng HỌ nhưng khác dạng** (không nhân giá): `filled_qty = broker_total − baseline` ⇒ KL credit sớm bị tính là "đã khớp". Chỉ ảnh hưởng mã đang có chương trình tích luỹ (DGC/TV1) — VPB không phải. Chưa vá. |
+| 3 | `report_return_gate.py:126-166` | **CÙNG LỚP, CHƯA VÁ, ngoài phạm vi job này.** qty + `costPrice` từ broker (**cả hai** đã ở hệ SAU), giá từ `bq_close_prices(asof)` = 27.800 (hệ TRƯỚC, BQ đã có dòng 23/09). Đo thật: VPB ra **+26,24% (SpaceX) / +30,97% (ZaloPay)** thay vì +0,13% / +3,88%. **ĐÍNH CHÍNH vòng 2 — hệ quả KHÔNG phải "chặn oan" mà là LỖ HỔNG PHỦ IM LẶNG, tệ hơn:** nhánh BẢNG ghép theo `key = (mã, KL)` (`:510-511`); báo cáo lấy KL từ `verify_account_snapshot` (journal = 1.100) còn cổng dựng kỳ vọng từ broker (1.386) ⇒ key KHÔNG khớp ⇒ `unmatched += 1; continue` (`:512-513`) — **không fail**, chỉ in "ngoài phạm vi cổng này". `nocover` (`:568-570`) cũng không vớt được vì nó lọc `g > 0`, mà VPB là cổ tức CỔ PHIẾU nên `entitled_gross`=0. Chặn oan chỉ xảy ra ở nhánh VĂN XUÔI (`:543-551`, khớp theo mã). ⇒ Đúng mã có corp-action — mã KHÓ NHẤT — là mã cổng lặng lẽ thôi kiểm. |
+| 4 | `discretionary_accumulation_inject.py:113-125` | **Cùng HỌ nhưng khác dạng** (không nhân giá): `filled_qty = broker_total − baseline` ⇒ KL credit sớm bị tính là "đã khớp". Chỉ ảnh hưởng mã đang có chương trình tích luỹ (DGC/TV1) — VPB không phải. Chưa vá. **Bổ sung vòng 2 (khai thiếu ở vòng 1):** (a) chiều lệch là **MUA THIẾU**, không bao giờ thừa — `filled_qty` phồng ⇒ chương trình tưởng đã mua đủ ⇒ dừng sớm; (b) `baseline` ghi vào state file hỏng **VĨNH VIỄN** theo hệ số sau sự kiện, **KHÔNG tự lành** như mọi call-site khác (các chỗ kia tự khỏi ngay phiên ex-date khi giá G1 điều chỉnh; chỗ này số hỏng được PERSIST). |
 | — | `reconcile_equity.py:288` | **AN TOÀN** — `bp["qty"] × bp["marketPrice"]`, cả hai từ CÙNG bản ghi positions ⇒ tự nhất quán. |
 | — | `trading_bot/plan.py:1987` | **Cùng dạng nhưng cửa sổ KHÔNG xảy ra**: `p["total"] × (q.last or q.ref)`. Chỉ chạy ở live preflight 09:05 = ĐÚNG ngày ex-date, khi `ref` đã điều chỉnh ⇒ cùng hệ. (Chiều lệch nếu có: `nav_live` phồng ⇒ preflight YẾU đi, không phải cấp thêm vay.) |
 | — | `verify_account_snapshot.py` | AN TOÀN — xem Q2. |
@@ -144,3 +144,75 @@ cùng hệ với KL đã credit ⇒ tự lành. Đo được: bản ghi position
 - `nav_cum_dividend_selfcheck.py:34` đếm cấp `dirname×2` ⇒ chết `FileNotFoundError` từ MỌI
   worktree (38/38 PASS từ checkout canonical). **Tiền-tồn-tại**, đã báo trước (N4); bản vá này
   chỉ sửa đúng instance chặn việc verify chính nó (`corp_action_selfcheck.py`).
+
+---
+
+# VÒNG 2 — sau arch-review NEEDS_CHANGES (high), job Taylor_20260923_165842
+
+## 9. R1–R5 đã sửa
+
+| # | Vấn đề | Sửa | Test giết mutation |
+|---|---|---|---|
+| R1 | `_corp_action_daily_snapshot` trả `None` IM LẶNG khi thiếu file ⇒ MỌI mã thành `qty_unexplained` với câu **"lịch corp-action KHÔNG có sự kiện nào cho mã này"** — suy diễn từ SỰ VẮNG MẶT của một kênh (§28). Replay vòng 1 in đúng câu đó cho VHM 08-05 / MBB 08-11, hai ngày file lịch KHÔNG TỒN TẠI ⇒ **4/4 ca BLOCK trong replay đều bị chẩn đoán sai hướng**. | `classify_positions` gọi `dns._corp_action_gate_status(snap, asof)` (hàm ĐÃ CÓ SẴN, `daily_nav_snapshot` in nó từ vòng 2 của việc trước). Tách thành 3 ca trong `_calendar_clause()`: có `ex_date` / lịch OK mà không có sự kiện / **`snap is None` ⇒ "KHÔNG ĐỌC ĐƯỢC LỊCH corp-action cho `<asof>` ⇒ KHÔNG kết luận được mã này CÓ hay KHÔNG CÓ sự kiện"**. `ca_note` đính vào MỌI thông điệp. | D1 D2 D3 D4 |
+| R2 | Bỏ `missing_out=` ⇒ in "lệnh khớp thật +0" không caveat khi journal hỏng — tái lập ĐÚNG lỗi đã vá ở vòng 3 của `daily_nav_snapshot` (mục [N2]). | Truyền `missing_out=journal_gaps`; `_journal_caveat()` đính đúng chuỗi `[⚠️ journal KHÔNG đọc được cho N ngày GIAO DỊCH…]` như bản gốc (cắt 5 mục đầu, §29). | J1 J2 |
+| R3 | rc=6 in "chờ `corp_action_auto_confirm.py` rồi chạy lại" — đường đó đi qua `confirmed_share_event_multiplier`, thứ `exdate_frame.py`/`compute_active_nav.py` **không gọi ở bất kỳ nhánh nào** (grep: 0 hit). Mã kẹt ở nhánh 1b chạy lại cho kết quả **Y HỆT** ⇒ người vận hành lặp vô ích. | Thay bằng việc thật: (1) NGƯỜI xác minh giá tham chiếu sau sự kiện rồi đối chiếu marketPrice; (2) kiểm journal + lịch theo đúng vế đã nêu trong từng dòng. Nói thẳng "chạy lại khi CHƯA có thêm bằng chứng cho kết quả Y HỆT" + chỉ `--out` để xem số mà không đụng file sizing. | E9 E10 |
+| R4 | **Cổng fail-closed có LỐI VÒNG.** `:415` bỏ qua trọn khối khi `--asof` là quá khứ; `:238` `get_positions()` LUÔN trả vị thế LIVE; `:343` vẫn ghi FILE CANONICAL ⇒ sau rc=6, một lệnh `--asof <hôm qua>` ghi đúng con số phồng vào mẫu số sizing, rc=0, không cảnh báo. | Hai lớp: (a) `--asof` ≠ hôm nay **mà không có `--out` ⇒ rc=7, không chạm file canonical** (§8); (b) có `--out` thì vẫn chạy nhưng in cảnh báo cổng §exdate_frame BỊ TẮT cho bản chạy đó. | A1 A2 A3 A4 A5 |
+| R5 | Báo cáo vòng 1 kết luận hệ quả của `report_return_gate` là "CHẶN OAN". | SAI — đã sửa mục 4 dòng 3: thực tế là **PHỦ IM LẶNG** (`key=(mã,KL)` không khớp ⇒ `unmatched; continue`, không fail; `nocover` lọc `g>0` nên cổ tức CỔ PHIẾU cũng không lọt). Tệ hơn chặn oan. | — (ngoài phạm vi nhánh) |
+
+**R1–R5 có chỗ nào sai không: KHÔNG.** Tôi tự đọc lại code cho cả 5 và cả 5 đều đúng như reviewer
+mô tả. Riêng R4 tôi chọn bản **chặn cứng** (rc=7) thay vì chỉ cảnh báo, vì cảnh báo không đóng
+được lối vòng — và lý lẽ "BQ Close đã hồi tố ⇒ cùng hệ" đúng là bị chính §6.2 của tôi bác (8 sự
+kiện vendor chưa hồi tố trong tháng 9). Không có caller tự động nào truyền `--asof`
+(`compute_active_nav_all.sh:26` chạy trần), nên chốt này không chặn nhầm gì đang chạy.
+
+## 10. Selfcheck — **45/45 PASS** (vòng 1: 32/32), qua **5** TZ
+
+`TZ=Asia/Ho_Chi_Minh` · `env -u TZ` · `TZ=UTC` · `TZ=Pacific/Kiritimati` (+14) ·
+`TZ=Pacific/Midway` (−11) — cả 5 đều 45/45.
+
+**[V3] Câu "4/4 mutation chết bằng ASSERTION" ở vòng 1 là SAI — sửa lại:** đó là tính chất của 4
+mutation TÔI chọn, không phải của harness. Reviewer chỉ đúng: mutation `multiplier→1.0` chết bằng
+`FileNotFoundError`, `classify_positions→({},{})` (Mike) chết bằng `KeyError`. Vòng 2 đã thêm
+**10 assertion CÓ TÊN** và đo lại bằng 4 mutation mới, mỗi mutation = revert đúng một mục R:
+
+| Mutation (revert) | Kết quả | Chết bằng |
+|---|---|---|
+| R1 — bỏ `_corp_action_gate_status`, luôn nói "không có sự kiện nào" | 41/45, **4 FAIL** | D1 D2 D3 D4 — assertion có tên, KHÔNG crash |
+| R2 — bỏ `missing_out=` | 44/45, **1 FAIL** | J1 |
+| R3 — khuyên lại `corp_action_auto_confirm` | 43/45, **2 FAIL** | E9 E10 |
+| R4 — bỏ rc=7 + bỏ cảnh báo cổng tắt | 42/45, **3 FAIL** | A1 A2 A4 — **A2 fail chứng minh cơ học rằng file canonical THẬT SỰ bị ghi đè** ở bản chưa vá |
+
+Ghi nhận reviewer: mutation bỏ guard `market_price <= 0` SỐNG 32/32 — đúng là guard THỪA (dung
+sai vẫn loại ca 0đ), không phải lỗ hổng, không sửa.
+
+## 11. [V1] CALL-SITE THỨ BA — `dividend_adjusted_return.py`, CHẠM SỐ CÔNG BỐ CHO NHÀ ĐẦU TƯ
+
+Reviewer tìm ra, vòng 1 tôi **khai thiếu**. Tôi tự đọc code xác nhận **cả hai vế**:
+
+1. `broker_qty():459-470` key theo `ts[:10]` và giữ bản ghi **MỚI NHẤT** trong ngày ⇒ giá trị là
+   KL **CUỐI NGÀY**. `_qty_at():473-478` lấy `qmap[(ticker, last_cum_date)]` — nhưng ngữ nghĩa
+   cần là KL **HƯỞNG QUYỀN** (1.100), mà tối `last_cum_date` broker đã credit rồi (1.386).
+2. Bộ chống chính ca này (`:523-527`, gắn `STOCK_SUSPECTED` khi `qty[last_cum] != qty[ex_date]`)
+   **bị credit sớm VÔ HIỆU HOÁ**: hai ngày đã bằng nhau (1.386 = 1.386) ⇒ `changed` rỗng ⇒ không
+   gắn cờ, sự kiện đi thẳng vào hệ phương trình.
+
+`_qty_at` là **hệ số** của ma trận (`A[i, pos[c]] = _qty_at(...)`, `:565`) giải `A·x = b` với `b`
+= delta tiền ⇒ hệ số phồng theo `1+r` làm `value_per_share` giải ra **THẤP** đúng hệ số đó.
+
+**Hệ quả:** mã có **cổ tức TIỀN + cổ tức CỔ PHIẾU cùng ex-date** (rất phổ thông ở VN) ⇒ §21 cộng
+**THIẾU** cổ tức vào tỉ suất **CÔNG BỐ CHO NHÀ ĐẦU TƯ**, và `entitled_gross` của
+`report_return_gate` lệch theo. VPB đợt này không có chân tiền mặt nên chưa nổ.
+
+**Hướng sửa (chưa làm — ngoài phạm vi nhánh này):** neo KL hưởng quyền theo bản ghi positions
+**TRƯỚC `broker_effective_ts`**, không theo NGÀY. Đây là call-site NẶNG NHẤT trong cả 3 vì nó là
+số công bố, không phải số nội bộ — đề nghị ưu tiên trên #3 và #4.
+
+## 12. Việc còn mở sau vòng 2
+
+- **Vẫn CHƯA LAND** — chờ user/Mike duyệt (chạm đường tiền). Sau land: `compute_active_nav_all.sh`
+  rồi lập lại plan 24/09.
+- 3 call-site chưa vá, xếp theo mức nặng: **V1 `dividend_adjusted_return.py`** (số công bố) >
+  `report_return_gate.py` (phủ im lặng) > `discretionary_accumulation_inject.py` (baseline hỏng
+  vĩnh viễn). Cần quyết phạm vi riêng cho từng cái.
+- 24/09 là ex-date VPB THẬT ⇒ G1 close tự điều chỉnh sáng nay, lỗi của chính ca VPB tự lành. Bản
+  vá vẫn cần cho lần sau.

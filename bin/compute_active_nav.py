@@ -37,6 +37,9 @@ Vá: mã có bằng chứng credit sớm (`exdate_frame.classify_positions`, tá
 vị thế — sau khi đối soát nó tái tạo được giá cum qua hệ số sự kiện. KL đổi KHÔNG giải thích
 được, hoặc credit sớm mà không dựng nổi giá cùng hệ ⇒ **rc=6, KHÔNG ghi file** (đây là mẫu số
 sizing; số sai tệ hơn số cũ). Chi tiết + vì sao KHÔNG tin thẳng marketPrice: bin/exdate_frame.py.
+Cổng chỉ chạy ở nhánh asof=hôm nay, nên lối vòng của nó (`--asof <quá khứ>` vẫn đọc vị thế LIVE
+rồi ghi ĐÈ file canonical, rc=0, không cảnh báo) bị chốt bằng **rc=7**: `--asof` khác hôm nay bắt
+buộc có `--out` trỏ đi nơi khác (§8 — output khảo sát không được mang tên file canonical).
 
 §cash — CẤU PHẦN TIỀN = `totalCash − totalDebt`, KHÔNG phải `availableCash`
 (bug sửa 2026-08-10, job Taylor_20260810_004252; cùng LOẠI bug với mẫu số pool của
@@ -343,6 +346,24 @@ def main():
     out_path = args.out or os.path.join(
         WC_ROOT, "data", "execution_logs", f"active_nav_{args.account}.json")
 
+    # ── §exdate_frame [R4] — `--asof` QUÁ KHỨ KHÔNG được ghi đè file canonical ─────
+    # Cổng §exdate_frame dưới đây chỉ chạy ở nhánh asof=hôm nay, nhưng `get_positions()`
+    # LUÔN trả vị thế LIVE bất kể `--asof`. Nên sau một rc=6, đúng một lệnh
+    # `--asof <hôm qua>` ghi CHÍNH con số phồng đó vào file canonical, không cảnh báo,
+    # rc=0 — cổng fail-closed có lối vòng, và thông điệp rc=6 lại vừa bảo "chạy lại".
+    # Lý lẽ "giá BQ quá khứ đã điều chỉnh hồi tố ⇒ cùng hệ với KL đã credit" KHÔNG cứu được
+    # ca này: tháng 9/2026 đo được 8 sự kiện vendor CHƯA hồi tố, trong cửa sổ đó Close quá
+    # khứ vẫn là giá cum nhân với KL đã credit = y nguyên bug.
+    # Vẫn cho chạy để người vận hành đối chiếu/khảo sát — chỉ bắt nói rõ đích đến (§8:
+    # output khảo sát không bao giờ được trỏ vào tên file canonical).
+    if args.asof and args.asof != today_ict().isoformat() and not args.out:
+        print(f"❌ --asof {args.asof} là ngày KHÁC hôm nay ⇒ TỪ CHỐI ghi đè {out_path}. "
+              f"Vị thế luôn đọc LIVE (get_positions), giá lại lấy của {args.asof}: hai con số "
+              f"KHÁC HỆ QUY CHIẾU, và cổng §exdate_frame (chặn đúng lớp lỗi đó) chỉ chạy ở "
+              f"nhánh asof=hôm nay. Muốn khảo sát: thêm `--out <đường dẫn tạm>`. Muốn refresh "
+              f"số sizing thật: bỏ `--asof`.", file=sys.stderr)
+        sys.exit(7)
+
     profile = get_account_profile(args.account)
     if profile is None:
         print(f"❌ Không tìm thấy account '{args.account}' trong trading_bot_accounts.json",
@@ -410,8 +431,10 @@ def main():
     # của phiên hôm nay vẫn (đúng) là giá CÒN QUYỀN. Nhân chéo hai hệ = active_nav phồng
     # (đo thật VPB 2026-09-23: SpaceX +7.969.500đ, ZaloPay +8.694.000đ ⇒ plan 24/09 in
     # "NAV cơ sở 990.981.660" và sinh lệnh PARK_TRIM VPB trên rổ phồng). Xem bin/exdate_frame.py.
-    # CHỈ chạy ở nhánh asof=hôm nay: nhánh --asof QUÁ KHỨ dùng giá BQ lịch sử với vị thế LIVE,
-    # một vấn đề KHÁC và có sẵn từ trước — không mở rộng phạm vi bản vá này sang đó.
+    # CHỈ chạy ở nhánh asof=hôm nay (nhánh --asof QUÁ KHỨ trộn giá BQ lịch sử với vị thế LIVE —
+    # một vấn đề KHÁC). Để cổng này KHÔNG có lối vòng, nhánh kia đã bị chốt hai lớp ở trên:
+    # `--asof` ngày khác hôm nay không có `--out` ⇒ rc=7, không chạm file canonical; có `--out`
+    # ⇒ chạy nhưng in cảnh báo cổng BỊ TẮT (nhánh `elif tickers` cuối khối này).
     if tickers and (args.asof is None or args.asof == today_ict().isoformat()):
         import exdate_frame
         credited, blocked = exdate_frame.classify_positions(
@@ -438,13 +461,33 @@ def main():
             # FAIL-CLOSED. active_nav là MẪU SỐ của mọi phép sizing (LAG_book, slot CAPIT,
             # trần %ADV) — ghi một con số có thể sai còn tệ hơn để consumer thấy file quá hạn
             # rồi lùi về nav_history (đường lùi có sẵn ở golive_recommend_v23, 5 ngày).
+            # [R3] Đường phục hồi phải là việc CHÍNH script này chạy được. `corp_action_auto_confirm
+            # .py` + `--from-raw` là đường của `daily_nav_snapshot`: nó đọc data/corp_actions.json
+            # qua `confirmed_share_event_multiplier`. Script NÀY không đọc file đó ở bất kỳ nhánh
+            # nào, nên "chờ auto_confirm rồi chạy lại" cho kết quả Y HỆT — lặp vô ích (§29).
             print(f"❌ {args.account}: KHỐI LƯỢNG vị thế đổi NGOÀI lệnh khớp thật và KHÔNG quy "
                   f"được về một hệ quy chiếu giá cho {len(blocked)} mã ⇒ KHÔNG ghi active_nav "
                   f"(giữ nguyên file cũ), CẦN NGƯỜI xử lý: "
                   + "; ".join(f"{t}: {w}" for t, w in sorted(blocked.items())) +
-                  ". Mã đã khớp tỉ lệ sự kiện: chờ corp_action_auto_confirm.py rồi chạy lại.",
+                  ". Việc phải làm: (1) mã 'KHÔNG dựng được giá cùng hệ' — NGƯỜI xác minh giá "
+                  "tham chiếu sau sự kiện (bảng giá sở/HOSE, thông báo GDKHQ) rồi đối chiếu với "
+                  "marketPrice broker; (2) mã 'CHƯA GIẢI THÍCH ĐƯỢC' — kiểm journal fill và lịch "
+                  "corp-action theo đúng vế đã nêu trong từng dòng trên. Chạy lại khi CHƯA có "
+                  "thêm bằng chứng sẽ cho kết quả Y HỆT: script này không đọc "
+                  "data/corp_actions.json, `corp_action_auto_confirm.py`/`--from-raw` là đường "
+                  "phục hồi của daily_nav_snapshot.py, KHÔNG phải của đây. Cần xem số mà không "
+                  "ghi đè file sizing: chạy lại với `--out <đường dẫn tạm>`.",
                   file=sys.stderr)
             sys.exit(6)
+    elif tickers:
+        # [R4] asof khác hôm nay ⇒ cổng §exdate_frame KHÔNG chạy. Nói ra, đừng im lặng: nhánh
+        # này chỉ tới được khi có `--out` (xem chốt chặn ngay sau parse_args), tức là output
+        # KHÔNG phải file sizing canonical — nhưng người đọc con số vẫn cần biết nó chưa qua cổng.
+        print(f"⚠️ --asof {args.asof} ≠ hôm nay ⇒ cổng §exdate_frame (KL và giá phải CÙNG hệ quy "
+              f"chiếu) KHÔNG chạy cho bản chạy này. Vị thế vẫn là LIVE còn giá là của "
+              f"{args.asof}: nếu trong khoảng đó có sự kiện tỉ lệ mà vendor CHƯA hồi tố cột "
+              f"Close thì giá trị danh mục dưới đây PHỒNG theo hệ số sự kiện. Số này dùng để "
+              f"đối chiếu, KHÔNG dùng làm mẫu số sizing.", file=sys.stderr)
 
     rows = []
     total_mv = 0.0

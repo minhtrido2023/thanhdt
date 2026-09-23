@@ -173,8 +173,14 @@ def t_classify(ef):
 
 
 # ───────────────────── 3. compute_active_nav end-to-end (giá trị THẬT) ──────────────────────
-def run_nav(can, positions, prices, out, account="SpaceX", no_patch=False):
-    """Chạy main() thật với broker/giá đã stub. Trả rc."""
+def run_nav(can, positions, prices, out, account="SpaceX", no_patch=False, asof=DATE,
+            err_out=None):
+    """Chạy main() thật với broker/giá đã stub. Trả rc.
+
+    `out=None` ⇒ KHÔNG truyền `--out`, script tự trỏ vào tên file CANONICAL trong sandbox —
+    đúng đường mà chốt chặn `--asof` quá khứ ([R4]) phải chặn. `err_out` (StringIO) bắt stderr
+    để test ĐỌC ĐƯỢC thông điệp thay vì chỉ đếm rc.
+    """
     import exdate_frame as ef
     orig_cls = ef.classify_positions
     if no_patch:
@@ -188,10 +194,13 @@ def run_nav(can, positions, prices, out, account="SpaceX", no_patch=False):
     can.today_ict = lambda: _dt.date.fromisoformat(DATE)
     can.get_account_profile = lambda lab: {"label": lab, "account_id": ACC[lab]}
     argv = sys.argv
-    sys.argv = ["compute_active_nav.py", "--account", account, "--asof", DATE, "--out", out]
+    sys.argv = (["compute_active_nav.py", "--account", account, "--asof", asof]
+                + (["--out", out] if out else []))
     try:
         with contextlib.redirect_stdout(io.StringIO()):     # bảng NAV dài, không phải kết quả test
-            can.main()
+            with (contextlib.redirect_stderr(err_out) if err_out is not None
+                  else contextlib.nullcontext()):
+                can.main()
         return 0
     except SystemExit as e:
         return int(e.code or 0)
@@ -236,11 +245,20 @@ def t_e2e(ef, can, tmp):
     os.remove(out)
     with open(out, "w", encoding="utf-8") as f:
         json.dump({"sentinel": "file CŨ phải còn nguyên"}, f)
+    err = io.StringIO()
     rc = run_nav(can, {"VPB": {"total": QTY_NOW["SpaceX"], "sellable": 0,
-                               "marketPrice": PX_CUM}}, {"VPB": PX_CUM}, out)
+                               "marketPrice": PX_CUM}}, {"VPB": PX_CUM}, out, err_out=err)
     check(rc == 6, "E7 credit sớm mà không dựng nổi giá cùng hệ ⇒ rc=6", f"rc={rc}")
     check(json.load(open(out, encoding="utf-8")).get("sentinel"),
           "E8 fail-closed: file active_nav CŨ còn nguyên, không bị đè")
+    # [R3] Đường phục hồi in ra phải là việc CHÍNH script này chạy được. `corp_action_auto_confirm
+    # .py`/`--from-raw` đi qua `confirmed_share_event_multiplier`, thứ script này KHÔNG gọi ở bất
+    # kỳ nhánh nào ⇒ khuyên vậy là bắt người vận hành lặp một vòng cho kết quả Y HỆT (§29).
+    e = err.getvalue()
+    check("chờ corp_action_auto_confirm.py rồi chạy lại" not in e,
+          "E9 KHÔNG khuyên đường phục hồi mà script này không chạy được", e[-400:])
+    check("NGƯỜI xác minh giá tham chiếu" in e and "--out" in e,
+          "E10 nói ĐÚNG việc phải làm + cách xem số mà không đụng file sizing", e[-400:])
 
 
 def t_unexplained(tmp):
@@ -304,6 +322,79 @@ def t_park(sb, tmp):
           "K5 asof QUÁ KHỨ: giữ NGUYÊN hành vi cũ (giá BQ đã điều chỉnh hồi tố)", f"{mv3:,.0f}")
 
 
+def t_calendar_and_journal(tmp):
+    """[R1]+[R2] — hai kênh bằng chứng (LỊCH corp-action, JOURNAL fill) đều fail được trong im
+    lặng. Thông điệp blocked phải PHÂN BIỆT "lịch nói không có sự kiện" với "không đọc được
+    lịch", và phải tự khai khi journal thiếu — nếu không, chẩn đoán là suy diễn từ SỰ VẮNG MẶT
+    của một kênh (§28/§29), đúng lỗi replay vòng 1 in ra cho VHM 08-05 / MBB 08-11.
+
+    Cả 4 assertion dưới đây CHẾT BẰNG TÊN (không phải crash) nếu ai gỡ `_corp_action_gate_status`
+    hoặc `missing_out=` — đó là điểm V3 của arch-review vòng 2.
+    """
+    # (a) LỊCH KHÔNG ĐỌC ĐƯỢC (file không tồn tại — producer fail thật, xem _FAILED.json trên đĩa)
+    sb = build_sandbox(extra_ticker=("ACB", 900, 1000))
+    os.remove(os.path.join(sb, "data", "corp_action_daily", f"corp_action_daily_{DATE}.json"))
+    ef, _can = fresh_modules(sb)
+    msg = ef.classify_positions("SpaceX", ACC["SpaceX"], DATE,
+                                {"ACB": {"total": 1000}})[1].get("ACB", "")
+    check("KHÔNG ĐỌC ĐƯỢC LỊCH" in msg, "D1 thiếu file lịch ⇒ thông điệp nói ĐÚNG là không đọc "
+          "được lịch", msg)
+    check("KHÔNG có sự kiện nào" not in msg,
+          "D2 thiếu file lịch ⇒ TUYỆT ĐỐI không khẳng định 'lịch không có sự kiện nào'", msg)
+    check("thiếu/không đọc được corp_action_daily" in msg,
+          "D3 note của _corp_action_gate_status đi kèm (bằng chứng, không phải phỏng đoán)", msg)
+    check("journal KHÔNG đọc được" in msg,
+          "J1 journal thiếu trong cửa sổ ⇒ caveat 'lệnh khớp thật' có thể THIẾU", msg)
+    shutil.rmtree(sb, ignore_errors=True)
+
+    # (b) LỊCH ĐỌC ĐƯỢC + OK ⇒ câu "không có sự kiện nào" mới hợp lệ, và phải kèm status=OK.
+    sb = build_sandbox(extra_ticker=("ACB", 900, 1000))
+    ef, _can = fresh_modules(sb)
+    msg = ef.classify_positions("SpaceX", ACC["SpaceX"], DATE,
+                                {"ACB": {"total": 1000}})[1].get("ACB", "")
+    check("KHÔNG có sự kiện nào" in msg and "status=OK usable=True" in msg,
+          "D4 lịch OK ⇒ kết luận 'không có sự kiện' kèm bằng chứng lịch tươi", msg)
+
+    # (c) journal CÓ THẬT ⇒ caveat phải BIẾN MẤT (nếu không, nó là chuỗi hằng vô dụng).
+    with open(os.path.join(sb, "data", "execution_logs", f"exec_SpaceX_{DATE}_journal.csv"),
+              "w", encoding="utf-8") as f:
+        f.write("ts,child_oid,event,ticker,side,qty,price\n")
+    msg2 = ef.classify_positions("SpaceX", ACC["SpaceX"], DATE,
+                                 {"ACB": {"total": 1000}})[1].get("ACB", "")
+    check("journal KHÔNG đọc được" not in msg2,
+          "J2 journal đọc được ⇒ KHÔNG còn caveat (caveat theo bằng chứng, không hằng số)", msg2)
+    shutil.rmtree(sb, ignore_errors=True)
+
+
+def t_asof_guard(tmp):
+    """[R4] cổng §exdate_frame chỉ chạy ở nhánh asof=hôm nay ⇒ `--asof <quá khứ>` từng là LỐI
+    VÒNG: vị thế vẫn đọc LIVE (get_positions không phụ thuộc --asof) nên vẫn là KL ĐÃ CREDIT,
+    giá lại của ngày cũ, và file canonical vẫn bị ghi đè với rc=0."""
+    sb = build_sandbox()
+    ef, can = fresh_modules(sb)
+    canonical = os.path.join(sb, "data", "execution_logs", "active_nav_SpaceX.json")
+    with open(canonical, "w", encoding="utf-8") as f:
+        json.dump({"sentinel": "canonical phải còn nguyên"}, f)
+    pos = {"VPB": {"total": QTY_NOW["SpaceX"], "sellable": 0, "marketPrice": PX_TERP}}
+
+    rc = run_nav(can, pos, {"VPB": PX_CUM}, None, asof=PREV)
+    check(rc == 7, "A1 --asof quá khứ KHÔNG có --out ⇒ rc=7 (từ chối ghi canonical)", f"rc={rc}")
+    check(json.load(open(canonical, encoding="utf-8")).get("sentinel"),
+          "A2 file active_nav canonical KHÔNG bị đụng tới")
+
+    err = io.StringIO()
+    out = os.path.join(tmp, "asof.json")
+    rc2 = run_nav(can, pos, {"VPB": PX_CUM}, out, asof=PREV, err_out=err)
+    check(rc2 == 0, "A3 có --out ⇒ vẫn chạy được (khảo sát/đối chiếu)", f"rc={rc2}")
+    check("§exdate_frame" in err.getvalue() and "KHÔNG chạy" in err.getvalue(),
+          "A4 nhưng phải NÓI RA rằng cổng bị tắt cho bản chạy này", err.getvalue()[-300:])
+
+    rc3 = run_nav(can, pos, {"VPB": PX_CUM}, None, asof=DATE)
+    check(rc3 == 0 and json.load(open(canonical, encoding="utf-8")).get("active_nav"),
+          "A5 asof=HÔM NAY vẫn ghi canonical bình thường (chốt chặn không chặn nhầm)", f"rc={rc3}")
+    shutil.rmtree(sb, ignore_errors=True)
+
+
 def main():
     tz = os.environ.get("TZ", "(không đặt)")
     print(f"== exdate_frame_selfcheck (TZ={tz}) ==")
@@ -316,6 +407,8 @@ def main():
         t_e2e(ef, can, tmp)
         t_park(sb, tmp)
         t_unexplained(tmp)
+        t_calendar_and_journal(tmp)
+        t_asof_guard(tmp)
     finally:
         shutil.rmtree(sb, ignore_errors=True)
         shutil.rmtree(tmp, ignore_errors=True)

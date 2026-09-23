@@ -91,6 +91,17 @@ def classify_positions(account_label, account_no, asof, positions):
                                khớp tỉ lệ nào. Caller PHẢI fail-closed: đây là đường sizing,
                                đoán sai ở đây là đặt lệnh sai khối lượng bằng tiền thật.
 
+    §28/§29 — thông điệp `blocked` PHẢI mang theo trạng thái của hai kênh bằng chứng mà nó dựa
+    vào, vì CẢ HAI đều fail được trong im lặng:
+      · LỊCH corp-action — `_corp_action_daily_snapshot` trả `None` khi thiếu file, và producer
+        fail thật (`corp_action_daily_2026-08-27_FAILED.json` còn trên đĩa). Không phân biệt thì
+        "lịch KHÔNG có sự kiện nào cho mã này" là suy diễn từ SỰ VẮNG MẶT của một kênh — replay
+        vòng 1 in đúng câu đó cho VHM 2026-08-05 và MBB 2026-08-11, hai ngày mà file lịch KHÔNG
+        TỒN TẠI. Dùng `_corp_action_gate_status` (đã có sẵn, `daily_nav_snapshot` in nó từ vòng 2).
+      · JOURNAL fill — `net_fills_between(missing_out=...)` trả danh sách ngày GIAO DỊCH mà
+        journal không đọc được; thiếu nó thì "lệnh khớp thật +0" cũng là suy diễn từ vắng mặt
+        (đúng lỗi đã vá ở vòng 3 của `daily_nav_snapshot`, mục [N2]).
+
     TÁI DÙNG NGUYÊN `daily_nav_snapshot.classify_qty_residual` và bộ plumbing quanh nó
     (`_corp_action_daily_snapshot` / `held_event_next_session` / `previous_raw_qty` /
     `net_fills_between`) — hàm đó đã qua 5 vòng arch-review và đã đo trên 104 cặp phiên của cả
@@ -108,6 +119,7 @@ def classify_positions(account_label, account_no, asof, positions):
     import daily_nav_snapshot as dns
 
     snap = dns._corp_action_daily_snapshot(asof)
+    ca_active, ca_note = dns._corp_action_gate_status(snap, asof)
     credited, blocked, fill_cache = {}, {}, {}
     for tk in sorted(positions):
         p = positions[tk] or {}
@@ -115,7 +127,9 @@ def classify_positions(account_label, account_no, asof, positions):
         qty_prev, prev_d = dns.previous_raw_qty(account_no, tk, asof)
         if prev_d is not None and qty_prev is None:
             qty_prev = 0.0                      # [B2] bản ghi ngày trước CÓ mà vắng mã ⇒ "chưa giữ"
-        net_fill = (dns.net_fills_between(account_label, prev_d, asof, fill_cache).get(tk)
+        journal_gaps = []
+        net_fill = (dns.net_fills_between(account_label, prev_d, asof, fill_cache,
+                                          missing_out=journal_gaps).get(tk)
                     if prev_d else None)
         ev = dns.held_event_next_session(snap, asof, tk)
         verdict, detail = dns.classify_qty_residual(ev, qty_now, qty_prev, net_fill, prev_d)
@@ -126,8 +140,42 @@ def classify_positions(account_label, account_no, asof, positions):
                 f"KL {detail['qty_prev']:,.0f}→{detail['qty_now']:,.0f} (so với "
                 f"{detail['prev_qty_date']}), lệnh khớp thật {detail['net_fill']:+,.0f} ⇒ phần dư "
                 f"{detail['residual']:+,.0f} CHƯA GIẢI THÍCH ĐƯỢC"
-                + (f" — lịch có {detail['event_code']} ex-date {detail['ex_date']} nhưng phần dư "
-                   f"KHÔNG khớp tỉ lệ {detail.get('exercise_ratio')} (kỳ vọng "
-                   f"{detail.get('expected_residual')})" if detail.get("ex_date")
-                   else " — lịch corp-action KHÔNG có sự kiện nào cho mã này vào phiên kế tiếp"))
+                + _calendar_clause(detail, ca_active, ca_note, asof)
+                + _journal_caveat(journal_gaps))
     return credited, blocked
+
+
+def _calendar_clause(detail, ca_active, ca_note, asof):
+    """Vế "lịch nói gì" của thông điệp blocked — BA ca, không phải hai (§28/§29).
+
+    Ca thứ ba (`ca_active is False`) chính là lỗ hổng vòng 1: lịch KHÔNG ĐỌC ĐƯỢC thì mọi mã rơi
+    vào `qty_unexplained` với `ex_date=None`, và câu "lịch KHÔNG có sự kiện nào" đẩy người xử lý
+    đi kiểm đúng cái không cần kiểm. Ghép `ca_note` vào MỌI ca để người đọc thấy nguồn bằng chứng
+    ngay trên dòng chẩn đoán, không phải suy ra.
+    """
+    if detail.get("ex_date"):
+        why = (f" — lịch có {detail['event_code']} ex-date {detail['ex_date']} nhưng phần dư "
+               f"KHÔNG khớp tỉ lệ {detail.get('exercise_ratio')} (kỳ vọng "
+               f"{detail.get('expected_residual')})")
+    elif ca_active:
+        why = " — lịch corp-action KHÔNG có sự kiện nào cho mã này vào phiên kế tiếp"
+    else:
+        why = (f" — KHÔNG ĐỌC ĐƯỢC LỊCH corp-action cho {asof} ⇒ KHÔNG kết luận được mã này "
+               f"CÓ hay KHÔNG CÓ sự kiện; kiểm lịch TRƯỚC khi nghi nguyên nhân khác")
+    return why + f" [lịch: {ca_note}]"
+
+
+def _journal_caveat(gaps):
+    """Vế "journal có đọc được không" — thiếu nó thì `net_fill` +0 là suy diễn, không phải số đo.
+
+    Cắt còn 5 mục đầu vì cùng lý do §29 đã ghi ở `daily_nav_snapshot`: cửa sổ dài sinh chuỗi vài
+    nghìn ký tự trên MỘT dòng stderr, không ai đọc được.
+    """
+    if not gaps:
+        return ""
+    g = sorted(set(gaps))
+    head = "; ".join(g[:5])
+    tail = f"; … và {len(g) - 5} ngày nữa" if len(g) > 5 else ""
+    return (f" [⚠️ journal KHÔNG đọc được cho {len(g)} ngày GIAO DỊCH trong cửa sổ "
+            f"({head}{tail}) ⇒ 'lệnh khớp thật' phía trên có thể THIẾU; kiểm journal TRƯỚC "
+            f"khi nghi corp-action]")
