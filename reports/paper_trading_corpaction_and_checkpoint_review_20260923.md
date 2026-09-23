@@ -438,3 +438,81 @@ ngày 09-21 còn mở. Rất có thể cùng một gốc.
 | Mutation trên neo mới | **4/4 chết bằng assertion** — `tol=1e-6`→E2+E4 · `tol=0,5`→E1+E4 · `min→max`→E1 · vô hiệu hoá→E1 |
 | Mutation trên quy ước | revert về `accrue_only` ⇒ số dẫn dắt tụt +1,86→+0,81pp và **trùng** số đối chiếu — quan sát được ngay trên headline |
 | Báo cáo đầy đủ chạy thật | `paper_programs_daily_report.py --no-state` rc=0 |
+
+---
+
+## 7. Quyết định của user: **PHƯƠNG ÁN B** — sửa bằng CẬN TRÊN, rồi chốt gate trên số đã sửa
+
+Job `Taylor_20260923_155655`, commit `2617ad68`. Đóng bus question
+`alphalens-fpt-vendor-factor-stale-gate-0930` (mục 6.3 ở trên là phần escalate).
+
+### 7.1 Đã làm gì
+
+Hệ số điều chỉnh corp-action của FPT được sửa bằng **cận trên đã xác minh `r ≤ 0,909066`** và
+số này được áp vào chính **con số DẪN DẮT** của báo cáo (trước đây chỉ in cảnh báo kèm chặn dưới).
+
+| | trước | sau |
+|---|---|---|
+| FPT — giá vốn (`terp`) | 70.200 | **63.816** |
+| FPT — tỉ suất | −5,13% | **+4,36%** |
+| EW danh mục | −0,45% | **+1,92%** |
+| **excess vs VNINDEX (−2,32%)** | +1,86pp | **+4,23pp** |
+| `accrue_only` (số đối chiếu) | +0,81pp | +3,19pp |
+
+### 7.2 ⚠️ Đây là **CẬN TRÊN (bound)**, không phải giá trị đúng chính xác
+
+`Close/Price` tại ngày *d* = tích hệ số của MỌI sự kiện có GDKHQ **sau** *d* ⇒ không-giảm theo
+*d*. Quan sát `r = 0,909066` tại 2026-09-18 vì thế chỉ cho biết hệ số đúng tại 2026-06-30
+**không lớn hơn** 0,909066 — nó là **chặn trên của hệ số**, tức **chặn dưới của tỉ suất**. Nếu
+vendor hồi tố sâu hơn nữa (còn sự kiện khác chưa vào chuỗi), **tỉ suất thật CAO HƠN** con số
+trên, không bao giờ thấp hơn. Báo cáo vì thế in `≥` ở headline và nói thẳng "CHẶN DƯỚI" trong
+thân — không được đọc +4,23pp như một điểm ước lượng.
+
+**Độ chặt của bound, đo chứ không đoán**: 0,909066 so với giá trị lý thuyết của riêng sự kiện CP
+thưởng 10% là `1/1,1 = 0,909091` — lệch **2,7e-5**, đúng cỡ nhiễu làm tròn bước giá. Nghĩa là
+bound này **sát**, và cũng là bằng chứng độc lập rằng sự kiện duy nhất còn thiếu chính là đợt
+thưởng 10%. Thay bằng đúng `1/1,1`: excess = +4,233pp — **làm tròn vẫn +4,23pp**. Chênh lệch giữa
+hai cách ≈ 0,004pp trên FPT, ~0,001pp trên danh mục.
+
+### 7.3 Phạm vi áp dụng — chỉ FPT, chỉ trong cửa sổ vận hành
+
+Chặn trên chỉ được áp cho dòng nào bị neo `_terp_factor_stale` bắt, mà neo đó **chỉ quét từ ngày
+vào lệnh (2026-06-30) trở đi** — đúng phạm vi đã đo ở mục 6.3 (**6/267 mã = 2,2%**), KHÔNG phải
+kiểu quét thô cả năm (946/1.277 = 74%) đã tự đính chính là sai phạm vi. Trong sổ AlphaLens chỉ
+FPT dính; ACB/MBB/HDB **không bị đụng tới** — có test đối chứng riêng (E6) pin điều đó.
+
+Neo cơ học `_terp_factor_stale` (`8ee4a8b4`) **giữ nguyên, không xoá**: nay nó vừa cảnh báo vừa
+kích hoạt phép sửa, và vẫn là cái bắt được ca tiếp theo nếu vendor lag tái diễn ở mã khác.
+
+### 7.4 Verify
+
+- **Recompute độc lập, ngoài script** (không tin số script in ra): FPT `66.600/63.816,43−1 =
+  +4,3618%` · ACB `−2,8698%` · MBB `−0,3964%` · HDB `+6,5764%` ⇒ EW `+1,9180%`; VNINDEX
+  `1.816,93/1.860,01−1 = −2,3161%` ⇒ **excess +4,234pp**. Khớp số báo cáo in ra.
+- **Chặn trên verify thẳng trên `tav2_bq.ticker`**, không chỉ trên BQ cache:
+  `MIN(Close/Price)` trên 2026-06-30→09-22 = **0,909066** tại **2026-09-18** (kế đó 0,909078 tại
+  09-15) — đúng con số dùng để sửa.
+- `paper_report_render_selfcheck.py` **44/44 PASS** × 4 TZ (`Asia/Ho_Chi_Minh`, `UTC`,
+  `America/New_York`, `env -u TZ`). Thêm **E5/E5b** (chặn trên phải được ÁP vào số dẫn dắt + nhãn
+  CHẶN DƯỚI + bằng chứng ngày gãy) và **E6** (đối chứng: mã hệ số phẳng tuyệt đối không bị đụng).
+- **Mutation 4/4 chết**: bỏ áp chặn → E5 FAIL · `scale=1,0` → E5+E5b FAIL · bỏ điều kiện `sf` ở
+  nhãn `≥` → E6 FAIL · đảo tỉ số `r0/r_min` → E5+E5b FAIL.
+- **Blast radius**: thay đổi nằm GỌN trong `probe_alphalens`; không consumer nào khác gọi hàm
+  này; **không chạm NAV, không chạm order, không chạm tiền thật** — không có bất thường phải dừng.
+- Báo cáo ngày chạy thật `--no-state` rc=0.
+
+### 7.5 Trạng thái gate AlphaLens
+
+Số để chốt gate đã **khoá**: tiêu chí 1 ("excess dương vs VNINDEX qua full window 3 tháng") đang
+ở **≥ +4,23pp**, dương với biên rộng, và không còn phụ thuộc vào việc vendor có hồi tố kịp trước
+09-30 hay không — đó chính là mục đích của phương án B.
+
+**Chưa tuyên gate PASS hôm nay**, vì hai lý do cụ thể chứ không phải thận trọng chung chung:
+1. **Cửa sổ chưa đóng**: phiên ~61/66, window 2026-07-01→**2026-09-30**. Tiêu chí ghi rõ "qua
+   full window 3 tháng" ⇒ phán quyết thuộc về phiên 09-30, không phải 09-23.
+2. **Vai trò trong registry ngược với mô tả trong dispatch.** `kb/paper_programs_registry.json`
+   và `data/alphalens_paper.json` đều ghi: **owner/manager = DollarBill, auditor = Taylor**,
+   `end_or_trigger = "2026-09-30 (audit: Taylor)"`. Dispatch mô tả DollarBill là auditor độc lập —
+   không khớp. Giữ nguyên registry (không tự đảo vai), nên **audit 09-30 vẫn do Taylor thực
+   hiện**; DollarBill được thông báo con số đã sửa với tư cách chủ chương trình.
+
