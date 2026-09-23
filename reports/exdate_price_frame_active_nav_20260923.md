@@ -216,3 +216,84 @@ số công bố, không phải số nội bộ — đề nghị ưu tiên trên 
   vĩnh viễn). Cần quyết phạm vi riêng cho từng cái.
 - 24/09 là ex-date VPB THẬT ⇒ G1 close tự điều chỉnh sáng nay, lỗi của chính ca VPB tự lành. Bản
   vá vẫn cần cho lần sau.
+
+---
+
+# VÒNG 3 — F1..F5 (commit `3f66364c`, 2026-09-24 ~00:5x ICT)
+
+## Đã sửa
+
+| Mục | Sửa | Bằng chứng |
+|---|---|---|
+| **F1** | `args.asof = (args.asof or "").strip() or None` ngay sau `parse_args` (tiền lệ `park_holdings.py:550`) + lớp hai: `bq_close_sql` **NÉM** `ValueError` khi `as_of_date` rỗng thay vì âm thầm thành `TRUE` | A6/A7/A8; mutation M-F1, M-F1b |
+| **F2** | Chốt chặn đổi từ `not args.out` sang `os.path.realpath(out_path) == os.path.realpath(canonical_out)` | A9/A10 (cả đường thẳng lẫn qua `./`); mutation M-F2; **demo trên đường dẫn canonical THẬT: rc=7 × 2, md5 2 file không đổi** |
+| **F3** | `park_holdings` phát cờ **cấp tài khoản** `frame_blocked_tickers` + `frame_blocked_detail`; `compute_park_trim.py` và `compute_jit_unpark.py` thêm cổng `BLOCKED_FRAME` ngay sau cổng reconcile (cùng hình dạng `BLOCKED_CASH_BASIS`) | K6..K12; mutation M-F3a/b/c |
+| **F4** | 14 assertion CÓ TÊN (45 → **59**) | 59/59 PASS × 4 môi trường TZ |
+| **F5** | `{args.asof!r}` ở cả dòng rc=7 lẫn dòng ⚠️ | — |
+
+**Đo (sau commit, `git status --porcelain` RỖNG):** 59/59 PASS ở ICT / `env -u TZ` /
+`Pacific/Kiritimati` / `UTC` dưới `$DNA_PYEXE` · **6/6 mutation bị giết** · selfcheck theo phạm vi
+(§23, chạm `park_holdings` = lõi dùng chung của cả L1/L2): `compute_active_nav` ✅,
+`compute_park_trim` 82/82, `compute_jit_unpark` 80/80 (ma trận TZ, digest đồng nhất),
+`merge_park_orders` ✅, `approve_plan_with_jit` ✅, `corp_action` 85/85.
+
+**KHÔNG chạy `--asof ""` trên production.** Sau F1 nó tương đương một lần chạy bình thường ⇒ gọi
+DNSE live và ghi canonical thật. Bằng chứng là A6/A7 hermetic. Trước mọi lần chạy chạm đường dẫn
+thật đã backup (`/tmp/anav_backup_1790184600`); md5 2 file canonical trước = sau; số hiện tại vẫn
+là SpaceX 983.012.160 (VPB 30.561.300) / ZaloPay 521.077.109.
+
+## Ba chỗ tôi thấy F1–F5 nói SAI hoặc tự mâu thuẫn
+
+**(1) F4(c) mâu thuẫn với chính F3 — tôi theo F3.** F4(c) yêu cầu "nhánh verify-fail ⇒
+`park_mv_vnd` KHÔNG còn 38.530.800". Không làm được, và không nên làm: nhánh verify-fail **theo
+định nghĩa** là nhánh không dựng nổi giá cùng hệ, nên không tồn tại con số đúng để thay vào. Mọi
+phương án thay (bỏ lô, dùng `park_mv_verified_vnd`, gán 0) đều là bịa một con số theo hướng
+NGƯỢC LẠI. F3 nói đúng việc phải làm: *"trả BLOCKED_FRAME thay vì trim trên `park_mv_vnd` phồng"*.
+Tôi giữ `park_mv_vnd` = 38.530.800 và **chặn consumer**; assertion **K8** pin thẳng rằng ở nhánh
+fail mẫu số ĐÚNG LÀ số phồng — nên phải chặn, không phải tin.
+
+**(2) F4(a) đòi sai mã lỗi.** F4(a) viết `--asof ""` ⇒ **rc=7**. rc=7 nghĩa là *"từ chối ghi đè vì
+asof là ngày KHÁC hôm nay"* — sau F1 thì `""` ≡ `None` ≡ *không truyền* `--asof`, tức là một lần
+chạy bình thường hợp lệ; bắt nó rc=7 là bắt script nói một câu SAI về chuyện vừa xảy ra, và sẽ chặn
+cả ngày thường. Cái phải đạt là *`""` hết là lối vòng*: nó rơi vào **cùng nhánh** "hôm nay" nên
+cổng §exdate_frame CHẠY. Trên fixture VPB ⇒ **rc=6** (`❌`, `cron_health_check.py` thấy); ngày sạch
+⇒ rc=0 và ghi canonical, đúng. A6 assert rc=6, A7 assert canonical còn nguyên.
+
+**(3) K9 yếu hơn vẻ ngoài — nói rõ ở comment trong code.** Fixture `t_park` có mọi field tiền = 0,
+nên gỡ cổng `BLOCKED_FRAME` khỏi L1 thì nó rơi vào `BLOCKED_CASH_BASIS` chứ không ra lệnh trim (đo
+thật bằng mutation M-F3b). Vậy K9 chứng minh **cờ thắng trước mọi cổng khác**, KHÔNG thực thi được
+phản chứng "thiếu cổng thì over-trim thật". Vế đó vẫn là suy luận trên đường code
+`:331 park_mv` → `:406 pool` → `:408 delta` — cùng bằng chứng reviewer đã dùng, không mạnh hơn.
+
+F2, F3, F5: không có ý kiến ngược, đúng như mô tả.
+
+## Việc RIÊNG — ghi nhận, KHÔNG sửa ở nhánh này
+
+- **V1 · `discretionary_margin_gate.py:335` — call-site thứ TƯ, TIỀN THẬT.**
+  `drawdown = px / a["arm_price"] - 1.0`, `:341 if drawdown <= EXIT_DD_PCT` (−0,20).
+  `current_price()` (`:180-188`) trả giá SAU sự kiện; `arm_price` ghi lúc arm (`:269`) là giá CUM
+  và không bao giờ được điều chỉnh ⇒ mọi sự kiện hệ số ≥1,25 tự chế ra một lần "chạm −20% ⇒
+  de-lever bắt buộc" GIẢ (VPB 1,2604104: `1/1,2604104 − 1 = −20,66%`, vượt ngưỡng). Hiện **LATENT**
+  (không state file, 0 case đang arm) — nhưng đây là sleeve margin discretionary, lệnh thoát thật.
+- **V2 · Runbook rc=6, hai câu còn thiếu.** (a) Cửa sổ block **tự đóng sau GDKHQ** ⇒ tối đa 1 đêm;
+  người nhận rc=6 lúc 20:15 hiện KHÔNG có cách nào biết. (b) Vòng phụ thuộc `corp_action_daily`
+  ⇄ `active_nav` (`corp_action_daily.py:100,171` đọc danh sách mã đang giữ TỪ chính
+  `active_nav_*.json`) ⇒ rc=6 kéo dài nhiều đêm phải gỡ **TAY**, không chờ tự khỏi.
+- **V3 · `send_plan_report.sh:621`** đọc `active_nav_{acct}.json` KHÔNG có cổng độ tươi, bọc
+  `except: pass` ⇒ đêm rc=6 thì dòng 🥚 "CẦN RÚT X tr trước 9:05" tính trên tiền HÔM QUA. Có sẵn
+  từ trước bản vá này.
+- **V4 · Khoảng trống cảnh báo:** `❌` chỉ tới người lúc **08:25** hôm sau, trong khi user duyệt
+  plan ~21:00 đêm trước. Không có cảnh báo cùng-tối. Đúng với MỌI mã lỗi cũ, không riêng rc=6.
+- **V5 · 3 call-site đã biết:** `dividend_adjusted_return.py:473-478`, `report_return_gate.py`,
+  `discretionary_accumulation_inject.py:124`.
+- **Đã tra thêm, SẠCH:** `verify_account_snapshot.py:382` có BẢN CHÉP riêng của `bq_close_sql`
+  nhưng **không** có nhánh `else "TRUE"` (luôn `t.time <= '{as_of_date}'`) ⇒ `""` cho 0 dòng và
+  in `WARN no BQ price` cho từng mã (ồn, không im lặng); tên file output nhúng `asof` nên không
+  ghi đè được file sizing canonical. Khác lớp lỗi F1, không đụng.
+
+⚠️ **KHÔNG tuyên bố đã quét hết.** Lớp lỗi này là *"hai số từ hai nguồn, ranh giới corp-action nằm
+ở giữa"*; `grep` chỉ bắt được chỗ có `get_positions`/`close_prices`/`arm_price` lộ ra tên. Câu này
+là của reviewer và tôi giữ nguyên: chưa đóng được toàn bộ.
+
+**CHƯA LAND.** Nhánh `fix/exdate-price-frame-active-nav` @ `3f66364c`, worktree
+`mike/wt-exdate-price-frame`. Chờ arch-review vòng 3 + Mike/user.
