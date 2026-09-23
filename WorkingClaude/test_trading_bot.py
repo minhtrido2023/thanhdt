@@ -381,4 +381,103 @@ print(f"  [5d] per-account config: main paper=True, DNSE live accounts={[p['labe
 
 print("\n✅ floor guard + journal marker + per-account config: all assertions PASS")
 
+# ============ 6) HYBRID fill-timing schedule (_hybrid_active/_sched/_mult/_defer/_block_cap) ============
+# Bịt lỗ hổng coverage phát hiện 2026-09-23: fill_timing_hybrid_enabled=True là default từ
+# config.py:165 (LIVE 2026-08-10) nhưng KHÔNG có test trực tiếp nào cho lịch HYBRID trong repo
+# (grep xác nhận) — chỉ lộ ra gián tiếp qua 2 fixture ở mục 2/gap-adaptive từng FAIL flaky theo
+# giờ chạy thật (đã sửa bằng cách tắt cờ ở đó). Test này gọi thẳng các hàm `_hybrid_*` với `now`
+# tường minh (như style mục 3-5), không phụ thuộc now_ict() thật.
+from trading_bot.vn_market import LOT
+print("\n--- HYBRID schedule tests ---")
+
+hcfg = dict(cfgmod.DEFAULTS)
+hcfg.update({
+    "mode": "paper", "fill_timing_enabled": True, "fill_timing_hybrid_enabled": True,
+    "fill_timing_live_gate": True, "fill_timing_hybrid_live_gate": True,
+    "fill_timing_outside_mult": 4.0, "hybrid_block_min": 15, "slice_interval_min": 8,
+    "hybrid_buy_blocks": ["11:00", "11:15", "13:00", "13:15", "13:30"],
+    "hybrid_sell_blocks": ["09:15", "09:30", "09:45", "10:00"],
+})
+h_order = PlannedOrder(id="BUY-HYB-01", ticker="HYBTEST", side="buy", qty=1000, ref_price=10_000)
+h_urgent = PlannedOrder(id="SELL-HYB-URG", ticker="HYBTEST", side="sell",
+                        qty=1000, ref_price=10_000, urgency="high")
+h_plan = TradePlan(plan_date="2026-06-29", signal_date="2026-06-28", strategy="test",
+                   strategy_version="1", state=3, state_name="NEUTRAL", nav_basis={},
+                   orders=[h_order, h_urgent], account="hybtest")
+h_broker = PaperBroker(init_cash=1_000_000_000, fee_rate=0.0015,
+                        quote_source=fq, label="hybtest").connect()
+h_exec = Executor(h_plan, h_broker, hcfg, shared={})
+
+# 6a: _hybrid_active — cổng bật/tắt (master switch, hybrid switch, urgency=high luôn bypass)
+assert h_exec._hybrid_active(h_order) is True, "[FAIL] urgency=normal + hybrid on → active"
+assert h_exec._hybrid_active(h_urgent) is False, "[FAIL] urgency=high phải luôn bypass HYBRID"
+hcfg_off = dict(hcfg); hcfg_off["fill_timing_hybrid_enabled"] = False
+assert Executor(h_plan, h_broker, hcfg_off, shared={})._hybrid_active(h_order) is False, \
+    "[FAIL] fill_timing_hybrid_enabled=False phải tắt hẳn"
+hcfg_master_off = dict(hcfg); hcfg_master_off["fill_timing_enabled"] = False
+assert Executor(h_plan, h_broker, hcfg_master_off, shared={})._hybrid_active(h_order) is False, \
+    "[FAIL] fill_timing_enabled=False (master) phải tắt HYBRID theo"
+print("  [6a] _hybrid_active: normal→True, urgency=high→False, hybrid_off→False, master_off→False ✓")
+
+# 6b: _hybrid_sched — trong block / giữa 2 block / sau block cuối (tự kết thúc)
+t_in_block = dt.datetime(2026, 6, 29, 11, 5)     # trong block đầu [11:00,11:15)
+t_between = dt.datetime(2026, 6, 29, 12, 0)      # giữa block 2 [11:15,11:30) và 3 [13:00,13:15)
+t_after_all = dt.datetime(2026, 6, 29, 14, 0)    # sau block cuối [13:30,13:45)
+assert h_exec._hybrid_sched(h_order, t_in_block) == (True, 5), \
+    f"[FAIL] 11:05 phải (in_block=True, left=5), được {h_exec._hybrid_sched(h_order, t_in_block)}"
+assert h_exec._hybrid_sched(h_order, t_between) == (False, 3), \
+    f"[FAIL] 12:00 phải (False, 3), được {h_exec._hybrid_sched(h_order, t_between)}"
+assert h_exec._hybrid_sched(h_order, t_after_all) == (False, 0), \
+    f"[FAIL] 14:00 (sau block cuối) phải (False, 0), được {h_exec._hybrid_sched(h_order, t_after_all)}"
+print("  [6b] _hybrid_sched: 11:05→(True,5) 12:00→(False,3) 14:00→(False,0) ✓")
+
+# 6c: _hybrid_mult — trong block dùng nhịp block_min/slice_interval; ngoài block dùng outside_mult
+expect_in = max(1.0, hcfg["hybrid_block_min"] / hcfg["slice_interval_min"])
+m_in_block = h_exec._hybrid_mult(h_order, t_in_block)
+m_outside = h_exec._hybrid_mult(h_order, t_between)
+assert m_in_block == expect_in, f"[FAIL] trong block kỳ vọng {expect_in}, được {m_in_block}"
+assert m_outside == hcfg["fill_timing_outside_mult"], \
+    f"[FAIL] ngoài block kỳ vọng {hcfg['fill_timing_outside_mult']}, được {m_outside}"
+print(f"  [6c] _hybrid_mult: trong block={m_in_block} ngoài block={m_outside} ✓")
+
+# 6d: _hybrid_defer — hoãn khi NGOÀI block còn block phía sau; KHÔNG BAO GIỜ kẹt hàng vĩnh viễn
+# (hết cửa sổ ⇒ tự kết thúc, không hoãn nữa — đây chính là bug quant-skeptic 2026-08-10 tái lập
+# nếu điều kiện left>0 bị bỏ sót, xem docstring _hybrid_defer)
+assert h_exec._hybrid_defer(h_order, t_between) is True, "[FAIL] ngoài block còn block phía sau phải HOÃN"
+assert h_exec._hybrid_defer(h_order, t_in_block) is False, "[FAIL] đang trong block KHÔNG được hoãn"
+assert h_exec._hybrid_defer(h_order, t_after_all) is False, \
+    "[FAIL] hết cửa sổ (left=0) phải KHÔNG hoãn — tự kết thúc, sai chỗ này = kẹt hàng vĩnh viễn"
+print("  [6d] _hybrid_defer: ngoài-block→hoãn, trong-block→không, hết-cửa-sổ→tự kết thúc ✓")
+
+# 6e: _hybrid_block_cap — trần KL trải đều phần dư theo số block còn lại (sàn 1 lô); None khi
+# hết trần (block cuối / sau cửa sổ) — phần dư chạy tiếp không giới hạn
+ps_mid = {"filled": 400}
+expect_cap = max(LOT, -(-(h_order.qty - ps_mid["filled"]) // 3))   # left=3 tại t_between
+cap_mid = h_exec._hybrid_block_cap(h_order, ps_mid, t_between)
+assert cap_mid == expect_cap, f"[FAIL] cap giữa cửa sổ kỳ vọng {expect_cap}, được {cap_mid}"
+t_last_block = dt.datetime(2026, 6, 29, 13, 40)   # block cuối [13:30,13:45), left=1
+ps_last = {"filled": 950}
+assert h_exec._hybrid_block_cap(h_order, ps_last, t_last_block) is None, \
+    "[FAIL] block cuối (left<=1) phải None (hết trần, đi nốt phần dư)"
+assert h_exec._hybrid_block_cap(h_order, ps_last, t_after_all) is None, \
+    "[FAIL] sau cửa sổ (left=0) phải None"
+print(f"  [6e] _hybrid_block_cap: giữa cửa sổ={cap_mid} (kỳ vọng {expect_cap}); "
+      f"block cuối/sau cửa sổ→None ✓")
+
+# 6f: _hybrid_bypass — tầng rủi ro cao hơn (gap-adaptive down-gap ở mở cửa) PHẢI thắng HYBRID
+# tuyệt đối: không hoãn, tốc độ đầy đủ, không cắt trần KL (xem docstring _hybrid_bypass — thiếu
+# bypass này là lỗi thật quant-skeptic tái lập 2026-08-10, lệnh bán khẩn bị HYBRID làm chậm hơn
+# cả trước khi có HYBRID)
+hcfg_gap = dict(hcfg); hcfg_gap["gap_adaptive_enabled"] = True
+h_exec_gap = Executor(h_plan, h_broker, hcfg_gap, shared={})
+h_exec_gap._gap_z_cache["HYBTEST"] = -3.0
+t_gap_window = dt.datetime(2026, 6, 29, 9, 30)   # trong cửa sổ gap-override, NGOÀI block MUA
+assert h_exec_gap._hybrid_bypass(h_order, t_gap_window) is True, "[FAIL] down-gap mở cửa phải bypass HYBRID"
+assert h_exec_gap._hybrid_defer(h_order, t_gap_window) is False, "[FAIL] bypass → KHÔNG được hoãn dù ngoài block MUA"
+assert h_exec_gap._hybrid_mult(h_order, t_gap_window) == 1.0, "[FAIL] bypass → mult phải 1.0"
+assert h_exec_gap._hybrid_block_cap(h_order, ps_mid, t_gap_window) is None, "[FAIL] bypass → KHÔNG được cắt trần KL"
+print("  [6f] _hybrid_bypass: down-gap mở cửa thắng HYBRID (không hoãn, mult=1.0, cap=None) ✓")
+
+print("\n✅ HYBRID schedule: 6 nhóm assertion PASS")
+
 shutil.rmtree(TMP, ignore_errors=True)
