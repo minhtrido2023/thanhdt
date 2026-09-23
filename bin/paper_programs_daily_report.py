@@ -226,6 +226,57 @@ def probe_journal_scan(probe, prog, today):
     return {"headline": head, "body": body, "flags": flags}
 
 
+_TERP_DROP_TOL = 5e-3           # mức GIẢM tương đối coi là thật (xem docstring dưới: đo 227× nền nhiễu)
+
+
+def _terp_factor_stale(items, cache_dir=None):
+    """{(mã, asof): (ngày_gãy, r_tại_asof, r_min_sau_đó)} — dòng vi phạm bất biến không-giảm.
+
+    `Close/Price` tại ngày d = TÍCH hệ số điều chỉnh của MỌI sự kiện có GDKHQ **sau** d ⇒ đại
+    lượng này phải KHÔNG-GIẢM theo d (d càng muộn thì càng ít sự kiện tương lai). Một lần GIẢM
+    là bằng chứng cơ học — không phải suy đoán (§29) — rằng vendor chưa hồi tố hết: mọi dòng
+    TRƯỚC chỗ gãy mang hệ số QUÁ CAO ⇒ `entry_adj` rebase THIẾU ⇒ tỉ suất bị BÁO THIẾU.
+
+    Ca thật bắt được 2026-09-23 (FPT, verify thẳng trên `tav2_bq.ticker` chứ không chỉ cache):
+    r = 1,0 tại 2026-06-30 nhưng 0,909066 tại 2026-09-18 — CP thưởng 10% ngày 2026-09-21 chỉ
+    được hồi tố đúng 3 phiên (09-15→09-18) rồi dừng. Cái neo `factor <= 1` sẵn có KHÔNG bắt
+    được vì 1,0 là giá trị hợp lệ; chỉ so với chính chuỗi về sau mới lộ.
+
+    Trả về BOUND chứ không phải điểm: `r_min_sau_đó` là chặn TRÊN của hệ số đúng tại `asof`
+    (r phải không-giảm), nên tỉ suất thật ≥ tỉ suất tính lại bằng nó. Cố ý không đoán số đúng.
+
+    Ngưỡng `_TERP_DROP_TOL` là TƯƠNG ĐỐI và đo từ chính dữ liệu, không phải số chọn tay: `Close`
+    bị làm tròn về bước giá nên `Close/Price` rung nhẹ kể cả khi chuỗi hoàn toàn đúng. Đo trên 4
+    mã của sổ AlphaLens, cửa sổ 2026-06-30→2026-09-22 (58 phiên/mã): mức GIẢM lớn nhất do rung
+    làm tròn là **4,01e-4** (MBB; ACB/HDB không có lần giảm nào), còn ca hỏng thật là **9,09e-2**
+    (FPT) — cách nhau **227×**. 5e-3 nằm gần đúng trung bình NHÂN của hai mốc đó: cao hơn nền
+    nhiễu 12× và thấp hơn tín hiệu thật 18×. Dùng `FACTOR_EPS` (1e-6) ở đây là SAI — nó báo động
+    giả trên MBB ngay lần chạy đầu.
+    GIỚI HẠN đã biết, nói thẳng: sự kiện có tác động giá < 0,5% sẽ KHÔNG bị bắt.
+    """
+    import duckdb
+    cache_dir = cache_dir or os.path.join(WC_ROOT, "data", "bq_cache")
+    glob = os.path.join(cache_dir, "ticker", "*.parquet")
+    con = duckdb.connect()
+    con.execute("SET threads=1")
+    try:
+        out = {}
+        for ticker, asof, _ in items:
+            rows = con.execute(
+                f"SELECT time, Close/Price FROM read_parquet('{glob}') WHERE ticker = ? "
+                f"AND time >= CAST(? AS DATE) AND Price IS NOT NULL AND Price > 0 "
+                f"AND Close IS NOT NULL AND Close > 0 ORDER BY time", [ticker, asof]).fetchall()
+            if len(rows) < 2:
+                continue
+            r0 = float(rows[0][1])
+            worst = min(rows[1:], key=lambda r: float(r[1]))
+            if r0 > 0 and (r0 - float(worst[1])) / r0 > _TERP_DROP_TOL:
+                out[(ticker, str(asof))] = (str(worst[0]), r0, float(worst[1]))
+        return out
+    finally:
+        con.close()
+
+
 def probe_alphalens(probe, prog, today):
     """Đọc alphalens_paper.json + giá close mới nhất từ BQ cache → return vs benchmark.
 
@@ -247,14 +298,27 @@ def probe_alphalens(probe, prog, today):
     meta, positions = al["meta"], al["positions"]
     entry_asof = {p["ticker"]: (meta.get("entry_price_asof") or p.get("entry_date"))
                   for p in positions}
+    items = [(p["ticker"], entry_asof[p["ticker"]], p["entry_price"]) for p in positions]
+    # Quy ước DẪN DẮT = `terp` (chỉ đạo user 2026-09-23: "không để giá vốn bị ảnh hưởng bởi
+    # corp action" ⇒ mặc định THỰC HIỆN quyền). `accrue_only` vẫn tính để in kèm — hai quy ước
+    # là hai GIẢ ĐỊNH HÀNH VI khác nhau, giấu một cái đi thì báo cáo không trung thực.
     try:
-        adj = paper_entry_adjust.adjust_entries(
-            [(p["ticker"], entry_asof[p["ticker"]], p["entry_price"]) for p in positions])
+        adj = paper_entry_adjust.adjust_entries(items, convention="terp")
     except Exception as e:
         adj = {}
         adj_err = str(e)[:120]
     else:
         adj_err = None
+    try:
+        adj_alt = paper_entry_adjust.adjust_entries(items, convention="accrue_only")
+    except Exception:
+        adj_alt = {}
+    try:
+        stale_factor = _terp_factor_stale(items)
+    except Exception as e:
+        stale_factor, stale_err = {}, str(e)[:120]
+    else:
+        stale_err = None
     tickers = [p["ticker"] for p in positions]
     con = duckdb.connect()
     con.execute("PRAGMA threads=1")
@@ -269,8 +333,8 @@ def probe_alphalens(probe, prog, today):
     vnindex_now = next(r[2] for r in px.values() if r[2] is not None)
     bench_entry = meta["benchmark_entry"]
     bench_ret = (vnindex_now / bench_entry - 1) * 100
-    lines, port_ret, port_ret_terp = [], 0.0, 0.0
-    rights_names = []
+    lines, port_ret, port_ret_alt = [], 0.0, 0.0
+    rights_names, stale_lines = [], []
     for p in positions:
         t = p["ticker"]
         if t not in px:
@@ -278,7 +342,7 @@ def probe_alphalens(probe, prog, today):
             continue
         close = px[t][1]
         a = adj.get((t, entry_asof[t]))
-        ret_terp = None
+        ret_alt = None
         if a is None:
             entry_show, ret = p["entry_price"], (close / p["entry_price"] - 1) * 100
             note = f" [⚠ chưa rebase corp-action: {adj_err}]" if adj_err else ""
@@ -291,39 +355,56 @@ def probe_alphalens(probe, prog, today):
             else:
                 note = ""
             # QUYỀN MUA — hai quy ước cho hai giả định KHÁC NHAU về hành vi, phải hiện CẢ HAI.
-            # `accrue_only` (dẫn dắt, mặc định của paper_entry_adjust) giả định quyền BỊ BỎ; nó
-            # được chọn 2026-08-13 với lý do ghi thẳng trong docstring: "A PAPER book has no cash
-            # account, never subscribed". Chỉ đạo user 2026-09-23 lật đúng tiền đề đó — mặc định
-            # THỰC HIỆN 100% quyền, vì không mua = bỏ lỡ giá trị dương thật. `terp` là quy ước
-            # khớp chỉ đạo đó. KHÔNG tự đổi quy ước dẫn dắt (đổi số của một gate sắp tới hạn là
-            # quyết định của user), nhưng GIẤU con số kia thì báo cáo không trung thực.
-            if a.factor_terp and a.entry_price and not a.degraded:
-                entry_terp = a.entry_price * a.factor_terp
-                if entry_terp > 0:
-                    ret_terp = (close / entry_terp - 1) * 100
-                    if getattr(a, "rights_events", ()):
-                        rights_names.append(t)
-                        note += (f" · nếu THỰC HIỆN 100% quyền (TERP): vào "
-                                 f"{entry_terp:,.0f} → **{ret_terp:+.2f}%**")
+            # DẪN DẮT = `terp` (giả định THỰC HIỆN 100% quyền) theo chỉ đạo user 2026-09-23:
+            # "không để giá vốn bị ảnh hưởng bởi corp action" — không mua = bỏ lỡ giá trị dương
+            # THẬT. Tiền đề cũ của `accrue_only` ("sổ paper không có tài khoản tiền", chọn
+            # 2026-08-13) đã bị chính chỉ đạo đó lật. `accrue_only` vẫn in kèm làm số đối chiếu.
+            b = adj_alt.get((t, entry_asof[t]))
+            if b is not None and not b.degraded and b.entry_adj > 0:
+                ret_alt = b.pct_vs(close)
+                if getattr(a, "rights_events", ()) or getattr(b, "rights_events", ()):
+                    rights_names.append(t)
+                    note += (f" · nếu BỎ quyền (accrue-only): vào "
+                             f"{b.entry_adj:,.0f} → **{ret_alt:+.2f}%**")
+        sf = stale_factor.get((t, entry_asof[t]))
+        if sf:
+            d_bad, r0, r_min = sf
+            ret_floor = (close / (p["entry_price"] * r_min) - 1) * 100
+            note += " [⚠ HỆ SỐ VENDOR CHƯA HỒI TỐ ĐỦ — xem cảnh báo dưới]"
+            stale_lines.append(
+                f"{t}: `Close/Price` = {r0:.6f} tại {entry_asof[t]} nhưng chỉ còn "
+                f"{r_min:.6f} tại {d_bad} — đại lượng này KHÔNG được phép giảm theo thời gian "
+                f"(nó là tích hệ số của các sự kiện CÒN Ở TƯƠNG LAI). Hệ số tại ngày vào lệnh "
+                f"vì thế QUÁ CAO ⇒ giá vốn rebase THIẾU ⇒ tỉ suất **báo thiếu**: dùng chặn trên "
+                f"{r_min:.6f} thì giá vào {p['entry_price']:,.0f} → "
+                f"{p['entry_price'] * r_min:,.0f} và tỉ suất thật **ít nhất {ret_floor:+.2f}%** "
+                f"(đang báo {ret:+.2f}%)")
         w = p.get("weight_paper", 1.0 / len(positions))
         port_ret += w * ret
-        port_ret_terp += w * (ret if ret_terp is None else ret_terp)
+        port_ret_alt += w * (ret if ret_alt is None else ret_alt)
         lines.append(f"  • {t}: {entry_show:,.0f} → {close:,.0f} = **{ret:+.2f}%** "
                      f"(entry {p['entry_date']}, {p['lens']}){note}")
     excess = port_ret - bench_ret
-    excess_terp = port_ret_terp - bench_ret
+    excess_alt = port_ret_alt - bench_ret
     alt = ""
     if rights_names:
         alt = (f"\n- ⚖️ **Hai quy ước quyền mua** ({', '.join(rights_names)} có đợt quyền mua "
-               f"trong cửa sổ). Dẫn dắt ở trên = `accrue_only` (giả định BỎ quyền — tiền đề cũ "
-               f"'sổ paper không có tài khoản tiền'). Theo chỉ đạo user 2026-09-23 (mặc định "
-               f"THỰC HIỆN 100% quyền) thì con số đúng là `terp`: EW **{port_ret_terp:+.2f}%** "
-               f"vs VNINDEX {bench_ret:+.2f}% → **excess {excess_terp:+.2f}pp** "
-               f"(chênh {excess_terp - excess:+.2f}pp). CHƯA đổi quy ước dẫn dắt — cần user chốt.")
+               f"trong cửa sổ). Dẫn dắt ở trên = `terp` (THỰC HIỆN 100% quyền — chỉ đạo user "
+               f"2026-09-23). Quy ước cũ `accrue_only` (giả định BỎ quyền) cho: EW "
+               f"**{port_ret_alt:+.2f}%** vs VNINDEX {bench_ret:+.2f}% → **excess "
+               f"{excess_alt:+.2f}pp** (chênh {excess - excess_alt:+.2f}pp so với số dẫn dắt).")
+    if stale_lines:
+        alt += ("\n- 🚨 **Số dẫn dắt ĐANG BÁO THIẾU — lỗi dữ liệu nguồn, không phải quy ước.** "
+                + " · ".join(stale_lines)
+                + ". Đã verify thẳng trên `tav2_bq.ticker` (không chỉ cache) — đây là lỗi hồi tố "
+                  "của vendor. **Chưa tự sửa số**: đổi con số chính thức của một gate là quyết "
+                  "định của user.")
+    if stale_err:
+        alt += f"\n- ⚠️ không chạy được kiểm tra hệ số vendor: {stale_err}"
     return {"headline": (f"EW **{port_ret:+.2f}%** vs VNINDEX {bench_ret:+.2f}% → "
-                         f"**excess {excess:+.2f}pp** (MTM as-of {asof})"
-                         + (f" · TERP/thực-hiện-quyền: excess {excess_terp:+.2f}pp"
-                            if rights_names else "")),
+                         f"**excess {excess:+.2f}pp** (MTM as-of {asof}, quy ước `terp`)"
+                         + (f" · accrue-only: excess {excess_alt:+.2f}pp" if rights_names else "")
+                         + (" · 🚨 BÁO THIẾU do hệ số vendor chưa hồi tố đủ" if stale_lines else "")),
             "body": "- Vị thế (MTM as-of " + str(asof) + ", BQ cache close phiên gần nhất):\n"
                     + "\n".join(lines)
                     + f"\n- VNINDEX {bench_entry:,.2f} → {vnindex_now:,.2f}" + alt}

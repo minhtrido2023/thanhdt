@@ -300,6 +300,52 @@ def main():
     check("D3: probe journal_scan marker bắn hôm nay → badge RED (không lọt qua thành XANH)",
           "🔴 RED" in outd3 and "bắn hôm nay" in outd3, outd3[:500])
 
+    # ---- E. `_terp_factor_stale` — cái neo bắt lỗi HỒI TỐ CỦA VENDOR (thêm 2026-09-23) ----
+    # `Close/Price` = tích hệ số của các sự kiện CÒN Ở TƯƠNG LAI ⇒ phải KHÔNG-GIẢM theo ngày.
+    # Ba ca dưới pin đúng cái quyết định dễ sai nhất về sau: NGƯỠNG. Ca E2 là ca đã báo động
+    # giả thật khi ngưỡng còn là FACTOR_EPS=1e-6 — nó ở đây để ngưỡng không bị siết lại.
+    import duckdb
+
+    def _mkcache(sub, rows):
+        d = os.path.join(root, sub, "ticker")
+        os.makedirs(d, exist_ok=True)
+        con = duckdb.connect()
+        vals = ",".join(f"('{t}', DATE '{dd}', {c}, {pp})" for t, dd, c, pp in rows)
+        con.execute(f"COPY (SELECT * FROM (VALUES {vals}) AS t(ticker, time, Close, Price)) "
+                    f"TO '{os.path.join(d, '2026.parquet')}' (FORMAT PARQUET)")
+        con.close()
+        return os.path.join(root, sub)
+
+    # E1 — ca FPT thật: r=1,0 tại ngày vào lệnh, 0,909066 về sau (CP thưởng 10% chỉ hồi tố 3 phiên)
+    c1 = _mkcache("cache_e1", [("FPT", "2026-06-30", 70200, 70200),
+                               ("FPT", "2026-09-11", 72700, 72700),
+                               ("FPT", "2026-09-18", 65180, 71700)])
+    v1 = m._terp_factor_stale([("FPT", "2026-06-30", 70200.0)], cache_dir=c1)
+    hit = v1.get(("FPT", "2026-06-30"))
+    check("E1: chuỗi hệ số GIẢM thật (1,0 → 0,909) ⇒ bị bắt, kèm ngày gãy + chặn trên",
+          hit is not None and hit[0] == "2026-09-18" and abs(hit[1] - 1.0) < 1e-9
+          and abs(hit[2] - 65180 / 71700) < 1e-9, v1)
+
+    # E2 — ca MBB thật: chỉ rung do LÀM TRÒN bước giá (giảm 4,0e-4). KHÔNG được báo động.
+    c2 = _mkcache("cache_e2", [("MBB", "2026-06-30", 20180, 25200),
+                               ("MBB", "2026-07-08", 20820, 26000)])
+    v2 = m._terp_factor_stale([("MBB", "2026-06-30", 25200.0)], cache_dir=c2)
+    drop = (20180 / 25200 - 20820 / 26000) / (20180 / 25200)
+    check("E2: rung làm tròn (giảm ~4e-4) KHÔNG bị bắt — ngưỡng FACTOR_EPS từng báo động giả ở đây",
+          v2 == {} and 0 < drop < m._TERP_DROP_TOL, (v2, drop))
+
+    # E3 — hệ số phẳng (không có sự kiện nào) và ca thiếu dữ liệu: không bắt, không nổ.
+    c3 = _mkcache("cache_e3", [("HDB", "2026-06-30", 25850, 25850),
+                               ("HDB", "2026-09-18", 27550, 27550),
+                               ("ACB", "2026-06-30", 22650, 22650)])
+    v3 = m._terp_factor_stale([("HDB", "2026-06-30", 25850.0), ("ACB", "2026-06-30", 22650.0),
+                               ("XXX", "2026-06-30", 1000.0)], cache_dir=c3)
+    check("E3: hệ số phẳng / <2 dòng / mã không có trong cache ⇒ rỗng, không exception", v3 == {}, v3)
+
+    # E4 — ngưỡng phải tách được HAI mốc đo thật (nhiễu 4,01e-4 vs hỏng 9,09e-2), không kẹp biên.
+    check("E4: ngưỡng nằm GIỮA nền nhiễu và tín hiệu thật đã đo (4,01e-4 < tol < 9,09e-2)",
+          4.01e-4 < m._TERP_DROP_TOL < 9.09e-2, m._TERP_DROP_TOL)
+
     n_pass = N_RUN - len(FAILS)
     status = f"ALL PASS ({n_pass}/{N_RUN})" if not FAILS else f"FAILED {len(FAILS)}/{N_RUN}: " + ", ".join(FAILS)
     print(f"\n{status}  (tmp: {root})")
