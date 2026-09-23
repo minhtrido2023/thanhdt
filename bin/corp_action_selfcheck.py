@@ -25,8 +25,13 @@ import sys
 from zoneinfo import ZoneInfo
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-WC_ROOT = os.path.dirname(os.path.dirname(HERE))
 sys.path.insert(0, HERE)
+import wc_paths  # noqa: E402
+# Đếm cấp (`dirname×2`) chỉ đúng ở checkout canonical `mike/bin/`; chạy từ worktree
+# `mike/wt-*/bin/` nó cho `.../WorkingClaude/mike` ⇒ ca 7 mở `data/execution_logs/dnse_raw_*`
+# không tồn tại và selfcheck CHẾT bằng FileNotFoundError trước khi kiểm được gì (đúng lớp sự cố
+# 2026-09-12 mà `wc_paths.py` sinh ra để đóng). Dùng MARKER.
+WC_ROOT = wc_paths.find_wc_root(__file__)
 sys.path.insert(0, WC_ROOT)
 
 import corp_actions as CA               # noqa: E402

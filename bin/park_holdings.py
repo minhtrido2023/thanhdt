@@ -55,6 +55,7 @@ from zoneinfo import ZoneInfo
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from corp_actions import load_corp_actions, validate as validate_action   # noqa: E402
+from exdate_frame import verify_post_event_price   # noqa: E402 — §exdate_frame
 import wc_paths  # noqa: E402
 
 ICT = ZoneInfo("Asia/Ho_Chi_Minh")          # §16: neo TZ tường minh, không tin TZ của process
@@ -285,7 +286,11 @@ def read_broker_snapshot(label, account_no, asof, exec_dir=EXEC_DIR, price_fn=No
         raw_pos = b.get_positions()
         bal = b.client.balances(account_no)
         pos = {sym: {"qty": p["total"], "market_price": 0.0,
-                     "sellable": p.get("sellable", p["total"])}
+                     "sellable": p.get("sellable", p["total"]),
+                     # GIỮ marketPrice thô: KHÔNG phải nguồn giá (xem resolve_close_prices) mà là
+                     # giá CÙNG HỆ QUY CHIẾU với `qty` trong CÙNG bản ghi — thứ duy nhất dùng được
+                     # ở cửa sổ đêm-trước-GDKHQ khi broker đã credit sớm (§exdate_frame).
+                     "broker_market_price": p.get("marketPrice")}
                for sym, p in raw_pos.items() if p.get("total", 0) > 0}
         # Giá ĐÓNG CỬA đã xác minh, KHÔNG phải marketPrice — xem resolve_close_prices().
         for _sym, _px in resolve_close_prices(pos.keys(), asof,
@@ -344,7 +349,8 @@ def read_broker_snapshot(label, account_no, asof, exec_dir=EXEC_DIR, price_fn=No
                         sellable += prev["sellable"]
                         if mp is None:
                             mp = prev.get("market_price")
-                    cur[sym] = {"qty": q, "market_price": mp or 0.0, "sellable": sellable}
+                    cur[sym] = {"qty": q, "market_price": mp or 0.0, "sellable": sellable,
+                                "broker_market_price": mp}   # §exdate_frame — xem nhánh "hôm nay"
             if cur and (ts_pos is None or rec.get("ts", "") >= ts_pos):
                 pos, ts_pos = cur, rec.get("ts", "")          # bản ghi MỚI NHẤT trong ngày
         elif rec.get("kind") == "balances":
@@ -623,6 +629,41 @@ def park_holdings(account_label, asof=None, plan_dir=PLAN_DIR, exec_dir=EXEC_DIR
             book.unverified.add(tk)
     reconcile = {"ok": not mismatches, "n_tickers": len(set(ledger_qty) | set(positions)),
                  "mismatches": mismatches, "broker": bmeta}
+
+    # ── §exdate_frame — mã broker ĐÃ CREDIT SỚM: KL ở hệ SAU sự kiện, giá đóng cửa còn ở hệ
+    # TRƯỚC. Sổ lô ở trên ĐÃ nhân KL theo `corp_action_split` (điều kiện áp là
+    # `broker_effective_ts[:10] <= asof`), nên mọi act có `ex_date > asof` chính là cửa sổ đó.
+    # Không vá ⇒ `mv = qty_MỚI × giá_CÒN_QUYỀN`: đo thật VPB 2026-09-23 SpaceX
+    # 1.386×27.800 = 38.530.800 thay vì 1.386×22.050 = 30.561.300 (phồng 7.969.500đ). `park_mv`
+    # là MẪU SỐ cấp tài khoản của `compute_park_trim` (:330 dùng `park_mv_vnd`, KHÔNG phải
+    # `park_mv_verified_vnd`) ⇒ chỉ gắn cờ UNVERIFIED là CHƯA đủ, phải sửa đúng giá.
+    #
+    # CHỈ nhánh asof == HÔM NAY. Với asof QUÁ KHỨ nguồn giá là `tav2_bq.ticker.Close`, cột ĐÃ
+    # ĐIỀU CHỈNH HỒI TỐ ⇒ nó vốn đã nằm ở hệ SAU sự kiện, cùng hệ với KL đã credit: không có gì
+    # để sửa, và sửa thì thành chia HAI LẦN. (Kiểm chứng: ca VHM 2026-08-05 của
+    # corp_action_selfcheck §7 — asof quá khứ, mult 2,0 — phải tiếp tục cho 0 ticker UNVERIFIED.)
+    for a in (applied_acts if asof == today_ict() else []):
+        if a["ex_date"] <= asof or not a.get("lots_adjusted"):
+            continue                                  # đã qua ex-date ⇒ giá đóng cửa cùng hệ rồi
+        tk = a["ticker"]
+        p = positions.get(tk)
+        if not p:
+            continue
+        px_new, why = verify_post_event_price(p.get("market_price"),
+                                              p.get("broker_market_price"),
+                                              a["qty_multiplier"])
+        if px_new is None:
+            book.unverified.add(tk)
+            book.warnings.append(
+                f"{asof} {tk}: broker đã credit sớm quyền của sự kiện {a['id']} (ex {a['ex_date']}) "
+                f"⇒ KL trong sổ ở hệ SAU sự kiện, nhưng KHÔNG dựng được giá cùng hệ: {why} ⇒ "
+                f"{tk} UNVERIFIED (giá trị lô bên dưới VẪN Ở HỆ TRỘN, cần người xử lý)")
+            continue
+        book.warnings.append(
+            f"{asof} {tk}: broker đã credit sớm quyền của sự kiện {a['id']} (ex {a['ex_date']}) ⇒ "
+            f"định giá theo giá tham chiếu SAU sự kiện {px_new:,.0f} thay cho giá đóng cửa còn "
+            f"quyền {float(p['market_price']):,.0f} — {why}")
+        p["market_price"] = px_new
 
     # ── Định giá theo marketPrice broker (§6: KHÔNG BQ)
     by_book, park_lots = {}, []

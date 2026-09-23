@@ -27,6 +27,17 @@ cáo tách riêng phần NAV "chiến lược V2.4" khỏi phần legacy khi so 
 giữa các account (vd SpaceX vs ZaloPay) — số báo cáo không bị lẫn biến động của
 mã đang giữ ngoài chiến lược.
 
+§exdate_frame — ĐÊM TRƯỚC GDKHQ, KHỐI LƯỢNG VÀ GIÁ PHẢI CÙNG MỘT HỆ QUY CHIẾU (bug 2026-09-23,
+VPB ISS 0,2604104 ex-date 24/09). DNSE credit KL mới vào `positions` ngay tối T-1 (SpaceX
+1.100→1.386) trong khi giá đóng cửa G1 của phiên T-1 vẫn là giá CÒN QUYỀN 27.800 — cả hai đều
+đúng, nhưng nhân chéo thì sai: 1.386×27.800 = 38.530.800 thay vì 1.386×22.050 = 30.561.300,
+active_nav phồng 7.969.500đ (+0,80%) và plan 24/09 đã sinh lệnh PARK_TRIM VPB trên rổ phồng đó.
+Vá: mã có bằng chứng credit sớm (`exdate_frame.classify_positions`, tái dùng
+`daily_nav_snapshot.classify_qty_residual`) được định giá bằng `marketPrice` của CHÍNH bản ghi
+vị thế — sau khi đối soát nó tái tạo được giá cum qua hệ số sự kiện. KL đổi KHÔNG giải thích
+được, hoặc credit sớm mà không dựng nổi giá cùng hệ ⇒ **rc=6, KHÔNG ghi file** (đây là mẫu số
+sizing; số sai tệ hơn số cũ). Chi tiết + vì sao KHÔNG tin thẳng marketPrice: bin/exdate_frame.py.
+
 §cash — CẤU PHẦN TIỀN = `totalCash − totalDebt`, KHÔNG phải `availableCash`
 (bug sửa 2026-08-10, job Taylor_20260810_004252; cùng LOẠI bug với mẫu số pool của
 `compute_park_trim.py` sửa 2026-08-09, job Taylor_20260809_150316 — lần thứ hai trong
@@ -393,6 +404,47 @@ def main():
         if prices is None:
             print(f"❌ Không lấy được giá BQ: {err}", file=sys.stderr)
             sys.exit(3)
+
+    # ── §exdate_frame — "khối lượng của ai thì giá của người đó" ──────────────────
+    # Tối T-1 của một GDKHQ, DNSE credit KL mới vào positions NGAY trong khi giá đóng cửa G1
+    # của phiên hôm nay vẫn (đúng) là giá CÒN QUYỀN. Nhân chéo hai hệ = active_nav phồng
+    # (đo thật VPB 2026-09-23: SpaceX +7.969.500đ, ZaloPay +8.694.000đ ⇒ plan 24/09 in
+    # "NAV cơ sở 990.981.660" và sinh lệnh PARK_TRIM VPB trên rổ phồng). Xem bin/exdate_frame.py.
+    # CHỈ chạy ở nhánh asof=hôm nay: nhánh --asof QUÁ KHỨ dùng giá BQ lịch sử với vị thế LIVE,
+    # một vấn đề KHÁC và có sẵn từ trước — không mở rộng phạm vi bản vá này sang đó.
+    if tickers and (args.asof is None or args.asof == today_ict().isoformat()):
+        import exdate_frame
+        credited, blocked = exdate_frame.classify_positions(
+            args.account, account_id, asof_ref, positions)
+        for tk, detail in sorted(credited.items()):
+            px_new, why = exdate_frame.verify_post_event_price(
+                prices.get(tk), (positions[tk] or {}).get("marketPrice"),
+                1.0 + float(detail["exercise_ratio"]))
+            if px_new is None:
+                blocked[tk] = (
+                    f"broker ĐÃ credit sớm {detail['residual']:+,.0f}cp (khớp tỉ lệ "
+                    f"{detail['exercise_ratio']} của {detail['event_code']} ex-date "
+                    f"{detail['ex_date']}) nhưng KHÔNG dựng được giá cùng hệ: {why}")
+                continue
+            print(f"ℹ️ {tk}: broker đã CREDIT SỚM {detail['residual']:+,.0f}cp "
+                  f"(KL {detail['qty_prev']:,.0f}→{detail['qty_now']:,.0f}, khớp tỉ lệ "
+                  f"{detail['exercise_ratio']} của {detail['event_code']} ex-date "
+                  f"{detail['ex_date']}) ⇒ định giá theo giá tham chiếu SAU sự kiện của CHÍNH "
+                  f"bản ghi vị thế đó thay cho giá đóng cửa còn quyền {prices[tk]:,.0f}: {why}",
+                  file=sys.stderr)
+            prices[tk] = px_new
+            price_source[tk] = "dnse_position_marketprice_corpaction"
+        if blocked:
+            # FAIL-CLOSED. active_nav là MẪU SỐ của mọi phép sizing (LAG_book, slot CAPIT,
+            # trần %ADV) — ghi một con số có thể sai còn tệ hơn để consumer thấy file quá hạn
+            # rồi lùi về nav_history (đường lùi có sẵn ở golive_recommend_v23, 5 ngày).
+            print(f"❌ {args.account}: KHỐI LƯỢNG vị thế đổi NGOÀI lệnh khớp thật và KHÔNG quy "
+                  f"được về một hệ quy chiếu giá cho {len(blocked)} mã ⇒ KHÔNG ghi active_nav "
+                  f"(giữ nguyên file cũ), CẦN NGƯỜI xử lý: "
+                  + "; ".join(f"{t}: {w}" for t, w in sorted(blocked.items())) +
+                  ". Mã đã khớp tỉ lệ sự kiện: chờ corp_action_auto_confirm.py rồi chạy lại.",
+                  file=sys.stderr)
+            sys.exit(6)
 
     rows = []
     total_mv = 0.0
