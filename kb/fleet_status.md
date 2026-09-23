@@ -1,13 +1,13 @@
-# Fleet status — 2026-09-23T12:09:49 UTC
+# Fleet status — 2026-09-23T13:07:02 UTC
 
 | agent | title (desktop) | kind | status | last_heartbeat | age(min) | current_task |
 |---|---|---|---|---|---|---|
-| DollarBill | DollarBill | child | working | 2026-09-23T12:09:44Z | 0 |  |
-| Mike | Mike | child | dead | 2026-09-23T05:47:35Z | 382 |  |
-| Mike_2105404 | mike-3e | child | dead | 2026-09-22T09:10:01Z | 1619 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
-| Taylor | Taylor | child | dead | 2026-09-23T05:45:54Z | 383 |  |
-| Wags | Wags | child | dead | 2026-09-23T01:22:26Z | 647 |  |
-| Winston | Winston | child | dead | 2026-09-23T01:25:00Z | 644 |  |
-| fiinprox-harvest-22 | fiinprox-harvest-22 | external | dead | 2026-09-22T09:30:01Z | 1599 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/state/fiinprox_harvest |
-| mike-paseo-ad | mike-paseo-ad | external | running | 2026-09-23T12:00:01Z | 9 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike_paseo |
-| workingclaude-1d | workingclaude-1d | child | dead | 2026-09-23T01:27:35Z | 642 |  |
+| DollarBill | DollarBill | child | dead | 2026-09-23T12:09:44Z | 57 |  |
+| Mike | Mike | child | working | 2026-09-23T13:04:04Z | 2 |  |
+| Mike_2105404 | mike-3e | child | dead | 2026-09-22T09:10:01Z | 1677 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
+| Taylor | Taylor | child | dead | 2026-09-23T05:45:54Z | 441 |  |
+| Wags | Wags | child | dead | 2026-09-23T01:22:26Z | 704 |  |
+| Winston | Winston | child | dead | 2026-09-23T01:25:00Z | 702 |  |
+| fiinprox-harvest-22 | fiinprox-harvest-22 | external | dead | 2026-09-22T09:30:01Z | 1657 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/state/fiinprox_harvest |
+| mike-paseo-ad | mike-paseo-ad | external | running | 2026-09-23T13:00:01Z | 7 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike_paseo |
+| workingclaude-1d | workingclaude-1d | child | dead | 2026-09-23T01:27:35Z | 699 |  |

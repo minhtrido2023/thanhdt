@@ -602,3 +602,6 @@
 
 ## Archived 2026-09-23 (keep=12 days=0 require_done=False)
 - [2026-09-18T11:18:41Z] [2026-09-18] treasury_share_events (job _110145): 52d6ab96 tren feat/treasury-share-events-table (worktree mike/agents/wt-treasury-table) — va B1 dedup dem-2-lan (3 cot dup_group_id/is_canonical/duplicate_of, SUM tho phong 3.008.900 CP) + N1 inferred_window_days + 4 file kb/data_registry/*.proposed. 110 PASS, 32/32 mutation. CHUA ghi BQ/CHUA tao bang/CHUA merge — CHO arch-reviewer vong 2 + Mike/user duyet DDL + 4 file .proposed.
+
+## Archived 2026-09-23 (keep=12 days=0 require_done=False)
+- [2026-09-18T11:30:52Z] [2026-09-18] treasury_share_events (job _112831): vong 3 text-only 4e7f51d4 tren feat/treasury-share-events-table (worktree mike/agents/wt-treasury-table) — cam MERGE per-row + muc Nap lai. CHUA ghi BQ/CHUA merge. CHO Mike/user duyet DDL schema.sql + 4 file kb/data_registry/*.proposed.
