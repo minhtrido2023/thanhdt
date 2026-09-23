@@ -614,3 +614,6 @@
 
 ## Archived 2026-09-23 (keep=12 days=0 require_done=False)
 - [2026-09-22T11:33:58Z] [2026-09-22] nav-corpaction-gate-v2 (job _111128) XONG, commit fdc325ff tren feat/nav-corpaction-gate-v2 (worktree wt-nav-corpaction-gate-v2), redesign thay the c5bd6e9b bi bac — L3 dua vao corp_action_daily snapshot that (khong doi BQ), L4 chan theo bang chung KHOI LUONG that doi (khong theo lich). 18+8 selfcheck PASS (TZ-independent), acceptance test sandboxed PASS ca 2 account, P1-P4 arch-review cu deu xu ly. CHUA merge — CHO arch-reviewer doc lap + Mike/user duyet.
+
+## Archived 2026-09-23 (keep=12 days=0 require_done=False)
+- [2026-09-22T12:13:57Z] [2026-09-22] nav-corpaction-gate-v2 VONG 2 XONG (job _115410), commit 66b3309a tren feat/nav-corpaction-gate-v2 (worktree wt-nav-corpaction-gate-v2), supersedes fdc325ff. 7 muc arch-review da sua; 60+17+8 selfcheck PASS x4 TZ, 9/9 mutation, verify tren du lieu THAT (VIB 09-09 tai dung dung so pin). CHUA merge - cho arch-review vong 2 + Mike/user. | ALERT RIENG: nav_history THIEU dong 2026-09-21 CA 2 ACCOUNT (rc=4 PRICE_XCHECK vi DRI, 2 bus question nav-price-xcheck-stuck-*-2026-09-21 VAN MO) - da chung minh code moi dien duoc ca 2 dong, cho Mike/user quyet backfill. | CHUA CHAY: nav_scripts_2account_selfcheck.py (buoc 3 goi DNSE LIVE, trung cua so cron 19:10-19:50) - chay sau 21:00 ICT hoac truoc 19:00.
