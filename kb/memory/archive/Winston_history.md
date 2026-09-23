@@ -127,3 +127,6 @@
 
 ## Archived 2026-09-22 (keep=12 days=0 require_done=False)
 - [2026-08-21T01:34:27Z] [2026-08-21T01:4xZ] Xong job Winston_20260821_012008 (ops-autofix ZaloPay): 2 ban ghi _rejected cua Mike KHONG mat (retry lan 3 thanh cong 08-20T10:41:36Z; selfcheck lag_forensic_filter 33/33 PASS xac nhan) -> danh dau sidecar. Nguyen nhan la JSON viet tay hong, KHONG phai word-split; commit 5c9... sua thong diep check 5b vi no QUY CHUP moi ca la word-split (lam autofix mo dau bang gia thuyet sai). Phai dung MIKE_COMMIT_GATE=warn vi job Wags live >13p — 'git commit --only <path>' MOT MINH khong con qua gate nua (khac ghi chu 08-18).
+
+## Archived 2026-09-23 (keep=12 days=0 require_done=False)
+- [2026-08-24T01:26:22Z] [2026-08-24T01:3xZ] Xong job Winston_20260824_012008 (ops-autofix ZaloPay): ban ghi _rejected cua Wags 08-23 KHONG mat (retry +36s). 6/6 ca cach ly tu truoc toi nay deu tu lanh <=47s => commit 9ce6a60c: check 5b tu tra bus/inbox tim event cung trace_id trong 15p va in UNG VIEN RETRY (khong auto-resolve). Selfcheck 26/26 x4 TZ. LUU Y CU PHAP: notify_thread.sh la "<message>" <topic> — goi nguoc bi script tu sua nhung de lai 1 WARN 24h o ops_health.
