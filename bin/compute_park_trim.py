@@ -306,6 +306,27 @@ def compute_trim(account_label, asof=None, target=PARK_TARGET_F1, holdings=None,
                             f"Lệch: {h['reconcile']['mismatches']}")
         return out
 
+    # ── Cổng 0b §exdate_frame [F3]: MẪU SỐ trộn hệ quy chiếu ⇒ fail-closed ───
+    # `park_mv_vnd` = Σ(qty × market_price). Đêm trước GDKHQ broker credit KL mới NGAY trong
+    # khi giá đóng cửa vẫn là giá CÒN QUYỀN; park_holdings sửa được giá thì thôi, KHÔNG sửa
+    # được thì phát cờ này. Cờ là CẤP TÀI KHOẢN vì `:331 park_mv = float(h['park_mv_vnd'])`
+    # → `pool` → `delta` tính trên TOÀN rổ: loại riêng mã hỏng
+    # khỏi danh sách sinh lệnh (`unverified_tickers`) vẫn để số phồng nằm trong mẫu số ⇒
+    # over-trim các mã KHÁC. Cửa sổ này tự đóng sau GDKHQ (tối đa 1 đêm).
+    if h.get("frame_blocked_tickers"):
+        out["decision"] = "BLOCKED_FRAME"
+        out["frame_blocked_tickers"] = h["frame_blocked_tickers"]
+        out["notes"].append(
+            "KL và giá KHÔNG cùng hệ quy chiếu cho "
+            + ", ".join(f"{t}: {w}" for t, w in
+                        sorted((h.get("frame_blocked_detail") or {}).items()))
+            + f" ⇒ `park_mv_vnd` ({h['park_mv_vnd']:,.0f}) là số TRỘN HỆ, KHÔNG dùng làm mẫu "
+              "số được ⇒ fail-closed, "
+              "không sinh đề xuất nào (loại riêng mã đó vẫn over-trim các mã KHÁC). CẦN NGƯỜI: "
+              "xác minh giá tham chiếu sau sự kiện (bảng giá sở/HOSE, thông báo GDKHQ) rồi đối "
+              "chiếu với marketPrice broker. Cửa sổ tự đóng sau ngày GDKHQ.")
+        return out
+
     state = {}
     if os.path.exists(STATE_FILE):
         state = json.load(open(STATE_FILE, encoding="utf-8"))

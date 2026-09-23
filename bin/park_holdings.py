@@ -642,6 +642,14 @@ def park_holdings(account_label, asof=None, plan_dir=PLAN_DIR, exec_dir=EXEC_DIR
     # ĐIỀU CHỈNH HỒI TỐ ⇒ nó vốn đã nằm ở hệ SAU sự kiện, cùng hệ với KL đã credit: không có gì
     # để sửa, và sửa thì thành chia HAI LẦN. (Kiểm chứng: ca VHM 2026-08-05 của
     # corp_action_selfcheck §7 — asof quá khứ, mult 2,0 — phải tiếp tục cho 0 ticker UNVERIFIED.)
+    # [F3] Nhánh verify-FAIL chỉ gắn cờ UNVERIFIED là CHƯA ĐỦ — đúng điều comment ngay trên
+    # đã viết rồi nhánh fail lại làm. `unverified_tickers` chặn ticker đó SINH LỆNH
+    # (compute_park_trim.py:467, compute_jit_unpark.py:~214) nhưng KHÔNG rút nó khỏi MẪU SỐ
+    # `park_mv_vnd` ⇒ các mã KHÁC bị over-trim thêm (1−target)×Δ, và số đó chảy tiếp vào L2.
+    # Không dựng được giá cùng hệ thì `park_mv_vnd` là số TRỘN HỆ — không có cách nào sửa nó ở
+    # đây (đó chính là ca fail), nên phát cờ CẤP TÀI KHOẢN để consumer fail-closed, cùng hình
+    # dạng `BLOCKED_CASH_BASIS`: ghi một mẫu số có thể sai còn tệ hơn là không trim đêm nay.
+    frame_blocked = {}
     for a in (applied_acts if asof == today_ict() else []):
         if a["ex_date"] <= asof or not a.get("lots_adjusted"):
             continue                                  # đã qua ex-date ⇒ giá đóng cửa cùng hệ rồi
@@ -654,6 +662,8 @@ def park_holdings(account_label, asof=None, plan_dir=PLAN_DIR, exec_dir=EXEC_DIR
                                               a["qty_multiplier"])
         if px_new is None:
             book.unverified.add(tk)
+            frame_blocked[tk] = (f"sự kiện {a['id']} ex {a['ex_date']} hệ số "
+                                 f"{a['qty_multiplier']}: {why}")
             book.warnings.append(
                 f"{asof} {tk}: broker đã credit sớm quyền của sự kiện {a['id']} (ex {a['ex_date']}) "
                 f"⇒ KL trong sổ ở hệ SAU sự kiện, nhưng KHÔNG dựng được giá cùng hệ: {why} ⇒ "
@@ -717,6 +727,11 @@ def park_holdings(account_label, asof=None, plan_dir=PLAN_DIR, exec_dir=EXEC_DIR
         "balance_all_zero": bool(bmeta.get("balance_all_zero")),
         "cash_basis": "total_cash" if "total_cash_vnd" in bmeta else "available_fallback",
         "unverified_tickers": sorted(book.unverified), "warnings": book.warnings,
+        # [F3] CẤP TÀI KHOẢN, khác hẳn `unverified_tickers` (cấp ticker): rỗng ⇒ `park_mv_vnd`
+        # cùng một hệ quy chiếu, dùng làm mẫu số được. KHÔNG rỗng ⇒ mẫu số TRỘN HỆ, mọi lớp
+        # sizing đọc nó phải fail-closed, không riêng các mã có tên trong đây.
+        "frame_blocked_tickers": sorted(frame_blocked),
+        "frame_blocked_detail": dict(sorted(frame_blocked.items())),
         "n_fills_applied": len(applied), "reconcile": reconcile,
         "corp_actions_applied": [{"id": a["id"], "ticker": a["ticker"],
                                   "qty_multiplier": a["qty_multiplier"], "ex_date": a["ex_date"],

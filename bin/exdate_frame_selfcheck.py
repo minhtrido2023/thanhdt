@@ -314,6 +314,45 @@ def t_park(sb, tmp):
     check(any("KHÔNG dựng được giá cùng hệ" in w for w in r2["warnings"]),
           "K4 cảnh báo nói ĐÚNG chuyện gì xảy ra (§29)")
 
+    # [F4c] Nhánh verify-FAIL: `park_mv_vnd` KHÔNG sửa được (đó chính là ca fail) nên nó VẪN là
+    # 38.530.800 — điều phải chặn là con số đó trở thành MẪU SỐ sizing. Cờ CẤP TÀI KHOẢN
+    # `frame_blocked_tickers` + cổng BLOCKED_FRAME ở CẢ HAI lớp là chỗ chặn. Không có nó,
+    # `unverified_tickers` chỉ cấm VPB sinh lệnh còn số phồng vẫn nằm trong pool ⇒ over-trim
+    # các mã KHÁC thêm (1−target)×Δ, rồi chảy tiếp vào L2.
+    check(r2.get("frame_blocked_tickers") == ["VPB"],
+          "K6 verify-fail ⇒ phát cờ CẤP TÀI KHOẢN frame_blocked_tickers (không chỉ UNVERIFIED)",
+          str(r2.get("frame_blocked_tickers")))
+    check(not r["frame_blocked_tickers"],
+          "K7 verify-OK ⇒ cờ RỖNG (không chặn nhầm ngày thường)", str(r["frame_blocked_tickers"]))
+    mv2 = sum(l["mv_vnd"] for l in r2["park_lots"])
+    check(abs(mv2 - QTY_NOW["SpaceX"] * PX_CUM) < 1e-6,
+          "K8 (bối cảnh) mẫu số ở nhánh fail ĐÚNG LÀ số phồng 38.530.800 — nên phải chặn, không "
+          "phải tin", f"{mv2:,.0f}")
+
+    sys.modules.pop("compute_park_trim", None)
+    sys.modules.pop("compute_jit_unpark", None)
+    import compute_park_trim as L1
+    import compute_jit_unpark as L2
+    # Cổng đặt NGAY SAU reconcile, TRƯỚC cả cổng tiền/state ⇒ K9 đồng thời chứng minh thứ tự:
+    # fixture này có mọi field tiền = 0 nên KHÔNG có gate ⇒ rơi vào BLOCKED_CASH_BASIS (đo thật
+    # bằng mutation M-F3b). Nghĩa là K9 chứng minh CỜ THẮNG TRƯỚC, không chứng minh "nếu thiếu
+    # gate thì sinh lệnh trim" — vế đó suy từ đường code :331 park_mv → :406 pool → :408 delta.
+    t1 = L1.compute_trim("SpaceX", asof=DATE, holdings=r2)
+    check(t1["decision"] == "BLOCKED_FRAME",
+          "K9 L1 PARK_TRIM fail-closed BLOCKED_FRAME, KHÔNG trim trên mẫu số phồng",
+          f"{t1['decision']} / {t1.get('orders')}")
+    check(not t1["orders"] and "38,530,800" in " ".join(t1["notes"]),
+          "K10 L1 không sinh lệnh nào và NÓI RA con số mẫu số bị từ chối (§29)",
+          str(t1["notes"])[:200])
+    t2 = L2.compute_jit_unpark("SpaceX", asof=DATE, holdings=r2, orders=[])
+    check(t2["decision"] == "BLOCKED_FRAME" and not t2["orders"],
+          "K11 L2 JIT_UNPARK fail-closed BLOCKED_FRAME (số phồng KHÔNG chảy xuống tầng 2)",
+          f"{t2['decision']} / {t2.get('orders')}")
+    t1ok = L1.compute_trim("SpaceX", asof=DATE, holdings=r)
+    check(t1ok["decision"] != "BLOCKED_FRAME",
+          "K12 verify-OK ⇒ L1 KHÔNG bị chặn (cổng không chặn nhầm ngày thường)",
+          str(t1ok["decision"]))
+
     # asof QUÁ KHỨ: nguồn giá là BQ Close (đã điều chỉnh hồi tố) ⇒ KHÔNG được sửa lần hai.
     PH.today_ict = lambda: "2026-09-25"
     r3 = run(PX_TERP)
@@ -392,7 +431,49 @@ def t_asof_guard(tmp):
     rc3 = run_nav(can, pos, {"VPB": PX_CUM}, None, asof=DATE)
     check(rc3 == 0 and json.load(open(canonical, encoding="utf-8")).get("active_nav"),
           "A5 asof=HÔM NAY vẫn ghi canonical bình thường (chốt chặn không chặn nhầm)", f"rc={rc3}")
+
+    # [F4a] `--asof ""` — hình dạng `--asof "$ASOF"` với biến CHƯA SET. Chuỗi rỗng FALSY ⇒ trượt
+    # qua cả chốt chặn này (`args.asof and ...`), cổng §exdate_frame (`args.asof is None`) lẫn
+    # `bq_close_sql` (`if as_of_date else "TRUE"`). Mike chạy thật trên production: rc=0, canonical
+    # ghi đè, VPB = 38.530.800, tín hiệu duy nhất là ⚠️ nên `cron_health_check.py` (`^\s*❌`) mù.
+    # Sau chuẩn hoá, `""` ≡ None ⇒ CÙNG nhánh "hôm nay" ⇒ cổng §exdate_frame CHẠY và chặn.
+    sb2 = build_sandbox()
+    ef, can = fresh_modules(sb2)
+    canon2 = os.path.join(sb2, "data", "execution_logs", "active_nav_SpaceX.json")
+    with open(canon2, "w", encoding="utf-8") as f:
+        json.dump({"sentinel": "canonical phải còn nguyên"}, f)
+    pos_bad = {"VPB": {"total": QTY_NOW["SpaceX"], "sellable": 0, "marketPrice": PX_CUM}}
+    rc4 = run_nav(can, pos_bad, {"VPB": PX_CUM}, None, asof="")
+    check(rc4 == 6, "A6 `--asof \"\"` KHÔNG còn là lối vòng: chuẩn hoá về None ⇒ cổng "
+                    "§exdate_frame chạy ⇒ rc=6 (❌, cron_health_check thấy)", f"rc={rc4}")
+    check(json.load(open(canon2, encoding="utf-8")).get("sentinel"),
+          "A7 `--asof \"\"` KHÔNG đụng tới file canonical")
+    check(bq_empty_asof_rejected(can),
+          "A8 lớp hai: bq_close_sql từ chối as_of_date rỗng, không âm thầm thành 'TRUE'")
+
+    # [F4b] Chốt chặn từng kiểm `--out` CÓ/KHÔNG chứ không kiểm nó TRỎ ĐI ĐÂU — mà chính thông
+    # điệp rc=6/rc=7 lại dạy người vận hành dùng `--out`. Cả đường dẫn thẳng lẫn đường qua `./`.
+    for label, target in (("thẳng", canon2),
+                          ("qua ./", os.path.join(os.path.dirname(canon2), ".",
+                                                  os.path.basename(canon2)))):
+        with open(canon2, "w", encoding="utf-8") as f:
+            json.dump({"sentinel": "canonical phải còn nguyên"}, f)
+        rc5 = run_nav(can, pos, {"VPB": PX_CUM}, target, asof=PREV)
+        check(rc5 == 7, f"A9[{label}] `--out` trỏ vào CHÍNH file canonical ⇒ rc=7 (realpath, "
+                        f"không phải kiểm có/không)", f"rc={rc5}")
+        check(json.load(open(canon2, encoding="utf-8")).get("sentinel"),
+              f"A10[{label}] canonical KHÔNG bị ghi đè qua đường `--out`")
+    shutil.rmtree(sb2, ignore_errors=True)
     shutil.rmtree(sb, ignore_errors=True)
+
+
+def bq_empty_asof_rejected(can):
+    """`bq_close_sql("")` phải NÉM, không được sinh `WHERE ... AND TRUE` (= bỏ lọc ngày im lặng)."""
+    try:
+        can.bq_close_sql(["VPB"], "")
+        return False
+    except ValueError:
+        return True
 
 
 def main():

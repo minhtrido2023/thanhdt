@@ -249,6 +249,14 @@ def bq_close_sql(tickers, as_of_date=None):
     ngừng giao dịch/thiếu dòng thì mọi mã khác cũng lấy giá cũ (code-quality 2026-09-13).
     """
     tick_list = ",".join(f"'{t}'" for t in sorted(tickers))
+    # [F1] `as_of_date=""` KHÔNG được âm thầm thành "TRUE" (= không lọc ngày). Chuỗi rỗng ở đây
+    # chỉ có thể là một biến shell chưa set chảy xuống tới đây; nó có nghĩa "tôi ĐỊNH lọc theo
+    # ngày" chứ không phải "tôi cố ý không lọc". Caller chuẩn hoá ở main(); dòng này là lớp thứ
+    # hai để hàm không thể bị gọi sai từ chỗ khác. None = cố ý không lọc, vẫn hợp lệ.
+    if as_of_date is not None and not str(as_of_date).strip():
+        raise ValueError("bq_close_sql: as_of_date là chuỗi RỖNG — phải là None (cố ý không lọc "
+                         "ngày) hoặc 'YYYY-MM-DD'. Chuỗi rỗng thành 'TRUE' = lấy phiên mới nhất "
+                         "của mọi thời điểm, im lặng.")
     date_clause = (f"t.time <= '{as_of_date}'" if as_of_date else "TRUE")
     return f"""
     SELECT t.ticker, t.Close, CAST(t.time AS STRING) AS time
@@ -343,8 +351,22 @@ def main():
                     help="xác nhận account ĐÃ bán sạch thật — cho ghi positions rỗng dù file "
                          "active_nav trước còn cổ phiếu")
     args = ap.parse_args()
-    out_path = args.out or os.path.join(
+    # [F1] `--asof ""` (hình dạng `--asof "$ASOF"` với biến CHƯA SET) là chuỗi RỖNG ⇒ FALSY ⇒
+    # trượt qua CẢ BA tầng cùng lúc: chốt chặn ngay dưới, cổng §exdate_frame (`args.asof is
+    # None`) và `bq_close_sql` (`if as_of_date else "TRUE"` = không lọc ngày). Mike chạy thật
+    # trên file production: rc=0, canonical bị ghi đè, VPB = 38.530.800 (đúng con số bug gốc),
+    # và tín hiệu duy nhất là ⚠️ chứ không phải ❌ ⇒ `cron_health_check.py` (pattern `^\s*❌`)
+    # MÙ HẲN. Chuẩn hoá MỘT LẦN ở đây, đúng tiền lệ `park_holdings.py:550` (`asof or today_ict()`):
+    # từ dòng này trở xuống `args.asof` chỉ có hai dạng — None, hoặc chuỗi ngày không rỗng.
+    args.asof = (args.asof or "").strip() or None
+    canonical_out = os.path.join(
         WC_ROOT, "data", "execution_logs", f"active_nav_{args.account}.json")
+    out_path = args.out or canonical_out
+    # [F2] Chốt chặn dưới đây từng kiểm `--out` CÓ/KHÔNG chứ không kiểm nó TRỎ ĐI ĐÂU, mà
+    # CHÍNH thông điệp rc=6/rc=7 lại dạy người vận hành dùng `--out` ⇒ ai chép đúng đường dẫn
+    # canonical vào đó (hoặc script hoá thành biến) là ghi số phồng với rc=0, không cảnh báo.
+    # `realpath` để `./`, symlink và đường dẫn tương đối không lách qua được.
+    writes_canonical = os.path.realpath(out_path) == os.path.realpath(canonical_out)
 
     # ── §exdate_frame [R4] — `--asof` QUÁ KHỨ KHÔNG được ghi đè file canonical ─────
     # Cổng §exdate_frame dưới đây chỉ chạy ở nhánh asof=hôm nay, nhưng `get_positions()`
@@ -356,11 +378,12 @@ def main():
     # khứ vẫn là giá cum nhân với KL đã credit = y nguyên bug.
     # Vẫn cho chạy để người vận hành đối chiếu/khảo sát — chỉ bắt nói rõ đích đến (§8:
     # output khảo sát không bao giờ được trỏ vào tên file canonical).
-    if args.asof and args.asof != today_ict().isoformat() and not args.out:
-        print(f"❌ --asof {args.asof} là ngày KHÁC hôm nay ⇒ TỪ CHỐI ghi đè {out_path}. "
+    if args.asof and args.asof != today_ict().isoformat() and writes_canonical:
+        print(f"❌ --asof {args.asof!r} là ngày KHÁC hôm nay ⇒ TỪ CHỐI ghi đè {out_path}. "
               f"Vị thế luôn đọc LIVE (get_positions), giá lại lấy của {args.asof}: hai con số "
               f"KHÁC HỆ QUY CHIẾU, và cổng §exdate_frame (chặn đúng lớp lỗi đó) chỉ chạy ở "
-              f"nhánh asof=hôm nay. Muốn khảo sát: thêm `--out <đường dẫn tạm>`. Muốn refresh "
+              f"nhánh asof=hôm nay. Muốn khảo sát: thêm `--out <đường dẫn tạm>` — đường dẫn "
+              f"KHÁC {canonical_out} (trỏ vào chính nó cũng bị từ chối y hệt). Muốn refresh "
               f"số sizing thật: bỏ `--asof`.", file=sys.stderr)
         sys.exit(7)
 
@@ -483,9 +506,9 @@ def main():
         # [R4] asof khác hôm nay ⇒ cổng §exdate_frame KHÔNG chạy. Nói ra, đừng im lặng: nhánh
         # này chỉ tới được khi có `--out` (xem chốt chặn ngay sau parse_args), tức là output
         # KHÔNG phải file sizing canonical — nhưng người đọc con số vẫn cần biết nó chưa qua cổng.
-        print(f"⚠️ --asof {args.asof} ≠ hôm nay ⇒ cổng §exdate_frame (KL và giá phải CÙNG hệ quy "
-              f"chiếu) KHÔNG chạy cho bản chạy này. Vị thế vẫn là LIVE còn giá là của "
-              f"{args.asof}: nếu trong khoảng đó có sự kiện tỉ lệ mà vendor CHƯA hồi tố cột "
+        print(f"⚠️ --asof {args.asof!r} ≠ hôm nay ⇒ cổng §exdate_frame (KL và giá phải CÙNG hệ "
+              f"quy chiếu) KHÔNG chạy cho bản chạy này. Vị thế vẫn là LIVE còn giá là của "
+              f"{args.asof!r}: nếu trong khoảng đó có sự kiện tỉ lệ mà vendor CHƯA hồi tố cột "
               f"Close thì giá trị danh mục dưới đây PHỒNG theo hệ số sự kiện. Số này dùng để "
               f"đối chiếu, KHÔNG dùng làm mẫu số sizing.", file=sys.stderr)
 
