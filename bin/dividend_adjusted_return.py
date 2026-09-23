@@ -183,6 +183,9 @@ class Adjustment:
     vendor_stock: float = 0.0       # tổng ISS.exercise_ratio cùng ex-date — 0 nếu không có
     vendor_check: str = "unavailable"   # match | mismatch | vendor_only | broker_only | unavailable
     vendor_note: str = ""
+    # hệ số tăng KL của chân CỔ PHIẾU cùng ex-date (1,0 = không có chân cổ phiếu). Đặt bởi
+    # `solve_from_broker` khi `credit_frame` chứng minh được bằng KL.
+    share_multiplier: float = 1.0
 
     @property
     def cash_per_share(self) -> float:
@@ -470,12 +473,230 @@ def broker_qty(account_no: str) -> dict:
     return {k: v[1] for k, v in out.items()}
 
 
-def _qty_at(qmap: dict, adj) -> float:
-    """Số lượng hưởng quyền: ưu tiên ngày cuối còn quyền, thiếu thì lấy chính ex-date."""
+# ======================================================================================
+# KHUNG QUY CHIẾU KHỐI LƯỢNG HƯỞNG QUYỀN  (vá 2026-09-24 — call-site thứ 3 của lớp lỗi
+# "hai số từ hai nguồn, ranh giới corp-action nằm giữa"; hai cái trước: daily_nav_snapshot
+# `corp_action_gate_v2` 4dcc3643, compute_active_nav/park_holdings `exdate_frame` 508bb607)
+# ======================================================================================
+# VẤN ĐỀ. `broker_qty()` trả bản ghi positions CUỐI NGÀY. Nhưng DNSE credit cổ phiếu mới
+# ngay TỐI T-1 — đo thật trên 6/7 sự kiện có trong `data/corp_actions.json`:
+#
+#     VHM 05/08  SpaceX   500 → 1.000   (×2,0)        BID 14/08  SpaceX 1.100 → 1.175
+#     VIX 19/08  SpaceX   400 →   420   (×1,05)       MSB 27/08  SpaceX   500 →   600
+#     VIB 09/09  SpaceX   500 →   547   (×1,095)      VPB 23/09  SpaceX 1.100 → 1.386
+#
+# Nên ở `last_cum_date` con số đọc được là KL SAU sự kiện, trong khi ngữ nghĩa cần là KL
+# HƯỞNG QUYỀN (trước). Hệ phương trình tầng 2 (`delta = Σ qty × per_share`) do đó mang hệ số
+# lớn hơn sự thật đúng bằng hệ số sự kiện ⇒ `per_share` giải ra THẤP hơn đúng bấy nhiêu lần.
+#
+# TỆ HƠN: lá chắn cũ (`qtys[last_cum] != qtys[ex_date]` ⇒ STOCK_SUSPECTED) bị CHÍNH tình huống
+# này vô hiệu hoá — sau credit sớm thì hai ngày BẰNG NHAU (1.386 = 1.386) nên cờ không bao giờ
+# bật. Lá chắn sinh ra cho đúng ca này lại bị đúng ca đó tắt đi.
+#
+# KHÔNG NEO THEO `broker_effective_ts`. Trường đó CÓ ĐỦ ở cả 7 sự kiện nhưng KHÔNG dùng neo
+# được, hai lý do đo được:
+#   · MBB 11/08 khai `broker_effective_ts=2026-08-10T19:32:49`, nhưng bản ghi positions cuối
+#     cùng của 10/08 là 19:12:13 (KL 1.100, CHƯA credit) — credit thật chỉ xuất hiện trong bản
+#     ghi ngày 11/08. Neo theo mốc này trả về đúng số, nhưng vì lý do SAI.
+#   · VIX/MSB/VIB/VPB: bản ghi cuối cùng TRƯỚC mốc nằm ở ~04:47–04:51 sáng, tức TRƯỚC phiên.
+#     Neo ở đó sẽ bỏ mất mọi lệnh khớp trong chính phiên cum — mà cổ phiếu mua ngày cum VẪN
+#     hưởng quyền (SpaceX bán 1.500→1.100 MBB lúc 09:15 ngày 10/08 là ca thật cùng dạng).
+# Neo bằng BẰNG CHỨNG KHỐI LƯỢNG thay vì bằng MỐC THỜI GIAN: `classify_qty_residual` trừ lệnh
+# khớp thật rồi đối chiếu phần dư với tỉ lệ thực hiện — `qty_now − residual` chính là KL hưởng
+# quyền, đã gồm lệnh khớp trong phiên cum.
+
+_CORP_ACTIONS_PATH = "/home/trido/thanhdt/WorkingClaude/data/corp_actions.json"
+
+
+def _ledger_event(ticker: str, ex_date: str):
+    """Sự kiện CỔ PHIẾU từ sổ `data/corp_actions.json` (user đã ký duyệt), ở ĐÚNG hình dạng mà
+    `classify_qty_residual` nhận — nguồn lịch THỨ HAI, độc lập với `corp_action_daily_*.json`.
+
+    Vì sao cần nguồn thứ hai: snapshot lịch hằng ngày có ngày KHÔNG TỒN TẠI (đo thật — VHM
+    05/08/2026 không có `corp_action_daily_2026-08-05.json`), và khi đó nhánh gán tỉ lệ của
+    `classify_qty_residual` TẮT ⇒ một cú credit đúng tỉ lệ rơi xuống `qty_unexplained`. Sổ
+    `corp_actions.json` phủ đúng ca đó: VHM ×2,0 giải thích trọn vẹn phần dư +500.
+
+    Chỉ nhận dòng `_status` CONFIRMED — `REVOKED ...` là cách thu hồi một xác nhận (xem chính
+    `_status` của VHM), nhận nhầm là khôi phục một sự kiện đã bị rút lại.
+    """
+    try:
+        with open(_CORP_ACTIONS_PATH, encoding="utf-8") as f:
+            actions = json.load(f).get("actions") or []
+    except (OSError, ValueError):
+        return None
+    return _pick_ledger_action(actions, ticker, ex_date)
+
+
+def _pick_ledger_action(actions, ticker: str, ex_date: str):
+    """PURE — phần chọn dòng của `_ledger_event`, tách ra để test được cả nhánh REVOKED."""
+    for a in actions:
+        if a.get("ticker") != ticker or a.get("ex_date") != ex_date:
+            continue
+        if not str(a.get("_status", "")).upper().startswith("CONFIRMED"):
+            continue
+        try:
+            mult = float(a.get("qty_multiplier"))
+        except (TypeError, ValueError):
+            continue
+        if mult <= 1.0:          # sự kiện không làm tăng KL ⇒ không phải cái ta đang neo
+            continue
+        return {"date": ex_date, "event_code": a.get("event_type") or "ISS",
+                "price_adjusting": True, "exercise_ratio": mult - 1.0,
+                "_source": "corp_actions.json"}
+    return None
+
+
+def credit_frame(account_label: str, account_no: str, adjustments: list) -> dict:
+    """{(mã, last_cum_date): bằng chứng} — KL ở `last_cum_date` đang ở hệ TRƯỚC hay SAU sự kiện.
+
+    Trả bản ghi `{"status", "entitled", "multiplier", "note"}`:
+      status="pre_credit" — broker ĐÃ credit trong ngày cum; `entitled` = KL hưởng quyền thật.
+      status="eod"        — KL cuối ngày cum ĐÚNG là KL hưởng quyền (không có credit sớm).
+      status="unknown"    — KHÔNG chứng minh được đang ở hệ nào ⇒ người gọi PHẢI fail-closed.
+
+    TÁI DÙNG `daily_nav_snapshot.classify_qty_residual` + plumbing của nó (đã qua 5 vòng
+    arch-review, đo trên 104 cặp phiên của cả 2 account: 12 phần dư, 12/12 là corp-action thật).
+    Viết lại phép phân loại ở đây là nhân đôi rủi ro, không phải nhân đôi bảo vệ.
+
+    Hai kênh bằng chứng, cố ý KHÁC NHAU về cơ chế:
+      1. KHỐI LƯỢNG — phần dư sau khi trừ lệnh khớp thật, khớp tỉ lệ thực hiện.
+      2. GIÁ — `exdate_frame.verify_post_event_price`: khi KL KHÔNG đổi mà lịch lại có sự kiện
+         cổ phiếu phiên kế tiếp, `marketPrice` tái tạo được `last_cum_price / hệ số` nghĩa là
+         giá ĐÃ sang hệ mới trong khi KL chưa — không kết luận được KL thuộc hệ nào ⇒ unknown.
+         Kênh này bắt ca credit rơi TRƯỚC cả bản ghi vị thế gần nhất, thứ mà kênh 1 mù.
+
+    §12 — mọi bản ghi đọc ở đây đều đã lọc `account_no` bên trong `raw_positions`/
+    `previous_raw_qty`; hàm nhận account_no nên không có đường nào gộp nhầm 2 tài khoản.
+    """
+    import daily_nav_snapshot as _dns
+
+    out, fill_cache = {}, {}
+    by_day = {}
+    for adj in adjustments:
+        by_day.setdefault(adj.last_cum_date, []).append(adj)
+
+    for day, adjs in sorted(by_day.items()):
+        snap = _dns._corp_action_daily_snapshot(day)
+        pos, _ts = _dns.raw_positions(account_no, day)
+        if pos is None:
+            continue                      # không có bản ghi ngày đó ⇒ để người gọi xử như cũ
+        for adj in adjs:
+            tk = adj.ticker
+            qty_now = (pos.get(tk) or {}).get("qty")
+            if qty_now is None:
+                continue                  # không nắm giữ ⇒ không có gì để neo
+            qty_prev, prev_d = _dns.previous_raw_qty(account_no, tk, day)
+            if prev_d is not None and qty_prev is None:
+                qty_prev = 0.0            # [B2] bản ghi ngày trước CÓ mà vắng mã ⇒ "chưa giữ"
+            gaps = []
+            net_fill = (_dns.net_fills_between(account_label, prev_d, day, fill_cache,
+                                               missing_out=gaps).get(tk)
+                        if prev_d else None)
+            ev = (_dns.held_event_next_session(snap, day, tk)
+                  or _ledger_event(tk, adj.ex_date))
+            verdict, detail = _dns.classify_qty_residual(ev, qty_now, qty_prev, net_fill, prev_d)
+
+            if verdict == "share_event_credit":
+                ratio = float(detail["exercise_ratio"])
+                out[(tk, day)] = {
+                    "status": "pre_credit",
+                    "entitled": float(detail["qty_now"]) - float(detail["residual"]),
+                    "multiplier": 1.0 + ratio,
+                    "note": (f"{account_label}: broker credit sớm trong ngày cum "
+                             f"({detail['qty_prev']:,.0f}→{detail['qty_now']:,.0f}, lệnh khớp "
+                             f"thật {detail['net_fill']:+,.0f}, phần dư {detail['residual']:+,.0f} "
+                             f"= tỉ lệ {ratio:g}) ⇒ KL hưởng quyền "
+                             f"{float(detail['qty_now']) - float(detail['residual']):,.0f}"),
+                }
+                continue
+
+            if verdict == "qty_unexplained":
+                out[(tk, day)] = {
+                    "status": "unknown", "entitled": None, "multiplier": 1.0,
+                    "note": (f"{account_label}: KL {detail['qty_prev']:,.0f}→"
+                             f"{detail['qty_now']:,.0f} (so với {detail['prev_qty_date']}), lệnh "
+                             f"khớp thật {detail['net_fill']:+,.0f} ⇒ phần dư "
+                             f"{detail['residual']:+,.0f} CHƯA GIẢI THÍCH ĐƯỢC — không biết KL "
+                             f"đang ở hệ TRƯỚC hay SAU sự kiện"
+                             + (f" [⚠️ journal thiếu {len(set(gaps))} ngày giao dịch]"
+                                if gaps else "")),
+                }
+                continue
+
+            # verdict == "ok": KL không đổi (hoặc đổi đúng bằng lệnh khớp). Kênh GIÁ nói gì?
+            status, why = _frame_from_price(
+                adj.last_cum_price, (pos.get(tk) or {}).get("marketPrice"), _event_multiplier(ev))
+            out[(tk, day)] = {"status": status, "multiplier": _event_multiplier(ev),
+                              "entitled": None if status == "unknown" else float(qty_now),
+                              "note": f"{account_label}: {why}"}
+    return out
+
+
+def _event_multiplier(ev) -> float:
+    """Hệ số tăng KL của sự kiện CỔ PHIẾU. 1,0 nếu không phải sự kiện cổ phiếu / không đọc được.
+
+    Sự kiện DIV cũng mang `exercise_ratio` nhưng đó là tỉ lệ cổ tức trên MỆNH GIÁ (DRI
+    2026-09-22: 0,1 = 1.000đ/10.000đ), KHÔNG phải tỉ lệ cổ phiếu — cùng cái bẫy mà
+    `classify_qty_residual` đã ghi.
+    """
+    if not (ev and ev.get("price_adjusting") and ev.get("event_code") != "DIV"):
+        return 1.0
+    try:
+        return 1.0 + float(ev.get("exercise_ratio") or 0.0)
+    except (TypeError, ValueError):
+        return 1.0
+
+
+def _frame_from_price(last_cum_price, market_price, multiplier):
+    """(status, lý do) cho ca KL KHÔNG đổi — PURE, không đọc file, không phụ thuộc TZ.
+
+    Kênh KHỐI LƯỢNG mù đúng một ca: credit rơi TRƯỚC cả bản ghi vị thế gần nhất mà ta so sánh,
+    nên `qty_now == qty_prev` và phần dư = 0. Khi đó `marketPrice` là nhân chứng còn lại: nếu nó
+    tái tạo được `last_cum_price / hệ số` thì GIÁ đã ở hệ sau sự kiện, và ta KHÔNG biết KL đang
+    ở hệ nào ⇒ fail-closed. Đây chính là phép kiểm `exdate_frame.verify_post_event_price` — tái
+    dùng, không viết lại, vì nó đã có dung sai theo bước giá và ca DNSE điều chỉnh theo GÓI VAY.
+    """
+    if multiplier <= 1.0:
+        return "eod", "KL cuối ngày cum = KL hưởng quyền (không có sự kiện cổ phiếu)"
+    import exdate_frame as _ef
+    px, why = _ef.verify_post_event_price(last_cum_price, market_price, multiplier)
+    if px is not None:
+        return "unknown", (f"KL KHÔNG đổi nhưng GIÁ đã sang hệ SAU sự kiện ({why}) — credit có "
+                           f"thể đã rơi trước bản ghi vị thế gần nhất; không kết luận được KL "
+                           f"thuộc hệ nào")
+    return "eod", f"KL cuối ngày cum = KL hưởng quyền; giá vẫn ở hệ TRƯỚC sự kiện ({why})"
+
+
+def qty_entitled(qmap: dict, adj, frame: dict = None):
+    """(KL hưởng quyền, status, ghi chú). `frame` = `credit_frame()` của CHÍNH tài khoản đó.
+
+    `status="unknown"` ⇒ hệ số của ẩn này KHÔNG biết ⇒ người gọi phải BỎ phương trình chứa nó,
+    KHÔNG được coi như 0 (coi như 0 là lặng lẽ giải hệ thiếu một ẩn có thật).
+    """
+    ev = (frame or {}).get((adj.ticker, adj.last_cum_date))
     q = qmap.get((adj.ticker, adj.last_cum_date))
     if q is None:
         q = qmap.get((adj.ticker, adj.ex_date))
-    return float(q or 0.0)
+        if q is None:
+            return 0.0, "eod", ""                     # không nắm giữ ở cả hai ngày
+        if ev and float(ev.get("multiplier") or 1.0) > 1.0:
+            return 0.0, "unknown", ("chỉ có bản ghi vị thế của CHÍNH ex-date, mà mã này có sự "
+                                    "kiện cổ phiếu ⇒ số đó đã ở hệ SAU sự kiện, không suy ngược "
+                                    "ra KL hưởng quyền")
+        return float(q), "eod", ""
+    if ev is None:
+        return float(q or 0.0), "eod", ""
+    if ev["status"] == "unknown":
+        return 0.0, "unknown", ev["note"]
+    if ev["status"] == "pre_credit":
+        return float(ev["entitled"]), "pre_credit", ev["note"]
+    return float(q or 0.0), "eod", ev.get("note", "")
+
+
+def _qty_at(qmap: dict, adj, frame: dict = None) -> float:
+    """KL hưởng quyền (tương thích ngược: gọi 2 tham số = hành vi cũ, KL cuối ngày cum)."""
+    return qty_entitled(qmap, adj, frame)[0]
 
 
 def _connected(equations: list, n: int) -> list:
@@ -488,7 +709,7 @@ def _connected(equations: list, n: int) -> list:
             x = parent[x]
         return x
 
-    for cols, _, _ in equations:
+    for cols, *_ in equations:
         for c in cols[1:]:
             ra, rb = find(cols[0]), find(c)
             if ra != rb:
@@ -502,25 +723,75 @@ def _connected(equations: list, n: int) -> list:
     return [(eqs, sorted(cols)) for eqs, cols in groups.values()]
 
 
-def solve_from_broker(adjustments: list, accounts: dict, deltas=None, qtys=None) -> list:
+def _cash_ratio_ref(adj) -> float:
+    """Ước lượng TẦNG 1 của riêng CHÂN TIỀN MẶT — đã trừ phần giá tụt do chân CỔ PHIẾU.
+
+    `ratio_per_share` của `_scan_jumps` là `P(1 − 1/jump)`, mà `jump` gộp CẢ HAI chân:
+
+        jump = ratio_ex / ratio_cum = P_cum × m / (P_cum − cash)   (m = hệ số tăng KL)
+        ⇒ cash = P_cum × (1 − m / jump)
+
+    Với m = 1 (thuần tiền mặt) công thức thu về đúng bản cũ, nên mọi ca cũ KHÔNG đổi một đồng.
+    Với sự kiện CÓ chân cổ phiếu, bản cũ trả một con số lớn gấp nhiều lần chân tiền thật (VPB
+    23/09: P=27.800, m=1,2604 ⇒ bản cũ 5.744đ/cp cho một sự kiện KHÔNG có đồng tiền mặt nào),
+    và lưới an toàn `SANITY_REL` so với con số đó sẽ bác đúng nghiệm ĐÚNG.
+
+    Trả 0 khi không dựng được — người gọi coi đó là "không có chân tiền" và từ chối mọi nghiệm
+    dương (fail-closed), thay vì bỏ qua lưới an toàn.
+    """
+    est = float(getattr(adj, "ratio_per_share", adj.per_share) or 0.0)
+    m = float(getattr(adj, "share_multiplier", 1.0) or 1.0)
+    p = float(adj.last_cum_price or 0.0)
+    if m == 1.0:
+        return est
+    if p <= 0 or est >= p:
+        return 0.0
+    jump = p / (p - est)
+    return p * (1.0 - m / jump)
+
+
+def solve_from_broker(adjustments: list, accounts: dict, deltas=None, qtys=None,
+                      frames=None) -> list:
     """Giải `per_share` của từng sự kiện TỪ TIỀN BROKER THẬT.
 
     Đặt `kind=CASH_CONFIRMED` + `source='broker_solved'` khi giải được; ngược lại giữ
     `kind='UNVERIFIED'` (giá trị `per_share` ước lượng từ tỉ số vẫn nằm đó cho mục đích chẩn đoán,
     nhưng `.cash_per_share` trả 0 nên KHÔNG thể lọt vào báo cáo).
 
-    `deltas`/`qtys` cho phép tiêm dữ liệu giả lập trong selfcheck (chạy offline).
+    `deltas`/`qtys`/`frames` cho phép tiêm dữ liệu giả lập trong selfcheck (chạy offline).
+    `frames` = {nhãn tài khoản: `credit_frame()`} — bằng chứng KL hưởng quyền; None ⇒ tự dựng
+    từ dnse_raw + lịch corp-action.
     """
     import numpy as np
 
     deltas = deltas or {lb: broker_cash_deltas(no) for lb, no in accounts.items()}
     qtys = qtys or {lb: broker_qty(no) for lb, no in accounts.items()}
+    if frames is None:
+        frames = {lb: credit_frame(lb, no, adjustments) for lb, no in accounts.items()}
     for adj in adjustments:
         adj.source = getattr(adj, "source", "unresolved")
 
-    # (a) Nghi CHIA TÁCH/THƯỞNG CP: số lượng đổi ngay tại ex-date → không sinh tiền, loại khỏi hệ.
+    # (a) Sự kiện có chân CỔ PHIẾU ⇒ gắn STOCK_SUSPECTED. Hai nhánh, KHÁC NHAU về hệ quả:
     live = []
     for adj in adjustments:
+        # (a1) BẰNG CHỨNG CƠ KHÍ: broker credit sớm, phần dư KL khớp đúng tỉ lệ thực hiện.
+        # Lá chắn CŨ (so KL ngày cum với KL ex-date) KHÔNG bắt được ca này — credit sớm làm hai
+        # ngày BẰNG NHAU. Khác lá chắn cũ, nhánh này KHÔNG loại sự kiện khỏi hệ: đã biết chắc KL
+        # hưởng quyền (`credit_frame`) và hệ số sự kiện thì CHÂN TIỀN của một sự kiện vừa-tiền-
+        # vừa-cổ-phiếu vẫn giải được; solver chỉ nâng lên CASH_CONFIRMED khi nghiệm dương và
+        # khớp ước lượng tỉ số ĐÃ TRỪ phần cổ phiếu (xem `_cash_ratio_ref`).
+        proven = [frames[lb][(adj.ticker, adj.last_cum_date)] for lb in accounts
+                  if frames.get(lb, {}).get((adj.ticker, adj.last_cum_date), {}).get("status")
+                  == "pre_credit"]
+        if proven:
+            adj.share_multiplier = max(float(p["multiplier"]) for p in proven)
+            adj.kind = "STOCK_SUSPECTED"
+            adj.note = ("sự kiện CỔ PHIẾU đã chứng minh bằng KL (" + "; ".join(
+                p["note"] for p in proven) + ")")
+            live.append(adj)
+            continue
+
+        # (a2) LÁ CHẮN CŨ, giữ nguyên nguyên văn: KL cuối ngày cum ≠ KL ex-date.
         changed = [f"{lb} {qtys[lb][(adj.ticker, adj.last_cum_date)]}→{qtys[lb][(adj.ticker, adj.ex_date)]}"
                    for lb in accounts
                    if (adj.ticker, adj.last_cum_date) in qtys[lb] and (adj.ticker, adj.ex_date) in qtys[lb]
@@ -541,28 +812,44 @@ def solve_from_broker(adjustments: list, accounts: dict, deltas=None, qtys=None)
     # MỘT ngày trong cửa sổ (ngày SỚM NHẤT có delta dương), nếu không nó sẽ bị đếm ở cả hai.
     # Bẫy thật: ex-date của NCT (27/07) trùng ngày-cuối-còn-quyền của SAB (27/07) — để cửa sổ rộng
     # thì NCT bị cộng vào cả delta 24/07 lẫn 3.300.000 của 27/07, hệ mâu thuẫn, cả hai mã hỏng.
+    # KL hưởng quyền phải là KL TRƯỚC credit (xem khối "KHUNG QUY CHIẾU" ở trên). Ẩn nào KHÔNG
+    # chứng minh được đang ở hệ nào thì hệ số của nó KHÔNG BIẾT ⇒ BỎ CẢ PHƯƠNG TRÌNH chứa nó,
+    # không được coi như 0: coi như 0 là lặng lẽ giải một hệ thiếu đúng cái ẩn đang gây lệch.
     equations = []
     for lb in accounts:
-        by_day = {}
+        by_day, poisoned = {}, {}
         for i, adj in enumerate(live):
-            if _qty_at(qtys[lb], adj) <= 0:
+            qty, status, why = qty_entitled(qtys[lb], adj, frames.get(lb))
+            if status == "unknown":
+                adj.note = adj.note or f"KL hưởng quyền KHÔNG xác định được — {why}"
+                for day in (adj.last_cum_date, adj.ex_date):
+                    if deltas[lb].get(day, 0) > 0:
+                        poisoned.setdefault(day, []).append(f"{adj.ticker}: {why}")
+                continue
+            if qty <= 0:
                 continue
             for day in (adj.last_cum_date, adj.ex_date):
                 if deltas[lb].get(day, 0) > 0:
-                    by_day.setdefault(day, []).append(i)
+                    by_day.setdefault(day, []).append((i, qty))
                     break
         for day, cols in sorted(by_day.items()):
-            equations.append((cols, float(deltas[lb][day]), (lb, day)))
+            if day in poisoned:
+                for i, _ in cols:
+                    live[i].note = (f"phương trình {lb} {day} BỊ BỎ — có ẩn không xác định được "
+                                    f"KL hưởng quyền (" + "; ".join(poisoned[day]) + ")")
+                continue
+            equations.append(([i for i, _ in cols], float(deltas[lb][day]), (lb, day),
+                              {i: q for i, q in cols}))
 
     # (c) Giải từng thành phần liên thông độc lập.
     for eqs, cols in _connected(equations, len(live)):
         pos = {c: j for j, c in enumerate(cols)}
         A = np.zeros((len(eqs), len(cols)))
         b = np.zeros(len(eqs))
-        for i, (ecols, rhs, (lb, _)) in enumerate(eqs):
+        for i, (ecols, rhs, (lb, _), qmap_eq) in enumerate(eqs):
             b[i] = rhs
             for c in ecols:
-                A[i, pos[c]] = _qty_at(qtys[lb], live[c])
+                A[i, pos[c]] = qmap_eq[c]
 
         names = ", ".join(f"{live[c].ticker}@{live[c].ex_date}" for c in cols)
         shape = f"{len(eqs)} phương trình / {len(cols)} ẩn: {names}"
@@ -574,7 +861,7 @@ def solve_from_broker(adjustments: list, accounts: dict, deltas=None, qtys=None)
 
         x = np.round(np.linalg.lstsq(A, b, rcond=None)[0])
         resid = A @ x - b
-        bad = [f"{lb} {d}" for i, (_, _, (lb, d)) in enumerate(eqs)
+        bad = [f"{lb} {d}" for i, (_, _, (lb, d), _) in enumerate(eqs)
                if abs(resid[i]) > max(EQ_TOL_ABS, EQ_TOL_REL * abs(b[i]))]
         if bad:
             for c in cols:
@@ -584,8 +871,8 @@ def solve_from_broker(adjustments: list, accounts: dict, deltas=None, qtys=None)
 
         for c in cols:
             adj, val = live[c], float(x[pos[c]])
-            ref = float(getattr(adj, "ratio_per_share", adj.per_share) or 0.0)
-            if val <= 0 or (ref > 0 and abs(val - ref) > SANITY_REL * ref):
+            ref = _cash_ratio_ref(adj)
+            if val <= 0 or ref <= 0 or abs(val - ref) > SANITY_REL * ref:
                 adj.note = (f"nghiệm broker {val:,.0f}đ/cp LỆCH XA ước lượng tỉ số {ref:,.0f}đ/cp — "
                             "nghi phương trình bị nhiễm bởi sự kiện chưa phát hiện")
                 continue
@@ -773,14 +1060,19 @@ def _mk(tk, ex, cum, price, ratio_ps):
                       per_share=ratio_ps, ratio_per_share=ratio_ps)
 
 
-def _solve_offline(adjs, accounts, qty=None, delta=None):
+def _solve_offline(adjs, accounts, qty=None, delta=None, frame=None):
+    """`frame={}` (mặc định) = KHÔNG có bằng chứng credit ⇒ hành vi y hệt bản trước bản vá."""
     return solve_from_broker(
         adjs, accounts,
         deltas={lb: (delta or _DELTA).get(lb, {}) for lb in accounts},
-        qtys={lb: (qty or _QTY).get(lb, {}) for lb in accounts})
+        qtys={lb: (qty or _QTY).get(lb, {}) for lb in accounts},
+        frames={lb: (frame or {}).get(lb, {}) for lb in accounts})
 
 
 def _selfcheck() -> int:
+    # §5b — selfcheck này import `daily_nav_snapshot` (qua `credit_frame`), mà cây import đó
+    # chạm `trading_bot`. Chặn mọi side-effect ra BUS trước khi có gì được dựng.
+    os.environ.setdefault("MIKE_BOT_TEST_MODE", "1")
     passed = failed = 0
 
     def check(name, got, want, tol=0.51):
@@ -909,6 +1201,190 @@ def _selfcheck() -> int:
          round(PIT_DIVIDEND_RATE, 6))
     check("rút Trứng vàng == withdrawableCash 16/07 (không phải số ép cho khớp)",
           withdrawn, 302_108_211, tol=0)
+
+    # ==================================================================================
+    # KHUNG QUY CHIẾU KL HƯỞNG QUYỀN (vá 2026-09-24) — mục 16→20
+    # Số của fixture lấy nguyên hình dạng ca THẬT VPB 24/09/2026 (m = 1,2604104; SpaceX
+    # 1.100→1.386, ZaloPay 1.200→1.512), thêm một chân TIỀN MẶT 1.000đ/cp mà VPB không có —
+    # đó chính là cấu trúc "cổ tức tiền + cổ phiếu cùng ex-date" rất phổ thông ở VN.
+    # ==================================================================================
+    _M = 1.2604104
+    _P = 27800.0
+    _CASH = 1000.0
+    _JUMP = _P * _M / (_P - _CASH)              # tỉ số Close/Price nhảy vì CẢ HAI chân
+    _EST = _P * (1.0 - 1.0 / _JUMP)             # ước lượng tầng 1 (gộp cả hai chân)
+
+    def _combined_adj():
+        return _mk("ZZZ", "2026-09-24", "2026-09-23", _P, _EST)
+
+    def _frame_credited(entitled_by_lb):
+        return {lb: {("ZZZ", "2026-09-23"): {
+            "status": "pre_credit", "entitled": float(q), "multiplier": _M,
+            "note": f"{lb}: fixture credit sớm"}} for lb, q in entitled_by_lb.items()}
+
+    _QTY_CREDITED = {"SpaceX": {("ZZZ", "2026-09-23"): 1386, ("ZZZ", "2026-09-24"): 1386},
+                     "ZaloPay": {("ZZZ", "2026-09-23"): 1512, ("ZZZ", "2026-09-24"): 1512}}
+    _DELTA_COMBINED = {"SpaceX": {"2026-09-23": 1100 * _CASH},
+                       "ZaloPay": {"2026-09-23": 1200 * _CASH}}
+
+    print("16) CỔ TỨC TIỀN + CỔ PHIẾU CÙNG EX-DATE, broker credit sớm ⇒ per_share vẫn ĐÚNG:")
+    print(f"     KL cuối ngày cum ĐÃ credit (1.386/1.512) nhưng KL hưởng quyền là 1.100/1.200;"
+          f" tiền thật {1100 * _CASH:,.0f} / {1200 * _CASH:,.0f}")
+    a16 = _combined_adj()
+    _solve_offline([a16], ACCOUNTS, qty=_QTY_CREDITED, delta=_DELTA_COMBINED,
+                   frame=_frame_credited({"SpaceX": 1100, "ZaloPay": 1200}))
+    check("ZZZ per_share (chân TIỀN MẶT)", a16.per_share, _CASH)
+    same("ZZZ kind/source", (a16.kind, a16.source), ("CASH_CONFIRMED", "broker_solved"))
+    check("ZZZ cash_per_share được phép vào báo cáo", a16.cash_per_share, _CASH)
+    print("     MUTATION — đảo bản vá (dùng KL cuối ngày 1.386/1.512 như trước):")
+    a16b = _combined_adj()
+    _solve_offline([a16b], ACCOUNTS, qty=_QTY_CREDITED, delta=_DELTA_COMBINED)   # frame rỗng
+    check("→ per_share KHÔNG còn bằng 1.000 (bản cũ giải ra thấp hơn ~hệ số sự kiện)",
+          abs(a16b.cash_per_share - _CASH) > 1.0, True, tol=0)
+    check("→ và fail-closed về 0 (lưới SANITY bắt được, không ra số sai)",
+          a16b.cash_per_share, 0.0, tol=1e-9)
+
+    print("17) LÁ CHẮN: credit sớm làm KL hai ngày BẰNG NHAU ⇒ lá chắn CŨ mù, lá chắn MỚI bật:")
+    same("KL ngày cum == KL ex-date (điều kiện làm lá chắn cũ câm)",
+         _QTY_CREDITED["SpaceX"][("ZZZ", "2026-09-23")]
+         == _QTY_CREDITED["SpaceX"][("ZZZ", "2026-09-24")], True)
+    a17 = _combined_adj()
+    _solve_offline([a17], ACCOUNTS, qty=_QTY_CREDITED,
+                   delta={"SpaceX": {}, "ZaloPay": {}},          # không có dòng tiền nào
+                   frame=_frame_credited({"SpaceX": 1100, "ZaloPay": 1200}))
+    same("ZZZ kind (thuần cổ phiếu, không có tiền) = STOCK_SUSPECTED", a17.kind,
+         "STOCK_SUSPECTED")
+    check("ZZZ cash_per_share", a17.cash_per_share, 0.0, tol=1e-9)
+    check("ZZZ share_multiplier ghi lại đúng hệ số sự kiện", a17.share_multiplier, _M, tol=1e-9)
+
+    print("18) KHÔNG chứng minh được KL ở hệ nào ⇒ FAIL-CLOSED, và BỎ luôn phương trình đó:")
+    # Bộ số CỐ Ý dựng để "bỏ qua ẩn không biết" KHÔNG lộ ra dưới dạng dư số: tỉ lệ nắm giữ
+    # ZZZ/YYY giống hệt nhau ở cả hai tài khoản (1.100/1.000 = 440/400 = 1,1) nên phần nhiễm
+    # là một phép NHÂN đều — hệ vẫn "khớp tiền" hoàn hảo và lưới SANITY cũng cho qua (502 lệch
+    # 0,4% < 1%). Đây chính là ca mà coi ẩn-không-biết như 0 sẽ công bố một số SAI mà không có
+    # cảnh báo nào; chỉ việc BỎ phương trình mới chặn được.
+    a18 = _combined_adj()
+    other = _mk("YYY", "2026-09-24", "2026-09-23", 20000.0, 500.0)
+    unknown_frame = {lb: {("ZZZ", "2026-09-23"): {
+        "status": "unknown", "entitled": None, "multiplier": _M,
+        "note": f"{lb}: fixture không đọc được lịch"}} for lb in ACCOUNTS}
+    _solve_offline([a18, other], ACCOUNTS,
+                   qty={"SpaceX": {("ZZZ", "2026-09-23"): 1386, ("YYY", "2026-09-23"): 1000},
+                        "ZaloPay": {("ZZZ", "2026-09-23"): 555, ("YYY", "2026-09-23"): 400}},
+                   delta={"SpaceX": {"2026-09-23": 1100 * 2.0 + 1000 * 500.0},
+                          "ZaloPay": {"2026-09-23": 440 * 2.0 + 400 * 500.0}},
+                   frame=unknown_frame)
+    same("ZZZ kind", a18.kind, "UNVERIFIED")
+    check("ZZZ cash_per_share", a18.cash_per_share, 0.0, tol=1e-9)
+    same("YYY (mã LÀNH cùng ngày) cũng KHÔNG được giải — hệ số ẩn kia không biết",
+         other.kind, "UNVERIFIED")
+    check("YYY cash_per_share", other.cash_per_share, 0.0, tol=1e-9)
+    check("→ nếu coi ẩn-không-biết như 0 thì YYY sẽ được công bố 502đ/cp thay vì 500 "
+          "(sai 0,4%, lọt cả dư số lẫn SANITY)", other.per_share != 502.0, True, tol=0)
+    print(f"     lý do ghi lại: {other.note[:90]}…")
+
+    print("19) `_cash_ratio_ref` — ước lượng tỉ số phải TRỪ phần giá tụt do chân cổ phiếu:")
+    a19 = _combined_adj()
+    a19.share_multiplier = _M
+    check("sự kiện TIỀN+CỔ PHIẾU: ref ≈ đúng chân tiền 1.000đ/cp", _cash_ratio_ref(a19), _CASH,
+          tol=1.0)
+    pure_stock = _mk("VPB", "2026-09-24", "2026-09-23", _P, _P * (1.0 - 1.0 / _M))
+    pure_stock.share_multiplier = _M
+    check("sự kiện THUẦN cổ phiếu: ref = 0 ⇒ mọi nghiệm dương bị từ chối",
+          _cash_ratio_ref(pure_stock), 0.0, tol=1.0)
+    pure_cash = _mk("MBB", "2026-07-09", "2026-07-08", 26000.0, 1000.0)
+    check("sự kiện THUẦN tiền mặt: ref KHÔNG đổi một đồng so với bản cũ",
+          _cash_ratio_ref(pure_cash), 1000.0, tol=1e-9)
+
+    print("20) DỮ LIỆU THẬT — `credit_frame` trên dnse_raw của CẢ 2 tài khoản (§12):")
+    print("    7 sự kiện trong data/corp_actions.json; KL hưởng quyền phải KHÁC nhau giữa 2 TK.")
+    _REAL = {   # (mã, ngày cum): {tài khoản: KL hưởng quyền đã đối soát tay}
+        ("VHM", "2026-08-05"): {"SpaceX": 500.0, "ZaloPay": 300.0},
+        ("BID", "2026-08-14"): {"SpaceX": 1100.0, "ZaloPay": 400.0},
+        ("VIX", "2026-08-19"): {"SpaceX": 400.0, "ZaloPay": 100.0},
+        ("MSB", "2026-08-27"): {"SpaceX": 500.0, "ZaloPay": 200.0},
+        ("VIB", "2026-09-09"): {"SpaceX": 500.0, "ZaloPay": 200.0},
+        ("VPB", "2026-09-23"): {"SpaceX": 1100.0, "ZaloPay": 1200.0},
+    }
+    real_adjs = [_mk(tk, next_ex, cum, 0.0, 0.0) for (tk, cum), next_ex in [
+        (("VHM", "2026-08-05"), "2026-08-06"), (("BID", "2026-08-14"), "2026-08-17"),
+        (("VIX", "2026-08-19"), "2026-08-20"), (("MSB", "2026-08-27"), "2026-08-28"),
+        (("VIB", "2026-09-09"), "2026-09-10"), (("VPB", "2026-09-23"), "2026-09-24")]]
+    frames_real = {lb: credit_frame(lb, no, real_adjs) for lb, no in ACCOUNTS.items()}
+    for key, want in sorted(_REAL.items()):
+        for lb in ACCOUNTS:
+            got = frames_real[lb].get(key)
+            same(f"{key[0]} {key[1]} {lb} status", (got or {}).get("status"), "pre_credit")
+            check(f"{key[0]} {key[1]} {lb} KL hưởng quyền", (got or {}).get("entitled") or -1.0,
+                  want[lb])
+    diff = sum(1 for key in _REAL
+               if frames_real["SpaceX"][key]["entitled"] != frames_real["ZaloPay"][key]["entitled"])
+    check("§12: số sự kiện mà 2 tài khoản cho KL KHÁC nhau (phải > 0)", diff >= 5, True, tol=0)
+    mbb = [_mk("MBB", "2026-08-11", "2026-08-10", 24150.0, 0.0)]
+    f_mbb = {lb: credit_frame(lb, no, mbb) for lb, no in ACCOUNTS.items()}
+    same("MBB 10/08 SpaceX: broker CHƯA credit trong ngày cum ⇒ KL cuối ngày là đúng",
+         f_mbb["SpaceX"][("MBB", "2026-08-10")]["status"], "eod")
+    check("MBB 10/08 SpaceX KL hưởng quyền = 1.100 (đã trừ lệnh BÁN 400 trong phiên cum)",
+          f_mbb["SpaceX"][("MBB", "2026-08-10")]["entitled"], 1100.0)
+
+    print("21) KÊNH GIÁ — bắt ca kênh KHỐI LƯỢNG mù (credit rơi trước bản ghi vị thế gần nhất).")
+    print("    Số THẬT: Price(BQ, hệ cum) và marketPrice(broker) đọc từ dnse_raw cùng ngày.")
+    for name, px_cum, mp, mult, want in [
+        # BID 14/08: BQ Price 38.250 (cum) — broker đã hạ marketPrice về 35.800 = 38.250/1,068433
+        ("BID 14/08 giá ĐÃ sang hệ mới", 38250.0, 35800.0, 1.068433, "unknown"),
+        # VPB 23/09: 27.800 / 1,2604104 = 22.056 ≈ 22.050 (lệch 6đ, trong 1 bước giá)
+        ("VPB 23/09 giá ĐÃ sang hệ mới", 27800.0, 22050.0, 1.2604104, "unknown"),
+        # VHM 05/08: 153.000 / 2,0 = 76.500 đúng từng đồng
+        ("VHM 05/08 giá ĐÃ sang hệ mới", 153000.0, 76500.0, 2.0, "unknown"),
+        # MBB 10/08: broker vẫn để 24.150, cách xa 24.250/1,15 = 21.087 ⇒ còn ở hệ cum
+        ("MBB 10/08 giá CÒN ở hệ cum", 24250.0, 24150.0, 1.15, "eod"),
+        # không có chân cổ phiếu ⇒ không có gì để nghi, KL cuối ngày là đúng
+        ("thuần tiền mặt (m=1)", 26000.0, 25000.0, 1.0, "eod"),
+        # broker không trả giá ⇒ KHÔNG có nhân chứng ⇒ không được suy là "an toàn"
+        ("broker không trả marketPrice", 27800.0, None, 1.2604104, "eod"),
+    ]:
+        same(name, _frame_from_price(px_cum, mp, mult)[0], want)
+    print("     ⚠️ ca cuối: thiếu marketPrice ⇒ kênh giá CÂM, chỉ còn kênh khối lượng bảo vệ —")
+    print("        ghi lại để không ai tưởng 'eod' ở đó là một kết luận dương tính.")
+
+    print("22) `_event_multiplier` — sự kiện DIV cũng mang `exercise_ratio` nhưng đó là tỉ lệ")
+    print("    cổ tức trên MỆNH GIÁ, KHÔNG phải tỉ lệ cổ phiếu (ca thật DRI 22/09: 0,1 = 1.000đ):")
+    for name, ev, want in [
+        ("DIV ratio 0,1 (DRI 22/09) ⇒ KHÔNG được thành hệ số 1,1",
+         {"event_code": "DIV", "price_adjusting": True, "exercise_ratio": 0.1}, 1.0),
+        ("ISS ratio 0,2604104 (VPB 24/09) ⇒ hệ số 1,2604104",
+         {"event_code": "ISS", "price_adjusting": True, "exercise_ratio": 0.2604104}, 1.2604104),
+        ("sự kiện KHÔNG điều chỉnh giá ⇒ 1,0",
+         {"event_code": "ISS", "price_adjusting": False, "exercise_ratio": 0.5}, 1.0),
+        ("không có sự kiện ⇒ 1,0", None, 1.0),
+        ("ratio hỏng kiểu ⇒ 1,0 (không ném lỗi giữa đường dựng báo cáo)",
+         {"event_code": "ISS", "price_adjusting": True, "exercise_ratio": "x"}, 1.0),
+    ]:
+        check(name, _event_multiplier(ev), want, tol=1e-9)
+    print("23) `_ledger_event` — chỉ nhận dòng CONFIRMED, bỏ REVOKED, bỏ sự kiện không tăng KL:")
+    check("VPB 24/09 (CONFIRMED trong data/corp_actions.json) ⇒ hệ số 1,2604104",
+          _event_multiplier(_ledger_event("VPB", "2026-09-24")), 1.2604104, tol=1e-9)
+    same("mã không có trong sổ ⇒ None", _ledger_event("ZZZ", "2026-09-24"), None)
+    same("đúng mã nhưng SAI ex-date ⇒ None", _ledger_event("VPB", "2026-09-23"), None)
+    _LEDGER_FIXTURE = [
+        {"ticker": "AAA", "ex_date": "2026-10-01", "qty_multiplier": 1.5,
+         "event_type": "BONUS_ISSUE", "_status": "REVOKED — user rút xác nhận 2026-09-30"},
+        {"ticker": "BBB", "ex_date": "2026-10-01", "qty_multiplier": 1.0,
+         "event_type": "STOCK_DIVIDEND", "_status": "CONFIRMED — user ký duyệt"},
+        {"ticker": "CCC", "ex_date": "2026-10-01", "qty_multiplier": "hỏng",
+         "event_type": "BONUS_ISSUE", "_status": "CONFIRMED — user ký duyệt"},
+        {"ticker": "DDD", "ex_date": "2026-10-01", "qty_multiplier": 1.5,
+         "event_type": "BONUS_ISSUE", "_status": "CONFIRMED — user ký duyệt"},
+    ]
+    same("_status REVOKED ⇒ KHÔNG khôi phục sự kiện đã bị rút lại",
+         _pick_ledger_action(_LEDGER_FIXTURE, "AAA", "2026-10-01"), None)
+    same("hệ số 1,0 (không tăng KL) ⇒ None", _pick_ledger_action(_LEDGER_FIXTURE, "BBB",
+                                                                 "2026-10-01"), None)
+    same("hệ số hỏng kiểu ⇒ None (không ném lỗi)",
+         _pick_ledger_action(_LEDGER_FIXTURE, "CCC", "2026-10-01"), None)
+    check("dòng CONFIRMED hợp lệ ⇒ tỉ lệ 0,5",
+          (_pick_ledger_action(_LEDGER_FIXTURE, "DDD", "2026-10-01") or {})
+          .get("exercise_ratio", -1), 0.5, tol=1e-9)
 
     print(f"\n=== SELFCHECK: {passed} PASS / {failed} FAIL ===")
     return 1 if failed else 0
