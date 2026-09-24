@@ -44,6 +44,7 @@ from __future__ import annotations
 
 import argparse
 import datetime as _dt
+import io
 import json
 import os
 import re
@@ -173,19 +174,31 @@ def broker_positions(account_no: str, asof: str, price_fn=None) -> dict:
 
 
 # ---------------------------------------------------------------- nguồn (2): cổ tức
-def entitled_gross(tickers, account_no: str, asof: str) -> dict:
-    """{mã: cổ tức GỘP đồng/cp mà CHÍNH tài khoản này được hưởng, ex-date ≤ asof}."""
+def entitled_gross(tickers, account_no: str, asof: str) -> tuple:
+    """({mã: cổ tức GỘP đồng/cp tài khoản này được hưởng, ex-date ≤ asof}, [lệch nguồn vendor]).
+
+    Phần tử thứ hai là danh sách sự kiện mà TIỀN BROKER THẬT và nguồn vendor
+    `tav2_bq.corporate_action` cho hai số KHÁC nhau quá ngưỡng — `dar` đã hạ chúng về
+    `UNVERIFIED` (cash_per_share = 0) nên nếu chỉ trả về `out` thì mã đó lặng lẽ mất phần cổ tức
+    khỏi kỳ vọng mà KHÔNG ai biết. Trả kèm ra ngoài để cổng nói thành lời, không suy diễn từ sự
+    vắng mặt (§28).
+    """
     start = (_dt.date.fromisoformat(asof) - _dt.timedelta(days=LOOKBACK_DAYS)).isoformat()
     adjs = dar.resolve_dividends(sorted(tickers), start, asof)
     qmap = dar.broker_qty(account_no)
-    out = {}
+    out, mismatches = {}, []
     for a in adjs:
-        if a.cash_per_share <= 0 or a.ex_date > asof:
+        if a.ex_date > asof:
             continue
         if dar._qty_at(qmap, a) <= 0:          # tài khoản này KHÔNG nắm giữ tại ngày chốt quyền
             continue
+        if a.vendor_check == "mismatch":
+            mismatches.append((a.ticker, a.ex_date, a.per_share, a.vendor_cash))
+            continue
+        if a.cash_per_share <= 0:
+            continue
         out[a.ticker] = out.get(a.ticker, 0.0) + a.cash_per_share
-    return out
+    return out, mismatches
 
 
 def expected_pct(qty: float, cost_price: float, market: float, gross_ps: float,
@@ -485,13 +498,15 @@ def run_gate(report_path: str, tol_pp: float = DEFAULT_TOL_PP, out=sys.stdout) -
           f"tài khoản {', '.join(labels)} | dung sai {tol_pp:.2f}pp", file=out)
 
     expected, ambiguous, agg, skipped = {}, set(), {}, set()
+    vendor_mismatch = []     # (nhãn TK, mã, ex-date, đồng/cp broker, đồng/cp vendor)
     for lb in labels:
         acct = dar.ACCOUNTS[lb]
         pos = broker_positions(acct, asof)
         excl = excluded_tickers(lb)
         skipped |= {f"{t} ({lb})" for t in pos if t in excl}
         pos = {t: v for t, v in pos.items() if t not in excl}
-        gross = entitled_gross(pos.keys(), acct, asof)
+        gross, mism = entitled_gross(pos.keys(), acct, asof)
+        vendor_mismatch.extend((lb,) + m for m in mism)
         tot_pl = tot_cost = 0.0
         for tk, (qty, cp, mkt) in pos.items():
             pct, pl, raw = expected_pct(qty, cp, mkt, gross.get(tk, 0.0))
@@ -575,6 +590,34 @@ def run_gate(report_path: str, tol_pp: float = DEFAULT_TOL_PP, out=sys.stdout) -
     if nocover:
         print(f"ℹ️  {len(nocover)} vị thế CÓ cổ tức nhưng báo cáo không công bố tỉ suất riêng "
               f"(không chặn — không công bố thì không sai được): {', '.join(nocover)}", file=out)
+    # ---- LỆCH NGUỒN VENDOR: luôn NÓI RA (không im lặng), chặn khi mã đó đang được CÔNG BỐ.
+    # Cảnh báo phải tới người đọc kể cả khi báo cáo PASS — nếu chỉ chặn thì một báo cáo không
+    # công bố tỉ suất mã đó sẽ đi qua mà không ai biết nguồn vendor đang lệch.
+    vendor_fails = []
+    if vendor_mismatch:
+        published = {tk for tk, _q, _p in rows} | prose_tk
+        print("\n⚠️  LỆCH NGUỒN VENDOR — tiền broker thật ≠ `tav2_bq.corporate_action`:", file=out)
+        for lb, tk, ex, broker_ps, vendor_ps in sorted(vendor_mismatch):
+            lech = abs(vendor_ps - broker_ps) / broker_ps * 100.0 if broker_ps > 0 else float("inf")
+            line = (f"{tk} ({lb}, ex {ex}): broker giải {broker_ps:,.0f}đ/cp vs vendor "
+                    f"{vendor_ps:,.0f}đ/cp — lệch {lech:.1f}%")
+            print(f"   • {line}", file=out)
+            if tk in published:
+                vendor_fails.append(line)
+        print("   → sự kiện đã bị HẠ VỀ UNVERIFIED: cổ tức của nó KHÔNG vào kỳ vọng và KHÔNG được "
+              "công bố (§21).", file=out)
+        print("   → VIỆC CẦN LÀM: Winston (data-ops) đối soát `tav2_bq.corporate_action` với sổ "
+              "broker cho đúng (mã, ex-date) trên;", file=out)
+        print("      chỉ khi hai nguồn khớp lại thì tỉ suất mã đó mới được công bố.", file=out)
+    if vendor_fails:
+        print(f"\n❌ CHẶN — {len(vendor_fails)} mã đang CÔNG BỐ tỉ suất nhưng có sự kiện cổ tức "
+              f"lệch nguồn (UNVERIFIED):", file=out)
+        for v in vendor_fails:
+            print(f"   • {v}", file=out)
+        print("   Nguyên nhân KHÔNG phải sai cơ sở giá cũng KHÔNG phải quên cộng cổ tức: hai "
+              "nguồn độc lập đang bất đồng về SỐ cổ tức.", file=out)
+        print("   Gỡ chặn = Winston xác minh xong nguồn vendor, KHÔNG phải nới dung sai cổng.",
+              file=out)
     if fails:
         print(f"\n❌ CHẶN — {len(fails)} vấn đề:", file=out)
         for f_ in fails:
@@ -595,6 +638,8 @@ def run_gate(report_path: str, tol_pp: float = DEFAULT_TOL_PP, out=sys.stdout) -
                   "<rổ mã> --from … --to …`,"
                   "\n   cộng cổ tức RÒNG vào TỬ SỐ (giữ giá vốn THÔ ở mẫu số) — coding_guidelines §21.",
                   file=out)
+        return 1
+    if vendor_fails:
         return 1
     print("\n✅ PASS — mọi tỉ suất vị thế đang giữ đã khớp kỳ vọng dựng từ sổ broker + cổ tức đã xác minh.",
           file=out)
@@ -968,6 +1013,56 @@ def _selfcheck() -> int:
     rc2 = run_gate(p_twice, out=open(os.devnull, "w"))
     check("content-gate: chạy 2 lần liên tiếp ⇒ kết quả giống nhau (rc, rc)", (rc1, rc2), (0, 0))
     os.unlink(p_twice)
+
+    # ---- LỆCH NGUỒN VENDOR (chính sách user chốt 2026-09-24) — offline, không chạm BQ/broker.
+    # Ca gốc: broker giải 1.000đ/cp, vendor `corporate_action` khai 1.500đ/cp (lệch 50%).
+    # `dar` đã hạ sự kiện về UNVERIFIED ⇒ cổ tức biến mất khỏi kỳ vọng; nếu cổng KHÔNG nói ra thì
+    # đó đúng là "báo cáo bị chặn/lệch trong IM LẶNG" mà chính sách cấm.
+    def _run_vendor_case(report_body: str, mism):
+        g = globals()
+        keep = {k: g[k] for k in ("broker_positions", "entitled_gross", "excluded_tickers",
+                                  "parse_prose_pcts")}
+        g["broker_positions"] = lambda acct, asof, **kw: {"ZZZ": (100.0, 27_800.0, 24_464.0)}
+        g["entitled_gross"] = lambda tks, acct, asof: ({}, list(mism))
+        g["excluded_tickers"] = lambda lb: set()
+        with tempfile.NamedTemporaryFile("w", suffix="_SpaceX_report_2026-09-24.md",
+                                          delete=False, encoding="utf-8") as fh:
+            fh.write(report_body)
+            path = fh.name
+        buf = io.StringIO()
+        try:
+            rc = run_gate(path, out=buf)
+        finally:
+            g.update(keep)
+            os.unlink(path)
+        return rc, buf.getvalue()
+
+    _MISM = [("ZZZ", "2026-09-24", 1_000.0, 1_500.0)]
+    # Vị thế ZZZ: 100cp, giá vốn broker 27.800, giá 24.464 ⇒ -12,00% (đúng con số arch-review dựng)
+    rc_pub, txt_pub = _run_vendor_case(
+        "## Vị thế\n\n| Mã | KL | % lãi/lỗ |\n|---|---|---|\n| ZZZ | 100 | -12,00% |\n", _MISM)
+    check("vendor mismatch + mã ĐANG công bố ⇒ CHẶN (rc=1)", rc_pub, 1)
+    check("cảnh báo nêu cả hai số nguồn", ("1,000" in txt_pub and "1,500" in txt_pub), True)
+    check("cảnh báo lệch 50,0%", "50.0%" in txt_pub, True)
+    check("cảnh báo chỉ đích danh Winston (data-ops), không phải câu chung chung (§29)",
+          "Winston" in txt_pub, True)
+    assert rc_pub == 1 and "Winston" in txt_pub, (
+        "MUTATION-GUARD gate_vendor_mismatch_block: mã có sự kiện lệch nguồn vẫn được CÔNG BỐ tỉ "
+        f"suất mà cổng cho qua (rc={rc_pub}) hoặc không nêu Winston.")
+
+    # Không công bố tỉ suất mã đó ⇒ KHÔNG chặn (không công bố thì không sai được), NHƯNG cảnh báo
+    # vẫn phải in ra — đây chính là "raise warning mà KHÔNG chặn báo cáo im lặng".
+    rc_quiet2, txt_quiet2 = _run_vendor_case("## Không công bố tỉ suất mã nào\n", _MISM)
+    check("vendor mismatch + mã KHÔNG công bố ⇒ không chặn (rc=0)", rc_quiet2, 0)
+    check("… nhưng cảnh báo VẪN in ra (không im lặng)", "LỆCH NGUỒN VENDOR" in txt_quiet2, True)
+    assert "LỆCH NGUỒN VENDOR" in txt_quiet2, (
+        "MUTATION-GUARD gate_vendor_warning_always: cổng PASS mà không hề nhắc tới lệch nguồn ⇒ "
+        "user không bao giờ biết để gọi Winston.")
+
+    # Chống hồi quy: không có lệch nguồn ⇒ không có dòng cảnh báo nào, hành vi cũ nguyên vẹn.
+    rc_ok2, txt_ok2 = _run_vendor_case("## Không công bố tỉ suất mã nào\n", [])
+    check("không lệch nguồn ⇒ rc=0 và KHÔNG có cảnh báo vendor", (rc_ok2, "LỆCH NGUỒN VENDOR" in txt_ok2),
+          (0, False))
 
     print(f"SELFCHECK: {'PASS' if ok else 'FAIL'} ({pass_count}/{len(ran)} ca)")
     return 0 if ok else 1
