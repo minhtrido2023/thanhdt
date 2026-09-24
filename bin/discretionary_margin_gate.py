@@ -532,7 +532,14 @@ def cmd_check_exits(args):
                 bus_payload["frame_unverified_reason"] = factor_lookup_failed[id(a)]
             _bus("error", f"discretionary-margin-exit-breach-{ticker}", bus_payload)
             _notify(msg)
-    elif errors:
+
+    # R9-2 arch-review vòng 10: PHẢI là `if` ĐỘC LẬP, không phải `elif` của nhánh breaches ở
+    # trên — khi CÙNG lượt có ≥1 arm breach VÀ ≥1 arm khác rơi vào errors (giá không lấy được /
+    # registry lỗi / isfinite fail), `elif errors:` cũ KHÔNG BAO GIỜ chạy vì đã vào nhánh
+    # `if breaches:` trước đó ⇒ cảnh báo/bus/notify cho arm KHÔNG kiểm được biến mất hoàn toàn
+    # khỏi mọi kênh (chỉ còn dòng "⚠" rơi vào log cron, mù với ERROR_RE). Sleeve có trần 10%
+    # NAV / 5% per-name nên 2-3 arm cùng lúc là hình dạng bình thường, không phải ca hiếm.
+    if errors:
         summary = (f"⚠ {len(live)} case active, {len(errors)} case KHÔNG kiểm được breach lượt "
                    f"này (xem cảnh báo ⚠ ở trên) — KHÔNG phải xác nhận an toàn.")
         print(summary)
@@ -541,11 +548,19 @@ def cmd_check_exits(args):
         # "⚠" (đo thật). Ca thật tái hiện được: registry/multiplier hỏng khiến TOÀN BỘ case active
         # rơi vào errors (0 breach nào tính được) mà không ai được báo. Bắn bus+notify ở đây —
         # tần suất thấp (chỉ khi có lỗi giá/registry/dữ liệu VÀ còn case đang sống).
-        _bus("error", "discretionary-margin-check-exits-errors",
-             {"live_count": len(live), "error_count": len(errors), "errors": errors})
-        _notify(f"⚠️ **discretionary_margin_gate check-exits**: {summary}\n" +
-                "\n".join(f"• {e}" for e in errors))
-    else:
+        ok_b = _bus("error", "discretionary-margin-check-exits-errors",
+                    {"live_count": len(live), "error_count": len(errors), "errors": errors})
+        ok_n = _notify(f"⚠️ **discretionary_margin_gate check-exits**: {summary}\n" +
+                       "\n".join(f"• {e}" for e in errors))
+        if not (ok_b and ok_n):
+            # R9-3 arch-review vòng 10: nếu _bus/_notify thất bại, không có dấu vết nào khớp
+            # ERROR_RE của cron_health_check.py — dùng đúng marker "NOTIFY_FAILED" đã có tiền lệ
+            # trong chính codebase (corp_action_feed_canary.py:416).
+            print("❌ NOTIFY_FAILED discretionary-margin-check-exits-errors — bản ghi errors đã "
+                  "in ở trên nhưng dấu vết bus/Discord không đầy đủ, báo lại kênh "
+                  "discretionary_stocks bằng tay.")
+
+    if not breaches and not errors:
         print(f"OK — {len(live)} case active, không case nào chạm {EXIT_DD_PCT:.0%}.")
     return 1 if errors else 0
 

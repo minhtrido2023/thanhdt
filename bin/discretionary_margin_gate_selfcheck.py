@@ -636,8 +636,11 @@ def main():
             check("R3-21: cmd_check_exits KHÔNG được crash (thứ tự arm lỗi-trước-lành)",
                   False, f"{type(exc).__name__}: {exc}")
             rc = None
+        # Lọc riêng topic "exit-breach-<ticker>" — sau R9-2 (vòng 10), 1 case có errors≠∅ CÙNG
+        # lúc còn bắn thêm 1 bus "check-exits-errors" (topic khác, không phải per-ticker breach),
+        # không được lẫn vào dict breach-per-ticker này.
         bus_errors = {c[2].rsplit("-", 1)[-1]: c[3] for c in _NoBus.calls
-                      if c[0] == "bus" and c[1] == "error"}
+                      if c[0] == "bus" and c[1] == "error" and "exit-breach-" in c[2]}
         check("R3-21: CẢ HAI arm (VPB lỗi + TV1 lành) đều được báo breach qua bus",
               set(bus_errors) == {"VPB", "TV1"}, str(bus_errors))
         vpb_payload = bus_errors.get("VPB", {})
@@ -647,8 +650,11 @@ def main():
               vpb_payload.get("frame_unverified") is True, str(vpb_payload))
         check("R3-21: arm LÀNH (TV1, đứng SAU) frame_unverified=False (không bị lây lỗi của VPB)",
               tv1_payload.get("frame_unverified") is False, str(tv1_payload))
+        # Lọc riêng tin BREACH (đánh dấu "KỶ LUẬT THOÁT") — sau R9-2 (vòng 10) còn có thêm 1 tin
+        # notify SUMMARY errors (đánh dấu "check-exits") cũng nhắc "VPB" trong danh sách lỗi
+        # nhưng không dùng câu chữ "không xác định được"; không lẫn 2 loại tin này.
         notify_msgs = [c[1] for c in _NoBus.calls if c[0] == "notify"]
-        vpb_msgs = [m for m in notify_msgs if "VPB" in m]
+        vpb_msgs = [m for m in notify_msgs if "VPB" in m and "KỶ LUẬT THOÁT" in m]
         check("R3-21: tin notify của VPB CÓ 'không xác định được', KHÔNG có '×1.000000' giả",
               bool(vpb_msgs) and all("không xác định được" in m.lower() for m in vpb_msgs)
               and all("×1.000000" not in m and "x1.000000" not in m for m in vpb_msgs),
@@ -715,7 +721,11 @@ def main():
 
         daily_nav_snapshot.confirmed_qty_multiplier_after = _raise_by_arm_date
         rc = gate.cmd_check_exits(_argparse.Namespace())
-        breach_payloads = [c[3] for c in _NoBus.calls if c[0] == "bus" and c[1] == "error"]
+        # Lọc riêng topic "exit-breach-<ticker>" (xem chú thích R3-21 ở trên) — cả 2 arm ở đây
+        # breach, nhưng 1 trong 2 cũng rơi vào errors -> có thêm 1 bus "check-exits-errors" cần
+        # loại khỏi danh sách per-arm breach.
+        breach_payloads = [c[3] for c in _NoBus.calls
+                            if c[0] == "bus" and c[1] == "error" and "exit-breach-" in c[2]]
         check("21c: cả 2 arm VPB (cùng ticker, khác armed_at) đều được báo breach",
               len(breach_payloads) == 2, str(breach_payloads))
         by_frame = sorted(p.get("frame_unverified") for p in breach_payloads)
@@ -949,6 +959,127 @@ def main():
               any(c[0] == "notify" for c in _NoBus.calls), str(_NoBus.calls))
         check("24: rc=1 (có errors)", rc == 1, f"rc={rc}")
     finally:
+        daily_nav_snapshot.confirmed_qty_multiplier_after = ORIG_MULT_AFTER
+        _patch_io(monkey_price=(0.0, "reset", None))
+
+    # ---- 25. [R9-1 arch-review vòng 10] 3 guard mới vòng 9 hoàn toàn chưa có test riêng — ghim
+    #          từng guard bằng test CHỈ CHẾT khi guard đó bị revert, không dựa vào test 12b/23
+    #          (test khác mục đích: 12b test cổng cmd_arm với input CHUẨN, 23 chỉ test nan).
+    daily_nav_snapshot.confirmed_qty_multiplier_after = lambda ticker, asof_date: 1.0
+    try:
+        _patch_io(monkey_price=(16000.0, "dnse_g1_today", None))
+
+        # 25a: arm_price ÂM trong arms.json (file bị sửa tay, bỏ qua cmd_arm) — guard
+        # `a["arm_price"] <= 0` phải bắt, KHÔNG được sinh drawdown/breach GIẢ. Revert guard về
+        # chỉ isfinite (bỏ `<= 0`) sẽ tính drawdown = 16000/(-20000)-1 = -1.8 <= -20% -> breach
+        # GIẢ + ghi exit_alerts giả — đây chính là hiệu ứng đo thật trong review.
+        gate.save_arms([_mk_arm(-20000.0, ticker="NEGPRICE")])
+        _NoBus.calls.clear()
+        rc = gate.cmd_check_exits(_argparse.Namespace())
+        arms = gate.load_arms()
+        check("25a (R9-1a): arm_price âm -> rc=1 (rơi vào errors, không phải breach)",
+              rc == 1, f"rc={rc}")
+        check("25a: arm_price âm -> KHÔNG bắn bus 'error' topic BREACH (không phải breach thật)",
+              not any(c[0] == "bus" and c[1] == "error" and "exit-breach" in c[2]
+                      for c in _NoBus.calls), str(_NoBus.calls))
+        check("25a: arm_price âm -> KHÔNG ghi exit_alerts giả",
+              arms and len(arms[0]["exit_alerts"]) == 0, arms)
+        check("25a: arm_price âm -> last_drawdown KHÔNG được ghi (giữ absent, không phải -1.8 giả)",
+              arms and arms[0].get("last_drawdown") is None,
+              arms[0].get("last_drawdown") if arms else None)
+
+        # 25b: corp_action_multiplier ÂM (dữ liệu hỏng dạng khác, KHÔNG phải 0) — guard
+        # `mult_now <= 0` phải bắt trước khi chia, KHÔNG để lọt qua isfinite (số âm hữu hạn vẫn
+        # isfinite=True). Cần registry lookup LỖI để giữ nguyên giá trị âm đã preset (nếu lookup
+        # thành công sẽ ghi đè trước khi tới guard, giống lý do dùng stub raising ở test 23).
+        daily_nav_snapshot.confirmed_qty_multiplier_after = _mult_after_stub_raising(
+            {"NEGMULT"})
+        gate.save_arms([dict(_mk_arm(20000.0, ticker="NEGMULT"), corp_action_multiplier=-1.3)])
+        _NoBus.calls.clear()
+        rc = gate.cmd_check_exits(_argparse.Namespace())
+        arms = gate.load_arms()
+        check("25b (R9-1b): corp_action_multiplier âm -> rc=1 (rơi vào errors)",
+              rc == 1, f"rc={rc}")
+        check("25b: corp_action_multiplier âm -> KHÔNG breach giả",
+              not any(c[0] == "bus" and c[1] == "error" and "exit-breach" in c[2]
+                      for c in _NoBus.calls), str(_NoBus.calls))
+        check("25b: corp_action_multiplier âm -> KHÔNG ghi exit_alerts giả",
+              arms and len(arms[0]["exit_alerts"]) == 0, arms)
+    finally:
+        daily_nav_snapshot.confirmed_qty_multiplier_after = ORIG_MULT_AFTER
+        _patch_io(monkey_price=(0.0, "reset", None))
+
+    # 25c: cmd_arm's --f nan — guard `not math.isfinite(args.f)` phải bắt trước khi so sánh
+    # `args.f > MAX_F` (nan so sánh luôn False, lọt qua nếu chỉ có 1 vế điều kiện). Revert guard
+    # về `args.f > MAX_F + 1e-9` đơn (bỏ isfinite) sẽ ghi f=NaN vào arms JSON (JSON không hợp lệ
+    # cho reader không phải Python — json.dump mặc định allow_nan=True).
+    _patch_io(monkey_nav=NAV, monkey_adv=ADV_OK)
+    gate.save_arms([])
+    rc = gate.cmd_arm(mkargs(ticker="NANF", arm_price=10000, exposure_vnd=1_000_000,
+                              f=float("nan")))
+    check("25c (R9-1c): --f=nan bị từ chối tại cmd_arm (rc=2)", rc == 2, f"rc={rc}")
+    check("25c: --f=nan KHÔNG ghi arm (không có f=NaN lọt vào arms.json)",
+          len(gate.load_arms()) == 0)
+
+    # ---- 26. [R9-2+R9-3 arch-review vòng 10] mutation-kill cho `elif errors:` -> `if errors:`
+    #          ĐỘC LẬP: 1 arm BREACH thật + 1 arm khác rơi vào errors (giá không lấy được) trong
+    #          CÙNG lượt gọi cmd_check_exits — bản `elif` cũ KHÔNG BAO GIỜ vào nhánh errors vì đã
+    #          vào nhánh `if breaches:` trước đó ⇒ cảnh báo/bus/notify của arm lỗi biến mất khỏi
+    #          MỌI kênh. Assert CẢ HAI kênh (bus lẫn notify) có mặt tên arm không kiểm được.
+    daily_nav_snapshot.confirmed_qty_multiplier_after = lambda ticker, asof_date: 1.0
+    try:
+        gate.save_arms([
+            _mk_arm(20000.0, ticker="BREACHER"),
+            _mk_arm(20000.0, ticker="UNCHECKED"),
+        ])
+        _prices = {
+            "BREACHER": (15000.0, "dnse_g1_fake", None),        # -25%: breach thật
+            "UNCHECKED": (None, None, "DNSE khong tra duoc gia (test)"),  # rơi vào errors
+        }
+        gate.current_price = lambda ticker: _prices[ticker]
+        _NoBus.calls.clear()
+        rc = gate.cmd_check_exits(_argparse.Namespace())
+        bus_topics = [c[2] for c in _NoBus.calls if c[0] == "bus"]
+        notify_msgs = [c[1] for c in _NoBus.calls if c[0] == "notify"]
+        check("26 (R9-2): breach BREACHER được báo qua bus (nhánh breaches vẫn hoạt động)",
+              any("exit-breach-BREACHER" in t for t in bus_topics), str(bus_topics))
+        check("26 (R9-2): errors của UNCHECKED VẪN được báo qua bus dù CÙNG lượt có breach khác "
+              "(bắt mutation elif errors -> if errors độc lập)",
+              any(t == "discretionary-margin-check-exits-errors" for t in bus_topics),
+              str(bus_topics))
+        errors_bus_payload = next(
+            (c[3] for c in _NoBus.calls
+             if c[0] == "bus" and c[2] == "discretionary-margin-check-exits-errors"), None)
+        check("26: payload bus errors CÓ nhắc UNCHECKED", errors_bus_payload is not None
+              and any("UNCHECKED" in e for e in errors_bus_payload.get("errors", [])),
+              str(errors_bus_payload))
+        check("26: notify CŨNG có tin nhắc UNCHECKED (không chỉ bus)",
+              any("UNCHECKED" in m for m in notify_msgs), str(notify_msgs))
+        check("26: rc=1 (có errors)", rc == 1, f"rc={rc}")
+    finally:
+        daily_nav_snapshot.confirmed_qty_multiplier_after = ORIG_MULT_AFTER
+        _patch_io(monkey_price=(0.0, "reset", None))
+
+    # ---- 27. [R9-3 arch-review vòng 10] _bus/_notify thất bại ở nhánh errors -> phải in dòng
+    #          khớp ERROR_RE của cron_health_check.py (marker NOTIFY_FAILED, tiền lệ
+    #          corp_action_feed_canary.py:416), không được bỏ qua rc âm thầm.
+    daily_nav_snapshot.confirmed_qty_multiplier_after = lambda ticker, asof_date: 1.0
+    try:
+        gate.save_arms([_mk_arm(20000.0, ticker="DELIVERYFAIL")])
+        gate.current_price = lambda ticker: (None, None, "DNSE khong tra duoc gia (test)")
+        gate._bus = lambda *a, **k: False
+        gate._notify = lambda *a, **k: False
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            rc = gate.cmd_check_exits(_argparse.Namespace())
+        out = buf.getvalue()
+        check("27 (R9-3): _bus/_notify thất bại ở nhánh errors -> in dòng NOTIFY_FAILED "
+              "(khớp ERROR_RE của cron_health_check.py)",
+              "NOTIFY_FAILED" in out, out)
+        check("27: rc=1 (vẫn có errors dù bus/notify fail)", rc == 1, f"rc={rc}")
+    finally:
+        gate._bus = no_bus.bus
+        gate._notify = no_bus.notify
         daily_nav_snapshot.confirmed_qty_multiplier_after = ORIG_MULT_AFTER
         _patch_io(monkey_price=(0.0, "reset", None))
 

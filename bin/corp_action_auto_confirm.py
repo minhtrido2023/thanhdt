@@ -389,22 +389,42 @@ def run(date_str, dry_run=False):
             import re
             m = re.search(r"corp_actions\[(\d+)\]", str(e))
             bad_idx = int(m.group(1)) if m else None
-            bad_is_preexisting = bad_idx is not None and bad_idx < old_count
             new_tickers = [t for t, _ in new_confirms]
+            # R9-4 arch-review vòng 10: write_corp_actions() → validate() DỪNG ở record hỏng
+            # ĐẦU TIÊN gặp phải (không kiểm hết toàn bộ list) — khi record hỏng là record CŨ
+            # (index < old_count), các candidate MỚI của lượt này CHƯA HỀ được validate() đọc
+            # tới, nên không có bằng chứng để khẳng định chúng "không phải" thủ phạm hay
+            # "chắc chắn lành". Chỉ nói điều ĐÃ ĐỌC được.
+            bad_is_preexisting = bad_idx is not None and bad_idx < old_count
+            bad_ticker = (actions_raw[bad_idx].get("ticker") if bad_idx is not None
+                          and 0 <= bad_idx < len(actions_raw) else None)
+            bad_label = f"{bad_ticker} (index {bad_idx})" if bad_ticker else f"index {bad_idx}"
             if bad_is_preexisting:
-                print(f"\n❌ KHÔNG GHI — record CŨ (index {bad_idx}, đã tồn tại TỪ TRƯỚC lượt "
-                      f"này, KHÔNG PHẢI candidate mới {new_tickers}) không qua validate(): {e}\n"
+                print(f"\n❌ KHÔNG GHI — record cũ {bad_label}, đã tồn tại TỪ TRƯỚC lượt này, "
+                      f"không qua validate(): {e}\n"
                       f"   ⚠ Registry đã hỏng TỪ TRƯỚC — mọi consumer khác "
                       f"(park_holdings/verify_account_snapshot/reconcile_equity) CŨNG đang bị "
                       f"chặn bởi CHÍNH record này.")
-                note = (f"registry đã có record HỎNG TỪ TRƯỚC lượt chạy này (index {bad_idx}) — "
-                        f"KHÔNG PHẢI do candidate mới {new_tickers} gây ra. Mọi consumer khác "
+                note = (f"registry đã có record HỎNG TỪ TRƯỚC lượt chạy này ({bad_label}). "
+                        f"validate() dừng ở record hỏng ĐẦU TIÊN nên các candidate mới của lượt "
+                        f"này ({new_tickers}) CHƯA được kiểm tra — không khẳng định chúng có hỏng "
+                        f"hay không. Mọi consumer khác "
                         f"(park_holdings/verify_account_snapshot/reconcile_equity) cũng đang bị "
-                        f"chặn bởi cùng record này — cần sửa/REVOKE record cũ trước.")
+                        f"chặn bởi cùng record cũ này — cần sửa/REVOKE record cũ trước, rồi chạy "
+                        f"lại để biết candidate mới có qua được validate() hay không.")
                 candidates_payload = []
-            else:
-                print(f"\n❌ KHÔNG GHI — record vừa tạo (index {bad_idx}) không qua validate(): {e}")
+            elif bad_idx is not None:
+                print(f"\n❌ KHÔNG GHI — record vừa tạo {bad_label} không qua validate(): {e}")
                 note = ("auto_confirm tạo record hỏng, KHÔNG ghi vào registry — cần người kiểm tay")
+                candidates_payload = new_tickers
+            else:
+                # Không parse được index từ message lỗi — không đủ bằng chứng để nói "cũ" hay
+                # "mới", tránh suy diễn.
+                print(f"\n❌ KHÔNG GHI — không xác định được record nào hỏng từ message lỗi "
+                      f"validate(): {e}")
+                note = (f"validate() báo lỗi nhưng không parse được index record hỏng từ message "
+                        f"({e!r}) — không xác định được record cũ hay candidate mới ({new_tickers}) "
+                        f"là thủ phạm, cần kiểm tay toàn bộ registry.")
                 candidates_payload = new_tickers
             import subprocess
             subprocess.run(

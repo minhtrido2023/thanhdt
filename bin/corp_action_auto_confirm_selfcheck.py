@@ -243,6 +243,66 @@ def main():
               len(fcalls) == 1, str(_RunCalls.calls))
         check("(d) validate() thật sự chạy được trên record do run() tự sinh (không có lỗi "
               "field nào bị validate() từ chối ở đường lành)", rc == 0 and len(reg) == 1)
+
+        # ── (e) [R9-4 arch-review vòng 10] tên ticker của record hỏng PHẢI xuất hiện trong
+        #        message/note (không chỉ "index N") — case (a) record MỚI, case (b) record CŨ.
+        _reset_dirs(tmpdir)
+        _write_daily_events([_mk_event("ZZZ", ratio=15.0)])
+        _write_dnse_raw("ACC1", "SpaceX", {"ZZZ": (1000, 16000, 160000.0, 10000.0)})
+        cac.run(DATE, dry_run=False)
+        qcalls = _question_calls()
+        if qcalls:
+            note_a = json.loads(qcalls[-1][4]).get("note", "")
+            check("(e) case (a) [record MỚI]: note KHÔNG khẳng định 'KHÔNG PHẢI do candidate "
+                  "mới' (validate() dừng ở record ĐẦU TIÊN nên record mới CHÍNH LÀ thủ phạm ở "
+                  "case này, không phải overclaim ngược)",
+                  "KHÔNG PHẢI do candidate mới" not in note_a, note_a)
+
+        _reset_dirs(tmpdir)
+        _seed_registry([dict(_OLD_BROKEN_VHM)])
+        _write_daily_events([_mk_event("AAA", ratio=0.2)])
+        _write_dnse_raw("ACC1", "SpaceX", {"AAA": (1000, 1200, 12000.0, 10000.0)})
+        cac.run(DATE, dry_run=False)
+        qcalls = _question_calls()
+        if qcalls:
+            note_b = json.loads(qcalls[-1][4]).get("note", "")
+            check("(e) case (b) [record CŨ]: note nhắc TÊN TICKER 'VHM' của record hỏng "
+                  "(không chỉ 'index 0')", "VHM" in note_b, note_b)
+            check("(e) case (b): note KHÔNG còn khẳng định tuyệt đối 'KHÔNG PHẢI do candidate "
+                  "mới ... gây ra' — validate() dừng ở record hỏng ĐẦU TIÊN nên candidate mới "
+                  "(AAA) CHƯA được kiểm tra, không có bằng chứng để khẳng định điều đó",
+                  "KHÔNG PHẢI do candidate mới" not in note_b
+                  and "CHƯA được kiểm tra" in note_b, note_b)
+
+        # ── (f) [R9-4] bad_idx=None (message lỗi không parse được index) -> nhánh THỨ BA,
+        #        không suy diễn "cũ" hay "mới".
+        _reset_dirs(tmpdir)
+        _write_daily_events([_mk_event("CCC", ratio=0.2)])
+        _write_dnse_raw("ACC1", "SpaceX", {"CCC": (1000, 1200, 12000.0, 10000.0)})
+        orig_write = cac.write_corp_actions
+
+        def _raise_no_index(actions_list, dry_run=False):
+            raise cac.CA.CorpActionError("lỗi validate không có định dạng index chuẩn")
+
+        cac.write_corp_actions = _raise_no_index
+        try:
+            rc_f = cac.run(DATE, dry_run=False)
+        finally:
+            cac.write_corp_actions = orig_write
+        check("(f) rc=1 khi message lỗi không parse được index", rc_f == 1, f"rc={rc_f}")
+        qcalls = _question_calls()
+        if qcalls:
+            payload_f = json.loads(qcalls[-1][4])
+            check("(f) bad_record_index=None (không parse được từ message)",
+                  payload_f.get("bad_record_index") is None, payload_f)
+            check("(f) bad_record_is_preexisting=False (nhánh thứ ba, không suy diễn cũ/mới — "
+                  "None < old_count luôn False nên rơi vào is_preexisting=False, nhưng note "
+                  "PHẢI không suy diễn 'mới' hay 'cũ')",
+                  payload_f.get("bad_record_is_preexisting") is False, payload_f)
+            note_f = payload_f.get("note", "")
+            check("(f) note nói rõ 'không xác định được' thay vì suy diễn cũ/mới",
+                  "không xác định được" in note_f.lower() or "không parse được" in note_f.lower(),
+                  note_f)
     finally:
         _sp.run = orig_run
 
