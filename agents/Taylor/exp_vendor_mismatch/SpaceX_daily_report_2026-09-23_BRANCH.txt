@@ -1,0 +1,11 @@
+CỔNG TỈ SUẤT — SpaceX_daily_report_2026-09-23.md | chốt 2026-09-23 | tài khoản SpaceX | dung sai 0.15pp
+
+ma        KL       TK  % cong bo  % ky vong  lech pp co tuc GOP  ket qua
+
+TỔNG kỳ vọng (vị thế đang giữ, đã cộng cổ tức RÒNG — đối chiếu tay với dòng tổng trong báo cáo):
+   SpaceX   giá vốn thô     887,124,324  lãi/lỗ tổng      23,967,076     2.70%
+
+Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi; 0 dòng KHÔNG khớp sổ vị thế broker (bảng lãi/lỗ ĐÃ THỰC HIỆN / phân bổ — NGOÀI phạm vi cổng này, xem docstring).
+ℹ️  5 vị thế CÓ cổ tức nhưng báo cáo không công bố tỉ suất riêng (không chặn — không công bố thì không sai được): CTG (SpaceX, cổ tức 450đ/cp), MBB (SpaceX, cổ tức 1,000đ/cp), NCT (SpaceX, cổ tức 8,000đ/cp), SAB (SpaceX, cổ tức 3,000đ/cp), VCB (SpaceX, cổ tức 450đ/cp)
+
+✅ PASS — mọi tỉ suất vị thế đang giữ đã khớp kỳ vọng dựng từ sổ broker + cổ tức đã xác minh.

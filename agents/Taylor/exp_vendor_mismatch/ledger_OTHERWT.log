@@ -1,0 +1,56 @@
+cây ĐANG TEST (không qua env): /home/trido/thanhdt/WorkingClaude/mike/agents/wt-treasury-table
+RED control = bản cũ 7f9577f4 (ROOT = parent.parent), lấy từ git
+
+✅ gate MỚI từ worktree: chạy xong sạch
+✅ … ghi vào sổ CANONICAL
+✅ … KHÔNG tạo sổ lạc trong worktree
+✅ … KHÔNG tạo cả thư mục state/ lạc
+✅ … return gate + email chạy bản CANONICAL (không phải bản tiền-vá của worktree)
+✅ … Discord cũng đi qua bản canonical
+✅ RED · gate CŨ từ worktree: vẫn báo COMPLETE (lỗi IM LẶNG, không tự lộ)
+✅ RED · gate CŨ: sổ CANONICAL trống ⇒ cadence check mù ⇒ gửi trùng
+✅ RED · gate CŨ: sổ LẠC mọc trong worktree
+✅ RED · gate CŨ: chạy luôn bản tiền-vá trong worktree (đúng mục #1 incident)
+✅ hai tiến trình (canonical + worktree) đều xong sạch
+✅ … không chồng lấn: ENTER/EXIT xen kẽ đúng 2 lượt
+✅ … và cả hai lượt giao hàng nằm chung MỘT sổ canonical
+✅ RED · bản CŨ: hai cây KHÔNG loại trừ nhau (ENTER chồng ENTER) ⇒ phép đo có rằng
+✅ find_mike_canonical_root từ worktree giả ⇒ cây canonical
+✅ env WC_ROOT hợp lệ-nhưng-khác-cây: vẫn được tôn trọng (không đổi hành vi)
+✅ … và có cảnh báo stderr
+✅ … env trỏ ĐÚNG cây thì KHÔNG cảnh báo (không gây nhiễu cho đường chạy thật)
+✅ env MIKE_ROOT trỏ cây khác KHÔNG lái được sổ canonical
+✅ env WC_ROOT trỏ cây khác KHÔNG lái được sổ canonical
+✅ CLI wc_paths --mike-canonical chạy TỪ worktree ⇒ in ra cây canonical
+❌ env WC_ROOT trỏ cây anh em HỢP LỆ: KHÔNG được đổi sổ canonical (sổ là singleton của fleet, không phải 'cây của tôi')
+     got='/home/trido/thanhdt/WorkingClaude/mike'
+     want='/home/trido/thanhdt/WorkingClaude/mike/agents/wt-treasury-table'
+✅ check_report_cadence.sh · đoạn cắt KHÔNG chứa lệnh có side-effect
+✅ check_report_cadence.sh · đoạn cắt CÓ chứa khối tính gốc cây (cắt đúng chỗ)
+❌ check_report_cadence.sh chạy từ worktree ⇒ ROOT = cây canonical
+     got=['/home/trido/thanhdt/WorkingClaude/mike']
+     want=['/home/trido/thanhdt/WorkingClaude/mike/agents/wt-treasury-table']
+✅ check_report_cadence.sh · đoạn cắt KHÔNG chứa lệnh có side-effect
+✅ check_report_cadence.sh · đoạn cắt CÓ chứa khối tính gốc cây (cắt đúng chỗ)
+❌ check_report_cadence.sh dưới env WC_ROOT/MIKE_ROOT trỏ cây anh em ⇒ VẪN là cây canonical
+     got=['/home/trido/thanhdt/WorkingClaude/mike']
+     want=['/home/trido/thanhdt/WorkingClaude/mike/agents/wt-treasury-table']
+✅ check_report_cadence.sh · đoạn cắt KHÔNG chứa lệnh có side-effect
+✅ check_report_cadence.sh · đoạn cắt CÓ chứa khối tính gốc cây (cắt đúng chỗ)
+✅ RED · check_report_cadence.sh KHÔNG có wc_paths.py (worktree tiền-vá) ⇒ ROOT vẫn lệch về cây phụ
+✅ paper_programs_daily_report.sh · đoạn cắt KHÔNG chứa lệnh có side-effect
+✅ paper_programs_daily_report.sh · đoạn cắt CÓ chứa khối tính gốc cây (cắt đúng chỗ)
+❌ paper_programs_daily_report.sh chạy từ worktree ⇒ ROOT = cây canonical
+     got=['/home/trido/thanhdt/WorkingClaude/mike']
+     want=['/home/trido/thanhdt/WorkingClaude/mike/agents/wt-treasury-table']
+✅ paper_programs_daily_report.sh · đoạn cắt KHÔNG chứa lệnh có side-effect
+✅ paper_programs_daily_report.sh · đoạn cắt CÓ chứa khối tính gốc cây (cắt đúng chỗ)
+❌ paper_programs_daily_report.sh dưới env WC_ROOT/MIKE_ROOT trỏ cây anh em ⇒ VẪN là cây canonical
+     got=['/home/trido/thanhdt/WorkingClaude/mike']
+     want=['/home/trido/thanhdt/WorkingClaude/mike/agents/wt-treasury-table']
+✅ paper_programs_daily_report.sh · đoạn cắt KHÔNG chứa lệnh có side-effect
+✅ paper_programs_daily_report.sh · đoạn cắt CÓ chứa khối tính gốc cây (cắt đúng chỗ)
+✅ RED · paper_programs_daily_report.sh KHÔNG có wc_paths.py (worktree tiền-vá) ⇒ ROOT vẫn lệch về cây phụ
+
+35/40 check
+❌ SELFCHECK FAIL — 5 test: env WC_ROOT trỏ cây anh em HỢP LỆ: KHÔNG được đổi sổ canonical (sổ là singleton của fleet, không phải 'cây của tôi'); check_report_cadence.sh chạy từ worktree ⇒ ROOT = cây canonical; check_report_cadence.sh dưới env WC_ROOT/MIKE_ROOT trỏ cây anh em ⇒ VẪN là cây canonical; paper_programs_daily_report.sh chạy từ worktree ⇒ ROOT = cây canonical; paper_programs_daily_report.sh dưới env WC_ROOT/MIKE_ROOT trỏ cây anh em ⇒ VẪN là cây canonical

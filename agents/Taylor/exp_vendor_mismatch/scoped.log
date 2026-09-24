@@ -1,0 +1,4 @@
+=== report_return_gate_selfcheck rc=0 :: ✅ SELFCHECK PASS
+=== reconcile_equity_realized_selfcheck rc=0 :: 32 PASS, 0 FAIL
+=== report_delivery_ledger_selfcheck rc=1 :: ❌ SELFCHECK FAIL — 5 test: env WC_ROOT trỏ cây anh em HỢP LỆ: KHÔNG được đổi sổ canonical (sổ là singleton của fleet, không phải 'cây của tôi'); check_report_cadence.sh chạy từ worktree ⇒ ROOT = cây canonical; check_report_cadence.sh dưới env WC_ROOT/MIKE_ROOT trỏ cây anh em ⇒ VẪN là cây canonical; paper_programs_daily_report.sh chạy từ worktree ⇒ ROOT = cây canonical; paper_programs_daily_report.sh dưới env WC_ROOT/MIKE_ROOT trỏ cây anh em ⇒ VẪN là cây canonical
+=== worktree_stale_check_selfcheck rc=0 :: ✅ SELFCHECK PASS
