@@ -80,6 +80,16 @@ Chi tiết đầy đủ (thuật toán, self-check, danh sách mã theo 3 nhóm,
 `mike/agents/Taylor/research/treasury_oshares_overlay_20260907/report.md`.
 
 ## Liên quan
+- **Tầng định lượng đặt trên bảng này**:
+  [`treasury_share_events.md`](treasury_share_events.md) — `tav2_mike.treasury_share_events`
+  (PROPOSED 2026-09-18, bảng chưa tồn tại). Gộp 577 sự kiện `buy_done`/`sell_done` theo
+  `(ticker, public_date, action_type)` và tách bạch nguồn của từng con số thành 3 tier. Xử đúng
+  bẫy (1) + (4) của entry này: dòng trùng cùng ngày thành tier `SIBLING_ROW`; `shares_delta` NULL
+  thành `size_status='UNSIZED'` với `outstanding_delta` NULL, KHÔNG nội suy thành 0. Thêm một bẫy
+  entry này CHƯA ghi: cùng một giao dịch thật có thể được công bố ở **hai ngày khác nhau** (NDN
+  2018-05-17 + 05-18 mỗi dòng 1.000.000 CP; CTD 2021-02-01 + 02-03) ⇒ gộp theo
+  `(ticker, public_date, action_type)` là ĐIỀU KIỆN CẦN nhưng CHƯA ĐỦ, còn phải dedup theo khoảng
+  cách ngày + độ lệch giá trị.
 - **Consumer (`mike/bin/treasury_buyback_window_monitor.py`, ĐÃ MERGE master + cài cron 2026-09-18)**:
   `mike/bin/treasury_buyback_window_monitor.py` — WARN-ONLY, buy_done ≥2021-01-01 quá 45 ngày chưa
   thấy AIS "Giảm niêm yết". Bẫy (5) đo khi viết nó: bảng KHÔNG có field phân biệt ESOP (`category`

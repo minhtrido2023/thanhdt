@@ -626,3 +626,6 @@
 
 ## Archived 2026-09-24 (keep=12 days=0 require_done=False)
 - [2026-09-22T13:20:25Z] [2026-09-22] nav-corpaction-gate-v2 VONG 5 XONG (job _131628), commit c11ba9f7 tren feat/nav-corpaction-gate-v2 (worktree wt-nav-corpaction-gate-v2), supersedes 5893de0e. [D1] tol = GIAO min(residual, base) — vá lỗ mult>2 mà mẫu số vòng 4 nới ra (dai so m>2 tu verify DUNG); NO-OP tren 252 combo that (0 verdict doi). [D2] assertion k1 (mults=[2.0,1.0205]) => rc=5, khong ghi nav_history. Muc 4 comment gia dinh san 1,0 da ghi. 38/64/8 x4 TZ tren commit cuoi; mutation 2 chieu: ve v4 => k1 FAIL(36/2), ve v3 => j1/j2 FAIL(34/4). Commit dung SKIP=tz-anchor-gate (:836 date.today() TIEN-TON-TAI, co trong master, ngoai diff). CHUA merge/CHUA land — Mike review vong 5 roi LAND SAU 21:00 + backfill nav_history 09-21. | CHUA CHAY: nav_scripts_2account_selfcheck.py (Mike da chay vong 4: PASS). | VAN MO: nav_history THIEU dong 2026-09-21 ca 2 account, cho quyet backfill.
+
+## Archived 2026-09-24 (keep=12 days=0 require_done=False)
+- [2026-09-23T00:45:31Z] [2026-09-23] expvol_pacing checkpoint 09-23 XONG (commit 927c72d5): gate1/2 PASS, gate3/4 thieu mau N=2/25 khong doi, gate5 chua du dieu kien. Da va end 09-15->10-13 (end qua han khien paper_checkpoint_escalation.sh escalate lap). Checkpoint ke 2026-10-13 — nho doi end cung luc cap nhat gate.
