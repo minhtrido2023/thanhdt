@@ -162,8 +162,12 @@ EQ_TOL_ABS, EQ_TOL_REL = 10.0, 0.005
 # chưa phát hiện rơi cùng delta ⇒ hạ về UNVERIFIED (tầng 1 làm LƯỚI AN TOÀN, không làm nguồn số).
 SANITY_REL = 0.01
 # Ngưỡng coi hai nguồn ĐỘC LẬP (tiền broker thật vs `tav2_bq.corporate_action`) là LỆCH.
-# Giữ nguyên giá trị đã chạy từ 2026-08-13 (1% tương đối, sàn 1đ/cp) — đo trên dữ liệu thật
-# 2026-03-24→09-24 cho 0 ca mismatch, nên KHÔNG nới: nới là nới một cổng chưa từng kêu.
+# Giữ nguyên giá trị đã chạy từ 2026-08-13 (1% tương đối, sàn 1đ/cp). ĐÃ ĐO trước khi chốt, trên
+# 39 mã hai tài khoản từng nắm giữ, cửa sổ 2026-03-24→09-24: 62 sự kiện, trong đó 6 sự kiện đủ
+# điều kiện đối soát (CASH_CONFIRMED + vendor có số tiền) và CẢ 6 khớp ĐÚNG TỪNG ĐỒNG (MBB 09/07
+# 1.000 · CTG+VCB 23/07 450 · NCT 27/07 8.000 · SAB 28/07 3.000 · DGC 14/09 8.000) ⇒ **0 ca
+# mismatch**, 0 cảnh báo nhiễu. Vì cổng này chưa từng kêu một lần nào nên KHÔNG có cơ sở để nới —
+# nới bây giờ là nới mù. Số đo tái lập bằng `agents/Taylor/exp_vendor_mismatch/measure_k1.py`.
 VENDOR_MISMATCH_REL, VENDOR_MISMATCH_ABS = 0.01, 1.0
 
 
