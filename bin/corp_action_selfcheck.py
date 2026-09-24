@@ -170,6 +170,26 @@ raises(lambda: CA.validate({"ticker": "VHM", "event_type": "SPLIT", "qty_multipl
 raises(lambda: CA.validate({"ticker": "VHM", "event_type": "SPLIT", "qty_multiplier": 2.0,
                             "ex_date": "2026-08-06"}),
        "thiếu broker_effective_ts bị từ chối")
+# [B4 arch-review vòng 7] nan không bị guard `mult <= 1.0` bắt (so sánh với nan luôn False) —
+# đo thật TRƯỚC bản vá này: validate() trả về record với qty_multiplier=nan, KHÔNG ném lỗi.
+raises(lambda: CA.validate({"ticker": "VHM", "event_type": "SPLIT", "qty_multiplier": float("nan"),
+                            "ex_date": "2026-08-06", "broker_effective_ts": "2026-08-05"}),
+       "qty_multiplier=nan bị từ chối (so sánh với nan luôn False, guard cũ để lọt)")
+raises(lambda: CA.validate({"ticker": "VHM", "event_type": "SPLIT", "qty_multiplier": float("inf"),
+                            "ex_date": "2026-08-06", "broker_effective_ts": "2026-08-05"}),
+       "qty_multiplier=inf bị từ chối")
+raises(lambda: CA.validate({"ticker": "VHM", "event_type": "SPLIT", "qty_multiplier": 13.0,
+                            "ex_date": "2026-08-06", "broker_effective_ts": "2026-08-05"}),
+       "qty_multiplier=13 (lỗi gõ tay điển hình: thiếu dấu chấm của 1.3) bị từ chối — vượt "
+       "QTY_MULT_MAX")
+v_bound = CA.validate({"ticker": "VHM", "event_type": "SPLIT", "qty_multiplier": CA.QTY_MULT_MAX,
+                       "ex_date": "2026-08-06", "broker_effective_ts": "2026-08-05"})
+check("qty_multiplier = QTY_MULT_MAX (biên trên, ca VHM thật) vẫn được chấp nhận — không chặn "
+      "oan sự kiện thật lớn nhất đã biết", v_bound["qty_multiplier"] == CA.QTY_MULT_MAX, v_bound)
+raises(lambda: CA.validate({"ticker": "VHM", "event_type": "SPLIT",
+                            "qty_multiplier": CA.QTY_MULT_MAX + 0.0001,
+                            "ex_date": "2026-08-06", "broker_effective_ts": "2026-08-05"}),
+       "qty_multiplier vượt QTY_MULT_MAX dù chỉ một chút vẫn bị từ chối")
 v = CA.validate({"ticker": " vhm ", "event_type": "stock_dividend", "qty_multiplier": "2",
                  "ex_date": "2026-08-06", "broker_effective_ts": "2026-08-05T12:00:00"})
 check("chuẩn hoá ticker/type/số", v["ticker"] == "VHM" and v["event_type"] == "STOCK_DIVIDEND"

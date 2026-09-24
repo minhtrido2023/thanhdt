@@ -681,6 +681,39 @@ def main():
         _restore_corp_action_mocks()
         _patch_io(monkey_price=(0.0, "reset", None))
 
+    # ---- 21c. [B1 vòng 7] factor_lookup_failed key theo id(a), KHÔNG theo ticker string — 2
+    #           arm CÙNG TICKER (VPB), một arm registry LỖI, một arm registry LÀNH. Bản sai
+    #           (`factor_lookup_failed[a["ticker"]] = ...`) sẽ COLLAPSE 2 arm thành 1 key "VPB":
+    #           arm lành xử lý SAU sẽ bị lây `frame_unverified=True`/lý do lỗi của arm lỗi
+    #           (hoặc ngược lại, tuỳ thứ tự) — mất khả năng phân biệt "quy đổi tin được" khỏi
+    #           "không xác định được" ngay trên CHÍNH 1 mã. Phân biệt 2 arm cùng ticker bằng
+    #           `armed_at` KHÁC nhau (arm_date khác nhau) — stub raise theo asof_date, không
+    #           theo ticker, vì ticker trùng nhau ở cả 2 arm nên không thể dùng để phân biệt.
+    try:
+        arm_bad = _mk_arm(20000.0, ticker="VPB", armed_at="2026-09-01T09:00:00+07:00")
+        arm_good = _mk_arm(20000.0, ticker="VPB", armed_at="2026-09-05T09:00:00+07:00")
+        gate.save_arms([arm_bad, arm_good])
+        _NoBus.calls.clear()
+        _patch_io(monkey_price=(15000.0, "dnse_g1_fake", None))   # -25%: breach cho cả hai
+
+        def _raise_by_arm_date(ticker, asof_date):
+            if asof_date == "2026-09-01":
+                raise RuntimeError("gia lap corp_actions.json hong cho arm_date 2026-09-01")
+            return 1.0
+
+        daily_nav_snapshot.confirmed_qty_multiplier_after = _raise_by_arm_date
+        rc = gate.cmd_check_exits(_argparse.Namespace())
+        breach_payloads = [c[3] for c in _NoBus.calls if c[0] == "bus" and c[1] == "error"]
+        check("21c: cả 2 arm VPB (cùng ticker, khác armed_at) đều được báo breach",
+              len(breach_payloads) == 2, str(breach_payloads))
+        by_frame = sorted(p.get("frame_unverified") for p in breach_payloads)
+        check("21c: ĐÚNG 1 arm frame_unverified=True (lỗi) và 1 arm frame_unverified=False "
+              "(lành) — KHÔNG bị lây chéo do key trùng ticker (bắt mutation keying theo ticker)",
+              by_frame == [False, True], str(breach_payloads))
+    finally:
+        _restore_corp_action_mocks()
+        _patch_io(monkey_price=(0.0, "reset", None))
+
     # ══════ Vòng 6 blocker 1 — daily_nav_snapshot.confirmed_qty_multiplier_after() HÀM THẬT,
     # KHÔNG stub: record hỏng trong corp_actions.json phải NÉM CorpActionError, không nuốt im
     # lặng. Test THẲNG hàm này (không qua discretionary_margin_gate) để cô lập blocker 1 khỏi
@@ -776,6 +809,47 @@ def main():
         mult2 = daily_nav_snapshot.confirmed_qty_multiplier_after("VPB", "2026-09-20")
         check("22e: registry LÀNH, asof SAU ex_date -> mult=1.0 (sự kiện đã qua)",
               abs(mult2 - 1.0) < 1e-9, f"mult={mult2}")
+    finally:
+        _restore_corp_actions_file()
+
+    # ---- 22f. [B2 vòng 7] cổng `_status` CONFIRMED — mutation `load_corp_actions(...) ->
+    #           load_all(...)` (bỏ lọc `_status`) hiện SỐNG qua toàn bộ 93 test cũ vì chưa có
+    #           test nào đặt record KHÔNG-CONFIRMED cạnh 1 record CONFIRMED cùng ticker. Registry
+    #           có 1 record PROPOSED (chưa ký) + 1 record REVOKED (đã thu hồi) — CẢ HAI đều
+    #           KHÔNG được tính vào tích số dù ex_date hợp lệ và SAU asof_date.
+    try:
+        proposed = dict(_valid_vpb)
+        proposed.update(qty_multiplier=1.50, ex_date="2026-09-16", _status="PROPOSED — chưa ký")
+        revoked = dict(_valid_vpb)
+        revoked.update(qty_multiplier=1.20, ex_date="2026-09-17",
+                       _status="REVOKED — thu hồi ngày 2026-09-18")
+        daily_nav_snapshot.CORP_ACTIONS_FILE = _write_registry([proposed, revoked])
+        mult = daily_nav_snapshot.confirmed_qty_multiplier_after("VPB", "2026-09-01")
+        check("22f [B2]: record PROPOSED + REVOKED (ex_date hợp lệ, SAU asof) -> mult=1.0 "
+              "(cổng _status CONFIRMED phải lọc CẢ HAI, không tính vào tích số — bắt mutation "
+              "load_corp_actions -> load_all bỏ lọc _status)",
+              abs(mult - 1.0) < 1e-9, f"mult={mult}")
+    finally:
+        _restore_corp_actions_file()
+
+    # ---- 22g. [B2 vòng 7] tích luỹ THẬT (mult *=), không phải chỉ giữ hệ số sự kiện CUỐI —
+    #           mutation `mult *= a["qty_multiplier"]` -> `mult = a["qty_multiplier"]` hiện SỐNG
+    #           qua toàn bộ test cũ vì 22e chỉ có ĐÚNG 1 sự kiện CONFIRMED mỗi lần gọi. 2 sự
+    #           kiện CONFIRMED cùng ticker, cả 2 ex_date đều SAU asof -> kết quả PHẢI là TÍCH của
+    #           cả 2 hệ số (1,30 × 1,10 = 1,43), không phải chỉ hệ số của record xử lý SAU CÙNG.
+    try:
+        ev1 = dict(_valid_vpb)
+        ev1.update(qty_multiplier=1.30, ex_date="2026-09-15",
+                   broker_effective_ts="2026-09-14T19:00:00+07:00")
+        ev2 = dict(_valid_vpb)
+        ev2.update(qty_multiplier=1.10, ex_date="2026-09-20",
+                   broker_effective_ts="2026-09-19T19:00:00+07:00")
+        daily_nav_snapshot.CORP_ACTIONS_FILE = _write_registry([ev1, ev2])
+        mult = daily_nav_snapshot.confirmed_qty_multiplier_after("VPB", "2026-09-01")
+        check("22g [B2]: 2 sự kiện CONFIRMED cùng ticker, cả 2 ex_date SAU asof -> mult = "
+              "TÍCH của cả 2 hệ số (1,30 × 1,10 = 1,43), KHÔNG chỉ hệ số cuối (bắt mutation "
+              "mult *= -> mult =)",
+              abs(mult - 1.43) < 1e-9, f"mult={mult}")
     finally:
         _restore_corp_actions_file()
 
