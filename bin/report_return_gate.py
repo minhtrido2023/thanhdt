@@ -1064,6 +1064,59 @@ def _selfcheck() -> int:
     check("không lệch nguồn ⇒ rc=0 và KHÔNG có cảnh báo vendor", (rc_ok2, "LỆCH NGUỒN VENDOR" in txt_ok2),
           (0, False))
 
+    # ---- CHÍNH `entitled_gross` (arch-review vòng 2, V1). 6 ca ngay trên MONKEYPATCH chính
+    # `entitled_gross` nên chúng chỉ kiểm nửa DƯỚI (cổng xử lý danh sách mismatch được BƠM TAY);
+    # nửa TRÊN — đoạn đọc `adjs` thật để SINH ra danh sách đó — không có một assertion nào: xoá
+    # hẳn khối `if a.vendor_check == "mismatch"` vẫn cho 137 PASS / 0 FAIL. Ở đây patch TẦNG
+    # DƯỚI (`dar.resolve_dividends` / `dar.broker_qty` / `dar._qty_at`) để thân hàm thật chạy
+    # đủ, TUYỆT ĐỐI không patch `entitled_gross`.
+    _ASOF = "2026-09-24"
+
+    def _adj(tk, ex, ps, kind, vcheck, vcash):
+        a = dar.Adjustment(ticker=tk, ex_date=ex, last_cum_date=ex, last_cum_price=10_000.0,
+                           per_share=ps)
+        a.kind, a.vendor_check, a.vendor_cash = kind, vcheck, vcash
+        return a
+
+    _EG_ADJS = [
+        # (1) lệch nguồn, ĐÃ bị `dar` hạ về UNVERIFIED — phải nổi lên ở danh sách mismatch
+        _adj("AAA", "2026-09-10", 1_000.0, "UNVERIFIED", "mismatch", 1_500.0),
+        # (2) hai nguồn khớp — vẫn phải vào kỳ vọng như cũ
+        _adj("BBB", "2026-09-11", 800.0, "CASH_CONFIRMED", "match", 800.0),
+        # (3) ex-date SAU asof — ngoài kỳ, bỏ
+        _adj("CCC", "2026-09-30", 700.0, "CASH_CONFIRMED", "match", 700.0),
+        # (4) tài khoản không nắm giữ tại ngày chốt quyền — bỏ
+        _adj("DDD", "2026-09-12", 600.0, "CASH_CONFIRMED", "match", 600.0),
+        # (5) PHÒNG THỦ NHIỀU TẦNG: giả định `dar` hồi quy, để nguyên CASH_CONFIRMED cho một sự
+        # kiện lệch nguồn ⇒ `cash_per_share` > 0. Cổng vẫn PHẢI loại nó khỏi kỳ vọng, không
+        # được dựa vào tầng dưới đã hạ cấp hộ.
+        _adj("EEE", "2026-09-13", 500.0, "CASH_CONFIRMED", "mismatch", 900.0),
+    ]
+
+    _saved_dar = {k: getattr(dar, k) for k in ("resolve_dividends", "broker_qty", "_qty_at")}
+    try:
+        dar.resolve_dividends = lambda tks, start, end: list(_EG_ADJS)
+        dar.broker_qty = lambda acct: {"stub": True}
+        dar._qty_at = lambda qmap, a, frame=None: (0.0 if a.ticker == "DDD" else 100.0)
+        eg_out, eg_mism = entitled_gross(["AAA", "BBB", "CCC", "DDD", "EEE"], "0002023347", _ASOF)
+    finally:
+        for k, v in _saved_dar.items():
+            setattr(dar, k, v)
+
+    check("entitled_gross: sự kiện lệch nguồn vào ĐÚNG phần tử thứ 2 (mã, ex, broker, vendor)",
+          sorted(eg_mism), [("AAA", "2026-09-10", 1_000.0, 1_500.0),
+                            ("EEE", "2026-09-13", 500.0, 900.0)])
+    check("entitled_gross: mã lệch nguồn KHÔNG vào kỳ vọng công bố",
+          ("AAA" in eg_out, "EEE" in eg_out), (False, False))
+    check("entitled_gross: sự kiện hai nguồn KHỚP vẫn vào kỳ vọng", eg_out, {"BBB": 800.0})
+    assert [m[0] for m in sorted(eg_mism)] == ["AAA", "EEE"], (
+        "MUTATION-GUARD entitled_gross_detect_mismatch: thân hàm thật KHÔNG sinh ra danh sách "
+        "lệch nguồn ⇒ cổng dưới không bao giờ có gì để chặn/cảnh báo (xoá khối "
+        "`if a.vendor_check == \"mismatch\"` mà mọi test vẫn xanh).")
+    assert "EEE" not in eg_out, (
+        "MUTATION-GUARD entitled_gross_mismatch_excluded: sự kiện lệch nguồn vẫn cộng cổ tức vào "
+        "kỳ vọng (bỏ `continue` sau khi ghi nhận mismatch).")
+
     print(f"SELFCHECK: {'PASS' if ok else 'FAIL'} ({pass_count}/{len(ran)} ca)")
     return 0 if ok else 1
 

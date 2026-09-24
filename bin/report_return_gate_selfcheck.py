@@ -13,8 +13,11 @@ vào `bin/` của nó rồi chạy như production. Có RED control: bản TRƯ�
 lịch sử git, không chép tay — đặt ở CÙNG đường dẫn giả phải FAIL. RED control là phần quan
 trọng nhất: không có nó, 4 test xanh không chứng minh được test có khả năng bắt lỗi.
 
-    python3 mike/bin/report_return_gate_selfcheck.py            # đủ 4 test (~8-10 phút, chạm BQ)
-    python3 mike/bin/report_return_gate_selfcheck.py --root-only  # chỉ 2 test ROOT (vài giây)
+    python3 mike/bin/report_return_gate_selfcheck.py            # đủ bộ (~8-10 phút, chạm BQ)
+    python3 mike/bin/report_return_gate_selfcheck.py --root-only  # bỏ 2 test chạm BQ (vài giây)
+
+Ngoài 7 test ROOT/worktree, nó còn chạy bộ assertion NHÚNG của chính `report_return_gate.py`
+(`--selfcheck`) — xem `run_embedded_selfcheck()`: bộ đó không có runner nào gọi tới.
 """
 from __future__ import annotations
 
@@ -115,6 +118,29 @@ def probe_root(worktree: str, extra_env: dict = None) -> tuple:
     return tuple(json.loads(p.stdout.strip().splitlines()[-1]))
 
 
+def run_embedded_selfcheck() -> tuple:
+    """(rc, output) của `report_return_gate.py --selfcheck` — bộ assertion NHÚNG trong file gốc.
+
+    Bộ đó sống trong CHÍNH `report_return_gate.py` sau cờ `--selfcheck`, mà không runner nào của
+    fleet gọi cờ đó: `run_selfchecks.sh` chạy file NÀY với `--root-only`, còn file này trước
+    2026-09-24 chỉ gọi `--report`. ⇒ toàn bộ assertion nhúng (gồm 6 ca cổng LỆCH NGUỒN VENDOR và
+    2 MUTATION-GUARD của `entitled_gross`) TÀNG HÌNH với cả hai runner — đúng lớp vấn đề mà
+    `dividend_adjusted_return_selfcheck.py` (8989d80e) vừa vá cho file anh em. Offline, không
+    chạm BQ/broker nên chạy ở CẢ `--root-only`.
+
+    Chạy bản NẰM CẠNH file này (`dirname(__file__)`), KHÔNG phải `REAL_BIN` như phần còn lại:
+    các test ROOT cố ý kiểm bản CANONICAL (chúng hỏi "bản canonical có chạy được từ worktree
+    không"), còn bộ nhúng hỏi "logic trong CÂY NÀY có đúng không" — chạy nó trên canonical thì
+    thay đổi đang phát triển trong worktree sẽ không bao giờ được kiểm. Cùng khuôn
+    `dividend_adjusted_return_selfcheck.py`.
+    """
+    here = os.path.dirname(os.path.abspath(__file__))
+    p = subprocess.run([sys.executable, os.path.join(here, SCRIPT), "--selfcheck"],
+                       capture_output=True, text=True, env=child_env(),
+                       cwd=os.path.dirname(here))
+    return p.returncode, (p.stdout + p.stderr)
+
+
 def run_gate(worktree: str, report: str) -> tuple:
     p = subprocess.run([sys.executable, os.path.join(worktree, "bin", SCRIPT), "--report", report],
                        capture_output=True, text=True, env=child_env(), cwd=worktree)
@@ -132,6 +158,12 @@ def main() -> int:
         src_new = f.read()
     print(f"gốc cây (marker wc_env.sh): {WC}")
     print(f"RED control = bản cũ {sha_old[:8]} (dirname×3), lấy từ git\n")
+
+    rc_emb, out_emb = run_embedded_selfcheck()
+    check("bộ assertion NHÚNG `report_return_gate.py --selfcheck` PASS", rc_emb, 0)
+    _count = [l for l in out_emb.strip().splitlines() if l.startswith("SELFCHECK:")]
+    print("     " + (_count[-1] if _count
+                     else "\n     ".join(out_emb.strip().splitlines()[-8:])))
 
     wt_new = make_fake_worktree(src_new)
     wt_old = make_fake_worktree(src_old)
