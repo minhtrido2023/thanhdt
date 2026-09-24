@@ -17,7 +17,9 @@ trọng nhất: không có nó, 4 test xanh không chứng minh được test c�
     python3 mike/bin/report_return_gate_selfcheck.py --root-only  # bỏ 2 test chạm BQ (vài giây)
 
 Ngoài 7 test ROOT/worktree, nó còn chạy bộ assertion NHÚNG của chính `report_return_gate.py`
-(`--selfcheck`) — xem `run_embedded_selfcheck()`: bộ đó không có runner nào gọi tới.
+(`--selfcheck`) — xem `run_embedded_selfcheck()`, được gọi ở luồng chính (:163). Đây LÀ runner của
+bộ đó: `report_return_gate.py --selfcheck` không có điểm vào nào khác, nên bỏ file này khỏi
+`run_selfchecks.sh` là bộ assertion nhúng ngừng chạy mà không ai báo.
 """
 from __future__ import annotations
 
