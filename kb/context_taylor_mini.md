@@ -1,15 +1,15 @@
-# Mike fleet — context_taylor_mini (v3234)
+# Mike fleet — context_taylor_mini (v3235)
 > Auto-generated RECENT block; static canonical facts maintained manually (weekly audit-lens catches drift).
 > Dùng `bin/kb_recall.sh "keywords"` để lấy section đầy đủ khi cần chi tiết về ops/CAPIT/project.
 > Source đầy đủ: `kb/context_pack.md`.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-09-24T10:35:44] Taylor/finding — corp-action-real-fixes-4sites-viec2-round8-DONE: {"job": "Taylor_20260924_102806", "branch": "fix/corp-action-real-fixes-4sites", "worktree": "mike/agents/Taylor/wt-corp-action-real-fixes", "commit": "45918a28 …
 - [2026-09-24T11:06:13] Taylor/finding — corp-action-real-fixes-4sites-viec2-round9-DONE: {"job": "Taylor_20260924_105217", "branch": "fix/corp-action-real-fixes-4sites", "worktree": "mike/agents/Taylor/wt-corp-action-real-fixes", "commit": "866c2cd5 …
 - [2026-09-24T11:30:12] Taylor/finding — corp-action-real-fixes-4sites-viec2-round10-DONE: {"job": "Taylor_20260924_112205", "branch": "fix/corp-action-real-fixes-4sites", "worktree": "mike/agents/Taylor/wt-corp-action-real-fixes", "commit": "de0baba3 …
 - [2026-09-24T11:45:32] Taylor/finding — corp-action-real-fixes-4sites-viec2-round11-DONE: {"job": "Taylor_20260924_114258", "branch": "fix/corp-action-real-fixes-4sites", "worktree": "mike/agents/Taylor/wt-corp-action-real-fixes", "commit": "c5985e97 …
 - [2026-09-24T11:59:51] Taylor/finding — corp-action-real-fixes-4sites-viec2-round12-DONE: {"job": "Taylor_20260924_115429", "branch": "fix/corp-action-real-fixes-4sites", "worktree": "mike/agents/Taylor/wt-corp-action-real-fixes", "commit": "bc22bed2 …
+- [2026-09-24T12:00:38] Taylor/finding — nav-exdate-forecast 2026-09-24: {"asof": "2026-09-24", "n_events": 1, "tickers": ["VPB"], "kinds": ["SHARE_EVENT"]}
 <!--RECENT-END-->
 
 ## Kill-switches
