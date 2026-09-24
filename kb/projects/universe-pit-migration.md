@@ -26,9 +26,14 @@ vòng đo thất bại tìm ngưỡng bảo toàn) — cấm cutover pool khi `c
 XONG 2026-07-22** (`results_registry.md:4040`); số bị **re-pin LẠI 07-29 do đổi vintage restate
 DT5G, không đổi mô hình** (số liệu ở `kb/canonical.md`). Còn lại thật: G5 shadow
 ≥10 phiên, G7 N-trial review, G8 data/cron-registry gate, G9 quant-skeptic full review — cộng 3
-việc mới phát sinh từ audit 07-29 (Winston_20260729_132257): (1) migrate breadth-decoupling guard
-`macro_state_live.py:158` sang `universe_pit` (đang chạy, cần self-check+quant-skeptic trước khi
-wire — input DT5G production); (2) pin/snapshot BQ hàng tháng cho bảng dễ restate (`ticker`/
+việc mới phát sinh từ audit 07-29 (Winston_20260729_132257): (1) ~~migrate breadth-decoupling guard
+`macro_state_live.py:158` sang `universe_pit`~~ **ĐÃ XONG 2026-07-29**, commit `8f958957`
+(`BREADTH_SOURCE = "pit"`, `UNIVERSE_PIT_TABLE = tav2_mike.universe_pit`); quant-skeptic
+CONFIRMED confidence cao (`mike/logs/verify_20260729_153007.log`), post-merge self-check trên
+module production 6/6 PASS, A/B 3135 phiên: breadth khác 3132 ngày (mean |Δ| 2,4pp), guard flip
+229 phiên, macro cap khác 13 phiên, **state DT5G cuối cùng khác 0 phiên**. Ngưỡng giữ nguyên;
+rollback = đổi đúng 1 dòng. (Dòng "đang chạy, cần self-check+quant-skeptic trước khi wire" là
+trạng thái 07-29 lúc audit, đã lỗi thời ~2 tháng — sửa 2026-09-24.); (2) pin/snapshot BQ hàng tháng cho bảng dễ restate (`ticker`/
 `ticker_financial`/`ticker_prune`/`universe_pit`/VNINDEX_PE, dispatch Winston đang chạy); (3)
 WASHOUT_GATE đã tự verify KHÔNG cần rà lại (0,31 hiệu chuẩn đúng trên `universe_pit`, không phải
 bug). Tài liệu đầy đủ:
@@ -67,8 +72,16 @@ Backlog treo 8,4 tuần (escalate qua `kb_nightly.sh` item 12) — user quyết 
   không đối chiếu tracker migration. Mức độ THẤP (tra giá thuần, fail-safe về hướng chặt hơn,
   không phải look-ahead/rủi ro vốn) nhưng là vi phạm thật — đã cập nhật vào
   `kb/data_registry/price-volume/ticker_prune.md` (mục "VI PHẠM ĐÃ XẢY RA THẬT") + escalate bus
-  `question` riêng (`Taylor/executor-chase-cap-still-reads-ticker-prune-20260919`) — **CHƯA SỬA**,
-  cần review riêng vì đụng code thực thi live, không tự ý vá trong job này. Hai điểm còn mở khác
+  `question` riêng (`Taylor/executor-chase-cap-still-reads-ticker-prune-20260919`) — **ĐÃ SỬA VÀ ĐÓNG
+  2026-09-20** (user chốt Option A trên bus 03:46Z; commit `fd3f5597`:
+  `_load_gap_ref_data()` đọc cache `tav2_bq.ticker` superset thay `ticker_prune`, kèm guard
+  recency ≤10 ngày + contiguity ≤40 ngày do arch-reviewer yêu cầu; answer đóng bus 04:03Z).
+  A/B đo lại 2026-09-24 trên cache thật (job `Taylor_20260923_235320`): 638 mã có gap-ref ở
+  nguồn LIVE vs 204 ở nguồn cũ, **0 mã mất gap-ref** (không regression), 2 mã (C4G, PVI) đổi
+  `prior_close` — nguyên nhân là tail per-ticker của `ticker_prune` dừng ở ngày mã đó RỜI
+  universe (238/450 mã chung có tail cũ hơn; chỉ 2 mã rời trong vòng 10 ngày nên lọt qua guard
+  recency), không phải bất đồng giá trị. Bổ sung `churn_guard_selfcheck.py` **section G** ghim
+  NGUỒN dữ liệu bằng decoy fixture (section F không kill được mutation đổi nguồn). Hai điểm còn mở khác
   G9 xác nhận (không phải mới, nhưng vẫn treo thật): G7's câu hỏi liquidity-overlap (nay đã đóng ở
   trên) và khoảng hở fidelity R&D (`universe_pit` raw không nằm trong `sync_bq_cache.py`, backtest
   chạy dưới `BQ_LOCAL_CACHE` không bao giờ chạm breadth-decoupling guard — đã có bus event
