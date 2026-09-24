@@ -1,4 +1,4 @@
-# Fleet status — 2026-09-24T06:00:05 UTC
+# Fleet status — 2026-09-24T06:00:09 UTC
 
 | agent | title (desktop) | kind | status | last_heartbeat | age(min) | current_task |
 |---|---|---|---|---|---|---|
