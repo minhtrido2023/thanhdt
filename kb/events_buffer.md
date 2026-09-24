@@ -511,3 +511,21 @@
 - [2026-09-24T02:13:20Z] Taylor/heartbeat — Taylor_20260924_020630: {"status": "in_progress", "note": "da xac dinh scope R1/R2/R3, dang sua report_return_gate.py print branching + vendor_mismatch_alert.sh REASON join"}
 - [2026-09-24T02:13:32Z] Taylor/heartbeat — Taylor_20260924_020630: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20260924_020630", "source": "watcher"}
 - [2026-09-24T02:14:32Z] Taylor/heartbeat — Taylor_20260924_020630: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20260924_020630", "source": "watcher"}
+
+## Consolidation 2026-09-24T02:28:03Z
+- [2026-09-24T02:15:32Z] Taylor/heartbeat — Taylor_20260924_020630: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20260924_020630", "source": "watcher"}
+- [2026-09-24T02:16:32Z] Taylor/heartbeat — Taylor_20260924_020630: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20260924_020630", "source": "watcher"}
+- [2026-09-24T02:17:23Z] Taylor/heartbeat — Taylor_20260924_020630: {"status": "in_progress", "note": "R2/R3 python xong (75/75, 148/0); dang lam R1 vendor_mismatch_alert.sh join REASON"}
+- [2026-09-24T02:17:33Z] Taylor/heartbeat — Taylor_20260924_020630: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20260924_020630", "source": "watcher"}
+- [2026-09-24T02:18:34Z] Taylor/heartbeat — Taylor_20260924_020630: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20260924_020630", "source": "watcher"}
+- [2026-09-24T02:19:34Z] Taylor/heartbeat — Taylor_20260924_020630: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20260924_020630", "source": "watcher"}
+- [2026-09-24T02:20:34Z] Taylor/heartbeat — Taylor_20260924_020630: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20260924_020630", "source": "watcher"}
+- [2026-09-24T02:21:34Z] Taylor/heartbeat — Taylor_20260924_020630: {"status": "still_running", "elapsed_min": 15, "job_id": "Taylor_20260924_020630", "source": "watcher"}
+- [2026-09-24T02:22:35Z] Taylor/heartbeat — Taylor_20260924_020630: {"status": "still_running", "elapsed_min": 16, "job_id": "Taylor_20260924_020630", "source": "watcher"}
+- [2026-09-24T02:23:08Z] Taylor/heartbeat — Taylor_20260924_020630: {"status": "in_progress", "note": "worktree wt-vendor-d1 da co R1/R2/R3 dang do (attempt truoc), dang chay full selfcheck 4 moi truong"}
+- [2026-09-24T02:23:35Z] Taylor/heartbeat — Taylor_20260924_020630: {"status": "still_running", "elapsed_min": 17, "job_id": "Taylor_20260924_020630", "source": "watcher"}
+- [2026-09-24T02:24:35Z] Taylor/heartbeat — Taylor_20260924_020630: {"status": "still_running", "elapsed_min": 18, "job_id": "Taylor_20260924_020630", "source": "watcher"}
+- [2026-09-24T02:25:35Z] Taylor/heartbeat — Taylor_20260924_020630: {"status": "still_running", "elapsed_min": 19, "job_id": "Taylor_20260924_020630", "source": "watcher"}
+- [2026-09-24T02:26:35Z] Taylor/heartbeat — Taylor_20260924_020630: {"status": "still_running", "elapsed_min": 20, "job_id": "Taylor_20260924_020630", "source": "watcher"}
+- [2026-09-24T02:27:36Z] Taylor/heartbeat — Taylor_20260924_020630: {"status": "still_running", "elapsed_min": 21, "job_id": "Taylor_20260924_020630", "source": "watcher"}
+- [2026-09-24T02:27:45Z] Taylor/finding — vendor-mismatch-d1b: {"job": "Taylor_20260924_020630", "branch": "fix/vendor-mismatch-d1-stockleg", "worktree": "mike/wt-vendor-d1", "head": "77837876", "commits": ["853385e9 R1 vendor_mismatch_alert.sh reason-routing + fix selfcheck bad()/ok() text mismatch bug", "6d13ad60 R2 report_return_gate.py fail-closed unknown", "77837876 R3 dividend_adjusted_return.py comment fixes + assertion"], "status": "3 required_change tu arch-review D1b XONG, CHUA LAND, cho arch-review vong ke", "selfcheck": {"dar": "148/0 x4TZ (147->148)", "gate": "75/75 x4TZ (71->75)", "alert": "57/0 x4TZ (48->57, mutation moi m6 giet dung cho)", "gate_root_only": "PASS"}, "bug_found_and_fixed": "selfcheck CA10 bad() dung ten rut gon khac ok() -> kill_check cua MUTATION6 grep sai, bao mutant chet SAI cho du da chet DUNG cho; da dong bo text", "manual_mutations_reverified": 4, "report": "agents/Taylor/research/vendor_mismatch_round_D1b_20260924.md", "git_status_after_run": "porcelain RONG"}

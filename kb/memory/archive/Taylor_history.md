@@ -635,3 +635,6 @@
 
 ## Archived 2026-09-24 (keep=12 days=0 require_done=False)
 - [2026-09-23T02:01:12Z] [2026-09-23] paper corp-action VONG 3 (ea6c1b97) sau quant-skeptic vong 2 REFUTED/high: sua D1 (nhanh cron doc positions => du 2.425.000d), D2 (thu tu ghi so cai/state), + loi phat sinh apply_records gan qty_after xoa fill sau GDKHQ (~13,5tr). 59/59 x4TZ+py3, 7/7 mutation chet. Headline 7.915.455d KHONG DOI. CHUA cai cron. CHUA XU (skeptic neu): neo MBB 08-11 vong tron / co tuc GROSS vs 5% PIT cua so that / PaperBroker sellable==total => 180 CP thuong ban duoc ngay sang GDKHQ - PHAI xu truoc khi cam cron. BAY: chay mutation tren .py phai xoa __pycache__ (reorder cung size+mtime giay => tai dung bytecode mutate, FAIL gia).
+
+## Archived 2026-09-24 (keep=12 days=0 require_done=False)
+- [2026-09-23T05:45:33Z] [2026-09-23] job _051148 XONG ca 4 viec user chot (corp-action paper): co tuc NET 5% a8fa47d6 · PaperBroker sellable!=total 24e885ac+6ca93ac1 · cron 08:40 T2-T6 07487da8 (LUOT DAU T5 2026-09-24) · order_book (A) bae551d7+e8066c75. Bao cao muc 5. | CHO USER QUYET 2 muc con lai: (a) hoi to 7.860.455d vao so paper qua khu, (b) AlphaLens convention=terp TRUOC gate 09-30 (+1,86pp vs +0,81pp). | order_book_execution_shadow: end 10-21, tieu chi doi sang N>=30 o TANG REAL (PROBE da 295, du); toi 10-21 van <30 thi CHOT tren mau dang co va DONG, khong gia han lan 4.
