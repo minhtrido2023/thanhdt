@@ -474,17 +474,43 @@ def broker_cash_deltas(account_no: str) -> dict:
 
 
 def broker_qty(account_no: str) -> dict:
-    """{(mã, ngày): số lượng cuối ngày} từ bản ghi positions (đã lọc account, §12)."""
-    out = {}
+    """{(mã, ngày): TỔNG KL các lô cùng mã trong bản ghi CUỐI NGÀY} (đã lọc account, §12).
+
+    Bug đã sửa 2026-09-24 (đo thật, xem `_selfcheck` mục 25): bản cũ khoá theo `(symbol, ngày)`
+    rồi OVERWRITE — nhiều lô cùng mã trong CÙNG một bản ghi (gói vay margin khác nhau,
+    `loanPackageId` khác nhau) chỉ lô đứng CUỐI mảng `positions[]` sống sót, các lô trước bị
+    ghi đè vì so `ts >= ts` của chính bản ghi đó luôn đúng. Đo trên dữ liệu thật ZaloPay:
+    135 cặp (mã, ngày) lệch (BID/MBB/VCB, đều có ≥2 gói vay), lệch 25,0%–66,7% — ca cụ thể BID
+    14/08 báo 320 (chỉ lô `loanPackageId=1258`) trong khi tổng thật 2 lô là 427
+    (107 `loanPackageId=1826` + 320 `loanPackageId=1258`). SpaceX cùng kỳ 0 cặp lệch (không có
+    mã nào tách ≥2 gói vay) — bug LATENT ở đó, không phải không tồn tại.
+
+    Cùng quy ước GỘP LÔ với `daily_nav_snapshot.raw_positions` (`row["qty"] += qty`) — hàm đó
+    cũng đọc positions của CÙNG loại bản ghi DNSE và cũng phải gộp nhiều `loanPackageId` của một
+    mã. Khác biệt CÓ CHỦ Ý duy nhất: `raw_positions` nhận 1 `date` cụ thể (đọc đúng 1 file), còn
+    hàm này quét NHIỀU ngày (nhiều file `dnse_raw_*.jsonl`) nên cần chọn bản ghi MỚI NHẤT của
+    TỪNG ngày trước khi gộp — không được gộp CHÉO giữa hai bản ghi khác thời điểm của cùng
+    ngày (sẽ cộng hai lần), và cũng không được lấy nhầm bản ghi CŨ hơn nếu file chứa nhiều
+    snapshot trong ngày mà không theo đúng thứ tự thời gian.
+    """
+    day_last_ts = {}   # ngày -> ts bản ghi mới nhất đã thấy cho ngày đó
+    day_last_rec = {}  # ngày -> bản ghi positions ứng với ts mới nhất đó
     for rec in _broker_records("positions", account_no):
         ts = rec.get("ts") or ""
+        day = ts[:10]
+        if day in day_last_ts and ts < day_last_ts[day]:
+            continue                                  # bản ghi cũ hơn bản đã thấy — bỏ
+        day_last_ts[day] = ts
+        day_last_rec[day] = rec
+
+    out = {}
+    for day, rec in day_last_rec.items():
         for it in rec.get("payload", {}).get("positions", []):
             if str(it.get("accountNo")) != str(account_no):
                 continue
-            key = (it["symbol"], ts[:10])
-            if key not in out or ts >= out[key][0]:
-                out[key] = (ts, it.get("openQuantity"))
-    return {k: v[1] for k, v in out.items()}
+            key = (it["symbol"], day)
+            out[key] = out.get(key, 0.0) + float(it.get("openQuantity") or 0)
+    return out
 
 
 # ======================================================================================
@@ -1598,6 +1624,66 @@ def _selfcheck() -> int:
     a24g = _resolve_offline("2026-09-24", 0.0, 0.0, 0.2604104, solved=False)
     same("broker chưa giải + vendor có chân cổ phiếu ⇒ STOCK_CONFIRMED",
          (a24g.vendor_check, a24g.kind), ("vendor_only", "STOCK_CONFIRMED"))
+
+    print("25) `broker_qty()` — GỘP TỔNG các lô cùng mã/ngày, KHÔNG lấy lô CUỐI (vá 2026-09-24).")
+    print("    Fixture hình dạng THẬT ZaloPay BID 14/08 (2 gói vay margin, loanPackageId khác nhau,")
+    print("    107 + 320 = 427; bản cũ chỉ giữ lô đứng CUỐI mảng positions[] = 320):")
+    import tempfile as _tempfile
+    global EXEC_LOG_DIR
+    _orig_exec_log_dir = EXEC_LOG_DIR
+    _tmpdir = _tempfile.mkdtemp(prefix="dividend_selfcheck_")
+    try:
+        _acct = "9999999999"
+        _rec_day1 = {
+            "kind": "positions", "account_no": _acct, "ts": "2026-09-01T09:00:00Z",
+            "payload": {"positions": [
+                {"symbol": "MULTI", "accountNo": _acct, "openQuantity": 107, "loanPackageId": 1826},
+                {"symbol": "MULTI", "accountNo": _acct, "openQuantity": 320, "loanPackageId": 1258},
+                {"symbol": "SOLO", "accountNo": _acct, "openQuantity": 500, "loanPackageId": 1},
+            ]},
+        }
+        # bản ghi THỨ HAI trong CÙNG ngày, ts SỚM HƠN (rớt về sau trong iteration) — phải bị bỏ,
+        # không được cộng chéo vào bản ghi mới nhất (nếu không sẽ nhân đôi KL của MULTI).
+        _rec_day1_earlier = {
+            "kind": "positions", "account_no": _acct, "ts": "2026-09-01T08:00:00Z",
+            "payload": {"positions": [
+                {"symbol": "MULTI", "accountNo": _acct, "openQuantity": 999, "loanPackageId": 1826},
+            ]},
+        }
+        _rec_day2 = {
+            "kind": "positions", "account_no": _acct, "ts": "2026-09-02T09:00:00Z",
+            "payload": {"positions": [
+                {"symbol": "MULTI", "accountNo": _acct, "openQuantity": 200, "loanPackageId": 1826},
+            ]},
+        }
+        with open(os.path.join(_tmpdir, "dnse_raw_2026-09-01.jsonl"), "w", encoding="utf-8") as f:
+            f.write(json.dumps(_rec_day1_earlier) + "\n")
+            f.write(json.dumps(_rec_day1) + "\n")
+        with open(os.path.join(_tmpdir, "dnse_raw_2026-09-02.jsonl"), "w", encoding="utf-8") as f:
+            f.write(json.dumps(_rec_day2) + "\n")
+        EXEC_LOG_DIR = _tmpdir
+        _q25 = broker_qty(_acct)
+    finally:
+        EXEC_LOG_DIR = _orig_exec_log_dir
+        shutil.rmtree(_tmpdir, ignore_errors=True)
+
+    check("nhiều lô cùng mã/ngày ⇒ TỔNG (107+320)", _q25.get(("MULTI", "2026-09-01")), 427.0,
+          tol=1e-9)
+    check("một lô duy nhất ⇒ KHÔNG đổi so với trước", _q25.get(("SOLO", "2026-09-01")), 500.0,
+          tol=1e-9)
+    check("ngày khác của CÙNG mã không bị cộng chéo", _q25.get(("MULTI", "2026-09-02")), 200.0,
+          tol=1e-9)
+    assert _q25.get(("MULTI", "2026-09-01")) == 427.0, (
+        "MUTATION-GUARD broker_qty_last_lot_wins: broker_qty() phải GỘP TỔNG các lô cùng "
+        "(mã, ngày) trong bản ghi CUỐI NGÀY, không lấy lô đứng cuối mảng positions[]. Ca thật "
+        "ZaloPay BID 14/08: 2 lô margin (loanPackageId 1826=107, 1258=320) tổng 427; bản cũ chỉ "
+        f"giữ lô cuối = 320. Đang trả về {_q25.get(('MULTI', '2026-09-01'))!r} cho fixture 107+320."
+    )
+    assert _q25.get(("MULTI", "2026-09-01")) != 999 + 320 + 107, (
+        "MUTATION-GUARD broker_qty_cross_record_double_count: broker_qty() ĐANG cộng chéo giữa "
+        "hai bản ghi khác thời điểm của CÙNG một ngày (999 từ bản ghi 08:00 cộng nhầm vào bản ghi "
+        "09:00) thay vì chỉ lấy bản ghi MỚI NHẤT của ngày đó rồi gộp lô bên trong bản ghi đó."
+    )
 
     print(f"\n=== SELFCHECK: {passed} PASS / {failed} FAIL ===")
     return 1 if failed else 0
