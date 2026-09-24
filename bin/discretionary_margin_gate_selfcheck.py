@@ -6,15 +6,24 @@ không đụng `data/discretionary_margin_arms.json` production).
 Theo skill verify-before-done: chạy dưới TZ lạ (env -u TZ) để bắt lỗi neo múi giờ tường minh (§16).
 KHÔNG chạm Executor (sleeve này không wire vào bot) nên không cần MIKE_BOT_TEST_MODE (§5b).
 
-Bước 13-18 (job Taylor_20260924_064510, Việc 2) — cổng corp-action của `cmd_check_exits()`.
-BUG ĐÃ SỬA: `drawdown = px / a["arm_price"] - 1.0` so `arm_price` (hệ giá TẠI THỜI ĐIỂM ARM) với
-`px` hiện tại (đã tự nhiên đi qua mọi sự kiện tỉ lệ giữa lúc arm và bây giờ) mà KHÔNG quy đổi —
-nhân chéo hai hệ quy chiếu giống bug đã vá ở `compute_active_nav.py` (`exdate_frame.py`). Sự kiện
-tỉ lệ giữa hai mốc ⇒ cảnh báo de-lever GIẢ. Vá: `corp_action_frame_multiplier()` đối chiếu qua
-`exdate_frame.classify_positions()` (tái dùng nguyên khối đã audit 5 vòng) — CONFIRMED thì quy đổi
-arm_price theo hệ số tích luỹ; KL bất thường không giải thích được thì FAIL-CLOSED; lỗi hạ tầng
-phụ trợ thì KHÔNG fail-closed cả cổng, giữ hành vi CŨ. Chỉ mock `current_price`, `_account_id_for`,
-`trading_bot.brokers.DNSEBroker`, `exdate_frame.classify_positions` (KHÔNG chạm DNSE/BQ thật).
+Bước 13-16 (job Taylor_20260924_064510+_073500, Việc 2 — THIẾT KẾ LẠI sau arch-review
+NEEDS_CHANGES bản đầu e75788f8) — cổng corp-action của `cmd_check_exits()`.
+BUG GỐC ĐÃ SỬA: `drawdown = px / a["arm_price"] - 1.0` so `arm_price` (hệ giá TẠI THỜI ĐIỂM ARM)
+với `px` hiện tại (đã tự nhiên đi qua mọi sự kiện tỉ lệ giữa lúc arm và bây giờ) mà KHÔNG quy
+đổi — nhân chéo hai hệ quy chiếu, sinh cảnh báo de-lever GIẢ.
+
+BUG BẢN VÁ ĐẦU (e75788f8, arch-review NEEDS_CHANGES): dùng `exdate_frame.classify_positions()`
+— cơ chế đối chiếu THEO NGÀY, chỉ khớp khi cron chạy ĐÚNG cửa sổ credit (~19:07-19:10 ICT); cron
+thật (`check-exits`) chạy 15:20 ICT ⇒ KHÔNG BAO GIỜ khớp (no-op cấu trúc). Cũng KHÔNG idempotent
+(nhân dồn `corp_action_multiplier` mỗi lần gọi lại).
+
+THIẾT KẾ LẠI: `corp_action_frame_multiplier(ticker, arm_date)` gọi thẳng
+`daily_nav_snapshot.confirmed_qty_multiplier_after()` — đọc registry PERSISTENT
+`data/corp_actions.json` (do `corp_action_auto_confirm.py` ghi 19:25 ICT, TRƯỚC cửa sổ credit
+phiên mai), tích luỹ TẤT CẢ sự kiện CONFIRMED có `ex_date > arm_date` — không phụ thuộc thời
+điểm gọi trong ngày, và tự động idempotent (đọc lại từ nguồn mỗi lần, không cộng dồn state).
+Chỉ mock `current_price` + `daily_nav_snapshot.confirmed_qty_multiplier_after` (KHÔNG chạm
+DNSE/BQ/corp_actions.json thật).
 """
 import os
 import sys
@@ -22,8 +31,7 @@ import tempfile
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import discretionary_margin_gate as gate  # noqa: E402
-import exdate_frame  # noqa: E402
-import trading_bot.brokers as tb_brokers  # noqa: E402
+import daily_nav_snapshot  # noqa: E402
 
 PASS = []
 FAIL = []
@@ -60,32 +68,19 @@ def _patch_io(monkey_nav=None, monkey_adv=None, monkey_price=None):
         gate.current_price = lambda ticker: monkey_price
 
 
-class _FakeBroker:
-    def __init__(self, total_by_ticker):
-        self._total = total_by_ticker
-
-    def connect(self):
-        pass
-
-    def get_positions(self):
-        return {tk: {"total": q} for tk, q in self._total.items()}
-
-
-def _broker_factory(total_by_ticker):
-    def _f(account_id=None, credentials_file=None, label=None):
-        return _FakeBroker(total_by_ticker)
+def _mult_after_stub(mult_by_ticker):
+    """Mock `daily_nav_snapshot.confirmed_qty_multiplier_after(ticker, asof_date)` — trả hệ số
+    cố định theo ticker bất kể `asof_date` (test wiring, KHÔNG test bản thân hàm gốc — hàm đó
+    đã có test riêng trong `daily_nav_snapshot`)."""
+    def _f(ticker, asof_date):
+        return mult_by_ticker.get(ticker, 1.0)
     return _f
 
 
-def _classify_stub(credited, blocked):
-    def _f(account_label, account_no, asof, positions):
-        return dict(credited), dict(blocked)
-    return _f
-
-
-def _mk_arm(arm_price, ticker="VPB"):
+def _mk_arm(arm_price, ticker="VPB", armed_at="2026-09-01T09:00:00+07:00"):
     return {"ticker": ticker, "account": "SpaceX", "arm_price": arm_price, "shares": 1000,
-            "exposure_vnd": arm_price * 1000, "f": 1.0, "exited": False, "exit_alerts": []}
+            "exposure_vnd": arm_price * 1000, "f": 1.0, "exited": False, "exit_alerts": [],
+            "armed_at": armed_at}
 
 
 def main():
@@ -206,25 +201,19 @@ def main():
                               account="ZaloPay"))
     check("account ZaloPay (cash-only) bi chan cung", rc == 2, f"rc={rc}")
 
-    # ════════════════════ CORP-ACTION GATE (cmd_check_exits) — Việc 2 ═══════════════════════
-    ORIG_DNSEBROKER = tb_brokers.DNSEBroker
-    ORIG_CLASSIFY = exdate_frame.classify_positions
-    ORIG_ACCOUNT_ID_FOR = gate._account_id_for
-    gate._account_id_for = lambda label: "0002023347"
+    # ════════════════════ CORP-ACTION GATE (cmd_check_exits) — Việc 2 (thiết kế lại) ═════════
+    ORIG_MULT_AFTER = daily_nav_snapshot.confirmed_qty_multiplier_after
 
     def _restore_corp_action_mocks():
-        tb_brokers.DNSEBroker = ORIG_DNSEBROKER
-        exdate_frame.classify_positions = ORIG_CLASSIFY
+        daily_nav_snapshot.confirmed_qty_multiplier_after = ORIG_MULT_AFTER
 
-    # ---- 13. co su kien CONFIRMED -> arm_price quy doi dung he, drawdown that (-5%), KHONG breach gia
+    # ---- 13. co su kien CONFIRMED (registry) -> arm_price quy doi dung he, drawdown that (-5%),
+    #          KHONG breach gia; + 13b idempotency (goi lai LAN 2 KHONG binh phuong multiplier)
     try:
         gate.save_arms([_mk_arm(26000.0)])
         _NoBus.calls.clear()
         _patch_io(monkey_price=(19000.0, "dnse_g1_fake", None))
-        tb_brokers.DNSEBroker = _broker_factory({"VPB": 1260})
-        exdate_frame.classify_positions = _classify_stub(
-            {"VPB": {"residual": 260.0, "exercise_ratio": 0.30, "event_code": "ISS",
-                     "ex_date": "2026-09-25"}}, {})
+        daily_nav_snapshot.confirmed_qty_multiplier_after = _mult_after_stub({"VPB": 1.30})
         rc = gate.cmd_check_exits(_argparse.Namespace())
         a0 = (gate.load_arms() or [{}])[0]
         check("corp-action CONFIRMED: multiplier tich luy = 1.30",
@@ -239,6 +228,18 @@ def main():
         old_buggy = 19000.0 / 26000.0 - 1.0
         check("[doi chung] cong thuc CU (khong quy doi) se breach GIA (-26,9% <= -20%)",
               old_buggy <= -0.20, f"old_buggy_drawdown={old_buggy:.4f}")
+
+        n_adj_before = len(a0.get("corp_action_adjustments") or [])
+        rc2 = gate.cmd_check_exits(_argparse.Namespace())
+        a1 = (gate.load_arms() or [{}])[0]
+        check("idempotent: goi lai LAN 2 (cung du lieu) multiplier VAN 1.30 (khong binh phuong 1.69)",
+              abs(a1.get("corp_action_multiplier", 0) - 1.30) < 1e-9, f"{a1.get('corp_action_multiplier')}")
+        check("idempotent: corp_action_adjustments KHONG them entry moi",
+              len(a1.get("corp_action_adjustments") or []) == n_adj_before,
+              f"before={n_adj_before} after={len(a1.get('corp_action_adjustments') or [])}")
+        check("idempotent: drawdown lan 2 van dung -5% (khong lech do cong don)",
+              abs(a1.get("last_drawdown", 0) - (-0.05)) < 1e-6, f"{a1.get('last_drawdown')}")
+        check("idempotent: rc2=0", rc2 == 0, f"rc2={rc2}")
     finally:
         _restore_corp_action_mocks()
 
@@ -247,8 +248,7 @@ def main():
         gate.save_arms([_mk_arm(20000.0)])
         _NoBus.calls.clear()
         _patch_io(monkey_price=(17000.0, "dnse_g1_fake", None))
-        tb_brokers.DNSEBroker = _broker_factory({"VPB": 1000})
-        exdate_frame.classify_positions = _classify_stub({}, {})
+        daily_nav_snapshot.confirmed_qty_multiplier_after = _mult_after_stub({})
         rc = gate.cmd_check_exits(_argparse.Namespace())
         a0 = (gate.load_arms() or [{}])[0]
         check("khong su kien: KHONG co corp_action_multiplier", "corp_action_multiplier" not in a0)
@@ -265,8 +265,7 @@ def main():
         gate.save_arms([_mk_arm(20000.0)])
         _NoBus.calls.clear()
         _patch_io(monkey_price=(15000.0, "dnse_g1_fake", None))
-        tb_brokers.DNSEBroker = _broker_factory({"VPB": 1000})
-        exdate_frame.classify_positions = _classify_stub({}, {})
+        daily_nav_snapshot.confirmed_qty_multiplier_after = _mult_after_stub({})
         rc = gate.cmd_check_exits(_argparse.Namespace())
         a0 = (gate.load_arms() or [{}])[0]
         check("khong su kien, drawdown that -25%: gia tri dung",
@@ -276,76 +275,43 @@ def main():
     finally:
         _restore_corp_action_mocks()
 
-    # ---- 16. KL bat thuong KHONG giai thich duoc -> fail-closed (khong tinh drawdown)
+    # ---- 16. thieu armed_at (record cu/hong) -> fail-safe factor=1.0, KHONG doan, KHONG crash
     try:
-        gate.save_arms([_mk_arm(20000.0)])
+        a_no_armed_at = _mk_arm(20000.0)
+        a_no_armed_at.pop("armed_at", None)
+        gate.save_arms([a_no_armed_at])
         _NoBus.calls.clear()
-        _patch_io(monkey_price=(15000.0, "dnse_g1_fake", None))
-        tb_brokers.DNSEBroker = _broker_factory({"VPB": 1500})
-        exdate_frame.classify_positions = _classify_stub(
-            {}, {"VPB": "KL 1.000->1.500, lenh khop that +50 => phan du +450 CHUA GIAI THICH DUOC"})
+        _patch_io(monkey_price=(17000.0, "dnse_g1_fake", None))
+        daily_nav_snapshot.confirmed_qty_multiplier_after = _mult_after_stub({"VPB": 1.30})
         rc = gate.cmd_check_exits(_argparse.Namespace())
         a0 = (gate.load_arms() or [{}])[0]
-        check("KL bat thuong: last_drawdown KHONG duoc set (fail-closed)", "last_drawdown" not in a0, f"{a0}")
-        check("KL bat thuong: last_checked KHONG duoc set", "last_checked" not in a0)
-        check("KL bat thuong: canh bao len bus (kind=error, topic corpaction-blocked)",
-              any(c[0] == "bus" and c[1] == "error" and "corpaction-blocked" in c[2] for c in _NoBus.calls),
-              str(_NoBus.calls))
-        check("KL bat thuong: canh bao day Discord (notify)",
-              any(c[0] == "notify" and "CẦN NGƯỜI xử lý tay" in c[1] for c in _NoBus.calls), str(_NoBus.calls))
-        check("KL bat thuong: rc=1", rc == 1, f"rc={rc}")
-    finally:
-        _restore_corp_action_mocks()
-
-    # ---- 17. exdate_frame tu than loi (ha tang) -> KHONG fail-closed toan cong, giu hanh vi CU
-    try:
-        gate.save_arms([_mk_arm(20000.0)])
-        _patch_io(monkey_price=(17000.0, "dnse_g1_fake", None))
-        tb_brokers.DNSEBroker = _broker_factory({"VPB": 1000})
-
-        def _raise(*a, **kw):
-            raise RuntimeError("BQ down")
-        exdate_frame.classify_positions = _raise
-        gate.cmd_check_exits(_argparse.Namespace())
-        a0 = (gate.load_arms() or [{}])[0]
-        check("loi ha tang: drawdown van tinh -15% (KHONG fail-closed vi loi phu tro)",
+        check("thieu armed_at: fail-safe factor=1.0 (khong goi registry, khong doan)",
+              "corp_action_multiplier" not in a0, f"{a0}")
+        check("thieu armed_at: drawdown dung cong thuc cu -15%",
               abs(a0.get("last_drawdown", 0) - (-0.15)) < 1e-6, f"{a0.get('last_drawdown')}")
-        check("loi ha tang: KHONG co corp_action_multiplier", "corp_action_multiplier" not in a0)
+        check("thieu armed_at: rc=0", rc == 0, f"rc={rc}")
     finally:
         _restore_corp_action_mocks()
 
-    # ---- 18. MUTATION GUARD cho corp_action_frame_multiplier — moi assertion tren phai chet dung
+    # ---- 17. MUTATION GUARD cho corp_action_frame_multiplier — moi assertion tren phai chet dung
     #          mutation cua no
     ORIG_FRAME_MULT = gate.corp_action_frame_multiplier
 
     def _oracle_A():
         gate.save_arms([_mk_arm(26000.0)])
         _patch_io(monkey_price=(19000.0, "dnse_g1_fake", None))
-        tb_brokers.DNSEBroker = _broker_factory({"VPB": 1260})
-        exdate_frame.classify_positions = _classify_stub(
-            {"VPB": {"residual": 260.0, "exercise_ratio": 0.30, "event_code": "ISS",
-                     "ex_date": "2026-09-25"}}, {})
         gate.cmd_check_exits(_argparse.Namespace())
         a0 = (gate.load_arms() or [{}])[0]
         return (abs(a0.get("corp_action_multiplier", 0) - 1.30) < 1e-9
                 and abs(a0.get("last_drawdown", 0) - (-0.05)) < 1e-6)
 
-    def _oracle_C():
-        gate.save_arms([_mk_arm(20000.0)])
-        _patch_io(monkey_price=(15000.0, "dnse_g1_fake", None))
-        tb_brokers.DNSEBroker = _broker_factory({"VPB": 1500})
-        exdate_frame.classify_positions = _classify_stub({}, {"VPB": "phan du CHUA GIAI THICH DUOC"})
+    def _oracle_idempotent():
+        gate.save_arms([_mk_arm(26000.0)])
+        _patch_io(monkey_price=(19000.0, "dnse_g1_fake", None))
         gate.cmd_check_exits(_argparse.Namespace())
-        return "last_drawdown" not in (gate.load_arms() or [{}])[0]
-
-    def _oracle_D():
-        gate.save_arms([_mk_arm(20000.0)])
-        _patch_io(monkey_price=(17000.0, "dnse_g1_fake", None))
-        tb_brokers.DNSEBroker = _broker_factory({"VPB": 1000})
-        exdate_frame.classify_positions = lambda *a, **kw: (_ for _ in ()).throw(RuntimeError("BQ down"))
         gate.cmd_check_exits(_argparse.Namespace())
         a0 = (gate.load_arms() or [{}])[0]
-        return abs(a0.get("last_drawdown", 999) - (-0.15)) < 1e-6
+        return abs(a0.get("corp_action_multiplier", 0) - 1.30) < 1e-9
 
     def _mutate(name, patched, oracle_fn):
         try:
@@ -354,22 +320,19 @@ def main():
             check(f"mutation {name}: mutant bi giet (assertion dao verdict)", killed)
         finally:
             gate.corp_action_frame_multiplier = ORIG_FRAME_MULT
-            _restore_corp_action_mocks()
 
-    # Mutant 1: bo qua quy doi khi co credited — luon tra factor=1.0. Kich ban A se KHONG quy
-    # doi => multiplier khong dat 1.30, drawdown giu nguyen -26,9% (!= -5%) => assertion goc bat duoc.
-    _mutate("baseline-not-converted",
-            lambda ticker, account_label, account_id, asof: (1.0, None, None), _oracle_A)
-    # Mutant 2: bo qua nhanh blocked — luon tra (1.0, None, None) du co blocked_reason that.
-    # Kich ban C se TINH drawdown thay vi fail-closed => last_drawdown SE duoc set.
-    _mutate("blocked-not-failclosed",
-            lambda ticker, account_label, account_id, asof: (1.0, None, None), _oracle_C)
-    # Mutant 3: fail-closed TOAN BO cong khi co loi ha tang (thay vi fail-open giu hanh vi cu).
-    _mutate("infra-error-wrongly-fail-closed",
-            lambda ticker, account_label, account_id, asof: (1.0, None, "gia lap fail-closed sai"),
-            _oracle_D)
+    # Mutant 1: bo qua quy doi hoan toan — luon tra factor=1.0. Kich ban A se KHONG quy doi =>
+    # multiplier khong dat 1.30, drawdown giu nguyen -26,9% (!= -5%) => assertion goc bat duoc.
+    _mutate("factor-not-applied", lambda ticker, arm_date: 1.0, _oracle_A)
 
-    gate._account_id_for = ORIG_ACCOUNT_ID_FOR
+    # Mutant 2: gia lap bug CU (nhan don moi lan goi thay vi doc lai TU NGUON) — moi lan goi
+    # binh phuong luy thua thay vi tra CO DINH 1.30 => oracle idempotency phai bat duoc lech.
+    _acc_state = {"n": 0}
+
+    def _accumulating_mult(ticker, arm_date):
+        _acc_state["n"] += 1
+        return 1.30 ** _acc_state["n"]
+    _mutate("idempotency-missing-simulated", _accumulating_mult, _oracle_idempotent)
 
     print(f"\n{'='*70}\nPASS={len(PASS)} FAIL={len(FAIL)}")
     if FAIL:

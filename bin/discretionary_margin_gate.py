@@ -189,67 +189,34 @@ def current_price(ticker):
     return prices[ticker], sources.get(ticker), None
 
 
-def _account_id_for(label):
-    """`account_id` (= account_no broker) trong secrets/trading_bot_accounts.json cho `label`."""
-    accounts_path = os.path.join(WC_ROOT, "secrets", "trading_bot_accounts.json")
-    accounts = json.load(open(accounts_path, encoding="utf-8")).get("accounts", [])
-    for a in accounts:
-        if a.get("label") == label:
-            return a.get("account_id")
-    return None
+def corp_action_frame_multiplier(ticker, arm_date):
+    """factor — hệ số quy đổi `arm_price` về CÙNG HỆ QUY CHIẾU với `px` (giá hiện tại, DNSE G1)
+    trước khi tính drawdown. `arm_date` = ngày ARM (YYYY-MM-DD, hệ giá TRƯỚC mọi sự kiện).
 
+    §corp-action (job Taylor_20260924_064510+_073500, Việc 2 — THIẾT KẾ LẠI sau arch-review
+    NEEDS_CHANGES bản đầu e75788f8). Bản đầu dùng `exdate_frame.classify_positions()` — cơ chế
+    đối chiếu THEO NGÀY (so vị thế broker HÔM NAY với snapshot NGÀY TRƯỚC `asof`, chỉ khớp sự
+    kiện có `ex_date` = ĐÚNG phiên KẾ TIẾP `asof`). Cron `check-exits` chạy 15:20 ICT — TRƯỚC
+    cửa sổ broker credit thật (~19:07-19:10 ICT, đo VPB 09-23/VIB 09-09/BID-MBB-VCB 08-14) ⇒
+    KHÔNG BAO GIỜ khớp đúng lúc chạy (no-op CẤU TRÚC, không phải hiếm gặp — đo VPB thật: dd
+    -21,1% BÁO SAI). Cũng KHÔNG idempotent: `corp_action_multiplier` bị NHÂN DỒN mỗi lần gọi
+    lại trong cùng cửa sổ (che mất một breach thật sau vài lần chạy lại).
 
-def corp_action_frame_multiplier(ticker, account_label, account_id, asof):
-    """(factor, note, blocked_reason) — hệ số quy đổi `arm_price` về CÙNG HỆ QUY CHIẾU với
-    `px` (giá hiện tại, DNSE G1) trước khi tính drawdown.
+    Thay bằng `daily_nav_snapshot.confirmed_qty_multiplier_after(ticker, arm_date)` — TÁI DÙNG
+    nguyên hàm đã audit (dùng cho quy đổi NGƯỢC vị thế broker LIVE về vị thế lịch sử), đọc
+    THẲNG `data/corp_actions.json` (registry CONFIRMED do `corp_action_auto_confirm.py` ghi
+    19:25 ICT — TRƯỚC cả cửa sổ credit của phiên MAI, PERSISTENT trong file, không phụ thuộc
+    THỜI ĐIỂM gọi hàm trong ngày). Tích luỹ TẤT CẢ sự kiện CONFIRMED có `ex_date > arm_date` —
+    đúng "cả khoảng [arm_date, hôm nay]" thay vì chỉ 1 phiên kế tiếp — và TỰ ĐỘNG idempotent:
+    hàm đọc lại từ nguồn mỗi lần gọi (KHÔNG cộng dồn state), gọi 2 lần cùng dữ liệu trả cùng
+    kết quả.
 
-    §corp-action (job Taylor_20260924_064510, Việc 2) — `arm_price` được gõ tay lúc ARM (hệ
-    giá TRƯỚC mọi sự kiện xảy ra sau đó), còn `px` (`current_price`) luôn là giá phiên hiện tại
-    — đã tự nhiên đi qua mọi sự kiện tỉ lệ giữa lúc arm và bây giờ (ex-date làm giá rơi đúng tỉ
-    lệ pha loãng). Trừ trực tiếp `px/arm_price − 1` khi có sự kiện ở giữa hai mốc là nhân chéo
-    hai hệ quy chiếu (giống bug `compute_active_nav.py` đã vá — xem `exdate_frame.py`), sinh
-    cảnh báo de-lever GIẢ (VD tách 2:1: px ~ nửa arm_price ⇒ drawdown -50% giả).
-
-    Dùng lại đúng khối "KHỐI LƯỢNG" (`exdate_frame.classify_positions`, so vị thế broker HÔM
-    NAY với bản ghi RAW gần nhất TRƯỚC `asof`) để phát hiện — nhưng ở đây kết quả dùng để quy
-    đổi GIÁ (arm_price), không phải khối lượng chương trình gom như Việc 1.
-
-      · Có sự kiện CONFIRMED (`credited`) ⇒ trả `factor = 1 + exercise_ratio` — caller nhân
-        DỒN vào `corp_action_multiplier` đã lưu (nhiều sự kiện giữa arm và hôm nay phải nhân
-        dồn, không ghi đè) rồi chia `arm_price` cho tích luỹ đó.
-      · KL đổi bất thường KHÔNG giải thích được (`blocked`) ⇒ trả `blocked_reason` khác None:
-        caller PHẢI fail-closed (KHÔNG tính drawdown phiên này), KHÔNG đoán theo tỉ lệ (§29).
-      · Đọc broker positions lỗi, HOẶC `classify_positions` tự thân lỗi (IO/BQ down) ⇒
-        `factor=1.0, note=None, blocked_reason=None` — KHÔNG fail-closed vì một lỗi hạ tầng ở
-        subsystem phụ trợ (khác biệt với `blocked`: ở đây ta KHÔNG có bằng chứng gì về sự kiện,
-        không phải có bằng chứng KL bất thường không giải thích được).
+    KHÔNG còn nhánh `blocked`/fail-closed — hàm chỉ đọc registry đã CONFIRMED (do người/agent
+    xác nhận qua 2-3 nguồn độc lập, xem `corp_actions.json._status`), không tự suy từ diff KL
+    broker nữa nên không còn "KL bất thường chưa giải thích được" để fail-safe ở TẦNG NÀY.
     """
-    try:
-        from trading_bot.brokers import DNSEBroker
-        b = DNSEBroker(account_id=account_id, credentials_file=None, label=account_label)
-        b.connect()
-        positions = b.get_positions()
-    except Exception:
-        return 1.0, None, None
-
-    try:
-        import exdate_frame
-        credited, blocked = exdate_frame.classify_positions(
-            account_label, account_id, asof, {ticker: positions.get(ticker) or {}})
-    except Exception:
-        return 1.0, None, None
-
-    if ticker in blocked:
-        return 1.0, None, blocked[ticker]
-
-    if ticker in credited:
-        detail = credited[ticker]
-        ratio = float(detail["exercise_ratio"])
-        note = (f"broker đã credit sớm (tỉ lệ {ratio} của {detail['event_code']} ex-date "
-                f"{detail['ex_date']}) ⇒ quy đổi arm_price theo hệ số ×{1 + ratio:.6f}")
-        return 1.0 + ratio, note, None
-
-    return 1.0, None, None
+    import daily_nav_snapshot as dns
+    return dns.confirmed_qty_multiplier_after(ticker, arm_date)
 
 
 # ---------------------------------------------------------------- arm ---------------------------
@@ -390,31 +357,25 @@ def cmd_check_exits(args):
     changed = False
     breaches = []
     errors = []
-    today_str = dt.datetime.now(ICT).date().isoformat()
     for a in live:
         px, src, err = current_price(a["ticker"])
         if err:
             errors.append(f"{a['ticker']}: {err}")
             continue
 
-        factor, note, blocked_reason = corp_action_frame_multiplier(
-            a["ticker"], a["account"], _account_id_for(a["account"]), today_str)
-        if blocked_reason:
-            msg = (f"⚠ arm {a['ticker']} có sự kiện corp-action chưa quy đổi được về CÙNG hệ "
-                   f"quy chiếu với arm_price ⇒ KHÔNG tính drawdown phiên này, CẦN NGƯỜI xử lý "
-                   f"tay: {blocked_reason}")
-            print(msg)
-            errors.append(f"{a['ticker']}: corp-action frame blocked — {blocked_reason}")
-            _bus("error", f"discretionary-margin-corpaction-blocked-{a['ticker']}",
-                 {"ticker": a["ticker"], "reason": blocked_reason})
-            _notify(msg)
-            continue
-
-        if factor != 1.0:
-            a["corp_action_multiplier"] = a.get("corp_action_multiplier", 1.0) * factor
+        # arm_date = ngày ARM (hệ giá TRƯỚC mọi sự kiện kể từ đó) — registry đọc lại TOÀN BỘ
+        # sự kiện CONFIRMED có ex_date > arm_date mỗi lần gọi, nên tự idempotent (không cộng
+        # dồn state, xem docstring corp_action_frame_multiplier).
+        arm_date = str(a.get("armed_at") or "")[:10]
+        factor = corp_action_frame_multiplier(a["ticker"], arm_date) if arm_date else 1.0
+        prior_factor = a.get("corp_action_multiplier", 1.0)
+        if factor != prior_factor:
+            note = (f"registry corp_actions.json: tích luỹ sự kiện CONFIRMED ex_date > "
+                    f"{arm_date} ⇒ hệ số ×{factor:.6f} (trước đó ×{prior_factor:.6f})")
             a.setdefault("corp_action_adjustments", []).append(
                 {"at": dt.datetime.now(ICT).isoformat(timespec="seconds"),
-                 "factor": factor, "note": note})
+                 "factor_before": prior_factor, "factor_after": factor, "note": note})
+            a["corp_action_multiplier"] = factor
             print(f"  [CORPACTION] {a['ticker']}: {note}")
 
         arm_price_frame = a["arm_price"] / a.get("corp_action_multiplier", 1.0)
