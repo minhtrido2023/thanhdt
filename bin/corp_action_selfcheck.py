@@ -184,8 +184,9 @@ raises(lambda: CA.validate({"ticker": "VHM", "event_type": "SPLIT", "qty_multipl
        "QTY_MULT_MAX")
 v_bound = CA.validate({"ticker": "VHM", "event_type": "SPLIT", "qty_multiplier": CA.QTY_MULT_MAX,
                        "ex_date": "2026-08-06", "broker_effective_ts": "2026-08-05"})
-check("qty_multiplier = QTY_MULT_MAX (biên trên, ca VHM thật) vẫn được chấp nhận — không chặn "
-      "oan sự kiện thật lớn nhất đã biết", v_bound["qty_multiplier"] == CA.QTY_MULT_MAX, v_bound)
+check("qty_multiplier = QTY_MULT_MAX (biên trên) vẫn được chấp nhận — VHM thật chỉ là ×2.0, "
+      "sự kiện thật lớn nhất từng đo là F88 ×13.0 và bị CHẶN đúng bởi biên này (không phải "
+      "'không chặn oan sự kiện lớn nhất')", v_bound["qty_multiplier"] == CA.QTY_MULT_MAX, v_bound)
 raises(lambda: CA.validate({"ticker": "VHM", "event_type": "SPLIT",
                             "qty_multiplier": CA.QTY_MULT_MAX + 0.0001,
                             "ex_date": "2026-08-06", "broker_effective_ts": "2026-08-05"}),
@@ -396,8 +397,8 @@ for a in CA.load_corp_actions():
           len(a["evidence"]))
     check(f"  [{a['id']}] khai decided_by (§20: 'user' chỉ khi user THẬT ký, không thì 'agent')",
           raw.get("decided_by") in ("user", "agent"), raw.get("decided_by"))
-    check(f"  [{a['id']}] hệ số > 1 và ≤ 10 (chặn lỗi gõ nhầm thang, vd 15 thay vì 1,15)",
-          1.0 < a["qty_multiplier"] <= 10.0, a["qty_multiplier"])
+    check(f"  [{a['id']}] hệ số > 1 và ≤ QTY_MULT_MAX (chặn lỗi gõ nhầm thang, vd 15 thay vì 1,15)",
+          1.0 < a["qty_multiplier"] <= CA.QTY_MULT_MAX, a["qty_multiplier"])
 
 print(f"\n{'=' * 70}\nKẾT QUẢ: {len(PASS)} PASS / {len(FAIL)} FAIL")
 if FAIL:

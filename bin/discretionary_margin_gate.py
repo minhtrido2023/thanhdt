@@ -279,9 +279,9 @@ def cmd_arm(args):
               f"sự kiện.", file=sys.stderr)
         return 2
 
-    if args.f > MAX_F + 1e-9:
-        print(f"❌ f={args.f} vượt hard-cap {MAX_F} (đồng quy ước capit_margin_lever, KHÔNG dùng "
-              f"broker-max 2,0).", file=sys.stderr)
+    if not math.isfinite(args.f) or args.f > MAX_F + 1e-9:
+        print(f"❌ f={args.f} không phải số hữu hạn ≤ hard-cap {MAX_F} (đồng quy ước "
+              f"capit_margin_lever, KHÔNG dùng broker-max 2,0).", file=sys.stderr)
         return 2
 
     if not math.isfinite(args.arm_price) or args.arm_price <= 0:
@@ -469,9 +469,10 @@ def cmd_check_exits(args):
         # dù drawdown thật KHÔNG so sánh được (đo thật: --arm-price nan qua CLI trước bản vá
         # BLOCKER 1 ở cmd_arm vẫn tới được đây nếu file arms bị sửa tay/hỏng dữ liệu cũ).
         mult_now = a.get("corp_action_multiplier", 1.0)
-        if not math.isfinite(a["arm_price"]) or not math.isfinite(mult_now) or mult_now == 0:
+        if (not math.isfinite(a["arm_price"]) or a["arm_price"] <= 0
+                or not math.isfinite(mult_now) or mult_now <= 0):
             msg = (f"{a['ticker']}: arm_price={a['arm_price']!r} hoặc "
-                   f"corp_action_multiplier={mult_now!r} không phải số hữu hạn khác 0 — "
+                   f"corp_action_multiplier={mult_now!r} không phải số hữu hạn dương — "
                    f"KHÔNG tính được drawdown, bỏ qua breach check cho case này lượt này.")
             print(f"⚠ {msg}", file=sys.stderr)
             errors.append(msg)
@@ -532,8 +533,18 @@ def cmd_check_exits(args):
             _bus("error", f"discretionary-margin-exit-breach-{ticker}", bus_payload)
             _notify(msg)
     elif errors:
-        print(f"⚠ {len(live)} case active, {len(errors)} case KHÔNG kiểm được breach lượt này "
-              f"(xem cảnh báo ⚠ ở trên) — KHÔNG phải xác nhận an toàn.")
+        summary = (f"⚠ {len(live)} case active, {len(errors)} case KHÔNG kiểm được breach lượt "
+                   f"này (xem cảnh báo ⚠ ở trên) — KHÔNG phải xác nhận an toàn.")
+        print(summary)
+        # B-2 arch-review vòng 9: nhánh này trước đây chỉ in stdout/stderr — rc=1 rơi vào log
+        # cron không MAILTO, cron_health_check.py's ERROR_RE chỉ bắt dòng bắt đầu "❌", MÙ với
+        # "⚠" (đo thật). Ca thật tái hiện được: registry/multiplier hỏng khiến TOÀN BỘ case active
+        # rơi vào errors (0 breach nào tính được) mà không ai được báo. Bắn bus+notify ở đây —
+        # tần suất thấp (chỉ khi có lỗi giá/registry/dữ liệu VÀ còn case đang sống).
+        _bus("error", "discretionary-margin-check-exits-errors",
+             {"live_count": len(live), "error_count": len(errors), "errors": errors})
+        _notify(f"⚠️ **discretionary_margin_gate check-exits**: {summary}\n" +
+                "\n".join(f"• {e}" for e in errors))
     else:
         print(f"OK — {len(live)} case active, không case nào chạm {EXIT_DD_PCT:.0%}.")
     return 1 if errors else 0

@@ -255,7 +255,13 @@ def run(date_str, dry_run=False):
           f"{[a for _, a in accounts]}")
 
     new_confirms = []
+    pending_bus_posts = []   # B-4 arch-review vòng 9: post_bus() BỊ DỜI ra sau write thành công —
+                              # bản cũ post_bus() TRƯỚC write_corp_actions() nên trên đường bị
+                              # reject (validate() ném CorpActionError) Discord/bus vẫn hiện
+                              # "✅ AUTO-CONFIRMED" dù registry KHÔNG hề được ghi (tự mâu thuẫn
+                              # artifact-vs-thực-tế, MIKE.md quy chuẩn #2).
     actions_raw = load_corp_actions_raw()
+    old_count = len(actions_raw)   # B-3: mốc phân biệt record CŨ (đã có trước lượt này) vs MỚI
 
     for ev in candidates:
         ticker   = ev.get("ticker", "").upper()
@@ -368,23 +374,53 @@ def run(date_str, dry_run=False):
 
         actions_raw.append(new_rec)
         new_confirms.append((ticker, event_id))
-        post_bus(ticker, event_id, ex_date, mult, acct_results, dry_run=dry_run)
+        pending_bus_posts.append((ticker, event_id, ex_date, mult, acct_results))
 
     if new_confirms:
         try:
             write_corp_actions(actions_raw, dry_run=dry_run)
         except CA.CorpActionError as e:
-            print(f"\n❌ KHÔNG GHI — record vừa tạo không qua validate(): {e}")
+            # B-3 arch-review vòng 9: write_corp_actions() validate() TOÀN BỘ registry (record
+            # CŨ + MỚI), nhưng bản cũ luôn quy kết "record vừa tạo" và trỏ candidates=CANDIDATE
+            # MỚI — SAI khi record hỏng là record CŨ đã tồn tại từ TRƯỚC lượt này (vd VHM index 0
+            # hỏng sẵn), khiến người xử lý đi kiểm nhầm candidate mới trong khi thủ phạm thật là
+            # record cũ (và nếu vậy thì park_holdings/verify_account_snapshot/reconcile_equity
+            # CŨNG đang bị chặn đồng thời — thông tin quan trọng bị mất nếu quy kết sai).
+            import re
+            m = re.search(r"corp_actions\[(\d+)\]", str(e))
+            bad_idx = int(m.group(1)) if m else None
+            bad_is_preexisting = bad_idx is not None and bad_idx < old_count
+            new_tickers = [t for t, _ in new_confirms]
+            if bad_is_preexisting:
+                print(f"\n❌ KHÔNG GHI — record CŨ (index {bad_idx}, đã tồn tại TỪ TRƯỚC lượt "
+                      f"này, KHÔNG PHẢI candidate mới {new_tickers}) không qua validate(): {e}\n"
+                      f"   ⚠ Registry đã hỏng TỪ TRƯỚC — mọi consumer khác "
+                      f"(park_holdings/verify_account_snapshot/reconcile_equity) CŨNG đang bị "
+                      f"chặn bởi CHÍNH record này.")
+                note = (f"registry đã có record HỎNG TỪ TRƯỚC lượt chạy này (index {bad_idx}) — "
+                        f"KHÔNG PHẢI do candidate mới {new_tickers} gây ra. Mọi consumer khác "
+                        f"(park_holdings/verify_account_snapshot/reconcile_equity) cũng đang bị "
+                        f"chặn bởi cùng record này — cần sửa/REVOKE record cũ trước.")
+                candidates_payload = []
+            else:
+                print(f"\n❌ KHÔNG GHI — record vừa tạo (index {bad_idx}) không qua validate(): {e}")
+                note = ("auto_confirm tạo record hỏng, KHÔNG ghi vào registry — cần người kiểm tay")
+                candidates_payload = new_tickers
             import subprocess
             subprocess.run(
                 [APPEND_EVENT, "Mike", "question",
                  "corp-action-auto-confirm-validate-reject",
-                 json.dumps({"error": str(e), "candidates": [t for t, _ in new_confirms],
-                             "urgency": "high",
-                             "note": "auto_confirm tạo record hỏng, KHÔNG ghi vào registry — "
-                                     "cần người kiểm tay"}, ensure_ascii=False)],
+                 json.dumps({"error": str(e), "bad_record_index": bad_idx,
+                             "bad_record_is_preexisting": bad_is_preexisting,
+                             "candidates": candidates_payload,
+                             "urgency": "high", "note": note}, ensure_ascii=False)],
                 check=False)
+            # B-4: KHÔNG post_bus() ở đây — pending_bus_posts chưa hề được gửi (bị dời ra sau
+            # write thành công) nên không có gì cần rút lại; "✅ AUTO-CONFIRMED" sẽ KHÔNG BAO GIỜ
+            # xuất hiện trên đường reject.
             return 1
+        for ticker, event_id, ex_date, mult, acct_results in pending_bus_posts:
+            post_bus(ticker, event_id, ex_date, mult, acct_results, dry_run=dry_run)
         print(f"\nXong: {len(new_confirms)} event(s) AUTO-CONFIRMED: "
               f"{[t for t, _ in new_confirms]}")
     else:

@@ -879,9 +879,14 @@ def main():
         rc = gate.cmd_check_exits(_argparse.Namespace())
         arms = gate.load_arms()
         check("23: arm_price=nan -> rc=1 (KHÔNG rc=0 im lặng)", rc == 1, f"rc={rc}")
-        check("23: arm_price=nan -> KHÔNG bắn bus 'error' (không tính được, không phải breach "
-              "xác nhận)", not any(c[0] == "bus" and c[1] == "error" for c in _NoBus.calls),
-              str(_NoBus.calls))
+        check("23: arm_price=nan -> KHÔNG bắn bus 'error' topic BREACH (không tính được, không "
+              "phải breach xác nhận)",
+              not any(c[0] == "bus" and c[1] == "error" and "exit-breach" in c[2]
+                      for c in _NoBus.calls), str(_NoBus.calls))
+        check("23 (B-2): arm_price=nan -> VẪN bắn bus 'error' topic SUMMARY errors (khác breach — "
+              "B-2 vòng 9: nhánh errors≠∅ không còn fail-silent)",
+              any(c[0] == "bus" and c[1] == "error" and c[2] == "discretionary-margin-check-exits-errors"
+                  for c in _NoBus.calls), str(_NoBus.calls))
         check("23: arm_price=nan -> KHÔNG ghi exit_alerts giả", arms and
               len(arms[0]["exit_alerts"]) == 0, arms)
         check("23: arm_price=nan -> last_drawdown KHÔNG được ghi là số (giữ absent/None, "
@@ -917,6 +922,35 @@ def main():
               rc == 1, f"rc={rc}")
     finally:
         daily_nav_snapshot.confirmed_qty_multiplier_after = ORIG_MULT_AFTER
+
+    # ---- 24. [B-1+B-2 vòng 9] mutation-kill cho nhánh `elif errors:` (arch-review vòng 9 đo
+    #          thật: xoá NGUYÊN nhánh này vẫn PASS 110/110 vì không assertion nào ghim câu chữ
+    #          tổng kết mới, và nhánh cũ fail-silent — không bus/notify khi errors≠∅). Kịch bản:
+    #          1 case active, DNSE không trả được giá (errors≠∅), KHÔNG có breach nào (breaches=∅).
+    import contextlib
+    import io
+
+    daily_nav_snapshot.confirmed_qty_multiplier_after = lambda ticker, asof_date: 1.0
+    try:
+        gate.save_arms([_mk_arm(20000.0, ticker="ERRCASE")])
+        gate.current_price = lambda ticker: (None, None, "DNSE khong tra duoc gia (test)")
+        _NoBus.calls.clear()
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            rc = gate.cmd_check_exits(_argparse.Namespace())
+        out = buf.getvalue()
+        check("24 (B-1): errors!=0, breaches=0 -> stdout CO cau 'KHÔNG phải xác nhận an toàn'",
+              "KHÔNG phải xác nhận an toàn" in out, out)
+        check("24 (B-1): stdout KHÔNG còn câu cũ gây nhầm 'không case nào chạm'",
+              "không case nào chạm" not in out, out)
+        check("24 (B-2): errors!=0 -> PHẢI bắn bus 'error' (không fail-silent)",
+              any(c[0] == "bus" and c[1] == "error" for c in _NoBus.calls), str(_NoBus.calls))
+        check("24 (B-2): errors!=0 -> PHẢI gọi notify (không fail-silent)",
+              any(c[0] == "notify" for c in _NoBus.calls), str(_NoBus.calls))
+        check("24: rc=1 (có errors)", rc == 1, f"rc={rc}")
+    finally:
+        daily_nav_snapshot.confirmed_qty_multiplier_after = ORIG_MULT_AFTER
+        _patch_io(monkey_price=(0.0, "reset", None))
 
     print(f"\n{'='*70}\nPASS={len(PASS)} FAIL={len(FAIL)}")
     if FAIL:
