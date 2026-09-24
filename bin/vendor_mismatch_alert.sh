@@ -19,7 +19,32 @@
 #   ⚠️ 10 nói về SỰ TỒN TẠI của lệch nguồn, KHÔNG hứa "đã gửi được cảnh báo" — hai caller
 #   (`check_report_cadence.sh:91`, `eod_trading_report.sh:72`) chỉ dùng nó để quy ĐÚNG nguyên
 #   nhân/người xử lý (§29), nên nó phải đúng cả khi Discord chết. Gửi hỏng thì in LỖI THẬT ra
-#   stderr và KHÔNG ghi de-dup ⇒ lượt sau thử lại.
+#   stderr và KHÔNG ghi de-dup cho file đó (gọi LẠI đúng script/file/ngày này sẽ thử gửi lại).
+#
+#   ⚠️ ĐÍNH CHÍNH (arch-review vòng 3b, R1 — bản trước khẳng định "⇒ lượt sau thử lại" quá tay):
+#   "gọi lại thì thử lại" chỉ đúng Ở CẤP SCRIPT NÀY, không có nghĩa caller thật sự SẼ gọi lại cho
+#   đúng file đó. `check_report_cadence.sh:76-81` chỉ chạy lại khối gate+vendor-alert cho 1 file
+#   khi `state/report_emailed.json` (EMAILED_STATE — dedup của TOÀN BỘ report, KHÁC de-dup cục bộ
+#   ở trên) CHƯA có key file đó. Key này được ghi ngay khi kênh EMAIL của `report_delivery_gate.py`
+#   thành công (dòng 266-270); và một khi record đã COMPLETE (đủ artifact_validated + discord +
+#   email), `complete(record, sha)` return SỚM ở dòng 238-239 — TRƯỚC bước validate lại — nên với
+#   1 báo cáo đã giao trót lọt, sweep KHÔNG BAO GIỜ quay lại đúng file đó nữa, bất kể Discord của
+#   vendor_mismatch_alert.sh hôm đó gửi được hay không.
+#   Đường phát lại THẬT của SỰ KIỆN lệch nguồn là báo cáo NGÀY KẾ TIẾP — tên file KHÁC nên chạy
+#   lại toàn bộ pipeline từ đầu, và `report_return_gate.py` (LOOKBACK_DAYS=120 dòng 60, chỉ giữ
+#   sự kiện của mã còn trong vị thế — dòng 186-192) quét lại đúng cặp (mã, ex-date) đó nếu vẫn còn
+#   trong cửa sổ VÀ vị thế còn nắm. Hệ quả:
+#     (a) MẤT cảnh báo thật chỉ xảy ra khi Discord chết ĐÚNG hôm đó **VÀ** vị thế bị bán hết
+#         trước báo cáo kế tiếp (dar._qty_at ⇒ 0 ⇒ event không còn được quét ra nữa, nên không
+#         còn "ngày kế tiếp" nào tái tạo lại marker để thử gửi).
+#     (b) event `Mike error vendor-mismatch-...` (dòng ~99) KHÔNG phải backstop hành động được:
+#         `bin/ops_health_check.sh` chỉ xét `event_type == "question"`, bỏ qua `error` — đo thật
+#         2026-09-24: `bus/inbox/Mike.jsonl` có `error/selfcheck-weekly-new-red` lặp lại 5 lần từ
+#         09-14 đến 09-23 không ai đóng, cùng lớp "error không có ai xử lý".
+#   Không ghi state cục bộ khi Discord hỏng vẫn ĐÚNG phải làm — sổ sách không được nói "đã cảnh
+#   báo" khi chưa gửi được gì (§5/§29) — chỉ là nó không mua được "lượt sau thử lại ĐÚNG file này
+#   qua caller thật" như bản cũ ngụ ý; nó mua được tính trung thực của bookkeeping + khả năng thử
+#   lại NẾU có ai gọi lại chính script này (thủ công/kênh khác).
 #
 # `state/vendor_mismatch_alerted.json` (de-dup 1 key/file báo cáo/ngày) TĂNG KHÔNG TRẦN, CÓ CHỦ Ý
 # — cùng quy ước với `state/report_delivery_incomplete_alerted.json` của check_report_cadence.sh:61
@@ -100,10 +125,11 @@ if ! BUS_ERR="$("$ROOT/bin/append_event.sh" Mike error "vendor-mismatch-${FNAME}
   echo "vendor_mismatch_alert: append_event.sh THAT BAI (bus la kenh phu, van gui Discord). Loi that: ${BUS_ERR}" >&2
 fi
 
-# DISCORD = kênh CHÍNH và là ĐIỀU KIỆN để ghi de-dup. Trước đây `2>/dev/null || true` + ghi state
-# vô điều kiện: ccdb chết/topic sai ⇒ lỗi bị nuốt, state vẫn ghi "đã cảnh báo hôm nay", và ở ca
-# rc=0 (mã không công bố) báo cáo ĐÃ giao xong nên sweep hôm sau không quay lại file đó nữa
-# ⇒ MẤT CẢNH BÁO VĨNH VIỄN — đúng thứ script này sinh ra để chặn.
+# DISCORD = kênh CHÍNH và là ĐIỀU KIỆN để ghi de-dup CỤC BỘ (vendor_mismatch_alerted.json, KHÁC
+# tầng EMAILED_STATE của check_report_cadence.sh — xem ĐÍNH CHÍNH ở header). Trước đây
+# `2>/dev/null || true` + ghi state vô điều kiện: ccdb chết/topic sai ⇒ lỗi bị NUỐT (§29) và state
+# vẫn ghi "đã cảnh báo hôm nay" dù KHÔNG có gì được gửi — sổ sách nói dối, và nếu có lượt gọi lại
+# THẬT cho đúng file/ngày đó thì lượt đó cũng bị khoá oan bởi chính de-dup cục bộ này.
 if ! NOTIFY_ERR="$("$ROOT/bin/notify_thread.sh" "$MSG" "$TOPIC" 2>&1 >/dev/null)"; then
   echo "vendor_mismatch_alert: notify_thread.sh THAT BAI — KHONG ghi de-dup, luot sau se thu lai. Loi that: ${NOTIFY_ERR}" >&2
   exit 10
