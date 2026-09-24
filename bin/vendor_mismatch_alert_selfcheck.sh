@@ -85,6 +85,27 @@ fi
 exec "$REAL_PY" "$@"
 SHIM
   chmod +x "$sb/shim/python3"
+  # Shim `date`: chỉ bật khi SC_FAKE_DATE=1 (R2, arch-review vòng 3b) — trả ngày CỐ ĐỊNH theo $TZ
+  # nhận được thay vì đồng hồ thật, để test mốc ICT không lệ thuộc giờ chạy thật (chạy lúc nào
+  # trong ngày cũng ra cùng kết quả — không phụ thuộc khoảng lệch múi giờ trùng ngày lịch tình cờ).
+  # Script sản xuất gọi `TZ='Asia/Ho_Chi_Minh' date +%Y-%m-%d` (dòng neo TZ tường minh) — override
+  # đó thắng TZ môi trường ngoài nên shim thấy đúng "Asia/Ho_Chi_Minh"; ai lỡ bỏ tiền tố TZ= đi thì
+  # shim thấy TZ AMBIENT (test set = Pacific/Kiritimati) và trả ngày KHÁC — đó là cách
+  # MUTATION-GUARD vendor_alert_ict_anchor bắt được hồi quy.
+  cat > "$sb/shim/date" <<'SHIM'
+#!/usr/bin/env bash
+REAL_DATE="$(PATH="${SC_REAL_PATH}" command -v date)"
+if [ "${SC_FAKE_DATE:-0}" = "1" ]; then
+  if [ "${TZ:-}" = "Asia/Ho_Chi_Minh" ]; then
+    echo "2026-09-24"
+  else
+    echo "2026-09-25"
+  fi
+  exit 0
+fi
+exec "$REAL_DATE" "$@"
+SHIM
+  chmod +x "$sb/shim/date"
   printf '%s' "$sb"
 }
 
@@ -228,6 +249,36 @@ printf '{\n  "old_report_2026-09-01.md": "2026-09-01"\n}\n' > "$SB7/$STATE_REL"
   echo "$PASS|$FAIL" > "$SB7/tally" )
 read -r PASS FAIL < <(tr '|' ' ' < "$SB7/tally")
 
+section "CA 8 — sai số đối số (0/1) ⇒ rc=2 + usage ra stderr, KHÔNG post gì (dòng 18/31-34)"
+SB8="$(make_sandbox "$SRC")"
+( for nargs in 0 1; do
+    export SC_CALLLOG="$SB8/calls_$nargs.log"; : > "$SC_CALLLOG"
+    case "$nargs" in
+      0) OUT_ERR="$("$SB8/mike/bin/vendor_mismatch_alert.sh" 2>&1 >/dev/null </dev/null)"; RC8=$? ;;
+      1) OUT_ERR="$("$SB8/mike/bin/vendor_mismatch_alert.sh" "only_one_arg" 2>&1 >/dev/null </dev/null)"; RC8=$? ;;
+    esac
+    check "rc=2 khi gọi với $nargs đối số" "2" "$RC8"
+    case "$OUT_ERR" in *"Usage:"*) ok "in usage ra stderr ($nargs đối số)" ;; *) bad "in usage ra stderr ($nargs đối số)" "chứa 'Usage:'" "$OUT_ERR" ;; esac
+    check "KHÔNG gọi side-effect nào ($nargs đối số)" "" "$(cat "$SC_CALLLOG")"
+  done
+  echo "$PASS|$FAIL" > "$SB8/tally" )
+read -r PASS FAIL < <(tr '|' ' ' < "$SB8/tally")
+
+section "CA 9 — mốc ICT neo CỨNG bất kể TZ môi trường gọi script (MUTATION-GUARD vendor_alert_ict_anchor)"
+SB9="$(make_sandbox "$SRC")"
+( export SC_NOTIFY_RC=0 SC_APPEND_RC=0 SC_FAKE_DATE=1 TZ='Pacific/Kiritimati'
+  run_one "$SB9" "$MARKER_PUB"
+  check "exit 10" "10" "$RC"
+  case "$STATE_TXT" in
+    *'"spacex_daily_report_2026-09-11.md":"2026-09-24"'*)
+      ok "MUTATION-GUARD vendor_alert_ict_anchor: key = ngày ICT (2026-09-24), không phải ngày theo TZ môi trường (2026-09-25)" ;;
+    *)
+      bad "MUTATION-GUARD vendor_alert_ict_anchor: key = ngày ICT (2026-09-24), không phải ngày theo TZ môi trường (2026-09-25)" \
+          '"...":"2026-09-24"' "$STATE_TXT" ;;
+  esac
+  echo "$PASS|$FAIL" > "$SB9/tally" )
+read -r PASS FAIL < <(tr '|' ' ' < "$SB9/tally")
+
 # ---------------------------------------------------------------- mutation
 if [ "$RUN_MUTATIONS" -eq 1 ]; then
   # Mutation THẬT: dựng bản hỏng rồi chạy TRỌN bộ ca trên nó (SC_TARGET_SRC). Mutant "bị giết"
@@ -306,6 +357,11 @@ fi' 'if ! BUS_ERR="$("$ROOT/bin/append_event.sh" Mike error "vendor-mismatch-${F
 fi'
   kill_check m4 "kênh phụ chặn kênh chính" \
     "bus hỏng KHÔNG chặn đường tới user"
+
+  section "MUTATION 5 — mốc ICT quay xe: bỏ TZ='Asia/Ho_Chi_Minh' khi tính TODAY (R2)"
+  mutate m5 "TODAY=\"\$(TZ='Asia/Ho_Chi_Minh' date +%Y-%m-%d)\"" 'TODAY="$(date +%Y-%m-%d)"'
+  kill_check m5 "mốc ngày lệ thuộc TZ môi trường gọi (cron/host có thể không phải ICT)" \
+    "MUTATION-GUARD vendor_alert_ict_anchor: key = ngày ICT (2026-09-24), không phải ngày theo TZ môi trường (2026-09-25)"
 fi
 
 printf '\n===== vendor_mismatch_alert_selfcheck: %d PASS / %d FAIL =====\n' "$PASS" "$FAIL"
