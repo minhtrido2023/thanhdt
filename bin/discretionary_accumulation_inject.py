@@ -40,7 +40,7 @@ from trading_bot.no_chase_ceiling import ANCHOR_BASIS_OFFICIAL_REF, check_refere
 from trading_bot.config import live_dnse_labels
 from trading_bot.plan_cash_commitment import gate_injected_order, replan_dropped_injection
 from trading_bot.vn_market import (
-    session_phase, now_ict, normalize_price_vnd, is_holiday)
+    session_phase, now_ict, normalize_price_vnd, is_holiday, today_ict)
 
 _ICT_TZ = ZoneInfo("Asia/Ho_Chi_Minh")   # §16: neo TZ tường minh, không tin TZ của process
 
@@ -110,9 +110,30 @@ def load_active_states(account):
     return out, skipped
 
 
-def broker_filled_qty(account, account_id, ticker, baseline):
+def broker_filled_qty(account, account_id, ticker, baseline, state=None):
     """filled_qty của CHƯƠNG TRÌNH = broker_total(ticker) − baseline_qty_before_program.
-    None nếu không đọc được broker (fail-safe)."""
+    None nếu không đọc được broker (fail-safe).
+
+    §corp-action (job Taylor_20260924_064510, Việc 1) — `total` đọc THẲNG từ broker mang cả KL
+    CREDIT do sự kiện tỉ lệ (thưởng CP/cổ tức CP/tách), không chỉ KL do lệnh gom mua thêm. Trừ
+    thẳng `total − baseline` khi có credit sẽ thổi phồng `filled_qty` ⇒ `remaining <= 0` giả ⇒
+    chương trình dừng gom sớm trong im lặng (khác `discretionary_margin_gate`: ở đó hậu quả là
+    cảnh báo GIẢ; ở đây hậu quả là KHÔNG cảnh báo khi lẽ ra phải tiếp tục gom).
+
+    Trước khi trừ, đối chiếu qua `exdate_frame.classify_positions` — TÁI DÙNG nguyên khối
+    "KHỐI LƯỢNG" đã audit 5 vòng ở `compute_active_nav.py` (12/12 phần dư đo được là
+    corp-action thật, 0 nhiễu), không viết lại phép phân loại:
+      · Có sự kiện CONFIRMED (`credited`) ⇒ quy đổi `baseline` (+residual, `state` nếu truyền
+        vào được cập nhật `baseline_qty_before_program` — PERSIST để phiên sau không tính lại)
+        RỒI mới trừ, giữ đúng tỉ lệ mục tiêu thay vì đếm KL credit là "đã gom".
+      · KL đổi bất thường KHÔNG giải thích được (`blocked`) ⇒ FAIL-SAFE: trả filled=None (đúng
+        nhánh "failsafe" sẵn có ở `compute_session_order` — không mua bởi thiếu thông tin),
+        KHÔNG đoán theo tỉ lệ khi thiếu bằng chứng (§29).
+      · `classify_positions` tự thân lỗi (IO/import) ⇒ KHÔNG fail-closed cả cổng — giữ hành vi
+        CŨ (trừ thẳng, không quy đổi) để không phá luồng gom đang chạy đúng vì một lỗi phụ trợ.
+
+    Trả `(filled, broker, corp_action_note)` — note=None khi KHÔNG có gì bất thường trong
+    ngày (đường mòn, không có sự kiện)."""
     try:
         from trading_bot.brokers import DNSEBroker
         b = DNSEBroker(account_id=account_id, credentials_file=None, label=account)
@@ -120,9 +141,44 @@ def broker_filled_qty(account, account_id, ticker, baseline):
         positions = b.get_positions()
     except Exception as exc:
         print(f"  [FAILSAFE] không đọc được broker positions ({ticker}): {exc}")
-        return None, None
+        return None, None, None
     total = int((positions.get(ticker) or {}).get("total", 0) or 0)
-    return max(0, total - int(baseline)), b
+
+    try:
+        import exdate_frame
+        credited, blocked = exdate_frame.classify_positions(
+            account, account_id, today_ict().isoformat(), {ticker: positions.get(ticker) or {}})
+    except Exception as exc:
+        print(f"  [WARN] {ticker}: exdate_frame.classify_positions lỗi ({exc}) — bỏ qua cổng "
+              f"corp-action phiên này, dùng baseline hiện có (hành vi trước khi có cổng)")
+        credited, blocked = {}, {}
+
+    if ticker in blocked:
+        note = (f"KL đổi NGOÀI lệnh khớp thật, KHÔNG xác nhận được sự kiện corp-action ⇒ "
+                f"KHÔNG tính filled (fail-safe, không đoán): {blocked[ticker]}")
+        print(f"  [FAILSAFE-CORPACTION] {ticker}: {note}")
+        return None, b, note
+
+    if ticker in credited:
+        detail = credited[ticker]
+        residual = detail["residual"]
+        old_baseline = int(baseline)
+        new_baseline = old_baseline + int(round(residual))
+        note = (f"broker đã credit sớm {residual:+,.0f}cp (tỉ lệ {detail['exercise_ratio']} "
+                f"của {detail['event_code']} ex-date {detail['ex_date']}) ⇒ quy đổi baseline "
+                f"{old_baseline:,}→{new_baseline:,} để KHÔNG đếm KL credit là đã gom mua")
+        print(f"  [CORPACTION] {ticker}: {note}")
+        if state is not None:
+            state["baseline_qty_before_program"] = new_baseline
+            state.setdefault("corp_action_baseline_adjustments", []).append({
+                "at": dt.datetime.now(_ICT_TZ).isoformat(), "ticker": ticker,
+                "residual": residual, "exercise_ratio": detail["exercise_ratio"],
+                "event_code": detail["event_code"], "ex_date": detail["ex_date"],
+                "baseline_before": old_baseline, "baseline_after": new_baseline})
+        baseline = new_baseline
+        return max(0, total - int(baseline)), b, note
+
+    return max(0, total - int(baseline)), b, None
 
 
 def prev_session_market(broker, ticker):
@@ -428,7 +484,15 @@ def process_account(account, plan_date, dry_run):
             continue
 
         baseline = int(state.get("baseline_qty_before_program", 0) or 0)
-        filled, broker = broker_filled_qty(account, account_id, ticker, baseline)
+        filled, broker, corp_action_note = broker_filled_qty(
+            account, account_id, ticker, baseline, state=state)
+        if corp_action_note:
+            plan.setdefault("discretionary_inject_notes", []).append(
+                {"at": now_iso, "ticker": ticker,
+                 "action": "corp_action_blocked" if filled is None else "corp_action_baseline_adjusted",
+                 "state_file": state.get("_state_file"), "note": corp_action_note})
+            if not dry_run:
+                _atomic_write_json(plan_path, plan)
         prev_turnover = prev_price = anchors = anchor_dates = None
         anchor_basis = anchor_exchange = None
         if filled is not None and broker is not None:
