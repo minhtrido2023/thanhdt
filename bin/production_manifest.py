@@ -67,6 +67,7 @@ ROOT_TIER = {
     "late_plan_catchup.sh": T0, "nav_sync_retry.sh": T0, "nav_snapshot_daily.sh": T0, "check_report_cadence.sh": T0,
     "corp_action_auto_confirm.py": T0, "discretionary_margin_check_exits_daily.sh": T0,
     "bq_freshness_check.sh": T0,  # EOD pipeline + dispatch lập plan
+    "plan_approval_reminder.sh": T0,  # tái dùng approval_block_reason() của bot_execute.py — phần của chuỗi approval-gate T0
     # T1 — pipeline dữ liệu / regime / feed / paper
     "papertrade_daily.sh": T1, "pt_8l_daily.sh": T1, "telegram_run_daily.sh": T1,
     "daily_refresh_v34b_linux.sh": T1, "auto_update_commodity_wb.sh": T1,
@@ -91,6 +92,7 @@ ROOT_TIER = {
     "fiinprox_harvest_tick.sh": T1,            # wrapper cron harvest FiinPro-X
     "fiinprox_harvest_tick.py": T1,            # hàng đợi harvest FiinPro-X (ghi file raw)
     "treasury_buyback_window_monitor.py": T1,  # monitor cửa sổ tuân thủ mua cổ phiếu quỹ
+    "paper_corp_action.py": T1,  # công cụ ĐO corp-action cho sổ PaperBroker, không chạm tiền thật/đường đặt lệnh
     # T2 — fleet-ops (dispatch/bus/consolidate/health/backup/audit/hook)
     "consolidate.sh": T2, "watchdog.sh": T2, "discover_sessions.py": T2,
     "resume_pending.py": T2, "fleet_backup.sh": T2, "start.sh": T2,
