@@ -19,8 +19,17 @@ import os
 import subprocess
 import sys
 
-WC = "/home/trido/thanhdt/WorkingClaude"
-MIKE_BIN = os.path.join(WC, "mike", "bin")
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+import wc_paths  # noqa: E402
+# `WC` cứng canonical trước đây làm mọi ca (kể cả A-J, không chỉ shim K) LUÔN import
+# compute_active_nav.py từ checkout canonical, bất kể selfcheck này đang chạy từ worktree nào —
+# PASS không chứng minh gì về code TRONG worktree. MIKE_BIN neo theo VỊ TRÍ FILE
+# (`HERE`, sibling compute_active_nav.py cùng thư mục) nên tự đổi theo worktree đang chạy;
+# `WC` (trading_bot ở Section E, không đổi theo mike worktree) vẫn tra qua marker
+# `wc_paths.find_wc_root` — quy ước sẵn có ở `corp_action_selfcheck.py`, không tự bịa.
+WC = wc_paths.find_wc_root(__file__)
+MIKE_BIN = HERE
 
 fails = []
 
