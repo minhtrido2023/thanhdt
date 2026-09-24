@@ -222,8 +222,20 @@ def corp_action_frame_multiplier(ticker, arm_date):
     KHÔNG còn nhánh `blocked`/fail-closed — hàm chỉ đọc registry đã CONFIRMED (do người/agent
     xác nhận qua 2-3 nguồn độc lập, xem `corp_actions.json._status`), không tự suy từ diff KL
     broker nữa nên không còn "KL bất thường chưa giải thích được" để fail-safe ở TẦNG NÀY.
+
+    §29 vòng 5 — `dns.confirmed_qty_multiplier_after()` tự trả 1.0 IM LẶNG khi file registry
+    KHÔNG TỒN TẠI (fail-open đúng ý cho call-site GỐC của nó trong `daily_nav_snapshot.main()`,
+    nơi thiếu file hợp lệ nghĩa là "không có corp-action nào cần quy đổi"). Ở ĐÂY thì khác:
+    `cmd_check_exits()` cần phân biệt "registry nói 0 sự kiện" (factor=1.0 tin được) với
+    "registry vắng nên chưa hề đọc được gì" (factor=1.0 không có nghĩa gì) — file vắng ở 11/12
+    worktree anh em là chuyện thường, không phải hiếm. Không tự đổi hành vi fail-open của hàm
+    dùng chung (sẽ vỡ call-site kia) — kiểm `exists()` NGAY TẠI ĐÂY và ném exception thật để đi
+    đúng nhánh except đã có sẵn ở `cmd_check_exits()` (giữ nguyên hệ số cũ, không ghi
+    `corp_action_adjustments`, báo "KHÔNG XÁC ĐỊNH ĐƯỢC").
     """
     import daily_nav_snapshot as dns
+    if not os.path.exists(dns.CORP_ACTIONS_FILE):
+        raise FileNotFoundError(f"registry corp-action không tồn tại: {dns.CORP_ACTIONS_FILE}")
     return dns.confirmed_qty_multiplier_after(ticker, arm_date)
 
 
@@ -385,10 +397,16 @@ def cmd_check_exits(args):
             # từng vá sai: fail-open factor=1.0 rồi vẫn rơi vào nhánh ghi note "tích luỹ sự
             # kiện ⇒ ×1.000000", ĐÈ MẤT hệ số 1.30 đã biết từ lần đọc thành công trước đó).
             # Sửa: GIỮ NGUYÊN corp_action_multiplier đã biết gần nhất (nếu chưa từng đọc thành
-            # công thì mặc định 1.0, đúng tinh thần fail-open — drawdown bị tính nhiều hơn thực,
-            # cảnh báo giả chứ không bao giờ bỏ sót cảnh báo thật). Không `continue` — arm này
-            # vẫn được đánh giá breach, các arm KHÁC trong vòng lặp không bị 1 registry lỗi làm
-            # crash lây.
+            # công thì mặc định 1.0). An toàn MỘT CHIỀU, không phải mọi chiều: hệ số chỉ TÍCH LUỸ
+            # TĂNG DẦN theo sự kiện CONFIRMED mới (§corp-action ở trên) nên giữ giá trị cũ thường
+            # làm drawdown tính RA ÂM HƠN thực (cảnh báo giả, không bỏ sót cảnh báo thật). Chiều
+            # NGƯỢC LẠI — một sự kiện CONFIRMED bị REVOKE khiến hệ số thật đã giảm xuống dưới giá
+            # trị cache — thì giữ hệ số CŨ (cao hơn) làm drawdown tính RA ÍT ÂM HƠN thực, CÓ THỂ
+            # che một breach thật. Chưa có cơ chế fail-closed cho chiều này (revoke hiếm, và
+            # fail-closed sẽ chặn oan mọi lần registry chỉ đơn thuần tạm không đọc được) — người
+            # vận hành cần biết giới hạn này khi thấy dòng "KHÔNG XÁC ĐỊNH ĐƯỢC" lặp lại nhiều lần.
+            # Không `continue` — arm này vẫn được đánh giá breach, các arm KHÁC trong vòng lặp
+            # không bị 1 registry lỗi làm crash lây.
             err_detail = f"{type(exc).__name__}: {exc}"
             msg = (f"{a['ticker']}: lỗi đọc corp-action registry khi tính multiplier — "
                    f"KHÔNG cập nhật hệ số (giữ nguyên giá trị đã biết gần nhất, nếu có). "
@@ -448,8 +466,11 @@ def cmd_check_exits(args):
                    f"de-lever BẮT BUỘC (`discretionary-margin-policy-20260823.md` §Rào chắn rủi "
                    f"ro) — đây là CẢNH BÁO, hành động thoát vẫn cần người quyết.")
             print(msg)
-            _bus("error", f"discretionary-margin-exit-breach-{ticker}",
-                 {"ticker": ticker, "price": px, "drawdown": drawdown})
+            bus_payload = {"ticker": ticker, "price": px, "drawdown": drawdown,
+                           "frame_unverified": ticker in factor_lookup_failed}
+            if ticker in factor_lookup_failed:
+                bus_payload["frame_unverified_reason"] = factor_lookup_failed[ticker]
+            _bus("error", f"discretionary-margin-exit-breach-{ticker}", bus_payload)
             _notify(msg)
     else:
         print(f"OK — {len(live)} case active, không case nào chạm {EXIT_DD_PCT:.0%}.")

@@ -25,6 +25,7 @@ phiên mai), tích luỹ TẤT CẢ sự kiện CONFIRMED có `ex_date > arm_dat
 Chỉ mock `current_price` + `daily_nav_snapshot.confirmed_qty_multiplier_after` (KHÔNG chạm
 DNSE/BQ/corp_actions.json thật).
 """
+import json
 import os
 import sys
 import tempfile
@@ -51,7 +52,7 @@ class _NoBus:
     calls = []
 
     def bus(self, kind, topic, payload, trace_id=None):
-        _NoBus.calls.append(("bus", kind, topic))
+        _NoBus.calls.append(("bus", kind, topic, payload))
         return True
 
     def notify(self, msg):
@@ -478,6 +479,137 @@ def main():
               n_adj_after_decrease >= 1, f"{n_adj_after_decrease}")
     finally:
         _restore_corp_action_mocks()
+
+    # ════════════════ Vòng 5 — R1/R2/R3: HÀM THẬT (không stub), cửa "file vắng" ═══════════════
+    # Bug vòng 3+4: `confirmed_qty_multiplier_after()` trả 1.0 IM LẶNG khi CORP_ACTIONS_FILE
+    # KHÔNG TỒN TẠI (khác lớp lỗi "JSON hỏng" đã vá vòng 4) — mọi test 13-18c ở trên đều STUB
+    # `daily_nav_snapshot.confirmed_qty_multiplier_after`, KHÔNG một ca nào chạm
+    # `corp_action_frame_multiplier()` THẬT lẫn `confirmed_qty_multiplier_after()` THẬT cùng lúc,
+    # nên hợp đồng "ném exception khi registry vắng" chưa từng được kiểm. R2 bắt buộc: dùng HÀM
+    # THẬT, trỏ CORP_ACTIONS_FILE vào tmpdir tự tạo.
+    ORIG_CORP_ACTIONS_FILE = daily_nav_snapshot.CORP_ACTIONS_FILE
+
+    def _restore_corp_actions_file():
+        daily_nav_snapshot.CORP_ACTIONS_FILE = ORIG_CORP_ACTIONS_FILE
+
+    # ---- 19. R2a [HÀM THẬT]: CORP_ACTIONS_FILE trỏ tmpdir, file KHÔNG TỒN TẠI, arm ĐÃ có
+    #          corp_action_multiplier=1.30 từ lần đọc thành công trước đó -> phải đi đúng nhánh
+    #          except (giữ nguyên 1.30, KHÔNG entry adjustments mới, notify "không xác định
+    #          được" và KHÔNG "×1.000000", rc=1). Bắt mutation bỏ nhánh exists()-check mới thêm
+    #          ở corp_action_frame_multiplier() (không check -> confirmed_qty_multiplier_after
+    #          THẬT trả 1.0 im lặng -> multiplier bị đè về 1.0, đúng bug vòng 3 tái hiện).
+    try:
+        daily_nav_snapshot.CORP_ACTIONS_FILE = os.path.join(tmpdir, "corp_actions_R2a_absent.json")
+        check("R2a-setup: file registry THẬT SỰ không tồn tại (tiền đề của ca này)",
+              not os.path.exists(daily_nav_snapshot.CORP_ACTIONS_FILE))
+        arm = _mk_arm(26000.0, ticker="VPB", armed_at="2026-09-01T09:00:00+07:00")
+        arm["corp_action_multiplier"] = 1.30
+        arm["corp_action_adjustments"] = [
+            {"at": "2026-09-10T09:00:00+07:00", "factor_before": 1.0, "factor_after": 1.30,
+             "note": "seed: da doc thanh cong lan truoc"}]
+        gate.save_arms([arm])
+        _NoBus.calls.clear()
+        n_adj_before = len(arm["corp_action_adjustments"])
+        # arm_price_frame = 26000/1.30 = 20000; px=15000 -> drawdown = -25% (breach)
+        _patch_io(monkey_price=(15000.0, "dnse_g1_fake", None))
+        rc = gate.cmd_check_exits(_argparse.Namespace())
+        a0 = (gate.load_arms() or [{}])[0]
+        check("R2a: CORP_ACTIONS_FILE vắng -> corp_action_frame_multiplier() THẬT phải NÉM lỗi "
+              "(không trả 1.0 im lặng) -> multiplier CŨ (1.30) được GIỮ NGUYÊN, không bị đè về 1.0",
+              abs(a0.get("corp_action_multiplier", 0) - 1.30) < 1e-9, f"{a0.get('corp_action_multiplier')}")
+        check("R2a: KHÔNG sinh thêm corp_action_adjustments khi registry vắng",
+              len(a0.get("corp_action_adjustments") or []) == n_adj_before,
+              f"before={n_adj_before} after={len(a0.get('corp_action_adjustments') or [])}")
+        check("R2a: drawdown vẫn tính theo hệ số CŨ đã biết (frame 20.000 => -25%, không reset "
+              "về không quy đổi)", abs(a0.get("last_drawdown", 0) - (-0.25)) < 1e-6,
+              f"{a0.get('last_drawdown')}")
+        check("R2a: rc=1 (có errors)", rc == 1, f"rc={rc}")
+        notify_msgs = [c[1] for c in _NoBus.calls if c[0] == "notify"]
+        joined = " ".join(notify_msgs)
+        check("R2a: notify CÓ ít nhất 1 tin khi breach", len(notify_msgs) >= 1, str(_NoBus.calls))
+        check("R2a: notify KHÔNG chứa 'x1.000000' (không ngụ ý đã đọc được registry vắng)",
+              "×1.000000" not in joined and "x1.000000" not in joined, joined)
+        check("R2a: notify CÓ dấu hiệu 'không xác định được'",
+              "không xác định được" in joined.lower(), joined)
+        bus_payloads = [c[3] for c in _NoBus.calls if c[0] == "bus" and c[1] == "error"]
+        check("R2a (R4): bus payload đánh dấu frame_unverified=True khi registry vắng",
+              bus_payloads and bus_payloads[0].get("frame_unverified") is True, str(bus_payloads))
+    finally:
+        _restore_corp_actions_file()
+        _patch_io(monkey_price=(0.0, "reset", None))
+
+    # ---- 20. R2b [HÀM THẬT]: CORP_ACTIONS_FILE trỏ tmpdir, file CÓ 1 sự kiện CONFIRMED hợp lệ
+    #          -> hàm thật vẫn quy đổi ĐÚNG khi có dữ liệu tốt (chứng minh exists()-check mới
+    #          không chặn nhầm đường THÀNH CÔNG, chỉ chặn đường FILE VẮNG).
+    try:
+        corp_file = os.path.join(tmpdir, "corp_actions_R2b_present.json")
+        with open(corp_file, "w", encoding="utf-8") as f:
+            json.dump({"actions": [
+                {"ticker": "VPB", "_status": "CONFIRMED", "ex_date": "2026-09-15",
+                 "qty_multiplier": 1.30},
+            ]}, f)
+        daily_nav_snapshot.CORP_ACTIONS_FILE = corp_file
+        gate.save_arms([_mk_arm(26000.0, ticker="VPB", armed_at="2026-09-01T09:00:00+07:00")])
+        _NoBus.calls.clear()
+        _patch_io(monkey_price=(19000.0, "dnse_g1_fake", None))
+        rc = gate.cmd_check_exits(_argparse.Namespace())
+        a0 = (gate.load_arms() or [{}])[0]
+        check("R2b: HÀM THẬT (không stub) đọc registry CÓ file -> multiplier tích luỹ = 1.30",
+              abs(a0.get("corp_action_multiplier", 0) - 1.30) < 1e-9, f"{a0.get('corp_action_multiplier')}")
+        check("R2b: HÀM THẬT -> drawdown quy đổi đúng -5% (20.000 frame), không breach",
+              abs(a0.get("last_drawdown", 0) - (-0.05)) < 1e-6, f"{a0.get('last_drawdown')}")
+        check("R2b: HÀM THẬT -> KHÔNG breach, rc=0",
+              rc == 0 and not any(c[0] == "bus" and c[1] == "error" for c in _NoBus.calls),
+              f"rc={rc} {_NoBus.calls}")
+    finally:
+        _restore_corp_actions_file()
+        _patch_io(monkey_price=(0.0, "reset", None))
+
+    # ---- 21. R3: factor_lookup_failed PHẢI khởi tạo 1 LẦN TRƯỚC vòng lặp, không phải bên trong.
+    #          2 arm CÙNG breach, arm LỖI đứng TRƯỚC arm LÀNH (đảo thứ tự so với test 18, nơi arm
+    #          lỗi VPB đứng trước nhưng KHÔNG breach nên không bắt được mutation). Mutation
+    #          "factor_lookup_failed = {} khởi tạo TRONG vòng lặp" sẽ reset dict khi xử lý TV1
+    #          (lành, sau VPB) -> mất entry lỗi của VPB -> tin breach VPB SAI thành "đã quy đổi
+    #          ×1.000000" thay vì "không xác định được" (đúng bug vòng 3 tái hiện qua thứ tự).
+    try:
+        gate.save_arms([
+            _mk_arm(20000.0, ticker="VPB", armed_at="2026-09-01T09:00:00+07:00"),  # LỖI, đứng TRƯỚC
+            _mk_arm(20000.0, ticker="TV1", armed_at="2026-09-01T09:00:00+07:00"),  # LÀNH, đứng SAU
+        ])
+        _NoBus.calls.clear()
+        _prices = {
+            "VPB": (15000.0, "dnse_g1_fake", None),   # -25%: breach, nhưng registry lỗi
+            "TV1": (15000.0, "dnse_g1_fake", None),   # -25%: breach, registry lành (mult=1.0)
+        }
+        gate.current_price = lambda ticker: _prices[ticker]
+        daily_nav_snapshot.confirmed_qty_multiplier_after = _mult_after_stub_raising({"VPB"})
+        try:
+            rc = gate.cmd_check_exits(_argparse.Namespace())
+        except Exception as exc:
+            check("R3-21: cmd_check_exits KHÔNG được crash (thứ tự arm lỗi-trước-lành)",
+                  False, f"{type(exc).__name__}: {exc}")
+            rc = None
+        bus_errors = {c[2].rsplit("-", 1)[-1]: c[3] for c in _NoBus.calls
+                      if c[0] == "bus" and c[1] == "error"}
+        check("R3-21: CẢ HAI arm (VPB lỗi + TV1 lành) đều được báo breach qua bus",
+              set(bus_errors) == {"VPB", "TV1"}, str(bus_errors))
+        vpb_payload = bus_errors.get("VPB", {})
+        tv1_payload = bus_errors.get("TV1", {})
+        check("R3-21: arm LỖI (VPB, đứng TRƯỚC) VẪN giữ frame_unverified=True dù xử lý sau đó "
+              "có arm lành khác (bắt mutation factor_lookup_failed khởi tạo trong vòng lặp)",
+              vpb_payload.get("frame_unverified") is True, str(vpb_payload))
+        check("R3-21: arm LÀNH (TV1, đứng SAU) frame_unverified=False (không bị lây lỗi của VPB)",
+              tv1_payload.get("frame_unverified") is False, str(tv1_payload))
+        notify_msgs = [c[1] for c in _NoBus.calls if c[0] == "notify"]
+        vpb_msgs = [m for m in notify_msgs if "VPB" in m]
+        check("R3-21: tin notify của VPB CÓ 'không xác định được', KHÔNG có '×1.000000' giả",
+              bool(vpb_msgs) and all("không xác định được" in m.lower() for m in vpb_msgs)
+              and all("×1.000000" not in m and "x1.000000" not in m for m in vpb_msgs),
+              str(vpb_msgs))
+        check("R3-21: rc=1 (có errors)", rc == 1, f"rc={rc}")
+    finally:
+        _restore_corp_action_mocks()
+        _patch_io(monkey_price=(0.0, "reset", None))
 
     print(f"\n{'='*70}\nPASS={len(PASS)} FAIL={len(FAIL)}")
     if FAIL:
