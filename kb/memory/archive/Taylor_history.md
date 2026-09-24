@@ -629,3 +629,6 @@
 
 ## Archived 2026-09-24 (keep=12 days=0 require_done=False)
 - [2026-09-23T00:45:31Z] [2026-09-23] expvol_pacing checkpoint 09-23 XONG (commit 927c72d5): gate1/2 PASS, gate3/4 thieu mau N=2/25 khong doi, gate5 chua du dieu kien. Da va end 09-15->10-13 (end qua han khien paper_checkpoint_escalation.sh escalate lap). Checkpoint ke 2026-10-13 — nho doi end cung luc cap nhat gate.
+
+## Archived 2026-09-24 (keep=12 days=0 require_done=False)
+- [2026-09-23T01:40:26Z] [2026-09-23] paper corp-action + checkpoint (job _005911) XONG: 3 commit d622f2d9/b755fc77/a88819fd, bao cao reports/paper_trading_corpaction_and_checkpoint_review_20260923.md. CHUA BAT cron paper_corp_action.py (cho user duyet) - chua cai = khong chay. CHO USER QUYET 4 muc: (1) bat cron, (2) hoi to 7.915.455d vao so paper main (rieng FPT 09-21 dang sai KL hien tai), (3) doi AlphaLens sang convention=terp truoc gate 09-30 (+1,86pp vs +0,81pp), (4) order_book_execution_shadow (A) sua instrumentation hay (B) dung ghi ket qua null - end da doi 10-07. vol_scale_chase_cap: BAO DONG SAI, da live tu 08-04 (d4f667b2), da dong ho so.
