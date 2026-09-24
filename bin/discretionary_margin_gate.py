@@ -193,6 +193,14 @@ def corp_action_frame_multiplier(ticker, arm_date):
     """factor — hệ số quy đổi `arm_price` về CÙNG HỆ QUY CHIẾU với `px` (giá hiện tại, DNSE G1)
     trước khi tính drawdown. `arm_date` = ngày ARM (YYYY-MM-DD, hệ giá TRƯỚC mọi sự kiện).
 
+    CHỈ phủ sự kiện ĐỔI KHỐI LƯỢNG (`corp_actions.py QTY_EVENT_TYPES` — stock dividend/bonus
+    issue/split), vì `data/corp_actions.json` chỉ ghi loại sự kiện đó. Cổ tức TIỀN MẶT KHÔNG
+    nằm trong registry này — giá vẫn bị cắt đúng ex-date nhưng KL không đổi, nên hàm này trả
+    factor=1.0 (không quy đổi) và drawdown vẫn bị phóng đại đúng bằng tỉ lệ cổ tức/giá (ca
+    thật DGC 8.000đ/46.750đ ≈ 17,1%, sát ngưỡng −20%). KHÔNG có cơ chế cảnh báo riêng cho
+    trường hợp này ở tầng này — người vận hành cần tự nhớ khi thấy drawdown gần ngưỡng ngay
+    sau một ex-date cổ tức tiền mặt.
+
     §corp-action (job Taylor_20260924_064510+_073500, Việc 2 — THIẾT KẾ LẠI sau arch-review
     NEEDS_CHANGES bản đầu e75788f8). Bản đầu dùng `exdate_frame.classify_positions()` — cơ chế
     đối chiếu THEO NGÀY (so vị thế broker HÔM NAY với snapshot NGÀY TRƯỚC `asof`, chỉ khớp sự
@@ -367,7 +375,20 @@ def cmd_check_exits(args):
         # sự kiện CONFIRMED có ex_date > arm_date mỗi lần gọi, nên tự idempotent (không cộng
         # dồn state, xem docstring corp_action_frame_multiplier).
         arm_date = str(a.get("armed_at") or "")[:10]
-        factor = corp_action_frame_multiplier(a["ticker"], arm_date) if arm_date else 1.0
+        try:
+            factor = corp_action_frame_multiplier(a["ticker"], arm_date) if arm_date else 1.0
+        except Exception as exc:
+            # §29: in LỖI THẬT vừa bắt được, không đoán nguyên nhân. Fail-OPEN factor=1.0 (không
+            # quy đổi) là hướng AN TOÀN ở tầng này: arm_price_frame giữ nguyên arm_price gốc =>
+            # drawdown bị tính NHIỀU HƠN thực (cảnh báo giả), KHÔNG BAO GIỜ bỏ sót cảnh báo thật.
+            # Không `continue` — arm này vẫn được đánh giá breach bằng gía chưa quy đổi, và các
+            # arm KHÁC trong vòng lặp không bị một registry lỗi làm crash lây.
+            err_detail = f"{type(exc).__name__}: {exc}"
+            msg = (f"{a['ticker']}: lỗi đọc corp-action registry khi tính multiplier — "
+                   f"fail-open factor=1.0. Lỗi thật: {err_detail}")
+            print(f"⚠ {msg}", file=sys.stderr)
+            errors.append(msg)
+            factor = 1.0
         prior_factor = a.get("corp_action_multiplier", 1.0)
         if factor != prior_factor:
             note = (f"registry corp_actions.json: tích luỹ sự kiện CONFIRMED ex_date > "
@@ -397,12 +418,19 @@ def cmd_check_exits(args):
     for ticker, err in [(None, e) for e in errors]:
         print(f"⚠ {err}")
 
+    by_ticker = {a["ticker"]: a for a in live}
     if breaches:
         for ticker, px, drawdown in breaches:
+            a = by_ticker.get(ticker, {})
+            frame_note = ""
+            if "arm_price_frame_adjusted" in a:
+                frame_note = (f" (quy đổi corp-action: arm_price {a['arm_price']:,.0f} → "
+                               f"{a['arm_price_frame_adjusted']:,.0f}, hệ số ×"
+                               f"{a.get('corp_action_multiplier', 1.0):.6f})")
             msg = (f"🚨 **KỶ LUẬT THOÁT −20% CHẠM** — {ticker}: giá hiện tại {px:,.0f} vs giá arm "
-                   f"→ drawdown {drawdown:.1%} ≤ {EXIT_DD_PCT:.0%}. Chính sách yêu cầu de-lever "
-                   f"BẮT BUỘC (`discretionary-margin-policy-20260823.md` §Rào chắn rủi ro) — đây "
-                   f"là CẢNH BÁO, hành động thoát vẫn cần người quyết.")
+                   f"→ drawdown {drawdown:.1%} ≤ {EXIT_DD_PCT:.0%}{frame_note}. Chính sách yêu cầu "
+                   f"de-lever BẮT BUỘC (`discretionary-margin-policy-20260823.md` §Rào chắn rủi "
+                   f"ro) — đây là CẢNH BÁO, hành động thoát vẫn cần người quyết.")
             print(msg)
             _bus("error", f"discretionary-margin-exit-breach-{ticker}",
                  {"ticker": ticker, "price": px, "drawdown": drawdown})

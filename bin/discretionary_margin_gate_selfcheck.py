@@ -68,11 +68,28 @@ def _patch_io(monkey_nav=None, monkey_adv=None, monkey_price=None):
         gate.current_price = lambda ticker: monkey_price
 
 
-def _mult_after_stub(mult_by_ticker):
+def _mult_after_stub(mult_by_ticker, calls_out=None):
     """Mock `daily_nav_snapshot.confirmed_qty_multiplier_after(ticker, asof_date)` — trả hệ số
-    cố định theo ticker bất kể `asof_date` (test wiring, KHÔNG test bản thân hàm gốc — hàm đó
-    đã có test riêng trong `daily_nav_snapshot`)."""
+    theo ticker (test wiring, KHÔNG test bản thân hàm gốc — hàm đó đã có test riêng trong
+    `daily_nav_snapshot`). Nếu `calls_out` (list) được truyền, GHI LẠI (ticker, asof_date) mỗi
+    lần gọi để test kiểm tra đúng arm_date THẬT được truyền vào (bắt mutation truyền nhầm ngày
+    hôm nay thay vì ngày arm — trước đây stub bỏ qua hẳn `asof_date` nên không bắt được)."""
     def _f(ticker, asof_date):
+        if calls_out is not None:
+            calls_out.append((ticker, asof_date))
+        return mult_by_ticker.get(ticker, 1.0)
+    return _f
+
+
+def _mult_after_stub_raising(bad_tickers, mult_by_ticker=None):
+    """Mock ném exception cho ticker trong `bad_tickers` (giả lập registry `corp_actions.json`
+    hỏng/lookup lỗi) — dùng để test R3: 1 arm lỗi registry KHÔNG được làm mất breach thật của
+    arm KHÁC trong cùng vòng lặp (fail-silent)."""
+    mult_by_ticker = mult_by_ticker or {}
+
+    def _f(ticker, asof_date):
+        if ticker in bad_tickers:
+            raise RuntimeError("gia lap corp_actions.json hong: Expecting value: line 1 column 1")
         return mult_by_ticker.get(ticker, 1.0)
     return _f
 
@@ -243,6 +260,40 @@ def main():
     finally:
         _restore_corp_action_mocks()
 
+    # ---- 13c. R1+R2 (khong qua mutation-harness, di THANG qua code that): su kien MOI duoc
+    #           CONFIRMED GIUA 2 lan goi (gia tri KHAC, khong lap lai) -> multiplier phai CAP
+    #           NHAT dung gia tri MOI, KHONG nhan don voi gia tri CU (R1: bat mutation
+    #           `a["corp_action_multiplier"] = prior_factor * factor`). Dong thoi bat arm_date
+    #           THAT duoc truyen vao registry o CA 2 lan (R2: bat mutation truyen ngay HOM NAY
+    #           thay vi ngay ARM that).
+    try:
+        gate.save_arms([_mk_arm(26000.0, armed_at="2026-09-01T09:00:00+07:00")])
+        _NoBus.calls.clear()
+        _patch_io(monkey_price=(19000.0, "dnse_g1_fake", None))
+        calls = []
+        daily_nav_snapshot.confirmed_qty_multiplier_after = _mult_after_stub({"VPB": 1.30}, calls_out=calls)
+        gate.cmd_check_exits(_argparse.Namespace())
+        a0 = (gate.load_arms() or [{}])[0]
+        check("13c buoc 1: multiplier = 1.30",
+              abs(a0.get("corp_action_multiplier", 0) - 1.30) < 1e-9, f"{a0.get('corp_action_multiplier')}")
+
+        # su kien MOI duoc CONFIRMED giua 2 phien -> stub tra gia tri KHAC (1.43, khong phai lap
+        # lai 1.30) - mo phong dung kich ban "1 su kien moi xuat hien" thay vi "goi lai y het".
+        daily_nav_snapshot.confirmed_qty_multiplier_after = _mult_after_stub({"VPB": 1.43}, calls_out=calls)
+        gate.cmd_check_exits(_argparse.Namespace())
+        a1 = (gate.load_arms() or [{}])[0]
+        check("13c buoc 2 (R1): multiplier CAP NHAT = 1.43 (KHONG phai 1.30*1.43=1.859 nhan don)",
+              abs(a1.get("corp_action_multiplier", 0) - 1.43) < 1e-9, f"{a1.get('corp_action_multiplier')}")
+        expected_drawdown = 19000.0 / (26000.0 / 1.43) - 1.0
+        check("13c buoc 2: drawdown dung theo he quy doi MOI (1.43, khong phai 1.30 cu)",
+              abs(a1.get("last_drawdown", 0) - expected_drawdown) < 1e-6, f"{a1.get('last_drawdown')}")
+
+        check("13c (R2): arm_date THAT truyen vao registry o CA 2 lan goi = ngay ARM (2026-09-01), "
+              "KHONG phai ngay hom nay/rong",
+              len(calls) == 2 and all(c[1] == "2026-09-01" for c in calls), f"{calls}")
+    finally:
+        _restore_corp_action_mocks()
+
     # ---- 14. KHONG co su kien -> hanh vi CU giu nguyen (drawdown nhe, khong breach)
     try:
         gate.save_arms([_mk_arm(20000.0)])
@@ -333,6 +384,37 @@ def main():
         _acc_state["n"] += 1
         return 1.30 ** _acc_state["n"]
     _mutate("idempotency-missing-simulated", _accumulating_mult, _oracle_idempotent)
+
+    # ---- 18. R3 (§29 fail-silent): registry loi (vd corp_actions.json hong JSON) o MOT arm
+    #          KHONG duoc lam crash vong lap / mat breach THAT cua arm KHAC.
+    try:
+        gate.save_arms([
+            _mk_arm(20000.0, ticker="VPB", armed_at="2026-09-01T09:00:00+07:00"),
+            _mk_arm(20000.0, ticker="TV1", armed_at="2026-09-01T09:00:00+07:00"),
+        ])
+        _NoBus.calls.clear()
+        _prices = {
+            "VPB": (17000.0, "dnse_g1_fake", None),   # -15%: fail-open factor=1.0 -> khong breach
+            "TV1": (15000.0, "dnse_g1_fake", None),   # -25%: breach THAT, khong lien quan VPB
+        }
+        gate.current_price = lambda ticker: _prices[ticker]
+        daily_nav_snapshot.confirmed_qty_multiplier_after = _mult_after_stub_raising({"VPB"})
+        rc = gate.cmd_check_exits(_argparse.Namespace())
+        arms_after = {a["ticker"]: a for a in gate.load_arms()}
+        check("R3: registry loi o VPB KHONG lam crash vong lap (TV1 van duoc xu ly)",
+              "TV1" in arms_after and arms_after["TV1"].get("last_checked"), f"{arms_after}")
+        check("R3: breach THAT cua TV1 (-25%) VAN duoc gui bus du VPB registry loi",
+              any(c[0] == "bus" and c[1] == "error" for c in _NoBus.calls), str(_NoBus.calls))
+        check("R3: VPB fail-open factor=1.0 (drawdown -15% KHONG quy doi, KHONG crash)",
+              abs(arms_after.get("VPB", {}).get("last_drawdown", 0) - (-0.15)) < 1e-6,
+              f"{arms_after.get('VPB', {}).get('last_drawdown')}")
+        check("R3: VPB fail-open KHONG ghi corp_action_multiplier gia (factor=1.0 == default)",
+              "corp_action_multiplier" not in arms_after.get("VPB", {}), f"{arms_after.get('VPB')}")
+        check("R3: rc=1 (co errors) de nguoi truc biet co van de can kiem",
+              rc == 1, f"rc={rc}")
+    finally:
+        _restore_corp_action_mocks()
+        _patch_io(monkey_price=(0.0, "reset", None))
 
     print(f"\n{'='*70}\nPASS={len(PASS)} FAIL={len(FAIL)}")
     if FAIL:
