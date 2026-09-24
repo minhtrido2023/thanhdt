@@ -114,26 +114,45 @@ def broker_filled_qty(account, account_id, ticker, baseline, state=None):
     """filled_qty của CHƯƠNG TRÌNH = broker_total(ticker) − baseline_qty_before_program.
     None nếu không đọc được broker (fail-safe).
 
-    §corp-action (job Taylor_20260924_064510, Việc 1) — `total` đọc THẲNG từ broker mang cả KL
-    CREDIT do sự kiện tỉ lệ (thưởng CP/cổ tức CP/tách), không chỉ KL do lệnh gom mua thêm. Trừ
-    thẳng `total − baseline` khi có credit sẽ thổi phồng `filled_qty` ⇒ `remaining <= 0` giả ⇒
-    chương trình dừng gom sớm trong im lặng (khác `discretionary_margin_gate`: ở đó hậu quả là
-    cảnh báo GIẢ; ở đây hậu quả là KHÔNG cảnh báo khi lẽ ra phải tiếp tục gom).
+    §corp-action (job Taylor_20260924_064510+_073500, Việc 1 — THIẾT KẾ LẠI sau arch-review
+    REJECTED bản đầu d595a64c) — `total` đọc THẲNG từ broker mang cả KL CREDIT do sự kiện tỉ lệ
+    (thưởng CP/cổ tức CP/tách), không chỉ KL do lệnh gom mua thêm.
 
-    Trước khi trừ, đối chiếu qua `exdate_frame.classify_positions` — TÁI DÙNG nguyên khối
-    "KHỐI LƯỢNG" đã audit 5 vòng ở `compute_active_nav.py` (12/12 phần dư đo được là
-    corp-action thật, 0 nhiễu), không viết lại phép phân loại:
-      · Có sự kiện CONFIRMED (`credited`) ⇒ quy đổi `baseline` (+residual, `state` nếu truyền
-        vào được cập nhật `baseline_qty_before_program` — PERSIST để phiên sau không tính lại)
-        RỒI mới trừ, giữ đúng tỉ lệ mục tiêu thay vì đếm KL credit là "đã gom".
+    Cơ chế quy đổi baseline CHỈ áp cho chế độ target CỐ ĐỊNH (`target_qty`, không khai
+    `target_pct_active_nav`) — `pct_mode` bên dưới bỏ QUA HẲN khối corp-action, giữ NGUYÊN
+    hành vi `total − baseline` cũ, KHÔNG chạm gì. Lý do (đọc `trading_bot/discretionary_
+    accumulation.py::resolve_target_qty`/`compute_session_order`): ở `target_pct_active_nav`,
+    target được SUY LẠI MỖI PHIÊN = target_pct × active_nav / giá — một sự kiện tỉ lệ làm giá
+    giảm theo đúng hệ số credit, nên `filled_qty` (broker credit) VÀ `target` (giá mới) tự nhân
+    CÙNG hệ số: bài toán TỰ KHỚP, không cần can thiệp. Kiểm tra thật 2026-09-24: CẢ HAI state
+    file LIVE duy nhất (`data/trade_plans/discretionary/state_TV1_{SpaceX,ZaloPay}.json`) đều
+    `target_basis=pct_active_nav` — 0 chương trình LIVE dùng `target_qty` cố định. Bản đầu
+    d595a64c PERSIST residual vào baseline bất kể mode, biến một lệch một-đêm (tự sửa ở pct_mode)
+    thành lệch VĨNH VIỄN, đo được đẩy vị thế TV1 SpaceX vượt trần sleeve 5%/mã (mô phỏng
+    arch-reviewer: 6300+1300=7600cp = 6,03% active_nav > 5%) — OVERBUY tiền thật nếu land.
+
+    Với chế độ `target_qty` cố định (giữ lại làm hạ tầng phòng thủ cho chương trình tương lai,
+    dù hiện 0 chương trình LIVE dùng), đối chiếu qua `exdate_frame.classify_positions` — TÁI
+    DÙNG nguyên khối "KHỐI LƯỢNG" đã audit 5 vòng ở `compute_active_nav.py`:
+      · Có sự kiện CONFIRMED (`credited`) VÀ (ticker, ex_date, event_code) CHƯA quy đổi trước
+        đó (đọc lại `state["corp_action_baseline_adjustments"]` — khoá idempotency, chạy lại
+        cùng cửa sổ KHÔNG cộng dồn residual lần 2) ⇒ quy đổi `baseline` (+residual, persist).
+      · Đã quy đổi rồi (event_key trùng) ⇒ idempotent no-op: trừ thẳng bằng baseline HIỆN CÓ,
+        không cộng residual lần nữa.
       · KL đổi bất thường KHÔNG giải thích được (`blocked`) ⇒ FAIL-SAFE: trả filled=None (đúng
         nhánh "failsafe" sẵn có ở `compute_session_order` — không mua bởi thiếu thông tin),
         KHÔNG đoán theo tỉ lệ khi thiếu bằng chứng (§29).
       · `classify_positions` tự thân lỗi (IO/import) ⇒ KHÔNG fail-closed cả cổng — giữ hành vi
         CŨ (trừ thẳng, không quy đổi) để không phá luồng gom đang chạy đúng vì một lỗi phụ trợ.
 
+    ⚠️ Giới hạn cửa sổ phát hiện (kế thừa từ `exdate_frame.classify_positions`, không sửa ở
+    đây): chỉ đúng trong 1 CỬA SỔ NGẮN quanh ex-date — nhánh "chưa có plan file" của
+    `process_account()` đã fire thật 3 lần trong `logs/inject_discretionary.log` (retry hợp lệ,
+    KHÔNG phải lỗi), nhưng nếu injector bỏ lỡ NHIỀU phiên liên tiếp quanh ex-date thật, sự kiện
+    có thể trôi khỏi cửa sổ trước khi cổng này chạy lần đầu — không có cơ chế quét lùi lịch sử.
+
     Trả `(filled, broker, corp_action_note)` — note=None khi KHÔNG có gì bất thường trong
-    ngày (đường mòn, không có sự kiện)."""
+    ngày (đường mòn, không có sự kiện, hoặc pct_mode)."""
     try:
         from trading_bot.brokers import DNSEBroker
         b = DNSEBroker(account_id=account_id, credentials_file=None, label=account)
@@ -143,6 +162,10 @@ def broker_filled_qty(account, account_id, ticker, baseline, state=None):
         print(f"  [FAILSAFE] không đọc được broker positions ({ticker}): {exc}")
         return None, None, None
     total = int((positions.get(ticker) or {}).get("total", 0) or 0)
+
+    pct_mode = state is not None and state.get("target_pct_active_nav") is not None
+    if pct_mode:
+        return max(0, total - int(baseline)), b, None
 
     try:
         import exdate_frame
@@ -161,6 +184,16 @@ def broker_filled_qty(account, account_id, ticker, baseline, state=None):
 
     if ticker in credited:
         detail = credited[ticker]
+        event_key = (ticker, str(detail.get("ex_date")), str(detail.get("event_code")))
+        prior = state.get("corp_action_baseline_adjustments") or [] if state is not None else []
+        already_done = {(a.get("ticker"), str(a.get("ex_date")), str(a.get("event_code")))
+                        for a in prior}
+        if event_key in already_done:
+            note = (f"sự kiện {detail['event_code']} ex-date {detail['ex_date']} đã quy đổi "
+                    f"baseline ở lần chạy trước (idempotent — event_key trùng, KHÔNG cộng dồn "
+                    f"residual lần 2)")
+            print(f"  [CORPACTION-DEDUP] {ticker}: {note}")
+            return max(0, total - int(baseline)), b, note
         residual = detail["residual"]
         old_baseline = int(baseline)
         new_baseline = old_baseline + int(round(residual))

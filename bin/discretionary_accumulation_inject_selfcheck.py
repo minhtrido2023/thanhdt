@@ -1,19 +1,28 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Self-check cho cổng corp-action của `discretionary_accumulation_inject.py::broker_filled_qty()`
-(job Taylor_20260924_064510, Việc 1 — ưu tiên cao nhất, LIVE hôm nay: TV1 SpaceX + ZaloPay,
+(job Taylor_20260924_064510+_073500, Việc 1 — THIẾT KẾ LẠI sau arch-review REJECTED bản đầu
+d595a64c. LIVE hôm nay: TV1 SpaceX + ZaloPay, CẢ HAI `target_pct_active_nav=0.05` (pct_mode),
 baseline_qty_before_program=0).
 
-BUG ĐÃ SỬA: `broker_filled_qty()` trừ thẳng `total − baseline` từ `positions.total` đọc broker,
-không phân biệt KL do LỆNH GOM MUA THÊM với KL do BROKER CREDIT sự kiện tỉ lệ (thưởng CP/cổ tức
-CP/tách). Credit sự kiện thổi phồng `filled_qty` ⇒ `remaining <= 0` giả ⇒ chương trình
-`mark_completed=True` SAI, dừng gom sớm TRONG IM LẶNG (không cảnh báo — khác
-`discretionary_margin_gate` nơi hậu quả là cảnh báo GIẢ).
+BUG GỐC ĐÃ SỬA: `broker_filled_qty()` trừ thẳng `total − baseline` từ `positions.total` đọc
+broker, không phân biệt KL do LỆNH GOM MUA THÊM với KL do BROKER CREDIT sự kiện tỉ lệ (thưởng
+CP/cổ tức CP/tách). Credit sự kiện thổi phồng `filled_qty` ⇒ `remaining <= 0` giả ⇒ chương trình
+`mark_completed=True` SAI, dừng gom sớm TRONG IM LẶNG.
 
-Vá: đối chiếu qua `exdate_frame.classify_positions()` (TÁI DÙNG nguyên khối đã audit 5 vòng ở
-`compute_active_nav.py`) trước khi trừ — có sự kiện CONFIRMED thì quy đổi baseline; KL bất
-thường không giải thích được thì fail-safe (filled=None, không đoán, §29); lỗi hạ tầng phụ trợ
-(exdate_frame tự thân lỗi) thì KHÔNG fail-closed cả cổng, giữ hành vi CŨ.
+BUG BẢN VÁ ĐẦU (d595a64c, arch-review REJECTED): áp cơ chế quy đổi baseline BẤT KỂ mode, PERSIST
+residual vào `state["baseline_qty_before_program"]` — ở `pct_mode` (TV1, DUY NHẤT LIVE), target
+tự SUY LẠI mỗi phiên theo giá mới nên đã TỰ KHỚP; quy đổi thêm biến 1 lệch một-đêm tự sửa thành
+lệch VĨNH VIỄN ⇒ mô phỏng arch-reviewer: vị thế vượt trần sleeve 5%/mã (6300+1300=7600cp=6,03%).
+Cũng KHÔNG idempotent: chạy lại trong cùng cửa sổ cộng dồn residual nhiều lần.
+
+THIẾT KẾ LẠI: (1) `pct_mode` (`state["target_pct_active_nav"]` có mặt) ⇒ BỎ QUA HẲN khối
+corp-action, giữ NGUYÊN `total − baseline` thô — 0 chương trình LIVE nào cần cơ chế này.
+(2) Chế độ `target_qty` cố định (hạ tầng phòng thủ, hiện 0 chương trình LIVE dùng) vẫn đối
+chiếu qua `exdate_frame.classify_positions()`, NHƯNG có sự kiện CONFIRMED thì quy đổi baseline
+CHỈ khi (ticker, ex_date, event_code) CHƯA quy đổi trước đó (idempotency key) — gọi lại cùng cửa
+sổ KHÔNG cộng dồn residual lần 2. KL bất thường không giải thích được thì fail-safe (filled=None,
+§29); lỗi hạ tầng phụ trợ (exdate_frame tự thân lỗi) thì KHÔNG fail-closed cả cổng.
 
 MỌI CA CHẠY QUA HÀM THẬT `broker_filled_qty()` + `compute_session_order()` thật (không mock nội
 bộ), chỉ FakeBroker (KHÔNG chạm DNSE thật) và monkeypatch `exdate_frame.classify_positions`
@@ -208,6 +217,69 @@ try:
 finally:
     restore()
 
+# ── Section F — pct_mode (TV1 LIVE thật) + sự kiện CONFIRMED: gate BỎ QUA HẲN ─────────────
+print("F. pct_mode (target_pct_active_nav khai báo, TV1 LIVE thật) + sự kiện CONFIRMED — gate "
+      "BỎ QUA HẲN corp-action, filled=total-baseline THÔ, baseline KHÔNG bị persist (chặn "
+      "overbuy vượt trần sleeve 5%/mã)")
+try:
+    tb_brokers.DNSEBroker = broker_factory({TICKER: 1360})
+    exdate_frame.classify_positions = classify_stub(
+        {TICKER: {"residual": 260.0, "exercise_ratio": 0.26, "event_code": "ISS",
+                  "ex_date": "2026-09-25", "qty_prev": 1000.0, "qty_now": 1260.0}}, {})
+    state = {"baseline_qty_before_program": 0, "target_pct_active_nav": 0.05}
+    filled, broker, note = dai.broker_filled_qty("SpaceX", "0002023347", TICKER, 0, state=state)
+    check("F1 filled=1360 (total-baseline THÔ, KHÔNG quy đổi — pct_mode tự sửa qua target)",
+          filled == 1360, f"filled={filled}")
+    check("F2 baseline KHÔNG bị đổi (vẫn 0)",
+          state.get("baseline_qty_before_program") == 0,
+          f"baseline={state.get('baseline_qty_before_program')}")
+    check("F3 note=None (gate bỏ qua hẳn, không ghi gì)", note is None, f"note={note!r}")
+    check("F4 KHÔNG ghi corp_action_baseline_adjustments",
+          "corp_action_baseline_adjustments" not in state)
+finally:
+    restore()
+
+# ── Section G — pct_mode + KL bất thường (blocked): gate vẫn BỎ QUA HẲN ───────────────────
+print("G. pct_mode + KL bất thường (blocked ở exdate_frame) — gate vẫn BỎ QUA HẲN (hành vi "
+      "total-baseline thô, KHÔNG fail-safe — pct_mode không dùng khối corp-action)")
+try:
+    tb_brokers.DNSEBroker = broker_factory({TICKER: 1500})
+    exdate_frame.classify_positions = classify_stub(
+        {}, {TICKER: "KL bất thường CHƯA GIẢI THÍCH ĐƯỢC"})
+    state = {"baseline_qty_before_program": 1000, "target_pct_active_nav": 0.05}
+    filled, broker, note = dai.broker_filled_qty("SpaceX", "0002023347", TICKER, 1000, state=state)
+    check("G1 filled=500 (pct_mode bỏ qua hẳn cổng blocked, KHÔNG fail-safe)",
+          filled == 500, f"filled={filled}")
+    check("G2 note=None", note is None, f"note={note!r}")
+finally:
+    restore()
+
+# ── Section H — idempotency (target_qty cố định): gọi 2 lần cùng cửa sổ, KHÔNG cộng dồn ───
+print("H. Idempotency (target_qty cố định) — gọi broker_filled_qty() 2 lần liên tiếp cùng sự "
+      "kiện, residual KHÔNG cộng dồn lần 2")
+try:
+    tb_brokers.DNSEBroker = broker_factory({TICKER: 1360})
+    exdate_frame.classify_positions = classify_stub(
+        {TICKER: {"residual": 260.0, "exercise_ratio": 0.26, "event_code": "ISS",
+                  "ex_date": "2026-09-25", "qty_prev": 1000.0, "qty_now": 1260.0}}, {})
+    state = {"baseline_qty_before_program": 1000}
+    filled1, _b1, note1 = dai.broker_filled_qty("SpaceX", "0002023347", TICKER, 1000, state=state)
+    baseline_after_1 = state.get("baseline_qty_before_program")
+    filled2, _b2, note2 = dai.broker_filled_qty(
+        "SpaceX", "0002023347", TICKER, baseline_after_1, state=state)
+    check("H1 run#1 baseline 1000→1260", baseline_after_1 == 1260, f"baseline={baseline_after_1}")
+    check("H2 run#2 baseline KHÔNG cộng dồn nữa (vẫn 1260, không thành 1520)",
+          state.get("baseline_qty_before_program") == 1260,
+          f"baseline={state.get('baseline_qty_before_program')}")
+    check("H3 run#2 note nhắc 'idempotent' (dedup theo event_key)",
+          bool(note2) and "idempotent" in note2.lower(), f"note2={note2!r}")
+    check("H4 chỉ 1 entry trong corp_action_baseline_adjustments (không nhân đôi)",
+          len(state.get("corp_action_baseline_adjustments") or []) == 1,
+          f"len={len(state.get('corp_action_baseline_adjustments') or [])}")
+    check("H5 filled2=100 (1360-1260, không lệch do double-count)", filled2 == 100, f"filled2={filled2}")
+finally:
+    restore()
+
 
 # ═══════════════════════════════════════ MUTATION GUARD ═══════════════════════════════════
 # Không sửa file nguồn — patch object trong module ĐÃ LOAD (dai) để giả lập từng mutation, rồi
@@ -288,6 +360,56 @@ def _mut3():
 
 
 mutate("infra-error-wrongly-fail-closed", _mut3, run_case_D_infra_error_not_closed)
+
+
+def run_case_F_pctmode_untouched():
+    tb_brokers.DNSEBroker = broker_factory({TICKER: 1360})
+    exdate_frame.classify_positions = classify_stub(
+        {TICKER: {"residual": 260.0, "exercise_ratio": 0.26, "event_code": "ISS",
+                  "ex_date": "2026-09-25", "qty_prev": 1000.0, "qty_now": 1260.0}}, {})
+    state = {"baseline_qty_before_program": 0, "target_pct_active_nav": 0.05}
+    filled, _b, _n = dai.broker_filled_qty("SpaceX", "0002023347", TICKER, 0, state=state)
+    return filled == 1360 and state.get("baseline_qty_before_program") == 0
+
+
+def run_case_H_idempotent():
+    tb_brokers.DNSEBroker = broker_factory({TICKER: 1360})
+    exdate_frame.classify_positions = classify_stub(
+        {TICKER: {"residual": 260.0, "exercise_ratio": 0.26, "event_code": "ISS",
+                  "ex_date": "2026-09-25", "qty_prev": 1000.0, "qty_now": 1260.0}}, {})
+    state = {"baseline_qty_before_program": 1000}
+    dai.broker_filled_qty("SpaceX", "0002023347", TICKER, 1000, state=state)
+    b1 = state.get("baseline_qty_before_program")
+    dai.broker_filled_qty("SpaceX", "0002023347", TICKER, b1, state=state)
+    return state.get("baseline_qty_before_program") == 1260
+
+
+# Mutant 4: pct_mode KHÔNG được bỏ qua — bug bản đầu d595a64c (quy đổi baseline bất kể mode).
+def _mut4():
+    def fake(account, account_id, ticker, baseline, state=None):
+        residual = 260.0
+        new_baseline = int(baseline) + int(residual)
+        if state is not None:
+            state["baseline_qty_before_program"] = new_baseline
+        return max(0, 1360 - new_baseline), None, "quy đổi baseline dù đang pct_mode (SAI, bug d595a64c)"
+    dai.broker_filled_qty = fake
+
+
+mutate("pct-mode-not-skipped", _mut4, run_case_F_pctmode_untouched)
+
+
+# Mutant 5: thiếu khoá idempotency — mỗi lần gọi lại cộng dồn residual (không dedup theo event_key).
+def _mut5():
+    def fake(account, account_id, ticker, baseline, state=None):
+        new_baseline = int(baseline) + 260
+        if state is not None:
+            state["baseline_qty_before_program"] = new_baseline
+            state.setdefault("corp_action_baseline_adjustments", []).append({"residual": 260})
+        return max(0, 1360 - new_baseline), None, "cộng dồn residual mỗi lần gọi (SAI, thiếu dedup)"
+    dai.broker_filled_qty = fake
+
+
+mutate("idempotency-dedup-missing", _mut5, run_case_H_idempotent)
 
 
 n_mutation_fail = sum(1 for _, k in mutation_results if not k)
