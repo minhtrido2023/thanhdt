@@ -241,6 +241,26 @@ def main():
     rc = gate.cmd_arm(mkargs(ticker="III", arm_price=-100.0, exposure_vnd=1_000_000))
     check("12b: arm_price âm bị từ chối", rc == 2, f"rc={rc}")
 
+    # ---- 12c. [Việc 2 vòng 12, arch-review vòng 11 test-pinning gap] cmd_arm's
+    #           `if not (ok_b and ok_n): return 3` phải là AND THẬT — chỉ 1 trong 2 kênh chết đã
+    #           đủ để trả rc=3, không cần CẢ HAI cùng chết. Mutation and->or sống sót 135/0 vì
+    #           test 7/8 (fail-safe NAV/ADV) chỉ đi qua nhánh này gián tiếp, không stub bus/notify
+    #           lệch nhau. Kịch bản thực tế nhất: bus (ghi file cục bộ) OK nhưng Discord bridge chết.
+    gate.save_arms([])
+    gate._bus = lambda *a, **k: True
+    gate._notify = lambda *a, **k: False
+    rc = gate.cmd_arm(mkargs(ticker="JJJ", arm_price=10000, exposure_vnd=1_000_000))
+    check("12c: cmd_arm — chỉ Discord chết (bus OK) vẫn phải rc=3 (bắt mutation and->or)",
+          rc == 3, f"rc={rc}")
+    gate.save_arms([])
+    gate._bus = lambda *a, **k: False
+    gate._notify = lambda *a, **k: True
+    rc = gate.cmd_arm(mkargs(ticker="KKK", arm_price=10000, exposure_vnd=1_000_000))
+    check("12c: cmd_arm — chỉ bus chết (Discord OK) vẫn phải rc=3 (chiều ngược lại)",
+          rc == 3, f"rc={rc}")
+    gate._bus = no_bus.bus
+    gate._notify = no_bus.notify
+
     # ════════════════════ CORP-ACTION GATE (cmd_check_exits) — Việc 2 (thiết kế lại) ═════════
     ORIG_MULT_AFTER = daily_nav_snapshot.confirmed_qty_multiplier_after
 
@@ -1083,6 +1103,38 @@ def main():
         daily_nav_snapshot.confirmed_qty_multiplier_after = ORIG_MULT_AFTER
         _patch_io(monkey_price=(0.0, "reset", None))
 
+    # ---- 27b/27c. [Việc 2 vòng 12] cùng lớp test-pinning gap với 12c — guard `if not (ok_b and
+    #      ok_n):` ở nhánh ERRORS (dòng ~569) phải là AND THẬT, không phải OR. Test 27 ở trên chỉ
+    #      stub CẢ HAI _bus/_notify cùng False nên mutation and->or vẫn sống 135/0.
+    daily_nav_snapshot.confirmed_qty_multiplier_after = lambda ticker, asof_date: 1.0
+    try:
+        gate.save_arms([_mk_arm(20000.0, ticker="ERRORSANDGUARD1")])
+        gate.current_price = lambda ticker: (None, None, "DNSE khong tra duoc gia (test)")
+        gate._bus = lambda *a, **k: True
+        gate._notify = lambda *a, **k: False
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            gate.cmd_check_exits(_argparse.Namespace())
+        out = buf.getvalue()
+        check("27b: nhánh errors — chỉ Discord chết (bus OK) vẫn phải in NOTIFY_FAILED "
+              "(bắt mutation and->or)", "NOTIFY_FAILED" in out, out)
+
+        gate.save_arms([_mk_arm(20000.0, ticker="ERRORSANDGUARD2")])
+        gate.current_price = lambda ticker: (None, None, "DNSE khong tra duoc gia (test)")
+        gate._bus = lambda *a, **k: False
+        gate._notify = lambda *a, **k: True
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            gate.cmd_check_exits(_argparse.Namespace())
+        out = buf.getvalue()
+        check("27c: nhánh errors — chỉ bus chết (Discord OK) vẫn phải in NOTIFY_FAILED "
+              "(chiều ngược lại)", "NOTIFY_FAILED" in out, out)
+    finally:
+        gate._bus = no_bus.bus
+        gate._notify = no_bus.notify
+        daily_nav_snapshot.confirmed_qty_multiplier_after = ORIG_MULT_AFTER
+        _patch_io(monkey_price=(0.0, "reset", None))
+
     # ---- 28. [R11-1 arch-review vòng 11] _bus/_notify thất bại ở nhánh BREACH (không phải
     #          errors) -> phải in dòng NOTIFY_FAILED. Nhánh breach là cảnh báo nghiêm trọng nhất
     #          trong file (−20% de-lever bắt buộc) và trước bản vá vòng 11 là nơi DUY NHẤT còn
@@ -1107,6 +1159,40 @@ def main():
         daily_nav_snapshot.confirmed_qty_multiplier_after = ORIG_MULT_AFTER
         _patch_io(monkey_price=(0.0, "reset", None))
 
+    # ---- 28b/28c. [Việc 2 vòng 12] cùng lớp test-pinning gap — guard nhánh BREACH `if not
+    #      (ok_b and ok_n):` (dòng ~540) phải là AND THẬT. Đây là nhánh nghiêm trọng nhất trong
+    #      file (cảnh báo −20% de-lever bắt buộc) nên là ưu tiên cao nhất trong nhóm 3 site cùng
+    #      lớp lỗi (cmd_arm/errors/breach) reviewer đo mutation and->or sống sót 135/0 cả 3.
+    daily_nav_snapshot.confirmed_qty_multiplier_after = lambda ticker, asof_date: 1.0
+    try:
+        gate.save_arms([_mk_arm(20000.0, ticker="BREACHANDGUARD1")])
+        gate.current_price = lambda ticker: (15000.0, "dnse_g1_fake", None)  # -25%: breach thật
+        gate._bus = lambda *a, **k: True
+        gate._notify = lambda *a, **k: False
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            gate.cmd_check_exits(_argparse.Namespace())
+        out = buf.getvalue()
+        check("28b: nhánh breach — chỉ Discord chết (bus OK) vẫn phải in NOTIFY_FAILED "
+              "(bắt mutation and->or, kịch bản thực tế nhất: bus local OK, Discord bridge chết)",
+              "NOTIFY_FAILED" in out and "BREACHANDGUARD1" in out, out)
+
+        gate.save_arms([_mk_arm(20000.0, ticker="BREACHANDGUARD2")])
+        gate.current_price = lambda ticker: (15000.0, "dnse_g1_fake", None)
+        gate._bus = lambda *a, **k: False
+        gate._notify = lambda *a, **k: True
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            gate.cmd_check_exits(_argparse.Namespace())
+        out = buf.getvalue()
+        check("28c: nhánh breach — chỉ bus chết (Discord OK) vẫn phải in NOTIFY_FAILED "
+              "(chiều ngược lại)", "NOTIFY_FAILED" in out and "BREACHANDGUARD2" in out, out)
+    finally:
+        gate._bus = no_bus.bus
+        gate._notify = no_bus.notify
+        daily_nav_snapshot.confirmed_qty_multiplier_after = ORIG_MULT_AFTER
+        _patch_io(monkey_price=(0.0, "reset", None))
+
     # ---- 29. [không bắt buộc, arch-review vòng 11] mutation-kill cho `if not breaches and not
     #          errors:` -> `if not errors:` (mất điều kiện `not breaches`). Lượt CHỈ có breach
     #          (không có errors) mà mutate mất `not breaches` sẽ in CẢ dòng breach 🚨 THẬT lẫn
@@ -1123,6 +1209,43 @@ def main():
         check("29: lượt chỉ có breach (không errors) KHÔNG in dòng OK mâu thuẫn "
               "(bắt mutation `not breaches and not errors` -> `not errors`)",
               "không case nào chạm" not in out, out)
+    finally:
+        daily_nav_snapshot.confirmed_qty_multiplier_after = ORIG_MULT_AFTER
+        _patch_io(monkey_price=(0.0, "reset", None))
+
+    # ---- 30. [non-blocker vòng 11, ghim vòng 12] `a.setdefault("exit_alerts", [])` (dòng ~499)
+    #          — arm THIẾU HẲN key `exit_alerts` (đúng hình dạng bản ghi bị sửa tay/hỏng dữ liệu,
+    #          vd arm giả VPB từng nằm thật trong data/discretionary_margin_arms.json) đặt CẠNH
+    #          1 arm lành mạnh đầy đủ key trong CÙNG lượt gọi cmd_check_exits — cả hai breach.
+    #          Mutation bỏ setdefault (`a["exit_alerts"].append(...)` trần) sẽ KeyError ngay tại
+    #          arm thiếu key, HUỶ TOÀN BỘ lượt TRƯỚC save_arms() — kéo theo cả arm lành mạnh cạnh
+    #          nó cũng mất breach report.
+    daily_nav_snapshot.confirmed_qty_multiplier_after = lambda ticker, asof_date: 1.0
+    try:
+        broken_arm = _mk_arm(20000.0, ticker="MISSINGKEY")
+        del broken_arm["exit_alerts"]
+        healthy_arm = _mk_arm(20000.0, ticker="HEALTHYSIB")
+        gate.save_arms([broken_arm, healthy_arm])
+        gate.current_price = lambda ticker: (15000.0, "dnse_g1_fake", None)  # -25%: breach cả 2
+        _NoBus.calls.clear()
+        rc = gate.cmd_check_exits(_argparse.Namespace())
+        bus_topics = [c[2] for c in _NoBus.calls if c[0] == "bus"]
+        check("30: arm thiếu key exit_alerts KHÔNG làm KeyError huỷ cả lượt (rc bình thường)",
+              rc == 0, f"rc={rc}")
+        check("30: breach của chính arm thiếu key vẫn được báo",
+              any("exit-breach-MISSINGKEY" in t for t in bus_topics), str(bus_topics))
+        check("30: breach của arm LÀNH MẠNH cạnh nó KHÔNG bị mất theo (bắt mutation bỏ "
+              "setdefault)", any("exit-breach-HEALTHYSIB" in t for t in bus_topics),
+              str(bus_topics))
+        arms = gate.load_arms()
+        by_ticker = {a["ticker"]: a for a in arms}
+        check("30: save_arms() ghi lại được exit_alerts cho arm thiếu key ban đầu (setdefault "
+              "tạo key mới, không chỉ tránh crash)",
+              "MISSINGKEY" in by_ticker and len(by_ticker["MISSINGKEY"]["exit_alerts"]) == 1,
+              by_ticker.get("MISSINGKEY"))
+        check("30: exit_alerts của arm lành mạnh cũng ghi đúng (không bị lệch theo arm hỏng)",
+              "HEALTHYSIB" in by_ticker and len(by_ticker["HEALTHYSIB"]["exit_alerts"]) == 1,
+              by_ticker.get("HEALTHYSIB"))
     finally:
         daily_nav_snapshot.confirmed_qty_multiplier_after = ORIG_MULT_AFTER
         _patch_io(monkey_price=(0.0, "reset", None))
