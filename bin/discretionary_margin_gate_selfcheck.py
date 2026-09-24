@@ -344,46 +344,18 @@ def main():
     finally:
         _restore_corp_action_mocks()
 
-    # ---- 17. MUTATION GUARD cho corp_action_frame_multiplier — moi assertion tren phai chet dung
-    #          mutation cua no
-    ORIG_FRAME_MULT = gate.corp_action_frame_multiplier
-
-    def _oracle_A():
-        gate.save_arms([_mk_arm(26000.0)])
-        _patch_io(monkey_price=(19000.0, "dnse_g1_fake", None))
-        gate.cmd_check_exits(_argparse.Namespace())
-        a0 = (gate.load_arms() or [{}])[0]
-        return (abs(a0.get("corp_action_multiplier", 0) - 1.30) < 1e-9
-                and abs(a0.get("last_drawdown", 0) - (-0.05)) < 1e-6)
-
-    def _oracle_idempotent():
-        gate.save_arms([_mk_arm(26000.0)])
-        _patch_io(monkey_price=(19000.0, "dnse_g1_fake", None))
-        gate.cmd_check_exits(_argparse.Namespace())
-        gate.cmd_check_exits(_argparse.Namespace())
-        a0 = (gate.load_arms() or [{}])[0]
-        return abs(a0.get("corp_action_multiplier", 0) - 1.30) < 1e-9
-
-    def _mutate(name, patched, oracle_fn):
-        try:
-            gate.corp_action_frame_multiplier = patched
-            killed = not oracle_fn()
-            check(f"mutation {name}: mutant bi giet (assertion dao verdict)", killed)
-        finally:
-            gate.corp_action_frame_multiplier = ORIG_FRAME_MULT
-
-    # Mutant 1: bo qua quy doi hoan toan — luon tra factor=1.0. Kich ban A se KHONG quy doi =>
-    # multiplier khong dat 1.30, drawdown giu nguyen -26,9% (!= -5%) => assertion goc bat duoc.
-    _mutate("factor-not-applied", lambda ticker, arm_date: 1.0, _oracle_A)
-
-    # Mutant 2: gia lap bug CU (nhan don moi lan goi thay vi doc lai TU NGUON) — moi lan goi
-    # binh phuong luy thua thay vi tra CO DINH 1.30 => oracle idempotency phai bat duoc lech.
-    _acc_state = {"n": 0}
-
-    def _accumulating_mult(ticker, arm_date):
-        _acc_state["n"] += 1
-        return 1.30 ** _acc_state["n"]
-    _mutate("idempotency-missing-simulated", _accumulating_mult, _oracle_idempotent)
+    # ---- 17. [GO 2026-09-24, vong 4, arch-review R4] MUTATION GUARD cu cho
+    #          corp_action_frame_multiplier bi VO HIEU: _restore_corp_action_mocks() da thao stub
+    #          truoc khi chay toi day, nen "khong mutation" (ORIG_FRAME_MULT) cung goi thang
+    #          daily_nav_snapshot.confirmed_qty_multiplier_after THAT (doc corp_actions.json that
+    #          tren may, khong phai stub 1.30) => oracle_fn() LUON False bat ke co mutation hay
+    #          khong => "mutant bi giet" la HU CAU (vacuous anchor, cung lop voi
+    #          report_return_gate.py:723/727/737). Khong dung lai bang cach them
+    #          `assert oracle_fn() is True` truoc _mutate: gia tri do phu thuoc corp_actions.json
+    #          THAT tren may chay selfcheck (khong on dinh giua cac moi truong/CI). Cac invariant
+    #          ma Section 17 dinh bat (quy doi dung, idempotent khong nhan don) da duoc phu bang
+    #          KICH BAN THAT (khong can gia lap ham) o test 13/13b/13c ben tren — xoa Section 17
+    #          thay vi dung lai, tranh nuoi mot test hu cau song song voi test that.
 
     # ---- 18. R3 (§29 fail-silent): registry loi (vd corp_actions.json hong JSON) o MOT arm
     #          KHONG duoc lam crash vong lap / mat breach THAT cua arm KHAC.
@@ -399,7 +371,16 @@ def main():
         }
         gate.current_price = lambda ticker: _prices[ticker]
         daily_nav_snapshot.confirmed_qty_multiplier_after = _mult_after_stub_raising({"VPB"})
-        rc = gate.cmd_check_exits(_argparse.Namespace())
+        try:
+            rc = gate.cmd_check_exits(_argparse.Namespace())
+        except Exception as exc:
+            # R5: neu mutation go try/except quanh corp_action_frame_multiplier() lam loi
+            # registry CRASH thang ra ngoai, bat lai o day de chet bang assertion CO TEN thay vi
+            # traceback lam sap ca selfcheck (dung quy uoc R3/13-18 hom nay).
+            check("R3: cmd_check_exits KHONG duoc de loi registry lam crash ra ngoai "
+                  "(try/except quanh corp_action_frame_multiplier bi thao?)", False,
+                  f"{type(exc).__name__}: {exc}")
+            rc = None
         arms_after = {a["ticker"]: a for a in gate.load_arms()}
         check("R3: registry loi o VPB KHONG lam crash vong lap (TV1 van duoc xu ly)",
               "TV1" in arms_after and arms_after["TV1"].get("last_checked"), f"{arms_after}")
@@ -415,6 +396,88 @@ def main():
     finally:
         _restore_corp_action_mocks()
         _patch_io(monkey_price=(0.0, "reset", None))
+
+    # ---- 18b. [vong 4, arch-review R1+R2] registry loi NHUNG arm DA CO corp_action_multiplier=
+    #           1.30 tu lan doc THANH CONG truoc do -> gia tri do PHAI duoc GIU NGUYEN (khong bi
+    #           de ve 1.0), KHONG sinh them corp_action_adjustments, va tin notify KHONG duoc
+    #           ngu y da doc duoc registry luot nay (khong in "x1.000000"). Day chinh la ca that
+    #           arch-reviewer do duoc: arm factor dung 1.30, drawdown that -5%, nhung ban va vong
+    #           3 in "he so x1.000000" trong tin breach khi registry loi.
+    try:
+        arm = _mk_arm(26000.0, ticker="VPB", armed_at="2026-09-01T09:00:00+07:00")
+        arm["corp_action_multiplier"] = 1.30
+        arm["corp_action_adjustments"] = [
+            {"at": "2026-09-10T09:00:00+07:00", "factor_before": 1.0, "factor_after": 1.30,
+             "note": "seed: da doc thanh cong lan truoc"}]
+        gate.save_arms([arm])
+        _NoBus.calls.clear()
+        n_adj_before = len(arm["corp_action_adjustments"])
+        # arm_price_frame = 26000/1.30 = 20000; px=15000 -> drawdown = -25% (breach, de test noi
+        # dung tin notify khi breach xay ra dung luc registry loi).
+        _patch_io(monkey_price=(15000.0, "dnse_g1_fake", None))
+        daily_nav_snapshot.confirmed_qty_multiplier_after = _mult_after_stub_raising({"VPB"})
+        try:
+            rc = gate.cmd_check_exits(_argparse.Namespace())
+        except Exception as exc:
+            check("18b: cmd_check_exits KHONG duoc crash khi registry loi + da co multiplier cu",
+                  False, f"{type(exc).__name__}: {exc}")
+            rc = None
+        a0 = (gate.load_arms() or [{}])[0]
+        check("18b (R1a): registry loi NHUNG multiplier CU (1.30) duoc GIU NGUYEN, khong bi de ve 1.0",
+              abs(a0.get("corp_action_multiplier", 0) - 1.30) < 1e-9, f"{a0.get('corp_action_multiplier')}")
+        check("18b (R1b): KHONG sinh them corp_action_adjustments moi khi registry loi",
+              len(a0.get("corp_action_adjustments") or []) == n_adj_before,
+              f"before={n_adj_before} after={len(a0.get('corp_action_adjustments') or [])}")
+        check("18b (R1c): drawdown van tinh theo he so CU da biet (20.000 frame => -25%, khong "
+              "bi reset ve khong quy doi / -42,3%)",
+              abs(a0.get("last_drawdown", 0) - (-0.25)) < 1e-6, f"{a0.get('last_drawdown')}")
+        check("18b: rc=1 (co errors)", rc == 1, f"rc={rc}")
+
+        notify_msgs = [c[1] for c in _NoBus.calls if c[0] == "notify"]
+        check("18b: co it nhat 1 tin notify duoc gui khi breach xay ra du registry loi",
+              len(notify_msgs) >= 1, str(_NoBus.calls))
+        joined = " ".join(notify_msgs)
+        check("18b (R1d): tin notify KHONG chua 'x1.000000' (khong ngu y da doc duoc registry)",
+              "×1.000000" not in joined and "x1.000000" not in joined, joined)
+        check("18b (R1e): tin notify CO dau hieu 'khong xac dinh duoc' cho nguoi doc biet ro "
+              "day la canh bao chua xac nhan, khong phai da quy doi that",
+              "không xác định được" in joined.lower(), joined)
+    finally:
+        _restore_corp_action_mocks()
+        _patch_io(monkey_price=(0.0, "reset", None))
+
+    # ---- 18c. [vong 4, arch-review R3] he so GIAM (su kien bi REVOKE / row bi xoa khoi registry)
+    #           -> corp_action_multiplier PHAI CAP NHAT xuong gia tri moi, khong chi cap nhat khi
+    #           TANG. arch-reviewer ban mutation `factor != prior_factor` -> `factor > prior_factor`
+    #           (dong ~402) va no SONG vi chua co test cho chieu giam — mutation nay PHAI chet
+    #           sau khi them ca duoi day (factor > prior_factor se False khi factor=1.0 <
+    #           prior_factor=1.30 => khong cap nhat => assertion 18c-a bat duoc ngay).
+    try:
+        gate.save_arms([_mk_arm(26000.0, ticker="VPB", armed_at="2026-09-01T09:00:00+07:00")])
+        _NoBus.calls.clear()
+        _patch_io(monkey_price=(19000.0, "dnse_g1_fake", None))
+        daily_nav_snapshot.confirmed_qty_multiplier_after = _mult_after_stub({"VPB": 1.30})
+        gate.cmd_check_exits(_argparse.Namespace())
+        a0 = (gate.load_arms() or [{}])[0]
+        check("18c-setup: multiplier ban dau = 1.30",
+              abs(a0.get("corp_action_multiplier", 0) - 1.30) < 1e-9, f"{a0.get('corp_action_multiplier')}")
+
+        # su kien bi REVOKE giua 2 lan goi -> registry (da doc THANH CONG, khong loi) tra ve 1.0
+        daily_nav_snapshot.confirmed_qty_multiplier_after = _mult_after_stub({"VPB": 1.0})
+        gate.cmd_check_exits(_argparse.Namespace())
+        a1 = (gate.load_arms() or [{}])[0]
+        check("18c-a (R3): he so GIAM tu 1.30 xuong 1.0 PHAI duoc cap nhat (bat mutation "
+              "'factor != prior_factor' -> 'factor > prior_factor')",
+              abs(a1.get("corp_action_multiplier", 0) - 1.0) < 1e-9, f"{a1.get('corp_action_multiplier')}")
+        expected_dd = round(19000.0 / (26000.0 / 1.0) - 1.0, 4)   # last_drawdown duoc round(4)
+        check("18c-b: drawdown tinh lai dung theo he so MOI (1.0) sau khi giam, khong con dung "
+              "frame 1.30 cu", abs(a1.get("last_drawdown", 0) - expected_dd) < 1e-6,
+              f"{a1.get('last_drawdown')} vs expected {expected_dd}")
+        n_adj_after_decrease = len(a1.get("corp_action_adjustments") or [])
+        check("18c-c: co ghi corp_action_adjustments cho lan giam (khong bi coi la 'khong doi')",
+              n_adj_after_decrease >= 1, f"{n_adj_after_decrease}")
+    finally:
+        _restore_corp_action_mocks()
 
     print(f"\n{'='*70}\nPASS={len(PASS)} FAIL={len(FAIL)}")
     if FAIL:

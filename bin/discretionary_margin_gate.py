@@ -365,6 +365,8 @@ def cmd_check_exits(args):
     changed = False
     breaches = []
     errors = []
+    factor_lookup_failed = {}   # ticker -> lỗi thật, chỉ tồn tại trong LƯỢT NÀY (không persist
+                                 # vào arm JSON) — dùng để rẽ câu khi build tin breach (§29)
     for a in live:
         px, src, err = current_price(a["ticker"])
         if err:
@@ -378,26 +380,33 @@ def cmd_check_exits(args):
         try:
             factor = corp_action_frame_multiplier(a["ticker"], arm_date) if arm_date else 1.0
         except Exception as exc:
-            # §29: in LỖI THẬT vừa bắt được, không đoán nguyên nhân. Fail-OPEN factor=1.0 (không
-            # quy đổi) là hướng AN TOÀN ở tầng này: arm_price_frame giữ nguyên arm_price gốc =>
-            # drawdown bị tính NHIỀU HƠN thực (cảnh báo giả), KHÔNG BAO GIỜ bỏ sót cảnh báo thật.
-            # Không `continue` — arm này vẫn được đánh giá breach bằng gía chưa quy đổi, và các
-            # arm KHÁC trong vòng lặp không bị một registry lỗi làm crash lây.
+            # §29: "lỗi đọc registry" ≠ "registry nói không có sự kiện" — KHÔNG được ghi
+            # a["corp_action_multiplier"] hay khẳng định đã đọc được registry lượt này (vòng 3
+            # từng vá sai: fail-open factor=1.0 rồi vẫn rơi vào nhánh ghi note "tích luỹ sự
+            # kiện ⇒ ×1.000000", ĐÈ MẤT hệ số 1.30 đã biết từ lần đọc thành công trước đó).
+            # Sửa: GIỮ NGUYÊN corp_action_multiplier đã biết gần nhất (nếu chưa từng đọc thành
+            # công thì mặc định 1.0, đúng tinh thần fail-open — drawdown bị tính nhiều hơn thực,
+            # cảnh báo giả chứ không bao giờ bỏ sót cảnh báo thật). Không `continue` — arm này
+            # vẫn được đánh giá breach, các arm KHÁC trong vòng lặp không bị 1 registry lỗi làm
+            # crash lây.
             err_detail = f"{type(exc).__name__}: {exc}"
             msg = (f"{a['ticker']}: lỗi đọc corp-action registry khi tính multiplier — "
-                   f"fail-open factor=1.0. Lỗi thật: {err_detail}")
+                   f"KHÔNG cập nhật hệ số (giữ nguyên giá trị đã biết gần nhất, nếu có). "
+                   f"Lỗi thật: {err_detail}")
             print(f"⚠ {msg}", file=sys.stderr)
             errors.append(msg)
-            factor = 1.0
-        prior_factor = a.get("corp_action_multiplier", 1.0)
-        if factor != prior_factor:
-            note = (f"registry corp_actions.json: tích luỹ sự kiện CONFIRMED ex_date > "
-                    f"{arm_date} ⇒ hệ số ×{factor:.6f} (trước đó ×{prior_factor:.6f})")
-            a.setdefault("corp_action_adjustments", []).append(
-                {"at": dt.datetime.now(ICT).isoformat(timespec="seconds"),
-                 "factor_before": prior_factor, "factor_after": factor, "note": note})
-            a["corp_action_multiplier"] = factor
-            print(f"  [CORPACTION] {a['ticker']}: {note}")
+            factor_lookup_failed[a["ticker"]] = err_detail
+            factor = a.get("corp_action_multiplier", 1.0)
+        else:
+            prior_factor = a.get("corp_action_multiplier", 1.0)
+            if factor != prior_factor:
+                note = (f"registry corp_actions.json: tích luỹ sự kiện CONFIRMED ex_date > "
+                        f"{arm_date} ⇒ hệ số ×{factor:.6f} (trước đó ×{prior_factor:.6f})")
+                a.setdefault("corp_action_adjustments", []).append(
+                    {"at": dt.datetime.now(ICT).isoformat(timespec="seconds"),
+                     "factor_before": prior_factor, "factor_after": factor, "note": note})
+                a["corp_action_multiplier"] = factor
+                print(f"  [CORPACTION] {a['ticker']}: {note}")
 
         arm_price_frame = a["arm_price"] / a.get("corp_action_multiplier", 1.0)
         drawdown = px / arm_price_frame - 1.0
@@ -423,7 +432,14 @@ def cmd_check_exits(args):
         for ticker, px, drawdown in breaches:
             a = by_ticker.get(ticker, {})
             frame_note = ""
-            if "arm_price_frame_adjusted" in a:
+            if ticker in factor_lookup_failed:
+                # §29: registry lỗi lượt này — KHÔNG in bất kỳ số nào ngụ ý đã đọc được registry
+                # (kể cả hệ số cũ đã biết), tuyệt đối không lặp lại bug "×1.000000" vòng 3.
+                frame_note = (f" (⚠ hệ số corp-action KHÔNG XÁC ĐỊNH ĐƯỢC lượt này — lỗi đọc "
+                               f"registry: {factor_lookup_failed[ticker]}. Drawdown dưới đây "
+                               f"CHƯA xác nhận quy đổi theo sự kiện mới nhất, có thể là cảnh "
+                               f"báo giả)")
+            elif "arm_price_frame_adjusted" in a:
                 frame_note = (f" (quy đổi corp-action: arm_price {a['arm_price']:,.0f} → "
                                f"{a['arm_price_frame_adjusted']:,.0f}, hệ số ×"
                                f"{a.get('corp_action_multiplier', 1.0):.6f})")
