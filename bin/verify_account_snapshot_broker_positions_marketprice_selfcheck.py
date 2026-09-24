@@ -1,14 +1,20 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Selfcheck cho `verify_account_snapshot.broker_positions_from_raw()` — Việc 3 (job
-Taylor_20260924_064510).
+Taylor_20260924_064510+_073500).
 
-BUG ĐÃ SỬA: `out.setdefault(tk, {"qty": 0.0, "marketPrice": p.get("marketPrice")})` chỉ ghi
-`marketPrice` của LÔ ĐẦU TIÊN gặp trong mảng `positions[]` cho mỗi mã — các lô sau (loan
-package khác, cùng mã) bị bỏ qua hoàn toàn, kể cả khi giá của chúng MỚI HƠN/ĐÚNG HƠN. DNSE điều
-chỉnh `marketPrice` theo TỪNG GÓI VAY và KHÔNG NGUYÊN TỬ (`price_frame.py` §G4, đo thật BID
-2026-08-14: 35.800 vs 38.850, lệch 8,5%). Vá: giữ `marketPrice` LATEST non-None, đúng quy ước
-`DNSEBroker.get_positions()` (`trading_bot/brokers.py`) đã dùng.
+VÁ ĐỒNG BỘ QUY ƯỚC (KHÔNG PHẢI fix một lỗi số đã xảy ra — xem docstring hàm gốc):
+`out.setdefault(tk, {"qty": 0.0, "marketPrice": p.get("marketPrice")})` chỉ ghi `marketPrice`
+của LÔ ĐẦU TIÊN gặp trong mảng `positions[]` cho mỗi mã — các lô sau (loan package khác, cùng
+mã) bị bỏ qua hoàn toàn. Vá: giữ `marketPrice` LATEST non-None, đúng quy ước
+`DNSEBroker.get_positions()` (`trading_bot/brokers.py:694-701`) đã dùng.
+
+⚠️ Quét 83 file `dnse_raw` thật (2026-06→09, arch-review job Taylor_20260924_073500) cho 0 ca
+hàm này đổi hành vi: hàm đọc bản ghi `positions` CUỐI CÙNG trong ngày, nơi các lô loan package
+THƯỜNG đã hội tụ về cùng giá trước khi bản ghi đó được ghi (đo thật BID 2026-08-14: bản ghi
+21:52:31 cuối ngày mọi lô đều 35.800, TRÙNG lô đầu — không phải 38.850 như giữa ngày). Fixture
+2 lô 35.800/38.850 dưới đây là DỮ LIỆU TỔNG HỢP để chứng minh cơ chế "giữ latest" hoạt động
+đúng khi hai lô CHƯA hội tụ — không phải bản ghi thật đã gây sai số quan sát được.
 
 Chạy:  python3 mike/bin/verify_account_snapshot_broker_positions_marketprice_selfcheck.py
 Phải PASS y hệt dưới TZ lạ (§16 + skill verify-before-done):

@@ -282,11 +282,20 @@ def broker_positions_from_raw(account_no, asof):
     Gộp các loan package cùng mã. Đây là neo độc lập bắt buộc trước khi một lô mua
     sau legacy-oversell được coi là coverage đầy đủ cho P&L.
 
-    §corp-action (job Taylor_20260924_064510, Việc 3) — `marketPrice` giữ giá trị của lô
-    loan package MỚI NHẤT khác-None gặp trong `positions[]`, không phải lô ĐẦU TIÊN. DNSE
-    điều chỉnh `marketPrice` theo TỪNG GÓI VAY và KHÔNG NGUYÊN TỬ (`price_frame.py` §G4, đo
-    thật BID 2026-08-14: 35.800 vs 38.850, lệch 8,5%) — cùng quy ước "latest non-None" mà
-    `DNSEBroker.get_positions()` đã dùng (`trading_bot/brokers.py::DNSEBroker.get_positions`).
+    §corp-action (job Taylor_20260924_064510+_073500, Việc 3) — `marketPrice` giữ giá trị của
+    lô loan package MỚI NHẤT khác-None gặp trong `positions[]`, không phải lô ĐẦU TIÊN — ĐỒNG
+    BỘ đúng quy ước "latest non-None" mà `DNSEBroker.get_positions()` đã dùng
+    (`trading_bot/brokers.py:694-701`, cùng lý do: DNSE trả nhiều dòng/loan-package cho cùng
+    mã, `marketPrice` là giá mark chung nên giữ bản mới nhất).
+
+    ⚠️ Đây là vá PHÒNG NGỪA/ĐỒNG BỘ QUY ƯỚC, KHÔNG PHẢI vá một lỗi số đã xảy ra: hàm này đọc
+    bản ghi `positions` CUỐI CÙNG của ngày (`latest = rec.get(...)` ghi đè qua từng dòng file,
+    xem vòng lặp bên dưới) — tại thời điểm đó các lô THƯỜNG đã HỘI TỤ về cùng giá (đo thật ca
+    BID 2026-08-14: bản ghi 21:52:31 cuối ngày, mọi lô đều đã về 35.800/20.000/58.500 — TRÙNG
+    với lô ĐẦU, không phải 38.850/59.500 như ở giữa ngày). Quét 83 file `dnse_raw` (2026-06→09)
+    cho 0 ca hàm này đổi hành vi thật (arch-review, job Taylor_20260924_073500) — vá này chỉ
+    phòng ngừa cho ca TƯƠNG LAI nếu bản ghi cuối ngày chưa kịp hội tụ (broker điều chỉnh trễ
+    theo gói vay không nguyên tử, `price_frame.py` §G4), không sửa một con số sai đã quan sát.
     """
     path = os.path.join(EXEC_DIR, f"dnse_raw_{asof}.jsonl")
     if not os.path.exists(path):
