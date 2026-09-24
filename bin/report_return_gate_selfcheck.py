@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -161,7 +162,14 @@ def main() -> int:
 
     rc_emb, out_emb = run_embedded_selfcheck()
     check("bộ assertion NHÚNG `report_return_gate.py --selfcheck` PASS", rc_emb, 0)
+    # rc=0 CHƯA đủ: thay lời gọi bằng một hằng số giả cũng cho rc=0 (mutation sống). Đòi thêm
+    # dòng đếm THẬT với số ca > 0 — "chạy 0 ca rồi báo xanh" không lọt được.
     _count = [l for l in out_emb.strip().splitlines() if l.startswith("SELFCHECK:")]
+    _m = re.search(r"\((\d+)/(\d+) ca\)", _count[-1]) if _count else None
+    _ran = int(_m.group(2)) if _m else 0
+    _passed = int(_m.group(1)) if _m else -1
+    check("… và nó THỰC SỰ chạy: dòng đếm có thật, số ca > 0, không ca nào FAIL",
+          (_ran > 0, _passed == _ran), (True, True))
     print("     " + (_count[-1] if _count
                      else "\n     ".join(out_emb.strip().splitlines()[-8:])))
 
