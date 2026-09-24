@@ -1279,6 +1279,22 @@ def _selfcheck() -> int:
           "cặp số cũ)", "VENDOR_MISMATCH_ALERT" in txt_lkf, False)
     check("VIỆC CẦN LÀM nói 'chạy lại' (rerun khi BQ khoẻ), không giao Winston đối soát số",
           "chạy lại" in txt_lkf, True)
+    # arch-review dispatch 2026-09-24 (audit vòng 7, C1): check "chạy lại" ở trên là VACUOUS cho
+    # nhánh `if "lookup_failed" in reasons_present:` (khối VIỆC CẦN LÀM) — chuỗi "chạy lại" CŨNG
+    # xuất hiện ở khối `if "lookup_failed" in vendor_fail_reasons:` phía dưới (T1(b) đã ghim
+    # riêng), nên ca `_LOOKUP` này (bị CHẶN, cả hai khối cùng chạy) khiến mutation
+    # `if "lookup_failed" in reasons_present: -> if False:` vẫn PASS 93/93 (đo thật: sed dòng
+    # 732 thành `if False:` rồi chạy --selfcheck, không FAIL ca nào). Cần anchor RIÊNG của khối
+    # VIỆC CẦN LÀM: "hạ tầng tra vendor thất bại, KHÔNG PHẢI bất đồng số liệu" chỉ có ở đây,
+    # khối kia dùng chữ khác ("KHÔNG PHẢI hai nguồn bất đồng").
+    check("khối VIỆC CẦN LÀM (reasons_present) có câu riêng 'hạ tầng tra vendor thất bại, KHÔNG "
+          "PHẢI bất đồng số liệu'", "hạ tầng tra vendor thất bại, KHÔNG PHẢI bất đồng số liệu"
+          in txt_lkf, True)
+    assert "hạ tầng tra vendor thất bại, KHÔNG PHẢI bất đồng số liệu" in txt_lkf, (
+        "MUTATION-GUARD gate_lookup_failed_reasons_present_note: nhánh "
+        "`if \"lookup_failed\" in reasons_present:` (khối VIỆC CẦN LÀM) đã bị tắt/hỏng — câu "
+        "'chạy lại' sống sót chỉ nhờ khối `vendor_fail_reasons` khác phía dưới, KHÔNG phải bằng "
+        f"chứng cho nhánh này. Đang là: {txt_lkf!r}")
     assert rc_lkf == 1 and "VENDOR_LOOKUP_FAILED" in txt_lkf and "VENDOR_MISMATCH_ALERT" not in txt_lkf, (
         "MUTATION-GUARD gate_lookup_failed_own_tag: ca BQ lỗi hạ tầng phải dùng TAG RIÊNG "
         "VENDOR_LOOKUP_FAILED, KHÔNG tái dùng VENDOR_MISMATCH_ALERT (sentinel 0đ sẽ bị đọc nhầm "

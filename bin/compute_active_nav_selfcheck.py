@@ -13,12 +13,23 @@ MỌI CA ĐỀU CHẠY QUA HÀM THẬT `compute_active_nav.cash_basis()` — kh�
 
 Không chạm DNSE / BQ / bus / file production. Chạy: python3 mike/bin/compute_active_nav_selfcheck.py
 """
+import glob
 import importlib.util
 import os
+import subprocess
 import sys
 
-WC = "/home/trido/thanhdt/WorkingClaude"
-MIKE_BIN = os.path.join(WC, "mike", "bin")
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+import wc_paths  # noqa: E402
+# `WC` cứng canonical trước đây làm mọi ca (kể cả A-J, không chỉ shim K) LUÔN import
+# compute_active_nav.py từ checkout canonical, bất kể selfcheck này đang chạy từ worktree nào —
+# PASS không chứng minh gì về code TRONG worktree. MIKE_BIN neo theo VỊ TRÍ FILE
+# (`HERE`, sibling compute_active_nav.py cùng thư mục) nên tự đổi theo worktree đang chạy;
+# `WC` (trading_bot ở Section E, không đổi theo mike worktree) vẫn tra qua marker
+# `wc_paths.find_wc_root` — quy ước sẵn có ở `corp_action_selfcheck.py`, không tự bịa.
+WC = wc_paths.find_wc_root(__file__)
+MIKE_BIN = HERE
 
 fails = []
 
@@ -424,6 +435,102 @@ finally:
     (can.get_account_profile, can.live_balance_and_positions, can.resolve_prices,
      sys.argv) = saved_j
     _shutil.rmtree(_j_tmp, ignore_errors=True)
+
+print()
+print("K. Ghi NGUYÊN TỬ ra `out_path` (§5 coding_guidelines, C2 arch-review vòng 7) — kill GIỮA "
+      "lúc ghi tmp KHÔNG được làm mất/hỏng file NAV canonical của lần chạy trước. Ca này chạy "
+      "main() trong SUBPROCESS RIÊNG (os._exit thật, không phải mock/exception) vì kill giữa "
+      "chừng không mô phỏng được bằng try/except trong cùng tiến trình selfcheck.")
+_k_tmp = _tempfile.mkdtemp(prefix="can_sc_k_")
+_k_out = os.path.join(_k_tmp, "active_nav_KSELFCHK.json")
+_k_good_prior = {"computed_at": "2026-09-20", "total_nav": 999_000_000.0,
+                  "active_nav": 999_000_000.0, "total_stock_value": 999_000_000.0,
+                  "positions": [], "marker": "GOOD_PRIOR_UNTOUCHED_BY_KILL"}
+with open(_k_out, "w", encoding="utf-8") as _kf:
+    _json.dump(_k_good_prior, _kf)
+with open(_k_out, "rb") as _kf:
+    _k_good_prior_bytes = _kf.read()
+
+# Shim chạy trong subprocess riêng: monkeypatch `json.dump` bên trong compute_active_nav để
+# ghi vài byte JSON DỞ DANG rồi `os._exit(137)` NGAY — mô phỏng kill -9 giữa lúc ghi tmp,
+# TRƯỚC dòng `os.replace(tmp, out_path)`. Token PLACEHOLDER thay bằng `.replace()` (không
+# `.format()`) vì thân shim có literal `{`/`}` của JSON — `.format()` sẽ nổ trên chúng.
+_k_shim_src = '''\
+import sys, os
+sys.path.insert(0, MIKE_BIN_PLACEHOLDER)
+import compute_active_nav as can
+
+
+def _crashing_dump(obj, fp, **kw):
+    fp.write('{"computed_at": "CORRUPT_PARTIAL_FROM_KILL_MID_WRITE')
+    fp.flush()
+    os.fsync(fp.fileno())
+    os._exit(137)
+
+
+can.json.dump = _crashing_dump
+can.get_account_profile = lambda label: {"account_id": "KSC"}
+can.live_balance_and_positions = lambda aid, label: (
+    100000000.0, {}, {"reason": None, "cash_basis": "totalCash-totalDebt",
+                       "cash_total_vnd": 100000000.0, "cash_debt_vnd": 0.0,
+                       "cash_available_vnd": 100000000.0,
+                       "cash_dividend_receiving_vnd": 0.0}, 0.0)
+can.resolve_prices = lambda tickers, asof: ({}, {}, None)
+sys.argv = ["compute_active_nav.py", "--account", "KSELFCHK", "--out", OUT_PATH_PLACEHOLDER,
+            "--confirm-flat"]
+try:
+    can.main()
+except SystemExit:
+    pass
+'''
+_k_shim_path = os.path.join(_k_tmp, "_kill_shim.py")
+with open(_k_shim_path, "w", encoding="utf-8") as _kf:
+    _kf.write(_k_shim_src.replace("MIKE_BIN_PLACEHOLDER", repr(MIKE_BIN))
+                          .replace("OUT_PATH_PLACEHOLDER", repr(_k_out)))
+
+_k_proc = subprocess.run([sys.executable, _k_shim_path], capture_output=True, timeout=30)
+check("K1 shim con THẬT SỰ crash bằng os._exit(137) (không lặng lẽ rơi vào nhánh khác)",
+      _k_proc.returncode == 137,
+      f"returncode={_k_proc.returncode} stderr={_k_proc.stderr.decode(errors='replace')[:300]}")
+
+with open(_k_out, "rb") as _kf:
+    _k_out_after_kill = _kf.read()
+check("K2 file canonical KHÔNG bị hỏng/mất sau kill giữa lúc ghi tmp — byte-identical với "
+      "bản TỐT của lần chạy trước (os.replace không hề chạy)",
+      _k_out_after_kill == _k_good_prior_bytes,
+      f"after_kill={_k_out_after_kill[:80]!r}")
+
+_k_leftover_tmp = glob.glob(os.path.join(_k_tmp, "active_nav_KSELFCHK.json.*.tmp"))
+check("K3 phần ghi dở nằm ở file TMP riêng (không phải out_path) — chứng minh cơ chế mkstemp "
+      "+ os.replace thật sự tách 2 file, không ghi thẳng vào canonical",
+      len(_k_leftover_tmp) == 1
+      and open(_k_leftover_tmp[0], encoding="utf-8").read() == '{"computed_at": "CORRUPT_PARTIAL_FROM_KILL_MID_WRITE',
+      f"leftover={_k_leftover_tmp}")
+
+# K4 — CHỨNG MINH NGƯỢC K1-K3: chạy lại BÌNH THƯỜNG (không crash) trên CÙNG out_path, với
+# tmp cũ còn sót lại từ vụ kill ⇒ lần chạy sau vẫn ghi thành công, không bị khoá/kẹt bởi tmp mồ côi.
+saved_k = (can.get_account_profile, can.live_balance_and_positions, can.resolve_prices, sys.argv)
+try:
+    can.get_account_profile = lambda label: {"account_id": "KSC"}
+    can.live_balance_and_positions = lambda aid, label: (
+        100_000_000.0, {}, {"reason": None, "cash_basis": "totalCash-totalDebt",
+                             "cash_total_vnd": 100_000_000.0, "cash_debt_vnd": 0.0,
+                             "cash_available_vnd": 100_000_000.0,
+                             "cash_dividend_receiving_vnd": 0.0}, 0.0)
+    can.resolve_prices = lambda tickers, asof: ({}, {}, None)
+    sys.argv = ["compute_active_nav.py", "--account", "KSELFCHK", "--out", _k_out,
+                "--confirm-flat"]
+    can.main()
+finally:
+    (can.get_account_profile, can.live_balance_and_positions, can.resolve_prices,
+     sys.argv) = saved_k
+_k_res_recovered = _json.load(open(_k_out, encoding="utf-8"))
+check("K4 CHỨNG MINH NGƯỢC: lần chạy BÌNH THƯỜNG sau đó (tmp mồ côi còn sót) vẫn ghi ĐÚNG "
+      "(active_nav = cash 100tr, hết marker GOOD_PRIOR cũ) — kill lần trước không để lại khoá",
+      _k_res_recovered.get("active_nav") == 100_000_000
+      and _k_res_recovered.get("marker") is None,
+      f"res={ {k: _k_res_recovered.get(k) for k in ('active_nav', 'marker')} }")
+_shutil.rmtree(_k_tmp, ignore_errors=True)
 
 print()
 if fails:

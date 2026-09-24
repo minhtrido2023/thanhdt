@@ -114,6 +114,7 @@ import json
 import os
 import subprocess
 import sys
+import tempfile
 
 BQ_PATH_PREFIX = "/home/trido/google-cloud-sdk/bin"
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -613,8 +614,23 @@ def main():
                         "price_source": price_source.get(tk, "?")}
                        for tk, qty, px, mv, is_excl in rows],
     }
-    with open(out_path, "w", encoding="utf-8") as f:
-        json.dump(result, f, indent=2, ensure_ascii=False)
+    # §5 coding_guidelines — ghi nguyên tử: `out_path` là file NAV canonical (consumer đọc lại
+    # nhiều nơi khác), kill giữa lúc ghi KHÔNG được để lại file cụt đè lên bản tốt lần trước.
+    # Cùng khuôn `vendor_mismatch_alert.sh` (mkstemp CÙNG THƯ MỤC đích + fsync + os.replace).
+    fd, tmp = tempfile.mkstemp(dir=os.path.dirname(out_path) or ".",
+                                prefix=os.path.basename(out_path) + ".", suffix=".tmp")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            json.dump(result, f, indent=2, ensure_ascii=False)
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(tmp, out_path)
+    except BaseException:
+        try:
+            os.unlink(tmp)
+        except OSError:
+            pass
+        raise
     print(f"\nGhi ra: {out_path}")
 
 
