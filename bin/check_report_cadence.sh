@@ -79,7 +79,18 @@ state = json.load(open('$EMAILED_STATE'))
 print('yes' if state.get('$FNAME') else 'no')
 ")"
   if [ "$ALREADY" = "no" ]; then
-    if ! python3 "$ROOT/bin/report_delivery_gate.py" "$f" --topic "$TRADING_REPORT_THREAD"; then
+    # Capture thay vì để chảy thẳng ra log: khối "⚠️ LỆCH NGUỒN VENDOR" mà report_return_gate in
+    # ra đi qua stdout của delivery gate ⇒ chôn trong logs/check_report_cadence.log, user không
+    # thấy. Bắt lấy ở đây rồi bắn Discord/bus với ĐÚNG nguyên nhân + ĐÚNG người (Winston).
+    # Chạy cho CẢ hai nhánh rc: ca "mã lệch nguồn nhưng báo cáo không công bố tỉ suất" cho rc=0,
+    # tức cổng KHÔNG chặn — đó chính là ca không kênh nào khác kêu lên.
+    GATE_OUT="$(python3 "$ROOT/bin/report_delivery_gate.py" "$f" --topic "$TRADING_REPORT_THREAD" 2>&1)"
+    GATE_RC=$?
+    printf '%s\n' "$GATE_OUT"
+    VENDOR_RC=0
+    printf '%s\n' "$GATE_OUT" | "$ROOT/bin/vendor_mismatch_alert.sh" \
+      "$FNAME" "$TRADING_REPORT_THREAD" || VENDOR_RC=$?
+    if [ "$GATE_RC" -ne 0 ]; then
       echo "check_report_cadence: DELIVERY INCOMPLETE cho $FNAME — giữ việc mở và tự retry lần sau." >&2
       # arch-review coord-2026-08-31 (required_changes #1): trước đây CHỈ có dòng >&2 ở trên —
       # chết trong logs/check_report_cadence.log, không ai thấy trừ khi tự đi đọc log. Cùng khuôn
@@ -94,7 +105,15 @@ print('yes' if state.get('$FNAME') == '$TODAY' else 'no')
         "$ROOT/bin/append_event.sh" Mike error "report-delivery-incomplete-${FNAME}" \
           "{\"artifact\":\"${FNAME}\",\"retry\":\"check_report_cadence sweep (hằng ngày)\"}" \
           2>/dev/null || true
-        "$ROOT/bin/notify_thread.sh" "🔴 **Delivery INCOMPLETE — ${FNAME}** — báo cáo đã tạo nhưng chưa giao đủ (Discord+email, hash-bound). Sweep tự retry mỗi ngày; nếu kéo dài, cần Taylor kiểm tra bin/report_delivery_gate.py --status ${FNAME}." \
+        # Nguyên nhân/người xử lý suy từ BẰNG CHỨNG cổng vừa in ra, không phát một câu cố định
+        # (§29). VENDOR_RC=10 ⇒ chặn là do hai nguồn cổ tức bất đồng: việc của Winston
+        # (data-ops), không phải Taylor, và không phải "chưa giao đủ kênh".
+        if [ "$VENDOR_RC" -eq 10 ]; then
+          INCOMPLETE_MSG="🔴 **Delivery INCOMPLETE — ${FNAME}** — bị CHẶN vì **LỆCH NGUỒN CỔ TỨC** (tiền broker ≠ \`tav2_bq.corporate_action\`), KHÔNG phải lỗi soạn báo cáo. Cần **Winston (data-ops)** đối soát nguồn vendor — chi tiết ở cảnh báo ngay trên. Sweep tự retry mỗi ngày."
+        else
+          INCOMPLETE_MSG="🔴 **Delivery INCOMPLETE — ${FNAME}** — báo cáo đã tạo nhưng chưa giao đủ (Discord+email, hash-bound). Sweep tự retry mỗi ngày; nếu kéo dài, cần Taylor kiểm tra bin/report_delivery_gate.py --status ${FNAME}."
+        fi
+        "$ROOT/bin/notify_thread.sh" "$INCOMPLETE_MSG" \
           "$TRADING_REPORT_THREAD" 2>/dev/null || true
         python3 -c "
 import json

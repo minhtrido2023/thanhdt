@@ -604,6 +604,14 @@ def run_gate(report_path: str, tol_pp: float = DEFAULT_TOL_PP, out=sys.stdout) -
             print(f"   • {line}", file=out)
             if tk in published:
                 vendor_fails.append(line)
+            # Dòng MÁY ĐỌC cạnh dòng người đọc: stdout của cổng này chảy vào stdout của
+            # `report_delivery_gate.py` (subprocess kế thừa fd) rồi vào LOG của cron — nên nếu
+            # không có gì để shell caller bám vào thì cảnh báo chết trong log, KHÔNG tới user.
+            # `bin/vendor_mismatch_alert.sh` parse đúng dòng này (giá trị đã chuẩn hoá, KHÔNG
+            # grep câu văn xuôi — §28) và bắn Discord/bus. Cố ý in cho CẢ ca không công bố
+            # (rc=0): đó chính là ca mà cổng KHÔNG chặn nên không kênh nào khác kêu.
+            print(f"VENDOR_MISMATCH_ALERT|{lb}|{tk}|{ex}|{broker_ps:.0f}|{vendor_ps:.0f}|"
+                  f"{1 if tk in published else 0}", file=out)
         print("   → sự kiện đã bị HẠ VỀ UNVERIFIED: cổ tức của nó KHÔNG vào kỳ vọng và KHÔNG được "
               "công bố (§21).", file=out)
         print("   → VIỆC CẦN LÀM: Winston (data-ops) đối soát `tav2_bq.corporate_action` với sổ "
@@ -1046,6 +1054,10 @@ def _selfcheck() -> int:
     check("cảnh báo lệch 50,0%", "50.0%" in txt_pub, True)
     check("cảnh báo chỉ đích danh Winston (data-ops), không phải câu chung chung (§29)",
           "Winston" in txt_pub, True)
+    # Dòng MÁY ĐỌC là HỢP ĐỒNG với `bin/vendor_mismatch_alert.sh` (V3): thiếu nó thì cảnh báo
+    # chỉ còn là văn xuôi trong log cron, không kênh nào bắn tới user được.
+    check("có dòng máy đọc VENDOR_MISMATCH_ALERT, cờ published=1",
+          "VENDOR_MISMATCH_ALERT|SpaceX|ZZZ|2026-09-24|1000|1500|1" in txt_pub, True)
     assert rc_pub == 1 and "Winston" in txt_pub, (
         "MUTATION-GUARD gate_vendor_mismatch_block: mã có sự kiện lệch nguồn vẫn được CÔNG BỐ tỉ "
         f"suất mà cổng cho qua (rc={rc_pub}) hoặc không nêu Winston.")
@@ -1055,6 +1067,8 @@ def _selfcheck() -> int:
     rc_quiet2, txt_quiet2 = _run_vendor_case("## Không công bố tỉ suất mã nào\n", _MISM)
     check("vendor mismatch + mã KHÔNG công bố ⇒ không chặn (rc=0)", rc_quiet2, 0)
     check("… nhưng cảnh báo VẪN in ra (không im lặng)", "LỆCH NGUỒN VENDOR" in txt_quiet2, True)
+    check("… và dòng máy đọc vẫn có, cờ published=0 (ca rc=0 — nếu thiếu, cảnh báo chết trong log)",
+          "VENDOR_MISMATCH_ALERT|SpaceX|ZZZ|2026-09-24|1000|1500|0" in txt_quiet2, True)
     assert "LỆCH NGUỒN VENDOR" in txt_quiet2, (
         "MUTATION-GUARD gate_vendor_warning_always: cổng PASS mà không hề nhắc tới lệch nguồn ⇒ "
         "user không bao giờ biết để gọi Winston.")
@@ -1063,6 +1077,8 @@ def _selfcheck() -> int:
     rc_ok2, txt_ok2 = _run_vendor_case("## Không công bố tỉ suất mã nào\n", [])
     check("không lệch nguồn ⇒ rc=0 và KHÔNG có cảnh báo vendor", (rc_ok2, "LỆCH NGUỒN VENDOR" in txt_ok2),
           (0, False))
+    check("không lệch nguồn ⇒ KHÔNG có dòng máy đọc (không báo động giả tới user)",
+          "VENDOR_MISMATCH_ALERT" in txt_ok2, False)
 
     # ---- CHÍNH `entitled_gross` (arch-review vòng 2, V1). 6 ca ngay trên MONKEYPATCH chính
     # `entitled_gross` nên chúng chỉ kiểm nửa DƯỚI (cổng xử lý danh sách mismatch được BƠM TAY);
