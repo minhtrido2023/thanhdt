@@ -161,6 +161,14 @@ EQ_TOL_ABS, EQ_TOL_REL = 10.0, 0.005
 # Nghiệm lệch quá ngưỡng này so với ước lượng tỉ số ⇒ nghi phương trình bị nhiễm bởi một sự kiện
 # chưa phát hiện rơi cùng delta ⇒ hạ về UNVERIFIED (tầng 1 làm LƯỚI AN TOÀN, không làm nguồn số).
 SANITY_REL = 0.01
+# Ngưỡng coi hai nguồn ĐỘC LẬP (tiền broker thật vs `tav2_bq.corporate_action`) là LỆCH.
+# Giữ nguyên giá trị đã chạy từ 2026-08-13 (1% tương đối, sàn 1đ/cp). ĐÃ ĐO trước khi chốt, trên
+# 39 mã hai tài khoản từng nắm giữ, cửa sổ 2026-03-24→09-24: 62 sự kiện, trong đó 6 sự kiện đủ
+# điều kiện đối soát (CASH_CONFIRMED + vendor có số tiền) và CẢ 6 khớp ĐÚNG TỪNG ĐỒNG (MBB 09/07
+# 1.000 · CTG+VCB 23/07 450 · NCT 27/07 8.000 · SAB 28/07 3.000 · DGC 14/09 8.000) ⇒ **0 ca
+# mismatch**, 0 cảnh báo nhiễu. Vì cổng này chưa từng kêu một lần nào nên KHÔNG có cơ sở để nới —
+# nới bây giờ là nới mù. Số đo tái lập bằng `agents/Taylor/exp_vendor_mismatch/measure_k1.py`.
+VENDOR_MISMATCH_REL, VENDOR_MISMATCH_ABS = 0.01, 1.0
 
 
 @dataclass
@@ -964,12 +972,25 @@ def resolve_dividends(tickers, start: str, end: str, accounts: dict = None,
             # broker đã cho số chính thức — vendor chỉ được phép XÁC NHẬN hoặc BÁO ĐỘNG
             if adj.vendor_cash <= 0:
                 adj.vendor_check = "broker_only"
-            elif abs(adj.vendor_cash - adj.per_share) <= max(1.0, 0.01 * adj.per_share):
+            elif abs(adj.vendor_cash - adj.per_share) <= max(VENDOR_MISMATCH_ABS,
+                                                              VENDOR_MISMATCH_REL * adj.per_share):
                 adj.vendor_check = "match"
             else:
+                # HẠ VỀ UNVERIFIED (chính sách user chốt 2026-09-24). Trước bản vá này nhãn
+                # `mismatch` chỉ là GHI CHÚ: `kind` vẫn CASH_CONFIRMED ⇒ `cash_per_share` vẫn cho
+                # số qua cổng ⇒ hai nguồn độc lập lệch 50% vẫn ra một tỉ suất CÔNG BỐ, và
+                # `PositionReturn.unverified` rỗng nên không một cảnh báo nào nổi lên. Không
+                # consumer nào trong repo đọc `vendor_check`, nên nhãn đó KHÔNG chặn được gì.
                 adj.vendor_check = "mismatch"
-                adj.vendor_note = (f"vendor {adj.vendor_cash:,.0f}đ/cp ≠ tiền broker "
-                                   f"{adj.per_share:,.0f}đ/cp — ĐIỀU TRA trước khi dùng số nào")
+                lech_pct = (abs(adj.vendor_cash - adj.per_share) / adj.per_share * 100.0
+                            if adj.per_share > 0 else float("inf"))
+                ly_do = (f"LỆCH NGUỒN: broker giải {adj.per_share:,.0f}đ/cp, vendor "
+                         f"`corporate_action` khai {adj.vendor_cash:,.0f}đ/cp (lệch {lech_pct:.1f}%) "
+                         f"⇒ HẠ VỀ UNVERIFIED, KHÔNG công bố tỉ suất cho mã này — cần Winston "
+                         f"(data-ops) đối soát nguồn vendor với sổ broker")
+                adj.vendor_note = ly_do
+                adj.kind = "UNVERIFIED"
+                adj.note = (adj.note + " | " if adj.note else "") + ly_do
         elif adj.vendor_cash > 0 and adj.vendor_stock <= 0:
             # thuần tiền mặt theo vendor, broker chưa giải được ⇒ có SỐ nhưng chưa có BẰNG CHỨNG TIỀN
             adj.per_share, adj.source, adj.kind = adj.vendor_cash, "bq_corp_action", "CASH_VENDOR"
@@ -1385,6 +1406,87 @@ def _selfcheck() -> int:
     check("dòng CONFIRMED hợp lệ ⇒ tỉ lệ 0,5",
           (_pick_ledger_action(_LEDGER_FIXTURE, "DDD", "2026-10-01") or {})
           .get("exercise_ratio", -1), 0.5, tol=1e-9)
+
+    print("24) CHÍNH SÁCH vendor mismatch (user chốt 2026-09-24): LỆCH NGUỒN ⇒ HẠ VỀ UNVERIFIED.")
+    print("    Ca gốc do arch-review dựng: sự kiện VỪA-TIỀN-VỪA-CỔ-PHIẾU, broker giải ra 1.000đ/cp,")
+    print("    vendor khai 1.500đ/cp (lệch 50%) — trước bản vá vẫn ra số CÔNG BỐ, 0 cảnh báo.")
+
+    def _resolve_offline(ex_date, broker_ps, vendor_cash, vendor_stock, solved=True):
+        """Chạy `resolve_dividends` KHÔNG chạm BQ/broker: thay 3 cửa I/O bằng hằng số."""
+        g = globals()
+        keep = {k: g[k] for k in ("detect_adjustments", "solve_from_broker", "bq_corp_action")}
+        made = _mk("ZZZ", ex_date, "2026-09-23", 27_800.0, broker_ps)
+
+        def _detect(tk, start, end):
+            return [made]
+
+        def _solve(todo, accounts, *a, **kw):
+            for t in todo:
+                if solved:
+                    t.per_share, t.kind, t.source = broker_ps, "CASH_CONFIRMED", "broker_solved"
+            return todo
+
+        def _vendor(tk, ex, include_announced=False):
+            return {"cash": vendor_cash, "stock": vendor_stock, "titles": "DIV+ISS (fixture)"}
+
+        g["detect_adjustments"], g["solve_from_broker"], g["bq_corp_action"] = (
+            _detect, _solve, _vendor)
+        try:
+            return resolve_dividends(["ZZZ"], "2026-09-01", "2026-09-30", with_crosscheck=False)[0]
+        finally:
+            g.update(keep)
+
+    a24 = _resolve_offline("2026-09-24", 1_000.0, 1_500.0, 0.2604104)
+    same("mismatch ⇒ vendor_check", a24.vendor_check, "mismatch")
+    same("mismatch ⇒ kind HẠ VỀ UNVERIFIED (KHÔNG còn CASH_CONFIRMED)", a24.kind, "UNVERIFIED")
+    check("mismatch ⇒ cash_per_share = 0 (không qua cổng công bố)", a24.cash_per_share, 0.0,
+          tol=1e-9)
+    # ASSERTION có tên — mutation "giữ CASH_CONFIRMED khi mismatch" phải CHẾT ở đây, không chỉ
+    # đếm FAIL rồi chạy tiếp (đúng yêu cầu dispatch 2026-09-24).
+    assert a24.kind == "UNVERIFIED", (
+        "MUTATION-GUARD vendor_mismatch_downgrade: vendor lệch 50% với tiền broker mà `kind` vẫn "
+        f"{a24.kind!r} ⇒ tỉ suất mã này VẪN được công bố. Đây chính là lỗ hổng chính sách "
+        "2026-09-24.")
+    assert a24.cash_per_share == 0.0, (
+        "MUTATION-GUARD vendor_mismatch_cash_blocked: mismatch mà cash_per_share vẫn > 0.")
+    for tu in ("1,000", "1,500", "50.0%", "Winston"):
+        same(f"lý do có '{tu}'", tu in a24.note, True)
+    assert "Winston" in a24.note and "1,500" in a24.note and "1,000" in a24.note, (
+        "MUTATION-GUARD vendor_mismatch_reason: lý do phải có SỐ của cả hai nguồn + chỉ đích danh "
+        f"Winston (data-ops) — §29. Đang là: {a24.note!r}")
+    pr24 = PositionReturn("ZZZ", 100, 27_800.0, 24_464.0, 0.0, [a24])
+    check("mã lệch nguồn nổi lên PositionReturn.unverified", len(pr24.unverified), 1, tol=0)
+    assert pr24.unverified, ("MUTATION-GUARD vendor_mismatch_surfaced: PositionReturn.unverified "
+                             "rỗng ⇒ báo cáo công bố số mà không một cảnh báo nào nổi lên.")
+
+    print("    Chống hồi quy — vendor KHỚP thì vẫn công bố BÌNH THƯỜNG (kể cả có chân cổ phiếu):")
+    a24b = _resolve_offline("2026-09-24", 1_000.0, 1_000.0, 0.2604104)
+    same("vendor khớp ⇒ vendor_check", a24b.vendor_check, "match")
+    same("vendor khớp ⇒ kind giữ CASH_CONFIRMED", a24b.kind, "CASH_CONFIRMED")
+    check("vendor khớp ⇒ vẫn công bố 1.000đ/cp", a24b.cash_per_share, 1_000.0, tol=1e-9)
+    assert a24b.cash_per_share == 1_000.0, (
+        "MUTATION-GUARD vendor_match_still_published: vá mismatch KHÔNG được làm mất số công bố "
+        "của sự kiện hai nguồn ĐỒNG THUẬN.")
+
+    print("    Ngưỡng (VENDOR_MISMATCH_REL=1%, sàn 1đ/cp) — hai bên sát ngưỡng:")
+    a24c = _resolve_offline("2026-09-24", 1_000.0, 1_009.0, 0.0)     # lệch 0,9% < 1%
+    same("lệch 0,9% ⇒ match, vẫn công bố", (a24c.vendor_check, a24c.kind),
+         ("match", "CASH_CONFIRMED"))
+    a24d = _resolve_offline("2026-09-24", 1_000.0, 1_011.0, 0.0)     # lệch 1,1% > 1%
+    same("lệch 1,1% ⇒ mismatch, hạ UNVERIFIED", (a24d.vendor_check, a24d.kind),
+         ("mismatch", "UNVERIFIED"))
+
+    print("    Ba nhánh CÒN LẠI không được đổi hành vi:")
+    a24e = _resolve_offline("2026-09-24", 1_000.0, 0.0, 0.0)
+    same("vendor không có số tiền ⇒ broker_only, giữ CASH_CONFIRMED",
+         (a24e.vendor_check, a24e.kind), ("broker_only", "CASH_CONFIRMED"))
+    a24f = _resolve_offline("2026-09-24", 0.0, 1_200.0, 0.0, solved=False)
+    same("broker chưa giải + vendor thuần tiền ⇒ CASH_VENDOR (vẫn bị chặn ở cash_per_share)",
+         (a24f.vendor_check, a24f.kind), ("vendor_only", "CASH_VENDOR"))
+    check("CASH_VENDOR vẫn không được công bố", a24f.cash_per_share, 0.0, tol=1e-9)
+    a24g = _resolve_offline("2026-09-24", 0.0, 0.0, 0.2604104, solved=False)
+    same("broker chưa giải + vendor có chân cổ phiếu ⇒ STOCK_CONFIRMED",
+         (a24g.vendor_check, a24g.kind), ("vendor_only", "STOCK_CONFIRMED"))
 
     print(f"\n=== SELFCHECK: {passed} PASS / {failed} FAIL ===")
     return 1 if failed else 0

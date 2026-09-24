@@ -61,16 +61,30 @@ _deliver_eod() {
   # delivery gate vẫn hash-bind đủ Discord + email. Report đầy đủ chạy validation.
   local gate_args=("$artifact" --topic "$TRADING_REPORT_THREAD")
   [ "$validation_mode" = "not_applicable" ] && gate_args+=(--skip-validation)
-  if python3 "$ROOT/bin/report_delivery_gate.py" "${gate_args[@]}"; then
+  # Capture (không để chảy thẳng ra log): khối "⚠️ LỆCH NGUỒN VENDOR" của report_return_gate
+  # đi qua stdout của delivery gate, nên nếu không bám lấy ở đây thì nó chết trong logs/ và
+  # user KHÔNG BAO GIỜ thấy — kể cả ca rc=0 (mã lệch nguồn không được công bố ⇒ không chặn).
+  # Vẫn in nguyên văn ra ngoài để nội dung log không đổi.
+  local gate_out gate_rc vendor_rc=0
+  gate_out="$(python3 "$ROOT/bin/report_delivery_gate.py" "${gate_args[@]}" 2>&1)"
+  gate_rc=$?
+  printf '%s\n' "$gate_out"
+  printf '%s\n' "$gate_out" | "$ROOT/bin/vendor_mismatch_alert.sh" \
+    "$(basename "$artifact")" "$TRADING_REPORT_THREAD" || vendor_rc=$?
+  if [ "$gate_rc" -eq 0 ]; then
     "$ROOT/bin/append_event.sh" Mafee status "eod-trading-report" \
       "{\"account\":\"$ACCOUNT\",\"plan_date\":\"$PLAN_DATE\",\"delivered_via\":\"report_delivery_gate\",\"artifact\":\"$(basename "$artifact")\"}" \
       2>/dev/null || true
     return 0
   fi
+  # Nguyên nhân phải đọc từ BẰNG CHỨNG cổng vừa in ra, không quy chụp một nguyên nhân cố định
+  # (§29): vendor_rc=10 nghĩa là chính cổng đã nêu lệch nguồn vendor ⇒ người xử lý là Winston.
+  local why="delivery chưa đủ kênh (Discord/email)"
+  [ "$vendor_rc" -eq 10 ] && why="LỆCH NGUỒN VENDOR (tiền broker ≠ tav2_bq.corporate_action) — cần Winston (data-ops), KHÔNG phải lỗi soạn báo cáo"
   "$ROOT/bin/append_event.sh" Mafee error "eod-trading-report-delivery-incomplete" \
-    "{\"account\":\"$ACCOUNT\",\"plan_date\":\"$PLAN_DATE\",\"artifact\":\"$(basename "$artifact")\",\"retry\":\"check_report_cadence\"}" \
+    "{\"account\":\"$ACCOUNT\",\"plan_date\":\"$PLAN_DATE\",\"artifact\":\"$(basename "$artifact")\",\"retry\":\"check_report_cadence\",\"cause\":\"$why\"}" \
     2>/dev/null || true
-  echo "eod_trading_report: DELIVERY INCOMPLETE cho $(basename "$artifact")" >&2
+  echo "eod_trading_report: DELIVERY INCOMPLETE cho $(basename "$artifact") — $why" >&2
   return 1
 }
 
