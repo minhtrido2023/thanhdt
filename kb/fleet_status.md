@@ -1,15 +1,15 @@
-# Fleet status — 2026-09-24T17:37:32 UTC
+# Fleet status — 2026-09-24T18:07:02 UTC
 
 | agent | title (desktop) | kind | status | last_heartbeat | age(min) | current_task |
 |---|---|---|---|---|---|---|
-| DollarBill | DollarBill | child | dead | 2026-09-24T12:11:23Z | 326 |  |
-| DollarBill_31175 | dollarbill-56 | child | dead | 2026-09-24T12:10:01Z | 327 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/DollarBill |
-| Mike | Mike | child | working | 2026-09-24T17:33:58Z | 3 |  |
-| Mike_3069063 | mike-b9 | child | dead | 2026-09-23T17:40:01Z | 1437 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
-| Mike_3322192 | mike-8f | child | dead | 2026-09-24T00:50:01Z | 1007 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
-| Taylor | Taylor | child | dead | 2026-09-24T11:59:57Z | 337 |  |
-| Taylor_3357134 | taylor-5b | child | dead | 2026-09-24T01:20:01Z | 977 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
-| Wags | Wags | child | working | 2026-09-24T17:35:15Z | 2 |  |
-| Winston | Winston | child | dead | 2026-09-23T01:25:00Z | 2412 |  |
-| mike-paseo-ad | mike-paseo-ad | external | running | 2026-09-24T17:30:01Z | 7 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike_paseo |
-| workingclaude-1d | workingclaude-1d | child | dead | 2026-09-23T01:27:35Z | 2409 |  |
+| DollarBill | DollarBill | child | dead | 2026-09-24T12:11:23Z | 355 |  |
+| DollarBill_31175 | dollarbill-56 | child | dead | 2026-09-24T12:10:01Z | 357 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/DollarBill |
+| Mike | Mike | child | working | 2026-09-24T17:37:57Z | 29 |  |
+| Mike_3069063 | mike-b9 | child | dead | 2026-09-23T17:40:01Z | 1467 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
+| Mike_3322192 | mike-8f | child | dead | 2026-09-24T00:50:01Z | 1037 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
+| Taylor | Taylor | child | dead | 2026-09-24T11:59:57Z | 367 |  |
+| Taylor_3357134 | taylor-5b | child | dead | 2026-09-24T01:20:01Z | 1007 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
+| Wags | Wags | child | dead | 2026-09-24T17:35:15Z | 31 |  |
+| Winston | Winston | child | dead | 2026-09-23T01:25:00Z | 2442 |  |
+| mike-paseo-ad | mike-paseo-ad | external | running | 2026-09-24T18:00:01Z | 7 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike_paseo |
+| workingclaude-1d | workingclaude-1d | child | dead | 2026-09-23T01:27:35Z | 2439 |  |
