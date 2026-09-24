@@ -991,9 +991,13 @@ def resolve_dividends(tickers, start: str, end: str, accounts: dict = None,
                 # pre_credit, a2 KL đổi tại ex-date) hạ sự kiện xuống STOCK_SUSPECTED trước; nhưng
                 # đó là phòng thủ ở HÀM KHÁC và lá chắn TRƯỢT được (credit muộn + thiếu bản ghi
                 # `dnse_raw` ⇒ cả hai dấu hiệu im lặng). Phòng thủ phải ĐỐI XỨNG.
-                # Đo trên dữ liệu thật (K1, 39 mã × 6 tháng, 62 sự kiện): 0 sự kiện khớp hình dạng
-                # này ⇒ 0 DƯƠNG TÍNH GIẢ. 12/62 sự kiện có `vendor_cash=0 ∧ vendor_stock>0` nhưng
-                # tất cả đã là STOCK_CONFIRMED (broker không giải được) nên không vào nhánh này.
+                # Đo trên dữ liệu thật (K1, 39 mã × 6 tháng): MẪU SỐ ĐÚNG không phải 62 sự kiện —
+                # nhánh này chỉ CÓ THỂ chạy khi `adj.kind == "CASH_CONFIRMED"` (dòng if ở trên), và
+                # chỉ 6/62 sự kiện đạt điều kiện đó (MBB 09/07, CTG+VCB 23/07, NCT 27/07, SAB
+                # 28/07, DGC 14/09) ⇒ ô rủi ro thật = 6, và 0/6 khớp hình dạng này ⇒ 0 DƯƠNG TÍNH
+                # GIẢ. 12/62 sự kiện có `vendor_cash=0 ∧ vendor_stock>0` nhưng tất cả đã là
+                # STOCK_CONFIRMED (broker không giải được) nên KHÔNG đi vào nhánh CASH_CONFIRMED
+                # này — không phải mẫu số của phép đo này (arch-review D1b, R3).
                 adj.vendor_check = "mismatch"
                 adj.vendor_mismatch_reason = "stock_leg_ignored"
                 ly_do = (
@@ -1008,8 +1012,12 @@ def resolve_dividends(tickers, start: str, end: str, accounts: dict = None,
                 adj.note = (adj.note + " | " if adj.note else "") + ly_do
             elif adj.vendor_cash <= 0:
                 # vendor thiếu hẳn chân tiền mà cũng không khai chân cổ phiếu nào (hoặc solver ĐÃ
-                # biết chân cổ phiếu): vendor thiếu dòng DIV là chuyện thường (VNM 2026-06-25:
-                # broker 1.850đ/cp, vendor rỗng) ⇒ CỐ Ý không hạ cấp, tránh mất số oan.
+                # biết chân cổ phiếu): vendor thiếu dòng DIV là chuyện thường (K1 thực tế
+                # 2026-09-24: 0/62 sự kiện rơi vào nhánh này — CHƯA gặp ca thật, nhưng lý do vẫn
+                # đứng: một mã có tiền cổ tức thật về tài khoản mà `corporate_action` chưa kịp có
+                # dòng DIV cho đúng (ticker, ex-date) đó) ⇒ CỐ Ý không hạ cấp, tránh mất số oan.
+                # (VNM 2026-06-25 KHÔNG phải ví dụ của nhánh này — `row` không tồn tại ⇒ nó rơi
+                # vào `if not row: vendor_check = "unavailable"` ở TRÊN, arch-review D1b, R3.)
                 adj.vendor_check = "broker_only"
             elif abs(adj.vendor_cash - adj.per_share) <= max(VENDOR_MISMATCH_ABS,
                                                               VENDOR_MISMATCH_REL * adj.per_share):
@@ -1526,6 +1534,20 @@ def _selfcheck() -> int:
     a24h = _resolve_offline("2026-09-24", 1_000.0, 0.0, 0.2604104, mult=1.0)
     same("vendor thuần CP + mult=1,0 ⇒ vendor_check",
          (a24h.vendor_check, a24h.vendor_mismatch_reason), ("mismatch", "stock_leg_ignored"))
+    same("vendor thuần CP + mult=1,0 ⇒ vendor_check ĐƠN LẺ đúng 'mismatch' (không phải "
+         "'broker_only' — nhãn mà entitled_gross lọc, arch-review D1b R3)",
+         a24h.vendor_check, "mismatch")
+    # ASSERTION CÓ TÊN (arch-review D1b, R3) — trước bản vá này mutant "mismatch -> broker_only"
+    # chỉ chết bằng dòng got/want của `same()` ở trên (đếm FAIL, không dừng), vì `kind`/
+    # `cash_per_share` vẫn HẠ ĐÚNG dù `vendor_check` sai. Hậu quả của mutant đó KHÔNG PHẢI vô hại:
+    # `report_return_gate.entitled_gross` chỉ vào nhánh cảnh báo khi
+    # `a.vendor_check == "mismatch"` — "broker_only" là nhãn LÀNH TÍNH không consumer nào chặn, nên
+    # cảnh báo biến mất TRONG IM LẶNG dù `kind` bên dưới đã đúng.
+    assert a24h.vendor_check == "mismatch", (
+        "MUTATION-GUARD vendor_stock_leg_check_label: `vendor_check` phải là 'mismatch' để "
+        "`report_return_gate.entitled_gross` (lọc theo đúng nhãn này) đưa sự kiện vào danh sách "
+        f"cảnh báo — đang là {a24h.vendor_check!r}. Nhãn khác 'mismatch' (vd 'broker_only') làm "
+        "cảnh báo biến mất TRONG IM LẶNG dù kind/cash_per_share bên dưới vẫn hạ đúng.")
     same("vendor thuần CP + mult=1,0 ⇒ kind HẠ VỀ UNVERIFIED", a24h.kind, "UNVERIFIED")
     check("vendor thuần CP + mult=1,0 ⇒ cash_per_share = 0", a24h.cash_per_share, 0.0, tol=1e-9)
     assert a24h.kind == "UNVERIFIED" and a24h.cash_per_share == 0.0, (
@@ -1559,9 +1581,11 @@ def _selfcheck() -> int:
     a24e = _resolve_offline("2026-09-24", 1_000.0, 0.0, 0.0)
     same("vendor không có số tiền ⇒ broker_only, giữ CASH_CONFIRMED",
          (a24e.vendor_check, a24e.kind), ("broker_only", "CASH_CONFIRMED"))
-    # ASSERTION CÓ TÊN, không chỉ đếm FAIL: đây là ca vendor THIẾU HẲN dòng DIV (VNM 2026-06-25 —
-    # broker 1.850đ/cp, `corporate_action` rỗng). Nới điều kiện của vá D1 cho trùm cả ca này
-    # (bỏ `vendor_stock > 0`) là MẤT SỐ OAN trên một sự kiện đã đối soát được với tiền thật.
+    # ASSERTION CÓ TÊN, không chỉ đếm FAIL: đây là ca vendor THIẾU HẲN dòng DIV (`row` CÓ tồn tại
+    # nhưng cash=0 ∧ stock=0 — KHÔNG phải VNM 2026-06-25: mã đó `row` không tồn tại nên rơi vào
+    # nhánh `unavailable`, không phải `broker_only`; K1 thực tế 0/62 sự kiện có ca `broker_only`
+    # thật, arch-review D1b R3). Nới điều kiện của vá D1 cho trùm cả ca này (bỏ `vendor_stock > 0`)
+    # là MẤT SỐ OAN trên một sự kiện đã đối soát được với tiền thật.
     assert a24e.kind == "CASH_CONFIRMED" and a24e.cash_per_share == 1_000.0, (
         "MUTATION-GUARD vendor_missing_div_row_still_published: vendor không khai gì (cash=0, "
         "stock=0) là chuyện THƯỜNG và KHÔNG phải bằng chứng chống lại nghiệm broker — hạ cấp ở đây "
