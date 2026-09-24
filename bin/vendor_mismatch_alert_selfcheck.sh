@@ -326,6 +326,59 @@ SB10="$(make_sandbox "$SRC")"
   echo "$PASS|$FAIL" > "$SB10/tally" )
 read -r PASS FAIL < <(tr '|' ' ' < "$SB10/tally")
 
+section "CA 11 — VENDOR_LOOKUP_FAILED (arch-review 2026-09-24 vòng 4, R1(e)): BQ lỗi hạ tầng dùng TAG RIÊNG, KHÔNG lẫn với mismatch"
+# Ca THUẦN lookup_failed (không có mismatch nào khác trong lượt gọi) — trước bản vá này script
+# chỉ grep VENDOR_MISMATCH_ALERT nên MARKERS rỗng ⇒ exit 0 câm lặng đúng lúc báo cáo đang bị CHẶN.
+MARKER_LOOKUP_ONLY='VENDOR_LOOKUP_FAILED|SpaceX|VPB|2026-09-23|1200|1'
+SB11="$(make_sandbox "$SRC")"
+( export SC_NOTIFY_RC=0 SC_APPEND_RC=0; run_one "$SB11" "$MARKER_LOOKUP_ONLY"
+  check "exit 10 (thuần lookup_failed vẫn phải bắn cảnh báo)" "10" "$RC"
+  case "$CALLS" in
+    *"KHÔNG TRA ĐƯỢC nguồn vendor"*) ok "câu Discord nói ĐÚNG 'KHÔNG TRA ĐƯỢC nguồn vendor', không phải 'hai nguồn bất đồng'" ;;
+    *) bad "câu Discord nói ĐÚNG 'KHÔNG TRA ĐƯỢC nguồn vendor'" "chứa 'KHÔNG TRA ĐƯỢC nguồn vendor'" "$CALLS" ;;
+  esac
+  case "$CALLS" in
+    *"VENDOR LOOKUP THẤT BẠI"*) ok "tiêu đề riêng cho ca THUẦN lookup_failed (không phải 'LỆCH NGUỒN CỔ TỨC')" ;;
+    *) bad "tiêu đề riêng cho ca THUẦN lookup_failed" "chứa 'VENDOR LOOKUP THẤT BẠI'" "$CALLS" ;;
+  esac
+  case "$CALLS" in
+    *"chạy lại"*"report_return_gate.py"*) ok "Việc cần làm nói 'chạy lại report_return_gate.py' (rerun), không giao Winston đối soát số" ;;
+    *) bad "Việc cần làm nói 'chạy lại report_return_gate.py'" "chứa 'chạy lại' + 'report_return_gate.py'" "$CALLS" ;;
+  esac
+  case "$CALLS" in
+    *"hai nguồn bất đồng số cổ tức"*) bad "KHÔNG được phát câu 'hai nguồn bất đồng số cổ tức' cho ca lookup_failed" "không chứa" "$CALLS" ;;
+    *) ok "KHÔNG phát nhầm câu 'hai nguồn bất đồng số cổ tức' của mismatch" ;;
+  esac
+  echo "$PASS|$FAIL" > "$SB11/tally" )
+read -r PASS FAIL < <(tr '|' ' ' < "$SB11/tally")
+
+section "CA 12 — MIX: mismatch (VCB) + lookup_failed (VPB) trong CÙNG lượt ⇒ CẢ HAI câu cùng có mặt, không đè lẫn nhau"
+MARKER_MIX="VENDOR_MISMATCH_ALERT|SpaceX|VCB|2026-09-11|1600|1450|1
+VENDOR_MISMATCH_REASON|SpaceX|VCB|2026-09-11|cash_mismatch|0.0000
+VENDOR_LOOKUP_FAILED|SpaceX|VPB|2026-09-23|1200|0"
+SB12="$(make_sandbox "$SRC")"
+( export SC_NOTIFY_RC=0 SC_APPEND_RC=0; run_one "$SB12" "$MARKER_MIX"
+  check "exit 10" "10" "$RC"
+  case "$CALLS" in
+    *"VCB"*"hai nguồn bất đồng số cổ tức"*) ok "VCB (mismatch) vẫn ra ĐÚNG câu cash_mismatch" ;;
+    *) bad "VCB (mismatch) vẫn ra ĐÚNG câu cash_mismatch" "chứa 'VCB' + 'hai nguồn bất đồng số cổ tức'" "$CALLS" ;;
+  esac
+  case "$CALLS" in
+    *"VPB"*"KHÔNG TRA ĐƯỢC nguồn vendor"*) ok "VPB (lookup_failed) vẫn ra ĐÚNG câu riêng, không bị VCB đè" ;;
+    *) bad "VPB (lookup_failed) vẫn ra ĐÚNG câu riêng" "chứa 'VPB' + 'KHÔNG TRA ĐƯỢC nguồn vendor'" "$CALLS" ;;
+  esac
+  case "$CALLS" in
+    *"Bất đồng số cổ tức"*"BQ lỗi hạ tầng"*) ok "Việc cần làm có CẢ HAI mục (đối soát Winston + rerun BQ), không mất mục nào" ;;
+    *) bad "Việc cần làm có CẢ HAI mục" "chứa cả 'Bất đồng số cổ tức' và 'BQ lỗi hạ tầng'" "$CALLS" ;;
+  esac
+  # tiêu đề ca MIX phải là tiêu đề LỆCH NGUỒN chung (không phải tiêu đề riêng của ca THUẦN lookup_failed)
+  case "$CALLS" in
+    *"VENDOR LOOKUP THẤT BẠI"*) bad "ca MIX KHÔNG dùng tiêu đề riêng của ca THUẦN lookup_failed" "không chứa 'VENDOR LOOKUP THẤT BẠI'" "$CALLS" ;;
+    *) ok "ca MIX dùng tiêu đề chung 'LỆCH NGUỒN CỔ TỨC' (đúng vì có cả 2 loại)" ;;
+  esac
+  echo "$PASS|$FAIL" > "$SB12/tally" )
+read -r PASS FAIL < <(tr '|' ' ' < "$SB12/tally")
+
 # ---------------------------------------------------------------- mutation
 if [ "$RUN_MUTATIONS" -eq 1 ]; then
   # Mutation THẬT: dựng bản hỏng rồi chạy TRỌN bộ ca trên nó (SC_TARGET_SRC). Mutant "bị giết"
@@ -420,6 +473,15 @@ fi'
             'REASON_LINES=""'
   kill_check m6 "3 mã lý do khác nhau gộp về cùng 1 câu, mất định tuyến Winston" \
     "MUTATION-GUARD vendor_alert_reason_routing: CẢ BA câu đặc trưng cùng có mặt — 3 mã lý do KHÔNG bị gộp thành 1 câu chung"
+
+  section "MUTATION 7 — R1(e) quay xe: bỏ điều kiện LOOKUP_MARKERS ở cổng thoát sớm (ca THUẦN lookup_failed lại exit 0 câm lặng)"
+  # Hậu quả THẬT nếu mutant này sống: một báo cáo bị CHẶN THUẦN vì lookup_failed (không có mismatch
+  # nào khác) làm MARKERS rỗng ⇒ script exit 0 ngay dòng 1, không post gì — đúng lúc report đang bị
+  # CHẶN thật, quay lại nguyên hành vi mà toàn bộ script này sinh ra để chặn (§29).
+  mutate m7 '[ -z "$MARKERS" ] && [ -z "$LOOKUP_MARKERS" ] && exit 0' \
+            '[ -z "$MARKERS" ] && exit 0'
+  kill_check m7 "ca THUẦN lookup_failed exit 0 câm lặng đúng lúc bị CHẶN" \
+    "exit 10 (thuần lookup_failed vẫn phải bắn cảnh báo)"
 fi
 
 printf '\n===== vendor_mismatch_alert_selfcheck: %d PASS / %d FAIL =====\n' "$PASS" "$FAIL"

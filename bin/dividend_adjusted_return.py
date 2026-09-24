@@ -1199,6 +1199,14 @@ def _selfcheck() -> int:
 
     def check(name, got, want, tol=0.51):
         nonlocal passed, failed
+        # got=None (vd `.get()` không thấy key) KHÔNG được nổ TypeError ở `abs(got - want)` —
+        # arch-review 2026-09-24 vòng 4, R2: crash ở đây CHE mất assertion CÓ TÊN đứng ngay sau
+        # trong cùng mục self-check, vi phạm luật harness "mutation phải chết bằng assertion có
+        # tên", không phải bằng traceback không tên.
+        if got is None:
+            print(f"  [FAIL] {name}: got=None want={want:,.2f}")
+            failed += 1
+            return
         ok = abs(got - want) <= tol
         print(f"  [{'PASS' if ok else 'FAIL'}] {name}: got={got:,.2f} want={want:,.2f}")
         passed, failed = passed + ok, failed + (not ok)
@@ -1669,8 +1677,12 @@ def _selfcheck() -> int:
                 {"symbol": "SOLO", "accountNo": _acct, "openQuantity": 500, "loanPackageId": 1},
             ]},
         }
-        # bản ghi THỨ HAI trong CÙNG ngày, ts SỚM HƠN (rớt về sau trong iteration) — phải bị bỏ,
-        # không được cộng chéo vào bản ghi mới nhất (nếu không sẽ nhân đôi KL của MULTI).
+        # bản ghi THỨ HAI trong CÙNG ngày, ts SỚM HƠN, nhưng ĐỨNG SAU trong FILE (arch-review
+        # 2026-09-24 vòng 4, R2 — bản trước đây ghi bản ghi CŨ này TRƯỚC bản ghi MỚI trong file,
+        # nên với vòng lặp "giữ ts LỚN NHẤT đã thấy" thì nhánh `continue` ở dòng so-sánh
+        # KHÔNG BAO GIỜ fire — coverage 0% trên chính đường code cần test). Đặt bản ghi CŨ đứng
+        # SAU buộc code phải chủ động BỎ nó (so ts với bản ghi 09:00 đã thấy trước đó), không
+        # phải chỉ tình cờ ghi đè bởi thứ tự file.
         _rec_day1_earlier = {
             "kind": "positions", "account_no": _acct, "ts": "2026-09-01T08:00:00Z",
             "payload": {"positions": [
@@ -1684,8 +1696,8 @@ def _selfcheck() -> int:
             ]},
         }
         with open(os.path.join(_tmpdir, "dnse_raw_2026-09-01.jsonl"), "w", encoding="utf-8") as f:
-            f.write(json.dumps(_rec_day1_earlier) + "\n")
             f.write(json.dumps(_rec_day1) + "\n")
+            f.write(json.dumps(_rec_day1_earlier) + "\n")
         with open(os.path.join(_tmpdir, "dnse_raw_2026-09-02.jsonl"), "w", encoding="utf-8") as f:
             f.write(json.dumps(_rec_day2) + "\n")
         EXEC_LOG_DIR = _tmpdir
@@ -1710,6 +1722,18 @@ def _selfcheck() -> int:
         "MUTATION-GUARD broker_qty_cross_record_double_count: broker_qty() ĐANG cộng chéo giữa "
         "hai bản ghi khác thời điểm của CÙNG một ngày (999 từ bản ghi 08:00 cộng nhầm vào bản ghi "
         "09:00) thay vì chỉ lấy bản ghi MỚI NHẤT của ngày đó rồi gộp lô bên trong bản ghi đó."
+    )
+    # MUTATION-GUARD THẬT của nhánh chọn "bản ghi MỚI NHẤT của ngày" (arch-review 2026-09-24 vòng
+    # 4, R2 — assertion `cross_record_double_count` ở trên VACUOUS: với cấu trúc gather-rồi-sum
+    # theo TỪNG NGÀY, cộng chéo giữa 2 bản ghi bất khả thi bởi construction, không cần bug nào bị
+    # sửa mới qua được). Fixture ở trên đặt bản ghi CŨ (999, ts 08:00) đứng SAU bản ghi MỚI (427,
+    # ts 09:00) trong file — đảo dấu so sánh `ts < day_last_ts[day]` thành `ts > ...` (hoặc xoá
+    # hẳn cổng so ts) sẽ khiến bản ghi CŨ ghi đè bản ghi MỚI, kết quả tụt về 999 thay vì 427.
+    assert _q25.get(("MULTI", "2026-09-01")) == 427.0, (
+        "MUTATION-GUARD broker_qty_latest_record_of_day: broker_qty() phải giữ bản ghi có ts LỚN "
+        "NHẤT của mỗi ngày bất kể thứ tự xuất hiện trong file — bản ghi CŨ hơn (999, đứng SAU "
+        f"trong file) đang ghi đè bản ghi MỚI (427). Đang trả về "
+        f"{_q25.get(('MULTI', '2026-09-01'))!r}."
     )
 
     print("26) `bq_corp_action` KHÔNG TRA ĐƯỢC (lỗi hạ tầng) ⇒ nhãn `lookup_failed`, KHÔNG lẫn với")

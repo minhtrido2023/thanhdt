@@ -14,8 +14,11 @@
 # Cổng giữ THUẦN (không ghi bus từ trong nó — §5b): việc ghi bus/Discord nằm ở đây, phía shell.
 # Parse dòng MÁY ĐỌC `VENDOR_MISMATCH_ALERT|<acct>|<mã>|<ex>|<broker>|<vendor>|<đang công bố>`
 # — giá trị đã chuẩn hoá, KHÔNG grep câu văn xuôi (§28).
+# `VENDOR_LOOKUP_FAILED|<acct>|<mã>|<ex>|<broker>|<đang công bố>` (5 trường — arch-review
+# 2026-09-24 vòng 4, R1(e)): BQ lỗi hạ tầng, KHÔNG tra được vendor — KHÁC "hai nguồn bất đồng số"
+# (không có vendor_ps để so). TAG RIÊNG cố ý, không tái dùng VENDOR_MISMATCH_ALERT.
 #
-# Exit: 0 = KHÔNG có lệch nguồn nào · 10 = CÓ lệch nguồn · 2 = sai đối số.
+# Exit: 0 = KHÔNG có lệch nguồn/lookup_failed nào · 10 = CÓ ít nhất một trong hai · 2 = sai đối số.
 #   ⚠️ 10 nói về SỰ TỒN TẠI của lệch nguồn, KHÔNG hứa "đã gửi được cảnh báo" — hai caller
 #   (`check_report_cadence.sh:91`, `eod_trading_report.sh:72`) chỉ dùng nó để quy ĐÚNG nguyên
 #   nhân/người xử lý (§29), nên nó phải đúng cả khi Discord chết. Gửi hỏng thì in LỖI THẬT ra
@@ -64,7 +67,13 @@ DRY_RUN=0
 
 GATE_OUT="$(cat)"
 MARKERS="$(printf '%s\n' "$GATE_OUT" | grep -E '^VENDOR_MISMATCH_ALERT\|' || true)"
-[ -z "$MARKERS" ] && exit 0
+# VENDOR_LOOKUP_FAILED (arch-review 2026-09-24 vòng 4, R1(e)): TAG RIÊNG, 5 trường
+# (tag|acct|mã|ex|broker|published — KHÔNG có vendor_ps, BQ lỗi hạ tầng nên chưa tra được số thứ
+# hai). Trước bản vá này script chỉ grep VENDOR_MISMATCH_ALERT ⇒ một báo cáo CHẶN THUẦN vì
+# lookup_failed (không có mismatch nào) làm MARKERS rỗng ⇒ exit 0 câm lặng, đúng lúc report bị
+# CHẶN thật — user chỉ thấy "Delivery INCOMPLETE" chung chung, sai nguyên nhân/người (§29).
+LOOKUP_MARKERS="$(printf '%s\n' "$GATE_OUT" | grep -E '^VENDOR_LOOKUP_FAILED\|' || true)"
+[ -z "$MARKERS" ] && [ -z "$LOOKUP_MARKERS" ] && exit 0
 
 # Mã lý do đi ở dòng TAG RIÊNG (`VENDOR_MISMATCH_REASON|<acct>|<mã>|<ex>|<reason>|<vendor_stock>`,
 # `report_return_gate.py` — hợp đồng 7 trường của dòng ALERT giữ NGUYÊN BYTE, không đọc reason từ
@@ -84,6 +93,7 @@ BLOCKED=0
 SEEN_CASH=0
 SEEN_STOCK=0
 SEEN_UNKNOWN=0
+SEEN_LOOKUP=0
 while IFS='|' read -r _tag acct tk ex broker vendor published; do
   [ -z "${tk:-}" ] && continue
   reason="${REASON_MAP["${acct}|${tk}|${ex}"]:-}"
@@ -112,6 +122,21 @@ while IFS='|' read -r _tag acct tk ex broker vendor published; do
   fi
 done <<< "$MARKERS"
 
+# VENDOR_LOOKUP_FAILED — vòng RIÊNG, KHÔNG gộp vào vòng trên: không có REASON_MAP (nhãn này
+# KHÔNG có "mã lý do", nó LÀ nguyên nhân) và không có vendor_ps (5 trường, không phải 7).
+while IFS='|' read -r _tag acct tk ex broker published; do
+  [ -z "${tk:-}" ] && continue
+  SEEN_LOOKUP=1
+  DETAIL="${DETAIL}
+• **${tk}** (${acct}, ex ${ex}): KHÔNG TRA ĐƯỢC nguồn vendor \`corporate_action\` (lỗi hạ tầng BQ, KHÔNG phải vendor xác nhận 0 sự kiện) — broker đã giải ${broker}đ/cp nhưng chưa đối soát chéo được"
+  if [ "${published:-0}" = "1" ]; then
+    BLOCKED=1
+    DETAIL="${DETAIL} — mã này ĐANG công bố tỉ suất ⇒ báo cáo bị CHẶN"
+  else
+    DETAIL="${DETAIL} — báo cáo vẫn gửi (không công bố tỉ suất mã này), cổ tức đã bị bỏ khỏi kỳ vọng"
+  fi
+done <<< "$LOOKUP_MARKERS"
+
 TODO=""
 [ "$SEEN_CASH" = "1" ] && TODO="${TODO}
 - **Bất đồng số cổ tức:** Winston (data-ops) đối soát \`tav2_bq.corporate_action\` với sổ broker cho (mã, ex-date) trên. Chỉ khi hai nguồn khớp lại thì tỉ suất mã đó mới được công bố (§21)."
@@ -119,6 +144,8 @@ TODO=""
 - **Nghi giá rơi chia tách bị đọc thành cổ tức:** Winston xác nhận lại sự kiện CỔ PHIẾU (ISS) với vendor — vì sao chân cổ phiếu chưa được credit vào vị thế. KHÔNG PHẢI đối soát số tiền (vendor không khai chân tiền nào cho sự kiện này)."
 [ "$SEEN_UNKNOWN" = "1" ] && TODO="${TODO}
 - **Không xác định được mã lý do:** kiểm thủ công (mã lý do bị thiếu/rỗng ở nguồn) — KHÔNG suy đoán nguyên nhân."
+[ "$SEEN_LOOKUP" = "1" ] && TODO="${TODO}
+- **BQ lỗi hạ tầng (KHÔNG phải bất đồng số liệu):** chạy lại \`report_return_gate.py\` cho báo cáo này SAU KHI BQ khoẻ (kiểm tra bằng \`bin/bq_freshness_check.sh\`); KHÔNG cần đối soát số hay xác nhận sự kiện trừ khi lỗi lặp lại nhiều lượt liên tiếp."
 
 TODAY="$(TZ='Asia/Ho_Chi_Minh' date +%Y-%m-%d)"
 STATE="$ROOT/state/vendor_mismatch_alerted.json"
@@ -152,14 +179,26 @@ if [ "$ALREADY" = "yes" ]; then
   exit 10
 fi
 
-MSG="⚠️ **LỆCH NGUỒN CỔ TỨC — cần Winston (data-ops)** — \`${FNAME}\`
+# Tiêu đề/câu mở phân biệt ca THUẦN lookup_failed (BQ lỗi hạ tầng — KHÔNG PHẢI hai nguồn bất
+# đồng số) khỏi ca có mismatch thật — dùng chung một câu mở cho cả hai sẽ nói "không khớp" cho
+# một sự kiện mà thật ra CHƯA đối soát được (§29, arch-review 2026-09-24 vòng 4, R1(e)).
+if [ "$SEEN_CASH" = "0" ] && [ "$SEEN_STOCK" = "0" ] && [ "$SEEN_UNKNOWN" = "0" ] && [ "$SEEN_LOOKUP" = "1" ]; then
+  MSG="⚠️ **VENDOR LOOKUP THẤT BẠI (lỗi hạ tầng BQ) — cần Winston (data-ops)** — \`${FNAME}\`
+Cổng KHÔNG tra được nguồn vendor \`tav2_bq.corporate_action\` cho (các) sự kiện cổ tức dưới đây (lỗi hạ tầng, KHÔNG phải hai nguồn bất đồng số):${DETAIL}
+
+**Việc cần làm:**${TODO}
+
+Đây KHÔNG phải lỗi soạn báo cáo — không nới dung sai cổng để gỡ chặn, thử lại khi BQ khoẻ."
+else
+  MSG="⚠️ **LỆCH NGUỒN CỔ TỨC — cần Winston (data-ops)** — \`${FNAME}\`
 Cổng phát hiện sự kiện cổ tức mà tiền broker thật và bảng vendor \`tav2_bq.corporate_action\` không khớp:${DETAIL}
 
 **Việc cần làm:**${TODO}
 
 Đây KHÔNG phải lỗi soạn báo cáo — không nới dung sai cổng để gỡ chặn, xử lý đúng nguyên nhân ở trên trước."
+fi
 
-PAYLOAD="{\"artifact\":\"${FNAME}\",\"owner\":\"Winston\",\"blocked_report\":${BLOCKED},\"markers\":$(printf '%s\n' "$MARKERS" | python3 -c 'import json,sys; print(json.dumps([l.strip() for l in sys.stdin if l.strip()]))')}"
+PAYLOAD="{\"artifact\":\"${FNAME}\",\"owner\":\"Winston\",\"blocked_report\":${BLOCKED},\"markers\":$(printf '%s\n%s\n' "$MARKERS" "$LOOKUP_MARKERS" | python3 -c 'import json,sys; print(json.dumps([l.strip() for l in sys.stdin if l.strip()]))')}"
 
 # BUS = kênh PHỤ. Hỏng thì nêu lỗi thật rồi ĐI TIẾP — không được vì bus mà chặn đường tới user.
 if ! BUS_ERR="$("$ROOT/bin/append_event.sh" Mike error "vendor-mismatch-${FNAME}" "$PAYLOAD" 2>&1 >/dev/null)"; then
