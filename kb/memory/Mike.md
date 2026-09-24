@@ -5,103 +5,38 @@
 > Cập nhật mỗi khi đổi mạch việc. Bơm vào đầu phiên của Mike.
 
 ## Ưu tiên hiện tại
-- Retro 2026-09-23 XONG (6 sự cố, 3 pattern, Wags GAPS FOUND→đã sửa, commit `6d320fad`).
-  Pattern 1 (approval-gate trễ) CHỐT sau 3 lần tái diễn — cron `plan_approval_reminder.sh`
-  08:50 ICT go-live hôm nay, chưa qua chu kỳ nhiều ngày, theo dõi tuần tới.
-- NAV corp-action gate v2 (L2-L4) LANDED master `4dcc3643`. Runbook rc=5 mới **CHỜ MIKE DUYỆT
-  ĐƯA LIVE** — `kb/ops_runbook.md.proposed` §13.
-- Go-live V2.4 lever LIVE từ 08-24: capit_margin_lever.enabled=TRUE. Ngày có CAPIT margin phải
-  chạy approve_margin_day.py TRƯỚC bot.
+- Chuỗi audit lớp lỗi corp-action (exdate price-frame + 3 call-site + vendor-mismatch chain)
+  ĐÃ ĐÓNG HOÀN TOÀN 2026-09-24 — tất cả LIVE trên master, xác nhận qua bus finding
+  corp-action-4sites-audit-COMPLETE-all-4-LIVE + memory entries chi tiết bên dưới nếu cần tra lại.
+- 0 bus question pending (đã đóng 2 câu cuối 2026-09-24 20:2x: wags-fix-not-confirmed coord-09-23
+  [chỉ lỗi độ-chính-xác log, việc thật đã xong từ trước] + selfcheck-red production_manifest
+  [đã fix: phân loại 2 cron mới paper_corp_action.py=T1, plan_approval_reminder.sh=T0, commit 4e89ca46]).
 
-## Việc đang mở / cần theo dõi
-1. **`test_trading_bot.py:353`** (raw `p["broker"]`/`p["mode"]`) — CHƯA sửa, quá hạn 2 ngày liên
-   tiếp (deadline gốc "trước retro 09-22"). Cần dispatch cụ thể ai sửa.
-2. **`question wags-fix-not-confirmed: coord-2026-09-23`** vẫn TREO cuối ngày 09-23 — arch-reviewer
-   NEEDS_CHANGES cho finding `wags-fix: coord-2026-09-23`, chưa có finding/answer sửa theo sau.
-   Root cause: root_cause sai + mô tả hành vi hệ thống sai vẫn đứng nguyên trên bus.
-3. **Pattern 2 CHƯA sửa gốc** (retro-2026-09-23): `daily_retro.sh:195` sinh topic escalate nhúng
-   bộ đếm ngày (`retro-pattern-recurring-<n>-days`) khiến ack theo topic khớp tuyệt đối không
-   phủ được khi topic đổi số — ≥6 lần cùng gốc. Hướng sửa: tách `recurrence_count` ra payload
-   riêng, topic ổn định theo tên pattern. Chưa đủ ngưỡng "2 retro liên tiếp" để bắt buộc — nếu
-   lặp ở retro 09-24 phải escalate ngay.
-4. **NAV corp-action gate v2 rc=5 runbook** — chờ Mike duyệt đưa live.
-5. **universe-pit-migration G7/G8/G9** — ~9 tuần treo, chờ user chọn A (dispatch Taylor làm dứt
-   điểm) hay B (đóng hẳn). G8.1 đã đóng 09-20.
-6. **excluded_dividend_receivable[DGC]** (ZaloPay) cần dọn config sau khi tiền DGC về thật
-   (~2026-09-25).
-7. Treasury buyback/corp_action mở rộng (Taylor branch feat/treasury-share-events-table) — chờ
-   user duyệt chính thức.
-8. FiinPro/OShares harvest dừng 09-15 ở 4/59 lô — chưa có selfcheck/commit xác nhận.
+## Việc đang mở / cần theo dõi (xác nhận lại 2026-09-24 20:3x — nhiều mục cũ trong memory là STALE)
+1. **FiinPro harvest**: 25/74 lô, kẹt vì rate-limit DAILY của connector (không phải lỗi) — tự
+   resume 00:20 ICT mỗi ngày, tối nay (09-25 00:20) sẽ chạy tiếp vài lô nữa. Theo dõi thụ động.
+2. **excluded_dividend_receivable[DGC]** (ZaloPay) — dọn config sau khi tiền DGC về thật, dự kiến
+   ~2026-09-25 (MAI). Chưa tới hạn, chưa hành động.
+3. Pattern 2 (daily_retro.sh:195 topic escalate nhúng bộ đếm ngày, ack không phủ khi topic đổi số)
+   — CHƯA sửa gốc, không urgent. CHỈ escalate nếu lặp lại ở retro 09-24 (tối nay/mai).
 
-- [2026-09-23T17:52:24Z] 24/09 00:5x — exdate price-frame ĐÃ LAND: mike master 508bb607, arch-review APPROVED sau 3 VÒNG. current_ops đã ghi (1656990a). Selfcheck từ master 59/59 qua 5 TZ + corp_action 85/0.
-SỐ ĐÃ ĐÚNG cả 2 account (Mike chạy lại lúc 00:5x): SpaceX VPB 1.386 × 22.050 = 30.561.300, active_nav 982.294.013; ZaloPay VPB 1.512 × 22.050 = 33.339.600, active_nav 520.678.926; computed_at 2026-09-24.
-Dispatch DollarBill_20260923_175136 LẬP LẠI plan 24/09 cả 2 account trên số mới (plan cũ BÁN VPB 200cp/100cp ref_price 27.800, CHƯA duyệt nên không có lệnh nào chạy).
-ĐÃ ĐẾM 5 CALL-SITE CÙNG LỚP CHƯA VÁ — thứ tự ưu tiên: (1) dividend_adjusted_return.py:473-478 chạm SỐ CÔNG BỐ nhà đầu tư §21; (2) discretionary_margin_gate.py:335 sleeve margin tiền thật, latent; (3) report_return_gate.py lỗ hổng phủ im lặng; (4) discretionary_accumulation_inject.py:124 baseline hỏng vĩnh viễn; (5) due_diligence.py adv_vnd() chiều an toàn không gấp.
-NỢ VỆ SINH: compute_active_nav.py:616 chưa atomic (§5, đóng luôn lỗ hardlink); bản CŨ mike/.claude/worktrees/wags-fix-coord-08-19/bin/compute_active_nav.py ghi thẳng canonical với bug gốc (grep exdate_frame = 0); runbook rc=6/rc=7.
-⚠️ arch-reviewer KHÔNG khẳng định đã quét hết lớp lỗi này — không tuyên bố đã đóng.
-- [2026-09-23T18:51:05Z] 24/09 01:5x — CALL-SITE THỨ 3 ĐÃ LAND: mike master 1608a267 (+ current_ops 733e08a7), arch-review APPROVED high. Selfcheck 120/0 từ master qua 3 TZ.
-Q1 — CÂU QUAN TRỌNG NHẤT, ĐÃ TRẢ LỜI: KHÔNG số công bố nào bị ảnh hưởng. Mike tự xác nhận độc lập bằng BQ + quét toàn bộ dnse_raw: 24 sự kiện DIV+ISS cùng ex-date sau go-live 01/07, 39 mã đã từng nắm giữ, GIAO = RỖNG. Reviewer mở rộng: cả 2025 còn 5 ca nữa (SHS 04-24, ACB 05-23, HAH 08-07, MBB 08-13, TLG 12-11) => nhịp ~5-7 ca/năm, KHÔNG phải ca hiếm, chỉ chưa cắn.
-SPEC MIKE SAI LẦN 6 — Taylor bác bằng dữ liệu thật, reviewer đo lại xác nhận: hướng 'neo theo broker_effective_ts' SAI. (1) MBB 10/08 mốc khai 19:32:49 nhưng bản ghi positions CUỐI của ngày là 19:12:13 vẫn ở 1.100 chưa credit; credit thật chỉ ở file 11/08 => mốc ĐÚNG SỐ nhưng SAI LÝ DO. (2) VPB 23/09 bản ghi duy nhất trước mốc 11:58 là 04:51 SÁNG => neo ở đó bỏ mất lệnh khớp trong chính phiên cum; ca thật SpaceX bán MBB 1.500->1.100 lúc 09:15 ngày 10/08 => neo mốc trả 1.500 thay vì 1.100, sai 36%.
-MIKE ĐỌC SAI TRƯỜNG: tôi báo mutation cho 'per_share 6.537 = số THỪA'. Reviewer bác: 6.537 là giá trị KHỞI TẠO tầng 1 để chẩn đoán (_EST = 27.800 × (1 − 1/1,30756)), KHÔNG bao giờ đi ra ngoài vì cash_per_share (:191-207) trả 0 với mọi kind != CASH_CONFIRMED. Taylor đúng, tôi sai.
-MÔ TẢ RỦI RO ĐÚNG (reviewer chốt, 4 chiều): MẤT số (fail-closed về 0) => §21 công bố THIẾU cổ tức, tỉ suất thấp hơn thực tế — CÓ tới số công bố; số THIẾU — bị lưới SANITY_REL 1% bác; số THỪA — KHÔNG TỒN TẠI; LÂY sang mã KHÁC cùng ngày delta — CÓ tới số công bố (selfcheck 18 ghim: YYY công bố 502đ/cp thay vì 500, lệch 0,4%, lọt CẢ dư số LẪN sanity). Đây mới là đường im lặng thật.
-LỖ MỚI reviewer tìm, ƯU TIÊN CAO NHẤT việc sau: dividend_adjusted_return.py:469-472 broker_qty() lấy LÔ CUỐI thay vì TỔNG LÔ (cùng ts thì ghi đè chứ không cộng) => thiếu 25% KL thật ở 135 cặp (mã,ngày) của ZaloPay (BID 11/08: 300 vs 400; BID 14/08: 320 vs 427). credit_frame đi qua raw_positions thì GỘP LÔ ĐÚNG => sau bản vá có HAI QUY ƯỚC KL cùng tồn tại trong một lần giải. Pre-existing + fail-closed (hệ 2x2 bất tương thích => dư số bác; hệ 1x1 nghiệm cao hơn ~33% => sanity bác) nhưng BID/VCB/MBB trả cổ tức tiền HẰNG NĂM nên sẽ cắn. Kèm vi phạm §29: thông điệp :876-877 khẳng định cứng 'nghi phương trình bị nhiễm bởi sự kiện chưa phát hiện' — sai hẳn hướng.
-VIỆC SAU KHÁC: (2) §29 :876-877; (3) thêm bin/dividend_adjusted_return_selfcheck.py 3 dòng — hiện 120 assertion TÀNG HÌNH với CẢ 2 runner (run_selfchecks.sh tìm -iname '*selfcheck*.py', selfcheck_weekly_baseline_check.sh tìm '*_selfcheck.py'), pre-existing; (4) bỏ default frame=None của _qty_at để caller mới không âm thầm nhận semantics cũ (report_return_gate.py:185 là caller 2-tham-số DUY NHẤT, chỉ dùng DẤU nên vô hại); (5) 3 khoảng trống test (mutation A2/A3/C2 sống); (6) CHÍNH SÁCH cần user quyết: resolve_dividends:963 vs :977 — vendor_check='mismatch' hiện chỉ là ghi chú, unverified rỗng, KHÔNG consumer nào đọc; gói chung với bus question can-user-quyet-mo-cong-CASH_VENDOR; (7) entitled_gross() report_return_gate.py:176 chưa có selfcheck nào — là cổng cuối trước số gửi nhà đầu tư.
-CÒN 4 CALL-SITE: discretionary_margin_gate.py:335 (sleeve margin tiền thật, latent, ƯU TIÊN TIẾP), report_return_gate.py, discretionary_accumulation_inject.py:124, due_diligence.py adv_vnd().
-⚠️ reviewer KHÔNG khẳng định đã quét hết.
-- [2026-09-23T23:45:19Z] 24/09 06:5x — BACKFILL 09-23 XONG, nav_history ĐỦ 6 phiên liên tục cả 2 account (09-16..09-23) => báo cáo tuần thứ Sáu không bị chặn. SpaceX 09-23 = 983.020.903; ZaloPay = 955.586.647 (cả 2 nav_is_estimate=True).
-ĐƯỜNG PHỤC HỒI ĐÃ CHỨNG MINH TRÊN CA THẬT: corp_action_auto_confirm.py ghi VPB CONFIRMED qty_multiplier=1,2604104 lúc 19:25:01 ngày 23/09 (2-source) => daily_nav_snapshot --from-raw --date 2026-09-23 quy KL 1.386->1.099,64 (SpaceX) / 1.512->1.199,61 (ZaloPay), mark giá BQ Price 27.800 của chính ngày đó. Đây ĐÚNG là đường mà gate v2 vòng 1 đã phá và vòng 2 khôi phục theo killer objection của arch-reviewer — giờ đã verify bằng sự kiện production thật, không phải fixture.
-CÒN LẠI 09-24: cron NAV 19:50 tối nay sẽ ghi bình thường (hôm nay là ex-date nên giá G1 và KL cùng hệ, không cần can thiệp).
-- [2026-09-23T23:54:35Z] 24/09 07:0x — user quyết 3 việc. ĐÍNH CHÍNH working memory: G7/G8/G9 KHÔNG còn treo — đã ĐÓNG 2026-09-19 (job Taylor_20260919_033750). Dòng "9 tuần treo, chờ user chọn A/B" trong memory là LẠC HẬU, tôi đã báo user.
-VIỆC 1 (user: "làm dứt điểm") => thực chất chỉ còn ĐÚNG 1 action item do G9 sinh ra: bus question Taylor/executor-chase-cap-still-reads-ticker-prune-20260919 — VI PHẠM gate cứng G8.1: chase_cap_vol_scale_enabled lên LIVE 04/08 trong khi executor.py::_load_gap_ref_data() VẪN đọc cache ticker_prune. Mức THẤP (tra giá thuần, fail-safe chặt hơn, không look-ahead/không rủi ro vốn) nhưng vi phạm thật + đang chạy production. Dispatch Taylor_20260923_235320 (worktree riêng, KHÔNG tự land, chạm code đặt lệnh live). Bắt trả lời Q1 còn chỗ nào KHÁC trong trading_bot/ đọc ticker_prune, Q2 khoảng hở fidelity universe_pit không có trong sync_bq_cache (bus event 09-17), Q3 trạng thái THẬT của macro_state_live.py:158 breadth-decoupling guard.
-VIỆC 3 (user: vendor mismatch => hạ UNVERIFIED + raise warning để user gọi Winston) => dispatch Taylor_20260923_235405. Lỗ arch-reviewer đo được: resolve_dividends:963 nhánh CASH_CONFIRMED thắng trước :977 elif vendor_stock>0 => nhãn STOCK_CONFIRMED bị tước, vendor_check='mismatch' chỉ là ghi chú, unverified RỖNG, KHÔNG consumer nào đọc vendor_check => lệch 50% với nguồn thứ ba KHÔNG chặn gì; ca dựng thật công bố -8,20%. Bắt trả lời K1 (bao nhiêu mã sẽ rơi vào mismatch trong 6 tháng — nếu nhiều thì user nhận cảnh báo mỗi ngày, ĐIỀU KIỆN để land), K2 (mã nào đang công bố sẽ MẤT số), K3 (có đóng bus question can-user-quyet-mo-cong-CASH_VENDOR không).
-VIỆC 2 — user HỎI LẠI "duyệt chính thức sẽ như thế nào?", CHƯA quyết. Dữ kiện tôi đã tra: nhánh feat/treasury-share-events-table ahead 3 / BEHIND 209 commit (merge-base 18/09) => rất cũ, phải rebase. Nội dung thật = research artifact treasury_size_20260918/ + 4 file .md.proposed data-registry + loader one-time/dry-run bảng tav2_mike.treasury_share_events; 26.648 insertion nhưng gần hết là CSV/research. Dự án liên quan ĐÃ ĐÓNG: treasury-buyback-oshares-overlay-20260907.md — user chốt 08/09 KHÔNG WIRE, giữ làm công cụ tra cứu ad-hoc. ĐIỀU KIỆN MỞ LẠI đã ghi sẵn: "chỉ wire nếu có 1 case cho thấy sai lệch thực sự ĐỔI QUYẾT ĐỊNH đầu tư/backtest — lúc đó đo tác động cụ thể (so ranking có/không overlay) rồi mới quyết, không wire phòng khi cần".
-- [2026-09-24T00:03:27Z] 24/09 07:0x — VIỆC 1 (G8.1) KẾT THÚC: KHÔNG CÒN VIỆC MIGRATION NÀO MỞ. SPEC DISPATCH CỦA MIKE SAI 4 CHỖ — lần thứ 7. Mike TỰ VERIFY từng chỗ bằng git merge-base + đọc code + đọc bus, không nhận lời khai:
- (1) executor.py::_load_gap_ref_data() ĐÃ sửa 2026-09-20 commit fd3f5597 (ancestor của HEAD, đang LIVE) — file chỉ còn ticker_prune trong COMMENT dòng 1360-1362,1388.
- (2) ⚠️ NGHIÊM TRỌNG NHẤT: spec bắt migrate sang universe_pit — TRÁI quyết định USER đã chốt. Bus Mike/answer 2026-09-20T03:46:27Z decided_by=user: 'A - sua dut diem, tro _load_gap_ref_data() sang tav2_bq.ticker thay vi ticker_prune'. Lý do: tra GIÁ thuần nên dùng superset, KHÔNG cần ngữ nghĩa in_universe. Làm theo spec = ĐẢO NGƯỢC quyết định của user.
- (3) bus question executor-chase-cap-still-reads-ticker-prune-20260919 ĐÃ đóng 2026-09-20T04:03:53Z.
- (4) macro_state_live.py breadth guard ĐÃ migrate 2026-07-29 commit 8f958957, BREADTH_SOURCE='pit'.
-GỐC RỄ: tôi đọc kb/projects/universe-pit-migration.md (STALE, chưa cập nhật sau 2 commit) + working memory lạc hậu, KHÔNG kiểm git/bus trước khi viết spec. => BÀI HỌC: trước khi dispatch việc dựa trên tracker/memory, PHẢI verify bằng git log + bus (2 phút, rẻ hơn 1 job 90 phút sai hướng + rủi ro đảo quyết định user).
-ĐÃ SỬA GỐC RỄ: tracker đã cập nhật, commit mike 979b2200 (duyệt .proposed theo §13 sau khi tự verify).
-VIỆC THẬT LÀM ĐƯỢC: Taylor tìm lỗ hổng mutation THẬT — churn_guard_selfcheck.py section F (thêm cùng fd3f5597) KHÔNG kill được mutation đổi nguồn cache, vì fixture TST vắng ở CẢ HAI cache nên bản revert về ticker_prune vẫn PASS exit 0. Thêm section G ghim NGUỒN bằng decoy fixture. Mike TỰ bắn mutation chunk_dir ticker->ticker_prune: G2 FAIL bằng ASSERTION (prior_close=50000 expected=20000), exit 1. LANDED outer repo main 06ad6512 (test-only, 1 file +52, KHÔNG chạm production nên không cần arch-review đầy đủ). Selfcheck ALL PASS qua 3 env từ main.
-PHÁT HIỆN PHỤ đáng giá: A/B thật cho thấy nguồn CŨ từng nạp prior_close cũ 8-9 phiên vào chase cap LIVE (tail per-ticker của ticker_prune dừng ở ngày mã RỜI universe; 238/450 mã chung có tail cũ hơn, lag tối đa 4108 ngày). Tức fd3f5597 là bản vá thật, không phải vệ sinh.
-CẢNH BÁO MỚI: section F là FALSE-POSITIVE trong mọi checkout KHÔNG có data/bq_cache (vd worktree) — nó in 'no chunks' rồi PASS vacuously. Đúng lớp lỗi skill verify-before-done (§19).
-Q2 CÒN MỞ (không nặng thêm): universe_pit raw KHÔNG có trong sync_bq_cache.py TABLES (chỉ có universe_pit_q + ticker_prune) => chạy _breadth_sql dưới BQ_LOCAL_CACHE ném CatalogException, bị bắt => breadth guard inactive => backtest KHÔNG BAO GIỜ chạm guard. Đề xuất Taylor: thêm entry universe_pit vào TABLES, hoặc đổi guard sang universe_pit_q sau khi đo A/B — CẦN dispatch riêng + user duyệt.
-VIỆC 2 (treasury): Mike đã trả lời user 3 điều kiện duyệt chính thức + đề xuất gộp research/data-registry vào master và archive loader. CHỜ user quyết.
-VIỆC 3 (vendor mismatch): Taylor_20260923_235405 CÒN CHẠY.
-- [2026-09-24T00:51:49Z] 24/09 07:5x — vendor mismatch @ 4beb093e arch-review: NEEDS_CHANGES (high). Dispatch vòng 2: Taylor_20260924_005111.
-⚠️ LỖI CỦA MIKE, ĐÃ XÁC NHẬN: acceptance tôi tự chạy là RỖNG. Tôi gọi `report_return_gate.py <file>` nhưng `--report` là CỜ, không có positional ⇒ tôi so HAI THÔNG ĐIỆP ARGPARSE USAGE giống nhau rồi kết luận "output BYTE-IDENTICAL ✓, 0 dòng ⚠️". Reviewer bắt được. BÀI HỌC: khi chạy acceptance, PHẢI kiểm output có nội dung THẬT không, đừng chỉ so 2 chuỗi bằng nhau — 2 lỗi giống nhau cũng "identical".
-VÀ acceptance của Taylor (chạy đúng --report, rc=0 × 4, identical) CŨNG gần như rỗng: cả 2 daily report 09-23 công bố 0 dòng bảng + 0 tỉ suất văn xuôi ⇒ published={} ⇒ cấu trúc KHÔNG THỂ phân biệt nhánh chặn mới.
-KILLER OBJECTION: cây cầu DUY NHẤT của cơ chế có 0 TEST. Mutation xoá hẳn khối phát hiện mismatch trong report_return_gate.py:193-196 (entitled_gross) ⇒ VẪN 137/0 và 60/60, vì :1023 MONKEYPATCH chính entitled_gross. 6 assertion vendor mới chỉ kiểm logic chặn khi được BƠM TAY danh sách mismatch. Đối chứng M-D1 xoá :612-613 CHẾT bằng assertion có tên ⇒ harness có răng nửa DƯỚI, mù nửa TRÊN.
-+ V2: 60 assertion của cổng KHÔNG chạy trong runner nào (report_return_gate_selfcheck.py:119 chỉ gọi --report; run_selfchecks.sh:122-124 ép --root-only). Bỏ dở ĐÚNG NỬA chứa cơ chế chặn công bố.
-+ V3: NỬA SAU chỉ đạo user CHƯA THỰC THI. report_delivery_gate.py:105-106 run_checked không capture ⇒ khối ⚠️ vào cron log. Ca mã KHÔNG công bố ⇒ rc=0 ⇒ 0 ký tự tới Discord. Ca CÓ công bố ⇒ user chỉ thấy check_report_cadence.sh:97 "chưa giao đủ … cần Taylor" = SAI nguyên nhân, SAI người; chữ Winston không tới user qua đường tự động nào. §29 tầng NGOÀI.
-ĐƯỢC XÁC NHẬN (giữ nguyên, không audit lại): ngưỡng 1% neo bằng số đo, reviewer ĐỒNG Ý giữ — cả 2 phía đều GỘP (6/6 khớp từng đồng; thuế 5% áp hạ nguồn :246-252; ca DRI 09-21 là ước lượng tầng 1, cơ chế khác); nếu DNSE đổi sang RÒNG thì hỏng LOUD. K1=0/62 tái lập được. K3 đi ngược chiều — giữ bus question MỞ. Blast radius sạch. Vỏ selfcheck dar lọt cả 2 runner, offline 1,0s.
-E2 — ĐỌC LẠI "LATENT": ca VPB HÔM NAY KHÔNG đi qua cửa (BQ: chỉ 1 chân ISS, KHÔNG có chân DIV; event_status=announced mà bq_corp_action lọc executed). NHƯNG k1.log có 2 sự kiện HỖN HỢP THẬT trong rổ: TCM 25/05 (cash 500 + stock 0,05), ACB 15/06 (cash 700 + stock 0,13) — trước go-live nên broker không giải được. ⇒ "vừa-tiền-vừa-cổ-phiếu" KHÔNG hiếm trong rổ; latent theo nghĩa may mắn về THỜI ĐIỂM, không phải hiếm về bản chất.
-R3 CẢNH BÁO NGÀY MAI: unmatched+continue (:527-529) + nocover lọc g>0 (:584-586) VẪN MỞ NGUYÊN. VPB ISS cho cash_per_share=0 ⇒ g=0 ⇒ nocover bỏ qua VPB; cổng chỉ phủ qua đường bảng (mã,KL) mà KL vừa đổi 1.100→1.386. Báo cáo tuần thứ Sáu cần để ý.
-TIN TỐT cho báo cáo tuần: 5 mã cổ tức SpaceX sẽ công bố (CTG/MBB/NCT/SAB/VCB) đều vendor_check=match ⇒ bản vá KHÔNG làm mất số nào.
-CALL-SITE ỨNG VIÊN MỚI (chưa dựng ca): verify_account_snapshot.py — script DUY NHẤT được phép tính giá vốn/P&L báo cáo SpaceX (§6), nhận biết corp-action qua corp_actions.json _status=CONFIRMED = cơ chế KHÁC HẲN credit_frame; đêm credit sớm mà auto_confirm 19:25 chưa CONFIRMED thì multiplier=1 trong khi KL broker đã nhân.
-- [2026-09-24T01:06:58Z] 24/09 08:1x — VIỆC 2 (treasury) XONG, user duyệt "theo ý bạn, không để nguyên nhánh nữa": mike master 83f6a3ef. Rút 31 file lên master hiện tại thay vì merge nhánh (nhánh ahead 3/BEHIND 209, merge sẽ cuốn ngược). 27 research artifact (Taylor treasury_table_20260918 + Winston treasury_size_20260918) + 4 entry data-registry (.proposed -> file thật, Mike duyệt §13 sau khi xác nhận master chưa đụng 3 file đó từ merge-base). Đối chiếu TỪNG file: 31/31 khớp, không thiếu. Selfcheck artifact 110/0 (khớp lời khai). Worktree agents/wt-treasury-table đã gỡ, nhánh feat/treasury-share-events-table đã XOÁ. KHÔNG có loader production nào cần archive riêng — tất cả đã ở trong research/. Điều kiện duyệt chính thức giữ nguyên từ 08/09 (cần 1 case đổi quyết định + đo tác động RANKING + đóng 3 khoảng trống dữ liệu).
-VIỆC 3 (vendor mismatch) arch-review: NEEDS_CHANGES high. Dispatch vòng 2 Taylor_20260924_010622.
-ĐIỀU KIỆN LAND CỦA TÔI ĐÃ ĐẠT: báo cáo tuần thứ Sáu KHÔNG mã nào mất số (3 nguồn xác nhận), bản vá NO-OP trên toàn bộ 6 tháng (K1 = 0 mismatch/62 sự kiện).
-LỖI QUY TRÌNH TÔI GÂY RA: giao review trên MỤC TIÊU ĐANG DI CHUYỂN. Lúc giao commit 4beb093e git status RỖNG; 20 phút sau có thêm commit 29a6e5a5 + 3 file tracked dirty (check_report_cadence.sh cron 08:30, eod_trading_report.sh cron 19:10, report_return_gate.py) + 1 file UNTRACKED 88 dòng bash (vendor_mismatch_alert.sh) chưa qua pre-commit gate nào. => LẦN SAU: yêu cầu Taylor commit HẾT + git status RỖNG rồi mới báo xong, TRƯỚC khi tôi giao review.
-TÔI ĐO SAI K2: báo "rc=2 cả 2 bên, byte-identical". rc=2 là LỖI ARGPARSE (main() chỉ nhận --report, tôi truyền positional) => cổng CHƯA TỪNG CHẠY, "byte-identical" chỉ là 2 thông điệp usage giống nhau. Reviewer chạy đúng: rc=0/rc=0, vẫn byte-identical, nhưng sức phân biệt ~0 vì daily report công bố 0 tỉ suất per-position. Bằng chứng NO-OP thật là K1, không phải K2.
-TAYLOR KHAI SAI 2 CHỖ: (1) "ca đầu tiên có thể là VPB 24/09" — SAI, BQ thật cho VPB chỉ ISS, event_status=announced, value_per_share=NULL => vendor_cash=0 => rơi vào broker_only KHÔNG phải mismatch; (2) cột broker= trong measure_k1.py với dòng CASH_VENDOR in số VENDOR (vì :996 ghi đè per_share) => 17 dòng "khớp" là TAUTOLOGY, cơ sở độc lập là 6 ca không phải 23.
-LỖ CÒN MỞ (D1, BLOCKING vòng 2): nhánh con ANH EM — vendor khai THUẦN CỔ PHIẾU (vendor_cash=0, vendor_stock>0) + broker giải CASH_CONFIRMED => dar:974 gán nhãn lành tính broker_only, GIỮ CASH_CONFIRMED, cash_per_share=1000 => CÔNG BỐ cổ tức KHÔNG TỒN TẠI, 0 cảnh báo. Là hình dạng của 14/62 sự kiện trong K1 VÀ của VPB 24/09. Latent chỉ nhờ lá chắn STOCK_SUSPECTED ở HÀM KHÁC (solve_from_broker:786/:807) — lá chắn trượt là bằng chứng vendor bị vứt. Discriminator: share_multiplier==1.0 while vendor_stock>0. K1 => 0 dương tính giả.
-D2: vendor_mismatch_alert.sh:78-87 ghi de-dup state VÔ ĐIỀU KIỆN sau notify best-effort || true => 1 lần Discord tạch = MẤT CẢNH BÁO VĨNH VIỄN ở ca rc=0 (sweep không quay lại file đã giao xong); json.dump(open(w)) không atomic.
-- [2026-09-24T01:09:15Z] 24/09 08:1x — VIỆC 2 (treasury) XONG theo user duyệt: commit mike 83f6a3ef. Rút 31 file lên master hiện tại (KHÔNG merge nhánh vì nó behind 209 commit): 27 research artifact (Taylor treasury_table_20260918 + Winston treasury_size_20260918) + 4 entry data-registry (.proposed -> file thật, Mike duyệt §13 sau khi xác nhận master chưa đổi 3 file đó từ merge-base). Đối chiếu TỪNG file: 31/31 khớp, không thiếu. Selfcheck artifact 110/0 (khớp lời khai). Nhánh feat/treasury-share-events-table + worktree wt-treasury-table ĐÃ XOÁ. Không có loader production nào cần archive riêng — tất cả đã ở agents/*/research/.
-Điều kiện duyệt chính thức GIỮ NGUYÊN (từ 09-08): cần 1 case sai lệch THỰC SỰ đổi quyết định đầu tư/backtest + đo tác động lên RANKING + đóng 3 khoảng trống dữ liệu (76% thiếu shares_delta, 100% ref_price NULL, 24-27 mã gap vendor).
-VENDOR MISMATCH VÒNG 2 (@9bf8550a) — Mike tự verify, V1/V2/V3 ĐÓNG THẬT:
- V1: 2 mutation mà arch-review vòng 1 thấy SỐNG SÓT nay CẢ HAI chết bằng assertion CÓ TÊN (MUTATION-GUARD entitled_gross_detect_mismatch): xoá khối if a.vendor_check=='mismatch' (:195-197), và đổi nhãn coupling thành typo.
- V2: run_embedded_selfcheck() gọi ở :163 luồng chính; Mike mutate gate rồi chạy WRAPPER => rc=1; wrapper còn assert 'nó THỰC SỰ chạy: dòng đếm có thật, số ca > 0' nên không pass rỗng được. Gate 60 -> 66 ca.
- V3 tầng gate: 8/8 assertion vendor đúng đường thật, gồm ca entitled_gross KHÔNG monkeypatch. mismatch+công bố => rc=1 CHẶN; đích danh Winston; dòng máy đọc VENDOR_MISMATCH_ALERT published=1; mismatch+không công bố => rc=0; không lệch => KHÔNG cảnh báo giả.
- §5b sạch: hit append_event/notify_thread duy nhất trong gate là COMMENT :942.
- Selfcheck 137/0 + 66/66 qua 3 TZ.
-CÒN LẠI — 3 required_change vòng 1 CHƯA LÀM, đều ở bin/vendor_mismatch_alert.sh (Mike đọc code xác nhận). Dispatch vòng 3: Taylor_20260924_010833.
- W1 FAIL-SILENT MẤT CẢNH BÁO VĨNH VIỄN: :80-81 append_event + notify_thread đều 2>/dev/null || true (nuốt lỗi), rồi :82-87 ghi de-dup state VÔ ĐIỀU KIỆN => notify tạch nhưng state vẫn ghi 'đã cảnh báo' => de-dup chặn lần sau; ca rc=0 thì báo cáo đã giao xong nên sweep không quay lại => mất vĩnh viễn.
- W2 :82-87 json.dump(open(w)) KHÔNG atomic (§5) => kill giữa lúc ghi để lại JSON cụt, lần sau json.load nổ.
- W3 88 dòng bash MỚI chưa có selfcheck nào (đã có --dry-run làm điểm neo).
-ARCH-REVIEW VÒNG 1 CÒN SỬA 1 SỐ ĐO CỦA MIKE: tôi báo K2 'rc=2 cả hai bên, byte-identical' — rc=2 là LỖI ARGPARSE (--report là CỜ, truyền positional => usage error), nghĩa là cổng CHƯA TỪNG CHẠY và 'byte-identical' chỉ là 2 thông điệp usage giống nhau. Reviewer chạy đúng: rc=0 x4, identical, NHƯNG sức phân biệt ~0 vì cả 2 daily report công bố 0 tỉ suất per-position. Bằng chứng NO-OP thật nằm ở K1 (0 mismatch/62 sự kiện), không nằm ở K2. => BÀI HỌC: acceptance phải dựng ca CÓ dữ liệu, 'identical trên tập rỗng' không chứng minh gì.
-VÀ: Taylor khai sai 'ca đầu tiên có thể là VPB 24/09' — BQ thật cho VPB chỉ có chân ISS, value_per_share NULL => vendor_cash=0 => KHÔNG thể là mismatch; nó rơi vào broker_only.
-LỖ HỔNG ANH EM reviewer tìm (required_change #1 vòng 1, CHƯA làm, tôi chưa đưa vào vòng 3 vì chờ xác nhận): dividend_adjusted_return.py:972-975 — vendor khai THUẦN CỔ PHIẾU (cash=0, stock>0) mà broker giải CASH_CONFIRMED => gán nhãn lành tính broker_only, GIỮ CASH_CONFIRMED, công bố cổ tức KHÔNG TỒN TẠI, 0 cảnh báo. Đúng hình dạng VPB 24/09 và 14/62 sự kiện. Latent nhờ lá chắn STOCK_SUSPECTED ở HÀM KHÁC (solve_from_broker:786/:807). Discriminator có sẵn: share_multiplier==1.0 trong khi vendor_stock>0. K1 cho 0 dương tính giả. => PHẢI ĐƯA VÀO VÒNG 4.
-- [2026-09-24T02:49:42Z] vendor-mismatch LAND XONG master: dc147859 (vong 1-3b) + 6b751298 (D1 stock_leg_ignored) + 07288554 (current_ops); 6 vong arch-review; nhanh+worktree da xoa. Dang cho Taylor 2 viec trong dividend_adjusted_return.py: broker_qty LO CUOI->TONG LO (:469-472) + tach nhan bq_corp_action except Exception (:417-419, CA HAI la chan vendor tat IM LANG khi BQ hong). HDB 100cp@27.950 khop 09:15:05.
-- [2026-09-24T04:18:28Z] V1 broker_qty TONG LO da LAND master (merge 4b59c6d1): BID 14/08 427 (was 320), MBB 632 (was 232), 151/0, §21 khong so cong bo nao doi. V2 lookup_failed CON O NHANH fix/dividend-broker-qty-vendor-label — vong 5 dang chay (R1-A per_share uoc luong khong phai tien broker 56/62 ca; R1-B pham vi chan; R1-C 3 cho hardcode Winston gom 2 caller shell; R1-D mutant dao blocked tag moi SONG).
-- [2026-09-24T05:17:25Z] Chuoi vendor-mismatch DONG DAY DU tren master: dc147859 + 6b751298 + 4b59c6d1 (broker_qty TONG LO) + 206dd348 (nhan lookup_failed). Nhanh+worktree da xoa. CON 1 lo hong TEST-ONLY: mutation tat report_return_gate.py:732 (reasons_present lookup_failed) van SONG. Viec tiep: discretionary_margin_gate.py:335; report_return_gate :527-529 + :584-586; verify_account_snapshot.py; runbook rc=5/6/7 + muc VENDOR_LOOKUP_FAILED.
+## ĐÃ XÁC NHẬN KHÔNG CÒN TREO (đừng báo lại nhầm — nhiều mục memory cũ đã lỗi thời)
+- test_trading_bot.py:353 — ĐÃ SỬA từ 09-23 (commit 9fefd245 + 91564b1b + aa7a36ee), verify lại
+  bằng grep 09-24: dùng đúng p["cfg"]["mode"].
+- universe-pit-migration G7/G8/G9 — ĐÃ ĐÓNG 2026-09-19 (job Taylor_20260919_033750).
+- NAV corp-action gate v2 rc=5 runbook — ĐÃ DUYỆT + promote 09-22 (commit c581c74e).
+- data/discretionary_margin_arms.json (WorkingClaude root) — arm giả đã dọn sạch, hiện = [].
+- dnse-balances-stock-block-zero 09-24 — tự hồi phục, fail-closed guard hoạt động đúng, không
+  cần can thiệp.
+- Treasury buyback branch — user duyệt "theo ý bạn", rút 31 file lên master 09-24 (commit 83f6a3ef),
+  nhánh cũ đã xoá. Điều kiện wire chính thức giữ nguyên từ 08-09 (cần case đổi quyết định thật).
+
+## Bài học tích luỹ quan trọng (đừng lặp lại)
+- TRƯỚC KHI dispatch dựa trên tracker/memory: verify bằng git log + bus TRƯỚC (2 phút, rẻ hơn
+  job sai hướng) — Mike đã viết spec sai dựa trên memory lỗi thời ít nhất 7 LẦN trong chuỗi audit
+  09-24. Tracker `kb/projects/*.md` có thể STALE dù mới đọc gần đây.
+- acceptance/verify tự chạy: phải xem output có NỘI DUNG THẬT không, đừng chỉ so 2 chuỗi bằng nhau
+  (ca report_return_gate.py --report vs positional arg — 2 lỗi argparse giống nhau cũng "identical").
+- Lớp lỗi §29 (chẩn đoán không dựa bằng chứng) có thể có NHIỀU CỬA trong CÙNG 1 file — 1 vòng
+  review chỉ đóng đúng cửa nó thấy, không đảm bảo hết (case discretionary_margin_gate.py: 12 vòng).
+
