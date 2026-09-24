@@ -15,7 +15,16 @@
 # Parse dòng MÁY ĐỌC `VENDOR_MISMATCH_ALERT|<acct>|<mã>|<ex>|<broker>|<vendor>|<đang công bố>`
 # — giá trị đã chuẩn hoá, KHÔNG grep câu văn xuôi (§28).
 #
-# Exit: 0 = không có lệch nguồn nào · 10 = CÓ (đã alert, hoặc đã alert hôm nay rồi) · 2 = sai đối số.
+# Exit: 0 = KHÔNG có lệch nguồn nào · 10 = CÓ lệch nguồn · 2 = sai đối số.
+#   ⚠️ 10 nói về SỰ TỒN TẠI của lệch nguồn, KHÔNG hứa "đã gửi được cảnh báo" — hai caller
+#   (`check_report_cadence.sh:91`, `eod_trading_report.sh:72`) chỉ dùng nó để quy ĐÚNG nguyên
+#   nhân/người xử lý (§29), nên nó phải đúng cả khi Discord chết. Gửi hỏng thì in LỖI THẬT ra
+#   stderr và KHÔNG ghi de-dup ⇒ lượt sau thử lại.
+#
+# `state/vendor_mismatch_alerted.json` (de-dup 1 key/file báo cáo/ngày) TĂNG KHÔNG TRẦN, CÓ CHỦ Ý
+# — cùng quy ước với `state/report_delivery_incomplete_alerted.json` của check_report_cadence.sh:61
+# (cũng không TTL, không chủ dọn). Chấp nhận được vì tốc độ tăng đo thật ~0: K1 2026-09-24 đếm
+# **0 lệch nguồn / 62 sự kiện cổ tức 6 tháng** ⇒ key chỉ sinh khi có lệch thật. Không cài cron dọn.
 set -uo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
@@ -59,10 +68,19 @@ mkdir -p "$ROOT/state"
 [ -f "$STATE" ] || echo '{}' > "$STATE"
 # De-dup 1 lần/file/ngày — cùng khuôn ALREADY_ALERTED của check_report_cadence.sh:88 (sweep chạy
 # lại mỗi ngày cho cùng 1 file kẹt; không de-dup là spam đúng cái topic user đang đọc).
-ALREADY="$(python3 -c "
-import json
-state = json.load(open('$STATE'))
-print('yes' if state.get('$FNAME') == '$TODAY' else 'no')
+# State hỏng/cụt (kill giữa lúc ghi ở bản trước) KHÔNG được làm câm cảnh báo: coi như CHƯA
+# cảnh báo (fail-open về phía GỬI) và in LỖI THẬT (§29 — không nuốt stderr rồi đoán).
+# Giá trị đi qua ENV chứ không nội suy vào nguồn python: tên file báo cáo là dữ liệu ngoài.
+ALREADY="$(STATE="$STATE" FNAME="$FNAME" TODAY="$TODAY" python3 -c "
+import json, os, sys
+try:
+    state = json.load(open(os.environ['STATE']))
+except Exception as e:
+    print('no')
+    sys.stderr.write('vendor_mismatch_alert: KHONG doc duoc state de-dup %s — coi nhu CHUA canh bao, VAN gui. Loi that: %s: %s\n'
+                     % (os.environ['STATE'], type(e).__name__, e))
+    sys.exit(0)
+print('yes' if state.get(os.environ['FNAME']) == os.environ['TODAY'] else 'no')
 ")"
 if [ "$ALREADY" = "yes" ]; then
   echo "vendor_mismatch_alert: đã cảnh báo $FNAME hôm nay, bỏ qua (de-dup)." >&2
@@ -75,14 +93,48 @@ Tiền cổ tức THẬT về tài khoản (sổ broker) và bảng vendor \`tav
 **Việc cần làm:** Winston đối soát \`tav2_bq.corporate_action\` với sổ broker cho (mã, ex-date) trên. Chỉ khi hai nguồn khớp lại thì tỉ suất mã đó mới được công bố (§21).
 Đây KHÔNG phải lỗi soạn báo cáo và KHÔNG phải sai cơ sở giá — không nới dung sai cổng để gỡ chặn."
 
-"$ROOT/bin/append_event.sh" Mike error "vendor-mismatch-${FNAME}" \
-  "{\"artifact\":\"${FNAME}\",\"owner\":\"Winston\",\"blocked_report\":${BLOCKED},\"markers\":$(printf '%s\n' "$MARKERS" | python3 -c 'import json,sys; print(json.dumps([l.strip() for l in sys.stdin if l.strip()]))')}" \
-  2>/dev/null || true
-"$ROOT/bin/notify_thread.sh" "$MSG" "$TOPIC" 2>/dev/null || true
-python3 -c "
-import json
-state = json.load(open('$STATE'))
-state['$FNAME'] = '$TODAY'
-json.dump(state, open('$STATE', 'w'), indent=2, ensure_ascii=False)
+PAYLOAD="{\"artifact\":\"${FNAME}\",\"owner\":\"Winston\",\"blocked_report\":${BLOCKED},\"markers\":$(printf '%s\n' "$MARKERS" | python3 -c 'import json,sys; print(json.dumps([l.strip() for l in sys.stdin if l.strip()]))')}"
+
+# BUS = kênh PHỤ. Hỏng thì nêu lỗi thật rồi ĐI TIẾP — không được vì bus mà chặn đường tới user.
+if ! BUS_ERR="$("$ROOT/bin/append_event.sh" Mike error "vendor-mismatch-${FNAME}" "$PAYLOAD" 2>&1 >/dev/null)"; then
+  echo "vendor_mismatch_alert: append_event.sh THAT BAI (bus la kenh phu, van gui Discord). Loi that: ${BUS_ERR}" >&2
+fi
+
+# DISCORD = kênh CHÍNH và là ĐIỀU KIỆN để ghi de-dup. Trước đây `2>/dev/null || true` + ghi state
+# vô điều kiện: ccdb chết/topic sai ⇒ lỗi bị nuốt, state vẫn ghi "đã cảnh báo hôm nay", và ở ca
+# rc=0 (mã không công bố) báo cáo ĐÃ giao xong nên sweep hôm sau không quay lại file đó nữa
+# ⇒ MẤT CẢNH BÁO VĨNH VIỄN — đúng thứ script này sinh ra để chặn.
+if ! NOTIFY_ERR="$("$ROOT/bin/notify_thread.sh" "$MSG" "$TOPIC" 2>&1 >/dev/null)"; then
+  echo "vendor_mismatch_alert: notify_thread.sh THAT BAI — KHONG ghi de-dup, luot sau se thu lai. Loi that: ${NOTIFY_ERR}" >&2
+  exit 10
+fi
+
+# Ghi NGUYÊN TỬ (tmp + os.replace, §5): kill giữa lúc ghi không được để lại JSON cụt cho lượt
+# sau `json.load` vấp. State không đọc được thì dựng lại từ {} — thà mất de-dup (cảnh báo lặp)
+# còn hơn mất cảnh báo.
+STATE="$STATE" FNAME="$FNAME" TODAY="$TODAY" python3 -c "
+import json, os, sys, tempfile
+path = os.environ['STATE']
+try:
+    state = json.load(open(path))
+    if not isinstance(state, dict):
+        raise ValueError('state khong phai dict: %r' % type(state).__name__)
+except Exception as e:
+    print('vendor_mismatch_alert: state cu hong (%s: %s) — dung lai tu {}' % (type(e).__name__, e), file=sys.stderr)
+    state = {}
+state[os.environ['FNAME']] = os.environ['TODAY']
+fd, tmp = tempfile.mkstemp(dir=os.path.dirname(path), prefix='.vendor_mismatch_alerted.', suffix='.tmp')
+try:
+    with os.fdopen(fd, 'w') as f:
+        json.dump(state, f, indent=2, ensure_ascii=False)
+        f.flush()
+        os.fsync(f.fileno())
+    os.replace(tmp, path)
+except BaseException:
+    try:
+        os.unlink(tmp)
+    except OSError:
+        pass
+    raise
 "
 exit 10
