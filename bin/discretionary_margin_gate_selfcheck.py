@@ -229,6 +229,18 @@ def main():
                               account="ZaloPay"))
     check("account ZaloPay (cash-only) bi chan cung", rc == 2, f"rc={rc}")
 
+    # ---- 12b. [BLOCKER 2 vòng 8] arm_price=nan bị TỪ CHỐI tại cmd_arm, kể cả khi
+    #           --exposure-vnd override khiến cổng `exposure_vnd > 0` không phát hiện được
+    #           (đường CLI thật: --arm-price nan --exposure-vnd <dương>).
+    gate.save_arms([])
+    rc = gate.cmd_arm(mkargs(ticker="GGG", arm_price=float("nan"), exposure_vnd=1_000_000))
+    check("12b: arm_price=nan bị từ chối kể cả có --exposure-vnd override", rc == 2, f"rc={rc}")
+    check("12b: KHÔNG ghi arm khi arm_price=nan", len(gate.load_arms()) == 0)
+    rc = gate.cmd_arm(mkargs(ticker="HHH", arm_price=float("inf"), exposure_vnd=1_000_000))
+    check("12b: arm_price=inf bị từ chối", rc == 2, f"rc={rc}")
+    rc = gate.cmd_arm(mkargs(ticker="III", arm_price=-100.0, exposure_vnd=1_000_000))
+    check("12b: arm_price âm bị từ chối", rc == 2, f"rc={rc}")
+
     # ════════════════════ CORP-ACTION GATE (cmd_check_exits) — Việc 2 (thiết kế lại) ═════════
     ORIG_MULT_AFTER = daily_nav_snapshot.confirmed_qty_multiplier_after
 
@@ -852,6 +864,59 @@ def main():
               abs(mult - 1.43) < 1e-9, f"mult={mult}")
     finally:
         _restore_corp_actions_file()
+
+    # ---- 23. [BLOCKER 2 vòng 8] arm_price=nan trong arms.json (file bị sửa tay/hỏng dữ liệu
+    #          cũ, KHÔNG qua cmd_arm) phải KHÔNG cho rc=0/0-alert khi giá hiện tại thực sự
+    #          breach — trước bản vá: `px / (nan/1.0) - 1.0` = nan, `nan <= EXIT_DD_PCT` luôn
+    #          False -> case ÂM THẦM rơi khỏi breach check, in "OK", bus/notify=0.
+    #          Đối chứng: arm_price HỢP LỆ cùng kịch bản phải bắn đúng 1 bus + 1 notify.
+    daily_nav_snapshot.confirmed_qty_multiplier_after = lambda ticker, asof_date: 1.0
+    try:
+        _patch_io(monkey_price=(16000.0, "dnse_g1_today", None))  # -20% nếu arm_price=20000
+
+        gate.save_arms([_mk_arm(float("nan"), ticker="NANCASE")])
+        _NoBus.calls.clear()
+        rc = gate.cmd_check_exits(_argparse.Namespace())
+        arms = gate.load_arms()
+        check("23: arm_price=nan -> rc=1 (KHÔNG rc=0 im lặng)", rc == 1, f"rc={rc}")
+        check("23: arm_price=nan -> KHÔNG bắn bus 'error' (không tính được, không phải breach "
+              "xác nhận)", not any(c[0] == "bus" and c[1] == "error" for c in _NoBus.calls),
+              str(_NoBus.calls))
+        check("23: arm_price=nan -> KHÔNG ghi exit_alerts giả", arms and
+              len(arms[0]["exit_alerts"]) == 0, arms)
+        check("23: arm_price=nan -> last_drawdown KHÔNG được ghi là số (giữ absent/None, "
+              "không phải nan bị coi là 'đã kiểm')",
+              arms and arms[0].get("last_drawdown") is None, arms[0].get("last_drawdown") if
+              arms else None)
+
+        # Đối chứng: cùng kịch bản giá, arm_price HỢP LỆ -> phải bắt đúng breach thật.
+        gate.save_arms([_mk_arm(20000.0, ticker="REALCASE")])
+        _NoBus.calls.clear()
+        rc = gate.cmd_check_exits(_argparse.Namespace())
+        arms = gate.load_arms()
+        check("23 đối chứng: arm_price hợp lệ, giá -20% -> rc=0 (breach xác nhận được)",
+              rc == 0, f"rc={rc}")
+        check("23 đối chứng: bắn đúng 1 bus 'error'",
+              sum(1 for c in _NoBus.calls if c[0] == "bus" and c[1] == "error") == 1,
+              str(_NoBus.calls))
+        check("23 đối chứng: bắn đúng 1 notify",
+              sum(1 for c in _NoBus.calls if c[0] == "notify") == 1, str(_NoBus.calls))
+        check("23 đối chứng: ghi đúng 1 exit_alert",
+              arms and len(arms[0]["exit_alerts"]) == 1, arms)
+
+        # corp_action_multiplier=0 (hỏng dữ liệu khác dạng) cũng phải bị chặn — chia cho 0.
+        # Registry lookup phải LỖI cho ticker này (dùng stub raising) để giữ nguyên
+        # corp_action_multiplier=0.0 đã preset — nếu registry trả về hệ số mới thành công, nhánh
+        # "tích luỹ" sẽ ghi đè 0.0 trước khi tới guard, không test đúng đường chia-cho-0.
+        daily_nav_snapshot.confirmed_qty_multiplier_after = _mult_after_stub_raising(
+            {"ZEROMULT"})
+        gate.save_arms([dict(_mk_arm(20000.0, ticker="ZEROMULT"), corp_action_multiplier=0.0)])
+        _NoBus.calls.clear()
+        rc = gate.cmd_check_exits(_argparse.Namespace())
+        check("23: corp_action_multiplier=0 -> rc=1, KHÔNG ZeroDivisionError lộ ra ngoài",
+              rc == 1, f"rc={rc}")
+    finally:
+        daily_nav_snapshot.confirmed_qty_multiplier_after = ORIG_MULT_AFTER
 
     print(f"\n{'='*70}\nPASS={len(PASS)} FAIL={len(FAIL)}")
     if FAIL:

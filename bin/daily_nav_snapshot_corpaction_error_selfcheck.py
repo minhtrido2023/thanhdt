@@ -65,11 +65,15 @@ def run_main(tmp, registry_actions):
     D.broker_positions = lambda account_label, account_no: {
         "VPB": {"qty": 500.0, "marketPrice": 20_000.0}}
     D.subprocess.run = lambda *a, **k: _fake_completed(0)
-    # Đường KHÔNG bị chặn bởi CorpActionError (test 3) đi tiếp tới bq_close_prices() — ngoài
-    # phạm vi B3 (đó là gọi BQ thật qua subprocess riêng của verify_account_snapshot, không
-    # phải D.subprocess). Mock trả rỗng để main() dừng ở guard "thiếu giá" (rc=2) ngay sau,
-    # KHÔNG chạm mạng — vẫn đủ để phân biệt "chặn vì CorpActionError" khỏi "chặn vì lý do khác".
-    V.bq_close_prices = lambda tickers, date: ({}, None)
+    # BLOCKER 3 (arch-review vòng 8): mock TRẢ RỖNG trước đây khiến guard "thiếu giá đóng cửa"
+    # (dòng ~919-923, PHÍA SAU nhánh CorpActionError) cũng tự cho rc=2 — mutation swallow-lỗi
+    # (`except ...: mult = 1.0` thay vì `return 2`) VẪN rc=2 qua đường "thiếu giá", làm (1a)/
+    # (1c)/(2a)/(2b) sống sót dù nhánh CorpActionError không còn chặn gì (đo thật: mutate rồi
+    # chạy, chỉ (1b) — check message — chết). Trả giá HỢP LỆ ở đây để guard "thiếu giá" không
+    # còn là lý do rc=2 thay thế: nếu nhánh CorpActionError bị mutate-swallow, main() sẽ ĐI TIẾP
+    # qua guard giá (pass) rồi kẹt ở guard balance/raw_path (rc=2 vì lý do KHÁC hẳn, không chứa
+    # 'corp_actions.json có record hỏng') hoặc rc=0 — cả hai đều làm test 1a/2a chết đúng.
+    V.bq_close_prices = lambda tickers, date: ({"VPB": 20_000.0}, None)
     sys.argv = ["daily_nav_snapshot.py", "--account", ACCOUNT, "--account-no", ACCOUNT_NO,
                 "--date", DATE, "--starting-capital", "10000000"]
     err = io.StringIO()
@@ -90,8 +94,12 @@ with tempfile.TemporaryDirectory() as tmp:
            "ex_date": "2026-09-15", "broker_effective_ts": "2026-09-14T19:00:00+07:00",
            "_status": "CONFIRMED — test"}
     rc, err, hist_exists = run_main(tmp, [bad])
-    check("(1a) rc=2 — main() PHẢI chặn khi corp_actions.json có record hỏng", rc == 2,
-          (rc, err[-500:]))
+    # (1a) BLOCKER 3: rc==2 KHÔNG ĐỦ để phân biệt nhánh CorpActionError khỏi guard "thiếu giá"
+    # phía sau (cả hai đều rc=2) — điều kiện ĐỦ là có mặt câu lý do CỤ THỂ, cùng chuỗi (1b) đã
+    # dùng. Gộp cả 2 điều kiện vào MỘT check để mutation swallow-lỗi không còn chỗ lọt.
+    check("(1a) rc=2 VÀ lý do CHÍNH XÁC là 'corp_actions.json có record hỏng' — không phải rc=2 "
+          "vì guard khác phía sau (§28/§29: so giá trị đã chuẩn hoá, không suy từ rc trần)",
+          rc == 2 and "corp_actions.json có record hỏng" in err, (rc, err[-500:]))
     check("(1b) thông điệp lỗi nêu rõ corp_actions.json + ticker liên quan",
           "corp_actions.json" in err and "VPB" in err, err[-500:])
     check("(1c) KHÔNG ghi nav_history — record hỏng không được lọt qua thành NAV",
@@ -103,8 +111,12 @@ with tempfile.TemporaryDirectory() as tmp:
            "ex_date": None, "broker_effective_ts": "2026-09-14T19:00:00+07:00",
            "_status": "CONFIRMED — test"}
     rc, err, hist_exists = run_main(tmp, [bad])
-    check("(2a) rc=2", rc == 2, (rc, err[-500:]))
-    check("(2b) KHÔNG ghi nav_history", not hist_exists, hist_exists)
+    check("(2a) rc=2 VÀ lý do CHÍNH XÁC là 'corp_actions.json có record hỏng' (cùng lý do §28 "
+          "như (1a) — bắt mutation swallow-lỗi qua guard 'thiếu giá' phía sau)",
+          rc == 2 and "corp_actions.json có record hỏng" in err, (rc, err[-500:]))
+    check("(2b) thông điệp lỗi nêu rõ corp_actions.json + ticker liên quan",
+          "corp_actions.json" in err and "VPB" in err, err[-500:])
+    check("(2c) KHÔNG ghi nav_history", not hist_exists, hist_exists)
 
 print("3. Đối chứng KHÔNG-ĐƯỢC-CHẾT: registry LÀNH hoàn toàn không kích nhánh except "
       "(rc khác 2 vì lý do KHÁC — chứng minh guard không chặn oan đường lành)")

@@ -31,6 +31,7 @@ DÙNG:
 import argparse
 import datetime as dt
 import json
+import math
 import os
 import subprocess
 import sys
@@ -283,6 +284,12 @@ def cmd_arm(args):
               f"broker-max 2,0).", file=sys.stderr)
         return 2
 
+    if not math.isfinite(args.arm_price) or args.arm_price <= 0:
+        print(f"❌ --arm-price={args.arm_price} không phải số hữu hạn dương (nan/inf/≤0) — "
+              f"cấm arm: mọi phép chia dùng arm_price ở cmd_check_exits sẽ ÂM THẦM cho drawdown "
+              f"=nan và bị bỏ qua khỏi breach check (§29 coding_guidelines).", file=sys.stderr)
+        return 2
+
     exposure_vnd = args.exposure_vnd if args.exposure_vnd is not None else args.shares * args.arm_price
     if not (exposure_vnd > 0):
         print("❌ exposure phải > 0 (truyền --shares + --arm-price, hoặc --exposure-vnd).",
@@ -455,7 +462,26 @@ def cmd_check_exits(args):
                 a["corp_action_multiplier"] = factor
                 print(f"  [CORPACTION] {a['ticker']}: {note}")
 
-        arm_price_frame = a["arm_price"] / a.get("corp_action_multiplier", 1.0)
+        # BLOCKER 2 arch-review vòng 8: `math.isfinite` đã gác `mult` khi GHI vào
+        # `corp_actions.json` (§29), nhưng phép chia dưới đây dùng `a["arm_price"]` (đọc từ
+        # arms JSON, không qua CA.validate()) làm SỐ BỊ CHIA — nan/inf ở đây làm `drawdown`=nan,
+        # so sánh `nan <= EXIT_DD_PCT` luôn False ⇒ arm ÂM THẦM rơi khỏi breach check, in "OK"
+        # dù drawdown thật KHÔNG so sánh được (đo thật: --arm-price nan qua CLI trước bản vá
+        # BLOCKER 1 ở cmd_arm vẫn tới được đây nếu file arms bị sửa tay/hỏng dữ liệu cũ).
+        mult_now = a.get("corp_action_multiplier", 1.0)
+        if not math.isfinite(a["arm_price"]) or not math.isfinite(mult_now) or mult_now == 0:
+            msg = (f"{a['ticker']}: arm_price={a['arm_price']!r} hoặc "
+                   f"corp_action_multiplier={mult_now!r} không phải số hữu hạn khác 0 — "
+                   f"KHÔNG tính được drawdown, bỏ qua breach check cho case này lượt này.")
+            print(f"⚠ {msg}", file=sys.stderr)
+            errors.append(msg)
+            a["last_checked"] = dt.datetime.now(ICT).isoformat(timespec="seconds")
+            a["last_price"] = px
+            a["last_price_source"] = src
+            changed = True
+            continue
+
+        arm_price_frame = a["arm_price"] / mult_now
         drawdown = px / arm_price_frame - 1.0
         a["last_checked"] = dt.datetime.now(ICT).isoformat(timespec="seconds")
         a["last_price"] = px
@@ -505,6 +531,9 @@ def cmd_check_exits(args):
                 bus_payload["frame_unverified_reason"] = factor_lookup_failed[id(a)]
             _bus("error", f"discretionary-margin-exit-breach-{ticker}", bus_payload)
             _notify(msg)
+    elif errors:
+        print(f"⚠ {len(live)} case active, {len(errors)} case KHÔNG kiểm được breach lượt này "
+              f"(xem cảnh báo ⚠ ở trên) — KHÔNG phải xác nhận an toàn.")
     else:
         print(f"OK — {len(live)} case active, không case nào chạm {EXIT_DD_PCT:.0%}.")
     return 1 if errors else 0

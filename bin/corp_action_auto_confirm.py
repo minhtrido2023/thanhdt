@@ -36,6 +36,7 @@ CA_DAILY_DIR       = os.path.join(WC_ROOT, "data", "corp_action_daily")
 EXEC_DIR           = os.path.join(WC_ROOT, "data", "execution_logs")
 
 sys.path.insert(0, MIKE_ROOT)
+import corp_actions as CA  # noqa: E402 — validate() tại điểm ghi, BLOCKER 1b arch-review vòng 8
 
 # ── Constants ──────────────────────────────────────────────────────────────
 RATIO_TOL       = 0.02   # ±2% chấp nhận giữa hệ số khai báo và hệ số suy từ broker
@@ -178,11 +179,21 @@ def broker_modified_today(last_rec, today_str):
 
 
 def write_corp_actions(actions_list, dry_run=False):
-    """Ghi lại corp_actions.json với list actions mới. Atomic tmp+rename."""
-    data = {"actions": actions_list}
+    """Ghi lại corp_actions.json với list actions mới. Atomic tmp+rename.
+
+    BLOCKER 1b (arch-review vòng 8): validate() TỪNG record trước khi ghi — writer này là điểm
+    duy nhất tạo record CONFIRMED tự động, không đi qua ai review tay. Một record vượt biên
+    QTY_MULT_MAX (lỗi gõ tay ở `exercise_ratio` nguồn, hoặc bug tính `mult`) mà lọt vào registry
+    sẽ làm MỌI consumer khác (park_holdings, verify_account_snapshot, reconcile_equity) ném
+    CorpActionError cho TOÀN BỘ ticker trong file, không riêng ticker hỏng — validate ở đây chặn
+    trước khi file bị đầu độc, thay vì để 3 consumer khác nhau tự phát hiện sau.
+    """
+    for i, rec in enumerate(actions_list):
+        CA.validate(rec, i)  # ném CorpActionError nếu hỏng — KHÔNG bắt ở đây, để caller quyết định
     if dry_run:
         print(f"[DRY-RUN] would write {len(actions_list)} records to {CORP_ACTIONS_FILE}")
         return
+    data = {"actions": actions_list}
     tmp = CORP_ACTIONS_FILE + ".tmp"
     with open(tmp, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
@@ -360,7 +371,20 @@ def run(date_str, dry_run=False):
         post_bus(ticker, event_id, ex_date, mult, acct_results, dry_run=dry_run)
 
     if new_confirms:
-        write_corp_actions(actions_raw, dry_run=dry_run)
+        try:
+            write_corp_actions(actions_raw, dry_run=dry_run)
+        except CA.CorpActionError as e:
+            print(f"\n❌ KHÔNG GHI — record vừa tạo không qua validate(): {e}")
+            import subprocess
+            subprocess.run(
+                [APPEND_EVENT, "Mike", "question",
+                 "corp-action-auto-confirm-validate-reject",
+                 json.dumps({"error": str(e), "candidates": [t for t, _ in new_confirms],
+                             "urgency": "high",
+                             "note": "auto_confirm tạo record hỏng, KHÔNG ghi vào registry — "
+                                     "cần người kiểm tay"}, ensure_ascii=False)],
+                check=False)
+            return 1
         print(f"\nXong: {len(new_confirms)} event(s) AUTO-CONFIRMED: "
               f"{[t for t, _ in new_confirms]}")
     else:
