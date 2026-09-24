@@ -1083,6 +1083,50 @@ def main():
         daily_nav_snapshot.confirmed_qty_multiplier_after = ORIG_MULT_AFTER
         _patch_io(monkey_price=(0.0, "reset", None))
 
+    # ---- 28. [R11-1 arch-review vòng 11] _bus/_notify thất bại ở nhánh BREACH (không phải
+    #          errors) -> phải in dòng NOTIFY_FAILED. Nhánh breach là cảnh báo nghiêm trọng nhất
+    #          trong file (−20% de-lever bắt buộc) và trước bản vá vòng 11 là nơi DUY NHẤT còn
+    #          thiếu guard này (cmd_arm và nhánh errors đã có từ trước — test 27).
+    daily_nav_snapshot.confirmed_qty_multiplier_after = lambda ticker, asof_date: 1.0
+    try:
+        gate.save_arms([_mk_arm(20000.0, ticker="BREACHNOTIFYFAIL")])
+        gate.current_price = lambda ticker: (15000.0, "dnse_g1_fake", None)   # -25%: breach thật
+        gate._bus = lambda *a, **k: False
+        gate._notify = lambda *a, **k: False
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            rc = gate.cmd_check_exits(_argparse.Namespace())
+        out = buf.getvalue()
+        check("28 (R11-1): _bus/_notify thất bại ở nhánh breach -> in dòng NOTIFY_FAILED "
+              "(khớp ERROR_RE của cron_health_check.py)",
+              "NOTIFY_FAILED" in out, out)
+        check("28: dòng NOTIFY_FAILED nhắc đúng ticker breach", "BREACHNOTIFYFAIL" in out, out)
+    finally:
+        gate._bus = no_bus.bus
+        gate._notify = no_bus.notify
+        daily_nav_snapshot.confirmed_qty_multiplier_after = ORIG_MULT_AFTER
+        _patch_io(monkey_price=(0.0, "reset", None))
+
+    # ---- 29. [không bắt buộc, arch-review vòng 11] mutation-kill cho `if not breaches and not
+    #          errors:` -> `if not errors:` (mất điều kiện `not breaches`). Lượt CHỈ có breach
+    #          (không có errors) mà mutate mất `not breaches` sẽ in CẢ dòng breach 🚨 THẬT lẫn
+    #          dòng "OK — không case nào chạm ..." mâu thuẫn ngay sau đó trong cùng log.
+    daily_nav_snapshot.confirmed_qty_multiplier_after = lambda ticker, asof_date: 1.0
+    try:
+        gate.save_arms([_mk_arm(20000.0, ticker="BREACHONLY")])
+        gate.current_price = lambda ticker: (15000.0, "dnse_g1_fake", None)   # -25%: breach thật
+        _NoBus.calls.clear()
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            rc = gate.cmd_check_exits(_argparse.Namespace())
+        out = buf.getvalue()
+        check("29: lượt chỉ có breach (không errors) KHÔNG in dòng OK mâu thuẫn "
+              "(bắt mutation `not breaches and not errors` -> `not errors`)",
+              "không case nào chạm" not in out, out)
+    finally:
+        daily_nav_snapshot.confirmed_qty_multiplier_after = ORIG_MULT_AFTER
+        _patch_io(monkey_price=(0.0, "reset", None))
+
     print(f"\n{'='*70}\nPASS={len(PASS)} FAIL={len(FAIL)}")
     if FAIL:
         for name, detail in FAIL:

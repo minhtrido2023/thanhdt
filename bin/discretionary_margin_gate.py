@@ -491,8 +491,13 @@ def cmd_check_exits(args):
         a["arm_price_frame_adjusted"] = round(arm_price_frame, 2)
         changed = True
         if drawdown <= EXIT_DD_PCT + 1e-9:      # epsilon: tránh lệch làm tròn nhị phân bỏ sót đúng ngưỡng
-            a["exit_alerts"].append({"date": a["last_checked"], "price": px,
-                                      "drawdown": round(drawdown, 4)})
+            # non-blocker arch-review vòng 11: setdefault, không `a["exit_alerts"]` trần — arm
+            # record bị sửa tay/thiếu key (vd file hiện tại có arm giả thiếu cả exit_alerts lẫn
+            # exited) trước đây gây KeyError huỷ TOÀN BỘ lượt trước save_arms, kéo theo breach
+            # check của MỌI arm khác trong cùng lượt mất theo — cùng threat-model đã áp cho
+            # arm_price/multiplier ở round 9.
+            a.setdefault("exit_alerts", []).append({"date": a["last_checked"], "price": px,
+                                                      "drawdown": round(drawdown, 4)})
             # §29 vòng 6 blocker 3: mang thẳng OBJECT `a` (không phải chỉ ticker) — tra lại qua
             # ticker string bên dưới (`by_ticker = {a["ticker"]: a for a in live}`) collapse 2
             # arm CÙNG ticker (vd re-arm lại giá khác, cmd_arm không có guard chặn) thành 1 entry,
@@ -530,8 +535,17 @@ def cmd_check_exits(args):
                            "frame_unverified": id(a) in factor_lookup_failed}
             if id(a) in factor_lookup_failed:
                 bus_payload["frame_unverified_reason"] = factor_lookup_failed[id(a)]
-            _bus("error", f"discretionary-margin-exit-breach-{ticker}", bus_payload)
-            _notify(msg)
+            ok_b = _bus("error", f"discretionary-margin-exit-breach-{ticker}", bus_payload)
+            ok_n = _notify(msg)
+            if not (ok_b and ok_n):
+                # R11-1 arch-review vòng 11: nhánh breach là nghiêm trọng nhất trong file (cảnh
+                # báo −20% bắt buộc de-lever) nhưng trước bản vá là nơi DUY NHẤT thiếu guard này
+                # dù cmd_arm (dòng ~374-376) và nhánh errors (dòng ~555-561) đã có tiền lệ. Không
+                # có backstop nào đọc exit_alerts trong arms JSON — thiếu dòng "❌ NOTIFY_FAILED"
+                # này thì một breach thật lúc bridge unreachable biến mất hoàn toàn khỏi mọi kênh.
+                print(f"❌ NOTIFY_FAILED discretionary-margin-exit-breach-{ticker} — cảnh báo đã "
+                      "in ở trên nhưng dấu vết bus/Discord không đầy đủ, báo lại kênh "
+                      "discretionary_stocks bằng tay.")
 
     # R9-2 arch-review vòng 10: PHẢI là `if` ĐỘC LẬP, không phải `elif` của nhánh breaches ở
     # trên — khi CÙNG lượt có ≥1 arm breach VÀ ≥1 arm khác rơi vào errors (giá không lấy được /
