@@ -39,9 +39,17 @@ from zoneinfo import ZoneInfo
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import wc_paths  # noqa: E402
 WC_ROOT = wc_paths.find_wc_root(__file__)
-MIKE_ROOT = os.path.join(WC_ROOT, "mike")
+MIKE_ROOT = os.path.join(WC_ROOT, "mike")   # dùng để gọi append_event.sh/notify_thread.sh CANONICAL
+                                             # (subprocess, không phải Python import) — KHÔNG
+                                             # push vào sys.path: chèn `MIKE_ROOT/bin` sẽ đặt
+                                             # `mike/bin` CANONICAL trước chính thư mục file này
+                                             # trong sys.path, khiến `import daily_nav_snapshot`/
+                                             # `corp_actions` từ TRONG worktree lại nạp bản
+                                             # CANONICAL đã landed thay vì bản đang sửa dở trong
+                                             # worktree (bug cùng lớp với compute_active_nav
+                                             # 833abcc5 — phát hiện khi test 22a/§29 vòng 6 dùng
+                                             # hàm thật không stub, xem selfcheck).
 sys.path.insert(0, WC_ROOT)
-sys.path.insert(0, os.path.join(MIKE_ROOT, "bin"))
 
 ICT = ZoneInfo("Asia/Ho_Chi_Minh")                       # §16: neo múi giờ tường minh
 
@@ -377,8 +385,10 @@ def cmd_check_exits(args):
     changed = False
     breaches = []
     errors = []
-    factor_lookup_failed = {}   # ticker -> lỗi thật, chỉ tồn tại trong LƯỢT NÀY (không persist
-                                 # vào arm JSON) — dùng để rẽ câu khi build tin breach (§29)
+    factor_lookup_failed = {}   # id(arm dict) -> lỗi thật, chỉ tồn tại trong LƯỢT NÀY (không
+                                 # persist vào arm JSON) — dùng để rẽ câu khi build tin breach
+                                 # (§29). Key theo id(a), KHÔNG theo ticker: 2 arm CÙNG ticker
+                                 # (blocker 3) sẽ collide nếu key bằng ticker string.
     for a in live:
         px, src, err = current_price(a["ticker"])
         if err:
@@ -388,14 +398,35 @@ def cmd_check_exits(args):
         # arm_date = ngày ARM (hệ giá TRƯỚC mọi sự kiện kể từ đó) — registry đọc lại TOÀN BỘ
         # sự kiện CONFIRMED có ex_date > arm_date mỗi lần gọi, nên tự idempotent (không cộng
         # dồn state, xem docstring corp_action_frame_multiplier).
-        arm_date = str(a.get("armed_at") or "")[:10]
+        #
+        # §29 vòng 6 blocker 2: bản cũ `str(a.get("armed_at") or "")[:10]` + `if arm_date else
+        # 1.0` coi armed_at RỖNG hoặc KHÔNG PHẢI ngày hợp lệ (vd "unknown-date"[:10]=
+        # "unknown-da") là "không có ngày arm ⇒ không có sự kiện" và rơi thẳng vào nhánh
+        # SUCCESS bên dưới — ghi note "tích luỹ sự kiện CONFIRMED ex_date > '' ⇒ hệ số
+        # ×1.000000", ĐÈ MẤT multiplier cũ đã biết (từ lần đọc thành công trước) về 1.0 dù CHƯA
+        # HỀ đọc registry lượt này. Sửa: parse ISO TRƯỚC khi gọi registry; rỗng/không hợp lệ đi
+        # thẳng vào nhánh "unverified" giống hệt lỗi đọc registry (giữ nguyên hệ số cũ, không
+        # note giả, factor_lookup_failed) — KHÔNG BAO GIỜ vào nhánh success với arm_date rỗng.
+        arm_date_raw = str(a.get("armed_at") or "")[:10]
+        err_detail = None
         try:
-            factor = corp_action_frame_multiplier(a["ticker"], arm_date) if arm_date else 1.0
-        except Exception as exc:
-            # §29: "lỗi đọc registry" ≠ "registry nói không có sự kiện" — KHÔNG được ghi
-            # a["corp_action_multiplier"] hay khẳng định đã đọc được registry lượt này (vòng 3
-            # từng vá sai: fail-open factor=1.0 rồi vẫn rơi vào nhánh ghi note "tích luỹ sự
-            # kiện ⇒ ×1.000000", ĐÈ MẤT hệ số 1.30 đã biết từ lần đọc thành công trước đó).
+            arm_date = dt.date.fromisoformat(arm_date_raw).isoformat()
+        except ValueError:
+            arm_date = None
+            err_detail = f"armed_at={a.get('armed_at')!r} rỗng hoặc không phải ngày ISO hợp lệ"
+
+        if err_detail is None:
+            try:
+                factor = corp_action_frame_multiplier(a["ticker"], arm_date)
+            except Exception as exc:
+                err_detail = f"{type(exc).__name__}: {exc}"
+
+        if err_detail is not None:
+            # §29: "lỗi đọc registry"/"arm_date không hợp lệ" ≠ "registry nói không có sự
+            # kiện" — KHÔNG được ghi a["corp_action_multiplier"] hay khẳng định đã đọc được
+            # registry lượt này (vòng 3 từng vá sai: fail-open factor=1.0 rồi vẫn rơi vào nhánh
+            # ghi note "tích luỹ sự kiện ⇒ ×1.000000", ĐÈ MẤT hệ số 1.30 đã biết từ lần đọc
+            # thành công trước đó).
             # Sửa: GIỮ NGUYÊN corp_action_multiplier đã biết gần nhất (nếu chưa từng đọc thành
             # công thì mặc định 1.0). An toàn MỘT CHIỀU, không phải mọi chiều: hệ số chỉ TÍCH LUỸ
             # TĂNG DẦN theo sự kiện CONFIRMED mới (§corp-action ở trên) nên giữ giá trị cũ thường
@@ -407,14 +438,12 @@ def cmd_check_exits(args):
             # vận hành cần biết giới hạn này khi thấy dòng "KHÔNG XÁC ĐỊNH ĐƯỢC" lặp lại nhiều lần.
             # Không `continue` — arm này vẫn được đánh giá breach, các arm KHÁC trong vòng lặp
             # không bị 1 registry lỗi làm crash lây.
-            err_detail = f"{type(exc).__name__}: {exc}"
             msg = (f"{a['ticker']}: lỗi đọc corp-action registry khi tính multiplier — "
                    f"KHÔNG cập nhật hệ số (giữ nguyên giá trị đã biết gần nhất, nếu có). "
                    f"Lỗi thật: {err_detail}")
             print(f"⚠ {msg}", file=sys.stderr)
             errors.append(msg)
-            factor_lookup_failed[a["ticker"]] = err_detail
-            factor = a.get("corp_action_multiplier", 1.0)
+            factor_lookup_failed[id(a)] = err_detail
         else:
             prior_factor = a.get("corp_action_multiplier", 1.0)
             if factor != prior_factor:
@@ -437,7 +466,12 @@ def cmd_check_exits(args):
         if drawdown <= EXIT_DD_PCT + 1e-9:      # epsilon: tránh lệch làm tròn nhị phân bỏ sót đúng ngưỡng
             a["exit_alerts"].append({"date": a["last_checked"], "price": px,
                                       "drawdown": round(drawdown, 4)})
-            breaches.append((a["ticker"], px, drawdown))
+            # §29 vòng 6 blocker 3: mang thẳng OBJECT `a` (không phải chỉ ticker) — tra lại qua
+            # ticker string bên dưới (`by_ticker = {a["ticker"]: a for a in live}`) collapse 2
+            # arm CÙNG ticker (vd re-arm lại giá khác, cmd_arm không có guard chặn) thành 1 entry,
+            # khiến alert của arm A in nhầm arm_price/frame của arm B (đo thật: 2 arm VPB 26.000
+            # và 39.000 cùng breach, alert của arm dd −25% lại in "arm_price 39.000" của arm kia).
+            breaches.append((a, px, drawdown))
 
     if changed:
         save_arms(arms)
@@ -445,16 +479,15 @@ def cmd_check_exits(args):
     for ticker, err in [(None, e) for e in errors]:
         print(f"⚠ {err}")
 
-    by_ticker = {a["ticker"]: a for a in live}
     if breaches:
-        for ticker, px, drawdown in breaches:
-            a = by_ticker.get(ticker, {})
+        for a, px, drawdown in breaches:
+            ticker = a["ticker"]
             frame_note = ""
-            if ticker in factor_lookup_failed:
+            if id(a) in factor_lookup_failed:
                 # §29: registry lỗi lượt này — KHÔNG in bất kỳ số nào ngụ ý đã đọc được registry
                 # (kể cả hệ số cũ đã biết), tuyệt đối không lặp lại bug "×1.000000" vòng 3.
                 frame_note = (f" (⚠ hệ số corp-action KHÔNG XÁC ĐỊNH ĐƯỢC lượt này — lỗi đọc "
-                               f"registry: {factor_lookup_failed[ticker]}. Drawdown dưới đây "
+                               f"registry: {factor_lookup_failed[id(a)]}. Drawdown dưới đây "
                                f"CHƯA xác nhận quy đổi theo sự kiện mới nhất, có thể là cảnh "
                                f"báo giả)")
             elif "arm_price_frame_adjusted" in a:
@@ -467,9 +500,9 @@ def cmd_check_exits(args):
                    f"ro) — đây là CẢNH BÁO, hành động thoát vẫn cần người quyết.")
             print(msg)
             bus_payload = {"ticker": ticker, "price": px, "drawdown": drawdown,
-                           "frame_unverified": ticker in factor_lookup_failed}
-            if ticker in factor_lookup_failed:
-                bus_payload["frame_unverified_reason"] = factor_lookup_failed[ticker]
+                           "frame_unverified": id(a) in factor_lookup_failed}
+            if id(a) in factor_lookup_failed:
+                bus_payload["frame_unverified_reason"] = factor_lookup_failed[id(a)]
             _bus("error", f"discretionary-margin-exit-breach-{ticker}", bus_payload)
             _notify(msg)
     else:

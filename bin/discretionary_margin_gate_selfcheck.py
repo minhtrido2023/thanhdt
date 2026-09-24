@@ -34,6 +34,16 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import discretionary_margin_gate as gate  # noqa: E402
 import daily_nav_snapshot  # noqa: E402
 
+# Bẫy 2026-09-24 (vòng 6 blocker 1 debug): `gate.py` từng chèn `MIKE_ROOT/bin` CANONICAL vào
+# sys.path phía TRƯỚC thư mục của chính nó, khiến `import daily_nav_snapshot` (và mọi sibling
+# module) nạp bản ĐÃ LANDED thay vì bản đang sửa dở trong worktree — test 22a-22d "hàm thật"
+# từng PASS giả vì thực ra chạy code cũ. Chốt cứng: module vừa import PHẢI nằm CÙNG thư mục
+# với chính file selfcheck này (không phải canonical mike/bin nếu đang chạy từ worktree khác).
+_HERE = os.path.dirname(os.path.abspath(__file__))
+assert os.path.dirname(os.path.abspath(daily_nav_snapshot.__file__)) == _HERE, (
+    f"daily_nav_snapshot nạp từ {daily_nav_snapshot.__file__}, KHÔNG phải {_HERE} — "
+    f"sys.path đang shadow bản worktree bằng bản canonical, xem gate.py MIKE_ROOT comment")
+
 PASS = []
 FAIL = []
 
@@ -327,21 +337,45 @@ def main():
     finally:
         _restore_corp_action_mocks()
 
-    # ---- 16. thieu armed_at (record cu/hong) -> fail-safe factor=1.0, KHONG doan, KHONG crash
+    # ---- 16. [vong 6, blocker 2] thieu armed_at (record cu/hong) -> nhanh UNVERIFIED (KHONG
+    #          phai success voi factor=1.0 ngu y da doc registry) - fail-safe factor=1.0 (mac
+    #          dinh khi thieu key), KHONG goi registry (stub KHONG duoc goi), rc=1 (co errors).
     try:
         a_no_armed_at = _mk_arm(20000.0)
         a_no_armed_at.pop("armed_at", None)
         gate.save_arms([a_no_armed_at])
         _NoBus.calls.clear()
         _patch_io(monkey_price=(17000.0, "dnse_g1_fake", None))
-        daily_nav_snapshot.confirmed_qty_multiplier_after = _mult_after_stub({"VPB": 1.30})
+        calls = []
+        daily_nav_snapshot.confirmed_qty_multiplier_after = _mult_after_stub({"VPB": 1.30}, calls_out=calls)
         rc = gate.cmd_check_exits(_argparse.Namespace())
         a0 = (gate.load_arms() or [{}])[0]
         check("thieu armed_at: fail-safe factor=1.0 (khong goi registry, khong doan)",
               "corp_action_multiplier" not in a0, f"{a0}")
+        check("thieu armed_at: KHONG goi corp_action_frame_multiplier/registry",
+              len(calls) == 0, f"{calls}")
         check("thieu armed_at: drawdown dung cong thuc cu -15%",
               abs(a0.get("last_drawdown", 0) - (-0.15)) < 1e-6, f"{a0.get('last_drawdown')}")
-        check("thieu armed_at: rc=0", rc == 0, f"rc={rc}")
+        check("thieu armed_at (vong 6): rc=1 (UNVERIFIED, KHONG phai success gia)",
+              rc == 1, f"rc={rc}")
+    finally:
+        _restore_corp_action_mocks()
+
+    # ---- 16b. [vong 6, blocker 2] armed_at = chuoi khong hop le ("unknown-date") -> cung nhanh
+    #           UNVERIFIED nhu rong, KHONG bi cat [:10] roi so chuoi tho lam sai lech ngay.
+    try:
+        a_bad = _mk_arm(20000.0, armed_at="unknown-date")
+        gate.save_arms([a_bad])
+        _NoBus.calls.clear()
+        _patch_io(monkey_price=(17000.0, "dnse_g1_fake", None))
+        calls = []
+        daily_nav_snapshot.confirmed_qty_multiplier_after = _mult_after_stub({"VPB": 1.30}, calls_out=calls)
+        rc = gate.cmd_check_exits(_argparse.Namespace())
+        a0 = (gate.load_arms() or [{}])[0]
+        check("16b armed_at='unknown-date': fail-safe factor=1.0, KHONG doan",
+              "corp_action_multiplier" not in a0, f"{a0}")
+        check("16b: KHONG goi registry", len(calls) == 0, f"{calls}")
+        check("16b: rc=1 (UNVERIFIED)", rc == 1, f"rc={rc}")
     finally:
         _restore_corp_action_mocks()
 
@@ -546,7 +580,8 @@ def main():
         with open(corp_file, "w", encoding="utf-8") as f:
             json.dump({"actions": [
                 {"ticker": "VPB", "_status": "CONFIRMED", "ex_date": "2026-09-15",
-                 "qty_multiplier": 1.30},
+                 "qty_multiplier": 1.30, "event_type": "BONUS_ISSUE",
+                 "broker_effective_ts": "2026-09-14T19:00:00+07:00"},
             ]}, f)
         daily_nav_snapshot.CORP_ACTIONS_FILE = corp_file
         gate.save_arms([_mk_arm(26000.0, ticker="VPB", armed_at="2026-09-01T09:00:00+07:00")])
@@ -610,6 +645,139 @@ def main():
     finally:
         _restore_corp_action_mocks()
         _patch_io(monkey_price=(0.0, "reset", None))
+
+    # ---- 21b. [§29 vòng 6 blocker 3] 2 arm CÙNG ticker (re-arm ở giá khác) cùng breach — bản
+    #           cũ tra lại theo `by_ticker = {a["ticker"]: a for a in live}` (dict, key=ticker)
+    #           COLLAPSE 2 arm thành 1 entry ⇒ alert của arm A in nhầm arm_price/frame của arm
+    #           B. Đo thật: 2 arm VPB (26.000 và 39.000) cùng breach, alert của arm dd -25% (arm
+    #           26.000) lại in "arm_price 39.000" (thuộc arm kia). Sửa: mang thẳng OBJECT `a`
+    #           trong breaches, KHÔNG tra lại qua ticker string.
+    try:
+        arm_a = _mk_arm(26000.0, ticker="VPB", armed_at="2026-09-01T09:00:00+07:00")  # dd -25%
+        arm_b = _mk_arm(39000.0, ticker="VPB", armed_at="2026-09-05T09:00:00+07:00")  # dd -50%
+        gate.save_arms([arm_a, arm_b])
+        _NoBus.calls.clear()
+        _patch_io(monkey_price=(19500.0, "dnse_g1_fake", None))
+        daily_nav_snapshot.confirmed_qty_multiplier_after = _mult_after_stub({})
+        rc = gate.cmd_check_exits(_argparse.Namespace())
+        breach_payloads = [c[3] for c in _NoBus.calls if c[0] == "bus" and c[1] == "error"]
+        check("21b: CẢ HAI arm VPB (2 giá arm khác nhau) đều báo breach riêng (không bị collapse)",
+              len(breach_payloads) == 2, str(breach_payloads))
+        dds = sorted(round(p["drawdown"], 4) for p in breach_payloads)
+        # arm 26.000: 19500/26000-1=-25%; arm 39.000: 19500/39000-1=-50%
+        check("21b: drawdown của TỪNG arm đúng theo arm_price CỦA CHÍNH NÓ (không lẫn giữa 2 arm)",
+              dds == [-0.5, -0.25], f"dds={dds}")
+        notify_msgs = [c[1] for c in _NoBus.calls if c[0] == "notify"]
+        msg_25 = [m for m in notify_msgs if "-25.0%" in m or "-25,0%" in m]
+        msg_50 = [m for m in notify_msgs if "-50.0%" in m or "-50,0%" in m]
+        check("21b: tin −25% CÓ nhắc arm_price 26.000, KHÔNG lẫn arm_price 39.000",
+              bool(msg_25) and all("26,000" in m and "39,000" not in m for m in msg_25),
+              str(msg_25))
+        check("21b: tin −50% CÓ nhắc arm_price 39.000, KHÔNG lẫn arm_price 26.000",
+              bool(msg_50) and all("39,000" in m and "26,000" not in m for m in msg_50),
+              str(msg_50))
+        check("21b: rc=0 (không lỗi registry, chỉ mock ticker khác)", rc == 0, f"rc={rc}")
+    finally:
+        _restore_corp_action_mocks()
+        _patch_io(monkey_price=(0.0, "reset", None))
+
+    # ══════ Vòng 6 blocker 1 — daily_nav_snapshot.confirmed_qty_multiplier_after() HÀM THẬT,
+    # KHÔNG stub: record hỏng trong corp_actions.json phải NÉM CorpActionError, không nuốt im
+    # lặng. Test THẲNG hàm này (không qua discretionary_margin_gate) để cô lập blocker 1 khỏi
+    # blocker 2/3 (arm_date/by_ticker) — 2 lớp lỗi độc lập, không nên chung 1 assertion.
+    import corp_actions as _corp_actions
+
+    def _write_registry(actions):
+        path = os.path.join(tmpdir, f"corp_actions_v6_{len(actions)}_{id(actions)}.json")
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump({"actions": actions}, f)
+        return path
+
+    _valid_vpb = {"ticker": "VPB", "event_type": "BONUS_ISSUE", "qty_multiplier": 1.30,
+                  "ex_date": "2026-09-15", "broker_effective_ts": "2026-09-14T19:00:00+07:00",
+                  "_status": "CONFIRMED — test"}
+
+    # ---- 22a. qty_multiplier kiểu số Việt "1,30" (JSON hợp lệ, số SAI định dạng) -> phải NÉM
+    #           CorpActionError, KHÔNG được nuốt rồi trả 1.0/coi như không có sự kiện.
+    try:
+        bad = dict(_valid_vpb)
+        bad["qty_multiplier"] = "1,30"
+        daily_nav_snapshot.CORP_ACTIONS_FILE = _write_registry([bad])
+        try:
+            daily_nav_snapshot.confirmed_qty_multiplier_after("VPB", "2026-09-01")
+            check("22a: qty_multiplier='1,30' (số kiểu Việt) PHẢI ném CorpActionError", False,
+                  "không ném lỗi nào — record hỏng bị nuốt im lặng")
+        except _corp_actions.CorpActionError:
+            check("22a: qty_multiplier='1,30' (số kiểu Việt) PHẢI ném CorpActionError", True)
+    finally:
+        _restore_corp_actions_file()
+
+    # ---- 22b. ex_date null/thiếu -> phải NÉM CorpActionError.
+    try:
+        bad = dict(_valid_vpb)
+        bad["ex_date"] = None
+        daily_nav_snapshot.CORP_ACTIONS_FILE = _write_registry([bad])
+        try:
+            daily_nav_snapshot.confirmed_qty_multiplier_after("VPB", "2026-09-01")
+            check("22b: ex_date=None PHẢI ném CorpActionError", False,
+                  "không ném lỗi nào — record hỏng bị nuốt im lặng")
+        except _corp_actions.CorpActionError:
+            check("22b: ex_date=None PHẢI ném CorpActionError", True)
+    finally:
+        _restore_corp_actions_file()
+
+    # ---- 22c. 2 record, 1 hỏng (ticker KHÁC) -> KHÔNG được âm thầm trả tích số của phần còn
+    #           lại (load_all() validate TOÀN BỘ file, chủ đích — xem docstring
+    #           confirmed_qty_multiplier_after). Hỏi về VPB (record LÀNH) vẫn phải ném lỗi vì
+    #           record TV1 (KHÔNG liên quan) hỏng.
+    try:
+        bad_other = dict(_valid_vpb)
+        bad_other.update(ticker="TV1", qty_multiplier="1,10")
+        daily_nav_snapshot.CORP_ACTIONS_FILE = _write_registry([dict(_valid_vpb), bad_other])
+        try:
+            mult = daily_nav_snapshot.confirmed_qty_multiplier_after("VPB", "2026-09-01")
+            check("22c: 1 record TV1 hỏng KHÔNG được để lọt qua tích số của VPB (phải ném lỗi)",
+                  False, f"trả về mult={mult} thay vì ném lỗi")
+        except _corp_actions.CorpActionError:
+            check("22c: 1 record TV1 hỏng KHÔNG được để lọt qua tích số của VPB (phải ném lỗi)",
+                  True)
+    finally:
+        _restore_corp_actions_file()
+
+    # ---- 22d. [QUAN TRỌNG NHẤT] ex_date="2026-9-05" (không zero-pad) với asof_date="2026-10-01"
+    #           -> bản CŨ so CHUỖI THÔ: "2026-9-05" > "2026-10-01" = True (so ký tự, ký tự '9' >
+    #           '1') -> sự kiện NẰM TRƯỚC ngày arm/asof vẫn bị coi là "SAU" -> ÁP NHẦM, che một
+    #           breach thật (ca đã đo: drawdown thật -21,15% bị báo +2,5%). Bản MỚI: ex_date
+    #           không zero-pad bị `dt.date.fromisoformat` từ chối ngay ở validate() -> PHẢI ném
+    #           CorpActionError (KHÔNG được lặng lẽ áp dụng multiplier).
+    try:
+        bad = dict(_valid_vpb)
+        bad["ex_date"] = "2026-9-05"
+        daily_nav_snapshot.CORP_ACTIONS_FILE = _write_registry([bad])
+        try:
+            mult = daily_nav_snapshot.confirmed_qty_multiplier_after("VPB", "2026-10-01")
+            check("22d [missed-breach]: ex_date='2026-9-05' KHÔNG zero-pad, asof='2026-10-01' — "
+                  "PHẢI ném lỗi, KHÔNG được so chuỗi thô rồi áp nhầm multiplier (che breach thật)",
+                  False, f"trả về mult={mult} thay vì ném lỗi — so chuỗi thô đã tái hiện")
+        except _corp_actions.CorpActionError:
+            check("22d [missed-breach]: ex_date='2026-9-05' KHÔNG zero-pad, asof='2026-10-01' — "
+                  "PHẢI ném lỗi, KHÔNG được so chuỗi thô rồi áp nhầm multiplier (che breach thật)",
+                  True)
+    finally:
+        _restore_corp_actions_file()
+
+    # ---- 22e. đối chứng KHÔNG-ĐƯỢC-CHẾT: registry LÀNH hoàn toàn vẫn quy đổi ĐÚNG (chứng minh
+    #           validate() không chặn nhầm đường thành công).
+    try:
+        daily_nav_snapshot.CORP_ACTIONS_FILE = _write_registry([dict(_valid_vpb)])
+        mult = daily_nav_snapshot.confirmed_qty_multiplier_after("VPB", "2026-09-01")
+        check("22e: registry LÀNH -> mult=1.30 đúng (ex_date 2026-09-15 > asof 2026-09-01)",
+              abs(mult - 1.30) < 1e-9, f"mult={mult}")
+        mult2 = daily_nav_snapshot.confirmed_qty_multiplier_after("VPB", "2026-09-20")
+        check("22e: registry LÀNH, asof SAU ex_date -> mult=1.0 (sự kiện đã qua)",
+              abs(mult2 - 1.0) < 1e-9, f"mult={mult2}")
+    finally:
+        _restore_corp_actions_file()
 
     print(f"\n{'='*70}\nPASS={len(PASS)} FAIL={len(FAIL)}")
     if FAIL:
