@@ -1,13 +1,13 @@
-# Mike fleet — context pack (v3214)
+# Mike fleet — context pack (v3215)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-09-24T02:59:06] Taylor/finding — vendor-mismatch dividend-broker-qty-fix V1 XONG: {"job": "Taylor_20260924_024940", "branch": "fix/dividend-broker-qty-vendor-label", "worktree": "mike/agents/Taylor/wt-dividend-fix", "base": "07288554", "commi …
-- [2026-09-24T03:13:49] Taylor/finding — vendor-mismatch dividend-broker-qty-fix V2 XONG: {"job": "Taylor_20260924_024940", "branch": "fix/dividend-broker-qty-vendor-label", "worktree": "mike/agents/Taylor/wt-dividend-fix", "base": "085bd6cb", "commi …
-- [2026-09-24T03:57:39] Taylor/finding — vendor-mismatch dividend-broker-qty-fix VONG 4 XONG (lookup_failed co consumer): {"job": "Taylor_20260924_033534", "branch": "fix/dividend-broker-qty-vendor-label", "worktree": "mike/agents/Taylor/wt-dividend-fix", "commit": "f3b5b96b", "bas …
-- [2026-09-24T04:39:57] Taylor/finding — vendor-mismatch dividend-broker-qty-fix VONG 5 XONG (R1-A/B/C/D): {"job": "Taylor_20260924_041826", "branch": "fix/dividend-broker-qty-vendor-label", "worktree": "mike/agents/Taylor/wt-dividend-fix", "commit": "0092f769", "bas …
-- [2026-09-24T05:12:13] Taylor/finding — vendor-mismatch dividend-broker-qty-fix VONG 6 XONG (mutation coverage T1/T2): {"job": "Taylor_20260924_050052", "branch": "fix/dividend-broker-qty-vendor-label", "worktree": "mike/agents/Taylor/wt-dividend-fix", "base": "0092f769", "commi …
+- [2026-09-24T05:53:03] Taylor/finding — audit-candidate-2-report-return-gate-unmatched-THAT-nocover-AN-TOAN: {"file": "bin/report_return_gate.py", "site_unmatched": "L558-566 unmatched+=1;continue khi (tk,qty) khong co trong expected; L624-626 in ra thong diep CHAN DOA …
+- [2026-09-24T05:54:02] Taylor/finding — audit-candidate-3-discretionary-accumulation-inject-THAT-LIVE: {"file": "bin/discretionary_accumulation_inject.py + trading_bot/discretionary_accumulation.py", "site": "broker_filled_qty() L113-125: total=positions.get(tick …
+- [2026-09-24T05:55:01] Taylor/finding — audit-candidate-4-due-diligence-adv-vnd-AN-TOAN: {"file": "trading_bot/due_diligence.py:173-202 adv_vnd()", "site": "L191-198: v50=row[Volume_3M_P50] (KL THO chua dieu chinh corp-action, theo bigquery_schema.m …
+- [2026-09-24T05:55:53] Taylor/finding — audit-candidate-5-verify-account-snapshot-AN-TOAN: {"file": "bin/verify_account_snapshot.py + bin/corp_actions.py", "site": "corp_action_multiplier() L101-118 dung load_corp_actions() tu data/corp_actions.json ( …
+- [2026-09-24T05:57:03] Taylor/finding — audit-partB-sweep-summary-1-THAT-found: {"scope": "grep toan mike/bin/*.py + trading_bot/*.py cho openQuantity/marketPrice, loai selfcheck + 5 file da audit Phan A", "call_site_moi_THAT": "bin/verify_ …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -76,7 +76,14 @@
   · `vendor_mismatch_alert.sh`: Discord là kênh **CHÍNH và là ĐIỀU KIỆN** để ghi de-dup — notify thất bại ⇒ in LỖI THẬT + **KHÔNG** ghi state; bus là kênh PHỤ, hỏng thì đi tiếp. State ghi nguyên tử `tmp+os.replace+fsync`. Câu Discord + "Việc cần làm" RẼ theo mã lý do (3 nhánh)
   · ⚠️ **đường phát lại**: KHÔNG phải sweep cùng file (`check_report_cadence.sh:76-81` bỏ qua file đã giao; `report_delivery_gate.py:238-239` return trước validate) mà là **báo cáo EOD NGÀY KẾ** (tên file khác, `LOOKBACK_DAYS=120` + còn nắm vị thế). Mất cảnh báo thật CHỈ khi notify chết đúng hôm đó **VÀ** bán hết vị thế trước báo cáo kế. Bus `error` KHÔNG phải backstop (`ops_health_check.sh:731` chỉ xét `question`)
   Selfcheck: `dividend_adjusted_return` **148/0**, `report_return_gate --selfcheck` **75/75**, `vendor_mismatch_alert_selfcheck` **57/0 qua 5 môi trường** (ICT, America/New_York, UTC, Pacific/Kiritimati, `env -u TZ`), gate `--root-only` PASS. K1 (39 mã × 6 tháng): **0/62** lệch nguồn thật; mẫu số ĐÚNG của ô rủi ro D1 = **6 ca `CASH_CONFIRMED`** (không phải 62), 0/6 khớp hình dạng ⇒ 0 dương tính giả.
-  ⚠️ **CÒN MỞ, pre-existing**: `dividend_adjusted_return.py:417-419` `except Exception: return None` trong `bq_corp_action` ⇒ BQ hỏng thì `vendor_check="unavailable"` và **CẢ HAI lá chắn tắt IM LẶNG**, báo cáo công bố theo số broker như trước. "Không tra được" bị trộn với "không có sự kiện" trong cùng một nhãn — cần tách nhãn.
+  · **ĐÃ VÁ 2026-09-24, commit `206dd348`** (6 vòng: 4 arch-review độc lập + 2 vòng sửa): `bq_corp_action` NÉM LẠI exception thay vì `except Exception: return None`; nhãn **`lookup_failed`** tách khỏi `unavailable` (= vendor XÁC NHẬN 0 dòng, 25/62 ca thật, GIỮ nguyên hành vi). Trước đó BQ hỏng ⇒ **CẢ HAI lá chắn tắt IM LẶNG**.
+    · dòng máy đọc RIÊNG `VENDOR_LOOKUP_FAILED|<acct>|<mã>|<ex>|<broker>|<had_broker_cash>|<published>` (7 trường); hợp đồng `VENDOR_MISMATCH_ALERT` giữ NGUYÊN BYTE
+    · `had_broker_cash` chụp `(kind == CASH_CONFIRMED)` **TRƯỚC** khi hạ `kind` — lúc đó `CASH_CONFIRMED` chỉ có MỘT nguồn (`solve_from_broker`, nghiệm trên `cashDividendReceiving` THẬT) ⇒ `True ⟺ per_share LÀ tiền broker`, không phải proxy
+    · **CHẶN chỉ khi `had_broker_cash AND published`** — ca chưa từng `CASH_CONFIRMED` thì `cash_per_share=0` trước VÀ sau khi BQ lỗi ⇒ không mất số công bố nào ⇒ không chặn oan. Đo K1: **6/62** ca `had_broker_cash=1`, **56/62** `=0` mà cả 56 đều có `per_share>0` ⇒ bản trước sẽ in câu SAI + chặn oan ~90% dòng
+    · câu chẩn đoán RẼ theo provenance (§29): `=0` ⇒ *"broker CHƯA giải được số nào (ước lượng từ giá rơi Xđ/cp, KHÔNG phải tiền broker thật)"*; `=1` ⇒ *"broker đã giải Xđ/cp"*. Câu *"hai nguồn độc lập đang bất đồng + Gỡ chặn = Winston"* chỉ in khi CÓ nguồn thứ hai; ca thuần `lookup_failed` ⇒ *"gỡ chặn = chạy lại khi BQ khoẻ"*. 2 caller (`check_report_cadence.sh:112`, `eod_trading_report.sh:84`) rẽ bằng **grep tag** trên `$GATE_OUT`, KHÔNG suy từ rc=10
+    Selfcheck: `dar` **159/0** · gate **93/93** · alert **78/0** · `check_report_cadence_selfcheck` 32/32 · `eod_trading_report_account_filter` 21/0 · `--root-only` PASS. Mike tự bắn 5 mutation + arch-reviewer 16 mutation, tất cả chết bằng assertion CÓ TÊN; E2E gate↔shell khớp 4/4 góc.
+  · **`broker_qty()` gộp TỔNG lô** — LIVE từ 2026-09-24, merge `4b59c6d1`: trước đây nhiều lô cùng mã khác `loanPackageId` thì chỉ lô CUỐI sống sót. Đo thật ZaloPay: **BID 14/08 320 → 427**, **MBB 14/08 232 → 632**; 135 cặp (mã, ngày) lệch 25-66,7%, chỉ BID/MBB/VCB; SpaceX 0 cặp (latent). §21: **KHÔNG số công bố nào đổi** (resolve 3 mã × 2 TK byte-identical hai cây).
+  ⚠️ **CÒN MỞ (test-only)**: mutation tắt `report_return_gate.py:732` `if "lookup_failed" in reasons_present:` — dòng *"VIỆC CẦN LÀM (hạ tầng tra vendor thất bại)"* trong khối CẢNH BÁO, đường KHÔNG chặn — vẫn SỐNG; vòng 6 neo assertion vào nhánh `vendor_fail_reasons` (đường CHẶN) thay vì `reasons_present`.
 
 ## R&D pipeline — PAPER-ONLY, chi tiết `kb/projects/rnd-pipeline-tracker.md`
 Fear-buy quét hàng tuần `bin/fearbuy_weekly_scan.sh` (Friday 08:10 ICT). Recon thuần, KHÔNG tự mua.
