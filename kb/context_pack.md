@@ -1,13 +1,13 @@
-# Mike fleet — context pack (v3208)
+# Mike fleet — context pack (v3209)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-09-24T01:03:55] Taylor/finding — vendor-mismatch VONG 2 — V1/V2/V3 xong @9bf8550a, 4/4 mutation CHET, khong land: {"job": "Taylor_20260924_005111", "subject": "vendor-mismatch VONG 2 — V1/V2/V3 XONG, KHONG land", "branch": "fix/vendor-mismatch-unverified", "head": "9bf8550a …
-- [2026-09-24T01:20:10] Taylor/finding — vendor-mismatch VONG 3 XONG @a675dead — W1/W2/W3+N1/N2 dong, KHONG land: {"job": "Taylor_20260924_010833", "branch": "fix/vendor-mismatch-unverified", "worktree": "mike/wt-vendor-mismatch", "head": "a675dead", "commits": ["592c52cf W …
 - [2026-09-24T01:27:33] Taylor/finding — D1 vendor stock_leg_ignored XONG tren nhanh RIENG — Mike dispatch TRUNG job, VONG 3 danh roi D1: {"job": "Taylor_20260924_010622", "branch": "fix/vendor-mismatch-d1-stockleg", "worktree": "mike/wt-vendor-d1", "base": "9bf8550a", "commits": ["5f9a531d code+t …
 - [2026-09-24T01:48:45] Taylor/finding — vendor-mismatch-round3b: {"job": "Taylor_20260924_014037", "branch": "fix/vendor-mismatch-unverified", "head": "deef9b4b", "commits": ["e80cccbd docs R1: sua header khang dinh sai co ch …
 - [2026-09-24T02:27:45] Taylor/finding — vendor-mismatch-d1b: {"job": "Taylor_20260924_020630", "branch": "fix/vendor-mismatch-d1-stockleg", "worktree": "mike/wt-vendor-d1", "head": "77837876", "commits": ["853385e9 R1 ven …
+- [2026-09-24T02:48:35] Mike/finding — vendor-mismatch-policy-LANDED-20260924: {"summary": "Chinh sach lech nguon vendor DA LAND DAY DU vao master: dc147859 (vong 1-3b) + 6b751298 (nhanh con D1 stock_leg_ignored). 6 vong arch-review doc la …
+- [2026-09-24T02:59:06] Taylor/finding — vendor-mismatch dividend-broker-qty-fix V1 XONG: {"job": "Taylor_20260924_024940", "branch": "fix/dividend-broker-qty-vendor-label", "worktree": "mike/agents/Taylor/wt-dividend-fix", "base": "07288554", "commi …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -67,6 +67,16 @@
   · `--selfcheck` 120/0 qua 3 TZ (58 ca cũ giữ nguyên); e2e `--resolve` BYTE-IDENTICAL với master
   **Q1 — ĐÃ KIỂM, KHÔNG SỐ CÔNG BỐ NÀO BỊ ẢNH HƯỞNG**: 24 sự kiện DIV+ISS cùng ex-date sau go-live 01/07 × 39 mã đã từng nắm giữ ⇒ **giao RỖNG** (Mike tự xác nhận bằng BQ + quét toàn bộ `dnse_raw`). Nhịp thật ~5-7 ca/năm ⇒ không phải ca hiếm, chỉ chưa cắn.
   ⚠️ **VIỆC LÀM SAU, ưu tiên cao nhất**: `dividend_adjusted_return.py:469-472` `broker_qty()` lấy **LÔ CUỐI** thay vì **TỔNG LÔ** ⇒ thiếu 25% KL thật ở **135 cặp (mã, ngày)** của ZaloPay (BID 14/08: 320 vs 427); `credit_frame` thì gộp lô ĐÚNG ⇒ hai quy ước cùng tồn tại trong một lần giải. Pre-existing + fail-closed, nhưng BID/VCB/MBB trả cổ tức tiền hằng năm nên sẽ cắn.
+
+- **LỆCH NGUỒN VENDOR ⇒ hạ UNVERIFIED + cảnh báo ĐÚNG NGƯỜI (Winston)** (`bin/dividend_adjusted_return.py` + `bin/report_return_gate.py` + `bin/vendor_mismatch_alert.sh` MỚI) — LIVE từ **2026-09-24**, commit `dc147859` (**4 vòng**: 3 arch-review độc lập + 1 vòng sửa tài liệu/test) và `6b751298` (nhánh con D1, **2 vòng**, vòng cuối APPROVED 0 required_change). Chỉ đạo user 2026-09-24: *"vendor mismatch thì hạ về unverified rồi raise warning lên để tôi kêu winston xử lý."*
+  · broker vs `tav2_bq.corporate_action` lệch >1% hoặc >1đ/cp ⇒ `kind=UNVERIFIED`, lý do mang **CẢ HAI** số + gọi tên Winston (§21: UNVERIFIED thì CẤM công bố tỉ suất)
+  · **nhánh con D1**: vendor khai THUẦN CỔ PHIẾU (`vendor_cash=0, vendor_stock>0`) mà solver vẫn trả `CASH_CONFIRMED` ⇒ trước đây gán nhãn lành tính `broker_only` (không consumer nào đọc) và **CÔNG BỐ cổ tức KHÔNG TỒN TẠI, 0 cảnh báo**. Discriminator: `share_multiplier == 1.0` (solver chưa hề biết chân cổ phiếu). Chống quá-hạ-cấp: `share_multiplier > 1` ⇒ VẪN QUA; vendor thiếu hẳn dòng DIV (`cash=0, stock=0`) ⇒ VẪN CÔNG BỐ
+  · `SANITY_REL=0.01` khiến "mult==1 mà nghiệm tiền vẫn ĐÚNG" gần như bất khả (cần ε ≤ 0,036% với c=1.000, P=27.800) ⇒ không thể lấy oan sự kiện hỗn hợp giải đúng. Họ **"quyền mua cho cổ đông hiện hữu"** (MBS 02/04, SHB 03/04) credit hàng tuần SAU ex-date nên `mult=1.0` ⇒ **cả hai lá chắn cũ hệ thống hoá việc trượt**, D1 là phòng thủ duy nhất
+  · dòng máy đọc `VENDOR_MISMATCH_ALERT|<acct>|<mã>|<ex>|<broker>|<vendor>|<đang công bố>` giữ **ĐÚNG 7 trường NGUYÊN BYTE** (đo thật: thêm trường thứ 8 làm consumer đảo `blocked` 1→0 và nói "báo cáo vẫn gửi" đúng lúc đang CHẶN); mã lý do đi ở dòng TAG RIÊNG `VENDOR_MISMATCH_REASON|...`. Reason thiếu/rỗng ⇒ **fail-closed "unknown"**, KHÔNG đoán (§29)
+  · `vendor_mismatch_alert.sh`: Discord là kênh **CHÍNH và là ĐIỀU KIỆN** để ghi de-dup — notify thất bại ⇒ in LỖI THẬT + **KHÔNG** ghi state; bus là kênh PHỤ, hỏng thì đi tiếp. State ghi nguyên tử `tmp+os.replace+fsync`. Câu Discord + "Việc cần làm" RẼ theo mã lý do (3 nhánh)
+  · ⚠️ **đường phát lại**: KHÔNG phải sweep cùng file (`check_report_cadence.sh:76-81` bỏ qua file đã giao; `report_delivery_gate.py:238-239` return trước validate) mà là **báo cáo EOD NGÀY KẾ** (tên file khác, `LOOKBACK_DAYS=120` + còn nắm vị thế). Mất cảnh báo thật CHỈ khi notify chết đúng hôm đó **VÀ** bán hết vị thế trước báo cáo kế. Bus `error` KHÔNG phải backstop (`ops_health_check.sh:731` chỉ xét `question`)
+  Selfcheck: `dividend_adjusted_return` **148/0**, `report_return_gate --selfcheck` **75/75**, `vendor_mismatch_alert_selfcheck` **57/0 qua 5 môi trường** (ICT, America/New_York, UTC, Pacific/Kiritimati, `env -u TZ`), gate `--root-only` PASS. K1 (39 mã × 6 tháng): **0/62** lệch nguồn thật; mẫu số ĐÚNG của ô rủi ro D1 = **6 ca `CASH_CONFIRMED`** (không phải 62), 0/6 khớp hình dạng ⇒ 0 dương tính giả.
+  ⚠️ **CÒN MỞ, pre-existing**: `dividend_adjusted_return.py:417-419` `except Exception: return None` trong `bq_corp_action` ⇒ BQ hỏng thì `vendor_check="unavailable"` và **CẢ HAI lá chắn tắt IM LẶNG**, báo cáo công bố theo số broker như trước. "Không tra được" bị trộn với "không có sự kiện" trong cùng một nhãn — cần tách nhãn.
 
 ## R&D pipeline — PAPER-ONLY, chi tiết `kb/projects/rnd-pipeline-tracker.md`
 Fear-buy quét hàng tuần `bin/fearbuy_weekly_scan.sh` (Friday 08:10 ICT). Recon thuần, KHÔNG tự mua.
