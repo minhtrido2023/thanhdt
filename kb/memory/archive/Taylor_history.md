@@ -656,3 +656,6 @@
 
 ## Archived 2026-09-24 (keep=12 days=0 require_done=False)
 - [2026-09-23T18:26:17Z] div-qty-entitlement-frame (job _175927): commit 33664187 tren fix/div-qty-entitlement-frame, worktree mike/wt-div-qty-exdate. CHUA LAND — cho arch-review + user. Selfcheck 120/0, 9/9 mutation chet bang assertion, e2e byte-identical master. Q1 sach (0 ca bi anh huong). CON MO: lo hong unmatched im lang cua report_return_gate.py:511-513 la viec RIENG, chua ai nhan.
+
+## Archived 2026-09-24 (keep=12 days=0 require_done=False)
+- [2026-09-23T23:59:32Z] CHO ARCH-REVIEW: b6a655df nhanh verify/gapref-mutation-20260924 (worktree /home/trido/thanhdt/wt-gapref-verify) — churn_guard_selfcheck section G ghim NGUON gap-ref bang decoy; mutant chet bang assertion. CHUA LAND. | CHO MIKE DUYET: kb/projects/universe-pit-migration.md.proposed (2 cho stale: breadth guard da xong 07-29 commit 8f958957; executor chase-cap da xong 09-20 commit fd3f5597). | VAN MO (can dispatch rieng + user duyet): universe_pit raw khong co trong sync_bq_cache.py TABLES => backtest duoi BQ_LOCAL_CACHE nem CatalogException => breadth-decoupling guard KHONG BAO GIO chay. | BAI HOC: selfcheck doc data/bq_cache la false-positive trong worktree (khong co cache => fail-safe => PASS vacuously) — section F cua churn_guard dinh dung loi nay.
