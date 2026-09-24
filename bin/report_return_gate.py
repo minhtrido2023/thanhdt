@@ -193,7 +193,13 @@ def entitled_gross(tickers, account_no: str, asof: str) -> tuple:
         if dar._qty_at(qmap, a) <= 0:          # tài khoản này KHÔNG nắm giữ tại ngày chốt quyền
             continue
         if a.vendor_check == "mismatch":
-            mismatches.append((a.ticker, a.ex_date, a.per_share, a.vendor_cash))
+            # Mã lý do đi kèm để tầng ngoài nói ĐÚNG nguyên nhân: "hai nguồn lệch SỐ" và "vendor
+            # khai thuần cổ phiếu mà solver giải ra tiền" dẫn tới hai việc điều tra KHÁC nhau,
+            # và ở ca thứ hai `vendor_cash = 0` nên nếu chỉ in hai con số thì người đọc hiểu là
+            # "vendor không có dữ liệu" — trái hẳn sự thật (§29).
+            mismatches.append((a.ticker, a.ex_date, a.per_share, a.vendor_cash,
+                               getattr(a, "vendor_mismatch_reason", "") or "cash_mismatch",
+                               a.vendor_stock))
             continue
         if a.cash_per_share <= 0:
             continue
@@ -597,10 +603,18 @@ def run_gate(report_path: str, tol_pp: float = DEFAULT_TOL_PP, out=sys.stdout) -
     if vendor_mismatch:
         published = {tk for tk, _q, _p in rows} | prose_tk
         print("\n⚠️  LỆCH NGUỒN VENDOR — tiền broker thật ≠ `tav2_bq.corporate_action`:", file=out)
-        for lb, tk, ex, broker_ps, vendor_ps in sorted(vendor_mismatch):
-            lech = abs(vendor_ps - broker_ps) / broker_ps * 100.0 if broker_ps > 0 else float("inf")
-            line = (f"{tk} ({lb}, ex {ex}): broker giải {broker_ps:,.0f}đ/cp vs vendor "
-                    f"{vendor_ps:,.0f}đ/cp — lệch {lech:.1f}%")
+        for lb, tk, ex, broker_ps, vendor_ps, reason, vendor_stock in sorted(vendor_mismatch):
+            # Câu chẩn đoán rẽ theo MÃ LÝ DO mà `dar` đã tính, không phát một câu cố định (§29).
+            if reason == "stock_leg_ignored":
+                line = (f"{tk} ({lb}, ex {ex}): vendor khai THUẦN CỔ PHIẾU (ISS tỉ lệ "
+                        f"{vendor_stock:.4f}, không có chân tiền) nhưng solver giải ra "
+                        f"{broker_ps:,.0f}đ/cp TIỀN MẶT mà chưa biết chân cổ phiếu "
+                        f"(share_multiplier=1,0) — nghi giá rơi chia tách bị đọc thành cổ tức")
+            else:
+                lech = (abs(vendor_ps - broker_ps) / broker_ps * 100.0 if broker_ps > 0
+                        else float("inf"))
+                line = (f"{tk} ({lb}, ex {ex}): broker giải {broker_ps:,.0f}đ/cp vs vendor "
+                        f"{vendor_ps:,.0f}đ/cp — lệch {lech:.1f}%")
             print(f"   • {line}", file=out)
             if tk in published:
                 vendor_fails.append(line)
@@ -612,6 +626,14 @@ def run_gate(report_path: str, tol_pp: float = DEFAULT_TOL_PP, out=sys.stdout) -
             # (rc=0): đó chính là ca mà cổng KHÔNG chặn nên không kênh nào khác kêu.
             print(f"VENDOR_MISMATCH_ALERT|{lb}|{tk}|{ex}|{broker_ps:.0f}|{vendor_ps:.0f}|"
                   f"{1 if tk in published else 0}", file=out)
+            # MÃ LÝ DO đi ở dòng TAG RIÊNG, KHÔNG thêm trường thứ 8 vào dòng trên. Lý do rất cụ
+            # thể: `bin/vendor_mismatch_alert.sh` đọc dòng `ALERT` bằng
+            # `while IFS='|' read -r _tag acct tk ex broker vendor published` — `read` gộp MỌI
+            # trường dư vào biến CUỐI, nên một trường thứ 8 sẽ biến `published` thành
+            # `"1|stock_leg_ignored"`, `[ "$published" = "1" ]` FAIL, và cảnh báo nói "báo cáo vẫn
+            # gửi" đúng lúc báo cáo đang bị CHẶN. Tag riêng ⇒ reader cũ bỏ qua (grep của nó neo
+            # `^VENDOR_MISMATCH_ALERT\|`), reader mới đọc thêm được. Hợp đồng cũ giữ NGUYÊN BYTE.
+            print(f"VENDOR_MISMATCH_REASON|{lb}|{tk}|{ex}|{reason}|{vendor_stock:.4f}", file=out)
         print("   → sự kiện đã bị HẠ VỀ UNVERIFIED: cổ tức của nó KHÔNG vào kỳ vọng và KHÔNG được "
               "công bố (§21).", file=out)
         print("   → VIỆC CẦN LÀM: Winston (data-ops) đối soát `tav2_bq.corporate_action` với sổ "
@@ -1045,7 +1067,7 @@ def _selfcheck() -> int:
             os.unlink(path)
         return rc, buf.getvalue()
 
-    _MISM = [("ZZZ", "2026-09-24", 1_000.0, 1_500.0)]
+    _MISM = [("ZZZ", "2026-09-24", 1_000.0, 1_500.0, "cash_mismatch", 0.0)]
     # Vị thế ZZZ: 100cp, giá vốn broker 27.800, giá 24.464 ⇒ -12,00% (đúng con số arch-review dựng)
     rc_pub, txt_pub = _run_vendor_case(
         "## Vị thế\n\n| Mã | KL | % lãi/lỗ |\n|---|---|---|\n| ZZZ | 100 | -12,00% |\n", _MISM)
@@ -1079,6 +1101,27 @@ def _selfcheck() -> int:
           (0, False))
     check("không lệch nguồn ⇒ KHÔNG có dòng máy đọc (không báo động giả tới user)",
           "VENDOR_MISMATCH_ALERT" in txt_ok2, False)
+
+    # ---- LÝ DO THỨ HAI `stock_leg_ignored` (arch-review vòng 2, D1). Ở ca này `vendor_cash = 0`,
+    # nên câu cũ ("broker 1.000 vs vendor 0 — lệch 100%") mời người đọc hiểu "vendor KHÔNG CÓ dữ
+    # liệu", trái hẳn sự thật: vendor có dữ liệu RÕ RÀNG và đang nói sự kiện này không có tiền.
+    _MISM_STOCK = [("ZZZ", "2026-09-24", 1_000.0, 0.0, "stock_leg_ignored", 0.2604104)]
+    rc_st, txt_st = _run_vendor_case(
+        "## Vị thế\n\n| Mã | KL | % lãi/lỗ |\n|---|---|---|\n| ZZZ | 100 | -12,00% |\n", _MISM_STOCK)
+    check("stock_leg_ignored + mã ĐANG công bố ⇒ vẫn CHẶN (rc=1)", rc_st, 1)
+    check("câu chẩn đoán nói ĐÚNG nguyên nhân (thuần cổ phiếu + tỉ lệ ISS), KHÔNG nói 'vendor 0đ'",
+          ("THUẦN CỔ PHIẾU" in txt_st and "0.2604" in txt_st), True)
+    check("… và KHÔNG phát câu 'lệch 100.0%' gây hiểu sai", "lệch 100.0%" in txt_st, False)
+    # Hợp đồng CŨ giữ nguyên byte (7 trường) — thêm trường thứ 8 sẽ làm `read -r` của shell gộp
+    # nó vào `published` và đảo ngược cờ CHẶN. Mã lý do đi ở dòng TAG RIÊNG.
+    check("dòng ALERT giữ ĐÚNG 7 trường như hợp đồng cũ (không thêm trường thứ 8)",
+          "VENDOR_MISMATCH_ALERT|SpaceX|ZZZ|2026-09-24|1000|0|1\n" in txt_st, True)
+    check("có dòng TAG RIÊNG mang mã lý do + tỉ lệ ISS",
+          "VENDOR_MISMATCH_REASON|SpaceX|ZZZ|2026-09-24|stock_leg_ignored|0.2604" in txt_st, True)
+    assert "THUẦN CỔ PHIẾU" in txt_st and "VENDOR_MISMATCH_REASON" in txt_st, (
+        "MUTATION-GUARD gate_vendor_reason_routing: hai mã lý do khác nhau mà cổng phát CÙNG một "
+        "câu ⇒ ca D1 bị đọc thành 'vendor thiếu dữ liệu' và Winston điều tra sai hướng ngay dòng "
+        f"đầu (§29). Đang là: {txt_st!r}")
 
     # ---- CHÍNH `entitled_gross` (arch-review vòng 2, V1). 6 ca ngay trên MONKEYPATCH chính
     # `entitled_gross` nên chúng chỉ kiểm nửa DƯỚI (cổng xử lý danh sách mismatch được BƠM TAY);
@@ -1120,8 +1163,8 @@ def _selfcheck() -> int:
             setattr(dar, k, v)
 
     check("entitled_gross: sự kiện lệch nguồn vào ĐÚNG phần tử thứ 2 (mã, ex, broker, vendor)",
-          sorted(eg_mism), [("AAA", "2026-09-10", 1_000.0, 1_500.0),
-                            ("EEE", "2026-09-13", 500.0, 900.0)])
+          sorted(eg_mism), [("AAA", "2026-09-10", 1_000.0, 1_500.0, "cash_mismatch", 0.0),
+                            ("EEE", "2026-09-13", 500.0, 900.0, "cash_mismatch", 0.0)])
     check("entitled_gross: mã lệch nguồn KHÔNG vào kỳ vọng công bố",
           ("AAA" in eg_out, "EEE" in eg_out), (False, False))
     check("entitled_gross: sự kiện hai nguồn KHỚP vẫn vào kỳ vọng", eg_out, {"BBB": 800.0})

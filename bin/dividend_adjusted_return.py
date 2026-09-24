@@ -191,6 +191,12 @@ class Adjustment:
     vendor_stock: float = 0.0       # tổng ISS.exercise_ratio cùng ex-date — 0 nếu không có
     vendor_check: str = "unavailable"   # match | mismatch | vendor_only | broker_only | unavailable
     vendor_note: str = ""
+    # KHI `vendor_check == "mismatch"`: mã lý do đã CHUẨN HOÁ để tầng ngoài rẽ nhánh thông điệp
+    # theo bằng chứng thay vì đoán (§28 — so giá trị, không so câu văn xuôi; §29).
+    #   cash_mismatch     = hai nguồn CÙNG khai chân tiền nhưng SỐ lệch quá ngưỡng
+    #   stock_leg_ignored = vendor khai THUẦN CỔ PHIẾU, solver lại giải ra tiền mà không biết
+    #                       chân cổ phiếu (share_multiplier = 1,0)
+    vendor_mismatch_reason: str = ""
     # hệ số tăng KL của chân CỔ PHIẾU cùng ex-date (1,0 = không có chân cổ phiếu). Đặt bởi
     # `solve_from_broker` khi `credit_frame` chứng minh được bằng KL.
     share_multiplier: float = 1.0
@@ -970,7 +976,40 @@ def resolve_dividends(tickers, start: str, end: str, accounts: dict = None,
 
         if adj.kind == "CASH_CONFIRMED":
             # broker đã cho số chính thức — vendor chỉ được phép XÁC NHẬN hoặc BÁO ĐỘNG
-            if adj.vendor_cash <= 0:
+            if adj.vendor_cash <= 0 and adj.vendor_stock > 0 and adj.share_multiplier == 1.0:
+                # BẤT NHẤT NỘI BỘ (arch-review vòng 2, D1). Ba mảnh bằng chứng đang cầm trong tay,
+                # KHÔNG phải hạ cấp mù (§29):
+                #   · vendor NÓI THẲNG đây là sự kiện CỔ PHIẾU (`ISS`, exercise_ratio > 0) và
+                #     KHÔNG có chân tiền (`value_per_share` rỗng ⇒ vendor_cash = 0);
+                #   · solver vẫn trả `CASH_CONFIRMED` với một số tiền dương;
+                #   · `share_multiplier == 1,0` ⇒ solver CHƯA HỀ biết đến chân cổ phiếu đó, nên
+                #     con số nó giải ra là giá rơi của chia tách bị đọc thành tiền cổ tức.
+                # Không có bản vá này thì nhánh `vendor_cash <= 0` gán nhãn LÀNH TÍNH `broker_only`
+                # (không consumer nào đọc), GIỮ CASH_CONFIRMED, và CÔNG BỐ một khoản cổ tức KHÔNG
+                # TỒN TẠI — y hệt lỗ hổng mà chính sách 2026-09-24 ra đời để đóng, chỉ khác nhánh
+                # con. Trước đây nó LATENT nhờ hai lá chắn ở `solve_from_broker` (a1 `credit_frame`
+                # pre_credit, a2 KL đổi tại ex-date) hạ sự kiện xuống STOCK_SUSPECTED trước; nhưng
+                # đó là phòng thủ ở HÀM KHÁC và lá chắn TRƯỢT được (credit muộn + thiếu bản ghi
+                # `dnse_raw` ⇒ cả hai dấu hiệu im lặng). Phòng thủ phải ĐỐI XỨNG.
+                # Đo trên dữ liệu thật (K1, 39 mã × 6 tháng, 62 sự kiện): 0 sự kiện khớp hình dạng
+                # này ⇒ 0 DƯƠNG TÍNH GIẢ. 12/62 sự kiện có `vendor_cash=0 ∧ vendor_stock>0` nhưng
+                # tất cả đã là STOCK_CONFIRMED (broker không giải được) nên không vào nhánh này.
+                adj.vendor_check = "mismatch"
+                adj.vendor_mismatch_reason = "stock_leg_ignored"
+                ly_do = (
+                    f"LỆCH NGUỒN (chân cổ phiếu bị bỏ qua): vendor `corporate_action` khai đây là "
+                    f"sự kiện CỔ PHIẾU tỉ lệ {adj.vendor_stock:.4f} và KHÔNG có chân tiền, nhưng "
+                    f"solver giải ra {adj.per_share:,.0f}đ/cp TIỀN MẶT với share_multiplier=1,0 "
+                    f"(tức chưa hề biết đến chân cổ phiếu) ⇒ con số đó gần như chắc chắn là giá "
+                    f"rơi của chia tách bị đọc thành cổ tức ⇒ HẠ VỀ UNVERIFIED, KHÔNG công bố tỉ "
+                    f"suất cho mã này — cần Winston (data-ops) đối soát nguồn vendor với sổ broker")
+                adj.vendor_note = ly_do
+                adj.kind = "UNVERIFIED"
+                adj.note = (adj.note + " | " if adj.note else "") + ly_do
+            elif adj.vendor_cash <= 0:
+                # vendor thiếu hẳn chân tiền mà cũng không khai chân cổ phiếu nào (hoặc solver ĐÃ
+                # biết chân cổ phiếu): vendor thiếu dòng DIV là chuyện thường (VNM 2026-06-25:
+                # broker 1.850đ/cp, vendor rỗng) ⇒ CỐ Ý không hạ cấp, tránh mất số oan.
                 adj.vendor_check = "broker_only"
             elif abs(adj.vendor_cash - adj.per_share) <= max(VENDOR_MISMATCH_ABS,
                                                               VENDOR_MISMATCH_REL * adj.per_share):
@@ -982,6 +1021,7 @@ def resolve_dividends(tickers, start: str, end: str, accounts: dict = None,
                 # `PositionReturn.unverified` rỗng nên không một cảnh báo nào nổi lên. Không
                 # consumer nào trong repo đọc `vendor_check`, nên nhãn đó KHÔNG chặn được gì.
                 adj.vendor_check = "mismatch"
+                adj.vendor_mismatch_reason = "cash_mismatch"
                 lech_pct = (abs(adj.vendor_cash - adj.per_share) / adj.per_share * 100.0
                             if adj.per_share > 0 else float("inf"))
                 ly_do = (f"LỆCH NGUỒN: broker giải {adj.per_share:,.0f}đ/cp, vendor "
@@ -1411,8 +1451,11 @@ def _selfcheck() -> int:
     print("    Ca gốc do arch-review dựng: sự kiện VỪA-TIỀN-VỪA-CỔ-PHIẾU, broker giải ra 1.000đ/cp,")
     print("    vendor khai 1.500đ/cp (lệch 50%) — trước bản vá vẫn ra số CÔNG BỐ, 0 cảnh báo.")
 
-    def _resolve_offline(ex_date, broker_ps, vendor_cash, vendor_stock, solved=True):
-        """Chạy `resolve_dividends` KHÔNG chạm BQ/broker: thay 3 cửa I/O bằng hằng số."""
+    def _resolve_offline(ex_date, broker_ps, vendor_cash, vendor_stock, solved=True, mult=1.0):
+        """Chạy `resolve_dividends` KHÔNG chạm BQ/broker: thay 3 cửa I/O bằng hằng số.
+
+        `mult` = `share_multiplier` mà solver để lại (1,0 = solver KHÔNG biết chân cổ phiếu nào).
+        """
         g = globals()
         keep = {k: g[k] for k in ("detect_adjustments", "solve_from_broker", "bq_corp_action")}
         made = _mk("ZZZ", ex_date, "2026-09-23", 27_800.0, broker_ps)
@@ -1422,6 +1465,7 @@ def _selfcheck() -> int:
 
         def _solve(todo, accounts, *a, **kw):
             for t in todo:
+                t.share_multiplier = mult
                 if solved:
                     t.per_share, t.kind, t.source = broker_ps, "CASH_CONFIRMED", "broker_solved"
             return todo
@@ -1476,10 +1520,53 @@ def _selfcheck() -> int:
     same("lệch 1,1% ⇒ mismatch, hạ UNVERIFIED", (a24d.vendor_check, a24d.kind),
          ("mismatch", "UNVERIFIED"))
 
+    print("    24b) NHÁNH CON ANH EM (arch-review vòng 2, D1): vendor khai THUẦN CỔ PHIẾU mà")
+    print("         solver vẫn giải ra tiền với share_multiplier=1,0 ⇒ BẤT NHẤT NỘI BỘ.")
+    # Ca G1 do reviewer dựng: trước bản vá D1 nó ra (broker_only, CASH_CONFIRMED, 1.000đ/cp CÔNG BỐ).
+    a24h = _resolve_offline("2026-09-24", 1_000.0, 0.0, 0.2604104, mult=1.0)
+    same("vendor thuần CP + mult=1,0 ⇒ vendor_check",
+         (a24h.vendor_check, a24h.vendor_mismatch_reason), ("mismatch", "stock_leg_ignored"))
+    same("vendor thuần CP + mult=1,0 ⇒ kind HẠ VỀ UNVERIFIED", a24h.kind, "UNVERIFIED")
+    check("vendor thuần CP + mult=1,0 ⇒ cash_per_share = 0", a24h.cash_per_share, 0.0, tol=1e-9)
+    assert a24h.kind == "UNVERIFIED" and a24h.cash_per_share == 0.0, (
+        "MUTATION-GUARD vendor_stock_leg_ignored: vendor khai ISS tỉ lệ 0,26 và KHÔNG có chân tiền, "
+        "solver giải 1.000đ/cp với share_multiplier=1,0 (chưa biết chân cổ phiếu), mà `kind` vẫn "
+        f"{a24h.kind!r} / cash_per_share = {a24h.cash_per_share} ⇒ báo cáo CÔNG BỐ một khoản cổ tức "
+        "KHÔNG TỒN TẠI, không một cảnh báo nào. Đây là nhánh con D1 của lỗ hổng 2026-09-24.")
+    for tu in ("0.2604", "1,000", "Winston", "share_multiplier"):
+        same(f"lý do D1 có '{tu}'", tu in a24h.note, True)
+    assert "Winston" in a24h.note and "0.2604" in a24h.note, (
+        "MUTATION-GUARD vendor_stock_leg_reason: lý do phải TRÍCH tỉ lệ ISS mà vendor khai + chỉ "
+        f"đích danh Winston, không phát câu chung (§29). Đang là: {a24h.note!r}")
+    pr24h = PositionReturn("ZZZ", 100, 27_800.0, 24_464.0, 0.0, [a24h])
+    check("mã D1 nổi lên PositionReturn.unverified", len(pr24h.unverified), 1, tol=0)
+
+    print("         CHỐNG QUÁ-HẠ-CẤP: solver ĐÃ biết chân cổ phiếu (mult > 1) ⇒ VẪN QUA.")
+    # Ở đây `share_multiplier > 1` là bằng chứng cơ khí rằng `credit_frame` đã chứng minh chân cổ
+    # phiếu và `_cash_ratio_ref` đã TRỪ nó ra trước khi nhận nghiệm ⇒ chân tiền dương là hợp lệ,
+    # vendor chỉ thiếu dòng DIV (chuyện thường). Hạ cấp ở đây là MẤT SỐ OAN.
+    a24i = _resolve_offline("2026-09-24", 1_000.0, 0.0, 0.2604104, mult=1.2604104)
+    same("vendor thuần CP nhưng mult>1 ⇒ broker_only, giữ CASH_CONFIRMED",
+         (a24i.vendor_check, a24i.kind), ("broker_only", "CASH_CONFIRMED"))
+    check("vendor thuần CP nhưng mult>1 ⇒ vẫn công bố 1.000đ/cp", a24i.cash_per_share, 1_000.0,
+          tol=1e-9)
+    assert a24i.cash_per_share == 1_000.0, (
+        "MUTATION-GUARD vendor_stock_leg_no_overreach: vá D1 KHÔNG được hạ cấp sự kiện mà solver ĐÃ "
+        "chứng minh chân cổ phiếu bằng KL (share_multiplier > 1) — đó là ca vừa-tiền-vừa-cổ-phiếu "
+        "giải ĐÚNG, hạ cấp là mất số oan.")
+
     print("    Ba nhánh CÒN LẠI không được đổi hành vi:")
     a24e = _resolve_offline("2026-09-24", 1_000.0, 0.0, 0.0)
     same("vendor không có số tiền ⇒ broker_only, giữ CASH_CONFIRMED",
          (a24e.vendor_check, a24e.kind), ("broker_only", "CASH_CONFIRMED"))
+    # ASSERTION CÓ TÊN, không chỉ đếm FAIL: đây là ca vendor THIẾU HẲN dòng DIV (VNM 2026-06-25 —
+    # broker 1.850đ/cp, `corporate_action` rỗng). Nới điều kiện của vá D1 cho trùm cả ca này
+    # (bỏ `vendor_stock > 0`) là MẤT SỐ OAN trên một sự kiện đã đối soát được với tiền thật.
+    assert a24e.kind == "CASH_CONFIRMED" and a24e.cash_per_share == 1_000.0, (
+        "MUTATION-GUARD vendor_missing_div_row_still_published: vendor không khai gì (cash=0, "
+        "stock=0) là chuyện THƯỜNG và KHÔNG phải bằng chứng chống lại nghiệm broker — hạ cấp ở đây "
+        f"làm mất tỉ suất của mã đã có tiền thật về tài khoản. Đang là kind={a24e.kind!r}, "
+        f"cash_per_share={a24e.cash_per_share}.")
     a24f = _resolve_offline("2026-09-24", 0.0, 1_200.0, 0.0, solved=False)
     same("broker chưa giải + vendor thuần tiền ⇒ CASH_VENDOR (vẫn bị chặn ở cash_per_share)",
          (a24f.vendor_check, a24f.kind), ("vendor_only", "CASH_VENDOR"))
