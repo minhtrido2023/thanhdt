@@ -1,13 +1,13 @@
-# Mike fleet — context pack (v3219)
+# Mike fleet — context pack (v3220)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-09-24T06:12:47] Taylor/finding — audit-partD-ops-runbook-proposed-ready: {"file": "kb/ops_runbook.md.proposed", "status": "MOI, CHUA ap dung (S13, can Mike duyet)", "noi_dung": "2 muc: (1) compute_active_nav.py exit 6/7 (cong Sexdate …
-- [2026-09-24T06:13:12] Taylor/finding — audit-partB-sweep-supplement-2-no-new-sites: {"scope": "grep bo sung openQuantity|marketPrice tren TOAN bo bin/*.py + trading_bot/*.py, loai selfcheck, doi chieu voi 14 file hit voi danh sach da audit/da f …
-- [2026-09-24T06:14:28] Taylor/finding — corp-action-audit-c1c2-dispatch-COMPLETE: {"job": "Taylor_20260924_055050 attempt 2/2", "PhanA": "5 candidate XONG (attempt1, bus 05:51-05:57): C1 margin-gate THAT-LATENT, C2 return-gate MIXED, C3 accum …
 - [2026-09-24T06:22:44] Taylor/finding — compute-active-nav-selfcheck-path-bug-fixed: {"commit": "833abcc5", "branch": "fix/corp-action-audit-c1c2", "worktree": "mike/agents/Taylor/wt-corp-action-audit-c1c2", "bug": "WC hardcode canonical Working …
 - [2026-09-24T06:23:31] Taylor/finding — selfcheck-canonical-path-bug-likely-widespread: {"pattern": "WC/WC_ROOT hardcode \"/home/trido/thanhdt/WorkingClaude\" dung de sys.path.insert mike/bin RIENG NGOAI cac ham import module dang test - cung lop b …
+- [2026-09-24T06:35:35] Mike/finding — corp-action-audit-c1c2-LANDED-20260924: {"summary": "C1 (report_return_gate.py:732 gap test) + C2 (compute_active_nav.py ghi nguyen tu) + va bay duong dan selfcheck (compute_active_nav_selfcheck.py MI …
+- [2026-09-24T06:54:38] Taylor/finding — corp-action-4sites-viec1-broker-filled-qty-FIXED: {"job": "Taylor_20260924_064510 Viec 1/4", "branch": "fix/corp-action-real-fixes-4sites", "worktree": "mike/agents/Taylor/wt-corp-action-real-fixes", "commit":  …
+- [2026-09-24T07:04:19] Taylor/finding — corp-action-real-fixes-viec2-margin-gate-DONE: {"commit": "e75788f8", "branch": "fix/corp-action-real-fixes-4sites", "worktree": "mike/agents/Taylor/wt-corp-action-real-fixes", "viec": "2/4 - discretionary_m …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -83,7 +83,10 @@
     · câu chẩn đoán RẼ theo provenance (§29): `=0` ⇒ *"broker CHƯA giải được số nào (ước lượng từ giá rơi Xđ/cp, KHÔNG phải tiền broker thật)"*; `=1` ⇒ *"broker đã giải Xđ/cp"*. Câu *"hai nguồn độc lập đang bất đồng + Gỡ chặn = Winston"* chỉ in khi CÓ nguồn thứ hai; ca thuần `lookup_failed` ⇒ *"gỡ chặn = chạy lại khi BQ khoẻ"*. 2 caller (`check_report_cadence.sh:112`, `eod_trading_report.sh:84`) rẽ bằng **grep tag** trên `$GATE_OUT`, KHÔNG suy từ rc=10
     Selfcheck: `dar` **159/0** · gate **93/93** · alert **78/0** · `check_report_cadence_selfcheck` 32/32 · `eod_trading_report_account_filter` 21/0 · `--root-only` PASS. Mike tự bắn 5 mutation + arch-reviewer 16 mutation, tất cả chết bằng assertion CÓ TÊN; E2E gate↔shell khớp 4/4 góc.
   · **`broker_qty()` gộp TỔNG lô** — LIVE từ 2026-09-24, merge `4b59c6d1`: trước đây nhiều lô cùng mã khác `loanPackageId` thì chỉ lô CUỐI sống sót. Đo thật ZaloPay: **BID 14/08 320 → 427**, **MBB 14/08 232 → 632**; 135 cặp (mã, ngày) lệch 25-66,7%, chỉ BID/MBB/VCB; SpaceX 0 cặp (latent). §21: **KHÔNG số công bố nào đổi** (resolve 3 mã × 2 TK byte-identical hai cây).
-  ⚠️ **CÒN MỞ (test-only)**: mutation tắt `report_return_gate.py:732` `if "lookup_failed" in reasons_present:` — dòng *"VIỆC CẦN LÀM (hạ tầng tra vendor thất bại)"* trong khối CẢNH BÁO, đường KHÔNG chặn — vẫn SỐNG; vòng 6 neo assertion vào nhánh `vendor_fail_reasons` (đường CHẶN) thay vì `reasons_present`.
+  · **VÁ 2026-09-24, commit `a56203f2`**: gap test-only `report_return_gate.py:732` đã bịt bằng `MUTATION-GUARD gate_lookup_failed_reasons_present_note` (anchor riêng, không vacuous). ⚠️ arch-reviewer tìm thêm 3 nhánh anh em CÙNG lớp vacuous-anchor CHƯA vá: `:723` (`cash_mismatch`), `:727` (`stock_leg_ignored`), `:737` (`reasons_present - {...}` — assertion `gate_vendor_reason_unknown_no_guess` hiện dùng chung anchor với `:694-696` nên không phân biệt được nhánh nào chết).
+
+- **Bẫy đường dẫn selfcheck — MỌI selfcheck import module qua `load_module()`/`sys.path.insert` phải TỰ ĐỔI theo worktree, không hardcode canonical** (phát hiện 2026-09-24 khi verify C2, commit `a56203f2`). `compute_active_nav_selfcheck.py` hardcode `WC = "/home/trido/thanhdt/WorkingClaude"` dùng cho **MỌI ca A-J** (không chỉ Section K kill-mid-write) ⇒ chạy selfcheck từ BẤT KỲ worktree nào cũng luôn test code MASTER — mọi "PASS" trước đó không chứng minh gì về code đang sửa trong worktree. Vá: `MIKE_BIN = HERE` (tự đổi theo vị trí vật lý file selfcheck) + `WC` qua `wc_paths.find_wc_root(__file__)` (tiện ích dùng chung, đã có 36 file khác trong `bin/` dùng). arch-reviewer tự bắn mutation 2 chiều xác nhận: bản vá bắt được lỗi tiêm vào worktree, bản kiểu-cũ bỏ lọt hoàn toàn.
+  ⚠️ **CÒN MỞ — 3 file khác nghi cùng lớp bug, CHƯA vá** (Taylor quan sát, arch-reviewer xác nhận 3/3 nhưng lưu ý phạm vi khác nhau): `bin/paper_corp_action_selfcheck.py:28-31` và `bin/send_plan_report_park_jit_selfcheck.py:28-30` cắn **worktree `mike/`**; `bin/due_diligence_corp_flags_selfcheck.py:19-21` cắn **worktree ngoài `mike/`** (repo `WorkingClaude` gốc — `trading_bot/due_diligence.py`), KHÔNG cắn worktree `mike/` vì module đó không tồn tại trong `mike/`.
 
 ## R&D pipeline — PAPER-ONLY, chi tiết `kb/projects/rnd-pipeline-tracker.md`
 Fear-buy quét hàng tuần `bin/fearbuy_weekly_scan.sh` (Friday 08:10 ICT). Recon thuần, KHÔNG tự mua.
