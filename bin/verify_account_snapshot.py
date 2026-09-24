@@ -281,6 +281,12 @@ def broker_positions_from_raw(account_no, asof):
 
     Gộp các loan package cùng mã. Đây là neo độc lập bắt buộc trước khi một lô mua
     sau legacy-oversell được coi là coverage đầy đủ cho P&L.
+
+    §corp-action (job Taylor_20260924_064510, Việc 3) — `marketPrice` giữ giá trị của lô
+    loan package MỚI NHẤT khác-None gặp trong `positions[]`, không phải lô ĐẦU TIÊN. DNSE
+    điều chỉnh `marketPrice` theo TỪNG GÓI VAY và KHÔNG NGUYÊN TỬ (`price_frame.py` §G4, đo
+    thật BID 2026-08-14: 35.800 vs 38.850, lệch 8,5%) — cùng quy ước "latest non-None" mà
+    `DNSEBroker.get_positions()` đã dùng (`trading_bot/brokers.py::DNSEBroker.get_positions`).
     """
     path = os.path.join(EXEC_DIR, f"dnse_raw_{asof}.jsonl")
     if not os.path.exists(path):
@@ -306,8 +312,11 @@ def broker_positions_from_raw(account_no, asof):
         if qty <= 0:
             continue
         tk = p.get("symbol")
-        row = out.setdefault(tk, {"qty": 0.0, "marketPrice": p.get("marketPrice")})
+        row = out.setdefault(tk, {"qty": 0.0, "marketPrice": None})
         row["qty"] += qty
+        mp = p.get("marketPrice")
+        if mp is not None:
+            row["marketPrice"] = mp
     return out
 
 
