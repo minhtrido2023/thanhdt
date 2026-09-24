@@ -55,6 +55,7 @@ Dùng như CLI (đường offline — có gọi BQ để lấy bằng chứng):
 import argparse
 import datetime as dt
 import json
+import math
 import os
 import sys
 
@@ -69,6 +70,14 @@ REGISTRY = os.path.join(WC_ROOT, "data", "corp_actions.json")
 QTY_EVENT_TYPES = {"STOCK_DIVIDEND", "BONUS_ISSUE", "SPLIT"}
 CONFIRMED_PREFIX = "CONFIRMED"
 RATIO_TOL = 0.02          # sai số cho phép giữa hệ số khai báo và hệ số suy từ tỉ số BQ
+# Biên chặn LỖI GÕ TAY (vd 13 thay vì 1,3), KHÔNG PHẢI biên "tỉ lệ thường gặp" — vòng 7 từng đặt
+# 2.0 (giả định thưởng 1:1 là phổ biến nhất) và nó CHẶN OAN sự kiện thật: TRC 2026-09-15 ratio=3.0
+# (mult=4.0, chỉ 9 ngày trước dispatch này), CMN/L40 ratio=2.0 (mult=3.0), BMF ratio=2.81
+# (mult=3.81), DGC 2022-06-03 ratio=1.17 (mult=2.17) — đo thật bằng BQ tav2_bq.corporate_action,
+# 2026-09-24. 10.0 khớp đúng bất biến đã có sẵn ở corp_action_selfcheck.py ("hệ số > 1 và ≤ 10 —
+# chặn lỗi gõ nhầm thang") và vẫn bắt đúng ca typo 13.0 mà record test pin lại. Nới số này vẫn
+# cần xác nhận lại với user, nhưng đây không phải "biên giả định tỉ lệ 1:1" nữa.
+QTY_MULT_MAX = 10.0
 
 
 class CorpActionError(Exception):
@@ -101,10 +110,18 @@ def validate(rec, idx=0):
         mult = float(_require(rec, "qty_multiplier", idx))
     except (TypeError, ValueError):
         raise CorpActionError(f"corp_actions[{idx}].qty_multiplier không phải số")
+    if not math.isfinite(mult):
+        raise CorpActionError(f"corp_actions[{idx}].qty_multiplier={mult} không phải số hữu hạn "
+                              f"(nan/inf) — so sánh với nan luôn False nên mọi guard ngưỡng phía "
+                              f"dưới sẽ ÂM THẦM bỏ qua record này (§29 coding_guidelines)")
     if mult <= 1.0:
         raise CorpActionError(f"corp_actions[{idx}].qty_multiplier={mult} ≤ 1 — sổ này chỉ mô tả "
                               f"sự kiện LÀM TĂNG số lượng; gộp cổ phiếu (reverse split) chưa được "
                               f"thiết kế, cần bàn riêng vì phát sinh lô lẻ")
+    if mult > QTY_MULT_MAX:
+        raise CorpActionError(f"corp_actions[{idx}].qty_multiplier={mult} > {QTY_MULT_MAX} — vượt "
+                              f"biên chặn lỗi gõ tay (vd 13 thay vì 1.3). Nếu là sự kiện thật tỉ lệ "
+                              f"lớn hơn, xác nhận lại với user rồi mới nới QTY_MULT_MAX")
     ex_date = _date(_require(rec, "ex_date", idx), "ex_date", idx)
     eff_ts = str(_require(rec, "broker_effective_ts", idx))
     _date(eff_ts, "broker_effective_ts", idx)          # phải parse được phần ngày

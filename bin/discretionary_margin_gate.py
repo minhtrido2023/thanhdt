@@ -31,6 +31,7 @@ DÙNG:
 import argparse
 import datetime as dt
 import json
+import math
 import os
 import subprocess
 import sys
@@ -39,9 +40,17 @@ from zoneinfo import ZoneInfo
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import wc_paths  # noqa: E402
 WC_ROOT = wc_paths.find_wc_root(__file__)
-MIKE_ROOT = os.path.join(WC_ROOT, "mike")
+MIKE_ROOT = os.path.join(WC_ROOT, "mike")   # dùng để gọi append_event.sh/notify_thread.sh CANONICAL
+                                             # (subprocess, không phải Python import) — KHÔNG
+                                             # push vào sys.path: chèn `MIKE_ROOT/bin` sẽ đặt
+                                             # `mike/bin` CANONICAL trước chính thư mục file này
+                                             # trong sys.path, khiến `import daily_nav_snapshot`/
+                                             # `corp_actions` từ TRONG worktree lại nạp bản
+                                             # CANONICAL đã landed thay vì bản đang sửa dở trong
+                                             # worktree (bug cùng lớp với compute_active_nav
+                                             # 833abcc5 — phát hiện khi test 22a/§29 vòng 6 dùng
+                                             # hàm thật không stub, xem selfcheck).
 sys.path.insert(0, WC_ROOT)
-sys.path.insert(0, os.path.join(MIKE_ROOT, "bin"))
 
 ICT = ZoneInfo("Asia/Ho_Chi_Minh")                       # §16: neo múi giờ tường minh
 
@@ -189,6 +198,56 @@ def current_price(ticker):
     return prices[ticker], sources.get(ticker), None
 
 
+def corp_action_frame_multiplier(ticker, arm_date):
+    """factor — hệ số quy đổi `arm_price` về CÙNG HỆ QUY CHIẾU với `px` (giá hiện tại, DNSE G1)
+    trước khi tính drawdown. `arm_date` = ngày ARM (YYYY-MM-DD, hệ giá TRƯỚC mọi sự kiện).
+
+    CHỈ phủ sự kiện ĐỔI KHỐI LƯỢNG (`corp_actions.py QTY_EVENT_TYPES` — stock dividend/bonus
+    issue/split), vì `data/corp_actions.json` chỉ ghi loại sự kiện đó. Cổ tức TIỀN MẶT KHÔNG
+    nằm trong registry này — giá vẫn bị cắt đúng ex-date nhưng KL không đổi, nên hàm này trả
+    factor=1.0 (không quy đổi) và drawdown vẫn bị phóng đại đúng bằng tỉ lệ cổ tức/giá (ca
+    thật DGC 8.000đ/46.750đ ≈ 17,1%, sát ngưỡng −20%). KHÔNG có cơ chế cảnh báo riêng cho
+    trường hợp này ở tầng này — người vận hành cần tự nhớ khi thấy drawdown gần ngưỡng ngay
+    sau một ex-date cổ tức tiền mặt.
+
+    §corp-action (job Taylor_20260924_064510+_073500, Việc 2 — THIẾT KẾ LẠI sau arch-review
+    NEEDS_CHANGES bản đầu e75788f8). Bản đầu dùng `exdate_frame.classify_positions()` — cơ chế
+    đối chiếu THEO NGÀY (so vị thế broker HÔM NAY với snapshot NGÀY TRƯỚC `asof`, chỉ khớp sự
+    kiện có `ex_date` = ĐÚNG phiên KẾ TIẾP `asof`). Cron `check-exits` chạy 15:20 ICT — TRƯỚC
+    cửa sổ broker credit thật (~19:07-19:10 ICT, đo VPB 09-23/VIB 09-09/BID-MBB-VCB 08-14) ⇒
+    KHÔNG BAO GIỜ khớp đúng lúc chạy (no-op CẤU TRÚC, không phải hiếm gặp — đo VPB thật: dd
+    -21,1% BÁO SAI). Cũng KHÔNG idempotent: `corp_action_multiplier` bị NHÂN DỒN mỗi lần gọi
+    lại trong cùng cửa sổ (che mất một breach thật sau vài lần chạy lại).
+
+    Thay bằng `daily_nav_snapshot.confirmed_qty_multiplier_after(ticker, arm_date)` — TÁI DÙNG
+    nguyên hàm đã audit (dùng cho quy đổi NGƯỢC vị thế broker LIVE về vị thế lịch sử), đọc
+    THẲNG `data/corp_actions.json` (registry CONFIRMED do `corp_action_auto_confirm.py` ghi
+    19:25 ICT — TRƯỚC cả cửa sổ credit của phiên MAI, PERSISTENT trong file, không phụ thuộc
+    THỜI ĐIỂM gọi hàm trong ngày). Tích luỹ TẤT CẢ sự kiện CONFIRMED có `ex_date > arm_date` —
+    đúng "cả khoảng [arm_date, hôm nay]" thay vì chỉ 1 phiên kế tiếp — và TỰ ĐỘNG idempotent:
+    hàm đọc lại từ nguồn mỗi lần gọi (KHÔNG cộng dồn state), gọi 2 lần cùng dữ liệu trả cùng
+    kết quả.
+
+    KHÔNG còn nhánh `blocked`/fail-closed — hàm chỉ đọc registry đã CONFIRMED (do người/agent
+    xác nhận qua 2-3 nguồn độc lập, xem `corp_actions.json._status`), không tự suy từ diff KL
+    broker nữa nên không còn "KL bất thường chưa giải thích được" để fail-safe ở TẦNG NÀY.
+
+    §29 vòng 5 — `dns.confirmed_qty_multiplier_after()` tự trả 1.0 IM LẶNG khi file registry
+    KHÔNG TỒN TẠI (fail-open đúng ý cho call-site GỐC của nó trong `daily_nav_snapshot.main()`,
+    nơi thiếu file hợp lệ nghĩa là "không có corp-action nào cần quy đổi"). Ở ĐÂY thì khác:
+    `cmd_check_exits()` cần phân biệt "registry nói 0 sự kiện" (factor=1.0 tin được) với
+    "registry vắng nên chưa hề đọc được gì" (factor=1.0 không có nghĩa gì) — file vắng ở 11/12
+    worktree anh em là chuyện thường, không phải hiếm. Không tự đổi hành vi fail-open của hàm
+    dùng chung (sẽ vỡ call-site kia) — kiểm `exists()` NGAY TẠI ĐÂY và ném exception thật để đi
+    đúng nhánh except đã có sẵn ở `cmd_check_exits()` (giữ nguyên hệ số cũ, không ghi
+    `corp_action_adjustments`, báo "KHÔNG XÁC ĐỊNH ĐƯỢC").
+    """
+    import daily_nav_snapshot as dns
+    if not os.path.exists(dns.CORP_ACTIONS_FILE):
+        raise FileNotFoundError(f"registry corp-action không tồn tại: {dns.CORP_ACTIONS_FILE}")
+    return dns.confirmed_qty_multiplier_after(ticker, arm_date)
+
+
 # ---------------------------------------------------------------- arm ---------------------------
 
 def cmd_arm(args):
@@ -220,9 +279,15 @@ def cmd_arm(args):
               f"sự kiện.", file=sys.stderr)
         return 2
 
-    if args.f > MAX_F + 1e-9:
-        print(f"❌ f={args.f} vượt hard-cap {MAX_F} (đồng quy ước capit_margin_lever, KHÔNG dùng "
-              f"broker-max 2,0).", file=sys.stderr)
+    if not math.isfinite(args.f) or args.f > MAX_F + 1e-9:
+        print(f"❌ f={args.f} không phải số hữu hạn ≤ hard-cap {MAX_F} (đồng quy ước "
+              f"capit_margin_lever, KHÔNG dùng broker-max 2,0).", file=sys.stderr)
+        return 2
+
+    if not math.isfinite(args.arm_price) or args.arm_price <= 0:
+        print(f"❌ --arm-price={args.arm_price} không phải số hữu hạn dương (nan/inf/≤0) — "
+              f"cấm arm: mọi phép chia dùng arm_price ở cmd_check_exits sẽ ÂM THẦM cho drawdown "
+              f"=nan và bị bỏ qua khỏi breach check (§29 coding_guidelines).", file=sys.stderr)
         return 2
 
     exposure_vnd = args.exposure_vnd if args.exposure_vnd is not None else args.shares * args.arm_price
@@ -327,21 +392,118 @@ def cmd_check_exits(args):
     changed = False
     breaches = []
     errors = []
+    factor_lookup_failed = {}   # id(arm dict) -> lỗi thật, chỉ tồn tại trong LƯỢT NÀY (không
+                                 # persist vào arm JSON) — dùng để rẽ câu khi build tin breach
+                                 # (§29). Key theo id(a), KHÔNG theo ticker: 2 arm CÙNG ticker
+                                 # (blocker 3) sẽ collide nếu key bằng ticker string.
     for a in live:
         px, src, err = current_price(a["ticker"])
         if err:
             errors.append(f"{a['ticker']}: {err}")
             continue
-        drawdown = px / a["arm_price"] - 1.0
+
+        # arm_date = ngày ARM (hệ giá TRƯỚC mọi sự kiện kể từ đó) — registry đọc lại TOÀN BỘ
+        # sự kiện CONFIRMED có ex_date > arm_date mỗi lần gọi, nên tự idempotent (không cộng
+        # dồn state, xem docstring corp_action_frame_multiplier).
+        #
+        # §29 vòng 6 blocker 2: bản cũ `str(a.get("armed_at") or "")[:10]` + `if arm_date else
+        # 1.0` coi armed_at RỖNG hoặc KHÔNG PHẢI ngày hợp lệ (vd "unknown-date"[:10]=
+        # "unknown-da") là "không có ngày arm ⇒ không có sự kiện" và rơi thẳng vào nhánh
+        # SUCCESS bên dưới — ghi note "tích luỹ sự kiện CONFIRMED ex_date > '' ⇒ hệ số
+        # ×1.000000", ĐÈ MẤT multiplier cũ đã biết (từ lần đọc thành công trước) về 1.0 dù CHƯA
+        # HỀ đọc registry lượt này. Sửa: parse ISO TRƯỚC khi gọi registry; rỗng/không hợp lệ đi
+        # thẳng vào nhánh "unverified" giống hệt lỗi đọc registry (giữ nguyên hệ số cũ, không
+        # note giả, factor_lookup_failed) — KHÔNG BAO GIỜ vào nhánh success với arm_date rỗng.
+        arm_date_raw = str(a.get("armed_at") or "")[:10]
+        err_detail = None
+        try:
+            arm_date = dt.date.fromisoformat(arm_date_raw).isoformat()
+        except ValueError:
+            arm_date = None
+            err_detail = f"armed_at={a.get('armed_at')!r} rỗng hoặc không phải ngày ISO hợp lệ"
+
+        if err_detail is None:
+            try:
+                factor = corp_action_frame_multiplier(a["ticker"], arm_date)
+            except Exception as exc:
+                err_detail = f"{type(exc).__name__}: {exc}"
+
+        if err_detail is not None:
+            # §29: "lỗi đọc registry"/"arm_date không hợp lệ" ≠ "registry nói không có sự
+            # kiện" — KHÔNG được ghi a["corp_action_multiplier"] hay khẳng định đã đọc được
+            # registry lượt này (vòng 3 từng vá sai: fail-open factor=1.0 rồi vẫn rơi vào nhánh
+            # ghi note "tích luỹ sự kiện ⇒ ×1.000000", ĐÈ MẤT hệ số 1.30 đã biết từ lần đọc
+            # thành công trước đó).
+            # Sửa: GIỮ NGUYÊN corp_action_multiplier đã biết gần nhất (nếu chưa từng đọc thành
+            # công thì mặc định 1.0). An toàn MỘT CHIỀU, không phải mọi chiều: hệ số chỉ TÍCH LUỸ
+            # TĂNG DẦN theo sự kiện CONFIRMED mới (§corp-action ở trên) nên giữ giá trị cũ thường
+            # làm drawdown tính RA ÂM HƠN thực (cảnh báo giả, không bỏ sót cảnh báo thật). Chiều
+            # NGƯỢC LẠI — một sự kiện CONFIRMED bị REVOKE khiến hệ số thật đã giảm xuống dưới giá
+            # trị cache — thì giữ hệ số CŨ (cao hơn) làm drawdown tính RA ÍT ÂM HƠN thực, CÓ THỂ
+            # che một breach thật. Chưa có cơ chế fail-closed cho chiều này (revoke hiếm, và
+            # fail-closed sẽ chặn oan mọi lần registry chỉ đơn thuần tạm không đọc được) — người
+            # vận hành cần biết giới hạn này khi thấy dòng "KHÔNG XÁC ĐỊNH ĐƯỢC" lặp lại nhiều lần.
+            # Không `continue` — arm này vẫn được đánh giá breach, các arm KHÁC trong vòng lặp
+            # không bị 1 registry lỗi làm crash lây.
+            msg = (f"{a['ticker']}: lỗi đọc corp-action registry khi tính multiplier — "
+                   f"KHÔNG cập nhật hệ số (giữ nguyên giá trị đã biết gần nhất, nếu có). "
+                   f"Lỗi thật: {err_detail}")
+            print(f"⚠ {msg}", file=sys.stderr)
+            errors.append(msg)
+            factor_lookup_failed[id(a)] = err_detail
+        else:
+            prior_factor = a.get("corp_action_multiplier", 1.0)
+            if factor != prior_factor:
+                note = (f"registry corp_actions.json: tích luỹ sự kiện CONFIRMED ex_date > "
+                        f"{arm_date} ⇒ hệ số ×{factor:.6f} (trước đó ×{prior_factor:.6f})")
+                a.setdefault("corp_action_adjustments", []).append(
+                    {"at": dt.datetime.now(ICT).isoformat(timespec="seconds"),
+                     "factor_before": prior_factor, "factor_after": factor, "note": note})
+                a["corp_action_multiplier"] = factor
+                print(f"  [CORPACTION] {a['ticker']}: {note}")
+
+        # BLOCKER 2 arch-review vòng 8: `math.isfinite` đã gác `mult` khi GHI vào
+        # `corp_actions.json` (§29), nhưng phép chia dưới đây dùng `a["arm_price"]` (đọc từ
+        # arms JSON, không qua CA.validate()) làm SỐ BỊ CHIA — nan/inf ở đây làm `drawdown`=nan,
+        # so sánh `nan <= EXIT_DD_PCT` luôn False ⇒ arm ÂM THẦM rơi khỏi breach check, in "OK"
+        # dù drawdown thật KHÔNG so sánh được (đo thật: --arm-price nan qua CLI trước bản vá
+        # BLOCKER 1 ở cmd_arm vẫn tới được đây nếu file arms bị sửa tay/hỏng dữ liệu cũ).
+        mult_now = a.get("corp_action_multiplier", 1.0)
+        if (not math.isfinite(a["arm_price"]) or a["arm_price"] <= 0
+                or not math.isfinite(mult_now) or mult_now <= 0):
+            msg = (f"{a['ticker']}: arm_price={a['arm_price']!r} hoặc "
+                   f"corp_action_multiplier={mult_now!r} không phải số hữu hạn dương — "
+                   f"KHÔNG tính được drawdown, bỏ qua breach check cho case này lượt này.")
+            print(f"⚠ {msg}", file=sys.stderr)
+            errors.append(msg)
+            a["last_checked"] = dt.datetime.now(ICT).isoformat(timespec="seconds")
+            a["last_price"] = px
+            a["last_price_source"] = src
+            changed = True
+            continue
+
+        arm_price_frame = a["arm_price"] / mult_now
+        drawdown = px / arm_price_frame - 1.0
         a["last_checked"] = dt.datetime.now(ICT).isoformat(timespec="seconds")
         a["last_price"] = px
         a["last_price_source"] = src
         a["last_drawdown"] = round(drawdown, 4)
+        a["arm_price_frame_adjusted"] = round(arm_price_frame, 2)
         changed = True
         if drawdown <= EXIT_DD_PCT + 1e-9:      # epsilon: tránh lệch làm tròn nhị phân bỏ sót đúng ngưỡng
-            a["exit_alerts"].append({"date": a["last_checked"], "price": px,
-                                      "drawdown": round(drawdown, 4)})
-            breaches.append((a["ticker"], px, drawdown))
+            # non-blocker arch-review vòng 11: setdefault, không `a["exit_alerts"]` trần — arm
+            # record bị sửa tay/thiếu key (vd file hiện tại có arm giả thiếu cả exit_alerts lẫn
+            # exited) trước đây gây KeyError huỷ TOÀN BỘ lượt trước save_arms, kéo theo breach
+            # check của MỌI arm khác trong cùng lượt mất theo — cùng threat-model đã áp cho
+            # arm_price/multiplier ở round 9.
+            a.setdefault("exit_alerts", []).append({"date": a["last_checked"], "price": px,
+                                                      "drawdown": round(drawdown, 4)})
+            # §29 vòng 6 blocker 3: mang thẳng OBJECT `a` (không phải chỉ ticker) — tra lại qua
+            # ticker string bên dưới (`by_ticker = {a["ticker"]: a for a in live}`) collapse 2
+            # arm CÙNG ticker (vd re-arm lại giá khác, cmd_arm không có guard chặn) thành 1 entry,
+            # khiến alert của arm A in nhầm arm_price/frame của arm B (đo thật: 2 arm VPB 26.000
+            # và 39.000 cùng breach, alert của arm dd −25% lại in "arm_price 39.000" của arm kia).
+            breaches.append((a, px, drawdown))
 
     if changed:
         save_arms(arms)
@@ -350,16 +512,69 @@ def cmd_check_exits(args):
         print(f"⚠ {err}")
 
     if breaches:
-        for ticker, px, drawdown in breaches:
+        for a, px, drawdown in breaches:
+            ticker = a["ticker"]
+            frame_note = ""
+            if id(a) in factor_lookup_failed:
+                # §29: registry lỗi lượt này — KHÔNG in bất kỳ số nào ngụ ý đã đọc được registry
+                # (kể cả hệ số cũ đã biết), tuyệt đối không lặp lại bug "×1.000000" vòng 3.
+                frame_note = (f" (⚠ hệ số corp-action KHÔNG XÁC ĐỊNH ĐƯỢC lượt này — lỗi đọc "
+                               f"registry: {factor_lookup_failed[id(a)]}. Drawdown dưới đây "
+                               f"CHƯA xác nhận quy đổi theo sự kiện mới nhất, có thể là cảnh "
+                               f"báo giả)")
+            elif "arm_price_frame_adjusted" in a:
+                frame_note = (f" (quy đổi corp-action: arm_price {a['arm_price']:,.0f} → "
+                               f"{a['arm_price_frame_adjusted']:,.0f}, hệ số ×"
+                               f"{a.get('corp_action_multiplier', 1.0):.6f})")
             msg = (f"🚨 **KỶ LUẬT THOÁT −20% CHẠM** — {ticker}: giá hiện tại {px:,.0f} vs giá arm "
-                   f"→ drawdown {drawdown:.1%} ≤ {EXIT_DD_PCT:.0%}. Chính sách yêu cầu de-lever "
-                   f"BẮT BUỘC (`discretionary-margin-policy-20260823.md` §Rào chắn rủi ro) — đây "
-                   f"là CẢNH BÁO, hành động thoát vẫn cần người quyết.")
+                   f"→ drawdown {drawdown:.1%} ≤ {EXIT_DD_PCT:.0%}{frame_note}. Chính sách yêu cầu "
+                   f"de-lever BẮT BUỘC (`discretionary-margin-policy-20260823.md` §Rào chắn rủi "
+                   f"ro) — đây là CẢNH BÁO, hành động thoát vẫn cần người quyết.")
             print(msg)
-            _bus("error", f"discretionary-margin-exit-breach-{ticker}",
-                 {"ticker": ticker, "price": px, "drawdown": drawdown})
-            _notify(msg)
-    else:
+            bus_payload = {"ticker": ticker, "price": px, "drawdown": drawdown,
+                           "frame_unverified": id(a) in factor_lookup_failed}
+            if id(a) in factor_lookup_failed:
+                bus_payload["frame_unverified_reason"] = factor_lookup_failed[id(a)]
+            ok_b = _bus("error", f"discretionary-margin-exit-breach-{ticker}", bus_payload)
+            ok_n = _notify(msg)
+            if not (ok_b and ok_n):
+                # R11-1 arch-review vòng 11: nhánh breach là nghiêm trọng nhất trong file (cảnh
+                # báo −20% bắt buộc de-lever) nhưng trước bản vá là nơi DUY NHẤT thiếu guard này
+                # dù cmd_arm (dòng ~374-376) và nhánh errors (dòng ~555-561) đã có tiền lệ. Không
+                # có backstop nào đọc exit_alerts trong arms JSON — thiếu dòng "❌ NOTIFY_FAILED"
+                # này thì một breach thật lúc bridge unreachable biến mất hoàn toàn khỏi mọi kênh.
+                print(f"❌ NOTIFY_FAILED discretionary-margin-exit-breach-{ticker} — cảnh báo đã "
+                      "in ở trên nhưng dấu vết bus/Discord không đầy đủ, báo lại kênh "
+                      "discretionary_stocks bằng tay.")
+
+    # R9-2 arch-review vòng 10: PHẢI là `if` ĐỘC LẬP, không phải `elif` của nhánh breaches ở
+    # trên — khi CÙNG lượt có ≥1 arm breach VÀ ≥1 arm khác rơi vào errors (giá không lấy được /
+    # registry lỗi / isfinite fail), `elif errors:` cũ KHÔNG BAO GIỜ chạy vì đã vào nhánh
+    # `if breaches:` trước đó ⇒ cảnh báo/bus/notify cho arm KHÔNG kiểm được biến mất hoàn toàn
+    # khỏi mọi kênh (chỉ còn dòng "⚠" rơi vào log cron, mù với ERROR_RE). Sleeve có trần 10%
+    # NAV / 5% per-name nên 2-3 arm cùng lúc là hình dạng bình thường, không phải ca hiếm.
+    if errors:
+        summary = (f"⚠ {len(live)} case active, {len(errors)} case KHÔNG kiểm được breach lượt "
+                   f"này (xem cảnh báo ⚠ ở trên) — KHÔNG phải xác nhận an toàn.")
+        print(summary)
+        # B-2 arch-review vòng 9: nhánh này trước đây chỉ in stdout/stderr — rc=1 rơi vào log
+        # cron không MAILTO, cron_health_check.py's ERROR_RE chỉ bắt dòng bắt đầu "❌", MÙ với
+        # "⚠" (đo thật). Ca thật tái hiện được: registry/multiplier hỏng khiến TOÀN BỘ case active
+        # rơi vào errors (0 breach nào tính được) mà không ai được báo. Bắn bus+notify ở đây —
+        # tần suất thấp (chỉ khi có lỗi giá/registry/dữ liệu VÀ còn case đang sống).
+        ok_b = _bus("error", "discretionary-margin-check-exits-errors",
+                    {"live_count": len(live), "error_count": len(errors), "errors": errors})
+        ok_n = _notify(f"⚠️ **discretionary_margin_gate check-exits**: {summary}\n" +
+                       "\n".join(f"• {e}" for e in errors))
+        if not (ok_b and ok_n):
+            # R9-3 arch-review vòng 10: nếu _bus/_notify thất bại, không có dấu vết nào khớp
+            # ERROR_RE của cron_health_check.py — dùng đúng marker "NOTIFY_FAILED" đã có tiền lệ
+            # trong chính codebase (corp_action_feed_canary.py:416).
+            print("❌ NOTIFY_FAILED discretionary-margin-check-exits-errors — bản ghi errors đã "
+                  "in ở trên nhưng dấu vết bus/Discord không đầy đủ, báo lại kênh "
+                  "discretionary_stocks bằng tay.")
+
+    if not breaches and not errors:
         print(f"OK — {len(live)} case active, không case nào chạm {EXIT_DD_PCT:.0%}.")
     return 1 if errors else 0
 

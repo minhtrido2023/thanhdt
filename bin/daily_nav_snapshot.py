@@ -52,33 +52,45 @@ MIKE_BIN = os.path.dirname(os.path.abspath(__file__))
 HISTORY_FILE_TMPL = os.path.join(EXEC_DIR, "nav_history_{account}.csv")
 CORP_ACTIONS_FILE = os.path.join(WC_ROOT, "data", "corp_actions.json")
 
+import corp_actions  # noqa: E402 — validate() ép ex_date/qty_multiplier hợp lệ, xem
+# confirmed_qty_multiplier_after() (§29 vòng 6, Việc 2 blocker 1)
+
 
 def confirmed_qty_multiplier_after(ticker, asof_date):
     """Tích các `qty_multiplier` CONFIRMED trong corp_actions.json cho `ticker` có `ex_date`
-    SAU `asof_date`. Trả 1.0 nếu không có sự kiện nào áp dụng.
+    SAU `asof_date`. Trả 1.0 nếu file registry vắng hoặc không có sự kiện nào áp dụng.
 
     Dùng để quy đổi NGƯỢC vị thế broker LIVE (đã phản ánh sự kiện) về vị thế tại `asof_date`
     (trước sự kiện) — broker_positions() luôn trả ảnh chụp HIỆN TẠI bất kể --date, và DNSE
     credit cổ phiếu sớm hơn ex_date 1 phiên (mẫu hình VHM/MBB/BID/VIX/MSB/VIB, xem
     corp_action_auto_confirm.py), nên vị thế LIVE hôm nay có thể đã lớn hơn vị thế thật tại
     một --date lịch sử gần đây dù ex_date ghi sau ngày đó.
+
+    §29 vòng 6 (Việc 2, blocker 1): bản cũ tự đọc raw JSON + `except (TypeError, ValueError):
+    pass` quanh `float(qty_multiplier)` — record `qty_multiplier="1,30"` (số kiểu Việt) hay
+    `ex_date` null/thiếu bị NUỐT IM LẶNG, và `ex_date` so bằng CHUỖI THÔ (không ép ISO) khiến
+    `"2026-9-05" > "2026-10-01"` = True (so ký tự, không so ngày) — một sự kiện `ex_date` NẰM
+    TRƯỚC ngày arm vẫn bị coi là áp dụng. Đo thật: drawdown thật −21,15% (breach) bị báo thành
+    +2,5%, không alert nào bắn — chiều NGUY HIỂM NHẤT của §29 (nuốt lỗi làm rủi ro trông ÍT hơn
+    thực, không phải báo động giả).
+
+    Sửa: tái dùng `corp_actions.load_corp_actions()` — `validate()` của nó ép `ex_date` qua
+    `dt.date.fromisoformat` (raise `CorpActionError` nếu không phải ISO hợp lệ, chuẩn hoá
+    zero-pad trước khi so chuỗi) và ép `qty_multiplier` là số > 1 hợp lệ. Record hỏng ⇒
+    `CorpActionError` NÉM RA cho CALLER quyết định (xem `main()` — record hỏng phải chặn NAV,
+    không phải âm thầm coi như "không có sự kiện").
+
+    ⚠️ CHỦ ĐÍCH, không phải sơ suất: `load_corp_actions()` gọi `load_all()`, mà `load_all()`
+    validate TOÀN BỘ file, không lọc theo ticker trước khi validate — một record hỏng của
+    ticker KHÁC cũng làm lời gọi cho `ticker` này ném lỗi (unverified), dù ticker đang hỏi
+    không liên quan gì tới record hỏng. Chấp nhận được: `corp_actions.json` là file cấu hình
+    NHỎ do người ký tay (không phải dữ liệu tần suất cao), và an toàn hơn per-ticker (không có
+    đường nào để một record hỏng lọt qua mà không ai biết).
     """
-    if not os.path.exists(CORP_ACTIONS_FILE):
-        return 1.0
-    with open(CORP_ACTIONS_FILE, encoding="utf-8") as f:
-        actions = json.load(f).get("actions") or []
     mult = 1.0
-    for a in actions:
-        if str(a.get("ticker", "")).upper() != ticker.upper():
-            continue
-        if not str(a.get("_status", "")).upper().startswith("CONFIRMED"):
-            continue
-        ex_date = str(a.get("ex_date") or "")[:10]
-        if ex_date and ex_date > asof_date:
-            try:
-                mult *= float(a.get("qty_multiplier") or 1.0)
-            except (TypeError, ValueError):
-                pass
+    for a in corp_actions.load_corp_actions(path=CORP_ACTIONS_FILE, ticker=ticker):
+        if a["ex_date"] > asof_date:
+            mult *= a["qty_multiplier"]
     return mult
 
 
@@ -833,7 +845,8 @@ def main():
     # verify_account_snapshot: giờ chỉ là CROSS-CHECK advisory (cost-basis/đối soát journal)
     # — NAV không còn phụ thuộc nó (xem docstring broker_positions về bug 2026-07-07).
     import datetime as _dt
-    today_iso = _dt.date.today().isoformat()   # TZ đã ép Asia/Ho_Chi_Minh ở đầu module
+    from zoneinfo import ZoneInfo as _ZoneInfo
+    today_iso = _dt.datetime.now(_ZoneInfo("Asia/Ho_Chi_Minh")).date().isoformat()  # §16: neo tường minh
     is_today = args.date == today_iso
     if args.from_raw and args.date >= today_iso:
         print(f"❌ [{args.date}] --from-raw chỉ dành cho ngày QUÁ KHỨ — hôm nay dùng đường live.",
@@ -879,7 +892,15 @@ def main():
     corp_action_adj = {}
     if not is_today and not args.from_raw:   # vị thế raw là của CHÍNH --date, xem xcheck from-raw
         for t in tickers:
-            mult = confirmed_qty_multiplier_after(t, args.date)
+            try:
+                mult = confirmed_qty_multiplier_after(t, args.date)
+            except corp_actions.CorpActionError as e:
+                # §29: record hỏng trong corp_actions.json ⇒ KHÔNG XÁC ĐỊNH ĐƯỢC quy đổi cho
+                # MỌI mã (xem docstring confirmed_qty_multiplier_after) — chặn NAV thay vì âm
+                # thầm dùng KL chưa quy đổi (có thể che một corp-action credit sớm thật).
+                print(f"❌ [{args.date}] corp_actions.json có record hỏng khi quy đổi {t}: {e} "
+                      f"— KHÔNG tính NAV.", file=sys.stderr)
+                return 2
             if mult != 1.0:
                 corp_action_adj[t] = mult
                 positions[t]["qty"] = positions[t]["qty"] / mult
