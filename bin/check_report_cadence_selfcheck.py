@@ -240,6 +240,49 @@ check("#20 chạy 2 lần liên tiếp cùng input ⇒ actions+closable giống 
       _a == _b, f"a={_a} b={_b}")
 
 
+# ── Phần 1d: mã lý do INCOMPLETE_MSG rẽ theo TAG THẬT trong $GATE_OUT, không phải rc=10
+#     (arch-review 2026-09-24 vòng 6, T1-c). Trích khối RC_VENDOR_REASON thật (KHÔNG chép logic)
+#     — bỏ nhánh `elif … VENDOR_LOOKUP_FAILED` mà không có test này thì ca lookup_failed-thuần
+#     rơi về câu chung "chưa giao đủ kênh", sai nguyên nhân + sai người (§29).
+_MISMATCH_TAG = "VENDOR_MISMATCH_ALERT|SpaceX|ZZZ|2026-09-24|1000|1500|1"
+_LOOKUP_TAG = "VENDOR_LOOKUP_FAILED|SpaceX|ZZZ|2026-09-24|1000|1|1"
+
+
+def run_vendor_reason(gate_out):
+    with tempfile.TemporaryDirectory() as td:
+        script = Path(td) / "reason.sh"
+        script.write_text(
+            "#!/usr/bin/env bash\nset -uo pipefail\n"
+            'GATE_OUT="$1"\nFNAME="fixture.md"\n'
+            + extract("RC_VENDOR_REASON_BEGIN", "RC_VENDOR_REASON_END")
+            + '\nprintf \'%s\' "$INCOMPLETE_MSG"\n', encoding="utf-8")
+        r = subprocess.run(["bash", str(script), gate_out], capture_output=True, text=True)
+        if "syntax error" in r.stderr or "command not found" in r.stderr:
+            return "__BLOCK_DID_NOT_RUN__: " + r.stderr
+        return r.stdout
+
+
+msg_mismatch = run_vendor_reason(_MISMATCH_TAG)
+check("#21 GATE_OUT chỉ mismatch ⇒ nêu LỆCH NGUỒN CỔ TỨC + Winston",
+      ("LỆCH NGUỒN CỔ TỨC" in msg_mismatch and "Winston" in msg_mismatch), msg_mismatch)
+check("#21b … và KHÔNG lẫn câu lookup_failed",
+      "KHÔNG TRA ĐƯỢC nguồn vendor" not in msg_mismatch, msg_mismatch)
+
+msg_lookup = run_vendor_reason(_LOOKUP_TAG)
+check("#22 GATE_OUT chỉ lookup_failed ⇒ nêu lỗi hạ tầng BQ, KHÔNG giao Winston đối soát số",
+      ("KHÔNG TRA ĐƯỢC nguồn vendor" in msg_lookup and "lỗi hạ tầng BQ" in msg_lookup), msg_lookup)
+check("#22b … và KHÔNG lẫn câu 'LỆCH NGUỒN CỔ TỨC' (sai nguyên nhân/sai người, §29)",
+      "LỆCH NGUỒN CỔ TỨC" not in msg_lookup, msg_lookup)
+assert ("KHÔNG TRA ĐƯỢC nguồn vendor" in msg_lookup and "lỗi hạ tầng BQ" in msg_lookup
+        and msg_lookup != "__BLOCK_DID_NOT_RUN__"), (
+    "MUTATION-GUARD rc_vendor_reason_lookup_failed_branch: GATE_OUT thuần lookup_failed mà "
+    "INCOMPLETE_MSG không nêu đúng 'lỗi hạ tầng BQ' — nhánh elif VENDOR_LOOKUP_FAILED đã bị bỏ "
+    f"hoặc hỏng, ca rơi về câu chung/sai nhánh mismatch. Đang là: {msg_lookup!r}")
+
+msg_both = run_vendor_reason(_MISMATCH_TAG + "\n" + _LOOKUP_TAG)
+check("#23 GATE_OUT có CẢ HAI tag ⇒ ưu tiên nhánh mismatch (if đứng trước elif)",
+      ("LỆCH NGUỒN CỔ TỨC" in msg_both and "Winston" in msg_both), msg_both)
+
 # ── Phần 2: danh sách "còn treo" lấy từ matcher CHÍNH THỐNG (bus_question_audit.py) ─────
 def pending_topics_from_bus(events, archived=()):
     """Dựng 1 bus giả rồi hỏi bus_question_audit.py xem còn treo những gì."""

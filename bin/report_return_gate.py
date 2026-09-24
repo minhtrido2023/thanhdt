@@ -1274,7 +1274,7 @@ def _selfcheck() -> int:
     check("R1-A: had_broker_cash=True ⇒ câu khẳng định ĐÚNG 'broker đã giải' (per_share là tiền thật)",
           "broker đã giải 1,000đ/cp" in txt_lkf, True)
     check("có dòng máy đọc VENDOR_LOOKUP_FAILED, had_broker_cash=1, published=1",
-          "VENDOR_LOOKUP_FAILED|SpaceX|ZZZ|2026-09-24|1000|1|1" in txt_lkf, True)
+          "VENDOR_LOOKUP_FAILED|SpaceX|ZZZ|2026-09-24|1000|1|1\n" in txt_lkf, True)
     check("KHÔNG in dòng VENDOR_MISMATCH_ALERT cho ca lookup_failed (tránh trộn sentinel 0đ vào "
           "cặp số cũ)", "VENDOR_MISMATCH_ALERT" in txt_lkf, False)
     check("VIỆC CẦN LÀM nói 'chạy lại' (rerun khi BQ khoẻ), không giao Winston đối soát số",
@@ -1283,12 +1283,38 @@ def _selfcheck() -> int:
         "MUTATION-GUARD gate_lookup_failed_own_tag: ca BQ lỗi hạ tầng phải dùng TAG RIÊNG "
         "VENDOR_LOOKUP_FAILED, KHÔNG tái dùng VENDOR_MISMATCH_ALERT (sentinel 0đ sẽ bị đọc nhầm "
         f"thành 'vendor xác nhận 0đ'). Đang là: {txt_lkf!r}")
+    # R1-C, T1(a) (arch-review vòng 6): ca THUẦN lookup_failed (không có cash_mismatch/
+    # stock_leg_ignored/unknown nào khác) KHÔNG được in câu "hai nguồn độc lập đang bất đồng" —
+    # câu đó chỉ đúng khi có NGUỒN THỨ HAI để so, mà lookup_failed nghĩa là CHƯA TRA ĐƯỢC nguồn
+    # đó. Trước bản vá này, mutation `if vendor_fail_reasons - {"lookup_failed"}: -> if True:`
+    # vẫn PASS 90/90 vì không có assertion nào bám vào SỰ VẮNG MẶT của câu này.
+    check("KHÔNG in câu 'hai nguồn độc lập đang bất đồng' cho ca THUẦN lookup_failed",
+          "hai nguồn độc lập đang bất đồng" in txt_lkf, False)
+    check("KHÔNG in câu 'Gỡ chặn = Winston xác minh xong nguồn vendor' (sai người — BQ lỗi hạ "
+          "tầng, không phải Winston đối soát)",
+          "Gỡ chặn = Winston xác minh xong nguồn vendor" in txt_lkf, False)
+    assert "hai nguồn độc lập đang bất đồng" not in txt_lkf, (
+        "MUTATION-GUARD gate_lookup_failed_no_mismatch_sentence: ca THUẦN lookup_failed mà cổng "
+        "vẫn in câu 'hai nguồn độc lập đang bất đồng' ⇒ tự mâu thuẫn với dòng lookup_failed ngay "
+        f"phía trên nó, sai nguyên nhân (§29). Đang là: {txt_lkf!r}")
+    # T1(b): câu riêng "(các mã lookup_failed ở trên: KHÔNG PHẢI hai nguồn bất đồng…)" PHẢI có
+    # mặt cho ca này (bị CHẶN, vendor_fail_reasons={"lookup_failed"}) — dùng anchor RIÊNG của
+    # nhánh này, KHÔNG dùng "chạy lại" (câu đó CŨNG xuất hiện ở khối VIỆC CẦN LÀM phía trên,
+    # theo `reasons_present` — một mutation tắt nhánh `if "lookup_failed" in vendor_fail_reasons:`
+    # vẫn để "chạy lại" sống sót nhờ khối kia, nên check cũ ở dòng trên KHÔNG bắt được mutation này).
+    check("có câu riêng '…chưa tra được nguồn thứ hai' cho ca THUẦN lookup_failed BỊ CHẶN",
+          "chưa tra được nguồn thứ hai" in txt_lkf, True)
+    assert "chưa tra được nguồn thứ hai" in txt_lkf, (
+        "MUTATION-GUARD gate_lookup_failed_reason_note: ca THUẦN lookup_failed bị CHẶN mà thiếu "
+        "câu ghi chú riêng '…chưa tra được nguồn thứ hai' — nhánh "
+        "`if \"lookup_failed\" in vendor_fail_reasons:` đã bị tắt/hỏng (câu 'chạy lại' ở khối "
+        f"VIỆC CẦN LÀM phía trên KHÔNG phải bằng chứng cho nhánh này). Đang là: {txt_lkf!r}")
 
     rc_lkf_q, txt_lkf_q = _run_vendor_case("## Không công bố tỉ suất mã nào\n", _LOOKUP)
     check("lookup_failed + mã KHÔNG công bố ⇒ không chặn (rc=0)", rc_lkf_q, 0)
     check("… nhưng vẫn cảnh báo (không im lặng)", "KHÔNG TRA ĐƯỢC nguồn vendor" in txt_lkf_q, True)
     check("… và dòng máy đọc vẫn có, had_broker_cash=1, published=0",
-          "VENDOR_LOOKUP_FAILED|SpaceX|ZZZ|2026-09-24|1000|1|0" in txt_lkf_q, True)
+          "VENDOR_LOOKUP_FAILED|SpaceX|ZZZ|2026-09-24|1000|1|0\n" in txt_lkf_q, True)
 
     # ---- R1-A/R1-B (arch-review vòng 5): had_broker_cash=False — ca THẬT MBS 2026-04-02 dựng lại
     # từ exp_vendor_mismatch/k1_v2_rerun.log (STOCK_CONFIRMED/unresolved, broker=4.828,8đ/cp chỉ là
@@ -1306,7 +1332,7 @@ def _selfcheck() -> int:
     check("R1-A: KHÔNG khẳng định sai 'broker đã giải' khi had_broker_cash=False",
           "broker đã giải" in txt_lkf_nc, False)
     check("dòng máy đọc VENDOR_LOOKUP_FAILED có had_broker_cash=0, published=1",
-          "VENDOR_LOOKUP_FAILED|SpaceX|ZZZ|2026-09-24|4829|0|1" in txt_lkf_nc, True)
+          "VENDOR_LOOKUP_FAILED|SpaceX|ZZZ|2026-09-24|4829|0|1\n" in txt_lkf_nc, True)
     assert rc_lkf_nc == 0, (
         "MUTATION-GUARD gate_lookup_failed_hadcash_gate: had_broker_cash=False (per_share chỉ là "
         "ƯỚC LƯỢNG từ giá rơi, KHÔNG mất số công bố nào) nhưng cổng vẫn CHẶN — quá tay so với bằng "

@@ -17,13 +17,16 @@ PATH cũng chỉ trỏ vào thư mục stub). CHỨNG MINH NGƯỢC: cùng fixtu
 """
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
 import tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-SCRIPT = os.path.join(HERE, "eod_trading_report.sh")
+# EOD_SRC: chạy TOÀN BỘ ca lên một bản MUTANT thay vì bản thật (đối chứng mutation-kill, cùng
+# quy ước RC_SRC của check_report_cadence_selfcheck.py).
+SCRIPT = os.environ.get("EOD_SRC") or os.path.join(HERE, "eod_trading_report.sh")
 PRE_FIX_REF = "4195911c"   # c9edd4c6~1
 OPEN_MARK = "REPORT=\"$(python3 - \"$PLAN_FILE\" \"$STATE_FILE\" \"$ACCOUNT\" \"$PLAN_DATE\" \"$WC_ROOT\" << 'PYEOF'"
 DATE = "2026-08-11"
@@ -187,6 +190,65 @@ print("\n[iii] 2 account cùng file ⇒ SpaceX ≠ ZaloPay, mỗi bên đúng c�
 check("SpaceX = 100", R["iii_S"]["broker"] == {"FPT": 100}, R["iii_S"]["broker"])
 check("ZaloPay = 300", R["iii_Z"]["broker"] == {"FPT": 300}, R["iii_Z"]["broker"])
 check("SpaceX ≠ ZaloPay", R["iii_S"]["broker"] != R["iii_Z"]["broker"])
+
+def extract_bash(begin, end, sh_text=None):
+    """Trích phần THÂN bash giữa 2 marker comment (cùng quy ước với `extract()` của
+    check_report_cadence_selfcheck.py — cắt tới HẾT DÒNG chứa marker)."""
+    src = sh_text if sh_text is not None else cur_text
+    m = re.search(re.escape(begin) + r"[^\n]*\n(.*?)[^\n]*" + re.escape(end), src, re.S)
+    if not m:
+        print(f"❌ FATAL: không trích được khối {begin}…{end} trong {SCRIPT} — "
+              "khối đã bị đổi/di chuyển, selfcheck vô hiệu.")
+        sys.exit(1)
+    return m.group(1)
+
+
+_MISMATCH_TAG = "VENDOR_MISMATCH_ALERT|SpaceX|ZZZ|2026-09-24|1000|1500|1"
+_LOOKUP_TAG = "VENDOR_LOOKUP_FAILED|SpaceX|ZZZ|2026-09-24|1000|1|1"
+
+
+def run_eod_vendor_reason(gate_out, vendor_rc=10):
+    """Chạy khối EOD_VENDOR_REASON thật (why= rẽ theo TAG trong $gate_out) trên 1 fixture."""
+    body = extract_bash("EOD_VENDOR_REASON_BEGIN", "EOD_VENDOR_REASON_END")
+    script = ("#!/usr/bin/env bash\nset -uo pipefail\n"
+              'gate_out="$1"\nvendor_rc="$2"\nwhy="delivery chưa đủ kênh (Discord/email)"\n'
+              + body + '\nprintf \'%s\' "$why"\n')
+    with tempfile.TemporaryDirectory() as td:
+        p = os.path.join(td, "reason.sh")
+        with open(p, "w", encoding="utf-8") as f:
+            f.write(script)
+        r = subprocess.run(["bash", p, gate_out, str(vendor_rc)], capture_output=True, text=True)
+        if "syntax error" in r.stderr or "command not found" in r.stderr:
+            return "__BLOCK_DID_NOT_RUN__: " + r.stderr
+        return r.stdout
+
+
+print("\n[vendor-reason] why= rẽ theo TAG THẬT trong $gate_out, không suy từ vendor_rc=10 "
+      "(arch-review 2026-09-24 vòng 6, T1-c)")
+why_mismatch = run_eod_vendor_reason(_MISMATCH_TAG)
+check("mismatch-only ⇒ why nêu LỆCH NGUỒN VENDOR + Winston",
+      "LỆCH NGUỒN VENDOR" in why_mismatch and "Winston" in why_mismatch, why_mismatch)
+check("mismatch-only ⇒ KHÔNG lẫn câu lookup_failed",
+      "KHÔNG TRA ĐƯỢC nguồn vendor" not in why_mismatch, why_mismatch)
+
+why_lookup = run_eod_vendor_reason(_LOOKUP_TAG)
+check("lookup_failed-only ⇒ why nêu lỗi hạ tầng BQ, KHÔNG giao Winston đối soát số",
+      "KHÔNG TRA ĐƯỢC nguồn vendor" in why_lookup and "lỗi hạ tầng BQ" in why_lookup, why_lookup)
+check("lookup_failed-only ⇒ KHÔNG lẫn câu LỆCH NGUỒN VENDOR (sai nguyên nhân/sai người, §29)",
+      "LỆCH NGUỒN VENDOR" not in why_lookup, why_lookup)
+assert ("KHÔNG TRA ĐƯỢC nguồn vendor" in why_lookup and "lỗi hạ tầng BQ" in why_lookup
+        and why_lookup != "__BLOCK_DID_NOT_RUN__"), (
+    "MUTATION-GUARD eod_vendor_reason_lookup_failed_branch: gate_out thuần lookup_failed mà "
+    "why= không nêu đúng 'lỗi hạ tầng BQ' — nhánh elif VENDOR_LOOKUP_FAILED đã bị bỏ hoặc hỏng, "
+    f"ca rơi về why= mặc định/sai nhánh mismatch. Đang là: {why_lookup!r}")
+
+why_both = run_eod_vendor_reason(_MISMATCH_TAG + "\n" + _LOOKUP_TAG)
+check("cả hai tag ⇒ ưu tiên nhánh mismatch (if đứng trước elif)",
+      "LỆCH NGUỒN VENDOR" in why_both and "Winston" in why_both, why_both)
+
+why_no10 = run_eod_vendor_reason("", vendor_rc=1)
+check("vendor_rc≠10 ⇒ giữ why= mặc định (không đổi khi không có tag vendor để so)",
+      why_no10 == "delivery chưa đủ kênh (Discord/email)", why_no10)
 
 print(f"\n[RED] CHỨNG MINH NGƯỢC trên bản trước vá {PRE_FIX_REF}: (i)/(ii) phải ĐỎ")
 if old_py is not None:

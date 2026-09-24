@@ -110,6 +110,9 @@ print('yes' if state.get('$FNAME') == '$TODAY' else 'no')
         # loại nào — phải grep TAG THẬT trong $GATE_OUT (arch-review vòng 5, R1-C), ĐỪNG suy từ
         # rc=10 (bug gốc: cả 3 nơi từng khẳng định "hai nguồn bất đồng" ngay cả khi chỉ có
         # lookup_failed thuần — SAI, vì lookup_failed nghĩa là CHƯA có nguồn thứ hai để bất đồng).
+        # RC_VENDOR_REASON_BEGIN — trích bởi check_report_cadence_selfcheck.py, extract-and-test
+        # 3 tổ hợp $GATE_OUT (mismatch-only / lookup_failed-only / cả hai). Đổi tên/di chuyển
+        # marker ⇒ selfcheck FATAL, không im lặng pass.
         if printf '%s\n' "$GATE_OUT" | grep -q '^VENDOR_MISMATCH_ALERT|'; then
           INCOMPLETE_MSG="🔴 **Delivery INCOMPLETE — ${FNAME}** — bị CHẶN vì **LỆCH NGUỒN CỔ TỨC** (tiền broker ≠ \`tav2_bq.corporate_action\`), KHÔNG phải lỗi soạn báo cáo. Cần **Winston (data-ops)** đối soát nguồn vendor — chi tiết ở cảnh báo ngay trên. Sweep tự retry mỗi ngày."
         elif printf '%s\n' "$GATE_OUT" | grep -q '^VENDOR_LOOKUP_FAILED|'; then
@@ -117,6 +120,7 @@ print('yes' if state.get('$FNAME') == '$TODAY' else 'no')
         else
           INCOMPLETE_MSG="🔴 **Delivery INCOMPLETE — ${FNAME}** — báo cáo đã tạo nhưng chưa giao đủ (Discord+email, hash-bound). Sweep tự retry mỗi ngày; nếu kéo dài, cần Taylor kiểm tra bin/report_delivery_gate.py --status ${FNAME}."
         fi
+        # RC_VENDOR_REASON_END
         "$ROOT/bin/notify_thread.sh" "$INCOMPLETE_MSG" \
           "$TRADING_REPORT_THREAD" 2>/dev/null || true
         python3 -c "

@@ -81,6 +81,9 @@ _deliver_eod() {
   # (§29): vendor_rc=10 chỉ nói "có vendor-lệch-nguồn HOẶC lookup_failed", KHÔNG nói được loại
   # nào — phải grep TAG THẬT trong $gate_out (arch-review vòng 5, R1-C), ĐỪNG suy từ rc=10.
   local why="delivery chưa đủ kênh (Discord/email)"
+  # EOD_VENDOR_REASON_BEGIN — trích bởi eod_trading_report_account_filter_selfcheck.py,
+  # extract-and-test 3 tổ hợp $gate_out (mismatch-only / lookup_failed-only / cả hai). Đổi
+  # tên/di chuyển marker ⇒ selfcheck FATAL, không im lặng pass.
   if [ "$vendor_rc" -eq 10 ]; then
     if printf '%s\n' "$gate_out" | grep -q '^VENDOR_MISMATCH_ALERT|'; then
       why="LỆCH NGUỒN VENDOR (tiền broker ≠ tav2_bq.corporate_action) — cần Winston (data-ops), KHÔNG phải lỗi soạn báo cáo"
@@ -88,6 +91,7 @@ _deliver_eod() {
       why="KHÔNG TRA ĐƯỢC nguồn vendor tav2_bq.corporate_action (lỗi hạ tầng BQ) — KHÔNG PHẢI hai nguồn bất đồng, thử lại khi BQ khoẻ"
     fi
   fi
+  # EOD_VENDOR_REASON_END
   "$ROOT/bin/append_event.sh" Mafee error "eod-trading-report-delivery-incomplete" \
     "{\"account\":\"$ACCOUNT\",\"plan_date\":\"$PLAN_DATE\",\"artifact\":\"$(basename "$artifact")\",\"retry\":\"check_report_cadence\",\"cause\":\"$why\"}" \
     2>/dev/null || true
