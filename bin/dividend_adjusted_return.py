@@ -205,6 +205,15 @@ class Adjustment:
     # hệ số tăng KL của chân CỔ PHIẾU cùng ex-date (1,0 = không có chân cổ phiếu). Đặt bởi
     # `solve_from_broker` khi `credit_frame` chứng minh được bằng KL.
     share_multiplier: float = 1.0
+    # CHỈ có ý nghĩa khi `vendor_check == "lookup_failed"` — ghi lại `kind == "CASH_CONFIRMED"`
+    # ĐO NGAY TRƯỚC khi lookup thất bại hạ nó xuống UNVERIFIED (arch-review vòng 5, R1-A/R1-B).
+    # True  ⇒ `per_share` LÀ tiền broker thật (báo cáo VỪA MẤT một số đã từng công bố).
+    # False ⇒ `per_share` chỉ là ƯỚC LƯỢNG tỉ số từ giá rơi (tầng 1, `_scan_jumps`) — CHƯA BAO GIỜ
+    #         là tiền broker; lookup thất bại không làm mất số công bố nào. Phân biệt hai trường
+    #         hợp này là bắt buộc — gộp chung sẽ khiến "broker đã giải Xđ/cp" bị in cho một con số
+    #         chưa từng là tiền thật (đúng lớp lỗi D1 mà chính sách vendor-mismatch sinh ra để
+    #         đóng, chỉ đảo vai giữa hai nhánh).
+    lookup_failed_had_broker_cash: bool = False
 
     @property
     def cash_per_share(self) -> float:
@@ -1010,6 +1019,9 @@ def resolve_dividends(tickers, start: str, end: str, accounts: dict = None,
             # cáo hiện rõ "toàn UNVERIFIED" thay vì âm thầm công bố số chưa được lưới an toàn xác
             # nhận — lỗi hạ tầng thấy được LỚN HƠN để buộc chạy lại, so với công bố sai mà im lặng).
             adj.vendor_check = "lookup_failed"
+            # Chụp provenance TRƯỚC khi mutate `kind` ở dưới — sau dòng này `kind` có thể đã bị
+            # hạ về UNVERIFIED nên không còn đọc lại được "nó TỪNG là CASH_CONFIRMED" (R1-A).
+            adj.lookup_failed_had_broker_cash = (adj.kind == "CASH_CONFIRMED")
             err = str(e)[:300]
             adj.vendor_note = (f"KHÔNG TRA ĐƯỢC nguồn vendor corporate_action (lỗi hạ tầng, KHÔNG "
                                f"phải vendor không có sự kiện): {err} — 2 lá chắn D1 "
@@ -1712,7 +1724,13 @@ def _selfcheck() -> int:
           tol=1e-9)
     check("ngày khác của CÙNG mã không bị cộng chéo", _q25.get(("MULTI", "2026-09-02")), 200.0,
           tol=1e-9)
-    assert _q25.get(("MULTI", "2026-09-01")) == 427.0, (
+    # Predicate `!= 320.0` (KHÔNG phải `== 427.0`) có chủ đích (arch-review vòng 5, mục (a)):
+    # guard "latest_record_of_day" ở DƯỚI dùng CÙNG predicate `== 427.0` nên nếu cả hai đều
+    # `== 427.0`, guard NÀY luôn fire trước cho MỌI mutation làm sai giá trị — kể cả mutation
+    # KHÔNG liên quan gì tới "lô cuối thắng" (vd đảo dấu so ts ở nhánh chọn bản ghi mới nhất,
+    # ra 999 thay vì 427) — chẩn đoán SAI hướng người sửa (§29). `!= 320.0` chỉ bắt ĐÚNG bug mà
+    # tên guard này mô tả: broker_qty() trả lô CUỐI (320) thay vì TỔNG (427).
+    assert _q25.get(("MULTI", "2026-09-01")) != 320.0, (
         "MUTATION-GUARD broker_qty_last_lot_wins: broker_qty() phải GỘP TỔNG các lô cùng "
         "(mã, ngày) trong bản ghi CUỐI NGÀY, không lấy lô đứng cuối mảng positions[]. Ca thật "
         "ZaloPay BID 14/08: 2 lô margin (loanPackageId 1826=107, 1258=320) tổng 427; bản cũ chỉ "
@@ -1783,6 +1801,16 @@ def _selfcheck() -> int:
     assert "PERMISSION_DENIED" in a26.vendor_note and "quota exceeded" in a26.vendor_note, (
         "MUTATION-GUARD lookup_failed_real_error: vendor_note phải in LỖI THẬT của exception "
         f"(§29 — không đoán nguyên nhân). Đang là: {a26.vendor_note!r}")
+    # R1-A (arch-review vòng 5): a26 ĐÃ đạt CASH_CONFIRMED (solved=True) TRƯỚC khi BQ ném lỗi hạ nó
+    # về UNVERIFIED ⇒ per_share LÀ tiền broker thật — provenance phải chụp True, không phải suy
+    # từ `kind` SAU khi đã bị mutate (đọc lại `a26.kind` ở đây luôn là "UNVERIFIED", không phân
+    # biệt được hai ca — đúng lý do field riêng `lookup_failed_had_broker_cash` phải tồn tại).
+    assert a26.lookup_failed_had_broker_cash is True, (
+        "MUTATION-GUARD lookup_failed_hadcash_capture_true: sự kiện TỪNG đạt CASH_CONFIRMED trước "
+        "khi lookup thất bại (per_share LÀ tiền broker thật) nhưng "
+        f"`lookup_failed_had_broker_cash` = {a26.lookup_failed_had_broker_cash!r}, không phải True "
+        "— hạ nguồn (report_return_gate.py) sẽ in sai câu 'broker CHƯA giải được số nào' cho một "
+        "con số đã từng là tiền thật.")
 
     print("    Chống hồi quy — BQ ném lỗi mà broker CHƯA giải (kind chưa từng đạt CASH_CONFIRMED):")
     print("    KHÔNG được ép giá trị nào khác, chỉ đơn thuần KHÔNG promote lên CASH_VENDOR/")
@@ -1796,6 +1824,15 @@ def _selfcheck() -> int:
         "MUTATION-GUARD lookup_failed_no_promote: BQ ném lỗi (không tra được gì) mà `kind` lại "
         f"{a26b.kind!r} — CASH_VENDOR/STOCK_CONFIRMED chỉ hợp lệ khi vendor THỰC SỰ trả về dữ liệu, "
         "không phải khi truy vấn thất bại.")
+    # R1-A (arch-review vòng 5) — đúng hình dạng ca THẬT MBS 2026-04-02 (K1): broker CHƯA BAO GIỜ
+    # giải được số nào (solved=False ⇒ kind không đạt CASH_CONFIRMED trước khi BQ lỗi) ⇒ per_share
+    # chỉ là ƯỚC LƯỢNG tỉ số từ giá rơi (tầng 1 `_scan_jumps`), KHÔNG được chụp thành True.
+    assert a26b.lookup_failed_had_broker_cash is False, (
+        "MUTATION-GUARD lookup_failed_hadcash_capture_false: sự kiện CHƯA từng đạt CASH_CONFIRMED "
+        "(broker chưa giải được số nào, per_share chỉ là ước lượng) nhưng "
+        f"`lookup_failed_had_broker_cash` = {a26b.lookup_failed_had_broker_cash!r}, không phải "
+        "False — nếu code gán cứng True cho mọi lookup_failed, đây là assertion duy nhất bắt được "
+        "(a26 ở trên đã fix True nên không phân biệt được gán cứng khỏi provenance thật).")
 
     print("    Chống hồi quy — vendor XÁC NHẬN 0 dòng (`bq_corp_action` trả về None, KHÔNG ném lỗi)")
     print("    VẪN là 'unavailable', KHÔNG bị lẫn sang 'lookup_failed':")

@@ -14,9 +14,10 @@
 # Cổng giữ THUẦN (không ghi bus từ trong nó — §5b): việc ghi bus/Discord nằm ở đây, phía shell.
 # Parse dòng MÁY ĐỌC `VENDOR_MISMATCH_ALERT|<acct>|<mã>|<ex>|<broker>|<vendor>|<đang công bố>`
 # — giá trị đã chuẩn hoá, KHÔNG grep câu văn xuôi (§28).
-# `VENDOR_LOOKUP_FAILED|<acct>|<mã>|<ex>|<broker>|<đang công bố>` (5 trường — arch-review
-# 2026-09-24 vòng 4, R1(e)): BQ lỗi hạ tầng, KHÔNG tra được vendor — KHÁC "hai nguồn bất đồng số"
-# (không có vendor_ps để so). TAG RIÊNG cố ý, không tái dùng VENDOR_MISMATCH_ALERT.
+# `VENDOR_LOOKUP_FAILED|<acct>|<mã>|<ex>|<broker>|<had_broker_cash>|<published>` (7 trường — arch-
+# review 2026-09-24 vòng 4 R1(e), mở rộng vòng 5 R1-A/R1-B): BQ lỗi hạ tầng, KHÔNG tra được vendor
+# — KHÁC "hai nguồn bất đồng số" (không có vendor_ps để so). TAG RIÊNG cố ý, không tái dùng
+# VENDOR_MISMATCH_ALERT.
 #
 # Exit: 0 = KHÔNG có lệch nguồn/lookup_failed nào · 10 = CÓ ít nhất một trong hai · 2 = sai đối số.
 #   ⚠️ 10 nói về SỰ TỒN TẠI của lệch nguồn, KHÔNG hứa "đã gửi được cảnh báo" — hai caller
@@ -65,11 +66,34 @@ TOPIC="$2"
 DRY_RUN=0
 [ "${3:-}" = "--dry-run" ] && DRY_RUN=1
 
+# Định dạng số nghìn cho câu Discord — khớp quy ước `{broker_ps:,.0f}` mà report_return_gate.py
+# dùng cho chính con số này trong log cron (arch-review vòng 5, mục (d)): trước bản vá này Discord
+# in "1200đ/cp" trong khi log in "1,000đ/cp" cho CÙNG một giá trị — không sai, chỉ khác định dạng,
+# nhưng khác nhau không lý do giữa hai nơi cùng nói về một con số. Trường máy đọc (payload
+# VENDOR_MISMATCH_ALERT/VENDOR_LOOKUP_FAILED) giữ nguyên số THÔ, không qua hàm này.
+# Thuần bash (không dùng `printf "%'d"` của awk/C — grouping đó phụ thuộc locale biên dịch, đo
+# thật trên host này: LC_ALL=en_US.UTF-8 vẫn in "1200" không có dấu phẩy, im lặng KHÔNG báo lỗi).
+_fmt_vnd() {
+  local n="${1%%.*}" neg="" out=""
+  case "$n" in -*) neg="-"; n="${n#-}" ;; esac
+  while [ "${#n}" -gt 3 ]; do
+    out=",${n: -3}${out}"
+    n="${n%???}"
+  done
+  printf '%s%s%s' "$neg" "$n" "$out"
+}
+
 GATE_OUT="$(cat)"
 MARKERS="$(printf '%s\n' "$GATE_OUT" | grep -E '^VENDOR_MISMATCH_ALERT\|' || true)"
-# VENDOR_LOOKUP_FAILED (arch-review 2026-09-24 vòng 4, R1(e)): TAG RIÊNG, 5 trường
-# (tag|acct|mã|ex|broker|published — KHÔNG có vendor_ps, BQ lỗi hạ tầng nên chưa tra được số thứ
-# hai). Trước bản vá này script chỉ grep VENDOR_MISMATCH_ALERT ⇒ một báo cáo CHẶN THUẦN vì
+# VENDOR_LOOKUP_FAILED (arch-review 2026-09-24 vòng 4, R1(e); mở rộng vòng 5 R1-A/R1-B): TAG
+# RIÊNG, 7 trường (tag|acct|mã|ex|broker|had_broker_cash|published — KHÔNG có vendor_ps, BQ lỗi
+# hạ tầng nên chưa tra được số thứ hai). `had_broker_cash` phân biệt "broker ĐÃ giải số này (tiền
+# thật)" khỏi "đây chỉ là ước lượng tỉ số, CHƯA từng là tiền broker" — rẽ câu Discord ĐÚNG bằng
+# chứng thay vì khẳng định "broker đã giải" cho một con số ước lượng (§29). Trường cuối là
+# "published" THÔ — KHÔNG PHẢI "blocked" tính sẵn: script tự tính BLOCKED = had_broker_cash AND
+# published bên dưới, cùng công thức mà report_return_gate.py dùng để dựng `vendor_fails`, vì
+# R1-B chỉ chặn khi lookup_failed thật sự làm MẤT một số đã từng công bố.
+# Trước bản vá R1(e) này script chỉ grep VENDOR_MISMATCH_ALERT ⇒ một báo cáo CHẶN THUẦN vì
 # lookup_failed (không có mismatch nào) làm MARKERS rỗng ⇒ exit 0 câm lặng, đúng lúc report bị
 # CHẶN thật — user chỉ thấy "Delivery INCOMPLETE" chung chung, sai nguyên nhân/người (§29).
 LOOKUP_MARKERS="$(printf '%s\n' "$GATE_OUT" | grep -E '^VENDOR_LOOKUP_FAILED\|' || true)"
@@ -101,17 +125,17 @@ while IFS='|' read -r _tag acct tk ex broker vendor published; do
     stock_leg_ignored)
       SEEN_STOCK=1
       DETAIL="${DETAIL}
-• **${tk}** (${acct}, ex ${ex}): vendor khai THUẦN CỔ PHIẾU (không có chân tiền), nhưng broker giải ra ${broker}đ/cp TIỀN MẶT mà chưa biết chân cổ phiếu — nghi giá rơi chia tách bị đọc thành cổ tức"
+• **${tk}** (${acct}, ex ${ex}): vendor khai THUẦN CỔ PHIẾU (không có chân tiền), nhưng broker giải ra $(_fmt_vnd "$broker")đ/cp TIỀN MẶT mà chưa biết chân cổ phiếu — nghi giá rơi chia tách bị đọc thành cổ tức"
       ;;
     cash_mismatch)
       SEEN_CASH=1
       DETAIL="${DETAIL}
-• **${tk}** (${acct}, ex ${ex}): broker giải ${broker}đ/cp vs \`corporate_action\` ${vendor}đ/cp — hai nguồn bất đồng số cổ tức"
+• **${tk}** (${acct}, ex ${ex}): broker giải $(_fmt_vnd "$broker")đ/cp vs \`corporate_action\` $(_fmt_vnd "$vendor")đ/cp — hai nguồn bất đồng số cổ tức"
       ;;
     *)
       SEEN_UNKNOWN=1
       DETAIL="${DETAIL}
-• **${tk}** (${acct}, ex ${ex}): LỆCH NGUỒN cổ tức nhưng KHÔNG xác định được mã lý do (broker ${broker}đ/cp vs vendor ${vendor}đ/cp) — kiểm thủ công, KHÔNG suy đoán nguyên nhân"
+• **${tk}** (${acct}, ex ${ex}): LỆCH NGUỒN cổ tức nhưng KHÔNG xác định được mã lý do (broker $(_fmt_vnd "$broker")đ/cp vs vendor $(_fmt_vnd "$vendor")đ/cp) — kiểm thủ công, KHÔNG suy đoán nguyên nhân"
       ;;
   esac
   if [ "${published:-0}" = "1" ]; then
@@ -123,17 +147,31 @@ while IFS='|' read -r _tag acct tk ex broker vendor published; do
 done <<< "$MARKERS"
 
 # VENDOR_LOOKUP_FAILED — vòng RIÊNG, KHÔNG gộp vào vòng trên: không có REASON_MAP (nhãn này
-# KHÔNG có "mã lý do", nó LÀ nguyên nhân) và không có vendor_ps (5 trường, không phải 7).
-while IFS='|' read -r _tag acct tk ex broker published; do
+# KHÔNG có "mã lý do", nó LÀ nguyên nhân) và không có vendor_ps (7 trường, KHÁC 7 trường của ALERT
+# — vị trí trường khác nhau, xem header).
+while IFS='|' read -r _tag acct tk ex broker hadcash published; do
   [ -z "${tk:-}" ] && continue
   SEEN_LOOKUP=1
+  # R1-A: "broker đã giải" chỉ ĐÚNG khi sự kiện TỪNG là CASH_CONFIRMED (had_broker_cash=1) —
+  # ngược lại `broker` chỉ là ƯỚC LƯỢNG tỉ số từ giá rơi, CHƯA từng là tiền broker thật.
+  if [ "${hadcash:-0}" = "1" ]; then
+    moneytxt="broker đã giải $(_fmt_vnd "$broker")đ/cp nhưng chưa đối soát chéo được"
+  else
+    moneytxt="broker CHƯA giải được số nào (ước lượng từ giá rơi $(_fmt_vnd "$broker")đ/cp, KHÔNG phải tiền broker thật)"
+  fi
   DETAIL="${DETAIL}
-• **${tk}** (${acct}, ex ${ex}): KHÔNG TRA ĐƯỢC nguồn vendor \`corporate_action\` (lỗi hạ tầng BQ, KHÔNG phải vendor xác nhận 0 sự kiện) — broker đã giải ${broker}đ/cp nhưng chưa đối soát chéo được"
-  if [ "${published:-0}" = "1" ]; then
+• **${tk}** (${acct}, ex ${ex}): KHÔNG TRA ĐƯỢC nguồn vendor \`corporate_action\` (lỗi hạ tầng BQ, KHÔNG phải vendor xác nhận 0 sự kiện) — ${moneytxt}"
+  # R1-B: CHẶN chỉ khi lookup_failed thật sự làm mất một số đã từng công bố — cùng công thức
+  # (hadcash AND published) mà report_return_gate.py dùng để dựng `vendor_fails`. `published`
+  # ở đây LÀ trạng thái công bố thô (không gán sẵn), nên khi hadcash=0 mà mã VẪN đang công bố,
+  # câu đúng là "vẫn gửi" (không mất số) chứ không phải "không công bố tỉ suất mã này".
+  if [ "${hadcash:-0}" = "1" ] && [ "${published:-0}" = "1" ]; then
     BLOCKED=1
     DETAIL="${DETAIL} — mã này ĐANG công bố tỉ suất ⇒ báo cáo bị CHẶN"
-  else
+  elif [ "${hadcash:-0}" = "1" ]; then
     DETAIL="${DETAIL} — báo cáo vẫn gửi (không công bố tỉ suất mã này), cổ tức đã bị bỏ khỏi kỳ vọng"
+  else
+    DETAIL="${DETAIL} — không mất số đã công bố (chưa từng là CASH_CONFIRMED), báo cáo vẫn gửi bình thường"
   fi
 done <<< "$LOOKUP_MARKERS"
 

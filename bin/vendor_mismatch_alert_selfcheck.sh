@@ -326,10 +326,11 @@ SB10="$(make_sandbox "$SRC")"
   echo "$PASS|$FAIL" > "$SB10/tally" )
 read -r PASS FAIL < <(tr '|' ' ' < "$SB10/tally")
 
-section "CA 11 — VENDOR_LOOKUP_FAILED (arch-review 2026-09-24 vòng 4, R1(e)): BQ lỗi hạ tầng dùng TAG RIÊNG, KHÔNG lẫn với mismatch"
-# Ca THUẦN lookup_failed (không có mismatch nào khác trong lượt gọi) — trước bản vá này script
+section "CA 11 — VENDOR_LOOKUP_FAILED, had_broker_cash=1 published=1 (arch-review vòng 4 R1(e) + vòng 5 R1-A/R1-B): sự kiện TỪNG là CASH_CONFIRMED, đang công bố ⇒ CHẶN thật"
+# Ca THUẦN lookup_failed (không có mismatch nào khác trong lượt gọi) — trước bản vá R1(e) script
 # chỉ grep VENDOR_MISMATCH_ALERT nên MARKERS rỗng ⇒ exit 0 câm lặng đúng lúc báo cáo đang bị CHẶN.
-MARKER_LOOKUP_ONLY='VENDOR_LOOKUP_FAILED|SpaceX|VPB|2026-09-23|1200|1'
+# had_broker_cash=1: per_share LÀ tiền broker thật (đúng ca sự kiện từng CASH_CONFIRMED).
+MARKER_LOOKUP_ONLY='VENDOR_LOOKUP_FAILED|SpaceX|VPB|2026-09-23|1200|1|1'
 SB11="$(make_sandbox "$SRC")"
 ( export SC_NOTIFY_RC=0 SC_APPEND_RC=0; run_one "$SB11" "$MARKER_LOOKUP_ONLY"
   check "exit 10 (thuần lookup_failed vẫn phải bắn cảnh báo)" "10" "$RC"
@@ -349,13 +350,66 @@ SB11="$(make_sandbox "$SRC")"
     *"hai nguồn bất đồng số cổ tức"*) bad "KHÔNG được phát câu 'hai nguồn bất đồng số cổ tức' cho ca lookup_failed" "không chứa" "$CALLS" ;;
     *) ok "KHÔNG phát nhầm câu 'hai nguồn bất đồng số cổ tức' của mismatch" ;;
   esac
+  # R1-A: had_broker_cash=1 ⇒ câu phải khẳng định "broker đã giải" (per_share LÀ tiền thật).
+  case "$CALLS" in
+    *"broker đã giải 1,200đ/cp nhưng chưa đối soát chéo được"*)
+      ok "R1-A: had_broker_cash=1 ⇒ câu 'broker đã giải Xđ/cp' (per_share là tiền broker thật)" ;;
+    *) bad "R1-A: had_broker_cash=1 ⇒ câu 'broker đã giải Xđ/cp' (per_share là tiền broker thật)" \
+        "chứa 'broker đã giải 1,200đ/cp nhưng chưa đối soát chéo được'" "$CALLS" ;;
+  esac
+  # R1-B: had_broker_cash=1 AND published=1 ⇒ BLOCKED thật, câu phải nói "báo cáo bị CHẶN".
+  case "$CALLS" in
+    *"mã này ĐANG công bố tỉ suất ⇒ báo cáo bị CHẶN"*)
+      ok "R1-B: had_broker_cash=1 + published=1 ⇒ câu nói ĐÚNG 'báo cáo bị CHẶN'" ;;
+    *) bad "R1-B: had_broker_cash=1 + published=1 ⇒ câu nói ĐÚNG 'báo cáo bị CHẶN'" \
+        "chứa 'mã này ĐANG công bố tỉ suất ⇒ báo cáo bị CHẶN'" "$CALLS" ;;
+  esac
+  case "$CALLS" in
+    *'"blocked_report":1'*) ok "R1-D: payload bus ghi blocked_report=1 đúng lúc report bị CHẶN" ;;
+    *) bad "R1-D: payload bus ghi blocked_report=1" "chứa '\"blocked_report\":1'" "$CALLS" ;;
+  esac
   echo "$PASS|$FAIL" > "$SB11/tally" )
 read -r PASS FAIL < <(tr '|' ' ' < "$SB11/tally")
+
+section "CA 11b — VENDOR_LOOKUP_FAILED, had_broker_cash=0 (arch-review vòng 5 R1-A/R1-B): per_share chỉ là ƯỚC LƯỢNG, KHÔNG mất số công bố ⇒ KHÔNG chặn dù published=1"
+# Ca MBS thật (K1, dựng lại từ exp_vendor_mismatch/k1_v2_rerun.log): STOCK_CONFIRMED/unresolved,
+# broker=4828.8 chỉ là ước lượng từ giá rơi (_scan_jumps) — CHƯA từng là CASH_CONFIRMED. published=1
+# (mã ĐANG công bố tỉ suất) nhưng KHÔNG mất số nào ⇒ BLOCKED phải là 0, câu KHÔNG được nói "chặn".
+MARKER_LOOKUP_NOCASH='VENDOR_LOOKUP_FAILED|SpaceX|MBS|2026-04-02|4829|0|1'
+SB11B="$(make_sandbox "$SRC")"
+( export SC_NOTIFY_RC=0 SC_APPEND_RC=0; run_one "$SB11B" "$MARKER_LOOKUP_NOCASH"
+  check "exit 10 (vẫn phải bắn cảnh báo, kể cả không chặn)" "10" "$RC"
+  case "$CALLS" in
+    *"broker CHƯA giải được số nào (ước lượng từ giá rơi 4,829đ/cp, KHÔNG phải tiền broker thật)"*)
+      ok "R1-A: had_broker_cash=0 ⇒ câu ĐÚNG 'broker CHƯA giải được số nào (ước lượng...)'" ;;
+    *) bad "R1-A: had_broker_cash=0 ⇒ câu ĐÚNG 'broker CHƯA giải được số nào (ước lượng...)'" \
+        "chứa 'broker CHƯA giải được số nào (ước lượng từ giá rơi 4,829đ/cp, KHÔNG phải tiền broker thật)'" "$CALLS" ;;
+  esac
+  case "$CALLS" in
+    *"broker đã giải"*) bad "R1-A: KHÔNG được khẳng định 'broker đã giải' khi had_broker_cash=0" "không chứa 'broker đã giải'" "$CALLS" ;;
+    *) ok "R1-A: KHÔNG khẳng định sai 'broker đã giải' cho số ước lượng" ;;
+  esac
+  case "$CALLS" in
+    *"không mất số đã công bố (chưa từng là CASH_CONFIRMED), báo cáo vẫn gửi bình thường"*)
+      ok "R1-B: had_broker_cash=0 ⇒ câu ĐÚNG 'không mất số đã công bố ... vẫn gửi bình thường'" ;;
+    *) bad "R1-B: had_broker_cash=0 ⇒ câu ĐÚNG 'không mất số đã công bố ... vẫn gửi bình thường'" \
+        "chứa 'không mất số đã công bố (chưa từng là CASH_CONFIRMED), báo cáo vẫn gửi bình thường'" "$CALLS" ;;
+  esac
+  case "$CALLS" in
+    *"⇒ báo cáo bị CHẶN"*) bad "R1-B: KHÔNG được chặn khi had_broker_cash=0 (không mất số công bố)" "không chứa '⇒ báo cáo bị CHẶN'" "$CALLS" ;;
+    *) ok "R1-B: KHÔNG chặn oan — per_share ước lượng chưa từng là tiền broker" ;;
+  esac
+  case "$CALLS" in
+    *'"blocked_report":0'*) ok "payload bus ghi blocked_report=0 (published=1 nhưng had_broker_cash=0 ⇒ không chặn)" ;;
+    *) bad "payload bus ghi blocked_report=0" "chứa '\"blocked_report\":0'" "$CALLS" ;;
+  esac
+  echo "$PASS|$FAIL" > "$SB11B/tally" )
+read -r PASS FAIL < <(tr '|' ' ' < "$SB11B/tally")
 
 section "CA 12 — MIX: mismatch (VCB) + lookup_failed (VPB) trong CÙNG lượt ⇒ CẢ HAI câu cùng có mặt, không đè lẫn nhau"
 MARKER_MIX="VENDOR_MISMATCH_ALERT|SpaceX|VCB|2026-09-11|1600|1450|1
 VENDOR_MISMATCH_REASON|SpaceX|VCB|2026-09-11|cash_mismatch|0.0000
-VENDOR_LOOKUP_FAILED|SpaceX|VPB|2026-09-23|1200|0"
+VENDOR_LOOKUP_FAILED|SpaceX|VPB|2026-09-23|1200|1|0"
 SB12="$(make_sandbox "$SRC")"
 ( export SC_NOTIFY_RC=0 SC_APPEND_RC=0; run_one "$SB12" "$MARKER_MIX"
   check "exit 10" "10" "$RC"
@@ -482,6 +536,16 @@ fi'
             '[ -z "$MARKERS" ] && exit 0'
   kill_check m7 "ca THUẦN lookup_failed exit 0 câm lặng đúng lúc bị CHẶN" \
     "exit 10 (thuần lookup_failed vẫn phải bắn cảnh báo)"
+
+  section "MUTATION 8 — R1-D quay xe: đảo điều kiện published trong vòng lặp VENDOR_LOOKUP_FAILED (BLOCKED không còn bật đúng lúc CHẶN thật)"
+  # Hậu quả THẬT nếu mutant này sống: ca CA11 (had_broker_cash=1, published=1 — sự kiện TỪNG là
+  # CASH_CONFIRMED, mã ĐANG công bố, per_share bị mất khỏi báo cáo) không còn bật BLOCKED/nói
+  # "báo cáo bị CHẶN" nữa — báo cáo vẫn công bố Discord "gửi bình thường" đúng lúc report_return_gate
+  # đã CHẶN THẬT (rc=1) — đúng lớp lỗi "trường thứ 8" đã trả giá một lần trước đây.
+  mutate m8 'if [ "${hadcash:-0}" = "1" ] && [ "${published:-0}" = "1" ]; then' \
+            'if [ "${hadcash:-0}" = "1" ] && [ "${published:-0}" = "9" ]; then'
+  kill_check m8 "BLOCKED không bật đúng lúc CHẶN thật — lớp lỗi 'trường thứ 8' tái diễn" \
+    "R1-B: had_broker_cash=1 + published=1 ⇒ câu nói ĐÚNG 'báo cáo bị CHẶN'"
 fi
 
 printf '\n===== vendor_mismatch_alert_selfcheck: %d PASS / %d FAIL =====\n' "$PASS" "$FAIL"

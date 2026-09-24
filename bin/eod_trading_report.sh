@@ -78,9 +78,16 @@ _deliver_eod() {
     return 0
   fi
   # Nguyên nhân phải đọc từ BẰNG CHỨNG cổng vừa in ra, không quy chụp một nguyên nhân cố định
-  # (§29): vendor_rc=10 nghĩa là chính cổng đã nêu lệch nguồn vendor ⇒ người xử lý là Winston.
+  # (§29): vendor_rc=10 chỉ nói "có vendor-lệch-nguồn HOẶC lookup_failed", KHÔNG nói được loại
+  # nào — phải grep TAG THẬT trong $gate_out (arch-review vòng 5, R1-C), ĐỪNG suy từ rc=10.
   local why="delivery chưa đủ kênh (Discord/email)"
-  [ "$vendor_rc" -eq 10 ] && why="LỆCH NGUỒN VENDOR (tiền broker ≠ tav2_bq.corporate_action) — cần Winston (data-ops), KHÔNG phải lỗi soạn báo cáo"
+  if [ "$vendor_rc" -eq 10 ]; then
+    if printf '%s\n' "$gate_out" | grep -q '^VENDOR_MISMATCH_ALERT|'; then
+      why="LỆCH NGUỒN VENDOR (tiền broker ≠ tav2_bq.corporate_action) — cần Winston (data-ops), KHÔNG phải lỗi soạn báo cáo"
+    elif printf '%s\n' "$gate_out" | grep -q '^VENDOR_LOOKUP_FAILED|'; then
+      why="KHÔNG TRA ĐƯỢC nguồn vendor tav2_bq.corporate_action (lỗi hạ tầng BQ) — KHÔNG PHẢI hai nguồn bất đồng, thử lại khi BQ khoẻ"
+    fi
+  fi
   "$ROOT/bin/append_event.sh" Mafee error "eod-trading-report-delivery-incomplete" \
     "{\"account\":\"$ACCOUNT\",\"plan_date\":\"$PLAN_DATE\",\"artifact\":\"$(basename "$artifact")\",\"retry\":\"check_report_cadence\",\"cause\":\"$why\"}" \
     2>/dev/null || true

@@ -106,10 +106,14 @@ print('yes' if state.get('$FNAME') == '$TODAY' else 'no')
           "{\"artifact\":\"${FNAME}\",\"retry\":\"check_report_cadence sweep (hằng ngày)\"}" \
           2>/dev/null || true
         # Nguyên nhân/người xử lý suy từ BẰNG CHỨNG cổng vừa in ra, không phát một câu cố định
-        # (§29). VENDOR_RC=10 ⇒ chặn là do hai nguồn cổ tức bất đồng: việc của Winston
-        # (data-ops), không phải Taylor, và không phải "chưa giao đủ kênh".
-        if [ "$VENDOR_RC" -eq 10 ]; then
+        # (§29). VENDOR_RC=10 chỉ nói "có vendor-lệch-nguồn HOẶC lookup_failed", KHÔNG nói được
+        # loại nào — phải grep TAG THẬT trong $GATE_OUT (arch-review vòng 5, R1-C), ĐỪNG suy từ
+        # rc=10 (bug gốc: cả 3 nơi từng khẳng định "hai nguồn bất đồng" ngay cả khi chỉ có
+        # lookup_failed thuần — SAI, vì lookup_failed nghĩa là CHƯA có nguồn thứ hai để bất đồng).
+        if printf '%s\n' "$GATE_OUT" | grep -q '^VENDOR_MISMATCH_ALERT|'; then
           INCOMPLETE_MSG="🔴 **Delivery INCOMPLETE — ${FNAME}** — bị CHẶN vì **LỆCH NGUỒN CỔ TỨC** (tiền broker ≠ \`tav2_bq.corporate_action\`), KHÔNG phải lỗi soạn báo cáo. Cần **Winston (data-ops)** đối soát nguồn vendor — chi tiết ở cảnh báo ngay trên. Sweep tự retry mỗi ngày."
+        elif printf '%s\n' "$GATE_OUT" | grep -q '^VENDOR_LOOKUP_FAILED|'; then
+          INCOMPLETE_MSG="🔴 **Delivery INCOMPLETE — ${FNAME}** — bị CHẶN vì KHÔNG TRA ĐƯỢC nguồn vendor \`tav2_bq.corporate_action\` (lỗi hạ tầng BQ), KHÔNG PHẢI hai nguồn bất đồng số và KHÔNG phải lỗi soạn báo cáo. Thử lại khi BQ khoẻ — không cần Winston đối soát số trừ khi lỗi lặp lại nhiều lượt. Sweep tự retry mỗi ngày."
         else
           INCOMPLETE_MSG="🔴 **Delivery INCOMPLETE — ${FNAME}** — báo cáo đã tạo nhưng chưa giao đủ (Discord+email, hash-bound). Sweep tự retry mỗi ngày; nếu kéo dài, cần Taylor kiểm tra bin/report_delivery_gate.py --status ${FNAME}."
         fi
