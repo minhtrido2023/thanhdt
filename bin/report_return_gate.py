@@ -557,11 +557,21 @@ def run_gate(report_path: str, tol_pp: float = DEFAULT_TOL_PP, out=sys.stdout) -
 
     fails, checked, unmatched = list(paper_fails), 0, 0
     fails_no_div = []   # mã lệch mà cổ tức = 0 ⇒ nguyên nhân KHÔNG phải thiếu cổ tức
+    # §corp-action (job Taylor_20260924_064510, Việc 4) — mã CÒN GIỮ (có mặt trong `expected`
+    # dưới KL khác) mà lệch KL không phải "lệnh đã thực hiện/ngoài phạm vi" như mọi unmatched
+    # khác: có thể là vị thế ĐANG GIỮ bị lệch KL do corp-action credit sớm giữa lúc báo cáo
+    # soạn và lúc cổng chạy. Tách riêng để KHÔNG khẳng định nguyên nhân khi chưa xác nhận (§29).
+    unmatched_held_qty_mismatch = []
+    expected_tickers = {t for t, _q in expected}
     print(f"\n{'ma':5}{'KL':>7}{'TK':>9}{'% cong bo':>11}{'% ky vong':>11}{'lech pp':>9}"
           f"{'co tuc GOP':>11}  ket qua", file=out)
     for tk, qty, pct in rows:
         key = (tk, qty)
         if key not in expected:
+            if tk in expected_tickers:
+                held_qtys = sorted(q for (t2, q) in expected if t2 == tk)
+                unmatched_held_qty_mismatch.append((tk, qty, pct, held_qtys))
+                continue
             unmatched += 1
             continue
         if key in ambiguous:
@@ -624,6 +634,15 @@ def run_gate(report_path: str, tol_pp: float = DEFAULT_TOL_PP, out=sys.stdout) -
     print(f"\nĐã kiểm {checked} dòng bảng + {prose_checked} tỉ suất trong văn xuôi; {unmatched} dòng "
           f"KHÔNG khớp sổ vị thế broker (bảng lãi/lỗ ĐÃ THỰC HIỆN / phân bổ — NGOÀI phạm vi cổng "
           f"này, xem docstring).", file=out)
+    if unmatched_held_qty_mismatch:
+        print(f"\n⚠️  {len(unmatched_held_qty_mismatch)} dòng CÒN GIỮ mã đó trên sổ broker nhưng KL "
+              f"báo cáo KHÔNG khớp KL đang giữ — KHÔNG được tính vào '{unmatched} dòng ngoài phạm "
+              f"vi' phía trên (đó là suy luận cho lệnh ĐÃ THỰC HIỆN, ca này vẫn ĐANG GIỮ). Nghi "
+              f"corp-action credit sớm giữa lúc soạn báo cáo và lúc cổng chạy — CHƯA xác nhận, "
+              f"kiểm tay trước khi kết luận nguyên nhân (§29):", file=out)
+        for tk, qty, pct, held_qtys in unmatched_held_qty_mismatch:
+            print(f"   • {tk}: báo cáo KL={qty:.0f} ({pct:+.2f}%), broker đang giữ KL="
+                  f"{'/'.join(f'{q:.0f}' for q in held_qtys)}", file=out)
     if nocover:
         print(f"ℹ️  {len(nocover)} vị thế CÓ cổ tức nhưng báo cáo không công bố tỉ suất riêng "
               f"(không chặn — không công bố thì không sai được): {', '.join(nocover)}", file=out)
@@ -1481,6 +1500,56 @@ def _selfcheck() -> int:
     assert "EEE" not in eg_out, (
         "MUTATION-GUARD entitled_gross_mismatch_excluded: sự kiện lệch nguồn vẫn cộng cổ tức vào "
         "kỳ vọng (bỏ `continue` sau khi ghi nhận mismatch).")
+
+    # ---- Việc 4 (job Taylor_20260924_064510) — dòng CÒN GIỮ mã (broker vẫn có vị thế) nhưng KL
+    # báo cáo KHÔNG khớp KL broker phải rơi vào nhánh cảnh báo RIÊNG, KHÔNG bị đếm/chẩn đoán
+    # chung với "lệnh đã thực hiện/phân bổ — ngoài phạm vi" (đó là suy luận SAI khi mã vẫn đang
+    # được giữ — §29). Mã THẬT SỰ ngoài phạm vi (broker không hề giữ) phải giữ NGUYÊN hành vi cũ.
+    def _run_unmatched_case(report_body: str, positions: dict):
+        g = globals()
+        keep = {k: g[k] for k in ("broker_positions", "entitled_gross", "excluded_tickers")}
+        g["broker_positions"] = lambda acct, asof, **kw: dict(positions)
+        g["entitled_gross"] = lambda tks, acct, asof: ({}, [])
+        g["excluded_tickers"] = lambda lb: set()
+        with tempfile.NamedTemporaryFile("w", suffix="_SpaceX_report_2026-09-24.md",
+                                          delete=False, encoding="utf-8") as fh:
+            fh.write(report_body)
+            path = fh.name
+        buf = io.StringIO()
+        try:
+            rc = run_gate(path, out=buf)
+        finally:
+            g.update(keep)
+            os.unlink(path)
+        return rc, buf.getvalue()
+
+    # QQQ: broker ĐANG GIỮ 100cp; báo cáo ghi KL=150 (lệch, nghi corp-action). RRR: broker
+    # KHÔNG hề giữ mã này — đúng nghĩa "lệnh đã thực hiện/ngoài phạm vi" cũ.
+    rc_um, txt_um = _run_unmatched_case(
+        "## Vị thế\n\n| Mã | KL | % lãi/lỗ |\n|---|---|---|\n"
+        "| QQQ | 150 | +2,00% |\n| RRR | 999 | +3,00% |\n",
+        {"QQQ": (100.0, 20000.0, 22000.0)})
+    check("Việc4: PASS (rc=0) — không mã nào bị CHẶN vì lệch KL", rc_um, 0)
+    check("Việc4: QQQ (còn giữ, lệch KL) rơi vào khối cảnh báo RIÊNG",
+          "CÒN GIỮ mã đó" in txt_um and "QQQ" in txt_um, True)
+    check("Việc4: khối cảnh báo nêu đúng KL báo cáo (150) và KL broker đang giữ (100)",
+          "KL=150" in txt_um and "KL=100" in txt_um, True)
+    check("Việc4: đếm 'ngoài phạm vi' KHÔNG gộp mã còn giữ (đúng 1 dòng: chỉ RRR)",
+          "Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi; 1 dòng" in txt_um, True)
+    check("Việc4: RRR (thật sự ngoài phạm vi) KHÔNG xuất hiện trong khối cảnh báo lệch KL",
+          "RRR" not in txt_um.split("CÒN GIỮ mã đó")[1].split("vị thế CÓ cổ tức")[0]
+          if "CÒN GIỮ mã đó" in txt_um else True, True)
+
+    # MUTATION-GUARD: nếu ai revert về hành vi cũ (`unmatched += 1; continue` cho MỌI mã không
+    # khớp key, không phân biệt còn giữ hay không) — QQQ sẽ bị gộp vào đếm "ngoài phạm vi" (đếm
+    # sẽ là 2, không phải 1) và khối cảnh báo riêng biến mất hoàn toàn.
+    assert "CÒN GIỮ mã đó" in txt_um, (
+        "MUTATION-GUARD unmatched_held_qty_mismatch_missing: mã CÒN GIỮ trên broker nhưng lệch "
+        "KL không còn được tách khỏi 'ngoài phạm vi' — hành vi CŨ (unmatched += 1 vô điều kiện) "
+        f"đã quay lại. Output thật: {txt_um!r}")
+    assert "Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi; 2 dòng" not in txt_um, (
+        "MUTATION-GUARD unmatched_count_wrongly_includes_held: đếm 'ngoài phạm vi' đang gộp cả "
+        "QQQ (còn giữ) lẫn RRR (ngoài phạm vi thật) thành 2 — đúng lỗi §29 dispatch mô tả.")
 
     print(f"SELFCHECK: {'PASS' if ok else 'FAIL'} ({pass_count}/{len(ran)} ca)")
     return 0 if ok else 1
