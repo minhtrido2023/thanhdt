@@ -279,6 +279,53 @@ SB9="$(make_sandbox "$SRC")"
   echo "$PASS|$FAIL" > "$SB9/tally" )
 read -r PASS FAIL < <(tr '|' ' ' < "$SB9/tally")
 
+section "CA 10 — RẼ theo mã lý do (VENDOR_MISMATCH_REASON, arch-review D1b R1): câu Discord + Việc cần làm PHẢI khác nhau theo reason, không phát một câu cố định"
+# Ba mã lý do trong CÙNG một lượt gọi (đúng dạng report_return_gate.py thật in ra: ALERT rồi
+# REASON nối liền cho mỗi mã) — STK=stock_leg_ignored, CSH=cash_mismatch, UNK=REASON marker vắng
+# mặt hẳn (mô phỏng caller cũ/hỏng, giống hệt ca fail-closed "unknown" phía report_return_gate.py).
+MARKER_REASONS='VENDOR_MISMATCH_ALERT|SpaceX|STK|2026-09-24|1000|0|1
+VENDOR_MISMATCH_REASON|SpaceX|STK|2026-09-24|stock_leg_ignored|0.2604
+VENDOR_MISMATCH_ALERT|SpaceX|CSH|2026-09-11|1600|1450|1
+VENDOR_MISMATCH_REASON|SpaceX|CSH|2026-09-11|cash_mismatch|0.0000
+VENDOR_MISMATCH_ALERT|SpaceX|UNK|2026-09-12|900|820|1'
+SB10="$(make_sandbox "$SRC")"
+( export SC_NOTIFY_RC=0 SC_APPEND_RC=0; run_one "$SB10" "$MARKER_REASONS"
+  check "exit 10" "10" "$RC"
+  case "$CALLS" in
+    *"THUẦN CỔ PHIẾU"*) ok "STK (stock_leg_ignored): câu nói ĐÚNG 'THUẦN CỔ PHIẾU', không phải 'hai nguồn bất đồng'" ;;
+    *) bad "STK (stock_leg_ignored): câu nói ĐÚNG 'THUẦN CỔ PHIẾU'" "chứa 'THUẦN CỔ PHIẾU'" "$CALLS" ;;
+  esac
+  case "$CALLS" in
+    *"Nghi giá rơi chia tách"*) ok "STK: Việc cần làm có mục 'Nghi giá rơi chia tách' (không phải 'đối soát cho khớp lại')" ;;
+    *) bad "STK: Việc cần làm có mục 'Nghi giá rơi chia tách'" "chứa 'Nghi giá rơi chia tách'" "$CALLS" ;;
+  esac
+  case "$CALLS" in
+    *"CSH"*"hai nguồn bất đồng số cổ tức"*) ok "CSH (cash_mismatch): câu nói ĐÚNG 'hai nguồn bất đồng số cổ tức'" ;;
+    *) bad "CSH (cash_mismatch): câu nói ĐÚNG 'hai nguồn bất đồng số cổ tức'" "chứa 'hai nguồn bất đồng số cổ tức'" "$CALLS" ;;
+  esac
+  case "$CALLS" in
+    *"Bất đồng số cổ tức"*) ok "CSH: Việc cần làm có mục 'Bất đồng số cổ tức' (đối soát Winston)" ;;
+    *) bad "CSH: Việc cần làm có mục 'Bất đồng số cổ tức'" "chứa 'Bất đồng số cổ tức'" "$CALLS" ;;
+  esac
+  case "$CALLS" in
+    *"UNK"*"KHÔNG xác định được mã lý do"*) ok "UNK (REASON vắng mặt): câu nói THẲNG không xác định được, không đoán" ;;
+    *) bad "UNK (REASON vắng mặt): câu nói THẲNG không xác định được" "chứa 'KHÔNG xác định được mã lý do'" "$CALLS" ;;
+  esac
+  case "$CALLS" in
+    *"Không xác định được mã lý do"*"kiểm thủ công"*) ok "UNK: Việc cần làm nói 'kiểm thủ công', KHÔNG suy đoán nguyên nhân" ;;
+    *) bad "UNK: Việc cần làm nói 'kiểm thủ công'" "chứa 'Không xác định được mã lý do' + 'kiểm thủ công'" "$CALLS" ;;
+  esac
+  # MUTATION-GUARD chính: xoá dòng đọc REASON (hoặc gộp cả 3 mã vào MỘT câu cố định) sẽ làm CẢ BA
+  # assertion trên rơi vào cùng 1 nhánh — bắt bằng việc BA câu-đặc-trưng phải XUẤT HIỆN ĐỒNG THỜI.
+  if printf '%s' "$CALLS" | grep -qF "THUẦN CỔ PHIẾU" && printf '%s' "$CALLS" | grep -qF "hai nguồn bất đồng số cổ tức" && printf '%s' "$CALLS" | grep -qF "KHÔNG xác định được mã lý do"; then
+    ok "MUTATION-GUARD vendor_alert_reason_routing: CẢ BA câu đặc trưng cùng có mặt — 3 mã lý do KHÔNG bị gộp thành 1 câu chung"
+  else
+    bad "MUTATION-GUARD vendor_alert_reason_routing: CẢ BA câu đặc trưng cùng có mặt — 3 mã lý do KHÔNG bị gộp thành 1 câu chung" \
+        "cả 3 cụm từ" "$CALLS"
+  fi
+  echo "$PASS|$FAIL" > "$SB10/tally" )
+read -r PASS FAIL < <(tr '|' ' ' < "$SB10/tally")
+
 # ---------------------------------------------------------------- mutation
 if [ "$RUN_MUTATIONS" -eq 1 ]; then
   # Mutation THẬT: dựng bản hỏng rồi chạy TRỌN bộ ca trên nó (SC_TARGET_SRC). Mutant "bị giết"
@@ -362,6 +409,17 @@ fi'
   mutate m5 "TODAY=\"\$(TZ='Asia/Ho_Chi_Minh' date +%Y-%m-%d)\"" 'TODAY="$(date +%Y-%m-%d)"'
   kill_check m5 "mốc ngày lệ thuộc TZ môi trường gọi (cron/host có thể không phải ICT)" \
     "MUTATION-GUARD vendor_alert_ict_anchor: key = ngày ICT (2026-09-24), không phải ngày theo TZ môi trường (2026-09-25)"
+
+  section "MUTATION 6 — R1 quay xe: xoá dòng đọc VENDOR_MISMATCH_REASON (mọi mã lý do rơi về UNKNOWN)"
+  # Hậu quả THẬT nếu mutant này sống: 3 mã lý do khác nhau (bất đồng số tiền / thuần cổ phiếu bị
+  # bỏ qua / không xác định) đều nhận CÙNG một câu "KHÔNG xác định được mã lý do — kiểm thủ công"
+  # — bản thân câu đó không SAI (fail-safe), nhưng làm mất TOÀN BỘ giá trị của việc rẽ nhánh mà
+  # R1 dựng ra: Winston lại phải tự tra log để biết mã nào cần đối soát tiền, mã nào cần tra chân
+  # cổ phiếu — đúng việc alert này sinh ra để làm hộ.
+  mutate m6 "REASON_LINES=\"\$(printf '%s\n' \"\$GATE_OUT\" | grep -E '^VENDOR_MISMATCH_REASON\\|' || true)\"" \
+            'REASON_LINES=""'
+  kill_check m6 "3 mã lý do khác nhau gộp về cùng 1 câu, mất định tuyến Winston" \
+    "MUTATION-GUARD vendor_alert_reason_routing: CẢ BA câu đặc trưng cùng có mặt — 3 mã lý do KHÔNG bị gộp thành 1 câu chung"
 fi
 
 printf '\n===== vendor_mismatch_alert_selfcheck: %d PASS / %d FAIL =====\n' "$PASS" "$FAIL"

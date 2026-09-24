@@ -66,12 +66,44 @@ GATE_OUT="$(cat)"
 MARKERS="$(printf '%s\n' "$GATE_OUT" | grep -E '^VENDOR_MISMATCH_ALERT\|' || true)"
 [ -z "$MARKERS" ] && exit 0
 
+# Mã lý do đi ở dòng TAG RIÊNG (`VENDOR_MISMATCH_REASON|<acct>|<mã>|<ex>|<reason>|<vendor_stock>`,
+# `report_return_gate.py` — hợp đồng 7 trường của dòng ALERT giữ NGUYÊN BYTE, không đọc reason từ
+# đó). Ghép bằng khoá acct|mã|ex (arch-review D1b, R1): trước bản vá này script phát MỘT câu cố
+# định "hai số KHÁC nhau" / "đối soát cho khớp lại" cho MỌI mã lý do — SAI cho stock_leg_ignored
+# (vendor KHÔNG khai chân tiền nào, không có "hai số" nào để so; việc cần làm là tìm chân cổ
+# phiếu bị bỏ sót, không phải đối soát tiền) — đúng lớp lỗi §29.
+declare -A REASON_MAP
+REASON_LINES="$(printf '%s\n' "$GATE_OUT" | grep -E '^VENDOR_MISMATCH_REASON\|' || true)"
+while IFS='|' read -r _rtag racct rtk rex rreason _rstock; do
+  [ -z "${rtk:-}" ] && continue
+  REASON_MAP["${racct}|${rtk}|${rex}"]="$rreason"
+done <<< "$REASON_LINES"
+
 DETAIL=""
 BLOCKED=0
+SEEN_CASH=0
+SEEN_STOCK=0
+SEEN_UNKNOWN=0
 while IFS='|' read -r _tag acct tk ex broker vendor published; do
   [ -z "${tk:-}" ] && continue
-  DETAIL="${DETAIL}
-• **${tk}** (${acct}, ex ${ex}): broker giải ${broker}đ/cp vs \`corporate_action\` ${vendor}đ/cp"
+  reason="${REASON_MAP["${acct}|${tk}|${ex}"]:-}"
+  case "$reason" in
+    stock_leg_ignored)
+      SEEN_STOCK=1
+      DETAIL="${DETAIL}
+• **${tk}** (${acct}, ex ${ex}): vendor khai THUẦN CỔ PHIẾU (không có chân tiền), nhưng broker giải ra ${broker}đ/cp TIỀN MẶT mà chưa biết chân cổ phiếu — nghi giá rơi chia tách bị đọc thành cổ tức"
+      ;;
+    cash_mismatch)
+      SEEN_CASH=1
+      DETAIL="${DETAIL}
+• **${tk}** (${acct}, ex ${ex}): broker giải ${broker}đ/cp vs \`corporate_action\` ${vendor}đ/cp — hai nguồn bất đồng số cổ tức"
+      ;;
+    *)
+      SEEN_UNKNOWN=1
+      DETAIL="${DETAIL}
+• **${tk}** (${acct}, ex ${ex}): LỆCH NGUỒN cổ tức nhưng KHÔNG xác định được mã lý do (broker ${broker}đ/cp vs vendor ${vendor}đ/cp) — kiểm thủ công, KHÔNG suy đoán nguyên nhân"
+      ;;
+  esac
   if [ "${published:-0}" = "1" ]; then
     BLOCKED=1
     DETAIL="${DETAIL} — mã này ĐANG công bố tỉ suất ⇒ báo cáo bị CHẶN"
@@ -79,6 +111,14 @@ while IFS='|' read -r _tag acct tk ex broker vendor published; do
     DETAIL="${DETAIL} — báo cáo vẫn gửi (không công bố tỉ suất mã này), cổ tức đã bị bỏ khỏi kỳ vọng"
   fi
 done <<< "$MARKERS"
+
+TODO=""
+[ "$SEEN_CASH" = "1" ] && TODO="${TODO}
+- **Bất đồng số cổ tức:** Winston (data-ops) đối soát \`tav2_bq.corporate_action\` với sổ broker cho (mã, ex-date) trên. Chỉ khi hai nguồn khớp lại thì tỉ suất mã đó mới được công bố (§21)."
+[ "$SEEN_STOCK" = "1" ] && TODO="${TODO}
+- **Nghi giá rơi chia tách bị đọc thành cổ tức:** Winston xác nhận lại sự kiện CỔ PHIẾU (ISS) với vendor — vì sao chân cổ phiếu chưa được credit vào vị thế. KHÔNG PHẢI đối soát số tiền (vendor không khai chân tiền nào cho sự kiện này)."
+[ "$SEEN_UNKNOWN" = "1" ] && TODO="${TODO}
+- **Không xác định được mã lý do:** kiểm thủ công (mã lý do bị thiếu/rỗng ở nguồn) — KHÔNG suy đoán nguyên nhân."
 
 TODAY="$(TZ='Asia/Ho_Chi_Minh' date +%Y-%m-%d)"
 STATE="$ROOT/state/vendor_mismatch_alerted.json"
@@ -113,10 +153,11 @@ if [ "$ALREADY" = "yes" ]; then
 fi
 
 MSG="⚠️ **LỆCH NGUỒN CỔ TỨC — cần Winston (data-ops)** — \`${FNAME}\`
-Tiền cổ tức THẬT về tài khoản (sổ broker) và bảng vendor \`tav2_bq.corporate_action\` đang cho hai số KHÁC nhau:${DETAIL}
+Cổng phát hiện sự kiện cổ tức mà tiền broker thật và bảng vendor \`tav2_bq.corporate_action\` không khớp:${DETAIL}
 
-**Việc cần làm:** Winston đối soát \`tav2_bq.corporate_action\` với sổ broker cho (mã, ex-date) trên. Chỉ khi hai nguồn khớp lại thì tỉ suất mã đó mới được công bố (§21).
-Đây KHÔNG phải lỗi soạn báo cáo và KHÔNG phải sai cơ sở giá — không nới dung sai cổng để gỡ chặn."
+**Việc cần làm:**${TODO}
+
+Đây KHÔNG phải lỗi soạn báo cáo — không nới dung sai cổng để gỡ chặn, xử lý đúng nguyên nhân ở trên trước."
 
 PAYLOAD="{\"artifact\":\"${FNAME}\",\"owner\":\"Winston\",\"blocked_report\":${BLOCKED},\"markers\":$(printf '%s\n' "$MARKERS" | python3 -c 'import json,sys; print(json.dumps([l.strip() for l in sys.stdin if l.strip()]))')}"
 
