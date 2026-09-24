@@ -189,6 +189,69 @@ def current_price(ticker):
     return prices[ticker], sources.get(ticker), None
 
 
+def _account_id_for(label):
+    """`account_id` (= account_no broker) trong secrets/trading_bot_accounts.json cho `label`."""
+    accounts_path = os.path.join(WC_ROOT, "secrets", "trading_bot_accounts.json")
+    accounts = json.load(open(accounts_path, encoding="utf-8")).get("accounts", [])
+    for a in accounts:
+        if a.get("label") == label:
+            return a.get("account_id")
+    return None
+
+
+def corp_action_frame_multiplier(ticker, account_label, account_id, asof):
+    """(factor, note, blocked_reason) — hệ số quy đổi `arm_price` về CÙNG HỆ QUY CHIẾU với
+    `px` (giá hiện tại, DNSE G1) trước khi tính drawdown.
+
+    §corp-action (job Taylor_20260924_064510, Việc 2) — `arm_price` được gõ tay lúc ARM (hệ
+    giá TRƯỚC mọi sự kiện xảy ra sau đó), còn `px` (`current_price`) luôn là giá phiên hiện tại
+    — đã tự nhiên đi qua mọi sự kiện tỉ lệ giữa lúc arm và bây giờ (ex-date làm giá rơi đúng tỉ
+    lệ pha loãng). Trừ trực tiếp `px/arm_price − 1` khi có sự kiện ở giữa hai mốc là nhân chéo
+    hai hệ quy chiếu (giống bug `compute_active_nav.py` đã vá — xem `exdate_frame.py`), sinh
+    cảnh báo de-lever GIẢ (VD tách 2:1: px ~ nửa arm_price ⇒ drawdown -50% giả).
+
+    Dùng lại đúng khối "KHỐI LƯỢNG" (`exdate_frame.classify_positions`, so vị thế broker HÔM
+    NAY với bản ghi RAW gần nhất TRƯỚC `asof`) để phát hiện — nhưng ở đây kết quả dùng để quy
+    đổi GIÁ (arm_price), không phải khối lượng chương trình gom như Việc 1.
+
+      · Có sự kiện CONFIRMED (`credited`) ⇒ trả `factor = 1 + exercise_ratio` — caller nhân
+        DỒN vào `corp_action_multiplier` đã lưu (nhiều sự kiện giữa arm và hôm nay phải nhân
+        dồn, không ghi đè) rồi chia `arm_price` cho tích luỹ đó.
+      · KL đổi bất thường KHÔNG giải thích được (`blocked`) ⇒ trả `blocked_reason` khác None:
+        caller PHẢI fail-closed (KHÔNG tính drawdown phiên này), KHÔNG đoán theo tỉ lệ (§29).
+      · Đọc broker positions lỗi, HOẶC `classify_positions` tự thân lỗi (IO/BQ down) ⇒
+        `factor=1.0, note=None, blocked_reason=None` — KHÔNG fail-closed vì một lỗi hạ tầng ở
+        subsystem phụ trợ (khác biệt với `blocked`: ở đây ta KHÔNG có bằng chứng gì về sự kiện,
+        không phải có bằng chứng KL bất thường không giải thích được).
+    """
+    try:
+        from trading_bot.brokers import DNSEBroker
+        b = DNSEBroker(account_id=account_id, credentials_file=None, label=account_label)
+        b.connect()
+        positions = b.get_positions()
+    except Exception:
+        return 1.0, None, None
+
+    try:
+        import exdate_frame
+        credited, blocked = exdate_frame.classify_positions(
+            account_label, account_id, asof, {ticker: positions.get(ticker) or {}})
+    except Exception:
+        return 1.0, None, None
+
+    if ticker in blocked:
+        return 1.0, None, blocked[ticker]
+
+    if ticker in credited:
+        detail = credited[ticker]
+        ratio = float(detail["exercise_ratio"])
+        note = (f"broker đã credit sớm (tỉ lệ {ratio} của {detail['event_code']} ex-date "
+                f"{detail['ex_date']}) ⇒ quy đổi arm_price theo hệ số ×{1 + ratio:.6f}")
+        return 1.0 + ratio, note, None
+
+    return 1.0, None, None
+
+
 # ---------------------------------------------------------------- arm ---------------------------
 
 def cmd_arm(args):
@@ -327,16 +390,40 @@ def cmd_check_exits(args):
     changed = False
     breaches = []
     errors = []
+    today_str = dt.datetime.now(ICT).date().isoformat()
     for a in live:
         px, src, err = current_price(a["ticker"])
         if err:
             errors.append(f"{a['ticker']}: {err}")
             continue
-        drawdown = px / a["arm_price"] - 1.0
+
+        factor, note, blocked_reason = corp_action_frame_multiplier(
+            a["ticker"], a["account"], _account_id_for(a["account"]), today_str)
+        if blocked_reason:
+            msg = (f"⚠ arm {a['ticker']} có sự kiện corp-action chưa quy đổi được về CÙNG hệ "
+                   f"quy chiếu với arm_price ⇒ KHÔNG tính drawdown phiên này, CẦN NGƯỜI xử lý "
+                   f"tay: {blocked_reason}")
+            print(msg)
+            errors.append(f"{a['ticker']}: corp-action frame blocked — {blocked_reason}")
+            _bus("error", f"discretionary-margin-corpaction-blocked-{a['ticker']}",
+                 {"ticker": a["ticker"], "reason": blocked_reason})
+            _notify(msg)
+            continue
+
+        if factor != 1.0:
+            a["corp_action_multiplier"] = a.get("corp_action_multiplier", 1.0) * factor
+            a.setdefault("corp_action_adjustments", []).append(
+                {"at": dt.datetime.now(ICT).isoformat(timespec="seconds"),
+                 "factor": factor, "note": note})
+            print(f"  [CORPACTION] {a['ticker']}: {note}")
+
+        arm_price_frame = a["arm_price"] / a.get("corp_action_multiplier", 1.0)
+        drawdown = px / arm_price_frame - 1.0
         a["last_checked"] = dt.datetime.now(ICT).isoformat(timespec="seconds")
         a["last_price"] = px
         a["last_price_source"] = src
         a["last_drawdown"] = round(drawdown, 4)
+        a["arm_price_frame_adjusted"] = round(arm_price_frame, 2)
         changed = True
         if drawdown <= EXIT_DD_PCT + 1e-9:      # epsilon: tránh lệch làm tròn nhị phân bỏ sót đúng ngưỡng
             a["exit_alerts"].append({"date": a["last_checked"], "price": px,
