@@ -674,3 +674,6 @@
 
 ## Archived 2026-09-25 (keep=12 days=0 require_done=False)
 - [2026-09-24T03:57:49Z] [2026-09-24T03:35xx dispatch] vendor-mismatch dividend-broker-qty-fix VONG 4 XONG (job _033534): R1 (entitled_gross noi lookup_failed len mismatches + tag VENDOR_LOOKUP_FAILED rieng, khong tai dung VENDOR_MISMATCH_ALERT) + R2 (selfcheck check() chiu got=None, fixture 25 het vacuous) tren fix/dividend-broker-qty-vendor-label @f3b5b96b (worktree wt-dividend-fix). dar 159/0, gate 85/85, alert 68/0, root-only PASS x4TZ, 4/4 mutation chet bang assertion co ten. CHUA LAND, cho arch-review vong 5. R3 ghi nhan (khong sua): corp_action_daily.py:1643 khong boc try, exception se noi len top-level handler (chap nhan duoc theo reviewer).
+
+## Archived 2026-09-25 (keep=12 days=0 require_done=False)
+- [2026-09-24T04:40:04Z] [2026-09-24] vendor-mismatch dividend-broker-qty-fix VONG 5 XONG (job _041826): R1-A(had_broker_cash provenance)/R1-B(go chan oan 56/62 su kien)/R1-C(2 caller shell het suy sai nguyen nhan tu rc=10)/R1-D(mutation 8) tren fix/dividend-broker-qty-vendor-label @0092f769 (worktree wt-dividend-fix). dar 159/0, gate 90/90, alert 78/0, root-only PASS x4TZ, 8/8+2 mutation chet. CHUA LAND, cho arch-review vong ke hoac Mike/user duyet. CHUA LAM (ngoai pham vi, khong chan): header interpreter cho exp_vendor_mismatch/k1_v2_rerun.log (scratch chua track, re-run cham BQ that).
