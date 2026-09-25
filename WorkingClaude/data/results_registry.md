@@ -6831,3 +6831,84 @@ production **không có lợi ích đo được** (chính job này là phép đo
 CONCLUSION_lag_edge_exitkey_20260910.md · build_exitkey_series.py · lag_edge_health_exitkey.csv ·
 pt_v23_exitkey.py · analyze_legs.py → analyze_out.txt · 4 log leg) ·
 CSV `data/v23_golive_audit_2014_now_..._exp_{ekctrl,ekinert,ekexit,eknoedge}_univpit.csv`.
+
+---
+
+## 2026-09-25 — ORB intraday: validate ĐÚNG config ĐANG DEPLOY (lần đầu) + cơ chế cảnh báo sớm
+
+Job `Taylor_20260925_103217`. **PAPER-ONLY, không chạm tiền thật, không đổi tham số đang chạy.**
+Artifact: `mike/agents/Taylor/research/orb_deployed_config_validation_20260925/`.
+
+**Đối tượng** = tổ hợp trong `orb_pt.py`, KHÔNG phải config trong `vn30f_orb_strategy.py` /
+`vn30f_orb_final.py`: exit 14:30 · KHÔNG stop · TẤT CẢ ngày (không lọc |OR|) · size cố định ·
+slip 1 tick · fee 0,6bps round-trip · VN30F1M.
+
+**Neo provenance (bắt buộc đọc trước khi trích số):** `orb_core.py` tái tính 75 phiên trong cửa sổ
+live rồi đối soát từng cột với `data/orb_pt_log.csv` — **75/75 ngày khớp, lệch lớn nhất mọi cột
+2,98e-16**. Engine validate này ĐÚNG là config đang chạy. `viec_a_validate.py` tự abort nếu lệch > 1e-9.
+
+**Tape**: ghép `data/vn30f1m_1min.csv` (2023-09-11→2026-06-09) + `research/orb_reeval_20260925/vn30f1m_live_snapshot_20260925.csv`
+(2026-01-23→2026-09-25). 21.272 bar trùng nhau, **1 bar lệch** (high/low 0,3đ) ⇒ cùng tape.
+**745 phiên** có signal, 2023-09-11→2026-09-25.
+
+| | n | mean/phiên | Sharpe | cum | MaxDD | t |
+|---|---|---|---|---|---|---|
+| FULL | 745 | +9,31bps | **+1,59** | +93,69% | −8,07% | +2,73 |
+| BACKTEST pre-live | 670 | +9,34bps | +1,59 | +81,60% | −8,07% | +2,60 |
+| LIVE paper | 75 | +9,03bps | +1,54 | +6,66% | −6,15% | +0,84 |
+| IS (<2025-01-01) | 324 | +6,18bps | +1,17 | +20,77% | | +1,32 |
+| **OOS (≥2025-01-01)** | 421 | +11,72bps | **+1,87** | +60,39% | −7,20% | +2,42 |
+
+**Per-year: 4/4 năm DƯƠNG** (2023 từ 09-11 +1,44 · 2024 +1,07 · 2025 +1,60 · 2026 đến 09-25 +2,33);
+theo quý **12/13 quý dương** (chỉ 2023Q3 âm). **OOS TỐT HƠN IS** — không có dấu hiệu overfit theo thời gian.
+
+⚠️ **GIẢI QUYẾT gate criterion #2**: khoản lỗ 2024 mà tiêu chí đó nói đến thuộc **config GỐC**
+(exit 14:00/stop 0,7%/|OR|≥0,2%: 2024 = −4,50%, Sharpe −1,84), KHÔNG thuộc config đang chạy
+(2024 = +12,86%, Sharpe +1,07). Đây là **2 chiến lược khác nhau**, không phải 1 chiến lược bị
+"hoà tan". Với config ĐANG CHẠY thì không tồn tại năm lỗ nào cần giải thích.
+
+**PSR/DSR** (per-obs SR 0,1001, n=745, skew +0,013, kurt 5,73): PSR(0) = **0,9967**.
+V[SR] đo từ 60 tổ hợp lân cận = 0,000623. **DSR: N=1 → 0,9967 · N=12 → 0,9439 · N=20 → 0,9234 ·
+N=60 → 0,8702.** Pre-live riêng (n=670): PSR 0,9953, DSR(N=20) 0,9144.
+**Số đề nghị dùng khi trích dẫn: DSR(N=20) = 0,9234** (giả định bảo thủ: cả họ ~20 config đã sweep
+trước đều tính là phép thử). Trục duy nhất chưa hề được sweep là **bộ lọc |OR|** (cả 2 script cũ
+hardcode `min_or=0.002`). KHÔNG mâu thuẫn với "DSR 0,10–0,22" của job `_052050`: số đó tính trên
+CHỈ 74 phiên live — cùng Sharpe, n gấp 10 thì PSR nhảy 0,784 → 0,9967.
+
+**Robustness**: 60 tổ hợp lân cận (5 exit × 4 min_OR × 3 stop) — **60/60 Sharpe full > 0 và
+60/60 Sharpe OOS > 0**; config đang chạy ở **phân vị 58–77%** (median họ +1,27, max +2,09) ⇒ vùng ổn
+định, không phải điểm may mắn cô lập. Trễ thực thi 1/2/3/5 phút → Sharpe 1,61/1,59/1,50/1,48 (không
+phụ thuộc fill tức thì). **Break-even slip = 8 tick/chiều** (đang giả định 1). Bootstrap block-10
+pre-live: mean p5 +3,43bps, Sharpe p5 +0,59, P(mean≤0) = 0,0038. Ngày đáo hạn (n=35) +3,41bps yếu hơn
+nhưng không âm.
+⚠️ Các dòng `exit=14:45` trong grid bị nhiễm bar ATC (2025-12-25 gap ATC vs 14:30 = −3,56%, nghi
+roll/artifact vendor) — config đang chạy exit 14:30 nên KHÔNG bị ảnh hưởng. **KHÔNG dùng grid này để
+đề xuất đổi tham số** (ngoài phạm vi job).
+
+**Việc B — live 75 phiên vs kỳ vọng dựng từ CHỈ pre-live**: mean +9,03 vs +9,34bps, Sharpe +1,54 vs
++1,59, cum +6,66% ở **phân vị 50** (p5 −0,59% / p50 +6,43% / p95 +17,11%). Spearman(thứ tự phiên,
+net) ρ=−0,079 p=0,497 ⇒ không có xu hướng xấu đi. 3 cửa sổ 25 phiên: +23,48 → +10,52 → −6,91bps,
+nhưng theo tháng 09/2026 (+16,61bps) lại tốt hơn 07/2026 (+15,04) ⇒ không đơn điệu.
+📌 **ĐÍNH CHÍNH**: `orb_reeval_20260925/FINDINGS.md:15` viết "Aug 2026 was a losing month (−2,94%)"
+trong khối *tape_level*. −2,94% là **tổng đơn giản net của chính ORB** (compound −3,01%), **KHÔNG
+phải tape**. Tape VN30F 08/2026 **TĂNG** +5,68% (1875,0 → 1981,5). corr(ORB, tape daily) = −0,009.
+
+**Việc C — cơ chế cảnh báo sớm** (`DESIGN_early_warning.md` · `orb_drift_monitor.py`): 4 tầng,
+**CHỈ GIÁM SÁT**, ALERT chỉ ghi bus `question`. Ràng buộc vật lý: SNR 0,1003/phiên ⇒ cần ~614 phiên
+để phân biệt μ₀ với 0. CUSUM h chọn bằng **mô phỏng ARL trên residual thật** (kurt 5,76):
+A_warn (μ→0) k=μ₀/2 h=18 ARL0 809/ARL1 215; B_alert (đảo dấu) k=0 h=22 ARL0 3.580/ARL1 184.
+Dry-run 56 lần trên 75 phiên bình thường: **0 ALERT**, 10,7% WARN. **Vòng 1 KHÔNG đạt** (8/56 ALERT
+giả do dùng χ² hai phía cho sd trong khi kurt 5,76) → đã thay bằng envelope bootstrap một phía.
+Selfcheck mutation **22/22 PASS** dưới cả `python3` 3.10 và `$DNA_PYEXE` 3.12, và dưới
+`env -u TZ`/`TZ=America/New_York`/`TZ=UTC`. **Chưa cài cron** — chờ Mike.
+
+**Điểm yếu còn lại KHÔNG phải hiệu suất**: (a) lý do CHỌN tổ hợp này không được ghi lại ở bất kỳ
+đâu — nó tối đa hoá cum return chứ không phải Sharpe (bản |OR|≥0,05–0,2% có Sharpe 1,66–1,83 cao
+hơn); (b) toàn bộ 745 phiên nằm trong regime DT5G NEUTRAL hoặc gần như vậy, chưa hề test qua
+BEAR/CRISIS; (c) hạ tầng phái sinh vẫn là hard blocker độc lập (Mike lo).
+
+**Files**: `orb_core.py` · `viec_a_validate.py`+`viec_a_result.json` · `viec_a_robust.py`+`viec_a_robust_result.json` ·
+`neighbourhood_grid.csv` · `deployed_trades_full.csv` · `viec_b_live.py`+`viec_b_result.json` ·
+`calibrate_cusum{,2}.py`+`cusum_arl{,_extended}.json` · `make_baseline.py`+`orb_drift_baseline.json` ·
+`normstat.py` · `orb_drift_monitor.py` · `orb_drift_monitor_selfcheck.py` · `drift_monitor_replay.csv` ·
+`DESIGN_early_warning.md`.
