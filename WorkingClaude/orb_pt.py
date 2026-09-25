@@ -28,7 +28,7 @@ Window mo (tu STARTDATE, tich luy tien).
 import sys, io, json, os
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 import numpy as np, pandas as pd
-from vnstock import Vnstock
+from vnstock.api.quote import Quote
 
 # ORB_PT_WD chi de selfcheck tro vao sandbox (bin/orb_pt_appendonly_selfcheck.py); production bo trong.
 WD = os.environ.get("ORB_PT_WD") or r"/home/trido/thanhdt/WorkingClaude"
@@ -46,7 +46,14 @@ FEE         = 0.00006           # brokerage+tax round-trip ~0.6bps
 MULT        = 100_000
 
 # ---- fetch 1m, build per-day ORB result ----
-f = Vnstock().stock(symbol="VN30F1M", source="VCI").quote.history(
+# Duong goc `Vnstock().stock(symbol=...)` da DEPRECATED (vnstock 3.4.2 con chay nhung lop bao
+# `.stock()` se bi bo; rui ro "im lang dut" khi vendor go). Doi sang lop Quote truc tiep
+# 2026-09-25 (job Taylor_20260925_111203). Da do: hai duong tra ve DataFrame BYTE-IDENTICAL
+# tren cung tham so (42.331 dong x 6 cot, assert_frame_equal PASS), va chay orb_pt.py that
+# trong sandbox truoc/sau khi sua cho orb_pt_log.csv + orb_pt_status.json TRUNG md5.
+# Ghi chu: symbol VN30F1M khong phai co phieu -- lop `.stock()` cu van nhan la su tinh co,
+# Quote moi la API dung cho ca phai sinh.
+f = Quote(symbol="VN30F1M", source="VCI").history(
         start="2026-05-15", end="2026-12-31", interval="1m")
 f["time"]=pd.to_datetime(f["time"]); f=f.sort_values("time").reset_index(drop=True)
 f["date"]=f["time"].dt.date; f["hm"]=f["time"].dt.strftime("%H:%M")
