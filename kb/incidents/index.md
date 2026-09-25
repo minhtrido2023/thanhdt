@@ -4,7 +4,7 @@ title: Incidents — Mike fleet (sổ postmortem, cấu trúc OKF)
 owner: Mike fleet (mọi agent ghi; daily_retro.sh ghi entry RETRO hằng đêm)
 format: OKF (Open Knowledge Format) — markdown + YAML frontmatter, 1 sự cố = 1 file
 migrated_from: kb/INCIDENTS.md (single-file 408KB, migrate → OKF 2026-07-30 job Winston_20260730_144031)
-entries: 172 file (98 sự cố + 73 RETRO + 1 mục open-items chung)
+entries: 174 file (99 sự cố + 74 RETRO + 1 mục open-items chung)
 ---
 
 # Incidents — Mike fleet
@@ -77,6 +77,7 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 
 | Ngày | Sự cố | status |
 |---|---|---|
+| 2026-09-25 | [2026-09/2026-09-25-append-event-json-hint-guessed-truncation.md](2026-09/2026-09-25-append-event-json-hint-guessed-truncation.md) | ? |
 | 2026-09-25 | [2026-09/2026-09-25-append-event-json-hint-guessed-truncation.md](2026-09/2026-09-25-append-event-json-hint-guessed-truncation.md) — gợi ý chẩn đoán JSON của `append_event.sh` quy chụp "cụt thật (word-split)"; ca Taylor 09-24 đủ 2452 ký tự, argc=5, chỉ THIẾU 1 dấu `}`. Lần 2 cùng guard (§29) → thay văn xuôi bằng phép ĐẾM `bin/json_payload_diag.py` | fixed |
 | 2026-09-19 | [2026-09/2026-09-19-selfcheck-red-backlog-4-cases-none-production.md](2026-09/2026-09-19-selfcheck-red-backlog-4-cases-none-production.md) | fixed |
 | 2026-09-18 | [2026-09/2026-09-18-rejected-retry-candidate-heartbeat-shadow.md](2026-09/2026-09-18-rejected-retry-candidate-heartbeat-shadow.md) | ? |
@@ -94,6 +95,7 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 
 | Ngày | Sự cố | status |
 |---|---|---|
+| 2026-08-04 | [2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md](2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md) | fixed (monitoring); production-code fix in progress (Taylor job Taylor_20260804_094514) |
 | 2026-08-04 | [2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md](2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md) | fixed (monitoring); production-code fix in progress (Taylor job Taylor_20260804_094514) |
 | 2026-08-04 | [2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md](2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md) | fixed (monitoring); production-code fix in progress (Taylor job Taylor_20260804_094514) |
 | 2026-08-04 | [2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md](2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md) | fixed (monitoring); production-code fix in progress (Taylor job Taylor_20260804_094514) |
