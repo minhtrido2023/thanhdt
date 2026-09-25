@@ -110,21 +110,16 @@ fi
 # ops_health_check.sh chép nguyên văn vào dispatch ops-autofix, nên nó dẫn người xử lý đi sai
 # hướng ngay từ dòng đầu — cùng nhóm lỗi đã sửa cho check 5b ngày 2026-08-21 (quy chụp mọi ca
 # là word-split). Parser đã biết chính xác chỗ hỏng: in ra, đừng phỏng đoán.
+# 2026-09-25 (job Winston_20260925_012008): dòng gợi ý inline vẫn còn ĐOÁN — nó quy mọi lỗi
+# 'Expecting' là "cụt thật (word-split hoặc bị cắt)", sai trên ca Taylor 2026-09-24T06:13:45Z
+# (đủ 2452 ký tự, argc=5, kết thúc `"}`, chỉ THIẾU 1 dấu `}`). Nay chẩn đoán ĐO trên payload
+# ở bin/json_payload_diag.py (đếm dấu cấu trúc ngoài chuỗi + chuỗi còn mở hay không).
 case "$payload" in
   \{*|\[* )
-    _jerr="$(printf '%s' "$payload" | python3 -c '
-import json, sys
-try:
-    json.loads(sys.stdin.read())
-except ValueError as e:
-    sys.stderr.write(str(e))
-    sys.exit(1)
-' 2>&1 >/dev/null)" \
+    _jerr="$(printf '%s' "$payload" | python3 "$ROOT/bin/json_payload_diag.py" 2>&1 >/dev/null)" \
       || die "payload bắt đầu bằng '{' hoặc '[' nhưng KHÔNG phải JSON hợp lệ.
   Lỗi parser: $_jerr
   Độ dài payload: ${#payload} ký tự · đuôi nhận được: ...$(printf '%s' "${payload: -60}")
-  Đọc lỗi parser: 'Extra data' = THỪA dấu đóng }/] (JSON viết tay lệch ngoặc), payload KHÔNG
-  cụt · 'Unterminated string'/'Expecting' ở gần cuối = cụt thật (word-split hoặc bị cắt).
   Muốn ghi chuỗi thường thì đừng mở đầu bằng { hoặc [." ;;
 esac
 

@@ -77,6 +77,7 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 
 | Ngày | Sự cố | status |
 |---|---|---|
+| 2026-09-25 | [2026-09/2026-09-25-append-event-json-hint-guessed-truncation.md](2026-09/2026-09-25-append-event-json-hint-guessed-truncation.md) — gợi ý chẩn đoán JSON của `append_event.sh` quy chụp "cụt thật (word-split)"; ca Taylor 09-24 đủ 2452 ký tự, argc=5, chỉ THIẾU 1 dấu `}`. Lần 2 cùng guard (§29) → thay văn xuôi bằng phép ĐẾM `bin/json_payload_diag.py` | fixed |
 | 2026-09-19 | [2026-09/2026-09-19-selfcheck-red-backlog-4-cases-none-production.md](2026-09/2026-09-19-selfcheck-red-backlog-4-cases-none-production.md) | fixed |
 | 2026-09-18 | [2026-09/2026-09-18-rejected-retry-candidate-heartbeat-shadow.md](2026-09/2026-09-18-rejected-retry-candidate-heartbeat-shadow.md) | ? |
 | 2026-09-17 | [2026-09/2026-09-17-funding-gate-double-count-open-order-on-resume.md](2026-09/2026-09-17-funding-gate-double-count-open-order-on-resume.md) | ? |
