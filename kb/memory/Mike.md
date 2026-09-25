@@ -28,3 +28,4 @@
   compute_active_nav_selfcheck.py canonical-path — tất cả đã đóng (xem retro 09-22→09-24 cho chi
   tiết nếu cần tra lại).
 
+- [2026-09-25T17:44:35Z] Opening-window A/B thụ động (order_book_execution_shadow ext): triển khai job Taylor_20260925_174424 (deadline trước phiên 28/09); bắt đầu thu thập 28/09; checkpoint sơ bộ 21/10 (trùng mốc nghiệm thu shadow program mẹ, KHÔNG kết luận); mốc quyết định cứng 25/01/2027 (~80 phiên cho N=24 mới). Chi tiết: kb/projects/rnd-pipeline-tracker.md.
