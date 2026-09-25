@@ -306,3 +306,6 @@ BAI HOC: va NGUYEN NHAN thu N cua mot ho su co lap lai = dau hieu thieu MOT PHEP
 
 ## Archived 2026-09-22 (keep=6 days=5 require_done=True)
 - [2026-09-13T07:35:07Z] [2026-09-13] aria-G XONG (4b51de53+f42cb7fe, cron 50 12 nav_snapshot_daily.sh). THEO DOI T2 14/09 19:50 ICT: logs/nav_snapshot_daily.log phai co 'da co dong — bo qua' x2 (EOD ghi) hoac ✅ ghi bu; cron_health 08:25 T2 khong LOG_MISSING. BAI HOC: dong loi in qua log() co prefix => cron_health neo ^\s*❌ mu; selfcheck phai assert bang regex THAT cua consumer, khong tu che.
+
+## Archived 2026-09-25 (keep=12 days=0 require_done=False)
+- [2026-09-10T01:24:14Z] [2026-09-10] BAY rollup_of: dong sub-question voi ly do 'xem rollup' se tu dong dong LUON rollup (bus_question_audit.py:168 rollup_resolved) => ca chum bien mat du chua ai quyet. Neu gop, phai mo question thay the TRUOC. | CHO: user tra loi Wags/nav-price-xcheck-gate-can-quyet-dinh-user-2026-09-10 (A/B/C) — NAV 2026-09-09 con thieu, KHONG duoc backfill bang cach chay lai daily_nav_snapshot.py (broker_positions() luon LIVE + gate tat khi --date lich su => ghi so sai am tham).
