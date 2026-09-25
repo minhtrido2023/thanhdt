@@ -9,9 +9,57 @@ A fixed order of operations for any backtest/finding in this fleet, built from w
 went wrong (and right) in real jobs — not from theory. Each step below cites the incident that
 made it non-optional. If a report skips a step, don't trust its conclusion yet — send it back.
 
+## Step 0 — PRE-FLIGHT KHẢ THI: chạy TRƯỚC khi viết dòng backtest đầu tiên
+
+**Trước khi bắt đầu BẤT KỲ hướng R&D mới nào, trả lời một câu: "với effect size kỳ vọng của
+hướng này và số quan sát ĐỘC LẬP có sẵn trong dữ liệu VN, có bao giờ đạt được DSR 0,95 không?"
+Nếu KHÔNG — đừng bắt đầu.**
+
+```bash
+$DNA_PYEXE mike/bin/rnd_preflight_power.py \
+    --sharpe-ann <Sharpe năm kỳ vọng>   # hoặc --mean-bps X --sd-bps Y
+    --obs-per-year <252 | 12 | 4>       # tần suất chuỗi return dùng tính Sharpe
+    --n-available <số quan sát ĐỘC LẬP có sẵn>
+    --n-trials <số cấu hình bạn SẼ thử — khai trung thực>
+    --n-rule <per-day|per-episode|per-event|per-bet>   # BẮT BUỘC
+    [--max-history-years <trần cứng: tổng năm dữ liệu có thể TỒN TẠI>]
+```
+
+Phán: **GO** (dữ liệu hiện có đủ) · **MARGINAL** (phải chờ thêm X năm — chỉ bắt đầu nếu chấp
+nhận rõ ràng và ghi vào registry) · **NO-GO** (ngưỡng không đạt được bằng cách tích luỹ dữ liệu;
+đường ra duy nhất là edge mạnh hơn ×k, không phải N lớn hơn).
+
+`--n-rule` bắt buộc vì **đếm sai N là cách hỏng phổ biến nhất**, và quy tắc đếm khác nhau theo
+LOẠI chiến lược (`--help-rules` in bảng đầy đủ):
+
+| Loại chiến lược | 1 quan sát = | Lượng có trong dữ liệu VN |
+|---|---|---|
+| Cross-sectional stock-selection (tái cân bằng thường xuyên) | 1 phiên NAV (`per-day`) | ~3.000 phiên từ 2014 → **thường ĐỦ** |
+| Market-timing / regime / macro gate | 1 **episode** (`per-episode`) | ~13 episode DT5G từ 2014 → **gần như không bao giờ đủ** |
+| Event study (earnings, ex-date, corp action, đáo hạn) | 1 sự kiện (`per-event`), **chiết khấu cho chùm thời gian** | 48.500 ticker-quý có `Release_Date` nhưng chỉ ~51 đợt công bố |
+| Intraday / mỗi phiên một lượt | 1 phiên (`per-day`) — chỉ hợp lệ nếu mỗi phiên là quyết định MỚI | tuỳ hợp đồng; VN30F1M chỉ có 9,13 năm |
+
+**Sự cố làm luật này ra đời (2026-06→09, chương trình ORB VN30F):** 4 tháng R&D, ~20 cấu hình,
+5 job dispatch — rồi mới tính ra DSR 0,95 cần **4.075 phiên = 16,2 năm**, trong khi hợp đồng
+VN30F1M chỉ tồn tại 9,13 năm (ở đó DSR tối đa **0,779**). Phép tính mất 30 giây và đáng lẽ là
+bước ĐẦU TIÊN. Chẩn đoán hậu kiểm còn cho thấy không có suy giảm nào để giải thích: sup-Wald
+không tìm được điểm gãy nào (p=0,666) và đoạn drawdown "thảm hoạ" nằm ở phân vị 29% của chính
+phân phối null. Artifact: `mike/agents/Taylor/research/orb_threshold_recalc_20260925/` +
+`orb_diagnosis_20260925/`.
+
+**Hai cái bẫy khi chạy pre-flight:**
+1. `--n-trials` phải là số cấu hình bạn **sẽ** thử, không phải số cấu hình cuối cùng báo cáo.
+   Khai thấp làm DSR đẹp giả. ORB khai 20 — đó là con số thật.
+2. Effect size giả định phải đến từ **ngoài mẫu sẽ test** (lý thuyết, literature, thị trường
+   khác) — lấy từ chính mẫu sắp test là vòng luẩn quẩn. Nếu không biết, chạy 2 kịch bản
+   (lạc quan / bảo thủ) và dùng kịch bản bảo thủ để quyết GO/NO-GO.
+
+Selfcheck: `$DNA_PYEXE mike/bin/rnd_preflight_power_selfcheck.py` (21 assertion, tái lập đúng
+các con số đã pin của ORB).
+
 ## The order — do these IN THIS ORDER, not whichever feels natural
 
-**1. Scope by reading the real code first, never by assuming.**
+**1. Scope by reading the real code first, never by assuming.** *(chỉ tới đây sau khi Step 0 phán GO/MARGINAL)*
 Before designing any test, open the actual production function/SQL you're testing and confirm
 line-by-line what it does. Two real corrections happened from this in one afternoon
 (2026-08-01): a brief assumed a `RETAIL` route existed and that `POWER` used the FSCORE axis —
