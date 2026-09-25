@@ -6912,3 +6912,18 @@ BEAR/CRISIS; (c) hạ tầng phái sinh vẫn là hard blocker độc lập (Mik
 `calibrate_cusum{,2}.py`+`cusum_arl{,_extended}.json` · `make_baseline.py`+`orb_drift_baseline.json` ·
 `normstat.py` · `orb_drift_monitor.py` · `orb_drift_monitor_selfcheck.py` · `drift_monitor_replay.csv` ·
 `DESIGN_early_warning.md`.
+
+⚠️ **GIỚI HẠN DỮ LIỆU — hàng rào cứng của vendor, không phải lựa chọn thu thập.** Đã thử trực tiếp
+(`vnstock.api.quote.Quote('VN30F1M','VCI')`, 2026-09-25): mọi request 1m **trước 2023-09-11** trả
+`RetryError/ValueError`; request `2023-08-01..2023-09-30` trả về bar đầu tiên đúng **2023-09-11 09:00**.
+VN30F1M giao dịch từ **2017-08-10** ⇒ **~6 trong ~9 năm đời hợp đồng KHÔNG thể test ở độ phân giải
+1 phút** với nguồn này. Đoạn không test được chứa đúng các giai đoạn căng nhất: sụt 2018, sụp COVID
+2020, và bear 2022 (VNINDEX −33%). Vì vậy câu "validate trên toàn bộ lịch sử có dữ liệu" nghĩa là
+**3,04 năm của một công cụ 9,1 năm**, và nó CỘNG DỒN với điểm yếu (b) ở trên (chưa test qua
+BEAR/CRISIS) chứ không độc lập.
+
+⚠️ **Rủi ro vận hành phát hiện cùng lượt (không thuộc phạm vi job, chưa sửa):** `orb_pt.py` gọi API
+**đã bị ngừng hỗ trợ** `Vnstock().stock(...).quote.history(...)`. Hiện chỉ in cảnh báo migration,
+chưa vỡ; sẽ vỡ khi vendor bỏ hẳn. Đường thay thế đã xác nhận chạy: `from vnstock.api.quote import
+Quote; Quote(symbol=..., source='VCI').history(...)`. Cần Mike quyết định có sửa hay không —
+paper program sẽ im lặng đứt khi API bị bỏ (tầng T0 của monitor bắt được qua check "độ tuổi sổ paper").
