@@ -29,3 +29,4 @@
   tiết nếu cần tra lại).
 
 - [2026-09-25T17:44:35Z] Opening-window A/B thụ động (order_book_execution_shadow ext): triển khai job Taylor_20260925_174424 (deadline trước phiên 28/09); bắt đầu thu thập 28/09; checkpoint sơ bộ 21/10 (trùng mốc nghiệm thu shadow program mẹ, KHÔNG kết luận); mốc quyết định cứng 25/01/2027 (~80 phiên cho N=24 mới). Chi tiết: kb/projects/rnd-pipeline-tracker.md.
+- [2026-09-25T17:56:02Z] Opening-window l2-poll DEPLOYED (commit 4d863548, job Taylor_20260925_174424) — cron 09:13 ICT T2-T6 tự chạy từ 28/09, không cần theo dõi thêm cho tới checkpoint 21/10.
