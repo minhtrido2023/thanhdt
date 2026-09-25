@@ -10,7 +10,7 @@ hong nao khong con duoc bat.
 Chay: python3 orb_drift_monitor_selfcheck.py [-v]
 Exit 0 = tat ca PASS.
 """
-import sys, io, os, json, math
+import sys, os, json
 sys.stdout.reconfigure(encoding="utf-8")   # xem ghi chu trong orb_drift_monitor.py
 import numpy as np, pandas as pd
 from datetime import datetime, timedelta
@@ -19,7 +19,7 @@ HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 import orb_drift_monitor as M
 
 ICT = ZoneInfo("Asia/Ho_Chi_Minh")
-BASE = json.load(open(os.path.join(HERE, "orb_drift_baseline.json")))
+BASE = json.load(open(os.path.join(HERE, "..", "data", "orb_drift_baseline.json")))
 LOG0 = pd.read_csv(os.path.join("/home/trido/thanhdt/WorkingClaude", "data/orb_pt_log.csv"))
 MU0 = BASE["moments"]["mu_bps"]/1e4; SD0 = BASE["moments"]["sd_bps"]/1e4
 rng = np.random.default_rng(99)
@@ -175,7 +175,7 @@ onlysprt = [c for c in r["checks"] if c["status"]!="OK"]
 check("SPRT_co_the_dat_bien_H1", sp["value"] > 0, f"LLR={sp['value']:+.2f} sau {r['live']['n']} phien")
 
 # --- 15) monitor KHONG BAO GIO ghi vao file production ---
-src = open(os.path.join(HERE,"orb_drift_monitor.py")).read()
+src = open(os.path.join(HERE, "orb_drift_monitor.py")).read()
 bad = [t for t in ['orb_pt_log.csv", "w', "orb_pt_log.csv','w", ".to_csv(LOG", "open(LOG, 'w'", 'open(LOG, "w'] if t in src]
 check("monitor_khong_ghi_vao_log_production", not bad, f"pattern nghi ngo: {bad}")
 check("monitor_khong_goi_orb_pt", "orb_pt.py" not in src.replace("orb_pt.py (", "X(").replace("orb_pt_log","X").replace("orb_pt_revisions","X").replace('"orb_pt.py"','"X"'),

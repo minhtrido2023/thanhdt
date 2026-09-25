@@ -38,13 +38,22 @@ TAI SAO THIET KE NHU THE NAY (khong phai rolling-Sharpe, khong phai CUSUM don):
 Nguon ky vong: orb_drift_baseline.json (dong bang tu 670 phien PRE-LIVE cua DUNG config
 dang deploy, job Taylor_20260925_103217). Khong dung phien live nao de dung ky vong.
 
+Vi tri canonical (chuyen tu research/ ngay 2026-09-25, §10 coding_guidelines):
+  mike/bin/orb_drift_monitor.py          script
+  mike/bin/orb_normstat.py               helper (ban sao research/normstat.py, doi ten de
+                                         khong chiem ten chung 'normstat' trong mike/bin)
+  mike/data/orb_drift_baseline.json      ky vong dong bang tu 670 phien PRE-LIVE
+  mike/data/orb_drift_replay.csv         output cua --replay
+Cron: 45 8 * * 1-5 (= 15:45 ICT), SAU orb_pt trong papertrade_daily.sh (chay 15:30, buoc
+[17] orb_pt xong ~15:37). Escalate MAC DINH TAT -- crontab khong truyen --escalate.
+
 Chay:
   python3 orb_drift_monitor.py                 # kiem tra hom nay
   python3 orb_drift_monitor.py --json          # chi in JSON
   python3 orb_drift_monitor.py --replay         # dry-run: phat lai tung phien, dem bao gia
   python3 orb_drift_monitor.py --escalate       # cho phep ghi bus question khi ALERT
 """
-import sys, io, os, json, argparse, math, hashlib
+import sys, os, json, argparse, math
 # reconfigure thay vi tao TextIOWrapper moi: khi file nay duoc IMPORT boi mot script da
 # tu wrap stdout (selfcheck), wrapper cu bi GC va DONG luon buffer goc -> "I/O operation
 # on closed file". Loi nay chi hien duoi python3.12 ($DNA_PYEXE), khong hien duoi 3.10.
@@ -56,11 +65,11 @@ from zoneinfo import ZoneInfo
 HERE = os.path.dirname(os.path.abspath(__file__))
 WC   = "/home/trido/thanhdt/WorkingClaude"
 LOG  = os.path.join(WC, "data/orb_pt_log.csv")
-BASE = os.path.join(HERE, "orb_drift_baseline.json")
+BASE = os.path.join(WC, "mike/data/orb_drift_baseline.json")
 REVLOG = os.path.join(WC, "data/orb_pt_revisions.log")
 ICT  = ZoneInfo("Asia/Ho_Chi_Minh")
 sys.path.insert(0, HERE)
-from normstat import ncdf
+from orb_normstat import ncdf
 
 OK, WARN, ALERT = "OK", "WARN", "ALERT"
 RANK = {OK: 0, WARN: 1, ALERT: 2}
@@ -244,7 +253,7 @@ def evaluate(log, base, asof=None, check_freshness=True):
 def render(res):
     L, E = res["live"], res["expected"]
     print("=" * 94)
-    print(f"  ORB DRIFT MONITOR -- CHI GIAM SAT, khong doi tham so, khong dung paper")
+    print("  ORB DRIFT MONITOR -- CHI GIAM SAT, khong doi tham so, khong dung paper")
     print(f"  asof {res['asof']}  |  TRANG THAI TONG: {res['overall']}")
     print("=" * 94)
     print(f"  Live  n={L['n']:>4}  mean {L['mean_bps']:+7.2f}bps  sd {L['sd_bps']:6.2f}bps"
@@ -287,8 +296,8 @@ def replay(log, base):
     D = pd.DataFrame(rows)
     print("=" * 94)
     print(f"  DRY-RUN tren {len(log)} phien paper da co (phat lai tu phien 20 -> {len(log)})")
-    print(f"  Ky vong: 0 ALERT. Viec B da xac nhan cua so nay o phan vi 50 cua phan phoi")
-    print(f"  ky vong => bat ky ALERT nao o day la BAO GIA va thiet ke phai sua.")
+    print("  Ky vong: 0 ALERT. Viec B da xac nhan cua so nay o phan vi 50 cua phan phoi")
+    print("  ky vong => bat ky ALERT nao o day la BAO GIA va thiet ke phai sua.")
     print("=" * 94)
     tot = len(D)
     print(f"  Tong so lan chay mo phong: {tot}")
@@ -307,8 +316,8 @@ def replay(log, base):
         print(f"\n  !!! {len(bad)} lan ALERT tren du lieu BINH THUONG -- thiet ke CHUA dat:")
         print(bad[["i","date","overall"]].to_string(index=False))
     else:
-        print(f"\n  => 0 ALERT tren 75 phien binh thuong. Thiet ke qua buoc validate false-positive.")
-    D.to_csv(os.path.join(HERE, "drift_monitor_replay.csv"), index=False)
+        print("\n  => 0 ALERT tren 75 phien binh thuong. Thiet ke qua buoc validate false-positive.")
+    D.to_csv(os.path.join(WC, "mike/data/orb_drift_replay.csv"), index=False)
     return D
 
 
