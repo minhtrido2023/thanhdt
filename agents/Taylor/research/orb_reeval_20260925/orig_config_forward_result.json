@@ -1,0 +1,54 @@
+{
+  "job": "Taylor_20260925_095910",
+  "item": "2/6",
+  "snapshot": "/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/orb_reeval_20260925/vn30f1m_live_snapshot_20260925.csv",
+  "snapshot_sha256": "871aaebd41386fb9582710864634c2fbe1ec98fc1fef9350d869b920bd0968b2",
+  "window": [
+    "2026-06-09",
+    "2026-09-24"
+  ],
+  "sessions_complete": 75,
+  "orig_config": {
+    "exit": "14:00",
+    "stop": 0.007,
+    "min_or": 0.002,
+    "tc_bps": 2.5,
+    "source": "vn30f_orb_strategy.py section C"
+  },
+  "deploy_config": {
+    "exit": "14:30",
+    "stop": null,
+    "min_or": 0.0,
+    "tc_bps": 2.5,
+    "source": "orb_pt.py (TC normalised to 2.5bps for comparability)"
+  },
+  "orig_forward": {
+    "n": 35,
+    "wr": 0.4,
+    "mean": -0.0011202228766368726,
+    "sd": 0.005830539721542886,
+    "sh": -3.0499726811866323,
+    "cum": -0.039025998109762816,
+    "mdd": -0.05473598737212271,
+    "stp": 0.37142857142857144,
+    "t": -1.1366577074417672
+  },
+  "deploy_forward_same_tc": {
+    "n": 74,
+    "wr": 0.5540540540540541,
+    "mean": 0.0008191011455776115,
+    "sd": 0.009362081816420875,
+    "sh": 1.388882070655715,
+    "cum": 0.05905297590376857,
+    "mdd": -0.06190897059833911,
+    "stp": 0.0,
+    "t": 0.7526290219454204
+  },
+  "orig_2024_reference": {
+    "n": 76,
+    "mean_bps": -5.93,
+    "sharpe": -1.84,
+    "cum": -0.045,
+    "source": "FINDINGS.md C5 (job Taylor_20260925_052050)"
+  }
+}
