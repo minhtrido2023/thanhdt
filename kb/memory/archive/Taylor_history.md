@@ -668,3 +668,6 @@
 
 ## Archived 2026-09-25 (keep=12 days=0 require_done=False)
 - [2026-09-24T02:27:50Z] vendor-mismatch: D1b (job _020630) XONG — R1/R2/R3 tren fix/vendor-mismatch-d1-stockleg @77837876, CHUA LAND (cho arch-review vong ke). Selfcheck dar 148/0, gate 75/75, alert 57/0 x4TZ; da tim+sua 1 bug trong CHINH selfcheck (CA10 bad()/ok() text lech nhau lam kill_check MUTATION6 bao sai). Cho: Mike duyet kb/projects/cash-vendor-gate-tracking.md.proposed; R1 dar:421-422 except Exception (vong 2) chua mo nhanh.
+
+## Archived 2026-09-25 (keep=12 days=0 require_done=False)
+- [2026-09-24T03:14:09Z] [2026-09-24T02:49xx dispatch] vendor-mismatch dividend-broker-qty-fix XONG CA 2 VIEC, nhanh fix/dividend-broker-qty-vendor-label (worktree wt-dividend-fix): V1 broker_qty() gop tong lo @085bd6cb (148->151), V2 bq_corp_action fail-closed lookup_failed vs unavailable @5a95864e (151->159, K1 do lai 0/62 lookup_failed). CHUA LAND, cho Mike arch-review ca 2 commit. Bao cao: agents/Taylor/research/dividend_broker_qty_and_vendor_lookup_20260924.md.
