@@ -21,14 +21,17 @@ CONFIG DANG DEPLOY -- CHUA DUOC VALIDATE RIENG (sua 2026-09-25; truoc do docstri
             Taylor_20260925_052050) muc 7 + C5; forward-test cua config GOC tren dung
             cua so live: .../orb_reeval_20260925/orig_config_forward.md
 
-Idempotent: dung lai tu vnstock moi lan chay. Window mo (tu STARTDATE, tich luy tien).
+So paper data/orb_pt_log.csv la APPEND-ONLY: ngay da ghi khong bao gio bi ghi de, chi
+append ngay moi; vendor revision tren ngay cu -> giu so cu + ghi data/orb_pt_revisions.log.
+Window mo (tu STARTDATE, tich luy tien).
 """
-import sys, io, json
+import sys, io, json, os
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 import numpy as np, pandas as pd
 from vnstock import Vnstock
 
-WD = r"/home/trido/thanhdt/WorkingClaude"
+# ORB_PT_WD chi de selfcheck tro vao sandbox (bin/orb_pt_appendonly_selfcheck.py); production bo trong.
+WD = os.environ.get("ORB_PT_WD") or r"/home/trido/thanhdt/WorkingClaude"
 STARTDATE   = "2026-06-09"
 SLEEVE_BASE = 1_000_000_000     # 1B von danh rieng ORB
 TICK        = 0.1
@@ -59,6 +62,45 @@ for d,g in f.groupby("date"):
     net=sig*(xf/ef-1)-FEE
     recs.append({"date":str(d),"or_ret":or_ret,"sig":sig,"entry":entry,"exit":exitpx,"net":net})
 R=pd.DataFrame(recs)
+COLS = ["date","or_ret","sig","entry","exit","net"]
+if len(R): R = R[COLS]
+
+# ---- SO PAPER APPEND-ONLY (item 3/6 job Taylor_20260925_095910) ----------------------
+# Truoc day file nay bi GHI DE hoan toan moi lan chay: vnstock tra lai ca lich su, nen mot
+# ban sua du lieu cua vendor se am tham viet lai lich su trial ma khong de lai dau vet.
+# (Da quan sat that: request start=end=2026-08-26 tra ve bar tu 2026-08-24 14:02.)
+# Luat bay gio: ngay DA CO trong log la BAT KHA XAM PHAM -- chi duoc APPEND ngay moi.
+# Neu so tinh lai cho mot ngay cu khac so da luu => vendor revision: GIU so cu, in canh bao,
+# ghi 1 dong vao data/orb_pt_revisions.log. KHONG tu dong sua.
+LOG = WD+"/data/orb_pt_log.csv"
+REVLOG = WD+"/data/orb_pt_revisions.log"
+revisions = []
+if os.path.exists(LOG):
+    prev = pd.read_csv(LOG)
+    prev["date"] = prev["date"].astype(str)
+    if len(R):
+        cur = R.set_index("date")
+        for _, pr in prev.iterrows():
+            if pr["date"] not in cur.index: continue
+            c = cur.loc[pr["date"]]
+            if abs(float(pr["net"]) - float(c["net"])) > 1e-12 or int(pr["sig"]) != int(c["sig"]):
+                revisions.append((pr["date"], float(pr["net"]), float(c["net"]),
+                                  int(pr["sig"]), int(c["sig"])))
+        fresh = R[~R["date"].isin(set(prev["date"]))]
+    else:
+        fresh = R
+    n_new = len(fresh)
+    R = pd.concat([prev[COLS], fresh], ignore_index=True) if n_new else prev[COLS].copy()
+    R = R.sort_values("date").reset_index(drop=True)
+    if revisions:
+        print(f"\n  !! VENDOR REVISION: {len(revisions)} ngay da luu co so tinh lai KHAC."
+              f" GIU so cu (append-only). Chi tiet -> data/orb_pt_revisions.log")
+        with open(REVLOG, "a", encoding="utf-8") as fp:
+            for d, on, nn, osg, nsg in revisions:
+                print(f"     {d}: net luu {on:+.6f} vs tinh lai {nn:+.6f} | sig {osg:+d} -> {nsg:+d}")
+                fp.write(f"asof_bar={last_bar}\tdate={d}\tnet_stored={on:+.8f}"
+                         f"\tnet_refetch={nn:+.8f}\tsig_stored={osg:+d}\tsig_refetch={nsg:+d}\n")
+    print(f"  Log append-only: {len(prev)} ban ghi cu giu nguyen + {n_new} ngay moi = {len(R)}")
 
 # ---- forward instruction (sizing for next session) ----
 contracts = round(SLEEVE_BASE/(latest_px*MULT))
@@ -106,6 +148,8 @@ status.update({"n_days":int(len(R)),"window_started":True,
                "cum_ret":round(float(cum),4),"wr":round(float(wr),3),
                "sharpe":round(float(sh),2),"nav":int(R["nav"].iloc[-1])})
 _write()
-R.to_csv(WD+"/data/orb_pt_log.csv", index=False)
+R.to_csv(LOG, index=False, float_format="%.17g")   # 17g = round-trip chinh xac float64:
+#   log bi doc-roi-ghi lai moi lan chay, mac dinh cua pandas lam cut chu so cuoi va sai so
+#   se tich luy dan qua nhieu nam. Voi %.17g thi read->write la bat bien.
 print(f"\n  Log -> data/orb_pt_log.csv | status -> data/orb_pt_status.json")
 print("Done.")
