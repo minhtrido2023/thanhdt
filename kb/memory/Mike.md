@@ -40,3 +40,4 @@
 - Lớp lỗi §29 (chẩn đoán không dựa bằng chứng) có thể có NHIỀU CỬA trong CÙNG 1 file — 1 vòng
   review chỉ đóng đúng cửa nó thấy.
 
+- [2026-09-25T05:21:00Z] 25/09 12:2x — User hỏi VN30F1M có dùng không (có, orb_intraday) + hạ tầng đặt lệnh phái sinh sẵn sàng chưa. Mike tự kiểm code: CHƯA sẵn sàng — PHSFlashBroker chỉ ĐỌC balance/position phái sinh (fno_account_id SANDBOX), 0 method đặt lệnh phái sinh ở cả 5 broker class, docstring tự ghi 'Phase 1 chỉ ĐỌC, đặt lệnh chưa xác nhận spec'. Đã báo user: cần dự án hạ tầng riêng nếu muốn live, khuyên tách quyết định quant trước/hạ tầng sau. Dispatch Taylor_20260925_052050 (bg, opus/high, 1.5h) đánh giá lại orb_intraday theo đúng tiêu chí registry (≥60 phiên GỒM chop/bear qua DT5G thật, không phải đếm ngày) + re-eval quant-skeptic nếu đủ điều kiện + hỏi rõ config 'validated' có phải chọn từ sweep cần DSR/PBO không. Kết luận A(đủ+đứng vững)/B(chưa đủ regime)/C(NO-GO). ĐANG CHỜ — poll qua ScheduleWakeup.
