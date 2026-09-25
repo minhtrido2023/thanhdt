@@ -620,7 +620,7 @@ check("T21d excluded_dividend_receivable_pending_vnd ghi đúng 80tr vào output
       r21_excl.get("excluded_dividend_receivable_pending_vnd") == 80e6,
       r21_excl.get("excluded_dividend_receivable_pending_vnd"))
 check("T21e note cảnh báo LOẠI cổ tức excluded được ghi ra (để chép vào notes plan)",
-      any("cổ tức receivable của mã excluded" in n for n in r21_excl["notes"]),
+      any("cổ tức excluded" in n and "XCL" in n for n in r21_excl["notes"]),
       r21_excl["notes"])
 
 # (b) mã KHÔNG bị exclude vẫn giữ NGUYÊN hành vi §pool-egg-div gốc — cổ tức receivable của mã
@@ -673,6 +673,25 @@ check("T21i RỦI RO ĐÃ BIẾT (chưa sửa): config XCL còn hiệu lực dù
       "không lặng lẽ đổi mà không ai biết.",
       r21i.get("excluded_dividend_receivable_pending_vnd") == 3e6,
       r21i.get("excluded_dividend_receivable_pending_vnd"))
+
+# T21j — case thật ZaloPay 2026-09-25 (job dgc-dividend-note-misleading-fix): DGC cấu hình 80tr
+# nhưng DNSE chỉ còn báo receivable 1,9tr (78,1tr đã settle, đã tính vào active_nav). Note CŨ
+# ("pool đã LOẠI 1,9tr cổ tức receivable ... chưa thật sự về") đọc như thể TOÀN BỘ cổ tức DGC chỉ
+# có 1,9tr và chưa về — user (john) tự đối chiếu dữ liệu thô, xác nhận đây là thông tin sai lệch.
+# Note MỚI phải nêu đủ 3 số (cấu hình / ĐÃ VỀ / CÒN LẠI) và không để 1,9tr đứng một mình như tổng.
+h21j = holdings(BASE_LOTS, cash=0.0, total_cash=300e6, debt=0.0,
+               div_recv=1.9e6, excluded=("XCL",))
+r21j = run(h21j, excluded_dividend_config_override=DGC_CFG)
+note21j = next((n for n in r21j["notes"] if "cổ tức excluded" in n), "")
+check("T21j excluded_dividend_receivable_pending_vnd = 1,9tr (đúng phần còn lại DNSE báo)",
+      r21j.get("excluded_dividend_receivable_pending_vnd") == 1.9e6,
+      r21j.get("excluded_dividend_receivable_pending_vnd"))
+check("T21j note nêu đủ 3 số: cấu hình 80.0tr / ĐÃ VỀ 78.1tr / CÒN LẠI 1.9tr",
+      "80.0tr" in note21j and "78.1tr" in note21j and "1.9tr" in note21j,
+      note21j)
+check("T21j 1.9tr KHÔNG đứng một mình như tổng cổ tức — luôn đi kèm 'CÒN LẠI' ngay cạnh",
+      "CÒN LẠI 1.9tr" in note21j and "cấu hình 1.9tr" not in note21j,
+      note21j)
 
 print(f"\n=== {len(PASS)} PASS / {len(FAIL)} FAIL ===")
 if FAIL:

@@ -416,10 +416,28 @@ def compute_trim(account_label, asof=None, target=PARK_TARGET_F1, holdings=None,
     out["excluded_dividend_receivable_detail"] = excl_div_detail
     if excl_div_pending:
         overdue_tks = sorted({d["ticker"] for d in excl_div_detail if d["overdue"]})
+        # excl_div_detail["amount_vnd"] = phần CÒN LẠI DNSE vẫn báo receivable (đã kẹp min với
+        # remaining), KHÔNG PHẢI tổng cổ tức — đọc nhầm 2 số này là bug thật 2026-09-25 (DGC:
+        # cấu hình 80tr, còn lại chỉ 1,9tr vì 78,1tr đã về và đã tính vào active_nav). Số CẤU
+        # HÌNH gốc lấy từ excl_div_config; ĐÃ VỀ = cấu hình − còn lại.
+        excl_div_config_by_tk = {}
+        for ent in excl_div_config or []:
+            if isinstance(ent, dict) and ent.get("ticker"):
+                excl_div_config_by_tk[ent["ticker"]] = (
+                    excl_div_config_by_tk.get(ent["ticker"], 0.0)
+                    + float(ent.get("amount_vnd") or 0))
+        div_lines = []
+        for tk in sorted({d["ticker"] for d in excl_div_detail}):
+            pending_tk = sum(d["amount_vnd"] for d in excl_div_detail if d["ticker"] == tk)
+            total_tk = excl_div_config_by_tk.get(tk, pending_tk)
+            arrived_tk = total_tk - pending_tk
+            div_lines.append(
+                f"{tk} cấu hình {total_tk/1e6:,.1f}tr, ĐÃ VỀ {arrived_tk/1e6:,.1f}tr "
+                f"(đã tính vào active_nav), CÒN LẠI {pending_tk/1e6:,.1f}tr DNSE vẫn báo receivable")
         out["notes"].append(
-            f"⚠️ pool đã LOẠI {excl_div_pending/1e6:,.1f}tr cổ tức receivable của mã excluded "
-            f"({', '.join(sorted({d['ticker'] for d in excl_div_detail}))}) — chưa thật sự về "
-            f"(Option B, cùng cơ chế compute_active_nav.py). CHÉP dòng này vào notes plan."
+            "ℹ️ cổ tức excluded — " + "; ".join(div_lines) + " — pool tạm loại đúng phần CÒN LẠI "
+            "này tới khi DNSE xác nhận hết (Option B, cùng cơ chế compute_active_nav.py). "
+            "CHÉP dòng này vào notes plan."
             + (f" ⚠️ QUÁ HẠN dự kiến: {', '.join(overdue_tks)} — DNSE vẫn báo receivable dù đã "
                f"qua ngày dự kiến về, kiểm tiền đã về thật chưa / cập nhật "
                f"excluded_dividend_receivable trước khi duyệt lệnh bán (cùng cảnh báo "
