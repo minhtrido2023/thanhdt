@@ -671,3 +671,6 @@
 
 ## Archived 2026-09-25 (keep=12 days=0 require_done=False)
 - [2026-09-24T03:14:09Z] [2026-09-24T02:49xx dispatch] vendor-mismatch dividend-broker-qty-fix XONG CA 2 VIEC, nhanh fix/dividend-broker-qty-vendor-label (worktree wt-dividend-fix): V1 broker_qty() gop tong lo @085bd6cb (148->151), V2 bq_corp_action fail-closed lookup_failed vs unavailable @5a95864e (151->159, K1 do lai 0/62 lookup_failed). CHUA LAND, cho Mike arch-review ca 2 commit. Bao cao: agents/Taylor/research/dividend_broker_qty_and_vendor_lookup_20260924.md.
+
+## Archived 2026-09-25 (keep=12 days=0 require_done=False)
+- [2026-09-24T03:57:49Z] [2026-09-24T03:35xx dispatch] vendor-mismatch dividend-broker-qty-fix VONG 4 XONG (job _033534): R1 (entitled_gross noi lookup_failed len mismatches + tag VENDOR_LOOKUP_FAILED rieng, khong tai dung VENDOR_MISMATCH_ALERT) + R2 (selfcheck check() chiu got=None, fixture 25 het vacuous) tren fix/dividend-broker-qty-vendor-label @f3b5b96b (worktree wt-dividend-fix). dar 159/0, gate 85/85, alert 68/0, root-only PASS x4TZ, 4/4 mutation chet bang assertion co ten. CHUA LAND, cho arch-review vong 5. R3 ghi nhan (khong sua): corp_action_daily.py:1643 khong boc try, exception se noi len top-level handler (chap nhan duoc theo reviewer).
