@@ -420,11 +420,11 @@ def compute_trim(account_label, asof=None, target=PARK_TARGET_F1, holdings=None,
         # `cash_dividend_receiving_vnd` — con số đó là TỔNG CẤP TÀI KHOẢN, KHÔNG tách theo mã
         # (compute_active_nav.py::excluded_dividend_pending() docstring). Bản vá trước (ff41c629)
         # coi phần "còn lại" này là phần CÒN LẠI RIÊNG của đúng ticker và suy "ĐÃ VỀ = cấu hình −
-        # còn lại" — SAI trên ca thật 2026-09-25 (ZaloPay/XCL): 80tr cấu hình đã settle 100% một
+        # còn lại" — SAI trên ca thật 2026-09-25 (ZaloPay/DGC): 80tr cấu hình đã settle 100% một
         # lượt tối 09-25, phần 1,9tr còn lại trong cashDividendReceiving là cổ tức mã KHÁC phát
         # sinh 09-21, không phải phần sót của ticker này. KHÔNG khẳng định số "ĐÃ VỀ" per-ticker —
         # chỉ báo cáo đúng những gì code đọc được: cấu hình, tổng còn receivable toàn tài khoản,
-        # và mức pool đang tạm loại theo min().
+        # và mức pool đang tạm loại theo min(). ("XCL" trong selfcheck là mã fixture thay cho DGC.)
         excl_div_config_by_tk = {}
         for ent in excl_div_config or []:
             if isinstance(ent, dict) and ent.get("ticker"):

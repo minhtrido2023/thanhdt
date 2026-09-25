@@ -736,6 +736,25 @@ check("T21l ≥2 mã excluded — note KHÔNG khẳng định 'ĐÃ VỀ' cho b�
 check("T21l cả 2 mã đều xuất hiện trong note kèm cấu hình đúng của từng mã",
       "XCL cấu hình 80.0tr" in note21l and "SHS cấu hình 50.0tr" in note21l,
       note21l)
+# arch-review vòng 2 required_change (1): pin đúng SỐ POOL PER-TICKER thật (không phải account-
+# level 100tr) — mutation "pending_tk := account_total_recv" (thay số pool per-ticker bằng TỔNG
+# account-level, đúng lỗi misattribution vòng 1 đã bị bác) vẫn PASS check trên nếu chỉ pin cụm
+# "X cấu hình Ytr" (không đụng số min()). Pin thẳng 2 dòng min(...) = ... thật của T21l.
+check("T21l pin số per-ticker thật trong min() — XCL: min(80.0tr; 80.0tr) = 80.0tr "
+      "(không phải account-level 100.0tr)",
+      "min(80.0tr; 80.0tr) = 80.0tr" in note21l,
+      note21l)
+check("T21l pin số per-ticker thật trong min() — SHS: min(50.0tr; 20.0tr) = 20.0tr "
+      "(không phải account-level 100.0tr)",
+      "min(50.0tr; 20.0tr) = 20.0tr" in note21l,
+      note21l)
+# T21l là case KHÔNG có cảnh báo stale nào bắn ra (ratio XCL=1.0, SHS=0.4, cả 2 > 10%) ⇒ đây là
+# chỗ non-vacuous để pin cụm "không tách theo mã" (T21j vô tình pass qua câu cảnh báo stale-config
+# riêng, không phải dòng chính) — đúng 1 lần / mã, 2 mã ⇒ đúng 2 lần.
+check("T21l cụm 'không tách theo mã' xuất hiện đúng 2 lần (dòng chính, non-vacuous — case này "
+      "không có cảnh báo stale nào chen vào)",
+      note21l.count("không tách theo mã") == 2,
+      note21l)
 
 # T21m — required_changes (c): ≥2 entry config CÙNG 1 ticker phải CỘNG DỒN, không ghi đè. Mutation
 # "cộng dồn → ghi đè" từng sống qua 85/85 test vì chưa có case nào có ≥2 entry cùng ticker.
