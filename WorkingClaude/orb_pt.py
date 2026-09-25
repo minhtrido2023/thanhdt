@@ -33,7 +33,13 @@ from vnstock import Vnstock
 # ORB_PT_WD chi de selfcheck tro vao sandbox (bin/orb_pt_appendonly_selfcheck.py); production bo trong.
 WD = os.environ.get("ORB_PT_WD") or r"/home/trido/thanhdt/WorkingClaude"
 STARTDATE   = "2026-06-09"
-SLEEVE_BASE = 1_000_000_000     # 1B von danh rieng ORB
+# --- SLEEVE 1B = NOTIONAL, KHONG phai margin (khai bao ro, item 4/6 job Taylor_20260925_095910)
+# Cong thuc size la SLEEVE_BASE / (gia x MULT) => chia cho GIA TRI HOP DONG, nen 1B la
+# NOTIONAL EXPOSURE muc tieu. Tien ky quy thuc te nho hon nhieu: initial margin VN30F ~17%
+# => ~165M cho 5 HD. Con so 17% la tham so VSD/cong ty chung khoan, CHUA doi soat voi DNSE;
+# no chi dung de in ra do lon ky quy, KHONG dung trong bat ky phep tinh loi nhuan nao.
+SLEEVE_BASE = 1_000_000_000     # 1B NOTIONAL danh rieng ORB (khong phai von ky quy)
+MARGIN_RATE_INIT_EST = 0.17     # ~17%, CHUA XAC NHAN voi broker -- chi de hien thi
 TICK        = 0.1
 SLIP_TICKS  = 1                 # ~0.5bps/side thuc te VN30F thanh khoan cao
 FEE         = 0.00006           # brokerage+tax round-trip ~0.6bps
@@ -103,12 +109,34 @@ if os.path.exists(LOG):
     print(f"  Log append-only: {len(prev)} ban ghi cu giu nguyen + {n_new} ngay moi = {len(R)}")
 
 # ---- forward instruction (sizing for next session) ----
+# Kiem lai 2026-09-25: 1 HD = latest_px*MULT ~ 194.5M = 19.45% sleeve => so HD ly tuong ~5.14,
+# lam tron xuong 5 => notional thuc 97.2% muc tieu, tuc THIEU ~2.7% size. Day la gioi han
+# NGUYEN cua don vi hop dong (khong chia nho duoc), khong phai loi cong thuc: round() da la
+# lua chon gan muc tieu nhat. Nhung no PHAI duoc khai bao, vi:
+#   cot `net`/`nav` trong log la LOI SUAT thuan (sig*(xf/ef-1)-FEE), KHONG tham chieu so HD
+#   => no ngam dinh exposure = DUNG 1B notional (so HD chia nho duoc).
+#   Ban trien khai duoc voi 5 HD chi an notional_pct x loi suat do.
+# => NAV/cum trong log la GIOI HAN TREN, cao hon ban 5-HD khoang (1 - notional_pct).
 contracts = round(SLEEVE_BASE/(latest_px*MULT))
+notional_1ct   = latest_px*MULT
+notional_actual= contracts*notional_1ct
+notional_pct   = notional_actual/SLEEVE_BASE
+margin_est     = notional_actual*MARGIN_RATE_INIT_EST
 
 status={
     "asof_bar": str(last_bar), "latest_vn30f": round(latest_px,1),
     "rule": "09:30 lay dau cu 09:00-09:30 -> long/short giu den 14:30, no stop",
     "reco_contracts": int(contracts), "sleeve_base": SLEEVE_BASE,
+    "sleeve_basis": "NOTIONAL",
+    "notional_per_contract": round(notional_1ct),
+    "notional_actual": round(notional_actual),
+    "notional_pct_of_sleeve": round(notional_pct, 4),
+    "size_error_pct": round(notional_pct-1, 4),
+    "margin_required_est": round(margin_est),
+    "margin_rate_init_est": MARGIN_RATE_INIT_EST,
+    "margin_rate_verified": False,
+    "nav_basis": "loi suat tren DUNG 1B notional (HD chia nho duoc) -> gioi han tren "
+                 "cua ban 5-HD; nhan voi notional_pct de co ban trien khai duoc",
     "window_start": STARTDATE, "n_days":0, "window_started": False,
     "last_date":None,"last_sig":None,"last_or":None,"last_net":None,
     "cum_ret":None,"wr":None,"sharpe":None,"nav":None,
@@ -123,7 +151,14 @@ print(f"  Rule: sign(OR 09:00-09:30) giu den 14:30, no stop, net slip {SLIP_TICK
 print("="*92)
 print(f"\n  Data den: {last_bar} | VN30F={latest_px:.1f}")
 print(f"  >> Phien KE TIEP: {status['rule']}")
-print(f"     Size = {contracts} HD VN30F (sleeve {SLEEVE_BASE/1e9:.0f}B / [{latest_px:.0f}x{MULT:,}])")
+print(f"     Size = {contracts} HD VN30F (sleeve {SLEEVE_BASE/1e9:.0f}B NOTIONAL / [{latest_px:.0f}x{MULT:,}])")
+print(f"     1 HD = {notional_1ct/1e6:,.1f}M = {notional_1ct/SLEEVE_BASE*100:.2f}% sleeve"
+      f" -> {contracts} HD = {notional_actual/1e6:,.1f}M = {notional_pct*100:.1f}% muc tieu"
+      f" ({(notional_pct-1)*100:+.1f}% size error do lam tron)")
+print(f"     Ky quy uoc tinh {margin_est/1e6:,.0f}M (~{MARGIN_RATE_INIT_EST*100:.0f}% notional,"
+      f" CHUA doi soat voi broker) — sleeve 1B la NOTIONAL, KHONG phai von ky quy")
+print(f"     LUU Y: cot net/nav trong log la loi suat tren DUNG 1B notional (HD chia nho duoc)"
+      f" => gioi han TREN; ban 5-HD an ~{notional_pct*100:.1f}% so do")
 
 if len(R)==0:
     print(f"\n  [Chua co phien hoan chinh >= {STARTDATE}] (phien hom nay co the chua dong).")
