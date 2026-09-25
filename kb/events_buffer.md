@@ -825,3 +825,6 @@
 ## Consolidation 2026-09-25T17:37:29Z
 - [2026-09-25T17:36:14Z] Mike/heartbeat — Mike_20260925_173513: {"status": "still_running", "elapsed_min": 1, "job_id": "Mike_20260925_173513", "source": "watcher"}
 - [2026-09-25T17:37:14Z] Mike/heartbeat — Mike_20260925_173513: {"status": "still_running", "elapsed_min": 2, "job_id": "Mike_20260925_173513", "source": "watcher"}
+
+## Consolidation 2026-09-25T17:37:59Z
+- [2026-09-25T17:37:50Z] Mike/finding — daily-retro-2026-09-25-finalized: {"entry": "kb/incidents/retro/retro-2026-09-25.md", "commit": "f67e4db0", "verified_by": "Wags", "verdict": "CONFIRMED", "n_incidents": 3, "escalations": ["retro-pattern-recurring-ack-topic-counter-structural-3retros (mới)", "retro-pattern-recurring-fpt-vendor-backfill-2days (kế thừa, ngày 3)"], "memory_reset": true, "consolidate": "v3269", "draft_deleted": true}
