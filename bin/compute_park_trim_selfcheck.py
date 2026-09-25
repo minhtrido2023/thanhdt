@@ -674,11 +674,13 @@ check("T21i RỦI RO ĐÃ BIẾT (chưa sửa): config XCL còn hiệu lực dù
       r21i.get("excluded_dividend_receivable_pending_vnd") == 3e6,
       r21i.get("excluded_dividend_receivable_pending_vnd"))
 
-# T21j — case thật ZaloPay 2026-09-25 (job dgc-dividend-note-misleading-fix): DGC cấu hình 80tr
-# nhưng DNSE chỉ còn báo receivable 1,9tr (78,1tr đã settle, đã tính vào active_nav). Note CŨ
-# ("pool đã LOẠI 1,9tr cổ tức receivable ... chưa thật sự về") đọc như thể TOÀN BỘ cổ tức DGC chỉ
-# có 1,9tr và chưa về — user (john) tự đối chiếu dữ liệu thô, xác nhận đây là thông tin sai lệch.
-# Note MỚI phải nêu đủ 3 số (cấu hình / ĐÃ VỀ / CÒN LẠI) và không để 1,9tr đứng một mình như tổng.
+# T21j — case thật ZaloPay 2026-09-25 (job dgc-dividend-note-misleading-fix, vòng 2): DGC cấu
+# hình 80tr, DNSE chỉ còn báo receivable 1,9tr TOÀN TÀI KHOẢN. Verify độc lập của Mike bằng dữ
+# liệu thô (dnse_raw_2026-09-{11,21,25}.jsonl) xác nhận: XCL đã SETTLE 100% (đúng 80tr) trong MỘT
+# BƯỚC tối 09-25; phần 1,9tr còn lại là cổ tức của MÃ KHÁC phát sinh 09-21, không liên quan XCL.
+# Note vòng 1 (ff41c629, "ĐÃ VỀ 78,1tr ... CÒN LẠI 1,9tr DNSE vẫn báo receivable") khẳng định per-
+# ticker một điều code KHÔNG có bằng chứng để nói — SAI trên đúng ca này. Note MỚI không được
+# khẳng định "ĐÃ VỀ"/"CÒN LẠI của ticker" — chỉ báo cấu hình + tổng account-level + mức pool loại.
 h21j = holdings(BASE_LOTS, cash=0.0, total_cash=300e6, debt=0.0,
                div_recv=1.9e6, excluded=("XCL",))
 r21j = run(h21j, excluded_dividend_config_override=DGC_CFG)
@@ -686,12 +688,73 @@ note21j = next((n for n in r21j["notes"] if "cổ tức excluded" in n), "")
 check("T21j excluded_dividend_receivable_pending_vnd = 1,9tr (đúng phần còn lại DNSE báo)",
       r21j.get("excluded_dividend_receivable_pending_vnd") == 1.9e6,
       r21j.get("excluded_dividend_receivable_pending_vnd"))
-check("T21j note nêu đủ 3 số: cấu hình 80.0tr / ĐÃ VỀ 78.1tr / CÒN LẠI 1.9tr",
-      "80.0tr" in note21j and "78.1tr" in note21j and "1.9tr" in note21j,
+check("T21j note KHÔNG khẳng định 'ĐÃ VỀ'/'đã tính vào active_nav' per-ticker (đó là suy diễn "
+      "không có bằng chứng — ca thật đã chứng minh sai)",
+      "ĐÃ VỀ" not in note21j and "đã tính vào active_nav" not in note21j,
       note21j)
-check("T21j 1.9tr KHÔNG đứng một mình như tổng cổ tức — luôn đi kèm 'CÒN LẠI' ngay cạnh",
-      "CÒN LẠI 1.9tr" in note21j and "cấu hình 1.9tr" not in note21j,
+check("T21j note nêu đúng khung: cấu hình 80.0tr, TỔNG account-level 1.9tr, không tách theo mã",
+      "cấu hình 80.0tr" in note21j and "TỔNG" in note21j and "1.9tr" in note21j
+      and "không tách theo mã" in note21j,
       note21j)
+check("T21j note KHÔNG còn câu 'pool tạm loại đúng phần CÒN LẠI này' (khẳng định cơ chế đúng "
+      "ngay lúc nó đang loại nhầm cổ tức mã khác)",
+      "pool tạm loại đúng phần CÒN LẠI" not in note21j,
+      note21j)
+check("T21j ratio 1.9/80 = 2,4% ≤ 10% ⇒ có cảnh báo CẤU HÌNH CÓ THỂ ĐÃ CŨ",
+      "CẤU HÌNH CÓ THỂ ĐÃ CŨ" in note21j and "XCL" in note21j,
+      note21j)
+
+# T21k — required_changes (a): residual thuộc về mã KHÔNG bị exclude (tái dùng setup T21i: XCL đã
+# settle 0, còn 3tr receivable của AAA — mã KHÔNG excluded). Note KHÔNG được khẳng định 3tr đó là
+# phần "còn lại"/"đã về" CỦA XCL — chỉ được nói account-level.
+r21k = run(h21i, excluded_dividend_config_override=DGC_CFG)
+note21k = next((n for n in r21k["notes"] if "cổ tức excluded" in n), "")
+check("T21k residual thuộc mã khác (AAA) — note KHÔNG khẳng định 'ĐÃ VỀ' per-ticker cho XCL",
+      "ĐÃ VỀ" not in note21k,
+      note21k)
+check("T21k ratio 3/80 = 3,75% ≤ 10% ⇒ cảnh báo CẤU HÌNH CÓ THỂ ĐÃ CŨ nổi lên đúng lúc cần "
+      "(XCL gần như chắc đã settle, phần còn lại thuộc mã khác)",
+      "CẤU HÌNH CÓ THỂ ĐÃ CŨ" in note21k and "XCL" in note21k,
+      note21k)
+
+# T21l — required_changes (b): ≥2 mã excluded cùng lúc, KHÔNG được tạo phép chia giả tạo kiểu
+# "SHS ĐÃ VỀ 30tr" chỉ vì thứ tự xử lý tham lam (greedy min(amt, remaining)) trong vòng lặp.
+XCL_SHS_CFG = [{"ticker": "XCL", "amount_vnd": 80_000_000,
+               "expected_arrival_date": "2026-09-25"},
+              {"ticker": "SHS", "amount_vnd": 50_000_000,
+               "expected_arrival_date": "2026-09-25"}]
+h21l = holdings(BASE_LOTS, cash=0.0, total_cash=300e6, debt=0.0,
+               div_recv=100e6, excluded=("XCL", "SHS"))     # tổng receivable 100tr < 130tr cấu
+               # hình ⇒ greedy: XCL lấy hết 80tr (remaining 20), SHS lấy nốt 20tr (remaining 0) —
+               # cả 2 mã đều có amount > 0 trong excl_div_detail nên đều xuất hiện trong note.
+r21l = run(h21l, excluded_dividend_config_override=XCL_SHS_CFG)
+note21l = next((n for n in r21l["notes"] if "cổ tức excluded" in n), "")
+check("T21l ≥2 mã excluded — note KHÔNG khẳng định 'ĐÃ VỀ' cho bất kỳ mã nào (greedy split "
+      "không phải bằng chứng per-ticker)",
+      "ĐÃ VỀ" not in note21l,
+      note21l)
+check("T21l cả 2 mã đều xuất hiện trong note kèm cấu hình đúng của từng mã",
+      "XCL cấu hình 80.0tr" in note21l and "SHS cấu hình 50.0tr" in note21l,
+      note21l)
+
+# T21m — required_changes (c): ≥2 entry config CÙNG 1 ticker phải CỘNG DỒN, không ghi đè. Mutation
+# "cộng dồn → ghi đè" từng sống qua 85/85 test vì chưa có case nào có ≥2 entry cùng ticker.
+DGC_CFG_DUP = [{"ticker": "XCL", "amount_vnd": 80_000_000,
+               "expected_arrival_date": "2026-09-25"},
+              {"ticker": "XCL", "amount_vnd": 50_000_000,
+               "expected_arrival_date": "2026-10-15"}]
+h21m = holdings(BASE_LOTS, cash=0.0, total_cash=300e6, debt=0.0,
+               div_recv=130e6, excluded=("XCL",))
+r21m = run(h21m, excluded_dividend_config_override=DGC_CFG_DUP)
+note21m = next((n for n in r21m["notes"] if "cổ tức excluded" in n), "")
+check("T21m 2 entry cùng ticker XCL (80tr+50tr) ⇒ note phải cộng dồn cấu hình 130.0tr, KHÔNG "
+      "ghi đè thành 50.0tr (mutation cộng dồn→ghi đè)",
+      "XCL cấu hình 130.0tr" in note21m,
+      note21m)
+check("T21m excluded_dividend_receivable_pending_vnd = 130tr (min(130tr cấu hình, 130tr "
+      "receivable) — cả 2 entry được match hết)",
+      r21m.get("excluded_dividend_receivable_pending_vnd") == 130e6,
+      r21m.get("excluded_dividend_receivable_pending_vnd"))
 
 print(f"\n=== {len(PASS)} PASS / {len(FAIL)} FAIL ===")
 if FAIL:
