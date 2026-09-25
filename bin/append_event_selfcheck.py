@@ -41,6 +41,11 @@ def mksandbox():
     shutil.copy2(SCRIPT, os.path.join(d, "bin", "append_event.sh"))
     shutil.copy2(os.path.join(ROOT, "bin", "mike_json.py"),
                  os.path.join(d, "bin", "mike_json.py"))
+    # json_payload_diag.py: phụ thuộc MỚI của append_event.sh (2026-09-25). Không copy thì sandbox
+    # đo một script KHÁC với production — và chính cái thiếu này đã làm mọi ca payload JSON
+    # HỢP LỆ bị từ chối (weekly-ops-audit 2026-09-26).
+    shutil.copy2(os.path.join(ROOT, "bin", "json_payload_diag.py"),
+                 os.path.join(d, "bin", "json_payload_diag.py"))
     with open(os.path.join(d, "kb", "version.txt"), "w", encoding="utf-8") as f:
         f.write("1\n")
     return d

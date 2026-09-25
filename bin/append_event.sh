@@ -114,13 +114,31 @@ fi
 # 'Expecting' là "cụt thật (word-split hoặc bị cắt)", sai trên ca Taylor 2026-09-24T06:13:45Z
 # (đủ 2452 ký tự, argc=5, kết thúc `"}`, chỉ THIẾU 1 dấu `}`). Nay chẩn đoán ĐO trên payload
 # ở bin/json_payload_diag.py (đếm dấu cấu trúc ngoài chuỗi + chuỗi còn mở hay không).
+# 2026-09-26 (weekly-ops-audit): PHÁN QUYẾT "hợp lệ hay không" phải ĐỘC LẬP với helper chẩn
+# đoán. Bản trước gộp 2 việc vào 1 lệnh, nên helper VẮNG (python3 trả "can't open file", rc=2)
+# bị tính là "JSON hỏng" ⇒ payload HỢP LỆ bị TỪ CHỐI, và dòng "Lỗi parser:" in ra thông báo
+# thiếu file NHƯ THỂ là lỗi parser — đúng lớp §29 mà chính guard này sinh ra để chống.
+# Tái hiện: copy append_event.sh + mike_json.py sang tmpdir (KHÔNG copy helper) rồi ghi
+# '{"a":1}' ⇒ rc=1. Nay parser inline quyết định, helper CHỈ làm giàu thông điệp.
 case "$payload" in
   \{*|\[* )
-    _jerr="$(printf '%s' "$payload" | python3 "$ROOT/bin/json_payload_diag.py" 2>&1 >/dev/null)" \
-      || die "payload bắt đầu bằng '{' hoặc '[' nhưng KHÔNG phải JSON hợp lệ.
+    _jerr="$(printf '%s' "$payload" | python3 -c 'import json,sys
+try:
+    json.loads(sys.stdin.read())
+except ValueError as exc:
+    sys.stderr.write(str(exc)); sys.exit(1)' 2>&1 >/dev/null)" || {
+      _diag="$ROOT/bin/json_payload_diag.py"
+      if [ -f "$_diag" ]; then
+        _jerr="$(printf '%s' "$payload" | python3 "$_diag" 2>&1 >/dev/null || true)"
+      else
+        _jerr="$_jerr
+  (cây này KHÔNG có $_diag ⇒ thiếu phần chẩn đoán ĐO ĐƯỢC; lỗi trên là của parser JSON, không phải của helper)"
+      fi
+      die "payload bắt đầu bằng '{' hoặc '[' nhưng KHÔNG phải JSON hợp lệ.
   Lỗi parser: $_jerr
   Độ dài payload: ${#payload} ký tự · đuôi nhận được: ...$(printf '%s' "${payload: -60}")
-  Muốn ghi chuỗi thường thì đừng mở đầu bằng { hoặc [." ;;
+  Muốn ghi chuỗi thường thì đừng mở đầu bằng { hoặc [."
+    } ;;
 esac
 
 kbver="$(tr -dc '0-9' < "$ROOT/kb/version.txt" 2>/dev/null || true)"; kbver="${kbver:-0}"
