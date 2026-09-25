@@ -7,6 +7,31 @@
 
 Chi tiết đầy đủ từng mục: bus finding của Taylor + `kb/incidents/index.md`.
 
+- **Opening-window limit-order A/B thụ động (mở rộng `order_book_execution_shadow`)** — chốt
+  2026-09-26 (user duyệt phương án). Bối cảnh: `execution_alpha_20260925` (76 cụm, +13,75bps vs
+  open, t=4,98) → follow-up `opening_window_limit_20260926` (job `Taylor_20260925_171624`, quant-
+  skeptic REFUTE vòng 1 rồi sửa) xác nhận cơ chế ở mức **53%** (26/49 lệnh đặt 09:15:00-09 account
+  thật rơi vào fallback "thiếu lịch sử giá" `_decide_cross_adaptive`, ép cross=True) — KHÔNG dựng
+  được counterfactual định lượng vì `orderbook_shadow_*.jsonl` chỉ snapshot lúc ĐẶT LỆNH, không
+  poll định kỳ. Đề xuất §4 của FINDINGS.md: mở rộng chương trình paper `order_book_execution_shadow`
+  (owner Taylor, đã LIVE từ 08-18) thêm NHÁNH quan sát riêng cho chu kỳ ĐẦU PHIÊN (09:14:30-09:20,
+  poll tần suất cao hơn thay vì chỉ snapshot lúc đặt lệnh) để dựng được "nếu đặt limit thụ động thì
+  có khớp không, ở giá nào".
+  **Lịch đã chốt:**
+  - Triển khai (Taylor): xong trước phiên **2026-09-28** (Thứ Hai) — chỉ thêm logging/instrumentation,
+    KHÔNG đổi `_decide_cross_adaptive`/`bot_execute.py`/`trading_rules.json`, giữ nguyên bất biến
+    `behavior_contract = LOG_ONLY_NO_BROKER_PATH` của chương trình mẹ.
+  - Bắt đầu thu thập: phiên **2026-09-28**.
+  - Checkpoint sơ bộ (đọc tạm, KHÔNG kết luận GO/NO-GO): **2026-10-21** — trùng mốc nghiệm thu hiện
+    có của `order_book_execution_shadow` (tầng REAL N≥30, đã khoá 3 lần gia hạn, không gia hạn lần
+    4). Chỉ báo cáo N tích luỹ được ở nhánh mở cửa + đọc sơ bộ (nhiều khả năng CHƯA đủ N).
+  - **Mốc quyết định đầy đủ (cứng): 2027-01-25.** Cơ sở: pre-flight power80 cần **24 sự kiện MỚI**
+    thuộc đúng nhánh `no-hist` (§5 FINDINGS.md); tần suất đo được lịch sử ~0,30 sự kiện/phiên (26
+    event / ~86 phiên kể từ go-live 07-01) ⇒ cần ~80 phiên giao dịch ≈ ~16 tuần từ 09-28. KHÔNG kết
+    luận GO/NO-GO cho remedy trước mốc này trừ khi có lý do vận hành rõ ràng (giống tinh thần mốc
+    cứng `lag-adv-filter-tracking.md`). Nếu tần suất thật nhanh hơn ước tính, có thể rà soát sớm
+    hơn nhưng KHÔNG đóng sớm chỉ vì "trông có vẻ đủ".
+  Chi tiết: `agents/Taylor/research/opening_window_limit_20260926/FINDINGS.md`.
 - **Insider-sell WATCH shadow (`insider_flags.py`)** (WATCH-only, chưa wire due-diligence, từ
   2026-07-29): cờ bán ròng nội bộ ≥1% CP lưu hành/90 ngày (chỉ `event_code IN ('DDIND','DDRP')`,
   TTL 90d). Scoping (job Taylor_20260729_015830 + Phụ lục A `_032713`) kết luận GO: overlap thấp
