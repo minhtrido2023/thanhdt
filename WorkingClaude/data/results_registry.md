@@ -6927,3 +6927,64 @@ BEAR/CRISIS) chứ không độc lập.
 chưa vỡ; sẽ vỡ khi vendor bỏ hẳn. Đường thay thế đã xác nhận chạy: `from vnstock.api.quote import
 Quote; Quote(symbol=..., source='VCI').history(...)`. Cần Mike quyết định có sửa hay không —
 paper program sẽ im lặng đứt khi API bị bỏ (tầng T0 của monitor bắt được qua check "độ tuổi sổ paper").
+
+---
+
+## ORB intraday VN30F — tape MỞ RỘNG về 2022-02-17 bằng FiinProX (phiên 2026-09-25, job `Taylor_20260925_111203`)
+
+**PAPER-ONLY, không chạm tiền thật.** Mục này ĐÍNH CHÍNH phần "GIỚI HẠN DỮ LIỆU" của mục
+`Taylor_20260925_103217` ngay trên: hàng rào 2023-09-11 là hàng rào **của vnstock**, không phải
+của mọi vendor. FiinProX (qua FiinX MCP, `client.Fetch_Trading_Data(..., by="1m")`) **có** bar
+1 phút VN30F1M từ **2022-02-17** — đo trực tiếp: 2022-02-16 rỗng, 2022-02-17 trả 257 bar; 2018 và
+COVID-2020 rỗng cả với `VN30F1M` lẫn mã hợp đồng tháng (`VN30F1801`). Phủ **4,6/9,1 năm** đời hợp
+đồng (trước: 3,04/9,1). **Vẫn không test được sụt 2018 và sập COVID 2020.**
+
+**Lấy thêm 389 phiên** (2022-02-17→2023-09-08). Tape ghép **1.142 phiên / 1.129 trade**
+2022-02-17→2026-09-25.
+
+**Đối soát 2 vendor trên 76 phiên trùng** (điều kiện cần trước khi dùng): `c_first`, `entry`,
+`max_high_post` khớp **76/76 tuyệt đối**; dấu vị thế khớp **75/75**; ở mức KẾT QUẢ chiến lược
+mean +9,93bps (FiinX) vs +9,35bps (vnstock), Sharpe 1,54 vs 1,45 ⇒ nhiễu vendor **~0,6bps/phiên**.
+Quirk duy nhất đã truy ra nguyên nhân: FiinX **thu gọn bar 14:30 về một giá** (`o=h=l=c`, cùng
+volume) ⇒ mọi số dưới đây dùng **exit 14:29 cho CẢ HAI đoạn**. Độ lớn của chính quy ước đó, đo
+trên đoạn vnstock (có đủ cả 2 cột): Sharpe 1,57 (14:29) vs 1,58 (14:30).
+
+**Config ĐANG DEPLOY** (`orb_pt.py`: OR→09:30, sign(or_ret), exit cuối phiên, không stop, không
+lọc |OR|, slip 1 tick/chiều + fee 0,6bps):
+
+| Đoạn | n | WR | mean | Sharpe | cum | MaxDD | t |
+|---|---|---|---|---|---|---|---|
+| **MỚI** FiinX 2022-02→2023-09 | 384 | 48,4% | **+0,40bps** | **+0,05** | −2,14% | **−30,47%** | +0,06 |
+| CŨ vnstock 2023-09→2026-09 | 745 | 52,6% | +9,13bps | +1,57 | +91,29% | −7,79% | +2,71 |
+| **GỘP** | 1.129 | 51,2% | +6,16bps | **+0,89** | +87,19% | **−31,78%** | +1,88 |
+
+Theo năm: 2022 +21,9% · **2023 −14,2% (Sharpe −0,95)** · 2024 +11,1% · 2025 +28,5% · 2026 +25,4%.
+Tách 2023: 01→09 (FiinX) −12,99bps/phiên, Sharpe −2,10, cum −19,7%; 09→12 (vnstock) +9,35bps.
+**Drawdown −30,47% kéo dài 206 phiên (2022-10-27→2023-09-06) — kết thúc đúng 3 phiên TRƯỚC khi
+cửa sổ dữ liệu cũ bắt đầu.**
+
+**PSR/DSR trên mẫu ghép**: PSR(SR\*=0) **0,9679** (trước 0,9967) · **DSR(N=20) 0,4914** (trước
+**0,9234**). Dưới ngưỡng fleet 0,95 rất xa.
+
+⚠️ **Đọc số cho đúng.** Khác biệt giữa hai đoạn **KHÔNG có ý nghĩa thống kê**: Welch t=−1,11
+p=0,266; Mann-Whitney p=0,152. Để phát hiện delta 8,7bps với sd 110bps cần **~2.500 quan sát mỗi
+nhóm** (đang có 384 vs 745). Vì vậy **KHÔNG kết luận "regime đã đổi"**; kết luận đúng là ước lượng
+mean hợp nhất thấp hơn nhiều so với 9,13bps và khoảng tin cậy rộng hơn nhiều. Con số "4/4 năm
+dương, Sharpe 1,59, MaxDD −7,8%" vẫn đúng cho cửa sổ 745 phiên — nhưng cửa sổ đó là **biên giới dữ
+liệu của một vendor**, không phải lựa chọn nào cả.
+
+**Giới hạn của chính mục này**: chỉ lưu được **per-day record**, không lưu bar 1m thô — kênh duy
+nhất là MCP sandbox (không có SDK FiinQuant cài local; sandbox chặn `os`/file-IO nên dữ liệu chỉ
+về qua stdout, 389×257 bar không khả thi). Hệ quả: **không re-test được biến thể đổi exit time hay
+stop ở độ phân giải trong ngày** trên đoạn mới; cột `minlow29/maxhigh29` chỉ đủ cho stop kiểu
+"chạm là thoát" đúng như `orb_core.sim`.
+
+**Files**: `mike/agents/Taylor/research/orb_fiinx_vn30f1m_20260925/` — `README.md` ·
+`fiinx_daily_gap.csv` (389 dòng) · `fiinx_daily_overlap.csv` · `fiinx_daily_2023Q4.csv` ·
+`xcheck.py` · `xcheck2.py` · `extend.py` · `analyse.py` ·
+`orb_trades_extended_20220217_20260925.csv` (1.129 trade). Commit `mike 220c70bd`.
+
+**Đã xử lý trong cùng job** (2 điểm treo của mục trên): rủi ro API vnstock deprecated → ĐÃ SỬA
+(`orb_pt.py` dùng `Quote`, output byte-identical, commit WC `abe09928`); monitor cảnh báo sớm →
+ĐÃ CÀI CRON 15:50 ICT T2-T6, escalate TẮT (commit `mike 0e52bcff`), script chuyển canonical sang
+`mike/bin/orb_drift_monitor.py` + `mike/data/orb_drift_baseline.json`.
