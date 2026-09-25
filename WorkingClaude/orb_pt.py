@@ -4,7 +4,23 @@ orb_pt.py
 =========
 Paper-trade LIVE chien luoc ORB intraday VN30F. Chay daily SAU khi phien dong (>=15:00).
 Tai dung ket qua moi phien tu bar 1m: sign(OR 09:00-09:30) -> giu den 14:30, no stop.
-Config CHOT (validated): tat ca ngay (khong loc |OR|), size co dinh, net slip 1tick + fee.
+
+CONFIG DANG DEPLOY -- CHUA DUOC VALIDATE RIENG (sua 2026-09-25; truoc do docstring nay ghi
+"Config CHOT (validated)", la mot claim KHONG truy nguyen duoc):
+  Dang chay : exit 14:30 | KHONG stop | tat ca ngay (khong loc |OR|) | size co dinh
+              | net slip 1 tick + fee 0.6bps round-trip.
+  Config GOC that su tung duoc validate (vn30f_orb_strategy.py grid A, tren 670 phien
+              2023-09..2026-06): exit 14:00 | stop 0.7% | loc |OR| >= 0.2% | TC 2.5bps.
+  Hai config lech nhau tren 4 truc. Do lai tren rieng nam 2024:
+      config GOC (da validate)  : n=76  mean -5.93bps  Sharpe -1.84  cum  -4.50%
+      config DANG CHAY          : n=250 mean +5.69bps  Sharpe +1.18  cum +14.43%
+  => Khoan lo ca nam 2024 ma gate criterion #2 cua paper_programs_registry.json noi den
+     KHONG duoc giai thich; no bi HOA TAN boi viec doi config. Khong co artifact nao trong
+     repo validate to hop dang deploy.
+  Artifact: mike/agents/Taylor/research/orb_reeval_20260925/FINDINGS.md (job
+            Taylor_20260925_052050) muc 7 + C5; forward-test cua config GOC tren dung
+            cua so live: .../orb_reeval_20260925/orig_config_forward.md
+
 Idempotent: dung lai tu vnstock moi lan chay. Window mo (tu STARTDATE, tich luy tien).
 """
 import sys, io, json
