@@ -127,9 +127,22 @@ print(b['required_env']['slow_files'].get('$f', b['required_env']['default_timeo
     # Chạy bằng interpreter ĐÚNG THEO ĐUÔI FILE: `.sh` bằng bash, còn lại bằng DNA_PYEXE.
     # Ném một file bash vào DNA_PYEXE thì nó FAIL vì SyntaxError — một ca đỏ GIẢ trông y hệt
     # regression thật.
+    # Tham số RIÊNG theo file — phải KHỚP với `run_selfchecks.sh` (2026-09-19), nếu không
+    # thì hai runner đo HAI THỨ KHÁC NHAU trên cùng một file. Ca thực tế (weekly ops audit
+    # 2026-09-26): `report_return_gate_selfcheck.py` tự khai ~8-10 phút cho bộ 4 test chạm BQ.
+    # `run_selfchecks.sh` đã được vá ngày 09-19 để chạy nó với `--root-only` (~30s, 4/4 PASS,
+    # phủ ĐÚNG sự cố gốc ROOT-sai-trong-worktree), nhưng file NÀY thì không — nó gọi trần
+    # `default_timeout_s=150` cho bộ ĐẦY ĐỦ ⇒ rc=124 **chắc chắn, mỗi đêm, từ 2026-09-12**.
+    # Hậu quả: entry nằm lỳ trong `known_red` 14 ngày dưới nhãn `auto:true` mà KHÔNG AI
+    # có thể làm nó xanh — đúng kiểu "mục rừa baseline" mà cơ chế này sinh ra để chống.
+    # 2 test chạm BQ vẫn chạy ở `run_selfchecks.sh --live` (budget 720s), không mất coverage.
+    SC_ARGS=()
     case "$f" in
-        *.sh) timeout "$tmo" bash "$f" > "$log" 2>&1 ;;
-        *)    timeout "$tmo" "$DNA_PYEXE" "$f" > "$log" 2>&1 ;;
+        *report_return_gate_selfcheck.py) SC_ARGS=(--root-only) ;;
+    esac
+    case "$f" in
+        *.sh) timeout "$tmo" bash "$f" "${SC_ARGS[@]+"${SC_ARGS[@]}"}" > "$log" 2>&1 ;;
+        *)    timeout "$tmo" "$DNA_PYEXE" "$f" "${SC_ARGS[@]+"${SC_ARGS[@]}"}" > "$log" 2>&1 ;;
     esac
     rc=$?
     if [ $rc -eq 0 ]; then st=PASS; elif [ $rc -eq 124 ]; then st=TIMEOUT; else st=FAIL; fi
