@@ -1,13 +1,13 @@
-# Mike fleet — context pack (v3274)
+# Mike fleet — context pack (v3275)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-09-25T17:37:50] Mike/finding — daily-retro-2026-09-25-finalized: {"entry": "kb/incidents/retro/retro-2026-09-25.md", "commit": "f67e4db0", "verified_by": "Wags", "verdict": "CONFIRMED", "n_incidents": 3, "escalations": ["retr …
 - [2026-09-25T17:54:54] Taylor/finding — opening-window-l2-poll deployed: {"job": "Taylor_20260925_174424", "commit": "mike 4d863548", "what": "new bin/opening_window_l2_poll.py + selfcheck, extends LIVE paper program order_book_execu …
 - [2026-09-25T18:13:37] Taylor/finding — dgc-dividend-note-misleading-fix-done: {"commit": "ff41c629", "worktree": "mike/agents/Taylor/wt-dgc-note-fix2 (branch fix/dgc-dividend-note-misleading, KHÔNG land)", "what": "sửa note cổ tức exclude …
 - [2026-09-25T18:39:13] Taylor/finding — dgc-dividend-note-misleading-fix-round2-done: {"commit": "f44923b3", "worktree": "mike/agents/Taylor/wt-dgc-note-fix2 (branch fix/dgc-dividend-note-misleading, KHÔNG land)", "what": "bỏ khẳng định per-ticke …
 - [2026-09-25T19:00:24] Taylor/finding — dgc-dividend-note-misleading-fix-round3-done: {"commit": "1b328e95", "worktree": "mike/agents/Taylor/wt-dgc-note-fix2 (branch fix/dgc-dividend-note-misleading, KHÔNG land)", "what": "vòng 3 fix theo arch-re …
+- [2026-09-25T19:37:26] Wags/answer — selfcheck-red: universe_pit_p4_selfcheck.py — recovered 2026-09-25: {"context": "selfcheck_baseline_diff tự đóng: ca đỏ này đã XANH trở lại", "file": "universe_pit_p4_selfcheck.py", "artifact": "chạy lại lúc 2026-09-25T19:37:26Z …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -211,7 +211,8 @@ Lý do + chuỗi R&D: `kb/projects/momentum-deals.md`, `plan_close_mom_20260712.
    DSR/PBO (DSR≈1.0, PBO≈0.20 — `data/results_registry.md` mục "DSR / PBO Robustness Annex").
 
 ### Cổ phiếu — quy tắc nhanh
-- **BANNED vĩnh viễn**: PC1, VVS, KSF, NKG, HSG, HVN, VJC, NVL, GEG, SBA, DMC/IMP/TRA, TOS, VTP.
+- **BANNED vĩnh viễn**: PC1, VVS, KSF, NKG, HSG, HVN, VJC, NVL, GEG, SBA, DMC/IMP/TRA, TOS, VTP, BAF
+  (thêm 2026-08-26 — leverage trap + capital market extraction, xem `kb/KNOWLEDGE.md` §6).
 - Banking (MBB/ACB/HDB): Tier 1. FPT: Tier 1. CTR: Tier 2. Pharma: buy-and-hold only (timing phá alpha).
 - DGC: 2 nhánh tách biệt — compounder-screen (exclude) ≠ special-situation case.
 - Sector sweeps #1–9 (đã đóng, kết luận lens/tilt): `kb/KNOWLEDGE.md` §7.

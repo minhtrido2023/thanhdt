@@ -45,13 +45,43 @@
       "ack_pending": false,
       "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
     },
-    "universe_pit_p4_selfcheck.py": {
+    "mike/bin/append_event_selfcheck.py": {
       "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
-      "since": "2026-09-24T22:03:09Z",
+      "since": "2026-09-25T19:37:26Z",
       "status": "FAIL",
       "auto": true,
-      "topic": "selfcheck-red: universe_pit_p4_selfcheck.py",
-      "escalated_utc": "2026-09-24T22:03:09Z",
+      "topic": "selfcheck-red: mike/bin/append_event_selfcheck.py",
+      "escalated_utc": "2026-09-25T19:37:26Z",
+      "ack_pending": false,
+      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
+    },
+    "mike/bin/close_plan_approval_questions_selfcheck.py": {
+      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
+      "since": "2026-09-25T19:37:26Z",
+      "status": "FAIL",
+      "auto": true,
+      "topic": "selfcheck-red: mike/bin/close_plan_approval_questions_selfcheck.py",
+      "escalated_utc": "2026-09-25T19:37:26Z",
+      "ack_pending": false,
+      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
+    },
+    "mike/bin/orb_pt_appendonly_selfcheck.py": {
+      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
+      "since": "2026-09-25T19:37:26Z",
+      "status": "TIMEOUT",
+      "auto": true,
+      "topic": "selfcheck-red: mike/bin/orb_pt_appendonly_selfcheck.py",
+      "escalated_utc": "2026-09-25T19:37:26Z",
+      "ack_pending": false,
+      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
+    },
+    "mike/bin/production_manifest_selfcheck.sh": {
+      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
+      "since": "2026-09-25T19:37:26Z",
+      "status": "FAIL",
+      "auto": true,
+      "topic": "selfcheck-red: mike/bin/production_manifest_selfcheck.sh",
+      "escalated_utc": "2026-09-25T19:37:26Z",
       "ack_pending": false,
       "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
     }

@@ -177,6 +177,25 @@ agent nào bị flag** (`routing_retrospective.py --days 7`: Taylor fail 3%/retr
 nhất nhảy vọt, 2 điểm trước đó phẳng) — theo đúng luật item 5, đây là 1 tuần bất thường, ghi nhận
 không đề xuất gì; theo dõi tiếp tuần sau, nếu 09-26 vẫn ≥6h thì mới coi là xu hướng.
 
+**Cập nhật 09-26 (weekly editorial):** opus% tổng tuần mới nhất = **36%** (`spend_report.py --days
+7`), tiếp tục xu hướng giảm từ đỉnh 50% (09-19) qua 45,7%(09-24)/34,6%(09-25) — tự điều chỉnh,
+KHÔNG phải drift bền vững, dưới ngưỡng flag 60%. fable% vẫn 0%. **Effort 5d: Taylor 72% high
+(n=67)** — cùng biên độ dao động 55-94% đã quan sát 8 tuần, exempted theo kết luận đã có (KB §5d,
+R&D genuinely phức tạp) — không sample lại. **5e routing retro 09-26: Taylor [RETRY-RATE] 28%
+(19/67 job)** — mức cao nhất từng đo (trước đó đỉnh 24% ở Wags 08-21, 19% Taylor 08-28, cả 2 đều
+tự hết sau 1 tuần) nhưng đây là **điểm dữ liệu ĐƠN LẺ đầu tiên ở mức này cho Taylor** (tuần trước
+09-19 retry chỉ 9%) — theo đúng luật item 5e (cần ≥2 tuần liên tiếp mới kết luận drift), CHƯA đủ
+để đề xuất sửa MIKE.md §Routing; theo dõi tuần 10-03, nếu Taylor retry vẫn ≥15% thì escalate cụ
+thể. **Spend-trend (item 5): ops_h tiếp tục giảm** (6,2h 09-19 → 1,9h 09-26, xu hướng NGƯỢC lo
+ngại của mandate — không cần đề xuất gì; cảnh báo tuần 09-19 "theo dõi nếu ≥6h" đã tự giải quyết).
+research_h tăng lên 13,0h (từ 7,1h 09-19) — cùng thời điểm Taylor retry tăng, có thể liên quan
+(khối lượng R&D lớn hơn → nhiều job cần retry hơn) nhưng chưa đủ bằng chứng kết luận nhân quả.
+
+**Cập nhật 09-26 — fix drift thật tìm thấy trong review:** `kb/canonical.md` §"Cổ phiếu — quy tắc
+nhanh" (L3 core, inject mọi phiên) thiếu **BAF** trong danh sách BANNED vĩnh viễn — đã có ở
+`KNOWLEDGE.md` §6 và `kb/context_safety_core.md` từ 2026-08-26 nhưng chưa lan sang canonical.md
+(pyramid L3 §8 item (b): fact đã đổi ở nguồn nhưng chưa lan hết các bản sao cùng tầng). Đã vá.
+
 **Model mặc định của chính Mike:** đổi sang Fable 5 (2026-07-06) rồi **ĐẢO NGƯỢC LẠI Sonnet 5** (2026-07-07, user yêu cầu). Phát hiện **3 tầng config** trong bridge Discord (`ccdb-mike`): thread override (DB) > global (DB) > `.env` fallback — sửa `.env` vô tác dụng nếu DB đã có row cũ. Dọn 4 dòng rác sai format (`"Sonnet 5"`/`"sonnet 5"` có dấu cách — CLI từ chối) từng gây lỗi `/model` ở 1 thread. Đã đồng bộ cả 3 nơi.
 
 **Routing guards (2026-06-27):**
