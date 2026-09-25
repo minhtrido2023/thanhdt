@@ -2,14 +2,14 @@
 kind: reference
 title: Production manifest ARIA — tự sinh, ĐỪNG sửa tay
 generated_by: python3 mike/bin/production_manifest.py
-generated_at: 2026-09-24T13:08:44Z
+generated_at: 2026-09-25T20:52:52Z
 ---
 
 # Production manifest (auto-generated — sửa `mike/bin/production_manifest.py`, không sửa file này)
 
 Tái sinh: `cd /home/trido/thanhdt/WorkingClaude && python3 mike/bin/production_manifest.py` · Kiểm drift: `bash mike/bin/production_manifest_selfcheck.sh` (lệch bản commit = FAIL).
 
-**465 file** — T0 money-path **118** · T1 dữ liệu/regime/paper **103** · T2 fleet-ops **72** · T3 selfcheck **172** · gốc: 103 (systemd: ok).
+**471 file** — T0 money-path **119** · T1 dữ liệu/regime/paper **106** · T2 fleet-ops **72** · T3 selfcheck **174** · gốc: 103 (systemd: unavailable).
 
 Phương pháp: gốc = `crontab -l` + systemd user units + hook `.claude/settings*.json`; đóng bao AST import + tham chiếu exec `*.py|*.sh` resolve ra file có thật, lặp tới điểm bất động. Tầng = nhỏ nhất theo các gốc với tới, KHÔNG đi xuyên entry script của gốc khác (và dispatch.sh với gốc ngoài T2) — tầng blast radius thuần nằm ở `blast_tier` trong JSON. T3 = selfcheck ngoài bao đóng import/exec trực tiếp file T0–T2. Loại trừ: mike_paseo/, wt-*/ (mọi worktree), .claude/worktrees/, venv/__pycache__/node_modules.
 
@@ -19,33 +19,33 @@ Phương pháp: gốc = `crontab -l` + systemd user units + hook `.claude/settin
 
 | path | tầng | depth | cách vào | gốc quyết định tầng (+ số gốc khác) |
 |---|---|---|---|---|
-| `alt_valuation_lens.py` | T0 | 2 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+17) |
+| `alt_valuation_lens.py` | T0 | 2 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+18) |
 | `anomaly_gate.py` | T0 | 1 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+2) |
 | `bot_execute.py` | T0 | 0 | exec | cron `10 2 * * 1,3,5` bot_execute.py (+2) |
-| `bq_local_cache.py` | T0 | 2 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+27) |
+| `bq_local_cache.py` | T0 | 2 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+28) |
 | `bull_div_boost.py` | T0 | 3 | import | cron `10 2 * * 1,3,5` bot_execute.py (+12) |
 | `capit_episode.py` | T0 | 2 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+13) |
-| `corp_action_lib.py` | T0 | 1 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+38) |
-| `cpi_vn.py` | T0 | 2 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+19) |
+| `corp_action_lib.py` | T0 | 1 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+39) |
+| `cpi_vn.py` | T0 | 2 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+20) |
 | `custom30.py` | T0 | 2 | import | cron `0 12 * * 1-5` bq_freshness_check.sh |
-| `dcf_valuation.py` | T0 | 1 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+19) |
+| `dcf_valuation.py` | T0 | 1 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+20) |
 | `deploy_golive_dt5g_v4/golive_recommend_v23.py` | T0 | 1 | exec | cron `0 12 * * 1-5` bq_freshness_check.sh |
 | `deploy_golive_dt5g_v4/publish_gated_state.py` | T0 | 1 | exec | cron `0 12 * * 1-5` bq_freshness_check.sh (+2) |
-| `deposit_rate_vn.py` | T0 | 1 | exec | cron `0 12 * * 1-5` bq_freshness_check.sh (+23) |
+| `deposit_rate_vn.py` | T0 | 1 | exec | cron `0 12 * * 1-5` bq_freshness_check.sh (+24) |
 | `dna_report.py` | T0 | 1 | import | cron `0 14 * * 1-5` send_plan_report.sh (+3) |
-| `dnse_api.py` | T0 | 2 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+32) |
+| `dnse_api.py` | T0 | 2 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+33) |
 | `dt5g_freshness.py` | T0 | 1 | exec | cron `10 12 * * 1-5` eod_trading_report.sh (+1) |
 | `fetch_dnse_khoplenh_email.py` | T0 | 2 | exec | cron `10 12 * * 1-5` eod_trading_report.sh |
-| `gdp_growth_vn.py` | T0 | 2 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+19) |
-| `gmail_otp_reader.py` | T0 | 1 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+31) |
-| `lag_forensic_filter.py` | T0 | 2 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+15) |
+| `gdp_growth_vn.py` | T0 | 2 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+20) |
+| `gmail_otp_reader.py` | T0 | 1 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+32) |
+| `lag_forensic_filter.py` | T0 | 2 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+16) |
 | `lag_liq_ledger.py` | T0 | 1 | exec | cron `0 12 * * 1-5` bq_freshness_check.sh |
 | `lag_liquidity_filter.py` | T0 | 2 | import | cron `0 12 * * 1-5` bq_freshness_check.sh |
 | `lag_live_schedule.py` | T0 | 2 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+2) |
-| `lag_rating_filter.py` | T0 | 2 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+15) |
+| `lag_rating_filter.py` | T0 | 2 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+16) |
 | `macro_state_live.py` | T0 | 2 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+4) |
 | `mike/agents/Mafee/push_recommend_v23_to_bq.py` | T0 | 1 | exec | cron `0 12 * * 1-5` bq_freshness_check.sh |
-| `mike/bin/append_event.sh` | T0 | 1 | exec | cron `0 12 * * 1-5` bq_freshness_check.sh (+49) |
+| `mike/bin/append_event.sh` | T0 | 1 | exec | cron `0 12 * * 1-5` bq_freshness_check.sh (+50) |
 | `mike/bin/bot_heartbeat.sh` | T0 | 0 | exec | cron `*/5 2-7 * * 1-5` bot_heartbeat.sh |
 | `mike/bin/bq_freshness_check.sh` | T0 | 0 | exec | cron `0 12 * * 1-5` bq_freshness_check.sh |
 | `mike/bin/broker_fill_confirm.py` | T0 | 1 | import | cron `10 12 * * 1-5` eod_trading_report.sh |
@@ -78,10 +78,11 @@ Phương pháp: gốc = `crontab -l` + systemd user units + hook `.claude/settin
 | `mike/bin/incident_lookup.py` | T0 | 2 | exec | cron `5 2 * * 1-5` run_bot.sh (+6) |
 | `mike/bin/inject_discretionary_orders.sh` | T0 | 0 | exec | cron `30 13 * * 1-5` inject_discretionary_orders.sh |
 | `mike/bin/jit_unpark_daily.sh` | T0 | 0 | exec | cron `40 12 * * 1-5` jit_unpark_daily.sh |
+| `mike/bin/json_payload_diag.py` | T0 | 2 | exec | cron `0 12 * * 1-5` bq_freshness_check.sh (+50) |
 | `mike/bin/late_plan_catchup.sh` | T0 | 0 | exec | cron `45 14 * * 1-5` late_plan_catchup.sh (+2) |
 | `mike/bin/merge_park_daily.sh` | T0 | 0 | exec | cron `20 13 * * 1-5` merge_park_daily.sh |
 | `mike/bin/merge_park_orders.py` | T0 | 1 | exec | cron `20 13 * * 1-5` merge_park_daily.sh |
-| `mike/bin/mike_json.py` | T0 | 1 | exec | cron `0 12 * * 1-5` bq_freshness_check.sh (+52) |
+| `mike/bin/mike_json.py` | T0 | 1 | exec | cron `0 12 * * 1-5` bq_freshness_check.sh (+53) |
 | `mike/bin/nav_exdate_forecast.py` | T0 | 1 | exec | cron `0 12 * * 1-5` bq_freshness_check.sh |
 | `mike/bin/nav_period_returns.py` | T0 | 2 | exec | cron `10 12 * * 1-5` eod_trading_report.sh (+5) |
 | `mike/bin/nav_snapshot_daily.sh` | T0 | 0 | exec | cron `50 12 * * 1-5` nav_snapshot_daily.sh |
@@ -101,42 +102,42 @@ Phương pháp: gốc = `crontab -l` + systemd user units + hook `.claude/settin
 | `mike/bin/send_plan_report.sh` | T0 | 0 | exec | cron `0 14 * * 1-5` send_plan_report.sh (+1) |
 | `mike/bin/send_report_email.py` | T0 | 1 | exec | cron `5 2 * * 1-5` run_bot.sh (+10) |
 | `mike/bin/session_announce.sh` | T0 | 0 | exec | cron `31 4 * * 1-5` session_announce.sh (+2) |
-| `mike/bin/signal_holds.py` | T0 | 1 | exec | cron `0 12 * * 1-5` bq_freshness_check.sh (+15) |
+| `mike/bin/signal_holds.py` | T0 | 1 | exec | cron `0 12 * * 1-5` bq_freshness_check.sh (+16) |
 | `mike/bin/vendor_mismatch_alert.sh` | T0 | 1 | exec | cron `10 12 * * 1-5` eod_trading_report.sh (+3) |
 | `mike/bin/verify_account_snapshot.py` | T0 | 2 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+24) |
-| `mike/bin/wc_paths.py` | T0 | 1 | exec | cron `0 12 * * 1-5` bq_freshness_check.sh (+26) |
+| `mike/bin/wc_paths.py` | T0 | 1 | exec | cron `0 12 * * 1-5` bq_freshness_check.sh (+27) |
 | `moat_5f.py` | T0 | 2 | import | cron `0 14 * * 1-5` send_plan_report.sh (+4) |
 | `oshares_live.py` | T0 | 1 | exec | cron `0 12 * * 1-5` bq_freshness_check.sh (+25) |
 | `oshares_pit.py` | T0 | 2 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+25) |
 | `oshares_selfcheck_fixture.py` | T0 | 2 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+25) |
 | `paper_entry_adjust.py` | T0 | 2 | import | cron `5 2 * * 1-5` run_bot.sh (+11) |
 | `paper_entry_corpaction_crosscheck.py` | T0 | 2 | import | cron `5 2 * * 1-5` run_bot.sh (+11) |
-| `phs_flash_api.py` | T0 | 2 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+31) |
-| `phs_flex_api.py` | T0 | 2 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+31) |
+| `phs_flash_api.py` | T0 | 2 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+32) |
+| `phs_flex_api.py` | T0 | 2 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+32) |
 | `recommend_holistic.py` | T0 | 2 | import | cron `10 2 * * 1,3,5` bot_execute.py (+12) |
 | `sbv_macro_overlay.py` | T0 | 1 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+14) |
 | `signal_v11_sql.py` | T0 | 2 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+2) |
-| `simulate_holistic_nav.py` | T0 | 2 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+19) |
+| `simulate_holistic_nav.py` | T0 | 2 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+20) |
 | `state_publish_immutable.py` | T0 | 1 | exec | cron `0 12 * * 1-5` bq_freshness_check.sh (+3) |
 | `telegram_recommend.py` | T0 | 1 | exec | cron `10 2 * * 1,3,5` bot_execute.py (+12) |
-| `trading_bot/__init__.py` | T0 | 1 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+53) |
-| `trading_bot/brokers.py` | T0 | 1 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+31) |
-| `trading_bot/config.py` | T0 | 1 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+51) |
+| `trading_bot/__init__.py` | T0 | 1 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+55) |
+| `trading_bot/brokers.py` | T0 | 1 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+32) |
+| `trading_bot/config.py` | T0 | 1 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+52) |
 | `trading_bot/discretionary_accumulation.py` | T0 | 2 | import | cron `30 13 * * 1-5` inject_discretionary_orders.sh |
-| `trading_bot/due_diligence.py` | T0 | 1 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+17) |
+| `trading_bot/due_diligence.py` | T0 | 1 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+18) |
 | `trading_bot/exdate_gate.py` | T0 | 1 | import | cron `10 2 * * 1,3,5` bot_execute.py (+2) |
 | `trading_bot/executor.py` | T0 | 1 | import | cron `10 2 * * 1,3,5` bot_execute.py (+4) |
 | `trading_bot/gdkhq_rollout.py` | T0 | 1 | import | cron `10 2 * * 1,3,5` bot_execute.py (+2) |
 | `trading_bot/netting_recon.py` | T0 | 1 | import | cron `10 2 * * 1,3,5` bot_execute.py (+2) |
-| `trading_bot/no_chase_ceiling.py` | T0 | 2 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+18) |
-| `trading_bot/plan.py` | T0 | 1 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+15) |
+| `trading_bot/no_chase_ceiling.py` | T0 | 2 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+19) |
+| `trading_bot/plan.py` | T0 | 1 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+16) |
 | `trading_bot/plan_cash_commitment.py` | T0 | 2 | import | cron `30 13 * * 1-5` inject_discretionary_orders.sh |
 | `trading_bot/plan_funding_gate.py` | T0 | 1 | import | cron `30 13 * * 1-5` inject_discretionary_orders.sh (+5) |
 | `trading_bot/price_frame.py` | T0 | 1 | import | cron `10 2 * * 1,3,5` bot_execute.py (+5) |
-| `trading_bot/strategies.py` | T0 | 1 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+17) |
-| `trading_bot/vn_market.py` | T0 | 1 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+45) |
+| `trading_bot/strategies.py` | T0 | 1 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+18) |
+| `trading_bot/vn_market.py` | T0 | 1 | import | cron `0 12 * * 1-5` bq_freshness_check.sh (+47) |
 | `value_radar.py` | T0 | 2 | import | cron `0 14 * * 1-5` send_plan_report.sh (+3) |
-| `wc_env.sh` | T0 | 0 | exec | cron `0 12 * * 1-5` bq_freshness_check.sh (+60) |
+| `wc_env.sh` | T0 | 0 | exec | cron `0 12 * * 1-5` bq_freshness_check.sh (+61) |
 | `alphalens_report.py` | T1 | 1 | import | cron `0 23 * * 0-4` newdeals_daily_report.py |
 | `assert_chain_outputs.sh` | T1 | 1 | exec | cron `30 11 * * 1-5` daily_refresh_v34b_linux.sh |
 | `auto_update_commodity_wb.py` | T1 | 1 | exec | cron `0 1 5 * *` auto_update_commodity_wb.sh (+1) |
@@ -183,6 +184,9 @@ Phương pháp: gốc = `crontab -l` + systemd user units + hook `.claude/settin
 | `mike/bin/fiinprox_harvest_tick.sh` | T1 | 0 | exec | cron `7,27,47 * * * *` fiinprox_harvest_tick.sh |
 | `mike/bin/hit_details_daily.sh` | T1 | 0 | exec | cron `0 12 * * 1-5` hit_details_daily.sh |
 | `mike/bin/marginability_check.py` | T1 | 2 | import | cron `10 1 * * 5` fearbuy_weekly_scan.sh (+1) |
+| `mike/bin/opening_window_l2_poll.py` | T1 | 0 | exec | cron `13 2 * * 1-5` opening_window_l2_poll.py |
+| `mike/bin/orb_drift_monitor.py` | T1 | 0 | exec | cron `50 8 * * 1-5` orb_drift_monitor.py |
+| `mike/bin/orb_normstat.py` | T1 | 1 | import | cron `50 8 * * 1-5` orb_drift_monitor.py |
 | `mike/bin/paper_corp_action.py` | T1 | 0 | exec | cron `40 1 * * 1-5` paper_corp_action.py |
 | `mike/bin/paper_corp_action_selfcheck.py` | T1 | 1 | exec | cron `40 1 * * 1-5` paper_corp_action.py |
 | `mike/bin/paper_late_feeds.sh` | T1 | 0 | exec | cron `5 13 * * 1-5` paper_late_feeds.sh |
@@ -365,7 +369,7 @@ Phương pháp: gốc = `crontab -l` + systemd user units + hook `.claude/settin
 | `mike/agents/Taylor/seccap_dyn_selfcheck.py` | T3 | - | selfcheck | phủ: custom_basket.py, simulate_holistic_nav.py |
 | `mike/agents/Taylor/universe_freshness_selfcheck.py` | T3 | - | selfcheck | phủ: mike/agents/Taylor/anomaly_scan.py |
 | `mike/agents/Winston/freshness_warn_selfcheck.py` | T3 | - | selfcheck | phủ: anomaly_gate.py, dt5g_freshness.py (+6) |
-| `mike/bin/append_event_selfcheck.py` | T3 | - | selfcheck | phủ: mike/bin/append_event.sh, mike/bin/mike_json.py |
+| `mike/bin/append_event_selfcheck.py` | T3 | - | selfcheck | phủ: mike/bin/append_event.sh, mike/bin/json_payload_diag.py (+1) |
 | `mike/bin/backup_freshness_check_selfcheck.py` | T3 | - | selfcheck | phủ: mike/bin/backup_freshness_check.sh |
 | `mike/bin/broker_fill_confirm_selfcheck.py` | T3 | - | selfcheck | phủ: mike/bin/broker_fill_confirm.py |
 | `mike/bin/build_universe_pit_selfcheck.py` | T3 | - | selfcheck | phủ: mike/bin/build_universe_pit.py |
@@ -419,7 +423,9 @@ Phương pháp: gốc = `crontab -l` + systemd user units + hook `.claude/settin
 | `mike/bin/nav_sync_retry_rc_selfcheck.sh` | T3 | - | selfcheck | phủ: mike/bin/append_event.sh, mike/bin/daily_nav_snapshot.py (+2) |
 | `mike/bin/notify_thread_argswap_selfcheck.py` | T3 | - | selfcheck | phủ: mike/bin/discord_channel.sh, mike/bin/notify_thread.sh |
 | `mike/bin/now_injection_selfcheck.sh` | T3 | - | selfcheck | phủ: mike/bin/discord_channel.sh |
+| `mike/bin/opening_window_l2_poll_selfcheck.py` | T3 | - | selfcheck | phủ: mike/bin/opening_window_l2_poll.py |
 | `mike/bin/ops_health_check_rejected_selfcheck.py` | T3 | - | selfcheck | phủ: mike/bin/ops_health_check.sh |
+| `mike/bin/orb_drift_monitor_selfcheck.py` | T3 | - | selfcheck | phủ: mike/bin/orb_drift_monitor.py |
 | `mike/bin/paper_checkpoint_escalation_selfcheck.py` | T3 | - | selfcheck | phủ: mike/bin/append_event.sh, mike/bin/dispatch.sh (+4) |
 | `mike/bin/paper_report_render_selfcheck.py` | T3 | - | selfcheck | phủ: mike/bin/paper_programs_daily_report.py, paper_entry_adjust.py |
 | `mike/bin/plan_funding_gate_fee_sync_selfcheck.py` | T3 | - | selfcheck | phủ: mike/bin/dnse_fee_rates.py |
@@ -587,8 +593,8 @@ Phương pháp: gốc = `crontab -l` + systemd user units + hook `.claude/settin
 | cron | `10 0 * * 1` | treasury_buyback_window_monitor.py | T1 | `mike/bin/treasury_buyback_window_monitor.py`, `wc_env.sh` |
 | cron | `50 1 * * 1-5` | plan_approval_reminder.sh | T0 | `mike/bin/plan_approval_reminder.sh` |
 | cron | `40 1 * * 1-5` | paper_corp_action.py | T1 | `mike/bin/paper_corp_action.py` |
-| unit | `ccdb-mike.service` | unit:ccdb-mike.service | T2 | (ngoài repo / không file) |
-| unit | `paseo.service` | unit:paseo.service | T2 | (ngoài repo / không file) |
+| cron | `50 8 * * 1-5` | orb_drift_monitor.py | T1 | `mike/bin/orb_drift_monitor.py` |
+| cron | `13 2 * * 1-5` | opening_window_l2_poll.py | T1 | `mike/bin/opening_window_l2_poll.py` |
 | hook | `SessionStart` | session_start.sh | T2 | `mike/hooks/session_start.sh` |
 | hook | `Stop` | stop.sh | T2 | `mike/hooks/stop.sh` |
 | hook | `UserPromptSubmit` | user_prompt_submit.sh | T2 | `mike/hooks/user_prompt_submit.sh` |

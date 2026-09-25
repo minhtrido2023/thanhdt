@@ -93,6 +93,15 @@ ROOT_TIER = {
     "fiinprox_harvest_tick.py": T1,            # hàng đợi harvest FiinPro-X (ghi file raw)
     "treasury_buyback_window_monitor.py": T1,  # monitor cửa sổ tuân thủ mua cổ phiếu quỹ
     "paper_corp_action.py": T1,  # công cụ ĐO corp-action cho sổ PaperBroker, không chạm tiền thật/đường đặt lệnh
+    # Thêm 2026-09-26 (weekly ops audit): 2 gốc cron mới 09-25/09-26, cả hai là QUAN SÁT-ONLY
+    # của chương trình paper (order_book_execution_shadow / ORB intraday). Kiểm CƠ HỌC trước khi
+    # phân tầng: grep `place_order|PlannedOrder|trade_plans|nav_history|send_report|
+    # report_delivery` trên cả 3 file (kể cả orb_normstat.py đi kèm) ⇒ **0 hit**; docstring hai
+    # file tự khai "KHÔNG đặt lệnh" / "CHỈ GIÁM SÁT, không ghi file production nào". Cả hai
+    # KHÔNG nằm trong `code_quality_autodispatch.ORDER_WRITING_ROOTS` nên T1 không nới ranh
+    # giới tự-sửa nào — cùng lập luận đã dùng cho 4 gốc thêm ngày 2026-09-19.
+    "opening_window_l2_poll.py": T1,  # poll L2 cửa sổ đầu phiên, quote_only=True, không đặt lệnh
+    "orb_drift_monitor.py": T1,       # cảnh báo sớm lệch kỳ vọng paper ORB, chỉ log + bus question
     # T2 — fleet-ops (dispatch/bus/consolidate/health/backup/audit/hook)
     "consolidate.sh": T2, "watchdog.sh": T2, "discover_sessions.py": T2,
     "resume_pending.py": T2, "fleet_backup.sh": T2, "start.sh": T2,
