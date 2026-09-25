@@ -167,3 +167,44 @@ Grounds, in order of weight:
    un-validated config swap rather than explained.
 5. Criterion #3 (no VN30F execution path) is an independent hard blocker; #4 untouched.
 NOT grounds (withdrawn): "the edge is regime-conditional / absent outside NEUTRAL."
+
+---
+# BỔ SUNG 2026-09-25 (job Taylor_20260925_095910, triển khai 6 đề xuất user duyệt)
+
+## S1. Nhãn DT5G lịch sử là BACKFILL một lần — không phải nhãn real-time (item 5/6)
+Đo lại độc lập bằng `bq` ngày 2026-09-25 trên `tav2_bq.vnindex_5state_dt5g_live`:
+
+| asof_date | số dòng | phủ khoảng time |
+|---|---|---|
+| **2026-07-30** | **3.131** | 2014-01-02 → 2026-07-23 |
+| 2026-08-28 | 22 | 2026-07-24 → 2026-08-24 |
+| NULL | 5 | 2026-09-21 → 2026-09-25 |
+| 2026-09-15 / 09-04 / 09-08 | 2 / 1 / 1 | 2026-08-26 → 2026-09-09 |
+
+Tổng bảng 3.174 dòng ⇒ **98,6% nhãn được viết trong MỘT batch ngày 2026-07-30**. Chỉ từ
+2026-07-24 trở đi bảng mới ghi tăng dần theo phiên.
+
+Hệ quả cho chính tài liệu này: gate criterion #1 ("regime"), bảng edge-theo-regime ở §3 và
+episode-count N=13 ở C1 đều **điều kiện trên một construct full-sample**, không phải nhãn mà hệ
+thống đã có trong tay real-time tại thời điểm đó. Không phải look-ahead trong chuỗi giá — C7 đã
+kiểm lag nhãn 1–2 ngày, kết luận không đổi — nhưng **nhãn regime không point-in-time**. Người đọc
+sau này đừng hiểu là "DT5G đã gán nhãn này ngay lúc đó". Ghi chú tương ứng đã thêm vào
+`kb/paper_programs_registry.json` → `notes` của `orb_intraday` (nên xuất hiện trong
+`kb/paper_programs_charter/orb_intraday.md` ở lần render tới).
+
+## S2. Criterion #2 → FAILED (item 2/6)
+Xem `orig_config_forward.md`: config GỐC chạy forward trên đúng 74 phiên live cho n=35,
+mean −11,20bps, Sharpe −3,05, cum −3,90% (t −1,14, p 0,264). Cùng dấu với lỗ 2024 (−5,93bps,
+−4,50%), độ lớn/phiên lớn hơn ⇒ lỗ **không được giải thích và đã lặp lại**. Câu §9
+"Every calendar year positive" chỉ đúng cho config CHƯA validate — đã được vá trong docstring
+`orb_pt.py`.
+
+## S3. Hai defect vận hành đã vá (item 1, 3, 4/6)
+- `orb_pt.py` docstring: bỏ chữ "validated" sai; nêu rõ 4 trục lệch + số 2024 đối chiếu.
+- `data/orb_pt_log.csv` thành **append-only** (ngày cũ bất khả xâm phạm; vendor revision →
+  giữ số cũ + `data/orb_pt_revisions.log`), selfcheck `mike/bin/orb_pt_appendonly_selfcheck.py`
+  19/19 PASS, 2 mutation bị giết.
+- Sleeve 1B khai báo rõ là **NOTIONAL**, ký quỹ ~17% ≈ 165M (chưa đối soát broker). Lệch size
+  do làm tròn 5,15→5 HĐ = **−2,9%**: giới hạn nguyên của đơn vị hợp đồng, không phải lỗi công
+  thức. Defect thật: cột `net`/`nav` là lợi suất trên đúng 1B notional (HĐ chia nhỏ được) ⇒
+  **NAV/cum trong log là giới hạn TRÊN**, bản 5-HĐ chỉ ăn ~97,1%.
