@@ -712,3 +712,14 @@
 - [2026-09-25T11:45:11Z] Taylor/heartbeat — Taylor_20260925_111203: {"status": "still_running", "elapsed_min": 33, "job_id": "Taylor_20260925_111203", "source": "watcher"}
 - [2026-09-25T11:10:05Z] Winston/status — new-listings-daily: {"date": "2026-09-25", "count": 0, "lookback_days": 90, "note": "no new listings detected"}
 - [2026-09-25T11:40:06Z] Winston/status — corp-action-scan-daily: {"scanned_universe": "tav2_bq.ticker_prune", "candidates_this_run": 0, "fresh_alerts_this_run": 0, "resolved_since_last_run": [], "still_pending_count": 0, "still_pending": [], "stale_pending_over_7d": []}
+
+## Consolidation 2026-09-25T12:09:11Z
+- [2026-09-25T12:07:59Z] DollarBill/heartbeat — DollarBill_20260925_120658: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20260925_120658", "source": "watcher"}
+- [2026-09-25T12:08:00Z] DollarBill/heartbeat — DollarBill_20260925_120659: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20260925_120659", "source": "watcher"}
+- [2026-09-25T12:08:31Z] DollarBill/heartbeat — DollarBill_20260925_120658: {"status": "in_progress", "note": "plan file written, verifying load_plan"}
+- [2026-09-25T12:08:56Z] DollarBill/decision — plan-2026-09-28-ZaloPay: {"account": "ZaloPay", "plan_date": "2026-09-28", "orders": 0, "action": "HOLD_ALL", "dt5g_state": "NEUTRAL", "active_nav_vnd": 595869620, "egg_vnd": 102121977, "l1_park_trim": "NO_TRIM", "l2_jit_unpark": "NO_TRIGGER", "n_bal": 0, "n_lag_due": 0, "capit_episode": "CAPIT-2026-07-20 sessions=46 open"}
+- [2026-09-25T12:08:58Z] DollarBill/decision — plan-2026-09-28: {"account": "SpaceX", "plan_date": "2026-09-28", "orders": 0, "decision": "HOLD_ALL", "dt5g_state": "NEUTRAL", "n_bal": 0, "n_lag_due": 0, "l1_park_trim": "BLOCKED_ALL_NAMES", "l2_jit_unpark": "NO_TRIGGER", "capit_sessions_held": 46, "reconcile_ok": true, "egg_vnd": 85449493, "nav_vnd": 983031669}
+- [2026-09-25T12:08:58Z] DollarBill/heartbeat — DollarBill_20260925_120659: {"status": "done", "note": "plan SpaceX 2026-09-28 hoan tat, HOLD ALL, da gui Discord + bus decision"}
+- [2026-09-25T12:08:59Z] DollarBill/heartbeat — DollarBill_20260925_120658: {"status": "still_running", "elapsed_min": 2, "job_id": "DollarBill_20260925_120658", "source": "watcher"}
+- [2026-09-25T12:09:00Z] DollarBill/heartbeat — DollarBill_20260925_120659: {"status": "still_running", "elapsed_min": 2, "job_id": "DollarBill_20260925_120659", "source": "watcher"}
+- [2026-09-25T12:09:05Z] DollarBill/finding — plan-2026-09-28-ZaloPay-done: Plan ZaloPay 2026-09-28 hoan tat: HOLD ALL 0 lenh, load_plan() OK, gui Discord plan thread + bus decision. DT5G NEUTRAL. Active NAV 595,87tr, egg 102,12tr. L1 NO_TRIM, L2 NO_TRIGGER, n_bal=0, LAG due=0. CAPIT 46 phien giu nguyen.
