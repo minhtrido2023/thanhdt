@@ -166,7 +166,16 @@ max|dCDF| 2,4e-17, max|dPPF| 1,1e-11.
 3. **Baseline sẽ cũ**: nó là ảnh của 670 phiên pre-live. Nếu config đang chạy **đổi** thì
    baseline **phải dựng lại** (`make_baseline.py`) — nó pin `orb_pt.py` sha256 nhưng
    **chưa tự kiểm** hash đó lúc chạy. Đề xuất bổ sung nếu đưa vào sản xuất.
-4. **Điểm mù đã biết**: baseline được dựng từ một giai đoạn mà DT5G gần như luôn NEUTRAL.
+4. **Rủi ro vận hành liên quan trực tiếp tới T0**: `orb_pt.py` đang gọi API vnstock **đã bị
+   ngừng hỗ trợ** (`Vnstock().stock(...).quote.history(...)`). Hiện chỉ in cảnh báo migration.
+   Khi vendor bỏ hẳn, paper program sẽ **im lặng đứt** — và đó chính là ca mà check "độ tuổi sổ
+   paper" của T0 tồn tại để bắt (> 3 phiên → ALERT). Đường thay thế đã xác nhận chạy:
+   `from vnstock.api.quote import Quote; Quote(symbol=..., source='VCI').history(...)`.
+   Chưa sửa — ngoài phạm vi job, cần Mike quyết định.
+5. **Giới hạn dữ liệu của baseline**: vendor không có bar 1 phút nào trước **2023-09-11** (thử
+   trực tiếp 2026-09-25: mọi request sớm hơn trả `RetryError`). VN30F1M chạy từ 2017-08-10 ⇒
+   baseline dựng từ 3,04 năm của một công cụ 9,1 năm, thiếu đúng 2018 / COVID 2020 / bear 2022.
+6. **Điểm mù đã biết**: baseline được dựng từ một giai đoạn mà DT5G gần như luôn NEUTRAL.
    Monitor sẽ coi một regime BEAR/CRISIS là "lệch kỳ vọng" mặc dù đó có thể là hành vi
    bình thường trong regime chưa từng lấy mẫu. Không sửa được bằng thống kê — chỉ ghi rõ.
 
