@@ -1,25 +1,25 @@
 # DGC × Phốt pho vàng (P4) — nhận định tuần
 
-_Cập nhật: 2026-09-18 · nguồn giá: SunSirs prodetail-708 (spot Trung Quốc, benchmark xuất khẩu P4 của DGC)_
+_Cập nhật: 2026-09-25 · nguồn giá: SunSirs prodetail-708 (spot Trung Quốc, benchmark xuất khẩu P4 của DGC)_
 
 ## 1. Xu hướng giá P4
-- **Mới nhất:** 27,663 RMB/tấn (2026-09-18) ▲
-- **~1 tuần:** +0.3% (vs 2026-09-11)  ·  **~1 tháng:** -0.5% (vs 2026-08-19)
-- **So với đáy chu kỳ** (~24,173, 2026-03-02): **+14.4%**
+- **Mới nhất:** 27,766 RMB/tấn (2026-09-25) ▲
+- **~1 tuần:** +0.4% (vs 2026-09-18)  ·  **~1 tháng:** -2.5% (vs 2026-08-26)
+- **So với đáy chu kỳ** (~24,173, 2026-03-02): **+14.9%**
 - **Vùng chu kỳ:** `HỒI PHỤC` — đang hồi từ đáy — biên bắt đầu cải thiện nhưng chưa mạnh
 - **Kiểm tra cấu trúc:** ⚠️ dưới mốc ~30k → phục hồi **chưa được xác nhận**
 
 | Tuần (giá đóng) | P4 (RMB/tấn) |
 |---|---|
 | 2026-03-02 _(đáy chu kỳ)_ | 24,173 |
-| 2026-08-02 | 27,629 |
 | 2026-08-09 | 27,563 |
 | 2026-08-16 | 27,996 |
 | 2026-08-23 | 28,179 |
 | 2026-08-30 | 28,466 |
 | 2026-09-06 | 28,029 |
 | 2026-09-13 | 27,579 |
-| 2026-09-18 | 27,663 |
+| 2026-09-20 | 27,766 |
+| 2026-09-25 | 27,766 |
 
 ## 2. Nhận định cho DGC
 - **Cơ chế:** DGC là nhà sản xuất P4 chi phí thấp nhất (apatite + thủy điện Lào Cai) → mỗi đồng giá P4 tăng chảy gần thẳng vào lợi nhuận gộp (đòn bẩy vận hành lớn). Truyền dẫn trễ ~1 quý.
