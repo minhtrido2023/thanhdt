@@ -130,3 +130,6 @@
 
 ## Archived 2026-09-23 (keep=12 days=0 require_done=False)
 - [2026-08-24T01:26:22Z] [2026-08-24T01:3xZ] Xong job Winston_20260824_012008 (ops-autofix ZaloPay): ban ghi _rejected cua Wags 08-23 KHONG mat (retry +36s). 6/6 ca cach ly tu truoc toi nay deu tu lanh <=47s => commit 9ce6a60c: check 5b tu tra bus/inbox tim event cung trace_id trong 15p va in UNG VIEN RETRY (khong auto-resolve). Selfcheck 26/26 x4 TZ. LUU Y CU PHAP: notify_thread.sh la "<message>" <topic> — goi nguoc bi script tu sua nhung de lai 1 WARN 24h o ops_health.
+
+## Archived 2026-09-25 (keep=12 days=0 require_done=False)
+- [2026-08-25T05:57:31Z] [2026-08-25T05:5xZ] Xong job Winston_20260825_054504 (ops-autofix ZaloPay): retro 08-24 mat vi HOST TAT ~18h (08-24 15:30 -> 08-25 09:45 ICT), cron 00:30 khong he fire — KHONG phai bug script. Commit 52eb62ea: check#9 ops_health_check.sh bo phan doan hardcode 'nghi quoting bug 08-01' (da dan autofix sai huong 2 lan: 08-20 transport, 08-25 downtime), nay TRA daily_retro.log 3 nhanh + 3 ca hoi quy, PASS x4 TZ. Da chay bu daily_retro + corp_action_daily. CON TREO MOI: fleet KHONG co @reboot catch-up cho cron dem — kb_nightly + check_report_cadence van chua chay bu (cham KB/kenh bao cao, can user quyet). Con treo tu truoc: stash@{0} hybrid+refresh_skip_fix 20260810; cron 15:15 capture_upcom_vwap_eod chua cai (cho user duyet).
