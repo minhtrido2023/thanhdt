@@ -46,3 +46,27 @@ Khi vá "file này cần tham số/ngân sách riêng", phải hỏi **mọi run
 runner đang đứng trước mặt. Hai runner + một chính sách chỉ ghi ở một chỗ = chính sách đó sai ở
 chỗ còn lại, âm thầm. Cùng họ với bài học "cùng lớp lỗi còn N call-site chưa vá" của chuỗi
 corp-action 09-22→09-24.
+
+---
+
+## Ca thứ HAI cùng lớp, tìm ra cùng lượt: `orb_pt_appendonly_selfcheck.py`
+
+Docstring của chính file: *"KHÔNG đưa vào `run_selfchecks.sh`: mỗi lần chạy gọi vnstock THẬT 4
+lần (phụ thuộc mạng + rate limit của vendor). Chạy TAY khi sửa `orb_pt.py`."* Nhưng cả hai
+runner nhặt file theo glob `*_selfcheck.py` nên nó vẫn bị chạy **tự động mỗi ngày** — và vì
+`is_live()` không biết chuỗi `vnstock`, nó bị xếp `offline` (trần 60s) ⇒ `rc=124`.
+
+Đo thật 2026-09-26: chạy tay với trần **900s vẫn chưa xong và KHÔNG in ra dòng nào**.
+
+**Đã vá (`run_selfchecks.sh`)**: thêm `vnstock` vào `is_live()` ⇒ file xếp `live` ⇒ SKIP ở lần
+chạy mặc định, đúng ý tác giả, và thôi gọi vendor 4 lần/ngày. Kiểm tác động phụ: quét TOÀN BỘ
+selfcheck, **đúng 1 file** đổi phân loại — chính nó; không file nào khác mất coverage.
+
+**CÒN MỞ — `selfcheck_weekly_baseline_check.sh` không có khái niệm tier**, nó chạy MỌI file với
+trần `default_timeout_s`. Nên ca này vẫn đỏ ở đó mỗi đêm và vẫn gọi vnstock. Không tự thêm cơ
+chế skip ở đây vì đó là **mở rộng bề mặt cấu hình** (quyết định "cái gì KHÔNG còn được giám sát
+hằng ngày"), không phải sửa lỗi — đã escalate bus question để Mike/user chốt.
+
+**Ghi chú phụ (không sửa ở đây, §3)**: `orb_pt_appendonly_selfcheck.py:20` hardcode
+`WC = "/home/trido/thanhdt/WorkingClaude"` — đúng lớp "bẫy đường dẫn selfcheck" đã ghi
+2026-09-24 (chạy từ worktree nào cũng test code canonical). Chủ sở hữu: Taylor.

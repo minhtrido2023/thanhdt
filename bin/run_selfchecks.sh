@@ -75,7 +75,13 @@ echo "Tìm thấy ${#FILES[@]} selfcheck (đã loại exp_*/job_2026*/v4final_ex
 # offline bị phân nhầm "live" thì bị bỏ qua khi không có --live (an toàn hơn, không phải
 # false-negative nguy hiểm).
 is_live() {
-  grep -qE "bq query|bq show|dnse_api|requests\.(get|post)|urllib\.request|subprocess.*[\"']bq |from simulate_holistic_nav import|import simulate_holistic_nav|state_publish_immutable" \
+  # `vnstock` thêm 2026-09-26 (weekly ops audit): `orb_pt_appendonly_selfcheck.py` tự khai trong
+  # docstring "KHÔNG đưa vào run_selfchecks.sh: mỗi lần chạy gọi vnstock THẬT 4 lần (phụ thuộc
+  # mạng + rate limit của vendor)" — nhưng glob `*_selfcheck.py` vẫn nhặt nó lên, và vì
+  # `is_live()` không biết `vnstock` nên nó bị xếp `offline` (trần 60s) ⇒ rc=124 mỗi lần.
+  # Đo thật 2026-09-26: chạy 900s vẫn chưa xong và KHÔNG in ra dòng nào. Xếp `live` ⇒ SKIP ở
+  # lần chạy mặc định (đúng ý tác giả: "chạy TAY khi sửa orb_pt.py") và thôi đập vendor mỗi ngày.
+  grep -qE "bq query|bq show|dnse_api|vnstock|requests\.(get|post)|urllib\.request|subprocess.*[\"']bq |from simulate_holistic_nav import|import simulate_holistic_nav|state_publish_immutable" \
     "$WC_ROOT/$1" 2>/dev/null
 }
 
