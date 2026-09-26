@@ -740,13 +740,16 @@ check("T21l cả 2 mã đều xuất hiện trong note kèm cấu hình đúng c
 # level 100tr) — mutation "pending_tk := account_total_recv" (thay số pool per-ticker bằng TỔNG
 # account-level, đúng lỗi misattribution vòng 1 đã bị bác) vẫn PASS check trên nếu chỉ pin cụm
 # "X cấu hình Ytr" (không đụng số min()). Pin thẳng 2 dòng min(...) = ... thật của T21l.
-check("T21l pin số per-ticker thật trong min() — XCL: min(80.0tr; 80.0tr) = 80.0tr "
-      "(không phải account-level 100.0tr)",
-      "min(80.0tr; 80.0tr) = 80.0tr" in note21l,
+# arch-review vòng 3 required_change (M14): pin CẢ CỤM có tiền tố "pool tạm loại" đứng ngay
+# trước min(...) — thiếu tiền tố, mutation đổi nhãn cụm thành khẳng định per-ticker khác (vd
+# "CÒN LẠI của mã") vẫn PASS vì chỉ so khớp con số, không so nhãn cụm.
+check("T21l pin số per-ticker thật trong min() — XCL: 'pool tạm loại min(80.0tr; 80.0tr) = "
+      "80.0tr' (không phải account-level 100.0tr, và đúng nhãn cụm 'pool tạm loại')",
+      "pool tạm loại min(80.0tr; 80.0tr) = 80.0tr" in note21l,
       note21l)
-check("T21l pin số per-ticker thật trong min() — SHS: min(50.0tr; 20.0tr) = 20.0tr "
-      "(không phải account-level 100.0tr)",
-      "min(50.0tr; 20.0tr) = 20.0tr" in note21l,
+check("T21l pin số per-ticker thật trong min() — SHS: 'pool tạm loại min(50.0tr; 20.0tr) = "
+      "20.0tr' (không phải account-level 100.0tr, và đúng nhãn cụm 'pool tạm loại')",
+      "pool tạm loại min(50.0tr; 20.0tr) = 20.0tr" in note21l,
       note21l)
 # T21l là case KHÔNG có cảnh báo stale nào bắn ra (ratio XCL=1.0, SHS=0.4, cả 2 > 10%) ⇒ đây là
 # chỗ non-vacuous để pin cụm "không tách theo mã" (T21j vô tình pass qua câu cảnh báo stale-config
@@ -754,6 +757,16 @@ check("T21l pin số per-ticker thật trong min() — SHS: min(50.0tr; 20.0tr) 
 check("T21l cụm 'không tách theo mã' xuất hiện đúng 2 lần (dòng chính, non-vacuous — case này "
       "không có cảnh báo stale nào chen vào)",
       note21l.count("không tách theo mã") == 2,
+      note21l)
+# arch-review vòng 3 required_change (M9): pin số TỔNG account-level (account_total_recv,
+# 100tr = div_recv thật của h21l) — mutation hoán đổi account_total_recv↔pending_tk trong field
+# "DNSE hiện báo TỔNG" (compute_park_trim.py dòng ~452-453) làm 2 dòng ticker in ra 2 số "TỔNG"
+# KHÁC NHAU (20.0tr cho SHS, 80.0tr cho XCL) trong khi số TỔNG account-level thật phải giống
+# nhau cho cả 2 dòng — vẫn PASS mọi check phía trên vì chưa có assertion nào pin đúng con số
+# TỔNG account-level. count()==2 buộc CẢ HAI dòng ticker in cùng một số TỔNG thật.
+check("T21l cụm 'DNSE hiện báo TỔNG 100.0tr' xuất hiện đúng 2 lần (số TỔNG account-level thật, "
+      "GIỐNG NHAU cho cả 2 dòng ticker — không phải số per-ticker khác nhau)",
+      note21l.count("DNSE hiện báo TỔNG 100.0tr") == 2,
       note21l)
 
 # T21m — required_changes (c): ≥2 entry config CÙNG 1 ticker phải CỘNG DỒN, không ghi đè. Mutation
