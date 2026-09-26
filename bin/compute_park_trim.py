@@ -416,10 +416,46 @@ def compute_trim(account_label, asof=None, target=PARK_TARGET_F1, holdings=None,
     out["excluded_dividend_receivable_detail"] = excl_div_detail
     if excl_div_pending:
         overdue_tks = sorted({d["ticker"] for d in excl_div_detail if d["overdue"]})
+        # excl_div_detail["amount_vnd"] = phần DNSE vẫn báo receivable sau khi kẹp min() với
+        # `cash_dividend_receiving_vnd` — con số đó là TỔNG CẤP TÀI KHOẢN, KHÔNG tách theo mã
+        # (compute_active_nav.py::excluded_dividend_pending() docstring). Bản vá trước (ff41c629)
+        # coi phần "còn lại" này là phần CÒN LẠI RIÊNG của đúng ticker và suy "ĐÃ VỀ = cấu hình −
+        # còn lại" — SAI trên ca thật 2026-09-25 (ZaloPay/DGC): 80tr cấu hình đã settle 100% một
+        # lượt tối 09-25, phần 1,9tr còn lại trong cashDividendReceiving là cổ tức mã KHÁC phát
+        # sinh 09-21, không phải phần sót của ticker này. KHÔNG khẳng định số "ĐÃ VỀ" per-ticker —
+        # chỉ báo cáo đúng những gì code đọc được: cấu hình, tổng còn receivable toàn tài khoản,
+        # và mức pool đang tạm loại theo min(). ("XCL" trong selfcheck là mã fixture thay cho DGC.)
+        excl_div_config_by_tk = {}
+        for ent in excl_div_config or []:
+            if isinstance(ent, dict) and ent.get("ticker"):
+                excl_div_config_by_tk[ent["ticker"]] = (
+                    excl_div_config_by_tk.get(ent["ticker"], 0.0)
+                    + float(ent.get("amount_vnd") or 0))
+        account_total_recv = float(h.get("cash_dividend_receiving_vnd") or 0)
+        div_lines = []
+        for tk in sorted({d["ticker"] for d in excl_div_detail}):
+            pending_tk = sum(d["amount_vnd"] for d in excl_div_detail if d["ticker"] == tk)
+            # Fallback phòng thủ, KHÔNG PHẢI đường thực thi bình thường: mọi ticker trong
+            # excl_div_detail luôn có entry gốc khớp trong excl_div_config_by_tk (detail chỉ được
+            # tạo ra TỪ excl_div_config trong excluded_dividend_pending()) — nhánh `.get(tk, ...)`
+            # chỉ chạy nếu bất biến đó bị phá vỡ ở nơi khác.
+            total_tk = excl_div_config_by_tk.get(tk, pending_tk)
+            ratio = (pending_tk / total_tk) if total_tk else 0.0
+            stale_warn = ""
+            if total_tk and ratio <= 0.10:
+                stale_warn = (
+                    f" ⚠️ CẤU HÌNH CÓ THỂ ĐÃ CŨ — còn báo {pending_tk/1e6:,.1f}tr "
+                    f"({ratio*100:.0f}% so với cấu hình {total_tk/1e6:,.1f}tr), khả năng cao "
+                    f"{tk} đã settle gần hết và phần còn lại thuộc mã KHÁC (tổng không tách theo "
+                    f"mã) — kiểm và dọn entry excluded_dividend_receivable nếu {tk} đã về đủ.")
+            div_lines.append(
+                f"{tk} cấu hình {total_tk/1e6:,.1f}tr; DNSE hiện báo TỔNG "
+                f"{account_total_recv/1e6:,.1f}tr cổ tức chưa về TOÀN TÀI KHOẢN (không tách theo "
+                f"mã) ⇒ pool tạm loại min({total_tk/1e6:,.1f}tr; {pending_tk/1e6:,.1f}tr) = "
+                f"{pending_tk/1e6:,.1f}tr" + stale_warn)
         out["notes"].append(
-            f"⚠️ pool đã LOẠI {excl_div_pending/1e6:,.1f}tr cổ tức receivable của mã excluded "
-            f"({', '.join(sorted({d['ticker'] for d in excl_div_detail}))}) — chưa thật sự về "
-            f"(Option B, cùng cơ chế compute_active_nav.py). CHÉP dòng này vào notes plan."
+            "ℹ️ cổ tức excluded — " + "; ".join(div_lines) + " — tới khi DNSE xác nhận hết "
+            "(Option B, cùng cơ chế compute_active_nav.py). CHÉP dòng này vào notes plan."
             + (f" ⚠️ QUÁ HẠN dự kiến: {', '.join(overdue_tks)} — DNSE vẫn báo receivable dù đã "
                f"qua ngày dự kiến về, kiểm tiền đã về thật chưa / cập nhật "
                f"excluded_dividend_receivable trước khi duyệt lệnh bán (cùng cảnh báo "

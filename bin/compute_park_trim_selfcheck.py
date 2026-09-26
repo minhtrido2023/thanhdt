@@ -620,7 +620,7 @@ check("T21d excluded_dividend_receivable_pending_vnd ghi đúng 80tr vào output
       r21_excl.get("excluded_dividend_receivable_pending_vnd") == 80e6,
       r21_excl.get("excluded_dividend_receivable_pending_vnd"))
 check("T21e note cảnh báo LOẠI cổ tức excluded được ghi ra (để chép vào notes plan)",
-      any("cổ tức receivable của mã excluded" in n for n in r21_excl["notes"]),
+      any("cổ tức excluded" in n and "XCL" in n for n in r21_excl["notes"]),
       r21_excl["notes"])
 
 # (b) mã KHÔNG bị exclude vẫn giữ NGUYÊN hành vi §pool-egg-div gốc — cổ tức receivable của mã
@@ -673,6 +673,162 @@ check("T21i RỦI RO ĐÃ BIẾT (chưa sửa): config XCL còn hiệu lực dù
       "không lặng lẽ đổi mà không ai biết.",
       r21i.get("excluded_dividend_receivable_pending_vnd") == 3e6,
       r21i.get("excluded_dividend_receivable_pending_vnd"))
+
+# T21j — case thật ZaloPay 2026-09-25 (job dgc-dividend-note-misleading-fix, vòng 2): DGC cấu
+# hình 80tr, DNSE chỉ còn báo receivable 1,9tr TOÀN TÀI KHOẢN. Verify độc lập của Mike bằng dữ
+# liệu thô (dnse_raw_2026-09-{11,21,25}.jsonl) xác nhận: XCL đã SETTLE 100% (đúng 80tr) trong MỘT
+# BƯỚC tối 09-25; phần 1,9tr còn lại là cổ tức của MÃ KHÁC phát sinh 09-21, không liên quan XCL.
+# Note vòng 1 (ff41c629, "ĐÃ VỀ 78,1tr ... CÒN LẠI 1,9tr DNSE vẫn báo receivable") khẳng định per-
+# ticker một điều code KHÔNG có bằng chứng để nói — SAI trên đúng ca này. Note MỚI không được
+# khẳng định "ĐÃ VỀ"/"CÒN LẠI của ticker" — chỉ báo cấu hình + tổng account-level + mức pool loại.
+h21j = holdings(BASE_LOTS, cash=0.0, total_cash=300e6, debt=0.0,
+               div_recv=1.9e6, excluded=("XCL",))
+r21j = run(h21j, excluded_dividend_config_override=DGC_CFG)
+note21j = next((n for n in r21j["notes"] if "cổ tức excluded" in n), "")
+check("T21j excluded_dividend_receivable_pending_vnd = 1,9tr (đúng phần còn lại DNSE báo)",
+      r21j.get("excluded_dividend_receivable_pending_vnd") == 1.9e6,
+      r21j.get("excluded_dividend_receivable_pending_vnd"))
+check("T21j note KHÔNG khẳng định 'ĐÃ VỀ'/'đã tính vào active_nav' per-ticker (đó là suy diễn "
+      "không có bằng chứng — ca thật đã chứng minh sai)",
+      "ĐÃ VỀ" not in note21j and "đã tính vào active_nav" not in note21j,
+      note21j)
+check("T21j note nêu đúng khung: cấu hình 80.0tr, TỔNG account-level 1.9tr, không tách theo mã",
+      "cấu hình 80.0tr" in note21j and "TỔNG" in note21j and "1.9tr" in note21j
+      and "không tách theo mã" in note21j,
+      note21j)
+check("T21j note KHÔNG còn câu 'pool tạm loại đúng phần CÒN LẠI này' (khẳng định cơ chế đúng "
+      "ngay lúc nó đang loại nhầm cổ tức mã khác)",
+      "pool tạm loại đúng phần CÒN LẠI" not in note21j,
+      note21j)
+check("T21j ratio 1.9/80 = 2,4% ≤ 10% ⇒ có cảnh báo CẤU HÌNH CÓ THỂ ĐÃ CŨ",
+      "CẤU HÌNH CÓ THỂ ĐÃ CŨ" in note21j and "XCL" in note21j,
+      note21j)
+
+# T21k — required_changes (a): residual thuộc về mã KHÔNG bị exclude (tái dùng setup T21i: XCL đã
+# settle 0, còn 3tr receivable của AAA — mã KHÔNG excluded). Note KHÔNG được khẳng định 3tr đó là
+# phần "còn lại"/"đã về" CỦA XCL — chỉ được nói account-level.
+r21k = run(h21i, excluded_dividend_config_override=DGC_CFG)
+note21k = next((n for n in r21k["notes"] if "cổ tức excluded" in n), "")
+check("T21k residual thuộc mã khác (AAA) — note KHÔNG khẳng định 'ĐÃ VỀ' per-ticker cho XCL",
+      "ĐÃ VỀ" not in note21k,
+      note21k)
+check("T21k ratio 3/80 = 3,75% ≤ 10% ⇒ cảnh báo CẤU HÌNH CÓ THỂ ĐÃ CŨ nổi lên đúng lúc cần "
+      "(XCL gần như chắc đã settle, phần còn lại thuộc mã khác)",
+      "CẤU HÌNH CÓ THỂ ĐÃ CŨ" in note21k and "XCL" in note21k,
+      note21k)
+
+# T21l — required_changes (b): ≥2 mã excluded cùng lúc, KHÔNG được tạo phép chia giả tạo kiểu
+# "SHS ĐÃ VỀ 30tr" chỉ vì thứ tự xử lý tham lam (greedy min(amt, remaining)) trong vòng lặp.
+XCL_SHS_CFG = [{"ticker": "XCL", "amount_vnd": 80_000_000,
+               "expected_arrival_date": "2026-09-25"},
+              {"ticker": "SHS", "amount_vnd": 50_000_000,
+               "expected_arrival_date": "2026-09-25"}]
+h21l = holdings(BASE_LOTS, cash=0.0, total_cash=300e6, debt=0.0,
+               div_recv=100e6, excluded=("XCL", "SHS"))     # tổng receivable 100tr < 130tr cấu
+               # hình ⇒ greedy: XCL lấy hết 80tr (remaining 20), SHS lấy nốt 20tr (remaining 0) —
+               # cả 2 mã đều có amount > 0 trong excl_div_detail nên đều xuất hiện trong note.
+r21l = run(h21l, excluded_dividend_config_override=XCL_SHS_CFG)
+note21l = next((n for n in r21l["notes"] if "cổ tức excluded" in n), "")
+check("T21l ≥2 mã excluded — note KHÔNG khẳng định 'ĐÃ VỀ' cho bất kỳ mã nào (greedy split "
+      "không phải bằng chứng per-ticker)",
+      "ĐÃ VỀ" not in note21l,
+      note21l)
+check("T21l cả 2 mã đều xuất hiện trong note kèm cấu hình đúng của từng mã",
+      "XCL cấu hình 80.0tr" in note21l and "SHS cấu hình 50.0tr" in note21l,
+      note21l)
+# arch-review vòng 2 required_change (1): pin đúng SỐ POOL PER-TICKER thật (không phải account-
+# level 100tr) — mutation "pending_tk := account_total_recv" (thay số pool per-ticker bằng TỔNG
+# account-level, đúng lỗi misattribution vòng 1 đã bị bác) vẫn PASS check trên nếu chỉ pin cụm
+# "X cấu hình Ytr" (không đụng số min()). Pin thẳng 2 dòng min(...) = ... thật của T21l.
+# arch-review vòng 3 required_change (M14): pin CẢ CỤM có tiền tố "pool tạm loại" đứng ngay
+# trước min(...) — thiếu tiền tố, mutation đổi nhãn cụm thành khẳng định per-ticker khác (vd
+# "CÒN LẠI của mã") vẫn PASS vì chỉ so khớp con số, không so nhãn cụm.
+check("T21l pin số per-ticker thật trong min() — XCL: 'pool tạm loại min(80.0tr; 80.0tr) = "
+      "80.0tr' (không phải account-level 100.0tr, và đúng nhãn cụm 'pool tạm loại')",
+      "pool tạm loại min(80.0tr; 80.0tr) = 80.0tr" in note21l,
+      note21l)
+check("T21l pin số per-ticker thật trong min() — SHS: 'pool tạm loại min(50.0tr; 20.0tr) = "
+      "20.0tr' (không phải account-level 100.0tr, và đúng nhãn cụm 'pool tạm loại')",
+      "pool tạm loại min(50.0tr; 20.0tr) = 20.0tr" in note21l,
+      note21l)
+# T21l là case KHÔNG có cảnh báo stale nào bắn ra (ratio XCL=1.0, SHS=0.4, cả 2 > 10%) ⇒ đây là
+# chỗ non-vacuous để pin cụm "không tách theo mã" (T21j vô tình pass qua câu cảnh báo stale-config
+# riêng, không phải dòng chính) — đúng 1 lần / mã, 2 mã ⇒ đúng 2 lần.
+check("T21l cụm 'không tách theo mã' xuất hiện đúng 2 lần (dòng chính, non-vacuous — case này "
+      "không có cảnh báo stale nào chen vào)",
+      note21l.count("không tách theo mã") == 2,
+      note21l)
+# arch-review vòng 3 required_change (M9): pin số TỔNG account-level (account_total_recv,
+# 100tr = div_recv thật của h21l) — mutation hoán đổi account_total_recv↔pending_tk trong field
+# "DNSE hiện báo TỔNG" (compute_park_trim.py dòng ~452-453) làm 2 dòng ticker in ra 2 số "TỔNG"
+# KHÁC NHAU (20.0tr cho SHS, 80.0tr cho XCL) trong khi số TỔNG account-level thật phải giống
+# nhau cho cả 2 dòng — vẫn PASS mọi check phía trên vì chưa có assertion nào pin đúng con số
+# TỔNG account-level. count()==2 buộc CẢ HAI dòng ticker in cùng một số TỔNG thật.
+check("T21l cụm 'DNSE hiện báo TỔNG 100.0tr' xuất hiện đúng 2 lần (số TỔNG account-level thật, "
+      "GIỐNG NHAU cho cả 2 dòng ticker — không phải số per-ticker khác nhau)",
+      note21l.count("DNSE hiện báo TỔNG 100.0tr") == 2,
+      note21l)
+
+# T21m — required_changes (c): ≥2 entry config CÙNG 1 ticker phải CỘNG DỒN, không ghi đè. Mutation
+# "cộng dồn → ghi đè" từng sống qua 85/85 test vì chưa có case nào có ≥2 entry cùng ticker.
+DGC_CFG_DUP = [{"ticker": "XCL", "amount_vnd": 80_000_000,
+               "expected_arrival_date": "2026-09-25"},
+              {"ticker": "XCL", "amount_vnd": 50_000_000,
+               "expected_arrival_date": "2026-10-15"}]
+h21m = holdings(BASE_LOTS, cash=0.0, total_cash=300e6, debt=0.0,
+               div_recv=130e6, excluded=("XCL",))
+r21m = run(h21m, excluded_dividend_config_override=DGC_CFG_DUP)
+note21m = next((n for n in r21m["notes"] if "cổ tức excluded" in n), "")
+check("T21m 2 entry cùng ticker XCL (80tr+50tr) ⇒ note phải cộng dồn cấu hình 130.0tr, KHÔNG "
+      "ghi đè thành 50.0tr (mutation cộng dồn→ghi đè)",
+      "XCL cấu hình 130.0tr" in note21m,
+      note21m)
+check("T21m excluded_dividend_receivable_pending_vnd = 130tr (min(130tr cấu hình, 130tr "
+      "receivable) — cả 2 entry được match hết)",
+      r21m.get("excluded_dividend_receivable_pending_vnd") == 130e6,
+      r21m.get("excluded_dividend_receivable_pending_vnd"))
+
+# T21n — arch-review vòng 4 required_change (RC-a): mọi fixture tới T21m đều rơi vào
+# config_sum == account_total_recv (vd T21l: 80+20=100tr trùng khớp div_recv=100tr) ⇒ không phân
+# biệt được "TỔNG account-level" (account_total_recv, đọc từ h["cash_dividend_receiving_vnd"])
+# với "TỔNG per-ticker đã kẹp min()" (excl_div_pending, tổng các take() sau khi kẹp remaining).
+# Case này: config CHỈ 20tr nhưng DNSE báo receivable TOÀN TÀI KHOẢN tới 100tr (mô phỏng có cổ
+# tức mã KHÁC đang chờ) ⇒ 2 con số lệch xa, mutation account_total_recv → excl_div_pending
+# (compute_park_trim.py dòng ~434, đổi field hiển thị "TỔNG" từ h.get(...) sang biến pending đã
+# kẹp min) sẽ đổi "TỔNG 100.0tr" thành "TỔNG 20.0tr" — bị bắt.
+h21n = holdings(BASE_LOTS, cash=0.0, total_cash=300e6, debt=0.0,
+               div_recv=100e6, excluded=("XCL",))
+r21n = run(h21n, excluded_dividend_config_override=[
+    {"ticker": "XCL", "amount_vnd": 20_000_000, "expected_arrival_date": "2026-09-25"}])
+note21n = next((n for n in r21n["notes"] if "cổ tức excluded" in n), "")
+check("T21n TỔNG account-level (100tr) KHÁC XA cấu hình per-ticker (20tr) — note phải in đúng "
+      "TỔNG account-level thật (100.0tr), không phải số per-ticker đã kẹp min() (mutation "
+      "account_total_recv→excl_div_pending sẽ in nhầm 20.0tr)",
+      "DNSE hiện báo TỔNG 100.0tr" in note21n,
+      note21n)
+check("T21n pool tạm loại per-ticker = min(20.0tr cấu hình; 20.0tr receivable) = 20.0tr",
+      "pool tạm loại min(20.0tr; 20.0tr) = 20.0tr" in note21n,
+      note21n)
+
+# T21o — arch-review vòng 4 required_change (RC-b): dòng cảnh báo stale-config
+# ("⚠️ CẤU HÌNH CÓ THỂ ĐÃ CŨ — còn báo Xtr (Y% so với cấu hình Ztr)") PHẢI hiển thị số PER-TICKER
+# pending_tk, KHÔNG PHẢI account_total_recv — mutation hoán biến trong đúng dòng display này
+# (compute_park_trim.py dòng ~447) từng sống qua mọi case trước vì chưa case nào có ≥2 mã excluded
+# VỚI cảnh báo stale bắn ra mà 2 số (per-ticker vs account-level) khác nhau đủ để lộ ra.
+# XCL lấy hết 80tr đầu (remaining 82-80=2), SHS chỉ còn lấy được 2tr trên cấu hình 50tr ⇒
+# ratio SHS = 2/50 = 4% ≤ 10% ⇒ cảnh báo bắn cho SHS với "còn báo 2.0tr" — nếu mutation đổi
+# pending_tk→account_total_recv trong dòng cảnh báo thì sẽ in nhầm "còn báo 82.0tr".
+h21o = holdings(BASE_LOTS, cash=0.0, total_cash=300e6, debt=0.0,
+               div_recv=82e6, excluded=("XCL", "SHS"))
+r21o = run(h21o, excluded_dividend_config_override=[
+    {"ticker": "XCL", "amount_vnd": 80_000_000, "expected_arrival_date": "2026-09-25"},
+    {"ticker": "SHS", "amount_vnd": 50_000_000, "expected_arrival_date": "2026-09-25"}])
+note21o = next((n for n in r21o["notes"] if "cổ tức excluded" in n), "")
+check("T21o cảnh báo stale-config cho SHS in đúng số PER-TICKER pending (2.0tr trên cấu hình "
+      "50.0tr = 4%), KHÔNG PHẢI account-level 82.0tr (mutation pending_tk→account_total_recv "
+      "trong dòng cảnh báo sẽ in nhầm 'còn báo 82.0tr')",
+      "còn báo 2.0tr (4% so với cấu hình 50.0tr)" in note21o,
+      note21o)
 
 print(f"\n=== {len(PASS)} PASS / {len(FAIL)} FAIL ===")
 if FAIL:
