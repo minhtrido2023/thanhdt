@@ -207,3 +207,26 @@ so với phát hành thu tiền — cần `corporate_action` tách loại; (c) m
 lần đó tách `Close` (return) khỏi `Price` (weight) — đúng và vẫn đúng. Nhưng nó **không xét** số CP
 trong chân return; `basket_price_basis_selfcheck.py:199` chốt luôn kỳ vọng `mcap == Close*OShares`.
 Vì vậy đây là lỗ hổng mới, không phải hồi quy của bản sửa cũ.
+
+## 10. Nghiệm thu quant-skeptic — §9 **CONFIRMED (high)**, kèm 2 bằng chứng mạnh hơn của tôi
+
+`bus/inbox/quant-skeptic.jsonl` 2026-09-26T17:37:19Z · log `logs/verify_20260926_173234_1700056.log`
+· `killer_objection: null`.
+
+Reviewer tự dựng lại và tìm ra số **lớn hơn** con số tôi báo:
+- Đo TRỰC TIẾP trên index (không qua NAV): **basket index CAGR 2013-12-23→2026-06-19 control
+  32,95% vs flat 16,90%** — tức bản thân chuỗi xe park bị thổi **+16pp CAGR**; −4,48pp tôi báo là
+  phần đã bị pha loãng qua tỷ lệ thời gian park × tỷ trọng.
+- Lệch **một chiều**: 54 phiên có `ctrl − flat > +0,5%`, **0 phiên < −0,5%**; phiên nặng nhất
+  2018-08-01 +15,04%.
+- Ca đối chứng trên BQ: **TCB 2024-07-22** chuỗi `Close×OShares` +102,06% trong khi `Close` chỉ
+  +1,03%; hệ số `Close/Price` KHÔNG đổi qua bước nhảy OShares (0,954) và chỉ giảm nửa tại ex-date
+  thật ⇒ chứng minh trực tiếp việc đếm hai lần. Thêm VCB 2016-06-01 (`Price` −48,7% / `Close`
+  +2,7%) và HPG 2021-05-31 (`Price` −21,5% / `Close` +6,9%).
+- Gap log-return của rổ **12,9%/năm** ≈ ước lượng độc lập 13,53%/năm của tôi từ file PIT.
+
+Việc reviewer đề xuất (tôi KHÔNG tự làm — vượt phạm vi job): sửa `custom_basket.py` cho chân return
+thành chuỗi `Close` thuần (hoặc `OShares` hằng số theo tên), giữ chân weight; thêm self-check
+`max|ret_ctrl − ret_flat| ≈ 0`; **re-pin R3 và MỌI pin đi qua `custom_basket.build`/`build_pit`**;
+sửa kỳ vọng T4 của `basket_price_basis_selfcheck.py`; kiểm kê xem park LIVE có mua 30 mã thật không
+rồi so P&L park live vs backtest (nối với job panel-vs-live 2026-09-26).

@@ -91,3 +91,24 @@ Cổng LAG (user chốt 2026-07-27, `rating ≤ 3` auto-exclude ≥4) cũng nh�
 **Bẫy registry đã mang theo**: NPL FiinPro cao hơn OCR +1-2% tương đối (khác mẫu số) ⇒ chỉ dùng thứ
 hạng/cổng, đúng như prereg; NIM luỹ kế quy năm (không dùng trong `rate_bank`); nhảy NPL thật
 (SHB 2012Q3, STB 2015-17, NVB 2022-24) giữ nguyên, không lọc.
+
+## Nghiệm thu quant-skeptic — **CONFIRMED (high)**, mở rộng phạm vi chứng minh + 1 lỗ hổng LIVE
+
+`bus/inbox/quant-skeptic.jsonl` 2026-09-26T17:35:21Z · log `logs/verify_20260926_173015_1698566.log`.
+Reviewer tái lập `h1_bank_ab.py` khớp từng số + md5 CSV, khớp BQ 53.660 dòng `fa_ratings_8l`, và
+join độc lập xác nhận 962/962 dòng không-mới-nhất đúng bằng proxy ROE-only (18 lệch đều là dòng
+mới nhất bị override) ⇒ **tiền đề của tôi đúng**.
+
+Reviewer **lấp luôn 2 consumer tôi khai là CHƯA KIỂM**: mọi consumer V2.4 đều nhị phân ở biên 3/4 —
+`custom_basket.py:945` gate ≤3 (QTILT chỉ khi `quality=='tilt'`, dòng 1085; `custompitg` =
+`('none','q2m5',3)`), `regime_size_overlay.py:28 WEAK_RATING_MIN=4`, `golive_recommend_v23.py:683
+rating>=4`, `CAPIT_QEXIT r8l >3`, `build_universe_pit_quality QUALITY_OK<=3`. Không runner production
+nào đặt `BASKET_GATE_RATING=2` hay `custompitgq`.
+
+**Lỗ hổng reviewer tìm ra, nằm NGOÀI claim của tôi nhưng chạm LIVE — phải giải quyết trước khi wire:**
+dòng MỚI NHẤT mỗi NH do `override_current_bank_aq()` sinh từ `bank_lens_v3.csv` (nguồn ROE KHÁC) +
+fail-open `bank-nodata -> 3`. Hiện tại nó **đã** làm lệch gate hôm nay cho BAB/BVB/PGB (4→3),
+NVB/SGB (5→3), KLB (1→4). Không mã nào trong số đó thuộc custom30V ⇒ tác động live hôm nay = 0,
+nhưng bản wire **phải khai rõ nguồn ROE nào thắng ở dòng mới nhất**, và fail-open "không có dữ liệu
+⇒ rating 3" là vấn đề CÓ SẴN, độc lập với job này — NVB/SGB đang được chấm 3 live trong khi proxy
+nói 5.
