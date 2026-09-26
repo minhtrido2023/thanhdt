@@ -692,3 +692,6 @@
 
 ## Archived 2026-09-26 (keep=12 days=0 require_done=False)
 - [2026-09-24T07:48:35Z] corp-action-real-fixes-4sites ROUND2 XONG (job _073500): Viec1(34063dcb)/Viec2(ddc0ba05)/Viec3(fe4810be) da THIET KE LAI (khong phai va nho) sau arch-review REJECTED/NEEDS_CHANGES/NEEDS_CHANGES vong 1, tren nhanh fix/corp-action-real-fixes-4sites (worktree wt-corp-action-real-fixes). CHUA LAND, cho Mike verify + dispatch arch-review vong 2.
+
+## Archived 2026-09-26 (keep=12 days=0 require_done=False)
+- [2026-09-24T08:12:32Z] [2026-09-24T08:1x] corp-action-real-fixes-4sites VONG 3 XONG (job _080752): Viec2 sua R1(test 13c chan mutation nhan don)/R2(calls_out chan mutation truyen sai ngay)/R3(try/except fail-silent Sec29)/R4(docstring)/R5(msg) tren fix/corp-action-real-fixes-4sites @9a7d7f66 (rebase len master 7ec8d609, worktree wt-corp-action-real-fixes). Viec1+Viec3 DA LAND master, khong dong trong commit nay. selfcheck 52/52 x4 TZ, R1+R2+R3 tu ban lai xac nhan chet/crash dung mo ta. Hoi quy Viec1/3/4 deu PASS. CHUA LAND, cho Mike verify + arch-review vong 3.
