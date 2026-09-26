@@ -1,0 +1,346 @@
+ticker,date,shares_before,shares_after,delta,rel_pct,nearest_ca_gap_tdays,nearest_ca_date_field,nearest_ca_event_code,n_ca_rows_same_ticker_year,class
+IDV,2018-07-06,16125567,14825348,-1300219,-8.063,107,exright_date,ISS,1,delta<0 | CA gan nhat cach >60 phien (co dong trong cung nam)
+KDC,2015-12-22,235161141,205661141,-29500000,-12.545,-147,effective_date,AIS,1,delta<0 | CA gan nhat cach >60 phien (co dong trong cung nam)
+SFI,2020-08-21,14835293,13355293,-1480000,-9.976,86,effective_date,AIS,2,delta<0 | CA gan nhat cach >60 phien (co dong trong cung nam)
+VNE,2017-11-28,88834033,81934033,-6900000,-7.767,-223,effective_date,AIS,1,delta<0 | CA gan nhat cach >60 phien (co dong trong cung nam)
+EBS,2014-04-07,9382384,8535084,-847300,-9.031,,,,0,delta<0 | KHONG co dong ISS/AIS nao cho ma nay
+EBS,2014-11-17,8535084,7685084,-850000,-9.959,,,,0,delta<0 | KHONG co dong ISS/AIS nao cho ma nay
+ICG,2019-04-03,20000000,17572000,-2428000,-12.14,,,,0,delta<0 | KHONG co dong ISS/AIS nao cho ma nay
+UDJ,2015-07-23,16500000,14851015,-1648985,-9.994,,,,0,delta<0 | KHONG co dong ISS/AIS nao cho ma nay
+APC,2019-12-30,23608060,19905025,-3703035,-15.685,35,effective_date,AIS,1,delta<0 | co CA cach 11-60 phien
+BAB,2023-03-29,935394291,833426644,-101967647,-10.901,-32,exright_date,ISS,2,delta<0 | co CA cach 11-60 phien
+C47,2023-02-06,32529504,27533581,-4995923,-15.358,16,issue_date,AIS,5,delta<0 | co CA cach 11-60 phien
+CII,2016-08-16,264018237,240266727,-23751510,-8.996,-19,effective_date,AIS,7,delta<0 | co CA cach 11-60 phien
+CMI,2014-03-04,10000000,7426000,-2574000,-25.74,-14,exright_date,ISS,2,delta<0 | co CA cach 11-60 phien
+DC4,2018-03-23,14331358,10000000,-4331358,-30.223,33,effective_date,AIS,3,delta<0 | co CA cach 11-60 phien
+DHM,2018-03-12,37643123,31396180,-6246943,-16.595,29,effective_date,AIS,2,delta<0 | co CA cach 11-60 phien
+DLG,2017-02-14,429330459,285057850,-144272609,-33.604,-12,effective_date,AIS,2,delta<0 | co CA cach 11-60 phien
+ELC,2022-11-18,69771692,58778843,-10992849,-15.755,18,issue_date,AIS,3,delta<0 | co CA cach 11-60 phien
+EVS,2019-03-22,100000000,60000400,-39999600,-40.0,23,effective_date,AIS,1,delta<0 | co CA cach 11-60 phien
+G20,2017-05-18,28800000,14400000,-14400000,-50.0,-50,exright_date,ISS,1,delta<0 | co CA cach 11-60 phien
+G36,2017-08-03,100000800,93600000,-6400800,-6.401,29,effective_date,AIS,2,delta<0 | co CA cach 11-60 phien
+HAH,2018-07-09,50902149,48210126,-2692023,-5.289,18,effective_date,AIS,3,delta<0 | co CA cach 11-60 phien
+HCM,2024-04-09,754397854,703971114,-50426740,-6.684,-36,effective_date,AIS,6,delta<0 | co CA cach 11-60 phien
+HHV,2022-12-12,534768180,307804450,-226963730,-42.442,18,issue_date,AIS,1,delta<0 | co CA cach 11-60 phien
+HUT,2016-06-06,218288046,168417416,-49870630,-22.846,20,effective_date,AIS,4,delta<0 | co CA cach 11-60 phien
+IDI,2016-04-27,196650000,181609671,-15040329,-7.648,20,effective_date,AIS,2,delta<0 | co CA cach 11-60 phien
+IJC,2017-04-03,274194525,137097323,-137097202,-50.0,12,effective_date,AIS,1,delta<0 | co CA cach 11-60 phien
+IVS,2025-02-28,138700000,104923336,-33776664,-24.352,31,issue_date,AIS,2,delta<0 | co CA cach 11-60 phien
+KDC,2015-01-14,255161141,235161141,-20000000,-7.838,-20,effective_date,AIS,1,delta<0 | co CA cach 11-60 phien
+L18,2019-04-22,12499979,11488008,-1011971,-8.096,18,effective_date,AIS,3,delta<0 | co CA cach 11-60 phien
+L18,2021-01-29,45976016,38116528,-7859488,-17.095,-34,exright_date,ISS,1,delta<0 | co CA cach 11-60 phien
+LCG,2020-03-12,132298853,102901362,-29397491,-22.221,29,effective_date,AIS,4,delta<0 | co CA cach 11-60 phien
+LDP,2020-09-28,13389173,12703135,-686038,-5.124,40,effective_date,AIS,2,delta<0 | co CA cach 11-60 phien
+LGC,2013-10-18,16567122,15150719,-1416403,-8.549,28,effective_date,AIS,2,delta<0 | co CA cach 11-60 phien
+LIG,2016-08-19,46304055,42734124,-3569931,-7.71,19,effective_date,AIS,3,delta<0 | co CA cach 11-60 phien
+LPB,2019-04-01,987499399,888144095,-99355304,-10.061,14,effective_date,AIS,1,delta<0 | co CA cach 11-60 phien
+MSN,2017-11-16,1148139764,1047474042,-100665722,-8.768,29,effective_date,AIS,5,delta<0 | co CA cach 11-60 phien
+NAG,2026-06-08,57930349,52593726,-5336623,-9.212,28,issue_date,AIS,3,delta<0 | co CA cach 11-60 phien
+NBB,2013-10-10,35860600,33121200,-2739400,-7.639,50,effective_date,AIS,3,delta<0 | co CA cach 11-60 phien
+NDN,2016-02-01,51728870,42137173,-9591697,-18.542,19,effective_date,AIS,1,delta<0 | co CA cach 11-60 phien
+NDX,2016-02-02,6612564,4859793,-1752771,-26.507,18,effective_date,AIS,1,delta<0 | co CA cach 11-60 phien
+NDX,2018-05-23,5345747,4945747,-400000,-7.483,18,exright_date,ISS,2,delta<0 | co CA cach 11-60 phien
+NLG,2014-03-03,121013523,95513523,-25500000,-21.072,-13,exright_date,ISS,2,delta<0 | co CA cach 11-60 phien
+NVB,2019-07-26,482224674,406803587,-75421087,-15.64,25,effective_date,AIS,3,delta<0 | co CA cach 11-60 phien
+PCT,2023-09-08,55199792,50035493,-5164299,-9.356,-32,exright_date,ISS,3,delta<0 | co CA cach 11-60 phien
+PDV,2019-10-24,47600000,29500000,-18100000,-38.025,40,effective_date,AIS,2,delta<0 | co CA cach 11-60 phien
+PGB,2026-01-30,999996424,681587608,-318408816,-31.841,-32,effective_date,AIS,3,delta<0 | co CA cach 11-60 phien
+PLP,2019-04-16,31500000,26500000,-5000000,-15.873,25,effective_date,AIS,4,delta<0 | co CA cach 11-60 phien
+PLP,2019-04-23,26500000,25000000,-1500000,-5.66,20,effective_date,AIS,4,delta<0 | co CA cach 11-60 phien
+PXS,2013-05-09,60028802,40630661,-19398141,-32.315,33,effective_date,AIS,2,delta<0 | co CA cach 11-60 phien
+SBT,2018-05-21,557018673,495417879,-61600794,-11.059,20,effective_date,AIS,1,delta<0 | co CA cach 11-60 phien
+SCI,2026-03-11,45737113,42000000,-3737113,-8.171,26,issue_date,AIS,2,delta<0 | co CA cach 11-60 phien
+SCR,2015-10-08,247178934,217068101,-30110833,-12.182,-13,effective_date,AIS,5,delta<0 | co CA cach 11-60 phien
+SCS,2020-02-07,57555700,50365700,-7190000,-12.492,-53,effective_date,AIS,3,delta<0 | co CA cach 11-60 phien
+SD6,2014-05-16,30823711,19223711,-11600000,-37.633,16,effective_date,AIS,2,delta<0 | co CA cach 11-60 phien
+SII,2020-03-17,101935280,64522104,-37413176,-36.703,28,effective_date,AIS,2,delta<0 | co CA cach 11-60 phien
+SJE,2025-10-07,42295244,40000000,-2295244,-5.427,33,issue_date,AIS,2,delta<0 | co CA cach 11-60 phien
+TDP,2026-02-11,110277812,93699574,-16578238,-15.033,22,issue_date,AIS,2,delta<0 | co CA cach 11-60 phien
+TJC,2015-05-20,9600000,8600000,-1000000,-10.417,25,issue_date,AIS,3,delta<0 | co CA cach 11-60 phien
+TVB,2022-06-30,224030922,112097019,-111933903,-49.964,25,issue_date,AIS,5,delta<0 | co CA cach 11-60 phien
+TVC,2025-01-17,118610670,110610670,-8000000,-6.745,55,effective_date,AIS,1,delta<0 | co CA cach 11-60 phien
+TVC,2025-11-11,110610670,96155570,-14455100,-13.068,55,effective_date,AIS,1,delta<0 | co CA cach 11-60 phien
+TVC,2026-07-20,96155570,76155570,-20000000,-20.8,42,effective_date,AIS,2,delta<0 | co CA cach 11-60 phien
+TVS,2015-04-17,43000000,38700000,-4300000,-10.0,49,exright_date,ISS,2,delta<0 | co CA cach 11-60 phien
+VHC,2026-05-18,224453159,209453159,-15000000,-6.683,25,effective_date,AIS,1,delta<0 | co CA cach 11-60 phien
+VPG,2020-06-10,52899750,35000000,-17899750,-33.837,22,effective_date,AIS,5,delta<0 | co CA cach 11-60 phien
+YEG,2019-07-23,31279968,29505628,-1774340,-5.672,22,effective_date,AIS,1,delta<0 | co CA cach 11-60 phien
+ADS,2017-12-18,26867974,25517801,-1350173,-5.025,-8,exright_date,ISS,2,delta<0 | co CA cach 4-10 phien
+HAR,2015-09-03,109199626,94601678,-14597948,-13.368,6,effective_date,AIS,4,delta<0 | co CA cach 4-10 phien
+NAG,2022-08-17,33365244,30648022,-2717222,-8.144,7,effective_date,AIS,4,delta<0 | co CA cach 4-10 phien
+VE9,2015-10-29,23543787,11596165,-11947622,-50.746,9,effective_date,AIS,3,delta<0 | co CA cach 4-10 phien
+CIA,2021-01-14,19709904,18382143,-1327761,-6.737,-310,exright_date,ISS,0,delta<0 | ma co CA nhung KHONG co dong ISS/AIS nao trong CUNG NAM
+CTI,2020-06-26,62999997,54799997,-8200000,-13.016,11,issue_date,AIS,0,delta<0 | ma co CA nhung KHONG co dong ISS/AIS nao trong CUNG NAM
+DQC,2019-02-28,31258066,27558066,-3700000,-11.837,-651,effective_date,AIS,0,delta<0 | ma co CA nhung KHONG co dong ISS/AIS nao trong CUNG NAM
+DST,2014-09-08,1000000,919000,-81000,-8.1,250,exright_date,ISS,0,delta<0 | ma co CA nhung KHONG co dong ISS/AIS nao trong CUNG NAM
+EVE,2018-01-11,41979773,39548061,-2431712,-5.793,-339,effective_date,AIS,0,delta<0 | ma co CA nhung KHONG co dong ISS/AIS nao trong CUNG NAM
+HHS,2018-05-28,269744063,249744480,-19999583,-7.414,-290,effective_date,AIS,0,delta<0 | ma co CA nhung KHONG co dong ISS/AIS nao trong CUNG NAM
+ITQ,2020-05-18,23843305,22123705,-1719600,-7.212,435,exright_date,ISS,0,delta<0 | ma co CA nhung KHONG co dong ISS/AIS nao trong CUNG NAM
+MVN,2020-08-25,1404605800,1200588000,-204017800,-14.525,217,effective_date,AIS,0,delta<0 | ma co CA nhung KHONG co dong ISS/AIS nao trong CUNG NAM
+NAF,2022-12-09,62923023,50564090,-12358933,-19.641,-27,issue_date,AIS,0,delta<0 | ma co CA nhung KHONG co dong ISS/AIS nao trong CUNG NAM
+NBB,2020-11-18,93321256,78249916,-15071340,-16.15,-393,effective_date,AIS,0,delta<0 | ma co CA nhung KHONG co dong ISS/AIS nao trong CUNG NAM
+NDN,2017-01-12,42137173,39636994,-2500179,-5.933,-219,effective_date,AIS,0,delta<0 | ma co CA nhung KHONG co dong ISS/AIS nao trong CUNG NAM
+NKG,2020-07-03,182000339,171999868,-10000471,-5.495,286,exright_date,ISS,0,delta<0 | ma co CA nhung KHONG co dong ISS/AIS nao trong CUNG NAM
+PGV,2018-10-24,2080900000,1069969577,-1010930423,-48.581,192,effective_date,AIS,0,delta<0 | ma co CA nhung KHONG co dong ISS/AIS nao trong CUNG NAM
+PTC,2017-10-20,17999999,16209999,-1790000,-9.944,-547,effective_date,AIS,0,delta<0 | ma co CA nhung KHONG co dong ISS/AIS nao trong CUNG NAM
+PVC,2019-12-12,50000334,47500000,-2500334,-5.001,966,exright_date,ISS,0,delta<0 | ma co CA nhung KHONG co dong ISS/AIS nao trong CUNG NAM
+PXI,2013-02-28,57500000,30000000,-27500000,-47.826,-162,exright_date,ISS,0,delta<0 | ma co CA nhung KHONG co dong ISS/AIS nao trong CUNG NAM
+S55,2013-12-27,2490100,2000100,-490000,-19.678,332,exright_date,ISS,0,delta<0 | ma co CA nhung KHONG co dong ISS/AIS nao trong CUNG NAM
+TIS,2017-07-13,284000000,184000000,-100000000,-35.211,-524,effective_date,AIS,0,delta<0 | ma co CA nhung KHONG co dong ISS/AIS nao trong CUNG NAM
+TL4,2017-04-24,16008338,14658338,-1350000,-8.433,-1078,exright_date,ISS,0,delta<0 | ma co CA nhung KHONG co dong ISS/AIS nao trong CUNG NAM
+VCG,2020-12-08,441710673,402410673,-39300000,-8.897,387,exright_date,ISS,0,delta<0 | ma co CA nhung KHONG co dong ISS/AIS nao trong CUNG NAM
+VCS,2014-09-26,52999251,42399451,-10599800,-20.0,503,exright_date,ISS,0,delta<0 | ma co CA nhung KHONG co dong ISS/AIS nao trong CUNG NAM
+VHM,2024-11-26,4354367488,4107412004,-246955484,-5.671,27,effective_date,AIS,0,delta<0 | ma co CA nhung KHONG co dong ISS/AIS nao trong CUNG NAM
+VIB,2017-12-22,564440589,530574039,-33866550,-6.0,225,exright_date,ISS,0,delta<0 | ma co CA nhung KHONG co dong ISS/AIS nao trong CUNG NAM
+BCM,2018-07-13,23469000,1012581100,989112100,4214.547,62,effective_date,AIS,1,delta>0 | CA gan nhat cach >60 phien (co dong trong cung nam)
+BSR,2018-04-05,241427969,3100499616,2859071647,1184.234,181,effective_date,AIS,1,delta>0 | CA gan nhat cach >60 phien (co dong trong cung nam)
+CTG,2013-05-17,2621754537,3266144348,644389811,24.579,79,exright_date,ISS,2,delta>0 | CA gan nhat cach >60 phien (co dong trong cung nam)
+DLG,2015-08-24,149253515,169186135,19932620,13.355,-64,exright_date,ISS,1,delta>0 | CA gan nhat cach >60 phien (co dong trong cung nam)
+DVG,2021-05-19,4000000,28000000,24000000,600.0,-76,exright_date,ISS,2,delta>0 | CA gan nhat cach >60 phien (co dong trong cung nam)
+FMC,2014-06-26,12222630,13000000,777370,6.36,75,exright_date,ISS,2,delta>0 | CA gan nhat cach >60 phien (co dong trong cung nam)
+GVR,2018-06-11,99140960,4000000000,3900859040,3934.659,127,effective_date,AIS,1,delta>0 | CA gan nhat cach >60 phien (co dong trong cung nam)
+HVA,2022-03-11,5650000,13650000,8000000,141.593,-62,exright_date,ISS,1,delta>0 | CA gan nhat cach >60 phien (co dong trong cung nam)
+KDC,2021-11-30,228749100,251624010,22874910,10.0,-206,effective_date,AIS,1,delta>0 | CA gan nhat cach >60 phien (co dong trong cung nam)
+KDC,2024-06-13,267288970,289806316,22517346,8.424,-103,issue_date,AIS,1,delta>0 | CA gan nhat cach >60 phien (co dong trong cung nam)
+MSB,2021-01-28,1074477189,1157000000,82522811,7.68,170,exright_date,ISS,2,delta>0 | CA gan nhat cach >60 phien (co dong trong cung nam)
+MSN,2018-10-02,1053249650,1163149548,109899898,10.434,-65,effective_date,AIS,2,delta>0 | CA gan nhat cach >60 phien (co dong trong cung nam)
+NNC,2014-06-16,8302000,8768175,466175,5.615,129,exright_date,ISS,1,delta>0 | CA gan nhat cach >60 phien (co dong trong cung nam)
+PTC,2022-01-12,16184299,17884299,1700000,10.504,68,exright_date,ISS,2,delta>0 | CA gan nhat cach >60 phien (co dong trong cung nam)
+SKH,2018-05-18,7951640,33000000,25048360,315.009,135,effective_date,AIS,1,delta>0 | CA gan nhat cach >60 phien (co dong trong cung nam)
+VC7,2016-08-11,7500000,8000000,500000,6.667,73,exright_date,ISS,2,delta>0 | CA gan nhat cach >60 phien (co dong trong cung nam)
+VCS,2016-05-12,42399451,52999251,10599800,25.0,101,exright_date,ISS,2,delta>0 | CA gan nhat cach >60 phien (co dong trong cung nam)
+EBS,2015-12-25,8065584,9965584,1900000,23.557,,,,0,delta>0 | KHONG co dong ISS/AIS nao cho ma nay
+KKC,2022-02-23,4692300,5200000,507700,10.82,,,,0,delta>0 | KHONG co dong ISS/AIS nao cho ma nay
+UDJ,2021-03-25,14610840,16500000,1889160,12.93,,,,0,delta>0 | KHONG co dong ISS/AIS nao cho ma nay
+ACL,2016-09-12,18399675,22799675,4400000,23.913,-53,exright_date,ISS,1,delta>0 | co CA cach 11-60 phien
+APC,2014-11-07,11448000,12020400,572400,5.0,-23,exright_date,ISS,1,delta>0 | co CA cach 11-60 phien
+API,2015-05-19,26400000,36400000,10000000,37.879,35,effective_date,AIS,2,delta>0 | co CA cach 11-60 phien
+ASP,2014-10-29,22829609,37339542,14509933,63.558,-33,exright_date,ISS,1,delta>0 | co CA cach 11-60 phien
+BAB,2018-05-23,500000000,546204900,46204900,9.241,-45,exright_date,ISS,3,delta>0 | co CA cach 11-60 phien
+BAB,2019-10-21,550000000,650000000,100000000,18.182,-17,exright_date,ISS,2,delta>0 | co CA cach 11-60 phien
+BCE,2021-02-24,30000000,35000000,5000000,16.667,-15,exright_date,ISS,3,delta>0 | co CA cach 11-60 phien
+BID,2015-07-13,2811202644,3148123744,336921100,11.985,24,exright_date,ISS,3,delta>0 | co CA cach 11-60 phien
+BLF,2016-06-29,5500000,10500000,5000000,90.909,-26,exright_date,ISS,3,delta>0 | co CA cach 11-60 phien
+BOT,2020-02-11,40000000,48500000,8500000,21.25,-28,exright_date,ISS,2,delta>0 | co CA cach 11-60 phien
+BSI,2018-01-18,97632286,107632286,10000000,10.243,-13,exright_date,ISS,3,delta>0 | co CA cach 11-60 phien
+C47,2017-01-09,15000000,17020130,2020130,13.468,-13,exright_date,ISS,2,delta>0 | co CA cach 11-60 phien
+CII,2016-06-20,250344407,264018237,13673830,5.462,-21,exright_date,ISS,7,delta>0 | co CA cach 11-60 phien
+CII,2023-06-26,252222143,284019513,31797370,12.607,-53,effective_date,AIS,3,delta>0 | co CA cach 11-60 phien
+CTD,2016-01-08,43186344,46790874,3604530,8.346,-24,exright_date,ISS,5,delta>0 | co CA cach 11-60 phien
+CVN,2017-12-26,3250000,8250000,5000000,153.846,-12,exright_date,ISS,1,delta>0 | co CA cach 11-60 phien
+DC4,2019-09-30,12099764,29000000,16900236,139.674,-22,exright_date,ISS,4,delta>0 | co CA cach 11-60 phien
+DIG,2015-09-14,178743620,198643620,19900000,11.133,-15,exright_date,ISS,3,delta>0 | co CA cach 11-60 phien
+DIH,2018-11-23,3177576,5910262,2732686,85.999,-14,exright_date,ISS,3,delta>0 | co CA cach 11-60 phien
+DNP,2015-08-17,7872131,13507166,5635035,71.582,12,effective_date,AIS,5,delta>0 | co CA cach 11-60 phien
+DRH,2016-04-25,18399702,49000000,30600298,166.309,-12,exright_date,ISS,1,delta>0 | co CA cach 11-60 phien
+DTA,2018-09-13,15000000,17200000,2200000,14.667,-43,exright_date,ISS,1,delta>0 | co CA cach 11-60 phien
+HBC,2015-06-02,53396077,57368567,3972490,7.44,31,exright_date,ISS,4,delta>0 | co CA cach 11-60 phien
+HDA,2015-06-11,5900000,11500000,5600000,94.915,11,effective_date,AIS,3,delta>0 | co CA cach 11-60 phien
+HHG,2015-01-16,12617600,13600000,982400,7.786,56,exright_date,ISS,5,delta>0 | co CA cach 11-60 phien
+HQC,2014-09-15,90000000,120000000,30000000,33.333,-13,exright_date,ISS,3,delta>0 | co CA cach 11-60 phien
+HTG,2021-10-05,22500000,23625000,1125000,5.0,-14,exright_date,ISS,1,delta>0 | co CA cach 11-60 phien
+IJC,2021-01-07,137097323,217097323,80000000,58.353,14,exright_date,ISS,2,delta>0 | co CA cach 11-60 phien
+IMP,2015-01-28,26311486,28942646,2631160,10.0,-16,exright_date,ISS,1,delta>0 | co CA cach 11-60 phien
+ITA,2015-03-10,718905879,838282817,119376938,16.605,-11,exright_date,ISS,2,delta>0 | co CA cach 11-60 phien
+IVS,2019-10-24,34000000,69350000,35350000,103.971,-12,exright_date,ISS,2,delta>0 | co CA cach 11-60 phien
+KBC,2014-05-28,289760512,389760188,99999676,34.511,-21,effective_date,AIS,2,delta>0 | co CA cach 11-60 phien
+KBC,2015-03-09,389760188,469760189,80000001,20.525,-25,exright_date,ISS,1,delta>0 | co CA cach 11-60 phien
+KDH,2014-04-02,43738734,48069974,4331240,9.903,31,exright_date,ISS,1,delta>0 | co CA cach 11-60 phien
+KMR,2014-12-03,34396788,40396788,6000000,17.443,12,exright_date,ISS,3,delta>0 | co CA cach 11-60 phien
+LCG,2014-10-20,56249618,76249618,20000000,35.556,-14,exright_date,ISS,1,delta>0 | co CA cach 11-60 phien
+LGC,2015-01-27,36831242,72531242,35700000,96.929,-11,exright_date,ISS,5,delta>0 | co CA cach 11-60 phien
+LHC,2015-09-22,3000000,3600000,600000,20.0,11,effective_date,AIS,5,delta>0 | co CA cach 11-60 phien
+MPC,2019-07-02,138462850,198462850,60000000,43.333,-15,exright_date,ISS,2,delta>0 | co CA cach 11-60 phien
+MSH,2019-05-15,47628000,50009400,2381400,5.0,-17,exright_date,ISS,1,delta>0 | co CA cach 11-60 phien
+NBB,2013-10-18,33121200,35721200,2600000,7.85,44,effective_date,AIS,3,delta>0 | co CA cach 11-60 phien
+NKG,2014-08-25,29900000,39900000,10000000,33.445,-36,exright_date,ISS,1,delta>0 | co CA cach 11-60 phien
+NKG,2016-12-08,50034515,66034361,15999846,31.978,-24,exright_date,ISS,4,delta>0 | co CA cach 11-60 phien
+NKG,2021-07-05,171999868,181999868,10000000,5.814,35,exright_date,ISS,4,delta>0 | co CA cach 11-60 phien
+NLG,2014-03-18,95513523,121013523,25500000,26.698,-24,exright_date,ISS,2,delta>0 | co CA cach 11-60 phien
+PAN,2013-05-17,11550000,20050000,8500000,73.593,16,effective_date,AIS,2,delta>0 | co CA cach 11-60 phien
+PAN,2014-04-22,20050000,40362500,20312500,101.309,-25,exright_date,ISS,4,delta>0 | co CA cach 11-60 phien
+PGN,2021-04-05,5147998,6797991,1649993,32.051,-12,exright_date,ISS,5,delta>0 | co CA cach 11-60 phien
+PNJ,2017-08-04,98273868,108101325,9827457,10.0,-15,exright_date,ISS,1,delta>0 | co CA cach 11-60 phien
+PTI,2015-07-13,50395709,80395709,30000000,59.529,13,effective_date,AIS,2,delta>0 | co CA cach 11-60 phien
+PXS,2013-12-06,40630661,50000005,9369344,23.06,-14,exright_date,ISS,2,delta>0 | co CA cach 11-60 phien
+QCG,2015-03-10,130003691,275129141,145125450,111.632,-43,exright_date,ISS,2,delta>0 | co CA cach 11-60 phien
+REE,2013-12-27,244640638,263683638,19043000,7.784,-20,exright_date,ISS,1,delta>0 | co CA cach 11-60 phien
+SBT,2019-10-09,525139652,608351885,83212233,15.846,-13,exright_date,ISS,3,delta>0 | co CA cach 11-60 phien
+SCS,2017-07-27,53377200,56642000,3264800,6.116,-11,exright_date,ISS,2,delta>0 | co CA cach 11-60 phien
+SD6,2014-02-18,19223711,30823711,11600000,60.342,-28,exright_date,ISS,2,delta>0 | co CA cach 11-60 phien
+SD6,2014-05-20,19223711,34771611,15547900,80.879,14,effective_date,AIS,2,delta>0 | co CA cach 11-60 phien
+SDT,2014-03-18,27377996,35663710,8285714,30.264,-17,effective_date,AIS,5,delta>0 | co CA cach 11-60 phien
+SDT,2014-05-22,35663710,39945403,4281693,12.006,17,effective_date,AIS,5,delta>0 | co CA cach 11-60 phien
+SDT,2014-12-12,39945403,42732311,2786908,6.977,13,effective_date,AIS,5,delta>0 | co CA cach 11-60 phien
+SFI,2017-12-13,11238230,11800235,562005,5.001,-23,exright_date,ISS,2,delta>0 | co CA cach 11-60 phien
+SHB,2017-01-24,1019192914,1119192914,100000000,9.812,-15,exright_date,ISS,2,delta>0 | co CA cach 11-60 phien
+SHN,2016-10-03,42358467,115083360,72724893,171.689,-15,effective_date,AIS,4,delta>0 | co CA cach 11-60 phien
+SJD,2014-01-16,35879150,40999150,5120000,14.27,-24,exright_date,ISS,1,delta>0 | co CA cach 11-60 phien
+SJD,2015-02-03,40999150,45999150,5000000,12.195,-46,exright_date,ISS,1,delta>0 | co CA cach 11-60 phien
+TAR,2022-01-27,46199933,71199933,25000000,54.113,-13,exright_date,ISS,3,delta>0 | co CA cach 11-60 phien
+TCO,2014-10-13,12620000,13780000,1160000,9.192,-33,exright_date,ISS,1,delta>0 | co CA cach 11-60 phien
+TEG,2021-10-11,55591919,65591772,9999853,17.988,-11,exright_date,ISS,3,delta>0 | co CA cach 11-60 phien
+TIG,2014-09-15,16500000,26500000,10000000,60.606,-18,exright_date,ISS,2,delta>0 | co CA cach 11-60 phien
+TMS,2017-02-27,31255465,34554450,3298985,10.555,-17,exright_date,ISS,3,delta>0 | co CA cach 11-60 phien
+TMS,2019-07-04,47508888,54203873,6694985,14.092,-15,exright_date,ISS,4,delta>0 | co CA cach 11-60 phien
+TSC,2014-08-28,8312915,15812915,7500000,90.221,-19,exright_date,ISS,1,delta>0 | co CA cach 11-60 phien
+TTF,2014-12-29,73499536,100066636,26567100,36.146,-22,effective_date,AIS,4,delta>0 | co CA cach 11-60 phien
+TTF,2018-01-29,144607376,214607376,70000000,48.407,-26,exright_date,ISS,1,delta>0 | co CA cach 11-60 phien
+TTF,2022-02-07,311182487,411182487,100000000,32.135,-35,exright_date,ISS,1,delta>0 | co CA cach 11-60 phien
+VDS,2016-01-04,34979987,70000000,35020013,100.114,15,effective_date,AIS,1,delta>0 | co CA cach 11-60 phien
+VGC,2017-06-19,307000000,427000000,120000000,39.088,-15,exright_date,ISS,3,delta>0 | co CA cach 11-60 phien
+VIG,2023-01-13,34133300,45133300,11000000,32.227,-21,exright_date,ISS,1,delta>0 | co CA cach 11-60 phien
+VJC,2017-04-05,300000000,322388060,22388060,7.463,-13,exright_date,ISS,4,delta>0 | co CA cach 11-60 phien
+VMC,2015-04-20,6500000,10000000,3500000,53.846,19,effective_date,AIS,1,delta>0 | co CA cach 11-60 phien
+VMD,2016-12-20,8440268,11940268,3500000,41.468,-43,exright_date,ISS,1,delta>0 | co CA cach 11-60 phien
+VNG,2019-08-08,83704405,92666608,8962203,10.707,-11,exright_date,ISS,3,delta>0 | co CA cach 11-60 phien
+VTD,2019-12-10,1800000,6000000,4200000,233.333,48,effective_date,AIS,1,delta>0 | co CA cach 11-60 phien
+AAA,2017-01-16,51899988,56964988,5065000,9.759,6,effective_date,AIS,5,delta>0 | co CA cach 4-10 phien
+AAA,2017-12-12,59249988,83599988,24350000,41.097,-6,exright_date,ISS,5,delta>0 | co CA cach 4-10 phien
+AAA,2022-07-18,326434496,382274496,55840000,17.106,10,issue_date,AIS,2,delta>0 | co CA cach 4-10 phien
+ABW,2026-06-24,101150000,301150000,200000000,197.726,-5,exright_date,ISS,1,delta>0 | co CA cach 4-10 phien
+ADG,2020-03-03,7400000,8288000,888000,12.0,-10,exright_date,ISS,6,delta>0 | co CA cach 4-10 phien
+APG,2019-01-25,13528900,34028900,20500000,151.527,-4,exright_date,ISS,1,delta>0 | co CA cach 4-10 phien
+API,2022-01-12,36400000,38220000,1820000,5.0,-7,exright_date,ISS,2,delta>0 | co CA cach 4-10 phien
+APS,2021-11-12,78000000,83000000,5000000,6.41,-4,exright_date,ISS,5,delta>0 | co CA cach 4-10 phien
+BIC,2014-04-28,66000000,69300000,3300000,5.0,5,effective_date,AIS,4,delta>0 | co CA cach 4-10 phien
+BIG,2024-10-28,5000000,14335000,9335000,186.7,-5,exright_date,ISS,3,delta>0 | co CA cach 4-10 phien
+BLF,2019-05-07,10500000,11499999,999999,9.524,-8,exright_date,ISS,2,delta>0 | co CA cach 4-10 phien
+BMS,2025-12-16,78932652,203932652,125000000,158.363,-5,exright_date,ISS,3,delta>0 | co CA cach 4-10 phien
+C47,2015-03-10,10560000,12000000,1440000,13.636,7,effective_date,AIS,1,delta>0 | co CA cach 4-10 phien
+C69,2020-10-16,15000000,30000000,15000000,100.0,-9,exright_date,ISS,2,delta>0 | co CA cach 4-10 phien
+CIA,2018-10-29,9599982,11099982,1500000,15.625,-4,exright_date,ISS,4,delta>0 | co CA cach 4-10 phien
+CIA,2019-11-05,18209980,19709980,1500000,8.237,-9,exright_date,ISS,3,delta>0 | co CA cach 4-10 phien
+CIG,2016-12-23,13440113,31539947,18099834,134.67,-7,exright_date,ISS,1,delta>0 | co CA cach 4-10 phien
+CII,2015-09-30,202629138,217247638,14618500,7.214,8,effective_date,AIS,13,delta>0 | co CA cach 4-10 phien
+CII,2023-11-10,284019513,318364813,34345300,12.093,-6,exright_date,ISS,3,delta>0 | co CA cach 4-10 phien
+CII,2025-02-11,319752413,547976583,228224170,71.375,5,issue_date,AIS,9,delta>0 | co CA cach 4-10 phien
+CII,2026-02-03,625450421,671985291,46534870,7.44,-6,exright_date,ISS,2,delta>0 | co CA cach 4-10 phien
+CLL,2015-07-20,26400000,34000000,7600000,28.788,4,effective_date,AIS,5,delta>0 | co CA cach 4-10 phien
+CMI,2014-02-18,7426000,10000000,2574000,34.662,-4,exright_date,ISS,2,delta>0 | co CA cach 4-10 phien
+CMI,2014-04-21,7426000,10000000,2574000,34.662,6,effective_date,AIS,2,delta>0 | co CA cach 4-10 phien
+CMS,2022-07-19,17200000,25452500,8252500,47.98,-6,exright_date,ISS,2,delta>0 | co CA cach 4-10 phien
+CTI,2016-07-21,32999997,42999997,10000000,30.303,-7,exright_date,ISS,1,delta>0 | co CA cach 4-10 phien
+DC4,2018-08-23,10000000,11000000,1000000,10.0,-4,exright_date,ISS,3,delta>0 | co CA cach 4-10 phien
+DCS,2014-01-15,34772687,38348699,3576012,10.284,-5,exright_date,ISS,2,delta>0 | co CA cach 4-10 phien
+DGC,2018-09-17,50008002,107802938,57794936,115.571,-8,exright_date,ISS,2,delta>0 | co CA cach 4-10 phien
+DGT,2020-12-30,6481000,20000000,13519000,208.594,-4,exright_date,ISS,2,delta>0 | co CA cach 4-10 phien
+DGT,2022-03-31,20000000,79000000,59000000,295.0,-5,exright_date,ISS,2,delta>0 | co CA cach 4-10 phien
+DHC,2016-03-21,17258888,23258888,6000000,34.765,-4,exright_date,ISS,4,delta>0 | co CA cach 4-10 phien
+DL1,2016-04-07,3142026,15218717,12076691,384.36,-4,exright_date,ISS,4,delta>0 | co CA cach 4-10 phien
+DNP,2019-01-07,88008525,98008525,10000000,11.363,-4,exright_date,ISS,1,delta>0 | co CA cach 4-10 phien
+DNP,2024-07-11,118901103,140966036,22064933,18.557,-4,exright_date,ISS,2,delta>0 | co CA cach 4-10 phien
+DP3,2019-05-21,7650000,8600000,950000,12.418,10,effective_date,AIS,4,delta>0 | co CA cach 4-10 phien
+DXG,2014-02-21,63359617,75000000,11640383,18.372,9,effective_date,AIS,2,delta>0 | co CA cach 4-10 phien
+DXG,2015-01-07,74942000,100642000,25700000,34.293,7,exright_date,ISS,10,delta>0 | co CA cach 4-10 phien
+DXP,2023-07-07,29464334,54464334,25000000,84.848,-5,exright_date,ISS,7,delta>0 | co CA cach 4-10 phien
+EVS,2021-10-15,63000400,103000400,40000000,63.492,-4,exright_date,ISS,2,delta>0 | co CA cach 4-10 phien
+FCN,2019-04-17,94344562,113847742,19503180,20.672,-4,exright_date,ISS,6,delta>0 | co CA cach 4-10 phien
+FIT,2016-11-09,193548962,223548962,30000000,15.5,-9,exright_date,ISS,4,delta>0 | co CA cach 4-10 phien
+FIT,2017-01-13,223548962,254730247,31181285,13.948,-4,exright_date,ISS,1,delta>0 | co CA cach 4-10 phien
+GEG,2017-11-10,89388324,97091287,7702963,8.617,10,effective_date,AIS,4,delta>0 | co CA cach 4-10 phien
+GMC,2019-06-27,15506360,17832314,2325954,15.0,-5,exright_date,ISS,3,delta>0 | co CA cach 4-10 phien
+GMD,2017-06-28,179432281,288276968,108844687,60.661,-6,exright_date,ISS,3,delta>0 | co CA cach 4-10 phien
+HAX,2016-09-28,11116273,14231534,3115261,28.024,-8,exright_date,ISS,2,delta>0 | co CA cach 4-10 phien
+HBC,2013-05-09,37608174,47608174,10000000,26.59,4,effective_date,AIS,5,delta>0 | co CA cach 4-10 phien
+HBC,2019-07-11,205875398,230875398,25000000,12.143,6,effective_date,AIS,4,delta>0 | co CA cach 4-10 phien
+HHG,2015-06-04,13600000,16600000,3000000,22.059,9,exright_date,ISS,5,delta>0 | co CA cach 4-10 phien
+HID,2018-10-19,32548704,57048657,24499953,75.272,-6,exright_date,ISS,3,delta>0 | co CA cach 4-10 phien
+HQC,2013-07-19,72000000,90000000,18000000,25.0,-7,exright_date,ISS,4,delta>0 | co CA cach 4-10 phien
+HQC,2014-10-16,120000000,170000000,50000000,41.667,-10,exright_date,ISS,3,delta>0 | co CA cach 4-10 phien
+HQC,2015-10-12,263000000,395000000,132000000,50.19,-5,effective_date,AIS,7,delta>0 | co CA cach 4-10 phien
+HSV,2021-12-27,10000000,15000000,5000000,50.0,-5,exright_date,ISS,4,delta>0 | co CA cach 4-10 phien
+HT1,2013-12-31,197952000,317952000,120000000,60.621,-7,exright_date,ISS,1,delta>0 | co CA cach 4-10 phien
+HUT,2014-04-22,64647491,84647491,20000000,30.937,8,effective_date,AIS,3,delta>0 | co CA cach 4-10 phien
+HUT,2015-01-27,84647491,94647491,10000000,11.814,6,effective_date,AIS,5,delta>0 | co CA cach 4-10 phien
+HUT,2015-05-06,94647491,114647491,20000000,21.131,9,effective_date,AIS,5,delta>0 | co CA cach 4-10 phien
+ITA,2013-03-14,444579314,560257346,115678032,26.02,-10,exright_date,ISS,6,delta>0 | co CA cach 4-10 phien
+IVS,2017-01-16,24150000,34000000,9850000,40.787,7,effective_date,AIS,1,delta>0 | co CA cach 4-10 phien
+KDC,2014-06-02,172636014,212636014,40000000,23.17,-4,exright_date,ISS,6,delta>0 | co CA cach 4-10 phien
+KDH,2014-06-02,48069974,75000000,26930026,56.023,-8,exright_date,ISS,1,delta>0 | co CA cach 4-10 phien
+KDH,2015-02-11,75000000,126000000,51000000,68.0,-10,exright_date,ISS,6,delta>0 | co CA cach 4-10 phien
+KDH,2018-03-05,336000000,387832344,51832344,15.426,-6,exright_date,ISS,5,delta>0 | co CA cach 4-10 phien
+KDH,2024-08-02,799311971,909403715,110091744,13.773,-4,exright_date,ISS,5,delta>0 | co CA cach 4-10 phien
+KSF,2025-09-29,300000000,899787308,599787308,199.929,-8,exright_date,ISS,2,delta>0 | co CA cach 4-10 phien
+L14,2019-06-14,14999186,16498878,1499692,9.998,-4,exright_date,ISS,5,delta>0 | co CA cach 4-10 phien
+LCG,2018-02-05,77999662,99999706,22000044,28.205,-4,exright_date,ISS,2,delta>0 | co CA cach 4-10 phien
+LCM,2013-06-10,21420000,24633000,3213000,15.0,-5,exright_date,ISS,3,delta>0 | co CA cach 4-10 phien
+LIG,2022-02-21,64034124,89734124,25700000,40.135,-5,exright_date,ISS,3,delta>0 | co CA cach 4-10 phien
+MWG,2016-12-16,146579546,153910542,7330996,5.001,-4,effective_date,AIS,2,delta>0 | co CA cach 4-10 phien
+NAB,2022-02-23,513440504,656440504,143000000,27.851,-4,exright_date,ISS,5,delta>0 | co CA cach 4-10 phien
+NBB,2017-02-07,58181800,63848466,5666666,9.74,7,effective_date,AIS,5,delta>0 | co CA cach 4-10 phien
+NED,2018-07-26,36254754,40500000,4245246,11.709,6,effective_date,AIS,2,delta>0 | co CA cach 4-10 phien
+NLG,2015-01-26,121013523,133969279,12955756,10.706,6,effective_date,AIS,6,delta>0 | co CA cach 4-10 phien
+NLG,2015-07-24,134472157,141572229,7100072,5.28,5,effective_date,AIS,6,delta>0 | co CA cach 4-10 phien
+NLG,2018-11-22,211576563,239136918,27560355,13.026,6,effective_date,AIS,9,delta>0 | co CA cach 4-10 phien
+NLG,2021-09-10,285270660,345270660,60000000,21.033,-4,exright_date,ISS,6,delta>0 | co CA cach 4-10 phien
+NRC,2019-03-27,21000000,24000000,3000000,14.286,-4,exright_date,ISS,6,delta>0 | co CA cach 4-10 phien
+NVL,2018-05-22,854955928,907455928,52500000,6.141,-4,exright_date,ISS,8,delta>0 | co CA cach 4-10 phien
+ORS,2020-01-09,40000000,43960000,3960000,9.9,-5,exright_date,ISS,4,delta>0 | co CA cach 4-10 phien
+PAN,2015-03-09,61643748,83143748,21500000,34.878,8,effective_date,AIS,4,delta>0 | co CA cach 4-10 phien
+PBC,2020-09-30,40000000,90000000,50000000,125.0,-6,exright_date,ISS,2,delta>0 | co CA cach 4-10 phien
+PC1,2017-10-27,97840888,115452410,17611522,18.0,-5,exright_date,ISS,3,delta>0 | co CA cach 4-10 phien
+PGD,2014-09-10,56966666,59999045,3032379,5.323,7,effective_date,AIS,5,delta>0 | co CA cach 4-10 phien
+PGI,2017-08-08,70974218,88717773,17743555,25.0,-7,exright_date,ISS,1,delta>0 | co CA cach 4-10 phien
+PMG,2019-06-14,37949847,42124331,4174484,11.0,-4,exright_date,ISS,2,delta>0 | co CA cach 4-10 phien
+PVD,2013-08-15,210159735,248159735,38000000,18.081,6,effective_date,AIS,5,delta>0 | co CA cach 4-10 phien
+RAL,2021-04-05,11500000,12075000,575000,5.0,-9,exright_date,ISS,5,delta>0 | co CA cach 4-10 phien
+SBA,2013-10-31,52288331,60288331,8000000,15.3,-9,issue_date,AIS,3,delta>0 | co CA cach 4-10 phien
+SBT,2015-11-12,145231160,182373552,37142392,25.575,8,effective_date,AIS,2,delta>0 | co CA cach 4-10 phien
+SBT,2017-09-08,253188268,557018673,303830405,120.002,-6,exright_date,ISS,3,delta>0 | co CA cach 4-10 phien
+SBT,2020-12-24,608351885,638769480,30417595,5.0,-5,exright_date,ISS,1,delta>0 | co CA cach 4-10 phien
+SD5,2014-08-26,19799848,25999848,6200000,31.313,-7,effective_date,AIS,4,delta>0 | co CA cach 4-10 phien
+SFI,2014-08-12,9139704,10317704,1178000,12.889,6,effective_date,AIS,3,delta>0 | co CA cach 4-10 phien
+SHI,2014-10-29,28994663,32994663,4000000,13.796,7,effective_date,AIS,4,delta>0 | co CA cach 4-10 phien
+SHI,2018-10-09,67108516,85068477,17959961,26.763,-4,exright_date,ISS,3,delta>0 | co CA cach 4-10 phien
+SHN,2016-03-31,38591760,42358467,3766707,9.76,-7,exright_date,ISS,4,delta>0 | co CA cach 4-10 phien
+SJE,2014-01-08,10871797,11548005,676208,6.22,-7,effective_date,AIS,1,delta>0 | co CA cach 4-10 phien
+SMC,2017-05-05,29511643,41999243,12487600,42.314,-6,exright_date,ISS,1,delta>0 | co CA cach 4-10 phien
+STB,2015-11-13,1585265066,1885215716,299950650,18.921,9,effective_date,AIS,5,delta>0 | co CA cach 4-10 phien
+TCO,2026-07-20,31320622,57320622,26000000,83.012,-9,exright_date,ISS,2,delta>0 | co CA cach 4-10 phien
+TMS,2016-02-05,23766039,26610571,2844532,11.969,-7,exright_date,ISS,6,delta>0 | co CA cach 4-10 phien
+TMS,2020-06-22,63098791,70434542,7335751,11.626,-5,exright_date,ISS,7,delta>0 | co CA cach 4-10 phien
+TMS,2020-11-02,63474791,70810542,7335751,11.557,-10,issue_date,AIS,7,delta>0 | co CA cach 4-10 phien
+TPB,2021-09-20,1071671722,1171671722,100000000,9.331,-4,exright_date,ISS,2,delta>0 | co CA cach 4-10 phien
+TTF,2013-12-04,67918740,73499536,5580796,8.217,-6,exright_date,ISS,3,delta>0 | co CA cach 4-10 phien
+TTF,2019-05-28,214607376,311182487,96575111,45.001,-6,exright_date,ISS,1,delta>0 | co CA cach 4-10 phien
+TV2,2019-06-27,12313159,14775667,2462508,19.999,-5,exright_date,ISS,3,delta>0 | co CA cach 4-10 phien
+TVC,2021-12-27,103610670,118610670,15000000,14.477,-5,exright_date,ISS,7,delta>0 | co CA cach 4-10 phien
+TVS,2019-06-25,63502375,78424700,14922325,23.499,-6,exright_date,ISS,8,delta>0 | co CA cach 4-10 phien
+UNI,2025-04-16,15617632,42617632,27000000,172.882,-10,exright_date,ISS,2,delta>0 | co CA cach 4-10 phien
+VGC,2016-10-07,264500111,307000000,42499889,16.068,9,effective_date,AIS,3,delta>0 | co CA cach 4-10 phien
+VGC,2018-01-12,427000000,448350000,21350000,5.0,-9,exright_date,ISS,1,delta>0 | co CA cach 4-10 phien
+VIT,2026-03-26,49999664,68801326,18801662,37.604,-6,exright_date,ISS,6,delta>0 | co CA cach 4-10 phien
+VIX,2019-01-29,80964583,100964583,20000000,24.702,-5,exright_date,ISS,4,delta>0 | co CA cach 4-10 phien
+VLC,2022-03-16,63101000,172346173,109245173,173.127,-6,exright_date,ISS,3,delta>0 | co CA cach 4-10 phien
+VMD,2017-05-05,11940268,15440268,3500000,29.313,-7,exright_date,ISS,2,delta>0 | co CA cach 4-10 phien
+VNG,2018-09-27,75205031,79718480,4513449,6.002,-4,exright_date,ISS,2,delta>0 | co CA cach 4-10 phien
+VPB,2017-09-20,1405908635,1497403415,91494780,6.508,-4,exright_date,ISS,5,delta>0 | co CA cach 4-10 phien
+VRC,2017-10-23,24658095,50000000,25341905,102.773,-4,exright_date,ISS,3,delta>0 | co CA cach 4-10 phien
+BIC,2016-01-11,76229982,117276895,41046913,53.846,-46,exright_date,ISS,0,delta>0 | ma co CA nhung KHONG co dong ISS/AIS nao trong CUNG NAM
+BKC,2013-05-24,5473200,6034700,561500,10.259,411,exright_date,ISS,0,delta>0 | ma co CA nhung KHONG co dong ISS/AIS nao trong CUNG NAM
+CTI,2025-07-01,54799997,62999997,8200000,14.964,282,exright_date,ISS,0,delta>0 | ma co CA nhung KHONG co dong ISS/AIS nao trong CUNG NAM
+DPR,2021-07-06,40124790,43000000,2875210,7.166,408,exright_date,ISS,0,delta>0 | ma co CA nhung KHONG co dong ISS/AIS nao trong CUNG NAM
+EVE,2022-01-19,38047973,41091810,3043837,8.0,-1345,effective_date,AIS,0,delta>0 | ma co CA nhung KHONG co dong ISS/AIS nao trong CUNG NAM
+HGM,2024-10-09,11920720,12600000,679280,5.698,-2758,effective_date,AIS,0,delta>0 | ma co CA nhung KHONG co dong ISS/AIS nao trong CUNG NAM
+HHS,2020-04-16,249744480,274744063,24999583,10.01,425,exright_date,ISS,0,delta>0 | ma co CA nhung KHONG co dong ISS/AIS nao trong CUNG NAM
+HNM,2015-06-19,12500000,20000000,7500000,60.0,-110,exright_date,ISS,0,delta>0 | ma co CA nhung KHONG co dong ISS/AIS nao trong CUNG NAM
+IDC,2018-05-17,55305500,300000000,244694500,442.442,229,effective_date,AIS,0,delta>0 | ma co CA nhung KHONG co dong ISS/AIS nao trong CUNG NAM
+ITQ,2021-04-09,22123705,23843305,1719600,7.773,208,exright_date,ISS,0,delta>0 | ma co CA nhung KHONG co dong ISS/AIS nao trong CUNG NAM
+LHC,2013-07-08,1867000,2000000,133000,7.124,485,exright_date,ISS,0,delta>0 | ma co CA nhung KHONG co dong ISS/AIS nao trong CUNG NAM
+MCG,2026-05-14,52050000,57510000,5460000,10.49,-3469,exright_date,ISS,0,delta>0 | ma co CA nhung KHONG co dong ISS/AIS nao trong CUNG NAM
+NBB,2021-11-02,78249916,100159893,21909977,28.0,-631,effective_date,AIS,0,delta>0 | ma co CA nhung KHONG co dong ISS/AIS nao trong CUNG NAM
+NDN,2019-07-01,44432616,47932398,3499782,7.877,-204,effective_date,AIS,0,delta>0 | ma co CA nhung KHONG co dong ISS/AIS nao trong CUNG NAM
+OIL,2018-04-23,200445036,1034229500,833784464,415.967,176,effective_date,AIS,0,delta>0 | ma co CA nhung KHONG co dong ISS/AIS nao trong CUNG NAM
+PDV,2017-12-26,17000000,20000000,3000000,17.647,222,exright_date,ISS,0,delta>0 | ma co CA nhung KHONG co dong ISS/AIS nao trong CUNG NAM
+PGV,2018-05-18,7149644,2080900000,2073750356,29004.946,304,effective_date,AIS,0,delta>0 | ma co CA nhung KHONG co dong ISS/AIS nao trong CUNG NAM
+POW,2018-05-18,467802523,2341871600,1874069077,400.611,1893,exright_date,ISS,0,delta>0 | ma co CA nhung KHONG co dong ISS/AIS nao trong CUNG NAM
+PTB,2021-06-09,46059181,48599441,2540260,5.515,240,exright_date,ISS,0,delta>0 | ma co CA nhung KHONG co dong ISS/AIS nao trong CUNG NAM
+PTC,2013-12-23,9500000,10000000,500000,5.263,377,exright_date,ISS,0,delta>0 | ma co CA nhung KHONG co dong ISS/AIS nao trong CUNG NAM
+PVC,2022-02-18,47500000,50000000,2500000,5.263,422,exright_date,ISS,0,delta>0 | ma co CA nhung KHONG co dong ISS/AIS nao trong CUNG NAM
+QBS,2017-01-17,63999928,69329928,5330000,8.328,-11,exright_date,ISS,0,delta>0 | ma co CA nhung KHONG co dong ISS/AIS nao trong CUNG NAM
+S55,2014-11-11,2000100,2496000,495900,24.794,119,exright_date,ISS,0,delta>0 | ma co CA nhung KHONG co dong ISS/AIS nao trong CUNG NAM
+TCO,2021-09-10,16728076,18711000,1982924,11.854,803,exright_date,ISS,0,delta>0 | ma co CA nhung KHONG co dong ISS/AIS nao trong CUNG NAM
+TMS,2022-01-10,93645232,105859929,12214697,13.044,-5,exright_date,ISS,0,delta>0 | ma co CA nhung KHONG co dong ISS/AIS nao trong CUNG NAM
+VCG,2021-07-05,402410673,438627634,36216961,9.0,247,exright_date,ISS,0,delta>0 | ma co CA nhung KHONG co dong ISS/AIS nao trong CUNG NAM
+YEG,2020-10-15,29505628,31279968,1774340,6.014,-289,effective_date,AIS,0,delta>0 | ma co CA nhung KHONG co dong ISS/AIS nao trong CUNG NAM
