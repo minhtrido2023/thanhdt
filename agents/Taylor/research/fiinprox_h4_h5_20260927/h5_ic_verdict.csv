@@ -1,0 +1,9 @@
+period,axis,factor,n_mon_LO,n_mon_MID,n_mon_HI,hi_minus_lo,monotonic,p_boot,p_BH_4cmp
+IS,retail,ic_mom,11,6,4,0.1666,False,0.0,0.0
+IS,retail,ic_ey,11,6,4,-0.1439,False,0.0,0.0
+IS,breadth,ic_mom,19,22,27,0.0367,True,0.406,0.406
+IS,breadth,ic_ey,19,22,27,-0.0777,True,0.0045,0.006
+OOS,retail,ic_mom,35,19,24,0.0873,True,0.0185,0.074
+OOS,retail,ic_ey,35,19,24,-0.0336,True,0.142,0.284
+OOS,breadth,ic_mom,42,44,34,-0.0385,False,0.367,0.4893
+OOS,breadth,ic_ey,42,44,34,0.0025,False,0.9165,0.9165
