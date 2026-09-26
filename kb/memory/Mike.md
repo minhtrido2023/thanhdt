@@ -38,3 +38,4 @@
 - context_pack.md 47.6KB đã vượt ngưỡng 45KB (ghi nhận 09-25, chưa xử — theo dõi nếu tiếp tục
   phình).
 
+- [2026-09-26T17:48:06Z] 27/09 00:5x — FiinPro 7 HƯỚNG XONG (commit kb v: kết quả ở kb/projects/fiinprox-data-usage-proposal-20260926.md §6). Không wire gì. CHỜ USER QUYẾT: (1) bus question Taylor/custom30v-index-artifact-pham-vi-re-pin — R3 28,86%→24,38% (−4,48pp) khi bỏ bước nhảy số CP khỏi chuỗi return custom30V (custom_basket.py:220/:1125), quant-skeptic CONFIRMED high — A sửa+re-pin toàn bộ / B chỉ R3 / C TRAP; Taylor khuyên A + kiểm kê park LIVE có mua 30 mã thật không; (2) đóng B.1 production_mechanism_2009_2018 + G4 amh-review; (3) câu hỏi trục breadth-tercile 08-22 trượt 4/4 trên panel H5; (4) H1/H2 wire vệ sinh (giá trị 0/thấp) — có làm không. Đã lưu h5_retail_*.csv + artifact trong git (8acb69d4, aff8940e). Trial FiinPro hết 28/09 — KHÔNG mua.
