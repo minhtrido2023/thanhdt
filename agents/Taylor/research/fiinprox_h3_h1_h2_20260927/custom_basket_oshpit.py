@@ -278,9 +278,22 @@ WHERE t.ticker IN ({inlist})
     bx["time"] = pd.to_datetime(bx["time"])
     bx = bx.sort_values(["ticker", "time"])
     bx["OShares"] = bx.groupby("ticker")["OShares"].ffill().bfill()
+    _osh_fin = bx["OShares"].copy()                   # so cu (ticker_financial as-of)
     bx, _ = _apply_oshares_pit(bx)          # H3 harness: no-op khi OSHARES_PIT != 1
-    bx["mcap"] = bx["Close"] * bx["OShares"]          # RETURN leg (adjusted; ex-div is not a loss)
-    bx["mcapw"] = bx["pxw"] * bx["OShares"]           # WEIGHT leg (raw PIT; see PRICE BASIS header)
+    _osh_pit = bx["OShares"]
+    # OSHARES_PIT_SCOPE: both (mac dinh) | weight (chi mcapw) | return (chi mcap)
+    # De TACH hieu ung: mcap la chuoi RETURN (Close DA DIEU CHINH), nen mot buoc nhay trong
+    # so CP o day tao ra mot return GIA dung bang ty le phat hanh; mcapw la trong so mot ngay.
+    import os as _os
+    _sc = _os.environ.get("OSHARES_PIT_SCOPE", "both")
+    if _sc == "flat":
+        # DOI CHUNG CO HOC: Close DA DIEU CHINH da hap thu su kien CP, nen chan RETURN dung
+        # SO CP HANG SO moi ma (khong buoc nhay nao) => mcap_t/mcap_{t-1} khong con return gia.
+        _osh_flat = bx.groupby("ticker")["OShares"].transform("last")
+        bx["mcap"] = bx["Close"] * _osh_flat
+    else:
+        bx["mcap"] = bx["Close"] * (_osh_fin if _sc == "weight" else _osh_pit)
+    bx["mcapw"] = bx["pxw"] * (_osh_fin if _sc == "return" else _osh_pit)
     piv = bx.pivot_table(index="time", columns="ticker", values="mcap").sort_index()
     pivw = (bx.pivot_table(index="time", columns="ticker", values="mcapw")
               .reindex(index=piv.index, columns=piv.columns))
@@ -1184,9 +1197,22 @@ WHERE t.ticker IN ({inlist})
     bx["time"] = pd.to_datetime(bx["time"])
     bx = bx.sort_values(["ticker", "time"])
     bx["OShares"] = bx.groupby("ticker")["OShares"].ffill().bfill()
+    _osh_fin = bx["OShares"].copy()                   # so cu (ticker_financial as-of)
     bx, _ = _apply_oshares_pit(bx)          # H3 harness: no-op khi OSHARES_PIT != 1
-    bx["mcap"] = bx["Close"] * bx["OShares"]          # RETURN leg (adjusted; ex-div is not a loss)
-    bx["mcapw"] = bx["pxw"] * bx["OShares"]           # WEIGHT leg (raw PIT; see PRICE BASIS header)
+    _osh_pit = bx["OShares"]
+    # OSHARES_PIT_SCOPE: both (mac dinh) | weight (chi mcapw) | return (chi mcap)
+    # De TACH hieu ung: mcap la chuoi RETURN (Close DA DIEU CHINH), nen mot buoc nhay trong
+    # so CP o day tao ra mot return GIA dung bang ty le phat hanh; mcapw la trong so mot ngay.
+    import os as _os
+    _sc = _os.environ.get("OSHARES_PIT_SCOPE", "both")
+    if _sc == "flat":
+        # DOI CHUNG CO HOC: Close DA DIEU CHINH da hap thu su kien CP, nen chan RETURN dung
+        # SO CP HANG SO moi ma (khong buoc nhay nao) => mcap_t/mcap_{t-1} khong con return gia.
+        _osh_flat = bx.groupby("ticker")["OShares"].transform("last")
+        bx["mcap"] = bx["Close"] * _osh_flat
+    else:
+        bx["mcap"] = bx["Close"] * (_osh_fin if _sc == "weight" else _osh_pit)
+    bx["mcapw"] = bx["pxw"] * (_osh_fin if _sc == "return" else _osh_pit)
     mcap = bx.pivot_table(index="time", columns="ticker", values="mcap").sort_index()
     mcapw = (bx.pivot_table(index="time", columns="ticker", values="mcapw")
                .reindex(index=mcap.index, columns=mcap.columns))

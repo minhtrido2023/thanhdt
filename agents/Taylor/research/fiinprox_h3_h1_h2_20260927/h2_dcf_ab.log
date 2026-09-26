@@ -1,0 +1,37 @@
+[CPI CU  (cpi_vn T2/T3)] terminal_growth (5y-avg CPI) = 3.4426%  frac_real=0.22  -> g_term mode=cap_rf: 6.8000%
+[CPI THAT (FiinPro)] terminal_growth (5y-avg CPI) = 3.4147%  frac_real=0.22  -> g_term mode=cap_rf: 6.8000%
+
+[ket qua] 7/30 ma tinh duoc DCF ca 2 chan
+  Delta gia tri hop ly: median +0.000%  mean +0.000%  min +0.000%  max +0.000%  |Delta|>1%: 0
+  terminal_growth: 3.4426% -> 3.4147% (Delta -0.0279pp) | g_term: 6.8000% -> 6.8000% (Delta +0.0000pp)
+-> /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/fiinprox_h3_h1_h2_20260927/h2_dcf_delta.csv
+    ['ACB', '', '', '', 'financial-sector (BANK/INSURANCE/SECURITIES) — use Gordon-P/']
+    ['BID', '', '', '', 'financial-sector (BANK/INSURANCE/SECURITIES) — use Gordon-P/']
+    ['CSV', 23635.8, 23635.8, 0.0, '']
+    ['CTG', '', '', '', 'financial-sector (BANK/INSURANCE/SECURITIES) — use Gordon-P/']
+    ['DGC', 76500.7, 76500.7, 0.0, '']
+    ['DRI', 20884.7, 20884.7, 0.0, '']
+    ['EVF', '', '', '', 'financial-sector (BANK/INSURANCE/SECURITIES) — use Gordon-P/']
+    ['HDB', '', '', '', 'financial-sector (BANK/INSURANCE/SECURITIES) — use Gordon-P/']
+    ['HPG', '', '', '', 'normalized 3y FCFE <= 0 (capex > CFO, heavy reinvestment) — ']
+    ['LPB', '', '', '', 'financial-sector (BANK/INSURANCE/SECURITIES) — use Gordon-P/']
+    ['MBB', '', '', '', 'financial-sector (BANK/INSURANCE/SECURITIES) — use Gordon-P/']
+    ['MSB', '', '', '', 'financial-sector (BANK/INSURANCE/SECURITIES) — use Gordon-P/']
+    ['NCT', 233671.6, 233671.6, 0.0, '']
+    ['PVT', '', '', '', 'normalized 3y FCFE <= 0 (capex > CFO, heavy reinvestment) — ']
+    ['SAB', 37158.4, 37158.4, 0.0, '']
+    ['SCL', '', '', '', 'normalized 3y FCFE <= 0 (capex > CFO, heavy reinvestment) — ']
+    ['SHB', '', '', '', 'financial-sector (BANK/INSURANCE/SECURITIES) — use Gordon-P/']
+    ['SIP', '', '', '', 'normalized 3y FCFE <= 0 (capex > CFO, heavy reinvestment) — ']
+    ['TCB', '', '', '', 'financial-sector (BANK/INSURANCE/SECURITIES) — use Gordon-P/']
+    ['TPB', '', '', '', 'financial-sector (BANK/INSURANCE/SECURITIES) — use Gordon-P/']
+    ['TV1', 130537.3, 130537.3, 0.0, '']
+    ['VCB', '', '', '', 'financial-sector (BANK/INSURANCE/SECURITIES) — use Gordon-P/']
+    ['VHM', '', '', '', 'normalized 3y FCFE <= 0 (capex > CFO, heavy reinvestment) — ']
+    ['VIB', '', '', '', 'financial-sector (BANK/INSURANCE/SECURITIES) — use Gordon-P/']
+    ['VIX', '', '', '', 'financial-sector (BANK/INSURANCE/SECURITIES) — use Gordon-P/']
+    ['VND', '', '', '', 'financial-sector (BANK/INSURANCE/SECURITIES) — use Gordon-P/']
+    ['VNM', 60983.6, 60983.6, 0.0, '']
+    ['VPB', '', '', '', 'financial-sector (BANK/INSURANCE/SECURITIES) — use Gordon-P/']
+    ['VPI', '', '', '', 'CF_OA_3Y <= 0 (operating cash gate fails) — DCF not meaningf']
+    ['VRE', '', '', '', 'normalized 3y FCFE <= 0 (capex > CFO, heavy reinvestment) — ']
