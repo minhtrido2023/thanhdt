@@ -689,3 +689,6 @@
 
 ## Archived 2026-09-26 (keep=12 days=0 require_done=False)
 - [2026-09-24T07:13:47Z] [2026-09-24T07:0x] corp-action-real-fixes-4sites (job _064510) XONG CA 4 VIEC: nhanh fix/corp-action-real-fixes-4sites (worktree mike/agents/Taylor/wt-corp-action-real-fixes), commit d595a64c(V1 accumulation_inject)+e75788f8(V2 margin_gate, khoi phuc lai 12 check goc bi attempt1 xoa nham)+2770f733(V3 verify_account_snapshot marketPrice)+212b19f4(V4 report_return_gate unmatched). Tat ca selfcheck PASS x4 moi truong + mutation-guard verify thu cong. CHUA LAND, cho Mike verify tung commit + dispatch arch-review.
+
+## Archived 2026-09-26 (keep=12 days=0 require_done=False)
+- [2026-09-24T07:48:35Z] corp-action-real-fixes-4sites ROUND2 XONG (job _073500): Viec1(34063dcb)/Viec2(ddc0ba05)/Viec3(fe4810be) da THIET KE LAI (khong phai va nho) sau arch-review REJECTED/NEEDS_CHANGES/NEEDS_CHANGES vong 1, tren nhanh fix/corp-action-real-fixes-4sites (worktree wt-corp-action-real-fixes). CHUA LAND, cho Mike verify + dispatch arch-review vong 2.
