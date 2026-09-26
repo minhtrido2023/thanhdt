@@ -515,7 +515,7 @@
       "id": "engine_room_oos",
       "name": "Engine-room OOS panel (V11/V12/V4 vs V2.3-book vs VNINDEX)",
       "owner": "Taylor",
-      "objective": "V2.3-book (NGUỒN TÍN HIỆU của live V2.4 — trading_bot/strategies.py đọc pt_v22_dt5g_open_positions.csv để build plan thật) có tiếp tục thắng các kiến trúc BỊ LOẠI (V11 Song Sinh, V12 Âm Dương, V4 switched-allocator) trên OOS forward không? = validation liên tục của lựa chọn V2.4. Nếu một hệ bị loại dominate BỀN risk-adjusted → mở lại câu hỏi rotation (qua quant-skeptic + DSR/PBO, không tự wire).",
+      "objective": "V2.3-book (CÙNG LOGIC với recommender live V2.4, KHÔNG phải nguồn tín hiệu của nó — xác minh Taylor_20260926_042824: đường tín hiệu thật là bq_freshness_check.sh 19:00 → deploy_golive_dt5g_v4/golive_recommend_v23.py → out/golive_v23_recommendations_*.csv + golive_state_today.json → DollarBill lập plan; 0 dòng code live đọc pt_v22_dt5g_open_positions.csv, và lớp strategy V2.3 trong trading_bot/strategies.py đã GỠ 2026-09-13) có tiếp tục thắng các kiến trúc BỊ LOẠI (V11 Song Sinh, V12 Âm Dương, V4 switched-allocator) trên OOS forward không? = validation liên tục của lựa chọn V2.4. Nếu một hệ bị loại dominate BỀN risk-adjusted → mở lại câu hỏi rotation (qua quant-skeptic + DSR/PBO, không tự wire).",
       "start": "2026-06-11",
       "end": null,
       "end_or_trigger": "Review 2026-12-01 (~6 tháng OOS trên cửa sổ chung từ 2026-06-11) — Taylor trình bảng + khuyến nghị giữ panel / thu gọn / mở câu hỏi rotation.",
@@ -525,7 +525,7 @@
           "status": "pending"
         },
         {
-          "text": "pt_v22 artifacts fresh mỗi phiên (PRODUCTION DEPENDENCY — plan live scale từ sổ này; stale = sự cố ops, đã có tiền lệ 2026-07-07)",
+          "text": "pt_v22 artifacts fresh mỗi phiên (panel-integrity, KHÔNG phải production dependency — sửa 2026-09-26 job Taylor_20260926_042824: không có consumer live nào đọc pt_v22_dt5g_open_positions.csv; stale ⇒ panel OOS mất phiên, không ảnh hưởng plan thật)",
           "status": "pending"
         }
       ],
