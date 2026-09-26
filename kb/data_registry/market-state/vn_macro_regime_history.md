@@ -1223,3 +1223,100 @@ Trong 12 tháng (August 2017 - June 2018): ~VND 120+ nghìn tỷ market cap ngâ
 - Ngân hàng quốc doanh (VCB/BID/CTG) chiếm >46% tổng tài sản → bị constrain bởi yêu cầu tỷ lệ vốn nhà nước + chuẩn bị Basel II (Circular 41/2016 của SBV)
 - Nguồn: [Oxford Business Group Vietnam 2017 Banking Sector](https://oxfordbusinessgroup.com/reports/vietnam/2017-report/economy/turning-point-banking-sector)
 
+
+## Bổ sung 2026-09-27 — chuỗi FiinPro (snapshot, không refresh)
+
+**Ai/khi/nguồn:** Bobby (macro-strategist), 2026-09-27, việc H6+H7 của
+`kb/projects/fiinprox-data-usage-proposal-20260926.md`. Số tính bằng pandas trên 3 snapshot
+FiinPro-X (trial hết hạn 2026-09-28, KHÔNG có nguồn nối tiếp cho tỷ giá tự do):
+`data/fiinprox_usd_fx_monthly_20260926.csv` · `data/fiinprox_money_credit_monthly_20260914.csv` ·
+`data/fiinprox_gdp_nominal_quarterly_20260914.csv`. Registry nguồn: `kb/data_registry/macro/
+fiinprox_usd_fx_monthly.md`, `fiinprox_money_credit_monthly.md`. Chỉ đọc số, không suy diễn
+ngoài số; KHÔNG dùng forward-return của bất kỳ episode nào.
+
+### Nhãn: XÁC NHẬN MUỘN — không phải cổng
+Theo `kb/projects/vn-realestate-structural-risk-20260826.md` §88 (dòng 88): chuỗi số chính thức
+(tín dụng/M2/NPL) là "xác nhận muộn", cảnh báo sớm thật là market-based. Toàn bộ mục này chỉ
+để ĐỐI CHIẾU BẰNG SỐ các nhãn Loại-1/Loại-2 đã có; không dựng cổng, không đổi verdict episode nào.
+Riêng premium tỷ giá tự do là ứng viên market-based (§88), nhưng không có nguồn sống sau trial ⇒
+chỉ dùng phân loại LỊCH SỬ.
+
+### 1. Premium tỷ giá tự do = `free_ask − central` (2013-01→2026-09, cuối tháng)
+**Định nghĩa spike (đặt TRƯỚC khi nhìn kết quả):** tháng t là spike khi `prem_pct_t` > phân vị 90
+của 36 tháng LIỀN TRƯỚC (không tính t; cần ≥24 quan sát ⇒ ngưỡng có từ 2015-01, nên 2013-2014 và
+EP-2014-09 KHÔNG đánh giá được). Các tháng spike liên tiếp gộp thành 1 đợt.
+Kiểm soát: cùng định nghĩa cho `free_ask − vcb_ask` (premium so với NH thương mại) — vì từ 2022
+`vcb_ask` tự nó nằm sát trần biên độ +5% quanh `central`, nên `free − central` gánh cả vị trí
+trong biên độ chứ không chỉ stress chợ đen.
+
+| Đợt spike `free−central` | max % | Đối chiếu episode registry (ngày arm/đáy đã biết công khai) | Nhận xét |
+|---|---|---|---|
+| 2015-08→09 | 3,33 | EP-2015-07 (07-14→08-24) | trùng tháng đáy, KHÔNG dẫn trước |
+| 2015-11→12 | 3,52 | không có episode | báo động giả (vs VNINDEX) |
+| 2016-11→12 | 4,25 | không có episode | báo động giả |
+| 2018-07→09 | 3,62 | EP-2018-01 (đỉnh 04/2018) | TRỄ ~3 tháng sau đỉnh |
+| 2022-05→11 | 6,69 (10/2022) | EP-2022-05 (arm 05/2022, đáy 16/11/2022) | bắt đầu CÙNG tháng arm; max 10/2022 = 1 tháng trước đáy; dẫn trước ĐÁY 6 tháng, không dẫn trước ARM |
+| 2024-01→07 | 7,25 (06/2024) | "VND yếu Q2/2024" (không phải episode VNINDEX trong registry) | bắt đầu 3 tháng TRƯỚC Q2/2024 — nhưng `free−vcb` KHÔNG spike (max 2,46% < ngưỡng 3,13%) ⇒ phần lớn là giá chính thức đi lên trần biên độ, không phải chợ đen tách rời |
+| 2024-10→11 | 6,35 | không có episode | báo động giả |
+| 2025-10→12 | 10,79 (10/2025) | EP-2026-01 (arm 2026-01-13) | 3 tháng TRƯỚC arm; `free−vcb` cũng spike 5,51% (lớn nhất chuỗi tới lúc đó) |
+| 2026-02→03 | 11,86 (03/2026) | EP-2026-01 (đáy 2026-03-23) | trùng tháng đáy; `free−vcb` 6,54% = cực đại toàn chuỗi |
+
+**Trả lời 2 câu hỏi H6, bằng số:**
+- **Trước 2022-11:** CÓ spike bắt đầu 2022-05, cực đại 2022-10, tức trước đáy 16/11/2022 6 tháng
+  (cực đại trước đáy 1 tháng). KHÔNG dẫn trước tháng arm 05/2022 (spike và arm cùng tháng). Trên
+  thước `free−vcb`: có 1 đợt 2021-10→2022-01 (3,20%) dẫn trước arm 4-7 tháng, nhưng ngay trước nó
+  là đợt 2020-12→2021-04 (3,37%) không kèm episode nào ⇒ tín hiệu dẫn trước trên thước này đi kèm
+  1 báo động giả cùng cỡ.
+- **Trước 2024 (VND yếu Q2/2024):** CÓ trên thước `free−central` (bắt đầu 2024-01, 3 tháng trước
+  Q2), KHÔNG trên thước `free−vcb` (không tháng nào vượt ngưỡng trong 2023-08→2024-08). Đọc: 2024
+  là giá chính thức chạm trần biên độ, chợ đen không tách rời.
+- **Báo động giả (đợt spike không có episode registry trong ±3 tháng):** 3/9 đợt (2015-11,
+  2016-11, 2024-10); nếu coi "VND yếu Q2/2024" không phải stress cổ phiếu thì 4/9. **Bỏ sót**
+  (episode registry không có spike): EP-2020-02 (03/2020 prem 2,65% < ngưỡng ~3,4%), EP-2023-09
+  (1,5-2,1% < 3,81%), EP-2025-03 (04/2025 6,27% < 6,31%); EP-2014-09 không đánh giá được.
+  ⇒ N trúng có-dẫn-trước = 2 (2022 đáy, 2025-10→EP-2026-01), N trùng/trễ = 3, N sót = 3, N giả = 3-4.
+  Đúng như H6 dự liệu: **chẩn đoán, không luật**. Ngưỡng rolling tự trôi lên 6-7% giai đoạn
+  2024-26 vì mức nền đã đổi sau 2022 (mean năm: 2019-2020 0,5-0,8%; 2024-2026 5,4-6,3%).
+
+### 2. Tín dụng / M2 YoY theo episode — đối chiếu nhãn Loại-1 / Loại-2 (XÁC NHẬN MUỘN)
+Chuỗi bắt đầu 2012-12 (M2 từ 2013-04) ⇒ **KHÔNG phủ được 2009-2011**; mốc so sánh cho Loại-1 là
+tín dụng 2009 37,53% vs mục tiêu 21-23% ghi ở ADDENDUM 2026-08-31 (nguồn NHNN, không phải chuỗi này).
+
+| Cửa sổ | credit_yoy mean [min-max] | m2_yoy mean [min-max] | credit_construction mean | Nhãn đã có | Số nói gì |
+|---|---|---|---|---|---|
+| 2013-04→12 | 12,5 [11,5-13,3] | 19,9 [18,8-21,4] | 16,1 | đuôi Loại-1 2007-2012 | tín dụng đã giảm còn ~1/3 mức 2009; M2 > tín dụng 7pp = ngân hàng ngừng cho vay (VAMC) — đúng dấu vết Loại-1 "mất nhiều năm" |
+| 2014 | 12,4 [10,8-15,2] | 18,2 | 16,8 | (EP-2014-09 Loại-2 ngoại sinh) | không có dư thừa tín dụng |
+| 2015 | 16,8 [11,4-19,5] | 16,9 | 15,2 | EP-2015-07 Loại-2 ngoại sinh | tín dụng tăng tốc nhưng dưới 20%; 09/2015 (11,4) và 11/2015 (13,3) là 2 điểm gãy khó tin — nghi lỗi chuỗi |
+| 2017 (nền trước EP-2018-01) | 19,3 [18,2-20,1] | 16,5 | **27,1 (max 32,5 10/2017)** | — | tín dụng xây dựng bùng 1 ngành, tổng tín dụng <20% |
+| 2018 H1 (EP-2018-01) | 14,1 [13,8-14,5] | 16,0 | 5,7 | CONFIDENCE_LIQUIDITY / EXTERNAL_CYCLE (ambiguous) | tổng tín dụng GIẢM tốc từ 19→14, không phải đang bùng; nhưng xây dựng 2017 = mảnh Loại-1 cục bộ ⇒ giữ "ambiguous". ⚠ 2018-01 nhảy 18,2→14,0 và xây dựng 25,7→1,1 trong 1 tháng — nghi đổi cơ sở, không tin từng tháng |
+| 2020-02→06 (EP-2020-02) | 10,8 [9,6-12,6] | 13,1 | 12,6 | CONFIDENCE_LIQUIDITY / CONTAINABLE (clean) | tín dụng thấp nhất từ 2014 ⇒ KHÔNG có dư thừa tín dụng — xác nhận Loại-2 |
+| 2021-10→2022-04 (trước EP-2022-05) | 15,4 | 11,6 | 4,7 | — | tín dụng > M2 4pp, xây dựng gần 0 (bùng nổ nằm ở TPDN, ngoài chuỗi này) |
+| 2022-05→11 (EP-2022-05) | 16,4 [14,8-17,0] | **8,3 [6,4-10,3]** | 11,0 | CONFIDENCE_LIQUIDITY / CONTAINABLE | tín dụng 17% (cao hơn mục tiêu 14% nhưng = 1/2 mức 2009); **M2 rơi 12,7→6,4 trong 10 tháng** = rút thanh khoản (bán USD + rút tiền SCB), không phải bùng tín dụng ⇒ xác nhận Loại-2 "liquidity". M2 hồi 6,1 (06/2023) → 12,5 (12/2023) trong ~12 tháng sau đáy = phù hợp CONTAINABLE |
+| 2023-09→10 (EP-2023-09) | 9,9 | 8,9 | 9,0 | CONFIDENCE_LIQUIDITY | cả hai ở đáy 10 năm — không dư thừa gì |
+| 2025-01→09 | 18,6 [15,7-20,1] | 16,8 | 11,6 | (trước EP-2026-01) | tín dụng cao nhất từ 2017 |
+| 2025-10→2026-07 | **19,0 [17,4-20,5]** | 7,4 — **KHÔNG DÙNG (gãy)** | **18,5 (max 20,2)** | EP-2026-01 MIXED (ambiguous) | tín dụng ≥17,4% suốt 16 tháng liên tiếp (2025-04→2026-07), ≥18% ở 15/16 tháng; xây dựng cao nhất từ 2017. So 2009 (37,5%) = một nửa; so 2017 (19,3%) = ngang. Số ủng hộ "MIXED, nghiêng Loại-1 tích luỹ" đã ghi — KHÔNG đủ để nâng lên Loại-1 clean |
+
+**Kết luận đối chiếu:** 4/4 episode Loại-2 đã gắn nhãn (2018, 2020, 2022, 2023) đều KHÔNG có
+tín dụng bùng nổ tại thời điểm episode (tổng tín dụng 10-17%, đều <20%); 2022 khác ở chỗ M2 sụp
+(liquidity) chứ không phải tín dụng dư thừa — đúng phân biệt "confidence/liquidity" vs "cấu trúc".
+2025-26 là cửa sổ DUY NHẤT sau 2012 có tín dụng ≥18% kéo dài >12 tháng ngoài 2017. Chuỗi không
+phủ 2009-2011 nên KHÔNG thể tự thân "chứng minh" Loại-1 bằng số trong cùng bộ dữ liệu — chỉ đối
+chiếu gián tiếp qua mốc 37,5% (2009) của ADDENDUM.
+
+### Bẫy dữ liệu (ghi để người sau không vấp)
+1. **Tiền gửi gãy chuỗi 10/2025** (`dep_econ_orgs` +18%→−20%, `dep_residents` +12,6→+46%) —
+   registry nguồn đã ghi. **PHÁT HIỆN THÊM: `m2_yoy_pct` CŨNG gãy cùng tháng** 17,89 (09/2025) →
+   9,47 (10/2025) → 4,24 (06/2026); base 10/2024 không có nhảy (12,8→13,5) nên không phải hiệu
+   ứng nền. Registry nguồn nói "M2 tổng thì liền mạch" — SỐ KHÔNG ỦNG HỘ. ⇒ mọi cột M2/tiền gửi
+   từ 2025-10 KHÔNG DÙNG; khoảng cách tín dụng−M2 2026 (19 vs 5) KHÔNG đọc được. Báo Mike/Winston
+   sửa registry nguồn (Bobby không sửa file ngoài registry này).
+2. **`central` trước 2016-01 là tỷ giá bình quân liên ngân hàng** (chế độ khác, gần như phẳng
+   20.828-21.890 nhiều tháng) — premium 2013-2015 đo trên cơ sở khác 2016+; không nối 2 chế độ như một.
+3. `free_ask` trống 2012; ngưỡng rolling chỉ có từ 2015-01.
+4. Nghi điểm gãy nhỏ trong tín dụng: 2015-09/11, 2018-01 (xem bảng) — không dùng từng tháng đơn lẻ.
+5. Bộ tín dụng không có kênh TPDN ⇒ bùng nổ 2021-22 (BĐS qua trái phiếu) vô hình trong chuỗi này.
+
+### H7 — GDP danh nghĩa (1 dòng)
+Vốn hoá/GDP chỉ dùng cho Value Radar DISPLAY-ONLY; chuỗi 2018→2026Q2 (vintage `old_pre2021`
+2020Q4 2.121 nghìn tỷ → `revised_2021plus` 2021Q1 1.953 nghìn tỷ, gãy 2021) chỉ 8 năm + 1 lần
+đổi cơ sở ⇒ chưa kết luận gì, không nạp vào phân loại episode.

@@ -21,9 +21,11 @@ Tín dụng cuối năm vs số NHNN công bố: 2019 13,65 (NHNN 13,65) · 2020
 
 ## Bẫy
 1. **GÃY CHUỖI TIỀN GỬI từ 2025-10**: `dep_econ_orgs_yoy_pct` nhảy từ +18% (09/2025) xuống −20%,
-   `dep_residents_yoy_pct` từ +12,6% lên +46%, M2 tổng thì liền mạch ⇒ gần như chắc chắn là đổi
-   phân loại (chuyển nhóm tiền gửi giữa TCKT ↔ dân cư), KHÔNG phải dòng tiền thật. Không dùng 2 cột
-   tiền gửi qua mốc này trước khi xác minh nguyên nhân.
+   `dep_residents_yoy_pct` từ +12,6% lên +46% ⇒ gần như chắc chắn là đổi phân loại (chuyển nhóm
+   tiền gửi giữa TCKT ↔ dân cư), KHÔNG phải dòng tiền thật. Không dùng 2 cột tiền gửi qua mốc này
+   trước khi xác minh nguyên nhân. **ĐÍNH CHÍNH 2026-09-27 (Bobby, H6)**: `m2_yoy_pct` CŨNG gãy tại
+   cùng mốc (17,89 → 9,47 → 4,24), KHÔNG liền mạch như câu cũ ghi ⇒ 3/5 cột không dùng được qua
+   2025-10; chỉ `credit_yoy_pct` và `credit_construction_yoy_pct` còn liền.
 2. Đây là tăng trưởng YoY, không phải số dư tuyệt đối (route `data_type="Value"` có, chưa lấy).
 3. Không có chuỗi nào trong repo trước đây ⇒ không có đối chiếu nội bộ.
 

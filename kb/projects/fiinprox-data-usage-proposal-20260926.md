@@ -143,3 +143,19 @@ quant-skeptic. Khi đó mới hỏi giá gói thấp nhất — và vẫn so v�
 ## 5. Không lấp được (giữ nguyên workaround)
 SBV refi rate, lợi suất TPCP, lãi suất huy động từng NH theo ngày, TPDN BĐS late-payment (P5 chưa
 kịp dò trước khi trần ngày ăn hết quota). Không đưa vào đề xuất.
+
+## 6. KẾT QUẢ — 7 hướng chạy xong 27/09 00:4x (user duyệt 26/09 23:37, JOB A `Taylor_20260926_164113`, JOB B `Taylor_20260926_164143`, H6 Bobby inline)
+
+| # | Verdict | Số liệu quyết định | Còn lại |
+|---|---|---|---|
+| H1 bank 8L | **GO vệ sinh, Δ NAV = 0 theo cấu trúc** — quant-skeptic CONFIRMED high | 427/1.117 dòng mã-quý đổi rating (38%), **0** lần cổng ≤3 đổi (quét 45.090 tổ hợp) ⇒ 0 quyết định V2.4 đổi. Sửa tiền đề: lịch sử chấm bằng `rate_bank_proxy` (ROE-only) | Trước wire: quét `regime_size_overlay.py` + `*_screen.py` (dùng rating liên tục); reviewer thêm: `override_current_bank_aq` fail-open bank-nodata→3 lệch gate 6 NH UPCoM (live impact 0) |
+| H2 CPI | **GO wire T1.5, giá trị THẤP** | Regime đổi nhãn 27/185 tháng (14,6%) nhưng **0** ở episode 2011/2022 — đổi dày nhất 2019 (4 tháng) = đúng chỗ proxy sai nhất (nội suy 4,73 vs thật 2,0-2,2); DCF Δ = **0,000%** 7/7 mã (trần `cap_rf` 6,80% đang trói `g_term`) | Wire = thêm tầng T1.5 giữa T1 NSO live và T2, KHÔNG xoá T2; cần freshness-check §14 vì file là snapshot. Đổi tên `NSO_CPI_YOY_AVG_REAL` |
+| H3 OShares PIT | **GIỮ UNVERIFIED-PIT**; Δ R3 thật = **+0,04pp** (đúng kỳ vọng ≈0) | Khớp ngày ±3 = 85,7% (nhánh tăng 89,2%) < 90% prereg; khớp tỷ lệ 98,5%; 0 vi phạm restate/2.135 dòng; chuỗi neo **ex-right** (2.059/2.085), không phải ngày niêm yết bổ sung. +0,92pp ban đầu = ARTIFACT (phân rã 5 chân) | Registry `.proposed` Taylor → duyệt §13. 345 sự kiện không khớp cần nguồn thứ 3 (cáo bạch/HOSE) |
+| **PHÁT HIỆN NGOÀI PHẠM VI** (từ chân đối chứng H3) | **custom30V index return CỘNG cả tăng trưởng số CP vào lợi nhuận** — quant-skeptic CONFIRMED high, killer_objection NULL | `custom_basket.py:220/:1125` mcap = Close (đã điều chỉnh) × OShares (đổi theo quý) ⇒ mỗi bước nhảy số CP thành 1 return giả. Index CAGR 32,95% → 16,90% khi bỏ; **R3 28,86% → 24,38% (−4,48pp), NAV 1.178B → 758B**, Sharpe 1,90 → 1,69. Lệch MỘT CHIỀU 54/0 phiên; ca BQ TCB 2024-07-22 chuỗi +102% vs Close +1% | **Bus question `custom30v-index-artifact-pham-vi-re-pin` chờ user: A sửa + re-pin toàn bộ / B sửa + chỉ re-pin R3 / C giữ + TRAP.** Taylor khuyến nghị A, kèm kiểm kê rẻ nhất trước: park LIVE có mua 30 mã THẬT không |
+| H4 2018 | **NO-GO 5/5 cấu hình** | Bắt 2018 (fire 02/03, trước đỉnh 38 ngày) nhưng 6-10 báo động giả ngoài 2018 (trần ≤2); precision 33-54% vs nền 33,5%; p tốt nhất 0,106, Sidak 0,43; N thật 12-16, đúng 1 | Đóng câu hỏi B.1 `production_mechanism_2009_2018` — câu trả lời PHỦ ĐỊNH |
+| H5 retail | **KHÔNG ĐỦ BẰNG CHỨNG** (4/4); điều kiện 3 margin Loại-2 **FAIL** | Cơ chế: **cá nhân VN là người MUA đáy** (2020 +6.347 tỷ, 2018 +8.822 tỷ), chỉ 2022 bán ròng −13.722 tỷ (nghi force-sell). retail_net_share giảm 0,355 (2016) → 0,251 (2026) — tư liệu mô tả | Đóng G4 amh-review với ghi chú; phát hiện phụ: trục breadth-tercile PIT 08-22 cũng trượt 4/4 trên panel này (câu hỏi riêng, chưa đề xuất đổi) |
+| H6 credit/M2/FX | **Xác nhận muộn, đã nạp registry Bobby** (`vn_macro_regime_history.md` dòng 1227) | Premium tự do spike TRƯỚC đáy 11/2022 (05→11/2022, max 6,69%) nhưng cùng tháng arm; 2024 chỉ spike trên `free−central`, không trên `free−vcb_ask`; **3-4/9 đợt báo động giả, bỏ sót 2020-02/2023-09/2025-03** ⇒ chẩn đoán, không luật. Tín dụng 2025-26 ≥17,4% 16 tháng, xây dựng 18,5% = ½ mức 2009 ⇒ MIXED | Đính chính registry: `m2_yoy` CŨNG gãy 10/2025 (đã sửa) |
+| H7 GDP | Ghi chú display-only, không kết luận | 8 năm + gãy 2021 | — |
+
+**Mua FiinPro:** vẫn KHÔNG — điều kiện mở lại (H5 có ý nghĩa) không đạt.
+**Không wire gì vào production trong toàn bộ 7 hướng.**
