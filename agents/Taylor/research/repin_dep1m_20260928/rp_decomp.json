@@ -1,0 +1,118 @@
+{
+ "_ctrl_leg": "/home/trido/thanhdt/WorkingClaude/data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-30_wtnamecap_advprice_etfcreatpit_exp_rp_ctrl_univpit.csv",
+ "_n_daily": 3107,
+ "_window": [
+  "2014-01-02",
+  "2026-06-19"
+ ],
+ "_idle_frac_mean": 0.4638,
+ "_bootstrap": {
+  "L": 21,
+  "B": 4000,
+  "seed": 12345,
+  "paired": true
+ },
+ "ctrl_carry0": {
+  "cagr_pct": 23.369,
+  "sharpe": 1.81,
+  "maxdd_pct": -14.64,
+  "calmar": 1.5959,
+  "E_calmar": 1.4741,
+  "dd5th_pct": -25.2,
+  "cagr5th_pct": 15.46,
+  "P_gt_ctrl_calmar": 0.0
+ },
+ "overlay_median": {
+  "cagr_pct": 25.421,
+  "sharpe": 1.954,
+  "maxdd_pct": -13.94,
+  "calmar": 1.8238,
+  "offset_pp": -2.525,
+  "pre_series_zero_sessions": 0,
+  "rate_mean_pct": 3.501,
+  "delta_cagr_pp_ARITH": 2.052,
+  "E_calmar": 1.6701,
+  "dd5th_pct": -23.990000000000002,
+  "cagr5th_pct": 17.44,
+  "P_gt_ctrl_calmar": 1.0
+ },
+ "engine_median": {
+  "cagr_pct": 25.706,
+  "sharpe": 1.988,
+  "maxdd_pct": -14.03,
+  "calmar": 1.8327,
+  "offset_pp": -2.525,
+  "delta_cagr_pp_TOTAL": 2.337,
+  "delta_cagr_pp_PATH": 0.285,
+  "ledger": "/home/trido/thanhdt/WorkingClaude/data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-30_wtnamecap_advprice_etfcreatpit_exp_rp_pin_univpit_idledep1m.csv",
+  "E_calmar": 1.6945,
+  "dd5th_pct": -23.56,
+  "cagr5th_pct": 17.76,
+  "P_gt_ctrl_calmar": 0.9285
+ },
+ "overlay_p25": {
+  "cagr_pct": 25.207,
+  "sharpe": 1.939,
+  "maxdd_pct": -13.94,
+  "calmar": 1.8084,
+  "offset_pp": -3.4,
+  "pre_series_zero_sessions": 0,
+  "rate_mean_pct": 3.139,
+  "delta_cagr_pp_ARITH": 1.838,
+  "E_calmar": 1.65,
+  "dd5th_pct": -24.14,
+  "cagr5th_pct": 17.25,
+  "P_gt_ctrl_calmar": 1.0
+ },
+ "engine_p25": {
+  "cagr_pct": 25.887,
+  "sharpe": 2.012,
+  "maxdd_pct": -14.07,
+  "calmar": 1.8403,
+  "offset_pp": -3.4,
+  "delta_cagr_pp_TOTAL": 2.518,
+  "delta_cagr_pp_PATH": 0.68,
+  "ledger": "/home/trido/thanhdt/WorkingClaude/data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-30_wtnamecap_advprice_etfcreatpit_exp_rp_p25_univpit_idledep1m_offm3p400.csv",
+  "E_calmar": 1.7386,
+  "dd5th_pct": -23.27,
+  "cagr5th_pct": 17.95,
+  "P_gt_ctrl_calmar": 0.9975
+ },
+ "overlay_p75": {
+  "cagr_pct": 25.476,
+  "sharpe": 1.958,
+  "maxdd_pct": -13.94,
+  "calmar": 1.8277,
+  "offset_pp": -2.3,
+  "pre_series_zero_sessions": 0,
+  "rate_mean_pct": 3.594,
+  "delta_cagr_pp_ARITH": 2.107,
+  "E_calmar": 1.6752,
+  "dd5th_pct": -23.95,
+  "cagr5th_pct": 17.5,
+  "P_gt_ctrl_calmar": 1.0
+ },
+ "engine_p75": {
+  "cagr_pct": 25.798,
+  "sharpe": 1.996,
+  "maxdd_pct": -13.99,
+  "calmar": 1.844,
+  "offset_pp": -2.3,
+  "delta_cagr_pp_TOTAL": 2.429,
+  "delta_cagr_pp_PATH": 0.322,
+  "ledger": "/home/trido/thanhdt/WorkingClaude/data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-30_wtnamecap_advprice_etfcreatpit_exp_rp_p75_univpit_idledep1m_offm2p300.csv",
+  "E_calmar": 1.7061,
+  "dd5th_pct": -23.43,
+  "cagr5th_pct": 17.85,
+  "P_gt_ctrl_calmar": 0.9327
+ },
+ "_ann_obs_per_yr": 249.28,
+ "_band": {
+  "engine_cagr_range_pp": 0.181,
+  "overlay_cagr_range_pp": 0.269,
+  "engine_monotonic_in_offset": false,
+  "overlay_monotonic_in_offset": true,
+  "w2b_noise_floor_parked_leg_pp": 0.46,
+  "w2b_mde_one_leg_parked_pp": 0.4
+ }
+}

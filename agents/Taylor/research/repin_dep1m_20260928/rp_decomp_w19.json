@@ -1,0 +1,32 @@
+{
+ "_window": [
+  "2019-03-01",
+  "2026-06-19"
+ ],
+ "_n_daily": 1824,
+ "_idle_frac_mean": 0.4996,
+ "_rate_mean_pct": 3.077,
+ "_pre_series_zero_sessions": 0,
+ "_coverage": "88 thang SO THAT / 0 dung lai / 0 ff",
+ "carry0": {
+  "cagr_pct": 22.857,
+  "sharpe": 1.628,
+  "maxdd_pct": -17.48,
+  "calmar": 1.3072
+ },
+ "overlay_dep1m": {
+  "cagr_pct": 24.846,
+  "sharpe": 1.757,
+  "maxdd_pct": -16.11,
+  "calmar": 1.542
+ },
+ "engine_dep1m": {
+  "cagr_pct": 24.864,
+  "sharpe": 1.762,
+  "maxdd_pct": -15.99,
+  "calmar": 1.5555
+ },
+ "delta_cagr_pp_TOTAL": 2.007,
+ "delta_cagr_pp_ARITH": 1.989,
+ "delta_cagr_pp_PATH": 0.018
+}
