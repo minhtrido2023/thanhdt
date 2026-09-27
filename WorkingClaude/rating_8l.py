@@ -513,14 +513,34 @@ def main():
 
     # load forensic override registry (human findings that quant can't catch)
     global FORENSIC
-    try:
-        _fg = pd.read_csv(os.path.join(WORKDIR,"data","forensic_flags.csv"))
-        FORENSIC = {r["ticker"]: (str(r["severity"]).strip(), str(r["flag_type"]).strip(), str(r["note"]))
-                    for _, r in _fg.iterrows()}
-        _excl = sorted(t for t,(s,_,_) in FORENSIC.items() if s == "exclude")
-        print(f"  [forensic-gov] {len(FORENSIC)} flagged ({len(_excl)} exclude: {_excl}); excluded from golden-floor + BUY/ACC")
-    except Exception as e:
-        print("forensic_flags load fail (no overrides):", e); FORENSIC = {}
+    # FAIL-CLOSED tu 2026-09-27 (user duyet). Truoc day la
+    #   `except Exception as e: print("forensic_flags load fail (no overrides):", e); FORENSIC = {}`
+    # = fail-OPEN tren CONG LIVE: mat overrides thi ma bi co giu nguyen rating that va LOT
+    # cong `rating<=3` cua BAL/custom30V/CAPIT, log chi noi "load fail". Day la chieu KHONG
+    # an toan (mua mot ma da bi loai bang phan tich forensic), nen chan la dung.
+    # Opt-out TUONG MINH: RATING8L_FORENSIC_FLAGS="" (khai bao chay KHONG overrides);
+    # dat mot duong dan => dung dung file do, thieu/hong => TU CHOI (khong am tham doi cay).
+    _forx_env = os.environ.get("RATING8L_FORENSIC_FLAGS")
+    if _forx_env == "":
+        print("  [forensic-gov] TAT TUONG MINH (RATING8L_FORENSIC_FLAGS= rong) — KHONG overrides")
+        FORENSIC = {}
+    else:
+        _fpath = _forx_env or os.path.join(WORKDIR, "data", "forensic_flags.csv")
+        try:
+            _fg = pd.read_csv(_fpath)
+            FORENSIC = {r["ticker"]: (str(r["severity"]).strip(), str(r["flag_type"]).strip(), str(r["note"]))
+                        for _, r in _fg.iterrows()}
+            _excl = sorted(t for t,(s,_,_) in FORENSIC.items() if s == "exclude")
+            print(f"  [forensic-gov] {len(FORENSIC)} flagged ({len(_excl)} exclude: {_excl}); excluded from golden-floor + BUY/ACC")
+        except Exception as e:
+            # §29: trich exception THAT, khong doan nguyen nhan.
+            raise SystemExit(
+                "[forensic-gov] TU CHOI CHAY — khong doc duoc registry forensic, va bo qua no"
+                " se cho ma da bi co giu nguyen rating that roi LOT cong rating<=3 (BAL /"
+                " custom30V / CAPIT)." + os.linesep
+                + f"  Duong dan: {_fpath}" + os.linesep
+                + f"  Loi that: {type(e).__name__}: {e}" + os.linesep
+                + '  Chay KHONG overrides mot cach co y: RATING8L_FORENSIC_FLAGS=""')
 
     # load sector lenses
     global BANKD, POWERD
