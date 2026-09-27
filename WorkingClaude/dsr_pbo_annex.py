@@ -64,7 +64,21 @@ def daily_logret(s):
     return np.diff(np.log(s.values))
 
 # ---------- 1. Trial family ----------
-def family_paths():
+# Họ trial là hàm của CHÍNH tập cấu hình đã được so sánh khi chọn config deploy (BBLZ 2017) —
+# KHÔNG phải "mọi CSV đang có trong data/". Glob động làm họ nở theo mọi backtest R&D chạy sau
+# (73 → 486 CSV từ 2026-07 đến 2026-09-27) ⇒ PBO trôi theo thời gian và số đã pin trong registry
+# không tái lập được. Pin họ bằng manifest: DSR_FAMILY_MANIFEST=<file>, xem dsr_family_manifest.py.
+FAMILY_MANIFEST = os.environ.get("DSR_FAMILY_MANIFEST")
+
+
+def family_paths(_ignore_manifest=False):
+    if FAMILY_MANIFEST and not _ignore_manifest:
+        from dsr_family_manifest import load_manifest
+        paths, man = load_manifest(FAMILY_MANIFEST)   # fail-closed: thiếu file/md5 lệch ⇒ raise
+        print(f"[family] manifest {FAMILY_MANIFEST}: {len(paths)} CSV (tạo "
+              f"{man['created_at_ict']}, tiêu chí {man['criterion']['reason']!r}) — "
+              f"KHÔNG glob động, CSV lạ trong {DATA}/ không ảnh hưởng PBO.")
+        return paths
     paths = sorted(glob.glob(f"{DATA}/v23_golive_audit_2014_now_*.csv"))
     keep = []
     for p in paths:
@@ -76,6 +90,9 @@ def family_paths():
         if "from20" in base:
             continue
         keep.append(p)
+    print(f"[family] GLOB ĐỘNG trên {DATA}/ ⇒ {len(keep)} CSV. ⚠️ PBO tính trên họ này KHÔNG "
+          f"tái lập được về sau (mỗi backtest R&D mới làm họ nở ra). Muốn số pin được: dựng "
+          f"manifest (dsr_family_manifest.py build) rồi đặt DSR_FAMILY_MANIFEST.")
     return keep
 
 # ---------- 2. Deflated Sharpe Ratio (BLdP 2014) ----------
@@ -201,7 +218,11 @@ def main():
     print("DSR / PBO ROBUSTNESS ANNEX — computation log")
     print("="*78)
 
-    fam = family_paths()
+    try:
+        fam = family_paths()
+    except RuntimeError as e:
+        print(f"\n❌ {e}", file=sys.stderr)
+        return 2
     # load all family series, keep only full-history (>=2500 daily obs ~10y) at 50B
     series = {}
     for p in fam:
@@ -291,6 +312,7 @@ def main():
     print("\n"+"="*78)
     print("DONE. Numbers above feed the registry annex section.")
     print("="*78)
+    return 0
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main() or 0)
