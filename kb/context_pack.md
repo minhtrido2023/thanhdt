@@ -1,13 +1,13 @@
-# Mike fleet — context pack (v3356)
+# Mike fleet — context pack (v3357)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-09-27T16:34:23] Taylor/finding — w2b-c30v-truy-vet-rail-roi-rac: {"job": "Taylor_20260927_155645", "viec": "Buoc 2 (CAU HOI QUAN TRONG NHAT) — vi sao nhieu CHI o tien mat lai doi tap lenh BAL", "moc_phan_ky_DO_LAI": "2 moc tr …
-- [2026-09-27T16:35:25] Taylor/finding — w2b-c30v-san-nhieu-duong-di: {"job": "Taylor_20260927_155645", "viec": "Buoc 3 — do SAN NHIEU DUONG DI cua engine: 8 chan {D park0,0 | A custom30V park0,3} x IDLE_CARRY_FLAT {3,0 3,5 4,0 4, …
-- [2026-09-27T16:35:25] Taylor/finding — w2b-c30v-meta-cashidentity-va-R2R5: {"job": "Taylor_20260927_155645", "viec": "Buoc 4 — META cash_identity cho chan carry + chan doan R2/R5 basket_return_leg_oshares_selfcheck", "META_DA_SUA": "pt …
-- [2026-09-27T16:36:31] Taylor/finding — w2b-c30v-final: {"job": "Taylor_20260927_155645", "verdict_goc": "quant-skeptic/verification topic w2-c30v-q2-final, 2026-09-27 15:48Z, REFUTED / confidence high. Skeptic bac D …
-- [2026-09-27T16:44:53] quant-skeptic/verification — ✅ CONFIRMED VERIFY: w2b-c30v-final: {"finding_topic": "w2b-c30v-final", "verdict": "CONFIRMED", "confidence": "high", "checks": {"look_ahead_leak": "pass — flat legs use a scalar (pt_v23_audit_201 …
+- [2026-09-27T17:27:01] Taylor/finding — repin-dep1m-cong-control: {"job": "Taylor_20260927_170645", "buoc": "2 — CONG BAT BUOC truoc khi doc so", "ket_qua": "PASS", "chan_control": "rp_ctrl IDLE_CARRY_TIER=off, PARK_STATES=3:0 …
+- [2026-09-27T17:32:11] Taylor/finding — repin-dep1m-chan-pin: {"job": "Taylor_20260927_170645", "buoc": "3 — CHAN PIN MOI (lenh pin anchor R3 nguyen van + IDLE_CARRY_TIER=dep1m, PARK_STATES=3:0.3 giu nguyen)", "chan": "rp_ …
+- [2026-09-27T17:32:11] Taylor/finding — repin-dep1m-neo-sizing-DD: {"job": "Taylor_20260927_170645", "buoc": "4 — NEO SIZING DD do lai tren ledger MOI + DSR/PBO manifest ghim", "bootstrap": "bootstrap_nav.py, circular block L=2 …
+- [2026-09-27T17:34:53] Taylor/finding — repin-dep1m-bang-bat-dinh-cau: {"job": "Taylor_20260927_170645", "buoc": "5 — BANG BAT DINH CUA CAU (53/150 thang cua so la DUNG LAI) + chan doi chung KHONG CAN BAC CAU", "dai_offset_engine": …
+- [2026-09-27T17:34:53] Taylor/finding — repin-dep1m-tach-so-hoc-vs-duong-di: {"job": "Taylor_20260927_170645", "buoc": "6 — doc Delta KEM SAN NHIEU W2b (khong lap loi W2)", "phuong_phap": "Overlay carry LEN CHINH duong NAV carry-0% cua c …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -447,6 +447,27 @@ warnings=[]` IM LẶNG (đo thật `--date 2026-09-12`: 80 triệu vẫn nằm t
 trong trạng thái đó sẽ đếm 2 lần đúng 80 triệu (+8,15% NAV, lọt cổng sanity ±15%) và ghi thẳng vào
 `nav_history`. Nghĩa là: **tự động hoá SAI ở đây còn tệ hơn tự tay xử lý mỗi quý vài lần.**
 Runbook thao tác tay: `kb/ops_runbook.md` § PRICE_XCHECK.
+
+## QUY TẮC — Case có vấn đề PHÁP LÝ: vẫn phân tích như bình thường, chỉ WARNING tình trạng pháp lý (user chốt 2026-09-27 23:51 ICT)
+
+**Chỉ đạo nguyên văn:** *"Những case pháp lý, nếu có báo cáo tài chính thì cứ dựa báo cáo phân
+tích như bình thường, chỉ warning về tình trạng pháp lý nếu có thôi."*
+
+Áp dụng cho MỌI agent làm định giá / due-diligence / báo cáo (Taylor, DollarBill, Wendy,
+fundamental-skeptic):
+- Có BCTC ⇒ **phân tích bình thường** trên số liệu đó (định giá, dự báo quý, DCF, nhận định).
+  KHÔNG tự từ chối phân tích, KHÔNG tự hạ kết luận, KHÔNG tự loại mã chỉ vì có yếu tố pháp lý.
+- Tình trạng pháp lý đi vào báo cáo dưới dạng **WARNING tường minh** (nêu sự việc + nguồn +
+  ảnh hưởng đã biết), KHÔNG phải một cổng chặn ngầm.
+- **Không đổi** 3 cổng đã có, chúng độc lập với luật này: `BANNED` vĩnh viễn (hằng số trong
+  code), `excluded_tickers` per-account (vd DGC ở ZaloPay), và `data/forensic_flags.csv`
+  `severity=exclude`. Luật này nói về **cách VIẾT phân tích**, không nới cổng nào.
+- Rủi ro pháp lý của việc **lưu trữ/công bố** ghi chú pháp lý (vd đưa `forensic_flags.csv` vào
+  mirror GitHub): **user tự đánh giá và tự báo khi có thông tin** — không cần Mike chặn chờ
+  legal-vn soát trước.
+
+Liên quan: `kb/current_ops.md` (DGC 2 nhánh tách biệt), §21 (UNVERIFIED thì CẤM công bố tỉ suất
+— đó là cổng SỐ LIỆU, không phải cổng pháp lý).
 
 ## Dự án đã đóng — 1 dòng/dự án, chi tiết `cat kb/projects/<file>.md`
 <!-- Rút gọn 2026-08-10: mỗi dòng trước đây là 2-4 câu kể lại diễn biến. File này bơm vào MỌI
