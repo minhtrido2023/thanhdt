@@ -1,0 +1,5 @@
+BQ_LOCAL_CACHE = (live BQ)
+WORKDIR        = /home/trido/thanhdt/WorkingClaude
+custom_basket  = /home/trido/thanhdt/WorkingClaude/custom_basket.py  (BASKET_RETURN_OSHARES=flat (default))
+cửa sổ = 2025-01-02..2026-06-19  |  PROD_KW = {'quality': 'none', 'rebal': 'q2m5', 'gate_rating': 3, 'weight_scheme': 'namecap'}
+BASKET_RETLEG_PREREF=HEAD ĐÃ chứa bản sửa (thấy chuỗi BASKET_RETURN_OSHARES) ⇒ control leg sẽ là no-op và R5/R3 mất ý nghĩa. Trỏ vào commit TRƯỚC bản sửa.

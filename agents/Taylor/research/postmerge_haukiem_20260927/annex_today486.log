@@ -1,0 +1,32 @@
+==============================================================================
+DSR / PBO ROBUSTNESS ANNEX — computation log
+==============================================================================
+[family] manifest mike/research/dsr_family_manifest_20260927/man_today.json: 486 CSV (tạo 2026-09-27T12:43:39.137067+07:00, tiêu chí 'Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4.') — KHÔNG glob động, CSV lạ trong data/ không ảnh hưởng PBO.
+
+[1] TRIAL FAMILY: 486 candidate CSVs globbed, 486 pass full-history (>=2500 daily obs) filter.
+    Common aligned trading days across all trials: 3101
+
+[2] R3 PINNED (v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_pinR3_20260927pm_univpit.csv)
+    daily obs T = 3106  (12.460y CALENDAR, 249.3 obs/yr; session-count basis would say 12.325y)
+    per-day Sharpe = 0.10237  -> annualized = 1.616
+    skewness  gamma3 = -0.3619
+    kurtosis  gamma4 = 7.0941  (excess = 4.0941)
+
+    Trial Sharpe dispersion (per-day, N_csv=486):
+      mean ann-SR = 1.764, sd ann-SR = 0.123, Var(per-day SR) = 6.108e-05
+    DSR @ N_csv (surviving daily CSVs)              : SR0(ann)=0.376  DSR=1.0000
+    DSR @ N_reg=120 (registry-documented search)    : SR0(ann)=0.320  DSR=1.0000
+    DSR @ N_reg=200 (conservative upper)            : SR0(ann)=0.341  DSR=1.0000
+
+[3] CSCV / PBO
+    matrix: 3100 daily obs x 486 configs; S=16 blocks, 12870 IS/OOS combinations
+    PBO = 0.5013  (fraction of splits where IS-best config lands below OOS median)
+    logit lambda: median=-0.00, mean=0.77, P(lambda<0)=0.5013
+
+[4] BOOTSTRAP: circular block (L=21) vs stationary (mean L=21)
+    circular block     CAGR 5th= 15.5%  med= 24.4%  | MaxDD 5th= -30.3%  med= -20.4%  | P(DD<-30%)= 5.5%
+    stationary(PR)     CAGR 5th= 15.3%  med= 24.4%  | MaxDD 5th= -30.0%  med= -20.2%  | P(DD<-30%)= 5.1%
+
+==============================================================================
+DONE. Numbers above feed the registry annex section.
+==============================================================================

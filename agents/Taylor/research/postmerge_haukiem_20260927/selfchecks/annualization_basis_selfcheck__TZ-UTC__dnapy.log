@@ -1,0 +1,497 @@
+<unknown>:135: SyntaxWarning: invalid escape sequence '\|'
+<unknown>:96: SyntaxWarning: invalid escape sequence '\{'
+<unknown>:7: SyntaxWarning: invalid escape sequence '\`'
+<unknown>:15: SyntaxWarning: invalid escape sequence '\|'
+annualization_basis: KHÔNG PARSE ĐƯỢC /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/fearbuy_screen/analyze_fix.py (SyntaxError: unexpected character after line continuation character (<unknown>, line 39)) — không gate file này
+annualization_basis: KHÔNG PARSE ĐƯỢC /home/trido/thanhdt/WorkingClaude/mike_paseo/agents/Taylor/research/fearbuy_screen/analyze_fix.py (SyntaxError: unexpected character after line continuation character (<unknown>, line 39)) — không gate file này
+annualization_basis: KHÔNG PARSE ĐƯỢC /home/trido/thanhdt/WorkingClaude/stockquery/vnstock_stockquery/vnstock/core/constants.py (SyntaxError: cannot assign to literal here. Maybe you meant '==' instead of '='? (<unknown>, line 23)) — không gate file này
+_h8a_extract_metrics.py:11: sqrt-session-const: sh252 = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else 0
+agents/Taylor/research/backtest_2008_v24_20260825/engine_2008.py:1214: sqrt-session-const: vni_hist["rv10"] = _r.rolling(10).std() * np.sqrt(252) * 100
+agents/Taylor/research/backtest_2008_v24_20260825/engine_2008.py:2318: sqrt-session-const: _vm_report = {"sigma_target_ann": sigma_target * np.sqrt(252), "win": VOLMANAGE_WIN,
+agents/Taylor/research/backtest_2008_v24_20260825/engine_2008.py:2322: sqrt-session-const: print(f"  [VOLMANAGE_BAL win={VOLMANAGE_WIN} x{VOLMANAGE_TGT_MULT}] sigma_target(ann)={sigma_target*np.sqrt(252)*100:.1f
+agents/Taylor/research/backtest_2008_v24_20260825/engine_2008.py:2579: sqrt-session-const: sh252 = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else 0
+agents/Taylor/research/backtest_2008_v24_20260825/engine_2008.py:2582: sqrt-session-const: sortino = r.mean() / np.sqrt((dn**2).mean()) * np.sqrt(252) if len(dn) else 0
+archive/papertrade_milestone_report.py:78: sqrt-session-const: vol_ann = daily.std() * np.sqrt(252) if len(daily) > 0 else 0
+archive/papertrade_weekly_report.py:52: sqrt-session-const: vol_ann = daily.std() * np.sqrt(252) if len(daily) > 0 else 0
+audit_lib.py:19: sqrt-session-const: sh = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else 0
+audit_lib.py:20: sqrt-session-const: dn = r[r < 0]; sortino = r.mean() / np.sqrt((dn**2).mean()) * np.sqrt(252) if len(dn) else 0
+backtest_anticipate_exit.py:133: sqrt-session-const: sharpe = rets.mean() / rets.std() * np.sqrt(250) if rets.std() > 0 else 0
+backtest_bull_div_filtered.py:78: sqrt-session-const: sh = rets.mean()/rets.std()*np.sqrt(250) if rets.std()>0 else 0
+backtest_bull_div_filtered.py:130: sqrt-session-const: sh = rets.mean()/rets.std()*np.sqrt(250) if rets.std()>0 else 0
+backtest_capitulation_boost.py:118: sqrt-session-const: sharpe = rets.mean() / rets.std() * np.sqrt(250) if rets.std() > 0 else 0
+backtest_combined_system.py:269: sqrt-session-const: sharpe = np.mean(pr)/np.std(pr)*np.sqrt(252) if np.std(pr)>0 else 0
+backtest_market_timing.py:503: sqrt-session-const: sharpe   = (np.mean(port_ret) / np.std(port_ret)) * np.sqrt(252) if np.std(port_ret) > 0 else 0
+backtest_new_allocation.py:128: sqrt-session-const: for i in range(20,n): vol20[i]=np.nanstd(rets[i-19:i+1])*np.sqrt(252)
+backtest_plan_a.py:65: sqrt-session-const: sh = rets.mean()/rets.std()*np.sqrt(250) if rets.std()>0 else 0
+blend_megacap_stage1.py:60: sqrt-session-const: return dict(cg=cg*100, sh=r.mean()/r.std()*np.sqrt(252) if r.std()>0 else 0, dd=dd*100, cal=cg/abs(dd) if dd<0 else 0)
+blend_value_prod.py:32: sqrt-session-const: return dict(cagr=cg*100, sh=r.mean()/r.std()*np.sqrt(252) if r.std()>0 else 0, dd=dd*100, cal=cg/abs(dd) if dd<0 else 0)
+breadth_ensemble_backtest.py:176: sqrt-session-const: sh = rets.mean()/rets.std()*np.sqrt(250) if rets.std()>0 else 0
+build_comparison_v2_v34b.py:56: sqrt-session-const: sr   = rets.mean() / rets.std() * np.sqrt(252) if rets.std() > 0 else 0
+build_comparison_v2_v34b.py:63: sqrt-session-const: sortino = rets.mean() / neg.std() * np.sqrt(252) if len(neg) > 0 and neg.std() > 0 else 0
+c30b_bull_walkforward.py:72: sqrt-session-const: sh = r.mean() / r.std(ddof=1) * np.sqrt(TRADING_DAYS) if r.std(ddof=1) > 0 else np.nan
+c30b_bull_walkforward.py:117: yrs-per-session: bull_years = len(FULL) / TRADING_DAYS
+committed_sleeve_overlay.py:106: sqrt-session-const: return (nav.iloc[-1]**(1/yrs)-1)*100,(nav/nav.cummax()-1).min()*100,r.mean()/r.std()*np.sqrt(252)
+compare_ba_vn30.py:28: sqrt-session-const: mu = ret.mean()*252; sd = ret.std(ddof=1)*np.sqrt(252)
+compare_ba_vn30.py:29: yrs-per-session: nav = (1+ret).cumprod(); yrs = n/252; cagr = nav.iloc[-1]**(1/yrs)-1
+compare_integrated_bav11_dt.py:198: sqrt-session-const: sharpe = daily_ret.mean()/daily_ret.std()*np.sqrt(252) if daily_ret.std() > 0 else 0
+compare_lagged_vs_ba_deep.py:162: sqrt-session-const: sh = rets.mean()/rets.std()*np.sqrt(252) if rets.std()>0 else 0
+converge_fullharness_test.py:950: sqrt-session-const: vni_hist["rv10"] = _r.rolling(10).std() * np.sqrt(252) * 100
+converge_fullharness_test.py:1911: sqrt-session-const: _vm_report = {"sigma_target_ann": sigma_target * np.sqrt(252), "win": VOLMANAGE_WIN,
+converge_fullharness_test.py:1915: sqrt-session-const: print(f"  [VOLMANAGE_BAL win={VOLMANAGE_WIN} x{VOLMANAGE_TGT_MULT}] sigma_target(ann)={sigma_target*np.sqrt(252)*100:.1f
+converge_fullharness_test.py:2119: sqrt-session-const: sh252 = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else 0
+converge_fullharness_test.py:2122: sqrt-session-const: sortino = r.mean() / np.sqrt((dn**2).mean()) * np.sqrt(252) if len(dn) else 0
+cross_test_state_filter.py:197: sqrt-session-const: sh = daily.mean()/daily.std()*np.sqrt(252) if daily.std()>0 else 0
+custom30b_blend.py:42: sqrt-session-const: return dict(c=cg * 100, sh=r.mean() / r.std() * np.sqrt(252), dd=dd * 100, cal=cg / abs(dd))
+custom30b_stage1.py:44: sqrt-session-const: return dict(cagr=cg * 100, sh=r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else 0,
+custom30b_stage2.py:30: sqrt-session-const: return dict(c=cg*100,sh=r.mean()/r.std()*np.sqrt(252) if r.std()>0 else 0,dd=dd*100,
+custom30b_stage2.py:31: sqrt-session-const: cal=cg/abs(dd) if dd<0 else 0,std=r.std()*np.sqrt(252)*100)
+data/_exp8_mge_recompute.py:11: sqrt-session-const: sh252 = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else 0
+data/audit_spotcheck_generic.py:94: sqrt-session-const: cagr = (s_nav.iloc[-1]/s_nav.iloc[0])**(1/yrs)-1; sh = r.mean()/r.std()*np.sqrt(252); mdd = (s_nav/s_nav.cummax()-1).min
+data/dvr8l_exp/gate_analysis_20260712.py:26: sqrt-session-const: sh = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else np.nan
+data/f3_exp/pt_v23_basetable_probe_20260711.py:869: sqrt-session-const: vni_hist["rv10"] = _r.rolling(10).std() * np.sqrt(252) * 100
+data/f3_exp/pt_v23_basetable_probe_20260711.py:1792: sqrt-session-const: _vm_report = {"sigma_target_ann": sigma_target * np.sqrt(252), "win": VOLMANAGE_WIN,
+data/f3_exp/pt_v23_basetable_probe_20260711.py:1796: sqrt-session-const: print(f"  [VOLMANAGE_BAL win={VOLMANAGE_WIN} x{VOLMANAGE_TGT_MULT}] sigma_target(ann)={sigma_target*np.sqrt(252)*100:.1f
+data/f3_exp/pt_v23_basetable_probe_20260711.py:2000: sqrt-session-const: sh252 = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else 0
+data/f3_exp/pt_v23_basetable_probe_20260711.py:2003: sqrt-session-const: sortino = r.mean() / np.sqrt((dn**2).mean()) * np.sqrt(252) if len(dn) else 0
+data/fa8l_exp/pt_v23_fa8l_diag_20260711.py:939: sqrt-session-const: vni_hist["rv10"] = _r.rolling(10).std() * np.sqrt(252) * 100
+data/fa8l_exp/pt_v23_fa8l_diag_20260711.py:1862: sqrt-session-const: _vm_report = {"sigma_target_ann": sigma_target * np.sqrt(252), "win": VOLMANAGE_WIN,
+data/fa8l_exp/pt_v23_fa8l_diag_20260711.py:1866: sqrt-session-const: print(f"  [VOLMANAGE_BAL win={VOLMANAGE_WIN} x{VOLMANAGE_TGT_MULT}] sigma_target(ann)={sigma_target*np.sqrt(252)*100:.1f
+data/fa8l_exp/pt_v23_fa8l_diag_20260711.py:2070: sqrt-session-const: sh252 = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else 0
+data/fa8l_exp/pt_v23_fa8l_diag_20260711.py:2073: sqrt-session-const: sortino = r.mean() / np.sqrt((dn**2).mean()) * np.sqrt(252) if len(dn) else 0
+data/fa8l_exp/pt_v23_fa8l_phase2_20260711.py:956: sqrt-session-const: vni_hist["rv10"] = _r.rolling(10).std() * np.sqrt(252) * 100
+data/fa8l_exp/pt_v23_fa8l_phase2_20260711.py:1879: sqrt-session-const: _vm_report = {"sigma_target_ann": sigma_target * np.sqrt(252), "win": VOLMANAGE_WIN,
+data/fa8l_exp/pt_v23_fa8l_phase2_20260711.py:1883: sqrt-session-const: print(f"  [VOLMANAGE_BAL win={VOLMANAGE_WIN} x{VOLMANAGE_TGT_MULT}] sigma_target(ann)={sigma_target*np.sqrt(252)*100:.1f
+data/fa8l_exp/pt_v23_fa8l_phase2_20260711.py:2087: sqrt-session-const: sh252 = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else 0
+data/fa8l_exp/pt_v23_fa8l_phase2_20260711.py:2090: sqrt-session-const: sortino = r.mean() / np.sqrt((dn**2).mean()) * np.sqrt(252) if len(dn) else 0
+data/fa8l_exp/pt_v23_fatier8l_probe_20260711.py:872: sqrt-session-const: vni_hist["rv10"] = _r.rolling(10).std() * np.sqrt(252) * 100
+data/fa8l_exp/pt_v23_fatier8l_probe_20260711.py:1795: sqrt-session-const: _vm_report = {"sigma_target_ann": sigma_target * np.sqrt(252), "win": VOLMANAGE_WIN,
+data/fa8l_exp/pt_v23_fatier8l_probe_20260711.py:1799: sqrt-session-const: print(f"  [VOLMANAGE_BAL win={VOLMANAGE_WIN} x{VOLMANAGE_TGT_MULT}] sigma_target(ann)={sigma_target*np.sqrt(252)*100:.1f
+data/fa8l_exp/pt_v23_fatier8l_probe_20260711.py:2003: sqrt-session-const: sh252 = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else 0
+data/fa8l_exp/pt_v23_fatier8l_probe_20260711.py:2006: sqrt-session-const: sortino = r.mean() / np.sqrt((dn**2).mean()) * np.sqrt(252) if len(dn) else 0
+data/fscore_c30v_20260801/analyze_basket.py:36: sqrt-session-const: sh = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else np.nan
+data/fscore_c30v_20260801/analyze_engine.py:49: sqrt-session-const: sh = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else np.nan
+data/fscore_c30v_20260801/engine_fsx.py:1074: sqrt-session-const: vni_hist["rv10"] = _r.rolling(10).std() * np.sqrt(252) * 100
+data/fscore_c30v_20260801/engine_fsx.py:2109: sqrt-session-const: _vm_report = {"sigma_target_ann": sigma_target * np.sqrt(252), "win": VOLMANAGE_WIN,
+data/fscore_c30v_20260801/engine_fsx.py:2113: sqrt-session-const: print(f"  [VOLMANAGE_BAL win={VOLMANAGE_WIN} x{VOLMANAGE_TGT_MULT}] sigma_target(ann)={sigma_target*np.sqrt(252)*100:.1f
+data/fscore_c30v_20260801/engine_fsx.py:2317: sqrt-session-const: sh252 = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else 0
+data/fscore_c30v_20260801/engine_fsx.py:2320: sqrt-session-const: sortino = r.mean() / np.sqrt((dn**2).mean()) * np.sqrt(252) if len(dn) else 0
+data/fscore_review_20260801/engine_V1_nofscore.py:1074: sqrt-session-const: vni_hist["rv10"] = _r.rolling(10).std() * np.sqrt(252) * 100
+data/fscore_review_20260801/engine_V1_nofscore.py:2109: sqrt-session-const: _vm_report = {"sigma_target_ann": sigma_target * np.sqrt(252), "win": VOLMANAGE_WIN,
+data/fscore_review_20260801/engine_V1_nofscore.py:2113: sqrt-session-const: print(f"  [VOLMANAGE_BAL win={VOLMANAGE_WIN} x{VOLMANAGE_TGT_MULT}] sigma_target(ann)={sigma_target*np.sqrt(252)*100:.1f
+data/fscore_review_20260801/engine_V1_nofscore.py:2317: sqrt-session-const: sh252 = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else 0
+data/fscore_review_20260801/engine_V1_nofscore.py:2320: sqrt-session-const: sortino = r.mean() / np.sqrt((dn**2).mean()) * np.sqrt(252) if len(dn) else 0
+data/fscore_review_20260801/engine_V3_sectoraware.py:1074: sqrt-session-const: vni_hist["rv10"] = _r.rolling(10).std() * np.sqrt(252) * 100
+data/fscore_review_20260801/engine_V3_sectoraware.py:2109: sqrt-session-const: _vm_report = {"sigma_target_ann": sigma_target * np.sqrt(252), "win": VOLMANAGE_WIN,
+data/fscore_review_20260801/engine_V3_sectoraware.py:2113: sqrt-session-const: print(f"  [VOLMANAGE_BAL win={VOLMANAGE_WIN} x{VOLMANAGE_TGT_MULT}] sigma_target(ann)={sigma_target*np.sqrt(252)*100:.1f
+data/fscore_review_20260801/engine_V3_sectoraware.py:2317: sqrt-session-const: sh252 = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else 0
+data/fscore_review_20260801/engine_V3_sectoraware.py:2320: sqrt-session-const: sortino = r.mean() / np.sqrt((dn**2).mean()) * np.sqrt(252) if len(dn) else 0
+data/lag_harness_dnpr.py:228: sqrt-session-const: dd = (s/s.cummax()-1).min(); sh = r.mean()/r.std()*np.sqrt(252)
+data/momdeal_exp/analyze_momclose.py:36: sqrt-session-const: sharpe = r.mean() / r.std(ddof=1) * math.sqrt(ANN)
+data/momdeal_exp/analyze_momclose_scopeC.py:37: sqrt-session-const: sharpe = r.mean() / r.std(ddof=1) * math.sqrt(ANN)
+data/momdeal_exp/analyze_momclose_scopeC.py:70: yrs-per-session: yrs = len(r) / ANN
+data/momdeal_exp/pt_v23_scopeC_tmp_20260712.py:896: sqrt-session-const: vni_hist["rv10"] = _r.rolling(10).std() * np.sqrt(252) * 100
+data/momdeal_exp/pt_v23_scopeC_tmp_20260712.py:1819: sqrt-session-const: _vm_report = {"sigma_target_ann": sigma_target * np.sqrt(252), "win": VOLMANAGE_WIN,
+data/momdeal_exp/pt_v23_scopeC_tmp_20260712.py:1823: sqrt-session-const: print(f"  [VOLMANAGE_BAL win={VOLMANAGE_WIN} x{VOLMANAGE_TGT_MULT}] sigma_target(ann)={sigma_target*np.sqrt(252)*100:.1f
+data/momdeal_exp/pt_v23_scopeC_tmp_20260712.py:2027: sqrt-session-const: sh252 = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else 0
+data/momdeal_exp/pt_v23_scopeC_tmp_20260712.py:2030: sqrt-session-const: sortino = r.mean() / np.sqrt((dn**2).mean()) * np.sqrt(252) if len(dn) else 0
+data/qsleeve_logs/pt_v23_qsleeve_tmp_20260712.py:916: sqrt-session-const: vni_hist["rv10"] = _r.rolling(10).std() * np.sqrt(252) * 100
+data/qsleeve_logs/pt_v23_qsleeve_tmp_20260712.py:1839: sqrt-session-const: _vm_report = {"sigma_target_ann": sigma_target * np.sqrt(252), "win": VOLMANAGE_WIN,
+data/qsleeve_logs/pt_v23_qsleeve_tmp_20260712.py:1843: sqrt-session-const: print(f"  [VOLMANAGE_BAL win={VOLMANAGE_WIN} x{VOLMANAGE_TGT_MULT}] sigma_target(ann)={sigma_target*np.sqrt(252)*100:.1f
+data/qsleeve_logs/pt_v23_qsleeve_tmp_20260712.py:2047: sqrt-session-const: sh252 = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else 0
+data/qsleeve_logs/pt_v23_qsleeve_tmp_20260712.py:2050: sqrt-session-const: sortino = r.mean() / np.sqrt((dn**2).mean()) * np.sqrt(252) if len(dn) else 0
+data/research_edge_alloc_walkforward.py:33: sqrt-session-const: return c*100,r.mean()/r.std()*np.sqrt(252),dd*100,c/abs(dd)
+data/research_edge_conditional_allocator.py:44: sqrt-session-const: return c*100, r.mean()/r.std()*np.sqrt(252), dd*100, c/abs(dd)
+data/v23_audit_spotcheck.py:193: sqrt-session-const: sh = r.mean() / r.std() * np.sqrt(252)
+data/v25chk_logs/harvest.py:68: sqrt-session-const: print(f"DSR(LEV absolute)     N={N:2d}: SR_ann~{sr_lev*np.sqrt(252):.2f}  DSR={p:.4f}")
+data/v25chk_logs/pt_v25_loo_tmp_20260712.py:898: sqrt-session-const: vni_hist["rv10"] = _r.rolling(10).std() * np.sqrt(252) * 100
+data/v25chk_logs/pt_v25_loo_tmp_20260712.py:1832: sqrt-session-const: _vm_report = {"sigma_target_ann": sigma_target * np.sqrt(252), "win": VOLMANAGE_WIN,
+data/v25chk_logs/pt_v25_loo_tmp_20260712.py:1836: sqrt-session-const: print(f"  [VOLMANAGE_BAL win={VOLMANAGE_WIN} x{VOLMANAGE_TGT_MULT}] sigma_target(ann)={sigma_target*np.sqrt(252)*100:.1f
+data/v25chk_logs/pt_v25_loo_tmp_20260712.py:2040: sqrt-session-const: sh252 = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else 0
+data/v25chk_logs/pt_v25_loo_tmp_20260712.py:2043: sqrt-session-const: sortino = r.mean() / np.sqrt((dn**2).mean()) * np.sqrt(252) if len(dn) else 0
+data/volmanage_h3_logs/compute_metrics.py:14: sqrt-session-const: sharpe = ret.mean() / ret.std() * np.sqrt(252)
+data/volmanage_h3_logs/compute_metrics.py:16: sqrt-session-const: sortino = ret.mean() / np.sqrt((neg ** 2).mean()) * np.sqrt(252)
+dc_liquidity_floor_backtest.py:82: sqrt-session-const: sh = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else np.nan
+dc_overlap_cap_backtest.py:209: sqrt-session-const: sh = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else np.nan
+dc_rebal_timing_backtest.py:100: sqrt-session-const: sh = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else np.nan
+dc_trigger_gap_backtest.py:90: sqrt-session-const: sh = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else np.nan
+dc_waterfall_deepdive.py:56: sqrt-session-const: sh = r.mean() / sd * np.sqrt(252) if sd > 0 else np.nan
+dc_waterfall_deepdive.py:58: sqrt-session-const: so = r.mean() / np.sqrt((neg ** 2).mean()) * np.sqrt(252) if len(neg) else np.nan
+dc_waterfall_deepdive.py:123: sqrt-session-const: T = len(ex); sr = ex.mean() / ex.std() * np.sqrt(252) if ex.std() > 0 else 0
+dc_waterfall_deepdive.py:151: sqrt-session-const: print(f"(DSR via annex failed: {e}; raw daily SR of excess = {sr_d:.4f}, ann {sr_d*np.sqrt(252):.2f})")
+deploy_golive_dt5g_v4/golive_recommend_v23.py:819: sqrt-session-const: vnh["rv10"] = _r.rolling(10).std() * np.sqrt(252) * 100
+euphoria_short_analysis.py:227: sqrt-session-const: vol  = ret.std() * np.sqrt(252)
+euphoria_short_analysis.py:228: sqrt-session-const: sharpe = ret.mean() * 252 / (ret.std() * np.sqrt(252)) if ret.std() > 0 else 0
+export_journal.py:209: yrs-per-session: years = n_days / 252
+export_journal_v6.py:259: yrs-per-session: years = n_days / 252
+export_journal_v6_extended.py:429: yrs-per-session: years = n_days / 252
+extended_overlay_grind.py:95: sqrt-session-const: return (nav.iloc[-1]**(1/yrs)-1)*100,(nav/nav.cummax()-1).min()*100,r.mean()/r.std()*np.sqrt(252)
+final_overlay_overlap_corrected.py:71: sqrt-session-const: return (nav.iloc[-1]**(1/yrs)-1)*100,(nav/nav.cummax()-1).min()*100,r.mean()/r.std()*np.sqrt(252)
+final_overlay_realcash.py:52: sqrt-session-const: return (nav.iloc[-1]**(1/yrs)-1)*100,(nav/nav.cummax()-1).min()*100,r.mean()/r.std()*np.sqrt(252)
+final_overlay_realcash_rs.py:52: sqrt-session-const: return (nav.iloc[-1]**(1/yrs)-1)*100,(nav/nav.cummax()-1).min()*100,r.mean()/r.std()*np.sqrt(252)
+final_overlay_realcash_rscap.py:52: sqrt-session-const: return (nav.iloc[-1]**(1/yrs)-1)*100,(nav/nav.cummax()-1).min()*100,r.mean()/r.std()*np.sqrt(252)
+final_overlay_realcash_rscap_fix.py:82: sqrt-session-const: return (nav.iloc[-1]**(1/yrs)-1)*100,(nav/nav.cummax()-1).min()*100,r.mean()/r.std()*np.sqrt(252)
+format_sim_v11_output.py:96: sqrt-session-const: sharpe = rets.mean()/rets.std() * np.sqrt(252) if rets.std() > 0 else 0
+integrated_capitulation_overlay.py:80: sqrt-session-const: sh=r.mean()/r.std()*np.sqrt(252) if r.std()>0 else 0
+integrated_overlay_realistic.py:83: sqrt-session-const: return (nav.iloc[-1]**(1/yrs)-1)*100, (nav/nav.cummax()-1).min()*100, r.mean()/r.std()*np.sqrt(252)
+lag_dnpr_harness.py:855: sqrt-session-const: vni_hist["rv10"] = _r.rolling(10).std() * np.sqrt(252) * 100
+lag_dnpr_harness.py:1910: sqrt-session-const: sh252 = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else 0
+lag_dnpr_harness.py:1913: sqrt-session-const: sortino = r.mean() / np.sqrt((dn**2).mean()) * np.sqrt(252) if len(dn) else 0
+loo_h8a_dnpr.py:56: sqrt-session-const: sh252 = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else 0
+loo_h8a_dnpr_yearsens.py:50: sqrt-session-const: sh = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else 0
+market_allocation_system.py:258: sqrt-session-const: sharpe= np.mean(pr)/np.std(pr)*np.sqrt(252) if np.std(pr)>0 else 0
+mike/agents/Taylor/exp_book_attrib_20260805/book_attrib.py:26: sqrt-session-const: sharpe = r.mean() / r.std(ddof=1) * math.sqrt(ANN)
+mike/agents/Taylor/exp_capacity_20260804/pt_v23_capacity.py:1117: sqrt-session-const: vni_hist["rv10"] = _r.rolling(10).std() * np.sqrt(252) * 100
+mike/agents/Taylor/exp_capacity_20260804/pt_v23_capacity.py:2167: sqrt-session-const: _vm_report = {"sigma_target_ann": sigma_target * np.sqrt(252), "win": VOLMANAGE_WIN,
+mike/agents/Taylor/exp_capacity_20260804/pt_v23_capacity.py:2171: sqrt-session-const: print(f"  [VOLMANAGE_BAL win={VOLMANAGE_WIN} x{VOLMANAGE_TGT_MULT}] sigma_target(ann)={sigma_target*np.sqrt(252)*100:.1f
+mike/agents/Taylor/exp_capacity_20260804/pt_v23_capacity.py:2375: sqrt-session-const: sh252 = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else 0
+mike/agents/Taylor/exp_capacity_20260804/pt_v23_capacity.py:2378: sqrt-session-const: sortino = r.mean() / np.sqrt((dn**2).mean()) * np.sqrt(252) if len(dn) else 0
+mike/agents/Taylor/exp_lag_advdyn_20260825/pt_v23_advdyn.py:1142: sqrt-session-const: vni_hist["rv10"] = _r.rolling(10).std() * np.sqrt(252) * 100
+mike/agents/Taylor/exp_lag_advdyn_20260825/pt_v23_advdyn.py:2200: sqrt-session-const: _vm_report = {"sigma_target_ann": sigma_target * np.sqrt(252), "win": VOLMANAGE_WIN,
+mike/agents/Taylor/exp_lag_advdyn_20260825/pt_v23_advdyn.py:2204: sqrt-session-const: print(f"  [VOLMANAGE_BAL win={VOLMANAGE_WIN} x{VOLMANAGE_TGT_MULT}] sigma_target(ann)={sigma_target*np.sqrt(252)*100:.1f
+mike/agents/Taylor/exp_lag_advdyn_20260825/pt_v23_advdyn.py:2408: sqrt-session-const: sh252 = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else 0
+mike/agents/Taylor/exp_lag_advdyn_20260825/pt_v23_advdyn.py:2411: sqrt-session-const: sortino = r.mean() / np.sqrt((dn**2).mean()) * np.sqrt(252) if len(dn) else 0
+mike/agents/Taylor/exp_lag_advgate_20260804/pt_v23_advgate.py:1107: sqrt-session-const: vni_hist["rv10"] = _r.rolling(10).std() * np.sqrt(252) * 100
+mike/agents/Taylor/exp_lag_advgate_20260804/pt_v23_advgate.py:2160: sqrt-session-const: _vm_report = {"sigma_target_ann": sigma_target * np.sqrt(252), "win": VOLMANAGE_WIN,
+mike/agents/Taylor/exp_lag_advgate_20260804/pt_v23_advgate.py:2164: sqrt-session-const: print(f"  [VOLMANAGE_BAL win={VOLMANAGE_WIN} x{VOLMANAGE_TGT_MULT}] sigma_target(ann)={sigma_target*np.sqrt(252)*100:.1f
+mike/agents/Taylor/exp_lag_advgate_20260804/pt_v23_advgate.py:2368: sqrt-session-const: sh252 = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else 0
+mike/agents/Taylor/exp_lag_advgate_20260804/pt_v23_advgate.py:2371: sqrt-session-const: sortino = r.mean() / np.sqrt((dn**2).mean()) * np.sqrt(252) if len(dn) else 0
+mike/agents/Taylor/exp_lag_anchor_nav_20260810/summarize.py:68: sqrt-session-const: sharpe = r.mean() / r.std() * sqrt(SPY) if r.std() > 0 else float("nan")
+mike/agents/Taylor/exp_lag_anchor_nav_20260810/summarize.py:113: sqrt-session-const: return _norm_cdf(z), sr * sqrt(SPY), sr0 * sqrt(SPY)
+mike/agents/Taylor/exp_lag_bullmode_20260830/pt_v23_lagbullsue.py:1148: sqrt-session-const: vni_hist["rv10"] = _r.rolling(10).std() * np.sqrt(252) * 100
+mike/agents/Taylor/exp_lag_bullmode_20260830/pt_v23_lagbullsue.py:2185: sqrt-session-const: _vm_report = {"sigma_target_ann": sigma_target * np.sqrt(252), "win": VOLMANAGE_WIN,
+mike/agents/Taylor/exp_lag_bullmode_20260830/pt_v23_lagbullsue.py:2189: sqrt-session-const: print(f"  [VOLMANAGE_BAL win={VOLMANAGE_WIN} x{VOLMANAGE_TGT_MULT}] sigma_target(ann)={sigma_target*np.sqrt(252)*100:.1f
+mike/agents/Taylor/exp_lag_bullmode_20260830/pt_v23_lagbullsue.py:2393: sqrt-session-const: sh252 = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else 0
+mike/agents/Taylor/exp_lag_bullmode_20260830/pt_v23_lagbullsue.py:2396: sqrt-session-const: sortino = r.mean() / np.sqrt((dn**2).mean()) * np.sqrt(252) if len(dn) else 0
+mike/agents/Taylor/exp_lagrank_20260804/analyze_legs.py:22: sqrt-session-const: sharpe = (r.mean() / r.std() * np.sqrt(SPY)) if r.std() > 0 else np.nan
+mike/agents/Taylor/exp_lagrank_20260804/engine_lagrank.py:1104: sqrt-session-const: vni_hist["rv10"] = _r.rolling(10).std() * np.sqrt(252) * 100
+mike/agents/Taylor/exp_lagrank_20260804/engine_lagrank.py:2188: sqrt-session-const: _vm_report = {"sigma_target_ann": sigma_target * np.sqrt(252), "win": VOLMANAGE_WIN,
+mike/agents/Taylor/exp_lagrank_20260804/engine_lagrank.py:2192: sqrt-session-const: print(f"  [VOLMANAGE_BAL win={VOLMANAGE_WIN} x{VOLMANAGE_TGT_MULT}] sigma_target(ann)={sigma_target*np.sqrt(252)*100:.1f
+mike/agents/Taylor/exp_lagrank_20260804/engine_lagrank.py:2396: sqrt-session-const: sh252 = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else 0
+mike/agents/Taylor/exp_lagrank_20260804/engine_lagrank.py:2399: sqrt-session-const: sortino = r.mean() / np.sqrt((dn**2).mean()) * np.sqrt(252) if len(dn) else 0
+mike/agents/Taylor/exp_margin_kelly/p2/engine_dd52.py:1104: sqrt-session-const: vni_hist["rv10"] = _r.rolling(10).std() * np.sqrt(252) * 100
+mike/agents/Taylor/exp_margin_kelly/p2/engine_dd52.py:2159: sqrt-session-const: _vm_report = {"sigma_target_ann": sigma_target * np.sqrt(252), "win": VOLMANAGE_WIN,
+mike/agents/Taylor/exp_margin_kelly/p2/engine_dd52.py:2163: sqrt-session-const: print(f"  [VOLMANAGE_BAL win={VOLMANAGE_WIN} x{VOLMANAGE_TGT_MULT}] sigma_target(ann)={sigma_target*np.sqrt(252)*100:.1f
+mike/agents/Taylor/exp_margin_kelly/p2/engine_dd52.py:2367: sqrt-session-const: sh252 = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else 0
+mike/agents/Taylor/exp_margin_kelly/p2/engine_dd52.py:2370: sqrt-session-const: sortino = r.mean() / np.sqrt((dn**2).mean()) * np.sqrt(252) if len(dn) else 0
+mike/agents/Taylor/exp_margin_kelly/p2/metrics.py:27: sqrt-session-const: sh = r.mean() / r.std(ddof=1) * math.sqrt(ANN)
+mike/agents/Taylor/exp_margin_kelly/p3/engine_park.py:1113: sqrt-session-const: vni_hist["rv10"] = _r.rolling(10).std() * np.sqrt(252) * 100
+mike/agents/Taylor/exp_margin_kelly/p3/engine_park.py:2176: sqrt-session-const: _vm_report = {"sigma_target_ann": sigma_target * np.sqrt(252), "win": VOLMANAGE_WIN,
+mike/agents/Taylor/exp_margin_kelly/p3/engine_park.py:2180: sqrt-session-const: print(f"  [VOLMANAGE_BAL win={VOLMANAGE_WIN} x{VOLMANAGE_TGT_MULT}] sigma_target(ann)={sigma_target*np.sqrt(252)*100:.1f
+mike/agents/Taylor/exp_margin_kelly/p3/engine_park.py:2384: sqrt-session-const: sh252 = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else 0
+mike/agents/Taylor/exp_margin_kelly/p3/engine_park.py:2387: sqrt-session-const: sortino = r.mean() / np.sqrt((dn**2).mean()) * np.sqrt(252) if len(dn) else 0
+mike/agents/Taylor/exp_margin_kelly/p3/metrics_p3.py:32: sqrt-session-const: sh = r.mean() / r.std(ddof=1) * math.sqrt(ANN)
+mike/agents/Taylor/exp_margin_kelly/p4_fullcycle/step_c2_compounded.py:49: sqrt-session-const: return cagr, dd, (lr.mean() / lr.std() * np.sqrt(252) if lr.std() > 0 else np.nan)
+mike/agents/Taylor/exp_margin_kelly/p4_fullcycle/step_c_wholebook.py:57: sqrt-session-const: shp = lr.mean() / lr.std() * np.sqrt(252) if lr.std() > 0 else np.nan
+mike/agents/Taylor/exp_margin_kelly/p5_engine/engine_lever.py:1130: sqrt-session-const: vni_hist["rv10"] = _r.rolling(10).std() * np.sqrt(252) * 100
+mike/agents/Taylor/exp_margin_kelly/p5_engine/engine_lever.py:2216: sqrt-session-const: _vm_report = {"sigma_target_ann": sigma_target * np.sqrt(252), "win": VOLMANAGE_WIN,
+mike/agents/Taylor/exp_margin_kelly/p5_engine/engine_lever.py:2220: sqrt-session-const: print(f"  [VOLMANAGE_BAL win={VOLMANAGE_WIN} x{VOLMANAGE_TGT_MULT}] sigma_target(ann)={sigma_target*np.sqrt(252)*100:.1f
+mike/agents/Taylor/exp_margin_kelly/p5_engine/engine_lever.py:2477: sqrt-session-const: sh252 = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else 0
+mike/agents/Taylor/exp_margin_kelly/p5_engine/engine_lever.py:2480: sqrt-session-const: sortino = r.mean() / np.sqrt((dn**2).mean()) * np.sqrt(252) if len(dn) else 0
+mike/agents/Taylor/exp_margin_kelly/p5_engine/metrics_p5.py:44: sqrt-session-const: sh = r.mean() / r.std(ddof=1) * math.sqrt(ANN)
+mike/agents/Taylor/exp_park_jit_20260803/agg_metrics.py:70: sqrt-session-const: sharpe = r.mean() / r.std(ddof=1) * math.sqrt(ANN)
+mike/agents/Taylor/exp_park_jit_20260803/agg_metrics.py:178: yrs-per-session: yrs = len(logp) / ANN
+mike/agents/Taylor/exp_park_jit_20260803/agg_metrics.py:289: sqrt-session-const: f"(sd ann-SR = {np.std(srs, ddof=1)*math.sqrt(ANN):.3f})")
+mike/agents/Taylor/exp_park_jit_20260803/agg_metrics.py:291: sqrt-session-const: f"(sd ann-SR = {np.std(wide, ddof=1)*math.sqrt(ANN):.3f})  <- dung cho cot 'rong'")
+mike/agents/Taylor/park20_extract.py:13: sqrt-session-const: sh = r.mean() / r.std() * np.sqrt(252)
+mike/agents/Taylor/pending_adv3t_hard_gate_20260810/golive_recommend_v23.py:794: sqrt-session-const: vnh["rv10"] = _r.rolling(10).std() * np.sqrt(252) * 100
+mike/agents/Taylor/research/adaptive_gate_20260723/final_summary.py:11: yrs-per-session: yrs=len(nav)/252.0
+mike/agents/Taylor/research/adaptive_gate_20260723/final_summary.py:13: sqrt-session-const: sharpe=r.mean()/r.std()*np.sqrt(252)
+mike/agents/Taylor/research/bal_2025_diagnosis_20260909/p3/analyze_p3.py:15: sqrt-session-const: sh=r.mean()/r.std(ddof=1)*np.sqrt(252)
+mike/agents/Taylor/research/bal_2025_diagnosis_20260909/p3/bal_ey_engine.py:1105: sqrt-session-const: vni_hist["rv10"] = _r.rolling(10).std() * np.sqrt(252) * 100
+mike/agents/Taylor/research/bal_2025_diagnosis_20260909/p3/bal_ey_engine.py:2142: sqrt-session-const: _vm_report = {"sigma_target_ann": sigma_target * np.sqrt(252), "win": VOLMANAGE_WIN,
+mike/agents/Taylor/research/bal_2025_diagnosis_20260909/p3/bal_ey_engine.py:2146: sqrt-session-const: print(f"  [VOLMANAGE_BAL win={VOLMANAGE_WIN} x{VOLMANAGE_TGT_MULT}] sigma_target(ann)={sigma_target*np.sqrt(252)*100:.1f
+mike/agents/Taylor/research/bal_2025_diagnosis_20260909/p3/bal_ey_engine.py:2350: sqrt-session-const: sh252 = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else 0
+mike/agents/Taylor/research/bal_2025_diagnosis_20260909/p3/bal_ey_engine.py:2353: sqrt-session-const: sortino = r.mean() / np.sqrt((dn**2).mean()) * np.sqrt(252) if len(dn) else 0
+mike/agents/Taylor/research/bal_adaptive_exit_20260909/adaptive_engine.py:1105: sqrt-session-const: vni_hist["rv10"] = _r.rolling(10).std() * np.sqrt(252) * 100
+mike/agents/Taylor/research/bal_adaptive_exit_20260909/adaptive_engine.py:2212: sqrt-session-const: _vm_report = {"sigma_target_ann": sigma_target * np.sqrt(252), "win": VOLMANAGE_WIN,
+mike/agents/Taylor/research/bal_adaptive_exit_20260909/adaptive_engine.py:2216: sqrt-session-const: print(f"  [VOLMANAGE_BAL win={VOLMANAGE_WIN} x{VOLMANAGE_TGT_MULT}] sigma_target(ann)={sigma_target*np.sqrt(252)*100:.1f
+mike/agents/Taylor/research/bal_adaptive_exit_20260909/adaptive_engine.py:2420: sqrt-session-const: sh252 = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else 0
+mike/agents/Taylor/research/bal_adaptive_exit_20260909/adaptive_engine.py:2423: sqrt-session-const: sortino = r.mean() / np.sqrt((dn**2).mean()) * np.sqrt(252) if len(dn) else 0
+mike/agents/Taylor/research/bal_adaptive_exit_20260909/analyze.py:34: sqrt-session-const: sharpe=r.mean() / r.std(ddof=1) * np.sqrt(252), final_B=s.iloc[-1] / 1e9)
+mike/agents/Taylor/research/bal_edge_gate_20260910/pt_v23_edgegate.py:1103: sqrt-session-const: vni_hist["rv10"] = _r.rolling(10).std() * np.sqrt(252) * 100
+mike/agents/Taylor/research/bal_edge_gate_20260910/pt_v23_edgegate.py:2156: sqrt-session-const: _vm_report = {"sigma_target_ann": sigma_target * np.sqrt(252), "win": VOLMANAGE_WIN,
+mike/agents/Taylor/research/bal_edge_gate_20260910/pt_v23_edgegate.py:2160: sqrt-session-const: print(f"  [VOLMANAGE_BAL win={VOLMANAGE_WIN} x{VOLMANAGE_TGT_MULT}] sigma_target(ann)={sigma_target*np.sqrt(252)*100:.1f
+mike/agents/Taylor/research/bal_edge_gate_20260910/pt_v23_edgegate.py:2364: sqrt-session-const: sh252 = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else 0
+mike/agents/Taylor/research/bal_edge_gate_20260910/pt_v23_edgegate.py:2367: sqrt-session-const: sortino = r.mean() / np.sqrt((dn**2).mean()) * np.sqrt(252) if len(dn) else 0
+mike/agents/Taylor/research/bal_neutral_gate_20260909/analyze.py:42: sqrt-session-const: sharpe=r.mean() / r.std(ddof=1) * np.sqrt(252), final_B=s.iloc[-1] / 1e9)
+mike/agents/Taylor/research/bal_neutral_gate_20260909/gate_engine.py:1158: sqrt-session-const: vni_hist["rv10"] = _r.rolling(10).std() * np.sqrt(252) * 100
+mike/agents/Taylor/research/bal_neutral_gate_20260909/gate_engine.py:2218: sqrt-session-const: _vm_report = {"sigma_target_ann": sigma_target * np.sqrt(252), "win": VOLMANAGE_WIN,
+mike/agents/Taylor/research/bal_neutral_gate_20260909/gate_engine.py:2222: sqrt-session-const: print(f"  [VOLMANAGE_BAL win={VOLMANAGE_WIN} x{VOLMANAGE_TGT_MULT}] sigma_target(ann)={sigma_target*np.sqrt(252)*100:.1f
+mike/agents/Taylor/research/bal_neutral_gate_20260909/gate_engine.py:2426: sqrt-session-const: sh252 = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else 0
+mike/agents/Taylor/research/bal_neutral_gate_20260909/gate_engine.py:2429: sqrt-session-const: sortino = r.mean() / np.sqrt((dn**2).mean()) * np.sqrt(252) if len(dn) else 0
+mike/agents/Taylor/research/ccs_phase0_Taylor_20260905_135003/ccs_probe_engine.py:1111: sqrt-session-const: vni_hist["rv10"] = _r.rolling(10).std() * np.sqrt(252) * 100
+mike/agents/Taylor/research/ccs_phase0_Taylor_20260905_135003/ccs_probe_engine.py:2159: sqrt-session-const: _vm_report = {"sigma_target_ann": sigma_target * np.sqrt(252), "win": VOLMANAGE_WIN,
+mike/agents/Taylor/research/ccs_phase0_Taylor_20260905_135003/ccs_probe_engine.py:2163: sqrt-session-const: print(f"  [VOLMANAGE_BAL win={VOLMANAGE_WIN} x{VOLMANAGE_TGT_MULT}] sigma_target(ann)={sigma_target*np.sqrt(252)*100:.1f
+mike/agents/Taylor/research/ccs_phase0_Taylor_20260905_135003/ccs_probe_engine.py:2367: sqrt-session-const: sh252 = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else 0
+mike/agents/Taylor/research/ccs_phase0_Taylor_20260905_135003/ccs_probe_engine.py:2370: sqrt-session-const: sortino = r.mean() / np.sqrt((dn**2).mean()) * np.sqrt(252) if len(dn) else 0
+mike/agents/Taylor/research/ccs_phase0_earnings_quality/r3_t1floor_20260906/engine_t1.py:1100: sqrt-session-const: vni_hist["rv10"] = _r.rolling(10).std() * np.sqrt(252) * 100
+mike/agents/Taylor/research/ccs_phase0_earnings_quality/r3_t1floor_20260906/engine_t1.py:2137: sqrt-session-const: _vm_report = {"sigma_target_ann": sigma_target * np.sqrt(252), "win": VOLMANAGE_WIN,
+mike/agents/Taylor/research/ccs_phase0_earnings_quality/r3_t1floor_20260906/engine_t1.py:2141: sqrt-session-const: print(f"  [VOLMANAGE_BAL win={VOLMANAGE_WIN} x{VOLMANAGE_TGT_MULT}] sigma_target(ann)={sigma_target*np.sqrt(252)*100:.1f
+mike/agents/Taylor/research/ccs_phase0_earnings_quality/r3_t1floor_20260906/engine_t1.py:2345: sqrt-session-const: sh252 = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else 0
+mike/agents/Taylor/research/ccs_phase0_earnings_quality/r3_t1floor_20260906/engine_t1.py:2348: sqrt-session-const: sortino = r.mean() / np.sqrt((dn**2).mean()) * np.sqrt(252) if len(dn) else 0
+mike/agents/Taylor/research/ccs_phase2_Taylor_20260906_153255/ccs_p2_engine.py:1170: sqrt-session-const: vni_hist["rv10"] = _r.rolling(10).std() * np.sqrt(252) * 100
+mike/agents/Taylor/research/ccs_phase2_Taylor_20260906_153255/ccs_p2_engine.py:2226: sqrt-session-const: _vm_report = {"sigma_target_ann": sigma_target * np.sqrt(252), "win": VOLMANAGE_WIN,
+mike/agents/Taylor/research/ccs_phase2_Taylor_20260906_153255/ccs_p2_engine.py:2230: sqrt-session-const: print(f"  [VOLMANAGE_BAL win={VOLMANAGE_WIN} x{VOLMANAGE_TGT_MULT}] sigma_target(ann)={sigma_target*np.sqrt(252)*100:.1f
+mike/agents/Taylor/research/ccs_phase2_Taylor_20260906_153255/ccs_p2_engine.py:2434: sqrt-session-const: sh252 = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else 0
+mike/agents/Taylor/research/ccs_phase2_Taylor_20260906_153255/ccs_p2_engine.py:2437: sqrt-session-const: sortino = r.mean() / np.sqrt((dn**2).mean()) * np.sqrt(252) if len(dn) else 0
+mike/agents/Taylor/research/custom30v_accrual_gate_20260830/engine_ag.py:1100: sqrt-session-const: vni_hist["rv10"] = _r.rolling(10).std() * np.sqrt(252) * 100
+mike/agents/Taylor/research/custom30v_accrual_gate_20260830/engine_ag.py:2137: sqrt-session-const: _vm_report = {"sigma_target_ann": sigma_target * np.sqrt(252), "win": VOLMANAGE_WIN,
+mike/agents/Taylor/research/custom30v_accrual_gate_20260830/engine_ag.py:2141: sqrt-session-const: print(f"  [VOLMANAGE_BAL win={VOLMANAGE_WIN} x{VOLMANAGE_TGT_MULT}] sigma_target(ann)={sigma_target*np.sqrt(252)*100:.1f
+mike/agents/Taylor/research/custom30v_accrual_gate_20260830/engine_ag.py:2345: sqrt-session-const: sh252 = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else 0
+mike/agents/Taylor/research/custom30v_accrual_gate_20260830/engine_ag.py:2348: sqrt-session-const: sortino = r.mean() / np.sqrt((dn**2).mean()) * np.sqrt(252) if len(dn) else 0
+mike/agents/Taylor/research/custom30v_placebo_20260910/analyze.py:38: sqrt-session-const: sharpe=r.mean() / r.std(ddof=1) * np.sqrt(252), final_B=s.iloc[-1] / 1e9)
+mike/agents/Taylor/research/custom30v_placebo_20260910/basket_probe.py:103: sqrt-session-const: print(f"  [{leg}] RO GROSS: MaxDD {_dd*100:.2f}%  vol {ret.std()*np.sqrt(252)*100:.1f}%  "
+mike/agents/Taylor/research/custom30v_placebo_20260910/basket_probe.py:104: sqrt-session-const: f"Sharpe {ret.mean()/ret.std()*np.sqrt(252):.2f}")
+mike/agents/Taylor/research/custom30v_placebo_20260910/decomp_gross.py:11: sqrt-session-const: maxdd=100 * float((lv / lv.cummax() - 1).min()), vol=100 * s.std() * np.sqrt(252),
+mike/agents/Taylor/research/custom30v_placebo_20260910/decomp_gross.py:12: sqrt-session-const: sharpe=s.mean() / s.std() * np.sqrt(252))
+mike/agents/Taylor/research/custom30v_placebo_20260910/sel_engine.py:1105: sqrt-session-const: vni_hist["rv10"] = _r.rolling(10).std() * np.sqrt(252) * 100
+mike/agents/Taylor/research/custom30v_placebo_20260910/sel_engine.py:2142: sqrt-session-const: _vm_report = {"sigma_target_ann": sigma_target * np.sqrt(252), "win": VOLMANAGE_WIN,
+mike/agents/Taylor/research/custom30v_placebo_20260910/sel_engine.py:2146: sqrt-session-const: print(f"  [VOLMANAGE_BAL win={VOLMANAGE_WIN} x{VOLMANAGE_TGT_MULT}] sigma_target(ann)={sigma_target*np.sqrt(252)*100:.1f
+mike/agents/Taylor/research/custom30v_placebo_20260910/sel_engine.py:2350: sqrt-session-const: sh252 = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else 0
+mike/agents/Taylor/research/custom30v_placebo_20260910/sel_engine.py:2353: sqrt-session-const: sortino = r.mean() / np.sqrt((dn**2).mean()) * np.sqrt(252) if len(dn) else 0
+mike/agents/Taylor/research/custom30v_selector_20260909/analyze.py:38: sqrt-session-const: sharpe=r.mean()/r.std(ddof=1)*np.sqrt(252), final_B=s.iloc[-1]/1e9)
+mike/agents/Taylor/research/custom30v_selector_20260909/phase0_analyze.py:35: sqrt-session-const: f"vol nam hoa {ret.std()*np.sqrt(252)*100:.1f}%  |  Sharpe(rf=0) {ret.mean()/ret.std()*np.sqrt(252):.2f}")
+mike/agents/Taylor/research/custom30v_selector_20260909/sel_engine.py:1105: sqrt-session-const: vni_hist["rv10"] = _r.rolling(10).std() * np.sqrt(252) * 100
+mike/agents/Taylor/research/custom30v_selector_20260909/sel_engine.py:2142: sqrt-session-const: _vm_report = {"sigma_target_ann": sigma_target * np.sqrt(252), "win": VOLMANAGE_WIN,
+mike/agents/Taylor/research/custom30v_selector_20260909/sel_engine.py:2146: sqrt-session-const: print(f"  [VOLMANAGE_BAL win={VOLMANAGE_WIN} x{VOLMANAGE_TGT_MULT}] sigma_target(ann)={sigma_target*np.sqrt(252)*100:.1f
+mike/agents/Taylor/research/custom30v_selector_20260909/sel_engine.py:2350: sqrt-session-const: sh252 = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else 0
+mike/agents/Taylor/research/custom30v_selector_20260909/sel_engine.py:2353: sqrt-session-const: sortino = r.mean() / np.sqrt((dn**2).mean()) * np.sqrt(252) if len(dn) else 0
+mike/agents/Taylor/research/early_recovery_margin_lever_20260825/step0_control.py:17: sqrt-session-const: sh = r.mean()/r.std()*np.sqrt(252)
+mike/agents/Taylor/research/early_recovery_margin_lever_20260825/step2_sim.py:81: sqrt-session-const: return dict(CAGR=round(cagr,2), Sharpe=round(rr.mean()/rr.std()*np.sqrt(252),2),
+mike/agents/Taylor/research/early_recovery_margin_lever_20260825/step3_loo_exbull.py:11: sqrt-session-const: return dict(CAGR=round(c,2),Sharpe=round(rr.mean()/rr.std()*np.sqrt(252),2),
+mike/agents/Taylor/research/early_recovery_margin_lever_20260825/step4_boot.py:10: sqrt-session-const: return dict(CAGR=round(c,2),Sharpe=round(rr.mean()/rr.std()*np.sqrt(252),2),
+mike/agents/Taylor/research/early_recovery_margin_lever_20260825/step5_control_uncond.py:12: sqrt-session-const: return dict(CAGR=round(c,2),Sharpe=round(rr.mean()/rr.std()*np.sqrt(252),2),
+mike/agents/Taylor/research/exit_signal_backtest_20260721/exit_c30v.py:75: sqrt-session-const: return dict(cagr=(nav.iloc[-1]**(1/yrs)-1)*100, sharpe=(s.mean()/s.std()*np.sqrt(252)) if s.std()>0 else 0,
+mike/agents/Taylor/research/exit_signal_backtest_20260721/exit_nav2.py:37: sqrt-session-const: return dict(cagr=(nav.iloc[-1]**(1/yrs)-1)*100, sharpe=s.mean()/s.std()*np.sqrt(252) if s.std()>0 else 0,
+mike/agents/Taylor/research/exit_signal_backtest_20260721/exit_run.py:34: sqrt-session-const: sharpe=s.mean()/s.std()*np.sqrt(252) if s.std()>0 else 0
+mike/agents/Taylor/research/fiinprox_h3_h1_h2_20260927/engine_oshpit.py:1100: sqrt-session-const: vni_hist["rv10"] = _r.rolling(10).std() * np.sqrt(252) * 100
+mike/agents/Taylor/research/fiinprox_h3_h1_h2_20260927/engine_oshpit.py:2137: sqrt-session-const: _vm_report = {"sigma_target_ann": sigma_target * np.sqrt(252), "win": VOLMANAGE_WIN,
+mike/agents/Taylor/research/fiinprox_h3_h1_h2_20260927/engine_oshpit.py:2141: sqrt-session-const: print(f"  [VOLMANAGE_BAL win={VOLMANAGE_WIN} x{VOLMANAGE_TGT_MULT}] sigma_target(ann)={sigma_target*np.sqrt(252)*100:.1f
+mike/agents/Taylor/research/fiinprox_h3_h1_h2_20260927/engine_oshpit.py:2345: sqrt-session-const: sh252 = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else 0
+mike/agents/Taylor/research/fiinprox_h3_h1_h2_20260927/engine_oshpit.py:2348: sqrt-session-const: sortino = r.mean() / np.sqrt((dn**2).mean()) * np.sqrt(252) if len(dn) else 0
+mike/agents/Taylor/research/lag_disc_blended/analyze.py:63: sqrt-session-const: sr0 = sr0_annual / np.sqrt(252)
+mike/agents/Taylor/research/lag_disc_blended/analyze.py:67: sqrt-session-const: return stats.norm.cdf(z), sr * np.sqrt(252), z
+mike/agents/Taylor/research/lag_edge_exitkey_20260910/pt_v23_exitkey.py:1100: sqrt-session-const: vni_hist["rv10"] = _r.rolling(10).std() * np.sqrt(252) * 100
+mike/agents/Taylor/research/lag_edge_exitkey_20260910/pt_v23_exitkey.py:2148: sqrt-session-const: _vm_report = {"sigma_target_ann": sigma_target * np.sqrt(252), "win": VOLMANAGE_WIN,
+mike/agents/Taylor/research/lag_edge_exitkey_20260910/pt_v23_exitkey.py:2152: sqrt-session-const: print(f"  [VOLMANAGE_BAL win={VOLMANAGE_WIN} x{VOLMANAGE_TGT_MULT}] sigma_target(ann)={sigma_target*np.sqrt(252)*100:.1f
+mike/agents/Taylor/research/lag_edge_exitkey_20260910/pt_v23_exitkey.py:2356: sqrt-session-const: sh252 = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else 0
+mike/agents/Taylor/research/lag_edge_exitkey_20260910/pt_v23_exitkey.py:2359: sqrt-session-const: sortino = r.mean() / np.sqrt((dn**2).mean()) * np.sqrt(252) if len(dn) else 0
+mike/agents/Taylor/research/mania_20260903/qualitytilt/q3_tilt_more.py:42: sqrt-session-const: sharpe = (daily_ret.mean() / daily_ret.std()) * np.sqrt(252) if daily_ret.std() > 0 else np.nan
+mike/agents/Taylor/research/mania_20260903/qualitytilt/q3_tilt_more_v2.py:58: sqrt-session-const: return (r.mean()/r.std())*np.sqrt(252) if r.std()>0 else np.nan
+mike/agents/Taylor/research/mania_20260903/roundtrip/round_trip.py:102: sqrt-session-const: sharpe = (rets.mean() / rets.std() * np.sqrt(252)) if rets.std() > 0 else np.nan
+mike/agents/Taylor/research/margin_valuation_spread_phase1_20260823/engine_p1.py:1163: sqrt-session-const: vni_hist["rv10"] = _r.rolling(10).std() * np.sqrt(252) * 100
+mike/agents/Taylor/research/margin_valuation_spread_phase1_20260823/engine_p1.py:2257: sqrt-session-const: _vm_report = {"sigma_target_ann": sigma_target * np.sqrt(252), "win": VOLMANAGE_WIN,
+mike/agents/Taylor/research/margin_valuation_spread_phase1_20260823/engine_p1.py:2261: sqrt-session-const: print(f"  [VOLMANAGE_BAL win={VOLMANAGE_WIN} x{VOLMANAGE_TGT_MULT}] sigma_target(ann)={sigma_target*np.sqrt(252)*100:.1f
+mike/agents/Taylor/research/margin_valuation_spread_phase1_20260823/engine_p1.py:2518: sqrt-session-const: sh252 = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else 0
+mike/agents/Taylor/research/margin_valuation_spread_phase1_20260823/engine_p1.py:2521: sqrt-session-const: sortino = r.mean() / np.sqrt((dn**2).mean()) * np.sqrt(252) if len(dn) else 0
+mike/agents/Taylor/research/margin_valuation_spread_phase1_20260823/metrics_p1.py:20: sqrt-session-const: sh=r.mean()/r.std(ddof=1)*math.sqrt(ANN); dd=s/s.cummax()-1; mdd=dd.min()
+mike/agents/Taylor/research/strategy_regime_matrix_20260822.py:106: sqrt-session-const: vol = float(r.std(ddof=1)) * np.sqrt(SPY)
+mike/agents/Taylor/research/strategy_regime_matrix_20260822_b1.py:192: sqrt-session-const: sh = r.mean() / r.std() * np.sqrt(SPY) if r.std() > 0 else np.nan
+mike/agents/Taylor/research/strategy_regime_matrix_20260822_b2.py:55: sqrt-session-const: vol = float(r.std(ddof=1))*np.sqrt(SPY)
+mike/agents/Taylor/research/strategy_regime_matrix_20260822_b3.py:170: sqrt-session-const: return dict(CAGR=c, Sharpe=r.mean()/r.std()*np.sqrt(SPY), MaxDD=dd, Calmar=c/abs(dd))
+mike/agents/Taylor/research/valuetrap_20260904/analyze.py:29: sqrt-session-const: return r.mean() / r.std() * np.sqrt(252)
+mike/agents/Taylor/research/valuetrap_20260904/analyze.py:99: sqrt-session-const: sr_ann = excess.mean() / excess.std() * np.sqrt(252) if excess.std() > 0 else np.nan
+mike/agents/Taylor/research/valuetrap_20260904/analyze.py:111: sqrt-session-const: sr0 = sr0 / np.sqrt(252)  # scale to daily if using daily SR base... (kept simple, N_TRIALS=1 here anyway)
+mike/agents/Taylor/route_exp/basket_compare.py:125: sqrt-session-const: sh = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else np.nan
+mike/agents/Taylor/route_exp/route_abstain_sens.py:73: sqrt-session-const: out = dict(label=label, CAGR=100 * cagr, Sharpe=r.mean() / r.std() * np.sqrt(252),
+mike/agents/Taylor/route_exp/route_fix_compare.py:65: sqrt-session-const: out = dict(label=label, CAGR=100 * cagr, Sharpe=r.mean() / r.std() * np.sqrt(252),
+mike/agents/Taylor/route_exp/route_robustness.py:33: yrs-per-session: yrs = len(r) / 252.0
+mike/agents/Taylor/route_exp/route_robustness.py:42: sqrt-session-const: return float(r.mean() / r.std(ddof=1) * math.sqrt(252)) if r.std(ddof=1) > 0 else float("nan")
+mike/agents/Taylor/route_exp/route_robustness.py:106: sqrt-session-const: print(f"v3route per-day SR {sr_hat:.5f} (annualised {sr_hat*math.sqrt(252):.2f}); skew {g3:.3f} kurt {g4:.3f}")
+mike/agents/Taylor/route_exp/route_v3latest_arm.py:62: sqrt-session-const: out = dict(label=label, CAGR=100 * cagr, Sharpe=r.mean() / r.std() * np.sqrt(252),
+mike/agents/Taylor/seccap_vehicle_compare.py:35: sqrt-session-const: sharpe = r.mean() / r.std() * np.sqrt(252)
+mike_paseo/agents/Taylor/exp_book_attrib_20260805/book_attrib.py:26: sqrt-session-const: sharpe = r.mean() / r.std(ddof=1) * math.sqrt(ANN)
+mike_paseo/agents/Taylor/exp_capacity_20260804/pt_v23_capacity.py:1117: sqrt-session-const: vni_hist["rv10"] = _r.rolling(10).std() * np.sqrt(252) * 100
+mike_paseo/agents/Taylor/exp_capacity_20260804/pt_v23_capacity.py:2167: sqrt-session-const: _vm_report = {"sigma_target_ann": sigma_target * np.sqrt(252), "win": VOLMANAGE_WIN,
+mike_paseo/agents/Taylor/exp_capacity_20260804/pt_v23_capacity.py:2171: sqrt-session-const: print(f"  [VOLMANAGE_BAL win={VOLMANAGE_WIN} x{VOLMANAGE_TGT_MULT}] sigma_target(ann)={sigma_target*np.sqrt(252)*100:.1f
+mike_paseo/agents/Taylor/exp_capacity_20260804/pt_v23_capacity.py:2375: sqrt-session-const: sh252 = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else 0
+mike_paseo/agents/Taylor/exp_capacity_20260804/pt_v23_capacity.py:2378: sqrt-session-const: sortino = r.mean() / np.sqrt((dn**2).mean()) * np.sqrt(252) if len(dn) else 0
+mike_paseo/agents/Taylor/exp_lag_advdyn_20260825/pt_v23_advdyn.py:1142: sqrt-session-const: vni_hist["rv10"] = _r.rolling(10).std() * np.sqrt(252) * 100
+mike_paseo/agents/Taylor/exp_lag_advdyn_20260825/pt_v23_advdyn.py:2200: sqrt-session-const: _vm_report = {"sigma_target_ann": sigma_target * np.sqrt(252), "win": VOLMANAGE_WIN,
+mike_paseo/agents/Taylor/exp_lag_advdyn_20260825/pt_v23_advdyn.py:2204: sqrt-session-const: print(f"  [VOLMANAGE_BAL win={VOLMANAGE_WIN} x{VOLMANAGE_TGT_MULT}] sigma_target(ann)={sigma_target*np.sqrt(252)*100:.1f
+mike_paseo/agents/Taylor/exp_lag_advdyn_20260825/pt_v23_advdyn.py:2408: sqrt-session-const: sh252 = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else 0
+mike_paseo/agents/Taylor/exp_lag_advdyn_20260825/pt_v23_advdyn.py:2411: sqrt-session-const: sortino = r.mean() / np.sqrt((dn**2).mean()) * np.sqrt(252) if len(dn) else 0
+mike_paseo/agents/Taylor/exp_lag_advgate_20260804/pt_v23_advgate.py:1107: sqrt-session-const: vni_hist["rv10"] = _r.rolling(10).std() * np.sqrt(252) * 100
+mike_paseo/agents/Taylor/exp_lag_advgate_20260804/pt_v23_advgate.py:2160: sqrt-session-const: _vm_report = {"sigma_target_ann": sigma_target * np.sqrt(252), "win": VOLMANAGE_WIN,
+mike_paseo/agents/Taylor/exp_lag_advgate_20260804/pt_v23_advgate.py:2164: sqrt-session-const: print(f"  [VOLMANAGE_BAL win={VOLMANAGE_WIN} x{VOLMANAGE_TGT_MULT}] sigma_target(ann)={sigma_target*np.sqrt(252)*100:.1f
+mike_paseo/agents/Taylor/exp_lag_advgate_20260804/pt_v23_advgate.py:2368: sqrt-session-const: sh252 = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else 0
+mike_paseo/agents/Taylor/exp_lag_advgate_20260804/pt_v23_advgate.py:2371: sqrt-session-const: sortino = r.mean() / np.sqrt((dn**2).mean()) * np.sqrt(252) if len(dn) else 0
+mike_paseo/agents/Taylor/exp_lag_anchor_nav_20260810/summarize.py:68: sqrt-session-const: sharpe = r.mean() / r.std() * sqrt(SPY) if r.std() > 0 else float("nan")
+mike_paseo/agents/Taylor/exp_lag_anchor_nav_20260810/summarize.py:113: sqrt-session-const: return _norm_cdf(z), sr * sqrt(SPY), sr0 * sqrt(SPY)
+mike_paseo/agents/Taylor/exp_lagrank_20260804/analyze_legs.py:22: sqrt-session-const: sharpe = (r.mean() / r.std() * np.sqrt(SPY)) if r.std() > 0 else np.nan
+mike_paseo/agents/Taylor/exp_lagrank_20260804/engine_lagrank.py:1104: sqrt-session-const: vni_hist["rv10"] = _r.rolling(10).std() * np.sqrt(252) * 100
+mike_paseo/agents/Taylor/exp_lagrank_20260804/engine_lagrank.py:2188: sqrt-session-const: _vm_report = {"sigma_target_ann": sigma_target * np.sqrt(252), "win": VOLMANAGE_WIN,
+mike_paseo/agents/Taylor/exp_lagrank_20260804/engine_lagrank.py:2192: sqrt-session-const: print(f"  [VOLMANAGE_BAL win={VOLMANAGE_WIN} x{VOLMANAGE_TGT_MULT}] sigma_target(ann)={sigma_target*np.sqrt(252)*100:.1f
+mike_paseo/agents/Taylor/exp_lagrank_20260804/engine_lagrank.py:2396: sqrt-session-const: sh252 = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else 0
+mike_paseo/agents/Taylor/exp_lagrank_20260804/engine_lagrank.py:2399: sqrt-session-const: sortino = r.mean() / np.sqrt((dn**2).mean()) * np.sqrt(252) if len(dn) else 0
+mike_paseo/agents/Taylor/exp_margin_kelly/p2/engine_dd52.py:1104: sqrt-session-const: vni_hist["rv10"] = _r.rolling(10).std() * np.sqrt(252) * 100
+mike_paseo/agents/Taylor/exp_margin_kelly/p2/engine_dd52.py:2159: sqrt-session-const: _vm_report = {"sigma_target_ann": sigma_target * np.sqrt(252), "win": VOLMANAGE_WIN,
+mike_paseo/agents/Taylor/exp_margin_kelly/p2/engine_dd52.py:2163: sqrt-session-const: print(f"  [VOLMANAGE_BAL win={VOLMANAGE_WIN} x{VOLMANAGE_TGT_MULT}] sigma_target(ann)={sigma_target*np.sqrt(252)*100:.1f
+mike_paseo/agents/Taylor/exp_margin_kelly/p2/engine_dd52.py:2367: sqrt-session-const: sh252 = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else 0
+mike_paseo/agents/Taylor/exp_margin_kelly/p2/engine_dd52.py:2370: sqrt-session-const: sortino = r.mean() / np.sqrt((dn**2).mean()) * np.sqrt(252) if len(dn) else 0
+mike_paseo/agents/Taylor/exp_margin_kelly/p2/metrics.py:27: sqrt-session-const: sh = r.mean() / r.std(ddof=1) * math.sqrt(ANN)
+mike_paseo/agents/Taylor/exp_margin_kelly/p3/engine_park.py:1113: sqrt-session-const: vni_hist["rv10"] = _r.rolling(10).std() * np.sqrt(252) * 100
+mike_paseo/agents/Taylor/exp_margin_kelly/p3/engine_park.py:2176: sqrt-session-const: _vm_report = {"sigma_target_ann": sigma_target * np.sqrt(252), "win": VOLMANAGE_WIN,
+mike_paseo/agents/Taylor/exp_margin_kelly/p3/engine_park.py:2180: sqrt-session-const: print(f"  [VOLMANAGE_BAL win={VOLMANAGE_WIN} x{VOLMANAGE_TGT_MULT}] sigma_target(ann)={sigma_target*np.sqrt(252)*100:.1f
+mike_paseo/agents/Taylor/exp_margin_kelly/p3/engine_park.py:2384: sqrt-session-const: sh252 = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else 0
+mike_paseo/agents/Taylor/exp_margin_kelly/p3/engine_park.py:2387: sqrt-session-const: sortino = r.mean() / np.sqrt((dn**2).mean()) * np.sqrt(252) if len(dn) else 0
+mike_paseo/agents/Taylor/exp_margin_kelly/p3/metrics_p3.py:32: sqrt-session-const: sh = r.mean() / r.std(ddof=1) * math.sqrt(ANN)
+mike_paseo/agents/Taylor/exp_margin_kelly/p4_fullcycle/step_c2_compounded.py:49: sqrt-session-const: return cagr, dd, (lr.mean() / lr.std() * np.sqrt(252) if lr.std() > 0 else np.nan)
+mike_paseo/agents/Taylor/exp_margin_kelly/p4_fullcycle/step_c_wholebook.py:57: sqrt-session-const: shp = lr.mean() / lr.std() * np.sqrt(252) if lr.std() > 0 else np.nan
+mike_paseo/agents/Taylor/exp_margin_kelly/p5_engine/engine_lever.py:1130: sqrt-session-const: vni_hist["rv10"] = _r.rolling(10).std() * np.sqrt(252) * 100
+mike_paseo/agents/Taylor/exp_margin_kelly/p5_engine/engine_lever.py:2216: sqrt-session-const: _vm_report = {"sigma_target_ann": sigma_target * np.sqrt(252), "win": VOLMANAGE_WIN,
+mike_paseo/agents/Taylor/exp_margin_kelly/p5_engine/engine_lever.py:2220: sqrt-session-const: print(f"  [VOLMANAGE_BAL win={VOLMANAGE_WIN} x{VOLMANAGE_TGT_MULT}] sigma_target(ann)={sigma_target*np.sqrt(252)*100:.1f
+mike_paseo/agents/Taylor/exp_margin_kelly/p5_engine/engine_lever.py:2477: sqrt-session-const: sh252 = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else 0
+mike_paseo/agents/Taylor/exp_margin_kelly/p5_engine/engine_lever.py:2480: sqrt-session-const: sortino = r.mean() / np.sqrt((dn**2).mean()) * np.sqrt(252) if len(dn) else 0
+mike_paseo/agents/Taylor/exp_margin_kelly/p5_engine/metrics_p5.py:44: sqrt-session-const: sh = r.mean() / r.std(ddof=1) * math.sqrt(ANN)
+mike_paseo/agents/Taylor/exp_park_jit_20260803/agg_metrics.py:70: sqrt-session-const: sharpe = r.mean() / r.std(ddof=1) * math.sqrt(ANN)
+mike_paseo/agents/Taylor/exp_park_jit_20260803/agg_metrics.py:178: yrs-per-session: yrs = len(logp) / ANN
+mike_paseo/agents/Taylor/exp_park_jit_20260803/agg_metrics.py:289: sqrt-session-const: f"(sd ann-SR = {np.std(srs, ddof=1)*math.sqrt(ANN):.3f})")
+mike_paseo/agents/Taylor/exp_park_jit_20260803/agg_metrics.py:291: sqrt-session-const: f"(sd ann-SR = {np.std(wide, ddof=1)*math.sqrt(ANN):.3f})  <- dung cho cot 'rong'")
+mike_paseo/agents/Taylor/park20_extract.py:13: sqrt-session-const: sh = r.mean() / r.std() * np.sqrt(252)
+mike_paseo/agents/Taylor/pending_adv3t_hard_gate_20260810/golive_recommend_v23.py:794: sqrt-session-const: vnh["rv10"] = _r.rolling(10).std() * np.sqrt(252) * 100
+mike_paseo/agents/Taylor/research/adaptive_gate_20260723/final_summary.py:11: yrs-per-session: yrs=len(nav)/252.0
+mike_paseo/agents/Taylor/research/adaptive_gate_20260723/final_summary.py:13: sqrt-session-const: sharpe=r.mean()/r.std()*np.sqrt(252)
+mike_paseo/agents/Taylor/research/early_recovery_margin_lever_20260825/step0_control.py:17: sqrt-session-const: sh = r.mean()/r.std()*np.sqrt(252)
+mike_paseo/agents/Taylor/research/early_recovery_margin_lever_20260825/step2_sim.py:81: sqrt-session-const: return dict(CAGR=round(cagr,2), Sharpe=round(rr.mean()/rr.std()*np.sqrt(252),2),
+mike_paseo/agents/Taylor/research/early_recovery_margin_lever_20260825/step3_loo_exbull.py:11: sqrt-session-const: return dict(CAGR=round(c,2),Sharpe=round(rr.mean()/rr.std()*np.sqrt(252),2),
+mike_paseo/agents/Taylor/research/early_recovery_margin_lever_20260825/step4_boot.py:10: sqrt-session-const: return dict(CAGR=round(c,2),Sharpe=round(rr.mean()/rr.std()*np.sqrt(252),2),
+mike_paseo/agents/Taylor/research/early_recovery_margin_lever_20260825/step5_control_uncond.py:12: sqrt-session-const: return dict(CAGR=round(c,2),Sharpe=round(rr.mean()/rr.std()*np.sqrt(252),2),
+mike_paseo/agents/Taylor/research/exit_signal_backtest_20260721/exit_c30v.py:75: sqrt-session-const: return dict(cagr=(nav.iloc[-1]**(1/yrs)-1)*100, sharpe=(s.mean()/s.std()*np.sqrt(252)) if s.std()>0 else 0,
+mike_paseo/agents/Taylor/research/exit_signal_backtest_20260721/exit_nav2.py:37: sqrt-session-const: return dict(cagr=(nav.iloc[-1]**(1/yrs)-1)*100, sharpe=s.mean()/s.std()*np.sqrt(252) if s.std()>0 else 0,
+mike_paseo/agents/Taylor/research/exit_signal_backtest_20260721/exit_run.py:34: sqrt-session-const: sharpe=s.mean()/s.std()*np.sqrt(252) if s.std()>0 else 0
+mike_paseo/agents/Taylor/research/lag_disc_blended/analyze.py:63: sqrt-session-const: sr0 = sr0_annual / np.sqrt(252)
+mike_paseo/agents/Taylor/research/lag_disc_blended/analyze.py:67: sqrt-session-const: return stats.norm.cdf(z), sr * np.sqrt(252), z
+mike_paseo/agents/Taylor/research/margin_valuation_spread_phase1_20260823/engine_p1.py:1163: sqrt-session-const: vni_hist["rv10"] = _r.rolling(10).std() * np.sqrt(252) * 100
+mike_paseo/agents/Taylor/research/margin_valuation_spread_phase1_20260823/engine_p1.py:2257: sqrt-session-const: _vm_report = {"sigma_target_ann": sigma_target * np.sqrt(252), "win": VOLMANAGE_WIN,
+mike_paseo/agents/Taylor/research/margin_valuation_spread_phase1_20260823/engine_p1.py:2261: sqrt-session-const: print(f"  [VOLMANAGE_BAL win={VOLMANAGE_WIN} x{VOLMANAGE_TGT_MULT}] sigma_target(ann)={sigma_target*np.sqrt(252)*100:.1f
+mike_paseo/agents/Taylor/research/margin_valuation_spread_phase1_20260823/engine_p1.py:2518: sqrt-session-const: sh252 = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else 0
+mike_paseo/agents/Taylor/research/margin_valuation_spread_phase1_20260823/engine_p1.py:2521: sqrt-session-const: sortino = r.mean() / np.sqrt((dn**2).mean()) * np.sqrt(252) if len(dn) else 0
+mike_paseo/agents/Taylor/research/margin_valuation_spread_phase1_20260823/metrics_p1.py:20: sqrt-session-const: sh=r.mean()/r.std(ddof=1)*math.sqrt(ANN); dd=s/s.cummax()-1; mdd=dd.min()
+mike_paseo/agents/Taylor/research/strategy_regime_matrix_20260822.py:106: sqrt-session-const: vol = float(r.std(ddof=1)) * np.sqrt(SPY)
+mike_paseo/agents/Taylor/research/strategy_regime_matrix_20260822_b1.py:192: sqrt-session-const: sh = r.mean() / r.std() * np.sqrt(SPY) if r.std() > 0 else np.nan
+mike_paseo/agents/Taylor/research/strategy_regime_matrix_20260822_b2.py:55: sqrt-session-const: vol = float(r.std(ddof=1))*np.sqrt(SPY)
+mike_paseo/agents/Taylor/research/strategy_regime_matrix_20260822_b3.py:170: sqrt-session-const: return dict(CAGR=c, Sharpe=r.mean()/r.std()*np.sqrt(SPY), MaxDD=dd, Calmar=c/abs(dd))
+mike_paseo/agents/Taylor/route_exp/basket_compare.py:125: sqrt-session-const: sh = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else np.nan
+mike_paseo/agents/Taylor/route_exp/route_abstain_sens.py:73: sqrt-session-const: out = dict(label=label, CAGR=100 * cagr, Sharpe=r.mean() / r.std() * np.sqrt(252),
+mike_paseo/agents/Taylor/route_exp/route_fix_compare.py:65: sqrt-session-const: out = dict(label=label, CAGR=100 * cagr, Sharpe=r.mean() / r.std() * np.sqrt(252),
+mike_paseo/agents/Taylor/route_exp/route_robustness.py:33: yrs-per-session: yrs = len(r) / 252.0
+mike_paseo/agents/Taylor/route_exp/route_robustness.py:42: sqrt-session-const: return float(r.mean() / r.std(ddof=1) * math.sqrt(252)) if r.std(ddof=1) > 0 else float("nan")
+mike_paseo/agents/Taylor/route_exp/route_robustness.py:106: sqrt-session-const: print(f"v3route per-day SR {sr_hat:.5f} (annualised {sr_hat*math.sqrt(252):.2f}); skew {g3:.3f} kurt {g4:.3f}")
+mike_paseo/agents/Taylor/route_exp/route_v3latest_arm.py:62: sqrt-session-const: out = dict(label=label, CAGR=100 * cagr, Sharpe=r.mean() / r.std() * np.sqrt(252),
+mike_paseo/agents/Taylor/seccap_vehicle_compare.py:35: sqrt-session-const: sharpe = r.mean() / r.std() * np.sqrt(252)
+neutral_glide_backtest.py:110: sqrt-session-const: sd = r.std() * np.sqrt(252); sharpe = (r.mean() * 252) / sd if sd > 0 else 0
+paper_v11_v12_apr2026.py:385: sqrt-session-const: vol = rets.std() * np.sqrt(252) * 100 if len(rets) > 0 else 0
+paper_v11_v12_apr2026.py:393: sqrt-session-const: "vol":vni_aligned.pct_change().dropna().std()*np.sqrt(252)*100,
+paper_v11_v12_v121_apr2026.py:371: sqrt-session-const: vol = rets.std()*np.sqrt(252)*100 if len(rets)>0 else 0
+paper_v11_v12_v121_apr2026.py:379: sqrt-session-const: "vol":vni_aligned.pct_change().dropna().std()*np.sqrt(252)*100,
+papertrade_compare.py:60: sqrt-session-const: vol_ann = daily_ret.std() * np.sqrt(252)
+phase_b_option_a.py:77: sqrt-session-const: sharpe = df["ret"].mean()/df["ret"].std() * np.sqrt(252) if df["ret"].std()>0 else 0
+phase_b_v5_state_hold.py:101: sqrt-session-const: sharpe = df["ret"].mean()/df["ret"].std() * np.sqrt(252) if df["ret"].std()>0 else 0
+phase_c_combine_ds.py:71: sqrt-session-const: sharpe = df["ret"].mean()/df["ret"].std() * np.sqrt(252) if df["ret"].std()>0 else 0
+phase_c_diversify_softstop.py:89: sqrt-session-const: sharpe = df["ret"].mean()/df["ret"].std() * np.sqrt(252) if df["ret"].std()>0 else 0
+phase_d_isolate_q2.py:74: sqrt-session-const: sharpe = df["ret"].mean()/df["ret"].std() * np.sqrt(252) if df["ret"].std()>0 else 0
+phase_e_ablation.py:97: sqrt-session-const: sharpe = df["ret"].mean()/df["ret"].std() * np.sqrt(252) if df["ret"].std()>0 else 0
+phase_f_combo.py:93: sqrt-session-const: sharpe = df["ret"].mean()/df["ret"].std() * np.sqrt(252) if df["ret"].std()>0 else 0
+portfolio_review_jun2025.py:303: sqrt-session-const: sharpe = rets.mean()/rets.std() * np.sqrt(252) if rets.std() > 0 else 0
+portfolio_review_jun2025.py:305: sqrt-session-const: sortino = rets.mean()/downside.std() * np.sqrt(252) if len(downside) and downside.std() > 0 else 0
+portfolio_review_jun2025.py:315: sqrt-session-const: vol_annual = rets.std() * np.sqrt(252)
+portfolio_review_jun2025.py:323: sqrt-session-const: vni_sharpe = vni_rets.mean()/vni_rets.std()*np.sqrt(252) if vni_rets.std() > 0 else 0
+portfolio_review_jun2025.py:324: sqrt-session-const: vni_vol = vni_rets.std() * np.sqrt(252)
+probe_volmanage_h3.py:46: sqrt-session-const: sh = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else 0.0
+pt_crisis_margin_test.py:131: sqrt-session-const: cagr=(s.iloc[-1]/s.iloc[0])**(1/yrs)-1; dd=(s/s.cummax()-1).min(); sh=r.mean()/r.std()*np.sqrt(252)
+pt_margin_test.py:157: sqrt-session-const: cagr=(s.iloc[-1]/s.iloc[0])**(1/yrs)-1; dd=(s/s.cummax()-1).min(); sh=r.mean()/r.std()*np.sqrt(252)
+pt_onewallet_faithful.py:132: sqrt-session-const: cagr=(s.iloc[-1]/s.iloc[0])**(1/yrs)-1; dd=(s/s.cummax()-1).min(); sh=r.mean()/r.std()*np.sqrt(252)
+pt_orchestrator_test.py:171: sqrt-session-const: cagr=(s.iloc[-1]/s.iloc[0])**(1/yrs)-1; dd=(s/s.cummax()-1).min(); sh=r.mean()/r.std()*np.sqrt(252)
+pt_panic_yield_sleeve.py:151: sqrt-session-const: sh = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else 0
+pt_salvage_test.py:152: sqrt-session-const: cagr=(s.iloc[-1]/s.iloc[0])**(1/yrs)-1; dd=(s/s.cummax()-1).min(); sh=r.mean()/r.std()*np.sqrt(252)
+pt_v21_faithful.py:141: sqrt-session-const: cagr=(s.iloc[-1]/s.iloc[0])**(1/yrs)-1; dd=(s/s.cummax()-1).min(); sh=r.mean()/r.std()*np.sqrt(252)
+pt_v22_capit_v21.py:182: sqrt-session-const: cagr=(s.iloc[-1]/s.iloc[0])**(1/yrs)-1; dd=(s/s.cummax()-1).min(); sh=r.mean()/r.std()*np.sqrt(252)
+pt_v22_dt5g.py:510: sqrt-session-const: vni_hist["rv10"] = _r.rolling(10).std() * np.sqrt(252) * 100
+pt_v22fix_run.py:127: sqrt-session-const: cagr=(s.iloc[-1]/s.iloc[0])**(1/yrs)-1; dd=(s/s.cummax()-1).min(); sh=r.mean()/r.std()*np.sqrt(252)
+pt_v23_audit_2014.py:1100: sqrt-session-const: vni_hist["rv10"] = _r.rolling(10).std() * np.sqrt(252) * 100
+pt_v23_audit_2014.py:2146: sqrt-session-const: _vm_report = {"sigma_target_ann": sigma_target * np.sqrt(252), "win": VOLMANAGE_WIN,
+pt_v23_audit_2014.py:2150: sqrt-session-const: print(f"  [VOLMANAGE_BAL win={VOLMANAGE_WIN} x{VOLMANAGE_TGT_MULT}] sigma_target(ann)={sigma_target*np.sqrt(252)*100:.1f
+pt_v23_audit_2014.py:2354: sqrt-session-const: sh252 = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else 0
+pt_v23_audit_2014.py:2357: sqrt-session-const: sortino = r.mean() / np.sqrt((dn**2).mean()) * np.sqrt(252) if len(dn) else 0
+pt_v23_audit_ddpark.py:458: sqrt-session-const: vni_hist["rv10"] = _r.rolling(10).std() * np.sqrt(252) * 100
+pt_v23_audit_ddpark.py:885: sqrt-session-const: sh252 = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else 0
+pt_v23_audit_ddpark.py:888: sqrt-session-const: sortino = r.mean() / np.sqrt((dn**2).mean()) * np.sqrt(252) if len(dn) else 0
+pt_v23_lagcap_research.py:1100: sqrt-session-const: vni_hist["rv10"] = _r.rolling(10).std() * np.sqrt(252) * 100
+pt_v23_lagcap_research.py:2141: sqrt-session-const: _vm_report = {"sigma_target_ann": sigma_target * np.sqrt(252), "win": VOLMANAGE_WIN,
+pt_v23_lagcap_research.py:2145: sqrt-session-const: print(f"  [VOLMANAGE_BAL win={VOLMANAGE_WIN} x{VOLMANAGE_TGT_MULT}] sigma_target(ann)={sigma_target*np.sqrt(252)*100:.1f
+pt_v23_lagcap_research.py:2349: sqrt-session-const: sh252 = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else 0
+pt_v23_lagcap_research.py:2352: sqrt-session-const: sortino = r.mean() / np.sqrt((dn**2).mean()) * np.sqrt(252) if len(dn) else 0
+pt_v23_lagqual_research.py:1127: sqrt-session-const: vni_hist["rv10"] = _r.rolling(10).std() * np.sqrt(252) * 100
+pt_v23_lagqual_research.py:2164: sqrt-session-const: _vm_report = {"sigma_target_ann": sigma_target * np.sqrt(252), "win": VOLMANAGE_WIN,
+pt_v23_lagqual_research.py:2168: sqrt-session-const: print(f"  [VOLMANAGE_BAL win={VOLMANAGE_WIN} x{VOLMANAGE_TGT_MULT}] sigma_target(ann)={sigma_target*np.sqrt(252)*100:.1f
+pt_v23_lagqual_research.py:2372: sqrt-session-const: sh252 = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else 0
+pt_v23_lagqual_research.py:2375: sqrt-session-const: sortino = r.mean() / np.sqrt((dn**2).mean()) * np.sqrt(252) if len(dn) else 0
+pt_v4_capit_faithful.py:145: sqrt-session-const: dd = (s/s.cummax()-1).min(); sh = r.mean()/r.std()*np.sqrt(252)
+pt_v4_capit_faithful.py:237: sqrt-session-const: return (s.iloc[-1]**(1/yrs)-1)*100, (s/s.cummax()-1).min()*100, r.mean()/r.std()*np.sqrt(252)
+pt_v4_full_faithful.py:216: sqrt-session-const: dd = (s/s.cummax()-1).min(); sh = r.mean()/r.std()*np.sqrt(252)
+pt_v4_full_faithful.py:266: sqrt-session-const: return (s.iloc[-1]**(1/yrs)-1)*100, (s/s.cummax()-1).min()*100, r.mean()/r.std()*np.sqrt(252)
+pt_v4_variants_faithful.py:129: sqrt-session-const: dd = (s/s.cummax()-1).min(); sh = r.mean()/r.std()*np.sqrt(252)
+pt_v4_variants_faithful.py:171: sqrt-session-const: return (s.iloc[-1]**(1/yrs)-1)*100, (s/s.cummax()-1).min()*100, r.mean()/r.std()*np.sqrt(252)
+pt_v6v3_faithful.py:117: sqrt-session-const: dd = (nav/nav.cummax()-1); sh = ret.mean()/ret.std()*np.sqrt(252)
+pt_v6v3_faithful.py:118: sqrt-session-const: so = ret.mean()/ret[ret < 0].std()*np.sqrt(252)
+pt_v6v3_txn.py:114: yrs-per-session: ret = nav.pct_change().dropna(); n = len(ret); yrs = n/252
+pt_v6v3_txn.py:117: sqrt-session-const: sh = ret.mean()/ret.std()*np.sqrt(252)
+pt_v6v3_txn.py:118: sqrt-session-const: so = ret.mean()/ret[ret<0].std()*np.sqrt(252)
+pt_value_book.py:89: sqrt-session-const: return dict(cagr=cg*100,sh=r.mean()/r.std()*np.sqrt(252) if r.std()>0 else 0,dd=dd*100,cal=cg/abs(dd) if dd<0 else 0)
+realistic_extended_overlay.py:86: sqrt-session-const: return (nav.iloc[-1]**(1/yrs)-1)*100,(nav/nav.cummax()-1).min()*100,r.mean()/r.std()*np.sqrt(252)
+research/lag_regime_gate/stage3_loo_dsr.py:52: sqrt-session-const: ann = sr * math.sqrt(252)
+research_lh_v3_factors.py:174: sqrt-session-const: vol_120d = px_close.pct_change().rolling(120, min_periods=60).std() * np.sqrt(252)
+show_hybrid_v11_trades.py:143: sqrt-session-const: hyb_sharpe = hyb_rets.mean() / hyb_rets.std() * np.sqrt(252) if hyb_rets.std() > 0 else 0
+sim_v11_from_jun2025.py:201: sqrt-session-const: sharpe = rets.mean()/rets.std() * np.sqrt(252) if rets.std() > 0 else 0
+sim_v11_pre2014.py:236: sqrt-session-const: sharpe = rets.mean()/rets.std() * np.sqrt(252) if rets.std() > 0 else 0
+sim_v11_pre2014.py:255: sqrt-session-const: vni_sharpe = vni_rets.mean()/vni_rets.std()*np.sqrt(252)
+sim_v11_pre2014_c3test.py:233: sqrt-session-const: sharpe = rets.mean()/rets.std()*np.sqrt(252) if rets.std() > 0 else 0
+sim_v11_pre2014_clean.py:236: sqrt-session-const: sharpe = rets.mean()/rets.std()*np.sqrt(252) if rets.std() > 0 else 0
+sim_v5_pre2014.py:234: sqrt-session-const: sharpe = rets.mean()/rets.std()*np.sqrt(252) if rets.std() > 0 else 0
+split_metrics.py:15: sqrt-session-const: sh = r.mean()/r.std()*np.sqrt(252) if r.std() > 0 else float("nan")
+test_alpha.py:103: sqrt-session-const: if len(v)>=15: vol20[i]=np.std(v)*np.sqrt(SPY)
+test_alpha.py:146: sqrt-session-const: sharpe=np.mean(rets)*SPY/(np.std(rets)*np.sqrt(SPY)) if np.std(rets)>0 else 0
+test_beardvg_gate.py:128: sqrt-session-const: if len(vv)>=15: v20[i]=np.std(vv)*np.sqrt(SPY)
+test_beardvg_gate.py:216: sqrt-session-const: sh=np.mean(rets)*SPY/(np.std(rets)*np.sqrt(SPY)) if np.std(rets)>0 else 0
+test_c3_refinements.py:177: sqrt-session-const: sh = daily.mean()/daily.std()*np.sqrt(252) if daily.std()>0 else 0
+test_market_filter.py:220: sqrt-session-const: if len(vv)>=15: v20[i]=np.std(vv)*np.sqrt(SPY)
+test_market_filter.py:263: sqrt-session-const: sh=np.mean(rets)*SPY/(np.std(rets)*np.sqrt(SPY)) if np.std(rets)>0 else 0
+test_regime_off_in_capitulation.py:73: sqrt-session-const: return (nav.iloc[-1]**(1/yrs)-1)*100,(nav/nav.cummax()-1).min()*100,r.mean()/r.std()*np.sqrt(252)
+test_sector_limit_jun2025.py:119: sqrt-session-const: sharpe = rets.mean()/rets.std() * np.sqrt(252) if rets.std() > 0 else 0
+test_state_free_bav11.py:187: sqrt-session-const: sh = daily.mean()/daily.std()*np.sqrt(252) if daily.std()>0 else 0
+test_tam_quan_stress_2007_2013.py:215: sqrt-session-const: sharpe = rets.mean()/rets.std() * np.sqrt(252) if rets.std() > 0 else 0
+test_tam_quan_stress_2007_2013.py:226: sqrt-session-const: vni_sharpe = vni_rets.mean()/vni_rets.std()*np.sqrt(252) if vni_rets.std()>0 else 0
+test_v3_1_full.py:181: sqrt-session-const: sharpe = rets.mean()/rets.std()*np.sqrt(252) if rets.std()>0 else 0
+test_v5_dt4gate_integrated.py:251: sqrt-session-const: sh = daily.mean()/daily.std()*np.sqrt(252) if daily.std()>0 else 0
+test_v5_dt_c3clean.py:238: sqrt-session-const: sh = daily.mean()/daily.std()*np.sqrt(252) if daily.std()>0 else 0
+test_v5_dt_integrated.py:247: sqrt-session-const: sh = daily.mean()/daily.std()*np.sqrt(252) if daily.std()>0 else 0
+test_v5_macro_integrated.py:150: sqrt-session-const: sh = d.mean() / d.std() * np.sqrt(252) if d.std() > 0 else 0
+test_vni_proxy_bav11.py:198: sqrt-session-const: sh = daily.mean()/daily.std()*np.sqrt(252) if daily.std()>0 else 0
+tier1a_overlay_backtest.py:87: sqrt-session-const: sh = rets.mean()/rets.std()*np.sqrt(250) if rets.std()>0 else 0
+tier1a_overlay_v2.py:37: sqrt-session-const: sh = rets.mean()/rets.std()*np.sqrt(250) if rets.std()>0 else 0
+tier2_composite_overlay.py:58: sqrt-session-const: sh = rets.mean()/rets.std()*np.sqrt(250) if rets.std()>0 else 0
+tier2b_overlay.py:62: sqrt-session-const: sh = rets.mean()/rets.std()*np.sqrt(250) if rets.std()>0 else 0
+tier2b_sensitivity.py:110: sqrt-session-const: sh = rets.mean()/rets.std()*np.sqrt(250) if rets.std()>0 else 0
+tune_bav11_combined.py:188: sqrt-session-const: sh = daily.mean()/daily.std()*np.sqrt(252) if daily.std()>0 else 0
+tune_bav11_filters.py:203: sqrt-session-const: sh = daily.mean()/daily.std()*np.sqrt(252) if daily.std()>0 else 0
+voltarget_overlay.py:49: sqrt-session-const: df["rv"] = df["ret"].rolling(VOL_WIN).std() * np.sqrt(ANN)
+voltarget_overlay.py:50: sqrt-session-const: df["rv_ewma"] = df["ret"].ewm(span=VOL_WIN).std() * np.sqrt(ANN)
+voltarget_overlay.py:86: sqrt-session-const: vol = r.std() * np.sqrt(ANN)
+voltarget_overlay.py:88: sqrt-session-const: downside = r[r < 0].std() * np.sqrt(ANN)
+wf_basket_size_cap.py:34: sqrt-session-const: sharpe = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else np.nan
+workspace/bookc_faithful_sim.py:117: sqrt-session-const: dd = (s / s.cummax() - 1).min(); sh = r.mean() / r.std() * np.sqrt(252)
+workspace/pt_onewallet_allocator.py:154: sqrt-session-const: cagr=(s.iloc[-1]/s.iloc[0])**(1/yrs)-1; dd=(s/s.cummax()-1).min(); sh=r.mean()/r.std()*np.sqrt(252)
+workspace/pt_v22_breadth_gate.py:181: sqrt-session-const: cagr=(s.iloc[-1]/s.iloc[0])**(1/yrs)-1; dd=(s/s.cummax()-1).min(); sh=r.mean()/r.std()*np.sqrt(252)
+workspace/pt_v22_exbull_test.py:189: sqrt-session-const: cagr=(s.iloc[-1]/s.iloc[0])**(1/yrs)-1; dd=(s/s.cummax()-1).min(); sh=r.mean()/r.std()*np.sqrt(252)
+workspace/pt_v22_final_combined.py:182: sqrt-session-const: cagr=(s.iloc[-1]/s.iloc[0])**(1/yrs)-1; dd=(s/s.cummax()-1).min(); sh=r.mean()/r.std()*np.sqrt(252)
+workspace/pt_v22_final_combined.py:242: sqrt-session-const: cagr=(s.iloc[-1]/s.iloc[0])**(1/yrs)-1; dd=(s/s.cummax()-1).min(); sh=r.mean()/r.std()*np.sqrt(252)
+workspace/pt_v23c_compass_park.py:193: sqrt-session-const: cagr=(s.iloc[-1]/s.iloc[0])**(1/yrs)-1; dd=(s/s.cummax()-1).min(); sh=r.mean()/r.std()*np.sqrt(252)
+workspace/pt_v23c_etf_alloc.py:192: sqrt-session-const: cagr=(s.iloc[-1]/s.iloc[0])**(1/yrs)-1; dd=(s/s.cummax()-1).min(); sh=r.mean()/r.std()*np.sqrt(252)
+workspace/pt_v23c_etf_alloc_p5.py:192: sqrt-session-const: cagr=(s.iloc[-1]/s.iloc[0])**(1/yrs)-1; dd=(s/s.cummax()-1).min(); sh=r.mean()/r.std()*np.sqrt(252)
+workspace/pt_v23c_valve_radar.py:219: sqrt-session-const: cagr=(s.iloc[-1]/s.iloc[0])**(1/yrs)-1; dd=(s/s.cummax()-1).min(); sh=r.mean()/r.std()*np.sqrt(252)
+workspace/test_faithful_65.py:190: sqrt-session-const: cagr=(s.iloc[-1]/s.iloc[0])**(1/yrs)-1; dd=(s/s.cummax()-1).min(); sh=r.mean()/r.std()*np.sqrt(252)
+workspace/test_faithful_twobook.py:190: sqrt-session-const: cagr=(s.iloc[-1]/s.iloc[0])**(1/yrs)-1; dd=(s/s.cummax()-1).min(); sh=r.mean()/r.std()*np.sqrt(252)
+workspace/test_lag_capacity.py:140: sqrt-session-const: cagr=(s.iloc[-1]/s.iloc[0])**(1/yrs)-1; dd=(s/s.cummax()-1).min(); sh=r.mean()/r.std()*np.sqrt(252)
+annualization_basis: 488 vi phạm / 255 file (quét 2884 file .py)
+annualization_basis: PASS (không file nào vượt baseline)

@@ -1,0 +1,7 @@
+  [1] manifest hợp lệ: N=8, PBO=0.426
+  [2] +1 CSV lạ, CÓ manifest: N=8, PBO=0.426
+  [3] thiếu file: rc=2  [4] md5 lệch: rc=2
+  [5] manifest KHÔNG set: rc=2, PBO=None, N=None
+  [6] manifest rỗng: rc=2, PBO=None
+  [7] builder glob còn sống: rc=0, n_entries=9
+✅ 13/13 assertion PASS

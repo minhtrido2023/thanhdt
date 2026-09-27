@@ -1,0 +1,5 @@
+RC=0 TZ=NY py310
+RC=0 TZ=NY dnapy
+RC=0 TZ=unset py310
+RC=0 TZ=unset dnapy
+DONE_TZ_REST

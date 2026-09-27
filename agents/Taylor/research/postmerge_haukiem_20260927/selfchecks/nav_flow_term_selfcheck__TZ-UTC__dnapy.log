@@ -1,0 +1,3 @@
+report_delivery_gate: nav-flow PASS (SpaceX_weekly_report_2026-07-01_to_2026-07-07.md): SpaceX — 0 bước nhảy NAV >±5.0% không giải thích được tới 2026-07-07 (1 bản ghi dòng tiền)
+report_delivery_gate: nav-flow PASS (SpaceX_weekly_report_2026-07-01_to_2026-07-07.md): SpaceX — 0 bước nhảy NAV >±5.0% không giải thích được tới 2026-07-07 (1 bản ghi dòng tiền)
+OK — 146 assertion PASS (nav_flow_term_selfcheck.py) · ngưỡng cổng 5.0% · 113 cặp phiên thật kiểm false-positive
