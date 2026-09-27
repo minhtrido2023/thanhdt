@@ -45,6 +45,17 @@ Point-in-time honesty:
         change across those 266 rows. R&D variant, not V2.4 production.
       - cheap_pb_floor.py, sector_lens_monitor.py, newdeals_daily_report.py also gate at <=2 but read
         data/rating_8l.csv (the LIVE rate_bank output), which this module never writes -> unaffected.
+  - ROUTE (sector) is POINT-IN-TIME since 2026-09-27 (FAIL-G fix, audit measurement-integrity-2026-09-27):
+    ICB_Code is taken from CONSECUTIVE RUNS of >=ICB_MIN_RUN (20) sessions in tav2_bq.ticker and as-of
+    joined backward on eff_date, replacing the old `ANY_VALUE(ICB_Code) GROUP BY ticker`, which stamped
+    TODAY's sector onto the whole 2014->now panel and was not even deterministic.
+    ⚠️ DATA LIMIT, stated so nobody over-reads this fix: `tav2_bq.ticker` is a rebuilt daily panel, NOT a
+    sector-vintage source. It records only 6 tickers with >1 ICB_Code ever, and 5 of the 6 first differ in
+    2017 or later (2 of them only within the last 2 months) -> the source ESSENTIALLY DOES NOT RECORD
+    re-classifications before 2026. So this fix guarantees (a) determinism and (b) correct PIT for the
+    changes that ARE recorded; sector changes that were never recorded CANNOT be recovered from this
+    table. Fixing those needs a vintaged sector source (FiinPro-X / HOSE industry history).
+    Registry: mike/kb/data_registry/fundamentals/rating_8l_history.md.
   - POWER: the live rate_power() needs the lifecycle verdict (snapshot) -> we proxy with the D/E trajectory
     (STLTDebt_Eq_P0 vs _P4) + TTM-NP sign. Small-n group; flagged.
 
@@ -112,11 +123,71 @@ FROM tav2_bq.ticker_financial AS f
 WHERE f.time >= '2014-06-01'
 """
 
-ICB_SQL = """
-SELECT t.ticker, ANY_VALUE(t.ICB_Code) AS ICB_Code
-FROM tav2_bq.ticker AS t
-GROUP BY t.ticker
+# ĐỀ XUẤT 2026-09-27 (audit measurement-integrity FAIL-G). Bản cũ:
+#     SELECT t.ticker, ANY_VALUE(t.ICB_Code) ... GROUP BY t.ticker
+# gán phân ngành CỦA HÔM NAY cho toàn bộ panel lịch sử 2014→nay, và `ANY_VALUE` KHÔNG tất định.
+#
+# ĐO THẬT 2026-09-27 trên `tav2_bq.ticker`:
+#   - 1.285/1.291 mã chỉ có MỘT `ICB_Code` ⇒ nguồn gần như KHÔNG đổi theo thời gian.
+#   - 6 mã có HAI giá trị; 3 trong số đó (DIH, HDG, SBM) nhảy qua ranh giới `route_of()`.
+#   - Chỉ **4 mã** trên toàn bảng có >1 "đoạn" ICB_Code dài ≥20 phiên liên tiếp ⇒ tái phân ngành
+#     THẬT là cực hiếm; phần còn lại là NHIỄU một-vài-phiên. SBM là ca mẫu: `ICB_Code` nhảy qua
+#     lại 7535↔2357 suốt 2020-2025, mỗi lần 1-4 phiên. Vì thế chỉ as-of theo MIN(time) của mỗi mã
+#     là KHÔNG đủ — nó biến một phiên nhiễu 2020-11-23 thành "đổi ngành vĩnh viễn".
+#   - Hậu quả đã xảy ra, có artifact: `data/rating_8l_history.csv` dựng lại 2026-09-27 gán
+#     HDG route=POWER cho MỌI dòng từ 2014-08-01, trong khi `ICB_Code=7535` của HDG chỉ xuất hiện
+#     từ 2026-09-07 (trước đó 8633 = REALESTATE, 4.136 phiên). DIH cũng vậy (8633 từ 2026-08-21
+#     áp hồi tố về 2011). HDG là thành viên rổ custom30V (26 lượt trong
+#     `data/custom30v_8l_publish.csv`) ⇒ đây là ĐƯỜNG QUYẾT ĐỊNH, không phải hiển thị.
+#
+# Bản vá: lấy các ĐOẠN LIÊN TIẾP (run) của `ICB_Code`, chỉ coi là đổi ngành khi đoạn dài
+# ≥ `ICB_MIN_RUN` phiên, rồi as-of join theo `eff_date`. Tất định theo định nghĩa (hết ANY_VALUE).
+# ⚠️ GIỚI HẠN thừa nhận rõ: nguồn hầu như KHÔNG ghi lại tái phân ngành TRƯỚC 2026, nên bản vá chỉ
+# đảm bảo TẤT ĐỊNH + đúng PIT cho những lần đổi ĐƯỢC GHI. Những lần đổi không được ghi thì
+# **không sửa được từ dữ liệu này** — cần một nguồn phân ngành có vintage (FiinProX/HOSE).
+ICB_MIN_RUN = 20   # số phiên liên tiếp tối thiểu để một ICB_Code được coi là ĐÃ XÁC LẬP
+ICB_SQL = f"""
+WITH d AS (
+  SELECT t.ticker, t.time, CAST(t.ICB_Code AS INT64) AS icb,
+         ROW_NUMBER() OVER(PARTITION BY t.ticker ORDER BY t.time) rn
+  FROM tav2_bq.ticker AS t WHERE t.ICB_Code IS NOT NULL),
+g AS (SELECT d.*, d.rn - ROW_NUMBER() OVER(PARTITION BY d.ticker, d.icb ORDER BY d.time) grp FROM d),
+runs AS (SELECT ticker, icb, MIN(time) AS icb_from, COUNT(*) AS run_len
+         FROM g GROUP BY ticker, icb, grp)
+-- MỖI đoạn đủ dài là MỘT dòng hiệu lực riêng. KHÔNG `GROUP BY ticker, icb` + `MIN(icb_from)`:
+-- gộp như vậy làm một mã đi X->Y->X mất lần QUAY LẠI X (as-of sau `icb_from` của Y sẽ mãi trả Y).
+-- Hiện thực tế 0/1.291 mã gặp ca này (chỉ 4 mã có >1 đoạn >=20 phiên, không mã nào lặp lại mã cũ),
+-- nên sửa ở đây là chặn bẫy latent — nếu ai hạ `ICB_MIN_RUN` thì nó sẽ thành bug thật.
+-- Nhiều dòng cùng (ticker, icb) với `icb_from` khác nhau là VÔ HẠI cho `merge_asof` backward.
+SELECT ticker, icb AS ICB_Code, icb_from
+FROM runs WHERE run_len >= {ICB_MIN_RUN}
+ORDER BY ticker, icb_from
 """
+
+
+def attach_icb_pit(df, icb):
+    """As-of join `ICB_Code` theo ngày hiệu lực (backward), thay cho `ANY_VALUE` toàn-lịch-sử.
+
+    Dòng có ngày hiệu lực TRƯỚC đoạn ICB đầu tiên nhận mã SỚM NHẤT đã xác lập — trung thực nhất
+    có thể (mã muộn hơn là hindsight). Mã không có đoạn nào ≥ICB_MIN_RUN (toàn nhiễu) rơi về
+    NaN ⇒ `route_of()` trả COMPOUNDER, đúng như hành vi với ICB_Code NULL hiện tại.
+    """
+    icb = icb.copy()
+    icb["icb_from"] = pd.to_datetime(icb["icb_from"])
+    icb = icb.sort_values(["ticker", "icb_from"])
+    left = df.copy()
+    # `eff_date` chưa tồn tại ở điểm gọi (nó được dựng ở cuối main), nên dựng LẠI ĐÚNG công thức
+    # đó tại chỗ: Release_Date, thiếu thì q_time + 45 ngày. Đổi công thức ở một nơi mà quên nơi
+    # kia là đúng lớp lỗi §28 — nếu sửa, sửa cả hai.
+    _rel = pd.to_datetime(left["Release_Date"], errors="coerce")
+    left["_eff"] = _rel.fillna(pd.to_datetime(left["q_time"], errors="coerce")
+                               + pd.Timedelta(days=45))
+    left = left.sort_values("_eff")
+    out = pd.merge_asof(left, icb.sort_values("icb_from"), left_on="_eff",
+                        right_on="icb_from", by="ticker", direction="backward")
+    first = icb.groupby("ticker")["ICB_Code"].first()
+    out["ICB_Code"] = out["ICB_Code"].fillna(out["ticker"].map(first))
+    return out.drop(columns=["_eff", "icb_from"]).reset_index(drop=True)
 
 
 # ---------- ported scorecards (faithful to rating_8l.py) ----------
@@ -474,7 +545,7 @@ def main():
     print("pulling financial history ...")
     df = bq(HIST_SQL)
     icb = bq(ICB_SQL)
-    df = df.merge(icb, on="ticker", how="left")
+    df = attach_icb_pit(df, icb)
     print(f"  {len(df)} financial rows, {df['ticker'].nunique()} tickers")
 
     df["route"] = [route_of(t, c) for t, c in zip(df["ticker"], df["ICB_Code"])]
