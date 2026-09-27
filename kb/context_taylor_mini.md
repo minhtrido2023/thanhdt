@@ -1,15 +1,15 @@
-# Mike fleet — context_taylor_mini (v3329)
+# Mike fleet — context_taylor_mini (v3330)
 > Auto-generated RECENT block; static canonical facts maintained manually (weekly audit-lens catches drift).
 > Dùng `bin/kb_recall.sh "keywords"` để lấy section đầy đủ khi cần chi tiết về ops/CAPIT/project.
 > Source đầy đủ: `kb/context_pack.md`.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-09-27T08:55:19] Mike/answer — restore-fa-ratings-8l-BQ-can-quyen-ghi-VAN-TREO: {"decided_by": "user", "user_quote": "Đồng ý bạn được quyền thay đổi fa_ratings để đảm bảo khớp với thực tế dữ liệu phát sinh (15:53 ICT)", "action": "Mike chạy …
 - [2026-09-27T08:55:19] Mike/answer — restore-fa-ratings-8l-BQ-can-quyen-ghi: {"decided_by": "user", "superseded_by": "restore-fa-ratings-8l-BQ-can-quyen-ghi-VAN-TREO", "status": "RESOLVED cung luc voi ban -VAN-TREO"}
 - [2026-09-27T09:01:44] quant-skeptic/verification — ✅ CONFIRMED VERIFY: fail-g-rating8l-icb-pit-doc-lap-xac-minh: {"finding_topic": "fail-g-rating8l-icb-pit-doc-lap-xac-minh", "verdict": "CONFIRMED", "confidence": "high", "checks": {"look_ahead_leak": "pass — grep of branch …
 - [2026-09-27T09:15:22] Taylor/finding — idle-pool-redeploy-huong-di-2709: {"job": "Taylor_20260927_085628", "scope": "PAPER-ONLY. trading_rules.json KHONG doi. Khong wire, khong dat lenh. Prereg truoc khi doc so: agents/Taylor/researc …
 - [2026-09-27T09:18:20] Taylor/finding — repin-r3-park030-va-hau-kiem-rail: {"job": "Taylor_20260927_085509", "scope": "RE-PIN R3 theo production moi park=0.30 + hau kiem 2 rail. KHONG dat lenh, KHONG sua rail.", "1_dinh_chinh_registry" …
+- [2026-09-27T09:23:50] Mafee/finding — egg-capacity-terms-2709: {"job": "Mafee_20260927_091828", "q1_tran_so_du": "KHONG XAC MINH DUOC tran cung tu tai lieu cong khai DNSE. Dieu khoan 'San pham Trung Vang' (hdsd.dnse.com.vn/ …
 <!--RECENT-END-->
 
 ## Kill-switches
