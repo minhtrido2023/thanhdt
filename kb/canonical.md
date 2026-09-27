@@ -48,7 +48,7 @@
   lag_fidelity_decomp_20260803/T5_DECISION.md`.
 - Bootstrap 5th-pct: **CAGR 15.6%, DD −30.4% (anchor DD ~−30,5%, KHÔNG phải −18,8%)** — chạy lại
   2026-09-27 trên ledger pin mới (`bootstrap_nav.py`, L=21/B=4000/seed 12345); stationary-bootstrap
-  cross-check 15.5% / −30.1%. *Số cũ 18.6% / −28.6% SUPERSEDED (bản chạy 06-29, pin khác).*
+  cross-check 15.5% / −30.1%. ⚠️ FAIL-F (audit 2026-09-27): `bootstrap_nav.py`/`dsr_pbo_annex.py` annualize theo PHIÊN (/252) ⇒ CAGR bootstrap cao giả ~+0,3pp so với quy ước LỊCH; job Taylor_20260927_045241 đang sửa, số sẽ thay khi xong (DD không đổi). *Số cũ 18.6% / −28.6% SUPERSEDED (bản chạy 06-29, pin khác).*
 - **NEUTRAL parking custom30V = +2.01pp CAGR** (24.38% có park vs 22.37% park=0, cùng lệnh pin,
   đổi đúng 1 biến `PARK_STATES`; 30 mã, cap 0.10). ⚠️ **"+7.4pp Full" SUPERSEDED** — lệnh gốc của số
   đó không tồn tại trong registry; ở chân return LỖI delta là +6,49pp ⇒ **~2/3 của "+7,4pp" là return
