@@ -159,21 +159,97 @@ from trading_bot.vn_market import LOT, round_lot            # noqa: E402
 from lag_forensic_filter import BANNED                      # noqa: E402
 
 # ── Tham số — KHÔNG có cái nào tự chế ────────────────────────────────────────
-# Target park — user CHỐT **0,30** ngày 2026-09-27 15:48 ICT (trước đó 0,80 từ 08-04, 0,70 từ v2.1).
+# Target park — **KHÔNG hardcode ở đây nữa** (gỡ 2026-09-27). R2 (đường BÁN này) ĐỌC R3
+# `data/trading_rules.json` `neutral_parking.default_park_of_idle_pct` làm NGUỒN SỰ THẬT DUY NHẤT.
+#
+# VÌ SAO GỠ: mức park từng sống ở BA chỗ độc lập, không chỗ nào đọc chỗ nào, và lớp lỗi đó đã CẮN
+# HAI LẦN — cả hai lần IM LẶNG:
+#   · 2026-08-04: R1 (đường MUA `deploy_golive_dt5g_v4/golive_recommend_v23.py` ETF_PARK={3:…})
+#     còn 0,70 trong khi R2/R3 đã 0,80 ⇒ mua tới 70% nhưng chỉ trim khi vượt 80%.
+#   · 2026-09-27: user chốt 0,30, R1+R3 đổi, **R2 vẫn 0,80** ⇒ mua tới 30% nhưng chỉ trim khi vượt
+#     80%, tức knob user vừa chốt KHÔNG hiệu lực và sổ PARK cũ ~80% không bao giờ được đưa về 30%.
+# Sao chép một hằng số là cơ chế sinh ra cả hai. R3 là văn bản chính sách user duyệt (có
+# `risk_dial_override`, `default_change_history`) ⇒ nó phải là nguồn, không phải bản sao thứ ba.
+#
+# Mức hiện hành 0,30 — user CHỐT 2026-09-27 15:48 ICT (trước đó 0,80 từ 08-04, 0,70 từ v2.1).
 # Căn cứ: lưới 12 mức trên bản đã sửa 2 lỗi đo (chuỗi return bỏ OShares + weight tại ex-date);
 # 0,80 fail cổng bootstrap 5th-pct MaxDD ở CẢ 3 ngưỡng (−32,0% vs park=0 −24,0%); mọi mức ≥40% bị
-# loại; E[Calmar] paired bootstrap 30%=1,476 vs 80%=1,216. Pin R3 @0,30 = 23,43%/1,88/−14,4%/1,63
-# (`data/results_registry.md` mục "2026-09-27 (quinquies)").
-# ⚠️ BA RAIL PHẢI CÙNG GIÁ TRỊ — lệch là lỗi IM LẶNG (đã cắn 2 lần: 08-04 rail MUA còn 0,70 trong
-# khi rail BÁN 0,80; 2026-09-27 rail BÁN còn 0,80 trong khi rail MUA đã 0,30 ⇒ mua tới 30% nhưng
-# chỉ trim khi vượt 80%, tức knob user chốt KHÔNG hiệu lực):
-#   R1 MUA    `deploy_golive_dt5g_v4/golive_recommend_v23.py` ETF_PARK={3: …}
-#   R2 BÁN L1 hằng số ngay dưới đây
-#   R3 policy `data/trading_rules.json` neutral_parking.default_park_of_idle_pct (văn bản; hiện
-#      CHƯA có code path nào đọc — việc wire R2 đọc R3 đang chờ arch-review, xem bus finding
-#      `repin-r3-park030-va-hau-kiem-rail` mục 6)
-# Cổng cơ học: `bin/park_rail_consistency_selfcheck.py` (đọc giá trị 3 rail bằng AST, rc=1 nếu lệch).
-PARK_TARGET_F1 = 0.30
+# loại; E[Calmar] paired bootstrap 30%=1,476 vs 80%=1,216. Anchor R3 @0,30 = 23,37%/1,88/−14,6%/1,60
+# (`data/results_registry.md` mục "2026-09-27 (sexies)").
+#
+# CÒN LẠI R1: `golive_recommend_v23.py` VẪN hardcode `ETF_PARK={3: …}` — đó là đường SINH PLAN, đổi
+# rủi ro khác, KHÔNG wire trong lượt này (xem §"R1" của bus finding). Cổng cơ học
+# `bin/park_rail_consistency_selfcheck.py` vẫn so R1 (AST) vs R3 (JSON) vs **giá trị R2 THỰC SỰ
+# DÙNG** (chạy chính resolver dưới đây), rc=1 nếu lệch, rc=2 nếu không đọc được.
+PARK_TARGET_RULES = os.path.join(WC_ROOT, "data", "trading_rules.json")
+
+
+class ParkTargetUnavailable(RuntimeError):
+    """R3 không đọc được / không hợp lệ ⇒ TỪ CHỐI tính trim.
+
+    Fail-CLOSED có chủ đích: KHÔNG trả 0 (0 = "bán sạch sổ PARK" — lệnh BÁN thật, tệ hơn cả không
+    làm gì) và KHÔNG mặc định về giá trị cũ 0,80 (đúng cái bug 2026-09-27 mà việc này đi sửa).
+    Không biết trần là bao nhiêu thì không đề xuất lệnh nào — §5 coding_guidelines.
+    """
+
+
+def park_target_from_rules(path):
+    """R3 → trần park (float trong [0,1]). Raise `ParkTargetUnavailable` cho 4 ca fail-closed.
+
+    Mọi thông điệp lỗi TRÍCH BẰNG CHỨNG VỪA ĐỌC ĐƯỢC (§29 coding_guidelines: không đoán nguyên
+    nhân, không `2>/dev/null` rồi quy chụp) — chuỗi lỗi thật của OS, câu của json parser, danh sách
+    khoá thật có trong file, `repr`+type của giá trị thật.
+    """
+    try:
+        with open(path, encoding="utf-8") as f:
+            raw = f.read()
+    except OSError as e:
+        raise ParkTargetUnavailable(
+            f"R3 không đọc được: {path} — lỗi THẬT của OS: {type(e).__name__}: {e}") from e
+    try:
+        d = json.loads(raw)
+    except ValueError as e:
+        raise ParkTargetUnavailable(
+            f"R3 không phải JSON hợp lệ: {path} — json parser nói: {e}") from e
+    if not isinstance(d, dict):
+        raise ParkTargetUnavailable(
+            f"R3 {path}: gốc JSON là {type(d).__name__}, không phải object")
+    if "neutral_parking" not in d:
+        raise ParkTargetUnavailable(
+            f"R3 {path}: thiếu khoá gốc 'neutral_parking'. Khoá cấp 1 ĐỌC ĐƯỢC THẬT: {sorted(d)}")
+    npk = d["neutral_parking"]
+    if not isinstance(npk, dict):
+        raise ParkTargetUnavailable(
+            f"R3 {path}: 'neutral_parking' là {type(npk).__name__}, không phải object")
+    if "default_park_of_idle_pct" not in npk:
+        raise ParkTargetUnavailable(
+            f"R3 {path}: thiếu 'neutral_parking.default_park_of_idle_pct'. Khoá ĐỌC ĐƯỢC THẬT "
+            f"trong neutral_parking: {sorted(npk)}")
+    v = npk["default_park_of_idle_pct"]
+    # bool là subclass của int trong Python ⇒ phải loại tường minh, không thì `true` lọt thành 1,0.
+    if isinstance(v, bool) or not isinstance(v, (int, float)):
+        raise ParkTargetUnavailable(
+            f"R3 {path}: default_park_of_idle_pct KHÔNG phải số — đọc được {v!r} "
+            f"(type {type(v).__name__})")
+    v = float(v)
+    if not 0.0 <= v <= 1.0:      # NaN cũng rơi vào đây (mọi so sánh với NaN đều False)
+        raise ParkTargetUnavailable(
+            f"R3 {path}: default_park_of_idle_pct = {v!r} ngoài [0, 1] — từ chối tính trim")
+    return v
+
+
+def __getattr__(name):
+    """Tương thích ngược cho `from compute_park_trim import PARK_TARGET_F1` (PEP 562).
+
+    Rail thứ TƯ, không nằm trong cổng 3-rail: đường MUA P2
+    `mike/agents/DollarBill/tools/compute_park_add.py:52` import chính hằng số này. Giữ tên nhưng
+    resolve từ R3 **tại thời điểm truy cập** ⇒ rail đó tự đồng bộ theo chính sách, không phải sửa
+    file của agent khác, và không còn bản sao hằng số nào để lệch. Fail-closed lan đúng cách:
+    R3 hỏng ⇒ import/truy cập raise `ParkTargetUnavailable`, KHÔNG trả giá trị đoán.
+    """
+    if name == "PARK_TARGET_F1":
+        return park_target_from_rules(PARK_TARGET_RULES)
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 TRIM_BAND = 0.005          # = simulate_holistic_nav.py dòng 918 (PREFILL_STATE_REBAL)
 ETF_LIQ_PCT = 0.20         # = pt_v23_audit_2014.py:206 ETF_LIQ_PCT (trần thanh khoản rổ)
 STATE_FILE = os.path.join(WC_ROOT, "data", "golive_v23_status.json")
@@ -282,7 +358,7 @@ def live_price_fn(asof):
     return _f
 
 
-def compute_trim(account_label, asof=None, target=PARK_TARGET_F1, holdings=None,
+def compute_trim(account_label, asof=None, target=None, holdings=None,
                  share_override=None, adv_fn=None, day_cap_override=None,
                  basket_override=None, price_fn=None, excluded_dividend_config_override=None):
     """Trả dict mô tả đầy đủ quyết định. `*_override`/`*_fn` chỉ để selfcheck bơm dữ liệu.
@@ -292,6 +368,9 @@ def compute_trim(account_label, asof=None, target=PARK_TARGET_F1, holdings=None,
     tồn tại trong trading_bot_accounts.json); selfcheck dùng account_label giả ("TEST") nên
     PHẢI bơm qua đây, không thì account_profile() sẽ raise SystemExit (§pool-excl-div).
     """
+    # target=None ⇒ ĐỌC R3 (nguồn sự thật). Fail-closed: raise ParkTargetUnavailable,
+    # KHÔNG rơi về hằng số nào. Caller truyền target tường minh (selfcheck, A/B) vẫn được.
+    target = park_target_from_rules(PARK_TARGET_RULES) if target is None else float(target)
     asof = asof or today_ict()
     h = holdings if holdings is not None else park_holdings(account_label, asof)
     adv_fn = adv_fn or _adv_for_gate
@@ -694,13 +773,22 @@ def main():
     ap = argparse.ArgumentParser(description="L1 park-target compliance — CHỈ ĐỌC, đề xuất lệnh bán")
     ap.add_argument("--account", required=True)
     ap.add_argument("--asof", default=None)
-    ap.add_argument("--target", type=float, default=PARK_TARGET_F1)
+    ap.add_argument("--target", type=float, default=None,
+                    help="ghi đè trần park; mặc định ĐỌC data/trading_rules.json "
+                         "neutral_parking.default_park_of_idle_pct (R3)")
     ap.add_argument("--json", action="store_true")
     ap.add_argument("--out", default=None,
                     help="ghi kết quả JSON ra file (khuyến nghị cho consumer máy đọc — stdout "
                          "còn có dòng log kết nối của broker nên không parse thẳng được)")
     a = ap.parse_args()
-    r = compute_trim(a.account, a.asof, a.target)
+    try:
+        r = compute_trim(a.account, a.asof, a.target)
+    except ParkTargetUnavailable as e:
+        # MÃ LỖI RIÊNG 7 — phân biệt được với mọi lỗi khác, và KHÔNG sinh đề xuất nào.
+        print(f"[park_trim] ❌ FAIL-CLOSED (rc=7): {e}", file=sys.stderr)
+        print("[park_trim] KHÔNG tính trim, KHÔNG ghi file, KHÔNG đề xuất lệnh — "
+              "sửa R3 rồi chạy lại.", file=sys.stderr)
+        return 7
     if a.out:
         with open(a.out, "w", encoding="utf-8") as f:
             json.dump(r, f, ensure_ascii=False, indent=1, default=str)
