@@ -1,0 +1,35 @@
+/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/idle_pool_redeploy_20260927/conc_tail.py:79: RuntimeWarning: Mean of empty slice
+  seg_ret = np.nanmean(X, axis=2)
+universe_pit_q: 3043 quarter dates, 3034 with >=35 eligible names; 2014-08-01..2026-09-25  pool size med=137
+price panel: 3426 days x 1294 tickers  2013-01-02..2026-09-25
+2966 holding segments cover 2966/3106 return days
+
+k= 4 standalone EW sleeve, 300 random PIT draws, quarterly reshuffle:
+   CAGR  median  14.11%  5th   6.20%  95th  22.53%
+   MaxDD median  -52.1%  5th(worst tail)  -63.8%  95th  -39.3%
+   cross-draw SD of MaxDD = 7.54pp   SD of CAGR = 5.14pp
+
+k= 6 standalone EW sleeve, 300 random PIT draws, quarterly reshuffle:
+   CAGR  median  14.96%  5th   7.94%  95th  21.28%
+   MaxDD median  -51.3%  5th(worst tail)  -62.5%  95th  -40.6%
+   cross-draw SD of MaxDD = 6.73pp   SD of CAGR = 4.29pp
+
+k=30 standalone EW sleeve, 300 random PIT draws, quarterly reshuffle:
+   CAGR  median  15.43%  5th  12.54%  95th  18.28%
+   MaxDD median  -48.8%  5th(worst tail)  -53.7%  95th  -44.1%
+   cross-draw SD of MaxDD = 2.85pp   SD of CAGR = 1.76pp
+
+sleeve target w=10% of NAV funded from idle cash; days where cash < target = 8.7% (w_eff mean 0.094)
+
+=== injected into park=0.30, paired block bootstrap L=21 B=4000 seed=12345 ===
+config                                        CAGRact  Calmar E[Calmar]   DD5th  CAGR5th
+park0.30 + carry (baseline a)                  28.40%   2.057     1.963  -22.4%   20.26%
+park0.30 + carry + 10% k=4 [median-draw]       28.70%   1.784     1.713  -26.2%   19.94%
+park0.30 + carry + 10% k=4 [5th-pct-draw]      28.76%   1.636     1.683  -27.2%   19.91%
+park0.30 + carry + 10% k=6 [median-draw]       28.46%   1.730     1.668  -26.7%   19.62%
+park0.30 + carry + 10% k=6 [5th-pct-draw]      29.05%   1.846     1.742  -26.0%   20.35%
+park0.30 + carry + 10% k=30 [median-draw]      29.13%   1.841     1.761  -25.8%   20.43%
+park0.30 + carry + 10% k=30 [5th-pct-draw]     28.87%   1.805     1.722  -26.3%   20.08%
+
+reference (same bootstrap, carry run): park0.80+carry DD5th -30.02% CAGRact 28.05%
+wrote conc_tail_results.json
