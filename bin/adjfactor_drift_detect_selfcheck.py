@@ -278,6 +278,32 @@ def t_scan():
        v == "DRIFT" and p["ex"] == "2026-08-05", f"v={v} ex={p.get('ex')}")
     ck("cụm lệch kết thúc TRƯỚC ex-date bị hỏng", p["d1"] < "2026-08-05", f"d1={p.get('d1')}")
 
+    # M24 (arch-review vòng 3): bản vá F3 CHƯA có assertion nào — mutation revert về
+    # `min(used, default="")` vẫn 301/301. Ca cắn là `our_table_missing`: ex-date còn THIẾU theo định
+    # nghĩa KHÔNG nằm trong `used`, nên `ex > d1` luôn rỗng và fallback quyết định khoá de-dup.
+    only_a = [ev("2026-06-05", "ISS", "Cổ phiếu thưởng", 0.1)]   # bảng TA chỉ biết ex 06-05
+    #        vendor áp CẢ 06-05 lẫn một ex-date ta KHÔNG có -> r_obs > r_pred trên toàn cửa sổ
+    ser2 = [bar(d, 100, 100 / 1.2) for d in D]
+    v, p = det.scan_ticker(ser2, only_a, 0.003, 3, D[0])
+    ck("our_table_missing: KHÔNG vay tên ex-date vendor làm ĐÚNG (M24)",
+       v == "DRIFT" and p["ex"] != "2026-06-05", f"v={v} ex={p.get('ex')}")
+    ck("our_table_missing: khoá nói thẳng 'không xác định được ex-date nào thiếu'",
+       p["ex"].startswith("unknown_gap@"), f"ex={p.get('ex')}")
+    # R3-2: khoá phải BẤT BIẾN theo cửa sổ. Cùng một lệch, hai `asof` liên tiếp (chuỗi dài thêm 1
+    # phiên ⇒ `d1` trôi) phải cho CÙNG khoá — neo vào `d1` thì báo lại mỗi ngày.
+    ser2b = ser2 + [bar("2026-08-11", 100, 100 / 1.2)]
+    v2, p2 = det.scan_ticker(ser2b, only_a, 0.003, 3, D[0])
+    ck("R3-2: `d1` trôi sang phiên mới nhưng khoá de-dup KHÔNG đổi",
+       p2["ex"] == p["ex"] and p2["d1"] != p["d1"],
+       f"ex {p['ex']}->{p2['ex']} | d1 {p['d1']}->{p2['d1']}")
+    # R3-3: khoá của `too_few_sessions_to_compare` cũng không được trôi theo rìa cửa sổ nạp
+    v3, q3 = det.scan_ticker([bar("2026-08-09", 100, 100)], [], 0.003, 3, "2026-08-08")
+    v4, q4 = det.scan_ticker([bar("2026-08-08", 100, 100), bar("2026-08-09", 100, 100)], [],
+                             0.003, 3, "2026-08-08")
+    ck("R3-3: khoá too_few KHÔNG trôi theo rìa trái cửa sổ nạp",
+       v3 == v4 == "UNCOMPUTABLE" and q3["unknown"][0][0] == q4["unknown"][0][0] == "no_ex_in_window",
+       f"{q3['unknown'][0][0]!r} vs {q4['unknown'][0][0]!r}")
+
 
 # -------------------------------------------- 7. hợp đồng dòng máy đọc + CLI
 
@@ -367,8 +393,18 @@ def t_contract():
 
 
 def _exits_2(argv):
+    """rc==2 (argparse từ chối)? Chạy detector như tiến trình con, nhưng KHÔNG cho chạm BigQuery.
+
+    Các assertion "giá trị ĐÚNG vẫn được nhận" đi QUA cổng argparse rồi vào `run_scan` thật ⇒ trước
+    bản này nó phát một truy vấn `feed_freshness()` + `price_rows` + `events` THẬT và đọc cả
+    `data/execution_logs/` (arch-review vòng 3, R3-5: 9,6s, `# vi the LIVE: 30 ma`). Chỉ-đọc nên
+    KHÔNG vi phạm §5b hay ranh giới detect-only, nhưng LAYER1.md §1 hứa "không cần BigQuery" và một
+    selfcheck phụ thuộc mạng thì hỏng ở nơi khác vì lý do không liên quan. `MIKE_ADJFACTOR_NO_BQ=1`
+    làm mọi lối ra BQ raise ngay ⇒ rc=1 (hạ tầng), vẫn phân biệt được với rc=2 (sai đối số).
+    """
+    env = dict(os.environ, MIKE_ADJFACTOR_NO_BQ="1")
     r = subprocess.run([sys.executable, os.path.join(HERE, "adjfactor_drift_detect.py")] + argv,
-                       capture_output=True, text=True)
+                       capture_output=True, text=True, env=env)
     return r.returncode == 2
 
 
@@ -572,6 +608,50 @@ def t_alert(tz_label, env_tz):
         ck(f"[{tz_label}] held=skipped KHÔNG bị in thành 'ĐANG NẮM LIVE: skipped' (F7)",
            "ĐANG NẮM LIVE: skipped" not in m and "CHƯA TRA" in m, f"{m[:400]!r}")
 
+        # R3-7: một trường thứ 13 thêm về sau KHÔNG được làm mất nhánh cờ đính chính. `read` dồn phần
+        # còn lại vào biến CUỐI, nên thiếu biến hứng thì `corr` thành "1|extra" ⇒ so `= "1"` thất bại
+        # ⇒ dòng quay về "vendor THIẾU hệ số" + TODO Winston, tái lập F4 một cách im lặng.
+        os.remove(os.path.join(sink, "notify.txt"))
+        wide = (DRIFT_HELD.replace("VPB|2026-09-24", "W13|2026-09-08")[:-1] + "1|truong_moi")
+        r = _run_alert(tmp, tgt, "\n".join([wide, FEED_FRESH, SCAN]) + "\n", env_tz)
+        m = open(os.path.join(sink, "notify.txt")).read()
+        ck(f"[{tz_label}] dòng có trường thứ 13 -> cờ corr VẪN đọc đúng (R3-7)",
+           "NGHI BẢN ĐÍNH CHÍNH" in m and "yêu cầu backfill" not in m, f"{m[:500]!r}")
+        # và dòng 11 trường (bản CŨ, không có corr) vẫn phải đọc được như corr=0
+        os.remove(os.path.join(sink, "notify.txt"))
+        old11 = DRIFT_HELD.replace("VPB|2026-09-24", "O11|2026-09-06")[:-2]
+        ck("fixture 11 trường dựng đúng (không còn trường corr)", len(old11.split("|")) == 11, old11)
+        r = _run_alert(tmp, tgt, "\n".join([old11, FEED_FRESH, SCAN]) + "\n", env_tz)
+        m = open(os.path.join(sink, "notify.txt")).read()
+        ck(f"[{tz_label}] dòng 11 trường (không có corr) -> coi như corr=0, vẫn quy việc bình thường",
+           "O11" in m and "NGHI BẢN ĐÍNH CHÍNH" not in m, f"{m[:400]!r}")
+
+        # R3-4: KHÔNG MỞ được file lock là lỗi MÔI TRƯỜNG -> chạy TIẾP (fail-open về phía GỬI), và
+        # thông điệp phải trích LỖI THẬT chứ không khẳng định "một lượt khác đang chạy" (§29 dạng 2).
+        os.remove(os.path.join(sink, "notify.txt"))
+        lockdir = os.path.join(tmp, "state")
+        # Phải XOÁ .lock cũ trước khi khoá thư mục: mở một file ĐÃ TỒN TẠI để ghi chỉ cần quyền trên
+        # FILE (0600, ta sở hữu), không cần quyền trên thư mục — để nguyên thì ca này không tái hiện
+        # được và assertion trở thành vô nghĩa.
+        for f in os.listdir(lockdir):
+            if f.endswith(".lock"):
+                os.remove(os.path.join(lockdir, f))
+        mode = os.stat(lockdir).st_mode
+        os.chmod(lockdir, 0o500)                      # read-only: mở file .lock sẽ thất bại
+        try:
+            r = _run_alert(tmp, tgt, "\n".join([
+                DRIFT_HELD.replace("VPB|2026-09-24", "LCK|2026-09-04"), FEED_FRESH, SCAN]) + "\n",
+                env_tz)
+            sent = os.path.exists(os.path.join(sink, "notify.txt"))
+            ck(f"[{tz_label}] state/ read-only -> VẪN gửi Discord (fail-open về phía GỬI) (R3-4)",
+               sent, f"rc={r.returncode} {r.stderr[-300:]!r}")
+            ck(f"[{tz_label}] lock không mở được: trích LỖI THẬT, KHÔNG nói 'lượt khác đang chạy'",
+               "KHONG MO duoc file lock" in r.stderr
+               and "Permission denied" in r.stderr
+               and "dang giu" not in r.stderr, f"{r.stderr[-600:]!r}")
+        finally:
+            os.chmod(lockdir, mode)
+
         # Feed KHÔNG tươi: luôn lên Discord, đứng đầu, kèm lý do THẬT của detector, và nói rõ
         # "khớp" bên dưới không đáng tin. Đây là ca im-lặng-bằng-sạch mà arch-review chỉ ra.
         os.remove(os.path.join(sink, "notify.txt"))
@@ -714,6 +794,20 @@ def t_runner():
            "KHÔNG phải" in r.stderr and "FATAL" in r.stderr, f"{r.stderr[-300:]!r}")
         ck("detector rc=1 + --dry-run -> KHÔNG gửi Discord",
            not os.path.exists(os.path.join(sink, "notify.txt")))
+
+        # M31 (arch-review vòng 3): F2 chỉ được chốt cho rc=1, nên mutation NỚI allow-list thành
+        # `0|10|11|124|137` vẫn 301/301 — trong khi CHÍNH cái bị vá là "một rc BẤT NGỜ phải là thất
+        # bại". Chốt bằng đúng hai rc mà kernel/timeout sinh ra.
+        for bad_rc in (124, 137, 3):
+            r = run(["--dry-run"], rc=bad_rc, out=SCAN)
+            ck(f"detector rc={bad_rc} (ngoài allow-list) -> runner trả {bad_rc}, KHÔNG phải 0/10 (M31)",
+               r.returncode == bad_rc, f"rc={r.returncode}")
+            ck(f"detector rc={bad_rc} -> KHÔNG gọi alert, và nói rõ KHÔNG phải 'không có lệch'",
+               "KHONG goi alert" in r.stderr and "KHÔNG phải" in r.stderr, f"{r.stderr[-200:]!r}")
+        # rc=11 (điểm mù) NẰM TRONG allow-list: nó có kết luận, phải đi tiếp sang alert
+        r = run(["--dry-run"], rc=11, out="\n".join([UNCOMP_HELD, FEED_FRESH, SCAN]))
+        ck("detector rc=11 (điểm mù) -> VẪN gọi alert (nằm trong allow-list)",
+           "KHONG goi alert" not in r.stderr, f"{r.stderr[-200:]!r}")
 
         r = run([], rc=1, out="[FATAL] BQ chet")
         ck("detector rc=1 KHÔNG dry-run -> CÓ gửi Discord cảnh báo hạ tầng",
@@ -943,6 +1037,17 @@ def t_held_and_corr():
         ck("ảnh chụp TƯƠI -> trả map thật", hm == {"VPB": "SpaceX,ZaloPay"}, f"{hm}")
         fake.broker_qty = lambda acct: {("VPB", "2026-09-25"): 0}
         ck("qty = 0 -> KHÔNG tính là đang nắm", det.held_map("2026-09-25") == {})
+
+        # R3-1: MỘT tài khoản hỏng cũng phải fail-closed. Vòng 2 chỉ chặn ca CẢ HAI rỗng, nên một
+        # tài khoản hỏng bị `continue` bỏ qua lặng lẽ ⇒ mã chỉ nắm ở tài khoản đó bị gán `none`
+        # (đo thật trên dar THẬT: ZaloPay hỏng ⇒ CSV/DGC thành 'none', đúng lại failure mode F1).
+        fake.broker_qty = lambda acct: ({("VPB", "2026-09-25"): 1000}
+                                        if acct == "0002023347" else {})
+        ck("MỘT tài khoản rỗng (tài khoản kia khoẻ) -> held_map = None (R3-1)",
+           det.held_map("2026-09-25") is None)
+        fake.broker_qty = lambda acct: {("VPB", "2026-09-25"): 1000}
+        ck("CẢ HAI tài khoản trả vị thế -> mới được dùng nhãn nắm",
+           det.held_map("2026-09-25") == {"VPB": "SpaceX,ZaloPay"})
     finally:
         sys.modules.pop("dividend_adjusted_return", None)
 
@@ -979,8 +1084,19 @@ def t_held_and_corr():
     ck("--min-run 9999 bị TỪ CHỐI (chiều làm im) (F6)", _exits_2(["--min-run", "9999"]))
     ck("--lookback-days 2 bị TỪ CHỐI (chiều làm im)", _exits_2(["--lookback-days", "2"]))
     ck("--ex-days 0 bị TỪ CHỐI", _exits_2(["--ex-days", "0"]))
+    # R3-6: trần cũ 0.5 cao hơn sàn bằng chứng 0,3% hai bậc; `--dev-tol 0.4` đã biến lệch lớp VPB
+    # −20,66% thành AGREE. Đây là chiều LÀM IM, phải chặn như min-run/lookback.
+    ck(f"--dev-tol 0.4 bị TỪ CHỐI (> DEV_TOL_MAX={det.DEV_TOL_MAX}, chiều làm im) (R3-6)",
+       _exits_2(["--dev-tol", "0.4"]))
+    ck("--dev-tol 0.003 (mặc định, sàn bằng chứng) VẪN được nhận",
+       not _exits_2(["--dev-tol", "0.003", "--no-holdings", "--asof", "1999-01-01",
+                     "--tickers", "ZZZ"]))
+    ck("R3-5: selfcheck KHÔNG chạm BigQuery — cổng MIKE_ADJFACTOR_NO_BQ có tác dụng thật",
+       det.bq_guard_active({"MIKE_ADJFACTOR_NO_BQ": "1"}) is True
+       and det.bq_guard_active({}) is False)
     ck("--min-run 3 (mặc định) VẪN được nhận — cổng không chặn oan giá trị đúng",
-       not _exits_2(["--min-run", "3", "--asof", "1999-01-01", "--tickers", "ZZZ"]))
+       not _exits_2(["--min-run", "3", "--no-holdings", "--asof", "1999-01-01",
+                     "--tickers", "ZZZ"]))
 
 
 def main():

@@ -116,12 +116,30 @@ MIN_EVAL_SESSIONS = 3
 # phiên (VPB) ⇒ `--min-run` cao hơn 120 không còn ý nghĩa phát hiện nào, chỉ tắt cảnh báo.
 MIN_RUN_MAX = 120
 LOOKBACK_MIN = 20
+DEV_TOL_MAX = 0.05
 
 
 # ---------------------------------------------------------------- data access
 
+def bq_guard_active(env=None):
+    """`MIKE_ADJFACTOR_NO_BQ=1` ⇒ mọi lối ra BigQuery phải raise NGAY.
+
+    Chỉ dành cho selfcheck (R3-5): nó khẳng định "không cần BigQuery", nhưng các assertion kiểm
+    argparse chấp-nhận-giá-trị-đúng đi qua cổng rồi vào `run_scan` thật và phát truy vấn thật. Cổng
+    này biến chúng thành rc=1 (hạ tầng) — vẫn phân biệt được với rc=2 (sai đối số), mà không cần
+    stub từng hàm ở tiến trình con.
+    """
+    return (env if env is not None else os.environ).get("MIKE_ADJFACTOR_NO_BQ") == "1"
+
+
+def _bq(sql):
+    if bq_guard_active():
+        raise RuntimeError("MIKE_ADJFACTOR_NO_BQ=1: chan moi truy van BigQuery (selfcheck)")
+    return cal.bq(sql)
+
+
 def bq_max_session():
-    rows = cal.bq(f'SELECT CAST(MAX(t.time) AS STRING) AS d FROM `{BQ}.tav2_bq.ticker` AS t')
+    rows = _bq(f'SELECT CAST(MAX(t.time) AS STRING) AS d FROM `{BQ}.tav2_bq.ticker` AS t')
     if not rows or not rows[0].get("d"):
         raise RuntimeError("tav2_bq.ticker: MAX(time) rong — khong xac dinh duoc phien moi nhat")
     return rows[0]["d"]
@@ -146,6 +164,8 @@ def feed_gate(asof):
     SystemExit` dòng 154) — không chấp nhận được với một script chỉ-phát-hiện. Hằng số thì tái dùng.
     """
     try:
+        if bq_guard_active():
+            raise RuntimeError("MIKE_ADJFACTOR_NO_BQ=1: chan moi truy van BigQuery (selfcheck)")
         f = cal.feed_freshness()
     except Exception as e:                                   # noqa: BLE001
         # Ở đây KHÔNG được fail-open: không tra được độ tươi nghĩa là không biết feed còn sống hay
@@ -177,7 +197,7 @@ def price_rows(tickers, start, end):
     tính trên một `Price` đã ffill sai bằng đúng cả hệ số.
     """
     tk = ",".join(f'"{t}"' for t in sorted(set(tickers)))
-    return cal.bq(f"""
+    return _bq(f"""
         SELECT t.ticker AS tk, CAST(t.time AS STRING) AS d,
                t.Close AS close, t.Price AS price, t.High AS hi, t.Low AS lo
         FROM `{BQ}.tav2_bq.ticker` AS t
@@ -204,7 +224,7 @@ def cohort_tickers(ex0, ex1):
     `cal.is_price_adjusting` trong `build_factor_curve` — một chỗ duy nhất giữ taxonomy.
     """
     methods = ",".join(f'"{m}"' for m in sorted(cal.PRICE_ADJUSTING_ISS))
-    rows = cal.bq(f"""
+    rows = _bq(f"""
         SELECT DISTINCT c.ticker AS tk
         FROM `{BQ}.tav2_bq.corporate_action` AS c
         WHERE c.exright_date BETWEEN DATE "{ex0}" AND DATE "{ex1}"
@@ -229,7 +249,14 @@ def held_map(asof, max_stale_days=HELD_MAX_STALE_DAYS):
     KHÔNG raise**. Bản trước trả `{}` (dict RỖNG, falsy nhưng `is not None`) ⇒ `held.get(tk,"none")`
     cho ra `"none"` cho MỌI mã ⇒ VPB lệch −20,66% ĐANG NẮM in ra dưới tiêu đề "Mã không nắm (chỉ
     ảnh hưởng nghiên cứu/backtest)" và bị trần `MAX_OTHER_LINES` cắt — đúng nguyên văn lỗi vòng 1
-    #5, chỉ đổi đường vào. Hai tài khoản LIVE không thể cùng lúc rỗng thật: rỗng = nguồn hỏng.
+    #5, chỉ đổi đường vào. Một tài khoản LIVE rỗng thật là bất khả: rỗng = nguồn hỏng.
+
+    ⚠️⚠️ Phải fail-closed theo **TỪNG TÀI KHOẢN**, không chỉ khi TẤT CẢ đều rỗng (arch-review vòng 3,
+    R3-1). Bản vòng 2 dùng `if not qmap: continue` nên một tài khoản hỏng bị BỎ QUA lặng lẽ và
+    `snap_dates` vẫn còn của tài khoản sống ⇒ cả hai cổng mới đều PASS. Đo thật trên
+    `dividend_adjusted_return` THẬT với dữ liệu broker hôm nay: giả lập ZaloPay hỏng + SpaceX khoẻ
+    ⇒ trả dict(28) KHÔNG cảnh báo, và `CSV`/`DGC` (chỉ nắm ở ZaloPay) bị gán `none` ⇒ đúng lại failure
+    mode của F1, trên một vị thế LIVE thật. Vì vậy: THIẾU dù chỉ một tài khoản ⇒ None.
 
     Freshness (§14): ảnh chụp vị thế cũ hơn `max_stale_days` so với `asof` thì nhãn "none" không
     còn đáng tin (mã mới mua sẽ bị gán `none`) ⇒ trả None, KHÔNG dùng số cũ một cách im lặng.
@@ -237,20 +264,23 @@ def held_map(asof, max_stale_days=HELD_MAX_STALE_DAYS):
     try:
         import dividend_adjusted_return as dar
         out = defaultdict(set)
-        snap_dates = []
+        snap_dates, empty = [], []
         for label, acct in dar.ACCOUNTS.items():
             qmap = dar.broker_qty(acct)
             if not qmap:
+                empty.append(label)
                 continue
             last = max(d for _tk, d in qmap)
             snap_dates.append((label, last))
             for (tk, d), qty in qmap.items():
                 if d == last and float(qty or 0) > 0:
                     out[tk].add(label)
-        if not snap_dates:
-            print(f"[warn] khong mot tai khoan nao ({', '.join(dar.ACCOUNTS)}) tra ve vi the -> "
-                  f"nguon vi the coi nhu HONG, held=unknown cho moi ma. `broker_qty()` KHONG raise "
-                  f"khi thieu file/record: kiem `dividend_adjusted_return.EXEC_LOG_DIR`.",
+        if empty:
+            print(f"[warn] {len(empty)}/{len(dar.ACCOUNTS)} tai khoan KHONG tra ve vi the nao "
+                  f"({', '.join(empty)}) -> nguon vi the coi nhu HONG cho ca luot, held=unknown cho "
+                  f"moi ma. `broker_qty()` KHONG raise khi thieu file/record: kiem "
+                  f"`dividend_adjusted_return.EXEC_LOG_DIR`. Mot tai khoan con song KHONG du: ma chi "
+                  f"nam o tai khoan hong se bi gan 'none' — mot khang dinh SAI ve phoi nhiem tien that.",
                   file=sys.stderr)
             return None
         oldest_label, oldest = min(snap_dates, key=lambda x: x[1])
@@ -489,7 +519,12 @@ def scan_ticker(series, events, dev_tol, min_run, eval_from):
         # khác. `unknown_gap@<d1>` nói thẳng "không xác định được ex-date nào thiếu" thay vì đoán.
         ex_named = min((ex for ex, _f in used if ex > d1), default="")
         if not ex_named:
-            ex_named = f"unknown_gap@{d1}"
+            # Neo vào ĐỘ LỆCH, KHÔNG vào `d1` (arch-review vòng 3, R3-2). `d1` trôi theo phiên mới
+            # nhất khi cụm lệch chạm rìa phải: đo thật hai asof liên tiếp trên cùng một lệch không
+            # đổi cho `unknown_gap@2026-09-09` rồi `unknown_gap@2026-09-10` ⇒ báo lại MỖI NGÀY. Đó là
+            # ảnh gương của bug F3 (khoá quá ỔN ĐỊNH thành khoá quá BẤT ỔN). `dev` làm tròn 4 chữ số
+            # là bất biến theo cửa sổ: cùng một hệ số còn thiếu cho cùng một giá trị.
+            ex_named = f"unknown_gap@dev{worst[1]:+.4f}"
         out = {
             "ex": ex_named,
             "r_obs": r_obs, "r_pred": r_pred, "dev": worst[1], "run": run,
@@ -510,7 +545,9 @@ def scan_ticker(series, events, dev_tol, min_run, eval_from):
     # đủ dữ liệu để bất đồng" (arch-review vòng 2, F8: `evaluated == []` trả AGREE với n_eval=0, rồi
     # được cộng vào con số "N khớp" của câu Discord). Đây là fail-closed, cùng hạng UNCOMPUTABLE.
     if len(evaluated) < MIN_EVAL_SESSIONS:
-        ex_last = max((ex for ex, _f in used), default=d_min_of(series))
+        # Mặc định KHÔNG được là `d_min_of(series)`: rìa trái cửa sổ nạp trôi mỗi ngày ⇒ khoá de-dup
+        # đổi mỗi ngày ⇒ mã đang nắm ở trạng thái này báo lại hằng ngày (arch-review vòng 3, R3-3).
+        ex_last = max((ex for ex, _f in used), default="no_ex_in_window")
         return "UNCOMPUTABLE", {
             "unknown": [(ex_last, "too_few_sessions_to_compare",
                          f"chi so duoc {len(evaluated)} phien (< {MIN_EVAL_SESSIONS}) trong cua so "
@@ -518,10 +555,6 @@ def scan_ticker(series, events, dev_tol, min_run, eval_from):
             "notes": notes, "n_eval_clean": len(evaluated)}
     return "AGREE", {"n_eval": len(evaluated), "notes": notes, "n_ex": len(used)}
 
-
-def d_min_of(series):
-    """Ngày sớm nhất có dòng giá — dùng làm ex-date đại diện khi không có sự kiện nào trong `used`."""
-    return series[0]["d"] if series else ""
 
 
 # ── DÒNG MÁY ĐỌC: dựng ở MỘT chỗ duy nhất ───────────────────────────────────────────────────
@@ -614,6 +647,8 @@ def run_scan(args):
     # nạp chúng không mua được gì mà chỉ tạo ra fail-closed giả.
     series = series_by_ticker(price_rows(tks, load0, asof))
     ev_by_tk = defaultdict(list)
+    if bq_guard_active():
+        raise RuntimeError("MIKE_ADJFACTOR_NO_BQ=1: chan moi truy van BigQuery (selfcheck)")
     for e in cal.events(tks, since=win0, until=asof):
         ev_by_tk[e["ticker"]].append(e)
 
@@ -693,11 +728,12 @@ def main(argv=None):
     if args.min_run < MIN_RUN:
         ap.error(f"--min-run < {MIN_RUN} bi TU CHOI: nguong persistence nay la thu da loc duoc "
                  f"ffill `Price` toan thi truong 2026-01-30 (662/1252 ma). Xem docstring.")
-    if not 0 < args.dev_tol < 0.5:
-        # Trần 50%: một dung sai lớn hơn thế thì detector không bao giờ nổ trên bất kỳ sự kiện thật
-        # nào (hệ số lớn nhất đo được trên cohort control là 4,16 ⇒ lệch tối đa ~76%), tức là một
-        # cách TẮT cảnh báo mà trông như đang chạy.
-        ap.error("--dev-tol phai nam trong (0, 0.5) — ngoai khoang nay detector thanh no-op")
+    if not 0 < args.dev_tol <= DEV_TOL_MAX:
+        # Trần 5%, KHÔNG phải 50% (arch-review vòng 3, R3-6): trần cũ cao hơn sàn bằng chứng 0,3% hai
+        # bậc độ lớn, và `--dev-tol 0.4` được nhận đã biến đúng lệch lớp VPB −20,66% thành AGREE (đo
+        # thật: tol 0,003/0,05 -> DRIFT; 0,4/0,499 -> AGREE). Đây là chiều LÀM IM, cùng lớp F6.
+        ap.error(f"--dev-tol phai nam trong (0, {DEV_TOL_MAX}] — lon hon la mot cach TAT canh bao "
+                 f"ma trong nhu dang chay (--dev-tol 0.4 bien lech -20,66% thanh 'khop')")
     # arch-review vòng 2 (F6): hai cổng trên chỉ chặn chiều LÀM Ồ (hạ ngưỡng ⇒ báo động giả). Chiều
     # LÀM IM còn nguy hơn vì nó trông như một lượt quét sạch. Đo thật trên đúng cohort tuần nghi vấn
     # (16 DRIFT, gồm VPB −20,66% đang nắm LIVE):

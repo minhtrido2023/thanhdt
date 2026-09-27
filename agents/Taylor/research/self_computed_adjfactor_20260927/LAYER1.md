@@ -15,13 +15,17 @@ pháp khả thi (46 mã control, sai số ≤0,08%, hệ số 1,01→4,16).
 | `bin/adjfactor_drift_alert.sh` | Parse dòng máy đọc → Discord + bus + de-dup nguyên tử | Không tính lại gì; không grep văn xuôi (§28) |
 | `bin/adjfactor_drift_daily.sh` | Runner cron: chạy detector, **giữ rc của nó**, rồi gọi alert. rc hợp lệ là **allow-list `0/10/11`** — mọi rc khác (124 timeout, 137 OOM, …) là lỗi hạ tầng | Không dùng pipe trực tiếp (pipe làm MẤT rc=1 ⇒ "BQ chết" bị đọc thành "không có lệch"); không dùng deny-list rc (§8b F2) |
 
-Selfcheck: `bin/adjfactor_drift_detect_selfcheck.py` — **301/301 assertion PASS**, đo dưới `$DNA_PYEXE`
+Selfcheck: `bin/adjfactor_drift_detect_selfcheck.py` — **337/337 assertion PASS**, đo dưới `$DNA_PYEXE`
 (`/home/trido/thanhdt/wc_venv/bin/python`). Phần shell chạy LẶP dưới 4 môi trường TZ (`unset TZ`,
 `TZ=UTC`, `TZ=Pacific/Kiritimati` +14, `TZ=Pacific/Midway` −11) theo §16/§19 — hai TZ lệch CỰC ĐẠI
 được thêm ở vòng 2 vì `TZ=America/New_York` cùng ngày lịch với ICT trong phần lớn giờ hành chính,
 nên mutation "bỏ hẳn neo `TZ='Asia/Ho_Chi_Minh'`" vẫn PASS (§19: assertion neo-TZ phải phân biệt
 được, và selfcheck có một assertion META tự kiểm điều đó thay vì giả định).
-Không cần BigQuery: mọi assertion công thức/ngưỡng dùng chuỗi tổng hợp dựng theo CHỮ KÝ ca thật
+Không cần BigQuery — **cưỡng chế bằng `MIKE_ADJFACTOR_NO_BQ=1`**, không phải chỉ bằng lời hứa: mọi
+lối ra BQ đi qua `_bq()`/`bq_guard_active()` và raise ngay khi cờ bật. Trước vòng 3 các assertion
+"argparse NHẬN giá trị đúng" đi qua cổng rồi vào `run_scan` thật và phát truy vấn THẬT (9,6s, đọc cả
+`data/execution_logs/`) — chỉ-đọc nên không vi phạm §5b, nhưng vẫn là một selfcheck phụ thuộc mạng.
+Mọi assertion công thức/ngưỡng dùng chuỗi tổng hợp dựng theo CHỮ KÝ ca thật
 (FPT/VPB/XHC/GEX/DGC/DXG + ffill toàn thị trường 2026-01-30); phần shell chạy trong ROOT sandbox với
 `notify_thread.sh`/`append_event.sh` là stub ⇒ **selfcheck không bao giờ gửi Discord thật hay ghi bus thật**.
 
@@ -50,11 +54,12 @@ trong docstring rồi hy vọng không ai hạ.
 
 ## 4. UNCOMPUTABLE — fail-closed, không bao giờ suy đoán f=1,0 (yêu cầu #4)
 
-9 mã lý do MÁY ĐỌC, mỗi mã suy TỪ đúng thứ vừa đọc được (§29), kèm `note` văn xuôi có số thật:
+**10** mã lý do MÁY ĐỌC, mỗi mã suy TỪ đúng thứ vừa đọc được (§29), kèm `note` văn xuôi có số thật:
 
 `rights_issue_no_subscription_price` · `iss_ratio_unparsable` · `iss_ratio_nonpositive` ·
 `div_dps_unparsable` · `div_dps_nonpositive` · `unsupported_event_code` ·
-`no_cum_session_in_window` · `price_ffill_suspect` · `cash_exceeds_price`
+`no_cum_session_in_window` · `price_ffill_suspect` · `cash_exceeds_price` ·
+`too_few_sessions_to_compare` *(thêm ở vòng 3 — xem §8b F8)*
 
 Hai luật lan truyền, cả hai có assertion:
 1. **Một ex-date không tính được làm `r_pred` SAI cho MỌI phiên trước nó** ⇒ chỉ chấm điểm các phiên
@@ -160,7 +165,7 @@ audit. Discord gửi hỏng ⇒ **không** ghi de-dup (sổ sách không đượ
 ## 8. Lỗi arch-review tìm ra và đã vá (vòng 1 + 2 + 3)
 
 Ghi lại vì mỗi lỗi là một ca "im lặng/khẳng định sai" mà bản đầu KHÔNG bắt được, và cả sáu đều có
-assertion mới chốt lại (301 assertion hiện tại so với 142 của bản đầu).
+assertion mới chốt lại (337 assertion hiện tại so với 142 của bản đầu).
 
 1. **Feed nguồn chết = một tuần sạch.** `tav2_bq.corporate_action` là bảng **TRAP** có writer NGOÀI
    repo. Feed đứng im ⇒ 0 ex-date ⇒ mọi mã "khớp" ⇒ `ADJFACTOR_SCAN|…|0|0|0|0|0` và **rc=0, không
@@ -224,6 +229,37 @@ nào** (`too_few_sessions_to_compare` = 0 ca) — khớp đúng phép đo của 
 **Hạn chế còn lại đã biết (KHÔNG giải được bằng code):** phân biệt tranche thật với bản ĐÍNH CHÍNH
 cùng `event_code` cần đọc hiểu `event_title_vi` tiếng Việt. `corr=1` chỉ NÊU NGHI VẤN và chặn việc
 quy cho vendor — nó không nói được bên nào đúng.
+
+### 8c. Vòng 4 — 2 must-fix + 5 should-fix (5/6 mutation vòng 3 đã thành KILL)
+
+Vòng 3 xác nhận 5 trong 6 mutation sống sót đã bị giết (M4/M7/M18/M19 bởi mục `[13] t_emit`, M8 bởi
+assertion rc); M10 gốc thành vestigial nên arch-review mutate CƠ CHẾ MỚI thay vì mục tiêu cũ —
+**M10a** (tắt `corr_ex.add`) và **M10b** (tắt định tuyến corr trong `alert.sh`) đều KILLED.
+
+| # | Finding | Hạng | Bản vá |
+|---|---|---|---|
+| R3-1 | **F1 chưa hết: hỏng MỘT tài khoản vẫn không fail-closed.** `if not qmap: continue` bỏ qua tài khoản hỏng lặng lẽ, `snap_dates` còn của tài khoản sống ⇒ cả hai cổng vòng 3 PASS. Đo trên `dar` **THẬT** với dữ liệu broker hôm nay: ZaloPay hỏng + SpaceX khoẻ ⇒ dict(28) không cảnh báo, `CSV`/`DGC` (chỉ nắm ở ZaloPay) gán `none` ⇒ đúng lại failure mode F1 trên vị thế LIVE thật | **MED-HIGH** | thiếu dù MỘT tài khoản ⇒ `None`, thông điệp nêu rõ "một tài khoản còn sống KHÔNG đủ" |
+| R3-4 | **Lock F9 đảo chiều fail-open và tự bịa nguyên nhân.** `state/` không ghi được ⇒ thông điệp khẳng định "một lượt khác đang chạy" + "sau 60s" khi nó chờ 0s và không có lượt nào khác; bằng chứng thật (`Permission denied`) bash in ra rồi bị vứt — §29 dạng 2 trong chính code vá §29. Và lock lấy TRƯỚC cả bus lẫn Discord ⇒ lỗi môi trường thành im lặng HOÀN TOÀN, trái header của chính file | **MED** | tách "không MỞ được lock" (chạy TIẾP không lock) khỏi "lock đang bị giữ" (ghi bus rồi bỏ qua Discord, rc=11) |
+| R3-2 | `unknown_gap@<d1>` **re-key mỗi ngày** khi cụm lệch chạm rìa phải — ảnh gương của F3 (khoá quá ổn định → quá bất ổn). Đo: cùng lệch, hai asof liên tiếp cho `@2026-09-09` rồi `@2026-09-10` ⇒ báo lại hằng ngày | LOW-MED | neo vào `dev` làm tròn 4 chữ số (bất biến theo cửa sổ): `unknown_gap@dev-0.1667` |
+| R3-3 | cùng lớp: `too_few_sessions_to_compare` dùng `d_min_of(series)` làm ex de-dup ⇒ trôi theo rìa cửa sổ nạp | LOW | hằng `no_ex_in_window`; `d_min_of()` bị xoá |
+| R3-7 | `read ... held corr` để biến CUỐI hút phần còn lại ⇒ một trường **thứ 13** thêm về sau làm `corr` thành `"1\|extra"` ⇒ **mất nhánh cờ đính chính**, dòng quay về "vendor THIẾU hệ số" + TODO Winston = tái lập F4 im lặng | LOW | biến hứng `_rest` ở cả 3 vòng lặp; assertion cho cả dòng 13 trường và dòng 11 trường (bản cũ) |
+| R3-6 | **F6 còn hở chiều `--dev-tol`**: trần 0,5 cao hơn sàn bằng chứng 0,3% hai bậc độ lớn; `--dev-tol 0.4` được nhận và biến lệch lớp VPB −20,66% thành AGREE (đo: 0,003/0,05 → DRIFT; 0,4/0,499 → AGREE) | LOW | `DEV_TOL_MAX = 0.05` |
+| R3-5 | selfcheck **thật sự chạm BigQuery** ở assertion cuối của F6 (9,6s, `feed_freshness` + `price_rows` + `events` thật, đọc cả `data/execution_logs/` → `# vi the LIVE: 30 ma`). Chỉ-đọc nên KHÔNG vi phạm §5b, nhưng §1 hứa "không cần BigQuery" | LOW | `MIKE_ADJFACTOR_NO_BQ=1` + `_bq()`/`bq_guard_active()` chặn MỌI lối ra BQ; có assertion cho chính cổng đó |
+
+**Hai lỗi phát sinh trong lúc vá vòng 4, cả hai tự bắt được:**
+1. `_LOCK_ERR="$(exec 9>"$STATE.lock" 2>&1)"` **không bắt được lỗi**: redirect xử lý trái→phải nên
+   `9>file` thất bại khi stderr VẪN là stderr ngoài ⇒ biến rỗng và thông điệp phải in "khong ro" —
+   tức lại đúng §29 dạng 1 trong bản vá cho §29 dạng 2. Đo thật: dạng `9>file 2>&1` cho
+   `captured=[]`, dạng `2>&1` TRƯỚC cho đúng dòng `Permission denied`. Đã đổi sang dạng sau.
+2. Assertion R3-4 ban đầu **vô nghĩa**: `.lock` đã tồn tại từ các lượt trước, mà mở file ĐÃ CÓ để ghi
+   chỉ cần quyền trên FILE (0600, ta sở hữu) chứ không cần quyền trên thư mục ⇒ ca không tái hiện.
+   Phải XOÁ `.lock` trước khi `chmod 500`.
+
+Kèm theo: ghi state thất bại từng bung **traceback trần** (`PermissionError` từ `mkstemp`) — giờ nói
+rõ hệ quả thật ("Discord ĐÃ gửi, lượt sau sẽ GỬI LẠI các khoá này") kèm lỗi thật, §29.
+
+**Đo lại real-data lần thứ ba, vẫn KHÔNG đổi một số nào:** suspect 16/13/23/2 rc=10, VPB+DRI đúng
+nhãn, 0 `corr=1`, **0 `unknown_gap`**; control `--no-holdings` 95/11/26/46/12, 0 `too_few`.
 
 ## 9. Còn phải làm trước khi lên production (KHÔNG tự làm)
 

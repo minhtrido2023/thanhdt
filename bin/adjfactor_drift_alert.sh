@@ -10,7 +10,9 @@
 #   · parse DÒNG MÁY ĐỌC với giá trị đã chuẩn hoá, KHÔNG grep văn xuôi (§28);
 #   · Discord = kênh CHÍNH và là ĐIỀU KIỆN để ghi de-dup; bus = kênh PHỤ, hỏng thì nêu lỗi thật
 #     rồi đi tiếp (§29 — không nuốt stderr);
-#   · state de-dup ghi NGUYÊN TỬ (tmp + os.replace, §5); state hỏng ⇒ coi như CHƯA cảnh báo
+#   · state de-dup ghi NGUYÊN TỬ (tmp + os.replace, §5) dưới `flock`; state hỏng ⇒ coi như CHƯA
+#     cảnh báo. EXIT: 0 = không có gì để báo · 10 = đã xử lý (gửi hoặc de-dup) · 11 = bỏ qua vì một
+#     lượt khác đang giữ lock · 2 = sai đối số.
 #     (fail-open về phía GỬI) và in lỗi thật.
 #
 # KHÁC `vendor_mismatch_alert.sh` ở MỘT điểm có chủ ý — KHOÁ DE-DUP:
@@ -106,11 +108,27 @@ mkdir -p "$ROOT/state"
 # mất khoá của lượt về trước. Hướng fail là AN TOÀN (gửi thừa, không mất cảnh báo) nên không phải
 # lỗi tiền, nhưng §5 đòi idempotence thì phải đúng cả khi chạy song song, không chỉ khi tuần tự.
 # `flock` giữ suốt đời tiến trình qua FD 9; hết lock sau khi script thoát, kể cả khi bị kill.
-exec 9>"$STATE.lock"
-if ! flock -w 60 9; then
-  echo "adjfactor_drift_alert: KHONG lay duoc lock $STATE.lock sau 60s — mot luot khac dang chay. "\
-       "KHONG gui trung, thoat rc=11 (diem mu, KHONG phai 'sach')." >&2
-  exit 11
+# HAI ca KHÁC NHAU, không được gộp (arch-review vòng 3, R3-4):
+#   (a) KHÔNG MỞ được file lock (thư mục read-only, hết inode, quyền sai) — đây là lỗi MÔI TRƯỜNG,
+#       không phải tranh chấp. Bản trước gộp cả hai vào một thông điệp khẳng định "một lượt khác đang
+#       chạy" + "sau 60s" trong khi nó chờ 0s và KHÔNG có lượt nào khác; bằng chứng thật
+#       (`Permission denied`, `Bad file descriptor`) do bash in ra và bị vứt đi — §29 dạng 2, trong
+#       code MỚI mà `diagnosis_evidence_gate.py` về cấu trúc không nhìn thấy được.
+#       Xử lý: CHẠY TIẾP KHÔNG LOCK. Không có lock chỉ mất tính idempotent khi chạy song song (hướng
+#       fail là GỬI THỪA), còn thoát ở đây thì mất CẢ cảnh báo — đúng điều header file này cấm.
+#   (b) mở được nhưng KHÔNG giành được trong 60s ⇒ thật sự có lượt khác đang chạy ⇒ bỏ qua để không
+#       gửi trùng. Nhưng vẫn phải ghi BUS trước khi thoát (dấu vết audit không được mất).
+LOCK_SKIP=0
+# ⚠️ THỨ TỰ redirect quan trọng: `$(exec 9>file 2>&1)` KHÔNG bắt được lỗi, vì redirect xử lý từ trái
+# sang phải nên `9>file` thất bại trong khi stderr VẪN là stderr ngoài ⇒ `_LOCK_ERR` rỗng và thông
+# điệp phải nói "khong ro" — tức lại đúng §29 dạng 1 trong chính bản vá cho §29 dạng 2. Đo thật:
+# dạng A cho `captured=[]`, dạng B (2>&1 TRƯỚC) cho đúng dòng "Permission denied".
+if _LOCK_ERR="$(exec 2>&1; exec 9>"$STATE.lock")" && [ -z "$_LOCK_ERR" ]; then
+  exec 9>"$STATE.lock"
+  flock -w 60 9 || LOCK_SKIP=1
+else
+  echo "adjfactor_drift_alert: KHONG MO duoc file lock $STATE.lock -> chay TIEP KHONG LOCK (chi mat" \
+       "tinh idempotent khi chay song song; thoat o day se mat CA canh bao). Loi that: ${_LOCK_ERR}" >&2
 fi
 
 # Khoá nào đã cảnh báo trong vòng RE_ALERT_DAYS ngày ⇒ bỏ khỏi câu Discord (vẫn ở trong bus).
@@ -157,7 +175,11 @@ DETAIL_SKIPPED=""
 SEEN_VENDOR=0
 SEEN_OURS=0
 N_CORR=0
-while IFS='|' read -r _tag tk ex r_obs r_pred dev run d0 d1 dir held corr; do
+# `_rest` là BIẾN HỨNG bắt buộc (arch-review vòng 3, R3-7): `read` dồn toàn bộ phần còn lại vào
+# biến CUỐI, nên nếu thiếu nó, một trường thứ 13 thêm về sau làm `corr` thành "1|extra" ⇒ so
+# `= "1"` thất bại ⇒ **mất nhánh cờ đính chính** và dòng đó quay về "vendor THIẾU hệ số" + TODO cho
+# Winston, tức tái lập đúng F4 một cách im lặng.
+while IFS='|' read -r _tag tk ex r_obs r_pred dev run d0 d1 dir held corr _rest; do
   [ -z "${tk:-}" ] && continue
   key="${tk}|${ex}"
   _is_fresh "$key" && continue
@@ -226,7 +248,7 @@ done <<< "$DRIFTS"
 DETAIL_UNCOMP=""
 N_UNCOMP_HELD=0
 N_UNCOMP_OTHER=0
-while IFS='|' read -r _tag tk ex code held; do
+while IFS='|' read -r _tag tk ex code held _rest; do
   [ -z "${tk:-}" ] && continue
   # `skipped` = chưa tra vị thế ⇒ không được nêu như "mã có thể đang nắm"; đếm như `none`.
   if [ "$held" = "none" ] || [ "$held" = "skipped" ]; then
@@ -247,7 +269,7 @@ done <<< "$UNCOMPS"
 
 N_NODATA_HELD=0
 N_NODATA_OTHER=0
-while IFS='|' read -r _tag tk held; do
+while IFS='|' read -r _tag tk held _rest; do
   [ -z "${tk:-}" ] && continue
   if [ "$held" = "none" ] || [ "$held" = "skipped" ]; then
     N_NODATA_OTHER=$((N_NODATA_OTHER + 1))
@@ -298,6 +320,15 @@ if [ "$DRY_RUN" -eq 0 ]; then
   if ! BUS_ERR="$("$ROOT/bin/append_event.sh" Taylor status "adjfactor-drift-scan-${ASOF}" "$PAYLOAD" 2>&1 >/dev/null)"; then
     echo "adjfactor_drift_alert: append_event.sh THAT BAI (bus la kenh phu, van gui Discord). Loi that: ${BUS_ERR}" >&2
   fi
+fi
+
+# Bỏ qua vì lượt khác đang giữ lock — thoát Ở ĐÂY, tức SAU khi bus đã ghi. Thoát trước bước ghi bus
+# (bản vòng 3) làm mất CẢ HAI kênh cho một lệch thật, trong khi lý do bỏ qua chỉ là "để không gửi
+# trùng" — dấu vết audit không liên quan gì tới việc đó (arch-review vòng 3, R3-4).
+if [ "$LOCK_SKIP" -eq 1 ]; then
+  echo "adjfactor_drift_alert: mot luot khac dang giu $STATE.lock (cho 60s khong duoc) -> da ghi BUS," \
+       "KHONG gui Discord de khong trung. rc=11." >&2
+  exit 11
 fi
 
 FEED_BAD=0
@@ -424,7 +455,16 @@ for k in list(state):
 for k in os.environ['NEW_KEYS'].splitlines():
     if k.strip():
         state[k.strip()] = os.environ['TODAY']
-fd, tmp = tempfile.mkstemp(dir=os.path.dirname(path), prefix='.adjfactor_drift_alerted.', suffix='.tmp')
+# Ghi state THẤT BẠI (thư mục read-only, hết đĩa) KHÔNG được bung traceback trần: Discord ĐÃ gửi
+# xong ở bước trước, nên hệ quả thật là 'lượt sau sẽ gửi lại' — phải nói ra điều đó kèm LỖI THẬT
+# (§29), không phải để người đọc tự dịch một stack trace (arch-review vòng 3).
+try:
+    fd, tmp = tempfile.mkstemp(dir=os.path.dirname(path), prefix='.adjfactor_drift_alerted.', suffix='.tmp')
+except OSError as e:
+    sys.stderr.write('adjfactor_drift_alert: KHONG ghi duoc state de-dup %s — Discord DA gui roi, nen '
+                     'luot cron sau se GUI LAI dung cac khoa nay (khong mat canh bao, co the trung). '
+                     'Loi that: %s: %s\n' % (path, type(e).__name__, e))
+    raise SystemExit(0)
 try:
     with os.fdopen(fd, 'w') as f:
         json.dump(state, f, indent=2, ensure_ascii=False, sort_keys=True)
