@@ -336,8 +336,17 @@ try:
                 e = json.loads(line)
             except Exception:
                 continue
-            if e.get("event_type") == "question" and str(e.get("ts", "")) >= since:
-                t = e.get("topic")
+            # `status` với topic `retro-pattern-recurring-update:<topic>` là nhánh SKIP
+            # của bin/retro_escalate.py: bước 6 ĐÃ xử lý pattern đó (đã có câu hỏi đang
+            # được ack phủ) nên cố ý KHÔNG mở question mới. Chỉ thu event_type=question
+            # thì bước 3 thấy "chưa escalate gì" và được thả cửa mở question trùng —
+            # đúng sự cố 2026-08-15 mà guard này sinh ra để chặn (arch-review vòng 1
+            # ack-topic-counter, required_change #6).
+            _et, _t = e.get("event_type"), e.get("topic") or ""
+            _hit = (_et == "question"
+                    or (_et == "status" and _t.startswith("retro-pattern-recurring-update:")))
+            if _hit and str(e.get("ts", "")) >= since:
+                t = _t
                 if t and t not in out:
                     out.append(t)
 except Exception:

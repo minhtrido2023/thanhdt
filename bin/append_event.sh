@@ -102,6 +102,25 @@ if [ -n "$trace_id" ] && ! printf '%s' "$trace_id" \
   shell word-split và mảnh đuôi rơi vào tham số 5."
 fi
 
+# --- Chốt ack-topic-counter (Wags 2026-09-27, arch-review vòng 1 required_change #7) ---
+# `_acked()` của ops_health_check.sh khớp topic TUYỆT ĐỐI (cố ý). Một question escalate
+# pattern retro mà nhúng bộ ĐẾM ngày vào topic (`…-2days` → `…-3days`) thì ack hôm qua
+# không bao giờ phủ được escalation hôm nay ⇒ mỗi ngày đốt 1 job wags_autofix cho việc
+# người đã triage. Bug này escalate 3 lần (retro 09-23, 09-25, question 09-25T17:33Z)
+# trước khi được vá. Vá ở prompt `daily_retro.sh` là vá bằng TRÍ NHỚ CỦA LLM; chốt cơ
+# khí phải nằm ở ĐƯỜNG GHI. HẸP có chủ đích: chỉ event_type=question và chỉ đúng tiền
+# tố topic của retro — không đụng bất kỳ topic nào khác của fleet.
+case "$etype" in question)
+  if printf '%s' "$topic" \
+       | grep -qiE '^retro-pattern-recurring-.*[-_ ]?[0-9]+[-_ ]?(days?|retros?|lan|times?|x)?$'; then
+    die "topic escalate RETRO mang BỘ ĐẾM: $(printf '%q' "$topic")
+  ack 'triaged-needs-human:' khớp topic TUYỆT ĐỐI nên bộ đếm trong topic làm ack hôm qua
+  không phủ được escalation hôm nay (bug ack-topic-counter). Dùng ĐÚNG cổng:
+    mike/bin/retro_escalate.py --pattern '<slug-không-có-số-ở-cuối>' --days <n> --payload '<json>'
+  Nó tự đặt topic ổn định và tự bỏ qua nếu pattern đã có câu hỏi đang được ack phủ."
+  fi
+;; esac
+
 # Payload mở đầu bằng { hoặc [ mà không parse được = JSON hỏng, KHÔNG phải chuỗi thường.
 # NÓI ĐÚNG NGUYÊN NHÂN, ĐỪNG ĐOÁN (2026-08-28, job Winston_20260828_020258): bản cũ khẳng
 # định "nhiều khả năng bị cắt cụt" cho MỌI ca. Ca Taylor 2026-08-28T01:48:25Z không hề cụt —

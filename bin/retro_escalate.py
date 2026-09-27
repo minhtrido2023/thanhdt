@@ -62,29 +62,40 @@ ACK_PREFIX = "triaged-needs-human:"
 ACK_MAX_SUPPRESS_DAYS = 14
 
 TOPIC_PREFIX = "retro-pattern-recurring-"
-# Đuôi ĐẾM cần cắt. Chỉ cắt MỘT đuôi ở CUỐI chuỗi; `-3days-holiday` (số ở giữa) giữ nguyên.
-_COUNTER_TAIL = re.compile(r"[-_]\d+\s*(?:days?|retros?|lan|times?|x)?$", re.IGNORECASE)
-# Slug chỉ gồm bộ đếm (`3days`) — không có phần mô tả nào. Tách riêng khỏi _COUNTER_TAIL
-# (cái đó đòi dấu phân cách đứng trước) để không âm thầm sinh topic `…-recurring-3days`,
-# tức đúng hình thái bug đang đi diệt.
-_COUNTER_ONLY = re.compile(r"^\d+\s*(?:days?|retros?|lan|times?|x)?$", re.IGNORECASE)
+# Đuôi ĐẾM: số ở CUỐI, đơn vị tuỳ chọn, dấu phân cách tuỳ chọn ở cả 2 phía của số. Phủ
+# CẢ dạng dính (`-2days`) LẪN dạng có gạch (`-2-days`) — cả hai đều CÓ THẬT trên bus
+# (`retro-pattern-recurring-2-days` 08-09, `…-nav-price-xcheck-gate-2-days` 09-09).
+_COUNTER_TAIL = re.compile(r"[-_ ]?\d+[-_ ]?(?:days?|retros?|lan|times?|x)?$", re.IGNORECASE)
+
+
+def has_counter_tail(s):
+    return bool(_COUNTER_TAIL.search(str(s or "")))
 
 
 def stable_topic(pattern):
-    """slug (hoặc cả topic) → topic ỔN ĐỊNH, không chứa bộ đếm."""
-    s = str(pattern or "").strip().strip("-")
+    """slug → topic ỔN ĐỊNH. TỪ CHỐI (không tự cắt) nếu slug còn mang bộ đếm.
+
+    ⚠️ Bản vòng 1 CẮT đuôi đếm. arch-review vòng 1 bác đúng: cắt là VIẾT LẠI, mà viết
+    lại thì 2 slug mô tả KHÁC NHAU có thể gộp thành MỘT topic — `plan-t1-not-ready-
+    0001743767` và `…-0001743768` (2 account tiền thật) cùng ra `…-plan-t1-not-ready`
+    ⇒ ack của pattern này nuốt IM LẶNG escalation của pattern kia. Đổi một bug ỒN
+    (escalate thừa) lấy một bug IM là đi ngược đúng lý do chọn hướng này.
+    Nên: từ chối, fail-loud, bắt người gọi đặt tên không có đuôi số. Việc nhận diện các
+    câu hỏi LEGACY còn mang bộ đếm nằm ở `_same_pattern()` — khớp MỘT CHIỀU từ topic đã
+    biết ra biến thể có đếm, không bao giờ suy ngược từ 2 chuỗi lạ về cùng một gốc.
+    """
+    s = str(pattern or "").strip().strip("-_ ")
     if s.startswith(TOPIC_PREFIX):
         s = s[len(TOPIC_PREFIX):]
-    # Cắt LẶP: `foo-2days-3` (retro nối thêm lần nữa) vẫn phải về `foo`.
-    while True:
-        s2 = _COUNTER_TAIL.sub("", s).strip("-_")
-        if s2 == s:
-            break
-        s = s2
-    if not s or _COUNTER_ONLY.match(s):
-        raise SystemExit("FAIL: --pattern không có phần MÔ TẢ nào sau khi cắt bộ đếm — cần "
-                         "một slug có nghĩa (vd 'ack-topic-counter-structural', "
-                         f"không phải {str(pattern)!r}).")
+    if not s:
+        raise SystemExit("FAIL: --pattern rỗng — cần một slug mô tả pattern.")
+    if has_counter_tail(s):
+        raise SystemExit(
+            f"FAIL: --pattern {str(pattern)!r} kết thúc bằng một CON SỐ. Topic escalate "
+            "phải ỔN ĐỊNH qua các ngày: số lần tái diễn đi vào --days (payload), không "
+            "vào topic — đó chính là bug ack-topic-counter. Nếu con số là một phần của "
+            "danh tính (số tài khoản, id thread) thì viết lại cho nó không đứng cuối, "
+            "vd 'plan-t1-not-ready-acct0001743768'.")
     return TOPIC_PREFIX + s
 
 
@@ -116,14 +127,25 @@ def _ts(rec):
 
 
 def load_bus(bus_root):
-    """Trả (questions, acks) cho toàn bộ inbox + archive.
+    """Trả (questions, acks, resolvers) cho toàn bộ inbox + archive.
 
-    questions: [(agent, topic, ts)] · acks: [(topic_đã_bỏ_prefix, a_ts, a_until, sd)]
+    questions/resolvers: [(agent, topic, ts)] · acks: [(topic_đã_bỏ_prefix, a_ts, a_until, sd)]
+
+    Thiếu thư mục inbox ⇒ FAIL LOUD. Trả rỗng ở đây có nghĩa "chưa ai escalate bao giờ"
+    ⇒ POST — nghe thì fail-open vô hại, nhưng nó biến một lỗi đường dẫn (vd chạy từ
+    worktree, `--bus-root` trỏ nhầm) thành "kết luận về nội dung bus", đúng lớp lỗi mà
+    chính `ops_health_check.sh` đã phải vá (nhánh không thấy `bus/inbox` là WARN, không
+    phải "không có câu hỏi").
     """
     inbox = os.path.join(bus_root, "mike", "bus", "inbox")
+    if not os.path.isdir(inbox):
+        raise SystemExit(
+            f"FAIL: KHÔNG tìm thấy thư mục bus {inbox} — không thể kết luận pattern này "
+            "đã được escalate/ack hay chưa. Kiểm --bus-root (mặc định là thư mục CHA của "
+            "mike/; chạy từ worktree sẽ ra sai) thay vì coi bus là rỗng.")
     files = sorted(glob.glob(os.path.join(inbox, "*.jsonl"))
                    + glob.glob(os.path.join(inbox, "archive", "*.jsonl.gz")))
-    questions, acks = [], []
+    questions, acks, resolvers = [], [], []
     for p in files:
         agent_p = _agent_of(p)
         for rec in _iter_events(p):
@@ -150,7 +172,9 @@ def load_bus(bus_root):
                              ts + dt.timedelta(days=sd), sd))
             elif etype == "question" and topic:
                 questions.append((agent_p, topic, ts))
-    return questions, acks
+            elif etype in ("answer", "decision") and topic:
+                resolvers.append((agent_p, topic, ts))
+    return questions, acks, resolvers
 
 
 def is_acked(q_agent, q_topic, q_ts, acks, now=None):
@@ -172,18 +196,17 @@ def is_acked(q_agent, q_topic, q_ts, acks, now=None):
 def _same_pattern(q_topic, topic):
     """Câu hỏi này có thuộc CÙNG pattern với `topic` (đã ổn định) không?
 
-    Nhận cả các câu hỏi LEGACY còn nhúng bộ đếm (`…-fpt-vendor-backfill-2days`) — đó là
-    những cái đang mở THẬT trên bus lúc bản vá này land. Không nhận chúng thì ngày đầu
-    tiên sau khi land sẽ mở thêm một câu hỏi trùng nội dung cho mỗi pattern đang treo,
-    tức đúng thứ ồn ào mà bản vá này đi diệt.
+    Khớp MỘT CHIỀU: từ `topic` ĐÃ BIẾT sinh ra tập biến thể có bộ đếm và so khớp. Không
+    bao giờ chuẩn hoá 2 chuỗi lạ rồi so — đó là đường dẫn tới false-collapse (xem
+    `stable_topic`). Nhận các câu hỏi LEGACY đang mở thật trên bus, cả dạng dính
+    (`…-2days`) lẫn dạng có gạch (`…-2-days`).
     """
     q_topic = str(q_topic or "")
-    if not q_topic.startswith(TOPIC_PREFIX):
-        return False
-    try:
-        return stable_topic(q_topic) == topic
-    except SystemExit:
-        return False
+    if q_topic == topic:
+        return True
+    return bool(re.fullmatch(
+        re.escape(topic) + r"[-_ ]?\d+[-_ ]?(?:days?|retros?|lan|times?|x)?",
+        q_topic, re.IGNORECASE))
 
 
 def decide(topic, bus_root, now=None):
@@ -193,12 +216,31 @@ def decide(topic, bus_root, now=None):
     đúng là chuỗi mà `_acked()` của ops_health_check.sh nhìn thấy, nên 2 bên không thể
     lệch nhau về phán quyết cho cùng một câu hỏi.
     """
-    questions, acks = load_bus(bus_root)
+    now = now or dt.datetime.now(dt.timezone.utc)
+    questions, acks, resolvers = load_bus(bus_root)
     same = [(ag, tp, ts) for ag, tp, ts in questions if _same_pattern(tp, topic)]
     if not same:
         return "POST", "chưa có câu hỏi nào ở topic ổn định này"
+    # Câu hỏi ĐÃ ĐÓNG (có answer/decision đúng topic, sau nó) không còn là căn cứ để
+    # SKIP: ops_health_check cũng đã bỏ nó khỏi backlog, nên dựa vào nó để im lặng là
+    # nuốt một lần tái diễn THẬT. Khớp exact-topic (hẹp hơn `_resolved` bên kia, vốn
+    # còn nhận hậu tố) — sai sót nghiêng về phía POST, tức phía ỒN, đúng hướng an toàn.
+    same = [(ag, tp, ts) for ag, tp, ts in same
+            if not any(rt == tp and rts >= ts for _ra, rt, rts in resolvers)]
+    if not same:
+        return "POST", ("mọi câu hỏi cũ của pattern này ĐÃ có answer/decision — lần tái "
+                        "diễn này là lần MỚI, phải escalate")
     ag, tp, ts = max(same, key=lambda r: r[2])
     if is_acked(ag, tp, ts, acks, now=now):
+        # ĐƯỜNG THOÁT cho ack sd<=0: `_acked` coi nó là VĨNH VIỄN cho đúng instance đó,
+        # điều đúng với việc "không auto-dispatch lại câu hỏi CŨ". Nhưng dùng nguyên
+        # tính vĩnh viễn đó để chặn escalate của LẦN TÁI DIỄN MỚI thì một ack duy nhất
+        # khoá cả pattern mãi mãi. Trần = ACK_MAX_SUPPRESS_DAYS (cùng con số mà chính
+        # ops_health_check dùng để không ack nào tắt dispatch vĩnh viễn).
+        if (now - ts).days > ACK_MAX_SUPPRESS_DAYS:
+            return "POST", (f"câu hỏi {ag}/{tp} có ack nhưng đã {(now - ts).days} ngày tuổi "
+                            f"(> trần {ACK_MAX_SUPPRESS_DAYS}d) — ack không được khoá "
+                            f"pattern vĩnh viễn, escalate lại")
         return "SKIP", (f"đã có câu hỏi {ag}/{tp} ({ts:%Y-%m-%dT%H:%M:%SZ}) ĐANG được ack "
                         f"`{ACK_PREFIX}` phủ — không mở câu hỏi thứ hai cho cùng pattern")
     return "POST", (f"đã có câu hỏi {ag}/{tp} ({ts:%Y-%m-%dT%H:%M:%SZ}) nhưng KHÔNG ack nào "
