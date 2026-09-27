@@ -47,9 +47,21 @@ Họ config = **V2.3A (argv `v23a none postbull 0 edge`) + custom30V parking (ET
 - Capacity: nhỏ NAV cao hơn (R1 @20B 31.69 > R2 @50B 29.24), decay theo vốn.
 
 ### 🔁 RE-PIN 2026-06-25 — threads=1 DETERMINISTIC (thay số threads=4 1-sample ở trên)
-> ⭐ **SỐ R3 CHÍNH THỨC HIỆN HÀNH (từ 2026-08-03, RE-PIN theo đúng mặc định production
+> ⭐ **SỐ R3 CHÍNH THỨC HIỆN HÀNH (từ 2026-09-27, RE-PIN sau khi BỎ TĂNG TRƯỞNG SỐ CP khỏi chuỗi
+> return custom30V): CAGR 24,38% / Sharpe 1,69 / MaxDD −18,8% / Calmar 1,30** (Final NAV 757,61B,
+> IS 19,26% / OOS 29,24%, universe = MIXED `universe_pit` + `ticker_prune`). Mọi trích dẫn MỚI dùng
+> số này. **SỬA LỖI ĐO, KHÔNG PHẢI ĐỔI MÔ HÌNH** — không tune tham số nào, chân weight + membership
+> byte-identical; −4,48pp là return GIẢ bị gỡ ra (mỗi bước `OShares` theo quý từng thành 1 ngày
+> return, trong khi `Close` đã điều chỉnh hồi tố cho cùng sự kiện ⇒ đếm hai lần). Chân control tái
+> lập pin 08-03 **byte-identical trừ đúng 1 dòng META provenance**. Section
+> **"2026-09-27 — ⭐ RE-PIN R3 — SỬA CHUỖI RETURN custom30V (BỎ TĂNG TRƯỞNG SỐ CP)"** cuối file.
+> ⚠️ **CHỜ USER SIGN-OFF — chưa merge master** (branch `fix/custom30v-return-leg-oshares`).
+>
+> ~~⭐ **SỐ R3 (từ 2026-08-03, RE-PIN theo đúng mặc định production
 > `LAG_ADV_BASIS=price`): CAGR 28,86% / Sharpe 1,90 / MaxDD −17,8% / Calmar 1,62** (Final NAV
-> 1.178,01B, universe = MIXED `universe_pit` + `ticker_prune`). Mọi trích dẫn MỚI dùng số này.
+> 1.178,01B).~~ → **SUPERSEDED 2026-09-27.** Lý do: KHÔNG phải sai về `LAG_ADV_BASIS` — số đó tái
+> lập TUYỆT ĐỐI cho tới hôm nay — nhưng nó được đo bằng rổ parking có **return giả từ tăng trưởng số
+> CP**. Giữ làm lịch sử; phần nội dung về VÌ SAO mặc định là `price` vẫn còn hiệu lực.
 > **KHÔNG phải "hệ tốt lên"** — không có thay đổi mô hình; đây là đồng bộ registry theo code
 > production (mặc định ADV book LAG đổi `close`→`price` ngày 08-02, commit `0062aa0`). Toàn bộ chênh
 > nằm ở IS (+3,28pp), OOS +0,02pp. Xem section
@@ -6988,3 +7000,123 @@ stop ở độ phân giải trong ngày** trên đoạn mới; cột `minlow29/m
 (`orb_pt.py` dùng `Quote`, output byte-identical, commit WC `abe09928`); monitor cảnh báo sớm →
 ĐÃ CÀI CRON 15:50 ICT T2-T6, escalate TẮT (commit `mike 0e52bcff`), script chuyển canonical sang
 `mike/bin/orb_drift_monitor.py` + `mike/data/orb_drift_baseline.json`.
+
+## 2026-09-27 — ⭐ RE-PIN R3 — SỬA CHUỖI RETURN custom30V (BỎ TĂNG TRƯỞNG SỐ CP) — job `Taylor_20260927_022253` ⚠️ **CHỜ USER SIGN-OFF, CHƯA MERGE MASTER**
+
+**SỐ MỚI: CAGR 24,38% / Sharpe 1,69 / MaxDD −18,8% / Calmar 1,30 / Final NAV 757,61B / IS 19,26% / OOS 29,24%.**
+Thay cho **28,86% / 1,90 / −17,8% / 1,62 / 1.178,01B / IS 27,09% / OOS 30,48%** (pin 2026-08-03, section
+"2026-08-03 — ⭐ RE-PIN R3 THEO ĐÚNG MẶC ĐỊNH PRODUCTION `LAG_ADV_BASIS=price`" — giữ làm **lịch sử,
+SUPERSEDED**, KHÔNG xoá).
+
+⚠️ **ĐÂY LÀ SỬA LỖI ĐO, KHÔNG PHẢI ĐỔI MÔ HÌNH.** Không có tham số nào được tune, không có luật
+vào/ra nào đổi, chân WEIGHT và MEMBERSHIP byte-identical. Toàn bộ −4,48pp là **return GIẢ bị gỡ ra**.
+
+### Lỗi
+`custom_basket.py` (dòng ~220 `build()` và ~1125 `build_pit()`, code trước bản sửa) chain return trên
+`mcap = adjusted Close × OShares`. `OShares` là đại lượng point-in-time theo **QUÝ**, ffill từ
+`ticker_financial` ⇒ mỗi bước nhảy số CP (bonus issue, cổ tức CP, phát hành riêng lẻ) đi vào TỬ SỐ mà
+MẪU SỐ không thấy ⇒ **một ngày return giả**. Giả, và cụ thể là **ĐẾM HAI LẦN**: `Close` đã được điều
+chỉnh hồi tố cho đúng sự kiện đó, nên hiệu ứng phía giá đã bị net ra và hiệu ứng phía số CP KHÔNG được
+cộng thêm lên. Người nắm giữ thật nhận +k% CP **VÀ** ăn −k% mark giá ngày chốt ⇒ net ~0 — đúng bằng
+những gì chuỗi adjusted-Close diễn tả.
+Finding gốc: `custom30v-index-return-cong-tang-truong-so-CP` (bus 2026-09-26T17:29:47Z),
+**quant-skeptic CONFIRMED high** 17:37:19Z, `killer_objection` NULL.
+
+### Bản sửa
+Chân RETURN chuyển sang chuỗi `Close` THUẦN (không số CP). Cột export `mcap` **KHÔNG bị sửa** — vẫn là
+`Close × OShares`, vẫn là cột level/audit và vẫn là nguồn của mask `valid` (tên không có dòng OShares
+vẫn bị loại y như trước). Chân WEIGHT (`mcapw` = `COALESCE(Price,Close) × OShares`) và SELECTION
+byte-for-byte không đụng. Knob rollback một từ: `BASKET_RETURN_OSHARES=legacy`.
+
+**ĐƯỜNG TIỀN LIVE KHÔNG ĐỔI MỘT BYTE** (kiểm kê BƯỚC 0, finding `custom30v-park-live-inventory`
+2026-09-27T02:26:54Z): `custom30_history.py:30` gọi `cb.build_pit()` nhưng chỉ dùng `memdf`
+(membership) + `bx["mcapw"]` (chân weight) để sinh `data/custom30v_8l_publish.csv` →
+`tav2_bq.custom30v_8l` → `compute_park_trim.py`. Biến `lvl` (chuỗi level/return) được GÁN ở dòng 30
+nhưng **không dùng ở bất kỳ dòng nào sau đó**. `compute_park_trim` / `compute_jit_unpark` /
+`park_holdings` / `send_plan_report` KHÔNG import `custom_basket`.
+
+### Ba chân, cùng snapshot đóng cứng — chuỗi bằng chứng
+Lệnh pin R3 NGUYÊN VĂN (`research/c30v_retleg_repin_20260927/run_leg.sh` + `run_wt.sh`), snapshot
+`data/bq_cache_asof20260729_postrestate`, `BQ_CACHE_THREADS=1`, `$DNA_PYEXE`, `AUDIT_END=2026-06-19`.
+
+| Leg | custom_basket | `BASKET_RETURN_OSHARES` | CAGR | Sharpe | MaxDD | Calmar | Final NAV | IS 14-19 | OOS 20+ | self-check | CSV md5 |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| `c30vctl` control | CANONICAL (tiền-sửa) | (bỏ qua) | 28,86% | 1,90 | −17,8% | 1,62 | 1.178,01B | 27,09% | 30,48% | 0 VND BAL+LAG | `7de1daf4874bb062d87e16897a1db277` |
+| `c30vleg` inertness | đã sửa | `legacy` | 28,86% | 1,90 | −17,8% | 1,62 | 1.178,01B | 27,09% | 30,48% | 0 VND BAL+LAG | `7de1daf4874bb062d87e16897a1db277` |
+| **`c30vnew` PIN MỚI** | đã sửa | (mặc định `flat`) | **24,38%** | **1,69** | **−18,8%** | **1,30** | **757,61B** | **19,26%** | **29,24%** | 0 VND BAL+LAG | `3f836927c0df82915c4cfb973d8f4af3` |
+| Δ (mới − control) | | | **−4,48pp** | −0,21 | −1,0pp | −0,32 | −420,40B | **−7,83pp** | **−1,24pp** | | 29.746 dòng khác |
+
+**Neo control về artifact pin 08-03.** `diff c30vctl.csv` vs artifact pin
+`..._exp_repin0803_price_univpit.csv` (md5 `7d053e6201c9d107685ff4d1dd9d2d2a`) = **ĐÚNG 2 dòng**, và
+đó là **1 dòng META `custom_basket_recipe`** — dòng provenance mà bản sửa CỐ Ý viết lại (§29: dòng META
+phải nói đúng thứ code vừa làm). **Mọi dòng ledger, mọi con số: byte-identical.** Vì thế md5 của
+`c30vctl` (`7de1daf4`) khác md5 pin (`7d053e62`) đúng bởi 1 dòng văn bản, không bởi một phép tính nào.
+
+**`c30vleg` == `c30vctl` BYTE-IDENTICAL (diff 0 dòng)** ⇒ code mới **hoàn toàn trơ** dưới knob rollback,
+xuyên qua CẢ engine, không chỉ ở tầng rổ. Knob `BASKET_RETURN_OSHARES=legacy` là đường lùi THẬT.
+
+⚠️ **Bẫy kỹ thuật phải biết nếu tái lập:** `pt_v23_audit_2014.py:42` làm
+`sys.path.insert(0, WORKDIR)` với WORKDIR **hardcode** `/home/trido/thanhdt/WorkingClaude`. Chạy
+`$DNA_PYEXE <worktree>/pt_v23_audit_2014.py` vì thế vẫn import `custom_basket` **CANONICAL** — một
+no-op IM LẶNG. Hai leg dùng module đã sửa phải đi qua wrapper `run_wt_leg.py` (nạp module vào
+`sys.modules` trước khi engine chạy); wrapper in ra `custom_basket = <path> retchain_legacy=<bool>` mỗi
+lần chạy để không bao giờ phải suy đoán. Leg `c30vleg` chính là chứng minh wrapper không tự thêm delta.
+
+### Đọc số: vì sao IS rớt gấp 6 lần OOS
+IS 2014-2019 −7,83pp vs OOS 2020+ −1,24pp. Không nghịch lý: giai đoạn 2014-2019 ngân hàng VN phát hành
+CP thưởng/cổ tức CP dày hơn nhiều, nên mật độ "bước OShares" — tức mật độ return giả — cao hơn hẳn.
+Per-year: 2014 49,14→45,66 · 2015 27,48→18,59 · 2016 14,22→10,79 · 2017 33,73→24,26 ·
+2018 27,19→12,36 · 2019 13,81→6,85 · 2020 27,67→24,64 · 2021 108,08→**115,75** · 2022 −7,96→−8,82 ·
+2023 22,56→19,93 · 2024 25,15→25,31 · 2025 48,10→40,70 · 2026 −1,22→−0,75.
+(2021 và 2024 TĂNG nhẹ — chuỗi return đổi làm đổi cả thời điểm/kích cỡ lệnh park, nên tác động không
+đơn điệu theo năm; chỉ tổng thể mới đơn hướng.)
+
+### Selfcheck
+- **`basket_return_leg_oshares_selfcheck.py` (MỚI) — PASS 5/5**, 3 TZ (`TZ` unset / `UTC` /
+  `America/New_York`) cùng kết quả:
+  R1 `max|ret_engine − ret_flat| = 3,322e-16` trên 414 phiên (số CP đã ra khỏi chân return hoàn toàn);
+  R1b cùng phép so trên `legacy` lệch `5,168e-02` ⇒ R1 không phải hằng đúng.
+  R2 md5 bảng weight publish `a953d4bb06f7e429bd55837aebcdaefc` **giống hệt** mới / legacy / tiền-sửa
+  (240 dòng ticker×rebal) ⇒ đường tiền live bất biến.
+  R3 28/414 phiên lệch, `max|Δret| = 5,1677pp/phiên`, **28/28 phiên lệch trùng ĐÚNG ngày có bước
+  OShares** (khu trú, không trải đều); tổng kỳ legacy ×1,57227 vs mới ×1,32456.
+  R4 membership 0 tên đổi / 8 mốc rebal; `mcap/mcapw == Close/Price` `max|Δ| = 1,110e-16` (n=22.817);
+  `mcap == Close×OShares` `max|Δ| = 0`.
+  R5 `legacy` == tiền-sửa `max|Δlevel| = 0` trên 415 phiên.
+- **`basket_price_basis_selfcheck.py` (CẬP NHẬT) — PASS toàn bộ.** T4 (`mcap/mcapw == Close/Price`)
+  được sửa **KỲ VỌNG, không sửa số**: bất biến đó vẫn đúng nhưng từ nay **không còn là bằng chứng về
+  chân return** (chân return đã rời `mcap`) — đúng lỗi §28 "đừng suy trạng thái của A từ kênh B đã
+  thôi điều khiển A". Thêm **T4c** kiểm TRỰC TIẾP trên chuỗi return: `max|Δret|` flat vs legacy =
+  9,5347pp/phiên trên 753 phiên (0 = knob chết hoặc số CP đã quay lại chân return).
+  T1 (control leg) vẫn trùng `ebeacad^` BIT-FOR-BIT sau khi control revert **CẢ HAI** biến
+  (`BASKET_PRICE_BASIS=legacy` + `BASKET_RETURN_OSHARES=legacy`) — thiếu biến thứ hai thì T1 fail vì
+  control thiếu chân, KHÔNG phải vì code sai.
+  ⚠️ Bản T4c đầu tiên **FAIL giả**: nó set env rồi gọi `run()`, mà `run()` luôn GHI ĐÈ env bằng
+  `mod._SC_RETCHAIN` ngay trước `build_pit()` ⇒ `d_ret = 0`. Đã sửa thành lật `post._SC_RETCHAIN`.
+  Ghi lại vì đây đúng là lớp lỗi §28 (so kênh HÀNH ĐỘNG thay vì giá trị thật sự có hiệu lực) và nó
+  xảy ra ngay trong chính selfcheck viết để chống lớp lỗi đó.
+
+### KIỂM KÊ SỐ PIN ĐI QUA `custom_basket.build/build_pit`
+**Nguyên tắc phân loại** (không ước lượng gì — §8): (a) **MỨC TUYỆT ĐỐI** (CAGR/Sharpe/DD/NAV của một
+config có parking) → **STALE**, phải chạy lại mới dùng được; (b) **DELTA A/B CONTEMPORANEOUS** (hai
+leg cùng chạy, cùng mang lỗi) → **phần lớn GIỮ ĐƯỢC** vì lỗi có ở cả hai chân, nhưng **không được coi
+là đã verify** cho tới khi chạy lại — bug làm đổi thời điểm/kích cỡ lệnh park nên delta có thể xê dịch.
+
+| Số | Cũ | Mới | Trạng thái / nguồn |
+|---|---|---|---|
+| **R3 pin chính thức** | 28,86 / 1,90 / −17,8 / 1,62 / 1.178,01B | **24,38 / 1,69 / −18,8 / 1,30 / 757,61B** | ✅ **ĐÃ CHẠY LẠI** (section này) |
+| R3 IS / OOS | 27,09% / 30,48% | **19,26% / 29,24%** | ✅ đã chạy lại; recompute độc lập `extract_peryear.py` trùng khớp cả 2 chân |
+| **+7,4pp parking NEUTRAL** (`kb/KNOWLEDGE.md:26`, `context_pack.md:160`) | +7,4pp Full | — | ⚠️ **STALE** — là delta CAGR toàn hệ có/không parking ở một pin CŨ HƠN nữa; chưa chạy lại ở pin nào từ 07-2026. **Đã bị nghi vấn độc lập từ trước**: A1 (2026-08-22) kết luận "+7,4pp KHÔNG còn đứng trong bucket hiện tại (6,8% = HIGH)". **KHÔNG ước lượng lại.** |
+| **Bootstrap 5th-pct** (`kb/KNOWLEDGE.md:22`, `context_pack.md:159`) | CAGR 18,6% / DD −28,6% | — | ⚠️ **STALE, và đã stale TRƯỚC bug này**: nguồn `bootstrap_nav.py` chạy 2026-06-29 trên pin CAGR act 27,8% (registry:735); chính registry:2787 đã ghi bản chạy lại 07-11 cho **20,1% / −26,1%**. KB vẫn giữ số 06-29. Cần chạy lại `bootstrap_nav.py` trên NAV mới — **KHÔNG ước lượng.** |
+| **DSR / PBO annex** | DSR 1,0000 · PBO 0,209 · ann-SR 1,829 | — | ⚠️ **STALE.** `dsr_pbo_annex.py` cần họ ~80-200 CSV config; chạy lại là một job riêng. Lưu ý DSR/PBO đo **độ lệch do lựa chọn config**, không đo mức CAGR ⇒ ít nhạy với bug này hơn mức tuyệt đối, nhưng vẫn phải chạy lại trước khi trích dẫn. **KHÔNG ước lượng.** |
+| R1 / R2 (bull-park @20B/@50B) | 29,01 / 28,01 | — | ⚠️ **STALE** (nghiên cứu, không deploy). Chạy lại nếu bull-park được xét lại. |
+| ~38 section registry khác có `custompitg`/`custom30V` | — | — | Theo nguyên tắc (a)/(b) ở trên: **mọi MỨC TUYỆT ĐỐI = STALE**; các **VERDICT NO-GO** dựa trên delta A/B contemporaneous (FSCORE enhancer, accrual gate ×2, beta-cap, Q-sleeve, delta-momentum tilt, T1 accruals floor, CCS Phase 2, sàn thanh khoản LAG…) **không đảo dấu** — tất cả đều NO-GO với biên rộng và lỗi có ở cả hai chân. Không section nào cần đảo kết luận; tất cả cần đổi MỨC NỀN nếu trích số tuyệt đối. |
+
+**Hệ quả phải nói thẳng:** V2.4 R3 **không còn là hệ ~29% CAGR** — nó là hệ **~24,4%** trên cùng dữ
+liệu, cùng luật. Quy đổi thực tế (CLAUDE.md §Backtest: CAGR thật ≈ backtest − 1,5%) ⇒ kỳ vọng
+**~22,9%**. Không có vị thế live nào phải đổi vì điều này (đường tiền không đụng, xem BƯỚC 0), nhưng
+mọi kỳ vọng lợi nhuận trao đổi với user/nhà đầu tư dựa trên 28,86% là **đã nói quá ~4,5pp/năm**.
+
+**Artifact:** `mike/agents/Taylor/research/c30v_retleg_repin_20260927/` (run scripts + 3 log) ·
+CSV `data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_{c30vctl,c30vleg,c30vnew}_univpit.csv`
+· worktree `/home/trido/thanhdt/wt-c30v-retfix`, branch `fix/custom30v-return-leg-oshares`.
