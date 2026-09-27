@@ -43,6 +43,21 @@ BỔ SUNG 2026-09-13 (aria-F2) — account có vị thế LEGACY lúc go-live (Z
 thế), lô legacy lấy MTM ngày đó làm GIÁ VỐN GIẢ ĐỊNH (nạp trước khi replay fill) ⇒ bán legacy có
 realized, legacy còn giữ có unrealized + MTM; fill broker xác nhận (email/sao kê) mà dnse_raw thiếu
 được cộng vào replay. Truyền --starting-capital ⇒ bỏ qua file, hành vi cũ y nguyên (SpaceX).
+
+BỔ SUNG 2026-09-27 (job Taylor_20260927_053033) — vế phải cộng **Trứng vàng `egg.totalValue`**
+(sibling của `stock` trong payload `balances`, DNSE expose qua API từ 2026-08-18). Đây là chiều
+thứ BA của "tiền" theo `kb/coding_guidelines_ext.md` §25: vốn CHỦ SỞ HỮU thật nhưng KHÔNG nằm
+trong `totalCash` lẫn `availableCash` (cần lệnh rút, về tài khoản T+1). Bản cũ (`grep -c egg` = 0)
+bỏ sót hẳn ⇒ tiền user chuyển từ cash sang Trứng vàng làm vế phải co lại đúng bằng số đó, sinh
+residual DƯƠNG GIẢ và dòng "CHƯA GIẢI THÍCH ĐƯỢC" mỗi lần chạy: đo thật 2026-09-25 SpaceX
++85.765.426 (+9,5782% NAV), ZaloPay +102.272.560 (+11,9649% NAV) — cổng đối soát chặt nhất của
+pipeline §6 bước 3 do đó VÔ DỤNG cho việc bắt dòng tiền nhỏ (mọi lệch <9% NAV bị chìm trong nhiễu
+egg). Sau khi cộng egg: SpaceX +315.933 (+0,0322%), ZaloPay +150.583 (+0,0157%).
+`manual_offbook_assets_vnd` (--offbook-assets) vẫn dành cho tài sản off-book KHÁC egg — cùng quy
+ước với `daily_nav_snapshot.py:1254` / `compute_active_nav.py:533`; hai account hiện đều = 0 nên
+KHÔNG có double-count, nhưng script cảnh báo tường minh nếu cả hai cùng > 0.
+`--no-egg` tái lập đúng số của bản trước 2026-09-27 (chỉ để audit; nó chỉ làm residual TO HƠN, không
+bao giờ nới lỏng cổng).
 """
 import argparse
 import json
@@ -182,6 +197,9 @@ def main():
                           "asof ngày --balance-raw — cộng vào vế phải để KHÔNG báo residual giả "
                           "khi user đã chuyển tiền rảnh ra ngoài tài khoản giao dịch. Lấy số này "
                           "từ manual_offbook_assets_vnd trong secrets/trading_bot_accounts.json.")
+    ap.add_argument("--no-egg", action="store_true",
+                     help="bỏ Trứng vàng (egg.totalValue) khỏi vế phải — tái lập đúng số bản "
+                          "trước 2026-09-27; chỉ làm residual TO HƠN, không nới lỏng cổng")
     ap.add_argument("--no-realized", action="store_true",
                      help="bỏ realized P&L + cổ tức khỏi vế trái — tái lập đúng bản trước 2026-09-13")
     ap.add_argument("--div-tax-rate", type=float, default=0.05,
@@ -222,8 +240,14 @@ def main():
         sys.exit(2)
 
     stock = bal_rec["payload"]["stock"]
+    # §25 dòng "Tôi SỞ HỮU bao nhiêu vốn?" — cơ sở đối soát NAV, KHÔNG phải sức mua trong phiên.
     cash = stock["totalCash"]
     debt = stock["totalDebt"]
+    # Chiều thứ BA (§25): Trứng vàng KHÔNG nằm trong totalCash lẫn availableCash. `egg` là
+    # sibling của `stock` trong CÙNG payload balances ⇒ đọc từ bal_rec, không phải từ `stock`.
+    # Thiếu key `egg` (raw trước 2026-08-18) ⇒ 0 ⇒ output y hệt bản cũ, không phải fail.
+    egg_value = 0.0 if args.no_egg else float(
+        (bal_rec.get("payload", {}).get("egg") or {}).get("totalValue") or 0)
     accrued_fee = stock.get("depositFeeAmount", 0)
     bal_ts = bal_rec["ts"]
 
@@ -310,7 +334,15 @@ def main():
     lhs = args.starting_capital + unrealized_pnl + realized + dividends_net - fees - accrued_fee
     # Vế phải: đường bảng cân đối (số dư THẬT từ broker) + offbook (user tự báo, vd Trứng vàng —
     # tiền vẫn của user, chỉ ngoài phạm vi balances() API, xem --offbook-assets ở trên)
-    rhs = mtm_stock + cash - debt + args.offbook_assets
+    # + egg_value: Trứng vàng đọc TỰ ĐỘNG từ API (§25 chiều thứ ba) — cùng quy ước
+    # daily_nav_snapshot.py:1254 / compute_active_nav.py:533.
+    rhs = mtm_stock + cash - debt + egg_value + args.offbook_assets
+    if egg_value and args.offbook_assets:
+        print(f"⚠️ CẢ HAI cùng > 0: egg.totalValue {egg_value:,.0f} (API) và --offbook-assets "
+              f"{args.offbook_assets:,.0f} (user tự báo). --offbook-assets chỉ dành cho tài sản "
+              f"off-book KHÁC Trứng vàng — nếu nó vốn LÀ Trứng vàng thì vế phải đang đếm HAI LẦN. "
+              f"Kiểm manual_offbook_assets_vnd trong secrets/trading_bot_accounts.json.",
+              file=sys.stderr)
 
     residual = lhs - rhs
     tolerance_vnd = rhs * args.tolerance_pct / 100.0
@@ -359,6 +391,10 @@ def main():
     print(f"  Giá trị cổ phiếu (MTM):{mtm_stock:>16,.0f}")
     print(f"  + Tiền mặt:            {cash:>16,.0f}")
     print(f"  - Nợ vay margin:       {-debt:>16,.0f}")
+    if egg_value:
+        print(f"  + Trứng vàng (egg.totalValue, API):{egg_value:>11,.0f}")
+    elif args.no_egg:
+        print(f"  (--no-egg: BỎ Trứng vàng khỏi vế phải — tái lập bản trước 2026-09-27)")
     if args.offbook_assets:
         print(f"  + Off-book (tự báo):   {args.offbook_assets:>16,.0f}")
     print(f"  = VẾ PHẢI:             {rhs:>16,.0f}")
@@ -391,6 +427,7 @@ def main():
         "seed_capital_used": seed, "legacy_mtm_added": legacy_mtm, "legacy_unrealized_added": legacy_unreal,
         "accrued_margin_fee_real": accrued_fee,
         "lhs_pnl_path": lhs, "mtm_stock": mtm_stock, "cash": cash, "margin_debt": debt,
+        "egg_assets": egg_value, "egg_assets_auto": not args.no_egg,
         "offbook_assets_used": args.offbook_assets,
         "rhs_balance_sheet_path": rhs, "residual": residual,
         "residual_pct_of_rhs": residual / rhs * 100, "within_tolerance": within_tolerance,
