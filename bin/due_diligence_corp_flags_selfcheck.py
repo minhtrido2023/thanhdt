@@ -16,7 +16,20 @@ import sys
 # §5b — bất kỳ selfcheck nào có thể chạm Executor phải khai TEST MODE trước mọi import khác.
 os.environ.setdefault("MIKE_BOT_TEST_MODE", "1")
 
-WC = "/home/trido/thanhdt/WorkingClaude"
+HERE = os.path.dirname(os.path.abspath(__file__))
+if HERE not in sys.path:
+    sys.path.insert(0, HERE)
+import wc_paths  # noqa: E402
+
+# `WC` cứng canonical trước đây làm selfcheck LUÔN import `trading_bot.due_diligence` +
+# `corp_action_lib` của checkout CANONICAL — kể cả khi người sửa đang làm trong một worktree của
+# repo NGOÀI (`WorkingClaude/wt-*`, cây mang `trading_bot` riêng). PASS khi đó không nói gì về bản
+# đang sửa. `wc_paths.find_wc_root` neo theo marker `wc_env.sh` (và nhận override `WC_ROOT` ĐÃ
+# KIỂM CHỨNG có marker — biến `dispatch.sh` export cho mọi phiên agent), thay vì một đường tuyệt đối.
+# `MIKE_ROOT` riêng cho phía `mike` (Section E so với bản pin `agents/Taylor/insider_flags.py`):
+# hai cây khác repo nên phải neo độc lập, không suy cây này ra cây kia.
+WC = wc_paths.find_wc_root(__file__)
+MIKE_ROOT = os.path.dirname(HERE)
 if WC not in sys.path:
     sys.path.insert(0, WC)
 
@@ -191,7 +204,7 @@ def main():
           == {"has_red_flag", "red_flags", "as_of", "data_date", "universe_source", "evidence"})
 
     # ---- E: định nghĩa cờ insider KHÔNG drift khỏi bản pin `insider_flags.py` ----
-    sys.path.insert(0, os.path.join(WC, "mike", "agents", "Taylor"))
+    sys.path.insert(0, os.path.join(MIKE_ROOT, "agents", "Taylor"))
     try:
         import insider_flags as REF
         check("E1. hằng số khớp bản pin (ngưỡng/cửa sổ/stale)",

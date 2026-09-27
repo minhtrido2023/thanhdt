@@ -1262,6 +1262,22 @@ def _selfcheck() -> int:
         "MUTATION-GUARD gate_vendor_mismatch_block: mã có sự kiện lệch nguồn vẫn được CÔNG BỐ tỉ "
         f"suất mà cổng cho qua (rc={rc_pub}) hoặc không nêu Winston.")
 
+    # arch-review vòng 8 (job Taylor_20260927_103400): `gate_vendor_mismatch_block` ở trên chỉ ghim
+    # rc=1 + có chữ "Winston" — mà "Winston" xuất hiện ở NHIỀU khối (kể cả câu "Gỡ chặn = Winston
+    # xác minh xong nguồn vendor" của khối CHẶN). Nên mutation `if "cash_mismatch" in
+    # reasons_present: -> if False:` (dòng 786) vẫn PASS 99/99 (đo thật): dòng VIỆC CẦN LÀM nói
+    # ĐÚNG việc phải làm biến mất mà không ca nào FAIL. Anchor RIÊNG của nhánh này: tiền tố
+    # "VIỆC CẦN LÀM (bất đồng số cổ tức)".
+    check("khối VIỆC CẦN LÀM có dòng RIÊNG cho cash_mismatch (anchor riêng, không dùng chung chữ "
+          "'Winston' với khối CHẶN)",
+          "VIỆC CẦN LÀM (bất đồng số cổ tức)" in txt_pub, True)
+    assert "VIỆC CẦN LÀM (bất đồng số cổ tức)" in txt_pub, (
+        "MUTATION-GUARD gate_reasons_present_cash_mismatch_todo: nhánh "
+        "`if \"cash_mismatch\" in reasons_present:` (khối VIỆC CẦN LÀM) đã bị tắt/hỏng — báo cáo "
+        "vẫn CHẶN nhưng người xử lý không còn được bảo phải làm gì (Winston đối soát "
+        "`tav2_bq.corporate_action` với sổ broker). Chữ 'Winston' ở khối CHẶN KHÔNG phải bằng "
+        f"chứng cho nhánh này. Đang là: {txt_pub!r}")
+
     # Không công bố tỉ suất mã đó ⇒ KHÔNG chặn (không công bố thì không sai được), NHƯNG cảnh báo
     # vẫn phải in ra — đây chính là "raise warning mà KHÔNG chặn báo cáo im lặng".
     rc_quiet2, txt_quiet2 = _run_vendor_case("## Không công bố tỉ suất mã nào\n", _MISM)
@@ -1301,6 +1317,22 @@ def _selfcheck() -> int:
         "câu ⇒ ca D1 bị đọc thành 'vendor thiếu dữ liệu' và Winston điều tra sai hướng ngay dòng "
         f"đầu (§29). Đang là: {txt_st!r}")
 
+    # arch-review vòng 8 (job Taylor_20260927_103400): `gate_vendor_reason_routing` ở trên bám vào
+    # dòng chẩn đoán PER-EVENT ("THUẦN CỔ PHIẾU") — nó KHÔNG phủ nhánh VIỆC CẦN LÀM riêng
+    # `if "stock_leg_ignored" in reasons_present:` (dòng 790). Mutation dòng đó thành `if False:`
+    # vẫn PASS 99/99 (đo thật) ⇒ Winston mất dòng chỉ dẫn "xác nhận lại sự kiện CỔ PHIẾU (ISS)"
+    # mà không assertion nào kêu. Anchor RIÊNG: cụm "KHÔNG PHẢI đối soát số tiền" chỉ có ở đây
+    # (dòng chẩn đoán per-event không nhắc tới việc đối soát số tiền).
+    check("khối VIỆC CẦN LÀM có dòng RIÊNG cho stock_leg_ignored (giao Winston xác nhận chân CỔ "
+          "PHIẾU, KHÔNG PHẢI đối soát số tiền)",
+          "KHÔNG PHẢI đối soát số tiền" in txt_st, True)
+    assert "KHÔNG PHẢI đối soát số tiền" in txt_st, (
+        "MUTATION-GUARD gate_reasons_present_stock_leg_todo: nhánh "
+        "`if \"stock_leg_ignored\" in reasons_present:` (khối VIỆC CẦN LÀM) đã bị tắt/hỏng — "
+        "Winston mất dòng 'xác nhận lại sự kiện CỔ PHIẾU (ISS) … KHÔNG PHẢI đối soát số tiền' và "
+        "sẽ đi đối soát TIỀN cho một sự kiện vendor khai thuần cổ phiếu (§29). Câu chẩn đoán "
+        f"per-event 'THUẦN CỔ PHIẾU' KHÔNG phải bằng chứng cho nhánh này. Đang là: {txt_st!r}")
+
     # ---- LÝ DO THỨ BA: mã lý do KHÔNG xác định (arch-review D1b, R2) — fail-closed, KHÔNG đoán.
     # Mô phỏng đúng ca reviewer bắn: `Adjustment` set `vendor_check="mismatch"` mà không set
     # `vendor_mismatch_reason` (caller cũ/hỏng) ⇒ `entitled_gross` phải trả "unknown", KHÔNG được
@@ -1320,6 +1352,21 @@ def _selfcheck() -> int:
         "MUTATION-GUARD gate_vendor_reason_unknown_no_guess: mã lý do rỗng/lạ mà cổng vẫn phát một "
         "trong hai câu chẩn đoán cố định (cash_mismatch hoặc stock_leg_ignored) ⇒ đoán mò nguyên "
         f"nhân đúng lúc bằng chứng nói 'không biết' (§29). Đang là: {txt_unk!r}")
+
+    # arch-review vòng 8 (job Taylor_20260927_103400): guard `gate_vendor_reason_unknown_no_guess`
+    # ở trên dùng anchor "kiểm thủ công", chuỗi CÓ MẶT ở CẢ HAI chỗ — dòng chẩn đoán per-event
+    # (nhánh `else` của `reason`) VÀ khối VIỆC CẦN LÀM (`if reasons_present - {...}`). Nên mutation
+    # `if reasons_present - {...}: -> if False:` (dòng 800) vẫn PASS 99/99 (đo thật). Anchor RIÊNG
+    # của khối VIỆC CẦN LÀM: tiền tố "VIỆC CẦN LÀM (mã lý do không xác định)" chỉ có ở đó.
+    check("khối VIỆC CẦN LÀM có dòng RIÊNG cho mã lý do không xác định (anchor riêng, không dùng "
+          "chung 'kiểm thủ công' với dòng chẩn đoán per-event)",
+          "VIỆC CẦN LÀM (mã lý do không xác định)" in txt_unk, True)
+    assert "VIỆC CẦN LÀM (mã lý do không xác định)" in txt_unk, (
+        "MUTATION-GUARD gate_reasons_present_unknown_todo: nhánh "
+        "`if reasons_present - {\"cash_mismatch\", \"stock_leg_ignored\", \"lookup_failed\"}:` "
+        "(khối VIỆC CẦN LÀM) đã bị tắt/hỏng — người xử lý mất dòng chỉ dẫn 'kiểm thủ công (mã lý "
+        "do bị thiếu/rỗng ở nguồn)'. Chuỗi 'kiểm thủ công' ở dòng chẩn đoán per-event KHÔNG phải "
+        f"bằng chứng cho nhánh này. Đang là: {txt_unk!r}")
 
     # ---- LOOKUP_FAILED (arch-review 2026-09-24 vòng 4, R1): BQ lỗi hạ tầng, KHÔNG tra được vendor
     # — KHÁC HẲN "hai nguồn bất đồng số" (mismatch). Trước bản vá này sự kiện loại này KHÔNG vào

@@ -25,8 +25,19 @@ from __future__ import annotations
 import os
 import sys
 
-WC_ROOT = "/home/trido/thanhdt/WorkingClaude"
-for p in (WC_ROOT, os.path.join(WC_ROOT, "mike", "bin")):
+HERE = os.path.dirname(os.path.abspath(__file__))
+if HERE not in sys.path:
+    sys.path.insert(0, HERE)
+import wc_paths  # noqa: E402
+
+# `WC_ROOT` cứng canonical trước đây khiến MỌI ca LUÔN import `paper_corp_action` từ checkout
+# CANONICAL, bất kể selfcheck này vật lý nằm ở worktree nào ⇒ PASS không chứng minh gì về code
+# TRONG worktree đang sửa (cùng lớp lỗi đã vá ở `compute_active_nav_selfcheck.py`, 833abcc5).
+# `HERE` = thư mục chứa chính file này, sibling `paper_corp_action.py` ⇒ tự đổi theo worktree.
+# `WC_ROOT` (cây WorkingClaude, cho `trading_bot`/dữ liệu nếu sau này cần) tra qua marker
+# `wc_paths.find_wc_root` — tiện ích DÙNG CHUNG đã có, không bịa phép đếm dirname mới.
+WC_ROOT = wc_paths.find_wc_root(__file__)
+for p in (WC_ROOT, HERE):
     if p not in sys.path:
         sys.path.insert(0, p)
 

@@ -25,8 +25,19 @@ import subprocess
 import sys
 import tempfile
 
-WC = "/home/trido/thanhdt/WorkingClaude"
-SENDER = os.path.join(WC, "mike", "bin", "send_plan_report.sh")
+HERE = os.path.dirname(os.path.abspath(__file__))
+if HERE not in sys.path:
+    sys.path.insert(0, HERE)
+import wc_paths  # noqa: E402
+
+# `WC` cứng canonical trước đây làm `SENDER` LUÔN trỏ `send_plan_report.sh` của checkout
+# CANONICAL: chạy selfcheck này từ worktree vẫn test script MASTER, PASS không chứng minh gì về
+# bản đang sửa (lớp lỗi đã vá ở `compute_active_nav_selfcheck.py`, 833abcc5).
+# SENDER = sibling theo VỊ TRÍ FILE ⇒ đổi theo worktree. `WC` (cây WorkingClaude: `data/trade_plans`
+# đọc thật + `trading_bot` symlink vào sandbox — không nhân bản theo worktree của repo `mike`) tra
+# qua marker `wc_paths.find_wc_root`.
+WC = wc_paths.find_wc_root(__file__)
+SENDER = os.path.join(HERE, "send_plan_report.sh")
 REAL_PLANS = os.path.join(WC, "data", "trade_plans")
 
 PASS, FAIL = [], []
