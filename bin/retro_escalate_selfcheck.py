@@ -455,6 +455,13 @@ def case_daily_retro_wired():
     bad = re.findall(r"retro-pattern-recurring-<[^>]*>-days", src)
     check("daily_retro.sh KHÔNG còn ra lệnh nhúng bộ đếm vào topic",
           not bad, f"còn: {bad}")
+    # arch-review vòng 3 note N1: vòng 1 CẮT đuôi đếm, vòng 2 đổi sang TỪ CHỐI — nhưng
+    # prompt vẫn hứa "Helper tự cắt bộ đếm". Đây là consumer DUY NHẤT của cơ chế (phiên
+    # retro headless 00:30) nên prose sai = agent làm sai. §4 coding_guidelines: sửa hành
+    # vi thì phải grep MỌI nơi hành vi được operationalize, prompt cũng là một nơi.
+    check("daily_retro.sh KHÔNG còn hứa 'tự cắt' (hành vi vòng 1 đã bị bác bỏ)",
+          "tự cắt bộ đếm" not in src,
+          "prompt còn nói helper tự cắt — agent retro sẽ không đổi tên slug khi bị rc!=0")
 
 
 # ── Ca 9b: guard chống-trùng của daily_retro phải THẤY nhánh SKIP (event status) ────
@@ -694,6 +701,93 @@ def case_skip_prefix_constant_in_sync():
           f"không thấy {RE.SKIP_STATUS_PREFIX!r} trong daily_retro.sh")
 
 
+# ── Ca 10b: HAI bản sao regex đuôi đếm phải PHÁN QUYẾT GIỐNG NHAU, mọi locale ──────
+#    arch-review vòng 3 note N2 (lệch THẬT, tìm ra bằng differential fuzz): guard trong
+#    `append_event.sh` là bản sao ERE thứ hai của `_COUNTER_UNIT` và KHÔNG có test nào
+#    ghim 2 bản với nhau. Bản cũ dùng bracket `l[aầ]n`; dưới `LC_ALL=C` bracket thành tập
+#    BYTE nên `-3lần` bị Python TỪ CHỐI mà shell CHO QUA — cổng backstop yếu đi IM LẶNG
+#    tuỳ locale. Ca này feed CÙNG danh sách hậu tố cho CẢ HAI cổng và đòi verdict trùng.
+def case_counter_regex_copies_agree():
+    sfx = ["-3d", "-2ngay", "-2ngày", "-3lan", "-3lần", "-3LẦN", "-2days", "-2-days",
+           "-4", "-3retros", "-3x", "-2times", "-1day"]
+    ok_ctl = ["-baz", "-t1-not-ready", "-structural"]        # đối chứng: KHÔNG được chặn
+    sb = tempfile.mkdtemp(prefix="retro_regex_")
+    try:
+        os.symlink(BIN, os.path.join(sb, "bin"))
+        for loc in ({"LC_ALL": "C", "LANG": "C"}, {"LC_ALL": "C.UTF-8", "LANG": "C.UTF-8"}):
+            env = dict(os.environ, **loc)
+            lech = []
+            for tail in sfx + ok_ctl:
+                slug = "foo-bar" + tail
+                try:
+                    RE.stable_topic(slug)
+                    py_reject = False
+                except SystemExit:
+                    py_reject = True
+                r = subprocess.run(
+                    [os.path.join(sb, "bin", "append_event.sh"), "Mike", "question",
+                     RE.TOPIC_PREFIX + slug, '{"x":1}'],
+                    capture_output=True, text=True, env=env, cwd=sb)
+                sh_reject = r.returncode != 0
+                if py_reject != sh_reject:
+                    lech.append(f"{slug}: python_reject={py_reject} shell_reject={sh_reject}")
+            check(f"2 bản sao regex đuôi đếm trùng phán quyết dưới {loc['LC_ALL']}",
+                  not lech, "; ".join(lech))
+            # Trùng phán quyết là chưa đủ: hai cổng CÙNG cho qua hết cũng "trùng". Đòi
+            # nhóm đếm thật sự bị chặn, và đối chứng ok_ctl thật sự được cho qua.
+            lot = [t for t in sfx if not _py_rejects("foo-bar" + t)]
+            check(f"nhóm đếm bị TỪ CHỐI dưới {loc['LC_ALL']} (không phải cùng im lặng)",
+                  not lot, f"lọt: {lot}")
+            oan = [t for t in ok_ctl if _py_rejects("foo-bar" + t)]
+            check(f"slug KHÔNG có bộ đếm được cho qua dưới {loc['LC_ALL']} (không chặn oan)",
+                  not oan, f"bị chặn oan: {oan}")
+    finally:
+        shutil.rmtree(sb, ignore_errors=True)
+
+
+def _py_rejects(slug):
+    try:
+        RE.stable_topic(slug)
+        return False
+    except SystemExit:
+        return True
+
+
+# ── Ca 5e: NHIỀU ack cùng topic — ack `window` còn hiệu lực phải THẮNG `permanent` cũ ─
+#    arch-review vòng 3 note N4: luật `best` trong `ack_of()` chưa có fixture nào, nên 2
+#    mutation (đảo ưu tiên / bỏ hẳn ưu tiên) SỐNG SÓT. Hình thái: một pattern bị ack
+#    "vĩnh viễn" 40 ngày trước, rồi hôm qua người triage lại bằng ack có cửa sổ sd=14.
+#    Chọn nhầm ack `permanent` cũ ⇒ đường thoát (tuổi ack 40d > trần 14d) kích hoạt ⇒
+#    POST lại đúng việc người vừa triage hôm qua — chính bug ack-topic-counter đội lốt.
+def case_window_ack_wins_over_older_permanent():
+    root = _mk({
+        "Mike": [H.ev("Mike", "question", STABLE, H.ago(45))],
+        "Wags": [H.ev("Wags", "status", f"{RE.ACK_PREFIX}Mike/{STABLE}", H.ago(40)),
+                 H.ev("Wags", "status", f"{RE.ACK_PREFIX}Mike/{STABLE}", H.ago(1),
+                      {"suppress_days": 14})],
+    })
+    try:
+        q_ts = RE._ts({"ts": H.ago(45)})
+        hit = RE.ack_of("Mike", STABLE, q_ts, RE.load_bus(root)[1])
+        check("ack_of() chọn ack `window` (tươi) chứ không phải `permanent` (40 ngày)",
+              hit is not None and hit[0] == "window", str(hit))
+        decision, reason = RE.decide(STABLE, root)
+        check("ack permanent CŨ 40 ngày + ack window sd=14 MỚI 1 ngày ⇒ SKIP",
+              decision == "SKIP", f"{decision} — {reason}")
+        # CỐ Ý KHÔNG _consist ở ca này. `_check5_verdict` đọc dòng "ĐÃ TRIAGE, chờ
+        # NGƯỜI quyết", mà CHECK5 chỉ in dòng đó cho câu hỏi < 48h (nhánh pending_q_*);
+        # câu hỏi 45 ngày rơi vào nhánh aged_q ("TREO LÂU") nên phán quyết ack của
+        # `_acked` ở đó KHÔNG quan sát được qua output. Đây là giới hạn của HARNESS, không
+        # phải lệch sản phẩm — đã kiểm tay: `_acked` cũng trả True cho fixture này (ack
+        # permanent 40 ngày có a_ts >= q_ts 45 ngày). Tính nhất quán của nhánh <48h đã
+        # được các ca CONSIST khác ghim; đừng thêm _consist vào đây rồi "sửa" sản phẩm
+        # cho khớp một helper đọc sai nhánh.
+        check("lý do nêu đúng ack đang phủ (không viện dẫn đường thoát)",
+              "đường thoát" not in reason and "trần" not in reason, reason)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
 # ── Ca 7k: answer CŨ HƠN câu hỏi KHÔNG được coi là đã giải quyết (pre-resolve) ─────
 def case_older_answer_does_not_preresolve():
     root = _mk({
@@ -729,7 +823,9 @@ def main():
                case_escape_hatch_measures_ack_age, case_newest_question_wins,
                case_real_write_post_and_skip, case_skip_prefix_constant_in_sync,
                case_daily_retro_wired, case_daily_retro_guard_sees_skip_status,
-               case_append_event_guard_is_mechanical):
+               case_append_event_guard_is_mechanical,
+               case_counter_regex_copies_agree,
+               case_window_ack_wins_over_older_permanent):
         print(f"\n-- {fn.__name__}")
         fn()
     print()

@@ -202,8 +202,10 @@ QUY TRÌNH BẮT BUỘC (đọc bằng chứng thật, không suy đoán):
    'triaged-needs-human:' của ops_health_check khớp topic TUYỆT ĐỐI, nên bộ đếm trong
    topic làm ack hôm qua không phủ được escalation hôm nay ⇒ mỗi ngày đốt 1 job
    wags_autofix cho việc người đã triage (bug ack-topic-counter, tái diễn ≥3 retro).
-   Helper tự cắt bộ đếm, tự kiểm pattern này đã có câu hỏi đang được ack phủ chưa, và
-   tự quyết POST hay SKIP — đọc dòng DECISION= nó in ra rồi ghi kết quả đó vào draft.
+   Helper TỪ CHỐI (fail-loud, rc!=0) slug mang bộ đếm — nó KHÔNG tự cắt, vì cắt thì 2
+   slug mô tả khác nhau gộp thành 1 topic. Nó tự kiểm pattern này đã có câu hỏi đang
+   được ack phủ chưa và tự quyết POST hay SKIP — đọc dòng DECISION= nó in ra rồi ghi
+   kết quả đó vào draft. Bị từ chối thì ĐỔI TÊN slug theo gợi ý, đừng gọi append_event.
 
 XONG bước 4-6 ở trên là DỪNG. Không viết gì vào kb/incidents/, không dispatch Wags,
 không commit, không dọn memory — tất cả phần đó thuộc bước 2/3 của pipeline, KHÔNG phải

@@ -29,8 +29,10 @@ CƠ CHẾ DÙNG CHUNG (điểm mấu chốt — đây là chỗ 2 nơi trước 
   quên bên kia ⇒ selfcheck ĐỎ. Đó là ràng buộc cơ khí, không phải lời hứa trong docs.
 
 HÀNH VI:
-  - Chuẩn hoá slug: mọi đuôi đếm (`-3days`, `-2day`, `-3retros`, `-4`) bị CẮT khỏi topic.
-    Phiên retro có cố nhét bộ đếm vào cũng không vào được — đó là mục đích.
+  - Slug mang đuôi đếm (`-3days`, `-2day`, `-3retros`, `-4`, `-3d`, `-2ngay`) bị TỪ CHỐI
+    fail-loud, KHÔNG bị cắt: cắt thì `foo-2days` và `foo-3days` gộp thành `foo` cùng với
+    mọi slug mô tả khác kết thúc bằng số ⇒ false-collapse (arch-review vòng 2 bác bỏ
+    hành vi cắt của vòng 1). Phiên retro cố nhét bộ đếm vào thì nhận rc!=0 + tên gợi ý.
   - Đã có câu hỏi ĐÚNG topic đó và nó ĐANG được ack phủ ⇒ SKIP (không mở câu hỏi thứ
     hai cho cùng pattern — luật này trước đây chỉ là 1 dòng văn xuôi trong
     retro-2026-09-24.md:94 mà prompt retro không hề nhắc). Ghi 1 event `status` để số
@@ -65,7 +67,13 @@ TOPIC_PREFIX = "retro-pattern-recurring-"
 # Đuôi ĐẾM: số ở CUỐI, đơn vị tuỳ chọn, dấu phân cách tuỳ chọn ở cả 2 phía của số. Phủ
 # CẢ dạng dính (`-2days`) LẪN dạng có gạch (`-2-days`) — cả hai đều CÓ THẬT trên bus
 # (`retro-pattern-recurring-2-days` 08-09, `…-nav-price-xcheck-gate-2-days` 09-09).
-_COUNTER_UNIT = r"(?:days?|d|ngay|ng\u00e0y|retros?|l[a\u1ea7]n|times?|x)?"
+# `lan|lần` viết dạng NHÓM (không phải bracket `l[aầ]n`) vì bản sao ERE của regex này nằm
+# trong `bin/append_event.sh` chạy dưới `grep -qiE`: ở locale C bracket trở thành tập BYTE
+# nên `l`+1byte+`n` KHÔNG khớp `lần` (3 byte UTF-8). Cùng lớp với bản ghi đè TZ 07-31 —
+# một giả định kế thừa từ môi trường làm chốt yếu đi IM LẶNG (arch-review vòng 3, note N2).
+# Ca `case_counter_regex_copies_agree` TRÍCH cả 2 cổng rồi feed CÙNG danh sách hậu tố,
+# chạy cả dưới `LC_ALL=C`. `\uXXXX` là escape của module `re`, hoạt động trong raw string.
+_COUNTER_UNIT = r"(?:days?|d|ngay|ng\u00e0y|retros?|lan|l\u1ea7n|times?|x)?"
 _COUNTER_TAIL = re.compile(r"[-_ ]?\d+[-_ ]?" + _COUNTER_UNIT + "$", re.IGNORECASE)
 # CÒN SÓT CÓ Ý THỨC (arch-review vòng 2, ghi chú không chặn merge): bộ đếm ĐỨNG TRƯỚC
 # phần mô tả (`…-2days-selfreport-vs-artifact`, có thật 2026-08-26 nhưng đã đóng) không

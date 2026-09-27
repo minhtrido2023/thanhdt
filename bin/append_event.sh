@@ -110,9 +110,18 @@ fi
 # trước khi được vá. Vá ở prompt `daily_retro.sh` là vá bằng TRÍ NHỚ CỦA LLM; chốt cơ
 # khí phải nằm ở ĐƯỜNG GHI. HẸP có chủ đích: chỉ event_type=question và chỉ đúng tiền
 # tố topic của retro — không đụng bất kỳ topic nào khác của fleet.
+# LC_ALL CỐ ĐỊNH cho grep, KHÔNG thừa hưởng từ môi trường gọi, và `lan|lần` dạng NHÓM chứ
+# không phải bracket `l[aầ]n`: `grep -i` chỉ case-fold được ký tự multibyte dưới locale
+# UTF-8, còn bracket dưới locale C trở thành tập BYTE. Dưới `LC_ALL=C` (cron, systemd,
+# sandbox CI đều hay là C) `-3LẦN` LỌT LƯỚI trong khi cổng Python `stable_topic()` vẫn từ
+# chối ⇒ 2 bản sao regex lệch nhau IM LẶNG tuỳ môi trường — đúng lớp "giả định kế thừa từ
+# env" của bản ghi đè TZ 07-31. Đo được: LC_ALL=C → rc=0 (GHI THẬT), LC_ALL=C.UTF-8 → rc=1.
+# Ghim bởi ca `case_counter_regex_copies_agree`, chạy cả dưới LC_ALL=C.
+# C.UTF-8 không tồn tại thì grep cảnh báo rồi xử như C ⇒ các dạng ASCII (`days`, `d`,
+# `ngay`, `lan`, `retros`, `x`, số trần) VẪN bị chặn: suy giảm, không bao giờ tệ hơn bản cũ.
 case "$etype" in question)
   if printf '%s' "$topic" \
-       | grep -qiE '^retro-pattern-recurring-.*[-_ ]?[0-9]+[-_ ]?(days?|d|ngay|ngày|retros?|l[aầ]n|times?|x)?$'; then
+       | LC_ALL=C.UTF-8 grep -qiE '^retro-pattern-recurring-.*[-_ ]?[0-9]+[-_ ]?(days?|d|ngay|ngày|retros?|lan|lần|times?|x)?$'; then
     die "topic escalate RETRO mang BỘ ĐẾM: $(printf '%q' "$topic")
   ack 'triaged-needs-human:' khớp topic TUYỆT ĐỐI nên bộ đếm trong topic làm ack hôm qua
   không phủ được escalation hôm nay (bug ack-topic-counter). Dùng ĐÚNG cổng:
