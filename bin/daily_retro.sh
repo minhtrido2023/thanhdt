@@ -192,9 +192,20 @@ QUY TRÌNH BẮT BUỘC (đọc bằng chứng thật, không suy đoán):
    có 'Prevention' — đây là tín hiệu QUAN TRỌNG NHẤT cần nêu bật trong draft: prevention
    cũ chưa đủ mạnh, cần đề xuất prevention MẠNH HƠN (không chỉ lặp lại lời khuyên cũ).
 6. Nếu SAU 2 lần RETRO liên tiếp mà CÙNG 1 pattern vẫn tái diễn (kiểm tra RETRO entry
-   liền trước) → escalate NGAY bus question 'retro-pattern-recurring-<n>-days' (dùng
-   append_event.sh trực tiếp, không cần đợi ai) cho Mike/user biết prevention hiện tại
-   không hiệu quả, cần thay đổi cách tiếp cận (không chỉ viết thêm 1 dòng 'prevention').
+   liền trước) → escalate NGAY cho Mike/user biết prevention hiện tại không hiệu quả,
+   cần thay đổi cách tiếp cận (không chỉ viết thêm 1 dòng 'prevention').
+   ESCALATE BẰNG ĐÚNG LỆNH NÀY, KHÔNG gọi append_event.sh trực tiếp:
+     mike/bin/retro_escalate.py --pattern '<slug-ổn-định-mô-tả-pattern>' --days <n> \\
+         --payload '{\"summary\":\"...\",\"options\":[...],\"recommendation\":\"...\",\"urgency\":\"...\"}'
+   --pattern là slug MÔ TẢ pattern (vd 'ack-topic-counter-structural'), TUYỆT ĐỐI
+   KHÔNG nhét số ngày vào đó — số ngày đi qua --days và nằm trong payload. Lý do: ack
+   'triaged-needs-human:' của ops_health_check khớp topic TUYỆT ĐỐI, nên bộ đếm trong
+   topic làm ack hôm qua không phủ được escalation hôm nay ⇒ mỗi ngày đốt 1 job
+   wags_autofix cho việc người đã triage (bug ack-topic-counter, tái diễn ≥3 retro).
+   Helper TỪ CHỐI (fail-loud, rc!=0) slug mang bộ đếm — nó KHÔNG tự cắt, vì cắt thì 2
+   slug mô tả khác nhau gộp thành 1 topic. Nó tự kiểm pattern này đã có câu hỏi đang
+   được ack phủ chưa và tự quyết POST hay SKIP — đọc dòng DECISION= nó in ra rồi ghi
+   kết quả đó vào draft. Bị từ chối thì ĐỔI TÊN slug theo gợi ý, đừng gọi append_event.
 
 XONG bước 4-6 ở trên là DỪNG. Không viết gì vào kb/incidents/, không dispatch Wags,
 không commit, không dọn memory — tất cả phần đó thuộc bước 2/3 của pipeline, KHÔNG phải
@@ -327,8 +338,17 @@ try:
                 e = json.loads(line)
             except Exception:
                 continue
-            if e.get("event_type") == "question" and str(e.get("ts", "")) >= since:
-                t = e.get("topic")
+            # `status` với topic `retro-pattern-recurring-update:<topic>` là nhánh SKIP
+            # của bin/retro_escalate.py: bước 6 ĐÃ xử lý pattern đó (đã có câu hỏi đang
+            # được ack phủ) nên cố ý KHÔNG mở question mới. Chỉ thu event_type=question
+            # thì bước 3 thấy "chưa escalate gì" và được thả cửa mở question trùng —
+            # đúng sự cố 2026-08-15 mà guard này sinh ra để chặn (arch-review vòng 1
+            # ack-topic-counter, required_change #6).
+            _et, _t = e.get("event_type"), e.get("topic") or ""
+            _hit = (_et == "question"
+                    or (_et == "status" and _t.startswith("retro-pattern-recurring-update:")))
+            if _hit and str(e.get("ts", "")) >= since:
+                t = _t
                 if t and t not in out:
                     out.append(t)
 except Exception:
