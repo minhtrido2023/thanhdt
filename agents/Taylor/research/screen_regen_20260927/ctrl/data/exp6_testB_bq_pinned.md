@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/data/exp6_testB_bq_pinned.md

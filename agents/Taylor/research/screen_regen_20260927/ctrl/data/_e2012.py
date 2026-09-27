@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/data/_e2012.py

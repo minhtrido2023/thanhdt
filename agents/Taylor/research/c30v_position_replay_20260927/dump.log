@@ -1,0 +1,17 @@
+[cfg] UNIVERSE_SOURCE=pit BASKET_SELECT=yieldcombo BASKET_PRICE_BASIS=split (default) BASKET_OSHARES_STEP=exdate (default) CA_SNAPSHOT=/home/trido/thanhdt/WorkingClaude/data/snapshots/corp_action_share_20260927.parquet
+[BQ_LOCAL_CACHE] WARNING: cache verified 1431h ago (>36h) — consider re-running sync_bq_cache.py
+[BQ_LOCAL_CACHE] ready — 14 tables from /home/trido/thanhdt/WorkingClaude/data/bq_cache_asof20260729_postrestate
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+[BQ_LOCAL_CACHE] query took 63.7s (585845 rows)
+  [oshares-step] corp-action từ SNAPSHOT /home/trido/thanhdt/WorkingClaude/data/snapshots/corp_action_share_20260927.parquet: 4502 dòng
+  [oshares-step] exdate: 1619 bước OShares, 756 bước ĐƯỢC DỜI (median 42 ngày), 851 giữ ngày quý (không khớp sự kiện), 3 bị chặn bởi cổng PIT
+[leg flat] level n=3114 first=2013-12-23 00:00:00 last=2026-06-19 00:00:00
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+[BQ_LOCAL_CACHE] query took 64.0s (585845 rows)
+  [oshares-step] exdate: 1619 bước OShares, 756 bước ĐƯỢC DỜI (median 42 ngày), 851 giữ ngày quý (không khớp sự kiện), 3 bị chặn bởi cổng PIT
+[leg legacy] level n=3114 first=2013-12-23 00:00:00 last=2026-06-19 00:00:00
+[dump] panel rows=585,845 cols=['ticker', 'time', 'Close', 'pxw', 'tv', 'OShares', 'mcap', 'mcapw']
+[dump] members rows=1,440 cols=['quarter', 'rebal_date', 'ticker', 'qmult', 'rating', 'liq_rank', 'score'] rebals=48 union=204
+[dump] flat: level 1000.0 -> 7115.2  CAGR 17.02%  (12.49y)
+[dump] legacy: level 1000.0 -> 40477.8  CAGR 34.50%  (12.49y)
+EXIT=0

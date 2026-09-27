@@ -1,0 +1,184 @@
+
+##############################################################################
+# TZ = UTC
+##############################################################################
+FAIL-C residual selfcheck | TZ=UTC | python=3.12.13 | pandas=3.0.2
+
+[T1] LIVE w_lag_target  (mutate_label=None)
+     as-of=2026-07-28: nhan known_date -> w_LAG 0.65 (mean12 +3.00) | nhan entry -> w_LAG 0.5 (mean12 -1.00)
+     w_LAG=0.65  log=[edge-alloc] label_col=known_date mean12 as-of 2026-07-28 = 3.0% vs thr 1% -> w_LAG 0.65
+
+[T1b] LIVE thieu cot known_date -> FALLBACK `entry` + canh bao, KHONG crash
+     w_LAG=0.5  log=WARNING: lag_edge_health.csv thieu cot 'known_date' -> fallback nhan 'entry' (moc as-of in ra se TRE ~25 phien so voi thuc te; mean12/w_LAG KHONG doi). Chay lai edge_health_monitor.py de sinh cot dung.
+  [edge-alloc] label_col=entry mean12 as-of 2026-09-05 = -2.0% vs thr 1% -> w_LAG 0.50
+
+[T1c] file THAT: nhan entry vs known_date -> cung w_LAG (0 regression tien that)
+     {'entry': (-0.6047751162752933, 0.5, '2026-08-14'), 'known_date': (-0.6047751162752933, 0.5, '2026-09-23')}
+
+[T2] neg_month_streak  (mutate_label=None)
+     streak(entry)=3  streak(known_date)=1  used(known_date)=1
+
+[T2b] neg_month_streak: thieu cot known_date -> tra (None, None), KHONG crash
+
+[T2c] hop dong return dict cua lag_edge_health()
+
+==============================================================================
+MUTATION: doi nhan ve `entry` (bug goc) — cac test tren PHAI CHET
+==============================================================================
+
+[T1] LIVE w_lag_target  (mutate_label='entry')
+     as-of=2026-07-28: nhan known_date -> w_LAG 0.65 (mean12 +3.00) | nhan entry -> w_LAG 0.5 (mean12 -1.00)
+     w_LAG=0.5  log=WARNING: lag_edge_health.csv thieu cot 'known_date' -> fallback nhan 'entry' (moc as-of in ra se TRE ~25 phien so voi thuc te; mean12/w_LAG KHONG doi). Chay lai edge_health_monitor.py de sinh cot dung.
+  [edge-alloc] label_col=entry mean12 as-of 2026-07-28 = -1.0% vs thr 1% -> w_LAG 0.50
+  FAIL: tai as-of=2026-07-28 duong LIVE phai dung nhan `known_date` -> w_LAG 0.65; dang 0.5 (= ket qua cua nhan `entry` = 0.5)
+  -> mutant T1 live: KILLED (1 assertion chet)
+
+[T2] neg_month_streak  (mutate_label='entry')
+     streak(entry)=3  streak(known_date)=1  used(entry)=3
+  FAIL: neg_streak phai neo `known_date` (ky vong 1), nhung nhan dang dung cho ket qua 3 (label=entry)
+  FAIL: neg_streak dung cho nguong hanh dong phai <3 (khong ha w_LAG); dang 3 -> se HA w_LAG SOM ~1,2 thang
+  -> mutant T2 neg_streak: KILLED (2 assertion chet)
+
+==============================================================================
+assertion: 19 | mutation: 2/2 KILLED | fail: 0
+KET QUA: PASS
+
+
+##############################################################################
+# TZ = Asia/Ho_Chi_Minh
+##############################################################################
+FAIL-C residual selfcheck | TZ=Asia/Ho_Chi_Minh | python=3.12.13 | pandas=3.0.2
+
+[T1] LIVE w_lag_target  (mutate_label=None)
+     as-of=2026-07-28: nhan known_date -> w_LAG 0.65 (mean12 +3.00) | nhan entry -> w_LAG 0.5 (mean12 -1.00)
+     w_LAG=0.65  log=[edge-alloc] label_col=known_date mean12 as-of 2026-07-28 = 3.0% vs thr 1% -> w_LAG 0.65
+
+[T1b] LIVE thieu cot known_date -> FALLBACK `entry` + canh bao, KHONG crash
+     w_LAG=0.5  log=WARNING: lag_edge_health.csv thieu cot 'known_date' -> fallback nhan 'entry' (moc as-of in ra se TRE ~25 phien so voi thuc te; mean12/w_LAG KHONG doi). Chay lai edge_health_monitor.py de sinh cot dung.
+  [edge-alloc] label_col=entry mean12 as-of 2026-09-05 = -2.0% vs thr 1% -> w_LAG 0.50
+
+[T1c] file THAT: nhan entry vs known_date -> cung w_LAG (0 regression tien that)
+     {'entry': (-0.6047751162752933, 0.5, '2026-08-14'), 'known_date': (-0.6047751162752933, 0.5, '2026-09-23')}
+
+[T2] neg_month_streak  (mutate_label=None)
+     streak(entry)=3  streak(known_date)=1  used(known_date)=1
+
+[T2b] neg_month_streak: thieu cot known_date -> tra (None, None), KHONG crash
+
+[T2c] hop dong return dict cua lag_edge_health()
+
+==============================================================================
+MUTATION: doi nhan ve `entry` (bug goc) — cac test tren PHAI CHET
+==============================================================================
+
+[T1] LIVE w_lag_target  (mutate_label='entry')
+     as-of=2026-07-28: nhan known_date -> w_LAG 0.65 (mean12 +3.00) | nhan entry -> w_LAG 0.5 (mean12 -1.00)
+     w_LAG=0.5  log=WARNING: lag_edge_health.csv thieu cot 'known_date' -> fallback nhan 'entry' (moc as-of in ra se TRE ~25 phien so voi thuc te; mean12/w_LAG KHONG doi). Chay lai edge_health_monitor.py de sinh cot dung.
+  [edge-alloc] label_col=entry mean12 as-of 2026-07-28 = -1.0% vs thr 1% -> w_LAG 0.50
+  FAIL: tai as-of=2026-07-28 duong LIVE phai dung nhan `known_date` -> w_LAG 0.65; dang 0.5 (= ket qua cua nhan `entry` = 0.5)
+  -> mutant T1 live: KILLED (1 assertion chet)
+
+[T2] neg_month_streak  (mutate_label='entry')
+     streak(entry)=3  streak(known_date)=1  used(entry)=3
+  FAIL: neg_streak phai neo `known_date` (ky vong 1), nhung nhan dang dung cho ket qua 3 (label=entry)
+  FAIL: neg_streak dung cho nguong hanh dong phai <3 (khong ha w_LAG); dang 3 -> se HA w_LAG SOM ~1,2 thang
+  -> mutant T2 neg_streak: KILLED (2 assertion chet)
+
+==============================================================================
+assertion: 19 | mutation: 2/2 KILLED | fail: 0
+KET QUA: PASS
+
+
+##############################################################################
+# TZ = America/New_York
+##############################################################################
+FAIL-C residual selfcheck | TZ=America/New_York | python=3.12.13 | pandas=3.0.2
+
+[T1] LIVE w_lag_target  (mutate_label=None)
+     as-of=2026-07-28: nhan known_date -> w_LAG 0.65 (mean12 +3.00) | nhan entry -> w_LAG 0.5 (mean12 -1.00)
+     w_LAG=0.65  log=[edge-alloc] label_col=known_date mean12 as-of 2026-07-28 = 3.0% vs thr 1% -> w_LAG 0.65
+
+[T1b] LIVE thieu cot known_date -> FALLBACK `entry` + canh bao, KHONG crash
+     w_LAG=0.5  log=WARNING: lag_edge_health.csv thieu cot 'known_date' -> fallback nhan 'entry' (moc as-of in ra se TRE ~25 phien so voi thuc te; mean12/w_LAG KHONG doi). Chay lai edge_health_monitor.py de sinh cot dung.
+  [edge-alloc] label_col=entry mean12 as-of 2026-09-05 = -2.0% vs thr 1% -> w_LAG 0.50
+
+[T1c] file THAT: nhan entry vs known_date -> cung w_LAG (0 regression tien that)
+     {'entry': (-0.6047751162752933, 0.5, '2026-08-14'), 'known_date': (-0.6047751162752933, 0.5, '2026-09-23')}
+
+[T2] neg_month_streak  (mutate_label=None)
+     streak(entry)=3  streak(known_date)=1  used(known_date)=1
+
+[T2b] neg_month_streak: thieu cot known_date -> tra (None, None), KHONG crash
+
+[T2c] hop dong return dict cua lag_edge_health()
+
+==============================================================================
+MUTATION: doi nhan ve `entry` (bug goc) — cac test tren PHAI CHET
+==============================================================================
+
+[T1] LIVE w_lag_target  (mutate_label='entry')
+     as-of=2026-07-28: nhan known_date -> w_LAG 0.65 (mean12 +3.00) | nhan entry -> w_LAG 0.5 (mean12 -1.00)
+     w_LAG=0.5  log=WARNING: lag_edge_health.csv thieu cot 'known_date' -> fallback nhan 'entry' (moc as-of in ra se TRE ~25 phien so voi thuc te; mean12/w_LAG KHONG doi). Chay lai edge_health_monitor.py de sinh cot dung.
+  [edge-alloc] label_col=entry mean12 as-of 2026-07-28 = -1.0% vs thr 1% -> w_LAG 0.50
+  FAIL: tai as-of=2026-07-28 duong LIVE phai dung nhan `known_date` -> w_LAG 0.65; dang 0.5 (= ket qua cua nhan `entry` = 0.5)
+  -> mutant T1 live: KILLED (1 assertion chet)
+
+[T2] neg_month_streak  (mutate_label='entry')
+     streak(entry)=3  streak(known_date)=1  used(entry)=3
+  FAIL: neg_streak phai neo `known_date` (ky vong 1), nhung nhan dang dung cho ket qua 3 (label=entry)
+  FAIL: neg_streak dung cho nguong hanh dong phai <3 (khong ha w_LAG); dang 3 -> se HA w_LAG SOM ~1,2 thang
+  -> mutant T2 neg_streak: KILLED (2 assertion chet)
+
+==============================================================================
+assertion: 19 | mutation: 2/2 KILLED | fail: 0
+KET QUA: PASS
+
+
+##############################################################################
+# TZ = env -u TZ
+##############################################################################
+FAIL-C residual selfcheck | TZ=<unset> | python=3.12.13 | pandas=3.0.2
+
+[T1] LIVE w_lag_target  (mutate_label=None)
+     as-of=2026-07-28: nhan known_date -> w_LAG 0.65 (mean12 +3.00) | nhan entry -> w_LAG 0.5 (mean12 -1.00)
+     w_LAG=0.65  log=[edge-alloc] label_col=known_date mean12 as-of 2026-07-28 = 3.0% vs thr 1% -> w_LAG 0.65
+
+[T1b] LIVE thieu cot known_date -> FALLBACK `entry` + canh bao, KHONG crash
+     w_LAG=0.5  log=WARNING: lag_edge_health.csv thieu cot 'known_date' -> fallback nhan 'entry' (moc as-of in ra se TRE ~25 phien so voi thuc te; mean12/w_LAG KHONG doi). Chay lai edge_health_monitor.py de sinh cot dung.
+  [edge-alloc] label_col=entry mean12 as-of 2026-09-05 = -2.0% vs thr 1% -> w_LAG 0.50
+
+[T1c] file THAT: nhan entry vs known_date -> cung w_LAG (0 regression tien that)
+     {'entry': (-0.6047751162752933, 0.5, '2026-08-14'), 'known_date': (-0.6047751162752933, 0.5, '2026-09-23')}
+
+[T2] neg_month_streak  (mutate_label=None)
+     streak(entry)=3  streak(known_date)=1  used(known_date)=1
+
+[T2b] neg_month_streak: thieu cot known_date -> tra (None, None), KHONG crash
+
+[T2c] hop dong return dict cua lag_edge_health()
+
+==============================================================================
+MUTATION: doi nhan ve `entry` (bug goc) — cac test tren PHAI CHET
+==============================================================================
+
+[T1] LIVE w_lag_target  (mutate_label='entry')
+     as-of=2026-07-28: nhan known_date -> w_LAG 0.65 (mean12 +3.00) | nhan entry -> w_LAG 0.5 (mean12 -1.00)
+     w_LAG=0.5  log=WARNING: lag_edge_health.csv thieu cot 'known_date' -> fallback nhan 'entry' (moc as-of in ra se TRE ~25 phien so voi thuc te; mean12/w_LAG KHONG doi). Chay lai edge_health_monitor.py de sinh cot dung.
+  [edge-alloc] label_col=entry mean12 as-of 2026-07-28 = -1.0% vs thr 1% -> w_LAG 0.50
+  FAIL: tai as-of=2026-07-28 duong LIVE phai dung nhan `known_date` -> w_LAG 0.65; dang 0.5 (= ket qua cua nhan `entry` = 0.5)
+  -> mutant T1 live: KILLED (1 assertion chet)
+
+[T2] neg_month_streak  (mutate_label='entry')
+     streak(entry)=3  streak(known_date)=1  used(entry)=3
+  FAIL: neg_streak phai neo `known_date` (ky vong 1), nhung nhan dang dung cho ket qua 3 (label=entry)
+  FAIL: neg_streak dung cho nguong hanh dong phai <3 (khong ha w_LAG); dang 3 -> se HA w_LAG SOM ~1,2 thang
+  -> mutant T2 neg_streak: KILLED (2 assertion chet)
+
+==============================================================================
+assertion: 19 | mutation: 2/2 KILLED | fail: 0
+KET QUA: PASS
+
+
+==============================================================================
+TONG HOP 3 TZ + env -u TZ: {'UTC': 0, 'Asia/Ho_Chi_Minh': 0, 'America/New_York': 0, 'env -u TZ': 0}
+KET QUA: PASS o MOI TZ

@@ -1,0 +1,25 @@
+[px-repair] 8 ô ex-date có `Price` kẹt hệ CUM đã sửa thành Close/ratio_next
+[events] TRONG cửa sổ: 804 sự kiện CP thưởng/cổ tức CP áp vào N; 1895 cổ tức tiền vào cash; 195 QUYỀN MUA KHÔNG mô phỏng được. Bỏ: 1313 trước phiên đầu / 90 sau phiên cuối / 50 không có ex-date (phần lớn là AIS).
+[harness] chân flat tái lập từ panel vs level build_pit trả về: max |Δ| = 3.997e-15
+[harness] chân legacy tái lập từ panel vs level build_pit trả về: max |Δ| = 3.109e-15
+[identity] REPLAY_B không sự kiện/không phí vs chuỗi giá (cùng panel mark) viết độc lập: max |Δ| = 4.885e-15
+[replay A] 100 ô giá thiếu carry-forward; turnover 74.3x vốn gốc; cổ tức tiền nhận 0.75x; phí 0.000x
+[replay B] 9 ô giá thiếu carry-forward; turnover 126.3x vốn gốc; cổ tức tiền nhận 0.76x; phí 0.000x
+
+[window] đo từ rebal ĐẦU TIÊN 2014-08-05 -> 2026-06-19 (cửa sổ PREREG; bỏ 0.616y chưa đầu tư ở đầu chuỗi)
+ENGINE_FLAT    level   1011.8 ->     7115.2   CAGR  17.857%   (11.87y)
+ENGINE_LEGACY  level   1011.8 ->    40477.8   CAGR  36.445%   (11.87y)
+REPLAY_A       level   1011.7 ->     6620.2   CAGR  17.145%   (11.87y)
+REPLAY_B       level   1011.7 ->     6739.8   CAGR  17.322%   (11.87y)
+
+Δ CAGR  REPLAY_B − ENGINE_FLAT   = -0.536 pp (THÔ — chưa trừ phần quyền mua; ngưỡng PREREG 0,300pp áp cho số ĐÃ TRỪ, xem attribute.py)
+Δ CAGR  REPLAY_A − ENGINE_FLAT   = -0.713 pp
+Δ CAGR  REPLAY_B − ENGINE_LEGACY = -19.124 pp
+  REPLAY_B  vs FLAT   : corr 0.998653   tracking error  1.179%/yr
+  REPLAY_B  vs LEGACY : corr 0.963221   tracking error  6.309%/yr
+  REPLAY_A  vs FLAT   : corr 0.997908   tracking error  1.469%/yr
+  REPLAY_A  vs LEGACY : corr 0.962417   tracking error  6.375%/yr
+
+[rights] 195 sự kiện quyền mua TRONG cửa sổ (91 mã) — KHÔNG mô phỏng được (thiếu giá phát hành)
+[px-repair] ô sửa GIAO với một bước số CP trong rổ: 0 — nếu >0 thì đúng những ô đó replay bị CƯỠNG BỨC khớp chuỗi Close (xem docstring build_prices)
+[px-repair] ô sửa NẰM TRONG RỔ phiên đó: 0 — 0 ⇒ đường cưỡng bức không bao giờ được đi, với mọi loại sự kiện (mạnh hơn phép đếm GIAO-bước-số-CP ở trên)

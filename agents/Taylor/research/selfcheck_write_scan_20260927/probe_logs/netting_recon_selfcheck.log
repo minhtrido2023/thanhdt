@@ -1,0 +1,89 @@
+
+A. NET≠0 khớp đủ @ giá khớp thật (VPB SELL 800 park + BUY 700 LAG → NET SELL 100)
+  ✅ không failure — []
+  ✅ 1 record
+  ✅ net_to_broker = -100 (bán) — -100
+  ✅ giá dùng = giá khớp THẬT 24.850 — 24850
+  ✅ price_source = giá khớp thật — avg_price khớp thật của lệnh net
+  ✅ cả 2 leg định giá @ 24.850 (nội bộ cùng giá)
+  ✅ buy_leg book=LAG qty=700
+  ✅ sell_leg book=park qty=800
+  ✅ Σ book chạm-TT == net_to_broker (-100)
+
+B. NET=0 (100% nội bộ): SELL 700 park + BUY 700 LAG → 0 lệnh broker
+  ✅ adj action INTERNAL_ONLY
+  ✅ không failure — []
+  ✅ net_to_broker = 0
+  ✅ giá dùng = ref 26.000
+  ✅ price_source ghi rõ NET=0 no market leg — ref_price (NET=0, no market leg)
+  ✅ 2 leg 700 mua & 700 bán @ 26.000 → bù trừ
+  ✅ Σ book chạm-TT == 0
+
+C. FAIL LOUD — NET≠0 khớp 100cp nhưng avg_price=None
+  ✅ có đúng 1 failure — [{'ticker': 'VPB', 'reason': 'lệnh net khớp 100cp nhưng KHÔNG lấy được giá khớp thật (avg_price) — không định giá 2 leg bằng giá bịa; kiểm tra xác nhận khớp broker'}]
+  ✅ failure nói về giá khớp thật
+  ✅ KHÔNG ghi record khi fail
+
+D. FAIL LOUD — fill nói net -100 nhưng vị thế broker đổi -300 (Σbook ≠ broker)
+  ✅ có đúng 1 failure — [{'ticker': 'VPB', 'reason': 'phần chạm broker theo fill = -100cp ≠ thay đổi vị thế sở hữu thật -300cp — Σ(book) ≠ broker, cần người kiểm tra (không tự gộp)'}]
+  ✅ failure nói Σ(book) ≠ broker
+  ✅ KHÔNG ghi record khi fail
+
+E. Khớp một phần: NET SELL 100 chỉ khớp 60cp @ 24.800, broker đổi -60
+  ✅ không failure (partial hợp lệ) — []
+  ✅ net_to_broker = -60
+  ✅ Σ book chạm-TT == -60 == broker delta
+
+F. FAIL LOUD — NET=0 nhưng không lấy được ref price để định giá nội bộ
+  ✅ có đúng 1 failure — [{'ticker': 'HPG', 'reason': 'NET=0 (100% nội bộ) nhưng KHÔNG lấy được giá tham chiếu để định giá chuyển nội bộ — không ghi audit với giá bịa'}]
+  ✅ failure nói về giá tham chiếu
+
+G. FAIL LOUD — NET=0 (0 lệnh ra broker) nhưng broker đổi -700cp (ghost)
+  ✅ có đúng 1 failure — [{'ticker': 'HPG', 'reason': 'NET=0 (0 lệnh ra broker) nhưng vị thế broker đổi -700cp — bất nhất (ghost/nguồn khác?), cần người kiểm tra'}]
+  ✅ failure nói vị thế broker đổi dù 0 lệnh
+
+H. NET BUY: BUY 800 LAG + SELL 700 park → NET BUY 100, khớp đủ @ 24.700, broker +100
+  ✅ adj net BUY
+  ✅ không failure — []
+  ✅ net_to_broker = +100 (mua)
+  ✅ Σ book chạm-TT == +100
+
+I. NET≠0 nhưng lệnh net khớp 0cp (chưa ai khớp) → @ref, net_to_broker 0
+  ✅ không failure — []
+  ✅ net_to_broker = 0 (chưa khớp)
+  ✅ giá @ ref 24.900
+  ✅ price_source ghi 0-filled — ref_price (net order 0-filled)
+
+J. FAIL LOUD — adj bị sửa hỏng: net_qty không khớp total_buy-total_sell
+  ✅ có đúng 1 failure — [{'ticker': 'VPB', 'reason': 'adj hỏng: total_buy(700) − total_sell(800) = -100 ≠ net_qty(-50)'}]
+  ✅ failure nói adj hỏng
+
+K. write_recon_log — ghi JSONL atomic + append + rỗng trả None
+  ✅ ghi ra path
+  ✅ 1 dòng JSONL
+  ✅ dòng parse được + ticker đúng
+  ✅ append → 2 dòng
+  ✅ records rỗng → None
+
+L. Integration — FILL row THẬT trong journal executor: giá = avg_price broker, không giá đặt
+  ✅ journal: filled = 100 — 100
+  ✅ journal: avg_price = 24.850 (avg_price broker, KHÔNG phải 24.900 giá đặt) — 24850.0
+  ✅ integration: không failure — []
+  ✅ integration: record giá = 24.850 (từ journal FILL, KHÔNG phải ref/đặt 24.900) — 24850.0
+  ✅ integration: cả 2 leg định giá @ 24.850
+
+M. Integration — NET SELL 100 chỉ khớp 60cp (cumulative) trong journal thật → partial
+  ✅ journal partial: filled = 60 (cumulative dòng cuối, không cộng 30+60) — 60
+  ✅ journal partial: avg = 24.800 — 24800.0
+  ✅ integration partial: không false-fail (60 ∈ [0,100]) — []
+  ✅ integration partial: net_to_broker = -60 — -60
+  ✅ integration partial: giá = 24.800 (avg khớp thật)
+
+N. Integration — 2 child khớp giá khác nhau → avg_price gia quyền theo qty
+  ✅ journal 2-child: filled = 100 (40+60) — 100
+  ✅ journal 2-child: avg gia quyền = 24.860 ((40·24800+60·24900)/100) — 24860.0
+  ✅ journal thiếu file → (0,None)
+  ✅ parent không có FILL → (0,None)
+
+======================================================================
+✅ TẤT CẢ PASS (58/58)

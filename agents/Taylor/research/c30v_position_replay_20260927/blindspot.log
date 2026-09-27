@@ -1,0 +1,8 @@
+panel: 204 mã × 3114 phiên · 2531 ô ex-date price-adjusting
+  detector BẮT ĐƯỢC (kẹt MỘT PHẦN, bất đẳng thức ngặt thoả): 8 ô
+  ĐIỂM MÙ — kẹt HOÀN TOÀN (ratio_d ≈ ratio_prev, ratio_next nhảy): 0 ô
+  giao của hai tập: 0 ô (0 ⇒ hai dạng rời nhau đúng như đại số nói)
+
+KẾT LUẬN: điểm mù là THẬT về mặt đại số (bất đẳng thức ngặt loại bỏ ratio_d == lo), nhưng
+RỖNG trên panel này ⇒ không ô nào lọt, không ảnh hưởng con số nào của báo cáo. Ghi lại vì
+nếu tái dùng replay.py trên panel khác thì phải đổi thành >= với dung sai hai phía.

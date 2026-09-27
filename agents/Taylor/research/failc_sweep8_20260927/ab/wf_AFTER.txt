@@ -1,0 +1,21 @@
+  [edge-alloc] source=lag_edge_health.csv label_col=known_date rows=583
+LAG edge-health mean12 (causal trailing-12M LAG trade return):
+  IS 2014-2019: mean 4.3%  median 3.5%  %time<4% 63%  min -0.5%
+  OOS 2020+: mean 5.0%  median 4.6%  %time<4% 41%  min -3.2%
+
+--- threshold grid: pick on IS, read OOS (Calmar) ---
+  thr  IS_CAGR  IS_Cal  OOS_CAGR  OOS_Cal  OOS_DD
+    0   19.81%    1.93    28.06%    1.36  -20.6% <- state-tilt(V2.3A)
+    2   19.52%    2.00    28.13%    1.39  -20.3%
+    3   19.87%    1.98    28.48%    1.41  -20.3%
+    4   20.80%    2.11    28.27%    1.39  -20.3%
+    5   20.81%    2.11    27.60%    1.36  -20.3%
+    6   20.80%    2.11    27.71%    1.37  -20.3%
+    8   19.66%    2.00    28.05%    1.38  -20.3%
+
+--- head-to-head IS vs OOS (state-tilt vs edge-cond thr4) ---
+rule                            window    CAGR    Sh     DD   Cal
+state-tilt (V2.3A)        IS 2014-2019  19.81%  1.66 -10.3%  1.93
+state-tilt (V2.3A)           OOS 2020+  28.06%  1.91 -20.6%  1.36
+edge-cond thr4            IS 2014-2019  20.80%  1.75  -9.9%  2.11
+edge-cond thr4               OOS 2020+  28.27%  1.89 -20.3%  1.39

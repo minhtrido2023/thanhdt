@@ -1,0 +1,97 @@
+########## TZ=Asia/Ho_Chi_Minh ##########
+TZ = 'Asia/Ho_Chi_Minh'
+
+BASE
+    ENGINE_FLAT      17.857%
+    ENGINE_LEGACY    36.445%
+    REPLAY_A         16.875%
+    REPLAY_B         17.322%
+  PASS  0a. harness tái lập chân engine khớp build_pit (assert cứng trong replay.py)
+  PASS  0b. identity: replay không sự kiện/không phí == chuỗi giá thô độc lập (assert cứng)
+  PASS  0c. CAGR đo từ rebal ĐẦU TIÊN, không tính thời gian chưa đầu tư — bỏ 0.616y
+  PASS  0d. px-repair KHÔNG giao với bất kỳ bước số CP nào trong rổ ⇒ replay không bị cưỡng bức khớp chuỗi Close ở đúng những ô đó — giao = 0
+  PASS  M1 bỏ hẳn bước N×(1+Σq) ⇒ PHẢI làm lệch — ΔCAGR A -10.383pp / B -10.568pp
+  PASS  M1 bỏ hẳn bước N×(1+Σq) ⇒ lệch chiều ÂM (mất cổ phiếu thưởng) — ΔCAGR A -10.383pp / B -10.568pp
+  PASS  M1 bỏ hẳn bước N×(1+Σq) ⇒ KHÔNG đụng chân engine — flat 17.857 legacy 36.445
+  PASS  M1b hệ số cùng ngày NHÂN thay vì CỘNG (lỗi vòng 1) ⇒ PHẢI làm lệch — ΔCAGR A +0.124pp / B +0.129pp
+  PASS  M1b hệ số cùng ngày NHÂN thay vì CỘNG (lỗi vòng 1) ⇒ lệch chiều DƯƠNG (nhân = số CP ảo) — ΔCAGR A +0.124pp / B +0.129pp
+  PASS  M1b hệ số cùng ngày NHÂN thay vì CỘNG (lỗi vòng 1) ⇒ KHÔNG đụng chân engine — flat 17.857 legacy 36.445
+  PASS  M2 mark-to-market bằng Close (adj) thay vì Price (thô) ⇒ PHẢI làm lệch — ΔCAGR A +25.036pp / B +26.542pp
+  PASS  M2 mark-to-market bằng Close (adj) thay vì Price (thô) ⇒ KHÔNG đụng chân engine — flat 17.857 legacy 36.445
+  PASS  M3 bỏ phí rebal 0,1%/chiều ⇒ PHẢI làm lệch — ΔCAGR A +0.270pp / B +0.000pp
+  PASS  M3 bỏ phí rebal 0,1%/chiều ⇒ REPLAY_A lệch chiều DƯƠNG (bỏ phí) — ΔCAGR A +0.270pp / B +0.000pp
+  PASS  M3 bỏ phí rebal 0,1%/chiều ⇒ KHÔNG đụng chân engine — flat 17.857 legacy 36.445
+  PASS  M5 trễ trọng số 1 phiên (lỗi vòng 1) ⇒ PHẢI làm lệch — ΔCAGR A -0.130pp / B -0.305pp
+  PASS  M5 trễ trọng số 1 phiên (lỗi vòng 1) ⇒ dịch CẢ chân engine (chứng minh trễ là biến chung, không phải riêng replay) — flat 17.857 -> 17.526
+  PASS  M6 trả cổ tức tiền CHẬM 40 phiên (độ nhạy PREREG §4) ⇒ PHẢI làm lệch — ΔCAGR A +0.232pp / B +0.224pp
+  PASS  M6 trả cổ tức tiền CHẬM 40 phiên (độ nhạy PREREG §4) ⇒ KHÔNG đụng chân engine — flat 17.857 legacy 36.445
+  PASS  M4 bỏ px-repair ⇒ CAGR KHÔNG được lệch đáng kể (repair đã bị giới hạn vào ngày ex thật, 8 ô toàn panel, 0 ô giao bước số CP trong rổ) — ΔCAGR B +0.0000pp; 0 phiên chuỗi ngày lệch, max 0.00 bp
+  PASS  M4 bỏ px-repair ⇒ KHÔNG đụng chân engine — flat 17.857 legacy 36.445
+
+OK — selfcheck_replay PASS (6 mutation + 5 property, TZ='Asia/Ho_Chi_Minh')
+rc=0
+########## TZ=UNSET ##########
+TZ = '(unset)'
+
+BASE
+    ENGINE_FLAT      17.857%
+    ENGINE_LEGACY    36.445%
+    REPLAY_A         16.875%
+    REPLAY_B         17.322%
+  PASS  0a. harness tái lập chân engine khớp build_pit (assert cứng trong replay.py)
+  PASS  0b. identity: replay không sự kiện/không phí == chuỗi giá thô độc lập (assert cứng)
+  PASS  0c. CAGR đo từ rebal ĐẦU TIÊN, không tính thời gian chưa đầu tư — bỏ 0.616y
+  PASS  0d. px-repair KHÔNG giao với bất kỳ bước số CP nào trong rổ ⇒ replay không bị cưỡng bức khớp chuỗi Close ở đúng những ô đó — giao = 0
+  PASS  M1 bỏ hẳn bước N×(1+Σq) ⇒ PHẢI làm lệch — ΔCAGR A -10.383pp / B -10.568pp
+  PASS  M1 bỏ hẳn bước N×(1+Σq) ⇒ lệch chiều ÂM (mất cổ phiếu thưởng) — ΔCAGR A -10.383pp / B -10.568pp
+  PASS  M1 bỏ hẳn bước N×(1+Σq) ⇒ KHÔNG đụng chân engine — flat 17.857 legacy 36.445
+  PASS  M1b hệ số cùng ngày NHÂN thay vì CỘNG (lỗi vòng 1) ⇒ PHẢI làm lệch — ΔCAGR A +0.124pp / B +0.129pp
+  PASS  M1b hệ số cùng ngày NHÂN thay vì CỘNG (lỗi vòng 1) ⇒ lệch chiều DƯƠNG (nhân = số CP ảo) — ΔCAGR A +0.124pp / B +0.129pp
+  PASS  M1b hệ số cùng ngày NHÂN thay vì CỘNG (lỗi vòng 1) ⇒ KHÔNG đụng chân engine — flat 17.857 legacy 36.445
+  PASS  M2 mark-to-market bằng Close (adj) thay vì Price (thô) ⇒ PHẢI làm lệch — ΔCAGR A +25.036pp / B +26.542pp
+  PASS  M2 mark-to-market bằng Close (adj) thay vì Price (thô) ⇒ KHÔNG đụng chân engine — flat 17.857 legacy 36.445
+  PASS  M3 bỏ phí rebal 0,1%/chiều ⇒ PHẢI làm lệch — ΔCAGR A +0.270pp / B +0.000pp
+  PASS  M3 bỏ phí rebal 0,1%/chiều ⇒ REPLAY_A lệch chiều DƯƠNG (bỏ phí) — ΔCAGR A +0.270pp / B +0.000pp
+  PASS  M3 bỏ phí rebal 0,1%/chiều ⇒ KHÔNG đụng chân engine — flat 17.857 legacy 36.445
+  PASS  M5 trễ trọng số 1 phiên (lỗi vòng 1) ⇒ PHẢI làm lệch — ΔCAGR A -0.130pp / B -0.305pp
+  PASS  M5 trễ trọng số 1 phiên (lỗi vòng 1) ⇒ dịch CẢ chân engine (chứng minh trễ là biến chung, không phải riêng replay) — flat 17.857 -> 17.526
+  PASS  M6 trả cổ tức tiền CHẬM 40 phiên (độ nhạy PREREG §4) ⇒ PHẢI làm lệch — ΔCAGR A +0.232pp / B +0.224pp
+  PASS  M6 trả cổ tức tiền CHẬM 40 phiên (độ nhạy PREREG §4) ⇒ KHÔNG đụng chân engine — flat 17.857 legacy 36.445
+  PASS  M4 bỏ px-repair ⇒ CAGR KHÔNG được lệch đáng kể (repair đã bị giới hạn vào ngày ex thật, 8 ô toàn panel, 0 ô giao bước số CP trong rổ) — ΔCAGR B +0.0000pp; 0 phiên chuỗi ngày lệch, max 0.00 bp
+  PASS  M4 bỏ px-repair ⇒ KHÔNG đụng chân engine — flat 17.857 legacy 36.445
+
+OK — selfcheck_replay PASS (6 mutation + 5 property, TZ='(unset)')
+rc=0
+########## TZ=America/New_York ##########
+TZ = 'America/New_York'
+
+BASE
+    ENGINE_FLAT      17.857%
+    ENGINE_LEGACY    36.445%
+    REPLAY_A         16.875%
+    REPLAY_B         17.322%
+  PASS  0a. harness tái lập chân engine khớp build_pit (assert cứng trong replay.py)
+  PASS  0b. identity: replay không sự kiện/không phí == chuỗi giá thô độc lập (assert cứng)
+  PASS  0c. CAGR đo từ rebal ĐẦU TIÊN, không tính thời gian chưa đầu tư — bỏ 0.616y
+  PASS  0d. px-repair KHÔNG giao với bất kỳ bước số CP nào trong rổ ⇒ replay không bị cưỡng bức khớp chuỗi Close ở đúng những ô đó — giao = 0
+  PASS  M1 bỏ hẳn bước N×(1+Σq) ⇒ PHẢI làm lệch — ΔCAGR A -10.383pp / B -10.568pp
+  PASS  M1 bỏ hẳn bước N×(1+Σq) ⇒ lệch chiều ÂM (mất cổ phiếu thưởng) — ΔCAGR A -10.383pp / B -10.568pp
+  PASS  M1 bỏ hẳn bước N×(1+Σq) ⇒ KHÔNG đụng chân engine — flat 17.857 legacy 36.445
+  PASS  M1b hệ số cùng ngày NHÂN thay vì CỘNG (lỗi vòng 1) ⇒ PHẢI làm lệch — ΔCAGR A +0.124pp / B +0.129pp
+  PASS  M1b hệ số cùng ngày NHÂN thay vì CỘNG (lỗi vòng 1) ⇒ lệch chiều DƯƠNG (nhân = số CP ảo) — ΔCAGR A +0.124pp / B +0.129pp
+  PASS  M1b hệ số cùng ngày NHÂN thay vì CỘNG (lỗi vòng 1) ⇒ KHÔNG đụng chân engine — flat 17.857 legacy 36.445
+  PASS  M2 mark-to-market bằng Close (adj) thay vì Price (thô) ⇒ PHẢI làm lệch — ΔCAGR A +25.036pp / B +26.542pp
+  PASS  M2 mark-to-market bằng Close (adj) thay vì Price (thô) ⇒ KHÔNG đụng chân engine — flat 17.857 legacy 36.445
+  PASS  M3 bỏ phí rebal 0,1%/chiều ⇒ PHẢI làm lệch — ΔCAGR A +0.270pp / B +0.000pp
+  PASS  M3 bỏ phí rebal 0,1%/chiều ⇒ REPLAY_A lệch chiều DƯƠNG (bỏ phí) — ΔCAGR A +0.270pp / B +0.000pp
+  PASS  M3 bỏ phí rebal 0,1%/chiều ⇒ KHÔNG đụng chân engine — flat 17.857 legacy 36.445
+  PASS  M5 trễ trọng số 1 phiên (lỗi vòng 1) ⇒ PHẢI làm lệch — ΔCAGR A -0.130pp / B -0.305pp
+  PASS  M5 trễ trọng số 1 phiên (lỗi vòng 1) ⇒ dịch CẢ chân engine (chứng minh trễ là biến chung, không phải riêng replay) — flat 17.857 -> 17.526
+  PASS  M6 trả cổ tức tiền CHẬM 40 phiên (độ nhạy PREREG §4) ⇒ PHẢI làm lệch — ΔCAGR A +0.232pp / B +0.224pp
+  PASS  M6 trả cổ tức tiền CHẬM 40 phiên (độ nhạy PREREG §4) ⇒ KHÔNG đụng chân engine — flat 17.857 legacy 36.445
+  PASS  M4 bỏ px-repair ⇒ CAGR KHÔNG được lệch đáng kể (repair đã bị giới hạn vào ngày ex thật, 8 ô toàn panel, 0 ô giao bước số CP trong rổ) — ΔCAGR B +0.0000pp; 0 phiên chuỗi ngày lệch, max 0.00 bp
+  PASS  M4 bỏ px-repair ⇒ KHÔNG đụng chân engine — flat 17.857 legacy 36.445
+
+OK — selfcheck_replay PASS (6 mutation + 5 property, TZ='America/New_York')
+rc=0
+DONE

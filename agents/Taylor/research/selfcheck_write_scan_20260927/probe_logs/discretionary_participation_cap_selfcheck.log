@@ -1,0 +1,25 @@
+  [PASS] A0 loader đọc adv_ref_vnd đúng từ state file convention  — {'TV1': 701000000.0}
+  [PASS] A1 OLD guard %KL-ngày CHẶN oan trên phiên mỏng (return 0 = WAIT_QUOTA)  — old=0
+  [PASS] A2 NEW cho phép mua (qty>0, hết WAIT_QUOTA oan cho TV1)  — new=100
+  [PASS] A3 NEW = 100 (min(floor=3522, ceil=150)=150 → round_lot lô 100)  — new=100
+  [PASS] B1 trần phụ 30% realized cắt xuống ĐÚNG 300 (=0.30*1000)  — new=300
+  [PASS] B2 KHÔNG vượt ADV20-floor 3522  — new=300
+  [PASS] C1 ADV20-floor bind khi tape dày → 3500 (round_lot của 3522)  — new=3500
+  [PASS] D0 loader bỏ qua ticker thiếu adv_ref_vnd → {}  — {}
+  [PASS] D1 dv=0: fail-safe = guard cũ (không mua vô hạn)  — new=5000 old=5000
+  [PASS] D1 dv=500: fail-safe = guard cũ (không mua vô hạn)  — new=0 old=0
+  [PASS] D1 dv=100000: fail-safe = guard cũ (không mua vô hạn)  — new=5000 old=5000
+  [PASS] D2 adv_ref_vnd âm → bỏ qua (loader {})
+  [PASS] D3 adv_ref_vnd=0 → bỏ qua (loader {})
+  [PASS] E0 loader không crash khi thiếu file → {}  — {}
+  [PASS] E1 dv=0: DISCRETIONARY_SPECIAL không state → guard cũ, không crash  — new=5000 old=5000
+  [PASS] E1 dv=500: DISCRETIONARY_SPECIAL không state → guard cũ, không crash  — new=0 old=0
+  [PASS] E1 dv=100000: DISCRETIONARY_SPECIAL không state → guard cũ, không crash  — new=5000 old=5000
+  [PASS] F1 base_dir không tồn tại → {} (không crash)  — {}
+  [PASS] F2 plan không có DISCRETIONARY_SPECIAL buy → {} (short-circuit)
+  [PASS] G1 _adv20_basis_for(DISC buy) → adv_ref_vnd (KHÔNG lẫn nguồn CAPIT)  — 701000000.0
+  [PASS] G2 _adv20_basis_for(DISC SELL) → None (chỉ buy mới ADV20-paced)
+  [PASS] G3 _adv20_basis_for(BAL buy) → None (không phải ADV20-paced)
+  [PASS] H non-DISCRETIONARY (BAL/LAG buy) hành vi Y HỆT code cũ mọi input  — 36 tổ hợp dv×filled×order khớp new==old
+
+✅ ALL PASS — DISCRETIONARY_SPECIAL hybrid participation-cap (ADV20 floor + 30% realized ceiling)

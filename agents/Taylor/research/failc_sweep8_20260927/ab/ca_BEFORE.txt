@@ -1,0 +1,12 @@
+LAG edge-health mean12: latest 0.47% | range [-3.2, 14.2] | %time<4%: 53%
+
+rule                           FULL CAGR    Sh     DD   Cal  DD21-23 2025+CAGR  reb
+--------------------------------------------------------------------------------------
+A0 static 50/50 (V2.3C)           24.17%  1.78 -18.8%  1.29   -10.9%    20.77%    4
+A1 state-tilt (V2.3A)             24.04%  1.79 -20.6%  1.17   -10.7%    23.80%   33
+A2 edge-cond thr4 weak->.50       24.58%  1.81 -20.3%  1.21   -10.3%    23.37%   37
+A3 edge-cond thr4 weak->.40       24.82%  1.81 -20.2%  1.23   -10.2%    23.17%   42
+A4 edge-cond thr2 weak->.50       24.16%  1.80 -20.3%  1.19   -10.3%    24.82%   36
+
+Note: A0/A1 reproduce V2.3C/V2.3A+postbull. A2-A4 only tilt LAG to .65 when mean12>=thr (edge healthy),
+else hold .50/.40 in good states. Goal: cut the 2021-23 DD (allocator over-weighted weak-edge LAG in 2023).

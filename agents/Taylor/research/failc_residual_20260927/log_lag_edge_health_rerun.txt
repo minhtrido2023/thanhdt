@@ -1,0 +1,13 @@
+[lag-edge] neg_streak=1 (anchor=known_date, CAUSAL — dung cho nguong hanh dong) | neg_streak_entry_legacy=2 (anchor=entry, nhan CU trung binh som 25 phien — chi doi chieu)
+{
+  "mean12": -0.6,
+  "win12": 35.5,
+  "n12": 566,
+  "pctl": 5.0,
+  "asof": "2026-09-23",
+  "neg_streak": 1,
+  "neg_streak_anchor": "known_date",
+  "neg_streak_entry_legacy": 2,
+  "verdict": "NEGATIVE",
+  "act": "canh bao: ha w_LAG .65->.50 neu keo dai 3 thang (dang 1, moc known_date)"
+}

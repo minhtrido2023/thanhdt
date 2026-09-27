@@ -1,0 +1,24 @@
+[px-repair] 8 ô ex-date có `Price` kẹt hệ CUM đã sửa thành Close/ratio_next
+[events] TRONG cửa sổ: 804 sự kiện CP thưởng/cổ tức CP áp vào N; 1895 cổ tức tiền vào cash; 195 QUYỀN MUA KHÔNG mô phỏng được. Bỏ: 1313 trước phiên đầu / 90 sau phiên cuối / 50 không có ex-date (phần lớn là AIS).
+[weights] LAG 1 phiên bật lại (mutation M5 = lỗi vòng 1)
+[identity] REPLAY_B không sự kiện/không phí vs chuỗi giá (cùng panel mark) viết độc lập: max |Δ| = 1.710e-14
+[replay A] 103 ô giá thiếu carry-forward; turnover 72.1x vốn gốc; cổ tức tiền nhận 0.73x; phí 0.072x
+[replay B] 27 ô giá thiếu carry-forward; turnover 194.4x vốn gốc; cổ tức tiền nhận 0.74x; phí 0.000x
+
+[window] đo từ rebal ĐẦU TIÊN 2014-08-05 -> 2026-06-19 (cửa sổ PREREG; bỏ 0.616y chưa đầu tư ở đầu chuỗi)
+ENGINE_FLAT    level   1000.0 ->     6801.4   CAGR  17.526%   (11.87y)
+ENGINE_LEGACY  level   1000.0 ->    38716.6   CAGR  36.069%   (11.87y)
+REPLAY_A       level   1000.0 ->     6283.5   CAGR  16.745%   (11.87y)
+REPLAY_B       level   1000.0 ->     6459.8   CAGR  17.017%   (11.87y)
+
+Δ CAGR  REPLAY_B − ENGINE_FLAT   = -0.509 pp (THÔ — chưa trừ phần quyền mua; ngưỡng PREREG 0,300pp áp cho số ĐÃ TRỪ, xem attribute.py)
+Δ CAGR  REPLAY_A − ENGINE_FLAT   = -0.781 pp
+Δ CAGR  REPLAY_B − ENGINE_LEGACY = -19.052 pp
+  REPLAY_B  vs FLAT   : corr 0.998658   tracking error  1.177%/yr
+  REPLAY_B  vs LEGACY : corr 0.963331   tracking error  6.301%/yr
+  REPLAY_A  vs FLAT   : corr 0.997873   tracking error  1.481%/yr
+  REPLAY_A  vs LEGACY : corr 0.962527   tracking error  6.368%/yr
+
+[rights] 195 sự kiện quyền mua TRONG cửa sổ (91 mã) — KHÔNG mô phỏng được (thiếu giá phát hành)
+[px-repair] ô sửa GIAO với một bước số CP trong rổ: 0 — nếu >0 thì đúng những ô đó replay bị CƯỠNG BỨC khớp chuỗi Close (xem docstring build_prices)
+[px-repair] ô sửa NẰM TRONG RỔ phiên đó: 0 — 0 ⇒ đường cưỡng bức không bao giờ được đi, với mọi loại sự kiện (mạnh hơn phép đếm GIAO-bước-số-CP ở trên)

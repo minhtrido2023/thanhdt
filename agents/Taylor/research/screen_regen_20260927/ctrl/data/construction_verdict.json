@@ -1,0 +1,222 @@
+{
+  "job": "Taylor_20260706_033659",
+  "screen": "construction_contractors_epc",
+  "universe": [
+    "CTD",
+    "VCG",
+    "HBC",
+    "FCN",
+    "LCG",
+    "C4G",
+    "HTN",
+    "DPG",
+    "VC3",
+    "DC4",
+    "G36"
+  ],
+  "liq_gate_vnd": 5000000000.0,
+  "signal_test": {
+    "spearman_ic": {
+      "pb_rel_vs_profit_1M": -0.0,
+      "pb_rel_vs_profit_2M": -0.0277,
+      "pb_rel_vs_profit_3M": -0.057,
+      "dso_chg_vs_profit_1M": -0.0174,
+      "dso_chg_vs_profit_2M": -0.0207,
+      "dso_chg_vs_profit_3M": -0.0292,
+      "ar_rev_vs_profit_1M": 0.0143,
+      "ar_rev_vs_profit_2M": 0.0115,
+      "ar_rev_vs_profit_3M": 0.002,
+      "cfoa_vs_profit_1M": 0.0477,
+      "cfoa_vs_profit_2M": 0.0548,
+      "cfoa_vs_profit_3M": 0.0478
+    },
+    "whole_market_pb_rel_profit3M": 0.0005,
+    "regime_mean_fwd_return": {
+      "clean": {
+        "profit_1M": 1.609,
+        "profit_2M": 3.572,
+        "profit_3M": 4.941
+      },
+      "mixed": {
+        "profit_1M": 2.257,
+        "profit_2M": 4.142,
+        "profit_3M": 5.975
+      },
+      "stressed": {
+        "profit_1M": 1.109,
+        "profit_2M": 2.176,
+        "profit_3M": 3.589
+      }
+    },
+    "regime_n": {
+      "clean": 2763,
+      "mixed": 7187,
+      "stressed": 15830
+    },
+    "note": "POC accounting makes P/E noise; receivables (AR/DSO) are the risk. Tests whether P/B-trough, cash-quality (CF_OA), and receivables-deterioration (DSO_P0-DSO_P4, AR/Rev) predict fwd return."
+  },
+  "arquality": {
+    "months_held": 25,
+    "months": 151,
+    "full": {
+      "CAGR": 3.071,
+      "Sharpe": 0.323,
+      "MaxDD": -18.01,
+      "Calmar": 0.171,
+      "navfinal": 1.463,
+      "n": 151
+    },
+    "full_bh": {
+      "CAGR": 9.94,
+      "Sharpe": 0.585,
+      "MaxDD": -43.154,
+      "Calmar": 0.23,
+      "navfinal": 3.295,
+      "n": 151
+    },
+    "is_": {
+      "CAGR": 6.289,
+      "Sharpe": 0.698,
+      "MaxDD": -0.531,
+      "Calmar": 11.836,
+      "navfinal": 1.442,
+      "n": 72
+    },
+    "oos": {
+      "CAGR": 0.223,
+      "Sharpe": 0.084,
+      "MaxDD": -18.01,
+      "Calmar": 0.012,
+      "navfinal": 1.015,
+      "n": 79
+    },
+    "oos_bh": {
+      "CAGR": 10.842,
+      "Sharpe": 0.58,
+      "MaxDD": -32.239,
+      "Calmar": 0.336,
+      "navfinal": 1.969,
+      "n": 79
+    }
+  },
+  "basket": {
+    "months_held": 151,
+    "months": 151,
+    "full": {
+      "CAGR": 11.678,
+      "Sharpe": 0.495,
+      "MaxDD": -62.714,
+      "Calmar": 0.186,
+      "navfinal": 4.014,
+      "n": 151
+    },
+    "full_bh": {
+      "CAGR": 9.94,
+      "Sharpe": 0.585,
+      "MaxDD": -43.154,
+      "Calmar": 0.23,
+      "navfinal": 3.295,
+      "n": 151
+    },
+    "is_": {
+      "CAGR": 17.128,
+      "Sharpe": 0.739,
+      "MaxDD": -34.41,
+      "Calmar": 0.498,
+      "navfinal": 2.582,
+      "n": 72
+    },
+    "oos": {
+      "CAGR": 6.932,
+      "Sharpe": 0.37,
+      "MaxDD": -62.714,
+      "Calmar": 0.111,
+      "navfinal": 1.555,
+      "n": 79
+    },
+    "oos_bh": {
+      "CAGR": 10.842,
+      "Sharpe": 0.58,
+      "MaxDD": -32.239,
+      "Calmar": 0.336,
+      "navfinal": 1.969,
+      "n": 79
+    }
+  },
+  "pbtrough": {
+    "months_held": 138,
+    "months": 151,
+    "full": {
+      "CAGR": -1.39,
+      "Sharpe": 0.131,
+      "MaxDD": -70.439,
+      "Calmar": -0.02,
+      "navfinal": 0.839,
+      "n": 151
+    },
+    "full_bh": {
+      "CAGR": 9.94,
+      "Sharpe": 0.585,
+      "MaxDD": -43.154,
+      "Calmar": 0.23,
+      "navfinal": 3.295,
+      "n": 151
+    },
+    "is_": {
+      "CAGR": -3.051,
+      "Sharpe": -0.003,
+      "MaxDD": -44.417,
+      "Calmar": -0.069,
+      "navfinal": 0.83,
+      "n": 72
+    },
+    "oos": {
+      "CAGR": 0.149,
+      "Sharpe": 0.213,
+      "MaxDD": -70.439,
+      "Calmar": 0.002,
+      "navfinal": 1.01,
+      "n": 79
+    },
+    "oos_bh": {
+      "CAGR": 10.842,
+      "Sharpe": 0.58,
+      "MaxDD": -32.239,
+      "Calmar": 0.336,
+      "navfinal": 1.969,
+      "n": 79
+    }
+  },
+  "selfcheck_vnd": {
+    "arquality": 0.0,
+    "basket": 4e-06,
+    "pbtrough": 1e-06
+  },
+  "ortho_c30v": 18.0,
+  "ortho_8l": 16.7,
+  "median_sel_adv_b": 30.42,
+  "gate_note": "Screen A = PB<PB_MA1Y + CF_OA_P0>0 + CF_OA_3Y>0 + DSO_P0<=DSO_P4*1.15 + IntCov>1.5 + Debt_Eq<2.5. The AR/CASH quality gate is the differentiator vs the naive P/B-trough (Screen C).",
+  "verify": {
+    "HBC_in_A_crisis": [],
+    "HBC_in_C_crisis": [
+      "2022-10",
+      "2022-11",
+      "2022-12",
+      "2023-01",
+      "2023-02",
+      "2023-03",
+      "2023-04",
+      "2024-07",
+      "2024-08",
+      "2024-09",
+      "2024-12"
+    ],
+    "CTD_in_A": [],
+    "all_A_names": [
+      "DPG",
+      "FCN",
+      "LCG",
+      "VCG"
+    ]
+  }
+}

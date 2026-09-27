@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/data/results_registry.md

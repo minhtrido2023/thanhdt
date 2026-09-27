@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/data/qt_v4x_concentrated.md

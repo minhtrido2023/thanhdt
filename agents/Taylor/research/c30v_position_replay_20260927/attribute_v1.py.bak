@@ -1,0 +1,183 @@
+#!/usr/bin/env python3
+"""Decompose (REPLAY_B - ENGINE_FLAT) and (LEGACY - FLAT) to the name x session level.
+
+REPLAY_B is, by construction, a weight-times-return sum over the same weight vector the engine
+uses, so the daily gap is exactly attributable:
+
+    diff_t = sum_i  w_i,t * ( r_replay_i,t - r_flat_i,t )
+    r_replay_i,t = ( f_i,t * P_i,t + D_i,t ) / P_i,t-1 - 1        (raw price + explicit events)
+    r_flat_i,t   = Close_i,t / Close_i,t-1 - 1                    (vendor-adjusted chain)
+
+Each (name, session) contribution is then bucketed by what the corp-action table says happened
+that day, which is what turns "the two chains differ by X" into "they differ BECAUSE of Y".
+The same machinery reproduces the ledger of sessions where LEGACY != FLAT (the OShares-step
+phantom) without reusing either chain's code.
+"""
+import os
+import sys
+
+import numpy as np
+import pandas as pd
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+from replay import (BASE_LEVEL, FREE_SHARE_ISS, RIGHTS_ISS, build_events, build_prices,
+                    engine_weights, load, cagr)
+
+
+class A:      # argparse stand-in: base configuration, no mutations
+    no_share_step = mark_close = no_fee = no_px_repair = False
+
+
+def main():
+    args = A()
+    log = print
+    bx, mem, ev = load(args)
+    px, cl, _ = build_prices(bx, args, log)
+    fac, cash, rights = build_events(ev, px, args, log)
+    wmap, mcap = engine_weights(bx, mem, px)
+    dates = list(px.index)
+
+    # per (ticker, date) event label, for bucketing
+    lab = pd.DataFrame("", index=px.index, columns=px.columns)
+    dset = pd.DatetimeIndex(px.index)
+
+    def snap(d):
+        i = dset.searchsorted(pd.Timestamp(d))
+        return dset[i] if i < len(dset) else None
+
+    for r in ev.itertuples():
+        if r.ticker not in px.columns:
+            continue
+        m = (r.issue_method_name_vi or "").strip()
+        if r.event_code == "DIV" and pd.notna(r.value_per_share) and float(r.value_per_share) > 0:
+            tag = "DIV"
+        elif r.event_code == "ISS" and m == RIGHTS_ISS:
+            tag = "RIGHTS"
+        elif r.event_code == "ISS" and m in FREE_SHARE_ISS and float(r.exercise_ratio or 0) > 0:
+            tag = "FREESHARE"
+        elif r.event_code == "ISS":
+            tag = "ISS_NONADJ"
+        else:
+            continue
+        d = snap(r.exright_date)
+        if d is None:
+            continue
+        cur = lab.at[d, r.ticker]
+        lab.at[d, r.ticker] = tag if not cur else (cur if tag in cur else cur + "+" + tag)
+
+    # OShares step label (for the LEGACY-vs-FLAT ledger)
+    osh = bx.pivot_table(index="time", columns="ticker", values="OShares").reindex(
+        index=px.index, columns=px.columns)
+
+    rows = []
+    for i, d in enumerate(dates):
+        if d not in wmap:
+            continue
+        prev = dates[i - 1]
+        tks, w, _ = wmap[d]
+        p1 = px.loc[prev, tks].values.astype(float)
+        p2 = px.loc[d, tks].values.astype(float)
+        c1 = cl.loc[prev, tks].values.astype(float)
+        c2 = cl.loc[d, tks].values.astype(float)
+        f = fac.loc[d, tks].values.astype(float)
+        dv = cash.loc[d, tks].values.astype(float)
+        o1 = osh.loc[prev, tks].values.astype(float)
+        o2 = osh.loc[d, tks].values.astype(float)
+        r_rep = (f * p2 + dv) / p1 - 1.0
+        r_flat = c2 / c1 - 1.0
+        r_leg = (c2 * o2) / (c1 * o1) - 1.0
+        lb = lab.loc[d, tks].values
+        for k in range(len(tks)):
+            dr = r_rep[k] - r_flat[k]
+            dl = r_leg[k] - r_flat[k]
+            if abs(dr) < 1e-9 and abs(dl) < 1e-9:
+                continue
+            rows.append((d, tks[k], w[k], lb[k] or "NONE", p1[k], p2[k], c1[k], c2[k],
+                         f[k], dv[k], o1[k], o2[k], r_rep[k], r_flat[k], r_leg[k],
+                         w[k] * dr, w[k] * dl))
+    at = pd.DataFrame(rows, columns=["date", "ticker", "w", "label", "p_prev", "p", "c_prev", "c",
+                                     "fac", "div", "osh_prev", "osh", "r_replay", "r_flat",
+                                     "r_legacy", "contrib_rep_minus_flat", "contrib_leg_minus_flat"])
+    at.to_parquet(f"{HERE}/attribution.parquet", index=False)
+    print(f"\n[attr] {len(at):,} dòng (name x session) có chênh khác 0")
+
+    # ── bucket table: REPLAY_B − FLAT ────────────────────────────────────────────────────────
+    print("\n== REPLAY_B − ENGINE_FLAT: đóng góp theo NHÃN SỰ KIỆN (điểm % CAGR tương đương) ==")
+    tot_days = (px.index[-1] - px.index[0]).days / 365.25
+    g = at.groupby("label")["contrib_rep_minus_flat"]
+    tb = pd.DataFrame({"n_name_session": g.size(), "sum_contrib": g.sum(),
+                       "mean_bp": g.mean() * 1e4, "max_abs_bp": g.apply(lambda s: s.abs().max()) * 1e4})
+    tb["pp_cagr_equiv"] = tb["sum_contrib"] / tot_days * 100
+    print(tb.sort_values("sum_contrib").to_string(
+        float_format=lambda v: f"{v:,.4f}"))
+    print(f"\nTỔNG sum_contrib = {at['contrib_rep_minus_flat'].sum():+.4f} "
+          f"(~{at['contrib_rep_minus_flat'].sum()/tot_days*100:+.3f} pp/yr, xấp xỉ log-additive)")
+
+    # exact: rebuild REPLAY_B with the RIGHTS sessions neutralised (per-name, that day only)
+    r_b = pd.Series(0.0, index=px.index)
+    r_b_norights = pd.Series(0.0, index=px.index)
+    r_f = pd.Series(0.0, index=px.index)
+    for i, d in enumerate(dates):
+        if d not in wmap:
+            continue
+        prev = dates[i - 1]
+        tks, w, _ = wmap[d]
+        p1 = px.loc[prev, tks].values.astype(float); p2 = px.loc[d, tks].values.astype(float)
+        c1 = cl.loc[prev, tks].values.astype(float); c2 = cl.loc[d, tks].values.astype(float)
+        f = fac.loc[d, tks].values.astype(float); dv = cash.loc[d, tks].values.astype(float)
+        rr = (f * p2 + dv) / p1 - 1.0
+        rf = c2 / c1 - 1.0
+        isr = np.array(["RIGHTS" in (x or "") for x in lab.loc[d, tks].values])
+        r_b.loc[d] = float(np.nansum(w * rr))
+        r_f.loc[d] = float(np.nansum(w * rf))
+        r_b_norights.loc[d] = float(np.nansum(w * np.where(isr, rf, rr)))
+    for tag, s in (("ENGINE_FLAT", r_f), ("REPLAY_B", r_b), ("REPLAY_B_no_rights", r_b_norights)):
+        lv = BASE_LEVEL * (1 + s).cumprod()
+        c, yrs = cagr(lv)
+        print(f"{tag:22s} CAGR {c*100:7.3f}%")
+    cB = cagr(BASE_LEVEL * (1 + r_b).cumprod())[0]
+    cN = cagr(BASE_LEVEL * (1 + r_b_norights).cumprod())[0]
+    cF = cagr(BASE_LEVEL * (1 + r_f).cumprod())[0]
+    print(f"\nΔ REPLAY_B          − FLAT = {(cB-cF)*100:+.3f} pp")
+    print(f"Δ REPLAY_B_no_rights − FLAT = {(cN-cF)*100:+.3f} pp   <-- chân so NGƯỠNG 0,300pp "
+          f"(đã trừ phần quyền mua không mô phỏng được, PREREG §Ngưỡng)")
+    print(f"   riêng phần QUYỀN MUA      = {(cB-cN)*100:+.3f} pp")
+
+    # ── ledger LEGACY vs FLAT ────────────────────────────────────────────────────────────────
+    led = at[at["contrib_leg_minus_flat"].abs() > 1e-9]
+    bysess = led.groupby("date")["contrib_leg_minus_flat"].sum().sort_values(ascending=False)
+    print(f"\n== LEDGER phiên LEGACY ≠ FLAT: {len(bysess)} phiên, "
+          f"{int((bysess>0).sum())} dương / {int((bysess<0).sum())} âm, "
+          f"max {bysess.max()*100:+.2f}pp, min {bysess.min()*100:+.2f}pp ==")
+    led.to_csv(f"{HERE}/ledger_legacy_vs_flat.csv", index=False)
+    bysess.rename("contrib_pp").to_frame().to_csv(f"{HERE}/ledger_legacy_by_session.csv")
+    print(bysess.head(12).mul(100).round(3).to_string())
+
+    # the three cases quant-skeptic named
+    print("\n== 3 ca quant-skeptic nêu (ACB/HPG/TCB) — replay khớp chân nào ==")
+    hdr = f"{'ticker':6s} {'date':12s} {'w':>6s} {'raw Δ%':>8s} {'adj Δ%':>8s} {'ΔOShares%':>10s} " \
+          f"{'r_legacy%':>10s} {'r_flat%':>9s} {'r_replay%':>10s} {'label':14s}"
+    print(hdr)
+    for tk, dt in (("ACB", "2024-05-31"), ("HPG", "2025-06-26"), ("TCB", "2024-06-20")):
+        sub = at[(at.ticker == tk) & (at.date == pd.Timestamp(dt))]
+        if sub.empty:
+            print(f"{tk:6s} {dt:12s}  -- không nằm trong rổ phiên đó (hoặc chênh = 0)")
+            continue
+        r = sub.iloc[0]
+        print(f"{tk:6s} {dt:12s} {r.w:6.3f} {(r.p/r.p_prev-1)*100:8.2f} "
+              f"{(r.c/r.c_prev-1)*100:8.2f} {(r.osh/r.osh_prev-1)*100:10.2f} "
+              f"{r.r_legacy*100:10.2f} {r.r_flat*100:9.2f} {r.r_replay*100:10.2f} {r.label:14s}")
+
+    # top-|contrib| legacy sessions, full detail, as the table the bus finding carries
+    top = led.reindex(led["contrib_leg_minus_flat"].abs().sort_values(ascending=False).index).head(15)
+    print("\n== 15 name×session phantom LEGACY lớn nhất ==")
+    print(hdr)
+    for r in top.itertuples():
+        print(f"{r.ticker:6s} {str(r.date.date()):12s} {r.w:6.3f} {(r.p/r.p_prev-1)*100:8.2f} "
+              f"{(r.c/r.c_prev-1)*100:8.2f} {(r.osh/r.osh_prev-1)*100:10.2f} "
+              f"{r.r_legacy*100:10.2f} {r.r_flat*100:9.2f} {r.r_replay*100:10.2f} {r.label:14s}")
+
+
+if __name__ == "__main__":
+    main()

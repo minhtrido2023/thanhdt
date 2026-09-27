@@ -1,0 +1,18 @@
+scan dir: /home/trido/thanhdt/WorkingClaude
+môi trường TZ: ['ICT', 'UTC', 'NY', 'no-TZ']
+
+--- TZ=ICT rc=0
+  __RESULT__ files=20 sorts_checked=107 violations=0 ambiguous=0 behaviour_fails=0
+
+--- TZ=UTC rc=0
+  __RESULT__ files=20 sorts_checked=107 violations=0 ambiguous=0 behaviour_fails=0
+
+--- TZ=NY rc=0
+  __RESULT__ files=20 sorts_checked=107 violations=0 ambiguous=0 behaviour_fails=0
+
+--- TZ=no-TZ rc=0
+  __RESULT__ files=20 sorts_checked=107 violations=0 ambiguous=0 behaviour_fails=0
+
+BẤT BIẾN theo TZ: cả 4 môi trường cho cùng kết quả ✓
+
+PASS

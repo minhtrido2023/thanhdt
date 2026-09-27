@@ -1,0 +1,61 @@
+  [PASS] A1 cờ TẮT: mọi (KL ngày × giờ) cho ra đúng hành vi cũ
+  [PASS] A2 cờ BẬT nhưng now=None ⇒ byte-identical (cùng quy ước với HYBRID)
+  [PASS] B1 [CHỨNG MINH NGƯỢC] cờ TẮT: 09:40 tape 500cp ⇒ chỉ hiện được 100cp (đúng chữ ký thất bại thật 08-11)  — off=100
+  [PASS] B2 cờ BẬT ⇒ hiện được NHIỀU HƠN hẳn  — on=500 vs off=100
+  [PASS] B3 nhưng KHÔNG vượt trần đuôi 50% tape thật (V−2F = 500)  — on=500
+  [PASS] B4 tape dày: P2 KHÔNG được vượt floor 10% ADV20 (guard cũ còn nguyên)  — on2=600, floor=3522
+  [PASS] C1 f tại mốc lưới khớp số đo (09:15=0,045 · 11:00=0,411 · 14:30=0,958)  — 0.045/0.411/0.958
+  [PASS] C2 trước mốc đầu ⇒ 0,0 (⇒ max(cum_vol,0)=cum_vol = hành vi cũ, KHÔNG phải nhánh lỗi)
+  [PASS] C3 sau mốc cuối (ATC) ⇒ 1,0
+  [PASS] C4 nội suy tuyến tính giữa 2 mốc  — 0.062266666666666665
+  [PASS] C5 đơn điệu không giảm suốt phiên
+  [PASS] C6 nghỉ trưa (11:30→13:00) f gần như KHÔNG tăng — đúng thực tế thị trường VN  — 0.499 vs 0.488
+  [PASS] D1 curve rỗng ⇒ fail-safe về hành vi cũ (không raise)  — 100 vs 100
+  [PASS] D2 curve 1 điểm ⇒ fail-safe về hành vi cũ (không raise)  — 100 vs 100
+  [PASS] D3 curve KHÔNG đơn điệu ⇒ fail-safe về hành vi cũ (không raise)  — 100 vs 100
+  [PASS] D4 curve f>1 ⇒ fail-safe về hành vi cũ (không raise)  — 100 vs 100
+  [PASS] D5 curve f âm ⇒ fail-safe về hành vi cũ (không raise)  — 100 vs 100
+  [PASS] D6 curve phút vô lý ⇒ fail-safe về hành vi cũ (không raise)  — 100 vs 100
+  [PASS] D7 curve phần tử rác ⇒ fail-safe về hành vi cũ (không raise)  — 100 vs 100
+  [PASS] D8 clamp = 0 ⇒ fail-safe về hành vi cũ (không raise)  — 100 vs 100
+  [PASS] D9 clamp = 1 (ZeroDivisionError nếu không chặn) ⇒ fail-safe về hành vi cũ (không raise)  — 100 vs 100
+  [PASS] D10 clamp > 1 ⇒ fail-safe về hành vi cũ (không raise)  — 100 vs 100
+  [PASS] D11 clamp âm ⇒ fail-safe về hành vi cũ (không raise)  — 100 vs 100
+  [PASS] D12 clamp chuỗi KHÔNG parse được ⇒ fail-safe về hành vi cũ (không raise)  — 100 vs 100
+  [PASS] E1 fill luỹ kế fleet KHÔNG vượt 50% tape thật ở bất kỳ bước nào  — max F/V = 0.4000 sau 1 bước
+  [PASS] E2 hội tụ, không lặp vô hạn  — steps=1
+  [PASS] E3 [CHỨNG MINH NGƯỢC] cùng phiên mỏng đó, cờ TẮT gom được ÍT hơn hẳn  — ON=2000cp vs OFF=1200cp
+  [PASS] E4 ràng buộc chặn ở đây là trần 30% (KHÔNG phải clamp) — clamp là backstop, và backstop không được là thứ bind ở phiên bình thường  — 0.4000
+  [PASS] E5 phiên MỎNG cuối phiên: clamp tape (1.000) THẮNG cả floor ADV20 (3.522) — clamp là ràng buộc BINDING thật, không phải trang trí  — got=1000
+  [PASS] E6 clamp dạng chuỗi số '0.5' ⇒ CÙNG kết quả với 0.5 (coerce có chủ đích)
+  [PASS] F1 day_volume=0 (halt/chưa có tape): P2 KHÔNG áp clamp ⇒ hành vi cũ nguyên vẹn. Áp clamp ở đây sẽ là REGRESSION (0 tape ⇒ chặn sạch)  — 600/600
+  [PASS] G1 lệnh BÁN + lệnh non-ADV20 (BAL) + CAPIT BÁN: cờ BẬT hay TẮT đều RA CÙNG KL
+  [PASS] G2 route: chỉ MUA-ADV20 vào nhánh P2 (`_adv20_basis_for` trả None cho 3 lệnh trên)
+  [PASS] H1 EXTREME bật: lệnh BÁN vẫn KHÔNG đi vào nhánh ADV20/P2
+  [PASS] H2 chiều MUA khi EXTREME_DOWN bị chặn TRƯỚC khi tính KL (EXTREME_PAUSE + continue)
+  [PASS] H3 nhánh P2 chỉ tồn tại bên trong `if adv20_vnd and px:` (mua-ADV20)
+  [PASS] I1 trần HYBRID chặt hơn vẫn CẮT sau P2 (P2 không được vượt mặt tầng lịch trải)  — real=600, capped=200
+  [PASS] J1 journal EXPVOL_PACING ghi ĐÚNG 1 lần dù _child_qty chạy 25 lần (_place_slices + _would_be_unchanged mỗi 20s)  — 1 dòng
+  [PASS] K1 đường KIỂM TRA (exclude_reserved) ra CÙNG KL với đường ĐẶT ⇒ không huỷ+đặt lại vô ích  — place=600, recheck=600
+  [PASS] L1 cờ BẬT + mode=live ⇒ KL y hệt cờ TẮT trên toàn lưới (30 ô) — LIVE không đổi hành vi  — 0/30 ô lệch
+  [PASS] L2 CA CHỨNG MINH NGƯỢC: cùng cờ đó + mode=paper ⇒ KL THỰC SỰ khác (gate không phải no-op trá hình)  — 14/30 ô khác
+  [PASS] L3 THIẾU khoá live_gate + mode=live ⇒ vẫn chặn (fail-safe .get(...,True), không mở toang)
+  [PASS] L3b _expvol_active() = False khi thiếu khoá + live
+  [PASS] L4 gate=False + mode=live ⇒ P2 ăn ĐÚNG như trên paper (flip gate là cánh cửa duy nhất, cần user sign-off)
+  [PASS] L5 _expected_vol_basis ≠ None ⟺ _expvol_active() — hành động và cổng không lệch nhau  — 0 ca lệch
+  [PASS] M1 mode=live ⇒ CÓ ghi EXPVOL_SHADOW  — 1 dòng
+  [PASS] M2 ghi shadow KHÔNG đổi KL live (bằng đúng KL cấu hình tắt hẳn)  — live=100, off=100
+  [PASS] M3 p2_allow trong shadow = allowance P2 THẬT (chạy paper cùng tham số) — đối chứng không nói dối  — p2_allow=500, P2 thật=500
+  [PASS] M3b delta = p2_allow − base_allow, và > 0 ở ca tape mỏng 10:00 (P2 nới thật)  — delta=350, base=150, p2=500
+  [PASS] M3c bind ghi đúng guard đang quyết định (ceil ở ca này)  — ceil
+  [PASS] M3d tape DÀY ⇒ bind=floor và delta=0 (P2 không mở thêm khi ADV20 mới là ràng buộc)  — bind=floor, delta=0
+  [PASS] M4 dedupe THEO PHÚT: 25 lời gọi cùng phút ⇒ 1 dòng (không thổi phồng N của trial)  — 1 dòng
+  [PASS] M4b phút khác ⇒ điểm quan sát mới (chuỗi thời gian vẫn đo được)  — 2 dòng
+  [PASS] M5 tắt shadow_log ⇒ không ghi dòng nào (tắt được mà không đụng an toàn)
+  [PASS] M6 P2 đang ăn (paper) ⇒ KHÔNG ghi shadow (không đếm trùng 1 slice ở 2 chế độ)
+  [PASS] M7 clamp không parse được ⇒ shadow nuốt lỗi, KL live y nguyên  — got=100, want=100
+  [PASS] M7 clamp = 1 (ZeroDivisionError nếu không chặn) ⇒ shadow nuốt lỗi, KL live y nguyên  — got=100, want=100
+  [PASS] M7 curve rác ⇒ shadow nuốt lỗi, KL live y nguyên  — got=100, want=100
+  [PASS] M7 thiếu hẳn khoá clamp ⇒ shadow nuốt lỗi, KL live y nguyên  — got=100, want=100
+
+✅ tất cả PASS — P2 paper-only qua live_gate (LIVE byte-identical); clamp giữ bất biến ≤50% tape; shadow ghi đúng số P2 mà không chạm hành vi; không chạm BÁN/non-ADV20.

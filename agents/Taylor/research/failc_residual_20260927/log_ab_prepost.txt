@@ -1,0 +1,10 @@
+as-of = 2026-09-27 (phien gan nhat), state=3 NEUTRAL, EDGE_THR=1.0%
+
+file                                 ban     w_LAG   label_col   mean12 in ra   asof-label cua chuoi
+----------------------------------------------------------------------------------------------------------------------
+file MOI (co known_date)             BEFORE  0.5     entry (khong in) -0.6%          2026-08-14
+file MOI (co known_date)             AFTER   0.5     known_date  -0.6%          2026-09-23
+file BACKUP (khong co known_date)    BEFORE  0.5     entry (khong in) -0.6%          2026-08-14
+file BACKUP (khong co known_date)    AFTER   0.5     entry       -0.6%          2026-08-14
+                                             -> WARNING: lag_edge_health.csv thieu cot 'known_date' -> fallback nhan 'entry' (moc as-of in ra se TRE ~25 phien so voi thuc te; mean12/w_LAG KHONG doi). Chay lai edge_health_monitor.py de sinh cot dung.
+----------------------------------------------------------------------------------------------------------------------

@@ -1,0 +1,101 @@
+========================================================================================
+  IMMUTABLE PUBLISH SELF-CHECK  (sandbox tav2_bq._ipsc_*, KHÔNG chạm production)
+========================================================================================
+
+========================================================================================
+  BASE v3.4b  (sandbox tav2_bq._ipsc_base <- clone of tav2_bq.vnindex_5state)
+========================================================================================
+  baseline 6371 dòng 2000-07-28->2026-09-25 · cutoff (chốt tới) = 2026-08-18
+  [immutable] selfcheck BASE v3.4b: new series 6371 rows 2000-07-28 -> 2026-09-25
+  [migration] tav2_bq._ipsc_base: added asof_date, backfilled = 2026-09-27 (baseline đóng băng)
+  [immutable] cutoff=2026-08-18 (seal_n=25) · đã chốt 6346 dòng (BẤT BIẾN: OK) · đuôi 25 dòng: 0 đổi giá trị, 0 thêm, 0 bỏ
+  [immutable] phân kỳ vùng ĐÃ CHỐT (KHÔNG áp dụng, chỉ đếm): 39 phiên khác giá trị · 0 phiên chỉ có ở bản mới · 0 phiên chỉ có ở bản đã công bố
+  [immutable]   mẫu (đã công bố -> bản tính mới, KHÔNG ghi): 2016-02-01 2->1 | 2018-01-03 4->5 | 2019-06-17 3->2 | 2019-07-30 4->3 | 2019-11-13 3->4 | 2021-04-28 3->4 | 2021-07-07 5->4 | 2024-11-27 2->1
+  [alert suppressed] 🔁 UPSTREAM RESTATE (đã CHẶN, không ghi vào bảng) — selfcheck BASE v3.4b: bản tính hôm nay khác bản đã công bố ở 39 phiên ĐÃ CHỐT (+0 phiên thừa / 0 phiên thiếu). Bảng công bố GIỮ NGUYÊN (đúng thiết kế bất biến). Mẫu: 2016-02-01 2->1 | 2018-01-03 4->5 | 2019-06-17 3->2 | 2019-07-30 4->3 | 2019-11-13 3->4 | 2021-04-28 3->4 | 2021-07-07 5->4 | 2024-11-27 2->1. Nghĩa là: upstream (PE/corp-action/universe) đã sửa dữ liệu quá khứ — nếu cần dùng bản mới cho nghiên cứu, chụp VINTAGE riêng, đừng đè bảng công bố.
+  [PASS] A · BASE v3.4b · vùng đã chốt (time<=2026-08-18) BẤT BIẾN, 0 diff — 6346 dòng, checksum khớp; upstream muốn đổi 39 phiên nhưng đã bị CHẶN
+  [PASS] B · BASE v3.4b · đuôi 25 phiên == chuỗi tính công thức cũ (byte-for-byte) — 25 phiên đối chiếu
+  [immutable] selfcheck BASE v3.4b rerun: new series 6371 rows 2000-07-28 -> 2026-09-25
+  [immutable] cutoff=2026-08-18 (seal_n=25) · đã chốt 6346 dòng (BẤT BIẾN: OK) · đuôi 25 dòng: 0 đổi giá trị, 0 thêm, 0 bỏ
+  [immutable] phân kỳ vùng ĐÃ CHỐT (KHÔNG áp dụng, chỉ đếm): 39 phiên khác giá trị · 0 phiên chỉ có ở bản mới · 0 phiên chỉ có ở bản đã công bố
+  [immutable]   mẫu (đã công bố -> bản tính mới, KHÔNG ghi): 2016-02-01 2->1 | 2018-01-03 4->5 | 2019-06-17 3->2 | 2019-07-30 4->3 | 2019-11-13 3->4 | 2021-04-28 3->4 | 2021-07-07 5->4 | 2024-11-27 2->1
+  [alert suppressed] 🔁 UPSTREAM RESTATE (đã CHẶN, không ghi vào bảng) — selfcheck BASE v3.4b rerun: bản tính hôm nay khác bản đã công bố ở 39 phiên ĐÃ CHỐT (+0 phiên thừa / 0 phiên thiếu). Bảng công bố GIỮ NGUYÊN (đúng thiết kế bất biến). Mẫu: 2016-02-01 2->1 | 2018-01-03 4->5 | 2019-06-17 3->2 | 2019-07-30 4->3 | 2019-11-13 3->4 | 2021-04-28 3->4 | 2021-07-07 5->4 | 2024-11-27 2->1. Nghĩa là: upstream (PE/corp-action/universe) đã sửa dữ liệu quá khứ — nếu cần dùng bản mới cho nghiên cứu, chụp VINTAGE riêng, đừng đè bảng công bố.
+  [PASS] D · BASE v3.4b · idempotent (chạy lại lần 2 không đổi gì, kể cả asof_date) — 0 dòng đổi
+  [immutable] selfcheck BASE v3.4b FORGED: new series 6371 rows 2000-07-28 -> 2026-09-25
+  [immutable] cutoff=2026-08-18 (seal_n=25) · đã chốt 6346 dòng (BẤT BIẾN: OK) · đuôi 25 dòng: 0 đổi giá trị, 0 thêm, 0 bỏ
+  [immutable] phân kỳ vùng ĐÃ CHỐT (KHÔNG áp dụng, chỉ đếm): 140 phiên khác giá trị · 0 phiên chỉ có ở bản mới · 0 phiên chỉ có ở bản đã công bố
+  [immutable]   mẫu (đã công bố -> bản tính mới, KHÔNG ghi): 2016-02-01 2->1 | 2018-01-03 4->5 | 2019-06-17 3->2 | 2019-07-30 4->3 | 2019-11-13 3->4 | 2021-04-28 3->4 | 2021-07-07 5->4 | 2024-11-27 2->1
+  [alert suppressed] 🔁 UPSTREAM RESTATE (đã CHẶN, không ghi vào bảng) — selfcheck BASE v3.4b FORGED: bản tính hôm nay khác bản đã công bố ở 140 phiên ĐÃ CHỐT (+0 phiên thừa / 0 phiên thiếu). Bảng công bố GIỮ NGUYÊN (đúng thiết kế bất biến). Mẫu: 2016-02-01 2->1 | 2018-01-03 4->5 | 2019-06-17 3->2 | 2019-07-30 4->3 | 2019-11-13 3->4 | 2021-04-28 3->4 | 2021-07-07 5->4 | 2024-11-27 2->1. Nghĩa là: upstream (PE/corp-action/universe) đã sửa dữ liệu quá khứ — nếu cần dùng bản mới cho nghiên cứu, chụp VINTAGE riêng, đừng đè bảng công bố.
+  [PASS] C · BASE v3.4b · backfill giả viết lại 101 phiên đã chốt -> KHÔNG lan vào bảng — bảng không đổi 1 dòng nào; publisher ĐẾM ĐÚNG 140 phiên bị chặn (kỳ vọng 101)
+  [PASS] C2 · BASE v3.4b · telemetry đếm đúng số phiên upstream muốn viết lại — n_sealed_diff=140 == 140 (= 101 phiên giả mạo hoà với 39 phiên upstream restate THẬT, trừ phần trùng giá trị)
+  [immutable] selfcheck BASE v3.4b APPEND: new series 6401 rows 2000-07-28 -> 2026-11-06
+  [alert suppressed] ⚠️ GAP-FILL — selfcheck BASE v3.4b APPEND: 5 phiên nằm trong vùng đã chốt (<= 2026-10-02) nhưng CHƯA TỪNG được công bố → đã APPEND (không ghi đè gì). Nghĩa là publisher đã không chạy > 25 phiên liên tiếp — kiểm tra cron.
+  [immutable] GAP-FILL: append 5 phiên đã chốt chưa từng công bố
+  [immutable] cutoff=2026-10-02 (seal_n=25) · đã chốt 6376 dòng (BẤT BIẾN: OK) · đuôi 25 dòng: 25 đổi giá trị, 25 thêm, 0 bỏ
+  [immutable] phân kỳ vùng ĐÃ CHỐT (KHÔNG áp dụng, chỉ đếm): 140 phiên khác giá trị · 5 phiên chỉ có ở bản mới · 0 phiên chỉ có ở bản đã công bố
+  [immutable]   mẫu (đã công bố -> bản tính mới, KHÔNG ghi): 2016-02-01 2->1 | 2018-01-03 4->5 | 2019-06-17 3->2 | 2019-07-30 4->3 | 2019-11-13 3->4 | 2021-04-28 3->4 | 2021-07-07 5->4 | 2024-11-27 2->1
+  [alert suppressed] 🔁 UPSTREAM RESTATE (đã CHẶN, không ghi vào bảng) — selfcheck BASE v3.4b APPEND: bản tính hôm nay khác bản đã công bố ở 140 phiên ĐÃ CHỐT (+5 phiên thừa / 0 phiên thiếu). Bảng công bố GIỮ NGUYÊN (đúng thiết kế bất biến). Mẫu: 2016-02-01 2->1 | 2018-01-03 4->5 | 2019-06-17 3->2 | 2019-07-30 4->3 | 2019-11-13 3->4 | 2021-04-28 3->4 | 2021-07-07 5->4 | 2024-11-27 2->1. Nghĩa là: upstream (PE/corp-action/universe) đã sửa dữ liệu quá khứ — nếu cần dùng bản mới cho nghiên cứu, chụp VINTAGE riêng, đừng đè bảng công bố.
+  [PASS] E · BASE v3.4b · append 30 phiên mới (25 đuôi + 5 gap-fill) -> đủ, phần đã công bố nguyên vẹn — 30 dòng mới (gap-fill 5); 6371 dòng cũ không đổi
+  [PASS] F · BASE v3.4b · cutoff tiến lên sau append, phần vừa chốt vẫn bất biến — cutoff 2026-08-18 -> 2026-10-02
+  [immutable] selfcheck BASE v3.4b STALE: new series 6361 rows 2000-07-28 -> 2026-09-11
+  [PASS] G · BASE v3.4b · chuỗi tính tụt hậu -> fail-CLOSED, không xoá phiên đã công bố — abort đúng: new series max=2026-09-11 < published max=2026-11-06 — chuỗi tính mới 
+
+========================================================================================
+  DT5G live  (sandbox tav2_bq._ipsc_dt5g <- clone of tav2_bq.vnindex_5state_dt5g_live)
+========================================================================================
+  baseline 3174 dòng 2014-01-02->2026-09-25 · cutoff (chốt tới) = 2026-08-18
+  [immutable] selfcheck DT5G live: new series 3174 rows 2014-01-02 -> 2026-09-25
+  [migration] tav2_bq._ipsc_dt5g: added asof_date, backfilled = 2026-09-27 (baseline đóng băng)
+  [immutable] cutoff=2026-08-18 (seal_n=25) · đã chốt 3149 dòng (BẤT BIẾN: OK) · đuôi 25 dòng: 0 đổi giá trị, 0 thêm, 0 bỏ
+  [immutable] phân kỳ vùng ĐÃ CHỐT (KHÔNG áp dụng, chỉ đếm): 0 phiên khác giá trị · 0 phiên chỉ có ở bản mới · 0 phiên chỉ có ở bản đã công bố
+  [PASS] A · DT5G live · vùng đã chốt (time<=2026-08-18) BẤT BIẾN, 0 diff — 3149 dòng, checksum khớp; upstream muốn đổi 0 phiên nhưng đã bị CHẶN
+  [PASS] B · DT5G live · đuôi 25 phiên == chuỗi tính công thức cũ (byte-for-byte) — 25 phiên đối chiếu
+  [immutable] selfcheck DT5G live rerun: new series 3174 rows 2014-01-02 -> 2026-09-25
+  [immutable] cutoff=2026-08-18 (seal_n=25) · đã chốt 3149 dòng (BẤT BIẾN: OK) · đuôi 25 dòng: 0 đổi giá trị, 0 thêm, 0 bỏ
+  [immutable] phân kỳ vùng ĐÃ CHỐT (KHÔNG áp dụng, chỉ đếm): 0 phiên khác giá trị · 0 phiên chỉ có ở bản mới · 0 phiên chỉ có ở bản đã công bố
+  [PASS] D · DT5G live · idempotent (chạy lại lần 2 không đổi gì, kể cả asof_date) — 0 dòng đổi
+  [immutable] selfcheck DT5G live FORGED: new series 3174 rows 2014-01-02 -> 2026-09-25
+  [immutable] cutoff=2026-08-18 (seal_n=25) · đã chốt 3149 dòng (BẤT BIẾN: OK) · đuôi 25 dòng: 0 đổi giá trị, 0 thêm, 0 bỏ
+  [immutable] phân kỳ vùng ĐÃ CHỐT (KHÔNG áp dụng, chỉ đếm): 101 phiên khác giá trị · 0 phiên chỉ có ở bản mới · 0 phiên chỉ có ở bản đã công bố
+  [immutable]   mẫu (đã công bố -> bản tính mới, KHÔNG ghi): 2025-01-07 3->1 | 2025-01-08 3->1 | 2025-01-09 3->1 | 2025-01-10 3->1 | 2025-01-13 3->1 | 2025-01-14 3->1 | 2025-01-15 3->1 | 2025-01-16 3->1
+  [alert suppressed] 🔁 UPSTREAM RESTATE (đã CHẶN, không ghi vào bảng) — selfcheck DT5G live FORGED: bản tính hôm nay khác bản đã công bố ở 101 phiên ĐÃ CHỐT (+0 phiên thừa / 0 phiên thiếu). Bảng công bố GIỮ NGUYÊN (đúng thiết kế bất biến). Mẫu: 2025-01-07 3->1 | 2025-01-08 3->1 | 2025-01-09 3->1 | 2025-01-10 3->1 | 2025-01-13 3->1 | 2025-01-14 3->1 | 2025-01-15 3->1 | 2025-01-16 3->1. Nghĩa là: upstream (PE/corp-action/universe) đã sửa dữ liệu quá khứ — nếu cần dùng bản mới cho nghiên cứu, chụp VINTAGE riêng, đừng đè bảng công bố.
+  [PASS] C · DT5G live · backfill giả viết lại 101 phiên đã chốt -> KHÔNG lan vào bảng — bảng không đổi 1 dòng nào; publisher ĐẾM ĐÚNG 101 phiên bị chặn (kỳ vọng 101)
+  [PASS] C2 · DT5G live · telemetry đếm đúng số phiên upstream muốn viết lại — n_sealed_diff=101 == 101 (= 101 phiên giả mạo hoà với 0 phiên upstream restate THẬT, trừ phần trùng giá trị)
+  [immutable] selfcheck DT5G live APPEND: new series 3204 rows 2014-01-02 -> 2026-11-06
+  [alert suppressed] ⚠️ GAP-FILL — selfcheck DT5G live APPEND: 5 phiên nằm trong vùng đã chốt (<= 2026-10-02) nhưng CHƯA TỪNG được công bố → đã APPEND (không ghi đè gì). Nghĩa là publisher đã không chạy > 25 phiên liên tiếp — kiểm tra cron.
+  [immutable] GAP-FILL: append 5 phiên đã chốt chưa từng công bố
+  [immutable] cutoff=2026-10-02 (seal_n=25) · đã chốt 3179 dòng (BẤT BIẾN: OK) · đuôi 25 dòng: 25 đổi giá trị, 25 thêm, 0 bỏ
+  [immutable] phân kỳ vùng ĐÃ CHỐT (KHÔNG áp dụng, chỉ đếm): 101 phiên khác giá trị · 5 phiên chỉ có ở bản mới · 0 phiên chỉ có ở bản đã công bố
+  [immutable]   mẫu (đã công bố -> bản tính mới, KHÔNG ghi): 2025-01-07 3->1 | 2025-01-08 3->1 | 2025-01-09 3->1 | 2025-01-10 3->1 | 2025-01-13 3->1 | 2025-01-14 3->1 | 2025-01-15 3->1 | 2025-01-16 3->1
+  [alert suppressed] 🔁 UPSTREAM RESTATE (đã CHẶN, không ghi vào bảng) — selfcheck DT5G live APPEND: bản tính hôm nay khác bản đã công bố ở 101 phiên ĐÃ CHỐT (+5 phiên thừa / 0 phiên thiếu). Bảng công bố GIỮ NGUYÊN (đúng thiết kế bất biến). Mẫu: 2025-01-07 3->1 | 2025-01-08 3->1 | 2025-01-09 3->1 | 2025-01-10 3->1 | 2025-01-13 3->1 | 2025-01-14 3->1 | 2025-01-15 3->1 | 2025-01-16 3->1. Nghĩa là: upstream (PE/corp-action/universe) đã sửa dữ liệu quá khứ — nếu cần dùng bản mới cho nghiên cứu, chụp VINTAGE riêng, đừng đè bảng công bố.
+  [PASS] E · DT5G live · append 30 phiên mới (25 đuôi + 5 gap-fill) -> đủ, phần đã công bố nguyên vẹn — 30 dòng mới (gap-fill 5); 3174 dòng cũ không đổi
+  [PASS] F · DT5G live · cutoff tiến lên sau append, phần vừa chốt vẫn bất biến — cutoff 2026-08-18 -> 2026-10-02
+  [immutable] selfcheck DT5G live STALE: new series 3164 rows 2014-01-02 -> 2026-09-11
+  [PASS] G · DT5G live · chuỗi tính tụt hậu -> fail-CLOSED, không xoá phiên đã công bố — abort đúng: new series max=2026-09-11 < published max=2026-11-06 — chuỗi tính mới 
+
+========================================================================================
+  H · fail-closed trên input hỏng
+========================================================================================
+  [immutable] selfcheck bad (chuỗi ngắn hơn seal_n): new series 10 rows 2014-01-02 -> 2014-01-15
+  [migration] tav2_bq._ipsc_guard: added asof_date, backfilled = 2026-09-27 (baseline đóng băng)
+  [PASS] H · chuỗi ngắn hơn seal_n -> fail-CLOSED — abort đúng: new series chỉ 10 dòng <= seal_n=25 — không xác định được vù
+  [PASS] H · có ngày TRÙNG -> fail-CLOSED — abort đúng: new series có ngày TRÙNG — từ chối publish
+  [PASS] H · có state NULL -> fail-CLOSED — abort đúng: new series có state/state_raw NULL — từ chối publish
+
+========================================================================================
+  I/J · publish từ DataFrame + export CSV mirror từ BQ
+========================================================================================
+  [immutable] selfcheck DF-input: new series 3174 rows 2014-01-02 -> 2026-09-25
+  [migration] tav2_bq._ipsc_dfcsv: added asof_date, backfilled = 2026-09-27 (baseline đóng băng)
+  [immutable] cutoff=2026-08-18 (seal_n=25) · đã chốt 3149 dòng (BẤT BIẾN: OK) · đuôi 25 dòng: 0 đổi giá trị, 0 thêm, 0 bỏ
+  [immutable] phân kỳ vùng ĐÃ CHỐT (KHÔNG áp dụng, chỉ đếm): 60 phiên khác giá trị · 0 phiên chỉ có ở bản mới · 0 phiên chỉ có ở bản đã công bố
+  [immutable]   mẫu (đã công bố -> bản tính mới, KHÔNG ghi): 2024-08-15 1->5 | 2024-08-16 1->5 | 2024-08-19 1->5 | 2024-08-20 1->5 | 2024-08-21 1->5 | 2024-08-22 1->5 | 2024-08-23 1->5 | 2024-08-26 1->5
+  [alert suppressed] 🔁 UPSTREAM RESTATE (đã CHẶN, không ghi vào bảng) — selfcheck DF-input: bản tính hôm nay khác bản đã công bố ở 60 phiên ĐÃ CHỐT (+0 phiên thừa / 0 phiên thiếu). Bảng công bố GIỮ NGUYÊN (đúng thiết kế bất biến). Mẫu: 2024-08-15 1->5 | 2024-08-16 1->5 | 2024-08-19 1->5 | 2024-08-20 1->5 | 2024-08-21 1->5 | 2024-08-22 1->5 | 2024-08-23 1->5 | 2024-08-26 1->5. Nghĩa là: upstream (PE/corp-action/universe) đã sửa dữ liệu quá khứ — nếu cần dùng bản mới cho nghiên cứu, chụp VINTAGE riêng, đừng đè bảng công bố.
+  [PASS] I · publish_immutable nhận DataFrame; 60 phiên đã chốt bị sửa -> KHÔNG lan vào bảng — n_sealed_diff=60 (kỳ vọng 60), bảng không đổi 1 dòng
+  [PASS] J1 · CSV == bảng đã công bố (byte-for-byte), KHÔNG phải chuỗi tính lại — 3174 dòng khớp tuyệt đối
+  [PASS] J2 · CSV giữ đúng schema 3 cột [time,state,state_raw] (không đụng 7 consumer) — cols=['time', 'state', 'state_raw']
+  [PASS] J3 · CSV mang state ĐÃ CÔNG BỐ ở 60 phiên bị làm sai (không mang bản restate) — 60/60 phiên khớp bản đã công bố
+  [PASS] J4 · atomic: không để lại file .tmp
+
+========================================================================================
+  KẾT QUẢ: 24/24 PASS
+========================================================================================
