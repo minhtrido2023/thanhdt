@@ -1,0 +1,75 @@
+custom_basket = /home/trido/thanhdt/wt-c30v-wexdate/WorkingClaude/custom_basket.py
+corp-action snapshot = /home/trido/thanhdt/WorkingClaude/data/snapshots/corp_action_share_20260927.parquet
+TZ = ''
+
+T1 — knob BASKET_OSHARES_STEP đọc tại CALL time, mặc định = exdate
+  PASS  mặc định (không set env) = exdate
+  PASS  BASKET_OSHARES_STEP='quarter' -> quarter_mode=True
+  PASS  BASKET_OSHARES_STEP='QUARTER' -> quarter_mode=True
+  PASS  BASKET_OSHARES_STEP='exdate' -> quarter_mode=False
+  PASS  BASKET_OSHARES_STEP='ExDate' -> quarter_mode=False
+  PASS  BASKET_OSHARES_STEP='' -> quarter_mode=False
+  PASS  BASKET_OSHARES_STEP='bogus' -> quarter_mode=False
+
+T2 — _match_step_date: chỉ khớp khi CỠ khớp, không phải chỉ vì có sự kiện trong cửa sổ
+  PASS  ratio 2.0 -> ISS exercise_ratio=1.0 ngày 2024-06-20   [ISS_RATIO]
+  PASS  ratio 1.05 -> đúng sự kiện 5% ngày 2024-03-01   [ISS_RATIO]
+  PASS  cùng ratio 1.05 nhưng chỉ còn 2 tranche 2%+3% cùng ngày -> ISS_RATIO_SUM   [ISS_RATIO_SUM]
+  PASS  không có ratio khớp nhưng AIS khớp MỨC -> AIS_LEVEL   [AIS_LEVEL]
+  PASS  AIS lệch mức >0,1% -> KHÔNG khớp (EVENT_BUT_NO_RATIO_MATCH)   [EVENT_BUT_NO_RATIO_MATCH]
+  PASS  cửa sổ không có sự kiện nào -> NO_EVENT_IN_WINDOW   [NO_EVENT_IN_WINDOW]
+  PASS  dung sai: mục tiêu 0,153 vs sự kiện 0,150 -> KHỚP
+  PASS  dung sai: mục tiêu 0,158 vs sự kiện 0,150 -> KHÔNG khớp (fallback ngày quý)
+
+T3 — ca thật trên snapshot đã ghim (cả hai HƯỚNG lệch)
+  [oshares-step] corp-action từ SNAPSHOT /home/trido/thanhdt/WorkingClaude/data/snapshots/corp_action_share_20260927.parquet: 215 dòng
+  PASS  TCB x2: ngày hiệu lực dời về ex-date 2024-06-20   [eff=2024-06-20 moved=32]
+  PASS  TCB x2: tỷ lệ bước ĐÚNG 2.0 (không đổi MỨC, chỉ đổi NGÀY)   [ratio=2.0]
+  PASS  TCB ESOP: dòng quý 2024-10-22 mang số tương lai -> dời MUỘN tới 2024-11-30 (bỏ look-ahead)   [eff=2024-11-30 moved=-39]
+  PASS  FPT 2025-07-22 (cỡ không khớp sự kiện nào) -> GIỮ ngày quý   [EVENT_BUT_NO_RATIO_MATCH->KEEP_QUARTER eff=2025-07-22]
+  PASS  TCB: tập MỨC OShares y nguyên (chỉ NGÀY đổi)   [9 vs 9 mức]
+  PASS  ACB: tập MỨC OShares y nguyên (chỉ NGÀY đổi)   [17 vs 17 mức]
+  PASS  HPG: tập MỨC OShares y nguyên (chỉ NGÀY đổi)   [18 vs 18 mức]
+  PASS  FPT: tập MỨC OShares y nguyên (chỉ NGÀY đổi)   [23 vs 23 mức]
+  PASS  cổng PIT 1: không có bước nào dời tới/qua ngày dòng quý TRƯỚC đó   [[]]
+  PASS  cổng PIT 2: eff_date tăng NGẶT trong từng mã   [[]]
+
+T4 — apply_oshares trên frame NGÀY: ngày KHÔNG có sự kiện phải Y NGUYÊN
+  [oshares-step] corp-action từ SNAPSHOT /home/trido/thanhdt/WorkingClaude/data/snapshots/corp_action_share_20260927.parquet: 215 dòng
+  [oshares-step] exdate: 63 bước OShares, 38 bước ĐƯỢC DỜI (median 56 ngày), 25 giữ ngày quý (không khớp sự kiện), 0 bị chặn bởi cổng PIT
+  PASS  không mất/không thêm dòng nào   [13288/13288]
+  PASS  mặt nạ valid (OShares NaN) Y NGUYÊN giữa 2 chế độ   [NaN q=0 e=0]
+  PASS  ngày LỆCH == đúng hợp các cửa sổ dời (không rò ra ngoài một ngày nào)   [got 1372 want 1372 chỉ-got 0 chỉ-want 0]
+  PASS  ngoài các cửa sổ đó: OShares (và do đó mcapw) BYTE-IDENTICAL   [11916 ngày giống nhau]
+  PASS  trong cửa sổ: OShares_exdate/OShares_quarter == ĐÚNG tỷ lệ của bước   [[]]
+  PASS  chế độ 'quarter' == dòng gốc trước khi sửa (ffill().bfill()), byte-identical
+  PASS  ĐỘT BIẾN: hai chế độ thực sự KHÁC nhau (bản vá không phải no-op)   [1372 ngày lệch]
+
+T5 — diff publish CSV (đường tiền LIVE): liệt kê TỪNG TÊN đổi weight
+  PASS  THÀNH VIÊN rổ không đổi (selection không dùng OShares)
+  PASS  tổng weight mỗi rebal vẫn = 1 ở CẢ HAI chế độ
+    16/49 rebal đổi weight; 33 rebal BYTE-IDENTICAL
+      2015-08-05: 25 tên, sum|dw| 0.570pp | PET -0.285pp, REE +0.052pp, NT2 +0.044pp, VSH +0.020pp
+      2016-02-05: 26 tên, sum|dw| 0.145pp | NDN -0.073pp, DPM +0.011pp, PVD +0.007pp, NT2 +0.007pp
+      2016-11-07: 27 tên, sum|dw| 0.069pp | FCN -0.034pp, DPM +0.005pp, PVD +0.004pp, PVS +0.004pp
+      2017-08-07: 25 tên, sum|dw| 0.137pp | C32 -0.068pp, VCG +0.010pp, NT2 +0.009pp, VGC +0.009pp
+      2017-11-06: 24 tên, sum|dw| 0.249pp | DXG -0.124pp, CTD +0.026pp, SSI +0.016pp, NT2 +0.012pp
+      2018-05-07: 25 tên, sum|dw| 1.047pp | PDR +0.524pp, QNS -0.053pp, LPB -0.048pp, CTD -0.046pp
+      2018-11-05: 25 tên, sum|dw| 0.384pp | NLG -0.192pp, ACB +0.038pp, POW +0.032pp, FPT +0.026pp
+      2020-02-05: 25 tên, sum|dw| 2.432pp | SHB +1.216pp, HDB -0.230pp, POW -0.188pp, VIB -0.134pp
+      2020-08-05: 26 tên, sum|dw| 0.064pp | TCM +0.032pp, HDB -0.005pp, SHB -0.005pp, POW -0.004pp
+      2021-02-05: 18 tên, sum|dw| 0.006pp | AGG -0.003pp, VIB +0.001pp, HDB +0.000pp, TPB +0.000pp
+      2021-11-05: 26 tên, sum|dw| 2.748pp | MSB -0.870pp, SHS -0.504pp, ACB +0.236pp, VIB +0.154pp
+      2023-02-06: 27 tên, sum|dw| 0.060pp | IJC +0.030pp, VPB -0.004pp, HPG -0.004pp, TCB -0.003pp
+      2023-08-07: 26 tên, sum|dw| 0.185pp | HAH +0.093pp, TCB -0.014pp, MBB -0.012pp, ACB -0.011pp
+      2024-08-05: 24 tên, sum|dw| 0.015pp | GEX -0.008pp, CTG +0.001pp, GAS +0.001pp, TCB +0.001pp
+      2024-11-05: 26 tên, sum|dw| 0.047pp | TCB -0.024pp, MBB +0.003pp, ACB +0.003pp, LPB +0.002pp
+      2025-05-05: 27 tên, sum|dw| 0.056pp | HAH -0.028pp, CTG +0.004pp, TCB +0.004pp, MBB +0.003pp
+    REBAL HIỆN TẠI 2026-08-05: 0/30 tên đổi, max |dw| 0.0000pp
+  PASS  mọi thay đổi weight đều bị chặn trên bởi trần 10% (không tên nào vượt cap)   [max weight_e=0.100000]
+
+T6 — lỗi tiềm ẩn CŨ: bfill() không group (ngoài phạm vi ticket, ghim lại để không mất)
+  PASS  tái hiện lỗi cũ: mã AAA (không có dòng nào) bị lấp bằng số của BBB   [AAA -> 1000000000.0]
+  PASS  hướng sửa (bfill CÓ group): AAA vẫn NaN -> vẫn bị mặt nạ valid loại ra
+
+==== 37/37 PASS ====
