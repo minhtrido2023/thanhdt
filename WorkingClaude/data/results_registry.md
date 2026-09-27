@@ -7461,3 +7461,155 @@ ADV/phiên — `kb/projects/lag-adv-filter-tracking.md`); một đường đi l�
 `park_grid_curves.png` · `dd_episodes.txt` · `loyo_020_030_040.log` · `loyo_000_030_080.log`. CSV:
 `data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-*_wtnamecap_advprice_exp_parkgrid_*_univpit.csv`
 (14 file, tên non-canonical theo §8). **Không thay đổi một dòng code production nào trong job này.**
+
+## 2026-09-27 (quater) — ⭐ **PIN CHÍNH THỨC R3 SAU MERGE ĐỢT AUDIT 27/09** + chạy lại bootstrap/DSR/PBO theo manifest ghim — job `Taylor_20260927_064745` → `Taylor_20260927_071001`
+
+**Bối cảnh.** User duyệt 8 mục lúc 13:38 ICT 2026-09-27. Main `WorkingClaude` @`f2cfb124` đã merge 4
+branch (`fix/nav-flow-term-annualize` = FAIL-F, `fix/custom30v-weight-oshares-exdate` = ticket 1,
+`fix/lag-edge-health-causal-label` = FAIL-C, `fix/dsr-family-manifest`); `mike` @`8525d2d8` merge
+`fix/nav-flow-term` (FAIL-H) + `fix/reconcile-egg-manifest`. Mục này là **hậu kiểm trên main
+canonical**, mỗi số chạy MỘT lần trên đúng bản đã merge.
+
+### 1. PIN R3 — số chính thức từ 2026-09-27 (chiều)
+
+| Metric | **PIN MỚI (chính thức)** | Pin cũ 2026-09-27 (bis) |
+|---|---|---|
+| CAGR | **24,42%** | 24,38% |
+| Sharpe(252) | **1,69** | 1,69 |
+| MaxDD | **−18,8%** | −18,8% |
+| Calmar | **1,30** | 1,30 |
+| Final NAV | **761,11B** | 757,61B |
+
+- Ledger: `data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_pinR3_20260927pm_univpit.csv`
+  · **md5 `2f9c3702524391f5538d262edb17515d`** (16.808 dòng) — **trùng khít** bản chạy trong worktree
+  ticket 1 ⇒ merge không làm đổi số.
+- `self-check 0 VND` cả BAL và LAG (cash-flow identity + final-NAV identity); borrow-audit tổng 0 VND.
+- Lệnh pin (chép nguyên văn khi tái lập): `$DNA_PYEXE=/home/trido/thanhdt/wc_venv/bin/python` ·
+  `BQ_LOCAL_CACHE=data/bq_cache_asof20260729_postrestate` · `BQ_CACHE_THREADS=1` ·
+  `BASKET_CA_SNAPSHOT=data/snapshots/corp_action_share_20260927.parquet` ·
+  `BASKET_OSHARES_STEP` **để mặc định = `exdate`** (production sau ticket 1) ·
+  `NAV_TOTAL_B=50 ETF_LIQ=custompitg BASKET_WT=namecap BASKET_SELECT=yieldcombo PARK_STATES=3:0.7
+  AUDIT_END=2026-06-19` · `pt_v23_audit_2014.py v23a none postbull 0 edge`.
+  Runner đã ghim: `mike/agents/Taylor/research/postmerge_haukiem_20260927/run_pin.sh`.
+- Log: `research/postmerge_haukiem_20260927/pinR3_20260927pm.log`.
+
+> **SUPERSEDE**: 24,38% (bis, 2026-09-27 sáng) và mọi số trước đó. Chênh +0,04pp đến từ ticket 1
+> (OShares bước tại ex-date ở chân WEIGHT), không phải đổi mô hình.
+
+### 2. Đóng góp của parking NEUTRAL (custom30V) — đo lại ĐỒNG VINTAGE trên chính bản pin
+
+| Leg | Final NAV | CAGR | Sharpe | MaxDD | Calmar |
+|---|---|---|---|---|---|
+| `PARK_STATES=3:0.7` (production) | 761,11B | **24,42%** | 1,69 | −18,8% | 1,30 |
+| `PARK_STATES=3:0.0` (park=0) | 618,35B | 22,37% | **1,95** | **−16,1%** | **1,39** |
+| Δ do parking | +142,76B | **+2,05pp** | −0,26 | +2,7pp xấu hơn | −0,09 |
+
+**Parking mua CAGR bằng cách bán chất lượng rủi ro.** Con số **+7,4pp** trong KB cũ đã chết từ bản
+sửa chuỗi return `1b89881b`; **+2,01pp** (bis) nay thành **+2,05pp** trên bản pin mới.
+Log: `park0_20260927pm.log`.
+
+### 3. Bootstrap (`bootstrap_nav.py`, đã sang cơ sở LỊCH sau FAIL-F)
+
+3.106 phiên = **12,460 năm lịch** (249,3 obs/năm), block 21 phiên, B=4.000, seed 12345.
+
+| | ACTUAL | median | **5th-pct** | 95th |
+|---|---|---|---|---|
+| CAGR | 24,4% | 24,4% | **15,5%** | 34,3% |
+| Sharpe | 1,62 | 1,61 | 1,07 | 2,19 |
+| MaxDD | −18,8% | −20,4% | **−30,3%** | −14,5% |
+
+P(CAGR<0)=0,0% · P(CAGR<10%)=0,4% · P(Sharpe<1,0)=3,4% · P(MaxDD<−30%)=5,5% · P(MaxDD<−40%)=0,4%.
+Stationary bootstrap (mean L=21) làm đối chứng: CAGR 5th 15,3% / DD 5th −30,0%.
+**Neo sizing cho Spyros: DD −30,3%** (không phải −18,8%).
+
+> **SUPERSEDE**: "5th-pct CAGR 18,6% / DD −28,6%" (KB cũ) → chết từ `1b89881b`;
+> 15,6% (bis, cơ sở PHIÊN) → 15,4% (sau FAIL-F) → **15,5% (pin mới)**. DD: −30,4% → **−30,3%**.
+
+### 4. DSR / PBO Robustness Annex — **số pin đổi sang PBO(68)**, PBO(today) tách thành chỉ báo khác
+
+Chạy `dsr_pbo_annex.py` (bản đã merge, `DSR_FAMILY_MANIFEST` ghim danh sách file) hai lần trên
+**cùng ledger pin mới**, chỉ đổi HỌ TRIAL:
+
+| Họ trial | N | ann-SR trung bình họ | **DSR** | **PBO (CSCV, S=16)** |
+|---|---|---|---|---|
+| **Họ gốc phục dựng** `man_2026_07_recon.json` (md5 `2cea9626…`) | **68** | 1,688 | **1,0000** | **0,2085** ← **SỐ PIN** |
+| Họ "hôm nay" `man_today.json` (md5 `c774418c…`) | 486 | 1,764 | 1,0000 | 0,5013 |
+
+- R3: per-day Sharpe 0,10237 → **ann-SR 1,616**; skew −0,3619; kurtosis 7,0941 (excess 4,0941).
+  DSR ở cả N_reg=120 và N_reg=200 đều 1,0000.
+- **Số pin của V2.4 là PBO(68) = 0,2085** (khớp số 0,2088 pin từ 2026-07 ⇒ họ phục dựng đúng).
+  ⚠️ **Caveat mtime**: registry 2026-07 KHÔNG lưu tên file họ trial; 68 file này là phục dựng tốt
+  nhất theo `mtime < 2026-07-05T08:00 ICT` và `>=2500 obs`, **không phải danh sách gốc được ghi lại**.
+- **PBO(today) = 0,5013 KHÔNG phải PBO của V2.4.** Nó là **chỉ báo sức ép multiple-testing tích luỹ**
+  của thư mục `data/` tại thời điểm chạy: mỗi backtest R&D mới tự động nhập họ, nên con số này trôi
+  theo thời gian và nói về TỐC ĐỘ THỬ của đội, không nói về độ bền của config đang deploy.
+  (Tham chiếu: 80 file → 0,2088 · 477 → 0,3993 · 486 → 0,5013.)
+- Log: `annex_recon68.log`, `annex_today486.log`.
+
+> **SUPERSEDE**: dòng "PBO 0,3993 (họ 477)" ở mục 2026-09-27 (bis) §4 — con số đó là PBO(today) của
+> sáng 27/09, **không phải** số pin của V2.4. Số pin đúng = **PBO(68) 0,2085**.
+
+### 5. Bảng SUPERSEDED — mọi số cũ còn lưu hành
+
+| Đại lượng | Số cũ (nguồn) | **Số đúng từ 2026-09-27 (quater)** |
+|---|---|---|
+| R3 CAGR | 28,86% (pin 08-03) → 24,38% (bis) | **24,42%** |
+| R3 Final NAV | 1.178,01B → 757,61B | **761,11B** |
+| Bootstrap 5th-pct CAGR | 18,6% → 15,6% → 15,4% | **15,5%** |
+| Bootstrap 5th-pct MaxDD | −28,6% → −30,4% | **−30,3%** |
+| Parking NEUTRAL đóng góp | +7,4pp → +2,01pp | **+2,05pp** (và LÀM XẤU Sharpe/DD/Calmar) |
+| PBO pin | 0,2088 (họ 80) → 0,3993 (họ 477) | **0,2085 (họ 68 ghim)**; 0,5013 = PBO(today), chỉ báo khác |
+| DSR | 1,0000 | **1,0000** (không đổi) |
+| ann-SR R3 (annex) | 1,829 → 1,622 | **1,616** |
+
+### 6. Hồi quy selfcheck trên main sau merge — 8 selfcheck × 3 TZ × 2 interpreter (48 ô)
+
+Runner: `research/postmerge_haukiem_20260927/run_sc.sh` (+`run_sc_unset.sh`, `run_triage.sh`).
+`python3` = 3.10 (pandas 2.3) · `$DNA_PYEXE` = 3.12 (pandas 3).
+
+| Selfcheck | Kết quả | Chẩn đoán |
+|---|---|---|
+| `dsr_family_manifest` | ✅ 0/6 ô FAIL | — (thêm 13/13 assertion × 4 TZ × 2 py cho bản BẮT BUỘC, mục 7) |
+| `nav_flow_term` | ✅ 0/6 | — |
+| `annualization_basis` | ✅ 0/6 | — |
+| `reconcile_equity_egg` | ✅ 0/6 | — |
+| `basket_oshares_step_exdate` | ⚠️ FAIL 3/3 ô py3.10, **PASS 3/3 ô `$DNA_PYEXE`** | **ENV, không phải regression**: `pd.merge_asof` pandas 2.3 từ chối khoá `M8[ns]` vs `M8[us]` (`basket_oshares_step_exdate_selfcheck.py:260`). Interpreter pin của registry là `$DNA_PYEXE` ⇒ đường chạy chuẩn tắc PASS. Nợ: selfcheck chưa portable 3.10. |
+| `basket_price_basis` | ⚠️ FAIL 6/6 với mặc định · **PASS toàn bộ khi `BASKET_OSHARES_STEP=quarter`** | **Control leg cũ, không phải regression**: T1 ép so bit-for-bit với module TIỀN-SỬA, mà module đó không có bước OShares tại ex-date. Sau ticket 1, mặc định = `exdate` ⇒ T1[recent]/T1[old] lệch. Sửa 1 dòng: chân control phải pin `BASKET_OSHARES_STEP=quarter`. |
+| `basket_return_leg_oshares` | ⚠️ FAIL 6/6 với mặc định · **PASS khi `BASKET_RETLEG_PREREF=2c098c1a` + `BASKET_OSHARES_STEP=quarter`** · FAIL khi cùng PREREF nhưng để `exdate` | Cùng một gốc, **đã phân lập bằng 1 biến**: `RC=0` (quarter) vs `RC=1` (exdate) trên CÙNG PREREF ⇒ biến phân biệt đúng là bước OShares, không phải chân return. |
+| `asof_label` | ❌ **FAIL THẬT** (dnapy 3/3 ô); py3.10 rc=2 = ENV (không dựng được lịch phiên) | Xem mục 7 — FAIL-C còn vô hiệu. |
+
+### 7. 🚨 FAIL-C ĐÃ MERGE NHƯNG CÒN VÔ HIỆU — số pin 24,42% VẪN mang look-ahead 25 phiên
+
+- Code trên main đã vá (`5672e1e0`): `edge_health_monitor.py:167-183` sinh cột `known_date`,
+  `pt_v23_audit_2014.py:2064` chọn `label_col = "known_date" if "known_date" in _eh.columns else "entry"`.
+- **Artifact chưa sinh lại**: `data/lag_edge_health.csv` header vẫn `entry,ret,mean12,win12,n12`
+  ⇒ engine rơi về `entry`. Bằng chứng ngay trong log pin: `[edge-alloc] source=lag_edge_health.csv
+  label_col=entry rows=583`.
+- `bin/asof_label_selfcheck.py` trên chuỗi thật: **5.488/5.488 dòng vi phạm, sớm tối đa 25 phiên**
+  (unit test tổng hợp U1-U7 PASS ⇒ selfcheck có sức phân giải, không phải báo động giả).
+- ⇒ **24,42% là số đo TRÊN NHÃN LOOK-AHEAD.** A/B đo trước ticket 1: control 24,38% vs causal
+  24,44% (~+0,06pp).
+- **Việc còn lại cần NGƯỜI duyệt** (Taylor KHÔNG tự ghi đè file dữ liệu production): chạy lại
+  `edge_health_monitor.py` → sinh `data/lag_edge_health.csv` có `known_date` → **re-pin R3 lần nữa**
+  → chạy lại bootstrap/annex. Gắn `bin/asof_label_selfcheck.py` vào `run_selfchecks.sh` để lần sau
+  bắt được ngay.
+
+### 8. Hai việc CHẠM PRODUCTION bị chặn — cần Mike/user chạy tay
+
+- **custom30V publish → BQ**: cổng diff đã **PASS** — rebal đang hiệu lực **2026-08-05: 0/30 tên đổi
+  weight, max|Δw| = 0,0**, `liq_rank`/`rating_8l` y nguyên; 17/49 rebal LỊCH SỬ đổi (đúng kỳ vọng
+  ticket 1) ⇒ **merge không sinh lệnh mua/bán nào**. File chờ:
+  `data/custom30v_8l_publish_CAND_20260927pm.csv` (md5 `1d2f8cad366cc538a1844def6fd06a2d`; bản đang
+  live md5 `32659b23856448b4f566fb3d3fd834a1`). Hai lệnh còn thiếu (đều bị permission classifier chặn
+  trong phiên headless): `cp` đè `data/custom30v_8l_publish.csv` và
+  `bq load --replace ... tav2_bq.custom30v_8l`.
+- **`fix/dsr-manifest-mandatory`** (WC `9bb40de8`, mục 7 của đợt duyệt): `dsr_pbo_annex.py`
+  fail-closed `rc=2` khi thiếu `DSR_FAMILY_MANIFEST` — không còn đường glob động. Selfcheck
+  **13/13 assertion × 4 TZ × 2 interpreter**, 2/2 mutation bị giết. **CHƯA MERGE** (Mike merge).
+
+### 9. `reconcile_equity.py` chạy thật sau merge egg (`6a89e51b`)
+
+Ngày 2026-09-27, cả 2 tài khoản: **SpaceX residual +0,0281% NAV · ZaloPay +0,0107% NAV** — nằm
+trong dải kỳ vọng 0,02-0,03%, và so với **9,58% / 11,96%** trước bản sửa. Log:
+`reconcile_SpaceX_2026-09-27.log`, `reconcile_ZaloPay_2026-09-27.log`.
+
