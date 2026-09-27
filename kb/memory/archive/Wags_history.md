@@ -309,3 +309,7 @@ BAI HOC: va NGUYEN NHAN thu N cua mot ho su co lap lai = dau hieu thieu MOT PHEP
 
 ## Archived 2026-09-25 (keep=12 days=0 require_done=False)
 - [2026-09-10T01:24:14Z] [2026-09-10] BAY rollup_of: dong sub-question voi ly do 'xem rollup' se tu dong dong LUON rollup (bus_question_audit.py:168 rollup_resolved) => ca chum bien mat du chua ai quyet. Neu gop, phai mo question thay the TRUOC. | CHO: user tra loi Wags/nav-price-xcheck-gate-can-quyet-dinh-user-2026-09-10 (A/B/C) — NAV 2026-09-09 con thieu, KHONG duoc backfill bang cach chay lai daily_nav_snapshot.py (broker_positions() luon LIVE + gate tat khi --date lich su => ghi so sai am tham).
+
+## Archived 2026-09-27 (keep=12 days=0 require_done=False)
+- [2026-09-12T06:17:12Z] CÒN TREO (2026-09-12, incident 2026-09-12-report-return-gate-worktree-root.md): state/report_delivery.json fork theo worktree ⇒ nguy cơ GỬI TRÙNG báo cáo nhà đầu tư — cần việc riêng (pin DEFAULT_STATE về cây canonical hoặc gộp sổ); 17 worktree vẫn chạy report_return_gate bản tiền-vá.
+BÀI HỌC: git commit --pathspec KHÔNG bảo vệ khi 2 job cùng sửa 1 file — commit đầu nuốt hunk đang dở của job song song, phải dựng lại tree bằng git commit-tree. Kiểm 'git show --stat HEAD' MỌI lần ship dưới MIKE_COMMIT_GATE=warn.
