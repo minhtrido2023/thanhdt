@@ -1,0 +1,564 @@
+{
+ "_doc": "Họ trial CỐ ĐỊNH cho dsr_pbo_annex.py. Tạo bởi dsr_family_manifest.py build. KHÔNG sửa tay: sửa md5 mà không sửa file = phá chính cơ chế fail-closed.",
+ "manifest_version": 1,
+ "created_at_ict": "2026-09-27T12:43:03.229230+07:00",
+ "criterion": {
+  "glob": "data/v23_golive_audit_2014_now_*.csv (+ loại navXXB / from20XX như family_paths)",
+  "mtime_before_ict": "2026-07-05T08:00",
+  "min_obs": 2500,
+  "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+ },
+ "n_entries": 68,
+ "n_candidates_globbed": 586,
+ "skipped": {
+  "mtime": 518,
+  "short": 0,
+  "unreadable": 0
+ },
+ "entries": [
+  {
+   "path": "data/v23_golive_audit_2014_now_cap20.csv",
+   "md5": "9b935ae1dec526f0fe2393684f937426",
+   "size": 2378798,
+   "mtime_ict": "2026-06-17T09:47:34.135417+07:00",
+   "n_obs": 3103,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_cap30.csv",
+   "md5": "cf958a9001356775e361b4e30ff9689d",
+   "size": 2353673,
+   "mtime_ict": "2026-06-17T10:15:53.671130+07:00",
+   "n_obs": 3103,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_cap40.csv",
+   "md5": "2b4de8ec906b04ab52b8c4015d056f19",
+   "size": 2372490,
+   "mtime_ict": "2026-06-17T09:54:34.804258+07:00",
+   "n_obs": 3103,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_edge_etfliqcustompitg_wtnamecap.csv",
+   "md5": "02faa4474dd4745f93f981d22a9f7d73",
+   "size": 3130623,
+   "mtime_ict": "2026-06-17T13:30:29.417278+07:00",
+   "n_obs": 3103,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_etfliqcustompitg.csv",
+   "md5": "e3d17a1e9a014d14eb0533eb25776440",
+   "size": 3290085,
+   "mtime_ict": "2026-06-20T15:38:26.686845+07:00",
+   "n_obs": 3107,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_etfliqcustompitg_park2-20_3-100_4-100_5-100.csv",
+   "md5": "1be0833cda231c6ef55e152ff75d8362",
+   "size": 3444312,
+   "mtime_ict": "2026-06-20T17:22:13.421080+07:00",
+   "n_obs": 3107,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_etfliqcustompitg_park3-100.csv",
+   "md5": "d7c88a9a9439c87ca8180c163fa941be",
+   "size": 3231146,
+   "mtime_ict": "2026-06-20T17:22:24.801322+07:00",
+   "n_obs": 3107,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_etfliqcustompitg_park3-70_4-70_wtnamecap.csv",
+   "md5": "cf31b8d91cb5276016e615b1c99296fc",
+   "size": 3569587,
+   "mtime_ict": "2026-06-18T22:06:43.321054+07:00",
+   "n_obs": 3105,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_etfliqcustompitg_park_wtnamecap.csv",
+   "md5": "ed44d144b27816b9511ca77ff60bafde",
+   "size": 2590450,
+   "mtime_ict": "2026-06-18T21:51:17.837314+07:00",
+   "n_obs": 3105,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_etfliqcustompitg_wtnamecap.csv",
+   "md5": "7b795faf5238238f20f884cfdb6d887b",
+   "size": 3422921,
+   "mtime_ict": "2026-06-19T08:16:55.956800+07:00",
+   "n_obs": 3106,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matgate15_edge_etfliqcustompitg_wtnamecap.csv",
+   "md5": "61b4b6aa403bc7db9e0896996c36fb40",
+   "size": 3196364,
+   "mtime_ict": "2026-06-17T13:02:18.833209+07:00",
+   "n_obs": 3103,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_edge_etfliqcustompitg.csv",
+   "md5": "31cf78266e222915f091e948a5742e36",
+   "size": 3302215,
+   "mtime_ict": "2026-06-20T18:38:04.662673+07:00",
+   "n_obs": 3107,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0.csv",
+   "md5": "e544c15fa21d2573f637ecbd7089d236",
+   "size": 2463699,
+   "mtime_ict": "2026-06-13T10:55:17+07:00",
+   "n_obs": 3101,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcreation.csv",
+   "md5": "fb74f112c7090ba36ad0efde156c9761",
+   "size": 2459928,
+   "mtime_ict": "2026-06-13T21:57:09+07:00",
+   "n_obs": 3102,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustom.csv",
+   "md5": "cef349f1b89c4bc67d747169d4b7fff4",
+   "size": 3039813,
+   "mtime_ict": "2026-06-13T17:29:11+07:00",
+   "n_obs": 3102,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompit.csv",
+   "md5": "18823c608fdf566d6ad121721cf77cc4",
+   "size": 3226957,
+   "mtime_ict": "2026-06-14T09:54:45+07:00",
+   "n_obs": 3102,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg.csv",
+   "md5": "aa2fa2ecc1fa39deaa2e9fa917f2e2e8",
+   "size": 3221072,
+   "mtime_ict": "2026-06-14T22:16:15+07:00",
+   "n_obs": 3102,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-100_wtnamecap.csv",
+   "md5": "3c6db76e186902073038c35a9b7f6aba",
+   "size": 3314850,
+   "mtime_ict": "2026-07-03T20:27:56.049275+07:00",
+   "n_obs": 3107,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-70_4-100.csv",
+   "md5": "6639feee80ca2c8cc23e028487479367",
+   "size": 3363520,
+   "mtime_ict": "2026-06-14T22:24:53+07:00",
+   "n_obs": 3102,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-70_4-70_wtnamecap.csv",
+   "md5": "b7edec39fef82721b744185de4f299f7",
+   "size": 3483384,
+   "mtime_ict": "2026-06-25T23:51:40.735041+07:00",
+   "n_obs": 3107,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-70_4-70_wtnamecap_c30bfl5.csv",
+   "md5": "4bae870c86b61d8f2de3714ddf59e60b",
+   "size": 3570341,
+   "mtime_ict": "2026-06-21T08:30:36.558549+07:00",
+   "n_obs": 3107,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_bullpark60f70.csv",
+   "md5": "0e8669afaafd990344194a5c46d82aff",
+   "size": 3597011,
+   "mtime_ict": "2026-06-20T21:51:35.096853+07:00",
+   "n_obs": 3107,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark100z50.csv",
+   "md5": "15628bd4f8c2bc9be2804b1271e6af6f",
+   "size": 3449428,
+   "mtime_ict": "2026-06-22T21:37:28.921294+07:00",
+   "n_obs": 3107,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark100z70.csv",
+   "md5": "6beba70f3d732d232d212caef95ad692",
+   "size": 3416751,
+   "mtime_ict": "2026-06-22T20:45:02.930169+07:00",
+   "n_obs": 3107,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark130z50_depg75_mge130all_capitonly63cv17Ccf30lev.csv",
+   "md5": "d11e9d0b9ae4349f62ffa1344ea1c952",
+   "size": 3654230,
+   "mtime_ict": "2026-06-25T19:02:24.435950+07:00",
+   "n_obs": 3107,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark130z50_depg75_mge130cap_capitonly63cv17Ccf30lev.csv",
+   "md5": "a3af82f9943519d3583bdd404786e379",
+   "size": 3366005,
+   "mtime_ict": "2026-06-25T18:25:20.316308+07:00",
+   "n_obs": 3107,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark150z70.csv",
+   "md5": "6f44eb9b9a4ab3367b9c0b068501039e",
+   "size": 3449302,
+   "mtime_ict": "2026-06-22T21:24:45.692907+07:00",
+   "n_obs": 3107,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark70z70.csv",
+   "md5": "37a5657f677b0e12a40cef768bc418ff",
+   "size": 3406598,
+   "mtime_ict": "2026-06-22T20:54:20.877981+07:00",
+   "n_obs": 3107,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark90z70.csv",
+   "md5": "69a6225fa63d8aaeb5ba26b36f35ae07",
+   "size": 3410940,
+   "mtime_ict": "2026-06-22T21:02:41.912599+07:00",
+   "n_obs": 3107,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50.csv",
+   "md5": "cb555b3aa05eb2a144e1f04e401e5f41",
+   "size": 3400961,
+   "mtime_ict": "2026-06-23T20:06:34.228398+07:00",
+   "n_obs": 3107,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg60.csv",
+   "md5": "4a88a25f62b73e0366209431f937e0d6",
+   "size": 3416448,
+   "mtime_ict": "2026-06-23T12:16:47.429739+07:00",
+   "n_obs": 3107,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75.csv",
+   "md5": "3136c5adca9e1bbe580ee90841e5ed01",
+   "size": 3405628,
+   "mtime_ict": "2026-06-26T22:51:21.352948+07:00",
+   "n_obs": 3107,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_capitonly63cv17Ccf30.csv",
+   "md5": "e37043bcd293978d6ba82fe1070b420e",
+   "size": 3383497,
+   "mtime_ict": "2026-06-27T11:23:36.582245+07:00",
+   "n_obs": 3107,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_grad10cv16.csv",
+   "md5": "0fec877d6532912ccf198a6d0ad7ac36",
+   "size": 3385774,
+   "mtime_ict": "2026-06-24T17:55:01.467984+07:00",
+   "n_obs": 3109,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_grad10cv16_accel.csv",
+   "md5": "f684ef15c0f8a7588f65c4f895657f32",
+   "size": 3390189,
+   "mtime_ict": "2026-06-24T18:05:03.497074+07:00",
+   "n_obs": 3109,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_mge120cap_capitonly63cv17.csv",
+   "md5": "253c2dd79e516ead0fee6813df0dde14",
+   "size": 3401615,
+   "mtime_ict": "2026-06-24T22:54:59.766669+07:00",
+   "n_obs": 3107,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_mge130cap.csv",
+   "md5": "4c6a961b08358651ffa0a5ef141826f7",
+   "size": 3363394,
+   "mtime_ict": "2026-06-24T14:32:25.706915+07:00",
+   "n_obs": 3109,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_mge130cap_capitonly126cv17.csv",
+   "md5": "8b7a0a07617ea034b97d1f2e263a17ab",
+   "size": 3375185,
+   "mtime_ict": "2026-06-24T20:53:57.325321+07:00",
+   "n_obs": 3107,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_mge130cap_capitonly63cv16.csv",
+   "md5": "8b7a0a07617ea034b97d1f2e263a17ab",
+   "size": 3375185,
+   "mtime_ict": "2026-06-24T21:53:49.283291+07:00",
+   "n_obs": 3107,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_mge130cap_capitonly63cv17.csv",
+   "md5": "bcfc7a972f9d0d818ad3383f9ad796c8",
+   "size": 3414767,
+   "mtime_ict": "2026-06-24T22:46:51.304185+07:00",
+   "n_obs": 3107,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_mge130cap_capitonly63cv17B.csv",
+   "md5": "bcfc7a972f9d0d818ad3383f9ad796c8",
+   "size": 3414767,
+   "mtime_ict": "2026-06-24T22:01:38.445487+07:00",
+   "n_obs": 3107,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_mge130cap_capitonly63cv17BC.csv",
+   "md5": "a6169e71c1a62f4dbfdea26d26a1388f",
+   "size": 3361535,
+   "mtime_ict": "2026-06-24T22:09:37.675894+07:00",
+   "n_obs": 3107,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_mge130cap_capitonly63cv17Ccf30.csv",
+   "md5": "42ab06d33ed97dd63b2de643a702c823",
+   "size": 3441202,
+   "mtime_ict": "2026-06-27T09:50:41.859339+07:00",
+   "n_obs": 3107,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_mge130cap_capitonly63cv17Ccf40.csv",
+   "md5": "ddbe1e82e78743fe9426db31707d7185",
+   "size": 3446936,
+   "mtime_ict": "2026-06-25T08:35:01.948353+07:00",
+   "n_obs": 3107,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_mge130cap_dvo10.csv",
+   "md5": "4c6a961b08358651ffa0a5ef141826f7",
+   "size": 3363394,
+   "mtime_ict": "2026-06-24T14:42:16.295971+07:00",
+   "n_obs": 3109,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_mge130cap_dvo8.csv",
+   "md5": "4c6a961b08358651ffa0a5ef141826f7",
+   "size": 3363394,
+   "mtime_ict": "2026-06-24T14:50:26.414702+07:00",
+   "n_obs": 3109,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_mge130cap_grad10cv16lev.csv",
+   "md5": "94aef51800fc3e05582611499ebed269",
+   "size": 3408474,
+   "mtime_ict": "2026-06-24T16:19:38.319615+07:00",
+   "n_obs": 3109,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_mge130cap_lgconv.csv",
+   "md5": "c8d3224162aa83a41b2c80bb8379e002",
+   "size": 3340561,
+   "mtime_ict": "2026-06-24T13:56:33.764979+07:00",
+   "n_obs": 3109,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_mge130cap_lgdep.csv",
+   "md5": "d43ec647637d86f18d0c27acf4749a41",
+   "size": 3163181,
+   "mtime_ict": "2026-06-23T22:41:44.798178+07:00",
+   "n_obs": 3107,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_mge130cap_lgdepeye20.csv",
+   "md5": "0136354f0ca7f5100078fc15552e7e4d",
+   "size": 3353326,
+   "mtime_ict": "2026-06-24T09:13:42.247905+07:00",
+   "n_obs": 3109,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_mge130cap_real_capitonly63cv17Ccf40.csv",
+   "md5": "cb1597a938c4d2f3ea8d1f02a75e1e37",
+   "size": 3400249,
+   "mtime_ict": "2026-06-25T09:22:57.233116+07:00",
+   "n_obs": 3107,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_mge135cap_capitonly63cv17Ccf30.csv",
+   "md5": "081a44fb5cce35dcdf37337e0685f505",
+   "size": 3241652,
+   "mtime_ict": "2026-06-25T20:18:55.256702+07:00",
+   "n_obs": 3107,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_mge140cap_capitonly63cv17.csv",
+   "md5": "f4c6c2d841a6c33be99cf66566bdc99f",
+   "size": 3429342,
+   "mtime_ict": "2026-06-24T22:59:09.664014+07:00",
+   "n_obs": 3107,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_mge150cap.csv",
+   "md5": "223e99bd414ebc995b666fb5b22012dc",
+   "size": 3461361,
+   "mtime_ict": "2026-06-26T08:59:00.968781+07:00",
+   "n_obs": 3107,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_mge150cap_capitonly63cv17.csv",
+   "md5": "d3a6bd0bde744d6590007da851f58549",
+   "size": 3421533,
+   "mtime_ict": "2026-06-24T23:06:49.377846+07:00",
+   "n_obs": 3107,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_mge150cap_capitonly63cv17Ccf30.csv",
+   "md5": "157bcb04b7fd5adace412027d97c7300",
+   "size": 3426495,
+   "mtime_ict": "2026-06-29T15:36:04.821271+07:00",
+   "n_obs": 3107,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_mge150cap_lgfed15.csv",
+   "md5": "d6175e5cf1718b2c05417c4d9cc04c57",
+   "size": 3246929,
+   "mtime_ict": "2026-06-23T22:34:20.265482+07:00",
+   "n_obs": 3107,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_mge170cap_capitonly63cv17Ccf30.csv",
+   "md5": "2f44b9f77b2091c17fa775f18646424f",
+   "size": 3426393,
+   "mtime_ict": "2026-06-26T08:35:53.307415+07:00",
+   "n_obs": 3107,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_mge180cap_capitonly63cv17Ccf30.csv",
+   "md5": "5986d938e1675d18726b883e47e7eac1",
+   "size": 3443155,
+   "mtime_ict": "2026-06-27T09:50:27.819043+07:00",
+   "n_obs": 3107,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_mge200cap_capitonly63cv17Ccf30.csv",
+   "md5": "c52388bbac8745e867b588e218d8a056",
+   "size": 3502452,
+   "mtime_ict": "2026-06-27T09:50:28.235052+07:00",
+   "n_obs": 3107,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_fedg15.csv",
+   "md5": "cb555b3aa05eb2a144e1f04e401e5f41",
+   "size": 3400961,
+   "mtime_ict": "2026-06-23T20:21:39.819962+07:00",
+   "n_obs": 3107,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_v3latest.csv",
+   "md5": "faa91978081cb93a1eb472fc82530652",
+   "size": 3359561,
+   "mtime_ict": "2026-06-22T09:06:11.742214+07:00",
+   "n_obs": 3107,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitgq.csv",
+   "md5": "d1c13f6eadc88ed20645763b60296716",
+   "size": 3216247,
+   "mtime_ict": "2026-06-14T12:58:19+07:00",
+   "n_obs": 3102,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitq.csv",
+   "md5": "07986f7e7f4ee67f85383ff769c86871",
+   "size": 3220435,
+   "mtime_ict": "2026-06-14T10:35:17+07:00",
+   "n_obs": 3102,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqstrict.csv",
+   "md5": "7e66115b6c8f18440ae6e8c39504135c",
+   "size": 2999752,
+   "mtime_ict": "2026-06-13T14:43:26+07:00",
+   "n_obs": 3101,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_etfliqcustompitg_wtnamecap.csv",
+   "md5": "abeee71e2ad2af43061ddb4f4f4bd97f",
+   "size": 3210136,
+   "mtime_ict": "2026-06-17T12:34:03.680575+07:00",
+   "n_obs": 3103,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matsmooth_edge_etfliqcustompitg_wtnamecap.csv",
+   "md5": "ee730394fea376b736b54d7543996917",
+   "size": 3190991,
+   "mtime_ict": "2026-06-17T12:54:29.819159+07:00",
+   "n_obs": 3103,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_mge130cap_real.csv",
+   "md5": "c03ff6dde299da9f3ef60d6d9e85c6c8",
+   "size": 2479369,
+   "mtime_ict": "2026-06-26T00:26:56.300227+07:00",
+   "n_obs": 3111,
+   "reason": "PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime."
+  }
+ ]
+}
