@@ -1,13 +1,13 @@
-# Mike fleet — context pack (v3330)
+# Mike fleet — context pack (v3331)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-09-27T08:55:19] Mike/answer — restore-fa-ratings-8l-BQ-can-quyen-ghi: {"decided_by": "user", "superseded_by": "restore-fa-ratings-8l-BQ-can-quyen-ghi-VAN-TREO", "status": "RESOLVED cung luc voi ban -VAN-TREO"}
 - [2026-09-27T09:01:44] quant-skeptic/verification — ✅ CONFIRMED VERIFY: fail-g-rating8l-icb-pit-doc-lap-xac-minh: {"finding_topic": "fail-g-rating8l-icb-pit-doc-lap-xac-minh", "verdict": "CONFIRMED", "confidence": "high", "checks": {"look_ahead_leak": "pass — grep of branch …
 - [2026-09-27T09:15:22] Taylor/finding — idle-pool-redeploy-huong-di-2709: {"job": "Taylor_20260927_085628", "scope": "PAPER-ONLY. trading_rules.json KHONG doi. Khong wire, khong dat lenh. Prereg truoc khi doc so: agents/Taylor/researc …
 - [2026-09-27T09:18:20] Taylor/finding — repin-r3-park030-va-hau-kiem-rail: {"job": "Taylor_20260927_085509", "scope": "RE-PIN R3 theo production moi park=0.30 + hau kiem 2 rail. KHONG dat lenh, KHONG sua rail.", "1_dinh_chinh_registry" …
 - [2026-09-27T09:23:50] Mafee/finding — egg-capacity-terms-2709: {"job": "Mafee_20260927_091828", "q1_tran_so_du": "KHONG XAC MINH DUOC tran cung tu tai lieu cong khai DNSE. Dieu khoan 'San pham Trung Vang' (hdsd.dnse.com.vn/ …
+- [2026-09-27T09:58:52] Taylor/finding — failc-dong-do-tac-dong-that-repin: {"job": "Taylor_20260927_094043", "scope": "A/B mot bien = NHAN chuoi edge-health + RE-PIN R3. KHONG dat lenh, KHONG sua rail, KHONG sinh lai CSV.", "1_ab_mot_b …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -25,7 +25,7 @@
 - **SpaceX** (DNSE 0002023347): V2.4 LIVE từ 2026-07-01, có margin. NEUTRAL parking **80%** idle cash (config F1, đổi từ 70% ngày 2026-08-04, `trading_rules.json` `neutral_parking.default_park_of_idle_pct`). run_bot.sh 09:05 ICT T2-T6. NAV: `nav_history_SpaceX.csv` hoặc EOD report.
 - **ZaloPay** (DNSE 0001743768): V2.4 LIVE từ 2026-07-06, CASH-ONLY. **DGC EXCLUDED** (`excluded_tickers`, HOSE hạn chế giao dịch đến ~11-12/2026). Sizing dùng `active_nav`. Cùng target parking 80% (không có override riêng).
 - **AlphaLens Paper**: FPT/ACB/MBB/HDB, tracking đến 2026-09-30. DollarBill phụ trách.
-- **Trứng vàng** (`egg.totalValue`): SpaceX ~100,2tr / ZaloPay ~38,8tr (đo 08-19), đã cộng NAV tự động — KHÔNG phải `availableCash`, cần rút T+1. `manual_offbook_assets_vnd` ĐÃ ĐÓNG vĩnh viễn 07-23.
+- **Trứng vàng** (`egg.totalValue`): SpaceX ~100,9tr / ZaloPay ~102,2tr (đo 09-27), đã cộng NAV tự động — KHÔNG phải `availableCash`. ⚠️ **RÚT VỀ TRONG NGÀY, KHÔNG phải T+1** (đính chính 2026-09-27, Mafee job `Mafee_20260927_091828`: SpaceX 17/09 egg 100,9tr→51,0tr VÀ `availableCash` +49,8tr trong CÙNG snapshot 11:00:11 phiên sáng ⇒ tiền dùng mua được ngay phiên đó). ⚠️ **KHÔNG phải tiền gửi ngân hàng** — DNSE mô tả là "Sinh Lời Theo Ngày" qua giao dịch TRÁI PHIẾU niêm yết ⇒ không có bảo hiểm tiền gửi, phụ thuộc tổ chức phát hành; lãi đo thật **8,543%/năm** và DNSE **tự khấu trừ TNCN trước khi trả** nên số đó đã là net. Không thấy trần số dư (ZaloPay vượt 102tr vẫn cộng lãi phẳng); "Tài khoản Không Ngủ" là SẢN PHẨM KHÁC (trần 30 tỷ), đừng lẫn. `manual_offbook_assets_vnd` ĐÃ ĐÓNG vĩnh viễn 07-23.
 
 ## Signal holds
 - **VPI/BAL**: signal_hold 08-19→09-16 ĐÃ GỠ 2026-09-16. Review dựa trên `amh-adaptivity-review-20260910.md` (Taylor job A/B/C + quant-skeptic): lý do gốc của HOLD (edge-health dashboard báo mom_200 FLIPPED) đã bị bác — kênh đó REFUTED cho quyết định BAL; mom_200 IC hồi phục dương Q2/2026. User duyệt RESUME 2026-09-16 23:19 ICT: "tuân theo chiến lược production đã duyệt, không cần điều chỉnh gì" (`decided_by: user`, bus `answer/bal-vpi-checkpoint-resume-decision`). VPI/BAL trở lại logic bình thường từ plan kế tiếp — không còn escalate riêng.
@@ -98,6 +98,21 @@
 ## R&D pipeline — PAPER-ONLY, chi tiết `kb/projects/rnd-pipeline-tracker.md`
 Fear-buy quét hàng tuần `bin/fearbuy_weekly_scan.sh` (Friday 08:10 ICT). Recon thuần, KHÔNG tự mua.
 
+## Measurement integrity audit — cadence định kỳ (mở 2026-09-27, sau retro custom30V double-count)
+Lý do: bug custom30V double-count (`mcap = Close_adj × OShares`, −4,48pp CAGR) sống trong
+production nhiều tháng, KHÔNG bị bắt bởi self-check 0 VND (kiểm sổ sách mô phỏng, không kiểm
+tính đúng kinh tế của công thức) LẪN quant-skeptic (7 đòn cũ nhắm overfit/gaming, không nhắm lỗi
+kế toán double-count). Chỉ lộ ra vì có audit CHỦ ĐỘNG quét 23 chuỗi return/level/weight/NAV theo
+6 bất biến cố định — audit đó còn tìm thêm 7 bug không liên quan (FAIL-C/F/H, egg reconcile,
+FAIL-G ICB routing, DSR/PBO family drift). Kết luận: không đợi ai đó thấy số lạ mới đi tìm.
+**Review quý — next ~2026-12-27: dispatch Taylor lặp lại đúng phương pháp `measurement-integrity-
+audit-2026-09-27` (6 bất biến × mọi chuỗi return/level/weight/NAV đang production), rồi quant-
+skeptic verify từng finding trước khi wire.** Artifact/phương pháp gốc:
+`agents/Taylor/research/measurement_integrity_audit_20260927/`. quant-skeptic đã thêm đòn tấn
+công thứ 8 (double-count corp-action adjustment) vào checklist chuẩn (`~/.claude/agents/
+quant-skeptic.md`) — audit định kỳ vẫn cần vì đòn 8 chỉ bắt ĐÚNG lớp lỗi đã biết, không thay
+được việc chủ động quét tìm lớp lỗi MỚI.
+
 ## Macro watch — rủi ro cấu trúc BĐS VN (mở 2026-08-26)
 Bobby classify STRUCTURAL_ACCUMULATION/AMBIGUOUS. Thesis + lead indicators + playbook đã chốt:
 `kb/projects/vn-realestate-structural-risk-20260826.md`. KHÔNG đổi V2.4/DT5G/margin theo thesis này.
@@ -125,8 +140,18 @@ Ranh giới cứng (KHÔNG tự sửa): trade plan, trading_rules.json, logic đ
 - = **V2.3A + custom30V parking (NEUTRAL) + gated-overflow (bear-washout) + HAG eq_flag fix**.
 - 2 book: **BAL** (momentum SIGNAL_V11, yieldcombo: 1/PE + 1/PCF) + **LAG** (PEAD/earnings drift).
 - Allocator w_LAG: {CRISIS 50 / BEAR 0 / NEUTRAL-BULL-EXBULL 65}, band ±10pp.
-- **R3 NEUTRAL-only @50B: CAGR 24.42% / Sharpe 1.69 / DD −18.8% / Calmar 1.30** — pin CHÍNH THỨC từ
-  **2026-09-27 (chiều)** (Final NAV 761,11B, ledger md5 `2f9c3702…`; SUPERSEDE 24,38%/757,61B của
+- **R3 NEUTRAL-only @50B: CAGR 23.43% / Sharpe 1.88 / DD −14.4% / Calmar 1.63** — pin CHÍNH THỨC từ
+  **2026-09-27 (quinquies)**, Final NAV 688,77B, ledger md5 `ff0d3a37…`, IS 20,07% / OOS 26,56%,
+  self-check 0 VND. **Pin = `PARK_STATES=3:0.3` = ĐÚNG knob live** (user chốt park 30% lúc 15:48 ICT
+  2026-09-27, `ae81bd47` đổi `trading_rules.json` + `ETF_PARK`); ledger byte-identical với leg lưới
+  `parkgrid_030` ⇒ lệch 0,00pp. Neo sizing DD mới = **−25,1%** (bootstrap 5th-pct).
+  🚨 **ĐÍNH CHÍNH — pin cũ 24,42% mang nhãn "(production)" SAI**: production THẬT từ 2026-08-04 là
+  park **0,8** (= 24,95% / 1,66 / −19,8% / 1,26, chưa từng được pin), trong khi registry pin
+  `PARK_STATES=3:0.7` ⇒ **số pin lệch knob live suốt 54 ngày** (cùng lớp lỗi `LAG_ADV_BASIS` 08-03).
+  24,42% và 24,95% GIỮ làm lịch sử, **không còn là anchor**.
+  ✅ **Ba rail park ĐÃ ĐỒNG BỘ = 0,30** (commit mike `1f15139b`): R1 MUA `ETF_PARK={3:0.30}`, R2 BÁN `compute_park_trim.py PARK_TARGET_F1 = 0.30`, R3 policy `trading_rules.json` 0.30. Trước đó R2 còn hardcode 0,80 ⇒ bot MUA tới 30% nhưng chỉ TRIM khi vượt 80%, knob user chốt KHÔNG hiệu lực (đúng lớp lỗi im lặng 08-04, đảo chiều). Cổng cơ học `bin/park_rail_consistency_selfcheck.py` đọc giá trị 3 rail bằng AST, rc=1 khi lệch — live rc=0, selftest 6/6. ⚠️ R3 vẫn CHƯA có code path nào đọc (văn bản chính sách); việc wire R2 đọc R3 chờ arch-review.
+  Nguồn: `data/results_registry.md` mục "2026-09-27 (quinquies)".
+  *Bối cảnh bản 24,42% (lịch sử):* (Final NAV 761,11B, ledger md5 `2f9c3702…`; SUPERSEDE 24,38%/757,61B của
   sáng cùng ngày — chênh +0,04pp do ticket 1 "OShares bước tại EX-DATE" ở chân weight, merge `5c290848`), đo trên **`universe_pit`** (point-in-time, không look-ahead).
   ⚠️ **SỬA LỖI ĐO 2026-09-27, KHÔNG ĐỔI MÔ HÌNH** — không tune tham số nào, chân weight + membership
   byte-identical, đường tiền live không đụng. Chuỗi return rổ park custom30V từng chain trên
@@ -134,7 +159,8 @@ Ranh giới cứng (KHÔNG tự sửa): trade plan, trading_rules.json, logic đ
   `Close` đã điều chỉnh hồi tố cho cùng sự kiện ⇒ đếm hai lần. Gỡ ra = **−4,48pp**. Tái lập trên
   main: md5 `3f836927`, self-check 0 VND. Knob lùi `BASKET_RETURN_OSHARES=legacy`.
   **Số cũ 28.86% / 1.90 / −17.8% / 1.62 / 1.178,01B (pin 08-03) SUPERSEDED** — giữ làm lịch sử.
-  ⇒ **V2.4 không còn là hệ ~29% CAGR; là ~24,4%** (quy đổi thực tế ≈ 22,9%).
+  ⇒ **V2.4 không còn là hệ ~29% CAGR; ở park 0,30 (production hiện hành) là ~23,4%** (quy đổi thực tế
+  ≈ 21,9%); ~24,4% là bản @park 0,7 đã SUPERSEDED.
   Phần diễn giải `LAG_ADV_BASIS` dưới đây vẫn còn hiệu lực (nó nói về VÌ SAO mặc định là `price`):
   ⚠️ **KHÔNG phải "hệ tốt lên"** — KHÔNG có thay đổi mô hình nào. Đây là **đồng bộ registry theo
   code production**: mặc định `LAG_ADV_BASIS` (cơ sở giá của ADV book LAG) đã đổi `close`→`price`
@@ -165,13 +191,16 @@ Ranh giới cứng (KHÔNG tự sửa): trade plan, trading_rules.json, logic đ
   bằng backtest thêm — sổ theo dõi + **mốc cứng 2026-12-15 / 2027-03-31**:
   `kb/projects/lag-adv-filter-tracking.md`, chi tiết cơ chế: `agents/Taylor/research/
   lag_fidelity_decomp_20260803/T5_DECISION.md`.
-- Bootstrap 5th-pct: **CAGR 15.5%, DD −30.3% (neo sizing DD −30,3%, KHÔNG phải −18,8%)** — chạy lại
-  2026-09-27 (chiều) trên ledger pin mới, **theo LỊCH** (FAIL-F đã merge `3c944443`; cơ sở phiên cũ
+- Bootstrap 5th-pct: **CAGR 15.6%, DD −25.1% (neo sizing DD −25,1%, KHÔNG phải −14,4%)** — trên
+  ledger pin **park 0,30** (2026-09-27 quinquies); P(DD<−30%)=**1,0%**, P(SR<1,0)=1,0%; stationary
+  15,4% / −24,8%. *Bản @park 0,7 SUPERSEDED: 15,5% / −30,3%; @park 0,8: DD 5th −32,0%.*
+  Ghi chú cách chạy (không đổi) của bản @0,7: **theo LỊCH** (FAIL-F đã merge `3c944443`; cơ sở phiên cũ
   thổi cao giả ~+0,2-0,3pp). `bootstrap_nav.py` L=21/B=4000/seed 12345; P(DD<−30%)=5,5%,
   P(SR<1,0)=3,4%; stationary-bootstrap cross-check 15,3% / −30,0%.
   *Chuỗi số cũ SUPERSEDED: 18,6%/−28,6% (06-29) → 15,6% (cơ sở phiên) → 15,4% → **15,5%/−30,3%**.*
 - **DSR/PBO đã hết trôi — họ trial nay GHIM bằng `DSR_FAMILY_MANIFEST`** (merge `f2cfb124`):
-  **DSR 1,0000** (ann-SR R3 1,616). **Số pin của V2.4 là PBO = 0,2085** trên họ gốc phục dựng
+  **DSR 1,0000** (ann-SR R3 **1,815** trên ledger pin park 0,30; 1,616 ở bản @0,7). **Số pin của V2.4 là PBO = 0,2085** (chạy lại trên ledger pin park 0,30 — **không đổi**, vì CSCV
+  đo trên HỌ TRIAL, ledger R3 không thuộc họ) trên họ gốc phục dựng
   68 file (`mike/research/dsr_family_manifest_20260927/man_2026_07_recon.json`, md5 `2cea9626…`) —
   khớp 0,2088 pin từ 2026-07 ⇒ phục dựng đúng. ⚠️ caveat: registry 2026-07 không lưu tên file,
   68 file này dựng lại theo `mtime`, không phải danh sách gốc.
@@ -191,12 +220,16 @@ Ranh giới cứng (KHÔNG tự sửa): trade plan, trading_rules.json, logic đ
   được sinh lại** — header vẫn là `entry,ret,mean12,win12,n12`, không có `known_date` ⇒ engine rơi
   về `label_col=entry` (thấy ngay trong log pin: `[edge-alloc] label_col=entry`).
   `bin/asof_label_selfcheck.py` FAIL trên chuỗi thật: **5.488/5.488 dòng vi phạm, sớm tối đa 25
-  phiên**. ⇒ **24,42% vẫn là số ĐO TRÊN NHÃN LOOK-AHEAD**; A/B trước ticket 1 cho chênh ~+0,06pp
+  phiên**. ⇒ **cả 24,42% (@0,7) lẫn 23,43% (@0,30, pin hiện hành) vẫn là số ĐO TRÊN NHÃN LOOK-AHEAD**; A/B trước ticket 1 cho chênh ~+0,06pp
   (24,38 → 24,44). Việc còn lại cần NGƯỜI duyệt: chạy lại `edge_health_monitor.py` để sinh lại CSV
   rồi **re-pin R3 lần nữa** — Taylor KHÔNG tự đổi file dữ liệu production.
   2026-09-27 trên ledger pin mới (`bootstrap_nav.py`, L=21/B=4000/seed 12345); stationary-bootstrap
   cross-check 15.5% / −30.1%. ⚠️ **Annualize theo LỊCH (FAIL-F, sửa 2026-09-27 job Taylor_20260927_045241, branch `fix/nav-flow-term-annualize` CHƯA merge)**: bootstrap 5th-pct CAGR theo lịch = **15,4%** (theo phiên 15,6% — cao giả +0,18pp), Sharpe R3 1,61 (hiển thị 1,62); MaxDD −30,4% / P(DD<−30%) 5,35% KHÔNG đổi; **DSR và PBO KHÔNG phụ thuộc annualize** (đính chính framing audit). ⚠️ PBO đo ở 2 cây khác nhau cho **0,40 (main) vs 0,50 (worktree)** vì họ trial là glob động ⇒ PBO KHÔNG có nghĩa cho tới khi pin `family_manifest`. *Số cũ 18.6% / −28.6% SUPERSEDED (bản chạy 06-29, pin khác).*
-- **NEUTRAL parking custom30V = +2.05pp CAGR** (24.42% có park vs 22.37% park=0, cùng lệnh pin,
+- **NEUTRAL parking custom30V @0,30 (production) = +1.06pp CAGR** (23.43% vs 22.37% park=0) — và ở
+  30% parking làm **TỐT hơn** rủi ro: DD −16,1%→−14,4%, Calmar 1,39→**1,63**, Sharpe 1,95→1,88.
+  ⚠️ 0,30 vs 0,0 **không phân biệt được bằng dữ liệu** (paired block bootstrap P=0,479) ⇒ 0,30 là
+  sở thích rủi ro user chốt, không phải mức thắng có ý nghĩa thống kê.
+  *Bản @park 0,7 (SUPERSEDED làm production, giữ lịch sử):* **+2.05pp CAGR** (24.42% có park vs 22.37% park=0, cùng lệnh pin,
   đổi đúng 1 biến `PARK_STATES`; 30 mã, cap 0.10). ⚠️ **"+7.4pp Full" SUPERSEDED** — lệnh gốc của số
   đó không tồn tại trong registry; ở chân return LỖI delta là +6,49pp ⇒ **~2/3 của "+7,4pp" là return
   giả từ tăng trưởng số CP.** ⚠️ **Và chiều rủi ro ĐẢO DẤU**: parking làm Sharpe 1.95→1.69,
