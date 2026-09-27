@@ -152,10 +152,22 @@ sys.path.insert(0, WC)
 from trading_bot.brokers import DNSEBroker   # noqa: E402
 import inspect  # noqa: E402
 src_get_cash = inspect.getsource(DNSEBroker.get_cash)
-check("E1 DNSEBroker.get_cash() VẪN ưu tiên `availablecash` (check_plan_funding/executor "
-      "hỏi sức mua tức thời, không phải NAV — sửa nó = nới lỏng gate tiền)",
-      "availablecash" in src_get_cash and src_get_cash.index("availablecash")
-      < src_get_cash.index("totalcash"))
+# Kiểm bằng AST trên DANH SÁCH ALIAS truyền cho `qget`, KHÔNG bằng thứ tự chuỗi: từ
+# 2026-09-27 `get_cash()` CHỈ đọc họ availableCash, và docstring của nó nhắc tên
+# `totalcash`/`purchasingpower` như VĂN XUÔI giải thích vì sao KHÔNG dùng chúng — phép kiểm
+# chuỗi cũ (`index("availablecash") < index("totalcash")`) sẽ PASS trên chính lời giải thích
+# đó, tức pass giả kể cả khi chuỗi fallback được mang trở lại. Cùng lý lẽ đã ghi ở E2.
+import ast  # noqa: E402
+import textwrap as _tw  # noqa: E402
+_gc_aliases = [a.value for n in ast.walk(ast.parse(_tw.dedent(src_get_cash)))
+               if isinstance(n, ast.Call) and getattr(n.func, "id", None) == "qget"
+               for a in n.args[1:] if isinstance(a, ast.Constant)]
+check("E1 DNSEBroker.get_cash() CHỈ đọc họ availableCash (§25 'TIÊU ĐƯỢC NGAY'): mọi alias "
+      "truyền cho qget phải thuộc họ đó — rơi về totalcash/purchasingpower = nới lỏng gate "
+      "tiền một cách âm thầm",
+      bool(_gc_aliases)
+      and set(_gc_aliases) <= {"availablecash", "cashavailable", "withdrawablecash"},
+      f"aliases={_gc_aliases}")
 
 src_can = open(os.path.join(MIKE_BIN, "compute_active_nav.py"), encoding="utf-8").read()
 # Kiểm bằng AST, KHÔNG bằng chuỗi: docstring §cash CÓ nhắc `get_cash()` như văn xuôi giải
