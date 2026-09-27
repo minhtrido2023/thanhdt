@@ -117,6 +117,27 @@ def capit_edge_health(k_recent=4):
                 verdict=verdict, max_carve=CARVE_BY_HEALTH[verdict])
 
 
+def neg_month_streak(d, label):
+    """So thang LICH lien tiep gan nhat co reading mean12 cuoi thang < 0, neo theo `label`.
+
+    `label` PHAI la `known_date` cho moi quyet dinh/nguong hanh dong: `entry` la ngay VAO
+    lenh, con reading mean12 cua no chi doc duoc sau 25 phien giu -> resample tren `entry`
+    khai bao mot thang la "am" ~25 phien TRUOC khi that su biet (cung lop loi FAIL-C, do
+    that 2026-09-27: entry -> streak 2, known_date -> streak 1, tuc nguong neg_streak>=3
+    cham som ~1,2 thang). `entry` chi giu lai de in doi chieu (legacy), KHONG de quyet dinh.
+    """
+    if label not in d.columns:
+        return None, None
+    mo = d.sort_values(label).set_index(label)["mean12"].resample("ME").last().dropna()
+    ns = 0
+    for v in mo.values[::-1]:
+        if v < 0:
+            ns += 1
+        else:
+            break
+    return ns, mo
+
+
 def lag_edge_health():
     """LAG/PEAD edge health (half of the V2.3 book; w_LAG=.65 live in V2.3A).
     Rebuilds the e3 cohort exactly as the LAG book does (NP_R>=15, prior_n_good>=4,
@@ -184,23 +205,31 @@ def lag_edge_health():
     d.to_csv(out, index=False)
     m12, w12, n12 = d["mean12"].iloc[-1], d["win12"].iloc[-1], int(d["n12"].iloc[-1])
     pctl = (d["mean12"] <= m12).mean() * 100
-    # months-below-zero streak (calendar months whose last reading < 0)
-    mo = d.set_index("entry")["mean12"].resample("ME").last().dropna()
-    neg_streak = 0
-    for v in mo.values[::-1]:
-        if v < 0: neg_streak += 1
-        else: break
+    # months-below-zero streak. FAIL-C residual fix (2026-09-27, job Taylor_20260927_100121):
+    # anchor the calendar-month resample on `known_date`, NOT `entry` — see neg_month_streak().
+    # `neg_streak_entry_legacy` is printed/returned alongside for a transition period so nobody
+    # is surprised when the headline number drops; it must NEVER drive `act`.
+    neg_streak, mo = neg_month_streak(d, "known_date")
+    neg_streak_entry_legacy, _mo_entry = neg_month_streak(d, "entry")
+    print(f"[lag-edge] neg_streak={neg_streak} (anchor=known_date, CAUSAL — dung cho nguong "
+          f"hanh dong) | neg_streak_entry_legacy={neg_streak_entry_legacy} (anchor=entry, "
+          f"nhan CU trung binh som 25 phien — chi doi chieu)")
     if n12 < 8:        verdict, act = "THIN", "mau qua mong, khong ket luan"
     elif m12 >= 4.0:   verdict, act = "HEALTHY", "w_LAG .65 OK"
     elif m12 >= 1.0:   verdict, act = "NEUTRAL", "giu w_LAG, khong tang"
     elif m12 >= 0.0:   verdict, act = "TROUGH", "khong tang w_LAG; von moi paper-trade"
     else:
         verdict = "NEGATIVE"
-        act = ("HA w_LAG .65->.50 + treo entry LAG moi (am %d thang lien tiep)" % neg_streak
-               if neg_streak >= 3 else "canh bao: ha w_LAG .65->.50 neu keo dai 3 thang")
+        act = ("HA w_LAG .65->.50 + treo entry LAG moi (am %d thang lien tiep, moc known_date)"
+               % neg_streak
+               if neg_streak >= 3 else
+               "canh bao: ha w_LAG .65->.50 neu keo dai 3 thang (dang %d, moc known_date)"
+               % neg_streak)
     return dict(mean12=round(float(m12), 2), win12=round(float(w12), 1), n12=n12,
                 pctl=round(float(pctl), 0), asof=str(d["known_date"].iloc[-1].date()),
-                neg_streak=neg_streak, verdict=verdict, act=act)
+                neg_streak=neg_streak, neg_streak_anchor="known_date",
+                neg_streak_entry_legacy=neg_streak_entry_legacy,
+                verdict=verdict, act=act)
 
 
 def refresh_panel():
@@ -399,7 +428,9 @@ def main():
     le = lag_edge_health()
     if le:
         block.append(f"📮 LAG edge: {le['verdict']} (12M {le['mean12']:+.2f}%/win {le['win12']:.0f}%, "
-                     f"n={le['n12']}, pctile {le['pctl']:.0f}, asof {le['asof']}) → {le['act']}")
+                     f"n={le['n12']}, pctile {le['pctl']:.0f}, asof {le['asof']} "
+                     f"[moc={le['neg_streak_anchor']}], neg_streak {le['neg_streak']} "
+                     f"[nhan cu 'entry': {le['neg_streak_entry_legacy']}]) → {le['act']}")
         print(f"\n=== LAG-EDGE HEALTH (gates w_LAG in V2.3A) ===\n{le}")
     # momentum action hint: half the BAL book — pre-committed response when IC flips
     try:
