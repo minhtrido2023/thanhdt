@@ -21,8 +21,21 @@ rb = navb.pct_change().fillna(0).values; rl = navl.pct_change().fillna(0).values
 st = state.values
 
 # causal LAG edge-health: mean12 (trailing-12M mean trade return %), forward-filled daily
-eh = pd.read_csv("data/lag_edge_health.csv", parse_dates=["entry"]).drop_duplicates("entry").set_index("entry").sort_index()
-mean12 = eh["mean12"].reindex(common, method="ffill")
+# FAIL-C fix (audit 2026-09-27, job Taylor_20260927_103332): index the edge series on the
+# day its value is OBSERVABLE (known_date = entry + 25 sessions), not on `entry`. Indexing
+# on `entry` + ffill let the BACKTEST read each mean12 reading ~25 sessions before it could
+# exist. LIVE was already conservative (a row only appears once the event completed).
+# EDGE_HEALTH_CSV: non-canonical A/B input; default = the production file.
+_eh_path = os.environ.get("EDGE_HEALTH_CSV", "").strip() or os.path.join(W, "data", "lag_edge_health.csv")
+eh = pd.read_csv(_eh_path)
+_eh_key = "known_date" if "known_date" in eh.columns else "entry"
+if _eh_key != "known_date":
+    print(f"  [edge-alloc] WARNING: {os.path.basename(_eh_path)} has NO `known_date` column"
+          f" -> falling back to `entry` (LOOK-AHEAD ~25 sessions). Regenerate with edge_health_monitor.py.")
+eh[_eh_key] = pd.to_datetime(eh[_eh_key])
+eh = eh.drop_duplicates(_eh_key).set_index(_eh_key).sort_index()["mean12"]
+print(f"  [edge-alloc] source={os.path.basename(_eh_path)} label_col={_eh_key} rows={len(eh)}")
+mean12 = eh.reindex(common, method="ffill")
 print(f"LAG edge-health mean12: latest {mean12.iloc[-1]:.2f}% | "
       f"range [{mean12.min():.1f}, {mean12.max():.1f}] | %time<4%: {(mean12<4).mean()*100:.0f}%")
 

@@ -733,8 +733,20 @@ n_rebal = 0; rebal_rows = []
 # edge-conditional w_LAG target: gate the good-state (3/4/5) LAG tilt by LAG's own causal edge-health
 _edge_m12 = None
 if USE_EDGE_ALLOC:
-    _eh = pd.read_csv(os.path.join(WORKDIR, "data", "lag_edge_health.csv"), parse_dates=["entry"])
-    _eh = _eh.drop_duplicates("entry").set_index("entry").sort_index()["mean12"]
+    # FAIL-C fix (audit 2026-09-27, job Taylor_20260927_103332): index the edge series on the
+    # day its value is OBSERVABLE (known_date = entry + 25 sessions), not on `entry`. Indexing
+    # on `entry` + ffill let the BACKTEST read each mean12 reading ~25 sessions before it could
+    # exist. LIVE was already conservative (a row only appears once the event completed).
+    # EDGE_HEALTH_CSV: non-canonical A/B input; default = the production file.
+    _eh_path = os.environ.get("EDGE_HEALTH_CSV", "").strip() or os.path.join(WORKDIR, "data", "lag_edge_health.csv")
+    _eh = pd.read_csv(_eh_path)
+    _eh_key = "known_date" if "known_date" in _eh.columns else "entry"
+    if _eh_key != "known_date":
+        print(f"  [edge-alloc] WARNING: {os.path.basename(_eh_path)} has NO `known_date` column"
+              f" -> falling back to `entry` (LOOK-AHEAD ~25 sessions). Regenerate with edge_health_monitor.py.")
+    _eh[_eh_key] = pd.to_datetime(_eh[_eh_key])
+    _eh = _eh.drop_duplicates(_eh_key).set_index(_eh_key).sort_index()["mean12"]
+    print(f"  [edge-alloc] source={os.path.basename(_eh_path)} label_col={_eh_key} rows={len(_eh)}")
     _edge_m12 = _eh.reindex(common, method="ffill")
     print(f"  [edge-alloc] thr={EDGE_THR}%; mean12 latest={_edge_m12.iloc[-1]:.1f}%, "
           f"%time<thr={(_edge_m12 < EDGE_THR).mean()*100:.0f}%")

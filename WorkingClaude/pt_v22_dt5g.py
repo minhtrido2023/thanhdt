@@ -774,8 +774,21 @@ if USE_LAG_ALLOCATOR and len(common) >= 1:
     # >= EDGE_THR%; else hold 0.50 (avoid over-weighting LAG in its edge-cycle trough, e.g. 2022-23/2026).
     EDGE_THR = 4.0
     try:
-        _eh = pd.read_csv(os.path.join(WORKDIR, "data", "lag_edge_health.csv"), parse_dates=["entry"])
-        _m12 = _eh.drop_duplicates("entry").set_index("entry").sort_index()["mean12"].reindex(common, method="ffill")
+        # FAIL-C fix (audit 2026-09-27, job Taylor_20260927_103332): index the edge series on the
+        # day its value is OBSERVABLE (known_date = entry + 25 sessions), not on `entry`. Indexing
+        # on `entry` + ffill let the BACKTEST read each mean12 reading ~25 sessions before it could
+        # exist. LIVE was already conservative (a row only appears once the event completed).
+        # EDGE_HEALTH_CSV: non-canonical A/B input; default = the production file.
+        _eh_path = os.environ.get("EDGE_HEALTH_CSV", "").strip() or os.path.join(WORKDIR, "data", "lag_edge_health.csv")
+        _eh = pd.read_csv(_eh_path)
+        _eh_key = "known_date" if "known_date" in _eh.columns else "entry"
+        if _eh_key != "known_date":
+            print(f"  [edge-alloc] WARNING: {os.path.basename(_eh_path)} has NO `known_date` column"
+                  f" -> falling back to `entry` (LOOK-AHEAD ~25 sessions). Regenerate with edge_health_monitor.py.")
+        _eh[_eh_key] = pd.to_datetime(_eh[_eh_key])
+        _eh = _eh.drop_duplicates(_eh_key).set_index(_eh_key).sort_index()["mean12"]
+        print(f"  [edge-alloc] source={os.path.basename(_eh_path)} label_col={_eh_key} rows={len(_eh)}")
+        _m12 = _eh.reindex(common, method="ffill")
         print(f"  [edge-alloc] thr={EDGE_THR}%; mean12 latest={_m12.iloc[-1]:.1f}% (LAG tilt->.65 only if >= thr)")
     except Exception as _ex:
         _m12 = pd.Series(np.nan, index=common); print(f"  [edge-alloc] edge-health unavailable -> static tilt ({_ex})")
