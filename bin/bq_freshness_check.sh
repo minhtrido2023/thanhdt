@@ -144,11 +144,24 @@ _check() {
   lag_days="$(printf '%s\n' "$result" | tail -1)"
   # bq lỗi (auth/quota/network) hoặc output không phải số ⇒ KHÔNG PHẢI bảng stale, đừng báo
   # lag=999/STALE — báo đúng nguyên nhân (§28: tách "không tìm thấy bằng chứng" khỏi "tìm thấy
-  # và xấu"). Query thật ra số nguyên/thập phân qua CSV; bất cứ gì khác là lỗi truy vấn.
+  # và xấu"). Query thật ra số nguyên/thập phân qua CSV; bất cứ gì khác cần tách 2 case (arch-
+  # review coord-2026-09-27 round 1): rc!=0 = KHÔNG kết nối/tra được BQ (auth/quota/network);
+  # rc=0 nhưng giá trị không phải số = BQ TRẢ LỜI ĐƯỢC nhưng dữ liệu bất thường (bảng rỗng/cột
+  # toàn NULL/schema đổi tên cột) — khác nguyên nhân, khác hướng xử lý, đừng gộp chung một câu
+  # "kiểm tra auth/quota/network" (repro: MAX() trên bảng rỗng trả NULL dù bq hoàn toàn khoẻ).
   if [ $rc -ne 0 ] || ! printf '%s' "$lag_days" | grep -qE '^-?[0-9]+(\.[0-9]+)?$'; then
-    local errsnip="${lag_days:0:200}"
-    local fail_msg="⚠️ BQ QUERY FAILED ($TODAY $NOW_ICT): $label — không truy vấn được BQ (rc=$rc): ${errsnip}. KHÔNG PHẢI bảng stale, kiểm tra auth/quota/network trước khi nghi writer chết."
-    echo "FAIL $label: BQ QUERY FAILED (rc=$rc): ${errsnip}"
+    local errsnip reason fail_msg
+    # Lấy từ TOÀN BỘ $result (không phải tail -1 của lag_days) — bq thường wrap lỗi thành
+    # nhiều dòng, dòng cuối một mình có thể chỉ còn 1 mảnh vô nghĩa (repro round 1: "southeast1]").
+    errsnip="$(printf '%s' "$result" | tr '\n' ' ' | cut -c1-200)"
+    if [ $rc -ne 0 ]; then
+      reason="bq lỗi kết nối/quyền (rc=$rc, auth/quota/network)"
+      fail_msg="⚠️ BQ QUERY FAILED ($TODAY $NOW_ICT): $label — ${reason}: ${errsnip}. KHÔNG PHẢI bảng stale."
+    else
+      reason="bq trả giá trị không phải số dù rc=0 ('${lag_days}') — bảng rỗng/cột toàn NULL/schema đổi"
+      fail_msg="⚠️ BQ DATA BẤT THƯỜNG ($TODAY $NOW_ICT): $label — ${reason}. KHÔNG PHẢI lỗi kết nối BQ, đừng kiểm tra auth/quota — kiểm tra bảng/cột/schema. (raw: ${errsnip})"
+    fi
+    echo "FAIL $label: ${reason} (raw: ${errsnip})"
     if [ "$mode" = "WARN" ]; then
       "$ROOT/bin/notify_thread.sh" "$fail_msg" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
       WARNED=$((WARNED + 1))
@@ -190,7 +203,8 @@ _check_lastmod() {
   show_out=$(bq show --format=prettyjson "${PROJECT}:${table}" 2>&1)
   show_rc=$?
   if [ $show_rc -ne 0 ]; then
-    local errsnip="${show_out:0:200}"
+    local errsnip
+    errsnip="$(printf '%s' "$show_out" | tr '\n' ' ' | cut -c1-200)"
     local fail_msg="⚠️ BQ QUERY FAILED ($TODAY $NOW_ICT): $label — bq show thất bại (rc=$show_rc): ${errsnip}. KHÔNG PHẢI writer chết, kiểm tra auth/quota/network."
     echo "FAIL $label: BQ QUERY FAILED (rc=$show_rc): ${errsnip}"
     "$ROOT/bin/notify_thread.sh" "$fail_msg" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
