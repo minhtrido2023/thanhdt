@@ -163,12 +163,25 @@ tái tạo bằng cách chạy lại chính bộ dispatcher.
 Mã 3 có **HAI nguyên nhân khác nhau, cách xử khác nhau** — đọc dòng ❌ script in ra để biết là ca nào:
 
 1. **`bin/compute_active_nav.py:451` — truy vấn giá BQ THẤT BẠI** (không lấy được lô giá nào).
-   Xử: kiểm quyền/`bq` bằng `bq_freshness_check.sh`; nếu BQ đang sync dở thì chạy lại sau. Không
-   sửa gì trong script.
+   ⚠️ **KHÔNG BAO GIỜ xảy ra từ cron.** `resolve_prices()` chỉ trả `None` ở nhánh `asof != today`
+   (`bin/compute_active_nav.py:329-331`); nhánh `asof == today` — nhánh duy nhất cron chạy — luôn
+   trả dict. Và `--asof <ngày quá khứ>` mà vẫn ghi file canonical đã bị chốt **rc=7** (`:382-389`).
+   Nên ca này CHỈ phát sinh khi ai đó chạy TAY với `--asof <ngày quá khứ>` + `--out` riêng.
+   Xử: kiểm quyền/`bq` bằng `bq_freshness_check.sh`; BQ đang sync dở thì chạy lại sau. Không sửa
+   gì trong script. **Thấy rc=3 từ log cron ⇒ đó là ca (2), đừng đi kiểm BQ auth.**
 2. **`bin/compute_active_nav.py:548` — CÒN mã thiếu giá sau CẢ HAI nguồn** (DNSE live *và*
    fallback BQ). Xử: tra đúng mã script gọi tên — mã mới lên sàn / bị tạm ngừng giao dịch /
    sai mã trong sổ vị thế. Cần ghi `active_nav` gấp thì phải xử lý mã đó (loại khỏi sổ hoặc bổ
    sung giá), **KHÔNG** hạ cổng.
+
+⚠️ **Rủi ro khi KHAI TỬ một account** (liên quan cổng tỉ suất, ghi ở đây vì cùng lớp vận hành):
+đặt `enabled=false` cho SpaceX/ZaloPay trong `trading_bot_accounts.json` làm nhãn đó rơi khỏi
+`dividend_adjusted_return.ACCOUNTS` ⇒ `report_return_gate` fail-closed (từ 2026-09-27) trả rc=1 cho
+MỌI báo cáo cũ mang tên account đó. `bin/check_report_cadence.sh:70` quét TOÀN BỘ file
+`reports/*_{daily,weekly,monthly}_report_*.md` KHÔNG lọc theo ngày rồi gọi `report_delivery_gate.py`
+(`:244` → `report_return_gate.py`) ⇒ **80/115 báo cáo hiện có sẽ báo 🔴 "Delivery INCOMPLETE" mỗi
+ngày** cho tới khi config được bật lại. Khai tử account ⇒ phải lưu trữ (move) các báo cáo cũ ra
+ngoài phạm vi quét TRƯỚC, hoặc thêm carve-out theo ngày trong `check_report_cadence.sh`.
 
 **Vì sao fail-closed (đổi 2026-09-27, trước đó rc=0):** `active_nav` là **MẪU SỐ SIZING**
 (`discretionary_accumulation_inject.py` đọc để suy `target_pct_active_nav`). Bản cũ chỉ in `⚠️`

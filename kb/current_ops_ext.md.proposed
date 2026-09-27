@@ -18,7 +18,7 @@
 
 **P1 LIVE** (từ 2026-07-29, `d64717f`): `filter_lag_rating_orders()` — gate 8L rating≤3 tầng ORDER. Verify: 14/14 + 22/22 selfcheck, replay TRC/MST bị chặn, 0 lệnh khác đổi/21 plan thật.
 
-**P0 ACTIVE HARD BLOCK** (từ 2026-08-04, `bb8583c`): `check_plan_funding()` trong `bot_execute.py`. Vượt ⇒ KHÔNG đặt bất kỳ lệnh nào của account đó. Shadow log tiền thân `data/plan_buying_power_shadow_log.csv` là **bản ghi LỊCH SỬ, không còn được ghi** — logger `_log_plan_buying_power_shadow` đã xoá 2026-09-27 (mục đích tích luỹ dữ liệu hoàn thành bằng chính gate này; cột `would_block` sai 55/77 dòng, 11 cặp (ngày, account) ghi `true` mà phiên vẫn khớp lệnh).
+**P0 ACTIVE HARD BLOCK** (từ 2026-08-04, `bb8583c`): `check_plan_funding()` trong `bot_execute.py`. Vượt ⇒ KHÔNG đặt bất kỳ lệnh nào của account đó. Shadow log tiền thân `data/plan_buying_power_shadow_log.csv` là **bản ghi LỊCH SỬ, không còn được ghi** — logger `_log_plan_buying_power_shadow` đã xoá 2026-09-27 (mục đích tích luỹ dữ liệu hoàn thành bằng chính gate này; cột `would_block`: 55/77 dòng ghi `true`, và **11/13 cặp (ngày, account) được ghi `true` bị sổ khớp lệnh thật PHỦ ĐỊNH** — 10/13 nếu chỉ tính fill CHIỀU MUA, vì 2026-08-07 SpaceX có 13 fill nhưng toàn bán, 2026-08-07 ZaloPay không có file journal, và 2026-08-12 SpaceX ghi `true` với 0 fill. "Sai 55/77 dòng" là nói quá: 55 là số dòng ghi `true`, không phải số dòng đã chứng minh được là sai).
 
 **2 bug đã vá (08-07):**
 1. UPCOM (DRI): `loan_package_id=None` → WAIT_CASH vô hạn dù thừa tiền. Fix: luôn resolve gói vay theo MÃ (`_resolve_loan_package_id`), commit `c22bd1c`.
