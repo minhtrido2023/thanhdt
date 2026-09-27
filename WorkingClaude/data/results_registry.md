@@ -862,8 +862,8 @@ DGC 2016Q1 -0.08  18.4  9.9 0.35 0.31 pos  3   7.3 1.65   ~1700
 | IS 2014-2019 | 20.5% | 0.81 | −45.0% | 0.46 | 9.0% | +11.5pp |
 | OOS 2020-2026 | 50.3% | 1.31 | −46.8% | 1.07 | 12.5% | +37.8pp |
 **Robustness (decisive):** headline rides on TWO low-breadth lucky years — 2014 (+87pp on ~2.5 names) and 2020 (+181pp on ~2.1 names). **Excluding 2014+2020: CAGR 34.3%→19.6%, edge vs B&H +8.3pp** (B&H 11.3%). Still 9/13 years beat B&H → signal is REAL, not pure luck, but magnitude is concentration-inflated and MaxDD −51% is WORSE than market −43%.
-**Orthogonality:** mean overlap of Compounder picks vs **custom30V basket = 23%** (mostly distinct), vs **8L top-25 = 4%** (almost fully disjoint — 8L is value-tilted, compounder is growth-tilted). Confirms the growth/compounder axis is genuinely orthogonal to both existing books.
-**VERDICT (conditional):** signal exists + is orthogonal (esp. vs 8L), BUT **NOT deployable as a standalone top-15 book** — strict 6-gate conjunction yields a median of 4 names → high idiosyncratic variance, MaxDD>market, headline CAGR inflated by 2 lucky years. **Recommended use = compounder WATCHLIST / tilt-overlay feed into a diversified book, not a standalone allocation.** To make it a real book you'd have to widen beyond the liquid `ticker_prune` set (capacity hit) or materially loosen the gates (dilutes the "compounder" definition). Same family as gq_score/fair-value: the growth axis is detectable but doesn't cleanly become a tradeable sleeve.
+**Orthogonality:** mean overlap of Compounder picks vs **custom30V basket = 23%** (mostly distinct), vs **8L top-25 = 25.8%** [SỬA 2026-09-27 · cũ 4% = SỐ THEO BUG chiều sort] — **KHÔNG còn “almost fully disjoint”**: 1/4 số pick trùng 8L top-25. Kết luận “trục growth/compounder trực giao với 8L” KHÔNG còn suy được từ con số này.
+**VERDICT (conditional):** signal exists + is orthogonal vs custom30V (**vs 8L: chỉ một phần — 25.8% overlap, xem dòng trên**), BUT **NOT deployable as a standalone top-15 book** — strict 6-gate conjunction yields a median of 4 names → high idiosyncratic variance, MaxDD>market, headline CAGR inflated by 2 lucky years. **Recommended use = compounder WATCHLIST / tilt-overlay feed into a diversified book, not a standalone allocation.** To make it a real book you'd have to widen beyond the liquid `ticker_prune` set (capacity hit) or materially loosen the gates (dilutes the "compounder" definition). Same family as gq_score/fair-value: the growth axis is detectable but doesn't cleanly become a tradeable sleeve.
 
 ## 2026-06-30 · Retail Compounder Screen — built + backtested (Taylor_20260630_044929)
 **Script:** `retail_compounder_screen.py` (arg `invgate` to turn inventory gate ON; default OFF). **Outputs:** `data/retail_compounder_monthly.csv`, `data/retail_compounder_verdict.json`. Design = `mike/agents/Taylor/retail_valuation_framework.md` (job …044001). DISTINCT from industrial `compounder_screen.py`: P/S-primary (not P/E), two archetypes.
@@ -876,15 +876,15 @@ DGC 2016Q1 -0.08  18.4  9.9 0.35 0.31 pos  3   7.3 1.65   ~1700
 | OOS 2020-2026 | 22.53% | 0.69 | **−42.5%** | 0.53 | 21.13% | **+1.40pp (Sharpe −0.18)** |
 **Verify known names:** MWG ✓ appears 2015-05..2015-12 (volume archetype). FRT-2018 ✓ correctly EXCLUDED (CF_OA_5Y=−4.2e11 <0, the Long Châu burn). **PNJ ✗ NOT reproducible** — structural, not a bug: (1) PNJ was OUTSIDE `ticker_prune` in 2014/2015 (10/25 rows only; entered curated universe 2016+); (2) PNJ CF_OA_5Y went NEGATIVE in 2015 (−2.65e10) → fails the SAME cash gate that (correctly) kills FRT-2018. **The margin-turnaround archetype (PNJ) is indistinguishable from a value-trap (FRT) on point-in-time cash flow → not isolable without look-ahead.** The screen captures the volume archetype only.
 **Inventory-gate ablation:** rigid InvTurn_P0≥0.85·InvTurn_P4 on noisy quarterly data DELAYS MWG from 2015→2016 (MWG InvTurn swings 1.3↔7.5 q/q, cumulative-vs-single-quarter reporting artifact). Headline keeps gate OFF; framework intent was sector-relative trajectory judgement, not a hard quarterly ratio.
-**Orthogonality:** vs **8L top-25 = 0.0%** (fully disjoint — 8L is value-tilted, retail compounders are growth-priced), vs industrial Compounder top-15 = 7.5%, vs custom30V = 32.7%. Genuinely new axis.
-**VERDICT:** Same family as industrial compounder / gq_score / fair-value. Signal is REAL + perfectly orthogonal to 8L, **but NOT a standalone book**: 1–2 names/month, single-name-moonshot dependent (MWG 2015-16, retail 2021 +119%), MaxDD −52% > market, and **OOS edge is marginal (+1.4pp return but WORSE Sharpe −0.18 and DD)** — the spectacular IS (+35pp) is MWG-driven and does not persist. Captures only the volume archetype (MWG-type); the margin-turnaround archetype (PNJ-type) is structurally uncapturable. **Recommended use = retail-compounder WATCHLIST / tilt-overlay, NOT a standalone allocation** — matches the framework's pre-registered "thin → tilt not book" prediction.
+**Orthogonality:** vs **8L top-25 = 21.1%** [SỬA 2026-09-27 · cũ 0.0% = SỐ THEO BUG chiều sort] — **KHÔNG “fully disjoint”**, vs industrial Compounder top-15 = 7.5%, vs custom30V = 32.7%. Genuinely new axis.
+**VERDICT:** Same family as industrial compounder / gq_score / fair-value. Signal is REAL nhưng **KHÔNG trực giao hoàn toàn với 8L** (21.1% overlap — xem dòng trên), **but NOT a standalone book**: 1–2 names/month, single-name-moonshot dependent (MWG 2015-16, retail 2021 +119%), MaxDD −52% > market, and **OOS edge is marginal (+1.4pp return but WORSE Sharpe −0.18 and DD)** — the spectacular IS (+35pp) is MWG-driven and does not persist. Captures only the volume archetype (MWG-type); the margin-turnaround archetype (PNJ-type) is structurally uncapturable. **Recommended use = retail-compounder WATCHLIST / tilt-overlay, NOT a standalone allocation** — matches the framework's pre-registered "thin → tilt not book" prediction.
 
 ## Banking Compounder Screen — Taylor_20260630_051434 (2026-06-30)
 - **Script**: `bank_compounder_screen.py` → `data/bank_compounder_{monthly.csv,verdict.json}`. Framework: `mike/agents/Taylor/banking_valuation_framework.md`.
 - **Method**: ICB_Code=8355 banks, ticker_prune, TV_1M_P50≥1e9; ASOF point-in-time financials (staleness≤120d); Gordon justified-P/B `(ROE5Y−0.05)/0.08` (COE=0.13,g=0.05); gates ROE_Min3Y≥0.08, ROE5Y≥0.12, (NP_P0/NP_P4≥1.10 OR Rev_YoY≥0.12), PB<justified & PB<2.0; rank z(cheap_margin)+z(ROE5Y)+z(NPgro); top-10 monthly EW T+1 TC0.1%. AUDIT_END 2026-06-26.
 - **Result (net)**: FULL 2015-2026 CAGR **31.93%** / Sharpe 1.06 / MaxDD **−44.5%** vs B&H 13.23% (**+18.7pp**). IS2014-19 36.24% (+19.0pp). **OOS2020-26 30.04% (+18.6pp, broad: 2020+70/2021+60/2023+20/2024+19)**. Self-check diff 6e-6 VND PASS.
 - **Verify**: MBB caught 2016-17 (12mo) ✓; VCB correctly ABSENT (PB2.54≫Gordon0.61, premium/forward-ROE play, uncapturable w/o look-ahead) ✓; weak tail BVB/KLB/NVB excluded ✓.
-- **Orthogonality**: vs 8L top-25 **5%** (orthogonal); vs retail/industrial 0% (disjoint ICB); **vs custom30V 74%** (custom30V already holds 10-13 banks since 2018 → redundant).
+- **Orthogonality**: vs 8L top-25 **64.1%** [SỬA 2026-09-27 · cũ 5% = SỐ THEO BUG chiều sort] — **TRÙNG 2/3 với 8L top-25, KHÔNG trực giao**; vs retail/industrial 0% (disjoint ICB); **vs custom30V 74%** (custom30V already holds 10-13 banks since 2018 → redundant).
 - **Verdict**: REAL + holds OOS (strongest of 3 sector compounders), BUT high-beta (DD−44%), return concentrated in 2 bank-bull episodes (2017+2020-21 = 79% of cum), early era 1.1-name book (single MBB bet), 74% already in custom30V → **watchlist/tilt + Gordon valuation lens, NOT a standalone leveraged book**.
 
 ## RE Compounder Screens (dual) — Taylor_20260630_053151 (2026-06-30)
@@ -900,7 +900,7 @@ DGC 2016Q1 -0.08  18.4  9.9 0.35 0.31 pos  3   7.3 1.65   ~1700
 | B indust | OOS 20-26 | 19.84% | 0.69 | −22.1% | 29.63% | −9.79pp |
 - **VERIFY (flawless risk discipline)**: VHM 2022Q4-23 ✓ caught, NLG 2022-23 ✓, TCH 2022-23 ✓; **NVL leverage-trap EXCLUDED ✓** (PB0.62 cheap BUT Debt_Eq4.7/IntCov−0.39), **PDR-2022 EXCLUDED ✓** (IntCov−0.97). NTC-2017 ABSENT-by-design (PB2.5-3.7≫1.5; premium DY+ROE+land-revaluation re-rating, uncapturable w/o look-ahead — parallel banking-VCB/retail-PNJ).
 - **Capacity (Screen B)**: median selected ADV **1.7B/day**, 31 pick-months sub-10B, median 1 name/month → un-investable as a book (NTC-type: 10B buy = weeks).
-- **Orthogonality (resid A)**: vs custom30V 15.2%, vs 8L top-25 7.9% (orthogonal value/cyclical axis), vs indust B 0% (disjoint).
+- **Orthogonality (resid A)**: vs custom30V 15.2%, vs 8L top-25 **0.5%** [SỬA 2026-09-27 · cũ 7.9% = SỐ THEO BUG chiều sort] (vẫn trực giao, thậm chí hơn), vs indust B 0% (disjoint).
 - **VERDICT**: cleanest NEGATIVE of the 4 sector screens. Residential risk-discipline is REAL+valuable as a **GATE/lens** (separates cheap-quality from leverage traps) but the SECTOR DOESN'T COMPOUND — underperforms B&H −4.2pp full with −61.8% DD because a monthly value screen holds distress straight through 2022 (−48%); marginal OOS edge = pure 2020-21 recovery-beta. RE alpha needs regime TIMING (DT5G), absent from value screen. Industrial = REIT yield-watchlist only. **Deploy = valuation/risk LENS for sizing RE inside V2.4 (P/B-NAV proxy + leverage-trap exclusion), NOT a standalone book.**
 
 ## Logistics/Port/Shipping Compounder Screens (dual) — Taylor_20260630_054646 (2026-06-30)
@@ -922,7 +922,7 @@ DGC 2016Q1 -0.08  18.4  9.9 0.35 0.31 pos  3   7.3 1.65   ~1700
 
 - **VERIFY**: VSC 2019-21 ✓ caught (33mo, quality port), DVP 2020-21 ✓ (NaN-IntCov net-cash passed), PHP 2021 ✓, PVT-2020 trough ✓, **VOS leverage-trap EXCLUDED 2014-2021 ✓** (cheapest P/B 0.25 but DebtEq5.7/CF_OA<0/NP-loss), VOS-recovered caught 2023-24 ✓ (de-levered DebtEq0.75). **GMD NOT caught (2014 AND 2020+)** — structural, not a bug: the hybrid never simultaneously satisfies cheap-EVEB(<10) AND ROIC5Y≥5% — cheap window = pre-Gemalink-ramp low ROIC, earned-ROIC window = EVEB 15-16 expensive. Uncapturable by point-in-time value+quality conjunction w/o concession foresight (parallel banking-VCB / retail-PNJ / RE-NTC premium re-rate misses).
 - **Capacity**: PORT median selected ADV 2.4B/day, SHIP 4.8B — thin (port pure-plays sub-2B), micro-portfolio (PORT median 2 names/mo, 45/148 cash; SHIP median 1 name/mo, 53/148 cash). Never reaches top-10 target.
-- **Orthogonality**: PORT vs 8L top-25 **0.0%**, vs custom30V 12.9%; SHIP vs 8L 1.7%, vs custom30V 25.7% → both genuinely orthogonal new axes (8L value-tilt holds ~no maritime).
+- **Orthogonality**: PORT vs 8L top-25 **37.1%** [SỬA 2026-09-27 · cũ 0.0% = SỐ THEO BUG chiều sort], vs custom30V 12.9%; SHIP vs 8L **2.3%** [SỬA 2026-09-27 · cũ 1.7% = SỐ THEO BUG chiều sort], vs custom30V 25.7% → **chỉ SHIP còn trực giao; PORT trùng 8L 37%**.
 - **VERDICT**: same family as the other 4 sector screens. **Screen A (Ports) = the weakest of all 5** — NEGATIVE full-period (−3.06pp) with −58.9% DD, OOS edge is pure 2020-21 recovery beta, and it MISSES the marquee compounder (GMD). EVEB+ROIC value screen on ports doesn't compound. **Screen B (Shipping) = the more valuable artifact** — REAL OOS edge (+9.28pp, +0.22 Sharpe) with DRAWDOWN BETTER than market (−31% vs −43%) and flawless leverage-trap avoidance (VOS), but thin (1-name median), IS-negative, return rides 2022+2024 freight booms (matches the cyclical-timing flag). **Deploy = valuation/risk LENS, NOT standalone book**: for Ports use EVEB+ROIC_Trailing+net-cash as a quality lens (note GMD needs separate hybrid judgement); for Shipping the P/B<0.9 + Debt_Eq<2.0 + CF_OA>0 trough-buy rule is a clean trap-avoidance + cyclical-entry lens to size maritime inside V2.4 in DT5G NEUTRAL/BULL only.
 
 ## Telecom valuation lens (Taylor_20260630_060226) — 2026-06-30
@@ -952,7 +952,7 @@ DGC 2016Q1 -0.08  18.4  9.9 0.35 0.31 pos  3   7.3 1.65   ~1700
 | C rubber | OOS 20-26 | 4.48% | 0.47 | **−0.1%** | 11.45% | −6.97pp (waited/held cash) |
 
 - **VERIFY**: DGC 2019-2020 **CAUGHT** (15mo) ✓; DGC supercycle 2021-22 only LATE (2022Q3+ — Rev_YoY base-effect ejects it during the actual spike → screen misses own thesis). DPM/DCM 2019-20 troughs CAUGHT ✓. **PHR land-bank NOT caught** (PB re-rated 0.66→2.45 before <0.8 window opened in prune era — land-as-alpha uncapturable, parallel GMD/PNJ/VCB). DPR held 36mo (persistent cheap name).
-- **Orthogonality (custom30V | 8L top-25)**: FERT 47%|8% (already in c30V parking), CHEM 5%|0%, RUBB 13%|0%.
+- **Orthogonality (custom30V | 8L top-25)**: FERT 47%|**33.1%** [SỬA 2026-09-27 · cũ 8% = SỐ THEO BUG chiều sort] (already in c30V parking), CHEM 5%|**25.6%** [SỬA 2026-09-27 · cũ 0% = SỐ THEO BUG chiều sort], RUBB 13%|**6.7%** [SỬA 2026-09-27 · cũ 0% = SỐ THEO BUG chiều sort].
 - **VERDICT**: lens not book (same family as prior 6 sectors). **A Fertilizer = cyclical-timing lens** — cheapness predictable, ALL return = one un-forecastable global catalyst (2021 urea), IS-neg, −44% DD, 47% already held → EVEB<6+high-DY = cheap-and-waiting tell, cycle-gate the size. **B Specialty chem = documented capture FAILURE** — caught DGC's pre-entry but net-negative; Rev_YoY gate mistimes + base-effect drops DGC in the actual supercycle → **DGC phosphorus alpha NOT reliably capturable from financials**; watchlist only. **C Rubber land-bank = DEFENSIVE value floor, not land-alpha** — lags B&H (−4.6pp) but DD −12.5% vs −43% market, Calmar 0.45>0.24 (DPR); the land-conversion alpha (PHR re-rate) uncapturable (priced before PB<0.8). Land-as-downside-floor = real; deploy as defensive deep-value lens inside V2.4.
 
 ## Steel + Building Materials — triple sub-sector screen (sector #8, job Taylor_20260630_065623, 2026-06-30)
@@ -977,7 +977,7 @@ DGC 2016Q1 -0.08  18.4  9.9 0.35 0.31 pos  3   7.3 1.65   ~1700
 - **KEY FINDING — HPG structurally uncatchable by ANY value-trough steel screen**: HPG's cheap-PB windows always coincide with a disqualifier — negative IntCov in the 2013–14 capex era (IC −6.6), falling margins in 2019 (GPM_P0<GPM_P4), and never PB<1.5 post-2020 (quality floor ~1.0 only at the 2022 crash, where IntCov collapses to −0.6). Sensitivity EVEB<6/<8/<10 → **HPG = 0 months in all three**. The screen instead loads HSG/NKG (20+7 months), the leverage traps it was meant to avoid — they slip the gate when their leverage cyclically heals (HSG 2020 COVID bottom; HSG/NKG 2022 at the steel TOP, then −22.6% in 2022). HPG's return came from quality re-rating, not cheapness → not a value signal at all.
 - **Leverage gate audit**: of 58 EVEB/PB/margin-passing steel rows, Debt_Eq<2&IntCov>1.5 keeps 34, rejects 24 (11 are HSG/NKG). The gate works as a VETO but cannot manufacture an HPG entry.
 - **VERIFY**: HPG **MISSED** (0mo, structural); HSG leaked 20mo / NKG 7mo (cyclic leverage-heal at wrong times); BMP caught 72mo ✓, VCS 36mo ✓ (textbook compounders); **NTP documented-MISS** (ROIC5Y~10% + ~1.0× debt → fails both ROIC and clean-BS gates: 0/112 clean-BS rows); HT1 cement caught 38mo.
-- **Orthogonality (custom30V | 8L top-25)**: STEEL 53%|20% (high beta, already in c30V parking), CEMENT 10%|5%, SPEC 10%|0% (orthogonal but thin).
+- **Orthogonality (custom30V | 8L top-25)**: STEEL 53%|**0.0%** [SỬA 2026-09-27 · cũ 20% = SỐ THEO BUG chiều sort] (high beta, already in c30V parking), CEMENT 10%|**0.0%** [SỬA 2026-09-27 · cũ 5% = SỐ THEO BUG chiều sort], SPEC 10%|**73.2%** [SỬA 2026-09-27 · cũ 0% = SỐ THEO BUG chiều sort] (**SPEC KHÔNG trực giao — trùng 8L 73%**).
 - **VERDICT — weakest sector triple so far; all lens-not-book, steel screen actively FAILS**: **A Steel = capture FAILURE** — cannot own HPG (the only name worth owning), loads HSG/NKG leverage traps; full edge ≈0, the OOS +12pp is one un-repeatable 2020 HSG bounce; high beta. Only durable export = the **leverage VETO (Debt_Eq<2 & IntCov>1.5)** as a risk rule, NOT a stock picker. **B Cement = not investable** — 2 names, ADV 4.6B, DD −61% worse than market, DY uncapturable. **C Specialty/pipe = real IS compounder edge (+7pp) but NO OOS edge (−6.7pp), 3 names** — BMP/VCS are genuine high-ROIC clean-BS compounders (watchlist), but the signal is IS-driven (2015 BMP +66%) and de-rated OOS (2021/2025 negative). Watchlist/lens, not a sleeve.
 
 ---
@@ -1001,7 +1001,7 @@ Script `energy_screen.py`. Outputs `data/energy_{util,oilsvc,renew}_monthly.csv`
 - **DY-UNCAPTURABLE (sector-wide)**: DY only populated in dividend-DECLARATION quarters — UTIL 242/699, OILSVC 42/444 (PVD 0/79), RENEW 37/228. A hard DY>4% gate ejects payers in the 70% of quarters DY isn't recorded → DY used as scoring bonus, never a gate. Generalizes the cement-DY gap to all VN dividend-yield screens.
 - **FCF>0 maturity gate (the real alpha)**: FCF=CF_OA_P0+CF_Invest_P0 separates paid-off cash machine from expansion capex. VERIFY perfect on VSH — Thượng-Kon-Tum expansion 2017-19 (FCF<0) REJECTED, post-capex 2022-24 (FCF>0) CAUGHT. Rejects 82/267 EVEB/leverage/IC-passing rows.
 - **VERIFY**: SJD 44mo / NT2 63mo / POW 45mo CAUGHT; VSH expansion rejected + post-capex caught ✓; PVD 2016 trough CAUGHT (17mo), PVD 2014 pre-crash ABSENT ✓ (PB1.51), PVD 2020 Q2+ negative-CF rejected (of 182 cheap-PB rows CF_OA gate rejects 59); GEG present 36mo.
-- **Orthogonality (custom30V | 8L top-25)**: UTIL 12.5%|0%, OILSVC 33.8%|31.5%, RENEW 2.5%|0%.
+- **Orthogonality (custom30V | 8L top-25)**: UTIL 12.5%|**0.0%**, OILSVC 33.8%|**5.0%** [SỬA 2026-09-27 · cũ 31.5% = SỐ THEO BUG chiều sort], RENEW 2.5%|**0.0%**.
 - **VERDICT — weakest group alongside steel; all lens-not-book**: **A Mature utility = structural LAGGARD** — cash-machine identification real (SJD/NT2/POW) but VN utilities are defensive, don't compound, FAIL IS (−12pp, 2019 thermal crush −30%), ~flat OOS. Park-cash/income tilt only, no alpha. **B Oil services = two-faced high-beta oil-cycle bet** — disaster IS (−15pp, 2017-19 oil malaise), star OOS (+18.6pp, 2020-26 recovery), **−68% DD un-ownable standalone** → tactical risk-on oil-cycle overlay ONLY (the design caveat); trough discipline mechanically sound. **C Renewables = documented capture FAILURE** — expensive+levered+FCF-negative *while* building FIT assets; windfall is a policy event, not a financial signal. Durable exports = DY-uncapturable rule + FCF>0 maturity gate (reusable across capex-heavy/dividend sectors).
 
 ---
@@ -1022,7 +1022,7 @@ Script `pharma_screen.py`. Outputs `data/pharma_monthly.csv`, `data/pharma_verdi
 - **IMP CAPTURE FAILURE (documented)**: of 8 PE-cheap IMP rows the ROE/ROIC>15% floor REJECTS 8 (100%); IMP ROE5Y~0.106, ROIC5Y~0.092 — the ETC-growth champion is structurally sub-15% return (EU-GMP capex + hospital-tender working capital) → un-screenable on a backward quality floor. The single best secular story is the one the quality gate ejects.
 - **ROIC5Y artifact**: DMC/TRA show ROIC5Y 1.8–2.7 pre-2017 (scale artifact, tiny equity base; normalise ~0.17–0.20 by 2018). The >0.15 gate passes them anyway (no pick corruption) but ROIC value untrustworthy early — don't read as moat strength.
 - **Liquidity decay**: DHG/IMP to 2026, DBD from 2017 (ADV 3.7B), DMC stops 2023-09, TRA stops 2022-07 → tradeable universe collapses to ~2–3 names post-2023. Median selected ADV 2.89B (thin).
-- **Orthogonality**: vs custom30V **0.0%** | vs 8L top-25 **0.0%** — fully orthogonal (pharma never enters the liquid quality top-25), genuine diversifier but too thin/illiquid to be a book.
+- **Orthogonality**: vs custom30V **0.0%** | vs 8L top-25 **69.0%** [SỬA 2026-09-27 · cũ 0.0% = SỐ THEO BUG chiều sort] — **KHÔNG trực giao**: pharma (DHG/DBD/IMP/TRA…) là đúng nhóm chất lượng mà 8L top-25 nắm. Vẫn quá mỏng/kém thanh khoản để thành book, nhưng luận điểm “diversifier vì 8L không bao giờ chạm pharma” SAI.
 - **VERIFY**: DHG 15mo, DMC 8mo, DBD 16mo CAUGHT; TRA absent (never both cheap+qualifying in liquid window); IMP 0mo (correctly excluded by floor).
 - **VERDICT — weakest-class alongside steel/energy; lens-not-book**: the dispatched mean-reversion screen actively FAILS both IS and OOS. Durable exports: (1) **VN defensive pharma compounds via BUY-AND-HOLD** (+5.7pp, lower DD) — DHG/DBD are watchlist holds, not timed trades; (2) **PE-mean-reversion timing is anti-edge for defensive compounders** (reusable warning); (3) **IMP/ETC-growth capture failure** — backward quality floors eject the best forward story.
 
@@ -1045,7 +1045,7 @@ Script `fnb_screen.py`. Outputs `data/fnb_{fmcg,seafood}_monthly.csv`, `data/fnb
 - **GPM-stability moat gate**: gpm_avg8≥22% AND CV<25% = high+stable brand margin. Keeps MCH(CV.05)/SAB(.12)/QNS(.11)/VNM(.18), REJECTS KDC(CV.38, serial restructurer). Of 300 PE-cheap+ROE>18% rows rejects 27 — all KDC.
 - **Seafood duty-trap filter**: CF_OA_3Y>0 & Debt<1.5 rejects 90/133 cheap-PB+margin-up rows (ANV/FMC/IDI bad quarters; CMX fully excluded, Debt med3.5). **VHC = 0 trough entries** (PB floor 0.91, never <1.2) → quality structurally un-capturable as trough-buy; its return is compounding not cheapness.
 - **VERIFY**: VNM 89mo / MCH 37mo / SAB 77mo CAUGHT; KDC 7mo only (GPM gate) ✓; VHC 0 trough mo (correct); ANV 6mo / MPC 4mo duty-troughs CAUGHT; CMX 0mo (Debt) ✓.
-- **Orthogonality (custom30V | 8L top-25)**: FMCG 15.1%|0.0%, SEAFOOD 10.8%|2.6% (both orthogonal, thin).
+- **Orthogonality (custom30V | 8L top-25)**: FMCG 15.1%|**68.8%** [SỬA 2026-09-27 · cũ 0.0% = SỐ THEO BUG chiều sort], SEAFOOD 10.8%|**0.0%** [SỬA 2026-09-27 · cũ 2.6% = SỐ THEO BUG chiều sort] (**FMCG KHÔNG trực giao — trùng 8L 69%**; SEAFOOD vẫn trực giao, thin).
 - **Caveat**: SAB/MCH/QNS only in liquid prune from 2017 → FMCG IS leans on VNM/MSN 2015-16 megacap re-rating that doesn't repeat OOS.
 - **VERDICT — weak tier (steel/energy company); both lens-not-book**: **A FMCG = IS-driven, NO OOS edge** — real quality/defensive lens (rejects KDC cleanly) but +11pp IS → −2.4pp OOS, worse-than-market DD, lags bull years; watchlist/risk-off park, not an alpha picker (mirrors retail). **B Seafood = single-event OOS** — fails IS −8pp, +7pp OOS is ENTIRELY the 2022 ASP super-cycle, flat Sharpe, ADV 3.6B; cyclical trough LENS (the duty-trap filter is the reusable export) not a standalone book. Durable exports = DY-uncapturable rule (reconfirmed) + GPM-stability moat gate + seafood duty-cycle value-trap filter + "VHC un-capturable as trough-buy".
 
@@ -1055,7 +1055,7 @@ Script `fnb_screen.py`. Outputs `data/fnb_{fmcg,seafood}_monthly.csv`, `data/fnb
 - **Structural reality:** VN tech = IT services (Infosys/TCS archetype); liquid+quality universe is essentially ONE name (FPT). CMG ROIC5Y 7.8% & liquid only 2024; ELC/ITD low-quality micro-caps; CTR (ROIC 21-24%) is Viettel tower-co/telecom-infra not software.
 - **FPT timing lens (real):** flagged (PE<PE_MA1Y×0.9 + ROIC5Y>12 & ROE5Y>15 & NPM stable) n=26 fwd-12M **+50.6% / 88% win** vs unflagged n=105 +24.5% / 76% → **spread +26.0pp**.
 - **Tradeable basket (lens-not-book):** G_LIT (dispatch ROIC>18+RevYoY>12) holds **0 names all 2014-2026** (universe collapse). G_VN (ROIC>12) holds FPT 37/148 mo, Full CAGR 2.82% vs B&H 10.23% = **-7.42pp** (IS -10.1, OOS -4.78). Edge lives in 12M-hold, lost to cash-drag in monthly rebal.
-- **Self-check:** lit 0.000000 / vn 0.000001 VND → PASS. Orthogonality G_VN 32.4% vs custom30V | 0% vs 8L top-25. Median sel ADV 96.9B.
+- **Self-check:** lit 0.000000 / vn 0.000001 VND → PASS. Orthogonality G_VN 32.4% vs custom30V | **83.3%** vs 8L top-25 [SỬA 2026-09-27 · cũ 0% = SỐ THEO BUG chiều sort] (**trùng gần như hoàn toàn — FPT là tên 8L top-25 kinh điển**). Median sel ADV 96.9B.
 - **Durable exports:** (1) ROIC5Y>18 is Infosys/TCS bar — FPT blended 12-17% (Telecom+education dilution), use >12; (2) FPT RevYoY 2015-18 is FRT/Synnex divestment artifact, never gate on it; (3) cheap-vs-own-PE + quality = real FPT entry-timing lens (2018/2022-23/2025-26 windows); (4) CTR = telecom-infra not software.
 - **Verify:** 2018 divestment entry CAUGHT G_VN / MISSED G_LIT; 2022-23 slowdown CAUGHT; 2024 euphoria ABSENT; 2025 cheap re-entry caught. All as predicted.
 
@@ -1076,14 +1076,14 @@ Script `securities_screen.py`. Outputs `data/securities_{screen,screen_dt5g,bask
 - **STANDALONE CROSS-SECTIONAL SCREEN = FAIL**: loses to simply OWNING ALL BROKERS on CAGR **AND** Sharpe across FULL/IS/OOS. The ROE_Trailing>ROE3Y inflection gate is a LATE confirmation (not a trough-buy): it sits in cash through the basket's **+99.1% 2023** (screen 0.0%), and clips the recovery legs (2017 basket +130.5% vs screen +45.4%; 2020 basket +97.2% vs +40.9%). Ungated screen DD −65.7% is WORSE than the always-invested basket −60.8% — the valuation/cash-timing is mistimed (in cash during recoveries, fully loaded into 2022).
 - **THE DURABLE EXPORT — brokerage is the ONE sector where DT5G is a RETURN-ENHANCER, not just insurance.** Gating the screen to cash in DT5G {CRISIS,BEAR} transforms it: Full 17.74→**27.74% CAGR**, Calmar 0.27→**0.88**, DD −65.7→**−31.7%** (better than VNINDEX). Per-year proof it is multi-episode (not single-event): 2018 −38.0%→+9.9%, 2022 −49.3%→−19.0%, while keeping the 2021 super-cycle (+298%→+396% via the late-2020 entry). Mechanism: broker beta ~1.3 and its worst-drawdown quarters (2018, 2022) ARE the market's CRISIS/BEAR states → the de-risk gate halves DD and ADDS ~10pp CAGR. Concretely validates the dispatch's "high-beta → needs DT5G gate."
 - **Reusable rules:** (1) **PB-primary, not PE** for brokers (NP too cyclical); (2) **IntCov replaces Debt_Eq** — margin debt is by-design, a HARD IntCov>1.5 gate would drop 241/405 passing rows (116 known-bad + 125 NULL-coverage e.g. FTS) so NULL-tolerant; known-bad-IntCov names = SSI/SHS/VND/VIX/BSI/CTS/MBS/VDS/BVS at over-levered points; (3) **ROE_Trailing>ROE3Y = LATE confirmation not trough-pick** (re-crosses above the still-elevated 3Y base only mid-recovery); (4) **brokerage = highest-beta sector** (β 1.27 screen / 1.60 basket).
-- **Caveat:** OOS CAGR leans on the 2021 margin-lending super-cycle (+298%/+396%), a once-a-generation event; but the DT5G edge is NOT single-event (also 2018 + 2022). Orthogonality: custom30V 33.5% | 8L top-25 6.9%. Median ADV 21.2B.
+- **Caveat:** OOS CAGR leans on the 2021 margin-lending super-cycle (+298%/+396%), a once-a-generation event; but the DT5G edge is NOT single-event (also 2018 + 2022). Orthogonality: custom30V 33.5% | 8L top-25 **4.5%** [SỬA 2026-09-27 · cũ 6.9% = SỐ THEO BUG chiều sort]. Median ADV 21.2B.
 - **VERIFY:** VND ROE-recovery 2020-21 CAUGHT (9mo from 2020-10); SHS 2021 CAUGHT (4mo); SSI 2025 recovery CAUGHT (6mo); 2021-H2 euphoria-top entries only 1mo (PB>3 cap works); cash through 2022H2-2023 crash 12mo (NP/ROE gates work).
 - **VERDICT — lens-not-book as a screen, BUT a genuine DT5G use-case.** The cross-sectional pick fails (own the sector beats it); the *macro de-risk overlay on a high-beta sector* is the real, deployable finding — and it's the strongest evidence in the sweep that DT5G adds return (not just insurance) precisely where beta is highest.
 
 ## 2026-06-30 — Sector #14 AVIATION dual screen (job Taylor_20260630_074607)
 - **Scripts:** `aviation_screen.py` | framework `mike/agents/Taylor/aviation_valuation_framework.md` | outputs `data/aviation_infra_monthly.csv`, `data/aviation_airline_monthly.csv`, `data/aviation_verdict.json`. AUDIT_END 2026-04-29. Self-check infra 0.000000 / airline 0.000000 VND → PASS.
 - **Universe (prune):** airport/cargo infra = ACV, SCS, NCT, SGN (by NAME — ICB is inconsistent: SCS is tagged 5751 'airline' but is a net-cash cargo terminal); airlines = HVN, VJC. YOUNG sector: ACV/HVN/VJC/SCS listed 2017, only NCT has 2015+ → IS 2014-19 ≈ 2017-19 (~3y); OOS 2020-26 = COVID aviation shock (sector-specific, not a market regime). Economics outweigh the short backtest curve here.
-- **Screen A (airport/cargo infra, EVEB<12 + ROIC5Y≥10% + CF_OA_3Y>0 + (FCF>0 OR DY>4%) + IntCov NaN-or>2 + Rev_YoY≥−10%):** FULL CAGR **3.98%** vs B&H 10.23% (**−6.25pp**); IS −8.45pp; OOS −4.07pp. FAILS both windows. Holds median **1 name** (NCT 69mo + SCS 43mo + SGN 15mo; **ACV 0mo** — EVEB never<12 + DY=0 + Long-Thanh capex ⇒ perpetual FCF<0, value screen never buys it). Killed by 1-name idiosyncratic drag (2025 SCS −32.3% = −76.5pp) + early cash-drag. Orthogonality custom30V **0.0%** / 8L top-25 **0.0%** (genuinely un-owned names) but doesn't beat market. Median selected ADV **1.6B = microcap-thin**.
+- **Screen A (airport/cargo infra, EVEB<12 + ROIC5Y≥10% + CF_OA_3Y>0 + (FCF>0 OR DY>4%) + IntCov NaN-or>2 + Rev_YoY≥−10%):** FULL CAGR **3.98%** vs B&H 10.23% (**−6.25pp**); IS −8.45pp; OOS −4.07pp. FAILS both windows. Holds median **1 name** (NCT 69mo + SCS 43mo + SGN 15mo; **ACV 0mo** — EVEB never<12 + DY=0 + Long-Thanh capex ⇒ perpetual FCF<0, value screen never buys it). Killed by 1-name idiosyncratic drag (2025 SCS −32.3% = −76.5pp) + early cash-drag. Orthogonality custom30V **0.0%** / 8L top-25 **53.4%** [SỬA 2026-09-27 · cũ 0.0% = SỐ THEO BUG chiều sort] (**KHÔNG phải “un-owned”: SCS/NCT là tên chất lượng 8L top-25**) but doesn't beat market. Median selected ADV **1.6B = microcap-thin**.
 - **Screen B (airline trough-buy, PB<1 + CF_OA>0 + IntCov>1 + NP>0):** **STRUCTURALLY EMPTY — 0 qualifiers ever.** HVN excluded (PB=0 = NEGATIVE EQUITY 2021-24, near-bankruptcy value trap); VJC excluded (premium LCC, PB never<1, DY=0). **No VN airline trough-buy exists.**
 - **Buy-and-hold reality (2017-10 .. 2026-06, vs VNINDEX 10.21%/DD−45%):** SCS **5.50%**/DD−52% (45% ROIC franchise but listed expensive, de-rated), ACV **1.15%**/DD−63% (best franchise, worst stock — perpetual-expensive + Long-Thanh dilution), NCT **17.53%**/DD−51% (ONLY beater — cheapest cargo gem, microcap-illiquid), VJC 8.83%/DD−57%, HVN 6.02%/**DD−80.6%**. Even holding the gems mostly LAGS the index — sharper negative than pharma (where B&H won).
 - **Durable exports:** (1) **airline trough-buy does NOT exist in VN** — empty screen; **HVN = permanent-exclude** (negative equity), VJC never cheap; (2) **screen aviation by NAME not ICB** (SCS misclassified 5751); (3) **ACV = best monopoly franchise but value-uncapturable** (EVEB never<12 + DY0 + Long-Thanh FCF drag → GARP/quality-growth, not value); (4) **DY-uncapturable reconfirmed** (ACV DY=0, cargo DY lumpy); (5) cargo terminals (SCS/NCT/SGN) = real net-cash high-ROIC monopolies but microcap-thin (ADV 1.6B) + 1-name concentration + listed-expensive de-rate → buy-and-hold lens for patient single-name, NOT a timed book.
@@ -1785,7 +1785,7 @@ catalyst.) NB: `data/vcb_fx_rate.csv` live feed (Winston 2026-07-05) is forward-
   TCM (margin-stable, ROE now faded <0.15) >> TNG (thin-CMT trap: NPM~0, Debt_Eq 2-4, IntCov<0); ejects GIL
   (CV 0.38), STK (losses), VGT (ROE 0.07), EVE (0.04). **Verify:** MSH CAUGHT 18mo (incl 2020 COVID), TCM
   CAUGHT 33mo (incl 2018-19 IntCov-turn window pre-2020-21 surge), TNG/STK/VGT REJECTED, GIL leaked 11mo
-  2021-22 (transiently-stable margin pre-Amazon-loss, documented). Ortho 34% c30V / 2% 8L; median ADV 15.8B.
+  2021-22 (transiently-stable margin pre-Amazon-loss, documented). Ortho 34% c30V / **1.0%** 8L [SỬA 2026-09-27 · cũ 2% = SỐ THEO BUG chiều sort]; median ADV 15.8B.
 
 ### Verdict: **LENS, not a BOOK** (sweep Rule 3 holds). Do NOT wire a textile sleeve.
 Durable artifacts: (1) FX thesis refuted — don't size up on VND weakness. (2) GPM-CV+IntCov+ROE gate = a
@@ -1832,7 +1832,7 @@ work is the **margin inflection**, not the cheap multiple: Spearman(GPM_turn, pr
   2015–19); OOS "+9.48pp" is entirely the 2020-21-23-24 hog up-cycles.
 - **Verify:** DBC CAUGHT 14mo incl 2019Q4→2020 pre/into-ASF (PB 0.68<MA1Y 0.75) → the explosion · BAF leaked
   9mo 2023 (post-IPO multiple deflating PB 5.4→1.5 misread as cheap; later ejected by CF_OA_3Y<0 — honest
-  documented leak, like GIL) · HAG 6mo/HNG 3mo. Ortho 33% c30V / 12% 8L; median selected ADV **56.9B**.
+  documented leak, like GIL) · HAG 6mo/HNG 3mo. Ortho 33% c30V / **0.0%** 8L [SỬA 2026-09-27 · cũ 12% = SỐ THEO BUG chiều sort]; median selected ADV **56.9B**.
 
 ### Verdict: **LENS, not a BOOK** (sweep Rule 3 holds). Do NOT wire a livestock sleeve.
 Durable artifacts: (1) **Hog-cycle entry signal is REAL** (vs textile FX refuted) — but the **GPM-turn
@@ -1928,7 +1928,7 @@ basket 4e-6, pbtrough 3e-6). IS 2014-19 thin (liquid breadth only from ~2019: C4
 
 **Counterfactual (the point):** Screen A **REJECTED HBC through the entire 2022-24 crisis (0 months)**; Screen C
 (naive value) **walked into HBC Oct-2022→Apr-2023 = INTO the −1.2T loss + equity wipeout**. Screen A distinct picks
-ever = {VCG,LCG,FCN,DPG} (never HBC, never CTD). Ortho vs custom30V 4% / 8L-top25 16%; median sel ADV 32B.
+ever = {VCG,LCG,FCN,DPG} (never HBC, never CTD). Ortho vs custom30V 4% / 8L-top25 **0.0%** [SỬA 2026-09-27 · cũ 16% = SỐ THEO BUG chiều sort]; median sel ADV 32B.
 
 **HBC crisis anatomy + early-warning (confirmed):** the tell fired ~3q before the 2022Q4 −1,202B loss = **CF_OA_P0
 persistently NEGATIVE while P&L still showed profit (2022Q1-Q3), Debt_Eq already >3 & rising** (POC profit =
@@ -8045,3 +8045,88 @@ CSV production đã sinh lại có `known_date` (Mike thực hiện, user cho ph
   `known_date` ⇒ một tháng bị khai "âm" khoảng 25 phiên TRƯỚC khi đọc được. Đo thật: trên `entry`
   streak = **2** (2026-07, 2026-08); trên `known_date` chỉ **1** (2026-09). ⇒ ngưỡng hành động
   `neg_streak ≥ 3` sẽ chạm sớm hơn ~1,2 tháng so với đúng. Cùng lớp lỗi FAIL-C, ở call-site khác.
+
+## 2026-09-27 — SINH LẠI 16 `*_screen.py` sau khi sửa chiều sort "8L top-25" (job `Taylor_20260927_131720`)
+
+**Nền:** merge `ec9750f2` sửa `sort_values(["rating","tv"], ascending=False).head(25)` →
+`ascending=[True, False]`. `fa_ratings_8l.rating` là thang 1–5 kiểu xếp hạng tín nhiệm (1 = tốt
+nhất), nên bản cũ lấy đúng **25 mã XẤU NHẤT** rồi gọi là "8L top-25". Mọi số "orthogonality vs 8L
+top-25" đã pin trong registry TRƯỚC mục này đều là **SỐ THEO BUG** — 18 dòng đã được sửa tại chỗ
+và đánh dấu `[SỬA 2026-09-27 · cũ … = SỐ THEO BUG chiều sort]`.
+
+**Chạy lại:** `$DNA_PYEXE <file>_screen.py` cho đúng 16 file, từ `WorkingClaude/`. 16/16 rc=0.
+50 artifact bị ghi đè đã backup sang `<path>.bak_20260927_prescreenfix` (registry cũ:
+`data/results_registry.md.bak_20260927_prescreenfix`). Runner + log + control-leg:
+`mike/agents/Taylor/research/screen_regen_20260927/`.
+
+**Control leg (bắt buộc để quy kết đúng nguyên nhân):** 16 screen được copy sang sandbox
+`research/screen_regen_20260927/ctrl/` với ĐÚNG 1 phép thay `[True, False]` → `False` (tái lập
+bug), `data/` symlink về cache THẬT, chạy trên CÙNG cache ngày 2026-09-27. Kết quả:
+
+- **34/34 file `*_monthly.csv` GIỐNG HỆT giữa nhánh BUG và nhánh FIX.** Chiều sort chỉ ảnh hưởng
+  **số đo orthogonality**, KHÔNG ảnh hưởng chọn rổ / NAV / CAGR / Sharpe / DD của bất kỳ screen nào.
+  ⇒ mọi kết luận hiệu suất (GO/NO-GO, CAGR, DD) của 16 screen **KHÔNG đổi**.
+- 18/34 CSV khác so với bản `.bak` chỉ vì backup là artifact tháng 6–7 còn cache nay đã chạy tới
+  2026-09-25 — **vintage dữ liệu, không phải sort fix**. 16/34 (các screen đã chạy lại 17:52 cùng
+  ngày) giống hệt bản `.bak`, đúng như dự đoán của control leg.
+
+**Delta thuần do sort fix (cùng cache, BUG → FIX):**
+
+| screen | khoá | BUG | FIX | Δ |
+|---|---|---|---|---|
+| tech | basket_vn/ortho_8l | 0.0 | **83.3** | +83.3 |
+| steel_buildmat | spec/ortho_8l | 0.0 | **73.2** | +73.2 |
+| pharma | ortho_8l | 0.0 | **69.0** | +69.0 |
+| fnb | fmcg/ortho_8l | 0.0 | **68.8** | +68.8 |
+| bank_compounder | overlap_8l_top25 | 4.9 | **64.1** | +59.2 |
+| aviation | infra/ortho_8l | 0.0 | **53.4** | +53.4 |
+| logistics_port | port/ortho_8l | 0.0 | **37.1** | +37.1 |
+| fertchem_rubber | fert/ortho_8l | 7.5 | **33.1** | +25.6 |
+| fertchem_rubber | chem/ortho_8l | 0.0 | **25.6** | +25.6 |
+| compounder | overlap_8l_top25 | 4.0 | **25.8** | +21.8 |
+| retail_compounder | overlap_8l_top25 | 0.0 | **21.1** | +21.1 |
+| fertchem_rubber | rubber/ortho_8l | 0.0 | **6.7** | +6.7 |
+| logistics_port | ship/ortho_8l | 1.6 | **2.3** | +0.7 |
+| energy | util/ortho_8l · renew/ortho_8l | 0.0 · 1.6 | **0.0** · **0.0** | 0.0 · −1.6 |
+| tech | basket_lit/ortho_8l | 0.0 | **0.0** | 0.0 |
+| textile | ortho_8l | 2.0 | **1.0** | −1.0 |
+| fnb | seafood/ortho_8l | 2.4 | **0.0** | −2.4 |
+| securities | ortho_8l | 6.9 | **4.5** | −2.4 |
+| steel_buildmat | cement/ortho_8l | 4.8 | **0.0** | −4.8 |
+| re_compounder | orthogonality/vs_8l_top25 | 8.7 | **0.5** | −8.2 |
+| livestock | ortho_8l | 11.7 | **0.0** | −11.7 |
+| construction | ortho_8l | 16.7 | **0.0** | −16.7 |
+| energy | oilsvc/ortho_8l | 29.1 | **5.0** | −24.1 |
+| steel_buildmat | steel/ortho_8l | 20.0 | **0.0** | −20.0 |
+
+Mọi số `vs custom30V` **không đổi** (kiểm: re_compounder `vs_custom30v` 19.1 ở cả hai nhánh) —
+đúng như kỳ vọng, chỉ nhánh 8L bị chạm.
+
+**Hệ quả nghiên cứu (đây mới là phần quan trọng, không phải con số):**
+- **7 screen từng được ghi là "trực giao với 8L" thật ra TRÙNG 21–83%**: tech G_VN 83.3, steel SPEC
+  73.2, pharma 69.0, fnb FMCG 68.8, bank_compounder 64.1, aviation INFRA 53.4, logistics PORT 37.1
+  (+ compounder 25.8, retail 21.1, fertchem CHEM 25.6 / FERT 33.1). Luận điểm "sleeve này bổ sung
+  alpha MỚI, không lặp 8L" **KHÔNG còn được suy ra** cho các sleeve đó.
+- Chiều ngược cũng có thật: 6 screen **trực giao HƠN** so với số cũ (construction 16.7→0.0, steel
+  STEEL 20.0→0.0, energy OILSVC 29.1→5.0, livestock 11.7→0.0, re_compounder 8.7→0.5, cement
+  4.8→0.0). Đây là các sleeve chu kỳ/chất lượng thấp: rổ cũ (25 mã rating 4–5) chính là nhóm chúng
+  trùng; rổ đúng (rating 1–2) thì không.
+- Vì CSV/NAV không đổi, **không có kết luận GO/NO-GO nào bị lật** — cái bị lật là lý do "đáng giữ
+  vì trực giao".
+
+**Rổ "8L top-25" cũ vs mới (146 kỳ rebal 2014-01-27 → 2026-09-25, script
+`research/screen_regen_20260927/top25_inout.py`, tái lập độc lập đúng biểu thức của screen):**
+- rating trung bình rổ: **4.504 (bug) → 1.252 (đúng)**; overlap trung bình **0.01/25**;
+  **145/146 kỳ hai rổ RỜI NHAU HOÀN TOÀN**.
+- Vào nhiều nhất: VNM 146 kỳ, MBB 120, FPT 118, VCB 110, BMP 107, HDB 99, ACB 97, VCS 96, GAS 95,
+  SAB 93, DHG 91 (178 mã khác nhau).
+- Ra nhiều nhất: HAG 116, SBT 110, EIB 96, STB 93, HSG 92, CII 91, MSN 90, NKG 86, VIC 83, NVL 78
+  (192 mã khác nhau).
+- Rổ CŨ chứa 8 mã trong danh sách **BANNED vĩnh viễn** (GEG, HSG, HVN, KSF, NKG, NVL, PC1, VVS) —
+  tự nó là dấu hiệu rổ sai chiều.
+- Kỳ cuối 2026-09-25 (n=192 mã ADV≥1 tỷ): CŨ `APS CEO CII DCL EIB EVS GEX HAG HTN IDJ KDH MSN NLG
+  NVL PDR PVD PVS SBT SHS SSB STB TCO VC3 VIC VPI` → MỚI `ACB ACV BVH CTG FPT GAS GMD GVR HAH IDC
+  MBB MBS MCH NNC PNJ PVT SSI TCB TLG TOS VCB VHM VIX VNM VRE`.
+
+**Cảnh báo dùng lại:** mọi phân tích/dispatch trích số "trực giao 8L" từ registry với ngày TRƯỚC
+2026-09-27 mà không có dấu `[SỬA 2026-09-27]` là đang đọc số theo bug.
