@@ -42,7 +42,22 @@ import sys
 import tempfile
 
 MIKE_BIN = os.path.dirname(os.path.abspath(__file__))
-WC_ROOT = os.path.dirname(os.path.dirname(MIKE_BIN))
+sys.path.insert(0, MIKE_BIN)
+import wc_paths  # noqa: E402
+
+# Dùng CHÍNH hàm mà 3 script bị kiểm dùng (`wc_paths.find_wc_root`), KHÔNG đếm cấp thư mục.
+# Trước 2026-09-27 dòng này là `dirname(dirname(MIKE_BIN))` ⇒ backup/restore của selfcheck và file
+# mà `daily_nav_snapshot.py` GHI có thể là HAI cây khác nhau, và lời hứa "không bao giờ để lại
+# thay đổi thật trên đĩa" ở đầu file bị VI PHẠM IM LẶNG.
+# Đo thật (2026-09-27, job Taylor_20260927_103434): chạy selfcheck này từ một checkout KHÔNG nằm ở
+# `<gốc>/WorkingClaude/mike` trong khi env có `WC_ROOT=/home/trido/thanhdt/WorkingClaude` (chính
+# `bin/dispatch.sh` export biến này vào MỌI phiên agent) ⇒ selfcheck backup/restore bản
+# `<checkout>/../data/...`, còn `daily_nav_snapshot.py` (dùng find_wc_root — env override thắng)
+# GHI vào `/home/trido/thanhdt/WorkingClaude/data/execution_logs/nav_history_*.csv` THẬT. Quan sát
+# được: 1 dòng NAV ngày 2026-09-27 (CHỦ NHẬT — không phải phiên) bị thêm vào lịch sử THẬT của CẢ
+# SpaceX và ZaloPay, KHÔNG được restore, phải vá tay. Đó là nguồn DUY NHẤT của §31/WTD/MTD/
+# since-inception ⇒ một dòng rác ở đây đi thẳng vào báo cáo nhà đầu tư.
+WC_ROOT = wc_paths.find_wc_root(__file__)
 EXEC_DIR = os.path.join(WC_ROOT, "data", "execution_logs")
 ACCOUNTS = ["SpaceX", "ZaloPay"]
 
