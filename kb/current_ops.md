@@ -14,6 +14,24 @@
 - **ZaloPay** (DNSE 0001743768): V2.4 LIVE từ 2026-07-06, CASH-ONLY. **DGC EXCLUDED** (`excluded_tickers`, HOSE hạn chế giao dịch đến ~11-12/2026). Sizing dùng `active_nav`. Cùng target parking 80% (không có override riêng).
 - **AlphaLens Paper**: FPT/ACB/MBB/HDB, tracking đến 2026-09-30. DollarBill phụ trách.
 - **Trứng vàng** (`egg.totalValue`): SpaceX ~100,9tr / ZaloPay ~102,2tr (đo 09-27), đã cộng NAV tự động — KHÔNG phải `availableCash`. ⚠️ **RÚT VỀ TRONG NGÀY, KHÔNG phải T+1** (đính chính 2026-09-27, Mafee job `Mafee_20260927_091828`: SpaceX 17/09 egg 100,9tr→51,0tr VÀ `availableCash` +49,8tr trong CÙNG snapshot 11:00:11 phiên sáng ⇒ tiền dùng mua được ngay phiên đó). ⚠️ **KHÔNG phải tiền gửi ngân hàng** — DNSE mô tả là "Sinh Lời Theo Ngày" qua giao dịch TRÁI PHIẾU niêm yết ⇒ không có bảo hiểm tiền gửi, phụ thuộc tổ chức phát hành; lãi đo thật **8,543%/năm** và DNSE **tự khấu trừ TNCN trước khi trả** nên số đó đã là net. Không thấy trần số dư (ZaloPay vượt 102tr vẫn cộng lãi phẳng); "Tài khoản Không Ngủ" là SẢN PHẨM KHÁC (trần 30 tỷ), đừng lẫn. `manual_offbook_assets_vnd` ĐÃ ĐÓNG vĩnh viễn 07-23.
+  ⚠️ **ĐÍNH CHÍNH BẢN CHẤT 2026-09-27 (legal-vn, bus `dnse-trung-vang-legal-review-20260927`) — KHÔNG phải repo.**
+  Mô tả "bond repo" trước đó của Mike là SAI. Bằng chứng từ chính FAQ DNSE + 3 dấu hiệu gián tiếp
+  (phí lưu ký 0,3đ/trái phiếu/tháng, coupon về THẲNG TK khách, khách chịu thuế chuyển nhượng 0,1%):
+  khách **SỞ HỮU THẬT** trái phiếu niêm yết, **lưu ký tại VSDC**; cấu trúc = 2 giao dịch mua bán
+  dứt điểm + cam kết hợp đồng DNSE mua lại. ⇒ phần ĐANG GIỮ **không phải** claim không bảo đảm vào
+  DNSE. Ba rủi ro THẬT, khác nhau: (a) TCPH vỡ nợ ⇒ chủ nợ không bảo đảm (Luật Phá sản 2014 Đ54);
+  (b) cam kết mua lại của DNSE vô giá trị ⇒ **mắc kẹt tới đáo hạn / bán giá thị trường**, không mất
+  trắng; (c) tiền đang trên đường lúc DNSE vỡ nợ — **không tra được** điều luật nào tường minh loại
+  tiền khách khỏi khối tài sản phá sản (Đ89 LCK 2019 + TT121 Đ17-18 là nghĩa vụ HÀNH CHÍNH).
+  **Việt Nam KHÔNG CÓ Quỹ bảo vệ nhà đầu tư** (đề xuất 2014, không vào Luật CK 2019) — đây là kết
+  luận xác định, không phải "chưa tra được". Thuế: coupon **5%** + chuyển nhượng **0,1%** (TT111/2013;
+  TT92/2015 bỏ phương án 20%; 0,1% giữ sau 01/7/2026 theo L109/2025 + NĐ253/2026 + TT87/2026), khấu
+  trừ tại nguồn, **không quyết toán**. CTCK được phép làm việc này: TT121/2020 Đ28.3.
+  🔴 **2 CÂU CHƯA TRẢ LỜI ĐƯỢC, phải hỏi DNSE bằng VĂN BẢN**: (1) trái phiếu lưu ký đứng tên KHÁCH
+  hay nominee DNSE? (2) MÃ trái phiếu + TCPH cụ thể? — chưa biết (2) thì **không đo được tập trung
+  per-name**. Quyền yêu cầu sao kê chi tiết: TT121 Đ17-18. DNSE từ chối nêu mã = **red flag**.
+  Trần đề xuất (chưa user chốt): ~2% NAV/một TCPH (haircut 50% ⇒ max loss ≤1% NAV), sleeve ≤10% NAV
+  — mức hiện tại ~100,9tr / ~102,2tr **đã ở hoặc vượt nhẹ trần tổng**.
 
 ## Signal holds
 - **VPI/BAL**: signal_hold 08-19→09-16 ĐÃ GỠ 2026-09-16. Review dựa trên `amh-adaptivity-review-20260910.md` (Taylor job A/B/C + quant-skeptic): lý do gốc của HOLD (edge-health dashboard báo mom_200 FLIPPED) đã bị bác — kênh đó REFUTED cho quyết định BAL; mom_200 IC hồi phục dương Q2/2026. User duyệt RESUME 2026-09-16 23:19 ICT: "tuân theo chiến lược production đã duyệt, không cần điều chỉnh gì" (`decided_by: user`, bus `answer/bal-vpi-checkpoint-resume-decision`). VPI/BAL trở lại logic bình thường từ plan kế tiếp — không còn escalate riêng.
