@@ -2479,3 +2479,29 @@
 - [2026-09-27T13:54:35Z] Taylor/heartbeat — Taylor_20260927_131827: {"status": "still_running", "elapsed_min": 36, "job_id": "Taylor_20260927_131827", "source": "watcher"}
 - [2026-09-27T13:55:05Z] Taylor/heartbeat — Taylor_20260927_101335: {"status": "still_running", "elapsed_min": 221, "job_id": "Taylor_20260927_101335", "source": "watcher"}
 - [2026-09-27T13:55:28Z] Taylor/heartbeat — Taylor_20260927_131720: {"status": "still_running", "elapsed_min": 38, "job_id": "Taylor_20260927_131720", "source": "watcher"}
+
+## Consolidation 2026-09-27T14:07:02Z
+- [2026-09-27T13:55:39Z] Taylor/heartbeat — Taylor_20260927_131720: {"status": "in_progress", "note": "VIEC2 XONG (commit 6e9f11f1 + bus finding). VIEC3: dang pin BASKET_CA_SNAPSHOT vao basket_price_basis_selfcheck.py; da xac nhan leg PRE-EDIT (ebeacad^) KHONG doc corp-action nen chi post/ctl leg can pin. Dang do runtime 1 lan chay (>2 phut)."}
+- [2026-09-27T13:56:05Z] Taylor/heartbeat — Taylor_20260927_101335: {"status": "still_running", "elapsed_min": 222, "job_id": "Taylor_20260927_101335", "source": "watcher"}
+- [2026-09-27T13:56:28Z] Taylor/heartbeat — Taylor_20260927_131720: {"status": "still_running", "elapsed_min": 39, "job_id": "Taylor_20260927_131720", "source": "watcher"}
+- [2026-09-27T13:57:05Z] Taylor/heartbeat — Taylor_20260927_101335: {"status": "still_running", "elapsed_min": 223, "job_id": "Taylor_20260927_101335", "source": "watcher"}
+- [2026-09-27T13:57:28Z] Taylor/heartbeat — Taylor_20260927_131720: {"status": "still_running", "elapsed_min": 40, "job_id": "Taylor_20260927_131720", "source": "watcher"}
+- [2026-09-27T13:58:06Z] Taylor/heartbeat — Taylor_20260927_101335: {"status": "still_running", "elapsed_min": 224, "job_id": "Taylor_20260927_101335", "source": "watcher"}
+- [2026-09-27T13:58:28Z] Taylor/heartbeat — Taylor_20260927_131720: {"status": "still_running", "elapsed_min": 41, "job_id": "Taylor_20260927_131720", "source": "watcher"}
+- [2026-09-27T13:59:06Z] Taylor/heartbeat — Taylor_20260927_101335: {"status": "still_running", "elapsed_min": 225, "job_id": "Taylor_20260927_101335", "source": "watcher"}
+- [2026-09-27T13:59:28Z] Taylor/heartbeat — Taylor_20260927_131720: {"status": "still_running", "elapsed_min": 42, "job_id": "Taylor_20260927_131720", "source": "watcher"}
+- [2026-09-27T14:00:06Z] Taylor/heartbeat — Taylor_20260927_101335: {"status": "still_running", "elapsed_min": 226, "job_id": "Taylor_20260927_101335", "source": "watcher"}
+- [2026-09-27T14:00:28Z] Taylor/heartbeat — Taylor_20260927_131720: {"status": "still_running", "elapsed_min": 43, "job_id": "Taylor_20260927_131720", "source": "watcher"}
+- [2026-09-27T14:01:06Z] Taylor/heartbeat — Taylor_20260927_101335: {"status": "still_running", "elapsed_min": 227, "job_id": "Taylor_20260927_101335", "source": "watcher"}
+- [2026-09-27T14:01:28Z] Taylor/heartbeat — Taylor_20260927_131720: {"status": "still_running", "elapsed_min": 44, "job_id": "Taylor_20260927_131720", "source": "watcher"}
+- [2026-09-27T14:02:06Z] Taylor/heartbeat — Taylor_20260927_101335: {"status": "still_running", "elapsed_min": 228, "job_id": "Taylor_20260927_101335", "source": "watcher"}
+- [2026-09-27T14:02:28Z] Taylor/heartbeat — Taylor_20260927_131720: {"status": "still_running", "elapsed_min": 45, "job_id": "Taylor_20260927_131720", "source": "watcher"}
+- [2026-09-27T14:03:06Z] Taylor/heartbeat — Taylor_20260927_101335: {"status": "still_running", "elapsed_min": 229, "job_id": "Taylor_20260927_101335", "source": "watcher"}
+- [2026-09-27T14:03:29Z] Taylor/heartbeat — Taylor_20260927_131720: {"status": "still_running", "elapsed_min": 46, "job_id": "Taylor_20260927_131720", "source": "watcher"}
+- [2026-09-27T14:04:06Z] Taylor/heartbeat — Taylor_20260927_101335: {"status": "still_running", "elapsed_min": 230, "job_id": "Taylor_20260927_101335", "source": "watcher"}
+- [2026-09-27T14:04:29Z] Taylor/heartbeat — Taylor_20260927_131720: {"status": "still_running", "elapsed_min": 47, "job_id": "Taylor_20260927_131720", "source": "watcher"}
+- [2026-09-27T14:05:06Z] Taylor/heartbeat — Taylor_20260927_101335: {"status": "still_running", "elapsed_min": 231, "job_id": "Taylor_20260927_101335", "source": "watcher"}
+- [2026-09-27T14:05:29Z] Taylor/heartbeat — Taylor_20260927_131720: {"status": "still_running", "elapsed_min": 48, "job_id": "Taylor_20260927_131720", "source": "watcher"}
+- [2026-09-27T14:05:48Z] Taylor/heartbeat — Taylor_20260927_131720: {"status": "in_progress", "note": "attempt2 tiep noi: VIEC1+VIEC2 da co bus finding; dang hoan tat VIEC3 (determinism 6 run dang chay, PID 3037460 con song tu attempt1)"}
+- [2026-09-27T14:06:07Z] Taylor/heartbeat — Taylor_20260927_101335: {"status": "still_running", "elapsed_min": 232, "job_id": "Taylor_20260927_101335", "source": "watcher"}
+- [2026-09-27T14:06:29Z] Taylor/heartbeat — Taylor_20260927_131720: {"status": "still_running", "elapsed_min": 49, "job_id": "Taylor_20260927_131720", "source": "watcher"}
