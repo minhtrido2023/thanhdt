@@ -54,6 +54,36 @@ CORP_ACTIONS_FILE = os.path.join(WC_ROOT, "data", "corp_actions.json")
 
 import corp_actions  # noqa: E402 — validate() ép ex_date/qty_multiplier hợp lệ, xem
 # confirmed_qty_multiplier_after() (§29 vòng 6, Việc 2 blocker 1)
+from park_holdings import (_stock_block_all_zero, _cash_fields_all_zero,   # noqa: E402
+                           _cash_fields_inconsistent)
+# §25 hệ quả 2 (code-quality 2026-09-27): TÁI DÙNG cả BA guard tiền của park_holdings, KHÔNG
+# copy tay. Bản cũ chỉ có bản copy cục bộ `_stock_all_zero` (tương đương
+# `_stock_block_all_zero`) ⇒ hở đúng hai lối park_holdings đã ghi lại: (a) lỗi feed chỉ ăn ba
+# field tiền trong khi `depositInterest` còn sống, (b) `totalCash < availableCash` (vi phạm bất
+# biến kế toán). Alias giữ tên cũ cho `previous_balance()` và để hai file KHÔNG thể lệch nữa —
+# docstring park_holdings.py:148 đã ghi "sửa một nơi, sửa cả hai (đã lệch 1 lần)".
+_stock_all_zero = _stock_block_all_zero
+
+
+def cash_block_reject_reason(stock):
+    """None = block tiền của bản ghi `balances` đáng tin; str = LÝ DO từ chối (§25).
+
+    Ba guard, mỗi cái bắt một hình dạng lỗi feed KHÁC nhau mà hai cái còn lại bỏ lọt — lý do
+    đầy đủ nằm ở docstring từng hàm trong `park_holdings.py` (quant-skeptic REFUTED 2 vòng
+    2026-08-09 mới ra đủ ba). Ở đây hậu quả của việc tin block tiền hỏng là ghi một dòng NAV
+    SAI vào `nav_history_{account}.csv` — mọi báo cáo và mọi mẫu số sizing sau đó đọc nó.
+    """
+    if _stock_block_all_zero(stock):
+        return ("block `stock` TOÀN SỐ 0 (totalCash=0, totalDebt=0, và mọi field số khác =0) — "
+                "đây là lỗi API tạm thời của DNSE, KHÔNG phải NAV thật về 0")
+    if _cash_fields_all_zero(stock):
+        return ("cả totalCash/totalDebt/availableCash đều = 0 trong khi field khác vẫn sống "
+                "(vd depositInterest ≠ 0) — lỗi feed chỉ ăn phần tiền")
+    if _cash_fields_inconsistent(stock):
+        return (f"totalCash {float(stock['totalCash']):,.0f}đ < availableCash "
+                f"{float(stock['availableCash']):,.0f}đ — vi phạm bất biến kế toán "
+                f"(totalCash luôn CHỨA availableCash) ⇒ block tiền không đáng tin")
+    return None
 
 
 def confirmed_qty_multiplier_after(ticker, asof_date):
@@ -620,12 +650,6 @@ def latest_balance(raw_path, account_no=None):
     return latest
 
 
-def _stock_all_zero(stock):
-    """Khối `stock` TOÀN SỐ 0 = lỗi API tạm thời của DNSE (xem invariant trong main())."""
-    nums = [v for v in stock.values() if isinstance(v, (int, float)) and not isinstance(v, bool)]
-    return bool(nums) and not any(nums)
-
-
 def previous_balance(account_no, date):
     """Bản ghi 'balances' hợp lệ MỚI NHẤT của account, ở phiên TRƯỚC `date`.
 
@@ -950,13 +974,13 @@ def main():
     # Tài khoản live có cổ phiếu thì depositInterest/depositFeeAmount gần như không bao giờ
     # đồng loạt bằng 0 → toàn-0 = dấu hiệu lỗi feed rõ ràng. FAIL-SAFE: từ chối ghi, KHÔNG
     # tự đoán số đúng (người chạy lại script/lấy bản đọc tươi hôm sau mới là nguồn thật).
-    if _stock_all_zero(stock):
-        print(f"❌ [{args.date}] Balance record ({bal.get('ts')}) trả về TOÀN SỐ 0 "
-              f"(totalCash=0, totalDebt=0, và mọi field số khác =0) — đây là lỗi API tạm "
-              f"thời của DNSE, KHÔNG phải NAV thật về 0. KHÔNG tính NAV để tránh ghi số sai "
-              f"vào nav_history. Chạy lại script để lấy bản đọc balance tươi; nếu cuối ngày "
-              f"vẫn toàn 0, lấy bản đọc đầu phiên hôm sau (TRƯỚC cú khớp đầu tiên) và điền "
-              f"tay sau khi đối chiếu.", file=sys.stderr)
+    _cash_reject = cash_block_reject_reason(stock)
+    if _cash_reject:
+        print(f"❌ [{args.date}] Balance record ({bal.get('ts')}) có block tiền KHÔNG đáng tin: "
+              f"{_cash_reject}. KHÔNG tính NAV để tránh ghi số sai vào nav_history. Chạy lại "
+              f"script để lấy bản đọc balance tươi; nếu cuối ngày vẫn vậy, lấy bản đọc đầu "
+              f"phiên hôm sau (TRƯỚC cú khớp đầu tiên) và điền tay sau khi đối chiếu.",
+              file=sys.stderr)
         return 2
 
     cash, debt = stock["totalCash"], stock["totalDebt"]

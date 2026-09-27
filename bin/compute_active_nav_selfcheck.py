@@ -533,6 +533,62 @@ check("K4 CHỨNG MINH NGƯỢC: lần chạy BÌNH THƯỜNG sau đó (tmp mồ
 _shutil.rmtree(_k_tmp, ignore_errors=True)
 
 print()
+print("L. Thiếu giá vị thế ĐANG NẮM sau CẢ HAI nguồn ⇒ rc=3, KHÔNG ghi file "
+      "(code-quality 2026-09-27 [F2])")
+# Bản cũ: `continue` + ⚠️ + rc=0 ⇒ mã đó bị loại âm thầm khỏi total_mv, active_nav (mẫu số
+# sizing) ghi THIẾU mà consumer coi là tươi; cron_health_check chỉ khớp `^\s*❌` nên mù hẳn.
+_l_tmp = _tempfile.mkdtemp(prefix="can_sc_l_")
+_l_out = os.path.join(_l_tmp, "active_nav_LSELFCHK.json")
+_l_cash, _l_detail = can.cash_basis(stock(totalCash=200_000_000, totalDebt=0,
+                                         availableCash=200_000_000, depositInterest=1))
+_l_prev = {"computed_at": "2026-09-11", "total_stock_value": 1.0, "active_nav": 111.0,
+           "marker": "L_PRIOR"}
+
+
+def _l_run(positions, prices):
+    _json.dump(_l_prev, open(_l_out, "w", encoding="utf-8"))
+    saved = (can.get_account_profile, can.live_balance_and_positions, can.resolve_prices, sys.argv)
+    can.get_account_profile = lambda label: {"account_id": "LSC"}
+    can.live_balance_and_positions = lambda aid, label: (_l_cash, positions, _l_detail, 0.0)
+    can.resolve_prices = lambda tickers, asof: (prices, {t: "bq_close" for t in prices}, None)
+    # --asof QUÁ KHỨ + --out tạm: đúng lối section J dùng, để không phụ thuộc ngày hệ thống và
+    # không kích hoạt cổng §exdate_frame (chỉ chạy ở nhánh asof=hôm nay).
+    sys.argv = ["compute_active_nav.py", "--account", "LSELFCHK", "--out", _l_out,
+                "--asof", "2026-09-19"]
+    code, err = None, None
+    try:
+        can.main()
+    except SystemExit as e:
+        code = e.code
+    except BaseException as e:  # noqa: BLE001
+        err = f"{type(e).__name__}: {e}"
+    finally:
+        (can.get_account_profile, can.live_balance_and_positions, can.resolve_prices,
+         sys.argv) = saved
+    return _json.load(open(_l_out, encoding="utf-8")), code, err
+
+
+try:
+    _l_res, _l_code, _l_err = _l_run({"AAA": {"total": 1000}, "BBB": {"total": 500}},
+                                     {"AAA": 50_000})
+    check("L1 vị thế BBB (KL 500) không có giá ở CẢ HAI nguồn ⇒ rc=3, KHÔNG exception",
+          _l_code == 3 and _l_err is None, f"code={_l_code} err={_l_err}")
+    check("L2 file canonical GIỮ NGUYÊN bản trước (không ghi active_nav thiếu 1 mã)",
+          _l_res == _l_prev, f"res={_l_res}")
+    _l_res, _l_code, _l_err = _l_run({"AAA": {"total": 1000}, "BBB": {"total": 500}},
+                                     {"AAA": 50_000, "BBB": 20_000})
+    check("L3 CHỨNG MINH NGƯỢC: đủ giá cả 2 mã ⇒ ghi bình thường, total_stock_value = 60tr",
+          _l_code is None and _l_err is None and _l_res.get("total_stock_value") == 60_000_000,
+          f"code={_l_code} err={_l_err} res={ {k: _l_res.get(k) for k in ('total_stock_value',)} }")
+    _l_res, _l_code, _l_err = _l_run({"AAA": {"total": 1000}, "ZERO": {"total": 0}},
+                                     {"AAA": 50_000})
+    check("L4 KL = 0 mà thiếu giá KHÔNG chặn (không đóng góp giá trị nào ⇒ chặn là chặn oan)",
+          _l_code is None and _l_err is None and _l_res.get("total_stock_value") == 50_000_000,
+          f"code={_l_code} err={_l_err}")
+finally:
+    _shutil.rmtree(_l_tmp, ignore_errors=True)
+
+print()
 if fails:
     print(f"❌ {len(fails)} FAILED: {fails}")
     sys.exit(1)

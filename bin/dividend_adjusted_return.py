@@ -143,8 +143,50 @@ _GCP_ENV = {**os.environ,
             "CLOUDSDK_CONFIG": os.environ.get("CLOUDSDK_CONFIG",
                                               "/home/trido/thanhdt/gcloud_dtienthanh"),
             "PATH": os.environ.get("PATH", "") + f":{_GCP_SDK_BIN}"}
+# CỐ Ý là đường dẫn CANONICAL tuyệt đối, KHÔNG phải `wc_paths.find_wc_root(__file__)` như các
+# script anh em (code-quality 2026-09-27 đề xuất đổi — TỪ CHỐI, có bằng chứng): mỗi worktree của
+# repo NGOÀI mang một cây `WorkingClaude/data/execution_logs` RIÊNG và KHUYẾT (đo 2026-09-27:
+# 198 file trong `wt-cq20260927` vs 956 file ở cây canonical). Đây là script sinh SỐ TIỀN cho
+# báo cáo nhà đầu tư từ sổ khớp lệnh broker ⇒ neo theo "gốc của tôi" sẽ đọc sổ thiếu và ra tỉ
+# suất sai một cách IM LẶNG khi ai đó chạy nó từ worktree. Sổ broker chỉ có MỘT bản thật.
 EXEC_LOG_DIR = "/home/trido/thanhdt/WorkingClaude/data/execution_logs"
-ACCOUNTS = {"SpaceX": "0002023347", "ZaloPay": "0001743768"}
+
+# label → account_no. §7 (config.py:359 `live_dnse_labels` docstring): thêm account mới vào
+# `secrets/trading_bot_accounts.json` là TỰ ĐỘNG được nhận, KHÔNG sửa code. Bản cũ hardcode 2
+# account ⇒ bật account thứ 3 (RocketX đã có sẵn trong file, enabled=false) thì nó KHÔNG có
+# phương trình nào trong bộ giải tiền broker và `report_return_gate.py:375` (`[lb for lb in
+# dar.ACCOUNTS if lb in name]`) lặng lẽ KHÔNG BAO GIỜ gắn nhãn cho báo cáo của nó.
+_ACCOUNTS_OFFLINE_FIXTURE = {"SpaceX": "0002023347", "ZaloPay": "0001743768"}
+
+
+def _load_accounts_map(accounts_path: str = None) -> dict:
+    """{label: account_no} của mọi account enabled + mode=live trong trading_bot_accounts.json.
+
+    Đọc được nhưng RỖNG ⇒ vẫn trả rỗng (trạng thái thật "không có account live nào"), KHÔNG
+    rơi về fixture: rơi về = tự bịa ra 2 account không còn tồn tại. Chỉ KHÔNG đọc được config
+    (thiếu secrets — môi trường selfcheck offline) mới dùng fixture, và nói ra ở stderr.
+    """
+    try:
+        sys.path.insert(0, "/home/trido/thanhdt/WorkingClaude")
+        from trading_bot import config as _cfg
+        # TÁI DÙNG `live_dnse_labels()` làm định nghĩa "account live thật" — cùng nguồn mà 9
+        # script cron dùng (`for_each_live_account.sh`, `bq_freshness_check.sh`...), không tự
+        # dựng lại bộ lọc enabled/mode/broker. `load_accounts()` trả CẢ profile disabled (bộ
+        # lọc `enabled` nằm ở `pick_accounts`) — đo thật: RocketX (enabled=false) LỌT nếu chỉ
+        # gọi `load_accounts`.
+        _kw = {"path": accounts_path} if accounts_path else {}
+        labels = set(_cfg.live_dnse_labels(**_kw))
+        profiles = _cfg.load_accounts(_cfg.load_config(), **_kw)
+        return {p["label"]: str(p["account_id"]) for p in profiles
+                if p["label"] in labels and p.get("account_id")}
+    except Exception as exc:                       # noqa: BLE001 — thiếu config ⇒ nói ra, đừng đoán
+        print(f"⚠️  không đọc được trading_bot_accounts.json ({type(exc).__name__}: {exc}) — "
+              f"dùng fixture offline {sorted(_ACCOUNTS_OFFLINE_FIXTURE)}; nếu đang chạy THẬT thì "
+              f"account mới sẽ KHÔNG được nhận", file=sys.stderr)
+        return dict(_ACCOUNTS_OFFLINE_FIXTURE)
+
+
+ACCOUNTS = _load_accounts_map()
 
 # Thuế TNCN trên cổ tức tiền mặt của CÁ NHÂN cư trú — khấu trừ tại nguồn lúc chi trả.
 # TT 111/2013/TT-BTC Đ.10 + Đ.25; Luật TNCN 109/2025/QH15 (hiệu lực 01/07/2026) giữ nguyên 5%.
@@ -1875,6 +1917,42 @@ def _selfcheck() -> int:
         "MUTATION-GUARD unavailable_still_published: vendor 0 dòng là chuyện THƯỜNG (K1 đo 25/62) "
         f"và KHÔNG được hạ cấp sự kiện đã đối soát broker — đang kind={a26c.kind!r}, "
         f"cash_per_share={a26c.cash_per_share}.")
+
+    print("27) ACCOUNTS đọc từ trading_bot_accounts.json, KHÔNG hardcode (§7, code-quality "
+          "2026-09-27):")
+    import tempfile as _tf
+    _acc_tmp = _tf.mkdtemp(prefix="dar_acc_")
+    _acc_file = os.path.join(_acc_tmp, "accounts.json")
+    with open(_acc_file, "w", encoding="utf-8") as _f:
+        json.dump({"accounts": [
+            {"label": "SpaceX", "account_id": "0002023347", "mode": "live", "enabled": True,
+             "broker": "dnse"},
+            {"label": "ZaloPay", "account_id": "0001743768", "mode": "live", "enabled": True,
+             "broker": "dnse"},
+            {"label": "RocketX", "account_id": "0002023348", "mode": "live", "enabled": True,
+             "broker": "dnse"},
+            {"label": "SleepyX", "account_id": "0002023349", "mode": "live", "enabled": False,
+             "broker": "dnse"},
+            {"label": "ab_dip", "account_id": None, "mode": "paper", "enabled": True,
+             "broker": "phs"}]}, _f)
+    _m = _load_accounts_map(accounts_path=_acc_file)
+    same("account thứ BA vừa bật (enabled=true) TỰ ĐỘNG có trong ACCOUNTS — bản hardcode "
+         "KHÔNG BAO GIỜ thấy nó", _m.get("RocketX"), "0002023348")
+    same("2 account live cũ vẫn đúng account_no",
+         (_m.get("SpaceX"), _m.get("ZaloPay")), ("0002023347", "0001743768"))
+    same("account enabled=false KHÔNG lọt (bộ lọc `enabled` nằm ở pick_accounts/"
+         "live_dnse_labels, load_accounts trả CẢ disabled)", "SleepyX" in _m, False)
+    same("account paper/phs KHÔNG lọt (bộ giải dùng sổ khớp DNSE)", "ab_dip" in _m, False)
+    _bad = os.path.join(_acc_tmp, "corrupt.json")
+    with open(_bad, "w", encoding="utf-8") as _f:
+        _f.write("{khong phai json")
+    same("config HỎNG ⇒ rơi về fixture offline 2 account + cảnh báo stderr (không nổ, không "
+         "trả rỗng âm thầm)", _load_accounts_map(accounts_path=_bad),
+         _ACCOUNTS_OFFLINE_FIXTURE)
+    same("ACCOUNTS ở module KHÔNG phải chính object fixture (chứng minh đã đi qua config)",
+         ACCOUNTS is _ACCOUNTS_OFFLINE_FIXTURE, False)
+    _shutil_rm = __import__("shutil").rmtree
+    _shutil_rm(_acc_tmp, ignore_errors=True)
 
     print(f"\n=== SELFCHECK: {passed} PASS / {failed} FAIL ===")
     return 1 if failed else 0

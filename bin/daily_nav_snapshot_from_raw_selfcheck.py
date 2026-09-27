@@ -365,5 +365,36 @@ with tempfile.TemporaryDirectory() as tmp:
     check("(11c) ghi thành công thì thay được nội dung",
           json.load(open(f, encoding="utf-8"))["rc"] == 5)
 
+print("12. cash_block_reject_reason — CẢ BA guard §25 (code-quality 2026-09-27)")
+# Bản cũ chỉ có bản copy cục bộ `_stock_all_zero` ⇒ hai hình dạng lỗi feed (12b)/(12c) LỌT
+# NGUYÊN VẸN và ghi một dòng NAV sai vào nav_history. park_holdings.py đã có đủ ba guard từ
+# 2026-08-09 (quant-skeptic REFUTED 2 vòng mới ra đủ) — đây là tái dùng, không viết lại.
+import park_holdings as _PH  # noqa: E402
+
+r = D.cash_block_reject_reason
+check("(12a) block stock TOÀN SỐ 0 ⇒ từ chối",
+      r({"totalCash": 0, "totalDebt": 0, "availableCash": 0, "depositInterest": 0}) is not None)
+check("(12b) CHỈ ba field tiền = 0, depositInterest còn sống ⇒ từ chối "
+      "(guard _cash_fields_all_zero; bản cũ LỌT)",
+      r({"totalCash": 0, "totalDebt": 0, "availableCash": 0, "depositInterest": 318.0})
+      is not None)
+check("(12c) totalCash 0 < availableCash 5.000.000 ⇒ từ chối "
+      "(bất biến kế toán; bản cũ LỌT)",
+      r({"totalCash": 0, "totalDebt": 0, "availableCash": 5_000_000.0,
+         "depositInterest": 318.0}) is not None)
+check("(12d) block tiền LÀNH MẠNH (số thật SpaceX 2026-08-07) ⇒ None, không chặn oan",
+      r({"totalCash": 203_656_265.0, "totalDebt": 0.0, "availableCash": 4_821_143.0,
+         "depositInterest": 1_200.0}) is None)
+check("(12e) 0 đồng tiền mặt HỢP LỆ (availableCash=0 nhưng totalDebt sống) ⇒ None",
+      r({"totalCash": 0.0, "totalDebt": 50_000_000.0, "availableCash": 0.0,
+         "depositInterest": 318.0}) is None)
+check("(12f) ba guard là CHÍNH hàm của park_holdings, không phải bản copy "
+      "(chống lệch lại — park_holdings.py:148)",
+      D._stock_block_all_zero is _PH._stock_block_all_zero
+      and D._cash_fields_all_zero is _PH._cash_fields_all_zero
+      and D._cash_fields_inconsistent is _PH._cash_fields_inconsistent)
+check("(12g) alias `_stock_all_zero` (previous_balance dùng) trỏ về guard đã import",
+      D._stock_all_zero is _PH._stock_block_all_zero)
+
 print(f"\n{len(PASS)} PASS, {len(FAIL)} FAIL")
 sys.exit(1 if FAIL else 0)
