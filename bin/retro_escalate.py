@@ -65,7 +65,21 @@ TOPIC_PREFIX = "retro-pattern-recurring-"
 # Đuôi ĐẾM: số ở CUỐI, đơn vị tuỳ chọn, dấu phân cách tuỳ chọn ở cả 2 phía của số. Phủ
 # CẢ dạng dính (`-2days`) LẪN dạng có gạch (`-2-days`) — cả hai đều CÓ THẬT trên bus
 # (`retro-pattern-recurring-2-days` 08-09, `…-nav-price-xcheck-gate-2-days` 09-09).
-_COUNTER_TAIL = re.compile(r"[-_ ]?\d+[-_ ]?(?:days?|retros?|lan|times?|x)?$", re.IGNORECASE)
+_COUNTER_UNIT = r"(?:days?|d|ngay|ng\u00e0y|retros?|l[a\u1ea7]n|times?|x)?"
+_COUNTER_TAIL = re.compile(r"[-_ ]?\d+[-_ ]?" + _COUNTER_UNIT + "$", re.IGNORECASE)
+# CÒN SÓT CÓ Ý THỨC (arch-review vòng 2, ghi chú không chặn merge): bộ đếm ĐỨNG TRƯỚC
+# phần mô tả (`…-2days-selfreport-vs-artifact`, có thật 2026-08-26 nhưng đã đóng) không
+# bị bắt — bắt nó đồng nghĩa cấm mọi số ở giữa slug, đắt hơn lợi. Nếu hình thái đó sống
+# lại thì thêm ca vào selfcheck trước, đừng nới regex mù.
+
+# Tiền tố topic của nhánh SKIP. Xuất thành HẰNG vì có 3 nơi phải khớp nhau: chính file
+# này, ca selfcheck, và chuỗi grep trong daily_retro.sh (guard chống-trùng bước 3).
+SKIP_STATUS_PREFIX = "retro-pattern-recurring-update:"
+
+# Ví dụ tên HỢP LỆ in trong thông điệp từ chối. Là HẰNG để selfcheck feed ngược lại qua
+# `stable_topic()` — vòng 2 của arch-review bắt được đúng lỗi này: thông điệp gợi ý đúng
+# cái tên mà chính nó vừa từ chối, nên người làm theo hướng dẫn rơi vào vòng lặp.
+_REJECT_EXAMPLE = "acct0001743768-plan-t1-not-ready"
 
 
 def has_counter_tail(s):
@@ -94,8 +108,8 @@ def stable_topic(pattern):
             f"FAIL: --pattern {str(pattern)!r} kết thúc bằng một CON SỐ. Topic escalate "
             "phải ỔN ĐỊNH qua các ngày: số lần tái diễn đi vào --days (payload), không "
             "vào topic — đó chính là bug ack-topic-counter. Nếu con số là một phần của "
-            "danh tính (số tài khoản, id thread) thì viết lại cho nó không đứng cuối, "
-            "vd 'plan-t1-not-ready-acct0001743768'.")
+            "danh tính (số tài khoản, id thread) thì viết lại cho nó KHÔNG đứng cuối, "
+            f"vd {_REJECT_EXAMPLE!r}.")
     return TOPIC_PREFIX + s
 
 
@@ -185,12 +199,35 @@ def is_acked(q_agent, q_topic, q_ts, acks, now=None):
       sd  > 0 ⇒ phủ theo CỬA SỔ tính từ lúc ack, so với THỜI ĐIỂM CHẠY (a_until >= now).
     Khớp topic TUYỆT ĐỐI, chấp nhận thêm dạng "Agent/topic" — không prefix, không substring.
     """
+    return ack_of(q_agent, q_topic, q_ts, acks, now=now) is not None
+
+
+def ack_of(q_agent, q_topic, q_ts, acks, now=None):
+    """Ack ĐANG phủ câu hỏi này, hoặc None. Trả (kind, a_ts) với kind ∈ {window, permanent}.
+
+    `window` = ack khai suppress_days>0 (tự hết hạn, trần ACK_MAX_SUPPRESS_DAYS).
+    `permanent` = ack sd<=0, `_acked` coi là vĩnh viễn cho ĐÚNG instance đó. Phân biệt 2
+    loại vì chỉ loại `permanent` mới cần đường thoát ở `decide()` — vòng 2 của arch-review
+    bắt được: đo đường thoát bằng tuổi CÂU HỎI thì một ack sd=14 mới 1 ngày cũng bị đè.
+    """
     if not q_topic:
-        return False
+        return None
     now = now or dt.datetime.now(dt.timezone.utc)
     want = (q_topic, f"{q_agent}/{q_topic}")
-    return any(a in want and ((sd <= 0 and a_ts >= q_ts) or (sd > 0 and a_until >= now))
-               for a, a_ts, a_until, sd in acks)
+    best = None
+    for a, a_ts, a_until, sd in acks:
+        if a not in want:
+            continue
+        if sd > 0 and a_until >= now:
+            kind = "window"
+        elif sd <= 0 and a_ts >= q_ts:
+            kind = "permanent"
+        else:
+            continue
+        # `window` thắng `permanent`: nó có hạn tự nhiên nên không cần đường thoát.
+        if best is None or (best[0] == "permanent" and kind == "window"):
+            best = (kind, a_ts)
+    return best
 
 
 def _same_pattern(q_topic, topic):
@@ -204,9 +241,8 @@ def _same_pattern(q_topic, topic):
     q_topic = str(q_topic or "")
     if q_topic == topic:
         return True
-    return bool(re.fullmatch(
-        re.escape(topic) + r"[-_ ]?\d+[-_ ]?(?:days?|retros?|lan|times?|x)?",
-        q_topic, re.IGNORECASE))
+    return bool(re.fullmatch(re.escape(topic) + r"[-_ ]?\d+[-_ ]?" + _COUNTER_UNIT,
+                             q_topic, re.IGNORECASE))
 
 
 def decide(topic, bus_root, now=None):
@@ -231,16 +267,20 @@ def decide(topic, bus_root, now=None):
         return "POST", ("mọi câu hỏi cũ của pattern này ĐÃ có answer/decision — lần tái "
                         "diễn này là lần MỚI, phải escalate")
     ag, tp, ts = max(same, key=lambda r: r[2])
-    if is_acked(ag, tp, ts, acks, now=now):
-        # ĐƯỜNG THOÁT cho ack sd<=0: `_acked` coi nó là VĨNH VIỄN cho đúng instance đó,
-        # điều đúng với việc "không auto-dispatch lại câu hỏi CŨ". Nhưng dùng nguyên
-        # tính vĩnh viễn đó để chặn escalate của LẦN TÁI DIỄN MỚI thì một ack duy nhất
-        # khoá cả pattern mãi mãi. Trần = ACK_MAX_SUPPRESS_DAYS (cùng con số mà chính
-        # ops_health_check dùng để không ack nào tắt dispatch vĩnh viễn).
-        if (now - ts).days > ACK_MAX_SUPPRESS_DAYS:
-            return "POST", (f"câu hỏi {ag}/{tp} có ack nhưng đã {(now - ts).days} ngày tuổi "
-                            f"(> trần {ACK_MAX_SUPPRESS_DAYS}d) — ack không được khoá "
-                            f"pattern vĩnh viễn, escalate lại")
+    hit = ack_of(ag, tp, ts, acks, now=now)
+    if hit:
+        kind, a_ts = hit
+        # ĐƯỜNG THOÁT, CHỈ cho ack `permanent` (sd<=0): `_acked` coi loại đó là vĩnh viễn
+        # cho đúng instance — đúng với "không auto-dispatch lại câu hỏi CŨ", nhưng dùng
+        # nguyên tính vĩnh viễn đó để chặn escalate của LẦN TÁI DIỄN MỚI thì 1 ack khoá
+        # cả pattern mãi mãi. Đo bằng tuổi của ACK (không phải tuổi câu hỏi — vòng 2 của
+        # arch-review tái lập được: câu hỏi 20 ngày + ack mới 1 ngày sd=14 vẫn bị đè).
+        # Ack `window` không cần đường thoát: nó tự hết hạn, trần ACK_MAX_SUPPRESS_DAYS.
+        if kind == "permanent" and (now - a_ts).days > ACK_MAX_SUPPRESS_DAYS:
+            return "POST", (f"ack (không khai suppress_days) cho {ag}/{tp} đã "
+                            f"{(now - a_ts).days} ngày tuổi (> trần "
+                            f"{ACK_MAX_SUPPRESS_DAYS}d) — ack không được khoá pattern "
+                            f"vĩnh viễn, escalate lại")
         return "SKIP", (f"đã có câu hỏi {ag}/{tp} ({ts:%Y-%m-%dT%H:%M:%SZ}) ĐANG được ack "
                         f"`{ACK_PREFIX}` phủ — không mở câu hỏi thứ hai cho cùng pattern")
     return "POST", (f"đã có câu hỏi {ag}/{tp} ({ts:%Y-%m-%dT%H:%M:%SZ}) nhưng KHÔNG ack nào "
@@ -285,7 +325,7 @@ def main(argv=None):
     else:
         # KHÔNG im lặng: số ngày tái diễn mới vẫn phải nằm trên bus, chỉ là dưới dạng
         # status (không đánh thức kênh backlog) thay vì một câu hỏi trùng lặp.
-        etype, ev_topic = "status", f"retro-pattern-recurring-update:{topic}"
+        etype, ev_topic = "status", f"{SKIP_STATUS_PREFIX}{topic}"
         payload["suppressed_reason"] = reason
 
     cmd = [os.path.join(ROOT, "bin", "append_event.sh"), a.agent, etype, ev_topic,

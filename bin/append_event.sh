@@ -112,7 +112,7 @@ fi
 # tố topic của retro — không đụng bất kỳ topic nào khác của fleet.
 case "$etype" in question)
   if printf '%s' "$topic" \
-       | grep -qiE '^retro-pattern-recurring-.*[-_ ]?[0-9]+[-_ ]?(days?|retros?|lan|times?|x)?$'; then
+       | grep -qiE '^retro-pattern-recurring-.*[-_ ]?[0-9]+[-_ ]?(days?|d|ngay|ngày|retros?|l[aầ]n|times?|x)?$'; then
     die "topic escalate RETRO mang BỘ ĐẾM: $(printf '%q' "$topic")
   ack 'triaged-needs-human:' khớp topic TUYỆT ĐỐI nên bộ đếm trong topic làm ack hôm qua
   không phủ được escalation hôm nay (bug ack-topic-counter). Dùng ĐÚNG cổng:

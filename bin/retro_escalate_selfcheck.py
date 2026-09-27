@@ -23,6 +23,7 @@ tả khác nhau KHÔNG được gộp thành 1 topic), ca resolver, ca fail-loud
 Chạy: python3 bin/retro_escalate_selfcheck.py     (thêm `env -u TZ` khi kiểm lớp TZ)
 """
 import importlib.util
+import json
 import os
 import re
 import shutil
@@ -471,7 +472,7 @@ def case_daily_retro_guard_sees_skip_status():
     try:
         f = os.path.join(d, "Mike.jsonl")
         H.write_events(f, [
-            H.ev("Mike", "status", f"retro-pattern-recurring-update:{STABLE}", H.ago(0, 1)),
+            H.ev("Mike", "status", f"{RE.SKIP_STATUS_PREFIX}{STABLE}", H.ago(0, 1)),
             H.ev("Mike", "status", "chuyen-khac-khong-lien-quan", H.ago(0, 1)),
         ])
         r = subprocess.run([sys.executable, "-c", code, f, H.ago(1)],
@@ -498,11 +499,11 @@ def case_append_event_guard_is_mechanical():
               bad.returncode != 0, bad.stdout + bad.stderr)
         check("thông điệp chặn trỏ đúng sang retro_escalate.py",
               "retro_escalate.py" in (bad.stdout + bad.stderr), bad.stdout + bad.stderr)
-        dashed = subprocess.run(
-            [ae, "Mike", "question", RE.TOPIC_PREFIX + "foo-bar-2-days", '{"a":1}'],
-            capture_output=True, text=True, env=env)
-        check("append_event.sh chặn CẢ dạng có gạch `-2-days`",
-              dashed.returncode != 0, dashed.stdout + dashed.stderr)
+        for suf in ("-2-days", "-3retros", "-4", "-3x", "-3d", "-2ngay"):
+            v = subprocess.run([ae, "Mike", "question", RE.TOPIC_PREFIX + "foo-bar" + suf,
+                                '{"a":1}'], capture_output=True, text=True, env=env)
+            check(f"append_event.sh chặn biến thể '{suf}'", v.returncode != 0,
+                  v.stdout + v.stderr)
         ok = subprocess.run([ae, "Mike", "question", STABLE, '{"a":1}'],
                             capture_output=True, text=True, env=env)
         check("append_event.sh CHO QUA topic ổn định (đối chứng — guard không chặn bừa)",
@@ -520,6 +521,195 @@ def case_append_event_guard_is_mechanical():
         shutil.rmtree(d, ignore_errors=True)
 
 
+# ── Ca 2c: ví dụ trong THÔNG ĐIỆP TỪ CHỐI phải tự nó qua được stable_topic ──────────
+#    arch-review vòng 2 (killer): thông điệp gợi ý đúng cái tên vừa bị từ chối ⇒ phiên
+#    retro làm theo hướng dẫn lặp vô hạn và tưởng pattern này không escalate được.
+def case_reject_message_example_is_actually_valid():
+    try:
+        got = RE.stable_topic(RE._REJECT_EXAMPLE)
+        check("ví dụ trong thông điệp từ chối TỰ NÓ qua được stable_topic()", True, got)
+    except SystemExit as e:
+        check("ví dụ trong thông điệp từ chối TỰ NÓ qua được stable_topic()", False, str(e))
+    try:
+        RE.stable_topic("plan-t1-not-ready-0001743768")
+        msg = ""
+    except SystemExit as e:
+        msg = str(e)
+    check("thông điệp từ chối có in ví dụ hợp lệ ra cho người đọc",
+          RE._REJECT_EXAMPLE in msg, msg)
+    # Mọi tên được GỢI Ý (sau chữ "vd ") phải tự nó qua được — chống việc sửa ví dụ sau
+    # này thành một tên lại bị từ chối. Chuỗi bị TỪ CHỐI cũng nằm trong thông điệp (echo
+    # lại input), nên chỉ soi phần gợi ý, không soi mọi chuỗi trong nháy.
+    sugg = re.findall(r"vd '([^']+)'", msg)
+    check("thông điệp từ chối có ít nhất 1 tên GỢI Ý", bool(sugg), msg)
+    for cand in sugg:
+        try:
+            RE.stable_topic(cand)
+            ok = True
+        except SystemExit:
+            ok = False
+        check(f"chuỗi ví dụ {cand!r} trong thông điệp lỗi phải hợp lệ", ok, msg)
+
+
+# ── Ca 2d: đơn vị đếm còn sót ở vòng 2 (`-3d`, `-3lần`) nay cũng bị từ chối ─────────
+def case_extra_counter_units_rejected():
+    lot = []
+    for v in ["foo-bar-3d", "foo-bar-3lần", "foo-bar-2ngay", "foo-bar-3x", "foo-bar-2times"]:
+        try:
+            lot.append(f"{v} → {RE.stable_topic(v)}")
+        except SystemExit:
+            pass
+    check("các đơn vị đếm bổ sung (d / lần / ngay / x / times) đều bị TỪ CHỐI",
+          not lot, f"lọt: {lot}")
+
+
+# ── Ca 5c: ack `window` (sd>0) còn hiệu lực KHÔNG bị đường thoát đè ─────────────────
+#    arch-review vòng 2: đo đường thoát bằng tuổi CÂU HỎI thì ack sd=14 mới 1 ngày cũng
+#    bị đè. Đúng ngưỡng là tuổi của ACK, và chỉ áp cho ack `permanent`.
+def case_fresh_window_ack_not_overridden_by_escape():
+    root = _mk({
+        "Mike": [H.ev("Mike", "question", STABLE, H.ago(20))],
+        "Wags": [H.ev("Wags", "status", f"{RE.ACK_PREFIX}Mike/{STABLE}", H.ago(1),
+                      {"suppress_days": 14})],
+    })
+    try:
+        decision, reason = RE.decide(STABLE, root)
+        check("câu hỏi 20 ngày tuổi nhưng ack sd=14 MỚI 1 ngày ⇒ vẫn SKIP",
+              decision == "SKIP", f"{decision} — {reason}")
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+# ── Ca 5d: đường thoát đo bằng tuổi ACK (permanent), không phải tuổi câu hỏi ────────
+def case_escape_hatch_measures_ack_age():
+    root = _mk({
+        "Mike": [H.ev("Mike", "question", STABLE, H.ago(40))],
+        "Wags": [H.ev("Wags", "status", f"{RE.ACK_PREFIX}Mike/{STABLE}", H.ago(1))],
+    })
+    try:
+        decision, reason = RE.decide(STABLE, root)
+        check("ack permanent MỚI 1 ngày (câu hỏi 40 ngày) ⇒ SKIP, đo theo tuổi ACK",
+              decision == "SKIP", f"{decision} — {reason}")
+        check("lý do KHÔNG viện dẫn tuổi câu hỏi", "40 ngày tuổi" not in reason, reason)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+# ── Ca 7j: legacy ĐÃ ack (cũ) + câu hỏi ổn định CHƯA ack (mới) ⇒ phải POST ──────────
+#    Hình thái CÓ THẬT trong giai đoạn migrate. Chọn nhầm câu hỏi CŨ ⇒ SKIP im lặng.
+def case_newest_question_wins():
+    legacy = STABLE + "-2days"
+    root = _mk({
+        "Mike": [H.ev("Mike", "question", legacy, H.ago(5)),
+                 H.ev("Mike", "question", STABLE, H.ago(1))],
+        "Wags": [H.ev("Wags", "status", f"{RE.ACK_PREFIX}Mike/{legacy}", H.ago(4),
+                      {"suppress_days": 14})],
+    })
+    try:
+        decision, reason = RE.decide(STABLE, root)
+        check("câu hỏi MỚI NHẤT (chưa ack) quyết định, không phải legacy đã ack ⇒ POST",
+              decision == "POST", f"{decision} — {reason}")
+        acked, esc, out = _check5_verdict(root, STABLE)
+        check("CHECK5 thật cũng escalate câu hỏi mới đó", esc and not acked, out)
+        _consist("ca 7j", decision, acked)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+# ── Ca 8b: ĐƯỜNG GHI THẬT (không --dry-run) cho CẢ 2 nhánh POST và SKIP ─────────────
+#    arch-review vòng 2: mọi ca CLI trước đây đều --dry-run nên 2 mutation (bỏ
+#    recurring_days khỏi payload; đổi prefix topic nhánh SKIP) sống sót.
+def _run_real(sandbox_bin_root, bus_root, pattern, days, payload):
+    return subprocess.run(
+        [sys.executable, "-B", os.path.join(sandbox_bin_root, "bin", "retro_escalate.py"),
+         "--pattern", pattern, "--days", str(days), "--payload", payload,
+         "--bus-root", bus_root],
+        capture_output=True, text=True,
+        env=dict(os.environ, PYTHONDONTWRITEBYTECODE="1", JOB_ID=""))
+
+
+def _events_of(path):
+    out = []
+    with open(path, encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if line:
+                out.append(json.loads(line))
+    return out
+
+
+def case_real_write_post_and_skip():
+    sb = tempfile.mkdtemp(prefix="retro_write_")
+    try:
+        os.symlink(BIN, os.path.join(sb, "bin"))          # ROOT của append_event.sh = sb
+        bus_root = _mk({"Taylor": [H.ev("Taylor", "question", "chuyen-khac", H.ago(1))]})
+        try:
+            # (1) POST — pattern chưa có câu hỏi nào
+            r = _run_real(sb, bus_root, "foo-bar", 3, '{"summary":"x"}')
+            check("ghi THẬT nhánh POST: rc=0", r.returncode == 0, r.stdout + r.stderr)
+            check("ghi THẬT nhánh POST: in WROTE=question", "WROTE=question" in r.stdout,
+                  r.stdout)
+            evs = _events_of(os.path.join(sb, "bus", "inbox", "Mike.jsonl"))
+            q = [e for e in evs if e.get("event_type") == "question"]
+            check("POST ghi đúng 1 event question", len(q) == 1, str(evs))
+            if q:
+                check("POST: topic = topic ỔN ĐỊNH", q[0].get("topic") == STABLE,
+                      str(q[0].get("topic")))
+                check("POST: payload.recurring_days == --days",
+                      q[0].get("payload", {}).get("recurring_days") == 3,
+                      str(q[0].get("payload")))
+            # (2) SKIP — dựng bus có câu hỏi + ack phủ
+            H.write_events(os.path.join(bus_root, "mike", "bus", "inbox", "Mike.jsonl"),
+                           [H.ev("Mike", "question", STABLE, H.ago(1))])
+            H.write_events(os.path.join(bus_root, "mike", "bus", "inbox", "Wags.jsonl"),
+                           [H.ev("Wags", "status", f"{RE.ACK_PREFIX}Mike/{STABLE}",
+                                 H.ago(0, 12), {"suppress_days": 7})])
+            r2 = _run_real(sb, bus_root, "foo-bar", 4, '{"summary":"x"}')
+            check("ghi THẬT nhánh SKIP: rc=0", r2.returncode == 0, r2.stdout + r2.stderr)
+            evs2 = _events_of(os.path.join(sb, "bus", "inbox", "Mike.jsonl"))
+            st = [e for e in evs2 if e.get("event_type") == "status"]
+            check("SKIP ghi đúng 1 event status (không mở question thứ hai)",
+                  len(st) == 1 and len([e for e in evs2
+                                        if e.get("event_type") == "question"]) == 1,
+                  str([e.get("event_type") for e in evs2]))
+            if st:
+                check(f"SKIP: topic mang đúng hằng SKIP_STATUS_PREFIX "
+                      f"({RE.SKIP_STATUS_PREFIX!r})",
+                      st[0].get("topic") == f"{RE.SKIP_STATUS_PREFIX}{STABLE}",
+                      str(st[0].get("topic")))
+                check("SKIP: payload vẫn giữ recurring_days (số ngày KHÔNG mất)",
+                      st[0].get("payload", {}).get("recurring_days") == 4,
+                      str(st[0].get("payload")))
+        finally:
+            shutil.rmtree(bus_root, ignore_errors=True)
+    finally:
+        shutil.rmtree(sb, ignore_errors=True)
+
+
+# ── Ca 9c: hằng SKIP_STATUS_PREFIX phải khớp chuỗi grep trong daily_retro.sh ────────
+def case_skip_prefix_constant_in_sync():
+    src = open(os.path.join(BIN, "daily_retro.sh"), encoding="utf-8").read()
+    check("daily_retro.sh dùng ĐÚNG chuỗi SKIP_STATUS_PREFIX của retro_escalate.py",
+          f'"{RE.SKIP_STATUS_PREFIX}"' in src,
+          f"không thấy {RE.SKIP_STATUS_PREFIX!r} trong daily_retro.sh")
+
+
+# ── Ca 7k: answer CŨ HƠN câu hỏi KHÔNG được coi là đã giải quyết (pre-resolve) ─────
+def case_older_answer_does_not_preresolve():
+    root = _mk({
+        "Mike": [H.ev("Mike", "answer", STABLE, H.ago(10)),
+                 H.ev("Mike", "question", STABLE, H.ago(1))],
+    })
+    try:
+        decision, reason = RE.decide(STABLE, root)
+        check("answer đăng TRƯỚC câu hỏi không được pre-resolve nó ⇒ vẫn xét ack, POST vì "
+              "chưa ai ack", decision == "POST", f"{decision} — {reason}")
+        check("lý do phải là 'không ack nào phủ', KHÔNG phải 'đã có answer'",
+              "KHÔNG ack nào" in reason, reason)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
 def main():
     print("== retro_escalate selfcheck (bug ack-topic-counter) ==")
     for fn in (case_constants_in_sync, case_counter_slug_is_rejected,
@@ -531,7 +721,13 @@ def main():
                case_different_pattern_not_collapsed, case_unrelated_ack_does_not_cover,
                case_ack_bare_topic_form_covers, case_corrupt_ts_is_fail_closed,
                case_archive_gz_is_read, case_resolved_question_is_not_basis_for_skip,
+               case_older_answer_does_not_preresolve,
                case_missing_bus_fails_loud, case_cli_dry_run_writes_nothing,
+               case_reject_message_example_is_actually_valid,
+               case_extra_counter_units_rejected,
+               case_fresh_window_ack_not_overridden_by_escape,
+               case_escape_hatch_measures_ack_age, case_newest_question_wins,
+               case_real_write_post_and_skip, case_skip_prefix_constant_in_sync,
                case_daily_retro_wired, case_daily_retro_guard_sees_skip_status,
                case_append_event_guard_is_mechanical):
         print(f"\n-- {fn.__name__}")
