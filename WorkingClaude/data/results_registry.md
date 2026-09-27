@@ -7120,3 +7120,58 @@ mọi kỳ vọng lợi nhuận trao đổi với user/nhà đầu tư dựa tr�
 **Artifact:** `mike/agents/Taylor/research/c30v_retleg_repin_20260927/` (run scripts + 3 log) ·
 CSV `data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_{c30vctl,c30vleg,c30vnew}_univpit.csv`
 · worktree `/home/trido/thanhdt/wt-c30v-retfix`, branch `fix/custom30v-return-leg-oshares`.
+
+---
+
+## 2026-09-27 — chân WEIGHT custom30V: `OShares` bước tại EX-DATE (không phải ngày công bố quý) — job `Taylor_20260927_043542` ⚠️ **CHỜ USER SIGN-OFF, CHƯA MERGE**
+
+**Kết quả: CAGR 24,38% → 24,42% (+0,04pp) / Sharpe 1,69 (không đổi) / MaxDD −18,8% (không đổi) /
+Calmar 1,30 (không đổi) / Final NAV 757,61B → 761,11B / IS 19,26→19,31 / OOS 29,24→29,29.
+`self-check 0 VND` BAL+LAG cả hai chân.** Đây là bản sửa ĐÚNG-SAI, **+0,04pp là NHIỄU** — giá trị
+nằm ở chỗ bỏ **73 bước look-ahead** và **663 bước lệch ngày** khỏi chân weight, không ở lợi nhuận.
+
+**Lỗi**: `custom_basket` join `OShares` bằng `t.time >= f.time`, mà `ticker_financial.time` **chính
+là `Release_Date`** ⇒ mọi bước nhảy số cổ phiếu rơi vào ngày CÔNG BỐ QUÝ. Đo trên 203 mã đã từng
+vào rổ, 2014-2026: **1.489 bước, 757 khớp được `corporate_action`, chỉ 9 rơi đúng ngày**; 675 TRỄ
+(median 47 ngày), **73 SỚM = look-ahead** (dòng quý đã mang số của sự kiện đi ex sau đó — bẫy
+RESTATE của `kb/data_registry/fundamentals/ticker_financial_oshares.md`). Nguồn thứ 2 FiinProX đồng
+ý ngày với `corporate_action` **85,9%** (|lệch| median 0 ngày).
+
+**Bản sửa** dời NGÀY, không đổi MỨC. Nguồn sự thật = `tav2_bq.corporate_action` qua semantics
+`corp_action_lib` (`event_status != "not_executed"`), ISS→`exright_date` (nhóm phát sinh quyền),
+AIS→`effective_date`; chỉ gắn khi **cỡ khớp** (ratio ≤2%+0,2pp hoặc AIS level ≤0,1%); **fallback =
+ngày quý = hành vi hiện tại** (49% bước không khớp sự kiện nào); hai cổng PIT (biên dưới = dòng quý
+trước, biên trên = dòng quý sau & +45 ngày, + đơn điệu). Knob `BASKET_OSHARES_STEP=exdate|quarter`.
+
+| Leg | `BASKET_OSHARES_STEP` | CAGR | Sharpe | MaxDD | Calmar | Final NAV | IS 14-19 | OOS 20+ | self-check | CSV md5 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| `wexd_ctl_quarter` control | `quarter` | 24,38% | 1,69 | −18,8% | 1,30 | 757,61B | 19,26% | 29,24% | 0 VND | `3f836927c0df82915c4cfb973d8f4af3` |
+| **`wexd_new_exdate`** | `exdate` | **24,42%** | **1,69** | **−18,8%** | **1,30** | **761,11B** | **19,31%** | **29,29%** | 0 VND | `80fc59f9476b280225063bd02136c75d` |
+
+**Neo control**: md5 chân control **trùng khít** md5 bản pin R3 hiện hành (§ "2026-09-27 — ⭐ RE-PIN
+R3 — SỬA CHUỖI RETURN custom30V") ⇒ A/B một biến, Δ đọc được.
+
+**Đường tiền LIVE** (`custom30_history.py` → `custom30v_8l_publish.csv` → `tav2_bq.custom30v_8l` →
+`compute_park_trim.py`): thành viên rổ **không đổi một dòng nào** (selection không dùng số cổ
+phiếu); **16/49 rebal đổi weight, 33 rebal byte-identical**; nặng nhất `2021-11-05` sum|Δw| 2,748pp
+(MSB −0,870pp), `2020-02-05` 2,432pp (SHB +1,216pp). **Rebal đang hiệu lực `2026-08-05`: 0/30 tên
+đổi weight** (là do lịch — cửa sổ lệch gần nhất của thành viên hiện tại là ACB `[2026-06-15,
+2026-07-22)`, không chứa 08-05) ⇒ merge **không** sinh lệnh park/trim mới.
+
+**Selfcheck** `basket_oshares_step_exdate_selfcheck.py`: **37/37 PASS**, giống nhau từng dòng dưới
+4 biến thể TZ (ICT/UTC/New_York/`env -u TZ`). Gồm đột biến (2 chế độ phải thực sự khác nhau), bất
+biến "ngày lệch == đúng hợp các cửa sổ dời, ngoài đó byte-identical", và T6 ghim một **lỗi tiềm ẩn
+CŨ** phát hiện nhân đây: `ffill().bfill()` có `.bfill()` **không group theo mã** ⇒ mã không có dòng
+`OShares` nào sẽ bị lấp bằng số của MÃ KHÁC (đo thật: 203/203 mã trong rổ đều có dòng ⇒ hiện KHÔNG
+cắn; chân `exdate` dùng `groupby(...).bfill()` nên không có đường rò).
+
+**Tái lập**: `BASKET_CA_SNAPSHOT=data/snapshots/corp_action_share_20260927.parquet` (14.912 dòng /
+1.434 mã, `max_ingested=2026-09-26 15:43:40 UTC`, digest `7409599216578255470`) — bảng
+`corporate_action` bị UPSERT IN-PLACE nên vintage phải ghim. Dumper `corp_action_share_snapshot.py`.
+Lệnh: `mike/agents/Taylor/research/oshares_weight_exdate_20260927/run_leg.sh <tag>
+BASKET_OSHARES_STEP=exdate|quarter`. Báo cáo đầy đủ + mọi CSV lớp lệch:
+`mike/agents/Taylor/research/oshares_weight_exdate_20260927/` (`README.md`, `AB_R3.md`).
+
+**Nếu merge**: (1) re-pin R3 sang 24,42% hoặc ghi rõ pin chưa gồm bản sửa — không để 2 số không
+nhãn; (2) `bootstrap_nav.py` + `dsr_pbo_annex.py` vẫn STALE **từ JOB C** (nợ cũ), chạy lại MỘT lần
+trên bản cuối sau merge; (3) chạy lại `custom30_history.py` để `tav2_bq.custom30v_8l` đồng bộ.
