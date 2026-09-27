@@ -39,8 +39,47 @@ BVB/VAB trống nhiều quý 2018-2020; nhiều mã chỉ có Q4 trước 2017.
    Phương Nam), NVB 2022-2024 tới 35,9%, KLB 2020 ~6,7%, STB 2025Q4→2026Q2 6,6→7,9%.
 6. Số theo ngày công bố KHÔNG có ⇒ không phải PIT; khi backtest phải trễ ≥45 ngày sau quý (Q4: ≥90).
 
-## Consumer tiềm năng (CHƯA wire)
-`bank_lens_v3.py` / `rating_8l.py::rate_bank()` — hiện NaN NPL/coverage 9/18 mã. Wire = quyết định
-riêng, qua quant-skeptic.
+## Consumer
+
+### ĐÃ VIẾT, CHỜ USER DUYỆT MERGE — `rating_8l_history.py::rate_bank_hist()` (2026-09-27)
+Branch `wire/fiinprox-h1-h2-ve-sinh` (worktree `wt-fiinprox-h1h2-wire`), job `Taylor_20260927_022319`.
+Thay `rate_bank_proxy()` (ROE-only) trên route BANK của chuỗi lịch sử 2014-2026 bằng ngưỡng
+**nguyên văn** của `rating_8l.py::rate_bank()` + NPL/LLR file này, as-of theo **trễ công bố ≥45 ngày
+sau quý (Q4 ≥90)** — đúng bẫy 6 ở trên. Thiếu file / thiếu NPL+coverage cho quý đó ⇒ **rơi về
+proxy từng dòng**, không bao giờ fail-open sang một điểm bịa.
+
+Đo thật (`rating_8l_history_bank_aq_selfcheck.py`, 33 assertion, PASS ở 3 TZ, 2 mutation-kill; và
+A/B đầu-cuối 53.687 dòng):
+- 980 dòng mã-quý BANK từ 2014-06, **100%** đọc được NPL/LLR sau trễ công bố; **365 dòng (37,2%)
+  đổi rating** (1→2:82, 1→3:158, 2→1:9, 2→3:116) — đây là panel THÔ của selfcheck, TRƯỚC
+  `override_current_bank_aq`/forensic. Con số để trích dẫn về ARTIFACT cuối (`fa_ratings_8l`) là
+  **360/981** (1→2:80, 1→3:153, 2→1:8, 2→3:112): override áp lại điểm live lên dòng mới nhất, che 5
+  thay đổi ở đó. Hai panel, hai con số — **không được trộn**.
+- **0 dòng lịch sử đổi cổng nhị phân `rating≤3`** ⇒ 0 quyết định V2.4 đổi. Bất biến này là
+  ĐẠI SỐ, không phải may: cả hai hàm trả ≤3 ⟺ ROE≥12%; NPL/coverage chỉ phân biệt 1/2/3 BÊN TRONG
+  vùng ≤3 (lưới vét 35.571 tổ hợp: 0 lần đổi dấu). **HẾT hiệu lực** nếu ai đặt
+  `BASKET_GATE_RATING<3` hoặc đổi `ETF_LIQ` sang biến thể `quality=tilt` (`custompitgq`).
+- 0 dòng route KHÁC BANK đổi.
+- ⚠️ **Bất biến trên CHỈ nói về biên 3/4 — KHÔNG nói gì về biên 2/3**, mà dữ liệu AQ làm biên đó dịch
+  rất nhiều: **266/981 dòng BANK (27,1%)** vượt biên `rating≤2` (1→3:153, 2→3:112, 3→2:1; nhiều nhất
+  HDB 34, VIB 33, VPB 25, SHB 22). Consumer gate ở `≤2` (kiểm kê 2026-09-27, quant-skeptic phát hiện
+  lỗ hổng này): `mike/agents/Taylor/anomaly_scan.py:156` (cron 08:20 T2-T6 + `fearbuy_weekly_scan.sh`
+  T6) đọc CHÍNH bảng này qua `data/bq_cache/fa_ratings_8l.parquet` ⇒ **Δ live đúng 1 tên: ABB dòng mới
+  nhất 3→2, vào watchlist tier W** (watchlist chất lượng, KHÔNG phải vị thế/sizing);
+  `custom30v_hybrid.py` (luật swap `rating≤2`, biến thể R&D) có backtest đổi trên 266 dòng đó;
+  `cheap_pb_floor.py`/`sector_lens_monitor.py`/`newdeals_daily_report.py` đọc `data/rating_8l.csv`
+  nên KHÔNG ảnh hưởng. Phát biểu đúng: "0 quyết định V2.4 đổi", **không** phải "0 consumer nào đổi".
+- ⚠️ **Δ live thật của bản vá fail-closed** (`override_current_bank_aq` từ chối `bank-nodata`/
+  `bank-noROE` thay vì nhập điểm 3 bịa ra): 6 dòng MỚI NHẤT đổi cổng `≤3` — BAB/BVB/PGB 3→4,
+  NVB/SGB 3→5, KLB 4→3. Chỉ **BVB** với tới book (`QUALITY_OK` → mất, điểm thật theo ROE 10,22% là 4);
+  NVB/KLB đã `FLOOR_FAIL`, BAB/PGB/SGB ngoài `ticker_prune`.
+- Consumer dùng rating như biến LIÊN TỤC đã quét hết: `regime_size_overlay.py:96` là nhị phân
+  (`rating8l>=4`; "tier D/E" ở dòng 9 là phương án ĐÃ BỊ LOẠI OOS −0,45, không chạy); 15 `*_screen.py`
+  có `sort_values(["rating","tv"]).head(25)` nhưng chỉ nuôi số chẩn đoán `overlap_8l_top25` trong
+  verdict JSON — đo 146 tháng: **145 tháng top-25 y nguyên**, 1 tháng đổi 1 tên (Jaccard 0,923).
+
+### `rating_8l.py::rate_bank()` (LIVE) — KHÔNG đụng
+Vẫn đọc `data/bank_lens_v3.csv` (nguồn nối tiếp sau 28/09 = OCR `bank_npl_coverage_primary`). File
+FiinPro CHỈ phục vụ LỊCH SỬ nên không cần refresh sau khi trial hết hạn.
 
 ↩ [Về nhóm fundamentals](index.md) · [Về index tổng](../index.md)

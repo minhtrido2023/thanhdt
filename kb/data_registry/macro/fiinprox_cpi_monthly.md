@@ -29,16 +29,38 @@ hay tỷ giá). Harvest 2 lệnh (2008-2016, 2017-2026), filter server-side 4 `t
   ⇒ "đáy base-effect −0,02% Oct-2009" trong docstring `cpi_vn.py` là SAI; đáy thật 1,97% (2009-08).
 
 ## Bẫy
-1. **`NSO_CPI_YOY_AVG_REAL` trong `cpi_vn.py` bị gắn nhãn sai**: comment nói "bình quân/YTD",
-   nhưng khớp **13/13** với `core_yoy_pct` (lạm phát cơ bản). Không ai import biến này (grep
-   2026-09-14) ⇒ không ảnh hưởng production, chỉ đừng trích nó là CPI bình quân.
+1. ~~**`NSO_CPI_YOY_AVG_REAL` trong `cpi_vn.py` bị gắn nhãn sai**~~ — **ĐÃ SỬA 2026-09-27**
+   (branch `wire/fiinprox-h1-h2-ve-sinh`, job `Taylor_20260927_022319`): đổi tên thành
+   `NSO_CPI_CORE_YOY_REAL` + sửa comment. Xác minh lại trước khi đổi: khớp `core_yoy_pct` **13/13**,
+   khớp `cpi_yoy_pct` (headline) **0/13** ⇒ đúng là lạm phát CƠ BẢN. `grep --include=*.py` toàn repo
+   2026-09-27: **0 file .py nào đọc** tên cũ (chỉ định nghĩa ở `cpi_vn.py`) ⇒ rename không thể làm
+   hỏng caller nào.
 2. `core_yoy_pct` 2013-12 FiinPro trả `0.0` trơ trọi giữa chuỗi null — đã ghi trống.
 3. 2015-09/10 headline = `0` là số thật (giảm phát sát 0), không phải null.
 4. Không có cột MoM/nhóm hàng (11 nhóm có sẵn — chưa lấy).
 
 ## Nâng status / dùng
-- Headline + lõi: DERIVED. Thay T2/T3 của `cpi_vn.py` bằng file này = đổi consumer
-  (`macro_confidence_regime.py`, `dcf_valuation.py`, `gdp_growth_vn.py`, golive_recommend_v23…) ⇒
-  quyết định riêng, qua quant-skeptic. KHÔNG tự wire.
+- Headline + lõi: DERIVED.
+
+### ĐÃ WIRE, CHỜ USER DUYỆT MERGE — `cpi_vn.py` tầng **T1.5** (2026-09-27)
+Branch `wire/fiinprox-h1-h2-ve-sinh`, job `Taylor_20260927_022319`. Thứ tự tầng mới
+**T1 > T1.5 > T3 > T2**: T1 (NSO live, 13 tháng) giữ ưu tiên TUYỆT ĐỐI; T1.5 = `cpi_yoy_pct` của
+file này phủ 2008-01→2026-08; **T2 và T3 GIỮ NGUYÊN làm fallback** (mất file ⇒ chuỗi byte-identical
+với bản trước khi wire — đã assert). Hệ quả: T3 chỉ còn phục vụ 2007 khi có file.
+
+⚠️ **§14 — file là snapshot đông lạnh, không phải feed.** `cpi_vn.cpi_coverage(end)` đọc tháng cuối
+**TỪ FILE** (không hardcode) và in cảnh báo MỘT LẦN khi caller hỏi tháng vượt mọi tầng THẬT, nêu rõ
+cách sửa = refresh `NSO_CPI_YOY_REAL` từ GSO (refresh FiinPro là bất khả sau 28/09). Hiện tại
+`dcf_valuation.py` gọi `end="2026-12-01"` ⇒ cảnh báo đúng 4 tháng 2026-09→12.
+
+Đo thật (`cpi_vn_tier15_selfcheck.py`, 33 assertion, PASS ở 3 TZ, 1 mutation-kill):
+- `macro_confidence_regime` đổi nhãn **đúng 27/185 tháng** REG_C và **17/185** REG_B — TRÙNG KHỚP
+  danh sách tháng đã công bố ở finding, không hơn không kém; **0 tháng** nằm trong episode lạm phát
+  2011 hoặc 2022-H2.
+- DCF: CPI TB 5 năm 3,4426% → 3,4147% (Δ −0,0279pp) nhưng `g_term` **bất biến 6,8000%** do trần
+  `cap_rf=r_f` ⇒ fair value Δ = **0,0** trên 7/7 mã định giá được. KHÔNG rút gọn thành "CPI không
+  ảnh hưởng DCF": đổi `DCF_TERMINAL_MODE` sang `cpi` là −0,0279pp đi thẳng vào `g_term`.
+- KHÔNG có bằng chứng nào nói việc này tăng lợi nhuận hay cải thiện chất lượng tín hiệu. Đây là
+  VỆ SINH DỮ LIỆU.
 
 ↩ [Về nhóm macro](index.md) · [Về index tổng](../index.md)
