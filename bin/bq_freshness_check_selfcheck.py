@@ -88,16 +88,29 @@ import tempfile
 
 
 def case_query_fail_multiline_error():
-    """rc!=0 with a bq error wrapped across multiple lines — round-1 bug (a): tail -1 of the
-    raw result lost the real message. errsnip must now come from the FULL captured output."""
+    """rc!=0 with a bq error wrapped across multiple lines, matching real bq's mid-token wrap
+    (the informative content is NOT on the last line — the last line is a meaningless leftover
+    fragment, e.g. a location name split mid-word). Round-1 bug (a): old code took errsnip from
+    `tail -1` of the ALREADY-tail-1'd lag_days, which for this shape keeps ONLY the fragment and
+    loses the real message. errsnip must now come from the FULL captured output.
+
+    Mutation-tested (arch-review round 2): the OLD stub here put the informative text on the
+    LAST line, which `tail -1` happens to preserve — so all 4 assertions passed even on the
+    buggy fcbb9d94 code (a vacuous negative control). This version's last line is a genuine
+    fragment, so the first-line-content assertions below correctly FAIL on the old code and
+    PASS on the fixed code — verify with:
+      REAL = Path("<git show fcbb9d94:bin/bq_freshness_check.sh, checked out to a tmp file>")
+    """
     with tempfile.TemporaryDirectory() as td:
         root = Path(td)
-        stub = 'echo "BigQuery error in query operation:"; echo "Error processing job \'\'proj:job123\'\':"; echo "Not found: Dataset proj:tav2_bq was not found in location asia-southeast1"; return 1'
+        stub = ('echo "BigQuery error in query operation: Error processing job \'proj:job123\':"; '
+                 'echo "Not found: Table lithe-record-440915-m9:tav2_bq.no_such_table_zzz was not found in location asia-"; '
+                 'echo "southeast1"; return 1')
         out, err = run_bash(extract_snippet(), stub,
                              '_check "table-A" "t.tbl" "t.time" 2 "trading" BLOCK', root)
-        check("multiline-error-full-message-kept", "Not found: Dataset" in out,
+        check("multiline-error-first-line-kept", "BigQuery error in query operation" in out,
               extra=f"out={out!r} err={err[-300:]}")
-        check("multiline-error-not-truncated-to-fragment", "southeast1]" not in out, extra=out)
+        check("multiline-error-not-truncated-to-fragment", "Not found: Table" in out, extra=out)
         check("multiline-error-labelled-query-failed-not-stale", "BQ QUERY FAILED" in out and "STALE" not in out, extra=out)
         check("multiline-error-blocks-pipeline", "FAILED=1 WARNED=0" in out, extra=out)
 
