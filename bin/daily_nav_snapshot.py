@@ -118,10 +118,37 @@ def confirmed_qty_multiplier_after(ticker, asof_date):
     đường nào để một record hỏng lọt qua mà không ai biết).
     """
     mult = 1.0
-    for a in corp_actions.load_corp_actions(path=CORP_ACTIONS_FILE, ticker=ticker):
-        if a["ex_date"] > asof_date:
-            mult *= a["qty_multiplier"]
+    for a in confirmed_actions_after(ticker, asof_date):   # đường đọc sổ DUY NHẤT của file này
+        mult *= a["qty_multiplier"]
     return mult
+
+
+def confirmed_actions_after(ticker, date, actions=None):
+    """Record corp-action ĐÃ CONFIRMED của `ticker` có `ex_date` > `date`, đã chuẩn hoá.
+
+    MỘT cách DUY NHẤT để file này đọc `data/corp_actions.json` (code-quality-weekly 2026-09-27).
+    Trước đó cùng một file parse sổ đó theo 3 kiểu khác nhau: `confirmed_qty_multiplier_after()`
+    đã chuyển sang `corp_actions.load_corp_actions()` (§29 vòng 6), còn `classify_raw_price_gap()`
+    và `confirmed_share_event_multiplier()` vẫn mở file thô rồi `except (TypeError, ValueError):
+    continue` — nghĩa là một record hỏng bị BỎ QUA IM LẶNG ở hai đường này nhưng CHẶN NAV ở
+    đường kia. Cùng một sổ hỏng cho hai kết luận khác nhau tuỳ đường nào chạm tới nó trước.
+
+    Nay cả ba đi qua `corp_actions.validate()`: record hỏng ném `CorpActionError` (caller
+    fail-closed, KHÔNG tính NAV) thay vì lặng lẽ biến mất. `validate()` bắt được đúng những thứ
+    `float()` không bắt: `qty_multiplier` = nan/inf (mọi so sánh ngưỡng phía dưới ÂM THẦM False),
+    ≤ 1, > QTY_MULT_MAX (lỗi gõ tay 13 thay vì 1.3), `ex_date` không phải ISO, thiếu `event_type`.
+
+    `actions=` là seam cho test/caller đã có sẵn list — ĐI QUA CÙNG `validate()`, không phải
+    đường tắt bỏ kiểm; nếu không thì "cách duy nhất" lại thành hai cách.
+    """
+    if actions is None:
+        recs = corp_actions.load_corp_actions(path=CORP_ACTIONS_FILE, ticker=ticker)
+    else:
+        recs = [corp_actions.validate(a, i) for i, a in enumerate(actions)]
+        recs = [a for a in recs
+                if a["_status"].upper().startswith("CONFIRMED")
+                and a["ticker"] == str(ticker).upper()]
+    return [a for a in recs if a["ex_date"] > date]
 
 
 def trading_dates_with_fills(account, upto_date):
@@ -227,23 +254,9 @@ def classify_raw_price_gap(ticker, date, price, prev_price, market_price, tol_pc
         return "ok", None
     if prev_price and abs(prev_price - market_price) / market_price * 100 <= RAW_PRICE_PREV_MATCH_PCT:
         return "stale_market_price", None
-    if actions is None:
-        actions = []
-        if os.path.exists(CORP_ACTIONS_FILE):
-            with open(CORP_ACTIONS_FILE, encoding="utf-8") as f:
-                actions = json.load(f).get("actions") or []
-    for a in actions:
-        if str(a.get("ticker", "")).upper() != ticker.upper():
-            continue
-        if not str(a.get("_status", "")).upper().startswith("CONFIRMED"):
-            continue
-        if str(a.get("ex_date") or "")[:10] <= date:
-            continue
-        try:
-            mult = float(a.get("qty_multiplier") or 1.0)
-        except (TypeError, ValueError):
-            continue
-        if mult != 1.0 and abs(price / mult - market_price) / market_price * 100 <= tol_pct:
+    for a in confirmed_actions_after(ticker, date, actions):
+        mult = a["qty_multiplier"]
+        if abs(price / mult - market_price) / market_price * 100 <= tol_pct:
             return "early_credit", mult
     return "unexplained", None
 
@@ -415,27 +428,10 @@ def confirmed_share_event_multiplier(ticker, date, ex_date=None, actions=None):
     (2 nguồn độc lập) hoặc người ký. Chế độ LIVE (không --from-raw) vẫn CHẶN — tự quy đổi ngược
     KL ở LIVE nằm NGOÀI phạm vi user đã duyệt.
     """
-    if actions is None:
-        if not os.path.exists(CORP_ACTIONS_FILE):
-            return None
-        with open(CORP_ACTIONS_FILE, encoding="utf-8") as f:
-            actions = json.load(f).get("actions") or []
-    for a in actions:
-        if str(a.get("ticker", "")).upper() != ticker.upper():
+    for a in confirmed_actions_after(ticker, date, actions):
+        if ex_date and a["ex_date"] != str(ex_date)[:10]:
             continue
-        if not str(a.get("_status", "")).upper().startswith("CONFIRMED"):
-            continue
-        a_ex = str(a.get("ex_date") or "")[:10]
-        if not a_ex or a_ex <= date:
-            continue
-        if ex_date and a_ex != str(ex_date)[:10]:
-            continue
-        try:
-            mult = float(a.get("qty_multiplier") or 1.0)
-        except (TypeError, ValueError):
-            continue
-        if mult != 1.0:
-            return mult
+        return a["qty_multiplier"]
     return None
 
 
@@ -1083,7 +1079,17 @@ def main():
             journal_gaps.update(_miss)
             qverdict, qdetail = classify_qty_residual(ev, qty_now, qty_prev, net_fill, prev_d)
             if qverdict != "ok":
-                mult = confirmed_share_event_multiplier(t, args.date, nxt_session)
+                try:
+                    mult = confirmed_share_event_multiplier(t, args.date, nxt_session)
+                except corp_actions.CorpActionError as e:
+                    # §29 + code-quality 2026-09-27: record hỏng trong corp_actions.json ⇒ KHÔNG
+                    # XÁC ĐỊNH ĐƯỢC hệ số quy đổi. Bản cũ parse thô + `except (TypeError,
+                    # ValueError): continue` nên record hỏng bị BỎ QUA IM LẶNG, `mult=None`,
+                    # đường PHỤC HỒI --from-raw không chạy và ngày đó mất dòng nav_history mà
+                    # KHÔNG ai biết vì sao. Fail-closed y như confirmed_qty_multiplier_after.
+                    print(f"❌ [{args.date}] corp_actions.json có record hỏng khi tra sự kiện tỉ lệ "
+                          f"của {t}: {e} — KHÔNG tính NAV.", file=sys.stderr)
+                    return 2
                 _base = (qty_prev or 0) + (net_fill or 0)
                 _mult_explains = (
                     bool(mult) and qty_prev is not None and
@@ -1206,9 +1212,18 @@ def main():
                     f"− cổ tức) — mark giá CUM, cổ tức phải thu đã trừ khỏi tiền mặt riêng "
                     f"(cum_dividend_double_count, không đếm 2 lần).")
                 continue
-            kind, mult = classify_raw_price_gap(t, args.date, prices.get(t), prev_prices.get(t),
-                                                (positions[t] or {}).get("marketPrice"),
-                                                PRICE_XCHECK_TOLERANCE_PCT)
+            try:
+                kind, mult = classify_raw_price_gap(t, args.date, prices.get(t),
+                                                    prev_prices.get(t),
+                                                    (positions[t] or {}).get("marketPrice"),
+                                                    PRICE_XCHECK_TOLERANCE_PCT)
+            except corp_actions.CorpActionError as e:
+                # Cùng lý lẽ nhánh trên: một record hỏng không được biến "early_credit" thành
+                # "unexplained" IM LẶNG — mã sẽ bị xếp vào `mismatched` và chặn NAV với lý do
+                # SAI (lệch giá), che mất nguyên nhân thật là sổ corp-action hỏng.
+                print(f"❌ [{args.date}] corp_actions.json có record hỏng khi giải thích lệch giá "
+                      f"của {t}: {e} — KHÔNG tính NAV.", file=sys.stderr)
+                return 2
             mp, cp = (positions[t] or {}).get("marketPrice"), prices.get(t)
             if kind == "stale_market_price":
                 raw_price_notes.append(f"{t}: marketPrice {mp:,.0f} = giá phiên trước "

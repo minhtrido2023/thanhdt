@@ -32,9 +32,18 @@ def check(name, cond, detail=""):
     print(("  ✓ " if cond else "  ✗ ") + name + (f"   [{detail}]" if detail and not cond else ""))
 
 
-MSB = [{"ticker": "MSB", "ex_date": "2026-08-28", "qty_multiplier": 1.2, "_status": "CONFIRMED — test"},
-       {"ticker": "VHM", "ex_date": "2026-08-06", "qty_multiplier": 2.0, "_status": "CONFIRMED — test"},
-       {"ticker": "XXX", "ex_date": "2026-08-28", "qty_multiplier": 1.2, "_status": "PROPOSED — test"}]
+# Fixture phải là record ĐẦY ĐỦ như trong data/corp_actions.json thật (`event_type` +
+# `broker_effective_ts` là trường BẮT BUỘC của `corp_actions.validate()`): từ code-quality
+# 2026-09-27 cả ba đường đọc sổ trong daily_nav_snapshot.py đều đi qua `validate()`, nên fixture
+# thiếu trường sẽ ném CorpActionError thay vì "được bỏ qua" — đó là hành vi ĐÚNG mới.
+def _ca(ticker, ex_date, mult, status, event_type="BONUS_ISSUE"):
+    return {"ticker": ticker, "ex_date": ex_date, "qty_multiplier": mult, "_status": status,
+            "event_type": event_type, "broker_effective_ts": f"{ex_date}T19:25:01+07:00"}
+
+
+MSB = [_ca("MSB", "2026-08-28", 1.2, "CONFIRMED — test"),
+       _ca("VHM", "2026-08-06", 2.0, "CONFIRMED — test"),
+       _ca("XXX", "2026-08-28", 1.2, "PROPOSED — test")]
 
 print("1. classify_raw_price_gap")
 c = D.classify_raw_price_gap
@@ -331,10 +340,9 @@ with tempfile.TemporaryDirectory() as tmp:
 
 print("10. confirmed_share_event_multiplier — đường PHỤC HỒI --from-raw (mục [1])")
 # Ca THẬT VIB: corp_action_auto_confirm.py ghi CONFIRMED lúc 2026-09-09T19:25:01, mult 1.095.
-ACTS = [{"ticker": "VIB", "ex_date": "2026-09-10", "qty_multiplier": 1.095,
-         "_status": "CONFIRMED — corp_action_auto_confirm.py 2026-09-09T19:25:01+07:00"},
-        {"ticker": "VPB", "ex_date": "2026-09-24", "qty_multiplier": 1.2604104,
-         "_status": "PROPOSED — chưa ai ký"}]
+ACTS = [_ca("VIB", "2026-09-10", 1.095,
+            "CONFIRMED — corp_action_auto_confirm.py 2026-09-09T19:25:01+07:00"),
+        _ca("VPB", "2026-09-24", 1.2604104, "PROPOSED — chưa ai ký")]
 m = D.confirmed_share_event_multiplier
 check("(10a) VIB ngày 09-09, ex 09-10, CONFIRMED ⇒ 1.095 (bỏ điều kiện CONFIRMED thì (10b) chết)",
       m("VIB", "2026-09-09", "2026-09-10", ACTS) == 1.095)
@@ -395,6 +403,86 @@ check("(12f) ba guard là CHÍNH hàm của park_holdings, không phải bản c
       and D._cash_fields_inconsistent is _PH._cash_fields_inconsistent)
 check("(12g) alias `_stock_all_zero` (previous_balance dùng) trỏ về guard đã import",
       D._stock_all_zero is _PH._stock_block_all_zero)
+
+
+print("13. MỘT đường đọc corp_actions.json duy nhất (code-quality 2026-09-27)")
+# Trước bản vá, CÙNG file parse sổ theo 2 luật khác nhau: `confirmed_qty_multiplier_after()` đã
+# qua `corp_actions.validate()` (§29 vòng 6) và CHẶN NAV khi sổ hỏng, còn `classify_raw_price_gap`
+# + `confirmed_share_event_multiplier` mở file thô + `except (TypeError, ValueError): continue`
+# ⇒ BỎ QUA IM LẶNG. Một sổ hỏng cho hai kết luận khác nhau tuỳ đường nào chạm tới trước.
+import corp_actions as _CA  # noqa: E402
+
+_BAD = [
+    ("qty_multiplier = nan (mọi so sánh ngưỡng ÂM THẦM False — §29)",
+     _ca("MSB", "2026-08-28", float("nan"), "CONFIRMED — test")),
+    ("qty_multiplier = '1,30' (dấu phẩy kiểu VN, float() nổ ValueError)",
+     _ca("MSB", "2026-08-28", "1,30", "CONFIRMED — test")),
+    ("qty_multiplier = 13 (gõ tay thiếu dấu chấm, > QTY_MULT_MAX)",
+     _ca("MSB", "2026-08-28", 13, "CONFIRMED — test")),
+    ("qty_multiplier = 1.0 (sổ này chỉ mô tả sự kiện LÀM TĂNG KL)",
+     _ca("MSB", "2026-08-28", 1.0, "CONFIRMED — test")),
+    ("ex_date = '28/08/2026' (không phải ISO)",
+     _ca("MSB", "28/08/2026", 1.2, "CONFIRMED — test")),
+]
+for _why, _rec in _BAD:
+    _raised = []
+    for _fname, _call in (
+            ("classify_raw_price_gap",
+             lambda r=_rec: D.classify_raw_price_gap("MSB", "2026-08-27", 15_700, 15_650,
+                                                    13_100, 5.0, [r])),
+            ("confirmed_share_event_multiplier",
+             lambda r=_rec: D.confirmed_share_event_multiplier("MSB", "2026-08-27", None, [r])),
+    ):
+        try:
+            _call()
+        except _CA.CorpActionError:
+            _raised.append(_fname)
+        except Exception as _e:                                   # noqa: BLE001
+            _raised.append(f"{_fname}:SAI_LOẠI({type(_e).__name__})")
+    check(f"(13) record hỏng — {_why} — CẢ HAI đường ném CorpActionError (bản cũ bỏ qua im lặng)",
+          _raised == ["classify_raw_price_gap", "confirmed_share_event_multiplier"], _raised)
+
+# Ba đường PHẢI là cùng một hàm đọc — không phải ba khối parse giống nhau (chống lệch lại).
+_src13 = open(os.path.join(os.path.dirname(os.path.abspath(D.__file__)),
+                           "daily_nav_snapshot.py"), encoding="utf-8").read()
+check("(13x) daily_nav_snapshot.py KHÔNG còn mở CORP_ACTIONS_FILE thô ở bất kỳ đâu",
+      "CORP_ACTIONS_FILE, encoding" not in _src13 and "open(CORP_ACTIONS_FILE" not in _src13)
+import ast as _ast13  # noqa: E402
+_t13 = _ast13.parse(_src13)
+# Đếm bằng AST, KHÔNG bằng chuỗi: hai DOCSTRING trong file cố ý nhắc `except (TypeError,
+# ValueError)` để giải thích bản cũ sai ở đâu ⇒ phép đếm chuỗi tính cả lời giải thích (đã xảy ra
+# khi viết mục này). Handler HỢP LỆ duy nhất còn lại nằm ở `classify_qty_residual`, và nó đọc
+# `ev["exercise_ratio"]` của corp_action_daily snapshot — NGUỒN KHÁC, không phải corp_actions.json.
+_tv_owners = sorted(
+    fn.name
+    for fn in _ast13.walk(_t13) if isinstance(fn, _ast13.FunctionDef)
+    for h in _ast13.walk(fn)
+    if isinstance(h, _ast13.ExceptHandler) and isinstance(h.type, _ast13.Tuple)
+    and {getattr(x, "id", None) for x in h.type.elts} == {"TypeError", "ValueError"})
+check("(13y) `except (TypeError, ValueError)` chỉ còn ở `classify_qty_residual` (đọc "
+      "exercise_ratio của corp_action_daily — NGUỒN KHÁC), không còn ở đường đọc corp_actions.json",
+      _tv_owners == ["classify_qty_residual"], _tv_owners)
+
+
+def _calls13(fn):
+    f = next(n for n in _ast13.walk(_t13)
+             if isinstance(n, _ast13.FunctionDef) and n.name == fn)
+    return {n.func.id for n in _ast13.walk(f)
+            if isinstance(n, _ast13.Call) and isinstance(n.func, _ast13.Name)}
+
+
+for _fn in ("confirmed_qty_multiplier_after", "classify_raw_price_gap",
+            "confirmed_share_event_multiplier"):
+    check(f"(13z) `{_fn}` đọc sổ qua `confirmed_actions_after()` — MỘT đường duy nhất",
+          "confirmed_actions_after" in _calls13(_fn), sorted(_calls13(_fn)))
+
+# CHỨNG MINH NGƯỢC: sổ LÀNH vẫn cho đúng kết quả cũ (guard mới không chặn oan) — đã phủ ở mục 1
+# và 10, khẳng định lại ở đây trên CÙNG record đầy đủ để hai mục không thể trôi khỏi nhau.
+check("(13w) record ĐẦY ĐỦ, hợp lệ ⇒ vẫn early_credit 1,2 như mục 1",
+      D.classify_raw_price_gap("MSB", "2026-08-27", 15_700, 15_650, 13_100, 5.0,
+                               MSB) == ("early_credit", 1.2))
+check("(13v) record ĐẦY ĐỦ, hợp lệ ⇒ confirmed_share_event_multiplier vẫn 1.095 như mục 10",
+      D.confirmed_share_event_multiplier("VIB", "2026-09-09", "2026-09-10", ACTS) == 1.095)
 
 print(f"\n{len(PASS)} PASS, {len(FAIL)} FAIL")
 sys.exit(1 if FAIL else 0)

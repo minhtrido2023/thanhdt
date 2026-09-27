@@ -63,8 +63,14 @@ def build_fixture(tmp, qty_now, qty_prev=500.0, fills=(), event=True, confirmed=
         f.write(hdr)
         for i, (side, q) in enumerate(fills):
             f.write(f"{DATE}T09:20:0{i},FILL,P{i},VIB,{side},{9000+i},{q},{PRICE},0,BAL,X,\n")
+    # Record phải ĐẦY ĐỦ như data/corp_actions.json thật: `event_type` + `broker_effective_ts`
+    # là trường BẮT BUỘC của `corp_actions.validate()`. Từ code-quality 2026-09-27 cả ba đường
+    # đọc sổ trong daily_nav_snapshot.py đều đi qua validate() và fail-closed rc=2 khi record
+    # hỏng, nên fixture thiếu trường sẽ chặn NAV — đúng hành vi mới, không phải lỗi test.
     acts = {"actions": [{"id": f"VIB-TEST-{i}", "ticker": "VIB",
+                         "event_type": "BONUS_ISSUE",
                          "ex_date": act_ex_date or EX_DATE,
+                         "broker_effective_ts": f"{DATE}T19:25:01+07:00",
                          "qty_multiplier": m,
                          "_status": ("CONFIRMED — corp_action_auto_confirm.py test"
                                      if confirmed else "PROPOSED — chưa ai ký")}
