@@ -57,6 +57,13 @@ if os.path.realpath(_SELF_DIR) != os.path.realpath(WORKDIR):
     print("     (nhung cay do phai co du data/ — nhieu *.csv bi .gitignore an khoi worktree)")
     print("=" * 100)
 sys.path.insert(0, WORKDIR)
+# W2/Q2 WORKTREE ISOLATION (job Taylor_20260927_141318). The line above puts the HARDCODED canonical
+# WORKDIR ahead of everything, so a copy of this script running from a worktree still imported the
+# CANONICAL siblings -- the patched simulate_holistic_nav.py was never loaded (caught by a real crash,
+# not by reading the code). Re-insert THIS file's own directory at position 0 so siblings resolve from
+# the same tree as the script, while WORKDIR/data stays canonical exactly as the pinned command has it.
+# In the canonical tree both paths are the same directory, so this line is a no-op there.
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 os.chdir(WORKDIR)
 
 import simulate_holistic_nav as shn
