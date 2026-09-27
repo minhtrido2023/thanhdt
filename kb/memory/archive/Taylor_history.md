@@ -713,3 +713,6 @@
 
 ## Archived 2026-09-27 (keep=12 days=0 require_done=False)
 - [2026-09-25T12:14:09Z] orb nguong N tinh lai XONG (job _120926, commit mike 20ec4029): DSR(N=20) 0.95 can 4075 phien=16.2 nam > ca doi hop dong VN30F1M (9.13 nam, o do DSR chi 0.779) => tich luy N KHONG bao gio dua toi nguong fleet o effect size +6.16bps. Power 80% can 2510 (thieu 1381 ~5.5 nam). CHO MIKE/USER chon (a) tiep tuc paper hay (b) NO-GO tam dung R&D — Taylor KHONG tu quyet. Registry end_or_trigger+review_short da viet lai, gate#2 giu 'fail'.
+
+## Archived 2026-09-27 (keep=12 days=0 require_done=False)
+- [2026-09-25T12:45:06Z] orb job _122513 XONG 3/3 (commit mike 56a9b03a/84c7465f/a43b0341, WC 2d727161). KET LUAN LON: ORB khong he 'suy giam' — sup-Wald khong co diem gay (p=0.666), doan drawdown -30% nam o phan vi 29% cua null iid. Bo loc |OR|>=0.2% la NHIEU (1056 cua so 74 phien: sd 29bps, ty le p<=0.028 la 3.7% vs null 2.8%). Khong tim duoc co che kinh te (5 ung vien, ~12 bien, 0 ket qua p<0.05). | CONG CU MOI dung cho MOI R&D sau nay: mike/bin/rnd_preflight_power.py (selfcheck 21/21) — chay TRUOC khi bat dau huong moi. | CON SO PHAI NHO: 3176 phien VN + DSR 0.95 => chi xac nhan duoc Sharpe >= ~1.0. Tin hieu doc lap duoi muc do la NO-GO o VN. | CHO MIKE/USER: duyet .claude/skills/quant-research/SKILL.md.proposed (Step 0) + chon huong tu shortlist (hang 1 = execution alpha, GO).
