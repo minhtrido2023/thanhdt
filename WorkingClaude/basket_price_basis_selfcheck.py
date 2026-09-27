@@ -6,7 +6,8 @@
 Bốn câu hỏi, không hơn — theo đúng `.claude/skills/quant-research/SKILL.md` bước 9 (two-way
 self-check) + bước 7 (control leg phải tái lập ĐÚNG số cũ):
 
-  T1. ĐỒNG NHẤT THỨC (mạnh nhất): ép `mcapw == mcap` (pxw := Close) trong module MỚI → chuỗi
+  T1. ĐỒNG NHẤT THỨC (mạnh nhất): ép `mcapw == mcap` (pxw := Close) VÀ revert chuỗi return về
+      `mcap` (`BASKET_RETURN_OSHARES=legacy`, thêm 2026-09-27) trong module MỚI → chuỗi
       level PHẢI trùng BIT-FOR-BIT với module TRƯỚC KHI SỬA. Chứng minh việc viết lại
       SUM(mcap_t)/SUM(mcap_{t-1})-1  →  SUM(w*r)/SUM(w) không hề đổi đại số.
       Nếu T1 fail = refactor sai, mọi số A/B sau đó vô nghĩa.
@@ -14,8 +15,14 @@ self-check) + bước 7 (control leg phải tái lập ĐÚNG số cũ):
       gần như không đổi. Lệch lớn ở đây = đã làm hỏng thứ khác.
   T3. POSITIVE CONTROL NGÀY CŨ (hệ số điều chỉnh xa 1,00): PHẢI có khác biệt THẬT.
       0 diff ở đây = bản "sửa" không làm gì cả, chẩn đoán sai.
-  T4. AN TOÀN CỔ TỨC: ngày chốt quyền KHÔNG được biến thành khoản lỗ giả — kiểm chân return
-      vẫn nằm trên `Close` bằng cách so r_i,t của rổ với Close_t/Close_{t-1} trên cùng ngày.
+  T4. AN TOÀN CỔ TỨC: ngày chốt quyền KHÔNG được biến thành khoản lỗ giả — kiểm cơ sở giá
+      ĐIỀU CHỈNH vẫn nằm đúng chỗ. ⚠️ Từ 2026-09-27 (job Taylor_20260927_022253) T4 KHÔNG còn
+      đọc `mcap` như bằng chứng về chân return: chuỗi return đã chuyển sang `Close` THUẦN, nên
+      đồng nhất thức `mcap/mcapw == Close/Price` chỉ còn nói về 2 CỘT EXPORT (vẫn đúng, vẫn phải
+      giữ), không nói gì về chân return. Phần "chân return nằm trên Close" được kiểm TRỰC TIẾP
+      trên chuỗi return ở T4c dưới đây, và đầy đủ ở
+      `basket_return_leg_oshares_selfcheck.py` (R1/R3/R5). Đây chính là lỗi §28 mà luật fleet
+      cấm: đừng suy ra trạng thái của A từ một kênh B đã thôi điều khiển A.
 
 T2/T3 cùng nhau là điều kiện CẦN VÀ ĐỦ: một mình T2 không phân biệt "sửa đúng" với "no-op",
 một mình T3 không phân biệt "sửa đúng" với "làm hỏng".
@@ -28,7 +35,10 @@ import subprocess
 import sys
 import types
 
-WORKDIR = "/home/trido/thanhdt/WorkingClaude"
+# Env override (them 2026-09-27): selfcheck nay phai chay duoc tu WORKTREE, neu khong
+# `load_post_edit()` se doc `custom_basket.py` CANONICAL (chua sua) va T4c tro thanh no-op
+# im lang — dung lop loi §29. Mac dinh giu nguyen duong canonical.
+WORKDIR = os.environ.get("BASKET_SELFCHECK_WORKDIR", "/home/trido/thanhdt/WorkingClaude")
 sys.path.insert(0, WORKDIR)
 os.chdir(WORKDIR)
 
@@ -82,6 +92,12 @@ def load_post_edit(force_close_basis=False):
     # qua CHÍNH đường code mà lệnh A/B của Bước 4 sẽ chạy, nếu không T1 chỉ chứng minh cho một
     # phiên bản không ai chạy. `pxw_sql()` đọc env tại thời điểm gọi nên set ở đây là đủ.
     m._SC_BASIS = "legacy" if force_close_basis else "split"
+    # Chân return cũng phải revert trong control leg (thêm 2026-09-27, job Taylor_20260927_022253).
+    # T1 đòi trùng BIT-FOR-BIT với `ebeacad^`, mà giữa `ebeacad^` và HÔM NAY có HAI thay đổi, không
+    # một: (1) tách vai cơ sở GIÁ 2026-08-02, (2) bỏ số CP khỏi chuỗi RETURN 2026-09-27. Control leg
+    # thiếu biến thứ hai sẽ fail T1 vì chính lý do docstring đã ghi một lần rồi ("T1 fail vì control
+    # thiếu chân selection, KHÔNG phải vì code sai") — không phải vì code sai.
+    m._SC_RETCHAIN = "legacy" if force_close_basis else "flat"
     return m
 
 
@@ -99,15 +115,22 @@ def adj_factor_line(tag, raw):
 
 def run(mod, bq, win):
     prev = os.environ.get("BASKET_PRICE_BASIS")
+    prev_rc = os.environ.get("BASKET_RETURN_OSHARES")
     basis = getattr(mod, "_SC_BASIS", None)
+    retchain = getattr(mod, "_SC_RETCHAIN", None)
     if basis:
         os.environ["BASKET_PRICE_BASIS"] = basis
+    if retchain:
+        os.environ["BASKET_RETURN_OSHARES"] = retchain
     try:
         lvl, adv, mem, raw = mod.build_pit(bq, win[0], win[1], **PROD_KW)
     finally:
         os.environ.pop("BASKET_PRICE_BASIS", None)
+        os.environ.pop("BASKET_RETURN_OSHARES", None)
         if prev is not None:
             os.environ["BASKET_PRICE_BASIS"] = prev
+        if prev_rc is not None:
+            os.environ["BASKET_RETURN_OSHARES"] = prev_rc
     s = pd.Series(lvl).sort_index()
     mem = mem.copy()
     mem["rebal_date"] = pd.to_datetime(mem["rebal_date"])
@@ -195,20 +218,44 @@ def main():
           f"{sum(per_r)/max(len(ds_r),1):.2f} tên/rebal")
 
     # ── T4. AN TOÀN CỔ TỨC ────────────────────────────────────────────────────────────────
-    # Chân RETURN phải vẫn là Close. Kiểm trực tiếp: mcap/mcapw của cùng 1 mã-ngày phải lệch
-    # đúng bằng hệ số Close/Price, và mcap phải tái lập Close*OShares (không phải Price*OShares).
-    print("\nT4. An toàn cổ tức (chân return vẫn trên Close → ngày chốt quyền không thành lỗ giả)")
+    # T4/T4b: 2 cột EXPORT tách vai đúng — mcap/mcapw của cùng 1 mã-ngày lệch đúng bằng hệ số
+    # Close/Price, và mcap vẫn tái lập Close*OShares (không phải Price*OShares). Vẫn là bất biến
+    # thật và vẫn phải giữ, NHƯNG từ 2026-09-27 nó KHÔNG còn nói gì về chân return (chân return
+    # đã rời `mcap`, sang `Close` thuần) — phần đó do T4c kiểm trực tiếp trên chuỗi return.
+    print("\nT4. An toàn cổ tức (cơ sở điều chỉnh đúng chỗ; chân return kiểm riêng ở T4c)")
     r = raw_o.dropna(subset=["mcap", "mcapw", "Close", "pxw", "OShares"])
     lhs = (r["mcap"] / r["mcapw"]).values
     rhs = (r["Close"] / r["pxw"]).values
     ok_ratio = np.nanmax(np.abs(lhs - rhs)) < 1e-9
-    check("T4 mcap/mcapw == Close/Price (2 chân tách đúng)", bool(ok_ratio),
+    check("T4 mcap/mcapw == Close/Price (2 CỘT EXPORT tách đúng — không phải chân return)",
+          bool(ok_ratio),
           f"max|Δ| = {np.nanmax(np.abs(lhs - rhs)):.3e}, n={len(r):,}")
     adj = (r["Close"] / r["pxw"])
     n_far = int((adj.sub(1.0).abs() > 0.05).sum())
     check("T4 có mẫu hệ số đ/c XA 1,00 trong cửa sổ (phép thử có sức phân giải)", n_far > 0,
           f"{n_far:,}/{len(r):,} dòng có |Close/Price-1|>5% "
           f"(trung vị hệ số {float(adj.median()):.3f})")
+
+    # T4c — KIỂM TRỰC TIẾP TRÊN CHUỖI RETURN (không qua cột `mcap`). Sau bản sửa 2026-09-27 chân
+    # return chạy trên `Close` THUẦN, nên đảo `BASKET_RETURN_OSHARES` phải làm chuỗi ĐỔI: nếu
+    # không đổi thì hoặc knob chết, hoặc ai đó đã âm thầm đưa số CP trở lại chân return.
+    # ⚠️ Phải lật `_SC_RETCHAIN` của module, KHÔNG phải env trực tiếp: `run()` luôn GHI ĐÈ env
+    # bằng `mod._SC_RETCHAIN` ngay trước khi gọi build_pit() (để control leg của T1 không bị môi
+    # trường bên ngoài làm nhiễu). Bản đầu của T4c set env rồi gọi run() ⇒ bị đè về "flat" ⇒
+    # d_ret = 0 ⇒ FAIL giả, đúng lớp lỗi §28 (so kênh HÀNH ĐỘNG thay vì giá trị thật sự có hiệu lực).
+    _prev_rc = getattr(post, "_SC_RETCHAIN", None)
+    post._SC_RETCHAIN = "legacy"
+    try:
+        s_leg_o, _, _ = run(post, bq, OLD)
+    finally:
+        post._SC_RETCHAIN = _prev_rc
+    ix_o = s_new_o.index.intersection(s_leg_o.index)
+    d_ret = float((ret_of(s_new_o).loc[ix_o[1:]] - ret_of(s_leg_o).loc[ix_o[1:]]).abs().max())
+    check("T4c số CP ĐÃ ra khỏi chân return (đảo BASKET_RETURN_OSHARES làm chuỗi ĐỔI)",
+          d_ret > 1e-9,
+          f"max|Δret| flat vs legacy = {d_ret*100:.4f}pp/phiên trên {len(ix_o)} phiên "
+          f"(0 = knob chết hoặc số CP đã quay lại chân return — xem "
+          f"basket_return_leg_oshares_selfcheck.py)")
 
     print("\n" + "=" * 78)
     if FAILS:

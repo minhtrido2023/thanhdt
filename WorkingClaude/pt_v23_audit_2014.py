@@ -2440,11 +2440,19 @@ if _IS_CUSTOM:
      ("custom_basket_mode", ETF_LIQ + (" (PIT membership)" if _is_pit else " (static hindsight membership)")),
      ("custom_basket_pit_params", f"quality={_pq} rebal={_preb} gate_rating={_pgate} weight_scheme={BASKET_WT} top_n={BASKET_TOPN} name_cap={BASKET_NAMECAP} qtilt={';'.join(f'{k}:{v}' for k,v in sorted((BASKET_QTILT if BASKET_QTILT is not None else __import__('custom_basket').QTILT).items()))}" if _is_pit else "n/a"),
      ("custom_basket_members", ",".join(CUSTOM_MEMBERS) + ("" if not _is_pit else "  [UNION across quarters; see CUSTOM_MEMBERS rows for per-quarter]")),
-     ("custom_basket_recipe", _recipe + " Per name per day: mcap = adjusted Close (tav2_bq.ticker) * OShares "
-                              "(tav2_bq.ticker_financial as-of/ffilled). Daily return = SUM(w*mcap_t)/SUM(w*mcap_{t-1})-1 "
-                              "over active-membership names valid BOTH days (chained); level=1000*cumprod(1+ret). "
+     # Cong thuc RETURN doi 2026-09-27 (job Taylor_20260927_022253): so CP (OShares) DA BI GO khoi
+     # chuoi return — moi buoc OShares theo quy truoc day thanh 1 ngay return GIA, va gia da duoc
+     # dieu chinh nguoc cho cung su kien do nen la dem 2 lan. Dong META nay la PROVENANCE ghi vao
+     # CSV audit: no PHAI noi dung thu code vua lam, khong duoc giu cong thuc cu (§29).
+     ("custom_basket_recipe", _recipe + " Per name per day: weight base mcapw = raw COALESCE(Price,Close) "
+                              "(tav2_bq.ticker) * OShares (tav2_bq.ticker_financial as-of/ffilled). Daily return "
+                              "r_i = adjusted Close_t / Close_{t-1} - 1 (NO share count in the return chain: "
+                              "OShares is quarterly, so a share-count step used to book a fake one-day return "
+                              "while `Close` already nets the same event out). ret = SUM(w*r)/SUM(w) over "
+                              "active-membership names valid BOTH days (chained); level=1000*cumprod(1+ret). "
                               "ADV cap = 20% of 60d-rolling SUM(Price*Volume) of active members. "
-                              "Reproduced by custom_basket.py " + ("build_pit()" if _is_pit else "build()")),
+                              "Reproduced by custom_basket.py " + ("build_pit()" if _is_pit else "build()")
+                              + " (BASKET_RETURN_OSHARES=legacy restores the pre-2026-09-27 mcap chain)"),
      ("custom_basket_capacity_note", "creation-equivalent: parking capped at 20% of the basket's own aggregate "
                                      "trading value (~100x E1VFVN30 secondary). ex-VIC = controlled beta"),
     ]

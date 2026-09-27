@@ -16,9 +16,9 @@ competes like any name; it is admitted iff it passes the 8L quality gate (see bu
 
 Construction (cap-weighted CHAINED index):
   members  = top-30 by AVG(Volume_3M_P50*COALESCE(Price,Close)); build()=static, build_pit()=PIT/quarter.
-  mcap_i,t  = adjusted Close_i,t * OShares_i  -> RETURN leg only (see PRICE BASIS below).
   mcapw_i,t = raw COALESCE(Price,Close)_i,t * OShares_i  -> WEIGHT leg only.
-  r_i,t    = mcap_i,t / mcap_i,t-1 - 1   (adjusted -> an ex-dividend date is NOT a loss)
+  mcap_i,t  = adjusted Close_i,t * OShares_i  -> LEVEL column (raw_df/audit) + validity mask only.
+  r_i,t    = Close_i,t / Close_i,t-1 - 1   (adjusted -> an ex-dividend date is NOT a loss)
   ret_t    = SUM_i(mcapw_i,t-1 * qmult_i * r_i,t) / SUM_i(mcapw_i,t-1 * qmult_i)  over names valid
              on BOTH t-1 and t (chained -> listings/halts cause no composition jumps).
   level_t  = 1000 * cumprod(1 + ret_t).   (base 1000 arbitrary; only returns matter for parking.)
@@ -38,6 +38,33 @@ PRICE BASIS — SPLIT BY ROLE (fix 2026-08-02, job Taylor_20260802_141725; same 
       NOT a file-wide Close->Price replace.
   Report: mike/agents/Taylor/research/pe_pb_basis_broad_audit_20260802.md §3
   Registry: mike/kb/data_registry/price-volume/ticker_close_vs_price_dividend_adj.md
+
+RETURN CHAIN — SHARE COUNT MUST NOT ENTER THE RETURN (fix 2026-09-27, job
+Taylor_20260927_022253; finding `custom30v-index-return-cong-tang-truong-so-CP`, quant-skeptic
+CONFIRMED high 2026-09-26):
+  Until this fix the return chain was r_i,t = mcap_i,t / mcap_i,t-1 - 1 with
+  mcap = adjusted Close * OShares. `OShares` is a QUARTERLY point-in-time quantity ffilled from
+  `ticker_financial`, so every share-count step (bonus issue, stock dividend, private placement)
+  put a STEP into the numerator that the denominator never saw — booked as a one-day return.
+  That return is FAKE, and specifically DOUBLE-COUNTED: `Close` is already retroactively adjusted
+  for the same bonus/stock-dividend, so the price-side effect is netted out and the share-side
+  effect must NOT be added on top. A real holder gets +k% shares AND takes the matching -k% price
+  mark on the ex-date — net ~0 — which is exactly what the adjusted-Close chain expresses.
+  Measured: on the live SpaceX PARK basket (19 real names) over 2026-07-01..2026-09-25 the old
+  chain returned -6.6668% vs -7.6419% on the Close chain, i.e. +0.9751pp of pure fake return from
+  exactly two OShares steps (ACB +13.00% on 2026-07-22, HPG +10.00% on 2026-07-30). On the pinned
+  R3 window it moved CAGR 28.86% -> ~24.4%. This is a MEASUREMENT FIX, not a model change.
+  SCOPE OF THE FIX — the return chain ONLY:
+    - `bx["mcap"]` (the exported raw_df column) is UNCHANGED, still Close*OShares. It remains the
+      audit/level column and the source of the `valid` mask (a name with no OShares row at all is
+      excluded from the basket exactly as before). Its identity with `mcapw` (mcap/mcapw ==
+      Close/Price) therefore still holds — but it is NO LONGER evidence about the return basis,
+      so any check asserting the return leg must read the return series, not this column.
+    - the WEIGHT leg (`mcapw`) and SELECTION are byte-for-byte untouched.
+  env BASKET_RETURN_OSHARES: "flat" (default = PRODUCTION) chains adjusted Close directly;
+  "legacy" restores the pre-fix mcap chain. Kept as the A/B control leg for
+  basket_return_leg_oshares_selfcheck.py and as a one-word rollback — same role as
+  BASKET_PRICE_BASIS="legacy" / UNIVERSE_SOURCE="prune". NEVER for production.
 """
 import bisect
 import os
@@ -88,6 +115,15 @@ def pxw_sql(alias="t"):
     if os.environ.get("BASKET_PRICE_BASIS", "split").lower() == "legacy":
         return f"{alias}.Close"
     return f"COALESCE({alias}.Price,{alias}.Close)"
+
+
+def retchain_legacy():
+    """True -> chain the RETURN on `mcap` (adjusted Close * OShares), i.e. the pre-2026-09-27
+    behaviour in which every quarterly OShares step became a one-day return. See the module
+    header's RETURN CHAIN block. Read at CALL time (not import time) so a selfcheck can flip it
+    per run, exactly like pxw_sql()/BASKET_PRICE_BASIS.
+    """
+    return os.environ.get("BASKET_RETURN_OSHARES", "flat").lower() == "legacy"
 
 
 def universe_pred(alias="t"):
@@ -217,15 +253,21 @@ WHERE t.ticker IN ({inlist})
     bx["time"] = pd.to_datetime(bx["time"])
     bx = bx.sort_values(["ticker", "time"])
     bx["OShares"] = bx.groupby("ticker")["OShares"].ffill().bfill()
-    bx["mcap"] = bx["Close"] * bx["OShares"]          # RETURN leg (adjusted; ex-div is not a loss)
+    bx["mcap"] = bx["Close"] * bx["OShares"]          # LEVEL column + validity mask (see header)
     bx["mcapw"] = bx["pxw"] * bx["OShares"]           # WEIGHT leg (raw PIT; see PRICE BASIS header)
     piv = bx.pivot_table(index="time", columns="ticker", values="mcap").sort_index()
+    # RETURN leg: adjusted Close with NO share count (see header RETURN CHAIN). `valid` still comes
+    # from `piv`, so a name lacking an OShares row is excluded exactly as before the fix.
+    pivr = (bx.pivot_table(index="time", columns="ticker", values="Close")
+              .reindex(index=piv.index, columns=piv.columns))
     pivw = (bx.pivot_table(index="time", columns="ticker", values="mcapw")
               .reindex(index=piv.index, columns=piv.columns))
     valid = piv.notna() & piv.shift().notna()  # name priced on BOTH t-1 and t
-    r = (piv / piv.shift() - 1.0).where(valid)                 # adjusted-Close return
+    _rsrc = piv if retchain_legacy() else pivr
+    r = (_rsrc / _rsrc.shift() - 1.0).where(valid)             # adjusted-Close return
     wprev = pivw.shift().where(valid).fillna(piv.shift().where(valid))  # raw-Price weight as of t-1
-    # Identity: with wprev == piv.shift() this is exactly the legacy SUM(mcap_t)/SUM(mcap_t-1)-1.
+    # Identity: with wprev == piv.shift() AND BASKET_RETURN_OSHARES=legacy this is exactly the
+    # legacy SUM(mcap_t)/SUM(mcap_t-1)-1. On the default (flat) chain it is not, by design.
     ret = (wprev.mul(r).sum(axis=1) / wprev.sum(axis=1)).fillna(0.0)
     lvl = BASE_LEVEL * (1.0 + ret).cumprod()
     adv_src = bx.groupby("time", as_index=False)["tv"].sum().sort_values("time")
@@ -1122,11 +1164,16 @@ WHERE t.ticker IN ({inlist})
     bx["time"] = pd.to_datetime(bx["time"])
     bx = bx.sort_values(["ticker", "time"])
     bx["OShares"] = bx.groupby("ticker")["OShares"].ffill().bfill()
-    bx["mcap"] = bx["Close"] * bx["OShares"]          # RETURN leg (adjusted; ex-div is not a loss)
+    bx["mcap"] = bx["Close"] * bx["OShares"]          # LEVEL column + validity mask (see header)
     bx["mcapw"] = bx["pxw"] * bx["OShares"]           # WEIGHT leg (raw PIT; see PRICE BASIS header)
     mcap = bx.pivot_table(index="time", columns="ticker", values="mcap").sort_index()
     mcapw = (bx.pivot_table(index="time", columns="ticker", values="mcapw")
                .reindex(index=mcap.index, columns=mcap.columns))
+    # RETURN leg: adjusted Close with NO share count (see header RETURN CHAIN). `valid` below still
+    # derives from `mcap`, so membership/exclusion behaviour is unchanged by this fix.
+    mcapr = (bx.pivot_table(index="time", columns="ticker", values="Close")
+               .reindex(index=mcap.index, columns=mcap.columns))
+    retpx = mcap if retchain_legacy() else mcapr
     tvv = bx.pivot_table(index="time", columns="ticker", values="tv").sort_index()
     # (6) chained quality/cap-weighted return using each day's active-quarter membership
     idx_dates = mcap.index
@@ -1155,7 +1202,10 @@ WHERE t.ticker IN ({inlist})
                 # WEIGHT uses the raw PIT price. COALESCE(Price,Close) is non-NULL wherever Close is,
                 # so this fills only on a genuine data hole -> fail-safe back to the legacy basis.
                 yvw = np.where(np.isnan(yestw[valid]), yv, yestw[valid])
-                r = today[valid] / yv - 1.0                   # adjusted-Close return, ex-div safe
+                # RETURN CHAIN (header): `retpx` is adjusted Close, share count excluded, so a
+                # quarterly OShares step no longer books a fake one-day return.
+                r = (retpx.loc[d, tks].values.astype(float)[valid]
+                     / retpx.loc[prev, tks].values.astype(float)[valid] - 1.0)
                 if weight_scheme == "capwt":
                     base = yvw * w[valid]                     # cap-weight (x qmult) base
                     if base.sum() > 0:
