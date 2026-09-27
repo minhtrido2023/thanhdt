@@ -1,15 +1,15 @@
-# Mike fleet — context_taylor_mini (v3300)
+# Mike fleet — context_taylor_mini (v3299)
 > Auto-generated RECENT block; static canonical facts maintained manually (weekly audit-lens catches drift).
 > Dùng `bin/kb_recall.sh "keywords"` để lấy section đầy đủ khi cần chi tiết về ops/CAPIT/project.
 > Source đầy đủ: `kb/context_pack.md`.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
+- [2026-09-27T03:10:02] code-reviewer/finding — code-quality-weekly-2026-09-27: {"n_files_scanned": 25, "n_findings": 13, "n_before_verify": 13, "hot_core_this_week": "/home/trido/thanhdt/WorkingClaude/trading_bot/plan_funding_gate.py", "sc …
+- [2026-09-27T03:35:50] Mike/answer — selfcheck-red: loan_package_multi_account_selfcheck.py: {"resolution": "Mike đã triage 2026-09-25: KHÔNG phải regression production, assertion selfcheck lỗi thời (loại B)", "evidence": "bus finding 2026-09-25T21:00:1 …
+- [2026-09-27T03:35:51] Mike/answer — wags-fix-not-confirmed: coord-2026-09-25: {"resolution": "Wags triage xong, files_changed=[], không cần arch-review — root cause là FPT vendor/ETL backfill (đã tách riêng thành câu hỏi Mike/retro-patter …
+- [2026-09-27T03:36:01] Mike/answer — fiinprox-H1-H2-wire-merge-hay-khong: {"resolution": "User đã duyệt merge trực tiếp qua Discord 2026-09-27 10:28 ICT — merged --no-ff vào main repo ngoài WorkingClaude", "evidence": "commit 1546895a …
 - [2026-09-27T03:41:19] Taylor/finding — fiinprox-H1-H2-hau-kiem-sau-merge: {"verdict": "PASS — merge H1/H2 hau kiem sach, khong co bat ngo", "merge": "1546895a (WorkingClaude main)", "kb_commit": "ae77b515 (mike)", "step1_selfcheck": { …
-- [2026-09-27T03:50:18] Mike/answer — cq-2026-09-27-hard-boundary: {"resolution": "User duyệt xử lý toàn bộ 11 finding (2026-09-27 10:46 ICT Discord) — dispatch Taylor job Taylor_20260927_035010, ưu tiên theo severity, worktree …
-- [2026-09-27T03:54:34] Taylor/finding — cq-2026-09-27 P1/HIGH: discretionary_margin_gate.current_price ValueError — ĐÃ VÁ: {"finding": "bin/discretionary_margin_gate.py:195 current_price() unpack 3 tu 2-tuple cua dnse_close_prices(with_source=True) -> ValueError moi lan goi; cmd_che …
-- [2026-09-27T03:54:53] Taylor/finding — selfcheck-red: lag_forensic_filter_selfcheck.py — CHECKER BUG, production DUNG: {"ket_luan": "KHONG phai (b) production hong. La (a')-checker bug: parser cua chinh selfcheck lay nham dong KB. Khong co banned ticker nao lot vao book LAG.", " …
-- [2026-09-27T03:55:25] Taylor/answer — selfcheck-red: lag_forensic_filter_selfcheck.py: {"resolution": "CHECKER BUG, KHONG phai production drift — da va va merge. Assertion do 'BANNED khop KNOWLEDGE.md' bao symdiff toan bo 15 ma non-BAF, nhung prod …
 <!--RECENT-END-->
 
 ## Kill-switches
@@ -58,7 +58,7 @@ Rating = binary gate ≤3, KHÔNG phải return-tilt.
 5. **quant-skeptic CONFIRMED = điều kiện cần trước khi wire production.**
 
 ### BANNED tickers vĩnh viễn
-PC1, VVS, KSF, NKG, HSG, HVN, VJC, NVL, GEG, SBA, DMC/IMP/TRA, TOS, VTP.
+PC1, VVS, KSF, NKG, HSG, HVN, VJC, NVL, GEG, SBA, DMC/IMP/TRA, TOS, VTP, BAF.
 
 ### Đã thử, BỊ LOẠI — không đề xuất lại
 custom30V permanent-exclude 7 tên; LAG SUE-tilt 3 tầng; hold-neutral exit; stability floor ROE<0;
