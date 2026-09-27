@@ -109,6 +109,60 @@ if old is not None:
     check("bản cũ: ngày giá neo theo AAA (09-05) ⇒ FPT/HPG MẤT giá — bug tái lập được",
           opx is not None and "FPT" not in opx and "HPG" not in opx, opx)
 
+print("\n[4] `today_ict_iso()` — công tắc \"asof là hôm nay\" (code-quality 2026-09-27, §16)")
+# main() bật overlay giá DNSE khi `args.asof == today_ict_iso()`. Bản cũ so với
+# `_dt.date.today()` TRẦN ⇒ dưới TZ=UTC khoảng 00:00–07:00 ICT trả NGÀY HÔM TRƯỚC, công tắc
+# TẮT oan và báo cáo mark-to-market bằng giá BQ phiên T-1 thay giá DNSE hôm nay, IM LẶNG.
+#
+# Test TẤT ĐỊNH ở mọi giờ chạy: thay module `_dt` của VAS bằng stub mô phỏng ĐÚNG khoảnh khắc
+# gây lỗi — 2026-09-27 01:30 ICT = 2026-09-26 18:30 UTC. Stub trả:
+#   datetime.now(<tz ICT>) → 2026-09-27 01:30   (đường ĐÃ VÁ đọc cái này)
+#   date.today()           → 2026-09-26         (đường CŨ đọc cái này — lệch 1 ngày)
+# Nên PASS/FAIL không phụ thuộc giờ thật lẫn TZ thật của máy chạy.
+import datetime as _real_dt  # noqa: E402
+
+_ICT_MOMENT = _real_dt.datetime(2026, 9, 27, 1, 30, tzinfo=_real_dt.timezone(_real_dt.timedelta(hours=7)))
+
+
+class _FakeDateTime(_real_dt.datetime):
+    @classmethod
+    def now(cls, tz=None):
+        return _ICT_MOMENT.astimezone(tz) if tz is not None else _ICT_MOMENT.replace(tzinfo=None)
+
+
+class _FakeDate(_real_dt.date):
+    @classmethod
+    def today(cls):
+        return _ICT_MOMENT.astimezone(_real_dt.timezone.utc).date()   # 2026-09-26 (bản CŨ)
+
+
+_fake_dt_mod = types.SimpleNamespace(datetime=_FakeDateTime, date=_FakeDate,
+                                     timedelta=_real_dt.timedelta, timezone=_real_dt.timezone)
+_saved_dt = VAS._dt
+VAS._dt = _fake_dt_mod
+try:
+    got = VAS.today_ict_iso()
+finally:
+    VAS._dt = _saved_dt
+check("(4a) 01:30 ICT 27/09 (= 18:30 UTC 26/09) ⇒ today_ict_iso() = 2026-09-27, KHÔNG phải "
+      "2026-09-26 mà date.today() trần trả dưới TZ=UTC", got == "2026-09-27", got)
+# Khẳng định trên `_ICT_MOMENT` chứ không GỌI `_fake_dt_mod.date.today()`: tz_anchor_gate (§16)
+# đếm mọi `X.date.today()` trần theo AST, không phân biệt stub-diễn-lại-bug với bug thật (đúng
+# thiết kế). Giá trị y hệt — `_FakeDate.today()` trả CHÍNH biểu thức này.
+_old_sees = _ICT_MOMENT.astimezone(_real_dt.timezone.utc).date().isoformat()
+check("(4b) CHỨNG MINH NGƯỢC: cùng khoảnh khắc đó, `date.today()` trần dưới TZ=UTC đọc ra "
+      "2026-09-26 — đổi today_ict_iso() về date.today() trần là (4a) chết ngay",
+      _old_sees == "2026-09-26", _old_sees)
+check("(4c) main() KHÔNG được inline lại biểu thức ngày — công tắc asof phải gọi today_ict_iso()",
+      "args.asof == today_ict_iso()" in open(
+          os.path.join(HERE, "verify_account_snapshot.py"), encoding="utf-8").read())
+# Đồng bộ với `dnse_close_prices()`: hai bên phải cùng một định nghĩa "hôm nay". Đọc source
+# của ĐÚNG hàm đó (inspect), không cắt chuỗi theo số ký tự — docstring dài sẽ làm lệch cửa sổ.
+import inspect as _inspect  # noqa: E402
+_dcp_src = _inspect.getsource(VAS.dnse_close_prices)
+check("(4d) `dnse_close_prices` vẫn neo ICT bằng ZoneInfo (không âm thầm tụt về date.today())",
+      'ZoneInfo("Asia/Ho_Chi_Minh")' in _dcp_src and ".date.today()" not in _dcp_src)
+
 print(f"\n{'=' * 70}\nKẾT QUẢ: {len(PASS)} PASS / {len(FAIL)} FAIL")
 if FAIL:
     print("FAIL:")

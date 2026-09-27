@@ -27,6 +27,7 @@ script THOÁT với exit != 0 và in cảnh báo rõ ràng — không tự đoá
 """
 import argparse
 import datetime as _dt
+from zoneinfo import ZoneInfo as _ZoneInfo   # §16: neo ICT, xem main() asof-là-hôm-nay
 import glob
 import json
 import os
@@ -444,6 +445,20 @@ def bq_close_prices(tickers, as_of_date):
     return prices, None
 
 
+def today_ict_iso():
+    """Ngày HÔM NAY theo giờ ICT, ISO. Seam để test được — KHÔNG inline lại biểu thức này.
+
+    §16: `_dt.date.today()` trần đọc TZ của process. Dưới `TZ=UTC` (cron không export TZ,
+    container) khoảng 00:00–07:00 ICT nó trả NGÀY HÔM TRƯỚC ⇒ công tắc "asof là hôm nay" ở
+    `main()` TẮT oan, và báo cáo mark-to-market dùng giá BQ của phiên T-1 thay vì giá DNSE hôm
+    nay — IM LẶNG (dòng WARN "dùng giá BQ" phía dưới dành cho ca KHÁC nên không tố giác được).
+    `dnse_close_prices()` ngay dưới đã neo ICT đúng bằng ZoneInfo từ trước; hai bên PHẢI cùng
+    một định nghĩa "hôm nay", nếu không thì overlay giá chạy trên một ngày mà bộ lọc bên trong
+    lại coi là ngày khác. Phát hiện: code-quality-weekly 2026-09-27.
+    """
+    return _dt.datetime.now(_ZoneInfo("Asia/Ho_Chi_Minh")).date().isoformat()
+
+
 def dnse_close_prices(tickers, with_source=False):
     """Giá tham chiếu ĐÚNG PHIÊN của từng mã qua API DNSE (đơn vị nghìn đồng → VND).
 
@@ -807,7 +822,7 @@ def main():
             print(f"XÁC MINH THẤT BẠI — không lấy được giá BQ: {perr}", file=sys.stderr)
             sys.exit(3)
         price_source = {tk: "bq_close" for tk in prices}
-    if tickers and args.asof == _dt.date.today().isoformat():
+    if tickers and args.asof == today_ict_iso():
         dnse_prices = dnse_close_prices(tickers)
         for tk, px in dnse_prices.items():
             prices[tk] = px

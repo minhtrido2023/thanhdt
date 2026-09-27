@@ -516,12 +516,21 @@ def main():
     rows = []
     total_mv = 0.0
     excluded_mv = 0.0
+    missing_px = []
     for tk, pos in positions.items():
         qty = pos.get("total", 0)
         px = prices.get(tk)
         if px is None:
-            print(f"⚠️ Thiếu giá cho {tk} — bỏ qua khỏi tổng (có thể làm lệch active_nav)",
-                  file=sys.stderr)
+            # [F2] code-quality 2026-09-27: bản cũ `continue` + ⚠️ + rc=0 ⇒ vị thế bị LOẠI ÂM
+            # THẦM khỏi total_mv, active_nav (MẪU SỐ SIZING) ghi THIẾU đúng bằng giá trị mã đó,
+            # mà mọi consumer vẫn coi file là tươi — và `cron_health_check.py` chỉ khớp `^\s*❌`
+            # nên ⚠️ là MÙ HẲN (cùng lý lẽ [F1] ở trên). Đây là điểm cuối cùng sau CẢ HAI tầng
+            # giá (DNSE live + fallback BQ từng mã trong resolve_prices) ⇒ tới đây là thật sự
+            # không dựng nổi giá. Fail-closed như `park_holdings.resolve_close_prices` làm với
+            # cùng tình huống ("mẫu số cấp tài khoản"): KHÔNG ghi file, để consumer rơi về
+            # nav_history thay vì đọc một active_nav nhỏ hơn thật.
+            if qty:
+                missing_px.append(tk)
             continue
         mv = qty * px
         total_mv += mv
@@ -529,6 +538,14 @@ def main():
         if is_excluded:
             excluded_mv += mv
         rows.append((tk, qty, px, mv, is_excluded))
+
+    if missing_px:
+        print(f"❌ Thiếu giá cho vị thế ĐANG NẮM {missing_px} sau CẢ HAI nguồn (DNSE live + "
+              f"fallback BQ từng mã) — KHÔNG ghi active_nav (mẫu số sizing sẽ thiếu đúng bằng "
+              f"giá trị các mã này mà consumer vẫn coi file là tươi). Chạy lại khi DNSE/BQ trả "
+              f"giá; cần xem số mà không ghi đè file sizing: `--out <đường dẫn tạm>`.",
+              file=sys.stderr)
+        sys.exit(3)
 
     total_nav = cash + total_mv + egg_value + offbook
     active_nav = total_nav - excluded_mv

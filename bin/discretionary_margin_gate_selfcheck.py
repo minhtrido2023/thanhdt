@@ -44,6 +44,11 @@ assert os.path.dirname(os.path.abspath(daily_nav_snapshot.__file__)) == _HERE, (
     f"daily_nav_snapshot nạp từ {daily_nav_snapshot.__file__}, KHÔNG phải {_HERE} — "
     f"sys.path đang shadow bản worktree bằng bản canonical, xem gate.py MIKE_ROOT comment")
 
+# Hàm THẬT `current_price` phải được chụp lại NGAY khi import: `_patch_io()` thay
+# `gate.current_price` bằng stub và KHÔNG khôi phục, nên tới test 31 `gate.current_price` đã là
+# stub. Bản đầu của test 31 (2026-09-27) gọi `gate.current_price` và PASS GIẢ đúng vì lý do này.
+ORIG_CURRENT_PRICE = gate.current_price
+
 PASS = []
 FAIL = []
 
@@ -1248,6 +1253,62 @@ def main():
               by_ticker.get("HEALTHYSIB"))
     finally:
         daily_nav_snapshot.confirmed_qty_multiplier_after = ORIG_MULT_AFTER
+        _patch_io(monkey_price=(0.0, "reset", None))
+
+    # ---- 31. [code-quality 2026-09-27, finding HIGH] HỢP ĐỒNG THẬT của `current_price()` với
+    #          `verify_account_snapshot.dnse_close_prices(..., with_source=True)`.
+    #          BUG GỐC: `current_price` unpack BA giá trị (`prices, sources, substituted`) trong
+    #          khi hàm kia `return (prices, sources) if with_source else prices` — HAI giá trị ⇒
+    #          MỌI lần gọi raise ValueError, `cmd_check_exits()` (kỷ luật thoát −20%) chết ngay
+    #          khi có arm sống đầu tiên. Latent vì 28 test trên đều mock `gate.current_price`
+    #          NGUYÊN HÀM nên hàm thật chưa từng được chạy.
+    #          Test này gọi HÀM THẬT (không mock `gate.current_price`) và chạy luôn HÀM THẬT
+    #          `dnse_close_prices` — chỉ chặn ở tầng client DNSE bằng module giả
+    #          `trading_bot.brokers` trong sys.modules ⇒ arity của hợp đồng được ghim ở CẢ HAI
+    #          đầu: đổi một đầu mà quên đầu kia là FAIL ngay.
+    import datetime as _dt
+    import types as _types
+    from zoneinfo import ZoneInfo as _ZI
+
+    class _FakeDNSEClient:
+        def close_price(self, tk):
+            today = _dt.datetime.now(_ZI("Asia/Ho_Chi_Minh")).date().isoformat()
+            return {"prices": [{"boardId": "G1", "closePrice": 15.0,
+                                "time": f"{today} 14:45:03.261"}]}
+
+    _fake_brokers = _types.ModuleType("trading_bot.brokers")
+    _fake_brokers.get_dnse_client = lambda *a, **k: _FakeDNSEClient()
+    _saved_brokers = sys.modules.get("trading_bot.brokers")
+    _saved_vas = sys.modules.get("verify_account_snapshot")
+    sys.modules["trading_bot.brokers"] = _fake_brokers
+    try:
+        import verify_account_snapshot as _vas
+        check("31: verify_account_snapshot nạp từ CÙNG thư mục selfcheck (không bị canonical "
+              "shadow — cùng bẫy vòng 6)",
+              os.path.dirname(os.path.abspath(_vas.__file__)) == _HERE, _vas.__file__)
+        try:
+            got = ORIG_CURRENT_PRICE("TESTTK")   # HÀM THẬT, không phải stub của _patch_io
+            err = None
+        except Exception as e:                                    # noqa: BLE001
+            got, err = None, f"{type(e).__name__}: {e}"
+        check("31: current_price() HÀM THẬT chạy được với dnse_close_prices HÀM THẬT "
+              "(bắt bug unpack 3 giá trị từ 2-tuple)", err is None, str(err))
+        check("31: current_price() trả (px_vnd, source, None) đúng giá trị",
+              got == (15000.0, "dnse_g1_today", None), f"got={got!r} err={err!r}")
+        # Chiều ngược lại: nếu ai đó đổi `dnse_close_prices` sang trả 3 giá trị mà quên
+        # `current_price`, test dưới FAIL ngay tại nguồn thay vì để lỗi rơi xuống runtime.
+        _shape = _vas.dnse_close_prices([], with_source=True)
+        check("31: dnse_close_prices(with_source=True) trả ĐÚNG 2-tuple (prices, sources)",
+              isinstance(_shape, tuple) and len(_shape) == 2, repr(_shape))
+    finally:
+        if _saved_brokers is None:
+            sys.modules.pop("trading_bot.brokers", None)
+        else:
+            sys.modules["trading_bot.brokers"] = _saved_brokers
+        if _saved_vas is None:
+            sys.modules.pop("verify_account_snapshot", None)
+        else:
+            sys.modules["verify_account_snapshot"] = _saved_vas
         _patch_io(monkey_price=(0.0, "reset", None))
 
     print(f"\n{'='*70}\nPASS={len(PASS)} FAIL={len(FAIL)}")

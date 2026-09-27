@@ -369,6 +369,33 @@ def excluded_tickers(label: str) -> set:
     return set()
 
 
+def _all_account_labels() -> set:
+    """Nhãn của MỌI account BROKER DNSE trong `trading_bot_accounts.json`, KỂ CẢ disabled.
+
+    Dùng để phân biệt hai ca mà nhánh "không nhận ra tài khoản nào" của `main()` trước đây gộp
+    làm một: (a) báo cáo thật sự không thuộc account nào (vd "New deals") ⇒ cho qua; (b) tên file
+    nhắc một account CÓ THẬT mà `dar.ACCOUNTS` không thấy vì config lệch ⇒ phải chặn.
+
+    CHỈ lấy profile broker DNSE — đúng population mà `dar.ACCOUNTS` rút từ. Lọc này KHÔNG phải
+    cho gọn: sổ paper có nhãn `main`, `ab_dip`, `ab_cross`; `"main" in <tên file>` khớp bừa vào
+    hàng loạt tên file vô can và biến cổng thành chặn oan. Đọc không được ⇒ trả rỗng (main() giữ
+    hành vi cũ, không tự bịa ra chặn).
+    """
+    try:
+        sys.path.insert(0, "/home/trido/thanhdt/WorkingClaude")
+        from trading_bot import config as _cfg
+        # PHẢI dùng ĐÚNG biểu thức broker của `live_dnse_labels()` (config.py:371):
+        # `(p.get("broker") or p["cfg"].get("broker") or "phs")`. Hai population này bắt buộc
+        # trùng nhau — lệch một chút là account khai broker CHỈ ở `cfg` sẽ vắng ở đây và cổng ÂM
+        # THẦM trở lại fail-open đúng cho account đó. Hôm nay hai bên cho cùng kết quả
+        # {RocketX, SpaceX, ZaloPay} nên lệch là LATENT, không phải vô hại.
+        return {p["label"] for p in _cfg.load_accounts(_cfg.load_config())
+                if p.get("label")
+                and str(p.get("broker") or p["cfg"].get("broker") or "phs").lower() == "dnse"}
+    except Exception:                                          # noqa: BLE001
+        return set()
+
+
 def accounts_asof_from_name(path: str) -> tuple:
     """(danh sách nhãn tài khoản, ngày chốt) suy từ TÊN FILE báo cáo."""
     name = os.path.basename(path)
@@ -527,6 +554,23 @@ def run_gate(report_path: str, tol_pp: float = DEFAULT_TOL_PP, out=sys.stdout) -
             print("\n✅ PASS — chân sổ paper khớp corporate_action (chân broker không áp dụng: "
                   "tên file không mang nhãn tài khoản nào).", file=out)
             return 0
+        # FAIL-CLOSED khi tên file CÓ nhắc một account mà `dar.ACCOUNTS` lại KHÔNG có
+        # (arch-review 2026-09-27). `accounts_asof_from_name()` suy nhãn bằng `dar.ACCOUNTS`,
+        # và từ 2026-09-27 `ACCOUNTS` đọc `trading_bot_accounts.json` thay vì hardcode ⇒ một
+        # config lệch (`enabled=false`, `mode` đổi, thiếu `account_id`) làm nhãn BIẾN MẤT, nhánh
+        # này trả 0 và cổng tỉ suất của báo cáo gửi nhà đầu tư TẮT ÂM THẦM. So với danh sách
+        # TOÀN BỘ account (kể cả disabled) để phân biệt "báo cáo không thuộc account nào" (đúng,
+        # cho qua) với "account có thật mà cổng không nhìn thấy" (phải chặn).
+        _known = _all_account_labels()
+        _named = sorted(lb for lb in _known if lb in os.path.basename(report_path))
+        if _named:
+            print(f"\n❌ CHẶN — tên file nhắc tài khoản {_named} nhưng "
+                  f"`dividend_adjusted_return.ACCOUNTS` (đọc trading_bot_accounts.json) chỉ có "
+                  f"{sorted(dar.ACCOUNTS)} ⇒ cổng tỉ suất KHÔNG kiểm được báo cáo này. Đây là "
+                  f"lệch CONFIG, không phải báo cáo sai: kiểm `enabled`/`mode`/`account_id` của "
+                  f"{_named}. KHÔNG cho qua im lặng (§6 mục 5 — email fail-closed theo cổng này).",
+                  file=out)
+            return 1
         print(f"⚠️  {os.path.basename(report_path)}: không nhận ra tài khoản nào trong tên file "
               f"→ cổng KHÔNG áp dụng (không chặn).", file=out)
         return 0

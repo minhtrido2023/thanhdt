@@ -65,8 +65,14 @@ def _atomic_write_json(path, obj):
 
 
 def next_trading_day_str():
+    """Phiên giao dịch KẾ TIẾP tính từ HÔM NAY theo giờ ICT.
+
+    §16: `dt.date.today()` trần đọc TZ của process — dưới `TZ=UTC` (cron không export TZ,
+    container) từ 00:00–07:00 ICT nó trả NGÀY HÔM TRƯỚC, nên plan_date mặc định của lần chèn
+    lệch một phiên về quá khứ. `today_ict()` đã được import ở đầu file.
+    """
     from trading_bot.vn_market import next_trading_day
-    return str(next_trading_day(dt.date.today()))
+    return str(next_trading_day(today_ict()))
 
 
 def load_active_states(account):
@@ -463,7 +469,11 @@ def process_account(account, plan_date, dry_run):
         return 1
     plan.setdefault("orders", [])
 
-    now_iso = dt.datetime.now().astimezone().isoformat(timespec="seconds")
+    # §16: neo ICT tường minh bằng `_ICT_TZ` (dòng 45) — `.astimezone()` trần dán offset
+    # của process, nên cùng một lần chèn ghi "+00:00" trên host UTC và "+07:00" trên host
+    # ICT; dấu thời gian này đi thẳng vào `notes[].at`/`completed_at` của plan + state, là
+    # artifact người duyệt plan đọc.
+    now_iso = dt.datetime.now(_ICT_TZ).isoformat(timespec="seconds")
     account_mode = "live" if account in live_dnse_labels() else "paper"
 
     # active_nav CHỈ đọc khi có state khai target theo tỷ trọng — state target cố định không

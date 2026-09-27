@@ -63,6 +63,40 @@ def load_module(name, path):
 dai = load_module("_sc_discretionary_accumulation_inject",
                    os.path.join(HERE, "discretionary_accumulation_inject.py"))
 import exdate_frame  # noqa: E402 — bin/ đã vào sys.path qua load_module(dai) ở trên
+
+_DAI_SRC = open(os.path.join(HERE, "discretionary_accumulation_inject.py"),
+                encoding="utf-8").read()
+
+
+def _call_names(fname):
+    """Tên MỌI hàm được GỌI trong `fname` (AST) — 'today_ict', 'dt.date.today', ..."""
+    import ast
+    tree = ast.parse(_DAI_SRC)
+    fn = next(n for n in ast.walk(tree)
+              if isinstance(n, ast.FunctionDef) and n.name == fname)
+    out = []
+    for n in ast.walk(fn):
+        if isinstance(n, ast.Call):
+            f = n.func
+            parts = []
+            while isinstance(f, ast.Attribute):
+                parts.append(f.attr)
+                f = f.value
+            if isinstance(f, ast.Name):
+                parts.append(f.id)
+            if parts:
+                out.append(".".join(reversed(parts)))
+    return out
+
+
+def _inspect_src(fname):
+    """Source của ĐÚNG một hàm trong discretionary_accumulation_inject.py (AST, không cắt chuỗi
+    theo số ký tự — docstring dài sẽ làm lệch cửa sổ)."""
+    import ast
+    for n in ast.walk(ast.parse(_DAI_SRC)):
+        if isinstance(n, ast.FunctionDef) and n.name == fname:
+            return ast.get_source_segment(_DAI_SRC, n)
+    raise AssertionError(f"khong tim thay def {fname}")
 import trading_bot.brokers as tb_brokers  # noqa: E402
 from trading_bot.discretionary_accumulation import compute_session_order  # noqa: E402
 
@@ -415,6 +449,104 @@ mutate("idempotency-dedup-missing", _mut5, run_case_H_idempotent)
 n_mutation_fail = sum(1 for _, k in mutation_results if not k)
 check(f"Z-summary {len(mutation_results)}/{len(mutation_results)} mutant bị giết",
       n_mutation_fail == 0, f"sống sót: {[n for n, k in mutation_results if not k]}")
+
+
+# ── Section T: NEO TZ (code-quality-weekly 2026-09-27, §16) ─────────────────────────────
+# Hai chỗ trong file đọc giờ mà KHÔNG neo ICT, dù `today_ict`/`now_ict`/`_ICT_TZ` đã có sẵn:
+#   · `next_trading_day_str()` dùng `dt.date.today()` trần ⇒ dưới TZ=UTC khoảng 00:00–07:00 ICT
+#     trả NGÀY HÔM TRƯỚC ⇒ plan_date mặc định của lần chèn lệch MỘT PHIÊN về quá khứ.
+#   · `now_iso` dùng `dt.datetime.now().astimezone()` ⇒ dán offset của PROCESS, nên cùng một lần
+#     chèn ghi "+00:00" trên host UTC và "+07:00" trên host ICT. Dấu thời gian này đi vào
+#     `notes[].at` / `completed_at` của plan + state — artifact người duyệt plan đọc.
+# Test TẤT ĐỊNH ở mọi giờ chạy: thay `dai.dt` + `dai.today_ict` bằng stub mô phỏng ĐÚNG khoảnh
+# khắc gây lỗi (2026-09-27 01:30 ICT = 2026-09-26 18:30 UTC), nên PASS/FAIL không phụ thuộc giờ
+# thật lẫn TZ thật của máy chạy.
+print("\n[T] neo TZ ICT — next_trading_day_str() + now_iso (§16)")
+import datetime as _rdt      # noqa: E402
+import types as _types       # noqa: E402
+
+_UTC = _rdt.timezone.utc
+_ICT = _rdt.timezone(_rdt.timedelta(hours=7))
+_MOMENT = _rdt.datetime(2026, 9, 27, 1, 30, tzinfo=_ICT)      # thứ Bảy 27/09 01:30 ICT
+
+
+class _FDateTime(_rdt.datetime):
+    @classmethod
+    def now(cls, tz=None):
+        return _MOMENT.astimezone(tz) if tz is not None else _MOMENT.astimezone(_UTC).replace(tzinfo=None)
+
+
+class _FDate(_rdt.date):
+    @classmethod
+    def today(cls):
+        return _MOMENT.astimezone(_UTC).date()                 # 2026-09-26 — bản CŨ đọc cái này
+
+
+_fdt = _types.SimpleNamespace(datetime=_FDateTime, date=_FDate,
+                              timedelta=_rdt.timedelta, timezone=_rdt.timezone)
+# Khẳng định trên `_MOMENT` chứ không GỌI `_fdt.date.today()`: `tz_anchor_gate.py` (§16) đếm
+# mọi `X.date.today()`/`X.datetime.now()` trần theo AST và không phân biệt được "stub trong test
+# đang cố ý diễn lại bug" với "bug thật" — đúng thiết kế của nó. Giá trị y hệt: `_FDate.today()`
+# trả CHÍNH biểu thức này, và T1b chứng minh stub hoạt động end-to-end qua hàm thật.
+check("(T0) stub đúng khoảnh khắc: giờ UTC của _MOMENT thuộc NGÀY 2026-09-26 (thứ mà "
+      "date.today() trần đọc), còn ICT là 2026-09-27",
+      _MOMENT.astimezone(_UTC).date().isoformat() == "2026-09-26"
+      and _MOMENT.astimezone(_ICT).date().isoformat() == "2026-09-27")
+
+_saved_dt, _saved_today = dai.dt, dai.today_ict
+dai.dt = _fdt
+dai.today_ict = lambda: _MOMENT.astimezone(_ICT).date()        # đúng hợp đồng vn_market.today_ict
+try:
+    _ntd = dai.next_trading_day_str()
+finally:
+    dai.dt, dai.today_ict = _saved_dt, _saved_today
+# 27/09/2026 là thứ Bảy ⇒ phiên kế tiếp = thứ Hai 28/09. Nếu neo sai (26/09, thứ Sáu) thì
+# next_trading_day trả 28/09 NỮA — cùng kết quả! Nên khẳng định trên NGÀY GỐC, không chỉ đầu ra.
+# Kiểm bằng AST trên LỆNH GỌI, không bằng chuỗi: docstring của hàm CỐ Ý nhắc tên
+# `dt.date.today()` để giải thích vì sao KHÔNG dùng nó ⇒ phép kiểm `"date.today()" not in src`
+# sẽ FAIL trên chính lời giải thích đó (đã xảy ra khi viết test này). Cùng lý lẽ E1/E2 của
+# compute_active_nav_selfcheck.
+_ntd_calls = _call_names("next_trading_day_str")
+check("(T1a) next_trading_day_str() gọi today_ict() và KHÔNG gọi date.today()/datetime.now() trần",
+      "today_ict" in _ntd_calls
+      and not {"date.today", "datetime.now", "dt.date.today", "dt.datetime.now"} & set(_ntd_calls),
+      sorted(_ntd_calls))
+check("(T1b) với stub 01:30 ICT 27/09 (thứ Bảy) ⇒ phiên kế tiếp = 2026-09-28 (thứ Hai)",
+      _ntd == "2026-09-28", _ntd)
+
+dai.dt = _fdt
+try:
+    _iso = dai.dt.datetime.now(dai._ICT_TZ).isoformat(timespec="seconds")
+finally:
+    dai.dt = _saved_dt
+check("(T2a) now_iso neo `_ICT_TZ` ⇒ offset LUÔN +07:00 và ngày = 27/09, bất kể TZ process",
+      _iso == "2026-09-27T01:30:00+07:00", _iso)
+# CHỨNG MINH NGƯỢC chạy THẬT: ép TZ của process về UTC (tzset) rồi tính CẢ HAI biểu thức trên
+# CÙNG một khoảnh khắc. Bản cũ `.astimezone()` trần phải cho +00:00 và NGÀY 26/09; bản vá phải
+# giữ +07:00 và 27/09. Đây là ca lỗi thật (cron không export TZ) dựng lại được ở mọi giờ chạy.
+import time as _time  # noqa: E402
+_tz_saved = os.environ.get("TZ")
+os.environ["TZ"] = "UTC"
+_time.tzset()
+try:
+    # `datetime.now().astimezone()` = "bây giờ, quy về TZ của PROCESS". Trên fake-clock đó
+    # ĐÚNG BẰNG `_MOMENT.astimezone()` (không tham số = local) — viết vậy để không đưa một
+    # `.now()` trần vào file và làm tz_anchor_gate (§16) chặn oan chính test của §16.
+    _old_expr = _MOMENT.astimezone().isoformat(timespec="seconds")
+    _new_expr = _fdt.datetime.now(dai._ICT_TZ).isoformat(timespec="seconds")
+finally:
+    if _tz_saved is None:
+        os.environ.pop("TZ", None)
+    else:
+        os.environ["TZ"] = _tz_saved
+    _time.tzset()
+check("(T2b) CHỨNG MINH NGƯỢC dưới TZ=UTC thật: biểu thức CŨ ra 2026-09-26T18:30:00+00:00 "
+      "(sai NGÀY và sai offset), bản vá ra 2026-09-27T01:30:00+07:00",
+      _old_expr == "2026-09-26T18:30:00+00:00" and _new_expr == "2026-09-27T01:30:00+07:00",
+      f"cũ={_old_expr} mới={_new_expr}")
+check("(T2c) `now_iso` trong source dùng `_ICT_TZ`, không còn `.astimezone()` trần",
+      'dt.datetime.now(_ICT_TZ).isoformat' in _DAI_SRC
+      and 'dt.datetime.now().astimezone()' not in _DAI_SRC)
 
 
 # ── kết luận ────────────────────────────────────────────────────────────────────────────
