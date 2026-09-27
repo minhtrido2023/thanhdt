@@ -224,6 +224,65 @@ def main() -> int:
         shutil.rmtree(wt_new, ignore_errors=True)
         shutil.rmtree(wt_old, ignore_errors=True)
 
+    # ── [CFG] Lệch config làm BIẾN MẤT nhãn account ⇒ CHẶN, không cho qua im lặng ──────────
+    # `accounts_asof_from_name()` suy nhãn bằng `dar.ACCOUNTS`, và từ 2026-09-27 ACCOUNTS đọc
+    # trading_bot_accounts.json thay vì hardcode (§7). Một config lệch (`enabled=false`, `mode`
+    # đổi, thiếu `account_id`) làm nhãn biến mất ⇒ nhánh "không nhận ra tài khoản nào" trả 0 và
+    # cổng tỉ suất của báo cáo gửi nhà đầu tư TẮT ÂM THẦM, trong khi `send_report_email.py`
+    # fail-closed THEO cổng này (§6 mục 5) nên nó sẽ gửi. arch-review 2026-09-27 chặn ca này.
+    print("\n[CFG] nhãn account biến mất khỏi ACCOUNTS vì lệch config ⇒ cổng phải CHẶN")
+    import report_return_gate as _RG_cfg   # noqa: E402
+    import dividend_adjusted_return as _dar_cfg  # noqa: E402
+
+    _all_lbl = _RG_cfg._all_account_labels()
+    check("[CFG0] `_all_account_labels()` chỉ trả profile broker DNSE, KHÔNG trả sổ paper "
+          "(`main`/`ab_dip`/`ab_cross` — `'main' in <tên file>` sẽ chặn oan hàng loạt)",
+          bool(_all_lbl) and not ({"main", "ab_dip", "ab_cross"} & _all_lbl), True)
+    check("[CFG1] …và nó CÓ thấy account DNSE đang disabled (RocketX) — đúng mục đích: phân biệt "
+          "'account có thật mà cổng không thấy' với 'báo cáo không thuộc account nào'",
+          "RocketX" in _all_lbl, True)
+
+    with tempfile.TemporaryDirectory() as _td_cfg:
+        _rp = os.path.join(_td_cfg, "SpaceX_weekly_report_2026-09-19.md")
+        open(_rp, "w", encoding="utf-8").write("# Báo cáo\n\nKhông có mục TBD nào.\n")
+        # Mô phỏng ĐÚNG lệch config (SpaceX biến mất khỏi ACCOUNTS) rồi chạy CHÍNH
+        # `accounts_asof_from_name()` — hàm quyết định nhánh — chứ không chỉ suy luận.
+        _saved_acc = dict(_dar_cfg.ACCOUNTS)
+        try:
+            _dar_cfg.ACCOUNTS.clear()
+            _lbls_after, _ = _RG_cfg.accounts_asof_from_name(_rp)
+        finally:
+            _dar_cfg.ACCOUNTS.clear()
+            _dar_cfg.ACCOUNTS.update(_saved_acc)
+        check("[CFG1b] ACCOUNTS rỗng ⇒ `accounts_asof_from_name()` KHÔNG thấy nhãn nào, tức đúng "
+              "nhánh 'không nhận ra tài khoản nào' mà bản cũ trả 0", _lbls_after, [])
+        _named = sorted(lb for lb in _all_lbl if lb in os.path.basename(_rp))
+        check("[CFG2] tên file `SpaceX_weekly_report_*.md` khớp một nhãn DNSE có thật ⇒ nhánh "
+              "fail-closed được kích hoạt (trước bản vá: trả 0, cổng tắt im lặng)",
+              _named, ["SpaceX"])
+        _rp2 = os.path.join(_td_cfg, "New_deals_2026-09-19.md")
+        check("[CFG3] CHỨNG MINH NGƯỢC: báo cáo KHÔNG mang nhãn account nào ⇒ _named rỗng ⇒ vẫn "
+              "giữ hành vi cũ (cho qua), không chặn oan",
+              sorted(lb for lb in _all_lbl if lb in os.path.basename(_rp2)), [])
+    # Kiểm bằng AST, KHÔNG bằng cắt chuỗi: lần thứ TƯ trong job này một phép kiểm "source có/không
+    # chứa X" cho kết quả sai vì văn xuôi quanh X (xem E1, T1a, 13y). Ở đây `.split("return")`
+    # bắt được `return` của comment/câu khác trong cùng nhánh.
+    import ast as _ast_cfg  # noqa: E402
+    _tree_cfg = _ast_cfg.parse(open(os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                                 "report_return_gate.py"),
+                                    encoding="utf-8").read())
+    # Nhánh nằm trong `run_gate()` (hàm làm việc thật), `main()` chỉ parse argv rồi gọi nó.
+    _rg_cfg = next(n for n in _ast_cfg.walk(_tree_cfg)
+                   if isinstance(n, _ast_cfg.FunctionDef) and n.name == "run_gate")
+    _named_ifs = [n for n in _ast_cfg.walk(_rg_cfg)
+                  if isinstance(n, _ast_cfg.If) and isinstance(n.test, _ast_cfg.Name)
+                  and n.test.id == "_named"]
+    check("[CFG4a] `run_gate()` có ĐÚNG MỘT nhánh `if _named:`", len(_named_ifs), 1)
+    check("[CFG4b] nhánh đó thật sự `return 1` (không chỉ in cảnh báo rồi vẫn trả 0)",
+          any(isinstance(n, _ast_cfg.Return) and isinstance(n.value, _ast_cfg.Constant)
+              and n.value.value == 1
+              for n in _ast_cfg.walk(_named_ifs[0])) if _named_ifs else False, True)
+
     print()
     if _fails:
         print(f"❌ SELFCHECK FAIL — {len(_fails)} test: " + "; ".join(_fails))

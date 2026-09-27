@@ -177,8 +177,26 @@ def _load_accounts_map(accounts_path: str = None) -> dict:
         _kw = {"path": accounts_path} if accounts_path else {}
         labels = set(_cfg.live_dnse_labels(**_kw))
         profiles = _cfg.load_accounts(_cfg.load_config(), **_kw)
-        return {p["label"]: str(p["account_id"]) for p in profiles
-                if p["label"] in labels and p.get("account_id")}
+        out = {p["label"]: str(p["account_id"]) for p in profiles
+               if p["label"] in labels and p.get("account_id")}
+        # NÓI TO khi kết quả RỖNG hoặc MẤT account so với nhãn live (arch-review 2026-09-27):
+        # consumer `mike/bin/report_return_gate.py` coi "không resolve được nhãn nào" là
+        # "cổng KHÔNG áp dụng" và trả 0 (KHÔNG chặn) ⇒ một config lệch sẽ ÂM THẦM tắt cổng tỉ
+        # suất của báo cáo gửi nhà đầu tư. Bản hardcode cũ không thể mất SpaceX/ZaloPay; bản đọc
+        # config thì có thể, nên phải thấy được. In ❌ (không raise: import-time raise sẽ giết
+        # 5 script khác đang import module này chỉ để dùng hàm khác).
+        _lost = sorted(labels - set(out))
+        if not out:
+            print("❌ [dividend_adjusted_return] trading_bot_accounts.json ĐỌC ĐƯỢC nhưng KHÔNG "
+                  "có account live nào ⇒ ACCOUNTS rỗng. Cổng tỉ suất của report "
+                  "(report_return_gate.py) sẽ coi là 'không áp dụng' và KHÔNG CHẶN — kiểm lại "
+                  "`enabled`/`mode`/`account_id` trước khi tin bất kỳ tỉ suất nào.",
+                  file=sys.stderr)
+        elif _lost:
+            print(f"❌ [dividend_adjusted_return] nhãn live {_lost} KHÔNG resolve được "
+                  f"`account_id` ⇒ bị loại khỏi ACCOUNTS (còn {sorted(out)}). Báo cáo của các "
+                  f"account đó sẽ KHÔNG được cổng tỉ suất kiểm.", file=sys.stderr)
+        return out
     except Exception as exc:                       # noqa: BLE001 — thiếu config ⇒ nói ra, đừng đoán
         print(f"⚠️  không đọc được trading_bot_accounts.json ({type(exc).__name__}: {exc}) — "
               f"dùng fixture offline {sorted(_ACCOUNTS_OFFLINE_FIXTURE)}; nếu đang chạy THẬT thì "
