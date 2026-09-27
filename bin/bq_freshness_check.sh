@@ -232,6 +232,117 @@ _check_lastmod() {
   fi
 }
 
+# _check_price_freeze: phát hiện cột giá THÔ bị ETL upstream copy nguyên từ phiên T-1 trên
+# DIỆN RỘNG (2026-09-27, job Taylor_20260927_103434). Vì sao cần một check RIÊNG: cả 3 gate
+# giá phía trên đều mù với lỗi này — _check đo MAX(time) (vẫn advance), depth-check đếm số mã
+# (vẫn đủ ~250), và cache == live nên không phải lỗi cache. Sự cố thật đã xảy ra 2 lần mà
+# KHÔNG có gì kêu: 2026-01-30 (254/256 mã Price[t]==Price[t-1]) và 2025-02-03 (258/258).
+#
+# NGƯỠNG ĐO TỪ DỮ LIỆU, không bốc số — phân bố 4.171 phiên ticker_prune 2010-01-05→2026-09-25
+# (series: mike/agents/Taylor/research/price_freeze_gate_20260927/daily_flat_series_v2.csv,
+# script tái lập: .../calibrate.py). Trên 3.174 phiên 2014+:
+#   tỉ lệ mã có Price phẳng: p50=0,136  p90=0,216  p99=0,291  p99,9=0,381  → rồi KHOẢNG TRỐNG
+#   → 0,755 (2018-01-23) / 0,792 (2018-01-24) / 0,992 (2026-01-30) / 1,000 (2025-02-03).
+#   Chọn 0,50 = giữa khoảng trống rỗng [0,381 ; 0,755]; ≈ med + 6,7·robustSD (1,4826·MAD).
+#   FP thực đo = 0/3.174 phiên (2014+) và 0/4.171 (2010+); bắt 4/4 phiên bất thường đã biết.
+# So sánh cặp = PHIÊN LIỀN KỀ CỦA BẢNG (LAG trên danh sách ngày distinct), KHÔNG phải
+# "cách ≤7 ngày lịch": bản đầu dùng ngưỡng ngày lịch đã ÂM THẦM bỏ qua chính phiên đầu sau
+# Tết (gap 10-12 ngày) — và 2025-02-03, một trong hai phiên đóng băng thật, RƠI ĐÚNG vào đó.
+#
+# Hai chữ ký cơ học KHÁC NHAU, hệ quả khác nhau (§29: rẽ nhánh theo bit script vừa ĐỌC được,
+# không quy chụp một nguyên nhân):
+#   (a) Price phẳng nhưng Close (đã điều chỉnh) VẪN đổi ⇒ lỗi riêng cột Price thô. Close mới
+#       là cột production đọc ⇒ WARN, không chặn. Chữ ký 2026-01-30 (222/254), 2025-02-03 (234/258).
+#   (b) CẢ Price và Close phẳng ⇒ nguyên dòng giá là bản sao T-1. Bước [pipeline-1b/1c]
+#       (build_universe_pit + _quality) và chấm điểm custom30V ngay dưới sẽ ăn dữ liệu chết
+#       ⇒ BLOCK. Chữ ký 2018-01-24 (174/221 mã phẳng CẢ HAI cột = 0,787). Ngưỡng 0,50 đo
+#       riêng cho metric này trên cùng 3.174 phiên 2014+: p50=0,133 p99=0,286 p99,9=0,353,
+#       giá trị lớn nhất KHÔNG thuộc phiên bất thường nào = 0,377 ⇒ 0 FP; chỉ 2018-01-24 vượt.
+#       (2018-01-23 AB=0,455 — chữ ký PHA TRỘN, 66/166 mã có Close đổi — nên nó rơi vào nhánh
+#       WARN qua metric Price-phẳng 0,755, KHÔNG bị BLOCK. Đó là hành vi ĐÚNG mong muốn.)
+MAX_PRICE_FLAT_PCT=50   # % mã có Price[t]==Price[t-1] — xem khối trên, đo từ 4.171 phiên
+MIN_FLAT_SAMPLE=50      # < 50 cặp mã so được ⇒ KHÔNG kết luận (nói thẳng), đừng báo động
+_check_price_freeze() {
+  local q result rc row n_tot n_flat n_cm n_both pct_flat pct_both pct_cm_of_flat d dprev
+  q="WITH days AS (
+       SELECT DISTINCT time AS d FROM \`${PROJECT}.tav2_bq.ticker_prune\`
+       WHERE time >= DATE_SUB(CURRENT_DATE('Asia/Ho_Chi_Minh'), INTERVAL 60 DAY)),
+     dseq AS (SELECT d, LAG(d) OVER (ORDER BY d) AS dprev FROM days),
+     last2 AS (SELECT d, dprev FROM dseq ORDER BY d DESC LIMIT 1),
+     b AS (
+       SELECT ticker, time, Price, Close,
+              LAG(Price) OVER (PARTITION BY ticker ORDER BY time) AS p_prev,
+              LAG(Close) OVER (PARTITION BY ticker ORDER BY time) AS c_prev,
+              LAG(time)  OVER (PARTITION BY ticker ORDER BY time) AS t_prev
+       FROM \`${PROJECT}.tav2_bq.ticker_prune\`
+       WHERE time >= DATE_SUB(CURRENT_DATE('Asia/Ho_Chi_Minh'), INTERVAL 60 DAY))
+     SELECT COUNT(*) AS n_tot,
+            COUNTIF(b.Price = b.p_prev) AS n_flat,
+            COUNTIF(b.Price = b.p_prev AND b.Close != b.c_prev) AS n_cm,
+            COUNTIF(b.Price = b.p_prev AND b.Close =  b.c_prev) AS n_both,
+            CAST(MAX(l.d) AS STRING) AS d, CAST(MAX(l.dprev) AS STRING) AS dprev
+     FROM b JOIN last2 AS l ON b.time = l.d AND b.t_prev = l.dprev
+     WHERE b.Price IS NOT NULL AND b.p_prev IS NOT NULL
+       AND b.Close IS NOT NULL AND b.c_prev IS NOT NULL"
+
+  result=$(bq query --use_legacy_sql=false --project_id="$PROJECT" --format=csv --quiet "$q" 2>&1)
+  rc=$?
+  row="$(printf '%s\n' "$result" | tail -1)"
+  # §28/§29: tách "không tra được BQ" khỏi "tra được nhưng dữ liệu bất thường"; in LỖI THẬT
+  # bq vừa trả, không đoán nguyên nhân.
+  if [ $rc -ne 0 ] || ! printf '%s' "$row" | grep -qE '^[0-9]+,[0-9]+,[0-9]+,[0-9]+,[0-9-]+,[0-9-]+$'; then
+    local errsnip reason
+    errsnip="$(printf '%s' "$result" | tr '\n' ' ' | cut -c1-200)"
+    if [ $rc -ne 0 ]; then
+      reason="bq lỗi kết nối/quyền (rc=$rc, auth/quota/network)"
+    else
+      reason="bq trả dòng không đúng dạng dù rc=0 ('${row}') — bảng rỗng/đổi schema"
+    fi
+    echo "SKIP ticker_prune Price-freeze: KHÔNG kết luận được — ${reason} (raw: ${errsnip})"
+    "$ROOT/bin/notify_thread.sh" "🟡 BQ CHECK KHÔNG CHẠY ĐƯỢC ($TODAY $NOW_ICT): Price-freeze gate trên ticker_prune — ${reason}. ĐÂY KHÔNG PHẢI kết luận 'dữ liệu sạch', chỉ là không đo được. (raw: ${errsnip})" \
+      "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+    WARNED=$((WARNED + 1))
+    return 0
+  fi
+
+  IFS=, read -r n_tot n_flat n_cm n_both d dprev <<<"$row"
+
+  # Fail-safe theo hướng KHÔNG báo động giả: quá ít cặp mã so được (mã mới vào universe, phiên
+  # đầu sau đợt nghỉ dài mà bảng thiếu ngày liền trước…) ⇒ nói thẳng là không kết luận được.
+  if [ "$n_tot" -lt "$MIN_FLAT_SAMPLE" ] 2>/dev/null; then
+    echo "SKIP ticker_prune Price-freeze: chỉ ${n_tot} mã có cả $d và $dprev (<${MIN_FLAT_SAMPLE}) — KHÔNG đủ dữ liệu để kết luận, không báo động"
+    return 0
+  fi
+
+  pct_flat=$(( n_flat * 100 / n_tot ))
+  pct_both=$(( n_both * 100 / n_tot ))
+  pct_cm_of_flat=0
+  [ "$n_flat" -gt 0 ] && pct_cm_of_flat=$(( n_cm * 100 / n_flat ))
+
+  if [ "$pct_both" -gt "$MAX_PRICE_FLAT_PCT" ]; then
+    # Chữ ký (b): cả hai cột phẳng ⇒ nguyên dòng giá là bản sao T-1 ⇒ chặn pipeline.
+    local msg="⚠️ BQ PRICE FROZEN ($TODAY $NOW_ICT): ticker_prune phiên $d — ${n_both}/${n_tot} mã (${pct_both}%) có CẢ Price VÀ Close y hệt phiên $dprev, vượt ngưỡng ${MAX_PRICE_FLAT_PCT}% (đo từ 3.174 phiên 2014+: p99,9=35%, cao nhất phần thân=46%). Nguyên dòng giá nghi là bản sao T-1 ⇒ build_universe_pit + chấm custom30V sẽ ăn dữ liệu chết. CHẶN pipeline. So sánh: tổng mã Price phẳng ${n_flat}/${n_tot} (${pct_flat}%), trong đó ${n_cm} mã có Close đổi."
+    echo "FAIL ticker_prune Price-freeze: both-flat ${n_both}/${n_tot} (${pct_both}%) phiên $d vs $dprev (>${MAX_PRICE_FLAT_PCT}%) — nguyên dòng giá nghi copy T-1"
+    "$ROOT/bin/notify.sh" "$msg" 2>/dev/null || true
+    "$ROOT/bin/notify_thread.sh" "$msg" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+    FAILED=1
+    return 1
+  fi
+
+  if [ "$pct_flat" -gt "$MAX_PRICE_FLAT_PCT" ]; then
+    # Chữ ký (a): Price thô phẳng nhưng Close đã điều chỉnh vẫn đổi ⇒ lỗi cột Price của ETL
+    # nguồn. Close mới là cột production đọc ⇒ WARN, không chặn.
+    local msg="🟡 BQ WARN — Price THÔ đóng băng ($TODAY $NOW_ICT): ticker_prune phiên $d — ${n_flat}/${n_tot} mã (${pct_flat}%) có Price y hệt phiên $dprev, vượt ngưỡng ${MAX_PRICE_FLAT_PCT}% (đo từ 3.174 phiên 2014+: p99,9=38%, khoảng trống 38%→76%). Trong số đó ${n_cm}/${n_flat} mã (${pct_cm_of_flat}%) có Close (đã điều chỉnh) VẪN đổi ⇒ đúng chữ ký lỗi RIÊNG cột Price thô của ETL nguồn (giống 2026-01-30: 222/254; 2025-02-03: 234/258), KHÔNG phải phiên nghỉ/không giao dịch. Close là cột production đọc nên KHÔNG chặn pipeline; báo upstream sửa cột Price. Both-flat ${n_both}/${n_tot} (${pct_both}%)."
+    echo "WARN ticker_prune Price-freeze: Price phẳng ${n_flat}/${n_tot} (${pct_flat}%) phiên $d vs $dprev (>${MAX_PRICE_FLAT_PCT}%), Close vẫn đổi ở ${n_cm}/${n_flat} — lỗi cột Price thô, non-blocking"
+    "$ROOT/bin/notify_thread.sh" "$msg" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+    WARNED=$((WARNED + 1))
+    return 0
+  fi
+
+  [ -z "$QUIET" ] && echo "OK   ticker_prune Price-freeze: ${n_flat}/${n_tot} mã Price phẳng (${pct_flat}% ≤${MAX_PRICE_FLAT_PCT}%) phiên $d vs $dprev; both-flat ${n_both}/${n_tot} (${pct_both}%)"
+  return 0
+}
+
 # _check_corp_action_scanner: thay cho _check cũ trên shares_outstanding_live (xem giải thích
 # đầy đủ ở khối comment đầu file, mục "SỬA LẠI 2026-08-03"). Đo scanner có còn chạy qua
 # checked_at của corp_action_backlog.json — KHÔNG đo lag ghi bảng BQ (writer event-driven,
@@ -295,6 +406,7 @@ else
   "$ROOT/bin/notify_thread.sh" "$depth_msg" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
   FAILED=1
 fi
+_check_price_freeze || true
 _check "vnindex_5state_dt5g_live (DT5G)"  "tav2_bq.vnindex_5state_dt5g_live"  "t.time"  $MAX_STATE_LAG  "trading"  || true
 # --- DT5G PUBLISHER-EVIDENCE gate (2026-07-31, job Winston_20260731_014953) ------------------
 # VÌ SAO cần: bảng dt5g_live có WRITER THỨ HAI ngoài luồng — pipeline kaffa_v2 của team dữ liệu
