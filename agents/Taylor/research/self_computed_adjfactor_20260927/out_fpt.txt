@@ -1,0 +1,37 @@
+=== FPT  2025-01-02 .. 2026-09-25  (428 sessions) ===
+
+-- events read from tav2_bq.corporate_action (executed only) --
+   2025-05-07 ISS 'Phát hành cho CBCNV': NON price-adjusting
+   2025-05-07 ISS 'Phát hành cho CBCNV': NON price-adjusting
+   2026-06-24 ISS 'Phát hành cho CBCNV': NON price-adjusting
+   2026-06-24 ISS 'Phát hành cho CBCNV': NON price-adjusting
+   2025-06-12 DIV 1000d on raw 117900 (2025-06-11) -> f=1.008554
+   2025-07-21 ISS Cổ phiếu thưởng 0.15 -> f=1.150000 (no cash leg)
+   2025-12-01 DIV 1000d on raw 97100 (2025-11-28) -> f=1.010406
+   2026-05-28 DIV 1000d on raw 73600 (2026-05-27) -> f=1.013774
+   2026-09-21 ISS Cổ phiếu thưởng 0.1 -> f=1.100000 (no cash leg)
+
+   factors USED: 5   UNKNOWN (fail-closed): none
+
+-- r_obs = Price/Close (vendor)  vs  r_pred = self-computed --
+d0          d1             n       r_obs      r_pred     ratio-1  verdict
+2025-01-02  2025-01-24    17    1.187674    1.306853    -9.1196%  MISMATCH
+2025-02-03  2025-02-03     1    1.252143    1.306853    -4.1864%  MISMATCH
+2025-02-04  2025-06-11    88    1.187674    1.306853    -9.1196%  MISMATCH
+2025-06-12  2025-07-18    27    1.177597    1.295769    -9.1198%  MISMATCH
+2025-07-21  2025-11-28    93    1.024326    1.126756    -9.0907%  MISMATCH
+2025-12-01  2026-01-29    42    1.013772    1.115152    -9.0911%  MISMATCH
+2026-01-30  2026-01-30     1    1.029298    1.115152    -7.6989%  MISMATCH
+2026-02-02  2026-05-27    75    1.013771    1.115152    -9.0912%  MISMATCH
+2026-05-28  2026-09-14    75    1.000000    1.100000    -9.0909%  MISMATCH
+2026-09-15  2026-09-18     4    1.099978    1.100000    -0.0020%  OK
+2026-09-21  2026-09-25     5    1.000000    1.000000    +0.0000%  OK
+
+-- repair on the mismatching window: Close_self = Price / r_pred --
+date             Price   Close_obs  Close_self     delta
+2025-01-02      152000   127980.00   116309.91  -9.1187%
+2025-11-06      100200    97820.00    88927.89  -9.0903%
+2026-09-14       72400    72400.00    65818.18  -9.0909%
+
+   mismatching sessions: 419 / 428   window: 2025-01-02 .. 2026-09-14
+   worst segment deviation: -9.1198% (2025-06-12..2025-07-18)
