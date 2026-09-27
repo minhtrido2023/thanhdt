@@ -159,15 +159,21 @@ from trading_bot.vn_market import LOT, round_lot            # noqa: E402
 from lag_forensic_filter import BANNED                      # noqa: E402
 
 # ── Tham số — KHÔNG có cái nào tự chế ────────────────────────────────────────
-# Target park F1, user CHỐT 2026-08-04 (báo cáo `park_wiring_two_options_20260804.md`:
-# F1 = đỉnh Calmar 1,63 của cả dải quét; PBO họ 7 cấu hình = 0,08 trên metric CAGR).
-# ⚠️ Đây là DUY NHẤT một tham số đổi so với spec đã pin (0,70 → 0,80).
-# Cổng chính sách ĐÃ MỞ 2026-08-04: `data/trading_rules.json` v2.3 đặt
-# `neutral_parking.default_park_of_idle_pct = 0.80` (user chốt, job Taylor_20260804_034133).
-# CÒN LẠI: engine `golive_recommend_v23.py:96 ETF_PARK={3:0.7}` — đường MUA — vẫn publish 0,70,
-# nên `etf_park_frac` live còn lệch target này (xem `neutral_parking.pending_engine_consistency`).
-# Cảnh báo dưới đây nói về CHỖ LỆCH ĐÓ, không phải cổng chính sách.
-PARK_TARGET_F1 = 0.80
+# Target park — user CHỐT **0,30** ngày 2026-09-27 15:48 ICT (trước đó 0,80 từ 08-04, 0,70 từ v2.1).
+# Căn cứ: lưới 12 mức trên bản đã sửa 2 lỗi đo (chuỗi return bỏ OShares + weight tại ex-date);
+# 0,80 fail cổng bootstrap 5th-pct MaxDD ở CẢ 3 ngưỡng (−32,0% vs park=0 −24,0%); mọi mức ≥40% bị
+# loại; E[Calmar] paired bootstrap 30%=1,476 vs 80%=1,216. Pin R3 @0,30 = 23,43%/1,88/−14,4%/1,63
+# (`data/results_registry.md` mục "2026-09-27 (quinquies)").
+# ⚠️ BA RAIL PHẢI CÙNG GIÁ TRỊ — lệch là lỗi IM LẶNG (đã cắn 2 lần: 08-04 rail MUA còn 0,70 trong
+# khi rail BÁN 0,80; 2026-09-27 rail BÁN còn 0,80 trong khi rail MUA đã 0,30 ⇒ mua tới 30% nhưng
+# chỉ trim khi vượt 80%, tức knob user chốt KHÔNG hiệu lực):
+#   R1 MUA    `deploy_golive_dt5g_v4/golive_recommend_v23.py` ETF_PARK={3: …}
+#   R2 BÁN L1 hằng số ngay dưới đây
+#   R3 policy `data/trading_rules.json` neutral_parking.default_park_of_idle_pct (văn bản; hiện
+#      CHƯA có code path nào đọc — việc wire R2 đọc R3 đang chờ arch-review, xem bus finding
+#      `repin-r3-park030-va-hau-kiem-rail` mục 6)
+# Cổng cơ học: `bin/park_rail_consistency_selfcheck.py` (đọc giá trị 3 rail bằng AST, rc=1 nếu lệch).
+PARK_TARGET_F1 = 0.30
 TRIM_BAND = 0.005          # = simulate_holistic_nav.py dòng 918 (PREFILL_STATE_REBAL)
 ETF_LIQ_PCT = 0.20         # = pt_v23_audit_2014.py:206 ETF_LIQ_PCT (trần thanh khoản rổ)
 STATE_FILE = os.path.join(WC_ROOT, "data", "golive_v23_status.json")
