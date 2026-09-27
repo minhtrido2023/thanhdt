@@ -1,13 +1,13 @@
-# Mike fleet — context pack (v3294)
+# Mike fleet — context pack (v3295)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-09-26T17:40:09] Mike/finding — daily-retro-2026-09-26-finalized: {"summary": "Retro 2026-09-26 finalized: 2 incidents (append_event guard self-inflicted bug fixed 3rd time, dual-runner selfcheck timeout fixed), 2 patterns, Wa …
-- [2026-09-27T02:04:42] Taylor/finding — spend-report-routing-review-2026-09-27: {"verdict": "no_action", "evidence": {"opus_share": "~37% (44-45/118 job), trend 27-47% qua 8 ngay gan nhat (state/spend_history.csv), duoi nguong 60% da chot o …
 - [2026-09-27T02:21:51] Mike/answer — custom30v-index-artifact-pham-vi-re-pin: {"resolution": "User chọn A (2026-09-27 09:20 ICT): sửa custom_basket.py (chân return = Close thuần, số CP không tạo return) + selfcheck max|ret_ctrl−ret_flat|≈ …
 - [2026-09-27T02:26:54] Taylor/finding — custom30v-park-live-inventory: {"scope": "BUOC 0 cua JOB C (option A) — kiem ke park LIVE truoc khi sua custom_basket.py", "q1_park_live_co_mua_ro_that": "CO. park_holdings.py (reader chuan t …
 - [2026-09-27T02:36:33] Taylor/finding — breadth-tercile-08-22-recheck: {"verdict": "A - QUY UOC 08-22 DUNG VUNG (khong doi truc)", "one_line": "H5 do breadth bang tieu chi IC-separation ma quyet dinh 08-22 CHUA BAO GIO tuyen bo dat …
+- [2026-09-27T02:48:06] Taylor/finding — fiinprox-H1-H2-wire-ve-sinh: {"verdict": "WIRED tren branch, CHUA MERGE — cho user sign-off. Ca 2 la SUA DU LIEU: 0 quyet dinh V2.4 doi tren lich su 2014-2026 (H1), 0 tac dong DCF (H2). CO  …
+- [2026-09-27T02:55:23] quant-skeptic/verification — ✅ CONFIRMED VERIFY: fiinprox-H1-H2-wire-ve-sinh: {"finding_topic": "fiinprox-H1-H2-wire-ve-sinh", "verdict": "CONFIRMED", "confidence": "medium", "checks": {"look_ahead_leak": "pass — H1: bank_aq_asof() only r …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -247,19 +247,46 @@ Observable indicators + escalation process là deliverable đúng, không phải
 
 **Breadth-tercile PIT thay Value Radar zone làm trục 2 mặc định cho mọi phân tích conditional.**
 
-Lý do:
-- Value Radar zone ≈ kỷ nguyên: 54% số năm bị 1 nhãn chiếm ≥90% phiên → n_effective ~2-3 chu kỳ, không bao giờ đủ sức thống kê
-- Breadth-tercile PIT (universe_pit %>MA200, phân vị rolling 252 phiên trước): 0% năm bị 1 nhãn chiếm ≥90%; 2.0× số episode so với radar
+⚠️ **RANH GIỚI HIỆU LỰC — đọc trước khi dùng (bổ sung 2026-09-27, job `Taylor_20260927_022338`).**
+Trục này được chọn **CHỈ vì CẤU TRÚC MẪU**, không vì nó tách được lợi suất hay IC:
+- **KHÔNG có bằng chứng trục này tách tín hiệu.** 08-22: **0/27 ô** qua BH FDR 10% (radar: 0/24 —
+  hai trục HOÀ). Chính báo cáo gốc §7 viết **"KHÔNG wire"** và §6.3 "tốt hơn để **MÔ TẢ**, không
+  phải để wire". Job E 2026-09-27 đo lại bằng thước khác (IC cross-sectional momentum/value) trên
+  **12,6 năm** (IS 72 tháng / OOS 80 tháng): **0/4** — `ic_mom` đảo dấu IS +0,057 → OOS −0,038;
+  `ic_ey` từ −0,082 (p_BH 0,0030, CI loại 0, đơn điệu) về +0,003 (p 0,886) = **artifact IS**.
+  Không phải lỗi cửa sổ ngắn: hỏng y hệt trên cửa sổ dài gấp 1,6×.
+- ⇒ Dùng để **MÔ TẢ / phân tầng mẫu**. **Đừng suy ra tín hiệu từ nhãn ô**, đừng coi "trục mặc
+  định" là "trục có thông tin". (H5 2026-09-26 đã đọc quá nghĩa đúng theo hướng này rồi báo
+  "trục mặc định trượt 4/4" — nó trượt một tiêu chí 08-22 chưa bao giờ tuyên bố đạt.)
+- **Không trục nào khác qua được cùng chuẩn**: job E so 3 trục cùng khuôn (breadth / retail_net_share
+  / DT5G state) = **0/12**. `retail_net_share` giữ được cùng dấu IS&OOS nhưng IS chỉ 9/7/5 tháng và
+  **nguồn chết 28/09/2026** ⇒ không phải ứng viên thay thế.
 
-Cách tính breadth chuẩn:
+Lý do (nguyên văn 08-22, vẫn đúng — tái lập CHÍNH XÁC 2026-09-27):
+- Value Radar zone ≈ kỷ nguyên: 54% số năm bị 1 nhãn chiếm ≥90% phiên → n_effective ~2-3 chu kỳ, không bao giờ đủ sức thống kê
+- Breadth-tercile PIT: **0%** năm bị 1 nhãn chiếm ≥90%; **2,0×** số episode so với radar (262 vs 131)
+
+Cách tính breadth chuẩn — **định nghĩa đầy đủ, 3 chi tiết dưới đây từng làm tái lập lệch**:
 - Nguồn: `tav2_mike.universe_pit` (CANONICAL)
 - breadth_t = COUNT(Close_t > MA200_t | in_universe=True) / COUNT(in_universe=True)
-- Phân loại phiên t: dùng breadth_{t-1} (PIT, không look-ahead cùng phiên)
-- Tercile: phân vị rolling 252 phiên trước (không phân vị toàn mẫu)
+  **Mẫu số chỉ đếm mã có `MA200` KHÔNG NULL.** Tính từ `data/bq_cache/ticker` mà không lọc
+  `MA200 IS NOT NULL` → breadth 2016 ra **0,243 thay vì 0,730** (`bq-cache` registry, bẫy MA200 NULL
+  2015-2017). Lọc đúng: corr 0,999954 với chuỗi gốc.
+- Phân loại phiên t: dùng breadth_{t-1} (PIT, không look-ahead cùng phiên).
+  ⚠️ **Đây KHÔNG phải biến thể sinh ra bảng §4 của báo cáo gốc** — bảng đó dùng breadth CÙNG PHIÊN
+  (look-ahead corr **+0,109**, báo cáo tự thừa nhận) và §5a của chính nó cho thấy **trễ 1 phiên là
+  mất tính đơn điệu**. Hai chuỗi cho số khác nhau đáng kể (ô HIGH excess **+5,5pp vs +16,6pp**, thứ
+  tự tercile ĐẢO). Trích số 08-22 thì phải nói rõ biến thể nào.
+- Tercile: phân vị rolling **252 phiên trước** (không phân vị toàn mẫu). Quy ước tie của bản gốc:
+  `(# trong 252 phiên trước < breadth_t) / 253` — 4 quy ước hợp lý khác cho LOW 1.224-1.226 thay vì
+  **1.232**. Và `pd.cut([0,1/3,2/3,1])` **ném mất `pct==0,0`** (63 phiên breadth thấp nhất lịch sử,
+  tức các phiên VNI xấu nhất) ⇒ excess ô LOW tụt +27,4pp → +14,7pp. Dùng ngưỡng tường minh.
 
 Value Radar vẫn giữ vai trò DISPLAY-ONLY trong báo cáo (§6b coding_guidelines). Không wire vào sizing.
 
 Kết quả dẫn tới quyết định: breadth-vs-radar-matrix-20260822 (Taylor, B2) + user confirm 2026-08-22.
+Tái kiểm + ranh giới hiệu lực: `agents/Taylor/research/breadth_tercile_recheck_20260927/report.md`
+(bus `finding:breadth-tercile-08-22-recheck`, verdict **A — quy ước ĐỨNG, không đổi trục**).
 
 ## QUY TẮC — DNSE điều chỉnh giá vị thế TỐI TRƯỚC ngày ex-date (user chốt 2026-09-12, bài học lặp ≥3 lần)
 **Sự thật broker:** DNSE cập nhật `marketPrice` của vị thế theo giá đã điều chỉnh corp-action vào
