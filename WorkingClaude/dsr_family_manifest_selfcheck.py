@@ -7,9 +7,18 @@ Chạy trong một thư mục CÔ LẬP (`tmp/data/` chứa symlink tới CSV th
   1. Manifest hợp lệ ⇒ annex chạy, N = số entry của manifest (không phải số file trong thư mục).
   2. **Thêm CSV LẠ vào thư mục ⇒ PBO KHÔNG ĐỔI** (đây là bệnh gốc: glob động làm PBO trôi —
      đo thật cùng ngày 2026-09-27: 477 file lúc sáng PBO 0,3993 → 486 file lúc 12:47 PBO 0,5013,
-     vượt ngưỡng quyết định 0,5). Đối chứng: cùng thư mục đó, KHÔNG set manifest ⇒ PBO PHẢI đổi.
+     vượt ngưỡng quyết định 0,5).
   3. Manifest thiếu file ⇒ **fail-CLOSED** (exit≠0, không in PBO trên họ đã bị thu nhỏ).
   4. md5 lệch (file bị ghi lại) ⇒ fail-CLOSED.
+  5. **`DSR_FAMILY_MANIFEST` KHÔNG set ⇒ fail-CLOSED rc=2** (bắt buộc từ 2026-09-27, user duyệt).
+     Trước đó đường này IN cảnh báo rồi vẫn trả PBO — một con số không tái lập được nhưng trông y
+     như số pin. Đây cũng là chân ĐỐI CHỨNG của test 2 (đổi nghĩa 2026-09-27: trước là "glob động
+     PHẢI đổi N", nay là "đường glob không còn tồn tại trong annex").
+  6. Set nhưng RỖNG (`DSR_FAMILY_MANIFEST=""`) ⇒ cũng fail-CLOSED rc=2 — biến rỗng không được coi
+     là "đã set" (nếu không, một `export DSR_FAMILY_MANIFEST=$UNSET_VAR` biến gate thành no-op).
+  7. **Glob VẪN sống cho `dsr_family_manifest.py build`** — nó cần candidate để dựng manifest. Test
+     này là chân đối xứng của 5/6: nếu ai "sửa" gate bằng cách xoá luôn nhánh glob thì builder chết
+     và không còn cách nào dựng manifest mới.
 
     $DNA_PYEXE dsr_family_manifest_selfcheck.py [--n-configs 8]
 """
@@ -29,11 +38,14 @@ BUILDER = os.path.join(HERE, "dsr_family_manifest.py")
 REAL_DATA = os.path.join("/home/trido/thanhdt/WorkingClaude", "data")
 
 
-def run_annex(cwd, manifest=None, r3=None):
+UNSET = object()   # phân biệt "biến KHÔNG có trong env" với "có nhưng rỗng" (test 5 vs 6)
+
+
+def run_annex(cwd, manifest=UNSET, r3=None):
     env = dict(os.environ)
     env.pop("DSR_FAMILY_MANIFEST", None)
-    if manifest:
-        env["DSR_FAMILY_MANIFEST"] = manifest
+    if manifest is not UNSET:
+        env["DSR_FAMILY_MANIFEST"] = manifest   # có thể là "" — đó chính là test 6
     env["DSR_R3_CSV"] = r3
     p = subprocess.run([sys.executable, ANNEX], cwd=cwd, env=env,
                        capture_output=True, text=True)
@@ -87,11 +99,49 @@ def main():
         if with_man["pbo"] != base["pbo"] or with_man["ncfg"] != base["ncfg"]:
             fails.append(f"2: CSV lạ ĐÃ ĐỔI kết quả dù có manifest — PBO {base['pbo']}→"
                          f"{with_man['pbo']}, N {base['ncfg']}→{with_man['ncfg']}")
-        no_man = run_annex(tmp, manifest=None, r3=r3)   # đối chứng: glob động PHẢI đổi
+        # 5. KHÔNG set DSR_FAMILY_MANIFEST ⇒ fail-closed rc=2 (thay chân đối chứng glob cũ:
+        #    từ 2026-09-27 đường glob không còn tồn tại trong annex, nên "N phải đổi" vô nghĩa).
+        no_man = run_annex(tmp, r3=r3)
         n += 1
-        if no_man["ncfg"] == base["ncfg"]:
-            fails.append(f"2-đối chứng: KHÔNG manifest mà N vẫn {no_man['ncfg']} — test không đo "
-                         f"cái nó tuyên bố đo (CSV lạ phải nhập họ khi glob động)")
+        if no_man["rc"] != 2:
+            fails.append(f"5: KHÔNG set DSR_FAMILY_MANIFEST mà rc={no_man['rc']} (phải là 2) — "
+                         f"annex không fail-closed")
+        n += 1
+        if no_man["pbo"] is not None or no_man["ncfg"] is not None:
+            fails.append(f"5: fail-closed mà VẪN in số — PBO={no_man['pbo']}, N={no_man['ncfg']}; "
+                         f"chính con số không tái lập được mà gate này tồn tại để chặn")
+        n += 1
+        msg = no_man["err"] + no_man["out"]
+        missing_bits = [b for b in ("DSR_FAMILY_MANIFEST", "dsr_family_manifest.py build")
+                        if b not in msg]
+        if missing_bits:
+            fails.append(f"5: thông điệp lỗi thiếu {missing_bits} — người chạy không biết phải làm "
+                         f"gì tiếp (§29 phải trích bằng chứng + cách sửa): {msg[-300:]}")
+
+        # 6. set nhưng RỖNG ⇒ cũng fail-closed (biến rỗng không phải "đã set")
+        empty_man = run_annex(tmp, manifest="", r3=r3)
+        n += 1
+        if empty_man["rc"] != 2 or empty_man["pbo"] is not None:
+            fails.append(f"6: DSR_FAMILY_MANIFEST=\"\" mà rc={empty_man['rc']}, "
+                         f"PBO={empty_man['pbo']} — biến rỗng bị coi là đã set ⇒ gate thành no-op")
+
+        # 7. glob VẪN sống cho builder: dựng lại manifest SAU khi thêm CSV lạ ⇒ phải thấy nó
+        man2 = os.path.join(tmp, "manifest2.json")
+        b2 = subprocess.run([sys.executable, BUILDER, "build", "--out", man2,
+                             "--reason", "selfcheck-glob-alive", "--min-obs", "2500"],
+                            cwd=tmp, capture_output=True, text=True)
+        n += 1
+        if b2.returncode != 0:
+            fails.append(f"7: builder FAIL sau khi gate bắt buộc manifest (rc={b2.returncode}) — "
+                         f"nhánh glob candidate bị xoá mất ⇒ không còn cách dựng manifest mới:\n"
+                         f"{b2.stderr[-300:]}")
+            n2_entries = None
+        else:
+            n2_entries = json.load(open(man2, encoding="utf-8"))["n_entries"]
+            n += 1
+            if n2_entries != args.n_configs + 1:
+                fails.append(f"7: builder thấy {n2_entries} entry, mong {args.n_configs + 1} "
+                             f"(8 gốc + 1 CSV lạ) — glob candidate không còn quét đúng thư mục")
 
         # 3. manifest thiếu file
         os.remove(os.path.join(d, os.path.basename(picked[-1])))
@@ -119,9 +169,11 @@ def main():
             fails.append(f"4: thông điệp lỗi không nêu MD5 LỆCH: {bad['err'][-200:]}")
 
         print(f"  [1] manifest hợp lệ: N={base['ncfg']}, PBO={base['pbo']}")
-        print(f"  [2] +1 CSV lạ, CÓ manifest: N={with_man['ncfg']}, PBO={with_man['pbo']}  "
-              f"(đối chứng KHÔNG manifest: N={no_man['ncfg']}, PBO={no_man['pbo']})")
+        print(f"  [2] +1 CSV lạ, CÓ manifest: N={with_man['ncfg']}, PBO={with_man['pbo']}")
         print(f"  [3] thiếu file: rc={miss['rc']}  [4] md5 lệch: rc={bad['rc']}")
+        print(f"  [5] manifest KHÔNG set: rc={no_man['rc']}, PBO={no_man['pbo']}, N={no_man['ncfg']}")
+        print(f"  [6] manifest rỗng: rc={empty_man['rc']}, PBO={empty_man['pbo']}")
+        print(f"  [7] builder glob còn sống: rc={b2.returncode}, n_entries={n2_entries}")
     print(f"{'✅' if not fails else '❌'} {n - len(fails)}/{n} assertion PASS")
     for f in fails:
         print(f"   ❌ {f}")

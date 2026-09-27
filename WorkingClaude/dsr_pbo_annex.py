@@ -68,11 +68,29 @@ def daily_logret(s):
 # KHÔNG phải "mọi CSV đang có trong data/". Glob động làm họ nở theo mọi backtest R&D chạy sau
 # (73 → 486 CSV từ 2026-07 đến 2026-09-27) ⇒ PBO trôi theo thời gian và số đã pin trong registry
 # không tái lập được. Pin họ bằng manifest: DSR_FAMILY_MANIFEST=<file>, xem dsr_family_manifest.py.
+#
+# BẮT BUỘC từ 2026-09-27 (user duyệt, hậu kiểm job Taylor_20260927_064745): chạy annex mà KHÔNG
+# set DSR_FAMILY_MANIFEST là fail-closed rc=2, KHÔNG còn im lặng rơi về glob động. Lý do: đường
+# glob trước đây chỉ IN cảnh báo rồi vẫn trả số — một con số PBO không tái lập được nhưng trông
+# y như số pin, đúng lớp lỗi §8 (default cũ quyết định một con số). Glob CHỈ còn sống cho
+# `dsr_family_manifest.py build` (nó gọi `family_paths(_ignore_manifest=True)` để lấy CANDIDATE
+# trước khi lọc thành manifest) — đó là nơi glob là đúng nghĩa, không phải nơi tính PBO.
 FAMILY_MANIFEST = os.environ.get("DSR_FAMILY_MANIFEST")
 
 
 def family_paths(_ignore_manifest=False):
-    if FAMILY_MANIFEST and not _ignore_manifest:
+    """Họ trial của annex. `_ignore_manifest=True` CHỈ dành cho dsr_family_manifest.py build
+    (lấy candidate để dựng manifest); mọi đường tính PBO phải đi qua manifest."""
+    if not _ignore_manifest:
+        if not FAMILY_MANIFEST:
+            raise RuntimeError(
+                "DSR_FAMILY_MANIFEST chưa set — annex fail-closed (rc=2), KHÔNG rơi về glob động.\n"
+                f"  Glob động trên {DATA}/ nở theo mọi backtest R&D chạy sau (73 → 486 CSV từ "
+                "2026-07 đến 2026-09-27) ⇒ PBO trôi theo thời gian, số pin trong registry không "
+                "tái lập được — nhưng con số in ra trông y như số pin.\n"
+                "  Cách chạy đúng: DSR_FAMILY_MANIFEST=<manifest.json> python3 dsr_pbo_annex.py\n"
+                "  Chưa có manifest: python3 dsr_family_manifest.py build --out <f.json> "
+                "[--mtime-before <ISO>] [--min-obs 2500]")
         from dsr_family_manifest import load_manifest
         paths, man = load_manifest(FAMILY_MANIFEST)   # fail-closed: thiếu file/md5 lệch ⇒ raise
         print(f"[family] manifest {FAMILY_MANIFEST}: {len(paths)} CSV (tạo "
@@ -90,9 +108,8 @@ def family_paths(_ignore_manifest=False):
         if "from20" in base:
             continue
         keep.append(p)
-    print(f"[family] GLOB ĐỘNG trên {DATA}/ ⇒ {len(keep)} CSV. ⚠️ PBO tính trên họ này KHÔNG "
-          f"tái lập được về sau (mỗi backtest R&D mới làm họ nở ra). Muốn số pin được: dựng "
-          f"manifest (dsr_family_manifest.py build) rồi đặt DSR_FAMILY_MANIFEST.")
+    print(f"[family] GLOB ĐỘNG trên {DATA}/ ⇒ {len(keep)} CSV — CANDIDATE để dựng manifest, "
+          f"KHÔNG phải họ trial để tính PBO (đường đó đã fail-closed).")
     return keep
 
 # ---------- 2. Deflated Sharpe Ratio (BLdP 2014) ----------
@@ -231,7 +248,7 @@ def main():
         if len(s) < 2500:   # drop short cuts / paper stubs
             continue
         series[p] = s
-    print(f"\n[1] TRIAL FAMILY: {len(fam)} candidate CSVs globbed, "
+    print(f"\n[1] TRIAL FAMILY: {len(fam)} CSVs from manifest {FAMILY_MANIFEST}, "
           f"{len(series)} pass full-history (>=2500 daily obs) filter.")
 
     # align all series to a common date index for the PBO matrix
