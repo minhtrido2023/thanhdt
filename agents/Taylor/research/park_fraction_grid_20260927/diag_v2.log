@@ -1,0 +1,20 @@
+12 legs aligned on the SAME 3107 calendar days 2014-01-02 -> 2026-06-19
+N_ret=3106  calendar years=12.460  obs/yr=249.3
+
+
+=== DIAGNOSTIC (post-decision, not a re-decision) ===
+    x E[Calmar] med[Calmar] gap vs E-max gap vs med-max
+ 0.00    1.5073      1.4367       0.0000         0.0000
+ 0.10    1.4983      1.4359       0.0090         0.0008
+ 0.20    1.4601      1.3983       0.0472         0.0384
+ 0.30    1.4761      1.4054       0.0312         0.0313
+
+E[Calmar] gap 0% vs 30% = 0.0312  (prereg tie threshold 0.0300)
+  -> 30% is excluded from the tie group by 0.0012 Calmar. Knife edge.
+median[Calmar] argmax within 0-30% = x 0.00  (mean argmax = x 0.00)
+
+Paired head-to-head 0% vs 30% on the SAME 4000 paths:
+  P(Calmar_30 > Calmar_0) = 0.479
+  P(CAGR_30  > CAGR_0)    = 0.826
+  P(MaxDD_30 better than MaxDD_0) = 0.312
+  mean dCAGR(30-0) = +1.07pp   mean dMaxDD(30-0) = -1.03pp
