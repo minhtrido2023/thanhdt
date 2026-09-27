@@ -371,6 +371,8 @@ def simulate(signals_df, prices, vni_dates, *,
              profit_target=None,             # close position if ret >= profit_target (e.g., 0.30 = +30%)
              pt_blacklist_days=0,            # re-entry blacklist after PROFIT_TARGET exit (default 0 = re-enter freely)
              deposit_annual=0.0,             # idle cash yield (default 0%/yr; set 0.01 or 0.005 for realistic VN non-term)
+                                             # ALSO accepts a pd.Series/dict {date -> fraction/yr} for a TIME-VARYING
+                                             # point-in-time carry proxy (W2/Q2 2026-09-27). Scalar path unchanged.
              borrow_annual=0.10,             # margin borrow rate (default 10%/yr per CLAUDE.md); charged when cash<0
              nav_log_extra=None,             # optional list to capture (date, cash, n_pos, deployed_pct, state)
              etf_log=None,                   # optional list to capture ETF rebalance events {ymd, action, amount_vnd, price_vn30, friction_cost, cash_after, cash_etf_after}
@@ -464,6 +466,16 @@ def simulate(signals_df, prices, vni_dates, *,
     sig_filtered = signals_df[signals_df["play_type"].isin(allowed_tiers)].copy()
     sig_by_date = {d: g for d, g in sig_filtered.groupby("time")}
     date_idx = {d: i for i, d in enumerate(vni_dates)}
+
+    # TIME-VARYING IDLE-CASH CARRY (W2/Q2, job Taylor_20260927_141318). `deposit_annual` may now be
+    # a pd.Series / dict {date -> annual rate as a FRACTION} instead of a scalar, so a backtest can
+    # use a point-in-time idle-cash proxy (idle_rate_proxy.py) rather than one constant. Scalar
+    # (incl. the 0.0 default) takes the ORIGINAL code path untouched -> byte-identical when unused.
+    # A date missing from the map resolves to 0.0 (no carry), never to a forward-filled guess: the
+    # PIT forward-fill is the proxy module's job, not this engine's.
+    _dep_lut = None
+    if not isinstance(deposit_annual, (int, float, np.floating, np.integer)):
+        _dep_lut = {pd.Timestamp(k): float(v) for k, v in dict(deposit_annual).items()}
 
     # Slippage: pay more on buy, get less on sell
     sell_cost_factor = (1 - TC_SELL - CG_TAX) * (1 - slippage)   # 0.998 * (1 - slip)
@@ -877,8 +889,9 @@ def simulate(signals_df, prices, vni_dates, *,
         #    _interest_today = the cash change from interest (no tx row); recorded so the per-session
         #    cash-flow self-check can reconcile it (>0 = deposit earned, <0 = borrow interest paid).
         _cash_pre_int = cash
-        if cash > 0 and deposit_annual > 0:
-            cash *= (1 + deposit_annual / 252)
+        _dep_today = deposit_annual if _dep_lut is None else _dep_lut.get(today, 0.0)
+        if cash > 0 and _dep_today > 0:
+            cash *= (1 + _dep_today / 252)
         if cash < 0 and borrow_annual > 0:
             cash *= (1 + borrow_annual / 252)  # cash<0 grows MORE negative (interest expense)
         _interest_today = cash - _cash_pre_int

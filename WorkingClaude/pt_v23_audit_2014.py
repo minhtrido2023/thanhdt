@@ -250,6 +250,21 @@ if BASKET_WT == "fincap":
 BASKET_TOPN = int(os.environ.get("BASKET_TOPN", "30"))
 BASKET_NAMECAP = float(os.environ.get("BASKET_NAMECAP", "0.10"))
 _sz_tag = "" if (BASKET_TOPN == 30 and abs(BASKET_NAMECAP - 0.10) < 1e-9) else f"_n{BASKET_TOPN}_cap{int(round(BASKET_NAMECAP*100))}"
+# IDLE-CASH CARRY (W2/Q2 cua kb/projects/custom30v-revalidation-plan-20260927.md, job
+# Taylor_20260927_141318). Engine's historical assumption is 0%/yr on idle cash (CLAUDE.md cost
+# model) -> every park-vs-no-park comparison so far silently paid the no-park leg NOTHING. This knob
+# feeds the POINT-IN-TIME proxy from `idle_rate_proxy.py` (W1, user approved plan §7 on 2026-09-27)
+# into simulate()'s existing `deposit_annual`, which credits ONLY cash>0 -- i.e. the NOT-yet-parked
+# cash (parked cash lives in the ETF/basket lots after the step-6b sweep). AUDIT/R&D ONLY.
+#   off (default) -> deposit_annual=0.0, byte-identical to the pinned anchor. Proven by cmp.
+#   baseline      -> tier 1 (SBV >12-24M low - 2.04pp haircut).  floor -> tier 2 (interbank 1M).
+# `spot` is deliberately NOT accepted here: plan §2.2 limits it to a <=6-month forward window, so
+# it must never enter a 2014-2026 backtest.
+IDLE_CARRY_TIER = os.environ.get("IDLE_CARRY_TIER", "off").strip().lower()
+if IDLE_CARRY_TIER not in ("off", "baseline", "floor"):
+    raise ValueError(f"IDLE_CARRY_TIER={IDLE_CARRY_TIER!r} khong hop le; chi {{off,baseline,floor}} "
+                     f"(tier 'spot' bi tu choi co y: ke hoach §2.2 chi cho cua so nhin truoc <=6 thang)")
+_idle_tag = "" if IDLE_CARRY_TIER == "off" else f"_idle{IDLE_CARRY_TIER}"
 # Q-SLEEVE audit knobs (plan_quality_sleeve_20260712.md, family N=5). All default OFF = byte-identical.
 # BASKET_GATE_RATING: override the _PIT_PARAMS gate for custom* vehicles ("2" = Đ1 strict gate,
 # "none" = no rating gate — used when BASKET_QFLOOR=1 replaces it with the Đ2 fundamentals floor,
@@ -735,7 +750,7 @@ AUDIT_PATH  = os.path.join(WORKDIR, "data",
                            {"v23a": "v23_golive_audit_2014_now.csv",
                             "v23c": "v23c_golive_audit_2014_now.csv",
                             "v22base": "v22base_audit_2014_now.csv",
-                            "singlebook": "singlebook_audit_2014_now.csv"}.get(MODE, MODE+"_audit.csv").replace(".csv", _capsuf + _matsuf + _liqsuf + _park_tag + _wt_tag + _sz_tag + _qs_tag + _qt_tag + _bullpark_tag + _c30b_tag + _recpark_tag + _vm_tag + _dnpr_tag + _dvr8l_tag + _dcf_tag + _droptag + _sel_tag + _NAV_TAG + _START_TAG + _EXP_TAG + ".csv"))
+                            "singlebook": "singlebook_audit_2014_now.csv"}.get(MODE, MODE+"_audit.csv").replace(".csv", _capsuf + _matsuf + _liqsuf + _park_tag + _wt_tag + _sz_tag + _qs_tag + _qt_tag + _bullpark_tag + _c30b_tag + _recpark_tag + _vm_tag + _dnpr_tag + _dvr8l_tag + _dcf_tag + _droptag + _sel_tag + _idle_tag + _NAV_TAG + _START_TAG + _EXP_TAG + ".csv"))
 
 BUY_TIERS_V11 = {"MEGA","MOMENTUM","MOMENTUM_N","MOMENTUM_S","MOMENTUM_QUALITY",
                  "MOMENTUM_A","MOMENTUM_S_N","COMPOUNDER_BUY","DEEP_VALUE_RECOVERY","S_PRO",
@@ -934,6 +949,33 @@ liq_map = dict(zip(zip(sig_f["ticker"], sig_f["time"]), sig_f["liq"]))
 vni = bq(VNI_QUERY.format(start=START_DATE, end=END_DATE))
 vni["time"] = pd.to_datetime(vni["time"])
 vni_dates = sorted(vni["time"].unique())
+# IDLE-CASH CARRY series (see IDLE_CARRY_TIER above). Built ONCE from vni_dates so BAL and LAG see
+# the identical rate on the identical session. r_idle_series returns %/yr -> /100 to a fraction.
+if IDLE_CARRY_TIER == "off":
+    DEPOSIT_ANNUAL = 0.0
+else:
+    import idle_rate_proxy as _irp
+    # PRE-START POLICY (explicit, NOT a silent swallow): the tier-2 interbank series only begins
+    # 2014-01, so under the PIT rule (month T usable from the 1st of T+1) no rate exists for the
+    # sessions in Jan-2014 (and any warm-up session before that). Those days get carry = 0 --
+    # fail-safe and look-ahead-free. Back-filling the first known month would leak 1 month of
+    # future rate into the very start of the window; paying 0 cannot. Count is printed so the
+    # number is auditable, never invisible.
+    _idle_dts = [pd.Timestamp(d) for d in vni_dates]
+    _idle_pct, _idle_nostart = [], 0
+    for _d in _idle_dts:
+        try:
+            _idle_pct.append(_irp.r_idle(_d, tier=IDLE_CARRY_TIER))
+        except ValueError:
+            _idle_pct.append(0.0); _idle_nostart += 1
+    _idle_pct = np.array(_idle_pct, dtype=float)
+    DEPOSIT_ANNUAL = pd.Series(_idle_pct / 100.0, index=_idle_dts)
+    print(f"  [idle-carry] pre-series sessions paid 0%: {_idle_nostart}"
+          + (f" ({_idle_dts[0].date()}..{_idle_dts[_idle_nostart-1].date()})" if _idle_nostart else ""))
+    print(f"  [idle-carry] tier={IDLE_CARRY_TIER} n={len(DEPOSIT_ANNUAL)} "
+          f"first={DEPOSIT_ANNUAL.iloc[0]*100:.3f}%/yr last={DEPOSIT_ANNUAL.iloc[-1]*100:.3f}%/yr "
+          f"mean={DEPOSIT_ANNUAL.mean()*100:.3f}%/yr min={DEPOSIT_ANNUAL.min()*100:.3f}% "
+          f"max={DEPOSIT_ANNUAL.max()*100:.3f}%  (PIT: moc thang T dung tu dau thang T+1)")
 vni_close_by_date = dict(zip(vni["time"], vni["Close"]))
 
 etf_real = bq(f"""SELECT t.time, t.Close FROM tav2_bq.ticker AS t
@@ -2051,7 +2093,7 @@ BAL_KW = dict(allowed_tiers=RS["allowed_tiers"], max_positions=MAX_POS_V11,
               sector_limit_per_sector={8: 4}, ticker_sector_map=sec_map,
               sector_cap_exempt_tiers=RS["sector_cap_exempt"],
               tier_weights_by_state=RS["tier_weights_by_state"],
-              deposit_annual=0.0, borrow_annual=BORROW_ANNUAL, state_by_date=state_ff,
+              deposit_annual=DEPOSIT_ANNUAL, borrow_annual=BORROW_ANNUAL, state_by_date=state_ff,
               cash_etf_states=PARK_STATES_DICT, cash_etf_states_by_date=PARK_BY_DATE, vn30_underlying=vn30_underlying,
               etf_mgmt_fee_annual=0.0, etf_tracking_drag_annual=0.0, etf_rebalance_friction=0.0015,
               open_prices=open_prices, t1_open_exec=True,
@@ -2104,7 +2146,7 @@ LAG_KW = dict(allowed_tiers=list(_LAG_BASE_TIERS), max_positions=12,
               hold_days_by_tier={t: 25 for t in _LAG_BASE_TIERS},
               tier_position_limit={t: 12 for t in _LAG_BASE_TIERS},
               count_inflight_slots=LAG_SLOT_INFLIGHT,
-              deposit_annual=0.0, borrow_annual=BORROW_ANNUAL, state_by_date=state_ff,
+              deposit_annual=DEPOSIT_ANNUAL, borrow_annual=BORROW_ANNUAL, state_by_date=state_ff,
               cash_etf_states=PARK_STATES_DICT, cash_etf_states_by_date=PARK_BY_DATE, vn30_underlying=vn30_underlying,
               etf_mgmt_fee_annual=0.0, etf_tracking_drag_annual=0.0, etf_rebalance_friction=0.0015,
               fund_tiebreak_col=("_fund_tb" if _LAG_FUND_DNPR else None),   # Wave1/H8a within-tier reorder (OFF-default None = byte-identical)
