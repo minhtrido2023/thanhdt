@@ -38,7 +38,24 @@ import numpy as np
 import pandas as pd
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
-WORKDIR = r"/home/trido/thanhdt/WorkingClaude"
+# WORKDIR quyet dinh CA HAI thu: module nao duoc import (sys.path) va file du lieu nao duoc doc
+# (os.chdir). Mac dinh GIU NGUYEN cay canonical de moi lenh pin trong results_registry.md con tai
+# lap duoc y nguyen. Nhung vi the: chay script nay TU MOT WORKTREE van import module CANONICAL
+# => moi A/B tren mot module ma engine nay import co the la NO-OP IM LANG (da can that
+# 2026-09-27 voi chinh ban va FAIL-C: file trong worktree duoc sua, engine chay lai ra so cu).
+# => canh bao TO khi cay cua chinh file nay khac WORKDIR; override bang PT_WORKDIR.
+WORKDIR = os.environ.get("PT_WORKDIR", "").strip() or r"/home/trido/thanhdt/WorkingClaude"
+_SELF_DIR = os.path.dirname(os.path.abspath(__file__))
+if os.path.realpath(_SELF_DIR) != os.path.realpath(WORKDIR):
+    print("=" * 100)
+    print("[WORKDIR] CANH BAO — file nay nam o mot cay, nhung engine se import module + doc du lieu o CAY KHAC:")
+    print(f"  cay cua pt_v23_audit_2014.py : {_SELF_DIR}")
+    print(f"  WORKDIR (import + chdir)     : {WORKDIR}")
+    print("  => Moi thay doi module trong cay tren se KHONG duoc chay. Neu dang A/B mot ban va trong")
+    print("     worktree thi ket qua nay VO NGHIA (no-op im lang). Muon chay code cua worktree:")
+    print(f"     PT_WORKDIR={_SELF_DIR} $DNA_PYEXE {os.path.basename(__file__)} ...")
+    print("     (nhung cay do phai co du data/ — nhieu *.csv bi .gitignore an khoi worktree)")
+    print("=" * 100)
 sys.path.insert(0, WORKDIR)
 os.chdir(WORKDIR)
 
@@ -1078,11 +1095,25 @@ _LAG_FUND_DNPR = os.environ.get("LAG_FUND_DNPR", "0") == "1"
 _qm = bq("SELECT f.ticker,f.quarter,f.NPM_P0,f.EBITM_P0 FROM tav2_bq.ticker_financial f WHERE f.quarter IS NOT NULL")
 ev = ev.merge(_qm, on=["ticker","quarter"], how="left")
 ev["_nonop"] = (ev["NPM_P0"] > 1.2 * ev["EBITM_P0"]) & ev["EBITM_P0"].notna()
+# FAIL-CLOSED tu 2026-09-27 (user duyet). Truoc day la `except Exception: pass` = neu khong doc
+# duoc registry thi cong forensic cua book LAG bien thanh no-op IM LANG, va con so di thang vao
+# data/results_registry.md. Chi chan khi cong dang BAT (_LAG_FOR) — tat cong thi dict khong duoc
+# dung den nen thieu file khong doi gi, nhung van IN loi that thay vi `pass` (§29).
 _forx = {}
 try:
     _ff = pd.read_csv("data/forensic_flags.csv")
     _forx = {r["ticker"]: pd.Timestamp(r["date"]) for _, r in _ff.iterrows() if str(r["severity"]).strip() == "exclude"}
-except Exception: pass
+except Exception as _e:
+    if _LAG_FOR:
+        raise SystemExit(
+            "[LAG gate] TU CHOI CHAY — LAG_FORENSIC_GATE=1 nhung khong doc duoc"
+            " data/forensic_flags.csv, nen cong forensic se thanh no-op im lang va con so"
+            " van duoc pin." + os.linesep
+            + f"  cwd: {os.getcwd()}" + os.linesep
+            + f"  Loi that: {type(_e).__name__}: {_e}" + os.linesep
+            + "  Tat cong mot cach co y: LAG_FORENSIC_GATE=0")
+    print(f"  [LAG gate] forensic registry khong doc duoc ({type(_e).__name__}: {_e})"
+          f" — bo qua vi LAG_FORENSIC_GATE=0 (cong dang TAT, dict khong duoc dung)")
 ev["_forbid"] = [(tk in _forx) and (rd >= _forx[tk]) for tk, rd in zip(ev["ticker"], ev["Release_Date"])]
 _m = (ev["NP_R"] >= 15) & (ev["prior_n_good"] >= 4) & (ev["pa_HL3"] >= 5)
 if _LAG_NONOP: _m &= ~ev["_nonop"]
