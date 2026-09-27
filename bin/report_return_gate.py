@@ -384,8 +384,14 @@ def _all_account_labels() -> set:
     try:
         sys.path.insert(0, "/home/trido/thanhdt/WorkingClaude")
         from trading_bot import config as _cfg
+        # PHẢI dùng ĐÚNG biểu thức broker của `live_dnse_labels()` (config.py:371):
+        # `(p.get("broker") or p["cfg"].get("broker") or "phs")`. Hai population này bắt buộc
+        # trùng nhau — lệch một chút là account khai broker CHỈ ở `cfg` sẽ vắng ở đây và cổng ÂM
+        # THẦM trở lại fail-open đúng cho account đó. Hôm nay hai bên cho cùng kết quả
+        # {RocketX, SpaceX, ZaloPay} nên lệch là LATENT, không phải vô hại.
         return {p["label"] for p in _cfg.load_accounts(_cfg.load_config())
-                if p.get("label") and str(p.get("broker", "")).lower() == "dnse"}
+                if p.get("label")
+                and str(p.get("broker") or p["cfg"].get("broker") or "phs").lower() == "dnse"}
     except Exception:                                          # noqa: BLE001
         return set()
 

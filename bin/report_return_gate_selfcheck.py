@@ -26,6 +26,7 @@ from __future__ import annotations
 import argparse
 import os
 import re
+import io
 import shutil
 import subprocess
 import sys
@@ -256,14 +257,31 @@ def main() -> int:
             _dar_cfg.ACCOUNTS.update(_saved_acc)
         check("[CFG1b] ACCOUNTS rỗng ⇒ `accounts_asof_from_name()` KHÔNG thấy nhãn nào, tức đúng "
               "nhánh 'không nhận ra tài khoản nào' mà bản cũ trả 0", _lbls_after, [])
-        _named = sorted(lb for lb in _all_lbl if lb in os.path.basename(_rp))
-        check("[CFG2] tên file `SpaceX_weekly_report_*.md` khớp một nhãn DNSE có thật ⇒ nhánh "
-              "fail-closed được kích hoạt (trước bản vá: trả 0, cổng tắt im lặng)",
-              _named, ["SpaceX"])
+
+        # CFG2/CFG3 gọi CHÍNH `run_gate()`, không chép lại vị từ production vào test (arch-review
+        # vòng 2: bản đầu tự tính `_named` trong test nên chỉ chứng minh bằng GHÉP ba mảnh). Rẻ:
+        # báo cáo synthetic không có mốc TBD và nhánh này `return` TRƯỚC mọi phép tính broker.
         _rp2 = os.path.join(_td_cfg, "New_deals_2026-09-19.md")
-        check("[CFG3] CHỨNG MINH NGƯỢC: báo cáo KHÔNG mang nhãn account nào ⇒ _named rỗng ⇒ vẫn "
-              "giữ hành vi cũ (cho qua), không chặn oan",
-              sorted(lb for lb in _all_lbl if lb in os.path.basename(_rp2)), [])
+        open(_rp2, "w", encoding="utf-8").write("# New deals\n\nKhông có mục TBD nào.\n")
+
+        def _rc_with_empty_accounts(path):
+            _sv = dict(_dar_cfg.ACCOUNTS)
+            _b = io.StringIO()
+            try:
+                _dar_cfg.ACCOUNTS.clear()
+                return _RG_cfg.run_gate(path, out=_b), _b.getvalue()
+            finally:
+                _dar_cfg.ACCOUNTS.clear()
+                _dar_cfg.ACCOUNTS.update(_sv)
+
+        _rc2, _o2 = _rc_with_empty_accounts(_rp)
+        check("[CFG2] `run_gate()` THẬT trên `SpaceX_weekly_report_*.md` khi ACCOUNTS mất SpaceX "
+              "⇒ rc=1 (trước bản vá: rc=0, cổng tắt im lặng)", _rc2, 1)
+        check("[CFG2b] …và nói đúng nguyên nhân là LỆCH CONFIG, không phải báo cáo sai (§29)",
+              "SpaceX" in _o2 and "trading_bot_accounts.json" in _o2, True)
+        _rc3, _o3 = _rc_with_empty_accounts(_rp2)
+        check("[CFG3] CHỨNG MINH NGƯỢC: `run_gate()` THẬT trên báo cáo KHÔNG mang nhãn account "
+              "nào ⇒ vẫn rc=0 (giữ hành vi cũ, không chặn oan)", _rc3, 0)
     # Kiểm bằng AST, KHÔNG bằng cắt chuỗi: lần thứ TƯ trong job này một phép kiểm "source có/không
     # chứa X" cho kết quả sai vì văn xuôi quanh X (xem E1, T1a, 13y). Ở đây `.split("return")`
     # bắt được `return` của comment/câu khác trong cùng nhánh.
