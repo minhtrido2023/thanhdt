@@ -67,7 +67,20 @@ check("BANNED khớp build_universe_pit_quality.py", _other == set(BANNED),
       f"chênh: {_other ^ set(BANNED)}")
 
 _kb = open(os.path.join(WORKDIR, "mike", "kb", "KNOWLEDGE.md"), encoding="utf-8").read()
-_line = next((l for l in _kb.splitlines() if "BANNED vĩnh viễn" in l), "")
+# Chọn dòng bằng NHÃN CHUẨN TẮC CÓ NEO, không phải substring lỏng "BANNED vĩnh viễn": KB còn
+# văn xuôi khác nhắc đúng cụm đó (weekly review 2026-09-26, commit mike b67d538c, thêm 1 dòng
+# ở §"pyramid drift" NẰM TRƯỚC dòng chuẩn tắc) ⇒ next() lấy nhầm dòng MÔ TẢ và báo lệch giả
+# toàn bộ 15 mã trong khi production hoàn toàn đúng (§28 — so GIÁ TRỊ đã chuẩn hoá, đừng so
+# chuỗi mô tả tự do; §29 — thông điệp phải nói đúng cái vừa đọc được).
+_KB_LABEL = re.compile(r"^\*\*Cổ phiếu BANNED vĩnh viễn:\*\*")
+_kblines = [l for l in _kb.splitlines() if _KB_LABEL.match(l.strip())]
+# Tách "không tìm thấy dòng chuẩn tắc" khỏi "tìm thấy nhưng lệch": không có assertion này thì
+# đổi tên tiêu đề KB sẽ cho _line="" ⇒ symdiff = toàn bộ danh sách, đúng cái thông điệp khó
+# hiểu đã treo 2 ngày (2026-09-25→27) và làm người đọc tưởng production hỏng.
+check("KNOWLEDGE.md có ĐÚNG 1 dòng BANNED chuẩn tắc", len(_kblines) == 1,
+      f"tìm thấy {len(_kblines)} dòng khớp nhãn '**Cổ phiếu BANNED vĩnh viễn:**' "
+      f"(0 = nhãn bị đổi tên; >1 = KB có bản sao, phải gộp)")
+_line = _kblines[0] if len(_kblines) == 1 else ""
 # Bỏ phần trong ngoặc TRƯỚC khi trích mã: chú thích văn xuôi chứa token 3 ký tự IN HOA
 # không phải mã ("ROE", "IPO", "CF_OA"...) sẽ bị bắt nhầm nếu quét cả dòng (§28 — chuẩn hoá
 # GIÁ TRỊ trước khi so, đừng so chuỗi mô tả).
@@ -76,7 +89,9 @@ while re.search(r"\([^()]*\)", _kbtxt):
     _kbtxt = re.sub(r"\([^()]*\)", " ", _kbtxt)
 _kbset = set(re.findall(r"\b([A-Z]{2}[A-Z0-9])\b", _kbtxt))
 check("BANNED khớp mike/kb/KNOWLEDGE.md (nguồn chuẩn tắc)", _kbset == set(BANNED),
-      f"chênh: {_kbset ^ set(BANNED)} | dòng KB: {_line[:120]}")
+      f"chênh: {_kbset ^ set(BANNED)} | dòng KB: {_line[:120]}" if _line
+      else "KHÔNG so được vì chưa xác định được dòng chuẩn tắc — sửa check ngay trên TRƯỚC; "
+           "đây KHÔNG phải bằng chứng production lệch")
 
 # --- 2. Hành vi lõi ---
 p = tmp_flags([("VVS", "exclude", "2026-06-20"), ("BFC", "exclude", "2026-06-20"),
