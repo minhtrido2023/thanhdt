@@ -2,7 +2,7 @@
 """
 cpi_vn.py — Vietnam headline CPI year-over-year (%), MONTHLY.
 
-DATA PROVENANCE (two tiers):
+DATA PROVENANCE (tier order, best first: T1 > T1.5 > T3 > T2):
   TIER 1 — REAL, AUTHORITATIVE (2025-06 .. 2026-06, 13 months):
     Source: General Statistics Office of Vietnam (NSO/GSO), Highcharts chart-embed
       https://www.nso.gov.vn/chart/cpi/embed/?show=chart   (chart slug "cpi", post id 24238)
@@ -16,6 +16,37 @@ DATA PROVENANCE (two tiers):
       chart data reaches back only ~13 months. Gold/USD: NSO articles are titled
       "...chỉ số giá vàng và chỉ số giá đô la Mỹ" but publish NO chart for them (prose
       only) — not fetchable by this method; keep vnstock gold / macro USD/VND instead.
+
+  TIER 1.5 — REAL, FiinPro-X (2008-01 .. 2026-08, 224 months) — ADDED 2026-09-27, job
+    Taylor_20260927_022319, finding `fiinprox-H2-cpi-swap`:
+    Source: mike/data/fiinprox_cpi_monthly_20260914.csv, column `cpi_yoy_pct` (headline CPI YoY).
+    Registry: mike/kb/data_registry/macro/fiinprox_cpi_monthly.md (status DERIVED — headline matches
+    the real NSO print 13/13 months, diff 0.00). Sits BELOW Tier 1 (the live NSO chart keeps absolute
+    priority) and ABOVE Tier 2/Tier 3, which stay in place as fallbacks.
+    WHY: Tier 2 declares correct anchors and then LINEARLY INTERPOLATES between them, so the months
+    in between are fabricated. Measured against this file: MAE 0.49pp, max 2.51pp, 30 months off by
+    >1pp; worst is 2019 (interpolated 4.5-4.7 for Sep/Oct vs the real 2.0-2.2 — the pork-price shock
+    only broke out in Nov-Dec 2019, so a whole year of steady climb was an artifact of the two
+    anchors). `cpi_yoy_chg3` (the 3-month direction) agreed in sign on only 77.5% of Tier-2 months.
+    MEASURED CONSEQUENCE, so nobody oversells this: macro_confidence_regime relabels 27/185 months
+    (14.6%) — and ZERO of them in the 2011 or 2022 inflation episodes (both series read CPI far above
+    every threshold there). DCF delta is EXACTLY 0.000% on 7/7 valuable names, because the default
+    DCF_TERMINAL_MODE=cap_rf clamps g_term at r_f. This is DATA HYGIENE, not alpha: no evidence was
+    produced that it improves returns or signal quality.
+    ⚠️ FROZEN SNAPSHOT, NOT A FEED (coding_guidelines §14). FiinPro-X trial ended 2026-09-28 — this
+    file will never gain a month. Tier 1.5 therefore covers only up to FIINPRO_CPI_LAST_MONTH (read
+    from the file, never hardcoded); any later month falls back to Tier 2's forward-fill and
+    `cpi_monthly_df()` prints a ONE-TIME coverage warning naming the gap. The continuing live source
+    is Tier 1 (GSO/NSO monthly print) — refresh NSO_CPI_YOY_REAL, not this file.
+    CONSUMERS (enumerated 2026-09-27; the CAPIT one was surfaced by quant-skeptic, not by the
+    original finding): macro_confidence_regime.py (REG_* labels), dcf_valuation.py (5y-avg CPI ->
+    terminal growth), and deploy_golive_dt5g_v4/golive_recommend_v23.py:920 — the CAPIT leverage
+    PIT gate, CAPIT_LEVER_PIT_CPI_THRESHOLD = 6.0% (line 579), which BLOCKS leverage when PIT CPI
+    reaches 6%. Measured: the LIVE value at 2026-09-25 is 4.69% before and after (that path already
+    takes max(interpolated, last real NSO), so Tier 1.5 cannot lower it). 4 historical months would
+    flip the 6% gate, all in the same direction -- the interpolated proxy OVERSTATED and would have
+    blocked leverage: 2012-07 6.88 -> 5.35, 2012-08 6.87 -> 5.04, 2013-10 6.23 -> 5.92, 2013-11
+    6.11 -> 5.78. The gate is evaluated live-only, so those are informational, not a re-run.
 
   TIER 2 — PROXY / ANCHOR (2011-01 .. 2025-05, pre-NSO-window): best-estimate MONTHLY
     YoY anchors from well-documented public GSO / IMF / news prints for the pivotal
@@ -36,7 +67,12 @@ DATA PROVENANCE (two tiers):
         the other 41 months. Directionally reliable (2008 peak 28.3% Aug, 2009 trough
         -0.02% Oct) but individual levels carry more uncertainty than Tier 1/2.
     Superseded by Tier 2 from 2011-01 onward (no overlap by construction — Tier 2's
-    earliest anchor is exactly 2011-01-01).
+    earliest anchor is exactly 2011-01-01). Since Tier 1.5 was added, Tier 3's only EFFECTIVE months
+    are 2007-01..2007-12 (FiinPro starts 2008-01); 2008-2010 now come from FiinPro, which is the
+    better source there too (2008 agreed with T3 to MAE 0.01pp, but T3 is off 1.3-2.3pp across
+    2009-09/10 and 2010-09..11 — the "-0.02% Oct-2009 base-effect trough" in the list below is
+    WRONG, the real trough was 1.97% in 2009-08). Tier 3 still covers 2008-2010 whenever the
+    FiinPro file is unavailable, which is exactly why it was not deleted.
 
   NOTE ON WHAT TIER 1 CHANGED: the old proxy badly missed early-2026 — it modeled a
     smooth rise (2026-01 proxy 4.5) whereas the real NSO print DIPPED to 2.53 in Jan
@@ -60,6 +96,8 @@ Documented Tier-2 proxy anchors (YoY %, headline CPI vs same month prior year):
   2024: Jan 3.4, mid ~4.4, Dec 2.9
   2025: ~3.3 flat, Dec 3.4  [→ superseded from 2025-06 by real NSO]
 """
+import os
+
 import pandas as pd
 
 # TIER 1 — REAL headline CPI YoY (%) from NSO chart-embed (slug "cpi"), fetched 2026-07-06.
@@ -71,10 +109,14 @@ NSO_CPI_YOY_REAL = {
     "2026-06-01": 4.69,
 }
 
-# TIER 1 (bonus) — REAL average/cumulative CPI YoY (%) ("bình quân") from NSO chart "inflation"
-# (slug "inflation", post id 24239), same fetch/window. Not used by the merge below; kept for
-# reference (this is the year-to-date average print, distinct from the monthly YoY above).
-NSO_CPI_YOY_AVG_REAL = {
+# TIER 1 (bonus) — REAL **CORE** inflation YoY (%) from NSO chart "inflation" (slug "inflation",
+# post id 24239), same fetch/window. Not read by anything; kept for reference only.
+# RENAMED 2026-09-27 (was NSO_CPI_YOY_AVG_REAL, job Taylor_20260927_022319): the old name and comment
+# claimed this was the year-to-date AVERAGE ("bình quân") print. It is not — all 13 values match
+# fiinprox_cpi_monthly_20260914.csv's `core_yoy_pct` (lạm phát cơ bản) exactly, and NONE of them
+# matches the headline series. See trap #1 in mike/kb/data_registry/macro/fiinprox_cpi_monthly.md.
+# Safe rename: grep 2026-09-27 found the old name DEFINED here and read nowhere in any .py.
+NSO_CPI_CORE_YOY_REAL = {
     "2025-06-01": 3.46, "2025-07-01": 3.30, "2025-08-01": 3.25, "2025-09-01": 3.18,
     "2025-10-01": 3.30, "2025-11-01": 3.28, "2025-12-01": 3.27, "2026-01-01": 3.19,
     "2026-02-01": 3.74, "2026-03-01": 3.96, "2026-04-01": 4.66, "2026-05-01": 4.67,
@@ -123,6 +165,69 @@ CPI_YOY_BACKFILL_2007_2010 = {
 }
 
 
+# ---------------- TIER 1.5 — FiinPro-X monthly headline CPI (frozen snapshot) ----------------
+# Path is module-relative so a git worktree (where mike/ is absent — .gitignore:107 hides the nested
+# repo) degrades LOUDLY to Tier 2 instead of silently reading a stale copy. Env override is for
+# selfchecks only.
+FIINPRO_CPI_CSV = os.environ.get(
+    "FIINPRO_CPI_CSV",
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "mike", "data",
+                 "fiinprox_cpi_monthly_20260914.csv"))
+FIINPRO_CPI_VINTAGE = "2026-09-14"      # the day the snapshot was harvested; it never advances
+_FIINPRO_CPI = None                     # cached pd.Series (Timestamp -> headline YoY %)
+_WARNED = set()                         # one-time warnings, keyed by message
+
+
+def _warn_once(msg):
+    if msg not in _WARNED:
+        _WARNED.add(msg)
+        print(f"[cpi_vn] {msg}")
+
+
+def fiinpro_cpi_series():
+    """Tier-1.5 headline CPI YoY (%) keyed by month-start Timestamp. Empty Series when the snapshot
+    is unavailable -> every caller falls back to Tier 2/Tier 3 (the pre-2026-09-27 behaviour)."""
+    global _FIINPRO_CPI
+    if _FIINPRO_CPI is not None:
+        return _FIINPRO_CPI
+    try:
+        f = pd.read_csv(FIINPRO_CPI_CSV)
+        idx = pd.to_datetime(f["month"].astype(str) + "-01")
+        ser = pd.Series(pd.to_numeric(f["cpi_yoy_pct"], errors="coerce").values, index=idx)
+        _FIINPRO_CPI = ser.dropna().sort_index()
+    except Exception as e:
+        _warn_once(f"Tier 1.5 UNAVAILABLE ({FIINPRO_CPI_CSV}: {e}) -> Tier 2 interpolation is in "
+                   f"force for 2011-01..2025-05 and Tier 3 for 2007-2010. Values there are PROXY "
+                   f"(MAE 0.49pp, max 2.51pp) -- do not quote them as real prints.")
+        _FIINPRO_CPI = pd.Series(dtype=float)
+    return _FIINPRO_CPI
+
+
+def cpi_coverage(end):
+    """FRESHNESS CHECK (coding_guidelines §14) for the producer->consumer pair
+    `fiinprox_cpi_monthly_20260914.csv` (frozen) -> this module (read live).
+
+    Returns (real_last, fp_last, gap_months) where gap_months lists the requested months no REAL
+    source covers, i.e. the months served by the Tier-2 forward-fill. Never raises: this module
+    feeds golive_recommend_v23, so it must degrade, not abort — but it must degrade OUT LOUD."""
+    end_ts = pd.to_datetime(end).normalize().replace(day=1)
+    real_last = max(pd.to_datetime(list(NSO_CPI_YOY_REAL))) if NSO_CPI_YOY_REAL else pd.NaT
+    fp = fiinpro_cpi_series()
+    fp_last = fp.index.max() if len(fp) else pd.NaT
+    covered = max([d for d in (real_last, fp_last) if pd.notna(d)], default=pd.NaT)
+    if pd.isna(covered) or end_ts <= covered:
+        return real_last, fp_last, []
+    gap = list(pd.date_range(covered + pd.offsets.MonthBegin(1), end_ts, freq="MS"))
+    _m = lambda d: "(none)" if pd.isna(d) else f"{d:%Y-%m}"     # NaT = that tier has no month at all
+    _warn_once(
+        f"CPI COVERAGE GAP: {len(gap)} month(s) {gap[0]:%Y-%m}..{gap[-1]:%Y-%m} have NO real source. "
+        f"Tier 1 (live NSO) ends {_m(real_last)}; Tier 1.5 (FiinPro snapshot {FIINPRO_CPI_VINTAGE}, "
+        f"trial ended 2026-09-28 -> FROZEN) ends {_m(fp_last)}. Those months are Tier 2's "
+        f"forward-fill of its last anchor, NOT a print. FIX = refresh NSO_CPI_YOY_REAL from the GSO "
+        f"monthly release; refreshing the FiinPro file is impossible.")
+    return real_last, fp_last, gap
+
+
 def cpi_monthly_df(end="2026-06-01"):
     """Monthly YoY CPI (%): real NSO chart-embed where available (2025-06..2026-06),
     linear-interpolated proxy anchors 2011-01..2025-05 (fallback), Tier-3 backfill
@@ -139,11 +244,22 @@ def cpi_monthly_df(end="2026-06-01"):
     # Overlay Tier-3 backfill first (lowest priority; NaN below 2011-01 since Tier-2's
     # anchors start there and interpolate() never extrapolates before its first anchor).
     out["cpi_yoy"] = out["time"].map(backfill).fillna(out["cpi_yoy"])
-    out["is_backfill_2007_2010"] = out["time"].isin(backfill.index)
-    # Overlay REAL NSO values wherever present (Tier 1 overrides Tier-2/Tier-3).
+    # Overlay Tier 1.5 (FiinPro-X real prints, 2008-01..2026-08) above Tier 2/Tier 3. With the file
+    # present this leaves Tier 3 serving 2007 only; with the file absent Tier 3 still covers
+    # 2007-2010 and Tier 2 still covers 2011+ -- i.e. exactly the pre-wire behaviour.
+    fp = fiinpro_cpi_series()
+    out["cpi_yoy"] = out["time"].map(fp).fillna(out["cpi_yoy"]) if len(fp) else out["cpi_yoy"]
+    out["is_fiinpro"] = out["time"].isin(fp.index)
+    # Overlay REAL NSO values wherever present (Tier 1 overrides everything).
     real = pd.Series({pd.to_datetime(k): v for k, v in NSO_CPI_YOY_REAL.items()})
     out["cpi_yoy"] = out["time"].map(real).fillna(out["cpi_yoy"])
     out["is_real_nso"] = out["time"].isin(real.index)
+    out["is_fiinpro"] = out["is_fiinpro"] & ~out["is_real_nso"]
+    # `is_backfill_2007_2010` must mean "Tier 3 is what you are actually reading", so it is computed
+    # AFTER the higher tiers have overridden -- otherwise 2008-2010 would keep claiming Tier 3.
+    out["is_backfill_2007_2010"] = (out["time"].isin(backfill.index)
+                                    & ~out["is_fiinpro"] & ~out["is_real_nso"])
+    cpi_coverage(end)          # §14 freshness gate: warns once if `end` reaches past every real tier
     # 3-month change of YoY = "inflation accelerating?" (direction signal)
     out["cpi_yoy_chg3"] = out["cpi_yoy"].diff(3)
     return out
@@ -159,8 +275,13 @@ def merge_cpi(df, time_col="time", end="2026-06-01"):
 
 
 if __name__ == "__main__":
-    c = cpi_monthly_df()
+    c = cpi_monthly_df(end="2026-08-01")
     ann = c.groupby(c.time.dt.year).cpi_yoy.mean().round(2)
-    print("VN CPI YoY proxy (annual mean of monthly, %):")
+    src = c.assign(tier=lambda d: pd.Series(
+        ["T1 NSO" if a else "T1.5 FiinPro" if b else "T3 backfill" if cc else "T2 proxy"
+         for a, b, cc in zip(d.is_real_nso, d.is_fiinpro, d.is_backfill_2007_2010)], index=d.index))
+    print("VN CPI YoY (annual mean of monthly, %) and the tier each year is served from:")
     for y, v in ann.items():
-        print(f"  {y}: {v:.2f}")
+        tiers = "+".join(sorted(src[src.time.dt.year == y].tier.unique()))
+        print(f"  {y}: {v:5.2f}   [{tiers}]")
+    print("\nmonths per tier: " + ", ".join(f"{k}={v}" for k, v in src.tier.value_counts().items()))
