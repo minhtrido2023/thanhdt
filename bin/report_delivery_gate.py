@@ -209,6 +209,63 @@ def _check_period_returns(report: Path) -> None:
           f"canonical {canonical:+.3f}% (lệch {diff:.3f}pp)")
 
 
+# NAV-flow gate (FAIL-H, audit measurement-integrity 2026-09-27) — CỐ Ý FAIL-CLOSED, khác
+# `_check_period_returns` ở trên (fail-open). Lý do khác nhau: cổng kia so 2 con số đã tồn tại nên
+# "thiếu dữ liệu" = không kết luận được; cổng này canh một BƯỚC NHẢY NAV không giải thích được —
+# mà đúng hình dạng đó là hình dạng của một lần nạp/rút chưa ghi nhận, tức tỉ suất trong báo cáo
+# đang sai. Không chặn thì cái sai được công bố cho nhà đầu tư. Mở cổng = ghi bản ghi có BẰNG
+# CHỨNG vào `data/account_cash_flows.json` (kể cả `kind:"market_only"` khi đó thật là thị trường).
+def _accounts_in_report(report: Path) -> list[str]:
+    """Account suy từ TÊN FILE. Không suy được ⇒ [] ⇒ cổng BỎ QUA (báo cáo không phải của
+    account: spend report, code-quality...). KHÔNG đoán từ nội dung — §28: không suy diễn."""
+    return [a for a in ("SpaceX", "ZaloPay") if a in report.name]
+
+
+def _check_nav_flow_records(report: Path) -> None:
+    accounts = _accounts_in_report(report)
+    if not accounts:
+        return
+    report_date = _extract_report_date(report.name)
+    if report_date is None:
+        raise RuntimeError(
+            f"nav-flow BLOCK ({report.name}): không suy được report-date từ tên file, nên không "
+            f"kiểm được bước nhảy NAV nào thuộc kỳ báo cáo. Đặt tên file có YYYY-MM-DD.")
+    end = dt.date.fromisoformat(report_date)
+    # Import module EM RUỘT trong CÙNG cây đang chạy (không phải ROOT canonical): logic cổng và
+    # module nó gọi phải cùng một phiên bản, nếu không thì sửa cổng trong worktree sẽ chạy với
+    # module cũ. Khác chủ đích với `report_return_gate.py` ở dưới — cái đó CỐ Ý gọi subprocess của
+    # cây canonical (sự cố 2026-09-12: giao hàng từ bản tiền-vá).
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from account_cash_flows import (NAV_JUMP_BLOCK_PCT, load_flows,  # noqa: E402
+                                    unexplained_nav_jumps)
+    from nav_period_returns import load_nav_history  # noqa: E402
+
+    for account in accounts:
+        try:
+            rows = load_nav_history(account)
+            flows = load_flows(account)
+        except Exception as exc:                       # noqa: BLE001 — fail-closed có chủ đích
+            raise RuntimeError(
+                f"nav-flow BLOCK ({report.name}): không đọc được nav_history/cash-flows của "
+                f"{account} ({type(exc).__name__}: {exc}) — số tiền trong báo cáo không kiểm "
+                f"chứng được, không gửi.") from exc
+        jumps = unexplained_nav_jumps(rows, flows, end=end)
+        if jumps:
+            lines = "\n".join(
+                f"    {j['prev_date']} → {j['date']}: {j['nav0']:,.0f} → {j['nav1']:,.0f} VND "
+                f"({j['change_pct']:+.2f}%)" for j in jumps)
+            raise RuntimeError(
+                f"nav-flow BLOCK ({report.name}): {len(jumps)} bước nhảy NAV ngày vượt "
+                f"±{NAV_JUMP_BLOCK_PCT}% của {account} KHÔNG có bản ghi dòng tiền nào:\n{lines}\n"
+                f"  Đúng hình dạng của một lần nạp/rút chưa ghi nhận ⇒ tỉ suất 'Hiệu suất lũy kế' "
+                f"đang tính nạp/rút thành lãi/lỗ. Ghi bản ghi có bằng chứng vào "
+                f"data/account_cash_flows.json (kind=deposit/withdraw), hoặc kind=market_only "
+                f"nếu đã xác minh đó là biến động thị trường thật.")
+        print(f"report_delivery_gate: nav-flow PASS ({report.name}): {account} — 0 bước nhảy NAV "
+              f">±{NAV_JUMP_BLOCK_PCT}% không giải thích được tới {report_date} "
+              f"({len(flows)} bản ghi dòng tiền)")
+
+
 def deliver(report: Path, state_path: Path, topic: str, notify_script: Path,
             email_script: Path, skip_validation: bool = False) -> int:
     report = report.resolve()
@@ -244,6 +301,7 @@ def deliver(report: Path, state_path: Path, topic: str, notify_script: Path,
                     run_checked([sys.executable, str(ROOT / "bin" / "report_return_gate.py"),
                                  "--report", str(report)])
                     _check_period_returns(report)
+                    _check_nav_flow_records(report)
                 record["artifact_validated_at"] = now()
                 save_atomic(state_path, state)
 
