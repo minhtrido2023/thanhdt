@@ -55,11 +55,49 @@ if [ -z "$LIVE_LABELS" ]; then
   exit 1
 fi
 
+CHAIN_TAG="park_trim"
+# ─── rc != 0 PHẢI tới NGƯỜI ─────────────────────────────────────────────────────────────────
+# Trước 2026-09-27 mọi lỗi ở đây chỉ `|| rc=1` rồi `>> log 2>&1` của crontab: không Discord,
+# không Telegram, không bus ⇒ một trading_rules.json hỏng (compute_park_trim rc=7 fail-closed)
+# để sổ PARK nguyên ở mức cũ mà KHÔNG AI BIẾT cho tới khi có người mở log. Fail-closed mà
+# không ai nghe thấy thì chỉ đổi một lỗi im lặng thành một lỗi im lặng khác.
+# Discord là kênh CHÍNH; notify thất bại ⇒ in LỖI THẬT ra stderr (§29), không nuốt.
+# Bus là kênh PHỤ. Tắt khi test: PARK_CHAIN_NO_NOTIFY=1
+ALERT_TOPIC="${PARK_CHAIN_ALERT_TOPIC:-trading_daily}"   # TÊN kênh, không ID trần (discord_id_gate)
+alert_human() {   # $1 = nhãn ngắn (topic bus)  $2 = nội dung đầy đủ
+  if [ -n "${PARK_CHAIN_NO_NOTIFY:-}" ]; then
+    echo "[$CHAIN_TAG] (notify TẮT bằng PARK_CHAIN_NO_NOTIFY) $2"
+    return 0
+  fi
+  local _err
+  if ! _err="$("$ROOT/bin/notify_thread.sh" "$2" "$ALERT_TOPIC" 2>&1 >/dev/null)"; then
+    echo "[$CHAIN_TAG] LỖI: không post được Discord (cảnh báo KHÔNG tới người): $_err" >&2
+  fi
+  "$ROOT/bin/append_event.sh" Mike error "$1" \
+    "{\"chain\":\"$CHAIN_TAG\",\"plan_date\":\"$PLAN_DATE\",\"chi_tiet\":\"xem Discord + log\"}" \
+    >/dev/null 2>&1 || echo "[$CHAIN_TAG] (bus không ghi được — Discord vẫn là kênh chính)" >&2
+}
+
 rc=0
 for ACCT in $LIVE_LABELS; do
   echo "=== [park_trim] $ACCT plan_date=$PLAN_DATE — $NOW_ICT ==="
+  OUT_LOG="$(mktemp)"
   # shellcheck disable=SC2086  # EXTRA_ARGS cố ý tách từ (cùng khuôn inject_discretionary_orders.sh)
   (cd "$WC_ROOT" && "$PY" mike/bin/compute_park_trim.py --account "$ACCT" \
-      --out "$PLAN_DIR/park_trim_${ACCT}_${PLAN_DATE}.json" $EXTRA_ARGS) || rc=1
+      --out "$PLAN_DIR/park_trim_${ACCT}_${PLAN_DATE}.json" $EXTRA_ARGS) >"$OUT_LOG" 2>&1
+  arc=$?
+  cat "$OUT_LOG"
+  if [ "$arc" -ne 0 ]; then
+    rc=$arc
+    # §29: mang theo rc THẬT + đúng những dòng script vừa đọc được, không đoán nguyên nhân.
+    alert_human "park-chain-park-trim-rc" \
+"🔴 **PARK_TRIM L1 THẤT BẠI** — \`$ACCT\` plan_date \`$PLAN_DATE\` ($NOW_ICT)
+rc=\`$arc\` từ \`compute_park_trim.py\`$([ "$arc" = 7 ] && printf ' — **rc=7 = KHÔNG đọc được trần park từ trading_rules.json** (fail-closed: KHÔNG trim, sổ PARK giữ nguyên mức cũ)')
+\`\`\`
+$(tail -n 12 "$OUT_LOG")
+\`\`\`
+Việc cần làm: đọc \`logs/park_trim_daily.log\`; nếu rc=7 thì kiểm \`data/trading_rules.json\` khoá \`neutral_parking.default_park_of_idle_pct\` (phải là số trong [0,1]). Chuỗi 19:40 jit_unpark sẽ BỎ QUA account này vì thiếu artifact L1."
+  fi
+  rm -f "$OUT_LOG"
 done
 exit $rc

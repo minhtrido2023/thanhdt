@@ -35,6 +35,19 @@ import json
 import os
 import sys
 
+# Gốc mặc định phải TỰ ĐỔI THEO CÂY chứa chính file này. Hardcode canonical ở đây là bẫy đã
+# được ghi vào KB (`compute_active_nav_selfcheck`, 2026-09-24): chạy `--selftest` từ một worktree
+# thì sandbox copy file của MASTER ⇒ "PASS"/"FAIL" đều không nói gì về code đang sửa. Đo thật
+# 2026-09-27: `--selftest` trong worktree wire/park-rail CRASH ở M3 vì nó copy `compute_park_trim.py`
+# của master (còn hardcode PARK_TARGET_F1, không có `park_target_from_rules`).
+MIKE_ROOT_DEFAULT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(MIKE_ROOT_DEFAULT, "bin"))
+try:
+    from wc_paths import find_wc_root
+    WC_ROOT_DEFAULT = find_wc_root(__file__)
+except Exception:                                    # cây bị cắt rời / thiếu wc_env.sh
+    WC_ROOT_DEFAULT = "/home/trido/thanhdt/WorkingClaude"
+
 TOL = 1e-9
 R1_REL = os.path.join("deploy_golive_dt5g_v4", "golive_recommend_v23.py")
 R2_REL = os.path.join("bin", "compute_park_trim.py")   # tương đối MIKE root (repo lồng riêng)
@@ -302,10 +315,12 @@ def selftest(wc, mike=None):
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("--wc-root", default="/home/trido/thanhdt/WorkingClaude")
-    ap.add_argument("--mike-root", default=None,
-                    help="gốc repo lồng `mike/` chứa bin/compute_park_trim.py (mặc định <wc>/mike); "
-                         "trỏ vào worktree để kiểm TRƯỚC khi merge")
+    ap.add_argument("--wc-root", default=WC_ROOT_DEFAULT,
+                    help=f"gốc WorkingClaude chứa R1+R3 (mặc định suy từ vị trí file này: {WC_ROOT_DEFAULT})")
+    ap.add_argument("--mike-root", default=MIKE_ROOT_DEFAULT,
+                    help="gốc repo lồng `mike/` chứa bin/compute_park_trim.py — mặc định là CÂY CHỨA "
+                         f"chính file selfcheck này ({MIKE_ROOT_DEFAULT}), nên chạy từ worktree là "
+                         "kiểm ĐÚNG code của worktree")
     ap.add_argument("--selftest", action="store_true")
     a = ap.parse_args()
     if a.selftest:
