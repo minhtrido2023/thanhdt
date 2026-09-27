@@ -326,76 +326,6 @@ def _reconcile_net_fills(executors, net_adjustments, pre_net_refs, plan_date):
     return failed
 
 
-_BP_SHADOW_LOG = os.path.join(_WC_ROOT, "data", "plan_buying_power_shadow_log.csv")
-_BP_SHADOW_COLS = ("date", "account", "orders_buy_value_vnd", "buying_power_vnd",
-                   "buying_power_source", "would_block")
-
-
-def _log_plan_buying_power_shadow(label, plan, broker, mode):
-    """SHADOW (WARN_ONLY) — ghi log so Σ giá trị lệnh MUA vs SỨC MUA THẬT của broker.
-
-    ⚠️ CHỈ GHI LOG. KHÔNG chặn, KHÔNG sửa plan/orders, KHÔNG raise — không đổi hành vi phiên
-    theo bất kỳ cách nào. Mục đích duy nhất: tích luỹ dữ liệu để Mike/user quyết có nên nâng
-    thành gate thật hay không (thiết kế §3.6 ontology_constraint_layer_design_20260729.md,
-    yêu cầu ≥10 phiên trước khi bàn ACTIVE).
-
-    VÌ SAO: pattern "orders[] chứa lệnh dựa trên vốn CHƯA tồn tại" tái diễn 3 lần trong 6 ngày
-    (07-23 rút Trứng vàng ảo → 07-27 field `funding_required` → 07-28 văn xuôi "user sẽ nạp
-    136M"), tần suất TĂNG; cả 3 lần chỉ thoát nhờ một bước QA thứ hai TÌNH CỜ chạy
-    (kb/INCIDENTS.md 07-28 "Sự cố 3"). Cấm từng hình thức diễn đạt không đóng được lỗ hổng —
-    Σ giá trị orders[] thì độc lập hoàn toàn với tên field/văn xuôi.
-
-    VẾ PHẢI = SỨC MUA ĐO ĐƯỢC (`ppse.pp0Buy` của chính broker), KHÔNG phải cash tĩnh, KHÔNG
-    phải giả định — tôn trọng nguyên vẹn quyết định user 16:16 ICT 07-28 (từ chối luật cứng
-    `orders ≤ cash_vnd` vì hệ sẽ dùng margin): pp0Buy tự bao gồm hạn mức vay của gói đang dùng
-    và tiền bán chờ về T+0, nên chỉ bắt "vốn CHƯA TỒN TẠI", không cấm đòn bẩy. Đọc DNSE sống
-    (coding_guidelines §6 bright-line: sức mua same-day PHẢI từ broker, tuyệt đối không từ BQ).
-
-    Phạm vi: account mode=live, plan có ≥1 lệnh MUA. Chỉ tính `orders[]`; `deferred_orders[]`
-    KHÔNG tính (đó là cơ chế ĐÚNG đã được dạy — và load_plan() vốn không nạp field đó).
-    Không đo được sức mua → ghi would_block="unknown" + lý do trong buying_power_source, KHÔNG
-    đoán (bản ACTIVE sau này mới phải quyết chặn hay không trong tình huống đó).
-    """
-    try:
-        if str(mode or "").lower() != "live":
-            return
-        buys = [o for o in plan.orders if (o.side or "").lower() == "buy"]
-        if not buys:
-            return
-        buy_value = sum(o.value for o in buys)
-        biggest = max(buys, key=lambda o: o.value)
-        bp = src = None
-        # Đo bằng ĐÚNG gói vay của lệnh được lấy làm mốc. Nếu phiên này có đòn bẩy CAPIT,
-        # `pp0Buy` ở gói default 1841 là số của MỘT NỬA sức mua thật (gói 1840 initialRate
-        # 0,5) ⇒ log sẽ ghi `would_block=true` GIẢ. Đây chính là bộ dữ liệu ≥10 phiên đang
-        # tích luỹ để quyết P0 → ACTIVE, nên một cột sai ở đây sẽ biến thành một cổng chặn
-        # sai sau này (arch-reviewer 2026-08-03, phát hiện #2).
-        _lp = getattr(biggest, "loan_package_id", None)
-        try:
-            bp = broker.get_buying_power(biggest.ticker, int(biggest.ref_price),
-                                         loan_package_id=_lp)
-            src = (f"dnse:ppse.pp0Buy@{biggest.ticker}"
-                   + (f"/pkg{_lp}" if _lp is not None else "")) if bp is not None \
-                else "unavailable:ppse"
-        except Exception as ex:
-            src = f"unavailable:{type(ex).__name__}"
-        would_block = "unknown" if bp is None else str(buy_value > bp).lower()
-        row = (plan.plan_date, label, f"{buy_value:.0f}",
-               "" if bp is None else f"{bp:.0f}", src, would_block)
-        new = not os.path.exists(_BP_SHADOW_LOG)
-        os.makedirs(os.path.dirname(_BP_SHADOW_LOG), exist_ok=True)
-        with open(_BP_SHADOW_LOG, "a", encoding="utf-8") as f:
-            if new:
-                f.write(",".join(_BP_SHADOW_COLS) + "\n")
-            f.write(",".join(row) + "\n")
-        print(f"[{label}] ℹ️ shadow PLAN_BUYING_POWER (chỉ log, không chặn): "
-              f"Σ mua {buy_value:,.0f}đ vs sức mua "
-              f"{'n/a' if bp is None else format(bp, ',.0f') + 'đ'} ({src}) "
-              f"→ would_block={would_block}")
-    except Exception as ex:                      # shadow log KHÔNG được làm hỏng phiên
-        print(f"[{label}] ⚠ shadow PLAN_BUYING_POWER bỏ qua (lỗi ghi log, vô hại): {ex}")
-
-
 def _acquire_account_lock(label, plan_date):
     """Khoá độc quyền per (account, plan_date) — chống 2 tiến trình bot_execute.py cùng
     chạy 1 account/ngày (vd heartbeat autoheal đua với cron đúng giờ, 2026-07-02: cả 2
@@ -733,15 +663,12 @@ def main():
             icon = {"LIVE_PREFLIGHT_OK": "🔎", "LIVE_PREFLIGHT_STRIP": "⛔",
                     "LIVE_PREFLIGHT_WARN": "⚠️", "LIVE_PREFLIGHT_SKIPPED": "ℹ️"}.get(a["action"], "•")
             print(f"[{p['label']}] {icon} PREFLIGHT ĐÒN BẨY {a['action']}: {a['reason']}")
-        # SHADOW (chỉ log, không chặn) — plan đã qua TOÀN BỘ cascade + approval gate ở trên,
-        # và chưa lệnh nào được đặt (run_session chạy sau). Đặt sau connect() vì sức mua phải
-        # đọc từ broker SỐNG (§6), không suy từ cash tĩnh/BQ.
-        _log_plan_buying_power_shadow(p["label"], plan, broker, cfg["mode"])
         # GATE CỨNG cấp PLAN — Σ lệnh MUA (đã gồm phí) ≤ SỨC MUA THẬT `ppse.pp0Buy` đo SỐNG
         # tại ĐÚNG thời điểm thực thi (sau khi injector đêm trước đã trừ tiền xong; KHÔNG dùng
         # bất kỳ số cash nào trong plan JSON). Vá lỗ hổng khiến luật "Σ orders[] ≤ cash thực,
-        # tự SHRINK" tái phạm 3 lần/15 ngày trong khi tầng duy nhất enforce nó là shadow log
-        # WARN_ONLY ngay trên. Vượt ⇒ KHÔNG đặt BẤT KỲ lệnh nào của account này (thực thi một
+        # tự SHRINK" tái phạm 3 lần/15 ngày trong khi tầng duy nhất enforce nó là một shadow log
+        # WARN_ONLY (`_log_plan_buying_power_shadow`, ĐÃ XOÁ 2026-09-27 — xem git log: mục đích
+        # "tích luỹ ≥10 phiên trước khi bàn ACTIVE" hoàn thành chính bằng gate NÀY ở bb8583cc). Vượt ⇒ KHÔNG đặt BẤT KỲ lệnh nào của account này (thực thi một
         # phần chính là hành vi "list-rồi-đợi-tiền" mà luật cấm), báo to, exit ≠ 0. Đặt CUỐI
         # cascade: mọi bộ lọc/trần/đòn bẩy đã chốt nên Σ ở đây là tập lệnh THẬT SỰ sắp đặt.
         # Resume phải tính phần chưa khớp. Module funding chỉ dùng state khi đủ cùng phiên;
@@ -804,3 +731,4 @@ def main():
 
 if __name__ == "__main__":
     sys.exit(main())
+

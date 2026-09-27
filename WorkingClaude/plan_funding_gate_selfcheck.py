@@ -629,6 +629,40 @@ v_r5 = check_plan_funding(p_r1, b_r1, "live", execution_state=st_r5)
 check("need ≈ 24.824.056đ (500 − 40 filled − 60 đang giữ = 400cp còn lại)",
       abs(v_r5["need_vnd"] - 24_824_056) < 1, v_r5["need_vnd"])
 
+print("\n[R6] ★ RATCHET — `funding_block_reason()` KHÔNG được có caller production")
+# Nó gọi `check_plan_funding()` mà KHÔNG truyền `execution_state` ⇒ `_remaining_quantities()`
+# trả TOÀN BỘ qty plan, không phải phần CÒN LẠI. Lúc RESUME (một phần đã khớp / child còn mở —
+# chính ca [R5] ngay trên) nó ĐẾM KÉP: đòi tiền cho cả phần đã mua xong. Đúng lớp bug 2026-08-11
+# và 2026-09-17 (coding_guidelines §27). Hôm nay 0 caller production nên bug là LATENT — ratchet
+# này tồn tại để người thêm caller đầu tiên bị chặn lại và đọc docstring cảnh báo trước.
+# Thêm caller hợp lệ = thêm tham số `execution_state` vào signature RỒI cập nhật danh sách dưới.
+import ast as _ast_r6      # noqa: E402
+import glob as _glob_r6    # noqa: E402
+import os as _os_r6        # noqa: E402
+
+_WC_R6 = _os_r6.path.dirname(_os_r6.path.abspath(__file__))
+_ALLOWED_R6 = {"plan_funding_gate_selfcheck.py",        # chính file này
+               "plan_funding_gate.py"}                  # nơi định nghĩa
+_callers_r6 = []
+for _f in (_glob_r6.glob(_os_r6.path.join(_WC_R6, "*.py"))
+           + _glob_r6.glob(_os_r6.path.join(_WC_R6, "trading_bot", "*.py"))):
+    _base = _os_r6.path.basename(_f)
+    if _base in _ALLOWED_R6:
+        continue
+    try:
+        _tree = _ast_r6.parse(open(_f, encoding="utf-8").read())
+    except SyntaxError:
+        continue
+    for _n in _ast_r6.walk(_tree):
+        if isinstance(_n, _ast_r6.Call) and getattr(_n.func, "id", None) == "funding_block_reason":
+            _callers_r6.append(f"{_base}:{_n.lineno}")
+check("funding_block_reason() vẫn 0 caller production — thêm caller PHẢI thêm `execution_state` "
+      "vào signature trước (xem docstring: resume sẽ đếm kép qty đã khớp)",
+      _callers_r6 == [], _callers_r6)
+check("…và docstring của nó vẫn mang cảnh báo đó (đừng xoá khi refactor)",
+      "execution_state" in (__import__("trading_bot.plan_funding_gate", fromlist=["x"])
+                            .funding_block_reason.__doc__ or ""))
+
 print("\n" + "=" * 78)
 print(f"KẾT QUẢ: {PASS} PASS / {FAIL} FAIL")
 print("=" * 78)

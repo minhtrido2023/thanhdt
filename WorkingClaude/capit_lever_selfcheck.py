@@ -2092,12 +2092,18 @@ with tempfile.TemporaryDirectory() as TMP:
     _i_lever = _bx_main.find("apply_capit_lever(plan")
     _i_conn = _bx_main.find("make_broker(cfg, otp=otp, profile=p).connect()")
     _i_pref = _bx_main.find("lever_live_preflight(")
-    _i_shadow = _bx_main.find("_log_plan_buying_power_shadow(p[")
+    # Mốc CUỐI của K2 là GATE TIỀN THẬT, không phải shadow-log: `_log_plan_buying_power_shadow`
+    # đã XOÁ 2026-09-27 (mục đích "tích luỹ ≥10 phiên rồi quyết P0→ACTIVE" hoàn thành bằng chính
+    # `check_plan_funding` ở bb8583cc; đo thật: 11 cặp (ngày, account) shadow ghi
+    # would_block=true mà phiên vẫn khớp lệnh — cột đó SAI hệ thống, không phải nhiễu lẻ).
+    # Bất biến cần giữ MẠNH HƠN bản cũ: preflight phải chốt đòn bẩy TRƯỚC KHI cổng tiền đo sức
+    # mua, nếu không gate đo trên trạng thái đòn bẩy chưa chung cuộc và CHẶN/CHO QUA sai.
+    _i_fund = _bx_main.find("check_plan_funding(plan, broker")
     check("K1 bot_execute.py có gọi lever_live_preflight", _i_pref > 0)
-    check("K2 …SAU connect() (cần sổ broker sống) và TRƯỚC shadow-log P0 (shadow phải đo "
-          "theo trạng thái đòn bẩy CHUNG CUỘC, nếu không nó ghi would_block GIẢ)",
-          0 < _i_conn < _i_pref < _i_shadow,
-          detail=f"connect={_i_conn} preflight={_i_pref} shadow={_i_shadow}")
+    check("K2 …SAU connect() (cần sổ broker sống) và TRƯỚC gate tiền `check_plan_funding` "
+          "(gate phải đo theo trạng thái đòn bẩy CHUNG CUỘC)",
+          0 < _i_conn < _i_pref < _i_fund,
+          detail=f"connect={_i_conn} preflight={_i_pref} check_plan_funding={_i_fund}")
     check("K3 …và cascade vẫn gọi apply_capit_lever TRƯỚC đó (preflight chỉ GỠ, không cấp)",
           0 < _i_lever < _i_conn)
     check("K4 bot_execute.py KHÔNG BAO GIỜ gọi apply_capit_lever ở chế độ preview "
