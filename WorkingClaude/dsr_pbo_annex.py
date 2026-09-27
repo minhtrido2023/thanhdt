@@ -13,11 +13,16 @@ Implements:
 
 Deterministic: fixed seeds. Reproducible: run `python dsr_pbo_annex.py`.
 """
-import sys, glob, math
+import os, sys, glob, math
 import numpy as np, pandas as pd
 
 DATA = "data"
-R3_CSV = f"{DATA}/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap.csv"
+# Which ledger is "the pinned R3" is NOT a constant of nature — it moved on 2026-08-03 (advprice /
+# univpit) and again on 2026-09-27 (return leg without OShares). Env override so a re-run can name
+# the ledger explicitly instead of editing this line (§8: never let a stale default decide a number).
+R3_CSV = os.environ.get(
+    "DSR_R3_CSV",
+    f"{DATA}/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap.csv")
 ANN = 252.0  # trading days / year used across the registry's Sharpe convention
 
 # ---------- NAV loading (mirror bootstrap_nav.py collapse-to-daily) ----------

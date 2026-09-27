@@ -7106,9 +7106,9 @@ là đã verify** cho tới khi chạy lại — bug làm đổi thời điểm/
 |---|---|---|---|
 | **R3 pin chính thức** | 28,86 / 1,90 / −17,8 / 1,62 / 1.178,01B | **24,38 / 1,69 / −18,8 / 1,30 / 757,61B** | ✅ **ĐÃ CHẠY LẠI** (section này) |
 | R3 IS / OOS | 27,09% / 30,48% | **19,26% / 29,24%** | ✅ đã chạy lại; recompute độc lập `extract_peryear.py` trùng khớp cả 2 chân |
-| **+7,4pp parking NEUTRAL** (`kb/KNOWLEDGE.md:26`, `context_pack.md:160`) | +7,4pp Full | — | ⚠️ **STALE** — là delta CAGR toàn hệ có/không parking ở một pin CŨ HƠN nữa; chưa chạy lại ở pin nào từ 07-2026. **Đã bị nghi vấn độc lập từ trước**: A1 (2026-08-22) kết luận "+7,4pp KHÔNG còn đứng trong bucket hiện tại (6,8% = HIGH)". **KHÔNG ước lượng lại.** |
-| **Bootstrap 5th-pct** (`kb/KNOWLEDGE.md:22`, `context_pack.md:159`) | CAGR 18,6% / DD −28,6% | — | ⚠️ **STALE, và đã stale TRƯỚC bug này**: nguồn `bootstrap_nav.py` chạy 2026-06-29 trên pin CAGR act 27,8% (registry:735); chính registry:2787 đã ghi bản chạy lại 07-11 cho **20,1% / −26,1%**. KB vẫn giữ số 06-29. Cần chạy lại `bootstrap_nav.py` trên NAV mới — **KHÔNG ước lượng.** |
-| **DSR / PBO annex** | DSR 1,0000 · PBO 0,209 · ann-SR 1,829 | — | ⚠️ **STALE.** `dsr_pbo_annex.py` cần họ ~80-200 CSV config; chạy lại là một job riêng. Lưu ý DSR/PBO đo **độ lệch do lựa chọn config**, không đo mức CAGR ⇒ ít nhạy với bug này hơn mức tuyệt đối, nhưng vẫn phải chạy lại trước khi trích dẫn. **KHÔNG ước lượng.** |
+| **+7,4pp parking NEUTRAL** (`kb/KNOWLEDGE.md:26`, `context_pack.md:160`) | +7,4pp Full | **+2,01pp** (đã đo 2026-09-27 (bis) §5) | ✅ **ĐÃ CHẠY LẠI** — trước đó: ⚠️ STALE — là delta CAGR toàn hệ có/không parking ở một pin CŨ HƠN nữa; chưa chạy lại ở pin nào từ 07-2026. **Đã bị nghi vấn độc lập từ trước**: A1 (2026-08-22) kết luận "+7,4pp KHÔNG còn đứng trong bucket hiện tại (6,8% = HIGH)". **KHÔNG ước lượng lại.** |
+| **Bootstrap 5th-pct** (`kb/KNOWLEDGE.md:22`, `context_pack.md:159`) | CAGR 18,6% / DD −28,6% | **15,6% / −30,4%** (2026-09-27 (bis) §3) | ✅ **ĐÃ CHẠY LẠI** — trước đó: ⚠️ STALE, và đã stale TRƯỚC bug này: nguồn `bootstrap_nav.py` chạy 2026-06-29 trên pin CAGR act 27,8% (registry:735); chính registry:2787 đã ghi bản chạy lại 07-11 cho **20,1% / −26,1%**. KB vẫn giữ số 06-29. Cần chạy lại `bootstrap_nav.py` trên NAV mới — **KHÔNG ước lượng.** |
+| **DSR / PBO annex** | DSR 1,0000 · PBO 0,209 · ann-SR 1,829 | **DSR 1,0000 · PBO 0,3993 · ann-SR 1,622** (2026-09-27 (bis) §4) | ✅ **ĐÃ CHẠY LẠI** (PBO tăng do HỌ TRIAL nở 80→477, không do bug). Trước đó: ⚠️ STALE. `dsr_pbo_annex.py` cần họ ~80-200 CSV config; chạy lại là một job riêng. Lưu ý DSR/PBO đo **độ lệch do lựa chọn config**, không đo mức CAGR ⇒ ít nhạy với bug này hơn mức tuyệt đối, nhưng vẫn phải chạy lại trước khi trích dẫn. **KHÔNG ước lượng.** |
 | R1 / R2 (bull-park @20B/@50B) | 29,01 / 28,01 | — | ⚠️ **STALE** (nghiên cứu, không deploy). Chạy lại nếu bull-park được xét lại. |
 | ~38 section registry khác có `custompitg`/`custom30V` | — | — | Theo nguyên tắc (a)/(b) ở trên: **mọi MỨC TUYỆT ĐỐI = STALE**; các **VERDICT NO-GO** dựa trên delta A/B contemporaneous (FSCORE enhancer, accrual gate ×2, beta-cap, Q-sleeve, delta-momentum tilt, T1 accruals floor, CCS Phase 2, sàn thanh khoản LAG…) **không đảo dấu** — tất cả đều NO-GO với biên rộng và lỗi có ở cả hai chân. Không section nào cần đảo kết luận; tất cả cần đổi MỨC NỀN nếu trích số tuyệt đối. |
 
@@ -7120,3 +7120,159 @@ mọi kỳ vọng lợi nhuận trao đổi với user/nhà đầu tư dựa tr�
 **Artifact:** `mike/agents/Taylor/research/c30v_retleg_repin_20260927/` (run scripts + 3 log) ·
 CSV `data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_{c30vctl,c30vleg,c30vnew}_univpit.csv`
 · worktree `/home/trido/thanhdt/wt-c30v-retfix`, branch `fix/custom30v-return-leg-oshares`.
+
+## 2026-09-27 (bis) — HẬU KIỂM SAU MERGE `a808a613` (re-pin R3 custom30V) — job `Taylor_20260927_043541`
+
+Merge `a808a613` đã vào **main** (user sign-off 11:33 ICT). Section này là phần HẬU KIỂM mà commit
+gốc `1b89881b` để lại ở trạng thái STALE: bootstrap, DSR/PBO, và đóng góp parking NEUTRAL. Mọi số
+dưới đây **đo trên main canonical**, không trên worktree.
+
+### 1. Selfcheck trên main — PASS, trùng bản trước merge
+`basket_return_leg_oshares_selfcheck.py` với `BASKET_RETLEG_PREREF=d04251f0` (commit main ngay
+TRƯỚC merge; đã kiểm `git show d04251f0:./custom_basket.py` KHÔNG chứa `BASKET_RETURN_OSHARES` ⇒
+đúng là bản tiền-sửa): **PASS 5/5 × 3 TZ** (`TZ` unset / `UTC` / `America/New_York`), 3 log khớp
+BIT-FOR-BIT ở khối kết quả (md5 các dòng `[ok]` = `7aba6181591c`). Số y nguyên bản pre-merge:
+R1 `3.322e-16`/414 phiên · R1b legacy lệch `5.168e-02` · R2 md5 weight `a953d4bb…` giống cả 3 biến
+thể · R3 28/414 phiên lệch, 28/28 trùng ngày bước OShares · R4 0 tên đổi/8 rebal · R5 `Δlevel = 0`.
+`basket_price_basis_selfcheck.py`: **PASS toàn bộ × 3 TZ**, gồm T4c (`max|Δret|` flat vs legacy
+9.5347pp/phiên trên 753 phiên).
+Log: `mike/agents/Taylor/research/c30v_hau_kiem_20260927/sc_{retleg,pricebasis}_main_TZ_*.log`.
+
+### 2. Tái lập pin R3 trên main — **BYTE-IDENTICAL**
+Lệnh: `research/c30v_hau_kiem_20260927/run_main.sh c30vmain` (env pin nguyên văn từ
+`c30v_retleg_repin_20260927/run_leg.sh`, chỉ đổi cây sang CANONICAL — sau merge thì `WORKDIR`
+hardcode của `pt_v23_audit_2014.py:42` trỏ đúng vào bản ĐÃ SỬA nên **không cần wrapper**; EXP_TAG
+đổi sang `c30vmain` theo §8, và `EXP_TAG` không xuất hiện trong nội dung CSV nên md5 so được trực tiếp).
+
+**Final NAV 757,61B · CAGR 24,38% · Sharpe 1,69 · MaxDD −18,8% · Calmar 1,30 · self-check
+BAL+LAG = 0 VND · md5 `3f836927c0df82915c4cfb973d8f4af3` · `diff` vs `c30vnew` = 0 dòng.**
+⇒ pin mới tái lập được trên main, không phụ thuộc worktree/wrapper.
+
+### 3. Bootstrap (`bootstrap_nav.py`, circular block L=21, B=4000, seed=12345) — **XẤU ĐI THẬT**
+
+A/B contemporaneous, **cùng lệnh, cùng snapshot**, chỉ khác chân return:
+
+| | CAGR act | CAGR 5th | CAGR 95th | Sharpe 5th | MaxDD act | **MaxDD 5th** | P(DD<−30%) | P(DD<−40%) | P(SR<1,0) |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| `c30vctl` (chân return CŨ) | 29,2% | 19,4% | 39,7% | 1,28 | −17,8% | **−28,1%** | 2,8% | 0,2% | 0,9% |
+| **`c30vmain` (PIN MỚI)** | **24,7%** | **15,6%** | **34,7%** | **1,07** | **−18,8%** | **−30,4%** | **5,3%** | **0,4%** | **3,3%** |
+| Δ | −4,5pp | **−3,8pp** | −5,0pp | −0,21 | −1,0pp | **−2,3pp** | +2,5pp | +0,2pp | +2,4pp |
+
+(`CAGR act` của `bootstrap_nav.py` = quy ước 252 phiên/năm nên lệch nhẹ so với CAGR theo LỊCH của
+engine — 24,7% vs 24,38%; so sánh trong bảng là cùng quy ước nên hợp lệ.)
+
+**Số KB phải thay:** `kb/KNOWLEDGE.md:22` + `canonical.md:41` ghi **CAGR 18,6% / DD −28,6%** — số đó
+từ bản chạy 2026-06-29 trên một pin khác hẳn, **SUPERSEDED**. Số hiện hành: **CAGR 5th 15,6% / MaxDD
+5th −30,4%**. **Anchor DD phải nâng từ ~−29% lên ~−30,5%.** Cross-check stationary bootstrap (Politis–
+Romano, mean L=21) trong annex: 15,5% / −30,1% ⇒ không phải giả tạo của một kiểu block.
+Log: `bootstrap_c30vmain.log`, `bootstrap_c30vctl.log`.
+
+### 4. DSR / PBO (`dsr_pbo_annex.py`) — DSR VẪN QUA CỔNG; **PBO TĂNG, nhưng KHÔNG do bug này**
+
+| | 2026-07-11 (pin log cũ) | 2026-09-27 trên pin MỚI | Đọc |
+|---|---|---|---|
+| Họ trial (N CSV qua bộ lọc ≥2500 phiên) | **80** / 80 candidate | **477** / 577 candidate | ⚠️ họ **KHÔNG đóng băng** |
+| ann-SR R3 (quy ước annex) | 1,829 | **1,622** | theo pin mới |
+| DSR @ N_csv / 120 / 200 | 1,0000 / 1,0000 / 1,0000 | **1,0000 / 1,0000 / 1,0000** | ✅ **≥0,95, KHÔNG red flag** |
+| **PBO (CSCV)** | **0,2088** | **0,3993** | ⚠️ tăng +19pp, **vẫn <0,5** |
+
+**Phân tách nguyên nhân PBO — đo, không đoán.** Chạy annex HAI lần trên **cùng** họ 477 CSV, chỉ đổi
+ledger R3: PBO = **0,3993 ở CẢ HAI** (log `dsr_pbo_asis_oldR3.log` vs `dsr_pbo_newR3.log`). PBO của
+CSCV tính trên MA TRẬN HỌ, không dùng R3 làm đầu vào ⇒ **bug chuỗi return KHÔNG làm PBO tăng**.
+Toàn bộ +19pp đến từ việc họ config nở **80 → 477** kể từ 07-2026: `family_paths()` là một `glob`
+động `data/v23_golive_audit_2014_now_*.csv`, nên **mỗi backtest R&D mới tự động nhập họ** và PBO
+trôi lên theo thời gian. Đây là một **phát hiện riêng, không phải hệ quả của re-pin**:
+
+> ⚠️ **`dsr_pbo_annex.py` KHÔNG tái lập được số đã pin** vì (a) họ trial là glob động, (b) `R3_CSV`
+> từng là một hằng hardcode trỏ `..._wtnamecap.csv` — file đó CŨNG đã bị ghi lại 2026-07-14 (nên
+> ann-SR của "cùng" pin cũ đã trôi 1,829 → 1,771 mà không ai đổi dòng nào). Bản này thêm env
+> `DSR_R3_CSV` để gọi tên ledger tường minh. **Muốn PBO so sánh được theo thời gian thì phải PIN DANH
+> SÁCH FILE** (một `family_manifest`), không dùng glob — CHƯA LÀM, đề xuất để user/Mike quyết.
+
+Kết luận cổng §18: **DSR 1,0000 ≥ 0,95 và PBO 0,3993 < 0,5 ⇒ KHÔNG có red flag**, không phải vì
+"đọc nhẹ đi" mà vì hai chỉ số đo độ lệch do LỰA CHỌN CONFIG, và bug này ở trong *mọi* config của họ.
+Nhưng PBO 0,40 ở ngưỡng đáng theo dõi: còn 0,10 là tới mốc "ưu tiên config robust-trung vị".
+
+### 5. Đóng góp parking NEUTRAL — **+7,4pp → +2,01pp**, và parking giờ LÀM XẤU mọi chỉ tiêu rủi ro
+
+**Lệnh gốc của "+7,4pp" KHÔNG tồn tại trong registry** (grep `7,4pp`/`7.4pp` chỉ ra 3 chỗ TRÍCH DẪN
+lại — :4838, :5801, :7109 — không chỗ nào có lệnh hay CSV). Vì vậy đây **KHÔNG phải tái lập phương
+pháp cũ**; đây là một phép đo MỚI, phương pháp khai báo tường minh: cùng lệnh pin, đổi ĐÚNG MỘT biến
+`PARK_STATES=3:0.7 → 3:0.0` (parking 0% tiền nhàn rỗi; đối chuẩn = tiền 0%/năm, đúng quy ước A1 08-22).
+
+| Leg | PARK_STATES | CAGR | Sharpe | MaxDD | Calmar | Final NAV | self-check |
+|---|---|---:|---:|---:|---:|---:|---|
+| `c30vnopark2` KHÔNG park | `3:0.0` | 22,37% | **1,95** | **−16,1%** | **1,39** | 618,35B | 0 VND |
+| `c30vmain` pin MỚI | `3:0.7` | **24,38%** | 1,69 | −18,8% | 1,30 | 757,61B | 0 VND |
+| `c30vctl` pin CŨ (chân return lỗi) | `3:0.7` | 28,86% | 1,90 | −17,8% | 1,62 | 1.178,01B | 0 VND |
+
+- **Đóng góp parking ở pin MỚI = +2,01pp CAGR** (24,38 − 22,37).
+- Đóng góp parking ở pin CŨ (thế giới có bug) = +6,49pp (28,86 − 22,37) — **gần khớp "+7,4pp" của KB**
+  và giải thích số đó đến từ đâu: **~2/3 của nó là return giả từ tăng trưởng số CP.**
+- **Chiều rủi ro ĐẢO DẤU và phải nói thẳng:** parking làm Sharpe **1,95 → 1,69**, MaxDD **−16,1% →
+  −18,8%**, Calmar **1,39 → 1,30**. Ở pin mới, parking **mua thêm ~2pp CAGR bằng cách làm xấu mọi
+  chỉ tiêu rủi ro-điều chỉnh**. Câu KB "NEUTRAL parking = phần tin cậy nhất" **KHÔNG còn đứng** trên
+  cơ sở risk-adjusted — đó là một **quyết định của user**, không phải việc Taylor tự đảo.
+
+**Kiểm chứng phép đo (để delta không lẫn biến khác):** chạy thêm `c30vnoparkleg` = park 0% **+**
+`BASKET_RETURN_OSHARES=legacy`. Mọi dòng NGOÀI khối `CUSTOM_BASKET` (tức toàn bộ sổ cái, NAV, TX,
+METRIC) **diff = 0 dòng**; chỉ 2.906 dòng level rổ export khác (rổ vẫn được TÍNH và ghi ra, chỉ không
+được DÙNG khi park=0). ⇒ ở park=0 chân return của rổ không ảnh hưởng kết quả, nên `c30vnopark2` là
+đối chuẩn ĐÚNG cho cả hai pin.
+
+⚠️ **NO-OP IM LẶNG BẮT ĐƯỢC TRONG CHÍNH JOB NÀY (§29).** Lần chạy no-park đầu (`c30vnopark`) ra số
+**y hệt** `c30vmain` (757,61B / 24,38%, md5 nội dung giống): `run_leg.sh`/`run_main.sh` đặt
+`PARK_STATES="3:0.7"` trong khối pin **SAU** `env "$@"`, nên override của caller bị ghi đè — `env` lấy
+assignment cuối. Chỉ phát hiện được vì log in ra `parking policy (cash_etf_states) {3: 0.7}`. Đã tách
+`run_main2.sh` cho `"$@"` đứng CUỐI (và ghi lý do vào chính file đó). **Bài học chung: script pin nào
+hardcode biến trong khối `env` thì mọi `--override` của caller là no-op im lặng — luôn đọc dòng log
+echo lại giá trị thật, đừng tin là mình đã set được.**
+
+### 6. Bảng SUPERSEDED — số cũ → số mới (cập nhật bảng kiểm kê ở section 2026-09-27 phía trên)
+
+| Số | Cũ (SUPERSEDED) | **Mới 2026-09-27** | Trạng thái |
+|---|---|---|---|
+| R3 pin | 28,86 / 1,90 / −17,8 / 1,62 / 1.178,01B | **24,38 / 1,69 / −18,8 / 1,30 / 757,61B** | ✅ tái lập trên main, md5 `3f836927` |
+| Bootstrap 5th-pct | CAGR 18,6% · DD −28,6% (anchor ~−29%) | **CAGR 15,6% · DD −30,4% (anchor ~−30,5%)** | ✅ đã chạy lại |
+| DSR | 1,0000 (N=80/120/200) | **1,0000** (N=477/120/200) | ✅ vẫn qua cổng |
+| PBO | 0,2088 (họ 80) | **0,3993** (họ 477) | ✅ <0,5; tăng do HỌ NỞ, không do bug |
+| ann-SR annex | 1,829 | **1,622** | ✅ |
+| +7,4pp parking NEUTRAL | +7,4pp Full | **+2,01pp CAGR; Sharpe −0,26 / DD +2,7pp / Calmar −0,09** | ✅ đo mới (lệnh gốc không tồn tại) |
+| Park-fraction sweep 70/80/85% (`KNOWLEDGE.md:32-33`) | 28,86 / 29,85 / 30,51 | — | ⚠️ **STALE** — cả 3 đo ở chân return lỗi; chạy lại là 3 backtest, CHƯA LÀM |
+| R1/R2 bull-park @20B/@50B | 29,01 / 28,01 | — | ⚠️ **STALE** (nghiên cứu, không deploy) |
+
+**Artifact:** `mike/agents/Taylor/research/c30v_hau_kiem_20260927/` (run scripts + 12 log) · CSV
+`data/..._exp_{c30vmain,c30vnopark2,c30vnoparkleg}_univpit.csv` · thay đổi code duy nhất của hậu kiểm:
+`dsr_pbo_annex.py` thêm env `DSR_R3_CSV` (không đổi phép tính nào).
+
+### 7. ⚠️ QUÉT LẠI PARK-FRACTION 70/80/85% — **XẾP HẠNG CALMAR ĐẢO NGƯỢC HOÀN TOÀN** (knob LIVE)
+
+`trading_rules.json` v2.3 đặt `neutral_parking.default_park_of_idle_pct = **0.8**` (user chốt
+2026-08-04). Căn cứ của quyết định đó, theo `kb/KNOWLEDGE.md:32-33`: **80% thắng Calmar cả dải**
+(1,63 vs 70%=1,62 vs 85%=1,62) — một biên **0,01 Calmar**, đo trên chân return LỖI. Chạy lại cả dải
+trên main, cùng lệnh pin, đổi đúng 1 biến `PARK_STATES`, self-check 0 VND mọi chân:
+
+| park% | CAGR | Sharpe | MaxDD | **Calmar** | Final NAV | Calmar CŨ (chân lỗi) |
+|---:|---:|---:|---:|---:|---:|---:|
+| 0% | 22,37% | **1,95** | **−16,1%** | **1,39** | 618,35B | — |
+| 70% | 24,38% | 1,69 | −18,8% | 1,30 | 757,61B | 1,62 |
+| **80% ← LIVE** | **24,66%** | 1,64 | −19,8% | **1,24** | 779,35B | **1,63 (đỉnh cũ)** |
+| 85% | 24,57% | 1,60 | −20,5% | 1,20 | 772,28B | 1,62 |
+
+**Calmar giờ ĐƠN ĐIỆU GIẢM theo park% (1,39 → 1,30 → 1,24 → 1,20).** Sharpe cũng đơn điệu giảm, MaxDD
+đơn điệu xấu đi. CAGR vẫn đạt đỉnh ở 80% (24,66%) nhưng chỉ hơn 70% **+0,28pp** trong khi DD xấu thêm
+**1,0pp** ⇒ **cái "đỉnh Calmar ở 80%" mà quyết định 08-04 dựa vào KHÔNG CÒN TỒN TẠI**; ở chuỗi return
+đúng, mọi mức parking đều làm xấu Calmar so với không park.
+
+⛔ **KHÔNG TỰ ĐỔI GÌ.** `trading_rules.json` giữ 0.8. Đây là **câu hỏi cho user**: knob này ảnh hưởng
+tiền thật, và Taylor không đảo một quyết định user đã chốt chỉ vì số nền đổi. Ba lựa chọn, không kèm
+khuyến nghị ép:
+(a) **giữ 80%** — chấp nhận parking là công cụ tăng CAGR tuyệt đối, không phải tăng risk-adjusted;
+(b) **hạ về 70%** — mất 0,28pp CAGR, lấy lại 1,0pp DD + 0,05 Calmar + 0,05 Sharpe;
+(c) **xét lại parking từ gốc** (kể cả về 0%) — 0% cho Sharpe 1,95 / DD −16,1% / Calmar 1,39 tốt nhất
+cả dải, đổi bằng −2,01pp CAGR. Lưu ý (c) là thay đổi ARCHITECTURE (custom30V parking là một trong 4
+thành phần định nghĩa V2.4), nên cần quant-skeptic + sign-off, không phải một lần đổi config.
+
+⚠️ Caveat phải nói kèm: cả 4 chân trên **cùng một vintage dữ liệu** (`bq_cache_asof20260729_postrestate`)
+và cùng một tham số fill chưa neo (trần 20% ADV/phiên) — xem `kb/projects/lag-adv-filter-tracking.md`.
+Biên 0,05-0,19 Calmar giữa các mức KHÔNG có khoảng tin cậy; đây là 4 điểm, không phải một thống kê.
