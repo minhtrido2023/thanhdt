@@ -18,6 +18,10 @@ TRẠNG THÁI 4 TẦNG TRƯỚC KHI CÓ MODULE NÀY (xác minh 2026-08-04, job T
   1. DollarBill (nơi VIẾT plan)  — chỉ VĂN XUÔI trong context_planning_mini.md → đã thủng 3 lần.
   2. `bot_execute.py:_log_plan_buying_power_shadow` — SHADOW WARN_ONLY, `print` + 1 dòng CSV,
      không `return`/`raise`/`continue` nào. Log có ĐÚNG 1 dòng từ trước tới nay.
+     (ĐÃ XOÁ 2026-09-27: module này chính là bản ACTIVE mà shadow tích luỹ dữ liệu để quyết,
+     nên sau khi wire ở bb8583cc nó chỉ còn ghi một cột `would_block` SAI HỆ THỐNG — 11 cặp
+     (ngày, account) ghi `true` mà phiên vẫn khớp lệnh, vì shadow không trừ qty đã khớp lúc
+     resume, không cộng JIT-sell credit / shared pot, và đo `pp0Buy` ở gói vay của MỘT lệnh.)
   3. `trading_bot/executor.py:1066` (`get_cash() < need` → `WAIT_CASH`) — per-ORDER, first-come-
      first-served: plan vượt tiền vẫn khớp N lệnh đầu rồi phần còn lại treo. Đó CHÍNH LÀ hành vi
      "list-rồi-đợi-tiền" mà luật cấm, chứ không phải cơ chế chặn nó.
@@ -450,6 +454,23 @@ def check_plan_funding(plan, broker, account_mode, execution_state=None):
 
 
 def funding_block_reason(plan, broker, account_mode):
-    """Bọc mỏng theo khuôn `approval_block_reason()`: None = cho chạy, chuỗi = lý do CHẶN."""
+    """Bọc mỏng theo khuôn `approval_block_reason()`: None = cho chạy, chuỗi = lý do CHẶN.
+
+    ⚠️ 0 CALLER PRODUCTION (kiểm kê 2026-09-27, code-quality-weekly): chỉ
+    `plan_funding_gate_selfcheck.py` gọi. Đường thực thi thật dùng `check_plan_funding()`
+    TRỰC TIẾP ở `bot_execute.py` để truyền được `execution_state`.
+
+    ⚠️ ĐỪNG THÊM CALLER MÀ KHÔNG SỬA SIGNATURE TRƯỚC. Hàm này KHÔNG nhận `execution_state`, nên
+    nó gọi `check_plan_funding(plan, broker, account_mode)` với `execution_state=None` ⇒
+    `_remaining_quantities()` trả TOÀN BỘ qty của plan chứ không phải phần CÒN LẠI. Lúc RESUME
+    (bot chạy lần 2 trong cùng phiên sau khi một phần đã khớp / còn child order đang mở) nó ĐẾM
+    KÉP: yêu cầu tiền cho cả phần đã mua xong ⇒ BLOCK một plan hợp lệ, hoặc ngược lại làm lệch
+    utilization. Đây ĐÚNG lớp bug đã cắn 2026-08-11 và 2026-09-17 (xem coding_guidelines §27:
+    "lệnh đã đặt ≠ lệnh đã khớp").
+
+    Cần một wrapper trả-lý-do ở call-site mới ⇒ thêm tham số `execution_state=None` và BẮT BUỘC
+    truyền nó xuống, đừng dựa vào mặc định. `plan_funding_gate_selfcheck.py` có assertion ghim
+    "0 caller production" — thêm caller sẽ làm nó FAIL, đó là chủ đích để buộc đọc đoạn này.
+    """
     v = check_plan_funding(plan, broker, account_mode)
     return v["reason"] if v["action"] == "BLOCK" else None

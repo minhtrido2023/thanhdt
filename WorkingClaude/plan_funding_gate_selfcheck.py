@@ -629,6 +629,84 @@ v_r5 = check_plan_funding(p_r1, b_r1, "live", execution_state=st_r5)
 check("need ≈ 24.824.056đ (500 − 40 filled − 60 đang giữ = 400cp còn lại)",
       abs(v_r5["need_vnd"] - 24_824_056) < 1, v_r5["need_vnd"])
 
+print("\n[R6] ★ RATCHET — `funding_block_reason()` KHÔNG được có caller production")
+# Nó gọi `check_plan_funding()` mà KHÔNG truyền `execution_state` ⇒ `_remaining_quantities()`
+# trả TOÀN BỘ qty plan, không phải phần CÒN LẠI. Lúc RESUME (một phần đã khớp / child còn mở —
+# chính ca [R5] ngay trên) nó ĐẾM KÉP: đòi tiền cho cả phần đã mua xong. Đúng lớp bug 2026-08-11
+# và 2026-09-17 (coding_guidelines §27). Hôm nay 0 caller production nên bug là LATENT — ratchet
+# này tồn tại để người thêm caller đầu tiên bị chặn lại và đọc docstring cảnh báo trước.
+# Thêm caller hợp lệ = thêm tham số `execution_state` vào signature RỒI cập nhật danh sách dưới.
+import ast as _ast_r6      # noqa: E402
+import glob as _glob_r6    # noqa: E402
+import os as _os_r6        # noqa: E402
+
+_WC_R6 = _os_r6.path.dirname(_os_r6.path.abspath(__file__))
+_ALLOWED_R6 = {"plan_funding_gate_selfcheck.py",        # chính file này
+               "plan_funding_gate.py"}                  # nơi định nghĩa
+# Ba HÌNH DẠNG gọi, không chỉ một (arch-review 2026-09-27: bản đầu chỉ khớp `ast.Name` nên
+# `g.funding_block_reason(...)` và `import ... as fbr; fbr(...)` đều LỌT — đã đo, 0 hit cả hai).
+# Và phải quét CẢ `mike/bin/*.py`: 60+ script đường tiền sống ở đó, bản đầu không chạm tới.
+_ROOTS_R6 = [_os_r6.path.join(_WC_R6, "*.py"),
+             _os_r6.path.join(_WC_R6, "trading_bot", "*.py"),
+             _os_r6.path.join(_WC_R6, "mike", "bin", "*.py")]
+_by_root_r6 = {pat: _glob_r6.glob(pat) for pat in _ROOTS_R6}
+_files_r6 = [f for fs in _by_root_r6.values() for f in fs]
+_unparsed_r6 = []
+_callers_r6 = []
+for _f in _files_r6:
+    _base = _os_r6.path.basename(_f)
+    if _base in _ALLOWED_R6:
+        continue
+    try:
+        _tree = _ast_r6.parse(open(_f, encoding="utf-8").read())
+    except SyntaxError:
+        # "Không parse được" KHÔNG được thành "sạch" (§29). 6 file R&D dùng f-string PEP 701 chỉ
+        # parse ở 3.12 ($DNA_PYEXE), hook/selfcheck này chạy python3 3.10 — cùng ca đã ghi ở
+        # coding_guidelines §16 cho tz_anchor_gate. Rẽ về phép quét VĂN BẢN: không cần AST để
+        # biết một file KHÔNG hề nhắc tên hàm.
+        _unparsed_r6.append(_f)          # ĐƯỜNG DẪN ĐẦY ĐỦ, không phải basename: mục kiểm dưới
+        # mở lại chúng, và `join(_WC_R6, basename)` chỉ tình cờ đúng vì cả 6 file đang nằm ở WC
+        # root — một file không parse được trong `trading_bot/` hay `mike/bin/` sẽ làm mục đó nổ
+        # FileNotFoundError (traceback) thay vì FAIL sạch (arch-review vòng 2).
+        if "funding_block_reason" in open(_f, encoding="utf-8", errors="replace").read():
+            _callers_r6.append(f"{_base}:?(không parse được, khớp theo văn bản)")
+        continue
+    # alias nhập khẩu: `from ... import funding_block_reason as fbr`
+    _aliases_r6 = {"funding_block_reason"}
+    for _n in _ast_r6.walk(_tree):
+        if isinstance(_n, _ast_r6.ImportFrom):
+            for _a in _n.names:
+                if _a.name == "funding_block_reason" and _a.asname:
+                    _aliases_r6.add(_a.asname)
+    for _n in _ast_r6.walk(_tree):
+        if not isinstance(_n, _ast_r6.Call):
+            continue
+        _fn = _n.func
+        _nm = (_fn.id if isinstance(_fn, _ast_r6.Name)
+               else _fn.attr if isinstance(_fn, _ast_r6.Attribute) else None)
+        if _nm in _aliases_r6:
+            _callers_r6.append(f"{_base}:{_n.lineno}")
+# Sàn PER-ROOT, không phải sàn TỔNG (arch-review vòng 2): riêng WC root đã 1008 file nên một sàn
+# tổng "≥200" vẫn qua ngon lành khi TOÀN BỘ nhánh `mike/bin` (198 file) biến mất — mà `mike/` bị
+# `.gitignore` của repo ngoài ẩn, nên clone mới / checkout CI KHÔNG có `mike/` chút nào. Sàn tổng
+# ở đó chính là kiểu "fail-closed trên giấy, fail-open trên thực tế".
+_empty_roots_r6 = sorted(pat.replace(_WC_R6 + "/", "") for pat, fs in _by_root_r6.items() if not fs)
+check("ratchet quét được CẢ BA gốc, không gốc nào rỗng (fail-closed thật: thiếu `mike/bin` — 60+ "
+      "script đường tiền — KHÔNG được thành PASS giả; xem E1 compute_active_nav_selfcheck)",
+      _empty_roots_r6 == [], _empty_roots_r6)
+check("funding_block_reason() vẫn 0 caller production (khớp CẢ 3 hình dạng: tên trần, "
+      "`x.funding_block_reason(...)`, alias nhập khẩu) — thêm caller PHẢI thêm `execution_state` "
+      "vào signature trước (xem docstring: resume sẽ đếm kép qty đã khớp)",
+      _callers_r6 == [], _callers_r6)
+check("…và file không parse được (f-string PEP 701, chỉ 3.12) vẫn được quét bằng VĂN BẢN nên "
+      "không lọt im lặng — danh sách in ra để thấy được, không phải để chặn",
+      all("funding_block_reason" not in open(_p6, encoding="utf-8", errors="replace").read()
+          for _p6 in _unparsed_r6),
+      [_os_r6.path.relpath(_p6, _WC_R6) for _p6 in _unparsed_r6])
+check("…và docstring của nó vẫn mang cảnh báo đó (đừng xoá khi refactor)",
+      "execution_state" in (__import__("trading_bot.plan_funding_gate", fromlist=["x"])
+                            .funding_block_reason.__doc__ or ""))
+
 print("\n" + "=" * 78)
 print(f"KẾT QUẢ: {PASS} PASS / {FAIL} FAIL")
 print("=" * 78)

@@ -571,14 +571,36 @@ class DNSEBroker(BrokerBase):
         return lp
 
     def get_cash(self):
+        """§25 "TIÊU ĐƯỢC NGAY" — CHỈ họ `availableCash`. Dùng bởi executor WAIT_CASH
+        (`get_cash() < need`) và biên dưới fallback của `check_plan_funding` ⇒ là CỔNG TIỀN.
+
+        CHỈ ĐỌC họ availableCash và KHÔNG rơi về thứ khác (code-quality 2026-09-27, §25 hệ quả
+        1 "Fail-closed, KHÔNG rơi về ... Rơi về = tái lập đúng bug vừa sửa, lặng lẽ"). Chuỗi
+        alias cũ kết thúc ở `purchasingpower`/`totalcash`/`cash`/`balance` — cả ba đều trả lời
+        CÂU KHÁC: `totalCash` gồm tiền bán chưa settle + cổ tức phải thu (đo thật SpaceX
+        2026-08-07: availableCash 4,82M vs totalCash 203,66M — gấp 42 lần), `purchasingpower`
+        là khái niệm của `ppse` (đã cộng hạn mức vay, xem `get_buying_power`). DNSE bỏ/đổi tên
+        `availableCash` một ngày nào đó thì bản cũ ÂM THẦM nới cổng tiền lên số "SỞ HỮU".
+
+        Thiếu cả họ availableCash ⇒ trả 0.0 (fail-closed: `0 < need` ⇒ WAIT_CASH; mọi caller
+        khác đều `float(... or 0.0)`) + in ❌ để người vận hành thấy. KHÔNG trả None: caller
+        `executor.py:1863` so sánh trực tiếp `get_cash() < need` ⇒ None sẽ là TypeError giữa
+        phiên, tức đổi một cổng fail-closed thành một vụ crash.
+        """
         bal = self.client.balances(self.account_id)
         self._log_raw("balances", bal)
         row = bal[0] if isinstance(bal, list) and bal else bal
         if isinstance(row, dict) and isinstance(row.get("stock"), dict):
             row = row["stock"]          # balances thật: {"stock": {...}, "derivative": {...}}
-        v = _fnum(qget(row, "availablecash", "withdrawablecash", "purchasingpower",
-                       "cashavailable", "totalcash", "cash", "balance",
-                       default=0))
+        v = _fnum(qget(row, "availablecash", "cashavailable", "withdrawablecash",
+                       default=None))
+        if v is None:
+            print(f"❌ [dnse] {self.label}: payload `balances` KHÔNG có field nào thuộc họ "
+                  f"availableCash (availableCash/cashAvailable/withdrawableCash) — "
+                  f"field có: {sorted(row) if isinstance(row, dict) else type(row).__name__}. "
+                  f"KHÔNG rơi về totalCash/purchasingPower (đó là câu hỏi §25 KHÁC, sẽ nới "
+                  f"lỏng cổng tiền) ⇒ coi như 0đ tiêu được ngay, lệnh sẽ WAIT_CASH.")
+            return 0.0
         return v or 0.0
 
     def _cash_totalcash_minus_debt(self):
@@ -600,6 +622,31 @@ class DNSEBroker(BrokerBase):
         av = _fnum(qget(row, "availablecash", default=None))
         if tc == 0 and td == 0 and (av is None or av == 0):
             return None
+        # ⛔ KHÔNG thêm guard `tc < av ⇒ None` ở ĐÂY. Bất biến "totalCash ≥ availableCash" mà
+        # `mike/bin/park_holdings.py::_cash_fields_inconsistent` dùng KHÔNG ĐÚNG với hàm này, và
+        # việc thêm nó vào đã bị arch-review chặn 2026-09-27 (code-quality-weekly, finding gốc
+        # của report SAI Ở ĐIỂM NÀY — xem git log của commit revert).
+        #
+        # ĐO THẬT trên toàn bộ `data/execution_logs/dnse_raw_*.jsonl` (7.181 record `balances`
+        # có cả hai field): **1.911 record có totalCash < availableCash**, tập trung đúng vào
+        # giờ giao dịch — 881/1.438 (61%) ở giờ 13, 416/655 ở giờ 14 — và 0/819 ngoài giờ.
+        # 10 ngày khác nhau, gồm cả 2026-09-17 và 2026-09-18. Nguyên nhân là NGỮ NGHĨA của
+        # feed, không phải lỗi: `availableCash ≈ totalCash + secureAmount` (09-18T13:30
+        # SpaceX: tc 35.011.893 · av 45.693.614 · secureAmount 25.044.269) — DNSE không hạ
+        # `availableCash` trong phiên, phần bị giữ nằm ở `secureAmount`.
+        #
+        # VÌ SAO NGUY HIỂM, không chỉ là "báo động giả": caller `trading_bot/plan.py:1977` rơi
+        # về `get_cash()` khi hàm này trả None, mà `get_cash()` trả CHÍNH họ availableCash ⇒
+        # giá trị LỚN HƠN. Comment ở plan.py:1973-1974 khẳng định fallback "CHỈ làm nav_live
+        # nhỏ hơn thật, tức fail-safe" — điều đó SAI đúng trong mọi ca guard này kích hoạt.
+        # nav_live bị thổi lên ⇒ `plan.py:2000` (`nav_art > nav_live*(1+CAPIT_LEVER_NAV_TOL)`,
+        # TOL=0,15) NỚI LỎNG đúng chiều mà docstring `lever_live_preflight` gọi là "chiều duy
+        # nhất sinh ra vay vượt mức". Giờ 13 chính là lúc `run_bot.sh` chạy lại (crontab
+        # "13:00 ICT — khởi động lại sau nghỉ trưa, resume state").
+        #
+        # Guard NÀY vẫn đúng và VẪN GIỮ ở `daily_nav_snapshot.py`: caller đó đọc bản ghi CUỐI
+        # của ngày (sau giờ đóng cửa), nơi đo được 2/165 cặp (ngày, account) vi phạm và cả hai
+        # là ngày go-live, một bản ghi có totalCash âm — ở đó chặn là đúng.
         return tc - td
 
     def get_max_buy_qty(self, symbol, price, loan_package_id=None):
