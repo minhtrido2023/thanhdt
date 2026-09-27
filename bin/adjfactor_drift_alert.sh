@@ -71,17 +71,47 @@ FEED_STATUS=""
 FEED_REASON=""
 if [ -n "$FEED" ]; then
   IFS='|' read -r _ftag FEED_STATUS FEED_ING FEED_PUB FEED_ROWS FEED_AGE FEED_REASON <<< "$FEED"
+else
+  # THIẾU dòng FEED = FAIL-CLOSED, không phải "feed ổn" (arch-review vòng 2, F5). Bản trước để
+  # `FEED_STATUS=""` rồi coi rỗng như FRESH ở cả early-exit lẫn `FEED_BAD`, nên một detector không in
+  # được marker (phiên bản cũ, output bị cắt, nhánh lỗi sớm) cho ra IM LẶNG HOÀN TOÀN. Đó đúng là
+  # §28 dạng 3: suy "không có vấn đề" từ sự VẮNG MẶT của kênh — mà đây lại chính là kênh duy nhất
+  # tồn tại để chống ca feed chết.
+  FEED_STATUS="MISSING"
+  FEED_REASON="detector KHONG in dong ADJFACTOR_FEED — khong biet feed con song hay khong; coi la DIEM MU, khong phai 'feed on'"
 fi
 
-[ -z "$DRIFTS" ] && [ -z "$UNCOMPS" ] && [ -z "$NODATAS" ] \
-  && { [ -z "$FEED_STATUS" ] || [ "$FEED_STATUS" = "FRESH" ]; } && exit 0
-
 IFS='|' read -r _stag ASOF N_SCANNED N_DRIFT N_UNCOMP N_AGREE N_NODATA <<< "${SCAN:-|?|?|?|?|?|?}"
+
+# Universe RỖNG là điểm mù có rc=11 ở detector, nhưng nó KHÔNG sinh ra marker nào — nên bản trước
+# thoát ở early-exit bên dưới TRƯỚC cả bước ghi bus: không Discord, không bus, rc=0. Tức là tài liệu
+# §7 ("rc=11 → bus") sai đúng cho ca này (arch-review vòng 2, F2). Cohort 30 ngày rỗng là bất khả về
+# cấu trúc ở VN (đo thật 95 mã cho cửa sổ 18 ngày) ⇒ 0 mã = feed/cohort hỏng, phải tới người.
+EMPTY_UNIVERSE=0
+[ "$N_SCANNED" = "0" ] && EMPTY_UNIVERSE=1
+
+# Chỉ im lặng khi feed ĐÚNG LÀ FRESH, có mã được quét, và không có marker nào. `MISSING` và universe
+# rỗng đều KHÔNG lọt qua đây.
+[ -z "$DRIFTS" ] && [ -z "$UNCOMPS" ] && [ -z "$NODATAS" ] \
+  && [ "$FEED_STATUS" = "FRESH" ] && [ "$EMPTY_UNIVERSE" -eq 0 ] && exit 0
 
 TODAY="$(TZ='Asia/Ho_Chi_Minh' date +%Y-%m-%d)"
 STATE="$ROOT/state/adjfactor_drift_alerted.json"
 mkdir -p "$ROOT/state"
 [ -f "$STATE" ] || echo '{}' > "$STATE"
+
+# LOCK quanh toàn bộ đọc-sửa-ghi state (arch-review vòng 2, F9). Từng lần GHI đã nguyên tử
+# (`mkstemp` + `os.replace`) nhưng đọc ở đây và ghi ở cuối là hai bước rời nhau: hai lượt chồng nhau
+# (cron + một lần chạy tay) đều thấy state CŨ ⇒ cả hai gửi Discord, và khoá của lượt về sau ghi đè
+# mất khoá của lượt về trước. Hướng fail là AN TOÀN (gửi thừa, không mất cảnh báo) nên không phải
+# lỗi tiền, nhưng §5 đòi idempotence thì phải đúng cả khi chạy song song, không chỉ khi tuần tự.
+# `flock` giữ suốt đời tiến trình qua FD 9; hết lock sau khi script thoát, kể cả khi bị kill.
+exec 9>"$STATE.lock"
+if ! flock -w 60 9; then
+  echo "adjfactor_drift_alert: KHONG lay duoc lock $STATE.lock sau 60s — mot luot khac dang chay. "\
+       "KHONG gui trung, thoat rc=11 (diem mu, KHONG phai 'sach')." >&2
+  exit 11
+fi
 
 # Khoá nào đã cảnh báo trong vòng RE_ALERT_DAYS ngày ⇒ bỏ khỏi câu Discord (vẫn ở trong bus).
 # Giá trị đi qua ENV, không nội suy vào nguồn python (dữ liệu ngoài).
@@ -122,14 +152,26 @@ N_HELD=0
 N_OTHER=0
 N_UNKNOWN=0
 DETAIL_UNKNOWN=""
+N_SKIPPED=0
+DETAIL_SKIPPED=""
 SEEN_VENDOR=0
 SEEN_OURS=0
-while IFS='|' read -r _tag tk ex r_obs r_pred dev run d0 d1 dir held; do
+N_CORR=0
+while IFS='|' read -r _tag tk ex r_obs r_pred dev run d0 d1 dir held corr; do
   [ -z "${tk:-}" ] && continue
   key="${tk}|${ex}"
   _is_fresh "$key" && continue
   N_NEW=$((N_NEW + 1))
   NEW_KEYS="${NEW_KEYS}${key}"$'\n'
+  # `corr=1` ⇒ NGHI ta đã cộng một bản ĐÍNH CHÍNH như tranche thật ⇒ **chưa quy được cho vendor**.
+  # Bản trước chỉ ghi tiêu đề sự kiện vào `notes` (stdout/log) trong khi CÁO BUỘC đi lên Discord, nên
+  # ca DIV 500 + "Điều chỉnh … 800" gửi nguyên văn "vendor THIẾU hệ số" + dòng việc cho Winston mà
+  # bằng chứng phản bác nằm ở kênh khác (arch-review vòng 2, F4 — §29: caveat phải đi CÙNG lời cáo
+  # buộc). Những dòng này KHÔNG bật SEEN_VENDOR.
+  if [ "${corr:-0}" = "1" ]; then
+    N_CORR=$((N_CORR + 1))
+    cause="⚠️ **NGHI BẢN ĐÍNH CHÍNH, CHƯA QUY ĐƯỢC CHO VENDOR** — ex-date này có >1 dòng cùng \`event_code\` trong \`corporate_action\`; nếu một dòng là bản đính chính thì hệ số tự suy của TA sai, không phải vendor (r_obs ${r_obs} vs r_pred ${r_pred}). Đọc chứng từ tiêu đề trong log trước khi giao việc cho ai"
+  else
   case "$dir" in
     vendor_missing) SEEN_VENDOR=1
       cause="vendor \`tav2_bq.ticker.Close\` THIẾU hệ số (r_obs ${r_obs} < r_pred ${r_pred})" ;;
@@ -137,16 +179,28 @@ while IFS='|' read -r _tag tk ex r_obs r_pred dev run d0 d1 dir held; do
       cause="\`corporate_action\` của TA nghi thiếu một mắt xích (r_obs ${r_obs} > r_pred ${r_pred})" ;;
     *) cause="KHÔNG xác định được chiều lệch (dir=${dir}) — kiểm thủ công, KHÔNG suy đoán bên nào sai" ;;
   esac
+  fi
   line="
 • **${tk}** (ex ${ex}): lệch $(_pct "$dev") liên tục **${run} phiên** ${d0}..${d1} — ${cause}"
   # `unknown` KHÔNG được gộp vào `none`. Bản trước gộp, và arch-review 2026-09-27 đo thật: một mã
   # ĐANG NẮM (VPB, lệch −20,66%) in ra dưới tiêu đề "Mã không nắm (chỉ ảnh hưởng nghiên cứu/
   # backtest)" khi `held_map()` fail-open — một KHẲNG ĐỊNH SAI về mức phơi nhiễm tiền thật (§29
   # dạng 2), và còn bị trần `MAX_OTHER_LINES` cắt mất.
+  #
+  # `skipped` (người chạy dùng `--no-holdings`) KHÁC `unknown` (tra mà không được) và KHÁC tên tài
+  # khoản — nếu để nó rơi vào nhánh `*)` thì Discord in ra "**ĐANG NẮM LIVE: skipped**", một khẳng
+  # định sai trắng trợn về vị thế tiền thật. Nó không khẳng định gì về vị thế, nên xếp cùng nhóm
+  # "không nêu ưu tiên" và nói rõ là CHƯA TRA.
   case "$held" in
     unknown)
       N_UNKNOWN=$((N_UNKNOWN + 1))
       DETAIL_UNKNOWN="${DETAIL_UNKNOWN}${line} — **KHÔNG TRA ĐƯỢC vị thế, phải coi như CÓ THỂ đang nắm**"
+      ;;
+    skipped)
+      N_SKIPPED=$((N_SKIPPED + 1))
+      if [ "$N_SKIPPED" -le "$MAX_OTHER_LINES" ]; then
+        DETAIL_SKIPPED="${DETAIL_SKIPPED}${line} — _vị thế CHƯA TRA (\`--no-holdings\`)_"
+      fi
       ;;
     none)
       N_OTHER=$((N_OTHER + 1))
@@ -174,7 +228,8 @@ N_UNCOMP_HELD=0
 N_UNCOMP_OTHER=0
 while IFS='|' read -r _tag tk ex code held; do
   [ -z "${tk:-}" ] && continue
-  if [ "$held" = "none" ]; then
+  # `skipped` = chưa tra vị thế ⇒ không được nêu như "mã có thể đang nắm"; đếm như `none`.
+  if [ "$held" = "none" ] || [ "$held" = "skipped" ]; then
     N_UNCOMP_OTHER=$((N_UNCOMP_OTHER + 1))
     continue
   fi
@@ -194,7 +249,7 @@ N_NODATA_HELD=0
 N_NODATA_OTHER=0
 while IFS='|' read -r _tag tk held; do
   [ -z "${tk:-}" ] && continue
-  if [ "$held" = "none" ]; then
+  if [ "$held" = "none" ] || [ "$held" = "skipped" ]; then
     N_NODATA_OTHER=$((N_NODATA_OTHER + 1))
     continue
   fi
@@ -246,12 +301,14 @@ if [ "$DRY_RUN" -eq 0 ]; then
 fi
 
 FEED_BAD=0
-if [ -n "$FEED_STATUS" ] && [ "$FEED_STATUS" != "FRESH" ]; then
+if [ "$FEED_STATUS" != "FRESH" ]; then
   FEED_BAD=1
 fi
 
+# `EMPTY_UNIVERSE` phải nằm trong điều kiện này: nó không sinh khoá de-dup nào (N_NEW=0) nên nếu
+# thiếu, ca universe rỗng ghi bus rồi thoát mà KHÔNG gửi Discord — tức vẫn im lặng ở kênh người đọc.
 if [ "$N_NEW" -eq 0 ] && [ "$N_UNCOMP_HELD" -eq 0 ] && [ "$N_NODATA_HELD" -eq 0 ] \
-   && [ "$FEED_BAD" -eq 0 ]; then
+   && [ "$FEED_BAD" -eq 0 ] && [ "$EMPTY_UNIVERSE" -eq 0 ]; then
   echo "adjfactor_drift_alert: ${N_DRIFT} lech nhung tat ca da canh bao trong ${RE_ALERT_DAYS} ngay qua," \
        "khong co uncomputable/nodata nao co the dang nam, feed nguon TUOI -> chi ghi bus," \
        "khong gui Discord (de-dup)." >&2
@@ -259,6 +316,12 @@ if [ "$N_NEW" -eq 0 ] && [ "$N_UNCOMP_HELD" -eq 0 ] && [ "$N_NODATA_HELD" -eq 0 
 fi
 
 SECTIONS=""
+if [ "$EMPTY_UNIVERSE" -eq 1 ]; then
+  SECTIONS="${SECTIONS}
+__**UNIVERSE RỖNG — 0 mã được quét, đây là ĐIỂM MÙ:**__
+• Không một mã nào có ex-date điều chỉnh giá trong cohort. Ở VN điều đó bất khả về cấu trúc (đo thật: 95 mã cho cửa sổ 18 ngày) ⇒ **cohort hoặc feed đang hỏng, KHÔNG phải \"tuần này không có sự kiện\"**.
+"
+fi
 if [ "$FEED_BAD" -eq 1 ]; then
   SECTIONS="${SECTIONS}
 __**FEED NGUỒN \`tav2_bq.corporate_action\` KHÔNG TƯƠI — đọc mục này TRƯỚC:**__
@@ -283,6 +346,9 @@ __**Mã không nắm (chỉ ảnh hưởng nghiên cứu/backtest đọc lịch 
 "
 fi
 # Khối `unknown` đặt NGAY SAU khối nắm-LIVE và KHÔNG bao giờ bị cắt: nó có thể là tiền thật.
+[ -n "$DETAIL_SKIPPED" ] && SECTIONS="${SECTIONS}
+__**Vị thế CHƯA TRA (\`--no-holdings\`) — không kết luận nắm hay không:**__${DETAIL_SKIPPED}
+"
 [ -n "$DETAIL_UNKNOWN" ] && SECTIONS="${SECTIONS}
 __**KHÔNG TRA ĐƯỢC VỊ THẾ (phải coi như có thể đang nắm):**__${DETAIL_UNKNOWN}
 "
@@ -299,6 +365,10 @@ TODO=""
 - **Feed \`corporate_action\` không tươi (\`${FEED_STATUS}\`):** Winston (data-ops) kiểm writer NGOÀI repo của bảng TRAP này (\`kb/data_registry/price-volume/corporate_action_bq.md\`). **Cho tới khi feed tươi lại, coi lượt quét này là ĐIỂM MÙ, không phải \"không có lệch\"** — đừng đóng cảnh báo bằng lý do \"đã quét, không thấy gì\"."
 [ "$N_UNKNOWN" -gt 0 ] && TODO="${TODO}
 - **Không tra được vị thế LIVE:** \`dividend_adjusted_return.broker_qty()\` lỗi ⇒ nhãn nắm/không nắm của lượt này KHÔNG dùng được. Kiểm \`data/execution_logs/dnse_raw_*.jsonl\` rồi chạy lại; trong lúc chờ, coi MỌI mã ở khối trên như có thể đang nắm."
+[ "$EMPTY_UNIVERSE" -eq 1 ] && TODO="${TODO}
+- **Universe rỗng:** Winston (data-ops) kiểm \`tav2_bq.corporate_action\` còn nhận dòng mới không, và kiểm câu SQL cohort của detector. **Đừng đóng bằng \"đã quét, không thấy gì\"** — lượt này KHÔNG quét được mã nào."
+[ "$N_CORR" -gt 0 ] && TODO="${TODO}
+- **${N_CORR} mã NGHI bản đính chính (\`corr=1\`):** KHÔNG giao cho Winston và KHÔNG coi là vendor sai. \`corporate_action\` giữ cả tranche thật (phải CỘNG) lẫn bản đính chính của cùng tranche (KHÔNG được cộng), phân biệt bằng \`event_title_vi\` — chỉ đọc hiểu được bằng mắt. Mở log cron, đọc dòng chứng từ \`[>1 dòng cùng event_code ...]\` của mã đó trước khi kết luận."
 [ "$N_UNCOMP_HELD" -gt 0 ] && TODO="${TODO}
 - **Mã nắm LIVE không tính được hệ số:** \`rights_issue_no_subscription_price\` = giá phát hành không có trong \`corporate_action\` (cột \`ref_price\` NULL toàn bộ từ 2025-01-01) ⇒ Layer 1 KHÔNG kết luận được gì cho mã đó, cổng §21 vẫn là lớp bảo vệ duy nhất. \`price_ffill_suspect\` = \`Price\` phiên cum cuối nằm ngoài band ⇒ Winston kiểm dòng giá đó."
 

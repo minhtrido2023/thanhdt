@@ -37,10 +37,17 @@ OUT="$("$ROOT/bin/adjfactor_drift_detect.py" "${DET_ARGS[@]}" 2>&1)"
 DET_RC=$?
 printf '%s\n' "$OUT"
 
-if [ "$DET_RC" -eq 1 ] || [ "$DET_RC" -eq 2 ]; then
+# ALLOW-LIST, không phải deny-list (arch-review vòng 2, F2). Bản trước chỉ coi rc=1/2 là thất bại,
+# nên MỌI rc khác — kể cả `124` (timeout), `137` (OOM/SIGKILL), hay một rc mới thêm về sau — rơi vào
+# nhánh "chạy được" và runner trả 0 mà KHÔNG gửi gì. Đo thật: rc=124 và rc=137 với output bị cắt đều
+# cho `runner exit=0 | Discord sent=False`, tức một detector bị giết không phân biệt được với một
+# tuần sạch — đúng lớp lỗi §14/§29 mà header của chính file này tuyên bố ngăn.
+case "$DET_RC" in
+  0|10|11) ;;   # ba hạng kết luận HỢP LỆ duy nhất — xem bảng exit code trong detector
+  *)
   # KHÔNG gọi alert: không có kết luận nào để cảnh báo, và im lặng ở đây là SAI — nói thẳng ra
   # rằng lượt quét KHÔNG chạy được, kèm LỖI THẬT mà detector đã in (§29).
-  echo "adjfactor_drift_daily: detector rc=$DET_RC -> KHONG ket luan gi, KHONG goi alert." >&2
+  echo "adjfactor_drift_daily: detector rc=$DET_RC (NGOAI allow-list 0/10/11) -> KHONG ket luan gi, KHONG goi alert." >&2
   MSG="⚠️ **Layer 1 adjfactor: LƯỢT QUÉT KHÔNG CHẠY ĐƯỢC** (rc=${DET_RC})
 Không có kết luận nào cho hôm nay — **đây KHÔNG phải \"không có lệch\"**.
 \`\`\`
@@ -53,7 +60,8 @@ $(printf '%s\n' "$OUT" | tail -12)
     echo "adjfactor_drift_daily: notify_thread.sh THAT BAI khi bao loi ha tang. Loi that: ${NOTIFY_ERR}" >&2
   fi
   exit "$DET_RC"
-fi
+  ;;
+esac
 
 printf '%s\n' "$OUT" | "$ROOT/bin/adjfactor_drift_alert.sh" "$TOPIC" "${DRY[@]}"
 ALERT_RC=$?

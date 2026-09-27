@@ -13,9 +13,9 @@ pháp khả thi (46 mã control, sai số ≤0,08%, hệ số 1,01→4,16).
 |---|---|---|
 | `bin/adjfactor_drift_detect.py` | So `r_obs = Price/Close` với `r_pred` tự suy từ `corporate_action`; in dòng MÁY ĐỌC | Không ghi bus, không gửi Discord, không sửa số nào (§5b: cổng giữ THUẦN) |
 | `bin/adjfactor_drift_alert.sh` | Parse dòng máy đọc → Discord + bus + de-dup nguyên tử | Không tính lại gì; không grep văn xuôi (§28) |
-| `bin/adjfactor_drift_daily.sh` | Runner cron: chạy detector, **giữ rc của nó**, rồi gọi alert | Không dùng pipe trực tiếp (pipe làm MẤT rc=1 ⇒ "BQ chết" bị đọc thành "không có lệch") |
+| `bin/adjfactor_drift_daily.sh` | Runner cron: chạy detector, **giữ rc của nó**, rồi gọi alert. rc hợp lệ là **allow-list `0/10/11`** — mọi rc khác (124 timeout, 137 OOM, …) là lỗi hạ tầng | Không dùng pipe trực tiếp (pipe làm MẤT rc=1 ⇒ "BQ chết" bị đọc thành "không có lệch"); không dùng deny-list rc (§8b F2) |
 
-Selfcheck: `bin/adjfactor_drift_detect_selfcheck.py` — **233/233 assertion PASS**, đo dưới `$DNA_PYEXE`
+Selfcheck: `bin/adjfactor_drift_detect_selfcheck.py` — **301/301 assertion PASS**, đo dưới `$DNA_PYEXE`
 (`/home/trido/thanhdt/wc_venv/bin/python`). Phần shell chạy LẶP dưới 4 môi trường TZ (`unset TZ`,
 `TZ=UTC`, `TZ=Pacific/Kiritimati` +14, `TZ=Pacific/Midway` −11) theo §16/§19 — hai TZ lệch CỰC ĐẠI
 được thêm ở vòng 2 vì `TZ=America/New_York` cùng ngày lịch với ICT trong phần lớn giờ hành chính,
@@ -146,20 +146,21 @@ cũ đi một phiên, không bao giờ đọc ra một ngày không tồn tại.
 
 | marker | khoá | vì sao |
 |---|---|---|
-| DRIFT | `<mã>\|<ex>` | `<ex>` = ex-date mà hệ số của nó đang THIẾU (ex-date sớm nhất SAU cụm lệch), không phải ex-date sớm nhất trong cửa sổ — xem §8 mục 3 |
+| DRIFT | `<mã>\|<ex>` | `<ex>` = ex-date mà hệ số của nó đang THIẾU (ex-date sớm nhất SAU cụm lệch), không phải ex-date sớm nhất trong cửa sổ — xem §8 mục 3. Không tìm được ex-date nào sau cụm lệch ⇒ `unknown_gap@<d1>`, neo vào CỤM LỆCH chứ không vay tên sự kiện khác (§8b F3) |
 | UNCOMPUTABLE | `<mã>\|<ex>\|<reason_code>` | đổi mã lý do là đổi việc phải làm ⇒ phải báo lại |
 | NODATA | `<mã>\|nodata` | không gắn với ex-date nào |
-| FEED không tươi | **không de-dup** | không thuộc mã nào, và im lặng ở đây là đúng lớp lỗi §14/§29 ⇒ LUÔN lên Discord |
+| FEED không tươi **hoặc THIẾU** (`MISSING`) | **không de-dup** | không thuộc mã nào, và im lặng ở đây là đúng lớp lỗi §14/§29 ⇒ LUÔN lên Discord |
+| universe RỖNG (`N_SCANNED=0`) | **không de-dup** | không sinh khoá nào ⇒ nếu de-dup thì im lặng vĩnh viễn |
 
 De-dup **không** theo ngày (detector quét cohort 30 ngày nên de-dup theo ngày sẽ bắn FPT 30 lần);
 nhắc lại sau **7 ngày** nếu vẫn còn lệch. Bus ghi **mọi** lượt, không qua de-dup — đó là dấu vết
 audit. Discord gửi hỏng ⇒ **không** ghi de-dup (sổ sách không được nói "đã cảnh báo" khi chưa gửi
 được gì) ⇒ lượt cron sau thử lại.
 
-## 8. Sáu lỗi arch-review tìm ra và đã vá (vòng 1 + 2)
+## 8. Lỗi arch-review tìm ra và đã vá (vòng 1 + 2 + 3)
 
 Ghi lại vì mỗi lỗi là một ca "im lặng/khẳng định sai" mà bản đầu KHÔNG bắt được, và cả sáu đều có
-assertion mới chốt lại (233 assertion hiện tại so với 142 của bản đầu).
+assertion mới chốt lại (301 assertion hiện tại so với 142 của bản đầu).
 
 1. **Feed nguồn chết = một tuần sạch.** `tav2_bq.corporate_action` là bảng **TRAP** có writer NGOÀI
    repo. Feed đứng im ⇒ 0 ex-date ⇒ mọi mã "khớp" ⇒ `ADJFACTOR_SCAN|…|0|0|0|0|0` và **rc=0, không
@@ -193,6 +194,36 @@ Ngoài ra `NODATA` được cho dòng máy đọc riêng (trước đó chỉ l�
 NẮM không có dòng giá nào không sinh ra bất cứ thứ gì người đọc thấy; đo thật 12/95 mã trên control),
 và universe rỗng trả **rc=11** chứ không phải 0 (cohort 30 ngày rỗng là bất khả về cấu trúc ở VN —
 đo thật 95 mã cho cửa sổ 18 ngày).
+
+### 8b. Vòng 3 — 9 finding nữa, 6 mutation SỐNG SÓT 233/233
+
+Vòng 2 vá đúng 6 lỗi vòng 1, nhưng arch-review vòng 3 chạy **23 mutation** và **6 con sống sót** —
+tất cả đều ở CÙNG MỘT khe: `marker_*` đã được unit-test và `alert.sh` đã được test bằng dòng viết
+tay, nhưng **không có gì chốt `run_scan` THẬT SỰ phát ra marker nào và trả rc nào**. Tức là điểm yếu
+cấu trúc của lỗi vòng 1 #2 chỉ dịch lên một tầng. Đó là lý do có hẳn mục `[13] t_emit` chạy `run_scan`
+thật với mọi lối ra BQ được thay bằng dữ liệu tổng hợp.
+
+| # | Finding | Hạng | Bản vá |
+|---|---|---|---|
+| F1 | `held_map()` trả `{}` (dict RỖNG, `is not None`) khi `broker_qty()` không đọc được file — nó **không raise** — ⇒ mọi mã gán `none` ⇒ **VPB −20,66% ĐANG NẮM in dưới tiêu đề "Mã không nắm"**, y nguyên lỗi vòng 1 #5 qua đường khác. Kèm theo `if held:` falsy ⇒ mất luôn phần universe cộng thêm mã đang nắm | **HIGH** | `snap_dates` rỗng ⇒ `None`; thêm freshness `HELD_MAX_STALE_DAYS=4` so với `asof` (§14) |
+| F2 | Runner chỉ coi `rc=1/2` là thất bại ⇒ **rc=124 (timeout), rc=137 (OOM/SIGKILL) trả exit 0, không gửi gì**: detector bị giết không phân biệt được với tuần sạch. Và `rc=11` universe rỗng thoát TRƯỚC bước ghi bus ⇒ §7 ghi "rc=11 → bus" là SAI cho ca đó | **HIGH** | `case` **allow-list** `0\|10\|11`, mọi rc khác = hạ tầng; `EMPTY_UNIVERSE` lên cả bus và Discord |
+| F3 | `ex_broken` fallback `min(used)` = đúng biểu thức bug vòng 1. Với `our_table_missing`, ex-date còn thiếu **theo định nghĩa** không nằm trong `used` ⇒ `ex > d1` luôn rỗng ⇒ nêu tên ex-date vendor làm ĐÚNG, rồi khoá đổi khi ex-date đó trôi khỏi cửa sổ | MED-HIGH | khoá neo vào CỤM LỆCH: `unknown_gap@<d1>`, không vay tên sự kiện khác |
+| F4 | Mitigation của lỗi vòng 1 #6 chỉ vào `notes` → **stdout/log**, còn CÁO BUỘC đi lên **Discord** ⇒ ca `DIV 500 + "Điều chỉnh 800"` vẫn gửi "vendor THIẾU hệ số" + dòng việc cho Winston, bằng chứng phản bác ở kênh khác | MED | bit cơ học `corr` vào **dòng máy đọc**; `alert.sh` gắn cờ "NGHI BẢN ĐÍNH CHÍNH" và **loại khỏi TODO của Winston** |
+| F5 | **THIẾU** dòng `ADJFACTOR_FEED` ⇒ `FEED_STATUS=""` ⇒ coi như FRESH ⇒ im lặng hoàn toàn. §28 dạng 3 (suy "không có vấn đề" từ sự VẮNG MẶT của kênh) — trên đúng kênh duy nhất tồn tại để chống feed chết | MED | `FEED_STATUS="MISSING"` fail-closed, luôn lên Discord |
+| F6 | Ngưỡng chỉ được canh chiều LÀM Ồ. Chiều LÀM IM mở: `--lookback-days 2` và `--min-run 9999` biến **16 lệch thật (gồm VPB) thành "50 khớp"**, rc=11 | MED | `MIN_RUN_MAX=120`, `LOOKBACK_MIN=20`, `--ex-days >= 1` |
+| F7 | `--no-holdings` bị gộp vào `unknown` ⇒ trên đúng lệnh control tài liệu hoá, Discord khẳng định "`broker_qty()` lỗi ⇒ kiểm `dnse_raw_*.jsonl`" cho cả 49 mã **trong khi `broker_qty()` chưa hề được gọi** (§29 dạng 2) | LOW-MED | nhãn thứ ba `skipped`, tách khỏi `unknown` ở cả 3 vòng lặp của `alert.sh` |
+| F8 | `evaluated == []` trả **AGREE** với `n_eval=0` ⇒ "khớp" nghĩa là "không có đủ dữ liệu để bất đồng", vẫn được cộng vào con số "N khớp". Kèm: lý do `UNREADABLE` đa dòng bị cắt ở newline đầu ⇒ Discord in ra "bq failed:" mất nguyên nhân | LOW | `MIN_EVAL_SESSIONS=3` ⇒ UNCOMPUTABLE `too_few_sessions_to_compare`; `marker_feed` làm phẳng `reason` |
+| F9 | de-dup đọc-sửa-ghi không có lock: 2 lượt chồng nhau đều gửi Discord, khoá của lượt trước bị ghi đè | LOW | `flock -w 60` trên FD 9 quanh toàn bộ read-modify-write |
+
+**Đo lại sau vá, không đổi một số nào:** suspect week 16 DRIFT / 13 UNCOMP / 23 AGREE / 2 NODATA,
+feed FRESH, rc=10, VPB+DRI đúng nhãn `SpaceX,ZaloPay`, 0 dòng `corr=1`. Control `--no-holdings`
+95 / 11 / 26 / 46 / 12, mọi nhãn là `skipped`, và **`MIN_EVAL_SESSIONS` không làm mất một AGREE thật
+nào** (`too_few_sessions_to_compare` = 0 ca) — khớp đúng phép đo của arch-review (0/69 mã AGREE có
+`n_eval < 3`, nhỏ nhất 43), tức cổng F8 là lưới cho ca cấu trúc, không phải thứ đang cắt dữ liệu thật.
+
+**Hạn chế còn lại đã biết (KHÔNG giải được bằng code):** phân biệt tranche thật với bản ĐÍNH CHÍNH
+cùng `event_code` cần đọc hiểu `event_title_vi` tiếng Việt. `corr=1` chỉ NÊU NGHI VẤN và chặn việc
+quy cho vendor — nó không nói được bên nào đúng.
 
 ## 9. Còn phải làm trước khi lên production (KHÔNG tự làm)
 

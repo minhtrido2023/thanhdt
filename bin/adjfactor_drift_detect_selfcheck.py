@@ -166,7 +166,7 @@ def t_curve():
     # Hai ex-date NẰM TRONG chuỗi (D = ngày 01..10 mỗi tháng) để kiểm được cả biên "ex == t".
     evs = [ev("2026-07-05", "ISS", "Cổ phiếu thưởng", 0.1),
            ev("2026-08-05", "ISS", "Cổ phiếu thưởng", 0.2)]
-    curve, used, _notes, unknown = det.build_factor_curve(s, evs)
+    curve, used, _notes, unknown, corr0 = det.build_factor_curve(s, evs)
     ck("2 ex-date liên tiếp: r_pred trước cả hai = 1.1*1.2",
        abs(curve["2026-06-01"] - 1.32) < 1e-9, f"{curve['2026-06-01']}")
     ck("giữa hai ex-date: chỉ hệ số của ex-date SAU",
@@ -175,21 +175,22 @@ def t_curve():
     ck("ex-date ĐÚNG ngày không tính hệ số của CHÍNH nó (tích lấy ex > t)",
        abs(curve["2026-07-05"] - 1.2) < 1e-9, f"{curve['2026-07-05']}")
     ck("không có unknown", unknown == [] and len(used) == 2)
+    ck("2 ex-date khác code, không dòng trùng code -> corr_ex rỗng", corr0 == set(), f"{corr0}")
 
     # Dedupe: hai dòng y hệt nhau = MỘT số hạng; hai tranche KHÁC số = CỘNG
-    curve2, _u, _n, _unk = det.build_factor_curve(s, [
+    curve2, _u, _n, _unk, _c = det.build_factor_curve(s, [
         ev("2026-08-05", "ISS", "Cổ phiếu thưởng", 0.2),
         ev("2026-08-05", "ISS", "Cổ phiếu thưởng", 0.2)])
     ck("dòng trùng y hệt -> dedupe thành 1 (1.2, không phải 1.4)",
        abs(curve2["2026-07-01"] - 1.2) < 1e-9, f"{curve2['2026-07-01']}")
-    curve3, _u, _n, _unk = det.build_factor_curve(s, [
+    curve3, _u, _n, _unk, _c = det.build_factor_curve(s, [
         ev("2026-08-05", "ISS", "Cổ phiếu thưởng", 0.2),
         ev("2026-08-05", "ISS", "Trả Cổ tức bằng Cổ phiếu", 0.1)])
     ck("hai tranche KHÁC nhau -> CỘNG (1.3)",
        abs(curve3["2026-07-01"] - 1.3) < 1e-9, f"{curve3['2026-07-01']}")
 
     # Taxonomy: ESOP không làm rơi giá (tái dùng corp_action_lib, không tự định nghĩa)
-    curve4, used4, _n, _unk = det.build_factor_curve(s, [
+    curve4, used4, _n, _unk, _c = det.build_factor_curve(s, [
         ev("2026-08-05", "ISS", "Phát hành cho CBCNV", 0.05)])
     ck("ESOP KHÔNG điều chỉnh giá -> r_pred = 1.0 ở mọi phiên",
        all(abs(v - 1.0) < 1e-12 for v in curve4.values()) and used4 == [])
@@ -313,15 +314,16 @@ def t_contract():
     # trên câu Discord. Mutation M1 (hoán `dir` với `held`) trước đây PASS 142/142 và sinh nhãn SAI
     # "ĐANG NẮM LIVE: vendor_missing" — round-trip này giết nó.
     payload = {"ex": "2026-09-24", "r_obs": 1.0, "r_pred": 1.26041, "dev": -0.206608,
-               "run": 78, "d0": "2026-05-28", "d1": "2026-09-17", "dir": "vendor_missing"}
+               "run": 78, "d0": "2026-05-28", "d1": "2026-09-17", "dir": "vendor_missing",
+               "corr": "0"}
     line = det.marker_drift("VPB", payload, "SpaceX,ZaloPay")
     f = line.split("|")
-    ck("marker_drift: 11 trường", len(f) == 11, f"{len(f)}: {f}")
-    ck("marker_drift: thứ tự trường đúng vị trí (tag,tk,ex,r_obs,r_pred,dev,run,d0,d1,dir,held)",
+    ck("marker_drift: 12 trường", len(f) == 12, f"{len(f)}: {f}")
+    ck("marker_drift: thứ tự trường đúng vị trí (tag,tk,ex,r_obs,r_pred,dev,run,d0,d1,dir,held,corr)",
        f[0] == "ADJFACTOR_DRIFT" and f[1] == "VPB" and f[2] == "2026-09-24"
        and f[3] == "1.000000" and f[4] == "1.260410" and f[5] == "-0.206608" and f[6] == "78"
        and f[7] == "2026-05-28" and f[8] == "2026-09-17" and f[9] == "vendor_missing"
-       and f[10] == "SpaceX,ZaloPay", f"{f}")
+       and f[10] == "SpaceX,ZaloPay" and f[11] == "0", f"{f}")
 
     u = det.marker_uncomputable("MBB", "2026-08-11", "rights_issue_no_subscription_price", "SpaceX")
     ck("marker_uncomputable: 5 trường đúng vị trí",
@@ -383,9 +385,9 @@ exit ${MIKE_SELFCHECK_BUS_RC:-0}
 """
 
 DRIFT_HELD = ("ADJFACTOR_DRIFT|VPB|2026-09-24|1.000000|1.260410|-0.206608|78|2026-05-28"
-              "|2026-09-17|vendor_missing|SpaceX,ZaloPay")
+              "|2026-09-17|vendor_missing|SpaceX,ZaloPay|0")
 DRIFT_FREE = ("ADJFACTOR_DRIFT|FPT|2026-09-21|1.000000|1.100000|-0.090909|75|2026-05-28"
-              "|2026-09-14|vendor_missing|none")
+              "|2026-09-14|vendor_missing|none|0")
 UNCOMP_HELD = "ADJFACTOR_UNCOMPUTABLE|MBB|2026-08-11|rights_issue_no_subscription_price|SpaceX"
 UNCOMP_FREE = "ADJFACTOR_UNCOMPUTABLE|RYG|2026-09-03|rights_issue_no_subscription_price|none"
 NODATA_HELD = "ADJFACTOR_NODATA|ZZZ|SpaceX"
@@ -425,10 +427,13 @@ def t_alert(tz_label, env_tz):
         sink = os.path.join(tmp, "sink")
         state = os.path.join(tmp, "state", "adjfactor_drift_alerted.json")
 
-        r = _run_alert(tmp, tgt, "khong co marker nao\n", env_tz)
-        ck(f"[{tz_label}] không có marker -> rc=0, không gửi gì",
+        # Lối im lặng THẬT đòi CẢ BA: 0 marker, feed FRESH, và có mã được quét. Bản trước chỉ đưa
+        # văn bản rác (không có dòng FEED) và vẫn kỳ vọng rc=0 — tức chốt đúng bug F5 (thiếu FEED bị
+        # đọc thành "feed ổn"). Giờ ca đó là một assertion RIÊNG bên dưới và phải GỬI.
+        r = _run_alert(tmp, tgt, "khong co marker nao\n" + FEED_FRESH + "\n" + SCAN + "\n", env_tz)
+        ck(f"[{tz_label}] 0 marker + feed FRESH + có mã quét -> rc=0, không gửi gì",
            r.returncode == 0 and not os.path.exists(os.path.join(sink, "notify.txt")),
-           f"rc={r.returncode}")
+           f"rc={r.returncode} {r.stderr[-200:]!r}")
 
         body = "\n".join([DRIFT_HELD, DRIFT_FREE, UNCOMP_HELD, UNCOMP_FREE,
                            FEED_FRESH, SCAN]) + "\n"
@@ -483,7 +488,8 @@ def t_alert(tz_label, env_tz):
 
         # Lượt 2 cùng ngày: de-dup CHẶN Discord nhưng VẪN ghi bus (dấu vết không được mất)
         os.remove(os.path.join(sink, "notify.txt"))
-        r = _run_alert(tmp, tgt, "\n".join([DRIFT_HELD, DRIFT_FREE, SCAN]) + "\n", env_tz)
+        r = _run_alert(tmp, tgt, "\n".join([DRIFT_HELD, DRIFT_FREE, FEED_FRESH, SCAN]) + "\n",
+                       env_tz)
         ck(f"[{tz_label}] lượt 2: de-dup -> KHÔNG gửi Discord, rc=10",
            r.returncode == 10 and not os.path.exists(os.path.join(sink, "notify.txt")),
            f"rc={r.returncode}")
@@ -515,6 +521,56 @@ def t_alert(tz_label, env_tz):
                        env_tz)
         m = open(os.path.join(sink, "notify.txt")).read()
         ck(f"[{tz_label}] NODATA mã đang nắm được nêu tên", "ZZZ" in m and "CMP" not in m)
+        ck(f"[{tz_label}] khoá NODATA được ghi state (`<mã>|nodata`)",
+           "ZZZ|nodata" in json.load(open(state)), f"{sorted(json.load(open(state)))}")
+        # M4 (arch-review vòng 2): nhánh NODATA de-dup không có assertion nào — mutation xoá nó vẫn
+        # 233/233. Chốt idempotence bằng lượt LẶP LẠI y hệt trên input CHỈ có NODATA.
+        os.remove(os.path.join(sink, "notify.txt"))
+        r = _run_alert(tmp, tgt, "\n".join([NODATA_HELD, NODATA_FREE, FEED_FRESH, SCAN]) + "\n",
+                       env_tz)
+        ck(f"[{tz_label}] lượt 2 chỉ-NODATA y hệt -> de-dup, KHÔNG gửi lại (M4)",
+           not os.path.exists(os.path.join(sink, "notify.txt")), f"rc={r.returncode}")
+
+        # F5: THIẾU dòng FEED = fail-closed, KHÔNG được coi là "feed ổn" rồi im lặng.
+        r = _run_alert(tmp, tgt, "khong co gi\n" + SCAN + "\n", env_tz)
+        ck(f"[{tz_label}] 0 marker + THIẾU dòng FEED -> VẪN gửi Discord (F5, không im lặng)",
+           os.path.exists(os.path.join(sink, "notify.txt")) and r.returncode == 10,
+           f"rc={r.returncode} {r.stderr[-200:]!r}")
+        m = open(os.path.join(sink, "notify.txt")).read()
+        ck(f"[{tz_label}] thiếu FEED: nói rõ là ĐIỂM MÙ, không phải 'feed ổn'",
+           "MISSING" in m and "ĐIỂM MÙ" in m, f"{m[:300]!r}")
+
+        # F2/F7: universe RỖNG (N_SCANNED=0) là điểm mù — bản trước ghi bus rồi thoát im lặng.
+        os.remove(os.path.join(sink, "notify.txt"))
+        r = _run_alert(tmp, tgt, "\n".join(
+            [FEED_FRESH, "ADJFACTOR_SCAN|2026-09-25|0|0|0|0|0"]) + "\n", env_tz)
+        ck(f"[{tz_label}] universe RỖNG + feed FRESH -> VẪN gửi Discord (F2)",
+           os.path.exists(os.path.join(sink, "notify.txt")), f"rc={r.returncode}")
+        m = open(os.path.join(sink, "notify.txt")).read()
+        ck(f"[{tz_label}] universe rỗng: nói rõ ĐIỂM MÙ + quy việc, không phải 'không có sự kiện'",
+           "UNIVERSE RỖNG" in m and "Winston" in m, f"{m[:300]!r}")
+
+        # F4: dòng DRIFT corr=1 KHÔNG được quy cho Winston (chưa đủ căn cứ cáo buộc vendor)
+        os.remove(os.path.join(sink, "notify.txt"))
+        corr_line = DRIFT_HELD.replace("VPB|2026-09-24", "AAA|2026-09-05")[:-1] + "1"
+        r = _run_alert(tmp, tgt, "\n".join([corr_line, FEED_FRESH, SCAN]) + "\n", env_tz)
+        m = open(os.path.join(sink, "notify.txt")).read()
+        ck(f"[{tz_label}] corr=1: câu Discord nói NGHI BẢN ĐÍNH CHÍNH, không khẳng định vendor sai",
+           "NGHI BẢN ĐÍNH CHÍNH" in m and "THIẾU hệ số" not in m, f"{m[:500]!r}")
+        ck(f"[{tz_label}] corr=1: KHÔNG sinh dòng việc backfill cho Winston (F4)",
+           "yêu cầu backfill" not in m, f"{m[:600]!r}")
+        ck(f"[{tz_label}] corr=1: vẫn nêu mã + vẫn ghi bus (không im lặng bỏ qua)",
+           "AAA" in m and "ĐANG NẮM LIVE" in m)
+
+        # `held=skipped` KHÔNG được in thành "ĐANG NẮM LIVE: skipped" (F7)
+        os.remove(os.path.join(sink, "notify.txt"))
+        # Mã + ex-date MỚI: `VPB|2026-09-24` đã bị de-dup ở các lượt trên nên sẽ không gửi gì.
+        skip_line = DRIFT_HELD.replace("VPB|2026-09-24", "SKP|2026-09-07") \
+                              .replace("|SpaceX,ZaloPay|0", "|skipped|0")
+        r = _run_alert(tmp, tgt, "\n".join([skip_line, FEED_FRESH, SCAN]) + "\n", env_tz)
+        m = open(os.path.join(sink, "notify.txt")).read()
+        ck(f"[{tz_label}] held=skipped KHÔNG bị in thành 'ĐANG NẮM LIVE: skipped' (F7)",
+           "ĐANG NẮM LIVE: skipped" not in m and "CHƯA TRA" in m, f"{m[:400]!r}")
 
         # Feed KHÔNG tươi: luôn lên Discord, đứng đầu, kèm lý do THẬT của detector, và nói rõ
         # "khớp" bên dưới không đáng tin. Đây là ca im-lặng-bằng-sạch mà arch-review chỉ ra.
@@ -745,6 +801,188 @@ def t_feedgate():
     ck("FEED_DEAD_DAYS khớp nguồn chuẩn tắc corp_action_daily.py", det.FEED_DEAD_DAYS == 5)
 
 
+# ---------------------------------- 13. run_scan PHÁT RA GÌ (kill M7/M8/M18/M19)
+
+def t_emit():
+    """Chốt hợp đồng ở TẦNG `run_scan`, không chỉ ở `marker_*`.
+
+    arch-review vòng 2: `marker_*` đã được unit-test và `alert.sh` đã được test bằng dòng viết tay,
+    nhưng KHÔNG có gì chốt rằng `run_scan` THẬT SỰ in ra marker nào và trả rc nào. 4 mutation sống
+    sót 233/233 vì đúng khe này:
+      M7  — bỏ `print(marker_feed(...))`      ⇒ alert.sh không thấy FEED ⇒ im lặng (F5)
+      M8  — bỏ `feed_status != FRESH` khỏi rc ⇒ feed chết trả rc=0 = "sạch"
+      M18 — bỏ `print(marker_nodata(...))`    ⇒ mã đang NẮM không có giá không sinh ra gì
+      M19 — `held=None` gán nhãn `none`       ⇒ khẳng định SAI "không nắm" (F1)
+    Cách chốt: chạy `run_scan` thật với mọi lối ra BQ được thay bằng dữ liệu tổng hợp, rồi so TỪNG
+    dòng stdout — đây là mức duy nhất bắt được cả 4.
+    """
+    print("\n[13] run_scan — marker thật phát ra + rc thật (kill M7/M8/M18/M19)")
+
+    class A:
+        asof = "2026-08-10"; ex0 = "2026-06-01"; ex1 = "2026-08-10"; ex_days = 30
+        lookback_days = 120; dev_tol = 0.003; min_run = 3; tickers = None; no_holdings = False
+
+    evs = [ev("2026-08-05", "ISS", "Cổ phiếu thưởng", 0.1, tk="HELDX")]
+
+    def run(feed_ing, held_ret, with_nodata):
+        """(rc, stdout) của một lượt run_scan thật."""
+        saved = (det.cohort_tickers, det.price_rows, det.held_map, det.cal.feed_freshness,
+                 det.cal.events, det.bq_max_session)
+        tks = ["HELDX"] + (["NOPRICE"] if with_nodata else [])
+        try:
+            det.cohort_tickers = lambda a, b: tks
+            det.bq_max_session = lambda: A.asof
+            # HELDX: vendor CHƯA áp hệ số -> DRIFT. NOPRICE: không có dòng giá nào -> NODATA.
+            det.price_rows = lambda t, s, e: [
+                {"tk": "HELDX", "d": b["d"], "close": b["close"], "price": b["price"],
+                 "hi": b["hi"], "lo": b["lo"]} for b in flat_series(D, 100, 1.0)]
+            det.held_map = lambda asof, **kw: held_ret
+            det.cal.feed_freshness = lambda: {"max_ingested": feed_ing,
+                                              "max_public": "2026-08-10", "n": "36428"}
+            det.cal.events = lambda t, since=None, until=None: evs
+            import io
+            from contextlib import redirect_stdout
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                rc = det.run_scan(A)
+            return rc, buf.getvalue()
+        finally:
+            (det.cohort_tickers, det.price_rows, det.held_map, det.cal.feed_freshness,
+             det.cal.events, det.bq_max_session) = saved
+
+    # --- M7: dòng FEED phải CÓ trong stdout thật
+    rc, out = run("2026-08-10 15:00:00", {"HELDX": "SpaceX"}, False)
+    ck("run_scan IN RA dòng ADJFACTOR_FEED (M7)",
+       any(l.startswith("ADJFACTOR_FEED|FRESH|") for l in out.splitlines()), f"{out[:300]!r}")
+    ck("run_scan in ra dòng DRIFT cho mã lệch", "ADJFACTOR_DRIFT|HELDX|" in out)
+    ck("dòng DRIFT mang nhãn nắm THẬT (không phải 'none')",
+       "|vendor_missing|SpaceX|" in out,
+       f"{[l for l in out.splitlines() if l.startswith('ADJFACTOR_DRIFT')]}")
+    ck("có DRIFT -> rc=10", rc == 10, f"rc={rc}")
+
+    # --- M19: held_map() trả None (nguồn hỏng) PHẢI thành `unknown`, KHÔNG được thành `none`
+    rc, out = run("2026-08-10 15:00:00", None, False)
+    dl = [l for l in out.splitlines() if l.startswith("ADJFACTOR_DRIFT")]
+    ck("held_map()=None -> nhãn `unknown`, KHÔNG phải `none` (M19/F1)",
+       dl and dl[0].endswith("|unknown|0"), f"{dl}")
+    ck("held_map()=None: KHÔNG có dòng nào mang nhãn `none`",
+       not any(l.endswith("|none|0") for l in dl), f"{dl}")
+
+    # --- F7: --no-holdings là `skipped`, KHÁC `unknown` (không được sinh dòng việc 'broker_qty lỗi')
+    A.no_holdings = True
+    rc, out = run("2026-08-10 15:00:00", None, False)
+    dl = [l for l in out.splitlines() if l.startswith("ADJFACTOR_DRIFT")]
+    ck("--no-holdings -> nhãn `skipped`, KHÔNG phải `unknown` (F7)",
+       dl and dl[0].endswith("|skipped|0"), f"{dl}")
+    A.no_holdings = False
+
+    # --- M18: NODATA phải có DÒNG RIÊNG, không chỉ là một con số trong SCAN
+    rc, out = run("2026-08-10 15:00:00", {"HELDX": "SpaceX"}, True)
+    ck("mã không có dòng giá -> IN RA ADJFACTOR_NODATA (M18)",
+       "ADJFACTOR_NODATA|NOPRICE|" in out, f"{out[:400]!r}")
+    ck("dòng NODATA mang nhãn nắm (mã không nắm vẫn phải có dòng để bus thấy)",
+       "ADJFACTOR_NODATA|NOPRICE|none" in out)
+
+    # --- M8: feed KHÔNG tươi phải vào rc, kể cả khi mọi mã đều KHỚP
+    def run_clean(feed_ing):
+        saved = (det.cohort_tickers, det.price_rows, det.held_map, det.cal.feed_freshness,
+                 det.cal.events, det.bq_max_session)
+        try:
+            det.cohort_tickers = lambda a, b: ["OKX"]
+            det.bq_max_session = lambda: A.asof
+            # vendor áp ĐÚNG hệ số -> AGREE, 0 uncomputable, 0 nodata
+            det.price_rows = lambda t, s, e: [
+                {"tk": "OKX", "d": b["d"], "close": b["close"], "price": b["price"],
+                 "hi": b["hi"], "lo": b["lo"]}
+                for b in (bar(d, 100, 100 / (1.1 if d < "2026-08-05" else 1.0)) for d in D)]
+            det.held_map = lambda asof, **kw: {}
+            det.cal.feed_freshness = lambda: {"max_ingested": feed_ing,
+                                              "max_public": "2026-08-10", "n": "36428"}
+            det.cal.events = lambda t, since=None, until=None: [
+                ev("2026-08-05", "ISS", "Cổ phiếu thưởng", 0.1, tk="OKX")]
+            import io
+            from contextlib import redirect_stdout
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                rc = det.run_scan(A)
+            return rc, buf.getvalue()
+        finally:
+            (det.cohort_tickers, det.price_rows, det.held_map, det.cal.feed_freshness,
+             det.cal.events, det.bq_max_session) = saved
+
+    rc, out = run_clean("2026-08-10 15:00:00")
+    ck("mọi mã khớp + feed FRESH -> rc=0 (trạng thái 'không có gì' DUY NHẤT)", rc == 0, f"rc={rc}")
+    ck("lượt sạch vẫn in ADJFACTOR_SCAN", "ADJFACTOR_SCAN|" in out)
+    rc, out = run_clean("2026-07-20 15:00:00")     # cũ > FEED_DEAD_DAYS
+    ck("mọi mã khớp nhưng feed CHẾT -> rc=11, KHÔNG phải 0 (M8)", rc == 11, f"rc={rc}")
+    ck("feed chết in ra status DEAD để alert.sh đọc được",
+       any(l.startswith("ADJFACTOR_FEED|DEAD|") for l in out.splitlines()),
+       f"{[l for l in out.splitlines() if l.startswith('ADJFACTOR_FEED')]}")
+
+
+# --------------------------- 14. held_map fail-closed + corr (F1 / F4 / F6 / F8)
+
+def t_held_and_corr():
+    print("\n[14] held_map fail-closed · corr đính chính · knob làm-im (F1/F4/F6/F8)")
+
+    # --- F1: broker_qty() trả {} KHÔNG raise ⇒ phải là None (unknown), không phải {} (none)
+    import types
+    fake = types.ModuleType("dividend_adjusted_return")
+    fake.ACCOUNTS = {"SpaceX": "0002023347", "ZaloPay": "0001743768"}
+    fake.broker_qty = lambda acct: {}
+    sys.modules["dividend_adjusted_return"] = fake
+    try:
+        ck("broker_qty() trả {} (không raise) -> held_map = None, KHÔNG phải {} (F1)",
+           det.held_map("2026-09-25") is None)
+        # ảnh chụp CŨ hơn ngưỡng -> None (§14)
+        fake.broker_qty = lambda acct: {("VPB", "2026-09-01"): 1000}
+        ck(f"ảnh chụp cũ > {det.HELD_MAX_STALE_DAYS} ngày -> held_map = None (freshness §14)",
+           det.held_map("2026-09-25") is None)
+        fake.broker_qty = lambda acct: {("VPB", "2026-09-25"): 1000}
+        hm = det.held_map("2026-09-25")
+        ck("ảnh chụp TƯƠI -> trả map thật", hm == {"VPB": "SpaceX,ZaloPay"}, f"{hm}")
+        fake.broker_qty = lambda acct: {("VPB", "2026-09-25"): 0}
+        ck("qty = 0 -> KHÔNG tính là đang nắm", det.held_map("2026-09-25") == {})
+    finally:
+        sys.modules.pop("dividend_adjusted_return", None)
+
+    # --- F4: ex-date có >1 dòng CÙNG event_code -> corr_ex, và corr=1 tới được dòng máy đọc
+    s = [bar(d, 100, 100) for d in D]
+    _c, _u, _n, _unk, corr = det.build_factor_curve(s, [
+        ev("2026-08-05", "DIV", dps=500), ev("2026-08-05", "DIV", dps=800)])
+    ck("2 dòng DIV cùng ex-date (nghi đính chính) -> corr_ex có ex-date đó (F4)",
+       corr == {"2026-08-05"}, f"{corr}")
+    # ca thật: DIV 500 + "Điều chỉnh 800" trên giá thô, vendor áp 1.017410 mà ta suy 1.028603
+    ser = [bar(d, 46750, 46750 / (1.017410 if d < "2026-08-05" else 1.0)) for d in D]
+    v, p = det.scan_ticker(ser, [ev("2026-08-05", "DIV", dps=500),
+                                 ev("2026-08-05", "DIV", dps=800)], 0.003, 3, D[0])
+    ck("ca đính chính -> DRIFT với corr=1 (caveat đi CÙNG cáo buộc, §29)",
+       v == "DRIFT" and p["corr"] == "1", f"v={v} corr={p.get('corr')}")
+    ck("dòng máy đọc mang corr=1 ở trường cuối",
+       det.marker_drift("AAA", p, "SpaceX").endswith("|SpaceX|1"),
+       det.marker_drift("AAA", p, "SpaceX"))
+    # và ca KHÔNG đính chính phải là corr=0 (nếu luôn 1 thì cờ vô nghĩa)
+    v2, p2 = det.scan_ticker(flat_series(D, 100, 1.0),
+                             [ev("2026-08-05", "ISS", "Cổ phiếu thưởng", 0.1)], 0.003, 3, D[0])
+    ck("ca thường -> corr=0 (cờ phân biệt được, không phải luôn bật)", p2["corr"] == "0")
+
+    # --- F8: AGREE phải nghĩa là ĐÃ SO; quá ít phiên -> UNCOMPUTABLE, không phải AGREE
+    v, p = det.scan_ticker([bar("2026-08-09", 100, 100)],
+                           [ev("2026-08-05", "ISS", "Cổ phiếu thưởng", 0.1)], 0.003, 3, "2026-08-08")
+    ck(f"chỉ so được 1 phiên (< {det.MIN_EVAL_SESSIONS}) -> UNCOMPUTABLE, KHÔNG phải AGREE (F8)",
+       v == "UNCOMPUTABLE", f"v={v} p={p}")
+    ck("mã lý do nói rõ thiếu phiên để so",
+       v == "UNCOMPUTABLE" and p["unknown"][0][1] == "too_few_sessions_to_compare",
+       f"{p.get('unknown')}")
+
+    # --- F6: chiều LÀM IM của các knob bị từ chối cứng
+    ck("--min-run 9999 bị TỪ CHỐI (chiều làm im) (F6)", _exits_2(["--min-run", "9999"]))
+    ck("--lookback-days 2 bị TỪ CHỐI (chiều làm im)", _exits_2(["--lookback-days", "2"]))
+    ck("--ex-days 0 bị TỪ CHỐI", _exits_2(["--ex-days", "0"]))
+    ck("--min-run 3 (mặc định) VẪN được nhận — cổng không chặn oan giá trị đúng",
+       not _exits_2(["--min-run", "3", "--asof", "1999-01-01", "--tickers", "ZZZ"]))
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--py", action="store_true")
@@ -764,6 +1002,8 @@ def main():
         t_contract()
         t_infra()
         t_feedgate()
+        t_emit()
+        t_held_and_corr()
     if do_sh:
         # §16/§19: LẶP dưới 4 môi trường TZ. `unset TZ` = ca cron thật (không có TZ trong env).
         # `Pacific/Kiritimati` (+14) và `Pacific/Midway` (−11) là hai đầu cực: với MỌI thời điểm,
