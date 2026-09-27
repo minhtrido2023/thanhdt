@@ -12,9 +12,27 @@ Point-in-time honesty:
   - Effective date = Release_Date (when the financials became public) -> first tradable day >= that.
   - COMPOUNDER / CYCLICAL / REALESTATE / SECURITIES / INSURANCE: reconstructed EXACTLY (all inputs are in
     ticker_financial historically).
-  - BANK: the live rate_bank() needs NPL/coverage from a CURRENT snapshot CSV (no history) -> we use an
-    ROE-only historical proxy (ROE<8%->5, graded by ROE otherwise). Drops the asset-quality premium; BANK's
-    flat composite was already decent so this is acceptable and clearly flagged.
+  - BANK: AQ-AWARE since 2026-09-27 (H1 wire, job Taylor_20260927_022319). rate_bank_hist() ports
+    rating_8l.py::rate_bank() thresholds VERBATIM and feeds them point-in-time NPL / LLR-coverage from
+    mike/data/fiinprox_bank_ratios_quarterly_20260914.csv (FiinPro-X, 27 banks, 2010Q1-2026Q2), taking
+    for each eff_date the LATEST FiinPro quarter already past its publication lag (>=45d after quarter
+    end; Q4 >=90d) -> no look-ahead. ROE stays the ticker_financial chain (ROE_Trailing -> ROE5Y ->
+    ROE3Y) the old proxy used, so the 3/4 gate boundary is unchanged by construction (proof below).
+    Falls back to rate_bank_proxy() (ROE-only) per row whenever the FiinPro file is missing or the
+    bank/quarter has no usable NPL+coverage — never fails open to a fabricated grade.
+    SOURCE CONTINUITY (FiinPro-X trial ended 2026-09-28, NO refresh): the file is a frozen HISTORY
+    vintage and is only ever read for eff_date <= its last covered quarter. The live path for names we
+    actually hold is the OCR pipeline `bank_npl_coverage_primary` (data/bank_npl_coverage_primary_*.csv
+    -> data/bank_lens_v3.csv -> rating_8l.py::rate_bank), which keeps feeding the CURRENT row via
+    override_current_bank_aq() below; this module's FiinPro read never needs to be refreshed.
+    INVARIANT THAT MAKES THIS A DATA-HYGIENE WIRE, NOT A STRATEGY CHANGE: rate_bank_hist() and
+    rate_bank_proxy() return <=3 iff ROE>=12%, =4 iff 8%<=ROE<12%, =5 iff ROE<8% — NPL/coverage only
+    discriminate 1 vs 2 vs 3 INSIDE the <=3 region. Every V2.4 consumer of fa_ratings_8l gates on the
+    binary rating<=3 (custom_basket.py BASKET_GATE_RATING=3, regime_size_overlay.py WEAK_RATING_MIN=4,
+    golive_recommend_v23.py rating>=4, CAPIT_QEXIT r8l>3, build_universe_pit_quality QUALITY_OK<=3), so
+    0 V2.4 decisions change. Verified by exhaustive grid + real-panel A/B in
+    rating_8l_history_bank_aq_selfcheck.py. This stops holding if anyone sets BASKET_GATE_RATING<3 or
+    switches ETF_LIQ to a quality=tilt variant (custompitgq), which DOES read 1/2/3 apart.
   - POWER: the live rate_power() needs the lifecycle verdict (snapshot) -> we proxy with the D/E trajectory
     (STLTDebt_Eq_P0 vs _P4) + TTM-NP sign. Small-n group; flagged.
 
@@ -212,6 +230,92 @@ def rate_realestate(r, cfo_np, ttm_np):
     s += (1 if (pd.notna(pipeline) and pipeline>=0.15) else 0)
     return 2 if s>=6 else 3 if s>=4 else 4
 
+# ---------- BANK asset quality, point-in-time (H1 wire 2026-09-27) ----------
+# Registry: mike/kb/data_registry/fundamentals/fiinprox_bank_ratios_quarterly.md (status DERIVED).
+# Trap 6 of that entry is exactly why avail_date() exists: the file carries NO publication date, so a
+# quarter may only be read after its statutory lag. Overridable for the selfcheck sandbox ONLY.
+BANK_AQ_CSV = os.environ.get(
+    "BANK_AQ_CSV", os.path.join(WORKDIR, "mike", "data", "fiinprox_bank_ratios_quarterly_20260914.csv"))
+BANK_AQ = {}          # (ticker, "YYYYQn") -> dict(npl=decimal|None, cov=decimal|None)
+BANK_AQ_BY_TK = {}    # ticker -> [(avail_date, "YYYYQn"), ...] sorted by avail_date
+_QEND = {1: (3, 31), 2: (6, 30), 3: (9, 30), 4: (12, 31)}
+
+
+def bank_aq_avail_date(q):
+    """First date a FiinPro quarter may be READ: quarter end + 45d (Q4 + 90d). PIT gate, see trap 6."""
+    y, qq = int(q[:4]), int(q[-1])
+    m, d = _QEND[qq]
+    return pd.Timestamp(year=y, month=m, day=d) + pd.Timedelta(days=90 if qq == 4 else 45)
+
+
+def load_bank_aq():
+    """Load FiinPro quarterly NPL / LLR-coverage into BANK_AQ. Missing file -> empty dict, and every
+    bank row then falls back to rate_bank_proxy (ROE-only) -> the pre-wire behaviour, never fail-open."""
+    global BANK_AQ, BANK_AQ_BY_TK
+    BANK_AQ, BANK_AQ_BY_TK = {}, {}
+    try:
+        fp = pd.read_csv(BANK_AQ_CSV)
+    except Exception as e:
+        print(f"  [bank-AQ hist] FiinPro file unavailable -> ROE-only proxy for ALL bank rows: {e}")
+        return
+    for _, row in fp.iterrows():
+        q = f"{int(row['year'])}Q{int(row['quarter'])}"
+        npl = row.get("npl_ratio_3_5_pct"); cov = row.get("llr_coverage_pct")
+        npl = float(npl) / 100.0 if pd.notna(npl) else None
+        cov = float(cov) / 100.0 if pd.notna(cov) else None
+        if npl is None and cov is None: continue          # nim_only rows carry no asset quality
+        BANK_AQ[(row["ticker"], q)] = dict(npl=npl, cov=cov)
+    for (tk, q) in BANK_AQ:
+        BANK_AQ_BY_TK.setdefault(tk, []).append((bank_aq_avail_date(q), q))
+    for tk in BANK_AQ_BY_TK:
+        BANK_AQ_BY_TK[tk].sort()
+    print(f"  [bank-AQ hist] {len(BANK_AQ)} bank-quarter NPL/LLR rows, {len(BANK_AQ_BY_TK)} banks "
+          f"from {os.path.basename(BANK_AQ_CSV)} (PIT lag >=45d, Q4 >=90d)")
+
+
+def bank_aq_asof(ticker, eff_date):
+    """Latest FiinPro quarter for `ticker` whose publication lag has elapsed by `eff_date`.
+    Returns (npl, cov, quarter_label); (None, None, "") when nothing is readable yet."""
+    hist = BANK_AQ_BY_TK.get(ticker)
+    if not hist or pd.isna(eff_date): return None, None, ""
+    best_q = ""
+    for avail, q in hist:                                  # sorted by avail -> last one <= eff wins
+        if avail <= eff_date: best_q = q
+        else: break
+    if not best_q: return None, None, ""
+    f = BANK_AQ[(ticker, best_q)]
+    return f["npl"], f["cov"], best_q
+
+
+def bank_eff_date(r):
+    """Same effective date main() stamps on the row: Release_Date, else quarter end + 45d."""
+    eff = pd.to_datetime(r.get("Release_Date"), errors="coerce")
+    if pd.isna(eff):
+        eff = pd.to_datetime(r.get("q_time"), errors="coerce")
+        eff = eff + pd.Timedelta(days=45) if pd.notna(eff) else pd.NaT
+    return eff
+
+
+def rate_bank_hist(r):
+    """AQ-aware historical bank rating. Thresholds copied VERBATIM from rating_8l.py::rate_bank();
+    ROE uses the same ticker_financial chain as rate_bank_proxy, so the <=3 / >=4 boundary is
+    identical to the proxy (see module docstring invariant). No AQ readable -> proxy."""
+    roe = r.get("ROE_Trailing", np.nan)
+    if pd.isna(roe): roe = r.get("ROE5Y", np.nan)
+    if pd.isna(roe): roe = r.get("ROE3Y", np.nan)
+    if pd.isna(roe): return 3                              # same as proxy / rate_bank "bank-noROE"
+    if roe < 0.08: return 5                                # only genuine weakness -> 5
+    npl, cov, _q = bank_aq_asof(r.get("ticker"), bank_eff_date(r))
+    if npl is None and cov is None:
+        return rate_bank_proxy(r)                          # no AQ yet -> pre-wire behaviour
+    pristine = npl is not None and npl <= 0.012 and cov is not None and cov >= 1.5
+    strong   = npl is not None and npl <= 0.020 and cov is not None and cov >= 0.9
+    if roe >= 0.15 and pristine: return 1                  # elite asset-quality
+    if roe >= 0.14 and strong:   return 2                  # strong asset-quality
+    if roe >= 0.12: return 3                               # profitable (AQ-modulated)
+    return 4                                               # modest ROE
+
+
 def rate_bank_proxy(r):
     """HISTORICAL proxy: ROE-only (no NPL/coverage history). Mirrors the franchise base of rate_bank()."""
     roe = r.get("ROE_Trailing", np.nan)
@@ -255,7 +359,7 @@ def rate_row(r):
     if route == "SECURITIES": return rate_securities(r)
     if route == "INSURANCE":  return rate_insurance(r)
     if route == "REALESTATE": return rate_realestate(r, cfo_np, ttm_np)
-    if route == "BANK":       return rate_bank_proxy(r)
+    if route == "BANK":       return rate_bank_hist(r)
     if route == "POWER":      return rate_power_proxy(r, ttm_np)
     rf = redflag(r, ttm_np)
     if route == "CYCLICAL":
@@ -289,13 +393,34 @@ def override_current_bank_aq(out):
     NPL/coverage have no deep history (avoids look-ahead); but for the MOST RECENT snapshot we DO have current
     asset quality, so the latest row per bank should reflect it (e.g. BID/SHB/HDB proxy=1 -> AQ-aware=3 when
     coverage<0.9). Only the single latest eff_date row per BANK ticker changes; all prior (backtest) rows keep
-    the proxy -> no look-ahead introduced. Fail-safe: missing live file / ticker -> keep proxy."""
+    the proxy -> no look-ahead introduced. Fail-safe: missing live file / ticker -> keep proxy.
+
+    FAIL-CLOSED on no-data (2026-09-27, H1 wire): rate_bank() returns a FABRICATED 3 ("bank-nodata"
+    when the ticker is absent from data/bank_lens_v3.csv, "bank-noROE" when its ROE is null). Importing
+    that 3 overwrote a ROE-derived grade with a constant and flipped the <=3 gate for 6 illiquid UPCoM
+    banks (BAB/BVB/PGB 4->3, NVB/SGB 5->3, KLB 1->4 pre-wire). Those notes are now REJECTED: the row
+    keeps this module's own AQ-aware/proxy value, which is grounded in ticker_financial ROE. Only a live
+    row whose rating actually came from real lens data may override. `note` absent from the CSV -> reject
+    EVERY override rather than guess (coding_guidelines §28: never infer from absence of evidence)."""
     try:
         live = pd.read_csv(os.path.join(WORKDIR, "data", "rating_8l.csv"))
     except Exception as e:
         print(f"  [bank-AQ override] SKIPPED (live rating_8l.csv unavailable -> keep proxy): {e}"); return out
     lb = live[live["route"] == "BANK"] if "route" in live.columns else live.iloc[0:0]
-    live_map = {t: int(r) for t, r in zip(lb["ticker"], lb["rating"]) if pd.notna(r)}
+    if "note" not in lb.columns:
+        print("  [bank-AQ override] SKIPPED: live rating_8l.csv has no `note` column, so a fabricated "
+              "bank-nodata/bank-noROE grade cannot be told apart from a real one -> keep proxy")
+        return out
+    NODATA_NOTES = ("bank-nodata", "bank-noROE")
+    live_map, rejected = {}, []
+    for _t, _r, _nt in zip(lb["ticker"], lb["rating"], lb["note"]):
+        if pd.isna(_r): continue
+        if any(k in str(_nt) for k in NODATA_NOTES):
+            rejected.append(f"{_t}({str(_nt).strip()})"); continue
+        live_map[_t] = int(_r)
+    if rejected:
+        print(f"  [bank-AQ override] REJECTED {len(rejected)} live row(s) with no real lens data "
+              f"(fail-closed, keep this module's ROE-grounded grade): {', '.join(sorted(rejected))}")
     r2t = {1: "A", 2: "B", 3: "C", 4: "D", 5: "E"}
     n = 0
     for tk in out.loc[out["route"] == "BANK", "ticker"].unique():
@@ -341,6 +466,7 @@ def main():
     print(f"  {len(df)} financial rows, {df['ticker'].nunique()} tickers")
 
     df["route"] = [route_of(t, c) for t, c in zip(df["ticker"], df["ICB_Code"])]
+    load_bank_aq()          # PIT NPL/LLR for the AQ-aware BANK route (rate_bank_hist)
     global MOAT_TIER
     try:
         _mg = pd.read_csv(os.path.join(WORKDIR,"data","moat_tags.csv"))
@@ -401,10 +527,16 @@ def main():
             print(f"  [forensic] appended {len(_add)} exclude override row(s) rating 5 @flag date: {[a['ticker'] for a in _add]}")
     except Exception as e:
         print("  forensic_flags load fail:", e)
-    path = os.path.join(WORKDIR,"data","rating_8l_history.csv")
+    # coding_guidelines §8: an A/B or selfcheck run must never be able to target the registry-pinned
+    # data/rating_8l_history.csv nor REPLACE tav2_bq.fa_ratings_8l. Both are explicit opt-outs; with no
+    # env set the canonical production invocation behaves byte-for-byte as before.
+    path = os.environ.get("R8L_HIST_OUT") or os.path.join(WORKDIR,"data","rating_8l_history.csv")
     out.to_csv(path, index=False)
     print(f"wrote {path}  ({len(out)} rows)")
-    refresh_bq_table(path)
+    if os.environ.get("R8L_HIST_NO_BQ_REFRESH") == "1":
+        print("  [bq] refresh SKIPPED (R8L_HIST_NO_BQ_REFRESH=1) -- tav2_bq.fa_ratings_8l untouched")
+    else:
+        refresh_bq_table(path)
     print("\ndistribution by route x rating (raw 1-5):")
     print(pd.crosstab(out["route"], out["rating"]).to_string())
     print("\ndistribution by route x TIER (final A-E, compounder=per-qtr percentile):")
