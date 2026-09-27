@@ -65,6 +65,90 @@ CONFIRMED high 2026-09-26):
   "legacy" restores the pre-fix mcap chain. Kept as the A/B control leg for
   basket_return_leg_oshares_selfcheck.py and as a one-word rollback — same role as
   BASKET_PRICE_BASIS="legacy" / UNIVERSE_SOURCE="prune". NEVER for production.
+
+WEIGHT LEG — THE SHARE COUNT MUST STEP ON THE EX-DATE, NOT ON THE QUARTERLY RELEASE DATE
+(fix 2026-09-27, job Taylor_20260927_043542; raised by quant-skeptic while verifying
+`custom30v-fix-repin-R3`):
+  `ticker_financial.OShares` is joined on `t.time >= f.time`, and `f.time` IS the release date
+  (measured: it equals `Release_Date` row for row). So a share-count step landed on the day the
+  QUARTER WAS PUBLISHED, not the day the shares actually appeared. Measured on the 203 names that
+  have ever been in the basket, 2014-2026 (1.489 steps, 192 names — report
+  `mike/agents/Taylor/research/oshares_weight_exdate_20260927/`):
+    - 757 steps match a `corporate_action` event; only **9** of them land on the true date,
+      **675** are LATE (median **47** calendar days) and **73** are EARLY, i.e. the quarterly row
+      already carries a count whose event goes ex LATER (min −45 days) — that half is LOOK-AHEAD,
+      the RESTATE trap of `mike/kb/data_registry/fundamentals/ticker_financial_oshares.md`.
+    - FiinProX's independent per-day share series agrees with `corporate_action` on the true date
+      for 85,9% of those steps (median |diff| 0 days) — second source, not the source of truth
+      (`fundamentals/fiinprox_oshares_pit.md` is UNVERIFIED-PIT).
+  THE FIX re-dates each step; it never invents a LEVEL. Source of truth for the date =
+  `tav2_bq.corporate_action` read with `corp_action_lib` semantics (`event_status !=
+  "not_executed"`, i.e. `pricing_events`), codes ISS + AIS. The date is chosen by `event_code`,
+  NOT by the price-adjusting taxonomy — deliberately, and measured:
+    - ISS -> `exright_date`, for EVERY issue method the vendor dates.
+    - AIS (additional listing — the only place `shares_total_after` is populated) ->
+      `effective_date`, falling back to `exright_date` where the vendor left it empty.
+  WHY NOT SPLIT ISS BY `corp_action_lib.PRICE_ADJUSTING_ISS` (this header promised that split from
+  2026-09-27 12:06 until 15:xx while the code never did it; job Taylor_20260927_052432 resolved
+  the mismatch in favour of the CODE, after measuring what the split would do):
+    - the price argument only covers HALF the set. For price-adjusting ISS (stock dividend /
+      bonus / rights to existing holders) `exright_date` IS the day `Close` is retroactively
+      diluted, so the count must rise the same day or market cap gaps. For the 18 basket steps
+      matched to a NON-adjusting ISS (ESOP / private placement) the `Close/Price` ratio is flat
+      across that date in 18/18 cases (max |Δ| 0,034% = rounding; measured on the pinned cache),
+      exactly as `corp_action_lib.is_price_adjusting` predicts. So for those the reason for the
+      same date is a DIFFERENT one: it is the earliest date the vendor puts on "these shares
+      exist", and `is_price_adjusting` is about `Close`, not about existence.
+    - routing them to AIS instead makes the leg WORSE: 17 of the 18 have no AIS row matching the
+      level (only MWG 2025-04-28 does), so they would take the release-date fallback — and the
+      release date is EARLIER than the ISS date in 15 of the 18 (median 28 days), i.e. the split
+      would REINSTATE exactly the restate look-ahead this fix exists to remove. The header was
+      wrong, not the code.
+    - `price_adjusting` is still carried (and now reported: the `match` label gains a `_NONADJ`
+      suffix) so those 18 steps stay auditable instead of invisible.
+  A step is attached to an event only on a MEASURED match: ISS `exercise_ratio` within
+  2% + 0,2pp of `new/old − 1` (incl. the same-day sum when several tranches go ex together), or
+  AIS `shares_total_after` within 0,1% of the new level.
+  FALLBACK = the release date, i.e. TODAY'S BEHAVIOUR. 49% of steps match no event (the vendor
+  table has real gaps) and a design that required one would empty the basket. Falling back is a
+  pure staleness cost, never a wrong number.
+  PIT GUARDS (three, all needed):
+    - a step may NOT move earlier than the previous quarterly row's own date (enforced as the
+      match window's lower bound, so an out-of-range event is never even a candidate). That row
+      asserted the OLD count, and restatement only ever drags a row's value FORWARD in time, so a row that
+      still shows the old count is evidence the event had not happened by then. Cost of
+      the clamp is staleness; without it, one bad ratio match could rewrite months of weights.
+      NOTE (2026-09-27, raised by quant-skeptic): this bound is deliberately CONSERVATIVE, not an
+      identity — `OShares` on a quarterly row is as-of quarter END and the release lags it by a
+      median 32 days, so an event going ex inside that gap legitimately predates the previous
+      release. Measured cost of not loosening it to quarter end: 11 steps have a size-matching
+      event in that gap, 7 of the 11 are re-clamped by the monotonic guard anyway, so only **4 of
+      764** matched steps actually pay — and they pay staleness, never a wrong number. Buying
+      those 4 means spending PIT risk in the one direction that can CREATE look-ahead (moving a
+      step EARLIER on a possibly spurious ratio match). Declined for that reason, not overlooked.
+    - the re-dated steps must stay strictly increasing per name; a candidate that would land
+      on/before the previous step keeps the release date instead.
+    - a step may NOT land before the market could know the event: every event's `share_date` is
+      clamped to `max(share_date, public_date)` (`_clamp_share_date_to_public`, fail-safe — a
+      missing `public_date` leaves the date untouched). Measured need: 34 of 764 matched steps
+      landed 1-15 days (median 3) BEFORE their own `public_date`; all 34 are non-price-adjusting
+      ISS, whose `exright_date` the vendor publishes a few days LATE (0 of the price-adjusting
+      matches violate it — an ex-right is announced before it goes ex by construction). A clamped
+      date pushed outside the match window is simply no longer a candidate, so such a step takes
+      the release-date fallback.
+  SCOPE: this re-dates the shared `OShares` column, so `mcap` (audit/level + validity mask) and
+  `mcapw` (weight) move together and the documented identity `mcap/mcapw == Close/Price` holds.
+  SELECTION is untouched (it ranks on `Volume_3M_P50 * COALESCE(Price,Close)` — no share count)
+  and the RETURN leg no longer contains `OShares` at all (see RETURN CHAIN above), so the ONLY
+  thing that moves is the weight.
+  WHY NOT `oshares_live.py`/`oshares_pit.py` (the wired PIT level module): it answers a different
+  question — the LEVEL at a date — and declines 33,3% of a 108-name universe at 2014-07-01 by
+  design. Substituting it here would trade this dating error for a much larger availability bias
+  (its own docstring says so). Re-dating an existing level needs no new level source.
+  env BASKET_OSHARES_STEP: "exdate" (default = PRODUCTION) | "quarter" (pre-fix behaviour, kept
+    as the A/B control leg for basket_oshares_step_exdate_selfcheck.py and as a one-word
+    rollback). env BASKET_CA_SNAPSHOT=<parquet> pins the corp-action vintage for a reproducible
+    re-pin (the table is UPSERT-in-place — `price-volume/corporate_action_bq.md` Bẫy 2b).
 """
 import bisect
 import os
@@ -124,6 +208,208 @@ def retchain_legacy():
     per run, exactly like pxw_sql()/BASKET_PRICE_BASIS.
     """
     return os.environ.get("BASKET_RETURN_OSHARES", "flat").lower() == "legacy"
+
+
+def oshares_step_quarter():
+    """True -> keep each OShares step on the quarterly RELEASE date (pre-2026-09-27 behaviour).
+    See the module header's WEIGHT LEG block. Read at CALL time so a selfcheck can flip it."""
+    return os.environ.get("BASKET_OSHARES_STEP", "exdate").lower() == "quarter"
+
+
+_CA_CACHE = {}
+
+
+def normalise_corp_action(rows):
+    """`corp_action_lib._events` rows -> typed frame with the `share_date` a cap-weight index must
+    step on. ONE definition, shared by the live reader and by the snapshot dumper
+    (`corp_action_share_snapshot.py`) so a pinned vintage can never drift from a live read."""
+    import corp_action_lib as _cal
+    ev = pd.DataFrame(rows, columns=[
+        "ticker", "event_code", "exright_date", "effective_date", "event_status",
+        "value_per_share", "exercise_ratio", "issue_method_name_vi", "shares_delta",
+        "shares_total_after", "event_title_vi", "public_date"])
+    for c in ("exright_date", "effective_date", "public_date"):
+        ev[c] = pd.to_datetime(ev[c], errors="coerce")
+    for c in ("exercise_ratio", "shares_total_after"):
+        ev[c] = pd.to_numeric(ev[c], errors="coerce")
+    # NaN -> "": corp_action_lib does `(x or "").strip()` and a pandas NaN is a float that passes
+    # `or` but has no .strip(). Normalise here rather than patching the shared lib.
+    ev["issue_method_name_vi"] = ev["issue_method_name_vi"].fillna("")
+    ev["price_adjusting"] = [
+        _cal.is_price_adjusting({"event_code": c, "issue_method_name_vi": m})
+        for c, m in zip(ev["event_code"], ev["issue_method_name_vi"])]
+    # ISS -> exright_date (price diluted that day). AIS -> effective_date (shares listed);
+    # exright_date only as a fallback where the vendor left effective_date empty.
+    ev["share_date"] = ev["exright_date"].where(
+        ev["event_code"] != "AIS", ev["effective_date"].fillna(ev["exright_date"]))
+    return _clamp_share_date_to_public(ev)
+
+
+def _clamp_share_date_to_public(ev):
+    """PIT guard 3 (header): no step may land before the market could know the event.
+
+    `share_date = max(share_date, public_date)`. Fail-safe and IDEMPOTENT: a missing `public_date`
+    (or a missing column, as in a vintage dumped before this guard existed) leaves the date
+    untouched, and re-applying the clamp changes nothing."""
+    if "public_date" not in ev.columns:
+        return ev
+    pub = pd.to_datetime(ev["public_date"], errors="coerce")
+    ev["share_date"] = ev["share_date"].where(pub.isna() | (pub <= ev["share_date"]), pub)
+    return ev
+
+
+def _corp_action_share_events(tickers):
+    """ISS+AIS rows for `tickers` with the date on which the SHARE COUNT should step.
+
+    Read through `corp_action_lib` so the status filter and the accrual taxonomy have exactly one
+    definition in the repo. `tav2_bq.corporate_action` is NOT in the local parquet cache, so this
+    goes to live BQ through that module's own client — deliberately not the injected `bq`, which a
+    cached backtest routes to DuckDB and which would fail on an absent table.
+    env BASKET_CA_SNAPSHOT=<parquet> reads a frozen vintage instead (the table is upserted in
+    place, so a pinned result must be able to name the vintage it was computed on)."""
+    key = tuple(tickers)
+    if key in _CA_CACHE:
+        return _CA_CACHE[key]
+    snap = os.environ.get("BASKET_CA_SNAPSHOT", "")
+    if snap:
+        ev = pd.read_parquet(snap)
+        ev = ev[ev["ticker"].isin(tickers)].copy()
+        ev["share_date"] = pd.to_datetime(ev["share_date"], errors="coerce")
+        # The pinned 2026-09-27 vintage was dumped before PIT guard 3 existed, so its
+        # `share_date` is un-clamped. Re-applying here (idempotent) is what makes a pinned
+        # read and a live read agree — trusting the column as dumped would silently disable
+        # the guard for exactly the runs that re-pin a result.
+        ev = _clamp_share_date_to_public(ev)
+        print(f"  [oshares-step] corp-action từ SNAPSHOT {snap}: {len(ev)} dòng")
+    else:
+        import corp_action_lib as _cal
+        rows = []
+        for i in range(0, len(tickers), 60):        # keep each bq CLI argv small
+            rows += _cal._events(list(tickers[i:i + 60]), None, None, ("ISS", "AIS"),
+                                 'event_status != "not_executed"')
+        ev = normalise_corp_action(rows)
+        print(f"  [oshares-step] corp-action LIVE BQ: {len(ev)} dòng ISS+AIS "
+              f"({ev['ticker'].nunique()} mã)")
+    ev = ev[ev["share_date"].notna()].sort_values(["ticker", "share_date"])
+    _CA_CACHE[key] = ev
+    return ev
+
+
+def _nonadj_tag(iss, d):
+    """`_NONADJ` if the ISS matched on `d` is NOT price-adjusting (ESOP / placement / conversion).
+
+    Not a filter — see the header's "WHY NOT SPLIT ISS": those events are dated the same way but
+    for a different reason, so the report has to NAME them or the 18 steps concerned become
+    invisible to the next audit."""
+    same = iss[iss["share_date"] == d]
+    return "" if same["price_adjusting"].any() else "_NONADJ"
+
+
+def _match_step_date(ratio, new_level, lo, hi, ev_t):
+    """Date on which a step old->new (ratio=new/old) actually happened, or None.
+
+    Matched on MEASURED agreement only — an event merely sitting in the window is not evidence
+    (49% of steps have such an event and no matching size; see the header)."""
+    c = ev_t[(ev_t["share_date"] > lo) & (ev_t["share_date"] <= hi)]
+    if c.empty:
+        return None, "NO_EVENT_IN_WINDOW"
+    tgt = ratio - 1.0
+    tol = 0.02 * abs(tgt) + 0.002
+    iss = c[(c["event_code"] == "ISS") & c["exercise_ratio"].notna() & (c["exercise_ratio"] > 0)]
+    hit = iss[(iss["exercise_ratio"] - tgt).abs() <= tol]
+    if not hit.empty:
+        d = hit["share_date"].min()
+        return d, "ISS_RATIO" + _nonadj_tag(iss, d)
+    if not iss.empty:                     # several tranches going ex the same day
+        g = iss.groupby("share_date")["exercise_ratio"].sum()
+        g = g[(g - tgt).abs() <= tol]
+        if len(g):
+            return g.index.min(), "ISS_RATIO_SUM" + _nonadj_tag(iss, g.index.min())
+    ais = c[(c["event_code"] == "AIS") & c["shares_total_after"].notna()]
+    ais = ais[(ais["shares_total_after"] - new_level).abs() / abs(new_level) <= 0.001]
+    if not ais.empty:
+        return ais["share_date"].min(), "AIS_LEVEL"
+    return None, "EVENT_BUT_NO_RATIO_MATCH"
+
+
+def oshares_pit_grid(bq, tickers, lo_date, hi_date):
+    """Quarterly OShares with each step re-dated to the day the share count really changed.
+
+    Returns (DataFrame[ticker, eff_date, OShares], report DataFrame). See the module header's
+    WEIGHT LEG block for the taxonomy, the two PIT guards and why the fallback is the release
+    date. The `bq` argument is the caller's own client, so a cached backtest stays cached."""
+    inlist = ",".join(f"'{x}'" for x in tickers)
+    q = bq(f"""SELECT f.ticker, f.time AS eff_date, f.OShares
+FROM tav2_bq.ticker_financial AS f
+WHERE f.OShares IS NOT NULL AND f.ticker IN ({inlist})
+  AND f.time >= DATE_SUB(DATE '{lo_date}', INTERVAL 400 DAY) AND f.time <= DATE '{hi_date}'
+ORDER BY f.ticker, f.time""")
+    q["eff_date"] = pd.to_datetime(q["eff_date"])
+    q["OShares"] = pd.to_numeric(q["OShares"], errors="coerce")
+    q = q.dropna(subset=["OShares"]).sort_values(["ticker", "eff_date"]).reset_index(drop=True)
+    ev_all = _corp_action_share_events(tuple(tickers))
+    ev_by = {t: g for t, g in ev_all.groupby("ticker")}
+    empty_ev = ev_all.iloc[:0]
+    out, rep = [], []
+    for tk, g in q.groupby("ticker", sort=True):
+        ev_t = ev_by.get(tk, empty_ev)
+        qds, oss = list(g["eff_date"]), list(g["OShares"])
+        prev_os = prev_q = prev_eff = None
+        for i, (qd, os_) in enumerate(zip(qds, oss)):
+            eff, how = qd, "FIRST_ROW" if prev_os is None else "NO_STEP"
+            if prev_os is not None and os_ != prev_os and prev_os > 0:
+                ratio = os_ / prev_os
+                # PIT guard 1 (header) IS this window's lower bound: nothing at/before the
+                # previous quarterly row's own date is a candidate, because that row still showed
+                # the OLD count. The upper bound stops at the NEXT quarterly row, beyond which
+                # that row's own level governs — this is what keeps the re-dated steps ordered.
+                hi = qd + pd.Timedelta(days=45)
+                if i + 1 < len(qds):
+                    hi = min(hi, qds[i + 1])
+                cand, how = _match_step_date(ratio, os_, prev_q, hi, ev_t)
+                if cand is None:
+                    eff, how = qd, how + "->KEEP_QUARTER"
+                elif prev_eff is not None and cand <= prev_eff:
+                    # PIT guard 2 (header): re-dated steps must stay strictly increasing.
+                    eff, how = qd, how + "->CLAMPED_MONOTONIC"
+                else:
+                    eff = cand
+                rep.append(dict(ticker=tk, quarter_date=qd, eff_date=eff, oshares_old=prev_os,
+                                oshares_new=os_, ratio=ratio, match=how,
+                                moved_days=(qd - eff).days))
+            out.append((tk, eff, os_))
+            prev_os, prev_q, prev_eff = os_, qd, eff
+    grid = pd.DataFrame(out, columns=["ticker", "eff_date", "OShares"])
+    grid = (grid.sort_values(["ticker", "eff_date"])
+                .drop_duplicates(["ticker", "eff_date"], keep="last").reset_index(drop=True))
+    return grid, pd.DataFrame(rep)
+
+
+def apply_oshares(bq, bx, tickers):
+    """Fill `bx["OShares"]` (daily) — the ONE place the share count enters the basket.
+
+    "quarter" mode reproduces the pre-fix line byte for byte (ffill+bfill of the SQL join, which
+    steps on the release date). "exdate" mode rebuilds the column from `oshares_pit_grid`, keeping
+    the same shape: the value is carried forward from its effective date, backfilled before a
+    name's first quarterly row, and left NaN for a name with no row at all so the `valid` mask
+    still excludes it exactly as before."""
+    if oshares_step_quarter():
+        bx["OShares"] = bx.groupby("ticker")["OShares"].ffill().bfill()
+        return bx, pd.DataFrame()
+    grid, rep = oshares_pit_grid(bq, tickers, bx["time"].min().date(), bx["time"].max().date())
+    bx = bx.sort_values(["ticker", "time"]).reset_index(drop=True)
+    merged = pd.merge_asof(bx.drop(columns=["OShares"]).sort_values("time"),
+                           grid.rename(columns={"eff_date": "time"}).sort_values("time"),
+                           on="time", by="ticker", direction="backward")
+    merged = merged.sort_values(["ticker", "time"])
+    merged["OShares"] = merged.groupby("ticker")["OShares"].bfill()
+    if len(rep):
+        mv = rep[rep["moved_days"] != 0]
+        print(f"  [oshares-step] exdate: {len(rep)} bước OShares, {len(mv)} bước ĐƯỢC DỜI "
+              f"(median {mv['moved_days'].median() if len(mv) else 0:.0f} ngày), "
+              f"{(rep['match'].str.contains('KEEP_QUARTER')).sum()} giữ ngày quý (không khớp sự "
+              f"kiện), {(rep['match'].str.contains('CLAMPED')).sum()} bị chặn bởi cổng PIT")
+    return merged.reset_index(drop=True), rep
 
 
 def universe_pred(alias="t"):
@@ -252,7 +538,8 @@ WHERE t.ticker IN ({inlist})
   AND t.time >= DATE_SUB(DATE '{start_date}', INTERVAL 200 DAY) AND t.time <= DATE '{end_date}'""")
     bx["time"] = pd.to_datetime(bx["time"])
     bx = bx.sort_values(["ticker", "time"])
-    bx["OShares"] = bx.groupby("ticker")["OShares"].ffill().bfill()
+    # WEIGHT LEG (header): the share count steps on the ex-date, not on the quarterly release date.
+    bx, _osrep = apply_oshares(bq, bx, names)
     bx["mcap"] = bx["Close"] * bx["OShares"]          # LEVEL column + validity mask (see header)
     bx["mcapw"] = bx["pxw"] * bx["OShares"]           # WEIGHT leg (raw PIT; see PRICE BASIS header)
     piv = bx.pivot_table(index="time", columns="ticker", values="mcap").sort_index()
@@ -1163,7 +1450,8 @@ WHERE t.ticker IN ({inlist})
   AND t.time >= DATE_SUB(DATE '{eff_start}', INTERVAL 10 DAY) AND t.time <= DATE '{end_date}'""")
     bx["time"] = pd.to_datetime(bx["time"])
     bx = bx.sort_values(["ticker", "time"])
-    bx["OShares"] = bx.groupby("ticker")["OShares"].ffill().bfill()
+    # WEIGHT LEG (header): the share count steps on the ex-date, not on the quarterly release date.
+    bx, _osrep = apply_oshares(bq, bx, union)
     bx["mcap"] = bx["Close"] * bx["OShares"]          # LEVEL column + validity mask (see header)
     bx["mcapw"] = bx["pxw"] * bx["OShares"]           # WEIGHT leg (raw PIT; see PRICE BASIS header)
     mcap = bx.pivot_table(index="time", columns="ticker", values="mcap").sort_index()
