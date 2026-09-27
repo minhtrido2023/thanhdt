@@ -41,7 +41,7 @@ BVB/VAB trống nhiều quý 2018-2020; nhiều mã chỉ có Q4 trước 2017.
 
 ## Consumer
 
-### ĐÃ VIẾT, CHỜ USER DUYỆT MERGE — `rating_8l_history.py::rate_bank_hist()` (2026-09-27)
+### LIVE từ 2026-09-27 (merge `1546895a`) — `rating_8l_history.py::rate_bank_hist()`
 Branch `wire/fiinprox-h1-h2-ve-sinh` (worktree `wt-fiinprox-h1h2-wire`), job `Taylor_20260927_022319`.
 Thay `rate_bank_proxy()` (ROE-only) trên route BANK của chuỗi lịch sử 2014-2026 bằng ngưỡng
 **nguyên văn** của `rating_8l.py::rate_bank()` + NPL/LLR file này, as-of theo **trễ công bố ≥45 ngày
@@ -81,5 +81,26 @@ A/B đầu-cuối 53.687 dòng):
 ### `rating_8l.py::rate_bank()` (LIVE) — KHÔNG đụng
 Vẫn đọc `data/bank_lens_v3.csv` (nguồn nối tiếp sau 28/09 = OCR `bank_npl_coverage_primary`). File
 FiinPro CHỈ phục vụ LỊCH SỬ nên không cần refresh sau khi trial hết hạn.
+
+
+### Hậu kiểm sau merge trên `main` (2026-09-27, job `Taylor_20260927_033050`)
+Chạy lại thật trên main, KHÔNG dùng `R8L_HIST_NO_BQ_REFRESH` ⇒ `tav2_bq.fa_ratings_8l` đã refresh live.
+A/B snapshot BQ trước/sau (53.660 dòng cả hai, 0 dòng thêm/mất): **360/981 dòng BANK đổi rating**
+(1→2:80, 1→3:153, 2→1:8, 2→3:112, 3→2:1, 3→4:3, 3→5:2, 4→3:1), **0 dòng route khác đổi**,
+**266/981 vượt biên `≤2`** — khớp từng con số mục trên.
+- **0 dòng LỊCH SỬ đổi cổng `≤3`.** Có 6 dòng đổi cổng nhưng cả 6 là dòng **mới nhất** của đúng 6
+  bank bị `override_current_bank_aq()` **từ chối fail-closed** vì không có lens data thật
+  (BAB 3→4, BVB 3→4, PGB 3→4, NVB 3→5, SGB 3→5, KLB 4→3) — tức xoá điểm live BỊA, đúng chủ đích H1,
+  không phải dòng lịch sử. 9 tên bị từ chối: ABB, BAB, BVB, KLB, NVB, PGB, SGB, VAB, VBB.
+- `build_universe_pit_quality` (recompute phiên 2026-09-25 vs dòng đã lưu): **đúng 1 mã đổi cờ —
+  BVB `QUALITY_OK` → `RATING_FAIL`**; ABB giữ `QUALITY_OK`. ⚠️ Bảng `universe_pit_quality` là
+  **append-only** ⇒ dòng 09-25 đã ghi VẪN giữ `QUALITY_OK` cho BVB; cờ mới chỉ có hiệu lực từ lần
+  build ngày kế tiếp.
+- Watchlist tier W (`anomaly_scan.py:156`, luật `rating≤2` trên dòng mới nhất): **+ABB, −0** (242→243).
+  Ghi chú: `data/bq_cache/fa_ratings_8l.parquet` (23:45 25/09) có HDG trong tier W mà bảng live
+  TRƯỚC refresh không có — lệch này có TRƯỚC và KHÔNG do merge; cache sẽ đồng bộ ở lần sync kế tiếp.
+- Bất biến đường tiền: md5 `data/custom30v_8l_publish.csv` = `32659b23856448b4f566fb3d3fd834a1` và
+  `data/rating_8l.csv` = `620debcf6374c5d0ecd318a6cd349b40` **KHÔNG đổi** trước/sau.
+- `rating_8l_history_bank_aq_selfcheck.py`: **33/33 PASS** ở cả 3 TZ (ICT / UTC / `env -u TZ`).
 
 ↩ [Về nhóm fundamentals](index.md) · [Về index tổng](../index.md)

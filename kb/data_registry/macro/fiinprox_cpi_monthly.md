@@ -42,7 +42,7 @@ hay tỷ giá). Harvest 2 lệnh (2008-2016, 2017-2026), filter server-side 4 `t
 ## Nâng status / dùng
 - Headline + lõi: DERIVED.
 
-### ĐÃ WIRE, CHỜ USER DUYỆT MERGE — `cpi_vn.py` tầng **T1.5** (2026-09-27)
+### LIVE từ 2026-09-27 (merge `1546895a`) — `cpi_vn.py` tầng **T1.5**
 Branch `wire/fiinprox-h1-h2-ve-sinh`, job `Taylor_20260927_022319`. Thứ tự tầng mới
 **T1 > T1.5 > T3 > T2**: T1 (NSO live, 13 tháng) giữ ưu tiên TUYỆT ĐỐI; T1.5 = `cpi_yoy_pct` của
 file này phủ 2008-01→2026-08; **T2 và T3 GIỮ NGUYÊN làm fallback** (mất file ⇒ chuỗi byte-identical
@@ -62,5 +62,16 @@ cách sửa = refresh `NSO_CPI_YOY_REAL` từ GSO (refresh FiinPro là bất kh�
   ảnh hưởng DCF": đổi `DCF_TERMINAL_MODE` sang `cpi` là −0,0279pp đi thẳng vào `g_term`.
 - KHÔNG có bằng chứng nào nói việc này tăng lợi nhuận hay cải thiện chất lượng tín hiệu. Đây là
   VỆ SINH DỮ LIỆU.
+
+
+### Hậu kiểm sau merge trên `main` (2026-09-27, job `Taylor_20260927_033050`)
+`cpi_vn_tier15_selfcheck.py`: **33/33 PASS** ở cả 3 TZ (ICT / UTC / `env -u TZ`), relabel
+**REG_C 27/185 · REG_B 17/185** — khớp con số mục trên.
+⚠️ **Cách chạy ĐỔI sau merge:** selfcheck là A/B thật, `CPI_OLD_ROOT` mặc định trỏ vào checkout
+canonical — sau merge canonical CHÍNH LÀ bản mới ⇒ chạy mặc định **hard-fail**
+(`AttributeError: module 'cpi_old' has no attribute 'NSO_CPI_YOY_AVG_REAL'`), KHÔNG phải regression.
+Muốn chạy lại phải trỏ `CPI_OLD_ROOT` vào một root có `cpi_vn.py` TRƯỚC merge, ví dụ:
+`git show 1546895a^1:./cpi_vn.py` vào một thư mục symlink-mirror của `WorkingClaude/`
+(cần `mike/` + `data/macro_features.csv`).
 
 ↩ [Về nhóm macro](index.md) · [Về index tổng](../index.md)
