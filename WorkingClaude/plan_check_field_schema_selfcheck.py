@@ -18,6 +18,7 @@ một plan sai schema cho người đọc.
 TAG = "selfcheck_chkfield"  # unique — không dùng chung với selfcheck khác
 """
 
+import atexit
 import glob
 import json
 import os
@@ -34,14 +35,45 @@ sys.path.insert(0, WORKDIR)
 
 _TAG = "selfcheck_chkfield"
 _PLAN_DATE = "2026-08-14"
-_EXEC_DIR = os.path.join(WORKDIR, "data", "execution_logs")
-for _f in glob.glob(os.path.join(_EXEC_DIR, f"exec_{_TAG}_*")):
-    os.remove(_f)
 
 from trading_bot.plan import (CHECK_FIELDS_AS_DICT, PlannedOrder, TradePlan,
                               load_plan, normalize_check_field)
 from trading_bot.executor import Executor
-from trading_bot.config import PLAN_DIR
+from trading_bot.config import EXEC_DIR as _CFG_EXEC_DIR, PLAN_DIR
+
+# ── Dọn rác vào ĐÚNG cây mà `Executor` GHI ───────────────────────────────────────────────────
+# Cùng lớp lỗi với `mike/bin/nav_scripts_2account_selfcheck.py` (vá `7b14e3e8`, 2026-09-27):
+# selfcheck tính đường dẫn theo MỘT cách, script bị kiểm ghi theo cách KHÁC ⇒ dọn cây A trong khi
+# rác nằm ở cây B. Ở đây `_EXEC_DIR` cũ = `<dir của FILE NÀY>/data/execution_logs`, còn `Executor`
+# ghi journal vào `trading_bot.config.EXEC_DIR` — mà `config.py:13` cho `TRADING_BOT_RUNTIME_ROOT`
+# GHI ĐÈ gốc. Đặt biến đó (hoặc chạy bản `trading_bot` của cây khác qua `sys.path`) là hai bên tách
+# đôi ngay, im lặng. Nên: lấy ĐÚNG đường dẫn từ module bị kiểm, và fail-closed nếu không khớp cây
+# của file này mà cũng không có lý do tường minh (env override).
+_EXEC_DIR = _CFG_EXEC_DIR
+_LOCAL_EXEC_DIR = os.path.join(WORKDIR, "data", "execution_logs")
+if os.path.realpath(_EXEC_DIR) != os.path.realpath(_LOCAL_EXEC_DIR):
+    assert os.environ.get("TRADING_BOT_RUNTIME_ROOT"), (
+        f"FAIL-CLOSED: Executor ghi journal vào {_EXEC_DIR} nhưng file selfcheck này nằm ở cây "
+        f"{WORKDIR} và KHÔNG có TRADING_BOT_RUNTIME_ROOT giải thích chênh lệch — không chạy tiếp, "
+        f"vì dọn rác sẽ nhắm sai cây (xem 7b14e3e8)")
+
+
+def _cleanup_journals():
+    """Xoá MỌI artifact sentinel của selfcheck này khỏi EXEC_DIR THẬT.
+
+    Trước 2026-09-27 chỉ có vòng dọn TRƯỚC khi chạy ⇒ sau mỗi lần chạy vẫn còn đúng một
+    `exec_selfcheck_chkfield_2026-08-14_journal.csv` nằm lại trong `data/execution_logs/` THẬT
+    (đo được bằng md5 trước/sau: nội dung file đổi mỗi lần chạy). `atexit` phủ cả đường FAIL.
+    """
+    for _f in glob.glob(os.path.join(_EXEC_DIR, f"exec_{_TAG}_*")):
+        try:
+            os.remove(_f)
+        except OSError:
+            pass
+
+
+atexit.register(_cleanup_journals)
+_cleanup_journals()       # dọn rác còn sót của lần chạy TRƯỚC
 
 # Chuỗi THẬT, sao y từ plan production (không phải chuỗi bịa) — mỗi dòng là một hình dạng khác
 # nhau mà nguồn sinh plan đã thực sự ghi ra.
