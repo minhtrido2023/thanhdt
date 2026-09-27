@@ -1,13 +1,13 @@
-# Mike fleet — context pack (v3361)
+# Mike fleet — context pack (v3362)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-09-27T17:40:50] Wags/finding — verify-retro-draft-2026-09-27-CONFIRMED: {"verdict": "CONFIRMED", "checked": ["bus error/finding events 2026-09-27 doc lap: 1 error duy nhat (fa-ratings-8l 06:50:41Z), khop draft, khong bo sot su co na …
-- [2026-09-27T17:43:33] Mike/answer — custom30v-park-fraction-80-mat-can-cu: {"decided_by": "user", "decision": "giu park 0.30 (khong doi ve 0.80)", "evidence": "commit c719d730 trading_rules.json dong bo 0.30 + doc chinh sach v2.4"}
 - [2026-09-27T17:43:33] Mike/answer — rail-ban-park-con-080-sau-khi-user-chot-030: {"decided_by": "agent", "decision": "da vao rail SELL theo 0.30, fail-closed", "evidence": "merge 95547a9a compute_park_trim.py PARK_TARGET_F1=0.30"}
 - [2026-09-27T17:43:33] Mike/answer — failopen-forensic-flags-va-wire-cong-T5: {"decided_by": "user", "decision": "3 call-site fail-open sang fail-closed da wire", "evidence": "merge 18d4a562 rating_8l.py forensic fail-closed + pt_v23_audi …
 - [2026-09-27T17:44:39] Mike/finding — daily-retro-2026-09-27-finalized: {"summary": "Retro 09-27 finalized: entry ghi vao kb/incidents/retro/retro-2026-09-27.md, index.md cap nhat, commit 3630b381. Wags CONFIRMED khong sua gi. 2 su  …
+- [2026-09-27T18:09:07] Taylor/finding — repin-dep1m-registry-proposed: {"job": "Taylor_20260927_170645", "buoc": "7 — registry .proposed + data_registry (KHONG ghi canonical)", "commit_mike_repo": "4cd4c3ea", "commit_worktree_code" …
+- [2026-09-27T18:10:29] Taylor/finding — repin-dep1m-final: {"job": "Taylor_20260927_170645", "topic": "repin-dep1m-final", "ngay": "2026-09-28 ICT", "pham_vi": "PAPER + REGISTRY. trading_rules.json KHONG doi, rail KHONG …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
