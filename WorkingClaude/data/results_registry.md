@@ -7359,14 +7359,23 @@ trên bản cuối sau merge; (3) chạy lại `custom30_history.py` để `tav2
 
 ---
 
-## 2026-09-27 (ter) — QUÉT LƯỚI PARK-FRACTION custom30V 12 MỨC — **ĐỈNH NỘI THẬT Ở 30%**, bis §7 "đơn điệu giảm" là do lưới quá thưa — job `Taylor_20260927_064747` ⚠️ **PAPER-ONLY, `trading_rules.json` KHÔNG ĐỔI, CHỜ USER**
+## 2026-09-27 (ter) — QUÉT LƯỚI PARK-FRACTION custom30V 12 MỨC — **PLATEAU 0-30%, MỌI MỨC ≥40% BỊ LOẠI**, bis §7 "đơn điệu giảm" là do lưới quá thưa — job `Taylor_20260927_064747` ⚠️ **PAPER-ONLY, `trading_rules.json` KHÔNG ĐỔI, CHỜ USER**
 
 User (13:38 ICT 27/09) yêu cầu **một con số cụ thể** thay cho `neutral_parking.default_park_of_idle_pct
 = 0.8` (chốt 08-04 dựa trên biên **0,01 Calmar** ở chân return LỖI, nay mất căn cứ). PREREG viết
 trước khi chạy: `mike/agents/Taylor/research/park_fraction_grid_20260927/PREREG.md` (+ 2 amendment).
 Cây đo **main @`f2cfb124`** (đã merge cả chân return `a808a613` và chân weight ex-date ticket 1).
 
-### KẾT LUẬN — **30 %** (dải hợp lý **20–30 %**; mọi mức ≥40% bị ràng buộc rủi ro loại)
+### KẾT LUẬN — **plateau 0–30 %** (mọi mức ≥40% bị ràng buộc rủi ro loại)
+
+> ⚠️ **SỬA CHỮ 2026-09-27 vòng 2 (job `Taylor_20260927_074727`) — mọi CON SỐ dưới đây giữ nguyên,
+> chỉ suy luận "đỉnh nội ở 30%" bị rút lại.** quant-skeptic (`quant-skeptic_20260927_072455`)
+> REFUTED tuyên bố đó: argmax Calmar trên MỘT đường lịch sử là biến ồn (paired bootstrap:
+> `P(argmax=30%) = 0,147` vs `P(argmax=0%) = 0,371`, `P(Calmar_30 > Calmar_0) = 0,479`), và
+> E[Calmar] **không có đỉnh nội** — nó gần phẳng trên 0–30% rồi giảm đơn điệu. Con số chọn theo
+> PREREG v2 là **0 %**; 30 % là con số nếu đổi hàm mục tiêu sang minimax-regret CAGR. Chi tiết +
+> bảng paired bootstrap / leave-out / độ nhạy ngưỡng: mục **2026-09-27 (ter-bis)** phía dưới và
+> `mike/agents/Taylor/research/park_fraction_grid_20260927/REPORT_v2.md`.
 
 Hàm mục tiêu khai báo TRƯỚC: tối đa **Calmar**, với ràng buộc **bootstrap 5th-pct MaxDD không xấu
 hơn park=0 quá 2,0pp**; tie-break Sharpe, rồi mức park thấp hơn.
@@ -7376,7 +7385,7 @@ hơn park=0 quá 2,0pp**; tie-break Sharpe, rồi mức park thấp hơn.
 | 0 | 22,37% | **1,95** | −16,1% | 1,390 | 618,35B | 20,30% | 24,23% | 15,2% | **−24,0%** | ✅ |
 | 10 | 22,75% | 1,94 | −15,7% | 1,450 | 642,68B | 20,11% | 25,16% | 15,3% | −24,3% | ✅ |
 | 20 | 22,76% | 1,90 | −15,2% | 1,500 | 643,55B | 20,11% | 25,19% | 15,1% | −24,9% | ✅ |
-| **30 ← ĐỀ XUẤT** | **23,43%** | 1,88 | **−14,4%** | **1,630** | 688,77B | 20,07% | 26,56% | 15,6% | **−25,1%** | ✅ (1,1pp) |
+| **30** (đề xuất vòng 1, ĐÃ RÚT LẠI — xem sửa chữ trên) | **23,43%** | 1,88 | **−14,4%** | **1,630** | 688,77B | 20,07% | 26,56% | 15,6% | **−25,1%** | ✅ (1,1pp) |
 | 40 | 23,03% | 1,80 | −15,1% | 1,530 | 661,56B | 19,86% | 25,97% | 14,9% | −26,4% | ❌ |
 | 50 | 24,15% | 1,81 | −16,6% | 1,450 | 740,30B | 19,73% | 28,32% | 15,8% | −27,4% | ❌ |
 | 60 | 24,32% | 1,75 | −17,7% | 1,370 | 753,06B | 19,54% | 28,84% | 15,6% | −28,9% | ❌ |
@@ -7416,7 +7425,9 @@ CẢ lưới). Đọc thẳng: **tăng park gần như không mua thêm gì ở 
 chỉ mua thêm đuôi DD.** "80% so với 30%" = +1,52pp CAGR ↔ **+5,4pp MaxDD thực + 6,9pp đuôi DD 5th-pct,
 −0,37 Calmar, −0,22 Sharpe** = **0,28pp CAGR / 1pp MaxDD**.
 
-### Đỉnh 30% ROBUST theo leave-one-year-out, nhưng N hiệu dụng ≈ 2 — phải nói kèm
+### Ưu thế 30% trên ĐƯỜNG LỊCH SỬ bền theo leave-one-year-out, nhưng N hiệu dụng ≈ 2 — và KHÔNG bền trong kỳ vọng
+⚠️ Mục này nói về argmax của Calmar **lịch sử**. Vòng 2 cho thấy nó KHÔNG chuyển thành đỉnh trong
+E[Calmar]; đọc mục này kèm sửa chữ ở đầu.
 - Phân giải: 30% cách mức kề gần nhất **0,100 Calmar** (tới 40%) — hơn **3×** ngưỡng 0,03 khai báo
   trước, và lớn hơn **10×** biên 0,01 mà quyết định 08-04 từng dựa vào.
 - **LOYO**: bộ {20,30,40}% → 30% thắng **12/13**, đổi **1/13** (bỏ 2020 → 20%) ⇒ **≤1 ⇒ robust**
@@ -7443,7 +7454,7 @@ theo x). Drag đơn điệu **0,000 → 0,083pp/năm** (30% chỉ 0,023pp) ⇒ c
 
 ### ⛔ KHÔNG TỰ ĐỔI GÌ — hai phương án cho user
 `trading_rules.json` vẫn `0.8`, không đụng một byte. Áp vào LIVE cần **user duyệt + quant-skeptic**.
-- **(a) khuyến nghị — 30%**: Calmar 1,630 (+0,37 vs LIVE), Sharpe 1,88 (+0,22), MaxDD −14,4% (tốt hơn
+- **(a) đề xuất vòng 1, ĐÃ RÚT LẠI sau REFUTED — 30%**: Calmar 1,630 (+0,37 vs LIVE), Sharpe 1,88 (+0,22), MaxDD −14,4% (tốt hơn
   5,4pp), đuôi DD −25,1% (tốt hơn 6,9pp); CAGR 23,43% (mất 1,52pp). Quy đổi thực tế ⇒ **≈21,9%/năm**.
 - **(b) mức thấp nhất còn giữ CAGR ≥24,0% = 50%** (40% chỉ 23,03%) — nhưng 50% có đuôi DD −27,4%,
   **vi phạm** ràng buộc 2,0pp ⇒ (b) chỉ tồn tại nếu user chủ động nới ràng buộc rủi ro.
@@ -7461,6 +7472,83 @@ ADV/phiên — `kb/projects/lag-adv-filter-tracking.md`); một đường đi l�
 `park_grid_curves.png` · `dd_episodes.txt` · `loyo_020_030_040.log` · `loyo_000_030_080.log`. CSV:
 `data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-*_wtnamecap_advprice_exp_parkgrid_*_univpit.csv`
 (14 file, tên non-canonical theo §8). **Không thay đổi một dòng code production nào trong job này.**
+
+## 2026-09-27 (ter-bis) — PARK-FRACTION VÒNG 2 sau quant-skeptic REFUTED — **MỘT CON SỐ: 0 %** (plateau 0-30% phẳng; luật quyết, không phải dữ liệu) — job `Taylor_20260927_074727` ⚠️ **PAPER-ONLY, `trading_rules.json` KHÔNG ĐỔI, CHỜ USER**
+
+Engine **KHÔNG chạy lại**: tái dùng đúng 12 CSV leg của (ter). PREREG v2 viết **và commit trước khi
+đọc số nào** (`mike` commit `fb6f0aa7`, `PREREG_v2.md`). Tiêu chí chọn khai báo trước = tối đa
+**E[Calmar] dưới paired block bootstrap** (KHÔNG phải Calmar 1 đường lịch sử — lỗi vòng 1), ràng
+buộc DD giữ nguyên, tie-break = **mức THẤP hơn** nếu `|ΔE[Calmar]| < 0,03` (v1 nói Sharpe; v2 đổi
+có chủ ý và nêu rõ trước).
+
+### KẾT LUẬN — **0 %**, và nói thẳng: do LUẬT quyết, KHÔNG do dữ liệu phân biệt được
+- Tập qua cổng DD 2,0pp = {0, 10, 20, 30}. `E[Calmar]` = **1,5073 / 1,4983 / 1,4601 / 1,4761** ⇒
+  argmax = 0%, nhóm tie 0,03 = {0, 10} ⇒ tie-break "thấp hơn" ⇒ **0 %**.
+- Các khoảng cách này là **nhiễu**: dải 5th–95th của chính Calmar rộng **~1,9** (0,72→2,57). **30%
+  bị loại khỏi nhóm tie bởi 0,0012 Calmar.** `P(Calmar_30 > Calmar_0) = 0,479` = đồng xu.
+- median[Calmar] cho cùng thứ hạng (gap 0% vs 10% = 0,0008) ⇒ không phải artefact đuôi phép chia.
+- **`P(argmax Calmar = x)` phân tán khắp lưới** (0,371 @0% · 0,147 @30% · 0,114 @50%) ⇒ argmax
+  Calmar là biến ồn; **dùng nó làm tiêu chí chọn (vòng 1) là sai phương pháp**, đây là bài học giữ lại.
+- **E[Calmar] KHÔNG có đỉnh nội**: gần phẳng ≤30%, rồi giảm đơn điệu (1,367 @40% → 1,078 @100%).
+  "Đỉnh nội thật ở 30%" của (ter) chính thức **RÚT LẠI** (số của (ter) vẫn đúng, suy luận thì không).
+
+### Paired = một chuỗi block index cho CẢ 12 leg (L=21, B=4000, seed 12345)
+12 leg `assert` trùng khít **3107 ngày lịch** 2014-01-02→2026-06-19 (N_ret=3106, 12,460y calendar,
+quy ước lịch của `bootstrap_nav.py` sau FAIL-F). Vòng 1 chạy **12 bootstrap ĐỘC LẬP** nên về nguyên
+tắc không trả lời được "30 có hơn 0 không" — nhiễu không được chia sẻ. Đó là lỗ hổng vòng 2 vá.
+
+| x | E[Calmar] | Cal 5th–95th | P(argmax) | P(>x=0) | E[MaxDD] | DD 5th | E[CAGR] | CAGR 5th | cổng 2,0pp |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|:--|
+| **0 ← CHỌN** | **1,5073** | 0,72–2,57 | 0,371 | — | −16,1% | **−24,0%** | 22,44% | 15,15% | ✅ |
+| 10 | 1,4983 | 0,72–2,54 | 0,126 | 0,508 | −16,5% | −24,3% | 22,82% | 15,29% | ✅ (tie) |
+| 20 | 1,4601 | 0,69–2,49 | 0,030 | 0,410 | −16,9% | −24,9% | 22,83% | 15,13% | ✅ |
+| 30 | 1,4761 | 0,71–2,50 | 0,147 | 0,479 | −17,1% | −25,1% | 23,51% | **15,55%** | ✅ |
+| 40 | 1,3670 | 0,65–2,32 | 0,015 | 0,318 | −18,2% | −26,4% | 23,11% | 14,92% | ❌ |
+| 50 | 1,3819 | 0,66–2,33 | 0,114 | 0,372 | −18,9% | −27,4% | 24,24% | 15,76% | ❌ |
+| 60 | 1,3112 | 0,61–2,25 | 0,036 | 0,305 | −20,1% | −28,9% | 24,43% | 15,62% | ❌ |
+| 70 | 1,2497 | 0,58–2,15 | 0,019 | 0,264 | −21,2% | −30,3% | 24,53% | 15,46% | ❌ |
+| 75 | 1,2350 | 0,57–2,15 | 0,027 | 0,259 | −21,6% | −31,1% | 24,77% | 15,52% | ❌ |
+| **80 ← LIVE** | **1,2164** | 0,56–2,12 | 0,051 | **0,257** | −22,2% | **−32,0%** | 25,07% | 15,62% | ❌ |
+| 90 | 1,1174 | 0,49–1,97 | 0,025 | 0,183 | −24,1% | −34,7% | 24,94% | 15,03% | ❌ |
+| 100 | 1,0784 | 0,48–1,90 | 0,038 | 0,173 | −25,1% | −36,1% | 25,06% | 15,02% | ❌ |
+
+### Hai tiêu chí khai báo trước chỉ NGƯỢC về 30% — báo nguyên văn, không che
+- **Minimax regret CAGR trên 0–30%: chọn 30%.** CAGR 5th-pct 15,15/15,29/15,13/**15,55**%; regret
+  per-path (so mức tốt nhất trên CÙNG đường) mean **1,20 / 0,82 / 0,80 / 0,13**pp, 95th
+  **2,91 / 2,02 / 1,59 / 0,90**pp.
+- **Leave-out theo episode: 4/5 ca chọn 30%.** argmax Calmar: FULL 30% · bỏ 2018 30% · bỏ 2018-2020
+  30% · bỏ 2022 30% · **bỏ {2019,2020} → 10%** (ca duy nhất đảo, và đảo về 10% chứ không về 0%).
+  ⇒ ưu thế lịch sử của 30% **tựa vào đợt Covid 2019→24/03/2020**, khớp cơ chế `dd_episodes.txt`
+  của (ter). **Mọi ca: mức thắng luôn trong 0–30%; 80% không thắng ca nào.**
+- **Không mâu thuẫn dữ liệu — cùng một sự thật:** parking đổi **+1,07pp CAGR ↔ −1,03pp MaxDD**
+  (trung bình 4000 đường, `P(CAGR_30>CAGR_0)=0,826` nhưng `P(MaxDD_30 tốt hơn)=0,312`). Tỷ lệ
+  ~**1:1** ⇒ chọn đầu nào là **SỞ THÍCH RỦI RO**, không phải phát hiện định lượng. PREREG v2 khai
+  báo sở thích (thận trọng ⇒ x thấp) TRƯỚC khi thấy số ⇒ 0 %.
+
+### Độ nhạy ngưỡng DD — kết luận "≥40% bị loại" BỀN với ngưỡng
+| trần | ngưỡng DD5th | mức qua cổng |
+|---|---|---|
+| 1,5pp | ≥ −25,50% | 0 / 10 / 20 / 30 |
+| **2,0pp (prereg)** | ≥ −26,00% | **0 / 10 / 20 / 30** |
+| 3,0pp | ≥ −27,00% | 0 / 10 / 20 / 30 / **40** |
+
+40% chỉ vào tập khi nới tới 3,0pp, và khi vào thì `E[Calmar]` 1,367 **thấp hơn cả 4 mức kia** ⇒
+**không mức nào ≥40% đổi được kết luận ở bất kỳ ngưỡng trong 1,5–3,0pp.**
+
+### ⛔ KHÔNG ĐỔI GÌ — user chọn LUẬT, không chọn SỐ sau khi xem số
+`trading_rules.json` vẫn `neutral_parking.default_park_of_idle_pct = 0.8`, không đụng một byte.
+- **Theo PREREG v2: 0 %.** Nếu user ưu tiên minimax-regret CAGR thay vì E[Calmar]: **30 %**.
+- **Không phụ thuộc luật nào — phần dữ liệu THỰC SỰ nói: hạ 80 % ⇒ ≤ 30 %.** 80% fail cổng DD ở
+  CẢ 3 ngưỡng, E[Calmar] thấp nhất vùng khả thi (1,216), `P(>x=0)=0,257`, không thắng ca nào.
+  Chênh 0% vs 30% = 1pp CAGR đổi 1pp DD; chênh 80% vs 0–30% = **~8pp đuôi DD**.
+
+**Caveat:** bootstrap = bất định **lấy mẫu** (biên DƯỚI của bất định thật, không mô hình vỡ chế độ);
+12 leg cùng vintage `bq_cache_asof20260729_postrestate`, cùng snapshot
+`data/snapshots/corp_action_share_20260927.parquet`, cùng tham số fill chưa neo (trần 20% ADV/phiên).
+
+**Artifact:** `mike/agents/Taylor/research/park_fraction_grid_20260927/` — `PREREG_v2.md` (commit
+`fb6f0aa7`, **trước** mọi kết quả) · `REPORT_v2.md` · `paired_v2.py` · `paired_v2.log` ·
+`paired_v2_results.json` · `diag_v2.py` · `diag_v2.log`. **Không thay đổi một dòng code production nào.**
 
 ## 2026-09-27 (quater) — ⭐ **PIN CHÍNH THỨC R3 SAU MERGE ĐỢT AUDIT 27/09** + chạy lại bootstrap/DSR/PBO theo manifest ghim — job `Taylor_20260927_064745` → `Taylor_20260927_071001`
 
