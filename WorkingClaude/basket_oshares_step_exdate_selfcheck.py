@@ -33,8 +33,10 @@ import custom_basket as cb                # noqa: E402
 CANON = "/home/trido/thanhdt/WorkingClaude"
 CA_SNAP = f"{CANON}/data/snapshots/corp_action_share_20260927.parquet"
 FIN_PARQUET = f"{CANON}/data/bq_cache_asof20260729_postrestate/ticker_financial.parquet"
-PUB_Q = f"{CANON}/data/custom30v_8l_publish_expwexdate_quarter.csv"
-PUB_E = f"{CANON}/data/custom30v_8l_publish_expwexdate_exdate.csv"
+# Vòng review 2: cặp `expwexdate2_*` được sinh VỚI `BASKET_CA_SNAPSHOT` truyền vào (vòng 1 đọc
+# live BQ — bảng đó bị UPSERT in-place nên claim "0/30 ở rebal 2026-08-05" không tái lập được).
+PUB_Q = f"{CANON}/data/custom30v_8l_publish_expwexdate2_quarter.csv"
+PUB_E = f"{CANON}/data/custom30v_8l_publish_expwexdate2_exdate.csv"
 
 FAILS = []
 N = [0]
@@ -56,6 +58,23 @@ def bq_pinned(sql):
     sql = BQLocalCache._translate(None, sql)     # also strips the `tav2_bq.` dataset prefix
     sql = re.sub(r"\bticker_financial\b", f"read_parquet('{FIN_PARQUET}')", sql)
     return duckdb.connect().execute(sql).df()
+
+
+def basket_union(path=None):
+    """Union mọi mã đã từng là thành viên custom30V (publish CSV) — 203 mã. Đọc từ CSV publish
+    thay vì hardcode để tập mã không lệch khỏi cái `custom30_history.py` chạy thật."""
+    path = path or f"{CANON}/data/custom30v_8l_publish.csv"
+    return sorted(pd.read_csv(path, usecols=["ticker"])["ticker"].unique().tolist())
+
+
+def fin_rows_many(tickers, since="2012-11-28"):
+    """fin_rows cho NHIỀU mã trong MỘT query — 203 query duckdb riêng lẻ mất hàng phút."""
+    inlist = ",".join(f"'{t}'" for t in tickers)
+    d = bq_pinned(f"""SELECT ticker, time AS eff_date, OShares FROM tav2_bq.ticker_financial
+        WHERE ticker IN ({inlist}) AND OShares IS NOT NULL AND time >= DATE '{since}'
+        ORDER BY ticker, time""")
+    d["eff_date"] = pd.to_datetime(d["eff_date"])
+    return d
 
 
 def fin_rows(ticker, since="2012-11-28"):
@@ -89,17 +108,21 @@ def t1_knob():
 def t2_match_rule():
     print("\nT2 — _match_step_date: chỉ khớp khi CỠ khớp, không phải chỉ vì có sự kiện trong cửa sổ")
     ts = pd.Timestamp
+    # price_adjusting is part of the real frame's schema (normalise_corp_action fills it), so the
+    # synthetic frames carry it too — a stub missing a column tests a shape production never sees.
     ev = pd.DataFrame([
         dict(ticker="X", event_code="ISS", share_date=ts("2024-06-20"), exercise_ratio=1.0,
-             shares_total_after=np.nan),
+             shares_total_after=np.nan, price_adjusting=True),
         dict(ticker="X", event_code="ISS", share_date=ts("2024-03-01"), exercise_ratio=0.05,
-             shares_total_after=np.nan),
+             shares_total_after=np.nan, price_adjusting=True),
         dict(ticker="X", event_code="ISS", share_date=ts("2024-09-05"), exercise_ratio=0.02,
-             shares_total_after=np.nan),
+             shares_total_after=np.nan, price_adjusting=True),
         dict(ticker="X", event_code="ISS", share_date=ts("2024-09-05"), exercise_ratio=0.03,
-             shares_total_after=np.nan),
+             shares_total_after=np.nan, price_adjusting=True),
         dict(ticker="X", event_code="AIS", share_date=ts("2024-12-02"), exercise_ratio=np.nan,
-             shares_total_after=2_000_000_000.0),
+             shares_total_after=2_000_000_000.0, price_adjusting=False),
+        dict(ticker="X", event_code="ISS", share_date=ts("2025-03-11"), exercise_ratio=0.012,
+             shares_total_after=np.nan, price_adjusting=False),      # ESOP: dated, not adjusting
     ])
     lo, hi = ts("2024-01-01"), ts("2025-01-01")
     d, how = cb._match_step_date(2.0, 2e9, lo, hi, ev)
@@ -116,16 +139,51 @@ def t2_match_rule():
     d, how = cb._match_step_date(1.37, 9e9, ts("2024-11-01"), hi, ev)
     ck("AIS lệch mức >0,1% -> KHÔNG khớp (EVENT_BUT_NO_RATIO_MATCH)",
        d is None and how == "EVENT_BUT_NO_RATIO_MATCH", how)
-    d, how = cb._match_step_date(1.5, 1e9, ts("2025-02-01"), ts("2025-06-01"), ev)
+    d, how = cb._match_step_date(1.5, 1e9, ts("2025-04-01"), ts("2025-06-01"), ev)
     ck("cửa sổ không có sự kiện nào -> NO_EVENT_IN_WINDOW",
        d is None and how == "NO_EVENT_IN_WINDOW", how)
     # dung sai 2% + 0,2pp: 0,15 vs 0,153 lọt, 0,15 vs 0,158 KHÔNG
     ev2 = pd.DataFrame([dict(ticker="X", event_code="ISS", share_date=ts("2025-07-21"),
-                             exercise_ratio=0.15, shares_total_after=np.nan)])
+                             exercise_ratio=0.15, shares_total_after=np.nan,
+                             price_adjusting=True)])
     d, _ = cb._match_step_date(1.153, 1e9, ts("2025-04-01"), ts("2025-09-01"), ev2)
     ck("dung sai: mục tiêu 0,153 vs sự kiện 0,150 -> KHỚP", d == ts("2025-07-21"))
     d, _ = cb._match_step_date(1.158, 1e9, ts("2025-04-01"), ts("2025-09-01"), ev2)
     ck("dung sai: mục tiêu 0,158 vs sự kiện 0,150 -> KHÔNG khớp (fallback ngày quý)", d is None)
+    # ISS KHÔNG điều chỉnh giá vẫn khớp BÌNH THƯỜNG (xem header "WHY NOT SPLIT ISS") — chỉ được
+    # GẮN NHÃN. Đây là chốt chống hồi quy cho đúng cái lệch header/code của vòng review 2.
+    d, how = cb._match_step_date(1.012, 1e9, ts("2025-01-01"), ts("2025-06-01"), ev)
+    ck("ESOP (không điều chỉnh giá) VẪN khớp ex-date, nhãn mang hậu tố _NONADJ",
+       d == ts("2025-03-11") and how == "ISS_RATIO_NONADJ", how)
+    d, how = cb._match_step_date(2.0, 2e9, lo, hi, ev)
+    ck("ISS điều chỉnh giá -> nhãn KHÔNG có hậu tố _NONADJ", how == "ISS_RATIO", how)
+
+
+# ------------------------------- T2b: cổng PIT 3 — clamp theo public_date
+def t2b_public_clamp():
+    print("\nT2b — cổng PIT 3: share_date không bao giờ TRƯỚC public_date")
+    ts = pd.Timestamp
+    raw = pd.DataFrame([
+        dict(ticker="X", share_date=ts("2024-05-10"), public_date=ts("2024-05-15")),   # công bố MUỘN
+        dict(ticker="X", share_date=ts("2024-07-01"), public_date=ts("2024-06-20")),   # công bố TRƯỚC
+        dict(ticker="X", share_date=ts("2024-08-01"), public_date=pd.NaT),             # thiếu -> giữ
+    ])
+    out = cb._clamp_share_date_to_public(raw.copy())
+    ck("public_date SAU share_date -> dời tới public_date", out.share_date.iloc[0] == ts("2024-05-15"),
+       str(out.share_date.iloc[0].date()))
+    ck("public_date TRƯỚC share_date -> giữ nguyên", out.share_date.iloc[1] == ts("2024-07-01"))
+    ck("public_date thiếu (NaT) -> giữ nguyên (fail-safe)", out.share_date.iloc[2] == ts("2024-08-01"))
+    ck("IDEMPOTENT: clamp lần 2 không đổi gì",
+       cb._clamp_share_date_to_public(out.copy()).share_date.equals(out.share_date))
+    nopub = pd.DataFrame([dict(ticker="X", share_date=ts("2024-05-10"))])
+    ck("thiếu CẢ CỘT public_date (vintage cũ) -> không lỗi, giữ nguyên",
+       cb._clamp_share_date_to_public(nopub.copy()).share_date.iloc[0] == ts("2024-05-10"))
+    # ĐỘT BIẾN: snapshot đã ghim PHẢI thực sự bị clamp khi đọc, nếu không cổng 3 là no-op im lặng
+    ev = pd.read_parquet(CA_SNAP)
+    ev["share_date"] = pd.to_datetime(ev["share_date"])
+    pub = pd.to_datetime(ev["public_date"], errors="coerce")
+    n = int((pub.notna() & (pub > ev["share_date"])).sum())
+    ck("ĐỘT BIẾN: snapshot ghim CÓ dòng cần clamp (cổng 3 không phải no-op)", n > 0, f"{n} dòng")
 
 
 # ------------------------------------- T3: ca thật, ĐÚNG ngày, ĐÚNG hướng
@@ -146,10 +204,14 @@ def t3_real_cases():
        abs(float(row["ratio"]) - 2.0) < 1e-9, f"ratio={row['ratio']}")
 
     # (b) hướng NGƯỢC LẠI = look-ahead: dòng quý 2024-10-22 đã mang số CP của ESOP đi ex 11-30.
+    # Ex-date vendor ghi 2024-11-30 nhưng public_date là 2024-12-03 ⇒ cổng PIT 3 dời tới ngày CÔNG
+    # BỐ. ESOP không điều chỉnh giá ⇒ nhãn phải có hậu tố _NONADJ (không bị lọc bỏ — xem header).
     row = r.loc[("TCB", "2024-10-22")]
-    ck("TCB ESOP: dòng quý 2024-10-22 mang số tương lai -> dời MUỘN tới 2024-11-30 (bỏ look-ahead)",
-       str(row["eff_date"].date()) == "2024-11-30" and int(row["moved_days"]) == -39,
+    ck("TCB ESOP: dời MUỘN tới public_date 2024-12-03 (bỏ look-ahead + cổng PIT 3)",
+       str(row["eff_date"].date()) == "2024-12-03" and int(row["moved_days"]) == -42,
        f"eff={row['eff_date'].date()} moved={row['moved_days']}")
+    ck("TCB ESOP: nhãn ghi rõ ISS không điều chỉnh giá (_NONADJ)",
+       "_NONADJ" in str(row["match"]), str(row["match"]))
 
     # (c) ca KHÔNG khớp được -> PHẢI giữ ngày quý (fallback = hành vi hiện tại, không bịa ngày)
     row = r.loc[("FPT", "2025-07-22")]
@@ -178,17 +240,23 @@ def t3_real_cases():
     bad = [tk for tk, g in grid.groupby("ticker")
            if not g["eff_date"].is_monotonic_increasing or g["eff_date"].duplicated().any()]
     ck("cổng PIT 2: eff_date tăng NGẶT trong từng mã", not bad, str(bad))
-    return grid, rep
 
 
 # ------------------- T4: hành vi trên frame NGÀY — bất biến quan trọng nhất
-def t4_daily_frame(grid, rep):
-    print("\nT4 — apply_oshares trên frame NGÀY: ngày KHÔNG có sự kiện phải Y NGUYÊN")
-    tks = ["TCB", "ACB", "HPG", "FPT"]
+def t4_daily_frame():
+    """Chạy trên TOÀN BỘ union 203 mã từng vào rổ, không phải 4 mã mẫu (mở rộng vòng review 2,
+    2026-09-27): đây là CỔNG MERGE — "ngoài cửa sổ dời thì byte-identical" chỉ có giá trị khi đo
+    trên đúng tập mã mà `custom30_history.py` sẽ chạy thật."""
+    tks = basket_union()
+    print(f"\nT4 — apply_oshares trên frame NGÀY, TOÀN BỘ union {len(tks)} mã "
+          f"(ngày KHÔNG có sự kiện phải Y NGUYÊN)")
+    os.environ["BASKET_CA_SNAPSHOT"] = CA_SNAP
+    cb._CA_CACHE.clear()
+    grid, rep = cb.oshares_pit_grid(bq_pinned, tks, "2014-01-01", "2026-09-25")
     days = pd.bdate_range("2014-01-02", "2026-09-25")
     bx0 = pd.DataFrame([(t, d) for t in tks for d in days], columns=["ticker", "time"])
     # nạp OShares theo đúng cách SQL của build/build_pit: t.time >= f.time (ngày CÔNG BỐ quý)
-    fin = pd.concat([fin_rows(t) for t in tks]).rename(columns={"eff_date": "time"})
+    fin = fin_rows_many(tks).rename(columns={"eff_date": "time"})
     bx0 = pd.merge_asof(bx0.sort_values("time"), fin.sort_values("time"),
                         on="time", by="ticker", direction="backward")
     bx0["Close"] = 10.0
@@ -313,8 +381,9 @@ def main():
     print(f"TZ = {os.environ.get('TZ', '<unset>')!r}")
     t1_knob()
     t2_match_rule()
-    grid, rep = t3_real_cases()
-    t4_daily_frame(grid, rep)
+    t2b_public_clamp()
+    t3_real_cases()
+    t4_daily_frame()
     t5_publish_diff()
     t6_ungrouped_bfill()
     print(f"\n==== {N[0] - len(FAILS)}/{N[0]} PASS ====")
