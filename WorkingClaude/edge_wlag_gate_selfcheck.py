@@ -26,8 +26,16 @@ import pandas as pd
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 PROD = os.path.join(ROOT, "deploy_golive_dt5g_v4", "golive_recommend_v23.py")
+# Baseline check G. RETARGET 2026-09-27 (user chọn phương án A, 17:29 ICT): trỏ vào ledger
+# của ANCHOR R3 ĐANG HIỆU LỰC (pin "2026-09-27 (sexies)": park 0,30 + advprice + univpit +
+# engine đã vá FAIL-C), md5 4707bcbe… — tên canonical hoá từ bản `_exp_failc_new_` (byte-identical).
+# Vì sao đổi: baseline cũ `..._wtnamecap.csv` sinh 2026-07-14 bởi engine TRƯỚC FAIL-C nên nó
+# encode CHÍNH nhãn look-ahead `entry` (đo thật: khớp entry 40/40 nhưng known_date chỉ 28/40).
+# Ledger anchor hiện hành ngược lại: known_date 38/38, entry 36/38. Giữ baseline cũ = ghim
+# tương đương với một nhãn đã bị loại bỏ.
 PINNED_CSV = os.path.join(ROOT, "data",
-    "v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap.csv")
+    "v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg"
+    "_park3-30_wtnamecap_advprice_univpit.csv")
 
 fails = []
 

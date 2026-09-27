@@ -7942,6 +7942,25 @@ new: [edge-alloc] source=lag_edge_health.csv                        label_col=kn
   KHÔNG rớt OOS.
 - Ledger NEW md5 **`4707bcbeb7e801d49a4a851ffd91d5e7`**, 16.633 dòng:
   `data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-30_wtnamecap_advprice_exp_failc_new_univpit.csv`
+  ✅ **TÊN CANONICAL hoá 2026-09-27 17:3x ICT (user chọn phương án A)** — theo §8 coding_guidelines
+  ("không ghi output thí nghiệm vào tên canonical", và ngược lại: **tên pin không được mang hậu tố
+  `_exp_`**). Tên canonical của ledger anchor R3 từ nay là:
+  `data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-30_wtnamecap_advprice_univpit.csv`
+  — **BYTE-IDENTICAL** với bản `_exp_failc_new_` (cùng md5 `4707bcbe…`); bản `_exp_` GIỮ LẠI làm
+  artifact A/B, không xoá. Trục cấu hình còn trong tên: `park3-30` (knob live), `advprice`
+  (`LAG_ADV_BASIS=price`), `univpit` (`universe_pit`). Nhãn as-of causal `known_date` KHÔNG có hậu
+  tố vì nó đã là **hành vi mặc định của engine** sau FAIL-C (§8: chỉ trục nào còn bật/tắt được mới
+  cần tag).
+
+  **Baseline tripwire `edge_wlag_gate_selfcheck.py` check G đã RETARGET sang tên canonical này.**
+  Trước đó nó ghim `..._wtnamecap.csv` (mtime 2026-07-14 11:52, md5 `4d736d91…`) — sinh bởi engine
+  TRƯỚC FAIL-C, nên nó ghim **chính nhãn look-ahead**: đo thật, baseline đó khớp `entry` **40/40**
+  nhưng `known_date` chỉ **28/40**; ledger anchor hiện hành thì ngược lại — `known_date` **38/38**,
+  `entry` **36/38**. ⇒ check G FAIL sau khi vá tồn dư FAIL-C là **bằng chứng ỦNG HỘ** bản vá.
+  Sau retarget: **13/13 PASS**. Chống anti-pattern "sửa test cho vừa bản vá" — đã bắn mutation:
+  đổi `key` về `"entry"` trong engine ⇒ check G **FAIL** (lệch đầu tiên 2017-09-01, 2017-11-30)
+  ⇒ tripwire mới thực sự ghim nhãn causal, không vacuous. Bản `..._wtnamecap.csv` Jul-14 GIỮ trên
+  đĩa (lịch sử), **không còn là baseline của bất kỳ cổng nào**.
 
 **Số phiên cổng `w_lag_target` đổi giá trị giữa 2 chân — ĐO LẠI trên nhãn mới, không trích số cũ:**
 **226 / 3.107 ngày allocator = 7,27%**, hướng gần đối xứng nhưng NGHIÊNG LÊN:
