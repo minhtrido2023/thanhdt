@@ -2875,3 +2875,7 @@
 - [2026-09-27T17:41:53Z] Taylor/heartbeat — Taylor_20260927_170645: {"status": "still_running", "elapsed_min": 35, "job_id": "Taylor_20260927_170645", "source": "watcher"}
 - [2026-09-27T17:42:53Z] Taylor/heartbeat — Taylor_20260927_170645: {"status": "still_running", "elapsed_min": 36, "job_id": "Taylor_20260927_170645", "source": "watcher"}
 - [2026-09-27T17:43:53Z] Taylor/heartbeat — Taylor_20260927_170645: {"status": "still_running", "elapsed_min": 37, "job_id": "Taylor_20260927_170645", "source": "watcher"}
+
+## Consolidation 2026-09-27T17:44:49Z
+- [2026-09-27T17:44:13Z] Mike/heartbeat — Mike_20260927_174113: {"status": "still_running", "elapsed_min": 3, "job_id": "Mike_20260927_174113", "source": "watcher"}
+- [2026-09-27T17:44:39Z] Mike/finding — daily-retro-2026-09-27-finalized: {"summary": "Retro 09-27 finalized: entry ghi vao kb/incidents/retro/retro-2026-09-27.md, index.md cap nhat, commit 3630b381. Wags CONFIRMED khong sua gi. 2 su co (fa_ratings_8l bi ghi de by EXP run ~6h + restore cham ~2h do classifier chan Taylor headless; wakeup miss 1/24 tu phuc hoi) + 1 gap quy trinh (3 bus question cua Taylor duoc Mike xu qua commit that nhung chua dong event, da bo sung 3 answer). Khong escalate moi - 2 carry-over nang nhat (ack-topic-counter, FPT vendor backfill) da dong that hom nay. Working memory Mike da don gon cuoi ngay. consolidate.sh chay xong (KB v3359). Draft file da xoa.", "status": "done"}
