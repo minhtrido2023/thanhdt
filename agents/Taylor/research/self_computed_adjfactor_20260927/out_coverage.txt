@@ -1,0 +1,14 @@
+sustained factor drops (real ex-date candidates) : 65
+  matched by a price-adjusting corporate_action row: 55
+  ORPHAN (our table blind)                        : 10
+transient 1-day ratio spikes (stale `Price`, NOT ex-dates, excluded): 40
+   ORPHAN VHM    2026-08-07  implied f=1.984436
+   ORPHAN VNM    2026-06-25  implied f=1.032772
+   ORPHAN GEE    2026-02-02  implied f=1.028758
+   ORPHAN GVR    2026-02-02  implied f=1.025094
+   ORPHAN FPT    2026-02-02  implied f=1.015284
+   ORPHAN HPG    2026-02-02  implied f=1.011328
+   ORPHAN DCM    2026-02-02  implied f=1.010881
+   ORPHAN VHM    2026-02-02  implied f=1.009501
+   ORPHAN DCM    2026-07-10  implied f=1.007407
+   ORPHAN VNM    2026-02-02  implied f=1.007132
