@@ -649,7 +649,8 @@ _ALLOWED_R6 = {"plan_funding_gate_selfcheck.py",        # chính file này
 _ROOTS_R6 = [_os_r6.path.join(_WC_R6, "*.py"),
              _os_r6.path.join(_WC_R6, "trading_bot", "*.py"),
              _os_r6.path.join(_WC_R6, "mike", "bin", "*.py")]
-_files_r6 = [f for pat in _ROOTS_R6 for f in _glob_r6.glob(pat)]
+_by_root_r6 = {pat: _glob_r6.glob(pat) for pat in _ROOTS_R6}
+_files_r6 = [f for fs in _by_root_r6.values() for f in fs]
 _unparsed_r6 = []
 _callers_r6 = []
 for _f in _files_r6:
@@ -663,7 +664,10 @@ for _f in _files_r6:
         # parse ở 3.12 ($DNA_PYEXE), hook/selfcheck này chạy python3 3.10 — cùng ca đã ghi ở
         # coding_guidelines §16 cho tz_anchor_gate. Rẽ về phép quét VĂN BẢN: không cần AST để
         # biết một file KHÔNG hề nhắc tên hàm.
-        _unparsed_r6.append(_base)
+        _unparsed_r6.append(_f)          # ĐƯỜNG DẪN ĐẦY ĐỦ, không phải basename: mục kiểm dưới
+        # mở lại chúng, và `join(_WC_R6, basename)` chỉ tình cờ đúng vì cả 6 file đang nằm ở WC
+        # root — một file không parse được trong `trading_bot/` hay `mike/bin/` sẽ làm mục đó nổ
+        # FileNotFoundError (traceback) thay vì FAIL sạch (arch-review vòng 2).
         if "funding_block_reason" in open(_f, encoding="utf-8", errors="replace").read():
             _callers_r6.append(f"{_base}:?(không parse được, khớp theo văn bản)")
         continue
@@ -682,18 +686,23 @@ for _f in _files_r6:
                else _fn.attr if isinstance(_fn, _ast_r6.Attribute) else None)
         if _nm in _aliases_r6:
             _callers_r6.append(f"{_base}:{_n.lineno}")
-check("ratchet quét được ít nhất 200 file (fail-closed: glob rỗng KHÔNG được thành PASS giả — "
-      "cùng lý lẽ E1 của compute_active_nav_selfcheck)",
-      len(_files_r6) >= 200, len(_files_r6))
+# Sàn PER-ROOT, không phải sàn TỔNG (arch-review vòng 2): riêng WC root đã 1008 file nên một sàn
+# tổng "≥200" vẫn qua ngon lành khi TOÀN BỘ nhánh `mike/bin` (198 file) biến mất — mà `mike/` bị
+# `.gitignore` của repo ngoài ẩn, nên clone mới / checkout CI KHÔNG có `mike/` chút nào. Sàn tổng
+# ở đó chính là kiểu "fail-closed trên giấy, fail-open trên thực tế".
+_empty_roots_r6 = sorted(pat.replace(_WC_R6 + "/", "") for pat, fs in _by_root_r6.items() if not fs)
+check("ratchet quét được CẢ BA gốc, không gốc nào rỗng (fail-closed thật: thiếu `mike/bin` — 60+ "
+      "script đường tiền — KHÔNG được thành PASS giả; xem E1 compute_active_nav_selfcheck)",
+      _empty_roots_r6 == [], _empty_roots_r6)
 check("funding_block_reason() vẫn 0 caller production (khớp CẢ 3 hình dạng: tên trần, "
       "`x.funding_block_reason(...)`, alias nhập khẩu) — thêm caller PHẢI thêm `execution_state` "
       "vào signature trước (xem docstring: resume sẽ đếm kép qty đã khớp)",
       _callers_r6 == [], _callers_r6)
 check("…và file không parse được (f-string PEP 701, chỉ 3.12) vẫn được quét bằng VĂN BẢN nên "
       "không lọt im lặng — danh sách in ra để thấy được, không phải để chặn",
-      all("funding_block_reason" not in open(_os_r6.path.join(_WC_R6, _b), encoding="utf-8",
-                                            errors="replace").read()
-          for _b in _unparsed_r6), _unparsed_r6)
+      all("funding_block_reason" not in open(_p6, encoding="utf-8", errors="replace").read()
+          for _p6 in _unparsed_r6),
+      [_os_r6.path.relpath(_p6, _WC_R6) for _p6 in _unparsed_r6])
 check("…và docstring của nó vẫn mang cảnh báo đó (đừng xoá khi refactor)",
       "execution_state" in (__import__("trading_bot.plan_funding_gate", fromlist=["x"])
                             .funding_block_reason.__doc__ or ""))

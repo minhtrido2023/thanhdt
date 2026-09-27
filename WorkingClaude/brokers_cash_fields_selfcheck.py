@@ -135,11 +135,31 @@ else:
     check("4b …và KHÔNG chặn khi tc ≥ av",
           _PH4._cash_fields_inconsistent({"totalCash": 5_000_000.0,
                                           "availableCash": 5_000_000.0}) is False)
+    # Kiểm bằng AST trên SO SÁNH THẬT, không bằng cắt chuỗi. Bản đầu dùng
+    # `.split("⛔")[-1]` nên MÙ với đúng hai hình dạng dễ xảy ra nhất (arch-review vòng 2 đo được):
+    # guard thêm lại PHÍA TRÊN khối ⛔ — chính chỗ 6a5ebca7 đặt nó — và cách viết
+    # `float(tc) < float(av)`. Đây là lần thứ NĂM trong job này phép kiểm source bằng chuỗi cho
+    # kết quả sai. Cổng thật vẫn là 2e/2f/2g (hành vi, bắt mọi cách viết); mục này chỉ để chỉ
+    # đúng tên thủ phạm khi chúng đỏ.
+    import ast as _a4      # noqa: E402
     import inspect as _i4  # noqa: E402
-    check("4c `DNSEBroker._cash_totalcash_minus_debt` KHÔNG mang guard đó (khác caller, khác "
-          "ngữ cảnh thời gian) — nếu ai thêm lại, mục 2e/2f chết trước",
-          "tc < av" not in _i4.getsource(DNSEBroker._cash_totalcash_minus_debt).split("⛔")[-1]
-          .replace("`tc < av ⇒ None`", ""))
+    import textwrap as _t4  # noqa: E402
+
+    def _names4(node):
+        """Tên biến xuất hiện trong một biểu thức, kể cả qua float()/Decimal()."""
+        return {n.id for n in _a4.walk(node) if isinstance(n, _a4.Name)}
+
+    _fn4 = _a4.parse(_t4.dedent(
+        _i4.getsource(DNSEBroker._cash_totalcash_minus_debt))).body[0]
+    _bad4 = [c.lineno for c in _a4.walk(_fn4)
+             if isinstance(c, _a4.Compare)
+             and any(isinstance(o, (_a4.Lt, _a4.LtE)) for o in c.ops)
+             and "tc" in _names4(c.left)
+             and any("av" in _names4(cp) for cp in c.comparators)]
+    check("4c `DNSEBroker._cash_totalcash_minus_debt` KHÔNG có phép so sánh nào dạng `tc < av` "
+          "(bắt cả `float(tc) < float(av)` và cả khi guard đặt TRÊN khối ⛔) — thêm lại thì "
+          "2e/2f/2g chết trước, mục này chỉ gọi đúng tên thủ phạm",
+          _bad4 == [], _bad4)
 
 print(f"\n{len(PASS)} PASS, {len(FAIL)} FAIL")
 if FAIL:
