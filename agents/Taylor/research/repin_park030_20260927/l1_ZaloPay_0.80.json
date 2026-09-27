@@ -1,0 +1,47 @@
+[dnse] ⚠ chưa có trading-token (ZaloPay) — inquiry OK, đặt lệnh sẽ bị từ chối (cần --otp; email_otp: gửi mã bằng --send-otp trước)
+[dnse] kết nối OK [ZaloPay] tiểu khoản 0001743768
+{
+ "account_label": "ZaloPay",
+ "asof": "2026-09-27",
+ "target_park": 0.8,
+ "trim_band": 0.005,
+ "orders": [],
+ "blocked": [],
+ "notes": [
+  "ℹ️ cổ tức excluded — DGC cấu hình 80.0tr; DNSE hiện báo TỔNG 1.9tr cổ tức chưa về TOÀN TÀI KHOẢN (không tách theo mã) ⇒ pool tạm loại min(80.0tr; 1.9tr) = 1.9tr ⚠️ CẤU HÌNH CÓ THỂ ĐÃ CŨ — còn báo 1.9tr (2% so với cấu hình 80.0tr), khả năng cao DGC đã settle gần hết và phần còn lại thuộc mã KHÁC (tổng không tách theo mã) — kiểm và dọn entry excluded_dividend_receivable nếu DGC đã về đủ. — tới khi DNSE xác nhận hết (Option B, cùng cơ chế compute_active_nav.py). CHÉP dòng này vào notes plan. ⚠️ QUÁ HẠN dự kiến: DGC — DNSE vẫn báo receivable dù đã qua ngày dự kiến về, kiểm tiền đã về thật chưa / cập nhật excluded_dividend_receivable trước khi duyệt lệnh bán (cùng cảnh báo compute_active_nav.py).",
+  "PARK 157.0tr vs target 209.1tr (pool 261.4tr) — vượt 0.0tr, chưa quá ngưỡng 1.3tr"
+ ],
+ "at_or_below_target": [],
+ "park_mv_vnd": 157022000.0,
+ "cash_available_vnd": 5615.0,
+ "cash_total_vnd": 4107343.0,
+ "reconcile_ok": true,
+ "unverified_tickers": [],
+ "excluded_tickers": [
+  "DGC"
+ ],
+ "state": {
+  "state": 3,
+  "state_name": "NEUTRAL",
+  "date": "2026-09-25",
+  "etf_park_frac_live": 0.8
+ },
+ "cash_basis": "total_cash",
+ "cash_dividend_receiving_vnd": 1900000.0,
+ "cash_debt_vnd": 0.0,
+ "egg_assets_vnd": 102169788.0,
+ "excluded_dividend_receivable_pending_vnd": 1900000.0,
+ "excluded_dividend_receivable_detail": [
+  {
+   "ticker": "DGC",
+   "amount_vnd": 1900000.0,
+   "expected_arrival_date": "2026-09-25",
+   "overdue": true
+  }
+ ],
+ "pool_vnd": 261399131.0,
+ "target_park_vnd": 209119304.8,
+ "delta_vnd": 52097304.80000001,
+ "threshold_vnd": 1306995.655,
+ "decision": "NO_TRIM"
+}

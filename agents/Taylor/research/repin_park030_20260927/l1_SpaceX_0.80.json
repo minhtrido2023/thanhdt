@@ -1,0 +1,246 @@
+[dnse] ⚠ chưa có trading-token (SpaceX) — inquiry OK, đặt lệnh sẽ bị từ chối (cần --otp; email_otp: gửi mã bằng --send-otp trước)
+[dnse] kết nối OK [SpaceX] tiểu khoản 0002023347
+[dnse] chế độ quote-only (market data)
+{
+ "account_label": "SpaceX",
+ "asof": "2026-09-27",
+ "target_park": 0.8,
+ "trim_band": 0.005,
+ "orders": [],
+ "blocked": [
+  {
+   "ticker": "ACB",
+   "reason": "trần/khả năng bán < 1 lô (muốn 196,517đ, trần ADV 21,351,529,000đ, sellable 900cp)"
+  },
+  {
+   "ticker": "BID",
+   "reason": "trần/khả năng bán < 1 lô (muốn 1,902,153đ, trần ADV 11,467,170,000đ, sellable 1,100cp)"
+  },
+  {
+   "ticker": "HDB",
+   "reason": "trần/khả năng bán < 1 lô (muốn 18,737đ, trần ADV 27,373,131,000đ, sellable 700cp)"
+  },
+  {
+   "ticker": "MBB",
+   "reason": "trần/khả năng bán < 1 lô (muốn 517,972đ, trần ADV 23,917,278,670đ, sellable 1,300cp)"
+  },
+  {
+   "ticker": "MSB",
+   "reason": "trần/khả năng bán < 1 lô (muốn 1,058,466đ, trần ADV 7,256,270,728đ, sellable 500cp)"
+  },
+  {
+   "ticker": "SHB",
+   "reason": "trần/khả năng bán < 1 lô (muốn 55,256đ, trần ADV 55,034,634,000đ, sellable 800cp)"
+  },
+  {
+   "ticker": "TCB",
+   "reason": "trần/khả năng bán < 1 lô (muốn 2,512,215đ, trần ADV 41,339,725,000đ, sellable 1,000cp)"
+  },
+  {
+   "ticker": "TPB",
+   "reason": "trần/khả năng bán < 1 lô (muốn 1,314,062đ, trần ADV 10,633,253,000đ, sellable 500cp)"
+  },
+  {
+   "ticker": "VCB",
+   "reason": "trần/khả năng bán < 1 lô (muốn 495,903đ, trần ADV 23,962,705,800đ, sellable 700cp)"
+  },
+  {
+   "ticker": "VHM",
+   "reason": "trần/khả năng bán < 1 lô (muốn 1,355,903đ, trần ADV 42,272,951,135đ, sellable 600cp)"
+  },
+  {
+   "ticker": "VIX",
+   "reason": "trần/khả năng bán < 1 lô (muốn 294,373đ, trần ADV 51,278,196,228đ, sellable 400cp)"
+  },
+  {
+   "ticker": "VND",
+   "reason": "trần/khả năng bán < 1 lô (muốn 530,001đ, trần ADV 15,781,197,250đ, sellable 300cp)"
+  },
+  {
+   "ticker": "VPB",
+   "reason": "trần/khả năng bán < 1 lô (muốn 2,280,374đ, trần ADV 33,422,054,400đ, sellable 1,100cp)"
+  }
+ ],
+ "notes": [
+  "rổ mục tiêu kỳ 2026-08-05: 19/30 mã khả thi, bỏ 11 mã (Σ 4.44% trọng số) — trọng số đã CHUẨN HOÁ LẠI trên tập khả thi: DCM 0.60% (target 2,309,081đ < 1 lô (100cp × 34,300đ)); DDV 0.10% (target 392,065đ < 1 lô (100cp × 16,600đ)); DGC 0.56% (target 2,153,098đ < 1 lô (100cp × 35,950đ)); HAH 0.32% (target 1,212,220đ < 1 lô (100cp × 51,700đ)); IDC 0.50% (target 1,925,831đ < 1 lô (100cp × 33,400đ)); PAN 0.19% (target 741,205đ < 1 lô (100cp × 18,400đ)); PNJ 0.71% (target 2,711,494đ < 1 lô (100cp × 33,000đ)); PVT 0.35% (target 1,322,596đ < 1 lô (100cp × 23,100đ)); TCM 0.07% (target 276,323đ < 1 lô (100cp × 15,800đ)); VGC 0.62% (target 2,391,480đ < 1 lô (100cp × 42,750đ)); VHC 0.41% (target 1,566,726đ < 1 lô (100cp × 49,550đ))"
+ ],
+ "at_or_below_target": [
+  {
+   "ticker": "CTG",
+   "mv_vnd": 36180000.0,
+   "target_vnd": 36190338.16537895,
+   "gap_vnd": 10338.165378950536
+  },
+  {
+   "ticker": "EVF",
+   "mv_vnd": 1160000.0,
+   "target_vnd": 1396424.6572162264,
+   "gap_vnd": 236424.65721622645
+  },
+  {
+   "ticker": "HPG",
+   "mv_vnd": 24780000.0,
+   "target_vnd": 27173734.03895953,
+   "gap_vnd": 2393734.0389595293
+  },
+  {
+   "ticker": "LPB",
+   "mv_vnd": 18580000.0,
+   "target_vnd": 23162522.257949565,
+   "gap_vnd": 4582522.257949565
+  },
+  {
+   "ticker": "VIB",
+   "mv_vnd": 7329800.0,
+   "target_vnd": 7370330.944951123,
+   "gap_vnd": 40530.94495112263
+  },
+  {
+   "ticker": "VRE",
+   "mv_vnd": 7350000.0,
+   "target_vnd": 8792823.265211305,
+   "gap_vnd": 1442823.2652113046
+  }
+ ],
+ "park_mv_vnd": 387075550.0,
+ "cash_available_vnd": 2795794.0,
+ "cash_total_vnd": 6497626.0,
+ "reconcile_ok": true,
+ "unverified_tickers": [],
+ "excluded_tickers": [],
+ "state": {
+  "state": 3,
+  "state_name": "NEUTRAL",
+  "date": "2026-09-25",
+  "etf_park_frac_live": 0.8
+ },
+ "cash_basis": "total_cash",
+ "cash_dividend_receiving_vnd": 3700000.0,
+ "cash_debt_vnd": 0.0,
+ "egg_assets_vnd": 85489312.0,
+ "excluded_dividend_receivable_pending_vnd": 0.0,
+ "excluded_dividend_receivable_detail": [],
+ "pool_vnd": 479062488.0,
+ "target_park_vnd": 383249990.40000004,
+ "delta_vnd": -3825559.5999999642,
+ "threshold_vnd": 2395312.44,
+ "basket_rebal_date": "2026-08-05",
+ "basket_n": 30,
+ "etf_day_cap_vnd": 1238678820553.5,
+ "adv_share": 0.5,
+ "live_labels": [
+  "ZaloPay",
+  "SpaceX"
+ ],
+ "basket_dropped": [
+  {
+   "ticker": "DCM",
+   "weight": 0.006025,
+   "reason": "target 2,309,081đ < 1 lô (100cp × 34,300đ)"
+  },
+  {
+   "ticker": "DDV",
+   "weight": 0.001023,
+   "reason": "target 392,065đ < 1 lô (100cp × 16,600đ)"
+  },
+  {
+   "ticker": "DGC",
+   "weight": 0.005618,
+   "reason": "target 2,153,098đ < 1 lô (100cp × 35,950đ)"
+  },
+  {
+   "ticker": "HAH",
+   "weight": 0.003163,
+   "reason": "target 1,212,220đ < 1 lô (100cp × 51,700đ)"
+  },
+  {
+   "ticker": "IDC",
+   "weight": 0.005025,
+   "reason": "target 1,925,831đ < 1 lô (100cp × 33,400đ)"
+  },
+  {
+   "ticker": "PAN",
+   "weight": 0.001934,
+   "reason": "target 741,205đ < 1 lô (100cp × 18,400đ)"
+  },
+  {
+   "ticker": "PNJ",
+   "weight": 0.007075,
+   "reason": "target 2,711,494đ < 1 lô (100cp × 33,000đ)"
+  },
+  {
+   "ticker": "PVT",
+   "weight": 0.003451,
+   "reason": "target 1,322,596đ < 1 lô (100cp × 23,100đ)"
+  },
+  {
+   "ticker": "TCM",
+   "weight": 0.000721,
+   "reason": "target 276,323đ < 1 lô (100cp × 15,800đ)"
+  },
+  {
+   "ticker": "VGC",
+   "weight": 0.00624,
+   "reason": "target 2,391,480đ < 1 lô (100cp × 42,750đ)"
+  },
+  {
+   "ticker": "VHC",
+   "weight": 0.004088,
+   "reason": "target 1,566,726đ < 1 lô (100cp × 49,550đ)"
+  }
+ ],
+ "basket_dropped_weight": 0.044363,
+ "basket_feasible_n": 19,
+ "target_weights": {
+  "ACB": 0.0497416385702536,
+  "BID": 0.10464213436468622,
+  "CTG": 0.09443010847203649,
+  "EVF": 0.0036436391185783743,
+  "HDB": 0.05072736747596894,
+  "HPG": 0.07090341740282409,
+  "LPB": 0.060437111123668175,
+  "MBB": 0.0747176232004169,
+  "MSB": 0.019234270717572978,
+  "SHB": 0.024069783746565127,
+  "TCB": 0.08020296388381376,
+  "TPB": 0.015618884975273065,
+  "VCB": 0.10464213436468622,
+  "VHM": 0.10464213436468622,
+  "VIB": 0.019231131453542032,
+  "VIX": 0.013094916694396835,
+  "VND": 0.009849964107747914,
+  "VPB": 0.07722798800382573,
+  "VRE": 0.022942787959457454
+ },
+ "target_value_vnd": {
+  "ACB": 19063482.504529964,
+  "BID": 40104096.99070151,
+  "CTG": 36190338.16537895,
+  "EVF": 1396424.6572162264,
+  "HDB": 19441263.09818237,
+  "HPG": 27173734.03895953,
+  "LPB": 23162522.257949565,
+  "MBB": 28635528.3742706,
+  "MSB": 7371534.0678608455,
+  "SHB": 9224744.389801161,
+  "TCB": 30737785.138523173,
+  "TPB": 5985937.516832107,
+  "VCB": 40104096.99070151,
+  "VHM": 40104096.99070151,
+  "VIB": 7370330.944951123,
+  "VIX": 5018626.6974163875,
+  "VND": 3774998.649734733,
+  "VPB": 29597625.66107753,
+  "VRE": 8792823.265211305
+ },
+ "structural_excess_vnd": 12531932.929666596,
+ "trim_total_vnd": 12531932.929666596,
+ "day_cap_binding": false,
+ "day_cap_scale": 1.0,
+ "decision": "BLOCKED_ALL_NAMES",
+ "trim_proposed_vnd": 0,
+ "trim_shortfall_vnd": 12531932.929666596,
+ "park_mv_after_vnd": 387075550.0,
+ "park_pct_after": 0.8079855127375366,
+ "underpark_after_vnd": 0.0
+}
