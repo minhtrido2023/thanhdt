@@ -38,6 +38,15 @@ DATA PROVENANCE (tier order, best first: T1 > T1.5 > T3 > T2):
     from the file, never hardcoded); any later month falls back to Tier 2's forward-fill and
     `cpi_monthly_df()` prints a ONE-TIME coverage warning naming the gap. The continuing live source
     is Tier 1 (GSO/NSO monthly print) — refresh NSO_CPI_YOY_REAL, not this file.
+    CONSUMERS (enumerated 2026-09-27; the CAPIT one was surfaced by quant-skeptic, not by the
+    original finding): macro_confidence_regime.py (REG_* labels), dcf_valuation.py (5y-avg CPI ->
+    terminal growth), and deploy_golive_dt5g_v4/golive_recommend_v23.py:920 — the CAPIT leverage
+    PIT gate, CAPIT_LEVER_PIT_CPI_THRESHOLD = 6.0% (line 579), which BLOCKS leverage when PIT CPI
+    reaches 6%. Measured: the LIVE value at 2026-09-25 is 4.69% before and after (that path already
+    takes max(interpolated, last real NSO), so Tier 1.5 cannot lower it). 4 historical months would
+    flip the 6% gate, all in the same direction -- the interpolated proxy OVERSTATED and would have
+    blocked leverage: 2012-07 6.88 -> 5.35, 2012-08 6.87 -> 5.04, 2013-10 6.23 -> 5.92, 2013-11
+    6.11 -> 5.78. The gate is evaluated live-only, so those are informational, not a re-run.
 
   TIER 2 — PROXY / ANCHOR (2011-01 .. 2025-05, pre-NSO-window): best-estimate MONTHLY
     YoY anchors from well-documented public GSO / IMF / news prints for the pivotal

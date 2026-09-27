@@ -33,6 +33,18 @@ Point-in-time honesty:
     0 V2.4 decisions change. Verified by exhaustive grid + real-panel A/B in
     rating_8l_history_bank_aq_selfcheck.py. This stops holding if anyone sets BASKET_GATE_RATING<3 or
     switches ETF_LIQ to a quality=tilt variant (custompitgq), which DOES read 1/2/3 apart.
+    ⚠️ THE INVARIANT IS ABOUT THE 3/4 BOUNDARY ONLY -- it says NOTHING about rating<=2, and the AQ
+    data moves the 2/3 boundary a LOT: 266 of 981 BANK rows (27.1%) cross <=2 (1->3:153, 2->3:112,
+    3->2:1). Consumers that gate at <=2, enumerated 2026-09-27 (quant-skeptic surfaced this gap):
+      - mike/agents/Taylor/anomaly_scan.py:156 `query("rating<=2")` reads THIS table (via
+        data/bq_cache/fa_ratings_8l.parquet) and runs on cron (08:20 T2-T6 inside
+        ops_health_check.sh, plus fearbuy_weekly_scan.sh Friday 08:10). LIVE DELTA = exactly one
+        name: ABB's latest row 3 -> 2, so ABB joins the tier-W quality watchlist. A watchlist, not a
+        position or a sizing decision.
+      - custom30v_hybrid.py (rating<=2 swap rule) reads fa_ratings_8l from BQ -> its BACKTEST would
+        change across those 266 rows. R&D variant, not V2.4 production.
+      - cheap_pb_floor.py, sector_lens_monitor.py, newdeals_daily_report.py also gate at <=2 but read
+        data/rating_8l.csv (the LIVE rate_bank output), which this module never writes -> unaffected.
   - POWER: the live rate_power() needs the lifecycle verdict (snapshot) -> we proxy with the D/E trajectory
     (STLTDebt_Eq_P0 vs _P4) + TTM-NP sign. Small-n group; flagged.
 
