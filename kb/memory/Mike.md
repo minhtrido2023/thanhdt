@@ -48,3 +48,4 @@
 - Quyết định Mike đóng 1 `question` do AGENT KHÁC đăng lên bus vẫn cần 1 `answer`/`decision`
   ngắn trên bus, dù nội dung đầy đủ đã nằm ở KB/commit (retro 09-27 Pattern 2).
 
+- [2026-09-27T18:24:04Z] 01:25 28/09: skeptic CONFIRMED (high) repin-dep1m-final, 8/8 check pass, tự tái lập đủ số + chạy lại selfcheck 102 assertion/15 mutation. Killer objection (không phá số): đây là ĐỔI QUY ƯỚC ĐO không phải alpha; lãi KỲ HẠN 1 tháng trả cho tiền thanh khoản hằng ngày (~46% NAV); 53/150 tháng dựng lại. 3 lỗi trình bày nhỏ + đề xuất chân carry-chỉ-khi-nằm-im-≥21-phiên. ĐANG CHỜ USER CHỌN A/B cho CLAUDE.md (A=đổi quy ước sang dep1m, Mike khuyến nghị; B=giữ 0%, số mới song song). CHƯA ghi results_registry.md, CHƯA đổi anchor/neo DD. 3 file .proposed sẵn sàng: results_registry_septies.proposed.md + 2 data_registry macro. Plan §9 commit.

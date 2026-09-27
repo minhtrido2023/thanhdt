@@ -318,3 +318,8 @@ BÀI HỌC: git commit --pathspec KHÔNG bảo vệ khi 2 job cùng sửa 1 file
 - [2026-09-12T06:21:19Z] [2026-09-12] job Wags_20260912_052122: V1 (selfcheck fixture, ac5b636f) + V2 (cron 19:12 + wait_for_artifact + §14b, fe6b0ccc) XONG. V3 NAV ex-date DỪNG ở arch-review vòng 2 (NEEDS_CHANGES) — code đã GỠ khỏi production (git restore), patch cất agents/Wags/research/nav_exdate_xcheck_wip_20260912.patch, ship quy trình TAY a1188b36. CHỜ USER: question 'nav-xcheck-exdate-tu-dong-hoa-vong-3-hay-giu-tay-2026-09-12' (a) giữ tay / (b) vòng 3 / (c) bỏ.
 BÀI HỌC: cổng an toàn kiểm PROXY (có warning không) thay vì BẤT BIẾN (số tiền đã bị trừ chưa) là lỗ hổng im lặng — nhánh nào trả 0 mà KHÔNG warning thì proxy mù. Và fix của chính vòng review phải có test HÀNH VI, không phải test so chuỗi ký tự: mutation xoá 'return 4' vẫn 29/29 PASS.
 BÀI HỌC 2: 'git add <file> && git commit' KHÔNG surgical khi consolidator vừa git add -A vào index chung — commit đầu quét nhầm 15 file KB. Dùng 'git commit -- <pathspec>' (bỏ qua index).
+
+## Archived 2026-09-27 (keep=6 days=5 require_done=True)
+- [2026-09-14T08:44:32Z] [2026-09-14] wc-paths-dirname-sweep XONG, commit 8b3ae596 (20 file), arch-review 2 vong APPROVED. Follow-up KHONG lam (out of scope, da ghi bus): 25+ worktree/mike_paseo thieu bin/wc_paths.py (staleness co san tu truoc); 7 selfcheck test-only con dem cap dirname; wc_paths.py chua co selfcheck rieng.
+- [2026-09-19T04:40:00Z] [2026-09-19] coord-2026-09-19 XONG (4 vong arch-review, commit 1a3596e1/d4727a50/61709c70): gate tu dong escalate khi arch-review NEEDS_CHANGES 2 vong lien tiep cung topic trong 24h (wags_autofix.sh khoi WAGS_ROUND2_ESCALATE/CLOSE) LIVE. coord-2026-09-17 (ZaloPay active_nav dividend) da dong that qua Taylor commit baf1c51f.
+
