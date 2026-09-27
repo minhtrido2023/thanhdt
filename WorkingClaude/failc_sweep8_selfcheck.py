@@ -25,6 +25,11 @@ WC = os.path.dirname(os.path.abspath(__file__))
 
 # file -> name of the variable the block assigns the daily-reindexed series to
 TARGETS = {
+    # THÊM 2026-09-27 20:xx ICT sau sự cố CLOBBER: `pt_v23_audit_2014.py` là file SINH ANCHOR R3
+    # nhưng KHÔNG nằm trong 9 file của đợt sweep ⇒ khi `27b4d92d` lấy cả file từ một branch cắt
+    # TRƯỚC bản vá FAIL-C `75976eda`, nhãn look-ahead quay lại ĐÚNG file quan trọng nhất mà
+    # không cổng nào kêu. Đưa nó vào đây để lần sau clobber là FAIL ngay.
+    "pt_v23_audit_2014.py":                         "_edge_m12",
     "pt_v22_dt5g.py":                               "_m12",
     "pt_v23_audit_ddpark.py":                       "_edge_m12",
     "pt_v23_lagcap_research.py":                    "_edge_m12",
