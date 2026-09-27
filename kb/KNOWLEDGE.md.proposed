@@ -34,8 +34,13 @@
   ⚠️⚠️ **CẢ BA SỐ NÀY SUPERSEDED 2026-09-27** — đo trên chân return LỖI, nên **xếp hạng Calmar
   1,63 vs 1,62 (biên 0,01) mà quyết định 80% dựa vào KHÔNG còn được chứng minh**. Ở pin mới, parking
   làm XẤU Calmar (1,39 park=0 → 1,30 park=70%), tức chiều của cả họ đã đổi. Số chạy lại cho 70/80/85%:
-  xem `data/results_registry.md` mục "2026-09-27 (bis)". **Việc có giữ 80% hay không là quyết định
-  của user** — `trading_rules.json` v2.3 vẫn đang là 0.8, KHÔNG tự đổi.
+  ĐÃ CHẠY LẠI 2026-09-27 trên main (cùng lệnh pin, đổi đúng 1 biến, self-check 0 VND):
+  **0%=22,37/1,95/−16,1/Calmar 1,39 · 70%=24,38/1,69/−18,8/1,30 · 80%=24,66/1,64/−19,8/1,24 ·
+  85%=24,57/1,60/−20,5/1,20** ⇒ **Calmar ĐƠN ĐIỆU GIẢM theo park%; "đỉnh Calmar ở 80%" KHÔNG CÒN
+  TỒN TẠI.** CAGR vẫn đỉnh ở 80% nhưng chỉ +0,28pp so với 70% trong khi DD xấu thêm 1,0pp.
+  ⛔ **`trading_rules.json` v2.3 GIỮ 0.8, KHÔNG tự đổi** — đây là câu hỏi mở cho user (giữ 80% /
+  hạ 70% / xét lại parking từ gốc). Chi tiết + caveat: `data/results_registry.md` mục
+  "2026-09-27 (bis) ... §7".
   Muốn park≠0.80 bắt buộc `risk_dial_override` (2 field: `risk_dial_confirmed_by_user` +
   `risk_dial_warning_acknowledged`) — thiếu 1 trong 2 thì Mafee tự block plan.
   - *Lịch sử (SUPERSEDED bởi 80% ở trên, giữ làm bối cảnh):* quyết định 70% gốc (thay 93.8-94.7%
