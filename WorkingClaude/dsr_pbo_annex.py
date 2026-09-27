@@ -13,12 +13,37 @@ Implements:
 
 Deterministic: fixed seeds. Reproducible: run `python dsr_pbo_annex.py`.
 """
-import sys, glob, math
+import os, sys, glob, math
 import numpy as np, pandas as pd
 
 DATA = "data"
-R3_CSV = f"{DATA}/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap.csv"
-ANN = 252.0  # trading days / year used across the registry's Sharpe convention
+# Which ledger is "the pinned R3" is NOT a constant of nature — it moved on 2026-08-03 (advprice /
+# univpit) and again on 2026-09-27 (return leg without OShares). Env override so a re-run can name
+# the ledger explicitly instead of editing this line (§8: never let a stale default decide a number).
+R3_CSV = os.environ.get(
+    "DSR_R3_CSV",
+    f"{DATA}/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap.csv")
+# ANNUALIZATION = CALENDAR time, not session count (CLAUDE.md section Backtest;
+# `simulate_holistic_nav.metrics` = source of every registry number). Fixed 2026-09-27 (FAIL-F,
+# audit measurement-integrity): `yrs = len(logp)/252` made the bootstrap CAGR column ~+0.3pp higher
+# than the registry CAGR it is quoted beside. `ANN_FALLBACK` is used ONLY when a series carries no
+# usable date index; `annual_obs()` is the real thing.
+ANN_FALLBACK = 252.0
+
+def calendar_years(s):
+    """(t_last - t_first).days / 365.25 for a date-indexed NAV/return series."""
+    idx = pd.DatetimeIndex(s.index)
+    yrs = (idx[-1] - idx[0]).days / 365.25
+    if yrs <= 0:
+        raise SystemExit("series spans 0 calendar days - cannot annualize")
+    return yrs
+
+def annual_obs(s, n_ret=None):
+    """Observations per CALENDAR year = N_returns / yrs_calendar (mirrors
+    simulate_holistic_nav.metrics' `sessions_per_year`). Measured on pinned R3 2026-09-27:
+    3,106 returns / 12.460y = 249.3 obs/yr, not 252."""
+    n = len(s) - 1 if n_ret is None else n_ret
+    return n / calendar_years(s)
 
 # ---------- NAV loading (mirror bootstrap_nav.py collapse-to-daily) ----------
 def load_nav(path):
@@ -137,24 +162,26 @@ def cscv_pbo(M, S=16):
     return pbo, np.array(logits), len(combos), Ncfg, T2
 
 # ---------- 4. Stationary bootstrap (Politis-Romano) ----------
-def cagr_dd_sharpe(logp):
+def cagr_dd_sharpe(logp, yrs):
+    """`yrs` is REQUIRED and must be CALENDAR years of the source series - no default, because a
+    default is how `len(logp)/252` survived here (FAIL-F 2026-09-27). Resampled bootstrap paths keep
+    the same N returns as the source, so they inherit the source's calendar span."""
     nav = np.exp(np.cumsum(logp)); peak = np.maximum.accumulate(nav)
-    yrs = len(logp)/ANN
     cagr = nav[-1]**(1/yrs) - 1
     dd = (nav/peak - 1).min()
-    sh = logp.mean()/logp.std()*math.sqrt(ANN)
+    sh = logp.mean()/logp.std()*math.sqrt(len(logp)/yrs)
     return cagr, dd, sh
 
-def circular_block_boot(r, L=21, B=4000, seed=12345):
+def circular_block_boot(r, yrs, L=21, B=4000, seed=12345):
     N=len(r); rng=np.random.default_rng(seed); nblk=int(np.ceil(N/L))
     C=np.empty(B); D=np.empty(B)
     for b in range(B):
         st=rng.integers(0,N,nblk)
         p=np.concatenate([np.take(r,np.arange(s0,s0+L),mode="wrap") for s0 in st])[:N]
-        c,d,_=cagr_dd_sharpe(p); C[b]=c; D[b]=d
+        c,d,_=cagr_dd_sharpe(p, yrs); C[b]=c; D[b]=d
     return C,D
 
-def stationary_boot(r, mean_L=21, B=4000, seed=12345):
+def stationary_boot(r, yrs, mean_L=21, B=4000, seed=12345):
     """Politis-Romano: geometric block lengths (p=1/mean_L), circular wrap."""
     N=len(r); rng=np.random.default_rng(seed); p_geom=1.0/mean_L
     C=np.empty(B); D=np.empty(B)
@@ -165,7 +192,7 @@ def stationary_boot(r, mean_L=21, B=4000, seed=12345):
             Lb=rng.geometric(p_geom)
             out.extend(np.take(r,np.arange(start,start+Lb),mode="wrap"))
         p=np.array(out[:N])
-        c,d,_=cagr_dd_sharpe(p); C[b]=c; D[b]=d
+        c,d,_=cagr_dd_sharpe(p, yrs); C[b]=c; D[b]=d
     return C,D
 
 # ==================== RUN ====================
@@ -198,9 +225,15 @@ def main():
     r3r = daily_logret(r3)
     T = len(r3r)
     sr_hat, g3, g4 = moments(r3r)
-    sr_ann = sr_hat*math.sqrt(ANN)
+    # CALENDAR basis, from the R3 series' own date index (FAIL-F fix 2026-09-27). DSR itself is
+    # annualization-INVARIANT (it is computed from the per-observation SR, sr0 and T) - sqrt() below
+    # only affects the DISPLAYED annualized figures. Stated explicitly so nobody re-derives it.
+    yrs_cal = calendar_years(r3)
+    ANN_CAL = T / yrs_cal
+    sr_ann = sr_hat*math.sqrt(ANN_CAL)
     print(f"\n[2] R3 PINNED ({R3_CSV.split('/')[-1]})")
-    print(f"    daily obs T = {T}  ({T/ANN:.1f}y)")
+    print(f"    daily obs T = {T}  ({yrs_cal:.3f}y CALENDAR, {ANN_CAL:.1f} obs/yr; "
+          f"session-count basis would say {T/ANN_FALLBACK:.3f}y)")
     print(f"    per-day Sharpe = {sr_hat:.5f}  -> annualized = {sr_ann:.3f}")
     print(f"    skewness  gamma3 = {g3:.4f}")
     print(f"    kurtosis  gamma4 = {g4:.4f}  (excess = {g4-3:.4f})")
@@ -214,8 +247,8 @@ def main():
     srs=np.array(srs)
     var_sr = srs.var(ddof=1)
     print(f"\n    Trial Sharpe dispersion (per-day, N_csv={len(srs)}):")
-    print(f"      mean ann-SR = {srs.mean()*math.sqrt(ANN):.3f}, "
-          f"sd ann-SR = {srs.std(ddof=1)*math.sqrt(ANN):.3f}, "
+    print(f"      mean ann-SR = {srs.mean()*math.sqrt(ANN_CAL):.3f}, "
+          f"sd ann-SR = {srs.std(ddof=1)*math.sqrt(ANN_CAL):.3f}, "
           f"Var(per-day SR) = {var_sr:.3e}")
 
     # DSR under two N: empirical CSV count and a larger registry-documented count
@@ -225,7 +258,7 @@ def main():
         sr0 = expected_max_sr(var_sr, N)
         p_dsr, stat = dsr(sr_hat, sr0, g3, g4, T)
         flag = "  <<< RED FLAG (DSR<0.95)" if p_dsr < 0.95 else ""
-        print(f"    DSR @ {label:42s}: SR0(ann)={sr0*math.sqrt(ANN):.3f}  "
+        print(f"    DSR @ {label:42s}: SR0(ann)={sr0*math.sqrt(ANN_CAL):.3f}  "
               f"DSR={p_dsr:.4f}{flag}")
 
     # PBO
@@ -244,8 +277,8 @@ def main():
 
     # Bootstrap comparison on R3
     print("\n[4] BOOTSTRAP: circular block (L=21) vs stationary (mean L=21)")
-    Cb,Db = circular_block_boot(r3r, L=21, B=4000, seed=12345)
-    Cs,Ds = stationary_boot(r3r, mean_L=21, B=4000, seed=12345)
+    Cb,Db = circular_block_boot(r3r, yrs_cal, L=21, B=4000, seed=12345)
+    Cs,Ds = stationary_boot(r3r, yrs_cal, mean_L=21, B=4000, seed=12345)
     def line(tag,C,D):
         print(f"    {tag:18s} CAGR 5th={np.percentile(C,5)*100:5.1f}%  "
               f"med={np.percentile(C,50)*100:5.1f}%  | "
