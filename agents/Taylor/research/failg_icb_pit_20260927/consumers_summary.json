@@ -1,0 +1,10 @@
+{
+ "publish_rows_changed_tickers": 26,
+ "publish_rating_differs": 19,
+ "publish_gate3_flips": 6,
+ "publish_le2_flips": 15,
+ "gate3_flips_all_rebals": 12,
+ "le2_flips_all_rebals": 23,
+ "rebal_in_force": [],
+ "changed_tickers_in_force": []
+}

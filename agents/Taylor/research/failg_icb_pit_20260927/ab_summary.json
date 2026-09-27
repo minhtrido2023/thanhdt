@@ -1,0 +1,22 @@
+{
+ "control_md5": "68ae047b3e4fcb4d5115088de6248d99",
+ "new_md5": "ea66aa956e039bca0c7088d2dc193c8c",
+ "rows": 53687,
+ "route_changed": 98,
+ "rating_changed": 36,
+ "tier_changed": 91,
+ "cross_gate_3_4": 12,
+ "tickers_route": [
+  "DIH",
+  "HDG"
+ ],
+ "tickers_rating": [
+  "DIH",
+  "HDG"
+ ],
+ "tickers_cross": [
+  "DIH",
+  "HDG"
+ ],
+ "unchanged_tickers": 1289
+}

@@ -1,0 +1,4 @@
+Dòng cần THÊM vào kb/data_registry/fundamentals/index.md (bảng, giữ thứ tự alphabet — sau
+insider_transaction_snapshots.md, trước risk_rating.md):
+
+| [`rating_8l_history.md`](rating_8l_history.md) — `data/rating_8l_history.csv` + `tav2_bq.fa_ratings_8l`, cột `route` (phân ngành 8L; dựng bởi `rating_8l_history.py`) | **TRAP** (`route` không có vintage trước 2026 + 6 bẫy: ANY_VALUE không tất định, ngưỡng 20 phiên là knob thật, tier COMPOUNDER là phân vị cross-sectional, run thí nghiệm ghi đè bảng production, backtest đọc parquet chứ không đọc CSV) |

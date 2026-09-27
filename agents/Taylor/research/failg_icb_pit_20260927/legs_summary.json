@@ -1,0 +1,16 @@
+{
+ "ctl_anyvalue": {
+  "rows": 53660,
+  "parquet_md5": "ee4f30fd28abee7889a403945552eac2",
+  "src_csv": "/home/trido/thanhdt/WorkingClaude/data/rating_8l_history.csv",
+  "src_csv_md5": "68ae047b3e4fcb4d5115088de6248d99"
+ },
+ "new_icbpit": {
+  "rows": 53660,
+  "parquet_md5": "5c8c58e9db3db25c886bce7a37de95cf",
+  "src_csv": "/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/failg_icb_pit_20260927/r8l_hist_EXP_icbpit_v2.csv",
+  "src_csv_md5": "ea66aa956e039bca0c7088d2dc193c8c"
+ },
+ "engine_visible_diff_rows": 138,
+ "engine_visible_diff_in_window": 136
+}

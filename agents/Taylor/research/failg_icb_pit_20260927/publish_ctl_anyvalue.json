@@ -1,0 +1,12 @@
+{
+ "leg": "ctl_anyvalue",
+ "rows": 1470,
+ "rebals": 49,
+ "md5": "d8e5041c1449c44cb6da29282739005b",
+ "cols": [
+  "rebal_date",
+  "ticker",
+  "liq_rank",
+  "rating"
+ ]
+}
