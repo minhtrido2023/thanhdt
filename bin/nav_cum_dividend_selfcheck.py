@@ -31,7 +31,12 @@ import sys
 
 MIKE_BIN = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, MIKE_BIN)
-WC_ROOT = os.path.dirname(os.path.dirname(MIKE_BIN))
+import wc_paths  # noqa: E402
+
+# `dirname x2` chỉ ĐÚNG cho bản gốc `mike/bin/`: từ worktree `mike/agents/Taylor/wt-*/bin/` nó cho
+# `.../agents/Taylor` ⇒ `EXEC_DIR` trỏ thư mục KHÔNG TỒN TẠI ⇒ crash FileNotFoundError, đúng lớp
+# sự cố 2026-09-12 mà `wc_paths` sinh ra để đóng (5 ca báo cáo nhà đầu tư không gửi được).
+WC_ROOT = wc_paths.find_wc_root(__file__)
 EXEC_DIR = os.path.join(WC_ROOT, "data", "execution_logs")
 
 from daily_nav_snapshot import (  # noqa: E402
