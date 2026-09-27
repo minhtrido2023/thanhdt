@@ -58,7 +58,7 @@ Rating = binary gate ≤3, KHÔNG phải return-tilt.
 5. **quant-skeptic CONFIRMED = điều kiện cần trước khi wire production.**
 
 ### BANNED tickers vĩnh viễn
-PC1, VVS, KSF, NKG, HSG, HVN, VJC, NVL, GEG, SBA, DMC/IMP/TRA, TOS, VTP.
+PC1, VVS, KSF, NKG, HSG, HVN, VJC, NVL, GEG, SBA, DMC/IMP/TRA, TOS, VTP, BAF.
 
 ### Đã thử, BỊ LOẠI — không đề xuất lại
 custom30V permanent-exclude 7 tên; LAG SUE-tilt 3 tầng; hold-neutral exit; stability floor ROE<0;
