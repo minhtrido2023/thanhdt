@@ -98,9 +98,26 @@ def run_old_block(workdir):
 
 # ─────────────────────────── các phép thử, chạy trên MỘT module ───────────────────────────
 def t_canonical_fallback(mod, cap):
-    """T1 — worktree KHÔNG có file (.gitignore) nhưng cây canonical có ⇒ vẫn lọc đủ 8 mã."""
+    """T1 — worktree KHÔNG có file (.gitignore) nhưng cây canonical có ⇒ vẫn lọc đủ 8 mã.
+
+    Chạy TỪ CHÍNH cây canonical thì `_forensic_flags_candidates()` chỉ còn MỘT đường dẫn
+    (cây module == cây canonical, đã dedup) ⇒ nhánh fallback KHÔNG CÓ GÌ để thử. Đó là tính
+    chất của vị trí chạy, không phải lỗi bản vá — nên báo TƯỜNG MINH rồi vẫn kiểm nhánh
+    cây-module, thay vì FAIL (bản trước FAIL ở đây mỗi lần chạy từ canonical sau merge).
+    """
     env_clean()
     cands = mod._forensic_flags_candidates()
+    if len(cands) == 1:
+        ok(os.path.abspath(cands[0]) == os.path.abspath(CANON_FLAGS),
+           f"T1: chỉ 1 candidate mà KHÔNG phải cây canonical: {cands[0]} vs {CANON_FLAGS}")
+        ok(os.path.exists(cands[0]), f"T1: candidate duy nhất không tồn tại: {cands[0]}")
+        out, got = cap(mod.load_forensic_excludes)
+        ok(set(got) == EXPECT, f"T1: kỳ vọng {sorted(EXPECT)}, được {sorted(got)}")
+        ok("none" not in out, f"T1: vẫn in 'none':\n{out}")
+        print("  NOTE t_canonical_fallback: đang chạy TỪ cây canonical ⇒ chỉ 1 candidate, "
+              "nhánh fallback chưa được thử ở lượt này (chạy lại từ worktree để phủ nhánh đó); "
+              "nhánh cây-module ĐÃ kiểm, trả đúng 8 mã.")
+        return
     ok(len(cands) >= 2, f"T1: thiếu cây canonical trong candidates: {cands}")
     ok(not os.path.exists(cands[0]),
        "T1: worktree LẠI có forensic_flags.csv — tiền đề của test sai, kiểm .gitignore")
