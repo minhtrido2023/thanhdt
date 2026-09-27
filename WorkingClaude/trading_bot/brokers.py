@@ -622,16 +622,31 @@ class DNSEBroker(BrokerBase):
         av = _fnum(qget(row, "availablecash", default=None))
         if tc == 0 and td == 0 and (av is None or av == 0):
             return None
-        # Guard THỨ BA (§25 hệ quả 2, code-quality 2026-09-27): totalCash = availableCash +
-        # tiền bán chưa settle + cổ tức chờ + lãi tiền gửi ⇒ nó KHÔNG BAO GIỜ nhỏ hơn
-        # availableCash. Hai guard trên đòi CẢ BA field = 0, nên lỗi feed chỉ ăn HAI trong ba
-        # (totalCash=0, totalDebt=0 mà availableCash còn sống) LỌT nguyên vẹn và trả cash=0
-        # như thể tiền thật về 0. Bản gốc của bất biến này:
-        # `mike/bin/park_holdings.py::_cash_fields_inconsistent` (quant-skeptic vòng 3
-        # 2026-08-09 mới ra guard này). Không import được qua ranh giới repo ⇒ bản sao này
-        # được khoá bằng selfcheck đồng bộ, xem `brokers_cash_fields_selfcheck.py`.
-        if av is not None and tc < av:
-            return None
+        # ⛔ KHÔNG thêm guard `tc < av ⇒ None` ở ĐÂY. Bất biến "totalCash ≥ availableCash" mà
+        # `mike/bin/park_holdings.py::_cash_fields_inconsistent` dùng KHÔNG ĐÚNG với hàm này, và
+        # việc thêm nó vào đã bị arch-review chặn 2026-09-27 (code-quality-weekly, finding gốc
+        # của report SAI Ở ĐIỂM NÀY — xem git log của commit revert).
+        #
+        # ĐO THẬT trên toàn bộ `data/execution_logs/dnse_raw_*.jsonl` (7.181 record `balances`
+        # có cả hai field): **1.911 record có totalCash < availableCash**, tập trung đúng vào
+        # giờ giao dịch — 881/1.438 (61%) ở giờ 13, 416/655 ở giờ 14 — và 0/819 ngoài giờ.
+        # 10 ngày khác nhau, gồm cả 2026-09-17 và 2026-09-18. Nguyên nhân là NGỮ NGHĨA của
+        # feed, không phải lỗi: `availableCash ≈ totalCash + secureAmount` (09-18T13:30
+        # SpaceX: tc 35.011.893 · av 45.693.614 · secureAmount 25.044.269) — DNSE không hạ
+        # `availableCash` trong phiên, phần bị giữ nằm ở `secureAmount`.
+        #
+        # VÌ SAO NGUY HIỂM, không chỉ là "báo động giả": caller `trading_bot/plan.py:1977` rơi
+        # về `get_cash()` khi hàm này trả None, mà `get_cash()` trả CHÍNH họ availableCash ⇒
+        # giá trị LỚN HƠN. Comment ở plan.py:1973-1974 khẳng định fallback "CHỈ làm nav_live
+        # nhỏ hơn thật, tức fail-safe" — điều đó SAI đúng trong mọi ca guard này kích hoạt.
+        # nav_live bị thổi lên ⇒ `plan.py:2000` (`nav_art > nav_live*(1+CAPIT_LEVER_NAV_TOL)`,
+        # TOL=0,15) NỚI LỎNG đúng chiều mà docstring `lever_live_preflight` gọi là "chiều duy
+        # nhất sinh ra vay vượt mức". Giờ 13 chính là lúc `run_bot.sh` chạy lại (crontab
+        # "13:00 ICT — khởi động lại sau nghỉ trưa, resume state").
+        #
+        # Guard NÀY vẫn đúng và VẪN GIỮ ở `daily_nav_snapshot.py`: caller đó đọc bản ghi CUỐI
+        # của ngày (sau giờ đóng cửa), nơi đo được 2/165 cặp (ngày, account) vi phạm và cả hai
+        # là ngày go-live, một bản ghi có totalCash âm — ở đó chặn là đúng.
         return tc - td
 
     def get_max_buy_qty(self, symbol, price, loan_package_id=None):

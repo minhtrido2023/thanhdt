@@ -12,9 +12,12 @@ Khoá 2 thứ, mỗi thứ là một câu hỏi §25 KHÁC nhau — trộn hai c
      fallback của `check_plan_funding`). CHỈ được đọc họ availableCash. Chuỗi alias cũ kết
      thúc ở `purchasingpower`/`totalcash`/`cash`/`balance` ⇒ DNSE đổi tên field là cổng tiền
      ÂM THẦM nhảy lên số "SỞ HỮU" (đo thật SpaceX 2026-08-07: 4,82M vs 203,66M — gấp 42 lần).
-  2. `_cash_totalcash_minus_debt()` = "SỞ HỮU" (cơ sở NAV, caller `plan.py` nav_live) phải có
-     ĐỦ BA guard của `mike/bin/park_holdings.py`. Bản cũ chỉ có 2/3 — thiếu bất biến
-     `totalCash ≥ availableCash`, nên lỗi feed ăn HAI trong ba field lọt nguyên vẹn.
+  2. `_cash_totalcash_minus_debt()` = "SỞ HỮU" (cơ sở NAV, caller `plan.py` nav_live). Nó CỐ Ý
+     KHÔNG mang bất biến `totalCash ≥ availableCash` của `mike/bin/park_holdings.py`: bất biến đó
+     chỉ đúng SAU GIỜ ĐÓNG CỬA. Đo thật trên dnse_raw_*.jsonl: 1.911/7.181 record `balances` có
+     totalCash < availableCash, 881/1.438 (61%) ở giờ 13 — và trả None ở đây làm plan.py rơi về
+     `get_cash()` (LỚN HƠN) ⇒ thổi nav_live đúng chiều nới vay. Mục 2e/2f/2g dùng SỐ THẬT để ghim
+     việc guard đó không được thêm lại; mục 4 ghim việc nó vẫn sống ở đường post-close.
 """
 import os
 import sys
@@ -68,7 +71,7 @@ check("1e biến thể viết khác của CÙNG khái niệm vẫn nhận (cashA
 check("1f withdrawableCash cũng nhận", _broker({**_no_av, "withdrawableCash": 5.0}).get_cash() == 5.0)
 check("1g availableCash = 0 THẬT ⇒ 0.0, không nổ", _broker({**REAL, "availableCash": 0.0}).get_cash() == 0.0)
 
-print("2. _cash_totalcash_minus_debt() = SỞ HỮU — đủ BA guard §25")
+print("2. _cash_totalcash_minus_debt() = SỞ HỮU — guard đúng PHẠM VI caller")
 m = lambda st: _broker(st)._cash_totalcash_minus_debt()   # noqa: E731
 check("2a payload thật ⇒ 203.656.265 − 0", m(REAL) == 203_656_265.0, m(REAL))
 check("2b thiếu totalCash ⇒ None", m({k: v for k, v in REAL.items() if k != "totalCash"}) is None)
@@ -76,16 +79,33 @@ check("2c thiếu totalDebt ⇒ None", m({k: v for k, v in REAL.items() if k != 
 check("2d cả ba field tiền = 0 ⇒ None (guard _cash_fields_all_zero)",
       m({"totalCash": 0.0, "totalDebt": 0.0, "availableCash": 0.0,
          "depositInterest": 318.0}) is None)
-check("2e GUARD MỚI: totalCash 0 < availableCash 5.000.000 ⇒ None (bất biến kế toán; bản cũ "
-      "trả 0.0 như thể tiền thật về 0)",
-      m({"totalCash": 0.0, "totalDebt": 0.0, "availableCash": 5_000_000.0,
-         "depositInterest": 318.0}) is None,
-      m({"totalCash": 0.0, "totalDebt": 0.0, "availableCash": 5_000_000.0,
-         "depositInterest": 318.0}))
-check("2f GUARD MỚI, ca tổng quát hơn: totalCash 1tr < availableCash 5tr (không field nào = 0) "
-      "⇒ None", m({"totalCash": 1_000_000.0, "totalDebt": 0.0,
-                   "availableCash": 5_000_000.0}) is None)
-check("2g CHỨNG MINH NGƯỢC 2e/2f: totalCash == availableCash (bất biến THOẢ dạng ≥) ⇒ trả 5tr",
+# ── 2e/2f: BẤT BIẾN `totalCash ≥ availableCash` KHÔNG ĐÚNG Ở HÀM NÀY ────────────────────
+# Bản đầu (2026-09-27) thêm guard `tc < av ⇒ None` vào đây theo finding của code-quality report.
+# arch-review CHẶN, và đo thật cho thấy finding SAI Ở ĐIỂM NÀY: trên toàn bộ dnse_raw_*.jsonl
+# (7.181 record `balances` có cả hai field) có **1.911 record totalCash < availableCash**, tập
+# trung đúng giờ giao dịch — 881/1.438 (61%) ở giờ 13, 416/655 ở giờ 14, 0/819 ngoài giờ — trải
+# 10 ngày, gồm 2026-09-17 và 2026-09-18. Ngữ nghĩa feed: `availableCash ≈ totalCash +
+# secureAmount` (DNSE không hạ availableCash trong phiên; phần bị giữ nằm ở secureAmount).
+# Trả None ở đây khiến `plan.py:1977` rơi về `get_cash()` = CHÍNH họ availableCash ⇒ LỚN HƠN ⇒
+# nav_live thổi lên ⇒ `plan.py:2000` nới lỏng đúng chiều sinh ra vay vượt mức. Giờ 13 là lúc
+# `run_bot.sh` chạy lại (crontab "13:00 ICT — khởi động lại sau nghỉ trưa").
+# BA ca dưới dùng SỐ THẬT đọc từ dnse_raw, không phải fixture bịa — đó là điểm mà bộ 17 fixture
+# tổng hợp của bản đầu không thể phát hiện được.
+check("2e SỐ THẬT SpaceX 2026-09-18T13:30 (tc 35.011.893 < av 45.693.614, secureAmount "
+      "25.044.269) ⇒ PHẢI trả 35.011.893, KHÔNG được None (None ⇒ plan.py rơi về availableCash "
+      "= 45.693.614, thổi nav_live lên 10,7tr đúng chiều nới vay)",
+      m({"totalCash": 35_011_893.0, "totalDebt": 0.0, "availableCash": 45_693_614.0,
+         "secureAmount": 25_044_269.0}) == 35_011_893.0,
+      m({"totalCash": 35_011_893.0, "totalDebt": 0.0, "availableCash": 45_693_614.0,
+         "secureAmount": 25_044_269.0}))
+check("2f SỐ THẬT SpaceX 2026-09-17T13:10 (tc 45.694.517 < av 58.105.642) ⇒ trả 45.694.517",
+      m({"totalCash": 45_694_517.0, "totalDebt": 0.0, "availableCash": 58_105_642.0,
+         "secureAmount": 12_412_028.0}) == 45_694_517.0)
+check("2g SỐ THẬT go-live 2026-07-01T13:00 (tc 506.919.547 < av 1.000.021.918, secureAmount "
+      "493.107.851 — đúng hằng đẳng thức av ≈ tc + secure) ⇒ trả 506.919.547",
+      m({"totalCash": 506_919_547.0, "totalDebt": 0.0, "availableCash": 1_000_021_918.0,
+         "secureAmount": 493_107_851.0}) == 506_919_547.0)
+check("2g2 totalCash == availableCash (ca post-close bình thường) ⇒ trả 5tr",
       m({"totalCash": 5_000_000.0, "totalDebt": 0.0, "availableCash": 5_000_000.0}) == 5_000_000.0)
 check("2h CHỨNG MINH NGƯỢC: thiếu availableCash nhưng totalCash/totalDebt sống ⇒ vẫn trả hiệu "
       "(guard mới không được chặn oan)",
@@ -98,6 +118,28 @@ print("3. RANH GIỚI — hai hàm KHÔNG được trả cùng một số trên 
 check("3a get_cash() ≠ _cash_totalcash_minus_debt() trên payload thật (nếu bằng nhau thì một "
       "trong hai đã trả lời sai câu hỏi §25 của nó)",
       _broker(REAL).get_cash() != m(REAL))
+
+print("4. RANH GIỚI THỜI GIAN — guard `tc < av` vẫn ĐÚNG ở caller POST-CLOSE")
+# Không phải "bất biến này sai", mà là "nó sai Ở CALLER NÀY". `park_holdings
+# ._cash_fields_inconsistent` đọc bản ghi CUỐI của ngày (sau đóng cửa), nơi secureAmount đã về 0:
+# đo 2/165 cặp (ngày, account) vi phạm, cả hai là ngày go-live và một bản ghi có totalCash ÂM —
+# ở đó chặn là đúng. Mục này ghim việc guard KHÔNG bị xoá lây khỏi đường post-close.
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "mike", "bin"))
+try:
+    import park_holdings as _PH4
+except Exception as _e4:                                       # noqa: BLE001
+    check(f"4a nạp được mike/bin/park_holdings.py ({_e4})", False)
+else:
+    check("4a park_holdings._cash_fields_inconsistent VẪN chặn tc < av (đường post-close)",
+          _PH4._cash_fields_inconsistent({"totalCash": 0.0, "availableCash": 5_000_000.0}) is True)
+    check("4b …và KHÔNG chặn khi tc ≥ av",
+          _PH4._cash_fields_inconsistent({"totalCash": 5_000_000.0,
+                                          "availableCash": 5_000_000.0}) is False)
+    import inspect as _i4  # noqa: E402
+    check("4c `DNSEBroker._cash_totalcash_minus_debt` KHÔNG mang guard đó (khác caller, khác "
+          "ngữ cảnh thời gian) — nếu ai thêm lại, mục 2e/2f chết trước",
+          "tc < av" not in _i4.getsource(DNSEBroker._cash_totalcash_minus_debt).split("⛔")[-1]
+          .replace("`tc < av ⇒ None`", ""))
 
 print(f"\n{len(PASS)} PASS, {len(FAIL)} FAIL")
 if FAIL:

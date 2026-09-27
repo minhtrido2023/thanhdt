@@ -643,22 +643,57 @@ import os as _os_r6        # noqa: E402
 _WC_R6 = _os_r6.path.dirname(_os_r6.path.abspath(__file__))
 _ALLOWED_R6 = {"plan_funding_gate_selfcheck.py",        # chính file này
                "plan_funding_gate.py"}                  # nơi định nghĩa
+# Ba HÌNH DẠNG gọi, không chỉ một (arch-review 2026-09-27: bản đầu chỉ khớp `ast.Name` nên
+# `g.funding_block_reason(...)` và `import ... as fbr; fbr(...)` đều LỌT — đã đo, 0 hit cả hai).
+# Và phải quét CẢ `mike/bin/*.py`: 60+ script đường tiền sống ở đó, bản đầu không chạm tới.
+_ROOTS_R6 = [_os_r6.path.join(_WC_R6, "*.py"),
+             _os_r6.path.join(_WC_R6, "trading_bot", "*.py"),
+             _os_r6.path.join(_WC_R6, "mike", "bin", "*.py")]
+_files_r6 = [f for pat in _ROOTS_R6 for f in _glob_r6.glob(pat)]
+_unparsed_r6 = []
 _callers_r6 = []
-for _f in (_glob_r6.glob(_os_r6.path.join(_WC_R6, "*.py"))
-           + _glob_r6.glob(_os_r6.path.join(_WC_R6, "trading_bot", "*.py"))):
+for _f in _files_r6:
     _base = _os_r6.path.basename(_f)
     if _base in _ALLOWED_R6:
         continue
     try:
         _tree = _ast_r6.parse(open(_f, encoding="utf-8").read())
     except SyntaxError:
+        # "Không parse được" KHÔNG được thành "sạch" (§29). 6 file R&D dùng f-string PEP 701 chỉ
+        # parse ở 3.12 ($DNA_PYEXE), hook/selfcheck này chạy python3 3.10 — cùng ca đã ghi ở
+        # coding_guidelines §16 cho tz_anchor_gate. Rẽ về phép quét VĂN BẢN: không cần AST để
+        # biết một file KHÔNG hề nhắc tên hàm.
+        _unparsed_r6.append(_base)
+        if "funding_block_reason" in open(_f, encoding="utf-8", errors="replace").read():
+            _callers_r6.append(f"{_base}:?(không parse được, khớp theo văn bản)")
         continue
+    # alias nhập khẩu: `from ... import funding_block_reason as fbr`
+    _aliases_r6 = {"funding_block_reason"}
     for _n in _ast_r6.walk(_tree):
-        if isinstance(_n, _ast_r6.Call) and getattr(_n.func, "id", None) == "funding_block_reason":
+        if isinstance(_n, _ast_r6.ImportFrom):
+            for _a in _n.names:
+                if _a.name == "funding_block_reason" and _a.asname:
+                    _aliases_r6.add(_a.asname)
+    for _n in _ast_r6.walk(_tree):
+        if not isinstance(_n, _ast_r6.Call):
+            continue
+        _fn = _n.func
+        _nm = (_fn.id if isinstance(_fn, _ast_r6.Name)
+               else _fn.attr if isinstance(_fn, _ast_r6.Attribute) else None)
+        if _nm in _aliases_r6:
             _callers_r6.append(f"{_base}:{_n.lineno}")
-check("funding_block_reason() vẫn 0 caller production — thêm caller PHẢI thêm `execution_state` "
+check("ratchet quét được ít nhất 200 file (fail-closed: glob rỗng KHÔNG được thành PASS giả — "
+      "cùng lý lẽ E1 của compute_active_nav_selfcheck)",
+      len(_files_r6) >= 200, len(_files_r6))
+check("funding_block_reason() vẫn 0 caller production (khớp CẢ 3 hình dạng: tên trần, "
+      "`x.funding_block_reason(...)`, alias nhập khẩu) — thêm caller PHẢI thêm `execution_state` "
       "vào signature trước (xem docstring: resume sẽ đếm kép qty đã khớp)",
       _callers_r6 == [], _callers_r6)
+check("…và file không parse được (f-string PEP 701, chỉ 3.12) vẫn được quét bằng VĂN BẢN nên "
+      "không lọt im lặng — danh sách in ra để thấy được, không phải để chặn",
+      all("funding_block_reason" not in open(_os_r6.path.join(_WC_R6, _b), encoding="utf-8",
+                                            errors="replace").read()
+          for _b in _unparsed_r6), _unparsed_r6)
 check("…và docstring của nó vẫn mang cảnh báo đó (đừng xoá khi refactor)",
       "execution_state" in (__import__("trading_bot.plan_funding_gate", fromlist=["x"])
                             .funding_block_reason.__doc__ or ""))
