@@ -7356,3 +7356,108 @@ BASKET_OSHARES_STEP=exdate|quarter`. Báo cáo đầy đủ + mọi CSV lớp l�
 **Nếu merge**: (1) re-pin R3 sang 24,42% hoặc ghi rõ pin chưa gồm bản sửa — không để 2 số không
 nhãn; (2) `bootstrap_nav.py` + `dsr_pbo_annex.py` vẫn STALE **từ JOB C** (nợ cũ), chạy lại MỘT lần
 trên bản cuối sau merge; (3) chạy lại `custom30_history.py` để `tav2_bq.custom30v_8l` đồng bộ.
+
+---
+
+## 2026-09-27 (ter) — QUÉT LƯỚI PARK-FRACTION custom30V 12 MỨC — **ĐỈNH NỘI THẬT Ở 30%**, bis §7 "đơn điệu giảm" là do lưới quá thưa — job `Taylor_20260927_064747` ⚠️ **PAPER-ONLY, `trading_rules.json` KHÔNG ĐỔI, CHỜ USER**
+
+User (13:38 ICT 27/09) yêu cầu **một con số cụ thể** thay cho `neutral_parking.default_park_of_idle_pct
+= 0.8` (chốt 08-04 dựa trên biên **0,01 Calmar** ở chân return LỖI, nay mất căn cứ). PREREG viết
+trước khi chạy: `mike/agents/Taylor/research/park_fraction_grid_20260927/PREREG.md` (+ 2 amendment).
+Cây đo **main @`f2cfb124`** (đã merge cả chân return `a808a613` và chân weight ex-date ticket 1).
+
+### KẾT LUẬN — **30 %** (dải hợp lý **20–30 %**; mọi mức ≥40% bị ràng buộc rủi ro loại)
+
+Hàm mục tiêu khai báo TRƯỚC: tối đa **Calmar**, với ràng buộc **bootstrap 5th-pct MaxDD không xấu
+hơn park=0 quá 2,0pp**; tie-break Sharpe, rồi mức park thấp hơn.
+
+| park % | CAGR | Sharpe | MaxDD | **Calmar** | Final NAV | IS 14-19 | OOS 20+ | boot CAGR 5th | **boot MaxDD 5th** | cổng DD (trần −26,0%) |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|:--|
+| 0 | 22,37% | **1,95** | −16,1% | 1,390 | 618,35B | 20,30% | 24,23% | 15,2% | **−24,0%** | ✅ |
+| 10 | 22,75% | 1,94 | −15,7% | 1,450 | 642,68B | 20,11% | 25,16% | 15,3% | −24,3% | ✅ |
+| 20 | 22,76% | 1,90 | −15,2% | 1,500 | 643,55B | 20,11% | 25,19% | 15,1% | −24,9% | ✅ |
+| **30 ← ĐỀ XUẤT** | **23,43%** | 1,88 | **−14,4%** | **1,630** | 688,77B | 20,07% | 26,56% | 15,6% | **−25,1%** | ✅ (1,1pp) |
+| 40 | 23,03% | 1,80 | −15,1% | 1,530 | 661,56B | 19,86% | 25,97% | 14,9% | −26,4% | ❌ |
+| 50 | 24,15% | 1,81 | −16,6% | 1,450 | 740,30B | 19,73% | 28,32% | 15,8% | −27,4% | ❌ |
+| 60 | 24,32% | 1,75 | −17,7% | 1,370 | 753,06B | 19,54% | 28,84% | 15,6% | −28,9% | ❌ |
+| 70 | 24,42% | 1,69 | −18,8% | 1,300 | 761,11B | 19,31% | 29,29% | 15,5% | −30,3% | ❌ |
+| 75 | 24,66% | 1,68 | −19,3% | 1,280 | 778,96B | 19,24% | 29,83% | 15,5% | −31,1% | ❌ |
+| **80 ← LIVE** | **24,95%** | 1,66 | −19,8% | **1,260** | 802,27B | 19,04% | 30,62% | 15,6% | **−32,0%** | ❌ (8,0pp) |
+| 90 | 24,81% | 1,58 | −20,8% | 1,190 | 790,76B | 18,79% | 30,59% | 15,0% | −34,7% | ❌ |
+| 100 | 24,93% | 1,52 | −20,8% | 1,200 | 800,67B | 18,04% | 31,63% | 15,0% | −36,1% | ❌ |
+
+`self-check BAL+LAG = 0 VND` **12/12** (+2 control), `EXIT=0` 14/14, dòng log `parking policy
+(cash_etf_states) {3: x}` **assert bằng code** khớp `x` ở 12/12 (`summary.py` — chống no-op im lặng
+đã cắn job `_043541`, không đọc bằng mắt).
+
+### bis §7 SAI HƯỚNG vì lưới 4 điểm bỏ lọt cả vùng nghiệm
+bis §7 (0/70/80/85%) thấy Calmar đơn điệu giảm ⇒ kết luận "tối ưu risk-adjusted = KHÔNG park".
+Lưới 12 điểm cho thấy **có đỉnh nội ở 30%**, và ở dải 0→30% parking tốt hơn **CẢ HAI chiều cùng lúc**
+(CAGR 22,37→23,43% *và* MaxDD −16,1→**−14,4%**). Câu trả lời đúng không phải "bỏ parking" mà
+**"parking đang đặt to gấp ~2,7× mức tối ưu"**. Mọi con số bis §7 vẫn ĐÚNG (tái lập byte-identical,
+xem cổng neo) — chỉ **suy luận về hình dạng** từ 4 điểm là sai.
+
+### Cổng NEO — có md5, gồm 1 lần FAIL đã phân tách bằng control
+- `x=0` → 22,37%/1,95/−16,1%/1,39 khớp KHÍT bis §7.
+- `x=0,7` → CSV md5 **`2f9c3702524391f5538d262edb17515d`** = **byte-identical** leg
+  `wexd2_new_exdate` (ticket 1).
+- `x=0,8` **FAIL cổng ban đầu**: 24,95% vs bis §7 24,66% = **+0,29pp** (trần prereg 0,05pp).
+  Phân tách bằng control `BASKET_OSHARES_STEP=quarter`: `parkgrid_070q` md5
+  **`3f836927c0df82915c4cfb973d8f4af3`** = `c30vmain`; `parkgrid_080q` md5
+  **`a90e87c093873028ac2cd19f71c1780e`** = `c30vpark80` — **cả hai byte-identical** ⇒ +0,29pp là
+  **biên THẬT của ticket 1 tại x=0,8**. ⚠️ **Biên ticket 1 KHÔNG hằng số theo x**: +0,04pp @70%,
+  **+0,29pp @80%** — vì nó chỉ đi qua chân weight của rổ, mà tỷ trọng rổ tăng theo x. Ai trích
+  "+0,04pp là nhiễu" phải kèm điều kiện "ở x=0,7".
+
+### 5th-pct MaxDD là đại lượng quyết định; 5th-pct CAGR gần như PHẲNG
+Bootstrap (circular block L=21, B=4000, seed 12345, quy ước LỊCH sau FAIL-F): 5th-pct MaxDD chạy
+**−24,0% → −36,1%** (dải 12pp, đơn điệu) trong khi 5th-pct CAGR chỉ **14,9–15,8%** (dải 0,9pp trên
+CẢ lưới). Đọc thẳng: **tăng park gần như không mua thêm gì ở chân CAGR khi đã tính bất định lấy mẫu,
+chỉ mua thêm đuôi DD.** "80% so với 30%" = +1,52pp CAGR ↔ **+5,4pp MaxDD thực + 6,9pp đuôi DD 5th-pct,
+−0,37 Calmar, −0,22 Sharpe** = **0,28pp CAGR / 1pp MaxDD**.
+
+### Đỉnh 30% ROBUST theo leave-one-year-out, nhưng N hiệu dụng ≈ 2 — phải nói kèm
+- Phân giải: 30% cách mức kề gần nhất **0,100 Calmar** (tới 40%) — hơn **3×** ngưỡng 0,03 khai báo
+  trước, và lớn hơn **10×** biên 0,01 mà quyết định 08-04 từng dựa vào.
+- **LOYO**: bộ {20,30,40}% → 30% thắng **12/13**, đổi **1/13** (bỏ 2020 → 20%) ⇒ **≤1 ⇒ robust**
+  (prereg: >1 = reshuffle-luck). Bộ {0,30,80}% → 30% thắng 12/13; **80% không thắng lần nào**. Cả 13
+  lần, mức thắng luôn nằm **0–30%**.
+- ⚠️ **Cơ chế: danh tính MaxDD ĐỔI ĐỢT tại 30→40%** (`dd_episodes.txt`). park ≤30% → đợt ràng buộc là
+  **2019→24/03/2020** (Covid) và parking **cải thiện** nó (−16,1 → −14,4%, vì suốt 2019 tiền nhàn rỗi
+  ăn 0%/năm còn rổ ăn return ⇒ NAV đỉnh cao hơn, %DD nhỏ hơn). park ≥40% → chuyển sang
+  **05/04→05/07/2018** và parking **làm xấu** đơn điệu (−13,9 → −19,8%). ⇒ 30% = `argmin
+  max(DD_2018, DD_2020)`, vị trí do **hai sự kiện đơn lẻ** định ra ⇒ **kết luận là dải 20–30%, không
+  phải điểm 30,0%**.
+- **Walk-forward cảnh báo ngược chiều:** IS giảm đơn điệu theo park (20,30% @0 → 18,04% @100), OOS
+  tăng đơn điệu (24,23% → 31,63%) ⇒ toàn bộ lợi ích CAGR của park NHIỀU nằm ở OOS 2020+ (bỏ 2021 kéo
+  CAGR mọi mức về ~17,5-17,8%). Mức 30% có IS **20,07%** ≈ park=0 (20,30%) nên KHÔNG dựa vào chế độ
+  hậu-2020 để đứng.
+
+### Haircut thuế cổ tức FAIL-D — áp số học, không đảo thứ hạng
+`k = 5,095%`, `drag = 1 − Π(1 − k·DY_kỳ·park_share_kỳ)^(1/yrs)`, `DY_kỳ` nguyên văn 49 kỳ từ
+`part2/dy_by_rebal.csv`, **`park_share_kỳ` đo THẬT trên CSV từng leg** (không giả định tuyến tính
+theo x). Drag đơn điệu **0,000 → 0,083pp/năm** (30% chỉ 0,023pp) ⇒ chỉ làm mức park cao xấu thêm.
+**Neo:** tại x=0,7 bản dựng lại độc lập cho park_share **0,2450** / drag **0,0552pp** — khớp
+`part2/nav_drag.txt` (0,2453 / 0,0552pp). Ghi nhớ: knob 30% ⇒ rổ chỉ **10,5% NAV** trung bình
+(knob 80% ⇒ 28,1%) — knob là phần **TIỀN NHÀN RỖI**, không phải phần NAV.
+
+### ⛔ KHÔNG TỰ ĐỔI GÌ — hai phương án cho user
+`trading_rules.json` vẫn `0.8`, không đụng một byte. Áp vào LIVE cần **user duyệt + quant-skeptic**.
+- **(a) khuyến nghị — 30%**: Calmar 1,630 (+0,37 vs LIVE), Sharpe 1,88 (+0,22), MaxDD −14,4% (tốt hơn
+  5,4pp), đuôi DD −25,1% (tốt hơn 6,9pp); CAGR 23,43% (mất 1,52pp). Quy đổi thực tế ⇒ **≈21,9%/năm**.
+- **(b) mức thấp nhất còn giữ CAGR ≥24,0% = 50%** (40% chỉ 23,03%) — nhưng 50% có đuôi DD −27,4%,
+  **vi phạm** ràng buộc 2,0pp ⇒ (b) chỉ tồn tại nếu user chủ động nới ràng buộc rủi ro.
+- Giữ 80% vẫn là lựa chọn hợp lệ của user, nhưng phải gọi đúng tên: mua +1,52pp CAGR bằng +5,4pp
+  MaxDD / +6,9pp đuôi DD, và **không thắng Calmar lần nào trong 13 lần LOYO**.
+
+**Caveat chung:** 12 leg cùng vintage `bq_cache_asof20260729_postrestate`, cùng snapshot corp-action
+ghim `data/snapshots/corp_action_share_20260927.parquet`, cùng tham số fill chưa neo (trần 20%
+ADV/phiên — `kb/projects/lag-adv-filter-tracking.md`); một đường đi lịch sử duy nhất, bootstrap là
+**biên DƯỚI** của bất định thật.
+
+**Artifact:** `mike/agents/Taylor/research/park_fraction_grid_20260927/` — `PREREG.md` (+2 amendment)
+· `REPORT.md` · `run_leg.sh` · `summary.py` · `park_haircut.py` · `loyo.py` · 14 `parkgrid_*.log` ·
+12 `bootstrap_parkgrid_*.log` · `haircut_all.log` · `isoos.txt` · `grid_summary.{csv,txt}` ·
+`park_grid_curves.png` · `dd_episodes.txt` · `loyo_020_030_040.log` · `loyo_000_030_080.log`. CSV:
+`data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-*_wtnamecap_advprice_exp_parkgrid_*_univpit.csv`
+(14 file, tên non-canonical theo §8). **Không thay đổi một dòng code production nào trong job này.**
