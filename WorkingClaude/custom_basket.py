@@ -152,6 +152,7 @@ WEIGHT LEG — THE SHARE COUNT MUST STEP ON THE EX-DATE, NOT ON THE QUARTERLY RE
 """
 import bisect
 import os
+import subprocess
 import numpy as np
 import pandas as pd
 
@@ -181,6 +182,103 @@ N_MEMBERS = 30
 # `ticker_prune` was thin.
 UNIVERSE_SOURCE = "pit"
 UNIVERSE_PIT_TABLE = "lithe-record-440915-m9.tav2_mike.universe_pit_q"
+
+
+FORENSIC_FLAGS_NAME = os.path.join("data", "forensic_flags.csv")
+
+
+def _forensic_flags_candidates():
+    """Nơi tìm `data/forensic_flags.csv`, theo thứ tự ưu tiên — KHÔNG hardcode đường dẫn canonical.
+
+    Vì sao cần cây thứ hai: `.gitignore:57` (`*.csv`) ẩn chính file này ⇒ **KHÔNG worktree nào
+    có nó** (đo thật 2026-09-27: `wt-forensic-failclosed-2709/WorkingClaude/data/` không có file,
+    cây canonical có). Nếu chỉ tìm theo cây của module thì cổng fail-closed dưới đây sẽ chặn ở
+    ĐÚNG lúc cần nhất — lúc review một branch trong worktree. Cùng khuôn với
+    `basket_price_basis_selfcheck._ca_snapshot_candidates()` (vintage `*.parquet`, merge
+    `07d5b4ad`): cây canonical suy ra bằng `git rev-parse --git-common-dir` nên di chuyển repo
+    không làm hỏng, và không có đường dẫn nào viết cứng.
+    """
+    here = os.path.dirname(os.path.abspath(__file__))
+    cands = [os.path.join(here, FORENSIC_FLAGS_NAME)]
+    try:
+        common = subprocess.run(["git", "rev-parse", "--git-common-dir"], cwd=here,
+                                capture_output=True, text=True, check=True).stdout.strip()
+        top = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=here,
+                             capture_output=True, text=True, check=True).stdout.strip()
+        # `--git-common-dir` có thể trả đường dẫn TƯƠNG ĐỐI (vd `../.git`) và nó tương đối với
+        # `cwd=here`, KHÔNG phải cwd của process ⇒ join với `here` trước khi normalise.
+        common_abs = common if os.path.isabs(common) else os.path.join(here, common)
+        canon = os.path.join(os.path.dirname(os.path.normpath(common_abs)),
+                             os.path.relpath(here, top))
+        cands.append(os.path.normpath(os.path.join(canon, FORENSIC_FLAGS_NAME)))
+    except Exception:
+        pass  # không nằm trong git / không có git: chỉ còn cây của chính module này
+    return [c for i, c in enumerate(cands) if c not in cands[:i]]
+
+
+def load_forensic_excludes():
+    """{ticker: ngày cờ} cho severity=='exclude' — **FAIL-CLOSED** (đổi 2026-09-27, user duyệt).
+
+    TRƯỚC 2026-09-27 khối này là `except Exception: print("  [forensic exclude] none (...)")` rồi
+    ĐI TIẾP = fail-OPEN. Hệ quả đo thật: chạy từ một worktree, universe custom30 giữ lại **8 mã**
+    mà cây canonical loại (KSF VVS PC1 HHS L40 KLB DIG BFC — trong đó PC1/VVS/KSF còn nằm trong
+    danh sách BANNED vĩnh viễn), mà log CHỈ nói "none" ⇒ một rổ KHÁC hẳn, không ai biết.
+
+    Ba trạng thái, phân biệt TƯỜNG MINH:
+      · env `BASKET_FORENSIC_FLAGS` **không đặt** → tìm theo `_forensic_flags_candidates()`;
+        không thấy / không đọc được ⇒ **SystemExit**.
+      · env đặt **rỗng** (`BASKET_FORENSIC_FLAGS=`) → khai TƯỜNG MINH "chạy KHÔNG lọc forensic",
+        trả {} và in dấu vết. Rỗng KHÁC HOÀN TOÀN với thiếu file.
+      · env đặt **một đường dẫn** → dùng đúng file đó; thiếu/hỏng ⇒ SystemExit (KHÔNG âm thầm rơi
+        về cây khác — người gọi đã chỉ định thì phải tôn trọng).
+
+    Vì sao fail-CLOSED ở ĐÂY mà `lag_forensic_filter.py:67` cố ý fail-OPEN — KHÔNG mâu thuẫn, hai
+    hàm trả hai thứ khác nhau:
+      · `lag_forensic_filter` là **cổng chặn lệnh runtime** cho book LAG, còn NGUYÊN tầng `BANNED`
+        (hằng số trong code, không thể hỏng) làm sàn phía dưới, và nó TRẢ error string để
+        `status.json` phân biệt "không mã nào bị cờ" với "gate không chạy được" — không im lặng.
+        Fail-closed ở đó = chặn TOÀN BỘ book LAG vì một file lỗi, thiệt hại lớn hơn rủi ro.
+      · `custom_basket` là **tầng dựng UNIVERSE của backtest/re-pin**, KHÔNG có sàn BANNED độc lập
+        nào phía dưới, và đầu ra là một CON SỐ được ghim vào `data/results_registry.md`. Fail-open
+        ở đây không chặn ai — nó sinh một con số SAI trông như đúng. Không chạy được thì TỪ CHỐI.
+    Chính comment `lag_forensic_filter.py:71-73` đã gọi tên fail-mode này ("thiếu file ⇒ fail-open
+    ⇒ im lặng thôi loại"); bản vá này đóng nó ở đúng call-site không có sàn.
+    """
+    if "BASKET_FORENSIC_FLAGS" in os.environ:
+        env_path = os.environ["BASKET_FORENSIC_FLAGS"]
+        if not env_path:
+            print("  [forensic exclude] TẮT TƯỜNG MINH (BASKET_FORENSIC_FLAGS= rỗng) — "
+                  "universe KHÔNG lọc forensic")
+            return {}
+        cands, src = [env_path], "env BASKET_FORENSIC_FLAGS"
+    else:
+        cands, src = _forensic_flags_candidates(), "mặc định (cây module → cây canonical)"
+    errs = []
+    for i, path in enumerate(cands):
+        try:
+            ff = pd.read_csv(path)
+            forx = {r["ticker"]: pd.Timestamp(r["date"]) for _, r in ff.iterrows()
+                    if str(r["severity"]).strip() == "exclude"}
+            tag = "cây canonical" if i > 0 else src
+            print(f"  [forensic exclude] {path} [{tag}] — custom30 universe drops from flag date: "
+                  f"{ {k: str(v.date()) for k, v in forx.items()} }")
+            return forx
+        except Exception as e:
+            errs.append(f"    {path}" + os.linesep + f"      -> {type(e).__name__}: {e}")
+    # §29: trích ĐÚNG exception của từng đường dẫn vừa thử, không đoán nguyên nhân.
+    raise SystemExit(os.linesep.join([
+        "[forensic exclude] TỪ CHỐI CHẠY — không đọc được registry forensic, và bỏ qua nó sẽ giữ",
+        "lại trong universe những mã đã bị loại ở cây canonical (đo 2026-09-27: 8 mã, gồm",
+        "PC1/VVS/KSF thuộc BANNED vĩnh viễn) mà chỉ in 'none'.",
+        f"  Nguồn tra: {src}",
+        "  Đã thử, kèm lỗi THẬT:",
+        *errs,
+        "  Cách thoát (chọn 1):",
+        "    - copy registry vào cây đang chạy:  cp <canonical>/" + FORENSIC_FLAGS_NAME + " "
+        + os.path.join(os.path.dirname(os.path.abspath(__file__)), FORENSIC_FLAGS_NAME),
+        "    - chỉ đúng file:  BASKET_FORENSIC_FLAGS=/duong/dan/forensic_flags.csv",
+        "    - KHAI muốn chạy KHÔNG lọc (số sẽ KHÁC pin):  BASKET_FORENSIC_FLAGS=  (rỗng)",
+    ]))
 
 
 def pxw_sql(alias="t"):
@@ -635,13 +733,7 @@ WHERE r.time <= DATE '{end_date}' ORDER BY r.ticker, r.time""")
     # FORENSIC EXCLUDE (2026-06-20, date-aware, NO hindsight): a human-flagged 'exclude' name (related-party/
     # manipulation, data/forensic_flags.csv) is forced rating 5 (fails gate<=3) ONLY from its flag date
     # forward -> dropped from custom30/V2.3 going forward; historical rebals keep its real rating (PIT-honest).
-    _FORX = {}
-    try:
-        _ff = pd.read_csv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "forensic_flags.csv"))
-        _FORX = {r["ticker"]: pd.Timestamp(r["date"]) for _, r in _ff.iterrows() if str(r["severity"]).strip() == "exclude"}
-        if _FORX: print(f"  [forensic exclude] custom30 universe drops from flag date: { {k: str(v.date()) for k,v in _FORX.items()} }")
-    except Exception as e:
-        print(f"  [forensic exclude] none ({e})")
+    _FORX = load_forensic_excludes()   # FAIL-CLOSED, xem docstring
     def rating_asof(tk, d):
         fd = _FORX.get(tk)
         if fd is not None and pd.Timestamp(d) >= fd: return 5.0   # forensic exclude, flag date onward
