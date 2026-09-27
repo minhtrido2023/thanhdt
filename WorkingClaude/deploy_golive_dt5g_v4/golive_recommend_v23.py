@@ -287,14 +287,29 @@ def w_lag_target(state, asof):
     when LAG's own causal edge-health mean12 (trailing-12M mean LAG trade post-return, from
     data/lag_edge_health.csv, ffill as-of the signal date) >= EDGE_THR%; else hold 0.50.
     BEAR=0 / CRISIS=0.50 unchanged. Verified 0/3107 days mismatch vs the pinned R3 CSV
-    w_lag_tgt column (2014 -> 2026-06-19). CSV unreadable -> fail-safe 0.50 (gate-fail branch)."""
+    w_lag_tgt column (2014 -> 2026-06-19). CSV unreadable -> fail-safe 0.50 (gate-fail branch).
+
+    FAIL-C residual (audit 2026-09-27, job Taylor_20260927_100121): index on `known_date`
+    (= entry + 25 sessions, the day the reading is actually OBSERVABLE), mirroring the already
+    fixed backtest engine pt_v23_audit_2014.py. The MONEY number is unchanged here — live always
+    reads the LAST row, and both labels give the same mean12 (measured: -0.605% -> w_LAG 0.50 on
+    both the new and the pre-fix backup file) — what was wrong is the as-of DATE this function
+    prints into the plan/report, which on `entry` lags reality by 25 sessions.
+    FALLBACK, deliberate: column missing -> fall back to `entry` + shout a warning. This is the
+    LIVE path; a missing DISPLAY column must not fail-close a real-money allocator."""
     if int(state) in (3, 4, 5):
         try:
-            eh = pd.read_csv(os.path.join(WORKDIR, "data", "lag_edge_health.csv"), parse_dates=["entry"])
-            eh = eh.drop_duplicates("entry").set_index("entry").sort_index()["mean12"]
+            eh = pd.read_csv(os.path.join(WORKDIR, "data", "lag_edge_health.csv"))
+            key = "known_date" if "known_date" in eh.columns else "entry"
+            if key != "known_date":
+                print("  WARNING: lag_edge_health.csv thieu cot 'known_date' -> fallback nhan "
+                      "'entry' (moc as-of in ra se TRE ~25 phien so voi thuc te; mean12/w_LAG "
+                      "KHONG doi). Chay lai edge_health_monitor.py de sinh cot dung.")
+            eh[key] = pd.to_datetime(eh[key])
+            eh = eh.drop_duplicates(key).set_index(key).sort_index()["mean12"]
             m = eh.asof(pd.Timestamp(asof))
             gate_ok = bool(pd.notna(m) and m >= EDGE_THR)
-            print(f"  [edge-alloc] mean12 as-of {pd.Timestamp(asof).date()} = "
+            print(f"  [edge-alloc] label_col={key} mean12 as-of {pd.Timestamp(asof).date()} = "
                   f"{(f'{m:.1f}%' if pd.notna(m) else 'n/a')} vs thr {EDGE_THR:.0f}% -> w_LAG {'0.65' if gate_ok else '0.50'}")
             return 0.65 if gate_ok else 0.50
         except Exception as e:
