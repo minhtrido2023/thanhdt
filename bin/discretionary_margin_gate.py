@@ -192,7 +192,11 @@ def current_price(ticker):
     UPCOM basicPrice), không tự viết lại logic giá phiên hôm nay.
     """
     from verify_account_snapshot import dnse_close_prices
-    prices, sources, substituted = dnse_close_prices([ticker], with_source=True)
+    # `dnse_close_prices(..., with_source=True)` trả ĐÚNG 2-tuple (prices, sources) —
+    # xem verify_account_snapshot.py `return (prices, sources) if with_source else prices`.
+    # Bản cũ unpack 3 giá trị ⇒ ValueError mọi lần gọi (code-quality 2026-09-27); hợp đồng
+    # này được ghim ở CẢ HAI đầu bởi test 31 của selfcheck.
+    prices, sources = dnse_close_prices([ticker], with_source=True)
     if ticker not in prices:
         return None, None, f"DNSE không trả được giá cho {ticker}"
     return prices[ticker], sources.get(ticker), None
