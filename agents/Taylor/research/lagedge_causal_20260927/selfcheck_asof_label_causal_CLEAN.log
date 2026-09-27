@@ -1,0 +1,14 @@
+== unit tests (synthetic) ==
+  [PASS] U1 nhan=anchor voi horizon 25 -> 3/3 vi pham, lech 25 phien
+  [PASS] U2 nhan = anchor+25 phien -> 0 vi pham
+  [PASS] U3 nhan tre hon can thiet (bao thu) -> 0 vi pham
+  [PASS] U4 som DUNG 1 phien -> bat duoc, w=1
+  [PASS] U5 horizon=0 -> nhan=anchor hop le
+  [PASS] U6 dong ngoai lich bi loai (n=1, van bat dong con lai)
+  [PASS] U7 thieu known_date -> nhan rot ve 'entry'
+
+== series that ==
+  [PASS] lag_edge_health  file=lag_edge_health_exp_causal.csv  nhan='known_date'  n=5488  vi_pham=0  som_toi_da=0 phien
+
+OK: moi series dan nhan CAUSAL.
+causal rc=0
