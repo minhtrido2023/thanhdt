@@ -88,6 +88,14 @@ trước khi trình user — đúng ranh giới dispatch, không tự tiến th�
 
 ## CÂU HỎI B — 2018: chỉ báo vá điểm mù
 
+> **ĐÓNG 2026-09-27 (user duyệt).** Câu hỏi "khối ngoại KHỚP LỆNH có vá được điểm mù 2018 không" đã
+> đo được nhờ chuỗi FiinPro `foreign_matched_net_bn` 2014→2026 (bus `fiinprox-H4-foreign-matched-2018`,
+> job `Taylor_20260926_164143`): **NO-GO 5/5 cấu hình prereg** — bắt 2018 (fire 02/03, trước đỉnh 38
+> ngày) nhưng 6-10 báo động giả ngoài 2018 (trần ≤2), precision 33-54% vs nền 33,5%, p tốt nhất 0,106
+> (Sidak 0,43), N thật 12-16 sự kiện. Câu trả lời là **PHỦ ĐỊNH**, không phải "thiếu dữ liệu". 2009
+> vẫn không đánh giá được (file gross bắt đầu 2009-06, warm-up 250 phiên). Không mở lại trừ khi có
+> dạng chỉ báo KHÁC prereg trước — 5 trial đã dùng hết.
+
 ### B.1 — Khả thi dữ liệu: 2/4 chỉ báo Bobby đề xuất DÙNG ĐƯỢC, 1/4 KHÔNG dùng được cho chính episode nó nhắm vá
 
 | Chỉ báo | Nguồn | Khả thi? |
