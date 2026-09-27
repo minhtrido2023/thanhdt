@@ -1,0 +1,51 @@
+DIRTY  rc=0  n=6471->6468  plan_check_field_schema_selfcheck.py
+      < 0984ab0af6c5102476aa7bebf7b49916  data/execution_logs/exec_selfcheck_chkfield_2026-08-14_journal.csv
+      > 1356ce69afe0e347f82694141232fc4a  data/execution_logs/exec_selfcheck_chkfield_2026-08-14_journal.csv
+      < data/qwf_hybrid_v2_rolling3y_2026-03-30.csv 2752 1778770903.0000000000
+      < data/qwf_hybrid_v2_snapshot_2026-01-16.csv 981 1778770623.0000000000
+      < data/qwf_hybrid_v2_snapshot_2026-03-30.csv 989 1778770903.0000000000
+      < data/qwf_hybrid_v3_rolling3y_2026-03-30.csv 2750 1778773332.0000000000
+      < data/qwf_hybrid_v3_snapshot_2026-03-30.csv 990 1778773332.0000000000
+      < data/qwf_report_2026-03-30.csv 932 1778426846.0000000000
+      > data/qwf_hybrid_v2_rolling3y_2026-6d22a8c283f52712e33b511c49431e74  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-30_wtnamecap_advprice_etfcreatpit_exp_ab_park_REPLAY_B_univpit.csv
+      > 4707bcbeb7e801d49a4a851ffd91d5e7  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-30_wtnamecap_advprice_etfcreatpit_exp_reverify_j131635_univpit.csv
+      > .0000000000
+DIRTY  rc=0  n=6471->6471  netting_recon_selfcheck.py
+      < data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_advpctile_exp_dynB30_univpit.csv 2966572 1787653361.2154765480
+      < data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_advpctile_exp_dynB43_univpit.csv 2804319 1787653364.0955388990
+      < data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_A_blend_w0_1B_univpit_nav1B.csv 2055393 1785821796.8683489880
+      > data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_advpctile_exp_dynB30_univpit.csv 2966572 1787653361.2154702f2e57f532101f37f6f7a4be576d776  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_bg_g10_univpit.csv
+      > 33577d64447e597cc4132c35e523b9b3  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_bg_g4_univpit.csv
+      > 1785821796.8683489880
+DIRTY  rc=0  n=6471->6471  edge_wlag_gate_selfcheck.py
+      < data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_baladapta.csv 3025846 1788954848.2757083830
+      < data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_baladaptb.csv 2882301 1788954832.7833778470
+      > data/v23_golive_aud64cebb926e3bd0910311deeb7b7d0c80  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_nav200B.csv
+      > b8b3f77b35c07160f25c21481b6eb7ec  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_nav20B.csv
+      > 88954832.7833778470
+DIRTY  rc=0  n=6471->6471  expected_volume_pacing_selfcheck.py
+      < 6a1aa3f7efe1fd51509f3396e910c143  data/20260407-DGC-CBTT-Bao-cao-thuong-nien-2025.pdf
+      < a4060622f13a3a7c3d4c027f58a1e945  data/5sys_dt4_macro_nav.csv
+      < 1227daba37c01ab469a9b46a3aa2dc9b  data/5sys_dt4_nav.csv
+      < ac2bd782158f42ee43ee6f09f7e00b54  data/5sys_prodspec_201401_201506.csv
+      < 9f87c9dd3465585c6027ccbeb813b9af  data/5sys_prodspec_201401_201506_cashfrac.csv
+      < cd7a95c94e7f9f228c1cb66fb5e6a919  data/5sys_prodspec_201401_202605.log
+      < 5108929904ac1bdf6d79fa24304d54c2  data/5sys_prodspec_201401_202605_DTS_dt_10_25_25.csv
+      < f0d1d2ae7de0d663d3ecb307a2d37812  data/5sys_prodspec_201401_202605_DTS_dt_15_30_25.csv
+      < dfe7238b29aee3353cf014f7c608349b  data/5sys_prodspec_201401_202605_DTS_dt_5_15_15.csv
+      < e65d4956aa4589083d822a21c9d0cf37  data/5sys_prodspec_201401_202605_DTS_dt_7_20_20.csv
+      < 377fb3e63a50b35e0cd6211e44ac5448  data/5sys_prodspec_201401_202605_DTS_v34b_base.csv
+      < 8038080333c5001df052633055972dde  data/5sys_prodspec_201401_202605_MV_mode15_ms7.csv
+DIRTY  rc=0  n=6468->6469  discretionary_accumulation_selfcheck.py
+      < data/sector_lens_status_2026-09f2934bc9723ceb0e18907bfdb453eaf  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_advmin500m_exp_gate500m_univpit.csv
+      < fb0a36a0cb6f4ede2498035b4fef5086  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_advpctile_exp_dynB20_univpit.csv
+      < 154f73f0c9b29fea0b895d1e51217e0b  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_advpctile_exp_dynB25_univpit.csv
+      < 6589950d6b23855a3fdc74ae15a17234  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_advpctile_exp_dynB30_univpit.csv
+      < 36190df436d9dfd403f9fb35805489c3  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_advpctile_exp_dynB43_univpit.csv
+      < 7b6e0f2fe6f016ca6eeef40bdb94c150  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_A_blend_w0_1B_univpit_nav1B.csv
+      < 25eefd805a3dfbe262cbd1eb6d14f2fb  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_A_blend_w0_50B_univpit.csv
+      < a268c1740c875998db7cf723afc207d1  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_A_dnpr_w0_1B_univpit_nav1B.csv
+      < 6fec00ed8bdc7e7527e5d02f4b3487c0  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_A_dnpr_w0_50B_univpit.csv
+      < b0267b257d62892189f479b20971787f  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_A_fill_w0_1B_univpit_nav1B.csv
+      < 63882540a8fb0c9ee1c586e7128e5a01  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_A_fill_w0_50B_univpit.csv
+      < bd04650e8aaf83b725cc1bcfd289f8ef  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_A_pahl3_w0_1B_univpit_nav1B.csv

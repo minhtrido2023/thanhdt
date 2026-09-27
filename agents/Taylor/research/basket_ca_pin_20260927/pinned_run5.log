@@ -1,0 +1,49 @@
+BQ_LOCAL_CACHE = (live BQ)
+BASKET_CA_SNAPSHOT = /home/trido/thanhdt/WorkingClaude/data/snapshots/corp_action_share_20260927.parquet [pin mặc định]
+  vintage: 14912 dòng ISS+AIS, 1434 mã, digest=7409599216578255470
+
+T1. Đồng nhất thức (ép mcapw==mcap → phải trùng module tiền-sửa BIT-FOR-BIT)
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+  [ok] T1[recent] level trùng khít — max|Δlevel| = 0.000000e+00 trên 415 phiên
+  [ok] T1[recent] rổ trùng khít — 0 tên đổi trên 8 mốc rebal
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+  [ok] T1[old] level trùng khít — max|Δlevel| = 0.000000e+00 trên 753 phiên
+  [ok] T1[old] rổ trùng khít — 0 tên đổi trên 10 mốc rebal
+
+T2. Parity tại mốc rebal MỚI NHẤT (nơi Close/Price ~1,00)
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+  [oshares-step] corp-action từ SNAPSHOT /home/trido/thanhdt/WorkingClaude/data/snapshots/corp_action_share_20260927.parquet: 1736 dòng
+  [oshares-step] exdate: 123 bước OShares, 83 bước ĐƯỢC DỜI (median 44 ngày), 39 giữ ngày quý (không khớp sự kiện), 0 bị chặn bởi cổng PIT
+  [ok] T2 rổ tại rebal mới nhất (2026-05-05) KHÔNG đổi — 0 tên đổi/30
+      sức phân giải (hệ số Close/Price đo trên chính panel này):
+      recent p05 0.620 / p50 0.888 / p95 1.000 | |f-1|>5% ở 68.7% dòng (n=22,817)
+      [đo, KHÔNG phải gate] cả cửa sổ 2025-01-02..2026-06-19: 12 tên đổi / 8 rebal (TB 1.50/30); tổng lợi suất cũ x1.41245 vs mới x1.32772 (Δ -8.47pp)
+
+T3. Positive control ngày cũ (Close/Price xa 1,00 → PHẢI có khác biệt thật)
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+  [oshares-step] corp-action từ SNAPSHOT /home/trido/thanhdt/WorkingClaude/data/snapshots/corp_action_share_20260927.parquet: 1875 dòng
+  [oshares-step] exdate: 250 bước OShares, 87 bước ĐƯỢC DỜI (median 41 ngày), 163 giữ ngày quý (không khớp sự kiện), 0 bị chặn bởi cổng PIT
+      sức phân giải (hệ số Close/Price đo trên chính panel này):
+      old    p05 0.120 / p50 0.392 / p95 1.000 | |f-1|>5% ở 93.7% dòng (n=53,301)
+  [ok] T3 rổ ĐỔI thật (>0 tên) — 48 tên đổi / 10 mốc rebal (TB 4.80/30, max 7)
+  [ok] T3 chuỗi return ĐỔI thật (>0) — max|Δret| = 6.9618pp/phiên; tổng kỳ cũ x1.24932 vs mới x1.05591 (Δ -19.34pp)
+  [ok] T3 khác biệt LỚN HƠN ngày gần đây (dose-response theo hệ số đ/c) — cũ 4.80 tên/rebal vs gần đây 1.50 tên/rebal
+
+T4. An toàn cổ tức (cơ sở điều chỉnh đúng chỗ; chân return kiểm riêng ở T4c)
+  [ok] T4 mcap/mcapw == Close/Price (2 CỘT EXPORT tách đúng — không phải chân return) — max|Δ| = 1.110e-16, n=53,301
+  [ok] T4 có mẫu hệ số đ/c XA 1,00 trong cửa sổ (phép thử có sức phân giải) — 49,924/53,301 dòng có |Close/Price-1|>5% (trung vị hệ số 0.392)
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+  [oshares-step] exdate: 250 bước OShares, 87 bước ĐƯỢC DỜI (median 41 ngày), 163 giữ ngày quý (không khớp sự kiện), 0 bị chặn bởi cổng PIT
+  [ok] T4c số CP ĐÃ ra khỏi chân return (đảo BASKET_RETURN_OSHARES làm chuỗi ĐỔI) — max|Δret| flat vs legacy = 6.2894pp/phiên trên 753 phiên (0 = knob chết hoặc số CP đã quay lại chân return — xem basket_return_leg_oshares_selfcheck.py)
+
+T5. Grep-gate cơ sở giá trên danh sách file BẢO VỆ (12 file; SỐ LƯỢNG thô × GIÁ đã điều chỉnh)
+      [miễn trừ có đánh dấu] pt_v23_audit_2014.py:914
+  [ok] T5 không còn biểu thức tiền/ADV trộn số-lượng-thô × giá-đã-điều-chỉnh — 0 vi phạm trên 0 file
+  [ok] T5b số miễn trừ có đánh dấu không vượt trần — 1 miễn trừ / trần 1
+
+==============================================================================
+KẾT QUẢ: PASS toàn bộ (T1 đồng nhất thức / T2 parity / T3 positive control / T4 cổ tức)

@@ -1,0 +1,12 @@
+DIRTY  rc=0  plan_check_field_schema_selfcheck.py
+      < 1356ce69afe0e347f82694141232fc4a  data/execution_logs/exec_selfcheck_chkfield_2026-08-14_journal.csv
+      > 315e00372915d4780b8bbf24c485f784  data/execution_logs/exec_selfcheck_chkfield_2026-08-14_journal.csv
+CLEAN  rc=0  netting_recon_selfcheck.py
+CLEAN  rc=0  edge_wlag_gate_selfcheck.py
+CLEAN  rc=0  expected_volume_pacing_selfcheck.py
+CLEAN  rc=0  discretionary_accumulation_selfcheck.py
+DIRTY  rc=0  immutable_publish_selfcheck.py
+      > 3962701104269aec59656f27b07c09eb  mike/kb/memory/Mike.md
+      < 9911e1e511645b5f43687f492c58cd26  mike/kb/memory/Mike.md
+      < data/immutable_publish_history.jsonl 370711 1790459049.5782320230
+      > data/immutable_publish_history.jsonl 375357 1790516707.6399567400

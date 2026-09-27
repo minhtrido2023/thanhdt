@@ -1,0 +1,99 @@
+CLEAN  rc=0  hard_no_chase_ceiling_selfcheck.py
+DIRTY  rc=0  plan_check_field_schema_selfcheck.py
+      3845a3846,4413
+      > 966de2932e032d2f218c5782227e7c1a  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_balgatea1.csv
+      > 70e3fd71efc113766636ecfe4e0e908c  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_balgatea2.csv
+      > 01868fd3307ae64ea3a6450ff29a9639  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_balgatea3.csv
+      > c212e29de9be8d7effbfac45f20265d3  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_balgatea4.csv
+      > 8e32b0862b705ee6aa5093d8a92c0746  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_balgateb1.csv
+      > b89c4a40c3fee63b4445a9b18d05774d  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_balgateb2.csv
+      > 30bb584dc2c098f89efee6876446904d  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_balgateb3.csv
+      > 7d053e6201c9d107685ff4d1dd9d2d2a  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_balgatectrl.csv
+      > 7d053e6201c9d107685ff4d1dd9d2d2a  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_c30vpbctrl.csv
+      > cb691839043115fe24237ed78fc56495  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_c30vpbl1b.csv
+      > ad5f843d82de05a3928e153fe2e74a8d  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_c30vpbp1d.csv
+      > 47665a6e528fe7fa43a0ac7d392a7219  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advpricmike/agents/Taylor/research/selfcheck_write_scan_20260927/probe_realtree.sh: line 17: warning: command substitution: ignored null byte in input
+DIRTY  rc=0  edge_wlag_gate_selfcheck.py
+      2436,3593c2436
+      < 66fd661f6e7e50f7ebd9338225ec6847  data/intraday_full.pkl
+      < 289c625c35b3ee9b3a15f5d0923f29e4  data/intraday_stop_compare.csv
+      < 5e8ab3960cc8a6e42ad96c0d7c0cb439  data/intraday_stop_lows.csv
+      < d16ba4edfca0b7a7424c1d69d1745937  data/intraday_stop_nav_BAL_8pos_stop_CLOSE.csv
+      < 1b681155e1d3e05eecb2b68111cd59dc  data/intraday_stop_nav_BAL_8pos_stop_INTRADAY_LOW.csv
+      < e374ba2887bdbff1a79d305ed8c0ed06  data/intraday_stop_nav_MEGA_3pos_stop_CLOSE.csv
+      < 1821a99584c910f5f2a98b183c8a0b1a  data/intraday_stop_nav_MEGA_3pos_stop_INTRADAY_LOW.csv
+      < c6219a07c84a630a00e6fdce3fc7b86d  data/intraday_stop_trades_BAL_8pos_stop_CLOSE.csv
+      < 20311ee5d579e9f2490a809a3a0d8d4f  data/intraday_stop_trades_BAL_8pos_stop_INTRADAY_LOW.csv
+      < 5f144814773d2eaf30c36e11f80382b7  data/intraday_stop_trades_MEGA_3pos_stop_CLOSE.csv
+      < 4fb2bbf2c35dc4929ffb3af940d27301  data/intraday_stop_trades_MEGA_3pos_stop_INTDIRTY  rc=0  netting_recon_selfcheck.py
+      3506a3507,4413
+      > 99402d61baf4cca9a92e845d8759ec87  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-85_4-85_wtnamecap_nav300B.csv
+      > f3e376d002a5d6bb66068c661872fe7e  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-85_wtnamecap_advprice_exp_agg_F2_t85_univpit.csv
+      > 97f34b9af94c2ae180db9c1204f422e5  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-85_wtnamecap_advprice_exp_agg_H1_t85b03_univpit.csv
+      > 36d3e4d2f57ceCLEAN  rc=0  screen_sort_direction_selfcheck.py
+now_matpostbull_shrink0_edge_etfliqcustompitg_park3-85_wtnamecap_advprice_exp_c30vpark85_univpit.csv
+      > 7235decc3519bc7fc46119fa6213ef60  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-90_wtnamecap.csv
+      > 62a3b869cb209704746d0b7bbac3ef1e  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-90_wtnamecap_advprice_exp_agg_F3_t90_univpit.csv
+      > c158c861dc31d0ea2f0ca983e2620614  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-90_wtnamecap_advprice_exp_parkgrid_090_univpit.csv
+      > 325d55f4b0b6ad919bb2b3c22d1585ed  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-90_wtnamecap_nav20B.csv
+      > d852ca10442494e098eb91dc79387030  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-94_wtnamecap.csv
+      > 64ac02693e461fd28143b4950b985193  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-94_wtnamecap_nav20B.csv
+      > 0db3b2bdfeafb6c58a72b26a846fc530  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtew_n12_cap10_gate2_liqf5B_exp_qsleeve_q12neu.csv
+      > c91033ed29b502dc5ce59e0b4023347e  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtew_n8_cap10_gate2_liqf5B_exp_qsleeve_q8neu.csv
+      > 3675cef3071dab73c9065585980c53ef  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtew_n8_cap10_gatenone_qfloor_liqf5B_exp_qsleeve_qf8neu.csv
+      > 588990611c5178bd5421d8f14ad19657  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtew_nav200B.csv
+      > 00279c5afc7228cabadfc892aec2e5e7  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtew_nav500B.csv
+      > 63a8d59ffe590fd1c1f0f72a94cc2feb  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtfincap30_exp_v4f_A3_fincap_exp_seleyonly.csv
+      > 989e20ab5cff73d06453bb057eb04537  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtfincap45_exp_v4f_C45_fincap_exp_seleyonly.csv
+      > ac69dd543cf651e3028526f9495c3cad  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtfincap50_exp_v4f_C50_fincap_exp_seleyonly.csv
+      > e58a92f28d3946dc5271630282c92018  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtfincap55_exp_v4f_C55_fincap_exp_seleyonly.csv
+DIRTY  rc=0  expected_volume_pacing_selfcheck.py
+      1356c1356
+      < dd7d31537e288704a31accb846e56ea9  mike/bin/__pycache__/report_return_gate.cpython-310.pyc
+      ---
+      > 33e49221baeace8900605396fa3072cd  mike/bin/__pycache__/report_return_gate.cpython-310.pyc
+DIRTY  rc=0  discretionary_accumulation_selfcheck.py
+      4364,4611c4364,4725
+      < data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_baladapta.csv 3025846 1788954848.2757083830
+      < data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_baladaptb.csv 2882301 1788954832.7833778470
+      < data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_baladaptc.csv 3013134 1788954834.7314194090
+      < data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_baladaptctrl.csv 3042954 1788954816.9750405680
+      < data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_baladaptd.csv 2915360 1788954818.1510656590
+      < data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_baleyctrl.csv 3042954 1788949774.7410181130
+      < data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_baleyctrl2.csv 3042954 1788950884.3689573350
+      < data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_baleyey025.csv 3055193 1788950890.8890943350
+      < data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_baleyey050.csv 3026281 1788950884.5809617900
+      < data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_baleyey100.csv 3042175 1788950888.5370449140
+      < data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_balgatea1.csv 3638757 1788957119.0762569440
+      < data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_balgatea2.csv 3431139 1788957106.0959793640
+      < data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_balgatea3.csv 3483594 1788957119.4842656700
+      < data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_balgatea4.csv 3297262 1788957120.8242943250
+      < data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_balgateb1.csv 3141463 1788957143.6727829330
+      < data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_balgateb2.csv 3064255 1788957134.3965845650
+      < data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_balgateb3.csv 3038907 1788957148.7808921680
+      < data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_balgatectrl.csv 3042954 1788956997.7216626360
+      < data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_c30vpbctrl.csv 3042954 1788973695.9953020780
+CLEAN  rc=0  edge_wlag_gate_selfcheck.py
+DIRTY  rc=0  screen_sort_direction_selfcheck.py
+      3669,3750c3669,3883
+      < data/sector_lens_status_2026-09f2934bc9723ceb0e18907bfdb453eaf  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_advmin500m_exp_gate500m_univpit.csv
+      < fb0a36a0cb6f4ede2498035b4fef5086  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_advpctile_exp_dynB20_univpit.csv
+      < 154f73f0c9b29fea0b895d1e51217e0b  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_advpctile_exp_dynB25_univpit.csv
+      < 6589950d6b23855a3fdc74ae15a17234  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_advpctile_exp_dynB30_univpit.csv
+      < 36190df436d9dfd403f9fb35805489c3  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_advpctile_exp_dynB43_univpit.csv
+      < 7b6e0f2fe6f016ca6eeef40bdb94c150  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_A_blend_w0_1B_univpit_nav1B.csv
+      < 25eefd805a3dfbe262cbd1eb6d14f2fb  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_A_blend_w0_50B_univpit.csv
+      < a268c1740c875998db7cf723afc207d1  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_A_dnpr_w0_1B_univpit_nav1B.csv
+      < 6fec00ed8bdc7e7527e5d02f4b3487c0  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_A_dnpr_w0_50B_univpit.csv
+      < b0267b257d62892189f479b20971787f  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_A_fill_w0_1B_univpit_nav1B.csv
+      < 63882540a8fb0c9ee1c586e7128e5a01  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_A_fill_w0_50B_univpit.csv
+      < bd04650e8aaf83b725cc1bcfd289f8ef  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_A_pahl3_w0_1B_univpit_nav1B.csv
+      < 1315fd1a3eaa83a39348c67389dd500b  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_A_pahl3_w0_50B_univpit.csv
+      < da4b495f1d2337b3a279ed85e5f10900  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_A_surprise_w0_1B_univpit_nav1B.csv
+      < 5234702072bca5c545c8b106ddac64c8  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_A_surprise_w0_50B_univpit.csv
+      < a7777f7ba50c7e1e2bae6277db4869e3  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_B_blend_w5_1B_univpit_nav1B.csv
+      < b2347c5cfd1a24156b2052c14a0342cd  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_B_blend_w5_50B_univpit.csv
+      < 7fa0fd1d3c1a91f59c13d2efae2ea4e2  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_B_dnpr_w5_1B_univpit_nav1B.csv
+      < bcdf29182d71a2951e48da06c5cf9bc1  data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_B_dnpr_w5_50B_univpit.csv
+/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/selfcheck_write_scan_20260927/probe_realtree.sh: line 32: unexpected EOF while looking for matching `"'
+/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/selfcheck_write_scan_20260927/probe_realtree.sh: line 35: syntax error: unexpected end of file
