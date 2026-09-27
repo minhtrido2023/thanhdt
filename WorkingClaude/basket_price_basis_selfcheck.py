@@ -103,6 +103,14 @@ def load_post_edit(force_close_basis=False):
     # thiếu biến thứ hai sẽ fail T1 vì chính lý do docstring đã ghi một lần rồi ("T1 fail vì control
     # thiếu chân selection, KHÔNG phải vì code sai") — không phải vì code sai.
     m._SC_RETCHAIN = "legacy" if force_close_basis else "flat"
+    # BIẾN THỨ BA (Mike thêm 2026-09-27, sau khi T1 FAIL trên main): giữa `ebeacad^` và HÔM NAY có
+    # BA thay đổi, không hai — thay đổi thứ ba là "OShares bước tại EX-DATE thay vì mốc quý"
+    # (ticket 1, merge 5c290848). Chính lần chạy phát hiện in ra bằng chứng: "[oshares-step]
+    # exdate: 119 bước OShares, 80 bước ĐƯỢC DỜI (median 40 ngày)" — control leg không revert nó
+    # nên KHÔNG THỂ trùng bit-for-bit, và T1 FAIL vì ĐÚNG lý do docstring đã ghi HAI lần rồi
+    # ("T1 fail vì control thiếu <một chân>, KHÔNG phải vì code sai"). Knob production:
+    # custom_basket.py:216 `BASKET_OSHARES_STEP` (mặc định "exdate", legacy "quarter").
+    m._SC_OSTEP = "quarter" if force_close_basis else "exdate"
     return m
 
 
@@ -121,21 +129,28 @@ def adj_factor_line(tag, raw):
 def run(mod, bq, win):
     prev = os.environ.get("BASKET_PRICE_BASIS")
     prev_rc = os.environ.get("BASKET_RETURN_OSHARES")
+    prev_os = os.environ.get("BASKET_OSHARES_STEP")
     basis = getattr(mod, "_SC_BASIS", None)
     retchain = getattr(mod, "_SC_RETCHAIN", None)
+    ostep = getattr(mod, "_SC_OSTEP", None)
     if basis:
         os.environ["BASKET_PRICE_BASIS"] = basis
     if retchain:
         os.environ["BASKET_RETURN_OSHARES"] = retchain
+    if ostep:
+        os.environ["BASKET_OSHARES_STEP"] = ostep
     try:
         lvl, adv, mem, raw = mod.build_pit(bq, win[0], win[1], **PROD_KW)
     finally:
         os.environ.pop("BASKET_PRICE_BASIS", None)
         os.environ.pop("BASKET_RETURN_OSHARES", None)
+        os.environ.pop("BASKET_OSHARES_STEP", None)
         if prev is not None:
             os.environ["BASKET_PRICE_BASIS"] = prev
         if prev_rc is not None:
             os.environ["BASKET_RETURN_OSHARES"] = prev_rc
+        if prev_os is not None:
+            os.environ["BASKET_OSHARES_STEP"] = prev_os
     s = pd.Series(lvl).sort_index()
     mem = mem.copy()
     mem["rebal_date"] = pd.to_datetime(mem["rebal_date"])
