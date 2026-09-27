@@ -199,7 +199,7 @@ for d in rebal_sorted:
     liqset = df[df.d == d][["ticker","tv"]]
     m = asof.merge(liqset, on="ticker", how="inner")
     if len(m) >= 25:
-        top25 = set(m.sort_values(["rating","tv"], ascending=False).head(25).ticker)
+        top25 = set(m.sort_values(["rating","tv"], ascending=[True, False]).head(25).ticker)
         ov_8l.append(len(C & top25) / len(C) * 100)
 print(f"\nORTHOGONALITY (mean overlap of Compounder picks):")
 print(f"  vs custom30V basket : {np.mean(ov_v):5.1f}%  (n_months {len(ov_v)})")

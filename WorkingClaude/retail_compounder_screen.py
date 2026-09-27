@@ -262,7 +262,7 @@ for d in sorted(picks):
     liqset = fullliq[fullliq.d==d][["ticker","tv"]]
     m = asof.merge(liqset, on="ticker", how="inner")
     if len(m) >= 25:
-        top25 = set(m.sort_values(["rating","tv"], ascending=False).head(25).ticker)
+        top25 = set(m.sort_values(["rating","tv"], ascending=[True, False]).head(25).ticker)
         ov_8l.append(len(C & top25) / len(C) * 100)
 print(f"\nORTHOGONALITY (mean overlap of Retail picks):")
 print(f"  vs industrial Compounder top-15 : {np.mean(ov_ind):5.1f}%  (n_months {len(ov_ind)})")

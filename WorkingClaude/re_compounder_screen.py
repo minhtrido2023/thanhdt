@@ -215,7 +215,7 @@ for d in sorted(picksA):
     asof = r8[r8.time<=d].sort_values("time").groupby("ticker").tail(1)
     m = asof.merge(fullliq[fullliq.d==d][["ticker","tv"]], on="ticker", how="inner")
     if len(m) >= 25:
-        top25 = set(m.sort_values(["rating","tv"], ascending=False).head(25).ticker)
+        top25 = set(m.sort_values(["rating","tv"], ascending=[True, False]).head(25).ticker)
         ov_8l.append(len(C & top25)/len(C)*100)
     if d in picksB and picksB[d]: ov_ind.append(len(C & set(picksB[d]))/len(C)*100)
 print(f"\nORTHOGONALITY (resid Screen A picks):")

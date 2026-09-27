@@ -293,7 +293,7 @@ def ortho(pk):
         asof = r8[r8.time<=dd].sort_values("time").groupby("ticker").tail(1)
         m = asof.merge(fullliq[fullliq.d==dd][["ticker","tv"]], on="ticker", how="inner")
         if len(m) >= 25:
-            top25 = set(m.sort_values(["rating","tv"], ascending=False).head(25).ticker)
+            top25 = set(m.sort_values(["rating","tv"], ascending=[True, False]).head(25).ticker)
             ov_8l.append(len(C & top25)/len(C)*100)
     return (float(np.mean(ov_v)) if ov_v else 0.0, float(np.mean(ov_8l)) if ov_8l else 0.0)
 ov = ortho(picks)
