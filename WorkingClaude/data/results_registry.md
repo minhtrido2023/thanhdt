@@ -7123,7 +7123,7 @@ CSV `data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wt
 
 ---
 
-## 2026-09-27 — chân WEIGHT custom30V: `OShares` bước tại EX-DATE (không phải ngày công bố quý) — job `Taylor_20260927_043542` ⚠️ **CHỜ USER SIGN-OFF, CHƯA MERGE**
+## 2026-09-27 — chân WEIGHT custom30V: `OShares` bước tại EX-DATE (không phải ngày công bố quý) — job `Taylor_20260927_043542` (vòng 1) + `Taylor_20260927_052432` (vòng 2, sau quant-skeptic) ⚠️ **CHỜ USER SIGN-OFF, CHƯA MERGE**
 
 **Kết quả: CAGR 24,38% → 24,42% (+0,04pp) / Sharpe 1,69 (không đổi) / MaxDD −18,8% (không đổi) /
 Calmar 1,30 (không đổi) / Final NAV 757,61B → 761,11B / IS 19,26→19,31 / OOS 29,24→29,29.
@@ -7146,24 +7146,49 @@ trước, biên trên = dòng quý sau & +45 ngày, + đơn điệu). Knob `BASK
 | Leg | `BASKET_OSHARES_STEP` | CAGR | Sharpe | MaxDD | Calmar | Final NAV | IS 14-19 | OOS 20+ | self-check | CSV md5 |
 |---|---|---|---|---|---|---|---|---|---|---|
 | `wexd_ctl_quarter` control | `quarter` | 24,38% | 1,69 | −18,8% | 1,30 | 757,61B | 19,26% | 29,24% | 0 VND | `3f836927c0df82915c4cfb973d8f4af3` |
-| **`wexd_new_exdate`** | `exdate` | **24,42%** | **1,69** | **−18,8%** | **1,30** | **761,11B** | **19,31%** | **29,29%** | 0 VND | `80fc59f9476b280225063bd02136c75d` |
+| **`wexd2_new_exdate`** | `exdate` | **24,42%** | **1,69** | **−18,8%** | **1,30** | **761,11B** | **19,31%** | **29,29%** | 0 VND | `2f9c3702524391f5538d262edb17515d` |
 
 **Neo control**: md5 chân control **trùng khít** md5 bản pin R3 hiện hành (§ "2026-09-27 — ⭐ RE-PIN
 R3 — SỬA CHUỖI RETURN custom30V") ⇒ A/B một biến, Δ đọc được.
 
 **Đường tiền LIVE** (`custom30_history.py` → `custom30v_8l_publish.csv` → `tav2_bq.custom30v_8l` →
 `compute_park_trim.py`): thành viên rổ **không đổi một dòng nào** (selection không dùng số cổ
-phiếu); **16/49 rebal đổi weight, 33 rebal byte-identical**; nặng nhất `2021-11-05` sum|Δw| 2,748pp
+phiếu); **17/49 rebal đổi weight, 32 rebal byte-identical**; nặng nhất `2021-11-05` sum|Δw| 2,748pp
 (MSB −0,870pp), `2020-02-05` 2,432pp (SHB +1,216pp). **Rebal đang hiệu lực `2026-08-05`: 0/30 tên
 đổi weight** (là do lịch — cửa sổ lệch gần nhất của thành viên hiện tại là ACB `[2026-06-15,
 2026-07-22)`, không chứa 08-05) ⇒ merge **không** sinh lệnh park/trim mới.
+Con số vòng 2 này chạy với `BASKET_CA_SNAPSHOT` **đã ghim** (vòng 1 đọc LIVE BQ ⇒ không tái lập
+được sau này); CSV publish md5 `518651bf3c6b86fe814acc68daab14d6` (exdate) /
+`8eb19acfd3c18392da23eaca6a5404dd` (quarter), **chạy lại lần 2 ra md5 giống hệt**. Chênh 16→17
+rebal là do đổi nguồn corp-action + cổng PIT 3 (rebal thêm: `2025-08-05`, TCB −0,0244pp).
 
-**Selfcheck** `basket_oshares_step_exdate_selfcheck.py`: **37/37 PASS**, giống nhau từng dòng dưới
+**Vòng 2 (sau quant-skeptic CONFIRMED high, job `quant-skeptic_20260927_051309`)** — commit
+`d77f1123`, 3 việc, KHÔNG đổi một con số metric nào ở 2 chữ số thập phân:
+* **Header nói ngược code** (skeptic đúng): header hứa tách ISS theo `PRICE_ADJUSTING_ISS` nhưng
+  `_match_step_date` tính `price_adjusting` rồi không dùng ⇒ 18 bước ESOP/riêng lẻ gắn vào
+  `exright_date`. **Sửa HEADER, giữ CODE** — đo được: `Close/Price` PHẲNG qua ex-date ở 18/18 ca
+  (max |Δ| 0,034% = làm tròn) nên nhãn `is_price_adjusting` đúng, nhưng áp filter như header sẽ
+  làm chân weight **xấu hơn**: 17/18 ca không có dòng AIS khớp mức ⇒ rơi về ngày quý, mà ngày quý
+  SỚM HƠN ex-date ở 15/18 ca (median 28 ngày) = tái lập đúng look-ahead RESTATE. `price_adjusting`
+  nay được dùng thật: nhãn `match` mang hậu tố `_NONADJ`.
+* **Cổng PIT 3 MỚI** (`_clamp_share_date_to_public`): 34/764 bước khớp rơi vào ngày TRƯỚC
+  `public_date` của chính sự kiện (1-15 ngày, median 3; **0 ca price-adjusting** — ex-right luôn
+  công bố trước khi đi ex). `share_date = max(share_date, public_date)`, fail-safe + idempotent
+  (snapshot đã ghim được dump TRƯỚC cổng này nên reader phải clamp lại khi đọc).
+* **Cổng PIT 1 — KHÔNG nới** biên dưới về cuối quý trước (ticket gợi ý). Đo trước khi quyết: nới
+  cho 11 bước cơ hội khớp, 7/11 bị cổng đơn điệu chặn ⇒ chỉ **4/764** bước hưởng lợi, đổi lại tiêu
+  rủi ro PIT theo hướng DUY NHẤT có thể TẠO look-ahead (dời bước SỚM hơn trên ratio-match có thể
+  sai). Sửa CHỮ trong header thay vì nới luật.
+
+**Selfcheck** `basket_oshares_step_exdate_selfcheck.py`: **46/46 PASS** (vòng 1: 37/37), giống nhau từng dòng dưới
 4 biến thể TZ (ICT/UTC/New_York/`env -u TZ`). Gồm đột biến (2 chế độ phải thực sự khác nhau), bất
 biến "ngày lệch == đúng hợp các cửa sổ dời, ngoài đó byte-identical", và T6 ghim một **lỗi tiềm ẩn
 CŨ** phát hiện nhân đây: `ffill().bfill()` có `.bfill()` **không group theo mã** ⇒ mã không có dòng
 `OShares` nào sẽ bị lấp bằng số của MÃ KHÁC (đo thật: 203/203 mã trong rổ đều có dòng ⇒ hiện KHÔNG
 cắn; chân `exdate` dùng `groupby(...).bfill()` nên không có đường rò).
+**T4 mở rộng vòng 2 từ 4 mã lên TOÀN BỘ union 203 mã** làm cổng merge: 674.366 dòng ngày, tập ngày
+LỆCH khớp TUYỆT ĐỐI hợp các cửa sổ dời (**22.621 = 22.621, chỉ-got 0 / chỉ-want 0**), 651.745 ngày
+còn lại byte-identical. Khối PASS/FAIL md5 `f829c69d687b…` giống hệt ở cả 4 biến thể TZ.
 
 **Tái lập**: `BASKET_CA_SNAPSHOT=data/snapshots/corp_action_share_20260927.parquet` (14.912 dòng /
 1.434 mã, `max_ingested=2026-09-26 15:43:40 UTC`, digest `7409599216578255470`) — bảng
