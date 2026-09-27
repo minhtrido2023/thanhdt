@@ -45,21 +45,30 @@ UNCOMPUTABLE = fail-closed, KHÔNG BAO GIỜ suy đoán f=1,0:
     (prototype) bỏ CẢ mã khi có unknown; ở đây ta giữ phần CÒN HỢP LỆ thay vì bỏ hết, nhưng
     KHÔNG BAO GIỜ đánh giá phần đã bị nhiễm.
 
-DÒNG MÁY ĐỌC trên stdout (giá trị đã chuẩn hoá — §28, shell KHÔNG grep văn xuôi):
-  ADJFACTOR_DRIFT|<tk>|<ex0>|<r_obs>|<r_pred>|<dev>|<run>|<d0>|<d1>|<dir>|<held>
+DÒNG MÁY ĐỌC trên stdout (giá trị đã chuẩn hoá — §28, shell KHÔNG grep văn xuôi). Dựng ở MỘT chỗ
+duy nhất, các hàm `marker_*` — xem ghi chú ở đó về vì sao:
+  ADJFACTOR_DRIFT|<tk>|<ex>|<r_obs>|<r_pred>|<dev>|<run>|<d0>|<d1>|<dir>|<held>
   ADJFACTOR_UNCOMPUTABLE|<tk>|<ex>|<reason_code>|<held>
+  ADJFACTOR_NODATA|<tk>|<held>
+  ADJFACTOR_FEED|<status>|<max_ingested_ict>|<max_public>|<rows>|<age_days>|<reason>
   ADJFACTOR_SCAN|<asof>|<n_scanned>|<n_drift>|<n_uncomputable>|<n_agree>|<n_nodata>
+`<ex>` của dòng DRIFT = ex-date SỚM NHẤT nằm SAU cụm lệch, tức ex-date mà hệ số của nó đang thiếu —
+KHÔNG phải ex-date sớm nhất trong cửa sổ (nó vừa nêu sai tên sự kiện vừa làm khoá de-dup của
+alert.sh không theo dõi đúng định danh của lỗi).
 `<dir>` là GỢI Ý ĐIỀU HƯỚNG, không phải bằng chứng: r_obs < r_pred ⇒ `vendor_missing` (vendor
 thiếu hệ số — việc của Winston/data-ops); r_obs > r_pred ⇒ `our_table_missing` (bảng
 corporate_action của ta thiếu một mắt xích — việc của ta). Chỉ dấu duy nhất phân biệt được hai
 lớp này là DẤU của lệch; detector KHÔNG tự kết luận bên nào sai.
 
 EXIT CODE (phân biệt rõ 3 trạng thái KHÁC nhau — §29, không gộp "không có gì" với "không chạy được"):
-  0  = mọi mã tính được và khớp; không có uncomputable nào.
+  0  = feed nguồn TƯƠI, mọi mã tính được và khớp, 0 uncomputable, 0 nodata. Đây là trạng thái
+       DUY NHẤT có nghĩa "không có gì".
   10 = có ≥1 DRIFT (lệch thật, persistent) → alert Discord.
-  11 = 0 DRIFT nhưng có ≥1 UNCOMPUTABLE → kiểm kê điểm mù, ghi bus, KHÔNG spam Discord.
-       (Uncomputable là trạng thái BÌNH THƯỜNG của quyền mua: 26/83 mã cohort control. Bắn
-        Discord mỗi ngày cho nó = dạy người ta bỏ qua đúng cái topic cần đọc.)
+  11 = ĐIỂM MÙ, KHÔNG phải "sạch": ≥1 UNCOMPUTABLE, hoặc ≥1 NODATA, hoặc feed `corporate_action`
+       KHÔNG tươi (STALE/DEAD/UNREADABLE), hoặc universe rỗng (bất khả về cấu trúc ở VN — đo thật
+       95 mã cho cửa sổ 18 ngày). Dòng máy đọc phân biệt rõ ba loại; chỉ mã đang NẮM LIVE và ca
+       feed-không-tươi mới lên Discord (uncomputable là trạng thái BÌNH THƯỜNG của quyền mua —
+       26/83 mã cohort control — bắn Discord mỗi ngày cho nó là dạy người ta bỏ qua đúng topic).
   1  = lỗi HẠ TẦNG (BQ không tra được) — KHÔNG phải "sạch".
   2  = sai đối số.
 """
@@ -67,7 +76,7 @@ import argparse
 import os
 import sys
 from collections import defaultdict
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
 WC = os.environ.get("WC_ROOT", "/home/trido/thanhdt/WorkingClaude")
@@ -86,6 +95,10 @@ CUM_PAD_DAYS = 25        # đệm để tìm được phiên cum cuối của ex
 
 RIGHTS_METHOD = "Quyền mua CP cho Cổ đông hiện hữu"
 
+# Ngưỡng "feed đã CHẾT" — cùng giá trị `FEED_DEAD_DAYS` của `bin/corp_action_daily.py:181`, nguồn
+# chuẩn tắc cho việc phân loại độ tươi của `corporate_action`.
+FEED_DEAD_DAYS = 5
+
 
 # ---------------------------------------------------------------- data access
 
@@ -94,6 +107,48 @@ def bq_max_session():
     if not rows or not rows[0].get("d"):
         raise RuntimeError("tav2_bq.ticker: MAX(time) rong — khong xac dinh duoc phien moi nhat")
     return rows[0]["d"]
+
+
+def feed_gate(asof):
+    """(status, detail) với status ∈ FRESH / STALE / DEAD / UNREADABLE — độ tươi của feed nguồn.
+
+    Bắt buộc, không phải tuỳ chọn: `tav2_bq.corporate_action` là bảng **TRAP** có writer NGOÀI repo
+    (`kb/data_registry/price-volume/corporate_action_bq.md`, Bẫy 2 — "ai đọc bảng này ngoài cron đó
+    thì vẫn phải tự gọi `feed_freshness()`"). Nếu feed đứng im, mọi mã sẽ "khớp" và detector trả rc=0
+    ⇒ **một feed chết không phân biệt được với một tuần sạch** — đúng lớp lỗi §14/§29 mà runner của
+    chính nó tuyên bố ngăn cho ca BQ-down. arch-review 2026-09-27 đo được: feed trả 0 ex-date + bảng
+    giá khoẻ ⇒ `ADJFACTOR_SCAN|...|0|0|0|0|0`, rc=0, không một dòng cảnh báo nào.
+
+    Mốc FRESH neo vào `asof` = `MAX(time)` của `tav2_bq.ticker` = **phiên giao dịch cuối đã có dữ
+    liệu**, nên "nạp vào hoặc sau `asof`" chính là điều kiện tươi — KHÔNG cần lịch nghỉ lễ, và vì vậy
+    KHÔNG chạm vào bẫy `tdays`/`np.busday_count` của §16 RULE 2.
+
+    CỐ Ý KHÔNG import `corp_action_daily.gate_freshness` dù logic giống: module đó có side effect ở
+    TOP LEVEL (`os.environ.pop("BQ_LOCAL_CACHE")` dòng 138 và một cổng phiên bản có thể `raise
+    SystemExit` dòng 154) — không chấp nhận được với một script chỉ-phát-hiện. Hằng số thì tái dùng.
+    """
+    try:
+        f = cal.feed_freshness()
+    except Exception as e:                                   # noqa: BLE001
+        # Ở đây KHÔNG được fail-open: không tra được độ tươi nghĩa là không biết feed còn sống hay
+        # không ⇒ trả UNREADABLE kèm LỖI THẬT, để caller coi là điểm mù chứ không phải "sạch".
+        return "UNREADABLE", {"reason": f"feed_freshness() lỗi: {type(e).__name__}: {e}"}
+    raw = (f.get("max_ingested") or "")[:19]
+    try:
+        ing_ict = (datetime.fromisoformat(raw).replace(tzinfo=timezone.utc)).astimezone(ICT)
+    except ValueError as e:
+        return "UNREADABLE", {**f, "reason": f"max_ingested={f.get('max_ingested')!r} không đọc "
+                                            f"được: {e}"}
+    age = (date.fromisoformat(asof) - ing_ict.date()).days
+    detail = {"max_ingested_ict": ing_ict.isoformat(timespec="seconds"),
+              "max_public": f.get("max_public"), "rows": f.get("n"), "age_days": age}
+    if age > FEED_DEAD_DAYS:
+        return "DEAD", {**detail, "reason": f"lần nạp gần nhất cũ {age} ngày (> {FEED_DEAD_DAYS}) "
+                                           f"so với phiên {asof} — bảng không còn refresh"}
+    if age > 0:
+        return "STALE", {**detail, "reason": f"chưa có lần nạp nào kể từ phiên {asof} "
+                                            f"(nạp gần nhất cách {age} ngày)"}
+    return "FRESH", detail
 
 
 def price_rows(tickers, start, end):
@@ -235,6 +290,18 @@ def group_price_factor(ex, evs, series):
             return None, "unsupported_event_code", f"{ex} event_code={code!r} khong ho tro"
 
     desc = " + ".join(kinds)
+    # Registry Bẫy (3): `corporate_action` chứa CẢ tranche thật (phải CỘNG) LẪN bản đính chính của
+    # cùng tranche (không được cộng), và `corp_action_lib.events()` nói rõ trường phân biệt là
+    # `event_title_vi`. Dedupe theo số hạng kinh tế (xem `build_factor_curve`) bắt được bản đính
+    # chính TRÙNG SỐ, nhưng KHÔNG bắt được bản đính chính ĐỔI SỐ — arch-review 2026-09-27 đo thật:
+    # DIV 500 + "Điều chỉnh … 800" cộng thành f=1,028603 trong khi đúng là 1,017410 (+1,1%, VƯỢT
+    # dung sai) ⇒ một cáo buộc `vendor_missing` SAI được quy cho Winston. Chưa phân biệt được bằng
+    # code (đọc hiểu tiêu đề tiếng Việt), nên ít nhất phải ĐƯA TIÊU ĐỀ vào chứng từ để người xử lý
+    # thấy ngay — KHÔNG im lặng cộng rồi khẳng định vendor sai (§29).
+    same_code = len({e["event_code"] for e in evs}) < len(evs)
+    if same_code:
+        titles = " | ".join((e.get("event_title_vi") or "?").strip() for e in evs)
+        desc += f"  [>1 dòng cùng event_code — KIỂM tiêu đề xem có bản ĐÍNH CHÍNH: {titles}]"
     if d_total <= 0:
         f = 1.0 + q_total
         return f, "", f"{ex} {desc} -> f={f:.6f} (khong co chan tien)"
@@ -346,9 +413,6 @@ def scan_ticker(series, events, dev_tol, min_run, eval_from):
     evaluated = [(b["d"], (b["price"] / b["close"]) / curve[b["d"]] - 1.0)
                  for b in series if (floor is None or b["d"] >= floor)]
 
-    if unknown and not evaluated:
-        return "UNCOMPUTABLE", {"unknown": unknown, "notes": notes}
-
     run, bad = longest_bad_run(evaluated, dev_tol)
     if run >= min_run:
         d0, d1 = bad[0][0], bad[-1][0]
@@ -356,8 +420,17 @@ def scan_ticker(series, events, dev_tol, min_run, eval_from):
         bar = next(b for b in series if b["d"] == worst[0])
         r_obs = bar["price"] / bar["close"]
         r_pred = curve[worst[0]]
+        # Ex-date được NÊU TÊN phải là ex-date mà hệ số của nó đang THIẾU trên cửa sổ lệch — tức
+        # ex-date SỚM NHẤT nằm SAU phiên cuối của cụm lệch. `min(used)` (bản trước) là ex-date sớm
+        # nhất trong cả cửa sổ 120 phiên, và arch-review 2026-09-27 đo được hai hệ quả thật: (1) câu
+        # Discord nêu một ex-date KHÔNG phải cái bị hỏng; (2) khoá de-dup `<mã>|<ex>` không theo dõi
+        # ĐỊNH DANH của lỗi ⇒ một lỗi MỚI −16,67% ở ex 09-05 tái dùng khoá của ex 07-05 và bị chặn
+        # tới 7 ngày, còn khi ex cũ trôi khỏi cửa sổ thì lỗi CŨ y nguyên lại báo lại.
+        ex_broken = min((ex for ex, _f in used if ex > d1), default="")
+        if not ex_broken:
+            ex_broken = min((ex for ex, _f in used), default="")
         out = {
-            "ex0": min((ex for ex, _f in used), default=""),
+            "ex": ex_broken,
             "r_obs": r_obs, "r_pred": r_pred, "dev": worst[1], "run": run,
             "d0": d0, "d1": d1,
             "dir": "vendor_missing" if worst[1] < 0 else "our_table_missing",
@@ -369,6 +442,35 @@ def scan_ticker(series, events, dev_tol, min_run, eval_from):
         return "UNCOMPUTABLE", {"unknown": unknown, "notes": notes,
                                 "n_eval_clean": len(evaluated)}
     return "AGREE", {"n_eval": len(evaluated), "notes": notes, "n_ex": len(used)}
+
+
+# ── DÒNG MÁY ĐỌC: dựng ở MỘT chỗ duy nhất ───────────────────────────────────────────────────
+# Trước bản này mỗi dòng được f-string tại chỗ in, nên selfcheck chỉ grep được VĂN BẢN NGUỒN;
+# arch-review 2026-09-27 chứng minh hợp đồng KHÔNG được test: hoán đổi `dir` với `held` trong dòng
+# DRIFT vẫn 142/142 PASS và sinh ra nhãn SAI "ĐANG NẮM LIVE: vendor_missing" trên Discord. Tách ra
+# hàm để selfcheck bơm dòng THẬT qua alert.sh và so TỪNG TRƯỜNG.
+
+def marker_drift(tk, p, held):
+    return ("ADJFACTOR_DRIFT|{tk}|{ex}|{r_obs:.6f}|{r_pred:.6f}|{dev:.6f}|{run}|{d0}|{d1}"
+            "|{dir}|{held}").format(tk=tk, held=held, **p)
+
+
+def marker_uncomputable(tk, ex, code, held):
+    return f"ADJFACTOR_UNCOMPUTABLE|{tk}|{ex}|{code}|{held}"
+
+
+def marker_nodata(tk, held):
+    return f"ADJFACTOR_NODATA|{tk}|{held}"
+
+
+def marker_feed(status, detail):
+    return (f"ADJFACTOR_FEED|{status}|{detail.get('max_ingested_ict', '?')}"
+            f"|{detail.get('max_public', '?')}|{detail.get('rows', '?')}"
+            f"|{detail.get('age_days', '?')}|{detail.get('reason', '')}")
+
+
+def marker_scan(asof, n_scanned, n_drift, n_uncomp, n_agree, n_nodata):
+    return (f"ADJFACTOR_SCAN|{asof}|{n_scanned}|{n_drift}|{n_uncomp}|{n_agree}|{n_nodata}")
 
 
 def run_scan(args):
@@ -399,10 +501,17 @@ def run_scan(args):
     print(f"# cua so danh gia {win0}..{asof} (nap tu {load0} de tim phien cum cuoi) "
           f"| dev_tol={args.dev_tol:.3%} min_run={args.min_run}")
     print(f"# vi the LIVE: {'khong tra duoc (held=unknown)' if held is None else str(len(held)) + ' ma'}")
+
+    feed_status, feed_detail = feed_gate(asof)
+    print(marker_feed(feed_status, feed_detail))
+    print(f"# feed corporate_action: {feed_status} {feed_detail}")
+
     if not tks:
-        print("ADJFACTOR_SCAN|%s|0|0|0|0|0" % asof)
-        print("# khong co ma nao trong universe -> khong co gi de kiem")
-        return 0
+        print(marker_scan(asof, 0, 0, 0, 0, 0))
+        # Cohort 30 ngày RỖNG là bất khả về mặt cấu trúc ở VN (đo thật: 95 mã cho cửa sổ 18 ngày)
+        # ⇒ đây là điểm mù, KHÔNG phải "không có gì để kiểm". rc=11, không bao giờ 0.
+        print("# universe RONG -> DIEM MU, khong phai 'khong co lech'. rc=11.")
+        return 11
 
     # GIÁ nạp từ `load0` (sớm hơn), SỰ KIỆN chỉ từ `win0`. Ngược lại là một bug thật: một ex-date
     # rơi đúng rìa trái của khoảng NẠP không còn phiên cum nào trước nó ⇒ `no_cum_session_in_window`
@@ -427,15 +536,19 @@ def run_scan(args):
         elif verdict == "AGREE":
             agree.append(tk)
         else:
-            nodata.append(tk)
+            nodata.append((tk, h))
 
     for tk, p, h in sorted(drift, key=lambda x: -abs(x[1]["dev"])):
-        print(f"ADJFACTOR_DRIFT|{tk}|{p['ex0']}|{p['r_obs']:.6f}|{p['r_pred']:.6f}"
-              f"|{p['dev']:.6f}|{p['run']}|{p['d0']}|{p['d1']}|{p['dir']}|{h}")
+        print(marker_drift(tk, p, h))
     for tk, p, h in sorted(uncomp):
         for ex, code, _note in p["unknown"]:
-            print(f"ADJFACTOR_UNCOMPUTABLE|{tk}|{ex}|{code}|{h}")
-    print(f"ADJFACTOR_SCAN|{asof}|{len(tks)}|{len(drift)}|{len(uncomp)}|{len(agree)}|{len(nodata)}")
+            print(marker_uncomputable(tk, ex, code, h))
+    # NODATA có dòng máy đọc RIÊNG: trước bản này nó chỉ là một con số trong SCAN ⇒ một mã đang NẮM
+    # mà không có dòng giá nào không sinh ra bất cứ thứ gì người đọc thấy (arch-review 2026-09-27;
+    # đo thật 12/95 mã NODATA trên cohort control).
+    for tk, h in sorted(nodata):
+        print(marker_nodata(tk, h))
+    print(marker_scan(asof, len(tks), len(drift), len(uncomp), len(agree), len(nodata)))
 
     print(f"\n-- ket qua: DRIFT {len(drift)} | UNCOMPUTABLE {len(uncomp)} | "
           f"AGREE {len(agree)} | NODATA {len(nodata)} --")
@@ -456,13 +569,16 @@ def run_scan(args):
             for ex, code, note in p["unknown"]:
                 print(f"   {tk} [{h}] {code}: {note}")
     if nodata:
-        print(f"\nNODATA (khong co dong gia trong cua so): {sorted(nodata)}")
+        print(f"\nNODATA (khong co dong gia trong cua so): "
+              f"{[f'{tk} [{h}]' for tk, h in sorted(nodata)]}")
     if agree:
         print(f"\nAGREE: {sorted(agree)}")
 
     if drift:
         return 10
-    if uncomp:
+    # rc=11 = ĐIỂM MÙ, không phải "sạch": uncomputable, NODATA, hoặc feed nguồn không tươi. Gộp cả
+    # ba vào một mã vì hệ quả giống nhau (không kết luận được), nhưng dòng máy đọc phân biệt rõ.
+    if uncomp or nodata or feed_status != "FRESH":
         return 11
     return 0
 
@@ -483,8 +599,11 @@ def main(argv=None):
     if args.min_run < MIN_RUN:
         ap.error(f"--min-run < {MIN_RUN} bi TU CHOI: nguong persistence nay la thu da loc duoc "
                  f"ffill `Price` toan thi truong 2026-01-30 (662/1252 ma). Xem docstring.")
-    if args.dev_tol <= 0:
-        ap.error("--dev-tol phai > 0")
+    if not 0 < args.dev_tol < 0.5:
+        # Trần 50%: một dung sai lớn hơn thế thì detector không bao giờ nổ trên bất kỳ sự kiện thật
+        # nào (hệ số lớn nhất đo được trên cohort control là 4,16 ⇒ lệch tối đa ~76%), tức là một
+        # cách TẮT cảnh báo mà trông như đang chạy.
+        ap.error("--dev-tol phai nam trong (0, 0.5) — ngoai khoang nay detector thanh no-op")
     try:
         return run_scan(args)
     except Exception as e:                                   # noqa: BLE001

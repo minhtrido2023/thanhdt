@@ -20,11 +20,19 @@
 #   30 lần. Khoá là `<mã>|<ex-date>` + ngày cảnh báo cuối, nhắc lại sau `RE_ALERT_DAYS`=7 ngày
 #   nếu vẫn còn lệch. Im lặng hoàn toàn sau lần đầu cũng sai — một lỗi chưa ai sửa phải còn nhắc.
 #
-# UNCOMPUTABLE: LUÔN được in ra stdout của detector (⇒ vào log cron) và LUÔN nằm trong payload bus
-# — không bao giờ im lặng, không bao giờ bị coi là "khớp" (yêu cầu #4 của dispatch). Nhưng chỉ mã
-# đang NẮM LIVE mới được nêu tên trên Discord: uncomputable là trạng thái BÌNH THƯỜNG của quyền mua
-# cổ đông hiện hữu (26/83 mã cohort control) và của guard ffill `Price` trên mã mỏng — bắn Discord
-# mỗi ngày cho nó là dạy người ta bỏ qua đúng cái topic cần đọc.
+# UNCOMPUTABLE / NODATA: LUÔN được in ra stdout của detector (⇒ vào log cron) và LUÔN nằm trong
+# payload bus — không bao giờ im lặng, không bao giờ bị coi là "khớp" (yêu cầu #4 của dispatch).
+# Nhưng chỉ mã CÓ THỂ đang nắm (`held` ≠ `none`, tức kể cả `unknown`) mới được nêu tên trên Discord,
+# và **có de-dup riêng** theo khoá `<mã>|<ex>|<reason_code>` / `<mã>|nodata`: uncomputable là trạng
+# thái BÌNH THƯỜNG của quyền mua cổ đông hiện hữu (26/83 mã cohort control) và của guard ffill
+# `Price` trên mã mỏng — bắn Discord mỗi ngày cho nó là dạy người ta bỏ qua đúng cái topic cần đọc.
+# (arch-review 2026-09-27 đo được bản đầu gửi CẢ BA lượt liên tiếp trên cùng input vì nhánh này
+# không có de-dup và `N_UNCOMP_HELD > 0` luôn phá de-dup của nhánh DRIFT.)
+#
+# FEED: `ADJFACTOR_FEED|<status>|...` với status ≠ FRESH là hạng cảnh báo RIÊNG, KHÔNG de-dup theo
+# (mã, ex) được (nó không thuộc mã nào) và LUÔN lên Discord. `tav2_bq.corporate_action` là bảng TRAP
+# có writer NGOÀI repo; feed đứng im ⇒ mọi mã "khớp" ⇒ im lặng không phân biệt được với một tuần
+# sạch, đúng lớp lỗi §14/§29.
 #
 # Exit: 0 = không có gì để cảnh báo · 10 = đã có cảnh báo (hoặc dry-run có nội dung) · 2 = sai đối số.
 #   ⚠️ 10 nói về SỰ TỒN TẠI của cảnh báo, KHÔNG hứa "đã gửi được" — Discord hỏng thì in LỖI THẬT ra
@@ -33,6 +41,7 @@ set -uo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 RE_ALERT_DAYS=7
+PRUNE_DAYS=90     # dọn khoá de-dup cũ hơn mốc này (xem ghi chú ở bước ghi state)
 # Trần số dòng của khối "mã KHÔNG nắm" trên Discord. `notify_thread.sh` tự chunk ở 1900 ký tự nên
 # một tuần 16 mã lệch KHÔNG làm gửi hỏng — nó chia thành 4 tin, và 4 tin cho một việc không phải
 # tiền thật là đúng cách để dạy người ta cuộn qua topic. Khối mã ĐANG NẮM LIVE **không bao giờ bị
@@ -51,8 +60,21 @@ DRY_RUN=0
 DET_OUT="$(cat)"
 DRIFTS="$(printf '%s\n' "$DET_OUT" | grep -E '^ADJFACTOR_DRIFT\|' || true)"
 UNCOMPS="$(printf '%s\n' "$DET_OUT" | grep -E '^ADJFACTOR_UNCOMPUTABLE\|' || true)"
+NODATAS="$(printf '%s\n' "$DET_OUT" | grep -E '^ADJFACTOR_NODATA\|' || true)"
+FEED="$(printf '%s\n' "$DET_OUT" | grep -E '^ADJFACTOR_FEED\|' | tail -1 || true)"
 SCAN="$(printf '%s\n' "$DET_OUT" | grep -E '^ADJFACTOR_SCAN\|' | tail -1 || true)"
-[ -z "$DRIFTS" ] && [ -z "$UNCOMPS" ] && exit 0
+
+# Feed nguồn KHÔNG tươi là hạng cảnh báo RIÊNG và CAO nhất: `corporate_action` là bảng TRAP có
+# writer ngoài repo, feed đứng im ⇒ mọi mã "khớp" ⇒ im lặng không phân biệt được với tuần sạch
+# (arch-review 2026-09-27). Phải tới người, không de-dup theo (mã,ex) được vì nó không thuộc mã nào.
+FEED_STATUS=""
+FEED_REASON=""
+if [ -n "$FEED" ]; then
+  IFS='|' read -r _ftag FEED_STATUS FEED_ING FEED_PUB FEED_ROWS FEED_AGE FEED_REASON <<< "$FEED"
+fi
+
+[ -z "$DRIFTS" ] && [ -z "$UNCOMPS" ] && [ -z "$NODATAS" ] \
+  && { [ -z "$FEED_STATUS" ] || [ "$FEED_STATUS" = "FRESH" ]; } && exit 0
 
 IFS='|' read -r _stag ASOF N_SCANNED N_DRIFT N_UNCOMP N_AGREE N_NODATA <<< "${SCAN:-|?|?|?|?|?|?}"
 
@@ -98,6 +120,8 @@ NEW_KEYS=""
 N_NEW=0
 N_HELD=0
 N_OTHER=0
+N_UNKNOWN=0
+DETAIL_UNKNOWN=""
 SEEN_VENDOR=0
 SEEN_OURS=0
 while IFS='|' read -r _tag tk ex r_obs r_pred dev run d0 d1 dir held; do
@@ -115,37 +139,83 @@ while IFS='|' read -r _tag tk ex r_obs r_pred dev run d0 d1 dir held; do
   esac
   line="
 • **${tk}** (ex ${ex}): lệch $(_pct "$dev") liên tục **${run} phiên** ${d0}..${d1} — ${cause}"
-  if [ "$held" = "none" ] || [ "$held" = "unknown" ]; then
-    N_OTHER=$((N_OTHER + 1))
-    if [ "$N_OTHER" -le "$MAX_OTHER_LINES" ]; then
-      DETAIL_OTHER="${DETAIL_OTHER}${line}"
-    fi
-  else
-    N_HELD=$((N_HELD + 1))
-    DETAIL_HELD="${DETAIL_HELD}${line} — **ĐANG NẮM LIVE: ${held}**"
-  fi
+  # `unknown` KHÔNG được gộp vào `none`. Bản trước gộp, và arch-review 2026-09-27 đo thật: một mã
+  # ĐANG NẮM (VPB, lệch −20,66%) in ra dưới tiêu đề "Mã không nắm (chỉ ảnh hưởng nghiên cứu/
+  # backtest)" khi `held_map()` fail-open — một KHẲNG ĐỊNH SAI về mức phơi nhiễm tiền thật (§29
+  # dạng 2), và còn bị trần `MAX_OTHER_LINES` cắt mất.
+  case "$held" in
+    unknown)
+      N_UNKNOWN=$((N_UNKNOWN + 1))
+      DETAIL_UNKNOWN="${DETAIL_UNKNOWN}${line} — **KHÔNG TRA ĐƯỢC vị thế, phải coi như CÓ THỂ đang nắm**"
+      ;;
+    none)
+      N_OTHER=$((N_OTHER + 1))
+      if [ "$N_OTHER" -le "$MAX_OTHER_LINES" ]; then
+        DETAIL_OTHER="${DETAIL_OTHER}${line}"
+      fi
+      ;;
+    *)
+      N_HELD=$((N_HELD + 1))
+      DETAIL_HELD="${DETAIL_HELD}${line} — **ĐANG NẮM LIVE: ${held}**"
+      ;;
+  esac
 done <<< "$DRIFTS"
 
-# UNCOMPUTABLE: chỉ nêu tên trên Discord các mã đang NẮM LIVE (xem header). Phần còn lại chỉ đếm.
+# UNCOMPUTABLE / NODATA: chỉ nêu tên trên Discord khi mã có thể đang NẮM (kể cả `unknown` —
+# fail-open về phía CẢNH BÁO). Phần còn lại chỉ đếm.
+#
+# ⚠️ PHẢI de-dup y như DRIFT. Bản trước KHÔNG de-dup nhánh này và `N_UNCOMP_HELD > 0` luôn phá
+# de-dup ⇒ arch-review 2026-09-27 chạy 3 lượt cùng input: gửi Discord CẢ BA lượt. Không phải giả
+# định: LAYER1.md ghi 5 mã đang nắm đã ở trạng thái này (MBB quyền mua, CTG/VCB/VND/VNM ffill) với
+# cửa sổ sự kiện 120 ngày ⇒ cùng một tin mỗi ngày, đúng cái mà header này lập luận chống lại.
+# Khoá gồm `code` vì đổi mã lý do là đổi việc phải làm.
 DETAIL_UNCOMP=""
 N_UNCOMP_HELD=0
 N_UNCOMP_OTHER=0
 while IFS='|' read -r _tag tk ex code held; do
   [ -z "${tk:-}" ] && continue
-  if [ "$held" = "none" ] || [ "$held" = "unknown" ]; then
+  if [ "$held" = "none" ]; then
     N_UNCOMP_OTHER=$((N_UNCOMP_OTHER + 1))
     continue
   fi
+  key="${tk}|${ex}|${code}"
+  _is_fresh "$key" && continue
   N_UNCOMP_HELD=$((N_UNCOMP_HELD + 1))
+  NEW_KEYS="${NEW_KEYS}${key}"$'\n'
+  hl="$held"
+  if [ "$held" = "unknown" ]; then
+    hl="KHÔNG TRA ĐƯỢC vị thế"
+  fi
   DETAIL_UNCOMP="${DETAIL_UNCOMP}
-• **${tk}** (ex ${ex}, ${held}): \`${code}\` — KHÔNG tính được hệ số, **không kết luận là khớp**"
+• **${tk}** (ex ${ex}, ${hl}): \`${code}\` — KHÔNG tính được hệ số, **không kết luận là khớp**"
 done <<< "$UNCOMPS"
+
+N_NODATA_HELD=0
+N_NODATA_OTHER=0
+while IFS='|' read -r _tag tk held; do
+  [ -z "${tk:-}" ] && continue
+  if [ "$held" = "none" ]; then
+    N_NODATA_OTHER=$((N_NODATA_OTHER + 1))
+    continue
+  fi
+  key="${tk}|nodata"
+  _is_fresh "$key" && continue
+  N_NODATA_HELD=$((N_NODATA_HELD + 1))
+  NEW_KEYS="${NEW_KEYS}${key}"$'\n'
+  hl="$held"
+  if [ "$held" = "unknown" ]; then
+    hl="KHÔNG TRA ĐƯỢC vị thế"
+  fi
+  DETAIL_UNCOMP="${DETAIL_UNCOMP}
+• **${tk}** (${hl}): KHÔNG có dòng giá nào trong cửa sổ — **không kết luận được gì cho mã này**"
+done <<< "$NODATAS"
 
 # BUS trước (kênh PHỤ, luôn ghi kể cả khi Discord im vì de-dup) — đây là dấu vết audit đầy đủ:
 # mọi DRIFT và mọi UNCOMPUTABLE của lượt quét, không qua bộ lọc de-dup/held nào.
 PAYLOAD="$(ASOF="$ASOF" N_SCANNED="$N_SCANNED" N_DRIFT="$N_DRIFT" N_UNCOMP="$N_UNCOMP" \
   N_AGREE="$N_AGREE" N_NODATA="$N_NODATA" N_NEW="$N_NEW" N_HELD="$N_HELD" \
-  DRIFTS="$DRIFTS" UNCOMPS="$UNCOMPS" python3 -c "
+  N_UNKNOWN="$N_UNKNOWN" FEED_STATUS="$FEED_STATUS" FEED_LINE="$FEED" \
+  DRIFTS="$DRIFTS" UNCOMPS="$UNCOMPS" NODATAS="$NODATAS" python3 -c "
 import json, os
 def lines(v):
     return [l.strip() for l in os.environ[v].splitlines() if l.strip()]
@@ -156,24 +226,47 @@ print(json.dumps({
     'uncomputable': os.environ['N_UNCOMP'], 'agree': os.environ['N_AGREE'],
     'nodata': os.environ['N_NODATA'],
     'new_since_last_alert': os.environ['N_NEW'], 'drift_held_live': os.environ['N_HELD'],
+    'drift_holdings_unknown': os.environ['N_UNKNOWN'],
+    'corp_action_feed': os.environ['FEED_STATUS'] or 'not_reported',
+    'corp_action_feed_marker': os.environ['FEED_LINE'],
     'published_any_number': False,
     'drift_markers': lines('DRIFTS'), 'uncomputable_markers': lines('UNCOMPS'),
+    'nodata_markers': lines('NODATAS'),
 }, ensure_ascii=False))
 ")"
 
+# `status`, KHÔNG phải `finding`: lượt quét chạy MỖI NGÀY và consolidator đưa `finding` lên khối
+# "MỚI NHẤT" của `kb/context_*_mini.md` (file auto-inject mọi phiên) ⇒ một dòng rác mỗi ngày cho cả
+# fleet. `finding` dành cho tri thức BỀN; đây là nhật ký vận hành. (Tiền lệ: `vendor_mismatch_alert.sh`
+# dùng `Mike error` cho cùng loại việc.)
 if [ "$DRY_RUN" -eq 0 ]; then
-  if ! BUS_ERR="$("$ROOT/bin/append_event.sh" Taylor finding "adjfactor-drift-scan-${ASOF}" "$PAYLOAD" 2>&1 >/dev/null)"; then
+  if ! BUS_ERR="$("$ROOT/bin/append_event.sh" Taylor status "adjfactor-drift-scan-${ASOF}" "$PAYLOAD" 2>&1 >/dev/null)"; then
     echo "adjfactor_drift_alert: append_event.sh THAT BAI (bus la kenh phu, van gui Discord). Loi that: ${BUS_ERR}" >&2
   fi
 fi
 
-if [ "$N_NEW" -eq 0 ] && [ "$N_UNCOMP_HELD" -eq 0 ]; then
-  echo "adjfactor_drift_alert: ${N_DRIFT} lech nhung tat ca da canh bao trong ${RE_ALERT_DAYS} ngay qua" \
-       "va khong co uncomputable nao dang nam LIVE -> chi ghi bus, khong gui Discord (de-dup)." >&2
+FEED_BAD=0
+if [ -n "$FEED_STATUS" ] && [ "$FEED_STATUS" != "FRESH" ]; then
+  FEED_BAD=1
+fi
+
+if [ "$N_NEW" -eq 0 ] && [ "$N_UNCOMP_HELD" -eq 0 ] && [ "$N_NODATA_HELD" -eq 0 ] \
+   && [ "$FEED_BAD" -eq 0 ]; then
+  echo "adjfactor_drift_alert: ${N_DRIFT} lech nhung tat ca da canh bao trong ${RE_ALERT_DAYS} ngay qua," \
+       "khong co uncomputable/nodata nao co the dang nam, feed nguon TUOI -> chi ghi bus," \
+       "khong gui Discord (de-dup)." >&2
   exit 10
 fi
 
 SECTIONS=""
+if [ "$FEED_BAD" -eq 1 ]; then
+  SECTIONS="${SECTIONS}
+__**FEED NGUỒN \`tav2_bq.corporate_action\` KHÔNG TƯƠI — đọc mục này TRƯỚC:**__
+• trạng thái \`${FEED_STATUS}\`: ${FEED_REASON:-không có lý do kèm theo}
+• nạp gần nhất (ICT) \`${FEED_ING:-?}\` · public_date \`${FEED_PUB:-?}\` · ${FEED_ROWS:-?} dòng · cũ ${FEED_AGE:-?} ngày
+• ⚠️ **Mọi kết luận \"khớp\" bên dưới KHÔNG đáng tin khi feed đứng im** — hệ số tự suy lấy từ chính bảng này.
+"
+fi
 [ -n "$DETAIL_HELD" ] && SECTIONS="${SECTIONS}
 __**Mã ĐANG NẮM LIVE — ưu tiên:**__${DETAIL_HELD}
 "
@@ -189,8 +282,12 @@ if [ -n "$DETAIL_OTHER" ]; then
 __**Mã không nắm (chỉ ảnh hưởng nghiên cứu/backtest đọc lịch sử):**__${DETAIL_OTHER}${more}
 "
 fi
+# Khối `unknown` đặt NGAY SAU khối nắm-LIVE và KHÔNG bao giờ bị cắt: nó có thể là tiền thật.
+[ -n "$DETAIL_UNKNOWN" ] && SECTIONS="${SECTIONS}
+__**KHÔNG TRA ĐƯỢC VỊ THẾ (phải coi như có thể đang nắm):**__${DETAIL_UNKNOWN}
+"
 [ -n "$DETAIL_UNCOMP" ] && SECTIONS="${SECTIONS}
-__**KHÔNG TÍNH ĐƯỢC hệ số (fail-closed, mã đang nắm):**__${DETAIL_UNCOMP}
+__**KHÔNG KẾT LUẬN ĐƯỢC (fail-closed, mã có thể đang nắm):**__${DETAIL_UNCOMP}
 "
 
 TODO=""
@@ -198,6 +295,10 @@ TODO=""
 - **Vendor thiếu hệ số điều chỉnh:** Winston (data-ops) yêu cầu backfill \`tav2_bq.ticker\`/\`ticker_prune\` cho các (mã, ex-date) trên. Chữ ký đã biết: hệ số chỉ chạm **4 phiên cum cuối** (\`SETTLE_RUN=4\`) rồi dừng — nhánh fallback hẹp của ETL chạy, còn bản rewrite toàn cửa sổ (gated \`need_cafef\`) KHÔNG chạy."
 [ "$SEEN_OURS" = "1" ] && TODO="${TODO}
 - **Nghi \`corporate_action\` của TA thiếu mắt xích:** Taylor đối chiếu sự kiện thật của mã đó (chiều lệch NGƯỢC lại: vendor có hệ số mà ta không suy ra được). Đây là GỢI Ý ĐIỀU HƯỚNG theo dấu của lệch, KHÔNG phải bằng chứng."
+[ "$FEED_BAD" -eq 1 ] && TODO="${TODO}
+- **Feed \`corporate_action\` không tươi (\`${FEED_STATUS}\`):** Winston (data-ops) kiểm writer NGOÀI repo của bảng TRAP này (\`kb/data_registry/price-volume/corporate_action_bq.md\`). **Cho tới khi feed tươi lại, coi lượt quét này là ĐIỂM MÙ, không phải \"không có lệch\"** — đừng đóng cảnh báo bằng lý do \"đã quét, không thấy gì\"."
+[ "$N_UNKNOWN" -gt 0 ] && TODO="${TODO}
+- **Không tra được vị thế LIVE:** \`dividend_adjusted_return.broker_qty()\` lỗi ⇒ nhãn nắm/không nắm của lượt này KHÔNG dùng được. Kiểm \`data/execution_logs/dnse_raw_*.jsonl\` rồi chạy lại; trong lúc chờ, coi MỌI mã ở khối trên như có thể đang nắm."
 [ "$N_UNCOMP_HELD" -gt 0 ] && TODO="${TODO}
 - **Mã nắm LIVE không tính được hệ số:** \`rights_issue_no_subscription_price\` = giá phát hành không có trong \`corporate_action\` (cột \`ref_price\` NULL toàn bộ từ 2025-01-01) ⇒ Layer 1 KHÔNG kết luận được gì cho mã đó, cổng §21 vẫn là lớp bảo vệ duy nhất. \`price_ffill_suspect\` = \`Price\` phiên cum cuối nằm ngoài band ⇒ Winston kiểm dòng giá đó."
 
@@ -206,7 +307,7 @@ Hệ số tự suy từ \`tav2_bq.corporate_action\` không khớp hệ số ẩ
 ${SECTIONS}
 **Việc cần làm:**${TODO}
 
-_Quét ${N_SCANNED} mã: ${N_DRIFT} lệch · ${N_UNCOMP} không tính được · ${N_AGREE} khớp · ${N_NODATA} không có dữ liệu. ${N_UNCOMP_OTHER} uncomputable của mã không nắm chỉ ghi bus, không nêu ở đây._
+_Quét ${N_SCANNED} mã: ${N_DRIFT} lệch · ${N_UNCOMP} không tính được · ${N_AGREE} khớp · ${N_NODATA} không có dữ liệu · feed nguồn \`${FEED_STATUS:-không báo}\`. ${N_UNCOMP_OTHER} uncomputable + ${N_NODATA_OTHER} nodata của mã KHÔNG nắm chỉ ghi bus, không nêu ở đây._
 _Layer 1 **KHÔNG công bố và KHÔNG sửa** số nào — cổng §21 (\`report_return_gate\`) vẫn là lớp chặn báo cáo, không thay đổi._"
 
 if [ "$DRY_RUN" -eq 1 ]; then
@@ -225,8 +326,8 @@ if ! NOTIFY_ERR="$("$ROOT/bin/notify_thread.sh" "$MSG" "$TOPIC" 2>&1 >/dev/null)
   exit 10
 fi
 
-STATE="$STATE" TODAY="$TODAY" NEW_KEYS="$NEW_KEYS" python3 -c "
-import json, os, sys, tempfile
+STATE="$STATE" TODAY="$TODAY" NEW_KEYS="$NEW_KEYS" PRUNE_DAYS="$PRUNE_DAYS" python3 -c "
+import datetime, json, os, sys, tempfile
 path = os.environ['STATE']
 try:
     state = json.load(open(path))
@@ -236,6 +337,20 @@ except Exception as e:
     print('adjfactor_drift_alert: state cu hong (%s: %s) — dung lai tu {}' % (type(e).__name__, e),
           file=sys.stderr)
     state = {}
+# Don khoa qua cu: mot khoa cu hon PRUNE_DAYS khong con anh huong quyet dinh nao (de-dup chi xet
+# trong RE_ALERT_DAYS), nen giu no chi lam file phinh vo han. vendor_mismatch_alert.sh chap nhan
+# duoc vi o do khoa chi sinh khi co lech THAT (do 0/62 su kien), con o day moi (ma,ex) cua moi
+# cohort deu sinh khoa (~1,2k/nam) va khong ai lam chu viec don.
+# (Khong dung backtick trong khoi nay: no nam trong chuoi NHAY KEP cua python3 -c => command
+#  substitution that su, khong phai trich dan van xuoi — §15.)
+today = datetime.date.fromisoformat(os.environ['TODAY'])
+prune = int(os.environ['PRUNE_DAYS'])
+for k in list(state):
+    try:
+        if (today - datetime.date.fromisoformat(str(state[k]))).days > prune:
+            del state[k]
+    except ValueError:
+        del state[k]          # giá trị không đọc được: bỏ, lần sau coi như chưa cảnh báo
 for k in os.environ['NEW_KEYS'].splitlines():
     if k.strip():
         state[k.strip()] = os.environ['TODAY']
