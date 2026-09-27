@@ -24,7 +24,9 @@ import pandas as pd
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 CANON_FLAGS = os.path.join(HERE, "data", "forensic_flags.csv")
-OLD_REF = os.environ.get("FAILOPEN_OLD_REF", "").strip() or "main"
+# Neo ban CU vao CHA cua commit va, KHONG dung "main"/"HEAD": sau khi merge thi main DA va
+# va test two-sided se FAIL vinh vien du ban va dung (da can that 2026-09-27, 2 lan).
+OLD_REF = os.environ.get("FAILOPEN_OLD_REF", "").strip() or "74dfd6ee^"
 
 _n = 0
 
