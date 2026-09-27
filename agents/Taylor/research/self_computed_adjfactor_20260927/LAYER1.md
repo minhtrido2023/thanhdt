@@ -15,7 +15,7 @@ pháp khả thi (46 mã control, sai số ≤0,08%, hệ số 1,01→4,16).
 | `bin/adjfactor_drift_alert.sh` | Parse dòng máy đọc → Discord + bus + de-dup nguyên tử | Không tính lại gì; không grep văn xuôi (§28) |
 | `bin/adjfactor_drift_daily.sh` | Runner cron: chạy detector, **giữ rc của nó**, rồi gọi alert. rc hợp lệ là **allow-list `0/10/11`** — mọi rc khác (124 timeout, 137 OOM, …) là lỗi hạ tầng | Không dùng pipe trực tiếp (pipe làm MẤT rc=1 ⇒ "BQ chết" bị đọc thành "không có lệch"); không dùng deny-list rc (§8b F2) |
 
-Selfcheck: `bin/adjfactor_drift_detect_selfcheck.py` — **337/337 assertion PASS**, đo dưới `$DNA_PYEXE`
+Selfcheck: `bin/adjfactor_drift_detect_selfcheck.py` — **361/361 assertion PASS**, đo dưới `$DNA_PYEXE`
 (`/home/trido/thanhdt/wc_venv/bin/python`). Phần shell chạy LẶP dưới 4 môi trường TZ (`unset TZ`,
 `TZ=UTC`, `TZ=Pacific/Kiritimati` +14, `TZ=Pacific/Midway` −11) theo §16/§19 — hai TZ lệch CỰC ĐẠI
 được thêm ở vòng 2 vì `TZ=America/New_York` cùng ngày lịch với ICT trong phần lớn giờ hành chính,
@@ -165,7 +165,7 @@ audit. Discord gửi hỏng ⇒ **không** ghi de-dup (sổ sách không đượ
 ## 8. Lỗi arch-review tìm ra và đã vá (vòng 1 + 2 + 3)
 
 Ghi lại vì mỗi lỗi là một ca "im lặng/khẳng định sai" mà bản đầu KHÔNG bắt được, và cả sáu đều có
-assertion mới chốt lại (337 assertion hiện tại so với 142 của bản đầu).
+assertion mới chốt lại (361 assertion hiện tại so với 142 của bản đầu).
 
 1. **Feed nguồn chết = một tuần sạch.** `tav2_bq.corporate_action` là bảng **TRAP** có writer NGOÀI
    repo. Feed đứng im ⇒ 0 ex-date ⇒ mọi mã "khớp" ⇒ `ADJFACTOR_SCAN|…|0|0|0|0|0` và **rc=0, không
@@ -260,6 +260,33 @@ rõ hệ quả thật ("Discord ĐÃ gửi, lượt sau sẽ GỬI LẠI các kh
 
 **Đo lại real-data lần thứ ba, vẫn KHÔNG đổi một số nào:** suspect 16/13/23/2 rc=10, VPB+DRI đúng
 nhãn, 0 `corr=1`, **0 `unknown_gap`**; control `--no-holdings` 95/11/26/46/12, 0 `too_few`.
+
+### 8d. Vòng 5 — arch-review APPROVE (32/34 mutation KILL), 3 mục theo sau đã đóng luôn
+
+Vòng 4 được **APPROVE cho merge** dưới dạng công cụ DETECT-ONLY: **32/34 mutation KILL** trên toàn
+bộ tập tích luỹ. M22 (vòng 3 xếp là *equivalent mutant*) đã được **phân loại lại thành KILL thật**
+sau R3-1 — `empty` được kiểm TRƯỚC mọi lệnh `min()`, nên guard không còn tương đương.
+
+3 mục "không chặn merge" được đóng ngay thay vì để lại cho bước cron:
+
+1. **Nhánh (b) của lock vẫn gộp hai nguyên nhân** (`flock -w 60 9 || LOCK_SKIP=1` coi MỌI rc≠0 là
+   tranh chấp). Với `flock` không có trong PATH: chờ 0s, không có lượt nào khác, mà vẫn in "một lượt
+   khác đang giữ (chờ 60s không được)" rồi TẮT Discord cho một lệch VPB thật — **lại đúng §29 dạng 2,
+   ở nhánh KẾ BÊN nhánh vừa vá vòng 4**. Vá: phân loại rc — flock(1) trả **1 CHỈ khi hết timeout**,
+   126/127 và các rc khác là môi trường ⇒ về nhánh (a), chạy tiếp KHÔNG lock.
+2. **M47** — thứ tự "ghi BUS TRƯỚC, bỏ Discord SAU" (cả điểm của R3-4) không có assertion ⇒ một
+   refactor sau có thể lặng lẽ khôi phục ca mất CẢ HAI kênh. Đã chốt bằng một tiến trình nền GIỮ
+   lock thật (`ADJFACTOR_LOCK_WAIT=1` để khỏi chờ 60s), assert `bus.jsonl` tăng 1 dòng và
+   `notify.txt` KHÔNG tồn tại, rc=11.
+3. **M45** — handler `OSError` của bước ghi state không có assertion. Đã chốt: `state/` read-only ⇒
+   stderr KHÔNG có traceback trần, và có cả "GUI LAI" lẫn lỗi thật `Permission denied`.
+
+Selfcheck 337 → **361/361**. Ba assertion mới cho mục 1 (`flock` giả rc=127 đặt đầu `PATH`), M47 và
+M45. Đo lại real-data lần thứ tư: **không đổi một số nào**.
+
+**Không có mục nào còn treo từ arch-review.** Hai điều kiện còn lại để lên production đều là việc
+CẦN NGƯỜI, không phải code: §11 ghi `kb/cron_registry.md` trước khi thêm dòng crontab, và user
+sign-off — xem §9.
 
 ## 9. Còn phải làm trước khi lên production (KHÔNG tự làm)
 

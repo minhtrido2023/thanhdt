@@ -116,8 +116,10 @@ mkdir -p "$ROOT/state"
 #       code MỚI mà `diagnosis_evidence_gate.py` về cấu trúc không nhìn thấy được.
 #       Xử lý: CHẠY TIẾP KHÔNG LOCK. Không có lock chỉ mất tính idempotent khi chạy song song (hướng
 #       fail là GỬI THỪA), còn thoát ở đây thì mất CẢ cảnh báo — đúng điều header file này cấm.
-#   (b) mở được nhưng KHÔNG giành được trong 60s ⇒ thật sự có lượt khác đang chạy ⇒ bỏ qua để không
-#       gửi trùng. Nhưng vẫn phải ghi BUS trước khi thoát (dấu vết audit không được mất).
+#   (b) mở được nhưng `flock` trả **rc=1** (và CHỈ rc=1 — đó là mã hết-timeout của flock(1)) ⇒ thật
+#       sự có lượt khác đang giữ ⇒ bỏ qua để không gửi trùng. Nhưng vẫn phải ghi BUS trước khi thoát
+#       (dấu vết audit không được mất). Mọi rc khác (126/127 = không chạy được, FD sai) là môi
+#       trường ⇒ về nhánh (a): chạy tiếp KHÔNG lock.
 LOCK_SKIP=0
 # ⚠️ THỨ TỰ redirect quan trọng: `$(exec 9>file 2>&1)` KHÔNG bắt được lỗi, vì redirect xử lý từ trái
 # sang phải nên `9>file` thất bại trong khi stderr VẪN là stderr ngoài ⇒ `_LOCK_ERR` rỗng và thông
@@ -125,7 +127,19 @@ LOCK_SKIP=0
 # dạng A cho `captured=[]`, dạng B (2>&1 TRƯỚC) cho đúng dòng "Permission denied".
 if _LOCK_ERR="$(exec 2>&1; exec 9>"$STATE.lock")" && [ -z "$_LOCK_ERR" ]; then
   exec 9>"$STATE.lock"
-  flock -w 60 9 || LOCK_SKIP=1
+  # `flock` rc phải được PHÂN LOẠI, không gộp (arch-review vòng 4, mục 1). flock(1) trả **1 CHỈ khi
+  # hết timeout** — 126/127 là "không chạy được / không có lệnh", và các rc khác là lỗi FD/môi
+  # trường. Bản trước coi MỌI rc≠0 là tranh chấp: với `flock` không có trong PATH, nó in ra "một
+  # lượt khác đang giữ (chờ 60s không được)" sau khi chờ 0s và không có lượt nào khác, rồi TẮT
+  # Discord cho một lệch VPB thật — lại đúng nguyên văn §29 dạng 2, ở nhánh KẾ BÊN nhánh vừa vá.
+  # `ADJFACTOR_LOCK_WAIT` chỉ để selfcheck khỏi phải chờ 60s thật; production dùng mặc định.
+  _FLOCK_ERR="$(flock -w "${ADJFACTOR_LOCK_WAIT:-60}" 9 2>&1)" && _FLOCK_RC=0 || _FLOCK_RC=$?
+  case "$_FLOCK_RC" in
+    0) ;;
+    1) LOCK_SKIP=1 ;;   # hết 60s: THẬT SỰ có lượt khác đang giữ
+    *) echo "adjfactor_drift_alert: flock KHONG CHAY DUOC (rc=$_FLOCK_RC) -> chay TIEP KHONG LOCK," \
+            "KHONG phai tranh chap. Loi that: ${_FLOCK_ERR:-khong co stderr}" >&2 ;;
+  esac
 else
   echo "adjfactor_drift_alert: KHONG MO duoc file lock $STATE.lock -> chay TIEP KHONG LOCK (chi mat" \
        "tinh idempotent khi chay song song; thoat o day se mat CA canh bao). Loi that: ${_LOCK_ERR}" >&2
@@ -326,7 +340,8 @@ fi
 # (bản vòng 3) làm mất CẢ HAI kênh cho một lệch thật, trong khi lý do bỏ qua chỉ là "để không gửi
 # trùng" — dấu vết audit không liên quan gì tới việc đó (arch-review vòng 3, R3-4).
 if [ "$LOCK_SKIP" -eq 1 ]; then
-  echo "adjfactor_drift_alert: mot luot khac dang giu $STATE.lock (cho 60s khong duoc) -> da ghi BUS," \
+  echo "adjfactor_drift_alert: mot luot khac dang giu $STATE.lock (cho ${ADJFACTOR_LOCK_WAIT:-60}s" \
+       "khong duoc) -> da ghi BUS," \
        "KHONG gui Discord de khong trung. rc=11." >&2
   exit 11
 fi

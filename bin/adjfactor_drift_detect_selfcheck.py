@@ -652,6 +652,67 @@ def t_alert(tz_label, env_tz):
         finally:
             os.chmod(lockdir, mode)
 
+        # Vòng 4 mục 1: `flock` KHÔNG CHẠY ĐƯỢC (rc 126/127) là lỗi MÔI TRƯỜNG, không phải tranh
+        # chấp ⇒ phải chạy TIẾP không lock, KHÔNG được tắt Discord và KHÔNG được nói "lượt khác đang
+        # giữ". Giả lập bằng một `flock` giả luôn rc=127 đặt đầu PATH.
+        os.remove(os.path.join(sink, "notify.txt"))
+        fakebin = os.path.join(tmp, "fakebin")
+        os.makedirs(fakebin, exist_ok=True)
+        fl = os.path.join(fakebin, "flock")
+        open(fl, "w").write("#!/usr/bin/env bash\necho 'flock: command not found' >&2\nexit 127\n")
+        os.chmod(fl, 0o755)
+        env_nf = dict(env_tz, PATH=fakebin + os.pathsep + os.environ.get("PATH", ""))
+        r = _run_alert(tmp, tgt, "\n".join([
+            DRIFT_HELD.replace("VPB|2026-09-24", "NFL|2026-09-03"), FEED_FRESH, SCAN]) + "\n",
+            env_nf)
+        ck(f"[{tz_label}] flock không chạy được -> VẪN gửi Discord (môi trường, không tranh chấp)",
+           os.path.exists(os.path.join(sink, "notify.txt")), f"rc={r.returncode} {r.stderr[-300:]!r}")
+        ck(f"[{tz_label}] flock không chạy được: KHÔNG nói 'lượt khác đang giữ', trích LỖI THẬT",
+           "dang giu" not in r.stderr and "KHONG CHAY DUOC" in r.stderr
+           and "command not found" in r.stderr, f"{r.stderr[-400:]!r}")
+
+        # M47: lock THẬT SỰ bị giữ -> ghi BUS rồi mới bỏ Discord. Thứ tự này là cả điểm của R3-4;
+        # không có assertion thì một refactor sau có thể lặng lẽ khôi phục ca mất CẢ HAI kênh.
+        os.remove(os.path.join(sink, "notify.txt"))
+        bus_before = len([l for l in open(os.path.join(sink, "bus.jsonl")) if l.strip()])
+        holder = subprocess.Popen(
+            ["bash", "-c", f'exec 9>"{state}.lock"; flock 9; sleep 8'],
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        try:
+            import time
+            time.sleep(0.5)
+            r = _run_alert(tmp, tgt, "\n".join([
+                DRIFT_HELD.replace("VPB|2026-09-24", "HLD|2026-09-02"), FEED_FRESH, SCAN]) + "\n",
+                dict(env_tz, ADJFACTOR_LOCK_WAIT="1"))
+            bus_after = len([l for l in open(os.path.join(sink, "bus.jsonl")) if l.strip()])
+            ck(f"[{tz_label}] lock bị giữ -> BUS VẪN ghi (dấu vết audit không mất) (M47)",
+               bus_after == bus_before + 1, f"{bus_before} -> {bus_after}")
+            ck(f"[{tz_label}] lock bị giữ -> KHÔNG gửi Discord (không trùng), rc=11",
+               not os.path.exists(os.path.join(sink, "notify.txt")) and r.returncode == 11,
+               f"rc={r.returncode} {r.stderr[-300:]!r}")
+        finally:
+            holder.kill()
+            holder.wait()
+
+        # M45: ghi state thất bại -> KHÔNG bung traceback trần, nói rõ hệ quả + lỗi thật (§29).
+        # (Lượt M47 ở trên ĐÚNG là không gửi, nên notify.txt có thể không tồn tại.)
+        if os.path.exists(os.path.join(sink, "notify.txt")):
+            os.remove(os.path.join(sink, "notify.txt"))
+        for f in os.listdir(lockdir):
+            if f.endswith(".lock"):
+                os.remove(os.path.join(lockdir, f))
+        os.chmod(lockdir, 0o500)
+        try:
+            r = _run_alert(tmp, tgt, "\n".join([
+                DRIFT_HELD.replace("VPB|2026-09-24", "STW|2026-09-01"), FEED_FRESH, SCAN]) + "\n",
+                env_tz)
+            ck(f"[{tz_label}] ghi state hỏng -> KHÔNG bung traceback trần (M45)",
+               "Traceback (most recent call last)" not in r.stderr, f"{r.stderr[-400:]!r}")
+            ck(f"[{tz_label}] ghi state hỏng -> nói rõ 'lượt sau GỬI LẠI' + lỗi thật",
+               "GUI LAI" in r.stderr and "Permission denied" in r.stderr, f"{r.stderr[-400:]!r}")
+        finally:
+            os.chmod(lockdir, mode)
+
         # Feed KHÔNG tươi: luôn lên Discord, đứng đầu, kèm lý do THẬT của detector, và nói rõ
         # "khớp" bên dưới không đáng tin. Đây là ca im-lặng-bằng-sạch mà arch-review chỉ ra.
         os.remove(os.path.join(sink, "notify.txt"))
