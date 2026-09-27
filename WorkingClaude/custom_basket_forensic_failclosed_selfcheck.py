@@ -59,13 +59,24 @@ def env_clean():
     os.environ.pop("BASKET_FORENSIC_FLAGS", None)
 
 
+# Ref neo bản CŨ. KHÔNG dùng `HEAD` — sau khi branch này commit/merge thì HEAD ĐÃ vá,
+# khối fail-open không còn ở đó và test two-sided sẽ FAIL vĩnh viễn dù bản vá đúng
+# (đã cắn thật khi verify trước merge 2026-09-27). Neo vào cha của commit vá.
+OLD_REF = os.environ.get("BASKET_FORENSIC_OLD_REF", "").strip() or "e548fd73^"
+
+
 def old_block_source():
     """Khối fail-open CŨ, lấy NGUYÊN VĂN từ git (không chép tay ⇒ không thể lệch)."""
-    blob = subprocess.run(["git", "show", "HEAD:WorkingClaude/custom_basket.py"], cwd=HERE,
-                          capture_output=True, text=True, check=True).stdout
+    r = subprocess.run(["git", "show", f"{OLD_REF}:WorkingClaude/custom_basket.py"], cwd=HERE,
+                       capture_output=True, text=True)
+    if r.returncode != 0:
+        raise AssertionError(
+            f"không đọc được ref neo bản cũ {OLD_REF!r} — git nói: {r.stderr.strip()}\n"
+            f"  (đặt BASKET_FORENSIC_OLD_REF=<ref> nếu lịch sử đã rewrite)")
     m = re.search(r"\n(    _FORX = \{\}\n    try:\n.*?\n        print\(f\"  \[forensic exclude\] "
-                  r"none \(\{e\}\)\"\)\n)", blob, re.S)
-    assert m, "không tìm được khối fail-open cũ trong HEAD — dừng, đừng đoán"
+                  r"none \(\{e\}\)\"\)\n)", r.stdout, re.S)
+    assert m, (f"không tìm được khối fail-open cũ trong {OLD_REF} "
+               f"({len(r.stdout)} byte đọc được) — dừng, đừng đoán")
     return m.group(1)
 
 
