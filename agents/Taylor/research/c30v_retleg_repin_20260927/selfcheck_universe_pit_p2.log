@@ -1,0 +1,23 @@
+[wrapper] custom_basket = /home/trido/thanhdt/wt-c30v-retfix/WorkingClaude/custom_basket.py  retchain_legacy=False
+== T1: rổ prune vs pit, cửa sổ 2025-02-01 → 2026-09-24 ==
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+  [ok] T1.0 cùng tập mốc rebal — prune 7 mốc / pit 7 mốc
+  [ok] T1 rổ 2025-02-05 byte-identical — GIỐNG HỆT
+  [diff-benign] T1 rổ 2025-05-05 — VÀO ['BAF'] / RA ['TCM']: ['BAF'] chưa từng có dòng nào trong ticker_prune (lỗ hổng độ đầy đủ) và thanh khoản 3M cao hơn ['TCM'] (121.2 ≥ 65.8 tỷ đ/phiên)
+  [ok] T1 rổ 2025-08-05 byte-identical — GIỐNG HỆT
+  [ok] T1 rổ 2025-11-05 byte-identical — GIỐNG HỆT
+  [ok] T1 rổ 2026-02-05 byte-identical — GIỐNG HỆT
+  [ok] T1 rổ 2026-05-05 byte-identical — GIỐNG HỆT
+  [ok] T1 rổ 2026-08-05 byte-identical — GIỐNG HỆT
+  [ok] T1.LIVE mốc rebal đang chạy giống hệt — 2026-08-05
+== T2: fail-safe khi universe_pit thiếu ngày ==
+  [ok] T2.1 thiếu phiên → DỪNG CÓ LỖI — universe_pit thieu ngay trong [2026-01-01,2026-07-21]: co 200 phien / tav2_bq.ticker co 250 phien. DUNG — khon
+  [ok] T2.2 đủ phiên → chạy tiếp bình thường
+  [ok] T2.3 nhánh pit không có đường fallback ticker_prune — EXISTS(SELECT 1 FROM `lithe-record-440915-m9.tav2_mike.universe_pit_q`
+  [ok] T2.4 build_pit gọi cổng TRƯỚC truy vấn đầu tiên
+== T3: nhánh đọc qua BQ_LOCAL_CACHE ==
+  [ok] T3.1 cache dịch được tham chiếu tav2_mike — 360 mã
+  [ok] T3.2 cache == BigQuery — BQ 360 / cache 360
+
+PASS

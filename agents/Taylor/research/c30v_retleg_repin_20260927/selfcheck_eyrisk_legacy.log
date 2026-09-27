@@ -1,0 +1,48 @@
+[wrapper] custom_basket = /home/trido/thanhdt/wt-c30v-retfix/WorkingClaude/custom_basket.py  retchain_legacy=True
+== [6] multiplier unit test (formula fixed a priori — no grid) ==
+  [PASS] 6a r=-0.5 -> 0.5
+  [PASS] 6b r=0    -> 0.5
+  [PASS] 6c r=0.05 -> 0.75
+  [PASS] 6d r=0.10 -> 1.0
+  [PASS] 6e r=0.30 -> 1.0 (cap)
+== [1] OFF-path byte-identical vs pre-edit (eyonly + yieldcombo) ==
+[BQ_LOCAL_CACHE] ready — 14 tables from /home/trido/thanhdt/WorkingClaude/data/bq_cache
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+[BQ_LOCAL_CACHE] query took 11.3s (99115 rows)
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+[BQ_LOCAL_CACHE] query took 11.3s (99115 rows)
+  [PASS] 1a eyonly identical
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+[BQ_LOCAL_CACHE] query took 11.7s (102462 rows)
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+[BQ_LOCAL_CACHE] query took 11.6s (102462 rows)
+  [PASS] 1b yieldcombo identical
+== [2] fail-open identity: all-NaN ROE_Min5Y -> eyrisk(all) == eyonly ==
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+  [eyrisk] scope=all: ey × clip(0.5 + 5·ROE_Min5Y, 0.5, 1.0), missing→1.0 (0 tickers with a PIT ROE_Min5Y history)
+[BQ_LOCAL_CACHE] query took 11.3s (99115 rows)
+  [PASS] 2 fail-open identity — diff rebals=0
+== [3] wiring: eyrisk(all) real panel differs from eyonly ==
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+  [eyrisk] scope=all: ey × clip(0.5 + 5·ROE_Min5Y, 0.5, 1.0), missing→1.0 (1282 tickers with a PIT ROE_Min5Y history)
+[BQ_LOCAL_CACHE] query took 10.3s (90150 rows)
+  [PASS] 3 penalty binds somewhere — membership differs on 16 rebals
+== [4] negative control: ROE=-1 on FINANCIAL routes moves eyrisk(all) ==
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+  [eyrisk] scope=all: ey × clip(0.5 + 5·ROE_Min5Y, 0.5, 1.0), missing→1.0 (1282 tickers with a PIT ROE_Min5Y history)
+[BQ_LOCAL_CACHE] query took 10.4s (91263 rows)
+  [PASS] 4 non-uniform penalty reorders — differs on 17 rebals
+== [5] scope: ROE=-1 on NON-financials -> eyrisk(fin) inert, eyrisk(all) not ==
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+  [eyrisk] scope=fin: ey × clip(0.5 + 5·ROE_Min5Y, 0.5, 1.0), missing→1.0 (1283 tickers with a PIT ROE_Min5Y history)
+[BQ_LOCAL_CACHE] query took 11.2s (98002 rows)
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+  [eyrisk] scope=fin: ey × clip(0.5 + 5·ROE_Min5Y, 0.5, 1.0), missing→1.0 (1282 tickers with a PIT ROE_Min5Y history)
+[BQ_LOCAL_CACHE] query took 11.2s (98002 rows)
+  [PASS] 5a fin scope ignores non-fin floors — diff rebals=0
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+  [eyrisk] scope=all: ey × clip(0.5 + 5·ROE_Min5Y, 0.5, 1.0), missing→1.0 (1283 tickers with a PIT ROE_Min5Y history)
+[BQ_LOCAL_CACHE] query took 10.3s (89263 rows)
+  [PASS] 5b all scope DOES read them — differs on 17 rebals
+
+== SUMMARY: 12 PASS / 0 FAIL ==

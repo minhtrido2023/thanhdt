@@ -1,0 +1,12 @@
+[wrapper] custom_basket = /home/trido/thanhdt/wt-c30v-retfix/WorkingClaude/custom_basket.py  retchain_legacy=False
+snapshot = data/bq_cache_asof20260729_postrestate
+
+rebal_date = 2026-05-05 | 30 mã | vintage 2026-07-29
+
+  [ok] T1 chân `mcap` tái lập ĐÚNG bảng custom30v_8l đang publish — max|Δ| = 4.91e-07 (bảng làm tròn 6 chữ số)
+  [ok] T2 danh sách 30 mã KHÔNG đổi — bản sửa chỉ chạm khối trọng số; thành viên đến từ memdf/liq_rank của build_pit
+  [ok] T3 trọng số đổi THẬT và khớp ĐÚNG đại số w_new/w_old = (1/factor)·k — 26 mã không chạm trần dùng CHUNG k = 0.9677416852 (spread 1.1e-15); 4 mã chạm trần 10%; Σ|Δw| = 1.653pp, max = 0.478pp (ACB, factor 0.862)
+  [ok] T4 bất biến trọng số — Σw = 1.0000000000; max w = 0.100000 <= 0.1
+  [ok] T5 trọng số đã sửa KHÔNG trôi giữa 2 vintage — cùng rebal 2026-05-05, vintage 07-28 vs 07-29: chân cũ trôi 0.0000pp, chân mới trôi 0.0000pp  ⚠️ KHÔNG PHÂN GIẢI ĐƯỢC: chân cũ cũng trôi 0 (2 snapshot cách nhau 1 ngày, không có sự kiện quyền xen giữa) => test đạt tầm thường, KHÔNG phải bằng chứng. Bằng chứng thật cho cơ chế trôi nằm ở T3 + số đo 18/30 mã factor≠1 sau ~3 tháng.
+
+PASS — tất cả kiểm tra đạt
