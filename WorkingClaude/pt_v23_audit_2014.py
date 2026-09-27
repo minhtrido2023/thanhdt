@@ -292,12 +292,20 @@ elif LAG_ADV_BASIS != "close": raise SystemExit(f"LAG_ADV_BASIS không hợp l�
 # START_DATE), chỉ hết look-ahead chứ CHƯA phải point-in-time theo quý. Muốn PIT đầy đủ thì phải
 # chọn lại mỗi quý — thay đổi lớn hơn, không nằm trong phạm vi bản vá này.
 ETF_CREATION_BASIS = os.environ.get("ETF_CREATION_BASIS", "pit").strip().lower()
-if ETF_CREATION_BASIS == "legacy": _qs_tag += "_etfcreatlegacy"
-# §8: CA HAI nhanh deu tag. "pit" doi HANH VI so voi code truoc 2026-09-27 nen neu khong tag,
-# mot lan chay moi se ghi de file cung TEN do code cu sinh ra (ETF_LIQ=creation). 0 pin nao
-# trong results_registry dung ETF_LIQ=creation (da grep) nen khong pin nao bi anh huong.
-elif ETF_CREATION_BASIS == "pit": _qs_tag += "_etfcreatpit"
-elif ETF_CREATION_BASIS != "pit": raise SystemExit(f"ETF_CREATION_BASIS không hợp lệ: {ETF_CREATION_BASIS!r} (pit|legacy)")
+if ETF_CREATION_BASIS not in ("pit", "legacy"):
+    raise SystemExit(f"ETF_CREATION_BASIS khong hop le: {ETF_CREATION_BASIS!r} (pit|legacy)")
+# §8 — tag CHI khi truc nay THAT SU dieu khien ket qua, tuc `ETF_LIQ == "creation"` (nhanh DUY
+# NHAT doc `ETF_CREATION_BASIS`, dong ~911). Khi ETF_LIQ khac thi truc nay INERT: khong doi mot
+# byte nao cua output, nen tag vao ten file la SAI theo dung chu cua §8 ("axis that CHANGES THE
+# NUMBERS must change the filename").
+# ⚠️ Ban dau tag o day VO DIEU KIEN. He qua do THAT (job Taylor_20260927_131635): lenh pin
+# canonical dung `ETF_LIQ=custompitg` — KHONG phai `creation` — van bi cong `_etfcreatpit`, nen
+# chay lai lenh pin se ghi ra `..._advprice_etfcreatpit_univpit.csv` thay vi
+# `..._advprice_univpit.csv`: file pin canonical KHONG duoc refresh va moi checker ghim theo TEN
+# se bao thieu file. Ledger van byte-identical (md5 4707bcbe) ⇒ thuan loi DAT TEN, nhung dung
+# loai loi §8 sinh ra de chan.
+if ETF_LIQ == "creation":
+    _qs_tag += "_etfcreatlegacy" if ETF_CREATION_BASIS == "legacy" else "_etfcreatpit"
 # LAG_SLOT_INFLIGHT (2026-07-22, job Taylor_20260722_030015): vá "cổng rò" trần vị thế LAG.
 # Engine gốc chỉ đếm vị thế ĐÃ HOÀN TẤT khi kiểm max_positions/tier_position_limit, nên tối đa
 # max_fill_days=5 phiên lệnh đang khớp dở là VÔ HÌNH với trần ⇒ concurrency thực vượt 12

@@ -7942,6 +7942,25 @@ new: [edge-alloc] source=lag_edge_health.csv                        label_col=kn
   KHÔNG rớt OOS.
 - Ledger NEW md5 **`4707bcbeb7e801d49a4a851ffd91d5e7`**, 16.633 dòng:
   `data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-30_wtnamecap_advprice_exp_failc_new_univpit.csv`
+  ✅ **HẬU KIỂM 2026-09-27 20:3x ICT — CANONICAL TÁI LẬP BYTE-IDENTICAL sau khi vá REGRESSION.**
+  Bối cảnh: `27b4d92d` đã CLOBBER bản vá FAIL-C ở `pt_v23_audit_2014.py` (lấy cả file từ branch cắt
+  trước bản vá) ⇒ nhãn look-ahead quay lại ĐÚNG file sinh anchor. Mike vá + merge `2b2f6a28`; job
+  `Taylor_20260927_131635` chạy lại **nguyên văn lệnh pin** (`$DNA_PYEXE`, `BQ_LOCAL_CACHE=
+  data/bq_cache_asof20260729_postrestate`, `BASKET_CA_SNAPSHOT`, `NAV_TOTAL_B=50 ETF_LIQ=custompitg
+  BASKET_WT=namecap BASKET_SELECT=yieldcombo PARK_STATES=3:0.3 AUDIT_END=2026-06-19`) ra ledger
+  **md5 `4707bcbeb7e801d49a4a851ffd91d5e7`, `cmp` SẠCH, 16.633 dòng** — Mike tự `md5sum` + `cmp` lại.
+  Mọi chỉ tiêu KHỚP pin: 23,37% / 1,88 / −14,6% / 1,60 / 684,52B; `extract_peryear.py` độc lập cho
+  FULL 23,37 / IS 20,00 / OOS 26,50; self-check 0 VND (BAL+LAG, final-NAV, borrow-audit); 39 band
+  rebalance. Log engine in `label_col=known_date rows=583` ⇒ nhãn causal đã sống thật.
+  ⚠️ **Lỗi ĐẶT TÊN phát hiện trong cùng lần chạy, ĐÃ VÁ**: tag `_etfcreatpit` (Mike thêm 19:4x theo
+  §8) được cộng vào `_qs_tag` ở KHỐI PARSE CONFIG nên xuất hiện cho MỌI cấu hình, kể cả khi
+  `ETF_LIQ != creation` — tức trục đó INERT. Hệ quả: chạy lại lệnh pin canonical sẽ ghi ra
+  `..._advprice_etfcreatpit_univpit.csv` thay vì `..._advprice_univpit.csv` ⇒ **file pin canonical
+  không được refresh** và checker ghim theo TÊN sẽ báo thiếu file. Ledger vẫn byte-identical nên
+  đây thuần là tên. Vá: chỉ tag khi `ETF_LIQ == "creation"` (nhánh duy nhất đọc biến đó); kiểm bằng
+  cách **exec chính khối code đó trên 9 tổ hợp** — `custompitg`/`off` × `pit`/`legacy` ⇒ KHÔNG tag,
+  `creation` ⇒ tag đúng nhánh, giá trị sai ⇒ vẫn `SystemExit` ở cả 3 mức `ETF_LIQ`.
+
   ✅ **TÊN CANONICAL hoá 2026-09-27 17:3x ICT (user chọn phương án A)** — theo §8 coding_guidelines
   ("không ghi output thí nghiệm vào tên canonical", và ngược lại: **tên pin không được mang hậu tố
   `_exp_`**). Tên canonical của ledger anchor R3 từ nay là:
