@@ -7,8 +7,9 @@
 - = **V2.3A + custom30V parking (NEUTRAL) + gated-overflow (bear-washout) + HAG eq_flag fix**.
 - 2 book: **BAL** (momentum SIGNAL_V11, yieldcombo: 1/PE + 1/PCF) + **LAG** (PEAD/earnings drift).
 - Allocator w_LAG: {CRISIS 50 / BEAR 0 / NEUTRAL-BULL-EXBULL 65}, band ±10pp.
-- **R3 NEUTRAL-only @50B: CAGR 24.38% / Sharpe 1.69 / DD −18.8% / Calmar 1.30** — pin CHÍNH THỨC từ
-  **2026-09-27** (Final NAV 757,61B), đo trên **`universe_pit`** (point-in-time, không look-ahead).
+- **R3 NEUTRAL-only @50B: CAGR 24.42% / Sharpe 1.69 / DD −18.8% / Calmar 1.30** — pin CHÍNH THỨC từ
+  **2026-09-27 (chiều)** (Final NAV 761,11B, ledger md5 `2f9c3702…`; SUPERSEDE 24,38%/757,61B của
+  sáng cùng ngày — chênh +0,04pp do ticket 1 "OShares bước tại EX-DATE" ở chân weight, merge `5c290848`), đo trên **`universe_pit`** (point-in-time, không look-ahead).
   ⚠️ **SỬA LỖI ĐO 2026-09-27, KHÔNG ĐỔI MÔ HÌNH** — không tune tham số nào, chân weight + membership
   byte-identical, đường tiền live không đụng. Chuỗi return rổ park custom30V từng chain trên
   `mcap = Close_adj × OShares`, nên mỗi bước số CP theo QUÝ thành một ngày return GIẢ trong khi
@@ -37,7 +38,7 @@
   trên 1 tham số mô hình fill (trần 20% ADV/phiên) mà 90-96% số phiên-fill sống Ở TRẦN đó, trong
   khi fill THẬT (DNSE) mới chỉ xác nhận tới ~3,86% ADV/phiên — 2 thiên lệch NGƯỢC CHIỀU cùng bậc
   độ lớn (+4,08pp do sửa đúng nhóm mã không mua được vs. −4,0..4,5pp do giả định fill quá lỏng)
-  gần **triệt tiêu nhau**. ⇒ **24,38% (cũ: 28,86%) ĐỌC LÀ ƯỚC LƯỢNG ĐIỂM có điều kiện vào 1 tham số chưa neo**,
+  gần **triệt tiêu nhau**. ⇒ **24,42% (cũ: 28,86%) ĐỌC LÀ ƯỚC LƯỢNG ĐIỂM có điều kiện vào 1 tham số chưa neo**,
   KHÔNG PHẢI cận dưới, không phải cận trên (đổi nhãn 2026-08-03, thay khoảng `[~27,2%;~31,3%]`
   đã hết hiệu lực) — **không trích +3,85pp/+4,08pp/+4,11pp như edge đã kiểm chứng** ở bất kỳ
   chiều nào. Follow-up 08-04 (gate động theo executability thật) củng cố thêm: giải quyết được
@@ -46,10 +47,38 @@
   bằng backtest thêm — sổ theo dõi + **mốc cứng 2026-12-15 / 2027-03-31**:
   `kb/projects/lag-adv-filter-tracking.md`, chi tiết cơ chế: `agents/Taylor/research/
   lag_fidelity_decomp_20260803/T5_DECISION.md`.
-- Bootstrap 5th-pct: **CAGR 15.6%, DD −30.4% (anchor DD ~−30,5%, KHÔNG phải −18,8%)** — chạy lại
+- Bootstrap 5th-pct: **CAGR 15.5%, DD −30.3% (neo sizing DD −30,3%, KHÔNG phải −18,8%)** — chạy lại
+  2026-09-27 (chiều) trên ledger pin mới, **theo LỊCH** (FAIL-F đã merge `3c944443`; cơ sở phiên cũ
+  thổi cao giả ~+0,2-0,3pp). `bootstrap_nav.py` L=21/B=4000/seed 12345; P(DD<−30%)=5,5%,
+  P(SR<1,0)=3,4%; stationary-bootstrap cross-check 15,3% / −30,0%.
+  *Chuỗi số cũ SUPERSEDED: 18,6%/−28,6% (06-29) → 15,6% (cơ sở phiên) → 15,4% → **15,5%/−30,3%**.*
+- **DSR/PBO đã hết trôi — họ trial nay GHIM bằng `DSR_FAMILY_MANIFEST`** (merge `f2cfb124`):
+  **DSR 1,0000** (ann-SR R3 1,616). **Số pin của V2.4 là PBO = 0,2085** trên họ gốc phục dựng
+  68 file (`mike/research/dsr_family_manifest_20260927/man_2026_07_recon.json`, md5 `2cea9626…`) —
+  khớp 0,2088 pin từ 2026-07 ⇒ phục dựng đúng. ⚠️ caveat: registry 2026-07 không lưu tên file,
+  68 file này dựng lại theo `mtime`, không phải danh sách gốc.
+  **PBO 0,5013 trên "họ hôm nay" (486 file) KHÔNG phải PBO của V2.4** — đó là **chỉ báo sức ép
+  multiple-testing TÍCH LUỸ** của thư mục `data/` (80→0,2088 · 477→0,3993 · 486→0,5013): nó nói về
+  tốc độ thử của đội, không nói về độ bền của config đang deploy. *0,3993 (bis) SUPERSEDED làm số pin.*
+- **3 bản sửa đo lường ĐÃ LIVE trên main 2026-09-27** (user duyệt 13:38 ICT):
+  **FAIL-F** annualize theo LỊCH 365,25 trong `bootstrap_nav.py` + `dsr_pbo_annex.py` (WC merge
+  `3c944443`) — bỏ cơ sở "N/252 phiên" vốn thổi CAGR bootstrap cao giả ~+0,3pp.
+  **FAIL-H** `nav_period_returns.py` có số hạng dòng tiền (TWR) + cổng NAV-jump 5% fail-closed
+  (mike merge `2b6ab8ac`) — lần NẠP/RÚT đầu tiên không còn bị công bố thành lãi/lỗ giả.
+  **egg** `reconcile_equity.py` cộng `egg.totalValue` (mike merge `6a89e51b`) — residual thật
+  2026-09-27 còn **SpaceX +0,0281% / ZaloPay +0,0107% NAV** (trước: 9,58% / 11,96%).
+- 🚨 **FAIL-C ĐÃ MERGE NHƯNG CÒN VÔ HIỆU (INERT) — look-ahead 25 phiên VẪN NẰM TRONG SỐ PIN.**
+  Code đã vá (WC merge `5672e1e0`: `edge_health_monitor.py` sinh cột `known_date`,
+  `pt_v23_audit_2014.py:2064` đọc theo nhãn đó), nhưng **artifact `data/lag_edge_health.csv` chưa
+  được sinh lại** — header vẫn là `entry,ret,mean12,win12,n12`, không có `known_date` ⇒ engine rơi
+  về `label_col=entry` (thấy ngay trong log pin: `[edge-alloc] label_col=entry`).
+  `bin/asof_label_selfcheck.py` FAIL trên chuỗi thật: **5.488/5.488 dòng vi phạm, sớm tối đa 25
+  phiên**. ⇒ **24,42% vẫn là số ĐO TRÊN NHÃN LOOK-AHEAD**; A/B trước ticket 1 cho chênh ~+0,06pp
+  (24,38 → 24,44). Việc còn lại cần NGƯỜI duyệt: chạy lại `edge_health_monitor.py` để sinh lại CSV
+  rồi **re-pin R3 lần nữa** — Taylor KHÔNG tự đổi file dữ liệu production.
   2026-09-27 trên ledger pin mới (`bootstrap_nav.py`, L=21/B=4000/seed 12345); stationary-bootstrap
   cross-check 15.5% / −30.1%. ⚠️ **Annualize theo LỊCH (FAIL-F, sửa 2026-09-27 job Taylor_20260927_045241, branch `fix/nav-flow-term-annualize` CHƯA merge)**: bootstrap 5th-pct CAGR theo lịch = **15,4%** (theo phiên 15,6% — cao giả +0,18pp), Sharpe R3 1,61 (hiển thị 1,62); MaxDD −30,4% / P(DD<−30%) 5,35% KHÔNG đổi; **DSR và PBO KHÔNG phụ thuộc annualize** (đính chính framing audit). ⚠️ PBO đo ở 2 cây khác nhau cho **0,40 (main) vs 0,50 (worktree)** vì họ trial là glob động ⇒ PBO KHÔNG có nghĩa cho tới khi pin `family_manifest`. *Số cũ 18.6% / −28.6% SUPERSEDED (bản chạy 06-29, pin khác).*
-- **NEUTRAL parking custom30V = +2.01pp CAGR** (24.38% có park vs 22.37% park=0, cùng lệnh pin,
+- **NEUTRAL parking custom30V = +2.05pp CAGR** (24.42% có park vs 22.37% park=0, cùng lệnh pin,
   đổi đúng 1 biến `PARK_STATES`; 30 mã, cap 0.10). ⚠️ **"+7.4pp Full" SUPERSEDED** — lệnh gốc của số
   đó không tồn tại trong registry; ở chân return LỖI delta là +6,49pp ⇒ **~2/3 của "+7,4pp" là return
   giả từ tăng trưởng số CP.** ⚠️ **Và chiều rủi ro ĐẢO DẤU**: parking làm Sharpe 1.95→1.69,
