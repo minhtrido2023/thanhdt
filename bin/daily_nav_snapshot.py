@@ -54,6 +54,8 @@ CORP_ACTIONS_FILE = os.path.join(WC_ROOT, "data", "corp_actions.json")
 
 import corp_actions  # noqa: E402 — validate() ép ex_date/qty_multiplier hợp lệ, xem
 # confirmed_qty_multiplier_after() (§29 vòng 6, Việc 2 blocker 1)
+from account_cash_flows import (CashFlowError, attach_flows_to_rows,  # noqa: E402
+                                load_flows)
 from park_holdings import (_stock_block_all_zero, _cash_fields_all_zero,   # noqa: E402
                            _cash_fields_inconsistent)
 # §25 hệ quả 2 (code-quality 2026-09-27): TÁI DÙNG cả BA guard tiền của park_holdings, KHÔNG
@@ -811,6 +813,135 @@ def _write_nav_history(hist_path, hist_rows, fieldnames):
     os.replace(tmp, hist_path)
 
 
+# --- NAV-jump sanity guard (tách ra hàm thuần 2026-09-27, job Taylor_20260927_103434) -------
+# SANITY GUARD (bài học 2026-07-07: NAV -98.25% được auto-đăng lên Trading report vì không tầng
+# nào chặn số phi lý): |biến động ngày| vượt ngưỡng → KHÔNG ghi lịch sử, KHÔNG in NAV — trả
+# cảnh báo escalate để con người xem.
+#
+# NGƯỠNG MẶC ĐỊNH 15% — GIỮ NGUYÊN, đã ĐO LẠI 2026-09-27 chứ không kế thừa mù. Phân bố |Δnav|
+# ngày thật trên TOÀN BỘ lịch sử 2 TK (N=113 cặp phiên liên tiếp: SpaceX 58 từ 2026-07-02,
+# ZaloPay 55 từ 2026-07-07 — tái lập: agents/Taylor/research/nav_jump_gate_20260927/measure.py):
+#     max = 4,148% (ZaloPay 2026-08-07) · p95 = 2,900% · median = 0,654% · mean 0,867% · sd 0,803%
+#     (p95 theo `statistics.quantiles(n=20)` mặc định — nội suy 'exclusive'; ước lượng phân vị
+#      khác cho số khác trên N=113, nên con số này chỉ có nghĩa kèm đúng câu lệnh đó)
+#     số phiên vượt ngưỡng: >3% → 4/113 · >4% → 1/113 · >5% đến >15% → 0/113
+# Vì sao KHÔNG hạ xuống 5% cho khớp `NAV_JUMP_BLOCK_PCT` của cổng công bố: HAI CỔNG TRẢ LỜI HAI
+# CÂU KHÁC NHAU, gộp về một số chính là §28 (thu hai câu hỏi về một giá trị).
+#   • cổng NÀY (15%, chặn GHI `nav_history`) hỏi "con số này có khả dĩ về mặt vật lý không?"
+#     Chi phí chặn oan = MẤT HẲN một dòng NAV mà mọi báo cáo + park-trim + active_nav dùng chung.
+#     Biên độ HOSE ±7%/phiên; danh mục tập trung ít mã đi ~7% thật trong một phiên sàn là chuyện
+#     có thể xảy ra — 113 phiên lịch sử CHƯA chứa phiên nào như thế, nên hạ về 5% là mua thêm độ
+#     nhạy bằng một rủi ro false-positive mà dữ liệu hiện có KHÔNG loại trừ được.
+#   • `NAV_JUMP_BLOCK_PCT` = 5% (`account_cash_flows.py`, dùng trong `report_delivery_gate`) hỏi
+#     "tỉ suất sắp CÔNG BỐ có bị dòng tiền chưa khai làm nhiễu không?" Chặn oan ở đó = báo cáo
+#     chậm, rẻ hơn nhiều ⇒ được phép nhạy hơn.
+# HỆ QUẢ PHẢI BIẾT: bước nhảy trong khoảng 5–15% mà KHÔNG khai dòng tiền vẫn được GHI ở đây và
+# chỉ bị bắt ở cổng công bố. Đó là thiết kế có chủ đích, không phải chỗ sót.
+#
+# ĐỔI 2026-09-27: bản trước ĐOÁN nguyên nhân ("nếu là nạp/rút tiền thật → chạy lại với
+# NAV_SANITY_MAX_PCT lớn hơn") mà chưa đọc bằng chứng nào — đúng lớp lỗi §29 — và lối thoát nó
+# gợi ý (nâng env var) TẮT guard cho MỌI nguyên nhân của ngày đó, kể cả bug dữ liệu thật. Giờ nó
+# TRA `data/account_cash_flows.json` (nguồn sự thật nạp/rút, do NGƯỜI ghi kèm bằng chứng) rồi mới
+# kết luận, và mọi câu nó nói đều trích số vừa đọc được.
+# Ngưỡng mặc định để MODULE-LEVEL (không nhúng trong main()) để selfcheck kiểm được đúng con số
+# này — trước đó mọi case đều truyền `sanity_max` tường minh nên mutation đổi 15→95 SỐNG SÓT.
+NAV_SANITY_DEFAULT_PCT = 15.0
+
+def nav_jump_verdict(account, date, prev_nav, nav, sanity_max, hist_rows,
+                     components=None, flows_path=None):
+    """Quyết định có được GHI dòng nav_history của `date` hay không.
+
+    Trả `(ok: bool, message: str|None)`. `ok=False` ⇒ caller KHÔNG ghi lịch sử và exit 3.
+    `message` khác None kể cả khi `ok=True` (trường hợp vượt ngưỡng nhưng dòng tiền đã khai
+    giải thích được — vẫn phải in ra để có vết).
+
+    `hist_rows`: list dict nav_history đã đọc (chưa chèn dòng `date`). `components`: dict số
+    thành phần để in kèm khi chặn (mtm_stock/cash/debt/egg/offbook) — chỉ để chẩn đoán.
+    """
+    comp = components or {}
+    day_change = nav - prev_nav
+    day_change_pct = day_change / prev_nav * 100 if prev_nav else 0.0
+    if abs(day_change_pct) <= sanity_max:
+        return True, None
+
+    def _comp_line():
+        return (f"mtm_stock {comp.get('mtm_stock', 0):,.0f}, cash {comp.get('cash', 0):,.0f}, "
+                f"debt {comp.get('debt', 0):,.0f}, egg {comp.get('egg', 0):,.0f}, "
+                f"offbook {comp.get('offbook', 0):,.0f}")
+
+    # rows cho attach_flows_to_rows: lịch sử + dòng hôm nay (chưa ghi). Dùng CHÍNH hàm mapping
+    # của account_cash_flows thay vì so ngày bằng tay, để quy ước bod/eod chỉ tồn tại ở MỘT chỗ.
+    # ⚠️ Khoá phải là `datetime.date`, KHÔNG phải chuỗi: `attach_flows_to_rows` so `d >= f["date"]`
+    # với `f["date"]` là `date` ⇒ truyền chuỗi (dạng lưu trong nav_history CSV) nổ TypeError.
+    # Selfcheck `nav_jump_flow_gate_selfcheck.py` bắt đúng lỗi này ngay lần chạy đầu (§19).
+    date_d = datetime.date.fromisoformat(date)
+    flow_rows = sorted(
+        [(datetime.date.fromisoformat(r["date"]), float(r["nav"])) for r in hist_rows
+         if r.get("date") and r["date"] < date and r.get("nav")] + [(date_d, nav)])
+    try:
+        flows = load_flows(account, flows_path=flows_path)
+        mapped = attach_flows_to_rows(flow_rows, flows)
+    except CashFlowError as exc:
+        # Bản ghi dòng tiền hỏng = dòng tiền CÓ THỂ đã xảy ra mà ta không đọc đúng ⇒ chặn, và in
+        # ĐÚNG lỗi parser vừa trả, không đoán hộ (§29).
+        return False, (
+            f"🔴 NAV {date} ({account}) TỰ CHẶN KHÔNG ĐĂNG: biến động {day_change_pct:+.2f}%/ngày "
+            f"vượt ngưỡng ±{sanity_max:.0f}%, và data/account_cash_flows.json KHÔNG ĐỌC ĐƯỢC nên "
+            f"không xác nhận được có nạp/rút hay không.\n"
+            f"   Lỗi thật: {exc}\n"
+            f"   Sửa bản ghi dòng tiền rồi chạy lại. KHÔNG nâng NAV_SANITY_MAX_PCT để đi qua — "
+            f"làm vậy là tắt guard cho cả nguyên nhân bug dữ liệu.")
+
+    today_flows = list(mapped.get(date_d, []))
+    if not today_flows:
+        # §29: nói rõ ĐÃ ĐỌC gì (file nào, bao nhiêu bản ghi của account này, ngày nào) — KHÔNG
+        # khẳng định nguyên nhân là bug hay là nạp/rút.
+        near = [f["date"].isoformat() for f in flows if abs((f["date"] - date_d).days) <= 3]
+        return False, (
+            f"🔴 NAV {date} ({account}) TỰ CHẶN KHÔNG ĐĂNG: {nav:,.0f} VND (biến động "
+            f"{day_change_pct:+.2f}%/ngày = {day_change:+,.0f} VND, vượt ngưỡng ±{sanity_max:.0f}%).\n"
+            f"   ĐÃ TRA data/account_cash_flows.json: {len(flows)} bản ghi cho '{account}', KHÔNG "
+            f"có bản ghi nào gán vào {date}"
+            + (f" (gần nhất trong ±3 ngày: {', '.join(near)})" if near
+               else " (không có bản ghi nào trong ±3 ngày)") + ".\n"
+            f"   ⇒ CHƯA xác định được nguyên nhân. Hai việc cần làm, KHÔNG được đoán:\n"
+            f"     (a) nếu ĐÚNG là nạp/rút → khai vào data/account_cash_flows.json kèm bằng chứng "
+            f"(schema: mike/bin/account_cash_flows.py), rồi chạy lại — guard tự cho qua, KHÔNG "
+            f"cần sửa NAV_SANITY_MAX_PCT;\n"
+            f"     (b) nếu KHÔNG có nạp/rút nào → đây là chuyện dữ liệu, không phải dòng tiền: "
+            f"kiểm vị thế thiếu/giá sai ({_comp_line()}). Xác nhận là biến động thị trường thật "
+            f"thì ghi bản ghi kind='market_only' (amount_vnd=0) kèm bằng chứng.")
+
+    # CÓ bản ghi cho ngày này. `market_only` = người đã KHẲNG ĐỊNH kèm bằng chứng rằng bước nhảy
+    # này là biến động thị trường ⇒ cho qua. deposit/withdraw thì phải KIỂM: dòng tiền có thật sự
+    # giải thích được bước nhảy không (khai 1tr mà NAV nhảy 50% thì bản ghi đó KHÔNG phải lời
+    # giải thích) — trừ dòng tiền ra rồi đo lại phần dư.
+    net_flow = sum(f["amount_vnd"] for f in today_flows)
+    kinds = {f["kind"] for f in today_flows}
+    evid = "; ".join(f"{f['date']} {f['kind']} {f['amount_vnd']:+,.0f} [timing={f['timing']}] "
+                     f"{f['evidence']}" for f in today_flows)
+    resid_pct = ((nav - net_flow) / prev_nav - 1) * 100 if prev_nav else 0.0
+    if "market_only" in kinds and net_flow == 0:
+        return True, (
+            f"   ℹ️ NAV {date} ({account}) biến động {day_change_pct:+.2f}% vượt ngưỡng "
+            f"±{sanity_max:.0f}% nhưng ĐƯỢC PHÉP GHI: data/account_cash_flows.json có bản ghi "
+            f"kind='market_only' cho ngày này (người đã xác nhận đây là biến động thị trường, "
+            f"không phải nạp/rút) — {evid}")
+    if abs(resid_pct) <= sanity_max:
+        return True, (
+            f"   ℹ️ NAV {date} ({account}) biến động {day_change_pct:+.2f}% vượt ngưỡng "
+            f"±{sanity_max:.0f}% nhưng ĐƯỢC PHÉP GHI: đã trừ dòng tiền đã khai {net_flow:+,.0f} "
+            f"VND thì phần dư còn {resid_pct:+.2f}% (≤±{sanity_max:.0f}%) — {evid}")
+    return False, (
+        f"🔴 NAV {date} ({account}) TỰ CHẶN KHÔNG ĐĂNG: {nav:,.0f} VND (biến động "
+        f"{day_change_pct:+.2f}%/ngày = {day_change:+,.0f} VND).\n"
+        f"   ĐÃ TRA data/account_cash_flows.json: CÓ dòng tiền khai cho {date} ({evid}), net "
+        f"{net_flow:+,.0f} VND — nhưng trừ nó ra phần dư VẪN {resid_pct:+.2f}%, vượt ngưỡng "
+        f"±{sanity_max:.0f}%.\n"
+        f"   ⇒ dòng tiền đã khai KHÔNG giải thích hết bước nhảy. Kiểm số tiền khai có đúng chưa, "
+        f"hoặc có thêm nguyên nhân dữ liệu ({_comp_line()}).")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--account", required=True)
@@ -1311,17 +1442,14 @@ def main():
     day_change = nav - prev_nav
     day_change_pct = day_change / prev_nav * 100 if prev_nav else 0
 
-    # SANITY GUARD (bài học 2026-07-07: NAV -98.25% được auto-đăng lên Trading report vì
-    # không tầng nào chặn số phi lý): |biến động ngày| vượt ngưỡng → KHÔNG ghi lịch sử,
-    # KHÔNG in NAV — in cảnh báo escalate để con người xem. VNINDEX biên độ ±7%/ngày; NAV
-    # account biến động >15%/ngày gần như chắc chắn là bug dữ liệu (hoặc nạp/rút tiền lớn —
-    # trường hợp đó con người xác nhận rồi chạy lại với NAV_SANITY_MAX_PCT cao hơn).
-    sanity_max = float(os.environ.get("NAV_SANITY_MAX_PCT", "15"))
-    if abs(day_change_pct) > sanity_max:
-        print(f"🔴 NAV {args.date} ({args.account}) TỰ CHẶN KHÔNG ĐĂNG: {nav:,.0f} VND "
-              f"(biến động {day_change_pct:+.2f}%/ngày vượt ngưỡng ±{sanity_max:.0f}%) — "
-              f"gần như chắc chắn lỗi dữ liệu (vị thế thiếu/giá sai). Cần người kiểm tra; "
-              f"nếu là nạp/rút tiền thật → chạy lại với NAV_SANITY_MAX_PCT lớn hơn.")
+    sanity_max = float(os.environ.get("NAV_SANITY_MAX_PCT", NAV_SANITY_DEFAULT_PCT))
+    jump_ok, jump_msg = nav_jump_verdict(
+        args.account, args.date, prev_nav, nav, sanity_max, hist_rows,
+        components={"mtm_stock": mtm_stock, "cash": cash, "debt": debt,
+                    "egg": egg_value, "offbook": offbook})
+    if jump_msg:
+        print(jump_msg)
+    if not jump_ok:
         return 3
 
     hist_rows = [row for row in hist_rows if row["date"] != args.date]
