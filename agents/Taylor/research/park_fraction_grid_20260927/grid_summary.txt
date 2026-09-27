@@ -1,0 +1,33 @@
+bootstrap 5th-pct MaxDD at park=0 = -24.0%  =>  PREREG constraint floor = -26.0%
+    x    CAGR  Sharpe   MaxDD  Calmar    NAV_B     IS    OOS   C5th   DD5th  SR5th  park%NAV   drag  CAGRnet  ok
+ 0.00   22.37    1.95   -16.1   1.390   618.35  20.30  24.23   15.2   -24.0   1.34      0.00  0.000   22.370  OK
+ 0.10   22.75    1.94   -15.7   1.450   642.68  20.11  25.16   15.3   -24.3   1.33      3.49  0.008   22.742  OK
+ 0.20   22.76    1.90   -15.2   1.500   643.55  20.11  25.19   15.1   -24.9   1.29      6.99  0.015   22.744  OK
+ 0.30   23.43    1.88   -14.4   1.630   688.77  20.07  26.56   15.6   -25.1   1.27     10.48  0.023   23.407  OK
+ 0.40   23.03    1.80   -15.1   1.530   661.56  19.86  25.97   14.9   -26.4   1.18     13.95  0.031   22.999 FAIL
+ 0.50   24.15    1.81   -16.6   1.450   740.30  19.73  28.32   15.8   -27.4   1.19     17.44  0.039   24.111 FAIL
+ 0.60   24.32    1.75   -17.7   1.370   753.06  19.54  28.84   15.6   -28.9   1.13     21.06  0.047   24.273 FAIL
+ 0.70   24.42    1.69   -18.8   1.300   761.11  19.31  29.29   15.5   -30.3   1.07     24.50  0.055   24.365 FAIL
+ 0.75   24.66    1.68   -19.3   1.280   778.96  19.24  29.83   15.5   -31.1   1.05     26.18  0.059   24.601 FAIL
+ 0.80   24.95    1.66   -19.8   1.260   802.27  19.04  30.62   15.6   -32.0   1.03     28.06  0.064   24.887 FAIL
+ 0.90   24.81    1.58   -20.8   1.190   790.76  18.79  30.59   15.0   -34.7   0.94     31.55  0.071   24.739 FAIL
+ 1.00   24.93    1.52   -20.8   1.200   800.67  18.04  31.63   15.0   -36.1   0.89     36.72  0.083   24.847 FAIL
+
+Marginal 'CAGR bought per 1pp of extra MaxDD' between adjacent grid levels:
+  0.00 -> 0.10:  dCAGR +0.38pp  d|MaxDD| -0.40pp   FREE (CAGR up AND DD better/equal)
+  0.10 -> 0.20:  dCAGR +0.01pp  d|MaxDD| -0.50pp   FREE (CAGR up AND DD better/equal)
+  0.20 -> 0.30:  dCAGR +0.67pp  d|MaxDD| -0.80pp   FREE (CAGR up AND DD better/equal)
+  0.30 -> 0.40:  dCAGR -0.40pp  d|MaxDD| +0.70pp   STRICTLY WORSE (CAGR down, DD worse)
+  0.40 -> 0.50:  dCAGR +1.12pp  d|MaxDD| +1.50pp   0.75 pp CAGR per 1pp DD
+  0.50 -> 0.60:  dCAGR +0.17pp  d|MaxDD| +1.10pp   0.15 pp CAGR per 1pp DD
+  0.60 -> 0.70:  dCAGR +0.10pp  d|MaxDD| +1.10pp   0.09 pp CAGR per 1pp DD
+  0.70 -> 0.75:  dCAGR +0.24pp  d|MaxDD| +0.50pp   0.48 pp CAGR per 1pp DD
+  0.75 -> 0.80:  dCAGR +0.29pp  d|MaxDD| +0.50pp   0.58 pp CAGR per 1pp DD
+  0.80 -> 0.90:  dCAGR -0.14pp  d|MaxDD| +1.00pp   STRICTLY WORSE (CAGR down, DD worse)
+  0.90 -> 1.00:  dCAGR +0.12pp  d|MaxDD| +0.00pp   FREE (CAGR up AND DD better/equal)
+
+candidates passing the DD constraint: [0.0, 0.1, 0.2, 0.3]
+Calmar-max candidate: x=0.30 (Calmar 1.630)
+levels indistinguishable from it at the declared 0.03-Calmar resolution: [0.3]
+
+wrote grid_summary.csv + park_grid_curves.png

@@ -1,0 +1,17 @@
+=== Bootstrap robustness (3106 days, 12.460y CALENDAR, 249.3 obs/yr, block=21d, B=4000, seed=12345) ===
+src: data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-50_wtnamecap_advprice_exp_parkgrid_050_univpit.csv
+  metric   ACTUAL   median      5th     95th
+    CAGR    24.1%    24.1%    15.8%    33.5%
+  Sharpe     1.74     1.74     1.19     2.31
+   MaxDD   -16.6%   -18.2%   -27.4%   -13.0%
+
+Tail probabilities (over 4000 bootstrap paths):
+  P(CAGR < 0)     = 0.0%
+  P(CAGR < 10%)   = 0.3%
+  P(Sharpe < 1.0) = 1.6%
+  P(MaxDD < -30%) = 2.4%
+  P(MaxDD < -40%) = 0.0%
+
+SIZING: use 5th-pct MaxDD (-27.4%) as the DD anchor, NOT actual (-16.6%).
+
+NOTE: sampling-uncertainty only (resamples history); excludes regime-change/structural risk -> real uncertainty is WIDER. Not a pass/fail gate — a sizing input for Spyros.

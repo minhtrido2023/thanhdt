@@ -1,0 +1,60 @@
+csv=parkgrid_000_univpit.csv
+  window 2014-01-02..2026-06-19 = 12.460 yrs; k=0.05095
+  park share NAV mean full period = 0.0000
+  PROD(1-k*DY*park) over 49 periods = 1.000000
+  drag on CAGR = 0.0000 pp/yr  =>  CAGR 22.3700% -> 22.3700%
+csv=parkgrid_010_univpit.csv
+  window 2014-01-02..2026-06-19 = 12.460 yrs; k=0.05095
+  park share NAV mean full period = 0.0349
+  PROD(1-k*DY*park) over 49 periods = 0.999216
+  drag on CAGR = 0.0077 pp/yr  =>  CAGR 22.7500% -> 22.7423%
+csv=parkgrid_020_univpit.csv
+  window 2014-01-02..2026-06-19 = 12.460 yrs; k=0.05095
+  park share NAV mean full period = 0.0699
+  PROD(1-k*DY*park) over 49 periods = 0.998432
+  drag on CAGR = 0.0155 pp/yr  =>  CAGR 22.7600% -> 22.7445%
+csv=parkgrid_030_univpit.csv
+  window 2014-01-02..2026-06-19 = 12.460 yrs; k=0.05095
+  park share NAV mean full period = 0.1048
+  PROD(1-k*DY*park) over 49 periods = 0.997646
+  drag on CAGR = 0.0233 pp/yr  =>  CAGR 23.4300% -> 23.4067%
+csv=parkgrid_040_univpit.csv
+  window 2014-01-02..2026-06-19 = 12.460 yrs; k=0.05095
+  park share NAV mean full period = 0.1395
+  PROD(1-k*DY*park) over 49 periods = 0.996866
+  drag on CAGR = 0.0310 pp/yr  =>  CAGR 23.0300% -> 22.9990%
+csv=parkgrid_050_univpit.csv
+  window 2014-01-02..2026-06-19 = 12.460 yrs; k=0.05095
+  park share NAV mean full period = 0.1744
+  PROD(1-k*DY*park) over 49 periods = 0.996078
+  drag on CAGR = 0.0391 pp/yr  =>  CAGR 24.1500% -> 24.1109%
+csv=parkgrid_060_univpit.csv
+  window 2014-01-02..2026-06-19 = 12.460 yrs; k=0.05095
+  park share NAV mean full period = 0.2106
+  PROD(1-k*DY*park) over 49 periods = 0.995268
+  drag on CAGR = 0.0473 pp/yr  =>  CAGR 24.3200% -> 24.2727%
+csv=parkgrid_070_univpit.csv
+  window 2014-01-02..2026-06-19 = 12.460 yrs; k=0.05095
+  park share NAV mean full period = 0.2450
+  PROD(1-k*DY*park) over 49 periods = 0.994488
+  drag on CAGR = 0.0552 pp/yr  =>  CAGR 24.4200% -> 24.3648%
+csv=parkgrid_075_univpit.csv
+  window 2014-01-02..2026-06-19 = 12.460 yrs; k=0.05095
+  park share NAV mean full period = 0.2618
+  PROD(1-k*DY*park) over 49 periods = 0.994103
+  drag on CAGR = 0.0592 pp/yr  =>  CAGR 24.6600% -> 24.6008%
+csv=parkgrid_080_univpit.csv
+  window 2014-01-02..2026-06-19 = 12.460 yrs; k=0.05095
+  park share NAV mean full period = 0.2806
+  PROD(1-k*DY*park) over 49 periods = 0.993686
+  drag on CAGR = 0.0635 pp/yr  =>  CAGR 24.9500% -> 24.8865%
+csv=parkgrid_090_univpit.csv
+  window 2014-01-02..2026-06-19 = 12.460 yrs; k=0.05095
+  park share NAV mean full period = 0.3155
+  PROD(1-k*DY*park) over 49 periods = 0.992895
+  drag on CAGR = 0.0714 pp/yr  =>  CAGR 24.8100% -> 24.7386%
+csv=parkgrid_100_univpit.csv
+  window 2014-01-02..2026-06-19 = 12.460 yrs; k=0.05095
+  park share NAV mean full period = 0.3672
+  PROD(1-k*DY*park) over 49 periods = 0.991796
+  drag on CAGR = 0.0826 pp/yr  =>  CAGR 24.9300% -> 24.8474%
