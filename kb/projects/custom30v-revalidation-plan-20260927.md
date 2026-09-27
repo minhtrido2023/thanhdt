@@ -126,3 +126,13 @@ Cây quyết định (điền số từ Q1/Q2, không quyết trước):
 2. **Duyệt định nghĩa ứng viên C** ở §3.1 (rổ tập trung theo quy tắc, không dùng 4 tên AlphaLens).
 3. **AlphaLens paper hết hạn 30/09**: đề xuất **không gia hạn** như chương trình riêng (N=1, không kiểm chứng được) — kết quả track được giữ làm 1 dòng tham chiếu trong W2, không hơn.
 4. Cho phép dispatch W1 ngay sau khi duyệt (Taylor, opus/high, ~1 phiên).
+
+## 8. Kết quả W1 + W2 (2026-09-27, Mike ghi 22:58 ICT)
+
+**W1 (Q1 proxy)** — XONG. `idle_rate_proxy.py` 3 tầng (baseline = SBV 12M-low − 2,04pp; floor = max(0, liên NH 1M); spot chỉ 2026-08→2027-03). Registry `kb/data_registry/macro/fiinprox_rates_snapshot_20260927.md` CANONICAL-PIT phạm vi 2025-11→2026-09; **2011→2025-10 single-source**.
+
+**W2 (Q2)** — job `Taylor_20260927_141318`, commit `fcbc15c7`, REPORT `agents/Taylor/research/c30v_w2_q2_20260927/REPORT.md`. Control byte-identical anchor (md5 4707bcbe), selfcheck 0 VND 13/13, đòn 8 sạch. Bảng: tầng 1 D-không-park E[Calmar] 2,00 > C10 1,86 > C6 1,80 > A 1,76 ≈ B 1,75; tầng 2 C6 1,84 > B 1,78 > A 1,77 > C10 1,73 > D 1,71. **Không ứng viên nào đạt prereg.** A custom30V xếp 3/5 ở cả hai tầng.
+
+**quant-skeptic 2026-09-27 15:48Z: REFUTED (high)** — số tái lập đúng, pipeline PIT/live-BQ/prereg OK, nhưng **diễn giải "0,55pp carry đảo thứ hạng" SAI**: hiệu ứng trực tiếp của đổi tầng carry chỉ ~0,3pp/book và ĐỒNG ĐỀU cho mọi phương tiện; đảo dấu đến từ engine đi **đường giao dịch rời rạc khác** khi tiền lệch nhẹ (495 lệnh BAL khác giữa D-baseline/D-floor, năm 2022 giữ tập tên khác hẳn, swing 13–28pp/năm/book; phân kỳ đầu 2018-05-09 (D) / 2015-12-03 (A)). Overlay carry lên đường carry-0% (điều PREREG §3(3) hứa mà REPORT bỏ): A>D ở CẢ HAI tầng, không đảo. ⇒ **Khoảng cách E[Calmar] giữa phương tiện (0,05–0,25) nằm DƯỚI sàn nhiễu đường đi của engine — W2 không xếp hạng được phương tiện nào.** Khuyến nghị W3 "củng cố proxy" nhắm sai nguyên nhân.
+
+**Hệ quả**: Q2 CHƯA trả lời được. Trước khi so phương tiện phải đo sàn nhiễu đường đi của engine (W2b). Production giữ park 0,30, không đổi. Q3 hoãn.
