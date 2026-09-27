@@ -35,10 +35,15 @@ import subprocess
 import sys
 import types
 
-# Env override (them 2026-09-27): selfcheck nay phai chay duoc tu WORKTREE, neu khong
-# `load_post_edit()` se doc `custom_basket.py` CANONICAL (chua sua) va T4c tro thanh no-op
-# im lang — dung lop loi §29. Mac dinh giu nguyen duong canonical.
-WORKDIR = os.environ.get("BASKET_SELFCHECK_WORKDIR", "/home/trido/thanhdt/WorkingClaude")
+# WORKDIR = cay chua CHINH file selfcheck nay, KHONG hardcode canonical.
+# Vi sao (Mike vá 2026-09-27 truoc khi merge): ban dau mac dinh la
+# "/home/trido/thanhdt/WorkingClaude" + env override. Do thuc: chay tu worktree
+# /home/trido/thanhdt/wt-faileg-proposal (da co ban va) thi T5 bao FAIL 2 vi pham vi no quet
+# MAIN chua va; set BASKET_SELFCHECK_WORKDIR tro dung worktree moi PASS. Tuc mac dinh hardcode
+# lam cong NAY VO HIEU o moi worktree — dung luc can nhat (luc review mot branch). Cung lop
+# "bay duong dan selfcheck" da va o compute_active_nav_selfcheck.py (commit a56203f2).
+# Env override GIU LAI cho sandbox, nhung mac dinh gio tu doi theo vi tri file.
+WORKDIR = os.environ.get("BASKET_SELFCHECK_WORKDIR") or os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, WORKDIR)
 os.chdir(WORKDIR)
 
@@ -158,6 +163,145 @@ def member_diff(ma, mb):
     return ds, per
 
 
+
+# ── T5. GREP-GATE CƠ SỞ GIÁ (thêm 2026-09-27, audit measurement-integrity FAIL-E) ─────────
+# Vì sao T1-T4 KHÔNG thay được T5: T1-T4 chỉ chạy trên `custom_basket.py`. Lỗi trộn hệ quy chiếu
+# là lỗi LẶP LẠI ở nhiều call-site (đã vá `LAG_ADV_BASIS` 2026-08-02 và `custom_basket` cùng
+# ngày, vẫn sót `pt_v23_audit_2014.py:895` tới 2026-09-27). Một selfcheck hành vi chỉ canh được
+# nơi nó đã cắn; phần LẶP LẠI phải là cổng CƠ HỌC (coding_guidelines §Enforcement policy).
+#
+# Luật: trong biểu thức TIỀN / ADV / mcap-weight, KHÔNG được nhân một SỐ LƯỢNG thô
+# (`Volume*`, `OShares`) với một GIÁ ĐÃ ĐIỀU CHỈNH (`Close`, `Close_T1*`). Giá đúng = `Price`
+# thô, hoặc `COALESCE(Price,Close)`, hoặc `pxw_sql()`.
+#
+# PHẠM VI CÓ CHỦ Ý = danh sách file được BẢO VỆ, KHÔNG quét cả repo. Đo thật 2026-09-27:
+# regex này khớp 2.349 dòng / 1.010 file `.py` trong repo — gần như toàn bộ là script
+# `backtest_*`/`test_*` legacy mà `data/results_registry.md` không trích. Một cổng 2.349 mục là
+# một cổng không ai chạy. Muốn siết dần thì thêm file vào PROTECTED, đừng mở toàn repo.
+#
+# Phân biệt CODE với VĂN XUÔI bằng AST, không bằng "dòng có bắt đầu bằng #":
+#   - chuỗi có chứa CẢ `SELECT` lẫn `FROM` = SQL thật  -> quét
+#   - chuỗi khác (nhãn báo cáo, docstring)             -> BỎ QUA
+#   - biểu thức code thường (pandas `df.Close*df.Volume`) -> quét
+# Nếu không có bước này thì `pt_v23:2431`/`custom_basket.py:46` (văn xuôi mô tả chính cái bug)
+# sẽ bị báo và cổng lập tức mất uy tín.
+import ast as _ast  # noqa: E402
+import re as _re  # noqa: E402
+
+PROTECTED = [
+    "pt_v23_audit_2014.py", "pt_v22_dt5g.py", "custom_basket.py",
+    "simulate_holistic_nav.py", "signal_v11_sql.py", "edge_health_monitor.py",
+    "rating_8l.py", "rating_8l_history.py", "custom30v_hybrid.py",
+    "bootstrap_nav.py", "dsr_pbo_annex.py", "regime_size_overlay.py",
+]
+_QTY = r"(?:Volume[A-Za-z0-9_]*|OShares)"
+_ADJ = r"(?:Close(?:_T1W?)?)"
+_PFX = r"(?:[A-Za-z_][A-Za-z0-9_]*\.)?"
+BAN_RE = _re.compile(
+    rf"{_PFX}{_QTY}\s*\*\s*{_PFX}{_ADJ}\b|{_PFX}{_ADJ}\s*\*\s*{_PFX}{_QTY}\b")
+# `COALESCE(Price,Close)` chứa `Close` nhưng là giá THÔ đã đúng -> gỡ khỏi văn bản trước khi khớp.
+SAFE_RE = _re.compile(r"COALESCE\s*\(\s*[A-Za-z_0-9.]*Price\s*,\s*[A-Za-z_0-9.]*Close\s*\)",
+                      _re.IGNORECASE)
+
+
+# Điều kiện thứ HAI, bắt buộc: chính DÒNG vi phạm phải trông như SQL/biểu thức, không phải văn
+# xuôi. Chỉ đòi "chuỗi bao quanh có SELECT+FROM" là KHÔNG đủ — docstring của `custom_basket.py`
+# vừa mô tả chính cái bug này vừa trích SQL, nên 3 dòng VĂN XUÔI (`:35`, `:46`, `:58`) bị báo ở
+# vòng thử đầu. Từ khoá cố ý phân biệt HOA/thường: SQL viết `AND`, văn xuôi viết `and`.
+SQLLINE_RE = _re.compile(
+    r"\b(SELECT|FROM|WHERE|GROUP BY|ORDER BY|HAVING|AND|OR|AVG|SUM|CAST|COALESCE|OVER)\b")
+
+
+def _sql_string_hits(src):
+    """Trả (lineno, text) cho mọi vi phạm nằm trong chuỗi TRÔNG NHƯ SQL."""
+    hits = []
+    tree = _ast.parse(src)
+    for node in _ast.walk(tree):
+        if not (isinstance(node, _ast.Constant) and isinstance(node.value, str)):
+            continue
+        v = node.value
+        if not ("SELECT" in v.upper() and "FROM" in v.upper()):
+            continue
+        base = node.lineno
+        for off, line in enumerate(v.splitlines()):
+            clean = SAFE_RE.sub("__RAWPX__", line)
+            if BAN_RE.search(clean) and SQLLINE_RE.search(line):
+                hits.append((base + off, line.strip()))
+    return hits
+
+
+def _code_line_hits(src):
+    """Vi phạm trên dòng CODE thật (không phải comment, không nằm trong chuỗi)."""
+    import io as _io
+    import tokenize as _tok
+    # ⚠️ Python >= 3.12 (PEP 701) tách f-string thành FSTRING_START/MIDDLE/END, KHÔNG còn là
+    # `STRING`. Chỉ liệt `_tok.STRING` thì mọi dòng f-string SQL bị coi là code ⇒ báo TRÙNG với
+    # `_sql_string_hits`. Runner thật (`$DNA_PYEXE`) là 3.12 nên đây là đường chạy mặc định, không
+    # phải trường hợp hiếm. Lọc theo TÊN token để chạy đúng trên cả 3.10 và 3.12.
+    _SKIP_NAMES = {"COMMENT", "STRING", "FSTRING_START", "FSTRING_MIDDLE", "FSTRING_END"}
+    skip = set()
+    toks = list(_tok.generate_tokens(_io.StringIO(src).readline))
+    for t in toks:
+        if _tok.tok_name.get(t.type) in _SKIP_NAMES:
+            for ln in range(t.start[0], t.end[0] + 1):
+                skip.add(ln)
+    hits = []
+    for i, line in enumerate(src.splitlines(), 1):
+        if i in skip:
+            continue
+        clean = SAFE_RE.sub("__RAWPX__", line)
+        if BAN_RE.search(clean):
+            hits.append((i, line.strip()))
+    return hits
+
+
+# Miễn trừ CÓ DANH DẤU, duy nhất một dạng: chân đối chứng A/B cố ý giữ hành vi cũ (rollback một
+# từ). Viết bằng comment SQL `--` nên hợp lệ với BigQuery và nằm ĐÚNG trên dòng vi phạm.
+# ⚠️ Kèm TRẦN: `EXEMPT_BUDGET` — miễn trừ không được nở âm thầm. Thêm một chân đối chứng mới thì
+# phải nâng trần TRONG commit đó, tức phải có người đọc. Cùng triết lý ratchet với
+# `mike/bin/tz_anchor_gate.py` (baseline per-file, chỉ hạ được).
+EXEMPT_MARK = "pricebasis-gate:legacy-control"
+EXEMPT_BUDGET = 1
+
+
+def scan_price_basis(root=None, files=None, verbose=True, return_exempt=False):
+    root = root or WORKDIR
+    out = {}
+    exempt = {}
+    for fn in (files or PROTECTED):
+        path = os.path.join(root, fn)
+        if not os.path.exists(path):
+            continue
+        src = open(path, encoding="utf-8").read()
+        hits = sorted(set(_sql_string_hits(src) + _code_line_hits(src)))
+        keep = [(ln, txt) for ln, txt in hits if EXEMPT_MARK not in txt]
+        ex = [(ln, txt) for ln, txt in hits if EXEMPT_MARK in txt]
+        if keep:
+            out[fn] = keep
+        if ex:
+            exempt[fn] = ex
+    if verbose:
+        for fn, hits in out.items():
+            for ln, txt in hits:
+                print(f"      {fn}:{ln}  {txt[:110]}")
+        for fn, hits in exempt.items():
+            for ln, _ in hits:
+                print(f"      [miễn trừ có đánh dấu] {fn}:{ln}")
+    return (out, exempt) if return_exempt else out
+
+
+def t5():
+    print("\nT5. Grep-gate cơ sở giá trên danh sách file BẢO VỆ "
+          f"({len(PROTECTED)} file; SỐ LƯỢNG thô × GIÁ đã điều chỉnh)")
+    hits, exempt = scan_price_basis(return_exempt=True)
+    n = sum(len(v) for v in hits.values())
+    n_ex = sum(len(v) for v in exempt.values())
+    check("T5 không còn biểu thức tiền/ADV trộn số-lượng-thô × giá-đã-điều-chỉnh", n == 0,
+          f"{n} vi phạm trên {len(hits)} file")
+    check("T5b số miễn trừ có đánh dấu không vượt trần", n_ex <= EXEMPT_BUDGET,
+          f"{n_ex} miễn trừ / trần {EXEMPT_BUDGET}")
+    return n + max(0, n_ex - EXEMPT_BUDGET)
+
 def main():
     bq = _bq()
     print(f"BQ_LOCAL_CACHE = {os.environ.get('BQ_LOCAL_CACHE', '(live BQ)')}")
@@ -257,6 +401,8 @@ def main():
           f"(0 = knob chết hoặc số CP đã quay lại chân return — xem "
           f"basket_return_leg_oshares_selfcheck.py)")
 
+    t5()
+
     print("\n" + "=" * 78)
     if FAILS:
         print(f"KẾT QUẢ: FAIL {len(FAILS)} — {', '.join(FAILS)}")
@@ -266,4 +412,8 @@ def main():
 
 
 if __name__ == "__main__":
+    # `--scan-only`: chạy RIÊNG T5, không đụng BigQuery/cache — để cổng cơ học này dùng được
+    # trong pre-commit và trong CI nhẹ, không phải chờ cả selfcheck rổ (§23: chạy theo phạm vi).
+    if "--scan-only" in sys.argv:
+        sys.exit(1 if t5() else 0)
     sys.exit(main())
