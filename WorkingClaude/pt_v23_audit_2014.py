@@ -272,6 +272,22 @@ if IDLE_CARRY_TIER not in ("off", "baseline", "floor"):
     raise ValueError(f"IDLE_CARRY_TIER={IDLE_CARRY_TIER!r} khong hop le; chi {{off,baseline,floor}} "
                      f"(tier 'spot' bi tu choi co y: ke hoach §2.2 chi cho cua so nhin truoc <=6 thang)")
 _idle_tag = "" if IDLE_CARRY_TIER == "off" else f"_idle{IDLE_CARRY_TIER}"
+# W2b NOISE-FLOOR CONTROL (job Taylor_20260927_155645, quant-skeptic recommended_rerun #2). A FLAT
+# scalar %/yr on idle cash, used ONLY to measure how much the simulator's discrete trade path moves
+# when the cash level is nudged by an amount comparable to the tier-1<->tier-2 gap. Not a proxy, not
+# PIT -- a constant, so it carries no look-ahead by construction. Mutually exclusive with
+# IDLE_CARRY_TIER: a leg must not have two carry sources.
+IDLE_CARRY_FLAT = os.environ.get("IDLE_CARRY_FLAT", "").strip()
+if IDLE_CARRY_FLAT:
+    if IDLE_CARRY_TIER != "off":
+        raise ValueError("IDLE_CARRY_FLAT va IDLE_CARRY_TIER loai tru nhau (mot chan chi duoc co MOT "
+                         f"nguon carry); dang co TIER={IDLE_CARRY_TIER!r} FLAT={IDLE_CARRY_FLAT!r}")
+    IDLE_CARRY_FLAT = float(IDLE_CARRY_FLAT)          # fraction/yr, e.g. 0.035 = 3.5%/yr
+    if not (0.0 <= IDLE_CARRY_FLAT <= 0.20):
+        raise ValueError(f"IDLE_CARRY_FLAT={IDLE_CARRY_FLAT} ngoai [0, 0.20]")
+    _idle_tag = f"_idleflat{int(round(IDLE_CARRY_FLAT*10000))}"   # 0.035 -> _idleflat350 (§8: truc doi so => doi ten file)
+else:
+    IDLE_CARRY_FLAT = None
 # Q-SLEEVE audit knobs (plan_quality_sleeve_20260712.md, family N=5). All default OFF = byte-identical.
 # BASKET_GATE_RATING: override the _PIT_PARAMS gate for custom* vehicles ("2" = Đ1 strict gate,
 # "none" = no rating gate — used when BASKET_QFLOOR=1 replaces it with the Đ2 fundamentals floor,
@@ -958,7 +974,10 @@ vni["time"] = pd.to_datetime(vni["time"])
 vni_dates = sorted(vni["time"].unique())
 # IDLE-CASH CARRY series (see IDLE_CARRY_TIER above). Built ONCE from vni_dates so BAL and LAG see
 # the identical rate on the identical session. r_idle_series returns %/yr -> /100 to a fraction.
-if IDLE_CARRY_TIER == "off":
+if IDLE_CARRY_FLAT is not None:
+    DEPOSIT_ANNUAL = IDLE_CARRY_FLAT
+    print(f"  [idle-carry] FLAT scalar {IDLE_CARRY_FLAT*100:.3f}%/yr (noise-floor control, khong PIT-proxy)")
+elif IDLE_CARRY_TIER == "off":
     DEPOSIT_ANNUAL = 0.0
 else:
     import idle_rate_proxy as _irp
@@ -2572,7 +2591,23 @@ meta = [
  ("fee_buy","fee = buy_amount x ((1+0.0015)x(1+slippage_book)-1); slippage_book: BAL=0.0, LAG=0.001"),
  ("fee_sell","fee = sell_amount x (1-(1-0.0015-0.001)x(1-slippage_book)x(1-tier_slip)); tier_slip: 0 if trade<=5% ADV, 0.001 if >5%, 0.003 if >10%, 0.005 if >20% ADV"),
  ("fee_etf","E1VFVN30 parking rebalance friction = 0.15% of amount_vnd per side; ETF priced at tav2_bq.ticker Close of E1VFVN30"),
- ("cash_identity","per book per day: cash(d)-cash(d-1) == SUM over that day's TX of [sell: +(sell_amount-fee) | buy: -(buy_amount+fee)]. cash(d) = bal_cash_ref / lag_cash_ref in DAILY rows. No other cash flows exist (deposit interest = 0, no margin)"),
+ ("cash_identity",
+  # OFF leg emits this string BYTE-FOR-BYTE as before (anchor ledger md5 4707bcbe depends on it --
+  # verified: re-ordering the clauses alone already breaks the md5). Carry legs get a DIFFERENT
+  # string because for them the old text is wrong: interest mutates cash with no TX row.
+  ("per book per day: cash(d)-cash(d-1) == SUM over that day's TX of [sell: +(sell_amount-fee) | "
+   "buy: -(buy_amount+fee)]. cash(d) = bal_cash_ref / lag_cash_ref in DAILY rows. No other cash "
+   "flows exist (deposit interest = 0, no margin)")
+  if (IDLE_CARRY_FLAT is None and IDLE_CARRY_TIER == "off") else
+  ("per book per day: cash(d)-cash(d-1) == SUM over that day's TX of [sell: +(sell_amount-fee) | "
+   "buy: -(buy_amount+fee)] + deposit interest credited that day on cash>0. cash(d) = "
+   "bal_cash_ref / lag_cash_ref in DAILY rows. IDLE-CASH CARRY IS ACTIVE ON THIS LEG ("
+   + (f"FLAT {IDLE_CARRY_FLAT*100:.3f}%/yr" if IDLE_CARRY_FLAT is not None
+      else f"PIT proxy tier={IDLE_CARRY_TIER}")
+   + ", compounded /252 per session, credited only while cash>0): that interest mutates cash with "
+     "NO tx row, so a TX-only rebuild of cash will NOT close. Add the `interest` column of the NAV "
+     "frame, exactly as the engine's own cash-flow self-check does (`_resid = dcash - f_full - "
+     "interest`). No margin.")),
  ("nav_identity","book NAV ref (nav_bal_ref/nav_lag_ref) = cash_ref + stocks_ref(mark at BQ Close) + etf_ref(mark at E1VFVN30 Close). Positions reconstructable from TX by holding_id (buys add shares, sells remove)"),
  ("mtm_rows","TX rows whose reason starts with MTM are NOT cash events. MTM_UNREALIZED = open stock positions & ETF lots marked at final session Close. MTM_PENDING_PARTIAL = residual market value of an order still completing its multi-day fill on the final session (its filled shares already appear as ENTRY_FILL buys earlier in the TX log; this phantom marks them to the final stocks value). Property: final cash_ref + SUM(all MTM sell_amount) == final book NAV ref, per book"),
  ("combination_rule", (f"V2.3A ALLOCATOR: cap_bal/cap_lag start at (1-w0)/w0 x 50e9 with w0=w_LAG(state day1); each day cap_x *= (1+book ref-NAV daily return); if |cap_lag/(cap_bal+cap_lag) - w_tgt(state)| > {ALLOC_REBAL_BAND} then total -= {ALLOC_REBAL_TC} x |moved capital| and reset to target. w_tgt by state: {STATE_LAG_WEIGHT}. combined_nav = cap_bal + cap_lag"
