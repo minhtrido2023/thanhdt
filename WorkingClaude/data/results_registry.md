@@ -47,6 +47,13 @@ Họ config = **V2.3A (argv `v23a none postbull 0 edge`) + custom30V parking (ET
 - Capacity: nhỏ NAV cao hơn (R1 @20B 31.69 > R2 @50B 29.24), decay theo vốn.
 
 ### 🔁 RE-PIN 2026-06-25 — threads=1 DETERMINISTIC (thay số threads=4 1-sample ở trên)
+> ⭐⭐ **SỐ R3 HIỆN HÀNH (từ 2026-09-27 mục (sexies)) = CAGR 23,37% / Sharpe 1,88 / MaxDD −14,6% /
+> Calmar 1,60** (Final NAV 684,52B, IS 20,00% / OOS 26,50%, ledger md5 `4707bcbe…`, bootstrap 5th
+> CAGR 15,5% / DD **−25,2%**, DSR 1,0000, PBO(68) 0,2085). Đây là số SẠCH trên CẢ HAI chiều: nhãn
+> edge-health causal (`known_date`) **và** đúng knob park live 0,30. Mọi số R3 khác trong khối này —
+> kể cả 24,38% và 23,43% — là LỊCH SỬ. Mục: **"2026-09-27 (sexies) — ⭐ RE-PIN R3 SẠCH NHÃN as-of +
+> park 0,30"** cuối file.
+
 > ⭐ **SỐ R3 CHÍNH THỨC HIỆN HÀNH (từ 2026-09-27, RE-PIN sau khi BỎ TĂNG TRƯỞNG SỐ CP khỏi chuỗi
 > return custom30V): CAGR 24,38% / Sharpe 1,69 / MaxDD −18,8% / Calmar 1,30** (Final NAV 757,61B,
 > IS 19,26% / OOS 29,24%, universe = MIXED `universe_pit` + `ticker_prune`). Mọi trích dẫn MỚI dùng
@@ -7876,6 +7883,146 @@ lý do §6 lọt hai lần. Đề xuất (ĐÃ VIẾT + ĐÃ CHẠY, **chưa** w
 
 ### 9. Caveat còn hiệu lực, không đổi bởi mục này
 
-**FAIL-C vẫn vô hiệu**: log pin mới in `[edge-alloc] source=lag_edge_health.csv label_col=entry
+~~**FAIL-C vẫn vô hiệu**: log pin mới in `[edge-alloc] source=lag_edge_health.csv label_col=entry
 rows=583` ⇒ **23,43% cũng là số đo TRÊN NHÃN LOOK-AHEAD 25 phiên**, y như 24,42%. Việc sinh lại
-`data/lag_edge_health.csv` có `known_date` vẫn chờ người duyệt (mục (quater) §7).
+`data/lag_edge_health.csv` có `known_date` vẫn chờ người duyệt (mục (quater) §7).~~
+→ **ĐÃ ĐÓNG 2026-09-27, xem mục (sexies)**: CSV sinh lại có `known_date`,
+`asof_label_selfcheck.py` PASS 0 vi phạm, A/B một biến cho Δ = **−0,06pp CAGR / −0,2pp MaxDD**.
+**23,43% SUPERSEDED làm anchor; anchor hiện hành = 23,37%** (mục (sexies)).
+
+## 2026-09-27 (sexies) — ⭐ **RE-PIN R3 SẠCH NHÃN as-of + park 0,30** — FAIL-C ĐÓNG, look-ahead 25 phiên đã GỠ khỏi số pin — job `Taylor_20260927_094043`
+
+> **Đây là số SẠCH đầu tiên của V2.4 trên CẢ HAI chiều cùng lúc**: (a) nhãn chuỗi edge-health
+> causal (`known_date`, không còn đọc trước 25 phiên), (b) đúng knob park live 0,30. Mọi pin
+> trước — kể cả 23,43% của mục (quinquies) — đo trên nhãn LOOK-AHEAD.
+
+### 1. A/B MỘT BIẾN = NHÃN (không phải một biến nào khác)
+
+**Cách dựng A/B và VÌ SAO nó đúng một biến.** Chân CONTROL trỏ `EDGE_HEALTH_CSV` vào file backup
+`data/lag_edge_health.csv.bak_20260927_prefailc` (header cũ `entry,ret,mean12,win12,n12`, KHÔNG có
+`known_date`) ⇒ engine `pt_v23_audit_2014.py:2064` rơi về `_eh_key="entry"`. Chân NEW để mặc định
+⇒ đọc `data/lag_edge_health.csv` mới, `_eh_key="known_date"`.
+
+Chọn cách này thay vì thêm biến `LAG_EDGE_LABEL` vì nó **không cần sửa một dòng code nào** —
+`EDGE_HEALTH_CSV` đã tồn tại sẵn và tự khai trong comment là "non-canonical A/B input" — và vì
+**đã verify độc lập rằng 5 cột số học của 2 file BYTE-IDENTICAL**:
+`cut -d, -f1,3,4,5,6 lag_edge_health.csv` cho md5 **`d6ac4be1294cc26650af9b61ea20dd1e`** = md5 của
+chính file backup. File mới md5 `dc4ce3a9bd35152c5a344a4fe90d0554`, n=5.488 (khớp báo cáo Mike).
+⇒ khác biệt duy nhất CÓ THỂ xảy ra giữa 2 chân là NHÃN index. Engine byte-identical với commit pin
+`ae81bd47` (`git diff ae81bd47..HEAD -- pt_v23_audit_2014.py` rỗng).
+
+**CỔNG BẮT BUỘC — chân control tái lập pin hiện hành TUYỆT ĐỐI:**
+ledger control md5 **`ff0d3a37d2ba682ca9b1244b2e36125d`** = **BYTE-IDENTICAL** với ledger pin
+(quinquies) (`cmp` sạch, 16.633 dòng). ⇒ cổng qua, Δ đọc được.
+
+Bằng chứng cổng FAIL-C đã hiệu lực, lấy từ log (trước đây log pin in `label_col=entry`):
+```
+ctl: [edge-alloc] source=lag_edge_health.csv.bak_20260927_prefailc label_col=entry      rows=583
+new: [edge-alloc] source=lag_edge_health.csv                        label_col=known_date rows=583
+```
+
+### 2. Δ TÁC ĐỘNG THẬT — nhỏ, và làm số XẤU đi nhẹ (đúng chiều kỳ vọng khi gỡ look-ahead)
+
+| Metric | CONTROL (`entry`, = pin quinquies) | **NEW (`known_date`) = PIN MỚI** | Δ |
+|---|---|---|---|
+| CAGR | 23,43% | **23,37%** | **−0,06pp** |
+| Sharpe(252) | 1,88 | **1,88** | 0,00 |
+| MaxDD | −14,4% | **−14,6%** | −0,2pp (xấu hơn) |
+| Calmar | 1,63 | **1,60** | −0,03 |
+| Final NAV | 688,77B | **684,52B** | −4,25B |
+| IS (2014-19) | 20,07% | **20,00%** | −0,07pp |
+| OOS (2020+) | 26,56% | **26,50%** | −0,06pp |
+| band rebalances | 39 | 39 | 0 |
+
+- `self-check 0 VND` **cả 2 chân**: BAL + LAG cash-flow identity = 0 VND, final-NAV identity = 0 VND;
+  borrow-audit 0 VND (max gross BAL 1.000 / LAG 1.000 / combined 1.000).
+- Recompute độc lập `extract_peryear.py` trên ledger NEW: FULL 23,37% · IS 20,00% · OOS 26,50%
+  (khớp print engine).
+- **Δ đồng đều IS và OOS** (−0,07 / −0,06pp) ⇒ không phải hiệu ứng tập trung một giai đoạn; edge
+  KHÔNG rớt OOS.
+- Ledger NEW md5 **`4707bcbeb7e801d49a4a851ffd91d5e7`**, 16.633 dòng:
+  `data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-30_wtnamecap_advprice_exp_failc_new_univpit.csv`
+
+**Số phiên cổng `w_lag_target` đổi giá trị giữa 2 chân — ĐO LẠI trên nhãn mới, không trích số cũ:**
+**226 / 3.107 ngày allocator = 7,27%**, hướng gần đối xứng nhưng NGHIÊNG LÊN:
+**133 ngày 0,50→0,65** và **93 ngày 0,65→0,50**. Khoảng lệch 2015-08-10 → 2025-12-12.
+%thời gian ở 0,65: ctl 35,82% → new 37,11%; ở 0,50: ctl 56,42% → new 55,13%.
+⚠️ Con số ~317/3.654 = 8,7% của lần đo trước KHÔNG so trực tiếp được — mẫu số khác (3.654 vs
+3.107 ngày allocator thật). Dùng 226/3.107 làm số hiện hành.
+
+### 3. Bootstrap (`bootstrap_nav.py`, cơ sở LỊCH) trên ledger pin MỚI
+3.106 phiên = 12,460 năm lịch (249,3 obs/năm), block 21 phiên, B=4.000, seed 12345.
+
+| | ACTUAL | median | **5th-pct** | 95th |
+|---|---|---|---|---|
+| CAGR | 23,4% | 23,4% | **15,5%** | 31,9% |
+| Sharpe | 1,81 | 1,81 | 1,26 | 2,35 |
+| MaxDD | −14,6% | −16,4% | **−25,2%** | −11,7% |
+
+P(CAGR<0)=0,0% · P(CAGR<10%)=0,2% · P(Sharpe<1,0)=1,0% · P(MaxDD<−30%)=**1,1%** · P(MaxDD<−40%)=0,0%.
+Stationary bootstrap (mean L=21) đối chứng: CAGR 5th **15,3%** / DD 5th **−24,9%**.
+**Neo sizing cho Spyros: DD −25,2%** (từ −25,1% @nhãn cũ — thực tế KHÔNG đổi neo, lệch 0,1pp).
+Log: `research/failc_ab_20260927/bootstrap_failc_new.log`.
+
+### 4. DSR / PBO Annex trên ledger pin MỚI (cùng manifest ghim 68 file)
+
+`DSR_R3_CSV=<ledger NEW>` · `DSR_FAMILY_MANIFEST=mike/research/dsr_family_manifest_20260927/man_2026_07_recon.json`.
+
+- R3: per-day Sharpe **0,11465 → ann-SR 1,810** (từ 1,815 @nhãn cũ); skew −0,1121; kurtosis 8,0443
+  (excess 5,0443). **DSR = 1,0000** ở N_csv=68, N_reg=120 và N_reg=200 ⇒ **KHÔNG red flag** (≥0,95).
+- Trial Sharpe dispersion (N_csv=68): mean ann-SR 1,688 · sd 0,145.
+- **PBO(68) = 0,2085 — KHÔNG ĐỔI** (by-construction: CSCV chạy trên HỌ TRIAL 68 file; ledger R3
+  không thuộc họ nên đổi nhãn/park không dịch PBO). Số pin của V2.4 vẫn là **PBO(68)=0,2085**.
+- Log: `research/failc_ab_20260927/annex_failc_new.log`.
+
+### 5. Lệnh pin (chép nguyên văn)
+
+Runner `mike/agents/Taylor/research/failc_ab_20260927/run_leg.sh` — copy nguyên env của pin
+(quinquies), **không đổi biến nào**; chân NEW không set `EDGE_HEALTH_CSV`:
+```
+$DNA_PYEXE=/home/trido/thanhdt/wc_venv/bin/python · BQ_LOCAL_CACHE=data/bq_cache_asof20260729_postrestate
+BQ_CACHE_THREADS=1 · BASKET_CA_SNAPSHOT=data/snapshots/corp_action_share_20260927.parquet
+BASKET_OSHARES_STEP mặc định (exdate) · NAV_TOTAL_B=50 ETF_LIQ=custompitg BASKET_WT=namecap
+BASKET_SELECT=yieldcombo PARK_STATES="3:0.3" AUDIT_END=2026-06-19
+pt_v23_audit_2014.py v23a none postbull 0 edge
+```
+Chân CONTROL: thêm đúng `EDGE_HEALTH_CSV=$WC/data/lag_edge_health.csv.bak_20260927_prefailc`.
+Log: `research/failc_ab_20260927/failc_{ctl,new}.log`.
+
+### 6. Bảng SUPERSEDED — anchor production đổi theo nhãn as-of
+
+| Đại lượng | Số cũ (nhãn LOOK-AHEAD `entry`) | **Số production từ 2026-09-27 (sexies)** |
+|---|---|---|
+| R3 CAGR | 23,43% @park 0,30 (quinquies) | **23,37%** |
+| R3 Sharpe | 1,88 | **1,88** |
+| R3 MaxDD | −14,4% | **−14,6%** |
+| R3 Calmar | 1,63 | **1,60** |
+| R3 Final NAV | 688,77B | **684,52B** |
+| R3 IS / OOS | 20,07% / 26,56% | **20,00% / 26,50%** |
+| ledger md5 | `ff0d3a37…` | **`4707bcbe…`** |
+| bootstrap 5th CAGR / DD | 15,6% / −25,1% | **15,5% / −25,2%** |
+| ann-SR (annex) | 1,815 | **1,810** |
+| DSR / PBO(68) | 1,0000 / 0,2085 | **1,0000 / 0,2085** (không đổi) |
+
+**23,43% SUPERSEDED làm anchor** — giữ làm lịch sử. Lý do supersede: đo trên nhãn look-ahead 25
+phiên (`label_col=entry`), KHÔNG phải sai mô hình hay sai knob.
+
+### 7. FAIL-C ĐÓNG
+
+CSV production đã sinh lại có `known_date` (Mike thực hiện, user cho phép 16:37 ICT 27/09);
+`bin/asof_label_selfcheck.py` **PASS vi_pham=0, som_toi_da=0** trên chuỗi thật (bản cũ FAIL
+5.488/5.488, sớm 25 phiên); Δ pin = **−0,06pp CAGR / −0,2pp MaxDD / −0,03 Calmar / −4,25B NAV**.
+⇒ khối 🚨 "FAIL-C còn vô hiệu" trong `kb/KNOWLEDGE.md` + `kb/canonical.md` GỠ (xem `.proposed`).
+
+### 8. Tồn dư PHÁT HIỆN TRONG JOB NÀY (không đổi Δ, cần xử lý riêng)
+
+- **`deploy_golive_dt5g_v4/golive_recommend_v23.py:293-294` (đường LIVE) VẪN index trên `entry`** —
+  `parse_dates=["entry"]` / `set_index("entry")`. Đã verify EMPIRIC là **benign hôm nay**: live
+  luôn lấy dòng CUỐI nên cả 2 nhãn cho **cùng** `mean12 = −0,605%` as-of 2026-09-27 ⇒ cùng
+  `w_LAG = 0,50`; và `parse_dates=["entry"]` đọc file mới KHÔNG lỗi (cột thừa bị bỏ qua, 5.488
+  dòng). Nhưng nhãn `entry` làm `asof` báo cáo TRẺ hơn thực tế 25 phiên. Nên đổi sang `known_date`
+  cho nhất quán — **không gấp, không ảnh hưởng số**.
+- **`edge_health_monitor.py:188` tính `neg_streak` bằng `resample` trên nhãn `entry`**, không phải
+  `known_date` ⇒ một tháng bị khai "âm" khoảng 25 phiên TRƯỚC khi đọc được. Đo thật: trên `entry`
+  streak = **2** (2026-07, 2026-08); trên `known_date` chỉ **1** (2026-09). ⇒ ngưỡng hành động
+  `neg_streak ≥ 3` sẽ chạm sớm hơn ~1,2 tháng so với đúng. Cùng lớp lỗi FAIL-C, ở call-site khác.
