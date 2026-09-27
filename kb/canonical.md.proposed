@@ -7,17 +7,21 @@
 - = **V2.3A + custom30V parking (NEUTRAL) + gated-overflow (bear-washout) + HAG eq_flag fix**.
 - 2 book: **BAL** (momentum SIGNAL_V11, yieldcombo: 1/PE + 1/PCF) + **LAG** (PEAD/earnings drift).
 - Allocator w_LAG: {CRISIS 50 / BEAR 0 / NEUTRAL-BULL-EXBULL 65}, band ±10pp.
-- **R3 NEUTRAL-only @50B: CAGR 23.43% / Sharpe 1.88 / DD −14.4% / Calmar 1.63** — pin CHÍNH THỨC từ
-  **2026-09-27 (quinquies)**, Final NAV 688,77B, ledger md5 `ff0d3a37…`, IS 20,07% / OOS 26,56%,
-  self-check 0 VND. **Pin = `PARK_STATES=3:0.3` = ĐÚNG knob live** (user chốt park 30% lúc 15:48 ICT
+- **R3 NEUTRAL-only @50B: CAGR 23.37% / Sharpe 1.88 / DD −14.6% / Calmar 1.60** — pin CHÍNH THỨC từ
+  **2026-09-27 (sexies)**, Final NAV 684,52B, ledger md5 `4707bcbe…`, IS 20,00% / OOS 26,50%,
+  self-check 0 VND. **Số SẠCH đầu tiên trên CẢ HAI chiều**: nhãn edge-health causal (`known_date`,
+  FAIL-C đã đóng) **và** đúng knob park live 0,30. Neo sizing DD (bootstrap 5th) = **−25,2%**;
+  DSR 1,0000 · PBO(68) 0,2085.
+  *~~23,43% / 1,88 / −14,4% / 1,63 / 688,77B (pin quinquies)~~ SUPERSEDED làm anchor 2026-09-27* —
+  lý do: đo trên nhãn LOOK-AHEAD 25 phiên (`label_col=entry`), KHÔNG phải sai mô hình/sai knob;
+  Δ gỡ look-ahead = −0,06pp CAGR. **Pin = `PARK_STATES=3:0.3` = ĐÚNG knob live** (user chốt park 30% lúc 15:48 ICT
   2026-09-27, `ae81bd47` đổi `trading_rules.json` + `ETF_PARK`); ledger byte-identical với leg lưới
-  `parkgrid_030` ⇒ lệch 0,00pp. Neo sizing DD mới = **−25,1%** (bootstrap 5th-pct).
+  `parkgrid_030` ⇒ lệch 0,00pp. Neo sizing DD mới = **−25,2%** (bootstrap 5th-pct, nhãn as-of; @nhãn cũ −25,1% — neo thực tế không đổi).
   🚨 **ĐÍNH CHÍNH — pin cũ 24,42% mang nhãn "(production)" SAI**: production THẬT từ 2026-08-04 là
   park **0,8** (= 24,95% / 1,66 / −19,8% / 1,26, chưa từng được pin), trong khi registry pin
   `PARK_STATES=3:0.7` ⇒ **số pin lệch knob live suốt 54 ngày** (cùng lớp lỗi `LAG_ADV_BASIS` 08-03).
   24,42% và 24,95% GIỮ làm lịch sử, **không còn là anchor**.
-  🚨 **Rail BÁN chưa đổi**: `mike/bin/compute_park_trim.py:170 PARK_TARGET_F1 = 0.80` hardcode (không
-  đọc `trading_rules.json`) ⇒ mua tới 30% nhưng chỉ trim khi vượt 80%; chờ user/Mike duyệt.
+  ✅ **Ba rail park ĐÃ ĐỒNG BỘ = 0,30** (commit mike `1f15139b`): R1 MUA `ETF_PARK={3:0.30}`, R2 BÁN `compute_park_trim.py PARK_TARGET_F1 = 0.30`, R3 policy `trading_rules.json` 0.30. Trước đó R2 còn hardcode 0,80 ⇒ bot MUA tới 30% nhưng chỉ TRIM khi vượt 80%, knob user chốt KHÔNG hiệu lực (đúng lớp lỗi im lặng 08-04, đảo chiều). Cổng cơ học `bin/park_rail_consistency_selfcheck.py` đọc giá trị 3 rail bằng AST, rc=1 khi lệch — live rc=0, selftest 6/6. ⚠️ R3 vẫn CHƯA có code path nào đọc (văn bản chính sách); việc wire R2 đọc R3 chờ arch-review.
   Nguồn: `data/results_registry.md` mục "2026-09-27 (quinquies)".
   *Bối cảnh bản 24,42% (lịch sử):* (Final NAV 761,11B, ledger md5 `2f9c3702…`; SUPERSEDE 24,38%/757,61B của
   sáng cùng ngày — chênh +0,04pp do ticket 1 "OShares bước tại EX-DATE" ở chân weight, merge `5c290848`), đo trên **`universe_pit`** (point-in-time, không look-ahead).
@@ -82,15 +86,13 @@
   (mike merge `2b6ab8ac`) — lần NẠP/RÚT đầu tiên không còn bị công bố thành lãi/lỗ giả.
   **egg** `reconcile_equity.py` cộng `egg.totalValue` (mike merge `6a89e51b`) — residual thật
   2026-09-27 còn **SpaceX +0,0281% / ZaloPay +0,0107% NAV** (trước: 9,58% / 11,96%).
-- 🚨 **FAIL-C ĐÃ MERGE NHƯNG CÒN VÔ HIỆU (INERT) — look-ahead 25 phiên VẪN NẰM TRONG SỐ PIN.**
-  Code đã vá (WC merge `5672e1e0`: `edge_health_monitor.py` sinh cột `known_date`,
-  `pt_v23_audit_2014.py:2064` đọc theo nhãn đó), nhưng **artifact `data/lag_edge_health.csv` chưa
-  được sinh lại** — header vẫn là `entry,ret,mean12,win12,n12`, không có `known_date` ⇒ engine rơi
-  về `label_col=entry` (thấy ngay trong log pin: `[edge-alloc] label_col=entry`).
-  `bin/asof_label_selfcheck.py` FAIL trên chuỗi thật: **5.488/5.488 dòng vi phạm, sớm tối đa 25
-  phiên**. ⇒ **cả 24,42% (@0,7) lẫn 23,43% (@0,30, pin hiện hành) vẫn là số ĐO TRÊN NHÃN LOOK-AHEAD**; A/B trước ticket 1 cho chênh ~+0,06pp
-  (24,38 → 24,44). Việc còn lại cần NGƯỜI duyệt: chạy lại `edge_health_monitor.py` để sinh lại CSV
-  rồi **re-pin R3 lần nữa** — Taylor KHÔNG tự đổi file dữ liệu production.
+- ✅ **FAIL-C ĐÓNG 2026-09-27**: CSV sinh lại có `known_date`, `asof_label_selfcheck.py` PASS 0 vi
+  phạm (bản cũ FAIL 5.488/5.488, sớm 25 phiên), Δ pin = **−0,06pp CAGR / −0,2pp MaxDD / −0,03
+  Calmar / −4,25B NAV** (A/B một biến, chân control byte-identical với pin ⇒ Δ đọc được). Anchor R3
+  đổi 23,43% → **23,37%**; xem registry mục "2026-09-27 (sexies)". Tồn dư KHÔNG gấp, không ảnh
+  hưởng số: đường LIVE `golive_recommend_v23.py:293` và `edge_health_monitor.py:188` (`neg_streak`)
+  vẫn index trên `entry` — benign hôm nay (live luôn lấy dòng cuối ⇒ cùng `w_LAG=0,50`), nhưng
+  `neg_streak` chạm ngưỡng sớm ~1,2 tháng.
   2026-09-27 trên ledger pin mới (`bootstrap_nav.py`, L=21/B=4000/seed 12345); stationary-bootstrap
   cross-check 15.5% / −30.1%. ⚠️ **Annualize theo LỊCH (FAIL-F, sửa 2026-09-27 job Taylor_20260927_045241, branch `fix/nav-flow-term-annualize` CHƯA merge)**: bootstrap 5th-pct CAGR theo lịch = **15,4%** (theo phiên 15,6% — cao giả +0,18pp), Sharpe R3 1,61 (hiển thị 1,62); MaxDD −30,4% / P(DD<−30%) 5,35% KHÔNG đổi; **DSR và PBO KHÔNG phụ thuộc annualize** (đính chính framing audit). ⚠️ PBO đo ở 2 cây khác nhau cho **0,40 (main) vs 0,50 (worktree)** vì họ trial là glob động ⇒ PBO KHÔNG có nghĩa cho tới khi pin `family_manifest`. *Số cũ 18.6% / −28.6% SUPERSEDED (bản chạy 06-29, pin khác).*
 - **NEUTRAL parking custom30V @0,30 (production) = +1.06pp CAGR** (23.43% vs 22.37% park=0) — và ở
