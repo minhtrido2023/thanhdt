@@ -1,9 +1,9 @@
-# Fleet status — 2026-09-27T17:44:09 UTC
+# Fleet status — 2026-09-27T17:44:50 UTC
 
 | agent | title (desktop) | kind | status | last_heartbeat | age(min) | current_task |
 |---|---|---|---|---|---|---|
 | Mafee | Mafee | child | dead | 2026-09-27T09:24:07Z | 500 |  |
-| Mike | Mike | child | working | 2026-09-27T17:41:14Z | 2 |  |
+| Mike | Mike | child | working | 2026-09-27T17:44:43Z | 0 |  |
 | Mike_2006625 | mike-3e | child | dead | 2026-09-27T03:30:01Z | 854 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
 | Mike_2884659 | mike-d8 | child | dead | 2026-09-27T11:30:01Z | 374 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
 | Mike_3032104 | mike-a1 | child | dead | 2026-09-27T14:00:01Z | 224 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
@@ -51,14 +51,14 @@
 | mike-paseo-ad | mike-paseo-ad | external | running | 2026-09-27T17:40:01Z | 4 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike_paseo |
 | trido-53 | trido-53 | external | dead | 2026-09-27T03:10:01Z | 874 | interactive · cwd=/home/trido |
 | workingclaude-1b | workingclaude-1b | child | dead | 2026-09-27T16:44:53Z | 59 |  |
-| workingclaude-1e | workingclaude-1e | child | dead | 2026-09-26T17:35:20Z | 1448 |  |
+| workingclaude-1e | workingclaude-1e | child | dead | 2026-09-26T17:35:20Z | 1449 |  |
 | workingclaude-45 | workingclaude-45 | child | dead | 2026-09-27T15:50:51Z | 113 |  |
-| workingclaude-5a | workingclaude-5a | child | dead | 2026-09-27T09:01:43Z | 522 |  |
-| workingclaude-6e | workingclaude-6e | child | dead | 2026-09-27T10:40:36Z | 423 |  |
+| workingclaude-5a | workingclaude-5a | child | dead | 2026-09-27T09:01:43Z | 523 |  |
+| workingclaude-6e | workingclaude-6e | child | dead | 2026-09-27T10:40:36Z | 424 |  |
 | workingclaude-ad | workingclaude-ad | child | dead | 2026-09-27T15:48:01Z | 116 |  |
-| workingclaude-c9 | workingclaude-c9 | child | dead | 2026-09-27T02:55:23Z | 888 |  |
+| workingclaude-c9 | workingclaude-c9 | child | dead | 2026-09-27T02:55:23Z | 889 |  |
 | workingclaude-cb | workingclaude-cb | child | dead | 2026-09-27T05:20:05Z | 744 |  |
-| workingclaude-d6 | workingclaude-d6 | child | dead | 2026-09-26T17:37:18Z | 1446 |  |
-| workingclaude-f7 | workingclaude-f7 | child | dead | 2026-09-27T14:14:44Z | 209 |  |
-| workingclaude-fb | workingclaude-fb | child | dead | 2026-09-27T07:30:29Z | 613 |  |
+| workingclaude-d6 | workingclaude-d6 | child | dead | 2026-09-26T17:37:18Z | 1447 |  |
+| workingclaude-f7 | workingclaude-f7 | child | dead | 2026-09-27T14:14:44Z | 210 |  |
+| workingclaude-fb | workingclaude-fb | child | dead | 2026-09-27T07:30:29Z | 614 |  |
 | workingclaude-ff | workingclaude-ff | child | dead | 2026-09-27T04:13:57Z | 810 |  |
