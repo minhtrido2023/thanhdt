@@ -7356,3 +7356,526 @@ BASKET_OSHARES_STEP=exdate|quarter`. Báo cáo đầy đủ + mọi CSV lớp l�
 **Nếu merge**: (1) re-pin R3 sang 24,42% hoặc ghi rõ pin chưa gồm bản sửa — không để 2 số không
 nhãn; (2) `bootstrap_nav.py` + `dsr_pbo_annex.py` vẫn STALE **từ JOB C** (nợ cũ), chạy lại MỘT lần
 trên bản cuối sau merge; (3) chạy lại `custom30_history.py` để `tav2_bq.custom30v_8l` đồng bộ.
+
+---
+
+## 2026-09-27 (ter) — QUÉT LƯỚI PARK-FRACTION custom30V 12 MỨC — **PLATEAU 0-30%, MỌI MỨC ≥40% BỊ LOẠI**, bis §7 "đơn điệu giảm" là do lưới quá thưa — job `Taylor_20260927_064747` ⚠️ **PAPER-ONLY, `trading_rules.json` KHÔNG ĐỔI, CHỜ USER**
+
+User (13:38 ICT 27/09) yêu cầu **một con số cụ thể** thay cho `neutral_parking.default_park_of_idle_pct
+= 0.8` (chốt 08-04 dựa trên biên **0,01 Calmar** ở chân return LỖI, nay mất căn cứ). PREREG viết
+trước khi chạy: `mike/agents/Taylor/research/park_fraction_grid_20260927/PREREG.md` (+ 2 amendment).
+Cây đo **main @`f2cfb124`** (đã merge cả chân return `a808a613` và chân weight ex-date ticket 1).
+
+### KẾT LUẬN — **plateau 0–30 %** (mọi mức ≥40% bị ràng buộc rủi ro loại)
+
+> ⚠️ **SỬA CHỮ 2026-09-27 vòng 2 (job `Taylor_20260927_074727`) — mọi CON SỐ dưới đây giữ nguyên,
+> chỉ suy luận "đỉnh nội ở 30%" bị rút lại.** quant-skeptic (`quant-skeptic_20260927_072455`)
+> REFUTED tuyên bố đó: argmax Calmar trên MỘT đường lịch sử là biến ồn (paired bootstrap:
+> `P(argmax=30%) = 0,147` vs `P(argmax=0%) = 0,371`, `P(Calmar_30 > Calmar_0) = 0,479`), và
+> E[Calmar] **không có đỉnh nội** — nó gần phẳng trên 0–30% rồi giảm đơn điệu. Con số chọn theo
+> PREREG v2 là **0 %**; 30 % là con số nếu đổi hàm mục tiêu sang minimax-regret CAGR. Chi tiết +
+> bảng paired bootstrap / leave-out / độ nhạy ngưỡng: mục **2026-09-27 (ter-bis)** phía dưới và
+> `mike/agents/Taylor/research/park_fraction_grid_20260927/REPORT_v2.md`.
+
+Hàm mục tiêu khai báo TRƯỚC: tối đa **Calmar**, với ràng buộc **bootstrap 5th-pct MaxDD không xấu
+hơn park=0 quá 2,0pp**; tie-break Sharpe, rồi mức park thấp hơn.
+
+| park % | CAGR | Sharpe | MaxDD | **Calmar** | Final NAV | IS 14-19 | OOS 20+ | boot CAGR 5th | **boot MaxDD 5th** | cổng DD (trần −26,0%) |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|:--|
+| 0 | 22,37% | **1,95** | −16,1% | 1,390 | 618,35B | 20,30% | 24,23% | 15,2% | **−24,0%** | ✅ |
+| 10 | 22,75% | 1,94 | −15,7% | 1,450 | 642,68B | 20,11% | 25,16% | 15,3% | −24,3% | ✅ |
+| 20 | 22,76% | 1,90 | −15,2% | 1,500 | 643,55B | 20,11% | 25,19% | 15,1% | −24,9% | ✅ |
+| **30** (đề xuất vòng 1, ĐÃ RÚT LẠI — xem sửa chữ trên) | **23,43%** | 1,88 | **−14,4%** | **1,630** | 688,77B | 20,07% | 26,56% | 15,6% | **−25,1%** | ✅ (1,1pp) |
+| 40 | 23,03% | 1,80 | −15,1% | 1,530 | 661,56B | 19,86% | 25,97% | 14,9% | −26,4% | ❌ |
+| 50 | 24,15% | 1,81 | −16,6% | 1,450 | 740,30B | 19,73% | 28,32% | 15,8% | −27,4% | ❌ |
+| 60 | 24,32% | 1,75 | −17,7% | 1,370 | 753,06B | 19,54% | 28,84% | 15,6% | −28,9% | ❌ |
+| 70 | 24,42% | 1,69 | −18,8% | 1,300 | 761,11B | 19,31% | 29,29% | 15,5% | −30,3% | ❌ |
+| 75 | 24,66% | 1,68 | −19,3% | 1,280 | 778,96B | 19,24% | 29,83% | 15,5% | −31,1% | ❌ |
+| **80 ← LIVE** | **24,95%** | 1,66 | −19,8% | **1,260** | 802,27B | 19,04% | 30,62% | 15,6% | **−32,0%** | ❌ (8,0pp) |
+| 90 | 24,81% | 1,58 | −20,8% | 1,190 | 790,76B | 18,79% | 30,59% | 15,0% | −34,7% | ❌ |
+| 100 | 24,93% | 1,52 | −20,8% | 1,200 | 800,67B | 18,04% | 31,63% | 15,0% | −36,1% | ❌ |
+
+`self-check BAL+LAG = 0 VND` **12/12** (+2 control), `EXIT=0` 14/14, dòng log `parking policy
+(cash_etf_states) {3: x}` **assert bằng code** khớp `x` ở 12/12 (`summary.py` — chống no-op im lặng
+đã cắn job `_043541`, không đọc bằng mắt).
+
+### bis §7 SAI HƯỚNG vì lưới 4 điểm bỏ lọt cả vùng nghiệm
+bis §7 (0/70/80/85%) thấy Calmar đơn điệu giảm ⇒ kết luận "tối ưu risk-adjusted = KHÔNG park".
+Lưới 12 điểm cho thấy **có đỉnh nội ở 30%**, và ở dải 0→30% parking tốt hơn **CẢ HAI chiều cùng lúc**
+(CAGR 22,37→23,43% *và* MaxDD −16,1→**−14,4%**). Câu trả lời đúng không phải "bỏ parking" mà
+**"parking đang đặt to gấp ~2,7× mức tối ưu"**. Mọi con số bis §7 vẫn ĐÚNG (tái lập byte-identical,
+xem cổng neo) — chỉ **suy luận về hình dạng** từ 4 điểm là sai.
+
+### Cổng NEO — có md5, gồm 1 lần FAIL đã phân tách bằng control
+- `x=0` → 22,37%/1,95/−16,1%/1,39 khớp KHÍT bis §7.
+- `x=0,7` → CSV md5 **`2f9c3702524391f5538d262edb17515d`** = **byte-identical** leg
+  `wexd2_new_exdate` (ticket 1).
+- `x=0,8` **FAIL cổng ban đầu**: 24,95% vs bis §7 24,66% = **+0,29pp** (trần prereg 0,05pp).
+  Phân tách bằng control `BASKET_OSHARES_STEP=quarter`: `parkgrid_070q` md5
+  **`3f836927c0df82915c4cfb973d8f4af3`** = `c30vmain`; `parkgrid_080q` md5
+  **`a90e87c093873028ac2cd19f71c1780e`** = `c30vpark80` — **cả hai byte-identical** ⇒ +0,29pp là
+  **biên THẬT của ticket 1 tại x=0,8**. ⚠️ **Biên ticket 1 KHÔNG hằng số theo x**: +0,04pp @70%,
+  **+0,29pp @80%** — vì nó chỉ đi qua chân weight của rổ, mà tỷ trọng rổ tăng theo x. Ai trích
+  "+0,04pp là nhiễu" phải kèm điều kiện "ở x=0,7".
+
+### 5th-pct MaxDD là đại lượng quyết định; 5th-pct CAGR gần như PHẲNG
+Bootstrap (circular block L=21, B=4000, seed 12345, quy ước LỊCH sau FAIL-F): 5th-pct MaxDD chạy
+**−24,0% → −36,1%** (dải 12pp, đơn điệu) trong khi 5th-pct CAGR chỉ **14,9–15,8%** (dải 0,9pp trên
+CẢ lưới). Đọc thẳng: **tăng park gần như không mua thêm gì ở chân CAGR khi đã tính bất định lấy mẫu,
+chỉ mua thêm đuôi DD.** "80% so với 30%" = +1,52pp CAGR ↔ **+5,4pp MaxDD thực + 6,9pp đuôi DD 5th-pct,
+−0,37 Calmar, −0,22 Sharpe** = **0,28pp CAGR / 1pp MaxDD**.
+
+### Ưu thế 30% trên ĐƯỜNG LỊCH SỬ bền theo leave-one-year-out, nhưng N hiệu dụng ≈ 2 — và KHÔNG bền trong kỳ vọng
+⚠️ Mục này nói về argmax của Calmar **lịch sử**. Vòng 2 cho thấy nó KHÔNG chuyển thành đỉnh trong
+E[Calmar]; đọc mục này kèm sửa chữ ở đầu.
+- Phân giải: 30% cách mức kề gần nhất **0,100 Calmar** (tới 40%) — hơn **3×** ngưỡng 0,03 khai báo
+  trước, và lớn hơn **10×** biên 0,01 mà quyết định 08-04 từng dựa vào.
+- **LOYO**: bộ {20,30,40}% → 30% thắng **12/13**, đổi **1/13** (bỏ 2020 → 20%) ⇒ **≤1 ⇒ robust**
+  (prereg: >1 = reshuffle-luck). Bộ {0,30,80}% → 30% thắng 12/13; **80% không thắng lần nào**. Cả 13
+  lần, mức thắng luôn nằm **0–30%**.
+- ⚠️ **Cơ chế: danh tính MaxDD ĐỔI ĐỢT tại 30→40%** (`dd_episodes.txt`). park ≤30% → đợt ràng buộc là
+  **2019→24/03/2020** (Covid) và parking **cải thiện** nó (−16,1 → −14,4%, vì suốt 2019 tiền nhàn rỗi
+  ăn 0%/năm còn rổ ăn return ⇒ NAV đỉnh cao hơn, %DD nhỏ hơn). park ≥40% → chuyển sang
+  **05/04→05/07/2018** và parking **làm xấu** đơn điệu (−13,9 → −19,8%). ⇒ 30% = `argmin
+  max(DD_2018, DD_2020)`, vị trí do **hai sự kiện đơn lẻ** định ra ⇒ **kết luận là dải 20–30%, không
+  phải điểm 30,0%**.
+- **Walk-forward cảnh báo ngược chiều:** IS giảm đơn điệu theo park (20,30% @0 → 18,04% @100), OOS
+  tăng đơn điệu (24,23% → 31,63%) ⇒ toàn bộ lợi ích CAGR của park NHIỀU nằm ở OOS 2020+ (bỏ 2021 kéo
+  CAGR mọi mức về ~17,5-17,8%). Mức 30% có IS **20,07%** ≈ park=0 (20,30%) nên KHÔNG dựa vào chế độ
+  hậu-2020 để đứng.
+
+### Haircut thuế cổ tức FAIL-D — áp số học, không đảo thứ hạng
+`k = 5,095%`, `drag = 1 − Π(1 − k·DY_kỳ·park_share_kỳ)^(1/yrs)`, `DY_kỳ` nguyên văn 49 kỳ từ
+`part2/dy_by_rebal.csv`, **`park_share_kỳ` đo THẬT trên CSV từng leg** (không giả định tuyến tính
+theo x). Drag đơn điệu **0,000 → 0,083pp/năm** (30% chỉ 0,023pp) ⇒ chỉ làm mức park cao xấu thêm.
+**Neo:** tại x=0,7 bản dựng lại độc lập cho park_share **0,2450** / drag **0,0552pp** — khớp
+`part2/nav_drag.txt` (0,2453 / 0,0552pp). Ghi nhớ: knob 30% ⇒ rổ chỉ **10,5% NAV** trung bình
+(knob 80% ⇒ 28,1%) — knob là phần **TIỀN NHÀN RỖI**, không phải phần NAV.
+
+### ⛔ KHÔNG TỰ ĐỔI GÌ — hai phương án cho user
+`trading_rules.json` vẫn `0.8`, không đụng một byte. Áp vào LIVE cần **user duyệt + quant-skeptic**.
+- **(a) đề xuất vòng 1, ĐÃ RÚT LẠI sau REFUTED — 30%**: Calmar 1,630 (+0,37 vs LIVE), Sharpe 1,88 (+0,22), MaxDD −14,4% (tốt hơn
+  5,4pp), đuôi DD −25,1% (tốt hơn 6,9pp); CAGR 23,43% (mất 1,52pp). Quy đổi thực tế ⇒ **≈21,9%/năm**.
+- **(b) mức thấp nhất còn giữ CAGR ≥24,0% = 50%** (40% chỉ 23,03%) — nhưng 50% có đuôi DD −27,4%,
+  **vi phạm** ràng buộc 2,0pp ⇒ (b) chỉ tồn tại nếu user chủ động nới ràng buộc rủi ro.
+- Giữ 80% vẫn là lựa chọn hợp lệ của user, nhưng phải gọi đúng tên: mua +1,52pp CAGR bằng +5,4pp
+  MaxDD / +6,9pp đuôi DD, và **không thắng Calmar lần nào trong 13 lần LOYO**.
+
+**Caveat chung:** 12 leg cùng vintage `bq_cache_asof20260729_postrestate`, cùng snapshot corp-action
+ghim `data/snapshots/corp_action_share_20260927.parquet`, cùng tham số fill chưa neo (trần 20%
+ADV/phiên — `kb/projects/lag-adv-filter-tracking.md`); một đường đi lịch sử duy nhất, bootstrap là
+**biên DƯỚI** của bất định thật.
+
+**Artifact:** `mike/agents/Taylor/research/park_fraction_grid_20260927/` — `PREREG.md` (+2 amendment)
+· `REPORT.md` · `run_leg.sh` · `summary.py` · `park_haircut.py` · `loyo.py` · 14 `parkgrid_*.log` ·
+12 `bootstrap_parkgrid_*.log` · `haircut_all.log` · `isoos.txt` · `grid_summary.{csv,txt}` ·
+`park_grid_curves.png` · `dd_episodes.txt` · `loyo_020_030_040.log` · `loyo_000_030_080.log`. CSV:
+`data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-*_wtnamecap_advprice_exp_parkgrid_*_univpit.csv`
+(14 file, tên non-canonical theo §8). **Không thay đổi một dòng code production nào trong job này.**
+
+## 2026-09-27 (ter-bis) — PARK-FRACTION VÒNG 2 sau quant-skeptic REFUTED — **MỘT CON SỐ: 0 %** (plateau 0-30% phẳng; luật quyết, không phải dữ liệu) — job `Taylor_20260927_074727` ⚠️ **PAPER-ONLY, `trading_rules.json` KHÔNG ĐỔI, CHỜ USER**
+
+Engine **KHÔNG chạy lại**: tái dùng đúng 12 CSV leg của (ter). PREREG v2 viết **và commit trước khi
+đọc số nào** (`mike` commit `fb6f0aa7`, `PREREG_v2.md`). Tiêu chí chọn khai báo trước = tối đa
+**E[Calmar] dưới paired block bootstrap** (KHÔNG phải Calmar 1 đường lịch sử — lỗi vòng 1), ràng
+buộc DD giữ nguyên, tie-break = **mức THẤP hơn** nếu `|ΔE[Calmar]| < 0,03` (v1 nói Sharpe; v2 đổi
+có chủ ý và nêu rõ trước).
+
+### KẾT LUẬN — **0 %**, và nói thẳng: do LUẬT quyết, KHÔNG do dữ liệu phân biệt được
+- Tập qua cổng DD 2,0pp = {0, 10, 20, 30}. `E[Calmar]` = **1,5073 / 1,4983 / 1,4601 / 1,4761** ⇒
+  argmax = 0%, nhóm tie 0,03 = {0, 10} ⇒ tie-break "thấp hơn" ⇒ **0 %**.
+- Các khoảng cách này là **nhiễu**: dải 5th–95th của chính Calmar rộng **~1,9** (0,72→2,57). **30%
+  bị loại khỏi nhóm tie bởi 0,0012 Calmar.** `P(Calmar_30 > Calmar_0) = 0,479` = đồng xu.
+- median[Calmar] cho cùng thứ hạng (gap 0% vs 10% = 0,0008) ⇒ không phải artefact đuôi phép chia.
+- **`P(argmax Calmar = x)` phân tán khắp lưới** (0,371 @0% · 0,147 @30% · 0,114 @50%) ⇒ argmax
+  Calmar là biến ồn; **dùng nó làm tiêu chí chọn (vòng 1) là sai phương pháp**, đây là bài học giữ lại.
+- **E[Calmar] KHÔNG có đỉnh nội**: gần phẳng ≤30%, rồi giảm đơn điệu (1,367 @40% → 1,078 @100%).
+  "Đỉnh nội thật ở 30%" của (ter) chính thức **RÚT LẠI** (số của (ter) vẫn đúng, suy luận thì không).
+
+### Paired = một chuỗi block index cho CẢ 12 leg (L=21, B=4000, seed 12345)
+12 leg `assert` trùng khít **3107 ngày lịch** 2014-01-02→2026-06-19 (N_ret=3106, 12,460y calendar,
+quy ước lịch của `bootstrap_nav.py` sau FAIL-F). Vòng 1 chạy **12 bootstrap ĐỘC LẬP** nên về nguyên
+tắc không trả lời được "30 có hơn 0 không" — nhiễu không được chia sẻ. Đó là lỗ hổng vòng 2 vá.
+
+| x | E[Calmar] | Cal 5th–95th | P(argmax) | P(>x=0) | E[MaxDD] | DD 5th | E[CAGR] | CAGR 5th | cổng 2,0pp |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|:--|
+| **0 ← CHỌN** | **1,5073** | 0,72–2,57 | 0,371 | — | −16,1% | **−24,0%** | 22,44% | 15,15% | ✅ |
+| 10 | 1,4983 | 0,72–2,54 | 0,126 | 0,508 | −16,5% | −24,3% | 22,82% | 15,29% | ✅ (tie) |
+| 20 | 1,4601 | 0,69–2,49 | 0,030 | 0,410 | −16,9% | −24,9% | 22,83% | 15,13% | ✅ |
+| 30 | 1,4761 | 0,71–2,50 | 0,147 | 0,479 | −17,1% | −25,1% | 23,51% | **15,55%** | ✅ |
+| 40 | 1,3670 | 0,65–2,32 | 0,015 | 0,318 | −18,2% | −26,4% | 23,11% | 14,92% | ❌ |
+| 50 | 1,3819 | 0,66–2,33 | 0,114 | 0,372 | −18,9% | −27,4% | 24,24% | 15,76% | ❌ |
+| 60 | 1,3112 | 0,61–2,25 | 0,036 | 0,305 | −20,1% | −28,9% | 24,43% | 15,62% | ❌ |
+| 70 | 1,2497 | 0,58–2,15 | 0,019 | 0,264 | −21,2% | −30,3% | 24,53% | 15,46% | ❌ |
+| 75 | 1,2350 | 0,57–2,15 | 0,027 | 0,259 | −21,6% | −31,1% | 24,77% | 15,52% | ❌ |
+| **80 ← LIVE** | **1,2164** | 0,56–2,12 | 0,051 | **0,257** | −22,2% | **−32,0%** | 25,07% | 15,62% | ❌ |
+| 90 | 1,1174 | 0,49–1,97 | 0,025 | 0,183 | −24,1% | −34,7% | 24,94% | 15,03% | ❌ |
+| 100 | 1,0784 | 0,48–1,90 | 0,038 | 0,173 | −25,1% | −36,1% | 25,06% | 15,02% | ❌ |
+
+### Hai tiêu chí khai báo trước chỉ NGƯỢC về 30% — báo nguyên văn, không che
+- **Minimax regret CAGR trên 0–30%: chọn 30%.** CAGR 5th-pct 15,15/15,29/15,13/**15,55**%; regret
+  per-path (so mức tốt nhất trên CÙNG đường) mean **1,20 / 0,82 / 0,80 / 0,13**pp, 95th
+  **2,91 / 2,02 / 1,59 / 0,90**pp.
+- **Leave-out theo episode: 4/5 ca chọn 30%.** argmax Calmar: FULL 30% · bỏ 2018 30% · bỏ 2018-2020
+  30% · bỏ 2022 30% · **bỏ {2019,2020} → 10%** (ca duy nhất đảo, và đảo về 10% chứ không về 0%).
+  ⇒ ưu thế lịch sử của 30% **tựa vào đợt Covid 2019→24/03/2020**, khớp cơ chế `dd_episodes.txt`
+  của (ter). **Mọi ca: mức thắng luôn trong 0–30%; 80% không thắng ca nào.**
+- **Không mâu thuẫn dữ liệu — cùng một sự thật:** parking đổi **+1,07pp CAGR ↔ −1,03pp MaxDD**
+  (trung bình 4000 đường, `P(CAGR_30>CAGR_0)=0,826` nhưng `P(MaxDD_30 tốt hơn)=0,312`). Tỷ lệ
+  ~**1:1** ⇒ chọn đầu nào là **SỞ THÍCH RỦI RO**, không phải phát hiện định lượng. PREREG v2 khai
+  báo sở thích (thận trọng ⇒ x thấp) TRƯỚC khi thấy số ⇒ 0 %.
+
+### Độ nhạy ngưỡng DD — kết luận "≥40% bị loại" BỀN với ngưỡng
+| trần | ngưỡng DD5th | mức qua cổng |
+|---|---|---|
+| 1,5pp | ≥ −25,50% | 0 / 10 / 20 / 30 |
+| **2,0pp (prereg)** | ≥ −26,00% | **0 / 10 / 20 / 30** |
+| 3,0pp | ≥ −27,00% | 0 / 10 / 20 / 30 / **40** |
+
+40% chỉ vào tập khi nới tới 3,0pp, và khi vào thì `E[Calmar]` 1,367 **thấp hơn cả 4 mức kia** ⇒
+**không mức nào ≥40% đổi được kết luận ở bất kỳ ngưỡng trong 1,5–3,0pp.**
+
+### ⛔ KHÔNG ĐỔI GÌ — user chọn LUẬT, không chọn SỐ sau khi xem số
+`trading_rules.json` vẫn `neutral_parking.default_park_of_idle_pct = 0.8`, không đụng một byte.
+- **Theo PREREG v2: 0 %.** Nếu user ưu tiên minimax-regret CAGR thay vì E[Calmar]: **30 %**.
+- **Không phụ thuộc luật nào — phần dữ liệu THỰC SỰ nói: hạ 80 % ⇒ ≤ 30 %.** 80% fail cổng DD ở
+  CẢ 3 ngưỡng, E[Calmar] thấp nhất vùng khả thi (1,216), `P(>x=0)=0,257`, không thắng ca nào.
+  Chênh 0% vs 30% = 1pp CAGR đổi 1pp DD; chênh 80% vs 0–30% = **~8pp đuôi DD**.
+
+**Caveat:** bootstrap = bất định **lấy mẫu** (biên DƯỚI của bất định thật, không mô hình vỡ chế độ);
+12 leg cùng vintage `bq_cache_asof20260729_postrestate`, cùng snapshot
+`data/snapshots/corp_action_share_20260927.parquet`, cùng tham số fill chưa neo (trần 20% ADV/phiên).
+
+**Artifact:** `mike/agents/Taylor/research/park_fraction_grid_20260927/` — `PREREG_v2.md` (commit
+`fb6f0aa7`, **trước** mọi kết quả) · `REPORT_v2.md` · `paired_v2.py` · `paired_v2.log` ·
+`paired_v2_results.json` · `diag_v2.py` · `diag_v2.log`. **Không thay đổi một dòng code production nào.**
+
+## 2026-09-27 (quater) — ⭐ **PIN CHÍNH THỨC R3 SAU MERGE ĐỢT AUDIT 27/09** + chạy lại bootstrap/DSR/PBO theo manifest ghim — job `Taylor_20260927_064745` → `Taylor_20260927_071001`
+
+**Bối cảnh.** User duyệt 8 mục lúc 13:38 ICT 2026-09-27. Main `WorkingClaude` @`f2cfb124` đã merge 4
+branch (`fix/nav-flow-term-annualize` = FAIL-F, `fix/custom30v-weight-oshares-exdate` = ticket 1,
+`fix/lag-edge-health-causal-label` = FAIL-C, `fix/dsr-family-manifest`); `mike` @`8525d2d8` merge
+`fix/nav-flow-term` (FAIL-H) + `fix/reconcile-egg-manifest`. Mục này là **hậu kiểm trên main
+canonical**, mỗi số chạy MỘT lần trên đúng bản đã merge.
+
+### 1. PIN R3 — số chính thức từ 2026-09-27 (chiều)
+
+| Metric | **PIN MỚI (chính thức)** | Pin cũ 2026-09-27 (bis) |
+|---|---|---|
+| CAGR | **24,42%** | 24,38% |
+| Sharpe(252) | **1,69** | 1,69 |
+| MaxDD | **−18,8%** | −18,8% |
+| Calmar | **1,30** | 1,30 |
+| Final NAV | **761,11B** | 757,61B |
+
+- Ledger: `data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_pinR3_20260927pm_univpit.csv`
+  · **md5 `2f9c3702524391f5538d262edb17515d`** (16.808 dòng) — **trùng khít** bản chạy trong worktree
+  ticket 1 ⇒ merge không làm đổi số.
+- `self-check 0 VND` cả BAL và LAG (cash-flow identity + final-NAV identity); borrow-audit tổng 0 VND.
+- Lệnh pin (chép nguyên văn khi tái lập): `$DNA_PYEXE=/home/trido/thanhdt/wc_venv/bin/python` ·
+  `BQ_LOCAL_CACHE=data/bq_cache_asof20260729_postrestate` · `BQ_CACHE_THREADS=1` ·
+  `BASKET_CA_SNAPSHOT=data/snapshots/corp_action_share_20260927.parquet` ·
+  `BASKET_OSHARES_STEP` **để mặc định = `exdate`** (production sau ticket 1) ·
+  `NAV_TOTAL_B=50 ETF_LIQ=custompitg BASKET_WT=namecap BASKET_SELECT=yieldcombo PARK_STATES=3:0.7
+  AUDIT_END=2026-06-19` · `pt_v23_audit_2014.py v23a none postbull 0 edge`.
+  Runner đã ghim: `mike/agents/Taylor/research/postmerge_haukiem_20260927/run_pin.sh`.
+- Log: `research/postmerge_haukiem_20260927/pinR3_20260927pm.log`.
+
+> **SUPERSEDE**: 24,38% (bis, 2026-09-27 sáng) và mọi số trước đó. Chênh +0,04pp đến từ ticket 1
+> (OShares bước tại ex-date ở chân WEIGHT), không phải đổi mô hình.
+
+### 2. Đóng góp của parking NEUTRAL (custom30V) — đo lại ĐỒNG VINTAGE trên chính bản pin
+
+| Leg | Final NAV | CAGR | Sharpe | MaxDD | Calmar |
+|---|---|---|---|---|---|
+| `PARK_STATES=3:0.7` ~~(production)~~ ⚠️ nhãn SAI — xem §0 mục (quinquies) | 761,11B | **24,42%** | 1,69 | −18,8% | 1,30 |
+| `PARK_STATES=3:0.0` (park=0) | 618,35B | 22,37% | **1,95** | **−16,1%** | **1,39** |
+| Δ do parking | +142,76B | **+2,05pp** | −0,26 | +2,7pp xấu hơn | −0,09 |
+
+> ⚠️ **ĐÍNH CHÍNH 2026-09-27 (quinquies)**: nhãn "(production)" cho `3:0.7` **SAI** — production
+> THẬT từ 2026-08-04 là **0,8** (cả 2 rail), và từ 2026-09-27 15:48 ICT là **0,30** (user chốt,
+> `ae81bd47`). Số 24,42% GIỮ NGUYÊN làm lịch sử nhưng **không còn là anchor production**; anchor mới
+> = **23,43% @park 0,30** (mục (quinquies) §1). Cùng lớp lỗi registry-vs-production của
+> `LAG_ADV_BASIS` 2026-08-03.
+
+**Parking mua CAGR bằng cách bán chất lượng rủi ro.** Con số **+7,4pp** trong KB cũ đã chết từ bản
+sửa chuỗi return `1b89881b`; **+2,01pp** (bis) nay thành **+2,05pp** trên bản pin mới.
+Log: `park0_20260927pm.log`.
+
+### 3. Bootstrap (`bootstrap_nav.py`, đã sang cơ sở LỊCH sau FAIL-F)
+
+3.106 phiên = **12,460 năm lịch** (249,3 obs/năm), block 21 phiên, B=4.000, seed 12345.
+
+| | ACTUAL | median | **5th-pct** | 95th |
+|---|---|---|---|---|
+| CAGR | 24,4% | 24,4% | **15,5%** | 34,3% |
+| Sharpe | 1,62 | 1,61 | 1,07 | 2,19 |
+| MaxDD | −18,8% | −20,4% | **−30,3%** | −14,5% |
+
+P(CAGR<0)=0,0% · P(CAGR<10%)=0,4% · P(Sharpe<1,0)=3,4% · P(MaxDD<−30%)=5,5% · P(MaxDD<−40%)=0,4%.
+Stationary bootstrap (mean L=21) làm đối chứng: CAGR 5th 15,3% / DD 5th −30,0%.
+**Neo sizing cho Spyros: DD −30,3%** (không phải −18,8%).
+
+> **SUPERSEDE**: "5th-pct CAGR 18,6% / DD −28,6%" (KB cũ) → chết từ `1b89881b`;
+> 15,6% (bis, cơ sở PHIÊN) → 15,4% (sau FAIL-F) → **15,5% (pin mới)**. DD: −30,4% → **−30,3%**.
+
+### 4. DSR / PBO Robustness Annex — **số pin đổi sang PBO(68)**, PBO(today) tách thành chỉ báo khác
+
+Chạy `dsr_pbo_annex.py` (bản đã merge, `DSR_FAMILY_MANIFEST` ghim danh sách file) hai lần trên
+**cùng ledger pin mới**, chỉ đổi HỌ TRIAL:
+
+| Họ trial | N | ann-SR trung bình họ | **DSR** | **PBO (CSCV, S=16)** |
+|---|---|---|---|---|
+| **Họ gốc phục dựng** `man_2026_07_recon.json` (md5 `2cea9626…`) | **68** | 1,688 | **1,0000** | **0,2085** ← **SỐ PIN** |
+| Họ "hôm nay" `man_today.json` (md5 `c774418c…`) | 486 | 1,764 | 1,0000 | 0,5013 |
+
+- R3: per-day Sharpe 0,10237 → **ann-SR 1,616**; skew −0,3619; kurtosis 7,0941 (excess 4,0941).
+  DSR ở cả N_reg=120 và N_reg=200 đều 1,0000.
+- **Số pin của V2.4 là PBO(68) = 0,2085** (khớp số 0,2088 pin từ 2026-07 ⇒ họ phục dựng đúng).
+  ⚠️ **Caveat mtime**: registry 2026-07 KHÔNG lưu tên file họ trial; 68 file này là phục dựng tốt
+  nhất theo `mtime < 2026-07-05T08:00 ICT` và `>=2500 obs`, **không phải danh sách gốc được ghi lại**.
+- **PBO(today) = 0,5013 KHÔNG phải PBO của V2.4.** Nó là **chỉ báo sức ép multiple-testing tích luỹ**
+  của thư mục `data/` tại thời điểm chạy: mỗi backtest R&D mới tự động nhập họ, nên con số này trôi
+  theo thời gian và nói về TỐC ĐỘ THỬ của đội, không nói về độ bền của config đang deploy.
+  (Tham chiếu: 80 file → 0,2088 · 477 → 0,3993 · 486 → 0,5013.)
+- Log: `annex_recon68.log`, `annex_today486.log`.
+
+> **SUPERSEDE**: dòng "PBO 0,3993 (họ 477)" ở mục 2026-09-27 (bis) §4 — con số đó là PBO(today) của
+> sáng 27/09, **không phải** số pin của V2.4. Số pin đúng = **PBO(68) 0,2085**.
+
+### 5. Bảng SUPERSEDED — mọi số cũ còn lưu hành
+
+| Đại lượng | Số cũ (nguồn) | **Số đúng từ 2026-09-27 (quater)** |
+|---|---|---|
+| R3 CAGR | 28,86% (pin 08-03) → 24,38% (bis) | **24,42%** |
+| R3 Final NAV | 1.178,01B → 757,61B | **761,11B** |
+| Bootstrap 5th-pct CAGR | 18,6% → 15,6% → 15,4% | **15,5%** |
+| Bootstrap 5th-pct MaxDD | −28,6% → −30,4% | **−30,3%** |
+| Parking NEUTRAL đóng góp | +7,4pp → +2,01pp | **+2,05pp** (và LÀM XẤU Sharpe/DD/Calmar) |
+| PBO pin | 0,2088 (họ 80) → 0,3993 (họ 477) | **0,2085 (họ 68 ghim)**; 0,5013 = PBO(today), chỉ báo khác |
+| DSR | 1,0000 | **1,0000** (không đổi) |
+| ann-SR R3 (annex) | 1,829 → 1,622 | **1,616** |
+
+### 6. Hồi quy selfcheck trên main sau merge — 8 selfcheck × 3 TZ × 2 interpreter (48 ô)
+
+Runner: `research/postmerge_haukiem_20260927/run_sc.sh` (+`run_sc_unset.sh`, `run_triage.sh`).
+`python3` = 3.10 (pandas 2.3) · `$DNA_PYEXE` = 3.12 (pandas 3).
+
+| Selfcheck | Kết quả | Chẩn đoán |
+|---|---|---|
+| `dsr_family_manifest` | ✅ 0/6 ô FAIL | — (thêm 13/13 assertion × 4 TZ × 2 py cho bản BẮT BUỘC, mục 7) |
+| `nav_flow_term` | ✅ 0/6 | — |
+| `annualization_basis` | ✅ 0/6 | — |
+| `reconcile_equity_egg` | ✅ 0/6 | — |
+| `basket_oshares_step_exdate` | ⚠️ FAIL 3/3 ô py3.10, **PASS 3/3 ô `$DNA_PYEXE`** | **ENV, không phải regression**: `pd.merge_asof` pandas 2.3 từ chối khoá `M8[ns]` vs `M8[us]` (`basket_oshares_step_exdate_selfcheck.py:260`). Interpreter pin của registry là `$DNA_PYEXE` ⇒ đường chạy chuẩn tắc PASS. Nợ: selfcheck chưa portable 3.10. |
+| `basket_price_basis` | ⚠️ FAIL 6/6 với mặc định · **PASS toàn bộ khi `BASKET_OSHARES_STEP=quarter`** | **Control leg cũ, không phải regression**: T1 ép so bit-for-bit với module TIỀN-SỬA, mà module đó không có bước OShares tại ex-date. Sau ticket 1, mặc định = `exdate` ⇒ T1[recent]/T1[old] lệch. Sửa 1 dòng: chân control phải pin `BASKET_OSHARES_STEP=quarter`. |
+| `basket_return_leg_oshares` | ⚠️ FAIL 6/6 với mặc định · **PASS khi `BASKET_RETLEG_PREREF=2c098c1a` + `BASKET_OSHARES_STEP=quarter`** · FAIL khi cùng PREREF nhưng để `exdate` | Cùng một gốc, **đã phân lập bằng 1 biến**: `RC=0` (quarter) vs `RC=1` (exdate) trên CÙNG PREREF ⇒ biến phân biệt đúng là bước OShares, không phải chân return. |
+| `asof_label` | ❌ **FAIL THẬT** (dnapy 3/3 ô); py3.10 rc=2 = ENV (không dựng được lịch phiên) | Xem mục 7 — FAIL-C còn vô hiệu. |
+
+### 7. 🚨 FAIL-C ĐÃ MERGE NHƯNG CÒN VÔ HIỆU — số pin 24,42% VẪN mang look-ahead 25 phiên
+
+- Code trên main đã vá (`5672e1e0`): `edge_health_monitor.py:167-183` sinh cột `known_date`,
+  `pt_v23_audit_2014.py:2064` chọn `label_col = "known_date" if "known_date" in _eh.columns else "entry"`.
+- **Artifact chưa sinh lại**: `data/lag_edge_health.csv` header vẫn `entry,ret,mean12,win12,n12`
+  ⇒ engine rơi về `entry`. Bằng chứng ngay trong log pin: `[edge-alloc] source=lag_edge_health.csv
+  label_col=entry rows=583`.
+- `bin/asof_label_selfcheck.py` trên chuỗi thật: **5.488/5.488 dòng vi phạm, sớm tối đa 25 phiên**
+  (unit test tổng hợp U1-U7 PASS ⇒ selfcheck có sức phân giải, không phải báo động giả).
+- ⇒ **24,42% là số đo TRÊN NHÃN LOOK-AHEAD.** A/B đo trước ticket 1: control 24,38% vs causal
+  24,44% (~+0,06pp).
+- **Việc còn lại cần NGƯỜI duyệt** (Taylor KHÔNG tự ghi đè file dữ liệu production): chạy lại
+  `edge_health_monitor.py` → sinh `data/lag_edge_health.csv` có `known_date` → **re-pin R3 lần nữa**
+  → chạy lại bootstrap/annex. Gắn `bin/asof_label_selfcheck.py` vào `run_selfchecks.sh` để lần sau
+  bắt được ngay.
+
+### 8. Hai việc CHẠM PRODUCTION bị chặn — cần Mike/user chạy tay
+
+- **custom30V publish → BQ**: cổng diff đã **PASS** — rebal đang hiệu lực **2026-08-05: 0/30 tên đổi
+  weight, max|Δw| = 0,0**, `liq_rank`/`rating_8l` y nguyên; 17/49 rebal LỊCH SỬ đổi (đúng kỳ vọng
+  ticket 1) ⇒ **merge không sinh lệnh mua/bán nào**. File chờ:
+  `data/custom30v_8l_publish_CAND_20260927pm.csv` (md5 `1d2f8cad366cc538a1844def6fd06a2d`; bản đang
+  live md5 `32659b23856448b4f566fb3d3fd834a1`). Hai lệnh còn thiếu (đều bị permission classifier chặn
+  trong phiên headless): `cp` đè `data/custom30v_8l_publish.csv` và
+  `bq load --replace ... tav2_bq.custom30v_8l`.
+- **`fix/dsr-manifest-mandatory`** (WC `9bb40de8`, mục 7 của đợt duyệt): `dsr_pbo_annex.py`
+  fail-closed `rc=2` khi thiếu `DSR_FAMILY_MANIFEST` — không còn đường glob động. Selfcheck
+  **13/13 assertion × 4 TZ × 2 interpreter**, 2/2 mutation bị giết. **CHƯA MERGE** (Mike merge).
+
+### 9. `reconcile_equity.py` chạy thật sau merge egg (`6a89e51b`)
+
+Ngày 2026-09-27, cả 2 tài khoản: **SpaceX residual +0,0281% NAV · ZaloPay +0,0107% NAV** — nằm
+trong dải kỳ vọng 0,02-0,03%, và so với **9,58% / 11,96%** trước bản sửa. Log:
+`reconcile_SpaceX_2026-09-27.log`, `reconcile_ZaloPay_2026-09-27.log`.
+
+
+## 2026-09-27 (quinquies) — ⭐ **RE-PIN R3 THEO ĐÚNG PRODUCTION `park = 0,30`** + ĐÍNH CHÍNH nhãn "(production)" của pin `3:0.7` — job `Taylor_20260927_085509`
+
+> Tiêu đề dispatch ghi "(quater)"; mục đó đã tồn tại (pin 24,42%) nên mục này lấy số **(quinquies)**.
+> **KHÔNG xoá số cũ** — 24,42% @park 0,7 và 24,95% @park 0,8 giữ nguyên làm lịch sử, chỉ mất nhãn
+> "production".
+
+### 0. 🚨 ĐÍNH CHÍNH — số pin CHƯA BAO GIỜ khớp knob live suốt 54 ngày (cùng lớp lỗi `LAG_ADV_BASIS` 08-03)
+
+| Rail | Giá trị 2026-08-04 → 2026-09-27 | Bằng chứng |
+|---|---|---|
+| Đường MUA `golive_recommend_v23.py:99 ETF_PARK{3}` | **0,8** (từ 0,7) | `git log -L 99,99` → `48d6d4b5` (2026-08-04), diff `-{3: 0.7}` `+{3: 0.8}` |
+| Cổng chính sách `trading_rules.json neutral_parking.default_park_of_idle_pct` | **0,8** | backup `data/trading_rules.json.bak_20260927_park30` = 0.8; `_meta.changelog` "v2.3 (2026-08-04): 0.70 → 0.80"; file vào git 2026-09-09 (`760268a4`) đã là 0.8 |
+| Pin R3 trong registry | chạy `PARK_STATES=3:0.7`, **nhãn "(production)"** ở mục (quater) §2 | dòng lệnh pin `PARK_STATES=3:0.7` |
+
+⇒ Từ **2026-08-04 đến 2026-09-27**, số pin (`park 0,7`) đo một cấu hình **KHÔNG phải cấu hình live**
+(`park 0,8`). Chênh ở chính lưới đo cùng vintage: **24,42% @0,7 vs 24,95% @0,8** (Calmar 1,30 vs 1,26,
+bootstrap DD 5th −30,3% vs −32,0%). Nhãn "(production)" ở mục (quater) §2 và mọi chỗ trích dẫn
+**SAI**; sửa bằng mục này, **không xoá số**.
+
+### 1. PIN MỚI R3 @ `PARK_STATES=3:0.3` — trùng KHÍT leg lưới `parkgrid_030`
+
+| Metric | **PIN MỚI (production, park 0,30)** | Pin cũ @0,7 (lịch sử) | @0,8 = knob live 08-04→09-27 (lịch sử) |
+|---|---|---|---|
+| CAGR | **23,43%** | 24,42% | 24,95% |
+| Sharpe(252) | **1,88** | 1,69 | 1,66 |
+| MaxDD | **−14,4%** | −18,8% | −19,8% |
+| Calmar | **1,63** | 1,30 | 1,26 |
+| Final NAV | **688,77B** | 761,11B | 802,27B |
+| IS 2014-19 / OOS 2020+ | **20,07% / 26,56%** | 19,31% / 29,29% | 19,04% / 30,62% |
+
+- Ledger: `data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-30_wtnamecap_advprice_exp_pinR3_20260927_park030_univpit.csv`
+  · **md5 `ff0d3a37d2ba682ca9b1244b2e36125d`** (16.632 dòng) — **byte-identical** với leg lưới
+  `parkgrid_030` (cùng md5) ⇒ **lệch 0,00pp**, dưới trần DỪNG 0,05pp của dispatch.
+- `self-check 0 VND` cả BAL và LAG (cash-flow identity + final-NAV identity); borrow-audit 0 VND.
+- Recompute độc lập `extract_peryear.py`: FULL 23,43% · IS 20,07% · OOS 26,56% (khớp print engine).
+- Lệnh pin (chép nguyên văn): runner `mike/agents/Taylor/research/repin_park030_20260927/run_pin.sh`
+  — copy nguyên env của pin (quater), **đổi đúng 1 biến** `PARK_STATES=3:0.7` → `3:0.3`:
+  `$DNA_PYEXE=/home/trido/thanhdt/wc_venv/bin/python` · `BQ_LOCAL_CACHE=data/bq_cache_asof20260729_postrestate`
+  · `BQ_CACHE_THREADS=1` · `BASKET_CA_SNAPSHOT=data/snapshots/corp_action_share_20260927.parquet`
+  · `BASKET_OSHARES_STEP` mặc định (`exdate`) · `NAV_TOTAL_B=50 ETF_LIQ=custompitg BASKET_WT=namecap
+  BASKET_SELECT=yieldcombo AUDIT_END=2026-06-19` · `pt_v23_audit_2014.py v23a none postbull 0 edge`
+  · main @ **`ae81bd47`**. Log: `research/repin_park030_20260927/pinR3_20260927_park030.log`.
+
+### 2. Đóng góp của parking ở 0,30 — **chiều rủi ro KHÔNG còn đảo dấu**
+
+| Leg | Final NAV | CAGR | Sharpe | MaxDD | Calmar |
+|---|---|---|---|---|---|
+| `PARK_STATES=3:0.3` (**production mới**) | 688,77B | **23,43%** | 1,88 | **−14,4%** | **1,63** |
+| `PARK_STATES=3:0.0` (park=0) | 618,35B | 22,37% | **1,95** | −16,1% | 1,39 |
+| Δ do parking @0,30 | +70,42B | **+1,06pp** | −0,07 | **+1,7pp TỐT hơn** | **+0,24 TỐT hơn** |
+
+Khác hẳn @0,7 (+2,05pp CAGR nhưng LÀM XẤU Sharpe/DD/Calmar): ở 0,30 parking mua ~1pp CAGR mà DD và
+Calmar **tốt hơn** park=0. ⚠️ Vẫn nhắc lại kết luận vòng 2 (mục (ter-bis)): **0,30 và 0,0 KHÔNG phân
+biệt được bằng dữ liệu** (paired block bootstrap P(Calmar_30>Calmar_0)=0,479); 0,30 là **lựa chọn
+sở thích rủi ro của user**, không phải mức thắng có ý nghĩa thống kê.
+
+### 3. Bootstrap (`bootstrap_nav.py`, cơ sở LỊCH) trên ledger pin MỚI
+3.106 phiên = 12,460 năm lịch (249,3 obs/năm), block 21 phiên, B=4.000, seed 12345.
+
+| | ACTUAL | median | **5th-pct** | 95th |
+|---|---|---|---|---|
+| CAGR | 23,4% | 23,4% | **15,6%** | 32,1% |
+| Sharpe | 1,82 | 1,82 | 1,27 | 2,36 |
+| MaxDD | −14,4% | −16,5% | **−25,1%** | −11,6% |
+
+P(CAGR<0)=0,0% · P(CAGR<10%)=0,2% · P(Sharpe<1,0)=1,0% · P(MaxDD<−30%)=**1,0%** · P(MaxDD<−40%)=0,0%.
+Stationary bootstrap (mean L=21) đối chứng: CAGR 5th 15,4% / DD 5th −24,8%.
+**Neo sizing cho Spyros đổi: DD −25,1%** (từ −30,3% @0,7; @0,8 là −32,0%). Log:
+`research/repin_park030_20260927/bootstrap_pin_park030.log`.
+
+### 4. DSR / PBO Annex trên ledger pin MỚI (cùng manifest ghim 68 file)
+
+`DSR_R3_CSV=<ledger mới>` · `DSR_FAMILY_MANIFEST=mike/research/dsr_family_manifest_20260927/man_2026_07_recon.json`.
+
+- R3: per-day Sharpe **0,11498 → ann-SR 1,815** (từ 1,616 @0,7); skew −0,0973; kurtosis 8,0933
+  (excess 5,0933). **DSR = 1,0000** ở N_csv=68, N_reg=120 và N_reg=200.
+- **PBO(68) = 0,2085 — KHÔNG ĐỔI** (đúng by-construction: CSCV chạy trên HỌ TRIAL 68 file, ledger R3
+  không thuộc họ nên đổi park không dịch PBO). Số pin của V2.4 vẫn là **PBO(68)=0,2085**.
+- Bootstrap trong annex khớp §3: circular 15,6%/−25,1%, stationary 15,4%/−24,8%.
+- Log: `research/repin_park030_20260927/annex_recon68_park030.log`.
+
+### 5. Bảng SUPERSEDED — anchor production đổi theo park 0,30
+
+| Đại lượng | Số cũ (nhãn cũ) | **Số production từ 2026-09-27 (quinquies)** |
+|---|---|---|
+| R3 CAGR | 28,86% (08-03) → 24,38% → **24,42% @park 0,7** (lịch sử) · 24,95% @park 0,8 (knob live 08-04→09-27, chưa từng được pin) | **23,43% @park 0,30** |
+| R3 Sharpe / MaxDD / Calmar | 1,69 / −18,8% / 1,30 | **1,88 / −14,4% / 1,63** |
+| R3 Final NAV | 761,11B | **688,77B** |
+| Bootstrap 5th-pct CAGR | 18,6% → 15,6% → 15,4% → 15,5% | **15,6%** |
+| Bootstrap 5th-pct MaxDD (**neo sizing**) | −28,6% → −30,4% → −30,3% | **−25,1%** |
+| Parking NEUTRAL đóng góp | +7,4pp → +2,01pp → +2,05pp (@0,7, làm XẤU risk) | **+1,06pp (@0,30, DD/Calmar TỐT hơn park=0)** |
+| ann-SR R3 (annex) | 1,829 → 1,622 → 1,616 | **1,815** |
+| PBO pin / DSR | 0,2085 (họ 68) / 1,0000 | **0,2085 / 1,0000 (KHÔNG đổi)** |
+
+### 6. 🚨 RAIL THỨ BA CHƯA ĐỔI — `park = 0,30` HIỆN CHỈ ÁP ĐƯỢC CHO ĐƯỜNG MUA
+
+`ae81bd47` đổi 2 chỗ, nhưng **đường BÁN/L1 không đọc `trading_rules.json`**:
+
+| Rail | Chỗ thật | Giá trị sau `ae81bd47` |
+|---|---|---|
+| R1 MUA | `deploy_golive_dt5g_v4/golive_recommend_v23.py:99 ETF_PARK={3: 0.30}` | **0,30** ✅ |
+| R2 **BÁN / L1 trim** | `mike/bin/compute_park_trim.py:170 PARK_TARGET_F1 = 0.80` (**hardcode**) | **0,80** ❌ |
+| R3 chính sách | `data/trading_rules.json neutral_parking.default_park_of_idle_pct` | **0,30** ✅ |
+
+- `grep -rn "default_park_of_idle_pct" --include=*.py --include=*.sh` trên toàn repo: **0 code path
+  nào ĐỌC field này** — nó chỉ xuất hiện trong comment. `trading_rules.json` là **văn bản chính sách**,
+  không phải nguồn cấu hình runtime của L1.
+- `park_trim_daily.sh:62` gọi `compute_park_trim.py` **không truyền `--target`** ⇒ chạy 0,80.
+- `mike/agents/DollarBill/tools/compute_park_add.py` (đường MUA P2) `import PARK_TARGET_F1` ⇒ cũng 0,80.
+- Hệ quả đo được hôm nay (§7): ở target 0,80 L1 trả `BLOCKED_ALL_NAMES`/`NO_TRIM` ⇒ **sổ PARK ~80%
+  pool sẽ KHÔNG bao giờ được đưa về 30%**; chỉ đường MUA ngừng nạp thêm. Đây đúng là dạng lỗi im lặng
+  của 2026-08-04, chỉ đảo chiều (lần đó: mua 70% / trim 80%; lần này: mua 30% / trim 80%).
+- **Taylor KHÔNG tự sửa** (dispatch cấm đụng rail; và đây là đường tiền thật) → cần user/Mike duyệt
+  đổi `PARK_TARGET_F1 = 0.30`, hoặc (tốt hơn) để nó **đọc** `trading_rules.json` để rail không nhân bản.
+
+### 7. Đường tiền LIVE hôm nay (2026-09-27, read-only — KHÔNG ghi file plan, KHÔNG đặt lệnh)
+
+`park_holdings.py` (FIFO theo lô, đối soát broker **✅ KHỚP 28 mã** cả 2 TK, `unverified = []`):
+
+| | SpaceX (0002023347) | ZaloPay (0001743768) |
+|---|---|---|
+| PARK MV thật (19 / 17 mã) | **387,08 tr** | **157,02 tr** |
+| pool L1 = (totalCash−debt) + egg + park_mv | 479,06 tr | 261,40 tr |
+| PARK % pool hiện tại | **80,8%** | **60,1%** |
+| target @0,30 | 143,72 tr | 78,42 tr |
+| δ vượt trần | **−243,36 tr** | **−78,60 tr** |
+| Đề xuất bán phiên 1 (`decision=TRIM`) | **218,93 tr / 19 mã** | **53,08 tr / 15 mã** |
+| Carry-over sang phiên sau | 24,43 tr | 25,52 tr |
+| PARK % pool sau phiên 1 | 35,1% | 39,8% |
+| target @0,80 (rail đang chạy) | 383,25 tr → `BLOCKED_ALL_NAMES`, **0 lệnh** | 209,12 tr → `NO_TRIM` |
+
+- Trim phiên 1 @0,30 (giá tham chiếu = close 2026-09-25, `--target 0.30`, artifact
+  `research/repin_park030_20260927/l1_{SpaceX,ZaloPay}_0.30.json`):
+  **SpaceX** ACB 500 · BID 700 · CTG 700 · EVF 100 · HDB 400 · HPG 600 · LPB 200 · MBB 900 · MSB 400
+  · SHB 400 · TCB 600 · TPB 300 · VCB 400 · VHM 300 · VIB 300 · VIX 200 · VND 300 · VPB 800 · VRE 100.
+  **ZaloPay** BID/CTG/HDB/HPG/MSB/SHB/TCB/TPB/VCB/VHM/VIX/VRE 100 · LPB 200 · MBB 200 · VPB 200.
+- Cổng: `BLOCKED_FRAME`/`BLOCKED_RECONCILE` **không vướng** (`blocked=[]` SpaceX; ZaloPay chỉ ACB+VIB
+  bị loại vì "trần/khả năng bán < 1 lô"). `reconcile_ok=True` cả 2. **T+2 không chặn**: không có lệnh
+  MUA sổ PARK nào trong 3 phiên gần nhất (FILL PARK gần nhất là 2 lệnh BÁN 09-24/09-25). Trần TỔNG
+  ngày (`etf_day_cap`) **không binding** (`day_cap_scale=1,0`); ràng buộc thật là **%ADV per-name +
+  lô 100cp** → shortfall carry-over ⇒ cần **~2 phiên** mỗi TK để về 30%.
+- Phiên nào: `park_trim_daily.sh` chạy **19:30 ICT T2-T6**, `PLAN_DATE = next_trading_day(today)`
+  ⇒ lần chạy thật đầu tiên **T2 28/09 19:30 → plan T3 29/09**. **Nhưng** với R2 còn 0,80 (§6) nó sẽ
+  trả `BLOCKED_ALL_NAMES`/`NO_TRIM` ⇒ **0 lệnh trim được sinh** cho tới khi rail bán được duyệt đổi.
+
+### 8. Hồi quy selfcheck park + ĐỀ XUẤT cổng cơ học cho §6
+
+| Selfcheck (`$DNA_PYEXE`, `MIKE_BOT_TEST_MODE=1`) | Kết quả |
+|---|---|
+| `compute_park_trim_selfcheck.py` | ✅ **100 PASS / 0 FAIL** |
+| `compute_jit_unpark_selfcheck.py` | ✅ **80 PASS / 0 FAIL × 4 TZ**, digest đồng nhất `71150c8a` |
+| `send_plan_report_park_jit_selfcheck.py` | ✅ **21 PASS / 0 FAIL** (gồm T9 `env -u TZ` + America/New_York) |
+| `merge_park_orders_selfcheck.py` | ✅ PASS toàn bộ |
+
+⇒ Không có regression từ `ae81bd47`. **Nhưng không selfcheck nào so 3 rail với nhau** — đó chính là
+lý do §6 lọt hai lần. Đề xuất (ĐÃ VIẾT + ĐÃ CHẠY, **chưa** wire vào `run_selfchecks.sh`):
+`mike/agents/Taylor/research/repin_park030_20260927/park_rail_consistency_selfcheck.py` → đích đề xuất
+**`mike/bin/park_rail_consistency_selfcheck.py`**.
+- Đọc GIÁ TRỊ của cả 3 rail (R1/R2 parse bằng **`ast`**, không regex — bài học `tz_anchor_gate.py` §16),
+  so bằng số, `exit 1` khi lệch, **`exit 2` fail-CLOSED** khi không đọc được rail (không đoán).
+- Chạy trên cây live **NGAY BÂY GIỜ: `rc=1`, in ra đúng `R1=0.3 R2=0.8 R3=0.3`** ⇒ cổng có sức phân giải
+  thật, không phải báo động giả lý thuyết.
+- `--selftest`: **6/6 mutation đúng kỳ vọng** — M0 ba rail đồng bộ ⇒ rc=0 (không fail bừa) · M1 ca thật
+  27/09 (R2 lệch) ⇒ 1 · M2 ca thật 08-04 (R1 lệch) ⇒ 1 · M3 (R3 lệch) ⇒ 1 · M4 hằng số viết xuống dòng
+  + comment ⇒ 1 (regex sẽ trượt) · M5 rail bị xoá ⇒ 2.
+
+### 9. Caveat còn hiệu lực, không đổi bởi mục này
+
+**FAIL-C vẫn vô hiệu**: log pin mới in `[edge-alloc] source=lag_edge_health.csv label_col=entry
+rows=583` ⇒ **23,43% cũng là số đo TRÊN NHÃN LOOK-AHEAD 25 phiên**, y như 24,42%. Việc sinh lại
+`data/lag_edge_health.csv` có `known_date` vẫn chờ người duyệt (mục (quater) §7).
