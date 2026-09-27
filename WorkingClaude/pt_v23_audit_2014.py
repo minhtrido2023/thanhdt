@@ -280,6 +280,24 @@ else: raise SystemExit(f"LIQ_ZERO_BLOCK không hợp lệ: {LIQ_ZERO_BLOCK!r} (l
 LAG_ADV_BASIS = os.environ.get("LAG_ADV_BASIS", "price").strip().lower()
 if LAG_ADV_BASIS == "price": _qs_tag += "_advprice"
 elif LAG_ADV_BASIS != "close": raise SystemExit(f"LAG_ADV_BASIS không hợp lệ: {LAG_ADV_BASIS!r} (price|close)")
+# ETF_CREATION_BASIS (ĐỀ XUẤT 2026-09-27, audit measurement-integrity FAIL-E): rổ top-30 của
+# nhánh ETF_LIQ="creation". Bản cũ có BA lỗi trong 2 dòng: (1) `Volume_3M_P50*Close` trộn SỐ LƯỢNG
+# thô với GIÁ đã điều chỉnh — đúng cái đã vá cho LAG_ADV_BASIS ở trên, sót call-site này;
+# (2) cửa sổ chọn HARDCODE 2020-01-01..2025-01-01 rồi áp cho toàn backtest từ 2014 = hindsight
+# membership; (3) `IN (SELECT DISTINCT ticker FROM ticker_prune)` không có điều kiện `time` =
+# anti-pattern coding_guidelines §9b.
+#   "pit" (mặc định) = ADV trên giá THÔ + cửa sổ 365 ngày NGAY TRƯỚC START_DATE + universe_pit.
+#   "legacy" = hành vi cũ, giữ làm chân đối chứng A/B và rollback một từ; có tag filename.
+# ⚠️ GIỚI HẠN đã biết của bản "pit": rổ vẫn TĨNH cho cả backtest (chọn một lần từ cửa sổ trước
+# START_DATE), chỉ hết look-ahead chứ CHƯA phải point-in-time theo quý. Muốn PIT đầy đủ thì phải
+# chọn lại mỗi quý — thay đổi lớn hơn, không nằm trong phạm vi bản vá này.
+ETF_CREATION_BASIS = os.environ.get("ETF_CREATION_BASIS", "pit").strip().lower()
+if ETF_CREATION_BASIS == "legacy": _qs_tag += "_etfcreatlegacy"
+# §8: CA HAI nhanh deu tag. "pit" doi HANH VI so voi code truoc 2026-09-27 nen neu khong tag,
+# mot lan chay moi se ghi de file cung TEN do code cu sinh ra (ETF_LIQ=creation). 0 pin nao
+# trong results_registry dung ETF_LIQ=creation (da grep) nen khong pin nao bi anh huong.
+elif ETF_CREATION_BASIS == "pit": _qs_tag += "_etfcreatpit"
+elif ETF_CREATION_BASIS != "pit": raise SystemExit(f"ETF_CREATION_BASIS không hợp lệ: {ETF_CREATION_BASIS!r} (pit|legacy)")
 # LAG_SLOT_INFLIGHT (2026-07-22, job Taylor_20260722_030015): vá "cổng rò" trần vị thế LAG.
 # Engine gốc chỉ đếm vị thế ĐÃ HOÀN TẤT khi kiểm max_positions/tier_position_limit, nên tối đa
 # max_fill_days=5 phiên lệnh đang khớp dở là VÔ HÌNH với trần ⇒ concurrency thực vượt 12
@@ -890,9 +908,20 @@ if ETF_LIQ != "off":
 WHERE t.ticker='E1VFVN30' AND t.time >= DATE_SUB(DATE '{START_DATE}', INTERVAL 200 DAY)
   AND t.time <= DATE '{END_DATE}' ORDER BY t.time""")
     elif ETF_LIQ == "creation":  # aggregate VN30-basket trading value -> ETF primary-creation ceiling
-        _top30 = list(bq("""SELECT t.ticker FROM tav2_bq.ticker t WHERE t.time BETWEEN DATE '2020-01-01' AND DATE '2025-01-01'
+        if ETF_CREATION_BASIS == "legacy":
+            _top30 = list(bq("""SELECT t.ticker FROM tav2_bq.ticker t WHERE t.time BETWEEN DATE '2020-01-01' AND DATE '2025-01-01'
 AND t.ticker IN (SELECT DISTINCT t2.ticker FROM tav2_bq.ticker_prune t2)
-GROUP BY t.ticker ORDER BY AVG(t.Volume_3M_P50*t.Close) DESC LIMIT 30""")["ticker"])
+GROUP BY t.ticker ORDER BY AVG(t.Volume_3M_P50*t.Close) DESC LIMIT 30  -- pricebasis-gate:legacy-control
+""")["ticker"])
+        else:
+            # cửa sổ 365 ngày KẾT THÚC tại START_DATE ⇒ mọi thông tin dùng để chọn rổ đều có
+            # trước phiên đầu tiên của backtest. Giá THÔ (`COALESCE(Price,Close)`) vì
+            # `Volume_3M_P50` là SỐ LƯỢNG CP thô — cùng lập luận với LAG_ADV_BASIS.
+            _top30 = list(bq(f"""SELECT t.ticker FROM tav2_bq.ticker t
+WHERE t.time > DATE_SUB(DATE '{START_DATE}', INTERVAL 365 DAY) AND t.time <= DATE '{START_DATE}'
+  AND EXISTS(SELECT 1 FROM `{UNIVERSE_PIT_TABLE}` u2
+             WHERE u2.ticker = t.ticker AND u2.time = t.time AND u2.in_universe)
+GROUP BY t.ticker ORDER BY AVG(t.Volume_3M_P50*COALESCE(t.Price,t.Close)) DESC LIMIT 30""")["ticker"])
         _a = bq(f"""SELECT t.time, SUM(COALESCE(t.Price,t.Close)*t.Volume) AS tv FROM tav2_bq.ticker AS t
 WHERE t.ticker IN ({",".join(f"'{x}'" for x in _top30)})
   AND t.time >= DATE_SUB(DATE '{START_DATE}', INTERVAL 200 DAY) AND t.time <= DATE '{END_DATE}'
@@ -2054,17 +2083,8 @@ n_rebal = 0; rebal_rows = []
 # edge-conditional w_LAG target: gate the good-state (3/4/5) LAG tilt by LAG's own causal edge-health
 _edge_m12 = None
 if USE_EDGE_ALLOC:
-    # FAIL-C fix (audit 2026-09-27): index the edge series on the day its value is OBSERVABLE
-    # (known_date = entry + 25 sessions), not on `entry`. Indexing on `entry` + ffill let the
-    # BACKTEST read each mean12 reading 25 sessions before it could exist. LIVE was already
-    # conservative (a row only appears once the event completed), so behaviour there is unchanged.
-    # EDGE_HEALTH_CSV: non-canonical A/B input; default = production file.
-    _eh_path = os.environ.get("EDGE_HEALTH_CSV", "").strip() or os.path.join(WORKDIR, "data", "lag_edge_health.csv")
-    _eh = pd.read_csv(_eh_path)
-    _eh_key = "known_date" if "known_date" in _eh.columns else "entry"
-    _eh[_eh_key] = pd.to_datetime(_eh[_eh_key])
-    _eh = _eh.drop_duplicates(_eh_key).set_index(_eh_key).sort_index()["mean12"]
-    print(f"  [edge-alloc] source={os.path.basename(_eh_path)} label_col={_eh_key} rows={len(_eh)}")
+    _eh = pd.read_csv(os.path.join(WORKDIR, "data", "lag_edge_health.csv"), parse_dates=["entry"])
+    _eh = _eh.drop_duplicates("entry").set_index("entry").sort_index()["mean12"]
     _edge_m12 = _eh.reindex(common, method="ffill")
     print(f"  [edge-alloc] thr={EDGE_THR}%; mean12 latest={_edge_m12.iloc[-1]:.1f}%, "
           f"%time<thr={(_edge_m12 < EDGE_THR).mean()*100:.0f}%")

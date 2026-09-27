@@ -69,9 +69,19 @@ print(f"    {len(rebal_dates)} quarterly rebals; baseline union={memdf.ticker.nu
 
 # ---------- 2) quarterly inputs for the overlay ----------
 print("[2] quarterly liquidity / ratings / yield pivots...")
-qliq = bq(f"""SELECT t.ticker, DATE_TRUNC(t.time, QUARTER) AS q, AVG(t.Volume_3M_P50*t.Close) AS liq, COUNT(*) nd
+# ĐỀ XUẤT 2026-09-27 (audit measurement-integrity, do cổng T5 của basket_price_basis_selfcheck
+# bắt được): HAI lỗi trong 2 dòng, cùng lớp với FAIL-E ở pt_v23:895 —
+#   (1) `Volume_3M_P50*Close` trộn SỐ LƯỢNG thô với GIÁ đã điều chỉnh. `custom_basket.py:333` đã
+#       vá đúng chỗ này từ 2026-08-02 (đo thật: 8,5/30 tên đổi pre-2014, 5,0/30 từ 2014) nhưng
+#       file này giữ bản cũ ⇒ pool thanh khoản của overlay xếp hạng theo một cơ sở giá KHÁC với
+#       baseline nó so sánh.
+#   (2) `IN (SELECT DISTINCT ticker FROM ticker_prune)` không có điều kiện `time` = anti-pattern
+#       coding_guidelines §9b (look-ahead universe 1,6-2,6x).
+qliq = bq(f"""SELECT t.ticker, DATE_TRUNC(t.time, QUARTER) AS q,
+  AVG(t.Volume_3M_P50*COALESCE(t.Price,t.Close)) AS liq, COUNT(*) nd
 FROM tav2_bq.ticker t
-WHERE t.ticker IN (SELECT DISTINCT t2.ticker FROM tav2_bq.ticker_prune t2)
+WHERE EXISTS(SELECT 1 FROM `lithe-record-440915-m9.tav2_mike.universe_pit` u2
+             WHERE u2.ticker = t.ticker AND u2.time = t.time AND u2.in_universe)
   AND t.ICB_Code IS NOT NULL
   AND t.time >= DATE_SUB(DATE '{START}', INTERVAL 380 DAY) AND t.time <= DATE '{END}'
 GROUP BY t.ticker, q HAVING nd >= 20""")
