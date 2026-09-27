@@ -317,9 +317,88 @@ def t5():
           f"{n_ex} miễn trừ / trần {EXEMPT_BUDGET}")
     return n + max(0, n_ex - EXEMPT_BUDGET)
 
+# ── PIN vintage corp-action cho T1-T4 (VIỆC 3 job Taylor_20260927_131720, 2026-09-27) ─────────
+# Vì sao: `custom_basket._corp_action_share_events()` đọc `tav2_bq.corporate_action` từ LIVE BQ, và
+# bảng đó được UPSERT TẠI CHỖ (`kb/data_registry/price-volume/corporate_action_bq.md` Bẫy 2b) ⇒ số
+# dòng ISS+AIS ĐỔI giữa các lần chạy. Đo thật: Mike thấy 1706/1843 rồi 1736/1875 (hai con số/lần
+# chạy = hai cửa sổ RECENT/OLD có member-union khác nhau), và đã có MỘT lần T1 FAIL rồi các lần sau
+# PASS mà không giải thích được dứt điểm lần FAIL đó. Một selfcheck mà input đổi theo giờ thì
+# "PASS" của nó không phải bằng chứng — nên ghim vintage.
+#
+# Dùng LẠI đúng vintage `data/snapshots/corp_action_share_20260927.parquet` (sinh 11:53 ICT
+# 2026-09-27 bằng `corp_action_share_snapshot.py`) thay vì sinh một bản mới cùng ngày: nó đã là
+# vintage mà lệnh pin `research/oshares_weight_exdate_20260927/run_publish_leg_v3.sh` chạy trên, nên
+# ghim cùng file giữ selfcheck và kết quả đã pin nói về CÙNG một tập sự kiện. Sinh thêm một vintage
+# 09-27 thứ hai là tự tạo ra hai nguồn sự thật cho cùng một ngày.
+#
+# FAIL-CLOSED nếu thiếu file: thà dừng còn hơn âm thầm rơi về LIVE BQ và lại bất tất định.
+# Override: đặt sẵn `BASKET_CA_SNAPSHOT` (env thắng) — hoặc `BASKET_CA_SNAPSHOT=` rỗng thì
+# `setdefault` không đè, nhưng `custom_basket` coi chuỗi rỗng là "đọc LIVE", nên đó là cách khai
+# TƯỜNG MINH rằng mình muốn đọc live.
+CA_SNAPSHOT_NAME = "corp_action_share_20260927.parquet"
+
+
+def _ca_snapshot_candidates():
+    """Nơi tìm vintage, theo thứ tự ưu tiên — KHÔNG hardcode đường dẫn canonical.
+
+    Vì sao cần cây thứ hai: vintage nằm trong `data/`, là thư mục DỮ LIỆU không được git theo
+    dõi. Đo thật trên worktree của chính commit này
+    (`mike/agents/Taylor/wt-casnap-2709/WorkingClaude/data/snapshots/` chỉ có `latest_date.txt`)
+    ⇒ nếu chỉ tìm theo `WORKDIR` thì cổng fail-closed ở ĐÚNG lúc cần nhất: lúc review một branch
+    trong worktree. Đó là y hệt cái bẫy Mike vừa vá cho `WORKDIR`/T5 vài giờ trước
+    ("mặc định hardcode làm cổng NÀY VÔ HIỆU ở mọi worktree"), chỉ đổi chỗ từ CODE sang DỮ LIỆU.
+    Cây canonical suy ra bằng `git --git-common-dir` (worktree nào cũng trỏ về .git của repo
+    chính) nên di chuyển repo không làm hỏng.
+    """
+    cands = [os.path.join(WORKDIR, "data", "snapshots", CA_SNAPSHOT_NAME)]
+    try:
+        common = subprocess.run(["git", "rev-parse", "--git-common-dir"], cwd=WORKDIR,
+                                capture_output=True, text=True, check=True).stdout.strip()
+        top = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=WORKDIR,
+                             capture_output=True, text=True, check=True).stdout.strip()
+        canon = os.path.join(os.path.dirname(os.path.abspath(common)),
+                             os.path.relpath(WORKDIR, top))
+        cands.append(os.path.join(canon, "data", "snapshots", CA_SNAPSHOT_NAME))
+    except Exception:
+        pass  # không nằm trong git / git không có: chỉ còn cây của chính file này
+    return [c for i, c in enumerate(cands) if c not in cands[:i]]
+
+
+CA_SNAPSHOT = _ca_snapshot_candidates()[0]
+
+
+def _pin_corp_action_vintage():
+    """Ghim vintage corp-action và IN dấu vết để tất định kiểm được từ ngoài."""
+    if "BASKET_CA_SNAPSHOT" in os.environ:
+        snap = os.environ["BASKET_CA_SNAPSHOT"]
+        print(f"BASKET_CA_SNAPSHOT = {snap or '(rỗng → LIVE BQ, khai tường minh)'} [env]")
+        if not snap:
+            return
+    else:
+        cands = _ca_snapshot_candidates()
+        found = [c for c in cands if os.path.exists(c)]
+        snap = found[0] if found else cands[0]
+        os.environ["BASKET_CA_SNAPSHOT"] = snap
+        tag = "pin mặc định" if snap == cands[0] else "pin mặc định · cây canonical"
+        print(f"BASKET_CA_SNAPSHOT = {snap} [{tag}]")
+    if not os.path.exists(snap):
+        raise SystemExit(
+            f"FAIL-CLOSED: thiếu snapshot corp-action. Đã tìm:\n"
+            + "".join(f"    - {c}\n" for c in _ca_snapshot_candidates())
+            + f"  Sinh lại: python3 corp_action_share_snapshot.py data/snapshots/{CA_SNAPSHOT_NAME}\n"
+            f"  (KHÔNG rơi về LIVE BQ: bảng corporate_action upsert tại chỗ ⇒ selfcheck sẽ bất "
+            f"tất định, đúng lý do cổng này được ghim.)")
+    _ev = pd.read_parquet(snap)
+    _dig = int(pd.util.hash_pandas_object(
+        _ev[["ticker", "event_code", "share_date", "exercise_ratio"]].astype(str)).sum())
+    print(f"  vintage: {len(_ev)} dòng ISS+AIS, {_ev['ticker'].nunique()} mã, "
+          f"digest={_dig}")
+
+
 def main():
     bq = _bq()
     print(f"BQ_LOCAL_CACHE = {os.environ.get('BQ_LOCAL_CACHE', '(live BQ)')}")
+    _pin_corp_action_vintage()
     pre = load_pre_edit()
     post = load_post_edit()
     ctl = load_post_edit(force_close_basis=True)
