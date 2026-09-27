@@ -1,0 +1,329 @@
+diff --git a/WorkingClaude/basket_price_basis_selfcheck.py b/WorkingClaude/basket_price_basis_selfcheck.py
+index 24ada04c..a80f94b0 100644
+--- a/WorkingClaude/basket_price_basis_selfcheck.py
++++ b/WorkingClaude/basket_price_basis_selfcheck.py
+@@ -158,6 +158,145 @@ def member_diff(ma, mb):
+     return ds, per
+ 
+ 
++
++# ── T5. GREP-GATE CƠ SỞ GIÁ (thêm 2026-09-27, audit measurement-integrity FAIL-E) ─────────
++# Vì sao T1-T4 KHÔNG thay được T5: T1-T4 chỉ chạy trên `custom_basket.py`. Lỗi trộn hệ quy chiếu
++# là lỗi LẶP LẠI ở nhiều call-site (đã vá `LAG_ADV_BASIS` 2026-08-02 và `custom_basket` cùng
++# ngày, vẫn sót `pt_v23_audit_2014.py:895` tới 2026-09-27). Một selfcheck hành vi chỉ canh được
++# nơi nó đã cắn; phần LẶP LẠI phải là cổng CƠ HỌC (coding_guidelines §Enforcement policy).
++#
++# Luật: trong biểu thức TIỀN / ADV / mcap-weight, KHÔNG được nhân một SỐ LƯỢNG thô
++# (`Volume*`, `OShares`) với một GIÁ ĐÃ ĐIỀU CHỈNH (`Close`, `Close_T1*`). Giá đúng = `Price`
++# thô, hoặc `COALESCE(Price,Close)`, hoặc `pxw_sql()`.
++#
++# PHẠM VI CÓ CHỦ Ý = danh sách file được BẢO VỆ, KHÔNG quét cả repo. Đo thật 2026-09-27:
++# regex này khớp 2.349 dòng / 1.010 file `.py` trong repo — gần như toàn bộ là script
++# `backtest_*`/`test_*` legacy mà `data/results_registry.md` không trích. Một cổng 2.349 mục là
++# một cổng không ai chạy. Muốn siết dần thì thêm file vào PROTECTED, đừng mở toàn repo.
++#
++# Phân biệt CODE với VĂN XUÔI bằng AST, không bằng "dòng có bắt đầu bằng #":
++#   - chuỗi có chứa CẢ `SELECT` lẫn `FROM` = SQL thật  -> quét
++#   - chuỗi khác (nhãn báo cáo, docstring)             -> BỎ QUA
++#   - biểu thức code thường (pandas `df.Close*df.Volume`) -> quét
++# Nếu không có bước này thì `pt_v23:2431`/`custom_basket.py:46` (văn xuôi mô tả chính cái bug)
++# sẽ bị báo và cổng lập tức mất uy tín.
++import ast as _ast  # noqa: E402
++import re as _re  # noqa: E402
++
++PROTECTED = [
++    "pt_v23_audit_2014.py", "pt_v22_dt5g.py", "custom_basket.py",
++    "simulate_holistic_nav.py", "signal_v11_sql.py", "edge_health_monitor.py",
++    "rating_8l.py", "rating_8l_history.py", "custom30v_hybrid.py",
++    "bootstrap_nav.py", "dsr_pbo_annex.py", "regime_size_overlay.py",
++]
++_QTY = r"(?:Volume[A-Za-z0-9_]*|OShares)"
++_ADJ = r"(?:Close(?:_T1W?)?)"
++_PFX = r"(?:[A-Za-z_][A-Za-z0-9_]*\.)?"
++BAN_RE = _re.compile(
++    rf"{_PFX}{_QTY}\s*\*\s*{_PFX}{_ADJ}\b|{_PFX}{_ADJ}\s*\*\s*{_PFX}{_QTY}\b")
++# `COALESCE(Price,Close)` chứa `Close` nhưng là giá THÔ đã đúng -> gỡ khỏi văn bản trước khi khớp.
++SAFE_RE = _re.compile(r"COALESCE\s*\(\s*[A-Za-z_0-9.]*Price\s*,\s*[A-Za-z_0-9.]*Close\s*\)",
++                      _re.IGNORECASE)
++
++
++# Điều kiện thứ HAI, bắt buộc: chính DÒNG vi phạm phải trông như SQL/biểu thức, không phải văn
++# xuôi. Chỉ đòi "chuỗi bao quanh có SELECT+FROM" là KHÔNG đủ — docstring của `custom_basket.py`
++# vừa mô tả chính cái bug này vừa trích SQL, nên 3 dòng VĂN XUÔI (`:35`, `:46`, `:58`) bị báo ở
++# vòng thử đầu. Từ khoá cố ý phân biệt HOA/thường: SQL viết `AND`, văn xuôi viết `and`.
++SQLLINE_RE = _re.compile(
++    r"\b(SELECT|FROM|WHERE|GROUP BY|ORDER BY|HAVING|AND|OR|AVG|SUM|CAST|COALESCE|OVER)\b")
++
++
++def _sql_string_hits(src):
++    """Trả (lineno, text) cho mọi vi phạm nằm trong chuỗi TRÔNG NHƯ SQL."""
++    hits = []
++    tree = _ast.parse(src)
++    for node in _ast.walk(tree):
++        if not (isinstance(node, _ast.Constant) and isinstance(node.value, str)):
++            continue
++        v = node.value
++        if not ("SELECT" in v.upper() and "FROM" in v.upper()):
++            continue
++        base = node.lineno
++        for off, line in enumerate(v.splitlines()):
++            clean = SAFE_RE.sub("__RAWPX__", line)
++            if BAN_RE.search(clean) and SQLLINE_RE.search(line):
++                hits.append((base + off, line.strip()))
++    return hits
++
++
++def _code_line_hits(src):
++    """Vi phạm trên dòng CODE thật (không phải comment, không nằm trong chuỗi)."""
++    import io as _io
++    import tokenize as _tok
++    # ⚠️ Python >= 3.12 (PEP 701) tách f-string thành FSTRING_START/MIDDLE/END, KHÔNG còn là
++    # `STRING`. Chỉ liệt `_tok.STRING` thì mọi dòng f-string SQL bị coi là code ⇒ báo TRÙNG với
++    # `_sql_string_hits`. Runner thật (`$DNA_PYEXE`) là 3.12 nên đây là đường chạy mặc định, không
++    # phải trường hợp hiếm. Lọc theo TÊN token để chạy đúng trên cả 3.10 và 3.12.
++    _SKIP_NAMES = {"COMMENT", "STRING", "FSTRING_START", "FSTRING_MIDDLE", "FSTRING_END"}
++    skip = set()
++    toks = list(_tok.generate_tokens(_io.StringIO(src).readline))
++    for t in toks:
++        if _tok.tok_name.get(t.type) in _SKIP_NAMES:
++            for ln in range(t.start[0], t.end[0] + 1):
++                skip.add(ln)
++    hits = []
++    for i, line in enumerate(src.splitlines(), 1):
++        if i in skip:
++            continue
++        clean = SAFE_RE.sub("__RAWPX__", line)
++        if BAN_RE.search(clean):
++            hits.append((i, line.strip()))
++    return hits
++
++
++# Miễn trừ CÓ DANH DẤU, duy nhất một dạng: chân đối chứng A/B cố ý giữ hành vi cũ (rollback một
++# từ). Viết bằng comment SQL `--` nên hợp lệ với BigQuery và nằm ĐÚNG trên dòng vi phạm.
++# ⚠️ Kèm TRẦN: `EXEMPT_BUDGET` — miễn trừ không được nở âm thầm. Thêm một chân đối chứng mới thì
++# phải nâng trần TRONG commit đó, tức phải có người đọc. Cùng triết lý ratchet với
++# `mike/bin/tz_anchor_gate.py` (baseline per-file, chỉ hạ được).
++EXEMPT_MARK = "pricebasis-gate:legacy-control"
++EXEMPT_BUDGET = 1
++
++
++def scan_price_basis(root=None, files=None, verbose=True, return_exempt=False):
++    root = root or WORKDIR
++    out = {}
++    exempt = {}
++    for fn in (files or PROTECTED):
++        path = os.path.join(root, fn)
++        if not os.path.exists(path):
++            continue
++        src = open(path, encoding="utf-8").read()
++        hits = sorted(set(_sql_string_hits(src) + _code_line_hits(src)))
++        keep = [(ln, txt) for ln, txt in hits if EXEMPT_MARK not in txt]
++        ex = [(ln, txt) for ln, txt in hits if EXEMPT_MARK in txt]
++        if keep:
++            out[fn] = keep
++        if ex:
++            exempt[fn] = ex
++    if verbose:
++        for fn, hits in out.items():
++            for ln, txt in hits:
++                print(f"      {fn}:{ln}  {txt[:110]}")
++        for fn, hits in exempt.items():
++            for ln, _ in hits:
++                print(f"      [miễn trừ có đánh dấu] {fn}:{ln}")
++    return (out, exempt) if return_exempt else out
++
++
++def t5():
++    print("\nT5. Grep-gate cơ sở giá trên danh sách file BẢO VỆ "
++          f"({len(PROTECTED)} file; SỐ LƯỢNG thô × GIÁ đã điều chỉnh)")
++    hits, exempt = scan_price_basis(return_exempt=True)
++    n = sum(len(v) for v in hits.values())
++    n_ex = sum(len(v) for v in exempt.values())
++    check("T5 không còn biểu thức tiền/ADV trộn số-lượng-thô × giá-đã-điều-chỉnh", n == 0,
++          f"{n} vi phạm trên {len(hits)} file")
++    check("T5b số miễn trừ có đánh dấu không vượt trần", n_ex <= EXEMPT_BUDGET,
++          f"{n_ex} miễn trừ / trần {EXEMPT_BUDGET}")
++    return n + max(0, n_ex - EXEMPT_BUDGET)
++
+ def main():
+     bq = _bq()
+     print(f"BQ_LOCAL_CACHE = {os.environ.get('BQ_LOCAL_CACHE', '(live BQ)')}")
+@@ -257,6 +396,8 @@ def main():
+           f"(0 = knob chết hoặc số CP đã quay lại chân return — xem "
+           f"basket_return_leg_oshares_selfcheck.py)")
+ 
++    t5()
++
+     print("\n" + "=" * 78)
+     if FAILS:
+         print(f"KẾT QUẢ: FAIL {len(FAILS)} — {', '.join(FAILS)}")
+@@ -266,4 +407,8 @@ def main():
+ 
+ 
+ if __name__ == "__main__":
++    # `--scan-only`: chạy RIÊNG T5, không đụng BigQuery/cache — để cổng cơ học này dùng được
++    # trong pre-commit và trong CI nhẹ, không phải chờ cả selfcheck rổ (§23: chạy theo phạm vi).
++    if "--scan-only" in sys.argv:
++        sys.exit(1 if t5() else 0)
+     sys.exit(main())
+diff --git a/WorkingClaude/custom30v_hybrid.py b/WorkingClaude/custom30v_hybrid.py
+index 889877b2..c76ec654 100644
+--- a/WorkingClaude/custom30v_hybrid.py
++++ b/WorkingClaude/custom30v_hybrid.py
+@@ -69,9 +69,19 @@ print(f"    {len(rebal_dates)} quarterly rebals; baseline union={memdf.ticker.nu
+ 
+ # ---------- 2) quarterly inputs for the overlay ----------
+ print("[2] quarterly liquidity / ratings / yield pivots...")
+-qliq = bq(f"""SELECT t.ticker, DATE_TRUNC(t.time, QUARTER) AS q, AVG(t.Volume_3M_P50*t.Close) AS liq, COUNT(*) nd
++# ĐỀ XUẤT 2026-09-27 (audit measurement-integrity, do cổng T5 của basket_price_basis_selfcheck
++# bắt được): HAI lỗi trong 2 dòng, cùng lớp với FAIL-E ở pt_v23:895 —
++#   (1) `Volume_3M_P50*Close` trộn SỐ LƯỢNG thô với GIÁ đã điều chỉnh. `custom_basket.py:333` đã
++#       vá đúng chỗ này từ 2026-08-02 (đo thật: 8,5/30 tên đổi pre-2014, 5,0/30 từ 2014) nhưng
++#       file này giữ bản cũ ⇒ pool thanh khoản của overlay xếp hạng theo một cơ sở giá KHÁC với
++#       baseline nó so sánh.
++#   (2) `IN (SELECT DISTINCT ticker FROM ticker_prune)` không có điều kiện `time` = anti-pattern
++#       coding_guidelines §9b (look-ahead universe 1,6-2,6x).
++qliq = bq(f"""SELECT t.ticker, DATE_TRUNC(t.time, QUARTER) AS q,
++  AVG(t.Volume_3M_P50*COALESCE(t.Price,t.Close)) AS liq, COUNT(*) nd
+ FROM tav2_bq.ticker t
+-WHERE t.ticker IN (SELECT DISTINCT t2.ticker FROM tav2_bq.ticker_prune t2)
++WHERE EXISTS(SELECT 1 FROM `lithe-record-440915-m9.tav2_mike.universe_pit` u2
++             WHERE u2.ticker = t.ticker AND u2.time = t.time AND u2.in_universe)
+   AND t.ICB_Code IS NOT NULL
+   AND t.time >= DATE_SUB(DATE '{START}', INTERVAL 380 DAY) AND t.time <= DATE '{END}'
+ GROUP BY t.ticker, q HAVING nd >= 20""")
+diff --git a/WorkingClaude/pt_v23_audit_2014.py b/WorkingClaude/pt_v23_audit_2014.py
+index 03fa4006..b96c4cb9 100644
+--- a/WorkingClaude/pt_v23_audit_2014.py
++++ b/WorkingClaude/pt_v23_audit_2014.py
+@@ -280,6 +280,20 @@ else: raise SystemExit(f"LIQ_ZERO_BLOCK không hợp lệ: {LIQ_ZERO_BLOCK!r} (l
+ LAG_ADV_BASIS = os.environ.get("LAG_ADV_BASIS", "price").strip().lower()
+ if LAG_ADV_BASIS == "price": _qs_tag += "_advprice"
+ elif LAG_ADV_BASIS != "close": raise SystemExit(f"LAG_ADV_BASIS không hợp lệ: {LAG_ADV_BASIS!r} (price|close)")
++# ETF_CREATION_BASIS (ĐỀ XUẤT 2026-09-27, audit measurement-integrity FAIL-E): rổ top-30 của
++# nhánh ETF_LIQ="creation". Bản cũ có BA lỗi trong 2 dòng: (1) `Volume_3M_P50*Close` trộn SỐ LƯỢNG
++# thô với GIÁ đã điều chỉnh — đúng cái đã vá cho LAG_ADV_BASIS ở trên, sót call-site này;
++# (2) cửa sổ chọn HARDCODE 2020-01-01..2025-01-01 rồi áp cho toàn backtest từ 2014 = hindsight
++# membership; (3) `IN (SELECT DISTINCT ticker FROM ticker_prune)` không có điều kiện `time` =
++# anti-pattern coding_guidelines §9b.
++#   "pit" (mặc định) = ADV trên giá THÔ + cửa sổ 365 ngày NGAY TRƯỚC START_DATE + universe_pit.
++#   "legacy" = hành vi cũ, giữ làm chân đối chứng A/B và rollback một từ; có tag filename.
++# ⚠️ GIỚI HẠN đã biết của bản "pit": rổ vẫn TĨNH cho cả backtest (chọn một lần từ cửa sổ trước
++# START_DATE), chỉ hết look-ahead chứ CHƯA phải point-in-time theo quý. Muốn PIT đầy đủ thì phải
++# chọn lại mỗi quý — thay đổi lớn hơn, không nằm trong phạm vi bản vá này.
++ETF_CREATION_BASIS = os.environ.get("ETF_CREATION_BASIS", "pit").strip().lower()
++if ETF_CREATION_BASIS == "legacy": _qs_tag += "_etfcreatlegacy"
++elif ETF_CREATION_BASIS != "pit": raise SystemExit(f"ETF_CREATION_BASIS không hợp lệ: {ETF_CREATION_BASIS!r} (pit|legacy)")
+ # LAG_SLOT_INFLIGHT (2026-07-22, job Taylor_20260722_030015): vá "cổng rò" trần vị thế LAG.
+ # Engine gốc chỉ đếm vị thế ĐÃ HOÀN TẤT khi kiểm max_positions/tier_position_limit, nên tối đa
+ # max_fill_days=5 phiên lệnh đang khớp dở là VÔ HÌNH với trần ⇒ concurrency thực vượt 12
+@@ -890,9 +904,20 @@ if ETF_LIQ != "off":
+ WHERE t.ticker='E1VFVN30' AND t.time >= DATE_SUB(DATE '{START_DATE}', INTERVAL 200 DAY)
+   AND t.time <= DATE '{END_DATE}' ORDER BY t.time""")
+     elif ETF_LIQ == "creation":  # aggregate VN30-basket trading value -> ETF primary-creation ceiling
+-        _top30 = list(bq("""SELECT t.ticker FROM tav2_bq.ticker t WHERE t.time BETWEEN DATE '2020-01-01' AND DATE '2025-01-01'
++        if ETF_CREATION_BASIS == "legacy":
++            _top30 = list(bq("""SELECT t.ticker FROM tav2_bq.ticker t WHERE t.time BETWEEN DATE '2020-01-01' AND DATE '2025-01-01'
+ AND t.ticker IN (SELECT DISTINCT t2.ticker FROM tav2_bq.ticker_prune t2)
+-GROUP BY t.ticker ORDER BY AVG(t.Volume_3M_P50*t.Close) DESC LIMIT 30""")["ticker"])
++GROUP BY t.ticker ORDER BY AVG(t.Volume_3M_P50*t.Close) DESC LIMIT 30  -- pricebasis-gate:legacy-control
++""")["ticker"])
++        else:
++            # cửa sổ 365 ngày KẾT THÚC tại START_DATE ⇒ mọi thông tin dùng để chọn rổ đều có
++            # trước phiên đầu tiên của backtest. Giá THÔ (`COALESCE(Price,Close)`) vì
++            # `Volume_3M_P50` là SỐ LƯỢNG CP thô — cùng lập luận với LAG_ADV_BASIS.
++            _top30 = list(bq(f"""SELECT t.ticker FROM tav2_bq.ticker t
++WHERE t.time > DATE_SUB(DATE '{START_DATE}', INTERVAL 365 DAY) AND t.time <= DATE '{START_DATE}'
++  AND EXISTS(SELECT 1 FROM `{UNIVERSE_PIT_TABLE}` u2
++             WHERE u2.ticker = t.ticker AND u2.time = t.time AND u2.in_universe)
++GROUP BY t.ticker ORDER BY AVG(t.Volume_3M_P50*COALESCE(t.Price,t.Close)) DESC LIMIT 30""")["ticker"])
+         _a = bq(f"""SELECT t.time, SUM(COALESCE(t.Price,t.Close)*t.Volume) AS tv FROM tav2_bq.ticker AS t
+ WHERE t.ticker IN ({",".join(f"'{x}'" for x in _top30)})
+   AND t.time >= DATE_SUB(DATE '{START_DATE}', INTERVAL 200 DAY) AND t.time <= DATE '{END_DATE}'
+diff --git a/WorkingClaude/rating_8l_history.py b/WorkingClaude/rating_8l_history.py
+index b8dcff5f..5e948117 100755
+--- a/WorkingClaude/rating_8l_history.py
++++ b/WorkingClaude/rating_8l_history.py
+@@ -112,13 +112,69 @@ FROM tav2_bq.ticker_financial AS f
+ WHERE f.time >= '2014-06-01'
+ """
+ 
+-ICB_SQL = """
+-SELECT t.ticker, ANY_VALUE(t.ICB_Code) AS ICB_Code
+-FROM tav2_bq.ticker AS t
+-GROUP BY t.ticker
++# ĐỀ XUẤT 2026-09-27 (audit measurement-integrity FAIL-G). Bản cũ:
++#     SELECT t.ticker, ANY_VALUE(t.ICB_Code) ... GROUP BY t.ticker
++# gán phân ngành CỦA HÔM NAY cho toàn bộ panel lịch sử 2014→nay, và `ANY_VALUE` KHÔNG tất định.
++#
++# ĐO THẬT 2026-09-27 trên `tav2_bq.ticker`:
++#   - 1.285/1.291 mã chỉ có MỘT `ICB_Code` ⇒ nguồn gần như KHÔNG đổi theo thời gian.
++#   - 6 mã có HAI giá trị; 3 trong số đó (DIH, HDG, SBM) nhảy qua ranh giới `route_of()`.
++#   - Chỉ **4 mã** trên toàn bảng có >1 "đoạn" ICB_Code dài ≥20 phiên liên tiếp ⇒ tái phân ngành
++#     THẬT là cực hiếm; phần còn lại là NHIỄU một-vài-phiên. SBM là ca mẫu: `ICB_Code` nhảy qua
++#     lại 7535↔2357 suốt 2020-2025, mỗi lần 1-4 phiên. Vì thế chỉ as-of theo MIN(time) của mỗi mã
++#     là KHÔNG đủ — nó biến một phiên nhiễu 2020-11-23 thành "đổi ngành vĩnh viễn".
++#   - Hậu quả đã xảy ra, có artifact: `data/rating_8l_history.csv` dựng lại 2026-09-27 gán
++#     HDG route=POWER cho MỌI dòng từ 2014-08-01, trong khi `ICB_Code=7535` của HDG chỉ xuất hiện
++#     từ 2026-09-07 (trước đó 8633 = REALESTATE, 4.136 phiên). DIH cũng vậy (8633 từ 2026-08-21
++#     áp hồi tố về 2011). HDG là thành viên rổ custom30V (26 lượt trong
++#     `data/custom30v_8l_publish.csv`) ⇒ đây là ĐƯỜNG QUYẾT ĐỊNH, không phải hiển thị.
++#
++# Bản vá: lấy các ĐOẠN LIÊN TIẾP (run) của `ICB_Code`, chỉ coi là đổi ngành khi đoạn dài
++# ≥ `ICB_MIN_RUN` phiên, rồi as-of join theo `eff_date`. Tất định theo định nghĩa (hết ANY_VALUE).
++# ⚠️ GIỚI HẠN thừa nhận rõ: nguồn hầu như KHÔNG ghi lại tái phân ngành TRƯỚC 2026, nên bản vá chỉ
++# đảm bảo TẤT ĐỊNH + đúng PIT cho những lần đổi ĐƯỢC GHI. Những lần đổi không được ghi thì
++# **không sửa được từ dữ liệu này** — cần một nguồn phân ngành có vintage (FiinProX/HOSE).
++ICB_MIN_RUN = 20   # số phiên liên tiếp tối thiểu để một ICB_Code được coi là ĐÃ XÁC LẬP
++ICB_SQL = f"""
++WITH d AS (
++  SELECT t.ticker, t.time, CAST(t.ICB_Code AS INT64) AS icb,
++         ROW_NUMBER() OVER(PARTITION BY t.ticker ORDER BY t.time) rn
++  FROM tav2_bq.ticker AS t WHERE t.ICB_Code IS NOT NULL),
++g AS (SELECT d.*, d.rn - ROW_NUMBER() OVER(PARTITION BY d.ticker, d.icb ORDER BY d.time) grp FROM d),
++runs AS (SELECT ticker, icb, MIN(time) AS icb_from, COUNT(*) AS run_len
++         FROM g GROUP BY ticker, icb, grp)
++SELECT ticker, icb AS ICB_Code, MIN(icb_from) AS icb_from
++FROM runs WHERE run_len >= {ICB_MIN_RUN}
++GROUP BY ticker, icb
++ORDER BY ticker, icb_from
+ """
+ 
+ 
++def attach_icb_pit(df, icb):
++    """As-of join `ICB_Code` theo ngày hiệu lực (backward), thay cho `ANY_VALUE` toàn-lịch-sử.
++
++    Dòng có ngày hiệu lực TRƯỚC đoạn ICB đầu tiên nhận mã SỚM NHẤT đã xác lập — trung thực nhất
++    có thể (mã muộn hơn là hindsight). Mã không có đoạn nào ≥ICB_MIN_RUN (toàn nhiễu) rơi về
++    NaN ⇒ `route_of()` trả COMPOUNDER, đúng như hành vi với ICB_Code NULL hiện tại.
++    """
++    icb = icb.copy()
++    icb["icb_from"] = pd.to_datetime(icb["icb_from"])
++    icb = icb.sort_values(["ticker", "icb_from"])
++    left = df.copy()
++    # `eff_date` chưa tồn tại ở điểm gọi (nó được dựng ở cuối main), nên dựng LẠI ĐÚNG công thức
++    # đó tại chỗ: Release_Date, thiếu thì q_time + 45 ngày. Đổi công thức ở một nơi mà quên nơi
++    # kia là đúng lớp lỗi §28 — nếu sửa, sửa cả hai.
++    _rel = pd.to_datetime(left["Release_Date"], errors="coerce")
++    left["_eff"] = _rel.fillna(pd.to_datetime(left["q_time"], errors="coerce")
++                               + pd.Timedelta(days=45))
++    left = left.sort_values("_eff")
++    out = pd.merge_asof(left, icb.sort_values("icb_from"), left_on="_eff",
++                        right_on="icb_from", by="ticker", direction="backward")
++    first = icb.groupby("ticker")["ICB_Code"].first()
++    out["ICB_Code"] = out["ICB_Code"].fillna(out["ticker"].map(first))
++    return out.drop(columns=["_eff", "icb_from"]).reset_index(drop=True)
++
++
+ # ---------- ported scorecards (faithful to rating_8l.py) ----------
+ def real_lev(r):
+     v = r.get("STLTDebt_Eq_P0", np.nan)
+@@ -474,7 +530,7 @@ def main():
+     print("pulling financial history ...")
+     df = bq(HIST_SQL)
+     icb = bq(ICB_SQL)
+-    df = df.merge(icb, on="ticker", how="left")
++    df = attach_icb_pit(df, icb)
+     print(f"  {len(df)} financial rows, {df['ticker'].nunique()} tickers")
+ 
+     df["route"] = [route_of(t, c) for t, c in zip(df["ticker"], df["ICB_Code"])]

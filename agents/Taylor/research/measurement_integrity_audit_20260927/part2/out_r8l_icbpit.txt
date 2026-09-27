@@ -1,0 +1,31 @@
+pulling financial history ...
+  53679 financial rows, 1291 tickers
+  [bank-AQ hist] 1318 bank-quarter NPL/LLR rows, 27 banks from fiinprox_bank_ratios_quarterly_20260914.csv (PIT lag >=45d, Q4 >=90d)
+  [moat-gov] 39 5F tiers; only WIDE earns +1 from 2025-06-01: ['DHG', 'TLG', 'VNM']; registry NARROW/NONE -> no notch (recent)
+  [bank-AQ override] REJECTED 9 live row(s) with no real lens data (fail-closed, keep this module's ROE-grounded grade): ABB(bank-nodata), BAB(bank-nodata), BVB(bank-nodata), KLB(bank-nodata), NVB(bank-nodata), PGB(bank-nodata), SGB(bank-nodata), VAB(bank-nodata), VBB(bank-nodata)
+  [bank-AQ override] current-snapshot bank rating set to live AQ for 1 bank(s); history proxy untouched
+  [forensic] appended 8 exclude override row(s) rating 5 @flag date: ['KSF', 'VVS', 'PC1', 'HHS', 'L40', 'KLB', 'DIG', 'BFC']
+wrote /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/measurement_integrity_audit_20260927/part2/rating_8l_history_EXP_icbpit.csv  (53687 rows)
+refreshed BQ table tav2_bq.fa_ratings_8l
+
+distribution by route x rating (raw 1-5):
+rating         1     2      3      4    5
+route                                    
+BANK          61   144    364    181  231
+COMPOUNDER  3149  3975  11528  23452  486
+CYCLICAL      40   267    403    297  464
+INSURANCE     67   124    230    100   15
+POWER          0   665   1125    161   37
+REALESTATE     0  1058   1140   1653  523
+SECURITIES     0   218    313    515  701
+
+distribution by route x TIER (final A-E, compounder=per-qtr percentile):
+tier           A     B      C      D     E
+route                                     
+BANK          61   144    364    181   231
+COMPOUNDER  4873  8015  12741  10849  6112
+CYCLICAL      40   267    403    297   464
+INSURANCE     67   124    230    100    15
+POWER          0   665   1125    161    37
+REALESTATE     0  1058   1140   1653   523
+SECURITIES     0   218    313    515   701

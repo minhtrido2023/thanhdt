@@ -1,0 +1,12 @@
+
+=== alloc2014 (n=3107, 2014-01-02..2026-06-19) dep_yr mean that=0.0596
+variant       CAGR dep=THAT  CAGR dep=0  delta pp
+BASELINE             13.57%      10.95%     2.62
+DEPTH1.0             13.37%      11.11%     2.26
+DEPTH1.5             12.82%      10.63%     2.19
+
+=== alloc2011 (n=3855, 2011-01-04..2026-06-19) dep_yr mean that=0.0699
+variant       CAGR dep=THAT  CAGR dep=0  delta pp
+BASELINE             12.37%       8.62%     3.76
+DEPTH0.95            11.16%       8.82%     2.34
+DEPTH1.5              9.41%       7.71%     1.71
