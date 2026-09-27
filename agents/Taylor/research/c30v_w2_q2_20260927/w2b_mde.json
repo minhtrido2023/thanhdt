@@ -1,0 +1,32 @@
+{
+ "D.cagr_pct": {
+  "sd_over_4_rates": 0.8627,
+  "range": 1.574,
+  "n_legs_for_g_equal_sd": 15.7
+ },
+ "D.E_calmar": {
+  "sd_over_4_rates": 0.1146,
+  "range": 0.2247,
+  "n_legs_for_g_equal_sd": 15.7
+ },
+ "D.maxdd_pct": {
+  "sd_over_4_rates": 0.2994,
+  "range": 0.71,
+  "n_legs_for_g_equal_sd": 15.7
+ },
+ "A.cagr_pct": {
+  "sd_over_4_rates": 0.1993,
+  "range": 0.459,
+  "n_legs_for_g_equal_sd": 15.7
+ },
+ "A.E_calmar": {
+  "sd_over_4_rates": 0.021,
+  "range": 0.0468,
+  "n_legs_for_g_equal_sd": 15.7
+ },
+ "A.maxdd_pct": {
+  "sd_over_4_rates": 0.042,
+  "range": 0.1,
+  "n_legs_for_g_equal_sd": 15.7
+ }
+}

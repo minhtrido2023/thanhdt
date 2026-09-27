@@ -1,0 +1,162 @@
+[
+ {
+  "label": "D vehicle (park 0.0), tier1 vs tier2",
+  "legs": [
+   "w2d_baseline",
+   "w2d_floor"
+  ],
+  "first_tx_divergence": "2014-02-06",
+  "first_cash_divergence": "2014-01-02",
+  "sessions": [
+   {
+    "ymd": "2014-02-06",
+    "cash_bal_A_minus_B": 97661251.6,
+    "nav_A_minus_B": 184398430.5,
+    "state": 3.0,
+    "only_in_w2d_baseline": [],
+    "only_in_w2d_floor": [],
+    "same_key_diff_shares": {
+     "LAG|DNC|buy": [
+      2601115.088400856,
+      2590993.782088107,
+      -10121.31
+     ],
+     "LAG|VBC|buy": [
+      461041.89027894544,
+      459247.91013391095,
+      -1793.98
+     ]
+    },
+    "n_tx": [
+     9,
+     9
+    ]
+   },
+   {
+    "ymd": "2014-02-07",
+    "cash_bal_A_minus_B": 97642720.3,
+    "nav_A_minus_B": 184330534.3,
+    "state": 3.0,
+    "only_in_w2d_baseline": [],
+    "only_in_w2d_floor": [],
+    "same_key_diff_shares": {
+     "LAG|BVS|buy": [
+      20276.610232018764,
+      19462.25225283204,
+      -814.36
+     ]
+    },
+    "n_tx": [
+     8,
+     8
+    ]
+   },
+   {
+    "ymd": "2014-02-10",
+    "cash_bal_A_minus_B": 97624176.4,
+    "nav_A_minus_B": 185082225.9,
+    "state": 3.0,
+    "only_in_w2d_baseline": [],
+    "only_in_w2d_floor": [],
+    "same_key_diff_shares": {},
+    "n_tx": [
+     8,
+     8
+    ]
+   },
+   {
+    "ymd": "2014-02-11",
+    "cash_bal_A_minus_B": 97605619.7,
+    "nav_A_minus_B": 184768172.5,
+    "state": 3.0,
+    "only_in_w2d_baseline": [],
+    "only_in_w2d_floor": [],
+    "same_key_diff_shares": {},
+    "n_tx": [
+     9,
+     9
+    ]
+   }
+  ]
+ },
+ {
+  "label": "A vehicle (custom30V park 0.3), tier1 vs tier2",
+  "legs": [
+   "w2a_baseline",
+   "w2a_floor"
+  ],
+  "first_tx_divergence": "2014-02-06",
+  "first_cash_divergence": "2014-01-02",
+  "sessions": [
+   {
+    "ymd": "2014-02-06",
+    "cash_bal_A_minus_B": 97661251.6,
+    "nav_A_minus_B": 184398430.5,
+    "state": 3.0,
+    "only_in_w2a_baseline": [],
+    "only_in_w2a_floor": [],
+    "same_key_diff_shares": {
+     "LAG|DNC|buy": [
+      2601115.088400856,
+      2590993.782088107,
+      -10121.31
+     ],
+     "LAG|VBC|buy": [
+      461041.89027894544,
+      459247.91013391095,
+      -1793.98
+     ]
+    },
+    "n_tx": [
+     9,
+     9
+    ]
+   },
+   {
+    "ymd": "2014-02-07",
+    "cash_bal_A_minus_B": 97642720.3,
+    "nav_A_minus_B": 184330534.3,
+    "state": 3.0,
+    "only_in_w2a_baseline": [],
+    "only_in_w2a_floor": [],
+    "same_key_diff_shares": {
+     "LAG|BVS|buy": [
+      20276.610232018764,
+      19462.25225283204,
+      -814.36
+     ]
+    },
+    "n_tx": [
+     8,
+     8
+    ]
+   },
+   {
+    "ymd": "2014-02-10",
+    "cash_bal_A_minus_B": 97624176.4,
+    "nav_A_minus_B": 185082225.9,
+    "state": 3.0,
+    "only_in_w2a_baseline": [],
+    "only_in_w2a_floor": [],
+    "same_key_diff_shares": {},
+    "n_tx": [
+     8,
+     8
+    ]
+   },
+   {
+    "ymd": "2014-02-11",
+    "cash_bal_A_minus_B": 97605619.7,
+    "nav_A_minus_B": 184768172.5,
+    "state": 3.0,
+    "only_in_w2a_baseline": [],
+    "only_in_w2a_floor": [],
+    "same_key_diff_shares": {},
+    "n_tx": [
+     9,
+     9
+    ]
+   }
+  ]
+ }
+]

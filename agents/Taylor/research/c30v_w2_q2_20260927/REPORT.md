@@ -8,6 +8,15 @@
 
 ## 0. Kết luận một dòng
 
+> ⚠️ **ĐỌC §11 TRƯỚC KHI DÙNG BẤT KỲ SỐ NÀO Ở §2/§3.** quant-skeptic đã **REFUTED** (2026-09-27
+> 15:48Z) phần DIỄN GIẢI của W2, và W2b (job `Taylor_20260927_155645`) đã xác nhận bằng 3 phép đo
+> độc lập. Cụ thể: câu *"bị quyết định bởi tầng proxy"* dưới đây **ĐÃ RÚT LẠI** — đảo dấu là
+> **nhiễu đường giao dịch của engine**, và khoảng cách giữa các phương tiện ở §2/§3 nằm DƯỚI sàn
+> nhiễu đó nên **không đọc được**. Kết luận "không ai đạt tiêu chí PREREG" vẫn đúng, nhưng vì lý do
+> khác (không đo được). Xem §11 (rút lại) · §12 (overlay) · §13 (sàn nhiễu) · §14 (cơ chế) ·
+> §17 (kết luận sau W2b).
+
+
 **Không ứng viên nào đạt tiêu chí PREREG.** Thứ hạng **ĐẢO DẤU HOÀN TOÀN** giữa hai tầng proxy: ở
 tầng 1 (baseline) **không park (D) thắng tất cả** (P(D>X) = 0,67–0,81); ở tầng 2 (floor) **mọi
 phương tiện park đều thắng D** (P(X>D) = 0,55–0,68). PREREG §1 đòi "đứng ở tầng 1 VÀ không đảo dấu
@@ -256,3 +265,376 @@ cd /home/trido/thanhdt/WorkingClaude && DSR_FAMILY_MANIFEST=data/dsr_family_mani
 Artifact: `logs/*.log` (13 chân + paired + pairwise + null ×4 + dsr ×2), `paired_{baseline,floor}.json`,
 `pairwise_{baseline,floor}.json`, `null_*.json`, `nullliq_*.json`,
 `data/dsr_family_manifest_w2q2_2026-09-27.json`, `selfchecks/`.
+
+---
+
+# W2b — SỬA W2 theo verdict REFUTED của quant-skeptic
+
+> Job `Taylor_20260927_155645`. Verdict gốc: bus `quant-skeptic/verification` topic
+> `w2-c30v-q2-final`, 2026-09-27 15:48Z, **REFUTED / confidence high**. PAPER-ONLY, `EXP_TAG`
+> non-canonical, không re-pin, không đổi rail, không merge. 13 chân W2 giữ nguyên, không chạy lại.
+> **Skeptic bác DIỄN GIẢI, không bác số** — `independent_recompute` của nó khớp cả 12 ledger, và
+> tôi không tranh chấp điểm đó.
+
+## 11. RÚT LẠI — đoạn nào của finding `w2-c30v-q2-final` không còn đứng được
+
+Rút lại **nguyên văn** 3 tuyên bố sau. Tất cả đều là DIỄN GIẢI, không phải phép đo:
+
+| # | Tuyên bố cũ (ở đâu) | Trạng thái | Vì sao |
+|---|---|---|---|
+| **R1** | "**Khoảng 0,55pp carry trung bình là đủ để đảo toàn bộ thứ hạng**" (§3, cuối) | **RÚT LẠI** | 0,55pp carry KHÔNG đảo thứ hạng. Overlay §3(3) (bảng dưới) cho thấy khi chỉ có carry thay đổi mà đường giao dịch KHÔNG đổi, đổi tầng dịch MỌI phương tiện gần như đồng đều (−0,37pp CAGR cho D, −0,31pp cho A) và **không có đảo dấu**. Cái đảo dấu đến từ chỗ khác. |
+| **R2** | "thứ hạng **bị quyết định bởi tầng proxy**, không phải bởi phương tiện" (§0) | **RÚT LẠI một nửa** | Nửa phủ định ĐÚNG và còn mạnh hơn: thứ hạng KHÔNG do phương tiện quyết định. Nửa khẳng định SAI: nó cũng không do tầng proxy quyết định — nó do **đường giao dịch rời rạc** của chính engine. Tầng proxy chỉ là thứ tình cờ làm xáo đường đi ở lần đo này. |
+| **R3** | "giới hạn nghiêm trọng nhất của W2 là proxy single-source trước 2025-11" (§9.1) → và hàm ý W3 "làm chắc proxy trước" | **RÚT LẠI thứ tự ưu tiên** | Proxy single-source vẫn là một giới hạn thật, nhưng **không phải cái chặn**. Làm proxy chính xác tuyệt đối cũng không giúp gì: sàn nhiễu đường đi của engine (§13) lớn hơn toàn bộ khoảng cách giữa các phương tiện. Siết proxy trước = nhắm sai nguyên nhân. |
+
+**KHÔNG rút lại** (vẫn đứng, skeptic cũng xác nhận): mọi con số ledger và mọi cổng §1; §4 (C có edge
+trên CAGR, đuôi DD xấu hơn ngẫu nhiên, 2 pool cho cùng phán quyết); §5 (park 0,0 không rò tiền);
+§6 (R2/R5 là nợ cũ, không phải regression W2); §9 các mục 2-7; và kết luận **"không ứng viên nào đạt
+tiêu chí PREREG"** — kết luận đó vẫn đúng, chỉ là **vì lý do khác** (không đo được, thay vì đo được
+rồi thấy không robust).
+
+Một lệch **so với chữ PREREG** phải khai ở đây: PREREG §3(3) hứa overlay như "phép đối chiếu bậc 1
+trong REPORT"; attempt 2 đã bỏ sót nó. Skeptic bắt đúng
+(`reproducibility_selfcheck: "Undisclosed deviation: PREREG §3(3) overlay cross-check missing"`).
+Mục §12 dưới đây trả món nợ đó.
+
+## 12. Overlay PREREG §3(3) — carry ÁP LÊN đường carry-0%, đường giao dịch KHÔNG đổi
+
+Đây là phép đo tách được **hiệu ứng carry trực tiếp** khỏi **hiệu ứng đổi đường giao dịch**, vì nó
+áp carry bằng số học lên chuỗi NAV của chân carry-0% thật, không cho nó chạy lại engine.
+
+- Đường nền: `w2d_off` (= D, park 0,0, carry 0%) và `w2ctrl2` (= A, park 0,3, carry 0% — **chính là
+  chân control ledger md5 `4707bcbe`**). Cả hai là chân THẬT đã pin, không dựng lại.
+- Công thức mỗi phiên: `nav_ov(d) = nav_ov(d−1)·(1+r_eng(d)) + max(idle_cash(d−1),0)·rate(d)/252·(nav_ov/nav_eng)(d−1)`
+  với `idle_cash = bal_cash_ref + lag_cash_ref` từ **DAILY rows** (đúng đại lượng `simulate()` trả
+  lãi: chỉ `cash>0`, tiền đã park nằm ở `bal_etf_ref`/`lag_etf_ref`), `rate` = `idle_rate_proxy.r_idle`
+  PIT theo tầng, `/252` đúng quy ước engine, 0 trước khi chuỗi bắt đầu (tầng 2: 18 phiên).
+- Tiền nhàn rỗi trung bình: **D 57,6% NAV · A 46,4% NAV** — đây là đòn mà overlay tác động qua, và
+  là lý do D được lợi nhiều hơn A.
+- Script `w2b_overlay.py`, output `w2b_overlay.json`, paired bootstrap DÙNG CHUNG `paired_w2.py`
+  (L=21, B=4000, seed=12345) trên cả 6 đường ⇒ cùng một "thế giới resample" như W2.
+
+| Đường | CAGR | Sharpe | MaxDD | Calmar | **E[Calmar]** | DD5th | ΔCAGR vs carry-0% |
+|---|---|---|---|---|---|---|---|
+| D carry 0% (`w2d_off`) | 22,12% | 1,87 | −16,2% | 1,363 | 1,488 | −23,9% | — |
+| A carry 0% (`w2ctrl2`) | 23,37% | 1,81 | −14,6% | 1,596 | 1,474 | −25,2% | — |
+| **D + overlay tầng 1** | 25,08% | 2,10 | −15,5% | 1,621 | **1,779** | −22,5% | **+2,96pp** |
+| **A + overlay tầng 1** | 25,77% | 1,98 | −13,9% | 1,850 | 1,705 | −23,8% | **+2,40pp** |
+| **D + overlay tầng 2** | 24,71% | 2,07 | −15,5% | 1,592 | **1,744** | −22,6% | **+2,59pp** |
+| **A + overlay tầng 2** | 25,46% | 1,96 | −14,0% | 1,821 | 1,677 | −24,0% | **+2,09pp** |
+
+`P(A > D)` trên Calmar bootstrap: carry 0% **0,515** · overlay tầng 1 **0,422** · overlay tầng 2
+**0,430**.
+
+**Ba điều đọc ra, và một chỗ tôi khác skeptic:**
+
+1. **KHÔNG CÓ ĐẢO DẤU giữa hai tầng.** Trên tiêu chí CHÍNH của PREREG (E[Calmar]) overlay cho
+   **D > A ở CẢ hai tầng** (1,779 vs 1,705 và 1,744 vs 1,677), `P(A>D)` = 0,422 / 0,430 — cùng
+   phía, cùng độ lớn. Trên CAGR thì **A > D ở cả hai tầng** (25,77 vs 25,08; 25,46 vs 24,71).
+   Hai tiêu chí trả lời khác nhau, nhưng **mỗi tiêu chí trả lời NHẤT QUÁN qua hai tầng.** Đó là
+   điều bảng engine-rerun §2 không có.
+2. **Đổi tầng dịch mọi thứ cùng chiều, cỡ ~0,3pp.** D −0,37pp CAGR, A −0,31pp; E[Calmar] D −0,035,
+   A −0,028. So với engine-rerun: D **−2,01pp** CAGR (26,23→24,22) và A **+0,38pp** (25,84→26,22).
+   Tức hiệu ứng trực tiếp của tầng nhỏ hơn cái W2 đo được **5,4 lần** ở chân D, và **ngược dấu** ở
+   chân A. Phần chênh lệch ấy không phải carry — nó là đường đi.
+3. **Skeptic nói "mọi phương tiện dịch ĐỒNG ĐỀU ~0,3pp/book"; chính xác hơn là KHÔNG hoàn toàn đồng
+   đều** — D được +2,96pp còn A +2,40pp khi bật carry tầng 1, lệch **0,56pp**, đúng bằng tỉ lệ tiền
+   nhàn rỗi (57,6% vs 46,4%). Đây là một hiệu ứng THẬT và nó đi **đúng chiều có lợi cho D**: cho tiền
+   nhàn rỗi ăn lãi thì không-park được lợi nhiều hơn park, hiển nhiên. Nhưng 0,56pp vẫn nhỏ hơn sàn
+   nhiễu 1,57pp (§13) ⇒ **vẫn không đọc được**. Điều chỉnh này không cứu kết luận cũ, nó chỉ làm
+   phép mô tả đúng hơn.
+
+**Giới hạn của chính overlay (PREREG §3 đã khai TRƯỚC, không phải biện hộ sau):** overlay KHÔNG
+truyền carry vào sizing, nên nó **hạ thấp chân D một cách có hệ thống** (ở D tiền nhàn rỗi là 57,6%
+NAV; carry của nó làm NAV to hơn ⇒ lệnh sau to hơn — overlay không có cơ chế đó). Vì vậy overlay là
+**phép đối chiếu bậc 1**, không phải nguồn số kết luận. Nó đủ để trả lời đúng một câu — "carry tự nó
+có đảo thứ hạng không?" — và câu trả lời là **KHÔNG**.
+
+## 13. SÀN NHIỄU ĐƯỜNG ĐI — 8 chân engine, carry FLAT, không proxy
+
+Câu hỏi: nếu giữ nguyên MỌI thứ và chỉ nhích mức lãi tiền nhàn rỗi, engine trả lời khác bao nhiêu?
+8 chân thật: {D = park 0,0 · A = custom30V park 0,3} × `IDLE_CARRY_FLAT` ∈ {3,0 · 3,5 · 4,0 · 4,5}%/năm.
+
+**Vì sao FLAT, không phải proxy:** hằng số không có cấu trúc theo tháng, nên mọi chuyển động của
+metric qua 4 mức **không thể** là tính chất của chuỗi lãi — nó chỉ có thể là engine đi đường giao
+dịch khác vì mức tiền đổi. Bằng cấu tạo, chân flat cũng không thể có look-ahead.
+
+Cùng lệnh pin, cùng `BQ_LOCAL_CACHE`/`BASKET_CA_SNAPSHOT`, cùng paired bootstrap (L=21, B=4000,
+seed=12345, MỘT chuỗi block-index cho cả 8 chân). Script `w2b_noise.py` → `w2b_noise.json`.
+
+| chân | CAGR | Sharpe | MaxDD | Calmar | E[Calmar] | DD5th |
+|---|---|---|---|---|---|---|
+| D @3,0% | 24,38% | 2,05 | −14,4% | 1,690 | 1,735 | −22,1% |
+| D @3,5% | 24,29% | 2,04 | −14,1% | 1,722 | 1,723 | −22,1% |
+| D @4,0% | 25,86% | 2,14 | −13,9% | 1,855 | **1,901** | −21,3% |
+| D @4,5% | 25,79% | 2,17 | −13,7% | 1,880 | **1,947** | −20,7% |
+| A @3,0% | 25,68% | 2,00 | −14,1% | 1,826 | 1,716 | −23,4% |
+| A @3,5% | 26,14% | 2,03 | −14,0% | 1,863 | 1,763 | −23,2% |
+| A @4,0% | 26,02% | 2,02 | −14,0% | 1,856 | 1,754 | −23,1% |
+| A @4,5% | 26,04% | 2,02 | −14,0% | 1,866 | 1,756 | −23,1% |
+
+### 13.1 Sàn nhiễu, hai thước đo
+
+`step_0,5pp` = bước LỚN NHẤT giữa hai mức lãi KỀ NHAU (0,5pp). Đây là thước **so sánh trực tiếp
+được**, vì khoảng cách tầng 1 ↔ tầng 2 mà kết luận W2 dựa vào là **0,55pp** lãi trung bình.
+
+| phương tiện | metric | 4 giá trị | range (1,5pp) | **step (0,5pp)** | đơn điệu theo lãi? |
+|---|---|---|---|---|---|
+| **D** | CAGR | 24,38 / 24,29 / 25,86 / 25,79 | 1,574pp | **1,574pp** | **KHÔNG** |
+| **D** | E[Calmar] | 1,735 / 1,723 / 1,901 / 1,947 | 0,225 | **0,178** | **KHÔNG** |
+| **D** | MaxDD | −14,43 / −14,11 / −13,94 / −13,72 | 0,71pp | 0,32pp | có |
+| **A** | CAGR | 25,68 / 26,14 / 26,02 / 26,04 | 0,459pp | **0,459pp** | **KHÔNG** |
+| **A** | E[Calmar] | 1,716 / 1,763 / 1,754 / 1,756 | 0,047 | **0,047** | **KHÔNG** |
+| **A** | MaxDD | −14,06 / −14,03 / −14,01 / −13,96 | 0,10pp | 0,05pp | có |
+
+**Nhích lãi tiền nhàn rỗi 0,5pp — từ 3,5% lên 4,0% — làm CAGR của chân D nhảy 1,57pp và E[Calmar]
+nhảy 0,178.** Không đơn điệu (3,0→3,5 còn GIẢM 0,09pp rồi 3,5→4,0 tăng 1,57pp). Đó không phải hàm
+phản ứng của một tham số, đó là nhiễu.
+
+### 13.2 Khoảng cách phương tiện nằm TRONG sàn nhiễu — bảng phán quyết
+
+| mức lãi flat | ΔCAGR (A−D) | ΔE[Calmar] (A−D) | ΔMaxDD | `P(A>D)` Calmar |
+|---|---|---|---|---|
+| 3,0% | **+1,31pp** | −0,018 | +0,37pp | 0,501 |
+| 3,5% | **+1,86pp** | **+0,041** | +0,08pp | 0,588 |
+| 4,0% | +0,16pp | **−0,147** | −0,07pp | 0,287 |
+| 4,5% | +0,25pp | **−0,191** | −0,24pp | 0,258 |
+
+Cùng một cặp phương tiện, cùng một cửa sổ, chỉ đổi một hằng số vô hại: `ΔE[Calmar]` **đổi dấu**
+(−0,018 → +0,041 → −0,147 → −0,191) và `P(A>D)` chạy từ **0,258 đến 0,588**. So sánh trực tiếp với
+W2: `P(A>D)` = 0,192 (tầng 1) → 0,610 (tầng 2). **Toàn bộ "đảo dấu" của W2 nằm gọn trong dải mà một
+hằng số lãi vô nghĩa cũng tạo ra được.** Skeptic đúng: đó là nhiễu đường đi, không phải tính chất
+phương tiện.
+
+### 13.3 Kích cỡ hiệu ứng TỐI THIỂU đọc được (MDE) trên engine này
+
+`sd` = độ lệch chuẩn qua 4 mức lãi (n=4, `w2b_mde.json`). MDE ở n=4/phương tiện ≈ `2,8·sd·√(2/4)`:
+
+| phương tiện | metric | sd | **MDE @n=4** | số chân/phương tiện để phân giải hiệu ứng = nửa dải nhiễu |
+|---|---|---|---|---|
+| **D** (park 0,0) | CAGR | 0,863pp | **1,71pp** | ~19 |
+| **D** | E[Calmar] | 0,115 | **0,227** | ~16 |
+| **A** (park 0,3) | CAGR | 0,199pp | **0,39pp** | ~12 |
+| **A** | E[Calmar] | 0,021 | **0,042** | ~13 |
+
+**Sàn nhiễu là tính chất của CHÂN, không của engine nói chung** — và đây là phát hiện khó chịu nhất:
+chân D (57,6% NAV là tiền mặt) nhiễu **hơn 4 lần** chân A (46,4%). Càng nhiều tiền nhàn rỗi, càng
+nhiều "nhiên liệu" cho engine chọn đường khác. Nghĩa là **trục park-vs-không-park chính là trục
+engine này đo TỆ NHẤT** — đúng cái trục W2 được hỏi. Khoảng cách E[Calmar] giữa các phương tiện mà
+W2 báo (0,05–0,25) nhỏ hơn MDE của chân D (0,227) ⇒ **không một so sánh nào trong §2/§3 của W2 đọc
+được.**
+
+## 14. VÌ SAO nhiễu tiền mặt lại đổi TẬP LỆNH — truy vết tới rail của engine
+
+Skeptic đề nghị bắt đầu ở phiên phân kỳ đầu 2018-05-09 (D) / 2015-12-03 (A). Đo lại thì **hai mốc
+đó không phải phân kỳ đầu**: phân kỳ TX đầu tiên là **2014-02-06 cho CẢ HAI phương tiện**, và phân
+kỳ tiền mặt là **2014-01-02** — ngay phiên đầu cửa sổ, đúng như phải thế (lãi vào cash từ phiên 1).
+Tôi báo mốc đo được, không chép lại mốc trong prompt.
+
+### 14.1 Hai loại phân kỳ, phải tách ra mới hiểu được
+
+| | phân kỳ đầu | bản chất |
+|---|---|---|
+| **liên tục** (cùng tên, cùng hành động, khác SỐ LƯỢNG) | **2014-02-06** — `LAG\|DNC\|buy` 2.601.115,09 vs 2.590.993,78 cp (−0,39%); `LAG\|VBC\|buy` −0,39% | vô hại, đúng như mong đợi: tiền nhiều hơn 0,4% ⇒ mua nhiều hơn 0,4% |
+| **rời rạc** (tập TÊN khác nhau) | **2014-08-11** — `LAG\|VIP\|buy ENTRY_FILL` 81,58M **CÓ ở tầng 1, KHÔNG có ở tầng 2**; 16 TX vs 15 TX | đây mới là chỗ sinh ra swing 13–28pp |
+
+**`shares` là số THỰC, không phải số lô** (`2601115,088400856` — kiểm chứng trong `w2b_trace2.py`,
+`shares_are_fractional: True`). **Không có lượng hoá theo lô nào trong engine này.** Vậy không phải
+"round/lô" gây chuyện — sizing liên tục hoàn hảo theo tiền. Chuyện xảy ra khi một chênh lệch LIÊN TỤC
+cán qua một **ngưỡng RỜI RẠC**.
+
+### 14.2 Ba rail rời rạc, đọc thẳng từ `simulate_holistic_nav.py`
+
+| rail | vị trí | cơ chế | cash có vào không? |
+|---|---|---|---|
+| **R-a min-ticket 100.000 VND** | `simulate_holistic_nav.py:1240` `if buy_value >= 100_000` với `buy_value = min(remaining_value, daily_max, _bp)` và `_bp = cash + …` (1226-1229) | ngưỡng CỨNG. Chênh lệch tiền đủ đẩy một chân lên trên và chân kia xuống dưới 100k | **trực tiếp** (`cash` là một trong 3 hạng của `min`) |
+| **R-b hoàn tất/bỏ lệnh** | `:1263` `done = fill_pct >= 0.95 or days_filling >= max_fill_days(5)`; `:1264` `elif filled_shares > 0 and fill_pct >= min_fill_pct(0.30)` → nếu không thì **`ABANDONED_REFUND`** (`:1297,1317`) | HAI ngưỡng cứng (0,95 và 0,30) trên một TỈ SỐ mà mẫu số là `target_value = cur_nav / max_positions` (`:1145`) và tử số bị chặn bởi tiền + trần ADV | **trực tiếp** (qua cả `cash` và `cur_nav`) |
+| **R-c đếm slot** | `:1082` `if is_first_fill and not _slot_exempt and _n_slots >= max_positions`; `:1264` cổng nạp `len(positions)+len(pending) < max_positions*3` | occupancy là SỐ NGUYÊN. Một khi R-a/R-b nhét tên khác vào một slot, **mọi tín hiệu SAU đó** được nạp/bị chặn khác đi | gián tiếp — đây là bộ **KHUẾCH ĐẠI**, không phải nguồn |
+
+Trần ADV (`daily_max = liq × 0,20`) là liên tục, **không** phải rail.
+
+### 14.3 Rail nào thật sự cắn — đếm trên ledger (`w2b_trace3.json`)
+
+D tầng 1 vs tầng 2 (chỉ khác đúng chuỗi lãi):
+
+| đại lượng | giá trị |
+|---|---|
+| TX rows | 7.663 vs 7.534 |
+| TX chỉ có ở một chân | **407 / 278** (reason: `ENTRY_FILL` 292/182 · `TIME` 56/66 · `ABANDONED_REFUND` 52/17 · `STOP` 7/13) |
+| `ABANDONED_REFUND` **tổng** mỗi chân | **995 / 960** trên ~5.600 lệnh mua ⇒ **~17% lệnh vào bị BỎ** |
+| `holding_id` dùng chung | **546** · chỉ có ở chân 1: **1.437** · chỉ chân 2: **1.418** ⇒ **chỉ 16% vị thế là chung** |
+| phiên có SỐ LƯỢNG lệnh mua khác nhau | 184 / 1.127 |
+| lệnh mua nằm trong `[100k, 200k)` (vùng R-a cắn) | 82 / 79 trên 5.681 ⇒ **1,4%** |
+| lệnh mua NHỎ NHẤT | 104.500 VND (cả 2 chân) — **sát rail 100k** |
+
+Đối chứng quyết định — **D @3,5% vs D @4,0%**, chỉ khác một hằng số 0,5pp:
+
+| | tầng1 vs tầng2 | flat 3,5% vs 4,0% |
+|---|---|---|
+| TX chỉ một chân | 407 / 278 | 267 / 331 |
+| `holding_id` chung | 546 | 1.006 |
+| phiên khác số lệnh mua | 184 | 134 |
+
+**Cùng một cỡ độ phân kỳ.** Đổi tầng proxy không đặc biệt gì cả — nó chỉ là một cách nhích tiền.
+
+### 14.4 Phân loại theo yêu cầu: (i) threshold artefact vá được, hay (ii) cố hữu?
+
+**Trả lời: chủ yếu (ii), phần (i) có thật nhưng nhỏ VÀ không vá được mà không đổi hành vi anchor.**
+
+- **R-a (min-ticket 100k) = (i) threshold artefact.** 100.000 VND là hằng số tuyệt đối trên sổ 50
+  **tỷ** (= 2 phần triệu NAV) và vô nghĩa khi `shares` là số thực. *Patch đề xuất (KHÔNG merge):* bỏ
+  hẳn ngưỡng, hoặc đổi thành tỉ lệ NAV. **Nhưng nó KHÔNG phải patch trung tính**: 82/5.681 lệnh nằm
+  trong vùng nó cắn và lệnh nhỏ nhất là 104.500 VND ⇒ vá là **đổi fill của anchor**, tức phải
+  re-pin. Và vì chỉ 1,4% lệnh dính, vá xong **sàn nhiễu gần như không giảm**. Chi phí cao, lợi ích
+  thấp — **đề xuất KHÔNG vá**.
+- **R-b + R-c = (ii) tính chất cố hữu của mô phỏng rời rạc.** Chuỗi nhân quả: tiền lệch → `cur_nav`
+  lệch → `target_value = cur_nav/max_positions` lệch → `fill_pct` lệch → cán ngưỡng 0,30/0,95 →
+  **vị thế khác hẳn** (thành position vs `ABANDONED_REFUND`) → occupancy slot số nguyên khác →
+  **tín hiệu kế tiếp được nạp khác** → tiền khác nhiều hơn → lặp lại. Đây là **bản đồ hỗn loạn có
+  hồi tiếp dương**, không phải một bug ở một dòng. Với 17% lệnh vào đi qua nhánh bỏ-lệnh, engine có
+  hàng nghìn cơ hội rẽ nhánh mỗi lượt chạy. Bằng chứng khoá chặt nhất: cùng một vị thế
+  `LAG|DIC` 16.784,502927628666 cp **thoát bằng `ABANDONED_REFUND` ngày 2015-08-14 ở chân tầng 1**,
+  nhưng ở chân tầng 2 nó được giữ thêm **một tháng** rồi thoát bằng `TIME` ngày **2015-09-16**. Không
+  ngưỡng nào bị "vá sai" ở đây — hai chân chỉ đơn giản ở hai phía của cùng một biên quyết định.
+- **Không thể vá được theo nghĩa nào?** Bỏ ngưỡng 0,30 thì mọi lệnh khớp dở đều thành vị thế (đổi
+  chiến lược, không phải sửa lỗi). Bỏ đếm slot thì bỏ luôn trần tập trung. Cả hai đều là **luật
+  chiến lược**, không phải chi tiết cài đặt. **Không có patch nào giữ nguyên hành vi anchor mà hạ
+  được sàn nhiễu.**
+
+**Hệ quả cho MỌI A/B ±0,3pp đã làm trong quá khứ trên engine này** (đây là câu hỏi quan trọng nhất
+của W2b, trả lời thẳng): với chân có nhiều tiền nhàn rỗi, **±0,3pp CAGR hoặc ±0,05 E[Calmar] KHÔNG
+đọc được** — sàn nhiễu ở chân D là 1,57pp / 0,178. Với chân đã park gần hết tiền (A) sàn thấp hơn
+nhiều (0,46pp / 0,047) nhưng vẫn lớn hơn 0,3pp. **Bất kỳ kết luận cũ nào dựa trên một lần chạy
+duy nhất mỗi cấu hình và khoảng cách dưới ~0,5pp CAGR đều phải coi là CHƯA KẾT LUẬN**, không phải
+sai — chỉ là không có sức phân giải. Việc rà soát lại các A/B cũ theo tiêu chí này chưa làm, và
+**không** thuộc phạm vi W2b.
+
+## 15. META `cash_identity` + selfcheck R2/R5 (recommended_reruns #4, #5)
+
+**META `cash_identity` — ĐÃ SỬA trong worktree** (`pt_v23_audit_2014.py`, branch
+`research/c30v-w2-idlecarry-2709`). Trước đó mọi chân carry vẫn ghi *"No other cash flows exist
+(deposit interest = 0, no margin)"* — sai theo nghĩa nặng nhất: ai đó dựng lại cash **chỉ từ TX** sẽ
+thấy không khớp và không biết vì sao. Text mới, chỉ ở chân có carry, nói rõ có khoản lãi mutate cash
+KHÔNG có dòng TX, kèm chính chỗ engine tự cộng nó lại (`_resid = dcash − f_full − interest`) và mức
+lãi thật của chân (FLAT %/năm hay tier proxy). Chân `off` giữ nguyên nguyên văn cũ ⇒ **anchor không
+đổi** (xác nhận bằng md5 ở §16).
+
+**Selfcheck R2/R5 — KHÔNG có baseline nào để refresh, đây là chẩn đoán khác với giả định của dispatch.**
+Baseline không phải file số mà là **một module dựng từ git ref**
+(`basket_return_leg_oshares_selfcheck.py:82-83` `git show {BASKET_RETLEG_PREREF}:./custom_basket.py`).
+Module tiền-sửa đó **không có knob `BASKET_OSHARES_STEP`** (knob sinh ra cùng bản vá exdate,
+`custom_basket.py:148,216`) ⇒ nó CHỈ biết bước OShares theo QUÝ ⇒ *"regen baseline sang exdate"* là
+việc **không thể thực hiện**, không phải việc chưa làm. Bằng chứng cơ học, 3 log cùng TZ/interpreter/
+WORKDIR khác nhau đúng một biến env (`research/postmerge_haukiem_20260927/selfchecks/`):
+`…PREREF2c_STEPQUARTER…` **PASS toàn bộ**, R5 `max|Δlevel| = 0.000000e+00`; `…PREREF2c_EXDATE…` và
+`…PREREF…` **FAIL 2**, cùng cặp md5, cùng `9.223644e+01`. Nguyên nhân: R2/R5 được viết để chứng minh
+knob `BASKET_RETURN_OSHARES` không đổi đường weight, nhưng sau khi exdate thành mặc định thì phép so
+ấy **gộp hai thay đổi độc lập vào một assertion** và fail vì thay đổi thứ hai.
+**Đề xuất (KHÔNG merge, không chạm `custom_basket.py`)**: pin `BASKET_OSHARES_STEP=quarter` trong
+`run()` của selfcheck cho cả 3 chân R2/R5, **kèm cùng lượt** một R6 kiểu positive-control khẳng định
+`exdate` PHẢI đổi weight — nếu chỉ làm nửa đầu thì đường exdate mất hẳn lớp phủ. Patch + rủi ro:
+`w2b_retleg_R2R5.proposed.md`.
+
+## 16. Cổng bắt buộc của W2b + tái lập
+
+| Cổng | Kết quả |
+|---|---|
+| **Control leg tái lập anchor SAU khi vá code W2b** | xem §16.1 — **PASS ở `w2bn_ctrl3` và `w2bn_ctrl5`**, và một **FAIL THẬT bị bắt ở `w2bn_ctrl4`** |
+| **Self-check 0 VND** | **PASS 11/11 chân W2b mới** (8 flat + 3 control/meta): BAL + LAG cash-flow identity, final-NAV identity, borrow-audit — kể cả chân FLAT carry |
+| **Mutual-exclusion knob** | `IDLE_CARRY_FLAT` + `IDLE_CARRY_TIER` cùng lúc ⇒ `ValueError`, không có chân nào được có hai nguồn carry |
+| **Filename tag (§8)** | `_idleflat300/350/400/450` — trục mới đổi số ⇒ đổi tên file, không chân nào ghi vào tên canonical |
+| **Look-ahead trên chân flat** | không thể có, **theo cấu tạo**: hằng số không mang thông tin thời gian |
+
+### 16.1 Cổng control đã BẮT một lỗi thật của chính W2b — ghi lại vì nó là bài học, không phải thủ tục
+
+Bản vá META `cash_identity` **lần 1** viết lại câu cho chân `off` theo thứ tự clause khác (nội dung y
+nguyên về nghĩa). Chân `w2bn_ctrl4` cho md5 **`55e9f15f`** ≠ anchor `4707bcbe`. `diff` ra **đúng 1
+dòng**: dòng META đó, chỉ khác THỨ TỰ CLAUSE.
+
+Đã sửa: chân `off` phát ra chuỗi **NGUYÊN VĂN BYTE-FOR-BYTE** như cũ, nhánh carry mới có chuỗi khác.
+`w2bn_ctrl5` (sau khi sửa) → md5 **`4707bcbe…`** ✓.
+
+Bài học đáng ghi: **ledger được băm toàn file, nên một dòng tài liệu cũng là một phần của anchor.**
+"Chỉ sửa comment/text, không đổi số" **không** đủ để khỏi cần chạy lại cổng control. Nếu W2b bỏ qua
+cổng này vì "chỉ đổi chữ", nó sẽ âm thầm làm mọi so sánh với anchor sau này lệch nền.
+
+### 16.2 Tái lập W2b
+
+```bash
+WT=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/wt-w2q2-2709/WorkingClaude   # branch research/c30v-w2-idlecarry-2709
+R=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/c30v_w2_q2_20260927
+# 8 chan san nhieu (FLAT carry, khong proxy):
+for r in 0.030 0.035 0.040 0.045; do
+  $R/run_leg.sh w2bn_d$(python3 -c "print(int($r*10000))") BASKET_WT=namecap BASKET_SELECT=yieldcombo PARK_STATES=3:0.0 IDLE_CARRY_FLAT=$r
+  $R/run_leg.sh w2bn_a$(python3 -c "print(int($r*10000))") BASKET_WT=namecap BASKET_SELECT=yieldcombo PARK_STATES=3:0.3 IDLE_CARRY_FLAT=$r
+done
+$R/run_leg.sh w2bn_ctrl5 BASKET_WT=namecap BASKET_SELECT=yieldcombo PARK_STATES=3:0.3 IDLE_CARRY_TIER=off   # cong control -> md5 4707bcbe
+$DNA_PYEXE $R/w2b_overlay.py   # §12 overlay PREREG §3(3)   -> w2b_overlay.json
+$DNA_PYEXE $R/w2b_noise.py     # §13 san nhieu duong di     -> w2b_noise.json
+$DNA_PYEXE $R/w2b_trace.py     # §14.1 phan ky lien tuc     -> w2b_trace.json
+$DNA_PYEXE $R/w2b_trace2.py    # §14.1 phan ky ROI RAC      -> w2b_trace2.json
+$DNA_PYEXE $R/w2b_trace3.py    # §14.3 dem theo rail        -> w2b_trace3.json
+```
+
+Artifact W2b: `w2b_overlay.py|json` · `w2b_noise.py|json` · `w2b_trace{,2,3}.py|json` ·
+`w2b_mde.json` · `w2b_retleg_R2R5.proposed.md` · `logs/w2bn_*.log` (11 chân) ·
+`logs/w2b_{overlay,noise,trace,trace2,trace3,mde}.log`.
+
+## 17. KẾT LUẬN SAU W2b
+
+### 17.1 Có xếp hạng được phương tiện không? **KHÔNG.**
+
+Không phải "chưa đủ bằng chứng để chọn A hay C6" — là **engine không có sức phân giải để trả lời câu
+hỏi này ở kích cỡ hiệu ứng đang tồn tại.** Ba phép đo độc lập cùng chỉ một chỗ:
+
+1. **Overlay (§12)**: khi chỉ có carry đổi mà đường giao dịch KHÔNG đổi, **không có đảo dấu nào** —
+   E[Calmar] cho D > A ở cả hai tầng, CAGR cho A > D ở cả hai tầng, mỗi tiêu chí nhất quán.
+2. **Sàn nhiễu (§13)**: nhích một hằng số lãi vô nghĩa 0,5pp làm `P(A>D)` chạy từ **0,258 đến 0,588**
+   và CAGR chân D nhảy **1,57pp**. Dải "đảo dấu" của W2 (`P(A>D)` 0,192 → 0,610) nằm gọn trong đó.
+3. **Truy vết (§14)**: cơ chế đã xác định, đọc thẳng từ code — ngưỡng `fill_pct` 0,30/0,95 +
+   `ABANDONED_REFUND` (17% lệnh vào) + đếm slot số nguyên, có hồi tiếp dương. Chỉ **16% vị thế** là
+   chung giữa hai chân chỉ khác nhau chuỗi lãi.
+
+Vì vậy §2/§3 của W2 **không đọc được**, và §11 rút lại 3 tuyên bố diễn giải. Kết luận "không ứng viên
+nào đạt tiêu chí PREREG" **vẫn đúng** nhưng lý do đổi hẳn: **không đo được**, không phải "đo được rồi
+thấy không robust".
+
+### 17.2 Cần chính xác những gì để trả lời được Q2
+
+**(a) Kích cỡ hiệu ứng TỐI THIỂU đọc được, ở thiết kế một-chân-một-cấu-hình như W2** (§13.3):
+
+| chân | CAGR | E[Calmar] | MaxDD |
+|---|---|---|---|
+| có nhiều tiền nhàn rỗi (D, park 0,0 — 57,6% NAV là cash) | **≥ 1,7pp** | **≥ 0,23** | ≥ 0,6pp |
+| đã park (A, park 0,3 — 46,4%) | ≥ 0,4pp | ≥ 0,04 | ≥ 0,08pp |
+
+So sánh park-vs-không-park luôn có chân D trong đó ⇒ **ngưỡng ràng buộc là dòng trên: 1,7pp CAGR /
+0,23 E[Calmar]**. Khoảng cách phương tiện thật đo được là 0,05–0,25 E[Calmar] ⇒ nhỏ hơn 1 bậc.
+**Không hy vọng đọc được bằng cách đo cẩn thận hơn cùng một cách.**
+
+**(b) Hai đường ra, cả hai đều tốn kém — và đây là chỗ cần user/Mike quyết, W2b không tự quyết:**
+
+| đường | việc phải làm | chi phí | rủi ro |
+|---|---|---|---|
+| **ENSEMBLE** (khuyến nghị) | mỗi phương tiện chạy **~16-19 chân** với nhiễu tiền mặt độc lập (mức lãi flat rải rác / seed), so **TRUNG BÌNH** phương tiện chứ không so một chân. §13.3 tính từ `sd` thật. | 16-19 chân × 5 phương tiện × 2 tầng ≈ **160-190 chân engine**, mỗi chân ~7-10 phút | 4 mức của W2b chưa chắc độc lập (D có dấu hiệu 2 cụm: 3,0/3,5 vs 4,0/4,5) ⇒ `sd` n=4 có thể **ước thấp**, số chân thật có thể cao hơn |
+| **SỬA ENGINE** | không phải vá ngưỡng — phải đổi bản chất: thực thi liên tục thay vì lệnh rời rạc, hoặc trung bình hoá nội bộ nhiều đường thực thi | Bản viết lại `simulate()` | **Đổi engine = đổi cả anchor và toàn bộ lịch sử pin.** Và R-b/R-c là **luật chiến lược** (trần tập trung, bỏ lệnh khớp dở), không phải chi tiết cài đặt ⇒ sửa chúng là đổi chiến lược, không phải sửa đo lường |
+
+**(c) Không nên làm:** siết proxy lãi tiền nhàn rỗi để "chắc số hơn" (đó là ưu tiên W3 cũ, §11-R3
+rút lại). Proxy chính xác tuyệt đối cũng không hạ được sàn nhiễu một chút nào.
+
+### 17.3 Ranh giới — W2b KHÔNG kết luận gì về custom30V
+
+**Không kết luận giữ/bỏ custom30V.** W2b không cung cấp thêm bằng chứng nào cho quyết định đó theo
+CHIỀU NÀO — nó chỉ chứng minh rằng **bằng chứng ủng hộ VÀ bằng chứng phản đối trong W2 đều dưới sàn
+nhiễu**. Cụ thể, W2b **không** nói custom30V tốt, **không** nói custom30V tệ, và **không** nói
+"không park" tốt hơn. Ai đọc §13.2 rồi kết luận "D thắng ở lãi cao" là đang đọc chính cái nhiễu vừa
+được đo. Quyết định vẫn là của user (Q3/W3) và phải dựa trên căn cứ khác — ví dụ lý do vận hành /
+thanh khoản / tập trung — chứ không phải trên xếp hạng E[Calmar] của W2.
+
+**Một điểm vẫn đứng và có thể dùng** (không bị nhiễu phá vì nó không so hai chân engine): dưới quy
+ước cũ **lãi tiền nhàn rỗi = 0%/năm**, parking "mua" được +1,25pp CAGR mà phần lớn chỉ là hệ quả của
+việc engine trả 0% cho tiền không park (§2, chân tham chiếu). Overlay §12 định lượng phần đó: cho
+tiền nhàn rỗi ăn lãi thật ở tầng 1 thì chân KHÔNG park được **+2,96pp** còn chân park chỉ **+2,40pp**
+— tức **lợi thế biểu kiến của parking co lại ~0,56pp** chỉ vì bỏ giả định 0%. Con số đó là **hiệu ứng
+số học trực tiếp**, không đi qua đường giao dịch, nên nó đọc được. Nó không xếp hạng phương tiện,
+nhưng nó nói rõ: **mọi kết quả backtest parking đã pin dưới quy ước 0%/năm đều thiên vị có lợi cho
+parking**, và cỡ thiên vị là bậc nửa điểm phần trăm CAGR.

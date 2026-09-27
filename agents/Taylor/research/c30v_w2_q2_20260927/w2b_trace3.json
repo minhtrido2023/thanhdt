@@ -1,0 +1,172 @@
+{
+ "D_tier1_vs_tier2": {
+  "legs": [
+   "w2d_baseline",
+   "w2d_floor"
+  ],
+  "n_tx": [
+   7663,
+   7534
+  ],
+  "n_tx_only_in_a": 407,
+  "n_tx_only_in_b": 278,
+  "reason_only_in_a": {
+   "ENTRY_FILL": 292,
+   "TIME": 56,
+   "ABANDONED_REFUND": 52,
+   "STOP": 7
+  },
+  "reason_only_in_b": {
+   "ENTRY_FILL": 182,
+   "TIME": 66,
+   "ABANDONED_REFUND": 17,
+   "STOP": 13
+  },
+  "n_ABANDONED_REFUND": [
+   995,
+   960
+  ],
+  "buys_within_2x_of_100k_a": 82,
+  "n_buys_a": 5681,
+  "min_buy_gross_a": 104500.0,
+  "buys_within_2x_of_100k_b": 79,
+  "n_buys_b": 5571,
+  "min_buy_gross_b": 104500.0,
+  "holding_ids": {
+   "only_a": 1437,
+   "only_b": 1418,
+   "shared": 546
+  },
+  "sessions_with_diff_buy_count": 184,
+  "sessions_with_buys": 1127
+ },
+ "A_tier1_vs_tier2": {
+  "legs": [
+   "w2a_baseline",
+   "w2a_floor"
+  ],
+  "n_tx": [
+   9255,
+   9155
+  ],
+  "n_tx_only_in_a": 462,
+  "n_tx_only_in_b": 372,
+  "reason_only_in_a": {
+   "ENTRY_FILL": 272,
+   "ETF_REBAL_state3": 83,
+   "TIME": 56,
+   "ABANDONED_REFUND": 39,
+   "STOP": 11,
+   "ETF_REBAL_state4": 1
+  },
+  "reason_only_in_b": {
+   "ENTRY_FILL": 204,
+   "ETF_REBAL_state3": 65,
+   "TIME": 57,
+   "ABANDONED_REFUND": 34,
+   "STOP": 8,
+   "ETF_REBAL_state1": 2,
+   "ETF_REBAL_state5": 1,
+   "ETF_REBAL_state4": 1
+  },
+  "n_ABANDONED_REFUND": [
+   961,
+   956
+  ],
+  "buys_within_2x_of_100k_a": 80,
+  "n_buys_a": 6155,
+  "min_buy_gross_a": 0.0,
+  "buys_within_2x_of_100k_b": 80,
+  "n_buys_b": 6074,
+  "min_buy_gross_b": 0.0,
+  "holding_ids": {
+   "only_a": 1740,
+   "only_b": 1720,
+   "shared": 744
+  },
+  "sessions_with_diff_buy_count": 229,
+  "sessions_with_buys": 1536
+ },
+ "D_flat3.0_vs_flat3.5": {
+  "legs": [
+   "w2bn_d300",
+   "w2bn_d350"
+  ],
+  "n_tx": [
+   7546,
+   7526
+  ],
+  "n_tx_only_in_a": 312,
+  "n_tx_only_in_b": 292,
+  "reason_only_in_a": {
+   "ENTRY_FILL": 214,
+   "TIME": 65,
+   "ABANDONED_REFUND": 26,
+   "STOP": 7
+  },
+  "reason_only_in_b": {
+   "ENTRY_FILL": 195,
+   "TIME": 50,
+   "ABANDONED_REFUND": 35,
+   "STOP": 12
+  },
+  "n_ABANDONED_REFUND": [
+   960,
+   969
+  ],
+  "buys_within_2x_of_100k_a": 80,
+  "n_buys_a": 5583,
+  "min_buy_gross_a": 101026.3,
+  "buys_within_2x_of_100k_b": 80,
+  "n_buys_b": 5564,
+  "min_buy_gross_b": 104500.0,
+  "holding_ids": {
+   "only_a": 1210,
+   "only_b": 1209,
+   "shared": 754
+  },
+  "sessions_with_diff_buy_count": 139,
+  "sessions_with_buys": 1109
+ },
+ "D_flat3.5_vs_flat4.0": {
+  "legs": [
+   "w2bn_d350",
+   "w2bn_d400"
+  ],
+  "n_tx": [
+   7526,
+   7590
+  ],
+  "n_tx_only_in_a": 267,
+  "n_tx_only_in_b": 331,
+  "reason_only_in_a": {
+   "ENTRY_FILL": 173,
+   "TIME": 57,
+   "ABANDONED_REFUND": 26,
+   "STOP": 11
+  },
+  "reason_only_in_b": {
+   "ENTRY_FILL": 228,
+   "TIME": 59,
+   "ABANDONED_REFUND": 38,
+   "STOP": 6
+  },
+  "n_ABANDONED_REFUND": [
+   969,
+   981
+  ],
+  "buys_within_2x_of_100k_a": 80,
+  "n_buys_a": 5564,
+  "min_buy_gross_a": 104500.0,
+  "buys_within_2x_of_100k_b": 82,
+  "n_buys_b": 5619,
+  "min_buy_gross_b": 102541.0,
+  "holding_ids": {
+   "only_a": 957,
+   "only_b": 966,
+   "shared": 1006
+  },
+  "sessions_with_diff_buy_count": 134,
+  "sessions_with_buys": 1115
+ }
+}
