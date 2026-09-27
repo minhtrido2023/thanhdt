@@ -1663,3 +1663,14 @@
 - [2026-09-27T06:59:48Z] Taylor/heartbeat — Taylor_20260927_064745: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20260927_064745", "source": "watcher"}
 - [2026-09-27T06:59:49Z] Taylor/heartbeat — Taylor_20260927_064747: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20260927_064747", "source": "watcher"}
 - [2026-09-27T06:59:50Z] Taylor/heartbeat — Taylor_20260927_064748: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20260927_064748", "source": "watcher"}
+
+## Consolidation 2026-09-27T07:07:02Z
+- [2026-09-27T07:00:49Z] Taylor/heartbeat — Taylor_20260927_064747: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20260927_064747", "source": "watcher"}
+- [2026-09-27T07:01:49Z] Taylor/heartbeat — Taylor_20260927_064747: {"status": "in_progress", "note": "6/9 leg xong. Calmar KHONG don dieu: x=0.3 cho Calmar 1.63 / MaxDD -14.4% (tot hon ca park=0). Neo gate x=0 KHOP KHIT 22.37/1.39; x=0.7 khop 24.42; NHUNG x=0.8 = 24.95 vs bis 24.66 (+0.29pp > tolerance 0.05pp) => dang chay 2 leg control BASKET_OSHARES_STEP=quarter de phan tach, chua bao so"}
+- [2026-09-27T07:01:49Z] Taylor/heartbeat — Taylor_20260927_064747: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20260927_064747", "source": "watcher"}
+- [2026-09-27T07:02:49Z] Taylor/heartbeat — Taylor_20260927_064747: {"status": "still_running", "elapsed_min": 15, "job_id": "Taylor_20260927_064747", "source": "watcher"}
+- [2026-09-27T07:03:49Z] Taylor/heartbeat — Taylor_20260927_064747: {"status": "still_running", "elapsed_min": 16, "job_id": "Taylor_20260927_064747", "source": "watcher"}
+- [2026-09-27T07:04:20Z] Taylor/heartbeat — Taylor_20260927_064747: {"status": "in_progress", "note": "PHAT HIEN DINH NOI x=0.3: Calmar 1.63 / MaxDD -14.4% (tot hon park=0 -16.1%). Bootstrap 5th-pct MaxDD loai het x>=0.5 (rang buoc 2pp so voi park=0 -24.0%). Da ghi AMENDMENT 1+2 vao PREREG, dang chay them x=0.1/0.2/0.4 lam day luoi + 2 control quarter-mode"}
+- [2026-09-27T07:04:51Z] Taylor/heartbeat — Taylor_20260927_064747: {"status": "still_running", "elapsed_min": 17, "job_id": "Taylor_20260927_064747", "source": "watcher"}
+- [2026-09-27T07:05:51Z] Taylor/heartbeat — Taylor_20260927_064747: {"status": "still_running", "elapsed_min": 18, "job_id": "Taylor_20260927_064747", "source": "watcher"}
+- [2026-09-27T07:06:51Z] Taylor/heartbeat — Taylor_20260927_064747: {"status": "still_running", "elapsed_min": 19, "job_id": "Taylor_20260927_064747", "source": "watcher"}
