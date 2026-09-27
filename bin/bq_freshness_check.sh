@@ -125,7 +125,7 @@ DISCORD_STALE_CHANNEL="trading_daily"   # tên trong kb/discord_channels.json
 #   dùng cho bảng research/early-warning mà việc block plan vì nó là phản ứng quá tay.
 _check() {
   local label="$1" table="$2" colexpr="$3" max_lag_days="$4" lag_unit="$5" mode="${6:-BLOCK}"
-  local query result lag_days
+  local query result rc lag_days
 
   if [ "$lag_unit" = "trading" ]; then
     query="SELECT COUNTIF(v.time > (SELECT MAX(${colexpr}) FROM \`${PROJECT}.${table}\` AS t))
@@ -139,9 +139,27 @@ _check() {
   fi
 
   result=$(bq query --use_legacy_sql=false --project_id="$PROJECT" \
-    --format=csv --quiet "$query" 2>/dev/null | tail -1)
-  lag_days="${result:-999}"
-  lag_days=$(printf "%.0f" "$lag_days" 2>/dev/null || echo 999)
+    --format=csv --quiet "$query" 2>&1)
+  rc=$?
+  lag_days="$(printf '%s\n' "$result" | tail -1)"
+  # bq lỗi (auth/quota/network) hoặc output không phải số ⇒ KHÔNG PHẢI bảng stale, đừng báo
+  # lag=999/STALE — báo đúng nguyên nhân (§28: tách "không tìm thấy bằng chứng" khỏi "tìm thấy
+  # và xấu"). Query thật ra số nguyên/thập phân qua CSV; bất cứ gì khác là lỗi truy vấn.
+  if [ $rc -ne 0 ] || ! printf '%s' "$lag_days" | grep -qE '^-?[0-9]+(\.[0-9]+)?$'; then
+    local errsnip="${lag_days:0:200}"
+    local fail_msg="⚠️ BQ QUERY FAILED ($TODAY $NOW_ICT): $label — không truy vấn được BQ (rc=$rc): ${errsnip}. KHÔNG PHẢI bảng stale, kiểm tra auth/quota/network trước khi nghi writer chết."
+    echo "FAIL $label: BQ QUERY FAILED (rc=$rc): ${errsnip}"
+    if [ "$mode" = "WARN" ]; then
+      "$ROOT/bin/notify_thread.sh" "$fail_msg" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+      WARNED=$((WARNED + 1))
+      return 0
+    fi
+    "$ROOT/bin/notify.sh" "$fail_msg" 2>/dev/null || true
+    "$ROOT/bin/notify_thread.sh" "$fail_msg" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+    FAILED=1
+    return 1
+  fi
+  lag_days=$(printf "%.0f" "$lag_days" 2>/dev/null || echo "$lag_days")
 
   if [ "$lag_days" -le "$max_lag_days" ] 2>/dev/null; then
     [ -z "$QUIET" ] && echo "OK   $label: lag=${lag_days}${lag_unit}d (≤${max_lag_days})"
@@ -168,14 +186,24 @@ _check() {
 #   (bài học custom30v_8l chết 06-18, mtime cache local luôn tươi vì sync re-download đêm).
 _check_lastmod() {
   local label="$1" table="$2" max_age_days="$3"
-  local ms age_days
-  ms=$(bq show --format=prettyjson "${PROJECT}:${table}" 2>/dev/null \
+  local show_out show_rc ms age_days
+  show_out=$(bq show --format=prettyjson "${PROJECT}:${table}" 2>&1)
+  show_rc=$?
+  if [ $show_rc -ne 0 ]; then
+    local errsnip="${show_out:0:200}"
+    local fail_msg="⚠️ BQ QUERY FAILED ($TODAY $NOW_ICT): $label — bq show thất bại (rc=$show_rc): ${errsnip}. KHÔNG PHẢI writer chết, kiểm tra auth/quota/network."
+    echo "FAIL $label: BQ QUERY FAILED (rc=$show_rc): ${errsnip}"
+    "$ROOT/bin/notify_thread.sh" "$fail_msg" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+    WARNED=$((WARNED + 1))
+    return 0
+  fi
+  ms=$(printf '%s' "$show_out" \
        | python3 -c "import json,sys; print(json.load(sys.stdin).get('lastModifiedTime',0))" 2>/dev/null)
   ms="${ms:-0}"
   if [ "$ms" -gt 0 ] 2>/dev/null; then
     age_days=$(( ( $(date +%s) - ms / 1000 ) / 86400 ))
   else
-    age_days=999   # metadata không đọc được = coi như đáng ngờ (fail-safe), báo WARN
+    age_days=999   # metadata đọc được nhưng thiếu lastModifiedTime = đáng ngờ thật (fail-safe), báo WARN
   fi
 
   if [ "$age_days" -le "$max_age_days" ]; then

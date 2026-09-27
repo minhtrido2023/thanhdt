@@ -73,10 +73,18 @@ for f in "$ROOT"/reports/*_daily_report_*.md "$ROOT"/reports/*_weekly_report_*.m
   # paper_programs_daily_report_*.md đã có cron+state EMAIL riêng (paper_programs_daily_report.sh
   # --email, state/paper_programs_report_emailed.json) — bỏ qua ở đây để KHÔNG gửi trùng 2 email.
   case "$FNAME" in paper_programs_daily_report_*.md) continue ;; esac
-  ALREADY="$(python3 -c "
-import json
-state = json.load(open('$EMAILED_STATE'))
-print('yes' if state.get('$FNAME') else 'no')
+  # State hỏng/cụt KHÔNG được làm câm sweep: coi như CHƯA gửi (fail-open về phía sweep/kiểm tra)
+  # và in lỗi thật ra stderr — cùng khuôn vendor_mismatch_alert.sh (§29, arch-review coord-2026-09-27).
+  # Giá trị đi qua ENV chứ không nội suy vào nguồn python: tên file là dữ liệu ngoài.
+  ALREADY="$(EMAILED_STATE="$EMAILED_STATE" FNAME="$FNAME" python3 -c "
+import json, os, sys
+try:
+    state = json.load(open(os.environ['EMAILED_STATE']))
+    print('yes' if state.get(os.environ['FNAME']) else 'no')
+except Exception as e:
+    print('no')
+    sys.stderr.write('check_report_cadence: KHONG doc duoc %s — coi nhu CHUA gui, VAN sweep. Loi that: %s: %s\n'
+                     % (os.environ['EMAILED_STATE'], type(e).__name__, e))
 ")"
   if [ "$ALREADY" = "no" ]; then
     # Capture thay vì để chảy thẳng ra log: khối "⚠️ LỆCH NGUỒN VENDOR" mà report_return_gate in
@@ -96,10 +104,16 @@ print('yes' if state.get('$FNAME') else 'no')
       # chết trong logs/check_report_cadence.log, không ai thấy trừ khi tự đi đọc log. Cùng khuôn
       # bin/eod_trading_report.sh:70-73 (append_event.sh error + notify_thread.sh), có de-dup
       # 1 lần/file/ngày để không spam mỗi lượt cron cho cùng 1 file kẹt.
-      ALREADY_ALERTED="$(python3 -c "
-import json
-state = json.load(open('$SWEEP_ALERTED_STATE'))
-print('yes' if state.get('$FNAME') == '$TODAY' else 'no')
+      # Cùng lý do fail-open + lỗi thật ra stderr như ALREADY ở trên (§29).
+      ALREADY_ALERTED="$(SWEEP_ALERTED_STATE="$SWEEP_ALERTED_STATE" FNAME="$FNAME" TODAY="$TODAY" python3 -c "
+import json, os, sys
+try:
+    state = json.load(open(os.environ['SWEEP_ALERTED_STATE']))
+    print('yes' if state.get(os.environ['FNAME']) == os.environ['TODAY'] else 'no')
+except Exception as e:
+    print('no')
+    sys.stderr.write('check_report_cadence: KHONG doc duoc %s — coi nhu CHUA canh bao, VAN gui. Loi that: %s: %s\n'
+                     % (os.environ['SWEEP_ALERTED_STATE'], type(e).__name__, e))
 ")"
       if [ "$ALREADY_ALERTED" = "no" ]; then
         "$ROOT/bin/append_event.sh" Mike error "report-delivery-incomplete-${FNAME}" \
@@ -123,11 +137,33 @@ print('yes' if state.get('$FNAME') == '$TODAY' else 'no')
         # RC_VENDOR_REASON_END
         "$ROOT/bin/notify_thread.sh" "$INCOMPLETE_MSG" \
           "$TRADING_REPORT_THREAD" 2>/dev/null || true
-        python3 -c "
-import json
-state = json.load(open('$SWEEP_ALERTED_STATE'))
-state['$FNAME'] = '$TODAY'
-json.dump(state, open('$SWEEP_ALERTED_STATE', 'w'), indent=2, ensure_ascii=False)
+        # Ghi NGUYÊN TỬ (tmp + os.replace, §5) — cùng khuôn vendor_mismatch_alert.sh: kill giữa
+        # lúc ghi không được để lại JSON cụt cho lượt sau vấp (đây chính là nguyên nhân state
+        # hỏng mà nhánh đọc ALREADY_ALERTED ở trên vừa phải phòng thủ).
+        SWEEP_ALERTED_STATE="$SWEEP_ALERTED_STATE" FNAME="$FNAME" TODAY="$TODAY" python3 -c "
+import json, os, sys, tempfile
+path = os.environ['SWEEP_ALERTED_STATE']
+try:
+    state = json.load(open(path))
+    if not isinstance(state, dict):
+        raise ValueError('state khong phai dict: %r' % type(state).__name__)
+except Exception as e:
+    print('check_report_cadence: state cu hong (%s: %s) — dung lai tu {}' % (type(e).__name__, e), file=sys.stderr)
+    state = {}
+state[os.environ['FNAME']] = os.environ['TODAY']
+fd, tmp = tempfile.mkstemp(dir=os.path.dirname(path), prefix='.report_delivery_incomplete_alerted.', suffix='.tmp')
+try:
+    with os.fdopen(fd, 'w') as f:
+        json.dump(state, f, indent=2, ensure_ascii=False)
+        f.flush()
+        os.fsync(f.fileno())
+    os.replace(tmp, path)
+except BaseException:
+    try:
+        os.unlink(tmp)
+    except OSError:
+        pass
+    raise
 "
       fi
     fi
@@ -490,10 +526,32 @@ for a in json.load(sys.stdin)['actions']:
   # dispatch). Tuần=medium (templated), tháng=high (attribution/outlook thật sự phức tạp hơn).
   "$ROOT/bin/dispatch.sh" Taylor "$PROMPT" --thread "$TRADING_REPORT_THREAD" --bg --model "$MODEL" --effort "$EFFORT" --timeout 3600 2>&1 | tail -5
 
-  python3 -c "
-import json
-state = json.load(open('$STATE'))
-state['$PKEY'] = '$TODAY'
-json.dump(state, open('$STATE', 'w'), indent=2, ensure_ascii=False)
+  # Ghi NGUYÊN TỬ (tmp + os.replace, §5) — cùng khuôn 2 chỗ trên: state cụt do bị kill giữa
+  # chừng từng làm ALREADY/ALREADY_ALERTED phía trên vấp; STATE này bị đọc lại bởi mọi lượt
+  # cron sau nên cùng rủi ro, sửa đồng bộ.
+  STATE="$STATE" PKEY="$PKEY" TODAY="$TODAY" python3 -c "
+import json, os, sys, tempfile
+path = os.environ['STATE']
+try:
+    state = json.load(open(path))
+    if not isinstance(state, dict):
+        raise ValueError('state khong phai dict: %r' % type(state).__name__)
+except Exception as e:
+    print('check_report_cadence: state cu hong (%s: %s) — dung lai tu {}' % (type(e).__name__, e), file=sys.stderr)
+    state = {}
+state[os.environ['PKEY']] = os.environ['TODAY']
+fd, tmp = tempfile.mkstemp(dir=os.path.dirname(path), prefix='.report_cadence_dispatched.', suffix='.tmp')
+try:
+    with os.fdopen(fd, 'w') as f:
+        json.dump(state, f, indent=2, ensure_ascii=False)
+        f.flush()
+        os.fsync(f.fileno())
+    os.replace(tmp, path)
+except BaseException:
+    try:
+        os.unlink(tmp)
+    except OSError:
+        pass
+    raise
 "
 done
