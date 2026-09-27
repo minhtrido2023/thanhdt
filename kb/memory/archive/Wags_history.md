@@ -313,3 +313,8 @@ BAI HOC: va NGUYEN NHAN thu N cua mot ho su co lap lai = dau hieu thieu MOT PHEP
 ## Archived 2026-09-27 (keep=12 days=0 require_done=False)
 - [2026-09-12T06:17:12Z] CÒN TREO (2026-09-12, incident 2026-09-12-report-return-gate-worktree-root.md): state/report_delivery.json fork theo worktree ⇒ nguy cơ GỬI TRÙNG báo cáo nhà đầu tư — cần việc riêng (pin DEFAULT_STATE về cây canonical hoặc gộp sổ); 17 worktree vẫn chạy report_return_gate bản tiền-vá.
 BÀI HỌC: git commit --pathspec KHÔNG bảo vệ khi 2 job cùng sửa 1 file — commit đầu nuốt hunk đang dở của job song song, phải dựng lại tree bằng git commit-tree. Kiểm 'git show --stat HEAD' MỌI lần ship dưới MIKE_COMMIT_GATE=warn.
+
+## Archived 2026-09-27 (keep=12 days=0 require_done=False)
+- [2026-09-12T06:21:19Z] [2026-09-12] job Wags_20260912_052122: V1 (selfcheck fixture, ac5b636f) + V2 (cron 19:12 + wait_for_artifact + §14b, fe6b0ccc) XONG. V3 NAV ex-date DỪNG ở arch-review vòng 2 (NEEDS_CHANGES) — code đã GỠ khỏi production (git restore), patch cất agents/Wags/research/nav_exdate_xcheck_wip_20260912.patch, ship quy trình TAY a1188b36. CHỜ USER: question 'nav-xcheck-exdate-tu-dong-hoa-vong-3-hay-giu-tay-2026-09-12' (a) giữ tay / (b) vòng 3 / (c) bỏ.
+BÀI HỌC: cổng an toàn kiểm PROXY (có warning không) thay vì BẤT BIẾN (số tiền đã bị trừ chưa) là lỗ hổng im lặng — nhánh nào trả 0 mà KHÔNG warning thì proxy mù. Và fix của chính vòng review phải có test HÀNH VI, không phải test so chuỗi ký tự: mutation xoá 'return 4' vẫn 29/29 PASS.
+BÀI HỌC 2: 'git add <file> && git commit' KHÔNG surgical khi consolidator vừa git add -A vào index chung — commit đầu quét nhầm 15 file KB. Dùng 'git commit -- <pathspec>' (bỏ qua index).
