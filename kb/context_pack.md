@@ -1,13 +1,13 @@
-# Mike fleet — context pack (v3312)
+# Mike fleet — context pack (v3313)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-09-27T05:13:36] Taylor/finding — fail-c-lag-edge-causal-ab: {"job": "Taylor_20260927_045243", "scope": "FAIL-C (audit measurement-integrity-audit-2026-09-27): cong w_LAG doc chuoi lag_edge_health dan nhan look-ahead 25 p …
 - [2026-09-27T05:20:06] quant-skeptic/verification — ✅ CONFIRMED VERIFY: custom30v-weight-oshares-exdate: {"finding_topic": "custom30v-weight-oshares-exdate", "verdict": "CONFIRMED", "confidence": "high", "checks": {"look_ahead_leak": "pass — no forward columns touc …
 - [2026-09-27T05:21:56] Taylor/finding — custom30v-hau-kiem-sau-merge: {"job": "Taylor_20260927_043541", "scope": "HAU KIEM BAT BUOC sau merge a808a613 (re-pin R3 custom30V). Lam tren MAIN canonical. Commit WC 0a000137 + mike 145cf …
 - [2026-09-27T05:27:07] Taylor/finding — fail-h-nav-flow-term-fix: {"job": "Taylor_20260927_045241", "scope": "FAIL-H audit measurement-integrity 2026-09-27: nav_period_returns.py:107/:133 return_pct = nav1/nav0-1, KHONG co so  …
 - [2026-09-27T05:28:02] Taylor/finding — fail-f-annualization-fix: {"job": "Taylor_20260927_045241", "scope": "FAIL-F audit measurement-integrity 2026-09-27: bootstrap_nav.py + dsr_pbo_annex.py annualize theo PHIEN trong khi si …
+- [2026-09-27T05:55:39] Taylor/finding — reconcile-egg-family-manifest: {"job": "Taylor_20260927_053033", "scope": "4 phat hien phu tu job _045241 + _043541. CHUA MERGE, cho user sign-off. Branch: mike fix/reconcile-egg-manifest @58 …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -166,7 +166,7 @@ Ranh giới cứng (KHÔNG tự sửa): trade plan, trading_rules.json, logic đ
   lag_fidelity_decomp_20260803/T5_DECISION.md`.
 - Bootstrap 5th-pct: **CAGR 15.6%, DD −30.4% (anchor DD ~−30,5%, KHÔNG phải −18,8%)** — chạy lại
   2026-09-27 trên ledger pin mới (`bootstrap_nav.py`, L=21/B=4000/seed 12345); stationary-bootstrap
-  cross-check 15.5% / −30.1%. ⚠️ FAIL-F (audit 2026-09-27): `bootstrap_nav.py`/`dsr_pbo_annex.py` annualize theo PHIÊN (/252) ⇒ CAGR bootstrap cao giả ~+0,3pp so với quy ước LỊCH; job Taylor_20260927_045241 đang sửa, số sẽ thay khi xong (DD không đổi). *Số cũ 18.6% / −28.6% SUPERSEDED (bản chạy 06-29, pin khác).*
+  cross-check 15.5% / −30.1%. ⚠️ **Annualize theo LỊCH (FAIL-F, sửa 2026-09-27 job Taylor_20260927_045241, branch `fix/nav-flow-term-annualize` CHƯA merge)**: bootstrap 5th-pct CAGR theo lịch = **15,4%** (theo phiên 15,6% — cao giả +0,18pp), Sharpe R3 1,61 (hiển thị 1,62); MaxDD −30,4% / P(DD<−30%) 5,35% KHÔNG đổi; **DSR và PBO KHÔNG phụ thuộc annualize** (đính chính framing audit). ⚠️ PBO đo ở 2 cây khác nhau cho **0,40 (main) vs 0,50 (worktree)** vì họ trial là glob động ⇒ PBO KHÔNG có nghĩa cho tới khi pin `family_manifest`. *Số cũ 18.6% / −28.6% SUPERSEDED (bản chạy 06-29, pin khác).*
 - **NEUTRAL parking custom30V = +2.01pp CAGR** (24.38% có park vs 22.37% park=0, cùng lệnh pin,
   đổi đúng 1 biến `PARK_STATES`; 30 mã, cap 0.10). ⚠️ **"+7.4pp Full" SUPERSEDED** — lệnh gốc của số
   đó không tồn tại trong registry; ở chân return LỖI delta là +6,49pp ⇒ **~2/3 của "+7,4pp" là return
