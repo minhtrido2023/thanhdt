@@ -1,0 +1,43 @@
+b2_breadth: 3652 phien 2012-01-03->2026-08-21  n_univ median=276 min=88 max=578
+panel_daily DAILY: 3106 phien 2014-01-03->2026-06-19
+
+merge: 3106 phien; thieu breadth=0; thieu ter_A=0; thieu ter_B=0
+
+=== KHOI 1: phan bo tercile (goc: LOW 1.232 / MID 897 / HIGH 978) ===
+  variant A: LOW 1232 / MID 897 / HIGH 977  tong=3106
+  variant B: LOW 1213 / MID 899 / HIGH 994  tong=3106
+
+=== KHOI 2: n_effective (goc: breadth 262 ep / radar 131; 0% vs 54% nam bi 1 nhan >=90%) ===
+  breadth ter_A : 0% nam bi 1 nhan >=90% | share troi TB 57% | o=13 | tong episode=262 | nam/o median=6
+  breadth ter_B : 0% nam bi 1 nhan >=90% | share troi TB 57% | o=13 | tong episode=263 | nam/o median=6
+  radar zone    : 54% nam bi 1 nhan >=90% | share troi TB 84% | o=14 | tong episode=131 | nam/o median=5
+
+=== KHOI 3: marginal excess theo tercile (goc A: LOW +27,1 / MID +10,8 / HIGH +5,4 pp) ===
+
+  --- variant A ---
+  tile   phien   ep      VNI     COMB   excess   IS_exc  OOS_exc
+  LOW     1232   54   -19.3%    +8.1%   +27.4pp   +27.5pp   +27.3pp
+  MID      897  107   +23.2%   +34.2%   +11.0pp   +10.7pp   +11.1pp
+  HIGH     977   54   +50.8%   +56.4%    +5.5pp    -0.2pp   +12.9pp
+
+  --- variant B ---
+  tile   phien   ep      VNI     COMB   excess   IS_exc  OOS_exc
+  LOW     1213   53    +0.7%   +27.1%   +26.3pp   +29.1pp   +23.8pp
+  MID      899  108   +19.3%   +27.3%    +8.1pp    +8.9pp    +7.4pp
+  HIGH     994   56   +17.1%   +33.7%   +16.6pp    +5.8pp   +29.0pp
+
+=== KHOI 3b: LOO theo nam tren excess (goc A: LOW +23,4..+31,9 / MID +3,3..+11,1 / HIGH +0,4..+5,5; 13/13 nam khong dao dau) ===
+  LOW   LOO n_nam=13 min=+23.4pp max=+31.5pp  dao dau=KHONG
+  MID   LOO n_nam=13 min=+4.6pp max=+14.9pp  dao dau=KHONG
+  HIGH  LOO n_nam=13 min=+0.9pp max=+8.8pp  dao dau=KHONG
+
+=== KHOI 4: §5b khu beta (goc: alpha LOW +16,3 < MID +20,2 < HIGH +28,1 -- DAO thu tu) ===
+  tile    beta     COMB      VNI   excess    alpha
+  LOW     0.44    +8.1%   -19.3%   +27.4pp   +16.5pp
+  MID     0.59   +34.2%   +23.2%   +11.0pp   +20.5pp
+  HIGH    0.55   +56.4%   +50.8%    +5.5pp   +28.4pp
+
+SELF-CHECK no-look-ahead goc bao +0,109 = corr(pct252_t, r_vni_t):
+  (tinh tren br truc tiep)
+  variant A: corr(pct_A_t, r_vni_t) = +0.1088   (goc: +0,1088)
+  variant B: corr(pct_B_t, r_vni_t) = +0.0272   (ky vong ~0 vi nhan tre 1 phien)

@@ -1,0 +1,13 @@
+window,period,axis,factor,hi_minus_lo,ci_lo,ci_hi,p_boot,monotonic,ci_excl_0,n_mon_lo,n_mon_hi,p_BH,n_bh,same_sign_IS_OOS,PASS_all4
+"GIAO 2016-04-2026 (robustness, KHONG trial moi)",IS,breadth,ic_mom,0.1142,0.0483,0.1785,0.0015,True,True,25,23,0.006,6.0,False,False
+"GIAO 2016-04-2026 (robustness, KHONG trial moi)",IS,breadth,ic_ey,-0.0771,-0.124,-0.0296,0.002,True,True,25,23,0.006,6.0,False,False
+"GIAO 2016-04-2026 (robustness, KHONG trial moi)",IS,retail,ic_mom,0.1155,0.0098,0.2092,0.0315,False,True,9,5,0.063,6.0,True,False
+"GIAO 2016-04-2026 (robustness, KHONG trial moi)",IS,retail,ic_ey,-0.0985,-0.1984,0.0096,0.072,True,False,9,5,0.108,6.0,True,False
+"GIAO 2016-04-2026 (robustness, KHONG trial moi)",IS,dt5g,ic_mom,-0.0105,-0.1879,0.136,0.9185,False,False,14,6,0.9185,6.0,False,False
+"GIAO 2016-04-2026 (robustness, KHONG trial moi)",IS,dt5g,ic_ey,0.0564,-0.0386,0.1694,0.3015,False,False,14,6,0.3618,6.0,False,False
+"GIAO 2016-04-2026 (robustness, KHONG trial moi)",OOS,breadth,ic_mom,-0.0382,-0.1167,0.0456,0.3585,False,False,43,34,0.5377,6.0,False,False
+"GIAO 2016-04-2026 (robustness, KHONG trial moi)",OOS,breadth,ic_ey,0.0032,-0.0439,0.0498,0.8855,False,False,43,34,0.8855,6.0,False,False
+"GIAO 2016-04-2026 (robustness, KHONG trial moi)",OOS,retail,ic_mom,0.0713,-0.007,0.1518,0.0715,True,False,33,26,0.429,6.0,True,False
+"GIAO 2016-04-2026 (robustness, KHONG trial moi)",OOS,retail,ic_ey,-0.0243,-0.0691,0.0202,0.3045,True,False,33,26,0.5377,6.0,True,False
+"GIAO 2016-04-2026 (robustness, KHONG trial moi)",OOS,dt5g,ic_mom,0.0611,-0.0272,0.1449,0.176,False,False,29,28,0.528,6.0,False,False
+"GIAO 2016-04-2026 (robustness, KHONG trial moi)",OOS,dt5g,ic_ey,-0.0169,-0.0641,0.0274,0.487,False,False,29,28,0.5844,6.0,False,False
