@@ -140,7 +140,9 @@ def run(h, state=None, basket=None, **kw):
         # account_label "TEST" không tồn tại trong trading_bot_accounts.json ⇒ PHẢI bơm config
         # cổ tức mã excluded qua override, không thì account_profile() raise (§pool-excl-div).
         kw.setdefault("excluded_dividend_config_override", [])
-        return cpt.compute_trim("TEST", ASOF, 0.80, holdings=h, **kw)
+        # `target` mặc định 0,80 = giữ NGUYÊN mọi kỳ vọng số học của 100 ca cũ (chúng được viết
+        # khi 0,80 là trần production). Nhóm T22 truyền target=None để kiểm đường ĐỌC R3.
+        return cpt.compute_trim("TEST", ASOF, kw.pop("target", 0.80), holdings=h, **kw)
     finally:
         cpt.STATE_FILE = old
         os.unlink(path)
@@ -829,6 +831,125 @@ check("T21o cảnh báo stale-config cho SHS in đúng số PER-TICKER pending (
       "trong dòng cảnh báo sẽ in nhầm 'còn báo 82.0tr')",
       "còn báo 2.0tr (4% so với cấu hình 50.0tr)" in note21o,
       note21o)
+
+
+# ════════════════════════════ T22. R2 ĐỌC R3 — 4 nhánh FAIL-CLOSED (wire 2026-09-27)
+# Trước lượt này R2 hardcode `PARK_TARGET_F1`, nên knob user chốt 0,30 KHÔNG hiệu lực trên đường BÁN
+# (nó vẫn trim ở 0,80) — IM LẶNG. Nhóm ca dưới đây khoá cả hai nửa: (a) R2 THỰC SỰ đi theo R3 chứ
+# không phải trùng số ngẫu nhiên hôm nay; (b) R3 hỏng thì R2 TỪ CHỐI, không trả 0 (= bán sạch) và
+# không rơi về 0,80 (= đúng cái bug đang sửa).
+print("\n T22. R2 đọc R3 (data/trading_rules.json) + fail-closed")
+
+
+def _rules_file(payload, raw=None):
+    """Ghi một trading_rules.json tạm; `raw` để bơm văn bản KHÔNG hợp lệ."""
+    fd, path = tempfile.mkstemp(suffix=".json")
+    with os.fdopen(fd, "w", encoding="utf-8") as f:
+        f.write(raw if raw is not None else json.dumps(payload))
+    return path
+
+
+def _refuses(path_or_none):
+    """Trả (đã_raise, message). KHÔNG bắt Exception rộng: chỉ ParkTargetUnavailable mới là hành vi đúng."""
+    try:
+        v = cpt.park_target_from_rules(path_or_none)
+        return False, f"KHÔNG raise, trả {v!r}"
+    except cpt.ParkTargetUnavailable as e:
+        return True, str(e)
+
+
+# T22a — đọc đúng giá trị R3 THẬT của cây này (không hardcode kỳ vọng: đọc lại bằng json độc lập)
+_r3_real = json.load(open(cpt.PARK_TARGET_RULES, encoding="utf-8"))["neutral_parking"]["default_park_of_idle_pct"]
+check(f"T22a park_target_from_rules(R3 thật) = giá trị trong file ({_r3_real})",
+      abs(cpt.park_target_from_rules(cpt.PARK_TARGET_RULES) - float(_r3_real)) < 1e-12,
+      f"{cpt.park_target_from_rules(cpt.PARK_TARGET_RULES)}")
+
+# T22b — NHÁNH 1: thiếu file ⇒ raise, và thông điệp trích lỗi THẬT của OS (§29: không đoán)
+_ok, _msg = _refuses("/tmp/khong-bao-gio-co-file-nay-park.json")
+check("T22b thiếu file R3 ⇒ ParkTargetUnavailable + thông điệp có lỗi THẬT của OS",
+      _ok and "FileNotFoundError" in _msg, _msg)
+
+# T22c — NHÁNH 1b: file không phải JSON ⇒ thông điệp có câu của json parser
+_p = _rules_file(None, raw="{ khong phai json ")
+_ok, _msg = _refuses(_p)
+check("T22c R3 không phải JSON ⇒ raise + thông điệp có câu của json parser",
+      _ok and "json parser nói" in _msg, _msg)
+os.unlink(_p)
+
+# T22d — NHÁNH 2: thiếu khoá gốc ⇒ thông điệp liệt kê khoá THẬT có trong file
+_p = _rules_file({"aaa": 1, "bbb": 2})
+_ok, _msg = _refuses(_p)
+check("T22d R3 thiếu 'neutral_parking' ⇒ raise + liệt kê khoá cấp 1 THẬT ['aaa','bbb']",
+      _ok and "'aaa'" in _msg and "'bbb'" in _msg, _msg)
+os.unlink(_p)
+
+# T22e — NHÁNH 2b: thiếu khoá con ⇒ liệt kê khoá THẬT trong neutral_parking
+_p = _rules_file({"neutral_parking": {"status": "ACTIVE", "default_park_note": "x"}})
+_ok, _msg = _refuses(_p)
+check("T22e R3 thiếu 'default_park_of_idle_pct' ⇒ raise + liệt kê khoá con THẬT",
+      _ok and "'status'" in _msg and "'default_park_note'" in _msg, _msg)
+os.unlink(_p)
+
+# T22f — NHÁNH 3: không phải số (chuỗi "0.30" — dạng dễ lọt nhất khi ai đó sửa tay)
+_p = _rules_file({"neutral_parking": {"default_park_of_idle_pct": "0.30"}})
+_ok, _msg = _refuses(_p)
+check("T22f R3 = chuỗi \"0.30\" ⇒ raise (KHÔNG tự float() chuỗi) + repr/type thật trong thông điệp",
+      _ok and "'0.30'" in _msg and "str" in _msg, _msg)
+os.unlink(_p)
+
+# T22g — NHÁNH 3b: bool. `isinstance(True, int)` là True trong Python ⇒ không loại tường minh thì
+# `true` lọt thành park 1,0 = "park 100% tiền nhàn rỗi". Đây là ca mutation, không phải giả thuyết.
+_p = _rules_file({"neutral_parking": {"default_park_of_idle_pct": True}})
+_ok, _msg = _refuses(_p)
+check("T22g R3 = true (bool) ⇒ raise, KHÔNG được thành 1.0 (bool là subclass của int)",
+      _ok and "bool" in _msg, _msg)
+os.unlink(_p)
+
+# T22h — NHÁNH 4: ngoài [0,1] (trên và dưới) + NaN
+for _v, _lbl in ((1.4, "1.4 > 1"), (-0.1, "-0.1 < 0"), (float("nan"), "NaN")):
+    _p = _rules_file({"neutral_parking": {"default_park_of_idle_pct": _v}})
+    _ok, _msg = _refuses(_p)
+    check(f"T22h R3 = {_lbl} ⇒ raise (ngoài [0,1])", _ok and "ngoài [0, 1]" in _msg, _msg)
+    os.unlink(_p)
+
+# T22i — R2 THỰC SỰ ĐI THEO R3: đổi R3 sang 0,55 ⇒ compute_trim(target=None) phải dùng 0,55.
+# Đây là ca giết được mọi biến thể "hardcode bằng đúng R3 hôm nay".
+_p = _rules_file({"neutral_parking": {"default_park_of_idle_pct": 0.55}})
+_old_rules = cpt.PARK_TARGET_RULES
+try:
+    cpt.PARK_TARGET_RULES = _p
+    _r22i = run(holdings(BASE_LOTS, cash=0.0, total_cash=300e6, debt=0.0), target=None)
+    check("T22i R3=0.55 ⇒ compute_trim(target=None) dùng target_park 0.55 (KHÔNG 0.30, KHÔNG 0.80)",
+          abs(_r22i["target_park"] - 0.55) < 1e-12, f"{_r22i['target_park']}")
+    # T22k — rail thứ TƯ: `from compute_park_trim import PARK_TARGET_F1` (đường MUA P2 của DollarBill)
+    check("T22k PARK_TARGET_F1 (module __getattr__) cũng theo R3 = 0.55 ⇒ rail thứ 4 tự đồng bộ",
+          abs(cpt.PARK_TARGET_F1 - 0.55) < 1e-12, f"{cpt.PARK_TARGET_F1}")
+finally:
+    cpt.PARK_TARGET_RULES = _old_rules
+    os.unlink(_p)
+
+# T22j — R3 hỏng ⇒ compute_trim TỪ CHỐI. Khẳng định CẢ HAI điều bị cấm: không trả 0, không về 0,80.
+try:
+    cpt.PARK_TARGET_RULES = "/tmp/khong-bao-gio-co-file-nay-park.json"
+    _raised, _got = False, None
+    try:
+        _got = run(holdings(BASE_LOTS, cash=0.0, total_cash=300e6, debt=0.0), target=None)
+    except cpt.ParkTargetUnavailable:
+        _raised = True
+    check("T22j R3 hỏng ⇒ compute_trim raise, KHÔNG trả target 0 (bán sạch) và KHÔNG rơi về 0.80",
+          _raised, "raise đúng" if _raised else f"trả về target_park={_got and _got.get('target_park')}")
+    # T22l — mã lỗi RIÊNG của CLI = 7 (không phải 0/1/2). Resolve target là câu lệnh ĐẦU TIÊN của
+    # compute_trim ⇒ không chạm broker/DNSE, an toàn gọi trong selfcheck.
+    _argv = sys.argv
+    try:
+        sys.argv = ["compute_park_trim.py", "--account", "SpaceX"]
+        _rc = cpt.main()
+    finally:
+        sys.argv = _argv
+    check("T22l CLI trả mã lỗi RIÊNG rc=7 khi R3 hỏng (phân biệt được với mọi rc khác)",
+          _rc == 7, f"rc={_rc}")
+finally:
+    cpt.PARK_TARGET_RULES = _old_rules
 
 print(f"\n=== {len(PASS)} PASS / {len(FAIL)} FAIL ===")
 if FAIL:
