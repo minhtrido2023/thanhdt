@@ -205,6 +205,14 @@ def oshares_step_dates(raw):
 def main():
     bq = _bq()
     print(f"BQ_LOCAL_CACHE = {os.environ.get('BQ_LOCAL_CACHE', '(live BQ)')}")
+    # In ra ĐÚNG file module đang test (quant-skeptic recommended_reruns, 2026-09-27). Chạy trần từ
+    # worktree mà quên `BASKET_RETLEG_WORKDIR=` thì selfcheck này test module CANONICAL: nó FAIL to
+    # (R1/R3) nên không im lặng, nhưng thông điệp FAIL không nói ra nguyên nhân thật — §29 đòi in
+    # bằng chứng đang cầm trong tay thay vì để người đọc đoán.
+    print(f"WORKDIR        = {WORKDIR}")
+    _cbmod = __import__("custom_basket")
+    print(f"custom_basket  = {_cbmod.__file__}  (BASKET_RETURN_OSHARES="
+          f"{os.environ.get('BASKET_RETURN_OSHARES', 'flat (default)')})")
     print(f"cửa sổ = {WIN[0]}..{WIN[1]}  |  PROD_KW = {PROD_KW}")
     cur = load_cur()
     pre = load_pre_edit()
