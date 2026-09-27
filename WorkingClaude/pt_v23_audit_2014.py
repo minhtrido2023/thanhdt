@@ -265,13 +265,27 @@ _sz_tag = "" if (BASKET_TOPN == 30 and abs(BASKET_NAMECAP - 0.10) < 1e-9) else f
 # cash (parked cash lives in the ETF/basket lots after the step-6b sweep). AUDIT/R&D ONLY.
 #   off (default) -> deposit_annual=0.0, byte-identical to the pinned anchor. Proven by cmp.
 #   baseline      -> tier 1 (SBV >12-24M low - 2.04pp haircut).  floor -> tier 2 (interbank 1M).
+#   dep1m         -> tier USER CHOT 2026-09-27 23:58 ICT ("tien mat thi neo theo lai suat huy dong
+#                    1 thang. Lay can cu nay lam so pin"): lai suat huy dong 1 thang, ca nhan,
+#                    binh quan Big 4. SO THAT 2019-02..2026-09; TRUOC DO dung lai tu SBV 12M-thap
+#                    + offset trung vi (-2.525pp) do tren 90 thang overlap. Doan dung lai = 53/150
+#                    thang cua cua so ⇒ moi so pin phai kem chan p25/p75 (bang bat dinh cua cau).
 # `spot` is deliberately NOT accepted here: plan §2.2 limits it to a <=6-month forward window, so
 # it must never enter a 2014-2026 backtest.
 IDLE_CARRY_TIER = os.environ.get("IDLE_CARRY_TIER", "off").strip().lower()
-if IDLE_CARRY_TIER not in ("off", "baseline", "floor"):
-    raise ValueError(f"IDLE_CARRY_TIER={IDLE_CARRY_TIER!r} khong hop le; chi {{off,baseline,floor}} "
+if IDLE_CARRY_TIER not in ("off", "baseline", "floor", "dep1m"):
+    raise ValueError(f"IDLE_CARRY_TIER={IDLE_CARRY_TIER!r} khong hop le; chi "
+                     f"{{off,baseline,floor,dep1m}} "
                      f"(tier 'spot' bi tu choi co y: ke hoach §2.2 chi cho cua so nhin truoc <=6 thang)")
 _idle_tag = "" if IDLE_CARRY_TIER == "off" else f"_idle{IDLE_CARRY_TIER}"
+# §8: IDLE_DEP1M_OFFSET_PP la mot TRUC DOI SO (doi so ⇒ doi ket qua) ⇒ PHAI doi ten file. Chi co
+# nghia voi tier dep1m; dat kem tier khac la loi cau hinh im lang nen chan cung.
+_dep1m_off_raw = os.environ.get("IDLE_DEP1M_OFFSET_PP", "").strip()
+if _dep1m_off_raw:
+    if IDLE_CARRY_TIER != "dep1m":
+        raise ValueError(f"IDLE_DEP1M_OFFSET_PP={_dep1m_off_raw!r} chi co nghia voi "
+                         f"IDLE_CARRY_TIER=dep1m; dang co TIER={IDLE_CARRY_TIER!r}")
+    _idle_tag += "_off" + _dep1m_off_raw.replace("-", "m").replace(".", "p")   # -3.4 -> _offm3p4
 # W2b NOISE-FLOOR CONTROL (job Taylor_20260927_155645, quant-skeptic recommended_rerun #2). A FLAT
 # scalar %/yr on idle cash, used ONLY to measure how much the simulator's discrete trade path moves
 # when the cash level is nudged by an amount comparable to the tier-1<->tier-2 gap. Not a proxy, not
@@ -998,6 +1012,12 @@ else:
     DEPOSIT_ANNUAL = pd.Series(_idle_pct / 100.0, index=_idle_dts)
     print(f"  [idle-carry] pre-series sessions paid 0%: {_idle_nostart}"
           + (f" ({_idle_dts[0].date()}..{_idle_dts[_idle_nostart-1].date()})" if _idle_nostart else ""))
+    if IDLE_CARRY_TIER == "dep1m":
+        _cov = _irp.dep1m_coverage(first_month=str(pd.Timestamp(START_DATE).to_period("M")),
+                                   last_month=str(pd.Timestamp(END_DATE).to_period("M")))
+        print(f"  [idle-carry] dep1m offset={_irp.DEP1M_OFFSET_PP:+.3f}pp  coverage {_cov['window']}: "
+              f"{_cov['n_real']} thang SO THAT / {_cov['n_recon']} thang DUNG LAI / "
+              f"{_cov['n_ff']} thang ff ({','.join(_cov['ff_months'])})")
     print(f"  [idle-carry] tier={IDLE_CARRY_TIER} n={len(DEPOSIT_ANNUAL)} "
           f"first={DEPOSIT_ANNUAL.iloc[0]*100:.3f}%/yr last={DEPOSIT_ANNUAL.iloc[-1]*100:.3f}%/yr "
           f"mean={DEPOSIT_ANNUAL.mean()*100:.3f}%/yr min={DEPOSIT_ANNUAL.min()*100:.3f}% "
