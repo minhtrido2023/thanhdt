@@ -164,7 +164,12 @@ def lag_edge_health():
         if pos < 0 or pos + 25 >= len(idx): continue                      # need complete 25-session hold
         p0, p1 = pxc.iloc[pos][tk], pxc.iloc[pos + 25][tk]
         if pd.isna(p0) or pd.isna(p1) or p0 <= 0: continue
-        rows.append({"entry": idx[pos], "ret": (p1 / p0 - 1) * 100})
+        # known_date = the day this event's 25-session return is actually OBSERVABLE.
+        # `entry` is the label the series historically carried; it is 25 sessions EARLIER
+        # than the day `ret` can be known, so any daily consumer indexing on `entry` reads
+        # a forward-looking value (FAIL-C, measurement-integrity audit 2026-09-27).
+        rows.append({"entry": idx[pos], "known_date": idx[pos + 25],
+                     "ret": (p1 / p0 - 1) * 100})
     if len(rows) < 20:
         print("[lag-edge] too few complete events"); return None
     d = pd.DataFrame(rows).sort_values("entry").reset_index(drop=True)
@@ -172,7 +177,11 @@ def lag_edge_health():
     for i in range(len(d)):
         w = d[(d["entry"] > d.at[i, "entry"] - pd.Timedelta(days=365)) & (d["entry"] <= d.at[i, "entry"])]["ret"]
         d.at[i, "mean12"], d.at[i, "win12"], d.at[i, "n12"] = w.mean(), (w > 0).mean() * 100, len(w)
-    d.to_csv(WORKDIR + r"/data/lag_edge_health.csv", index=False)
+    # known_date is a strictly monotone image of entry (pos -> pos+25), so the trailing-12M
+    # window above already contains only events with known_date <= known_date[i]; the fix is
+    # the LABEL, not the window membership. Consumers must index on known_date.
+    out = os.environ.get("LAG_EDGE_OUT", "").strip() or (WORKDIR + r"/data/lag_edge_health.csv")
+    d.to_csv(out, index=False)
     m12, w12, n12 = d["mean12"].iloc[-1], d["win12"].iloc[-1], int(d["n12"].iloc[-1])
     pctl = (d["mean12"] <= m12).mean() * 100
     # months-below-zero streak (calendar months whose last reading < 0)
@@ -190,7 +199,7 @@ def lag_edge_health():
         act = ("HA w_LAG .65->.50 + treo entry LAG moi (am %d thang lien tiep)" % neg_streak
                if neg_streak >= 3 else "canh bao: ha w_LAG .65->.50 neu keo dai 3 thang")
     return dict(mean12=round(float(m12), 2), win12=round(float(w12), 1), n12=n12,
-                pctl=round(float(pctl), 0), asof=str(d["entry"].iloc[-1].date()),
+                pctl=round(float(pctl), 0), asof=str(d["known_date"].iloc[-1].date()),
                 neg_streak=neg_streak, verdict=verdict, act=act)
 
 
