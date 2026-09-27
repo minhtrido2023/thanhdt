@@ -571,14 +571,36 @@ class DNSEBroker(BrokerBase):
         return lp
 
     def get_cash(self):
+        """§25 "TIÊU ĐƯỢC NGAY" — CHỈ họ `availableCash`. Dùng bởi executor WAIT_CASH
+        (`get_cash() < need`) và biên dưới fallback của `check_plan_funding` ⇒ là CỔNG TIỀN.
+
+        CHỈ ĐỌC họ availableCash và KHÔNG rơi về thứ khác (code-quality 2026-09-27, §25 hệ quả
+        1 "Fail-closed, KHÔNG rơi về ... Rơi về = tái lập đúng bug vừa sửa, lặng lẽ"). Chuỗi
+        alias cũ kết thúc ở `purchasingpower`/`totalcash`/`cash`/`balance` — cả ba đều trả lời
+        CÂU KHÁC: `totalCash` gồm tiền bán chưa settle + cổ tức phải thu (đo thật SpaceX
+        2026-08-07: availableCash 4,82M vs totalCash 203,66M — gấp 42 lần), `purchasingpower`
+        là khái niệm của `ppse` (đã cộng hạn mức vay, xem `get_buying_power`). DNSE bỏ/đổi tên
+        `availableCash` một ngày nào đó thì bản cũ ÂM THẦM nới cổng tiền lên số "SỞ HỮU".
+
+        Thiếu cả họ availableCash ⇒ trả 0.0 (fail-closed: `0 < need` ⇒ WAIT_CASH; mọi caller
+        khác đều `float(... or 0.0)`) + in ❌ để người vận hành thấy. KHÔNG trả None: caller
+        `executor.py:1863` so sánh trực tiếp `get_cash() < need` ⇒ None sẽ là TypeError giữa
+        phiên, tức đổi một cổng fail-closed thành một vụ crash.
+        """
         bal = self.client.balances(self.account_id)
         self._log_raw("balances", bal)
         row = bal[0] if isinstance(bal, list) and bal else bal
         if isinstance(row, dict) and isinstance(row.get("stock"), dict):
             row = row["stock"]          # balances thật: {"stock": {...}, "derivative": {...}}
-        v = _fnum(qget(row, "availablecash", "withdrawablecash", "purchasingpower",
-                       "cashavailable", "totalcash", "cash", "balance",
-                       default=0))
+        v = _fnum(qget(row, "availablecash", "cashavailable", "withdrawablecash",
+                       default=None))
+        if v is None:
+            print(f"❌ [dnse] {self.label}: payload `balances` KHÔNG có field nào thuộc họ "
+                  f"availableCash (availableCash/cashAvailable/withdrawableCash) — "
+                  f"field có: {sorted(row) if isinstance(row, dict) else type(row).__name__}. "
+                  f"KHÔNG rơi về totalCash/purchasingPower (đó là câu hỏi §25 KHÁC, sẽ nới "
+                  f"lỏng cổng tiền) ⇒ coi như 0đ tiêu được ngay, lệnh sẽ WAIT_CASH.")
+            return 0.0
         return v or 0.0
 
     def _cash_totalcash_minus_debt(self):
@@ -599,6 +621,16 @@ class DNSEBroker(BrokerBase):
             return None
         av = _fnum(qget(row, "availablecash", default=None))
         if tc == 0 and td == 0 and (av is None or av == 0):
+            return None
+        # Guard THỨ BA (§25 hệ quả 2, code-quality 2026-09-27): totalCash = availableCash +
+        # tiền bán chưa settle + cổ tức chờ + lãi tiền gửi ⇒ nó KHÔNG BAO GIỜ nhỏ hơn
+        # availableCash. Hai guard trên đòi CẢ BA field = 0, nên lỗi feed chỉ ăn HAI trong ba
+        # (totalCash=0, totalDebt=0 mà availableCash còn sống) LỌT nguyên vẹn và trả cash=0
+        # như thể tiền thật về 0. Bản gốc của bất biến này:
+        # `mike/bin/park_holdings.py::_cash_fields_inconsistent` (quant-skeptic vòng 3
+        # 2026-08-09 mới ra guard này). Không import được qua ranh giới repo ⇒ bản sao này
+        # được khoá bằng selfcheck đồng bộ, xem `brokers_cash_fields_selfcheck.py`.
+        if av is not None and tc < av:
             return None
         return tc - td
 
