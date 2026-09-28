@@ -117,6 +117,8 @@ class AdjustedEntry:
     factor_terp: float | None = None      # raw Close/Price (TERP: rights subscribed or sold)
     convention: str = "accrue_only"       # accrue_only | terp
     rights_events: tuple = ()             # ex-dates of the rights issues stripped out
+    adj_source: str = "vendor"            # vendor | self_computed (see close_repair.py)
+    repair_note: str | None = None        # why the Close was replaced, when it was
 
     @property
     def is_adjusted(self) -> bool:
@@ -166,6 +168,86 @@ def _fetch_rows(items, cache_dir):
     finally:
         con.close()
 
+
+
+def _repair_close(rows, items, cache_dir, cache_max_date):
+    """({(tk,asof): (time, Close, Price)}, {(tk,asof): Repair}) with the vendor Close REPAIRED.
+
+    Layer 2 of the self-computed adjustment factor (`close_repair.py`), OFF unless
+    `MIKE_CLOSE_REPAIR=1`. Wired HERE and nowhere else because `_fetch_rows` is the single point
+    at which a vendor `Close` enters this module; `factor_terp = Close/Price` and everything
+    downstream of it — `entry_adj`, the report's tỉ suất, and `report_return_gate`'s T1 test — are
+    derived from exactly this pair.
+
+    Never raises and never degrades an entry: on ANY failure it returns the original rows plus a
+    note. A repair that cannot be computed must leave the existing gate blocking, not replace one
+    unverifiable number with another.
+    """
+    if not rows:
+        return rows, {}
+    try:
+        import duckdb
+
+        import close_repair
+        from corp_action_lib import events as ca_events
+    except Exception as e:                       # close_repair absent, BQ lib absent, no duckdb
+        return rows, {"_error": f"không nạp được close_repair ({str(e)[:90]})"}
+    if not close_repair.enabled():
+        return rows, {}
+
+    try:
+        keys = [(t, a) for (t, a) in rows]
+        tickers = sorted({t for t, _ in keys})
+        # the window must start before the OLDEST asof (the ffill band guard reads a neighbour bar)
+        # and end at the series, never at today's date — see close_repair's docstring.
+        start = min(a for _, a in keys)
+        con = duckdb.connect()
+        con.execute("SET threads=1")
+        glob = f"{cache_dir}/ticker/*.parquet"
+        tk_sql = ",".join("?" for _ in tickers)
+        bars = con.execute(
+            f"""
+            SELECT ticker, CAST(time AS VARCHAR), Close, Price, High, Low
+            FROM read_parquet('{glob}')
+            WHERE ticker IN ({tk_sql})
+              AND time >= CAST(? AS DATE) - INTERVAL 25 DAY
+              AND Close > 0 AND Price > 0
+            ORDER BY ticker, time
+            """,
+            [*tickers, start],
+        ).fetchall()
+        con.close()
+        series = {}
+        for tk, d, c, pr, hi, lo in bars:
+            series.setdefault(tk, []).append(
+                {"d": d, "close": float(c), "price": float(pr),
+                 "high": float(hi or 0), "low": float(lo or 0)})
+        series_max = cache_max_date or max((b["d"] for s in series.values() for b in s), default=None)
+        if not series_max:
+            return rows, {"_error": "không xác định được ngày cuối của chuỗi giá"}
+        evs = {}
+        for e in ca_events(tickers, since=start, until=series_max):
+            evs.setdefault(e["ticker"], []).append(e)
+    except Exception as e:
+        return rows, {"_error": f"không dựng được dữ liệu sửa Close ({str(e)[:90]})"}
+
+    out, reps = dict(rows), {}
+    for (tk, asof), (time_used, close_at, price_at) in rows.items():
+        try:
+            rep = close_repair.repair_row(
+                tk, {"d": time_used, "close": close_at, "price": price_at,
+                     "high": next((b["high"] for b in series.get(tk, []) if b["d"] == time_used), 0),
+                     "low": next((b["low"] for b in series.get(tk, []) if b["d"] == time_used), 0)},
+                evs.get(tk, []), series.get(tk, []), series_max)
+        except Exception as e:                    # a single bad ticker must not sink the report
+            # Keep the parser's own words. Swallowing them and printing a guessed cause is the
+            # §29 failure mode: the caller then reports a reason nothing ever read.
+            reps[(tk, asof)] = f"lỗi khi sửa Close: {type(e).__name__}: {str(e)[:120]}"
+            continue
+        reps[(tk, asof)] = rep
+        if rep.repaired:
+            out[(tk, asof)] = (time_used, rep.close, price_at)
+    return out, reps
 
 def cache_vintage(cache_dir=None) -> dict:
     """{year: mtime} for `bq_cache/ticker/*.parquet` plus `ticker_1m` — the freshness fault line.
@@ -334,6 +416,11 @@ def adjust_entries(items, cache_dir=None, convention="accrue_only") -> dict:
     except Exception:
         cache_max_date = None
 
+    # Layer 2 (OFF by default, see `_repair_close`). Placed after `_fetch_rows` and before
+    # `factor_terp` is read, because the whole point is that `factor_terp` must be computed off a
+    # COMPLETE adjustment. It only ever replaces `Close`; `Price` and `time_used` are untouched.
+    rows, repairs = _repair_close(rows, items, cache_dir, cache_max_date)
+
     out = {}
     for ticker, asof, entry_price in items:
         row = rows.get((ticker, asof))
@@ -346,6 +433,12 @@ def adjust_entries(items, cache_dir=None, convention="accrue_only") -> dict:
 
         time_used, close_at, price_at = row
         factor_terp = close_at / price_at
+        rep = repairs.get((ticker, asof))
+        if isinstance(rep, str):                  # the repair layer failed on THIS ticker
+            prov = {"adj_source": "vendor", "repair_note": rep}
+        else:
+            prov = {"adj_source": rep.adj_source if rep is not None else "vendor",
+                    "repair_note": (rep.reason if rep is not None and rep.repaired else None)}
 
         # Invariant: adjustment only ever scales historical prices DOWN (dividends/dilution are
         # value leaving the share). factor > 1 means the pair is not what we think it is.
@@ -353,7 +446,7 @@ def adjust_entries(items, cache_dir=None, convention="accrue_only") -> dict:
             out[(ticker, asof)] = AdjustedEntry(
                 ticker, entry_price, entry_price, factor_terp, price_at, time_used, "BAD_FACTOR",
                 f"Close/Price = {factor_terp:.6f} ngoài (0,1] — không rebase, giữ giá gốc",
-                factor_terp=factor_terp, convention=convention,
+                factor_terp=factor_terp, convention=convention, **prov,
             )
             continue
 
@@ -367,7 +460,7 @@ def adjust_entries(items, cache_dir=None, convention="accrue_only") -> dict:
                 "VINTAGE_STALE",
                 f"bq_cache/ticker/{yr}.parquet cũ hơn {newest_year}.parquet {stale[yr]:.1f} ngày "
                 f"— Close/Price của {asof} có thể chưa gồm sự kiện gần đây, KHÔNG rebase",
-                factor_terp=factor_terp, convention=convention,
+                factor_terp=factor_terp, convention=convention, **prov,
             )
             continue
 
@@ -393,6 +486,7 @@ def adjust_entries(items, cache_dir=None, convention="accrue_only") -> dict:
                     "RIGHTS_UNRESOLVED",
                     note_text,
                     factor_terp=factor_terp, convention=convention, rights_events=rights,
+                    **prov,
                 )
                 continue
         else:
@@ -410,7 +504,7 @@ def adjust_entries(items, cache_dir=None, convention="accrue_only") -> dict:
         status = "ADJUSTED" if factor < 1.0 - FACTOR_EPS else "UNCHANGED"
         out[(ticker, asof)] = AdjustedEntry(
             ticker, entry_price, entry_price * factor, factor, price_at, time_used, status, note,
-            factor_terp=factor_terp, convention=convention, rights_events=rights,
+            factor_terp=factor_terp, convention=convention, rights_events=rights, **prov,
         )
     return out
 
@@ -485,7 +579,7 @@ def _selfcheck() -> int:
         skips.append("B")
     else:
         live = adjust_entries(
-            [("MBB", "2026-06-30", 25200.0), ("FPT", "2026-06-30", 70200.0),
+            [("MBB", "2026-06-30", 25200.0), ("STB", "2026-06-30", 73800.0),
              ("ACB", "2026-06-30", 22650.0), ("HDB", "2026-06-30", 25850.0)],
         )
         m = live[("MBB", "2026-06-30")]
@@ -494,7 +588,11 @@ def _selfcheck() -> int:
               f"terp={m.factor_terp:.6f} accrue_only={m.factor:.6f} entry_adj={m.entry_adj:,.1f}")
 
         # THE control assertion the dispatch demanded: names with no corp-action must be untouched.
-        for tk, ep in (("FPT", 70200.0), ("ACB", 22650.0), ("HDB", 25850.0)):
+        # FPT KHÔNG dùng được ở đây nữa — có bonus-share ex-date 2026-09-21 (Layer 2 self-computed
+        # sẽ sửa Close, factor 0,909091 ≠ 1,0). STB xác nhận zero price-adjusting event
+        # 2026-06-30..2026-09-27 (corp_action_lib.events), thay thế đúng tinh thần "không có
+        # corp-action sau entry" mà case này muốn kiểm.
+        for tk, ep in (("STB", 73800.0), ("ACB", 22650.0), ("HDB", 25850.0)):
             a = live[(tk, "2026-06-30")]
             check(f"8. {tk} (không có corp-action sau entry): entry_adj == entry_price TUYỆT ĐỐI",
                   a.status == "UNCHANGED" and a.entry_adj == ep and a.factor == 1.0,
