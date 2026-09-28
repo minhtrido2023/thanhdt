@@ -35,16 +35,6 @@
       "ack_pending": false,
       "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
     },
-    "mike/bin/orb_pt_appendonly_selfcheck.py": {
-      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
-      "since": "2026-09-25T19:37:26Z",
-      "status": "TIMEOUT",
-      "auto": true,
-      "topic": "selfcheck-red: mike/bin/orb_pt_appendonly_selfcheck.py",
-      "escalated_utc": "2026-09-25T19:37:26Z",
-      "ack_pending": false,
-      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
-    },
     "basket_return_leg_oshares_selfcheck.py": {
       "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
       "since": "2026-09-27T22:08:21Z",
@@ -115,13 +105,23 @@
       "ack_pending": false,
       "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
     },
-    "rating8l_icb_pit_selfcheck.py": {
+    "lag_governance_order_gate_selfcheck.py": {
       "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
-      "since": "2026-09-27T22:08:22Z",
+      "since": "2026-09-28T22:06:40Z",
       "status": "FAIL",
       "auto": true,
-      "topic": "selfcheck-red: rating8l_icb_pit_selfcheck.py",
-      "escalated_utc": "2026-09-27T22:08:22Z",
+      "topic": "selfcheck-red: lag_governance_order_gate_selfcheck.py",
+      "escalated_utc": "2026-09-28T22:06:40Z",
+      "ack_pending": false,
+      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
+    },
+    "mike/bin/orb_drift_monitor_selfcheck.py": {
+      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
+      "since": "2026-09-28T22:06:40Z",
+      "status": "FAIL",
+      "auto": true,
+      "topic": "selfcheck-red: mike/bin/orb_drift_monitor_selfcheck.py",
+      "escalated_utc": "2026-09-28T22:06:40Z",
       "ack_pending": false,
       "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
     }
