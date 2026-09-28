@@ -1,13 +1,13 @@
-# Mike fleet — context pack (v3382)
+# Mike fleet — context pack (v3383)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-09-28T10:57:04] Taylor/finding — closerepair-vnm-safe-regression: {"job": "Taylor_20260928_105249", "viec": "1/3 — VNM ex-date-off-by-one shape (thuc te tav2_bq.ticker: exright_date ghi 06-26, ex-date that 06-25) chay qua clos …
 - [2026-09-28T10:57:20] Taylor/finding — closerepair-2-new-bugs-block-merge: {"job": "Taylor_20260928_105249", "viec": "2/3 — 2 test edge-case quant-skeptic yeu cau; ca 2 deu FAIL tren code hien tai = 2 BUG THAT MOI, chua tung co coverag …
 - [2026-09-28T11:31:49] Taylor/finding — closerepair-quantskeptic-round1-notconfirmed-gap-found: {"job": "Taylor_20260928_111625", "verdict_round1": "NOT_CONFIRMED", "gap": "chainffill fix chi bat chain 3-in-a-row (series[i-1]==bar==series[i-2]), khong bat  …
 - [2026-09-28T11:36:36] Taylor/finding — closerepair-quantskeptic-round2-confirmed: {"job": "Taylor_20260928_111625", "verdict_round2": "CONFIRMED", "checks": "4 adversarial case (freeze>=4, freeze-not-touching-bar, alternating frozen/real, gen …
 - [2026-09-28T11:44:51] Taylor/finding — closerepair-ready-to-merge-blocked-by-classifier: {"job": "Taylor_20260928_111625", "status": "ALL_VERIFIED_READY", "commit": "eec792d7 on branch wire/close-repair-layer2-20260927", "quant_skeptic": "CONFIRMED  …
+- [2026-09-28T12:09:12] DollarBill/decision — plan-2026-09-29-ZaloPay: {"account": "ZaloPay", "plan_date": "2026-09-29", "n_orders": 15, "orders_summary": "15 lenh BAN park-trim (sleeve PARK, book=PARK, play_type=PARK_TRIM), tong 5 …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -63,6 +63,7 @@
 - **fill_timing HYBRID** (`fill_timing_live_gate=False`, `fill_timing_hybrid_live_gate=False`) — LIVE từ **2026-08-26** (user duyệt option A). BUY blocks: 11:00/11:15/13:00/13:15/13:30. SELL blocks: 09:15/09:30/09:45/10:00. Monitoring: fill-vs-open mỗi ~10 phiên, rollback nếu mean >+22bps. Commit `9be375a4`.
 - **CAPIT margin lever** (`capit_margin_lever.enabled=True`) — LIVE từ **2026-08-24**. Ngày có CAPIT margin phải chạy `approve_margin_day.py` TRƯỚC bot.
 - **Domain-constraint P1** (`filter_lag_rating_orders()`, 8L rating≤3 gate) — LIVE. 14/14+22/22 selfcheck.
+- **close_repair.py — Layer 2 self-computed back-adjustment khi vendor backfill kẹt vĩnh viễn** (`MIKE_CLOSE_REPAIR` mặc định ON) — LIVE từ **2026-09-28**, commit `3c55c249`. FPT (và mã tương lai cùng lớp lỗi) kẹt hồi tố corp-action NỬA CHỪNG trên `tav2_bq.ticker.Close` — bq_admin xác nhận self-heal vendor đóng băng sau 15 phiên, không bao giờ tự sửa tiếp. Tự tính hệ số (xác nhận 2 nguồn độc lập, lệch <0,006%), fail-closed khi không đủ bằng chứng. 2 vòng quant-skeptic CONFIRMED (vòng 1 điều kiện → 2 test mới lộ 2 bug thật chainffill/selfband → vá → vòng 2 lần 1 NOT_CONFIRMED bắt thêm gap → vá lại → vòng 2 CONFIRMED). Selfcheck trên cây đã merge: `close_repair_selfcheck` 855/855, 14/14 mutation; `paper_entry_adjust --selfcheck` 21/21 cả 3 trạng thái cờ. VND/VNM (Layer 1 detect-only UNCOMPUTABLE) đã điều tra riêng: KHÁC lớp lỗi FPT (VND vô hại/guard quá chặt, VNM là ex-date lệch 1 phiên trong `corporate_action` — `close_repair.py` xác nhận AN TOÀN không áp sai cho ca này, band-guard tự chối đúng).
 - **NAV corp-action L1 — cảnh báo TRƯỚC ex-date** (`bin/nav_exdate_forecast.py`) — LIVE từ **2026-09-22**, commit `2a7dd54e`. Wire `[pipeline-0]` trong `bq_freshness_check.sh` (TRƯỚC `exit 1` đầu tiên) ⇒ chuỗi 19:00 in cảnh báo corp-action của mã ĐANG GIỮ vào plan report + Discord. Selfcheck 58/58.
 - **NAV corp-action gate v2 (L2-L4)** (`classify_qty_residual` + `_mult_explains` trong `daily_nav_snapshot.py`) — LIVE từ **2026-09-22**, commit `4dcc3643`, **5 vòng arch-review**. Thay tripwire so giá MÙ bằng PHÂN LOẠI:
   · cổ tức TIỀN có bằng chứng ⇒ mark giá **CUM**, trừ khoản phải thu khỏi tiền (không đếm 2 lần)
