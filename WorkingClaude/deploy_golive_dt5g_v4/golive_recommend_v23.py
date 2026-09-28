@@ -432,22 +432,52 @@ def _account_nav_basis(label):
     Fallback: nav_history_<label>.csv (do daily_nav_snapshot.py ghi mỗi phiên, có cột
     `date` nên cũng dated theo nội dung) — TỔNG NAV, chưa trừ excluded_tickers.
     """
+    # ⚠️ TRƯỚC 2026-09-28 cả hai khối dưới đây là `except Exception: pass` — KHÔNG MỘT DÒNG LOG,
+    # trên chính con số sinh slot target tiền thật. Hệ quả: `active_nav` hỏng/thiếu/stale thì rơi
+    # NGẦM sang `nav_history` = TỔNG NAV (chưa trừ `excluded_tickers`) ⇒ phần chia trần %ADV LỚN
+    # hơn vốn triển khai thật, và người vận hành không phân biệt được 4 nguyên nhân khác nhau
+    # (thiếu file / JSON hỏng / quá hạn / nav ≤ 0) khi đi chẩn đoán (§29).
+    # KHÔNG làm fail-CLOSED ở đây, có lý do: docstring trên nói rõ file này ghi AD-HOC, không
+    # cron ⇒ **hết hạn là trạng thái BÌNH THƯỜNG**, và fallback chính là đường đã thiết kế.
+    # Fail-closed sẽ chặn sinh plan trong một ca kỳ vọng. Vì vậy: GIỮ fallback, nhưng
+    # (a) mang theo LÝ DO THẬT của từng ứng viên, (b) IN CẢNH BÁO TO khi phải fallback, và
+    # (c) nhồi lý do vào chuỗi `source` — chuỗi này đã chảy vào `golive_v23_status.json`
+    #     (`nav_basis_source`, :889) nên downstream/DollarBill đọc được, không cần field mới.
+    reasons = []
     p = os.path.join(WORKDIR, "data", "execution_logs", f"active_nav_{label}.json")
     try:
         d = json.load(open(p, encoding="utf-8"))
         age = (pd.Timestamp.now().normalize() - pd.Timestamp(d["computed_at"])).days
-        if 0 <= age <= ACTIVE_NAV_MAX_AGE_D and float(d["active_nav"]) > 0:
-            return float(d["active_nav"]), f"active_nav @{d['computed_at']}"
-    except Exception:
-        pass
-    p = os.path.join(WORKDIR, "data", "execution_logs", f"nav_history_{label}.csv")
+        nav = float(d["active_nav"])
+        if 0 <= age <= ACTIVE_NAV_MAX_AGE_D and nav > 0:
+            return nav, f"active_nav @{d['computed_at']}"
+        if not 0 <= age <= ACTIVE_NAV_MAX_AGE_D:
+            reasons.append(f"active_nav QUÁ HẠN: computed_at={d['computed_at']} ⇒ tuổi {age}d"
+                           f" (trần {ACTIVE_NAV_MAX_AGE_D}d)")
+        else:
+            reasons.append(f"active_nav = {nav} ≤ 0 (@{d['computed_at']})")
+    except Exception as e:
+        reasons.append(f"active_nav không đọc được ({os.path.basename(p)}):"
+                       f" {type(e).__name__}: {e}")
+    p2 = os.path.join(WORKDIR, "data", "execution_logs", f"nav_history_{label}.csv")
     try:
-        r = pd.read_csv(p).iloc[-1]
-        if float(r["nav"]) > 0:
-            return float(r["nav"]), f"nav_history @{r['date']} (TỔNG NAV, chưa trừ excluded)"
-    except Exception:
-        pass
-    return None, "không có active_nav/nav_history dùng được"
+        r = pd.read_csv(p2).iloc[-1]
+        nav2 = float(r["nav"])
+        if nav2 > 0:
+            why = " | ".join(reasons) or "không rõ (không có lý do nào được ghi)"
+            print(f"  [nav-basis] ⚠️ {label}: PHẢI DÙNG FALLBACK `nav_history` @{r['date']} ="
+                  f" TỔNG NAV, CHƯA trừ excluded_tickers ⇒ phần chia trần %ADV của account này"
+                  f" LỚN hơn vốn triển khai thật. Vì: {why}")
+            return nav2, (f"nav_history @{r['date']} (TỔNG NAV, chưa trừ excluded"
+                          f" — FALLBACK vì: {why})")
+        reasons.append(f"nav_history nav = {nav2} ≤ 0 (@{r['date']})")
+    except Exception as e:
+        reasons.append(f"nav_history không đọc được ({os.path.basename(p2)}):"
+                       f" {type(e).__name__}: {e}")
+    why = " | ".join(reasons) or "không rõ"
+    print(f"  [nav-basis] 🔴 {label}: KHÔNG có cơ sở NAV nào dùng được ⇒ account này KHÔNG được"
+          f" chia trần %ADV. Vì: {why}")
+    return None, f"không có active_nav/nav_history dùng được ({why})"
 
 
 def capit_account_shares():
