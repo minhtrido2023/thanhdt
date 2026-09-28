@@ -26,7 +26,7 @@ import textwrap
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REL = "WorkingClaude/trading_bot/plan.py"
-OLD_REF = os.environ.get("PLANPY_OLD_REF", "").strip() or "92b746d0"
+OLD_REF = os.environ.get("PLANPY_OLD_REF", "").strip() or "49fa8a30^"
 
 _n = 0
 
