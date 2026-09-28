@@ -49,12 +49,34 @@ def interest_by_book(g, tx, book, col):
     return cash.diff() - f, cash
 
 
+def matured_from_lumps(inter, rate, term):
+    """Che do pay_mode=maturity: suy lai GOC DAO HAN tung phien tu chuoi lai dang CUC.
+
+    KHONG phai xap xi. Trong che do maturity moi lo accrue MOI phien no con song va tra o dung phien
+    thu `term` cua ky han, nen ky han cua mot cuc tra o phien d LA DUNG `term` phien lien truoc d
+    ([d-term, d-1]). Vi vay:
+        P_d = cuc(d) / SUM_{k=d-term}^{d-1} rate(k)/252      (goc cua cuc do)
+    va goc dao han hieu dung cua phien k = tong P_d cua moi cuc co k trong ky han. Chuoi tra ve VI
+    THE so sanh duoc 1-1 voi `eligible` cua che do daily => cung mot cong thuc overlay dung cho ca hai.
+    """
+    per = rate / 252.0
+    inter = np.nan_to_num(np.asarray(inter, dtype=float), nan=0.0, posinf=0.0, neginf=0.0)
+    out = np.zeros(len(inter))
+    for d in np.flatnonzero(np.abs(inter) > 1.0):
+        lo = max(d - term, 0)
+        denom = per[lo:d].sum()
+        if denom <= 0:
+            continue
+        out[lo:d] += inter[d] / denom
+    return out
+
+
 def cagr(nav, idx):
     yrs = (idx[-1] - idx[0]).days / 365.25
     return (nav[-1] / nav[0]) ** (1 / yrs) - 1
 
 
-def main(ctrl_path, leg_paths):
+def main(ctrl_path, leg_paths, pay_mode="daily", term=21):
     gc, txc = load(ctrl_path)
     rate = np.array([irp.r_idle(t, tier="dep1m") / 100.0 for t in gc.index])
     nav_c = pd.to_numeric(gc["combined_nav"], errors="coerce").astype(float).values
@@ -68,7 +90,10 @@ def main(ctrl_path, leg_paths):
         mat_tot = np.zeros(len(gc)); cash_tot = np.zeros(len(gc))
         for bk, col in BOOKS:
             inter, cash_l = interest_by_book(gl, txl, bk, col)
-            mat = (inter.values / (rate / 252.0))          # tien du tuoi suy tu dong nhat thuc
+            if pay_mode == "maturity":
+                mat = matured_from_lumps(inter.values, rate, term)
+            else:
+                mat = (inter.values / (rate / 252.0))      # tien du tuoi suy tu dong nhat thuc
             mat = np.nan_to_num(mat, nan=0.0, posinf=0.0, neginf=0.0)
             r = np.divide(mat, cash_l.values, out=np.zeros_like(mat),
                           where=np.abs(cash_l.values) > 1.0)
@@ -93,4 +118,6 @@ def main(ctrl_path, leg_paths):
 
 
 if __name__ == "__main__":
-    main(sys.argv[1], sys.argv[2:])
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    _pm = "maturity" if "--maturity" in sys.argv else "daily"
+    main(args[0], args[1:], pay_mode=_pm)

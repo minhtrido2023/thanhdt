@@ -582,3 +582,218 @@ BASKET_CA_SNAPSHOT=…corp_action_share_20260927.parquet TZ=Asia/Ho_Chi_Minh`, `
 4. Vẫn **KHÔNG mở lại** câu hỏi xếp hạng PHƯƠNG TIỆN park (§7 + §8 của báo cáo) — engine không có
    sức phân giải, và chân `_21s` làm phần đường đi **to hơn** chứ không nhỏ hơn.
 5. CAGR thật ≈ CAGR backtest − 1,5% ⇒ 25,24% → ~**23,7%** (cách đọc số học 24,49% → ~**23,0%**).
+
+---
+
+# §12 — VIỆC 1: chân "TRẢ KHI ĐÁO HẠN" (`IDLE_CARRY_PAY_MODE=maturity`)
+
+> Job `Taylor_20260928_050623`, user duyệt 12:05 ICT 2026-09-28 (Discord). Thực hiện
+> `recommended_rerun` #1 của quant-skeptic (verdict `dep1m-21s-final`, bus 2026-09-28T02:18:51Z).
+
+## 12.1 Lập luận được sửa — và nó đúng
+
+Chân pin `_21s` hiện hành trả lãi **theo ngày** kể từ phiên thứ `min_age+1` của một lô, và **không
+bao giờ truy lĩnh** `min_age` phiên đầu. Lý lẽ cũ ghi trong code — *"truy lĩnh = phải biết lô có
+sống sót không = nhìn trước"* — **SAI**, và quant-skeptic nói đúng: credit một kỳ hạn **ĐÃ ĐI HẾT**
+vào đúng phiên kỷ niệm của nó chỉ dùng thông tin quá khứ, đó chính là cách một sổ tiết kiệm 1 tháng
+đảo hạn liên tục trả lãi thật. Hệ quả số học:
+
+| | Số ngày lãi một lô sống `n` phiên được trả |
+|---|---|
+| `pay_mode=daily` (chân pin) | `n − min_age` |
+| `pay_mode=maturity` (chân mới) | `min_age × floor(n / min_age)` |
+
+Vì `min_age×floor(n/min_age) ≥ n−min_age` với mọi `n`, chân `daily` là **CHẶN DƯỚI** của chân
+`maturity`, không phải một ước lượng điểm của nó. Vậy nhãn cũ *"ĐIỂM THỰC TẾ"* cho 25,24% là sai;
+đúng phải là **ĐIỂM THẬN TRỌNG**.
+
+## 12.2 Cách cài — và tại sao KHÔNG có xấp xỉ nào
+
+Knob đặt ở **engine** (`simulate_holistic_nav.py`), song song với `deposit_min_age_sessions`
+(*lô nào* đáo hạn) và `IDLE_CARRY_TIER` (*lãi suất nào*) — ba trục vuông góc nhau.
+
+Sổ lô ở chế độ maturity có **4 trường** `[tuổi, số_tiền, accrued, term_days]`:
+- `accrued` = **TỔNG rate/252** của các phiên lô đã sống trong kỳ hạn HIỆN TẠI — *rate-SUM*, không
+  phải số ngày, không phải bình quân. Đây chính là chỗ làm cho con số **CHÍNH XÁC dưới lãi suất
+  PIT biến thiên**: nhân `accrued` với gốc lúc đáo hạn cho đúng tổng lãi của đúng 21 phiên đó.
+  Không có bước xấp xỉ nào phải khai báo.
+- `term_days` = số phiên kỳ hạn hiện tại đã accrue. Đếm theo **số phiên đã ACCRUE**, KHÔNG theo
+  tuổi lô — vì lô sinh ở reconcile 6z (ví dụ chính cục lãi vừa trả) lệch 1 phiên so với tuổi.
+  Mutation **M17** chốt đúng điểm này.
+- Thứ tự trong phiên: `reconcile` → `idle_lots_mature()` → `idle_lots_accrue()`. Mature **TRƯỚC**
+  accrue nên kỳ hạn được trả ở phiên `tuổi == min_age` — đúng phiên mà chế độ `daily` trả lần đầu.
+  Mutation **M12** chốt đúng điểm này.
+
+Ba quy ước giữ **nguyên** như chân pin, theo chỉ đạo:
+1. **Kỳ hạn DỞ DANG ⇒ 0%.** Lô bị tiêu giữa kỳ bị reconcile xoá khỏi sổ, `accrued` của nó không bao
+   giờ được trả. Cưỡng chế **bằng cấu trúc**, không cần cơ chế thu hồi.
+2. **Lãi đã trả KHÔNG nhập gốc.** Nó vào `cash`, rồi reconcile 6z biến nó thành một lô tuổi 0 với
+   đồng hồ kỳ hạn riêng ⇒ không có compounding trong kỳ hạn. (Thấy rõ ở selfcheck T15e: cục lãi của
+   phiên 21 tự đáo hạn ở phiên 43.)
+3. **Tiêu một phần thì rate-SUM đi theo GỐC CÒN LẠI**, không theo gốc ban đầu (T13d).
+
+`pay_mode` **mặc định `daily`** — mọi chân đã pin vẫn tái lập nguyên trạng.
+
+## 12.3 Cổng bắt buộc đã QUA
+
+| Cổng | Kết quả |
+|---|---|
+| self-check 0 VND (dòng tiền + NAV identity), **cả 2 book, cả 2 chân** | ✅ `0 VND` / `0 VND` |
+| Chân control carry-OFF tái lập **byte-identical** | ✅ `rp_ctrl3` md5 **`4707bcbe…`** = anchor R3 |
+| Chân control **đường `daily`** tái lập byte-identical (chứng minh không làm hỏng chân đã pin) | ✅ `rp_21sfifo_re2` md5 **`d73f983d…`** = pin 08:38 |
+| Selfcheck `idle_cash_age_selfcheck.py` | ✅ **104 assertion PASS** (trước: 50) |
+| Mutation | ✅ **18/18 BỊ GIẾT** (trước: 11/11); 7 mutation mới cho chế độ maturity |
+| Mutation chết bằng HÀNH VI, không phải crash | ✅ cả 18 chết bằng `AssertionError` của một test cụ thể |
+| Không phụ thuộc TZ (§16) | ✅ PASS dưới 4 TZ + `env -u TZ` |
+| §8 trục config vào tên file | ✅ hậu tố `_mat` (`…_idledep1m_21sfifo_mat.csv`) |
+| Không ghi đè CSV đã pin nào | ✅ 9 tên file mới, 0 file cũ bị chạm |
+
+⚠️ **Một ghi chú audit trung thực.** Lần chạy control ĐẦU (`rp_21sfifo_re`) cho md5 `f3f3e068…`
+KHÁC pin. Điều tra: **đúng 1 dòng / 16.821 dòng** khác nhau — dòng `META,cash_identity`, là **văn
+xuôi tài liệu** mà tôi đã viết lại. Bỏ dòng đó ra, md5 hai file bằng nhau (`67b1cfab…`), và toàn bộ
+3.107 dòng DAILY / 9.015 TX / 37 METRIC / 13 ANNUAL giống hệt. Tôi đã **phục hồi văn xuôi nhánh
+`daily` về đúng byte cũ** (câu mới chỉ nằm ở nhánh `maturity`) rồi chạy lại: `rp_21sfifo_re2` cho
+md5 **`d73f983d…`** — pin tái lập được nguyên văn từ branch này. Bài học tổng quát: **md5 của ledger
+phụ thuộc cả văn xuôi META, nên sửa comment mô tả một chân ĐÃ PIN cũng phá md5 pin** — đổi văn xuôi
+thì phải đổi ở nhánh chưa pin, hoặc chấp nhận re-pin.
+
+Và để không ai phải tin lời tôi rằng việc phục hồi đó *không* làm lệch chân maturity: chạy lại chân
+maturity FIFO sau khi phục hồi (`rp_matfifo2`) cho md5 **`595136ea…`** — **byte-identical** với
+`rp_matfifo` chạy trước đó (16.920 dòng, self-check 0 VND). Mọi số ở §12.4 đứng nguyên.
+
+## 12.4 Số — VIỆC 1
+
+Cửa sổ 2014-01-02 → 2026-06-19 (12,46 năm), NAV 50B, `universe_pit`, ETF `custompitg`.
+
+| Chân | CAGR | Sharpe | MaxDD | Calmar | Final NAV | IS 2014-19 | OOS 2020+ | Tổng lãi trả |
+|---|---|---|---|---|---|---|---|---|
+| `ctrl3` carry OFF | 23,37% | 1,87 | −14,6% | 1,60 | 684,52B | 20,00% | 26,50% | 0,000B |
+| `21sfifo` **daily (PIN)** | 25,24% | 2,02 | −14,4% | 1,75 | 825,92B | 21,39% | 28,85% | 28,072B |
+| **`matfifo` MATURITY (chặn chính)** | **25,34%** | **2,02** | **−14,1%** | **1,79** | **833,72B** | **21,79%** | **28,64%** | **36,018B** |
+| `matlifo` MATURITY (độ nhạy) | 25,42% | 2,03 | −14,1% | 1,81 | 840,65B | 21,90% | 28,71% | 38,086B |
+| `pin2` dep1m KHÔNG age-gate (**trần**) | 25,71% | — | — | — | — | — | — | 51,576B |
+
+**KIỂM BẮT BUỘC — ĐẠT.** Chân maturity FIFO **25,34%** nằm **strictly trong `(25,24% ; 25,71%)`**,
+đúng như suy luận của quant-skeptic. LIFO 25,42% cũng nằm trong dải. Tổng lãi trả cũng đúng thứ tự
+đơn điệu kỳ vọng: `28,072B (daily) < 36,018B (maturity) < 51,576B (không gate)`.
+
+Bằng chứng cơ học hỗ trợ: số phiên trả lãi rơi từ **3.615 → 2.026** (lãi thành CỤC, không còn theo
+ngày) nhưng tổng lãi TĂNG 28,3% — đúng chữ ký của "trả trọn kỳ hạn ở mốc đáo hạn".
+
+## 12.5 Tách SỐ HỌC / ĐƯỜNG ĐI (`overlay_21s.py --maturity`)
+
+`overlay_21s.py` được mở rộng thêm cờ `--maturity`. **Không phải xấp xỉ**: ở chế độ maturity mỗi lô
+accrue MỌI phiên nó còn sống và trả ở đúng phiên thứ 21 của kỳ hạn, nên kỳ hạn của một cục trả ở
+phiên `d` **LÀ ĐÚNG** 21 phiên liền trước `d`. Vì vậy gốc của cục đó `= cục(d) / Σ_{k=d-21}^{d-1}
+rate(k)/252`, và rải gốc đó lên 21 phiên của kỳ hạn cho lại **đúng** chuỗi "gốc đang sinh lãi" so
+sánh 1-1 được với `eligible` của chế độ daily.
+
+**Chứng minh mở rộng không xâm lấn**: đường `daily` mặc định tái lập **chính xác** số cũ —
+`21sfifo +1,116 / +0,758` và `21slifo +1,191 / +0,393` (khớp tới 0,001pp số quant-skeptic đã verify).
+
+| Chân | Δ TỔNG | SỐ HỌC | ĐƯỜNG ĐI | % số học | gốc-đang-sinh-lãi / tiền nhàn rỗi |
+|---|---|---|---|---|---|
+| `21sfifo` daily (PIN) | +1,873pp | +1,116pp | **+0,758pp** ⚠️ *(1,6× sàn 0,46)* | 59,6% | 51,3% |
+| `21slifo` daily | +1,584pp | +1,191pp | +0,393pp | 75,2% | 57,0% |
+| **`matfifo` MATURITY** | **+1,968pp** | **+1,520pp** | **+0,448pp** *(dưới sàn 0,46)* | **77,2%** | **70,9%** |
+| `matlifo` MATURITY | +2,051pp | +1,597pp | +0,454pp *(dưới sàn 0,46)* | 77,9% | 76,9% |
+
+**Đọc ngược lại cho thấy một điều đáng chú ý:** chuyển sang quy ước ĐÚNG làm phần **số học tăng**
+(+1,116 → +1,520pp) nhưng phần **đường đi giảm** (+0,758 → +0,448pp), hai hiệu ứng gần như triệt
+tiêu nhau ⇒ CAGR chỉ nhúc nhích +0,10pp. Và nó **cải thiện chất lượng bằng chứng của chân này**:
+phần đường đi của chân maturity **rơi xuống DƯỚI sàn nhiễu 0,46pp**, tức cảnh báo lớn nhất ở §11.9
+điểm 1 (đường đi 0,758pp vượt sàn) **KHÔNG còn áp dụng** cho chân maturity.
+
+## 12.6 Kết luận VIỆC 1 — và điều nó KHÔNG cho phép kết luận
+
+1. **quant-skeptic đúng về lập luận, và đúng cả về khoảng số.** Con số trung thực của luật
+   "rút trước hạn = 0%" là **25,34%** (FIFO), nằm strictly trong dải đã công bố.
+2. **Nhưng biên độ là +0,10pp — ~1/5 sàn nhiễu 0,46pp.** Vậy 25,24% và 25,34% **không phân biệt
+   được với nhau**. Khuyết điểm quant-skeptic tìm ra là **lỗi NHÃN thật**, hệ quả **số** thì
+   immaterial. Không có lý do vận hành nào để re-pin cả dải vì 0,10pp.
+3. **Đề xuất nhãn** (Mike quyết, tôi không tự sửa registry): giữ **25,24% = pin FIFO THẬN TRỌNG**
+   làm số chính (nó là chặn dưới, nó đã qua verify, và sizing phải đứng ở cận xấu), thêm một dòng
+   ghi **25,34% = điểm trung thực của cùng luật, chênh +0,10pp < sàn nhiễu**. Đổi nhãn
+   *"ĐIỂM THỰC TẾ" → "ĐIỂM THẬN TRỌNG"* như quant-skeptic yêu cầu.
+4. **KHÔNG mở lại** dải pin0%…pin1M: cận dưới 23,37% và cận trên 25,71% **không đổi** (chân
+   maturity nằm giữa, không phải ngoài). **Neo sizing DD vẫn là −25,2% của đầu sàn.**
+5. FIFO/LIFO vẫn **không xếp hạng được** ở chế độ maturity (25,34 vs 25,42 = 0,08pp << 0,46pp) —
+   y như ở chế độ daily. Hai chân là hai **cận**, không phải hai ứng viên.
+
+---
+
+# §13 — VIỆC 2: độ nhạy `IDLE_CARRY_MIN_AGE ∈ {20, 21, 22, 23}`
+
+> `recommended_rerun` #3 của quant-skeptic. Chạy **FIFO**, chế độ trả **THEO NGÀY** (`daily`) — đúng
+> chế độ của chân pin 25,24% — để A/B chỉ đổi **1 biến**. Lý do phải đo: một tháng thật có 20–23
+> phiên giao dịch, nên `min_age=21` cần được chứng minh là **CAO NGUYÊN**, không phải một điểm may.
+
+| `min_age` | CAGR | Δ vs 21 | Sharpe | MaxDD | Calmar | Final NAV | IS 2014-19 | OOS 2020+ | Tổng lãi | md5 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 20 | 25,35% | **+0,11pp** | 2,02 | −14,4% | 1,76 | 835,22B | 21,41% | 29,05% | 29,019B | `1da5444d…` |
+| **21 (PIN)** | **25,24%** | — | 2,02 | −14,4% | 1,75 | 825,92B | 21,39% | 28,85% | 28,072B | `d73f983d…` |
+| 22 | 25,22% | **−0,02pp** | 2,02 | −14,5% | 1,74 | 823,89B | 21,34% | 28,85% | 27,072B | `acd82138…` |
+| 23 | 25,21% | **−0,03pp** | 2,02 | −14,5% | 1,74 | 823,12B | 21,30% | 28,87% | 26,122B | `469b4f7e…` |
+
+## 13.1 Đọc kết quả so với SÀN NHIỄU 0,46pp
+
+**Biên độ toàn dải 20→23 = 0,14pp = 30% của sàn nhiễu 0,46pp.** Chênh lệch lớn nhất so với 21
+(+0,11pp ở `min_age=20`) cũng chỉ bằng **24% sàn nhiễu** và dưới MDE một-chân (0,4pp).
+
+⇒ **ĐÚNG CAO NGUYÊN. Chân pin KHÔNG nhạy với tham số này.** `min_age=21` không phải một điểm may
+mắn; bất kỳ giá trị trong 20–23 (toàn bộ khoảng độ dài thật của một tháng giao dịch VN) đều cho
+cùng một con số trong phạm vi phân giải của engine.
+
+## 13.2 Ba dấu hiệu phụ củng cố kết luận (không phải bằng chứng độc lập)
+
+1. **Đơn điệu, không có vách.** CAGR giảm đơn điệu 25,35 → 25,24 → 25,22 → 25,21 khi ngưỡng tăng,
+   và tổng lãi trả cũng giảm đơn điệu 29,019 → 28,072 → 27,072 → 26,122B. Đó đúng là dấu hiệu số
+   học kỳ vọng (ngưỡng cao hơn ⇒ ít tiền đủ tuổi hơn ⇒ ít lãi hơn), **không** phải nhiễu đường đi.
+2. **Độ dốc ≈ tuyến tính, cỡ ~0,03pp / phiên ngưỡng** ở phía ngưỡng cao (21→22→23). Riêng bước
+   20→21 dốc hơn (0,11pp) vì ở ngưỡng thấp, một phiên ngưỡng giải phóng nhiều tiền hơn.
+3. **Sharpe bất động ở 2,02** và MaxDD chỉ trôi 0,1pp trên cả 4 chân — không có chân nào đổi tính
+   chất rủi ro.
+
+## 13.3 Điều VIỆC 2 KHÔNG chứng minh
+
+- **Không** chứng minh 21 là *tối ưu*. Nó chứng minh việc CHỌN trong 20–23 **không quan trọng** —
+  mạnh hơn "tối ưu" cho mục đích pin, vì nó nói kết quả không phụ thuộc lựa chọn.
+- **Không** mở rộng ra ngoài 20–23. Ngưỡng rất thấp (ví dụ 5 phiên) sẽ tiến về chân `pin2` 25,71%;
+  ngưỡng rất cao sẽ tiến về `ctrl` 23,37%. Cao nguyên chỉ được đo trong **khoảng có nghĩa vật lý**
+  (số phiên thật của một tháng), đó là đúng phạm vi câu hỏi.
+- Mỗi chân thêm vào đều **tăng N của DSR/PBO**. 4 chân min_age + 2 chân maturity = 6 chân mới trong
+  họ này; nếu Mike đưa bất kỳ chân nào vào registry như một *ứng viên* (không phải một *cận*) thì
+  phải tính lại DSR/PBO với N mới.
+
+## 13.4 Lệnh tái lập (§8 — mọi trục config đều nằm trong tên file)
+
+```bash
+cd /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/repin_dep1m_20260928
+C="BASKET_WT=namecap BASKET_SELECT=yieldcombo PARK_STATES=3:0.3"
+# §12 VIỆC 1 — trả khi đáo hạn
+./run_leg.sh rp_matfifo $C IDLE_CARRY_TIER=dep1m IDLE_CARRY_MIN_AGE=21 IDLE_CARRY_AGE_ORDER=fifo IDLE_CARRY_PAY_MODE=maturity
+./run_leg.sh rp_matlifo $C IDLE_CARRY_TIER=dep1m IDLE_CARRY_MIN_AGE=21 IDLE_CARRY_AGE_ORDER=lifo IDLE_CARRY_PAY_MODE=maturity
+# §13 VIỆC 2 — độ nhạy min_age (chế độ daily)
+for A in 20 22 23; do ./run_leg.sh rp_${A}sfifo $C IDLE_CARRY_TIER=dep1m IDLE_CARRY_AGE_ORDER=fifo IDLE_CARRY_MIN_AGE=$A; done
+# CONTROL (phải tái lập byte-identical, nếu không thì DỪNG)
+./run_leg.sh rp_ctrl3      $C IDLE_CARRY_TIER=off                    # -> md5 4707bcbe…
+./run_leg.sh rp_21sfifo_re2 $C IDLE_CARRY_TIER=dep1m IDLE_CARRY_MIN_AGE=21 IDLE_CARRY_AGE_ORDER=fifo   # -> md5 d73f983d…
+# Metric + tách số học/đường đi
+D=/home/trido/thanhdt/WorkingClaude/data
+$DNA_PYEXE leg_metrics.py $D/*_rp_matfifo_* $D/*_rp_matlifo_* $D/*_rp_2[023]sfifo_*
+$DNA_PYEXE overlay_21s.py            $D/*_rp_ctrl3_univpit.csv $D/*_rp_21sfifo_univpit_idledep1m_21sfifo.csv
+$DNA_PYEXE overlay_21s.py --maturity $D/*_rp_ctrl3_univpit.csv $D/*_rp_matfifo_univpit_idledep1m_21sfifo_mat.csv
+# Selfcheck
+cd ../../wt-repin-dep1m-2809/WorkingClaude
+$DNA_PYEXE idle_cash_age_selfcheck.py --mutations   # 104 assertion PASS, 18/18 mutation KILLED
+$DNA_PYEXE idle_cash_age_selfcheck.py --all-tz      # 4 TZ + env -u TZ
+```
+
+## 13.5 Việc CHƯA làm / ranh giới đã giữ
+
+- **KHÔNG** sửa `data/results_registry.md`, **KHÔNG** đổi KB canonical, **KHÔNG** merge vào `main`,
+  **KHÔNG** đụng `data/trading_rules.json`. Toàn bộ là PAPER-ONLY trong worktree
+  `agents/Taylor/wt-repin-dep1m-2809`, branch `research/repin-dep1m-2709`.
+- **KHÔNG** chạy bootstrap / DSR / PBO cho 6 chân mới — chúng là **CẬN và ĐỘ NHẠY**, không phải ứng
+  viên deploy; chạy DSR cho chúng sẽ chỉ làm phồng N mà không trả lời câu hỏi nào đang mở.
+- Dải pin đang hiệu lực **KHÔNG đổi**: pin0% **23,37%** (sàn) … pin1M **25,71%** (trần).
