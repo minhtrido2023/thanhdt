@@ -1951,14 +1951,32 @@ class Executor:
                               note="lệnh có trần giá tuyệt đối — ATC không đặt được giá, bỏ quét ATC")
                 continue
             c = self._open_child(ps)
+            _still_open_qty = 0
             if c:
                 try:
                     self.broker.cancel_order(c["oid"])
                     c["status"] = "cancelled"
                     self._release_child(o.ticker, c)
-                except Exception:
-                    pass
-            raw_remaining = o.qty - ps["filled"]
+                except Exception as e:
+                    # 2026-09-28 (user duyet). TRUOC day: `except Exception: pass` — CAM TUYET DOI,
+                    # va luong van chay tiep voi `raw_remaining = o.qty - ps["filled"]`. Cancel that
+                    # bai nghia la lenh LO VAN SONG tren so sanh; phan dang treo o do KHONG bi tru,
+                    # nen ATC duoc dat cho TOAN BO phan con lai ⇒ LO + ATC cung khop ⇒ **vuot
+                    # `o.qty`**. `atc_remainder_sell = True` (config.py:144) ⇒ nhanh nay DANG BAT
+                    # chieu BAN. `_ghost_tickers` KHONG che duoc: ca hai oid deu nam trong state,
+                    # khong co oid "la" nao.
+                    # Sua TOI THIEU, khong dong gi khac trong `_atc_sweep`:
+                    #   (1) journal CANCEL_FAIL — kha thi, `cancel_all_open` (:2008+) dung CUNG lenh
+                    #       `cancel_order` va da journal dung the;
+                    #   (2) TRU phan con song khoi `remaining` ⇒ tong dat ra khong the vuot ke hoach.
+                    # Neu phan con song phu kin phan con lai thi `remaining < LOT` ⇒ bo qua ATC luot
+                    # nay (bao thu, dung huong).
+                    _still_open_qty = max(0, int(c.get("qty") or 0) - int(c.get("filled") or 0))
+                    self._journal("CANCEL_FAIL", o, c.get("oid"), _still_open_qty, note=(
+                        f"ATC: huy lenh LO that bai ({type(e).__name__}: {e}) — lenh VAN SONG tren"
+                        f" so sanh, tru {_still_open_qty}cp dang treo khoi phan quet ATC de khong"
+                        f" dat vuot ke hoach"))
+            raw_remaining = o.qty - ps["filled"] - _still_open_qty
             remaining = round_lot(raw_remaining)
             if remaining < LOT:
                 if 0 < raw_remaining < LOT:
