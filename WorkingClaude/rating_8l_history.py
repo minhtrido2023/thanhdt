@@ -624,13 +624,32 @@ def main():
     # coding_guidelines §8: an A/B or selfcheck run must never be able to target the registry-pinned
     # data/rating_8l_history.csv nor REPLACE tav2_bq.fa_ratings_8l. Both are explicit opt-outs; with no
     # env set the canonical production invocation behaves byte-for-byte as before.
-    path = os.environ.get("R8L_HIST_OUT") or os.path.join(WORKDIR,"data","rating_8l_history.csv")
+    _canon = os.path.join(WORKDIR, "data", "rating_8l_history.csv")
+    path = os.environ.get("R8L_HIST_OUT") or _canon
     out.to_csv(path, index=False)
     print(f"wrote {path}  ({len(out)} rows)")
+    # REFRESH BQ TU SUY THEO DICH ĐEN, khong con "mac dinh refresh tru khi nho bat co" (retro
+    # 2026-09-27 Pattern 1, user duyet 16:52 ICT 2026-09-28). Su co goc: mot run EXP ghi ra file
+    # KHAC nhung VAN REPLACE `tav2_bq.fa_ratings_8l` vi nguoi chay quen dat
+    # `R8L_HIST_NO_BQ_REFRESH=1` ⇒ bang production mang so cua thi nghiem, mat ~2h khoi phuc.
+    # Mot guard OPT-IN thu cong (bien moi truong nguoi phai tu nho) khong the dua vao — no chi
+    # dung khi nguoi dung da y thuc duoc rui ro, tuc dung luc nao cung KHONG can guard.
+    # Nay: chi refresh khi dich ghi DUNG LA canonical; moi dich khac ⇒ KHONG dung toi bang
+    # production, va NOI RO vi sao. Co the ep tuong minh bang R8L_HIST_BQ_REFRESH=1 (cho ca
+    # duong phuc hoi: ghi ra file tam roi chu dong day len BQ).
+    _force = os.environ.get("R8L_HIST_BQ_REFRESH") == "1"
+    _is_canon = os.path.realpath(path) == os.path.realpath(_canon)
     if os.environ.get("R8L_HIST_NO_BQ_REFRESH") == "1":
         print("  [bq] refresh SKIPPED (R8L_HIST_NO_BQ_REFRESH=1) -- tav2_bq.fa_ratings_8l untouched")
-    else:
+    elif _force:
+        print(f"  [bq] refresh ÉP TƯỜNG MINH (R8L_HIST_BQ_REFRESH=1) tu {path}")
         refresh_bq_table(path)
+    elif _is_canon:
+        refresh_bq_table(path)
+    else:
+        print(f"  [bq] refresh SKIPPED -- dich ghi KHONG phai canonical"
+              f" ({path} != {_canon}) ⇒ day la run THI NGHIEM/A-B, khong dung toi"
+              f" tav2_bq.fa_ratings_8l. Muon day len that: R8L_HIST_BQ_REFRESH=1")
     print("\ndistribution by route x rating (raw 1-5):")
     print(pd.crosstab(out["route"], out["rating"]).to_string())
     print("\ndistribution by route x TIER (final A-E, compounder=per-qtr percentile):")

@@ -258,6 +258,20 @@ def _alert_funding_block(label, plan_date, verdict):
     _notify_trading_daily(msg)
 
 
+def _notify_failopen(label, gate, reason):
+    """Cong fail-open DA KEU tren stdout — nhung stdout cua run_bot chi nam trong LOG.
+
+    User chot 16:52 ICT 2026-09-28: "fail-open bao vao telegram". `_notify_trading_daily` da gui
+    CA Discord Trading Daily LAN Telegram (xem docstring cua no) nen dung lai, khong dung kenh moi.
+    Fail-safe: ham do khong bao gio raise.
+    """
+    print(f"[{label}] ⚠⚠ {gate} KHÔNG CHẠY ĐƯỢC — {reason}")
+    _notify_trading_daily(
+        f"⚠️ **{label} — CỔNG {gate} KHÔNG CHẠY ĐƯỢC (fail-open)**\n"
+        f"{reason}\n"
+        f"Lệnh VẪN ĐI RA theo plan. Cần người kiểm tra TRƯỚC khi tin kết quả phiên này.")
+
+
 def _notify_trading_daily(msg):
     """Post msg → Trading Daily Discord + Telegram — fail-safe (không bao giờ raise)."""
     notify_thread = os.path.join(_WC_ROOT, "mike", "bin", "notify_thread.sh")
@@ -514,7 +528,7 @@ def main():
         plan, holds_blocked = filter_signal_holds(plan)
         for b in holds_blocked:
             if b.get("action") == "FAIL_OPEN":
-                print(f"[{p['label']}] ⚠⚠ signal_holds gate KHÔNG CHẠY ĐƯỢC — {b['reason']}")
+                _notify_failopen(p["label"], "signal_holds", b["reason"])
             else:
                 o, h = b["order"], b["hold"]
                 print(f"[{p['label']}] ⛔ signal_holds BỎ lệnh {o.ticker} ({o.side} {o.qty} cp, "
@@ -553,7 +567,7 @@ def main():
         plan, rating_blocked = filter_lag_rating_orders(plan)
         for a in rating_blocked:
             if a["action"] == "FAIL_OPEN":
-                print(f"[{p['label']}] ⚠⚠ LAG gate rating KHÔNG CHẠY ĐƯỢC — {a['reason']}")
+                _notify_failopen(p["label"], "LAG rating 8L≤3", a["reason"])
             else:
                 print(f"[{p['label']}] ⛔ LAG BỎ lệnh {a['ticker']} ({a['qty_before']:,} cp, "
                       f"8L rating={a['rating']}) — {a['reason']}")
@@ -565,7 +579,7 @@ def main():
         plan, gov_blocked = filter_lag_governance_orders(plan)
         for a in gov_blocked:
             if a["action"] in ("FAIL_OPEN", "FAIL_OPEN_FORENSIC"):
-                print(f"[{p['label']}] ⚠⚠ LAG gate quản trị KHÔNG ĐẦY ĐỦ — {a['reason']}")
+                _notify_failopen(p["label"], "LAG quản trị (BANNED/forensic)", a["reason"])
             else:
                 print(f"[{p['label']}] ⛔ LAG BỎ lệnh {a['ticker']} ({a['qty_before']:,} cp, "
                       f"{a['kind']}) — {a['reason']}")
