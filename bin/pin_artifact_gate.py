@@ -58,6 +58,19 @@ def _git(args, cwd, allow_fail=False):
     return r.stdout
 
 
+def repo_rel_registry(wc_root: str) -> str:
+    """Đường dẫn registry TÍNH TỪ GỐC REPO, không phải từ wc_root.
+
+    BẮT ĐƯỢC KHI TEST THẬT 2026-09-28: `git show HEAD:<path>` giải path theo GỐC
+    REPO chứ không theo cwd. Repo ngoài là `/home/trido/thanhdt`, còn registry ở
+    `WorkingClaude/data/results_registry.md` ⇒ truyền `data/results_registry.md`
+    thì git trả RỖNG, `old_text=""`, và gate coi **cả 135 mục lịch sử là MỚI** —
+    tức ratchet biến mất đúng lúc cần nó nhất. Phải hỏi git tiền tố thật.
+    """
+    prefix = _git(["rev-parse", "--show-prefix"], wc_root, allow_fail=True).strip()
+    return (prefix + REGISTRY_REL).replace(os.sep, "/")
+
+
 def split_sections(text: str) -> dict:
     """{tiêu đề mục -> thân mục}. Trùng tiêu đề ⇒ nối thân lại (hiếm, nhưng có)."""
     out = {}
@@ -181,19 +194,31 @@ def main(argv=None) -> int:
             return 0
 
     rev = args.rev or "HEAD"
+    rel = repo_rel_registry(wc_root)
     if args.worktree:
         if not os.path.exists(reg_abs):
             print(f"Không thấy {reg_abs}")
             return 2
         new_text = open(reg_abs, encoding="utf-8").read()
     else:
-        new_text = _git(["show", f":{REGISTRY_REL}"], wc_root, allow_fail=True)
+        new_text = _git(["show", f":{rel}"], wc_root, allow_fail=True)
         if not new_text:
             new_text = open(reg_abs, encoding="utf-8").read() if os.path.exists(reg_abs) else ""
-    old_text = _git(["show", f"{rev}:{REGISTRY_REL}"], wc_root, allow_fail=True)
+    old_text = _git(["show", f"{rev}:{rel}"], wc_root, allow_fail=True)
 
     if not new_text:
         print("pin_artifact_gate: không đọc được nội dung registry mới — KHÔNG gate.")
+        return 0
+
+    # FAIL-CLOSED có chủ đích: đọc được bản MỚI mà bản CŨ rỗng nghĩa là ratchet
+    # KHÔNG hoạt động — mọi mục lịch sử sẽ bị coi là mới. Thà nói thẳng là không
+    # gate được còn hơn phun 135 vi phạm giả rồi bị người ta tắt hẳn hook (§29).
+    if not old_text.strip():
+        print(
+            f"⚠️ pin_artifact_gate: KHÔNG đọc được bản {rev} của `{rel}` "
+            f"(git show trả rỗng) ⇒ không xác định được mục nào là MỚI.\n"
+            f"   KHÔNG GATE lần này — đây là 'không kiểm được', KHÔNG phải 'sạch'."
+        )
         return 0
 
     violations, ok = check_text(new_text, old_text, wc_root)
