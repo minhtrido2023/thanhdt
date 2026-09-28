@@ -764,3 +764,6 @@
 
 ## Archived 2026-09-28 (keep=12 days=0 require_done=False)
 - [2026-09-27T11:23:06Z] BAI HOC 2026-09-27: selfcheck backup/restore file THAT phai dung wc_paths.find_wc_root, khong dem cap thu muc — nav_scripts_2account_selfcheck da them 1 dong NAV Chu Nhat vao nav_history_{SpaceX,ZaloPay}.csv THAT khi chay tu worktree (env WC_ROOT cua dispatch.sh thang o child nhung khong thang o selfcheck). Da phuc hoi + va. CHUA QUET cac selfcheck khac cung lop.
+
+## Archived 2026-09-28 (keep=12 days=0 require_done=False)
+- [2026-09-27T11:27:34Z] CHO USER SIGN-OFF: merge branch fix/failc-sweep-8callsites-2709 @546d5c83 (8 call-site edge-health entry->known_date). Delta cao nhat +0,29pp, KHONG so PIN nao doi, pt_v22_dt5g byte-identical => engine_room_oos an toan. Report: research/failc_sweep8_20260927/REPORT.md. | TON DU: 11 occurrence cung lop o snapshot dong bang — dang ke nhat agents/Taylor/research/backtest_2008_v24_20260825/engine_2008.py, de xuat job rieng.
