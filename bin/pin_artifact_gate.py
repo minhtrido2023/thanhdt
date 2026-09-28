@@ -165,12 +165,69 @@ def check_text(new_text: str, old_text: str, wc_root: str) -> tuple:
     return violations, ok
 
 
+STORE_REL = os.path.join("data", "pinned_ledgers")
+MANIFEST_NAME = pin_ledger.MANIFEST_NAME
+
+
+def check_store_immutability(wc_root: str, rev: str) -> list:
+    """B6 — kho đã pin là CHỈ-THÊM: cấm xoá, cấm sửa, PINS.jsonl append-only.
+
+    VÌ SAO: retention không phải lời hứa, nó phải là một thứ git từ chối làm.
+    Một ledger đã pin mất đi = một con số neo kỳ vọng vĩnh viễn không tái lập
+    được — đúng 2 ca đã xảy ra (`a953d4bb…`, `f30a5bea…`). Thiếu dung lượng thì
+    nén thêm, KHÔNG xoá.
+    """
+    prefix = _git(["rev-parse", "--show-prefix"], wc_root, allow_fail=True).strip()
+    store = (prefix + STORE_REL).replace(os.sep, "/")
+    # ⚠️ HAI QUY ƯỚC ĐƯỜNG DẪN KHÁC NHAU CỦA GIT — đã cắn 2 lần trong CHÍNH file này:
+    #   `git show <rev>:<path>`      → <path> tính từ GỐC REPO
+    #   `git diff … -- <pathspec>`   → <pathspec> tính từ CWD
+    # Chạy từ `WorkingClaude/` mà truyền "WorkingClaude/data/..." thì git đi tìm
+    # "WorkingClaude/WorkingClaude/data/..." ⇒ diff RỖNG ⇒ gate im lặng cho qua
+    # đúng lúc có người xoá artifact đã pin. `:(top)` ép pathspec về gốc repo.
+    out = _git(["diff", "--cached", "--name-status", "-M", rev, "--", f":(top){store}"],
+               wc_root, allow_fail=True)
+    v = []
+    manifest_rel = f"{store}/{MANIFEST_NAME}"
+    for line in out.splitlines():
+        if not line.strip():
+            continue
+        parts = line.split("\t")
+        st, path = parts[0], parts[-1]
+        if st.startswith("D"):
+            v.append(f"XOÁ artifact đã pin: {path} — kho là CHỈ-THÊM (B6). "
+                     f"Thiếu dung lượng thì nén, KHÔNG xoá.")
+        elif st.startswith("R"):
+            v.append(f"ĐỔI TÊN artifact đã pin: {line} — tên mang md5, đổi tên là "
+                     f"phá đường dò.")
+        elif st.startswith("M") and path != manifest_rel:
+            v.append(f"SỬA artifact đã pin: {path} — bản lưu bất biến, muốn số mới "
+                     f"thì pin ledger MỚI (md5 mới).")
+
+    # PINS.jsonl: append-only — N dòng đầu của bản mới phải TRÙNG bản cũ
+    old = _git(["show", f"{rev}:{manifest_rel}"], wc_root, allow_fail=True)
+    new = _git(["show", f":{manifest_rel}"], wc_root, allow_fail=True)
+    if old and new:
+        o, nl = old.splitlines(), new.splitlines()
+        if len(nl) < len(o):
+            v.append(f"{MANIFEST_NAME}: mất {len(o) - len(nl)} dòng — manifest là APPEND-ONLY.")
+        else:
+            for i, (a, b) in enumerate(zip(o, nl), 1):
+                if a != b:
+                    v.append(f"{MANIFEST_NAME} dòng {i} BỊ SỬA — manifest là APPEND-ONLY; "
+                             f"muốn bổ sung thông tin thì `pin_ledger.py annotate`.")
+                    break
+    return v
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("files", nargs="*", help="pre-commit truyền vào; bỏ qua file khác")
     ap.add_argument("--rev", default=None, help="so với rev này thay vì HEAD (dùng để test)")
     ap.add_argument("--worktree", action="store_true",
                     help="đọc bản trên ĐĨA thay vì bản trong index")
+    ap.add_argument("--store-immutability", action="store_true",
+                    help="B6: kiểm kho pinned_ledgers chỉ-thêm (không xoá/sửa/đổi tên)")
     ap.add_argument("--selfcheck", action="store_true")
     ap.add_argument("--mutations", action="store_true")
     args = ap.parse_args(argv)
@@ -184,6 +241,21 @@ def main(argv=None) -> int:
         return 0
 
     wc_root = os.environ.get("PIN_STORE_WC_ROOT") or find_wc_root(__file__)
+
+    if args.store_immutability:
+        v = check_store_immutability(wc_root, args.rev or "HEAD")
+        if not v:
+            return 0
+        print("\n🔴 pin-store BẤT BIẾN — commit này đang PHÁ kho đã pin (B6):")
+        for x in v:
+            print(f"   · {x}")
+        print("\n   Kho `data/pinned_ledgers/` CHỈ ĐƯỢC THÊM. Bỏ qua 1 lần: "
+              "MIKE_PIN_GATE=warn git commit …")
+        if mode == "warn":
+            print("\n   ⚠️ MIKE_PIN_GATE=warn ⇒ CHO QUA lần này. Lần sau vẫn chặn.")
+            return 0
+        return 1
+
     reg_abs = os.path.join(wc_root, REGISTRY_REL)
 
     if args.files:
@@ -280,6 +352,8 @@ def _run_selfcheck(mutations: bool) -> int:
         a = A()
         a.ledger, a.label, a.command = led, "sc", "CMD"
         a.audit_end, a.note, a.decided_by, a.pin_date = "2026-06-19", "", "agent", "2026-09-28"
+        a.control_md5, a.control_byte_identical = None, False
+        a.no_control = "sandbox selfcheck"
         pin_ledger.cmd_add(a, wc)
 
         # thêm 1 bản GIẢ có selfcheck_0vnd=false
@@ -342,6 +416,64 @@ def _run_selfcheck(mutations: bool) -> int:
         v, ok = run(OLD + f"\n## Gz bi sua\nledger_md5: {real}\n")
         check("gz_bi_noi_rac_bi_chan", len(v) == 1 and "bị SỬA" in v[0])
 
+        # ---- B6: kho CHỈ-THÊM, test trên một repo git THẬT trong sandbox
+        import subprocess as _sp
+
+        def g(*a, cwd):
+            return _sp.run(["git"] + list(a), cwd=cwd, capture_output=True, text=True)
+
+        grepo = os.path.join(sandbox, "grepo")
+        gwc = os.path.join(grepo, "WorkingClaude")
+        os.makedirs(os.path.join(gwc, "data", "pinned_ledgers"), exist_ok=True)
+        open(os.path.join(gwc, "wc_env.sh"), "w").close()
+        g("init", "-q", cwd=grepo)
+        g("config", "user.email", "t@t", cwd=grepo)
+        g("config", "user.name", "t", cwd=grepo)
+        st = os.path.join(gwc, "data", "pinned_ledgers")
+        open(os.path.join(st, "PINS.jsonl"), "w").write('{"md5":"aa","label":"x"}\n')
+        open(os.path.join(st, "a__aa.csv.gz"), "wb").write(b"one")
+        g("add", "-A", cwd=grepo)
+        g("commit", "-qm", "seed", cwd=grepo)
+        check("B6_kho_khong_doi_thi_sach", check_store_immutability(gwc, "HEAD") == [])
+
+        # THÊM bản mới + append manifest ⇒ hợp lệ
+        open(os.path.join(st, "b__bb.csv.gz"), "wb").write(b"two")
+        with open(os.path.join(st, "PINS.jsonl"), "a") as fh:
+            fh.write('{"md5":"bb","label":"y"}\n')
+        g("add", "-A", cwd=grepo)
+        check("B6_them_moi_va_append_thi_qua", check_store_immutability(gwc, "HEAD") == [])
+        g("commit", "-qm", "add", cwd=grepo)
+
+        # XOÁ ⇒ chặn
+        os.unlink(os.path.join(st, "a__aa.csv.gz"))
+        g("add", "-A", cwd=grepo)
+        r = check_store_immutability(gwc, "HEAD")
+        check("B6_xoa_bi_chan", len(r) == 1 and "XOÁ" in r[0])
+        g("reset", "-q", "--hard", "HEAD", cwd=grepo)
+
+        # SỬA bản .gz ⇒ chặn
+        open(os.path.join(st, "a__aa.csv.gz"), "wb").write(b"ONE-CHANGED")
+        g("add", "-A", cwd=grepo)
+        r = check_store_immutability(gwc, "HEAD")
+        check("B6_sua_ban_luu_bi_chan", len(r) == 1 and "SỬA" in r[0])
+        g("reset", "-q", "--hard", "HEAD", cwd=grepo)
+
+        # SỬA dòng cũ của PINS.jsonl ⇒ chặn (append-only)
+        open(os.path.join(st, "PINS.jsonl"), "w").write(
+            '{"md5":"aa","label":"BI-SUA"}\n{"md5":"bb","label":"y"}\n')
+        g("add", "-A", cwd=grepo)
+        r = check_store_immutability(gwc, "HEAD")
+        check("B6_sua_dong_cu_manifest_bi_chan",
+              len(r) == 1 and "dòng 1 BỊ SỬA" in r[0])
+        g("reset", "-q", "--hard", "HEAD", cwd=grepo)
+
+        # XOÁ dòng manifest ⇒ chặn
+        open(os.path.join(st, "PINS.jsonl"), "w").write('{"md5":"aa","label":"x"}\n')
+        g("add", "-A", cwd=grepo)
+        r = check_store_immutability(gwc, "HEAD")
+        check("B6_xoa_dong_manifest_bi_chan", len(r) == 1 and "mất 1 dòng" in r[0])
+        g("reset", "-q", "--hard", "HEAD", cwd=grepo)
+
         if mutations:
             killed = 0
             total = 0
@@ -377,6 +509,15 @@ def _run_selfcheck(mutations: bool) -> int:
                 shutil.move(stored_abs + ".bk", stored_abs)
                 return len(r) == 1 and "KHÔNG khớp" in r[0]
             mut("M5_bat_duoc_noi_dung_ban_luu_doi", m5)
+
+            # M6: B6 phai bat XOA (khong duoc am tham cho qua)
+            def m6():
+                os.unlink(os.path.join(st, "b__bb.csv.gz"))
+                g("add", "-A", cwd=grepo)
+                rr = check_store_immutability(gwc, "HEAD")
+                g("reset", "-q", "--hard", "HEAD", cwd=grepo)
+                return bool(rr)
+            mut("M6_B6_that_su_chan_xoa", m6)
 
             print(f"mutation: {killed}/{total} bị giết")
             n += total
