@@ -287,6 +287,31 @@ for label, extra in (("env -u TZ", {"TZ": None}),
           and f"(L2/JIT) — {SX_L2_N} lệnh BÁN" in o
           and f"MUA {SX_TK} {SX_QTY}cp" in o)
 
+# ── T10 — "Lý do: tuân thủ trần PARK X%" per-order phải ĐỘNG theo target_park, KHÔNG
+# hardcode "80%". Bug thật 2026-09-28: dòng này hardcode "80%" trong khi park target đã đổi
+# 0.80→0.30 từ 2026-09-27 — mỗi plan có PARK_TRIM order (như hôm nay, 34 lệnh cả 2 account)
+# vẫn in sai "80%". Real plan 08-07 đã có sẵn 3 PARK_TRIM order trong orders[]; ghi đè
+# target_park=0.30 để chứng minh dòng render đúng theo config, không phải hardcode.
+# ⚠️ CHỈ kiểm dòng "↳ ℹ️ Lý do:" do send_plan_report.sh TỰ SINH — các dòng note/notes khác
+# trong plan 08-07 là DỮ LIỆU LỊCH SỬ tĩnh (baked-in lúc target thật sự là 80%), không phải
+# code-generated, nên hợp lệ khi vẫn còn "80%" — không dùng blanket "80% not in out".
+print("\n[T10] Lý do PARK_TRIM per-order phải ĐỘNG theo target_park (bug hardcode 80% 2026-09-28)")
+p = copy.deepcopy(SX)
+p["park_trim_proposal"]["target_park"] = 0.30
+out = run_sender(p, "SpaceX")
+_reason_lines = [l.strip() for l in out.splitlines() if l.strip().startswith("↳ ℹ️ Lý do: tuân thủ trần PARK")]
+check("target_park=0.30 → MỌI dòng 'Lý do' per-order in đúng 'trần PARK 30%', "
+      "KHÔNG dòng nào còn hardcode 80%",
+      len(_reason_lines) > 0
+      and all("trần PARK 30%" in l for l in _reason_lines)
+      and not any("trần PARK 80%" in l for l in _reason_lines),
+      _reason_lines[:1])
+p2 = copy.deepcopy(SX)  # target_park thiếu/None → fallback "?" (khớp quy ước _tgt_s dòng 804) thay vì bịa số
+p2["park_trim_proposal"].pop("target_park", None)
+out2 = run_sender(p2, "SpaceX")
+check("target_park thiếu → fallback 'trần PARK ?' (không dấu %, khớp quy ước _tgt_s hiện có), KHÔNG bịa số",
+      "↳ ℹ️ Lý do: tuân thủ trần PARK ? (park-trim)" in out2)
+
 print(f"\n{'=' * 72}\nKẾT QUẢ: {len(PASS)} PASS / {len(FAIL)} FAIL")
 for f in FAIL:
     print(f"  ✗ {f}")
