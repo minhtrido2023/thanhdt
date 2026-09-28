@@ -529,6 +529,17 @@ Neo vào PE hiện tại 6,08x, giả định lõi bán lẻ vàng (phần lớn
 
 ### Kết luận: PNJ = **AMBIGUOUS** (nghiêng constructive, mạnh hơn DGC nhưng bị chặn bởi wait dài)
 
+> ⛔ **HẾT HIỆU LỰC — ĐÃ HẠ BẬC THÀNH `NON` ngày 2026-09-28** (job `Taylor_20260928_010002`, xem mục
+> quét sáng thứ Hai 2026-09-28 ở §13). Cổng #5 dưới đây (BCTC Q3/2026) **tự trả lời sớm và trả lời
+> XẤU** qua công bố của chính PNJ 25→27/09: dự phòng **7.071 tỷ cho chính sách THU ĐỔI SẢN PHẨM**
+> (= 50,8% vốn chủ) ⇒ LNST 2026 **−6.271 tỷ**, huy động tới **8.000 tỷ** (47,4% vốn hoá), **không
+> chia cổ tức tiền**, ĐHĐCĐ bất thường **21/10**. Trục quyết định #1 đã **lật sang phía LÕI** (nghĩa
+> vụ tiền mặt của pháp nhân, đi qua đúng kênh bán lẻ lõi), #3 FAIL (Q2/26 `CF_OA` −1.568 tỷ, `NP`
+> −283 tỷ, FSCORE 7→1 — quý TRƯỚC khủng hoảng, phủ định tiền đề "pre-crisis mạnh" của phán quyết
+> 18/07), #5 FAIL (PB thực sau dự phòng ≈ **2,62**, không phải 1,25). Bảng dưới giữ lại làm **tư liệu
+> lịch sử** của phán quyết 18/07/2026 — **đừng dùng làm cơ sở hành động.**
+
+
 | Tiêu chí | Phán quyết | Ghi chú |
 |---|---|---|
 | #1 cá nhân vs lõi | ⚠️ AMBIGUOUS | Gần lõi hơn 2015 (nội bộ + product-integrity), nhưng lõi vàng bán lẻ không chạm, P-Lab nhỏ. GIA + lan uy tín = ẩn số. |
@@ -2992,5 +3003,185 @@ Phước Vĩnh của KSB hết hạn 6/2027.**
 [baophapluat — Bimico lợi nhuận giảm, dòng tiền âm, cổ phiếu "lao dốc" (KCN 348ha, doanh thu thuê 500→235 tỷ)](https://doanhnhan.baophapluat.vn/bimico-loi-nhuan-giam-dong-tien-am-co-phieu-lao-doc-79176.html) ·
 [congluan — Chứng khoán 21/9: VN-Index giảm sâu mất mốc 1.800 điểm](https://congluan.vn/chung-khoan-hom-nay-2192026-vn-index-giam-sau-mat-moc-1800-diem-post361388.html) ·
 [investing/Vietstock — Vietstock Daily 25/09/2026: Sức ép lan rộng](https://vn.investing.com/news/stock-market-news/vietstock-daily-25092026-suc-ep-lan-rong-2719825)
+
+---
+### 2026-09-28 — QUÉT SÁNG THỨ HAI (job `Taylor_20260928_010002`, mục đích: BẢO VỆ PHÍA MUA trước 09:00) — **0 QUALIFY · 0 case mới · 30 mã gác rà qua · 2 read-through có dữ kiện mới THẬT (PNJ, VPB) · 1 HẠ BẬC: PNJ AMBIGUOUS-nghiêng-constructive → NON** · ★★★ **PNJ là THÀNH VIÊN SỐNG của rổ custom30V PRODUCTION (w=0,7075%, `effective_to` rỗng) ở state NEUTRAL đang bật parking — luận điểm vừa gãy bằng chính công bố của DN, và thứ DUY NHẤT chặn lệnh mua sáng nay là KÍCH THƯỚC LÔ, không phải bất kỳ cổng tin/pháp lý nào** · ★ **0 lệnh MUA trên mọi kênh cho phiên 28/09**
+
+**Độ tươi**: `anomaly_scan.py --backfill-days 7` báo **watchlist TƯƠI** (`active_nav` computed_at
+**2026-09-25** = đúng phiên hoàn tất gần nhất; 26–27/09 là T7/CN). Universe 255 mã (H:30 / W:243).
+Không có cảnh báo QUÁ HẠN.
+
+#### Việc 1 — anomaly_scan: 2 cờ, **0 cờ MỚI** (cả 2 đã có kết luận từ lượt 09-25)
+
+```
+[H] 2026-09-18 VPB: IDIOCRASH | ret −22,8% (VNI −0,4%, idio −22,4%)   → ARTIFACT corp-action (kết luận 09-25)
+[W] 2026-09-23 BTW: FLOOR2    | ret −10,0% (idio −9,1%) val 0,3B      → không-phải-case, loại ở thanh khoản (09-25)
+```
+
+Quét lại `ABS(Price/Close − 1) > 0,5%` trên **30 mã đang gác**, 3 phiên 23→25/09: chỉ còn **VPB
+2026-09-23 (1,2602)** — đuôi của chính cửa sổ lệch 4 phiên đã mô tả 09-25, **tự đóng ngày 24/09**.
+DRI đã hết lệch. ⇒ khuyết tật cơ chế `anomaly_scan.py:212/223` (đọc `Close` đã điều chỉnh) **vẫn
+chưa sửa** — đề xuất 09-25 còn treo, chờ user/Mike duyệt vì chạm công cụ dùng chung.
+
+#### ★★★ Việc 4 (câu hỏi chính của lượt này) — PNJ: luận điểm gãy TRÊN MÃ CÓ TRONG RỔ MUA
+
+**Dữ kiện mới, trong cửa sổ (công bố của chính PNJ, 25→27/09) — không phải suy đoán:**
+
+| Hạng mục | Số |
+|---|---|
+| Dự phòng **chính sách thu đổi sản phẩm** | **7.071 tỷ** (= **50,8%** vốn chủ Q2/26) |
+| LNTT 2026 điều chỉnh | **−6.059 tỷ** · LNST **−6.271 tỷ** (lỗ KỶ LỤC) |
+| Doanh thu 2026 điều chỉnh | **39.057 tỷ** (−9.600 tỷ, **−20% so kế hoạch gốc**) |
+| Kế hoạch huy động | **tối đa 8.000 tỷ** = **47,4%** vốn hoá (16.887 tỷ @33.000) |
+| Cổ tức tiền mặt 2026 | **KHÔNG chia** |
+| Nội bộ bán | **Cao Ngọc Duy** (em bà Cao Thị Ngọc Dung, CT HĐQT) đăng ký bán **9 tr cp**, 2,7% → **0,943%**, 01→30/10, ~300 tỷ |
+| ĐHĐCĐ bất thường | **21/10/2026** |
+
+**Áp lại §2 — cổng xác nhận tiền-đăng-ký (§7 mục 5) đã tự trả lời, và trả lời XẤU:**
+
+- **#1 cá nhân vs LÕI → FAIL (trục quyết định đã lật).** §7 dựng đúng trục này để tách PNJ-2015
+  (QUALIFY, scandal ở ngân hàng của CHỒNG chủ tịch, 0 chạm lõi) khỏi PNJ-2026 (AMBIGUOUS, P-Lab nội
+  bộ, chạm product-integrity). Dự phòng **7.071 tỷ cho chính sách THU ĐỔI SẢN PHẨM** = DN tự định
+  lượng nghĩa vụ **nhận lại hàng đã bán cho khách qua chuỗi bán lẻ lõi**. Đây không còn là "cáo buộc
+  nhắm cá nhân cựu GĐ P-Lab" — nó đã **chuyển thành nghĩa vụ tiền mặt của pháp nhân, đi qua đúng kênh
+  lõi**, khớp gạch đầu dòng ❌ §2 *"cáo buộc làm sản phẩm/dịch vụ vô giá trị"*. **Đo bằng công bố của
+  DN, không phải bằng suy luận của tôi.**
+- **#3 CF_OA ≥ NP → FAIL.** BQ `ticker_financial` **2026Q2**: `NP_P0` **−282,9 tỷ**, `CF_OA_P0`
+  **−1.568,2 tỷ**, **FSCORE 7 → 1**. Q2 = Apr–Jun, **TRƯỚC** khi scandal nổ (02/07) ⇒ tiền đề
+  "fundamentals **pre-crisis** mạnh" mà phán quyết AMBIGUOUS 18/07 dựa vào (viết khi chỉ có Q1) **đã
+  bị chính BCTC Q2 phủ định**. Cổng #1 của §7 ("đọc BCTC Q2/2026") thực tế đã đỏ và lượt trước bỏ sót.
+- **§2.5 #2 sống-sót-không-pha-loãng → FAIL.** Huy động tới **8.000 tỷ = 47,4% vốn hoá** ngay ở đáy để
+  tái thiết = đúng gạch ❌ *"buộc bán tài sản / pha loãng cổ phiếu ở đáy để tồn tại"*.
+- **#5 sàn định giá → FAIL.** Giá 25/09 **33.000**, `PB 1,25` — nhưng đó là PB trên **book TRƯỚC dự
+  phòng**. Vốn chủ Q2/26 = 511.721.959 cp × BVPS 27.188 = **13.913 tỷ**; LNST 6T +1.184,5 tỷ (Q1
+  +1.467,4 / Q2 −282,9) ⇒ H2 hàm ý **−7.455,5 tỷ** ⇒ vốn chủ cuối 2026 ≈ **6.457 tỷ**, BVPS ≈
+  **12.619** ⇒ **PB thực @33.000 ≈ 2,62** (PB_MA5Y 2,94). **Không có sàn** — chưa tính pha loãng.
+- **#4 solvent → PASS mềm** (Debt_Eq 0,511, LtDebt = 0) — trụ duy nhất còn đứng.
+
+**Góc TÀI SẢN/DÒNG TIỀN đã kiểm ĐÚNG CHIỀU (bài học TV1 + DGC — 2 lần bị user sửa vì quá thận trọng),
+và nó KHÔNG cứu được case:** PNJ có tài sản hữu hình thật và thanh khoản bậc nhất — `Inventory_P0`
+**15.149 tỷ** (vàng/trang sức), `Cash_P0` 708 tỷ, `totalAsset_P0` 21.018 tỷ, **0 nợ dài hạn**. Nhưng
+dự phòng thu đổi là **claim ĐÚNG VÀO chính tồn kho/tiền đó** (thu hàng về = trả tiền ra): tài sản
+ròng sau dự phòng ≈ 13.913 − 7.071 ≈ **6.842 tỷ** vs vốn hoá **16.887 tỷ** = **2,5× tài sản ròng**.
+Và cấu phần giá trị còn lại (thương hiệu + mạng bán lẻ) chính là thứ đang bị một đợt remediation
+product-integrity làm suy giảm. ⇒ Góc asset-backed **không** tạo được sàn như DGC (mỏ + cổ tức tiền)
+hay TV1 (thuỷ điện SOTP).
+
+**⇒ PNJ: HẠ BẬC AMBIGUOUS-nghiêng-constructive → NON.** 4/5 tiêu chí §2 FAIL, trong đó trục quyết
+định (#1) lật sang phía LÕI bằng con số của chính DN. Cổng §7 mục 5 (BCTC Q3/2026 cuối 10/2026) vẫn
+nên đọc, nhưng **không còn là cổng NÂNG BẬC** — nó chỉ còn xác nhận quy mô thiệt hại. `is_stable_payer`
+= true trong rổ nay **sai sự thật** (2026 không chia cổ tức tiền).
+
+##### ★★★ Phơi nhiễm PHÍA MUA — đo thật, 4 artifact độc lập
+
+1. **PNJ là thành viên SỐNG của rổ production.** `data/custom30v_8l_publish.csv` (file mà
+   `compute_park_trim.py:256` đọc thật, `BASKET_CSV`), dòng 1467:
+   `2026-08-05,2026-08-05,,PNJ,26,2,0.007075,2026-07-01,ABOVE_FLOOR,true` — **`effective_to` RỖNG =
+   kỳ đang mở**, w **0,7075%**, `rating_8l` **2**, `liq_rank` 26. `rating_8l`/`quarter` neo ở
+   **2026-07-01**, tức **trước** quý khủng hoảng.
+2. **Parking ĐANG BẬT.** `data/golive_v23_status.json`: `state=3` / `state_name=NEUTRAL` /
+   `etf_park_frac=0.8` (date 2026-09-25). `compute_park_trim.py:431` chỉ `SKIP_STATE` khi `state != 3`
+   ⇒ **không skip**.
+3. **Thứ duy nhất chặn lệnh mua sáng nay là KÍCH THƯỚC LÔ.** `park_trim_SpaceX_2026-09-28.json`:
+   `decision=BLOCKED_ALL_NAMES`, và PNJ nằm trong danh sách 11 mã bị bỏ với lý do nguyên văn
+   **`PNJ 0.71% (target 2,711,268đ < 1 lô (100cp × 33,000đ))`**. ⇒ chỉ cần park pool SpaceX tăng
+   **+21,7%** (3.300.000/2.711.268 = 1,2171) là PNJ **tự động thành mã mua được**, không qua cổng nào.
+4. **Không có lớp bảo vệ nào khác.** Tập khả thi của `compute_park_trim.py:23` =
+   `{i ∈ rổ : i ∉ BANNED ∧ i ∉ excluded_tickers ∧ có giá ∧ w_i×target_park ≥ 1 lô}`.
+   `lag_forensic_filter.BANNED` có **16 mã, KHÔNG có PNJ**; `data/forensic_flags.csv` **0 dòng PNJ**;
+   PNJ xuất hiện trong danh sách "bỏ" của park_trim với lý do **lô**, không phải `excluded` ⇒ cũng
+   không nằm trong `excluded_tickers` của account nào. **`compute_park_trim.py` KHÔNG đọc
+   `data/insider_flags.json` lẫn `data/anomaly_flags.json`** (grep: 0 hit).
+   ⚠️ Mà `data/insider_flags.json` **ĐÃ nổ đúng trên PNJ**:
+   `{"last_alert":"2026-09-22","n_sellers":1,"reasons":"INSIDER_SELL_1PCT","sell_pct_osh":0.03518,"tier":"W"}`.
+   Cờ có thật, đúng mã, đúng tuần — **nhưng đường mua park không tra nó**. (Nêu đúng mức đo được:
+   detector này có thể được thiết kế cho consumer khác — phễu/BAL; việc nó CÓ NÊN chặn park hay không
+   là câu hỏi thiết kế cho user/Mike, không phải tuyên bố lỗi.)
+
+**ESCALATE (không tự sửa — chạm rổ giao dịch LIVE, cần user duyệt):** đưa **PNJ** vào
+`excluded_tickers` (hoặc `hard_ban`) cho tới khi case được xét lại, **trước khi** park pool chạm mốc
++21,7%. Kèm 2 câu hỏi thiết kế: (i) `is_stable_payer=true` của PNJ nay sai sự thật — yield floor có
+nên tự rớt khi DN công bố không chia cổ tức? (ii) đường park có nên tra `insider_flags.json` /
+`anomaly_flags.json` như phễu vẫn làm?
+
+#### Việc 4 (phần còn lại) — kiểm kê lệnh MUA phiên 28/09: **0 lệnh trên MỌI kênh**
+
+`plan_SpaceX_2026-09-28` 0 lệnh · `plan_ZaloPay_2026-09-28` 0 lệnh · `park_trim_SpaceX_2026-09-28`
+**0 lệnh (`BLOCKED_ALL_NAMES` — 19/30 mã khả thi nhưng tất cả dưới 1 lô)** · `park_trim_ZaloPay_2026-09-28`
+**0 lệnh (`NO_TRIM`; PARK 157,0tr vs target 209,1tr, vượt 0,0tr, dưới ngưỡng 1,3tr)** ·
+`jit_unpark_SpaceX/ZaloPay_2026-09-28` 0 lệnh. `plan_main` mới nhất **2026-09-25** và là **PROBE
+harness** (12 lệnh gắn `strategy=PROBE`, note "probe harness"), **không phải plan giao dịch thật**.
+⇒ **Không có luận điểm mua nào để RÚT sáng nay.** Phơi nhiễm PNJ là **cấu trúc, chưa kích hoạt**.
+
+#### Read-through mã đang gác + case cũ (cửa sổ 25→27/09)
+
+- ★ **VPB (đang giữ) — dữ kiện mới, KHÔNG phải rủi ro.** Reuters (25/09): **SMBC đàm phán nâng sở hữu
+  15% → ~20%**, cân nhắc **mua thẳng trên sàn** thay vì phát hành riêng lẻ; bế tắc ở **giá** (VPB muốn
+  premium kiểu 2023 ~40%, SMBC không sẵn sàng) — một nguồn ghi "kết thúc đàm phán, **chưa đi tới thoả
+  thuận chung**". Hai chiều nhưng **không** chạm tiêu chí rủi ro nào; VPB +4,07% phiên 25/09.
+  Corp-action cổ tức cổ phiếu **đã đóng 24/09** (`Price/Close` về 1,0).
+- **KOS — echo không-phải-case (kết luận 09-21), nay ĐỦ ĐIỀU KIỆN GẠCH VĨNH VIỄN.** HoSE yêu cầu giải
+  trình sau **5 phiên sàn liên tiếp 21→25/09** (27.950 → **21.000**, −46% từ đầu 2026). Định giá vẫn
+  FAIL nặng dù đã rơi: **PE 165,7 · PB 1,93** (09-25) so PE 237/PB 2,76 lúc kết luận 09-21. **Thanh
+  khoản đã CHẾT**: khối lượng 22→25/09 = **10.400 / 1.500 / 9.000 / 3.300 cp** ⇒ **0,04–0,27 tỷ/phiên**
+  (so ADV 8,9 tỷ trước đó). 5 CTCK giải chấp nội bộ (CT Nguyễn Việt Cường 521.200 cp qua 3 CTCK; PTGĐ
+  Nguyễn Thị Phương Thảo 309.400 cp) và **2 lệnh giải chấp 23/09 KHÔNG khớp được** — sàn không có bên
+  mua. Đây là **xoáy giải chấp trên mã không có thanh khoản**, ngược hẳn chữ ký fear-buy; loại ở bộ
+  lọc rẻ nhất, **không cần tin thêm**.
+- **SSB (không giữ) — echo không-phải-case (09-07, 09-25), nguyên nhân nay ĐO ĐƯỢC ĐẦY ĐỦ**: 5 phiên
+  giảm 21→25/09, **22.450 → 19.450 = −13,4%** (tuần −19,29%), sau chuỗi **7 phiên tăng liên tiếp gồm 3
+  phiên trần, +36% ≈ 6.400đ/cp, vừa lập đỉnh lịch sử**; trùng loạt nội bộ đăng ký bán (**Lê Tuấn Anh,
+  con bà Nguyễn Thị Nga, bán 8 tr cp** 23/09→22/10) **và cả đăng ký MUA 8 tr cp** của một lãnh đạo
+  khác. **Chỉnh từ ĐỈNH, không phải sợ hãi ở ĐÁY.**
+- **TV1 (đang giữ cả 2 account)**: **0 dữ kiện mới** trong cửa sổ. Cổng gần nhất giữ nguyên = **kết
+  luận điều tra đại án ngành điện "sắp ban hành"** (tin 18/09, 47 bị can, phong toả TKCK ~1.756 tỷ,
+  vẫn **0 pháp nhân**) ⇒ trục §2 vẫn ở phía **CÁ NHÂN**.
+- **DGC**: **0 tin mới** về cổng audit / hạn chế giao dịch. Cổ tức tiền 80% đã trả 25/09. ⚠️ Vận hành:
+  `park_trim_ZaloPay_2026-09-28` cảnh báo **QUÁ HẠN cổ tức receivable DGC** — DNSE vẫn báo receivable
+  dù đã qua ngày dự kiến về; cần kiểm tiền đã về thật chưa (việc của daily-ops, không phải lượt này).
+- **Vingroup (VHM/VRE/VPI đang giữ)**: **0 sự kiện tín dụng/trái phiếu mới**. Nền hệ thống **đỡ hơn**:
+  tỷ lệ chậm trả TPDN luỹ kế 12T về **0,24%** (đáy 12 tháng, từ đỉnh 0,56% 8/2025), chậm trả mới trong
+  tháng chỉ **300 tỷ** (một DN BĐS); ca chậm trả được nêu tên là **DRH Holdings** (~570 tỷ, **không
+  giữ**). Đáo hạn 9→12/2026: 20/24/20/31 nghìn tỷ.
+- **13 mã ngân hàng**: **0 sự kiện rủi ro** — không kiểm soát đặc biệt / chuyển giao bắt buộc / khởi tố
+  lãnh đạo NH / rút tiền hàng loạt nào trong cửa sổ.
+- **17 mã ngoài ngân hàng**: **0 sự kiện riêng lẻ**. Biến động 25/09 (VHM −4,11%, VRE −3,01%, SAB
+  −2,44%, VND −1,83%, VIX −1,54%) là **diễn biến nhóm** sau đảo ETF/nâng hạng (khối ngoại bán ròng
+  >2.800 tỷ tuần), không phải trigger mã. DRI **+3,5%** (tăng).
+- **Nền vĩ mô/thị trường**: VN-Index **1.785,11** (−1,68% tuần, dưới 1.800), tuần đầu sau nâng hạng
+  Thị trường Mới nổi thứ cấp. Tuần 28/09→02/10: **21 DN trả cổ tức tiền**, tỷ lệ cao nhất 50%.
+- ⚠️ **Cờ vận hành (không thuộc phạm vi lượt này, chuyển Winston)**: `get_gated_state()` in
+  `DT4_only: health report 3696min old (> 1440)` và `BQ base state max=2026-09-25 < end=2026-09-28 →
+  base STALE`. `macro_health.json` cũ **2,6 ngày** ⇒ DT5G đang **fail-closed về DT4**. Cuối tuần nên
+  tuổi dữ liệu là bình thường một phần, **nhưng 3696' > ngưỡng 1440' là thật** — Winston xác nhận.
+
+#### Việc 7 — phễu candidate hệ thống
+
+**KHÔNG có khối "PHỄU CANDIDATE HỆ THỐNG" trong dispatch lượt này** (đây là cadence sáng thứ Hai, không
+phải `--mode weekly`) ⇒ **không rà FULLY_QUALIFIED, và KHÔNG suy diễn danh sách.**
+
+**Kết luận lượt này:** **30 mã gác rà qua** (13 NH + 17 ngoài NH) · 255 mã anomaly_scan × 5 phiên ·
+9 truy vấn tin + 2 WebFetch + 3 truy vấn BQ + 8 lần đọc artifact cục bộ · **0 QUALIFY** · **0 case
+mới** · **1 HẠ BẬC có hệ quả giao dịch: PNJ AMBIGUOUS → NON** · 2 read-through có dữ kiện mới THẬT
+(PNJ, VPB) + 4 echo (KOS, SSB, TV1, DGC) · **watchlist TƯƠI** · **0 lệnh mua để RÚT** · ★★★ **1 phơi
+nhiễm phía mua CẤU TRÚC cần user duyệt chặn: PNJ trong rổ custom30V production, parking đang bật, chỉ
+lô hàng chặn.**
+
+**Mốc phải theo, gần → xa: ★ PNJ ĐHĐCĐ bất thường 21/10 (duyệt huy động 8.000 tỷ) → em CT PNJ bán 9tr
+cp 01→30/10 → BCTC Q3/2026 cuối 10/2026 (xác nhận quy mô thiệt hại PNJ; cổng của PAN, PTB, KSB) →
+kết luận điều tra đại án điện (cổng TV1) → giấy phép mỏ Phước Vĩnh của KSB hết hạn 6/2027.**
+
+**Nguồn (cửa sổ 25→27/09/2026):**
+[Vietstock — PNJ dự kiến lỗ gần 6.3 ngàn tỷ, huy động 8 ngàn tỷ tái thiết hậu khủng hoảng](https://vietstock.vn/2026/09/pnj-du-kien-lo-gan-63-ngan-ty-dong-huy-dong-8-ngan-ty-tai-thiet-hau-khung-hoang-737-1496114.htm) ·
+[VietTimes — PNJ dự kiến lỗ 6.271 tỷ, em trai chủ tịch đăng ký bán 9 triệu cp](https://viettimes.vn/pnj-du-kien-lo-6271-ty-dong-em-trai-chu-tich-dang-ky-ban-9-trieu-co-phieu-post206277.html) ·
+[VnExpress — Em trai bà Cao Thị Ngọc Dung muốn bán 9 triệu cổ phiếu PNJ](https://vnexpress.net/em-trai-ba-cao-thi-ngoc-dung-muon-ban-9-trieu-co-phieu-pnj-5124871.html) ·
+[Znews — PNJ dự kiến lỗ kỷ lục hơn 6.000 tỷ, không chia cổ tức tiền mặt](https://znews.vn/pnj-du-kien-lo-ky-luc-hon-6000-ty-dong-khong-chia-co-tuc-tien-mat-post1685533.html) ·
+[Vietstock — 28/09: Đọc gì trước giờ giao dịch chứng khoán?](https://vietstock.vn/2026/09/2809-doc-gi-truoc-gio-giao-dich-chung-khoan-830-1496282.htm) ·
+[Vietstock — Cổ phiếu giảm sàn 5 phiên liên tiếp, KOS bị yêu cầu giải trình (26/09)](https://vietstock.vn/2026/09/co-phieu-giam-san-5-phien-lien-tiep-kos-bi-yeu-cau-giai-trinh-830-1496247.htm) ·
+[Vietstock — Reuters: SMBC đàm phán nâng sở hữu tại VPBank lên khoảng 20%](https://vietstock.vn/2026/09/reuters-ong-lon-nhat-ban-dam-phan-nang-so-huu-tai-vpbank-len-khoang-20-co-the-mua-tren-san-764-1495877.htm) ·
+[DNSE — Kết thúc đàm phán giữa SMBC và VPBank, các bên chưa đi tới thỏa thuận chung](https://www.dnse.com.vn/senses/tin-tuc/ket-thuc-dam-phan-giua-smbc-va-vpbank-cac-ben-chua-di-toi-thoa-thuan-chung-35287246) ·
+[Vietstock — Chứng khoán Tuần 21-25/09/2026: Thiếu vắng động lực](https://vietstock.vn/2026/09/chung-khoan-tuan-21-25092026-thieu-vang-dong-luc-1636-1496024.htm) ·
+[Tuổi Trẻ — 'Sơ suất' đặt lệnh, sếp SeABank mua nhầm hơn 3.000 cổ phiếu khi đang bán (25/09)](https://tuoitre.vn/so-suat-dat-lenh-sep-seabank-mua-nham-hon-3000-co-phieu-khi-dang-ban-100260925162109587.htm) ·
+[Thời báo Ngân hàng — TPDN: nợ chậm trả hạ nhiệt, 253 nghìn tỷ chờ đáo hạn](https://thoibaonganhang.vn/trai-phieu-doanh-nghiep-no-cham-tra-ha-nhiet-253-nghin-ty-dong-cho-dao-han-187223.html)
 
 ---

@@ -1,0 +1,499 @@
+file,line,lop,tier,func,except_type,hanh_vi_handler,try_body
+bot_execute.py,73,L1,A,_notify_gdkhq_shadow,Exception,except: pass,"for target in (_TRADING_DAILY_THREAD, _GDKHQ_DECISION_THREAD):     subprocess.ru"
+bot_execute.py,97,L2,A,_run_gdkhq_shadow,Exception,"except -> event_map = empty, continue","events = exprice.pricing_events(watch, since=(d - dt.timedelta(days=1)).isoforma ; event_map = exprice.events_by_ticker_date(events) ; missing = [tk for tk in watch if not exprice.events_on(event_map,"
+bot_execute.py,143,L2,A,_run_gdkhq_shadow,Exception,"except -> all_ok = empty, continue","cfg = dict(p['cfg']) ; if args.mode:     cfg['mode'] = args.mode ; otp = otp_by_label.get(p['label'], otp_common) ; broker = make_broker(cfg, otp=otp, profile=p).connect() ; getter = getattr(broker, '"
+bot_execute.py,183,L2,A,_run_gdkhq_shadow,Exception,except -> silent fallthrough,"report_path, acceptance = write_gdkhq_acceptance_report(trace, verdict, plan_dat ; trace['report_path'] = report_path ; trace['acceptance_status'] = acceptance['acceptance_status']"
+bot_execute.py,203,L2,A,_run_gdkhq_shadow,Exception,except -> silent fallthrough,"record_gdkhq_shadow_pass(trace_path, plan_date, report_path=report_path, accepta ; recorded = True ; trace['shadow_recorded'] = True ; verdict = f""✅ GDKHQ D1-D3 shadow {plan_date} PASS ({', '.join(wat"
+bot_execute.py,269,L1,A,_notify_trading_daily,Exception,except: pass,"subprocess.Popen([notify_thread, msg, _TRADING_DAILY_THREAD], stdout=subprocess."
+bot_execute.py,277,L1,A,_notify_trading_daily,Exception,except: pass,"with open(os.path.join(_WC_ROOT, 'secrets', 'telegram_config.json'), encoding='u ; from telegram_recommend import send_telegram_text ; send_telegram_text(tg['bot_token'], tg['chat_id'], msg, parse_mod"
+bot_execute.py,680,L2,A,main,Exception,"except -> execution_state = empty, continue","with open(state_path, encoding='utf-8') as sf:     execution_state = json.load(s"
+mike/bin/compute_jit_unpark.py,241,L2,A,build_pool,Exception,"except -> lag_days = empty, continue",lag_days = (dt.date.fromisoformat(asof) - dt.date.fromisoformat(data_date)).days
+mike/bin/compute_park_trim.py,703,L2,A,compute_trim,Exception,"except -> lag_days = empty, continue",lag_days = (dt.date.fromisoformat(asof) - dt.date.fromisoformat(data_date)).days
+mike/bin/daily_nav_snapshot.py,287,L3,A,_corp_action_daily_snapshot,Exception,except -> return None,"with open(path, encoding='utf-8') as f:     return json.load(f)"
+mike/bin/daily_nav_snapshot.py,604,L1,A,broker_positions,Exception,except: pass,b.get_cash()
+mike/bin/daily_nav_snapshot.py,608,L3,A,broker_positions,Exception,except -> return None,"b = DNSEBroker(account_id=account_no, quote_only=False, label=account_label) ; b.connect() ; pos = b.get_positions() ; try:     b.get_cash() except Exception:     pass ; return {sym: {'qty': p['total'"
+mike/bin/daily_nav_snapshot.py,741,L2,A,cum_dividend_double_count,Exception,"except -> events = empty, continue","sys.path.insert(0, MIKE_BIN) ; from dividend_adjusted_return import detect_adjustments_batch ; d0 = datetime.date.fromisoformat(date) ; events, bq_max_date = detect_adjustments_batch(sorted(positions)"
+mike/bin/discretionary_accumulation_inject.py,90,L2,A,load_active_states,Exception,"except -> report only, continue","state = json.load(open(path, encoding='utf-8'))"
+mike/bin/discretionary_accumulation_inject.py,180,L2,A,broker_filled_qty,Exception,"except -> report only, continue","import exdate_frame ; credited, blocked = exdate_frame.classify_positions(account, account_id, today_i"
+mike/bin/discretionary_accumulation_inject.py,341,L3,A,anchor_prices_for,Exception,except -> return None,"client = getattr(broker, 'client', None) ; if client is None:     print(f'  [FAILSAFE] {ticker}: broker chưa có client DNSE ; now_eff = now or now_ict() ; to_ts = int(now_eff.replace(tzinfo=_ICT_TZ).t"
+mike/bin/discretionary_margin_gate.py,89,L3,A,_bus,Exception,except -> return False,"r = subprocess.run(cmd, check=False, capture_output=True, timeout=60) ; if r.returncode != 0:     print(f""⚠ append_event.sh trả rc={r.returncode}: {(r.s ; return True"
+mike/bin/discretionary_margin_gate.py,103,L3,A,_notify,Exception,except -> return False,"r = subprocess.run([os.path.join(MIKE_ROOT, 'bin', 'notify_thread.sh'), msg, 'di ; if r.returncode != 0:     print(f""⚠ notify_thread.sh trả rc={r.returncode}: {(r. ; return True"
+mike/bin/discretionary_margin_gate.py,432,L2,A,cmd_check_exits,Exception,except -> silent fallthrough,"factor = corp_action_frame_multiplier(a['ticker'], arm_date)"
+mike/bin/dividend_adjusted_return.py,1073,L2,A,resolve_dividends,Exception,except -> silent fallthrough,"row = bq_corp_action(adj.ticker, adj.ex_date)"
+mike/bin/merge_park_orders.py,167,L3,A,_exdate_map,Exception,except -> return {},"if _WC_ROOT not in sys.path:     sys.path.insert(0, _WC_ROOT) ; from trading_bot.price_frame import pricing_events, events_by_ticker_date ; import datetime as _dt ; d = _dt.date.fromisoformat(str(plan"
+mike/bin/report_return_gate.py,367,L2,A,excluded_tickers,Exception,"except -> report only, continue","sys.path.insert(0, ROOT) ; from trading_bot import config as _cfg ; for p in _cfg.load_accounts(_cfg.load_config()):     if p['label'] == label:    "
+mike/bin/verify_account_snapshot.py,76,L3,A,_load_known_discrepancies,Exception,except -> return {},"with open(KNOWN_DISCREPANCY_PATH, encoding='utf-8') as f:     rows = json.load(f"
+mike/bin/verify_account_snapshot.py,523,L1,A,dnse_close_prices,Exception,except: continue (skip record silently),r = client.close_price(tk)
+mike/bin/verify_account_snapshot.py,573,L2,A,_today_session_price,Exception,"except -> r = empty, continue",r = client.latest_trade(ticker)
+mike/bin/verify_account_snapshot.py,593,L3,A,_secdef_basic_price,Exception,except -> return None,sd = client.secdef(ticker)
+trading_bot/brokers.py,351,L3,A,get_quote,Exception,except -> return None,rows = self.client.instruments(symbols=symbol)
+trading_bot/brokers.py,403,L3,A,_phs_l2_snapshot,Exception,except -> return None,"captured = now_ict() ; captured_epoch_ms = int(time.time() * 1000) ; bids, offers = ([], []) ; for i in (1, 2, 3):     p = normalize_price_vnd(_fnum(row.get(f'bidPrice{i}')))  ; for i in (1, 2, 3):   "
+trading_bot/brokers.py,499,L1,A,connect,Exception,except: pass,"svc = _build_gmail_service() ; q2 = 'from:noreply@mail.dnse.com.vn subject:""Xác thực với Email OTP""' ; resp = svc.users().messages().list(userId='me', q=q2, maxResults=1).execute() ; msgs = resp.get('"
+trading_bot/brokers.py,567,L2,A,_profile_default_lp,Exception,"except -> report only, continue",from . import config as _config ; path = _config.ACCOUNTS_FILE ; if not os.path.exists(path):     raise FileNotFoundError(f'không có file {path}' ; matched = [p for p in _config.load_accounts({'mode':
+trading_bot/brokers.py,666,L3,A,get_max_buy_qty,Exception,except -> return None,"lp_sent = loan_package_id if loan_package_id is not None else self._account_defa ; r = self.client.ppse(self.account_id, symbol, int(price), loan_package_id=lp_sen ; self._log_raw('ppse', {'symbol': s"
+trading_bot/brokers.py,684,L3,A,get_buying_power,Exception,except -> return None,"lp_sent = loan_package_id if loan_package_id is not None else self._account_defa ; r = self.client.ppse(self.account_id, symbol, int(price), loan_package_id=lp_sen ; self._log_raw('ppse', {'symbol': s"
+trading_bot/brokers.py,863,L3,A,_log_l2,Exception,except -> return None,"captured = now_ict() ; captured_epoch_ms = int(time.time() * 1000) ; bids = self._l2_levels(qget(qt, 'bid', 'bids')) ; offers = self._l2_levels(qget(qt, 'offer', 'offers', 'asks')) ; if not bids and ("
+trading_bot/brokers.py,877,L2,A,get_quote,Exception,"except -> sd = empty, continue","sd = self._pick_board(self.client.secdef(symbol), 'secdefs') ; self._secdef_cache[symbol] = sd"
+trading_bot/brokers.py,890,L2,A,get_quote,Exception,"except -> report only, continue","raw.update(self._pick_board(self.client.latest_trade(symbol), 'trades'))"
+trading_bot/brokers.py,908,L2,A,get_quote,Exception,"except -> report only, continue","qt = self._pick_board(self.client.latest_quote(symbol), 'quotes') ; for side_key, flat in (('bid', 'bidPrice1'), ('bids', 'bidPrice1'), ('offer', 'o ; if isinstance(qt, dict):     raw.update({k: v for"
+trading_bot/brokers.py,966,L2,A,_resolve_loan_package_id,Exception,"except -> report only, continue","raw = self.client.loan_packages(self.account_id, symbol=symbol) ; pkgs = self._extract_loan_pkgs(raw) ; ids = [qget(p, 'id', 'loanpackageid', 'loanproductid') for p in pkgs] ; ids = [i for i in ids if"
+trading_bot/brokers.py,999,L2,A,_validate_lever_package,Exception,except -> silent fallthrough,"pkgs = self._extract_loan_pkgs(self.client.loan_packages(self.account_id, symbol ; ids = {str(qget(p, 'id', 'loanpackageid', 'loanproductid')) for p in pkgs} ; ids.discard('None') ; if not ids:     re"
+trading_bot/brokers.py,1214,L3,A,get_max_buy_qty,Exception,except -> return None,"rows = self.client.get_buying_power(self.account_id, symbol, int(price)) ; self._log_raw('buying_power', {'symbol': symbol, 'price': price, 'resp': rows}) ; row = rows[0] if isinstance(rows, list) and"
+trading_bot/brokers.py,1225,L3,A,get_buying_power,Exception,except -> return None,"rows = self.client.get_buying_power(self.account_id, symbol, int(price)) ; self._log_raw('buying_power', {'symbol': symbol, 'price': price, 'resp': rows}) ; row = rows[0] if isinstance(rows, list) and"
+trading_bot/brokers.py,1257,L3,A,get_quote,Exception,except -> return None,rows = self.client.get_quote(symbol)
+trading_bot/brokers.py,1383,L2,A,connect,Exception,"except -> self.quote_source = empty, continue",if self.quote_source.client is None:     self.quote_source.connect()
+trading_bot/due_diligence.py,100,L1,A,_latest_row,Exception,except: pass,"df2 = _read_year('ticker', year - 1, _TICKER_COLS) ; d = df2[(df2['ticker'] == ticker) & (pd.to_datetime(df2['time']) <= pd.Timestamp"
+trading_bot/due_diligence.py,216,L3,A,_anomaly_note,Exception,except -> return '',"path = os.path.join(DATA_DIR, 'anomaly_flags.json') ; with open(path, encoding='utf-8') as f:     flags = json.load(f) ; rec = flags.get(ticker) ; if not rec:     return '' ; return f""⚠ cờ bất thường "
+trading_bot/due_diligence.py,401,L2,A,_recent_iss,Exception,"except -> report only, continue",if _corp_action_feed_ok(asof_d):     out['iss_note'] = 'CLEAR'     lib = _corp_a
+trading_bot/due_diligence.py,426,L1,A,_icb_code,Exception,except: continue (skip record silently),"df = _read_year('ticker', y, cols)"
+trading_bot/due_diligence.py,435,L2,A,_icb_code,Exception,"except -> out = empty, continue","year = int(str(asof)[:4]) ; cols = ['ticker', 'time', 'ICB_Code'] ; d = None ; for y in (year, year - 1):     try:         df = _read_year('ticker', y, cols)   ; if d is not None and (not d.empty):   "
+trading_bot/due_diligence.py,459,L2,A,_deposit_rate_pct,Exception,"except -> report only, continue","import sys as _sys ; if WORKDIR not in _sys.path:     _sys.path.insert(0, WORKDIR) ; from deposit_rate_vn import current_deposit_rate ; out = (float(current_deposit_rate(str(asof)[:10])), 'deposit_rat"
+trading_bot/due_diligence.py,532,L2,A,_yield_floor,Exception,"except -> report only, continue","dep, dep_src = _deposit_rate_pct(asof) ; out['deposit_rate_pct'] = round(dep, 4) ; out['deposit_rate_source'] = dep_src ; icb = _icb_code(ticker, asof) ; out['icb_code'] = icb ; if _corp_action_feed_o"
+trading_bot/due_diligence.py,588,L2,A,_corp_action_feed_ok,Exception,"except -> report only, continue",fr = _corp_action_lib().feed_freshness() ; ing = str(fr.get('max_ingested') or '')[:10] ; age = (today - dt.date.fromisoformat(ing)).days ; ok = age <= CORP_ACTION_STALE_DAYS_MAX ; if not ok:     _log
+trading_bot/due_diligence.py,639,L2,A,_get_upcoming_exdate,Exception,"except -> out = empty, continue",if _corp_action_feed_ok(today):     rows = _corp_action_lib().pricing_events([ti
+trading_bot/due_diligence.py,654,L3,A,_ref_price_for,Exception,except -> return None,"row = _latest_row(ticker, str(asof)[:10])"
+trading_bot/due_diligence.py,728,L2,A,_insider_scan,Exception,"except -> res = empty, continue","lib = _corp_action_lib() ; mx = lib.bq('SELECT CAST(MAX(snapshot_date) AS STRING) d FROM `lithe-record-4409 ; stale = _sessions_between(dt.date.fromisoformat(str(mx)[:10]), _as_date(asof)) ; if stale "
+trading_bot/due_diligence.py,768,L3,A,_get_insider_net_sell_flag,Exception,except -> return None,"return {'net_sell_pct': round(float(r['sell_pct_osh']), 5), 'window_days': INSID"
+trading_bot/due_diligence.py,777,L2,A,_corp_flags,Exception,"except -> ex = empty, continue","ex = _get_upcoming_exdate(ticker, asof)"
+trading_bot/due_diligence.py,782,L2,A,_corp_flags,Exception,"except -> ins = empty, continue","ins = _get_insider_net_sell_flag(ticker, asof)"
+trading_bot/due_diligence.py,987,L2,A,run_due_diligence,Exception,"except -> parts['yield_floor'] = empty, continue","parts['yield_floor'] = _yield_floor(ticker, asof, ctx.get('price'))"
+trading_bot/due_diligence.py,994,L2,A,run_due_diligence,Exception,"except -> parts['recent_iss'] = empty, continue","parts['recent_iss'] = _recent_iss(ticker, asof)"
+trading_bot/due_diligence.py,1014,L2,A,run_due_diligence,Exception,"except -> report only, continue","from .strategies import _dcf_check_for_order, format_dcf_check ; dcf = ctx.get('dcf') ; if not dcf:     px = ctx.get('price')     if px is None:         import pandas a ; dcf_s = format_dcf_check(dcf,"
+trading_bot/executor.py,68,L1,A,_publish_bot_event,Exception,except: pass,"with open(sink, 'a', encoding='utf-8') as fh:     fh.write(json.dumps({'event_ty"
+trading_bot/executor.py,79,L1,A,_publish_bot_event,Exception,except: pass,"subprocess.Popen([_APPEND_EVENT, 'Mafee', event_type, topic, json.dumps(payload,"
+trading_bot/executor.py,219,L3,A,_load_capit_adv20_basis,Exception,except -> return {},"with open(path, encoding='utf-8') as f:     st = json.load(f) ; if st.get('signal_date') and self.plan.signal_date and (st['signal_date'] != sel ; caps_total = st.get('capit_adv_caps_total') or {} ; x"
+trading_bot/executor.py,258,L1,A,_load_discretionary_adv20_basis,Exception,except: continue (skip record silently),"with open(path, encoding='utf-8') as f:     st = json.load(f) ; v = st.get('adv_ref_vnd') ; if isinstance(v, (int, float)) and v > 0:     out[o.ticker] = float(v)"
+trading_bot/executor.py,490,L3,A,_order_book_shadow,Exception,except -> return None,"if not self.cfg.get('order_book_shadow_enabled', False):     return ; if os.environ.get('MIKE_BOT_TEST_MODE') == '1' and (not os.environ.get('ORDER_BO ; if self.label.startswith(('selfcheck-', 'tickch"
+trading_bot/executor.py,624,L3,A,_probe_tick_log,Exception,except -> return None,"last = q.last or q.ref ; floor = q.floor if q.floor and q.floor > 0 else None ; band = float(self.cfg.get('extreme_band', 0.03)) ; headroom = last / floor - 1.0 if floor and last and (last > 0) else N"
+trading_bot/executor.py,855,L3,A,_retry_tick_mismatch,Exception,except -> return None,"oid = self.broker.place_order(o.ticker, qty, o.side, price=px_alt, cash_only=get"
+trading_bot/executor.py,960,L2,A,_expvol_shadow,Exception,except -> silent fallthrough,"if not self.cfg.get('expected_volume_pacing_shadow_log', True):     return ; if now is None or not day_volume or (not adv20_vnd) or (not px):     return ; key = (o.id, now.strftime('%Y-%m-%d %H:%M')) "
+trading_bot/executor.py,963,L1,A,_expvol_shadow,Exception,except: pass,"self._journal('EXPVOL_SHADOW_ERR', o, '', '', '', note=f'{type(e).__name__}: {e}"
+trading_bot/executor.py,1257,L1,A,_lever_package_audit,Exception,except: continue (skip record silently),"with open(_path, encoding='utf-8') as f:     lp = _dig(json.load(f) or {}) ; if lp is not None:     cached.add(str(lp))"
+trading_bot/executor.py,1320,L3,A,_would_be_unchanged,Exception,except -> return False,"q = self.broker.get_quote(o.ticker) ; if q is None or not q.ok():     return False ; extreme_down = self._extreme_regime(o, q, now) ; if o.side == 'buy' and (extreme_down or self._floor_guard_buy(o, q"
+trading_bot/executor.py,1343,L2,A,_cancel_stale,Exception,except -> silent fallthrough,"self.broker.cancel_order(c['oid']) ; c['status'] = 'cancelled' ; self._release_child(o.ticker, c) ; self._journal('CANCEL_STALE', o, c['oid'], c['qty'] - c.get('filled', 0), c['pri"
+trading_bot/executor.py,1404,L2,A,_load_gap_ref_data,Exception,"except -> report only, continue",import pandas as pd ; import pyarrow.parquet as _pq ; tickers = [o.ticker for o in self.plan.orders] if self.cfg.get('extreme_regime_e ; if not tickers:     return ; today = pd.Timestamp(self.plan.pla
+trading_bot/executor.py,1503,L1,A,_hybrid_sched,Exception,except: continue (skip record silently),bs = _parse_hhmm(s)
+trading_bot/executor.py,1667,L3,A,_extreme_regime_raw,Exception,except -> return False,last = q.last or q.ref ; if not last or last <= 0:     st['n'] = 0     return False ; trig = False ; floor = q.floor if q.floor and q.floor > 0 else None ; if floor and last <= floor * (1 + self.cfg.g
+trading_bot/executor.py,1690,L3,A,_floor_guard_buy,Exception,except -> return False,last = q.last or q.ref ; floor = q.floor if q.floor and q.floor > 0 else None ; return bool(floor and last and (last > 0) and (last <= floor * (1 + self.cfg.get
+trading_bot/executor.py,1703,L3,A,_extreme_armed,Exception,except -> return False,return bool(st and st.get('until') and (now < dt.datetime.fromisoformat(st['unti
+trading_bot/executor.py,1893,L2,A,_place_slices,Exception,except -> silent fallthrough,"oid = self.broker.place_order(o.ticker, qty, o.side, price=px, cash_only=getattr"
+trading_bot/executor.py,1959,L1,A,_atc_sweep,Exception,except: pass,"self.broker.cancel_order(c['oid']) ; c['status'] = 'cancelled' ; self._release_child(o.ticker, c)"
+trading_bot/executor.py,1995,L2,A,_atc_sweep,Exception,except -> silent fallthrough,"oid = self.broker.place_order(o.ticker, remaining, o.side, price=None, order_typ ; ps['children'].append({'oid': oid, 'qty': remaining, 'price': None, 'filled': 0, ; ps['atc_sent'] = True ; self._jour"
+trading_bot/executor.py,2008,L2,A,cancel_all_open,Exception,except -> silent fallthrough,"self.broker.cancel_order(c['oid']) ; c['status'] = 'cancelled' ; self._release_child(o.ticker, c) ; self._journal('CANCEL', o, c['oid'], note=reason)"
+trading_bot/executor.py,2063,L2,A,step,Exception,except -> silent fallthrough,"updates = self.broker.poll_orders() ; self._sync_fills(updates) ; ghost_tickers = self._ghost_tickers(updates) ; for t in ghost_tickers - self.state.setdefault('_ghost_warned', {}).keys():      ; leve"
+trading_bot/executor.py,2081,L2,A,step,Exception,except -> silent fallthrough,"self._record_prices(now, phase)"
+trading_bot/executor.py,2089,L2,A,step,Exception,except -> silent fallthrough,"self._record_prices(now, phase)"
+trading_bot/executor.py,2095,L2,A,step,Exception,except -> silent fallthrough,positions = self.broker.get_positions()
+trading_bot/executor.py,2209,L2,A,_await_postclose_fills,Exception,except -> silent fallthrough,"updates = e.broker.poll_orders() ; t = now_ict().strftime('%H:%M:%S') ; ok_ts[e.label] = t ; seen[e.label] = {oid: (u.status, t) for oid, u in updates.items()} ; e._sync_fills(updates)"
+trading_bot/executor.py,2223,L2,A,_await_postclose_fills,Exception,except -> silent fallthrough,e.broker.get_positions() ; e.broker.get_cash()
+trading_bot/executor.py,2282,L2,A,run_session,Exception,except -> silent fallthrough,"s = e.step(now, phase, cont) ; e._step_fail_count = 0 ; statuses.append(s)"
+trading_bot/executor.py,2321,L2,A,run_session,Exception,"except -> report only, continue",_await_postclose_fills(executors)
+trading_bot/executor.py,2327,L1,A,run_session,Exception,except: pass,"e._journal('ATC_POSTCLOSE_ERROR', note=str(ex)) ; e._save_state()"
+trading_bot/plan.py,298,L3,A,_signal_holds_matcher,Exception,except -> return None,"spec = importlib.util.spec_from_file_location('signal_holds', mod_path) ; mod = importlib.util.module_from_spec(spec) ; spec.loader.exec_module(mod) ; return mod.match_order"
+trading_bot/plan.py,493,L2,A,cap_capit_orders,Exception,except -> silent fallthrough,"with open(path, encoding='utf-8') as f:     st = json.load(f) ; all_caps = st.get('capit_adv_caps') or {} ; if any((not isinstance(v, dict) for v in all_caps.values())):     err = 'capit_a ; if st.get"
+trading_bot/plan.py,622,L2,A,cap_lag_orders,Exception,except -> silent fallthrough,"if live_labels is None:     from .config import load_config, load_accounts     l ; live_labels = list(live_labels or []) ; is_live = str(account_mode or 'live').lower() == 'live' ; if is_live and acco"
+trading_bot/plan.py,648,L2,A,cap_lag_orders,Exception,"except -> lag_days = empty, continue",lag_days = (dt.date.fromisoformat(asof) - dt.date.fromisoformat(data_date)).days
+trading_bot/plan.py,748,L2,A,annotate_pacing_horizon,Exception,except -> silent fallthrough,"adv, data_date, err = _adv_for_gate(o.ticker, asof)"
+trading_bot/plan.py,834,L2,A,filter_lag_rating_orders,Exception,except -> silent fallthrough,"import pandas as pd ; bq, lag_filter_low_rating = _rating_gate_deps() ; cand = pd.DataFrame({'ticker': tickers}) ; _, dropped, src_err = lag_filter_low_rating(bq, cand, asof)"
+trading_bot/plan.py,1390,L2,A,apply_capit_lever,Exception,except -> silent fallthrough,"with open(path, encoding='utf-8') as f:     st = json.load(f) ; lever = st.get('capit_lever') or {} ; if not lever:     err = 'artifact không có khối `capit_lever` (golive_recommend_"
+trading_bot/plan.py,1651,L1,A,apply_capit_lever,Exception,except: pass,"_st = st ; if not _st:     with open(path, encoding='utf-8') as _f:         _st = json.load ; _t = (_st.get('capit_slot_targets') or {}).get(account_label) or {} ; if _t.get('capit_slot_target_vnd_lev"
+trading_bot/plan.py,1756,L1,A,_lever_ledger_merge,Exception,except: pass,"with open(path, encoding='utf-8') as f:     for lp, tks in ((json.load(f) or {})"
+trading_bot/plan.py,1787,L2,A,_lever_ledger_write,Exception,"except -> report only, continue","if not granted and (not os.path.exists(path)):     return ; os.makedirs(os.path.dirname(path), exist_ok=True) ; tmp = path + '.tmp' ; with open(tmp, 'w', encoding='utf-8') as f:     json.dump({'grante"
+trading_bot/plan_cash_commitment.py,195,L1,A,_resolved_package,Exception,except: pass,"return (fn(ticker), 'resolved:cash_only')"
+trading_bot/plan_cash_commitment.py,240,L2,A,residual_headroom,Exception,"except -> bp = empty, continue","bp = broker.get_buying_power(ticker, int(unit_price), loan_package_id=lp)"
+trading_bot/plan_cash_commitment.py,261,L2,A,residual_headroom,Exception,"except -> cash = empty, continue",cash = float(broker.get_cash() or 0.0)
+trading_bot/plan_funding_gate.py,175,L1,A,_effective_loan_package,Exception,except: pass,"eff, ok, _note = fn(order.ticker, lp) ; return (eff, 'lever:validated' if ok else 'lever:invalid→account_default')"
+trading_bot/plan_funding_gate.py,197,L1,A,_effective_loan_package,Exception,except: pass,"return (fn(order.ticker), 'resolved:symbol')"
+trading_bot/plan_funding_gate.py,349,L2,A,check_plan_funding,Exception,except -> silent fallthrough,"bp = broker.get_buying_power(probe.ticker, int(probe.ref_price), loan_package_id"
+trading_bot/plan_funding_gate.py,422,L2,A,check_plan_funding,Exception,"except -> cash = empty, continue",cash = float(broker.get_cash() or 0.0)
+trading_bot/strategies.py,39,L3,A,_dcf_is_conglomerate,Exception,except -> return False,"import sys as _sys ; if WORKDIR not in _sys.path:     _sys.path.insert(0, WORKDIR) ; import dcf_valuation as _dcf ; return _dcf.is_conglomerate(ticker)"
+trading_bot/strategies.py,125,L3,A,_format_alt_lens,Exception,except -> return '',"import sys as _sys ; if WORKDIR not in _sys.path:     _sys.path.insert(0, WORKDIR) ; from alt_valuation_lens import format_alt_lens ; return format_alt_lens(ticker)"
+trading_bot/strategies.py,197,L2,A,log_dcf_history,Exception,"except -> report only, continue","if not dcf or not isinstance(dcf, dict):     return ; row = {'logged_at': dt.datetime.now().isoformat(timespec='seconds'), 'as_of': dc ; os.makedirs(os.path.dirname(DCF_HISTORY_CSV), exist_ok=True) ; "
+alt_valuation_lens.py,64,L3,B,_load,Exception,except -> return {},"with open(RATING_8L_CSV, encoding='utf-8') as f:     for r in csv.DictReader(f):"
+alt_valuation_lens.py,171,L3,B,alt_lens,Exception,except -> return None,"row = _load().get(str(ticker).strip().upper()) ; if not row:     return None ; route = (row.get('route') or '').strip().upper() ; icb = _f(row, 'ICB_Code') ; pb = _f(row, 'PB') ; roe5y = _f(row, 'ROE5"
+bull_div_boost.py,81,L3,B,f,bare,except -> return None,return float(rec[k])
+bull_div_boost.py,105,L2,B,detect_today,Exception,"except -> b1 = empty, continue","b1 = safe_div(min1W, min3M) > 0.9 and min1W < 0.6 and (min3M < 0.4) and (safe_di"
+bull_div_boost.py,114,L2,B,detect_today,Exception,"except -> b12 = empty, continue","b12 = safe_div(min1W, min3M) > 0.92 and min1W < 0.52 and (min3M < 0.38) and (saf"
+capit_episode.py,83,L3,B,_live_labels,Exception,except -> return [],from trading_bot.config import live_dnse_labels ; return sorted(live_dnse_labels())
+capit_episode.py,98,L1,B,_raw_records,Exception,except: continue (skip record silently),r = json.loads(ln)
+capit_episode.py,116,L3,B,_plan_capit_orders,Exception,except -> return {},"with open(p, encoding='utf-8') as f:     plan = json.load(f)"
+capit_episode.py,255,L3,B,_try_close,Exception,except -> return None,"age = (datetime.strptime(signal_date, '%Y-%m-%d') - datetime.strptime(asof, '%Y-"
+cheap_pb_floor.py,31,L1,B,<module>,Exception,except: pass,sys.stdout.reconfigure(encoding='utf-8')
+cheap_pb_floor.py,57,L1,B,bq,Exception,except: pass,os.unlink(tmp)
+cheap_pb_floor.py,67,L3,B,ngu_hanh_state,Exception,except -> return None,d = bq('SELECT state FROM tav2_bq.vnindex_5state_dt5g_live ORDER BY time DESC LI ; return int(d['state'].iloc[0])
+cheap_pb_floor.py,155,L2,B,main,Exception,"except -> report only, continue","from telegram_recommend import send_telegram_text, load_config ; cfg = load_config() ; print('telegram:', send_telegram_text(cfg['bot_token'], cfg['chat_id'], '\n'.joi"
+dc_book_waterfall_paper.py,404,L3,B,load_double_confirm,Exception,except -> return None,"import sector_lens_monitor as slm ; r = slm.compute_status() ; ratings = slm.load_ratings() ; df = r['df'] ; out = {} ; for _, row in df[df['status'] == 'BUY'].iterrows():     rt = ratings.get(row['ti"
+dc_book_waterfall_paper.py,443,L3,B,load_liquidity,Exception,except -> return None,"import duckdb ; con = duckdb.connect() ; con.execute('SET threads=1') ; q = ','.join((f""'{t}'"" for t in sorted(set(tickers)))) ; df = con.execute(f""\n            WITH r AS (SELECT ticker, Trading_Valu"
+dc_book_waterfall_paper.py,482,L3,B,sleeve_enabled,Exception,except -> return False,"sys.path.insert(0, WORKDIR) ; from trading_bot.config import load_config, load_accounts, pick_accounts ; prof = pick_accounts(load_accounts(load_config()), [account])[0] ; return bool(prof['cfg'].get("
+dc_book_waterfall_paper.py,507,L3,B,_load_state,Exception,except -> return None,"with open(STATE_FILE, encoding='utf-8') as f:     return json.load(f)"
+dc_book_waterfall_paper.py,725,L1,B,_append_nav_csv,Exception,except: pass,"with open(NAV_CSV, 'a', encoding='utf-8') as f:     if not exists:         f.wri"
+dc_book_waterfall_paper.py,763,L3,B,_dcf_echo_line,Exception,except -> return '',"if not dc_names:     return '' ; if WORKDIR not in sys.path:     sys.path.insert(0, WORKDIR) ; from trading_bot.strategies import _dcf_check_for_order, format_dcf_check, log_d ; from dcf_valuation imp"
+dc_book_waterfall_paper.py,792,L3,B,_dd_echo_lines,Exception,except -> return [],"if not dc_names:     return [] ; if WORKDIR not in sys.path:     sys.path.insert(0, WORKDIR) ; from trading_bot.due_diligence import run_due_diligence, DD_DISCLAIMER ; out = ['- Due-diligence (informa"
+dcf_refresh_gate.py,61,L3,B,load_state,Exception,except -> return None,with open(path) as f:     return json.load(f)
+dcf_refresh_gate.py,119,L1,B,run_gate,Exception,except: pass,"with open(log_path, 'a') as f:     f.write(json.dumps(out) + '\n')"
+dcf_valuation.py,185,L2,B,_load_icb_map,Exception,"except -> _ICB_CACHE = empty, continue","df = c.execute(f""SELECT ticker, MAX(ICB_Code) icb FROM read_parquet('{WORKDIR}/d ; _ICB_CACHE = dict(zip(df.ticker, df.icb))"
+dcf_valuation.py,201,L2,B,_load_routes,Exception,except -> silent fallthrough,"df = c.execute(f""SELECT ticker, time, route FROM read_parquet('{WORKDIR}/data/bq ; df['time'] = pd.to_datetime(df['time']) ; _ROUTE_CACHE = df.sort_values(['ticker', 'time']).reset_index(drop=True)"
+dcf_valuation.py,539,L2,B,latest_price,Exception,except -> silent fallthrough,"df = c.execute(f""SELECT time, Price, Close FROM read_parquet('{WORKDIR}/data/bq_"
+deploy_golive_dt5g_v4/golive_recommend_v23.py,414,L3,B,capit_adv_caps,Exception,except -> return {},"tl = ','.join((f""'{t}'"" for t in basket)) ; a = bq(f""WITH px AS (\n  SELECT p.ticker, p.time, COALESCE(p.Price,p.Close)*p.Vo ; caps = {r.ticker: float(ADV_X * r.adv20 * ADV_D) for r in a.itertuples() "
+deploy_golive_dt5g_v4/golive_recommend_v23.py,441,L1,B,_account_nav_basis,Exception,except: pass,"d = json.load(open(p, encoding='utf-8')) ; age = (pd.Timestamp.now().normalize() - pd.Timestamp(d['computed_at'])).days ; if 0 <= age <= ACTIVE_NAV_MAX_AGE_D and float(d['active_nav']) > 0:     return"
+deploy_golive_dt5g_v4/golive_recommend_v23.py,448,L1,B,_account_nav_basis,Exception,except: pass,"r = pd.read_csv(p).iloc[-1] ; if float(r['nav']) > 0:     return (float(r['nav']), f""nav_history @{r['date']} "
+deploy_golive_dt5g_v4/golive_recommend_v23.py,612,L2,B,<module>,Exception,"except -> report only, continue","prov = json.load(open(os.path.join(WORKDIR, 'deploy_golive_dt5g_v4', 'golive_sta ; print(f""  state source: {prov.get('source')} | as_of {prov.get('as_of')} | state"
+deploy_golive_dt5g_v4/golive_recommend_v23.py,630,L2,B,<module>,Exception,"except -> report only, continue","import subprocess ; subprocess.run([os.path.join(WORKDIR, 'mike', 'bin', 'append_event.sh'), 'Winsto"
+deploy_golive_dt5g_v4/golive_recommend_v23.py,801,L2,B,<module>,Exception,"except -> report only, continue","from lag_live_schedule import live_lag_candidates ; cand = live_lag_candidates(start=START) ; print(f""  [lag-live] {len(cand)} events in window, {int(cand['qualify'].sum())}  ; cand = cand[cand['quali"
+deploy_golive_dt5g_v4/golive_recommend_v23.py,815,L2,B,<module>,Exception,"except -> report only, continue","pl = pd.read_csv(os.path.join(WORKDIR, 'data', 'pt_v22_dt5g_logs.csv'), parse_da ; last = pl.iloc[-1] ; lag_mv = float(last['SECOND_cash']) + float(last['SECOND_stocks']) + float(last[ ; w_cur = lag_m"
+deploy_golive_dt5g_v4/golive_recommend_v23.py,948,L2,B,<module>,Exception,except -> silent fallthrough,"_pit_end = str((LATEST + cpi_vn.pd.DateOffset(months=2)).date()) ; _pit_q = cpi_vn.pd.DataFrame({'time': [LATEST]}) ; _pit_cpi_yoy = float(cpi_vn.merge_cpi(_pit_q, end=_pit_end)['cpi_yoy'].iloc[0]) ; "
+deploy_golive_dt5g_v4/golive_recommend_v23.py,1071,L2,B,<module>,Exception,"except -> report only, continue","import custom30 ; _park_basket = custom30.current(bq, table=custom30.TABLE_V) ; if len(_park_basket):     _park_rebal_date = str(_park_basket['rebal_date'].iloc"
+deploy_golive_dt5g_v4/golive_recommend_v23.py,1133,L2,B,<module>,Exception,"except -> report only, continue","from trading_bot.due_diligence import run_due_diligence as _run_dd ; for _r in recs:     _t, _b = (_r['ticker'], _r['book'])     if (_t, _b) not in d"
+deploy_golive_dt5g_v4/golive_recommend_v23.py,1376,L2,B,<module>,Exception,"except -> _DDD = empty, continue",from trading_bot.due_diligence import DD_DISCLAIMER as _DDD
+deploy_golive_dt5g_v4/publish_gated_state.py,88,L2,B,<module>,Exception,"except -> publish_ok = empty, continue","stats = publish_immutable(out, BQ_DS_TABLE, 'vnindex_5state_dt5g_live (PRODUCTIO ; print(f""  published -> BQ {BQ_TABLE} (bất biến: đã chốt {stats.get('n_sealed_row"
+deploy_golive_dt5g_v4/publish_gated_state.py,97,L2,B,<module>,Exception,"except -> report only, continue","n = export_published_csv(BQ_DS_TABLE, LOCAL_CSV) ; print(f'  wrote {LOCAL_CSV} ({n} rows) = ảnh chụp bảng đã công bố (KHÔNG phải bả"
+dna_card.py,15,L1,B,<module>,Exception,except: pass,sys.stdout.reconfigure(encoding='utf-8')
+dna_card.py,39,L2,B,<module>,Exception,"except -> MOAT5F = empty, continue",from moat_5f import load_moat_tags ; MOAT5F = load_moat_tags(W)
+dna_card.py,44,L2,B,<module>,Exception,"except -> OILMAP = empty, continue",from oil_transmission import load_oil_map ; OILMAP = load_oil_map(W)
+dna_card.py,49,L2,B,<module>,Exception,"except -> FMAP = empty, continue","from freight_map import load_freight_map, current_bdi ; FMAP = load_freight_map(W) ; _BDI = current_bdi(W)"
+dna_card.py,66,L1,B,bq,bare,except: pass,os.unlink(tmp)
+dna_card.py,83,L2,B,<module>,Exception,except -> silent fallthrough,"bank = pd.read_csv(os.path.join(W, 'data', 'bank_lens_v3.csv')).set_index('ticke"
+dna_card.py,88,L2,B,<module>,Exception,"except -> CYC_STRUCT = empty, continue","cs = pd.read_csv(os.path.join(W, 'data', 'cyclical_structural.csv')) ; CYC_STRUCT = {r['ticker']: (r['verdict'], r['structure']) for _, r in cs.iterrow"
+dna_card.py,92,L2,B,<module>,Exception,except -> silent fallthrough,"ap = pd.read_csv(os.path.join(W, 'data', 'asset_play.csv')) ; ASSET_PLAY = set(ap[ap['verdict'] == 'ASSET_PLAY']['ticker'])"
+dna_card.py,99,L2,B,<module>,Exception,except -> silent fallthrough,"d = pd.read_csv(os.path.join(W, 'data', f'{c}_monthly.csv')) ; d.columns = ['m', 'p'] ; d['pct'] = d['p'].rolling(60, min_periods=24).apply(lambda x: (x.iloc[-1] >= x). ; comm[c] = float(d['pct'].iloc"
+dna_report.py,48,L1,B,_bq,Exception,except: pass,os.unlink(tmp)
+dna_report.py,72,L2,B,get_regime,Exception,"except -> stale_flag = empty, continue","from datetime import datetime, timedelta, timezone ; _ict_today = (datetime.now(timezone.utc) + timedelta(hours=7)).date() ; lag = (_ict_today - pd.Timestamp(asof).date()).days ; stale_flag = lag > 2"
+dna_report.py,152,L1,B,get_compass,Exception,except: pass,"cs = pd.read_csv(os.path.join(W, 'data/compare_v11_v12_concentration_switch.csv' ; cur = int(cs['sig_m1'].iloc[0]) ; for a, bb in zip(cs['sig_m1'].astype(int), cs['sig_m3'].astype(int)):     if a = ; "
+dna_report.py,168,L1,B,get_compass,Exception,except: pass,er = pd.to_numeric(d['ew_ret']).tail(20) ; ew20 = float((1 + er).prod() - 1) ; if len(vn) >= 21:     vc = pd.to_numeric(vn['Close'])     vni20 = float(vc.iloc[
+dna_report.py,192,L2,B,get_compass,Exception,"except -> val = empty, continue","d = _bq('SELECT t.time, SAFE_DIVIDE(COUNTIF(t.Close>t.MA200),COUNT(*)) AS breadt ; vn = _bq(""SELECT t.time, t.Close FROM tav2_bq.ticker AS t\n          WHERE t.tic ; if len(d) >= 51:     b = pd.to_num"
+dna_report.py,269,L1,B,get_dt_gate_clock,Exception,except: pass,"hz = pd.read_csv(os.path.join(_HAZ_DIR, f'data_dt_hazard_{grp}_full.csv')) ; row = hz[hz['k'] == k] ; if len(row):     p = float(row['p_commit_given_k'].iloc[0])     lo = float(row['"
+dna_report.py,278,L2,B,get_dt_gate_clock,Exception,"except -> val = empty, continue","import sys ; if _HAZ_DIR not in sys.path:     sys.path.insert(0, _HAZ_DIR) ; from dt_gate_hazard_research import extract_episodes, dt_4gate ; b = _bq(""SELECT t.time, t.state FROM tav2_bq.vnindex_5stat"
+dna_report.py,340,L3,B,build_value_radar_line,Exception,except -> return None,"import sys ; if W not in sys.path:     sys.path.insert(0, W) ; from value_radar import build_value_radar_line as _vr ; return _vr(html=html)"
+dna_report.py,368,L2,B,build_cap_signal_advisory_line,Exception,"except -> val = empty, continue","import sys ; if _HAZ_DIR not in sys.path:     sys.path.insert(0, _HAZ_DIR) ; from cap_signal_advisory_check import run_advisory ; val = run_advisory(trace_id=trace_id)"
+dna_report.py,407,L2,B,get_neutral_base_rate,Exception,"except -> val = empty, continue","d = _bq(""SELECT t.time, t.state FROM tav2_bq.vnindex_5state_dt5g_live t WHERE t. ; if len(d) >= 500:     arr = d.sort_values('time')['state'].astype(int).values   "
+dna_report.py,459,L2,B,get_margin_spread,Exception,"except -> report only, continue","import json ; with open(os.path.join(W, 'data', 'trading_rules.json'), encoding='utf-8') as f: ; d = _bq('\n            WITH last_d AS (SELECT MAX(time) AS d FROM `tav2_mike.uni ; if len(d) and pd.not"
+dna_report.py,554,L2,B,build_report,Exception,except -> silent fallthrough,"scr = pd.read_csv(os.path.join(W, 'data', 'unified_screener.csv')).set_index('ti"
+dna_report.py,556,L2,B,build_report,Exception,except -> silent fallthrough,"rank = pd.read_csv(os.path.join(W, 'data', 'rank_8l.csv'))"
+dna_report.py,558,L2,B,build_report,Exception,except -> silent fallthrough,"dna = pd.read_csv(os.path.join(W, 'data', 'dna_cards.csv')).set_index('ticker')"
+dna_report.py,561,L2,B,build_report,Exception,"except -> MOAT5F = empty, continue",from moat_5f import load_moat_tags ; MOAT5F = load_moat_tags(W)
+edge_health_monitor.py,26,L1,B,<module>,Exception,except: pass,sys.stdout.reconfigure(encoding='utf-8')
+edge_health_monitor.py,101,L3,B,capit_edge_health,Exception,except -> return None,ev = pd.read_csv(CAPF)
+edge_health_monitor.py,162,L3,B,lag_edge_health,Exception,except -> return None,"with open(WORKDIR + '/data/earnings_px.pkl', 'rb') as f:     px = pickle.load(f) ; px['time'] = pd.to_datetime(px['time']) ; pxc = px.pivot_table(index='time', columns='ticker', values='Close', aggfun"
+edge_health_monitor.py,441,L1,B,main,Exception,except: pass,"mom_v = al.loc['mom_200', 'verdict'] if 'mom_200' in al.index else None ; if mom_v == 'FLIPPED':     block.append('📉 Momentum FLIPPED → không nới slot/siz"
+lag_forensic_filter.py,153,L2,B,lag_filter_forensic_banned,Exception,"except -> report only, continue",forx = _load_forensic_excludes(path)
+lag_forensic_filter.py,161,L2,B,lag_filter_forensic_banned,Exception,except -> silent fallthrough,asof_ts = pd.Timestamp(asof) ; if pd.isna(asof_ts):     raise ValueError('asof là NaT')
+lag_forensic_filter.py,172,L2,B,lag_filter_forensic_banned,Exception,except -> silent fallthrough,dts = pd.Timestamp(d)
+macro_healthcheck.py,65,L2,B,<module>,Exception,"except -> _vn_is_holiday = empty, continue",from trading_bot.vn_market import is_holiday as _vn_is_holiday ; VN_HOLIDAY_ERR = None
+macro_healthcheck.py,122,L2,B,<module>,Exception,"except -> bq = empty, continue",from simulate_holistic_nav import bq
+macro_healthcheck.py,143,L2,B,<module>,Exception,except -> silent fallthrough,"r = bq('SELECT MAX(s.time) AS mx FROM tav2_bq.vnindex_5state_tam_quan_v34b_clean ; d = pd.to_datetime(r['mx'].iloc[0]).date() ; state_fresh = add_source('local_v34b_state_csv', d, STATE_MAX_TDAYS, kin"
+macro_healthcheck.py,154,L2,B,<module>,Exception,except -> silent fallthrough,"r = bq(""SELECT MAX(t.time) AS mx FROM tav2_bq.ticker AS t WHERE t.ticker='VNINDE ; d = pd.to_datetime(r['mx'].iloc[0]).date() ; ticker_fresh = add_source('bq_ticker_vnindex', d, TICKER_MAX_TDAYS, kind"
+macro_healthcheck.py,165,L2,B,<module>,Exception,except -> silent fallthrough,"us = pd.read_csv(os.path.join(WORKDIR, 'data/us_market_history.csv'), parse_date ; us_fresh = add_source('data/us_market_history.csv', us['time'].iloc[-1].date(), "
+macro_healthcheck.py,187,L1,B,<module>,Exception,except: pass,"vlog = json.loads(open(sbv_verify_log_path, encoding='utf-8').read()) ; last_v = pd.to_datetime(vlog.get('last_verified')).date() ; verify_age_days = (TODAY - last_v).days"
+macro_healthcheck.py,200,L2,B,<module>,Exception,except -> silent fallthrough,from sbv_macro_overlay import SBV_REFI_EVENTS ; last_ev = pd.to_datetime(SBV_REFI_EVENTS[-1][0]).date() ; refi_now = float(SBV_REFI_EVENTS[-1][1]) ; sbv_age = (TODAY - last_ev).days ; sources.append({
+macro_healthcheck.py,255,L2,B,<module>,Exception,"except -> report only, continue","from macro_state_live import get_macro_state ; start = (NOW - pd.Timedelta(days=PROBE_LOOKBACK_DAYS)).strftime('%Y-%m-%d') ; m = get_macro_state(start, TODAY.strftime('%Y-%m-%d'), bq=bq) ; if m is Non"
+macro_healthcheck.py,268,L1,B,<module>,Exception,except: pass,"if os.path.exists(MARKER):     prev = datetime.fromisoformat(open(MARKER, encodi"
+macro_healthcheck.py,284,L2,B,<module>,Exception,"except -> vni_below = empty, continue","r = bq(""SELECT t.Close, t.MA200 FROM tav2_bq.ticker AS t WHERE t.ticker='VNINDEX ; vni_below = bool(float(r['Close'].iloc[0]) < float(r['MA200'].iloc[0]))"
+macro_healthcheck.py,288,L1,B,<module>,Exception,except: pass,"if us is not None and len(us):     v = float(us['vix'].iloc[-1])     vm = float( ; vni_below = False ; if bq is not None:     try:         r = bq(""SELECT t.Close, t.MA200 FROM tav2_bq ; stress = bool("
+macro_healthcheck.py,351,L1,B,<module>,Exception,except: pass,"open(MARKER, 'w', encoding='utf-8').write(f""{NOW.isoformat(timespec='seconds')} "
+macro_healthcheck.py,375,L1,B,<module>,Exception,except: pass,"open(os.path.join(DATADIR, 'MACRO_HEALTH_ALERT.md'), 'w', encoding='utf-8').writ"
+macro_healthcheck.py,388,L2,B,<module>,Exception,"except -> report only, continue","import json as _j ; cfg = _j.load(open(os.path.join(WORKDIR, 'secrets/telegram_config.json'), encodi ; from telegram_recommend import send_telegram_text ; msg = build_alert_text() if status != 'HEALTH"
+macro_state_live.py,149,L2,B,get_macro_state,Exception,"except -> report only, continue","sf = bq(f""SELECT s.time, s.state FROM tav2_bq.vnindex_5state_tam_quan_v34b_clean ; sf['time'] = pd.to_datetime(sf['time']) ; if len(sf) == 0:     raise RuntimeError('BQ base state `vnindex_5state_tam_"
+macro_state_live.py,199,L2,B,get_macro_state,Exception,"except -> report only, continue","bd = bq(_breadth_sql(qstart, end)) ; bd['time'] = pd.to_datetime(bd['time']) ; df = df.merge(bd, on='time', how='left') ; decoup = ((df['univ'].fillna(0) >= P['breadth_min_univ']) & (df['b200'] >= P['"
+macro_state_live.py,265,L1,B,_alert,Exception,except: pass,"import json, requests ; cfg = json.load(open(os.path.join(WORKDIR, 'secrets/telegram_config.json'), enco ; chat_ids = cfg['chat_id'] if isinstance(cfg['chat_id'], (list, tuple)) else [cfg ; for cid in"
+macro_state_live.py,273,L1,B,_alert,Exception,except: pass,"import subprocess ; nsh = os.path.join(WORKDIR, 'mike/bin/notify.sh') ; if os.path.exists(nsh):     subprocess.run([nsh, msg], timeout=8)     return"
+macro_state_live.py,312,L2,B,get_gated_state,Exception,except -> silent fallthrough,"h = json.load(open(health_path, encoding='utf-8')) ; age_min = (datetime.now() - datetime.fromisoformat(h['ts'])).total_seconds() / 6 ; if age_min > max_health_age_min:     reason = f'health report {a"
+macro_state_live.py,320,L2,B,get_gated_state,Exception,"except -> live_lag = empty, continue",live_lag = (datetime.now().date() - pd.Timestamp(end).date()).days
+macro_state_live.py,336,L2,B,get_gated_state,Exception,except -> silent fallthrough,"vf = bq(f""SELECT MAX(t.time) AS mx,\n                               COUNTIF(t.ti ; tgap = int(vf['gap'].iloc[0]) if len(vf) else 0 ; mkt_max = vf['mx'].iloc[0] if len(vf) else None ; if tgap > max_sta"
+mike/bin/corp_action_daily.py,252,L2,B,notify,Exception,"except -> report only, continue","subprocess.run(cmd, capture_output=True, text=True, timeout=60)"
+mike/bin/corp_action_daily.py,263,L2,B,bus,Exception,"except -> report only, continue","subprocess.run(cmd, capture_output=True, text=True, timeout=60)"
+mike/bin/corp_action_daily.py,330,L2,B,gate_selfcheck,Exception,except -> silent fallthrough,"r = run(path) ; rc, tail = (r.returncode, (r.stdout or '')[-400:])"
+mike/bin/corp_action_daily.py,416,L2,B,read_positions,Exception,"except -> stale = empty, continue",stale = (dt.date.fromisoformat(asof) - dt.date.fromisoformat(computed)).days
+mike/bin/corp_action_daily.py,558,L2,B,backfill_missed,Exception,"except -> report only, continue",rows = fetch(d)
+mike/bin/snapshot_corp_action_daily.py,178,L1,B,ensure_snapshot_table,Exception,except: pass,"return (True, client.get_table(snap_ref))"
+mike/bin/snapshot_corp_action_daily.py,377,L2,B,main,Exception,"except -> client = empty, continue",client = (client_factory or get_client)()
+mike/bin/snapshot_corp_action_daily.py,388,L2,B,main,Exception,"except -> report only, continue","results.append(run_one(client, s, snapshot_date, args.dry_run))"
+oshares_pit.py,153,L3,B,fetch_cache,Exception,except -> return None,"return _fetch(sorted(set(tickers)), until)"
+oshares_pit.py,386,L3,B,append_log,Exception,except -> return None,"os.makedirs(os.path.dirname(path), exist_ok=True) ; new = not os.path.exists(path) ; with open(path, 'a', newline='', encoding='utf-8') as fh:     w = csv.DictWriter ; return path"
+oshares_pit.py,787,L2,B,_selfcheck_body,Exception,except -> silent fallthrough,"live_real = real(['FPT', 'MBB'], '2026-08-12', _cache=frozen(['FPT', 'MBB'])) ; fb_real = {'FPT': live_real['FPT']['value'], 'MBB': live_real['MBB']['value'] /  ; rr = oshares_reconciled(['FPT', 'MBB'"
+paper_entry_adjust.py,290,L3,B,_ratio_step,Exception,except -> return None,"rows = con.execute(f""\n            SELECT time, Close / NULLIF(Price, 0) AS rati"
+paper_entry_adjust.py,322,L2,B,adjust_entries,Exception,except -> silent fallthrough,"rows = _fetch_rows(items, cache_dir) ; fetch_err = None"
+paper_entry_adjust.py,329,L2,B,adjust_entries,Exception,except -> silent fallthrough,"stale = stale_years(cache_dir) ; vintage = cache_vintage(cache_dir) ; newest_year = max((y for y in vintage if y != 'ticker_1m'), default=None)"
+paper_entry_adjust.py,334,L2,B,adjust_entries,Exception,"except -> cache_max_date = empty, continue",cache_max_date = _cache_max_date(cache_dir)
+paper_entry_adjust.py,379,L2,B,adjust_entries,Exception,except -> silent fallthrough,"factor, rights, err = _rights_free_factor(ticker, asof, factor_terp, cache_max_d"
+preflight_bq_cache.py,121,L2,B,check_duckdb,Exception,"except -> report only, continue","cnt = conn.execute(f""SELECT COUNT(*) FROM read_parquet('{path}')"").fetchone()[0] ; expected = info['rows'] ; if abs(cnt - expected) > max(10, expected * 0.001):     if name == 'ticker_1m': "
+preflight_bq_cache.py,152,L2,B,check_smoke_query,Exception,"except -> report only, continue","from bq_local_cache import BQLocalCache ; cache = BQLocalCache(CACHE_DIR) ; df = cache.query(""\n            SELECT p.time, p.ticker, p.Close, s.state\n      ; if len(df) == 0:     err('smoke query ret"
+preflight_bq_cache.py,205,L2,B,check_spot_bq,Exception,"except -> report only, continue","from bq_local_cache import BQLocalCache ; cache = BQLocalCache(CACHE_DIR) ; local = cache.query(""\n            SELECT t.time, t.Close\n            FROM tav2 ; if local.empty:     err('spot check: no V"
+pt_v22_dt5g.py,195,L2,B,<module>,Exception,"except -> report only, continue","with open(INTRADAY_PKL, 'rb') as f:     intraday = pickle.load(f) ; adv_by_ticker = {} ; slot_price_atc, slot_vol_atc, slot_price_t1115, slot_vol_t1115 = ({}, {}, {}, {} ; for tk, bars in intraday.ite"
+pt_v22_dt5g.py,435,L1,B,<module>,Exception,except: pass,"_ff = pd.read_csv('data/forensic_flags.csv') ; _forx = {r['ticker']: pd.Timestamp(r['date']) for _, r in _ff.iterrows() if str("
+pt_v22_dt5g.py,793,L2,B,<module>,Exception,"except -> report only, continue","_eh_path = os.environ.get('EDGE_HEALTH_CSV', '').strip() or os.path.join(WORKDIR ; _eh = pd.read_csv(_eh_path) ; _eh_key = 'known_date' if 'known_date' in _eh.columns else 'entry' ; if _eh_key != 'kno"
+rank_8l.py,20,L1,B,<module>,Exception,except: pass,sys.stdout.reconfigure(encoding='utf-8')
+rank_8l.py,30,L2,B,<module>,Exception,except -> silent fallthrough,"E = pd.read_csv(os.path.join(WORKDIR, 'data', 'engine_class.csv')).set_index('ti"
+rank_8l.py,33,L2,B,<module>,Exception,"except -> MC = empty, continue","MC = pd.read_csv(os.path.join(WORKDIR, 'data', 'margin_cycle_detector.csv')).set"
+rank_8l.py,40,L2,B,<module>,Exception,"except -> MOAT,apply_moat_overlay = empty, continue","from moat_5f import load_moat_tags, apply_moat_overlay ; MOAT = load_moat_tags(WORKDIR) ; if MOAT:     print(f'5F moat overlay active on {len(MOAT)} tagged names: ' + ', "
+rank_8l_daily_alert.py,11,L1,B,<module>,Exception,except: pass,sys.stdout.reconfigure(encoding='utf-8')
+rank_8l_daily_alert.py,31,L2,B,main,Exception,"except -> SDET = empty, continue","SDET = pd.read_csv(os.path.join(WORKDIR, 'data', 'unified_screener.csv')).set_in"
+rank_8l_daily_alert.py,61,L2,B,main,Exception,"except -> report only, continue","from telegram_recommend import send_telegram_text, load_config ; cfg = load_config() ; print('telegram:', send_telegram_text(cfg['bot_token'], cfg['chat_id'], msg).get"
+rating_8l.py,40,L1,B,<module>,Exception,except: pass,sys.stdout.reconfigure(encoding='utf-8')
+rating_8l.py,86,L1,B,bq,Exception,except: pass,os.unlink(tmp)
+rating_8l.py,171,L2,B,dt5g_freshness_flag,Exception,except -> silent fallthrough,from dt5g_freshness import dt5g_publisher_evidence ; ev = dt5g_publisher_evidence()
+rating_8l.py,488,L2,B,_reconcile_oshares,Exception,"except -> report only, continue","fb = {t: v for t, v in zip(df['ticker'], df['OShares'])} ; rec = oshares_reconciled(list(fb), asof, fb) ; df['OShares'] = df['ticker'].map({t: r['value'] for t, r in rec.items()}) ; s = summarize(rec)"
+rating_8l.py,501,L2,B,main,Exception,"except -> report only, continue","fin = bq(FIN_SQL) ; df = df.merge(fin, on='ticker', how='left')"
+rating_8l.py,511,L2,B,main,Exception,"except -> MOAT_TIER = empty, continue","_mg = pd.read_csv(os.path.join(WORKDIR, 'data', 'moat_tags.csv')) ; MOAT_TIER = dict(zip(_mg['ticker'], _mg['moat_tier'])) ; _wide = sorted((t for t, v in MOAT_TIER.items() if v == 'WIDE')) ; print(f'"
+rating_8l.py,551,L2,B,main,Exception,"except -> report only, continue","bank = pd.read_csv(os.path.join(WORKDIR, 'data', 'bank_lens_v3.csv')) ; BANKD = {row['ticker']: row.to_dict() for _, row in bank.iterrows()} ; bank_set = set(bank['ticker'])"
+rating_8l.py,557,L2,B,main,Exception,"except -> report only, continue","power = pd.read_csv(os.path.join(WORKDIR, 'data', 'power_lens.csv')) ; POWERD = {row['ticker']: row.to_dict() for _, row in power.iterrows()} ; power_set = set(power['ticker']) - bank_set"
+rating_8l.py,890,L2,B,main,Exception,"except -> report only, continue","from deposit_rate_vn import current_deposit_rate ; _dep = current_deposit_rate() ; _st, _dt5g_stale = dt5g_state_today() ; if int(_st) == 3 and os.environ.get('DEPOSIT_TILT', '1') == '1':     _spread "
+rating_8l_history.py,68,L1,B,<module>,Exception,except: pass,sys.stdout.reconfigure(encoding='utf-8')
+rating_8l_history.py,106,L1,B,bq,Exception,except: pass,os.unlink(tmp)
+rating_8l_history.py,341,L3,B,load_bank_aq,Exception,except -> return None,
+rating_8l_history.py,541,L2,B,refresh_bq_table,Exception,"except -> report only, continue",
+rating_8l_history.py,560,L2,B,main,Exception,"except -> MOAT_TIER = empty, continue",
+rating_8l_history.py,611,L2,B,main,Exception,"except -> report only, continue",
+sector_lens_monitor.py,438,L3,B,load_ratings,Exception,except -> return {},"rdf = pd.read_csv(RATING_CSV, usecols=['ticker', 'rating'])"
+sector_lens_monitor.py,505,L2,B,line,Exception,except -> silent fallthrough,"from dcf_valuation import dcf_line ; s += f"" · {dcf_line(r['ticker'], r.get('price_asof') or str(TODAY))}"""
+sector_lens_monitor.py,547,L3,B,send_telegram,Exception,except -> return False,"from telegram_recommend import send_telegram_text, load_config ; cfg = load_config() ; res = send_telegram_text(cfg['bot_token'], cfg['chat_id'], msg) ; print('telegram:', res.get('ok')) ; return res."
+telegram_recommend.py,149,L1,B,get_dt5g_state,Exception,except: pass,"with open(jp, 'r', encoding='utf-8') as f:     j = json.load(f) ; if str(j.get('as_of')) == as_of:     source = j.get('source')"
+telegram_recommend.py,186,L3,B,_read_pt_nav,Exception,except -> return None,"df = pd.read_csv(p, parse_dates=['ymd']).sort_values('ymd') ; if df.empty:     return None ; nav0 = float(df['nav'].iloc[0]) ; nav1 = float(df['nav'].iloc[-1]) ; ret = (nav1 / nav0 - 1) * 100 if nav0 "
+telegram_recommend.py,199,L3,B,build_orb_section,Exception,except -> return '',"import json as _json ; s = _json.load(open(path, encoding='utf-8'))"
+telegram_recommend.py,247,L2,B,build_v24_paper_section,Exception,"except -> plan = empty, continue","cands = sorted(glob.glob(os.path.join(WORKDIR, 'data', 'plan_paper_*.json'))) ; if cands:     with open(cands[-1], encoding='utf-8') as f:         plan = json.l"
+telegram_recommend.py,348,L3,B,_load_rating_map,Exception,except -> return {},"r = pd.read_csv(os.path.join(WORKDIR, 'data', 'rating_8l.csv')) ; return {t: int(v) if pd.notna(v) else None for t, v in zip(r['ticker'], r['ratin"
+telegram_recommend.py,480,L2,B,build_message,Exception,except -> silent fallthrough,"import capit_episode ; st = {**capit_episode.observe(), **st}"
+telegram_recommend.py,623,L1,B,main,Exception,except: pass,"with open(os.path.join(WORKDIR, 'data', 'golive_v23_status.json'), encoding='utf"
+telegram_recommend.py,647,L2,B,main,Exception,"except -> report only, continue","gpath = os.path.join(WORKDIR, 'deploy_golive_dt5g_v4', 'out', f'golive_v23_recom ; if not os.path.exists(gpath):     cands = sorted(glob.glob(os.path.join(WORKDIR, ; g = pd.read_csv(gpath) ; balt = g["
+unified_screener.py,18,L1,B,<module>,Exception,except: pass,sys.stdout.reconfigure(encoding='utf-8')
+unified_screener.py,48,L2,B,<module>,Exception,"except -> OILMAP = empty, continue","from oil_transmission import load_oil_map, oil_tag, OIL_TICKERS ; OILMAP = load_oil_map(WORKDIR) ; OIL_SET = set(OIL_TICKERS)"
+unified_screener.py,56,L2,B,<module>,Exception,"except -> FMAP = empty, continue","from freight_map import load_freight_map, freight_tag, current_bdi, FREIGHT_TICK ; FMAP = load_freight_map(WORKDIR) ; FREIGHT_SET = set(FREIGHT_TICKERS) ; _BDI = current_bdi(WORKDIR)"
+unified_screener.py,72,L1,B,bq,bare,except: pass,os.unlink(tmp)
+unified_screener.py,83,L2,B,<module>,Exception,"except -> POWERD = empty, continue","power = pd.read_csv(os.path.join(WORKDIR, 'data', 'power_lens.csv')) ; POWER_set = set(power['ticker']) - bank_set ; POWERD = {r['ticker']: (r['verdict'], r['action'], r['detail'], r['liqB']) for _"
+unified_screener.py,88,L2,B,<module>,Exception,"except -> ENGINE = empty, continue","eng = pd.read_csv(os.path.join(WORKDIR, 'data', 'engine_class.csv')) ; ENGINE = {r['ticker']: (r['engine'], bool(r['machine'])) for _, r in eng.iterrow"
+unified_screener.py,93,L2,B,<module>,Exception,"except -> CYC_STRUCT = empty, continue","cs = pd.read_csv(os.path.join(WORKDIR, 'data', 'cyclical_structural.csv')) ; CYC_STRUCT = {r['ticker']: (r['verdict'], r['structure'], r['pctile'], r['commod"
+unified_screener.py,98,L2,B,<module>,Exception,except -> silent fallthrough,"ap = pd.read_csv(os.path.join(WORKDIR, 'data', 'asset_play.csv')) ; ASSET_PLAY = set(ap[ap['verdict'] == 'ASSET_PLAY']['ticker']) - bank_set"
+unified_screener.py,112,L2,B,<module>,Exception,"except -> MARGIN,MARGIN_INPUT,INPUT_PEAKERS = empty, continue","mc = pd.read_csv(os.path.join(WORKDIR, 'data', 'margin_cycle_detector.csv')) ; MARGIN = {r['ticker']: (r['cycle'], round(r['GPM_pctile'], 2)) for _, r in mc.it ; MARGIN_INPUT = {r['ticker']: r['input'"
+unified_screener.py,128,L2,B,<module>,Exception,"except -> report only, continue","_rc = bq(f""""""WITH h AS (SELECT x.ticker, x.time, x.NPM_P0,\n       PERCENT_RANK( ; for _, _r in _rc.iterrows():     _p = round(float(_r['pct']), 2)     MARGIN_INPU"
+unified_screener.py,140,L2,B,<module>,Exception,"except -> report only, continue","_m = pd.read_csv(os.path.join(WORKDIR, 'data/fundamental_rating_latest.csv')).so ; _nan = fa['score'].isna() ; fa.loc[_nan, 'tier'] = fa.loc[_nan, 'ticker'].map(_m).fillna(fa.loc[_nan, 'tier' ; print("
+unified_screener.py,394,L2,B,<module>,Exception,"except -> report only, continue","_rt = pd.read_csv(os.path.join(WORKDIR, 'data', 'rating_8l.csv')).set_index('tic ; out['rating'] = out['ticker'].map(_rt)"
+update_shares_live.py,140,L3,B,vnstock_adj_close,Exception,except -> return None,"from vnstock.explorer.vci.quote import Quote as VciQuote ; ex = datetime.strptime(ex_date, '%Y-%m-%d') ; df = VciQuote(symbol=ticker).history(start=(ex - timedelta(days=12)).strftime('% ; if df is Non"
+update_shares_live.py,151,L3,B,vnstock_events_split,Exception,except -> return None,from vnstock.explorer.vci.company import Company ; return Company(symbol=ticker).dividends()
+update_shares_live.py,294,L2,B,bus,Exception,"except -> report only, continue","subprocess.run([APPEND_EVT, 'Winston', event_type, topic, json.dumps(payload, en"
+update_shares_live.py,302,L3,B,_load_pending,Exception,except -> return {},with open(PENDING) as f:     return json.load(f)
+update_shares_live.py,330,L2,B,_check_backlog,Exception,"except -> report only, continue","resolved_df = bq_df(f'SELECT ticker, ex_date FROM {TABLE}') ; resolved = {f'{r.ticker}|{r.ex_date}' for r in resolved_df.itertuples()} if not "
+update_shares_live.py,485,L2,B,main,Exception,"except -> report only, continue","r = process(tk, write=not args.detect_only) ; if r and (not args.detect_only) and r.get('new_osh'):     written.append(r)"
+value_radar.py,261,L2,B,value_radar_now,Exception,"except -> val = empty, continue","d = load_series(update=update) ; cur = d.dropna(subset=['score']).iloc[-1] ; val = dict(score=float(cur['score']), label=label_of(cur['score']), score_expand"
+../tools/sync_claude_history.py,47,L1,C,<module>,Exception,except: pass,"with open(os.path.join(dp, fn), encoding='utf-8') as fh:     walk_strings(json.l"
+alphalens_report.py,61,L3,C,query_pe_ma1y,Exception,except -> return {},"import duckdb ; con = duckdb.connect() ; tickers_sql = ','.join((f""'{t}'"" for t in tickers)) ; df = con.execute(f""\n            WITH ranked AS (\n                SELECT ticker ; return {row['ticker']:"
+alphalens_report.py,77,L1,C,query_vnindex_latest,Exception,except: pass,"import duckdb ; con = duckdb.connect() ; row = con.execute(f""\n            SELECT Close FROM read_parquet('{BQ_CACHE}/tic ; if not row.empty:     return float(row.iloc[0]['Close'])"
+alphalens_report.py,172,L2,C,generate_section,Exception,except -> silent fallthrough,"from dcf_valuation import dcf_line ; dcf_str = dcf_line(ticker, as_of_date or data_date, price=current)"
+amh_cockpit.py,19,L1,C,<module>,Exception,except: pass,sys.stdout.reconfigure(encoding='utf-8')
+anomaly_gate.py,131,L3,C,insider_sell_flagged,Exception,except -> return {},"flags = json.load(open(p, encoding='utf-8')) ; d = pd.Timestamp(asof).date() ; lo, hi = (str(d - timedelta(days=ttl_days)), str(d)) ; return {t: f for t, f in flags.items() if lo <= str(f.get('last_al"
+auto_update_commodity_wb.py,30,L1,C,<module>,Exception,except: pass,sys.stdout.reconfigure(encoding='utf-8')
+auto_update_commodity_wb.py,76,L2,C,discover_url,Exception,"except -> report only, continue","import requests ; r = requests.get(WB_PAGE, headers=UA, timeout=30) ; if r.status_code == 200:     m = re.findall('https://thedocs\\.worldbank\\.org/["
+auto_update_commodity_wb.py,233,L1,C,main,Exception,except: pass,old_val = float(pd.read_csv(path)['price'].iloc[-1])
+bq_local_cache.py,267,L3,C,get_cache,Exception,except -> return None,"_cache_instance = BQLocalCache(cache_dir) ; n = len(_cache_instance.manifest.get('tables', {})) ; print(f'[BQ_LOCAL_CACHE] ready — {n} tables from {cache_dir}', flush=True) ; return _cache_instance"
+c1_shadow_paper.py,140,L3,C,_load_state,Exception,except -> return None,"with open(STATE_FILE, encoding='utf-8') as f:     return json.load(f)"
+converge_report.py,64,L3,C,_live_double_confirm,Exception,except -> return {},"import sector_lens_monitor as slm ; r = slm.compute_status() ; ratings = slm.load_ratings() ; df = r['df'] ; out = {} ; for _, row in df[df['status'] == 'BUY'].iterrows():     rt = ratings.get(row['ti"
+converge_report.py,191,L2,C,generate_section,Exception,"except -> dcf_line = empty, continue",from dcf_valuation import dcf_line
+converge_report.py,198,L2,C,generate_section,Exception,except -> silent fallthrough,"dcf_str = dcf_line(tk, dcf_asof, price=price.get(tk))"
+cpi_vn.py,198,L2,C,fiinpro_cpi_series,Exception,"except -> report only, continue","f = pd.read_csv(FIINPRO_CPI_CSV) ; idx = pd.to_datetime(f['month'].astype(str) + '-01') ; ser = pd.Series(pd.to_numeric(f['cpi_yoy_pct'], errors='coerce').values, index=i ; _FIINPRO_CPI = ser.dropna()"
+crisis_alert_push.py,9,L1,C,<module>,Exception,except: pass,sys.stdout.reconfigure(encoding='utf-8')
+crisis_alert_push.py,21,L2,C,<module>,Exception,"except -> report only, continue","from telegram_recommend import send_telegram_text, load_config ; cfg = load_config() ; ok = send_telegram_text(cfg['bot_token'], cfg['chat_id'], msg).get('ok') ; print('telegram push ok:', ok)"
+custom_basket.py,214,L1,C,_forensic_flags_candidates,Exception,except: pass,"common = subprocess.run(['git', 'rev-parse', '--git-common-dir'], cwd=here, capt ; top = subprocess.run(['git', 'rev-parse', '--show-toplevel'], cwd=here, capture_ ; common_abs = common if os.path.isa"
+custom_basket.py,266,L2,C,load_forensic_excludes,Exception,"except -> report only, continue","ff = pd.read_csv(path) ; forx = {r['ticker']: pd.Timestamp(r['date']) for _, r in ff.iterrows() if str(r[ ; tag = 'cây canonical' if i > 0 else src ; print(f'  [forensic exclude] {path} [{tag}] — cust"
+custom_basket.py,913,L2,C,dcf_at,Exception,except -> silent fallthrough,"res = _dcfv.fair_value(tk, pd.Timestamp(d), price=px, fin=_fin) ; if res.get('ok'):     mos = res.get('margin_of_safety')     if mos is not None a"
+dt5g_freshness.py,57,L2,C,_last_trading_day,Exception,except -> silent fallthrough,"sys.path.insert(0, WORKDIR) ; from trading_bot.vn_market import is_holiday"
+dt5g_freshness.py,97,L2,C,dt5g_publisher_evidence,Exception,except -> silent fallthrough,"ltd, trading_today = _last_trading_day(today) ; out['last_trading_day'], out['is_trading_today'] = (str(ltd), trading_today) ; if not os.path.exists(path):     out['reason'] = f'{os.path.basename(path"
+ecology_dashboard.py,29,L1,C,<module>,Exception,except: pass,sys.stdout.reconfigure(encoding='utf-8')
+execution_quality_review.py,77,L1,C,<module>,Exception,except: continue (skip record silently),rec = json.loads(line)
+execution_quality_review.py,94,L1,C,<module>,Exception,except: continue (skip record silently),j = pd.read_csv(f) ; j['src'] = os.path.basename(f)
+execution_quality_review.py,168,L2,C,<module>,Exception,"except -> report only, continue","tks = ""','"".join(sorted(real['ticker'].dropna().unique())) ; opens = lc.query(f""SELECT ticker, time, Open FROM tav2_bq.ticker_1m WHERE ticker ; opens['key'] = opens['ticker'] + '|' + pd.to_datetime(op"
+f_sleeve_pt.py,55,L2,C,<module>,Exception,"except -> report only, continue","from recommend_holistic import bq ; st = bq(""SELECT s.time, s.state FROM tav2_bq.vnindex_5state_dt5g_live AS s WHERE ; st['time'] = pd.to_datetime(st['time'])"
+fetch_bdi_daily.py,16,L1,C,<module>,Exception,except: pass,sys.stdout.reconfigure(encoding='utf-8')
+fetch_new_listings.py,116,L2,C,get_exchange_industry_from_vnstock,Exception,"except -> report only, continue","from vnstock import Listing ; lst = Listing(source='vci') ; df = lst.symbols_by_exchange(lang='vi') ; df = df.rename(columns={'symbol': 'ticker', 'exchange': 'exchange', 'organ_name' ; return df[['tic"
+fetch_new_listings.py,144,L2,C,get_icb_name_map,Exception,"except -> report only, continue","from vnstock import Listing ; lst = Listing(source='vci') ; df = lst.industries_icb(lang='vi') ; result = {} ; for _, row in df.iterrows():     code_str = str(row.get('icb_code', '')).strip() ; return"
+freight_map.py,22,L3,C,load_freight_map,Exception,except -> return {},"df = pd.read_csv(os.path.join(workdir, 'data', 'freight_map.csv'))"
+freight_map.py,33,L1,C,current_bdi,Exception,except: pass,"d = pd.read_csv(real).sort_values('date') ; return (int(d['bdi'].iloc[-1]), str(d['date'].iloc[-1]), 'real')"
+fundamental_rating.py,73,L1,C,bq_query,bare,except: pass,os.unlink(tmp)
+gmail_otp_reader.py,137,L2,C,fetch_dnse_otp,Exception,"except -> report only, continue","resp = service.users().messages().list(userId='me', q=base_query, maxResults=10)"
+gmail_otp_reader.py,154,L2,C,fetch_dnse_otp,Exception,"except -> report only, continue","msg = service.users().messages().get(userId='me', id=msg_id, format='full').exec"
+hit_details.py,241,L2,C,main,Exception,except -> silent fallthrough,cand = live_lag_candidates(start=start) ; cand_idx = cand.set_index('ticker') ; cand_err = None
+hog_price_feed.py,129,L3,C,run,Exception,except -> return False,records = fetch_market(market_id) ; if since_date:     records = [r for r in records if r['date'] >= since] ; log.info(f'Market {market_id} ({region}): {len(records)} entries fetched') ; all_records.e
+lag_liq_ledger.py,170,L3,C,main,Exception,except -> return 0,"with open(STATUS, 'r', encoding='utf-8') as f:     st = json.load(f)"
+mike/agents/Mafee/push_recommend_v23_to_bq.py,98,L2,C,ensure_dataset,Exception,"except -> report only, continue",client.get_dataset(ds_ref)
+mike/agents/Mafee/push_recommend_v23_to_bq.py,110,L2,C,ensure_table,Exception,"except -> report only, continue",client.get_table(table_ref)
+mike/agents/Taylor/anomaly_scan.py,119,L2,C,universe_freshness,Exception,except -> silent fallthrough,"d = json.load(open(f, encoding='utf-8')) ; rec['computed_at'] = d.get('computed_at') ; rec['n_positions'] = len(d.get('positions', [])) ; dates.append(datetime.date.fromisoformat(str(d['computed_at'])"
+mike/agents/Taylor/anomaly_scan.py,150,L1,C,load_universe,Exception,except: continue (skip record silently),"d = json.load(open(f, encoding='utf-8'))"
+mike/agents/Taylor/anomaly_scan.py,264,L1,C,status_check,Exception,except: pass,"accts = c.accounts() ; acct = (accts.get('accounts') or accts)[0].get('id') if isinstance(accts, dict) "
+mike/agents/Taylor/anomaly_scan.py,275,L2,C,status_check,Exception,except -> silent fallthrough,"sd = c.secdef(tk, board_id='G1') ; r = sd[0] if isinstance(sd, list) else sd ; row['admin'] = r.get('symbolAdminStatusCode') ; row['method'] = r.get('symbolTradingMethodStatusCode') ; row['sanction'] "
+mike/agents/Taylor/insider_flags.py,173,L2,C,write_flags,Exception,"except -> flags = empty, continue","flags = json.load(open(path, encoding='utf-8'))"
+mike/bin/anomaly_escalate.py,43,L3,C,_load_ledger,Exception,except -> return {},return json.load(open(LEDGER))
+mike/bin/approve_margin_day.py,79,L3,C,_bus,Exception,except -> return False,"r = subprocess.run([os.path.join(MIKE_ROOT, 'bin', 'append_event.sh'), 'Mike', k ; if r.returncode != 0:     print(f""⚠ append_event.sh trả rc={r.returncode}: {(r.s ; return True"
+mike/bin/approve_margin_day.py,94,L3,C,_notify,Exception,except -> return False,"r = subprocess.run([os.path.join(MIKE_ROOT, 'bin', 'notify_thread.sh'), msg, 'pl ; if r.returncode != 0:     print(f""⚠ notify_thread.sh trả rc={r.returncode}: {(r. ; return True"
+mike/bin/bq_monthly_pin.py,421,L2,C,main,Exception,except -> silent fallthrough,"if not table_exists(dataset, table):     lines.append(f'CRITICAL {table}: BẢNG N ; status = 'skipped' if a.compare_only else snapshot(dataset, table, dst, a.dry_ru"
+mike/bin/bq_monthly_pin.py,441,L2,C,main,Exception,except -> silent fallthrough,"r = compare(prev_pin, dst, group_expr)"
+mike/bin/broker_fill_confirm.py,67,L3,C,_all_accounts,Exception,except -> return [],"with open(path, encoding='utf-8') as f:     accts = json.load(f).get('accounts',"
+mike/bin/broker_fill_confirm.py,95,L3,C,_try_fetch,Exception,except -> return False,"subprocess.run(['python3', 'fetch_dnse_khoplenh_email.py', '--date', d], cwd=wc_"
+mike/bin/build_universe_pit.py,243,L2,C,ensure_table,Exception,"except -> report only, continue",client.get_dataset(ds_ref)
+mike/bin/build_universe_pit.py,252,L2,C,ensure_table,Exception,"except -> report only, continue",client.get_table(ref)
+mike/bin/build_universe_pit_quality.py,155,L2,C,ensure_qtable,Exception,"except -> report only, continue",client.get_table(ref)
+mike/bin/build_universe_pit_quality.py,183,L2,C,ensure_view,Exception,"except -> report only, continue","client.get_table(ref) ; client.update_table(v, ['view_query', 'description'])"
+mike/bin/bus_question_audit.py,60,L1,C,iter_events,Exception,except: continue (skip record silently),yield json.loads(line)
+mike/bin/bus_question_audit.py,62,L3,C,iter_events,Exception,except -> return None,with opener(path) as f:     for line in f:         try:             yield json.l
+mike/bin/bus_question_audit.py,109,L1,C,main,Exception,except: continue (skip record silently),"r_ts = dt.datetime.fromisoformat(rec.get('ts', '').replace('Z', '+00:00'))"
+mike/bin/bus_question_audit.py,115,L2,C,main,Exception,"except -> payload = empty, continue",payload = json.loads(payload)
+mike/bin/bus_question_audit.py,182,L3,C,rollup_resolved,Exception,except -> return False,pl = json.loads(pl)
+mike/bin/bus_question_audit.py,212,L2,C,main,Exception,"except -> pl = empty, continue",pl = json.loads(pl)
+mike/bin/bus_question_audit.py,227,L1,C,main,Exception,except: continue (skip record silently),"r_ts = dt.datetime.fromisoformat(rec.get('ts', '').replace('Z', '+00:00'))"
+mike/bin/bus_question_audit.py,247,L1,C,main,Exception,except: continue (skip record silently),"ts_dt = dt.datetime.fromisoformat(rec.get('ts', '').replace('Z', '+00:00'))"
+mike/bin/close_plan_approval_questions.py,85,L3,C,approval_evidence,Exception,except -> return None,plan = json.loads(path.read_text(encoding='utf-8'))
+mike/bin/close_plan_approval_questions.py,111,L3,C,main,Exception,except -> return 0,qs = pending(a.root)
+mike/bin/code_quality_autodispatch.py,476,L2,C,run,Exception,"except -> state = empty, continue",state = json.loads(state_file.read_text(encoding='utf-8'))
+mike/bin/cron_health_check.py,204,L3,C,load_acks,Exception,except -> return [],"with open(ACK_PATH, encoding='utf-8') as f:     data = json.load(f)"
+mike/bin/cron_health_check.py,210,L1,C,load_acks,Exception,except: continue (skip record silently),"acked_ts = time.mktime(time.strptime(a['acked_at'], '%Y-%m-%dT%H:%M:%SZ')) - tim"
+mike/bin/discover_sessions.py,32,L3,C,alive,Exception,except -> return False,"os.kill(int(pid), 0) ; return True"
+mike/bin/discover_sessions.py,40,L3,C,cmdline,Exception,except -> return [],"with open('/proc/%s/cmdline' % pid, 'rb') as f:     return f.read().decode('utf-"
+mike/bin/discover_sessions.py,82,L1,C,latest_ai_title,Exception,except: continue (skip record silently),e = json.loads(line)
+mike/bin/discover_sessions.py,86,L3,C,latest_ai_title,Exception,except -> return None,"with open(tp, encoding='utf-8') as f:     for line in f:         if '""ai-title""'"
+mike/bin/discover_sessions.py,109,L1,C,resolve,Exception,except: continue (skip record silently),"with open(fp, encoding='utf-8') as f:     sess = json.load(f)"
+mike/bin/discover_sessions.py,140,L1,C,main,Exception,except: continue (skip record silently),"with open(fp, encoding='utf-8') as f:     sess = json.load(f)"
+mike/bin/filter_lag_entry_window.py,148,L2,C,_apply_anchor_gate,Exception,except -> silent fallthrough,"prices = anchor_fetcher([(it['ticker'], it['entry_date']) for it in late], plan_ ; err = None"
+mike/bin/forensic_flag_review_check.py,113,L2,C,scan_resolved,Exception,"except -> report only, continue","opener = gzip.open if path.endswith('.gz') else open ; with opener(path, 'rt', encoding='utf-8') as f:     for line in f:         line "
+mike/bin/incident_lookup.py,56,L1,C,entries,Exception,except: continue (skip record silently),"with open(full, encoding='utf-8') as f:     text = f.read()"
+mike/bin/incident_lookup.py,80,L3,C,main,Exception,except -> return None,"for rel, sec in entries():     hits = len(set(kw_re.findall(sec.lower())))     i"
+mike/bin/mike_json.py,93,L1,C,load_jsonl,Exception,except: pass,rows.append(json.loads(line))
+mike/bin/mike_json.py,217,L2,C,cmd_event,Exception,except -> silent fallthrough,p = json.loads(payload)
+mike/bin/mike_json.py,224,L2,C,cmd_event,Exception,"except -> v = empty, continue",v = int(kbver)
+mike/bin/mike_json.py,307,L2,C,_line_mark,Exception,except -> silent fallthrough,"e = json.loads(raw) ; eid, ts = (e.get('event_id'), e.get('ts'))"
+mike/bin/mike_json.py,404,L3,C,cmd_cursor_advance,Exception,except -> return None,"with open(inbox, encoding='utf-8') as f:     raw = f.read()"
+mike/bin/mike_json.py,500,L1,C,cmd_fleet_status,Exception,except: continue (skip record silently),"with open(fp, encoding='utf-8') as f:     r = json.load(f)"
+mike/bin/mike_json.py,510,L1,C,cmd_fleet_status,Exception,except: pass,"t = datetime.datetime.strptime(hb, TS_FMT).replace(tzinfo=datetime.timezone.utc) ; m = int((n - t).total_seconds() // 60) ; age = str(m) ; if m > 30:     disp = 'dead'"
+mike/bin/mike_json.py,608,L3,C,_ppid_of,Exception,except -> return None,"with open('/proc/%d/status' % int(pid), encoding='utf-8') as f:     for line in "
+mike/bin/mike_json.py,622,L3,C,_is_self_or_ancestor,Exception,except -> return False,pid = int(pid)
+mike/bin/mike_json.py,673,L2,C,cmd_job_set,Exception,except -> silent fallthrough,"with open(fp, encoding='utf-8') as f:     obj = json.load(f) ; if not isinstance(obj, dict):     obj, unparseable = ({}, True)"
+mike/bin/mike_json.py,904,L1,C,_hb_age,Exception,except: continue (skip record silently),rec = json.loads(line)
+mike/bin/mike_json.py,932,L3,C,cmd_job_hb_age,Exception,except -> return None,"with open(fp, encoding='utf-8') as f:     o = json.load(f)"
+mike/bin/mike_json.py,944,L1,C,_load_jobs,Exception,except: pass,"with open(fp, encoding='utf-8') as f:     rows.append(json.load(f))"
+mike/bin/mike_json.py,957,L3,C,_proc_state,Exception,except -> return None,"with open('/proc/%d/status' % int(pid), encoding='utf-8') as f:     for line in "
+mike/bin/mike_json.py,975,L3,C,_pid_alive,Exception,except -> return None,pid = int(pid)
+mike/bin/mike_json.py,990,L3,C,_pid_alive,Exception,except -> return None,"os.kill(pid, 0)"
+mike/bin/mike_json.py,1054,L1,C,cmd_job_reap,Exception,except: continue (skip record silently),"with open(_job_path(jobs_dir, job_id), encoding='utf-8') as f:     if json.load("
+mike/bin/mike_json.py,1092,L1,C,cmd_job_reap,Exception,except: pass,os.remove(os.path.normpath(om))
+mike/bin/mike_json.py,1227,L2,C,_ancestor_pids,Exception,except -> silent fallthrough,"with open('/proc/%d/stat' % p, encoding='utf-8') as f:     st = f.read() ; p = int(st[st.rindex(')') + 2:].split()[1])"
+mike/bin/mike_json.py,1377,L3,C,_descendants,Exception,except -> return [],pid = int(pid)
+mike/bin/mike_json.py,1384,L3,C,_descendants,Exception,except -> return [],entries = os.listdir('/proc')
+mike/bin/mike_json.py,1409,L3,C,_parse_pin,Exception,except -> return None,"dev, ino = str(pin).split(':', 1) ; return (int(dev), int(ino))"
+mike/bin/mike_json.py,1449,L3,C,_pids_holding,Exception,except -> return [],entries = os.listdir('/proc')
+mike/bin/mike_json.py,1456,L2,C,_pids_holding,Exception,"except -> target = empty, continue","st = os.stat(path) ; target = (st.st_dev, st.st_ino)"
+mike/bin/mike_json.py,1472,L2,C,_pids_holding,Exception,"except -> hit = empty, continue","fst = os.stat(fdp) ; hit = (fst.st_dev, fst.st_ino) == target"
+mike/bin/mike_json.py,1477,L1,C,_pids_holding,Exception,except: continue (skip record silently),link = os.readlink(fdp)
+mike/bin/mike_json.py,1531,L3,C,_live_holder_identity,Exception,except -> return {},root = int(str(root).strip())
+mike/bin/mike_json.py,1546,L1,C,_live_holder_identity,Exception,except: continue (skip record silently),link = os.readlink(fdp)
+mike/bin/mike_json.py,1557,L1,C,_live_holder_identity,Exception,except: continue (skip record silently),st = os.stat(fdp)
+mike/bin/mike_json.py,1573,L3,C,_path_is_pinned_file,Exception,except -> return False,st = os.stat(path)
+mike/bin/mike_json.py,1611,L3,C,cmd_job_pin_log,Exception,except -> return None,"with open(fp, encoding='utf-8') as f:     obj = json.load(f) ; if not isinstance(obj, dict):     return"
+mike/bin/mike_json.py,1626,L1,C,cmd_job_pin_log,Exception,except: continue (skip record silently),"os.makedirs(os.path.dirname(path) or '.', exist_ok=True) ; with open(path, 'a', encoding='utf-8'):     pass ; st = os.stat(path) ; pins[field] = '%d:%d' % (st.st_dev, st.st_ino)"
+mike/bin/mike_json.py,1658,L3,C,cmd_job_pin_log,Exception,except -> return None,"with open(fp, encoding='utf-8') as f:     fresh = json.load(f) ; if not isinstance(fresh, dict) or fresh.get('status') != obj.get('status') or _r ; fresh.pop('pin_failed', None) ; obj = fresh"
+mike/bin/mike_json.py,1881,L3,C,_kill_targets_are_identity_backed,Exception,except -> return '',root = int(str(root).strip())
+mike/bin/mike_json.py,1919,L3,C,_writer_belongs_to_job,Exception,except -> return False,want = set((int(p) for p in pids))
+mike/bin/mike_json.py,1986,L3,C,_boot_epoch,Exception,except -> return None,"with open('/proc/stat', encoding='utf-8') as f:     for line in f:         if li"
+mike/bin/mike_json.py,2003,L3,C,_proc_start_epoch,Exception,except -> return None,"with open('/proc/%d/stat' % int(pid), encoding='utf-8') as f:     data = f.read( ; tail = data[data.rindex(')') + 2:].split() ; return b + int(tail[19]) / float(os.sysconf('SC_CLK_TCK') or 100)"
+mike/bin/mike_json.py,2037,L3,C,_pid_owned_by_job,Exception,except -> return False,pid_i = int(pid)
+mike/bin/mike_json.py,2093,L2,C,_kill_tree,Exception,except -> silent fallthrough,want = set((int(x) for x in allowed))
+mike/bin/mike_json.py,2105,L1,C,_kill_tree,Exception,except: pass,"os.kill(p, sig) ; signalled.add(p)"
+mike/bin/mike_json.py,2278,L2,C,cmd_job_cancel,Exception,"except -> _pid_int = empty, continue",_pid_int = int(pid)
+mike/bin/mike_json.py,2390,L1,C,cmd_job_cancel,Exception,except: pass,os.remove(os.path.normpath(om))
+mike/bin/mike_json.py,2475,L1,C,cmd_trace,Exception,except: pass,"with open(jobs_fp, encoding='utf-8') as f:     jo = json.load(f) ; print('=== job %s%s ===' % (trace_id, ' (archived)' if jobs_archived else '')) ; for k in ('from', 'to', 'status', 'started_at', 'end"
+mike/bin/mike_json.py,2800,L1,C,cmd_circuit_tripped,Exception,except: continue (skip record silently),"with open(fp, encoding='utf-8') as f:     obj = json.load(f)"
+mike/bin/opening_window_l2_poll.py,87,L1,C,collect_opening_tickers,Exception,except: continue (skip record silently),"plan = load_plan_fn(plan_date, account=label)"
+mike/bin/opening_window_l2_poll.py,152,L1,C,poll_window,Exception,except: continue (skip record silently),q = broker.get_quote(ticker)
+mike/bin/paper_programs_daily_report.py,307,L2,C,probe_alphalens,Exception,"except -> adj = empty, continue","adj = paper_entry_adjust.adjust_entries(items, convention='terp')"
+mike/bin/paper_programs_daily_report.py,314,L2,C,probe_alphalens,Exception,"except -> adj_alt = empty, continue","adj_alt = paper_entry_adjust.adjust_entries(items, convention='accrue_only')"
+mike/bin/paper_programs_daily_report.py,318,L2,C,probe_alphalens,Exception,except -> silent fallthrough,stale_factor = _terp_factor_stale(items)
+mike/bin/paper_programs_daily_report.py,761,L2,C,render_section,Exception,except -> silent fallthrough,"handler = PROBES.get(probe.get('type')) ; if handler is None:     raise ValueError(f""probe type không hỗ trợ: {probe.get(' ; res = handler(probe, prog, today)"
+mike/bin/paper_programs_daily_report.py,838,L2,C,main,Exception,except -> silent fallthrough,"with open(args.registry, encoding='utf-8') as f:     reg = json.load(f) ; all_programs = reg.get('programs', []) ; programs = [p for p in all_programs if p.get('reporting', True)] ; excluded = [p for "
+mike/bin/paper_programs_daily_report.py,845,L2,C,main,Exception,except -> silent fallthrough,"sections.append(render_section(i, prog, today, state, reg_version))"
+mike/bin/paper_programs_daily_report.py,890,L2,C,main,Exception,except -> silent fallthrough,save_state(state)
+mike/bin/park_holdings.py,326,L1,C,read_broker_snapshot,Exception,except: continue (skip record silently),rec = json.loads(line)
+mike/bin/recap_prev.py,79,L1,C,main,Exception,except: continue (skip record silently),e = json.loads(line)
+mike/bin/recap_prev.py,85,L3,C,main,Exception,except -> return None,"with open(prev, encoding='utf-8') as f:     for line in f:         line = line.s"
+mike/bin/resume_pending.py,51,L1,C,log,Exception,except: pass,"with open(LOG, 'a', encoding='utf-8') as f:     f.write('%s %s\n' % (time.strfti"
+mike/bin/resume_pending.py,112,L1,C,fire,Exception,except: pass,"with open(os.path.join(ROOT, 'bus', 'jobs', '%s.json' % orig_job), encoding='utf ; if tid:     argv += ['--thread', tid]"
+mike/bin/resume_pending.py,117,L3,C,fire,Exception,except -> return False,"r = subprocess.run(argv, env=env, capture_output=True, text=True, timeout=30)"
+mike/bin/resume_pending.py,137,L1,C,fire,Exception,except: pass,"subprocess.Popen([NOTIFY, '[auto-resume] %s: %s, task (job gốc=%s, lần thử #%d) "
+mike/bin/resume_pending.py,149,L2,C,main,Exception,"except -> report only, continue","with open(fp, encoding='utf-8') as f:     rec = json.load(f)"
+mike/bin/resume_pending.py,157,L1,C,main,Exception,except: pass,os.remove(fp)
+mike/bin/resume_pending.py,177,L2,C,main,Exception,"except -> report only, continue","tmp = fp + '.tmp' ; with open(tmp, 'w', encoding='utf-8') as f:     json.dump(rec, f, ensure_ascii=F ; os.replace(tmp, fp) ; log(""RESTORED pending record %s (dispatch_fail_count=%d, thử lại sau 30')"" "
+mike/bin/resume_pending.py,188,L1,C,main,Exception,except: pass,"subprocess.Popen([NOTIFY, '⚠️ [auto-resume] %s: KHÔNG resume được task (job gốc="
+mike/bin/retro_escalate.py,134,L1,C,_iter_events,Exception,except: continue (skip record silently),yield json.loads(line)
+mike/bin/retro_escalate.py,136,L3,C,_iter_events,Exception,except -> return None,"with op(path, 'rt', encoding='utf-8') as f:     for line in f:         line = li"
+mike/bin/retro_escalate.py,147,L3,C,_ts,Exception,except -> return None,"return dt.datetime.fromisoformat(str(rec.get('ts', '')).replace('Z', '+00:00'))"
+mike/bin/retro_escalate.py,184,L2,C,load_bus,Exception,"except -> pl = empty, continue",pl = json.loads(pl)
+mike/bin/retro_escalate.py,190,L2,C,load_bus,Exception,"except -> sd = empty, continue",sd = int(pl.get('suppress_days') or 0)
+mike/bin/spend_report.py,122,L1,C,_scan_jobs,Exception,except: continue (skip record silently),"with open(path, encoding='utf-8') as f:     rec = json.load(f)"
+mike/bin/spend_report.py,226,L1,C,_scan_cache_usage,Exception,except: continue (skip record silently),event = json.loads(line)
+mike/bin/spend_report.py,245,L1,C,_scan_cache_usage,Exception,except: continue (skip record silently),"with open(tf, encoding='utf-8') as f:     for line in f:         if '""usage""' no"
+mike/bin/spend_report_weekly.py,270,L3,C,_save_grouped_bar,Exception,except -> return False,import matplotlib ; matplotlib.use('Agg') ; import matplotlib.pyplot as plt
+mike/bin/spend_report_weekly.py,296,L3,C,_save_pie,Exception,except -> return False,import matplotlib ; matplotlib.use('Agg') ; import matplotlib.pyplot as plt
+mike/bin/spend_report_weekly.py,538,L3,C,load_sent_state,Exception,except -> return {},"with open(path, encoding='utf-8') as f:     return json.load(f)"
+mike/bin/staleness_watch.py,70,L1,C,kb_ingest_lag_hours,Exception,except: continue (skip record silently),ev = json.loads(line)
+mike/bin/staleness_watch.py,77,L1,C,kb_ingest_lag_hours,Exception,except: continue (skip record silently),"with open(fp, encoding='utf-8') as f:     for line in f:         line = line.str"
+mike/bin/time_claim_audit.py,39,L2,C,<module>,Exception,"except -> session_phase = empty, continue",from vn_market import session_phase
+mike/bin/time_claim_audit.py,121,L2,C,_check_claim,Exception,except -> silent fallthrough,phase = session_phase(sent_ict.replace(tzinfo=None))[0]
+mike/bin/treasury_buyback_window_monitor.py,266,L2,C,main,Exception,except -> silent fallthrough,"res = evaluate(today, runner(sql_events(today)), runner(sql_ais(today)))"
+mike/bin/usage_watch.py,38,L1,C,collect,Exception,except: continue (skip record silently),"if os.path.getmtime(f) < cutoff:     continue ; lines = open(f, encoding='utf-8').read().splitlines()"
+mike/bin/usage_watch.py,45,L1,C,collect,Exception,except: continue (skip record silently),e = json.loads(line)
+mike/bin/usage_watch.py,58,L1,C,collect,Exception,except: pass,"tt = datetime.datetime.fromisoformat(ts.replace('Z', '+00:00')).timestamp() ; if tt < cutoff:     continue ; earliest = tt if earliest is None else min(earliest, tt)"
+mike/bin/wags_bus_verdict.py,39,L1,C,main,Exception,except: continue (skip record silently),e = json.loads(ln)
+mike/bin/wags_bus_verdict.py,51,L2,C,main,Exception,"except -> payload = empty, continue",payload = json.loads(payload)
+mike/bin/wags_risk_tier.py,55,L1,C,main,Exception,except: continue (skip record silently),e = json.loads(ln)
+newdeals_daily_report.py,176,L1,C,_alert_gate_blocked,Exception,except: pass,"subprocess.run([NOTIFY, msg, TRADING_DAILY_THREAD], check=False, timeout=30)"
+oil_transmission.py,24,L3,C,load_oil_map,Exception,except -> return {},"df = pd.read_csv(os.path.join(workdir, 'data', 'oil_transmission_map.csv'))"
+oni_index_feed.py,79,L3,C,run,Exception,except -> return False,raw = fetch_raw()
+oshares_live.py,1152,L3,C,_ais_certified,Exception,except -> return False,"return _ais_verdicts(corp, ticker, asof).get(anchor_date) in _SERVE_AIS_VERDICTS"
+oshares_live.py,1201,L2,C,oshares_at,Exception,"except -> verdicts = empty, continue","verdicts = _ais_verdicts(corp, tk, asof)"
+papertrade_compare.py,111,L2,C,main,Exception,"except -> report only, continue","vni = vni_series(first.strftime('%Y-%m-%d'), last.strftime('%Y-%m-%d')) ; vni_nav = vni / vni.iloc[0] * 50000000000.0 ; nav_all['VNI_BH'] = vni_nav ; rows['VNI_BH'] = {**stats(vni_nav), 'name': 'VNIND"
+phosphorus_dgc_weekly.py,27,L1,C,<module>,Exception,except: pass,sys.stdout.reconfigure(encoding='utf-8')
+phosphorus_dgc_weekly.py,125,L1,C,bq_query,Exception,except: pass,os.unlink(tmp)
+phosphorus_dgc_weekly.py,147,L3,C,dgc_snapshot,Exception,except -> return None,"fin = bq_query(""\n        SELECT f.quarter,\n          ROUND(f.NP_P0/1e9,0) NP_b ; px = bq_query(""\n        SELECT ROUND(t.Close,0) Close, ROUND(t.MA200,0) MA200,\ ; return {**fin.iloc[0].to_dict(), *"
+pt_capitulation_shadow.py,24,L1,C,<module>,Exception,except: pass,sys.stdout.reconfigure(encoding='utf-8')
+pt_capitulation_shadow.py,76,L2,C,<module>,Exception,except -> silent fallthrough,"vni = bq(""SELECT t.time, t.Close FROM tav2_bq.ticker AS t\n                    W ; closes = vni['Close'].astype(float) ; dd_now = (float(closes.iloc[-1]) / float(closes.max()) - 1) * 100 ; rv10 = clos"
+pt_dates.py,21,L1,C,detect_end_date,Exception,except: pass,"with open(os.path.join(WORKDIR, 'data/lagged_pos_ov.pkl'), 'rb') as f:     ov =  ; cands.append(pd.to_datetime(ov['time']).max())"
+pt_dates.py,34,L1,C,detect_end_date,Exception,except: pass,"import subprocess ; r = subprocess.run(['bq', 'query', '--use_legacy_sql=false', '--project_id=lithe ; lines = [l for l in r.stdout.splitlines() if l and (not l.startswith('f0_'))] ; if lines:     can"
+pt_sleeve_allocator.py,18,L1,C,<module>,Exception,except: pass,sys.stdout.reconfigure(encoding='utf-8')
+recommend_holistic.py,601,L2,C,main,Exception,"except -> report only, continue","from bull_div_boost import get_current_max_positions as _bull_mp ; _bull = _bull_mp() ; if _bull != 12:     _max_pos_sources.append(('BullDvg', _bull))"
+recommend_holistic.py,608,L2,C,main,Exception,"except -> report only, continue","from sbv_macro_overlay import get_current_max_positions as _sbv_mp ; _sbv = _sbv_mp() ; if _sbv != 12:     _max_pos_sources.append(('SBV Macro', _sbv))"
+rubber_weekly.py,54,L1,C,<module>,Exception,except: pass,sys.stdout.reconfigure(encoding='utf-8')
+rubber_weekly.py,292,L3,C,_load_state,Exception,except -> return {},with open(STATEF) as f:     return json.load(f)
+rubber_weekly.py,376,L2,C,bus,Exception,"except -> report only, continue","subprocess.run([APPEND_EVT, 'Winston', event_type, topic, json.dumps(payload, en"
+rubber_weekly.py,390,L3,C,telegram,Exception,except -> return False,"with open(TG_CONFIG) as f:     cfg = json.load(f) ; chat_ids = cfg['chat_id'] if isinstance(cfg['chat_id'], (list, tuple)) else [cfg ; url = f""https://api.telegram.org/bot{cfg['bot_token']}/sendMessag"
+rubber_weekly.py,570,L2,C,main,Exception,"except -> report only, continue","ra = fetch_regionalert() ; rows.append(ra) ; print(f""regionalert: RSS3 {ra['rss3_usdkg']:.2f} USD/kg ({ra['date']})"")"
+rubber_weekly.py,575,L2,C,main,Exception,"except -> report only, continue","ss = fetch_sunsirs() ; rows.append(ss) ; print(f""sunsirs-586: {ss['cn_rmb_ton']:,.0f} RMB/ton ({ss['date']})"")"
+sbv_macro_overlay.py,98,L1,C,load_events,Exception,except: pass,"d = json.loads(EVENTS_PATH.read_text()) ; return [(e[0], e[1]) for e in d['events']]"
+sbv_macro_overlay.py,325,L1,C,stale_check,Exception,except: pass,ack_event = json.loads(ack_path.read_text()).get('acknowledged_latest')
+score_live_signals.py,64,L1,C,bq_query,bare,except: pass,os.unlink(tmppath)
+sleeve_pnl_levered.py,17,L1,C,<module>,Exception,except: pass,sys.stdout.reconfigure(encoding='utf-8')
+sleeve_v6v2_backtest.py,14,L1,C,<module>,Exception,except: pass,sys.stdout.reconfigure(encoding='utf-8')
+state_publish_immutable.py,134,L1,C,_alert,Exception,except: pass,"if os.path.exists(argv[0]):     subprocess.run(argv, timeout=15)     return"
+state_publish_immutable.py,400,L2,C,_record,Exception,"except -> report only, continue","os.makedirs(os.path.dirname(HISTORY), exist_ok=True) ; with open(HISTORY, 'a', encoding='utf-8') as f:     f.write(json.dumps({'ts': da"
+sync_bq_cache.py,703,L2,C,verify_all,Exception,"except -> all_ok = empty, continue",bq_stats = bq_query_to_df(verify_sql)
+sync_bq_cache.py,805,L2,C,main,Exception,"except -> report only, continue","download_table(name, TABLES[name], manifest, args.delta) ; save_manifest(manifest)"
+trading_bot/exdate_gate.py,117,L2,C,apply_exdate_gate,Exception,except -> silent fallthrough,"frames[tk] = resolver(broker, tk, plan_date, events_map=events_map, position_row"
+trading_bot/exdate_gate.py,154,L1,C,apply_exdate_gate,Exception,except: pass,plan.notes = notes
+vcb_fx_feed.py,115,L3,C,run,Exception,except -> return False,record = fetch_vcb(date)
+vn30_8l.py,18,L1,C,<module>,Exception,except: pass,sys.stdout.reconfigure(encoding='utf-8')
+mike/bin/job_cancel_guard_selfcheck.py,113,L3,S,alive,Exception,except -> return False,"os.kill(int(pid), 0)"
+mike/bin/job_cancel_guard_selfcheck.py,120,L3,S,alive,Exception,except -> return False,"with open('/proc/%d/status' % int(pid), encoding='utf-8') as f:     for line in "
+mike/bin/job_cancel_guard_selfcheck.py,141,L2,S,spawn_wrapper,Exception,except -> silent fallthrough,"with open(logfile + '.workerpid', encoding='utf-8') as f:     worker = int(f.rea ; break"
+mike/bin/job_cancel_guard_selfcheck.py,160,L1,S,holders_of,Exception,except: continue (skip record silently),"if os.readlink('/proc/%s/fd/%s' % (entry, fd)) == path:     out.append(int(entry"
+mike/bin/job_cancel_guard_selfcheck.py,220,L2,S,spawn_sync_worker,Exception,except -> silent fallthrough,"with open(pidf, encoding='utf-8') as f:     worker = int(f.read().strip()) ; break"
+mike/bin/job_cancel_guard_selfcheck.py,236,L1,S,sync_self_close,Exception,except: pass,os.remove(f)
+mike/bin/job_cancel_guard_selfcheck.py,246,L2,S,sync_self_close,Exception,except -> silent fallthrough,"with open(rcf, encoding='utf-8') as f:     rc = int(f.read().strip()) ; with open(outf, encoding='utf-8') as f:     return (rc, '', f.read())"
+mike/bin/job_cancel_guard_selfcheck.py,348,L1,S,run_sync_kill_trap,Exception,except: pass,"with open(rec, encoding='utf-8') as f:     lf = json.load(f).get('logfile', '') ; with open(lf + '.workerpid', encoding='utf-8') as f:     worker = int(f.read().s ; SPAWNED.append(worker) ; break"
+mike/bin/job_cancel_guard_selfcheck.py,360,L1,S,run_sync_kill_trap,Exception,except: pass,p.wait(timeout=40)
+mike/bin/job_cancel_guard_selfcheck.py,365,L2,S,run_sync_kill_trap,Exception,"except -> derr = empty, continue",derr = p.stderr.read()
+mike/bin/job_cancel_guard_selfcheck.py,371,L2,S,run_sync_kill_trap,Exception,except -> silent fallthrough,"with open(rec, encoding='utf-8') as f:     final = json.load(f) ; status = final.get('status')"
+mike/bin/job_cancel_guard_selfcheck.py,386,L1,S,fd_links_of,Exception,except: continue (skip record silently),"out.append(os.readlink('/proc/%d/fd/%s' % (int(pid), fd)))"
+mike/bin/job_cancel_guard_selfcheck.py,420,L1,S,pin_pairs,Exception,except: continue (skip record silently),"if create:     open(path, 'a').close() ; st = os.stat(path)"
+mike/bin/job_cancel_guard_selfcheck.py,436,L1,S,make_job,Exception,except: pass,"open(logfile, 'a').close()"
+mike/bin/job_cancel_guard_selfcheck.py,499,L1,S,cleanup,Exception,except: pass,"os.kill(pid, sig)"
+mike/bin/job_cancel_guard_selfcheck.py,1485,L1,S,main,Exception,except: pass,"os.kill(squatter.pid, sig)"
+mike/bin/job_cancel_guard_selfcheck.py,1533,L1,S,main,Exception,except: pass,"os.kill(squat_d.pid, sig)"
+mike/bin/job_cancel_guard_selfcheck.py,1597,L1,S,main,Exception,except: pass,"os.kill(p, 9)"
+mike/bin/job_cancel_guard_selfcheck.py,1636,L1,S,main,Exception,except: pass,"os.kill(p, 9)"
+mike/bin/job_cancel_guard_selfcheck.py,1715,L2,S,main,Exception,"except -> _want = empty, continue","_st = os.stat(_lf) ; _want = '%d:%d' % (_st.st_dev, _st.st_ino)"
+mike/bin/job_cancel_guard_selfcheck.py,1749,L1,S,_descendants_of,Exception,except: continue (skip record silently),"with open('/proc/%s/status' % entry, encoding='utf-8') as f:     for line in f: "
+mike/bin/merge_park_orders_selfcheck.py,651,L2,S,<module>,Exception,except -> silent fallthrough,with contextlib.redirect_stdout(_buf):     print_report(_rp) ; _err = None
+mike/bin/selfcheck_baseline_diff.py,64,L3,S,_run,Exception,except -> return False,"subprocess.run(cmd, check=True, timeout=timeout, stdout=subprocess.DEVNULL, stde ; return True"
+mike/bin/wags_autofix_postq_selfcheck.py,240,L2,S,case_payload_not_word_split,Exception,"except -> got = empty, continue",got = json.loads(calls[0][3]) if calls else None
