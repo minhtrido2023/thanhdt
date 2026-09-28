@@ -718,7 +718,9 @@ if orders:
         # từ dòng "Tiền đâu ra" của lệnh mua bên dưới (user 2026-09-17: đọc 2 dòng liền nhau
         # tưởng mâu thuẫn "bán PARK" rồi "không cần bán PARK").
         if not is_buy and str(o.get("play_type", "")).upper() == "PARK_TRIM":
-            lines.append("      ↳ ℹ️ Lý do: tuân thủ trần PARK 80% (park-trim), KHÔNG liên quan "
+            _o_tgt = park_trim.get("target_park")
+            _o_tgt_s = f"{float(_o_tgt)*100:.0f}%" if isinstance(_o_tgt, (int, float)) else "?"
+            lines.append(f"      ↳ ℹ️ Lý do: tuân thủ trần PARK {_o_tgt_s} (park-trim), KHÔNG liên quan "
                           "tới việc tài trợ lệnh mua trong plan này.")
         # Funding note NGAY CẠNH lệnh mua — user đọc lệnh mua riêng lẻ không được phép hoảng
         # vì tưởng thiếu tiền (SSI 75,3tr vs cash 4,8tr, plan 08-07).
