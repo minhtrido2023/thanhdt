@@ -31,7 +31,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 MIKE_ROOT = os.path.dirname(HERE)
 # Neo bản CŨ vào CHA của commit vá — KHÔNG `HEAD`/`master` (sau merge chúng đã vá ⇒ test 2 chiều
 # FAIL vĩnh viễn; lớp lỗi này đã cắn 2 lần trong tuần 2026-09-27/28).
-OLD_REF = os.environ.get("FAILOPEN_B1_OLD_REF", "").strip() or "2e715497"
+OLD_REF = os.environ.get("FAILOPEN_B1_OLD_REF", "").strip() or "afc1e6b5^"
 
 _n = 0
 
