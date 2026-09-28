@@ -23,7 +23,7 @@ import tempfile    # noqa: E402
 import textwrap    # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-OLD_REF = os.environ.get("FOTG_OLD_REF", "").strip() or "54e8c068"
+OLD_REF = os.environ.get("FOTG_OLD_REF", "").strip() or "bfccf9af^"
 _n = 0
 
 
