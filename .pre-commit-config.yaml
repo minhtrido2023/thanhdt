@@ -54,3 +54,30 @@ repos:
         # (arch-review vòng 2, R2).
         verbose: true
         files: '^WorkingClaude/.*\.py$'
+
+      # ------------------------------------------------------------------------
+      # pin-artifact-gate (B2, user duyệt 2026-09-28) — mục MỚI trong
+      # data/results_registry.md phải trỏ tới một ledger ĐÃ PIN trong kho bất biến
+      # WorkingClaude/data/pinned_ledgers/, hoặc khai tường minh `no_ledger: <lý do>`.
+      #
+      # VÌ SAO: registry rule 2 ("CSV LÀ ARTIFACT ĐÔNG CỨNG") có từ 2026-06-19 và
+      # CHƯA BAO GIỜ có cơ chế cưỡng chế. Đo thật 2026-09-28: 2/28 md5 registry trích
+      # đã mất dấu hoàn toàn; và chính file audit user giữ từ 06-11 đã bị một file
+      # KHÁC ghi đè lên đúng cái tên `v23_golive_audit_2014_now.csv`.
+      #
+      # `entry` PHẢI là shim do CHÍNH repo này track (cùng lý do tz-anchor-gate):
+      # .gitignore:107 ẩn `WorkingClaude/mike/` ⇒ trỏ thẳng vào repo lồng sẽ hỏng
+      # cứng trong mọi worktree/clone mới. Thiếu repo lồng ⇒ CẢNH BÁO + exit 0.
+      #
+      # Ratchet: chỉ xét mục `## ` MỚI so với HEAD — 135 mục lịch sử KHÔNG bị đụng.
+      # Bỏ qua có chủ đích:  SKIP=pin-artifact-gate git commit ...
+      #                      MIKE_PIN_GATE=warn git commit ...   (qua 1 lần, không ghi nhớ)
+      - id: pin-artifact-gate
+        name: Mục registry mới phải có ledger đã pin (xem WorkingClaude/pin_artifact_gate_shim.sh)
+        entry: WorkingClaude/pin_artifact_gate_shim.sh
+        language: system
+        # verbose BẮT BUỘC: gate cố ý fail-open khi thiếu repo lồng / không đọc được
+        # bản HEAD; thiếu verbose thì pre-commit nuốt luôn cảnh báo và fail-open
+        # biến thành FAIL-SILENT.
+        verbose: true
+        files: '^WorkingClaude/data/results_registry\.md$'

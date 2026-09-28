@@ -130,3 +130,14 @@ wt-*/
 WorkingClaude/wt-*/
 WorkingClaude/mike_paseo/
 WorkingClaude/.verify_a4_worktree/
+
+# --- Kho ledger BẤT BIẾN (B1, user duyệt 2026-09-28) ---------------------------
+# Mọi số pin trong data/results_registry.md phải có artifact sống ở đây. Kho này
+# CỐ Ý nằm TRONG version control — đó chính là điểm khác biệt với 822 file audit
+# rời / 2,1GB ở data/*.csv (bị `*.csv` dòng 57 ẩn đi, nên tên canonical ghi đè
+# được: ca thật 2026-09-28, cùng tên `v23_golive_audit_2014_now.csv` mà md5
+# 84295bee vs 65e7bb04 là hai hệ khác nhau).
+# `*.jsonl` (dòng 65) và `*.gz` (dòng 86) ở trên sẽ nuốt kho này nếu không phủ định.
+!WorkingClaude/data/pinned_ledgers/
+!WorkingClaude/data/pinned_ledgers/PINS.jsonl
+!WorkingClaude/data/pinned_ledgers/*.csv.gz
