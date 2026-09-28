@@ -139,9 +139,44 @@ ok("T6b and the 45-day offset is the boundary that decides",
 
 # ---------------------------------------------------------------- T7 real A/B artifacts
 HERE = os.path.dirname(os.path.abspath(__file__))
-CTL = os.path.join("/home/trido/thanhdt/WorkingClaude", "data", "rating_8l_history.csv")
-EXP = os.path.join("/home/trido/thanhdt/WorkingClaude", "mike", "agents", "Taylor", "research",
-                   "failg_icb_pit_20260927", "r8l_hist_EXP_icbpit_v2.csv")
+# Đường dẫn suy từ VỊ TRÍ file này, không hardcode canonical (bẫy đã ghi KB 2026-09-24: selfcheck
+# hardcode gốc canonical thì chạy từ worktree nào cũng đo cây MASTER).
+def _artifact(env, *rel):
+    """Cây của file này TRƯỚC, rồi rơi về cây canonical. `data/*.csv` bị `.gitignore` ẩn nên
+    KHÔNG worktree nào có — chỉ tìm theo cây module thì T7 luôn SKIP đúng lúc cần nhất (review
+    một branch). Cây canonical suy bằng `git rev-parse --git-common-dir`, không viết cứng
+    (cùng khuôn `custom_basket._forensic_flags_candidates`)."""
+    v = os.environ.get(env)
+    if v:
+        return v
+    cands = [os.path.join(HERE, *rel)]
+    try:
+        common = subprocess.run(["git", "rev-parse", "--git-common-dir"], cwd=HERE,
+                                capture_output=True, text=True, check=True).stdout.strip()
+        top = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=HERE,
+                             capture_output=True, text=True, check=True).stdout.strip()
+        common_abs = common if os.path.isabs(common) else os.path.join(HERE, common)
+        canon = os.path.join(os.path.dirname(os.path.normpath(common_abs)),
+                             os.path.relpath(HERE, top))
+        cands.append(os.path.join(canon, *rel))
+    except Exception:
+        pass
+    return next((c for c in cands if os.path.exists(c)), cands[0])
+
+
+CTL = _artifact("R8L_CTL_CSV", "data", "rating_8l_history.csv")
+EXP = _artifact("R8L_EXP_CSV", "mike", "agents", "Taylor", "research",
+                "failg_icb_pit_20260927", "r8l_hist_EXP_icbpit_v2.csv")
+# ⚠️ CHÂN CONTROL HẾT HẠN SAU KHI FIX ĐƯỢC MERGE (đo 2026-09-28).
+# `CTL` mặc định là artifact CANONICAL ĐANG SỐNG. Fix ICB-PIT đã vào main ở `7cdc08cc`, nên lần
+# build lại canonical (mtime 09:35 27/09) sinh ra file BYTE-IDENTICAL với `EXP` (md5 ea66aa95…).
+# Từ lúc đó "control" không còn là control: 3 assertion delta bên dưới FAIL với route=0/rating=0
+# TRONG KHI bản vá hoàn toàn đúng — đúng lớp lỗi "neo bản cũ vào HEAD" đã cắn 2 lần tuần này.
+# ⇒ phát hiện tình huống bằng BIT CƠ HỌC (hai file bằng nhau) rồi NÓI THẲNG + bỏ đúng 3 assertion
+# delta, KHÔNG nới chúng thành luôn-đúng. Có bản control TRƯỚC `7cdc08cc` thì chạy:
+#     R8L_CTL_CSV=<pre-merge.csv> $DNA_PYEXE rating8l_icb_pit_selfcheck.py
+_CTL_IS_STALE = (os.path.exists(CTL) and os.path.exists(EXP)
+                 and open(CTL, "rb").read() == open(EXP, "rb").read())
 if os.path.exists(CTL) and os.path.exists(EXP):
     a = pd.read_csv(CTL); b = pd.read_csv(EXP)
     K = ["ticker", "eff_date", "q_time"]
@@ -151,23 +186,38 @@ if os.path.exists(CTL) and os.path.exists(EXP):
        f"{m['_merge'].value_counts().to_dict()} ctl={len(a)} new={len(b)}")
     changed = sorted(m[m.route_c != m.route_n].ticker.unique())
     n_tk = a.ticker.nunique()
-    ok("T7b route changes confined to the tickers whose ICB actually moved",
-       changed == ["DIH", "HDG"], f"changed={changed}")
-    ok("T7c every other ticker byte-identical on route",
-       n_tk - len(changed) == 1289, f"{n_tk - len(changed)}/{n_tk} unchanged")
+    if _CTL_IS_STALE:
+        print("  NOTE T7b/c/d BỎ QUA — chân control không còn tồn tại: "
+              f"{os.path.basename(CTL)} BYTE-IDENTICAL với {os.path.basename(EXP)} "
+              "(canonical đã build lại SAU khi fix ICB-PIT merge ở 7cdc08cc). Đo lại delta thật "
+              "thì cần một bản CSV dựng bằng code TRƯỚC 7cdc08cc: R8L_CTL_CSV=<file>. "
+              "Các assertion còn lại (T7/T7e + T1-T6) vẫn chạy thật.")
+        ok("T7-stale chân control và chân EXP trùng nhau ⇒ route toàn bộ là bản PIT",
+           len(changed) == 0, f"vẫn còn lệch dù 2 file byte-identical: {changed}")
+    else:
+        ok("T7b route changes confined to the tickers whose ICB actually moved",
+           changed == ["DIH", "HDG"], f"changed={changed}")
+        ok("T7c every other ticker byte-identical on route",
+           n_tk - len(changed) == 1289, f"{n_tk - len(changed)}/{n_tk} unchanged")
     # the 3<->4 gate is the only rating change that can flip a decision
     rd = m[m.rating_c != m.rating_n]
     cross = rd[((rd.rating_c <= 3) & (rd.rating_n >= 4)) | ((rd.rating_c >= 4) & (rd.rating_n <= 3))]
-    ok("T7d measured deltas match the reported figures (98 route / 36 rating / 12 gate)",
-       len(m[m.route_c != m.route_n]) == 98 and len(rd) == 36 and len(cross) == 12,
-       f"route={len(m[m.route_c != m.route_n])} rating={len(rd)} cross={len(cross)}")
+    if not _CTL_IS_STALE:
+        ok("T7d measured deltas match the reported figures (98 route / 36 rating / 12 gate)",
+           len(m[m.route_c != m.route_n]) == 98 and len(rd) == 36 and len(cross) == 12,
+           f"route={len(m[m.route_c != m.route_n])} rating={len(rd)} cross={len(cross)}")
     # direction matters: HDG improves (control was penalising it), DIH worsens
     hd = rd[rd.ticker == "HDG"]; di = rd[rd.ticker == "DIH"]
-    ok("T7e HDG ratings improve under PIT, DIH ratings worsen",
-       (hd.rating_n <= hd.rating_c).all() and (di.rating_n >= di.rating_c).all()
-       or (hd.rating_n <= hd.rating_c).all(),
-       f"HDG improved {(hd.rating_n < hd.rating_c).sum()}/{len(hd)}, "
-       f"DIH worsened {(di.rating_n > di.rating_c).sum()}/{len(di)}")
+    if _CTL_IS_STALE:
+        # KHÔNG để T7e "PASS" ở đây: với chân control mất, hd/di RỖNG và `(rỗng).all()` là True
+        # ⇒ một PASS RỖNG NGHĨA (vacuous). Nói thẳng là chưa đo được, đừng đếm nó là bằng chứng.
+        print("  NOTE T7e BỎ QUA — hd/di rỗng vì chân control mất; `(rỗng).all()` sẽ PASS vô nghĩa.")
+    else:
+        ok("T7e HDG ratings improve under PIT, DIH ratings worsen",
+           (hd.rating_n <= hd.rating_c).all() and (di.rating_n >= di.rating_c).all()
+           or (hd.rating_n <= hd.rating_c).all(),
+           f"HDG improved {(hd.rating_n < hd.rating_c).sum()}/{len(hd)}, "
+           f"DIH worsened {(di.rating_n > di.rating_c).sum()}/{len(di)}")
 else:
     skip("T7 real A/B artifact comparison", f"missing {CTL if not os.path.exists(CTL) else EXP}")
 
