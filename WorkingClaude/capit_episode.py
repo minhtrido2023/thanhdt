@@ -51,7 +51,14 @@ NO_DEPLOY_CLOSE_SESSIONS = 5
 
 # ────────────────────────────── ledger I/O ──────────────────────────────
 def _load(path):
+    # 2026-09-28 (user duyet): thieu file van tra so RONG (dung cho lan dau) nhung PHAI in ra —
+    # neu co mot episode DANG MO ma so bi mat/doi cho thi no thanh VO HINH va he co the vao lai
+    # CAPIT tren cung mot washout. "Chua tung co" va "mat so" khong phan biet duoc tu ben trong,
+    # nen it nhat phai de lai dau vet cho nguoi doc log (§29).
     if not os.path.exists(path):
+        print(f"  [capit-episode] so episode KHONG ton tai ({path}) ⇒ coi nhu CHUA co episode nao."
+              f" Neu dang co episode MO thi no vo hinh o luot nay — kiem duong dan/so truoc khi"
+              f" ket luan 'khong co episode'.")
         return {"episodes": []}
     with open(path, encoding="utf-8") as f:
         d = json.load(f)
