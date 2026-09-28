@@ -246,6 +246,51 @@ def run_assertions(cr, tag=""):
     rep = cr.repair_row("X", bar, [div("2026-09-21", -500.0)], fpt, "2026-09-25")
     nc("repair/negative_dps_uncomputable",
        not rep.repaired and rep.uncomputable_ex == ("2026-09-21",))
+
+    # -- REGRESSION (job Taylor_20260928_105249): VNM-shape ex-date-off-by-one. VNM's real
+    #    ex-date was 2026-06-25 (raw Price dropped exactly by the DIV 1.850đ that day) but
+    #    `corporate_action.exright_date` records 2026-06-26 -- one session late. The vendor's
+    #    Close already reflects the TRUE (06-25) ex-date throughout, so a naive group_factor
+    #    that trusts our metadata's 06-26 label would compute the cum bar off an ALREADY
+    #    adjusted 06-25 row and derive a wrong r_pred, risking overwriting a Close that was
+    #    correct all along. Real numbers, `tav2_bq.ticker` pinned 2026-09-28.
+    vnm = bars([("2026-06-22", 56_740.0, 58_600.0, 57_710.0, 56_740.0),
+                ("2026-06-23", 56_600.0, 58_400.0, 57_180.0, 56_600.0),
+                ("2026-06-24", 56_500.0, 58_300.0, 56_890.0, 56_310.0),
+                ("2026-06-25", 56_500.0, 56_450.0, 56_790.0, 56_400.0),
+                ("2026-06-26", 56_300.0, 56_300.0, 56_800.0, 55_900.0)])
+    vnm_ev = [div("2026-06-26", 1850.0)]
+    f, note = cr.group_factor("2026-06-26", vnm_ev, vnm)
+    nc("vnm/exdate_offbyone_caught_by_band_guard", f is None)
+    nc("vnm/exdate_offbyone_note_says_ffill", f is None and "ffill" in (note or "").lower())
+    for d, close0 in (("2026-06-22", 56_740.0), ("2026-06-24", 56_500.0), ("2026-06-25", 56_500.0)):
+        b = next(x for x in vnm if x["d"] == d)
+        rep = cr.repair_row("VNM", b, vnm_ev, vnm, "2026-06-26")
+        nc(f"vnm/{d}_untouched", not rep.repaired and rep.close == close0)
+
+    # -- EDGE CASE 2a (quant-skeptic, job Taylor_20260928_105249): the NEIGHBOUR row used to
+    #    lift the band is itself a chained ffill artifact (Price frozen at the SAME stale value
+    #    for two consecutive sessions). `_band_lifted_suspect` only ever looks one row back, so
+    #    the lift ratio it borrows is corrupted by the same defect it exists to catch. The test
+    #    degenerates to "is yesterday's Close inside today's [Low,High]", which a slow market
+    #    trivially satisfies -- BUG: a 2-session-frozen Price slips through undetected.
+    chain = bars([("2026-01-01", 50_000.0, 50_000.0, 50_500.0, 49_500.0),
+                  ("2026-01-02", 49_800.0, 50_000.0, 50_100.0, 49_600.0),   # neighbour: frozen
+                  ("2026-01-03", 49_700.0, 50_000.0, 49_900.0, 49_600.0)])  # cum bar: STILL frozen
+    f, _n = cr.group_factor("2026-01-04", [div("2026-01-04", 500.0)], chain)
+    nc("chainffill/two_session_freeze_caught", f is None)   # currently FAILS: f=1.0101...
+
+    # -- EDGE CASE 2b (quant-skeptic, job Taylor_20260928_105249): the row BEING REPAIRED has no
+    #    ffill guard of its own -- only the cum bar *inside* group_factor is band-tested.
+    #    Own Price (90.000) sits far outside its own [Low,High]=[93.500, 94.500] while its Close
+    #    (94.000, the vendor's genuinely fine number) is untouched. BUG: repair_row silently
+    #    replaces close=94.000 with close=90.000 (= its own stale Price) instead of refusing.
+    stale = bars([("2026-06-28", 100_000.0, 100_000.0, 101_000.0, 99_000.0),
+                 ("2026-06-29", 99_000.0, 99_000.0, 99_500.0, 98_500.0)])
+    stale_bar = {"d": "2026-06-30", "close": 94_000.0, "price": 90_000.0,
+                "high": 94_500.0, "low": 93_500.0}
+    rep = cr.repair_row("X", stale_bar, [div("2026-07-01", 1000.0)], stale, "2026-06-30")
+    nc("selfband/repaired_row_own_price_guarded", not rep.repaired)   # currently FAILS
     return named
 
 
