@@ -172,16 +172,27 @@ def attach_icb_pit(df, icb):
     có thể (mã muộn hơn là hindsight). Mã không có đoạn nào ≥ICB_MIN_RUN (toàn nhiễu) rơi về
     NaN ⇒ `route_of()` trả COMPOUNDER, đúng như hành vi với ICB_Code NULL hiện tại.
     """
+    # ĐỘ PHÂN GIẢI datetime phải ĐỒNG NHẤT ở CẢ HAI khoá, nếu không `merge_asof` NÉM MergeError
+    # ("incompatible merge keys ... <M8[s]  và  <M8[us]") và chết cả lần build lịch sử 8L.
+    # Đo thật trên pandas 3.0.2 (2026-09-28):
+    #   pd.to_datetime([None])          -> datetime64[s]    (cột Release_Date rỗng HOÀN TOÀN)
+    #   pd.to_datetime(["2020-03-31"])  -> datetime64[us]
+    #   Series[s].fillna(Series[us])    -> GIỮ [s] của bên trái  (im lặng)
+    # ⇒ lô nào mà Release_Date null TOÀN BỘ thì `_eff` ra [s] còn `icb_from` ra [us] ⇒ crash.
+    # Production thường có Release_Date nên đây là bẫy LATENT, nhưng nó đã giết
+    # `rating8l_icb_pit_selfcheck.py` T6 (không phải lỗi của test). Ép cả hai về [us] — nới từ [s]
+    # lên [us] là KHÔNG mất mát (mọi giá trị ở đây là ngày, phần giây luôn = 0).
+    _RES = "datetime64[us]"
     icb = icb.copy()
-    icb["icb_from"] = pd.to_datetime(icb["icb_from"])
+    icb["icb_from"] = pd.to_datetime(icb["icb_from"]).astype(_RES)
     icb = icb.sort_values(["ticker", "icb_from"])
     left = df.copy()
     # `eff_date` chưa tồn tại ở điểm gọi (nó được dựng ở cuối main), nên dựng LẠI ĐÚNG công thức
     # đó tại chỗ: Release_Date, thiếu thì q_time + 45 ngày. Đổi công thức ở một nơi mà quên nơi
     # kia là đúng lớp lỗi §28 — nếu sửa, sửa cả hai.
-    _rel = pd.to_datetime(left["Release_Date"], errors="coerce")
-    left["_eff"] = _rel.fillna(pd.to_datetime(left["q_time"], errors="coerce")
-                               + pd.Timedelta(days=45))
+    _rel = pd.to_datetime(left["Release_Date"], errors="coerce").astype(_RES)
+    left["_eff"] = _rel.fillna(pd.to_datetime(left["q_time"], errors="coerce").astype(_RES)
+                               + pd.Timedelta(days=45)).astype(_RES)
     left = left.sort_values("_eff")
     out = pd.merge_asof(left, icb.sort_values("icb_from"), left_on="_eff",
                         right_on="icb_from", by="ticker", direction="backward")
