@@ -1,13 +1,13 @@
-# Mike fleet — context pack (v3365)
+# Mike fleet — context pack (v3366)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-09-27T17:44:39] Mike/finding — daily-retro-2026-09-27-finalized: {"summary": "Retro 09-27 finalized: entry ghi vao kb/incidents/retro/retro-2026-09-27.md, index.md cap nhat, commit 3630b381. Wags CONFIRMED khong sua gi. 2 su  …
 - [2026-09-27T18:09:07] Taylor/finding — repin-dep1m-registry-proposed: {"job": "Taylor_20260927_170645", "buoc": "7 — registry .proposed + data_registry (KHONG ghi canonical)", "commit_mike_repo": "4cd4c3ea", "commit_worktree_code" …
 - [2026-09-27T18:10:29] Taylor/finding — repin-dep1m-final: {"job": "Taylor_20260927_170645", "topic": "repin-dep1m-final", "ngay": "2026-09-28 ICT", "pham_vi": "PAPER + REGISTRY. trading_rules.json KHONG doi, rail KHONG …
 - [2026-09-27T18:18:03] quant-skeptic/verification — ✅ CONFIRMED VERIFY: repin-dep1m-final: {"finding_topic": "repin-dep1m-final", "verdict": "CONFIRMED", "confidence": "high", "checks": {"look_ahead_leak": "pass — r_idle uses month T only from 1st of  …
 - [2026-09-27T22:08:22] Wags/answer — selfcheck-red: lag_forensic_filter_selfcheck.py — recovered 2026-09-27: {"context": "selfcheck_baseline_diff tự đóng: ca đỏ này đã XANH trở lại", "file": "lag_forensic_filter_selfcheck.py", "artifact": "chạy lại lúc 2026-09-27T22:08 …
+- [2026-09-28T01:14:27] Taylor/finding — failopen-inventory-20260928: {"job": "Taylor_20260928_005930", "topic": "failopen-inventory-20260928", "scope": "WorkingClaude + mike/bin, chi code DANG DUNG (crontab-seeded + transitive 4  …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -158,7 +158,20 @@ Ranh giới cứng (KHÔNG tự sửa): trade plan, trading_rules.json, logic đ
 - = **V2.3A + custom30V parking (NEUTRAL) + gated-overflow (bear-washout) + HAG eq_flag fix**.
 - 2 book: **BAL** (momentum SIGNAL_V11, yieldcombo: 1/PE + 1/PCF) + **LAG** (PEAD/earnings drift).
 - Allocator w_LAG: {CRISIS 50 / BEAR 0 / NEUTRAL-BULL-EXBULL 65}, band ±10pp.
-- **R3 NEUTRAL-only @50B: CAGR 23.37% / Sharpe 1.88 / DD −14.6% / Calmar 1.60** — pin CHÍNH THỨC từ
+- 🆕 **PIN DẢI 2 SỐ — user chốt 2026-09-28 08:02 ICT** (registry mục **"2026-09-28 (septies)"**):
+  R3 @park 0,30 = **23,37% (`pin0%`, NGƯỠNG SÀN — tiền nhàn rỗi 0%/năm) … 25,71% (`pin1M`, NGƯỠNG
+  TRẦN — lãi huy động 1 tháng Big-4 cá nhân PIT trả cho MỌI tiền nhàn rỗi)**. **CẢ HAI là số pin
+  chính thức, không cái nào SUPERSEDE cái nào; CẤM trích 1 số mà không kèm quy ước.** Chênh
+  +2,34pp trong đó **2,05pp (87,8%) là SỐ HỌC TRỰC TIẾP** (tiền nhàn rỗi 46,4% NAV, trước trả 0%
+  nay ~3,5%/năm), chỉ 0,285pp là đường giao dịch — DƯỚI sàn nhiễu W2b 0,46pp ⇒ **KHÔNG đọc là
+  "hệ tốt lên"**, đây là đổi thước đo áp đều mọi phương tiện. Quy đổi thực tế ~21,9% … ~24,2%.
+  ⚠️ **Neo sizing DD vẫn lấy đầu SÀN −25,2%** (KHÔNG lấy −23,6% của đầu trần) — sizing đứng ở cận
+  xấu, neo thực tế KHÔNG đổi. Điểm thực tế trong dải = chân `dep1m_21s` (rút trước hạn ⇒ 0%, chỉ
+  trả lãi cho tiền đã nằm im ≥21 phiên, KHÔNG truy lĩnh) đang chạy job `Taylor_20260928_010454`.
+  quant-skeptic **CONFIRMED (high)** 2026-09-27 18:18Z, 8/8 check. ⚠️ Giới hạn của `pin1M`:
+  53/150 tháng là SỐ DỰNG LẠI (FiinPro không có dữ liệu ≤2018-12, cầu = NHNN 12M-thấp −2,525pp);
+  upstream FiinPro-X **đã hết hạn 28/09/2026**; đây là lãi thị trường, không phải carry egg DNSE.
+- **R3 NEUTRAL-only @50B: CAGR 23.37% / Sharpe 1.88 / DD −14.6% / Calmar 1.60** = **`pin0%` (đầu SÀN của dải)** — pin CHÍNH THỨC từ
   **2026-09-27 (sexies)**, Final NAV 684,52B, ledger md5 `4707bcbe…`, IS 20,00% / OOS 26,50%,
   self-check 0 VND. **Số SẠCH đầu tiên trên CẢ HAI chiều**: nhãn edge-health causal (`known_date`,
   FAIL-C đã đóng) **và** đúng knob park live 0,30. Neo sizing DD (bootstrap 5th) = **−25,2%**;
