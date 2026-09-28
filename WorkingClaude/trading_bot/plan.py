@@ -10,6 +10,7 @@ import dataclasses
 import datetime as dt
 import json
 import os
+import time
 import sys
 
 from .config import PLAN_DIR
@@ -643,11 +644,20 @@ def cap_lag_orders(plan, account_label, asof=None, live_labels=None, account_mod
             _block(f"không đo được ADV: {err}")
             continue
         if data_date:
+            # FAIL-CLOSED 2026-09-28 (user duyet). Truoc day `except: lag_days = None` roi cau ke
+            # tiep `if lag_days is not None and ...` ⇒ None lam CA CAU GATE KHONG CHAY: cong chan
+            # ADV cu (ma co the da ngung GD / huy niem yet) BIEN MAT im lang, va lenh van duoc
+            # sizing theo ADV cu do. Cung mot dong code nay ton tai o 3 noi —
+            # `compute_jit_unpark.py:241` + `compute_park_trim.py:703` da fail-closed 2026-09-28
+            # (merge mike), day la site thu 3 (duong DAT LENH nen sua sau, user ky rieng).
             try:
                 lag_days = (dt.date.fromisoformat(asof) - dt.date.fromisoformat(data_date)).days
-            except Exception:
-                lag_days = None
-            if lag_days is not None and lag_days > LAG_ADV_MAX_STALE_DAYS:
+            except Exception as e:
+                _block(f"KHONG xac dinh duoc do cu ADV (asof={asof!r} data_date={data_date!r}): "
+                       f"{type(e).__name__}: {e} — khong the kiem cong ADV-stale nen chan, "
+                       f"khong sizing theo ADV chua biet tuoi")
+                continue
+            if lag_days > LAG_ADV_MAX_STALE_DAYS:
                 _block(f"dữ liệu ADV mới nhất {data_date} cũ {lag_days} ngày so với {asof} "
                        f"(> {LAG_ADV_MAX_STALE_DAYS}) — mã có thể ngừng giao dịch/huỷ niêm yết")
                 continue
@@ -1648,8 +1658,22 @@ def apply_capit_lever(plan, account_label, status_path=None, rules_path=None,
                                 f"tiền bất thường. Muốn dừng đòn bẩy GIỮA PHIÊN thì dùng "
                                 f"`data/BOT_STOP` (dừng hẳn), không dùng `enabled=false` (chỉ đổi "
                                 f"cấp vốn, không đổi khối lượng plan đã chốt).")})
-        except Exception:
-            pass
+        except Exception as _e:
+            # KHONG IM LANG 2026-09-28 (user duyet). Truoc day `except Exception: pass` ⇒ neu doc
+            # artifact / doi float that bai thi DONG canh bao "plan da sizing theo don bay ma thuc
+            # thi khong co don bay" BIEN MAT — dung canh bao ma arch-review vong 2 (#3a) tao ra de
+            # chong ca "WWAIT_CASH trong nhu thieu tien binh thuong". Nay de lai 1 dong adj rieng
+            # mang LOI THAT (§29): khong kiem cheo duoc thi phai NOI la khong kiem cheo duoc.
+            adj.append({"ticker": "-", "order_id": "-",
+                        "action": "LEVER_CROSSCHECK_UNAVAILABLE",
+                        "lever_f": None, "loan_package_id": None,
+                        "reason": (
+                            f"KHONG kiem cheo duoc muc tieu da nhan f trong artifact"
+                            f" (`capit_slot_target_vnd_levered`): {type(_e).__name__}: {_e}."
+                            f" Don bay KHONG duoc cap ({err}). Vi vay KHONG the ket luan lenh"
+                            f" CAPIT da duoc sizing theo 1,0x hay theo f — neu phien nay co"
+                            f" WAIT_CASH/khop thieu thi PHAI kiem tay artifact"
+                            f" `capit_slot_targets` truoc khi goi do la thieu tien binh thuong.")})
 
     # ARTIFACT NÓI ĐÒN BẨY ĐANG BẬT MÀ TA TỪ CHỐI — luôn để lại đúng 1 dòng, kể cả khi không
     # có cờ nào để "GỠ" và không có mục tiêu levered để cảnh báo sizing (ca artifact thiếu
@@ -1745,16 +1769,39 @@ def _lever_ledger_merge(account_label, plan_date, granted, exec_dir=None):
     path = _lever_ledger_path(account_label, plan_date, exec_dir)
     ok_lp = str(CAPIT_LEVER_APPROVED_PACKAGE)
     prior = {}
-    try:
-        with open(path, encoding="utf-8") as f:
-            for lp, tks in ((json.load(f) or {}).get("granted") or {}).items():
-                if str(lp) != ok_lp:
-                    continue
-                if isinstance(tks, str):
-                    tks = [tks]
-                prior[str(lp)] = {str(t) for t in (tks or [])}
-    except Exception:
-        pass
+    # 2026-09-28 (user duyet): TRUOC day ca khoi doc nay la `except Exception: pass` ⇒ mot so
+    # HONG/khong doc duoc trong khi TON TAI se cho `prior = {}`, roi `_lever_ledger_write` ngay ben
+    # duoi GHI DE len chinh no ⇒ **xoa bang chung** ma khong ai biet: ma da duoc cap goi vay sang
+    # nay bien thanh "chua duoc cap", audit `LEVER_PACKAGE_UNAUTHORIZED` mat dau, va `_strip` co
+    # the thu hoi co vay cua lenh THAT do tien trinh truoc dat.
+    # Ba trang thai nay TACH ROI:
+    #   · file KHONG ton tai  ⇒ prior = {} IM LANG (lan dau trong ngay — trang thai binh thuong)
+    #   · doc duoc + hop le   ⇒ merge nhu cu (khong doi hanh vi)
+    #   · TON TAI ma khong doc duoc ⇒ (1) GIU NGUYEN ban goc bang cach doi ten sang
+    #     `<path>.corrupt_<ts>` TRUOC khi ghi moi — bang chung song sot; (2) IN canh bao mang LOI
+    #     THAT (§29). KHONG raise: `_lever_ledger_merge` duoc goi THANG (khong try) tu duong dieu
+    #     chinh plan nen nem loi o day se lam sap ca buoc xu ly plan cua account — nang hon han
+    #     viec mat so. Danh doi nay ghi ra day de doi sau con tranh luan duoc.
+    if os.path.exists(path):
+        try:
+            with open(path, encoding="utf-8") as f:
+                for lp, tks in ((json.load(f) or {}).get("granted") or {}).items():
+                    if str(lp) != ok_lp:
+                        continue
+                    if isinstance(tks, str):
+                        tks = [tks]
+                    prior[str(lp)] = {str(t) for t in (tks or [])}
+        except Exception as _e:
+            _kept = None
+            try:
+                _kept = f"{path}.corrupt_{int(time.time())}"
+                os.replace(path, _kept)
+            except Exception as _e2:
+                _kept = f"(KHONG giu lai duoc ban goc: {type(_e2).__name__}: {_e2})"
+            print(f"  [lever-ledger] ⚠️ {account_label} {plan_date}: so 'ai DA duoc cap phep vay'"
+                  f" TON TAI ma KHONG doc duoc ⇒ coi nhu rong cho luot nay, nen ma da duoc cap"
+                  f" truoc do co the bi coi la CHUA cap (audit LEVER_PACKAGE_UNAUTHORIZED mat dau)."
+                  f" Loi that: {type(_e).__name__}: {_e}. Ban goc giu tai: {_kept}")
     out = {lp: set(tks) for lp, tks in prior.items()}
     for lp, tks in (granted or {}).items():
         if str(lp) != ok_lp:
