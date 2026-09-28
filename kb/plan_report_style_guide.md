@@ -126,3 +126,36 @@ xem qua Discord 2026-09-29 (user đã duyệt hướng này).
 - `state_verify_note` (audit §2b) — đã kiểm tra lại: không liên quan tới thay đổi DGC ở trên, mô
   tả trong audit gốc vẫn đúng (in mỗi ngày regime không đổi) → áp dụng mục 4 (rút gọn khi PASS)
   như audit đề xuất, không có mâu thuẫn cần điều chỉnh.
+- **Mục 3 (Case B — không liệt kê 2 lần) đã được giải quyết TRƯỚC audit này, bởi `d23aef0e`
+  (2026-08-15, "avoid duplicate merged PARK orders")**: `_already_merged()` +
+  `pt_merged`/`jit_merged` (`send_plan_report.sh:549-554`) đã tắt hẳn khối "MỤC RIÊNG 1/2" khi
+  `merge_park_orders.py` đã gộp proposal vào `orders[]` cùng ngày — luồng vận hành THẬT hiện tại
+  (cron merge chạy mỗi ngày trước report) không còn tái lập được ca duplicate 08-07 nữa. Mockup
+  Case B ở audit report.md §3b vẫn đúng NGUYÊN TẮC (không liệt kê 2 lần) nhưng minh hoạ bằng dữ
+  liệu LỊCH SỬ từ TRƯỚC khi `d23aef0e` tồn tại — không cần sửa code thêm cho mục 3; chỉ còn áp
+  dụng cho ca hiếm khi marker `_merged_into_orders` thiếu/hỏng (fail-open, giữ hiển thị cũ AN
+  TOÀN — không giấu lệnh — đây là lựa chọn có chủ đích, không phải lỗ hổng cần vá).
+
+## PHẦN B — trạng thái implement (2026-09-29, worktree `wt-planreportstyle-2909`)
+
+1. `bin/send_plan_report.sh`: đã sửa mục 1 (hardcode `"1,3× vốn"` → `f"{CAPIT_LEVER_APPROVED_F:g}×"`,
+   dòng ~469-483) và mục 2 (19 dòng "Lý do" PARK_TRIM lặp → 1 dòng tổng, dòng ~687-800). Mục 7
+   (cấu trúc DANH SÁCH→LÝ DO→CẢNH BÁO→PHỤ LỤC theo đúng mockup Case A/B compact) **CHƯA làm** —
+   đó là restructure lớn hơn (viết lại toàn bộ vòng lặp render lệnh, đụng DCF/DD/funding-note
+   lồng trong từng lệnh) với rủi ro cao hơn nhiều so với 2 bug cụ thể đã sửa; để lại cho 1 job
+   riêng có đủ turn budget thay vì làm vội trong job này.
+2. `bin/compute_park_trim.py`: đã sửa mục 5 — note "rổ mục tiêu kỳ..." rút còn 1 dòng tóm tắt,
+   chi tiết từng mã (ticker/weight/reason) vẫn nguyên vẹn trong `basket_dropped` (không mất
+   thông tin).
+3. Mọi nội dung compliance/provenance bắt buộc GIỮ NGUYÊN — không đụng.
+4. Selfcheck: `send_plan_report_park_jit_selfcheck.py` +2 test mới (T10 mở rộng, T11 mutation-
+   guard cho fix hardcode 1,3×) PASS dưới TZ=Asia/Ho_Chi_Minh (24/26, 2 fail PRE-EXISTING không
+   liên quan — xem dưới). `compute_park_trim_selfcheck.py` +2 test mới (T7c/T7d) PASS 116/116 cả
+   3 TZ (ICT/UTC/no-TZ). Regression `send_plan_report_state_gate_selfcheck.py` PASS 9/9.
+5. ⚠️ **Phát hiện ngoài phạm vi task này**: `send_plan_report_park_jit_selfcheck.py` KHÔNG
+   TZ-robust — dưới `TZ=UTC` hoặc `env -u TZ`, phần lớn test suite fail (không phải do thay đổi
+   trong job này: đã xác nhận bằng cách stash sạch về baseline `777734db` và chạy lại, fail set
+   giống hệt). 2 test cụ thể ("env -u TZ: 4 mục vẫn đủ", "TZ=America/New_York: 4 mục vẫn đủ")
+   fail NGAY CẢ dưới TZ=Asia/Ho_Chi_Minh ở baseline — pre-existing, không phải do PHẦN B. Việc
+   sửa cần điều tra riêng (khả năng: fixture ngày cố định lệch theo "hôm nay" tính theo TZ) —
+   không sửa trong job này vì ngoài phạm vi style guide.

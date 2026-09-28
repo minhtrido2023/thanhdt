@@ -287,30 +287,57 @@ for label, extra in (("env -u TZ", {"TZ": None}),
           and f"(L2/JIT) — {SX_L2_N} lệnh BÁN" in o
           and f"MUA {SX_TK} {SX_QTY}cp" in o)
 
-# ── T10 — "Lý do: tuân thủ trần PARK X%" per-order phải ĐỘNG theo target_park, KHÔNG
-# hardcode "80%". Bug thật 2026-09-28: dòng này hardcode "80%" trong khi park target đã đổi
-# 0.80→0.30 từ 2026-09-27 — mỗi plan có PARK_TRIM order (như hôm nay, 34 lệnh cả 2 account)
-# vẫn in sai "80%". Real plan 08-07 đã có sẵn 3 PARK_TRIM order trong orders[]; ghi đè
-# target_park=0.30 để chứng minh dòng render đúng theo config, không phải hardcode.
-# ⚠️ CHỈ kiểm dòng "↳ ℹ️ Lý do:" do send_plan_report.sh TỰ SINH — các dòng note/notes khác
+# ── T10 — "Lý do (áp dụng CHUNG...): tuân thủ trần PARK X%" phải ĐỘNG theo target_park,
+# KHÔNG hardcode "80%". Bug gốc 2026-09-28: dòng per-order hardcode "80%" trong khi park
+# target đã đổi 0.80→0.30. Sửa gốc: đọc target_park (98a9d633). Sửa kb/plan_report_style_
+# guide.md §2 (2026-09-29): N lệnh PARK_TRIM cùng lý do gộp thành 1 DÒNG TỔNG sau vòng lặp
+# thay vì lặp theo từng lệnh — bài test này cập nhật để khớp layout mới (1 dòng, không phải
+# N dòng), vẫn giữ nguyên tinh thần gốc: giá trị % PHẢI đọc động từ target_park.
+# Real plan 08-07 đã có sẵn 3 PARK_TRIM order trong orders[]; ghi đè target_park=0.30 để
+# chứng minh dòng render đúng theo config, không phải hardcode.
+# ⚠️ CHỈ kiểm dòng "↳ ℹ️ Lý do" do send_plan_report.sh TỰ SINH — các dòng note/notes khác
 # trong plan 08-07 là DỮ LIỆU LỊCH SỬ tĩnh (baked-in lúc target thật sự là 80%), không phải
 # code-generated, nên hợp lệ khi vẫn còn "80%" — không dùng blanket "80% not in out".
-print("\n[T10] Lý do PARK_TRIM per-order phải ĐỘNG theo target_park (bug hardcode 80% 2026-09-28)")
+print("\n[T10] Lý do PARK_TRIM phải ĐỘNG theo target_park + gộp 1 dòng (không lặp theo lệnh)")
 p = copy.deepcopy(SX)
 p["park_trim_proposal"]["target_park"] = 0.30
 out = run_sender(p, "SpaceX")
-_reason_lines = [l.strip() for l in out.splitlines() if l.strip().startswith("↳ ℹ️ Lý do: tuân thủ trần PARK")]
-check("target_park=0.30 → MỌI dòng 'Lý do' per-order in đúng 'trần PARK 30%', "
-      "KHÔNG dòng nào còn hardcode 80%",
+_reason_lines = [l.strip() for l in out.splitlines() if "↳ ℹ️ Lý do" in l]
+check("target_park=0.30 → dòng 'Lý do' tổng in đúng 'trần PARK 30%', KHÔNG hardcode 80%",
       len(_reason_lines) > 0
       and all("trần PARK 30%" in l for l in _reason_lines)
       and not any("trần PARK 80%" in l for l in _reason_lines),
       _reason_lines[:1])
-p2 = copy.deepcopy(SX)  # target_park thiếu/None → fallback "?" (khớp quy ước _tgt_s dòng 804) thay vì bịa số
+check("§2 style guide — CHỈ 1 dòng 'Lý do' tổng cho cả nhóm PARK_TRIM, KHÔNG lặp theo từng "
+      "lệnh (3 lệnh PARK_TRIM trong plan 08-07 ⇒ đúng 1 dòng, không phải 3)",
+      len(_reason_lines) == 1 and "áp dụng CHUNG" in _reason_lines[0],
+      _reason_lines)
+p2 = copy.deepcopy(SX)  # target_park thiếu/None → fallback "?" (khớp quy ước _tgt_s) thay vì bịa số
 p2["park_trim_proposal"].pop("target_park", None)
 out2 = run_sender(p2, "SpaceX")
 check("target_park thiếu → fallback 'trần PARK ?' (không dấu %, khớp quy ước _tgt_s hiện có), KHÔNG bịa số",
-      "↳ ℹ️ Lý do: tuân thủ trần PARK ? (park-trim)" in out2)
+      any("↳ ℹ️ Lý do" in l and "trần PARK ? (park-trim)" in l for l in out2.splitlines()))
+
+# ── T11 — margin_note "khối lượng tính cho X× vốn" (DENIED/sizing branch) phải ĐỘNG theo
+# CAPIT_LEVER_APPROVED_F, KHÔNG hardcode "1,3×". Bug cùng lớp với T10 (audit
+# plan_report_audit_20260928 §1 #2, dòng ~481-483): trước sửa, literal "1,3×" mô tả lại
+# CAPIT_LEVER_APPROVED_F trong khi biến/hằng số thật đã import được cùng scope — đổi gói
+# đòn bẩy (vd f=1.5) sẽ lập tức sai mà không ai phát hiện nếu còn hardcode.
+# ⚠️ Runtime fixture cho nhánh PLAN_SIZED_LEVERED_BUT_OFF/DENIED của preview_margin_day cần
+# dựng toàn bộ envelope CAPIT + apply_capit_lever gating — CHƯA có sẵn ở bất kỳ selfcheck
+# nào (kiểm tra 2026-09-29: 0 hit "PLAN_SIZED_LEVERED_BUT_OFF"/"CAPIT_LEVER_APPROVED_F"
+# trong mike/bin/*selfcheck*.py). Test này PIN Ở TẦNG SOURCE (đọc chính f-string trong
+# send_plan_report.sh) thay vì runtime — vẫn bắt được đúng mutation "hardcode lại 1,3×",
+# nhưng KHÔNG chứng minh nhánh DENIED render đúng end-to-end. Ghi rõ đây là gap còn lại,
+# không tự nhận là coverage đầy đủ.
+print("\n[T11] margin_note '...× vốn' phải đọc CAPIT_LEVER_APPROVED_F (source-level pin)")
+_sender_src = open(SENDER, encoding="utf-8").read()
+check("f-string 'khối lượng tính cho ...× vốn' dùng {CAPIT_LEVER_APPROVED_F:g}, KHÔNG literal '1,3×'",
+      "{CAPIT_LEVER_APPROVED_F:g}× " in _sender_src
+      and "khối lượng tính cho 1,3× vốn" not in _sender_src)
+check("import CAPIT_LEVER_APPROVED_F từ trading_bot.plan (cùng nguồn apply_capit_lever dùng)",
+      "from trading_bot.plan import preview_margin_day, margin_day_approval, "
+      "CAPIT_LEVER_APPROVED_F" in _sender_src)
 
 print(f"\n{'=' * 72}\nKẾT QUẢ: {len(PASS)} PASS / {len(FAIL)} FAIL")
 for f in FAIL:
