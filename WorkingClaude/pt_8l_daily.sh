@@ -43,7 +43,22 @@ notify_fails() {
 # dựa trên bảng xếp hạng đó — không được âm thầm coi regime hôm qua là regime hôm nay.
 # Bằng chứng = golive_state_today.json qua dt5g_freshness.py (CÙNG artifact + CÙNG luật với
 # gate bq_freshness_check 19:00). CHỈ CẢNH BÁO, KHÔNG chặn chain (báo trễ > không báo).
-DT5G_WARN="$(timeout 60 $PY dt5g_freshness.py --warn-line 2>/dev/null || true)"
+# FAIL-LOUD 2026-09-28 (user duyet). TRUOC day: `2>/dev/null || true` ⇒ checker CRASH/timeout
+# cho DT5G_WARN="" va `if [ -n ... ]` ngay duoi doc RONG = TUOI ⇒ script in
+# "--- [0-fresh] DT5G tươi (publisher của ta đã xác nhận hôm nay) ---".
+# Do KHONG phai im lang ma la KHANG DINH SAI chu dong (§29 dang 2): van hanh duoc bao "da xac
+# nhan" trong khi chua xac nhan duoc gi. TRI-STATE: rc!=0 ⇒ nhoi LOI THAT vao chinh DT5G_WARN
+# ⇒ roi vao nhanh CANH BAO (co notify), khong bao gio roi vao nhanh "tuoi".
+_dt5g_err=""
+if ! _dt5g_out="$(timeout 60 $PY dt5g_freshness.py --warn-line 2>&1)"; then
+  _dt5g_rc=$?
+  _dt5g_err="$_dt5g_out"
+fi
+if [ -n "$_dt5g_err" ]; then
+  DT5G_WARN="KHONG kiem duoc do tuoi DT5G (rc=${_dt5g_rc:-?}): ${_dt5g_err}"
+else
+  DT5G_WARN="$_dt5g_out"
+fi
 if [ -n "$DT5G_WARN" ]; then
   echo; echo "--- [0-fresh] DT5G STALE --- $DT5G_WARN"
   _m="⚠️ pt_8l_daily $(date +%F): $DT5G_WARN Bảng xếp hạng + alert 8L tối nay chạy trên regime CHƯA xác nhận."

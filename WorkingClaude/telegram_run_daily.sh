@@ -18,8 +18,15 @@ echo "===== telegram report run $(date) =====" >> "$LOG"
 # độ tươi của INPUT. CHỈ CẢNH BÁO: vẫn gửi báo cáo (trễ > không có), nhưng chèn 1 dòng ở
 # ĐẦU tin nhắn qua EXTRA_WARN_HEADER (telegram_recommend.build_message đọc env này; mặc
 # định trống ⇒ caller khác không đổi hành vi).
-EXTRA_WARN_HEADER="$("$WORKDIR_8L/mike/bin/csv_fresh_today.sh" "$WORKDIR_8L/data/rating_8l.csv" \
-  '⚠️ Dữ liệu 8L rating có thể chưa cập nhật hôm nay (file cũ).' 2>/dev/null || true)"
+# FAIL-LOUD 2026-09-28 (user duyet): `2>/dev/null || true` lam checker hong ⇒ header RONG ⇒ dong
+# ⚠️ bien mat khoi DAU tin Telegram, nguoi nhan thay rating cu y het rating moi. Nay hong thi NOI
+# LA KHONG KIEM DUOC (van gui bao cao — tre > khong co, dung tinh than cua cong §14 ban dau).
+if ! _fresh_out="$("$WORKDIR_8L/mike/bin/csv_fresh_today.sh" "$WORKDIR_8L/data/rating_8l.csv" \
+  '⚠️ Dữ liệu 8L rating có thể chưa cập nhật hôm nay (file cũ).' 2>&1)"; then
+  EXTRA_WARN_HEADER="⚠️ KHÔNG kiểm được độ tươi input 8L (csv_fresh_today lỗi: ${_fresh_out}) — không xác nhận được rating hôm nay là mới."
+else
+  EXTRA_WARN_HEADER="$_fresh_out"
+fi
 export EXTRA_WARN_HEADER
 [ -n "$EXTRA_WARN_HEADER" ] && echo "  [fresh] $EXTRA_WARN_HEADER" >> "$LOG"
 

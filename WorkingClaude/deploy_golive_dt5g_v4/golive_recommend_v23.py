@@ -664,7 +664,24 @@ if anomaly_fresh["is_stale"]:
 SIG = SIGNAL_V11.replace("tav2_bq.vnindex_5state AS s", "tav2_bq." + DT_TABLE + " AS s")
 sig = bq(SIG.format(start=START, end=END)); sig["time"] = pd.to_datetime(sig["time"])
 LATEST = sig["time"].max()
-state_today = int(sig.loc[sig["time"] == LATEST, "state5"].dropna().iloc[0]) if (sig["time"] == LATEST).any() else int(prov.get("state", 3))
+# FAIL-CLOSED 2026-09-28 (user duyet). TRUOC day nhanh du phong la `int(prov.get("state", 3))`
+# ⇒ provenance THIEU khoa `state` thi DOAN 3 = NEUTRAL (70%). Nhanh nay chi chay khi bang tin
+# hieu BQ khong co dong nao o LATEST — tuc DUNG LUC pipeline da hong — ma lai doan mot regime
+# O GIUA thay vi dung. `state_today` lai LAI `w_LAG`, `ETF_PARK` va `half_in_state` ⇒ doan sai
+# theo huong NEUTRAL la doan theo huong RUI RO CAO HON CRISIS(0%)/BEAR(20%).
+if (sig["time"] == LATEST).any():
+    state_today = int(sig.loc[sig["time"] == LATEST, "state5"].dropna().iloc[0])
+else:
+    if "state" not in (prov or {}):
+        raise SystemExit(
+            "[state] TU CHOI CHAY — bang tin hieu khong co dong nao o LATEST"
+            f" ({LATEST}) VA provenance gated-state khong co khoa `state`"
+            f" (cac khoa co: {sorted((prov or {}).keys())}). Khong co co so nao de suy ra regime;"
+            " doan NEUTRAL o day la doan huong rui ro cao hon CRISIS/BEAR. Kiem publisher DT5G"
+            " (`macro_state_live.py` / `golive_state_today.json`) roi chay lai.")
+    state_today = int(prov["state"])
+    print(f"  [state] CANH BAO: bang tin hieu khong co dong o LATEST ({LATEST}) ⇒ lay state tu"
+          f" provenance gated-state = {state_today}. Day la duong DU PHONG, khong phai duong thuong.")
 print(f"  latest signal date: {LATEST.date()} | {len(sig):,} signal rows in window")
 
 # ── 2. D1 RE_BACKLOG (gated state) + SV_TIGHT + overheat (same layering as pt_v22_dt5g) ──
@@ -728,7 +745,14 @@ sec_map = bq("SELECT DISTINCT t.ticker,CAST(FLOOR(t.ICB_Code/1000) AS INT64) AS 
 today["sec"] = today["ticker"].map(sec_map)
 today["prio"] = today["play_type"].map(PRIORITY)
 today["rating8l"] = today["ticker"].map(rating8l)
-today["weak"] = today["rating8l"].fillna(0).astype(float) >= 4
+# FAIL-CLOSED 2026-09-28 (user duyet). TRUOC day `fillna(0)`: ma THIEU 8L rating ⇒ 0 ⇒ `0 >= 4`
+# False ⇒ KHONG bi coi la yeu ⇒ dong duoi cho no POS_PCT DAY DU thay vi WEAK_PCT. Ma `half_in_state
+# = state_today in (1,2)` ⇒ nhanh nay CHI co tac dung trong CRISIS/BEAR: co che giam size cho ma
+# yeu bien mat DUNG LUC thi truong xau, va bien mat cho dung nhung ma ta KHONG BIET chat luong.
+# `fillna(99)` = thieu rating thi coi nhu yeu. Khuon nay da co san trong repo:
+# `mike/bin/discretionary_candidate_funnel.py:325` dung `rating.fillna(99) <= RATING_MAX` tren
+# CHINH truong nay — truoc ban va, hai file di hai chieu nguoc nhau.
+today["weak"] = today["rating8l"].fillna(99).astype(float) >= 4
 half_in_state = state_today in (1, 2)
 today["weight"] = np.where(today["weak"] & half_in_state, WEAK_PCT, POS_PCT)
 
