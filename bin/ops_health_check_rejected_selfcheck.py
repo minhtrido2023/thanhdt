@@ -266,6 +266,45 @@ def main():
     check("CHỈ có heartbeat ⇒ KHÔNG coi là ứng viên retry (không đóng báo động oan)",
           e is None and bool(w) and "KHÔNG tìm thấy ứng viên retry" in w[0], w)
 
+    print("\ncase_ban_bi_chan_CHINH_LA_heartbeat")
+    # Ca THẬT 2026-09-27 (Taylor 08:58:12Z): bản bị chặn là một heartbeat của AGENT
+    # (JSON thiếu '}'), retry lên bus +10s cũng là heartbeat. Bản 2026-09-17 loại MỌI
+    # event_type=="heartbeat" ⇒ mù hẳn ca này rồi khẳng định "MẤT THẬT".
+    hb_rej = rec(rej, who="Taylor", argc=5,
+                 argv=["Taylor", "heartbeat", "Taylor_20260831_042737",
+                       '{"status":"in_progress"', "Taylor_20260831_042737"])
+    hb_retry = {"event_id": "25c7f402-x", "ts": hit, "agent_id": "Taylor",
+                "event_type": "heartbeat", "topic": "Taylor_20260831_042737",
+                "trace_id": "Taylor_20260831_042737",
+                "payload": {"status": "in_progress", "note": "buoc1 xong"}}
+    hb_watch = {"event_id": "b6895ff1-x", "ts": hit, "agent_id": "Taylor",
+                "event_type": "heartbeat", "topic": "Taylor_20260831_042737",
+                "trace_id": "Taylor_20260831_042737",
+                "payload": {"status": "still_running", "source": "watcher"}}
+    w, o, _l, e = run(block, [hb_rej], inbox={"Taylor": [hb_retry]})
+    check("bản bị chặn LÀ heartbeat ⇒ heartbeat retry của agent VẪN là ứng viên",
+          e is None and bool(w) and "25c7f402" in w[0], w)
+
+    w, o, _l, e = run(block, [hb_rej], inbox={"Taylor": [hb_watch]})
+    check("heartbeat của WATCHER (payload.source=watcher) vẫn bị loại, kể cả ca trên",
+          e is None and bool(w) and "KHÔNG tìm thấy ứng viên retry" in w[0], w)
+
+    w, o, _l, e = run(block, [hb_rej], inbox={"Taylor": [hb_watch, hb_retry]})
+    check("watcher đứng TRƯỚC retry thật ⇒ chỉ ra retry thật",
+          e is None and bool(w) and "25c7f402" in w[0] and "b6895ff1" not in w[0], w)
+
+    print("\ncase_ghep_dung_agent_voi_ly_do")
+    # Ca THẬT 2026-09-27: 2 tập sorted() độc lập ⇒ người đọc ghép theo vị trí và ghép NGƯỢC
+    # (Taylor↔word-split, Wags↔JSON-hỏng — thực tế đúng là ngược lại).
+    w, o, _l, e = run(block, [rec(fresh, who="Taylor", why="payload KHONG phai JSON hop le"),
+                              rec(fresh, who="Wags", why="nhan 7 tham so — word-split")])
+    check("mỗi agent đi KÈM đúng lý do của chính nó",
+          e is None and bool(w)
+          and "Taylor: payload KHONG phai JSON hop le" in w[0]
+          and "Wags: nhan 7 tham so" in w[0], w)
+    check("KHÔNG còn in 2 tập hợp rời (Agent: [...]. Lý do: [...])",
+          bool(w) and "Lý do: [" not in w[0], w)
+
     print("\ncase_CONTROL_khong_duoc_keu_oan")
     w, o, _l, e = run(block, [])
     check("CONTROL: file RỖNG ⇒ không W, không OK", not w and not o and e is None,

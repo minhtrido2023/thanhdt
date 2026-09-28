@@ -1168,7 +1168,16 @@ if os.path.exists(_qf):
                             _bts = str(_be.get("ts") or "")
                             if not (_ets < _bts <= _t1):
                                 continue
-                            if str(_be.get("event_type") or "") == "heartbeat":
+                            # Bộ lọc nhiễu ĐO ĐƯỢC, không phải suy từ event_type: heartbeat
+                            # của WATCHER tự khai `payload.source == "watcher"`. Loại theo
+                            # event_type=="heartbeat" trần (bản 2026-09-17) làm MÙ HẲN ca bản
+                            # bị chặn CHÍNH LÀ một heartbeat của agent (ca thật Taylor
+                            # 2026-09-27T08:58:12Z, retry 25c7f402 +10s) ⇒ checker sẽ khẳng
+                            # định "MẤT THẬT" trong khi event có trên bus.
+                            _bpl = _be.get("payload")
+                            if isinstance(_bpl, dict) and str(_bpl.get("source") or "") == "watcher":
+                                continue
+                            if str(_be.get("event_type") or "") == "heartbeat" and _ty != "heartbeat":
                                 continue
                             _tpm = bool(_tp) and str(_be.get("topic") or "") == _tp
                             _trm = bool(_tr) and str(_be.get("trace_id") or "") == _tr
@@ -1189,8 +1198,15 @@ if os.path.exists(_qf):
                         f"topic {str(_best[2].get('topic'))[:60]}")
         except Exception:
             _qcand = []
-        _who = sorted({_q_who(_r) for _r in _q24})
-        _why = sorted({str(_r.get("reason") or "?").split("\n")[0][:110] for _r in _q24})
+        # GHÉP agent VỚI lý do theo TỪNG BẢN GHI. Bản cũ in 2 tập hợp sorted() độc lập
+        # ("Agent: [A, B]. Lý do: [x, y]") — người đọc ghép theo vị trí, mà 2 tập được sắp
+        # xếp bằng 2 khoá khác nhau nên ghép đó SAI bất cứ khi nào có ≥2 agent với ≥2
+        # nguyên nhân khác nhau. Ca thật 2026-09-27: Taylor bị chặn vì JSON thiếu '}' còn
+        # Wags vì word-split, thông điệp ghép ngược cả hai (§29 — không khẳng định cái
+        # chưa đo).
+        _pairs = sorted({f"{_q_who(_r)}: "
+                         f"{str(_r.get('reason') or '?').split(chr(10))[0][:110]}"
+                         for _r in _q24})
         W(f"append_event.sh đã CÁCH LY {len(_q24)} bản ghi trong 24h qua "
           f"({_qtot} bản ghi trong file hiện tại"
           f"{f', {_qres24} ca khác trong 24h đã được đánh dấu xử lý' if _qres24 else ''}"
@@ -1199,7 +1215,7 @@ if os.path.exists(_qf):
           f"phần lớn call site nuốt stderr nên agent tưởng đã ghi thành công. "
           f"NGUYÊN NHÂN KHÁC NHAU THEO TỪNG CA (word-split, JSON không hợp lệ, payload cụt…) "
           f"— đọc đúng `Lý do` dưới đây, đừng mặc định là lỗi quote. "
-          f"Agent: {_who}. Lý do: {_why}. "
+          f"Từng ca (agent: lý do): {_pairs}. "
           f"Xem `tail bus/_rejected.jsonl`; sửa đúng nguyên nhân ở call site rồi ghi LẠI event "
           f"(hàng đợi này là PHÁP Y, không ai tự phát lại — payload hỏng phát lại vẫn hỏng)."
           + (f" ỨNG VIÊN RETRY đã lên bus (cùng agent + cùng topic/trace_id, ≤15 phút sau, "
