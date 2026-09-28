@@ -18,8 +18,10 @@ Ba tang (dung dung ten user da duyet o §2.2 cua ke hoach):
                2019-02..2026-09 = SO THAT do FiinPro cong bo (92 thang, moi thang chup ngay 15).
                truoc 2019-02     = DUNG LAI  = sbv_low + DEP1M_OFFSET_PP. KHONG phai so cong bo.
              Route FiinPro tra HTTP 500 cho moi ngay <= 2018-12 (Mike do 2014/2015/2016/2018 deu
-             rong) va trial het han 2026-09-28 ⇒ KHONG the keo them. Doan dung lai phu 54/143
-             thang cua cua so backtest ⇒ moi ket luan phai kem bang bat dinh offset (p25/p75).
+             rong) va trial het han 2026-09-28 ⇒ KHONG the keo them. Doan dung lai phu 53/150
+             thang cua cua so backtest (2014-01..2026-06 — dung con so ENGINE TU IN qua
+             `dep1m_coverage()`; ban dau docstring ghi "54/143", sai ca tu va mau, quant-skeptic
+             bat 2026-09-27) ⇒ moi ket luan phai kem bang bat dinh offset (p25/p75).
 
 HAIRCUT_PP = 2.04 — KHONG phai con so quy uoc 1.0pp trong ban ke hoach. Do that tren
 143 thang 2014-01..2026-08: median(SBV low >12-24M - lien NH 3M) = +2.040pp
