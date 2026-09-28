@@ -81,3 +81,21 @@ repos:
         # biến thành FAIL-SILENT.
         verbose: true
         files: '^WorkingClaude/data/results_registry\.md$'
+
+      # ------------------------------------------------------------------------
+      # pin-store-immutable (B6, user duyệt 2026-09-28) — kho `pinned_ledgers/`
+      # là CHỈ-THÊM: cấm xoá, cấm sửa, cấm đổi tên artifact đã pin; PINS.jsonl
+      # append-only.
+      #
+      # VÌ SAO: retention không phải một lời hứa, nó phải là thứ git TỪ CHỐI làm.
+      # Đã có 2 md5 trong registry mất dấu vĩnh viễn (`a953d4bb…`, `f30a5bea…`) —
+      # mỗi cái là một con số neo kỳ vọng không còn tái lập được.
+      #
+      # Dùng CHUNG shim với pin-artifact-gate (shim `exec` truyền thẳng tham số).
+      # Bỏ qua: SKIP=pin-store-immutable · MIKE_PIN_GATE=warn (qua 1 lần).
+      - id: pin-store-immutable
+        name: Kho ledger đã pin là CHỈ-THÊM (B6)
+        entry: WorkingClaude/pin_artifact_gate_shim.sh --store-immutability
+        language: system
+        verbose: true
+        files: '^WorkingClaude/data/pinned_ledgers/'
