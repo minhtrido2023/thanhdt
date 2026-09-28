@@ -431,11 +431,21 @@ RATING_CSV = os.path.join(OUTDIR, "rating_8l.csv")
 def load_ratings():
     """ticker -> int rating from the fresh rating_8l.csv (same-day step [1]). Missing file/name
     -> empty dict / no entry (cross-check simply shows 'R?'); never fabricate a rating."""
+    # 2026-09-28 (user duyet): truoc day CA HAI nhanh tra {} IM LANG. Hai viec khac nhau —
+    # "chua co file" va "co file ma khong doc duoc" — va hau qua khong phai chi hien 'R?':
+    # `load_double_confirm` LOC theo rating, ratings rong lam tang loc rating BIEN MAT im lang.
+    # Van tra {} (day la lens paper, chan het se lam mat ca bao cao) nhung PHAI noi ra (§29).
     if not os.path.exists(RATING_CSV):
+        print(f"  [ratings] ⚠️ KHONG co {RATING_CSV} ⇒ cross-check hien 'R?' VA tang loc theo"
+              f" rating trong load_double_confirm() bi BO QUA. Chay lai buoc [1] rating_8l.")
         return {}
     try:
         rdf = pd.read_csv(RATING_CSV, usecols=["ticker", "rating"])
-    except Exception:
+    except Exception as e:
+        print(f"  [ratings] ⚠️ {RATING_CSV} TON TAI ma KHONG doc duoc ({type(e).__name__}: {e})"
+              f" ⇒ cross-check hien 'R?' VA tang loc theo rating trong load_double_confirm()"
+              f" bi BO QUA. Day KHAC voi"
+              f" 'chua co file' — kiem noi dung CSV truoc khi doc so.")
         return {}
     out = {}
     for _, r in rdf.iterrows():
