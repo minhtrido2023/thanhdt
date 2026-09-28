@@ -232,6 +232,28 @@ Rules when a script's output feeds `data/results_registry.md` or any pinned base
 - Cite the registry **by section title** (e.g. `## KẾT QUẢ THAM CHIẾU phiên 2026-06-19`), never by
   line number — refs drift as entries get inserted.
 
+**§8c. Số pin phải có ARTIFACT SỐNG trong kho bất biến — nay là CƠ CHẾ, không còn là văn xuôi
+(user duyệt 2026-09-28, B0-B6).** Registry rule 2 ("CSV LÀ ARTIFACT ĐÔNG CỨNG") có từ 2026-06-19
+và chưa bao giờ cưỡng chế được; hệ quả đo thật: `data/*.csv` nằm trong `.gitignore` ⇒ 822 file /
+2,1GB ngoài version control, **tên canonical ghi đè được** (ca thật: cùng tên
+`v23_golive_audit_2014_now.csv`, md5 `84295bee` của user vs `65e7bb04` trên đĩa = hai hệ khác
+nhau), và **2/28 md5 registry trích dẫn đã mất dấu vĩnh viễn**. Nay:
+- **Kho** `data/pinned_ledgers/` (trong git) — `bin/pin_ledger.py add` ghi-MỘT-LẦN khoá bằng md5;
+  md5 trùng ⇒ rc=2, không có `--force`. Manifest `PINS.jsonl` append-only.
+- **Pin phải khai chân CONTROL** (`--control-md5` / `--no-control "<lý do>"`): re-pin mà không
+  chạy lại chân cũ trên code mới thì Δ giữa hai số pin KHÔNG đọc được.
+- **Luật SO SÁNH 1 TRỤC** — `pin_ledger.py compare A B`: khác ≥2 trục ⇒ **rc=2, TỪ CHỐI xuất bảng**.
+  Hai ledger khai CÙNG config mà md5 khác cũng bị từ chối (= có trục nằm NGOÀI lệnh: vintage dữ
+  liệu / phiên bản code / engine không tất định).
+- **4 cổng pre-commit**: `pin-artifact-gate` (mục registry mới phải có `ledger_md5:` hoặc
+  `no_ledger:`) · `pin-store-immutable` (kho chỉ-thêm) · `number-provenance-gate` (khối KB mới
+  công bố CAGR/Sharpe/Calmar/MaxDD phải khai nguồn trong cùng khối) · kiểm kê `pin_artifact_inventory.py`.
+- ⚠️ **Bẫy git đã cắn 2 lần khi xây đúng bộ cổng này**: `git show <rev>:<path>` tính path từ **GỐC
+  REPO**, còn `git diff … -- <pathspec>` tính từ **CWD**. Nhầm một cái ⇒ diff rỗng ⇒ cổng **im lặng
+  cho qua**. Dùng `:(top)` cho pathspec, và `rev-parse --show-prefix` cho `show`.
+- ⚠️ **Đọc không được bản cũ ≠ sạch**: cả 2 cổng đều phải nói thẳng "KHÔNG GATE được" thay vì coi
+  mọi thứ là mới (nếu không sẽ phun hàng trăm vi phạm giả và bị tắt hẳn trong một ngày).
+
 *→ rationale §8 (+ §8b).* · **§8b** (retention snapshot `data/bq_cache_asof*`) → `kb/coding_guidelines_ext.md`.
 
 ## 9. Check `mike/kb/data_registry/` Before Wiring a New Data Source
