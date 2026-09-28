@@ -40,6 +40,7 @@ Selfcheck: `python3 mike/bin/nav_flow_term_selfcheck.py`
 import datetime
 import json
 import os
+import sys
 
 WC_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 FLOWS_PATH = os.path.join(WC_ROOT, "data", "account_cash_flows.json")
@@ -68,14 +69,35 @@ def _parse_date(s):
     return datetime.datetime.strptime(s, "%Y-%m-%d").date()
 
 
-def load_flows(account, flows_path=None):
+def load_flows(account, flows_path=None, require_file=False):
     """Trả list [{date, amount_vnd, kind, evidence, timing}, ...] tăng dần theo ngày.
 
-    File thiếu ⇒ []. Bản ghi sai schema ⇒ raise CashFlowError (KHÔNG bỏ qua: một bản ghi hỏng
-    nghĩa là dòng tiền có xảy ra mà ta không đọc đúng, đúng lớp lỗi §28 "suy từ sự vắng mặt").
+    Bản ghi sai schema ⇒ raise CashFlowError (KHÔNG bỏ qua: một bản ghi hỏng nghĩa là dòng tiền
+    có xảy ra mà ta không đọc đúng, đúng lớp lỗi §28 "suy từ sự vắng mặt").
+
+    **File THIẾU — hai chế độ, phân biệt theo người gọi (siết 2026-09-28, user duyệt):**
+      · `require_file=True` ⇒ **raise CashFlowError**. Dùng cho đường CÔNG BỐ SỐ (§21/§31:
+        `nav_period_returns.py`). Lý do: thiếu file thì "không có dòng tiền nào" và "đã mất sổ
+        dòng tiền" LÀ HAI VIỆC KHÁC NHAU mà hàm này không phân biệt được — và nếu đoán sai theo
+        hướng `[]` thì một lần NẠP tiền thật bị công bố thành LÃI, tức sai theo hướng có lợi cho
+        mình, hướng tệ nhất để sai.
+      · `require_file=False` (mặc định, giữ nguyên hành vi cũ) ⇒ trả `[]` **nhưng IN cảnh báo ra
+        stderr** thay vì im lặng. Dùng cho đường không công bố (`daily_nav_snapshot.py`, vốn còn
+        cổng NAV-jump 5% riêng).
+    Bản ghi RỖNG khi file CÓ (account chưa từng có dòng tiền) là `[]` hợp lệ ở CẢ HAI chế độ —
+    đó là "đã đọc và xác nhận không có", khác hẳn "không đọc được".
     """
     path = flows_path or os.environ.get("ACCOUNT_CASH_FLOWS_PATH") or FLOWS_PATH
     if not os.path.exists(path):
+        if require_file:
+            raise CashFlowError(
+                f"KHÔNG có sổ dòng tiền {path} — người gọi yêu cầu bắt buộc (require_file=True)."
+                " Thiếu file thì không phân biệt được 'chưa từng nạp/rút' với 'mất sổ', và đoán"
+                " theo hướng rỗng sẽ công bố một lần NẠP thành LÃI. Tạo file (có thể là"
+                ' {"<account>": []} nếu thật sự chưa có dòng tiền nào) rồi chạy lại.')
+        print(f"[account_cash_flows] CẢNH BÁO: không có {path} ⇒ coi như KHÔNG có dòng tiền"
+              f" nào cho '{account}'. Nếu account này ĐÃ từng nạp/rút, mọi tỉ suất tính từ đây"
+              f" đều SAI (nạp bị tính thành lãi).", file=sys.stderr)
         return []
     with open(path, "r", encoding="utf-8") as f:
         cfg = json.load(f)

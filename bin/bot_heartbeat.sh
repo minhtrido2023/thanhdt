@@ -121,7 +121,28 @@ PYEOF
 if [ ! -f "$PLAN_FILE" ]; then
   exit 0
 fi
-N_ORDERS="$(python3 -c "import json; print(len(json.load(open('$PLAN_FILE')).get('orders', [])))" 2>/dev/null || echo 0)"
+# FAIL-CLOSED tu 2026-09-28 (user duyet). Truoc day: `2>/dev/null || echo 0` ⇒ plan JSON HONG
+# cho ra N_ORDERS=0 roi `exit 0` IM LANG CA PHIEN. Heartbeat la kenh DUY NHAT bao bot con song
+# va da khop gi moi 5 phut ⇒ mat no la mat kha nang phat hien MOI su co khac trong gio giao dich,
+# dung dieu user cam ("im lang hoan toan = khong phan biet duoc voi pipeline chet").
+# Phai TACH: "plan co 0 lenh" (im lang DUNG) vs "khong doc duoc plan" (PHAI BAO).
+if _NO_OUT="$(python3 -c "import json,sys; print(len(json.load(open(sys.argv[1])).get('orders', [])))" "$PLAN_FILE" 2>&1)"; then
+  N_ORDERS="$_NO_OUT"
+else
+  _HB_MSG="🔴 **bot_heartbeat KHONG DOC DUOC PLAN** — \`$(basename "$PLAN_FILE")\`
+Truoc 2026-09-28 cho nay \`|| echo 0\` roi \`exit 0\` ⇒ heartbeat IM LANG CA PHIEN du bot co the dang chay va khop lenh.
+Loi that:
+\`\`\`
+${_NO_OUT}
+\`\`\`
+Viec can lam: kiem file plan (JSON hop le? co key \`orders\`?). Cho nao con im lang thi KHONG the ket luan bot song."
+  if [ -x "$ROOT/bin/notify_thread.sh" ] && [ -z "${HB_NO_NOTIFY:-}" ]; then
+    "$ROOT/bin/notify_thread.sh" "$_HB_MSG" trading_daily >/dev/null 2>&1 \
+      || echo "[bot_heartbeat] LOI: khong post duoc Discord — canh bao KHONG toi nguoi" >&2
+  fi
+  echo "[bot_heartbeat] KHONG doc duoc $PLAN_FILE: $_NO_OUT" >&2
+  exit 4
+fi
 if [ "${N_ORDERS:-0}" -eq 0 ] 2>/dev/null; then
   exit 0
 fi

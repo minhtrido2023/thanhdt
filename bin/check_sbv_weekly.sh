@@ -12,7 +12,10 @@
 # the timestamp — the human ran the script and SBV hasn't changed (known stable).
 
 set -euo pipefail
-WORKDIR="/home/trido/thanhdt/WorkingClaude"
+# WORKDIR override CHI de selfcheck chay duoc nhanh THAT BAI trong sandbox — neu khong thi
+# cach duy nhat de thu nhanh do la chay that va GHI vao data/sbv_verify_log.json production
+# (da lo xay ra 2026-09-28 01:48 khi Mike smoke-test: last_verified bi day som 3 ngay).
+WORKDIR="${SBV_CHECK_WORKDIR:-/home/trido/thanhdt/WorkingClaude}"
 LOGDIR="$WORKDIR/logs"
 VERIFY_LOG="$WORKDIR/data/sbv_verify_log.json"
 PY="/usr/bin/python3"
@@ -24,18 +27,40 @@ cd "$WORKDIR"
 echo "===== SBV weekly check $TODAY $(date +%H:%M:%S) ====="
 
 # ── Step 1: Get current rate from SBV_REFI_EVENTS (last entry) ──────────────
-CURRENT_RATE=$(python3 -c "
+# FAIL-CLOSED tu 2026-09-28 (user duyet). Truoc day 2 lenh nay la
+#   `... 2>/dev/null || echo "4.5"`  va  `... || echo "2023-06-19"`
+# ⇒ import hong thi script SO lai suat fetch duoc voi HANG SO BIA roi bao "unchanged".
+# Ca cron tuan nay ton tai DE PHAT HIEN lai suat SBV doi; doan gia tri o day lam no mu
+# dung viec no sinh ra de lam, va `SBV_REFI_EVENTS` khong duoc cap nhat ⇒ DT5G chay bang
+# regime tien te cu. Dung mau §29 ("vut bang chung roi doan").
+# `macro_healthcheck.py:200` doc CUNG nguon va fail-closed SEV1 ⇒ fail-closed o day la kha thi.
+# Doc CA HAI truong trong MOT lan import (truoc day 2 lan, co the lech 2 event khac nhau).
+_SBV_ERR=""
+if ! _SBV_OUT="$(python3 -c "
 import sys; sys.path.insert(0,'$WORKDIR')
 from sbv_macro_overlay import SBV_REFI_EVENTS
 ev = SBV_REFI_EVENTS[-1]
-print(ev[1])
-" 2>/dev/null || echo "4.5")
-CURRENT_DATE=$(python3 -c "
-import sys; sys.path.insert(0,'$WORKDIR')
-from sbv_macro_overlay import SBV_REFI_EVENTS
-ev = SBV_REFI_EVENTS[-1]
-print(ev[0])
-" 2>/dev/null || echo "2023-06-19")
+print(ev[1]); print(ev[0])
+" 2>&1)"; then
+  _SBV_ERR="$_SBV_OUT"
+fi
+CURRENT_RATE="$(printf '%s\n' "$_SBV_OUT" | sed -n 1p)"
+CURRENT_DATE="$(printf '%s\n' "$_SBV_OUT" | sed -n 2p)"
+if [ -n "$_SBV_ERR" ] || [ -z "$CURRENT_RATE" ] || [ -z "$CURRENT_DATE" ]; then
+  _MSG="🔴 **check_sbv_weekly TU CHOI CHAY** ($TODAY) — khong doc duoc \`SBV_REFI_EVENTS\` tu \`sbv_macro_overlay\`.
+Truoc 2026-09-28 cho nay am tham dung hang so \`4.5\` / \`2023-06-19\` roi bao \"unchanged\" ⇒ lai suat SBV doi that cung KHONG sinh alert, DT5G chay bang regime tien te cu.
+Loi that:
+\`\`\`
+${_SBV_ERR:-(import chay nhung in ra thieu dong: rate=${CURRENT_RATE:-<rong>} date=${CURRENT_DATE:-<rong>})}
+\`\`\`
+Viec can lam: kiem \`sbv_macro_overlay.py\` (SBV_REFI_EVENTS) roi chay lai \`mike/bin/check_sbv_weekly.sh\`. \`macro_healthcheck.py\` doc cung nguon nen se bao SEV1 neu no cung hong."
+  if [ -x "$WORKDIR/mike/bin/notify_thread.sh" ]; then
+    "$WORKDIR/mike/bin/notify_thread.sh" "$_MSG" trading_daily >/dev/null 2>&1 \
+      || echo "[check_sbv_weekly] LOI: khong post duoc Discord — canh bao KHONG toi nguoi" >&2
+  fi
+  echo "[check_sbv_weekly] TU CHOI CHAY — khong doc duoc SBV_REFI_EVENTS. Loi that: ${_SBV_ERR:-thieu dong output}" >&2
+  exit 3
+fi
 echo "  current recorded rate: ${CURRENT_RATE}% (last event: ${CURRENT_DATE})"
 
 # ── Step 2: Try to fetch SBV page (best-effort; timeout 20s) ────────────────

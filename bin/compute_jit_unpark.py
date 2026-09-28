@@ -236,11 +236,18 @@ def build_pool(h, asof, share, adv_fn, l1_used=None):
             blocked.append({"ticker": tk, "reason": f"không đo được ADV: {e}"})
             continue
         if data_date:
+            # FAIL-CLOSED tu 2026-09-28 (user duyet). Truoc day `except: lag_days = None` roi dieu
+            # kien ke tiep la `if lag_days is not None and ...` ⇒ None lam CA CAU GATE KHONG CHAY:
+            # cong chong ADV cu (ma co the da ngung GD / huy niem yet) BIEN MAT im lang. Nay khong
+            # do duoc do cu thi CHAN ma do, kem LOI THAT (§29).
             try:
                 lag_days = (dt.date.fromisoformat(asof) - dt.date.fromisoformat(data_date)).days
-            except Exception:
-                lag_days = None
-            if lag_days is not None and lag_days > LAG_ADV_MAX_STALE_DAYS:
+            except Exception as e:
+                blocked.append({"ticker": tk, "reason":
+                                f"khong xac dinh duoc do cu ADV (asof={asof!r} "
+                                f"data_date={data_date!r}): {type(e).__name__}: {e}"})
+                continue
+            if lag_days > LAG_ADV_MAX_STALE_DAYS:
                 blocked.append({"ticker": tk, "reason": f"ADV data {data_date} cũ {lag_days} ngày "
                                                         f"(> {LAG_ADV_MAX_STALE_DAYS})"})
                 continue
