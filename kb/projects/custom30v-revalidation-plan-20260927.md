@@ -155,3 +155,20 @@ Job re-pin: `Taylor_20260927_170645`. Cổng: control `IDLE_CARRY_TIER=off` ph�
 **quant-skeptic 2026-09-27 18:18Z trên số pin dep1m: CONFIRMED (high).** Tái lập toàn bộ số đầu mục từ ledger + CSV thô; PIT đúng ở mối nối 2019-02→03; carry không vào quyết định; tiền đã park không bị cộng lãi hai lần; selfcheck 102 assertion + 15/15 mutation PASS khi skeptic tự chạy lại. 8/8 check pass. **Killer objection (không phá số, nhưng phải trích kèm):** +2,34pp là ĐỔI QUY ƯỚC ĐO, không phải alpha — lãi kỳ hạn 1 tháng đang được trả hằng ngày cho tiền thanh khoản hằng ngày (~46% NAV), và 53/150 tháng là chuỗi dựng lại bằng offset hiệu chỉnh trên 2019-2026. Ba lỗi trình bày nhỏ cần sửa (bảng theo năm thiếu dòng 2020; docstring ghi 54/143 thay vì 53/150). Đề xuất tuỳ chọn: 1 chân chỉ trả carry cho tiền nằm im ≥21 phiên để chặn trên mức lạc quan của quy ước.
 
 **TRẠNG THÁI: CHỜ USER CHỌN A/B cho CLAUDE.md** (§Backtest đang ghi "lãi tiền gửi nhàn rỗi 0%/năm", 2 script trích thẳng "per CLAUDE.md"). Chưa chọn thì KHÔNG ghi registry canonical, KHÔNG đổi anchor.
+
+## 10. USER CHỐT 2026-09-28 08:02 ICT — PIN DẢI 2 SỐ (đóng câu hỏi A/B)
+
+> *"Đồng ý áp dụng chân tùy chọn chỉ trả carry cho phần tiền nằm im 21 phiên trở lên. Nhưng cũng chưa chính xác thận trọng. Thực tế nếu rút trước hạn coi như hưởng lãi 0%. Nên áp dụng bản pin 2 con số cho dễ hình dung. Cần note rõ pin0%, và pin1M để có ngưỡng sàn và Trần."* (`decided_by: user`)
+
+Câu hỏi A/B ở §9 được giải bằng **phương án thứ ba, tốt hơn cả hai**: giữ CẢ HAI quy ước làm dải.
+`pin0%` = 23,37% (sàn) · `pin1M` = 25,71% (trần). Cả hai chính thức, cấm trích 1 số trần trụi.
+**Neo sizing DD giữ đầu sàn −25,2%** — không nới rủi ro theo đầu trần.
+
+ĐÃ GHI CANONICAL (không chờ thêm): `WorkingClaude/CLAUDE.md` §Backtest (2 quy ước thay cho 1
+dòng "0%/năm"), `data/results_registry.md` mục "2026-09-28 (septies)", `kb/canonical.md` +
+`kb/KNOWLEDGE.md`, 2 entry `kb/data_registry/macro/` (từ `.proposed`).
+
+Chân `dep1m_21s` (job `Taylor_20260928_010454`): điểm thực tế trong dải, ngữ nghĩa RÚT TRƯỚC HẠN =
+0% — chỉ trả lãi cho tiền đã nằm im ≥21 phiên tính đến ngày đó, **KHÔNG truy lĩnh** 21 phiên đầu
+(truy lĩnh = nhìn trước). FIFO (tiêu lô cũ trước, thận trọng) làm chân pin, LIFO làm độ nhạy.
+Bổ sung vào registry §4 khi xong; bắt buộc nằm trong dải, ngoài dải = dấu hiệu lỗi.

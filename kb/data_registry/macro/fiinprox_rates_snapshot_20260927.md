@@ -7,8 +7,13 @@ group: macro
 upstream: FiinPro-X trial, HẾT HẠN 2026-09-28 — snapshot MỘT LẦN 2026-09-27 16:4x ICT, không có nguồn nối tiếp
 writer: Mike (tay), không cron
 verified_by: Taylor, job Taylor_20260927_101337, 2026-09-27
-consumer: idle_rate_proxy.py (R&D only, KHÔNG wire vào engine)
+consumer: idle_rate_proxy.py (R&D + cơ sở số pin registry; KHÔNG wire vào engine live)
+related: fiinprox_deposit_1m_big4_20260928.md (chuỗi huy động 1 THÁNG Big-4 — tier `dep1m`, dùng chuỗi `sbv_low` của file NÀY làm cầu về trước 2019-02)
 ---
+
+<!-- ĐỀ XUẤT (§13) — bản .proposed do job Taylor_20260927_170645 soạn, chờ Mike duyệt.
+     Thay đổi so bản live: thêm `related:`, sửa `consumer:`, thêm §Chuỗi thứ BA + bẫy 8-9,
+     cập nhật §Consumer (tier dep1m, selfcheck 102 assertion / 15 mutation). -->
 
 # FiinPro rates snapshot 2026-09-27 — lãi suất huy động (NHNN) + lãi suất BQ liên ngân hàng
 
@@ -25,6 +30,17 @@ dùng được cho R&D/backtest, nhưng ai pin một con số công bố dựa v
   tháng**) 2014-01-31→2026-09-25, 14 series: 7 tenor lãi suất (%/năm) + 7 tenor doanh số (VND).
 
 Schema chung: `period,series,rate_pct` (long format).
+
+## Chuỗi thứ BA, thêm 2026-09-27 ~23:5x ICT (ngay trước khi trial chết) — entry riêng
+`fiinprox_deposit_1m_big4_monthly_2019_2026.csv` — lãi suất **huy động 1 THÁNG, khách CÁ NHÂN, bình
+quân Big 4**, 92 tháng 2019-02→2026-09, schema `period,asof,series,rate_pct` (**có thêm cột `asof`**,
+khác 2 chuỗi trên). Route khác hẳn:
+`client.economy.interest_rate.get_other_banks_interest_rates(date=..., individual=True)`.
+**Đây là chuỗi user chốt làm quy ước tiền nhàn rỗi cho số pin** (23:58 ICT 2026-09-27) ⇒ có entry
+registry RIÊNG với đầy đủ bẫy: **`macro/fiinprox_deposit_1m_big4_20260928.md`**. Điểm quan trọng
+nhất, nhắc ở đây để không ai đọc lẫn: chuỗi đó **chỉ có từ 2019-02** (route trả HTTP 500 cho mọi
+ngày ≤ 2018-12) nên đoạn trước đó trong `idle_rate_proxy` được **DỰNG LẠI từ `sbv_low` của CHÍNH
+file này** + offset median −2,525pp.
 
 ## Đối chiếu (Taylor, 2026-09-27)
 **Tiền gửi — 3/3 mốc, lệch 0,00pp:** 2025-11 `4,9/6,2` (báo cáo NHNN 11/2025) · 2026-01 `5,1/6,5`
@@ -61,12 +77,26 @@ chuỗi PIT thật duy nhất phủ đủ 2014-2026.
    `dttktt.sbv.gov.vn` còn sống, chỉ là không có API) hoặc mua subscription.
 7. **Đoạn 2011-01→2025-10 chưa được nguồn thứ hai xác minh** (xem §Đối chiếu). Không tuyên bố
    "CANONICAL" cho toàn chuỗi.
+8. **`sbv_low` giờ là XƯƠNG SỐNG của một số pin, không chỉ của một tier R&D.** Tier `dep1m` dùng
+   `sbv_low` để dựng lại 53/150 tháng của cửa sổ pin R3 ⇒ mọi sai của `sbv_low` trước 2019-02 chảy
+   thẳng vào con số 25,71% của mục registry (septies). Bẫy 7 (chưa có nguồn thứ hai cho
+   2011-01→2025-10) vì thế **nặng hơn trước**, không nhẹ đi.
+9. **`sbv_low` khuyết 10 tháng** (2015-02, 2016-02, 2016-08, 2017-01, 2017-02, 2017-03, 2017-05,
+   2017-09, 2021-01, 2026-09) — `idle_rate_proxy` **forward-fill** mốc tháng trước. 8 trong 10 tháng
+   đó nằm đúng trong đoạn dựng lại của `dep1m`. Đếm bằng `dep1m_coverage()`, đừng giả định chuỗi liền.
 
 ## Consumer & haircut đã hiệu chỉnh
-`idle_rate_proxy.py` (WorkingClaude root, R&D-only) dùng chuỗi này qua `r_idle(date, tier)`:
+`idle_rate_proxy.py` (WorkingClaude root) dùng chuỗi này qua `r_idle(date, tier)`:
 `baseline` = SBV thấp nhất − **2,04pp** · `floor` = max(0, liên NH 1M) · `spot` = 8,543% (chỉ
-2026-08-18→2027-03-31, ngoài khoảng raise). Haircut 2,04pp = **median(SBV thấp nhất − liên NH 3M)**
+2026-08-18→2027-03-31, ngoài khoảng raise) · **`dep1m`** (thêm 2026-09-28, job
+`Taylor_20260927_170645`) = huy động 1 tháng Big-4: SỐ THẬT từ 2019-02, trước đó `sbv_low − 2,525pp`
+— **đây là tier của SỐ PIN**, không còn là R&D-only. Haircut 2,04pp = **median(SBV thấp nhất − liên NH 3M)**
 đo trên 143 tháng 2014-01→2026-08 (p25 +0,36 / p75 +3,15 / mean +1,59 / sd 1,92 / 21,0% tháng âm) —
 thay con số quy ước 1,0pp của bản kế hoạch, vốn quá nhỏ và nghiêng kết luận về phía "tiền có lợi".
-Selfcheck `idle_rate_proxy_selfcheck.py`: 50 assertion PASS, mutation 7/7 bị giết, PASS dưới
-`env -u TZ` + 3 TZ ngoại. Số liệu đầy đủ: `idle_cash_proxy_20260927/REPORT.md`.
+Selfcheck `idle_rate_proxy_selfcheck.py`: **102 assertion PASS, mutation 15/15 bị giết** (nâng từ
+50/7 khi thêm tier `dep1m`), PASS dưới `env -u TZ` + 4 TZ ngoại; mutation cũng 15/15 dưới `TZ=UTC`.
+Hai mutation ứng viên bị loại vì **chứng minh được là tương đương** (đảo thứ tự
+`real.combine_first(recon)` — hai mask rời nhau; bỏ `clip(lower=0)` — `min(sbv_low)` trên đoạn recon
+= 6,4 > |offset| tối đa 3,4) — ghi ra trong file selfcheck, không im lặng bỏ.
+Số liệu đầy đủ: `idle_cash_proxy_20260927/REPORT.md` (W1) và
+`repin_dep1m_20260928/REPORT.md` (tier `dep1m` + số pin).
