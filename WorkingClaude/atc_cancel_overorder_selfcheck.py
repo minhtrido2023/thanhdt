@@ -22,7 +22,7 @@ import textwrap    # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REL = "WorkingClaude/trading_bot/executor.py"
-OLD_REF = os.environ.get("ATC_OLD_REF", "").strip() or "df8d7b9a"
+OLD_REF = os.environ.get("ATC_OLD_REF", "").strip() or "34bb640d^"
 LOT = 100
 _n = 0
 
