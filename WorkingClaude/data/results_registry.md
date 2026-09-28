@@ -8195,10 +8195,54 @@ Sizing phải đứng ở cận xấu. Đầu trần cho DD mỏng hơn 1,6pp ch
 - 🚫 **KHÔNG đọc +2,34pp là "chiến lược tốt lên"**. Đây là đổi thước đo, áp đều cho mọi phương tiện.
 - 🚫 Dải này KHÔNG mở lại câu hỏi xếp hạng phương tiện park (W2b: engine không đủ sức phân giải).
 
-### 4. Điểm thực tế trong dải — chân `dep1m_21s` (ĐANG CHẠY, job `Taylor_20260928_010454`)
-Mô hình đúng ngữ nghĩa *rút trước hạn = 0%*: chỉ trả lãi cho phần tiền ĐÃ nằm im ≥21 phiên tính
-đến ngày đó, **không truy lĩnh** 21 phiên đầu (truy lĩnh = nhìn trước). Số sẽ bổ sung vào mục này
-khi xong; bắt buộc nằm trong dải 23,37…25,71, nằm ngoài = dấu hiệu lỗi.
+### 4. Điểm THẬN TRỌNG trong dải — chân `dep1m_21s` (job `Taylor_20260928_010454`)
+Mô hình ngữ nghĩa *rút trước hạn = 0%*: chỉ trả lãi cho phần tiền ĐÃ nằm im ≥21 phiên tính đến
+ngày đó, không truy lĩnh 21 phiên đầu.
+
+| Chân | CAGR | Sharpe | MaxDD | Calmar | Final NAV | Tiền đủ tuổi / tiền nhàn rỗi |
+|---|---|---|---|---|---|---|
+| `21s` **FIFO — CHÂN PIN** (luật định trước) | **25,24%** | 2,03 | −14,4% | 1,75 | 825,92B | 51,3% |
+| `21s` LIFO (độ nhạy) | 24,95% | 2,00 | −14,4% | 1,73 | 802,45B | 57,0% |
+
+Cả hai NẰM TRONG dải 23,37…25,71 ✅. IS(2014-19) 21,39% / OOS(2020+) 28,92% — OOS > IS ở cả 4 chân,
+đúng như kỳ vọng cho một hiệu ứng SỐ HỌC (không phải edge tín hiệu).
+
+⚠️ **ĐÍNH CHÍNH NHÃN — đây là ĐIỂM THẬN TRỌNG, KHÔNG phải "điểm thực tế"** (quant-skeptic
+2026-09-28 02:18Z, killer objection). Lập luận cũ *"không truy lĩnh vì truy lĩnh = nhìn trước"*
+**SAI**: trả 21 phiên lãi vào phiên 22 cho một kỳ hạn mà lô tiền ĐÃ đi hết là NHÂN QUẢ — đó đúng
+là cách sổ tiết kiệm 1 tháng quay vòng trả. Engine hiện trả 0 cho kỳ đầu rồi trả THEO NGÀY từ đó
+⇒ với lô sống n≥21 phiên nó trả `n−21` ngày thay vì `21·floor(n/21)` ngày ⇒ **trả THIẾU 1–21 ngày
+mỗi lô đáo hạn**. Hệ quả: số trung thực với luật user chốt nằm **strictly trong (25,24%; 25,71%)**;
+25,24% là cận dưới thận trọng của chính nó, KHÔNG phải điểm ước lượng tốt nhất.
+
+⚠️ **Phần ĐƯỜNG ĐI của chân pin = 0,758pp = 1,6× sàn nhiễu 0,46pp** (phân tách `overlay_21s.py`,
+cùng công thức đã CONFIRMED ở `w2b_overlay.py`): tổng +1,873 = số học +1,116 + đường đi +0,758.
+⇒ **điểm giữa KÉM CHẮC hơn hai đầu dải** (pin1M có đường đi 0,295pp, DƯỚI sàn) — đọc là "gần đầu
+trần", KHÔNG đọc như một con số chính xác.
+
+⚠️ **Engine KHÔNG xếp hạng được FIFO vs LIFO.** Chiều SỐ HỌC đơn điệu ĐÚNG (LIFO +1,191pp >
+FIFO +1,116pp, khớp tiền đủ tuổi 57,0% > 51,3%) nhưng thứ tự CAGR ĐẢO HẲN (FIFO 25,24% >
+LIFO 24,95%) — toàn bộ đảo chiều nằm ở phần đường đi, chênh 0,289pp DƯỚI sàn nhiễu. FIFO được pin
+vì là **luật định trước** + thận trọng ở chiều carry, KHÔNG phải vì nó đo cao hơn.
+
+Ngữ nghĩa engine (khớp chỉ đạo user 08:02 ICT 28/09): lô sinh ra ở tuổi 0, lần đầu được trả ở
+phiên 22; tiền tiêu trước phiên 22 tự động hưởng 0%; lãi đã trả KHÔNG nhập gốc (tự già lại từ 0);
+`cash<0` xoá sổ tuổi. **Mutation M6 giết một khe hở THẬT**: đối soát sổ tuổi 1 lần/phiên cho phép
+dòng ra phiên t triệt tiêu dòng vào phiên t+1 ⇒ tiền ĐÃ TIÊU vẫn sinh lãi (>240 triệu VND) — nay
+đối soát **2 lần/phiên**.
+
+Cổng: self-check 0 VND (tiền + NAV identity, cả 2 book, cả 2 chân); `idle_cash_age_selfcheck.py`
+50 assertion PASS / **11/11 mutation bị giết**, skeptic tự chạy lại dưới TZ mặc định + UTC; 4/4 md5
+khớp; chân control `ctrl2` md5 `4707bcbe…` **byte-identical** với pin R3 (sexies).
+**quant-skeptic CONFIRMED (medium) 2026-09-28 02:18Z**, 8/8 check pass — "medium" vì verdict có
+ĐIỀU KIỆN: phải đổi nhãn trước khi ghi canonical (đã làm ở mục này).
+
+**Còn mở, skeptic đề xuất, CHƯA chạy (cần user duyệt):** (a) chân "TRẢ KHI ĐÁO HẠN" — credit 21
+phiên lãi tại mỗi mốc 21 phiên của lô, 0 cho kỳ dở — đây mới là số trung thực với luật user,
+kỳ vọng rơi giữa 25,24% và 25,71%; (b) độ nhạy `IDLE_CARRY_MIN_AGE ∈ {20, 22, 23}` (tháng thật có
+22-23 phiên) để chứng minh pin đứng trên một cao nguyên, không phải một điểm.
+
+**Neo sizing DD GIỮ NGUYÊN −25,2%** (đầu SÀN của dải). Chân này KHÔNG đụng neo.
 
 ### 5. Nguồn lãi suất + giới hạn phải mang theo `pin1M`
 - Chuỗi: `mike/agents/Taylor/research/idle_cash_proxy_20260927/fiinprox_deposit_1m_big4_monthly_2019_2026.csv`
