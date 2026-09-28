@@ -5,7 +5,7 @@
 (b) mọi script sinh `notes[]`/text hiển thị bên trong plan JSON mà (a) echo lại nguyên văn —
 `bin/compute_park_trim.py`, `bin/merge_park_orders.py`, `bin/compute_jit_unpark.py`, và bất kỳ
 script tương tự sau này. Nội dung do (b) tạo ra HIỂN THỊ TRONG (a) — không tách biệt được, nên
-cùng 6 luật dưới áp dụng cho cả hai.
+cùng 7 luật dưới áp dụng cho cả hai.
 
 **Nguồn**: rút từ audit `agents/Taylor/research/plan_report_audit_20260928/report.md` +
 quyết định user tối 2026-09-28→29 (duyệt hướng đề xuất §3 report đó, mockup Case A/B). Viết
@@ -21,9 +21,17 @@ config thật đang có sẵn cùng scope — không viết literal mô tả l�
 - **Ca gốc (đã fix, merge `98a9d633`)**: `send_plan_report.sh` hardcode "trần PARK 80%" trong khi
   `target_park` đã đổi 0.80→0.30 ở config — sửa thành đọc `park_trim.get("target_park")`.
 - **Ca cùng lớp, CHƯA fix lúc audit** (`send_plan_report.sh:481-483`): `"1,3× vốn"` viết literal
-  trong khi `_pv['lever_f']` (biến số thật) đã có sẵn cùng scope, dùng đúng 10 dòng dưới ở dòng
-  492. Sửa: `f"{_pv['lever_f']:g}×"`. Đúng hôm audit vì `CAPIT_LEVER_APPROVED_F = 1.3` trùng khớp
-  ngẫu nhiên — đổi gói đòn bẩy (có tiền lệ đặt tên f=1.5) sẽ lập tức sai mà không ai phát hiện.
+  trong khi khối này thuộc nhánh `preview_margin_day` KHÔNG có `orders` (granted rỗng) — đúng lúc
+  đó `_pv['lever_f']` LUÔN LÀ `None` (`trading_bot/plan.py:1714` khởi tạo `None`, early-return
+  dòng 1725 trước khi gán giá trị khác), nên `f"{_pv['lever_f']:g}×"` sẽ NÉM `TypeError` ngay
+  trong `try/except` của khối này — except bắt lỗi sẽ THAY TOÀN BỘ cảnh báo bằng câu lỗi chung,
+  tức xoá mất cảnh báo an toàn "sizing theo đòn bẩy nhưng chạy vốn tự có" mà audit trước (finding
+  #3a) đã thêm. Sửa ĐÚNG (code thật đã làm): import `CAPIT_LEVER_APPROVED_F` từ `trading_bot.plan`
+  (cùng hằng số `apply_capit_lever` dùng để neo, `plan.py:1504`) và render
+  `f"{CAPIT_LEVER_APPROVED_F:g}×"` — hằng số cấu hình đòn bẩy được duyệt, không phụ thuộc nhánh
+  nào của `preview_margin_day` đang chạy. Đúng hôm audit vì `CAPIT_LEVER_APPROVED_F = 1.3` trùng
+  khớp ngẫu nhiên với literal cũ — đổi gói đòn bẩy (có tiền lệ đặt tên f=1.5) sẽ lập tức sai mà
+  không ai phát hiện.
 - **KHÔNG áp dụng** cho hằng số **tự sở hữu** bởi chính đoạn code đó (không có bản sao ở nơi khác
   để lệch theo) — vd `PRICE_TOLERANCE`, ngưỡng lệch CAPIT sizing nội bộ. Phân biệt: hỏi "giá trị
   này có đọc được từ 1 biến/config Python đã tồn tại trong cùng file/scope không?" — có thì phải

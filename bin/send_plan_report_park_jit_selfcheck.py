@@ -339,6 +339,54 @@ check("import CAPIT_LEVER_APPROVED_F từ trading_bot.plan (cùng nguồn apply_
       "from trading_bot.plan import preview_margin_day, margin_day_approval, "
       "CAPIT_LEVER_APPROVED_F" in _sender_src)
 
+# ── T12 — dòng tổng "Lý do (áp dụng CHUNG cho N lệnh)" trong orders[] loop (send_plan_report.sh
+# ~L693/796, biến _pt_trim_tickers) phải lọc play_type == "PARK_TRIM" TUYỆT ĐỐI, KHÔNG được gộp
+# nhầm 11 lệnh "PARK_TRIM+JIT_UNPARK" (đã dùng để TÀI TRỢ lệnh mua) vào nhóm "KHÔNG liên quan
+# tới việc tài trợ lệnh mua" — arch-review vòng 1 mutation M4 (đổi == thành .startswith) tái tạo
+# ĐÚNG sự cố 2026-09-17 (đọc 2 dòng liền nhau tưởng mâu thuẫn) theo chiều ngược lại. Logic sản
+# xuất hiện == đã ĐÚNG; test này chỉ PIN để lỡ ai đổi == → startswith/in hoặc đổi nguồn liệt kê
+# từ `sells` sang toàn bộ `orders` (gồm cả lệnh mua) thì selfcheck phải ĐỎ ngay.
+print("\n[T12] Dòng tổng 'Lý do PARK_TRIM' (orders loop) phải lọc play_type == 'PARK_TRIM' tuyệt đối")
+
+
+def _n_pure_park_trim(plan):
+    orders = plan.get("orders") or []
+    sells = [o for o in orders if str(o.get("side", "")).lower() in ("sell", "ban", "s")]
+    return len([o for o in sells if str(o.get("play_type", "")).upper() == "PARK_TRIM"])
+
+
+SX_N_PURE_PT = _n_pure_park_trim(SX)
+out_t12 = run_sender(SX, "SpaceX")
+_pt_reason_lines = [l.strip() for l in out_t12.splitlines()
+                    if "Lý do (áp dụng CHUNG cho" in l and "PARK_TRIM" in l]
+check(f"plan 08-07: dòng tổng ghi ĐÚNG N={SX_N_PURE_PT} lệnh PARK_TRIM thuần (đếm từ artifact, "
+      "KHÔNG hardcode) — KHÔNG được là 14 (tổng mọi lệnh bán) hay gộp cả PARK_TRIM+JIT_UNPARK",
+      SX_N_PURE_PT > 0
+      and len(_pt_reason_lines) == 1
+      and f"cho {SX_N_PURE_PT} lệnh BÁN PARK_TRIM" in _pt_reason_lines[0]
+      and f"cho {len(SX['orders'])} lệnh" not in _pt_reason_lines[0],
+      _pt_reason_lines[:1] or [f"(kỳ vọng N={SX_N_PURE_PT})"])
+
+# Biến thể: đổi 1 lệnh PARK_TRIM+JIT_UNPARK → PARK_TRIM thuần ⇒ N phải TĂNG đúng 1, chứng minh
+# số N phản ánh lọc play_type thật, không phải hằng số cố định trong test.
+p_t12b = copy.deepcopy(SX)
+_flipped = False
+for o in p_t12b.get("orders") or []:
+    if str(o.get("side", "")).lower() in ("sell", "ban", "s") and \
+       str(o.get("play_type", "")) == "PARK_TRIM+JIT_UNPARK":
+        o["play_type"] = "PARK_TRIM"
+        _flipped = True
+        break
+assert _flipped, "fixture 08-07 phải có ít nhất 1 lệnh PARK_TRIM+JIT_UNPARK để flip — kiểm tra lại artifact"
+N_EXPECTED_B = SX_N_PURE_PT + 1
+out_t12b = run_sender(p_t12b, "SpaceX")
+_pt_reason_lines_b = [l.strip() for l in out_t12b.splitlines()
+                      if "Lý do (áp dụng CHUNG cho" in l and "PARK_TRIM" in l]
+check(f"flip 1 lệnh PARK_TRIM+JIT_UNPARK→PARK_TRIM: N tăng đúng {SX_N_PURE_PT}→{N_EXPECTED_B}",
+      len(_pt_reason_lines_b) == 1
+      and f"cho {N_EXPECTED_B} lệnh BÁN PARK_TRIM" in _pt_reason_lines_b[0],
+      _pt_reason_lines_b[:1] or [f"(kỳ vọng N={N_EXPECTED_B})"])
+
 print(f"\n{'=' * 72}\nKẾT QUẢ: {len(PASS)} PASS / {len(FAIL)} FAIL")
 for f in FAIL:
     print(f"  ✗ {f}")
