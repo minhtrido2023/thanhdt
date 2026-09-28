@@ -761,3 +761,6 @@
 
 ## Archived 2026-09-28 (keep=12 days=0 require_done=False)
 - [2026-09-27T11:23:06Z] CHO USER DUYET MERGE 3 branch cua job Taylor_20260927_103434 (data-gates lo 3 viec, KHONG tu merge): (1) fix/data-gates-20260927 repo mike @/home/trido/thanhdt/wt-datagates-mike — commit 53ee33aa cong Price-freeze trong bq_freshness_check.sh + 3fd65386 cong NAV-jump tra account_cash_flows.json + 7b14e3e8 va nav_scripts_2account_selfcheck; (2) fix/screen-sort-direction-20260927 repo ngoai @/home/trido/thanhdt/wt-screen-sortdir — commit a9c0140b dao chieu sort 8L o 16 file *_screen.py.
+
+## Archived 2026-09-28 (keep=12 days=0 require_done=False)
+- [2026-09-27T11:23:06Z] BAI HOC 2026-09-27: selfcheck backup/restore file THAT phai dung wc_paths.find_wc_root, khong dem cap thu muc — nav_scripts_2account_selfcheck da them 1 dong NAV Chu Nhat vao nav_history_{SpaceX,ZaloPay}.csv THAT khi chay tu worktree (env WC_ROOT cua dispatch.sh thang o child nhung khong thang o selfcheck). Da phuc hoi + va. CHUA QUET cac selfcheck khac cung lop.
