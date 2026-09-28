@@ -56,14 +56,46 @@ done
 # lần" nhưng là một thay đổi nhìn thấy được mà không ai yêu cầu). Chỉ khi SpaceX KHÔNG còn
 # trong danh sách live thì mới rơi về account đầu tiên — đó chính là ca mà bản cũ lặng lẽ
 # KHÔNG chạy check nào cả.
+# FAIL-LOUD 2026-09-28 (user duyet). Comment ngay tren ke ca mot su co: ban cu "lang le KHONG
+# chay check nao ca". Ho va nhanh `ls[0]` RONG — nhung KHONG va nhanh EXCEPTION: `2>/dev/null ||
+# true` lam import loi cung cho RUNONCE_LABEL="" ⇒ ca 3 check chay-mot-lan deu bi cong
+# `[ -n "$RUNONCE_LABEL" ]` chan (anomaly_scan, forensic_check, worktree_stale) ⇒ BIEN MAT cho
+# CA HAI account ma khong mot dong nao noi vi sao. Nay tach: rong vi KHONG CO ACCOUNT LIVE
+# (hop le, im lang) vs rong vi LOI (phai KEU).
+# FAIL-LOUD 2026-09-28 (user duyet). Comment ngay tren ke ca mot su co: ban cu "lang le KHONG
+# chay check nao ca". Ho va nhanh `ls[0]` RONG — nhung KHONG va nhanh EXCEPTION: `2>/dev/null ||
+# true` lam import loi cung cho RUNONCE_LABEL="" ⇒ ca 3 check chay-mot-lan deu bi cong
+# `[ -n "$RUNONCE_LABEL" ]` chan (anomaly_scan, forensic_check, worktree_stale) ⇒ BIEN MAT cho
+# CA HAI account ma khong mot dong nao noi vi sao. Nay tach: rong vi KHONG CO ACCOUNT LIVE
+# (hop le, im lang) vs rong vi LOI (phai KEU).
+# ⚠️ Ham nay duoc goi trong `$( )` = SUBSHELL ⇒ gan bien ben trong KHONG ra duoc ngoai (ban va
+# dau tien cua Mike dinh dung `RUNONCE_ERR=...` va selfcheck bat duoc: loi bi nuot y nhu cu).
+# Vi vay bao loi bang chinh STDOUT, co tien to khong the nham voi mot nhan account.
 _runonce_label() {
-  (cd "$WC_ROOT" && python3 -c "
+  local _out _rc
+  _out="$(cd "$WC_ROOT" && python3 -c "
 from trading_bot.config import live_dnse_labels
 ls = live_dnse_labels()
 print('SpaceX' if 'SpaceX' in ls else (ls[0] if ls else ''))
-" 2>/dev/null) || true
+" 2>&1)"
+  _rc=$?
+  if [ "$_rc" -ne 0 ]; then
+    printf '__RUNONCE_ERR__rc=%s %s' "$_rc" "$_out"
+    return 0
+  fi
+  printf '%s' "$_out"
 }
 RUNONCE_LABEL="$(_runonce_label)"
+RUNONCE_ERR=""
+case "$RUNONCE_LABEL" in
+  __RUNONCE_ERR__*)
+    RUNONCE_ERR="${RUNONCE_LABEL#__RUNONCE_ERR__}"
+    RUNONCE_LABEL=""
+    echo "⚠️ [runonce] KHONG lay duoc nhan account live ⇒ BO QUA ca 3 check chay-mot-lan"
+    echo "   (anomaly_scan / forensic_check / worktree_stale) cho CA HAI account. Loi that:"
+    echo "   $RUNONCE_ERR"
+    ;;
+esac
 
 TODAY="$(TZ='Asia/Ho_Chi_Minh' date +%Y-%m-%d)"
 NOW_ICT="$(TZ='Asia/Ho_Chi_Minh' date '+%Y-%m-%d %H:%M ICT')"
