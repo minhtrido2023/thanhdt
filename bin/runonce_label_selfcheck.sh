@@ -6,7 +6,7 @@
 # Chạy hàm TRÍCH NGUYÊN VĂN từ script (không chép tay) trong sandbox có `trading_bot` giả.
 set -uo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-OLD_REF="${RUNONCE_OLD_REF:-9c7e8bf6}"   # cha cua commit va (cap nhat sau khi commit)
+OLD_REF="${RUNONCE_OLD_REF:-f36cff19^}"   # CHA cua commit va — khong dung HEAD/master (sau merge chung DA va)
 n=0; fails=0
 ok() { n=$((n+1)); if [ "$1" != "0" ]; then fails=$((fails+1)); echo "  FAIL $2"; else echo "  PASS $2"; fi; }
 
