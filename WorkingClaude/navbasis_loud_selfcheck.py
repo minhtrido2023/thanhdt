@@ -26,7 +26,7 @@ import pandas as pd
 HERE = os.path.dirname(os.path.abspath(__file__))
 REL = "WorkingClaude/deploy_golive_dt5g_v4/golive_recommend_v23.py"
 # CHA của commit vá — không `HEAD`/`main` (sau merge chúng ĐÃ vá ⇒ two-sided FAIL vĩnh viễn).
-OLD_REF = os.environ.get("NAVBASIS_OLD_REF", "").strip() or "99ac8047"
+OLD_REF = os.environ.get("NAVBASIS_OLD_REF", "").strip() or "1f7f1d6f^"
 TOP = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=HERE,
                      capture_output=True, text=True, check=True).stdout.strip()
 
