@@ -153,7 +153,16 @@ giá; không chép lại ở đây. Ba điều cần nhớ khi đọc bất kỳ
 - NAV đơn luồng, vốn 1 tỷ, **thực thi trễ T+1** (không nhìn trước), ramp 3 phiên tới tỷ trọng đích.
 - **Quy ước chi phí dùng chung** (`backtest_fundamental_rating.py`, `simulate_holistic_nav.py`…
   trích dẫn thẳng "per CLAUDE.md" — đổi ở đây là đổi giả định của chúng): TC **0,1%** mỗi chiều
-  trên phần vốn thực giao dịch · lãi tiền gửi nhàn rỗi **0%/năm** · lãi vay margin **10%/năm**.
+  trên phần vốn thực giao dịch · lãi vay margin **10%/năm** · lãi tiền gửi nhàn rỗi: **mặc định
+  code vẫn 0%/năm**, nhưng đó là ĐẦU SÀN của một dải — xem gạch đầu dòng ngay dưới.
+- **Tiền nhàn rỗi = DẢI 2 SỐ, KHÔNG phải 1 số** (user chốt 2026-09-28). Mọi số pin phải nói rõ đo
+  ở quy ước nào, **cấm trích 1 số trần trụi**: **pin0%** = tiền nhàn rỗi 0%/năm ⇒ **NGƯỠNG SÀN**
+  (giả định không đồng nào sinh lời); **pin1M** = lãi huy động **1 tháng** Big-4 cá nhân
+  (`idle_rate_proxy.py` tier `dep1m`, point-in-time) trả cho MỌI tiền nhàn rỗi ⇒ **NGƯỠNG TRẦN**
+  (giả định mọi đồng đều hưởng đủ lãi kỳ hạn, kể cả tiền ra vào trong tháng).
+  R3 hiện hành: **23,37% (sàn) … 25,71% (trần)**.
+  ⚠️ **Neo sizing DD lấy ĐẦU SÀN −25,2%**, KHÔNG lấy −23,6% của đầu trần — sizing phải đứng ở cận
+  xấu. Chi tiết + lệnh tái lập: `data/results_registry.md` mục **"2026-09-28 (septies)"**.
 - Metric tính trên **thời gian lịch**, không phải số phiên (VN có giai đoạn tuần 3 phiên trước 2007).
 - **Quy đổi thực tế: CAGR thật ≈ CAGR backtest − 1,5%** (phí + slippage + thuế). Backtest không
   mô hình hoá slippage lẫn thuế, và dùng VNINDEX làm proxy chứ không phải danh mục thật.

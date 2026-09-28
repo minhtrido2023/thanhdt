@@ -8149,3 +8149,78 @@ Mọi số `vs custom30V` **không đổi** (kiểm: re_compounder `vs_custom30v
 
 **Cảnh báo dùng lại:** mọi phân tích/dispatch trích số "trực giao 8L" từ registry với ngày TRƯỚC
 2026-09-27 mà không có dấu `[SỬA 2026-09-27]` là đang đọc số theo bug.
+
+---
+
+## 2026-09-28 (septies) — ⭐ **R3 CHUYỂN SANG PIN DẢI 2 SỐ: `pin0%` (SÀN) … `pin1M` (TRẦN)** — user chốt 2026-09-28 08:02 ICT
+
+> **ĐỔI QUY ƯỚC ĐO, KHÔNG ĐỔI MÔ HÌNH.** Park giữ **0,30**, knob live không đụng, `trading_rules.json`
+> và cả 3 rail KHÔNG đổi. Thay đổi duy nhất: bỏ chỗ dựa vào MỘT giả định lãi tiền nhàn rỗi.
+> Chỉ đạo user: *"Đồng ý giữ lại parking tỉ lệ 0.3. Tiền mặt thì neo theo lãi suất huy động 1 tháng"*
+> (23:58 ICT 27/09) và *"Nên áp dụng bản pin 2 con số cho dễ hình dung. Cần note rõ pin0%, và pin1M
+> để có ngưỡng sàn và trần"* (08:02 ICT 28/09).
+
+### 1. Hai số pin — CẢ HAI đều chính thức, không cái nào SUPERSEDE cái nào
+
+| Đại lượng | **`pin0%` = NGƯỠNG SÀN** (tiền nhàn rỗi 0%/năm) | **`pin1M` = NGƯỠNG TRẦN** (huy động 1M Big-4, mọi đồng) |
+|---|---|---|
+| CAGR | **23,37%** | **25,71%** |
+| Sharpe(252) | 1,88 | 2,06 |
+| MaxDD | −14,6% | −14,0% |
+| Calmar | 1,60 | 1,83 |
+| Final NAV | 684,52B | 864,86B |
+| IS 2014-2019 | 20,00% | 22,47% |
+| OOS 2020+ | 26,50% | 28,71% |
+| Bootstrap DD 5th | −25,2% | −23,6% |
+| Bootstrap CAGR 5th | 15,5% | 17,8% |
+| P(DD<−30%) | 1,1% | 0,5% |
+| DSR | 1,0000 | 1,0000 (N=4/120/200) |
+| ledger md5 | `4707bcbeb7e801d49a4a851ffd91d5e7` | `bcd0469f42c2f76937a6ebb10aae9b40` |
+| self-check | 0 VND | 0 VND |
+
+Cửa sổ 2014-01-02 → 2026-06-19 (12,46y), NAV 50B, `PARK_STATES=3:0.3`. OOS > IS ở mọi chiều ở cả
+hai chân. Quy đổi thực tế (− 1,5pp phí/slippage/thuế): **~21,9% … ~24,2%**.
+
+### 2. ⚠️ NEO SIZING DD = **−25,2%** (đầu SÀN), KHÔNG dùng −23,6%
+Sizing phải đứng ở cận xấu. Đầu trần cho DD mỏng hơn 1,6pp chỉ vì giả định tiền nhàn rỗi sinh lời
+đều — không được dùng nó để nới rủi ro. **Neo sizing thực tế KHÔNG ĐỔI so với trước 28/09.**
+
+### 3. Cách đọc dải — bắt buộc trích kèm quy ước
+- `pin0%` = không đồng tiền nhàn rỗi nào sinh lời. Sàn thật, nhưng phi thực tế theo chiều bi quan.
+- `pin1M` = MỌI đồng nhàn rỗi hưởng đủ lãi kỳ hạn 1 tháng, kể cả tiền ra vào trong tháng. Trần
+  thật, phi thực tế theo chiều lạc quan — vì gửi kỳ hạn mà rút trước hạn thì hưởng 0%.
+- Chênh **+2,34pp** giữa hai đầu: **2,05pp (87,8%) là SỐ HỌC TRỰC TIẾP** (tiền nhàn rỗi trung bình
+  46,4% NAV, trước trả 0% nay trả ~3,5%/năm), chỉ **0,285pp là đường giao dịch** — nằm DƯỚI sàn
+  nhiễu đường đi 0,46pp đo ở W2b ⇒ không phân biệt được với nhiễu.
+- 🚫 **KHÔNG đọc +2,34pp là "chiến lược tốt lên"**. Đây là đổi thước đo, áp đều cho mọi phương tiện.
+- 🚫 Dải này KHÔNG mở lại câu hỏi xếp hạng phương tiện park (W2b: engine không đủ sức phân giải).
+
+### 4. Điểm thực tế trong dải — chân `dep1m_21s` (ĐANG CHẠY, job `Taylor_20260928_010454`)
+Mô hình đúng ngữ nghĩa *rút trước hạn = 0%*: chỉ trả lãi cho phần tiền ĐÃ nằm im ≥21 phiên tính
+đến ngày đó, **không truy lĩnh** 21 phiên đầu (truy lĩnh = nhìn trước). Số sẽ bổ sung vào mục này
+khi xong; bắt buộc nằm trong dải 23,37…25,71, nằm ngoài = dấu hiệu lỗi.
+
+### 5. Nguồn lãi suất + giới hạn phải mang theo `pin1M`
+- Chuỗi: `mike/agents/Taylor/research/idle_cash_proxy_20260927/fiinprox_deposit_1m_big4_monthly_2019_2026.csv`
+  — huy động 1 tháng, khách cá nhân, BQ Big 4, 92 tháng 2019-02→2026-09, chụp ngày 15. Mean áp
+  thực tế 3,501%/năm (min 1,600 / max 4,975).
+- **53/150 tháng cửa sổ là SỐ DỰNG LẠI**, không phải số công bố: trước 2019-02 route FiinPro trả
+  HTTP 500. Cầu = NHNN 12M-thấp − 2,525pp (median trên 90 tháng overlap, corr +0,619).
+  Liên ngân hàng 1M **KHÔNG bắc cầu được** (corr −0,141, sd 2,47) — đã loại có bằng chứng.
+- Băng bất định của cầu (p25 −3,400 / p75 −2,300) chỉ làm CAGR xê dịch **0,181pp** — dưới sàn nhiễu
+  ⇒ số pin không nhạy với lựa chọn offset.
+- Chân đối chứng KHÔNG cần bắc cầu (2019-03→2026-06, 0 tháng dựng lại): carry vẫn +2,00pp, 99,1%
+  là số học ⇒ đoạn dựng lại không bịa ra hiệu ứng.
+- ⚠️ **Upstream FiinPro-X đã HẾT HẠN 28/09/2026** — không kéo lại được. Đoạn NHNN 12M-thấp
+  2011-01→2025-10 (xương sống của cầu) **chưa có nguồn thứ hai xác minh**.
+- ⚠️ Đây là lãi tiền gửi **thị trường**, KHÔNG phải carry Trứng vàng DNSE thật (8,543%/năm).
+
+### 6. Cổng đã qua
+Chân control `IDLE_CARRY_TIER=off` tái lập ledger anchor **byte-identical** (`4707bcbe…`, cmp sạch)
+⇒ mọi Δ là của riêng quy ước carry. self-check 0 VND cả hai chân. PBO 0,1258 (họ N=14); PBO 0,5000
+trên họ N=4 là **giá trị thoái hoá** (4 chân gần cộng tuyến, corr 0,988–0,99998), không phải bằng
+chứng overfit. **quant-skeptic CONFIRMED (high) 2026-09-27 18:18Z**, 8/8 check pass, tự tái lập
+toàn bộ số + chạy lại selfcheck 102 assertion / 15 mutation.
+
+Tái lập: `mike/agents/Taylor/research/repin_dep1m_20260928/run_leg.sh` + REPORT.md §8.
+Code: branch `research/repin-dep1m-2709`, commit `d3c37631`; artifact mike `4cd4c3ea`.
