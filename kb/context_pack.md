@@ -1,13 +1,13 @@
-# Mike fleet — context pack (v3379)
+# Mike fleet — context pack (v3380)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-09-28T05:47:27] Wags/finding — wags-fix: coord-2026-09-28 — PNJ trong ro custom30V live: KHONG phai loi dieu phoi, la quyet dinh USER: {"root_cause": "Question Taylor/pnj-trong-ro-custom30v-live-can-user-duyet-chan (mo 2026-09-28T01:26:50Z) chua co answer vi no can QUYET DINH CUA USER, khong ph …
-- [2026-09-28T05:52:45] Taylor/finding — dep1m-maturity-pay: {"job": "Taylor_20260928_050623", "viec": "1/2 — quant-skeptic recommended_rerun #1 (user duyet 12:05 ICT 2026-09-28 Discord, PAPER-ONLY)", "ket_luan": "quant-s …
 - [2026-09-28T05:53:17] Taylor/finding — dep1m-minage-sensitivity: {"job": "Taylor_20260928_050623", "viec": "2/2 — quant-skeptic recommended_rerun #3 (user duyet 12:05 ICT 2026-09-28 Discord, PAPER-ONLY)", "cau_hoi": "Thang th …
 - [2026-09-28T06:02:59] arch-reviewer/verification — ARCH-REVIEW: wags-fix: coord-2026-09-28 — PNJ trong ro custom30V live: KHONG phai loi dieu phoi, la quyet dinh USER: {"finding_topic": "wags-fix: coord-2026-09-28 — PNJ trong ro custom30V live: KHONG phai loi dieu phoi, la quyet dinh USER", "verdict": "NEEDS_CHANGES", "confide …
 - [2026-09-28T06:11:06] quant-skeptic/verification — ✅ CONFIRMED VERIFY: dep1m-maturity-pay: {"finding_topic": "dep1m-maturity-pay", "verdict": "CONFIRMED", "confidence": "high", "checks": {"look_ahead_leak": "pass — rate lookup uses _pit_month (month s …
+- [2026-09-28T10:49:11] Taylor/finding — vnd-vnm-uncomputable-not-fpt-class: {"job": "Taylor_20260928_103533", "viec": "Dieu tra VND/VNM UNCOMPUTABLE (Layer 1, price_ffill_suspect) - co giong loi FPT khong", "phuong_phap": "selfcomp_adjf …
+- [2026-09-28T10:49:23] Taylor/finding — closerepair-fixture-fix-verified: {"job": "Taylor_20260928_103533", "viec": "Sua stale-fixture case 8 paper_entry_adjust._selfcheck (tien de FPT khong co corp-action sau entry da SAI tu ex-date  …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -174,6 +174,14 @@ Ranh giới cứng (KHÔNG tự sửa): trade plan, trading_rules.json, logic đ
   ngày mỗi lô đáo hạn ⇒ số trung thực nằm strictly trong (25,24%; 25,71%). ⚠️ Phần ĐƯỜNG ĐI của
   chân này = 0,758pp = **1,6× sàn nhiễu 0,46pp** ⇒ điểm giữa KÉM CHẮC hơn hai đầu dải, đọc là
   "gần đầu trần" chứ không phải một con số chính xác.
+  ✅ **Chân TRẢ KHI ĐÁO HẠN = điểm TRUNG THỰC của luật user = 25,34%** (FIFO; LIFO 25,42%), nằm
+  strictly trong dải, quant-skeptic **CONFIRMED (high)** 2026-09-28 06:11Z 8/8. Chênh với 25,24%
+  chỉ **+0,10pp = 1/5 sàn nhiễu** ⇒ **GIỮ 25,24% làm số chính, KHÔNG re-pin** (cận dưới đã verify,
+  sizing đứng cận xấu). ⚠️ Đổi sang quy ước đúng làm SỐ HỌC tăng (+1,116→+1,520pp) nhưng ĐƯỜNG ĐI
+  GIẢM (+0,758→**+0,448pp, DƯỚI sàn nhiễu**) ⇒ **cảnh báo "1,6× sàn nhiễu" KHÔNG áp dụng cho chân
+  maturity**. ✅ **min_age là CAO NGUYÊN**: 20/21/22/23 = 25,35/25,24/25,22/25,21 — biên độ toàn
+  dải 0,14pp = 30% sàn nhiễu ⇒ pin KHÔNG nhạy tham số (KHÔNG chứng minh 21 tối ưu, chỉ chứng minh
+  chọn trong 20-23 không quan trọng). Chi tiết: registry §4b + §4c.
   quant-skeptic **CONFIRMED (high)** 2026-09-27 18:18Z, 8/8 check. ⚠️ Giới hạn của `pin1M`:
   53/150 tháng là SỐ DỰNG LẠI (FiinPro không có dữ liệu ≤2018-12, cầu = NHNN 12M-thấp −2,525pp);
   upstream FiinPro-X **đã hết hạn 28/09/2026**; đây là lãi thị trường, không phải carry egg DNSE.
