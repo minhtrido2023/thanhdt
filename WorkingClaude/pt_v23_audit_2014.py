@@ -312,6 +312,26 @@ if IDLE_CARRY_MIN_AGE == 0 and os.environ.get("IDLE_CARRY_AGE_ORDER", "").strip(
     raise ValueError("IDLE_CARRY_AGE_ORDER chi co nghia khi IDLE_CARRY_MIN_AGE > 0")
 if IDLE_CARRY_MIN_AGE:
     _idle_tag += f"_{IDLE_CARRY_MIN_AGE}s{IDLE_CARRY_AGE_ORDER}"   # 21 + fifo -> _21sfifo
+# IDLE_CARRY_PAY_MODE (quant-skeptic recommended_rerun #1, user duyet 12:05 ICT 2026-09-28) — HOW a
+# matured slice gets paid, orthogonal to WHICH slice is matured (MIN_AGE) and to the rate (TIER).
+#   daily (default)  = the pinned dep1m_21s convention: r/252 per session from session MIN_AGE+1 on,
+#                      the first MIN_AGE sessions never back-paid => a lot alive n sessions earns
+#                      n-MIN_AGE days. THAN TRONG: strictly under-pays a rolled 1M term deposit.
+#   maturity         = the FAITHFUL rule: every MIN_AGE-session anniversary of a lot credits that
+#                      whole term (MIN_AGE sessions of PIT rate, exact -- the lot carries a rate-SUM,
+#                      not an average); a term still in progress when the cash is spent pays 0%.
+#                      A lot alive n sessions earns MIN_AGE*floor(n/MIN_AGE) days >= the daily mode.
+# Default is daily on purpose: it keeps every already-pinned leg reproducible byte-for-byte.
+# §8: this is an argument axis (it changes the numbers) => it goes in the filename.
+IDLE_CARRY_PAY_MODE = os.environ.get("IDLE_CARRY_PAY_MODE", "daily").strip().lower()
+if IDLE_CARRY_PAY_MODE not in ("daily", "maturity"):
+    raise ValueError(f"IDLE_CARRY_PAY_MODE={IDLE_CARRY_PAY_MODE!r} khong hop le; chi {{daily,maturity}}")
+if IDLE_CARRY_PAY_MODE == "maturity":
+    if not IDLE_CARRY_MIN_AGE:
+        raise ValueError("IDLE_CARRY_PAY_MODE=maturity vo nghia khi IDLE_CARRY_MIN_AGE=0 (khong co "
+                         "ky han nao de dao han): chan cung de khong sinh mot chan im lang y het "
+                         "chan carry thuong")
+    _idle_tag += "_mat"                                            # -> _21sfifo_mat
 # W2b NOISE-FLOOR CONTROL (job Taylor_20260927_155645, quant-skeptic recommended_rerun #2). A FLAT
 # scalar %/yr on idle cash, used ONLY to measure how much the simulator's discrete trade path moves
 # when the cash level is nudged by an amount comparable to the tier-1<->tier-2 gap. Not a proxy, not
@@ -1054,6 +1074,7 @@ else:
 IDLE_AGE_LOG_BAL, IDLE_AGE_LOG_LAG = [], []
 if IDLE_CARRY_MIN_AGE:
     print(f"  [idle-carry] AGE GATE ON: min_age={IDLE_CARRY_MIN_AGE} phien, order={IDLE_CARRY_AGE_ORDER} "
+          f"pay_mode={IDLE_CARRY_PAY_MODE} "
           f"(lo tien phai nam im du {IDLE_CARRY_MIN_AGE} phien moi duoc tra lai; KHONG truy linh; "
           f"tien tieu truoc khi du tuoi huong 0%)")
 vni_close_by_date = dict(zip(vni["time"], vni["Close"]))
@@ -2175,6 +2196,7 @@ BAL_KW = dict(allowed_tiers=RS["allowed_tiers"], max_positions=MAX_POS_V11,
               tier_weights_by_state=RS["tier_weights_by_state"],
               deposit_annual=DEPOSIT_ANNUAL, borrow_annual=BORROW_ANNUAL, state_by_date=state_ff,
               deposit_min_age_sessions=IDLE_CARRY_MIN_AGE, deposit_age_order=IDLE_CARRY_AGE_ORDER,
+              deposit_pay_mode=IDLE_CARRY_PAY_MODE,
               idle_age_log=IDLE_AGE_LOG_BAL,
               cash_etf_states=PARK_STATES_DICT, cash_etf_states_by_date=PARK_BY_DATE, vn30_underlying=vn30_underlying,
               etf_mgmt_fee_annual=0.0, etf_tracking_drag_annual=0.0, etf_rebalance_friction=0.0015,
@@ -2230,6 +2252,7 @@ LAG_KW = dict(allowed_tiers=list(_LAG_BASE_TIERS), max_positions=12,
               count_inflight_slots=LAG_SLOT_INFLIGHT,
               deposit_annual=DEPOSIT_ANNUAL, borrow_annual=BORROW_ANNUAL, state_by_date=state_ff,
               deposit_min_age_sessions=IDLE_CARRY_MIN_AGE, deposit_age_order=IDLE_CARRY_AGE_ORDER,
+              deposit_pay_mode=IDLE_CARRY_PAY_MODE,
               idle_age_log=IDLE_AGE_LOG_LAG,
               cash_etf_states=PARK_STATES_DICT, cash_etf_states_by_date=PARK_BY_DATE, vn30_underlying=vn30_underlying,
               etf_mgmt_fee_annual=0.0, etf_tracking_drag_annual=0.0, etf_rebalance_friction=0.0015,
@@ -2667,10 +2690,19 @@ meta = [
      "frame, exactly as the engine's own cash-flow self-check does (`_resid = dcash - f_full - "
      "interest`). No margin."
    + ("" if not IDLE_CARRY_MIN_AGE else
-      f" AGE GATE: interest that day = rate/252 x the slice of cash that had ALREADY been idle "
-      f">= {IDLE_CARRY_MIN_AGE} sessions, NOT x total cash. Cash-lot ledger reconciled to real cash "
-      f"twice per session; outflows consume lots {IDLE_CARRY_AGE_ORDER.upper()}. No back-pay: the "
-      f"first {IDLE_CARRY_MIN_AGE} sessions of a lot are never credited retroactively."))),
+      (f" AGE GATE: interest that day = rate/252 x the slice of cash that had ALREADY been idle "
+       f">= {IDLE_CARRY_MIN_AGE} sessions, NOT x total cash. Cash-lot ledger reconciled to real cash "
+       f"twice per session; outflows consume lots {IDLE_CARRY_AGE_ORDER.upper()}. No back-pay: the "
+       f"first {IDLE_CARRY_MIN_AGE} sessions of a lot are never credited retroactively."
+       if IDLE_CARRY_PAY_MODE == "daily" else
+       f" AGE GATE (pay_mode=maturity): interest is paid in LUMPS, not daily — on every "
+       f"{IDLE_CARRY_MIN_AGE}-session anniversary of a cash lot, that lot is credited its whole "
+       f"accrued term (the SUM of rate/252 over exactly those {IDLE_CARRY_MIN_AGE} sessions, so "
+       f"exact under the time-varying PIT rate). A term still in progress when the cash is spent "
+       f"pays 0% ('rut truoc han = 0%'). Most sessions therefore show interest = 0 and that is "
+       f"CORRECT — do NOT reconcile this leg against a daily-accrual expectation. Cash-lot ledger "
+       f"reconciled to real cash twice per session; outflows consume lots "
+       f"{IDLE_CARRY_AGE_ORDER.upper()}; interest paid does not compound into the term.")))),
  ("nav_identity","book NAV ref (nav_bal_ref/nav_lag_ref) = cash_ref + stocks_ref(mark at BQ Close) + etf_ref(mark at E1VFVN30 Close). Positions reconstructable from TX by holding_id (buys add shares, sells remove)"),
  ("mtm_rows","TX rows whose reason starts with MTM are NOT cash events. MTM_UNREALIZED = open stock positions & ETF lots marked at final session Close. MTM_PENDING_PARTIAL = residual market value of an order still completing its multi-day fill on the final session (its filled shares already appear as ENTRY_FILL buys earlier in the TX log; this phantom marks them to the final stocks value). Property: final cash_ref + SUM(all MTM sell_amount) == final book NAV ref, per book"),
  ("combination_rule", (f"V2.3A ALLOCATOR: cap_bal/cap_lag start at (1-w0)/w0 x 50e9 with w0=w_LAG(state day1); each day cap_x *= (1+book ref-NAV daily return); if |cap_lag/(cap_bal+cap_lag) - w_tgt(state)| > {ALLOC_REBAL_BAND} then total -= {ALLOC_REBAL_TC} x |moved capital| and reset to target. w_tgt by state: {STATE_LAG_WEIGHT}. combined_nav = cap_bal + cap_lag"
