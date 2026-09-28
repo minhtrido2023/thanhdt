@@ -23,6 +23,14 @@
   ngày mỗi lô đáo hạn ⇒ số trung thực nằm strictly trong (25,24%; 25,71%). ⚠️ Phần ĐƯỜNG ĐI của
   chân này = 0,758pp = **1,6× sàn nhiễu 0,46pp** ⇒ điểm giữa KÉM CHẮC hơn hai đầu dải, đọc là
   "gần đầu trần" chứ không phải một con số chính xác.
+  ✅ **Chân TRẢ KHI ĐÁO HẠN = điểm TRUNG THỰC của luật user = 25,34%** (FIFO; LIFO 25,42%), nằm
+  strictly trong dải, quant-skeptic **CONFIRMED (high)** 2026-09-28 06:11Z 8/8. Chênh với 25,24%
+  chỉ **+0,10pp = 1/5 sàn nhiễu** ⇒ **GIỮ 25,24% làm số chính, KHÔNG re-pin** (cận dưới đã verify,
+  sizing đứng cận xấu). ⚠️ Đổi sang quy ước đúng làm SỐ HỌC tăng (+1,116→+1,520pp) nhưng ĐƯỜNG ĐI
+  GIẢM (+0,758→**+0,448pp, DƯỚI sàn nhiễu**) ⇒ **cảnh báo "1,6× sàn nhiễu" KHÔNG áp dụng cho chân
+  maturity**. ✅ **min_age là CAO NGUYÊN**: 20/21/22/23 = 25,35/25,24/25,22/25,21 — biên độ toàn
+  dải 0,14pp = 30% sàn nhiễu ⇒ pin KHÔNG nhạy tham số (KHÔNG chứng minh 21 tối ưu, chỉ chứng minh
+  chọn trong 20-23 không quan trọng). Chi tiết: registry §4b + §4c.
   quant-skeptic **CONFIRMED (high)** 2026-09-27 18:18Z, 8/8 check. ⚠️ Giới hạn của `pin1M`:
   53/150 tháng là SỐ DỰNG LẠI (FiinPro không có dữ liệu ≤2018-12, cầu = NHNN 12M-thấp −2,525pp);
   upstream FiinPro-X **đã hết hạn 28/09/2026**; đây là lãi thị trường, không phải carry egg DNSE.
