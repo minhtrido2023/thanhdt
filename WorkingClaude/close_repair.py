@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """Layer 2 — REPAIR an incomplete vendor back-adjustment from our own corp-action table.
 
-NOT WIRED INTO PRODUCTION. Gated by env `MIKE_CLOSE_REPAIR=1`; default OFF everywhere. The gate
-to turning it on is a quant-skeptic CONFIRMED verdict, because every number it changes is an
-investor-facing tỉ suất (`coding_guidelines` §21).
+WIRED, ON BY DEFAULT since 2026-09-28 (quant-skeptic CONFIRMED, round 2, job
+Taylor_20260928_111625 — round 1 found 2 real edge-case bugs, chainffill + selfband, both fixed
+and re-verified before this default flipped). Kill switch: `MIKE_CLOSE_REPAIR=0`. Every number it
+changes is an investor-facing tỉ suất (`coding_guidelines` §21) — the same CONFIRMED-verdict gate
+applies to any FUTURE change to this file, not just the initial go-live.
 
 WHAT IT FIXES. `tav2_bq.ticker.Close` is the vendor's back-adjusted close. Its cumulative factor
 `r = Price/Close` is supposed to be constant between two consecutive ex-dates. Measured
@@ -62,8 +64,11 @@ ENV_FLAG = "MIKE_CLOSE_REPAIR"
 
 
 def enabled() -> bool:
-    """True only when explicitly switched on. Absent env var = OFF, for every caller."""
-    return os.environ.get(ENV_FLAG) == "1"
+    """True unless explicitly disabled. Default ON since the quant-skeptic CONFIRMED verdict
+    (round 2, 2026-09-28, job Taylor_20260928_111625, after both fixed bugs — chainffill,
+    selfband — were re-verified). Set `MIKE_CLOSE_REPAIR=0` as the kill switch to force it off.
+    """
+    return os.environ.get(ENV_FLAG, "1") != "0"
 
 
 @dataclass
@@ -88,17 +93,42 @@ class Repair:
 
 # ------------------------------------------------------------------ factor maths
 
-def _band_lifted_suspect(bar: dict, neighbour: dict | None) -> bool:
-    """True when `bar['price']` cannot be a real trade of that session (ffill signature).
+def _lift_neighbour(series: list, i: int) -> tuple:
+    """(neighbour, chained) — nearest row before `series[i]` whose own Price DIFFERS from
+    `series[i]`'s. Walks back past any run of rows sharing that exact Price (a ffill carry-over
+    signature) instead of trusting the immediate predecessor: a lift ratio computed off a
+    neighbour that shares bar's own raw Price cannot tell a frozen bar from a healthy one — the
+    ratio would just normalize the freeze away — so such a neighbour is never usable as the
+    reference, no matter how many sessions the run spans. `chained` is True iff >=1 row was
+    skipped, i.e. bar's Price repeats at least the immediately preceding session.
+    """
+    price = series[i]["price"]
+    j = i - 1
+    chained = False
+    while j >= 0 and series[j]["price"] == price:
+        j -= 1
+        chained = True
+    return (series[j] if j >= 0 else None), chained
 
-    Needs a neighbour row to lift the adjusted `High`/`Low` band into the raw frame. No neighbour,
-    or no band → we cannot test, so we do NOT accuse: return False and let the caller's other
-    guards speak. (Refusing here instead would fail-close on every first row of a window.)
+
+def _band_lifted_suspect(bar: dict, series: list, i: int) -> bool:
+    """True when `bar` (= `series[i]`) cannot be a real trade of that session (ffill signature).
+
+    A raw Price that repeats one or more sessions immediately before it IS the ffill signature
+    this guard exists to catch — no neighbour ratio computed from inside that same frozen run can
+    be trusted to test it (see `_lift_neighbour`), so any such chain is refused outright, with no
+    band test needed. Otherwise lift the adjusted `High`/`Low` band into the raw frame with the
+    ratio of the nearest row whose Price genuinely differs. No prior row at all, or no band → we
+    cannot test, so we do NOT accuse: return False and let the caller's other guards speak.
+    (Refusing here instead would fail-close on every first row of a window.)
     """
     hi, lo = bar.get("high") or 0.0, bar.get("low") or 0.0
-    if hi <= 0 or lo <= 0 or not neighbour:
+    if hi <= 0 or lo <= 0 or i <= 0:
         return False
-    if not neighbour.get("close") or neighbour["close"] <= 0:
+    neighbour, chained = _lift_neighbour(series, i)
+    if chained:
+        return True
+    if not neighbour or not neighbour.get("close") or neighbour["close"] <= 0:
         return False
     lift = neighbour["price"] / neighbour["close"]
     return not (lo * lift * (1 - 1e-9) <= bar["price"] <= hi * lift * (1 + 1e-9))
@@ -146,7 +176,7 @@ def group_factor(ex: str, evs: list, series: list) -> tuple:
         return None, f"{ex} {desc}: no cum session inside the price window"
     i = idxs[-1]
     bar = series[i]
-    if _band_lifted_suspect(bar, series[i - 1] if i > 0 else None):
+    if _band_lifted_suspect(bar, series, i):
         return None, (f"{ex} {desc}: last cum bar {bar['d']} Price={bar['price']:,.0f} outside the "
                       f"raw-lifted [Low,High] band → ffill suspect, refuse")
     p_cum = bar["price"]
@@ -222,6 +252,17 @@ def repair_row(ticker: str, bar: dict, events: list, series: list, series_max: s
     base = dict(ticker=ticker, date=bar["d"], close=close, price=price)
     if close <= 0 or price <= 0:
         return Repair(**base, adj_source="vendor", reason="Close hoặc Price <= 0")
+
+    # The row BEING REPAIRED needs the same ffill guard as the cum bar `group_factor` tests
+    # internally — otherwise a stale/ffilled Price on THIS row (outside its own lifted band) gets
+    # treated as ground truth and used to compute `r_obs`, silently overwriting a correct Close
+    # with a wrong self-computed one.
+    own_hist = [b for b in series if b["d"] < bar["d"]] + [bar]
+    if _band_lifted_suspect(bar, own_hist, len(own_hist) - 1):
+        return Repair(**base, adj_source="vendor",
+                      reason="chính dòng đang sửa nằm ngoài band ffill-lifted của phiên liền "
+                             "trước → Price nghi ngờ ffill/stale, không tự tin sửa dựa trên "
+                             "input đáng ngờ")
 
     r_obs = price / close
     r_pred, uncomputable, notes = factor_after(bar["d"], events, series, series_max)

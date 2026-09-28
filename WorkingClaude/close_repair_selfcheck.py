@@ -88,13 +88,13 @@ def run_assertions(cr, tag=""):
         named[name] = bool(cond)
         check(cond, f"{tag}{name}")
 
-    # -- the flag: OFF unless exactly "1". A default-ON repair layer would rewrite investor
-    #    numbers on every machine that merely has the file on disk.
+    # -- the flag: ON unless exactly "0" (default flipped 2026-09-28 after quant-skeptic
+    #    CONFIRMED round 2). "0" is the kill switch; anything else, including absent, is ON.
     saved = os.environ.pop("MIKE_CLOSE_REPAIR", None)
     try:
-        nc("flag/absent_is_off", cr.enabled() is False)
-        for v, want in (("0", False), ("", False), ("true", False), ("yes", False),
-                        ("2", False), ("1", True)):
+        nc("flag/absent_is_on", cr.enabled() is True)
+        for v, want in (("0", False), ("", True), ("true", True), ("yes", True),
+                        ("2", True), ("1", True)):
             os.environ["MIKE_CLOSE_REPAIR"] = v
             nc(f"flag/{v!r}_is_{want}", cr.enabled() is want)
     finally:
@@ -160,6 +160,14 @@ def run_assertions(cr, tag=""):
     #    A pure stock leg needs no price, so an unusable price bar must NOT block it.
     f, _n = cr.group_factor("2026-06-12", [iss("2026-06-12", 0.1)], ffilled)
     nc("band/stock_leg_survives_bad_price", f is not None and abs(f - 1.1) < 1e-12)
+    #    A genuine band MISMATCH that is NOT a price freeze (Price moved from T-1, 60.000->58.000,
+    #    so the chain-freeze short-circuit does not fire) must still be caught by the lift/band
+    #    comparison itself -- keeps that comparison under live mutation coverage, distinct from
+    #    the frozen-Price signature above.
+    bad_band = bars([("2026-06-10", 50_000.0, 60_000.0, 51_000.0, 49_000.0),
+                     ("2026-06-11", 40_000.0, 58_000.0, 41_000.0, 39_000.0)])
+    f, note = cr.group_factor("2026-06-12", [div("2026-06-12", 1000.0)], bad_band)
+    nc("band/bad_band_refused", f is None)
 
     # -- dedup on the ECONOMIC term only: identical rows collapse, real tranches sum
     kept, dropped = cr.dedup_same_term([div("2026-09-14", 3000.0), div("2026-09-14", 3000.0)])
@@ -278,7 +286,18 @@ def run_assertions(cr, tag=""):
                   ("2026-01-02", 49_800.0, 50_000.0, 50_100.0, 49_600.0),   # neighbour: frozen
                   ("2026-01-03", 49_700.0, 50_000.0, 49_900.0, 49_600.0)])  # cum bar: STILL frozen
     f, _n = cr.group_factor("2026-01-04", [div("2026-01-04", 500.0)], chain)
-    nc("chainffill/two_session_freeze_caught", f is None)   # currently FAILS: f=1.0101...
+    nc("chainffill/two_session_freeze_caught", f is None)
+
+    # -- quant-skeptic verify round 2 (job Taylor_20260928_111625): the first chainffill fixture
+    #    happens to have ALL THREE rows sharing one price, which the fix's early-exit specifically
+    #    matches on (series[i-1]==bar==series[i-2]). A GENUINE 2-session-only freeze -- grandparent
+    #    at a DIFFERENT price, only the immediate neighbour and the cum bar share the frozen Price
+    #    -- must be caught too, or the fix only works for >=3-session freezes by coincidence.
+    chain2 = bars([("2026-01-01", 50_000.0, 48_000.0, 48_500.0, 47_500.0),   # grandparent: moved
+                   ("2026-01-02", 49_800.0, 50_000.0, 50_100.0, 49_600.0),   # neighbour: real trade
+                   ("2026-01-03", 49_700.0, 50_000.0, 49_900.0, 49_600.0)])  # cum bar: frozen copy
+    f, _n = cr.group_factor("2026-01-04", [div("2026-01-04", 500.0)], chain2)
+    nc("chainffill/two_session_freeze_grandparent_differs_caught", f is None)
 
     # -- EDGE CASE 2b (quant-skeptic, job Taylor_20260928_105249): the row BEING REPAIRED has no
     #    ffill guard of its own -- only the cum bar *inside* group_factor is band-tested.
@@ -310,7 +329,7 @@ MUTATIONS = [
     ("band_lifts_with_the_suspect_row_itself",
      "    lift = neighbour[\"price\"] / neighbour[\"close\"]",
      "    lift = bar[\"price\"] / bar[\"close\"]",
-     ["band/ffill_row_refused"]),
+     ["band/bad_band_refused"]),
     ("window_uses_no_upper_bound",
      "        if not ex or not (date < ex <= series_max):", "        if not ex or not (date < ex):",
      ["window/future_exdate_ignored"]),
@@ -326,9 +345,9 @@ MUTATIONS = [
     ("uncomputable_no_longer_blocks_repair",
      "    if uncomputable:", "    if False and uncomputable:",
      ["repair/uncomputable_blocks_repair", "repair/uncomputable_listed"]),
-    ("flag_defaults_on",
-     "    return os.environ.get(ENV_FLAG) == \"1\"", "    return os.environ.get(ENV_FLAG) != \"0\"",
-     ["flag/absent_is_off"]),
+    ("flag_ignores_kill_switch",
+     "    return os.environ.get(ENV_FLAG, \"1\") != \"0\"", "    return True",
+     ["flag/'0'_is_False"]),
     ("vendor_agreement_no_longer_respected",
      "    if abs(dev) <= tol:", "    if False:",
      ["repair/vendor_correct_untouched", "repair/vendor_correct_close_same"]),

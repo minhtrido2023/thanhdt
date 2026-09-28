@@ -579,7 +579,7 @@ def _selfcheck() -> int:
         skips.append("B")
     else:
         live = adjust_entries(
-            [("MBB", "2026-06-30", 25200.0), ("FPT", "2026-06-30", 70200.0),
+            [("MBB", "2026-06-30", 25200.0), ("STB", "2026-06-30", 73800.0),
              ("ACB", "2026-06-30", 22650.0), ("HDB", "2026-06-30", 25850.0)],
         )
         m = live[("MBB", "2026-06-30")]
@@ -588,7 +588,11 @@ def _selfcheck() -> int:
               f"terp={m.factor_terp:.6f} accrue_only={m.factor:.6f} entry_adj={m.entry_adj:,.1f}")
 
         # THE control assertion the dispatch demanded: names with no corp-action must be untouched.
-        for tk, ep in (("FPT", 70200.0), ("ACB", 22650.0), ("HDB", 25850.0)):
+        # FPT KHÔNG dùng được ở đây nữa — có bonus-share ex-date 2026-09-21 (Layer 2 self-computed
+        # sẽ sửa Close, factor 0,909091 ≠ 1,0). STB xác nhận zero price-adjusting event
+        # 2026-06-30..2026-09-27 (corp_action_lib.events), thay thế đúng tinh thần "không có
+        # corp-action sau entry" mà case này muốn kiểm.
+        for tk, ep in (("STB", 73800.0), ("ACB", 22650.0), ("HDB", 25850.0)):
             a = live[(tk, "2026-06-30")]
             check(f"8. {tk} (không có corp-action sau entry): entry_adj == entry_price TUYỆT ĐỐI",
                   a.status == "UNCHANGED" and a.entry_adj == ep and a.factor == 1.0,
