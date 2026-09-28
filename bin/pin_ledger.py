@@ -45,6 +45,7 @@ import hashlib
 import io
 import json
 import os
+import re
 import sys
 import tempfile
 from datetime import datetime
@@ -220,7 +221,125 @@ def safe_label(label: str) -> str:
     return out[:80]
 
 
+RE_ENVTOK = re.compile(r"\b([A-Z][A-Z0-9_]*)=(\S+)")
+_UNKNOWN_CMD = "KHONG BIET"
+
+
+def parse_config(command: str) -> dict:
+    """Rút các trục cấu hình `KEY=VALUE` ra khỏi LỆNH CHẠY đã lưu.
+
+    Đây là nguồn dữ liệu cho luật SO SÁNH 1 TRỤC (B4). Cố ý đọc từ chính lệnh
+    chạy chứ không bắt người pin khai tay một dict thứ hai — hai nguồn sẽ lệch
+    nhau, và lệnh chạy mới là thứ tái lập được.
+    """
+    if not command or command.strip().upper().startswith(_UNKNOWN_CMD):
+        return {}
+    return {k: v for k, v in RE_ENVTOK.findall(command)}
+
+
+def cmd_compare(args, wc_root: str) -> int:
+    """B4 — SO SÁNH 1 TRỤC. Khác ≥2 trục ⇒ TỪ CHỐI xuất bảng so sánh (rc=2).
+
+    VÌ SAO (ca thật 2026-09-28): user đưa ledger 21,94% (V2.3A · park E1VFVN30
+    70% · vintage 06-11) cạnh R3 pin0% 23,37% (V2.4 · custom30V 30% · AUDIT_END
+    06-19) và hỏi "chênh +1,43pp là gì". Hai số đó khác NHAU ÍT NHẤT 4 TRỤC cùng
+    lúc ⇒ hiệu của chúng KHÔNG quy được về bất kỳ nguyên nhân nào. Một bảng
+    "so sánh" như thế là số ảo đội lốt số thật.
+    """
+    man = [r for r in read_manifest(wc_root) if r.get("record") != "annotation"]
+    a = _find(man, args.md5_a)
+    b = _find(man, args.md5_b)
+    if len(a) != 1 or len(b) != 1:
+        print(f"Cần đúng 1 bản mỗi bên (tìm được {len(a)} và {len(b)}).")
+        return 1
+    a, b = a[0], b[0]
+    ca, cb = parse_config(a.get("command", "")), parse_config(b.get("command", ""))
+
+    print(f"A  {a['md5'][:12]}  {a.get('label')}")
+    print(f"B  {b['md5'][:12]}  {b.get('label')}")
+
+    if not ca or not cb:
+        which = "A" if not ca else ("B" if not cb else "A và B")
+        print(
+            f"\n🔴 KHÔNG SO TRỰC TIẾP ĐƯỢC — lệnh chạy của {which} không khai được trục nào\n"
+            f"   (command = {_UNKNOWN_CMD!r} hoặc rỗng). Không biết hai bên khác nhau ở đâu\n"
+            f"   thì mọi hiệu số đều vô nghĩa. Đây là 'không kiểm được', KHÔNG phải '0 trục khác'."
+        )
+        return 2
+
+    keys = sorted(set(ca) | set(cb))
+    diff = [(k, ca.get(k, "<không khai>"), cb.get(k, "<không khai>"))
+            for k in keys if ca.get(k) != cb.get(k)]
+
+    if not diff:
+        print(
+            "\n🔴 KHÔNG SO TRỰC TIẾP ĐƯỢC — hai ledger khai CÙNG một cấu hình nhưng md5 KHÁC nhau.\n"
+            "   Nghĩa là có trục thay đổi NẰM NGOÀI lệnh chạy: vintage dữ liệu, phiên bản code,\n"
+            "   bảng as-of được republish, hoặc engine không tất định. Phải tìm ra trục đó\n"
+            "   trước khi đặt hai số cạnh nhau."
+        )
+        return 2
+
+    if len(diff) > 1:
+        print(f"\n🔴 KHÔNG SO TRỰC TIẾP ĐƯỢC — khác {len(diff)} TRỤC cùng lúc:")
+        for k, va, vb in diff:
+            print(f"     · {k}: A={va}  ≠  B={vb}")
+        print("\n   Hiệu của hai số này KHÔNG quy được về bất kỳ trục nào. Muốn có câu so sánh\n"
+              "   hợp lệ thì chạy A/B đổi ĐÚNG 1 trục.")
+        return 2
+
+    k, va, vb = diff[0]
+    print(f"\n✅ A/B HỢP LỆ — khác ĐÚNG 1 trục:  {k}:  {va} → {vb}\n")
+    ma, mb = a.get("metrics", {}), b.get("metrics", {})
+    print(f"   {'chỉ tiêu':<16}{'A':>14}{'B':>14}{'Δ (B−A)':>14}")
+    for key, name, mul, unit in (
+        ("cagr", "CAGR", 100.0, "pp"),
+        ("sharpe_252", "Sharpe252", 1.0, ""),
+        ("max_dd", "MaxDD", 100.0, "pp"),
+        ("calmar", "Calmar", 1.0, ""),
+        ("final_nav_vnd", "Final NAV (B)", 1e-9, "B"),
+    ):
+        x, y = ma.get(key), mb.get(key)
+        if not isinstance(x, float) or not isinstance(y, float):
+            continue
+        print(f"   {name:<16}{x*mul:>14.3f}{y*mul:>14.3f}{(y-x)*mul:>13.3f}{unit}")
+    print(f"\n   Trích dẫn phải nói rõ trục: \"{k} {va} → {vb}\" "
+          f"(A md5 {a['md5'][:8]}…, B md5 {b['md5'][:8]}…).")
+    return 0
+
+
+def _control_field(args) -> dict:
+    """B5 — chân CONTROL bắt buộc khai tại lúc pin.
+
+    Mỗi lần re-pin phải chạy lại chân CŨ trên code MỚI: byte-identical ⇒ Δ đọc
+    được; không byte-identical ⇒ phải giải thích TRƯỚC khi pin. Đội đã làm đúng
+    việc này ở custom30V và FAIL-C, nhưng nó là thói quen chứ không phải luật —
+    và một thói quen thì không sống sót qua một phiên vội.
+    """
+    if getattr(args, "control_md5", None):
+        return {"kind": "control_md5", "md5": args.control_md5.lower(),
+                "byte_identical": bool(args.control_byte_identical)}
+    return {"kind": "no_control", "reason": args.no_control}
+
+
 def cmd_add(args, wc_root: str) -> int:
+    if not getattr(args, "control_md5", None) and not getattr(args, "no_control", None):
+        raise SystemExit(
+            "THIẾU khai chân CONTROL (B5). Chọn một:\n"
+            "  --control-md5 <md5 chân đối chứng đã pin> [--control-byte-identical]\n"
+            "  --no-control \"<lý do không có chân đối chứng>\"\n"
+            "Lý do: re-pin mà không chạy lại chân cũ trên code mới thì Δ giữa hai\n"
+            "số pin KHÔNG đọc được — không biết Δ là của thay đổi hay của engine."
+        )
+    if getattr(args, "control_md5", None):
+        known = {r["md5"] for r in read_manifest(wc_root)
+                 if r.get("record") != "annotation" and "md5" in r}
+        cm = args.control_md5.lower()
+        if cm not in known:
+            raise SystemExit(
+                f"--control-md5 {cm[:12]}… chưa có trong kho. Pin chân control TRƯỚC, "
+                f"rồi mới pin chân treatment."
+            )
     src = os.path.abspath(args.ledger)
     if not os.path.exists(src):
         raise SystemExit(f"Không thấy ledger: {src}")
@@ -280,6 +399,7 @@ def cmd_add(args, wc_root: str) -> int:
         "metrics": info["metrics"],
         "meta": info["meta"],
         "selfcheck_0vnd": selfcheck_ok(info["metrics"]),
+        "control": _control_field(args),
         "decided_by": args.decided_by,
         "note": args.note or "",
         "pinned_at_ict": datetime.now(ICT).isoformat(timespec="seconds"),
@@ -461,6 +581,18 @@ def _run_selfcheck(mutations: bool) -> int:
         a.note = ""
         a.decided_by = "agent"
         a.pin_date = "2026-09-28"
+        a.control_md5 = None
+        a.control_byte_identical = False
+        a.no_control = "chan dau tien, chua co gi de doi chung"
+
+        # B5: thiếu CẢ hai cách khai control ⇒ phải nổ
+        a.no_control = None
+        try:
+            cmd_add(a, wc)
+            check("B5_thieu_khai_control_phai_no", False)
+        except SystemExit as exc:
+            check("B5_thieu_khai_control_phai_no", "chân CONTROL" in str(exc))
+        a.no_control = "chan dau tien, chua co gi de doi chung"
 
         rc = cmd_add(a, wc)
         check("add_rc0_lan_dau", rc == 0)
@@ -542,13 +674,78 @@ def _run_selfcheck(mutations: bool) -> int:
             gz.write(b"noi dung khac han")
         check("verify_bat_duoc_noi_dung_doi", cmd_verify(va, wc) == 1)
 
-        # manifest hỏng ⇒ SystemExit có tên dòng, KHÔNG im lặng bỏ qua
-        _atomic_append_line(manifest_path(wc), "{khong-phai-json")
+        # ---- B5: control_md5 tro toi ban CHUA pin => phai no
+        led4 = os.path.join(sandbox, "led4.csv")
+        with open(led4, "w", encoding="utf-8") as fh:
+            fh.write(_SAMPLE.replace("0.2336876855359784", "0.2571000000000000"))
+        a.ledger = led4
+        a.label = "pin1M"
+        a.no_control = None
+        a.control_md5 = "f" * 32
         try:
-            read_manifest(wc)
-            check("manifest_hong_phai_bao_loi", False)
+            cmd_add(a, wc)
+            check("B5_control_md5_la_bi_no", False)
         except SystemExit as exc:
-            check("manifest_hong_phai_bao_loi", "dòng 3" in str(exc))
+            check("B5_control_md5_la_bi_no", "chưa có trong kho" in str(exc))
+
+        # control hợp lệ (trỏ về chân đầu tiên) ⇒ pin được, và ghi lại
+        a.control_md5 = digest
+        a.control_byte_identical = True
+        a.command = "IDLE_CARRY_TIER=dep1m NAV_TOTAL_B=50 PARK_STATES=3:0.3 AUDIT_END=2026-06-19"
+        check("B5_control_hop_le_pin_duoc", cmd_add(a, wc) == 0)
+        rec4 = [r for r in read_manifest(wc) if r.get("label") == "pin1M"][0]
+        check("B5_manifest_ghi_control", rec4["control"]["md5"] == digest
+              and rec4["control"]["byte_identical"] is True)
+        md4 = rec4["md5"]
+
+        # ---- B4: parse_config
+        check("B4_parse_config_rut_dung_truc",
+              parse_config("A=1 FOO_BAR=x y z $DNA_PYEXE s.py argv") == {"A": "1", "FOO_BAR": "x"})
+        check("B4_parse_config_KHONG_BIET_tra_rong",
+              parse_config("KHONG BIET — khong con dau vet") == {})
+        check("B4_parse_config_rong_tra_rong", parse_config("") == {})
+
+        class C:
+            pass
+
+        def cmp2(x, y):
+            c = C(); c.md5_a, c.md5_b = x, y
+            return cmd_compare(c, wc)
+
+        # A (dep1m-21s, command="CMD" -> 0 truc) vs pin1M -> khong du du lieu => rc2
+        rec_dep = [r for r in read_manifest(wc) if r.get("label") == "dep1m-21s"][0]
+        check("B4_command_khong_khai_truc_bi_tu_choi", cmp2(rec_dep["md5"], md4) == 2)
+
+        # dung 1 truc khac nhau => rc0
+        led5 = os.path.join(sandbox, "led5.csv")
+        with open(led5, "w", encoding="utf-8") as fh:
+            fh.write(_SAMPLE.replace("0.2336876855359784", "0.2524000000000001"))
+        a.ledger, a.label = led5, "mot-truc"
+        a.command = "IDLE_CARRY_TIER=dep1m NAV_TOTAL_B=50 PARK_STATES=3:0.7 AUDIT_END=2026-06-19"
+        a.control_md5, a.control_byte_identical = md4, False
+        cmd_add(a, wc)
+        md5_one = [r for r in read_manifest(wc) if r.get("label") == "mot-truc"][0]["md5"]
+        check("B4_dung_1_truc_thi_qua", cmp2(md4, md5_one) == 0)
+
+        # 3 truc khac nhau => rc2
+        led6 = os.path.join(sandbox, "led6.csv")
+        with open(led6, "w", encoding="utf-8") as fh:
+            fh.write(_SAMPLE.replace("0.2336876855359784", "0.2194000000000000"))
+        a.ledger, a.label = led6, "ba-truc"
+        a.command = "IDLE_CARRY_TIER=off NAV_TOTAL_B=20 PARK_STATES=3:0.9 AUDIT_END=2026-06-11"
+        cmd_add(a, wc)
+        md5_three = [r for r in read_manifest(wc) if r.get("label") == "ba-truc"][0]["md5"]
+        check("B4_ba_truc_bi_tu_choi", cmp2(md4, md5_three) == 2)
+
+        # CUNG command nhung md5 KHAC => phai tu choi (truc nam NGOAI lenh)
+        led7 = os.path.join(sandbox, "led7.csv")
+        with open(led7, "w", encoding="utf-8") as fh:
+            fh.write(_SAMPLE.replace("0.2336876855359784", "0.2337000000000000"))
+        a.ledger, a.label = led7, "cung-lenh-khac-md5"
+        a.command = "IDLE_CARRY_TIER=dep1m NAV_TOTAL_B=50 PARK_STATES=3:0.3 AUDIT_END=2026-06-19"
+        cmd_add(a, wc)
+        md5_same = [r for r in read_manifest(wc) if r.get("label") == "cung-lenh-khac-md5"][0]["md5"]
+        check("B4_cung_lenh_khac_md5_van_tu_choi", cmp2(md4, md5_same) == 2)
 
         if mutations:
             killed = 0
@@ -598,8 +795,39 @@ def _run_selfcheck(mutations: bool) -> int:
                                for f in os.listdir(store_root(wc)))
             mut("M5_khong_con_file_tam", m5)
 
+            # M6: luat 1-truc phai TU CHOI khi >1 truc (khong duoc am tham cho qua)
+            mut("M6_luat_1_truc_that_su_chan",
+                lambda: cmd_compare(type("X", (), {"md5_a": md4, "md5_b": md5_three})(), wc) == 2)
+            # M7: khai control bang md5 la khong duoc chap nhan
+            def m7():
+                aa = A()
+                for k, v in vars(a).items():
+                    setattr(aa, k, v)
+                aa.ledger = led6
+                aa.label = "m7"
+                aa.control_md5 = "0" * 32
+                aa.no_control = None
+                try:
+                    cmd_add(aa, wc)
+                    return False
+                except SystemExit:
+                    return True
+            mut("M7_control_md5_la_bi_chan", m7)
+
             print(f"mutation: {killed}/{total} bị giết")
             n += total
+
+        # ĐẶT CUỐI CÙNG có chủ đích: test này cố tình làm hỏng PINS.jsonl nên mọi
+        # assertion sau nó sẽ chết vì read_manifest (đúng thiết kế fail-loud).
+        # Bài học từ chính lần chạy này: thứ tự assertion trong selfcheck là một
+        # phụ thuộc THẬT, không phải chuyện thẩm mỹ.
+        bad_line_no = len(read_manifest(wc)) + 1
+        _atomic_append_line(manifest_path(wc), "{khong-phai-json")
+        try:
+            read_manifest(wc)
+            check("manifest_hong_phai_bao_loi", False)
+        except SystemExit as exc:
+            check("manifest_hong_phai_bao_loi", f"dòng {bad_line_no}" in str(exc))
 
     finally:
         shutil.rmtree(sandbox, ignore_errors=True)
@@ -645,6 +873,16 @@ def main(argv=None) -> int:
     p.add_argument("--note", default="")
     p.add_argument("--decided-by", default="agent", choices=["user", "agent"])
     p.add_argument("--pin-date", default=None)
+    p.add_argument("--control-md5", default=None,
+                   help="B5: md5 chân ĐỐI CHỨNG đã pin (chạy lại chân cũ trên code mới)")
+    p.add_argument("--control-byte-identical", action="store_true",
+                   help="B5: chân control tái lập BYTE-IDENTICAL với bản pin trước")
+    p.add_argument("--no-control", default=None,
+                   help="B5: lý do KHÔNG có chân đối chứng (bắt buộc nếu thiếu --control-md5)")
+
+    p = sub.add_parser("compare", help="B4 — so sánh 2 pin, TỪ CHỐI nếu khác >1 trục")
+    p.add_argument("md5_a")
+    p.add_argument("md5_b")
 
     p = sub.add_parser("verify")
     p.add_argument("--md5", default=None)
@@ -679,6 +917,7 @@ def main(argv=None) -> int:
         "extract": cmd_extract,
         "list": cmd_list,
         "annotate": cmd_annotate,
+        "compare": cmd_compare,
     }[args.cmd](args, wc_root)
 
 

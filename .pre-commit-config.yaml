@@ -125,3 +125,28 @@ repos:
         # (arch-review vòng 2, R2).
         verbose: true
         files: '^(bin|hooks|agents)/.*\.py$'
+
+      # ------------------------------------------------------------------------
+      # number-provenance-gate (B3, user duyệt 2026-09-28) — khối MỚI trong
+      # kb/canonical.md / kb/KNOWLEDGE.md công bố CAGR/Sharpe/Calmar/MaxDD kèm số
+      # thì trong CÙNG KHỐI phải có md5 ledger, tham chiếu registry, hoặc
+      # `no_pin: <lý do>`.
+      #
+      # VÌ SAO: ca 2026-09-28 — user cầm một số CAGR 21,94% không tra ngược được
+      # về đâu, vì nó đã được trích ra khỏi ledger rồi sống một mình. Số trần
+      # trong KB là số không kiểm chứng được.
+      #
+      # ĐÃ ĐO TRƯỚC KHI BẬT (mandate: test luật mới trên file thật):
+      # 116 commit · 310 khối mới · **12 bị chặn (3,9%)**, tất cả là vi phạm thật.
+      # Vòng đo ĐẦU cho 6,5% và lộ ra 8 khối `## Consolidation <ts>` do cron
+      # consolidate.sh tự sinh — chặn nhóm đó sẽ KẸT PIPELINE KB, nên đã miễn trừ
+      # theo header (bằng chứng, không phải nhân nhượng).
+      #
+      # Ratchet: chỉ xét khối MỚI. Bỏ qua: SKIP=number-provenance-gate ·
+      #          MIKE_PROV_GATE=warn (qua 1 lần, không ghi nhớ) · =off
+      - id: number-provenance-gate
+        name: Số hiệu suất mới trong KB phải khai nguồn (bin/number_provenance_gate.py, B3)
+        entry: bin/number_provenance_gate.py
+        language: system
+        verbose: true
+        files: '^kb/(canonical|KNOWLEDGE)\.md$'
