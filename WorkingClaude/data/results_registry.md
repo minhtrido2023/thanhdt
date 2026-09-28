@@ -8244,6 +8244,81 @@ kỳ vọng rơi giữa 25,24% và 25,71%; (b) độ nhạy `IDLE_CARRY_MIN_AGE 
 
 **Neo sizing DD GIỮ NGUYÊN −25,2%** (đầu SÀN của dải). Chân này KHÔNG đụng neo.
 
+### 4b. Chân TRẢ KHI ĐÁO HẠN — điểm TRUNG THỰC của luật user (job `Taylor_20260928_050623`)
+Chạy theo đúng đề xuất quant-skeptic: mỗi lô, tại MỖI mốc 21 phiên tuổi của chính nó, được credit
+đúng 21 phiên lãi PIT; kỳ DỞ DANG ⇒ 0% (cưỡng chế bằng cấu trúc). Knob `IDLE_CARRY_PAY_MODE=
+daily|maturity`, **mặc định `daily`** nên mọi chân đã pin tái lập nguyên trạng.
+
+| Chân | CAGR | Sharpe₂₅₂ | MaxDD | Calmar | Final NAV | IS / OOS | Lãi trả |
+|---|---|---|---|---|---|---|---|
+| `mat` FIFO (điểm trung thực) | **25,34%** | 2,03 | −14,1% | 1,79 | 833,72B | 21,79 / 28,64 | 36,018B |
+| `mat` LIFO (độ nhạy) | 25,42% | — | −14,1% | 1,81 | 840,65B | 21,90 / 28,71 | 38,086B |
+
+✅ **25,34% nằm STRICTLY trong (25,24%; 25,71%)** đúng như skeptic suy luận. Tổng lãi đơn điệu
+đúng kỳ vọng: **28,072B** (daily) < **36,018B** (maturity) < **51,576B** (không gate).
+
+⚠️ **Sharpe: bảng trên dùng `sharpe_252` (quy ước của anchor) = 2,03.** Báo cáo gốc in 2,02 =
+`sharpe_spy`. Trích số phải nói rõ quy ước — hai quy ước cho hai số khác nhau trên CÙNG một chân.
+
+**PHÁT HIỆN PHỤ, quan trọng hơn con số:** đổi sang quy ước ĐÚNG làm phần **SỐ HỌC TĂNG**
+(+1,116 → **+1,520pp**) nhưng phần **ĐƯỜNG ĐI GIẢM** (+0,758 → **+0,448pp**, **RƠI XUỐNG DƯỚI**
+sàn nhiễu 0,46pp), hai chiều gần triệt tiêu nhau ⇒ CAGR chỉ +0,10pp. Hệ quả: **cảnh báo "đường đi
+1,6× sàn nhiễu" ở §4 KHÔNG còn áp dụng cho chân maturity** — chân trung thực lại CHẮC hơn chân
+thận trọng. Tổng: +1,968 = +1,520 (số học) + 0,448 (đường đi), 77,2% là số học.
+
+**DISPOSITION — GIỮ 25,24% làm số chính, KHÔNG re-pin:** chênh +0,10pp = **1/5 sàn nhiễu**, trong
+khi 25,24% là cận dưới ĐÃ qua verify và sizing phải đứng ở cận xấu. 25,34% ghi ở đây làm điểm
+trung thực để tham chiếu, KHÔNG thay anchor. Dải `pin0%`…`pin1M` KHÔNG đổi; neo sizing DD vẫn −25,2%.
+
+Cài đặt (để tái lập): lô 4 trường `[tuổi, tiền, accrued, term_days]`; `accrued` = **TỔNG rate/252**
+(rate-SUM, KHÔNG phải số ngày, KHÔNG phải bình quân) ⇒ chính xác dưới lãi suất PIT biến thiên,
+không có xấp xỉ nào phải khai. `term_days` đếm theo số phiên ĐÃ ACCRUE, không theo tuổi lô (lô sinh
+ở reconcile 6z lệch 1 phiên). Thứ tự trong phiên: **reconcile → mature → accrue** (mature TRƯỚC
+accrue ⇒ trả ở phiên tuổi==21, đúng phiên daily trả lần đầu; mutation M12 giết thứ tự ngược).
+
+⚠️ **Vẫn còn thận trọng ở biên** (skeptic nêu, đều dưới sàn nhiễu và đều đẩy về phía AN TOÀN): lô
+bị tiêu đúng phiên kỷ niệm thì trả 0; rate thả nổi theo rate-SUM thay vì khoá tại lúc mở kỳ.
+
+**quant-skeptic CONFIRMED (high) 2026-09-28 06:11Z, 8/8 check, killer_objection = không có đòn nào
+vô hiệu hoá claim.** Skeptic tự tái lập độc lập TOÀN BỘ: CAGR/DD/NAV/IS/OOS/lãi/2.026 phiên trả +
+cả 4 chân min_age + overlay + selfcheck. Kiểm biên riêng của skeptic: **mọi khoản trả ≤ tiền phiên
+trước × tổng rate 21 phiên PIT, 0/2.026 vi phạm**.
+
+### 4c. Độ nhạy `IDLE_CARRY_MIN_AGE` — chân pin đứng trên CAO NGUYÊN, không phải một điểm
+FIFO, chế độ trả THEO NGÀY (đúng chế độ của chân pin 25,24%) ⇒ A/B chỉ đổi 1 biến.
+
+| `min_age` | 20 | **21 (PIN)** | 22 | 23 |
+|---|---|---|---|---|
+| CAGR | 25,35% | **25,24%** | 25,22% | 25,21% |
+| Δ vs 21 | +0,11pp | — | −0,02pp | −0,03pp |
+| Tổng lãi | 29,019B | 28,072B | 27,072B | 26,122B |
+
+**Biên độ toàn dải 20→23 = 0,14pp = 30% sàn nhiễu 0,46pp**; chênh lớn nhất (+0,11pp ở min_age=20)
+cũng dưới MDE một-chân 0,4pp ⇒ **không phân biệt được**. Đơn điệu, KHÔNG có vách; Sharpe bất động
+2,02 cả 4 chân, MaxDD trôi ≤0,1pp ⇒ không chân nào đổi tính chất rủi ro. Độ dốc ~0,03pp/phiên ở
+phía ngưỡng cao; bước 20→21 dốc hơn vì ở ngưỡng thấp một phiên giải phóng nhiều tiền hơn.
+
+🚫 **KHÔNG chứng minh 21 là TỐI ƯU** — chỉ chứng minh **việc CHỌN trong 20-23 không quan trọng**
+(mệnh đề mạnh hơn "tối ưu" cho mục đích pin). 🚫 **KHÔNG mở rộng ra ngoài 20-23**: ngưỡng rất thấp
+tiến về `pin1M` 25,71%, rất cao tiến về `pin0%` 23,37% — cao nguyên chỉ được đo trong khoảng CÓ
+NGHĨA VẬT LÝ (số phiên thực của một tháng).
+
+⚠️ **6 chân mới (4 min_age + 2 maturity) LÀM TĂNG N của DSR/PBO.** Chân nào được đưa vào registry
+như một **ỨNG VIÊN** (không phải một CẬN) thì **phải tính lại DSR/PBO với N mới** — hiện cả 6 chỉ
+đứng ở vai trò độ nhạy/tham chiếu nên chưa tính lại.
+
+⚠️ **BẪY MỚI — md5 ledger phụ thuộc CẢ dòng văn xuôi `META,cash_identity`.** Lần chạy control đầu
+lệch md5 CHỈ vì 1/16.821 dòng văn xuôi mô tả vừa được viết lại; 3.107 DAILY + 9.015 TX + 37 METRIC
++ 13 ANNUAL giống hệt (md5 sau khi bỏ dòng đó: `67b1cfab` cả hai). ⇒ **sửa comment mô tả một chân
+ĐÃ PIN cũng phá md5 pin** — muốn tái lập đúng thì phải giữ nguyên byte cả phần văn xuôi.
+
+Cổng đã qua (cả 4b + 4c): self-check 0 VND (tiền + NAV identity) mọi chân, cả 2 book · control
+`rp_ctrl3` md5 `4707bcbe…` **byte-identical anchor R3** · control đường daily `rp_21sfifo_re2` md5
+`d73f983d…` **byte-identical chân pin** (chứng minh không làm hỏng chân đã pin) ·
+`idle_cash_age_selfcheck.py` **104 assertion PASS / 18-18 mutation bị giết** (từ 50/11, thêm 7
+mutation cho maturity) qua 4 TZ + `env -u TZ` · §8 hậu tố `_mat` / `_20sfifo` / `_22sfifo` /
+`_23sfifo` vào tên file, **0 CSV đã pin bị ghi đè**.
+
 ### 5. Nguồn lãi suất + giới hạn phải mang theo `pin1M`
 - Chuỗi: `mike/agents/Taylor/research/idle_cash_proxy_20260927/fiinprox_deposit_1m_big4_monthly_2019_2026.csv`
   — huy động 1 tháng, khách cá nhân, BQ Big 4, 92 tháng 2019-02→2026-09, chụp ngày 15. Mean áp
