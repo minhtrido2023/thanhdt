@@ -21,7 +21,7 @@ import tempfile
 import textwrap
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-OLD_REF = os.environ.get("DOT2_OLD_REF", "").strip() or "8d1146c0"
+OLD_REF = os.environ.get("DOT2_OLD_REF", "").strip() or "68c0aeef^"
 _n = 0
 
 
