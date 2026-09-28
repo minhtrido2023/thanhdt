@@ -220,7 +220,9 @@ def compute_period_returns(account: str, report_date: datetime.date, rows: list,
                           f"{inception_from} cho {account}")
 
     if flows is None:
-        flows = load_flows(account)
+        # require_file=True: day la duong CONG BO SO (§21/§31). Thieu so dong tien ⇒ TU CHOI,
+        # khong duoc doan `[]` (mot lan NAP thanh LAI — sai theo huong co loi cho minh).
+        flows = load_flows(account, require_file=True)
     # Vốn khởi điểm KHÔNG phải flow — bỏ mọi bản ghi <= mốc baseline (nó đã nằm trong nav0).
     flows = [f for f in flows if f["date"] > inception_from]
     flows_by_date = attach_flows_to_rows(rows, flows)

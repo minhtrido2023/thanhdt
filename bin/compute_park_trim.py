@@ -698,11 +698,17 @@ def compute_trim(account_label, asof=None, target=None, holdings=None,
             out["blocked"].append({"ticker": tk, "reason": f"không đo được ADV: {err}"})
             continue
         if data_date:
+            # FAIL-CLOSED tu 2026-09-28 (user duyet) — cung mot dong code voi
+            # compute_jit_unpark.py:241 va plan.py:648 (plan.py la ranh gioi cung, user sua sau).
+            # `lag_days = None` lam cau gate ke tiep khong bao gio chay ⇒ cong ADV-stale bien mat.
             try:
                 lag_days = (dt.date.fromisoformat(asof) - dt.date.fromisoformat(data_date)).days
-            except Exception:
-                lag_days = None
-            if lag_days is not None and lag_days > LAG_ADV_MAX_STALE_DAYS:
+            except Exception as e:
+                out["blocked"].append({"ticker": tk, "reason":
+                                       f"khong xac dinh duoc do cu ADV (asof={asof!r} "
+                                       f"data_date={data_date!r}): {type(e).__name__}: {e}"})
+                continue
+            if lag_days > LAG_ADV_MAX_STALE_DAYS:
                 out["blocked"].append({"ticker": tk, "reason":
                                        f"ADV data {data_date} cũ {lag_days} ngày (> "
                                        f"{LAG_ADV_MAX_STALE_DAYS})"})
