@@ -310,6 +310,7 @@ def _finalize_partial(entry, positions, tk, play_type, ticker_sector_map, vni_da
 # `age` counts SESSIONS ELAPSED since the lot appeared, so a lot created this session has age 0 and
 # is on its 1st session of being idle. Eligibility is `age >= min_age`, i.e. a lot first earns on
 # its (min_age+1)-th session. NO BACK-PAY, ever: the first min_age sessions are never credited
+# (a CONSERVATIVE CONVENTION -- see the note at deposit_min_age_sessions; NOT a look-ahead constraint)
 # retroactively, because deciding to back-pay would require knowing whether the lot survives =
 # look-ahead. A lot spent before it matures therefore earns 0% with no claw-back mechanism needed.
 # ---------------------------------------------------------------------------------------------
@@ -426,7 +427,10 @@ def simulate(signals_df, prices, vni_dates, *,
              # the portion of cash that has ALREADY sat idle >= deposit_min_age_sessions sessions as
              # of that session. Sessions 1..min_age of a lot pay 0%; from session min_age+1 on the
              # lot earns r/252. NO back-pay ever: a lot idle 100 sessions is NEVER credited for its
-             # first min_age sessions (back-pay would require knowing the future = look-ahead).
+             # first min_age sessions. NOTE (quant-skeptic 2026-09-28): this is a CONSERVATIVE
+             # CONVENTION, not a look-ahead constraint -- paying a completed term at its
+             # anniversary is causal. The engine under-pays a matured lot by 1..min_age days,
+             # so the CAGR it yields is a LOWER BOUND of the faithful early-withdrawal-0% number.
              # Cash spent before it matures therefore earns 0% automatically -- no claw-back needed.
              # 0 (default) = OFF, original expression, byte-identical.
              deposit_min_age_sessions=0,

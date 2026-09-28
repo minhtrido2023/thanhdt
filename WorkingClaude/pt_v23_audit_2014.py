@@ -290,8 +290,11 @@ if _dep1m_off_raw:
 # 0%". A 1-month term deposit is not daily-liquid, so paying the 1M rate on cash that turns over
 # inside the month over-states the carry. IDLE_CARRY_MIN_AGE=<n sessions> credits carry ONLY to the
 # slice of cash that has ALREADY sat idle >= n sessions; sessions 1..n of a lot pay 0% and are NEVER
-# back-paid (back-pay needs to know whether the lot survives = look-ahead). Cash spent before it
-# matures earns 0% by construction. IDLE_CARRY_AGE_ORDER picks which lot an outflow eats:
+# back-paid. NOTE (quant-skeptic 2026-09-28): the no-back-pay rule is a CONSERVATIVE CONVENTION, not
+# a look-ahead constraint -- crediting a completed 21-session term at session 22 is causal, and is how
+# a rolled 1M term deposit actually pays. This engine therefore UNDER-pays a matured lot by 1..21 days,
+# so the resulting CAGR is a lower bound of the faithful 'rut truoc han = 0%' number, not a point
+# estimate of it. Cash spent before it matures earns 0% by construction. IDLE_CARRY_AGE_ORDER picks which lot an outflow eats:
 #   fifo (default) = oldest first  -> kills matured lots -> LESS carry -> the CONSERVATIVE pin.
 #   lifo           = newest first  -> preserves aged lots -> MORE carry -> sensitivity leg only.
 # §8: BOTH are argument axes (they change the numbers) => BOTH go in the filename.
