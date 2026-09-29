@@ -1,0 +1,34 @@
+== Reconcile equity — SpaceX ==
+Nguồn balance THẬT: data/execution_logs/dnse_raw_2026-09-27.jsonl (ts=2026-09-27T13:16:25, kind=balances)
+Nguồn P&L THẬT: data/execution_logs/verified_snapshot_SpaceX_2026-09-27.json
+
+VẾ TRÁI  (Vốn ban đầu + Lãi/lỗ - phí - lãi vay, TOÀN BỘ SỐ THẬT):
+  Vốn ban đầu:              1,000,000,000
+  + Lãi/lỗ chưa thực hiện:      +2,959,316
+  + Lãi/lỗ ĐÃ thực hiện (fill thật, lô-đang-sống):      -31,856,805
+  + Cổ tức tiền mặt ròng (gộp 15,875,000 − thuế 608,750):  +15,266,250
+  - Phí giao dịch (0.097% x giá vốn thật):         -860,102
+  - Phí/lãi margin đã POST (depositFeeAmount, API thật):       -7,129
+  = VẾ TRÁI:                  985,501,530
+
+VẾ PHẢI  (NAV thị trường + Tiền mặt - Nợ margin, số THẬT từ broker):
+  Giá trị cổ phiếu (MTM):     889,662,511
+  + Tiền mặt:                   6,497,626
+  - Nợ vay margin:                      0
+  + Trứng vàng (egg.totalValue, API): 85,489,312
+  = VẾ PHẢI:                  981,649,449
+
+CHÊNH LỆCH (trái - phải, TOÀN BỘ SỐ THẬT):       +3,852,081  (+0.3924% của vế phải)
+Ngưỡng dung sai: ±0.05% NAV + 5tr VND sàn tuyệt đối
+KẾT LUẬN (đẳng thức chính, chỉ số thật): ✅ KHỚP
+
+--- DIỄN GIẢI residual (ƯỚC TÍNH, KHÔNG phải số thật — margin rate 12.5%/năm do user cung cấp, chưa xác minh với DNSE) ---
+  Lãi margin ước tính/ngày trên dư nợ hiện tại:                0 VND/ngày
+  (depositFeeAmount hiện tại chỉ 7,129đ — có thể lãi margin post theo chu kỳ, không phải hàng ngày; cần đối chiếu sao kê DNSE để xác nhận chính xác)
+  Phí mua 0.097%/bán 0.097% trên TỔNG khớp mua+bán 3,151,520,000 (vế trái mới trừ trên giá vốn đang giữ):     +2,196,872
+  Thuế TNCN 0.1% giá trị bán 1,116,480,000:                +1,116,480
+  Lãi margin ước 12.5%/năm cộng dồn 2026-07-01→2026-09-27 (trừ phần đã post):       +262,614
+  = Giải thích được (ước):        +3,575,967
+  DƯ SAU DIỄN GIẢI:                 +276,114  (+0.0281% NAV) — trong ±0.3% NAV
+
+Ghi ra: data/execution_logs/reconcile_equity_SpaceX_2026-09-27.json

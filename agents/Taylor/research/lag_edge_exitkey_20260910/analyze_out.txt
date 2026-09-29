@@ -1,0 +1,58 @@
+================================================================================================================
+HEADLINE — independent recompute from DAILY.combined_nav (harness METRIC rows in brackets)
+================================================================================================================
+leg                                               CAGR%  Sharpe   MaxDD%  Calmar  FinalNAV_B
+----------------------------------------------------------------------------------------------------------------
+ctrl  = pin R3, entry-keyed gate                  28.86    1.89   -17.79    1.62     1178.01
+    harness METRIC rows                        {'cagr_pct': None, 'sharpe': None, 'maxdd_pct': None, 'calmar': '1.6228559703849674', 'final_nav_vnd': '1178009871755.5728'}
+inert = research engine copy, switch OFF          28.86    1.89   -17.79    1.62     1178.01
+    harness METRIC rows                        {'cagr_pct': None, 'sharpe': None, 'maxdd_pct': None, 'calmar': '1.6228559703849674', 'final_nav_vnd': '1178009871755.5728'}
+exitkey = gate reads mean12_av on exit axis       28.88    1.89   -17.70    1.63     1180.40
+    harness METRIC rows                        {'cagr_pct': None, 'sharpe': None, 'maxdd_pct': None, 'calmar': '1.6319396601715006', 'final_nav_vnd': '1180397922023.143'}
+noedge = allocator WITHOUT the edge gate          28.58    1.87   -18.56    1.54     1145.66
+    harness METRIC rows                        {'cagr_pct': None, 'sharpe': None, 'maxdd_pct': None, 'calmar': '1.5399390393253385', 'final_nav_vnd': '1145661090573.3464'}
+
+================================================================================================================
+TREATMENT DELTA (exitkey - ctrl):  CAGR +0.021pp   Sharpe +0.001   MaxDD +0.086pp   Calmar +0.009   FinalNAV +2.39B
+
+EDGE PREMIUM in this harness (vs the SAME allocator with the gate off):
+  entry-keyed (as published) : +0.288pp   (28.86% vs 28.58%)
+  exit-keyed  (causal)       : +0.309pp   (28.88% vs 28.58%)
+  SURVIVING SHARE            : 107.3%
+
+w_lag_tgt differs on 300 of 3,107 sessions (9.7%)
+  contiguous disagreement runs (N as independent events) = 15
+    2015-08-10 -> 2015-11-23  (75 sessions)
+    2017-03-16 -> 2017-05-09  (36 sessions)
+    2017-05-26 -> 2017-06-13  (13 sessions)
+    2017-07-19 -> 2017-07-27  (7 sessions)
+    2017-08-08 -> 2017-08-22  (11 sessions)
+    2017-09-01 -> 2017-09-12  (7 sessions)
+    2017-10-26 -> 2017-11-07  (9 sessions)
+    2017-11-30 -> 2017-12-12  (9 sessions)
+    2019-06-04 -> 2019-06-10  (5 sessions)
+    2019-08-08 -> 2019-09-12  (25 sessions)
+    2020-10-28 -> 2020-12-01  (25 sessions)
+    2023-11-30 -> 2023-12-05  (4 sessions)
+    2025-05-12 -> 2025-06-12  (24 sessions)
+    2025-07-24 -> 2025-08-27  (25 sessions)
+    2025-11-10 -> 2025-12-12  (25 sessions)
+
+PER-YEAR log-return delta (exitkey - ctrl):
+        ctrl  exitkey  delta_log
+ymd                             
+2014  0.3997   0.3997     0.0000
+2015  0.2362   0.2461     0.0099
+2016  0.1350   0.1350     0.0000
+2017  0.2906   0.2904    -0.0003
+2018  0.2535   0.2538     0.0003
+2019  0.1218   0.1175    -0.0043
+2020  0.2480   0.2519     0.0039
+2021  0.7369   0.7367    -0.0003
+2022 -0.0772  -0.0772     0.0000
+2023  0.2035   0.2030    -0.0005
+2024  0.2279   0.2280     0.0001
+2025  0.3927   0.3858    -0.0069
+2026 -0.0091  -0.0090     0.0001
+  total delta_log = +0.00203
+  largest single year = 2015 (+0.0099), share of |total| = 37% of gross movement

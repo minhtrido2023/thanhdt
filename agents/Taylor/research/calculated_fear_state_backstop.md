@@ -175,6 +175,14 @@ chỉ giao dịch là thật). Không bao giờ size như một vị thế momen
 ### Entry — 3 tranche (không cố bắt đáy)
 - **T1 (1/3)** khi đã QUALIFY §2 **và** DD>35% **và** giá ≤ book hữu hình. Chấp nhận còn dò đáy.
 - **T2 (1/3)** khi có *ổn định giá* (higher-low + volume cạn kiệt) **hoặc** 1 catalyst dương đầu tiên.
+  ⚠️ **Đây là KỶ LUẬT CHIA TRANCHE để hạ giá vốn trung bình, KHÔNG PHẢI tín hiệu làm tăng xác suất
+  thắng.** Kiểm định trực tiếp (`postshock_base_formation_20260823.md`, job `Taylor_20260823_025658`,
+  n=45 sự kiện RATING_OK độc lập, entry sau khi "ổn định giá" xác nhận): excess vs VNINDEX **ÂM** cả
+  3 horizon (H60 −5,9% / H120 −8,8% / H250 −20,1%, CI dưới 0 cả 3), rủi ro rơi tiếp ≥−30% KHÔNG giảm
+  so với vào ngay lúc sập (51,2% vs 48,8%, không có ý nghĩa thống kê). Cái quyết định thắng-thua vẫn
+  là discriminator ĐỊNH TÍNH §2/§2.5 (khủng hoảng có chạm lõi kinh doanh hay không), không phải hình
+  dạng giá/volume — đợi "ổn định giá" không mua được xác suất thắng cao hơn, chỉ mua được giá vốn
+  bình quân thấp hơn nếu giá tiếp tục đi ngang/xuống.
 - **T3 (1/3)** khi **catalyst xác nhận** (chọn được kiểm toán / công bố BCTC kiểm toán sạch / cổ tức
   thực trả / gỡ hạn chế giao dịch). Đây là tranche "thêm khi luận điểm được chứng minh", không phải đoán.
 
@@ -521,6 +529,17 @@ Neo vào PE hiện tại 6,08x, giả định lõi bán lẻ vàng (phần lớn
 
 ### Kết luận: PNJ = **AMBIGUOUS** (nghiêng constructive, mạnh hơn DGC nhưng bị chặn bởi wait dài)
 
+> ⛔ **HẾT HIỆU LỰC — ĐÃ HẠ BẬC THÀNH `NON` ngày 2026-09-28** (job `Taylor_20260928_010002`, xem mục
+> quét sáng thứ Hai 2026-09-28 ở §13). Cổng #5 dưới đây (BCTC Q3/2026) **tự trả lời sớm và trả lời
+> XẤU** qua công bố của chính PNJ 25→27/09: dự phòng **7.071 tỷ cho chính sách THU ĐỔI SẢN PHẨM**
+> (= 50,8% vốn chủ) ⇒ LNST 2026 **−6.271 tỷ**, huy động tới **8.000 tỷ** (47,4% vốn hoá), **không
+> chia cổ tức tiền**, ĐHĐCĐ bất thường **21/10**. Trục quyết định #1 đã **lật sang phía LÕI** (nghĩa
+> vụ tiền mặt của pháp nhân, đi qua đúng kênh bán lẻ lõi), #3 FAIL (Q2/26 `CF_OA` −1.568 tỷ, `NP`
+> −283 tỷ, FSCORE 7→1 — quý TRƯỚC khủng hoảng, phủ định tiền đề "pre-crisis mạnh" của phán quyết
+> 18/07), #5 FAIL (PB thực sau dự phòng ≈ **2,62**, không phải 1,25). Bảng dưới giữ lại làm **tư liệu
+> lịch sử** của phán quyết 18/07/2026 — **đừng dùng làm cơ sở hành động.**
+
+
 | Tiêu chí | Phán quyết | Ghi chú |
 |---|---|---|
 | #1 cá nhân vs lõi | ⚠️ AMBIGUOUS | Gần lõi hơn 2015 (nội bộ + product-integrity), nhưng lõi vàng bán lẻ không chạm, P-Lab nhỏ. GIA + lan uy tín = ẩn số. |
@@ -695,6 +714,61 @@ trúng chu kỳ, KHÔNG đếm ex-ante**). → entry PB 0.73 đủ đảm bảo 
 §2/§2.5 vẫn là HARD GATE thủ công + user duyệt từng tên. Sleeve special-situation ≤0.5–1.0% NAV/tên,
 NGOÀI book V2.4. Đề xuất nâng cấp `fearbuy_weekly_scan.sh` chạy FEARBUY v1 định lượng (gate −30% tự
 bật/tắt: 2026 hiện chưa −30% → screen "ngủ", crash sâu tự kích hoạt) — **chờ user duyệt, chưa wire.**
+
+---
+
+## 9.5. Mở rộng mẫu nhóm (b) — 14 case, 6 ngành: **discriminator KHÔNG phân biệt được ở 12M** (Taylor, job `Taylor_20260822_022947`, 2026-08-22)
+
+**Kết quả đầy đủ + số liệu: `cycle_fear_backtest_20260822.md`. PREREG commit `4e36d170` TRƯỚC mọi truy
+vấn outcome (`cycle_fear_prereg_20260822.md`). Verdict: NO-GO. KHÔNG wire, KHÔNG đổi §2.5.**
+
+Mục đích: §8 chỉ có **1** case (b) verify (HPG 2022). Job này mở ra **14 case × 6 ngành** (thép, chứng
+khoán, BĐS, chăn nuôi, phân bón, hoá chất), có **3 negative control chỉ định trước** (HSG/NKG = không
+phải leader chi phí thấp; NVL = nghi cấu trúc).
+
+| Giả thuyết | Ngưỡng | Đo được | |
+|---|---|---|---|
+| H1 median BHAR_12M > 0, N ≥ 5 | >0, N≥5 | **+108,3pp**, N=14 | ✅ đạt |
+| H2 median(PASS) − median(FAIL) ≥ +20pp @12M | ≥+20pp | **−17,0pp** | ❌ **bác bỏ** |
+
+### ★ Ba bài học ghi vào khung (KHÔNG đổi tiêu chí §2.5 — N_eff ≈ 2 cú sốc độc lập, sửa là overfit)
+
+1. **Chân trời đánh giá nhóm (b) phải là 24M, KHÔNG phải 12M.** Ở 12M **mọi thứ rơi sâu đều nảy** —
+   tiêu chí #2 (sống sót) có gap ≈ 0 (+104,9 vs +108,3pp). Ở 24M gap bung ra **−82,8pp** (nhóm nghi
+   ngờ +34,5 vs nhóm ổn +117,3). **12M quá ngắn để thiệt hại cấu trúc kịp cắn.** Bổ sung, không mâu
+   thuẫn, với ghi chú §8 ("recovery của (b) chậm hơn nhưng bền").
+2. **Tiêu chí #3 (leader chi phí thấp) ANTI-phân biệt ở 12M.** Cùng ngành cùng đáy: HSG **+178,1pp**
+   và NKG **+166,8pp** (biên mỏng, DD −80%/−82%) **ĐÁNH BẠI HPG +102,5pp** (leader, DD −71%). §8 viết
+   "HSG/NKG cùng đáy nhưng bật yếu hơn nhiều" — **số liệu bác bỏ câu đó ở chân trời 12M**. Cơ chế:
+   **độ nảy đi theo độ RƠI, không theo CHẤT LƯỢNG**. Đừng dùng #3 để kỳ vọng "leader nảy mạnh hơn";
+   giữ nó như bộ lọc rủi ro dài hạn thì được.
+3. **#2 (sống sót qua đáy) là tiêu chí duy nhất làm việc — và làm việc theo kiểu PHÒNG THỦ.** NVL,
+   case chỉ định trước là structural, là mã **DUY NHẤT âm ở 24M** (−22,0pp; neo thực tế T20 **−43,1pp**).
+   Giá trị của discriminator = **tránh thảm hoạ**, không phải chọn người thắng — đúng vai trò
+   "golden floor cắt blow-up" ở §9 phát hiện #2.
+
+**Cảnh báo đọc số:** median +108,3pp là **neo tại đáy ex-post**; neo thực tế trough+20 phiên còn
+**+52,6pp**. VNINDEX từ chính đáy đó đã +23,1%/12M. Và kết quả này **đá với screen N-lớn §9**
+(non-commodity +47,5% > commodity +12,5%, N=237 episode, 8 regime) ⟹ **khi hai bên đá nhau, tin §9**;
+đọc job này là bằng chứng cho "2022Q4 là một đáy tốt", KHÔNG phải "nhóm chu kỳ có edge".
+
+### Nhóm (c) vĩ mô — 1 case phản chứng đáng giá hơn cả 3 case thuận
+
+Mua **chỉ số** trong panic vĩ mô hiệu quả (VNINDEX từ đáy COVID 2020-03-24: **+76,2%**/12M; từ đáy
+2022-11-15: **+23,1%**). Nhưng **chọn mã vẫn cần discriminator**: cùng đáy COVID, FPT **+49,1pp** và
+MWG **+43,5pp** BHAR_12M, còn **VNM −28,3pp @12M và −106,7pp @24M** — large-cap "rẻ", cùng panic,
+nhưng **lõi đang xấu đi thật**. Đây là minh hoạ sạch nhất cho câu hỏi trung tâm của nhóm (c): *giá sập
+vì KỸ THUẬT hay vì lõi xấu đi thật*.
+⚠️ **Đính chính mô tả thường gặp**: đáy 2022 rơi vào **Q4/2022** (siết trái phiếu + margin call),
+KHÔNG phải Q1/2022 (Nga-Ukraine) — Q1/2022 là vùng **ĐỈNH** của VN-Index.
+
+### Nhóm (d) gián đoạn vận hành — vẫn CHƯA có case
+
+5 ứng viên tìm được (RAL cháy nhà máy 08/2019; MSH/TNG/VHC/FMC đóng cửa "3 tại chỗ" Q3/2021) đều có
+DD chỉ **−14,6% đến −28,9%**, trong khi nhóm (b) có DD **−43% đến −90%**. **Thị trường chưa bao giờ
+định giá đây là khủng hoảng** ⟹ không có nỗi sợ nào để mua. BHAR dương của chúng là lợi suất của DN
+tốt trong thị trường tăng, **không phải bằng chứng cho khung này**. Ô "case đã có" của nhóm (d) trong
+bảng §0.5 **giữ nguyên trống**.
 
 ---
 
@@ -1268,6 +1342,608 @@ Nguồn tin tuần này: [nguoiquansat — khởi tố CT/GĐ Đầu tư 706 (08
 
 ---
 
+### 2026-08-17 — QUÉT SÁNG THỨ HAI (job `Taylor_20260817_010002`, cadence khác quét tuần: mục đích là BẢO VỆ PHÍA MUA trước 09:00) — 1 case mới (POM → NON) · 0 QUALIFY · 1 mã đang mua có 2 cổng CHƯA đóng
+
+Cửa sổ tin 14/08 (sau phiên) → 16/08. Danh mục đang gác **29 mã** (13 NH + 16 ngoài NH).
+
+**Phần 1 — anomaly_scan** (`--backfill-days 5 --no-flags`): phiên cuối cache **2026-08-14**,
+universe 252 mã, **watchlist TƯƠI** (`active_nav` computed_at 2026-08-14) — không có cảnh báo quá hạn.
+**0 FLOOR2 · 0 IDIOCRASH.** Chỉ 2 cờ TĂNG (GAS/GVR `CEIL2` 10/08) đã ghi tuần trước.
+
+**Phần 2 — quét rộng** `bq_cache/ticker` 2026 (1.275 mã → **458 mã** đạt ADV ≥1 tỷ), IDIOCRASH
+12/08→14/08: **8 sự kiện / 8 mã**. 7/8 đã có kết luận tuần trước (ANT/DDG/HHP/TDM/L14 **NON**;
+HII/LLM **pullback từ đỉnh, không phải case**). **1 mã MỚI: POM.**
+
+| Mã | Số chặn | Kết luận |
+|---|---|---|
+| **POM** (Thép Pomina), 3.200đ, −33,3% so đỉnh 3M, +10,3% trên đáy | **Vốn chủ sở hữu ÂM** (−590 tỷ công ty mẹ / −630 tỷ hợp nhất, BCTC kiểm toán 2025) ⇒ trượt §2#4 + §10.5 solvency, và dưới sàn 30 tỷ để giữ tư cách công ty đại chúng · **ý kiến kiểm toán NGOẠI TRỪ ≥3 năm liên tiếp** = gạch ❌ tường minh của §2 · **hạn chế giao dịch từ 19/06/2026, chỉ khớp phiên thứ Sáu** · đang bị xem xét huỷ niêm yết/huỷ tư cách đại chúng | **NON** |
+
+⚠️ **Lớp dương-tính-giả CƠ HỌC mới phát hiện (đề xuất lọc, chưa wire):** POM chỉ giao dịch **1
+phiên/tuần** nên "ret 1 phiên" của nó thực chất là **ret 1 TUẦN** — mọi mã bị hạn chế giao dịch sẽ
+sinh cờ IDIOCRASH giả theo cùng cơ chế. Bước lọc rẻ: loại mã có <4 phiên có KL trong 5 phiên gần
+nhất, chạy TRƯỚC khi kéo dữ liệu tài chính (cùng tinh thần bước vị-trí-giá 3M thêm tuần trước).
+
+**Phần 3 — bối cảnh thị trường (mới, ảnh hưởng phía mua):** VNINDEX **14/08 đóng 1.729,08, −36,55đ
+(−2,07%)**, mất MA200; nhóm Vingroup lấy ~14,5 điểm chỉ số (VIC −3,5% / VRE −3,3% / VHM −2,7%);
+BĐS −2,93%, CNTT −2,17%, NH −0,82%. **DT5G vẫn NEUTRAL** (`golive_state_today` as_of 2026-08-14,
+published 19:01, base_state_dt4=3 == dt5g=3, không bị macro cap) — trạng thái này đã tính SAU cú
+giảm, không phải số cũ.
+
+**Phần 4 — PHÍA MUA phiên 17/08 (câu hỏi chính của lượt quét này): CHỈ CÓ 1 LỆNH MUA trên cả 2
+account** — SpaceX `BUY-TV1-DISC-2026-08-17`, 500cp LO ≤20.640 (10,32tr), tranche CUỐI của chương
+trình gom 2.300cp (đã khớp 1.800). ZaloPay 0 lệnh.
+- **Luận điểm TV1 KHÔNG gãy**: 0 tin mới 14→16/08 (vietstock tin-tức-sự-kiện trống trong cửa sổ);
+  nhân sự vẫn nguyên trạng (CT Nguyễn Hữu Chỉnh tạm đình chỉ từ 02/06, TGĐ Nguyễn Kim Cương phụ trách).
+- **NHƯNG cả 2 cổng §14 vẫn CHƯA đóng, và cổng (b) nay ĐÃ QUÁ HẠN:**
+  (a) **kết quả lấy ý kiến bằng văn bản chọn đơn vị kiểm toán (10/08) vẫn CHƯA công bố** — 7 ngày.
+  Nền: cả **4 Big4 (Deloitte/EY/KPMG/PwC) đã TỪ CHỐI** kiểm toán TV1 sau khi CT bị khởi tố.
+  (b) **cổ tức tiền mặt 15%, ngày thanh toán công bố 14/08 — KHÔNG có bằng chứng đã về.**
+  `cashDividendReceiving` của SpaceX = **9.775.000đ ĐỨNG YÊN** từ 13/08 qua 14/08 tới bản đọc mới
+  nhất, `totalCash` không tăng khoản nào ⇒ chưa credit. (Đây đúng là phép thử DDM §14 đặt ra.)
+- ⚠️ **Điểm giá đáng lưu ý (không phải vi phạm luật, nhưng nên cân nhắc):** limit **20.640** nằm
+  **+2,69% TRÊN giá đóng cửa 14/08 (20.100)**. Nguyên nhân cơ học: trần động neo vào **trung bình 5
+  phiên (20.140)**, mà trung bình 5 phiên TRỄ so với cú giảm −2,07% của chỉ số. Trần 20.744 vẫn dưới
+  `max_no_chase_ceiling` 25.000 nên hệ không chặn. Đề xuất escalate (KHÔNG tự đổi plan): hạ limit
+  tranche cuối về ≤20.100 hoặc hoãn 1 phiên, vì đây là 500cp cuối — không có áp lực thời gian.
+
+**Phần 5 — read-through peer (không phải case mua):** **TV3 (PECC3)** 14/08 bổ nhiệm PTGĐ Hồ Anh
+Tùng + tái bổ nhiệm GĐ Trung tâm Nhiệt điện — sau khi 3 lãnh đạo (nguyên CT Nguyễn Như Hoàng Tuấn,
+TGĐ Lạc Thái Phước, KTT Phạm Hoàng Vinh) bị khởi tố/tạm giam. Q2/2026 **doanh thu −53,8% YoY nhưng
+LNST +30,5% YoY** — chữ ký chất lượng lợi nhuận cần soi, nhưng TV3 quá nhỏ/mỏng thanh khoản, KHÔNG
+phải ứng viên. Giá trị duy nhất: xác nhận **cụm khởi tố ngành tư vấn điện (PECC1/3/4) là có thật và
+còn đang diễn tiến** — đúng bối cảnh rủi ro của TV1.
+
+**Phần 6 — nhóm ngân hàng (13 mã) + nhóm ngoài NH (16 mã):** 0 sự kiện. Không có tin kiểm soát đặc
+biệt / chuyển giao bắt buộc / khởi tố lãnh đạo NH / rút tiền hàng loạt trong cửa sổ. Ghi nhận 2 mục
+vận hành (không phải rủi ro): **VIX chốt quyền cổ tức CỔ PHIẾU 5% tuần 17-21/08** (điều chỉnh số
+lượng — việc của Winston/Mafee); **DGC vẫn trong danh sách cắt margin HOSE tháng 8** (đã biết).
+
+**Phần 7 — 1 khuyết tật dữ liệu (nhỏ, báo Winston):** trong `bq_cache/ticker/2026.parquet`, cột
+mirror `VNINDEX` phiên **2026-08-13** có **1 dòng (mã F88) mang giá trị CŨ 1793,18** thay vì 1765,63
+(775 dòng còn lại đúng). `anomaly_scan.compute_signals` dùng `.first()` theo ngày nên KHÔNG bị ảnh
+hưởng (F88 không đứng đầu bảng chữ cái và không nằm trong universe 252). Query ad-hoc dùng
+`max(VNINDEX)` thì BỊ — chính lượt này đã dính và phải tính lại: dùng **`ticker='VNINDEX'`** làm
+chuỗi chỉ số, đừng dùng cột mirror.
+
+**Tổng kết**: **29 mã đang gác** rà qua · 252 mã (anomaly_scan) + 458 mã (quét rộng) + 7 truy vấn tin
+· **1 case mới (POM → NON) · 0 QUALIFY mới** · watchlist **KHÔNG** quá hạn · **1 lệnh mua duy nhất
+phiên 17/08 (TV1) — luận điểm không gãy nhưng 2 cổng chưa đóng + 1 điểm giá đáng escalate.**
+**Mốc phải theo: TV1 kiểm toán + cổ tức (quá hạn, kiểm mỗi phiên) → TV4 30/08 → PNJ Q3 cuối 10/2026.**
+
+**✅ ĐÃ ĐÓNG (2026-08-17, Mike theo quyết định user):** tranche CUỐI TV1 đã khớp ĐỦ — SpaceX 500cp @
+**20.100** (PLACE/FILL 09:15 ICT, `exec_SpaceX_2026-08-17_journal.csv`, trong khi plan ref 20.640).
+Tracking `fearbuy-monday-buyside-TV1-2-cong-chua-dong` (2 cổng chưa đóng trước phiên 17/08) **CHÍNH
+THỨC ĐÓNG** — lệnh đã xong, không còn theo dõi. Chương trình tích luỹ TV1 2.300cp (5% NAV, cả 2
+account) vẫn hoạt động; mốc dài hạn giữ nguyên: TV1 kiểm toán + cổ tức (theo dõi chương trình) →
+TV4 30/08 → PNJ Q3 cuối 10/2026.
+
+Nguồn: [cafef — "tội đồ" nào khiến VN-Index bay gần 37 điểm phiên 14/8](https://cafef.vn/toi-do-nao-khien-vn-index-bay-gan-37-diem-trong-phien-14-8-188260814153439097.chn) ·
+[stockbiz — lý do POM bị duy trì hạn chế giao dịch](https://stockbiz.vn/tin-tuc/pom-ly-do-co-phieu-cua-thep-pomina-bi-duy-tri-han-che-giao-dich/40815374) ·
+[24hmoney — Pomina đối mặt án huỷ niêm yết](https://24hmoney.vn/news/pomina-doi-mat-an-huy-niem-yet-c1a2794307.html) ·
+[cafef — 4 Big4 từ chối kiểm toán TV1](https://cafef.vn/mot-cong-ty-con-cua-evn-bi-ca-4-cong-ty-big4-tu-choi-kiem-toan-sau-khi-chu-tich-hdqt-bi-khoi-to-188260701114401433.chn) ·
+[nguoiquansat — PECC3 (TV3) biến động nhân sự 14/08](https://nguoiquansat.vn/bien-dong-moi-tai-doanh-nghiep-dien-quy-mo-300-ty-dong-sau-khi-dan-lanh-dao-bi-khoi-to-310429.html) ·
+[vietstock — lịch chốt quyền cổ tức tuần 17-21/08](https://vietstock.vn/2026/08/tuan-17-2108-noi-bat-khoan-co-tuc-hon-5-ngan-ty-cua-tan-binh-hose-738-1481215.htm)
+
+---
+
+### 2026-08-21 (job `Taylor_20260821_011002`) — 0 QUALIFY mới · 1 NON mới (SGT) · 1 AMBIGUOUS-yếu cần cổng (ICG) · 2 không-phải-case (NTL, TIN) · 4 read-through (3 có tin mới THẬT)
+
+Cửa sổ tin **14/08 → 20/08**. Danh mục đang gác **29 mã** (13 NH + 16 ngoài NH).
+
+**Phần 1 — anomaly_scan** (`--backfill-days 8 --no-flags`): phiên cuối cache **2026-08-20**, universe
+**251 mã** (H:29 / W:240), **watchlist TƯƠI** (`active_nav` computed_at 2026-08-20) — KHÔNG có cảnh
+báo quá hạn. **0 FLOOR2 · 0 IDIOCRASH.** Cờ duy nhất trong 8 phiên là cờ TĂNG: PTX `CEIL2` 12/08
+(+9,5%, idio +8,4%, chỉ 0,3 tỷ giá trị — nhiễu thanh khoản mỏng). ⇒ **không mã nào trong danh mục
+đang gác bị sập riêng lẻ.**
+
+**Phần 2 — quét RỘNG** `bq_cache/ticker` 2026: 1.275 mã → **693 mã đạt sàn thanh khoản ≥1 tỷ**,
+IDIOCRASH (ret ≤ −6% ∧ idio ≤ −5% ∧ val ≥1 tỷ), cửa sổ 13/08→20/08 → **9 sự kiện / 7 mã**.
+*(⚠️ 693 KHÔNG so trực tiếp được với 458 của 2 tuần trước — lượt này lọc bằng `max(Close×Volume)` cả
+năm 2026 thay vì `Trading_Value`; cùng chiều NỚI LỎNG nên quét rộng hơn, không hụt.)*
+Chuỗi chỉ số lấy từ `ticker='VNINDEX'`, **không** dùng cột mirror (bẫy 08-17 Phần 7).
+
+Áp 2 bước lọc rẻ đã đề xuất các tuần trước, TRƯỚC khi kéo tài chính — **loại 3/7 mã**:
+
+| Bước lọc | Loại | Vì sao |
+|---|---|---|
+| Vị-trí-giá 3M (thêm 08-14) | **VNZ** (+81,7% trên đáy 3M), **LLM** (+86,8%) | Pullback trong xu hướng TĂNG, không có nỗi sợ để mua |
+| Số phiên có KL trong 5 phiên (thêm 08-17, ca POM) | **POM** (1/5 phiên) | Hạn chế giao dịch → "ret 1 phiên" thực chất là ret 1 tuần = cờ giả. Đã kết luận **NON** 08-17 |
+
+⇒ còn **4 mã ở/gần đáy 3M, đều CHƯA từng phân loại** (grep lịch sử case: 0 lần xuất hiện):
+
+| Mã | Giá 20/08 | Vị trí | Số chặn / số đỡ | Kết luận |
+|---|---|---|---|---|
+| **SGT** (SaigonTel, HOSE) | 8.310 (−46,7% so đỉnh 3M, **đúng đáy 3M**) | PB **0,50** (có sàn tài sản) | **CF_OA_3Y = −1.544 tỷ** (âm nặng 3 năm liền) · Debt_Eq 2,23 · 6T/2026 LNTT 82,4 tỷ **−82,3% YoY**, mới xong ~16% kế hoạch năm · **đang chào bán 148 triệu cp giá 10.000 cho cổ đông hiện hữu để TRẢ NỢ** trong khi thị giá 8.310 (**dưới giá phát hành**) | **NON** — gạch ❌ tường minh §2.5 *"DN bị buộc bán tài sản/pha loãng ở đáy"*; PB rẻ không cứu được khi lõi không sinh tiền 3 năm |
+| **ICG** (Xây dựng Sông Hồng, HNX) | 10.800 (−34,1% so đỉnh, +4,9% trên đáy) — **4 phiên SÀN liên tiếp** 14→19/08 (−9,9/−9,5/−9,7/−8,0%), KL 186k/95k/58k/232k vs 4-24k nền | PB **0,61** · PE 7,3 · **CF_OA_3Y +362 tỷ ≈ 1,9× vốn hoá 190 tỷ** · vừa trả cổ tức lớn (DY 23%, BVPS 20.406→17.736 QoQ) | **Debt_Eq 2,91→3,09→4,18 trong 2 quý** · CR 1,09 · ROE_Min3Y −2,7% · NP_P0 chỉ 2,18 tỷ trong khi CF_OA_P0 +109 tỷ (chênh quá lớn — nghi thu hồi công nợ/thoái vốn chứ không phải sinh lời) · ngành xây lắp = đúng chữ ký §10.10 (PVX: biên mỏng + đòn bẩy tăng) · **WebSearch 2 truy vấn KHÔNG tìm được tin nào giải thích 4 phiên sàn** | **AMBIGUOUS-yếu — KHÔNG khuyến nghị, nhưng KHÔNG đóng.** Đây là cú sập THẬT có chữ ký sự kiện (sàn liên tiếp + KL nhân 10×) mà chưa xác minh được trigger. Chặn thực tế mạnh hơn cả phân loại: **vốn hoá 190 tỷ, ADV ≤2,4 tỷ ngay trong phiên sập** — nhỏ hơn cả ràng buộc thanh khoản của TV1. **Cổng xác nhận cụ thể (kiểm tuần sau):** (a) công bố giải trình HNX về chuỗi giảm sàn; (b) **BCTC bán niên soát xét, hạn ~30/08** — cùng mốc TV4 |
+| **NTL** (Lideco, HOSE) | 12.500 (−24,5% so đỉnh, +0,4% trên đáy) — 1 phiên −6,7% ngày 19/08 với **3,98 triệu cp = ~20× nền**, rồi ổn định | Bảng cân đối rất khoẻ: Debt_Eq 0,25 · CR 8,42 · tiền 822 tỷ · DY 7,1% · PB 0,93 | **Lõi BĐS 2 năm liền không có doanh thu** (Q2/2026 doanh thu thuần ~4,7 tỷ) · CF_OA_P0 **−186 tỷ**, âm 3 quý liền · ROE_Trailing 1,7% · **lợi nhuận đến từ danh mục chứng khoán** (597 tỷ = 29% tổng tài sản, riêng **TCH chiếm 52%** mà TCH đã −40% từ tháng 5) | **Không phải case** — thiếu trigger §0.5 (không có khủng hoảng nào; giá rớt vì NAV danh mục cổ phiếu giảm THẬT, đúng giá trị, không phải nỗi sợ). Thực chất NTL đang là **proxy có đòn bẩy của TCH**, không phải BĐS giá rẻ |
+| **TIN** (ICB 8771 — quản lý tài sản/tài chính, UPCoM) | 106.000 (−19,0% so đỉnh, **+6,0% trên đáy** — chỉ là nhả lại cú tăng 105.000→120.000 trong 2 phiên 12-13/08) | ROE_Trailing 76,4% · PE 5,9 | **PB 3,41** → trượt thẳng §2#5 (không có sàn định giá) · Debt_Eq 7,2 (bình thường với tài chính, nhưng cộng PB 3,4 thì không còn đệm) · `CR_P0`/`Cash_P0` = 0 trong BQ (khoảng trống dữ liệu, không chấm được §2#4) | **Không phải case** — pullback sau spike, không có dislocation |
+
+**Phần 3 — WebSearch tin theo BỘ TỪ KHOÁ NHÓM (12 truy vấn + 2 WebFetch):**
+- **Nhóm chung** (khởi tố/thanh tra/đình chỉ/huỷ niêm yết/từ chối kiểm toán, cửa sổ 14→20/08):
+  **0 case NIÊM YẾT MỚI.** Mọi tên trả về đều đã có kết luận (ACV, PC1 **BANNED**, DGC, TV1/TV3/TV4).
+  Ghi nhận nền: HNX tiếp tục huỷ ĐKGD UPCoM tháng 8 (BCG/BCR/DAN/DVT ~1,4 tỷ cp) — không mã nào
+  trong danh mục gác.
+- **Nhóm ngân hàng (13 mã)** — bổ sung §4.2 `bank_tailrisk_insurance_design_20260814.md`:
+  **0 sự kiện.** Không có kiểm soát đặc biệt / chuyển giao bắt buộc / rút tiền hàng loạt / khởi tố
+  lãnh đạo NH mới trong cửa sổ. Kết quả trả về chỉ là nền cũ (4 NH đã chuyển giao xong: GPBank, MBV,
+  Vikki, VCBNeo).
+- **Nhóm BĐS đầu ngành/hạ tầng (VHM, VRE)** — §6 `vic_family_credit_concentration_20260818.md`:
+  **0 sự kiện tín dụng mới** trong cửa sổ. Không có tin chậm/vỡ nợ trái phiếu, hạ bậc tín nhiệm,
+  giải chấp/call margin cổ đông lớn, hay siết tài sản đảm bảo. Nền đã biết: Vingroup đã tất toán
+  906,5 triệu USD trái phiếu quốc tế chuyển đổi.
+- **Nhóm ngoài NH (16 mã)** — tai nạn nhà máy / thu hồi sản phẩm / mất mỏ-giấy phép / kê biên /
+  tranh chấp lãnh đạo: **0 sự kiện.**
+
+**Phần 4 — PHÍA MUA (câu hỏi bắt buộc của lượt quét): KHÔNG có rủi ro luận-điểm-gãy.**
+`plan_SpaceX_2026-08-21.json` và `plan_ZaloPay_2026-08-21.json` đều **0 orders** (HOLD_ALL cả 2
+account). Không mã nào trong rổ ứng viên mua. 4 mã mới quét được (SGT/ICG/NTL/TIN) **không nằm
+trong 29 mã đang gác**, nên không có read-through nào chạm danh mục.
+
+**Phần 5 — read-through case đang theo dõi (3/4 có dữ kiện mới THẬT)**
+
+- **TV1** (§4/§14/§13, QUALIFY — SpaceX 2.300cp + ZaloPay 1.200cp): giá **20.000** (20/08), vẫn kẹt
+  biên 19.900-20.300, dưới MA50 (21.172) và MA200 (25.417). **Cả 2 cổng VẪN CHƯA đóng, cổng (b) nay
+  quá hạn 6 phiên:**
+  (a) **kết quả lấy ý kiến bằng văn bản chọn đơn vị kiểm toán (10/08) — vẫn CHƯA công bố sau 11
+  ngày.** WebSearch + WebFetch trang tin-tức-sự-kiện vietstock của TV1 đều không có bài kết quả
+  (trang chi tiết bị paywall). Nền: cả 4 Big4 đã từ chối; đơn vị kiểm toán 2024 là **VACO**.
+  ⚠️ Giữ nguyên cảnh báo §14: *"chưa thấy tin xấu" ≠ "đã qua cổng"*.
+  (b) **cổ tức tiền mặt 15% (1.500đ/cp), ngày thanh toán công bố 14/08 — ĐO ĐƯỢC LÀ CHƯA VỀ.**
+  Bằng chứng broker: `cashDividendReceiving` SpaceX 9.775.000 (16→19/08) → **8.920.000 (20/08)**,
+  giảm **855.000**; ZaloPay 6.453.500 → **6.048.500**, giảm **405.000**. Cùng lúc `availableCash`
+  tăng đúng 812.250 / 384.750 = **95% của khoản giảm** (khớp thuế cổ tức 5% tuyệt đối) ⇒ có MỘT
+  khoản cổ tức được credit ngày 20/08, **nhưng KHÔNG PHẢI TV1**: TV1 15% trên 2.300cp phải là
+  **3.450.000** (SpaceX) và **1.800.000** (ZaloPay), và tỷ lệ 855/2.300 ≠ 405/1.200 nên khoản vừa
+  về cũng không cùng một mã theo tỷ lệ/cp. ⇒ **phép thử DDM §14 vẫn CHƯA có kết quả sau 6 phiên
+  quá hạn** — đây là khoảng cách đáng chú ý nhất tuần này với case QUALIFY duy nhất đang giữ.
+- **TV4** (AMBIGUOUS): **có tin mới THẬT, chiều XẤU, và giá đi ngược tin.** Giá bật **12.800 →
+  13.800 (+7,8%) đúng phiên 20/08** (PB 1,04 · PE 6,21 · DY 7,2%). Trong khi đó: **Trưởng ban Kiểm
+  soát nội bộ Nguyễn Thị Thanh Hoa từ nhiệm hiệu lực 01/08/2026**, PECC4 **đã thay TOÀN BỘ ban lãnh
+  đạo** (miễn nhiệm CT HĐQT + TGĐ + PTGĐ + KTT sau khởi tố), và **ĐHĐCĐ bất thường bị HOÃN**.
+  → Người kiểm soát nội bộ rời đi ngay TRƯỚC cổng soát xét bán niên là tín hiệu quản trị xấu, không
+  phải trung tính. **Cổng nhị phân giữ nguyên và nay chỉ còn 9 ngày: ý kiến kiểm toán BCTC bán niên
+  soát xét 2026, hạn ~30/08.** Không đổi phân loại; **giá tăng KHÔNG phải bằng chứng cổng sẽ mở**.
+- **DGC** (§6, AMBIGUOUS-nghiêng-constructive · ZaloPay giữ 10.000cp, `excluded=True`): giá
+  **41.400** (20/08), **thủng vùng 43-44 của tuần trước và làm đáy mới kể từ 21/07**; PB 0,97
+  (**lần đầu dưới book** trong chuỗi theo dõi), PE 7,24, DY 7,2%, dưới MA50 (44.269) và rất xa MA200
+  (61.288). **Không có tin MỚI trong cửa sổ** — mục "cổ phiếu bị kiểm soát" mà tìm kiếm trả về là
+  tin **11/05/2026** (HOSE chuyển từ cảnh báo sang kiểm soát từ 13/05 do nộp BCTC kiểm toán 2025
+  chậm >30 ngày), **không phải sự kiện tuần này** — ghi ra đây để lần quét sau không đếm nhầm là mới.
+  Nền chưa đổi: khai trường 25 dừng vì điều tra, kế hoạch 2026 1.600 tỷ LNST (thấp nhất từ 2020),
+  bù bằng Debt_Eq 0,19 · CR 5,21 · CF_OA_P0 2,8× NP · cam kết cổ tức 30% tiền mặt.
+- **PNJ** (§7, AMBIGUOUS): **có dữ kiện mới THẬT và là dữ kiện GIẢM rủi ro — cần ghi cho cân bằng.**
+  **Kết luận thanh tra Chính phủ về kinh doanh vàng đã ban hành 08/08** và PNJ đã công văn giải
+  trình HOSE 09/08: sai phạm là **xác định giá vốn trên tờ khai thuế GTGT**, **PNJ đã TỰ rà soát từ 9/2025 và nộp
+  bổ sung 9,999 tỷ đồng thuế GTGT + 973,4 triệu tiền chậm nộp ngay từ 11/11/2025** (trước khi kết
+  luận ban hành), cho giai đoạn 1/2023-9/2025 — thời kỳ đã được thanh tra trước 2025. ⇒ **overhang thanh tra nay đã ĐƯỢC LƯỢNG HOÁ và ở mức không trọng
+  yếu** (~11 tỷ so vốn hoá) — khác hẳn nỗi sợ "vi phạm chưa rõ quy mô". Giá phản ứng đúng chiều:
+  34.850 (14/08) → **37.300 (20/08), +7,0%**, và **+21,3% trên đáy 30.750 (24/07)**.
+  → **Không đổi AMBIGUOUS.** Rủi ro thật của PNJ chưa bao giờ là khoản thuế này mà là **Q2/2026 lỗ
+  282,9 tỷ + CF_OA −1.568 tỷ + FSCORE 1** (nghĩa vụ mua lại hàng 5.900 tỷ). **Cổng vẫn là BCTC
+  Q3/2026 (~cuối 10/2026)**, và giá đã bật 21% khỏi đáy nên biên an toàn để chờ cổng đã mỏng đi.
+
+**Tổng kết tuần**: **29 mã đang gác** rà qua · 251 mã (anomaly_scan) + **693 mã** (quét rộng) + **14
+truy vấn tin** · **0 QUALIFY mới** · 1 NON mới (SGT) · **1 AMBIGUOUS-yếu MỚI cần cổng (ICG)** · 2
+không-phải-case (NTL, TIN) · 3 loại bằng bước lọc rẻ (VNZ/LLM/POM) · **watchlist KHÔNG quá hạn** ·
+**0 lệnh mua trên cả 2 account phiên 21/08 ⇒ không có luận điểm mua nào bị gãy.**
+**Mốc phải theo, gần → xa: TV1 kiểm toán + cổ tức (QUÁ HẠN 6 phiên, kiểm mỗi tuần) → ICG giải trình
+HNX + soát xét bán niên ~30/08 → TV4 soát xét bán niên ~30/08 (9 ngày, + tín hiệu KSNB từ nhiệm) →
+PNJ Q3 cuối 10/2026.**
+
+Nguồn tuần này: [vietstock — SGT chào bán 148 triệu cp trả nợ / LNTT 6T −82,3%](https://finance.vietstock.vn/SGT-ctcp-cong-nghe-vien-thong-sai-gon.htm) ·
+[vietstock — Lideco thắng lớn Q2 nhờ đầu tư chứng khoán, danh mục TCH 52%](https://vietstock.vn/2026/07/lideco-tiep-tuc-thang-lon-quy-2-nho-dau-tu-chung-khoan-danh-muc-co-gi-737-1473379.htm) ·
+[tuoitre — 2 năm trắng doanh thu BĐS của Lideco](https://tuoitre.vn/2-nam-trang-doanh-thu-bat-dong-san-lideco-lay-gi-de-tra-nguoi-lao-dong-23-trieu-thang-20260406213130528.htm) ·
+[vietstock — loạt DN bị huỷ giao dịch UPCoM tháng 8](https://vietstock.vn/2026/08/loat-doanh-nghiep-bi-huy-giao-dich-tren-upcom-trong-thang-8-830-1481382.htm) ·
+[baomoi/Tạp chí Điện tử & Ứng dụng — PECC4 thay toàn bộ ban lãnh đạo, KSNB từ nhiệm 01/08](https://baomoi.com/sau-bien-co-phap-ly-pecc4-da-thay-toan-bo-ban-lanh-dao-c55703646.epi) ·
+[nguoiquansat — TV4 tiếp tục "có biến"](https://nguoiquansat.vn/doanh-nghiep-quy-mo-400-ty-bi-dieu-tra-trong-vu-an-nganh-dien-tiep-tuc-co-bien-309527.html) ·
+[thanhnien — PNJ lên tiếng về kết luận thanh tra (09/08)](https://thanhnien.vn/pnj-len-tieng-ve-ket-luan-thanh-tra-18526080915141617.htm) ·
+[tuoitre — PNJ công bố thông tin bất thường sau kết luận Thanh tra Chính phủ](https://tuoitre.vn/pnj-cong-bo-thong-tin-bat-thuong-mi-hong-bao-tin-manh-hai-phat-thong-cao-sau-ket-luan-thanh-tra-10026080913063588.htm) ·
+[tapchikinhtetaichinh — DGC chuyển sang diện kiểm soát từ 13/05 (tin CŨ, không phải tuần này)](https://tapchikinhtetaichinh.vn/hoa-chat-duc-giang-doi-mat-ap-luc-kep-tu-hoat-dong-kinh-doanh-va-co-phieu-bi-kiem-soat-155863.html) ·
+[dnse — Vingroup tất toán 906,5 triệu USD trái phiếu quốc tế](https://www.dnse.com.vn/senses/tin-tuc/vingroup-tat-toan-9065-trieu-usd-trai-phieu-quoc-te-co-quyen-chuyen-doi-thanh-co-phieu-vic-vhm-vfs-33861216)
+
+---
+
+### 2026-08-24 — QUÉT SÁNG THỨ HAI (job `Taylor_20260824_010002`, mục đích: BẢO VỆ PHÍA MUA trước 09:00) — 0 case mới · 0 QUALIFY · 1 read-through có CATALYST THẬT (DGC gỡ 1 lý do cảnh báo, hiệu lực ĐÚNG hôm nay) · 1 corp-action trên mã đang giữ (EVF pha loãng)
+
+Cửa sổ tin **21/08 → 23/08** (sau phiên thứ Sáu tới hết Chủ Nhật). Danh mục đang gác **29 mã**
+(13 NH + 16 ngoài NH).
+
+**Phần 1 — anomaly_scan** (`--backfill-days 3`): phiên cuối cache **2026-08-21**, universe **251 mã**
+(H:29 / W:240), **watchlist TƯƠI** (`active_nav` computed_at 2026-08-21 = đúng phiên cuối) — KHÔNG
+có cảnh báo quá hạn. **0 FLOOR2 · 0 IDIOCRASH · 0 CEIL2 · 0 VOLSPIKE** — không tín hiệu nào.
+Cửa sổ chỉ có **1 phiên giao dịch mới** (21/08) vì lượt quét 08-21 đã phủ tới 20/08.
+
+**Phần 2 — quét RỘNG** `bq_cache/ticker/2026.parquet`: 1.275 mã → **694 mã** đạt sàn thanh khoản
+(`max(Close×Volume)` 2026 ≥1 tỷ), IDIOCRASH (ret ≤ −6% ∧ idio ≤ −5% ∧ val ngày ≥1 tỷ), phiên 21/08
+→ **0 sự kiện**. Nới xuống ngưỡng mềm (ret ≤ −4% ∧ idio ≤ −3,5%) ra 25 mã nhưng **KHÔNG mã nào có
+giá trị khớp ngày ≥1 tỷ** (cao nhất VNE 816tr; TCD −26,7% chỉ 316tr, DFF −20,0% chỉ 60tr) ⇒ toàn
+bộ là penny thanh khoản mỏng, không đầu tư được, **0 ứng viên**.
+⚠️ Bối cảnh phải đọc kèm: **VNINDEX 21/08 +1,95%** (1.734,24 → 1.768,12) nên `idio = ret − mret` bị
+kéo xuống ~2pp cho MỌI mã — tức lượt này ngưỡng idio DỄ trip hơn bình thường mà vẫn 0 hit. Kết luận
+"sạch" ở đây là kết luận CHẶT, không phải do gate lỏng.
+
+**Phần 3 — WebSearch tin theo BỘ TỪ KHOÁ NHÓM (10 truy vấn + 1 WebFetch):**
+- **Nhóm chung** (khởi tố/thanh tra/đình chỉ/hạn chế giao dịch/từ chối kiểm toán/huỷ niêm yết):
+  **0 case NIÊM YẾT MỚI** trong cửa sổ. Mọi tên trả về đều đã có kết luận trước (PAT/DGC vụ Lưu Bách
+  Đạt 22-23/07, PC1 **BANNED**, HBS/DVT hạn chế giao dịch từ đầu tháng).
+- **Nhóm ngân hàng (13 mã)** — bổ sung §4.2 `bank_tailrisk_insurance_design_20260814.md`:
+  **0 sự kiện.** Không kiểm soát đặc biệt / chuyển giao bắt buộc / rút tiền hàng loạt / khởi tố lãnh
+  đạo NH niêm yết. Hit duy nhất trong cửa sổ là **cựu Phó GĐ chi nhánh Ngân hàng Hợp tác xã Thanh
+  Hoá bị bắt 20/08** — pháp nhân KHÔNG niêm yết, không thuộc 13 mã đang gác, không read-through.
+- **Nhóm BĐS đầu ngành/hạ tầng (VHM, VRE)** — §6 `vic_family_credit_concentration_20260818.md`:
+  **0 sự kiện tín dụng mới.** Không có chậm/vỡ nợ trái phiếu, hạ bậc tín nhiệm, giải chấp/call
+  margin cổ đông lớn, siết tài sản đảm bảo trong cửa sổ.
+- **Nhóm ngoài NH (16 mã)** — tai nạn nhà máy / thu hồi sản phẩm / mất mỏ-giấy phép / kê biên /
+  tranh chấp lãnh đạo: **0 sự kiện.**
+
+**Phần 4 — PHÍA MUA (câu hỏi bắt buộc của lượt quét): KHÔNG có rủi ro luận-điểm-gãy.**
+`plan_SpaceX_2026-08-24.json` và `plan_ZaloPay_2026-08-24.json` đều **0 orders** (HOLD_ALL cả 2
+account). Lý do HOLD của SpaceX là **signal_hold chính sách** (BAL paper-track tới 2026-09-16),
+KHÔNG phải thiếu tiền. Ứng viên mua duy nhất còn treo là **VPI** (BAL, RE_BACKLOG_BUY, weight 10%,
+carry-forward phiên thứ 4 liên tiếp, nay nằm ở `deferred_orders[]` với `deferred_reason=signal_hold`).
+→ **VPI KHÔNG có tin xấu nào trong cửa sổ** (giá 65.000 ngày 21/08, +2,36%). Nhưng ghi lại một dữ
+kiện NỀN cần theo nếu VPI được kích hoạt mua sau 16/09, vì nó rơi đúng bộ từ khoá nhóm (c) đã duyệt
+08-14: **dư nợ trái phiếu >2.584 tỷ so tiền mặt cuối Q1/2026 chỉ ~143 tỷ, ≥8 lô trái phiếu dùng
+CHÍNH cổ phiếu VPI của lãnh đạo/bên liên quan làm tài sản đảm bảo** (cấu trúc "cầm cố cổ phiếu đảm
+bảo nghĩa vụ trái phiếu" — cùng chữ ký rủi ro mà §6 VIC-family liệt kê). Đây là **nền, không phải
+sự kiện tuần này**; và định giá hiện tại (PE 52,0 · PB 3,63) **không phải case fear-buy** — ghi ở
+đây để lượt sau không phải tra lại từ đầu, KHÔNG phải khuyến nghị chặn lệnh.
+
+**Phần 5 — read-through case đang theo dõi + mã đang giữ dính tin**
+
+- **DGC** (§6, AMBIGUOUS-nghiêng-constructive · ZaloPay giữ 10.000cp, `excluded=True`): ★ **CÓ
+  CATALYST THẬT, HIỆU LỰC ĐÚNG HÔM NAY 24/08.** HOSE **gỡ MỘT lý do cảnh báo** (Quyết định 567 ngày
+  02/07 vì chưa họp ĐHĐCĐ thường niên đúng hạn) sau khi DGC **đã tổ chức ĐHĐCĐ 2026 ngày 13/08**.
+  Giá phản ứng ngay: **41.400 (20/08) → 43.050 (21/08), +3,99%**, bật khỏi đáy tuần trước và trở lại
+  **PB 1,01** (vừa trên book), PE 7,53.
+  ⚠️ **Nhưng đây mới là gỡ 1/3, KHÔNG phải mở cổng.** DGC **VẪN**: (a) **hạn chế giao dịch** do chậm
+  nộp BCTC kiểm toán 2025 quá 45 ngày; (b) **còn một diện cảnh báo KHÁC do kiểm toán ra Ý KIẾN NGOẠI
+  TRỪ trên BCTC 2025** — dữ kiện này chưa từng ghi tường minh trong §6, và nó là gạch ❌ §2 (*"cáo
+  buộc/nghi vấn làm con số BCTC mất giá trị"*) ở dạng nhẹ, phải mang theo khi đọc mọi số của DGC.
+  ⇒ **Không đổi phân loại.** Cổng xác nhận thật của DGC vẫn là **BCTC kiểm toán 2025 nộp xong +
+  ý kiến kiểm toán sạch**, không phải quyết định hành chính hôm nay.
+- **TV1** (§4/§14/§13, QUALIFY — SpaceX 2.300cp + ZaloPay 1.200cp): giá **20.000** (21/08, +0,00%,
+  KL 24.100), PB 1,06 · PE 3,46, vẫn dưới MA50 (21.118). **Cả 2 cổng VẪN CHƯA đóng; cổng (b) nay
+  quá hạn 7 phiên:** (a) kết quả lấy ý kiến bằng văn bản chọn kiểm toán (thực hiện 10/08) — WebSearch
+  + WebFetch trang vietstock TV1 đều **không có tin kết quả sau 14 ngày**; (b) cổ tức tiền mặt 15%
+  vẫn chưa đo được là đã về. Giữ nguyên cảnh báo §14: *"chưa thấy tin xấu" ≠ "đã qua cổng"*.
+- **TV4** (AMBIGUOUS): 14.000 (21/08, +1,45%), PB 1,06 · PE 6,30 — tiếp tục tăng, **+9,4% trong 2
+  phiên** kể từ mức 12.800 ngày 19/08. **Không có tin mới trong cửa sổ.** Cổng nhị phân giữ nguyên và
+  nay còn **~6 ngày**: **ý kiến kiểm toán BCTC bán niên soát xét 2026, hạn ~30/08**. Nhắc lại nguyên
+  văn kết luận tuần trước vì giá đang đi ngược: **giá tăng KHÔNG phải bằng chứng cổng sẽ mở.**
+- **PNJ** (§7, AMBIGUOUS): **39.900 (21/08, +6,97%, KL 4,04 triệu cp)** — phiên tăng mạnh nhất trong
+  chuỗi theo dõi, **+29,8% trên đáy 30.750 (24/07)**. Không có tin mới trong cửa sổ (dữ kiện giảm
+  rủi ro đã ghi tuần trước: kết luận thanh tra 08/08 lượng hoá ~11 tỷ, không trọng yếu). **Không đổi
+  AMBIGUOUS**, nhưng ghi rõ hệ quả thực dụng: **biên an toàn để chờ cổng BCTC Q3/2026 (~cuối 10/2026)
+  nay đã mỏng gần 30%** so với đáy — case này đang mất dần tính "mua khi sợ hãi" theo đúng nghĩa đen.
+- **ICG** (AMBIGUOUS-yếu, mở 08-21): **11.200 (21/08, +3,70%)**, PB 0,63 · PE 7,58 — đã hồi 2 phiên
+  liên tiếp sau chuỗi 4 phiên sàn. **KHÔNG tìm được công bố giải trình HNX** (WebSearch 1 truy vấn)
+  ⇒ **cổng (a) vẫn treo**, cổng (b) BCTC bán niên soát xét ~30/08 còn ~6 ngày. Không đổi phân loại;
+  chặn thanh khoản (vốn hoá ~190 tỷ) vẫn mạnh hơn mọi phân loại.
+- **SGT** (NON, đóng 08-21): 8.570 (+3,13%). Không có gì đổi kết luận — PE 39,1 · PB 0,51, vẫn đúng
+  hình "PB rẻ nhưng lõi không sinh tiền". Không theo tiếp.
+
+**Phần 6 — 2 corp-action/CBTT trên mã ĐANG GIỮ (không phải case fear-buy, nhưng phải ghi ra):**
+- **EVF** (đang giữ, nhóm ngoài NH): **ĐHĐCĐ bất thường 21/08 thông qua 3 nội dung** — (1) chào bán
+  **riêng lẻ tối đa 85 triệu cp (+850 tỷ mệnh giá)**, vốn điều lệ 7.605 tỷ → tối đa ~**8.455 tỷ**
+  (**pha loãng ~11,2%**), vốn thu về để cấp tín dụng giai đoạn 2027-2028; (2) **nới room ngoại lên
+  50%**; (3) bổ sung thành viên độc lập HĐQT. **Đọc theo khung**: đây là tăng vốn TĂNG TRƯỞNG (giá
+  21/08 12.550, +2,03%, PB 0,92), **KHÔNG phải "pha loãng ở đáy để sống sót"** — tức KHÔNG chạm gạch
+  ❌ §2.5. Nới room 50% là chiều dương cho dòng vốn ngoại. **Không escalate**; theo dõi giá phát hành
+  riêng lẻ khi công bố (phát hành dưới book ở PB 0,92 sẽ là pha loãng giá trị sổ sách thật).
+  ⚠️ Một dữ kiện nền đáng nhớ cho §6 (khoảng trống "exposure tài chính → BĐS" đã nêu 08-22): báo chí
+  cùng đợt ghi EVF **rót >11.369 tỷ vào bất động sản** — nếu sau này dựng thước đo exposure BĐS của
+  nhóm NH/tài chính thì EVF là mẫu quan sát được, không phải hộp đen.
+- **CTG** (đang giữ, nhóm NH): CBTT **bất thường** về HĐQT thông qua hợp đồng mua bán tài sản **qua
+  đấu giá giữa VietinBank và người có liên quan của thành viên nội bộ** (21/08). Là giao dịch bên
+  liên quan có cơ chế đấu giá công khai — **không phải sự kiện tail-risk §4.2**, không escalate; ghi
+  để lượt sau không đếm nhầm là tin mới.
+
+**Tổng kết**: **29 mã đang gác** rà qua · 251 mã (anomaly_scan) + **694 mã** (quét rộng) + **10 truy
+vấn tin + 1 WebFetch** · **0 case mới · 0 QUALIFY mới · 0 NON mới** · **watchlist KHÔNG quá hạn** ·
+**0 lệnh mua trên cả 2 account phiên 24/08 ⇒ KHÔNG có luận điểm mua nào bị gãy.**
+**Mốc phải theo, gần → xa: TV4 soát xét bán niên ~30/08 (~6 ngày) + ICG soát xét bán niên ~30/08 →
+TV1 kiểm toán + cổ tức (QUÁ HẠN 7 phiên, kiểm mỗi tuần) → DGC nộp BCTC kiểm toán 2025 + ý kiến sạch
+(gỡ hạn chế giao dịch; hôm nay MỚI gỡ được lý do cảnh báo ĐHĐCĐ) → PNJ Q3 cuối 10/2026.**
+
+Nguồn lượt này: [vietstock — HOSE gỡ một lý do cảnh báo, cổ phiếu DGC vẫn kẹt trong diện hạn chế giao dịch](https://vietstock.vn/2026/08/hose-go-mot-ly-do-canh-bao-co-phieu-dgc-van-ket-trong-dien-han-che-giao-dich-830-1483695.htm) ·
+[cafef — Tin vui cho cổ đông Hoá chất Đức Giang (21/08)](https://cafef.vn/tin-vui-cho-co-dong-hoa-chat-duc-giang-188260821150111887.chn) ·
+[baodautu — EVF nới room ngoại lên 50%, tăng vốn và kiện toàn bộ máy](https://baodautu.vn/evf-noi-room-ngoai-len-50-tang-von-va-kien-toan-bo-may-d679205.html) ·
+[antt — EVF chào bán riêng lẻ 85 triệu cp, tăng vốn thêm 850 tỷ](http://antt.vn/evf-du-kien-chao-ban-rieng-le-85-trieu-co-phieu-tang-von-them-850-ty-dong-404249.htm) ·
+[vietstock — Nhịp đập Thị trường 21/08 (VN-Index bứt phá, khối ngoại mua ròng)](https://vietstock.vn/2026/08/nhip-dap-thi-truong-2108-khoi-ngoai-quay-lai-mua-rong-vn-index-but-pha-cung-thanh-khoan-hoi-phuc-1636-1483481.htm) ·
+[dantri — TV1 bị cả 4 Big4 từ chối kiểm toán, lấy ý kiến cổ đông 10/08](https://dantri.com.vn/kinh-doanh/chu-tich-vua-bi-bat-cong-ty-dien-bi-ca-4-ben-big-4-tu-choi-kiem-toan-20260701145835409.htm) ·
+[docnhanh — bắt cựu Phó GĐ Ngân hàng Hợp tác xã CN Thanh Hoá 20/08 (KHÔNG niêm yết)](https://docnhanh.vn/phap-luat/thanh-hoa-bat-tam-giam-cuu-pho-giam-doc-ngan-hang-bi-cao-buoc-chiem-doat-65-ty-dong-tintuc1049408)
+
+---
+
+### 2026-08-28 (job `Taylor_20260828_011001`) — 0 QUALIFY mới · **2 NON mới (LDP, VTD)** · 1 không-phải-case (PDN) · 5 read-through · ★ **TV1: cổ tức 15% CHƯA TỪNG được broker book làm khoản phải thu** (đo được, không phải suy đoán)
+
+Cửa sổ tin **21/08 → 27/08** (5 phiên). Danh mục đang gác **29 mã** (13 NH + 16 ngoài NH).
+
+**Bối cảnh thị trường phải đọc kèm**: VNINDEX **1.734,24 (20/08) → 1.831,56 (27/08), +5,6%**, vượt
+1.750 và 1.800 trong cùng tuần; DT5G `macro_health` **HEALTHY**, state **3 = NEUTRAL**, `market_stress
+= false` (VIX không cao, VNI trên MA200). ⇒ Đây là tuần **thị trường tăng mạnh** — pool fear-buy hẹp
+lại theo cấu trúc, và vì `idio = ret − mret` bị kéo xuống ~1pp/phiên nên ngưỡng IDIOCRASH **DỄ trip
+hơn** bình thường. Kết luận "sạch" ở đây là kết luận CHẶT, không phải do gate lỏng (cùng lập luận
+08-24).
+
+**Phần 1 — anomaly_scan** (`--backfill-days 8`): phiên cuối cache **2026-08-27**, universe **253 mã**
+(H:29 / W:242), **watchlist TƯƠI** (`active_nav` computed_at 2026-08-27 = đúng phiên cuối) — **KHÔNG
+có cảnh báo quá hạn**. **0 IDIOCRASH · 0 FLOOR2.** Cờ duy nhất trong 8 phiên là cờ **TĂNG**: **PNJ
+`CEIL2` 24/08** (+6,9%, idio +5,7%, 48,8 tỷ giá trị) — thuộc case đang theo dõi, xem Phần 5.
+⇒ **không mã nào trong 29 mã đang gác bị sập riêng lẻ.**
+
+**Phần 2 — quét RỘNG** `bq_cache/ticker/2026.parquet`: 1.276 mã → **696 mã** đạt sàn thanh khoản
+(`max(Close×Volume)` 2026 ≥1 tỷ). IDIOCRASH cứng (ret ≤ −6% ∧ idio ≤ −5% ∧ val ngày ≥1 tỷ), 5 phiên
+21→27/08 → **2 sự kiện / 2 mã**; nới ngưỡng mềm (ret ≤ −4% ∧ idio ≤ −3,5%) → 13 sự kiện / 11 mã.
+Chuỗi chỉ số lấy từ `ticker='VNINDEX'`, **không** dùng cột mirror (bẫy 08-17 Phần 7).
+
+Áp các bước lọc rẻ TRƯỚC khi kéo tài chính:
+
+| Bước lọc | Loại | Vì sao |
+|---|---|---|
+| Đã có kết luận trước đó | **F88** (không-phải-case 08-14), **TIN**, **NTL** (không-phải-case 08-21) | Xem Phần 5b |
+| Vị-trí-giá 3M (thêm 08-14) | **SBB** (+7,5% trên đáy 3M, chỉ −7,0% so đỉnh), **HDA** (+16,9% trên đáy), **SBS** (+4,7%), **NRC** (+6,5%), **BKG** (+1,1% nhưng xem dưới) | Không ở vùng sợ hãi |
+| Sàn thanh khoản thực (ADV 3M) | **SBB** 0,47 tỷ · **HDA** 0,23 tỷ · **BKG** 0,59 tỷ · **PDN** 0,66 tỷ | Dưới mọi ràng buộc thanh khoản đã dùng cho TV1 |
+| Lõi hỏng hiển nhiên (§10.10) | **TTF** (Debt_Eq **22,0** · BVPS **276đ** · NP_P0 **−209,7 tỷ** · PB 6,17 — vốn chủ gần như bị xoá) · **BKG** (PB 0,18 nhưng PE 23,4, CF_OA_P0 −24,9 tỷ, FSCORE 3 — bẫy giá trị kinh điển) · **SBS** (ROE_Min3Y −22,6%, CF_OA_P0 −50,3 tỷ) · **NRC** (ROE_Min3Y −12,7%, CF_OA_P0 ≈0, Risk_Rating 4) | Trượt §2#3/#4 tường minh |
+| Số phiên có KL trong 5 phiên (thêm 08-17, ca POM) | *không loại mã nào lượt này* — **cả LDP và VTD đều 5/5 phiên có KL** ⇒ cú rơi là THẬT, không phải cờ giả do hạn chế giao dịch | |
+
+⇒ còn **3 mã đáng chấm, cả 3 CHƯA từng phân loại** (grep lịch sử case: 0 hit):
+
+| Mã | Giá 27/08 | Vị trí & chữ ký sự kiện | Số chặn / số đỡ | Kết luận |
+|---|---|---|---|---|
+| **LDP** (Dược Lâm Đồng — Ladophar, HNX, ICB 4577) | **7.100** (−26,8% so đỉnh 3M, **đúng đáy 3M**), phiên 27/08 **−8,97%** với **KL 154.800 = ~48× nền** (3.200→12.000→20.300→154.800) | PB **0,69** (BVPS 10.319) · PE 4,74 · Debt_Eq 0,64 · Cash_P0 16,8 tỷ (~27% vốn hoá) | **BCTC hợp nhất 2024 VÀ 2025 đều bị kiểm toán ra Ý KIẾN NGOẠI TRỪ** (2 năm liên tiếp) ⇒ cổ phiếu đang ở **diện kiểm soát** + **diện cảnh báo** (chưa họp ĐHĐCĐ thường niên quá 6 tháng) · **CF_OA_P0 = −2,86 tỷ trong khi NP_P0 = +0,83 tỷ** ⇒ **trượt thẳng §2#3 (CF_OA ≥ NP)** · FSCORE **2** · ROE_Min3Y −19,6% · PCF 31,7 · DY 0 · **đang có tranh chấp quyền kiểm soát**: công ty ra cảnh báo về nhóm tự nhận sở hữu **54% cổ phần** đi vận động uỷ quyền dự ĐHĐCĐ; chủ tịch liên tục thoái vốn · ADV3M **0,70 tỷ** | **NON** — gạch ❌ §2 tường minh (*"nghi vấn làm con số BCTC mất giá trị"*): **PB 0,69 không phải sàn định giá khi chính book value nằm dưới ý kiến ngoại trừ 2 năm liền**. Đã kiểm góc tài sản/dòng tiền theo bài học TV1/DGC (§3 dispatch): không có tài sản lõi tách rời định giá được, tiền mặt 16,8 tỷ không bù được CF_OA âm + tranh chấp kiểm soát chưa ngã ngũ |
+| **VTD** (Vietourist Holdings, UPCoM, ICB 5759 — lữ hành) | **4.500** (−16,7% so đỉnh 3M, **+2,3% trên đáy**), phiên 25/08 **−6,25%** (2,19 tỷ giá trị) | PB **0,40** (BVPS 11.259) · Debt_Eq 0,33 · FSCORE 5 · Risk_Rating 2 | **PE 18,07** (NP_P0 chỉ 5,8 tỷ trên vốn điều lệ 240 tỷ ⇒ sức sinh lời không đáng kể) · **`CF_OA_P0` = NaN trong BQ ⇒ KHÔNG chấm được §2#3**, mà §2#3 là tiêu chí quyết định · ROE_Min3Y −3,7% · **phát hành thêm cổ phiếu để TRẢ NỢ NGÂN HÀNG, nợ tăng gấp 3 trong 3 năm**; đợt phát hành cho cổ đông hiện hữu giá **10.000đ** trong khi thị giá **4.500đ** | **NON** — **đúng chữ ký SGT (đã kết luận NON 08-21)**: gạch ❌ §2.5 *"DN bị buộc bán tài sản/pha loãng ở đáy"*, phát hành **dưới thị giá 2,2×**. PB 0,40 không cứu được khi không chứng minh được lõi sinh tiền |
+| **PDN** (Cảng Đồng Nai, HOSE) | **88.700** (−18,6% so đỉnh 3M, **đúng đáy 3M**), phiên 25/08 −4,90% | Lõi **TỐT thật**: ROE_Min3Y **31,0%** · CF_OA_P0 130,5 tỷ ≈ 0,93× NP_P0 140,1 tỷ · Debt_Eq 0,35 · FSCORE 6 · DY 2,3% | **PB 3,32** ⇒ trượt thẳng §2#5 (**không có sàn định giá**) · ADV3M **0,66 tỷ** (không đầu tư được ở quy mô này) | **Không phải case** — doanh nghiệp tốt bị chiết khấu, KHÔNG phải doanh nghiệp tốt bị định giá dưới giá trị. Ghi ra vì nó là mã duy nhất trong nhóm soft có lõi sạch; nếu PB về ≲1,5 thì đáng mở lại |
+
+**Phần 3 — WebSearch tin theo BỘ TỪ KHOÁ NHÓM (12 truy vấn):**
+- **Nhóm chung** (khởi tố/bắt tạm giam/thanh tra/đình chỉ/hạn chế giao dịch/từ chối kiểm toán/chậm nộp
+  BCTC/cắt margin/huỷ niêm yết): **0 case NIÊM YẾT MỚI** liên quan danh mục gác. Hai ghi nhận nền:
+  (a) **HBS** (Chứng khoán Hoà Bình) — HNX ra quyết định **25/08**, **đình chỉ giao dịch ~33 triệu cp
+  từ 03/09** do tiếp tục vi phạm CBTT sau khi đã bị hạn chế giao dịch. Là **leo thang thật trong cửa
+  sổ** của mã đã ghi nền 08-24; **không thuộc 29 mã gác**, và bản thân vi phạm CBTT liên tục là gạch
+  ❌ §2 ⇒ không mở case. (b) Danh sách **59 mã HOSE cắt margin quý III/2026** (công bố 02/07, trong đó
+  có **DGC**) là tin CŨ — ghi ra để lượt sau không đếm nhầm là mới; danh sách quý IV sẽ ra đầu 10/2026.
+- **Nhóm ngân hàng (13 mã)** — bổ sung §4.2 `bank_tailrisk_insurance_design_20260814.md`:
+  **0 sự kiện.** Không kiểm soát đặc biệt / chuyển giao bắt buộc / rút tiền hàng loạt / khởi tố lãnh
+  đạo NH niêm yết / cho vay sân sau / thao túng cổ phiếu NH trong cửa sổ. Kết quả trả về chỉ là nền
+  2023-2024 (4 NH đã chuyển giao xong) + ca Thanh Hoá 20/08 đã ghi tuần trước (pháp nhân KHÔNG niêm yết).
+- **Nhóm BĐS đầu ngành/hạ tầng (VHM, VRE — và VIC/VPI ở phía mua)** — §6
+  `vic_family_credit_concentration_20260818.md`: **0 sự kiện tín dụng XẤU mới.** Không chậm/vỡ nợ trái
+  phiếu, không hạ bậc tín nhiệm, không siết tài sản đảm bảo, không call margin cổ đông lớn. Chiều
+  **ngược lại** trong cửa sổ: **VIC dẫn đầu mua ròng khối ngoại phiên 25/08 với 361,9 tỷ**, và theo
+  SSI Research VIC là mã nhận phân bổ thụ động lớn nhất (~689,7 triệu USD) khi dòng vốn FTSE giải ngân.
+  Nền đã biết, KHÔNG phải tin mới: 2 lô trái phiếu VHM dùng cổ phiếu VIC làm tài sản đảm bảo (40 triệu cp).
+- **Nhóm ngoài NH (16 mã)** — tai nạn/sự cố nhà máy, thu hồi sản phẩm, mất giấy phép/mỏ, kê biên tài
+  sản, tranh chấp lãnh đạo: **0 sự kiện.**
+
+**Phần 4 — PHÍA MUA (câu hỏi bắt buộc của lượt quét): KHÔNG có luận điểm mua nào bị gãy.**
+`plan_SpaceX_2026-08-28.json` và `plan_ZaloPay_2026-08-28.json` đều **0 orders**. Rổ ứng viên mua
+duy nhất = **2 lệnh BAL đang `deferred`** vì `signal_hold` (user quyết định 19/08, giữ tới checkpoint
+**2026-09-16**): **VPI** (case gốc) và **VIC** (mới vào diện hold, cùng luật `book=BAL, side=buy`).
+- **VIC**: 0 tin xấu trong cửa sổ; dữ kiện duy nhất là chiều DƯƠNG (khối ngoại mua ròng 361,9 tỷ 25/08,
+  dòng FTSE sắp giải ngân). **Luận điểm không gãy.**
+- **VPI**: 0 tin xấu trong cửa sổ. Giữ nguyên dữ kiện NỀN đã ghi 08-24 (dư nợ trái phiếu >2.584 tỷ vs
+  tiền mặt ~143 tỷ cuối Q1/2026, ≥8 lô dùng CHÍNH cổ phiếu VPI của lãnh đạo/bên liên quan làm TSĐB) —
+  **nền, không phải sự kiện tuần này**, và không có diễn biến mới làm nó xấu đi.
+⇒ Không cần hành động phía mua.
+
+**Phần 5 — read-through case đang theo dõi (1 có dữ kiện MỚI ĐO ĐƯỢC, 4 chỉ có giá)**
+
+- ★ **TV1** (§4/§14, **QUALIFY** — SpaceX 2.300cp + ZaloPay 1.200cp): giá **20.400** (27/08), PE 3,53 ·
+  PB 1,08, vẫn dưới MA50 (20.958) và rất xa MA200 (25.348). **Dữ kiện mới quan trọng nhất tuần này —
+  và nó MẠNH HƠN kết luận 3 tuần trước, không phải lặp lại:**
+  **Cổ tức tiền mặt 15% (1.500đ/cp, ngày thanh toán công bố 14/08) CHƯA TỪNG được DNSE ghi nhận là
+  khoản phải thu.** Bằng chứng: phân rã `cashDividendReceiving` khớp TUYỆT ĐỐI, không dư đồng nào —
+
+  | Ngày | SpaceX `divRecv` | ZaloPay `divRecv` | Cấu phần |
+  |---|---:|---:|---|
+  | 20/08 (số dư đầu cửa sổ) | 8.920.000 | 6.048.500 | = SAB + NCT + (khoản C) |
+  | 25/08 (chi trả) | −4.000.000 | −2.984.000 | **NCT 8.000đ/cp** — khớp CHÍNH XÁC 500cp / 373cp |
+  | 27/08 (chi trả) | −1.620.000 | −832.500 | khoản C, tỷ lệ **72:37** — **KHÔNG khớp TV1 (23:12)**, gần DRI (3.700:1.900) nhất |
+  | **28/08 (còn lại)** | **3.300.000** | **2.232.000** | **SAB 3.000đ/cp** — khớp CHÍNH XÁC 1.100cp / 744cp |
+
+  Cả hai chiều đều đóng: 3.300.000 + 4.000.000 + 1.620.000 = **8.920.000** ✓ và 2.232.000 + 2.984.000
+  + 832.500 = **6.048.500** ✓. TV1 15% phải là **3.450.000 (SpaceX) / 1.800.000 (ZaloPay)** — không có
+  mặt ở BẤT KỲ ô nào. ⇒ Đây không còn là *"chưa đo được là đã về"* (kết luận 08-21 và 08-24) mà là
+  **"broker chưa từng book nó làm khoản phải thu"** — nghĩa là TV1 chưa thực hiện chi trả, đã **quá
+  hạn ~9 phiên** kể từ công bố 14/08. Đồng thời cổng (a) **kết quả lấy ý kiến bằng văn bản chọn đơn vị
+  kiểm toán (thực hiện 10/08) vẫn CHƯA công bố sau 17 ngày** (WebSearch không có bài kết quả).
+  → **Không đổi phân loại QUALIFY** (§14 vẫn đứng: lõi tách biệt, CF_OA≥NP, solvent, PE 3,5).
+  Nhưng **phép thử DDM §14 — "SOE có ép chia được tiền ra không" — nay đã có tín hiệu NGƯỢC chiều đầu
+  tiên đo được bằng số**, chứ không chỉ là im lặng. Đây là dữ kiện đáng escalate nhất lượt này.
+- **PNJ** (§7, AMBIGUOUS): **41.900 (27/08)**, PE 7,40 · PB 1,54 · DY 5,7%; **+36,3% trên đáy 30.750
+  (24/07)**, tuần qua +10,2%. Cờ `CEIL2` 24/08 (+6,9%, KL lớn) là cờ TĂNG. **Không có tin mới trong
+  cửa sổ** (dữ kiện giảm rủi ro — kết luận thanh tra 08/08 lượng hoá ~11 tỷ, không trọng yếu — đã ghi
+  08-21). **Không đổi AMBIGUOUS**, nhưng nhắc lại hệ quả thực dụng đã cảnh báo tuần trước và nay mạnh
+  hơn: **biên an toàn để chờ cổng BCTC Q3/2026 (~cuối 10/2026) đã mỏng đi 36%** — case này **đã hết
+  tính "mua khi sợ hãi"** theo đúng nghĩa đen; nếu chưa vào thì cửa sổ giá đã đóng, phần còn lại là
+  cược vào cổng Q3 ở giá không còn chiết khấu.
+- **DGC** (§6, AMBIGUOUS-nghiêng-constructive · ZaloPay giữ 10.000cp, `excluded=True`): **43.200
+  (27/08)**, PE 7,56 · PB **1,01** · DY 6,9%; đi ngang quanh MA50 (43.908) sau cú bật 21/08, đỉnh tuần
+  44.950 (25/08). **Không có tin mới trong cửa sổ** — mọi kết quả tìm kiếm về "hạn chế giao dịch" đều
+  là tin **tháng 5/2026** (hạn chế từ 26/05 do chậm nộp BCTC kiểm toán 2025 >45 ngày), **không phải sự
+  kiện tuần này**. Cổng xác nhận thật giữ nguyên: **nộp xong BCTC kiểm toán 2025 + ý kiến SẠCH** (nhắc
+  lại dữ kiện 08-24: DGC còn một diện cảnh báo do **ý kiến NGOẠI TRỪ** trên BCTC 2025 — phải mang theo
+  khi đọc mọi con số DGC).
+- **TV4** (AMBIGUOUS): ⚠️ **KHÔNG có phiên giao dịch nào trong 25→27/08** — dòng cuối trong cache là
+  **24/08 với KL 200cp** (13.600, PE 6,12 · PB 1,02). Mã gần như ngừng khớp sau cú bật 19→21/08
+  (12.800 → 14.000). Không có tin mới. **Cổng nhị phân nay chỉ còn ~2 ngày: ý kiến kiểm toán BCTC bán
+  niên soát xét 2026, hạn ~30/08.** Giữ nguyên cảnh báo 08-21: KSNB từ nhiệm ngay trước cổng + đã thay
+  toàn bộ ban lãnh đạo; **giá tăng KHÔNG phải bằng chứng cổng sẽ mở**, và nay thanh khoản cạn càng làm
+  giá mất giá trị thông tin.
+- **ICG** (AMBIGUOUS-yếu, mở 08-21): **11.000 (27/08)**, PB 0,62 · PE 7,44, +2,8% trên mức 10.700 giữa
+  tuần, vốn hoá ~234 tỷ. **Vẫn KHÔNG tìm được công bố giải trình HNX** về chuỗi 4 phiên sàn 14→19/08
+  ⇒ **cổng (a) treo sang tuần thứ 2**. Cổng (b) BCTC bán niên soát xét ~30/08 còn ~2 ngày. Không đổi
+  phân loại; chặn thanh khoản vẫn mạnh hơn mọi phân loại.
+
+**Phần 5b — 3 mã trong danh sách soft đã có kết luận trước, chỉ echo:**
+**F88** (không-phải-case 08-14): 65.800, PB **5,08**, ROE_Min3Y 22,6% — vẫn lãi kỷ lục, không có nỗi
+sợ để mua; giá đã −24,8% so đỉnh 3M nhưng PB 5,08 nghĩa là chưa có sàn định giá. **TIN** (không-phải-
+case 08-21): 107.900, PB 3,41 — không đổi. **NTL** (không-phải-case 08-21): 12.800 — không đổi, vẫn
+là proxy có đòn bẩy của TCH.
+
+**Tổng kết tuần**: **29 mã đang gác** rà qua · 253 mã (anomaly_scan) + **696 mã** (quét rộng) + **12
+truy vấn tin** · **0 QUALIFY mới** · **2 NON mới (LDP, VTD)** · 1 không-phải-case (PDN) · 8 loại bằng
+bước lọc rẻ · **watchlist KHÔNG quá hạn** (computed_at 2026-08-27 = đúng phiên cuối) · **0 lệnh mua
+trên cả 2 account phiên 28/08, 2 ứng viên BAL (VIC, VPI) đang hold tới 16/09 và cả hai đều 0 tin xấu
+⇒ KHÔNG có luận điểm mua nào bị gãy.**
+**Mốc phải theo, gần → xa: TV4 + ICG soát xét bán niên ~30/08 (~2 ngày) → TV1 cổ tức + kiểm toán
+(cổ tức nay CHỨNG MINH ĐƯỢC là chưa được book, quá hạn ~9 phiên; kiểm toán quá hạn 17 ngày) → DGC nộp
+BCTC kiểm toán 2025 + ý kiến sạch → HBS đình chỉ giao dịch 03/09 (ngoài danh mục, chỉ ghi nền) →
+checkpoint BAL paper-track 16/09 → PNJ Q3 cuối 10/2026.**
+
+Nguồn lượt này: [kinhdoanhnet — LDP duy trì diện cảnh báo, BCTC 2024/2025 ý kiến ngoại trừ](https://kinhdoanhnet.vn/co-phieu-cua-ladophar-ldp-tiep-tuc-bi-duy-tri-dien-canh-bao-quy-i2026-lai-gan-936-trieu-dong-a79900.html) ·
+[cafef — Ladophar lên lộ trình khắc phục tình trạng chứng khoán bị cảnh báo](https://cafef.vn/ladophar-len-lo-trinh-khac-phuc-tinh-trang-chung-khoan-bi-canh-bao-188260727111538457.chn) ·
+[vietbao — Ladophar cảnh báo nhóm tự nhận sở hữu 54% vận động uỷ quyền dự ĐHĐCĐ](https://vietbao.vn/ladophar-canh-bao-thong-tin-van-dong-uy-quyen-du-hop-dhdcd-tu-nhom-tu-nhan-so-huu-54-co-phan-592856.html) ·
+[congluan — Vietourist (VTD) phát hành thêm cổ phiếu để trả nợ ngân hàng, nợ tăng gấp 3 trong 3 năm](https://congluan.vn/vietourist-vtd-phat-hanh-them-co-phieu-de-tra-no-ngan-hang-no-tang-gap-3-trong-3-nam-hoat-dong-post175645.html) ·
+[cafef — 33 triệu cp HBS bị đình chỉ giao dịch từ 03/09 (quyết định 25/08)](https://cafef.vn/dung-1-tuan-nua-hang-chuc-trieu-co-phieu-chung-khoan-nay-bi-dinh-chi-giao-dich-188260826134329745.chn) ·
+[vietstock — HBS duy trì diện hạn chế giao dịch từ 12/08](https://vietstock.vn/2026/08/tiep-tuc-vi-pham-cong-bo-thong-tin-co-phieu-hbs-duy-tri-dien-han-che-giao-dich-tu-1208-830-1478564.htm) ·
+[cafef — 59 mã bị HOSE cắt margin quý III/2026 (tin CŨ 02/07, có DGC)](https://cafef.vn/hose-cong-bo-59-ma-chung-khoan-bi-cat-margin-trong-quy-iii-2026-188260705145437452.chn) ·
+[thoibaotaichinhvietnam — khối ngoại gom mạnh VIC trước dòng vốn nâng hạng (mua ròng 361,9 tỷ phiên 25/08)](https://thoibaotaichinhvietnam.vn/khoi-ngoai-gom-manh-co-phieu-vingroup-truoc-them-dong-von-nang-hang-202896.html) ·
+[24hmoney — xếp hạng tín nhiệm đánh giá việc Vinhomes dùng 40 triệu cp VIC thế chấp (nền)](https://24hmoney.vn/news/to-chuc-xep-hang-tin-nhiem-danh-gia-ra-sao-khi-vinhomes-dung-40-trieu-co-phieu-vic-the-chap-c4a2787660.html) ·
+[vietstock — Vietstock Weekly 24-28/08/2026 (VN-Index +2,26% tuần, vượt 1.750)](https://vn.investing.com/news/stock-market-news/vietstock-weekly-2428082026-tim-lai-dong-luc-2697760) ·
+[tuoitre — DGC bị hạn chế giao dịch từ 26/05 (tin CŨ, không phải tuần này)](https://tuoitre.vn/co-phieu-hoa-chat-duc-giang-bi-han-che-giao-dich-tu-26-5-20260520100619702.htm) ·
+[vietnambiz — PNJ (nền, tham chiếu giá)](https://vietnambiz.vn/co-phieu-pnj-duoc-giai-cuu-2026727143946827.htm)
+
+---
+
+### 2026-08-31 — QUÉT SÁNG THỨ HAI (job `Taylor_20260831_010002`, mục đích: BẢO VỆ PHÍA MUA) — **0 QUALIFY · 1 NON mới (BNA) · 2 không-phải-case (VIT, DHD)** · ★ **thị trường NGHỈ LỄ 31/08→02/09, phiên kế tiếp 03/09 ⇒ bot KHÔNG đặt lệnh sáng nay** · ★ **0 lệnh mua trên MỌI kênh cho phiên 03/09**
+
+Cửa sổ tin **sau phiên 28/08 → hết CN 30/08**. Danh mục đang gác **29 mã** (13 NH + 16 ngoài NH).
+
+**⚠️ Dữ kiện đổi ý nghĩa cả lượt quét — HÔM NAY KHÔNG CÓ PHIÊN.** `filter_lag_entry_window.py --account
+SpaceX --json` trả `plan_date = 2026-09-03` với `calendar_check.ok=true` (signal_date 2026-08-28) ⇒
+31/08, 01/09, 02/09 là **nghỉ lễ Quốc khánh 2/9**; phiên kế tiếp **Thứ Năm 03/09**. Mục đích "phủ
+khoảng trống tin trước khi bot 09:05 đặt lệnh" vì vậy áp cho **03/09**, không phải hôm nay — và cửa sổ
+tin thực tế sẽ còn 3 ngày nữa chưa được phủ (31/08→02/09), cần quét lại tối 02/09 trước khi plan
+03/09 được thực thi. Đây là **khoảng trống thật**, không phải đã đóng bằng lượt này.
+
+**Bối cảnh thị trường**: VNINDEX **1.832,12 (28/08)**, **7 phiên tăng liên tiếp**, tuần 24–28/08 khối
+ngoại **mua ròng >1.100 tỷ** (tâm điểm **TCB** — mã đang gác). DT5G state **3 = NEUTRAL**, base_dt4 ==
+macro_dt5g, không macro cap. ⇒ Vẫn là chế độ **thị trường tăng** ⇒ pool fear-buy hẹp theo cấu trúc và
+ngưỡng IDIOCRASH dễ trip hơn (`idio = ret − mret` bị kéo xuống); kết luận "sạch" ở đây là kết luận
+CHẶT, không do gate lỏng — cùng lập luận 08-24 và 08-28.
+
+**Phần 1 — anomaly_scan**: phiên **2026-08-28**, universe **253 mã** (H:29 / W:242), **watchlist TƯƠI**
+(`active_nav` computed_at **2026-08-28** = đúng phiên cuối) ⇒ **KHÔNG có cảnh báo quá hạn**.
+**0 IDIOCRASH · 0 FLOOR2 · 0 CEIL2 · 0 VOLSPIKE** — không mã nào trong 29 mã gác bị sập riêng lẻ.
+
+**Phần 2 — quét RỘNG** `bq_cache/ticker/2026.parquet` (phiên cuối 28/08, đúng 1 phiên MỚI kể từ quét
+tuần 08-28): 1.276 mã → **697 mã** đạt sàn thanh khoản (`max(Close×Volume)` 2026 ≥1 tỷ). Chuỗi chỉ số
+lấy từ `ticker='VNINDEX'`, **không** dùng cột mirror (bẫy 08-17). IDIOCRASH cứng (ret ≤ −6% ∧ idio ≤
+−5% ∧ val ≥1 tỷ) → **3 mã**; nới mềm (ret ≤ −4% ∧ idio ≤ −3,5%) → thêm **1 mã**.
+
+| Mã | Giá 28/08 | Chữ ký sự kiện | Kết luận |
+|---|---|---|---|
+| **BNA** (Tập đoàn Đầu tư Bảo Ngọc — bánh kẹo, HNX, ICB 3577) | **2.100** (−66,1% so đỉnh 3M, **đúng đáy 3M**), phiên 28/08 **−8,70%**, KL 698.400 (≈4× nền) | ★ **CHỈ GIAO DỊCH PHIÊN THỨ SÁU** — 8 phiên gần nhất đều là Thứ Sáu (10/07, 17/07, 24/07, 31/07, 07/08, 14/08, 21/08, 28/08), 14/30 phiên lịch có KL. **Hạn chế giao dịch từ 20/05/2026** do chậm nộp BCTC kiểm toán 2025 **>45 ngày**; **diện kiểm soát** (chậm >30 ngày); **diện cảnh báo từ 10/07** (chưa họp ĐHĐCĐ quá 6 tháng). Nợ vay + thuê tài chính **731 tỷ** cuối Q1/2026 (ngắn hạn **604 tỷ**), HĐQT thông qua vay + bảo lãnh thêm **261,6 tỷ**; chi phí tài chính **+61% lên ~67 tỷ/quý** trong khi LNST Q1 chỉ ~3 tỷ. Số BQ: **NP_P0 −8,51 tỷ · CF_OA_P0 −49,73 tỷ · Debt_Eq 1,99 · DY 0 · ADV3M 0,57 tỷ** | **NON** — hai gạch ❌ §2 độc lập nhau. (1) **Cờ IDIOCRASH là cờ GIẢ về mặt cơ học** — đúng bài học POM (08-17): mã chỉ khớp 1 phiên/tuần thì một phiên Thứ Sáu gộp cả tuần tin, `ret` không so được với mã giao dịch hằng ngày. (2) **PB 0,115 KHÔNG phải sàn định giá** vì chính book value nằm dưới BCTC kiểm toán 2025 **chưa từng được nộp** — cùng chữ ký LDP (08-28). Đã kiểm góc tài sản/dòng tiền theo bài học TV1/DGC: không có tài sản lõi tách rời định giá được, **CF_OA −49,7 tỷ đối đầu nợ ngắn hạn 604 tỷ** là bài toán thanh khoản, không phải bài toán định giá |
+| **VIT** (Viglacera Tiên Sơn, ICB 2353) | **21.600**, phiên 28/08 −8,47% | **+13,9% TRÊN đáy 3M** (−23,4% so đỉnh) · **PB 2,00 · PE 16,80** · ADV3M **0,52 tỷ** · Debt_Eq 2,61. Lõi không xấu (CF_OA_P0 94,9 tỷ = **2,15× NP_P0** 44,2 tỷ, FSCORE 7) | **Không phải case** — trượt thẳng **§2#5 / §2.5#4 (sàn định giá)**: PB 2,00 không có sàn tài sản, và mã không ở vùng sợ hãi (trên đáy 3M gần 14%). Thanh khoản cũng dưới mọi ràng buộc đã dùng cho TV1 |
+| **DHD** (ICB 4577 — dược) | **27.000**, phiên 28/08 −5,26% | **chỉ −5,6% so đỉnh 3M** (+3,8% trên đáy) · **PB 2,48 · PE 20,76** · **ADV3M 0,15 tỷ** | **Không phải case** — loại ở bước lọc RẺ NHẤT: không ở vùng sợ hãi + không có sàn định giá + thanh khoản 0,15 tỷ/phiên (không đầu tư được ở quy mô này) |
+| **OGC** (Ocean Group) | **2.190**, phiên 28/08 −6,81% | PB 0,34 · **CF_OA_P0 −80,86 tỷ** · Risk_Rating 4 · +6,8% trên đáy 3M | **NON — đã kết luận, chỉ echo.** OGC là ca NON kinh điển ghi thẳng trong §2 (*"gian lận ngân hàng LÀ lõi"*). Không có gì trong cửa sổ đổi kết luận |
+
+**Phần 3 — WebSearch tin theo BỘ TỪ KHOÁ NHÓM (8 truy vấn):**
+- **Nhóm chung** (khởi tố/bắt tạm giam/thanh tra/đình chỉ/hạn chế giao dịch/từ chối kiểm toán/chậm nộp
+  BCTC/cắt margin/huỷ niêm yết/corp-action bất thường): **0 case NIÊM YẾT MỚI** liên quan danh mục gác
+  trong cửa sổ 28/08→30/08. Mọi kết quả trả về đều là tin nền 2023–2026/05 đã ghi ở các lượt trước.
+  Nhắc lại mốc đã ghi 08-28, **hiệu lực trong tuần này**: **HBS đình chỉ giao dịch từ 03/09** (ngoài
+  29 mã gác, chỉ ghi nền).
+- **Nhóm ngân hàng (13 mã)** — §4.2 `bank_tailrisk_insurance_design_20260814.md`: **0 sự kiện.** Không
+  kiểm soát đặc biệt / chuyển giao bắt buộc / rút tiền hàng loạt / khởi tố lãnh đạo NH niêm yết / cho
+  vay sân sau / thao túng cp NH trong cửa sổ. Kết quả chỉ trả về nền 2024–2025 (4 NH đã chuyển giao
+  xong: GPBank, MBV, Vikki, VCBNeo) + ca Thanh Hoá 20/08 (pháp nhân KHÔNG niêm yết) đã ghi 08-28.
+  Chiều **ngược lại**: **TCB là tâm điểm mua ròng khối ngoại tuần 24–28/08**.
+- **Nhóm BĐS đầu ngành/hạ tầng (VHM, VRE — và VIC/VPI ở phía mua)** — §6
+  `vic_family_credit_concentration_20260818.md`: **0 sự kiện tín dụng XẤU mới.** Không chậm/vỡ nợ trái
+  phiếu, không hạ bậc tín nhiệm, không siết TSĐB, không call margin cổ đông lớn, không giải chấp. Nền
+  đã biết, KHÔNG phải tin mới: FiinRatings xếp VHM **'A'/Stable**; 2 lô VHM12605 (3.000 tỷ) + VHM12606
+  (1.000 tỷ) dùng cổ phiếu VIC làm TSĐB. Chiều **dương** trong cửa sổ: bộ đôi **VIC–VHM là động lực
+  chính đưa VN-Index phá đỉnh**.
+- **Nhóm ngoài NH (16 mã)** — tai nạn/sự cố nhà máy, thu hồi sản phẩm, mất giấy phép/mỏ, kê biên tài
+  sản, tranh chấp lãnh đạo: **0 sự kiện.**
+
+**Phần 4 — PHÍA MUA (câu hỏi bắt buộc của lượt quét): 0 LỆNH MUA TRÊN MỌI KÊNH cho phiên 03/09 ⇒
+KHÔNG có luận điểm mua nào đang bị gãy.** Đã kiểm **cả ba** kênh mua, không suy đoán từ một kênh:
+
+| Kênh mua | Trạng thái cho phiên kế tiếp (03/09) | Bằng chứng |
+|---|---|---|
+| **V2.4 BAL** | 2 ứng viên **VIC, VPI** vẫn `deferred` vì `signal_hold` (user chốt 19/08, checkpoint **16/09**) | `deferred_orders` trong `plan_{SpaceX,ZaloPay}_2026-08-28.json`, cưỡng chế bằng `data/signal_holds.json` |
+| **V2.4 LAG** | **0 mã đến hạn**, 0 mã upcoming | `filter_lag_entry_window.py` → `due_today: []`, `upcoming_next_plans: []` |
+| **TV1 DISCRETIONARY_SPECIAL** (kênh gom TỰ ĐỘNG, cron 20:30) | **SKIP cả 2 account cho `plan_date=2026-09-03`** — SpaceX: deadband (thiếu 100cp = 0,21% active_nav < ngưỡng 0,50%); ZaloPay: đã đạt mục tiêu (filled 1.200 ≥ target 1.200) | `history_noninject` trong `state_TV1_{SpaceX,ZaloPay}.json` |
+
+- **VIC**: 0 tin xấu trong cửa sổ, chỉ dữ kiện DƯƠNG (dẫn dắt VN-Index phá đỉnh). **Luận điểm không gãy.**
+- **VPI**: 0 tin xấu trong cửa sổ. Nền 08-24 giữ nguyên (dư nợ trái phiếu >2.584 tỷ vs tiền mặt ~143 tỷ
+  cuối Q1/2026, ≥8 lô dùng CHÍNH cổ phiếu VPI của lãnh đạo/bên liên quan làm TSĐB) — **nền, không phải
+  sự kiện tuần này**, không có diễn biến mới làm nó xấu đi.
+⇒ **Không cần hành động phía mua.**
+
+**Phần 5 — read-through case đang theo dõi**
+
+- ★ **TV1** (§4/§14, **QUALIFY** — SpaceX 2.300cp + ZaloPay 1.200cp): **20.500 (28/08, +0,49%)**, PE 3,55
+  · PB 1,08, vẫn dưới MA50 (20.908). **Xác nhận thêm 1 phiên cho phát hiện 08-28, và mốc quá hạn dài
+  thêm:**
+  - **Cổ tức 15% vẫn CHƯA được broker book làm khoản phải thu.** `cashDividendReceiving` phiên 28/08 =
+    **3.300.000 (SpaceX) / 2.232.000 (ZaloPay)** — **không đổi** so với 27/08, và khớp CHÍNH XÁC
+    SAB 3.000đ/cp × 1.100cp / × 744cp. TV1 15% phải là **3.450.000 / 1.800.000** — vẫn **không có mặt**.
+    Nay **quá hạn ~11 phiên** kể từ công bố ngày thanh toán 14/08.
+  - **Kết quả lấy ý kiến bằng văn bản chọn đơn vị kiểm toán (thực hiện 10/08) vẫn CHƯA công bố sau 21
+    ngày** (WebSearch lượt này: chỉ trả về tin nền 01/07 về việc cả 4 Big4 từ chối — Deloitte, EY,
+    KPMG, PwC — không có bài kết quả).
+  → **Không đổi phân loại QUALIFY** (§14 vẫn đứng: lõi tách biệt, CF_OA ≥ NP, solvent, PE 3,55).
+  ⚠️ **Nhưng đây là mục ĐÁNG ESCALATE NHẤT lượt này, vì lý do PHÍA MUA chứ không phải phía bán:**
+  chương trình gom TV1 là **duy trì TỶ TRỌNG động** (`target_pct_active_nav = 0.05`, `status=active`,
+  `hard_expiry.halted = false`) ⇒ **giá TV1 giảm làm số cp mục tiêu TĂNG ⇒ hệ tự mua thêm vào chỗ yếu.**
+  Hai điều kiện `hard_expiry` (kiểm toán FY2026 ra ý kiến ngoại trừ/từ chối/trái ngược · TV1 bị đình chỉ
+  hoặc hạn chế giao dịch) là **`manual_only: true`** — **không có cơ chế tự động nào bật chúng**; phải
+  có người đọc tin rồi set `halted`. Cả hai cổng đang treo quá hạn đúng là **tiền đề** của điều kiện thứ
+  nhất. Hôm nay **chưa** đủ để kích hoạt (chưa có ý kiến kiểm toán nào được phát hành ⇒ chưa "ngoại
+  trừ/từ chối"), nên **KHÔNG đề xuất halt** — nhưng đề nghị user/Mike biết rằng lá chắn này là thủ công.
+- **PNJ** (§7, AMBIGUOUS): **42.100 (28/08, +0,48%)**, PE 7,43 · PB 1,55 · **+36,9% trên đáy 30.750
+  (24/07)**, vẫn dưới MA50 (44.014). **0 tin mới trong cửa sổ.** Không đổi AMBIGUOUS; nhắc lại hệ quả
+  thực dụng đã ghi 08-28: biên an toàn để chờ cổng BCTC Q3/2026 (~cuối 10/2026) đã mỏng đi ~37% —
+  case đã **hết tính "mua khi sợ hãi"** theo nghĩa đen.
+- **DGC** (§6, AMBIGUOUS-nghiêng-constructive · ZaloPay giữ 10.000cp, `excluded=True`): **43.000 (28/08,
+  −0,46%)**, PE 7,52 · PB **1,01** · vẫn dưới MA50 (43.800). **0 tin mới trong cửa sổ** — mọi kết quả
+  tìm kiếm đều là tin 05–06/2026 (hạn chế giao dịch từ 26/05; BCTC kiểm toán 2025 công bố 20/06 bởi UHY
+  với **ý kiến NGOẠI TRỪ** do không chứng kiến kiểm kê **950,9 tỷ hàng tồn kho**). ⇒ **Đính chính một
+  mốc trong sổ**: cổng "nộp xong BCTC kiểm toán 2025" ghi ở các lượt trước **đã đóng từ 20/06** — cổng
+  còn lại đúng là **gỡ được ý kiến ngoại trừ tồn kho** (chỉ có thể qua kỳ kiểm toán sau), không phải
+  việc nộp.
+- **TV4** (AMBIGUOUS): **13.000 (28/08, −4,41%, KL 12.700cp)** — giao dịch trở lại sau 2 phiên trắng
+  (25–27/08), PE 5,85 · PB 0,98, xuyên xuống dưới MA50 (13.046). **Rơi đúng ngay tại cổng.** Cổng nhị
+  phân **ý kiến kiểm toán BCTC bán niên soát xét 2026 (hạn ~30/08)** đã tới hạn trong cửa sổ mà
+  **WebSearch không tìm được công bố nào** ⇒ cổng **chưa mở, nay đã QUÁ HẠN**. Giữ nguyên cảnh báo
+  08-21 (KSNB từ nhiệm ngay trước cổng + đã thay toàn bộ ban lãnh đạo). Thanh khoản 12.700cp/phiên vẫn
+  chặn mạnh hơn mọi phân loại.
+- **ICG** (AMBIGUOUS-yếu, mở 08-21): **11.000 (28/08, 0,00%, KL 200cp)** — thanh khoản gần như CHẾT,
+  PB 0,62 · PE 7,44, giá còn cách MA50 (14.386) 24%. **Vẫn KHÔNG có công bố giải trình HNX** về chuỗi 4
+  phiên sàn 14→19/08 ⇒ **cổng (a) treo sang tuần thứ 3**. Cổng (b) soát xét bán niên ~30/08 **cũng quá
+  hạn không công bố**. Không đổi phân loại; **hai cổng cùng treo trên một mã KL 200cp/phiên = không có
+  đường vào dù phân loại có tốt lên**.
+
+**Tổng kết lượt**: **29 mã đang gác** rà qua · 253 mã (anomaly_scan) + **697 mã** (quét rộng) + **8
+truy vấn tin** · **0 QUALIFY mới** · **1 NON mới (BNA)** · 2 không-phải-case (VIT, DHD) · 1 echo NON
+(OGC) · **watchlist KHÔNG quá hạn** (computed_at 2026-08-28 = đúng phiên cuối) · **0 lệnh mua trên cả
+3 kênh (BAL/LAG/TV1-discretionary) cho phiên 03/09 ⇒ KHÔNG có luận điểm mua nào bị gãy.**
+**Mốc phải theo, gần → xa: quét lại tối 02/09 phủ khoảng trống 31/08→02/09 trước plan 03/09 → HBS đình
+chỉ giao dịch 03/09 (ngoài danh mục) → TV4 + ICG soát xét bán niên ĐÃ QUÁ HẠN, chờ công bố → TV1 cổ tức
+(quá hạn ~11 phiên, chứng minh được là chưa book) + kết quả chọn kiểm toán (quá hạn 21 ngày) → checkpoint
+BAL paper-track 16/09 → DGC gỡ ý kiến ngoại trừ tồn kho → PNJ Q3 cuối 10/2026.**
+
+Nguồn lượt này: [stockbiz — BNA bị kiểm soát do chậm nộp BCTC, nợ vay vượt 730 tỷ](https://stockbiz.vn/tin-tuc/bna-co-phieu-dau-tu-bao-ngoc-bi-kiem-soat-do-cham-nop-bao-cao-tai-chinh-no-vay-vuot-730-ty-dong/40086285) ·
+[vietstock — BNA bị đưa vào diện kiểm soát](https://vietstock.vn/2026/05/bna-bi-dua-vao-dien-kiem-soat-830-1442879.htm) ·
+[vietstock — Cổ phiếu bị đưa vào diện cảnh báo, BNA muốn vay và bảo lãnh hơn 260 tỷ](https://vietstock.vn/2026/07/co-phieu-bi-dua-vao-dien-canh-bao-bna-muon-vay-va-bao-lanh-hon-260-ty-830-1463805.htm) ·
+[vnbusiness — Cổ phiếu chủ thương hiệu Bánh Bảo Ngọc bị đưa vào diện kiểm soát](https://vnbusiness.vn/co-phieu-cua-chu-thuong-hieu-banh-bao-ngoc-bi-dua-vao-dien-kiem-soat.html) ·
+[dantri — Chủ tịch vừa bị bắt, công ty điện bị cả 4 bên Big4 từ chối kiểm toán (TV1, nền 01/07)](https://dantri.com.vn/kinh-doanh/chu-tich-vua-bi-bat-cong-ty-dien-bi-ca-4-ben-big-4-tu-choi-kiem-toan-20260701145835409.htm) ·
+[nguoiquansat — Big4 đồng loạt từ chối kiểm toán TV1, lấy ý kiến cổ đông chọn đơn vị mới ngày 10/08](https://nguoiquansat.vn/big4-dong-loat-tu-choi-kiem-toan-doanh-nghiep-dien-nghin-ty-sau-khi-chu-tich-bi-khoi-to-301231.html) ·
+[cafef — DGC công bố BCTC kiểm toán 2025 (20/06), hai vấn đề ngoại trừ](https://cafef.vn/hoa-chat-duc-giang-cong-bo-bctc-kiem-toan-2025-loi-nhuan-giam-hang-chuc-ty-hai-van-de-ngoai-tru-dang-luu-y-188260621122508047.chn) ·
+[tinnhanhchungkhoan — DGC bị ngoại trừ khoản hàng tồn kho 950,9 tỷ sau khi đổi đơn vị kiểm toán](https://www.tinnhanhchungkhoan.vn/hoa-chat-duc-giang-dgc-bi-ngoai-tru-khoan-hang-ton-kho-9509-ty-dong-sau-khi-doi-don-vi-kiem-toan-post392759.html) ·
+[nguoiquansat — Vinhomes phát hành lô trái phiếu 6.000 tỷ, xếp hạng tín nhiệm FiinRatings 'A'/Stable (nền)](https://nguoiquansat.vn/vinhomes-vhm-sap-phat-hanh-lo-trai-phieu-tri-gia-6-000-ty-dong-to-chuc-xep-hang-tin-nhiem-noi-gi-286189.html) ·
+[vietnamplus — VN-Index tăng 7 phiên liên tiếp trước kỳ nghỉ lễ Quốc khánh 2/9 (28/08: 1.832,12)](https://www.vietnamplus.vn/vn-index-tang-7-phien-lien-tiep-truoc-ky-nghi-le-quoc-khanh-29-post1133140.vnp) ·
+[dnse — Hành trình phá đỉnh của VN-Index: bộ đôi VIC–VHM áp đảo](https://www.dnse.com.vn/senses/tin-tuc/hanh-trinh-pha-dinh-cua-vn-index-ap-dao-phan-con-lai-dan-hut-hoi-35225059) ·
+[24hmoney — Tổ chức xếp hạng tín nhiệm đánh giá việc Vinhomes dùng 40 triệu cp VIC thế chấp (nền)](https://24hmoney.vn/news/to-chuc-xep-hang-tin-nhiem-danh-gia-ra-sao-khi-vinhomes-dung-40-trieu-co-phieu-vic-the-chap-c4a2787660.html)
+
+---
+
 ## 14. TV1 — cập nhật 2026-08-10 (Mike, due-diligence trực tiếp theo yêu cầu user, đúng ngày cổng T3)
 
 **Q2/2026 nay là số THẬT, không còn stale carry-forward.** Check 08-04 từng gắn cờ nghi ngờ dòng
@@ -1315,3 +1991,1197 @@ mua thêm chỉ vì tới hạn, cần cổng THẬT xác nhận trước.
 Sources: [stockbiz.vn](https://stockbiz.vn/tin-tuc/tv1-mot-cong-ty-con-cua-evn-bi-ca-4-cong-ty-big4-tu-choi-kiem-toan-sau-khi-chu-tich-hdqt-bi-khoi-to/40702174) ·
 [dantri.com.vn](https://dantri.com.vn/kinh-doanh/chu-tich-vua-bi-bat-cong-ty-dien-bi-ca-4-ben-big-4-tu-choi-kiem-toan-20260701145835409.htm) ·
 [baodauthau.vn](https://baodauthau.vn/dhcd-pecc1-manh-tay-chia-co-tuc-tham-gia-loat-du-an-thuy-dien-mo-rong-luoi-dien-dien-hat-nhan-post198014.html)
+
+### 2026-09-04 (job `Taylor_20260904_011034`) — **0 QUALIFY mới · 1 AMBIGUOUS mới (VCS) · 4 không-phải-case (VSC, TSB, MVN, CRE)** · ★ **phễu hệ thống 18 mã FULLY_QUALIFIED phân giải được thành 3 NGUYÊN NHÂN NHÓM, không mã nào là sự kiện sợ hãi riêng lẻ** · 1 caveat số liệu của phễu
+
+Cửa sổ tin **sau phiên 28/08 → sáng 04/09** (phủ luôn khoảng trống nghỉ lễ 31/08→02/09 mà lượt
+08-31 tự nhận là CHƯA phủ). Danh mục đang gác **29 mã** (13 NH + 16 ngoài NH).
+
+**Bối cảnh**: chỉ **2 phiên** trong cửa sổ (28/08 và **03/09** — 31/08–02/09 nghỉ lễ Quốc khánh;
+`--asof 2026-09-02` rơi ngược về 28/08, xác nhận không có phiên). VNINDEX **1.827,72 (03/09, −4,4đ,
+−0,24%)** — chấm dứt chuỗi 7 phiên tăng; độ rộng **260 giảm / 115 tăng**, khối ngoại **bán ròng
+1.562 tỷ** (VCB, VPB, TCB, VIC, HPG). ⇒ phiên 03/09 là **phiên đỏ diện rộng**, nên `idio = ret − mret`
+chỉ trừ đi −0,24% — cờ IDIOCRASH lượt này **dễ trip hơn bình thường**, phải đọc kèm độ rộng.
+
+**Phần 1 — anomaly_scan**: chạy cho **cả 3 mốc** 28/08 · 02/09 · 03/09. Universe **253 mã**
+(H:29 / W:242), **watchlist TƯƠI** (`active_nav` computed_at **2026-09-03** = đúng phiên cuối) ⇒
+**KHÔNG có cảnh báo quá hạn**. **0 IDIOCRASH · 0 FLOOR2 · 0 CEIL2 · 0 VOLSPIKE** ở cả 3 mốc. Cờ mới
+nhất trong `anomaly_flags.json` vẫn là **PNJ 24/08 (CEIL2)** — không mã nào trong 29 mã gác sập riêng lẻ.
+
+**Phần 2 — quét RỘNG** `bq_cache/ticker/2026.parquet` (phiên cuối 03/09): 1.276 mã → **699 mã** đạt sàn
+thanh khoản (`max(Close×Volume)` 2026 ≥1 tỷ). Chuỗi chỉ số lấy từ `ticker='VNINDEX'`, **không** dùng cột
+mirror (bẫy 08-17). IDIOCRASH cứng (ret ≤ −6% ∧ idio ≤ −5% ∧ val ≥1 tỷ) → **1 mã**; nới mềm (ret ≤ −4%
+∧ idio ≤ −3,5%) → thêm **4 mã**.
+
+| Mã | Giá 03/09 | Chữ ký sự kiện | Kết luận |
+|---|---|---|---|
+| **TSB** (Ắc quy Tia Sáng, HNX, ICB 2777) | **20.000**, phiên 03/09 **−9,91%** (cờ CỨNG) | **+6% TRÊN đáy 3M** (−17% so đỉnh 3M) · **PE −97,6** (lỗ), **NP_P0 −1,88 tỷ**, **CF_OA_P0 −2,53 tỷ / P1 −4,53 tỷ** (âm 2 quý liền) · **IntCov −5,01** · FSCORE 3 · **PB 1,82** · **ADV3M 0,15 tỷ** | **Không phải case** — loại ở bước rẻ nhất, hai gạch độc lập: (1) **PB 1,82 KHÔNG có sàn định giá** (§2#5/§2.5#4) — trả 1,8× book cho một DN đang lỗ; (2) ADV 0,15 tỷ/phiên = không đầu tư được ở quy mô 2 account. WebSearch: **0 tin sự kiện** — cờ là biến động của mã siêu mỏng, không phải trigger §0.5 |
+| **PNJ** (§7, AMBIGUOUS — **đang theo dõi, không phải case mới**) | **39.800**, phiên 03/09 **−5,46%**, KL **8,10 triệu** (~1,4× median 5,84tr từ 07/2026) | Xem Phần 5 | **Trả lại nhịp hồi, KHÔNG có tin mới** |
+| **TIN** | 105.000, −5,23% | PB **3,38** · Debt_Eq **7,19** | **Đã kết luận "không phải case" 08-21** — chỉ echo, không có gì đổi |
+| **MVN** (Hàng hải VN — VIMC, UPCoM) | **67.000**, −4,96% | **+37% TRÊN đáy 3M** (chỉ −8% so đỉnh) · **PB 3,85 · PE 29,2** · ADV3M 1,08 tỷ. Lõi KHOẺ (CF_OA_P0 1.926 tỷ = 2,1× NP 914 tỷ, FSCORE **9**, IntCov 16,7) | **Không phải case** — lõi tốt nhưng **trượt thẳng §2#5/§2.5#4**: PB 3,85 không phải sàn định giá, và mã **không ở vùng sợ hãi** (+37% trên đáy 3M). Đây là chốt lời trên một mã đang mạnh, ngược hẳn tiêu chí §0.5 |
+| **CRE** (CenLand, ICB 8633) | **6.580**, −4,64% | **+2% trên đáy 3M** · **PB 0,51** nhưng **PE 58,2** · **ROE_Min3Y 0,00018** (≈0) · **CF_OA_P0 −111,4 tỷ / P1 −36,5 tỷ** (âm 2 quý) · NP_P0 chỉ **3,1 tỷ** · FSCORE 4 · IntCov 1,51 | **Không phải case** — gạch ở **§2#3 (CF_OA ≥ NP)**: dòng tiền kinh doanh âm 2 quý liền trong khi LN sổ sách gần bằng 0, đúng chữ ký POC/môi giới biên mỏng §10.10. PB 0,51 rẻ nhưng không có tài sản lõi tách rời định giá được (khác TV1/DGC — đã kiểm góc này theo việc 3) |
+
+**Phần 3 — WebSearch tin theo BỘ TỪ KHOÁ NHÓM (10 truy vấn + 1 WebFetch):**
+- **Nhóm chung** (khởi tố/bắt tạm giam/thanh tra/đình chỉ/hạn chế GD/từ chối kiểm toán/chậm nộp BCTC/
+  cắt margin/huỷ niêm yết/corp-action bất thường): **0 sự kiện MỚI** liên quan 29 mã gác trong cửa sổ.
+  Mọi kết quả là tin nền 03–08/2026 đã ghi các lượt trước (ACV, Vinaconex, PC1, cụm đại án ngành điện).
+- **Nhóm ngân hàng (13 mã)** — §4.2 `bank_tailrisk_insurance_design_20260814.md`: **0 sự kiện.** Không
+  kiểm soát đặc biệt / chuyển giao bắt buộc / rút tiền hàng loạt / khởi tố lãnh đạo NH niêm yết / cho vay
+  sân sau / thao túng cp NH. Kết quả chỉ trả nền 2023–2025 (4 NH đã chuyển giao xong). ⚠️ Chiều NGƯỢC
+  trong cửa sổ: **VCB, VPB, TCB nằm trong nhóm bị khối ngoại bán ròng mạnh nhất phiên 03/09** — đó là
+  dòng tiền, KHÔNG phải sự kiện tín dụng; không đổi phân loại mã nào.
+- **Nhóm BĐS đầu ngành/hạ tầng (VHM, VRE — và VIC/VPI ở phía mua)** — §6
+  `vic_family_credit_concentration_20260818.md`: **0 sự kiện tín dụng XẤU mới.** Không chậm/vỡ nợ TPDN,
+  không hạ bậc tín nhiệm, không siết TSĐB, không call margin/giải chấp cổ đông lớn. Nền KHÔNG đổi:
+  S&I Ratings xếp VHM **'vnAA'/Ổn định**, 2 lô VHM12605/12606 **'vnAA+'**, TSĐB = cổ phiếu VIC
+  (30 triệu cp cho VHM12605, tỷ lệ TSĐB/phát hành ~199,3%); VHM đã phát hành 3.000 tỷ (VHM12613/14,
+  10/07) và VIC bảo lãnh tối đa 6.500 tỷ. Phiên 03/09 **VIC làm trụ đỡ chỉ số**.
+- **Nhóm ngoài NH (16 mã)** — tai nạn/sự cố nhà máy, thu hồi sản phẩm, mất giấy phép/mỏ, kê biên tài sản,
+  tranh chấp lãnh đạo: **0 sự kiện.**
+
+**Phần 4 — PHÍA MUA: 0 LỆNH MUA TRÊN MỌI KÊNH cho phiên 04/09 ⇒ KHÔNG có luận điểm mua nào bị gãy.**
+Kiểm **cả ba** kênh, không suy từ một kênh:
+
+| Kênh mua | Trạng thái cho phiên 04/09 | Bằng chứng |
+|---|---|---|
+| **V2.4 BAL** | 2 ứng viên **VIC, VPI** vẫn `deferred` vì `signal_hold` (user chốt 19/08, checkpoint **16/09**) | `deferred_orders` trong `plan_{SpaceX,ZaloPay}_2026-09-04.json` |
+| **V2.4 LAG** | **0 mã đến hạn**, 0 upcoming, **cổng lịch PASS** (`signal_date 2026-09-03 → plan_date 2026-09-04`) | `filter_lag_entry_window.py --plan-date 2026-09-04 --json` |
+| **TV1 DISCRETIONARY_SPECIAL** (cron 20:30) | **SKIP cả 2 account** — đã đạt tỷ trọng mục tiêu ĐỘNG: SpaceX filled 2.300 ≥ target 2.300 (5,00% × active_nav 978.563.615đ ÷ 20.400đ); ZaloPay filled 1.200 ≥ target 1.200 | `history_noninject` trong `data/trade_plans/discretionary/state_TV1_*.json`, at 2026-09-03T23:30 |
+
+⚠️ **Bẫy vận hành ghi lại để lượt sau không báo động giả**: chạy `filter_lag_entry_window.py` **không**
+`--plan-date` vào sáng ngày có phiên trả `plan_date = 2026-09-07` và `calendar_check.ok = FALSE`. Đó
+**KHÔNG phải lỗi lịch** — mặc định của script là *"phiên giao dịch KẾ TIẾP tính từ hôm nay"*, tức bỏ qua
+chính phiên hôm nay; cron sinh plan chạy TỐI HÔM TRƯỚC nên vẫn đúng. Truyền `--plan-date` tường minh khi
+quét trong ngày.
+
+- **VIC**: 0 tin xấu trong cửa sổ; dữ kiện DƯƠNG (làm trụ đỡ chỉ số 03/09; VHM/VIC vẫn phát hành + được
+  xếp hạng bình thường). **Luận điểm không gãy.**
+- **VPI**: 0 tin xấu trong cửa sổ. Nền 08-24 giữ nguyên (dư nợ TPDN >2.584 tỷ vs tiền mặt ~143 tỷ cuối
+  Q1/2026, ≥8 lô dùng CHÍNH cp VPI của lãnh đạo/bên liên quan làm TSĐB) — **nền, không phải sự kiện tuần
+  này**. ⇒ **Không cần hành động phía mua.**
+
+**Phần 5 — read-through case đang theo dõi**
+
+- ★ **PNJ** (§7, AMBIGUOUS — **mục đáng chú ý nhất phần này**): **39.800 (03/09, −5,46%)**, PE 7,0 ·
+  PB 1,46, dưới MA50 (43.490), **+29% trên đáy 3M (30.750)**. Diễn biến trọn cửa sổ: bật **+25% từ
+  35.050 (18/08) lên 43.100 (26/08)** nhờ catalyst **21/08 — kết luận điều tra ban đầu + kết quả giám
+  định của CQĐT Thanh Hoá, PNJ khẳng định kim cương liên quan KHÔNG vào hệ thống bán lẻ** (phiên đó PNJ
+  **tăng trần**), rồi **trả lại −7,7%** về 39.800. **WebSearch: 0 tin mới bất lợi trong cửa sổ** — không
+  có công bố nào ngày 01–03/09; KL 8,10 triệu chỉ ~1,4× median kể từ 07/2026 (5,84tr), không phải cú
+  xả bất thường. Phiên 03/09 độ rộng 260 giảm/115 tăng ⇒ đọc là **chốt lời trên nhịp hồi trong phiên đỏ
+  diện rộng**, KHÔNG phải sự kiện mới. **Không đổi AMBIGUOUS.** Hệ quả thực dụng đã ghi 08-28/08-31 vẫn
+  đứng: biên an toàn để chờ cổng BCTC Q3/2026 (~cuối 10/2026) đã mỏng. **PNJ không nằm trong kênh mua
+  nào** (tier W watchlist, không phải vị thế) ⇒ không ảnh hưởng phía mua.
+- ★ **TV1** (§4/§14, **QUALIFY** — SpaceX 2.300cp + ZaloPay 1.200cp): **20.400 (03/09, −0,49%)**,
+  PE 3,5 · PB 1,08, dưới MA50 (20.862). **Hai cổng vẫn treo, mốc quá hạn dài thêm:**
+  - **Cổ tức 15% vẫn CHƯA được broker book.** `cashDividendReceiving` = **0 ở CẢ 2 account** trong
+    `dnse_raw_2026-09-03.jsonl` VÀ `dnse_raw_2026-09-04.jsonl` — SAB (3.000đ/cp) đã về và tất toán, còn
+    TV1 (3.450.000đ SpaceX / 1.800.000đ ZaloPay) **chưa từng xuất hiện**. Nay **quá hạn ~12 phiên** kể từ
+    ngày thanh toán công bố 14/08.
+  - **Kết quả lấy ý kiến bằng văn bản chọn đơn vị kiểm toán (thực hiện 10/08) vẫn CHƯA công bố sau 24
+    ngày** (WebSearch lượt này: 0 kết quả, chỉ trả tin nền 01/07 về việc cả 4 Big4 từ chối).
+  → **Không đổi QUALIFY** (§14 vẫn đứng: lõi tách biệt, CF_OA_P0 24,3 tỷ vs NP 31,3 tỷ, IntCov 18,6,
+    PE 3,5). ⚠️ Nhắc lại nguyên văn cảnh báo 08-31, **vẫn đúng**: chương trình gom TV1 là **duy trì tỷ
+    trọng ĐỘNG** ⇒ giá giảm làm số cp mục tiêu TĂNG ⇒ hệ tự mua thêm vào chỗ yếu; hai điều kiện
+    `hard_expiry` đều `manual_only: true` ⇒ **lá chắn là THỦ CÔNG**. Hôm nay TV1 SKIP vì đã đạt target,
+    nhưng **giá giảm ~4% là target tăng lên 2.400/1.300cp và hệ mua tiếp mà không cần ai duyệt.**
+- **DGC** (§6, AMBIGUOUS-nghiêng-constructive · ZaloPay giữ 10.000cp, `excluded=True`): **44.900 (03/09,
+  **+4,42%**)** — **tăng ngược phiên đỏ**, KL 998.700, **vượt lên trên MA50 (43.668)**, cao nhất kể từ đợt
+  sập. PE 7,9 · PB **1,05** · DY 6,7% · Debt_Eq 0,19 · IntCov 32,7. **0 tin mới trong cửa sổ** — cổng còn
+  lại vẫn là **gỡ ý kiến ngoại trừ 950,9 tỷ hàng tồn kho** (chỉ có thể qua kỳ kiểm toán sau). Không đổi
+  phân loại; ghi nhận **diễn biến giá xác nhận chiều constructive của bản RE-DO 07-23**.
+- **TV4** (AMBIGUOUS): **13.800 (03/09)**, PE 6,2 · PB 1,12 · DY 7,2%, **đã lên lại trên MA50 (13.066)**,
+  −2% so đỉnh 3M. Cổng **ý kiến soát xét bán niên 2026 (hạn ~30/08)** — WebSearch + WebFetch bài
+  10/08 (nguoiquansat) chỉ xác nhận lại dữ kiện ĐÃ ghi 08-21/08-31 (bổ nhiệm 3 nhân sự từ 01/08, **miễn
+  nhiệm phụ trách KSNB**, ĐHĐCĐ bất thường lùi 10/8→24/8) — **không có công bố soát xét** ⇒ cổng
+  **quá hạn sang tuần thứ 2**. ADV3M **0,12 tỷ** vẫn chặn mạnh hơn mọi phân loại.
+- **ICG** (AMBIGUOUS-yếu): **10.900 (03/09)**, PB 0,61 · PE 7,3, ADV3M 0,21 tỷ, còn cách MA50 (14.296)
+  24%. Cả 2 cổng (giải trình HNX chuỗi 4 phiên sàn 14→19/08 · soát xét bán niên ~30/08) **vẫn treo, nay
+  sang tuần thứ 4 / tuần thứ 2**. Không đổi phân loại.
+- **OGC** (NON kinh điển §2): không có gì trong cửa sổ đổi kết luận.
+
+**Phần 6 — PHỄU CANDIDATE HỆ THỐNG (`--mode weekly`), 19 mã FULLY_QUALIFIED → due-diligence tin**
+
+Trong 19 mã, **NTL đã có kết luận "không phải case" (08-21)**, còn **18 mã CHƯA từng vào sổ**. Kết quả
+DD: **không mã nào là sự kiện sợ hãi RIÊNG LẺ**; cả 18 phân giải hết vào **3 nguyên nhân NHÓM** đã xác
+minh được bằng tin — đây là phát hiện chính của việc 7 lượt này.
+
+| Cụm | Mã | Nguyên nhân washout (đã verify bằng tin, không suy diễn) | Đọc qua §0.5/§2.5 |
+|---|---|---|---|
+| **(1) BĐS — lãi suất + siết tín dụng** | SZC, HDG, DTD, ITC, HPX *(+NTL đã kết luận)* | Mặt bằng **lãi suất tăng trở lại** so với 2025 ⇒ ép cả cầu mua nhà lẫn khả năng huy động vốn; **VIS Rating: tín dụng BĐS sẽ bị kiểm soát chặt hơn theo định hướng NHNN**. Tính tới 11/5 chỉ **3/20** cp BĐS theo dõi tăng giá | Nhóm **(c) vĩ mô/chính sách**. Discriminator §0.5(c) = *"kỹ thuật/tâm lý hay lõi xấu đi thật?"* → đây là **thay đổi CHÍNH SÁCH đang diễn ra, chưa có dấu hiệu đảo chiều** (lãi suất đi LÊN, room tín dụng siết vào) ⇒ **chưa thoả "khủng hoảng SẼ QUA"**. **Không mở case nào** — không có cổng xác nhận nào để chờ. Nhất quán với NTL (08-21) và với §9.5 *"nhóm (c) mới có 1 case phản chứng"* |
+| **(2) Xuất khẩu — thuế Mục 301 của Mỹ 12,5%** | **VCS**, DRC, TNG, ANV *(+VGS, HT1, LCG, VCS chịu gián tiếp)* | **24/07/2026 Mỹ áp thuế nhập khẩu bổ sung theo Điều 301 Luật Thương mại 1974 với 60 nền kinh tế; VN nằm trong nhóm 43 nền chịu 12,5%.** Tỷ trọng Mỹ: **DRC 28% doanh thu** · **TNG (dệt may) 40–50% kim ngạch, biên LN chỉ 3–10%** · **ANV: tỷ trọng cá tra sang Mỹ NHỎ ⇒ tác động TRUNG LẬP** · VCS (đá thạch anh nhân tạo) chịu **thuế đối ứng + biện pháp phòng vệ thương mại** | Nhóm **(b) chu kỳ/ngành**, nhưng discriminator §2.5 hỏi *"chu kỳ SẼ QUAY LẠI?"* — **thuế quan là BẬC CHI PHÍ CẤU TRÚC, không phải pha chu kỳ**. Mất ~2,5% lợi thế giá so Bangladesh/Campuchia/Indonesia ⇒ nguy cơ **dịch chuyển đơn hàng vĩnh viễn** (TCM/TNG/ADS/GIL). **Chỉ VCS mở case** (xem dưới); DRC/TNG **chưa đủ**: biên mỏng + phụ thuộc Mỹ cao là đúng chữ ký "lõi xấu đi thật" |
+| **(3) Riêng lẻ, đã có tin cụ thể** | **VSC** | Xem dòng riêng dưới | **Không phải case** |
+| **(4) Ngân hàng đang GIỮ** | SHB, VIB, TPB | **0 sự kiện tin** (Phần 3). Đo lại trên cache giá: dd52 (Close đã điều chỉnh) **SHB −28,7% · VIB −16,4% · TPB −22,3%**, đều **+4…+7% TRÊN đáy 52 tuần**, PB 0,81–1,05, PE 5,3–6,7 | **Không phải case fear-buy** — de-rating NHÓM ngân hàng, không trigger §0.5. Đây là **vị thế đang giữ**, thuộc khung risk/sizing V2.4, không thuộc sleeve này |
+
+**Hai mã mở dòng riêng:**
+
+| Mã | Số liệu (03/09, BQ cache) | Kết luận |
+|---|---|---|
+| **VCS** (Vicostone, HNX, ICB 2353) | **31.500 = ĐÚNG đáy 52 tuần** (dd52 −28,6% Close / −32,3% Price) · **PB 1,00 · PE 8,8 · DY 12,06%** · **Debt_Eq 0,25 · IntCov 18,9** · **CF_OA_P0 205,7 tỷ ≥ NP_P0 130,2 tỷ** (và P1 195,7 / P2 216,2 — ổn định 3 quý) · ROE_Min3Y **13,6%** · FSCORE 5 · **ADV3M 1,34 tỷ**. Tin: DT 2025 4.128,89 tỷ (87,5% KH), LNTT 823,35 tỷ (85,4% KH); LN 2026 **có thể chạm đáy 10 năm**; đã trả cổ tức tiền 38% cho 2025 + tạm ứng thêm 20%; LN luỹ kế chưa phân phối **>3.015 tỷ** | **AMBIGUOUS** — mã DUY NHẤT trong phễu qua được cả §2.5#1–#4 trên số: solvent thừa (nợ thấp, IntCov 18,9), **dòng tiền thực ≥ lợi nhuận sổ sách 3 quý liền**, sàn định giá PB 1,00 + DY 12%, và đang ở **đúng đáy 52 tuần**. **Điều CHƯA thoả là discriminator trung tâm §2.5: thuế 12,5% + phòng vệ thương mại Mỹ là bậc chi phí CẤU TRÚC, không phải pha chu kỳ sẽ tự quay lại.** Bài học §8 (HPG) áp thẳng: **PE 8,8 ở đây VÔ NGHĨA** vì mẫu số là LN đang trên đường về đáy 10 năm — neo vào PB/DY/dòng tiền, đừng neo PE. **CỔNG XÁC NHẬN (nhị phân, đúng 1 câu hỏi):** BCTC Q3/2026 (~cuối 10/2026) — **biên lợi nhuận gộp có hấp thụ được 12,5% mà KHÔNG phá dòng tiền không** (CF_OA_P0 có còn ≥ NP_P0?). ⚠️ **Ràng buộc quy mô đứng TRƯỚC mọi phân loại: ADV3M 1,34 tỷ/phiên** — cùng bậc TV1, tức nếu có vào thì là sleeve idiosyncratic §12 với sizing theo độ bảo vệ downside, KHÔNG phải vị thế book |
+| **VSC** (Viconship, HOSE, ICB 2777) | **14.400** (dd52 **−47,6%**, nhưng **+13,4% TRÊN đáy 52 tuần**) · PB 0,74 nhưng **PE 15,7** · **CF_OA_P0 −935,0 tỷ** · IntCov **2,99** · Debt_Eq 1,05 · ROE_Min3Y 4,4% · FSCORE 3 · ADV3M 112,4 tỷ. Tin: giảm >50% từ đỉnh 36.000 (giữa 08/2025); **Q1/2026 doanh thu 861 tỷ +26,2% nhưng LỢI NHUẬN GIẢM**; áp lực **chi phí tài chính tăng nhanh sau loạt thương vụ M&A**; **cạnh tranh do tăng nguồn cung cảng tại Hải Phòng**; rủi ro sản lượng hàng qua cảng HP vì thuế đối ứng; **cổ đông lớn "cắt lỗ" 30 triệu cp**; bị loại khỏi danh mục tự doanh CTCK | **Không phải case** — trượt **§2.5 discriminator gốc**: doanh thu TĂNG 26% mà lợi nhuận GIẢM là **lõi xấu đi THẬT** (chi phí nợ M&A + tăng cung cảng HP = **cạnh tranh cấu trúc**, không phải pha chu kỳ), không phải "nỗi sợ tạm thời". Cộng thêm **PE 15,7 = không có sàn định giá theo lợi nhuận**, CF_OA_P0 âm 935 tỷ, và mã đã **+13% trên đáy**. Cùng logic đã loại NTL (08-21): giá rớt vì giá trị giảm THẬT, đúng giá |
+
+⚠️ **CAVEAT SỐ LIỆU CỦA PHỄU — cần Winston/Mike kiểm, KHÔNG suy diễn nguyên nhân ở đây.** `washout` /
+`dd52` phễu in ra **không khớp** với cache giá cho một số mã: phễu ghi **SHB −36,4% · VIB −32,4% ·
+TPB −29,2% · TNG −32,4%**, còn đo lại trên `bq_cache/ticker/2026.parquet` (cửa sổ 370 ngày tới 03/09)
+ra **−28,7 / −16,4 / −22,3 / −32,4%** trên `Close` và **−29,7 / −20,8 / −22,3 / −37,7%** trên `Price`.
+Điều chỉnh cổ tức giải thích được MỘT PHẦN (Close vs Price lệch 1–5pp) nhưng **không giải thích hết**
+khoảng cách 7pp ở SHB/VIB. Đã đọc bằng chứng tới đây và **dừng ở đó — chưa xác định được nguyên nhân**
+(khác asof? khác cửa sổ? khác bảng `universe_pit`/`ticker_prune`?). Hệ quả nếu phễu overstate: nó
+**tuyển thừa** mã vào cohort "fear", làm loãng danh sách FULLY_QUALIFIED. Không đổi kết luận lượt này
+vì cả 4 mã đều bị loại bằng lý do KHÁC (0 sự kiện tin, không trigger §0.5).
+
+**Tổng kết lượt**: **29 mã đang gác** rà qua · 253 mã (anomaly_scan ×3 mốc) + **699 mã** (quét rộng) +
+**19 mã phễu FULLY_QUALIFIED** + **10 truy vấn tin** · **0 QUALIFY mới** · **1 AMBIGUOUS mới (VCS,
+có cổng nhị phân Q3/2026)** · **4 không-phải-case (VSC, TSB, MVN, CRE)** · 2 echo (TIN, OGC) ·
+**watchlist KHÔNG quá hạn** (computed_at 2026-09-03 = đúng phiên cuối) · **0 lệnh mua trên cả 3 kênh
+(BAL/LAG/TV1-discretionary) cho phiên 04/09 ⇒ KHÔNG có luận điểm mua nào bị gãy.**
+**Mốc phải theo, gần → xa: TV4 + ICG soát xét bán niên QUÁ HẠN tuần thứ 2 → TV1 cổ tức (quá hạn ~12
+phiên, đo được là chưa book) + kết quả chọn kiểm toán (quá hạn 24 ngày) → checkpoint BAL paper-track
+16/09 → DGC gỡ ý kiến ngoại trừ tồn kho → PNJ Q3 (~cuối 10/2026) → ★ VCS Q3/2026 (~cuối 10/2026):
+biên LN có hấp thụ được thuế 12,5% mà giữ CF_OA ≥ NP không.**
+
+Nguồn lượt này:
+[nhandan — Chứng khoán ngày 3/9: VN-Index giảm 4,4 điểm, khối ngoại bán ròng hơn 1.562 tỷ](https://nhandan.vn/chung-khoan-ngay-39-vn-index-giam-44-diem-khoi-ngoai-ban-rong-hon-1562-ty-dong-post986121.html) ·
+[thoibaotaichinhvietnam — Chứng khoán ngày 3/9: áp lực bán gia tăng, VN-Index chấm dứt chuỗi phiên tăng](https://thoibaotaichinhvietnam.vn/chung-khoan-ngay-3-9-ap-luc-ban-gia-tang-vn-index-cham-dut-chuoi-phien-tang-lien-tiep-203192.html) ·
+[dantri — Cổ phiếu PNJ tăng trần sau kết quả giám định kim cương (21/08)](https://dantri.com.vn/kinh-doanh/co-phieu-pnj-tang-tran-sau-ket-qua-giam-dinh-kim-cuong-trong-vu-an-buon-lau-xuyen-quoc-gia-20260821095551575.htm) ·
+[docnhanh — PNJ lên tiếng sau kết luận điều tra vụ buôn lậu kim cương](https://docnhanh.vn/kinh-te/pnj-len-tieng-sau-ket-luan-dieu-tra-vu-buon-lau-kim-cuong-tintuc1049411) ·
+[thuonghieucongluan — Cổ phiếu VSC lao dốc gần 40%, bị loại khỏi danh mục tự doanh CTCK](https://thuonghieucongluan.com.vn/co-phieu-vsc-lao-doc-gan-40-bi-loai-khoi-danh-muc-tu-doanh-ctck-a287601.html) ·
+[nguoiquansat — Cổ đông lớn Viconship 'cắt lỗ' 30 triệu cổ phiếu VSC](https://nguoiquansat.vn/co-dong-lon-viconship-cat-lo-30-trieu-co-phieu-vsc-sau-hon-hai-thang-ngoi-ghe-vip-302890.html) ·
+[24hmoney — VCS 2026: doanh thu 4.200 tỷ nhưng lợi nhuận có thể chạm đáy 10 năm](https://24hmoney.vn/news/vcs-2026-doanh-thu-4-200-ty-nhung-loi-nhuan-co-the-cham-day-10-nam--vicostone-dang-chuan-bi-cho-mot-cuoc-tai-thiet-lon-c30a2758176.html) ·
+[mekongasean — ĐHĐCĐ Vicostone 2026: thận trọng mục tiêu lợi nhuận (thuế đối ứng + phòng vệ thương mại Mỹ)](https://mekongasean.vn/dhdcd-vicostone-2026-than-trong-muc-tieu-loi-nhuan-53843.html) ·
+[danviet — "Đòn thuế" 12,5% từ Mỹ: dệt may, gỗ và thuỷ sản chịu áp lực (DRC 28%, TNG, ANV trung lập)](https://danviet.vn/don-thue-125-tu-my-det-may-go-va-thuy-san-chiu-ap-luc-lo-dien-nhom-doanh-nghiep-huong-loi-d1446345.html) ·
+[tuoitre — Mỹ áp mức thuế mới 12,5% theo Điều 301, VN trong nhóm 43 nền kinh tế](https://tuoitre.vn/my-ap-muc-thue-moi-125-nhieu-doanh-nghiep-noi-tac-dong-khong-lon-100260726182437649.htm) ·
+[vietstock — Phần lớn cổ phiếu bất động sản đang hụt hơi vì lãi suất (VIS Rating: tín dụng BĐS siết chặt hơn)](https://vietstock.vn/2026/05/phan-lon-co-phieu-bat-dong-san-dang-hut-hoi-vi-lai-suat-830-1441177.htm) ·
+[nguoiquansat — TV4: miễn nhiệm phụ trách KSNB, lùi ĐHĐCĐ bất thường 10/8→24/8 (10/08/2026)](https://nguoiquansat.vn/doanh-nghiep-quy-mo-400-ty-bi-dieu-tra-trong-vu-an-nganh-dien-tiep-tuc-co-bien-309527.html) ·
+[thitruongtaichinhtiente — Vingroup bảo lãnh tối đa 6.500 tỷ trái phiếu do Vinhomes phát hành](https://thitruongtaichinhtiente.vn/vingroup-bao-lanh-toi-da-6-500-ty-dong-trai-phieu-do-vinhomes-phat-hanh-64967.html) ·
+[24hmoney — Tổ chức xếp hạng tín nhiệm đánh giá việc Vinhomes dùng 40 triệu cp VIC thế chấp (nền)](https://24hmoney.vn/news/to-chuc-xep-hang-tin-nhiem-danh-gia-ra-sao-khi-vinhomes-dung-40-trieu-co-phieu-vic-the-chap-c4a2787660.html)
+
+---
+
+### 2026-09-07 — QUÉT SÁNG THỨ HAI (job `Taylor_20260907_010002`, mục đích: BẢO VỆ PHÍA MUA trước 09:00) — **0 QUALIFY · 0 case mới · 2 không-phải-case (SSB, VNE)** · ★ **0 lệnh mua trên cả 3 kênh cho phiên 07/09** · ★ **TV1 SpaceX chuyển từ "đã đạt target" sang DEADBAND (thiếu 100cp) — lá chắn thủ công nay sát ngưỡng hơn** · ★ **DGC chốt quyền cổ tức TIỀN MẶT 80% (record 15/09, trả 25/09)**
+
+Cửa sổ tin **sau phiên 04/09 → sáng 07/09**. Chỉ **1 phiên** trong cửa sổ (**04/09**; 05–06/09 cuối
+tuần). Danh mục đang gác **29 mã** (13 NH + 16 ngoài NH).
+
+**Bối cảnh phiên 04/09 — NGƯỢC hẳn phiên 03/09**: VNINDEX **1.853,08 (+1,39%, +25đ)**, mở gap giảm
+>10đ về sát 1.800 rồi đảo chiều; **VIC +4,74% đóng góp ~18,64đ**, nhóm BĐS +3,51% dẫn dắt; khối ngoại
+**mua ròng 118 tỷ** (đảo chiều từ bán ròng 1.562 tỷ phiên trước). ⚠️ Hệ quả đọc cờ: `idio = ret − mret`
+với mret **+1,39%** ⇒ ngưỡng IDIOCRASH **khó trip hơn** bình thường; mã nào trip là **thật sự riêng lẻ**
+(ngược tình huống 03/09 đã cảnh báo lượt trước).
+
+**Phần 1 — anomaly_scan** (`--backfill-days 3`, phiên 04/09): universe **253 mã** (H:29 / W:242),
+**watchlist TƯƠI** (`active_nav` computed_at **2026-09-04** = đúng phiên cuối) ⇒ **KHÔNG có cảnh báo
+quá hạn**. **0 IDIOCRASH · 0 FLOOR2 · 0 CEIL2 · 0 VOLSPIKE**. Cờ mới nhất trong `anomaly_flags.json`
+vẫn là **PNJ 24/08 (CEIL2)**.
+
+**Phần 2 — quét RỘNG** `bq_cache/ticker/2026.parquet` (phiên cuối 04/09, chuỗi chỉ số lấy từ
+`ticker='VNINDEX'`, không dùng cột mirror): 1.276 mã → **623 mã** đạt sàn thanh khoản
+(`max(Close×Volume)` 2026 ≥1 tỷ). IDIOCRASH cứng (ret ≤ −6% ∧ idio ≤ −5%) → **11 mã**; nới mềm → thêm 9.
+**Bộ lọc rẻ nhất (ADV3M) loại 10/11 trước cả khi đọc tin**: BCA 0,13 · BNA 0,59 *(đã NON 08-31)* ·
+DVG 0,17 · KSQ 0,04 · KVC 0,25 · LLM 0,63 · ND2 0,06 · PMC 0,07 · POS 0,11 · VKC 0,25 · VNA 0,02 tỷ/phiên
+— **không mã nào tới 1 tỷ/phiên**, tức không đầu tư được ở quy mô 2 account (cùng lý do đã loại TSB 09-04).
+
+| Mã | Số liệu (04/09) | Kết luận |
+|---|---|---|
+| **SSB** (SeABank, HOSE, NH) — **mã DUY NHẤT trong 11 cờ cứng có thanh khoản thật, ADV3M 36,4 tỷ** | **17.450, −4,38%** (idio −5,77% trong phiên VNINDEX **+1,39%**) · **+22,9% TRÊN đáy 3M**, −4,4% so đỉnh 3M, **trên MA50 (15.790)** · **PE 20,3 · PB 1,43** · Debt_Eq 9,12 · FSCORE 2 | **Không phải case.** Nguyên nhân đọc được, **không phải sự kiện sợ hãi**: (1) **03/09 SSB TĂNG TRẦN ngược nhóm NH đỏ lửa** sau khi FTSE Russell đưa SSB vào FTSE Global All Cap (review bán niên 09/2026) + MSCI Frontier hiệu lực 01/09 ⇒ 04/09 là **trả lại nhịp tăng trần**; (2) **nguồn cung ESOP**: 42 triệu cp phát hành 2023 cho >2.000 nhân viên hết khoá, nhân viên xả mạnh; (3) **Phó TGĐ Nguyễn Hồng Quang bán 145.000cp ngày 05/09** (khớp lệnh, còn >417.000cp). Gạch cứng ở **§2#5/§2.5#4: PE 20,3 · PB 1,43 = KHÔNG có sàn định giá**, và mã **+23% trên đáy 3M** = không ở vùng sợ hãi. **SSB không nằm trong danh mục gác** (13 NH đang giữ không có SSB) ⇒ 0 ảnh hưởng phía mua. Ghi lại giao dịch nội bộ như dữ kiện governance, không phải trigger §0.5 |
+| **VNE** (Xây dựng Điện VN, ADV3M 1,73 tỷ — mã thứ 2 duy nhất qua sàn thanh khoản, cờ MỀM −4,55%) | **2.100** · **NP_P0 −33,5 tỷ · ROE_Min3Y −30,1% · IntCov 0,0 · Debt_Eq 3,13** · PB 0,23 | **Không phải case** — loại ở **§2#3/§2#4**: lỗ, không trả nổi lãi vay, đòn bẩy 3,1×. PB 0,23 rẻ nhưng không có tài sản lõi tách rời định giá được; đúng chữ ký "giá rớt vì giá trị giảm THẬT" (cùng logic NTL 08-21, VSC 09-04) |
+
+**Phần 3 — WebSearch tin theo BỘ TỪ KHOÁ NHÓM (9 truy vấn + 1 WebFetch):**
+- **Nhóm chung** (khởi tố/bắt tạm giam/thanh tra/đình chỉ/hạn chế GD/từ chối kiểm toán/chậm nộp BCTC/
+  cắt margin/huỷ niêm yết/corp-action bất thường): **0 sự kiện MỚI** liên quan 29 mã gác trong cửa sổ.
+  Kết quả chỉ trả tin nền 03–06/2026 đã ghi các lượt trước (PC1, ACV, cụm đại án ngành điện) và danh
+  sách **cắt margin quý III/2026** (59 mã, công bố 05/07 — **đã cũ**, DGC vẫn trong danh sách vì trạng
+  thái *hạn chế giao dịch*, không đổi). Danh sách quý IV/2026 chưa tới hạn công bố.
+- **Nhóm ngân hàng (13 mã)** — §4.2 `bank_tailrisk_insurance_design_20260814.md`: **0 sự kiện.** Không
+  kiểm soát đặc biệt / chuyển giao bắt buộc mới / rút tiền hàng loạt / khởi tố lãnh đạo NH niêm yết /
+  cho vay sân sau / thao túng cp NH. Nền không đổi (4 NH GPBank·MBV·Vikki·VCBNeo đã chuyển giao xong).
+  Chiều NGƯỢC trong cửa sổ: phiên 04/09 nhóm NH đang giữ **TĂNG đồng loạt** (VPB +3,15 · VIB +2,38 ·
+  TCB +1,56 · TPB +1,38 · SHB +0,84%).
+- **Nhóm BĐS đầu ngành/hạ tầng (VHM, VRE — và VIC/VPI ở phía mua)** — §6
+  `vic_family_credit_concentration_20260818.md`: **0 sự kiện tín dụng XẤU mới.** Không chậm/vỡ nợ TPDN,
+  không hạ bậc, không siết TSĐB, không call margin/giải chấp cổ đông lớn. ⚠️ **Có một bài phân tích
+  BEARISH đăng ĐÚNG trong cửa sổ (07/09, elibook)** — đã WebFetch: nội dung là **chất lượng lợi nhuận
+  Q2/2026**, KHÔNG có sự kiện tín dụng nào. Số nó nêu (ghi lại làm nền, chưa đối chiếu BCTC): VIC tổng
+  nợ vay **~356.000 tỷ @10,9%/năm**, VinFast **lỗ gộp 27.600 tỷ 6 tháng**, net debt/EBITDA **2,2×**;
+  VHM nợ vay **+47% nửa năm** (146.300 → **215.500 tỷ**), net debt/equity **35,9% → 57,1%**, 74% doanh
+  thu Q2 từ bán buôn; VRE gửi **25.000 tỷ** trong hệ VIC/VHM. ⇒ **Là LUẬN ĐIỂM, không phải SỰ KIỆN** —
+  không đổi phân loại mã nào, nhưng là dữ kiện nên có khi mở lại VIC (xem Phần 4).
+- **Nhóm ngoài NH (16 mã)** — tai nạn/sự cố nhà máy, thu hồi sản phẩm, mất giấy phép/mỏ, kê biên tài sản,
+  tranh chấp lãnh đạo: **0 sự kiện.**
+- **Dòng vốn (nền, KHÔNG phải sự kiện rủi ro)**: FTSE phân bổ vốn nâng hạng qua 4 đợt — **đợt 1 ngày
+  21/09/2026 ước ~150 triệu USD**, danh mục mua gọi tên **VIC, VHM, VCB, HPG**.
+
+**Phần 4 — PHÍA MUA: 0 LỆNH MUA TRÊN MỌI KÊNH cho phiên 07/09 ⇒ KHÔNG có luận điểm mua nào bị gãy.**
+Kiểm **cả ba** kênh, không suy từ một kênh:
+
+| Kênh mua | Trạng thái cho phiên 07/09 | Bằng chứng |
+|---|---|---|
+| **V2.4 BAL** | `orders` = **0** cả 2 account; 2 ứng viên **VIC, VPI** vẫn `deferred` vì `signal_hold` (user chốt 19/08, checkpoint **16/09**) | `orders`/`deferred_orders` trong `plan_{SpaceX,ZaloPay}_2026-09-07.json` |
+| **V2.4 LAG** | **0 mã đến hạn**, 0 upcoming, **cổng lịch PASS** (`signal_date 2026-09-04 → plan_date 2026-09-07`) | `filter_lag_entry_window.py --plan-date 2026-09-07 --json` |
+| **TV1 DISCRETIONARY_SPECIAL** (cron 20:30 + 23:30) | **SKIP cả 2 account, nhưng LÝ DO SpaceX ĐÃ ĐỔI**: không còn "đã đạt target" mà là **DEADBAND — thiếu 100cp (2.020.000đ = 0,21% active_nav) < ngưỡng top-up 0,50% (4.903.482đ)**. ZaloPay vẫn "đã đạt target" (filled 1.200 = target 1.200 @20.200đ) | `history_noninject` trong `state_TV1_{SpaceX,ZaloPay}.json`, at 2026-09-04T23:30 |
+
+- **VIC**: 0 sự kiện xấu; dữ kiện DƯƠNG trong cửa sổ (**+4,74% phiên 04/09, trụ chính của chỉ số**; nằm
+  trong rổ FTSE mua đợt 1 ngày 21/09). Đối trọng: bài phân tích bearish 07/09 ở Phần 3 (đòn bẩy + chất
+  lượng lợi nhuận) — **luận điểm, không phải sự kiện**. Giá **256.100 (+33% trên đáy 3M, PE 88 · PB 11)**
+  ⇒ dù sao cũng **không** phải case fear-buy; nó là tín hiệu BAL đang HOLD. **Luận điểm không gãy.**
+- **VPI**: 0 tin xấu trong cửa sổ; 68.900 (+0,15%). Nền 08-24 giữ nguyên (dư nợ TPDN >2.584 tỷ vs tiền
+  mặt ~143 tỷ cuối Q1/2026, ≥8 lô dùng CHÍNH cp VPI của lãnh đạo/bên liên quan làm TSĐB) — **nền, không
+  phải sự kiện tuần này.** ⇒ **Không cần hành động phía mua.**
+- ⚠️ **Điểm PHẢI để mắt (đổi so với lượt trước)**: TV1 SpaceX đã rơi khỏi trạng thái "đủ target" sang
+  **deadband thiếu 100cp** vì giá 20.400 → **20.200** làm mục tiêu ĐỘNG tăng. Cảnh báo 08-31/09-04 vẫn
+  nguyên: **giá giảm ⇒ số cp mục tiêu TĂNG ⇒ hệ tự mua thêm vào chỗ yếu**, và 2 điều kiện `hard_expiry`
+  đều `manual_only: true` ⇒ **lá chắn là THỦ CÔNG**. Khoảng cách tới lệnh mua tự động nay chỉ còn
+  ~1 nhịp giảm nữa (cần thiếu ≥0,50% active_nav ≈ 243cp ⇒ giá ~ 19.5xx là trip).
+
+**Phần 5 — read-through case đang theo dõi**
+
+- ★ **DGC** (§6, AMBIGUOUS-nghiêng-constructive · ZaloPay giữ 10.000cp, `excluded=True`) — **mục đáng chú
+  ý nhất lượt này, và là CATALYST THẬT chứ không phải diễn biến giá**: **47.100 (04/09, +4,90%)**, nay
+  **+30,8% trên đáy 3M**, trên MA50 (43.600), PE 8,3 · PB 1,10 · DY 6,4%. Nguyên nhân đọc được:
+  **DGC công bố 03/09 chốt danh sách trả cổ tức TIỀN MẶT tổng 80% (8.000đ/cp)** = tạm ứng đợt 1/2026
+  **30%** + phần còn lại 2025 **50%**; **ngày đăng ký cuối cùng 15/09/2026, thanh toán dự kiến 25/09/2026**,
+  tổng chi >3.000 tỷ. ⇒ **Hệ quả trực tiếp cho sổ ZaloPay: ~80.000.000đ cổ tức tiền mặt về ~25/09** (và
+  giá tham chiếu sẽ bị điều chỉnh ~8.000đ vào ngày GDKHQ ~12/09 — **cần Winston/Mafee gắn corp-action**,
+  đây là loại việc đã sai một lần với TV1 nên nói trước). Không đổi phân loại: cổng còn lại vẫn là **gỡ ý
+  kiến ngoại trừ 950,9 tỷ hàng tồn kho** (chỉ qua kỳ kiểm toán sau). Diễn biến này **củng cố** chiều
+  constructive của bản RE-DO 07-23 (dòng tiền thật đủ trả cổ tức 3.000 tỷ tiền mặt).
+- **TV1** (§4/§14, **QUALIFY** — SpaceX 2.300cp + ZaloPay 1.200cp): **20.200 (04/09, −0,98%)**, PE 3,5 ·
+  PB 1,07, dưới MA50 (20.814). **Hai cổng vẫn treo, không có công bố nào trong cửa sổ**: (a) cổ tức 15%
+  **quá hạn ~13 phiên** kể từ ngày thanh toán công bố 14/08; (b) kết quả lấy ý kiến bằng văn bản chọn
+  đơn vị kiểm toán (thực hiện 10/08) **quá hạn 27 ngày**. WebSearch lượt này: **0 kết quả mới**.
+  **Không đổi QUALIFY.**
+- **PNJ** (§7, AMBIGUOUS): **40.050 (04/09, +0,63%)**, PE 7,1 · PB 1,47, dưới MA50 (42.987), +30,2% trên
+  đáy 3M. **0 tin mới trong cửa sổ.** Không đổi. Không nằm trong kênh mua nào.
+- **VCS** (AMBIGUOUS mới 09-04): **31.100 (04/09, −1,27%) = ĐÚNG đáy 3M** (giảm tiếp dưới mức 31.500 của
+  lượt trước), PB 0,99 · PE 8,7 · DY 12,2%, dưới MA50 (33.668). **0 tin mới**; WebSearch chỉ trả lại nền
+  đã ghi (mục tiêu LNTT 2026 **744 tỷ = thấp nhất 10 năm**, doanh thu 6T/2026 **1.633 tỷ**). Cổng nhị phân
+  **BCTC Q3/2026 (~cuối 10/2026): biên LN có hấp thụ được thuế 12,5% mà giữ CF_OA ≥ NP không**. Không đổi.
+- **TV4** (AMBIGUOUS): **13.500 (−2,17%)**, PE 6,1 · PB 1,10 · DY 7,4%. Cổng **soát xét bán niên (hạn
+  ~30/08) vẫn chưa công bố ⇒ quá hạn sang tuần thứ 3.** ADV3M 0,12 tỷ vẫn chặn mạnh hơn mọi phân loại.
+- **ICG** (AMBIGUOUS-yếu): **10.600 (−2,75%** trong phiên VNINDEX +1,39% — yếu tương đối), PB 0,60 ·
+  PE 7,1, còn cách MA50 (14.200) **34%**. Cả 2 cổng (giải trình HNX chuỗi 4 phiên sàn 14→19/08 · soát xét
+  bán niên) **quá hạn sang tuần thứ 5 / thứ 3**. Không đổi phân loại — nhưng đây là mã **duy nhất trong
+  sổ theo dõi vừa yếu tương đối vừa để cổng treo lâu nhất**; nếu tuần này vẫn im, đề xuất hạ về NON ở
+  lượt quét tuần kế (không tự hạ trong lượt recon này).
+- **OGC** (NON kinh điển §2) · **TIN, TSB, MVN, CRE, VSC, BNA** (đã "không phải case"): 0 thay đổi.
+
+**Corp-action trên mã ĐANG GIỮ (không thuộc sleeve này, chuyển tiếp để không rơi)**: **VIX hoàn tất phát
+hành 122 triệu cp trả cổ tức** (vốn 24.503 → **25.728 tỷ**) ⇒ giá/số lượng sẽ điều chỉnh; VIX là vị thế
+trong sổ. Cùng loại việc với EVF (08-24) — **Winston/Mafee cần xác nhận đã gắn corp-action**, Taylor chỉ
+báo, không tự sửa.
+
+**Tổng kết lượt**: **29 mã đang gác** rà qua · 253 mã (anomaly_scan) + **623 mã** (quét rộng) + 9 truy vấn
+tin + 1 WebFetch · **0 QUALIFY mới · 0 case mới · 2 không-phải-case (SSB, VNE)** · 8 echo · **watchlist
+KHÔNG quá hạn** (computed_at 2026-09-04 = đúng phiên cuối) · **0 lệnh mua trên cả 3 kênh (BAL/LAG/
+TV1-discretionary) cho phiên 07/09 ⇒ KHÔNG có luận điểm mua nào bị gãy.**
+**Mốc phải theo, gần → xa: ★ DGC GDKHQ ~12/09 + record 15/09 + trả 25/09 (cổ tức 80% tiền mặt, ~80 triệu đ
+cho ZaloPay — cần gắn corp-action) → TV4 + ICG soát xét bán niên QUÁ HẠN tuần thứ 3/thứ 5 (ICG là ứng viên
+hạ NON nếu tiếp tục im) → TV1 cổ tức (quá hạn ~13 phiên) + kết quả chọn kiểm toán (quá hạn 27 ngày) →
+FTSE giải ngân đợt 1 21/09 → checkpoint BAL paper-track 16/09 (VIC/VPI) → DGC gỡ ý kiến ngoại trừ tồn kho
+→ PNJ Q3 + VCS Q3 (~cuối 10/2026).**
+
+Nguồn lượt này:
+[vnexpress — Chứng khoán hôm nay 4/9: VN-Index lên mức cao nhất gần 2 tháng](https://vnexpress.net/chung-khoan-len-muc-cao-nhat-gan-hai-thang-5116577.html) ·
+[vietnam.vn — Chứng khoán ngày 4/9: VN-Index bật tăng hơn 25 điểm, nhóm bất động sản dẫn dắt](https://www.vietnam.vn/chung-khoan-ngay-4-9-vn-index-bat-tang-hon-25-diem-nhom-bat-dong-san-dan-dat-thi-truong) ·
+[cafef — Chứng khoán 3-9: Nhóm ngân hàng đỏ lửa, SeABank bật tăng trần](https://cafef.vn/chung-khoan-3-9-nhom-ngan-hang-do-lua-seabank-bat-tang-tran-188260903203553893.chn) ·
+[smartf — Vì sao cổ phiếu SSB của SeABank về đáy 3 năm, bị xả hàng ồ ạt (ESOP hết khoá)](https://smartf.vn/article/vi-sao-co-phieu-ssb-cua-seabank-ve-day-3-nam/) ·
+[mekongasean — Hóa chất Đức Giang chốt ngày trả cổ tức tiền mặt tỷ lệ 80%](https://mekongasean.vn/hoa-chat-duc-giang-chot-ngay-tra-co-tuc-tien-mat-ty-le-80-59204.html) ·
+[markettimes — Cổ phiếu DGC bất ngờ tăng hơn 4% sau thông báo mới từ Hóa chất Đức Giang](https://markettimes.vn/co-phieu-dgc-bat-ngo-tang-hon-4-sau-thong-bao-moi-tu-hoa-chat-duc-giang-130080.html) ·
+[mekongasean — Loạt giao dịch cổ phiếu nổi bật đầu tháng 9/2026 (VIX phát hành 122 triệu cp trả cổ tức)](https://mekongasean.vn/loat-giao-dich-co-phieu-noi-bat-dau-thang-92026-59285.html) ·
+[nguoiquansat — Lộ diện danh mục các mã FTSE sẽ mua từ tháng 9/2026: VIC, VHM, VCB, HPG](https://nguoiquansat.vn/chinh-thuc-lo-dien-danh-muc-cac-ma-ftse-se-mua-tu-thang-9-2026-goi-ten-vic-vhm-vcb-hpg-311887.html) ·
+[cafef — HoSE công bố 59 mã chứng khoán bị cắt margin trong quý III/2026 (nền, 05/07)](https://cafef.vn/hose-cong-bo-59-ma-chung-khoan-bi-cat-margin-trong-quy-iii-2026-188260705145437452.chn) ·
+[vietnamnet — 4 ngân hàng chuyển giao bắt buộc giờ ra sao (nền)](https://vietnamnet.vn/4-ngan-hang-chuyen-giao-bat-buoc-gio-ra-sao-2396786.html) ·
+[elibook — VIC/VHM/VRE/VPL: họ Vin lãi đậm quý 2/2026, ba lớp "game tài chính" (07/09, LUẬN ĐIỂM không phải sự kiện)](https://elibook.vn/2026/09/07/vic-vhm-vre-vpl-ho-vin-lai-dam-quy-2-2026-nang-hang-goi-ten-nhung-dung-bo-qua-ba-lop-game-tai-chinh-phia-sau-con-so-dep/) ·
+[mekongasean — Vicostone đặt mục tiêu lãi năm 2026 thấp nhất trong 10 năm (nền)](https://mekongasean.vn/vicostone-dat-muc-tieu-lai-nam-2026-thap-nhat-trong-10-nam-52719.html)
+
+---
+
+### 2026-09-11 (job `Taylor_20260911_011041`) — **0 QUALIFY mới · 1 AMBIGUOUS mới (PAN) · 3 không-phải-case (YEG, PTB, SKG) · 1 HẠ BẬC: ICG AMBIGUOUS-yếu → NON** · ★ **DGC: UHY ra Ý KIẾN NGOẠI TRỪ trên BCTC SOÁT XÉT BÁN NIÊN 2026 với LÝ DO MỚI (đang phối hợp CQĐT) ⇒ HoSE GIỮ hạn chế giao dịch 03/09 — cổng audit KHÔNG mở được khi vụ án còn mở** · ★ **DGC GDKHQ cổ tức 80% = 14/09 (PHIÊN KẾ TIẾP)** · ★ **TV1: ZaloPay nay CŨNG vào deadband (SpaceX đã từ 07/09) — cả 2 account đều dưới target**
+
+Cửa sổ tin **sau phiên 04/09 → sáng 11/09** (4 phiên: 07, 08, 09, 10/09). Danh mục đang gác **29 mã**
+(13 NH + 16 ngoài NH). **Watchlist TƯƠI** (`active_nav` computed_at **2026-09-10** = đúng phiên cuối)
+⇒ **KHÔNG có cảnh báo quá hạn**.
+
+**Bối cảnh tuần — đi ngang, thanh khoản CẠN, không có phiên sợ hãi nào**: VNINDEX 07/09 **1.821,64
+(−1,70%)** → 08/09 **1.830,44 (+0,48%)** → 09/09 **1.827,12 (−0,18%,** ngoại bán ròng 268 tỷ HOSE) →
+10/09 **1.829,23 (+0,12%,** ngoại **mua ròng 369,3 tỷ**, gom VIC/FPT/SBT; **KL khớp lệnh −18% so phiên
+trước, chỉ ~60% trung bình**). ⇒ tuần này không có cú sốc diện rộng nào để `idio` bóp méo theo cả 2 chiều
+(khác 03/09 và 04/09 đã cảnh báo 2 lượt trước).
+
+**Phần 1 — anomaly_scan** (`--backfill-days 4`, phủ 07→10/09): universe **253 mã** (H:29 / W:242).
+**0 IDIOCRASH · 0 FLOOR2 · 0 VOLSPIKE.** Cờ MỚI duy nhất: **VGR 08/09 CEIL2** (tier W) — `ret +11,4%`
+(VNI +0,5%, idio +10,9%), vol 3,7×, val 2,4 tỷ. Đây là cờ **TĂNG TRẦN, chiều NGƯỢC với fear-buy**, và VGR
+không nằm trong danh mục gác ⇒ **không phải case**, ghi lại cho đủ dấu vết. Cờ gần nhất còn hiệu lực trước
+đó vẫn là PNJ 24/08 (CEIL2).
+
+**Phần 2 — quét RỘNG** `bq_cache/ticker/2026.parquet` (phiên cuối 10/09; chuỗi chỉ số lấy từ
+`ticker='VNINDEX'`, **không** dùng cột mirror — bẫy 08-17): 1.276 mã → **701 mã** đạt sàn thanh khoản
+(`max(Close×Volume)` 2026 ≥ 1 tỷ). IDIOCRASH cứng (ret ≤ −6% ∧ idio ≤ −5% ∧ val ≥ 1 tỷ) → **3 mã**
+(TLP 07/09 **−26,98%**, HTC 09/09 −9,68%, FIR 10/09 −6,86%); nới mềm → thêm **9 mã** (PIA, CTP, SCL, TDP,
+TRC, LLM, MZG, TTF). **Bộ lọc rẻ nhất (ADV3M) loại 7/12 trước khi đọc tin**: TLP 0,22 · HTC 0,07 ·
+FIR 0,96 · CTP 0,84 · LLM 0,66 *(đã loại 09-07 cùng lý do)* · PIA 0,28 · SKG 0,38 tỷ/phiên. **5 mã còn
+lại đều trượt ở bước "có ở vùng sợ hãi không", không cần tới tin:**
+
+| Mã | Số liệu (10/09) | Kết luận |
+|---|---|---|
+| **SCL** (Sông Đà Cao Cường — **VỊ THẾ ĐANG GIỮ**, cờ mềm −5,96% ngày 09/09) | **26.500** · dd52 chỉ **−7,0%** nhưng **+71,3% TRÊN đáy 52 tuần** · **PB 2,12 · PE 10,7** · CF_OA_P0 56,7 tỷ ≥ NP 38,4 tỷ · IntCov 9,35 · FS 8 · ADV3M 2,92 tỷ | **Không phải case fear-buy** — đây là **chốt lời trên một mã đang RẤT mạnh** (+71% trên đáy), PB 2,12 = không có sàn định giá. Lõi khoẻ, 0 tin trong cửa sổ (WebSearch: không có công bố nào). **Là vị thế trong sổ ⇒ thuộc khung risk/sizing V2.4, không thuộc sleeve này** |
+| **TDP** (Thuận Đức, cờ mềm 08/09 −4,62%) | 33.150 · dd52 **−7,1%**, +28,0% trên đáy 52T · **PB 2,43 · PE 23,2** · IntCov 1,95 | **Không phải case** — §2#5/§2.5#4: PB 2,43 · PE 23,2 không có sàn định giá; không ở vùng sợ hãi |
+| **TRC** (Cao su Tây Ninh, cờ mềm 09/09 −4,20%) | 83.100 · dd52 **−5,9%**, +29,4% trên đáy 52T · PB 1,11 · PE 8,7 · CF_OA_P0 **−17,7 tỷ** | **Không phải case** — mã gần đỉnh, không ở vùng sợ hãi |
+| **MZG** (Miza, cờ mềm 10/09 −4,02%) | 11.950 · dd52 **−9,1%**, **+32,8% trên đáy 52T** · PB 0,98 · PE 9,0 · IntCov 2,13 | **Không phải case** — không ở vùng sợ hãi. (MZG có trong phễu nhưng **golden_floor=N** ⇒ không FULLY_QUALIFIED) |
+| **TTF** (Gỗ Trường Thành, cờ mềm 08/09 −5,42%) | 1.560 · **PB 5,66 · NP_P0 −209,7 tỷ · IntCov −12,05 · Debt_Eq 22,04** | **Đã kết luận trước đây** — echo: lỗ nặng, không trả nổi lãi, PB 5,66. Không đổi |
+
+**Phần 3 — WebSearch tin theo BỘ TỪ KHOÁ NHÓM (11 truy vấn + 1 WebFetch):**
+- **Nhóm chung**: **0 sự kiện MỚI** liên quan 29 mã gác trong cửa sổ. Mọi kết quả là tin nền 05–06/2026 đã
+  ghi các lượt trước (PC1, TV3, cụm đại án ngành điện) hoặc danh sách **cắt margin quý III/2026** (59 mã,
+  công bố 05/07 — **đã cũ**; DGC/DRH/VMD trong đó vì trạng thái *hạn chế giao dịch*). **BCG và TCD nhận
+  quyết định HUỶ NIÊM YẾT bắt buộc trên HOSE** — cả 2 **không** nằm trong danh mục gác, không phải case
+  (đình chỉ giao dịch dài trước đó = §2 loại thẳng).
+- **Nhóm ngân hàng (13 mã)** — §4.2 `bank_tailrisk_insurance_design_20260814.md`: **0 sự kiện.** Không
+  kiểm soát đặc biệt / chuyển giao bắt buộc mới / rút tiền hàng loạt / khởi tố lãnh đạo NH niêm yết / cho
+  vay sân sau / thao túng cp NH. Kết quả chỉ trả nền 2023–2025.
+- **Nhóm BĐS đầu ngành/hạ tầng (VHM, VRE — và VPI ở phía mua)** — §6
+  `vic_family_credit_concentration_20260818.md`: **0 sự kiện tín dụng XẤU mới.** Không chậm/vỡ nợ TPDN,
+  không hạ bậc tín nhiệm, không siết TSĐB, không call margin/giải chấp cổ đông lớn. Dữ kiện DƯƠNG: phiên
+  10/09 khối ngoại **mua ròng VIC** trong nhóm dẫn đầu.
+- **Nhóm ngoài NH (16 mã)**: tai nạn/sự cố nhà máy, thu hồi sản phẩm, mất giấy phép/mỏ, kê biên tài sản,
+  tranh chấp lãnh đạo → **0 sự kiện.**
+
+**Phần 4 — PHÍA MUA: 0 LỆNH MUA TRÊN MỌI KÊNH cho phiên 11/09 ⇒ KHÔNG có luận điểm mua nào bị gãy.**
+Kiểm **cả ba** kênh, không suy từ một kênh:
+
+| Kênh mua | Trạng thái cho phiên 11/09 | Bằng chứng |
+|---|---|---|
+| **V2.4 BAL** | `orders` = **0** cả 2 account. **`deferred_orders` nay CHỈ còn VPI** (`signal_hold` tới **16/09**) — **VIC đã RƠI khỏi danh sách deferred** so với plan 07/09 (khi đó có cả VIC + VPI) ⇒ tín hiệu BAL cho VIC đã hết, **không phải được giải phóng để mua** | `orders`/`deferred_orders` trong `plan_{SpaceX,ZaloPay}_2026-09-11.json` vs `plan_SpaceX_2026-09-07.json` |
+| **V2.4 LAG** | **0 mã đến hạn**, 0 upcoming, **cổng lịch PASS** (`signal_date 2026-09-10 → plan_date 2026-09-11`) | `mike/bin/filter_lag_entry_window.py --plan-date 2026-09-11 --json` |
+| **TV1 DISCRETIONARY_SPECIAL** (cron 20:00 + 23:30) | **SKIP cả 2 account — nhưng nay CẢ HAI đều ở DEADBAND, không còn "đã đạt target"**: SpaceX thiếu 100cp (2.000.000đ = **0,20%** active_nav) · **ZaloPay thiếu 100cp (2.000.000đ = 0,38%** active_nav) — ngưỡng top-up 0,50% | `history_noninject` trong `state_TV1_{SpaceX,ZaloPay}.json`, at 2026-09-10T23:30 |
+
+⚠️ **Điểm PHẢI để mắt (đổi so với 07/09)**: **ZaloPay đã chuyển từ "đã đạt target" sang deadband** (TV1
+20.200 → **20.000**). Nay **cả 2 account đều dưới mục tiêu ĐỘNG**, và ZaloPay ở **0,38% / 0,50%** = gần
+ngưỡng trip hơn SpaceX (0,20%). Cảnh báo 08-31/09-04/09-07 **vẫn nguyên và nay sát hơn một bậc**: giá giảm
+⇒ số cp mục tiêu TĂNG ⇒ hệ tự mua thêm vào chỗ yếu; 2 điều kiện `hard_expiry` đều `manual_only: true`
+⇒ **lá chắn là THỦ CÔNG**. **ZaloPay chỉ cần ~1 nhịp giảm nữa là trip lệnh mua tự động mà không ai duyệt.**
+- **VPI**: 0 tin xấu trong cửa sổ. Nền 08-24 giữ nguyên (dư nợ TPDN >2.584 tỷ vs tiền mặt ~143 tỷ cuối
+  Q1/2026, ≥8 lô dùng CHÍNH cp VPI của lãnh đạo/bên liên quan làm TSĐB) — **nền, không phải sự kiện tuần
+  này.** ⇒ **Không cần hành động phía mua.**
+
+**Phần 5 — read-through case đang theo dõi**
+
+- ★★ **DGC** (§6, AMBIGUOUS-nghiêng-constructive · ZaloPay giữ 10.000cp, `excluded=True`) — **mục quan
+  trọng nhất lượt này, và là SỰ KIỆN THẬT chứ không phải diễn biến giá**: **47.000 (10/09, +0,86%)**,
+  **+30,6% trên đáy 52 tuần**, trên MA50 (43.411 → vsMA50 **+8,3%**), PE 8,3 · PB 1,10 · DY 6,4%,
+  ADV3M 32,8 tỷ. **HAI dữ kiện mới:**
+  1. **Ý kiến ngoại trừ ĐÃ LẶP LẠI trên BCTC SOÁT XÉT BÁN NIÊN 2026, với LÝ DO MỚI** (WebFetch bài
+     nguoiquansat 04/09): **UHY ra ý kiến ngoại trừ** vì *"công ty và các cá nhân liên quan vẫn đang phối
+     hợp, cung cấp hồ sơ, tài liệu cho Cơ quan Cảnh sát điều tra"*; **HoSE ngày 03/09 GIỮ hạn chế giao
+     dịch + tái áp cảnh báo** (trước đó 20/08 đã gỡ MỘT diện cảnh báo sau khi họp ĐHĐCĐ, hiệu lực 24/08).
+     **Hệ quả cho khung, ghi rõ để không đọc sai lượt sau**: cổng xác nhận của DGC ghi từ 07-23 là *"gỡ ý
+     kiến ngoại trừ 950,9 tỷ hàng tồn kho, chỉ có thể qua kỳ kiểm toán sau"* — kỳ soát xét bán niên nay
+     **ĐÃ QUA và KHÔNG mở được cổng**, còn sinh thêm một căn cứ ngoại trừ **gắn trực tiếp vào vụ án đang
+     mở**. ⇒ **cổng audit của DGC KHÔNG thể đóng trước khi vụ án kết thúc** — đây là một cổng **dài hơn
+     đáng kể** so với cách ghi cũ ("kỳ kiểm toán sau"). **KHÔNG đổi phân loại** (luận điểm asset-backed
+     deep value + dòng tiền thật của bản RE-DO 07-23 không bị dữ kiện này chạm tới), nhưng **thời gian chờ
+     phải đọc lại là "theo vụ án", không phải "theo kỳ kiểm toán"**.
+  2. **GDKHQ cổ tức tiền mặt 80% = 14/09/2026 — ĐÚNG PHIÊN KẾ TIẾP** (record 15/09, thanh toán dự kiến
+     25/09; 8.000đ/cp = 5.000đ còn lại của 2025 + 3.000đ tạm ứng 2026). **Hệ quả sổ ZaloPay: giá tham chiếu
+     điều chỉnh ~8.000đ ngay 14/09 + ~80.000.000đ tiền về ~25/09.** ⚠️ **Winston/Mafee cần xác nhận
+     corp-action đã gắn TRƯỚC phiên 14/09** — đã nêu ở lượt 09-07, nay **chỉ còn 1 phiên**; đây đúng loại
+     việc đã sai một lần với TV1. Taylor chỉ báo, không tự sửa.
+- **TV1** (§4/§14, **QUALIFY** — SpaceX 2.300cp + ZaloPay 1.200cp): **20.000 (10/09, −0,50%)**, PE ~3,5 ·
+  PB ~1,06, dưới MA50 (20.624), dd52 −49,2% / +3,1% trên đáy 52T, ADV3M 0,75 tỷ. **Hai cổng vẫn treo, 0
+  công bố trong cửa sổ** (WebSearch: `finance.vietstock.vn/tv1` không có mục cổ tức nào): (a) cổ tức 15%
+  **quá hạn ~17 phiên** kể từ ngày thanh toán công bố 14/08; (b) kết quả lấy ý kiến bằng văn bản chọn đơn
+  vị kiểm toán (thực hiện 10/08) **quá hạn 31 ngày**. **Không đổi QUALIFY.** Xem cảnh báo deadband ở Phần 4.
+- **PNJ** (§7, AMBIGUOUS): **38.200 (10/09, +0,66%)**, dưới MA50 (40.920, −6,6%), **+24,2% trên đáy 52T**
+  — đã trả lại thêm so với 40.050 lượt trước. **0 tin mới trong cửa sổ.** Không đổi; không nằm trong kênh
+  mua nào. Hệ quả thực dụng 08-28 vẫn đứng: biên an toàn chờ cổng BCTC Q3/2026 (~cuối 10/2026) mỏng.
+- **VCS** (AMBIGUOUS 09-04): **31.600 (10/09, −0,63%)**, **+1,6% trên đáy 52 tuần**, PB 1,00 · PE 8,8 ·
+  DY 12,0%, dưới MA50 (33.334). **0 tin mới.** Kiểm lại chất lượng dòng tiền trên cơ sở **4 quý luỹ kế**
+  (đúng §10.3, không đọc 1 quý): CF_OA P0..P3 = **206 / 196 / 216 / −82 tỷ = 536 tỷ** vs NP **130 / 123 /
+  185 / 135 = 573 tỷ** ⇒ **CF_OA/NP ≈ 0,94×** — sát ngưỡng, chưa vỡ. Cổng nhị phân **Q3/2026 (~cuối
+  10/2026)** không đổi. ADV3M 1,37 tỷ.
+- **TV4** (AMBIGUOUS): **13.400 (−1,47%)**, PE ~6,1 · PB ~1,10, dd52 −19,8%. Cổng **soát xét bán niên
+  (hạn ~30/08) vẫn chưa công bố ⇒ quá hạn sang tuần thứ 4.** ADV3M **0,12 tỷ** vẫn chặn mạnh hơn mọi
+  phân loại.
+- ★ **ICG — HẠ BẬC: AMBIGUOUS-yếu → NON** (áp ĐÚNG tiêu chí đã tự cam kết ở lượt 09-07: *"nếu tuần này
+  vẫn im, đề xuất hạ về NON ở lượt quét tuần kế"*): **10.000 (10/09, 0,00%) = ĐÚNG đáy 52 tuần**
+  (dd52 **−43,7%**, off52low **+0,0%**), còn cách MA50 (13.800) **−27,5%**, PB ~0,60 · PE ~7,1, ADV3M
+  **0,22 tỷ**. **WebSearch lượt này: 0 công bố nào** — cả 2 cổng vẫn treo: giải trình HNX chuỗi 4 phiên
+  sàn 14→19/08 **quá hạn tuần thứ 6**, soát xét bán niên **quá hạn tuần thứ 4**. Căn cứ hạ bậc, không phải
+  cảm tính: (1) **im lặng trước yêu cầu giải trình của SGDCK suốt 6 tuần** là chữ ký quản trị, không phải
+  chậm hành chính — §2 xếp vào nhóm "không đủ điều kiện" vì không có cổng nào còn khả năng đóng; (2) giá
+  **tiếp tục về đúng đáy 52 tuần** trong tuần thị trường đi ngang ⇒ không phải nỗi sợ diện rộng; (3)
+  **ADV 0,22 tỷ/phiên** = không đầu tư được ở quy mô 2 account, tức kể cả có đúng cũng vô nghĩa. ⇒ **NON.**
+  Không cần theo tiếp; nếu sau này ICG công bố soát xét SẠCH thì mở lại từ đầu.
+- **OGC** (NON kinh điển §2) · **TIN, TSB, MVN, CRE, VSC, BNA, SSB, VNE** (đã "không phải case"): 0 thay đổi.
+
+**Phần 6 — PHỄU CANDIDATE HỆ THỐNG (`--mode weekly`), 21 mã FULLY_QUALIFIED → 17 đã có kết luận, 4 mã MỚI**
+
+Phễu tuần này in **21 mã FULLY_QUALIFIED**. **17/21 đã có kết luận trong sổ**: VSC (không-phải-case 09-04) ·
+NTL (không-phải-case 08-21) · VCS (AMBIGUOUS 09-04) · và 14 mã đã phân giải vào **3 nguyên nhân NHÓM** ở
+lượt 09-04 (BĐS-lãi suất: SZC, HDG, DTD, ITC, HPX · xuất khẩu-thuế 301: ANV, DRC, TNG, VGS, HT1, LCG ·
+ngân hàng đang giữ: SHB, VIB, TPB). **0 dữ kiện nào trong cửa sổ đổi các kết luận đó.**
+
+**4 mã CHƯA từng vào sổ — DD tin + áp §2.5 (`grep` xác nhận: 0 lần xuất hiện trước trong file này):**
+
+| Mã | Số liệu (10/09, BQ cache) | Nguyên nhân washout (verify bằng tin) | Kết luận |
+|---|---|---|---|
+| ★ **PAN** (Tập đoàn PAN, HOSE, ICB 3577, rating 3, golden_floor Y) | **18.500 = ĐÚNG đáy 52 tuần** (dd52 −29,1% Close / −46,4% Price, off52low **+0,0%**), dưới MA50 (20.746, −10,8%) · **PB 0,51** (BVPS **36.274** — giá bằng **nửa** giá trị sổ sách) · PE 3,9 · **DY 16,2%** · Debt_Eq 0,83 · **IntCov 8,11** · ROE_Min3Y **8,8%** · FS 5 · **ADV3M 8,21 tỷ** (đầu tư được ở quy mô 2 account, khác hẳn TV1/VCS) · **CF_OA 4 quý = −2.396 / +1.136 / +3.478 / +3.342 = +5.560 tỷ** vs **NP 4 quý = 182 / 585 / 270 / 156 = 1.193 tỷ ⇒ CF_OA/NP ≈ 4,7×** | Doanh thu 6T/2026 **−9%** về 7.386 tỷ, **dòng tiền KD 6T âm >600 tỷ**, **tồn kho +1.077 tỷ**; LN được đẩy bởi **thoái vốn Bibica** (Q1 công ty mẹ 1.094,5 tỷ = cao nhất lịch sử, và là **nguồn tài trợ cho cổ tức tiền 30%**); Q2 doanh thu −10% nhưng **lãi gộp vẫn +2,4%**. Xuất khẩu: **tôm sang Mỹ 8T −13,4%**; **Sao Ta (FMC, công ty con) tốn ~200 tỷ thuế đối ứng**, thuế CBPG sơ bộ kỳ 20 **10,76%** (08/05), + **12,5% Điều 301** từ 24/07. **0 sự kiện pháp lý/quản trị nào trong cửa sổ** | **AMBIGUOUS** — mã thứ 2 (sau VCS) qua được cả §2.5#1–#4 **trên số**, và **mạnh hơn VCS ở 2 trục**: sàn định giá **PB 0,51** (vs 1,00) + **ADV 8,21 tỷ** (vs 1,37). Điều quyết định là đọc CF theo **4 quý luỹ kế chứ không 1 quý** (§10.3): CF_OA_P0 **−2.396 tỷ** nhìn riêng là "gạch §2#3", nhưng luỹ kế **+5.560 tỷ = 4,7× NP** ⇒ P0 âm là **vốn lưu động / tích tồn kho**, không phải lõi hỏng; chữ ký cũng NGƯỢC VSC (ở đây doanh thu giảm nhẹ mà **lãi gộp TĂNG**, tức biên cải thiện). **BA caveat bắt buộc đọc kèm, không được bỏ:** (1) **PE 3,9 và DY 16,2% đều bị THỔI bởi khoản MỘT LẦN** (thoái vốn Bibica) — bỏ Q1 ra, LN thường 3 quý ≈ 608 tỷ ⇒ **PE thực ≈ 5,7**, và **cổ tức 30% tiền KHÔNG tái lập** vì nguồn là tiền bán Bibica, không phải dòng tiền thường (đúng chiều NGƯỢC bài học DGC, nơi 3.000 tỷ cổ tức là tiền thật của hoạt động); (2) **discriminator trung tâm §2.5 CHƯA thoả** — thuế 12,5% + CBPG tôm là **bậc chi phí CẤU TRÚC**, không phải pha chu kỳ sẽ tự quay lại (cùng lý do đã loại DRC/TNG 09-04); (3) **góc SOTP CÓ THẬT nhưng CHƯA định lượng được ở lượt này**: PAN Farm nắm **80,05% NSC** (Vinaseed, equity 1.649 tỷ), cộng sở hữu **FMC** + *"khối tài sản ngầm hàng triệu m² đất"* (ĐHĐCĐ 2026) — đây là trục ĐÚNG cần đo (bài học TV1), nhưng cần số cổ phần sở hữu chính xác để tính; **không tự suy ra con số**. **CỔNG XÁC NHẬN (nhị phân, 1 câu hỏi): BCTC Q3/2026 (~cuối 10/2026) — CF_OA có đảo về DƯƠNG khi tồn kho được giải phóng, và LN THƯỜNG (bỏ thoái vốn) có giữ được không?** Việc còn thiếu để nâng/hạ: **SOTP định lượng NSC+FMC+đất vs vốn hoá ~4.650 tỷ** (suy từ PE×NP 4 quý, **không phải số công bố** — cần verify) |
+| **PTB** (Phú Tài, HOSE, ICB 1733, rating 3) | **30.650 = ĐÚNG đáy 52 tuần** (dd52 −31,0%), PB 0,83 · PE 5,7 · DY 4,9% · IntCov 7,84 · Debt_Eq 0,81 · ROE_Min3Y 10,1% · FS 5 · ADV3M 2,56 tỷ. **CF_OA 4 quý = 518 / −136 / −29 / −108 = +245 tỷ** vs **NP 4 quý = 127 / 150 / 123 / 136 = 536 tỷ ⇒ CF_OA/NP ≈ 0,46×** | **Mỹ áp thuế Mục 232 với đồ gỗ 30–50% từ 01/2026** (nặng hơn hẳn mức 12,5% Điều 301 của cụm 09-04); VNDIRECT dự báo LN ròng 2026 **−14%+**; rủi ro **Mỹ mở rộng thuế sang mảng ĐÁ** sau điều tra. Công ty "đặt cược vào mảng đá" để bù gỗ | **Không phải case** — **gạch bằng 2 lý do độc lập**, không phải một: (1) **§2#3/§10.3 trên cơ sở 4 QUÝ: CF_OA chỉ bằng 0,46× NP** (3/4 quý âm) — lợi nhuận sổ sách không được dòng tiền xác nhận, đúng chữ ký cần loại; (2) discriminator §2.5: **thuế 30–50% là bậc chi phí cấu trúc**, và mảng bù (đá) **đang bị điều tra để áp thuế tiếp** ⇒ không có "chu kỳ sẽ quay lại". PB 0,83 rẻ nhưng đây là **mã gần nhất trượt** (nearest-miss) chứ vẫn là trượt — nếu Q3/2026 CF_OA đảo dương bền 2 quý thì mở lại |
+| **YEG** (Tập đoàn Yeah1, HOSE, ICB 5553, rating 3) | **7.170 = ĐÚNG đáy 52 tuần** (dd52 −41,7%), PB 0,68 nhưng **PE 32,4** · **DY 0%** · ROE_Min3Y **2,4%** · **CF_OA_P0 9,5 tỷ < NP_P0 14,3 tỷ** · IntCov 2,94 · ADV3M 5,81 tỷ | **Q2/2026: doanh thu −32,3%, LNST −56,7% về 15,6 tỷ; LÃI GỘP −74%** (13,2 tỷ vs 50,9 tỷ) · 6T doanh thu 519,4 tỷ **−23,3%** · Q1 LN −36,6% **vì không còn thu nhập tài chính từ thoái vốn công ty con** | **Không phải case** — **§2.5 discriminator gốc: lõi xấu đi THẬT** (lãi gộp −74% là biên bị bóp ở tầng vận hành, không phải một khoản bất thường), cộng **§2#5 không có sàn định giá** (PE 32,4, DY 0%) và **§2#3 CF_OA < NP**. PB 0,68 rẻ nhưng doanh nghiệp truyền thông **không có tài sản lõi tách rời định giá được** (khác hẳn TV1/DGC — đã kiểm đúng góc này theo việc 3). Cùng logic đã loại NTL/VSC/VNE: **giá rớt vì giá trị giảm thật** |
+| **SKG** (Superdong Kiên Giang, HOSE, ICB 5759, rating 3) | 7.590 (dd52 −26,3%, **+0,5% trên đáy 52T**) · PB 0,55 · PE 10,2 · DY 6,6% · Debt_Eq **0,06** · CF_OA_P0 46,2 tỷ ≥ NP 25,9 tỷ · **ADV3M 0,38 tỷ** | Không tìm được sự kiện riêng lẻ nào trong cửa sổ | **Không phải case — loại ở BỘ LỌC RẺ NHẤT trước khi cần tới tin**: **ADV3M 0,38 tỷ/phiên** = không đầu tư được ở quy mô 2 account (cùng lý do đã loại TSB 09-04, TV4, ICG, và 7 mã ở Phần 2). Ghi lại rằng **bảng cân đối rất sạch** (Debt_Eq 0,06, CF_OA ≥ NP, PB 0,55) để lượt sau không phải đo lại — nếu thanh khoản cải thiện lên ≥1,5 tỷ/phiên thì đáng mở DD đầy đủ |
+
+⚠️ **CAVEAT SỐ LIỆU CỦA PHỄU — VẪN CHƯA ĐƯỢC GIẢI QUYẾT** (escalate lần đầu 09-04, nhắc lại, **không suy
+diễn nguyên nhân**): `washout`/`dd52` phễu in ra vẫn không khớp bản đo lại trên `bq_cache/ticker/2026.parquet`
+(cửa sổ 370 ngày tới 10/09). Đo lượt này — phễu vs (Close / Price): **SHB** −34,5% vs (−29,9 / −30,9) ·
+**VIB** −28,9% vs (**−14,7** / −26,1) · **TPB** −26,4% vs (−22,5 / −22,5) · **PAN** −30,8%¹ vs (−29,1 /
+**−46,4**). Khoảng cách **thu hẹp khi so với chuỗi `Price`** ở 3 mã ngân hàng (≤4pp) nhưng **đảo chiều ở
+PAN** (phễu gần `Close`, lệch 17pp so `Price`) ⇒ **không phải một lệch hệ thống một chiều**; đã đọc bằng
+chứng tới đây và **dừng, chưa xác định được nguyên nhân**. Hệ quả nếu phễu overstate: **tuyển thừa** mã vào
+cohort "fear". Không đổi kết luận lượt này vì cả 4 mã đều được xử bằng lý do KHÁC.
+¹ *phễu in `dd52=-20.3%` cho PAN ở cột dd52 và `washout=-30.8%`; số so ở đây là washout.*
+
+**Tổng kết lượt**: **29 mã đang gác** rà qua · 253 mã (anomaly_scan ×4 phiên) + **701 mã** (quét rộng) +
+**21 mã phễu FULLY_QUALIFIED** (17 đã có kết luận + 4 DD mới) + **11 truy vấn tin + 1 WebFetch** ·
+**0 QUALIFY mới** · **1 AMBIGUOUS mới (PAN, có cổng nhị phân Q3/2026 + 1 việc SOTP còn thiếu)** ·
+**3 không-phải-case (YEG, PTB, SKG)** · **1 HẠ BẬC (ICG → NON)** · 9 echo · **watchlist KHÔNG quá hạn**
+(computed_at 2026-09-10 = đúng phiên cuối) · **0 lệnh mua trên cả 3 kênh (BAL/LAG/TV1-discretionary) cho
+phiên 11/09 ⇒ KHÔNG có luận điểm mua nào bị gãy.**
+**Mốc phải theo, gần → xa: ★★ DGC GDKHQ 14/09 (PHIÊN KẾ TIẾP — corp-action 8.000đ/cp phải gắn TRƯỚC đó,
+ZaloPay 10.000cp) + record 15/09 + trả 25/09 → ⚠️ TV1 CẢ 2 account ở deadband, ZaloPay 0,38%/0,50% (lá
+chắn thủ công) → checkpoint BAL paper-track 16/09 (nay chỉ còn VPI) → FTSE giải ngân đợt 1 21/09 → TV4
+soát xét bán niên quá hạn tuần thứ 4 → TV1 cổ tức (quá hạn ~17 phiên) + chọn kiểm toán (quá hạn 31 ngày)
+→ PNJ Q3 + VCS Q3 + ★ PAN Q3 (~cuối 10/2026) → DGC gỡ ngoại trừ: nay đọc là "THEO VỤ ÁN", không phải
+"kỳ kiểm toán sau".**
+
+Nguồn lượt này:
+[nhandan — Chứng khoán ngày 10/9: VN-Index tăng nhẹ 2,11 điểm, thanh khoản giảm](https://nhandan.vn/infographic-chung-khoan-ngay-109-vn-index-tang-nhe-211-diem-thanh-khoan-thi-truong-giam-post987713.html) ·
+[vietnamplus — Chứng khoán ngày 10/9: VN-Index hồi phục cuối phiên, khối ngoại mua ròng trở lại](https://www.vietnamplus.vn/chung-khoan-ngay-109-vn-index-hoi-phuc-cuoi-phien-khoi-ngoai-mua-rong-tro-lai-post1135382.vnp)
+· [investing/Vietstock Daily 10/09/2026 — Giằng co tiếp diễn](https://vn.investing.com/news/stock-market-news/vietstock-daily-10092026-giang-co-tiep-dien-2708886) ·
+[nguoiquansat — HoSE tiếp tục "tuýt còi" DGC (WebFetch: UHY ngoại trừ BCTC soát xét bán niên 2026 vì đang phối hợp CQĐT; HoSE giữ hạn chế GD 03/09)](https://nguoiquansat.vn/hose-tiep-tuc-tuyt-coi-dgc-co-phieu-hoa-chat-duc-giang-nhan-phan-quyet-moi-314191.html) ·
+[mekongasean — Hóa chất Đức Giang chốt ngày trả cổ tức tiền mặt 80% (GDKHQ 14/09, record 15/09, trả 25/09)](https://mekongasean.vn/hoa-chat-duc-giang-chot-ngay-tra-co-tuc-tien-mat-ty-le-80-59204.html) ·
+[vnbusiness — Công ty Phú Tài (PTB) đối mặt năm 2026 nhiều thách thức khi xuất khẩu suy yếu (thuế Mục 232 đồ gỗ 30–50% từ 01/2026)](https://vnbusiness.vn/cong-ty-phu-tai-ptb-doi-mat-nam-2026-nhieu-thach-thuc-khi-xuat-khau-suy-yeu.html) ·
+[thoibaotaichinhvietnam — Doanh thu giảm mạnh, lợi nhuận Yeah1 "bốc hơi" hơn một nửa trong Q2/2026 (lãi gộp −74%)](https://thoibaotaichinhvietnam.vn/doanh-thu-giam-manh-loi-nhuan-cua-yeah1-boc-hoi-hon-mot-nua-trong-quy-ii-2026-201873.html) ·
+[mekongasean — Không còn khoản thu từ thoái vốn, Yeah1 báo lãi Q1/2026 giảm 36%](https://mekongasean.vn/khong-con-khoan-thu-tu-thoai-von-yeah1-bao-lai-quy-12026-54752.html) ·
+[thuongtruong — PAN Group dòng tiền kinh doanh âm, tồn kho tăng hơn 1.077 tỷ](https://thuongtruong.com.vn/news/pan-group-pan-dong-tien-kinh-doanh-am-ton-kho-tang-hon-1077-ty-dong-167610.html) ·
+[kinhtetieudung — PAN báo lãi hơn 1.000 tỷ sau nửa đầu năm, dòng tiền kinh doanh vẫn chịu áp lực](https://kinhtetieudung.vn/pan-bao-lai-hon-1000-ty-dong-sau-nua-dau-nam-dong-tien-kinh-doanh-van-chiu-ap-luc-a29851.html) ·
+[doanhnhan.baophapluat — ĐHĐCĐ PAN Group 2026: "thay máu" Vinaseed, thu 500 tỷ từ Bibica và khối tài sản ngầm hàng triệu m² đất](https://doanhnhan.baophapluat.vn/dhdcd-pan-group-2026-thay-mau-vinaseed-thu-500-ty-tu-bibica-va-khoi-tai-san-ngam-hang-trieu-m2-dat.html) ·
+[thepangroup — PAN Farm muốn tăng sở hữu Vinaseed lên hơn 80% (80,05%)](https://thepangroup.vn/pan-farm-muon-tang-so-huu-vinaseed-len-hon-80--1785.htm) ·
+[dantri — Xuất khẩu tôm, cá tra sang Mỹ giảm sâu (tôm 8T −13,4%, thuế bổ sung 12,5% từ 24/7)](https://dantri.com.vn/kinh-doanh/xuat-khau-tom-ca-tra-sang-my-giam-sau-thuy-san-viet-tim-loi-thoat-moi-20260904104224092.htm) ·
+[nguoinuoitom — Sao Ta: tốn gần 200 tỷ đồng thuế đối ứng](https://nguoinuoitom.vn/sao-ta-ton-gan-200-ty-dong-thue-doi-ung/) ·
+[stockbiz — Thuế CBPG tôm sang Mỹ: Sao Ta sơ bộ kỳ 20 là 10,76%](https://stockbiz.vn/tin-tuc/thue-chong-ban-pha-gia-tom-sang-my-132-doanh-nghiep-ganh-muc-kich-khung-hon-25-sao-ta-va-stapimex-chiu-thue-bao-nhieu/39937697) ·
+[vietstock — Danh sách chứng khoán bị cắt margin trên HOSE thu hẹp còn 59 mã (nền, 05/07; BCG+TCD huỷ niêm yết)](https://vietstock.vn/2026/07/danh-sach-chung-khoan-bi-cat-margin-tren-hose-thu-hep-con-59-ma-830-1463350.htm)
+
+---
+
+### 2026-09-14 — QUÉT SÁNG THỨ HAI (job `Taylor_20260914_010002`, mục đích: BẢO VỆ PHÍA MUA trước 09:00) — **0 QUALIFY · 0 case mới · 5 không-phải-case (HBC, HHS, CII, VCI, CEO) · 29 mã gác rà qua** · ★★ **CÓ 1 LỆNH MUA trên kênh discretionary: ZaloPay TV1 200cp @19.900 — deadband ĐÃ TRIP, nhưng KHÔNG phải do giá: do cổ tức DGC 80tr (mã BỊ LOẠI) được cộng vào active_nav** · ★ **TV1: thua phúc thẩm 17,6 tỷ + kiểm toán An Việt NHẤN MẠNH khoản nợ 127,6 tỷ với 2 cá nhân (tin 08/09, lượt 09-11 bỏ sót)** · ★ **Đại án ngành điện mở rộng lên PHÍA KHÁCH HÀNG: khởi tố cựu Chủ tịch EVNNPT (13/09) — vẫn chỉ cá nhân, không pháp nhân**
+
+Cửa sổ tin **sau phiên 11/09 → sáng 14/09** (1 phiên: 11/09). Danh mục đang gác **29 mã** (13 NH + 16 ngoài NH).
+**Watchlist TƯƠI** (`active_nav` computed_at **2026-09-11** = phiên cuối) ⇒ **KHÔNG có cảnh báo quá hạn**.
+
+**Bối cảnh phiên 11/09 — phiên giảm diện rộng, không phải sự kiện riêng lẻ**: VNINDEX **1.795,21 (−1,86%,
+−34đ)**, mất mốc 1.800, mạnh nhất gần 1 tháng; 28/30 VN30 giảm; ngoại **bán ròng ~867 tỷ HOSE** (STB 229 tỷ,
+MBB/VPB 130–140 tỷ); tuần 07–11/09 **−3,12%**. Nhóm chứng khoán giảm đồng loạt (VCI −5,87 · VND −4,42 · VIX
+−3,99 · SSI −3,33%). ⚠️ Với mret −1,86%, `idio` bị kéo lên ⇒ mã nào trip IDIOCRASH là riêng lẻ thật; mã giảm
+4–6% mà không trip = beta nhóm.
+
+**Phần 1 — anomaly_scan** (`--backfill-days 1`, phiên 11/09): universe **253 mã** (H:29 / W:242). **0 IDIOCRASH ·
+0 FLOOR2 · 0 CEIL2 · 0 VOLSPIKE.** Cờ gần nhất vẫn là VGR 08/09 (CEIL2).
+Trong 29 mã gác, mã giảm sâu nhất là **VND −4,42% · VIX −3,99%** (idio ≈ −2,1..−2,6%, beta nhóm chứng khoán)
+— không mã nào đạt ngưỡng.
+
+**Phần 2 — quét RỘNG** `bq_cache/ticker/2026.parquet` (phiên 11/09, chỉ số từ `ticker='VNINDEX'`):
+**627 mã** qua sàn thanh khoản. IDIOCRASH cứng → **17 mã**, **14/17 loại ở ADV3M <1 tỷ** (ACM, BPC, CCC, FID,
+HHG, ILC, MKV, ONE, PLP, PVE, SGT *(đã NON 08-21)*, TCD *(huỷ niêm yết, 09-11)*, VKC, VMC); 3 mã còn lại
+**không ở vùng sợ hãi**: DST (+67,5% trên đáy 52T, PE 78) · HSL (+100% trên đáy, PE 118; đang thay HĐQT) ·
+SHN (+94% trên đáy, PE âm). Nới mềm (ret ≤ −4 ∧ idio ≤ −3,5) có thanh khoản:
+
+| Mã | Số liệu (11/09) | Kết luận |
+|---|---|---|
+| **HBC** (Hoà Bình, ADV3M 2,87 tỷ) | 3.500 = **đúng đáy 52T** (dd52 −47%) · PB 0,60 · **Debt_Eq 7,37 · IntCov 1,52** | **Không phải case** — §2.5#2 sống sót qua đáy FAIL (đòn bẩy 7,4×); cùng họ VNE/PVX |
+| **HHS** (Hoàng Huy, ADV3M 11,5 tỷ) | 10.000, +6,4% trên đáy · **PE 196** · CF_OA_P0 −1.359 tỷ | **Không phải case** — §2#5 không có sàn LN, CF_OA âm lớn |
+| **CII** (ADV3M 144 tỷ) | 13.250, +4,7% trên đáy · **PE 81 · Debt_Eq 2,36 · CF_OA_P0 −717 tỷ · FS 1** | **Không phải case** — §2#3/§2#4 |
+| **CEO** (ADV3M 75 tỷ) | 11.900 · PE 37 · CF_OA_P0 −1.270 tỷ · FS 1 | **Không phải case** — §2#3/§2#5 |
+| **VCI** (Vietcap, ADV3M 198 tỷ) | 20.050, +8,7% trên đáy · PB 1,35 · PE 15,9 | **Không phải case** — beta nhóm CK (cả nhóm −3..−6%) + quỹ Yuanta thoái hết VCI (dòng vốn, không phải sự kiện lõi). Không ở vùng sợ hãi |
+
+**Phần 3 — WebSearch theo BỘ TỪ KHOÁ NHÓM (12 truy vấn + 5 WebFetch):**
+- **Chung**: **1 sự kiện liên quan mã đang giữ, đọc kỹ ở Phần 5 (TV1)**. HOSE cập nhật **72 mã cắt margin
+  tháng 9** (10/09) — **0/29 mã gác nằm trong đó** ngoài DGC (đã biết, hạn chế GD). 3 DN bị phạt CBTT 340tr —
+  không mã gác.
+- **Ngân hàng (13 mã)**: **0 sự kiện rủi ro.** Corp-action (nền, không phải trigger): **VPB chốt quyền cổ tức
+  CỔ PHIẾU 26,04%, record 25/09** (vốn lên ~100.000 tỷ) · **TPB duyệt tăng vốn lên 31.901 tỷ**. ⇒ Winston/Mafee
+  gắn corp-action VPB trước GDKHQ (~24/09).
+- **BĐS/hạ tầng — họ Vin (VHM, VRE, VIC/VPI phía mua)**: **0 sự kiện tín dụng XẤU** (không chậm trả TPDN, không
+  hạ bậc, không giải chấp/call margin). **Dữ kiện quản trị 12/09**: ông Phạm Nhật Vượng + bà Phạm Thu Hương
+  chuyển giao vai trò CEO/Chủ tịch **VinFast & GSM** cho thế hệ sau (ông Vượng vẫn trong HĐQT VinFast) — là
+  **chuyển giao điều hành, không phải sự kiện tín dụng/pháp lý** ⇒ không đổi phân loại. VIC/VHM là lực kéo giảm
+  chỉ số 11/09 nhưng không có tin nguyên nhân cụ thể.
+- **Ngoài NH (16 mã)**: 0 tai nạn/thu hồi SP/mất giấy phép/kê biên/tranh chấp lãnh đạo. Dòng vốn thụ động:
+  **MarketVector Vietnam (VNM ETF) loại VNM**, thêm SSB — áp lực bán kỹ thuật, không phải sự kiện lõi.
+
+**Phần 4 — PHÍA MUA: 1 LỆNH MUA trên 3 kênh cho phiên 14/09 — KHÔNG luận điểm nào gãy, NHƯNG lệnh duy nhất
+được sinh ra bởi một hiệu ứng kế toán chứ không phải bởi giá.**
+
+| Kênh | Trạng thái phiên 14/09 | Bằng chứng |
+|---|---|---|
+| **V2.4 BAL** | `orders` = **0** cả 2 account; `deferred_orders` = **0** (VPI đã rơi khỏi deferred; signal_hold vẫn ghi tới 16/09 trong notes) | `plan_{SpaceX,ZaloPay}_2026-09-14.json` |
+| **V2.4 LAG** | **0 đến hạn**, 0 upcoming, cổng lịch PASS (11/09 → 14/09) | `filter_lag_entry_window.py --plan-date 2026-09-14 --json` |
+| **TV1 DISCRETIONARY** | **SpaceX: SKIP** (deadband thiếu 100cp = 0,21%) · ★ **ZaloPay: AUTO-INJECT `BUY-TV1-DISC-2026-09-14` 200cp LO 19.900, trần no-chase 20.000, 3,98tr** (cash gate PASS, headroom 5,96tr) | `orders[]` plan ZaloPay + `ledger` `state_TV1_ZaloPay.json` (at 2026-09-11T20:30) |
+
+★★ **Nguyên nhân trip — đo, không suy đoán**: target = 5% × active_nav ÷ giá. `active_nav_ZaloPay.json`
+(computed 11/09) = **593.512.771đ**, trong đó **`cash_dividend_receiving_vnd` = 80.000.000đ = cổ tức 80% của
+10.000cp DGC** — mà **DGC là `excluded_tickers`**. File tự in `cash_dividend_double_count_warning` (13,48%
+active_nav). Phản thực tế: bỏ 80tr ⇒ active_nav 513,5tr ⇒ target 1.290cp ⇒ làm tròn **1.200 = đúng số đang
+giữ ⇒ 0 lệnh**. Tức **toàn bộ 200cp đến từ khoản phải thu cổ tức của mã bị loại**, không phải từ giá TV1 giảm
+(20.000 → 19.900 một mình không trip). Hai cách đọc, **không tự chọn**: (a) sau 25/09 80tr là tiền thật
+trong account ⇒ target 1.400cp là hợp lệ, chỉ là *đến sớm 2 tuần*; (b) cổ tức của vị thế BỊ LOẠI không nên
+nâng quy mô sleeve discretionary (§7 tinh thần excluded_tickers) ⇒ lệnh là artifact. Quy mô nhỏ (3,98tr ≈
+0,4% tổng NAV ZaloPay), **không chạm vốn an toàn**, nhưng đây đúng lối "hệ tự mua thêm mà không ai duyệt"
+đã cảnh báo 4 lượt — lần này qua cửa active_nav chứ không qua cửa giá.
+⚠️ **Plan ZaloPay 14/09: `requires_user_approval=true`, `approved_by=null`** (đọc lúc ~08:10) ⇒ nếu không ai
+duyệt trước 09:05, `approval_block_reason()` chặn lệnh này. **Người duyệt cần biết nguồn gốc 200cp ở trên.**
+
+**Phần 5 — read-through case đang theo dõi**
+- ★ **TV1** (QUALIFY — SpaceX 2.300cp + ZaloPay 1.200cp): **19.900 (11/09, −0,50%)**, PE 3,45 · PB 1,05 ·
+  BVPS 18.911, CF_OA_P0 24,3 tỷ vs NP_P0 31,3 tỷ. **Tin 08/09 (nguoiquansat — nguồn đơn, chép từ BCTC soát xét
+  bán niên; lượt 09-11 bỏ sót)**: (1) BCTC **soát xét bán niên 2026 do Kiểm toán An Việt** thực hiện, ý kiến
+  dạng **NHẤN MẠNH VẤN ĐỀ, không ngoại trừ/từ chối**, về **số dư nợ vay + lãi phải trả 127,6 tỷ cho 2 cá nhân**
+  (Lê Phi Long, Nguyễn Thị Ngải) tại 30/06/2026; (2) tòa **phúc thẩm 26/08/2026 giữ nguyên** án sơ thẩm
+  12/12/2025: **8 giấy nhận nợ PECC1–bà Ngải vô hiệu, PECC1 hoàn trả + bồi thường 17,6 tỷ** (chưa chi, chờ bản
+  án văn bản); vụ ông Long còn treo. H1/2026: DT 279 tỷ (+16%), LN 58 tỷ (giảm nhẹ). Đo độ lớn: vốn chủ ≈
+  BVPS × ~26,7tr cp ≈ **505 tỷ** ⇒ 17,6 tỷ ≈ **3,5% vốn chủ / ~11% LN 4 quý** (và một phần là HOÀN TRẢ gốc đã
+  nằm trong 127,6 tỷ nợ sổ sách ⇒ tác động LN ròng < 17,6 tỷ); 127,6 tỷ **đã ghi nhận là nợ phải trả**, không
+  phải nợ ngoài sổ. **Áp §2 trục quyết định**: đây là **tiền lan vào pháp nhân nhưng KHÔNG chạm tài sản lõi**
+  (thuỷ điện Sông Bung 5/hợp đồng tư vấn EVN) và quy mô chịu được ⇒ **không gãy QUALIFY**. `hard_expiry` **KHÔNG
+  kích hoạt** (điều kiện là kiểm toán FY2026 ngoại trừ/từ chối; đây là soát xét H1 + nhấn mạnh). **Dữ kiện
+  DƯƠNG phụ**: đã có đơn vị soát xét H1 (An Việt) ⇒ cổng "chọn kiểm toán" (quá hạn 31 ngày ở lượt 09-11) nay
+  có bằng chứng gián tiếp đã giải — **cần xác nhận An Việt cũng được chọn cho kiểm toán FY2026**. Cổ tức 15%:
+  vẫn 0 công bố thanh toán. **Đại án ngành điện 13/09**: khởi tố **cựu Chủ tịch HĐTV EVNNPT Đặng Phan Tường**
+  (vụ đường dây 500kV mạch 3; 47 bị can; phong toả TK chứng khoán ~1.756 tỷ) — **bài không nêu pháp nhân nào bị
+  khởi tố**, PECC1–4 chỉ ở mức lãnh đạo cá nhân (đã biết từ 07/05) ⇒ mở rộng lên phía CHỦ ĐẦU TƯ, không lan vào
+  pháp nhân TV1. **Không đổi QUALIFY.**
+- **DGC** (AMBIGUOUS-nghiêng-constructive, ZaloPay 10.000cp excluded): **46.750 (11/09, −0,53%)**. **GDKHQ HÔM
+  NAY 14/09** — `corp_action_daily_2026-09-14.json` đã có DGC trong `triggers.exright_today` ⇒ pipeline corp-action
+  đã bắt, đóng mối lo từ 09-07/09-11. Tin 10/09: dự án Nghi Sơn (~12.000 tỷ) lùi mục tiêu vận hành sang **Q4/2026**
+  (kế hoạch gốc Q1/2026) — trễ tiến độ, không phải sự kiện lõi hỏng. Không đổi.
+- **PNJ** 37.300 (−2,36%) · **VCS** 31.000 (−1,90%, sát đáy 52T) · **PAN** 18.200 (−1,62%, PB 0,50, dưới đáy
+  52T cũ 18.500) · **TV4 / ICG(NON) / OGC / các mã không-phải-case**: **0 tin mới**, giảm theo thị trường. Không đổi.
+
+**Tổng kết lượt**: **29 mã gác** · 253 mã (anomaly_scan) + 627 mã (quét rộng) + 12 truy vấn + 5 WebFetch ·
+**0 QUALIFY · 0 case mới · 5 không-phải-case** · watchlist **KHÔNG quá hạn** · **1 lệnh mua (ZaloPay TV1 200cp)
+— luận điểm KHÔNG gãy, nhưng size đến từ cổ tức DGC phải thu trong active_nav ⇒ escalate cho người duyệt plan.**
+**Mốc gần → xa: ★ ZaloPay TV1 200cp chờ duyệt trước 09:05 hôm nay → checkpoint BAL 16/09 → FTSE đợt 1 21/09 → VPB
+GDKHQ cổ tức cp ~24/09 → DGC trả tiền 25/09 (từ đó target 1.400cp TV1 ZaloPay thành hợp lệ theo cách đọc (a)) → TV1
+bản án văn bản 17,6 tỷ + xác nhận kiểm toán FY2026 + cổ tức 15% → PNJ/VCS/PAN Q3 (~cuối 10/2026).**
+
+Nguồn lượt này:
+[vnexpress — Chứng khoán 11/9: VN-Index giảm mạnh nhất gần một tháng](https://vnexpress.net/chung-khoan-giam-manh-nhat-gan-mot-thang-5119262.html) ·
+[investing/Vietstock — Chứng khoán tuần 07-11/09/2026: Rủi ro gia tăng](https://vn.investing.com/news/stock-market-news/chung-khoan-tuan-0711092026-rui-ro-gia-tang-2710908) ·
+[investing/Vietstock — 14/09: Đọc gì trước giờ giao dịch](https://vn.investing.com/news/stock-market-news/1409-doc-gi-truoc-gio-giao-dich-chung-khoan-2711490) ·
+[nguoiquansat — Chủ tịch bị bắt, doanh nghiệp điện thuộc EVN tiếp tục thua kiện (TV1, 08/09)](https://nguoiquansat.vn/chu-tich-bi-bat-doanh-nghiep-dien-thuoc-evn-tiep-tuc-thua-kien-phai-boi-thuong-hang-chuc-ty-dong-314955.html) ·
+[nguoiquansat — Đại án ngành điện: khởi tố cựu chủ tịch EVNNPT (13/09)](https://nguoiquansat.vn/dai-an-nganh-dien-tiep-tuc-nong-khoi-to-cuu-chu-tich-doanh-nghiep-quy-mo-117-000-ty-dong-315925.html) ·
+[vnexpress — Cựu chủ tịch HĐTV EVNNPT bị khởi tố](https://vnexpress.net/cuu-chu-tich-hdtv-tong-cong-ty-truyen-tai-dien-quoc-gia-bi-khoi-to-5119762.html) ·
+[dantri — Tỷ phú Phạm Nhật Vượng chuyển giao vị trí TGĐ VinFast toàn cầu (12/09)](https://dantri.com.vn/kinh-doanh/ty-phu-pham-nhat-vuong-chuyen-giao-vi-tri-tong-giam-doc-vinfast-toan-cau-20260912085716519.htm) ·
+[cafef — HOSE công bố 72 mã cổ phiếu bị cắt margin tháng 9](https://cafef.vn/hose-cong-bo-72-ma-co-phieu-bi-cat-margin-thang-9-18826091116435351.chn) ·
+[nguoiquansat — DGC chốt thời gian vận hành Nghi Sơn Q4/2026 (10/09)](https://nguoiquansat.vn/nhieu-lan-lui-tien-do-hoa-chat-duc-giang-dgc-chot-thoi-gian-van-hanh-at-chu-bai-12-000-ty-dong-315473.html)
+
+---
+
+### 2026-09-18 (job `Taylor_20260918_011034`) — QUÉT TUẦN — **0 QUALIFY mới · 1 AMBIGUOUS-yếu mới (GEX) · 4 không-phải-case (GEE, VGC, PHP, BIC) · 1 không-phải-case-đang-giữ (VRE) · 30 mã gác rà qua** · ★★ **CỤM GELEX giảm sàn 14/09 do khởi tố ông Đặng Phan Tường (TV HĐQT GEE, nguyên Chủ tịch HĐTV EVNNPT) — scandal CÁ NHÂN + hành vi TRƯỚC khi vào Gelex, NHƯNG Cadivi/EEMC là NHÀ THẦU trúng ~217 tỷ + 55–82 tỷ gói thầu CHÍNH dự án 500kV mạch 3 đang bị điều tra tội đấu thầu ⇒ kênh lây CÓ THẬT và CÒN MỞ** · ★★ **CỬA SỔ SỢ HÃI ĐÃ ĐÓNG TRONG 3 PHIÊN: GEE hồi 61.510→57.240→65.000 (CAO HƠN trước sự kiện), GEX hồi 91% cú sập ⇒ không còn điểm vào kể cả nếu phân loại thuận** · ★ **Đại án mở rộng: danh sách 13 pháp nhân có vi phạm (họp báo BCA 02/07) gồm PC1 + "các công ty tư vấn xây dựng điện" — KHÔNG có pháp nhân Gelex, và KHÔNG phải dữ kiện mới tuần này**
+
+Cửa sổ tin **sau phiên 11/09 → sáng 18/09** (4 phiên: 14, 15, 16, 17/09). Danh mục gác **30 mã**
+(13 NH + 17 ngoài NH). **Watchlist TƯƠI** (`active_nav` computed_at **2026-09-17** = đúng phiên cuối)
+⇒ **KHÔNG có cảnh báo quá hạn**.
+
+**Bối cảnh tuần — hồi phục sau cú sập 11/09, không có phiên sợ hãi diện rộng**: VNINDEX 11/09
+**1.795,21 (−1,86%)** → 14/09 **1.788,23 (−0,39%)** → 15/09 **1.811,15 (+1,28%)** → 16/09 **1.810,11
+(−0,06%)** → 17/09 **1.822,77 (+0,70%)**. ⇒ 14/09 mret chỉ −0,39% nên cụm mã giảm 6,6–7,0% cùng phiên
+là **riêng lẻ thật**, không phải beta.
+
+**Phần 1 — anomaly_scan** (chạy từng phiên 11, 12, 15, 16, 17/09): universe **254 mã** (H:30 / W:242).
+**0 IDIOCRASH · 0 FLOOR2 · 0 CEIL2 · 0 VOLSPIKE** ở CẢ 5 phiên. ⚠️ **Cụm GELEX KHÔNG trip anomaly_scan
+vì không mã nào trong cụm nằm trong universe H/W** — đây đúng lý do việc 2 (quét rộng + tin) tồn tại
+song song với scanner; ghi lại để lượt sau không hiểu nhầm "scanner sạch = tuần sạch".
+
+**Phần 2 — quét RỘNG** `bq_cache/ticker/2026.parquet` (phiên cuối 17/09; chuỗi chỉ số từ
+`ticker='VNINDEX'`): 1.276 mã → **704 mã** qua sàn thanh khoản (`max(Close×Volume)` 2026 ≥ 1 tỷ).
+IDIOCRASH cứng (ret ≤ −6% ∧ idio ≤ −5% ∧ val ≥ 1 tỷ) → **15 mã**; nới mềm → thêm 28. **Dấu hiệu quyết
+định của lượt này là một CỤM, không phải mã lẻ**: 4/15 cờ cứng rơi đúng phiên 14/09 và đều thuộc/liên
+quan hệ sinh thái GELEX — **GEX −6,89% (547 tỷ) · GEE −6,94% (160 tỷ) · VGC −6,59% (25 tỷ) · PHP −7,03%
+(31 tỷ)** (GEL sàn −6,91% nhưng dưới sàn thanh khoản của quét này). Các cờ cứng còn lại loại ở ADV3M
+<1 tỷ hoặc không ở vùng sợ hãi: KDM, TCD *(đã huỷ niêm yết, 09-11)*, VNT, DST *(+67,5% trên đáy, 09-14)*,
+PLP, HSL *(+100% trên đáy, 09-14)*, TDP *(không-phải-case 09-11)*, PGC, FIR *(ADV 0,96 — loại 09-11)*,
+AST, TNH *(NP_TTM<0, redflag trong phễu)*.
+
+**Phần 3 — WebSearch tin theo BỘ TỪ KHOÁ NHÓM (8 truy vấn + 2 WebFetch):**
+- **Nhóm chung**: **1 sự kiện lớn — cụm GELEX (Phần 6)**. Ngoài ra 0 sự kiện mới chạm 30 mã gác:
+  không khởi tố/thanh tra/đình chỉ/hạn chế GD/từ chối kiểm toán/chậm BCTC/cắt margin/huỷ niêm yết mới.
+  Nền: DDG nguy cơ huỷ niêm yết sau 3 năm lỗ (không thuộc danh mục gác).
+- **Nhóm ngân hàng (13 mã)** — §4.2 `bank_tailrisk_insurance_design_20260814.md`: **0 sự kiện.** Không
+  kiểm soát đặc biệt mới, không chuyển giao bắt buộc mới, không rút tiền hàng loạt, không khởi tố lãnh
+  đạo NH niêm yết, không cho vay sân sau/thao túng cp NH. Kết quả chỉ trả nền 4 NH đã chuyển giao xong
+  (GPBank, MBV, Vikki, VCBNeo).
+- **Nhóm BĐS đầu ngành/hạ tầng (VHM, VRE — và VPI ở phía mua)** — §6
+  `vic_family_credit_concentration_20260818.md`: **0 sự kiện tín dụng XẤU mới.** Không chậm/vỡ nợ TPDN,
+  không hạ bậc tín nhiệm, không siết TSĐB, không call margin/giải chấp cổ đông lớn. Nền không đổi.
+- **Nhóm ngoài NH (17 mã)**: tai nạn/sự cố nhà máy, thu hồi sản phẩm, mất giấy phép/mỏ, kê biên tài sản,
+  tranh chấp lãnh đạo → **0 sự kiện.**
+
+**Phần 4 — PHÍA MUA: 1 mã mua trên kênh BAL (VPI, cả 2 account) ⇒ KHÔNG có luận điểm mua nào bị gãy.**
+Kiểm **cả ba** kênh, không suy từ một kênh:
+
+| Kênh mua | Trạng thái cho phiên 18/09 | Bằng chứng |
+|---|---|---|
+| **V2.4 BAL** | **`VPI` buy cả 2 account** (SpaceX kèm `VHM` sell) · `deferred_orders` = **0** ⇒ VPI đã ra khỏi `signal_hold` (hạn 16/09) và thành lệnh thật | `orders`/`deferred_orders` trong `plan_{SpaceX,ZaloPay}_2026-09-18.json` |
+| **V2.4 LAG** | **0 mã đến hạn**, 0 upcoming, cổng lịch PASS | `mike/bin/filter_lag_entry_window.py --plan-date 2026-09-18 --json` |
+| **TV1 DISCRETIONARY_SPECIAL** | **SKIP cả 2** — SpaceX deadband thiếu 100cp (2.010.000đ = **0,20%**, ngưỡng 0,50%) · **ZaloPay ĐÃ ĐẠT target: filled 1.400 ≥ target 1.400** | `history_noninject` trong `data/trade_plans/discretionary/state_TV1_{SpaceX,ZaloPay}.json`, at 2026-09-17T21:45 |
+
+**VPI — kiểm luận điểm phía mua (mã DUY NHẤT được mua):** **63.100 (17/09, +1,77%)**, **dd52 = 0,0% =
+ĐÚNG ĐỈNH 52 TUẦN**, +31,0% trên đáy 52T, **trên MA50 (58.044, +8,7%)**, **PE 55,2 · PB 3,88 · DY 0%**,
+CF_OA 4 quý 77,2 tỷ vs NP 4 quý 402,7 tỷ ⇒ **CF/NP 0,19×**, ADV3M 100,4 tỷ. ⇒ Đây là **lệnh MOMENTUM
+của BAL mua vào ĐỈNH, KHÔNG phải case fear-buy** — sleeve này không có ý kiến về nó, và **không được đọc
+ngược thành khuyến nghị**. **Tin trong cửa sổ: 0 sự kiện tín dụng/pháp lý xấu.** Nền §6 **không đổi** và
+đã ghi từ 08-24: dư nợ TPDN **2.900 tỷ = 39% tổng nợ vay** (2.260 tỷ dài hạn + **648 tỷ đáo hạn trong 12
+tháng**), 3 lô mới 2026 (VPI12601/02/03 = 480 tỷ, **có TSĐB**), **tổng nợ phải trả 10.127 tỷ = cao nhất
+lịch sử** (+9% so đầu năm, dư nợ vay tài chính 7.399 tỷ), LN Q1/2026 **−92%** còn 3,5 tỷ. ⇒ **Nền, KHÔNG
+phải sự kiện tuần này ⇒ luận điểm mua KHÔNG gãy theo tiêu chí của khung này.** Điều đáng nói: mã được mua
+đang ở **ĐỈNH 52 tuần với PE 55,2**, tức rủi ro ở đây là rủi ro ĐỊNH GIÁ/momentum, thuộc khung V2.4, không
+thuộc sleeve fear-buy — nêu ra để người duyệt plan thấy, không phải để đổi plan.
+
+**Phần 5 — read-through case đang theo dõi**
+
+- ★ **TV1** (§4/§14, **QUALIFY** — SpaceX 2.300cp + **ZaloPay nay 1.400cp**): **20.100 (17/09, +0,50%)**,
+  PE 3,5 · PB 1,06 · BVPS 18.911, dd52 −49,0% / **+3,6% trên đáy 52T**, dưới MA50 (20.352), CF_OA 4 quý
+  **220,1 tỷ vs NP 154,2 tỷ ⇒ 1,43×** (§2#3 vẫn đạt), ADV3M 0,68 tỷ. **0 công bố mới trong cửa sổ.**
+  **Không đổi QUALIFY.** Hai việc phải ghi:
+  1. **Lệnh ZaloPay 200cp @19.900 (14/09) ĐÃ KHỚP**: ledger `BUY-TV1-DISC-2026-09-14`, `filled_before`
+     1.200 → **filled hiện tại 1.400**. Cảnh báo 09-14 **đã thành hiện thực, không còn là giả định**:
+     target 1.400cp vẫn đang neo vào `active_nav_ZaloPay` = **600.317.076đ**, trong đó
+     **`cash_dividend_receiving_vnd` = 80.000.000đ cổ tức DGC** (mã `excluded`) — file vẫn tự in
+     `cash_dividend_double_count_warning` (13,33% active_nav). DGC đã qua GDKHQ 14/09 nên **khoản này
+     nay là phải thu THẬT, tiền về ~25/09** ⇒ theo cách đọc (a) của 09-14, size này **hợp lệ, chỉ đến
+     sớm ~2 tuần**. Không có việc phải sửa gấp; ghi lại để lượt sau không kết luận lại từ đầu.
+  2. **Đại án ngành điện — làm rõ một điểm 09-14 ghi chưa đủ** (và đây **KHÔNG phải tin mới tuần này**):
+     họp báo BCA **02/07/2026** đã nêu vụ án xảy ra tại **13 đơn vị**, gồm EVNNPT, 2 Ban QLDA điện miền
+     Bắc/Trung, **CTCP Tập đoàn PC1**, Chế tạo cột thép Đông Anh, Khoáng sản Tấn Phát, Sông Đà 11, **"các
+     công ty tư vấn xây dựng điện"** và một số DN liên quan; 47 bị can / 5 nhóm tội (đấu thầu, kế toán,
+     tham ô, đưa–nhận hối lộ); phong toả TKCK ~1.700–1.800 tỷ. ⇒ Câu "**bài không nêu pháp nhân nào bị
+     khởi tố**" ở lượt 09-14 đúng với BÀI ĐÓ nhưng **hẹp hơn hồ sơ vụ án**: nhóm PECC (TV1–TV4) nằm trong
+     mô tả chung "các công ty tư vấn xây dựng điện". **Chưa có pháp nhân TV1 nào bị khởi tố** và mô tả
+     "xảy ra tại" ≠ "pháp nhân bị khởi tố" ⇒ **chưa đủ để gãy §2**, nhưng **cổng phải theo dõi nay rõ
+     hơn: kết luận điều tra có nêu đích danh pháp nhân PECC1 không.** Bằng chứng thị trường ủng hộ đọc
+     "không leo thang": phiên 14/09 **TV1 0,00% · TV2 −0,19% · PC1 −0,74%** trong khi cụm GELEX sàn
+     ⇒ thị trường định giá đây là **sự kiện riêng của GELEX**, không phải tái định giá đại án.
+- ★ **DGC** (§6, AMBIGUOUS-nghiêng-constructive · ZaloPay 10.000cp `excluded`): **35.300 (17/09)** —
+  **con số này ĐÃ TRỪ cổ tức 8.000đ/cp (GDKHQ 14/09)**, đừng đọc nhầm thành sập giá; dd52 −47,4% ·
+  **+18,3% trên đáy 52T** · PE 6,2 · PB 0,83 · **DY 31%** (bị thổi bởi chính đợt 80% vừa chia) ·
+  Debt_Eq 0,19 · IntCov 32,7 · ADV3M 28,2 tỷ. **0 tin mới trong cửa sổ.** Hai cổng không đổi:
+  (a) **vẫn trong diện hạn chế giao dịch** (BCTC kiểm toán 2025 nộp chậm >45 ngày; HOSE 03/09 giữ
+  nguyên sau ý kiến ngoại trừ của UHY trên BCTC soát xét bán niên); (b) tiền cổ tức **80.000.000đ về
+  ~25/09**. **Không đổi phân loại.**
+- **PNJ** (§7, AMBIGUOUS): **36.750 (17/09)**, PB 1,40 · PE 7,7, +19,5% trên đáy 52T, dưới MA50
+  (38.556). **0 tin mới.** Không đổi; không nằm trong kênh mua nào.
+- **PAN** (AMBIGUOUS 09-11): **18.750**, PB **0,52** · PE 3,9 · DY 16,2%, +3,0% trên đáy 52T, dưới MA50
+  (20.304), CF_OA 4 quý 5.560 tỷ / NP 1.193 tỷ = **4,66×**, ADV3M 8,15 tỷ. **0 tin mới.** Cổng
+  **BCTC Q3/2026 (~cuối 10/2026)** + việc còn thiếu **SOTP NSC/FMC/đất** đều không đổi.
+- **VCS** (AMBIGUOUS 09-04): **31.200**, PB 0,99 · PE 8,7 · DY 12,0%, **+1,0% trên đáy 52T**, dưới MA50
+  (32.836), CF_OA/NP 4 quý **0,94×** (sát ngưỡng, chưa vỡ — y như lượt trước). **0 tin mới.** Cổng
+  Q3/2026 không đổi. ADV3M 1,26 tỷ.
+- **TV4** (AMBIGUOUS): **13.000**, PE 5,8 · PB 1,06, dd52 −22,2%. **ADV3M 0,12 tỷ** vẫn chặn mạnh hơn
+  mọi phân loại. **TV2**: 25.750, PB 1,37 — 0 tin. **TV3**: 14.500, ADV3M **0,02 tỷ**.
+- **ICG (NON 09-11)** · **OGC (NON §2)** · **TIN, TSB, MVN, CRE, VSC, BNA, SSB, VNE, PTB, YEG, SKG,
+  HBC, HHS, CII, VCI, CEO** (đã "không phải case"): **0 thay đổi, 0 tin.**
+
+**Phần 6 — CASE MỚI: CỤM GELEX (áp §2 nhóm (a) — scandal cá nhân)**
+
+**Sự kiện (14/09)**: C01 khởi tố bị can **ông Đặng Phan Tường** trong vụ án tại **EVNNPT + CTCP Tập đoàn
+PC1 và các công ty liên quan** (dự án đường dây 500kV mạch 3). Ông Tường là **Chủ tịch HĐTV EVNNPT
+09/2011 → 09/2020** (nghỉ hưu sớm), **gia nhập hệ sinh thái GELEX từ 2021**, giữ ghế **TV HĐQT không điều
+hành** tại **GEE (Điện lực Gelex)**, **EEMC (Thiết bị điện Đông Anh)**, **CADIVI**, và **Chủ tịch HĐQT
+THIBIDI**. Chiều tối 14/09 Gelex công bố: vụ việc **của cá nhân ông Tường, phát sinh giai đoạn TRƯỚC khi
+tham gia Gelex**, không liên quan hoạt động của tập đoàn. HĐQT GEE/Cadivi/Thibidi sau đó **ra nghị quyết
+miễn nhiệm** ông khỏi HĐQT; GEE **triệu tập ĐHĐCĐ bất thường**.
+
+**Phản ứng giá phiên 14/09 (VNINDEX chỉ −0,39%)**: GEE **−6,94%** (57.240) · GEX **−6,89%** (22.300) ·
+GEL −6,91% · VGC **−6,59%** (38.300) · PHP **−7,03%** (42.300). Thanh khoản đột biến: GEX 24,5tr cp /
+547 tỷ, GEE 160 tỷ.
+
+★★ **CỬA SỔ ĐÃ ĐÓNG TRONG 3 PHIÊN — đây là kết luận THỰC DỤNG quan trọng nhất của mục này.** Đến 17/09:
+**GEE 65.000 = CAO HƠN mức trước sự kiện (61.510 ngày 11/09)** — và mức 65.000 này còn là giá **SAU
+GDKHQ tạm ứng cổ tức đợt 2 ngày 17/09**, tức hồi phục thực còn mạnh hơn con số; **GEX 23.500 = hồi 91%
+cú sập** (−1,9% so 11/09); VGC 39.850; PHP 43.100. ⇒ **Không còn điểm vào ở vùng sợ hãi, kể cả nếu phân
+loại có thuận.** Ghi lại vì đây là dạng case **cửa sổ tính bằng NGÀY**, khác hẳn TV1/DGC (cửa sổ tính
+bằng tháng) — nhịp quét TUẦN của khung này **về cấu trúc là quá chậm để bắt loại case này**; muốn bắt
+thì phải là quét NGÀY có tin, không phải chỉnh tiêu chí.
+
+**Áp §2 cho từng mã trong cụm:**
+
+| Mã | Số liệu (17/09, BQ cache) | Áp §2 | Kết luận |
+|---|---|---|---|
+| **GEX** (Tập đoàn Gelex, HOSE, ICB 2737) | **23.500** · dd52 −35,1% · **+15,8% trên đáy 52T** · dưới MA50 (24.607) · **PB 0,89** (BVPS 26.342) · **PE 22,4** (PE_MA5Y 66,5) · DY 0% · **Debt_Eq 1,49 · IntCov 4,15 · FSCORE 2 · ROE_Min3Y ~0** · **CF_OA 4 quý 761 tỷ vs NP 4 quý 1.373 tỷ ⇒ 0,55×** · **ADV3M 302 tỷ** | #1 scandal cá nhân **✓** (hành vi 2011–2020 tại EVNNPT, trước khi vào Gelex 2021; ghế không điều hành; đã miễn nhiệm ngay) · #2 backstop NN/chiến lược **✗** (tư nhân, không có bên nâng đỡ) · #3 **CF_OA ≥ NP ✗ (0,55×)** — đây là test cốt lõi "tiền khó nguỵ tạo" cho DN đang dính điều tra, và nó TRƯỢT · #4 solvent **~** (Debt_Eq 1,49 · IntCov 4,15 · FS 2 — chịu được, không khoẻ) · #5 sàn định giá **✓** (PB 0,89 < 1) | **AMBIGUOUS-yếu** — trượt 2/5 tiêu chí (#2, #3) nên **KHÔNG QUALIFY**; không rơi vào nhánh ❌ nào của §2 nên chưa phải NON. **Cổng nhị phân (2 câu hỏi, cả hai phải sạch): (a) kết luận điều tra / công bố tiếp theo có nêu ĐÍCH DANH pháp nhân nào của Gelex (EEMC/Cadivi/Thibidi) trong nhóm vi phạm đấu thầu không? (b) BCTC Q3/2026 CF_OA có đảo về ≥ NP không?** **Thực dụng: cửa sổ đã đóng (+15,8% trên đáy, hồi 91%) ⇒ không actionable ở giá này.** |
+| **GEE** (Điện lực Gelex) | 65.000 · **PB 4,93** (BVPS 13.187) · PE 11,7 · **CF_OA 4 quý −1.304 tỷ vs NP 3.567 tỷ ⇒ −0,37×** · Debt_Eq 1,32 · FS 3 · ADV3M 101 tỷ | #5 **✗ không có sàn định giá** (PB 4,93) · #3 **✗ CF_OA 4 quý ÂM** | **Không phải case** — gạch bằng 2 lý do độc lập, không cần tới tin. Đây là mã **đắt nhất cụm**, và là mã ông Tường có ghế trực tiếp |
+| **VGC** (Viglacera) | 39.850 · **PB 1,52** · PE 12,6 · +14,2% trên đáy 52T · CF_OA/NP 4 quý **1,98×** · FS 6 | #5 **✗** (PB 1,52 > 1,2) + không ở vùng sợ hãi | **Không phải case** — lõi và dòng tiền ổn, nhưng không có sàn định giá. Giảm theo **liên đới nhóm**, không có cáo buộc riêng |
+| **PHP** (Cảng Hải Phòng) | 43.100 · **PB 1,98** · PE 11,5 · dd52 chỉ −11,1% · **+43,7% TRÊN đáy 52T** · FS **9** · CF_OA/NP 0,80× · ADV3M 8,0 tỷ | #5 **✗** (PB 1,98) + **không ở vùng sợ hãi** (+43,7% trên đáy) | **Không phải case** — mã đang MẠNH bị bán liên đới 1 phiên rồi hồi. Cùng dạng SCL 09-11 |
+
+⚠️ **Rủi ro lây chéo phải ghi rõ, vì nó là trục quyết định của §2 và nó CÒN MỞ**: cáo buộc trung tâm của
+vụ án là **vi phạm quy định về đấu thầu** tại dự án 500kV mạch 3 — và **các công ty con của Gelex là NHÀ
+THẦU TRÚNG THẦU CHÍNH dự án đó**: **CADIVI trúng 4 gói ~217 tỷ** (51–58 tỷ/gói) + các gói đường dây 220kV
+62–118 tỷ/gói; **EEMC trúng hợp đồng máy biến áp 55–82 tỷ** + bảo trì 2–23 tỷ (2025). Tức **người bị khởi
+tố là cựu Chủ tịch của CHỦ ĐẦU TƯ, đồng thời ngồi HĐQT của NHÀ THẦU** — đúng hình dạng quan hệ mà tội danh
+đấu thầu nhắm tới. **Tính đến 17/09 CHƯA có pháp nhân Gelex nào bị khởi tố và Gelex KHÔNG có trong danh
+sách 13 đơn vị của họp báo 02/07** — nên đây **chưa** là căn cứ loại theo nhánh ❌ §2 ("scandal lan vào
+pháp nhân"). Nhưng nó **không phải rủi ro suy đoán**: nó là một kênh cụ thể, có số tiền, có tên gói thầu,
+và **chưa được đóng bởi bất kỳ công bố nào**. Đây chính là lý do GEX dừng ở **AMBIGUOUS-yếu** thay vì được
+đọc như một PNJ-2015 (ở PNJ, lõi bán lẻ trang sức **không có giao dịch nào** với DongABank).
+
+**Phần 7 — PHỄU CANDIDATE HỆ THỐNG (`--mode weekly`), 22 mã FULLY_QUALIFIED → 20 đã có kết luận, 2 mã MỚI**
+
+**20/22 đã có kết luận trong sổ**: VSC (không-phải-case 09-04) · NTL (08-21) · VCS (AMBIGUOUS 09-04) ·
+PTB, YEG, SKG (không-phải-case 09-11) · và 14 mã đã phân giải vào **3 nguyên nhân NHÓM** ở lượt 09-04
+(BĐS-lãi suất: SZC, HDG, DTD, ITC, HPX · xuất khẩu-thuế 301: ANV, DRC, TNG, VGS, HT1, LCG · ngân hàng
+đang giữ: SHB, VIB, TPB). **0 dữ kiện nào trong cửa sổ đổi các kết luận đó.** *(PAN rơi khỏi phễu tuần
+này — đã là AMBIGUOUS trong sổ từ 09-11, theo dõi tiếp ở Phần 5.)*
+
+**2 mã MỚI vào phễu — DD + áp §2/§2.5:**
+
+| Mã | Số liệu (17/09, BQ cache) | Nguyên nhân washout (verify bằng tin) | Kết luận |
+|---|---|---|---|
+| **BIC** (Bảo hiểm BIDV, HOSE, ICB 8536, rating 2, golden_floor Y) | 21.050 · dd52 **−21,3%** · **+3,7% trên đáy 52T** · dưới MA50 (21.531) · PB 1,20 · PE 9,9 (PE_MA5Y 9,0 — **KHÔNG nén so lịch sử**) · **DY 0%** · IntCov 40,2 · **FSCORE 1** · **CF_OA 4 quý −20,7 tỷ vs NP 430 tỷ ⇒ −0,05×** · **ADV3M 0,66 tỷ** | **Không tìm được sự kiện riêng lẻ nào** trong cửa sổ; không có tin xấu về BIC. Giá trôi theo nhóm bảo hiểm | **Không phải case — loại ở BỘ LỌC RẺ NHẤT**: **ADV3M 0,66 tỷ/phiên** = không đầu tư được ở quy mô 2 account (cùng lý do đã loại SKG 0,38 · TV4 0,12 · ICG 0,22). Kể cả bỏ qua thanh khoản vẫn trượt tiếp 2 tầng: **§2#3 CF_OA 4 quý ÂM** và **§2#5 không có sàn định giá** (PB 1,20 ở mép, PE 9,9 **cao hơn** PE_MA5Y 9,0 ⇒ không hề bị nén). FSCORE 1 |
+| **VRE** (Vincom Retail, HOSE, ICB 8633, rating 2 — **VỊ THẾ ĐANG GIỮ**) | **25.800** · dd52 −30,7% nhưng **+21,1% TRÊN đáy 52T** · **TRÊN MA50** (25.019, +3,1%) · PB 1,19 · PE 8,1 · DY 0,04% · Debt_Eq 0,27 · IntCov 10,3 · FS 7 · **ADV3M 145 tỷ** · CF_OA 4 quý **−3.644 tỷ** vs NP 7.250 tỷ ⇒ **−0,50×** | **0 sự kiện** trong cửa sổ (đã quét bộ từ khoá BĐS đầu ngành §6: không chậm/vỡ nợ TPDN, không hạ bậc, không siết TSĐB, không giải chấp/call margin). LN sau thuế Q2/2026 **+30% YoY** | **Không phải case fear-buy** — **không ở vùng sợ hãi**: +21,1% trên đáy 52T và **đã vượt MA50** ⇒ phễu tuyển nó vào cohort "fear" chỉ vì cửa sổ 52 tuần, không vì trạng thái hiện tại (cùng dạng SCL/TDP/TRC/MZG 09-11). **Là vị thế trong sổ ⇒ thuộc khung risk/sizing V2.4, không thuộc sleeve này.** ⚠️ Số CF_OA/NP 4 quý (−0,50×) **chưa dùng để kết luận**: NP 4 quý 7.250 tỷ lệch xa mức LN thường niên đã biết của VRE ⇒ nghi join `ticker_financial` lệch kỳ; **đã đọc tới đây và dừng, chưa xác định nguyên nhân** — kết luận trên đứng độc lập, chỉ dựa vào trạng thái giá |
+
+⚠️ **CAVEAT SỐ LIỆU CỦA PHỄU — SANG TUẦN THỨ 3, VẪN CHƯA GIẢI QUYẾT** (escalate 09-04, nhắc 09-11):
+`washout`/`dd52` phễu in ra vẫn không khớp bản đo lại trên `bq_cache/ticker/2026.parquet` (cửa sổ 370
+ngày tới 17/09). Đo lượt này — phễu vs recompute (Close): **VRE** dd52 −38,5% vs **−30,7%** (lệch 7,8pp) ·
+**BIC** dd52 −25,1% vs **−21,3%** (3,8pp) · **SHB** −35,4% vs −33,x% · **VSC** −58,9% vs −(đo riêng).
+**Chiều lệch nhất quán: phễu LUÔN overstate mức giảm** ở cả 2 mã mới tuần này — khác lượt 09-11 (khi PAN
+đảo chiều), nên **vẫn chưa đủ để gọi là lệch hệ thống một chiều**; đã đọc bằng chứng tới đây và **dừng,
+chưa xác định được nguyên nhân**. Hệ quả nếu overstate: **tuyển THỪA** mã vào cohort "fear" — đúng cái đã
+xảy ra với VRE tuần này (thực tế +21% trên đáy). **Không đổi kết luận lượt này** vì cả 2 mã mới đều được
+xử bằng lý do khác.
+
+**Tổng kết lượt**: **30 mã đang gác** rà qua · 254 mã (anomaly_scan ×5 phiên) + **704 mã** (quét rộng) +
+**22 mã phễu FULLY_QUALIFIED** (20 đã có kết luận + 2 DD mới) + **8 truy vấn tin + 2 WebFetch** ·
+**0 QUALIFY mới** · **1 AMBIGUOUS-yếu mới (GEX, 2 cổng nhị phân)** · **5 không-phải-case (GEE, VGC, PHP,
+BIC, VRE)** · 12 echo · **watchlist KHÔNG quá hạn** (computed_at 2026-09-17 = đúng phiên cuối) ·
+**1 mã mua trên kênh BAL (VPI, cả 2 account) — luận điểm KHÔNG gãy** (0 sự kiện tín dụng/pháp lý mới;
+nền TPDN §6 không đổi; lưu ý VPI đang ở ĐỈNH 52 tuần, PE 55,2 ⇒ rủi ro định giá thuộc khung V2.4).
+**Bài học phương pháp của lượt này**: cụm GELEX **không trip anomaly_scan** (không mã nào trong universe
+H/W) và **cửa sổ sợ hãi đóng trong 3 phiên** ⇒ với case dạng "cụm liên đới một cá nhân", nhịp quét TUẦN
+là **quá chậm về cấu trúc**; muốn bắt thì phải là kênh tin theo NGÀY, không phải nới tiêu chí.
+**Mốc phải theo, gần → xa: FTSE giải ngân đợt 1 21/09 → VPB GDKHQ cổ tức cp ~24/09 → DGC trả cổ tức
+80.000.000đ về ZaloPay 25/09 (từ đó `active_nav` hết lệch) → GEE ĐHĐCĐ bất thường (kiện toàn HĐQT sau
+miễn nhiệm) → kết luận điều tra đại án 500kV mạch 3 (cổng chung cho GEX + TV1: có nêu đích danh pháp
+nhân nào không) → TV1 bản án văn bản 17,6 tỷ + xác nhận An Việt kiểm toán FY2026 + cổ tức 15% →
+PNJ/VCS/PAN/GEX BCTC Q3/2026 (~cuối 10/2026).**
+
+Nguồn lượt này:
+[tuoitre — Cổ phiếu "họ Gelex" đồng loạt giảm kịch sàn (14/09)](https://tuoitre.vn/co-phieu-ho-gelex-dong-loat-giam-kich-san-100260914152736579.htm) ·
+[dnse — Cổ phiếu đồng loạt giảm sàn, Gelex thông tin về vụ việc ông Đặng Phan Tường](https://www.dnse.com.vn/senses/tin-tuc/co-phieu-dong-loat-giam-san-gelex-thong-tin-ve-vu-viec-ong-dang-phan-tuong-35286500) ·
+[tienphong — Gelex lên tiếng về việc nguyên Chủ tịch EVNNPT bị khởi tố](https://tienphong.vn/gelex-len-tieng-ve-viec-nguyen-chu-tich-evnnpt-bi-khoi-to-post1876326.tpo) ·
+[mekongasean — Cổ phiếu đồng loạt giảm sàn, Gelex thông tin (vai trò ông Tường tại EEMC/GEE/Cadivi/Thibidi)](https://mekongasean.vn/co-phieu-dong-loat-giam-san-gelex-thong-tin-ve-vu-viec-ong-dang-phan-tuong-59596.html) ·
+[cafebiz — Ông Đặng Phan Tường bị khởi tố, doanh nghiệp triệu tập họp bất thường (16/09)](https://cafebiz.vn/ong-dang-phan-tuong-bi-khoi-to-doanh-nghiep-trieu-tap-hop-bat-thuong-176260916105504809.chn) ·
+[vietbao — Gelex trúng hàng loạt gói thầu của EVNNPT (Cadivi ~217 tỷ, EEMC 55–82 tỷ)](https://vietbao.vn/gelex-trung-hang-loat-goi-thau-cua-tong-cong-ty-truyen-tai-dien-quoc-gia-607360.html) ·
+[1thegioi — "Bão điện" quét qua TTCK: một mối liên quan, nhiều điểm nối dễ tổn thương](https://1thegioi.vn/bao-dien-lien-tiep-quet-qua-thi-truong-chung-khoan-mot-moi-lien-quan-nhieu-diem-noi-de-ton-thuong-258119.html) ·
+[vnexpress — 47 người bị khởi tố trong vụ án tại EVNNPT (13 đơn vị, 02/07)](https://vnexpress.net/47-nguoi-bi-khoi-to-trong-vu-an-tai-tong-cong-ty-truyen-tai-dien-quoc-gia-5092437.html) ·
+[nhipsongkinhdoanh — Nhóm cổ phiếu "họ GELEX" đồng loạt tăng trở lại](https://nhipsongkinhdoanh.vn/nhom-co-phieu--ho-gelex--dong-loat-tang-tro-lai-32929.htm) ·
+[vietstock — Văn Phú sắp phát hành 32 triệu cp trả cổ tức (nền nợ VPI)](https://vietstock.vn/2026/08/van-phu-sap-phat-hanh-32-trieu-co-phieu-tra-co-tuc-738-1484324.htm) ·
+[vietstock — HOSE gỡ một lý do cảnh báo, DGC vẫn kẹt trong diện hạn chế giao dịch](https://vietstock.vn/2026/08/hose-go-mot-ly-do-canh-bao-co-phieu-dgc-van-ket-trong-dien-han-che-giao-dich-830-1483695.htm) ·
+[tapchikinhtetaichinh — Sự kiện chứng khoán ngày 16/9 (GEE GDKHQ 17/09)](https://tapchikinhtetaichinh.vn/su-kien-chung-khoan-ngay-16-9-167105.html)
+
+---
+
+### 2026-09-21 — QUÉT SÁNG THỨ HAI (job `Taylor_20260921_010001`, mục đích: BẢO VỆ PHÍA MUA trước 09:00) — **0 QUALIFY · 0 case mới · 30 mã gác rà qua** · ★★ **0 lệnh MUA trên mọi kênh cho phiên 21/09 ⇒ không có luận điểm nào để RÚT** · ★ **Sự kiện lớn nhất cửa sổ là CƠ CẤU CHỈ SỐ, không phải sự kiện lõi: FTSE Vietnam Index loại 21 mã hiệu lực HÔM NAY 21/09 — 5 mã đang giữ trong đó (SHB, VRE, VIX, VND, VPI)**
+
+Cửa sổ tin **sau phiên thứ Sáu 18/09 → hết Chủ Nhật 20/09** (0 phiên giao dịch trong cửa sổ; phiên gần
+nhất = 18/09). Danh mục đang gác **30 mã** (13 NH + 17 ngoài NH).
+**Watchlist TƯƠI** — `anomaly_scan` in `watchlist tươi (active_nav computed_at 2026-09-19)` ⇒ **KHÔNG có
+cảnh báo WATCHLIST QUÁ HẠN**.
+
+**Phần 0 — phía MUA (câu hỏi chính của lượt này): KHÔNG CÓ GÌ ĐỂ RÚT.**
+
+| Kênh | Nội dung plan 21/09 | Phía mua |
+|---|---|---|
+| `data/trade_plans/plan_SpaceX_2026-09-21.json` | 3 lệnh, **toàn BÁN PARK**: MBB 100cp @19.900 · VHM 100cp @71.000 · VPB 100cp @27.450 | **0 lệnh mua** |
+| `data/trade_plans/plan_ZaloPay_2026-09-21.json` | `n_orders = 0` | **0 lệnh mua** |
+| Discretionary (TV1 deadband) | không có lệnh phát sinh | **0 lệnh mua** |
+
+⇒ Kể cả nếu tìm được một mã gãy luận điểm trong cửa sổ, **không có lệnh mua nào để rút**. Rủi ro phía mua
+của phiên 21/09 = 0. (3 lệnh bán park nằm NGOÀI phạm vi mandate lượt này — playbook nói rõ không can
+thiệp phía bán.)
+
+**Phần 1 — `anomaly_scan.py --backfill-days 3`** (phiên 18/09): universe **254 mã** (H:30 / W:242).
+**0 IDIOCRASH · 0 FLOOR2 · 0 CEIL2 · 0 VOLSPIKE** — *"Không có tín hiệu giá/khối lượng bất thường."*
+
+**Phần 2 — quét RỘNG** `bq_cache/ticker/2026.parquet` (phiên 18/09, `idio = ret − ret_VNINDEX`;
+VNINDEX 1.815,66, **−0,39%** ⇒ nền thị trường gần phẳng, mã nào trip là riêng lẻ thật). **836 mã**.
+
+- **IDIOCRASH cứng** (ret ≤ −6% ∧ idio ≤ −5%) → **12 mã**, **12/12 LOẠI Ở SÀN THANH KHOẢN** — ADV1M cao
+  nhất trong nhóm là **AGP 0,25 tỷ/phiên**, thấp hơn ngưỡng 1 tỷ một bậc độ lớn: SP2, VNT, PEG, CMM, PTV,
+  CKD, HAS, GTA, VSI, TTS, DTP, AGP. **0 mã liquid trip.**
+- Nới mềm (ret ≤ −4% ∧ idio ≤ −3,5%) **có thanh khoản ≥1 tỷ** → 4 mã, **không mã nào là case**:
+
+| Mã | Số liệu (18/09) | Kết luận |
+|---|---|---|
+| **VPL** (Vinpearl, ADV 85 tỷ) | 81.200 (−5,03%) · **+15,2% trên đáy 52T** · **PE 48,2 · PB 3,21** | **Không phải case** — §2#5 không có sàn định giá; giảm đúng ngày ETF tái cơ cấu (VPL là mã được THÊM vào FTSE VN Index) ⇒ nhiễu dòng vốn |
+| **DCL** (Dược Cửu Long, ADV 47 tỷ) | 40.500 (−4,59%) · **+47,5% trên đáy 52T** · PB 1,94 · ROE_Min3Y 1,3% | **Không phải case** — không ở vùng sợ hãi (cách đáy gần 50%) |
+| **KOS** (ADV 8,9 tỷ) | 30.050 (−4,15%) = đúng đáy 52T nhưng **PE 237 · PB 2,76 · ROE_Min3Y 0,8%** | **Không phải case** — §2#5 FAIL nặng |
+| **DHA** (ADV 1,6 tỷ) | 51.200 (−4,66%) · +22,0% trên đáy · PE 7,1 · PB 1,42 · Debt_Eq 0,11 | **Không phải case** — rẻ và solvent thật, nhưng KHÔNG ở vùng sợ hãi và KHÔNG có sự kiện trigger. Đây là value tilt → việc của BAL/custom30V (§9), không phải sleeve này |
+
+★ Ghi nhận một mã có **hồ sơ đúng nhưng un-investable**: **DTP** (Dược phẩm CPC1 Hà Nội) — 56.000,
+**+1,6% trên đáy 52T, −43,6% từ đỉnh**, PE 8,3 · PB 1,77 · **ROE_Min3Y 26,1%** · CF_OA_P0 +27,3 tỷ ·
+Debt_Eq 0,29. Vừa sợ hãi vừa chất lượng — nhưng **ADV1M 0,108 tỷ/phiên**, dưới sàn thanh khoản ~10×,
+không size được ở quy mô sổ. Ghi lại để không phải tìm lại; **không phải khuyến nghị**.
+
+**Phần 3 — WebSearch theo BỘ TỪ KHOÁ NHÓM (8 truy vấn + 2 WebFetch):**
+
+- **Chung (30/30 mã)**: **0 sự kiện khởi tố/thanh tra/đình chỉ/ngoại trừ/chậm BCTC/huỷ niêm yết nào chạm
+  mã đang gác trong cửa sổ.** Cập nhật cắt margin HOSE tới 10/09 (76 mã) — mã bổ sung là KLB, MHC, STK,
+  FUEPHVNS, **0/30 mã gác**. Sự kiện đình chỉ nổi bật của tháng vẫn là **HBS** (03/09, chậm BCTC + ngoại
+  trừ) — không phải mã gác, không phải case (công ty CK nhỏ, lõi tự hỏng).
+- **Ngân hàng (13 mã)**: **0 sự kiện rủi ro.** Không có kiểm soát đặc biệt / chuyển giao bắt buộc / khởi
+  tố lãnh đạo NH mới trong cửa sổ (4 NH yếu GPBank/MBV/Vikki/VCBNeo đã chuyển giao xong từ trước, không
+  phải tin mới). Nền lãi suất huy động 12T cuối tuần: ACB 7,8% dẫn đầu — bình thường.
+- **BĐS/hạ tầng (VHM, VRE, VPI, SIP)**: **0 sự kiện chạm 4 mã.** Áp lực đáo hạn TPDN nhóm BĐS T8–T12/2026
+  ~79.000 tỷ (riêng T9 ~20.000 tỷ) là **nền ngành đã biết**, không phải tin mới; ca chậm trả được nêu đích
+  danh là **No Va Thảo Điền** (nhóm Novaland — NVL đã BANNED, không giữ). Tỷ lệ thu hồi nợ chậm trả BĐS dân
+  cư cải thiện 29,2% (2024) → 48,8% (2025) → ~58,7% (2026) ⇒ nền ngành đang ĐỠ xấu đi, không xấu thêm.
+- **Ngoài ngân hàng (17 mã)**: **0 tai nạn nhà máy / thu hồi sản phẩm / mất giấy phép-mỏ / kê biên / tranh
+  chấp lãnh đạo.**
+
+**Phần 4 — read-through case cũ (không có gì mới trong cửa sổ):**
+
+| Case | Trạng thái | Có gì mới trong cửa sổ 18→20/09? |
+|---|---|---|
+| **TV1** (QUALIFY, có tail-risk) | Giữ nguyên | **KHÔNG.** Thua phúc thẩm 17,6 tỷ (tin 08/09) + kiểm toán An Việt nhấn mạnh nợ 127,6 tỷ với ông Lê Phi Long/bà Nguyễn Thị Ngải — **đã ghi ở lượt 09-14**, không phải dữ kiện mới. Cổng còn mở: ký hợp đồng kiểm toán BCTC **năm 2026** (An Việt mới chỉ SOÁT XÉT bán niên) |
+| **DGC** (AMBIGUOUS, bị loại khỏi universe) | Giữ nguyên | **KHÔNG.** Vẫn hạn chế giao dịch HOSE (ngoại trừ của UHY vì phối hợp CQĐT); cổ tức tiền mặt 80% đã trả 25/09-plan từ record 15/09. ĐHĐCĐ bất thường liên quan 3 TV HĐQT bị khởi tố — tin cũ |
+| **GEX/GEE** (AMBIGUOUS-yếu, cửa sổ ĐÃ ĐÓNG) | Giữ nguyên | **KHÔNG.** 2 cổng nhị phân (kết luận điều tra 500kV mạch 3 có nêu đích danh pháp nhân Gelex? · Q3/2026 CF_OA ≥ NP?) vẫn chưa đóng. Giá đã hồi vượt trước sự kiện ⇒ không actionable |
+| **PNJ** (AMBIGUOUS) | Giữ nguyên | **KHÔNG.** Cổng xác nhận vẫn là BCTC Q3/2026 |
+
+**Phần 5 — ★ Sự kiện lớn nhất cửa sổ là CƠ CẤU CHỈ SỐ, KHÔNG phải sự kiện lõi (đọc đúng để không phân
+loại nhầm thành "fear"):**
+
+Từ hôm nay **21/09/2026**, VN chính thức mang trạng thái **thị trường mới nổi thứ cấp (FTSE Russell)**.
+Cùng ngày có hiệu lực kỳ rà soát bán niên T9/2026 của **FTSE Vietnam Index** (rổ frontier cũ): **loại 21
+mã** — DXG, GEX, TCH, KDH, KBC, NVL, PVD, DPM, POW, PDR, **SHB, SSI, VPI, VCI, VJC, VCG, EIB, VRE, VIX,
+VND**, VCK; **thêm MCH, TCX, VPL**. Quỹ thụ động đã hoàn tất cơ cấu **trong phiên 18/09**.
+
+**5/30 mã đang gác nằm trong danh sách bị loại: SHB · VRE · VIX · VND · VPI.**
+
+**Phân loại: KHÔNG PHẢI case fear-buy, và KHÔNG phải luận điểm gãy.** Lý do, theo đúng trục §0.5:
+- Đây là **dòng vốn cơ học**, không chạm lõi kinh doanh, không chạm pháp nhân — không thuộc bất kỳ nhóm
+  trigger (a)/(b)/(c)/(d) nào. Trục quyết định của khung ("cáo buộc chạm LÕI hay chạm CÁ NHÂN") **không áp
+  dụng** vì không có cáo buộc nào.
+- Áp lực bán thụ động **đã xảy ra rồi** (18/09), không còn phía trước ⇒ ngay cả đọc theo nhóm (c) vĩ
+  mô/kỹ thuật thì cửa sổ cũng đã đóng, giống hệt bài học GEX ở lượt 09-18.
+- Đọc ngược lại cũng đúng: 8 mã NH vào **FTSE All-Cap** (VPB, VCB, STB, HDB, SHB, SSB, BID, MSB) ⇒ SHB
+  vừa RA rổ frontier vừa VÀO rổ All-Cap — nói "SHB bị loại" mà bỏ vế sau là đọc một chiều.
+
+**Hàm ý duy nhất, và nó thuộc phía VẬN HÀNH chứ không phải phía luận điểm**: phiên 21/09 có thể có biến
+động thanh khoản/giá bất thường ở 5 mã trên do dòng vốn chỉ số, **không phải tín hiệu cơ bản**. Không rút
+lệnh nào (vì không có lệnh mua), không đổi phân loại mã nào.
+
+**Kết luận lượt này:** 30 mã rà qua · **0 case mới** · **0 QUALIFY** · watchlist TƯƠI · **0 lệnh mua để
+bảo vệ**. Lượt sạch.
+
+**Nguồn (cửa sổ 18→20/09/2026):**
+[cafef — FTSE Russell loại 21 cổ phiếu FTSE Vietnam Index, thêm MCH, TCX, VPL](https://cafef.vn/ftse-russell-loai-21-co-phieu-ftse-vietnam-index-them-moi-mch-tcx-va-vpl-188260905100801281.chn) ·
+[dnse — FTSE loại 21 cổ phiếu khỏi FTSE Vietnam Index](https://www.dnse.com.vn/senses/tin-tuc/ftse-loai-21-co-phieu-khoi-ftse-vietnam-index-them-mch-tcx-va-vpl-35283445) ·
+[investing/Vietstock — 21/09: Đọc gì trước giờ giao dịch chứng khoán](https://vn.investing.com/news/stock-market-news/2109-doc-gi-truoc-gio-giao-dich-chung-khoan-2716475) ·
+[cafef — HOSE công bố 72 mã cổ phiếu bị cắt margin tháng 9](https://cafef.vn/hose-cong-bo-72-ma-co-phieu-bi-cat-margin-thang-9-18826091116435351.chn) ·
+[nguoiquansat — HoSE cắt margin thêm 3 cổ phiếu, danh sách tăng lên 72 mã](https://nguoiquansat.vn/hose-cat-margin-them-3-co-phieu-danh-sach-tang-len-72-ma-314855.html) ·
+[vietstock — Gần 33 triệu cp HBS nhận án đình chỉ giao dịch](https://vietstock.vn/2026/08/gan-33-trieu-cp-hbs-nhan-an-dinh-chi-giao-dich-830-1485892.htm) ·
+[dnse — Hơn 91.000 tỷ đồng trái phiếu doanh nghiệp đáo hạn trong 4 tháng cuối năm](https://www.dnse.com.vn/senses/tin-tuc/hon-91000-ty-dong-trai-phieu-doanh-nghiep-se-dao-han-tro-35286254) ·
+[dantri — Hàng loạt doanh nghiệp bất động sản tiếp tục khất nợ trái phiếu](https://dantri.com.vn/bat-dong-san/hang-loat-doanh-nghiep-bat-dong-san-tiep-tuc-khat-no-trai-phieu-20260901182133683.htm) ·
+[nguoiquansat — Chủ tịch bị bắt, doanh nghiệp điện thuộc EVN tiếp tục thua kiện (TV1, 08/09)](https://nguoiquansat.vn/chu-tich-bi-bat-doanh-nghiep-dien-thuoc-evn-tiep-tuc-thua-kien-phai-boi-thuong-hang-chuc-ty-dong-314955.html) ·
+[cafef — Cổ phiếu ngân hàng đồng loạt tăng giá, HDB được khối ngoại gom nhiều nhất](https://cafef.vn/co-phieu-ngan-hang-dong-loat-tang-gia-hdb-duoc-khoi-ngoai-gom-nhieu-nhat-thi-truong-188260917214916743.chn)
+
+---
+
+### 2026-09-25 (job `Taylor_20260925_011044`) — QUÉT TUẦN — **0 QUALIFY mới · 0 AMBIGUOUS mới · 1 không-phải-case mới (KSB) · 1 không-phải-case ở bộ lọc rẻ nhất (BTW) · 30 mã gác rà qua** · ★★ **CỜ IDIOCRASH VPB −22,8% là ARTIFACT CORP-ACTION, không phải sự kiện giá — khuyết tật CƠ CHẾ của `anomaly_scan.py`, đo được, không suy đoán** · ★ **Đại án điện: 47 bị can / phong toả TK chứng khoán ~1.756 tỷ (tin 18/09) — vẫn CHỈ cá nhân, 0 pháp nhân** · ★ **0 lệnh MUA trên mọi kênh phiên 25/09 ⇒ không có luận điểm nào để RÚT**
+
+**Độ tươi**: `anomaly_scan.py --backfill-days 7` báo **watchlist TƯƠI** (`active_nav` computed_at
+**2026-09-24** = đúng phiên hoàn tất gần nhất). Universe 255 mã (H:30 / W:243). Không có cảnh báo QUÁ HẠN.
+
+#### ★★ Phát hiện CƠ CHẾ — cờ IDIOCRASH của VPB là nhiễu corp-action, không phải sự kiện sợ hãi
+
+`anomaly_scan.py` báo `[H] 2026-09-18 VPB: IDIOCRASH | ret −22,8% (VNI −0,4%, idio −22,4%)`. **Sai.**
+Đo thẳng trên BQ `tav2_bq.ticker` (alias bảng theo bẫy #2 CLAUDE.md):
+
+| time | `Close` (điều chỉnh) | `Price` (thô) | `Price/Close` |
+|---|---|---|---|
+| 2026-09-17 | 28.200 | 28.200 | 1,0000 |
+| **2026-09-18** | **21.780** | **27.450** | **1,2603** |
+| 2026-09-21 | 22.570 | 28.450 | 1,2605 |
+| 2026-09-22 | 22.220 | 28.000 | 1,2601 |
+| 2026-09-23 | 22.060 | 27.800 | 1,2602 |
+| 2026-09-24 | 22.100 | 22.100 | 1,0000 |
+
+Giá THẬT phiên 18/09: 28.200 → **27.450 = −2,7%**, một phiên đỏ bình thường. Cú "−22,8%" là **hệ số điều
+chỉnh cổ tức cổ phiếu ~26% bị nhà cung cấp dữ liệu áp vào cột `Close` từ 18/09**, trong khi **GDKHQ thật
+là 24/09** (đúng mốc "VPB GDKHQ ~24/09" đã ghi ở lượt 09-11 và 09-18) — cửa sổ lệch **4 phiên**, tự đóng
+khi `Close` về bằng `Price` ngày 24/09.
+
+- `anomaly_scan.py:212/223` đọc **`Close`** (đã điều chỉnh) rồi `pct_change()` ⇒ **mọi corp-action đều
+  sinh IDIOCRASH/FLOOR2 giả**, và bộ lọc `idio` KHÔNG cứu được vì VNINDEX không hề giảm cùng.
+- Quét cùng cửa sổ trên **30 mã đang gác**: chỉ 2 mã có `|Price/Close−1| > 0,5%` là **VPB (1,2603)** và
+  **DRI (1,0725, 18–21/09)** — DRI không vượt ngưỡng nên không trip, nhưng là **cùng một lớp lỗi chờ nổ**.
+- ⚠️ Hệ quả đọc ngược: với 18 mã phễu đo lại 1 năm, tỷ lệ dòng có điều chỉnh chạy từ **0,0% (VSC) tới
+  97,2% (HT1)** — nên `washout`/`dd52` của phễu là **drawdown TỔNG LỢI NHUẬN** (đã trừ cổ tức), không
+  phải sụt giá thuần. Đây có thể là **một phần** lời giải cho caveat lệch số của phễu escalate từ 09-04;
+  **chưa đủ để kết luận** (PAN lệch NGƯỢC chiều) ⇒ **vẫn để mở, không suy diễn nguyên nhân** (§29).
+- **Đề xuất (chưa tự sửa — chạm công cụ dùng chung)**: trong `alerts()`, bỏ qua phiên có
+  `ABS(Price/Close − 1) > 0,5%` cho chính mã đó, hoặc tính `ret` trên `Price`. Cần user/Mike duyệt.
+
+#### Cờ thứ 2 — BTW (tier W)
+
+`[W] 2026-09-23 BTW: FLOOR2 | ret −10,0% (idio −9,1%) vol 8,4x val 0,3B close 65.000`. **Không phải case
+— loại ở BỘ LỌC RẺ NHẤT trước khi cần tới tin**: giá trị khớp **0,3 tỷ/phiên**, `pct_adj_rows` 96,1% (đây
+là mã cổ tức cao, drawdown 1 năm −34,3% phần lớn là cổ tức). Không đầu tư được ở quy mô 2 account — cùng
+lý do đã loại SKG (09-11), TSB, TV4, ICG.
+
+#### Phễu hệ thống — 23 mã FULLY_QUALIFIED, **22 đã có kết luận, 1 MỚI**
+
+`grep` trên chính file này xác nhận 22/23 mã đã vào sổ. Phân giải nhóm nguyên nhân của lượt 09-04/09-11
+GIỮ NGUYÊN, **0 dữ kiện nào trong cửa sổ đổi chúng**: BĐS-lãi suất (SZC, HDG, DTD, ITC, NTL) · xuất khẩu
+-thuế 301/232 (ANV, DRC, TNG, VGS, HT1, LCG, VCS, PTB) · ngân hàng đang giữ (SHB, VIB, TPB, VPB) ·
+đã kết luận riêng (VSC, YEG, SKG, PAN, VRE).
+
+**Mã DUY NHẤT chưa từng vào sổ — `grep "\bKSB\b"` trả 0 dòng:**
+
+| Mã | Số liệu (24/09, BQ `ticker` + `ticker_financial` 2026Q2) | Nguyên nhân washout (verify bằng tin) | Kết luận |
+|---|---|---|---|
+| **KSB** (Khoáng sản & Xây dựng Bình Dương – Bimico, HOSE, ICB 2353, rating 3, golden_floor Y, marginable Y, **ADV3M 9,73 tỷ** = đầu tư được) | **12.950** (đáy 1 năm 12.850, **+0,8% trên đáy**), dd từ đỉnh 1 năm **−39,1%** · **PB 0,51** (BVPS **25.202**) · PE 7,46 · **DY 0%** · Debt_Eq **1,007** (tăng từ 0,85 bốn quý trước) · ROE_Trailing 7,26% · **ROE_Min3Y 2,29%** (sát sàn golden floor) · FSCORE 5 · **`pct_adj_rows` 0,4% ⇒ −39% là sụt GIÁ THẬT, không phải cổ tức** · **NP 4 quý = 96,8+31,8+41,3+35,5 = 205,4 tỷ** vs **CF_OA 4 quý = −10,6 −61,2 +168,0 +70,6 = +166,8 tỷ ⇒ CF_OA/NP = 0,81×** (2 quý gần nhất ÂM liên tiếp) · Doanh thu Q2/26 272 tỷ (**+90% YoY**), NP **+125% YoY**, nhưng **GPM 35,0% so 40,7% cùng kỳ** | **KHÔNG tìm được sự kiện sợ hãi nào — tin trong năm là TÍCH CỰC**: ĐHĐCĐ 2026 ước lãi 6 tháng **vượt 65% kế hoạch**, dự báo LN ròng cả năm **+52%**; mỏ **Tân Mỹ được duyệt khai thác sâu tới 120m, giấy phép tới 2029**. Mặt trái có thật: **mỏ Phước Vĩnh hết hạn giấy phép 6/2027**; KCN 348ha **tỷ lệ lấp đầy cao, dư địa còn ít** — doanh thu cho thuê hạ tầng đã giảm từ **>500 tỷ (2020) xuống 235 tỷ (2023)**; **không chia cổ tức 2025** để giữ vốn | **Không phải case — gạch bằng 3 lý do ĐỘC LẬP**: (1) **KHÔNG CÓ TRIGGER**: không thuộc nhóm (a)/(b)/(c)/(d) §0.5 — đây là **giá trôi dần 1 năm** đi ngược dòng tin tốt, không phải cú sợ hãi; khung này due-diligence sự kiện, không phải screen value thuần (ranh giới §9/§10.9 với BAL/custom30V). (2) **§2#3 / §10.3 trên cơ sở 4 QUÝ: CF_OA chỉ 0,81× NP, 2 quý gần nhất ÂM** đúng lúc NP nhảy vọt — lợi nhuận sổ sách CHƯA được tiền xác nhận, cộng **Debt_Eq 0,85→1,01**. (3) **Góc SOTP/tài sản ĐÃ kiểm đúng chiều (bài học TV1/DGC), và nó đang chống lại luận điểm rẻ**: tài sản lõi là **giấy phép mỏ có hạn** (Phước Vĩnh **6/2027**) + KCN gần lấp đầy ⇒ book value **không** là năng lực sinh lời vĩnh viễn, **PB 0,51 là chiết khấu cho tài sản đang cạn, không hẳn định giá sai**. **CỔNG MỞ LẠI (nhị phân, 2 điều kiện AND): (i) BCTC Q3/2026 (~cuối 10/2026) — CF_OA đảo DƯƠNG và xác nhận mức NP đang báo; (ii) gia hạn/thay thế giấy phép Phước Vĩnh trước 6/2027.** Thiếu 1 trong 2 thì PB 0,51 vẫn không đủ |
+
+#### Read-through mã đang gác + case cũ (có gì MỚI trong cửa sổ 18→25/09)
+
+- ★ **TV1 (đang giữ cả 2 account) — CÓ dữ kiện mới, KHÔNG đổi phân loại.** Tin **18/09**: Cơ quan CSĐT Bộ
+  Công an **đã khởi tố 47 bị can về 5 tội danh**, **tạm giữ hơn 45,8 tỷ**, **phong toả tài khoản chứng
+  khoán tổng giá trị ~1.756 tỷ**; kết luận điều tra **sắp ban hành**. Bài **không** nêu pháp nhân nào bị
+  truy tố, **không** có kê biên tài sản doanh nghiệp, **không** có hợp đồng bị vô hiệu ⇒ **trục quyết định
+  §2 (chạm CÁ NHÂN hay chạm LÕI) vẫn ở phía CÁ NHÂN**, y như 09-14 và 09-18. **Kết luận điều tra ban hành
+  = cổng xác nhận gần nhất của TV1** — theo dõi, chưa hành động.
+- **Cụm Gelex (GEX/GEE)**: `WebFetch` xác nhận bài "Gelex đồng loạt giảm sàn" đăng **14/09**, phiên 14/9 —
+  **không phải dữ kiện mới**, echo nguyên kết luận 09-18 (cửa sổ sợ hãi đã đóng trong 3 phiên).
+- **SSB**: giảm sàn 2 phiên (22/09, đóng 20.900). Nguyên nhân: **điều chỉnh sau 7 phiên tăng liên tiếp
+  gồm 3 phiên trần, vừa lập đỉnh lịch sử** + **2 Phó TGĐ đăng ký bán** (95.000 + 70.000 cp, 23/09→22/10).
+  **Không phải case** — đây là **chỉnh từ ĐỈNH**, ngược hẳn chữ ký fear-buy (giá << giá trị ở ĐÁY); echo
+  kết luận 09-07.
+- **DGC**: **trả cổ tức tiền 8.000đ/cp (80%) ĐÚNG HÔM NAY 25/09** (record 15/09), tổng chi >3.000 tỷ.
+  Đúng mốc đã ghi từ 09-11. 0 tin mới về cổng audit/hạn chế giao dịch.
+- **Vingroup (VHM/VRE/VPI đang giữ)**: 0 sự kiện tín dụng/trái phiếu MỚI trong cửa sổ — mọi tin tìm được
+  đều trước cửa sổ (tất toán 906,5 triệu USD trái phiếu quốc tế; bảo lãnh vay VinFast 29/08; thế chấp tài
+  sản 03/09). Sụt giá tuần này (VHM −4,08%, VIC −2,57%, VRE −2,94%, VPI −4,19%) đi cùng **VN-Index −1,47%
+  phiên 24/09, khối ngoại bán ròng 664–918 tỷ/phiên** ⇒ **chốt lãi diện rộng sau phiên đảo ETF**, không
+  phải sự kiện lõi.
+- **13 mã ngân hàng**: **0 sự kiện rủi ro.** Không có kiểm soát đặc biệt / chuyển giao bắt buộc / khởi tố
+  lãnh đạo NH nào trong cửa sổ. Corp-action nền: **VPB GDKHQ cổ tức cổ phiếu 24/09** (xem mục artifact).
+- **Nhóm ngoài ngân hàng (17 mã)**: 0 sự kiện riêng lẻ. Sụt giá theo nhóm BĐS/tài chính + bối cảnh **thuế
+  đối ứng 10% của Mỹ hết hiệu lực trong tuần** — vĩ mô, không phải trigger mã.
+
+#### Việc 4 — ẢNH HƯỞNG TỚI PHÍA MUA
+
+**0 lệnh MUA trên MỌI kênh cho phiên 25/09.** Kiểm kê thật 6 file plan:
+`plan_SpaceX` 0 lệnh · `plan_ZaloPay` 1 lệnh **BÁN VPB** · `park_trim_ZaloPay` 1 lệnh **BÁN VPB** ·
+`park_trim_SpaceX` / `jit_unpark_SpaceX` / `jit_unpark_ZaloPay` 0 lệnh. `plan_main` mới nhất là
+**2026-09-24** (chưa có bản 09-25). ⇒ **Không có luận điểm mua nào để RÚT lượt này.**
+
+**Kết luận lượt này:** **30 mã gác rà qua** (13 NH + 17 ngoài NH) · 255 mã anomaly_scan ×5 phiên ·
+**23 mã phễu FULLY_QUALIFIED** (22 đã có kết luận + 1 DD mới) · 7 truy vấn tin + 2 WebFetch + 2 truy vấn
+BQ · **0 QUALIFY mới** · **0 AMBIGUOUS mới** · **2 không-phải-case (KSB có cổng mở lại, BTW loại ở thanh
+khoản)** · 5 read-through (1 có dữ kiện mới THẬT: TV1) · **watchlist TƯƠI** · **0 lệnh mua để bảo vệ** ·
+★★ **1 khuyết tật cơ chế đo được: `anomaly_scan.py` sinh cờ giả trên corp-action.**
+
+**Mốc phải theo, gần → xa: ★ DGC trả cổ tức 8.000đ/cp HÔM NAY 25/09 → kết luận điều tra đại án điện
+"sắp ban hành" (cổng TV1) → BCTC Q3/2026 cuối 10/2026 (cổng của PAN, PTB, và nay KSB) → giấy phép mỏ
+Phước Vĩnh của KSB hết hạn 6/2027.**
+
+**Nguồn (cửa sổ 18→25/09/2026):**
+[nguoiquansat — Sắp tung kết quả điều tra vụ án ngành điện: gần 50 bị can bị khởi tố (18/09)](https://nguoiquansat.vn/sap-tung-ket-qua-dieu-tra-vu-an-be-boi-nganh-dien-gan-50-bi-can-bi-khoi-to-he-lo-loat-sai-pham-nghiem-trong-316931.html) ·
+[dnse — Cổ phiếu nhóm Gelex đồng loạt giảm sàn (14/09, xác nhận NGOÀI cửa sổ)](https://www.dnse.com.vn/senses/tin-tuc/co-phieu-nhom-gelex-dong-loat-giam-san-mot-ma-ngan-hang-ve-dinh-3-nam-35286475) ·
+[mekongasean — SSB giảm sàn phiên thứ hai](https://mekongasean.vn/ssb-giam-san-phien-thu-hai-mot-ma-ho-masan-vuot-dinh-59880.html) ·
+[dnse — Hóa chất Đức Giang chốt ngày trả cổ tức tiền mặt 80% (trả 25/09)](https://www.dnse.com.vn/senses/tin-tuc/hoa-chat-duc-giang-chot-ngay-tra-co-tuc-tien-mat-ty-le-80-35282580) ·
+[baophapluat — ĐHĐCĐ KSB 2026: ước lãi 6 tháng vượt 65% kế hoạch, mỏ Tân Mỹ tới 2029](https://doanhnhan.baophapluat.vn/dhdcd-ksb-2026-uoc-lai-6-thang-vuot-65-ke-hoach-don-luc-phat-trien-khu-cong-nghiep-va-tang-cong-suat-mo-da.html) ·
+[baophapluat — Bimico lợi nhuận giảm, dòng tiền âm, cổ phiếu "lao dốc" (KCN 348ha, doanh thu thuê 500→235 tỷ)](https://doanhnhan.baophapluat.vn/bimico-loi-nhuan-giam-dong-tien-am-co-phieu-lao-doc-79176.html) ·
+[congluan — Chứng khoán 21/9: VN-Index giảm sâu mất mốc 1.800 điểm](https://congluan.vn/chung-khoan-hom-nay-2192026-vn-index-giam-sau-mat-moc-1800-diem-post361388.html) ·
+[investing/Vietstock — Vietstock Daily 25/09/2026: Sức ép lan rộng](https://vn.investing.com/news/stock-market-news/vietstock-daily-25092026-suc-ep-lan-rong-2719825)
+
+---
+### 2026-09-28 — QUÉT SÁNG THỨ HAI (job `Taylor_20260928_010002`, mục đích: BẢO VỆ PHÍA MUA trước 09:00) — **0 QUALIFY · 0 case mới · 30 mã gác rà qua · 2 read-through có dữ kiện mới THẬT (PNJ, VPB) · 1 HẠ BẬC: PNJ AMBIGUOUS-nghiêng-constructive → NON** · ★★★ **PNJ là THÀNH VIÊN SỐNG của rổ custom30V PRODUCTION (w=0,7075%, `effective_to` rỗng) ở state NEUTRAL đang bật parking — luận điểm vừa gãy bằng chính công bố của DN, và thứ DUY NHẤT chặn lệnh mua sáng nay là KÍCH THƯỚC LÔ, không phải bất kỳ cổng tin/pháp lý nào** · ★ **0 lệnh MUA trên mọi kênh cho phiên 28/09**
+
+**Độ tươi**: `anomaly_scan.py --backfill-days 7` báo **watchlist TƯƠI** (`active_nav` computed_at
+**2026-09-25** = đúng phiên hoàn tất gần nhất; 26–27/09 là T7/CN). Universe 255 mã (H:30 / W:243).
+Không có cảnh báo QUÁ HẠN.
+
+#### Việc 1 — anomaly_scan: 2 cờ, **0 cờ MỚI** (cả 2 đã có kết luận từ lượt 09-25)
+
+```
+[H] 2026-09-18 VPB: IDIOCRASH | ret −22,8% (VNI −0,4%, idio −22,4%)   → ARTIFACT corp-action (kết luận 09-25)
+[W] 2026-09-23 BTW: FLOOR2    | ret −10,0% (idio −9,1%) val 0,3B      → không-phải-case, loại ở thanh khoản (09-25)
+```
+
+Quét lại `ABS(Price/Close − 1) > 0,5%` trên **30 mã đang gác**, 3 phiên 23→25/09: chỉ còn **VPB
+2026-09-23 (1,2602)** — đuôi của chính cửa sổ lệch 4 phiên đã mô tả 09-25, **tự đóng ngày 24/09**.
+DRI đã hết lệch. ⇒ khuyết tật cơ chế `anomaly_scan.py:212/223` (đọc `Close` đã điều chỉnh) **vẫn
+chưa sửa** — đề xuất 09-25 còn treo, chờ user/Mike duyệt vì chạm công cụ dùng chung.
+
+#### ★★★ Việc 4 (câu hỏi chính của lượt này) — PNJ: luận điểm gãy TRÊN MÃ CÓ TRONG RỔ MUA
+
+**Dữ kiện mới, trong cửa sổ (công bố của chính PNJ, 25→27/09) — không phải suy đoán:**
+
+| Hạng mục | Số |
+|---|---|
+| Dự phòng **chính sách thu đổi sản phẩm** | **7.071 tỷ** (= **50,8%** vốn chủ Q2/26) |
+| LNTT 2026 điều chỉnh | **−6.059 tỷ** · LNST **−6.271 tỷ** (lỗ KỶ LỤC) |
+| Doanh thu 2026 điều chỉnh | **39.057 tỷ** (−9.600 tỷ, **−20% so kế hoạch gốc**) |
+| Kế hoạch huy động | **tối đa 8.000 tỷ** = **47,4%** vốn hoá (16.887 tỷ @33.000) |
+| Cổ tức tiền mặt 2026 | **KHÔNG chia** |
+| Nội bộ bán | **Cao Ngọc Duy** (em bà Cao Thị Ngọc Dung, CT HĐQT) đăng ký bán **9 tr cp**, 2,7% → **0,943%**, 01→30/10, ~300 tỷ |
+| ĐHĐCĐ bất thường | **21/10/2026** |
+
+**Áp lại §2 — cổng xác nhận tiền-đăng-ký (§7 mục 5) đã tự trả lời, và trả lời XẤU:**
+
+- **#1 cá nhân vs LÕI → FAIL (trục quyết định đã lật).** §7 dựng đúng trục này để tách PNJ-2015
+  (QUALIFY, scandal ở ngân hàng của CHỒNG chủ tịch, 0 chạm lõi) khỏi PNJ-2026 (AMBIGUOUS, P-Lab nội
+  bộ, chạm product-integrity). Dự phòng **7.071 tỷ cho chính sách THU ĐỔI SẢN PHẨM** = DN tự định
+  lượng nghĩa vụ **nhận lại hàng đã bán cho khách qua chuỗi bán lẻ lõi**. Đây không còn là "cáo buộc
+  nhắm cá nhân cựu GĐ P-Lab" — nó đã **chuyển thành nghĩa vụ tiền mặt của pháp nhân, đi qua đúng kênh
+  lõi**, khớp gạch đầu dòng ❌ §2 *"cáo buộc làm sản phẩm/dịch vụ vô giá trị"*. **Đo bằng công bố của
+  DN, không phải bằng suy luận của tôi.**
+- **#3 CF_OA ≥ NP → FAIL.** BQ `ticker_financial` **2026Q2**: `NP_P0` **−282,9 tỷ**, `CF_OA_P0`
+  **−1.568,2 tỷ**, **FSCORE 7 → 1**. Q2 = Apr–Jun, **TRƯỚC** khi scandal nổ (02/07) ⇒ tiền đề
+  "fundamentals **pre-crisis** mạnh" mà phán quyết AMBIGUOUS 18/07 dựa vào (viết khi chỉ có Q1) **đã
+  bị chính BCTC Q2 phủ định**. Cổng #1 của §7 ("đọc BCTC Q2/2026") thực tế đã đỏ và lượt trước bỏ sót.
+- **§2.5 #2 sống-sót-không-pha-loãng → FAIL.** Huy động tới **8.000 tỷ = 47,4% vốn hoá** ngay ở đáy để
+  tái thiết = đúng gạch ❌ *"buộc bán tài sản / pha loãng cổ phiếu ở đáy để tồn tại"*.
+- **#5 sàn định giá → FAIL.** Giá 25/09 **33.000**, `PB 1,25` — nhưng đó là PB trên **book TRƯỚC dự
+  phòng**. Vốn chủ Q2/26 = 511.721.959 cp × BVPS 27.188 = **13.913 tỷ**; LNST 6T +1.184,5 tỷ (Q1
+  +1.467,4 / Q2 −282,9) ⇒ H2 hàm ý **−7.455,5 tỷ** ⇒ vốn chủ cuối 2026 ≈ **6.457 tỷ**, BVPS ≈
+  **12.619** ⇒ **PB thực @33.000 ≈ 2,62** (PB_MA5Y 2,94). **Không có sàn** — chưa tính pha loãng.
+- **#4 solvent → PASS mềm** (Debt_Eq 0,511, LtDebt = 0) — trụ duy nhất còn đứng.
+
+**Góc TÀI SẢN/DÒNG TIỀN đã kiểm ĐÚNG CHIỀU (bài học TV1 + DGC — 2 lần bị user sửa vì quá thận trọng),
+và nó KHÔNG cứu được case:** PNJ có tài sản hữu hình thật và thanh khoản bậc nhất — `Inventory_P0`
+**15.149 tỷ** (vàng/trang sức), `Cash_P0` 708 tỷ, `totalAsset_P0` 21.018 tỷ, **0 nợ dài hạn**. Nhưng
+dự phòng thu đổi là **claim ĐÚNG VÀO chính tồn kho/tiền đó** (thu hàng về = trả tiền ra): tài sản
+ròng sau dự phòng ≈ 13.913 − 7.071 ≈ **6.842 tỷ** vs vốn hoá **16.887 tỷ** = **2,5× tài sản ròng**.
+Và cấu phần giá trị còn lại (thương hiệu + mạng bán lẻ) chính là thứ đang bị một đợt remediation
+product-integrity làm suy giảm. ⇒ Góc asset-backed **không** tạo được sàn như DGC (mỏ + cổ tức tiền)
+hay TV1 (thuỷ điện SOTP).
+
+**⇒ PNJ: HẠ BẬC AMBIGUOUS-nghiêng-constructive → NON.** 4/5 tiêu chí §2 FAIL, trong đó trục quyết
+định (#1) lật sang phía LÕI bằng con số của chính DN. Cổng §7 mục 5 (BCTC Q3/2026 cuối 10/2026) vẫn
+nên đọc, nhưng **không còn là cổng NÂNG BẬC** — nó chỉ còn xác nhận quy mô thiệt hại. `is_stable_payer`
+= true trong rổ nay **sai sự thật** (2026 không chia cổ tức tiền).
+
+##### ★★★ Phơi nhiễm PHÍA MUA — đo thật, 4 artifact độc lập
+
+1. **PNJ là thành viên SỐNG của rổ production.** `data/custom30v_8l_publish.csv` (file mà
+   `compute_park_trim.py:256` đọc thật, `BASKET_CSV`), dòng 1467:
+   `2026-08-05,2026-08-05,,PNJ,26,2,0.007075,2026-07-01,ABOVE_FLOOR,true` — **`effective_to` RỖNG =
+   kỳ đang mở**, w **0,7075%**, `rating_8l` **2**, `liq_rank` 26. `rating_8l`/`quarter` neo ở
+   **2026-07-01**, tức **trước** quý khủng hoảng.
+2. **Parking ĐANG BẬT.** `data/golive_v23_status.json`: `state=3` / `state_name=NEUTRAL` /
+   `etf_park_frac=0.8` (date 2026-09-25). `compute_park_trim.py:431` chỉ `SKIP_STATE` khi `state != 3`
+   ⇒ **không skip**.
+3. **Thứ duy nhất chặn lệnh mua sáng nay là KÍCH THƯỚC LÔ.** `park_trim_SpaceX_2026-09-28.json`:
+   `decision=BLOCKED_ALL_NAMES`, và PNJ nằm trong danh sách 11 mã bị bỏ với lý do nguyên văn
+   **`PNJ 0.71% (target 2,711,268đ < 1 lô (100cp × 33,000đ))`**. ⇒ chỉ cần park pool SpaceX tăng
+   **+21,7%** (3.300.000/2.711.268 = 1,2171) là PNJ **tự động thành mã mua được**, không qua cổng nào.
+4. **Không có lớp bảo vệ nào khác.** Tập khả thi của `compute_park_trim.py:23` =
+   `{i ∈ rổ : i ∉ BANNED ∧ i ∉ excluded_tickers ∧ có giá ∧ w_i×target_park ≥ 1 lô}`.
+   `lag_forensic_filter.BANNED` có **16 mã, KHÔNG có PNJ**; `data/forensic_flags.csv` **0 dòng PNJ**;
+   PNJ xuất hiện trong danh sách "bỏ" của park_trim với lý do **lô**, không phải `excluded` ⇒ cũng
+   không nằm trong `excluded_tickers` của account nào. **`compute_park_trim.py` KHÔNG đọc
+   `data/insider_flags.json` lẫn `data/anomaly_flags.json`** (grep: 0 hit).
+   ⚠️ Mà `data/insider_flags.json` **ĐÃ nổ đúng trên PNJ**:
+   `{"last_alert":"2026-09-22","n_sellers":1,"reasons":"INSIDER_SELL_1PCT","sell_pct_osh":0.03518,"tier":"W"}`.
+   Cờ có thật, đúng mã, đúng tuần — **nhưng đường mua park không tra nó**. (Nêu đúng mức đo được:
+   detector này có thể được thiết kế cho consumer khác — phễu/BAL; việc nó CÓ NÊN chặn park hay không
+   là câu hỏi thiết kế cho user/Mike, không phải tuyên bố lỗi.)
+
+**ESCALATE (không tự sửa — chạm rổ giao dịch LIVE, cần user duyệt):** đưa **PNJ** vào
+`excluded_tickers` (hoặc `hard_ban`) cho tới khi case được xét lại, **trước khi** park pool chạm mốc
++21,7%. Kèm 2 câu hỏi thiết kế: (i) `is_stable_payer=true` của PNJ nay sai sự thật — yield floor có
+nên tự rớt khi DN công bố không chia cổ tức? (ii) đường park có nên tra `insider_flags.json` /
+`anomaly_flags.json` như phễu vẫn làm?
+
+#### Việc 4 (phần còn lại) — kiểm kê lệnh MUA phiên 28/09: **0 lệnh trên MỌI kênh**
+
+`plan_SpaceX_2026-09-28` 0 lệnh · `plan_ZaloPay_2026-09-28` 0 lệnh · `park_trim_SpaceX_2026-09-28`
+**0 lệnh (`BLOCKED_ALL_NAMES` — 19/30 mã khả thi nhưng tất cả dưới 1 lô)** · `park_trim_ZaloPay_2026-09-28`
+**0 lệnh (`NO_TRIM`; PARK 157,0tr vs target 209,1tr, vượt 0,0tr, dưới ngưỡng 1,3tr)** ·
+`jit_unpark_SpaceX/ZaloPay_2026-09-28` 0 lệnh. `plan_main` mới nhất **2026-09-25** và là **PROBE
+harness** (12 lệnh gắn `strategy=PROBE`, note "probe harness"), **không phải plan giao dịch thật**.
+⇒ **Không có luận điểm mua nào để RÚT sáng nay.** Phơi nhiễm PNJ là **cấu trúc, chưa kích hoạt**.
+
+#### Read-through mã đang gác + case cũ (cửa sổ 25→27/09)
+
+- ★ **VPB (đang giữ) — dữ kiện mới, KHÔNG phải rủi ro.** Reuters (25/09): **SMBC đàm phán nâng sở hữu
+  15% → ~20%**, cân nhắc **mua thẳng trên sàn** thay vì phát hành riêng lẻ; bế tắc ở **giá** (VPB muốn
+  premium kiểu 2023 ~40%, SMBC không sẵn sàng) — một nguồn ghi "kết thúc đàm phán, **chưa đi tới thoả
+  thuận chung**". Hai chiều nhưng **không** chạm tiêu chí rủi ro nào; VPB +4,07% phiên 25/09.
+  Corp-action cổ tức cổ phiếu **đã đóng 24/09** (`Price/Close` về 1,0).
+- **KOS — echo không-phải-case (kết luận 09-21), nay ĐỦ ĐIỀU KIỆN GẠCH VĨNH VIỄN.** HoSE yêu cầu giải
+  trình sau **5 phiên sàn liên tiếp 21→25/09** (27.950 → **21.000**, −46% từ đầu 2026). Định giá vẫn
+  FAIL nặng dù đã rơi: **PE 165,7 · PB 1,93** (09-25) so PE 237/PB 2,76 lúc kết luận 09-21. **Thanh
+  khoản đã CHẾT**: khối lượng 22→25/09 = **10.400 / 1.500 / 9.000 / 3.300 cp** ⇒ **0,04–0,27 tỷ/phiên**
+  (so ADV 8,9 tỷ trước đó). 5 CTCK giải chấp nội bộ (CT Nguyễn Việt Cường 521.200 cp qua 3 CTCK; PTGĐ
+  Nguyễn Thị Phương Thảo 309.400 cp) và **2 lệnh giải chấp 23/09 KHÔNG khớp được** — sàn không có bên
+  mua. Đây là **xoáy giải chấp trên mã không có thanh khoản**, ngược hẳn chữ ký fear-buy; loại ở bộ
+  lọc rẻ nhất, **không cần tin thêm**.
+- **SSB (không giữ) — echo không-phải-case (09-07, 09-25), nguyên nhân nay ĐO ĐƯỢC ĐẦY ĐỦ**: 5 phiên
+  giảm 21→25/09, **22.450 → 19.450 = −13,4%** (tuần −19,29%), sau chuỗi **7 phiên tăng liên tiếp gồm 3
+  phiên trần, +36% ≈ 6.400đ/cp, vừa lập đỉnh lịch sử**; trùng loạt nội bộ đăng ký bán (**Lê Tuấn Anh,
+  con bà Nguyễn Thị Nga, bán 8 tr cp** 23/09→22/10) **và cả đăng ký MUA 8 tr cp** của một lãnh đạo
+  khác. **Chỉnh từ ĐỈNH, không phải sợ hãi ở ĐÁY.**
+- **TV1 (đang giữ cả 2 account)**: **0 dữ kiện mới** trong cửa sổ. Cổng gần nhất giữ nguyên = **kết
+  luận điều tra đại án ngành điện "sắp ban hành"** (tin 18/09, 47 bị can, phong toả TKCK ~1.756 tỷ,
+  vẫn **0 pháp nhân**) ⇒ trục §2 vẫn ở phía **CÁ NHÂN**.
+- **DGC**: **0 tin mới** về cổng audit / hạn chế giao dịch. Cổ tức tiền 80% đã trả 25/09. ⚠️ Vận hành:
+  `park_trim_ZaloPay_2026-09-28` cảnh báo **QUÁ HẠN cổ tức receivable DGC** — DNSE vẫn báo receivable
+  dù đã qua ngày dự kiến về; cần kiểm tiền đã về thật chưa (việc của daily-ops, không phải lượt này).
+- **Vingroup (VHM/VRE/VPI đang giữ)**: **0 sự kiện tín dụng/trái phiếu mới**. Nền hệ thống **đỡ hơn**:
+  tỷ lệ chậm trả TPDN luỹ kế 12T về **0,24%** (đáy 12 tháng, từ đỉnh 0,56% 8/2025), chậm trả mới trong
+  tháng chỉ **300 tỷ** (một DN BĐS); ca chậm trả được nêu tên là **DRH Holdings** (~570 tỷ, **không
+  giữ**). Đáo hạn 9→12/2026: 20/24/20/31 nghìn tỷ.
+- **13 mã ngân hàng**: **0 sự kiện rủi ro** — không kiểm soát đặc biệt / chuyển giao bắt buộc / khởi tố
+  lãnh đạo NH / rút tiền hàng loạt nào trong cửa sổ.
+- **17 mã ngoài ngân hàng**: **0 sự kiện riêng lẻ**. Biến động 25/09 (VHM −4,11%, VRE −3,01%, SAB
+  −2,44%, VND −1,83%, VIX −1,54%) là **diễn biến nhóm** sau đảo ETF/nâng hạng (khối ngoại bán ròng
+  >2.800 tỷ tuần), không phải trigger mã. DRI **+3,5%** (tăng).
+- **Nền vĩ mô/thị trường**: VN-Index **1.785,11** (−1,68% tuần, dưới 1.800), tuần đầu sau nâng hạng
+  Thị trường Mới nổi thứ cấp. Tuần 28/09→02/10: **21 DN trả cổ tức tiền**, tỷ lệ cao nhất 50%.
+- ⚠️ **Cờ vận hành (không thuộc phạm vi lượt này, chuyển Winston)**: `get_gated_state()` in
+  `DT4_only: health report 3696min old (> 1440)` và `BQ base state max=2026-09-25 < end=2026-09-28 →
+  base STALE`. `macro_health.json` cũ **2,6 ngày** ⇒ DT5G đang **fail-closed về DT4**. Cuối tuần nên
+  tuổi dữ liệu là bình thường một phần, **nhưng 3696' > ngưỡng 1440' là thật** — Winston xác nhận.
+
+#### Việc 7 — phễu candidate hệ thống
+
+**KHÔNG có khối "PHỄU CANDIDATE HỆ THỐNG" trong dispatch lượt này** (đây là cadence sáng thứ Hai, không
+phải `--mode weekly`) ⇒ **không rà FULLY_QUALIFIED, và KHÔNG suy diễn danh sách.**
+
+**Kết luận lượt này:** **30 mã gác rà qua** (13 NH + 17 ngoài NH) · 255 mã anomaly_scan × 5 phiên ·
+9 truy vấn tin + 2 WebFetch + 3 truy vấn BQ + 8 lần đọc artifact cục bộ · **0 QUALIFY** · **0 case
+mới** · **1 HẠ BẬC có hệ quả giao dịch: PNJ AMBIGUOUS → NON** · 2 read-through có dữ kiện mới THẬT
+(PNJ, VPB) + 4 echo (KOS, SSB, TV1, DGC) · **watchlist TƯƠI** · **0 lệnh mua để RÚT** · ★★★ **1 phơi
+nhiễm phía mua CẤU TRÚC cần user duyệt chặn: PNJ trong rổ custom30V production, parking đang bật, chỉ
+lô hàng chặn.**
+
+**Mốc phải theo, gần → xa: ★ PNJ ĐHĐCĐ bất thường 21/10 (duyệt huy động 8.000 tỷ) → em CT PNJ bán 9tr
+cp 01→30/10 → BCTC Q3/2026 cuối 10/2026 (xác nhận quy mô thiệt hại PNJ; cổng của PAN, PTB, KSB) →
+kết luận điều tra đại án điện (cổng TV1) → giấy phép mỏ Phước Vĩnh của KSB hết hạn 6/2027.**
+
+**Nguồn (cửa sổ 25→27/09/2026):**
+[Vietstock — PNJ dự kiến lỗ gần 6.3 ngàn tỷ, huy động 8 ngàn tỷ tái thiết hậu khủng hoảng](https://vietstock.vn/2026/09/pnj-du-kien-lo-gan-63-ngan-ty-dong-huy-dong-8-ngan-ty-tai-thiet-hau-khung-hoang-737-1496114.htm) ·
+[VietTimes — PNJ dự kiến lỗ 6.271 tỷ, em trai chủ tịch đăng ký bán 9 triệu cp](https://viettimes.vn/pnj-du-kien-lo-6271-ty-dong-em-trai-chu-tich-dang-ky-ban-9-trieu-co-phieu-post206277.html) ·
+[VnExpress — Em trai bà Cao Thị Ngọc Dung muốn bán 9 triệu cổ phiếu PNJ](https://vnexpress.net/em-trai-ba-cao-thi-ngoc-dung-muon-ban-9-trieu-co-phieu-pnj-5124871.html) ·
+[Znews — PNJ dự kiến lỗ kỷ lục hơn 6.000 tỷ, không chia cổ tức tiền mặt](https://znews.vn/pnj-du-kien-lo-ky-luc-hon-6000-ty-dong-khong-chia-co-tuc-tien-mat-post1685533.html) ·
+[Vietstock — 28/09: Đọc gì trước giờ giao dịch chứng khoán?](https://vietstock.vn/2026/09/2809-doc-gi-truoc-gio-giao-dich-chung-khoan-830-1496282.htm) ·
+[Vietstock — Cổ phiếu giảm sàn 5 phiên liên tiếp, KOS bị yêu cầu giải trình (26/09)](https://vietstock.vn/2026/09/co-phieu-giam-san-5-phien-lien-tiep-kos-bi-yeu-cau-giai-trinh-830-1496247.htm) ·
+[Vietstock — Reuters: SMBC đàm phán nâng sở hữu tại VPBank lên khoảng 20%](https://vietstock.vn/2026/09/reuters-ong-lon-nhat-ban-dam-phan-nang-so-huu-tai-vpbank-len-khoang-20-co-the-mua-tren-san-764-1495877.htm) ·
+[DNSE — Kết thúc đàm phán giữa SMBC và VPBank, các bên chưa đi tới thỏa thuận chung](https://www.dnse.com.vn/senses/tin-tuc/ket-thuc-dam-phan-giua-smbc-va-vpbank-cac-ben-chua-di-toi-thoa-thuan-chung-35287246) ·
+[Vietstock — Chứng khoán Tuần 21-25/09/2026: Thiếu vắng động lực](https://vietstock.vn/2026/09/chung-khoan-tuan-21-25092026-thieu-vang-dong-luc-1636-1496024.htm) ·
+[Tuổi Trẻ — 'Sơ suất' đặt lệnh, sếp SeABank mua nhầm hơn 3.000 cổ phiếu khi đang bán (25/09)](https://tuoitre.vn/so-suat-dat-lenh-sep-seabank-mua-nham-hon-3000-co-phieu-khi-dang-ban-100260925162109587.htm) ·
+[Thời báo Ngân hàng — TPDN: nợ chậm trả hạ nhiệt, 253 nghìn tỷ chờ đáo hạn](https://thoibaonganhang.vn/trai-phieu-doanh-nghiep-no-cham-tra-ha-nhiet-253-nghin-ty-dong-cho-dao-han-187223.html)
+
+---

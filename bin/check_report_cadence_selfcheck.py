@@ -59,7 +59,7 @@ def extract(begin, end):
 # ta chạy TOÀN BỘ heredoc detector — đó cũng chính là điều cần khoá: hai bên phải cùng scope.
 def detector_block():
     src = SRC.read_text(encoding="utf-8")
-    m = re.search(r'PLAN="\$\(python3 - "\$WC_ROOT" "\$TODAY" "\$STATE" << \'PYEOF\'\n(.*?)\nPYEOF\n',
+    m = re.search(r'PLAN="\$\(python3 - "\$WC_ROOT" "\$TODAY" "\$STATE" "\$DELIVERY_STATE" << \'PYEOF\'\n(.*?)\nPYEOF\n',
                   src, re.S)
     if not m:
         print(f"❌ FATAL: không trích được khối detector trong {SRC}.")
@@ -72,19 +72,36 @@ def detector_block():
     return block
 
 
-def run_detector(report_files, pending_topics, today="2026-08-14"):
-    """Chạy khối detector+closer thật trên một reports_dir giả."""
+def run_detector(report_files, pending_topics, today="2026-08-14", scheduled_kind="",
+                  content_by_file=None):
+    """Chạy khối detector+closer thật trên một reports_dir giả.
+
+    `content_by_file`: {tên file: nội dung} — mặc định "fixture" (đầy đủ, không marker TBD).
+    Dùng để dựng ca file tồn tại nhưng còn "[TBD" (content-completeness, 2026-09-02).
+    """
+    content_by_file = content_by_file or {}
     with tempfile.TemporaryDirectory() as td:
         reports = Path(td) / "mike" / "reports"
         reports.mkdir(parents=True)
         for fn in report_files:
-            (reports / fn).write_text("fixture", encoding="utf-8")
+            (reports / fn).write_text(content_by_file.get(fn, "fixture"), encoding="utf-8")
         state = Path(td) / "state.json"
         state.write_text("{}", encoding="utf-8")
+        delivery = Path(td) / "delivery.json"
+        records = {}
+        import hashlib
+        for fn in report_files:
+            p = reports / fn
+            sha = hashlib.sha256(p.read_bytes()).hexdigest()
+            records[fn] = {"sha256": sha, "artifact_validated_at": "fixture",
+                           "discord": {"status": "delivered", "delivered_at": "fixture", "sha256": sha},
+                           "email": {"status": "delivered", "delivered_at": "fixture", "sha256": sha}}
+        delivery.write_text(json.dumps({"reports": records}), encoding="utf-8")
         py = Path(td) / "block.py"
         py.write_text(detector_block(), encoding="utf-8")
-        env = dict(os.environ, RC_PENDING_TOPICS="\n".join(pending_topics))
-        r = subprocess.run([sys.executable, str(py), td, today, str(state)],
+        env = dict(os.environ, RC_PENDING_TOPICS="\n".join(pending_topics),
+                   REPORT_SCHEDULED_KIND=scheduled_kind)
+        r = subprocess.run([sys.executable, str(py), td, today, str(state), str(delivery)],
                            capture_output=True, text=True, env=env)
         if r.returncode != 0:
             return {"__crash__": r.stderr.strip()[-400:]}
@@ -96,15 +113,34 @@ Q_MONTH = "report-cadence-overdue-monthly_2026-07"
 
 print(f"check_report_cadence_selfcheck — nguồn: {SRC}")
 
-out = run_detector(["SpaceX_ZaloPay_weekly_report_2026-08-03_to_2026-08-07.md"], [Q_WEEK])
-check("#1 happy path: đúng tên file chuẩn ⇒ đóng được",
+out = run_detector(["SpaceX_weekly_report_2026-08-03_to_2026-08-07.md",
+                     "ZaloPay_weekly_report_2026-08-03_to_2026-08-07.md"], [Q_WEEK])
+check("#1 happy path: 2 file per-account chuẩn MỚI (2026-09-02) ⇒ đóng được",
       [c[0] for c in out.get("closable", [])] == ["weekly_2026-08-03_2026-08-07"], str(out))
 
-# ── CA KILLER của arch-review: tên biến thể. Detector im (nó chỉ đọc ngày trong tên), nên
-#    closer BẮT BUỘC phải đóng được — nếu không, question này không còn đường thoát nào.
-out = run_detector(["SpaceX_weekly_report_2026-08-07.md"], [Q_WEEK])
-check("#2 TÊN FILE BIẾN THỂ vẫn đóng được (ca killer coord-2026-08-10)",
+# Tương thích ngược: kỳ CŨ (trước mốc tách) vẫn dùng 1 file gộp — phải tiếp tục đóng được, không
+# thì hàng loạt kỳ lịch sử đột nhiên bị coi là "quá hạn" theo chuẩn mới.
+out = run_detector(["SpaceX_ZaloPay_weekly_report_2026-08-03_to_2026-08-07.md"], [Q_WEEK])
+check("#1b tương thích ngược: 1 file gộp CŨ vẫn đóng được (kỳ trước mốc tách)",
       [c[0] for c in out.get("closable", [])] == ["weekly_2026-08-03_2026-08-07"], str(out))
+
+# ── CA KILLER của arch-review: tên biến thể (hậu tố CORRECTION, có thật trong repo —
+#    SpaceX_ZaloPay_weekly_report_2026-08-10_to_2026-08-14_CORRECTION_VIB.md). Sau khi tách
+#    per-account (2026-09-02), "đã xong" đòi hỏi CẢ HAI file account — chỉ 1 file biến thể của
+#    1 account KHÔNG đủ (đúng, vì account kia vẫn thật sự thiếu). Test lại với ĐỦ CẢ HAI account,
+#    mỗi file mang hậu tố biến thể khác chuẩn `_to_` thẳng — closer vẫn phải đóng được nhờ khớp
+#    theo tiền tố+ngày (substring), không phải tên tuyệt đối.
+out = run_detector(["SpaceX_weekly_report_2026-08-03_to_2026-08-07_CORRECTION.md",
+                     "ZaloPay_weekly_report_2026-08-03_to_2026-08-07_CORRECTION.md"], [Q_WEEK])
+check("#2 TÊN FILE BIẾN THỂ (cả 2 account) vẫn đóng được (ca killer coord-2026-08-10)",
+      [c[0] for c in out.get("closable", [])] == ["weekly_2026-08-03_2026-08-07"], str(out))
+
+# Biến thể của một hình PHẢN đối chứng: chỉ 1 account có file (dù đúng chuẩn) ⇒ KHÔNG đủ, vì
+# account còn lại thật sự chưa có báo cáo nào — đây là hành vi MỚI có chủ đích (trước khi tách
+# per-account, 1 file gộp là đủ cho cả 2 tài khoản).
+out = run_detector(["SpaceX_weekly_report_2026-08-03_to_2026-08-07.md"], [Q_WEEK])
+check("#2b CHỈ 1 account có file ⇒ KHÔNG đóng được (account kia còn thiếu thật)",
+      out.get("closable") == [], str(out))
 
 out = run_detector([], [Q_WEEK])
 check("#3 KHÔNG có báo cáo nào ⇒ KHÔNG đóng (không tự dọn câu hỏi còn thật)",
@@ -115,8 +151,12 @@ out = run_detector(["SpaceX_ZaloPay_weekly_report_2026-07-27_to_2026-07-31.md"],
 check("#4 chỉ có báo cáo kỳ CŨ hơn ⇒ KHÔNG đóng kỳ mới",
       out.get("closable") == [], str(out))
 
+out = run_detector(["SpaceX_monthly_report_2026-07.md", "ZaloPay_monthly_report_2026-07.md"], [Q_MONTH])
+check("#5 monthly: 2 file per-account chuẩn MỚI ⇒ đóng được",
+      [c[0] for c in out.get("closable", [])] == ["monthly_2026-07"], str(out))
+
 out = run_detector(["SpaceX_ZaloPay_monthly_report_2026-07.md"], [Q_MONTH])
-check("#5 monthly: có báo cáo tháng ⇒ đóng được",
+check("#5b tương thích ngược: 1 file gộp CŨ vẫn đóng được",
       [c[0] for c in out.get("closable", [])] == ["monthly_2026-07"], str(out))
 
 out = run_detector(["SpaceX_ZaloPay_monthly_report_2026-06.md"], [Q_MONTH])
@@ -137,6 +177,111 @@ _keys = sorted(c[0] for c in out.get("closable", []))
 check("#9 nhiều question cùng lúc: đóng ĐÚNG cái đã phủ, giữ cái chưa phủ",
       _keys == ["weekly_2026-08-03_2026-08-07"], str(out))
 
+out = run_detector([], [], today="2026-08-15", scheduled_kind="weekly")
+check("#9b lượt scheduled-weekly sinh đúng kỳ T2→T6 vừa đóng, không chờ +3 ngày",
+      [a.get("period_key") for a in out.get("actions", [])]
+      == ["weekly_2026-08-10_2026-08-14"], str(out))
+
+out = run_detector([], [], today="2026-08-01", scheduled_kind="monthly")
+check("#9c lượt scheduled-monthly sinh đúng tháng vừa đóng ngay ngày 1",
+      [a.get("period_key") for a in out.get("actions", [])]
+      == ["monthly_2026-07"], str(out))
+
+
+# ── Content-completeness (2026-09-02, vụ báo cáo tháng 08: template "[TBD" được coi là xong) ──
+TBD_MONTHLY = "SpaceX_ZaloPay_monthly_report_2026-07.md"
+TBD_CONTENT = "## 1. Tóm tắt\n\n| NAV | *[TBD]* |\n\n## 5. Vĩ mô\nĐã điền đầy đủ.\n"
+FULL_CONTENT = "## 1. Tóm tắt\n\nĐã điền đầy đủ, không còn chỗ nào bỏ trống.\n"
+
+# Ca 1: file tồn tại NHƯNG còn marker TBD ⇒ detector vẫn coi là THIẾU (sinh action monthly,
+# closable KHÔNG đóng question) — giống hệt vụ thật: file có mặt không còn đủ để tắt cảnh báo.
+out = run_detector([TBD_MONTHLY], [Q_MONTH], today="2026-08-14",
+                    content_by_file={TBD_MONTHLY: TBD_CONTENT})
+check("#18 file có marker TBD ⇒ vẫn sinh action (coi như overdue, KHÔNG coi là đã xong)",
+      any(a.get("period_key") == "monthly_2026-07" for a in out.get("actions", [])), str(out))
+check("#18b file có marker TBD ⇒ KHÔNG đóng được question (chưa xong thật)",
+      out.get("closable") == [], str(out))
+
+# Ca 2: file đầy đủ, ledger COMPLETE, không TBD ⇒ im lặng hoàn toàn (không action, đóng được
+# question nếu có) — hành vi giống #5 nhưng khẳng định tường minh bằng nội dung THẬT đã qua
+# content_complete(), không chỉ nhờ ledger.
+out = run_detector([TBD_MONTHLY], [Q_MONTH], today="2026-08-14",
+                    content_by_file={TBD_MONTHLY: FULL_CONTENT})
+check("#19 file đầy đủ + ledger COMPLETE ⇒ KHÔNG sinh action (im lặng, không báo động giả)",
+      not any(a.get("period_key") == "monthly_2026-07" for a in out.get("actions", [])), str(out))
+check("#19b file đầy đủ + ledger COMPLETE ⇒ đóng được question cũ",
+      [c[0] for c in out.get("closable", [])] == ["monthly_2026-07"], str(out))
+
+# Ca 3: chạy 2 lần liên tiếp trên CÙNG input ⇒ kết quả giống hệt nhau (không tự trôi, không tự
+# nhân đôi action/closable giữa các lần chạy — detector không giữ state ẩn nào giữa lần gọi).
+out_a = run_detector([TBD_MONTHLY], [Q_MONTH], today="2026-08-14",
+                      content_by_file={TBD_MONTHLY: FULL_CONTENT})
+out_b = run_detector([TBD_MONTHLY], [Q_MONTH], today="2026-08-14",
+                      content_by_file={TBD_MONTHLY: FULL_CONTENT})
+# `run_detector` dựng một TemporaryDirectory MỚI mỗi lần gọi, và detector trả về đường dẫn
+# TUYỆT ĐỐI của report đích (`target_file_*`) ⇒ 2 lần chạy không bao giờ bằng nhau theo nghĩa đen,
+# bất kể detector có state ẩn hay không. Chuẩn hoá gốc tmp trước khi so (§28: so GIÁ TRỊ đã chuẩn
+# hoá, đừng so chuỗi thô) — giữ nguyên ý định của ca: không tự trôi / không tự nhân đôi.
+_TD_RE = re.compile(re.escape(tempfile.gettempdir()) + r"/[^/\s\"']+")
+
+
+def _norm_td(obj):
+    if isinstance(obj, str):
+        return _TD_RE.sub("<TD>", obj)
+    if isinstance(obj, dict):
+        return {k: _norm_td(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [_norm_td(v) for v in obj]
+    return obj
+
+
+_a, _b = _norm_td(out_a), _norm_td(out_b)
+check("#20 chạy 2 lần liên tiếp cùng input ⇒ actions+closable giống hệt nhau (không spam/không giao trùng)",
+      _a == _b, f"a={_a} b={_b}")
+
+
+# ── Phần 1d: mã lý do INCOMPLETE_MSG rẽ theo TAG THẬT trong $GATE_OUT, không phải rc=10
+#     (arch-review 2026-09-24 vòng 6, T1-c). Trích khối RC_VENDOR_REASON thật (KHÔNG chép logic)
+#     — bỏ nhánh `elif … VENDOR_LOOKUP_FAILED` mà không có test này thì ca lookup_failed-thuần
+#     rơi về câu chung "chưa giao đủ kênh", sai nguyên nhân + sai người (§29).
+_MISMATCH_TAG = "VENDOR_MISMATCH_ALERT|SpaceX|ZZZ|2026-09-24|1000|1500|1"
+_LOOKUP_TAG = "VENDOR_LOOKUP_FAILED|SpaceX|ZZZ|2026-09-24|1000|1|1"
+
+
+def run_vendor_reason(gate_out):
+    with tempfile.TemporaryDirectory() as td:
+        script = Path(td) / "reason.sh"
+        script.write_text(
+            "#!/usr/bin/env bash\nset -uo pipefail\n"
+            'GATE_OUT="$1"\nFNAME="fixture.md"\n'
+            + extract("RC_VENDOR_REASON_BEGIN", "RC_VENDOR_REASON_END")
+            + '\nprintf \'%s\' "$INCOMPLETE_MSG"\n', encoding="utf-8")
+        r = subprocess.run(["bash", str(script), gate_out], capture_output=True, text=True)
+        if "syntax error" in r.stderr or "command not found" in r.stderr:
+            return "__BLOCK_DID_NOT_RUN__: " + r.stderr
+        return r.stdout
+
+
+msg_mismatch = run_vendor_reason(_MISMATCH_TAG)
+check("#21 GATE_OUT chỉ mismatch ⇒ nêu LỆCH NGUỒN CỔ TỨC + Winston",
+      ("LỆCH NGUỒN CỔ TỨC" in msg_mismatch and "Winston" in msg_mismatch), msg_mismatch)
+check("#21b … và KHÔNG lẫn câu lookup_failed",
+      "KHÔNG TRA ĐƯỢC nguồn vendor" not in msg_mismatch, msg_mismatch)
+
+msg_lookup = run_vendor_reason(_LOOKUP_TAG)
+check("#22 GATE_OUT chỉ lookup_failed ⇒ nêu lỗi hạ tầng BQ, KHÔNG giao Winston đối soát số",
+      ("KHÔNG TRA ĐƯỢC nguồn vendor" in msg_lookup and "lỗi hạ tầng BQ" in msg_lookup), msg_lookup)
+check("#22b … và KHÔNG lẫn câu 'LỆCH NGUỒN CỔ TỨC' (sai nguyên nhân/sai người, §29)",
+      "LỆCH NGUỒN CỔ TỨC" not in msg_lookup, msg_lookup)
+assert ("KHÔNG TRA ĐƯỢC nguồn vendor" in msg_lookup and "lỗi hạ tầng BQ" in msg_lookup
+        and msg_lookup != "__BLOCK_DID_NOT_RUN__"), (
+    "MUTATION-GUARD rc_vendor_reason_lookup_failed_branch: GATE_OUT thuần lookup_failed mà "
+    "INCOMPLETE_MSG không nêu đúng 'lỗi hạ tầng BQ' — nhánh elif VENDOR_LOOKUP_FAILED đã bị bỏ "
+    f"hoặc hỏng, ca rơi về câu chung/sai nhánh mismatch. Đang là: {msg_lookup!r}")
+
+msg_both = run_vendor_reason(_MISMATCH_TAG + "\n" + _LOOKUP_TAG)
+check("#23 GATE_OUT có CẢ HAI tag ⇒ ưu tiên nhánh mismatch (if đứng trước elif)",
+      ("LỆCH NGUỒN CỔ TỨC" in msg_both and "Winston" in msg_both), msg_both)
 
 # ── Phần 2: danh sách "còn treo" lấy từ matcher CHÍNH THỐNG (bus_question_audit.py) ─────
 def pending_topics_from_bus(events, archived=()):

@@ -65,3 +65,12 @@ CAUGHT**. Of 267 EVEB/leverage/IC-passing utility rows, the FCF gate rejects 82 
 - A & C are orthogonal to custom30V/8L (≈0-12%) but have **no edge** → nothing to add.
 - B overlaps ~33% with both (PVD/PVS leak into momentum/quality baskets in oil rallies) and has edge **only** as a regime-timed tactical sleeve, never a standalone book.
 - **Net: Energy contributes a valuation/risk LENS, not a book.** Durable team takeaways = the DY-uncapturable rule and the FCF>0 maturity gate (both reusable across other capex-heavy/dividend sectors).
+
+**2026-09-12 addendum — hydrology (ENSO/ONI) checked as a possible missing variable for Screen A's
+hydro names.** This screen (EVEB/FCF/Debt/IC) is purely financial — no rainfall/reservoir variable.
+Tested ENSO phase (ONI, NOAA CPC) vs NP YoY for VSH+SJD (pure hydro; REE/POW can't isolate a hydro
+segment from `ticker_financial`), with NT2/PPC as a non-hydro control. Result: directionally real
+(5/5 El Niño episodes → negative median NP YoY; 3/4 La Niña episodes → positive; thermal control
+shows no pattern) but N=9 independent ENSO episodes since 2006 is too thin for anything beyond a
+soft earnings-nowcast flag — **does not change the LENS-not-BOOK verdict above**. Full writeup:
+`research/hydro_hydrology_oni_overlay_20260912.md`.

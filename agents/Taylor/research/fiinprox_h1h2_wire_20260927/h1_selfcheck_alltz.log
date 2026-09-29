@@ -1,0 +1,101 @@
+rating_8l_history bank-AQ selfcheck | TZ=(unset) | WORKDIR=/home/trido/thanhdt/WorkingClaude
+  [1] grid 35,571 (ROE,NPL,coverage) combos -> 0 gate flips, 0 out-of-range
+  [1] AQ differentiation inside gate: pristine ROE20% -> 1, dirty ROE20% -> 3
+  [2] avail_date: 2020Q1->2020-05-15, 2020Q2->2020-08-14, 2020Q3->2020-11-14, 2020Q4->2021-03-31
+  [2] PIT lag honoured on both sides of every boundary date
+  [bank-AQ hist] FiinPro file unavailable -> ROE-only proxy for ALL bank rows: [Errno 2] No such file or directory: '/nonexistent/fiinprox_missing.csv'
+  [bank-AQ hist] 0 bank-quarter NPL/LLR rows, 0 banks from h1_nimonly_probe.csv (PIT lag >=45d, Q4 >=90d)
+  [3] fail-safe: 6 degradation paths all land on the proxy / a non-inventing 3
+  [bank-AQ override] REJECTED 2 live row(s) with no real lens data (fail-closed, keep this module's ROE-grounded grade): AAA(bank-nodata), BBB(bank-noROE)
+  [bank-AQ override] current-snapshot bank rating set to live AQ for 0 bank(s); history proxy untouched
+  [bank-AQ override] current-snapshot bank rating set to live AQ for 2 bank(s); history proxy untouched
+  [bank-AQ override] REJECTED 1 live row(s) with no real lens data (fail-closed, keep this module's ROE-grounded grade): AAA(bank-nodata)
+  [bank-AQ override] current-snapshot bank rating set to live AQ for 1 bank(s); history proxy untouched
+  [bank-AQ override] SKIPPED: live rating_8l.csv has no `note` column, so a fabricated bank-nodata/bank-noROE grade cannot be told apart from a real one -> keep proxy
+  [4] fail-closed override: 6 assertions + 1 mutation kill
+  [4] real data/rating_8l.csv: 9/27 BANK rows are fabricated (ABB, BAB, BVB, KLB, NVB, PGB, SGB, VAB, VBB) -> now rejected
+  [bank-AQ hist] 1318 bank-quarter NPL/LLR rows, 27 banks from fiinprox_bank_ratios_quarterly_20260914.csv (PIT lag >=45d, Q4 >=90d)
+  [5] financial history from cache /tmp/h1h2_sbx (53,679 rows)
+  [5] BANK rows 980 | AQ readable 980 (100.0%) | rating changed 365 (37.2%) | GATE FLIPS 0
+  [5] proxy->AQ transitions: 1->2:82, 1->3:158, 2->1:9, 2->3:116
+  [5] mutation (NPL>3% -> 4 cliff): 59 gate flips detected
+
+==============================================================================
+assertions PASSED : 33
+assertions FAILED : 0
+BANK panel        : 980 rows, 365 ratings changed, 0 gate flips
+override rejected : 9 fabricated live bank grade(s): ABB, BAB, BVB, KLB, NVB, PGB, SGB, VAB, VBB
+VERDICT           : PASS
+rating_8l_history bank-AQ selfcheck | TZ=UTC | WORKDIR=/home/trido/thanhdt/WorkingClaude
+  [1] grid 35,571 (ROE,NPL,coverage) combos -> 0 gate flips, 0 out-of-range
+  [1] AQ differentiation inside gate: pristine ROE20% -> 1, dirty ROE20% -> 3
+  [2] avail_date: 2020Q1->2020-05-15, 2020Q2->2020-08-14, 2020Q3->2020-11-14, 2020Q4->2021-03-31
+  [2] PIT lag honoured on both sides of every boundary date
+  [bank-AQ hist] FiinPro file unavailable -> ROE-only proxy for ALL bank rows: [Errno 2] No such file or directory: '/nonexistent/fiinprox_missing.csv'
+  [bank-AQ hist] 0 bank-quarter NPL/LLR rows, 0 banks from h1_nimonly_probe.csv (PIT lag >=45d, Q4 >=90d)
+  [3] fail-safe: 6 degradation paths all land on the proxy / a non-inventing 3
+  [bank-AQ override] REJECTED 2 live row(s) with no real lens data (fail-closed, keep this module's ROE-grounded grade): AAA(bank-nodata), BBB(bank-noROE)
+  [bank-AQ override] current-snapshot bank rating set to live AQ for 0 bank(s); history proxy untouched
+  [bank-AQ override] current-snapshot bank rating set to live AQ for 2 bank(s); history proxy untouched
+  [bank-AQ override] REJECTED 1 live row(s) with no real lens data (fail-closed, keep this module's ROE-grounded grade): AAA(bank-nodata)
+  [bank-AQ override] current-snapshot bank rating set to live AQ for 1 bank(s); history proxy untouched
+  [bank-AQ override] SKIPPED: live rating_8l.csv has no `note` column, so a fabricated bank-nodata/bank-noROE grade cannot be told apart from a real one -> keep proxy
+  [4] fail-closed override: 6 assertions + 1 mutation kill
+  [4] real data/rating_8l.csv: 9/27 BANK rows are fabricated (ABB, BAB, BVB, KLB, NVB, PGB, SGB, VAB, VBB) -> now rejected
+  [bank-AQ hist] 1318 bank-quarter NPL/LLR rows, 27 banks from fiinprox_bank_ratios_quarterly_20260914.csv (PIT lag >=45d, Q4 >=90d)
+  [5] financial history from cache /tmp/h1h2_sbx (53,679 rows)
+  [5] BANK rows 980 | AQ readable 980 (100.0%) | rating changed 365 (37.2%) | GATE FLIPS 0
+  [5] proxy->AQ transitions: 1->2:82, 1->3:158, 2->1:9, 2->3:116
+  [5] mutation (NPL>3% -> 4 cliff): 59 gate flips detected
+
+==============================================================================
+assertions PASSED : 33
+assertions FAILED : 0
+BANK panel        : 980 rows, 365 ratings changed, 0 gate flips
+override rejected : 9 fabricated live bank grade(s): ABB, BAB, BVB, KLB, NVB, PGB, SGB, VAB, VBB
+VERDICT           : PASS
+rating_8l_history bank-AQ selfcheck | TZ=America/New_York | WORKDIR=/home/trido/thanhdt/WorkingClaude
+  [1] grid 35,571 (ROE,NPL,coverage) combos -> 0 gate flips, 0 out-of-range
+  [1] AQ differentiation inside gate: pristine ROE20% -> 1, dirty ROE20% -> 3
+  [2] avail_date: 2020Q1->2020-05-15, 2020Q2->2020-08-14, 2020Q3->2020-11-14, 2020Q4->2021-03-31
+  [2] PIT lag honoured on both sides of every boundary date
+  [bank-AQ hist] FiinPro file unavailable -> ROE-only proxy for ALL bank rows: [Errno 2] No such file or directory: '/nonexistent/fiinprox_missing.csv'
+  [bank-AQ hist] 0 bank-quarter NPL/LLR rows, 0 banks from h1_nimonly_probe.csv (PIT lag >=45d, Q4 >=90d)
+  [3] fail-safe: 6 degradation paths all land on the proxy / a non-inventing 3
+  [bank-AQ override] REJECTED 2 live row(s) with no real lens data (fail-closed, keep this module's ROE-grounded grade): AAA(bank-nodata), BBB(bank-noROE)
+  [bank-AQ override] current-snapshot bank rating set to live AQ for 0 bank(s); history proxy untouched
+  [bank-AQ override] current-snapshot bank rating set to live AQ for 2 bank(s); history proxy untouched
+  [bank-AQ override] REJECTED 1 live row(s) with no real lens data (fail-closed, keep this module's ROE-grounded grade): AAA(bank-nodata)
+  [bank-AQ override] current-snapshot bank rating set to live AQ for 1 bank(s); history proxy untouched
+  [bank-AQ override] SKIPPED: live rating_8l.csv has no `note` column, so a fabricated bank-nodata/bank-noROE grade cannot be told apart from a real one -> keep proxy
+  [4] fail-closed override: 6 assertions + 1 mutation kill
+  [4] real data/rating_8l.csv: 9/27 BANK rows are fabricated (ABB, BAB, BVB, KLB, NVB, PGB, SGB, VAB, VBB) -> now rejected
+  [bank-AQ hist] 1318 bank-quarter NPL/LLR rows, 27 banks from fiinprox_bank_ratios_quarterly_20260914.csv (PIT lag >=45d, Q4 >=90d)
+  [5] financial history from cache /tmp/h1h2_sbx (53,679 rows)
+  [5] BANK rows 980 | AQ readable 980 (100.0%) | rating changed 365 (37.2%) | GATE FLIPS 0
+  [5] proxy->AQ transitions: 1->2:82, 1->3:158, 2->1:9, 2->3:116
+  [5] mutation (NPL>3% -> 4 cliff): 59 gate flips detected
+
+==============================================================================
+assertions PASSED : 33
+assertions FAILED : 0
+BANK panel        : 980 rows, 365 ratings changed, 0 gate flips
+override rejected : 9 fabricated live bank grade(s): ABB, BAB, BVB, KLB, NVB, PGB, SGB, VAB, VBB
+VERDICT           : PASS
+
+==============================================================================
+== TZ = no TZ
+==============================================================================
+
+==============================================================================
+== TZ = UTC
+==============================================================================
+
+==============================================================================
+== TZ = America/New_York
+==============================================================================
+
+==============================================================================
+  TZ no TZ                -> PASS (rc=0)
+  TZ UTC                  -> PASS (rc=0)
+  TZ America/New_York     -> PASS (rc=0)

@@ -1,0 +1,495 @@
+{
+ "A20@0.02": [
+  {
+   "first": "2014-03-24",
+   "last": "2014-04-16",
+   "ndays": "14",
+   "fwd_dd_pct": "-15.4",
+   "false_alarm": "False"
+  },
+  {
+   "first": "2014-08-14",
+   "last": "2014-12-23",
+   "ndays": "42",
+   "fwd_dd_pct": "-14.4",
+   "false_alarm": "False"
+  },
+  {
+   "first": "2015-03-26",
+   "last": "2015-04-09",
+   "ndays": "11",
+   "fwd_dd_pct": "-5.3",
+   "false_alarm": "True"
+  },
+  {
+   "first": "2015-12-02",
+   "last": "2016-02-24",
+   "ndays": "50",
+   "fwd_dd_pct": "-9.1",
+   "false_alarm": "True"
+  },
+  {
+   "first": "2016-08-23",
+   "last": "2017-01-05",
+   "ndays": "66",
+   "fwd_dd_pct": "-1.2",
+   "false_alarm": "True"
+  },
+  {
+   "first": "2018-03-16",
+   "last": "2018-11-05",
+   "ndays": "102",
+   "fwd_dd_pct": "-22.3",
+   "false_alarm": "False"
+  },
+  {
+   "first": "2019-05-23",
+   "last": "2019-06-06",
+   "ndays": "11",
+   "fwd_dd_pct": "-4.0",
+   "false_alarm": "True"
+  },
+  {
+   "first": "2019-08-21",
+   "last": "2019-12-18",
+   "ndays": "30",
+   "fwd_dd_pct": "-9.2",
+   "false_alarm": "True"
+  },
+  {
+   "first": "2020-02-18",
+   "last": "2021-06-11",
+   "ndays": "195",
+   "fwd_dd_pct": "-29.0",
+   "false_alarm": "False"
+  },
+  {
+   "first": "2021-09-07",
+   "last": "2021-09-14",
+   "ndays": "6",
+   "fwd_dd_pct": "-1.3",
+   "false_alarm": "True"
+  },
+  {
+   "first": "2023-12-14",
+   "last": "2024-01-08",
+   "ndays": "17",
+   "fwd_dd_pct": "-1.6",
+   "false_alarm": "True"
+  },
+  {
+   "first": "2024-03-29",
+   "last": "2024-07-30",
+   "ndays": "60",
+   "fwd_dd_pct": "-8.5",
+   "false_alarm": "True"
+  },
+  {
+   "first": "2024-11-07",
+   "last": "2025-05-06",
+   "ndays": "86",
+   "fwd_dd_pct": "-13.1",
+   "false_alarm": "False"
+  },
+  {
+   "first": "2025-08-15",
+   "last": "2025-11-19",
+   "ndays": "58",
+   "fwd_dd_pct": "-3.0",
+   "false_alarm": "True"
+  },
+  {
+   "first": "2026-02-06",
+   "last": "2026-07-31",
+   "ndays": "80",
+   "fwd_dd_pct": "-9.4",
+   "false_alarm": "True"
+  }
+ ],
+ "A20@0.03": [
+  {
+   "first": "2014-08-19",
+   "last": "2014-10-27",
+   "ndays": "12",
+   "fwd_dd_pct": "-14.3",
+   "false_alarm": "False"
+  },
+  {
+   "first": "2015-03-30",
+   "last": "2015-04-02",
+   "ndays": "4",
+   "fwd_dd_pct": "-3.3",
+   "false_alarm": "True"
+  },
+  {
+   "first": "2015-12-08",
+   "last": "2016-02-22",
+   "ndays": "34",
+   "fwd_dd_pct": "-9.1",
+   "false_alarm": "True"
+  },
+  {
+   "first": "2016-08-26",
+   "last": "2017-01-03",
+   "ndays": "57",
+   "fwd_dd_pct": "-2.5",
+   "false_alarm": "True"
+  },
+  {
+   "first": "2018-05-04",
+   "last": "2018-07-30",
+   "ndays": "45",
+   "fwd_dd_pct": "-13.5",
+   "false_alarm": "False"
+  },
+  {
+   "first": "2019-10-07",
+   "last": "2019-10-17",
+   "ndays": "6",
+   "fwd_dd_pct": "-32.9",
+   "false_alarm": "False"
+  },
+  {
+   "first": "2020-02-20",
+   "last": "2020-05-21",
+   "ndays": "63",
+   "fwd_dd_pct": "-29.7",
+   "false_alarm": "False"
+  },
+  {
+   "first": "2020-08-27",
+   "last": "2020-11-26",
+   "ndays": "62",
+   "fwd_dd_pct": "0.0",
+   "false_alarm": "True"
+  },
+  {
+   "first": "2021-03-11",
+   "last": "2021-04-02",
+   "ndays": "15",
+   "fwd_dd_pct": "-1.7",
+   "false_alarm": "True"
+  },
+  {
+   "first": "2021-06-04",
+   "last": "2021-06-09",
+   "ndays": "4",
+   "fwd_dd_pct": "-9.5",
+   "false_alarm": "True"
+  },
+  {
+   "first": "2023-12-22",
+   "last": "2023-12-28",
+   "ndays": "5",
+   "fwd_dd_pct": "0.0",
+   "false_alarm": "True"
+  },
+  {
+   "first": "2024-06-04",
+   "last": "2024-07-18",
+   "ndays": "33",
+   "fwd_dd_pct": "-7.4",
+   "false_alarm": "True"
+  },
+  {
+   "first": "2024-11-18",
+   "last": "2024-12-04",
+   "ndays": "12",
+   "fwd_dd_pct": "-10.1",
+   "false_alarm": "False"
+  },
+  {
+   "first": "2025-02-11",
+   "last": "2025-04-25",
+   "ndays": "32",
+   "fwd_dd_pct": "-13.7",
+   "false_alarm": "False"
+  },
+  {
+   "first": "2025-08-27",
+   "last": "2025-10-16",
+   "ndays": "35",
+   "fwd_dd_pct": "-5.5",
+   "false_alarm": "True"
+  },
+  {
+   "first": "2026-05-15",
+   "last": "2026-07-27",
+   "ndays": "43",
+   "fwd_dd_pct": "-2.3",
+   "false_alarm": "None"
+  }
+ ],
+ "A60@0.015": [
+  {
+   "first": "2014-10-16",
+   "last": "2014-12-30",
+   "ndays": "43",
+   "fwd_dd_pct": "-11.7",
+   "false_alarm": "False"
+  },
+  {
+   "first": "2016-01-05",
+   "last": "2016-03-18",
+   "ndays": "48",
+   "fwd_dd_pct": "-8.4",
+   "false_alarm": "True"
+  },
+  {
+   "first": "2016-09-16",
+   "last": "2017-02-23",
+   "ndays": "109",
+   "fwd_dd_pct": "0.0",
+   "false_alarm": "True"
+  },
+  {
+   "first": "2018-05-02",
+   "last": "2018-12-26",
+   "ndays": "125",
+   "fwd_dd_pct": "-13.2",
+   "false_alarm": "False"
+  },
+  {
+   "first": "2019-10-09",
+   "last": "2019-12-20",
+   "ndays": "39",
+   "fwd_dd_pct": "-33.3",
+   "false_alarm": "False"
+  },
+  {
+   "first": "2020-02-27",
+   "last": "2021-07-06",
+   "ndays": "285",
+   "fwd_dd_pct": "-26.6",
+   "false_alarm": "False"
+  },
+  {
+   "first": "2021-10-20",
+   "last": "2021-11-08",
+   "ndays": "14",
+   "fwd_dd_pct": "-5.9",
+   "false_alarm": "True"
+  },
+  {
+   "first": "2023-12-19",
+   "last": "2024-01-15",
+   "ndays": "13",
+   "fwd_dd_pct": "0.0",
+   "false_alarm": "True"
+  },
+  {
+   "first": "2024-05-24",
+   "last": "2024-09-20",
+   "ndays": "84",
+   "fwd_dd_pct": "-5.9",
+   "false_alarm": "True"
+  },
+  {
+   "first": "2024-12-17",
+   "last": "2025-05-27",
+   "ndays": "105",
+   "fwd_dd_pct": "-13.3",
+   "false_alarm": "False"
+  },
+  {
+   "first": "2025-09-23",
+   "last": "2025-12-29",
+   "ndays": "70",
+   "fwd_dd_pct": "-3.3",
+   "false_alarm": "True"
+  },
+  {
+   "first": "2026-04-02",
+   "last": "2026-09-14",
+   "ndays": "112",
+   "fwd_dd_pct": "-1.2",
+   "false_alarm": "True"
+  }
+ ],
+ "B@2.0": [
+  {
+   "first": "2014-10-01",
+   "last": "2014-12-22",
+   "ndays": "31",
+   "fwd_dd_pct": "-14.9",
+   "false_alarm": "False"
+  },
+  {
+   "first": "2015-03-30",
+   "last": "2015-04-02",
+   "ndays": "4",
+   "fwd_dd_pct": "-3.3",
+   "false_alarm": "True"
+  },
+  {
+   "first": "2015-12-04",
+   "last": "2016-02-22",
+   "ndays": "39",
+   "fwd_dd_pct": "-8.7",
+   "false_alarm": "True"
+  },
+  {
+   "first": "2016-08-22",
+   "last": "2017-01-03",
+   "ndays": "64",
+   "fwd_dd_pct": "-1.0",
+   "false_alarm": "True"
+  },
+  {
+   "first": "2018-03-02",
+   "last": "2018-07-30",
+   "ndays": "66",
+   "fwd_dd_pct": "-20.3",
+   "false_alarm": "False"
+  },
+  {
+   "first": "2019-05-24",
+   "last": "2019-06-03",
+   "ndays": "7",
+   "fwd_dd_pct": "-2.8",
+   "false_alarm": "True"
+  },
+  {
+   "first": "2019-08-22",
+   "last": "2019-12-17",
+   "ndays": "28",
+   "fwd_dd_pct": "-9.4",
+   "false_alarm": "True"
+  },
+  {
+   "first": "2020-02-18",
+   "last": "2021-12-24",
+   "ndays": "358",
+   "fwd_dd_pct": "-29.0",
+   "false_alarm": "False"
+  },
+  {
+   "first": "2022-03-09",
+   "last": "2022-03-29",
+   "ndays": "15",
+   "fwd_dd_pct": "-22.0",
+   "false_alarm": "False"
+  },
+  {
+   "first": "2023-09-08",
+   "last": "2024-09-05",
+   "ndays": "157",
+   "fwd_dd_pct": "-17.2",
+   "false_alarm": "False"
+  },
+  {
+   "first": "2024-11-04",
+   "last": "2025-05-06",
+   "ndays": "97",
+   "fwd_dd_pct": "-12.1",
+   "false_alarm": "False"
+  },
+  {
+   "first": "2025-08-13",
+   "last": "2025-11-27",
+   "ndays": "75",
+   "fwd_dd_pct": "-1.9",
+   "false_alarm": "True"
+  },
+  {
+   "first": "2026-02-05",
+   "last": "2026-07-28",
+   "ndays": "86",
+   "fwd_dd_pct": "-10.7",
+   "false_alarm": "False"
+  }
+ ],
+ "B@2.5": [
+  {
+   "first": "2014-10-07",
+   "last": "2014-10-30",
+   "ndays": "18",
+   "fwd_dd_pct": "-15.6",
+   "false_alarm": "False"
+  },
+  {
+   "first": "2015-12-08",
+   "last": "2016-02-18",
+   "ndays": "32",
+   "fwd_dd_pct": "-9.1",
+   "false_alarm": "True"
+  },
+  {
+   "first": "2016-08-23",
+   "last": "2016-12-23",
+   "ndays": "56",
+   "fwd_dd_pct": "-1.2",
+   "false_alarm": "True"
+  },
+  {
+   "first": "2018-03-16",
+   "last": "2018-07-11",
+   "ndays": "43",
+   "fwd_dd_pct": "-22.3",
+   "false_alarm": "False"
+  },
+  {
+   "first": "2019-08-26",
+   "last": "2019-10-17",
+   "ndays": "17",
+   "fwd_dd_pct": "-8.8",
+   "false_alarm": "True"
+  },
+  {
+   "first": "2020-02-19",
+   "last": "2020-05-22",
+   "ndays": "65",
+   "fwd_dd_pct": "-29.0",
+   "false_alarm": "False"
+  },
+  {
+   "first": "2020-07-21",
+   "last": "2021-12-23",
+   "ndays": "268",
+   "fwd_dd_pct": "-8.9",
+   "false_alarm": "True"
+  },
+  {
+   "first": "2022-03-15",
+   "last": "2022-03-25",
+   "ndays": "9",
+   "fwd_dd_pct": "-20.9",
+   "false_alarm": "False"
+  },
+  {
+   "first": "2023-09-11",
+   "last": "2023-09-21",
+   "ndays": "5",
+   "fwd_dd_pct": "-16.0",
+   "false_alarm": "False"
+  },
+  {
+   "first": "2023-12-05",
+   "last": "2024-08-05",
+   "ndays": "122",
+   "fwd_dd_pct": "-2.2",
+   "false_alarm": "True"
+  },
+  {
+   "first": "2024-11-07",
+   "last": "2025-05-06",
+   "ndays": "86",
+   "fwd_dd_pct": "-13.1",
+   "false_alarm": "False"
+  },
+  {
+   "first": "2025-08-13",
+   "last": "2025-11-25",
+   "ndays": "71",
+   "fwd_dd_pct": "-1.9",
+   "false_alarm": "True"
+  },
+  {
+   "first": "2026-02-06",
+   "last": "2026-07-15",
+   "ndays": "66",
+   "fwd_dd_pct": "-9.4",
+   "false_alarm": "True"
+  }
+ ]
+}

@@ -1,0 +1,145 @@
+{
+  "job": "Taylor_20260630_072007",
+  "screen": "pharma_defensive_compounder",
+  "framework": "mike/agents/Taylor/pharma_valuation_framework.md",
+  "universe": [
+    "DBD",
+    "DHG",
+    "DMC",
+    "IMP",
+    "TRA"
+  ],
+  "qual_med": 1,
+  "months_held": 27,
+  "months": 151,
+  "median_sel_adv_b": 2.89,
+  "full": {
+    "CAGR": 6.04,
+    "Sharpe": 0.419,
+    "MaxDD": -23.168,
+    "Calmar": 0.261,
+    "navfinal": 2.092,
+    "n": 151
+  },
+  "full_bh": {
+    "CAGR": 9.94,
+    "Sharpe": 0.585,
+    "MaxDD": -43.154,
+    "Calmar": 0.23,
+    "navfinal": 3.295,
+    "n": 151
+  },
+  "is_": {
+    "CAGR": 5.944,
+    "Sharpe": 0.423,
+    "MaxDD": -0.1,
+    "Calmar": 59.439,
+    "navfinal": 1.414,
+    "n": 72
+  },
+  "oos": {
+    "CAGR": 6.128,
+    "Sharpe": 0.416,
+    "MaxDD": -16.846,
+    "Calmar": 0.364,
+    "navfinal": 1.479,
+    "n": 79
+  },
+  "oos_bh": {
+    "CAGR": 10.842,
+    "Sharpe": 0.58,
+    "MaxDD": -32.239,
+    "Calmar": 0.336,
+    "navfinal": 1.969,
+    "n": 79
+  },
+  "bh_samenames": {
+    "CAGR": 13.571,
+    "Sharpe": 0.581,
+    "MaxDD": -38.42,
+    "Calmar": 0.353,
+    "navfinal": 4.959,
+    "n": 151
+  },
+  "bh_samenames_bh": {
+    "CAGR": 9.94,
+    "Sharpe": 0.585,
+    "MaxDD": -43.154,
+    "Calmar": 0.23,
+    "navfinal": 3.295,
+    "n": 151
+  },
+  "ortho_c30v": 0.0,
+  "ortho_8l": 0.0,
+  "selfcheck_vnd": 1e-06,
+  "gate_attribution": {
+    "pe_cheap": 61,
+    "plus_roic": 51,
+    "plus_roe": 48,
+    "plus_gpm": 39,
+    "plus_cf": 39,
+    "full": 39
+  },
+  "imp_capture_failure": {
+    "pe_cheap_imp_rows": 8,
+    "rejected_by_quality_floor": 8,
+    "imp_roe5y_median": 0.106,
+    "imp_roic5y_median": 0.092,
+    "note": "ETC-growth champion structurally sub-15% ROE/ROIC (EU-GMP capex + tender WC) -> un-screenable on a backward quality floor"
+  },
+  "roic_artifact": {
+    "note": "ROIC5Y shows 1.8-2.7 for DMC/TRA pre-2017 (scale artifact, tiny equity base); >0.15 gate passes them anyway but ROIC value untrustworthy early"
+  },
+  "liquidity_decay": {
+    "note": "DHG/IMP to 2026, DBD from 2017, DMC stops 2023-09, TRA stops 2022-07, MKP not in prune -> tradeable universe collapses to ~2-3 names post-2023"
+  },
+  "verify": {
+    "DHG": [
+      "2019-01",
+      "2019-02",
+      "2019-03",
+      "2020-01",
+      "2020-02",
+      "2020-03",
+      "2020-04",
+      "2020-05",
+      "2020-06",
+      "2021-08",
+      "2021-09",
+      "2023-02",
+      "2023-05",
+      "2023-06",
+      "2023-07"
+    ],
+    "DMC": [
+      "2015-02",
+      "2020-05",
+      "2020-06",
+      "2020-07",
+      "2020-08",
+      "2020-09",
+      "2023-06",
+      "2023-07"
+    ],
+    "TRA": [],
+    "IMP_excluded": [],
+    "DBD": [
+      "2020-09",
+      "2020-12",
+      "2021-01",
+      "2021-08",
+      "2021-09",
+      "2021-10",
+      "2022-10",
+      "2022-11",
+      "2022-12",
+      "2023-01",
+      "2023-02",
+      "2023-03",
+      "2023-04",
+      "2023-05",
+      "2023-06",
+      "2023-07"
+    ]
+  }
+}

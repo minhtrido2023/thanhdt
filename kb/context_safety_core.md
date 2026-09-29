@@ -9,7 +9,8 @@
 - **`mike/state/NOTIFY_OFF`** = tắt Telegram push tạm thời (không ảnh hưởng giao dịch).
 
 ## BANNED tickers vĩnh viễn (không bao giờ mua, bất kể signal)
-PC1, VVS, KSF, NKG, HSG, HVN, VJC, NVL, GEG, SBA, DMC/IMP/TRA, TOS, VTP.
+PC1, VVS, KSF, NKG, HSG, HVN, VJC, NVL, GEG, SBA, DMC/IMP/TRA, TOS, VTP, BAF (thêm 2026-08-26,
+leverage trap + capital market extraction — xem KNOWLEDGE.md §6).
 
 ## Human-in-the-loop — không đảo thứ tự
 Taylor (đặt rule/`trading_rules.json`) → DollarBill (lập plan, **user duyệt**) → Mafee (chỉ thực thi

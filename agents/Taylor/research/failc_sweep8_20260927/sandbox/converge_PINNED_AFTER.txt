@@ -1,0 +1,155 @@
+====================================================================================================
+  V2.3A (allocator + CAPIT) + maturity:postbull + edge-cond-allocator(thr4%) — FULL AUDIT SIMULATION 2014-01-02 -> 2026-06-19
+  NAV=50B (BAL-slot=ConvergePort 50B active + LAG inert 1 VND)   state=tav2_bq.vnindex_5state_dt5g_live
+  PARK vehicle=custompitg  parking policy (cash_etf_states) {3: 0.7}
+  combine=STATIC 50/50 sum   CAPIT=ON
+  fills=T+1 Open (BQ-auditable, no intraday)   -> v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_CONVERGEPORT_wpn110.csv
+====================================================================================================
+
+[2] Loading v11 signals + Release_Date + 5-state + overheat + D1...
+  signals: 659,409 rows
+  [EXBULL fix] suppressed 707 momentum signals in EX-BULL (state==5)
+  [regime_size] rating coverage 96.2%; weak buy-rows flagged (rating>=4): 2,966 -> halved to 5% ONLY in BEAR/CRISIS (state<=2), full 10% elsewhere
+
+[3] Loading prices/Open/sector/E1VFVN30...
+
+[3.5] CONVERGE_BOOK — building point-in-time double-confirm active book (live eval_* fns)...
+  WL=16 names; entries=154; force-close dates=138; WPN=0.110; calendar 2014-08-05->2026-06-19 (2965 sess)
+  double-confirm breadth: mean-when-active 3.6, max 9, days>=1 name 2114/2965 (71%), empty days 851
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+  [oshares-step] corp-action LIVE BQ: 4466 dòng ISS+AIS (193 mã)
+  [oshares-step] exdate: 1608 bước OShares, 746 bước ĐƯỢC DỜI (median 42 ngày), 851 giữ ngày quý (không khớp sự kiện), 3 bị chặn bởi cổng PIT
+  [ETF-LIQ custompitg] ex-VIC PIT basket (quality=none, rebal=q2m5, gate=3, weight=namecap): 48 rebals, 203 union names, avg 30/rebal
+  [ETF-LIQ custompitg] cap=20% of ADV; median ADV 1743.1B/day -> ~348.6B/day parkable
+
+[4] Building LAGGED schedule...
+  [LAG gate] non_op=False forensic=True -> 5487 entries (dropped 1 by gates)
+  LAG candidate events in window: 5321
+
+[5] CAPIT v2 washout events...
+  washout 2014-05-08: state=1 grind=False dd52=-13.2% cool=False -> size=1.00
+  washout 2015-05-18: state=3 grind=False dd52=-17.4% cool=True -> size=0.75
+  washout 2015-08-24: state=3 grind=True dd52=-17.8% cool=False -> size=0.38
+  washout 2016-01-18: state=3 grind=False dd52=-17.6% cool=False -> size=0.75
+  washout 2018-05-28: state=1 grind=False dd52=-22.6% cool=True -> size=1.00
+  washout 2018-07-05: state=3 grind=True dd52=-25.3% cool=True -> size=0.38
+  washout 2020-02-03: state=3 grind=False dd52=-9.4% cool=False -> size=0.75
+  washout 2020-03-11: state=2 grind=True dd52=-20.8% cool=False -> size=0.25
+  washout 2020-07-27: state=3 grind=True dd52=-23.4% cool=False -> size=0.38
+    [postbull] 2022-04-19 ret2y=+83% dd1y=-8% -> post-strong-bull + shallow -> size x0.00 (1.00->0.00)
+  washout 2022-04-19: state=1 grind=False dd52=-8.0% cool=False -> size=0.00
+  washout 2022-06-15: state=2 grind=True dd52=-20.6% cool=True -> size=0.25
+  washout 2022-09-28: state=2 grind=True dd52=-25.2% cool=False -> size=0.00
+  washout 2023-10-30: state=1 grind=False dd52=-16.3% cool=False -> size=1.00
+  washout 2024-04-19: state=4 grind=False dd52=-8.9% cool=False -> size=0.50
+  washout 2024-08-05: state=1 grind=True dd52=-8.7% cool=False -> size=0.50
+  washout 2025-04-03: state=4 grind=False dd52=-8.0% cool=False -> size=0.50
+  washout 2025-10-20: state=3 grind=False dd52=-7.4% cool=False -> size=0.75
+  washout 2026-03-09: state=3 grind=False dd52=-13.1% cool=False -> size=0.75
+
+[4b] Fetching BQ prices for LAG universe (797 tickers)...
+  chunk 1/4: 675,461 rows
+  chunk 2/4: 676,877 rows
+  chunk 3/4: 696,356 rows
+  chunk 4/4: 128,356 rows
+  LAG signals in window: 0  [fund_dnpr_reorder=False]
+
+[6] BOOK A — ConvergePort (double-confirm active book) 50B...
+  BAL events: 469 stock + 506 ETF; final 249.9039B
+
+[7] BOOK B — LAG INERT (1 VND, disabled in CONVERGE mode — active book is ConvergePort in slot A)...
+  LAG events: 0 stock + 377 ETF; final 0.0000B
+
+[8] Combine books (static 50/50 sum)...
+  [edge-alloc] source=lag_edge_health.csv label_col=known_date rows=583
+  [edge-alloc] thr=4.0%; mean12 latest=0.5%, %time<thr=52%
+  static 50/50 sum; final combined = 249.9039B
+
+[9] Building TX table + self-checks...
+  [selfcheck BAL] cash-flow identity max err = 0 VND; final NAV identity err = 0 VND
+  [selfcheck LAG] cash-flow identity max err = 0 VND; final NAV identity err = 0 VND
+  [borrow-audit] total borrow cost = 0 VND (BAL 0 / LAG -0); max gross BAL 1.000 LAG 0.705 combined 1.000; borrow-days BAL 2 LAG 0
+
+====================================================================================================
+ V2.3A (allocator + CAPIT) + maturity:postbull + edge-cond-allocator(thr4%) AUDIT — FULL 2014-01-02 -> 2026-06-19 (12.46y)
+ Final NAV 249.90B  CAGR 13.78%  Sharpe(252) 0.94  MaxDD -36.9%  Calmar 0.37
+ VNINDEX B&H: CAGR 10.87%  Sharpe 0.66  MaxDD -45.3%
+====================================================================================================
+
+[11] Writing audit file...
+  -> /home/trido/thanhdt/WorkingClaude/data/_exp_failc8_20260927/AFTER/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_CONVERGEPORT_wpn110.csv  (9,135 rows)
+
+ANNUAL (sys vs VNINDEX):
+  2014: +26.06%   (vni=+0.0815)
+  2015: -2.34%   (vni=+0.0635)
+  2016: +15.17%   (vni=+0.1575)
+  2017: +26.83%   (vni=+0.4646)
+  2018: +22.41%   (vni=-0.1037)
+  2019: +5.84%   (vni=+0.0776)
+  2020: +36.35%   (vni=+0.1419)
+  2021: +40.02%   (vni=+0.3372)
+  2022: -28.55%   (vni=-0.3399)
+  2023: -0.85%   (vni=+0.0824)
+  2024: +24.75%   (vni=+0.1193)
+  2025: +32.09%   (vni=+0.4054)
+  2026: -6.36%   (vni=+0.0202)
+
+====================================================================================================
+ CONVERGEPORT-AS-ACTIVE-BOOK — production harness (simulate() engine, 50B, DT5G-gated {3:0.7}
+ custom30V parking [custompitg/namecap/yieldcombo], CAPIT ON, TC 0.15/0.15/0.1, borrow 10%)
+====================================================================================================
+  FULL           CAGR  13.78%  Sharpe 0.94  MaxDD  -36.9%  Calmar 0.37
+  IS 2014-2019   CAGR  14.81%  Sharpe 1.13  MaxDD  -17.8%  Calmar 0.83
+  OOS 2020-now   CAGR  12.85%  Sharpe 0.82  MaxDD  -36.9%  Calmar 0.35
+
+  PINNED REFERENCE (data/results_registry.md, same engine/parking/50B/TC, threads=1):
+    2-book V2.4 R3 (BAL+LAG, NEUTRAL-only)  CAGR 28.05%  Sharpe 1.86  MaxDD -17.5%  Calmar 1.60
+    ^ R3 includes CAPIT; ConvergePort run keeps CAPIT ON too -> only the ACTIVE book differs.
+
+  CAPACITY / ADV — required per-name position vs 60-session median ADV (20%-ADV/day fill rule)
+
+   NAV=50B  (per-name target = WPN 0.110 x NAV = 5.500B)
+   ticker    ADV60_B  20%ADV_B days_build    flag
+   MBB       511.039   102.208       0.05      OK
+   ACB       318.545    63.709       0.09      OK
+   HDB       369.550    73.910       0.07      OK
+   TCB       352.046    70.409       0.08      OK
+   VCB       488.909    97.782       0.06      OK
+   FPT       727.261   145.452       0.04      OK
+   SSI       762.868   152.574       0.04      OK
+   VCI       285.072    57.014       0.10      OK
+   VND       200.421    40.084       0.14      OK
+   HCM       279.045    55.809       0.10      OK
+   CTR        35.593     7.119       0.77      OK
+   MSH        13.526     2.705       2.03   WATCH
+   DHG         1.266     0.253      21.73  BREACH
+   PVT       159.909    31.982       0.17      OK
+   HAH        71.624    14.325       0.38      OK
+   DBC        77.916    15.583       0.35      OK
+   -> BREACH (>3 build-days): ['DHG'] | WATCH (1-3 days): ['MSH']
+
+   NAV=100B  (per-name target = WPN 0.110 x NAV = 11.000B)
+   ticker    ADV60_B  20%ADV_B days_build    flag
+   MBB       511.039   102.208       0.11      OK
+   ACB       318.545    63.709       0.17      OK
+   HDB       369.550    73.910       0.15      OK
+   TCB       352.046    70.409       0.16      OK
+   VCB       488.909    97.782       0.11      OK
+   FPT       727.261   145.452       0.08      OK
+   SSI       762.868   152.574       0.07      OK
+   VCI       285.072    57.014       0.19      OK
+   VND       200.421    40.084       0.27      OK
+   HCM       279.045    55.809       0.20      OK
+   CTR        35.593     7.119       1.55   WATCH
+   MSH        13.526     2.705       4.07  BREACH
+   DHG         1.266     0.253      43.45  BREACH
+   PVT       159.909    31.982       0.34      OK
+   HAH        71.624    14.325       0.77      OK
+   DBC        77.916    15.583       0.71      OK
+   -> BREACH (>3 build-days): ['MSH', 'DHG'] | WATCH (1-3 days): ['CTR']
+
+  DOUBLE-CONFIRM BREADTH over 2965 sessions: mean-when-active 3.6, max 9, days with 0 names 851 (29%), days 1-2 names 836 (28%)
+  (0-name days -> book is 100% custom30V-parking-or-cash per DT5G gate; not a capacity issue, a 'thin-book' one.)
+
+Done.
+ELAPSED 9:07.35 MAXRSS 2591012kB

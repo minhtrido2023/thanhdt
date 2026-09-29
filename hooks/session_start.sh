@@ -283,7 +283,7 @@ if [ "$id" = "Mike" ] && [ -n "$INTERACTIVE_TID" ]; then
     fi
   fi
   if [ "$_should_notify" = 1 ]; then
-    "$ROOT/bin/notify_thread.sh" "🟢 Đã resume xong — sẵn sàng nhận việc tiếp." "$INTERACTIVE_TID" \
+    "$ROOT/bin/notify_thread.sh" "🟢 Phiên đã khôi phục." "$INTERACTIVE_TID" \
       >/dev/null 2>&1 || true
   fi
 fi

@@ -41,9 +41,23 @@ bên dưới**): (a) `golive_recommend_v23.py:215` (CAPIT pool
 selection) + `:354` (CAPIT ADV cap) — ghim chờ (i) `capit_fired` về false VÀ (ii) quyết định riêng về
 sàn thanh khoản pool (ADV thay vì turnover-1-ngày); (b) `trading_bot/executor.py:588-603` đọc cache
 `ticker_prune` cho 3 tính năng R&D (`gap_adaptive_enabled`/`extreme_regime_enabled`/
-`chase_cap_vol_scale_enabled`) — **hiện TẮT trên cả SpaceX/ZaloPay** (chỉ bật ở account paper), nhưng
+`chase_cap_vol_scale_enabled`) — tại thời điểm audit 07-29 cả 3 cờ TẮT trên SpaceX/ZaloPay, nhưng
 đang trên lộ trình lên live — **PHẢI migrate executor.py sang `universe_pit` TRƯỚC KHI bật bất kỳ cờ
 nào trong 3 cờ này cho live**, đây là gap MỚI phát hiện, chưa nằm trong 4 phase P1-P4 migration gốc.
+
+> ⚠️ **VI PHẠM ĐÃ XẢY RA THẬT (phát hiện 2026-09-19, quant-skeptic G9 full-review)**:
+> `chase_cap_vol_scale_enabled` đã **LÊN LIVE từ 2026-08-04** (`trading_bot/config.py`) trong khi
+> `executor.py::_load_gap_ref_data()` (dòng ~1362) **VẪN đọc parquet cache `ticker_prune`**, không
+> đổi. Gate cứng ở trên **KHÔNG được tôn trọng** — review go-live của tính năng chase-cap
+> (`vol_scale_chase_cap_checkpoint_20260804.md`) chỉ xét khía cạnh execution, không đối chiếu
+> migration tracker này. **Mức độ nghiêm trọng THẤP** (đây là tra cứu GIÁ theo mã đã được CHỌN sẵn,
+> không phải filter thành viên ⇒ không phải look-ahead/rủi ro vốn thật; mã vắng mặt trong cache
+> `ticker_prune` — đúng nhóm rule-only mà `universe_pit` sinh ra để cứu — sẽ fallback về chase cap
+> tĩnh CHẶT HƠN, hướng AN TOÀN) nhưng là VI PHẠM GATE THẬT, không phải rủi ro giả định. Sửa đề xuất:
+> trỏ `_load_gap_ref_data()` sang cache `tav2_bq.ticker` (superset thật, không cần ngữ nghĩa
+> `in_universe`) thay vì `ticker_prune` — KHÔNG cần `universe_pit` cho việc tra giá thuần tuý này.
+> **CHƯA SỬA** — cần review riêng trước khi đụng `executor.py` (code thực thi live). Escalate:
+> `question` bus `Taylor/executor-chase-cap-still-reads-ticker-prune-20260919`.
 Vẫn cần giữ freshness-monitoring của `ticker_prune` (`preflight_check.sh`/`bq_freshness_check.sh`)
 chừng nào các consumer live trên còn tồn tại.
 

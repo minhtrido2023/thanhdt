@@ -1,0 +1,106 @@
+{
+  "V1_sector_floor": {
+    "a_absolute_cutoff": {
+      "is_cutoff": 0.04503380316885901,
+      "oos_excl_pct": 0.19825008306567726,
+      "oos_persist_excluded": 0.5608938547486033,
+      "oos_persist_kept": 0.64235391628678,
+      "delta_pp": 8.146006153817664,
+      "golden_floor_overlap_pct": 0.5100558659217878
+    },
+    "b_per_sector_percentile": {
+      "n_sectors_with_own_cutoff": 36,
+      "n_sectors_total_IS": 66,
+      "pct_oos_rows_using_fallback_global_cutoff": 0.09613467715140105,
+      "oos_excl_pct": 0.19337689666629748,
+      "oos_persist_excluded": 0.5767468499427262,
+      "oos_persist_kept": 0.6380612385006179,
+      "delta_pp": 6.131438855789173,
+      "golden_floor_overlap_pct": 0.41695303550973656
+    },
+    "c_sector_demean_then_absolute_cutoff": {
+      "is_demean_cutoff": 0.03926703369961876,
+      "oos_excl_pct": 0.19060804075755897,
+      "oos_persist_excluded": 0.5613015688553167,
+      "oos_persist_kept": 0.6414887794198139,
+      "delta_pp": 8.018721056449717,
+      "golden_floor_overlap_pct": 0.47239976757699015
+    },
+    "auc_raw_vs_sector_demeaned_full_sample": {
+      "auc_raw": 0.4728740177684748,
+      "auc_demean": 0.48215376638521407,
+      "dist_raw": 0.02712598223152518,
+      "dist_demean": 0.017846233614785934
+    }
+  },
+  "V2_liquidity_crosscheck": {
+    "n_excluded": 1790,
+    "n_kept": 7239,
+    "excluded_adv_percentiles": {
+      "10": 478075624.6376811,
+      "25": 1236354620.2272727,
+      "50": 4362744826.190477,
+      "75": 19254558011.857704,
+      "90": 67546719348.84585
+    },
+    "kept_adv_percentiles": {
+      "10": 453623005.54545456,
+      "25": 1175358741.5217392,
+      "50": 4712225247.619048,
+      "75": 24429762078.09524,
+      "90": 86744211654.54546
+    },
+    "excluded_median_adv": 4362744826.190477,
+    "kept_median_adv": 4712225247.619048,
+    "mwu_p_excluded_vs_kept_liquidity": 0.1351435124256398,
+    "frac_below_0.5bn_excluded": 0.10670391061452514,
+    "frac_below_0.5bn_kept": 0.11230832987981765,
+    "frac_below_1.0bn_excluded": 0.2122905027932961,
+    "frac_below_1.0bn_kept": 0.22061058157204033,
+    "frac_below_2.0bn_excluded": 0.34301675977653634,
+    "frac_below_2.0bn_kept": 0.34769995855781183
+  },
+  "V3_cluster_by_ticker": {
+    "row_level": {
+      "auc": 0.4728740177684748,
+      "p": 3.4730325708532573e-08,
+      "n1": 9466,
+      "n0": 5418,
+      "n_total": 14884
+    },
+    "cluster_bootstrap_by_ticker": {
+      "method": "block bootstrap, resample 733 tickers w/ replacement, B=2000, all quarterly rows travel with the drawn ticker",
+      "n_tickers": 733,
+      "n_bootstrap_draws": 2000,
+      "point_auc": 0.4728740177684748,
+      "boot_se": 0.005844537581206287,
+      "ci95": [
+        0.46155967462093817,
+        0.4844792081329422
+      ],
+      "z": -4.641253795467339,
+      "p_cluster": 3.4630146863445788e-06
+    },
+    "secondary_diagnostic_collapse_to_ticker_mean": {
+      "note": "DIFFERENT question (chronic firm-level accrual vs avg persistence), not the cluster-robust significance test \u2014 reported for context only",
+      "n_tickers": 733,
+      "spearman_ic": -0.1967975780544011,
+      "spearman_ic_p": 7.803469586846062e-08
+    },
+    "p_inflation_factor": 99.71155224420434,
+    "one_quarter_per_ticker_montecarlo": {
+      "method": "R=1000 draws, each draw picks 1 random quarter/ticker -> N=733 literally independent rows",
+      "auc_median": 0.47833691531465533,
+      "auc_iqr": [
+        0.4664762386775835,
+        0.49166109472951497
+      ],
+      "p_median": 0.30700965617649595,
+      "p_iqr": [
+        0.12220019845512242,
+        0.6136516451412336
+      ],
+      "frac_draws_p_below_0p05": 0.135
+    }
+  }
+}

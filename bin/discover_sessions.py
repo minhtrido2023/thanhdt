@@ -16,6 +16,9 @@ SESS_DIR = os.path.join(HOME, ".claude", "sessions")
 PROJ_DIR = os.path.join(HOME, ".claude", "projects")
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 REG_DIR = os.path.join(ROOT, "bus", "registry")
+# Registry filenames are ".<label>.tmp" / "<label>.json"; ext4 caps a name at 255 BYTES.
+# 180 leaves room for the prefix/suffix and for the "_<pid>" de-dup suffix in main().
+LABEL_MAX = 180
 
 
 def now_iso():
@@ -86,7 +89,13 @@ def latest_ai_title(tp):
 
 
 def safe(label):
-    return re.sub(r"[^A-Za-z0-9_-]", "_", label) or "unknown"
+    # A session's `name` can be a whole dispatch prompt (headless `claude --name "<prompt>"`),
+    # which turns into a >255-byte filename and makes open() raise OSError(ENAMETOOLONG) —
+    # that killed the WHOLE discovery run on 2026-08-14, so every other live session went
+    # unregistered that cycle. Cap the length; both call sites (resolve() and main()) go
+    # through here so registration and lookup stay in sync.
+    s = re.sub(r"[^A-Za-z0-9_-]", "_", label) or "unknown"
+    return s[:LABEL_MAX] if len(s) > LABEL_MAX else s
 
 
 def resolve(session_id):

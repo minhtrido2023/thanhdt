@@ -6,13 +6,17 @@ Dùng cho báo cáo TUẦN (Friday KB editorial review, kb_nightly.sh) — KHÔN
 bin/ops_health_check.sh check #5 (gate hàng ngày, đã hardening 4 vòng arch-review,
 KHÔNG đụng vào để tránh regression). Script này PORT lại đúng thuật toán match đã
 verify của check #5 (cross-agent answer, decision-là-resolver, substring+timestamp,
-dedup theo (agent,topic,ts), quét archive) — nếu sửa thuật toán match ở 1 nơi, sửa
+dedup theo (agent,topic,ts), quét archive, `rollup_of` khớp CHÍNH XÁC topic con —
+thêm 2026-08-16 theo arch-review coord-2026-08-14 required_change #4: trước đó
+grep rollup_of ở script này = 0, nên "danh sách ĐẦY ĐỦ" của báo cáo tuần lệch với
+gate hàng ngày đúng ở loại câu hỏi TỔNG) — nếu sửa thuật toán match ở 1 nơi, sửa
 luôn nơi kia (xem comment "resolvers"/"_resolved" ở bin/ops_health_check.sh check #5).
 
 Output: mỗi dòng PENDING = 1 câu hỏi, cũ nhất trước, KHÔNG cắt bớt (đây là điểm khác
 AGED_SHOWN=5 của check #5 — báo cáo tuần cần thấy hết, không phải digest hàng ngày).
-Exit code: số lượng PENDING (0 = sạch, không dùng exit>0 làm "lỗi" theo nghĩa thường —
-đây là audit, không phải health-gate).
+Exit code: số lượng PENDING, CHẶN ở 255 (shell cắt exit mod 256 — 256 pending mà trả thẳng
+sẽ thành 0 = "sạch"); cần số chính xác thì đọc `--json`. 0 = sạch, không dùng exit>0 làm "lỗi"
+theo nghĩa thường — đây là audit, không phải health-gate).
 
 Thêm 2026-08-01 (saga "coord-" round-5/6, arch-reviewer killer_objection): PROVENANCE của
 closure — bao nhiêu câu hỏi đóng gần đây có `decided_by=user` (quyết định NGƯỜI thật, real-
@@ -69,6 +73,10 @@ def main():
     ap.add_argument("--json", action="store_true", help="output JSON thay vì text")
     ap.add_argument("--provenance-days", type=int, default=14,
                      help="cửa sổ ngày để đếm provenance closure gần đây (mặc định 14)")
+    ap.add_argument("--rollup-impact", default="",
+                     help="Agent/topic sắp đóng — in JSON các rollup pending mà việc đóng ref"
+                          " này sẽ làm TẤT CẢ topic con khớp resolved_exact, tức tự đóng rollup"
+                          " theo (dùng bởi close_bus_question.py, coord-2026-09-10)")
     a = ap.parse_args()
 
     now = dt.datetime.now(dt.timezone.utc)
@@ -84,7 +92,10 @@ def main():
             if rec.get("event_type") == "question" and rec.get("topic"):
                 all_question_topics.add(rec.get("topic"))
 
-    resolvers = []
+    resolvers = []          # (agent, resolver_topic, ts, explicit question refs from payload.resolves)
+    # Xem `_split_ref` trong ops_health_check.sh — tiền tố chỉ được bóc khi là agent-id CÓ
+    # THẬT, nếu không thì topic tự chứa '/' (vd "selfcheck-red: mike/bin/x.py") bị hiểu sai.
+    known_agents = {agent_of(p) for p in files}
     prov_cutoff = now - dt.timedelta(days=a.provenance_days)
     recent_closures = []   # (ts, agent_of_file, topic, decided_by_or_None)
     for p in files:
@@ -97,7 +108,18 @@ def main():
                     r_ts = dt.datetime.fromisoformat(rec.get("ts", "").replace("Z", "+00:00"))
                 except Exception:
                     continue
-                resolvers.append((t, r_ts))
+                payload = rec.get("payload")
+                if isinstance(payload, str):
+                    try:
+                        payload = json.loads(payload)
+                    except Exception:
+                        payload = {}
+                raw_resolves = payload.get("resolves", []) if isinstance(payload, dict) else []
+                if isinstance(raw_resolves, str):
+                    raw_resolves = [raw_resolves]
+                explicit = {str(x).strip() for x in raw_resolves
+                            if isinstance(raw_resolves, list) and str(x).strip()}
+                resolvers.append((agent_of(p), t, r_ts, explicit))
                 # chỉ đếm provenance nếu topic này THẬT SỰ đóng 1 question đã biết (exact hoặc
                 # chứa nguyên topic câu hỏi gốc, cùng quy ước hậu-tố trạng thái đã dùng ở resolved())
                 closes_real_question = any(t == qt or qt in t for qt in all_question_topics)
@@ -106,10 +128,112 @@ def main():
                     decided_by = payload.get("decided_by") if isinstance(payload, dict) else None
                     recent_closures.append((r_ts, agent_of(p), t, decided_by))
 
-    def resolved(q_topic, q_ts):
+    def resolved(q_agent, q_topic, q_ts):
         if not q_topic:
             return False
-        return any((r == q_topic or q_topic in r) and r_ts >= q_ts for r, r_ts in resolvers)
+        refs = {q_topic, f"{q_agent}/{q_topic}"}
+        return any(r_ts >= q_ts and
+                   ((r == q_topic or q_topic in r) or bool(refs & explicit))
+                   for _ra, r, r_ts, explicit in resolvers)
+
+    def split_ref(s):
+        # Port nguyên `_split_ref` của check #5 (arch-review round 3). Tiền tố chỉ được bóc
+        # khi là agent-id CÓ THẬT, nếu không thì topic tự chứa '/' ("selfcheck-red:
+        # mike/bin/x.py" — lớp câu hỏi đông nhất trên bus) bị hiểu sai thành "Agent/topic"
+        # và kẹt pending vĩnh viễn. None = chuỗi KHÔNG khai agent.
+        if "/" in s:
+            pfx, rest = s.split("/", 1)
+            if pfx in known_agents and rest.strip():
+                return pfx, rest.strip()
+        return None, s
+
+    def same_ref(a, a_agent, b):
+        # Ràng buộc agent CHỈ áp khi bên đó thật sự khai agent — quy ước đóng câu hỏi trên
+        # bus không đòi cùng agent (người đóng thường khác người hỏi). Nhưng khai tường minh
+        # "Taylor/x" là lời khai VỀ CÂU HỎI NÀO và phải được tôn trọng, nếu không sub trần
+        # của Mike bị đóng bằng resolves của Taylor (false-CLOSED chéo agent).
+        # Sửa một bên mà quên bên kia là để báo cáo TUẦN mâu thuẫn với gate hàng ngày.
+        a_ag, a_tp = split_ref(a)
+        b_ag, b_tp = split_ref(b)
+        if a_tp != b_tp:
+            return False
+        a_ag = a_ag or a_agent
+        return b_ag is None or not a_ag or b_ag == a_ag
+
+    def resolved_exact(q_topic, q_ts, q_agent=""):
+        # Bản KHÔNG substring, dùng RIÊNG cho topic con của `rollup_of` — port nguyên
+        # `_resolved_exact` ở ops_health_check.sh check #5 (arch-review coord-2026-08-14).
+        if not q_topic:
+            return False
+        return any(r_ts >= q_ts and
+                   (same_ref(q_topic, q_agent, r) or
+                    any(same_ref(q_topic, q_agent, e) for e in explicit))
+                   for _r_a, r, r_ts, explicit in resolvers)
+
+    def rollup_resolved(rec, q_ts, q_agent=""):
+        # Port `_rollup_resolved` của check #5 (arch-review coord-2026-08-14 required_change
+        # #4): trước đó script này KHÔNG hiểu `rollup_of`, nên "danh sách ĐẦY ĐỦ" của báo cáo
+        # tuần lại MÂU THUẪN với gate hàng ngày — đúng thứ nó ra đời để tránh. OPT-IN +
+        # fail-closed ở mọi đường lỗi (giữ nguyên hành vi cũ khi payload không khai).
+        pl = rec.get("payload")
+        if isinstance(pl, str):
+            try:
+                pl = json.loads(pl)
+            except Exception:
+                return False
+        if not isinstance(pl, dict):
+            return False
+        raw = pl.get("rollup_of")
+        if not isinstance(raw, list) or not raw:
+            return False
+        # Phần tử rỗng/sai kiểu ⇒ fail-closed CẢ tổng, không lọc lặng (xem ops_health_check.sh).
+        subs = []
+        for s in raw:
+            if not isinstance(s, str) or not s.strip():
+                return False
+            subs.append(s.strip())
+        # Dạng "Agent/topic" xử lý DUY NHẤT trong `split_ref`. Chỗ này KHÔNG tự bóc tiền tố.
+        return all(resolved_exact(s, q_ts, q_agent) for s in subs)
+
+    if a.rollup_impact:
+        if "/" not in a.rollup_impact:
+            print(json.dumps({"error": "rollup-impact phải là Agent/topic"}, ensure_ascii=False))
+            return 1
+        triggers = []
+        for p in files:
+            r_agent = agent_of(p)
+            for rec in iter_events(p):
+                if rec.get("event_type") != "question":
+                    continue
+                pl = rec.get("payload")
+                if isinstance(pl, str):
+                    try:
+                        pl = json.loads(pl)
+                    except Exception:
+                        pl = None
+                if not isinstance(pl, dict):
+                    continue
+                raw = pl.get("rollup_of")
+                if not isinstance(raw, list) or not raw:
+                    continue
+                subs = [s.strip() for s in raw if isinstance(s, str) and s.strip()]
+                if len(subs) != len(raw):
+                    continue  # fail-closed như rollup_resolved: phần tử rỗng/sai kiểu ⇒ bỏ qua rollup này
+                if not any(same_ref(s, r_agent, a.rollup_impact) for s in subs):
+                    continue  # ref sắp đóng không phải topic con của rollup này
+                r_topic = rec.get("topic")
+                try:
+                    r_ts = dt.datetime.fromisoformat(rec.get("ts", "").replace("Z", "+00:00"))
+                except Exception:
+                    continue
+                if resolved_exact(r_topic, r_ts, r_agent):
+                    continue  # rollup đã đóng từ trước, không liên quan tới lần đóng này
+                other_subs = [s for s in subs if not same_ref(s, r_agent, a.rollup_impact)]
+                if all(resolved_exact(s, r_ts, r_agent) for s in other_subs):
+                    triggers.append({"rollup_agent": r_agent, "rollup_topic": r_topic,
+                                      "rollup_ts": rec.get("ts"), "rollup_of": subs})
+        print(json.dumps({"triggers": triggers}, ensure_ascii=False))
+        return 0
 
     seen = set()
     pending = []
@@ -127,7 +251,7 @@ def main():
             if key in seen:
                 continue
             seen.add(key)
-            if resolved(topic, ts_dt):
+            if resolved(agent, topic, ts_dt) or rollup_resolved(rec, ts_dt, agent):
                 continue
             age_d = (now - ts_dt).days
             pending.append({"agent": agent, "topic": topic, "ts": rec.get("ts"), "age_days": age_d})
@@ -156,7 +280,7 @@ def main():
             if db != "user":
                 print(f"    {ts.strftime('%Y-%m-%d')}  {agent}/{topic}")
 
-    return len(pending)
+    return min(len(pending), 255)
 
 
 if __name__ == "__main__":

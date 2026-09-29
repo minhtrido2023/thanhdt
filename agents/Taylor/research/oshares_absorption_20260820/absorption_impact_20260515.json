@@ -1,0 +1,67 @@
+{
+ "asof": "2026-05-15",
+ "universe": 240,
+ "buckets": {
+  "N/A": 236,
+  "ABSORBED": 1,
+  "WINDOW_AMBIGUOUS": 3
+ },
+ "detail": [
+  {
+   "ticker": "CTD",
+   "verdict": "ABSORBED",
+   "value": 111823220.0,
+   "method": "FIN_FALLBACK",
+   "anchor_date": "2026-04-28",
+   "window": [
+    "2026-02-10",
+    "2026-04-28"
+   ],
+   "n_events": 1,
+   "rolled": 0,
+   "note": "dòng quý 111,823,220 khớp giả thuyết 'đã gồm 1/1 ISS của cửa sổ' (kỳ vọng 111,779,136, lệch +0.039%) ⇒ KHÔNG lăn lại sự kiện nào"
+  },
+  {
+   "ticker": "HAH",
+   "verdict": "WINDOW_AMBIGUOUS",
+   "value": 185840401.0,
+   "method": "FIN_FALLBACK",
+   "anchor_date": "2026-05-04",
+   "window": [
+    "2026-01-04",
+    "2026-05-04"
+   ],
+   "n_events": 2,
+   "rolled": 0,
+   "note": "2 ISS trong cửa sổ (2026-01-04, 2026-05-04] KHÔNG quyết được là dòng quý 185,840,401 đã gồm hay chưa (0 giả thuyết khớp trong 0.1%) ⇒ GIỮ hành vi cũ: KHÔNG lăn. Các số giả thuyết: gồm 0/2 ⇒ thiếu ratio/issue_volumn · gồm 1/2 ⇒ 168,918,919 · gồm 2/2 ⇒ 171,418,919"
+  },
+  {
+   "ticker": "NAF",
+   "verdict": "WINDOW_AMBIGUOUS",
+   "value": 61181992.0,
+   "method": "FIN_FALLBACK",
+   "anchor_date": "2026-04-01",
+   "window": [
+    "2025-12-02",
+    "2026-04-01"
+   ],
+   "n_events": 1,
+   "rolled": 0,
+   "note": "1 ISS trong cửa sổ (2025-12-02, 2026-04-01] KHÔNG quyết được là dòng quý 61,181,992 đã gồm hay chưa (0 giả thuyết khớp trong 0.1%) ⇒ GIỮ hành vi cũ: KHÔNG lăn. Các số giả thuyết: gồm 0/1 ⇒ thiếu ratio/issue_volumn · gồm 1/1 ⇒ thiếu ratio/issue_volumn"
+  },
+  {
+   "ticker": "VTP",
+   "verdict": "WINDOW_AMBIGUOUS",
+   "value": 172931920.0,
+   "method": "FIN_FALLBACK",
+   "anchor_date": "2026-05-04",
+   "window": [
+    "2026-01-04",
+    "2026-05-04"
+   ],
+   "n_events": 1,
+   "rolled": 0,
+   "note": "1 ISS trong cửa sổ (2026-01-04, 2026-05-04] KHÔNG quyết được là dòng quý 172,931,920 đã gồm hay chưa (0 giả thuyết khớp trong 0.1%) ⇒ GIỮ hành vi cũ: KHÔNG lăn. Các số giả thuyết: gồm 0/1 ⇒ 119,635,371 · gồm 1/1 ⇒ 169,882,227"
+  }
+ ]
+}

@@ -1,0 +1,43 @@
+/home/trido/thanhdt/wc_venv/lib/python3.12/site-packages/pandas/core/internals/blocks.py:347: RuntimeWarning: divide by zero encountered in log
+  result = func(self.values, **kwargs)
+Calendar: 2018-01-02 -> 2026-09-10, 2167 sessions
+
+==========================================================================================
+CLUSTER: PVN-family  (BSR, GAS, OIL, PLX, PVB, PVC, PVD, PVS, PVT)
+  Monthly obs with valid RS_200 & fwd_3M: n=88, first=2019-01-02 00:00:00
+  FULL         n= 88  corr=-0.319   t_nw=-1.84  [CONCLUDE]
+  IS_pre2020   n= 12  corr=+0.275   t_nw=+1.35  [THIN]
+  OOS_2020p    n= 76  corr=-0.357*  t_nw=-2.16  [CONCLUDE]
+  Leave-one-year-out (OOS only):
+    2020: n=11  corr=+0.413
+    2021: n=12  corr=-0.546 (same sign as OOS-full)
+    2022: n=12  corr=-0.473 (same sign as OOS-full)
+    2023: n=12  corr=-0.354 (same sign as OOS-full)
+    2024: n=12  corr=+0.245
+    2025: n=11  corr=-0.710 (same sign as OOS-full)
+    2026: n= 6  corr=-0.906 (same sign as OOS-full)
+
+==========================================================================================
+CLUSTER: Viettel-family  (CTR, VGI, VTP)
+  Monthly obs with valid RS_200 & fwd_3M: n=78, first=2019-10-01 00:00:00
+  FULL         n= 78  corr=+0.016   t_nw=+0.14  [CONCLUDE]
+  IS_pre2020   n=  3  corr=-0.955   t_nw=+nan  [TOO-THIN(n<10)]
+  OOS_2020p    n= 75  corr=+0.073   t_nw=+0.64  [CONCLUDE]
+  Leave-one-year-out (OOS only):
+    2020: n=11  corr=+0.058 (same sign as OOS-full)
+    2021: n=12  corr=-0.138
+    2022: n=12  corr=-0.752
+    2023: n=11  corr=+0.175 (same sign as OOS-full)
+    2024: n=11  corr=-0.912
+    2025: n=12  corr=-0.852
+    2026: n= 6  corr=-0.754
+
+==========================================================================================
+QUYET DINH (theo quy tac khoa o PREREG_step1.md muc 6)
+==========================================================================================
+  PVN-family: OOS corr=-0.357 (n=76, CONCLUDE), sign-consistency 5/7 nam -> KHONG DAT
+    (tham khao, KHONG dung de quyet dinh) IS pre-2020: corr=+0.275 n=12
+  Viettel-family: OOS corr=+0.073 (n=75, CONCLUDE), sign-consistency 2/7 nam -> KHONG DAT
+    (tham khao, KHONG dung de quyet dinh) IS pre-2020: corr=-0.955 n=3
+
+VERDICT: NO-GO — dung ngay, khong buoc 2 (khop tien le Rule 3 + AMH momentum-death)

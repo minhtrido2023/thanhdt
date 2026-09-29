@@ -1,0 +1,27 @@
+{
+ "w2c10_baseline": {
+  "k": 10,
+  "ledger": "/home/trido/thanhdt/WorkingClaude/data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-30_wtew_n10_cap10_advprice_etfcreatpit_exp_w2c10_baseline_univpit_exp_selv3route3_idlebaseline.csv",
+  "cfo_pool": 60,
+  "n_segments": 48,
+  "yrs": 12.46,
+  "pool_full_med": 79,
+  "pool_liqmatched_med": 60,
+  "frac_C_names_in_liqpool_med": 0.55,
+  "frac_C_names_in_liqpool_min": 0.0,
+  "C_cagr_pct": 23.143,
+  "C_maxdd_pct": -50.27,
+  "null_R": 300,
+  "null_seed": 20260927,
+  "null_cagr_median_pct": 6.452,
+  "null_cagr_p90_pct": 9.165,
+  "null_cagr_5th_pct": 2.991,
+  "null_cagr_max_pct": 12.815,
+  "null_dd_median_pct": -40.57,
+  "null_dd_p90_pct": -33.6,
+  "null_dd_5th_pct": -48.99,
+  "C_percentile_in_null_cagr": 100.0,
+  "C_percentile_in_null_dd": 3.7,
+  "prereg_gate": "CO EDGE (vuot p90 CAGR)"
+ }
+}

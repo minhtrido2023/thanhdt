@@ -1,0 +1,91 @@
+{
+  "job": "Taylor_20260630_074607",
+  "screen": "aviation_dual",
+  "infra": {
+    "names": [
+      "ACV",
+      "SCS",
+      "NCT",
+      "SGN"
+    ],
+    "present": [
+      "ACV",
+      "NCT",
+      "SCS",
+      "SGN"
+    ],
+    "qual_med": 1,
+    "months_held": 88,
+    "months": 151,
+    "median_sel_adv_b": 1.67,
+    "full": {
+      "CAGR": 3.73,
+      "Sharpe": 0.319,
+      "MaxDD": -42.744,
+      "Calmar": 0.087,
+      "navfinal": 1.585,
+      "n": 151
+    },
+    "full_bh": {
+      "CAGR": 9.94,
+      "Sharpe": 0.585,
+      "MaxDD": -43.154,
+      "Calmar": 0.23,
+      "navfinal": 3.295,
+      "n": 151
+    },
+    "is_": {
+      "CAGR": 0.661,
+      "Sharpe": 0.116,
+      "MaxDD": -33.176,
+      "Calmar": 0.02,
+      "navfinal": 1.04,
+      "n": 72
+    },
+    "oos": {
+      "CAGR": 6.607,
+      "Sharpe": 0.469,
+      "MaxDD": -37.53,
+      "Calmar": 0.176,
+      "navfinal": 1.524,
+      "n": 79
+    },
+    "oos_bh": {
+      "CAGR": 10.842,
+      "Sharpe": 0.58,
+      "MaxDD": -32.239,
+      "Calmar": 0.336,
+      "navfinal": 1.969,
+      "n": 79
+    },
+    "selfcheck_vnd": 0.0,
+    "ortho_c30v": 0.0,
+    "ortho_8l": 0.0,
+    "scs_months": 46,
+    "nct_months": 74,
+    "sgn_months": 15,
+    "acv_months": 0
+  },
+  "airline": {
+    "names": [
+      "HVN",
+      "VJC"
+    ],
+    "months_held": 0,
+    "months": 151,
+    "structurally_empty": true,
+    "full": {
+      "CAGR": 0,
+      "Sharpe": 0,
+      "MaxDD": 0,
+      "Calmar": 0,
+      "navfinal": 1,
+      "n": 0
+    },
+    "selfcheck_vnd": 0.0,
+    "hvn_excluded": true,
+    "vjc_excluded": true,
+    "note": "HVN negative-equity value trap (PB=0 2021-24); VJC premium LCC never PB<1. No VN airline trough-buy exists."
+  },
+  "data_honesty": "Young sector: ACV/HVN/VJC/SCS listed 2017; IS 2014-19 ~= 2017-19 only; OOS 2020-26 = COVID aviation shock (sector-specific). Economics > short backtest curve here."
+}

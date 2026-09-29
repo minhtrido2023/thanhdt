@@ -1,0 +1,86 @@
+cpi_vn Tier-1.5 selfcheck | TZ=(unset)
+  old = /home/trido/thanhdt/WorkingClaude/cpi_vn.py   new = /home/trido/thanhdt/wt-fiinprox-h1h2-wire/WorkingClaude/cpi_vn.py
+  [1] rename: core match 13/13, headline match 0/13
+  [1] grep for the old name in .py files: 0 external reader(s)
+  [2] Tier 1: 13/13 months identical; flags disjoint
+  [2] tier partition: T1=13 T1.5=211 T3=12 T2(implicit)=0 of 236 months
+[cpi_vn] Tier 1.5 UNAVAILABLE (/nonexistent/fiinprox_cpi_missing.csv: [Errno 2] No such file or directory: '/nonexistent/fiinprox_cpi_missing.csv') -> Tier 2 interpolation is in force for 2011-01..2025-05 and Tier 3 for 2007-2010. Values there are PROXY (MAE 0.49pp, max 2.51pp) -- do not quote them as real prints.
+[cpi_vn] CPI COVERAGE GAP: 2 month(s) 2026-07..2026-08 have NO real source. Tier 1 (live NSO) ends 2026-06; Tier 1.5 (FiinPro snapshot 2026-09-14, trial ended 2026-09-28 -> FROZEN) ends (none). Those months are Tier 2's forward-fill of its last anchor, NOT a print. FIX = refresh NSO_CPI_YOY_REAL from the GSO monthly release; refreshing the FiinPro file is impossible.
+  [3] fallback reproduces pre-wire series exactly (T3 months 48, same as before)
+[cpi_vn] CPI COVERAGE GAP: 4 month(s) 2026-09..2026-12 have NO real source. Tier 1 (live NSO) ends 2026-06; Tier 1.5 (FiinPro snapshot 2026-09-14, trial ended 2026-09-28 -> FROZEN) ends 2026-08. Those months are Tier 2's forward-fill of its last anchor, NOT a print. FIX = refresh NSO_CPI_YOY_REAL from the GSO monthly release; refreshing the FiinPro file is impossible.
+  [4] §14 gate: fp_last=2026-08 from file; gap(2026-12)=4 months; warn-once OK
+  [5] cross-check vs h2_cpi_series.csv: n=236, max|diff|=0.00e+00
+  [6] REG_C 27/185 relabeled, REG_B 17/185
+  [6] month lists match the published artifact exactly
+  [6] relabels inside the 2011 / 2022-H2 episodes: 0
+[cpi_vn] CPI COVERAGE GAP: 4 month(s) 2026-09..2026-12 have NO real source. Tier 1 (live NSO) ends 2026-06; Tier 1.5 (FiinPro snapshot 2026-09-14, trial ended 2026-09-28 -> FROZEN) ends 2026-08. Those months are Tier 2's forward-fill of its last anchor, NOT a print. FIX = refresh NSO_CPI_YOY_REAL from the GSO monthly release; refreshing the FiinPro file is impossible.
+  [7] DCF: 5y-avg CPI 3.4426% -> 3.4147% (Δ -0.0279pp); g_term 6.8000% -> 6.8000%; fair value Δ = 0.0e+00% on 7 names
+
+==============================================================================
+assertions PASSED : 33
+assertions FAILED : 0
+regime relabels   : REG_C 27/185, REG_B 17/185
+VERDICT           : PASS
+cpi_vn Tier-1.5 selfcheck | TZ=UTC
+  old = /home/trido/thanhdt/WorkingClaude/cpi_vn.py   new = /home/trido/thanhdt/wt-fiinprox-h1h2-wire/WorkingClaude/cpi_vn.py
+  [1] rename: core match 13/13, headline match 0/13
+  [1] grep for the old name in .py files: 0 external reader(s)
+  [2] Tier 1: 13/13 months identical; flags disjoint
+  [2] tier partition: T1=13 T1.5=211 T3=12 T2(implicit)=0 of 236 months
+[cpi_vn] Tier 1.5 UNAVAILABLE (/nonexistent/fiinprox_cpi_missing.csv: [Errno 2] No such file or directory: '/nonexistent/fiinprox_cpi_missing.csv') -> Tier 2 interpolation is in force for 2011-01..2025-05 and Tier 3 for 2007-2010. Values there are PROXY (MAE 0.49pp, max 2.51pp) -- do not quote them as real prints.
+[cpi_vn] CPI COVERAGE GAP: 2 month(s) 2026-07..2026-08 have NO real source. Tier 1 (live NSO) ends 2026-06; Tier 1.5 (FiinPro snapshot 2026-09-14, trial ended 2026-09-28 -> FROZEN) ends (none). Those months are Tier 2's forward-fill of its last anchor, NOT a print. FIX = refresh NSO_CPI_YOY_REAL from the GSO monthly release; refreshing the FiinPro file is impossible.
+  [3] fallback reproduces pre-wire series exactly (T3 months 48, same as before)
+[cpi_vn] CPI COVERAGE GAP: 4 month(s) 2026-09..2026-12 have NO real source. Tier 1 (live NSO) ends 2026-06; Tier 1.5 (FiinPro snapshot 2026-09-14, trial ended 2026-09-28 -> FROZEN) ends 2026-08. Those months are Tier 2's forward-fill of its last anchor, NOT a print. FIX = refresh NSO_CPI_YOY_REAL from the GSO monthly release; refreshing the FiinPro file is impossible.
+  [4] §14 gate: fp_last=2026-08 from file; gap(2026-12)=4 months; warn-once OK
+  [5] cross-check vs h2_cpi_series.csv: n=236, max|diff|=0.00e+00
+  [6] REG_C 27/185 relabeled, REG_B 17/185
+  [6] month lists match the published artifact exactly
+  [6] relabels inside the 2011 / 2022-H2 episodes: 0
+[cpi_vn] CPI COVERAGE GAP: 4 month(s) 2026-09..2026-12 have NO real source. Tier 1 (live NSO) ends 2026-06; Tier 1.5 (FiinPro snapshot 2026-09-14, trial ended 2026-09-28 -> FROZEN) ends 2026-08. Those months are Tier 2's forward-fill of its last anchor, NOT a print. FIX = refresh NSO_CPI_YOY_REAL from the GSO monthly release; refreshing the FiinPro file is impossible.
+  [7] DCF: 5y-avg CPI 3.4426% -> 3.4147% (Δ -0.0279pp); g_term 6.8000% -> 6.8000%; fair value Δ = 0.0e+00% on 7 names
+
+==============================================================================
+assertions PASSED : 33
+assertions FAILED : 0
+regime relabels   : REG_C 27/185, REG_B 17/185
+VERDICT           : PASS
+cpi_vn Tier-1.5 selfcheck | TZ=Pacific/Auckland
+  old = /home/trido/thanhdt/WorkingClaude/cpi_vn.py   new = /home/trido/thanhdt/wt-fiinprox-h1h2-wire/WorkingClaude/cpi_vn.py
+  [1] rename: core match 13/13, headline match 0/13
+  [1] grep for the old name in .py files: 0 external reader(s)
+  [2] Tier 1: 13/13 months identical; flags disjoint
+  [2] tier partition: T1=13 T1.5=211 T3=12 T2(implicit)=0 of 236 months
+[cpi_vn] Tier 1.5 UNAVAILABLE (/nonexistent/fiinprox_cpi_missing.csv: [Errno 2] No such file or directory: '/nonexistent/fiinprox_cpi_missing.csv') -> Tier 2 interpolation is in force for 2011-01..2025-05 and Tier 3 for 2007-2010. Values there are PROXY (MAE 0.49pp, max 2.51pp) -- do not quote them as real prints.
+[cpi_vn] CPI COVERAGE GAP: 2 month(s) 2026-07..2026-08 have NO real source. Tier 1 (live NSO) ends 2026-06; Tier 1.5 (FiinPro snapshot 2026-09-14, trial ended 2026-09-28 -> FROZEN) ends (none). Those months are Tier 2's forward-fill of its last anchor, NOT a print. FIX = refresh NSO_CPI_YOY_REAL from the GSO monthly release; refreshing the FiinPro file is impossible.
+  [3] fallback reproduces pre-wire series exactly (T3 months 48, same as before)
+[cpi_vn] CPI COVERAGE GAP: 4 month(s) 2026-09..2026-12 have NO real source. Tier 1 (live NSO) ends 2026-06; Tier 1.5 (FiinPro snapshot 2026-09-14, trial ended 2026-09-28 -> FROZEN) ends 2026-08. Those months are Tier 2's forward-fill of its last anchor, NOT a print. FIX = refresh NSO_CPI_YOY_REAL from the GSO monthly release; refreshing the FiinPro file is impossible.
+  [4] §14 gate: fp_last=2026-08 from file; gap(2026-12)=4 months; warn-once OK
+  [5] cross-check vs h2_cpi_series.csv: n=236, max|diff|=0.00e+00
+  [6] REG_C 27/185 relabeled, REG_B 17/185
+  [6] month lists match the published artifact exactly
+  [6] relabels inside the 2011 / 2022-H2 episodes: 0
+[cpi_vn] CPI COVERAGE GAP: 4 month(s) 2026-09..2026-12 have NO real source. Tier 1 (live NSO) ends 2026-06; Tier 1.5 (FiinPro snapshot 2026-09-14, trial ended 2026-09-28 -> FROZEN) ends 2026-08. Those months are Tier 2's forward-fill of its last anchor, NOT a print. FIX = refresh NSO_CPI_YOY_REAL from the GSO monthly release; refreshing the FiinPro file is impossible.
+  [7] DCF: 5y-avg CPI 3.4426% -> 3.4147% (Δ -0.0279pp); g_term 6.8000% -> 6.8000%; fair value Δ = 0.0e+00% on 7 names
+
+==============================================================================
+assertions PASSED : 33
+assertions FAILED : 0
+regime relabels   : REG_C 27/185, REG_B 17/185
+VERDICT           : PASS
+
+==============================================================================
+== TZ = no TZ
+==============================================================================
+
+==============================================================================
+== TZ = UTC
+==============================================================================
+
+==============================================================================
+== TZ = Pacific/Auckland
+==============================================================================
+
+==============================================================================
+  TZ no TZ                -> PASS (rc=0)
+  TZ UTC                  -> PASS (rc=0)
+  TZ Pacific/Auckland     -> PASS (rc=0)

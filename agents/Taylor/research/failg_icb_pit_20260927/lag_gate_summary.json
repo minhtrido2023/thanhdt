@@ -1,0 +1,32 @@
+{
+ "pool_quarters_changed_tickers": 22,
+ "gate_flips": 3,
+ "newly_admitted": 3,
+ "newly_excluded": 0,
+ "flipped_quarters": [
+  {
+   "ticker": "HDG",
+   "quarter": "2019Q1",
+   "release": "2019-05-02",
+   "ctl_rating": 4.0,
+   "new_rating": 2.0,
+   "ret25_realized": 4.29
+  },
+  {
+   "ticker": "HDG",
+   "quarter": "2019Q2",
+   "release": "2019-08-01",
+   "ctl_rating": 4.0,
+   "new_rating": 3.0,
+   "ret25_realized": -5.36
+  },
+  {
+   "ticker": "HDG",
+   "quarter": "2019Q3",
+   "release": "2019-10-31",
+   "ctl_rating": 4.0,
+   "new_rating": 3.0,
+   "ret25_realized": -10.78
+  }
+ ]
+}

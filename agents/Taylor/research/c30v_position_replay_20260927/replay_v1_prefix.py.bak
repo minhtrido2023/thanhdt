@@ -1,0 +1,346 @@
+#!/usr/bin/env python3
+"""THIRD, INDEPENDENT reconstruction of the custom30V park basket — POSITION REPLAY.
+
+Model = the user's own (2026-09-27 17:11 ICT): hold SHARE COUNTS, mark to market at the RAW price
+actually traded that session, and apply every corporate action as an EXPLICIT event on its
+ex-date. Nothing here reads an adjusted price series, so it cannot inherit either of the two
+chains inside `custom_basket.py` (legacy `Close_adj x OShares`, or flat `Close_adj`).
+
+Three legs are produced, see PREREG.md:
+  REPLAY_A  buy-and-hold share counts between rebalances, 0,1%/side fees. The user's model.
+  REPLAY_B  same event arithmetic, but re-weighted DAILY to the engine's own target weights and
+            with NO fees -> differs from the engine's FLAT leg in EXACTLY ONE variable (the
+            return chain). This is the leg the 0,30pp match threshold is judged on.
+  ENGINE_*  the engine's own two legs, recomputed here from the dumped panel and asserted
+            against the levels `build_pit()` returned, so a disagreement in the harness itself
+            cannot be mistaken for a finding.
+
+Mutation knobs (selfcheck only — every one of them MUST move the number):
+  --no-share-step   drop N *= (1+q)                        (M1)
+  --mark-close      mark to market on adjusted Close        (M2)
+  --no-fee          drop rebalance fees                     (M3)
+  --no-px-repair    keep the stale ex-date raw Price as-is  (M4)
+"""
+import argparse
+import os
+import sys
+
+import numpy as np
+import pandas as pd
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+TC = 0.001          # 0,1%/side, CLAUDE.md § Backtest shared cost convention
+BASE_LEVEL = 1000.0
+# ISS issue methods that change an EXISTING holder's share count for free.
+FREE_SHARE_ISS = {"Trả Cổ tức bằng Cổ phiếu", "Cổ phiếu thưởng"}
+# Price-adjusting but NOT free: the holder must pay to subscribe, and the vendor table has no
+# issue price, so a replay cannot value it. Counted, never silently dropped (PREREG §4).
+RIGHTS_ISS = "Quyền mua CP cho Cổ đông hiện hữu"
+
+
+def cap_names(w, cap):
+    """Water-fill each weight down to `cap`, redistributing to the uncapped ones.
+
+    Same fixed point as custom_basket._cap_names; reimplemented here so the replay shares no code
+    with the thing it audits (a shared helper would make an identical bug invisible in both).
+    """
+    w = np.asarray(w, dtype=float).copy()
+    if w.sum() <= 0:
+        return w
+    w = w / w.sum()
+    for _ in range(100):
+        over = w > cap + 1e-12
+        if not over.any():
+            break
+        excess = float((w[over] - cap).sum())
+        w[over] = cap
+        free = ~over
+        if not free.any() or w[free].sum() <= 0:
+            break
+        w[free] += excess * w[free] / w[free].sum()
+    return w
+
+
+def load(args):
+    bx = pd.read_parquet(f"{HERE}/panel_bx.parquet")
+    bx["time"] = pd.to_datetime(bx["time"])
+    mem = pd.read_parquet(f"{HERE}/members_df.parquet")
+    mem["rebal_date"] = pd.to_datetime(mem["rebal_date"])
+    ev = pd.read_parquet(f"{HERE}/ca_vintage.parquet")
+    for c in ("exright_date", "effective_date"):
+        ev[c] = pd.to_datetime(ev[c], errors="coerce")
+    ev["exercise_ratio"] = pd.to_numeric(ev["exercise_ratio"], errors="coerce")
+    ev["value_per_share"] = pd.to_numeric(ev["value_per_share"], errors="coerce")
+    ev["issue_method_name_vi"] = ev["issue_method_name_vi"].fillna("")
+    return bx, mem, ev
+
+
+def build_prices(bx, args, log):
+    """Raw-price and adjusted-Close panels, with the ex-date staleness of `Price` repaired.
+
+    Registry `price-volume/ticker_price_stale_on_exdate.md`: on ~2% of events the ex-date row's
+    `Price` is the T-1 CUM price copied verbatim. For a share-count replay that is not a rounding
+    nit — the share count has already stepped up while the price has not stepped down, which
+    manufactures exactly the phantom return this audit exists to find. Detected on the invariant
+    that `ratio = Close/Price` is piecewise constant and steps to its post-event level ON the
+    ex-date, so a row whose ratio matches neither its own post-event level nor the next session's
+    is stale; repaired as `Price := Close / ratio_next`.
+    """
+    px = bx.pivot_table(index="time", columns="ticker", values="pxw").sort_index()
+    cl = bx.pivot_table(index="time", columns="ticker", values="Close").sort_index()
+    cl = cl.reindex(index=px.index, columns=px.columns)
+    if args.no_px_repair:
+        log("[px-repair] SKIPPED (mutation M4)")
+        return px, cl, 0
+    ratio = cl / px
+    rnext = ratio.shift(-1)
+    rprev = ratio.shift(1)
+    # stale = ratio sits strictly BETWEEN the previous session's level and the next session's,
+    # i.e. it is neither the cum level nor the post level -> a copied price, not a real quote.
+    lo = np.minimum(rprev, rnext)
+    hi = np.maximum(rprev, rnext)
+    stale = ((ratio > lo * 1.005) & (ratio < hi * 0.995)
+             & ratio.notna() & rnext.notna() & rprev.notna())
+    n = int(stale.values.sum())
+    fixed = cl / rnext
+    px = px.where(~stale, fixed)
+    log(f"[px-repair] {n} dòng ex-date có `Price` kẹt hệ CUM đã sửa thành Close/ratio_next "
+        f"({n/px.notna().values.sum()*100:.4f}% số ô có giá)")
+    return px, cl, n
+
+
+def build_events(ev, px, args, log):
+    """(share_factor, cash_per_share) panels aligned to the price grid, plus a rights inventory.
+
+    Several events can go ex on one day; PREREG §4 requires the COMBINED factor, not a product of
+    separate steps, so the cash and share legs of one day are resolved together downstream:
+    `f_E = (1+q) * P / (P - D)`. Here we only accumulate the two raw inputs per (ticker, date).
+    """
+    dates, cols = px.index, px.columns
+    fac = pd.DataFrame(1.0, index=dates, columns=cols)
+    cash = pd.DataFrame(0.0, index=dates, columns=cols)
+    dset = pd.DatetimeIndex(dates)
+
+    def snap(d):
+        """Map an ex-date to the first session on/after it (the grid has no weekend rows)."""
+        i = dset.searchsorted(pd.Timestamp(d))
+        return dset[i] if i < len(dset) else None
+
+    n_free, n_div, rights = 0, 0, []
+    for r in ev.itertuples():
+        tk = r.ticker
+        if tk not in cols:
+            continue
+        if r.event_code == "DIV":
+            d = snap(r.exright_date)
+            if d is None or pd.isna(r.value_per_share) or r.value_per_share <= 0:
+                continue
+            cash.at[d, tk] += float(r.value_per_share)
+            n_div += 1
+        elif r.event_code == "ISS":
+            m = r.issue_method_name_vi.strip()
+            d = snap(r.exright_date)
+            if d is None:
+                continue
+            if m == RIGHTS_ISS:
+                rights.append((tk, r.exright_date, float(r.exercise_ratio or 0.0)))
+            elif m in FREE_SHARE_ISS:
+                q = float(r.exercise_ratio or 0.0)
+                if q > 0:
+                    fac.at[d, tk] *= (1.0 + q)
+                    n_free += 1
+        # AIS = additional LISTING of shares already issued -> no effect on an existing holder.
+    if args.no_share_step:
+        fac.loc[:, :] = 1.0
+        log("[events] share step DROPPED (mutation M1)")
+    log(f"[events] {n_free} sự kiện CP thưởng/cổ tức CP áp vào N; {n_div} sự kiện cổ tức tiền vào cash; "
+        f"{len(rights)} sự kiện QUYỀN MUA KHÔNG mô phỏng được")
+    return fac, cash, rights
+
+
+def engine_weights(bx, mem, px):
+    """The engine's own daily target weight vector, recomputed from the dumped panel.
+
+    Mirrors custom_basket.build_pit()'s weight leg for weight_scheme='namecap': base =
+    mcapw(prev day) * qmult over the active rebal's members, restricted to names with a non-NaN
+    mcap on BOTH days, then water-filled to name_cap.
+    """
+    mcap = bx.pivot_table(index="time", columns="ticker", values="mcap").sort_index()
+    mcapw = bx.pivot_table(index="time", columns="ticker", values="mcapw").reindex(
+        index=mcap.index, columns=mcap.columns)
+    members = {d: list(zip(g["ticker"], g["qmult"])) for d, g in mem.groupby("rebal_date")}
+    reb = sorted(members)
+    out = {}
+    dates = list(mcap.index)
+    for i, d in enumerate(dates):
+        if i == 0:
+            continue
+        prev = dates[i - 1]
+        j = np.searchsorted(reb, d, side="right") - 1
+        if j < 0:
+            continue
+        mm = members[reb[j]]
+        tks = [t for t, _ in mm if t in mcap.columns]
+        qm = np.array([q for t, q in mm if t in mcap.columns], dtype=float)
+        today = mcap.loc[d, tks].values.astype(float)
+        yest = mcap.loc[prev, tks].values.astype(float)
+        yestw = mcapw.loc[prev, tks].values.astype(float)
+        valid = ~np.isnan(today) & ~np.isnan(yest)
+        if valid.sum() == 0:
+            continue
+        base = np.where(np.isnan(yestw[valid]), yest[valid], yestw[valid]) * qm[valid]
+        if base.sum() <= 0:
+            continue
+        out[d] = (list(np.array(tks)[valid]), cap_names(base, 0.10), reb[j])
+    return out, mcap
+
+
+def engine_legs(bx, wmap, mcap):
+    """Recompute the engine's FLAT and LEGACY daily returns from the dumped panel (harness check)."""
+    cl = bx.pivot_table(index="time", columns="ticker", values="Close").reindex(
+        index=mcap.index, columns=mcap.columns)
+    dates = list(mcap.index)
+    rf = pd.Series(0.0, index=mcap.index)
+    rl = pd.Series(0.0, index=mcap.index)
+    for i, d in enumerate(dates):
+        if d not in wmap:
+            continue
+        prev = dates[i - 1]
+        tks, w, _ = wmap[d]
+        rf.loc[d] = float(np.nansum(w * (cl.loc[d, tks].values / cl.loc[prev, tks].values - 1.0)))
+        rl.loc[d] = float(np.nansum(w * (mcap.loc[d, tks].values / mcap.loc[prev, tks].values - 1.0)))
+    return rf, rl
+
+
+def replay(px, cl, fac, cash, wmap, args, log, daily_reweight, fees):
+    """NAV path of a real share portfolio. `daily_reweight` False = REPLAY_A, True = REPLAY_B."""
+    mark = cl if args.mark_close else px
+    dates = list(px.index)
+    N = pd.Series(0.0, index=px.columns)
+    # initial capital sits in CASH, not in a phantom position: the mark-to-market step below runs
+    # before the first rebalance, so seeding nav without seeding cash would mark an empty
+    # portfolio and zero the NAV on session one.
+    cashbal = BASE_LEVEL
+    nav = BASE_LEVEL
+    navs, cur_reb, n_carry = {}, None, 0
+    last_px = pd.Series(np.nan, index=px.columns)
+    turnover_total = 0.0
+    for i, d in enumerate(dates):
+        if d not in wmap:
+            navs[d] = nav
+            continue
+        tks, w, rebd = wmap[d]
+        p = mark.loc[d].copy()
+        # a name can lose its quote mid-period (halt/delist); a real holder still owns it, so the
+        # last observed price is carried. Counted, never silently zeroed.
+        miss = p.isna() & (N != 0)
+        if miss.any():
+            n_carry += int(miss.sum())
+            p[miss] = last_px[miss]
+        last_px = last_px.where(p.isna(), p)
+
+        # (1) corporate actions of THIS session, resolved TOGETHER (PREREG §4 combined factor)
+        f = fac.loc[d]
+        dv = cash.loc[d]
+        held = N != 0
+        if held.any():
+            cashbal += float((N[held] * dv[held]).sum())
+            N[held] = N[held] * f[held]
+        # (2) mark to market
+        nav = float((N * p).fillna(0.0).sum()) + cashbal
+        # (3) rebalance: at a rebal date, or every session in REPLAY_B
+        if daily_reweight or rebd != cur_reb:
+            tgt = pd.Series(0.0, index=px.columns)
+            tgt[tks] = w
+            pv = p.where(p > 0)
+            newN = (tgt * nav / pv).fillna(0.0)
+            traded = float(((newN - N).abs() * p).fillna(0.0).sum())
+            turnover_total += traded
+            fee = traded * TC if fees else 0.0
+            N = newN
+            cashbal = nav - float((N * p).fillna(0.0).sum()) - fee
+            nav -= fee
+            cur_reb = rebd
+        navs[d] = nav
+    s = pd.Series(navs).sort_index()
+    log(f"[replay {'B' if daily_reweight else 'A'}] {n_carry} ô giá thiếu đã carry-forward; "
+        f"turnover tổng {turnover_total/BASE_LEVEL:.1f}x NAV gốc")
+    return s
+
+
+def cagr(s):
+    yrs = (s.index[-1] - s.index[0]).days / 365.25
+    return (float(s.iloc[-1]) / float(s.iloc[0])) ** (1 / yrs) - 1, yrs
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--no-share-step", action="store_true")
+    ap.add_argument("--mark-close", action="store_true")
+    ap.add_argument("--no-fee", action="store_true")
+    ap.add_argument("--no-px-repair", action="store_true")
+    ap.add_argument("--out-prefix", default="")
+    args = ap.parse_args()
+    lines = []
+
+    def log(m):
+        print(m, flush=True)
+        lines.append(m)
+
+    bx, mem, ev = load(args)
+    px, cl, n_stale = build_prices(bx, args, log)
+    fac, cash, rights = build_events(ev, px, args, log)
+    wmap, mcap = engine_weights(bx, mem, px)
+    rf, rl = engine_legs(bx, wmap, mcap)
+    lvl_f = BASE_LEVEL * (1 + rf).cumprod()
+    lvl_l = BASE_LEVEL * (1 + rl).cumprod()
+
+    # harness check: our recomputation of the engine's legs must match what build_pit() returned
+    for tag, lv in (("flat", lvl_f), ("legacy", lvl_l)):
+        ref = pd.read_parquet(f"{HERE}/level_{tag}.parquet")["level"]
+        j = lv.reindex(ref.index)
+        err = float((j / ref - 1).abs().max())
+        log(f"[harness] chân {tag} tái lập từ panel vs level build_pit trả về: max |Δ| = {err:.3e}")
+        assert err < 1e-9, f"harness lệch chân {tag} — không được đọc số replay khi harness sai"
+
+    a = replay(px, cl, fac, cash, wmap, args, log, daily_reweight=False, fees=not args.no_fee)
+    b = replay(px, cl, fac, cash, wmap, args, log, daily_reweight=True, fees=False)
+
+    log("")
+    res = {}
+    for tag, s in (("ENGINE_FLAT", lvl_f), ("ENGINE_LEGACY", lvl_l), ("REPLAY_A", a), ("REPLAY_B", b)):
+        c, yrs = cagr(s)
+        res[tag] = c
+        log(f"{tag:14s} level {float(s.iloc[0]):8.1f} -> {float(s.iloc[-1]):10.1f}   CAGR {c*100:7.3f}%   ({yrs:.2f}y)")
+    log("")
+    log(f"Δ CAGR  REPLAY_B − ENGINE_FLAT   = {(res['REPLAY_B']-res['ENGINE_FLAT'])*100:+.3f} pp   "
+        f"(ngưỡng khớp PREREG = 0,300pp)")
+    log(f"Δ CAGR  REPLAY_A − ENGINE_FLAT   = {(res['REPLAY_A']-res['ENGINE_FLAT'])*100:+.3f} pp")
+    log(f"Δ CAGR  REPLAY_B − ENGINE_LEGACY = {(res['REPLAY_B']-res['ENGINE_LEGACY'])*100:+.3f} pp")
+
+    # daily-return agreement
+    rb = b.pct_change().dropna()
+    ra = a.pct_change().dropna()
+    for tag, r in (("REPLAY_B", rb), ("REPLAY_A", ra)):
+        for eng, re_ in (("FLAT", rf), ("LEGACY", rl)):
+            j = pd.concat([r, re_.reindex(r.index)], axis=1).dropna()
+            corr = float(j.iloc[:, 0].corr(j.iloc[:, 1]))
+            te = float((j.iloc[:, 0] - j.iloc[:, 1]).std() * np.sqrt(252))
+            log(f"  {tag:9s} vs {eng:7s}: corr {corr:.6f}   tracking error {te*100:6.3f}%/yr")
+
+    log("")
+    log(f"[rights] {len(rights)} sự kiện quyền mua trong lịch sử 204 tên "
+        f"({len(set(t for t, _, _ in rights))} mã) — KHÔNG mô phỏng được (thiếu giá phát hành)")
+
+    pref = args.out_prefix or "base"
+    pd.DataFrame({"ENGINE_FLAT": lvl_f, "ENGINE_LEGACY": lvl_l, "REPLAY_A": a, "REPLAY_B": b}
+                 ).to_parquet(f"{HERE}/levels_{pref}.parquet")
+    pd.DataFrame(rights, columns=["ticker", "exright_date", "ratio"]).to_csv(
+        f"{HERE}/rights_not_modelled.csv", index=False)
+    with open(f"{HERE}/replay_{pref}.log", "w") as fh:
+        fh.write("\n".join(lines) + "\n")
+    print(f"\n[out] levels_{pref}.parquet + replay_{pref}.log")
+
+
+if __name__ == "__main__":
+    main()

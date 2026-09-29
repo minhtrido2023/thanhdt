@@ -1,0 +1,173 @@
+diff --git a/bin/daily_nav_snapshot.py b/bin/daily_nav_snapshot.py
+index 353d45f8..e8322508 100755
+--- a/bin/daily_nav_snapshot.py
++++ b/bin/daily_nav_snapshot.py
+@@ -67,6 +67,103 @@ def confirmed_qty_multiplier_after(ticker, asof_date):
+     return mult
+ 
+ 
++def expected_exdate_adjustment(ticker, asof_date, close_price, market_price, events=None):
++    """Lệch close_price vs marketPrice có phải ĐIỀU CHỈNH GIÁ THAM CHIẾU TRƯỚC NGÀY EX không?
++
++    DNSE hạ `marketPrice` của vị thế vào TỐI TRƯỚC phiên ex-date, trong khi giá đóng cửa của
++    phiên hôm nay vẫn là giá CUM (còn hưởng quyền). Gap giữa hai số đó, khi nó ĐÚNG BẰNG giá
++    trị quyền, là KỲ VỌNG — không phải "broker đồng bộ giá trễ" (ca PVT 2026-09-08) và cũng
++    không phải corp-action sai (ca VHM 2026-08-05).
++
++    Ca thật đã cắn (bus `Mafee/nav-price-xcheck-stuck-ZaloPay-2026-09-11`): DGC tối T6
++    2026-09-11 — close 46.750 vs marketPrice vị thế 38.750 (lệch 20,6%), gate PRICE_XCHECK
++    chặn NAV, `nav_sync_retry.sh` retry cả buổi tối rồi escalate bus question. Nhưng DGC trả
++    cổ tức tiền mặt HAI đợt cùng ex-date T2 2026-09-14 (3.000 + 5.000 = 8.000đ):
++    46.750 − 8.000 = 38.750 — khớp đến từng đồng. Không có gì hỏng cả.
++
++    Trả `(True, giải_thích)` KHI VÀ CHỈ KHI cả ba đúng:
++      1. có sự kiện ĐIỀU CHỈNH GIÁ (`corp_action_lib.is_price_adjusting`) với
++         `exright_date` == PHIÊN GIAO DỊCH KẾ TIẾP sau `asof_date` (T6 → T2, biết cả lễ);
++      2. cộng DỒN mọi sự kiện cùng ex-date đó — DGC cho thấy nhiều đợt cùng ngày là chuyện
++         thật, lấy một đợt sẽ ra số sai mà vẫn "gần đúng";
++      3. `|(close − Σ cổ tức tiền) / (1 + Σ tỉ lệ cp) − marketPrice| ≤ 1 bước giá`.
++
++    Mọi trường hợp khác (kể cả lỗi đọc BQ, thiếu lịch phiên, số không khớp) trả
++    `(False, lý_do)` ⇒ caller GIỮ NGUYÊN hành vi cũ: chặn NAV. Fail-safe theo đúng hướng —
++    một lỗi đọc dữ liệu KHÔNG được phép biến thành "đã giải thích được, cho qua".
++
++    `events=` để selfcheck bơm dữ liệu, không chạm BQ.
++    """
++    try:
++        sys.path.insert(0, WC_ROOT)
++        from trading_bot.vn_market import next_trading_day, tick_size
++        from corp_action_lib import is_price_adjusting
++    except ImportError as e:
++        return False, f"không import được lịch phiên/taxonomy corp-action ({e})"
++    if not close_price or not market_price or market_price <= 0:
++        return False, "thiếu close_price hoặc marketPrice"
++    try:
++        nxt = next_trading_day(datetime.date.fromisoformat(asof_date)).isoformat()
++    except ValueError as e:
++        return False, f"không tính được phiên kế tiếp sau {asof_date} ({e})"
++
++    if events is None:
++        try:
++            from corp_action_lib import pricing_events
++            # `pricing_events` (KHÔNG phải `events`): sự kiện tương lai còn ở trạng thái
++            # `announced` tới ~22:2x ICT của chính ngày ex — reader `executed_only` sẽ trả
++            # RỖNG đúng ngày ta cần nó nhất (bẫy đã đo, xem corp_action_lib).
++            events = pricing_events([ticker], since=asof_date, until=nxt)
++        except Exception as e:                                    # noqa: BLE001
++            return False, f"không đọc được lịch corp-action từ BQ ({e})"
++
++    rows = [e for e in (events or [])
++            if str(e.get("exright_date") or "")[:10] == nxt and is_price_adjusting(e)]
++    if not rows:
++        return False, f"không có sự kiện điều chỉnh giá nào có ex-date = {nxt}"
++
++    div = 0.0
++    mult = 1.0
++    parts = []
++    for e in rows:
++        if e.get("event_code") == "DIV":
++            v = float(e.get("value_per_share") or 0)
++            div += v
++            parts.append(f"cổ tức tiền {v:,.0f}đ")
++        elif e.get("event_code") == "ISS":
++            r = float(e.get("exercise_ratio") or 0)
++            mult *= 1.0 + r
++            parts.append(f"cổ phiếu tỉ lệ {r:.4g}")
++    if div == 0 and mult == 1.0:
++        return False, f"sự kiện ex-date {nxt} không mang giá trị quyền đọc được"
++    if mult != 1.0:
++        # ⛔ CHỈ nới cho cổ tức TIỀN MẶT. Với sự kiện CỔ PHIẾU (thưởng/trả cổ tức bằng cp/quyền
++        # mua), DNSE credit KHỐI LƯỢNG cùng lúc hạ giá — đo thật trên VIB tối 2026-09-09 19:07:
++        # openQuantity 500 → 547 VÀ marketPrice 15.050 → 13.700 trong CÙNG một bản ghi. Nhánh
++        # `is_today` KHÔNG quy đổi ngược qty (quy đổi chỉ chạy `if not is_today`), nên nếu bỏ mã
++        # này khỏi `mismatched` thì NAV = qty MỚI × giá CUM = 547 × 15.000 thay vì 547 × 13.700,
++        # thổi phồng 711.100đ — đúng con số retro-2026-09-10 ghi là hậu quả cổng phải chặn (với
++        # VHM 1:1 sai số là 100% giá trị vị thế). Giá khớp không có nghĩa là NAV khớp.
++        # (arch-reviewer BLOCKER 1, job Wags_20260912_052122)
++        return False, (f"có sự kiện CỔ PHIẾU ex-date {nxt} (hệ số {mult:.6g}) — broker credit qty "
++                       f"sớm 1 phiên nhưng nhánh is_today không quy đổi ngược qty ⇒ giá và khối "
++                       f"lượng khác cơ sở, VẪN CHẶN (chỉ nới cho cổ tức tiền mặt)")
++
++    adj = (close_price - div) / mult
++    # Bước giá: `tick_size` mặc định thang HOSE; mã HNX/UPCOM có bước 100đ (rộng hơn) nên lấy
++    # sàn 100đ làm trần dưới cho dung sai — script này không biết mã niêm yết ở sàn nào, và
++    # đoán HẸP hơn thực tế sẽ từ chối oan đúng ca nó sinh ra để nhận diện. 100đ trên giá vài
++    # chục nghìn ≈ 0,3%, vẫn chặt hơn cổng 5% nhiều bậc.
++    tol = max(float(tick_size(adj, ticker)), 100.0)
++    diff = abs(adj - market_price)
++    formula = (f"({close_price:,.0f} − {div:,.0f}) / {mult:.6g} = {adj:,.0f} "
++               f"vs marketPrice {market_price:,.0f} ⇒ lệch {diff:,.0f}đ "
++               f"(dung sai {tol:,.0f}đ); ex-date {nxt}: " + " + ".join(parts))
++    if diff <= tol:
++        return True, formula
++    return False, "số KHÔNG khớp: " + formula
++
++
+ def trading_dates_with_fills(account, upto_date):
+     dates = []
+     for path in sorted(glob.glob(os.path.join(EXEC_DIR, f"exec_{account}_*_journal.csv"))):
+@@ -472,6 +569,32 @@ def main():
+             diff_pct = abs(cp_adj - mp) / mp * 100
+             if diff_pct > PRICE_XCHECK_TOLERANCE_PCT:
+                 mismatched.append((t, cp_adj, mp, diff_pct))
++    # ── Ca ĐÃ GIẢI THÍCH ĐƯỢC: điều chỉnh giá tham chiếu trước ngày ex ──
++    # Chỉ áp cho `is_today` (nhánh lịch sử so trên cơ sở khác, xem trên) và chỉ chạy khi ĐÃ có
++    # lệch >5% — happy path không tốn thêm một truy vấn BQ nào.
++    xcheck_exceptions = []
++    if mismatched and is_today:
++        still_stuck = []
++        for row in mismatched:
++            t, cp, mp, d = row
++            ok, why = expected_exdate_adjustment(t, args.date, cp, mp)
++            if ok:
++                xcheck_exceptions.append({"ticker": t, "close_price": cp, "market_price": mp,
++                                          "diff_pct": d, "formula": why,
++                                          "qty": (positions[t] or {}).get("qty"),
++                                          "dividend_per_share": round(cp - mp, 4)})
++                print(f"ℹ️ [{args.date}] {t}: EXPECTED_EXDATE_ADJ — {why}. Dùng giá đóng cửa "
++                      f"CUM {cp:,.0f} cho NAV (nhất quán với cum_dividend_double_count/§21: "
++                      f"trước ex-date, cổ phiếu mark giá cum và khoản phải thu bị loại khỏi "
++                      f"tiền — lấy giá broker đã điều chỉnh sẽ hụt NAV đúng bằng cổ tức).",
++                      file=sys.stderr)
++            else:
++                still_stuck.append((row, why))
++        if len(still_stuck) < len(mismatched):
++            for _, why in still_stuck:
++                print(f"⚠️ [{args.date}] vẫn chặn: {why}", file=sys.stderr)
++        mismatched = [row for row, _ in still_stuck]
++
+     if mismatched:
+         detail = "; ".join(f"{t}: close_price={cp:,.0f} vs vị thế broker marketPrice={mp:,.0f} "
+                            f"(lệch {d:.1f}%)" for t, cp, mp, d in mismatched)
+@@ -549,6 +672,21 @@ def main():
+     cash_broker = cash
+     cash -= cum_div["amount"]
+ 
++    # ⛔ GHÉP CỨNG với ngoại lệ EXPECTED_EXDATE_ADJ ở trên (arch-reviewer BLOCKER 2). Ngoại lệ đó
++    # dựa trên MỘT giả định: khoản cổ tức phải thu mà broker vừa ghi vào `totalCash` đã được
++    # `cum_dividend_double_count` loại ra. Nhưng hàm đó có 2 nhánh trả amount=0 KÈM WARNING khi nó
++    # không tự kết luận được (thiếu bản ghi balance phiên trước; bản ghi phiên trước là GIỮA PHIÊN
++    # và BQ chưa có phiên sau). Rơi vào đó mà vẫn mark giá CUM ⇒ đếm 2 lần đúng bằng cổ tức
++    # (ca DGC: 80.000.000đ = +8,1% NAV ZaloPay), và cổng sanity ±15% không bắt được. Trước thay
++    # đổi này chính cổng PRICE_XCHECK là thứ chặn ngày đó lại — không được để mất lưới đó.
++    if xcheck_exceptions and cum_div.get("warnings"):
++        print(f"❌ [{args.date}] Đã nhận diện EXPECTED_EXDATE_ADJ cho "
++              f"{[e['ticker'] for e in xcheck_exceptions]} (mark giá CUM), NHƯNG "
++              f"cum_dividend_double_count KHÔNG kết luận được khoản phải thu có bị đếm 2 lần hay "
++              f"không: {cum_div['warnings']}. KHÔNG tính NAV — hai cơ chế này chỉ đúng khi đi "
++              f"cùng nhau.", file=sys.stderr)
++        return 4
++
+     # NAV = Tiền + Cổ phiếu − Nợ (đúng như app DNSE hiển thị "Tài sản ròng" — user xác nhận
+     # 2026-07-06 bằng ảnh chụp thật, khớp chính xác đến từng đồng: 709.276.086 + 683.590.000
+     # − 409.863.737 = 983.002.349). KHÔNG cần tự ước tính "tiền bán chờ T+2" cộng riêng —
+@@ -642,6 +780,9 @@ def main():
+     out = {"account": args.account, "date": args.date, "nav": nav,
+            "mtm_stock": mtm_stock, "cash": cash, "cash_broker": cash_broker,
+            "cum_dividend_excl": cum_div, "margin_debt": debt,
++           # Dòng NAV nào đã đi qua ngoại lệ của cổng PRICE_XCHECK phải TỰ KHAI ra — một tháng
++           # sau không ai phân biệt được "sạch" với "đã nới cổng" nếu chỉ có stderr.
++           "price_xcheck_exceptions": xcheck_exceptions,
+            "egg_assets": egg_value, "egg_assets_auto": True,
+            "offbook_assets": offbook, "offbook_assets_note": offbook_note,
+            "offbook_assets_asof": offbook_asof, "offbook_stale_warning": offbook_stale_warning,

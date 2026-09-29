@@ -1,0 +1,37 @@
+== Reconcile equity — ZaloPay ==
+Nguồn balance THẬT: data/execution_logs/dnse_raw_2026-09-27.jsonl (ts=2026-09-27T13:16:47, kind=balances)
+Nguồn P&L THẬT: data/execution_logs/verified_snapshot_ZaloPay_2026-09-27.json
+
+VẾ TRÁI  (Vốn ban đầu + Lãi/lỗ - phí - lãi vay, TOÀN BỘ SỐ THẬT):
+  Vốn ban đầu:                987,865,567  (NAV thật 2026-07-06 từ account_seed_capital.json)
+    legacy DGC: broker 10,000cp (replay 10,000) × 35,950 − giá vốn MTM-seed 462,500,000 ⇒ đã cộng vào unrealized + MTM
+    legacy VPB: broker 1,412cp (replay 1,412) × 23,000 − giá vốn MTM-seed 29,672,607 ⇒ đã cộng vào unrealized + MTM
+    + fill broker xác nhận dnse_raw thiếu: 2026-07-10 sell 600 VHC @57,500 (email khớp lệnh DNSE msg 19f4b4977cc2786e (100+500 @57.500) + sao kê T07 (11 dòng bán VHC 10/07 = 1.800cp); dnse_raw/journal chỉ có 1.200cp)
+  + Lãi/lỗ chưa thực hiện:     -92,057,937
+  + Lãi/lỗ ĐÃ thực hiện (fill thật, lô-đang-sống):      -20,514,424
+  + Cổ tức tiền mặt ròng (gộp 88,353,500 − thuế 4,322,675):  +84,030,825
+  - Phí giao dịch (0.097% x giá vốn thật):         -437,410
+  - Phí/lãi margin đã POST (depositFeeAmount, API thật):       -6,320
+  = VẾ TRÁI:                  958,880,301
+
+VẾ PHẢI  (NAV thị trường + Tiền mặt - Nợ margin, số THẬT từ broker):
+  Giá trị cổ phiếu (MTM):     851,041,612
+  + Tiền mặt:                   4,107,343
+  - Nợ vay margin:                      0
+  + Trứng vàng (egg.totalValue, API):102,169,788
+  = VẾ PHẢI:                  957,318,743
+
+CHÊNH LỆCH (trái - phải, TOÀN BỘ SỐ THẬT):       +1,561,558  (+0.1631% của vế phải)
+Ngưỡng dung sai: ±0.05% NAV + 5tr VND sàn tuyệt đối
+KẾT LUẬN (đẳng thức chính, chỉ số thật): ✅ KHỚP
+
+--- DIỄN GIẢI residual (ƯỚC TÍNH, KHÔNG phải số thật — margin rate 12.5%/năm do user cung cấp, chưa xác minh với DNSE) ---
+  Lãi margin ước tính/ngày trên dư nợ hiện tại:                0 VND/ngày
+  (depositFeeAmount hiện tại chỉ 6,320đ — có thể lãi margin post theo chu kỳ, không phải hàng ngày; cần đối chiếu sao kê DNSE để xác nhận chính xác)
+  Phí mua 0.097%/bán 0.097% trên TỔNG khớp mua+bán 1,283,357,300 (vế trái mới trừ trên giá vốn đang giữ):       +807,446
+  Thuế TNCN 0.1% giá trị bán 651,339,000:                  +651,339
+  Lãi margin ước 12.5%/năm cộng dồn 2026-07-07→2026-09-27 (trừ phần đã post):             +0
+  = Giải thích được (ước):        +1,458,785
+  DƯ SAU DIỄN GIẢI:                 +102,772  (+0.0107% NAV) — trong ±0.3% NAV
+
+Ghi ra: data/execution_logs/reconcile_equity_ZaloPay_2026-09-27.json

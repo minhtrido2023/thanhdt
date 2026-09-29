@@ -1,0 +1,295 @@
+daily_refresh_v34b_linux.sh	128:  /home/trido/thanhdt/WorkingClaude/mike/bin/notify.sh "$ALERT" 2>/dev/null || true
+daily_refresh_v34b_linux.sh	129:  /home/trido/thanhdt/WorkingClaude/mike/bin/notify_thread.sh "$ALERT" "1521470705563340910" 2>/dev/null || true
+daily_refresh_v34b_linux.sh	138:  /home/trido/thanhdt/WorkingClaude/mike/bin/notify.sh "$WMSG" 2>/dev/null || true
+daily_refresh_v34b_linux.sh	227:  /home/trido/thanhdt/WorkingClaude/mike/bin/notify.sh "$PMSG" 2>/dev/null || true
+daily_refresh_v34b_linux.sh	228:  /home/trido/thanhdt/WorkingClaude/mike/bin/notify_thread.sh "$PMSG" "1521470705563340910" 2>/dev/null || true
+mike/bin/append_event.sh	32:# gọi kèm `2>/dev/null || true` (eod_trading_report.sh, ops_health_check.sh, dispatch.sh,
+mike/bin/append_event.sh	64:    # allowed") NGAY tại f.write ⇒ `2>/dev/null || true` nuốt sạch ⇒ file cách ly 0 BYTE
+mike/bin/append_event.sh	70:' "$BUS/_rejected.jsonl" "$1" "${_ORIG_ARGV[@]}" 2>/dev/null || true
+mike/bin/append_event.sh	73:  mkdir -p "$BUS" 2>/dev/null || true
+mike/bin/append_event.sh	172:kbver="$(tr -dc '0-9' < "$ROOT/kb/version.txt" 2>/dev/null || true)"; kbver="${kbver:-0}"
+mike/bin/approve_plan_simple.sh	177:_LEVERAGED="$(python3 - "$PLAN_PATH" 2>/dev/null <<'PYEOF' || echo 0
+mike/bin/backup_freshness_check.sh	39:    timeout 120 git -C "$repo" fetch -q "$remote" "$branch" 2>/dev/null || true
+mike/bin/bot_heartbeat.sh	20:[ -f "$WC_ROOT/wc_env.sh" ] && source "$WC_ROOT/wc_env.sh" 2>/dev/null || true
+mike/bin/bot_heartbeat.sh	41:  "$ROOT/bin/notify_thread.sh" "$1" "$THREAD_ID" 2>/dev/null || true
+mike/bin/bot_heartbeat.sh	124:N_ORDERS="$(python3 -c "import json; print(len(json.load(open('$PLAN_FILE')).get('orders', [])))" 2>/dev/null || echo 0)"
+mike/bin/bot_heartbeat.sh	141:" 2>/dev/null || echo no)"
+mike/bin/bot_heartbeat.sh	204:LAST="$(cat "$LASTLINE_FILE" 2>/dev/null || echo 0)"
+mike/bin/bq_freshness_check.sh	46:[ -f "$ROOT/../wc_env.sh" ] && source "$ROOT/../wc_env.sh" 2>/dev/null || true
+mike/bin/bq_freshness_check.sh	166:      "$ROOT/bin/notify_thread.sh" "$fail_msg" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+mike/bin/bq_freshness_check.sh	170:    "$ROOT/bin/notify.sh" "$fail_msg" 2>/dev/null || true
+mike/bin/bq_freshness_check.sh	171:    "$ROOT/bin/notify_thread.sh" "$fail_msg" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+mike/bin/bq_freshness_check.sh	175:  lag_days=$(printf "%.0f" "$lag_days" 2>/dev/null || echo "$lag_days")
+mike/bin/bq_freshness_check.sh	183:    "$ROOT/bin/notify_thread.sh" "$warn_msg" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+mike/bin/bq_freshness_check.sh	189:    "$ROOT/bin/notify.sh" "$alert_msg" 2>/dev/null || true
+mike/bin/bq_freshness_check.sh	190:    "$ROOT/bin/notify_thread.sh" "$alert_msg" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+mike/bin/bq_freshness_check.sh	210:    "$ROOT/bin/notify_thread.sh" "$fail_msg" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+mike/bin/bq_freshness_check.sh	229:    "$ROOT/bin/notify_thread.sh" "$warn_msg" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+mike/bin/bq_freshness_check.sh	303:      "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+mike/bin/bq_freshness_check.sh	326:    "$ROOT/bin/notify.sh" "$msg" 2>/dev/null || true
+mike/bin/bq_freshness_check.sh	327:    "$ROOT/bin/notify_thread.sh" "$msg" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+mike/bin/bq_freshness_check.sh	337:    "$ROOT/bin/notify_thread.sh" "$msg" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+mike/bin/bq_freshness_check.sh	371:    "$ROOT/bin/notify_thread.sh" "$warn_msg" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+mike/bin/bq_freshness_check.sh	405:  "$ROOT/bin/notify.sh" "$depth_msg" 2>/dev/null || true
+mike/bin/bq_freshness_check.sh	406:  "$ROOT/bin/notify_thread.sh" "$depth_msg" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+mike/bin/bq_freshness_check.sh	466:  "$ROOT/bin/notify.sh" "$pub_msg" 2>/dev/null || true
+mike/bin/bq_freshness_check.sh	467:  "$ROOT/bin/notify_thread.sh" "$pub_msg" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+mike/bin/bq_freshness_check.sh	471:  DT5G_CSV_MDATE="$(date -d @"$(stat -c %Y "$DT5G_CSV_F" 2>/dev/null || echo 0)" +%Y-%m-%d 2>/dev/null)"
+mike/bin/bq_freshness_check.sh	475:    "$ROOT/bin/notify_thread.sh" "$csv_msg" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+mike/bin/bq_freshness_check.sh	510:    "$ROOT/bin/notify_thread.sh" "$warn_msg" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+mike/bin/bq_freshness_check.sh	518:  "$ROOT/bin/notify_thread.sh" "$warn_msg" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+mike/bin/bq_freshness_check.sh	575:      "$ROOT/bin/notify_thread.sh" "$warn_msg" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+mike/bin/bq_freshness_check.sh	585:    "$ROOT/bin/notify_thread.sh" "$warn_msg" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+mike/bin/bq_freshness_check.sh	621:  "$ROOT/bin/notify_thread.sh" "$warn_msg" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+mike/bin/bq_freshness_check.sh	640:      "$ROOT/bin/notify_thread.sh" "$warn_msg" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+mike/bin/bq_freshness_check.sh	648:    "$ROOT/bin/notify_thread.sh" "$warn_msg" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+mike/bin/bq_freshness_check.sh	672:  "$ROOT/bin/notify_thread.sh" "$STALE_SUMMARY" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+mike/bin/bq_freshness_check.sh	705:    "$ROOT/bin/notify.sh" "$_pit_err" 2>/dev/null || true
+mike/bin/bq_freshness_check.sh	706:    "$ROOT/bin/notify_thread.sh" "$_pit_err" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+mike/bin/bq_freshness_check.sh	719:  "$ROOT/bin/notify.sh" "$_pq_err" 2>/dev/null || true
+mike/bin/bq_freshness_check.sh	720:  "$ROOT/bin/notify_thread.sh" "$_pq_err" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+mike/bin/bq_freshness_check.sh	741:  mtime="$(stat -c %Y "$path" 2>/dev/null || echo 0)"
+mike/bin/bq_freshness_check.sh	743:    local msg="⛔ ARTIFACT STALE $TODAY — $label ($path) mtime $(date -d @"$mtime" +'%F %T' 2>/dev/null || echo 'MISSING') < gate start $(date -d @"$PIPELINE_START_EPOCH" +'%F %T'). Pipeline step ghi file này đã FAIL — DollarBill bị BLOCK, không lập plan với dữ liệu cũ. Check mike/logs/bq_freshness.log"
+mike/bin/bq_freshness_check.sh	744:    "$ROOT/bin/notify_thread.sh" "$msg" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+mike/bin/bq_freshness_check.sh	841:    --bg 2>/dev/null || echo "  [WARN] dispatch DollarBill cho $ACCT fail — check mike/logs/"
+mike/bin/bq_monthly_pin.sh	38:  "$ROOT/mike/bin/notify.sh" "BQ monthly pin FAIL (exit=$rc$([ "$rc" = 124 ] && echo ' TIMEOUT')) — xem $LOG" 2>/dev/null || true
+mike/bin/bq_monthly_pin.sh	39:  "$ROOT/mike/bin/notify_thread.sh" "BQ monthly pin FAIL (exit=$rc$([ "$rc" = 124 ] && echo ' TIMEOUT')) — xem $LOG" "trading_daily" 2>/dev/null || true
+mike/bin/check_report_cadence.sh	121:          2>/dev/null || true
+mike/bin/check_report_cadence.sh	139:          "$TRADING_REPORT_THREAD" 2>/dev/null || true
+mike/bin/check_report_cadence.sh	492:  "$ROOT/bin/notify_thread.sh" "$MSG" "$TRADING_REPORT_THREAD" 2>/dev/null || true
+mike/bin/check_report_cadence.sh	494:    2>/dev/null || true
+mike/bin/check_sbv_weekly.sh	32:" 2>/dev/null || echo "4.5")
+mike/bin/check_sbv_weekly.sh	38:" 2>/dev/null || echo "2023-06-19")
+mike/bin/check_sbv_weekly.sh	85:" 2>/dev/null || echo "unknown")
+mike/bin/check_sbv_weekly.sh	111:" 2>/dev/null || true
+mike/bin/check_sbv_weekly.sh	175:"$WORKDIR/mike/bin/append_event.sh" Winston finding "sbv-weekly-check-${TODAY}" "${PAYLOAD}" 2>/dev/null || true
+mike/bin/code_quality_weekly.sh	62:  idx="$(python3 -c "import json; print(json.load(open('$ROTATION_STATE')).get('next_idx',0))" 2>/dev/null || echo 0)"
+mike/bin/code_quality_weekly.sh	262:n_findings="$(python3 -c 'import json,sys; print(len(json.load(open(sys.argv[1])).get("findings",[])))' "$findings_raw_f" 2>/dev/null || echo 0)"
+mike/bin/code_quality_weekly.sh	274:n_medium_plus="$(python3 -c 'import json,sys; print(len(json.load(open(sys.argv[1]))))' "$medium_plus_f" 2>/dev/null || echo 0)"
+mike/bin/code_quality_weekly.sh	342:n_final="$(python3 -c 'import json,sys; print(len(json.load(open(sys.argv[1])).get("findings",[])))' "$verified_f" 2>/dev/null || echo "$n_findings")"
+mike/bin/code_quality_weekly.sh	408:ARCH_TID="$("$ROOT/bin/discord_channel.sh" "$ARCH_THREAD_NAME" 2>/dev/null || true)"
+mike/bin/code_quality_weekly.sh	410:  "$ROOT/bin/notify_thread.sh" "$summary_line Báo cáo: $report_file" "$ARCH_TID" 2>/dev/null || true
+mike/bin/compute_active_nav_all.sh	13:[ -f "$WC_ROOT/wc_env.sh" ] && source "$WC_ROOT/wc_env.sh" 2>/dev/null || true
+mike/bin/consolidate.sh	62:    wold="$(cat "$wmark" 2>/dev/null || true)"
+mike/bin/consolidate.sh	88:    python3 "$PY" format-events "$NEW" 2>/dev/null || true
+mike/bin/consolidate.sh	91:  ver="$(tr -dc '0-9' < "$KB/version.txt" 2>/dev/null || true)"; ver="${ver:-0}"
+mike/bin/consolidate.sh	96:  python3 "$PY" delta-append "$NEW" "$newver" >> "$KB/recent_delta.jsonl" 2>/dev/null || true
+mike/bin/consolidate.sh	97:  tail -n 400 "$KB/recent_delta.jsonl" > "$KB/.rd.tmp" 2>/dev/null && mv -f "$KB/.rd.tmp" "$KB/recent_delta.jsonl" || true
+mike/bin/consolidate.sh	100:  python3 "$ROOT/bin/rebuild_context_mini.py" 2>/dev/null || true
+mike/bin/consolidate.sh	121:  # in `2>/dev/null || true` with the success line printing unconditionally underneath. Since
+mike/bin/consolidate.sh	161:      if [ "$cstate" != "$(cat "$CMARK" 2>/dev/null || true)" ]; then
+mike/bin/consolidate.sh	170:  discord_summary="$(python3 "$PY" format-events "$NEW" 2>/dev/null | head -n 8 || true)"
+mike/bin/consolidate.sh	186:python3 "$PY" fleet-status "$BUS/registry" > "$KB/fleet_status.md" 2>/dev/null || true
+mike/bin/cron_health_check_daily.sh	30:  "$ROOT/bin/notify.sh" "🩺 [cron_health_check] $(date -u +%Y-%m-%d): tất cả job crontab OK (0 cần chú ý)." 2>/dev/null || true
+mike/bin/cron_health_check_daily.sh	36:    || "$ROOT/bin/notify_thread.sh" "$SUMMARY" "$TRADING_DAILY_THREAD" 2>/dev/null || true
+mike/bin/cron_health_check_daily.sh	37:  "$ROOT/bin/notify.sh" "🩺 [cron_health_check] ${BAD_COUNT} job crontab cần chú ý hôm nay — xem Architecture channel." 2>/dev/null || true
+mike/bin/cron_health_check_daily.sh	49:    "$ROOT/bin/notify.sh" "🟡 [cron_health_check] incidents_index_sync phát hiện drift nhưng --fix không đổi gì file — cần người kiểm tay: $DRIFT" 2>/dev/null || true
+mike/bin/cron_health_check_daily.sh	53:    # round 2-5, 2026-08-12): `2>/dev/null || true` nuốt lời từ chối của pre-commit gate rồi
+mike/bin/cron_health_check_daily.sh	61:      "$ROOT/bin/notify.sh" "🩺 [cron_health_check] incidents_index_sync tự sửa drift + ĐÃ COMMIT: $DRIFT" 2>/dev/null || true
+mike/bin/cron_health_check_daily.sh	64:      "$ROOT/bin/notify.sh" "⚠️ [cron_health_check] incidents_index_sync đã sửa index.md trên đĩa nhưng commit BỊ TỪ CHỐI — KHÔNG có commit nào, file còn dirty, CẦN COMMIT TAY. Drift: $DRIFT | git: $cerr" 2>/dev/null || true
+mike/bin/csv_fresh_today.sh	61:MTIME_DATE="$(TZ='Asia/Ho_Chi_Minh' date -r "$F" +%F 2>/dev/null || echo "?")"
+mike/bin/custom30v_rebalance_watch.sh	27:  "$ROOT/bin/notify_thread.sh" "$1" "$TRADING_DAILY_THREAD" 2>/dev/null || true
+mike/bin/daily_retro.sh	80:  "$ROOT/bin/notify.sh" "[daily_retro] Phát hiện draft RETRO cũ chưa dọn: $_stale — dấu hiệu finalize job của lần chạy đó đã fail âm thầm (không notify được vì chạy nền). Cần người kiểm tra kb/incidents/retro/retro-<ngày tương ứng>.md có entry chưa." 2>/dev/null || true
+mike/bin/daily_retro.sh	82:    "{\"reason\":\"leftover draft file phat hien khi chay daily_retro ngay $TODAY, nghia la finalize job truoc do fail am tham\",\"file\":\"$_stale\"}" 2>/dev/null || true
+mike/bin/daily_retro.sh	278:    "$ROOT/bin/notify.sh" "[daily_retro] RETRO $TODAY bỏ qua: tài khoản Mike hết usage-limit lúc chạy (00:30 ICT). Transient — sẽ tự chạy lại kỳ sau. Không cần làm gì trừ khi lặp nhiều ngày liên tiếp." 2>/dev/null || true
+mike/bin/daily_retro.sh	280:      "{\"reason\":\"tai khoan Mike het usage-limit luc chay retro (00:30 ICT), draft khong tao duoc — transient khong can user quyet\",\"rc\":$rc1,\"log\":\"$draft_log\"}" 2>/dev/null || true
+mike/bin/daily_retro.sh	292:  "$ROOT/bin/notify.sh" "[daily_retro] LỖI: draft RETRO $TODAY không hợp lệ sau 2 lần thử (job Mike rc=$rc1). Nguyên nhân: $_fail_cause. Xem $draft_log và state/retro_rejected_${TODAY}_a*.md. Retro hôm nay KHÔNG chạy — cần người kiểm tra." 2>/dev/null || true
+mike/bin/daily_retro.sh	294:    "{\"reason\":\"$_fail_cause (sau 2 lan thu), rc=$rc1\",\"log\":\"$draft_log\",\"rejected_glob\":\"state/retro_rejected_${TODAY}_a*.md\"}" 2>/dev/null || true
+mike/bin/daily_retro.sh	330:_esc_topics="$(python3 - "$ROOT/bus/inbox/Mike.jsonl" "$RUN_START_TS" <<'PY' 2>/dev/null || true
+mike/bin/dispatch.sh	180:  # hỏng, `2>/dev/null || true` nuốt lỗi, và check 10b báo xanh "không có dispatch bị từ chối"
+mike/bin/dispatch.sh	183:  mkdir -p "$(dirname "$_rejlog")" 2>/dev/null || true
+mike/bin/dispatch.sh	186:    >> "$_rejlog" 2>/dev/null || true
+mike/bin/dispatch.sh	278:              "$ROOT/kb/cli_providers.json" 2>/dev/null || echo claude)"
+mike/bin/dispatch.sh	356:  _defmodel="$("$ROOT/bin/cli_provider.sh" field "$PROVIDER" default_model 2>/dev/null || true)"
+mike/bin/dispatch.sh	359:CLI_PROFILE="$("$ROOT/bin/cli_provider.sh" field "$PROVIDER" profile 2>/dev/null || echo claude-native)"
+mike/bin/dispatch.sh	360:CLI_SUPPORTS_TURNS="$("$ROOT/bin/cli_provider.sh" field "$PROVIDER" supports_turns 2>/dev/null || echo true)"
+mike/bin/dispatch.sh	361:CLI_USAGE_PROBE="$("$ROOT/bin/cli_provider.sh" field "$PROVIDER" usage_probe 2>/dev/null || true)"
+mike/bin/dispatch.sh	362:CLI_MAXTURNS_PAT="$("$ROOT/bin/cli_provider.sh" field "$PROVIDER" max_turns_pattern 2>/dev/null || true)"
+mike/bin/dispatch.sh	456:    "$ROOT/bin/notify.sh" "[circuit-breaker] $1 TRIPPED ($_cr_out) — dispatch tạm dừng ${CIRCUIT_COOLDOWN}s." 2>/dev/null || true
+mike/bin/dispatch.sh	462:      "$ROOT/bin/notify_thread.sh" "🔴 **Circuit breaker OPEN** cho **$1** ($_cr_out) — $CIRCUIT_THRESHOLD+ lỗi liên tiếp, tạm dừng dispatch ${CIRCUIT_COOLDOWN}s. Ép chạy: \`DISPATCH_FORCE=1\`." "$_cbtid" 2>/dev/null || true
+mike/bin/dispatch.sh	539:    "$ROOT/bin/notify.sh" "[dispatch] $id: usage-limit-like failure lặp lại $((n + 1)) lần liên tiếp (job $job_id) — DỪNG auto-resume (chạm trần $cap), có thể KHÔNG PHẢI usage limit thật. Cần người kiểm tra: $lf" 2>/dev/null || true
+mike/bin/dispatch.sh	561:  local resume_ict; resume_ict="$(TZ=Asia/Ho_Chi_Minh date -d "@$resume_at" '+%H:%M %d/%m' 2>/dev/null || echo '?')"
+mike/bin/dispatch.sh	562:  "$ROOT/bin/notify.sh" "[dispatch] $id: tài khoản hết usage limit (job $job_id) — KHÔNG PHẢI lỗi task. Tự động resume lúc ~${resume_ict} ICT (lần thử #$((n + 1))/$cap)." 2>/dev/null || true
+mike/bin/dispatch.sh	570:    "$ROOT/bin/notify_thread.sh" "⏳ **$id** hết usage limit tài khoản (job \`$job_id\`) — không phải lỗi task. TỰ ĐỘNG resume lúc ~${resume_ict} ICT. Không cần làm gì." "$_tid" 2>/dev/null || true
+mike/bin/dispatch.sh	599:  "$ROOT/bin/notify.sh" "[dispatch] $id: provider '$PROVIDER' hết usage/rate limit (job $job_id) — đã fallback NGAY sang claude (không chờ, quota độc lập)." 2>/dev/null || true
+mike/bin/dispatch.sh	602:    "$ROOT/bin/notify_thread.sh" "🔀 **$id** provider '$PROVIDER' hết usage/rate limit (job \`$job_id\`) — đã tự chuyển sang claude ngay, không chờ reset." "$_tid" 2>/dev/null || true
+mike/bin/dispatch.sh	647:    "$ROOT/bin/notify.sh" "[dispatch] $id: hết turn-budget lặp lại $((n + 1)) lần liên tiếp (job $job_id, trần đã tới $MAX_TURNS) — DỪNG auto-resume (chạm trần $cap lần). Task có thể quá lớn để tự chia — cần người xem lại, cân nhắc chia thủ công thành nhiều dispatch độc lập (rẻ hơn nâng trần vô hạn). Log: $lf" 2>/dev/null || true
+mike/bin/dispatch.sh	658:  "$ROOT/bin/notify.sh" "[dispatch] $id: hết turn budget (job $job_id, --max-turns=$MAX_TURNS) — KHÔNG PHẢI lỗi nội dung. Tự động resume NGAY với trần cao hơn (--max-turns=$bumped, lần thử #$((n + 1))/$cap)." 2>/dev/null || true
+mike/bin/dispatch.sh	661:    "$ROOT/bin/notify_thread.sh" "⏳ **$id** hết turn budget (job \`$job_id\`) — không phải lỗi nội dung, chỉ hết lượt tool-call (--max-turns=$MAX_TURNS). TỰ ĐỘNG resume NGAY với trần cao hơn (--max-turns=$bumped)." "$_tid" 2>/dev/null || true
+mike/bin/dispatch.sh	704:    "$ROOT/bin/notify.sh" "[dispatch] registry Discord HỎNG: không phân giải được '$_name' cho $1 — job VẪN CHẠY nhưng KHÔNG có topic (không đoán); mọi thông báo Discord của job này bị mất." 2>/dev/null || true
+mike/bin/dispatch.sh	727:  python3 "$ROOT/bin/mike_json.py" job-field "$JOBS_DIR" "$1" discord_thread_id 2>/dev/null || true
+mike/bin/dispatch.sh	807:      && "$ROOT/bin/notify_thread.sh" "$1" "$discord_thread_id" 2>/dev/null || true
+mike/bin/dispatch.sh	812:    sz="$(stat -c '%s' "${logfile_path:-/dev/null}" 2>/dev/null || echo 0)"
+mike/bin/dispatch.sh	813:    mtime="$(stat -c '%Y' "${logfile_path:-/dev/null}" 2>/dev/null || echo 0)"
+mike/bin/dispatch.sh	848:      "{\"status\":\"still_running\",\"elapsed_min\":${elapsed_min},\"job_id\":\"$jid\",\"source\":\"watcher\"}" "$jid" 2>/dev/null || true
+mike/bin/dispatch.sh	946:  printf '%s' "$pid" > "$logfile.workerpid" 2>/dev/null || true
+mike/bin/dispatch.sh	951:      hb="$(python3 "$ROOT/bin/mike_json.py" job-hb-age "$JOBS_DIR" "$job_id" 2>/dev/null || echo '-')"
+mike/bin/dispatch.sh	955:        JSET deadline="$deadline" hb_extensions="$ext" 2>/dev/null || true
+mike/bin/dispatch.sh	965:      kill -TERM -- "-$pid" 2>/dev/null || kill -TERM "$pid" 2>/dev/null || true
+mike/bin/dispatch.sh	970:      kill -KILL -- "-$pid" 2>/dev/null || kill -KILL "$pid" 2>/dev/null || true
+mike/bin/dispatch.sh	972:      rm -f "$logfile.workerpid" 2>/dev/null || true
+mike/bin/dispatch.sh	979:  rm -f "$logfile.workerpid" 2>/dev/null || true
+mike/bin/dispatch.sh	1146:[ -f "$WC_ROOT/wc_env.sh" ] && source "$WC_ROOT/wc_env.sh" 2>/dev/null || true
+mike/bin/dispatch.sh	1196:    "$(TZ='Asia/Ho_Chi_Minh' date -Iseconds)" "$id" "${job_id:-<chua-tao>}" >> "$ROOT/logs/notify_thread_errors.log" 2>/dev/null || true
+mike/bin/dispatch.sh	1213:    "$ROOT/bin/notify.sh" "[dispatch] HUỶ job cho $id: topic '$_dtid0' không có trong registry Discord." 2>/dev/null || true
+mike/bin/dispatch.sh	1256:_dup="$(python3 "$ROOT/bin/mike_json.py" job-find-dup "$JOBS_DIR" "$id" "$_psum" 2>/dev/null || true)"
+mike/bin/dispatch.sh	1272:  _wsc="$(python3 "$ROOT/bin/mike_json.py" job-write-scope-conflict "$JOBS_DIR" "$WRITE_SCOPE" 2>/dev/null || true)"
+mike/bin/dispatch.sh	1383:        "$ROOT/bin/notify.sh" "[dispatch] $id hoàn thành (job $job_id): $(SUMMARY)" 2>/dev/null || true
+mike/bin/dispatch.sh	1408:            "$ROOT/bin/notify_thread.sh" "✅ **DollarBill** đã lập plan xong (job \`${job_id}\`) — report chi tiết (mục tiêu mua/bán, giá dự kiến, lý do) sẽ đăng vào kênh này lúc **19:30 ICT** hôm nay." "$_tid" 2>/dev/null || true
+mike/bin/dispatch.sh	1410:            "$ROOT/bin/notify_thread.sh" "✅ **$id** xong (job \`${job_id}\`): $_preview" "$_tid" 2>/dev/null || true
+mike/bin/dispatch.sh	1474:    "$ROOT/bin/notify.sh" "[dispatch] $id $why sau $max_attempts lần (job $job_id) — xem $logfile" 2>/dev/null || true
+mike/bin/dispatch.sh	1478:      "$ROOT/bin/notify_thread.sh" "❌ **$id** $why (job \`${job_id}\`). Xem log: $logfile" "$_tid" 2>/dev/null || true
+mike/bin/dispatch.sh	1553:  disown 2>/dev/null || true
+mike/bin/dispatch.sh	1560:  disown 2>/dev/null || true
+mike/bin/dispatch.sh	1633:      _eta_at="$(TZ='Asia/Ho_Chi_Minh' date -d "+${_wake_delay} seconds" '+%H:%M ICT' 2>/dev/null || true)"
+mike/bin/dispatch.sh	1635:      "$ROOT/bin/notify_thread.sh" "🚀 **$id** nhận việc (job \`$job_id\`): $_dp… — ${_eta_txt}; xong sẽ tự báo tại đây." "$_dtid" 2>/dev/null || true
+mike/bin/dispatch.sh	1665:      rm -f "$logfile.workerpid" 2>/dev/null || true
+mike/bin/dispatch.sh	1666:      kill "$_wpid" 2>/dev/null || true
+mike/bin/dispatch.sh	1702:      # phải thứ để `2>/dev/null || true` giấu đi.
+mike/bin/dispatch.sh	1707:    kill "$_wpid" 2>/dev/null || true
+mike/bin/dispatch.sh	1723:  kill "$_wpid" 2>/dev/null || true  # watcher no longer needed
+mike/bin/eod_trading_report.sh	77:      2>/dev/null || true
+mike/bin/eod_trading_report.sh	97:    2>/dev/null || true
+mike/bin/eod_trading_report.sh	143:" 2>/dev/null || true
+mike/bin/eod_trading_report.sh	162:" 2>/dev/null || true
+mike/bin/eod_trading_report.sh	179:  DT5G_WARN="$(cd "$WC_ROOT" && timeout 60 python3 dt5g_freshness.py --warn-line 2>/dev/null || true)"
+mike/bin/eod_trading_report.sh	272:  N_ORDERS_TODAY="$(python3 -c "import json; print(len(json.load(open('$PLAN_FILE')).get('orders', [])))" 2>/dev/null || echo "?")"
+mike/bin/eod_trading_report.sh	670:  _prev_started="$(cat "$_MISMATCH_MARKER" 2>/dev/null || true)"
+mike/bin/eod_trading_report.sh	680:  "$ROOT/bin/notify_thread.sh" "🔍 Phát hiện lệch đối soát — tự động kích hoạt kiểm toán độc lập (risk-auditor)..." "$_discord_thread" 2>/dev/null || true
+mike/bin/fearbuy_weekly_scan.sh	79:UNIVERSE_BLOCK=$(timeout 200 python3 "$MIKEDIR/agents/Taylor/anomaly_scan.py" --print-universe 2>/dev/null || true)
+mike/bin/fearbuy_weekly_scan.sh	92:  CANDIDATE_FUNNEL_BLOCK=$(timeout 240 python3 "$MIKEDIR/bin/discretionary_candidate_funnel.py" --print-block 2>/dev/null || true)
+mike/bin/fearbuy_weekly_scan.sh	212:SINCE_LAST_WEEK="$(TZ=UTC date -u -d '9 days ago' +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || true)"
+mike/bin/fleet_health.sh	42:    es=$(date -d "$enter" +%s 2>/dev/null || echo 0)
+mike/bin/fleet_health.sh	48:  streak="$(cat "$FLAP/$unit" 2>/dev/null || echo 0)"
+mike/bin/fleet_health.sh	57:      hs=$(date -d "$hb" +%s 2>/dev/null || echo 0)
+mike/bin/fleet_health.sh	96:tail -n 8 "$ROOT/logs/watchdog.log" 2>/dev/null | sed 's/^/  /' || echo "  (no watchdog.log yet)"
+mike/bin/fleet_housekeeping.sh	102:  sz=$(stat -c %s "$p" 2>/dev/null || echo 0)
+mike/bin/fleet_housekeeping.sh	111:  sz=$(stat -c %s "$p" 2>/dev/null || echo 0)
+mike/bin/fleet_housekeeping.sh	113:  ym="$(date -u -d "@$(stat -c %Y "$p")" +%Y-%m 2>/dev/null || echo unknown)"
+mike/bin/fleet_housekeeping.sh	162:        "$jf" 2>/dev/null || echo '')"
+mike/bin/fleet_housekeeping.sh	299:             "$ROOT/bus/jobs/$jid.json" 2>/dev/null || echo '')"
+mike/bin/hit_details_daily.sh	21:[ -f "$ROOT/wc_env.sh" ] && source "$ROOT/wc_env.sh" 2>/dev/null || true
+mike/bin/inject_discretionary_orders.sh	15:[ -f "$WC_ROOT/wc_env.sh" ] && source "$WC_ROOT/wc_env.sh" 2>/dev/null || true
+mike/bin/jit_unpark_daily.sh	30:[ -f "$WC_ROOT/wc_env.sh" ] && source "$WC_ROOT/wc_env.sh" 2>/dev/null || true
+mike/bin/jobs.sh	115:    val=$(MJ job-field "$JOBS_DIR" "$job_id" replied_at 2>/dev/null || true)
+mike/bin/kb_nightly.sh	88:    FRIDAY_CONFIRMED="$(python3 - "$SINCE_ISO" "$ROOT/bus/inbox/Mike.jsonl" <<'PYEOF' 2>/dev/null || echo no
+mike/bin/kb_nightly.sh	649:"$ROOT/bin/notify.sh" "$MSG" 2>/dev/null || true
+mike/bin/kb_nightly.sh	654:"$ROOT/bin/notify_thread.sh" "$MSG" "$_tid" 2>/dev/null || true
+mike/bin/kb_nightly.sh	893:    _prev="$(cat "$_CTXBLOAT_STAMP" 2>/dev/null || true)"
+mike/bin/kb_nightly.sh	894:    _attempted="$(cat "$_CTXBLOAT_AUTOFIX_STAMP" 2>/dev/null || true)"
+mike/bin/kb_nightly.sh	966:                2>/dev/null || true
+mike/bin/late_plan_catchup.sh	8:[ -f "$WC_ROOT/wc_env.sh" ] && source "$WC_ROOT/wc_env.sh" 2>/dev/null || true
+mike/bin/merge_park_daily.sh	32:[ -f "$WC_ROOT/wc_env.sh" ] && source "$WC_ROOT/wc_env.sh" 2>/dev/null || true
+mike/bin/nav_sync_retry.sh	47:$NAV_LINE" "trading_report" 2>/dev/null || true
+mike/bin/nav_sync_retry.sh	64:      2>/dev/null || true
+mike/bin/nav_sync_retry.sh	65:    "$ROOT/bin/notify_thread.sh" "🟡 NAV $ACCOUNT ($PLAN_DATE) vẫn lệch giá >5% sau 2h tự retry — có thể là corp-action thật, đã escalate bus question, cần kiểm tra thủ công." "trading_report" 2>/dev/null || true
+mike/bin/notify.sh	24:mkdir -p "$ROOT/logs" "$STATE" 2>/dev/null || true
+mike/bin/notify.sh	28:  msg="ping — Mike notify.sh self-test ($(hostname -s 2>/dev/null || echo host))"
+mike/bin/notify.sh	37:host="$(hostname -s 2>/dev/null || echo host)"
+mike/bin/notify.sh	41:log() { printf '%s | %s\n' "$ts" "$1" >>"$LOG" 2>/dev/null || true; }
+mike/bin/notify.sh	56:  last="$(cat "$mark" 2>/dev/null || echo 0)"
+mike/bin/notify.sh	66:"$ROOT/bin/notify_discord.sh" "$full" "Mike fleet" "3447003" "update task" 2>/dev/null || rc=$?
+mike/bin/notify.sh	69:  echo "$now" >"$mark" 2>/dev/null || true
+mike/bin/notify_thread.sh	66:# Tên-ý-nghĩa → ID thật. Hỏng ở đây là hỏng TO: mọi caller đều bọc `2>/dev/null || true`, nên
+mike/bin/ops_autofix.sh	71:  LAST_ISO="$(cat "$STARTED_ISO_FILE" 2>/dev/null || true)"
+mike/bin/ops_autofix.sh	73:    CONFIRMED="$(python3 - "$LAST_ISO" "$LABEL" "$ROOT/bus/inbox/Winston.jsonl" <<'PYEOF' 2>/dev/null || echo no
+mike/bin/ops_autofix.sh	109:      "$ROOT/bin/notify_thread.sh" "⚠️ [ops-autofix] Lần tự sửa TRƯỚC cho '$LABEL' (lúc $LAST_ISO) KHÔNG có kết quả xác nhận được (không có finding/question khớp trên bus) — fixer có thể đã lạc đề/chết im. Cần người kiểm tra trực tiếp, đừng tin thông báo 'đã sửa' trước đó." "$TRADING_DAILY_THREAD" 2>/dev/null || true
+mike/bin/ops_autofix.sh	115:  LAST=$(cat "$STAMP_FILE" 2>/dev/null || echo 0)
+mike/bin/ops_autofix.sh	118:    "$ROOT/bin/notify_thread.sh" "🔁 [ops-autofix] Vấn đề '$LABEL' TÁI DIỄN trong cooldown (fix trước có thể chưa ăn) — cần người xem: $DETAILS" "$TRADING_DAILY_THREAD" 2>/dev/null || true
+mike/bin/ops_autofix.sh	133:  GLAST=$(cat "$GLOBAL_STAMP" 2>/dev/null || echo 0)
+mike/bin/ops_autofix.sh	137:    "$ROOT/bin/notify_thread.sh" "⏸️ [ops-autofix] '$LABEL' phát hiện ${GAGE}s sau 1 autofix khác đang chạy — gộp chung episode, không dispatch song song (nếu là issue riêng biệt, checker kỳ sau sẽ tự re-flag): $DETAILS" "$TRADING_DAILY_THREAD" 2>/dev/null || true
+mike/bin/ops_autofix.sh	146:"$ROOT/bin/notify_thread.sh" "🔧 [ops-autofix] Phát hiện vấn đề '$LABEL' — đã tự động cử agent chẩn đoán + sửa (Winston/fable). Sẽ báo kết quả vào đây khi xong." "$TRADING_DAILY_THREAD" 2>/dev/null || true
+mike/bin/ops_autofix.sh	154:KNOWN_ISSUE="$(python3 "$ROOT/bin/incident_lookup.py" "$LABEL" "$DETAILS" 2>/dev/null || true)"
+mike/bin/ops_health_check.sh	64:" 2>/dev/null) || true
+mike/bin/ops_health_check.sh	1054:#     call site gọi kèm `2>/dev/null || true` nên thông điệp fail-loud bị vứt VÀ exit code
+mike/bin/ops_health_check.sh	1440:#     mỗi lần nó không gửi được; mọi caller đều bọc `2>/dev/null || true` nên KHÔNG ai thấy
+mike/bin/ops_health_check.sh	1829:      >> "$ROOT/logs/notify_thread_errors.log" 2>/dev/null || true
+mike/bin/ops_health_check.sh	1835:  "{\"account\":\"${ACCOUNT}\",\"label\":\"${LABEL}\",\"warn_count\":${WARN_COUNT:-0}}" 2>/dev/null || true
+mike/bin/ops_health_check.sh	1870:    "$ROOT/bin/wags_autofix.sh" "coord-${TODAY}" "$COORD_WARN (checker run: account=${ACCOUNT})" 2>/dev/null || true
+mike/bin/ops_health_check.sh	1885:    "$ROOT/bin/ops_autofix.sh" "ops-health-${ACCOUNT}" "$OTHER_WARN (checker run: account=${ACCOUNT})" 2>/dev/null || true
+mike/bin/paper_checkpoint_escalation.sh	111:  "$ROOT/bin/notify_thread.sh" "$MSG" "$TRADING_REPORT_THREAD" 2>/dev/null || true
+mike/bin/paper_checkpoint_escalation.sh	114:    2>/dev/null || true
+mike/bin/paper_checkpoint_escalation.sh	132:      2>/dev/null || true
+mike/bin/paper_checkpoint_escalation.sh	135:    "$ROOT/bin/notify_thread.sh" "$WARN" "$TRADING_REPORT_THREAD" 2>/dev/null || true
+mike/bin/paper_checkpoint_escalation.sh	151:    2>/dev/null || true
+mike/bin/paper_late_feeds.sh	42:  "${NOTIFY_BIN:-/home/trido/thanhdt/WorkingClaude/mike/bin/notify.sh}" "$msg" 2>/dev/null || true
+mike/bin/paper_late_feeds.sh	43:  "${NOTIFY_THREAD_BIN:-/home/trido/thanhdt/WorkingClaude/mike/bin/notify_thread.sh}" "$msg" "trading_daily" 2>/dev/null || true
+mike/bin/paper_main_early_check.sh	45:  "$ROOT/bin/notify_thread.sh" "$1" "$TRADING_DAILY_THREAD" 2>/dev/null || true
+mike/bin/paper_main_early_check.sh	101:" 2>/dev/null || echo no)"
+mike/bin/paper_main_early_check.sh	104:  GHOST_COUNT="$(grep -c ',GHOST_ORDER,' "$JOURNAL" 2>/dev/null || echo 0)"
+mike/bin/paper_main_early_check.sh	144:" 2>/dev/null || echo not_pure_hybrid_defer)"
+mike/bin/park_trim_daily.sh	24:[ -f "$WC_ROOT/wc_env.sh" ] && source "$WC_ROOT/wc_env.sh" 2>/dev/null || true
+mike/bin/plan_approval_reminder.sh	43:    "$ROOT/bin/notify.sh" "⏰ NHẮC DUYỆT PLAN — còn ~15 phút trước giờ bot chạy (09:05 ICT). $reason" 2>/dev/null || true
+mike/bin/preflight_check.sh	9:[ -f "$ROOT/../wc_env.sh" ] && source "$ROOT/../wc_env.sh" 2>/dev/null || true
+mike/bin/preflight_check.sh	51:                      "$WORKDIR"/data/plan_${ACCOUNT}_*_${TODAY}.json 2>/dev/null | head -1 || true)"
+mike/bin/preflight_check.sh	266:  2>/dev/null | tail -1 | tr -d '[:space:]' || echo "999,0,unknown")
+mike/bin/preflight_check.sh	321:  "$ROOT/bin/notify.sh" "$MSG" 2>/dev/null || true
+mike/bin/preflight_check.sh	323:    "$ROOT/bin/notify_thread.sh" "$MSG" "$TRADING_DAILY_THREAD" 2>/dev/null || true
+mike/bin/preflight_check.sh	328:  "{\"result\":\"$([ $FAILED -eq 0 ] && echo GREEN || echo RED)\",\"checks\":$(python3 -c "import json; print(json.dumps($(printf '[%s]' "$(IFS=,; printf '"%s",' "${LINES[@]}" | sed 's/,$//') ")))" 2>/dev/null || echo '[]')}" \
+mike/bin/preflight_check.sh	329:  2>/dev/null || true
+mike/bin/publish_context.sh	13:ver="$(tr -dc '0-9' < "$KB/version.txt" 2>/dev/null || true)"; ver="${ver:-0}"
+mike/bin/publish_context.sh	16:recent="$(python3 "$PY" recent "$KB/recent_delta.jsonl" 5 2>/dev/null || true)"
+mike/bin/refresh_fa_ratings.sh	58:  "$MIKE/bin/notify_thread.sh" "$MSG" "$DISCORD_TRADING_DAILY" 2>/dev/null || true
+mike/bin/refresh_fa_ratings.sh	59:  "$MIKE/bin/append_event.sh" Taylor error "fa_ratings-refresh-failed" "{\"reason\":\"$FAIL_REASON\"}" 2>/dev/null || true
+mike/bin/refresh_fa_ratings.sh	65:"$MIKE/bin/append_event.sh" Taylor status "fa_ratings-refresh-ok" "{\"rows\":$NUM_ROWS}" 2>/dev/null || true
+mike/bin/refresh_fa_ratings_8l.sh	56:  "$MIKE/bin/notify_thread.sh" "$MSG" "$DISCORD_TRADING_DAILY" 2>/dev/null || true
+mike/bin/refresh_fa_ratings_8l.sh	57:  "$MIKE/bin/append_event.sh" Winston error "fa_ratings_8l-refresh-failed" "{\"reason\":\"$FAIL_REASON\"}" 2>/dev/null || true
+mike/bin/refresh_fa_ratings_8l.sh	63:"$MIKE/bin/append_event.sh" Winston status "fa_ratings_8l-refresh-ok" "{\"rows\":$NUM_ROWS}" 2>/dev/null || true
+mike/bin/remember.sh	55:nb="$(grep -c '^- \[' "$f" 2>/dev/null || echo 0)"
+mike/bin/run_bot.sh	18:[ -f "$WC_ROOT/wc_env.sh" ] && source "$WC_ROOT/wc_env.sh" 2>/dev/null || true
+mike/bin/run_bot.sh	39:  "$ROOT/bin/notify_thread.sh" "$1" "$_tid" 2>/dev/null || true
+mike/bin/run_bot.sh	63:  "{\"account\":\"$ACCOUNT\",\"plan_date\":\"$PLAN_DATE\",\"auto_otp\":$AUTO_OTP}" 2>/dev/null || true
+mike/bin/run_bot.sh	94:    "{\"account\":\"$ACCOUNT\",\"plan_date\":\"$PLAN_DATE\",\"elapsed_s\":$elapsed,\"rc\":$rc}" 2>/dev/null || true
+mike/bin/run_bot.sh	109:    "{\"account\":\"$ACCOUNT\",\"plan_date\":\"$PLAN_DATE\",\"elapsed_s\":$elapsed,\"rc\":0}" 2>/dev/null || true
+mike/bin/run_bot.sh	114:    "{\"account\":\"$ACCOUNT\",\"plan_date\":\"$PLAN_DATE\",\"elapsed_s\":$elapsed,\"rc\":$rc,\"log\":\"$LOG\"}" 2>/dev/null || true
+mike/bin/run_bot.sh	120:    "run_bot.sh --account $ACCOUNT (plan $PLAN_DATE) thoát rc=$rc sau $((elapsed/60)) phút. Log: $LOG. Tail: $tail_preview — Việc cần làm: (1) xác định root cause thật trong log; (2) kiểm tra bot đã tự hồi phục chưa (heartbeat autoheal, log $ROOT/logs/run_bot_${ACCOUNT}_autoheal_*.log + journal exec_${ACCOUNT}_${PLAN_DATE}_journal.csv trong data/execution_logs/); (3) nếu còn lệnh kẹt/bot chết trong giờ giao dịch → ưu tiên khôi phục an toàn trong ranh giới cho phép, còn lại escalate." 2>/dev/null || true
+mike/bin/run_selfchecks.sh	18:[ -f "$WC_ROOT/wc_env.sh" ] && source "$WC_ROOT/wc_env.sh" 2>/dev/null || true
+mike/bin/selfcheck_weekly_baseline_check.sh	64:[ -f "$WC/wc_env.sh" ] && source "$WC/wc_env.sh" 2>/dev/null || true
+mike/bin/send_plan_report.sh	27:[ -f "$WC_ROOT/wc_env.sh" ] && source "$WC_ROOT/wc_env.sh" 2>/dev/null || true
+mike/bin/send_plan_report.sh	95:  python3 - "$f" << 'PYHASH' 2>/dev/null || echo ""
+mike/bin/send_plan_report.sh	112:  SENT_HASH="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1])).get("content_md5",""))' "$MARKER_FILE" 2>/dev/null || echo "")"
+mike/bin/send_plan_report.sh	908:    "$ROOT/bin/notify.sh" "$MSG" 2>/dev/null || true
+mike/bin/send_plan_report.sh	909:    "$ROOT/bin/notify_thread.sh" "$MSG" "$DISCORD_PLAN_CHANNEL" 2>/dev/null || true
+mike/bin/send_plan_report.sh	912:      2>/dev/null || true
+mike/bin/send_plan_report.sh	927:    "$ROOT/bin/notify.sh" "$MSG" 2>/dev/null || true
+mike/bin/send_plan_report.sh	928:    "$ROOT/bin/notify_thread.sh" "$MSG" "$DISCORD_PLAN_CHANNEL" 2>/dev/null || true
+mike/bin/send_plan_report.sh	931:      2>/dev/null || true
+mike/bin/send_plan_report.sh	949:  "$ROOT/bin/notify.sh" "$SUMMARY" 2>/dev/null || true
+mike/bin/send_plan_report.sh	950:  "$ROOT/bin/notify_thread.sh" "$SUMMARY" "$DISCORD_PLAN_CHANNEL" 2>/dev/null || true
+mike/bin/session_announce.sh	76:"$ROOT/bin/notify_thread.sh" "$MSG" "$TRADING_DAILY_THREAD" 2>/dev/null || true
+mike/bin/vendor_mismatch_alert.sh	248:# `2>/dev/null || true` + ghi state vô điều kiện: ccdb chết/topic sai ⇒ lỗi bị NUỐT (§29) và state
+mike/bin/verify_finding.sh	115:    _verify_src_tid="$(python3 "$ROOT/bin/mike_json.py" job-field "$JOBS_DIR" "$finding_trace_id" discord_thread_id 2>/dev/null || true)"
+mike/bin/verify_finding.sh	215:  [ -n "$bg" ] && "$ROOT/bin/notify.sh" "[verify] $finding_topic → $verdict" 2>/dev/null || true
+mike/bin/verify_finding.sh	219:    "$_verify_src_tid" 2>/dev/null || true
+mike/bin/wags_autofix.sh	127:if [ -f "$STAMP" ] && [ $((NOW - $(cat "$STAMP" 2>/dev/null || echo 0))) -lt "$AUTOFIX_COOLDOWN" ]; then
+mike/bin/wags_autofix.sh	139:KNOWN_ISSUE="$(python3 "$ROOT/bin/incident_lookup.py" "$LABEL" "$DETAILS" 2>/dev/null || true)"
+mike/bin/wags_autofix.sh	450:    print(\"false\")" 2>/dev/null || echo "false")"
+mike/bin/wake_thread.sh	103:    _last="$(cat "$_dbf" 2>/dev/null || echo 0)"
+mike/bin/wake_thread.sh	106:      mkdir -p "$ROOT/logs" 2>/dev/null || true
+mike/bin/wake_thread.sh	109:        "$((_now - _last))" "$WAKE_DEBOUNCE_S" >> "$ROOT/logs/wake_thread.log" 2>/dev/null || true
+mike/bin/wake_thread.sh	113:    printf '%s' "$_now" > "$_dbf" 2>/dev/null || true
+mike/bin/watchdog.sh	52:  [ -f "$bp" ] && mv -f "$bp" "$bp.stale.$(date -u +%s)" 2>/dev/null || true
+mike/bin/watchdog.sh	71:      prev="$(cat "$cnt_file" 2>/dev/null || echo 0)"
+mike/bin/watchdog.sh	85:      rm -f "$mark" 2>/dev/null || true
+mike/bin/watchdog.sh	91:  cnt="$(cat "$cnt_file" 2>/dev/null || echo 0)"; cnt=$(( ${cnt:-0} + 1 )); echo "$cnt" > "$cnt_file"
+mike/bin/watchdog.sh	95:    result="$(systemctl --user show "$unit" -p Result --value 2>/dev/null || true)"
+mike/bin/watchdog.sh	101:    systemctl --user reset-failed "$unit" 2>/dev/null || true
+mike/bin/watchdog.sh	109:      systemctl --user reset-failed "$unit" 2>/dev/null || true
+mike/bin/watchdog.sh	155:    _tid="$(python3 "$ROOT/bin/mike_json.py" job-field "$JOBS_DIR" "$_jid" discord_thread_id 2>/dev/null || true)"
+mike/bin/watchdog.sh	157:      "$ROOT/bin/notify_thread.sh" "⚠️ **Job OVERDUE** \`$_jid\` ($_jfrom→$_jto, ${_jmin}min quá hạn). Kiểm tra: \`bin/jobs.sh status $_jid\`" "$_tid" 2>/dev/null || true
+mike/bin/watchdog.sh	177:  rm -f "$umark" 2>/dev/null || true
+mike/bin/watchdog.sh	199:    rm -f "$smark" 2>/dev/null || true
+mike/bin/watchdog.sh	214:  rm -f "$MODELWARN" 2>/dev/null || true
+mike/bin/weekly_ops_audit.sh	30:SINCE_LAST_WEEK="$(TZ=UTC date -u -d '9 days ago' +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || true)"
+mike/bin/worktree_cleanup_daily.sh	74:active_csv="$(python3 - "$CCDB_URL" <<'PY' 2>/dev/null || true
+mike/bin/worktree_cleanup_daily.sh	160:  if [ -n "$(git -C "$wt" status --porcelain --untracked-files=normal 2>/dev/null || true)" ]; then
+papertrade_daily.sh	37:  "${NOTIFY_BIN:-/home/trido/thanhdt/WorkingClaude/mike/bin/notify.sh}" "$msg" 2>/dev/null || true
+papertrade_daily.sh	38:  "${NOTIFY_THREAD_BIN:-/home/trido/thanhdt/WorkingClaude/mike/bin/notify_thread.sh}" "$msg" "1521470705563340910" 2>/dev/null || true
+pt_8l_daily.sh	36:  "${NOTIFY_BIN:-/home/trido/thanhdt/WorkingClaude/mike/bin/notify.sh}" "$msg" 2>/dev/null || true
+pt_8l_daily.sh	37:  "${NOTIFY_THREAD_BIN:-/home/trido/thanhdt/WorkingClaude/mike/bin/notify_thread.sh}" "$msg" "1521470705563340910" 2>/dev/null || true
+pt_8l_daily.sh	46:DT5G_WARN="$(timeout 60 $PY dt5g_freshness.py --warn-line 2>/dev/null || true)"
+pt_8l_daily.sh	50:  "${NOTIFY_BIN:-/home/trido/thanhdt/WorkingClaude/mike/bin/notify.sh}" "$_m" 2>/dev/null || true
+pt_8l_daily.sh	51:  "${NOTIFY_THREAD_BIN:-/home/trido/thanhdt/WorkingClaude/mike/bin/notify_thread.sh}" "$_m" "1521470705563340910" 2>/dev/null || true
+sync_bq_cache_daily.sh	22:    "[BQ cache] sync/verify có vấn đề đêm nay — ops_autofix đã được kích hoạt. Chi tiết: data/bq_cache/sync.log" 2>/dev/null || true
+sync_bq_cache_daily.sh	30:re-download bảng đó) và chạy --verify xác nhận OK. Xem kb/INCIDENTS.md 2026-07-06 (đêm)." 2>/dev/null || true
+telegram_run_daily.sh	22:  '⚠️ Dữ liệu 8L rating có thể chưa cập nhật hôm nay (file cũ).' 2>/dev/null || true)"

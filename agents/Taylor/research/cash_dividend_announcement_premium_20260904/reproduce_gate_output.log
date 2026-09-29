@@ -1,0 +1,58 @@
+dropped 544 rows missing boundary price/index; dropped 8 more zero/neg price; N=12411
+
+eligible CASH pool (c14>=10000, raw_yield<=0.50, regime not null): N=5374, date range 2014-01-22..2026-06-01
+excess>0 & prior_3y>=3 subset: N=1552
+
+=== Per-regime table (excess>0 & prior_3y>=3) ===
+  CRISIS: N=329 tkr=208 med=1.5094% hit=56% p=0.00526 | STOCK(N=161) med=0.0575% MWU_two-sided_p=0.109
+  BEAR: N=105 tkr=91 med=2.3310% hit=64% p=0.000784 | STOCK(N=55) med=2.0185% MWU_two-sided_p=0.553
+  NEUTRAL: N=809 tkr=324 med=0.3914% hit=52% p=0.142 | STOCK(N=376) med=-0.5047% MWU_two-sided_p=0.0668
+  BULL: N=274 tkr=179 med=-1.7974% hit=43% p=0.0109 | STOCK(N=121) med=0.7992% MWU_two-sided_p=0.0964
+  EXBULL: N=35 tkr=34 med=0.8887% hit=54% p=0.852 | STOCK(N=10) med=-2.5695% MWU_two-sided_p=0.521
+
+=== GATE: regime in {CRISIS,BEAR} & excess>0 & prior_3y>=3 & c14>=10000 ===
+N=434, tickers=243, median=1.8799%, hit=58.1%, wilcoxon_p=5.52e-05
+p5=-17.4102%, p95=23.0627%
+cluster-robust (median-of-ticker-medians): median=1.9820%, N_ticker=243, p=0.000586
+
+--- Bản chặt (excess>4pp) ---
+N=152, tickers=111, median=2.4966%, hit=61.2%, cluster-robust median=2.7936%
+
+--- Dose-response trong gate ---
+  0-4pp: N=282, median=1.0942%
+  4-8pp: N=96, median=2.4966%
+  >8pp: N=56, median=2.6581%
+
+--- Split-half ---
+  2014-2019: N=136, median=0.2206%, p=0.664
+  2020+: N=298, median=2.3213%, p=6.97e-06
+
+--- LOYO: bỏ 2022 ---
+  N=292, median=1.0447%
+    excl-others check 2014: (not excluded) N=14
+    excl-others check 2015: (not excluded) N=7
+    excl-others check 2016: (not excluded) N=40
+    excl-others check 2017: (not excluded) N=3
+    excl-others check 2018: (not excluded) N=37
+    excl-others check 2019: (not excluded) N=35
+    excl-others check 2020: (not excluded) N=58
+    excl-others check 2023: (not excluded) N=31
+    excl-others check 2024: (not excluded) N=67
+
+=== Kiểm tra thêm 1: Ticker concentration trong gate ===
+ticker
+DHA    7
+NCT    6
+BMP    5
+DVP    5
+CLC    5
+LIX    5
+NTP    5
+CPC    5
+UIC    5
+HVT    5
+Name: count, dtype: int64
+top ticker share = 7/434 = 1.6%
+tickers with >3% of N (13.0 events): 0
+
+Saved gate_events_reproduced.csv, excess_prior_subset_reproduced.csv

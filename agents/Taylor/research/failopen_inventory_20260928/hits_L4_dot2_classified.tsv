@@ -1,0 +1,123 @@
+A-SOURCEENV	/home/trido/thanhdt/WorkingClaude/mike/bin/bot_heartbeat.sh	20:[ -f "$WC_ROOT/wc_env.sh" ] && source "$WC_ROOT/wc_env.sh" 2>/dev/null || true
+A-SOURCEENV	/home/trido/thanhdt/WorkingClaude/mike/bin/bq_freshness_check.sh	46:[ -f "$ROOT/../wc_env.sh" ] && source "$ROOT/../wc_env.sh" 2>/dev/null || true
+A-SOURCEENV	/home/trido/thanhdt/WorkingClaude/mike/bin/compute_active_nav_all.sh	13:[ -f "$WC_ROOT/wc_env.sh" ] && source "$WC_ROOT/wc_env.sh" 2>/dev/null || true
+A-SOURCEENV	/home/trido/thanhdt/WorkingClaude/mike/bin/dispatch.sh	1146:[ -f "$WC_ROOT/wc_env.sh" ] && source "$WC_ROOT/wc_env.sh" 2>/dev/null || true
+A-SOURCEENV	/home/trido/thanhdt/WorkingClaude/mike/bin/hit_details_daily.sh	21:[ -f "$ROOT/wc_env.sh" ] && source "$ROOT/wc_env.sh" 2>/dev/null || true
+A-SOURCEENV	/home/trido/thanhdt/WorkingClaude/mike/bin/inject_discretionary_orders.sh	15:[ -f "$WC_ROOT/wc_env.sh" ] && source "$WC_ROOT/wc_env.sh" 2>/dev/null || true
+A-SOURCEENV	/home/trido/thanhdt/WorkingClaude/mike/bin/jit_unpark_daily.sh	30:[ -f "$WC_ROOT/wc_env.sh" ] && source "$WC_ROOT/wc_env.sh" 2>/dev/null || true
+A-SOURCEENV	/home/trido/thanhdt/WorkingClaude/mike/bin/late_plan_catchup.sh	8:[ -f "$WC_ROOT/wc_env.sh" ] && source "$WC_ROOT/wc_env.sh" 2>/dev/null || true
+A-SOURCEENV	/home/trido/thanhdt/WorkingClaude/mike/bin/merge_park_daily.sh	32:[ -f "$WC_ROOT/wc_env.sh" ] && source "$WC_ROOT/wc_env.sh" 2>/dev/null || true
+A-SOURCEENV	/home/trido/thanhdt/WorkingClaude/mike/bin/park_trim_daily.sh	24:[ -f "$WC_ROOT/wc_env.sh" ] && source "$WC_ROOT/wc_env.sh" 2>/dev/null || true
+A-SOURCEENV	/home/trido/thanhdt/WorkingClaude/mike/bin/preflight_check.sh	9:[ -f "$ROOT/../wc_env.sh" ] && source "$ROOT/../wc_env.sh" 2>/dev/null || true
+A-SOURCEENV	/home/trido/thanhdt/WorkingClaude/mike/bin/run_bot.sh	18:[ -f "$WC_ROOT/wc_env.sh" ] && source "$WC_ROOT/wc_env.sh" 2>/dev/null || true
+A-SOURCEENV	/home/trido/thanhdt/WorkingClaude/mike/bin/run_selfchecks.sh	18:[ -f "$WC_ROOT/wc_env.sh" ] && source "$WC_ROOT/wc_env.sh" 2>/dev/null || true
+A-SOURCEENV	/home/trido/thanhdt/WorkingClaude/mike/bin/selfcheck_weekly_baseline_check.sh	64:[ -f "$WC/wc_env.sh" ] && source "$WC/wc_env.sh" 2>/dev/null || true
+A-SOURCEENV	/home/trido/thanhdt/WorkingClaude/mike/bin/send_plan_report.sh	27:[ -f "$WC_ROOT/wc_env.sh" ] && source "$WC_ROOT/wc_env.sh" 2>/dev/null || true
+C-CLEANUP	/home/trido/thanhdt/WorkingClaude/mike/bin/append_event.sh	73:  mkdir -p "$BUS" 2>/dev/null || true
+C-CLEANUP	/home/trido/thanhdt/WorkingClaude/mike/bin/dispatch.sh	1553:  disown 2>/dev/null || true
+C-CLEANUP	/home/trido/thanhdt/WorkingClaude/mike/bin/dispatch.sh	1560:  disown 2>/dev/null || true
+C-CLEANUP	/home/trido/thanhdt/WorkingClaude/mike/bin/dispatch.sh	1665:      rm -f "$logfile.workerpid" 2>/dev/null || true
+C-CLEANUP	/home/trido/thanhdt/WorkingClaude/mike/bin/dispatch.sh	1666:      kill "$_wpid" 2>/dev/null || true
+C-CLEANUP	/home/trido/thanhdt/WorkingClaude/mike/bin/dispatch.sh	1707:    kill "$_wpid" 2>/dev/null || true
+C-CLEANUP	/home/trido/thanhdt/WorkingClaude/mike/bin/dispatch.sh	1723:  kill "$_wpid" 2>/dev/null || true  # watcher no longer needed
+C-CLEANUP	/home/trido/thanhdt/WorkingClaude/mike/bin/dispatch.sh	183:  mkdir -p "$(dirname "$_rejlog")" 2>/dev/null || true
+C-CLEANUP	/home/trido/thanhdt/WorkingClaude/mike/bin/dispatch.sh	946:  printf '%s' "$pid" > "$logfile.workerpid" 2>/dev/null || true
+C-CLEANUP	/home/trido/thanhdt/WorkingClaude/mike/bin/dispatch.sh	965:      kill -TERM -- "-$pid" 2>/dev/null || kill -TERM "$pid" 2>/dev/null || true
+C-CLEANUP	/home/trido/thanhdt/WorkingClaude/mike/bin/dispatch.sh	970:      kill -KILL -- "-$pid" 2>/dev/null || kill -KILL "$pid" 2>/dev/null || true
+C-CLEANUP	/home/trido/thanhdt/WorkingClaude/mike/bin/dispatch.sh	972:      rm -f "$logfile.workerpid" 2>/dev/null || true
+C-CLEANUP	/home/trido/thanhdt/WorkingClaude/mike/bin/dispatch.sh	979:  rm -f "$logfile.workerpid" 2>/dev/null || true
+C-CLEANUP	/home/trido/thanhdt/WorkingClaude/mike/bin/notify.sh	24:mkdir -p "$ROOT/logs" "$STATE" 2>/dev/null || true
+C-CLEANUP	/home/trido/thanhdt/WorkingClaude/mike/bin/wake_thread.sh	106:      mkdir -p "$ROOT/logs" 2>/dev/null || true
+C-CLEANUP	/home/trido/thanhdt/WorkingClaude/mike/bin/watchdog.sh	101:    systemctl --user reset-failed "$unit" 2>/dev/null || true
+C-CLEANUP	/home/trido/thanhdt/WorkingClaude/mike/bin/watchdog.sh	109:      systemctl --user reset-failed "$unit" 2>/dev/null || true
+C-CLEANUP	/home/trido/thanhdt/WorkingClaude/mike/bin/watchdog.sh	177:  rm -f "$umark" 2>/dev/null || true
+C-CLEANUP	/home/trido/thanhdt/WorkingClaude/mike/bin/watchdog.sh	199:    rm -f "$smark" 2>/dev/null || true
+C-CLEANUP	/home/trido/thanhdt/WorkingClaude/mike/bin/watchdog.sh	214:  rm -f "$MODELWARN" 2>/dev/null || true
+C-CLEANUP	/home/trido/thanhdt/WorkingClaude/mike/bin/watchdog.sh	85:      rm -f "$mark" 2>/dev/null || true
+D-VAR	/home/trido/thanhdt/WorkingClaude/mike/bin/append_event.sh	172:kbver="$(tr -dc '0-9' < "$ROOT/kb/version.txt" 2>/dev/null || true)"; kbver="${kbver:-0}"
+D-VAR	/home/trido/thanhdt/WorkingClaude/mike/bin/code_quality_weekly.sh	408:ARCH_TID="$("$ROOT/bin/discord_channel.sh" "$ARCH_THREAD_NAME" 2>/dev/null || true)"
+D-VAR	/home/trido/thanhdt/WorkingClaude/mike/bin/consolidate.sh	170:  discord_summary="$(python3 "$PY" format-events "$NEW" 2>/dev/null | head -n 8 || true)"
+D-VAR	/home/trido/thanhdt/WorkingClaude/mike/bin/consolidate.sh	62:    wold="$(cat "$wmark" 2>/dev/null || true)"
+D-VAR	/home/trido/thanhdt/WorkingClaude/mike/bin/consolidate.sh	91:  ver="$(tr -dc '0-9' < "$KB/version.txt" 2>/dev/null || true)"; ver="${ver:-0}"
+D-VAR	/home/trido/thanhdt/WorkingClaude/mike/bin/daily_retro.sh	330:_esc_topics="$(python3 - "$ROOT/bus/inbox/Mike.jsonl" "$RUN_START_TS" <<'PY' 2>/dev/null || true
+D-VAR	/home/trido/thanhdt/WorkingClaude/mike/bin/dispatch.sh	1256:_dup="$(python3 "$ROOT/bin/mike_json.py" job-find-dup "$JOBS_DIR" "$id" "$_psum" 2>/dev/null || true)"
+D-VAR	/home/trido/thanhdt/WorkingClaude/mike/bin/dispatch.sh	1272:  _wsc="$(python3 "$ROOT/bin/mike_json.py" job-write-scope-conflict "$JOBS_DIR" "$WRITE_SCOPE" 2>/dev/null || true)"
+D-VAR	/home/trido/thanhdt/WorkingClaude/mike/bin/dispatch.sh	1633:      _eta_at="$(TZ='Asia/Ho_Chi_Minh' date -d "+${_wake_delay} seconds" '+%H:%M ICT' 2>/dev/null || true)"
+D-VAR	/home/trido/thanhdt/WorkingClaude/mike/bin/dispatch.sh	356:  _defmodel="$("$ROOT/bin/cli_provider.sh" field "$PROVIDER" default_model 2>/dev/null || true)"
+D-VAR	/home/trido/thanhdt/WorkingClaude/mike/bin/dispatch.sh	361:CLI_USAGE_PROBE="$("$ROOT/bin/cli_provider.sh" field "$PROVIDER" usage_probe 2>/dev/null || true)"
+D-VAR	/home/trido/thanhdt/WorkingClaude/mike/bin/dispatch.sh	362:CLI_MAXTURNS_PAT="$("$ROOT/bin/cli_provider.sh" field "$PROVIDER" max_turns_pattern 2>/dev/null || true)"
+D-VAR	/home/trido/thanhdt/WorkingClaude/mike/bin/eod_trading_report.sh	179:  DT5G_WARN="$(cd "$WC_ROOT" && timeout 60 python3 dt5g_freshness.py --warn-line 2>/dev/null || true)"
+D-VAR	/home/trido/thanhdt/WorkingClaude/mike/bin/eod_trading_report.sh	670:  _prev_started="$(cat "$_MISMATCH_MARKER" 2>/dev/null || true)"
+D-VAR	/home/trido/thanhdt/WorkingClaude/mike/bin/fearbuy_weekly_scan.sh	212:SINCE_LAST_WEEK="$(TZ=UTC date -u -d '9 days ago' +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || true)"
+D-VAR	/home/trido/thanhdt/WorkingClaude/mike/bin/fearbuy_weekly_scan.sh	79:UNIVERSE_BLOCK=$(timeout 200 python3 "$MIKEDIR/agents/Taylor/anomaly_scan.py" --print-universe 2>/dev/null || true)
+D-VAR	/home/trido/thanhdt/WorkingClaude/mike/bin/fearbuy_weekly_scan.sh	92:  CANDIDATE_FUNNEL_BLOCK=$(timeout 240 python3 "$MIKEDIR/bin/discretionary_candidate_funnel.py" --print-block 2>/dev/null || true)
+D-VAR	/home/trido/thanhdt/WorkingClaude/mike/bin/jobs.sh	115:    val=$(MJ job-field "$JOBS_DIR" "$job_id" replied_at 2>/dev/null || true)
+D-VAR	/home/trido/thanhdt/WorkingClaude/mike/bin/kb_nightly.sh	893:    _prev="$(cat "$_CTXBLOAT_STAMP" 2>/dev/null || true)"
+D-VAR	/home/trido/thanhdt/WorkingClaude/mike/bin/kb_nightly.sh	894:    _attempted="$(cat "$_CTXBLOAT_AUTOFIX_STAMP" 2>/dev/null || true)"
+D-VAR	/home/trido/thanhdt/WorkingClaude/mike/bin/ops_autofix.sh	154:KNOWN_ISSUE="$(python3 "$ROOT/bin/incident_lookup.py" "$LABEL" "$DETAILS" 2>/dev/null || true)"
+D-VAR	/home/trido/thanhdt/WorkingClaude/mike/bin/ops_autofix.sh	71:  LAST_ISO="$(cat "$STARTED_ISO_FILE" 2>/dev/null || true)"
+D-VAR	/home/trido/thanhdt/WorkingClaude/mike/bin/publish_context.sh	13:ver="$(tr -dc '0-9' < "$KB/version.txt" 2>/dev/null || true)"; ver="${ver:-0}"
+D-VAR	/home/trido/thanhdt/WorkingClaude/mike/bin/publish_context.sh	16:recent="$(python3 "$PY" recent "$KB/recent_delta.jsonl" 5 2>/dev/null || true)"
+D-VAR	/home/trido/thanhdt/WorkingClaude/mike/bin/verify_finding.sh	115:    _verify_src_tid="$(python3 "$ROOT/bin/mike_json.py" job-field "$JOBS_DIR" "$finding_trace_id" discord_thread_id 2>/dev/null || true)"
+D-VAR	/home/trido/thanhdt/WorkingClaude/mike/bin/wags_autofix.sh	139:KNOWN_ISSUE="$(python3 "$ROOT/bin/incident_lookup.py" "$LABEL" "$DETAILS" 2>/dev/null || true)"
+D-VAR	/home/trido/thanhdt/WorkingClaude/mike/bin/watchdog.sh	155:    _tid="$(python3 "$ROOT/bin/mike_json.py" job-field "$JOBS_DIR" "$_jid" discord_thread_id 2>/dev/null || true)"
+D-VAR	/home/trido/thanhdt/WorkingClaude/mike/bin/watchdog.sh	95:    result="$(systemctl --user show "$unit" -p Result --value 2>/dev/null || true)"
+D-VAR	/home/trido/thanhdt/WorkingClaude/mike/bin/weekly_ops_audit.sh	30:SINCE_LAST_WEEK="$(TZ=UTC date -u -d '9 days ago' +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || true)"
+D-VAR	/home/trido/thanhdt/WorkingClaude/mike/bin/worktree_cleanup_daily.sh	74:active_csv="$(python3 - "$CCDB_URL" <<'PY' 2>/dev/null || true
+D-VAR	/home/trido/thanhdt/WorkingClaude/pt_8l_daily.sh	46:DT5G_WARN="$(timeout 60 $PY dt5g_freshness.py --warn-line 2>/dev/null || true)"
+E-CONT	/home/trido/thanhdt/WorkingClaude/mike/bin/check_report_cadence.sh	121:          2>/dev/null || true
+E-CONT	/home/trido/thanhdt/WorkingClaude/mike/bin/check_report_cadence.sh	494:    2>/dev/null || true
+E-CONT	/home/trido/thanhdt/WorkingClaude/mike/bin/check_sbv_weekly.sh	136:" 2>/dev/null || true
+E-CONT	/home/trido/thanhdt/WorkingClaude/mike/bin/eod_trading_report.sh	143:" 2>/dev/null || true
+E-CONT	/home/trido/thanhdt/WorkingClaude/mike/bin/eod_trading_report.sh	162:" 2>/dev/null || true
+E-CONT	/home/trido/thanhdt/WorkingClaude/mike/bin/eod_trading_report.sh	77:      2>/dev/null || true
+E-CONT	/home/trido/thanhdt/WorkingClaude/mike/bin/eod_trading_report.sh	97:    2>/dev/null || true
+E-CONT	/home/trido/thanhdt/WorkingClaude/mike/bin/kb_nightly.sh	966:                2>/dev/null || true
+E-CONT	/home/trido/thanhdt/WorkingClaude/mike/bin/nav_sync_retry.sh	64:      2>/dev/null || true
+E-CONT	/home/trido/thanhdt/WorkingClaude/mike/bin/ops_health_check.sh	64:" 2>/dev/null) || true
+E-CONT	/home/trido/thanhdt/WorkingClaude/mike/bin/paper_checkpoint_escalation.sh	114:    2>/dev/null || true
+E-CONT	/home/trido/thanhdt/WorkingClaude/mike/bin/paper_checkpoint_escalation.sh	132:      2>/dev/null || true
+E-CONT	/home/trido/thanhdt/WorkingClaude/mike/bin/paper_checkpoint_escalation.sh	151:    2>/dev/null || true
+E-CONT	/home/trido/thanhdt/WorkingClaude/mike/bin/preflight_check.sh	329:  2>/dev/null || true
+E-CONT	/home/trido/thanhdt/WorkingClaude/mike/bin/send_plan_report.sh	912:      2>/dev/null || true
+E-CONT	/home/trido/thanhdt/WorkingClaude/mike/bin/send_plan_report.sh	931:      2>/dev/null || true
+F-STMT	/home/trido/thanhdt/WorkingClaude/mike/bin/append_event.sh	70:' "$BUS/_rejected.jsonl" "$1" "${_ORIG_ARGV[@]}" 2>/dev/null || true
+F-STMT	/home/trido/thanhdt/WorkingClaude/mike/bin/backup_freshness_check.sh	39:    timeout 120 git -C "$repo" fetch -q "$remote" "$branch" 2>/dev/null || true
+F-STMT	/home/trido/thanhdt/WorkingClaude/mike/bin/bq_freshness_check.sh	303:      "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+F-STMT	/home/trido/thanhdt/WorkingClaude/mike/bin/check_report_cadence.sh	139:          "$TRADING_REPORT_THREAD" 2>/dev/null || true
+F-STMT	/home/trido/thanhdt/WorkingClaude/mike/bin/consolidate.sh	100:  python3 "$ROOT/bin/rebuild_context_mini.py" 2>/dev/null || true
+F-STMT	/home/trido/thanhdt/WorkingClaude/mike/bin/consolidate.sh	161:      if [ "$cstate" != "$(cat "$CMARK" 2>/dev/null || true)" ]; then
+F-STMT	/home/trido/thanhdt/WorkingClaude/mike/bin/consolidate.sh	186:python3 "$PY" fleet-status "$BUS/registry" > "$KB/fleet_status.md" 2>/dev/null || true
+F-STMT	/home/trido/thanhdt/WorkingClaude/mike/bin/consolidate.sh	88:    python3 "$PY" format-events "$NEW" 2>/dev/null || true
+F-STMT	/home/trido/thanhdt/WorkingClaude/mike/bin/consolidate.sh	96:  python3 "$PY" delta-append "$NEW" "$newver" >> "$KB/recent_delta.jsonl" 2>/dev/null || true
+F-STMT	/home/trido/thanhdt/WorkingClaude/mike/bin/consolidate.sh	97:  tail -n 400 "$KB/recent_delta.jsonl" > "$KB/.rd.tmp" 2>/dev/null && mv -f "$KB/.rd.tmp" "$KB/recent_delta.jsonl" || true
+F-STMT	/home/trido/thanhdt/WorkingClaude/mike/bin/daily_retro.sh	280:      "{\"reason\":\"tai khoan Mike het usage-limit luc chay retro (00:30 ICT), draft khong tao duoc — transient khong can user quyet\",\"rc\":$rc1,\"log\":\"$draft_log\"}" 2>/dev/null || true
+F-STMT	/home/trido/thanhdt/WorkingClaude/mike/bin/daily_retro.sh	294:    "{\"reason\":\"$_fail_cause (sau 2 lan thu), rc=$rc1\",\"log\":\"$draft_log\",\"rejected_glob\":\"state/retro_rejected_${TODAY}_a*.md\"}" 2>/dev/null || true
+F-STMT	/home/trido/thanhdt/WorkingClaude/mike/bin/daily_retro.sh	82:    "{\"reason\":\"leftover draft file phat hien khi chay daily_retro ngay $TODAY, nghia la finalize job truoc do fail am tham\",\"file\":\"$_stale\"}" 2>/dev/null || true
+F-STMT	/home/trido/thanhdt/WorkingClaude/mike/bin/dispatch.sh	1196:    "$(TZ='Asia/Ho_Chi_Minh' date -Iseconds)" "$id" "${job_id:-<chua-tao>}" >> "$ROOT/logs/notify_thread_errors.log" 2>/dev/null || true
+F-STMT	/home/trido/thanhdt/WorkingClaude/mike/bin/dispatch.sh	186:    >> "$_rejlog" 2>/dev/null || true
+F-STMT	/home/trido/thanhdt/WorkingClaude/mike/bin/dispatch.sh	727:  python3 "$ROOT/bin/mike_json.py" job-field "$JOBS_DIR" "$1" discord_thread_id 2>/dev/null || true
+F-STMT	/home/trido/thanhdt/WorkingClaude/mike/bin/dispatch.sh	848:      "{\"status\":\"still_running\",\"elapsed_min\":${elapsed_min},\"job_id\":\"$jid\",\"source\":\"watcher\"}" "$jid" 2>/dev/null || true
+F-STMT	/home/trido/thanhdt/WorkingClaude/mike/bin/dispatch.sh	955:        JSET deadline="$deadline" hb_extensions="$ext" 2>/dev/null || true
+F-STMT	/home/trido/thanhdt/WorkingClaude/mike/bin/nav_sync_retry.sh	47:$NAV_LINE" "trading_report" 2>/dev/null || true
+F-STMT	/home/trido/thanhdt/WorkingClaude/mike/bin/notify.sh	41:log() { printf '%s | %s\n' "$ts" "$1" >>"$LOG" 2>/dev/null || true; }
+F-STMT	/home/trido/thanhdt/WorkingClaude/mike/bin/notify.sh	66:"$ROOT/bin/notify_discord.sh" "$full" "Mike fleet" "3447003" "update task" 2>/dev/null || rc=$?
+F-STMT	/home/trido/thanhdt/WorkingClaude/mike/bin/notify.sh	69:  echo "$now" >"$mark" 2>/dev/null || true
+F-STMT	/home/trido/thanhdt/WorkingClaude/mike/bin/ops_health_check.sh	1845:      >> "$ROOT/logs/notify_thread_errors.log" 2>/dev/null || true
+F-STMT	/home/trido/thanhdt/WorkingClaude/mike/bin/ops_health_check.sh	1851:  "{\"account\":\"${ACCOUNT}\",\"label\":\"${LABEL}\",\"warn_count\":${WARN_COUNT:-0}}" 2>/dev/null || true
+F-STMT	/home/trido/thanhdt/WorkingClaude/mike/bin/ops_health_check.sh	1886:    "$ROOT/bin/wags_autofix.sh" "coord-${TODAY}" "$COORD_WARN (checker run: account=${ACCOUNT})" 2>/dev/null || true
+F-STMT	/home/trido/thanhdt/WorkingClaude/mike/bin/ops_health_check.sh	1901:    "$ROOT/bin/ops_autofix.sh" "ops-health-${ACCOUNT}" "$OTHER_WARN (checker run: account=${ACCOUNT})" 2>/dev/null || true
+F-STMT	/home/trido/thanhdt/WorkingClaude/mike/bin/preflight_check.sh	51:                      "$WORKDIR"/data/plan_${ACCOUNT}_*_${TODAY}.json 2>/dev/null | head -1 || true)"
+F-STMT	/home/trido/thanhdt/WorkingClaude/mike/bin/run_bot.sh	109:    "{\"account\":\"$ACCOUNT\",\"plan_date\":\"$PLAN_DATE\",\"elapsed_s\":$elapsed,\"rc\":0}" 2>/dev/null || true
+F-STMT	/home/trido/thanhdt/WorkingClaude/mike/bin/run_bot.sh	114:    "{\"account\":\"$ACCOUNT\",\"plan_date\":\"$PLAN_DATE\",\"elapsed_s\":$elapsed,\"rc\":$rc,\"log\":\"$LOG\"}" 2>/dev/null || true
+F-STMT	/home/trido/thanhdt/WorkingClaude/mike/bin/run_bot.sh	120:    "run_bot.sh --account $ACCOUNT (plan $PLAN_DATE) thoát rc=$rc sau $((elapsed/60)) phút. Log: $LOG. Tail: $tail_preview — Việc cần làm: (1) xác định root cause thật trong log; (2) kiểm tra bot đã tự hồi phục chưa (heartbeat autoheal, log $ROOT/logs/run_bot_${ACCOUNT}_autoheal_*.log + journal exec_${ACCOUNT}_${PLAN_DATE}_journal.csv trong data/execution_logs/); (3) nếu còn lệnh kẹt/bot chết trong giờ giao dịch → ưu tiên khôi phục an toàn trong ranh giới cho phép, còn lại escalate." 2>/dev/null || true
+F-STMT	/home/trido/thanhdt/WorkingClaude/mike/bin/run_bot.sh	63:  "{\"account\":\"$ACCOUNT\",\"plan_date\":\"$PLAN_DATE\",\"auto_otp\":$AUTO_OTP}" 2>/dev/null || true
+F-STMT	/home/trido/thanhdt/WorkingClaude/mike/bin/run_bot.sh	94:    "{\"account\":\"$ACCOUNT\",\"plan_date\":\"$PLAN_DATE\",\"elapsed_s\":$elapsed,\"rc\":$rc}" 2>/dev/null || true
+F-STMT	/home/trido/thanhdt/WorkingClaude/mike/bin/verify_finding.sh	219:    "$_verify_src_tid" 2>/dev/null || true
+F-STMT	/home/trido/thanhdt/WorkingClaude/mike/bin/wake_thread.sh	109:        "$((_now - _last))" "$WAKE_DEBOUNCE_S" >> "$ROOT/logs/wake_thread.log" 2>/dev/null || true
+F-STMT	/home/trido/thanhdt/WorkingClaude/mike/bin/wake_thread.sh	113:    printf '%s' "$_now" > "$_dbf" 2>/dev/null || true
+F-STMT	/home/trido/thanhdt/WorkingClaude/mike/bin/watchdog.sh	52:  [ -f "$bp" ] && mv -f "$bp" "$bp.stale.$(date -u +%s)" 2>/dev/null || true
+F-STMT	/home/trido/thanhdt/WorkingClaude/mike/bin/worktree_cleanup_daily.sh	160:  if [ -n "$(git -C "$wt" status --porcelain --untracked-files=normal 2>/dev/null || true)" ]; then
+F-STMT	/home/trido/thanhdt/WorkingClaude/sync_bq_cache_daily.sh	22:    "[BQ cache] sync/verify có vấn đề đêm nay — ops_autofix đã được kích hoạt. Chi tiết: data/bq_cache/sync.log" 2>/dev/null || true
+F-STMT	/home/trido/thanhdt/WorkingClaude/sync_bq_cache_daily.sh	30:re-download bảng đó) và chạy --verify xác nhận OK. Xem kb/INCIDENTS.md 2026-07-06 (đêm)." 2>/dev/null || true
+F-STMT	/home/trido/thanhdt/WorkingClaude/telegram_run_daily.sh	22:  '⚠️ Dữ liệu 8L rating có thể chưa cập nhật hôm nay (file cũ).' 2>/dev/null || true)"

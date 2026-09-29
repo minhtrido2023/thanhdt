@@ -1,0 +1,133 @@
+====================================================================================================
+0. SELFCHECK — panel co khop pin R3 khong (dieu kien bat buoc truoc khi dung)
+====================================================================================================
+  COMB full-sample: n=3106 phien | CAGR=28.86% | NAV cuoi (tu 50B) = 1178.01B
+  pin R3          : CAGR=28.86%  NAV=1.178,01B
+  lech = 0.003pp  -> PASS (<=0,1pp)
+
+====================================================================================================
+1. BREADTH TERCILE — PIT, tre 1 phien (prereg §3.1)
+====================================================================================================
+  breadth: 2012-01-03..2026-08-21 n=3652 | warm-up NaN = 252 phien
+  panel 3107 phien | thieu btile = 1
+  [no-lookahead] corr(pct252_t SAME-DAY, r_vni_t) = +0.1088   <- kenh nhiem B2 do (+0,109 tren breadth tho)
+  [no-lookahead] corr(breadth_{t-1}, r_vni_t)     = +0.0137   <- nhan da tre 1 phien
+
+====================================================================================================
+2. ROLLING BETA 252 phien (min 126 obs), dung beta_{t-1} de khu beta cho phien t
+====================================================================================================
+  beta_BAL : n=2856 | median 0.661 | P10 0.261 P90 0.861 | min 0.039 max 0.978 | bat dau 2015-01-09
+  beta_LAG : n=2856 | median 0.475 | P10 0.253 P90 0.671 | min 0.164 max 0.774 | bat dau 2015-01-09
+  beta_COMB: n=2856 | median 0.572 | P10 0.274 P90 0.669 | min 0.107 max 0.761 | bat dau 2015-01-09
+
+  mau hieu dung (co btile_{t-1} + beta_{t-1}): n=2855 phien, 2015-01-12..2026-06-19, 12 nam
+  phan bo tercile: {'LOW': 1160, 'HIGH': 893, 'MID': 802}
+
+====================================================================================================
+4. ALPHA (nam hoa) THEO BREADTH-TERCILE — mau hieu dung
+====================================================================================================
+  tile   days   ep  yrs    brd |     BAL_a  BAL_b     LAG_a  LAG_b    COMB_a COMB_b |      VNI
+  LOW    1160   49   12  39.0% |    +19.4%   0.62    +22.6%   0.48    +20.9%   0.53 |    +3.7%
+  MID     802   97   12  58.5% |     +9.6%   0.67     +9.0%   0.49     +9.3%   0.55 |   +19.6%
+  HIGH    893   49   12  67.7% |    +28.6%   0.52    +21.5%   0.43    +24.6%   0.46 |   +15.4%
+  (cot _a = alpha nam hoa tu mean(alpha_t)*249,28; _b = beta_{t-1} trung binh trong o; VNI = mean(r_vni)*249,28)
+
+====================================================================================================
+5. TEST CHINH (prereg §4) — 3 chien luoc x 3 cap, block bootstrap L=20 x10.000, p MOT DUOI
+====================================================================================================
+  BAL  HIGH-LOW  nA= 893 nB=1160 | alpha_A=  +28.6% alpha_B=  +19.4% | Delta=   +9.2% CI95[ -13.3, +31.2] p1=0.2052 BH10=fail
+  BAL  HIGH-MID  nA= 893 nB= 802 | alpha_A=  +28.6% alpha_B=   +9.6% | Delta=  +19.0% CI95[  -1.9, +40.7] p1=0.0433 BH10=fail
+  BAL  MID-LOW   nA= 802 nB=1160 | alpha_A=   +9.6% alpha_B=  +19.4% | Delta=   -9.8% CI95[ -27.0,  +5.7] p1=0.8776 BH10=fail
+  LAG  HIGH-LOW  nA= 893 nB=1160 | alpha_A=  +21.5% alpha_B=  +22.6% | Delta=   -1.1% CI95[ -24.6, +20.9] p1=0.5389 BH10=fail
+  LAG  HIGH-MID  nA= 893 nB= 802 | alpha_A=  +21.5% alpha_B=   +9.0% | Delta=  +12.5% CI95[ -10.3, +35.1] p1=0.1360 BH10=fail
+  LAG  MID-LOW   nA= 802 nB=1160 | alpha_A=   +9.0% alpha_B=  +22.6% | Delta=  -13.6% CI95[ -35.0,  +7.2] p1=0.8960 BH10=fail
+  COMB HIGH-LOW  nA= 893 nB=1160 | alpha_A=  +24.6% alpha_B=  +20.9% | Delta=   +3.7% CI95[ -16.0, +21.8] p1=0.3494 BH10=fail
+  COMB HIGH-MID  nA= 893 nB= 802 | alpha_A=  +24.6% alpha_B=   +9.3% | Delta=  +15.3% CI95[  -2.5, +33.2] p1=0.0428 BH10=fail
+  COMB MID-LOW   nA= 802 nB=1160 | alpha_A=   +9.3% alpha_B=  +20.9% | Delta=  -11.6% CI95[ -28.2,  +3.7] p1=0.9218 BH10=fail
+
+  N_trials = 9 | PASS p<0,05 = 2 | PASS BH FDR 10% = 0
+
+====================================================================================================
+6. WALK-FORWARD: IS 2014-2019 vs OOS 2020+ (mau hieu dung bat dau ~2015)
+====================================================================================================
+  BAL  IS  n=1244 | LOW=  +21.2%(n= 538) MID=   +3.1%(n= 298) HIGH=  +14.6%(n= 408) | HIGH-LOW=   -6.6%
+  BAL  OOS n=1611 | LOW=  +17.8%(n= 622) MID=  +13.5%(n= 504) HIGH=  +40.4%(n= 485) | HIGH-LOW=  +22.6%
+  LAG  IS  n=1244 | LOW=  +24.5%(n= 538) MID=  -13.4%(n= 298) HIGH=  +16.7%(n= 408) | HIGH-LOW=   -7.8%
+  LAG  OOS n=1611 | LOW=  +21.0%(n= 622) MID=  +22.3%(n= 504) HIGH=  +25.6%(n= 485) | HIGH-LOW=   +4.6%
+  COMB IS  n=1244 | LOW=  +23.2%(n= 538) MID=   -2.7%(n= 298) HIGH=  +15.4%(n= 408) | HIGH-LOW=   -7.8%
+  COMB OOS n=1611 | LOW=  +18.9%(n= 622) MID=  +16.3%(n= 504) HIGH=  +32.3%(n= 485) | HIGH-LOW=  +13.4%
+  -> BAL: IS=-6.6% OOS=+22.6% : DOI DAU / thieu du lieu
+  -> LAG: IS=-7.8% OOS=+4.6% : DOI DAU / thieu du lieu
+  -> COMB: IS=-7.8% OOS=+13.4% : DOI DAU / thieu du lieu
+
+====================================================================================================
+7. LOO THEO NAM — bo tung nam, tinh lai Delta(HIGH-LOW)
+====================================================================================================
+  BAL  n_year=12 | %duong=100% | min   +4.8% max  +13.9% | 2015:+8 2016:+10 2017:+10 2018:+13 2019:+14 2020:+5 2021:+9 2022:+7 2023:+11 2024:+7 2025:+11 2026:+6
+  LAG  n_year=12 | %duong=33% | min   -4.3% max   +4.6% | 2015:-1 2016:-2 2017:-3 2018:+5 2019:+0 2020:+2 2021:-3 2022:-4 2023:-4 2024:-1 2025:+2 2026:-4
+  COMB n_year=12 | %duong=100% | min   +0.3% max   +8.4% | 2015:+3 2016:+4 2017:+3 2018:+8 2019:+7 2020:+3 2021:+3 2022:+0 2023:+2 2024:+3 2025:+7 2026:+1
+
+====================================================================================================
+8. ALIAS CHECK — breadth co phai chi la DT5G doi lot khong? (prereg §7.1)
+====================================================================================================
+  corr(breadth_{t-1}, DT5G ordinal): Pearson +0.388 | Spearman +0.398
+  corr(tercile_ord, DT5G ordinal)   : Spearman +0.269
+  -> THAP (<=0,5): breadth khong phai alias cua regime
+
+  crosstab % phien (hang = DT5G, cot = breadth tercile):
+    CRISIS   n=  443 | LOW= 57.8% MID= 35.0% HIGH=  7.2%
+    BEAR     n=  241 | LOW= 63.1% MID= 18.3% HIGH= 18.7%
+    NEUTRAL  n= 1689 | LOW= 37.7% MID= 25.8% HIGH= 36.5%
+    BULL     n=  422 | LOW= 27.3% MID= 39.6% HIGH= 33.2%
+    EXBULL   n=   60 | LOW=  0.0% MID=  0.0% HIGH=100.0%
+
+  CONDITIONAL: Delta alpha COMB (HIGH-LOW) TRONG cung mot DT5G state:
+    CRISIS   nH=  32 nL= 256 — MAU QUA NHO (bo)
+    BEAR     nH=  45 nL= 152 — MAU QUA NHO (bo)
+    NEUTRAL  nH= 616 nL= 637 aH=  +19.8% aL=  +26.6% Delta=   -6.8% p1=0.7108
+    BULL     nH= 140 nL= 115 aH=  +41.2% aL=  +43.6% Delta=   -2.4% p1=0.5406
+    EXBULL   nH=  60 nL=   0 — MAU QUA NHO (bo)
+
+====================================================================================================
+9. ROBUSTNESS (prereg §7.2-7.5) — Delta alpha COMB (HIGH-LOW) duoi cac bien the
+====================================================================================================
+  BASE (prereg)                      aH=  +24.6% aL=  +20.9% Delta=   +3.7% p1=0.3494  rolling beta_{t-1} + tercile_{t-1}
+  beta TOAN MAU (look-ahead)         aH=  +24.4% aL=  +21.7% Delta=   +2.7% p1=0.3877  beta=0.489
+  beta RIENG theo tercile (B2)       aH=  +22.5% aL=  +21.9% Delta=   +0.6% p1=0.4747  beta LOW=0.42 MID=0.57 HIGH=0.61
+  tercile TOAN MAU (non-PIT)         aH=  +32.6% aL=  +15.3% Delta=  +17.3% p1=0.0525  cutoff 0.483/0.641
+  tercile CUNG PHIEN (nhu B2)        aH=  +27.4% aL=  +17.5% Delta=   +9.9% p1=0.1461  co same-day contamination
+  rolling beta cua so 126 phien      aH=  +23.1% aL=  +20.3% Delta=   +2.9% p1=0.3827  
+  rolling beta cua so 504 phien      aH=  +22.8% aL=  +21.0% Delta=   +1.8% p1=0.4305  
+  EXCESS THO (khong khu beta)        aH=  +16.5% aL=  +19.8% Delta=   -3.3% p1=0.6098  <- huong B2 quan sat ban dau
+
+  PHAN RA — ty trong DAU TU va return tho theo tercile:
+    LOW   inv_BAL= 56.9% inv_LAG= 67.8% | r_COMB_ann=  +23.5% r_VNI_ann=   +3.7% excess_tho=  +19.8% alpha=  +20.9%
+    MID   inv_BAL= 66.4% inv_LAG= 63.2% | r_COMB_ann=  +19.3% r_VNI_ann=  +19.6% excess_tho=   -0.4% alpha=   +9.3%
+    HIGH  inv_BAL= 75.8% inv_LAG= 69.6% | r_COMB_ann=  +31.9% r_VNI_ann=  +15.4% excess_tho=  +16.5% alpha=  +24.6%
+
+====================================================================================================
+10. VERDICT theo tieu chi prereg §5 (ap cho COMB)
+====================================================================================================
+  (a) Delta_HIGH-LOW > 5pp/nam : +3.7%  -> KHONG DAT
+  (b) p<0,05 mot duoi + qua BH10: p=0.3494, BH10=fail -> KHONG DAT
+  (c) LOO >75% nam duong       : 100%  -> DAT
+  (d) OOS cung dau IS          : IS=-7.8% OOS=+13.4% -> KHONG DAT
+
+  ==> VERDICT (COMB): REFUTE
+
+[done] b2ext_alpha_tercile.csv / b2ext_tests.csv / b2ext_walkforward.csv / b2ext_loo.csv / b2ext_robustness.csv / b2ext_conditional.csv
+[VERDICT_MACHINE] REFUTE diff=0.037063 p=0.349400 loo_pos=1.0000 is=-0.077792 oos=0.134226
+
+====================================================================================================
+11. ATTRIBUTION — vi sao B2 ra ~+11,8pp con thiet ke prereg ra +3,7pp?
+====================================================================================================
+  B2 nguyen ban (CAGR + nhan cung phien)     LOW= +15.0% MID= +14.1% HIGH= +28.9% | HIGH-LOW= +13.8% | beta 0.43/0.58/0.59
+    doi sang nhan TRE 1 phien                LOW= +24.5% MID=  +8.7% HIGH= +26.9% | HIGH-LOW=  +2.4% | beta 0.42/0.57/0.61
+    doi tiep sang alpha SO HOC ngay          LOW= +21.9% MID=  +8.0% HIGH= +22.5% | HIGH-LOW=  +0.6% | beta 0.42/0.57/0.61
+  BASE prereg (rolling beta_{t-1}, ngay)     LOW= +20.9% MID=  +9.3% HIGH= +24.6% | HIGH-LOW=  +3.7%
+
+  HINH DANG quan he (prereg gia dinh DON DIEU tang):
+    BAL  LOW= +19.4% MID=  +9.6% HIGH= +28.6%  -> CHU U (MID thap nhat)
+    LAG  LOW= +22.6% MID=  +9.0% HIGH= +21.5%  -> CHU U (MID thap nhat)
+    COMB LOW= +20.9% MID=  +9.3% HIGH= +24.6%  -> CHU U (MID thap nhat)
+[done] b2ext_attribution.csv

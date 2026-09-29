@@ -29,15 +29,18 @@ import os
 import sys
 from zoneinfo import ZoneInfo
 
-WC_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import wc_paths  # noqa: E402
+WC_ROOT = wc_paths.find_wc_root(__file__)
 sys.path.insert(0, WC_ROOT)
 
 from trading_bot.discretionary_accumulation import (
     compute_session_order, validate_state, BOOK, DYNAMIC_CEILING_SESSIONS_DEFAULT)
+from trading_bot.no_chase_ceiling import ANCHOR_BASIS_OFFICIAL_REF, check_reference_snapshot
 from trading_bot.config import live_dnse_labels
 from trading_bot.plan_cash_commitment import gate_injected_order, replan_dropped_injection
 from trading_bot.vn_market import (
-    session_phase, now_ict, normalize_price_vnd, is_holiday)
+    session_phase, now_ict, normalize_price_vnd, is_holiday, today_ict)
 
 _ICT_TZ = ZoneInfo("Asia/Ho_Chi_Minh")   # §16: neo TZ tường minh, không tin TZ của process
 
@@ -62,8 +65,14 @@ def _atomic_write_json(path, obj):
 
 
 def next_trading_day_str():
+    """Phiên giao dịch KẾ TIẾP tính từ HÔM NAY theo giờ ICT.
+
+    §16: `dt.date.today()` trần đọc TZ của process — dưới `TZ=UTC` (cron không export TZ,
+    container) từ 00:00–07:00 ICT nó trả NGÀY HÔM TRƯỚC, nên plan_date mặc định của lần chèn
+    lệch một phiên về quá khứ. `today_ict()` đã được import ở đầu file.
+    """
     from trading_bot.vn_market import next_trading_day
-    return str(next_trading_day(dt.date.today()))
+    return str(next_trading_day(today_ict()))
 
 
 def load_active_states(account):
@@ -107,9 +116,49 @@ def load_active_states(account):
     return out, skipped
 
 
-def broker_filled_qty(account, account_id, ticker, baseline):
+def broker_filled_qty(account, account_id, ticker, baseline, state=None):
     """filled_qty của CHƯƠNG TRÌNH = broker_total(ticker) − baseline_qty_before_program.
-    None nếu không đọc được broker (fail-safe)."""
+    None nếu không đọc được broker (fail-safe).
+
+    §corp-action (job Taylor_20260924_064510+_073500, Việc 1 — THIẾT KẾ LẠI sau arch-review
+    REJECTED bản đầu d595a64c) — `total` đọc THẲNG từ broker mang cả KL CREDIT do sự kiện tỉ lệ
+    (thưởng CP/cổ tức CP/tách), không chỉ KL do lệnh gom mua thêm.
+
+    Cơ chế quy đổi baseline CHỈ áp cho chế độ target CỐ ĐỊNH (`target_qty`, không khai
+    `target_pct_active_nav`) — `pct_mode` bên dưới bỏ QUA HẲN khối corp-action, giữ NGUYÊN
+    hành vi `total − baseline` cũ, KHÔNG chạm gì. Lý do (đọc `trading_bot/discretionary_
+    accumulation.py::resolve_target_qty`/`compute_session_order`): ở `target_pct_active_nav`,
+    target được SUY LẠI MỖI PHIÊN = target_pct × active_nav / giá — một sự kiện tỉ lệ làm giá
+    giảm theo đúng hệ số credit, nên `filled_qty` (broker credit) VÀ `target` (giá mới) tự nhân
+    CÙNG hệ số: bài toán TỰ KHỚP, không cần can thiệp. Kiểm tra thật 2026-09-24: CẢ HAI state
+    file LIVE duy nhất (`data/trade_plans/discretionary/state_TV1_{SpaceX,ZaloPay}.json`) đều
+    `target_basis=pct_active_nav` — 0 chương trình LIVE dùng `target_qty` cố định. Bản đầu
+    d595a64c PERSIST residual vào baseline bất kể mode, biến một lệch một-đêm (tự sửa ở pct_mode)
+    thành lệch VĨNH VIỄN, đo được đẩy vị thế TV1 SpaceX vượt trần sleeve 5%/mã (mô phỏng
+    arch-reviewer: 6300+1300=7600cp = 6,03% active_nav > 5%) — OVERBUY tiền thật nếu land.
+
+    Với chế độ `target_qty` cố định (giữ lại làm hạ tầng phòng thủ cho chương trình tương lai,
+    dù hiện 0 chương trình LIVE dùng), đối chiếu qua `exdate_frame.classify_positions` — TÁI
+    DÙNG nguyên khối "KHỐI LƯỢNG" đã audit 5 vòng ở `compute_active_nav.py`:
+      · Có sự kiện CONFIRMED (`credited`) VÀ (ticker, ex_date, event_code) CHƯA quy đổi trước
+        đó (đọc lại `state["corp_action_baseline_adjustments"]` — khoá idempotency, chạy lại
+        cùng cửa sổ KHÔNG cộng dồn residual lần 2) ⇒ quy đổi `baseline` (+residual, persist).
+      · Đã quy đổi rồi (event_key trùng) ⇒ idempotent no-op: trừ thẳng bằng baseline HIỆN CÓ,
+        không cộng residual lần nữa.
+      · KL đổi bất thường KHÔNG giải thích được (`blocked`) ⇒ FAIL-SAFE: trả filled=None (đúng
+        nhánh "failsafe" sẵn có ở `compute_session_order` — không mua bởi thiếu thông tin),
+        KHÔNG đoán theo tỉ lệ khi thiếu bằng chứng (§29).
+      · `classify_positions` tự thân lỗi (IO/import) ⇒ KHÔNG fail-closed cả cổng — giữ hành vi
+        CŨ (trừ thẳng, không quy đổi) để không phá luồng gom đang chạy đúng vì một lỗi phụ trợ.
+
+    ⚠️ Giới hạn cửa sổ phát hiện (kế thừa từ `exdate_frame.classify_positions`, không sửa ở
+    đây): chỉ đúng trong 1 CỬA SỔ NGẮN quanh ex-date — nhánh "chưa có plan file" của
+    `process_account()` đã fire thật 3 lần trong `logs/inject_discretionary.log` (retry hợp lệ,
+    KHÔNG phải lỗi), nhưng nếu injector bỏ lỡ NHIỀU phiên liên tiếp quanh ex-date thật, sự kiện
+    có thể trôi khỏi cửa sổ trước khi cổng này chạy lần đầu — không có cơ chế quét lùi lịch sử.
+
+    Trả `(filled, broker, corp_action_note)` — note=None khi KHÔNG có gì bất thường trong
+    ngày (đường mòn, không có sự kiện, hoặc pct_mode)."""
     try:
         from trading_bot.brokers import DNSEBroker
         b = DNSEBroker(account_id=account_id, credentials_file=None, label=account)
@@ -117,9 +166,58 @@ def broker_filled_qty(account, account_id, ticker, baseline):
         positions = b.get_positions()
     except Exception as exc:
         print(f"  [FAILSAFE] không đọc được broker positions ({ticker}): {exc}")
-        return None, None
+        return None, None, None
     total = int((positions.get(ticker) or {}).get("total", 0) or 0)
-    return max(0, total - int(baseline)), b
+
+    pct_mode = state is not None and state.get("target_pct_active_nav") is not None
+    if pct_mode:
+        return max(0, total - int(baseline)), b, None
+
+    try:
+        import exdate_frame
+        credited, blocked = exdate_frame.classify_positions(
+            account, account_id, today_ict().isoformat(), {ticker: positions.get(ticker) or {}})
+    except Exception as exc:
+        print(f"  [WARN] {ticker}: exdate_frame.classify_positions lỗi ({exc}) — bỏ qua cổng "
+              f"corp-action phiên này, dùng baseline hiện có (hành vi trước khi có cổng)")
+        credited, blocked = {}, {}
+
+    if ticker in blocked:
+        note = (f"KL đổi NGOÀI lệnh khớp thật, KHÔNG xác nhận được sự kiện corp-action ⇒ "
+                f"KHÔNG tính filled (fail-safe, không đoán): {blocked[ticker]}")
+        print(f"  [FAILSAFE-CORPACTION] {ticker}: {note}")
+        return None, b, note
+
+    if ticker in credited:
+        detail = credited[ticker]
+        event_key = (ticker, str(detail.get("ex_date")), str(detail.get("event_code")))
+        prior = state.get("corp_action_baseline_adjustments") or [] if state is not None else []
+        already_done = {(a.get("ticker"), str(a.get("ex_date")), str(a.get("event_code")))
+                        for a in prior}
+        if event_key in already_done:
+            note = (f"sự kiện {detail['event_code']} ex-date {detail['ex_date']} đã quy đổi "
+                    f"baseline ở lần chạy trước (idempotent — event_key trùng, KHÔNG cộng dồn "
+                    f"residual lần 2)")
+            print(f"  [CORPACTION-DEDUP] {ticker}: {note}")
+            return max(0, total - int(baseline)), b, note
+        residual = detail["residual"]
+        old_baseline = int(baseline)
+        new_baseline = old_baseline + int(round(residual))
+        note = (f"broker đã credit sớm {residual:+,.0f}cp (tỉ lệ {detail['exercise_ratio']} "
+                f"của {detail['event_code']} ex-date {detail['ex_date']}) ⇒ quy đổi baseline "
+                f"{old_baseline:,}→{new_baseline:,} để KHÔNG đếm KL credit là đã gom mua")
+        print(f"  [CORPACTION] {ticker}: {note}")
+        if state is not None:
+            state["baseline_qty_before_program"] = new_baseline
+            state.setdefault("corp_action_baseline_adjustments", []).append({
+                "at": dt.datetime.now(_ICT_TZ).isoformat(), "ticker": ticker,
+                "residual": residual, "exercise_ratio": detail["exercise_ratio"],
+                "event_code": detail["event_code"], "ex_date": detail["ex_date"],
+                "baseline_before": old_baseline, "baseline_after": new_baseline})
+        baseline = new_baseline
+        return max(0, total - int(baseline)), b, note
+
+    return max(0, total - int(baseline)), b, None
 
 
 def prev_session_market(broker, ticker):
@@ -169,8 +267,42 @@ def bar_is_completed_session(bar_ts, now=None):
     return session_phase(now)[0] == "CLOSED"
 
 
-def anchor_prices_for(broker, state, ticker, now=None):
+def official_reference_price(broker, ticker):
+    """Giá tham chiếu CHÍNH THỨC của phiên giao dịch kế tiếp → (giá | None, info).
+
+    Nguồn = DNSE `q.ref` (secdef `refPrice`/`basicPrice`) — số do chính sở giao dịch công bố,
+    nên đã đúng công thức RIÊNG của từng sàn và đã điều chỉnh theo giá trị quyền.
+
+    🔴 VÌ SAO KHÔNG DÙNG `anchor_prices_for()` CHO LUẬT A (sửa lỗi 2026-08-15, job
+    Taylor_20260815_034407): hàm đó trả GIÁ ĐÓNG CỬA. Giá đóng cửa == giá tham chiếu **chỉ ở
+    HOSE/HNX trong ngày thường**. TV1 — mã DUY NHẤT chạy nhánh này — niêm yết **UPCOM**, nơi
+    tham chiếu là BÌNH QUÂN GIA QUYỀN giá khớp lô chẵn phiên trước. Đo 259 phiên TV1: median
+    lệch 0,389%, p90 1,333%, max 7,041%, và 47 phiên lệch >1%. Nhánh mean-N (luật B) KHÔNG
+    đụng tới: nó cố ý là trung bình 5 phiên GIÁ ĐÓNG, một đại lượng khác hẳn.
+
+    FAIL-CLOSED: quote lỗi / thiếu ref / snapshot không nhất quán ⇒ `(None, info)` và caller
+    rơi về band CỐ ĐỊNH (không chèn lệnh sai, không crash)."""
+    try:
+        q = broker.get_quote(ticker)
+    except Exception as exc:                                    # noqa: BLE001
+        return None, {"reason": f"DNSE không trả quote: {type(exc).__name__}: {exc}"}
+    ok, info = check_reference_snapshot(q.ref, q.ceiling, q.floor,
+                                        q.exchange, getattr(q, "exchange_known", False))
+    info["market_id"] = getattr(q, "market_id", None)
+    return (float(q.ref) if ok else None), info
+
+
+def anchor_prices_for(broker, state, ticker, now=None, with_dates=False):
     """Giá đóng cửa N phiên ĐÃ HOÀN TẤT gần nhất (cũ→mới) cho luật trần động P1, hoặc None.
+
+    ⚠️ CHỈ dùng cho nhánh **mean-N (luật B)**. Luật A phải lấy anchor từ
+    `official_reference_price()` — xem lý do ở docstring hàm đó.
+
+    `with_dates=True` → trả `(prices, dates)` với `dates` là ngày ICT của ĐÚNG các bar đó
+    (ISO, cùng thứ tự). LUẬT A bắt buộc có nó để khoá bất biến "anchor là phiên ĐÃ ĐÓNG TRƯỚC
+    plan_date"; không suy được ngày từ giá nên thiếu ⇒ engine fail-safe về band cố định.
+    Thất bại vẫn trả `None` (một giá trị, không phải tuple) ở cả hai chế độ — caller chỉ cần
+    một phép kiểm `is None`.
 
     CHỈ gọi khi state bật `dynamic_ceiling.enabled` — mặc định (cờ tắt) hàm này không chạy,
     không thêm một lời gọi API nào so với trước.
@@ -219,7 +351,7 @@ def anchor_prices_for(broker, state, ticker, now=None):
               f"(t={len(stamps) if isinstance(stamps, list) else 'n/a'}, "
               f"c={len(closes) if isinstance(closes, list) else 'n/a'}) → trần động không kích hoạt")
         return None
-    completed, n_dropped = [], 0
+    completed, comp_dates, n_dropped = [], [], 0
     for ts, v in zip(stamps, closes):
         ok = bar_is_completed_session(ts, now)
         if ok is None:
@@ -227,6 +359,7 @@ def anchor_prices_for(broker, state, ticker, now=None):
             return None
         if ok:
             completed.append(v)
+            comp_dates.append(dt.datetime.fromtimestamp(int(ts), _ICT_TZ).date().isoformat())
         else:
             n_dropped += 1
     if n_dropped:
@@ -246,7 +379,9 @@ def anchor_prices_for(broker, state, ticker, now=None):
         except (TypeError, ValueError):
             print(f"  [FAILSAFE] {ticker}: giá ohlc không parse được ({v!r}) → bỏ trần động")
             return None
-    return out
+    # Cắt ngày CÙNG một lát `[-n:]` với giá — hai danh sách phải song song từng phần tử, vì
+    # luật A đọc `dates[-1]` để khoá bất biến "anchor là phiên ĐÃ ĐÓNG TRƯỚC plan_date".
+    return (out, comp_dates[-n:]) if with_dates else out
 
 
 def load_active_nav(account, now=None):
@@ -334,7 +469,11 @@ def process_account(account, plan_date, dry_run):
         return 1
     plan.setdefault("orders", [])
 
-    now_iso = dt.datetime.now().astimezone().isoformat(timespec="seconds")
+    # §16: neo ICT tường minh bằng `_ICT_TZ` (dòng 45) — `.astimezone()` trần dán offset
+    # của process, nên cùng một lần chèn ghi "+00:00" trên host UTC và "+07:00" trên host
+    # ICT; dấu thời gian này đi thẳng vào `notes[].at`/`completed_at` của plan + state, là
+    # artifact người duyệt plan đọc.
+    now_iso = dt.datetime.now(_ICT_TZ).isoformat(timespec="seconds")
     account_mode = "live" if account in live_dnse_labels() else "paper"
 
     # active_nav CHỈ đọc khi có state khai target theo tỷ trọng — state target cố định không
@@ -388,15 +527,52 @@ def process_account(account, plan_date, dry_run):
             continue
 
         baseline = int(state.get("baseline_qty_before_program", 0) or 0)
-        filled, broker = broker_filled_qty(account, account_id, ticker, baseline)
-        prev_turnover = prev_price = anchors = None
+        filled, broker, corp_action_note = broker_filled_qty(
+            account, account_id, ticker, baseline, state=state)
+        if corp_action_note:
+            plan.setdefault("discretionary_inject_notes", []).append(
+                {"at": now_iso, "ticker": ticker,
+                 "action": "corp_action_blocked" if filled is None else "corp_action_baseline_adjusted",
+                 "state_file": state.get("_state_file"), "note": corp_action_note})
+            if not dry_run:
+                _atomic_write_json(plan_path, plan)
+        prev_turnover = prev_price = anchors = anchor_dates = None
+        anchor_basis = anchor_exchange = None
         if filled is not None and broker is not None:
             prev_turnover, prev_price = prev_session_market(broker, ticker)
-            anchors = anchor_prices_for(broker, state, ticker)   # None khi cờ P1 tắt (mặc định)
+            # LUÔN xin kèm ngày (`with_dates=True`), kể cả khi state chưa bật luật A: ngày lấy
+            # từ ĐÚNG các bar đã dùng làm giá nên không tốn thêm lời gọi API nào, và nhánh
+            # mean-N bỏ qua tham số này. Xin có điều kiện thì ngày ngày lật state file sẽ ra
+            # fail-safe câm (thiếu anchor_dates ⇒ engine rơi về band cố định) — đúng cái bẫy
+            # "đổi cấu hình mà không có gì đổi" mà job này sinh ra để tránh.
+            res = anchor_prices_for(broker, state, ticker, with_dates=True)  # None khi cờ P1 tắt
+            if res is not None:
+                anchors, anchor_dates = res
+                # LUẬT A: thay phần tử CUỐI (giá đóng phiên gần nhất) bằng GIÁ THAM CHIẾU CHÍNH
+                # THỨC của phiên kế tiếp. Giữ nguyên `anchor_dates` — ngày vẫn là phiên ĐÃ ĐÓNG
+                # sinh ra tham chiếu đó, nên bất biến #4 không đổi nghĩa. Nhánh mean-N không
+                # chạm tới (`ceiling_rule` trống ⇒ `anchor_basis` để None ⇒ engine dùng như cũ).
+                _cfg = state.get("dynamic_ceiling") or {}
+                if str(_cfg.get("ceiling_rule") or "").strip().upper() == "A":
+                    ref_px, ref_info = official_reference_price(broker, ticker)
+                    if ref_px is None:
+                        print(f"  [FAILSAFE] {ticker}: luật A không lấy được giá tham chiếu "
+                              f"chính thức ({ref_info.get('reason')}) → band cố định")
+                        anchors = anchor_dates = None
+                    else:
+                        print(f"  [anchor] {ticker}: luật A dùng GIÁ THAM CHIẾU chính thức "
+                              f"{ref_px:,.0f}đ (sàn {ref_info.get('exchange')}, "
+                              f"marketId={ref_info.get('market_id')}) thay giá đóng "
+                              f"{anchors[-1]:,.0f}đ — lệch {ref_px/anchors[-1]-1:+.3%}")
+                        anchors = anchors[:-1] + [float(ref_px)]
+                        anchor_basis = ANCHOR_BASIS_OFFICIAL_REF
+                        anchor_exchange = ref_info.get("exchange")
 
         order, decision = compute_session_order(
             state, filled, prev_turnover, prev_price, plan_date, now_iso,
-            anchor_prices=anchors, active_nav_vnd=active_nav_vnd)
+            anchor_prices=anchors, active_nav_vnd=active_nav_vnd,
+            anchor_dates=anchor_dates, anchor_basis=anchor_basis,
+            anchor_exchange=anchor_exchange)
         print(f"  decision: {decision['action']} — {decision['reason']}")
 
         # đánh dấu completed vào state nếu engine báo (rule e: không mua quá)

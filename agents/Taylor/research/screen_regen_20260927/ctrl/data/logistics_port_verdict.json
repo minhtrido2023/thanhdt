@@ -1,0 +1,202 @@
+{
+  "job": "Taylor_20260630_054646",
+  "screen": "logistics_port_dual",
+  "port": {
+    "icb": 2777.0,
+    "names": [
+      "ACV",
+      "DL1",
+      "DS3",
+      "DVP",
+      "DXP",
+      "GMD",
+      "HAH",
+      "ILB",
+      "NCT",
+      "PHP",
+      "SGN",
+      "SGP",
+      "STG",
+      "TCW",
+      "TMS",
+      "VSC"
+    ],
+    "qual_med": 2,
+    "months_held": 106,
+    "months": 151,
+    "median_sel_adv_b": 2.28,
+    "full": {
+      "CAGR": 8.072,
+      "Sharpe": 0.446,
+      "MaxDD": -58.65,
+      "Calmar": 0.138,
+      "navfinal": 2.656,
+      "n": 151
+    },
+    "full_bh": {
+      "CAGR": 9.94,
+      "Sharpe": 0.585,
+      "MaxDD": -43.154,
+      "Calmar": 0.23,
+      "navfinal": 3.295,
+      "n": 151
+    },
+    "is_": {
+      "CAGR": -0.745,
+      "Sharpe": 0.027,
+      "MaxDD": -34.35,
+      "Calmar": -0.022,
+      "navfinal": 0.956,
+      "n": 72
+    },
+    "oos": {
+      "CAGR": 16.787,
+      "Sharpe": 0.673,
+      "MaxDD": -58.65,
+      "Calmar": 0.286,
+      "navfinal": 2.778,
+      "n": 79
+    },
+    "oos_bh": {
+      "CAGR": 10.842,
+      "Sharpe": 0.58,
+      "MaxDD": -32.239,
+      "Calmar": 0.336,
+      "navfinal": 1.969,
+      "n": 79
+    },
+    "selfcheck_vnd": 3e-06,
+    "ortho_c30v": 20.0,
+    "ortho_8l": 0.0
+  },
+  "ship": {
+    "icb": 2773.0,
+    "names": [
+      "GSP",
+      "PVT",
+      "SFI",
+      "SWC",
+      "VIP",
+      "VOS",
+      "VTO"
+    ],
+    "qual_med": 1,
+    "months_held": 98,
+    "months": 151,
+    "median_sel_adv_b": 4.86,
+    "full": {
+      "CAGR": 11.982,
+      "Sharpe": 0.582,
+      "MaxDD": -31.033,
+      "Calmar": 0.386,
+      "navfinal": 4.154,
+      "n": 151
+    },
+    "full_bh": {
+      "CAGR": 9.94,
+      "Sharpe": 0.585,
+      "MaxDD": -43.154,
+      "Calmar": 0.23,
+      "navfinal": 3.295,
+      "n": 151
+    },
+    "is_": {
+      "CAGR": 4.348,
+      "Sharpe": 0.31,
+      "MaxDD": -26.101,
+      "Calmar": 0.167,
+      "navfinal": 1.291,
+      "n": 72
+    },
+    "oos": {
+      "CAGR": 19.425,
+      "Sharpe": 0.786,
+      "MaxDD": -28.924,
+      "Calmar": 0.672,
+      "navfinal": 3.218,
+      "n": 79
+    },
+    "oos_bh": {
+      "CAGR": 10.842,
+      "Sharpe": 0.58,
+      "MaxDD": -32.239,
+      "Calmar": 0.336,
+      "navfinal": 1.969,
+      "n": 79
+    },
+    "selfcheck_vnd": 1e-06,
+    "ortho_c30v": 27.1,
+    "ortho_8l": 1.6
+  },
+  "verify": {
+    "GMD": [],
+    "VSC": [
+      "2019-01",
+      "2019-02",
+      "2019-03",
+      "2019-04",
+      "2019-05",
+      "2019-06",
+      "2019-07",
+      "2019-08",
+      "2019-09",
+      "2019-10",
+      "2019-11",
+      "2019-12",
+      "2020-01",
+      "2020-02",
+      "2020-03",
+      "2020-04",
+      "2020-05",
+      "2020-06",
+      "2020-10",
+      "2020-11",
+      "2020-12",
+      "2021-01",
+      "2021-02",
+      "2021-03",
+      "2021-04",
+      "2021-05",
+      "2021-06",
+      "2021-07",
+      "2021-08",
+      "2021-09",
+      "2021-10",
+      "2021-11",
+      "2021-12"
+    ],
+    "DVP": [
+      "2020-10",
+      "2020-11",
+      "2020-12",
+      "2021-01",
+      "2021-02",
+      "2021-03",
+      "2021-04",
+      "2021-05",
+      "2021-06",
+      "2021-07"
+    ],
+    "PHP": [
+      "2021-06",
+      "2021-07",
+      "2021-08",
+      "2021-09"
+    ],
+    "GMD14_expected_absent": true,
+    "PVT2020": [
+      "2020-01"
+    ],
+    "VOS_trap_excluded": true,
+    "VOS_recovered": [
+      "2023-04",
+      "2023-05",
+      "2023-06",
+      "2023-07",
+      "2024-04",
+      "2024-05",
+      "2024-06"
+    ],
+    "gmd14_miss_reason": "GMD 2014 PB0.67 deep value but ROIC5Y1.5% (Gemalink pre-ramp); quality gate cannot catch w/o concession foresight (parallel banking-VCB/retail-PNJ/RE-NTC)"
+  }
+}

@@ -18,12 +18,16 @@ MỖI CA CHẶN ĐỀU CÓ CA CHỨNG MINH NGƯỢC. "Cổng bắt được X" m
 lọt vs INV2 chặn), và ca INV3 chứng minh rằng nếu KHÔNG đổi tên khoá sự kiện thì cổng bất biến
 sẽ mù hoàn toàn — đó là một bug thật đã tồn tại trong bản nháp của chính file này.
 
-Usage: python3 mike/bin/corp_action_daily_selfcheck.py [--no-subprocess]
+Usage: python3 mike/bin/corp_action_daily_selfcheck.py [--live]
+  (không cờ nào chạy cổng selfcheck THẬT: `gate_selfcheck` LUÔN được giả lập qua `runner=`.
+   `--live` chỉ thêm tầng `t_query_shape_live` — chạy mệnh đề WHERE trên BQ thật, nghiệm thu tay.)
 """
 from __future__ import annotations
 
+import contextlib
 import datetime as dt
 import inspect
+import io
 import json
 import os
 import subprocess
@@ -66,12 +70,16 @@ def _q(tk, time, shares):
 
 # AAA: sạch — AIS đầu năm, thưởng 15% ex 06-10, dòng quý 04-01 GIẢI THÍCH ĐƯỢC.
 # BBB: hình dạng HAH — dòng quý 2026-02-02 mang số của AIS 2026-05-27 (RESTATE / look-ahead).
+#   Anchor AIS 2025-11-15 CỐ Ý trong vòng 90 ngày (FIN_FALLBACK_MAX_AIS_AGE_DAYS, oshares_live.py)
+#   — sau policy 2026-08-19 (commit 269e16f5, "trust ticker_financial khi AIS cũ >90d"), anchor
+#   CŨ hơn 90 ngày rơi vào FIN_FALLBACK và tự khớp ticker_financial (0% lệch), không còn tạo được
+#   DIVERGENT cho ca X2/X2b nữa — đổi ngày để ca này tiếp tục đi qua nhánh AIS_EXACT như dự định.
 # CCC: chuyển đổi TP ratio 0,0 ⇒ mô hình fail-closed, không có số để đối soát.
 CACHE = (
     [_q("AAA", "2026-04-01", 100_000_000), _q("BBB", "2026-02-02", 185_840_401),
      _q("CCC", "2026-04-01", 100_000_000)],
     [_ais("AAA", "2026-01-05", 100_000_000), _iss("AAA", "2026-06-10", 0.15),
-     _ais("BBB", "2025-09-09", 168_861_212), _ais("BBB", "2026-05-27", 185_840_401),
+     _ais("BBB", "2025-11-15", 168_861_212), _ais("BBB", "2026-05-27", 185_840_401),
      _ais("CCC", "2026-01-05", 100_000_000),
      _iss("CCC", "2026-03-20", 0.0, "Chuyển từ trái phiếu chuyển đổi")],
 )
@@ -233,6 +241,77 @@ def t_invariants():
         finally:
             cad.STATE_PATH = old
 
+    # ── MODEL_REBASE: chênh lệch do BẢN MÃ đổi, không phải FEED đổi (thêm 2026-08-20) ────────
+    # Hình dạng lấy từ ca thật cùng ngày: MBB (10.189.574.884,885 nhân dồn → 10.068.749.885 cộng
+    # `issue_volumn`) và VRE (2.328.818.410 neo AIS → 2.272.318.410 FIN_FALLBACK). Cả hai bị lớp
+    # 4 GIẤU SỐ trong khi con số MỚI mới là con số đúng.
+    MB_PREV = {"model_version": "21c7e2b1337e",
+               "tickers": {"MBB": {"value": 10_189_574_884.885},
+                           "VRE": {"value": 2_328_818_410.0}}}
+    MB_CUR = {"MBB": {"value": 10_068_749_885.0, "events_applied": []},
+              "VRE": {"value": 2_272_318_410.0, "events_applied": []}}
+    MB_BACK = {"MBB": {"value": 10_068_749_885.0}, "VRE": {"value": 2_272_318_410.0}}
+
+    tk, notes = cad.model_rebase_set("2026-08-20", MB_CUR, "2026-08-19", MB_PREV, MB_BACK, True)
+    check("MR1. mô hình ĐỔI + tính lại hôm qua bằng mã hôm nay ra ĐÚNG quỹ đạo hôm nay ⇒ cả hai "
+          "mã vào tập MODEL_REBASE (số sẽ được CÔNG BỐ, không bị giấu vô hạn)",
+          tk == {"MBB", "VRE"} and len(notes) == 2
+          and all(n["kind"] == "MODEL_REBASE" for n in notes), f"{sorted(tk)} · {len(notes)} note")
+    check("MR1b. ghi chú mang CẢ HAI số + chữ ký mô hình cũ ⇒ đối chiếu tay được, không chỉ nói "
+          "'đã rebase'",
+          notes[0]["published_then"] == 10_189_574_884.885
+          and notes[0]["value"] == 10_068_749_885.0
+          and notes[0]["model_version_prev"] == "21c7e2b1337e", str(notes[0])[:160])
+
+    v = cad.check_invariants("2026-08-20", MB_CUR, "2026-08-19", MB_PREV, rebase=tk)
+    v += cad.check_retro("2026-08-20", "2026-08-19", MB_PREV, ([], []), set(MB_CUR),
+                         back=MB_BACK, rebase=tk)
+    check("MR2. hai cổng bất biến IM LẶNG trên mã đã rebase — đây chính là hành vi bị hỏng hôm "
+          "2026-08-20: MBB/VRE dính UNEXPLAINED_DROP + RETRO_CHANGE và bị giấu ĐÚNG con số đúng",
+          v == [], str(v))
+
+    # CHỨNG MINH NGƯỢC #1 — mô hình KHÔNG đổi thì không có miễn trừ nào, dù số có nhảy.
+    tk0, n0 = cad.model_rebase_set("2026-08-20", MB_CUR, "2026-08-19", MB_PREV, MB_BACK, False)
+    tkN, nN = cad.model_rebase_set("2026-08-20", MB_CUR, "2026-08-19", MB_PREV, MB_BACK, None)
+    v0 = cad.check_invariants("2026-08-20", MB_CUR, "2026-08-19", MB_PREV, rebase=tk0)
+    check("MR3. mô hình KHÔNG đổi (False) hoặc KHÔNG BIẾT (None — mốc chưa ghi chữ ký) ⇒ KHÔNG "
+          "miễn trừ, và cổng bất biến bắt lại đúng 2 mã. `None` KHÔNG được đọc thành True",
+          tk0 == set() and tkN == set() and not n0 and not nN
+          and {x["ticker"] for x in v0} == {"MBB", "VRE"},
+          f"tk_False={tk0} tk_None={tkN} viol={[x['ticker'] for x in v0]}")
+
+    # CHỨNG MINH NGƯỢC #2 — rebase rồi VẪN lệch ⇒ vi phạm THẬT, giữ nguyên fail-closed.
+    BAD_CUR = {"MBB": {"value": 11_000_000_000.0, "events_applied": []}}
+    tk2, _ = cad.model_rebase_set("2026-08-20", BAD_CUR, "2026-08-19", MB_PREV, MB_BACK, True)
+    v2 = cad.check_invariants("2026-08-20", BAD_CUR, "2026-08-19", MB_PREV, rebase=tk2)
+    check("MR4. mô hình đổi NHƯNG quỹ đạo hôm nay KHÔNG khớp bản tính lại (11,0 tỷ ≠ 10,07 tỷ) "
+          "⇒ KHÔNG miễn trừ, vi phạm vẫn nổ. 'Mô hình đổi' một mình không bao giờ đủ để tắt cổng",
+          tk2 == set() and len(v2) == 1 and v2[0]["kind"] == "UNEXPLAINED_JUMP",
+          f"tk={tk2} viol={[x['kind'] for x in v2]}")
+
+    # CHỨNG MINH NGƯỢC #3 — sự kiện chắn đường (không dựng được kỳ vọng) ⇒ KHÔNG miễn trừ.
+    BLK_CUR = {"MBB": {"value": 10_068_749_885.0, "events_applied": [
+        {"exright_date": "2026-08-20", "method_vi": "Phát hành riêng lẻ", "title": "t",
+         "ratio": None, "shares_delta": None}]}}
+    tk3, _ = cad.model_rebase_set("2026-08-20", BLK_CUR, "2026-08-19", MB_PREV, MB_BACK, True)
+    check("MR5. ISS chắn đường (không tỉ lệ, không delta) ⇒ không dựng được kỳ vọng ⇒ KHÔNG miễn "
+          "trừ (fail-closed giữ nguyên, không mượn cớ 'mô hình đổi')", tk3 == set(), str(tk3))
+
+    # CHỨNG MINH NGƯỢC #4 — số hôm qua tính lại KHÔNG đổi ⇒ không có gì để quy cho mô hình.
+    SAME_BACK = {"MBB": {"value": 10_189_574_884.885}}
+    SAME_CUR = {"MBB": {"value": 10_500_000_000.0, "events_applied": []}}
+    tk4, _ = cad.model_rebase_set("2026-08-20", SAME_CUR, "2026-08-19", MB_PREV, SAME_BACK, True)
+    check("MR6. mô hình đổi nhưng tính lại hôm qua ra Y HỆT số đã publish ⇒ chênh lệch hôm nay "
+          "KHÔNG phải do mã ⇒ KHÔNG miễn trừ (chặn kiểu 'mọi lần sửa oshares_live là một ngày "
+          "tắt cổng')", tk4 == set(), str(tk4))
+
+    check("MR7. `model_changed_vs` là MỘT vị ngữ: thiếu chữ ký ở mốc ⇒ None (KHÔNG kết luận), "
+          "có và khác ⇒ True, có và giống ⇒ False",
+          (cad.model_changed_vs({"model_version": "a"}, "b"),
+           cad.model_changed_vs({"model_version": "a"}, "a"),
+           cad.model_changed_vs({}, "b"),
+           cad.model_changed_vs(None, "b")) == (True, False, None, None))
+
     cur = {"AAA": {"value": 130_000_000}, "BBB": {"value": 5}}
     cad.withhold_suspect(cur, [{"ticker": "AAA", "kind": "UNEXPLAINED_JUMP"}])
     check("W1. vi phạm lẻ tẻ ⇒ GIẤU số của riêng mã đó (value=None, nhãn INVARIANT_SUSPECT, số "
@@ -289,6 +368,44 @@ def t_crosscheck():
     check("X2b. tên trường MANG THEO MẪU SỐ (`err_pct_vs_ticker_financial`), không có `err_pct` "
           "trung tính — hai file chia cho hai mẫu số khác nhau cho cùng một sự kiện",
           "err_pct" not in d[0] and "err_pct_vs_ticker_financial" in d[0], str(sorted(d[0])))
+
+    # ── ĐỐI SOÁT VỚI NHÁNH ĐANG PHỤC VỤ (sửa 2026-08-20) ───────────────────────────────────
+    # Hình dạng ca thật EVF/HHV: neo AIS uncertified (transition có `shares_delta` mâu thuẫn với
+    # neo trước) + dòng quý MỚI HƠN 1,5 năm. Trước bản vá, nhánh PIT câm ⇒ đối soát kêu "KHÔNG
+    # đối soát được" MỖI NGÀY về một chính sách fail-closed cố ý của backtest.
+    FB_CACHE = ([_q("EVFX", "2026-07-21", 760_565_802.0)],
+                [_ais("EVFX", "2023-06-01", 100_000_000.0),
+                 dict(_ais("EVFX", "2024-12-06", 704_248_289.0), shares_delta=1_000_000.0)])
+    d_pit = cad.crosscheck("2026-08-20", {"EVFX"}, FB_CACHE, live=False)
+    d_live = cad.crosscheck("2026-08-20", {"EVFX"}, FB_CACHE, live=True)
+    check("X6. ca EVF/HHV — nhánh PIT cho `NO_MODEL_VALUE` (báo động hằng ngày), nhánh PHỤC VỤ "
+          "cho `FIN_FALLBACK_SERVED`. Đây là chính xác cái báo động giả mà bản vá gỡ bỏ",
+          len(d_pit) == 1 and d_pit[0]["kind"] == "NO_MODEL_VALUE"
+          and len(d_live) == 1 and d_live[0]["kind"] == "FIN_FALLBACK_SERVED",
+          f"PIT={d_pit[0]['kind']} · LIVE={d_live[0]['kind']}")
+    check("X6b. `crosscheck` MẶC ĐỊNH nhánh phục vụ — không ai phải nhớ truyền `live=True`; một "
+          "mặc định PIT ở đây là cách báo động giả quay lại lặng lẽ",
+          cad.crosscheck("2026-08-20", {"EVFX"}, FB_CACHE) == d_live)
+    check("X6c. bản ghi GHI NHẬN mang khoảng cách với chuỗi AIS (thứ DUY NHẤT còn độc lập khi "
+          "neo CHÍNH là dòng quý), KHÔNG mang `err_pct_vs_ticker_financial` — sai số 0 ở đây là "
+          "phép so một số với chính nó",
+          d_live[0]["ais_expected"] == 704_248_289.0
+          and abs(d_live[0]["err_pct_vs_ais_expected"] - 8.0) < 0.01
+          and d_live[0]["ais_anchor_certified"] is False
+          and "err_pct_vs_ticker_financial" not in d_live[0], str(sorted(d_live[0])))
+    check("X6d. GHI NHẬN KHÔNG bị đếm là 'lệch' cũng KHÔNG bị đếm là 'từ chối' — ba vị ngữ tách "
+          "hẳn nhau (`refused` / `informational` / còn lại)",
+          not cad.refused(d_live[0]) and cad.informational(d_live[0])
+          and cad.refused(d_pit[0]) and not cad.informational(d_pit[0]))
+    line = cad._fmt_divergence(d_live)
+    check("X6e. dòng Discord cho tập TOÀN GHI NHẬN mở đầu bằng ℹ️ và nói thẳng 'không có mã nào "
+          "lệch hay câm' — một dòng toàn ghi-nhận mà mở bằng ⚠️ sẽ dạy người đọc bỏ qua nó",
+          line.startswith("ℹ️") and "không có mã nào lệch hay câm" in line
+          and "704,248,289" in line and "8.00%" in line, line[:200])
+    line_mix = cad._fmt_divergence(d_live + d_pit)
+    check("X6f. khi có CẢ ghi nhận LẪN báo động ⇒ quay về ⚠️ và đếm RIÊNG ba loại trong đầu dòng",
+          line_mix.startswith("⚠️") and "1 mã KHÔNG đối soát được" in line_mix
+          and "1 mã GHI NHẬN" in line_mix and "mã LỆCH" not in line_mix, line_mix[:200])
 
     check("X3. đối soát KHÔNG chứa trường nào kiểu 'số đúng là' — script không được phán",
           all(not any(k in r for k in ("correct", "chosen", "winner"))
@@ -690,6 +807,124 @@ def t_magnitude_gate():
           "chỉ để dùng lại phép tính, không đổi hành vi", a == b, f"{a} vs {b}")
 
 
+# ──────────────────────────── LỚP 4c WIRING · run() có THẬT SỰ nối tới cổng biên độ không
+
+# quant-skeptic (2026-08-19): mọi ca MG* ở trên gọi THẲNG `sanity_flag`/`sanity_warns`/
+# `_fmt_magnitude` — không ca nào đi qua `run()`. Nếu ai gỡ 3 lệnh gọi `sanity_warns*(...)` khỏi
+# thân `run()` (dòng `mag = (sanity_warns(cur, …) + sanity_warns(back, …) +
+# sanity_warns_from_crosscheck(diverge))`), toàn bộ 178 ca hiện có (kể cả MG1-MG16) VẪN XANH, vì
+# chúng kiểm hàm con, không kiểm dây nối. Ca dưới đây gọi `run()` NGUYÊN VẸN (dry-run, hermetic —
+# mọi phụ thuộc ngoài, kể cả BQ/Discord/bus/state file, đều được patch tại module), rồi kiểm đúng
+# NGAY output mà `run()` thật sự trả về và IN ra — không đọc lại `sanity_warns()` một lần nữa.
+
+def t_run_level_wiring():
+    print("== LỚP 4c WIRING · run() phải THẬT SỰ gọi sanity_warns*(), không chỉ định nghĩa hàm con ==")
+    asof = "2026-06-01"
+    cache = ([_q("MAG", "2020-01-01", 1000.0)], [])
+    positions = {"SpaceX": {"asof": asof, "stale_days": 0, "positions": {"MAG": 100},
+                            "excluded_tickers": [], "source": "test-fixture"}}
+
+    live_flags = []
+
+    def fake_oshares_at(tickers, at, _cache=None, live=False):
+        # cũ (dòng quý) = 1.000, mới (live) = 3.001 — ngay trên biên `>×3,0` (cùng con số ví dụ
+        # trong prompt dispatch), độc lập với ca thật VHM đã dùng ở MG1-MG16 phía trên.
+        # `live` GHI LẠI chứ không nuốt: bản double phải phơi ra tham số nó nhận, nếu không R9
+        # (dưới) không thể chứng minh `run()` gọi ĐÚNG nhánh phục vụ.
+        live_flags.append(live)
+        return {tk: {"value": 3001.0, "method": "TEST_INJECTED", "anchor_date": at,
+                     "anchor_source": "test"} for tk in tickers}
+
+    PATCHED = ("OUT_DIR", "STATE_PATH", "bus", "notify", "gate_selfcheck", "gate_freshness",
+              "read_positions", "triggered_today", "_fetch", "oshares_at", "upcoming_events",
+              "sanity_warns", "sanity_warns_from_crosscheck")
+
+    def _run_hermetic(tmp):
+        """Patch MỌI phụ thuộc ngoài của `run()` (BQ, Discord/Telegram, bus, state file trên
+        đĩa) rồi gọi `run()` nguyên vẹn — không mock chính cổng biên độ đang kiểm."""
+        cad.OUT_DIR = os.path.join(tmp, "out")
+        cad.STATE_PATH = os.path.join(tmp, "state.json")
+        cad.bus = lambda *a, **k: None
+        cad.notify = lambda *a, **k: None
+        cad.gate_selfcheck = lambda: (True, [{"module": "test", "rc": 0, "tail": ["ok"]}])
+        cad.gate_freshness = lambda a: ("FRESH", {
+            "max_ingested_utc": "2026-05-31T15:00:00+00:00",
+            "max_ingested_ict": "2026-05-31T22:00:00+07:00",
+            "max_public_date": None, "rows": 1, "age_days": 0, "prev_trading_day": "2026-05-29"})
+        cad.read_positions = lambda asof=None, nav_glob=None: positions
+        cad.triggered_today = lambda a, rows=None: (set(), set(), [])
+        cad._fetch = lambda tickers, until: cache
+        cad.oshares_at = fake_oshares_at
+        cad.upcoming_events = lambda a, tickers, days=cad.LOOKAHEAD_DAYS, rows=None: []
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            rc, snap = cad.run(asof=asof, dry_run=True, alert=False)
+        return rc, snap, buf.getvalue()
+
+    keep = {n: getattr(cad, n) for n in PATCHED}
+    try:
+        with tempfile.TemporaryDirectory() as tmp:
+            rc, snap, out = _run_hermetic(tmp)
+
+        check("R1. run() publish OK (rc=0) qua trọn 7 lớp với fixture hermetic — không cổng nào "
+              "khác tự đỏ vì input của ca này (nếu FAIL thì R2-R7 dưới đây không có nghĩa)",
+              rc == 0, f"rc={rc}")
+        check("R2. `tickers['MAG']['value']` GIỮ NGUYÊN 3001 sau khi đi qua CẢ `run()` — phương "
+              "án C (WARN, không SUPPRESS, user chốt 2026-08-14) đúng ngay ở tầng điều phối, "
+              "không chỉ ở `sanity_warns()` gọi trực tiếp (đó là điều MG2 đã kiểm)",
+              snap.get("tickers", {}).get("MAG", {}).get("value") == 3001.0,
+              str(snap.get("tickers", {}).get("MAG")))
+        check("R3. bản ghi MAG mang `sanity_warn` gắn TẠI CHỖ, đúng số dòng quý (1.000) — cờ đến "
+              "từ ĐÚNG phép so trong `run()`, không phải một dict test tự bịa",
+              snap.get("tickers", {}).get("MAG", {}).get("sanity_warn", {}).get("quarterly")
+              == 1000.0, str(snap.get("tickers", {}).get("MAG", {}).get("sanity_warn")))
+        check("R4. snapshot cấp cao có `magnitude_suspect == ['MAG']` — ĐÂY LÀ DÂY NỐI "
+              "quant-skeptic đòi kiểm: gỡ `sanity_warns*()` khỏi thân `run()` sẽ làm field này "
+              "rỗng dù mọi ca MG* (sanity_flag/sanity_warns gọi trực tiếp) vẫn xanh 100% — xem R8",
+              snap.get("magnitude_suspect") == ["MAG"], str(snap.get("magnitude_suspect")))
+        check("R5. mã đó tách riêng vào `magnitude_suspect_held` (đang giữ thật, không phải mã "
+              "lịch sử) — đúng nhánh MG10 đã kiểm ở tầng `_fmt_magnitude`, nay kiểm ở tầng `run()`",
+              snap.get("magnitude_suspect_held") == ["MAG"],
+              str(snap.get("magnitude_suspect_held")))
+        check("R6. dòng 📏 THẬT SỰ nằm trong nội dung `run()` IN RA khi `--no-alert` (đường "
+              "`[dry] tin nhắn SẼ gửi` dùng CHUNG list `lines` với đường gửi Discord thật khi "
+              "`alert=True`) — bằng chứng người đọc Discord thấy đúng cảnh báo, không chỉ dict",
+              "📏" in out and "MAG" in out, out[-400:])
+        check("R7. KHÔNG có dòng 🚨 THẬT (bất biến bị giấu — tiêu đề '🚨 **Bất biến số CP vi "
+              "phạm**') hay `value_withheld` bị trộn vào ca này — cờ này phải đến từ lớp 4c "
+              "(WARN), không phải lớp 4 (SUPPRESS). Không đếm bằng ký tự 🚨 trần: dòng 📏 CỐ Ý "
+              "nhắc tới 🚨 trong văn bản đối chiếu của chính nó (xem MG9b/MG11)",
+              "🚨 **Bất biến số CP vi phạm**" not in out
+              and snap.get("invariant_violations") == []
+              and "value_withheld" not in snap.get("tickers", {}).get("MAG", {}),
+              out[-400:])
+
+        check("R12. run() gọi `oshares_at(..., live=True)` ở MỌI điểm gọi — nhánh PHỤC VỤ, không "
+              "phải nhánh PIT. Một điểm gọi sót `live=True` sẽ làm `check_retro`/`crosscheck` so "
+              "số của HAI chính sách khác nhau và báo lệch giả mỗi ngày (§28); ca này là thứ duy "
+              "nhất bắt được kiểu sót đó vì mọi số trong fixture đều do double sinh ra",
+              bool(live_flags) and all(f is True for f in live_flags),
+              f"{len(live_flags)} điểm gọi, live={live_flags}")
+
+        # ── R8: MUTANT — gỡ CẢ HAI hàm phát cảnh báo biên độ (`sanity_warns`,
+        # `sanity_warns_from_crosscheck`) khỏi những gì `run()` gọi được, input Y HỆT ca trên.
+        # Mô phỏng đúng kiểu lỗi quant-skeptic mô tả: dây nối trong `run()` bị cắt mà bản thân
+        # `sanity_flag`/`sanity_warns` (đã kiểm ở MG1-MG16) không đổi một chữ.
+        cad.sanity_warns = lambda *a, **k: []
+        cad.sanity_warns_from_crosscheck = lambda *a, **k: []
+        with tempfile.TemporaryDirectory() as tmp2:
+            _, snap_mut, out_mut = _run_hermetic(tmp2)
+        check("R8. MUTANT PROOF — input Y HỆT ca PASS ở trên, chỉ cắt dây `sanity_warns*()` khỏi "
+              "`run()` ⇒ `magnitude_suspect` RỖNG và không còn 📏 trong tin nhắn. Chứng minh "
+              "R4/R6 KHÔNG PASS vì cổng chết sẵn — test này THẬT SỰ bắt được kiểu gỡ dây nối mà "
+              "0/178 ca cũ bắt được",
+              snap_mut.get("magnitude_suspect") == [] and "📏" not in out_mut,
+              f"magnitude_suspect={snap_mut.get('magnitude_suspect')!r} 📏 in out={'📏' in out_mut}")
+    finally:
+        for n, v in keep.items():
+            setattr(cad, n, v)
+
+
 # ─────────────────────────────────────── lịch trigger + LỚP 6 · cảnh báo proactive
 
 def t_triggers_and_alerts():
@@ -1068,12 +1303,12 @@ def t_missed_runs():
     check("M2. (ca a) T2 sau snapshot T6 ⇒ 0 phiên lỡ dù cách 3 NGÀY LỊCH — đếm bằng số ngày "
           "lịch sẽ báo động giả mỗi sáng thứ Hai",
           md("2026-08-14", "2026-08-17") == [], str(md("2026-08-14", "2026-08-17")))
-    check("M3. (ca a) qua NGÀY LỄ (02/09) cũng 0 phiên lỡ — lịch lễ dùng chung "
-          "`trading_bot.vn_market`, không tự khai bản thứ hai",
-          md("2026-09-01", "2026-09-03") == [], str(md("2026-09-01", "2026-09-03")))
-    check("M4. CHỨNG MINH NGƯỢC cho M3: cùng khoảng đó nhưng lùi mốc thêm 1 phiên thì 09-01 PHẢI "
-          "hiện ra (cổng không phải lúc nào cũng trả rỗng)",
-          md("2026-08-31", "2026-09-03") == ["2026-09-01"], str(md("2026-08-31", "2026-09-03")))
+    check("M3. (ca a) qua kỳ nghỉ bù Quốc khánh (31/08–02/09, DNSE 25/08/2026) cũng 0 phiên lỡ "
+          "— lịch lễ dùng chung `trading_bot.vn_market`, không tự khai bản thứ hai",
+          md("2026-08-28", "2026-09-03") == [], str(md("2026-08-28", "2026-09-03")))
+    check("M4. CHỨNG MINH NGƯỢC cho M3: cùng mốc kết thúc nhưng lùi mốc bắt đầu thêm 1 phiên "
+          "thì 08-28 PHẢI hiện ra (cổng không phải lúc nào cũng trả rỗng)",
+          md("2026-08-27", "2026-09-03") == ["2026-08-28"], str(md("2026-08-27", "2026-09-03")))
 
     # ── (b) lỡ đúng 1 phiên
     check("M5. (ca b) lỡ đúng 1 phiên ⇒ đúng 1 ngày", md("2026-08-11", "2026-08-13")
@@ -1453,6 +1688,7 @@ def main():
     t_render_divergence()
     t_none_value_watch()
     t_magnitude_gate()
+    t_run_level_wiring()
     t_triggers_and_alerts()
     t_query_shape()
     t_confirm_unique_key()

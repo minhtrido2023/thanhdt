@@ -1,0 +1,3566 @@
+[
+{
+"file": "/home/trido/thanhdt/WorkingClaude/bot_execute.py",
+"line": 663,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "",
+"code": "icon = {\"LIVE_PREFLIGHT_OK\": \"🔎\", \"LIVE_PREFLIGHT_STRIP\": \"⛔\",",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/bot_execute.py",
+"line": 661,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "offbook_vnd=p.get(\"manual_offbook_assets_vnd\") or 0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/capit_episode.py",
+"line": 128,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "out",
+"code": "out[(tk, side)] = out.get((tk, side), 0) + int(o.get(\"qty\") or 0)",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/capit_episode.py",
+"line": 152,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "tot += int(o.get(\"fillQuantity\") or 0)",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/capit_episode.py",
+"line": 128,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "out[(tk, side)] = out.get((tk, side), 0) + int(o.get(\"qty\") or 0)",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/capit_episode.py",
+"line": 175,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "qty",
+"code": "qty[sym] = qty.get(sym, 0) + int(q or 0)",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/capit_episode.py",
+"line": 224,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "qmap",
+"code": "rem = {t: int(qmap.get(t, 0)) for t in sorted(basket) if int(qmap.get(t, 0)) > 0}",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/capit_episode.py",
+"line": 243,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "if (not signal_today) and (ep.get(\"sessions_held\") or 0) >= NO_DEPLOY_CLOSE_SESSIONS:",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/capit_episode.py",
+"line": 199,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "p_acc",
+"code": "p_acc[tk] = p_acc.get(tk, 0) + sgn * q",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/capit_episode.py",
+"line": 174,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "q = int(it.get(\"accumulateQuantity\") or 0) - int(it.get(\"closedQuantity\") or 0)",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/capit_episode.py",
+"line": 174,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "q = int(it.get(\"accumulateQuantity\") or 0) - int(it.get(\"closedQuantity\") or 0)",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/capit_episode.py",
+"line": 202,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "f_acc",
+"code": "f_acc[tk] = f_acc.get(tk, 0) + sgn * fq",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/capit_episode.py",
+"line": 224,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "qmap",
+"code": "rem = {t: int(qmap.get(t, 0)) for t in sorted(basket) if int(qmap.get(t, 0)) > 0}",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/dc_book_waterfall_paper.py",
+"line": 667,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "detail",
+"code": "\"dc_weight_each\": detail.get(\"dc_weight_each\", 0.0),",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/dc_book_waterfall_paper.py",
+"line": 669,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "detail",
+"code": "\"dc_leg\": detail.get(\"dc_leg\", 0.0),",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/dc_book_waterfall_paper.py",
+"line": 670,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "detail",
+"code": "\"c30v_weight\": detail.get(\"park_leg\", 0.0),",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/dc_book_waterfall_paper.py",
+"line": 673,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "detail",
+"code": "\"cap_residual\": detail.get(\"cap_residual\", 0.0),",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/dc_book_waterfall_paper.py",
+"line": 821,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "last",
+"code": "regime = last.get(\"state_name\", \"?\")",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/dc_book_waterfall_paper.py",
+"line": 874,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "st",
+"code": "nav = st.get(\"nav_vnd\", 0)",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/dc_book_waterfall_paper.py",
+"line": 876,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "st",
+"code": "cum = st.get(\"cum_pnl_pct\", 0.0)",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/dc_book_waterfall_paper.py",
+"line": 379,
+"kind": "GET_DEFAULT",
+"fromfilevar": true,
+"root": "s",
+"code": "name = str(s.get(\"state_name\", \"?\"))",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/dc_book_waterfall_paper.py",
+"line": 383,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "n_bal = int(s.get(\"n_bal\", 0) or 0)",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/dc_book_waterfall_paper.py",
+"line": 384,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "n_lag_up = int(s.get(\"n_lag_upcoming\", 0) or 0)",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/dc_book_waterfall_paper.py",
+"line": 493,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "prof",
+"code": "return float(prof[\"cfg\"].get(\"paper_init_cash\", 1_000_000_000))",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/dc_book_waterfall_paper.py",
+"line": 717,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "row",
+"code": "f\"{row.get('dc_leg',0)},{row['c30v_weight']},\"",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/dc_book_waterfall_paper.py",
+"line": 718,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "row",
+"code": "f\"{row['cash_weight']},{row.get('turnover',0)},{row['sleeve_ret_pct']},{row['nav_vnd']},\"",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/dc_book_waterfall_paper.py",
+"line": 212,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "row",
+"code": "head = {t: cap - row.get(t, 0.0) for t in basket_members if cap - row.get(t, 0.0) > 1e-12}",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/dc_book_waterfall_paper.py",
+"line": 220,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "row",
+"code": "row[t] = row.get(t, 0.0) + add",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/dc_book_waterfall_paper.py",
+"line": 277,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "base",
+"code": "base[t] = base.get(t, 0.0) + park_frac * (w / bk_tot)",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/dc_book_waterfall_paper.py",
+"line": 342,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "target_w",
+"code": "d = round(target_w.get(t, 0.0) - prev_w.get(t, 0.0), 10)",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/dc_book_waterfall_paper.py",
+"line": 342,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "prev_w",
+"code": "d = round(target_w.get(t, 0.0) - prev_w.get(t, 0.0), 10)",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/dc_book_waterfall_paper.py",
+"line": 383,
+"kind": "GET_DEFAULT",
+"fromfilevar": true,
+"root": "s",
+"code": "n_bal = int(s.get(\"n_bal\", 0) or 0)",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/dc_book_waterfall_paper.py",
+"line": 384,
+"kind": "GET_DEFAULT",
+"fromfilevar": true,
+"root": "s",
+"code": "n_lag_up = int(s.get(\"n_lag_upcoming\", 0) or 0)",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/dc_book_waterfall_paper.py",
+"line": 402,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "out[str(row[\"ticker\"])] = row[\"buy_mode\"] or \"ACCUMULATE\"",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/dc_book_waterfall_paper.py",
+"line": 812,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "last",
+"code": "f\"| as-of {last.get('date','?')}*\")",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/dc_book_waterfall_paper.py",
+"line": 880,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "last",
+"code": "f\"| ret hôm nay {last.get('sleeve_ret_pct',0):+.3f}% (sau TC {last.get('tc_pct',0):.3f}%)\")",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/dc_book_waterfall_paper.py",
+"line": 880,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "last",
+"code": "f\"| ret hôm nay {last.get('sleeve_ret_pct',0):+.3f}% (sau TC {last.get('tc_pct',0):.3f}%)\")",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/dc_book_waterfall_paper.py",
+"line": 212,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "row",
+"code": "head = {t: cap - row.get(t, 0.0) for t in basket_members if cap - row.get(t, 0.0) > 1e-12}",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/dc_book_waterfall_paper.py",
+"line": 365,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "target_w",
+"code": "return 0.5 * sum(abs(target_w.get(t, 0.0) - prev_w.get(t, 0.0)) for t in names)",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/dc_book_waterfall_paper.py",
+"line": 365,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "prev_w",
+"code": "return 0.5 * sum(abs(target_w.get(t, 0.0) - prev_w.get(t, 0.0)) for t in names)",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/dc_book_waterfall_paper.py",
+"line": 843,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "last",
+"code": "f\"(leg {last.get('dc_leg',0)*100:.1f}%) \"",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/dc_book_waterfall_paper.py",
+"line": 844,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "last",
+"code": "f\"| custom30V {last.get('c30v_weight',0)*100:.1f}% \"",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/dc_book_waterfall_paper.py",
+"line": 845,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "last",
+"code": "f\"| cash {last.get('cash_weight',0)*100:.1f}%\")",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/dc_book_waterfall_paper.py",
+"line": 851,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "last",
+"code": "if last.get(\"cap_residual\", 0) > 1e-9 else \"\"))",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/dc_book_waterfall_paper.py",
+"line": 839,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "dcw_map",
+"code": "names_str = \", \".join(f\"{t} {dcw_map.get(t, 0)*100:.1f}%\" for t in dc)",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/dcf_valuation.py",
+"line": 96,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "os",
+"code": "DEFAULT_TERM_MODE = os.environ.get(\"DCF_TERMINAL_MODE\", \"cap_rf\")",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/dcf_valuation.py",
+"line": 436,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "res",
+"code": "fr = res.get(\"g_terminal_frac_real\", 0.0)",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/dcf_valuation.py",
+"line": 471,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "res",
+"code": "reason = res.get(\"reason\", \"unknown\")",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/dcf_valuation.py",
+"line": 438,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "res",
+"code": "f\"terminal g = {res['g_terminal']:.2%} [{res.get('term_mode','cpi')}] \"",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/dcf_valuation.py",
+"line": 519,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "label = _NC_LABEL.get(d.get(\"reason\", \"\"), (d.get(\"reason\") or \"unknown\")[:40])",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/deploy_golive_dt5g_v4/golive_recommend_v23.py",
+"line": 1087,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "ETF_PARK",
+"code": "etf_frac = ETF_PARK.get(state_today, 0.0)",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/deploy_golive_dt5g_v4/golive_recommend_v23.py",
+"line": 318,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "STATE_LAG_WEIGHT",
+"code": "return STATE_LAG_WEIGHT.get(int(state), 0.5)",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/deploy_golive_dt5g_v4/golive_recommend_v23.py",
+"line": 477,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "why = \" | \".join(reasons) or \"không rõ\"",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/deploy_golive_dt5g_v4/golive_recommend_v23.py",
+"line": 1175,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "SNAME",
+"code": "\"state_name\": SNAME.get(state_today, \"?\"), \"source\": prov.get(\"source\"),",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/deploy_golive_dt5g_v4/golive_recommend_v23.py",
+"line": 667,
+"kind": "GET_DEFAULT",
+"fromfilevar": true,
+"root": "prov",
+"code": "state_today = int(sig.loc[sig[\"time\"] == LATEST, \"state5\"].dropna().iloc[0]) if (sig[\"time\"] == LATEST).any() else int(prov.get(\"state\", 3))",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/deploy_golive_dt5g_v4/golive_recommend_v23.py",
+"line": 467,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "why = \" | \".join(reasons) or \"không rõ (không có lý do nào được ghi)\"",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/deploy_golive_dt5g_v4/golive_recommend_v23.py",
+"line": 694,
+"kind": "FILLNA",
+"fromfilevar": null,
+"root": "",
+"code": "d1m = (d1[\"adv_yoy\"].notna() & (d1[\"adv_yoy\"] > 0.5) & d1[\"fa_tier\"].isin([\"C\", \"D\"]) & d1[\"state5\"].isin([3,4,5]) & ((d1[\"np_yoy\"].fillna(-99) > 0) | (d1[\"rev_yoy\"].fillna(-99) > 0)))",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/deploy_golive_dt5g_v4/golive_recommend_v23.py",
+"line": 694,
+"kind": "FILLNA",
+"fromfilevar": null,
+"root": "",
+"code": "d1m = (d1[\"adv_yoy\"].notna() & (d1[\"adv_yoy\"] > 0.5) & d1[\"fa_tier\"].isin([\"C\", \"D\"]) & d1[\"state5\"].isin([3,4,5]) & ((d1[\"np_yoy\"].fillna(-99) > 0) | (d1[\"rev_yoy\"].fillna(-99) > 0)))",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/deploy_golive_dt5g_v4/golive_recommend_v23.py",
+"line": 731,
+"kind": "FILLNA",
+"fromfilevar": null,
+"root": "",
+"code": "today[\"weak\"] = today[\"rating8l\"].fillna(0).astype(float) >= 4",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/deploy_golive_dt5g_v4/golive_recommend_v23.py",
+"line": 1274,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "SNAME",
+"code": "L.append(f\"- **Market state (gated):** {state_today} = **{SNAME.get(state_today,'?')}**  (source: {prov.get('source','?')})\")",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/deploy_golive_dt5g_v4/golive_recommend_v23.py",
+"line": 1274,
+"kind": "GET_DEFAULT",
+"fromfilevar": true,
+"root": "prov",
+"code": "L.append(f\"- **Market state (gated):** {state_today} = **{SNAME.get(state_today,'?')}**  (source: {prov.get('source','?')})\")",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/deploy_golive_dt5g_v4/golive_recommend_v23.py",
+"line": 560,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "\"f\": float(blk.get(\"f\") or 0),",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/deploy_golive_dt5g_v4/golive_recommend_v23.py",
+"line": 641,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "SNAME",
+"code": "print(f\"  state source: {prov.get('source')} | as_of {prov.get('as_of')} | state {prov.get('state')} ({SNAME.get(prov.get('state'),'?')})\")",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/deploy_golive_dt5g_v4/golive_recommend_v23.py",
+"line": 1269,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "f\"`{anomaly_fresh['generated_at'] or 'thiếu'}` — {anomaly_fresh['reason']}). Gate \"",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/deploy_golive_dt5g_v4/golive_recommend_v23.py",
+"line": 1438,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "SNAME",
+"code": "print(f\"\\n  state={state_today}({SNAME.get(state_today,'?')})  w_LAG tgt={w_tgt*100:.0f}%\" +",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/deploy_golive_dt5g_v4/golive_recommend_v23.py",
+"line": 1396,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "f\"(NAV {nav.get('nav') or 0:,.0f}đ, {nav.get('source')}): \"",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/deploy_golive_dt5g_v4/golive_recommend_v23.py",
+"line": 745,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "+ \", \".join(f\"{d['ticker']} ({(d['adv_vnd'] or 0)/1e9:.2f} tỷ)\" for d in bal_liq_dropped))",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/dna_card.py",
+"line": 20,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "os",
+"code": "W=os.environ.get(\"WORKDIR_8L\", r\"/home/trido/thanhdt/WorkingClaude\")",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/dna_report.py",
+"line": 24,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "os",
+"code": "W = os.environ.get(\"WORKDIR_8L\", r\"/home/trido/thanhdt/WorkingClaude\")",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/dna_report.py",
+"line": 203,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "",
+"code": "conc_s = {1: \"conc=1 megacap-led\", 0: \"conc=0 broad\"}.get(c[\"conc\"], \"conc=?\")",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/dna_report.py",
+"line": 100,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "STATE_WEIGHT",
+"code": "reserve = max(0.0, 1.0 - STATE_WEIGHT.get(st, 0.70))",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/dna_report.py",
+"line": 503,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "cap",
+"code": "res = f\"reserve {cap.get('reserve',0)*100:.0f}% (1−tỉ trọng {nm})\"",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/dna_report.py",
+"line": 644,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "cap",
+"code": "L.append(f\"Panic  : 🔴 <b>WASHOUT CỰC ĐOAN</b> (oversold {cap['oversold']*100:.0f}%) — MUA-KHI-SỢ, đáy ~3 phiên · bơm reserve {cap.get('reserve',0)*100:.0f}%\")",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/dnse_api.py",
+"line": 330,
+"kind": "GET_DEFAULT",
+"fromfilevar": true,
+"root": "d",
+"code": "if d.get(\"token_expiry\", 0) > time.time():",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/dt5g_freshness.py",
+"line": 39,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "os",
+"code": "WORKDIR = os.environ.get(\"WORKDIR_8L\", \"/home/trido/thanhdt/WorkingClaude\")",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/edge_health_monitor.py",
+"line": 407,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "return \", \".join(f\"{r['signal']}·{r['scope']}({r['full']:+.3f}→{r['recent']:+.3f})\" for r in rs) or \"—\"",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/macro_healthcheck.py",
+"line": 378,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "os",
+"code": "ping = os.environ.get(\"MACRO_HEALTH_PING\", \"0\") == \"1\"",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/macro_state_live.py",
+"line": 358,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "os",
+"code": "start = os.environ.get(\"START_DATE\", \"2026-01-01\"); end = os.environ.get(\"END_DATE\", \"2026-05-26\")",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/macro_state_live.py",
+"line": 358,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "os",
+"code": "start = os.environ.get(\"START_DATE\", \"2026-01-01\"); end = os.environ.get(\"END_DATE\", \"2026-05-26\")",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/macro_state_live.py",
+"line": 197,
+"kind": "FILLNA",
+"fromfilevar": null,
+"root": "",
+"code": "decoup = ((df[\"univ\"].fillna(0) >= P[\"breadth_min_univ\"]) & (df[\"b200\"] >= P[\"breadth_th\"])).shift(1).fillna(False)",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/account_cash_flows.py",
+"line": 135,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "rec",
+"code": "timing = rec.get(\"timing\", \"bod\")",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/compute_active_nav.py",
+"line": 241,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "egg_value = float((bal.get(\"egg\") or {}).get(\"totalValue\") or 0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/compute_active_nav.py",
+"line": 403,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "offbook = float(profile.get(\"manual_offbook_assets_vnd\") or 0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/compute_active_nav.py",
+"line": 521,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "pos",
+"code": "qty = pos.get(\"total\", 0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/compute_active_nav.py",
+"line": 597,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "div_recv_remaining = (cash_detail.get(\"cash_dividend_receiving_vnd\") or 0) - excluded_div_pending_vnd",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/compute_active_nav.py",
+"line": 205,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "amt = float(ent.get(\"amount_vnd\") or 0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/compute_active_nav.py",
+"line": 637,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "fd, tmp = tempfile.mkstemp(dir=os.path.dirname(out_path) or \".\",",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/compute_active_nav.py",
+"line": 339,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "return float(json.load(f).get(\"total_stock_value\") or 0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/compute_active_nav.py",
+"line": 566,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "print(f\"  · availableCash:        {(cash_detail['cash_available_vnd'] or 0):>16,.0f}  \"",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/compute_active_nav.py",
+"line": 569,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "print(f\"  trong đó excluded:      {excluded_mv:>16,.0f}  ({', '.join(sorted(excluded)) or '(none)'})\")",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/compute_active_nav.py",
+"line": 631,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "price_source",
+"code": "\"price_source\": price_source.get(tk, \"?\")}",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/compute_active_nav.py",
+"line": 576,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "f\"{d['expected_arrival_date'] or '(chưa khai)'}{flag}\")",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/compute_jit_unpark.py",
+"line": 415,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "egg0 = float(h.get(\"egg_assets_vnd\") or 0.0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/compute_jit_unpark.py",
+"line": 653,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "_egg = r.get(\"egg_assets_vnd\") or 0",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/compute_jit_unpark.py",
+"line": 230,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "px = float(d[\"px\"] or 0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/compute_jit_unpark.py",
+"line": 358,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "\"egg_assets_vnd\": float(h.get(\"egg_assets_vnd\") or 0.0),",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/compute_jit_unpark.py",
+"line": 416,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "cash = float(h[\"cash_available_vnd\"] or 0) + egg0",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/compute_jit_unpark.py",
+"line": 467,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "qty0 = int(o.get(\"qty\") or 0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/compute_jit_unpark.py",
+"line": 495,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "mv_pool = sum(x[\"mv\"] for x in pool.values()) or 1.0",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/compute_jit_unpark.py",
+"line": 259,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "used",
+"code": "cap_i = LAG_ADV_PCT * adv * share - float(used.get(\"value_vnd\", 0.0))",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/compute_jit_unpark.py",
+"line": 261,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "used",
+"code": "avail_qty = min(int(d[\"qty\"]), sellable) - int(used.get(\"qty\", 0))",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/compute_jit_unpark.py",
+"line": 434,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "v = float(o.get(\"value_vnd\") or 0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/compute_jit_unpark.py",
+"line": 437,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "d[\"qty\"] += int(o.get(\"qty\") or 0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/compute_jit_unpark.py",
+"line": 513,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "sells",
+"code": "sells[tk] = sells.get(tk, 0) + q",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/compute_jit_unpark.py",
+"line": 657,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "r",
+"code": "f\"| {r.get('n_buy_orders_bal_lag', 0)} lệnh mua BAL/LAG\")",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/compute_jit_unpark.py",
+"line": 665,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "m",
+"code": "f\"{m.get('qty_plan', 0):>7,}cp → {m.get('qty_final', 0):>7,}cp   \"",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/compute_jit_unpark.py",
+"line": 665,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "m",
+"code": "f\"{m.get('qty_plan', 0):>7,}cp → {m.get('qty_final', 0):>7,}cp   \"",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/compute_jit_unpark.py",
+"line": 655,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "f\"{(r.get('cash_available_vnd') or 0)/1e6:,.2f}tr + Trứng vàng {_egg/1e6:,.2f}tr) \"",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/compute_jit_unpark.py",
+"line": 666,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "m",
+"code": "f\"bán PARK {m.get('jit_sell_vnd', 0)/1e6:>7,.2f}tr\")",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/compute_park_trim.py",
+"line": 484,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "egg = float(h.get(\"egg_assets_vnd\") or 0.0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/compute_park_trim.py",
+"line": 740,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "out",
+"code": "w_t = out[\"target_weights\"].get(tk, 0.0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/compute_park_trim.py",
+"line": 810,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "_debt = r.get(\"cash_debt_vnd\") or 0",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/compute_park_trim.py",
+"line": 811,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "_egg = r.get(\"egg_assets_vnd\") or 0",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/compute_park_trim.py",
+"line": 812,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "_excl_div = r.get(\"excluded_dividend_receivable_pending_vnd\") or 0",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/compute_park_trim.py",
+"line": 471,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "if float(h[\"cash_total_vnd\"]) < float(h.get(\"cash_available_vnd\") or 0):",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/compute_park_trim.py",
+"line": 519,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "account_total_recv = float(h.get(\"cash_dividend_receiving_vnd\") or 0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/compute_park_trim.py",
+"line": 809,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "- (r.get(\"cash_dividend_receiving_vnd\") or 0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/compute_park_trim.py",
+"line": 460,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "and float(h.get(\"cash_available_vnd\") or 0) == 0):",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/compute_park_trim.py",
+"line": 670,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "tgt",
+"code": "want_raw = {tk: max(0.0, d[\"mv\"] - tgt.get(tk, 0.0)) for tk, d in tradable.items()}",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/compute_park_trim.py",
+"line": 745,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "tgt",
+"code": "\"mv_vnd\": d[\"mv\"], \"target_vnd\": tgt.get(tk, 0.0),",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/compute_park_trim.py",
+"line": 808,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "_unset = (r[\"cash_total_vnd\"] or 0) - (r[\"cash_available_vnd\"] or 0) \\",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/compute_park_trim.py",
+"line": 808,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "_unset = (r[\"cash_total_vnd\"] or 0) - (r[\"cash_available_vnd\"] or 0) \\",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/compute_park_trim.py",
+"line": 517,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "excl_div_config_by_tk",
+"code": "excl_div_config_by_tk.get(ent[\"ticker\"], 0.0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/compute_park_trim.py",
+"line": 690,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "tgt",
+"code": "{\"ticker\": tk, \"mv_vnd\": d[\"mv\"], \"target_vnd\": tgt.get(tk, 0.0),",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/compute_park_trim.py",
+"line": 475,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "f\"{float(h.get('cash_available_vnd') or 0):,.0f}đ — vi phạm bất biến kế toán \"",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/compute_park_trim.py",
+"line": 518,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "+ float(ent.get(\"amount_vnd\") or 0))",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/compute_park_trim.py",
+"line": 691,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "tgt",
+"code": "\"gap_vnd\": tgt.get(tk, 0.0) - d[\"mv\"]})",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/compute_park_trim.py",
+"line": 814,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "f\"(totalCash: settled {(r['cash_available_vnd'] or 0)/1e6:,.2f} + bán chưa settle \"",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/compute_park_trim.py",
+"line": 815,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "f\"{_unset/1e6:,.2f} + cổ tức chờ {(r.get('cash_dividend_receiving_vnd') or 0)/1e6:,.2f} \"",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/compute_park_trim.py",
+"line": 824,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "r",
+"code": "f\"{r.get('basket_feasible_n', '?')}/{r.get('basket_n')} mã khả thi\"",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/compute_park_trim.py",
+"line": 845,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "r",
+"code": "if r.get(\"underpark_after_vnd\", 0) > 0 else \"\"))",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/compute_park_trim.py",
+"line": 813,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "print(f\"  pool = cash {((r['cash_total_vnd'] or 0) - _debt - _excl_div)/1e6:,.2f}tr \"",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/compute_park_trim.py",
+"line": 826,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "r",
+"code": "f\"(Σ {r.get('basket_dropped_weight', 0)*100:.2f}% trọng số)\"",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/compute_park_trim.py",
+"line": 750,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "tgt",
+"code": "f\"{tgt.get(tk, 0.0)/1e6:,.1f}tr \"",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/daily_nav_snapshot.py",
+"line": 720,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "cur_cd = float((cur_bal.get(\"payload\", {}).get(\"stock\") or {}).get(\"cashDividendReceiving\") or 0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/daily_nav_snapshot.py",
+"line": 727,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "prev_cd = float((prev_bal.get(\"payload\", {}).get(\"stock\") or {}).get(\"cashDividendReceiving\") or 0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/daily_nav_snapshot.py",
+"line": 972,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "offbook = float((_match or {}).get(\"manual_offbook_assets_vnd\") or 0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/daily_nav_snapshot.py",
+"line": 1117,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "egg_value = float((bal.get(\"payload\", {}).get(\"egg\") or {}).get(\"totalValue\") or 0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/daily_nav_snapshot.py",
+"line": 211,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "qty = float(p.get(\"openQuantity\") or 0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/daily_nav_snapshot.py",
+"line": 401,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "out",
+"code": "out[tk] = out.get(tk, 0.0) + (qty if side == \"buy\" else -qty)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/daily_nav_snapshot.py",
+"line": 868,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "comp",
+"code": "return (f\"mtm_stock {comp.get('mtm_stock', 0):,.0f}, cash {comp.get('cash', 0):,.0f}, \"",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/daily_nav_snapshot.py",
+"line": 868,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "comp",
+"code": "return (f\"mtm_stock {comp.get('mtm_stock', 0):,.0f}, cash {comp.get('cash', 0):,.0f}, \"",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/daily_nav_snapshot.py",
+"line": 869,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "comp",
+"code": "f\"debt {comp.get('debt', 0):,.0f}, egg {comp.get('egg', 0):,.0f}, \"",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/daily_nav_snapshot.py",
+"line": 869,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "comp",
+"code": "f\"debt {comp.get('debt', 0):,.0f}, egg {comp.get('egg', 0):,.0f}, \"",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/daily_nav_snapshot.py",
+"line": 870,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "comp",
+"code": "f\"offbook {comp.get('offbook', 0):,.0f}\")",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/daily_nav_snapshot.py",
+"line": 607,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "p",
+"code": "for sym, p in pos.items() if p.get(\"total\", 0) > 0}",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/daily_nav_snapshot.py",
+"line": 771,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "return float(v.get(\"qty\") or 0) if isinstance(v, dict) else float(v or 0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/daily_nav_snapshot.py",
+"line": 181,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "latest_by_child[child_oid] = (ts, float(row.get(\"qty\") or 0),",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/daily_nav_snapshot.py",
+"line": 182,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "float(row.get(\"price\") or 0))",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/daily_nav_snapshot.py",
+"line": 772,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "positions",
+"code": "res[\"expected_bq\"] = sum(_qty(positions.get(a.ticker, 0)) * a.per_share for a in pending)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/discretionary_accumulation_inject.py",
+"line": 170,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "total = int((positions.get(ticker) or {}).get(\"total\", 0) or 0)",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/discretionary_accumulation_inject.py",
+"line": 170,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "",
+"code": "total = int((positions.get(ticker) or {}).get(\"total\", 0) or 0)",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/discretionary_accumulation_inject.py",
+"line": 529,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "baseline = int(state.get(\"baseline_qty_before_program\", 0) or 0)",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/discretionary_accumulation_inject.py",
+"line": 529,
+"kind": "GET_DEFAULT",
+"fromfilevar": true,
+"root": "state",
+"code": "baseline = int(state.get(\"baseline_qty_before_program\", 0) or 0)",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/discretionary_candidate_funnel.py",
+"line": 325,
+"kind": "FILLNA",
+"fromfilevar": null,
+"root": "",
+"code": "cohort[\"rating_pass\"] = cohort[\"rating\"].fillna(99) <= RATING_MAX",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/discretionary_candidate_funnel.py",
+"line": 418,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "os.makedirs(os.path.dirname(args.json) or \".\", exist_ok=True)",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/discretionary_candidate_funnel.py",
+"line": 423,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "os.makedirs(os.path.dirname(args.csv) or \".\", exist_ok=True)",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/discretionary_candidate_funnel.py",
+"line": 361,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "meta",
+"code": "f\"universe_pit: {meta.get('n_universe_pit', '?')} mã | \"",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/discretionary_candidate_funnel.py",
+"line": 363,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "meta",
+"code": "f\"{meta.get('n_washout_dd52_cohort', '?')} mã | \"",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/discretionary_candidate_funnel.py",
+"line": 365,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "meta",
+"code": "f\"{meta.get('n_fear_cohort', '?')} mã \"",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/discretionary_candidate_funnel.py",
+"line": 366,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "meta",
+"code": "f\"(abs={meta.get('n_qualify_absolute', '?')}, \"",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/discretionary_candidate_funnel.py",
+"line": 367,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "meta",
+"code": "f\"percentile={meta.get('n_qualify_percentile', '?')})\"]",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/discretionary_candidate_funnel.py",
+"line": 381,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "r",
+"code": "f\"PB={r['pb']:.2f} pct_rank={pct_s} via={r.get('qualify_via', '?')} \"",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/discretionary_candidate_funnel.py",
+"line": 382,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "r",
+"code": "f\"icb={r.get('icb_code', 'NA')} rating={r.get('rating', 'NA')} \"",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/discretionary_candidate_funnel.py",
+"line": 382,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "r",
+"code": "f\"icb={r.get('icb_code', 'NA')} rating={r.get('rating', 'NA')} \"",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/discretionary_candidate_funnel.py",
+"line": 386,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "f\"marginable={marg}({r.get('margin_package_id') or '-'}) \"",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/discretionary_margin_gate.py",
+"line": 475,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "a",
+"code": "mult_now = a.get(\"corp_action_multiplier\", 1.0)",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/discretionary_margin_gate.py",
+"line": 459,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "a",
+"code": "prior_factor = a.get(\"corp_action_multiplier\", 1.0)",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/discretionary_margin_gate.py",
+"line": 532,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "a",
+"code": "f\"{a.get('corp_action_multiplier', 1.0):.6f})\")",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/dividend_adjusted_return.py",
+"line": 143,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "os",
+"code": "\"CLOUDSDK_CONFIG\": os.environ.get(\"CLOUDSDK_CONFIG\",",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/dividend_adjusted_return.py",
+"line": 859,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "est = float(getattr(adj, \"ratio_per_share\", adj.per_share) or 0.0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/dividend_adjusted_return.py",
+"line": 860,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "m = float(getattr(adj, \"share_multiplier\", 1.0) or 1.0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/dividend_adjusted_return.py",
+"line": 861,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "p = float(adj.last_cum_price or 0.0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/dividend_adjusted_return.py",
+"line": 1588,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "",
+"code": "(_pick_ledger_action(_LEDGER_FIXTURE, \"DDD\", \"2026-10-01\") or {})",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/dividend_adjusted_return.py",
+"line": 661,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "return {\"date\": ex_date, \"event_code\": a.get(\"event_type\") or \"ISS\",",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/dividend_adjusted_return.py",
+"line": 1035,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "ref = float(adj.per_share or 0.0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/dividend_adjusted_return.py",
+"line": 1098,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "adj.vendor_cash = float(row.get(\"cash\") or 0.0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/dividend_adjusted_return.py",
+"line": 1099,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "adj.vendor_stock = float(row.get(\"stock\") or 0.0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/dividend_adjusted_return.py",
+"line": 549,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "out",
+"code": "out[ts[:10]] = out.get(ts[:10], 0.0) + (cd - prev_cd)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/dividend_adjusted_return.py",
+"line": 589,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "out",
+"code": "out[key] = out.get(key, 0.0) + float(it.get(\"openQuantity\") or 0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/dividend_adjusted_return.py",
+"line": 763,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "return 1.0 + float(ev.get(\"exercise_ratio\") or 0.0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/dividend_adjusted_return.py",
+"line": 1520,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "check(f\"{key[0]} {key[1]} {lb} KL hưởng quyền\", (got or {}).get(\"entitled\") or -1.0,",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/dividend_adjusted_return.py",
+"line": 541,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "if all((stock.get(k) or 0) == 0 for k in",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/dividend_adjusted_return.py",
+"line": 589,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "out[key] = out.get(key, 0.0) + float(it.get(\"openQuantity\") or 0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/dividend_adjusted_return.py",
+"line": 800,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "if ev and float(ev.get(\"multiplier\") or 1.0) > 1.0:",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/dividend_adjusted_return.py",
+"line": 949,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "deltas",
+"code": "if deltas[lb].get(day, 0) > 0:",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/dividend_adjusted_return.py",
+"line": 943,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "deltas",
+"code": "if deltas[lb].get(day, 0) > 0:",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/merge_park_orders.py",
+"line": 472,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "foreign_sell_qty",
+"code": "other = foreign_sell_qty.get(tk, 0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/merge_park_orders.py",
+"line": 723,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "sell_by_tk",
+"code": "sell_by_tk[tk] = sell_by_tk.get(tk, 0) + max(0, _i(o.get(\"qty\")))",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/merge_park_orders.py",
+"line": 463,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "foreign_sell_qty",
+"code": "foreign_sell_qty[tk] = foreign_sell_qty.get(tk, 0) + max(0, _i(o.get(\"qty\")))",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/merge_park_orders.py",
+"line": 603,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "before_by_tk",
+"code": "before_by_tk[dp[\"ticker\"]] = before_by_tk.get(dp[\"ticker\"], 0) + _i(dp[\"qty\"])",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/merge_park_orders.py",
+"line": 605,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "after_by_tk",
+"code": "lost = {tk: (b, after_by_tk.get(tk, 0)) for tk, b in before_by_tk.items()",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/merge_park_orders.py",
+"line": 606,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "after_by_tk",
+"code": "if after_by_tk.get(tk, 0) < b}",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/report_return_gate.py",
+"line": 425,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "detail = \", \".join(f\"{e['event_code']} {e['exright_date']}\"",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/report_return_gate.py",
+"line": 520,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "detail = \", \".join(f\"{e['event_code']} {e['exright_date']}\" for e in evs) or \"—\"",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/report_return_gate.py",
+"line": 130,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "qty = float(p.get(\"openQuantity\") or 0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/report_return_gate.py",
+"line": 133,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "cp = float(p.get(\"costPrice\") or 0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/report_return_gate.py",
+"line": 237,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "out",
+"code": "out[a.ticker] = out.get(a.ticker, 0.0) + a.cash_per_share",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/report_return_gate.py",
+"line": 593,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "gross",
+"code": "pct, pl, raw = expected_pct(qty, cp, mkt, gross.get(tk, 0.0))",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/report_return_gate.py",
+"line": 599,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "gross",
+"code": "expected[key] = (lb, pct, pl, raw, cp, gross.get(tk, 0.0))",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/report_return_gate.py",
+"line": 218,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "getattr(a, \"vendor_mismatch_reason\", \"\") or \"unknown\",",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/verify_account_snapshot.py",
+"line": 267,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "fq = o.get(\"fillQuantity\") or 0",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/verify_account_snapshot.py",
+"line": 842,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "",
+"code": "broker_qty = (asof_positions or {}).get(tk, {}).get(\"qty\", 0.0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/verify_account_snapshot.py",
+"line": 321,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "qty = float(p.get(\"openQuantity\") or 0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/verify_account_snapshot.py",
+"line": 870,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "price_source",
+"code": "\"mtm_price\": px, \"mtm_price_source\": price_source.get(tk, \"bq_close\"),",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/verify_account_snapshot.py",
+"line": 595,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "entries = [e for e in (sd or []) if isinstance(e, dict) and (e.get(\"basicPrice\") or 0) > 0]",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/verify_account_snapshot.py",
+"line": 373,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "float(row.get(\"qty\") or 0), float(row.get(\"price\") or 0))",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/verify_account_snapshot.py",
+"line": 373,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "float(row.get(\"qty\") or 0), float(row.get(\"price\") or 0))",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/mike/bin/verify_account_snapshot.py",
+"line": 577,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "if e.get(\"boardId\") == \"G1\" and (e.get(\"matchPrice\") or 0) > 0), None)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/pt_v22_dt5g.py",
+"line": 403,
+"kind": "FILLNA",
+"fromfilevar": null,
+"root": "",
+"code": "ev[\"surprise_B_MA\"] = ev[\"surprise_B_MA\"].fillna(0)",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/pt_v22_dt5g.py",
+"line": 80,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "os",
+"code": "BULL_PARK_COND    = os.environ.get(\"BULL_PARK_COND\", \"0\") == \"1\"",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/pt_v22_dt5g.py",
+"line": 81,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "os",
+"code": "BULL_PARK_BREADTH = float(os.environ.get(\"BULL_PARK_BREADTH\", \"0.60\"))",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/pt_v22_dt5g.py",
+"line": 82,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "os",
+"code": "BULL_PARK_FRAC    = float(os.environ.get(\"BULL_PARK_FRAC\", \"0.70\"))",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/pt_v22_dt5g.py",
+"line": 83,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "os",
+"code": "BULL_PARK_EXT_LO  = float(os.environ.get(\"BULL_PARK_EXT_LO\", \"0.10\"))",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/pt_v22_dt5g.py",
+"line": 84,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "os",
+"code": "BULL_PARK_EXT_HI  = float(os.environ.get(\"BULL_PARK_EXT_HI\", \"0.30\"))",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/pt_v22_dt5g.py",
+"line": 423,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "os",
+"code": "_LAG_NONOP = os.environ.get(\"LAG_NONOP_FILTER\", \"0\") == \"1\"",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/pt_v22_dt5g.py",
+"line": 424,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "os",
+"code": "_LAG_FOR   = os.environ.get(\"LAG_FORENSIC_GATE\", \"1\") == \"1\"",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/pt_v22_dt5g.py",
+"line": 519,
+"kind": "FILLNA",
+"fromfilevar": null,
+"root": "",
+"code": "ws[\"g\"] = ws[\"time\"].diff().dt.days.fillna(999)",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/pt_v22_dt5g.py",
+"line": 558,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "os",
+"code": "CAPIT_OVERFLOW_MIN    = int(os.environ.get(\"CAPIT_OVERFLOW_MIN\", \"8\"))    # golden < this -> consider overflow",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/pt_v22_dt5g.py",
+"line": 559,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "os",
+"code": "CAPIT_OVERFLOW_N      = int(os.environ.get(\"CAPIT_OVERFLOW_N\", \"15\"))     # cap total names after overflow",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/pt_v22_dt5g.py",
+"line": 560,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "os",
+"code": "CAPIT_OVERFLOW_DD     = float(os.environ.get(\"CAPIT_OVERFLOW_DD\", \"-20.0\"))  # G1a: VNINDEX dd52w floor (deep)",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/pt_v22_dt5g.py",
+"line": 561,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "os",
+"code": "CAPIT_OVERFLOW_MATURE = os.environ.get(\"CAPIT_OVERFLOW_MATURE\", \"1\") == \"1\"  # G1b: require breadth-broken",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/pt_v22_dt5g.py",
+"line": 816,
+"kind": "FILLNA",
+"fromfilevar": null,
+"root": "",
+"code": "fb = (cap_b / navb_c).replace([np.inf, -np.inf], np.nan).fillna(0.0)",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/pt_v22_dt5g.py",
+"line": 817,
+"kind": "FILLNA",
+"fromfilevar": null,
+"root": "",
+"code": "fl = (cap_l / navl_c).replace([np.inf, -np.inf], np.nan).fillna(0.0)",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/pt_v22_dt5g.py",
+"line": 818,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "STATE_LAG_WEIGHT",
+"code": "_ls = states_c[-1]; _wl = STATE_LAG_WEIGHT.get(_ls, 0.5)",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/pt_v22_dt5g.py",
+"line": 65,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "os",
+"code": "TOTAL_NAV = float(os.environ.get(\"NAV_TOTAL_B\", \"50\")) * 1e9   # current account NAV (env-driven for live)",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/pt_v22_dt5g.py",
+"line": 328,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "os",
+"code": "PARK_VEHICLE = os.environ.get(\"PARK_VEHICLE\", \"custompitg\").lower()",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/pt_v22_dt5g.py",
+"line": 770,
+"kind": "FILLNA",
+"fromfilevar": null,
+"root": "",
+"code": "rb = navb_c.pct_change().fillna(0.0).values",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/pt_v22_dt5g.py",
+"line": 771,
+"kind": "FILLNA",
+"fromfilevar": null,
+"root": "",
+"code": "rl = navl_c.pct_change().fillna(0.0).values",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/pt_v22_dt5g.py",
+"line": 800,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "STATE_LAG_WEIGHT",
+"code": "return STATE_LAG_WEIGHT.get(s, 0.5)   # BEAR=0, CRISIS=0.50",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/pt_v22_dt5g.py",
+"line": 188,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "adv_by_ticker",
+"code": "is_top = adv_by_ticker.get(tk, 0) >= T1_TOP_ADV",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/pt_v22_dt5g.py",
+"line": 265,
+"kind": "FILLNA",
+"fromfilevar": null,
+"root": "",
+"code": "& ((d1[\"np_yoy\"].fillna(-99) > 0) | (d1[\"rev_yoy\"].fillna(-99) > 0)))",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/pt_v22_dt5g.py",
+"line": 265,
+"kind": "FILLNA",
+"fromfilevar": null,
+"root": "",
+"code": "& ((d1[\"np_yoy\"].fillna(-99) > 0) | (d1[\"rev_yoy\"].fillna(-99) > 0)))",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/pt_v22_dt5g.py",
+"line": 693,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "base = dict(_nbase); st = int(state_ff.get(d) or 3)",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/pt_v22_dt5g.py",
+"line": 523,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "state_by_date",
+"code": "st = int(state_ff.get(d0) or state_by_date.get(d0, 3) or 3)",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/pt_v22_dt5g.py",
+"line": 622,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "state_by_date",
+"code": "st = int(state_ff.get(d) or state_by_date.get(d, 3) or 3)",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/pt_v22_dt5g.py",
+"line": 769,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "state_by_date",
+"code": "states_c = [int(state_ff.get(d) or state_by_date.get(d, 3) or 3) for d in common]",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/pt_v22_dt5g.py",
+"line": 894,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "p",
+"code": "\"play_type\": p.get(\"play_type\", \"?\"), \"cash_after\": None,",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/rank_8l.py",
+"line": 22,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "os",
+"code": "WORKDIR=os.environ.get(\"WORKDIR_8L\", r\"/home/trido/thanhdt/WorkingClaude\")",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/rank_8l.py",
+"line": 103,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "",
+"code": "comp[\"L2_engine\"]={\"COMPOUNDER\":22,\"YIELD\":8,\"LOWROIC_GROWTH\":3}.get(eng.split()[0].replace(\"◆\",\"\") if eng and eng!=\"-\" else \"-\",6)",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/rank_8l.py",
+"line": 89,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "",
+"code": "base={\"CHEAP_QUALITY\":25,\"CHEAP_1lens\":12,\"NOT_CHEAP\":2,\"VALUE_TRAP\":-15,\"SPECIAL_SITUATION\":8}.get(v,0)",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/rank_8l.py",
+"line": 124,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "",
+"code": "comp[\"gate\"]={\"CLEAN\":40,\"WATCH\":15,\"AVOID\":-20}.get(gate,0)",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/rank_8l.py",
+"line": 133,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "",
+"code": "comp[\"regime\"]={\"TROUGH_BUY\":45,\"cmdty_CHEAP\":30,\"ELEVATED-SUPPORTED\":18,\"cmdty_MID\":10,",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/rank_8l.py",
+"line": 147,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "",
+"code": "comp[\"regime\"]={\"TREND_DIP_BUY\":40,\"TREND_UP\":28,\"WEAK_FADING\":-5,\"DOWNCYCLE_LOW\":-12,",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/rank_8l.py",
+"line": 158,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "",
+"code": "comp[\"lifecycle\"]={\"PRE_INFLECTION_CHEAP\":45,\"PRE_INFLECTION\":40,\"PRE_INFLECTION_RICH\":25,",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/rank_8l_daily_alert.py",
+"line": 13,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "os",
+"code": "WORKDIR=os.environ.get(\"WORKDIR_8L\", r\"/home/trido/thanhdt/WorkingClaude\")",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/rating_8l.py",
+"line": 44,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "os",
+"code": "WORKDIR = os.environ.get(\"WORKDIR_8L\", r\"/home/trido/thanhdt/WorkingClaude\")",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/rating_8l.py",
+"line": 461,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "os",
+"code": "if os.environ.get(\"OSHARES_RECONCILE\", \"1\") != \"1\":",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/rating_8l.py",
+"line": 736,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "MOAT_TIER",
+"code": "scr[\"moat5f\"] = scr[\"ticker\"].map(lambda t: MOAT_TIER.get(t, \"—\"))   # 5F-audited tier (\"—\" = chưa audit)",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/rating_8l.py",
+"line": 814,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "os",
+"code": "VALUE_VERSION = os.environ.get(\"VALUE_VERSION\", \"v3_div\").lower()",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/rating_8l.py",
+"line": 770,
+"kind": "FILLNA",
+"fromfilevar": null,
+"root": "",
+"code": "+ np.where(scr[\"ROE_Min5Y\"].fillna(-9) > 0.10, 0.03, 0.0))               # strong 5Y ROE floor",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/rating_8l.py",
+"line": 884,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "os",
+"code": "if int(_st) == 3 and os.environ.get(\"DEPOSIT_TILT\", \"1\") == \"1\":          # NEUTRAL only",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/rating_8l.py",
+"line": 857,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "_DIV_W",
+"code": "VR_W = {rt: w + (_DIV_W.get(rt, .00),) for rt, w in VR_W.items()}",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/rating_8l.py",
+"line": 875,
+"kind": "FILLNA",
+"fromfilevar": null,
+"root": "",
+"code": "comp = comp + 0.10*scr[\"golden_cell\"].fillna(0).to_numpy() + _track_bonus    # golden bonus (within-zone ordering) + track",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/rating_8l.py",
+"line": 978,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "f\"ey%{(t.ey_pct or 0)*100:3.0f} cfy%{(0 if pd.isna(t.cfy_pct) else t.cfy_pct)*100:3.0f} \"",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/rating_8l.py",
+"line": 771,
+"kind": "FILLNA",
+"fromfilevar": null,
+"root": "",
+"code": "scr[\"value_score_v2\"] = ((1 - W_ABS) * _rel + W_ABS * scr[\"value_yield_pct\"].fillna(0.5)",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/rating_8l_history.py",
+"line": 72,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "os",
+"code": "WORKDIR = os.environ.get(\"WORKDIR_8L\", r\"/home/trido/thanhdt/WorkingClaude\")",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/sector_lens_monitor.py",
+"line": 48,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "os",
+"code": "ROOT = os.environ.get(\"WORKDIR\", \"/home/trido/thanhdt/WorkingClaude\")",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/sector_lens_monitor.py",
+"line": 472,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "",
+"code": "slbl = {1: \"CRISIS\", 2: \"BEAR\", 3: \"NEUTRAL\", 4: \"BULL\", 5: \"EX-BULL\"}.get(state[\"state\"], \"?\")",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/sector_lens_monitor.py",
+"line": 635,
+"kind": "FILLNA",
+"fromfilevar": null,
+"root": "",
+"code": "df[\"_o\"] = df[\"status\"].map(order).fillna(9)",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/sector_lens_monitor.py",
+"line": 491,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "STATUS_EMO",
+"code": "emo = STATUS_EMO.get(r[\"status\"], \"•\")",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/sector_lens_monitor.py",
+"line": 597,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "prior",
+"code": "held = prior.get(tk, \"UNKNOWN\")",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/sector_lens_monitor.py",
+"line": 526,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "STATUS_EMO",
+"code": "summ = \" · \".join(f\"{STATUS_EMO.get(k,'•')}{k} {v}\" for k, v in",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/brokers.py",
+"line": 1204,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "return _fnum(qget(row, \"ppse\", default=0)) or 0.0",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/brokers.py",
+"line": 432,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "filled = _fnum(qget(o, \"execqtty\", \"matchedqtty\", \"matchqtty\",",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/brokers.py",
+"line": 1101,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "filled = _fnum(qget(o, \"fillquantity\", \"filledquantity\", \"cumqty\",",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/brokers.py",
+"line": 1334,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "filled = _fnum(qget(o, \"execqtty\", \"matchqtty\", default=0)) or 0",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/brokers.py",
+"line": 1556,
+"kind": "GET_DEFAULT",
+"fromfilevar": true,
+"root": "self",
+"code": "have = self.state[\"positions\"].get(o[\"symbol\"], 0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/brokers.py",
+"line": 338,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "total = int(_fnum(qget(p, \"total\", \"totalqtty\", \"qty\", default=0)) or 0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/brokers.py",
+"line": 725,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "total = int(_fnum(qget(p, \"openquantity\", \"quantity\", \"totalquantity\",",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/brokers.py",
+"line": 837,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "\"board_id\": qget(qt, \"boardId\", \"board\", default=\"G1\") or \"G1\",",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/brokers.py",
+"line": 852,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "os",
+"code": "gap = float(os.environ.get(\"DNSE_L2_LOG_SEC\", \"60\"))",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/brokers.py",
+"line": 1236,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "total = int(_fnum(qget(p, \"total\", default=0)) or 0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/brokers.py",
+"line": 1554,
+"kind": "GET_DEFAULT",
+"fromfilevar": true,
+"root": "self",
+"code": "self.state[\"positions\"].get(o[\"symbol\"], 0) + qty",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/brokers.py",
+"line": 1440,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "n += int(e.get(\"qty\") or 0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/brokers.py",
+"line": 313,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "f\"{self.credentials_file or 'secrets/phs_credentials.json'}\")",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/brokers.py",
+"line": 1241,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "receivable = sum(int(_fnum(qget(p, k, default=0)) or 0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/discretionary_accumulation.py",
+"line": 192,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "state",
+"code": "lot = state.get(\"lot_size\", 0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/discretionary_accumulation.py",
+"line": 408,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "state",
+"code": "status = state.get(\"status\", \"active\")",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/discretionary_accumulation.py",
+"line": 126,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "lot = int(state.get(\"lot_size\", 0) or 0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/discretionary_accumulation.py",
+"line": 491,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "opp",
+"code": "k = float(opp.get(\"k\", 2.0))",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/discretionary_accumulation.py",
+"line": 492,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "opp",
+"code": "m = float(opp.get(\"m\", 2.0))",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/discretionary_accumulation.py",
+"line": 574,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "state",
+"code": "\"ref_price_source\": state.get(\"ref_price_source\",",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/discretionary_accumulation.py",
+"line": 597,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "state",
+"code": "\"hold_horizon\": state.get(\"hold_horizon\",",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/discretionary_accumulation.py",
+"line": 126,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "state",
+"code": "lot = int(state.get(\"lot_size\", 0) or 0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/discretionary_accumulation.py",
+"line": 180,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "state",
+"code": "if state.get(\"target_qty\", 0) <= 0:",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/discretionary_accumulation.py",
+"line": 592,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "state",
+"code": "\"priority\": int(state.get(\"priority\", 5)),",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/discretionary_accumulation.py",
+"line": 417,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "hx",
+"code": "f\"hard_expiry halted: {hx.get('halted_reason', 'n/a')}\")",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/due_diligence.py",
+"line": 214,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "rec",
+"code": "return (f\"⚠ cờ bất thường {rec.get('tier', '?')} [{rec.get('reasons', '?')}] \"",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/due_diligence.py",
+"line": 214,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "rec",
+"code": "return (f\"⚠ cờ bất thường {rec.get('tier', '?')} [{rec.get('reasons', '?')}] \"",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/due_diligence.py",
+"line": 215,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "rec",
+"code": "f\"ngày {rec.get('last_alert', '?')}\")",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/due_diligence.py",
+"line": 496,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "div0 = float(r[\"div0\"] or 0.0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/due_diligence.py",
+"line": 497,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "div3 = float(r.get(\"div3\") or 0.0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/due_diligence.py",
+"line": 943,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "ctx",
+"code": "is_buy = str(ctx.get(\"side\", \"buy\")).lower() in (\"buy\", \"mua\", \"b\")",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/exdate_gate.py",
+"line": 177,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "qty_old = int(getattr(o, \"qty\", 0) or 0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/executor.py",
+"line": 658,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "self",
+"code": "mode = self.cfg.get(\"cross_mode\", \"adaptive\")",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/executor.py",
+"line": 681,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "self",
+"code": "threshold = self.cfg.get(\"adaptive_cross_adv_threshold\", 0.01)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/executor.py",
+"line": 717,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "self",
+"code": "k = self.cfg.get(\"chase_cap_vol_k\", 2.0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/executor.py",
+"line": 718,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "self",
+"code": "ceil = self.cfg.get(\"chase_cap_vol_ceil\", 0.04)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/executor.py",
+"line": 844,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "ex_used = q.exchange or \"HOSE\"",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/executor.py",
+"line": 1589,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "self",
+"code": "mult = self.cfg.get(\"fill_timing_outside_mult\", 4.0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/executor.py",
+"line": 771,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "info",
+"code": "return info.get(\"reason\", \"cơ sở giá luật A không đối soát được\"), info",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/executor.py",
+"line": 1297,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "c",
+"code": "if c.get(\"filled\", 0) != 0:",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/executor.py",
+"line": 1523,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "self",
+"code": "return self.cfg.get(\"fill_timing_outside_mult\", 4.0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/executor.py",
+"line": 1709,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "self",
+"code": "return (self.cfg.get(\"extreme_slice_mult\", 0.25)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/executor.py",
+"line": 325,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "c",
+"code": "unfilled = c[\"qty\"] - c.get(\"filled\", 0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/executor.py",
+"line": 402,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "os",
+"code": "if str(self.plan.plan_date) < os.environ.get(\"ORDER_BOOK_START\", \"2026-08-18\"):",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/executor.py",
+"line": 409,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "self",
+"code": "max_age = int(self.cfg.get(\"order_book_snapshot_max_age_ms\", 5000))",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/executor.py",
+"line": 455,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "self",
+"code": "\"policy_version\": self.cfg.get(\"order_book_shadow_policy_version\", \"spread_depth_v1\"),",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/executor.py",
+"line": 542,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "mins = float(self.cfg.get(\"probe_linger_min\", 0) or 0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/executor.py",
+"line": 598,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "self",
+"code": "band = float(self.cfg.get(\"extreme_band\", 0.03))",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/executor.py",
+"line": 603,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "self",
+"code": "z = float(self.cfg.get(\"extreme_move_z\", 3.0))",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/executor.py",
+"line": 730,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "v = float(getattr(o, \"hard_no_chase_ceiling_vnd\", None) or 0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/executor.py",
+"line": 1041,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "self",
+"code": "fleet_filled = self.shared.get(o.ticker, 0) - exclude_reserved",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/executor.py",
+"line": 1138,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "c",
+"code": "total += c.get(\"filled\", 0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/executor.py",
+"line": 1412,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "ref",
+"code": "if not ref or ref.get(\"rvol_20d\", 0) <= 0:",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/executor.py",
+"line": 1607,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "self",
+"code": "ws = _parse_hhmm(self.cfg.get(\"buy_window_start\", \"10:45\"))",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/executor.py",
+"line": 1608,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "self",
+"code": "we = _parse_hhmm(self.cfg.get(\"buy_window_end\", \"11:15\"))",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/executor.py",
+"line": 1613,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "self",
+"code": "ws = _parse_hhmm(self.cfg.get(\"sell_window_start\", \"09:15\"))",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/executor.py",
+"line": 1614,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "self",
+"code": "we = _parse_hhmm(self.cfg.get(\"sell_window_end\", \"09:45\"))",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/executor.py",
+"line": 1902,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "self",
+"code": "self.shared[o.ticker] = self.shared.get(o.ticker, 0) + qty  # reserve quota",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/executor.py",
+"line": 317,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "c",
+"code": "add = c[\"qty\"] if live else c.get(\"filled\", 0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/executor.py",
+"line": 327,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "self",
+"code": "self.shared[ticker] = self.shared.get(ticker, 0) - unfilled",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/executor.py",
+"line": 542,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "self",
+"code": "mins = float(self.cfg.get(\"probe_linger_min\", 0) or 0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/executor.py",
+"line": 1072,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "self",
+"code": "fleet_filled = self.shared.get(o.ticker, 0) - exclude_reserved",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/executor.py",
+"line": 1315,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "c",
+"code": "reserved = 0 if c.get(\"released\") else c[\"qty\"] - c.get(\"filled\", 0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/executor.py",
+"line": 1427,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "self",
+"code": "else prior_close * (1 - self.cfg.get(\"gap_floor_band\", 0.07)))",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/executor.py",
+"line": 1497,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "self",
+"code": "width = dt.timedelta(minutes=int(self.cfg.get(\"hybrid_block_min\", 15)))",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/executor.py",
+"line": 1524,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "self",
+"code": "return max(1.0, int(self.cfg.get(\"hybrid_block_min\", 15))",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/executor.py",
+"line": 1770,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "self",
+"code": "_gap = self.cfg.get(\"extreme_defer_poll_sec\", 60)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/executor.py",
+"line": 2240,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "c",
+"code": "\"qty\": c[\"qty\"], \"filled\": c.get(\"filled\", 0), \"last_seen\": why})",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/executor.py",
+"line": 319,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "self",
+"code": "self.shared[o.ticker] = self.shared.get(o.ticker, 0) + add",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/executor.py",
+"line": 432,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "depth_bid_10 = sum(float(x.get(\"quantity\") or 0) for x in bids)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/executor.py",
+"line": 433,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "depth_ask_10 = sum(float(x.get(\"quantity\") or 0) for x in offers)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/executor.py",
+"line": 1105,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "c",
+"code": "if u.filled_qty > c.get(\"filled\", 0):",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/executor.py",
+"line": 1525,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "self",
+"code": "/ max(1, int(self.cfg.get(\"slice_interval_min\", 8))))",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/executor.py",
+"line": 2303,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "p",
+"code": "total_plan = sum(p.get(\"qty\", 0) for p in ps.values())",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/executor.py",
+"line": 2304,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "p",
+"code": "total_fill = sum(p.get(\"filled\", 0) for p in ps.values())",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/executor.py",
+"line": 443,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "self",
+"code": "elif (spread_ticks >= float(self.cfg.get(\"order_book_defer_spread_ticks\", 4.0))",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/executor.py",
+"line": 445,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "self",
+"code": "and depth_ratio < float(self.cfg.get(\"order_book_defer_depth_ratio\", 0.5))):",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/executor.py",
+"line": 1106,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "c",
+"code": "delta = min(u.filled_qty, c[\"qty\"]) - c.get(\"filled\", 0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/executor.py",
+"line": 1289,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "f\"nay (được cấp: {sorted(authorized.get(str(lp), set())) or 'KHÔNG MÃ NÀO'})\")})",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/executor.py",
+"line": 1341,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "c",
+"code": "self._journal(\"CANCEL_STALE\", o, c[\"oid\"], c[\"qty\"] - c.get(\"filled\", 0),",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/executor.py",
+"line": 1649,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "self",
+"code": "if floor and last <= floor * (1 + self.cfg.get(\"extreme_band\", 0.03)):",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/executor.py",
+"line": 447,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "self",
+"code": "elif (spread_ticks >= float(self.cfg.get(\"order_book_reduce_spread_ticks\", 2.0))",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/executor.py",
+"line": 449,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "self",
+"code": "and depth_ratio < float(self.cfg.get(\"order_book_reduce_depth_ratio\", 1.0))):",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/executor.py",
+"line": 1109,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "self",
+"code": "self.shared[o.ticker] = self.shared.get(o.ticker, 0) + delta",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/executor.py",
+"line": 1689,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "self",
+"code": "and last <= floor * (1 + self.cfg.get(\"extreme_band\", 0.03)))",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/executor.py",
+"line": 1656,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "self",
+"code": "if r is not None and r < -self.cfg.get(\"extreme_move_z\", 3.0) * rvol:",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/executor.py",
+"line": 1664,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "self",
+"code": "minutes=self.cfg.get(\"extreme_cooldown_min\", 15))).isoformat(timespec=\"seconds\")",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/gdkhq_rollout.py",
+"line": 84,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "account",
+"code": "label = account.get(\"label\", \"?\")",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/netting_recon.py",
+"line": 136,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "broker_net_delta",
+"code": "bdelta = None if broker_net_delta is None else broker_net_delta.get(tk, 0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/netting_recon.py",
+"line": 84,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "q = int(round(float(row.get(\"qty\") or 0)))",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/no_chase_ceiling.py",
+"line": 247,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "declared = _as_pos_float(order.get(\"hard_no_chase_ceiling_vnd\")) or 0.0",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/plan.py",
+"line": 1708,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "f = float(out[\"lever_f\"] or 1.0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/plan.py",
+"line": 406,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "note = (f\"NET {side.upper()} {qty:,}cp (dư của book {lead.book or '?'}) ← gộp các lệnh \"",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/plan.py",
+"line": 1703,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "\"value_vnd\": float(a.get(\"value\") or 0)} for a in granted]",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/plan.py",
+"line": 1977,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "cash = float(_cash_val if _cash_val is not None else (broker.get_cash() or 0))",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/plan.py",
+"line": 133,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "self",
+"code": "f\"scale {self.nav_basis.get('scale', 0):.6f}\",",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/plan.py",
+"line": 223,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "o",
+"code": "filtered[\"id\"] = f\"{o.get('side', '?').upper()}-{o.get('ticker', '?')}-{o.get('priority', 0):02d}\"",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/plan.py",
+"line": 223,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "o",
+"code": "filtered[\"id\"] = f\"{o.get('side', '?').upper()}-{o.get('ticker', '?')}-{o.get('priority', 0):02d}\"",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/plan.py",
+"line": 618,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "f\"sách account live ({sorted(live_labels) or 'RỖNG'}) — không xác \"",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/plan.py",
+"line": 1194,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "f\"(revoked={_rv!r}, lý do: {rec.get('revoked_reason') or 'không ghi'})\")",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/plan.py",
+"line": 1240,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "want = sum(float(a.get(\"value\") or 0) for a in granted)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/plan.py",
+"line": 1416,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "err = (f\"capit_lever.active={lever.get('active')!r} — {lever.get('reason') or 'lever TẮT'}\")",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/plan.py",
+"line": 1851,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "n_filled = sum(1 for p in (st.get(\"parents\") or {}).values() if (p.get(\"filled\") or 0) > 0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/plan.py",
+"line": 1987,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "p",
+"code": "v = float(p.get(\"total\", 0)) * float(px)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/plan.py",
+"line": 131,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "self",
+"code": "f\"  NAV account {self.nav_basis.get('account_nav', 0)/1e6:,.0f}M | \"",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/plan.py",
+"line": 132,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "self",
+"code": "f\"paper {self.nav_basis.get('paper_nav', 0)/1e9:,.2f}B | \"",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/plan.py",
+"line": 387,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "legs_desc = \"; \".join(f\"{g.side.upper()} {g.qty:,} {g.book or '?'}\" for g in group)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/plan.py",
+"line": 223,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "o",
+"code": "filtered[\"id\"] = f\"{o.get('side', '?').upper()}-{o.get('ticker', '?')}-{o.get('priority', 0):02d}\"",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/plan.py",
+"line": 1575,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "f\"lệnh {o.side}/{o.book or '?'}\"",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/plan_cash_commitment.py",
+"line": 156,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "self.qty = _get(o, \"qty\") or 0",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/plan_cash_commitment.py",
+"line": 305,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "want = int(_get(order, \"qty\") or 0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/plan_cash_commitment.py",
+"line": 158,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "self.ref_price = px if px not in (None, 0) else (_get(o, \"limit_price_vnd\") or 0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/plan_cash_commitment.py",
+"line": 260,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "cash = float(broker.get_cash() or 0.0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/plan_cash_commitment.py",
+"line": 124,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "book = str(_get(o, \"book\", \"\") or \"?\")",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/plan_cash_commitment.py",
+"line": 125,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "by_book",
+"code": "by_book[book] = by_book.get(book, 0.0) + cost",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/plan_cash_commitment.py",
+"line": 312,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "f\"{(order_cost_vnd(order) or 0):,.0f}đ nhưng headroom chỉ còn \"",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/plan_funding_gate.py",
+"line": 421,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "cash = float(broker.get_cash() or 0.0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/plan_funding_gate.py",
+"line": 288,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "c",
+"code": "c_qty, c_filled = c.get(\"qty\"), c.get(\"filled\", 0)",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/price_frame.py",
+"line": 714,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "out[\"gate\"] = info123.get(\"gate\") or \"G1\"",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/price_frame.py",
+"line": 715,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "out[\"reason\"] = info123.get(\"reason\") or \"snapshot giá tham chiếu không hợp lệ\"",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/price_frame.py",
+"line": 486,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "tol = max(1.0, float(tol_ticks) * float(info.get(\"tick\") or 100))",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/price_frame.py",
+"line": 708,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "exchange=getattr(quote, \"exchange\", None) or \"HOSE\"))",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/price_frame.py",
+"line": 328,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "if str(r.get(\"status\") or \"OPEN\").upper() == \"CLOSED\":",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/strategies.py",
+"line": 61,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "res",
+"code": "reason = res.get(\"reason\", \"unknown\")",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/trading_bot/strategies.py",
+"line": 144,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "dcf",
+"code": "return (f\"DCF: NOT_COMPUTED ({dcf.get('reason', '?')})\"",
+"tier": "A"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/unified_screener.py",
+"line": 22,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "os",
+"code": "WORKDIR=os.environ.get(\"WORKDIR_8L\", r\"/home/trido/thanhdt/WorkingClaude\")",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/unified_screener.py",
+"line": 387,
+"kind": "FILLNA",
+"fromfilevar": null,
+"root": "",
+"code": "out[\"ar\"]=out[\"action\"].map(act_rank).fillna(9)",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/unified_screener.py",
+"line": 427,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "P(\"  ★ GOLDEN (cheap_quality + COMPOUNDER engine): \"+(\", \".join(gold['ticker'].tolist()) or \"none\"))",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/unified_screener.py",
+"line": 428,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "P(\"  ★★ + strict cash-machine◆: \"+(\", \".join(goldcm['ticker'].tolist()) or \"none\"))",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/unified_screener.py",
+"line": 433,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "P(\"  ◉ INVESTMENT-GRADE buy-zone (rating≤3, liq≥2): \"+(\", \".join(_ig['ticker'].tolist()) or \"none\"))",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/unified_screener.py",
+"line": 434,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "P(\"  ◌ SPECULATIVE buy-zone (rating=4 — catalyst-only, not buy&hold): \"+(\", \".join(_spec['ticker'].tolist()) or \"none\"))",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/unified_screener.py",
+"line": 422,
+"kind": "OR_DEFAULT",
+"fromfilevar": null,
+"root": "",
+"code": "P(f\"  {route}: \"+(\", \".join(g['ticker'].tolist()) or \"none\"))",
+"tier": "B"
+},
+{
+"file": "/home/trido/thanhdt/WorkingClaude/value_radar.py",
+"line": 59,
+"kind": "GET_DEFAULT",
+"fromfilevar": false,
+"root": "os",
+"code": "W = os.environ.get(\"WORKDIR_8L\", \"/home/trido/thanhdt/WorkingClaude\")",
+"tier": "B"
+}
+]

@@ -1,0 +1,466 @@
+{
+ "SpaceX": {
+  "OFF": {
+   "nav_basis": {
+    "account_nav": 867522545,
+    "paper_nav": 49109293804,
+    "scale": 0.017665139891023106
+   },
+   "notes": [
+    "NAV_BASIS old=867522545 new=968333234 diff=+11.62% (egg=100810689 offbook=0) · cờ nav_include_egg_offbook=OFF"
+   ],
+   "orders": {
+    "sell:VHM": {
+     "qty": 900,
+     "value": 64800000
+    },
+    "sell:DRI": {
+     "qty": 3700,
+     "value": 53650000
+    },
+    "sell:SIP": {
+     "qty": 1000,
+     "value": 48500000
+    },
+    "sell:TV1": {
+     "qty": 2300,
+     "value": 45770000
+    },
+    "sell:VCB": {
+     "qty": 700,
+     "value": 40740000
+    },
+    "sell:SCL": {
+     "qty": 1500,
+     "value": 39750000
+    },
+    "sell:BID": {
+     "qty": 1100,
+     "value": 39160000
+    },
+    "sell:CTG": {
+     "qty": 1200,
+     "value": 35940000
+    },
+    "sell:PVT": {
+     "qty": 1500,
+     "value": 33150000
+    },
+    "sell:VPB": {
+     "qty": 1200,
+     "value": 32340000
+    },
+    "sell:TCB": {
+     "qty": 1000,
+     "value": 31600000
+    },
+    "sell:MBB": {
+     "qty": 1400,
+     "value": 27650000
+    },
+    "sell:HPG": {
+     "qty": 1200,
+     "value": 25560000
+    },
+    "sell:HDB": {
+     "qty": 800,
+     "value": 21440000
+    },
+    "sell:ACB": {
+     "qty": 900,
+     "value": 19845000
+    },
+    "sell:LPB": {
+     "qty": 400,
+     "value": 18680000
+    },
+    "sell:VNM": {
+     "qty": 300,
+     "value": 17970000
+    },
+    "sell:SAB": {
+     "qty": 400,
+     "value": 17540000
+    },
+    "sell:SHB": {
+     "qty": 800,
+     "value": 9240000
+    },
+    "sell:NCT": {
+     "qty": 100,
+     "value": 8400000
+    },
+    "sell:VRE": {
+     "qty": 300,
+     "value": 7680000
+    },
+    "sell:TPB": {
+     "qty": 500,
+     "value": 7075000
+    },
+    "sell:VIB": {
+     "qty": 500,
+     "value": 6625000
+    },
+    "sell:MSB": {
+     "qty": 500,
+     "value": 6475000
+    },
+    "sell:VIX": {
+     "qty": 400,
+     "value": 5300000
+    },
+    "buy:E1VFVN30": {
+     "qty": 248400,
+     "value": 8656740000
+    },
+    "buy:VIC": {
+     "qty": 200,
+     "value": 48660000
+    },
+    "buy:VPI": {
+     "qty": 700,
+     "value": 41720000
+    },
+    "buy:PNJ": {
+     "qty": 700,
+     "value": 26110000
+    }
+   },
+   "n_orders": 29,
+   "signal_date": "2026-09-11",
+   "strategy": "v23"
+  },
+  "ON": {
+   "nav_basis": {
+    "account_nav": 968333234,
+    "paper_nav": 49109293804,
+    "scale": 0.0197179221892577
+   },
+   "notes": [
+    "NAV_BASIS old=867522545 new=968333234 diff=+11.62% (egg=100810689 offbook=0) · cờ nav_include_egg_offbook=ON"
+   ],
+   "orders": {
+    "sell:VHM": {
+     "qty": 900,
+     "value": 64800000
+    },
+    "sell:DRI": {
+     "qty": 3700,
+     "value": 53650000
+    },
+    "sell:TV1": {
+     "qty": 2300,
+     "value": 45770000
+    },
+    "sell:SIP": {
+     "qty": 900,
+     "value": 43650000
+    },
+    "sell:VCB": {
+     "qty": 700,
+     "value": 40740000
+    },
+    "sell:SCL": {
+     "qty": 1500,
+     "value": 39750000
+    },
+    "sell:BID": {
+     "qty": 1100,
+     "value": 39160000
+    },
+    "sell:CTG": {
+     "qty": 1200,
+     "value": 35940000
+    },
+    "sell:VPB": {
+     "qty": 1200,
+     "value": 32340000
+    },
+    "sell:TCB": {
+     "qty": 1000,
+     "value": 31600000
+    },
+    "sell:PVT": {
+     "qty": 1300,
+     "value": 28730000
+    },
+    "sell:MBB": {
+     "qty": 1400,
+     "value": 27650000
+    },
+    "sell:HPG": {
+     "qty": 1200,
+     "value": 25560000
+    },
+    "sell:HDB": {
+     "qty": 800,
+     "value": 21440000
+    },
+    "sell:ACB": {
+     "qty": 900,
+     "value": 19845000
+    },
+    "sell:LPB": {
+     "qty": 400,
+     "value": 18680000
+    },
+    "sell:SAB": {
+     "qty": 300,
+     "value": 13155000
+    },
+    "sell:VNM": {
+     "qty": 200,
+     "value": 11980000
+    },
+    "sell:SHB": {
+     "qty": 800,
+     "value": 9240000
+    },
+    "sell:NCT": {
+     "qty": 100,
+     "value": 8400000
+    },
+    "sell:VRE": {
+     "qty": 300,
+     "value": 7680000
+    },
+    "sell:TPB": {
+     "qty": 500,
+     "value": 7075000
+    },
+    "sell:VIB": {
+     "qty": 500,
+     "value": 6625000
+    },
+    "sell:MSB": {
+     "qty": 500,
+     "value": 6475000
+    },
+    "sell:VIX": {
+     "qty": 400,
+     "value": 5300000
+    },
+    "buy:E1VFVN30": {
+     "qty": 277300,
+     "value": 9663905000
+    },
+    "buy:VIC": {
+     "qty": 200,
+     "value": 48660000
+    },
+    "buy:VPI": {
+     "qty": 800,
+     "value": 47680000
+    },
+    "buy:PNJ": {
+     "qty": 800,
+     "value": 29840000
+    }
+   },
+   "n_orders": 29,
+   "signal_date": "2026-09-11",
+   "strategy": "v23"
+  }
+ },
+ "ZaloPay": {
+  "OFF": {
+   "nav_basis": {
+    "account_nav": 1022035350,
+    "paper_nav": 49109293804,
+    "scale": 0.020811444653949324
+   },
+   "notes": [
+    "NAV_BASIS old=1022035350 new=1061030929 diff=+3.82% (egg=38995579 offbook=0) · cờ nav_include_egg_offbook=OFF"
+   ],
+   "orders": {
+    "sell:DGC": {
+     "qty": 10000,
+     "value": 467500000
+    },
+    "sell:VPB": {
+     "qty": 1300,
+     "value": 35035000
+    },
+    "sell:DRI": {
+     "qty": 1900,
+     "value": 27550000
+    },
+    "sell:SCL": {
+     "qty": 1000,
+     "value": 26500000
+    },
+    "sell:TV1": {
+     "qty": 1200,
+     "value": 23880000
+    },
+    "sell:VHM": {
+     "qty": 300,
+     "value": 21600000
+    },
+    "sell:CSV": {
+     "qty": 1000,
+     "value": 20850000
+    },
+    "sell:VCB": {
+     "qty": 300,
+     "value": 17460000
+    },
+    "sell:BID": {
+     "qty": 400,
+     "value": 14240000
+    },
+    "sell:LPB": {
+     "qty": 300,
+     "value": 14010000
+    },
+    "sell:CTG": {
+     "qty": 400,
+     "value": 11980000
+    },
+    "sell:MBB": {
+     "qty": 600,
+     "value": 11850000
+    },
+    "sell:HDB": {
+     "qty": 400,
+     "value": 10720000
+    },
+    "sell:HPG": {
+     "qty": 500,
+     "value": 10650000
+    },
+    "sell:TCB": {
+     "qty": 300,
+     "value": 9480000
+    },
+    "sell:ACB": {
+     "qty": 300,
+     "value": 6615000
+    },
+    "buy:E1VFVN30": {
+     "qty": 292700,
+     "value": 10200595000
+    },
+    "buy:VIC": {
+     "qty": 200,
+     "value": 48660000
+    },
+    "buy:VPI": {
+     "qty": 800,
+     "value": 47680000
+    },
+    "buy:PNJ": {
+     "qty": 900,
+     "value": 33570000
+    }
+   },
+   "n_orders": 20,
+   "signal_date": "2026-09-11",
+   "strategy": "v23"
+  },
+  "ON": {
+   "nav_basis": {
+    "account_nav": 1061030929,
+    "paper_nav": 49109293804,
+    "scale": 0.021605501663921833
+   },
+   "notes": [
+    "NAV_BASIS old=1022035350 new=1061030929 diff=+3.82% (egg=38995579 offbook=0) · cờ nav_include_egg_offbook=ON"
+   ],
+   "orders": {
+    "sell:DGC": {
+     "qty": 10000,
+     "value": 467500000
+    },
+    "sell:VPB": {
+     "qty": 1300,
+     "value": 35035000
+    },
+    "sell:DRI": {
+     "qty": 1900,
+     "value": 27550000
+    },
+    "sell:SCL": {
+     "qty": 1000,
+     "value": 26500000
+    },
+    "sell:TV1": {
+     "qty": 1200,
+     "value": 23880000
+    },
+    "sell:VHM": {
+     "qty": 300,
+     "value": 21600000
+    },
+    "sell:CSV": {
+     "qty": 1000,
+     "value": 20850000
+    },
+    "sell:VCB": {
+     "qty": 300,
+     "value": 17460000
+    },
+    "sell:BID": {
+     "qty": 400,
+     "value": 14240000
+    },
+    "sell:LPB": {
+     "qty": 300,
+     "value": 14010000
+    },
+    "sell:CTG": {
+     "qty": 400,
+     "value": 11980000
+    },
+    "sell:MBB": {
+     "qty": 600,
+     "value": 11850000
+    },
+    "sell:HDB": {
+     "qty": 400,
+     "value": 10720000
+    },
+    "sell:HPG": {
+     "qty": 500,
+     "value": 10650000
+    },
+    "sell:TCB": {
+     "qty": 300,
+     "value": 9480000
+    },
+    "sell:ACB": {
+     "qty": 300,
+     "value": 6615000
+    },
+    "buy:E1VFVN30": {
+     "qty": 303800,
+     "value": 10587430000
+    },
+    "buy:VPI": {
+     "qty": 900,
+     "value": 53640000
+    },
+    "buy:VIC": {
+     "qty": 200,
+     "value": 48660000
+    },
+    "buy:PNJ": {
+     "qty": 900,
+     "value": 33570000
+    },
+    "buy:PVT": {
+     "qty": 300,
+     "value": 6630000
+    },
+    "buy:VNM": {
+     "qty": 100,
+     "value": 5990000
+    }
+   },
+   "n_orders": 22,
+   "signal_date": "2026-09-11",
+   "strategy": "v23"
+  }
+ }
+}

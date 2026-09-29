@@ -1,0 +1,31 @@
+ticker,event_code,exright_date,event_status,value_per_share,exercise_ratio,issue_method_name_vi
+PVT,ISS,2026-06-05,executed,,0.1,Trả Cổ tức bằng Cổ phiếu
+SCL,ISS,2026-06-09,executed,,0.17,Trả Cổ tức bằng Cổ phiếu
+ACB,DIV,2026-06-15,executed,700.0,0.07,
+ACB,ISS,2026-06-15,executed,,0.13,Trả Cổ tức bằng Cổ phiếu
+SSI,ISS,2026-06-15,executed,,0.004,Phát hành cho CBCNV
+FPT,ISS,2026-06-24,executed,,0.00135,Phát hành cho CBCNV
+FPT,ISS,2026-06-24,executed,,0.00499,Phát hành cho CBCNV
+VNM,DIV,2026-06-26,executed,1850.0,0.185,
+VHM,DIV,2026-06-29,executed,6000.0,0.6,
+VRE,DIV,2026-06-30,executed,1000.0,0.1,
+DCM,DIV,2026-07-09,executed,2000.0,0.2,
+MBB,DIV,2026-07-09,executed,1000.0,0.1,
+HAH,DIV,2026-07-14,executed,2000.0,0.2,
+TLG,DIV,2026-07-14,executed,1000.0,0.1,
+BID,DIV,2026-07-17,executed,450.0,0.045,
+CTG,DIV,2026-07-23,executed,450.0,0.045,
+VCB,DIV,2026-07-23,executed,450.0,0.045,
+NCT,DIV,2026-07-27,executed,8000.0,0.8,
+HAH,ISS,2026-07-28,executed,,0.01858,Phát hành cho CBCNV
+SAB,DIV,2026-07-28,executed,3000.0,0.3,
+VGC,DIV,2026-07-28,executed,2200.0,0.22,
+SCL,ISS,2026-07-30,executed,,0.0243,Phát hành cho CBCNV
+VHM,ISS,2026-08-06,executed,,1.0,Trả Cổ tức bằng Cổ phiếu
+MBB,ISS,2026-08-11,executed,,0.1,Quyền mua CP cho Cổ đông hiện hữu
+MBB,ISS,2026-08-11,executed,,0.15,Trả Cổ tức bằng Cổ phiếu
+BID,ISS,2026-08-17,announced,,0.068433,Cổ phiếu thưởng
+MBS,DIV,2026-08-17,announced,1000.0,0.1,
+SSI,DIV,2026-08-17,announced,1000.0,0.1,
+SSI,ISS,2026-08-17,announced,,0.2,Cổ phiếu thưởng
+VIX,ISS,2026-08-20,announced,,0.05,Trả Cổ tức bằng Cổ phiếu

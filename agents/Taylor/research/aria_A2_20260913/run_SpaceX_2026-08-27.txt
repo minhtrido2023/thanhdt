@@ -1,0 +1,6 @@
+💰 **NAV 2026-08-27: 985,121,512 VND** (+2,534,255 VND, +0.26% so với hôm trước)
+   Cổ phiếu 875,249,500 · Tiền mặt 9,460,341 · Nợ margin 0 · Trứng vàng 100,411,671
+   Từ go-live: -14,878,488 VND (-1.49%)
+   ℹ️ from-raw: bỏ cross-check verify_account_snapshot (advisory, không vào NAV).
+   ℹ️ BACKFILL ƯỚC TÍNH (nav_is_estimate=True): positions 2026-08-27T23:30:05, balances 2026-08-27T22:16:08, giá BQ Price thô
+   ℹ️ MSB: broker ghi có corp-action sớm (Price 15,700/1.2 ≈ marketPrice 13,100) — quy KL về trước sự kiện

@@ -1,0 +1,13 @@
+window,period,axis,factor,hi_minus_lo,ci_lo,ci_hi,p_boot,monotonic,ci_excl_0,n_mon_lo,n_mon_hi,p_BH,n_bh,same_sign_IS_OOS,PASS_all4
+LONG 2014-2026,IS,breadth,ic_mom,0.0569,-0.0156,0.1299,0.1315,True,False,41,36,0.1972,6.0,False,False
+LONG 2014-2026,IS,breadth,ic_ey,-0.0822,-0.1301,-0.0349,0.0005,True,True,41,36,0.003,6.0,False,False
+LONG 2014-2026,IS,retail,ic_mom,0.1155,0.0098,0.2092,0.0315,False,True,9,5,0.0945,6.0,True,False
+LONG 2014-2026,IS,retail,ic_ey,-0.0985,-0.1984,0.0096,0.072,True,False,9,5,0.144,6.0,True,False
+LONG 2014-2026,IS,dt5g,ic_mom,-0.0084,-0.1894,0.1382,0.9235,False,False,21,6,0.9235,6.0,False,False
+LONG 2014-2026,IS,dt5g,ic_ey,0.0451,-0.0482,0.1557,0.42,False,False,21,6,0.504,6.0,False,False
+LONG 2014-2026,OOS,breadth,ic_mom,-0.0382,-0.1167,0.0456,0.3585,False,False,43,34,0.5377,6.0,False,False
+LONG 2014-2026,OOS,breadth,ic_ey,0.0032,-0.0439,0.0498,0.8855,False,False,43,34,0.8855,6.0,False,False
+LONG 2014-2026,OOS,retail,ic_mom,0.0713,-0.007,0.1518,0.0715,True,False,33,26,0.429,6.0,True,False
+LONG 2014-2026,OOS,retail,ic_ey,-0.0243,-0.0691,0.0202,0.3045,True,False,33,26,0.5377,6.0,True,False
+LONG 2014-2026,OOS,dt5g,ic_mom,0.0611,-0.0272,0.1449,0.176,False,False,29,28,0.528,6.0,False,False
+LONG 2014-2026,OOS,dt5g,ic_ey,-0.0169,-0.0641,0.0274,0.487,False,False,29,28,0.5844,6.0,False,False

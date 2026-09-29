@@ -26,6 +26,7 @@ import json
 import os
 import re
 import shutil
+import subprocess
 import sys
 import tempfile
 
@@ -50,27 +51,45 @@ def extract_block(tag):
 
 
 CHECK5_SRC = extract_block("CHECK5")
+CHECK9_SRC = extract_block("CHECK9")
 CHECK10_SRC = extract_block("CHECK10")
+CHECK10B_SRC = extract_block("CHECK10B")
 CHECK11_SRC = extract_block("CHECK11")
+CHECK12_SRC = extract_block("CHECK12")
+ROUTING_SRC = extract_block("ROUTING")
 
 
-def run_check5(wc_root):
-    """Chạy khối thật trên 1 bus giả; trả về (lines, warn_count)."""
-    lines, warn = [], []
+def run_check5(wc_root, now=None):
+    """Chạy khối thật trên 1 bus giả; trả về (lines, warn_count).
 
-    def W(msg):
-        warn.append(msg)
-        lines.append(f"⚠️ {msg}")
+    `now` chỉ dành cho ca 8d: chèn CHECK5_NOW để ghim một thời điểm lịch cố định; production
+    luôn chạy không có biến này nên hành vi không đổi.
+    """
+    old = os.environ.get("CHECK5_NOW")
+    if now is not None:
+        os.environ["CHECK5_NOW"] = now
+    try:
+        lines, warn = [], []
 
-    def OK(msg):
-        lines.append(f"✅ {msg}")
+        def W(msg):
+            warn.append(msg)
+            lines.append(f"⚠️ {msg}")
 
-    ns = {
-        "glob": __import__("glob"), "gzip": gzip, "json": json, "os": os, "re": re,
-        "wc_root": wc_root, "W": W, "OK": OK, "lines": lines,
-    }
-    exec(compile(CHECK5_SRC, SRC + ":CHECK5", "exec"), ns)
-    return lines, warn
+        def OK(msg):
+            lines.append(f"✅ {msg}")
+
+        ns = {
+            "glob": __import__("glob"), "gzip": gzip, "json": json, "os": os, "re": re,
+            "wc_root": wc_root, "W": W, "OK": OK, "lines": lines,
+        }
+        exec(compile(CHECK5_SRC, SRC + ":CHECK5", "exec"), ns)
+        return lines, warn
+    finally:
+        if now is not None:
+            if old is None:
+                os.environ.pop("CHECK5_NOW", None)
+            else:
+                os.environ["CHECK5_NOW"] = old
 
 
 def write_events(path, events, gz=False):
@@ -89,9 +108,9 @@ def ago(days, hours=0):
             - dt.timedelta(days=days, hours=hours)).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
-def ev(agent, etype, topic, ts):
+def ev(agent, etype, topic, ts, payload=None):
     return {"agent_id": agent, "event_type": etype, "topic": topic, "ts": ts,
-            "payload": {}, "event_id": f"{agent}-{etype}-{topic}"}
+            "payload": payload or {}, "event_id": f"{agent}-{etype}-{topic}"}
 
 
 def mkbus():
@@ -100,6 +119,11 @@ def mkbus():
     d = tempfile.mkdtemp(prefix="ops_health_selfcheck_")
     inbox = os.path.join(d, "mike", "bus", "inbox")
     os.makedirs(inbox, exist_ok=True)
+    # Danh sách agent GIẢ cho khối owner-hint (case_owner_hint_from_needs_suffix): 2 agent
+    # thật + 1 worktree "wt-*" phải bị LOẠI khỏi danh sách hợp lệ (không phải agent).
+    agents_dir = os.path.join(d, "mike", "agents")
+    for name in ("Taylor", "DollarBill", "wt-selfcheck-fixture"):
+        os.makedirs(os.path.join(agents_dir, name), exist_ok=True)
     return d, inbox
 
 
@@ -146,6 +170,24 @@ def case_cross_layer_resolve():
         out = joined(lines)
         check("resolve chéo tầng+chéo agent: answer hot inbox đóng question trong archive",
               "cache-stability-blocker" not in out, out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+# ── Ca 2b: quyết định ở topic khác đóng canonical question qua payload.resolves.
+def case_explicit_cross_topic_resolve():
+    root, inbox = mkbus()
+    try:
+        write_events(os.path.join(inbox, "Taylor.jsonl"),
+                     [ev("Taylor", "question", "cash-vendor-policy", ago(3))])
+        write_events(os.path.join(inbox, "Mike.jsonl"),
+                     [ev("Mike", "decision", "ops-backlog-batch", ago(1),
+                         {"resolves": ["Taylor/cash-vendor-policy"],
+                          "evidence": "commit abc"})])
+        lines, _ = run_check5(root)
+        out = joined(lines)
+        check("resolves explicit: decision topic khác đóng canonical Agent/topic",
+              "cash-vendor-policy" not in out, out)
     finally:
         shutil.rmtree(root, ignore_errors=True)
 
@@ -258,6 +300,103 @@ def case_empty_archive_warns():
         shutil.rmtree(root, ignore_errors=True)
 
 
+# ── Ca 8b (2026-08-17, sự cố coord-2026-08-17): question VỪA ĐĂNG vài phút KHÔNG được kéo
+#    dispatch. Thật: Taylor đăng `hybrid-fill-live-deadline-20260817` 02:01:45Z, checker chạy
+#    02:06:15Z thấy "chưa có answer" sau 4m31s → dispatch job Wags (Opus); Mike đăng answer
+#    02:06:56Z. Ân hạn 60' cắt đúng lớp này. HAI chiều đều phải pin — chỉ pin chiều "không
+#    dispatch" thì đổi ân hạn thành ∞ vẫn PASS mà kênh escalate chết im.
+#
+#    ⚠️ GHIM ĐỒNG HỒ (sửa 2026-08-22, weekly ops audit): ca 8b/8c CHẠY ĐƯỢC hay không phụ
+#    thuộc HÔM NAY LÀ THỨ MẤY, vì ân hạn là schedule-aware (xem ca 8d) — nó chỉ giữ im lặng
+#    khi CÒN một lượt cron nữa trước khi hết hạn. Đo thật cùng fixture, chỉ đổi ngày:
+#    T2-T5 routable=0 (PASS) · T6/T7/CN routable=1 (FAIL). Tức là 3/7 ngày trong tuần bộ
+#    này đỏ GIẢ — nó đỏ đúng vào thứ Bảy, ngày weekly ops audit chạy. Production KHÔNG sai:
+#    cuối tuần không còn lượt cron nào nên routable NGAY là đúng thiết kế (chính ca 8d pin
+#    điều đó). Cái sai là ca 8b/8c đọc đồng hồ thật. Nay ghim vào một ngày THỨ TƯ cố định,
+#    cùng cơ chế CHECK5_NOW mà ca 8d đã dùng. §16 + §23 hệ luận 1.
+GRACE_PINNED_WEDNESDAY = "2026-08-19T06:00:00Z"
+
+def case_grace_fresh_question_not_routable():
+    root, inbox = mkbus()
+    try:
+        write_events(os.path.join(inbox, "Taylor.jsonl"),
+                     [ev("Taylor", "question", "hybrid-fill-live-deadline",
+                          GRACE_PINNED_WEDNESDAY)])
+        lines, _ = run_check5(root, now=GRACE_PINNED_WEDNESDAY)
+        out = joined(lines)
+        routable = [ln for ln in lines
+                    if "trong 48h qua CHƯA thấy answer" in ln and "[WARN-ONLY]" not in ln]
+        check("ân hạn: question 0 phút tuổi KHÔNG vào dòng routable (không dispatch Wags)",
+              not routable, out)
+        check("ân hạn: vẫn HIỆN trong báo cáo với marker [WARN-ONLY] (không im lặng)",
+              any("VỪA ĐĂNG" in ln and "[WARN-ONLY]" in ln
+                  and "hybrid-fill-live-deadline" in ln for ln in lines), out)
+        check("ân hạn: KHÔNG in ✅ 'không có câu hỏi nào đang chờ' khi vẫn còn câu hỏi mới",
+              "Không có câu hỏi (question) nào đang chờ xử lý" not in out, out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+# ── Ca 8c: quá ân hạn thì PHẢI routable trở lại — chiều ngược của ca 8b.
+def case_grace_expired_question_is_routable():
+    root, inbox = mkbus()
+    try:
+        write_events(os.path.join(inbox, "Taylor.jsonl"),
+                     [ev("Taylor", "question", "qua-an-han",
+                          "2026-08-19T03:00:00Z")])   # 3h trước mốc ghim
+        lines, _ = run_check5(root, now=GRACE_PINNED_WEDNESDAY)
+        out = joined(lines)
+        routable = [ln for ln in lines
+                    if "trong 48h qua CHƯA thấy answer" in ln and "[WARN-ONLY]" not in ln]
+        check("ân hạn: question 3h tuổi VẪN routable (kênh escalate còn sống)",
+              len(routable) == 1 and "qua-an-han" in routable[0], out)
+        check("ân hạn: question 3h tuổi KHÔNG bị xếp vào dòng 'VỪA ĐĂNG'",
+              not any("VỪA ĐĂNG" in ln for ln in lines), out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+# ── Ca 8d (2026-08-17, round-2): ân hạn KHÔNG được mở rộng khe T6→T2. Cron thật là
+#    `20 1 * * 1-5` + `45 5 * * 1-5`; khe hở lớn nhất T6 05:45Z→T2 01:20Z = 67h35 > cutoff
+#    48h. HAI HƯỚNG đều phải pin:
+#      - T5 còn lượt T6 01:20Z trước ts+48h ⇒ ân hạn giữ nguyên;
+#      - T6 không còn lượt cron nào trước ts+48h ⇒ question 31' tuổi VẪN routable ngay.
+def case_grace_schedule_aware_last_weekday_gap():
+    root, inbox = mkbus()
+    try:
+        write_events(os.path.join(inbox, "Wags.jsonl"),
+                     [ev("Wags", "question", "gap-t6-sang-t2",
+                         "2026-08-14T05:14:00Z")])
+        lines, _ = run_check5(root, now="2026-08-14T05:45:00Z")
+        out = joined(lines)
+        routable = [ln for ln in lines
+                    if "trong 48h qua CHƯA thấy answer" in ln and "[WARN-ONLY]" not in ln]
+        fresh = [ln for ln in lines if "VỪA ĐĂNG" in ln]
+        check("8d gap T6→T2: question 31' tuổi VẪN routable nếu không còn lượt cron "
+              "trước ts+48h",
+              len(routable) == 1 and "gap-t6-sang-t2" in routable[0], out)
+        check("8d gap T6→T2: KHÔNG rơi vào dòng VỪA ĐĂNG [WARN-ONLY]", not fresh, out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+    root, inbox = mkbus()
+    try:
+        write_events(os.path.join(inbox, "Wags.jsonl"),
+                     [ev("Wags", "question", "con-an-hand-thu-5",
+                         "2026-08-13T05:14:00Z")])
+        lines, _ = run_check5(root, now="2026-08-13T05:45:00Z")
+        out = joined(lines)
+        routable = [ln for ln in lines
+                    if "trong 48h qua CHƯA thấy answer" in ln and "[WARN-ONLY]" not in ln]
+        fresh = [ln for ln in lines if "VỪA ĐĂNG" in ln]
+        check("8d T5 còn lượt cron TRƯỚC ts+48h: ân hạn vẫn giữ nguyên",
+              len(fresh) == 1 and "con-an-hand-thu-5" in fresh[0], out)
+        check("8d T5 còn lượt cron: question chưa routable ngay",
+              not any("con-an-hand-thu-5" in ln for ln in routable), out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
 # ── Ca 9: question <48h nằm ở dòng "pending" (nhánh CÓ dispatch), không phải aged.
 def case_fresh_question_is_pending():
     root, inbox = mkbus()
@@ -270,6 +409,171 @@ def case_fresh_question_is_pending():
               len(pend) == 1 and "coord-moi" in pend[0], joined(lines))
         check("phân tầng: dòng pending KHÔNG mang [WARN-ONLY]",
               not any("[WARN-ONLY]" in p for p in pend), joined(lines))
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+# ── Ca 9b (2026-08-28): câu hỏi khai chủ sở hữu bằng quy ước topic "…-needs-<agent>".
+#    Sự cố thật 08-27→28: 4 question `…-needs-taylor` của Wags nằm im 19h vì hệ quả tự động
+#    duy nhất của một câu hỏi treo là dispatch **Wags**, không có đường tới Taylor. Dòng mới
+#    chỉ IN ra chủ sở hữu + lệnh dispatch (KHÔNG tự gọi peer) — pin cả 4 tính chất: có dòng,
+#    mang [WARN-ONLY] (⇒ không đổi routing), giữ NGUYÊN VĂN hoa-thường của agent_id, và
+#    "needs-human" KHÔNG bị nhận nhầm (nó đã có kênh ACK riêng).
+def case_owner_hint_from_needs_suffix():
+    root, inbox = mkbus()
+    try:
+        write_events(os.path.join(inbox, "Wags.jsonl"),
+                     [ev("Wags", "question", "loi-a-needs-taylor", ago(0, 5)),
+                      ev("Wags", "question", "loi-b-needs-taylor-urgent", ago(0, 5)),
+                      ev("Wags", "question", "loi-c-needs-DollarBill", ago(0, 5)),
+                      ev("Wags", "question", "loi-d-needs-human", ago(0, 5)),
+                      ev("Wags", "question", "loi-e-khong-khai-chu", ago(0, 5))])
+        lines, _ = run_check5(root)
+        out = joined(lines)
+        own = [ln for ln in lines if "TỰ KHAI người phụ trách" in ln]
+        # round 2 (required_change #1): đếm TỔNG SỐ DÒNG owner-hint và bắt buộc cả 2 topic
+        # 'taylor' nằm trên CÙNG 1 dòng — bản cũ đếm chuỗi con "'taylor'" nên một mutation làm
+        # owner tách sai (…-urgent KHÔNG bị cắt) vẫn lọt qua (xem changelog round 2).
+        taylor_lines = [ln for ln in own
+                        if "loi-a-needs-taylor" in ln or "loi-b-needs-taylor-urgent" in ln]
+        check("owner-hint: gom 2 topic cùng owner 'taylor' vào ĐÚNG 1 dòng (đếm tổng dòng, "
+              "không đếm chuỗi con)",
+              len(taylor_lines) == 1
+              and "loi-a-needs-taylor" in taylor_lines[0]
+              and "loi-b-needs-taylor-urgent" in taylor_lines[0], out)
+        check("owner-hint: hậu tố mức-độ (-urgent) KHÔNG tách thành owner riêng — tổng đúng "
+              "2 dòng owner (taylor + DollarBill)",
+              len(own) == 2, out)
+        check("owner-hint: tên agent in ra là CASE CHUẨN của agent thật (DollarBill), không "
+              "phải nguyên văn tuỳ ý người viết topic",
+              any("'DollarBill'" in ln for ln in own), out)
+        check("owner-hint: 'needs-human' KHÔNG bị nhận là owner (đã có kênh ACK riêng)",
+              not any("'human'" in ln for ln in own), out)
+        check("owner-hint: mọi dòng owner đều mang [WARN-ONLY] (không đổi routing dispatch)",
+              own and all("[WARN-ONLY]" in ln for ln in own), out)
+        check("owner-hint: câu hỏi không khai chủ vẫn nằm ở dòng pending routable",
+              any("loi-e-khong-khai-chu" in ln for ln in lines
+                  if "trong 48h qua CHƯA thấy answer" in ln), out)
+        check("owner-hint: tên agent KHÔNG bọc trong <> (lệnh mẫu copy-paste được thẳng)",
+              not any("<taylor>" in ln.lower() or "<dollarbill>" in ln.lower() for ln in own),
+              out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+# ── Ca 9c (round 2, arch-review coord-2026-08-28 required_change #2): owner-hint PHẢI phủ cả
+#    câu hỏi TREO >48h (aged_q) — bản round 1 chỉ đọc pending_q_meta (<48h), nghĩa là đúng lúc
+#    một câu hỏi "…-needs-<agent>" treo LÂU NHẤT (bằng chứng "chưa ai nhận" mạnh nhất) thì dòng
+#    gợi ý lại BIẾN MẤT.
+def case_owner_hint_covers_aged_over_48h():
+    root, inbox = mkbus()
+    try:
+        write_events(os.path.join(inbox, "Wags.jsonl"),
+                     [ev("Wags", "question", "loi-aged-needs-taylor", ago(5))])
+        lines, _ = run_check5(root)
+        out = joined(lines)
+        own = [ln for ln in lines if "TỰ KHAI người phụ trách" in ln]
+        check("owner-hint: câu hỏi TREO >48h (5 ngày) VẪN có dòng gợi ý chủ sở hữu",
+              any("loi-aged-needs-taylor" in ln for ln in own), out)
+        check("owner-hint aged: vẫn dùng case chuẩn agent thật ('Taylor')",
+              any("'Taylor'" in ln for ln in own), out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+# ── Ca 9e (round 3, arch-review round 2 required_change #1): quy ước ACK thật trên bus là
+#    `triaged-needs-human:<Agent>/<topic>` (dạng KHÔNG dấu cách — 6 topic thật hôm nay, vd
+#    `triaged-needs-human:Taylor/vol-scale-chase-cap-gate4-can-user-quyet-huong`). Token owner
+#    parse thô ra `human:Taylor/vol` ⇒ KHÔNG bằng "human" trong phép so tuyệt đối ⇒ rơi vào
+#    nhánh "không khớp agent nào" và in WARN rác. Phải chuẩn hoá (cắt tại ':' và '/') trước khi so.
+def case_owner_hint_ack_convention_is_human_skip():
+    root, inbox = mkbus()
+    try:
+        write_events(os.path.join(inbox, "Wags.jsonl"),
+                     [ev("Wags", "question",
+                         "triaged-needs-human:Taylor/vol-scale-chase-cap-gate4", ago(0, 5)),
+                      ev("Wags", "question",
+                         "triaged-needs-human: DollarBill/cap-margin-test", ago(0, 5)),
+                      ev("Wags", "question", "loi-needs-user/duyet-plan", ago(0, 5))])
+        lines, _ = run_check5(root)
+        out = joined(lines)
+        own = [ln for ln in lines
+               if "TỰ KHAI người phụ trách" in ln or "khai chủ" in ln]
+        # Assertion CHẶT: KHÔNG dòng owner-hint nào — cả dòng dispatch lẫn dòng "không khớp
+        # agent nào". Bản chưa chuẩn hoá in dòng thứ hai ⇒ mutation MU1 làm ca này ĐỎ.
+        check("owner-hint: topic theo quy ước ACK `triaged-needs-human:<Agent>/<topic>` "
+              "KHÔNG sinh dòng owner-hint nào (đã có kênh ACK riêng)",
+              len(own) == 0, out)
+        check("owner-hint: KHÔNG in lệnh dispatch cho owner giả 'human:Taylor/vol'",
+              not any("dispatch.sh human" in ln or "'human" in ln for ln in lines), out)
+        check("owner-hint: 'needs-user/<gì đó>' cũng được chuẩn hoá về 'user' và bỏ qua",
+              not any("duyet-plan" in ln for ln in own), out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+# ── Ca 9f (round 3, required_change #2): câu hỏi >48h ĐÃ có ack `triaged-needs-human:` là câu
+#    hỏi đang PARK chờ NGƯỜI quyết. Nó phải VẪN hiện ở dòng "TREO LÂU" (đang mở thật) nhưng
+#    KHÔNG được sinh owner-hint "dispatch <agent>" — nếu không, mỗi câu hỏi đã park sinh 1 dòng
+#    WARN rác 2 lần/ngày VĨNH VIỄN. Nhánh <48h đã lọc sẵn bằng _acked; nhánh >48h thì thiếu.
+def case_owner_hint_aged_respects_ack():
+    root, inbox = mkbus()
+    try:
+        write_events(os.path.join(inbox, "Wags.jsonl"),
+                     [ev("Wags", "question", "loi-parked-needs-taylor", ago(6)),
+                      ev("Wags", "status",
+                         "triaged-needs-human:Wags/loi-parked-needs-taylor", ago(5)),
+                      # Chứng: câu hỏi CÙNG TUỔI, CÙNG dạng topic nhưng KHÔNG ack ⇒ vẫn phải
+                      # có owner-hint. Không có nhánh đối chứng này thì một mutation "bỏ hẳn
+                      # owner-hint cho aged" cũng làm ca này XANH.
+                      ev("Wags", "question", "loi-chua-ai-nhan-needs-taylor", ago(6))])
+        lines, _ = run_check5(root)
+        out = joined(lines)
+        own = [ln for ln in lines if "TỰ KHAI người phụ trách" in ln]
+        check("owner-hint aged: câu hỏi ĐÃ ack (park chờ người) KHÔNG sinh dòng owner-hint",
+              not any("loi-parked-needs-taylor" in ln for ln in own), out)
+        check("owner-hint aged: câu hỏi CHƯA ai nhận VẪN sinh dòng owner-hint (đối chứng)",
+              any("loi-chua-ai-nhan-needs-taylor" in ln for ln in own), out)
+        check("aged: câu hỏi đã ack VẪN hiện ở dòng 'TREO LÂU' (nó đang mở thật)",
+              any("loi-parked-needs-taylor" in ln for ln in lines if "TREO LÂU" in ln), out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+# ── Ca 9g (round 3, required_change #4): thay cho điều kiện lọc "wt-*" ĐÃ GỠ (code chết). Bất
+#    biến thật: token owner là SEGMENT ĐẦU trước '-', nên với worktree tên `wt-<id>` token luôn
+#    ra đúng chữ "wt" và không bao giờ khớp khoá `wt-<id>` trong _KNOWN_AGENTS — dù thư mục
+#    worktree CÓ tồn tại trong agents/ (fixture mkbus tạo sẵn `wt-selfcheck-fixture`).
+def case_owner_hint_worktree_dir_never_becomes_owner():
+    root, inbox = mkbus()
+    try:
+        write_events(os.path.join(inbox, "Wags.jsonl"),
+                     [ev("Wags", "question", "loi-g-needs-wt-selfcheck-fixture", ago(0, 5))])
+        lines, _ = run_check5(root)
+        out = joined(lines)
+        check("owner-hint: worktree `wt-*` KHÔNG bao giờ thành owner có lệnh dispatch",
+              not any("dispatch.sh wt" in ln for ln in lines), out)
+        check("owner-hint: token 'wt' báo rõ là không khớp agent nào",
+              any("KHÔNG khớp agent nào" in ln and "loi-g-needs-wt-selfcheck-fixture" in ln
+                  for ln in lines), out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+# ── Ca 9d (round 2, required_change #3): owner token KHÔNG khớp agent thật nào (vd hậu tố
+#    "-needs-restart" không hề nói về agent) → PHẢI báo rõ, KHÔNG in lệnh dispatch cho một
+#    agent không tồn tại.
+def case_owner_hint_unmatched_agent_no_dispatch():
+    root, inbox = mkbus()
+    try:
+        write_events(os.path.join(inbox, "Wags.jsonl"),
+                     [ev("Wags", "question", "loi-f-needs-restart", ago(0, 5))])
+        lines, _ = run_check5(root)
+        out = joined(lines)
+        check("owner-hint: owner 'restart' không khớp agent thật nào → báo rõ, KHÔNG in "
+              "lệnh dispatch cho agent không tồn tại",
+              any("KHÔNG khớp agent nào" in ln and "loi-f-needs-restart" in ln for ln in lines)
+              and not any("dispatch.sh restart" in ln for ln in lines), out)
     finally:
         shutil.rmtree(root, ignore_errors=True)
 
@@ -287,7 +591,8 @@ def case_fresh_question_is_pending():
 #    selfcheck VẪN xanh trong lúc production đã lặp vòng thật (question 08-11T05:57:50Z →
 #    dispatch coord-2026-08-12 → INCONCLUSIVE → question coord-2026-08-12). Selfcheck chỉ pin
 #    một mẫu đại diện thì không bắt được lớp lỗi "quên mở rộng danh sách".
-WAGS_SELF_Q_PREFIXES = ("wags-fix-not-confirmed:", "wags-arch-review-inconclusive:")
+WAGS_SELF_Q_PREFIXES = ("wags-fix-not-confirmed:", "wags-arch-review-inconclusive:",
+                        "wags-autofix-review-needed:", "wags-arch-review-round2-unresolved:")
 
 
 def case_wagsfix_not_confirmed_is_warn_only():
@@ -394,6 +699,168 @@ def run_check10(wc_root):
     return lines, warn
 
 
+def run_check9(wc_root, today_d=None):
+    """Chạy khối CHECK9 thật trên một thư mục retro giả."""
+    lines, warn = [], []
+
+    def W(msg):
+        warn.append(msg)
+        lines.append(f"⚠️ {msg}")
+
+    def OK(msg):
+        lines.append(f"✅ {msg}")
+
+    today_d = today_d or dt.date.today()
+    ns = {"os": os, "re": re, "wc_root": wc_root, "W": W, "OK": OK, "lines": lines,
+          "today_d": today_d, "_date": dt.date, "_timedelta": dt.timedelta}
+    exec(compile(CHECK9_SRC, SRC + ":CHECK9", "exec"), ns)
+    return lines, warn
+
+
+def _mkretro(days_present, today_d):
+    """wc_root giả có mike/kb/incidents/retro/retro-<ngày>.md cho từng offset trong days_present."""
+    d = tempfile.mkdtemp(prefix="ops_health_check9_")
+    rd = os.path.join(d, "mike", "kb", "incidents", "retro")
+    os.makedirs(rd, exist_ok=True)
+    for off in days_present:
+        day = today_d - dt.timedelta(days=off)
+        with open(os.path.join(rd, f"retro-{day.isoformat()}.md"), "w", encoding="utf-8") as f:
+            f.write("# retro\n")
+    return d
+
+
+def case_c9_full_week_is_ok():
+    today = dt.date(2026, 8, 20)
+    root = _mkretro(range(1, 9), today)
+    try:
+        lines, warn = run_check9(root, today)
+        check("check9: đủ 7 ngày ⇒ OK, 0 WARN", not warn, joined(lines))
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+def case_c9_yesterday_missing_warns():
+    today = dt.date(2026, 8, 20)
+    root = _mkretro([2, 3, 4, 5, 6, 7, 8], today)   # thiếu đúng hôm qua
+    try:
+        lines, warn = run_check9(root, today)
+        out = joined(lines)
+        check("check9: thiếu hôm qua ⇒ WARN", len(warn) == 1, out)
+        check("check9: nói rõ nghi cron đêm qua chết", "HÔM QUA" in out, out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+def case_c9_older_gap_still_reported():
+    """Ca REGRESSION chính (sửa 2026-08-20): bản 1-ngày cũ trả OK cho đúng ca này ⇒ lần retro
+    bị mất 3 ngày trước biến mất khỏi mọi báo cáo vĩnh viễn."""
+    today = dt.date(2026, 8, 20)
+    root = _mkretro([1, 2, 4, 5, 6, 7, 8], today)   # thiếu ngày -3, hôm qua CÓ
+    try:
+        lines, warn = run_check9(root, today)
+        out = joined(lines)
+        check("check9: lỗ CŨ (không phải hôm qua) vẫn được báo", len(warn) == 1, out)
+        check("check9: nêu đúng ngày thiếu",
+              (today - dt.timedelta(days=3)).isoformat() in out, out)
+        check("check9: phân biệt lỗ cũ với ca hôm qua", "KHÔNG gồm hôm qua" in out, out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+def case_c9_no_demand_before_mechanism_existed():
+    """Sàn dưới = retro cũ nhất có thật: đừng đòi entry của ngày trước khi cơ chế tồn tại."""
+    today = dt.date(2026, 8, 20)
+    root = _mkretro([1, 2], today)   # cơ chế mới chạy 2 ngày
+    try:
+        lines, warn = run_check9(root, today)
+        check("check9: không đòi retro trước ngày cũ nhất có thật", not warn, joined(lines))
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+def case_c9_empty_dir_is_not_warn():
+    today = dt.date(2026, 8, 20)
+    root = _mkretro([], today)
+    try:
+        lines, warn = run_check9(root, today)
+        check("check9: thư mục retro rỗng ⇒ ℹ️, không WARN giả", not warn, joined(lines))
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+def _c9_write_retro_log(root, text):
+    """Ghi mike/logs/daily_retro.log vào wc_root giả (text=None ⇒ không tạo file)."""
+    ld = os.path.join(root, "mike", "logs")
+    os.makedirs(ld, exist_ok=True)
+    if text is not None:
+        with open(os.path.join(ld, "daily_retro.log"), "w", encoding="utf-8") as f:
+            f.write(text)
+
+
+# ── Ca 2026-08-25: check 9 TỪNG hardcode "nghi quoting bug 08-01" vào thông điệp, dẫn autofix
+# đi sai hướng 2 lần liên tiếp (08-20 lỗi truyền tải API; 08-25 HOST TẮT nên cron không fire).
+# 3 ca dưới khoá hành vi mới: nguyên nhân được TRA từ log, không đoán.
+def case_c9_started_but_incomplete():
+    today = dt.date(2026, 8, 20)
+    yday = (today - dt.timedelta(days=1)).isoformat()
+    root = _mkretro([2, 3], today)
+    try:
+        _c9_write_retro_log(root, f"[x] === daily_retro START (reviewing {yday}, chạy lúc y) ===\n")
+        lines, warn = run_check9(root, today)
+        j = joined(lines)
+        check("check9: log CÓ dòng START ⇒ quy lỗi vào chuỗi dispatch, không đổ cho cron",
+              warn and "CÓ dòng START" in j and "KHÔNG hề chạy" not in j, j)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+def case_c9_never_started_host_down():
+    today = dt.date(2026, 8, 20)
+    other = (today - dt.timedelta(days=5)).isoformat()
+    root = _mkretro([2, 3], today)
+    try:
+        _c9_write_retro_log(root, f"[x] === daily_retro START (reviewing {other}) ===\n")
+        lines, warn = run_check9(root, today)
+        j = joined(lines)
+        check("check9: log KHÔNG có START ⇒ nói rõ cron không fire, KHÔNG phải bug script",
+              warn and "KHÔNG hề chạy" in j and "CÓ dòng START" not in j, j)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+def case_c9_no_log_file_says_so():
+    today = dt.date(2026, 8, 20)
+    root = _mkretro([2, 3], today)
+    try:
+        _c9_write_retro_log(root, None)
+        lines, warn = run_check9(root, today)
+        j = joined(lines)
+        check("check9: không đọc được log ⇒ khai KHÔNG BIẾT, không đoán bừa",
+              warn and "KHÔNG đọc được" in j, j)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+def case_c9_red_control_one_day_window():
+    """RED control: đột biến cửa sổ về 1 ngày phải làm ĐỎ đúng ca lỗ-cũ ở trên."""
+    mut = CHECK9_SRC.replace("_RETRO_WINDOW_D = 7", "_RETRO_WINDOW_D = 1")
+    check("check9 RED: đột biến áp dụng được (hằng cửa sổ chưa trôi)", mut != CHECK9_SRC,
+          "không tìm thấy _RETRO_WINDOW_D để đột biến")
+    today = dt.date(2026, 8, 20)
+    root = _mkretro([1, 2, 4, 5, 6, 7, 8], today)
+    try:
+        lines, warn = [], []
+        ns = {"os": os, "re": re, "wc_root": root, "lines": lines,
+              "W": lambda m: (warn.append(m), lines.append(f"⚠️ {m}")),
+              "OK": lambda m: lines.append(f"✅ {m}"),
+              "today_d": today, "_date": dt.date, "_timedelta": dt.timedelta}
+        exec(compile(mut, SRC + ":CHECK9_MUT", "exec"), ns)
+        check("check9 RED (cửa sổ 1 ngày): lỗ cũ bị BỎ QUA ⇒ assertion chính phân biệt được",
+              not warn, joined(lines))
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
 def _mklog(content, age_seconds=0):
     """Dựng wc_root giả có mike/logs/notify_thread_errors.log; content=None ⇒ không tạo file."""
     d = tempfile.mkdtemp(prefix="ops_health_check10_")
@@ -418,8 +885,18 @@ def case_c10_no_file_is_ok():
         shutil.rmtree(root, ignore_errors=True)
 
 
+def _nte_ts(hours_ago):
+    """Timestamp bản ghi notify_thread, TƯƠNG ĐỐI với now.
+
+    Ngày cứng trong fixture sẽ tự mốc: cửa sổ 24h của check #10 nay áp lên TỪNG bản ghi
+    (sửa 2026-08-18), nên một fixture ghi "2026-08-16" sẽ tụt ra ngoài cửa sổ vài ngày sau
+    khi viết và ca test lặng lẽ đổi nghĩa (coding_guidelines §23 hệ luận 1).
+    """
+    return (dt.datetime.now().astimezone() - dt.timedelta(hours=hours_ago)).isoformat(timespec="seconds")
+
+
 def case_c10_fresh_log_warns():
-    root = _mklog("2026-08-02T23:14:57+07:00 notify_thread: KHONG phan giai duoc topic foo\n"
+    root = _mklog(f"{_nte_ts(1)} notify_thread: KHONG phan giai duoc topic foo\n"
                   "  ten hop le: architecture, trading_daily\n")
     try:
         lines, warn = run_check10(root)
@@ -443,7 +920,49 @@ def case_c10_fresh_log_without_timestamp_line():
         lines, warn = run_check10(root)
         out = joined(lines)
         check("check10: log không có dòng timestamp ⇒ vẫn WARN, không ném exception",
-              len(warn) == 1 and "không đọc được nội dung" in out, out)
+              len(warn) == 1 and "KHÔNG đọc được bản ghi nào có timestamp" in out, out)
+        check("check10: không có dòng timestamp ⇒ KHÔNG khẳng định mất tin",
+              "TIN NHẮN ĐÃ BỊ NUỐT" not in out, out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+# ── Ca c10-swap (2026-08-16, arch-review coord-2026-08-12 required_change #3): file
+#    notify_thread_errors.log chứa HAI loại bản ghi có hệ quả NGƯỢC nhau. "DA TU SUA VA GUI"
+#    nghĩa là caller đảo thứ tự đối số nhưng tin ĐÃ ĐẾN nơi; gộp nó vào tiêu đề "TIN NHẮN ĐÃ
+#    BỊ NUỐT" là nói với người rằng một tin đã giao là bị mất. "Sửa cả người ĐỌC, không chỉ
+#    người GHI."
+SWAP_LINE = (f'{_nte_ts(2)} notify_thread: DOI SO BI DAO (topic o vi tri 1, '
+             'message o vi tri 2) — DA TU SUA VA GUI toi topic "architecture". '
+             'SUA CALL SITE: dung `notify_thread.sh "<message>" <topic>`. caller=bin/foo.sh\n')
+HARD_LINE = f"{_nte_ts(1)} notify_thread: KHONG phan giai duoc topic bar\n"
+
+
+def case_c10_swap_recovery_is_not_swallowed():
+    root = _mklog(SWAP_LINE)
+    try:
+        lines, warn = run_check10(root)
+        out = joined(lines)
+        check("check10: CHỈ có bản ghi tự-sửa ⇒ KHÔNG nói 'TIN NHẮN ĐÃ BỊ NUỐT'",
+              "TIN NHẮN ĐÃ BỊ NUỐT" not in out, out)
+        check("check10: bản ghi tự-sửa vẫn WARN (call site còn sai) và nói rõ tin ĐÃ GỬI",
+              len(warn) == 1 and "ĐÃ ĐƯỢC GỬI" in out, out)
+        check("check10: bản ghi tự-sửa vẫn mang marker [WARN-ONLY]",
+              "[WARN-ONLY]" in out, out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+def case_c10_hard_error_wins_over_swap():
+    # Lỗi THẬT lẫn với bản ghi tự-sửa: không được để bản ghi tự-sửa che mất lỗi thật.
+    root = _mklog(SWAP_LINE + HARD_LINE)
+    try:
+        lines, warn = run_check10(root)
+        out = joined(lines)
+        check("check10: có lỗi THẬT lẫn bản ghi tự-sửa ⇒ vẫn báo TIN NHẮN ĐÃ BỊ NUỐT",
+              "TIN NHẮN ĐÃ BỊ NUỐT" in out, out)
+        check("check10: trích đúng dòng lỗi THẬT, không phải dòng tự-sửa",
+              "KHONG phan giai duoc topic bar" in out and "DA TU SUA VA GUI" not in out, out)
     finally:
         shutil.rmtree(root, ignore_errors=True)
 
@@ -453,6 +972,175 @@ def case_c10_old_log_is_ok():
     try:
         lines, warn = run_check10(root)
         check("check10: log cũ hơn 24h ⇒ OK (cảnh báo tự tắt)", not warn, joined(lines))
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+# ── Ca c10-window (2026-08-18, sự cố thật ops-health-SpaceX 02:58 ICT): file append-only
+#    KHÔNG xoay vòng ⇒ mtime của FILE chỉ nói "vừa có ai ghi", không nói bản ghi NÀO mới.
+#    Bản trước lọc cửa sổ 24h theo mtime rồi đọc TOÀN BỘ lịch sử: một dòng tự-sửa mới làm file
+#    tươi, check lôi lỗi thật 6 ngày trước ra báo "TIN NHẮN ĐÃ BỊ NUỐT trong 24h qua" —
+#    sai sự kiện, sai mốc thời gian, và che luôn kết luận đúng của bản ghi mới.
+def case_c10_old_hard_error_not_reported_as_recent():
+    root = _mklog("2026-08-12T18:46:56+07:00 notify_thread: KHONG phan giai duoc topic cu\n"
+                  + SWAP_LINE)
+    try:
+        lines, warn = run_check10(root)
+        out = joined(lines)
+        check("check10: lỗi THẬT cũ >24h + bản ghi tự-sửa mới ⇒ KHÔNG báo 'TIN NHẮN ĐÃ BỊ NUỐT'",
+              "TIN NHẮN ĐÃ BỊ NUỐT" not in out, out)
+        check("check10: bản ghi MỚI (tự-sửa) vẫn được báo đúng là tin ĐÃ GỬI",
+              len(warn) == 1 and "ĐÃ ĐƯỢC GỬI" in out, out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+def case_c10_fresh_file_all_records_old_is_ok():
+    # File vừa được chạm (mtime tươi) nhưng MỌI bản ghi đều cũ hơn 24h ⇒ OK thật, KHÔNG được
+    # rơi vào nhánh "không đọc được bản ghi nào có timestamp" (nhánh đó dành cho file rác).
+    root = _mklog("2026-07-01T10:00:00+07:00 notify_thread: loi cu\n")
+    try:
+        lines, warn = run_check10(root)
+        out = joined(lines)
+        check("check10: file tươi nhưng mọi bản ghi đều cũ >24h ⇒ OK, 0 WARN", not warn, out)
+        check("check10: ca đó KHÔNG bị nhầm sang nhánh 'không đọc được bản ghi'",
+              "KHÔNG đọc được bản ghi nào có timestamp" not in out, out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+# ── Check 10b (dispatch.sh TỪ CHỐI prompt rỗng/quá ngắn) ────────────────────────────────
+# Thêm 2026-08-21 vòng 3 (arch-reviewer, required_change): logic 10b là code MỚI và trước đó
+# chỉ được canh bằng 2 assertion `grep chuỗi` trong bin/dispatch_tiny_prompt_selfcheck.sh —
+# tức kiểm SỰ TỒN TẠI của khối, không kiểm HÀNH VI của nó. Cùng khuôn extract-and-exec như
+# check #10 ngay trên: cửa sổ 24h áp per-record, ts rác thì GIỮ (fail-loud), file đọc không
+# được thì nói KHÔNG BIẾT chứ không im lặng thành OK.
+def run_check10b(wc_root):
+    lines, warn = [], []
+
+    def W(msg):
+        warn.append(msg)
+        lines.append(f"⚠️ {msg}")
+
+    def OK(msg):
+        lines.append(f"✅ {msg}")
+
+    import time as _time_mod
+    ns = {"os": os, "re": re, "wc_root": wc_root, "W": W, "OK": OK, "lines": lines,
+          "_time": _time_mod, "_dt": dt}
+    exec(compile(CHECK10B_SRC, SRC + ":CHECK10B", "exec"), ns)
+    return lines, warn
+
+
+def _drp_ts(hours_ago):
+    """Timestamp reject TƯƠNG ĐỐI với now — không hardcode ngày (coding_guidelines §23)."""
+    return (dt.datetime.now().astimezone() - dt.timedelta(hours=hours_ago)).isoformat(timespec="seconds")
+
+
+def _mkdrp(lines_):
+    """Dựng wc_root giả có mike/logs/dispatch_rejected_prompts.log; lines_=None ⇒ không tạo file."""
+    d = tempfile.mkdtemp(prefix="ops_health_check10b_")
+    if lines_ is not None:
+        logdir = os.path.join(d, "mike", "logs")
+        os.makedirs(logdir, exist_ok=True)
+        with open(os.path.join(logdir, "dispatch_rejected_prompts.log"), "w", encoding="utf-8") as f:
+            f.write("".join(l + "\n" for l in lines_))
+    return d
+
+
+def _drp_line(ts, prompt="x", to="Taylor", frm="Mike", nbytes=1):
+    return f"{ts}\tto={to}\tfrom={frm}\tbytes={nbytes}\tprompt={prompt}"
+
+
+def case_c10b_no_file_is_ok():
+    root = _mkdrp(None)
+    try:
+        lines, warn = run_check10b(root)
+        check("check10b: không có file log ⇒ OK, 0 WARN", not warn, joined(lines))
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+def case_c10b_fresh_reject_warns():
+    root = _mkdrp([_drp_line(_drp_ts(1))])
+    try:
+        lines, warn = run_check10b(root)
+        out = joined(lines)
+        check("check10b: 1 reject cách đây 1h ⇒ WARN", len(warn) == 1, out)
+        check("check10b: WARN mang nhãn [WARN-ONLY] (user quyết, không đẻ vòng autofix)",
+              "[WARN-ONLY]" in out, out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+def case_c10b_old_reject_is_ok():
+    root = _mkdrp([_drp_line(_drp_ts(25))])
+    try:
+        lines, warn = run_check10b(root)
+        check("check10b: reject 25h trước ⇒ ngoài cửa sổ 24h ⇒ OK, 0 WARN", not warn, joined(lines))
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+def case_c10b_window_is_per_record():
+    # Cửa sổ áp lên TỪNG BẢN GHI, không phải mtime file: 1 cũ + 1 mới ⇒ đếm ĐÚNG 1.
+    root = _mkdrp([_drp_line(_drp_ts(25), prompt="cu"), _drp_line(_drp_ts(1), prompt="moi")])
+    try:
+        lines, warn = run_check10b(root)
+        out = joined(lines)
+        check("check10b: 25h + 1h ⇒ WARN", len(warn) == 1, out)
+        check("check10b: đếm ĐÚNG 1 (cửa sổ per-record, không phải mtime file)",
+              "TỪ CHỐI 1 dispatch" in out, out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+def case_c10b_unparseable_ts_is_kept():
+    # ts đúng dạng ngày nhưng KHÔNG parse được ⇒ GIỮ (fail-loud), không lặng lẽ loại trừ.
+    root = _mkdrp(["2026-13-45T99:99:99\tto=Taylor\tfrom=Mike\tbytes=1\tprompt=x"])
+    try:
+        lines, warn = run_check10b(root)
+        check("check10b: ts rác ⇒ GIỮ bản ghi (fail-loud), vẫn WARN", len(warn) == 1, joined(lines))
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+def case_c10b_unreadable_file_says_unknown():
+    # File CÓ nhưng đọc không được ⇒ phải nói KHÔNG BIẾT. Nuốt thành OK là biến chính cơ chế
+    # chống fail-silent thành fail-silent (arch-reviewer vòng 3).
+    root = _mkdrp([_drp_line(_drp_ts(1))])
+    path = os.path.join(root, "mike", "logs", "dispatch_rejected_prompts.log")
+    try:
+        os.chmod(path, 0o000)
+        if os.access(path, os.R_OK):   # chạy dưới root ⇒ chmod vô hiệu, bỏ ca này
+            check("check10b: (bỏ qua) đang chạy quyền root, không mô phỏng được file cấm đọc",
+                  True, "")
+            return
+        lines, warn = run_check10b(root)
+        out = joined(lines)
+        check("check10b: file cấm đọc ⇒ WARN 'KHÔNG ĐỌC ĐƯỢC', không im lặng thành OK",
+              len(warn) == 1 and "KHÔNG ĐỌC ĐƯỢC" in out, out)
+    finally:
+        os.chmod(path, 0o600)
+        shutil.rmtree(root, ignore_errors=True)
+
+
+def case_c10b_red_control_window():
+    """RED control: nới cửa sổ 24h→100 ngày phải làm ĐỎ đúng ca 'reject 25h ⇒ OK'."""
+    mut = CHECK10B_SRC.replace("< 86400", "< 8640000")
+    check("check10b RED: đột biến áp dụng được (hằng cửa sổ chưa trôi)", mut != CHECK10B_SRC,
+          "không tìm thấy '< 86400' để đột biến")
+    root = _mkdrp([_drp_line(_drp_ts(25))])
+    try:
+        lines, warn = [], []
+        import time as _time_mod
+        ns = {"os": os, "re": re, "wc_root": root, "lines": lines,
+              "W": lambda m: (warn.append(m), lines.append(f"⚠️ {m}")),
+              "OK": lambda m: lines.append(f"✅ {m}"),
+              "_time": _time_mod, "_dt": dt}
+        exec(compile(mut, SRC + ":CHECK10B_MUT", "exec"), ns)
+        check("check10b RED (cửa sổ 100 ngày): reject 25h LẠI bị báo ⇒ ca 24h phân biệt được",
+              len(warn) == 1, joined(lines))
     finally:
         shutil.rmtree(root, ignore_errors=True)
 
@@ -622,7 +1310,13 @@ def case_rollup_of_umbrella_question():
             umbrella("tong-khong-khai", None),
             umbrella("tong-rollup-rong", []),
             umbrella("tong-rollup-sai-kieu", "con-a"),
-            umbrella("tong-dang-agent-slash", ["Winston/con-b"]),
+            # Dạng "Agent/topic" (người copy thẳng chuỗi checker in ra) vẫn phải khớp — NHƯNG
+            # phải là ĐÚNG agent sở hữu câu hỏi con. Bản đầu của ca này viết "Winston/con-b"
+            # cho câu hỏi `Mike/con-b` và assert nó KHỚP: tức chính là hành vi false-CLOSED
+            # chéo agent mà arch-review round 3 bắt được, bị đóng đinh thành assertion. Sửa
+            # về đúng agent, và thêm ca dưới để khoá chiều sai lại.
+            umbrella("tong-dang-agent-slash", ["Mike/con-b"]),
+            umbrella("tong-dang-agent-SAI", ["Winston/con-b"]),
             # Con đã đóng TRƯỚC khi escalation tổng được mở ⇒ không được tính là đã quyết
             # (giữ đúng ràng buộc thời gian của _resolved: escalation mở lại là chuyện mới).
             umbrella("tong-con-dong-truoc-khi-hoi", ["con-dong-som"]),
@@ -643,8 +1337,11 @@ def case_rollup_of_umbrella_question():
               "tong-du-2-con" not in out, out)
         check("rollup_of RED CONTROL: thiếu 1 con chưa đóng ⇒ TỔNG vẫn pending (all, không any)",
               "tong-thieu-1-con" in pending, out)
-        check("rollup_of: dạng 'Agent/topic' vẫn khớp được con",
+        check("rollup_of: dạng 'Agent/topic' ĐÚNG agent vẫn khớp được con",
               "tong-dang-agent-slash" not in out, out)
+        check("rollup_of: dạng 'Agent/topic' SAI agent (Winston/con-b cho câu hỏi Mike/con-b) "
+              "⇒ KHÔNG khớp — lời khai agent phải được tôn trọng, không phải trang trí",
+              "tong-dang-agent-SAI" in pending, out)
         check("rollup_of: con đóng TRƯỚC khi tổng được hỏi ⇒ KHÔNG đóng tổng (giữ ràng buộc ts)",
               "tong-con-dong-truoc-khi-hoi" in pending, out)
         for t in ("tong-khong-khai", "tong-rollup-rong", "tong-rollup-sai-kieu"):
@@ -652,6 +1349,208 @@ def case_rollup_of_umbrella_question():
                   t in pending, out)
         check("rollup_of: các câu hỏi CON vẫn tự đóng như cũ (không hồi quy)",
               "con-a" not in pending and "con-b" not in pending, out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+# ── Ca 15c (2026-08-16, job Wags_20260816_090511): HAI lỗ của `rollup_of` khi topic con khớp
+#    SUBSTRING. arch-review coord-2026-08-14 (killer_objection) tái lập được cả hai trong
+#    sandbox; 8 assertion của ca 15b PASS ở CẢ bản lỏng lẫn bản chặt nên đang mù chiều này.
+#    Lỗ 1 — MỘT resolver thoả NHIỀU topic con: `all()` không còn nghĩa là "mọi con đã quyết".
+#    Lỗ 2 — topic con viết CẮT CỤT/tiền tố: khớp bừa vào resolver của câu hỏi con KHÁC.
+#    Cả hai đều đóng oan escalation của USER, đúng thứ `_acked` đã chọn exact để tránh.
+#    RED CONTROL: đổi `_resolved_exact` → `_resolved` trong ops_health_check.sh làm 2
+#    assertion dưới đây đỏ (đã chạy thật), tức chúng khoá đúng chiều hồi quy.
+def case_rollup_of_substring_holes():
+    root, inbox = mkbus()
+    try:
+        q_ts = ago(0, 6)
+        def umbrella(topic, subs):
+            e = ev("Mike", "question", topic, q_ts)
+            e["payload"] = {"rollup_of": subs}
+            return e
+        resolves_ev = ev("Wags", "decision", "quyet-gop-2-viec", ago(0, 1))
+        resolves_ev["payload"] = {"resolves": ["con-x", "con-y"]}
+        write_events(os.path.join(inbox, "Mike.jsonl"), [
+            # Lỗ 1: 2 con, nhưng chỉ có ĐÚNG 1 decision với topic dài chứa cả 2 chuỗi con.
+            umbrella("tong-mot-resolver-nuot-hai-con", ["patternB", "backlog"]),
+            # Lỗ 2: topic con viết cắt cụt; resolver thật chỉ đóng câu hỏi con DÀI hơn.
+            umbrella("tong-topic-con-cat-cut", ["retro-pattern-recurring"]),
+            ev("Mike", "question", "retro-pattern-recurring-wakeup-miss", ago(1)),
+            # Đường ĐÓNG HỢP LỆ bằng 1 event: decision khai TƯỜNG MINH `resolves` từng con.
+            # Phải giữ được sau khi siết exact, nếu không cơ chế rollup thành vô dụng.
+            umbrella("tong-dong-bang-resolves-tuong-minh", ["con-x", "con-y"]),
+        ])
+        write_events(os.path.join(inbox, "Wags.jsonl"), [
+            ev("Wags", "decision", "retro-patternB-and-backlog-summary", ago(0, 1)),
+            ev("Wags", "decision", "retro-pattern-recurring-wakeup-miss", ago(0, 1)),
+            resolves_ev,
+        ])
+        lines, _ = run_check5(root)
+        out = joined(lines)
+        pending = joined([ln for ln in lines if "trong 48h qua CHƯA thấy answer" in ln])
+        check("rollup_of: MỘT resolver KHÔNG được thoả nhiều topic con (khớp exact, không substring)",
+              "tong-mot-resolver-nuot-hai-con" in pending, out)
+        check("rollup_of: topic con CẮT CỤT/tiền tố KHÔNG khớp resolver của câu hỏi con khác",
+              "tong-topic-con-cat-cut" in pending, out)
+        check("rollup_of: `resolves` khai tường minh vẫn đóng được tổng bằng 1 event (không thắt chết cơ chế)",
+              "tong-dong-bang-resolves-tuong-minh" not in out, out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+# ── Ca 15e (2026-08-16, arch-review d65167a9): HAI kiểu đóng con hợp lệ mà bản exact đầu tiên
+#    KHÔNG phân biệt được. Mọi assertion 15b/15c đều dùng resolver TRÙNG KHÍT hoặc `resolves`
+#    dạng TRẦN, nên chiều "trần ↔ Agent/topic" hoàn toàn không được phủ.
+#    (a) PHẢI ĐÓNG: con đóng bằng decision gộp khai resolves=["Mike/con-B"] (đúng khuôn
+#        bin/close_bus_question.py) trong khi rollup_of viết dạng trần ["con-B"]. Trước
+#        `_same_ref`, `q_topic in explicit` so nguyên chuỗi ⇒ không khớp ⇒ tổng kẹt VĨNH VIỄN.
+#    (b) PHẢI PENDING (pin CÓ CHỦ ĐÍCH, không phải bug): con chỉ đóng bằng quy ước hậu-tố
+#        trạng thái ("<topic>-question-closed"). `_resolved` bản chính chấp nhận kiểu này qua
+#        nhánh substring, nhưng với rollup thì KHÔNG — vì chính nhánh substring đó là thứ cho
+#        MỘT resolver nuốt nhiều topic con (lỗ 1 của ca 15c). Đổi lại, tổng phải tự đăng
+#        `answer` giữ nguyên topic tổng — đã ghi vào MIKE.md § Escalation TỔNG.
+#        Hướng lỗi ở đây là false-PENDING (tốn 1 job wags_autofix), an toàn hơn hẳn
+#        false-CLOSED (nuốt quyết định của user) — đó là lý do chọn pin thay vì nới.
+#    RED CONTROL: bỏ `_same_ref` (quay lại `q_topic in explicit`) ⇒ assertion (a) đỏ.
+def case_rollup_of_ref_forms():
+    root, inbox = mkbus()
+    try:
+        q_ts = ago(0, 6)
+        def umbrella(topic, subs):
+            e = ev("Mike", "question", topic, q_ts)
+            e["payload"] = {"rollup_of": subs}
+            return e
+        # (a) rollup_of TRẦN, resolves QUALIFIED — hai dạng phải gặp được nhau.
+        gop = ev("Wags", "decision", "quyet-gop-qualified", ago(0, 1))
+        gop["payload"] = {"resolves": ["Mike/con-qual-1", "Mike/con-qual-2"]}
+        # Chiều ngược lại: rollup_of QUALIFIED, resolves TRẦN.
+        gop2 = ev("Wags", "decision", "quyet-gop-tran", ago(0, 1))
+        gop2["payload"] = {"resolves": ["con-nguoc-1"]}
+        # ĐỐI CHỨNG false-CLOSED: cùng tên con nhưng KHÁC agent ⇒ TUYỆT ĐỐI không được khớp.
+        gop3 = ev("Wags", "decision", "quyet-gop-khac-agent", ago(0, 1))
+        gop3["payload"] = {"resolves": ["Taylor/con-khac-agent"]}
+        write_events(os.path.join(inbox, "Mike.jsonl"), [
+            umbrella("tong-tran-vs-qualified", ["con-qual-1", "con-qual-2"]),
+            umbrella("tong-qualified-vs-tran", ["Mike/con-nguoc-1"]),
+            umbrella("tong-khac-agent-khong-duoc-khop", ["Mike/con-khac-agent"]),
+            # (b) con CHỈ đóng bằng hậu-tố trạng thái.
+            umbrella("tong-con-dong-kieu-hau-to", ["con-hau-to"]),
+            ev("Mike", "question", "con-hau-to", ago(1)),
+        ])
+        write_events(os.path.join(inbox, "Wags.jsonl"), [
+            gop, gop2, gop3,
+            ev("Wags", "decision", "con-hau-to-question-closed", ago(0, 1)),
+        ])
+        lines, _ = run_check5(root)
+        out = joined(lines)
+        pending = joined([ln for ln in lines if "trong 48h qua CHƯA thấy answer" in ln])
+        check("rollup_of TRẦN + resolves 'Agent/topic' ⇒ tổng PHẢI tự đóng",
+              "tong-tran-vs-qualified" not in out, out)
+        check("rollup_of 'Agent/topic' + resolves TRẦN ⇒ tổng PHẢI tự đóng (đối xứng 2 chiều)",
+              "tong-qualified-vs-tran" not in out, out)
+        check("ĐỐI CHỨNG false-CLOSED: 'Mike/con' KHÔNG được khớp 'Taylor/con' (khác agent)",
+              "tong-khac-agent-khong-duoc-khop" in pending, out)
+        check("PIN có chủ đích: con đóng kiểu hậu-tố trạng thái ⇒ tổng VẪN pending "
+              "(rollup không nhận substring; xem MIKE.md § Escalation TỔNG)",
+              "tong-con-dong-kieu-hau-to" in pending, out)
+        check("ĐỐI CHỨNG: chính câu hỏi CON đó vẫn tự đóng như cũ (không hồi quy _resolved)",
+              "con-hau-to" not in pending.replace("tong-con-dong-kieu-hau-to", ""), out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+# ── Ca 15f (2026-08-16, arch-review round 3): tiêu chí "đã ở dạng Agent/topic" của `_same_ref`
+#    bản đầu là `"/" in s` — SAI CẢ HAI CHIỀU, reviewer tái lập được cả hai:
+#    (a) FALSE-PENDING: topic TỰ NÓ chứa '/' (`selfcheck-red: mike/bin/x.py` — lớp câu hỏi
+#        ĐÔNG NHẤT trong backlog thật) bị tưởng là đã qualified ⇒ không bao giờ ghép được với
+#        dạng còn lại ⇒ rollup kẹt vĩnh viễn, đốt 1 job wags_autofix/ngày.
+#    (b) FALSE-CLOSED chéo agent: sub TRẦN + resolves của agent KHÁC khớp nhau vì chỉ MỘT bên
+#        có '/'. Ca 15e cũ chỉ pin biến thể "cả hai bên qualified" nên mù hoàn toàn với ca này.
+#    Fix: `_split_ref` chỉ bóc tiền tố khi nó là agent-id CÓ THẬT (known_agents, lấy từ tên
+#    file inbox), bên còn lại lấy agent NGỮ CẢNH, rồi so CẢ CẶP (agent, topic).
+#    RED CONTROL: quay `_split_ref` về `if "/" in s: return s.split("/",1)` ⇒ (a) và (b) đỏ.
+def case_rollup_of_ref_forms_agent_aware():
+    root, inbox = mkbus()
+    try:
+        q_ts = ago(0, 6)
+        # Topic THẬT đang pending trên bus (không phải chuỗi bịa): chúng chứa '/' ở giữa.
+        # HAI topic khác nhau cho (a) và (a'): dùng CHUNG một chuỗi thì resolver của ca này
+        # đóng luôn ca kia, và mutation "quay về tiêu chí `\"/\" in s`" chỉ làm đỏ 1 trong 2
+        # (đã đo) — tức một assertion xanh nhờ đường không thuộc phạm vi nó đang đo.
+        real = "selfcheck-red: mike/bin/job_cancel_guard_selfcheck.py"
+        real_b = "selfcheck-red: mike/bin/plan_cash_commitment_selfcheck.py"
+
+        def umbrella(topic, subs):
+            e = ev("Mike", "question", topic, q_ts)
+            e["payload"] = {"rollup_of": subs}
+            return e
+
+        # LƯU Ý cách dựng: agent của một resolver lấy từ TÊN FILE (`_agent_of`), không phải
+        # field agent_id — nên quyết định của Taylor phải nằm trong Taylor.jsonl mới đúng ca.
+        # `known_agents` cũng lấy từ tên file inbox: {Mike, Taylor, Wags}.
+        write_events(os.path.join(inbox, "Mike.jsonl"), [
+            # (a) sub TRẦN, đóng bằng resolves QUALIFIED — trên topic tự chứa '/'.
+            umbrella("tong-topic-co-dau-gach", [real]),
+            # (b) sub TRẦN của Mike, chỉ có quyết định của TAYLOR ⇒ phải Ở LẠI pending.
+            umbrella("tong-cheo-agent-sub-tran", ["con-cheo"]),
+            # (c) con ĐÃ đóng thật, nhưng danh sách có phần tử rỗng ⇒ fail-closed cả tổng.
+            umbrella("tong-co-phan-tu-rong", ["con-that", ""]),
+            # (c') ĐỐI CHỨNG cho (c): y hệt nhưng KHÔNG có phần tử rỗng ⇒ phải đóng. Không
+            #      có dòng này thì (c) xanh cả khi `con-that` đơn giản là không khớp được.
+            umbrella("tong-khong-co-phan-tu-rong", ["con-that"]),
+            ev("Mike", "question", "con-that", ago(1)),
+            ev("Mike", "decision", "con-that", ago(0, 1)),
+        ])
+        write_events(os.path.join(inbox, "Wags.jsonl"), [
+            ev("Wags", "decision", "quyet-gop-1", ago(0, 1), {"resolves": [f"Mike/{real}"]}),
+            # (a') chiều ngược: sub QUALIFIED, đóng bằng resolver topic TRẦN cùng agent.
+            ev("Wags", "question", "tong-cua-wags-sub-tran", q_ts,
+               {"rollup_of": [f"Wags/{real_b}"]}),
+            ev("Wags", "decision", real_b, ago(0, 1)),
+        ])
+        write_events(os.path.join(inbox, "Taylor.jsonl"), [
+            ev("Taylor", "decision", "quyet-cua-taylor", ago(0, 1),
+               {"resolves": ["Taylor/con-cheo"]}),
+        ])
+        lines, _ = run_check5(root)
+        out = joined(lines)
+        pending = joined([ln for ln in lines if "trong 48h qua CHƯA thấy answer" in ln])
+        check("(a) topic con TỰ CHỨA '/' + resolves qualified ⇒ tổng PHẢI tự đóng "
+              "(trước fix: kẹt pending vĩnh viễn — lớp câu hỏi đông nhất trên bus thật)",
+              "tong-topic-co-dau-gach" not in pending, out)
+        check("(a') chiều ngược: sub có '/' + resolves TRẦN cùng agent ⇒ cũng PHẢI đóng",
+              "tong-cua-wags-sub-tran" not in pending, out)
+        check("(b) FALSE-CLOSED chéo agent: sub TRẦN của Mike KHÔNG được đóng bằng "
+              "resolves ['Taylor/con-cheo'] — hướng lỗi nguy hiểm nhất",
+              "tong-cheo-agent-sub-tran" in pending, out)
+        check("phần tử RỖNG trong rollup_of ⇒ fail-closed CẢ tổng, không lọc lặng rồi "
+              "all() trên ít con hơn số đã khai",
+              "tong-co-phan-tu-rong" in pending, out)
+        check("ĐỐI CHỨNG cho ca trên: cùng danh sách nhưng KHÔNG có phần tử rỗng ⇒ đóng "
+              "bình thường (chứng minh (c) đỏ vì phần tử rỗng, không phải vì con không khớp)",
+              "tong-khong-co-phan-tu-rong" not in pending, out)
+        check("DIAGNOSTIC: tổng không đóng được thì in ra CON NÀO chưa khớp (fail-closed "
+              "đúng nhưng câm thì người đăng không sửa được)",
+              "topic con CHƯA khớp" in out, out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+# ── Ca 15d (2026-08-16): wc_root SAI ⇒ bus/inbox không tồn tại. Trước fix, mọi danh sách rỗng
+#    ⇒ check in ✅ "không có câu hỏi" — im lặng hoá TOÀN BỘ kênh backlog. arch-reviewer vấp
+#    phải khi audit coord-2026-08-14 (check fail_silent, đề nghị mở ticket riêng).
+def case_missing_inbox_dir_is_warn_not_green():
+    root = tempfile.mkdtemp(prefix="ops_health_selfcheck_noinbox_")
+    try:
+        lines, warn = run_check5(root)   # KHÔNG tạo mike/bus/inbox
+        out = joined(lines)
+        check("inbox_dir không tồn tại ⇒ WARN, KHÔNG in ✅ '0 câu hỏi'",
+              "Không có câu hỏi (question) nào đang chờ xử lý" not in out, out)
+        check("inbox_dir không tồn tại ⇒ nói rõ KHÔNG kiểm tra được (khác hẳn 'không có')",
+              any("KHÔNG tìm thấy thư mục bus/inbox" in w for w in warn), out)
+        check("inbox_dir không tồn tại CONTROL: không dòng ✅ nào của check #5",
+              "✅" not in out, out)
     finally:
         shutil.rmtree(root, ignore_errors=True)
 
@@ -670,6 +1569,35 @@ def case_ack_suppress_days_capped():
         pending = joined([ln for ln in lines if "trong 48h qua CHƯA thấy answer" in ln])
         check("suppress_days khổng lồ bị cắt trần: ack 20 ngày trước KHÔNG còn tắt dispatch",
               "window-vo-han" in pending, out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+# ── Ca 15c (arch-review coord-2026-09-03, commit c437548b): suppress_days>0 phải hết hạn
+#    theo THỜI ĐIỂM CHẠY CHECK (_now), không phải theo ts của câu hỏi (q_ts). Ca 14 KHÔNG
+#    phủ được lỗi này vì câu hỏi ở đó bị REISSUE (q_ts mới hơn ack) — với q_ts cố định
+#    (câu hỏi không tái phát, ca thật Winston/deposit-rate-refresh-question), a_until =
+#    a_ts + N luôn >= q_ts vĩnh viễn bất kể N vì a_ts luôn > q_ts (ack đăng SAU câu hỏi).
+#    arch-reviewer tái lập: revert `_acked` về so a_until >= q_ts → toàn bộ 234 assertion
+#    (kể cả ca 14) VẪN xanh — cần ca RIÊNG này để mutation MU5 bắt được đúng dòng đã sửa.
+def case_ack_suppress_days_expires_by_now_not_qts():
+    root, inbox = mkbus()
+    try:
+        # Câu hỏi trong cửa sổ 48h, KHÔNG tái phát (chỉ 1 event, q_ts cố định).
+        write_events(os.path.join(inbox, "Mike.jsonl"),
+                     [ev("Mike", "question", "khong-tai-phat-het-han", ago(0, 40))])
+        e = ev("Wags", "status", "triaged-needs-human: khong-tai-phat-het-han", ago(0, 30))
+        e["payload"] = {"suppress_days": 1}   # a_until = a_ts + 1d, hết hạn ~18h trước
+        write_events(os.path.join(inbox, "Wags.jsonl"), [e])
+        lines, _ = run_check5(root)
+        out = joined(lines)
+        pending = joined([ln for ln in lines if "trong 48h qua CHƯA thấy answer" in ln])
+        human = joined([ln for ln in lines if "ĐÃ TRIAGE, chờ NGƯỜI quyết" in ln])
+        check("suppress_days=1 hết hạn (so với NOW, không phải q_ts cố định): "
+              "câu hỏi KHÔNG tái phát quay lại routable",
+              "khong-tai-phat-het-han" in pending, out)
+        check("suppress_days=1 hết hạn: KHÔNG còn ở dòng ĐÃ TRIAGE/park",
+              "khong-tai-phat-het-han" not in human, out)
     finally:
         shutil.rmtree(root, ignore_errors=True)
 
@@ -949,29 +1877,439 @@ def case_c11_missing_and_corrupt_never_silent():
         shutil.rmtree(d, ignore_errors=True)
 
 
+# --- check #12: ccdb bridge mất wakeup one-shot (thêm 2026-08-17, job Wags_20260817_193233) ---
+# Cùng khuôn extract-and-test như check #10/#11, và vì đúng LÝ DO đó: check #12 tồn tại để phát
+# hiện một sự cố VÔ HÌNH (wakeup mất thì "không có gì xảy ra"). Nếu chính nó hỏng mà im lặng
+# xanh thì nó tệ hơn không có. `subprocess` được tiêm giả để khỏi phụ thuộc journalctl thật.
+class _FakeCompleted:
+    def __init__(self, returncode=0, stdout="", stderr=""):
+        self.returncode, self.stdout, self.stderr = returncode, stdout, stderr
+
+
+class _FakeSubprocess:
+    """Đứng thay module subprocess: trả sẵn kết quả, hoặc ném lỗi đã hẹn.
+
+    GHI LẠI argv của lời gọi: tiêm giả nghĩa là mọi thứ về CÁCH gọi journalctl (tên unit,
+    --user hay system, cửa sổ thời gian) nằm ngoài tầm kiểm — arch-review vòng 2 chạy thử 3
+    mutation (đổi tên unit, bỏ --user, đổi -24h thành -4000h) và cả 3 đều XANH. `calls` là
+    chỗ ca `case_c12_journalctl_invocation_is_pinned` bịt lại lỗ đó.
+    """
+
+    def __init__(self, result=None, raises=None):
+        self._result, self._raises = result, raises
+        self.calls = []
+
+    def run(self, *a, **_kw):
+        self.calls.append(a[0] if a else [])
+        if self._raises is not None:
+            raise self._raises
+        return self._result
+
+
+def run_check12(fake_sub):
+    lines, warn = [], []
+
+    def W(msg):
+        warn.append(msg)
+        lines.append(f"⚠️ {msg}")
+
+    def OK(msg):
+        lines.append(f"✅ {msg}")
+
+    ns = {"subprocess": fake_sub, "W": W, "OK": OK, "lines": lines}
+    exec(compile(CHECK12_SRC, SRC + ":CHECK12", "exec"), ns)
+    return lines, warn
+
+
+_C12_DROP = ("Aug 18 02:50:02 sgms python[1]: 2026-08-17 19:50:02 [ERROR] "
+             "claude_discord.cogs.scheduler: ONE_SHOT_DROPPED: task 41 (dispatch-wake-abc) was "
+             "claimed and deleted but never reached Claude — this wakeup is lost and will NOT retry")
+
+
+def case_c12_clean_journal_is_ok():
+    lines, warn = run_check12(_FakeSubprocess(_FakeCompleted(0, "some boring INFO line\n")))
+    check("check12: journal sạch ⇒ OK, 0 WARN", not warn, joined(lines))
+
+
+def case_c12_dropped_wakeup_warns():
+    lines, warn = run_check12(_FakeSubprocess(_FakeCompleted(0, _C12_DROP + "\n")))
+    out = joined(lines)
+    check("check12: có ONE_SHOT_DROPPED ⇒ WARN", len(warn) == 1, out)
+    # Đếm SAI thì người đọc tưởng mất 1 wakeup trong khi mất nhiều.
+    lines2, warn2 = run_check12(
+        _FakeSubprocess(_FakeCompleted(0, _C12_DROP + "\n" + _C12_DROP + "\n"))
+    )
+    check("check12: đếm đúng số wakeup bị mất", "MẤT 2 wakeup" in joined(lines2), joined(lines2))
+    check("check12: WARN-ONLY (không kích autofix cho việc đã mất, không sửa lại được)",
+          "[WARN-ONLY]" in out, out)
+
+
+_C12_INTERRUPTED = ("Aug 18 03:20:11 sgms python[1]: 2026-08-17 20:20:11 [ERROR] "
+                    "claude_discord.cogs.scheduler: ONE_SHOT_INTERRUPTED: task 42 "
+                    "(dispatch-wake-xyz) was claimed and deleted but its run did not finish")
+_C12_UNREACH = ("Aug 18 03:25:00 sgms python[1]: 2026-08-17 20:25:00 [WARNING] "
+                "claude_discord.cogs.scheduler: SchedulerCog: task 43 (dispatch-wake-def) "
+                "has no reachable destination (thread=555, channel=555) — leaving it due to retry")
+
+
+def case_c12_empty_journal_is_not_green():
+    """rc=0 + stdout RỖNG là XANH GIẢ, không phải 'sạch' (arch-review vòng 2, lỗ N1).
+
+    Chạy thật: `journalctl --user -u definitely-not-a-unit --since -24h -q` trả rc=0 và 0 byte.
+    Daemon sống ghi ~4800 dòng/24h ⇒ rỗng nghĩa là sai tên unit / sai scope / journal không giữ
+    log. Trước khi bịt, mọi ca đó in ✅ "không mất wakeup one-shot nào".
+    """
+    for label, out_s in (("rỗng hoàn toàn", ""), ("chỉ khoảng trắng", "  \n \n")):
+        lines, warn = run_check12(_FakeSubprocess(_FakeCompleted(0, out_s)))
+        out = joined(lines)
+        check(f"check12 [journal {label}]: WARN chứ không im lặng", len(warn) == 1, out)
+        check(f"check12 [journal {label}]: KHÔNG in dòng ✅ nào (xanh giả là lỗi tệ nhất ở đây)",
+              "✅" not in out, out)
+
+
+def case_c12_journalctl_invocation_is_pinned():
+    """Canh chính LỜI GỌI journalctl, không chỉ cách xử lý output.
+
+    Vì subprocess bị tiêm giả, đổi tên unit / bỏ --user / nới cửa sổ đều không làm ca nào đỏ —
+    check vẫn "chạy đúng" trên log giả trong khi ngoài đời soi nhầm chỗ.
+    """
+    fake = _FakeSubprocess(_FakeCompleted(0, "boring\n"))
+    run_check12(fake)
+    argv = list(fake.calls[0]) if fake.calls else []
+    check("check12: có gọi journalctl đúng 1 lần", len(fake.calls) == 1, repr(fake.calls))
+    check("check12: gọi đúng unit ccdb-mike", "ccdb-mike" in argv, repr(argv))
+    check("check12: đọc journal --user (daemon chạy dưới systemd --user, không phải system)",
+          "--user" in argv, repr(argv))
+    check("check12: cửa sổ đúng 24h như tiêu đề cảnh báo nói",
+          "--since" in argv and "-24h" in argv, repr(argv))
+
+
+def case_c12_interrupted_marker_also_counts():
+    """Restart GIỮA LƯỢT (lớp sự cố đẻ ra bản fix) ghi INTERRUPTED, không phải DROPPED."""
+    lines, warn = run_check12(_FakeSubprocess(_FakeCompleted(0, _C12_INTERRUPTED + "\n")))
+    out = joined(lines)
+    check("check12: ONE_SHOT_INTERRUPTED cũng tính là mất wakeup", len(warn) == 1, out)
+    check("check12: INTERRUPTED không bị bỏ qua thành ✅", "✅" not in out, out)
+    lines2, _ = run_check12(
+        _FakeSubprocess(_FakeCompleted(0, _C12_DROP + "\n" + _C12_INTERRUPTED + "\n"))
+    )
+    check("check12: đếm gộp cả 2 marker", "MẤT 2 wakeup" in joined(lines2), joined(lines2))
+
+
+def case_c12_unreachable_destination_is_reported_separately():
+    """Row còn sống nhưng không giao được: agent VẪN chưa được đánh thức ⇒ phải nhìn thấy.
+
+    Báo RIÊNG chứ không gộp vào 'MẤT': ca này còn cứu được (thread un-archive là tự chạy), gộp
+    vào sẽ nói với người đọc rằng wakeup đã mất hẳn.
+    """
+    lines, warn = run_check12(_FakeSubprocess(_FakeCompleted(0, _C12_UNREACH + "\n")))
+    out = joined(lines)
+    check("check12: 'has no reachable destination' ⇒ WARN", len(warn) == 1, out)
+    check("check12: KHÔNG in ✅ khi có wakeup chưa giao được", "✅" not in out, out)
+    check("check12: nói rõ row còn retry (khác hẳn ca MẤT hẳn)", "retry" in out, out)
+    lines2, warn2 = run_check12(
+        _FakeSubprocess(_FakeCompleted(0, _C12_DROP + "\n" + _C12_UNREACH + "\n"))
+    )
+    check("check12: 2 lớp sự cố báo thành 2 dòng riêng", len(warn2) == 2, joined(lines2))
+
+
+def case_c12_unreadable_journal_never_reports_green():
+    """Không đọc được journal ≠ không có sự cố — đây đúng là chỗ check #11 đã phải bịt một lần."""
+    for label, fake in (
+        ("rc!=0", _FakeSubprocess(_FakeCompleted(1, "", "Failed to add match: bad"))),
+        ("thiếu journalctl", _FakeSubprocess(raises=FileNotFoundError("journalctl"))),
+        ("lỗi lạ", _FakeSubprocess(raises=RuntimeError("boom"))),
+    ):
+        lines, warn = run_check12(fake)
+        out = joined(lines)
+        check(f"check12 [{label}]: WARN chứ không im lặng", len(warn) == 1, out)
+        check(f"check12 [{label}]: KHÔNG in dòng ✅ nào (khác hẳn 'đã kiểm và sạch')",
+              "✅" not in out, out)
+
+
+
+# ── Khối ROUTING (dispatch domain split) ────────────────────────────────────────────────
+# TẠI SAO: nhánh COORD_WARN → Wags được TÁCH RA sau commit gốc a8e5b8a6, nhưng lời gọi
+# ops_autofix.sh vẫn giữ nguyên "$MSG" (toàn bộ báo cáo) suốt từ đó ⇒ Winston nhận CẢ triệu
+# chứng điều phối vừa route sang Wags. Đo được 2 ngày liên tiếp 08-17 và 08-18: hai job Opus
+# chẩn đoán CÙNG một câu hỏi tồn đọng. Bản chất là refactor DỞ DANG, không phải bug logic —
+# loại lỗi mà không test nào bắt được vì cả 2 nhánh đều "chạy đúng". Ca này chạy ĐÚNG khối
+# bash thật (không copy) với 2 autofix GIẢ ghi lại argv, nên hồi quy = đỏ ngay.
+_ROUTE_MSG = "\n".join([
+    "✅ Kiểm tra sức khỏe vận hành SpaceX 2026-08-18",
+    "⚠️ Có 2 câu hỏi (question) trong 48h qua CHƯA thấy answer tương ứng: ['Mike/x', 'Wags/y']",
+    "⚠️ Circuit breaker đang TRIPPED cho Mafee",
+    "⚠️ Job board: 1 job overdue (Taylor_20260818_000000)",
+    "❌ run_bot ZaloPay lỗi: TimeoutError khi gọi broker",
+    "⚠️ [WARN-ONLY] question TREO LÂU >48h cần user chọn A/B: Mike/foo",
+    "⚠️ plan T+1 NOT_APPROVED cho SpaceX",
+])
+
+
+def run_routing(msg, src=None):
+    """Exec ĐÚNG khối ROUTING của ops_health_check.sh; trả argv thật của 2 autofix (None = không gọi)."""
+    import shlex
+    import subprocess as sp
+    d = tempfile.mkdtemp(prefix="ops_health_routing_")
+    try:
+        os.makedirs(os.path.join(d, "bin"))
+        for name in ("ops_autofix.sh", "wags_autofix.sh"):
+            fp = os.path.join(d, "bin", name)
+            with open(fp, "w", encoding="utf-8") as f:
+                f.write("#!/usr/bin/env bash\n"
+                        "printf '%s\\n=ARG=\\n' \"$@\" > \"$ARGV_DIR/" + name + ".argv\"\n")
+            os.chmod(fp, 0o755)
+        script = ("set -uo pipefail\n"
+                  "ROOT=" + shlex.quote(d) + "\n"
+                  "ACCOUNT=SpaceX\n"
+                  "TODAY=2026-08-18\n"
+                  "MSG=" + shlex.quote(msg) + "\n") + (src if src is not None else ROUTING_SRC)
+        env = dict(os.environ, ARGV_DIR=d)
+        sp.run(["bash", "-c", script], env=env, capture_output=True, text=True, timeout=30)
+
+        def read(name):
+            fp = os.path.join(d, name + ".argv")
+            if not os.path.exists(fp):
+                return None
+            with open(fp, encoding="utf-8") as f:
+                parts = f.read().split("\n=ARG=\n")
+            return [x for x in parts[:-1]]
+        return read("ops_autofix.sh"), read("wags_autofix.sh")
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+
+def case_routing_domain_split_is_real():
+    ops, wags = run_routing(_ROUTE_MSG)
+    check("routing: khối bash thật gọi ĐƯỢC cả 2 autofix (harness sống)",
+          ops is not None and wags is not None, "ops=%r wags=%r" % (ops, wags))
+    if ops is None or wags is None:
+        return
+    check("routing: label ops giữ nguyên per-account", ops[0] == "ops-health-SpaceX", ops[0])
+    check("routing: label wags fleet-wide theo ngày", wags[0] == "coord-2026-08-18", wags[0])
+    ops_d, wags_d = ops[1], wags[1]
+    check("routing: Winston VẪN nhận lỗi vận hành của mình (run_bot)",
+          "run_bot ZaloPay" in ops_d, ops_d)
+    for term in ("câu hỏi (question)", "Circuit breaker", "Job board:"):
+        check("routing: Winston KHÔNG nhận triệu chứng ĐIỀU PHỐI %r (đã route sang Wags)" % term,
+              term not in ops_d, ops_d)
+        check("routing: Wags nhận %r" % term, term in wags_d, wags_d)
+    check("routing: Wags KHÔNG nhận lỗi vận hành của Winston", "run_bot" not in wags_d, wags_d)
+    for who, det in (("Winston", ops_d), ("Wags", wags_d)):
+        check("routing: %s không nhận dòng [WARN-ONLY] (chỉ user quyết được)" % who,
+              "[WARN-ONLY]" not in det, det)
+        check("routing: %s không nhận dòng NOT_APPROVED (việc của user)" % who,
+              "NOT_APPROVED" not in det, det)
+    check("routing: chi tiết gửi Winston có nêu account đang chạy", "account=SpaceX" in ops_d, ops_d)
+
+
+def case_routing_coord_only_does_not_wake_winston():
+    ops, wags = run_routing("\n".join([
+        "⚠️ Có 1 câu hỏi (question) trong 48h qua CHƯA thấy answer tương ứng: ['Wags/y']",
+        "✅ phần còn lại ổn"]))
+    check("routing: chỉ có triệu chứng điều phối ⇒ KHÔNG dispatch Winston", ops is None, repr(ops))
+    check("routing: … nhưng vẫn dispatch Wags", wags is not None, repr(wags))
+
+
+def case_routing_red_control():
+    """RED control: 2 đột biến phải làm ĐỎ đúng assertion ở trên, nếu không test này vô nghĩa."""
+    mut_msg = ROUTING_SRC.replace('"$OTHER_WARN (checker run: account=${ACCOUNT})"',
+                                  '"$MSG"')
+    check("routing RED: đột biến 1 áp dụng được (chuỗi lời gọi chưa trôi)",
+          mut_msg != ROUTING_SRC, "không tìm thấy lời gọi ops_autofix để đột biến")
+    ops, _ = run_routing(_ROUTE_MSG, src=mut_msg)
+    check("routing RED#1 (quay lại $MSG): Winston LẠI nhận triệu chứng điều phối ⇒ assertion "
+          "chính phân biệt được",
+          ops is not None and "câu hỏi (question)" in ops[1], repr(ops))
+
+    mut_filter = ROUTING_SRC.replace('grep -vE "NOT_APPROVED|KHÔNG TÌM THẤY|Circuit breaker|'
+                                     'câu hỏi \\(question\\)|Job board:"',
+                                     'grep -vE "NOT_APPROVED|KHÔNG TÌM THẤY"')
+    check("routing RED: đột biến 2 áp dụng được (bộ lọc OTHER_WARN chưa trôi)",
+          mut_filter != ROUTING_SRC, "không tìm thấy bộ lọc OTHER_WARN để đột biến")
+    ops2, _ = run_routing(_ROUTE_MSG, src=mut_filter)
+    check("routing RED#2 (bỏ lọc coord khỏi OTHER_WARN): Winston LẠI nhận Circuit breaker",
+          ops2 is not None and "Circuit breaker" in ops2[1], repr(ops2))
+
+
+
+def _plan_approval_root(tmp, approved, topic="plan-SpaceX-2026-09-21-chua-duyet"):
+    """Bus có 1 câu hỏi 'plan chưa duyệt' + 1 file plan (đã duyệt hay chưa tuỳ `approved`)."""
+    os.makedirs(os.path.join(tmp, "data", "trade_plans"), exist_ok=True)
+    with open(os.path.join(tmp, "data", "trade_plans",
+                           "plan_SpaceX_2026-09-21.json"), "w", encoding="utf-8") as f:
+        json.dump({"approved_by": "user (John) - Discord" if approved else None,
+                   "approved_at": None, "orders": [{"ticker": "MBB"}]}, f)
+    write_events(os.path.join(tmp, "mike", "bus", "inbox", "Winston.jsonl"),
+                 [{"ts": ago(0, 5), "agent_id": "Winston", "event_type": "question",
+                   "topic": topic, "payload": {"question": "x"}}])
+    return tmp
+
+
+def case_c5_plan_da_duyet_that_thi_khong_escalate():
+    """coord-2026-09-21: user duyệt 09:10, bot khớp 3/3 lúc 09:15, không ai đăng answer ⇒
+    checker 12:45 vẫn escalate, đốt 1 job wags_autofix. Nguồn sự thật phải là ARTIFACT
+    (plan.approved_by), vì phần lớn lần duyệt KHÔNG chạy qua approve_plan_simple.sh."""
+    with tempfile.TemporaryDirectory() as tmp:
+        lines, _ = run_check5(_plan_approval_root(tmp, approved=True))
+        pend = [ln for ln in lines
+                if "trong 48h qua CHƯA thấy answer" in ln and "[WARN-ONLY]" not in ln]
+        check("check5: plan ĐÃ có approved_by ⇒ KHÔNG escalate câu hỏi 'chưa duyệt'",
+              not pend, repr(pend))
+        check("check5: vẫn NÓI RA việc bỏ qua (không im lặng nuốt khỏi backlog)",
+              any("ARTIFACT" in ln and "plan-SpaceX-2026-09-21-chua-duyet" in ln
+                  for ln in lines), repr(lines[-3:]))
+
+    # ĐỐI CHỨNG: chưa duyệt thì phải escalate như cũ — nếu không, test trên vô nghĩa.
+    with tempfile.TemporaryDirectory() as tmp:
+        lines, _ = run_check5(_plan_approval_root(tmp, approved=False))
+        pend = [ln for ln in lines
+                if "trong 48h qua CHƯA thấy answer" in ln and "[WARN-ONLY]" not in ln]
+        check("check5 ĐỐI CHỨNG: plan CHƯA duyệt ⇒ vẫn escalate bình thường",
+              any("plan-SpaceX-2026-09-21-chua-duyet" in ln for ln in pend), repr(pend))
+
+    # Lớp ops-autofix-unresolved KHÔNG được miễn: root cause có thể khác hẳn chuyện duyệt.
+    with tempfile.TemporaryDirectory() as tmp:
+        lines, _ = run_check5(_plan_approval_root(
+            tmp, approved=True,
+            topic="ops-autofix-unresolved: plan-SpaceX-2026-09-21-chua-duyet"))
+        pend = [ln for ln in lines
+                if "trong 48h qua CHƯA thấy answer" in ln and "[WARN-ONLY]" not in ln]
+        check("check5: lớp ops-autofix-unresolved VẪN escalate dù plan đã duyệt",
+              any("ops-autofix-unresolved" in ln for ln in pend), repr(pend))
+
+
+def case_c5_khac_account_van_escalate():
+    """arch-review vòng 2, mutation M4 SỐNG SÓT: bỏ hẳn luật khớp account (`acc not in
+    topic`) mà suite vẫn xanh ⇒ luật đó chưa có test. Ca này: hỏi về ZaloPay, chỉ SpaceX
+    được duyệt ⇒ PHẢI vẫn escalate."""
+    with tempfile.TemporaryDirectory() as tmp:
+        # _plan_approval_root ghi plan SpaceX đã duyệt; câu hỏi lại về ZaloPay.
+        _plan_approval_root(tmp, approved=True,
+                            topic="plan-ZaloPay-2026-09-21-chua-duyet")
+        lines, _ = run_check5(tmp)
+        pend = [ln for ln in lines
+                if "trong 48h qua CHƯA thấy answer" in ln and "[WARN-ONLY]" not in ln]
+        check("check5: plan SpaceX duyệt KHÔNG đóng hộ câu hỏi ZaloPay",
+              any("plan-ZaloPay-2026-09-21-chua-duyet" in ln for ln in pend), repr(lines))
+
+
+def case_c5_approved_by_user_variant():
+    """preflight_check.sh:63 / merge_park_orders.py:127 coi `approved_by_user` cũng là đã
+    duyệt — checker đọc thiếu khoá đó thì plan chạy thật vẫn bị escalate."""
+    with tempfile.TemporaryDirectory() as tmp:
+        _plan_approval_root(tmp, approved=False)
+        pf = os.path.join(tmp, "data", "trade_plans", "plan_SpaceX_2026-09-21.json")
+        with open(pf, encoding="utf-8") as f:
+            plan = json.load(f)
+        plan["approved_by"] = None
+        plan["approved_by_user"] = "user (John) - Discord"
+        with open(pf, "w", encoding="utf-8") as f:
+            json.dump(plan, f)
+        lines, _ = run_check5(tmp)
+        pend = [ln for ln in lines
+                if "trong 48h qua CHƯA thấy answer" in ln and "[WARN-ONLY]" not in ln]
+        check("check5: approved_by_user cũng tính là đã duyệt ⇒ KHÔNG escalate",
+              not pend, repr(pend))
+
+
+def case_c5_dry_run_khong_ghi_bus():
+    """DRY-RUN phải KHÔNG chạy closer: khối auto-close nằm TRƯỚC chỗ shell đọc DRY_RUN nên
+    không thừa hưởng guard đó. Test HÀNH VI (có chạy hay không), không so chuỗi: dựng một
+    closer giả ghi file mốc, rồi kiểm file mốc — bỏ guard env đi là ca này đỏ."""
+    def _run(dry):
+        with tempfile.TemporaryDirectory() as tmp:
+            _plan_approval_root(tmp, approved=True)
+            binp = os.path.join(tmp, "mike", "bin")
+            os.makedirs(binp, exist_ok=True)
+            mark = os.path.join(tmp, "closer_da_chay.mark")
+            with open(os.path.join(binp, "close_plan_approval_questions.py"), "w",
+                      encoding="utf-8") as f:
+                f.write("open(%r,'w').write('x')\nprint('closer gia da chay')\n" % mark)
+            old = os.environ.get("OPS_HEALTH_DRY_RUN")
+            if dry:
+                os.environ["OPS_HEALTH_DRY_RUN"] = "1"
+            else:
+                os.environ.pop("OPS_HEALTH_DRY_RUN", None)
+            try:
+                lines, _ = run_check5(tmp)
+            finally:
+                if old is None:
+                    os.environ.pop("OPS_HEALTH_DRY_RUN", None)
+                else:
+                    os.environ["OPS_HEALTH_DRY_RUN"] = old
+            return lines, os.path.exists(mark)
+
+    lines, ran = _run(dry=True)
+    check("check5 DRY-RUN: KHÔNG chạy closer (không ghi bus production)", not ran,
+          repr(lines[-2:]))
+    lines, ran = _run(dry=False)
+    check("check5 ĐỐI CHỨNG: chạy thật thì CÓ gọi closer (test không vô nghĩa)", ran,
+          repr(lines[-2:]))
+
+
 def main():
-    print("ops_health_check_selfcheck: check #5 (backlog question) + check #10 (notify_thread) "
-          "+ check #11 (selfcheck_red_sweep freshness) + khối DELIVER (Discord→Telegram) regression")
+    print("ops_health_check_selfcheck: check #5 (backlog question) + check #9 (retro freshness) "
+          "+ check #10 (notify_thread) "
+          "+ check #11 (selfcheck_red_sweep freshness) + check #12 (ccdb one-shot dropped) "
+          "+ khối DELIVER (Discord→Telegram) regression")
     for fn in (case_archived_question_visible, case_cross_layer_resolve,
+               case_explicit_cross_topic_resolve,
                case_resolver_must_be_after, case_dedupe_hot_and_archive,
                case_no_crowd_out, case_small_pool_prints_all,
                case_corrupt_gz_warns, case_empty_archive_warns,
-               case_fresh_question_is_pending,
+               case_grace_fresh_question_not_routable, case_grace_expired_question_is_routable,
+               case_grace_schedule_aware_last_weekday_gap,
+               case_fresh_question_is_pending, case_owner_hint_from_needs_suffix,
+               case_owner_hint_covers_aged_over_48h,
+               case_owner_hint_unmatched_agent_no_dispatch,
+               case_owner_hint_ack_convention_is_human_skip,
+               case_owner_hint_aged_respects_ack,
+               case_owner_hint_worktree_dir_never_becomes_owner,
                case_wagsfix_not_confirmed_is_warn_only, case_wagsfix_prefix_not_substring,
                case_wagsfix_only_no_false_ok, case_wagsfix_prefix_list_in_sync,
                case_triaged_needs_human_ack, case_triaged_only_no_false_ok,
                case_ack_suppress_days_window, case_rollup_of_umbrella_question,
+               case_rollup_of_substring_holes, case_rollup_of_ref_forms,
+               case_rollup_of_ref_forms_agent_aware,
+               case_missing_inbox_dir_is_warn_not_green,
                case_ack_suppress_days_capped,
+               case_ack_suppress_days_expires_by_now_not_qts,
                case_aged_wagsfix_never_truncated, case_aged_no_wagsfix_keeps_old_cut,
                case_aged_wagsfix_overflow_is_loud,
+               case_c9_full_week_is_ok, case_c9_yesterday_missing_warns,
+               case_c9_older_gap_still_reported,
+               case_c9_no_demand_before_mechanism_existed,
+               case_c9_empty_dir_is_not_warn, case_c9_red_control_one_day_window,
+               case_c9_started_but_incomplete, case_c9_never_started_host_down,
+               case_c9_no_log_file_says_so,
                case_c10_no_file_is_ok, case_c10_fresh_log_warns,
+               case_c10_swap_recovery_is_not_swallowed, case_c10_hard_error_wins_over_swap,
                case_c10_fresh_log_without_timestamp_line, case_c10_old_log_is_ok,
+               case_c10_old_hard_error_not_reported_as_recent,
+               case_c10_fresh_file_all_records_old_is_ok,
+               case_c10b_no_file_is_ok, case_c10b_fresh_reject_warns,
+               case_c10b_old_reject_is_ok, case_c10b_window_is_per_record,
+               case_c10b_unparseable_ts_is_kept, case_c10b_unreadable_file_says_unknown,
+               case_c10b_red_control_window,
                case_c11_fresh_all_green, case_c11_red_is_warn_only,
                case_c11_lists_every_red_no_truncation,
                case_c11_stale_is_routable, case_c11_missing_and_corrupt_never_silent,
+               case_c12_clean_journal_is_ok, case_c12_dropped_wakeup_warns,
+               case_c12_empty_journal_is_not_green, case_c12_journalctl_invocation_is_pinned,
+               case_c12_interrupted_marker_also_counts,
+               case_c12_unreachable_destination_is_reported_separately,
+               case_c12_unreadable_journal_never_reports_green,
+               case_routing_domain_split_is_real,
+               case_routing_coord_only_does_not_wake_winston,
+               case_routing_red_control,
                case_deliver_discord_ok_no_telegram,
                case_deliver_discord_fails_falls_back_to_telegram,
-               case_deliver_both_fail_logs_for_check10):
+               case_deliver_both_fail_logs_for_check10,
+               case_c5_plan_da_duyet_that_thi_khong_escalate,
+               case_c5_dry_run_khong_ghi_bus,
+               case_c5_khac_account_van_escalate,
+               case_c5_approved_by_user_variant):
         fn()
     if FAILS:
         print(f"\nFAIL: {len(FAILS)} assertion hỏng")
@@ -982,5 +2320,90 @@ def main():
     return 0
 
 
+# ── Mutation-test (round 3, arch-review round 2 required_change #3) ───────────────────────
+# Mỗi thay đổi của round 3 phải có 1 mutation CHỨNG MINH assertion tương ứng bắt được nó.
+# Mutate trên BẢN SAO của bin/ops_health_check.sh trong mkdtemp và trỏ selfcheck vào bản sao
+# qua OPS_HEALTH_CHECK_SRC — file production KHÔNG bao giờ bị ghi (bài học cùng ngày từ
+# diagnosis_evidence_gate_selfcheck: `finally` không cứu được SIGKILL/OOM).
+# Cột thứ 4 `expect_red`: True = mutation PHẢI bị giết. False = mutation PHẢI SỐNG SÓT — đó là
+# cách cơ học để chứng minh một dòng là CODE CHẾT (MU4: thêm lại điều kiện lọc "wt-" đã gỡ;
+# nếu nó bỗng làm suite đỏ thì nó KHÔNG chết và việc gỡ là sai).
+MUTATIONS = [
+    ("MU1 bỏ chuẩn hoá owner token (không cắt ':' và '/')",
+     '.split("-")[0].split(":")[0].split("/")[0].strip()', '.split("-")[0].strip()', True),
+    ("MU2 bỏ bộ lọc _acked cho aged_q_meta (owner-hint lại spam câu hỏi đã park)",
+     'if not _acked(agent, str(rec.get("topic") or ""), ts_dt):\n                    aged_q_meta.append',
+     'if True:\n                    aged_q_meta.append', True),
+    ("MU3 owner-hint bỏ hẳn nguồn aged_q_meta (hồi quy round 2)",
+     "for _qa, _qt, _ in pending_q_meta + aged_q_meta:",
+     "for _qa, _qt, _ in pending_q_meta:", True),
+    ("MU4 [expect SURVIVE] thêm lại điều kiện lọc 'wt-' đã gỡ ⇒ chứng minh nó là CODE CHẾT",
+     "        if not os.path.isdir(os.path.join(_AGENTS_DIR, _d)):",
+     '        if _d.startswith("wt-") or not os.path.isdir(os.path.join(_AGENTS_DIR, _d)):',
+     False),
+    # MU5/MU6 (arch-review round 2, coord-2026-09-03): ghim đúng dòng vừa sửa ở commit
+    # c437548b — round 1 (ca 14/15 sẵn có) KHÔNG bắt được vì câu hỏi ở đó bị reissue, còn
+    # ca 15c mới (case_ack_suppress_days_expires_by_now_not_qts) dùng câu hỏi KHÔNG tái
+    # phát nên phân biệt được q_ts (cố định, luôn < a_ts) khỏi _now (trôi theo thời gian).
+    ("MU5 quay lại so a_until >= q_ts (bug gốc coord-2026-09-03: ack không bao giờ hết hạn "
+     "cho câu hỏi không tái phát)",
+     "((sd <= 0 and a_ts >= q_ts) or (sd > 0 and a_until >= _now))",
+     "a_until >= q_ts", True),
+    ("MU6 gộp nhánh sd<=0 vào cùng so-với-NOW (phá tính vĩnh viễn của ack không khai "
+     "suppress_days — case_triaged_needs_human_ack)",
+     "((sd <= 0 and a_ts >= q_ts) or (sd > 0 and a_until >= _now))",
+     "a_until >= _now", True),
+]
+
+
+def run_mutations():
+    import hashlib
+
+    src_real = os.path.join(ROOT, "bin", "ops_health_check.sh")
+    orig = open(src_real, encoding="utf-8").read()
+    sha_before = hashlib.sha256(orig.encode("utf-8")).hexdigest()
+    tmpdir = tempfile.mkdtemp(prefix="ops_health_mut_")
+    mutant = os.path.join(tmpdir, "ops_health_check.sh")
+    bad = []
+    try:
+        for desc, a, b, expect_red in MUTATIONS:
+            if a not in orig:
+                # Mutation không áp được = HARNESS hỏng, KHÔNG phải "code ổn". Báo ĐỎ.
+                bad.append(f"HARNESS-BROKEN: {desc}")
+                print(f"  ❌ HARNESS-BROKEN  {desc}: không tìm thấy chuỗi cần thay")
+                continue
+            with open(mutant, "w", encoding="utf-8") as fh:
+                fh.write(orig.replace(a, b, 1))
+            r = subprocess.run(
+                [sys.executable, "-B", os.path.abspath(__file__)],
+                capture_output=True, text=True, cwd=ROOT,
+                env=dict(os.environ, PYTHONDONTWRITEBYTECODE="1",
+                         OPS_HEALTH_CHECK_SRC=mutant),
+            )
+            red = r.returncode != 0
+            if red == expect_red:
+                print(f"  {'KILLED  ' if red else 'SURVIVED'}  {desc}  (đúng kỳ vọng)")
+            else:
+                bad.append(desc)
+                print(f"  ❌ {'SỐNG SÓT' if not red else 'BỊ GIẾT'}  {desc} — "
+                      f"kỳ vọng {'ĐỎ' if expect_red else 'XANH'}")
+    finally:
+        shutil.rmtree(tmpdir, ignore_errors=True)
+    sha_after = hashlib.sha256(open(src_real, "rb").read()).hexdigest()
+    if sha_after != sha_before:
+        bad.append("PRODUCTION-FILE-MODIFIED")
+        print(f"  ❌ bin/ops_health_check.sh BỊ THAY ĐỔI: {sha_before[:12]} → {sha_after[:12]}")
+    else:
+        print(f"  OK        bin/ops_health_check.sh nguyên vẹn (sha256 {sha_before[:12]}…)")
+    print()
+    if bad:
+        print(f"❌ {len(bad)} mutation sai kỳ vọng: {bad}")
+        return 1
+    print(f"✅ {len(MUTATIONS)}/{len(MUTATIONS)} mutation đúng kỳ vọng")
+    return 0
+
+
 if __name__ == "__main__":
+    if "--mutations" in sys.argv:
+        sys.exit(run_mutations())
     sys.exit(main())

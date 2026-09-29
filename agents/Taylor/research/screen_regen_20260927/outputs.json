@@ -1,0 +1,84 @@
+{
+ "aviation_screen.py": [
+  "data/aviation_airline_monthly.csv",
+  "data/aviation_infra_monthly.csv",
+  "data/aviation_verdict.json"
+ ],
+ "bank_compounder_screen.py": [
+  "data/bank_compounder_monthly.csv",
+  "data/bank_compounder_verdict.json"
+ ],
+ "compounder_screen.py": [
+  "data/compounder_screen_monthly.csv",
+  "data/compounder_screen_verdict.json"
+ ],
+ "construction_screen.py": [
+  "data/construction_arquality_monthly.csv",
+  "data/construction_basket_monthly.csv",
+  "data/construction_pbtrough_monthly.csv",
+  "data/construction_verdict.json"
+ ],
+ "energy_screen.py": [
+  "data/energy_oilsvc_monthly.csv",
+  "data/energy_renew_monthly.csv",
+  "data/energy_util_monthly.csv",
+  "data/energy_verdict.json"
+ ],
+ "fertchem_rubber_screen.py": [
+  "data/fertchem_chem_monthly.csv",
+  "data/fertchem_fert_monthly.csv",
+  "data/fertchem_rubber_monthly.csv",
+  "data/fertchem_rubber_verdict.json"
+ ],
+ "fnb_screen.py": [
+  "data/fnb_fmcg_monthly.csv",
+  "data/fnb_seafood_monthly.csv",
+  "data/fnb_verdict.json"
+ ],
+ "livestock_screen.py": [
+  "data/livestock_basket_monthly.csv",
+  "data/livestock_troughbuy_monthly.csv",
+  "data/livestock_verdict.json"
+ ],
+ "logistics_port_screen.py": [
+  "data/logistics_port_monthly.csv",
+  "data/logistics_port_verdict.json",
+  "data/logistics_ship_monthly.csv"
+ ],
+ "pharma_screen.py": [
+  "data/pharma_monthly.csv",
+  "data/pharma_verdict.json"
+ ],
+ "re_compounder_screen.py": [
+  "data/re_compounder_indust_monthly.csv",
+  "data/re_compounder_resid_monthly.csv",
+  "data/re_compounder_verdict.json"
+ ],
+ "retail_compounder_screen.py": [
+  "data/retail_compounder_monthly.csv",
+  "data/retail_compounder_verdict.json"
+ ],
+ "securities_screen.py": [
+  "data/securities_basket_monthly.csv",
+  "data/securities_screen_dt5g_monthly.csv",
+  "data/securities_screen_monthly.csv",
+  "data/securities_verdict.json"
+ ],
+ "steel_buildmat_screen.py": [
+  "data/steel_buildmat_verdict.json",
+  "data/steel_cement_monthly.csv",
+  "data/steel_spec_monthly.csv",
+  "data/steel_steel_monthly.csv"
+ ],
+ "tech_screen.py": [
+  "data/tech_basket_lit_monthly.csv",
+  "data/tech_basket_vn_monthly.csv",
+  "data/tech_fpt_lens.csv",
+  "data/tech_verdict.json"
+ ],
+ "textile_screen.py": [
+  "data/textile_basket_monthly.csv",
+  "data/textile_qualityvalue_monthly.csv",
+  "data/textile_verdict.json"
+ ]
+}

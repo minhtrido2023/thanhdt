@@ -1,0 +1,5 @@
+[build] dynamic_gate (no static BANNED, PIT leverage/equity/dilution gate)
+[BQ_LOCAL_CACHE] ready — 14 tables from /home/trido/thanhdt/WorkingClaude/data/bq_cache
+  [forensic exclude] none ([Errno 2] No such file or directory: '/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/adaptive_exclusion_20260904/data/forensic_flags.csv')
+[BQ_LOCAL_CACHE] query took 75.1s (678322 rows)
+[done build]

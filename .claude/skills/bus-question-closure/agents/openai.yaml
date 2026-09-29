@@ -1,0 +1,4 @@
+interface:
+  display_name: "Bus Question Closure"
+  short_description: "Close fleet questions without false re-escalation"
+  default_prompt: "Use $bus-question-closure to resolve or re-escalate this fleet bus question safely."

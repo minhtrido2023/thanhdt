@@ -1,0 +1,11 @@
+M1_fparts_gt1_off: rc=1 crash=False fails=['FA1. [', 'FA2b. '] FAILED 2/102: ['FA1. [len(fparts)>1] bước nhảy +10.000.000 giải thích được bằng ISS CŨ ex 06-10 HOẶC ISS ex 07-30 sau dò
+M1b_fparts_ge1: rc=1 crash=False fails=['6. lăn', '7. hai', 'H4/202', 'H4/202', '9. cộn', 'LV2b. ', 'K1. KH', 'K2. ĐỐ', 'FA1b. ', 'FA2. [', 'FA3. [', 'FA3b. ', 'FA4b. ', 'FA5b. ', 'FA6b. '] FAILED 15/102: ['6. lăn qua 2 đợt ESOP 2025-05-07 ⇒ khớp AIS 06-19 trong 0,01%', '7. hai đợt ESOP cùng ngày, KHÁC số lượ
+M2_skip_empty: rc=1 crash=False fails=['FA2. ['] FAILED 1/102: ['FA2. [not_absorbed] cùng ca FA1 nhưng ISS 06-10 đã được `_absorption_test` kết luận SẼ LĂN ⇒ loại khỏi p
+M3_back_unsz_off: rc=1 crash=False fails=['FA3. ['] FAILED 1/102: ['FA3. [ISS cũ KHÔNG định cỡ được] phần sau-dòng-quý khớp, nhưng ISS 06-10 không cỡ có thể CHÍNH NÓ là bướ
+M4_skipunsz_off: rc=1 crash=True fails=[] 
+    ["TypeError: unsupported operand type(s) for *: 'float' and 'NoneType'"]
+M5_cap_99: rc=1 crash=False fails=['FA5. ['] FAILED 1/102: ['FA5. [trần pool>14] 15 ISS, bước nhảy khớp đúng tổng 15 ⇒ không duyệt 2^15 tập ⇒ FWD_AMBIGUOUS']
+M5b_cap_13: rc=1 crash=False fails=['FA5b. '] FAILED 1/102: ['FA5b. ĐỐI CHỨNG: 14 ISS (đúng trần), bước nhảy = tổng 14 ⇒ duyệt được ⇒ FWD_ABSORBED cả 14']
+M6_noprior_off: rc=1 crash=True fails=[] 
+    ['ValueError: max() iterable argument is empty']
+M7_drop_off: rc=1 crash=False fails=['H4/202', 'K1. KH'] FAILED 2/102: ['H4/2026-03-13. chuyển đổi TP 2026-03-12 (issue_volumn=16.979.189) ĐÃ nằm trong neo Q4/2025 185.840.401 ⇒

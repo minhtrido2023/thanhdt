@@ -1,0 +1,155 @@
+{
+ "haircut_pp": 2.04,
+ "N": 3106,
+ "yrs": 12.46,
+ "tiers": {
+  "baseline": {
+   "mean_day_weighted_pct": 4.1571,
+   "park": [
+    0.0,
+    0.3,
+    0.8
+   ],
+   "cagr_act_pct": [
+    25.32,
+    25.85,
+    26.463
+   ],
+   "E_cagr_pct": [
+    25.394,
+    25.928,
+    26.584
+   ],
+   "E_calmar": [
+    1.7975,
+    1.7076,
+    1.3232
+   ],
+   "dd5_pct": [
+    -22.43,
+    -23.75,
+    -31.01
+   ],
+   "dd_gate_floor_pct": -24.43,
+   "gate_pass": [
+    0.0,
+    0.3
+   ],
+   "P_calmar_030_gt_080": 0.868,
+   "P_cagr_030_gt_080": 0.3695,
+   "P_calmar_000_gt_030": 0.605,
+   "breakeven_scale_lambda": 1.6600000000000001
+  },
+  "floor": {
+   "mean_day_weighted_pct": 3.6122,
+   "park": [
+    0.0,
+    0.3,
+    0.8
+   ],
+   "cagr_act_pct": [
+    24.942,
+    25.532,
+    26.243
+   ],
+   "E_cagr_pct": [
+    25.013,
+    25.608,
+    26.362
+   ],
+   "E_calmar": [
+    1.7618,
+    1.6783,
+    1.3082
+   ],
+   "dd5_pct": [
+    -22.54,
+    -23.87,
+    -31.1
+   ],
+   "dd_gate_floor_pct": -24.54,
+   "gate_pass": [
+    0.0,
+    0.3
+   ],
+   "P_calmar_030_gt_080": 0.86325,
+   "P_cagr_030_gt_080": 0.35275,
+   "P_calmar_000_gt_030": 0.5995,
+   "breakeven_scale_lambda": 1.86
+  },
+  "flat_8.543": {
+   "mean_day_weighted_pct": 8.543,
+   "park": [
+    0.0,
+    0.3,
+    0.8
+   ],
+   "cagr_act_pct": [
+    28.435,
+    28.393,
+    28.048
+   ],
+   "E_cagr_pct": [
+    28.508,
+    28.471,
+    28.169
+   ],
+   "E_calmar": [
+    2.1156,
+    1.9622,
+    1.4386
+   ],
+   "dd5_pct": [
+    -21.21,
+    -22.44,
+    -29.96
+   ],
+   "dd_gate_floor_pct": -23.21,
+   "gate_pass": [
+    0.0,
+    0.3
+   ],
+   "P_calmar_030_gt_080": 0.9075,
+   "P_cagr_030_gt_080": 0.56475,
+   "P_calmar_000_gt_030": 0.67375,
+   "breakeven_scale_lambda": 0.8200000000000001
+  },
+  "zero": {
+   "mean_day_weighted_pct": 0.0,
+   "park": [
+    0.0,
+    0.3,
+    0.8
+   ],
+   "cagr_act_pct": [
+    22.366,
+    23.43,
+    24.95
+   ],
+   "E_cagr_pct": [
+    22.441,
+    23.509,
+    25.071
+   ],
+   "E_calmar": [
+    1.5073,
+    1.4761,
+    1.2159
+   ],
+   "dd5_pct": [
+    -24.0,
+    -25.15,
+    -31.98
+   ],
+   "dd_gate_floor_pct": -26.0,
+   "gate_pass": [
+    0.0,
+    0.3
+   ],
+   "P_calmar_030_gt_080": 0.803,
+   "P_cagr_030_gt_080": 0.219,
+   "P_calmar_000_gt_030": 0.5205,
+   "breakeven_scale_lambda": null
+  }
+ }
+}

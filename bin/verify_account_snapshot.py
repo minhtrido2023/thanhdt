@@ -27,6 +27,7 @@ script THOÁT với exit != 0 và in cảnh báo rõ ràng — không tự đoá
 """
 import argparse
 import datetime as _dt
+from zoneinfo import ZoneInfo as _ZoneInfo   # §16: neo ICT, xem main() asof-là-hôm-nay
 import glob
 import json
 import os
@@ -34,9 +35,65 @@ import subprocess
 import sys
 from collections import defaultdict
 
-WC_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-EXEC_DIR = os.path.join(WC_ROOT, "data", "execution_logs")
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import wc_paths  # noqa: E402
+
+# gốc cây neo theo marker `wc_env.sh` (wc_paths) — đếm cấp dirname SAI khi script chạy
+# từ worktree `mike/agents/wt-*/bin/` (sự cố 2026-09-12, chặn báo cáo nhà đầu tư).
+WC_ROOT = wc_paths.find_wc_root(__file__)
+EXEC_DIR = os.environ.get("VERIFY_ACCOUNT_EXEC_DIR",
+                          os.path.join(WC_ROOT, "data", "execution_logs"))
 BQ_PATH_PREFIX = "/home/trido/google-cloud-sdk/bin"
+KNOWN_DISCREPANCY_PATH = os.environ.get(
+    "VERIFY_ACCOUNT_KNOWN_DISCREPANCIES",
+    os.path.join(WC_ROOT, "data", "known_position_discrepancies.json"))
+
+
+def _load_known_discrepancies(account: str, asof: str) -> dict:
+    """Lệch broker-vs-journal ĐÃ ĐƯỢC GIẢI THÍCH và còn hạn, theo {ticker: bản ghi}.
+
+    Vì sao cần: có lệch ĐÚNG THẬT mà không phải lỗi — vd quyền mua MBB 10:1 đăng ký
+    2026-08-28, tiền đã trả và journal đã ghi 110cp, nhưng broker chưa ghi có vì cổ phiếu
+    mới chưa niêm yết. Không có chỗ nào ghi nhận "đã biết, đang chờ", script kêu WARN +
+    rc=1 mỗi ngày ⇒ dòng cảnh báo đó bị đọc như boilerplate, và khi có lệch THẬT sẽ không
+    ai phân biệt được (đúng cơ chế đã làm hỏng backup 09-06: lỗi thật chìm trong tiếng ồn).
+
+    Hai chốt an toàn, cả hai đều CỐ Ý:
+      · Khớp theo ĐÚNG CẶP SỐ (broker_qty, journal_qty) — kiểm ở call site, không phải ở
+        đây. Lệch đổi số = sự kiện khác = kêu lại.
+      · `expires_at` BẮT BUỘC. Hết hạn ⇒ bản ghi bị bỏ qua ⇒ WARN trở lại. Một ngoại lệ
+        không bao giờ được phép sống vĩnh viễn; nếu tới hạn mà chưa xong thì phải có người
+        nhìn lại và gia hạn có chủ đích.
+
+    FAIL-CLOSED: thiếu file, JSON hỏng, thiếu trường ⇒ trả {} ⇒ mọi lệch đều WARN như
+    trước. Một file khai báo hỏng KHÔNG bao giờ được phép làm im một cảnh báo.
+    """
+    try:
+        with open(KNOWN_DISCREPANCY_PATH, encoding="utf-8") as f:
+            rows = json.load(f).get("discrepancies", [])
+    except FileNotFoundError:
+        return {}
+    except Exception as e:
+        print(f"⚠️  Bỏ qua file khai báo lệch ({KNOWN_DISCREPANCY_PATH}): {e} — "
+              f"mọi lệch sẽ được báo WARN như bình thường.", file=sys.stderr)
+        return {}
+
+    out = {}
+    for r in rows:
+        try:
+            if r["account"] != account:
+                continue
+            if str(r["expires_at"]) < str(asof):      # ISO date, so chuỗi là đủ và đúng
+                continue
+            out[r["ticker"]] = {
+                "qty_delta": float(r["qty_delta"]),   # journal − broker, xem call site
+                "reason": str(r["reason"]),
+                "expires_at": str(r["expires_at"]),
+            }
+        except (KeyError, TypeError, ValueError) as e:
+            print(f"⚠️  Bản ghi khai báo lệch thiếu/sai trường ({e}) — bỏ qua bản ghi này, "
+                  f"lệch tương ứng sẽ báo WARN.", file=sys.stderr)
+    return out
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from corp_actions import load_corp_actions  # noqa: E402
@@ -77,16 +134,33 @@ class CostBook:
     52.583,33 thay vì 51.466,67 (= đúng costPrice broker). Sai cả giá vốn lẫn P&L% của mã.
     """
 
-    def __init__(self):
+    def __init__(self, recover_legacy=False):
         self.qty = 0.0      # KL ròng đang nắm giữ (đã nhân hệ số corp-action)
         self.basis = 0.0    # tổng tiền vốn CÒN LẠI của lô đang giữ (VND)
         self.resets = 0     # số lần vị thế về 0 (mỗi lần = 1 lô tất toán, cơ sở về 0)
+        self.legacy_reopens = 0  # mua lại sau phần bán legacy không có lịch sử mua
+        self.negative_since = None
+        self.recover_legacy = recover_legacy
 
-    def buy(self, qty, value):
+    def buy(self, qty, value, event_date=None):
+        # Ca VIB/ZaloPay 2026-08-11: lịch sử trace bắt đầu bằng lệnh bán sạch 9.200cp
+        # legacy nên qty=-9.200; lệnh mua mới 200cp sau đó phải mở một lô sống mới ở
+        # 14.900, không được cộng thành -9.000 rồi loại khỏi P&L. Chỉ reset ứng viên ở
+        # đây; main() bắt buộc đối chiếu book.qty với snapshot broker đúng ngày. Nếu
+        # legacy chỉ bán dở (broker còn 700 nhưng lô mới trace được 200), mismatch sẽ
+        # fail-closed và mã vẫn bị loại khỏi P&L — không bịa coverage.
+        # Chỉ một ngày SAU mới là lô mở lại có thể phân biệt được. Âm rồi mua trong
+        # cùng ngày có thể chỉ do modifiedDate không phải fill timestamp (thứ tự xấp
+        # xỉ); reset ca đó sẽ làm hỏng VHM/các lệnh khớp chéo trong phiên.
+        if (self.recover_legacy and self.qty < 0 and event_date is not None and self.negative_since is not None
+                and event_date > self.negative_since):
+            self.qty, self.basis = 0.0, 0.0
+            self.legacy_reopens += 1
+            self.negative_since = None
         self.qty += qty
         self.basis += value
 
-    def sell(self, qty):
+    def sell(self, qty, event_date=None):
         if self.qty > 0:
             self.basis -= self.basis * min(qty, self.qty) / self.qty
         self.qty -= qty
@@ -95,27 +169,44 @@ class CostBook:
             self.resets += 1
         elif self.qty < 0:              # bán quá KL trace được (vị thế legacy mua trước bot)
             self.basis = 0.0
+            if self.negative_since is None:
+                self.negative_since = event_date
 
     @property
     def avg_cost(self):
         return self.basis / self.qty if self.qty > 0 else 0.0
 
 
-def build_cost_books(events_by_date, asof, corp_actions):
+def build_cost_books(events_by_date, asof, corp_actions, recover_legacy=False):
     """{ticker: CostBook} từ các fill ĐÃ SẮP THEO THỜI GIAN.
 
     Thứ tự thời gian là BẮT BUỘC (không phải chi tiết trang trí): reset-khi-về-0 chỉ đúng
     khi lệnh được áp đúng trình tự thật — cả giữa các ngày lẫn trong cùng một ngày.
     """
-    books = defaultdict(CostBook)
+    books = defaultdict(lambda: CostBook(recover_legacy=recover_legacy))
     for date in sorted(events_by_date):
         for _ts, _key, tk, side, qty, price in events_by_date[date]:
             m = corp_action_multiplier(tk, date, asof, corp_actions)
             if side == "sell":
-                books[tk].sell(qty * m)
+                books[tk].sell(qty * m, date)
             else:
-                books[tk].buy(qty * m, qty * price)
+                books[tk].buy(qty * m, qty * price, date)
     return books
+
+
+def select_live_book(raw_qty, normal_book, candidate_book, broker_qty):
+    """Chọn lô P&L, chỉ promote legacy-reopen khi snapshot khớp tuyệt đối.
+
+    Trả `(book_or_none, qty, recovered, mismatch)`; pure để regression test khóa đúng
+    forcing function, không chỉ test CostBook rồi tự giả định main() sẽ dùng đúng.
+    """
+    if raw_qty > 0:
+        return normal_book, raw_qty, False, False
+    if broker_qty <= 0 or not candidate_book.legacy_reopens or candidate_book.qty <= 0:
+        return normal_book, raw_qty, False, False
+    if abs(candidate_book.qty - broker_qty) > 1e-6:
+        return None, 0.0, False, True
+    return candidate_book, candidate_book.qty, True, False
 
 
 def aggregate_events(events):
@@ -186,6 +277,59 @@ def dnse_fill_events(account_no, date):
     return events, None
 
 
+def broker_positions_from_raw(account_no, asof):
+    """Snapshot broker đúng ngày từ bản ghi positions cuối cùng trong dnse_raw.
+
+    Gộp các loan package cùng mã. Đây là neo độc lập bắt buộc trước khi một lô mua
+    sau legacy-oversell được coi là coverage đầy đủ cho P&L.
+
+    §corp-action (job Taylor_20260924_064510+_073500, Việc 3) — `marketPrice` giữ giá trị của
+    lô loan package MỚI NHẤT khác-None gặp trong `positions[]`, không phải lô ĐẦU TIÊN — ĐỒNG
+    BỘ đúng quy ước "latest non-None" mà `DNSEBroker.get_positions()` đã dùng
+    (`trading_bot/brokers.py:694-701`, cùng lý do: DNSE trả nhiều dòng/loan-package cho cùng
+    mã, `marketPrice` là giá mark chung nên giữ bản mới nhất).
+
+    ⚠️ Đây là vá PHÒNG NGỪA/ĐỒNG BỘ QUY ƯỚC, KHÔNG PHẢI vá một lỗi số đã xảy ra: hàm này đọc
+    bản ghi `positions` CUỐI CÙNG của ngày (`latest = rec.get(...)` ghi đè qua từng dòng file,
+    xem vòng lặp bên dưới) — tại thời điểm đó các lô THƯỜNG đã HỘI TỤ về cùng giá (đo thật ca
+    BID 2026-08-14: bản ghi 21:52:31 cuối ngày, mọi lô đều đã về 35.800/20.000/58.500 — TRÙNG
+    với lô ĐẦU, không phải 38.850/59.500 như ở giữa ngày). Quét 83 file `dnse_raw` (2026-06→09)
+    cho 0 ca hàm này đổi hành vi thật (arch-review, job Taylor_20260924_073500) — vá này chỉ
+    phòng ngừa cho ca TƯƠNG LAI nếu bản ghi cuối ngày chưa kịp hội tụ (broker điều chỉnh trễ
+    theo gói vay không nguyên tử, `price_frame.py` §G4), không sửa một con số sai đã quan sát.
+    """
+    path = os.path.join(EXEC_DIR, f"dnse_raw_{asof}.jsonl")
+    if not os.path.exists(path):
+        return None
+    latest = None
+    with open(path, encoding="utf-8") as f:
+        for line in f:
+            try:
+                rec = json.loads(line)
+            except (json.JSONDecodeError, UnicodeDecodeError):
+                continue
+            if rec.get("kind") != "positions":
+                continue
+            # File dùng chung hai account: thiếu tag cũng không được đoán (§12).
+            if rec.get("account_no") != account_no:
+                continue
+            latest = rec.get("payload", {}).get("positions") or []
+    if latest is None:
+        return None
+    out = {}
+    for p in latest:
+        qty = float(p.get("openQuantity") or 0)
+        if qty <= 0:
+            continue
+        tk = p.get("symbol")
+        row = out.setdefault(tk, {"qty": 0.0, "marketPrice": None})
+        row["qty"] += qty
+        mp = p.get("marketPrice")
+        if mp is not None:
+            row["marketPrice"] = mp
+    return out
+
+
 def true_fills_from_dnse_raw(account_no, date):
     """Trả về {ticker: (net_qty, buy_qty, buy_value)} từ log thô broker cho 1 ngày.
 
@@ -254,37 +398,80 @@ def true_fills_from_journal(account, date):
     return aggregate_events(events), None
 
 
+def bq_close_sql(tickers, as_of_date):
+    """Giá Close của phiên MỚI NHẤT (≤ as_of_date) THEO TỪNG MÃ.
+
+    Trước 2026-09-13 ngày giá = MAX(time) của mã đầu alphabet, áp cho cả danh mục ⇒ mã đó
+    ngừng giao dịch/thiếu dòng thì mọi mã khác cũng lấy giá cũ (hoặc mất giá). Cùng bản vá
+    compute_active_nav.bq_close_sql (c9edd4c6); chép chứ không import vì compute_active_nav
+    import ngược module này.
+    """
+    tick_list = ",".join(f"'{t}'" for t in sorted(tickers))
+    return f"""
+    SELECT t.ticker, t.Close, CAST(t.time AS STRING) AS time
+    FROM tav2_bq.ticker AS t
+    WHERE t.ticker IN ({tick_list}) AND t.time <= '{as_of_date}'
+    QUALIFY ROW_NUMBER() OVER (PARTITION BY t.ticker ORDER BY t.time DESC) = 1
+    """
+
+
+def parse_close_rows(rows):
+    """rows BQ → ({tk: Close}, {tk: ngày giá} của các mã có ngày giá CŨ HƠN ngày mới nhất
+    trong danh mục, ngày mới nhất). Mã tụt ngày không bị bỏ — chỉ bị gọi tên."""
+    prices = {r["ticker"]: float(r["Close"]) for r in rows}
+    dates = {r["ticker"]: str(r["time"]) for r in rows}
+    newest = max(dates.values()) if dates else None
+    lagging = {tk: d for tk, d in sorted(dates.items()) if d != newest}
+    return prices, lagging, newest
+
+
 def bq_close_prices(tickers, as_of_date):
     env = dict(os.environ)
     env["PATH"] = BQ_PATH_PREFIX + ":" + env.get("PATH", "")
-    tick_list = ",".join(f"'{t}'" for t in sorted(tickers))
-    sql = f"""
-    SELECT t.ticker, t.Close
-    FROM tav2_bq.ticker AS t
-    WHERE t.ticker IN ({tick_list})
-    AND t.time = (SELECT MAX(t2.time) FROM tav2_bq.ticker AS t2
-                  WHERE t2.ticker = '{sorted(tickers)[0]}' AND t2.time <= '{as_of_date}')
-    """
+    sql = bq_close_sql(tickers, as_of_date)
     cmd = ["bq", "query", "--use_legacy_sql=false",
            "--project_id=lithe-record-440915-m9", "--format=json",
            "--max_rows=5000", sql]
     out = subprocess.run(cmd, capture_output=True, text=True, env=env)
     if out.returncode != 0:
-        return None, out.stderr.strip()
-    rows = json.loads(out.stdout)
-    return {r["ticker"]: float(r["Close"]) for r in rows}, None
+        # `bq` ghi lỗi ra STDOUT chứ không phải stderr (kb/incidents/2026-08/
+        # 2026-08-29-bq-error-on-stdout-empty-diagnosis.md) — chỉ đọc stderr thì
+        # người vận hành nhận chuỗi RỖNG. Không đổi luồng, chỉ đổi chuỗi chẩn đoán.
+        return None, (out.stderr.strip() or out.stdout.strip())
+    prices, lagging, newest = parse_close_rows(json.loads(out.stdout))
+    if lagging:
+        print(f"⚠️ BQ: các mã có phiên giá cũ hơn {newest} (dùng giá phiên gần nhất của CHÍNH "
+              f"mã đó — kiểm tra ngừng giao dịch/thiếu dòng): {lagging}", file=sys.stderr)
+    return prices, None
+
+
+def today_ict_iso():
+    """Ngày HÔM NAY theo giờ ICT, ISO. Seam để test được — KHÔNG inline lại biểu thức này.
+
+    §16: `_dt.date.today()` trần đọc TZ của process. Dưới `TZ=UTC` (cron không export TZ,
+    container) khoảng 00:00–07:00 ICT nó trả NGÀY HÔM TRƯỚC ⇒ công tắc "asof là hôm nay" ở
+    `main()` TẮT oan, và báo cáo mark-to-market dùng giá BQ của phiên T-1 thay vì giá DNSE hôm
+    nay — IM LẶNG (dòng WARN "dùng giá BQ" phía dưới dành cho ca KHÁC nên không tố giác được).
+    `dnse_close_prices()` ngay dưới đã neo ICT đúng bằng ZoneInfo từ trước; hai bên PHẢI cùng
+    một định nghĩa "hôm nay", nếu không thì overlay giá chạy trên một ngày mà bộ lọc bên trong
+    lại coi là ngày khác. Phát hiện: code-quality-weekly 2026-09-27.
+    """
+    return _dt.datetime.now(_ZoneInfo("Asia/Ho_Chi_Minh")).date().isoformat()
 
 
 def dnse_close_prices(tickers, with_source=False):
     """Giá tham chiếu ĐÚNG PHIÊN của từng mã qua API DNSE (đơn vị nghìn đồng → VND).
 
-    Chỉ dùng khi --asof LÀ HÔM NAY: BQ tav2_bq.ticker chỉ sync đêm (23:45 ICT) nên
-    khi eod_trading_report.sh chạy 15:00 ICT cùng ngày, BQ CHƯA CÓ giá đóng cửa hôm
-    đó — bq_close_prices() lặng lẽ rơi về giá của ngày giao dịch gần nhất trước đó
+    Chỉ dùng khi --asof LÀ HÔM NAY: bug 2026-07-06 xảy ra khi EOD còn chạy 15:00,
+    trước BQ sync đêm (23:45), nên BQ CHƯA CÓ giá đóng cửa hôm đó — bq_close_prices()
+    lặng lẽ rơi về giá của ngày giao dịch gần nhất trước đó
     (2026-07-06: rơi về 07-03, lệch ~4.79tr VND cho SpaceX). Bug phát hiện 2026-07-06
     khi user đối chiếu bảng giá với app thật — field positions().marketPrice CŨNG sai
     (không phải giá ATC) nên không dùng; verify_finding: close_price()/latest_trade()
     boardId=G1 khớp 100% với nhau và khớp chính xác tới đồng với ảnh chụp app DNSE.
+    EOD hiện chạy 19:10, sau ticker ingest (~17:2x) và daily_refresh (18:30), nên BQ
+    thường đã có dòng hôm nay; vẫn overlay DNSE ở main() khi asof == today để lấy đúng
+    G1 close/giá tham chiếu thật của phiên hiện tại.
 
     ⚠️ CÁI BẪY THỨ HAI, NGƯỢC CHIỀU CÁI TRÊN (vá 2026-08-11, job Taylor_20260810_183618):
     `close_price` G1 là giá đóng cửa của PHIÊN GẦN NHẤT ĐÃ XONG. Khi hàm này chạy TRƯỚC
@@ -317,8 +504,8 @@ def dnse_close_prices(tickers, with_source=False):
     Cả hai cửa sổ giờ đi chung một đường: G1 không thuộc phiên hôm nay (thiếu HOẶC cũ) ⇒
     `_today_session_price()`.
 
-    KHÔNG đổi hành vi ở đường chạy chính EOD (17:30) / báo cáo 15:00: lúc đó G1 close ĐÃ
-    thuộc phiên hôm nay ⇒ nhánh mới không kích hoạt, giá vẫn là giá ATC thật như cũ.
+    KHÔNG đổi hành vi ở đường chạy chính EOD 19:10: lúc đó G1 close ĐÃ thuộc phiên hôm
+    nay ⇒ nhánh mới không kích hoạt, giá vẫn là giá ATC thật như cũ.
 
     `with_source=True` ⇒ trả (prices, sources) với sources[tk] ∈ {'dnse_g1_today',
     'dnse_trade_today', 'dnse_secdef_basic'} để consumer ghi provenance trung thực thay vì
@@ -436,6 +623,61 @@ def pnl_coverage_warnings(covered_tickers, live_positions):
     return warns, legacy
 
 
+def _dates_with_fills(account, upto_date):
+    """Trùng logic trading_dates_with_fills() trong daily_nav_snapshot.py — duplicate nhỏ có
+    chủ đích, KHÔNG import cross-module (daily_nav_snapshot.py đã import ngược lại module này
+    ở function level — import module-level 2 chiều sẽ vòng)."""
+    dates = []
+    for path in sorted(glob.glob(os.path.join(EXEC_DIR, f"exec_{account}_*_journal.csv"))):
+        base = os.path.basename(path)
+        date = base[len(f"exec_{account}_"):-len("_journal.csv")]
+        if date <= upto_date:
+            dates.append(date)
+    return dates
+
+
+def legacy_majority_guard(legacy_tickers, live_positions, dates_arg, account, asof_date):
+    """Phát hiện dấu hiệu `--dates` truyền vào quá hẹp: đa số vị thế live đang bị gắn nhãn
+    "legacy" và loại khỏi P&L. Bug thật đã xảy ra: caller truyền --dates=<1 ngày duy nhất>
+    (thay vì full fill history) => MỌI vị thế bị coi là legacy, cost-basis toàn account = 0
+    trong khi pipeline sản xuất daily_nav_snapshot.py không dính vì nó tự glob toàn bộ journal
+    qua trading_dates_with_fills(). Guard này KHÔNG đổi behavior (vẫn exclude legacy khỏi
+    P&L) — chỉ làm sai sót invocation không thể trôi qua âm thầm.
+
+    Trả về warning string (kèm gợi ý lệnh đúng) hoặc None nếu không có dấu hiệu. Pure ngoại
+    trừ 1 lần glob() để gợi ý ngày thật — tách khỏi pnl_coverage_warnings() để hàm đó giữ
+    nguyên ý nghĩa "cảnh báo per-ticker".
+    """
+    if not live_positions:
+        return None
+    n_legacy = len(legacy_tickers)
+    n_total = len(live_positions)
+    if n_legacy == 0 or (n_legacy / n_total < 0.5 and n_legacy < 3):
+        return None
+    full_dates = _dates_with_fills(account, asof_date)
+    if full_dates:
+        suggestion = (f"trading_dates_with_fills() (daily_nav_snapshot.py) tìm thấy "
+                      f"{len(full_dates)} ngày có journal cho {account} tính tới {asof_date}: "
+                      f"{','.join(full_dates)}")
+        example_dates = ",".join(full_dates)
+    else:
+        suggestion = (f"không tìm thấy file exec_{account}_*_journal.csv nào trong {EXEC_DIR} "
+                      f"tính tới {asof_date} — account có thể thật sự chưa có fill nào qua bot "
+                      f"(mọi vị thế đều legacy, không phải lỗi invocation)")
+        example_dates = "<toàn bộ ngày có journal, xem trading_dates_with_fills()>"
+    n_dates_passed = len(dates_arg.split(","))
+    return (
+        f"🚨 LEGACY-MAJORITY GUARD: {n_legacy}/{n_total} vị thế live bị gắn nhãn \"no fill "
+        f"history (legacy)\" và bị loại khỏi P&L — kết quả cost-basis/P&L bên dưới có thể "
+        f"KHÔNG đáng tin.\n"
+        f"   Nghi ngờ: --dates=\"{dates_arg}\" chỉ truyền {n_dates_passed} ngày — quá hẹp so "
+        f"với lịch sử fill thật?\n"
+        f"   Gợi ý: {suggestion}\n"
+        f"   Lệnh đúng ví dụ: python3 verify_account_snapshot.py --account {account} "
+        f"--dates \"{example_dates}\" --asof {asof_date} ..."
+    )
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--account", required=True)
@@ -504,6 +746,10 @@ def main():
     # KHÔNG dùng raw_agg[buy_value]/raw_agg[buy_qty] — xem CostBook (bug LPB 2026-08-10).
     raw_books = build_cost_books(raw_events, args.asof, corp_actions)
     journal_books = build_cost_books(journal_events, args.asof, corp_actions)
+    # Candidate riêng; không thay semantics CostBook chuẩn cho VHM/các mã có thứ tự fill
+    # nội ngày xấp xỉ. Chỉ promote candidate ở vòng positions khi raw net<=0, broker đang
+    # giữ >0 và candidate khớp snapshot đúng ngày.
+    raw_reopen_books = build_cost_books(raw_events, args.asof, corp_actions, recover_legacy=True)
 
     if any(w.startswith("FATAL") for w in warnings):
         print("XÁC MINH THẤT BẠI — không đủ dữ liệu nguồn broker thật:", file=sys.stderr)
@@ -512,13 +758,29 @@ def main():
         sys.exit(2)
 
     # cross-check dnse_raw vs journal (2 nguồn độc lập) — so KL NET (mua-bán), giá vốn chỉ từ mua
+    acks = _load_known_discrepancies(args.account, args.asof)
+    acked_tickers = set()
     for tk in set(raw_agg) | set(journal_agg):
         rq = raw_agg.get(tk, (0, 0, 0))[0]
         jq = journal_agg.get(tk, (0, 0, 0))[0]
         if rq == 0 and jq == 0:
             continue
         if abs(rq - jq) > 1e-6:
-            warnings.append(f"WARN qty mismatch {tk}: dnse_raw={rq:.0f} journal={jq:.0f}")
+            ack = acks.get(tk)
+            # Khớp theo ĐỘ LỆCH (journal − broker), KHÔNG theo cặp số tuyệt đối. Cái được
+            # giải thích là "N cổ phiếu quyền mua đã trả tiền, broker chưa ghi có" — mệnh
+            # đề đó dự đoán đúng ĐÚNG MỘT thứ: hiệu = +N. Vị thế tuyệt đối thì đổi mỗi lần
+            # mua/bán bình thường (đo thật 2026-09-09: ZaloPay 232→632 sau khi khai báo
+            # 08-28), nên khoá theo cặp tuyệt đối sẽ tự hết tác dụng ngay lần giao dịch kế
+            # và cảnh báo giả quay lại — đúng thứ ta đang đi dẹp.
+            # Hiệu đổi sang số khác = sự kiện KHÁC ⇒ vẫn WARN như thường.
+            if ack and abs(ack["qty_delta"] - (jq - rq)) < 1e-6:
+                warnings.append(
+                    f"INFO qty mismatch {tk} ĐÃ KHAI BÁO (hết hiệu lực {ack['expires_at']}): "
+                    f"dnse_raw={rq:.0f} journal={jq:.0f} — {ack['reason']}")
+                acked_tickers.add(tk)
+            else:
+                warnings.append(f"WARN qty mismatch {tk}: dnse_raw={rq:.0f} journal={jq:.0f}")
         # so giá vốn theo cùng quy ước lô-đang-sống ở CẢ 2 nguồn (so 2 quy ước khác nhau
         # sẽ đẻ ra cảnh báo giả ở đúng những mã đã tất toán rồi mua lại, vd LPB)
         r_avg = raw_books[tk].avg_cost if tk in raw_books else 0
@@ -526,9 +788,14 @@ def main():
         if r_avg and j_avg:
             diff_pct = abs(r_avg - j_avg) / r_avg * 100
             if diff_pct > args.tolerance_pct:
+                # Lệch giá vốn ở mã đã khai báo lệch SỐ LƯỢNG là HỆ QUẢ số học của chính
+                # nó (cùng tổng tiền chia cho 2 số lượng khác nhau), không phải phát hiện
+                # thứ hai độc lập — kêu riêng chỉ nhân đôi tiếng ồn cho cùng một sự việc.
+                _lvl = "INFO" if tk in acked_tickers else "WARN"
+                _sfx = " (hệ quả của lệch SL đã khai báo)" if tk in acked_tickers else ""
                 warnings.append(
-                    f"WARN cost mismatch {tk}: dnse_raw_avg={r_avg:,.0f} "
-                    f"journal_avg={j_avg:,.0f} (diff {diff_pct:.2f}%%)")
+                    f"{_lvl} cost mismatch {tk}: dnse_raw_avg={r_avg:,.0f} "
+                    f"journal_avg={j_avg:,.0f} (diff {diff_pct:.2f}%%){_sfx}")
 
     # cross-check quantities vs an independently-audited broker snapshot, if given
     if args.broker_snapshot and os.path.exists(args.broker_snapshot):
@@ -538,7 +805,13 @@ def main():
             rq = raw_agg.get(tk, (0, 0, 0))[0]
             if abs(rq - q) > 1e-6:
                 warnings.append(
-                    f"WARN qty vs broker-snapshot {tk}: dnse_raw={rq:.0f} snapshot={q:.0f}")
+                    f"WARN reconstructed qty vs broker-snapshot {tk}: book={rq:.0f} snapshot={q:.0f}")
+
+    # Neo snapshot đúng ngày cho mọi lần chạy, không chỉ khi caller nhớ truyền --broker-snapshot.
+    asof_positions = broker_positions_from_raw(args.account_no, args.asof)
+    if asof_positions is None:
+        warnings.append(f"WARN missing broker positions snapshot for {args.asof} — "
+                        "không được promote lô legacy-reopen vào P&L")
 
     tickers = sorted(raw_agg.keys())
     if not tickers:
@@ -549,7 +822,7 @@ def main():
             print(f"XÁC MINH THẤT BẠI — không lấy được giá BQ: {perr}", file=sys.stderr)
             sys.exit(3)
         price_source = {tk: "bq_close" for tk in prices}
-    if tickers and args.asof == _dt.date.today().isoformat():
+    if tickers and args.asof == today_ict_iso():
         dnse_prices = dnse_close_prices(tickers)
         for tk, px in dnse_prices.items():
             prices[tk] = px
@@ -557,21 +830,34 @@ def main():
         missing_today = [tk for tk in tickers if price_source.get(tk) != "dnse_atc_g1"]
         if missing_today:
             warnings.append(
-                f"WARN dùng giá BQ (có thể trễ vài ngày do BQ chỉ sync đêm) thay vì "
+                f"WARN dùng giá BQ (BQ live có thể thiếu phiên hôm nay nếu ticker ingest "
+                f"chưa xong/gặp lỗi) thay vì "
                 f"giá ATC DNSE hôm nay cho: {missing_today}")
 
     positions = []
     total_cost = total_mtm = 0.0
     for tk in tickers:
+        book = raw_books[tk]
         qty = raw_agg[tk][0]
+        broker_qty = (asof_positions or {}).get(tk, {}).get("qty", 0.0)
+        candidate = raw_reopen_books[tk]
+        book, qty, recovered, mismatch = select_live_book(qty, book, candidate, broker_qty)
+        if mismatch:
+            warnings.append(
+                f"WARN reconstructed qty vs broker {tk}: candidate={candidate.qty:.0f} "
+                f"snapshot={broker_qty:.0f} — loại khỏi P&L (coverage chưa đầy đủ)")
+            continue
         if qty <= 0:
             continue  # đã bán hết (net_qty<=0) -> không còn nắm giữ, bỏ khỏi báo cáo vị thế
-        book = raw_books[tk]
         cost = book.avg_cost  # bình quân gia quyền của LÔ ĐANG SỐNG (reset khi về 0)
         if book.resets:
             warnings.append(
                 f"INFO {tk}: vị thế đã về 0 {book.resets} lần rồi mua lại — giá vốn tính "
                 f"lại từ lô mới ({cost:,.2f}), KHÔNG trộn lô đã tất toán")
+        if recovered:
+            warnings.append(
+                f"INFO {tk}: mở lô mới sau {book.legacy_reopens} chuỗi bán legacy; "
+                f"book.qty={qty:.0f} khớp snapshot broker — giá vốn lô mới {cost:,.2f}")
         px = prices.get(tk)
         if px is None:
             warnings.append(f"WARN no BQ price for {tk} as of {args.asof}")
@@ -592,19 +878,18 @@ def main():
     # P&L partial thành P&L toàn account. Reuse broker_positions của daily_nav_snapshot
     # (import trong hàm — daily_nav_snapshot import ngược lại module này cũng ở function
     # level nên không tạo vòng import).
-    try:
-        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-        from daily_nav_snapshot import broker_positions
-        live_pos = broker_positions(args.account, args.account_no)
-    except Exception as e:
-        print(f"⚠️ Không kiểm tra được P&L coverage (broker_positions lỗi: {e})",
-              file=sys.stderr)
-        live_pos = None
+    live_pos = asof_positions
     cov_warns, legacy_tickers = pnl_coverage_warnings(
         [p["ticker"] for p in positions], live_pos)
     warnings.extend(cov_warns)
     for w in cov_warns:
         print(f"⚠️ {w}", file=sys.stderr)
+
+    guard_warn = legacy_majority_guard(legacy_tickers, live_pos, args.dates, args.account,
+                                        args.asof)
+    if guard_warn:
+        warnings.append(guard_warn)
+        print(guard_warn, file=sys.stderr)
 
     result = {
         "account": args.account,

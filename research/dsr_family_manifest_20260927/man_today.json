@@ -1,0 +1,3908 @@
+{
+ "_doc": "Họ trial CỐ ĐỊNH cho dsr_pbo_annex.py. Tạo bởi dsr_family_manifest.py build. KHÔNG sửa tay: sửa md5 mà không sửa file = phá chính cơ chế fail-closed.",
+ "manifest_version": 1,
+ "created_at_ict": "2026-09-27T12:43:39.137067+07:00",
+ "criterion": {
+  "glob": "data/v23_golive_audit_2014_now_*.csv (+ loại navXXB / from20XX như family_paths)",
+  "mtime_before_ict": "",
+  "min_obs": 2500,
+  "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+ },
+ "n_entries": 486,
+ "n_candidates_globbed": 586,
+ "skipped": {
+  "mtime": 0,
+  "short": 0,
+  "unreadable": 100
+ },
+ "entries": [
+  {
+   "path": "data/v23_golive_audit_2014_now_CONVERGEPORT_wpn110.csv",
+   "md5": "27e3efb39ef86fb7c3efca96f5a5b792",
+   "size": 876892,
+   "mtime_ict": "2026-07-06T17:31:37.356168+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_CONVERGEPORT_wpn110_STATEGATE.csv",
+   "md5": "a4bb7f1ff5f4bdeec390bfdab279ec15",
+   "size": 1577177,
+   "mtime_ict": "2026-07-06T19:27:12.009529+07:00",
+   "n_obs": 3117,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_cap20.csv",
+   "md5": "9b935ae1dec526f0fe2393684f937426",
+   "size": 2378798,
+   "mtime_ict": "2026-06-17T09:47:34.135417+07:00",
+   "n_obs": 3103,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_cap30.csv",
+   "md5": "cf958a9001356775e361b4e30ff9689d",
+   "size": 2353673,
+   "mtime_ict": "2026-06-17T10:15:53.671130+07:00",
+   "n_obs": 3103,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_cap40.csv",
+   "md5": "2b4de8ec906b04ab52b8c4015d056f19",
+   "size": 2372490,
+   "mtime_ict": "2026-06-17T09:54:34.804258+07:00",
+   "n_obs": 3103,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_edge_etfliqcustompitg_wtnamecap.csv",
+   "md5": "02faa4474dd4745f93f981d22a9f7d73",
+   "size": 3130623,
+   "mtime_ict": "2026-06-17T13:30:29.417278+07:00",
+   "n_obs": 3103,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_etfliqcustompitg.csv",
+   "md5": "e3d17a1e9a014d14eb0533eb25776440",
+   "size": 3290085,
+   "mtime_ict": "2026-06-20T15:38:26.686845+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_etfliqcustompitg_park2-20_3-100_4-100_5-100.csv",
+   "md5": "1be0833cda231c6ef55e152ff75d8362",
+   "size": 3444312,
+   "mtime_ict": "2026-06-20T17:22:13.421080+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_etfliqcustompitg_park3-100.csv",
+   "md5": "d7c88a9a9439c87ca8180c163fa941be",
+   "size": 3231146,
+   "mtime_ict": "2026-06-20T17:22:24.801322+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_etfliqcustompitg_park3-70_4-70_wtnamecap.csv",
+   "md5": "cf31b8d91cb5276016e615b1c99296fc",
+   "size": 3569587,
+   "mtime_ict": "2026-06-18T22:06:43.321054+07:00",
+   "n_obs": 3105,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_etfliqcustompitg_park_wtnamecap.csv",
+   "md5": "ed44d144b27816b9511ca77ff60bafde",
+   "size": 2590450,
+   "mtime_ict": "2026-06-18T21:51:17.837314+07:00",
+   "n_obs": 3105,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_etfliqcustompitg_wtnamecap.csv",
+   "md5": "7b795faf5238238f20f884cfdb6d887b",
+   "size": 3422921,
+   "mtime_ict": "2026-06-19T08:16:55.956800+07:00",
+   "n_obs": 3106,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matgate15_edge_etfliqcustompitg_wtnamecap.csv",
+   "md5": "61b4b6aa403bc7db9e0896996c36fb40",
+   "size": 3196364,
+   "mtime_ict": "2026-06-17T13:02:18.833209+07:00",
+   "n_obs": 3103,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_edge_etfliqcustompitg.csv",
+   "md5": "31cf78266e222915f091e948a5742e36",
+   "size": 3302215,
+   "mtime_ict": "2026-06-20T18:38:04.662673+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0.csv",
+   "md5": "e544c15fa21d2573f637ecbd7089d236",
+   "size": 2463699,
+   "mtime_ict": "2026-06-13T10:55:17+07:00",
+   "n_obs": 3101,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge.csv",
+   "md5": "4b5acf868b4951e4dbd2f0f52c4682cb",
+   "size": 2448998,
+   "mtime_ict": "2026-07-05T17:20:46.810529+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_capdivpos3_etfliqcustompitg_wtnamecap_exp_capdiv_a1.csv",
+   "md5": "4c6615ea97a0150bb661293f4483abdf",
+   "size": 3147092,
+   "mtime_ict": "2026-07-15T00:52:35.282537+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_capdivtilt3_etfliqcustompitg_wtnamecap_exp_capdiv_a2.csv",
+   "md5": "3e29469a11511788d79a8c2933e1e849",
+   "size": 3130881,
+   "mtime_ict": "2026-07-15T00:52:35.106533+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcreation.csv",
+   "md5": "fb74f112c7090ba36ad0efde156c9761",
+   "size": 2459928,
+   "mtime_ict": "2026-06-13T21:57:09+07:00",
+   "n_obs": 3102,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustom.csv",
+   "md5": "cef349f1b89c4bc67d747169d4b7fff4",
+   "size": 3039813,
+   "mtime_ict": "2026-06-13T17:29:11+07:00",
+   "n_obs": 3102,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompit.csv",
+   "md5": "18823c608fdf566d6ad121721cf77cc4",
+   "size": 3226957,
+   "mtime_ict": "2026-06-14T09:54:45+07:00",
+   "n_obs": 3102,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg.csv",
+   "md5": "aa2fa2ecc1fa39deaa2e9fa917f2e2e8",
+   "size": 3221072,
+   "mtime_ict": "2026-06-14T22:16:15+07:00",
+   "n_obs": 3102,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-0_wtnamecap_advprice_exp_c30vnopark2_univpit.csv",
+   "md5": "a0b83f3660ece0226ef575f58539f101",
+   "size": 2433130,
+   "mtime_ict": "2026-09-27T12:03:20.336041+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-0_wtnamecap_advprice_exp_c30vnoparkleg_univpit.csv",
+   "md5": "107723b540e956570f2c48f7e2c2457d",
+   "size": 2433462,
+   "mtime_ict": "2026-09-27T12:04:24.869484+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-100_wtnamecap.csv",
+   "md5": "3c6db76e186902073038c35a9b7f6aba",
+   "size": 3314850,
+   "mtime_ict": "2026-07-03T20:27:56.049275+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-70_4-100.csv",
+   "md5": "6639feee80ca2c8cc23e028487479367",
+   "size": 3363520,
+   "mtime_ict": "2026-06-14T22:24:53+07:00",
+   "n_obs": 3102,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-70_4-70_5-70_wtew_n12_cap10_gate2_liqf5B_exp_qsleeve_q12bullext.csv",
+   "md5": "5b2e549a93ab0e574999ba804922143e",
+   "size": 3173017,
+   "mtime_ict": "2026-07-12T15:57:10.376903+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-70_4-70_wtnamecap.csv",
+   "md5": "b7edec39fef82721b744185de4f299f7",
+   "size": 3483384,
+   "mtime_ict": "2026-06-25T23:51:40.735041+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-70_4-70_wtnamecap_c30bfl5.csv",
+   "md5": "4bae870c86b61d8f2de3714ddf59e60b",
+   "size": 3570341,
+   "mtime_ict": "2026-06-21T08:30:36.558549+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-80_4-30_wtnamecap_advprice_exp_bp_X30_univpit.csv",
+   "md5": "3b5c8b6dc01f6246a3c2b3f8ceca07f9",
+   "size": 3202772,
+   "mtime_ict": "2026-08-25T21:37:01.597057+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-80_4-50_wtnamecap_advprice_exp_bp_X50_univpit.csv",
+   "md5": "de25054a50733b26f0230f62d74a4d62",
+   "size": 3234886,
+   "mtime_ict": "2026-08-25T21:29:59.907985+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-80_4-65_wtnamecap_advprice_exp_bp_X65_univpit.csv",
+   "md5": "4a585db8e8d57a70decfec0aa7661eb6",
+   "size": 3247714,
+   "mtime_ict": "2026-08-25T21:40:10.589122+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-80_wtnamecap.csv",
+   "md5": "21c7d2a0299eb4b06af858988b456aab",
+   "size": 3333173,
+   "mtime_ict": "2026-07-09T00:24:07.918273+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-80_wtnamecap_advprice_exp_agg_F1_t80_univpit.csv",
+   "md5": "c57b274ed6070fa9666f11586fe4b17b",
+   "size": 3064008,
+   "mtime_ict": "2026-08-04T08:39:44.841132+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-80_wtnamecap_advprice_exp_c30vpark80_univpit.csv",
+   "md5": "a90e87c093873028ac2cd19f71c1780e",
+   "size": 2844376,
+   "mtime_ict": "2026-09-27T12:15:26.479925+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-85_wtnamecap_advprice_exp_agg_F2_t85_univpit.csv",
+   "md5": "f3e376d002a5d6bb66068c661872fe7e",
+   "size": 3066456,
+   "mtime_ict": "2026-08-04T08:40:06.253584+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-85_wtnamecap_advprice_exp_agg_H1_t85b03_univpit.csv",
+   "md5": "97f34b9af94c2ae180db9c1204f422e5",
+   "size": 3012596,
+   "mtime_ict": "2026-08-04T08:41:07.206870+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-85_wtnamecap_advprice_exp_c30vpark85_univpit.csv",
+   "md5": "36d3e4d2f57ce38fa96456320469db09",
+   "size": 2856382,
+   "mtime_ict": "2026-09-27T12:15:46.132344+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-90_wtnamecap.csv",
+   "md5": "7235decc3519bc7fc46119fa6213ef60",
+   "size": 3384473,
+   "mtime_ict": "2026-07-09T00:24:08.998296+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-90_wtnamecap_advprice_exp_agg_F3_t90_univpit.csv",
+   "md5": "62a3b869cb209704746d0b7bbac3ef1e",
+   "size": 3120485,
+   "mtime_ict": "2026-08-04T08:40:16.621803+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-94_wtnamecap.csv",
+   "md5": "d852ca10442494e098eb91dc79387030",
+   "size": 3445884,
+   "mtime_ict": "2026-07-09T00:24:16.662458+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtew_n12_cap10_gate2_liqf5B_exp_qsleeve_q12neu.csv",
+   "md5": "0db3b2bdfeafb6c58a72b26a846fc530",
+   "size": 2933274,
+   "mtime_ict": "2026-07-12T15:47:59.881094+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtew_n8_cap10_gate2_liqf5B_exp_qsleeve_q8neu.csv",
+   "md5": "c91033ed29b502dc5ce59e0b4023347e",
+   "size": 2915118,
+   "mtime_ict": "2026-07-12T15:41:10.312332+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtew_n8_cap10_gatenone_qfloor_liqf5B_exp_qsleeve_qf8neu.csv",
+   "md5": "3675cef3071dab73c9065585980c53ef",
+   "size": 3012370,
+   "mtime_ict": "2026-07-12T15:47:53.280953+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtfincap30_exp_v4f_A3_fincap_exp_seleyonly.csv",
+   "md5": "63a8d59ffe590fd1c1f0f72a94cc2feb",
+   "size": 3120524,
+   "mtime_ict": "2026-07-14T21:52:12.446112+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtfincap45_exp_v4f_C45_fincap_exp_seleyonly.csv",
+   "md5": "989e20ab5cff73d06453bb057eb04537",
+   "size": 3125866,
+   "mtime_ict": "2026-07-14T22:46:39.843941+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtfincap50_exp_v4f_C50_fincap_exp_seleyonly.csv",
+   "md5": "ac69dd543cf651e3028526f9495c3cad",
+   "size": 3122188,
+   "mtime_ict": "2026-07-14T22:53:02.424089+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtfincap55_exp_v4f_C55_fincap_exp_seleyonly.csv",
+   "md5": "e58a92f28d3946dc5271630282c92018",
+   "size": 3131105,
+   "mtime_ict": "2026-07-14T22:59:29.376319+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtfincap60_exp_v4f_C60_fincap_exp_seleyonly.csv",
+   "md5": "194290f497054215b46c7ad3426b0595",
+   "size": 3131284,
+   "mtime_ict": "2026-07-14T23:05:57.152569+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap.csv",
+   "md5": "4d736d9169c32f1055ea6c54ee5c6dac",
+   "size": 3150648,
+   "mtime_ict": "2026-07-14T18:52:02.020337+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_advmin1000m_exp_gate1000m_univpit.csv",
+   "md5": "969fb7ed732981bd01fb6c8069524de5",
+   "size": 2966773,
+   "mtime_ict": "2026-08-04T15:15:13.354015+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_advmin1000m_exp_s1000m_univpit.csv",
+   "md5": "969fb7ed732981bd01fb6c8069524de5",
+   "size": 2966773,
+   "mtime_ict": "2026-08-25T17:08:00.224414+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_advmin1500m_exp_s1500m_univpit.csv",
+   "md5": "bfcf733ae1b53c1cc45ab418e7ef0574",
+   "size": 2860622,
+   "mtime_ict": "2026-08-25T17:07:53.836276+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_advmin2000m_advinfl7_exp_dynA_univpit.csv",
+   "md5": "6940d85488c75289b2ff974855054d6e",
+   "size": 2887844,
+   "mtime_ict": "2026-08-25T17:15:20.461935+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_advmin2000m_exp_gate2000m_univpit.csv",
+   "md5": "7720b3e01cb90c9c8d33316952d32c60",
+   "size": 2788895,
+   "mtime_ict": "2026-08-04T15:15:30.986400+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_advmin2000m_exp_s2000m_univpit.csv",
+   "md5": "7720b3e01cb90c9c8d33316952d32c60",
+   "size": 2788895,
+   "mtime_ict": "2026-08-25T17:07:53.852276+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_advmin3000m_exp_s3000m_univpit.csv",
+   "md5": "5b12736012a1f15cb5dd4d7b8aceac9a",
+   "size": 2654578,
+   "mtime_ict": "2026-08-25T17:07:51.096217+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_advmin4000m_exp_s4000m_univpit.csv",
+   "md5": "08bbcc4c1b4e5659869fa05b5ff5a1e7",
+   "size": 2599616,
+   "mtime_ict": "2026-08-25T17:15:21.569959+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_advmin5000m_exp_gate5000m_univpit.csv",
+   "md5": "b725a29baa339b92044ca8ddf9acc383",
+   "size": 2536943,
+   "mtime_ict": "2026-08-04T15:20:41.969187+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_advmin500m_exp_gate500m_univpit.csv",
+   "md5": "9f2934bc9723ceb0e18907bfdb453eaf",
+   "size": 3118861,
+   "mtime_ict": "2026-08-04T15:20:22.352759+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_advpctile_exp_dynB20_univpit.csv",
+   "md5": "fb0a36a0cb6f4ede2498035b4fef5086",
+   "size": 3079533,
+   "mtime_ict": "2026-08-25T17:15:33.858225+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_advpctile_exp_dynB25_univpit.csv",
+   "md5": "154f73f0c9b29fea0b895d1e51217e0b",
+   "size": 3035528,
+   "mtime_ict": "2026-08-25T17:15:21.281952+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_advpctile_exp_dynB30_univpit.csv",
+   "md5": "6589950d6b23855a3fdc74ae15a17234",
+   "size": 2966572,
+   "mtime_ict": "2026-08-25T17:22:41.215477+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_advpctile_exp_dynB43_univpit.csv",
+   "md5": "36190df436d9dfd403f9fb35805489c3",
+   "size": 2804319,
+   "mtime_ict": "2026-08-25T17:22:44.095539+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_A_blend_w0_50B_univpit.csv",
+   "md5": "25eefd805a3dfbe262cbd1eb6d14f2fb",
+   "size": 3050717,
+   "mtime_ict": "2026-08-04T12:28:58.446551+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_A_dnpr_w0_50B_univpit.csv",
+   "md5": "6fec00ed8bdc7e7527e5d02f4b3487c0",
+   "size": 3064314,
+   "mtime_ict": "2026-08-04T12:28:19.821725+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_A_fill_w0_50B_univpit.csv",
+   "md5": "63882540a8fb0c9ee1c586e7128e5a01",
+   "size": 3047742,
+   "mtime_ict": "2026-08-04T12:28:13.261585+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_A_pahl3_w0_50B_univpit.csv",
+   "md5": "1315fd1a3eaa83a39348c67389dd500b",
+   "size": 3054423,
+   "mtime_ict": "2026-08-04T12:28:15.137625+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_A_surprise_w0_50B_univpit.csv",
+   "md5": "5234702072bca5c545c8b106ddac64c8",
+   "size": 3042552,
+   "mtime_ict": "2026-08-04T12:28:19.457717+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_B_blend_w5_50B_univpit.csv",
+   "md5": "b2347c5cfd1a24156b2052c14a0342cd",
+   "size": 2939861,
+   "mtime_ict": "2026-08-04T12:28:07.649465+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_B_dnpr_w5_50B_univpit.csv",
+   "md5": "bcdf29182d71a2951e48da06c5cf9bc1",
+   "size": 2923289,
+   "mtime_ict": "2026-08-04T12:36:31.080225+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_B_fill_w5_50B_univpit.csv",
+   "md5": "e06704207e64e52bacd4fb4d4acccf60",
+   "size": 2927117,
+   "mtime_ict": "2026-08-04T12:36:23.116055+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_B_pahl3_w5_50B_univpit.csv",
+   "md5": "2d5fad9479028e768951b52d757aaf0c",
+   "size": 2922906,
+   "mtime_ict": "2026-08-04T12:28:14.425610+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_B_surprise_w5_50B_univpit.csv",
+   "md5": "5e0e1c3824e4a93f62008714e30fc229",
+   "size": 2899490,
+   "mtime_ict": "2026-08-04T12:28:24.401823+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_D0_control_univpit.csv",
+   "md5": "7d053e6201c9d107685ff4d1dd9d2d2a",
+   "size": 3042954,
+   "mtime_ict": "2026-08-03T17:29:18.849762+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_D_f11_univpit_mge110cap.csv",
+   "md5": "121b93f005f919b81f621d345385bcd7",
+   "size": 3047126,
+   "mtime_ict": "2026-08-03T17:33:00.614633+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_D_f12_univpit_mge120cap.csv",
+   "md5": "3e9a4303297a3053b8fce798ef157065",
+   "size": 3048961,
+   "mtime_ict": "2026-08-03T17:32:50.370408+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_D_f13_univpit_mge130cap.csv",
+   "md5": "a91cb46711fb1aee06c13d00d2470800",
+   "size": 3060940,
+   "mtime_ict": "2026-08-03T17:32:58.534588+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_D_f13nc_univpit_mge130cap.csv",
+   "md5": "4ab3807187360b245a99544ed4be1263",
+   "size": 3062687,
+   "mtime_ict": "2026-08-03T17:38:04.121300+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_D_f15_univpit_mge150cap.csv",
+   "md5": "4f30cf7177cc469e3753487af9e42ba4",
+   "size": 3068873,
+   "mtime_ict": "2026-08-03T17:33:08.210800+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_E125_f11_univpit_mge110cap.csv",
+   "md5": "d45329862713fb64f557613a4fbc55b7",
+   "size": 3040970,
+   "mtime_ict": "2026-08-03T17:48:57.831706+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_E125_f12_univpit_mge120cap.csv",
+   "md5": "7dc3586bea0d48f4eae96638bfdc269c",
+   "size": 3046947,
+   "mtime_ict": "2026-08-03T17:48:58.095711+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_E125_f13_univpit_mge130cap.csv",
+   "md5": "28bfa44d23f9827f92e8e5ee66480bba",
+   "size": 3058791,
+   "mtime_ict": "2026-08-03T17:48:59.075733+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_E125_f15_univpit_mge150cap.csv",
+   "md5": "844d2fa1dded67eec8bf6bd001b030bc",
+   "size": 3069136,
+   "mtime_ict": "2026-08-03T17:48:55.991665+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_E140_f13_univpit_mge130cap.csv",
+   "md5": "26c54a724dd44b0e8cac3b6b7f99c430",
+   "size": 3061486,
+   "mtime_ict": "2026-08-03T17:48:57.271693+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_E140_f15_univpit_mge150cap.csv",
+   "md5": "0c3a27c1c0ca4264b9781bc34a89a19e",
+   "size": 3069710,
+   "mtime_ict": "2026-08-03T17:48:56.659680+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_INERT_f13_univpit_mge130cap.csv",
+   "md5": "28bfa44d23f9827f92e8e5ee66480bba",
+   "size": 3058791,
+   "mtime_ict": "2026-08-03T18:04:37.200383+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_L0_ctrl50B_univpit.csv",
+   "md5": "7d053e6201c9d107685ff4d1dd9d2d2a",
+   "size": 3042954,
+   "mtime_ict": "2026-08-04T12:23:01.158914+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_L0b_copyctrl50B_univpit.csv",
+   "md5": "7d053e6201c9d107685ff4d1dd9d2d2a",
+   "size": 3042954,
+   "mtime_ict": "2026-08-04T12:28:24.233819+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_L13e0_univpit_mge130cap.csv",
+   "md5": "67ed1da4ac9ebd17d828e05b70b91737",
+   "size": 3047457,
+   "mtime_ict": "2026-08-03T18:03:56.403487+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_L13e12_univpit_mge130cap.csv",
+   "md5": "05c5ecc2988e91555069445e951cabe9",
+   "size": 3058165,
+   "mtime_ict": "2026-08-03T18:03:49.467335+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_L13e14_univpit_mge130cap.csv",
+   "md5": "28bfa44d23f9827f92e8e5ee66480bba",
+   "size": 3058791,
+   "mtime_ict": "2026-08-03T18:03:57.651515+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_L13e16_univpit_mge130cap.csv",
+   "md5": "478da697a7a1b999e5b31578e1e44cc6",
+   "size": 3060608,
+   "mtime_ict": "2026-08-03T18:04:36.168360+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_L13e17_univpit_mge130cap.csv",
+   "md5": "6081a1b9a9e5d44be01a875befb222e6",
+   "size": 3058772,
+   "mtime_ict": "2026-08-03T18:03:58.475533+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_L2_advprice_univpit.csv",
+   "md5": "7d053e6201c9d107685ff4d1dd9d2d2a",
+   "size": 3042954,
+   "mtime_ict": "2026-08-02T23:48:50.312970+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_P1_BASE_univpit.csv",
+   "md5": "7d053e6201c9d107685ff4d1dd9d2d2a",
+   "size": 3042954,
+   "mtime_ict": "2026-08-23T19:19:40.913202+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_P1_INERT_univpit_mge130cap.csv",
+   "md5": "79f62563fdad9271f50d626965c37a1e",
+   "size": 3058790,
+   "mtime_ict": "2026-08-23T19:19:14.388629+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_P1_V0_R10_univpit_mge130cap.csv",
+   "md5": "f6504b7996856a3cca9bf4067a3538ed",
+   "size": 3056261,
+   "mtime_ict": "2026-08-23T19:30:55.343774+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_P1_V0_R125_univpit_mge130cap.csv",
+   "md5": "30073694d1c3e9690eddb1141a85a46c",
+   "size": 3054198,
+   "mtime_ict": "2026-08-23T19:31:16.888239+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_P1_V0_R15_univpit_mge130cap.csv",
+   "md5": "d676f8a78919d4e3c8f60c5725817be3",
+   "size": 3051632,
+   "mtime_ict": "2026-08-23T19:31:16.176224+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_P1_V1_R10_univpit_mge130cap.csv",
+   "md5": "4e8eba3225d37faa29951fe997ce40b1",
+   "size": 3057000,
+   "mtime_ict": "2026-08-23T19:31:10.312097+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_P1_V1_R125_univpit_mge130cap.csv",
+   "md5": "9477cb34edffacd65bc461b3d394d003",
+   "size": 3053065,
+   "mtime_ict": "2026-08-23T19:31:13.892174+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_P1_V1_R15_univpit_mge130cap.csv",
+   "md5": "74421fc0817566d7fbee308f23fcd154",
+   "size": 3054435,
+   "mtime_ict": "2026-08-23T19:30:52.603714+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_P1_V2_R10_univpit_mge130cap.csv",
+   "md5": "0a03f95ae708867e972f8a75570ea52d",
+   "size": 3050345,
+   "mtime_ict": "2026-08-23T19:38:02.617006+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_P1_V2_R125_univpit_mge130cap.csv",
+   "md5": "20f03568f33c5096e8738e63fd69b43b",
+   "size": 3050015,
+   "mtime_ict": "2026-08-23T19:38:03.233019+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_P1_V2_R15_univpit_mge130cap.csv",
+   "md5": "1d18125f76a014f128226739f15983fd",
+   "size": 3050433,
+   "mtime_ict": "2026-08-23T19:38:20.329389+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_P1_V3LOO_e0_univpit_mge130cap.csv",
+   "md5": "7f6ee83c290136b495b92dd8cecb9e5a",
+   "size": 3048744,
+   "mtime_ict": "2026-08-23T20:13:32.342980+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_P1_V3LOO_e2_univpit_mge130cap.csv",
+   "md5": "2bb8053b08fc0bc57bcbb7f8e88cf12c",
+   "size": 3063066,
+   "mtime_ict": "2026-08-23T20:13:33.311001+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_P1_V3LOO_e3_univpit_mge130cap.csv",
+   "md5": "84bca7363894926c420bf2912178b18a",
+   "size": 3058629,
+   "mtime_ict": "2026-08-23T20:13:12.386553+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_P1_V3LOO_e7_univpit_mge130cap.csv",
+   "md5": "936d2491e724ce43b7b1e21125d86772",
+   "size": 3059603,
+   "mtime_ict": "2026-08-23T20:13:32.414982+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_P1_V3LOO_e8_univpit_mge130cap.csv",
+   "md5": "1eb8130dcdc84f19cf2af2e2c726ba4a",
+   "size": 3054363,
+   "mtime_ict": "2026-08-23T20:13:07.598451+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_P1_V3_R10_univpit_mge130cap.csv",
+   "md5": "da7e6fda2453e0d61e1649be07423b6c",
+   "size": 3057109,
+   "mtime_ict": "2026-08-23T19:38:27.949553+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_P1_V3_R125_univpit_mge130cap.csv",
+   "md5": "48f26cc2869f99643278d115589139d6",
+   "size": 3060256,
+   "mtime_ict": "2026-08-23T19:38:34.997705+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_P1_V3_R15_univpit_mge130cap.csv",
+   "md5": "c0ef5716bcfca79eee3dddb3de1f79da",
+   "size": 3058734,
+   "mtime_ict": "2026-08-23T19:38:33.273668+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_P1_V4_R10_univpit_mge130cap.csv",
+   "md5": "a5501e676af6eb76899b1215ef5d261d",
+   "size": 3063790,
+   "mtime_ict": "2026-08-23T19:45:12.266289+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_P1_V4_R125_univpit_mge130cap.csv",
+   "md5": "ba21d4634c318b89d5e34c7ff7928c4e",
+   "size": 3061142,
+   "mtime_ict": "2026-08-23T19:45:07.786192+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_P1_V4_R15_univpit_mge130cap.csv",
+   "md5": "bb00dc5c04377aec887bdce8f34f9007",
+   "size": 3056536,
+   "mtime_ict": "2026-08-23T19:45:33.890756+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_P1_V5_R10_univpit_mge130cap.csv",
+   "md5": "0a03f95ae708867e972f8a75570ea52d",
+   "size": 3050345,
+   "mtime_ict": "2026-08-23T19:45:43.478964+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_P1_V5_R125_univpit_mge130cap.csv",
+   "md5": "20f03568f33c5096e8738e63fd69b43b",
+   "size": 3050015,
+   "mtime_ict": "2026-08-23T19:45:42.046933+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_P1_V5_R15_univpit_mge130cap.csv",
+   "md5": "1d18125f76a014f128226739f15983fd",
+   "size": 3050433,
+   "mtime_ict": "2026-08-23T19:45:39.774884+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_P1_V6_R10_univpit_mge150cap.csv",
+   "md5": "4f9922102fd1a16227b1675ca3ba8548",
+   "size": 3055418,
+   "mtime_ict": "2026-08-23T19:52:19.307516+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_P1_V6_R125_univpit_mge150cap.csv",
+   "md5": "53e0fc9484197f2a43f50ace921388b8",
+   "size": 3054936,
+   "mtime_ict": "2026-08-23T19:53:08.192573+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_P1_V6_R15_univpit_mge150cap.csv",
+   "md5": "7eec77454d17bb878ccff209054701ff",
+   "size": 3055147,
+   "mtime_ict": "2026-08-23T19:52:48.652150+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_P1_V7_R10_univpit_mge130cap.csv",
+   "md5": "ca1333a528a6ac6bb03a0a9b0d73b985",
+   "size": 3053091,
+   "mtime_ict": "2026-08-23T19:52:43.312035+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_P1_V7_R125_univpit_mge130cap.csv",
+   "md5": "ef44910e89e1f7c16d0cef8bd832247d",
+   "size": 3051784,
+   "mtime_ict": "2026-08-23T19:52:50.840198+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_P1_V7_R15_univpit_mge130cap.csv",
+   "md5": "dc8ee983cc512f5eee49826a41e936ed",
+   "size": 3053625,
+   "mtime_ict": "2026-08-23T19:52:50.372188+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_P1_V8_R10_univpit_mge130cap.csv",
+   "md5": "f6504b7996856a3cca9bf4067a3538ed",
+   "size": 3056261,
+   "mtime_ict": "2026-08-23T19:59:25.400715+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_P1_V8_R125_univpit_mge130cap.csv",
+   "md5": "30073694d1c3e9690eddb1141a85a46c",
+   "size": 3054198,
+   "mtime_ict": "2026-08-23T20:00:19.001872+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_P1_V8_R15_univpit_mge130cap.csv",
+   "md5": "d676f8a78919d4e3c8f60c5725817be3",
+   "size": 3051632,
+   "mtime_ict": "2026-08-23T19:59:42.097075+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_agate20_univpit_exp_selyieldcombo_agate_exp_agate20.csv",
+   "md5": "f94968b7f0545c1927f84818da7c0e0a",
+   "size": 3035740,
+   "mtime_ict": "2026-08-30T09:41:58.439667+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_agate20sec_univpit_exp_selyieldcombo_agate_exp_agate20sec.csv",
+   "md5": "c94a2ef1029bc297766f1bce6f8df164",
+   "size": 3047139,
+   "mtime_ict": "2026-08-30T11:10:47.831530+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_agate33_univpit_exp_selyieldcombo_agate_exp_agate33.csv",
+   "md5": "d24c1ca684d85ef8ae8ed516c3f84dea",
+   "size": 3040280,
+   "mtime_ict": "2026-08-30T09:41:40.563294+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_agate33sec_univpit_exp_selyieldcombo_agate_exp_agate33sec.csv",
+   "md5": "4ef80d58cc09fdde29893e0d8e5287a0",
+   "size": 3053258,
+   "mtime_ict": "2026-08-30T11:11:03.867867+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_agate50_univpit_exp_selyieldcombo_agate_exp_agate50.csv",
+   "md5": "a501887b984628bf62331c0f5280b195",
+   "size": 3043397,
+   "mtime_ict": "2026-08-30T09:42:10.251913+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_agate50sec_univpit_exp_selyieldcombo_agate_exp_agate50sec.csv",
+   "md5": "bd82071f7fcd16cfb8122cd41ce27a6f",
+   "size": 3037838,
+   "mtime_ict": "2026-08-30T11:11:02.043829+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_agg_A0_gate_univpit.csv",
+   "md5": "7d053e6201c9d107685ff4d1dd9d2d2a",
+   "size": 3042954,
+   "mtime_ict": "2026-08-04T08:39:38.905007+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_agg_G1_b03_univpit.csv",
+   "md5": "1fadb83d5c0ef2bc2b58ec1038179402",
+   "size": 2935804,
+   "mtime_ict": "2026-08-04T08:41:25.623259+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_agg_G2_b06_univpit.csv",
+   "md5": "3dc132c94b1b14ef4a7657ddce5c35ab",
+   "size": 2898130,
+   "mtime_ict": "2026-08-04T08:40:52.038550+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_anch_L0control_univpit.csv",
+   "md5": "7d053e6201c9d107685ff4d1dd9d2d2a",
+   "size": 3042954,
+   "mtime_ict": "2026-08-10T17:28:23.284537+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_anch_LA_cap000_univpit.csv",
+   "md5": "48d98901dfda1542ced2de39c48d3529",
+   "size": 2770405,
+   "mtime_ict": "2026-08-10T17:35:30.401604+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_anch_LB_cap001_univpit.csv",
+   "md5": "dda62dd9bc580f195cd7ca8f93aafe3d",
+   "size": 2813720,
+   "mtime_ict": "2026-08-10T17:35:48.129980+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_anch_LC_cap002_univpit.csv",
+   "md5": "d707beb69b57e6380b6cc9708f540383",
+   "size": 2848033,
+   "mtime_ict": "2026-08-10T17:49:55.443971+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_anch_LD_cap003_univpit.csv",
+   "md5": "b7dd3f251623f6b8ad61bb7022d86fc2",
+   "size": 2874722,
+   "mtime_ict": "2026-08-10T17:35:43.549883+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_anch_LE_cap005_univpit.csv",
+   "md5": "0e16ade723e606ef27ed8cc01a5c80b7",
+   "size": 2930286,
+   "mtime_ict": "2026-08-10T17:49:06.826939+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_anch_W0_w3nocap_univpit.csv",
+   "md5": "a1f1ee677124bba242a866edf6be8394",
+   "size": 2896190,
+   "mtime_ict": "2026-08-10T17:50:19.224477+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_anch_WA_w3cap000_univpit.csv",
+   "md5": "e9d4034765f9ecf68b22c17480bf2190",
+   "size": 2610974,
+   "mtime_ict": "2026-08-10T17:50:13.416353+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_anch_WD_w3cap003_univpit.csv",
+   "md5": "a4f64a1a4d65d5ec6f105cd2c6409f33",
+   "size": 2737111,
+   "mtime_ict": "2026-08-10T17:50:13.972365+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_bg_ctrl_univpit.csv",
+   "md5": "7d053e6201c9d107685ff4d1dd9d2d2a",
+   "size": 3042954,
+   "mtime_ict": "2026-09-10T20:38:18.743963+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_bg_g0_univpit.csv",
+   "md5": "acc8525413b0810c146a65ffd68acd65",
+   "size": 2868820,
+   "mtime_ict": "2026-09-10T20:53:31.887313+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_bg_g10_univpit.csv",
+   "md5": "02f2e57f532101f37f6f7a4be576d776",
+   "size": 3029499,
+   "mtime_ict": "2026-09-10T20:53:42.327534+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_bg_g4_univpit.csv",
+   "md5": "33577d64447e597cc4132c35e523b9b3",
+   "size": 2976325,
+   "mtime_ict": "2026-09-10T20:53:36.579412+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_bg_g6_univpit.csv",
+   "md5": "e6f9a79583fa56e281cff476a4def367",
+   "size": 3026730,
+   "mtime_ict": "2026-09-10T20:39:55.206011+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_bg_g8_univpit.csv",
+   "md5": "f467af47cb955aaec2b4df523121c916",
+   "size": 3031286,
+   "mtime_ict": "2026-09-10T20:53:37.519432+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_bg_inert_univpit.csv",
+   "md5": "7d053e6201c9d107685ff4d1dd9d2d2a",
+   "size": 3042954,
+   "mtime_ict": "2026-09-10T20:39:57.454058+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_bg_plac_univpit.csv",
+   "md5": "b396c24fbb33265b1548d9de766c074d",
+   "size": 3023276,
+   "mtime_ict": "2026-09-10T20:53:39.859482+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_c30vctl_univpit.csv",
+   "md5": "7de1daf4874bb062d87e16897a1db277",
+   "size": 3043239,
+   "mtime_ict": "2026-09-27T10:36:14.167719+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_c30vleg_univpit.csv",
+   "md5": "7de1daf4874bb062d87e16897a1db277",
+   "size": 3043239,
+   "mtime_ict": "2026-09-27T10:50:45.126315+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_c30vmain_univpit.csv",
+   "md5": "3f836927c0df82915c4cfb973d8f4af3",
+   "size": 2887158,
+   "mtime_ict": "2026-09-27T11:44:20.914960+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_c30vnew_univpit.csv",
+   "md5": "3f836927c0df82915c4cfb973d8f4af3",
+   "size": 2887158,
+   "mtime_ict": "2026-09-27T10:43:39.149266+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_c30vnopark_univpit.csv",
+   "md5": "3f836927c0df82915c4cfb973d8f4af3",
+   "size": 2887158,
+   "mtime_ict": "2026-09-27T11:53:48.379258+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_cap30b_real_univpit_nav30B.csv",
+   "md5": "a402aa10a5b3726b28ba7e2e67c538ba",
+   "size": 2786312,
+   "mtime_ict": "2026-08-04T17:56:12.399545+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_cap50b_real_univpit.csv",
+   "md5": "7d053e6201c9d107685ff4d1dd9d2d2a",
+   "size": 3042954,
+   "mtime_ict": "2026-08-04T18:31:58.854197+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_cap75b_real_univpit_nav75B.csv",
+   "md5": "0619ccf803908dba0f27cf27279ef943",
+   "size": 3270531,
+   "mtime_ict": "2026-08-04T18:03:01.572674+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_ccsp0_univpit.csv",
+   "md5": "7d053e6201c9d107685ff4d1dd9d2d2a",
+   "size": 3042954,
+   "mtime_ict": "2026-09-05T21:09:36.483754+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_ccsp2ctrl_univpit.csv",
+   "md5": "7d053e6201c9d107685ff4d1dd9d2d2a",
+   "size": 3042954,
+   "mtime_ict": "2026-09-06T22:45:44.699538+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_ccsp2trim50_univpit.csv",
+   "md5": "5fabb47d3eac9097e2eeb0b920ac795f",
+   "size": 3065790,
+   "mtime_ict": "2026-09-06T22:53:37.477614+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_ctrl0804_univpit.csv",
+   "md5": "7d053e6201c9d107685ff4d1dd9d2d2a",
+   "size": 3042954,
+   "mtime_ict": "2026-08-04T15:15:23.694241+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_ctrl2_retleg_legacy_univpit.csv",
+   "md5": "7de1daf4874bb062d87e16897a1db277",
+   "size": 3043239,
+   "mtime_ict": "2026-09-27T10:06:02.045095+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_ctrl_retleg_legacy_univpit.csv",
+   "md5": "7d053e6201c9d107685ff4d1dd9d2d2a",
+   "size": 3042954,
+   "mtime_ict": "2026-09-27T09:42:13.118939+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_ctrl_univpit_exp_ctrl.csv",
+   "md5": "7d053e6201c9d107685ff4d1dd9d2d2a",
+   "size": 3042954,
+   "mtime_ict": "2026-09-06T09:37:02.159458+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_ctrlw_retleg_legacy_univpit.csv",
+   "md5": "7d053e6201c9d107685ff4d1dd9d2d2a",
+   "size": 3042954,
+   "mtime_ict": "2026-09-27T09:54:04.205885+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_dc3book_baseline_check_univpit.csv",
+   "md5": "d95eeb1561abea49671ce82373cff7f4",
+   "size": 3080452,
+   "mtime_ict": "2026-08-30T22:51:07.441183+07:00",
+   "n_obs": 3156,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_dyn_ctrl_univpit.csv",
+   "md5": "7d053e6201c9d107685ff4d1dd9d2d2a",
+   "size": 3042954,
+   "mtime_ict": "2026-08-25T17:00:25.546583+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_ekctrl_univpit.csv",
+   "md5": "7d053e6201c9d107685ff4d1dd9d2d2a",
+   "size": 3042954,
+   "mtime_ict": "2026-09-10T21:34:04.798403+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_ekexit_univpit.csv",
+   "md5": "c24f39071a400cff5d956a2fc5288af9",
+   "size": 3043534,
+   "mtime_ict": "2026-09-10T21:34:17.750675+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_ekinert_univpit.csv",
+   "md5": "7d053e6201c9d107685ff4d1dd9d2d2a",
+   "size": 3042954,
+   "mtime_ict": "2026-09-10T21:34:01.954343+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_eknoedge_univpit.csv",
+   "md5": "7d053e6201c9d107685ff4d1dd9d2d2a",
+   "size": 3042954,
+   "mtime_ict": "2026-09-10T21:48:48.228935+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_eyctrl_univpit_exp_seleyonly_exp_eyctrl.csv",
+   "md5": "b6de92e5c579fb357c30f6b89a40652f",
+   "size": 3052062,
+   "mtime_ict": "2026-08-30T10:29:34.127506+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_eytb2045_univpit_exp_seleyonly_exp_eytb2045.csv",
+   "md5": "60529e25a06d7a7e90facff5c548fdad",
+   "size": 3029556,
+   "mtime_ict": "2026-08-30T10:29:52.723895+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_h3ctrl2_univpit.csv",
+   "md5": "7d053e6201c9d107685ff4d1dd9d2d2a",
+   "size": 3042954,
+   "mtime_ict": "2026-09-27T00:08:30.490143+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_h3ctrl3_univpit.csv",
+   "md5": "b6296e237d5fcbed05a33b3dfbc6c633",
+   "size": 2890833,
+   "mtime_ict": "2026-09-27T00:23:08.944628+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_h3ctrl_univpit.csv",
+   "md5": "7d053e6201c9d107685ff4d1dd9d2d2a",
+   "size": 3042954,
+   "mtime_ict": "2026-09-26T23:59:49.567226+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_h3flat_univpit.csv",
+   "md5": "afe6834dd3f536d480a89790d09847f7",
+   "size": 2887618,
+   "mtime_ict": "2026-09-27T00:23:13.356721+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_h3pitR_univpit.csv",
+   "md5": "402baa1c51583970b2ef30eabc75351f",
+   "size": 3053067,
+   "mtime_ict": "2026-09-27T00:08:32.510185+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_h3pitW_univpit.csv",
+   "md5": "b80a935a04cf7e4c9274b8ec749da040",
+   "size": 3069182,
+   "mtime_ict": "2026-09-27T00:08:14.509807+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_h3pit_univpit.csv",
+   "md5": "9579eea10cbc4aca9e886dbcba5bddbf",
+   "size": 3050683,
+   "mtime_ict": "2026-09-26T23:59:53.587310+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_jit_A_control_univpit.csv",
+   "md5": "7d053e6201c9d107685ff4d1dd9d2d2a",
+   "size": 3042954,
+   "mtime_ict": "2026-08-04T00:11:36.446814+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_jit_B_off_univpit.csv",
+   "md5": "7d053e6201c9d107685ff4d1dd9d2d2a",
+   "size": 3042954,
+   "mtime_ict": "2026-08-04T00:11:50.939120+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_jit_C_skip_univpit.csv",
+   "md5": "7d053e6201c9d107685ff4d1dd9d2d2a",
+   "size": 3042954,
+   "mtime_ict": "2026-08-04T00:11:48.235063+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_lagedgecausal_univpit.csv",
+   "md5": "457ba1da3b5b6aae6c1ba5da6a09a227",
+   "size": 2887341,
+   "mtime_ict": "2026-09-27T12:03:38.164440+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_lagedgectl_univpit.csv",
+   "md5": "3f836927c0df82915c4cfb973d8f4af3",
+   "size": 2887158,
+   "mtime_ict": "2026-09-27T12:03:37.964435+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_lagq_L0_control_univpit.csv",
+   "md5": "7d053e6201c9d107685ff4d1dd9d2d2a",
+   "size": 3042954,
+   "mtime_ict": "2026-08-03T09:13:46.331408+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_lagq_L0b_prodrepro_univpit.csv",
+   "md5": "7d053e6201c9d107685ff4d1dd9d2d2a",
+   "size": 3042954,
+   "mtime_ict": "2026-08-03T09:23:09.851330+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_lagq_L1_liq2B_univpit.csv",
+   "md5": "feca6db2690080e3f1101a9695b8655b",
+   "size": 2771823,
+   "mtime_ict": "2026-08-03T09:13:00.682442+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_lagq_L2_fscore5_univpit.csv",
+   "md5": "2254fcfe7026d3e688361378f287aff3",
+   "size": 3125579,
+   "mtime_ict": "2026-08-03T09:13:03.102493+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_n50_K12_95_univpit.csv",
+   "md5": "e92285688cdc5f58618c0e80e7f8b9bc",
+   "size": 1926328,
+   "mtime_ict": "2026-08-04T16:15:27.756730+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_n50_K1_00_univpit.csv",
+   "md5": "29dbaba6aa375e1881c7f4562fda5be7",
+   "size": 2270380,
+   "mtime_ict": "2026-08-04T16:05:24.035547+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_n50_K2_59_univpit.csv",
+   "md5": "26b30ad0f59ea321f18ad142cd640c18",
+   "size": 2066308,
+   "mtime_ict": "2026-08-04T16:05:12.507295+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_n50_K44_4_univpit.csv",
+   "md5": "a24b081b013022fb2fe86c79350823a4",
+   "size": 1868765,
+   "mtime_ict": "2026-08-04T16:15:28.460745+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_n50_K5_18_univpit.csv",
+   "md5": "cf094f85a4f7d970330916d71f006927",
+   "size": 1983418,
+   "mtime_ict": "2026-08-04T16:15:29.208762+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_n50_ctrl_univpit.csv",
+   "md5": "7d053e6201c9d107685ff4d1dd9d2d2a",
+   "size": 3042954,
+   "mtime_ict": "2026-08-04T16:05:25.055569+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_p3_P0_control_univpit.csv",
+   "md5": "7d053e6201c9d107685ff4d1dd9d2d2a",
+   "size": 3042954,
+   "mtime_ict": "2026-08-03T15:32:09.944536+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_pcap_p005_L0_univpit.csv",
+   "md5": "aa0fcb19459436d9b4499c418eeddba7",
+   "size": 3519091,
+   "mtime_ict": "2026-08-03T12:36:04.503066+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_pcap_p020_L0_univpit.csv",
+   "md5": "7d053e6201c9d107685ff4d1dd9d2d2a",
+   "size": 3042954,
+   "mtime_ict": "2026-08-03T12:36:16.039315+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_pcap_p100_L0_univpit.csv",
+   "md5": "4df8efd074bd392f24b7130f1b10d48e",
+   "size": 2616632,
+   "mtime_ict": "2026-08-03T12:36:15.987314+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_pin_retleg_flat_univpit.csv",
+   "md5": "3f836927c0df82915c4cfb973d8f4af3",
+   "size": 2887158,
+   "mtime_ict": "2026-09-27T10:13:01.898008+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_repin0803_price_univpit.csv",
+   "md5": "7d053e6201c9d107685ff4d1dd9d2d2a",
+   "size": 3042954,
+   "mtime_ict": "2026-08-03T11:01:22.784608+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_s4p2_L0_control_univpit.csv",
+   "md5": "7d053e6201c9d107685ff4d1dd9d2d2a",
+   "size": 3042954,
+   "mtime_ict": "2026-08-03T14:46:56.793019+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_s4p2_L1_mge130_univpit_mge130cap_real_lgdep.csv",
+   "md5": "daf2d0828d41218d5061a448af357774",
+   "size": 3061394,
+   "mtime_ict": "2026-08-03T14:47:27.457684+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_s4p2_L1b_mge130dd52_univpit_mge130cap_real_lgdep.csv",
+   "md5": "188eac299df5fcf309ae6a9569936b8e",
+   "size": 3050011,
+   "mtime_ict": "2026-08-03T14:57:18.454827+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_s4p2_L2_mge150_univpit_mge150cap_real_lgdep.csv",
+   "md5": "e9e787fdada1298806094b9cf1b3d0f5",
+   "size": 3070412,
+   "mtime_ict": "2026-08-03T14:47:03.745170+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_s4p2_L2b_mge150dd52_univpit_mge150cap_real_lgdep.csv",
+   "md5": "14369ef0b101c09ee55d335194994f31",
+   "size": 3051529,
+   "mtime_ict": "2026-08-03T14:57:18.382825+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_t1abs_univpit_exp_t1abs.csv",
+   "md5": "bd3c4898e49373b932a65f73ea0ecfaf",
+   "size": 3020781,
+   "mtime_ict": "2026-09-06T09:37:34.324145+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_t1demean_univpit_exp_t1demean.csv",
+   "md5": "607a329c2371f6ad40a670a62728d931",
+   "size": 3024003,
+   "mtime_ict": "2026-09-06T09:37:31.348082+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_v2_A_control_univpit.csv",
+   "md5": "7d053e6201c9d107685ff4d1dd9d2d2a",
+   "size": 3042954,
+   "mtime_ict": "2026-08-04T00:24:48.087593+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_v2_B_off_univpit.csv",
+   "md5": "fe06277c9f85f45e59b4e7c4849d631b",
+   "size": 2932634,
+   "mtime_ict": "2026-08-04T00:24:32.559263+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_v2_C_skip_univpit.csv",
+   "md5": "133a4c0aa9e9525061e2421fb6d7c5cd",
+   "size": 2759543,
+   "mtime_ict": "2026-08-04T00:24:37.491368+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_v3_A_control_univpit.csv",
+   "md5": "7d053e6201c9d107685ff4d1dd9d2d2a",
+   "size": 3042954,
+   "mtime_ict": "2026-08-04T01:19:07.260695+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_v3_D_prefill_off_univpit.csv",
+   "md5": "4220e8930378d70850d9cbd943507cff",
+   "size": 2979867,
+   "mtime_ict": "2026-08-04T01:25:51.561315+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_v3_E_both_off_univpit.csv",
+   "md5": "234892bae546dbb1bfaa736f2bd14544",
+   "size": 1488228,
+   "mtime_ict": "2026-08-04T01:32:42.150081+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_wexd_ctl_quarter_univpit.csv",
+   "md5": "3f836927c0df82915c4cfb973d8f4af3",
+   "size": 2887158,
+   "mtime_ict": "2026-09-27T12:02:21.662730+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_wexd_new_exdate_univpit.csv",
+   "md5": "80fc59f9476b280225063bd02136c75d",
+   "size": 2890401,
+   "mtime_ict": "2026-09-27T12:02:23.978782+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_baladapta.csv",
+   "md5": "65f57f65c0135f0710616074d43f432c",
+   "size": 3025846,
+   "mtime_ict": "2026-09-09T18:54:08.275708+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_baladaptb.csv",
+   "md5": "3129a0775618548b97abe508b01ad1b0",
+   "size": 2882301,
+   "mtime_ict": "2026-09-09T18:53:52.783378+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_baladaptc.csv",
+   "md5": "a30368c1c28d3667ef187a80ffdb4359",
+   "size": 3013134,
+   "mtime_ict": "2026-09-09T18:53:54.731419+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_baladaptctrl.csv",
+   "md5": "7d053e6201c9d107685ff4d1dd9d2d2a",
+   "size": 3042954,
+   "mtime_ict": "2026-09-09T18:53:36.975041+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_baladaptd.csv",
+   "md5": "c306ed4d47a740fcd32a5f5cc9c227f4",
+   "size": 2915360,
+   "mtime_ict": "2026-09-09T18:53:38.151066+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_baleyctrl.csv",
+   "md5": "7d053e6201c9d107685ff4d1dd9d2d2a",
+   "size": 3042954,
+   "mtime_ict": "2026-09-09T17:29:34.741018+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_baleyctrl2.csv",
+   "md5": "7d053e6201c9d107685ff4d1dd9d2d2a",
+   "size": 3042954,
+   "mtime_ict": "2026-09-09T17:48:04.368957+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_baleyey025.csv",
+   "md5": "03990365dd1f7c373bb1e669439fa4e0",
+   "size": 3055193,
+   "mtime_ict": "2026-09-09T17:48:10.889094+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_baleyey050.csv",
+   "md5": "dfe9c39c8c201187f42b8652141fff27",
+   "size": 3026281,
+   "mtime_ict": "2026-09-09T17:48:04.580962+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_baleyey100.csv",
+   "md5": "4f622c483e7bc8d7b374befc286a0e61",
+   "size": 3042175,
+   "mtime_ict": "2026-09-09T17:48:08.537045+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_balgatea1.csv",
+   "md5": "966de2932e032d2f218c5782227e7c1a",
+   "size": 3638757,
+   "mtime_ict": "2026-09-09T19:31:59.076257+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_balgatea2.csv",
+   "md5": "70e3fd71efc113766636ecfe4e0e908c",
+   "size": 3431139,
+   "mtime_ict": "2026-09-09T19:31:46.095979+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_balgatea3.csv",
+   "md5": "01868fd3307ae64ea3a6450ff29a9639",
+   "size": 3483594,
+   "mtime_ict": "2026-09-09T19:31:59.484266+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_balgatea4.csv",
+   "md5": "c212e29de9be8d7effbfac45f20265d3",
+   "size": 3297262,
+   "mtime_ict": "2026-09-09T19:32:00.824294+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_balgateb1.csv",
+   "md5": "8e32b0862b705ee6aa5093d8a92c0746",
+   "size": 3141463,
+   "mtime_ict": "2026-09-09T19:32:23.672783+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_balgateb2.csv",
+   "md5": "b89c4a40c3fee63b4445a9b18d05774d",
+   "size": 3064255,
+   "mtime_ict": "2026-09-09T19:32:14.396585+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_balgateb3.csv",
+   "md5": "30bb584dc2c098f89efee6876446904d",
+   "size": 3038907,
+   "mtime_ict": "2026-09-09T19:32:28.780892+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_balgatectrl.csv",
+   "md5": "7d053e6201c9d107685ff4d1dd9d2d2a",
+   "size": 3042954,
+   "mtime_ict": "2026-09-09T19:29:57.721663+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_c30vpbctrl.csv",
+   "md5": "7d053e6201c9d107685ff4d1dd9d2d2a",
+   "size": 3042954,
+   "mtime_ict": "2026-09-10T00:08:15.995302+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_c30vpbl1b.csv",
+   "md5": "cb691839043115fe24237ed78fc56495",
+   "size": 3102752,
+   "mtime_ict": "2026-09-10T00:08:41.979854+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_c30vpbp1d.csv",
+   "md5": "ad5f843d82de05a3928e153fe2e74a8d",
+   "size": 3041379,
+   "mtime_ict": "2026-09-10T00:18:01.087735+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_c30vpbp1r1.csv",
+   "md5": "47665a6e528fe7fa43a0ac7d392a7219",
+   "size": 3041269,
+   "mtime_ict": "2026-09-10T00:18:32.608405+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_c30vpbp1r2.csv",
+   "md5": "91a18deda38ec317f82e67c89e0722a7",
+   "size": 3016563,
+   "mtime_ict": "2026-09-10T00:29:30.774395+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_c30vpbp2d.csv",
+   "md5": "ad885fc7906881b3ef4622d8f89755cc",
+   "size": 3079142,
+   "mtime_ict": "2026-09-10T00:18:11.015946+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_c30vpbp2r1.csv",
+   "md5": "ea359ef12b3805210490484589f6de37",
+   "size": 3028404,
+   "mtime_ict": "2026-09-10T00:30:08.359194+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_c30vpbp2r2.csv",
+   "md5": "ce17eafd3a53f419df0de198b2fc2330",
+   "size": 3054377,
+   "mtime_ict": "2026-09-10T00:30:10.595241+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_c30vselctrl.csv",
+   "md5": "7d053e6201c9d107685ff4d1dd9d2d2a",
+   "size": 3042954,
+   "mtime_ict": "2026-09-09T23:02:02.351068+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_c30vsell1a.csv",
+   "md5": "2bd65a1d6dd0a49475e6938db198db6e",
+   "size": 3052548,
+   "mtime_ict": "2026-09-09T23:09:56.137088+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_c30vsell1b.csv",
+   "md5": "cb691839043115fe24237ed78fc56495",
+   "size": 3102752,
+   "mtime_ict": "2026-09-09T23:17:15.074377+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_c30vsell3.csv",
+   "md5": "e53baedfb254b026b8c142af51b1f564",
+   "size": 3053737,
+   "mtime_ict": "2026-09-09T23:31:06.119988+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_univpit_exp_seleycfq_exp_c30vsell2.csv",
+   "md5": "c4e6a0358464aa58213889af1c35cc4a",
+   "size": 3025603,
+   "mtime_ict": "2026-09-09T23:24:06.599098+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_bullpark60f70.csv",
+   "md5": "0e8669afaafd990344194a5c46d82aff",
+   "size": 3597011,
+   "mtime_ict": "2026-06-20T21:51:35.096853+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_dnprREORDER.csv",
+   "md5": "fae2dfb9b1d29e9d8517c3d436106e20",
+   "size": 3357341,
+   "mtime_ict": "2026-07-05T21:04:33.254847+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_L0_legacy_univpit.csv",
+   "md5": "51a1ec0f08d238a4a30964a1c02b1ab1",
+   "size": 3197694,
+   "mtime_ict": "2026-08-02T23:49:14.349479+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_basis_legA_legacy_univpit.csv",
+   "md5": "7eb65854c64563dcfb590003bba83004",
+   "size": 3186829,
+   "mtime_ict": "2026-08-02T21:55:49.896575+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_basis_legB_split_univpit.csv",
+   "md5": "51a1ec0f08d238a4a30964a1c02b1ab1",
+   "size": 3197694,
+   "mtime_ict": "2026-08-02T21:55:46.224497+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_blend_w010_univpit_exp_blend_w010.csv",
+   "md5": "abc72e983f9dac3939c5f5eba1579866",
+   "size": 3182178,
+   "mtime_ict": "2026-08-01T20:55:10.267398+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_blend_w020_univpit_exp_blend_w020.csv",
+   "md5": "582d3a1ea7b7f969d9c5723f368f26c0",
+   "size": 3177593,
+   "mtime_ict": "2026-08-01T20:54:56.043097+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_blend_w040_univpit_exp_blend_w040.csv",
+   "md5": "34eba896045233d3fcfa18c6dd1ae52d",
+   "size": 3168213,
+   "mtime_ict": "2026-08-01T21:00:32.170207+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_blend_w080_univpit_exp_blend_w080.csv",
+   "md5": "574fe8a9776fbd990990ce5351d6092a",
+   "size": 3180722,
+   "mtime_ict": "2026-08-01T21:00:32.810220+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_blend_w200_univpit_exp_blend_w200.csv",
+   "md5": "5e6797a47afdeba189bba18e866ab8e2",
+   "size": 3151284,
+   "mtime_ict": "2026-08-01T21:00:19.733946+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_cap_p005_L0_univpit.csv",
+   "md5": "b56557755dffb235fd64f72ab1743b06",
+   "size": 3623981,
+   "mtime_ict": "2026-08-03T09:27:37.917001+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_cap_p020_L0_univpit.csv",
+   "md5": "51a1ec0f08d238a4a30964a1c02b1ab1",
+   "size": 3197694,
+   "mtime_ict": "2026-08-03T09:27:39.025025+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_cap_p100_L0_univpit.csv",
+   "md5": "381bb6905445fa6e916601d0de05ef15",
+   "size": 2746186,
+   "mtime_ict": "2026-08-03T09:27:40.161049+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_capdiv_a0.csv",
+   "md5": "3784fd6e340353612876f293a76ed4a6",
+   "size": 3161313,
+   "mtime_ict": "2026-07-15T00:52:34.706525+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_capsz_ctrl_univpit.csv",
+   "md5": "7eb65854c64563dcfb590003bba83004",
+   "size": 3186829,
+   "mtime_ict": "2026-07-31T16:15:02.641872+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_cutoverdefault_univpit.csv",
+   "md5": "359b5bda180e5339890dcf65881fd745",
+   "size": 3176179,
+   "mtime_ict": "2026-07-22T23:03:41.758479+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_dcfctrl20260714.csv",
+   "md5": "cc8988bc4b078e18359bc6c9c9984acf",
+   "size": 3129238,
+   "mtime_ict": "2026-07-14T14:28:44.217356+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_dcfctrlrerun20260714.csv",
+   "md5": "cc8988bc4b078e18359bc6c9c9984acf",
+   "size": 3129238,
+   "mtime_ict": "2026-07-14T15:14:03.923853+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_dcfctrlrerun20260715.csv",
+   "md5": "f4035f8206e0ff085124617034de3f43",
+   "size": 3141681,
+   "mtime_ict": "2026-07-15T11:48:05.176044+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_dcfexrich.csv",
+   "md5": "d482bf8c5e227bd25159449ead642ab8",
+   "size": 3159574,
+   "mtime_ict": "2026-07-14T14:29:03.717775+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_dcfexrichrerun20260715.csv",
+   "md5": "4410dc67fb527bb9007a9c0a486c2e97",
+   "size": 3126506,
+   "mtime_ict": "2026-07-15T11:35:33.152261+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_dcfplacebo1.csv",
+   "md5": "ad4b526c4eb036fd586cfb0aa1f9d7d4",
+   "size": 3093021,
+   "mtime_ict": "2026-07-14T15:14:17.912154+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_dcfplacebo10.csv",
+   "md5": "01233b6e09d1b554903661b8f4210a8d",
+   "size": 3134640,
+   "mtime_ict": "2026-07-14T15:29:13.315446+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_dcfplacebo11.csv",
+   "md5": "8c28ea357140fc896c9872e3e3d7643d",
+   "size": 3106079,
+   "mtime_ict": "2026-07-14T15:36:02.404268+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_dcfplacebo12.csv",
+   "md5": "a4b8ec0d4ae19bcc57469dec95dd2ff5",
+   "size": 3110619,
+   "mtime_ict": "2026-07-14T15:36:10.172436+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_dcfplacebo13.csv",
+   "md5": "2fafe8ba8bf8d1e0a7e427cfb4fd57b5",
+   "size": 3133904,
+   "mtime_ict": "2026-07-14T15:36:24.320741+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_dcfplacebo14.csv",
+   "md5": "77f7817553a16d20a2716d1bac79e2ef",
+   "size": 3131386,
+   "mtime_ict": "2026-07-14T15:36:29.248847+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_dcfplacebo15.csv",
+   "md5": "f36d99de6ccec1c57872291e715adda8",
+   "size": 3129663,
+   "mtime_ict": "2026-07-14T15:36:29.156845+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_dcfplacebo16.csv",
+   "md5": "28df415e577c0e209db467a523056f70",
+   "size": 3116376,
+   "mtime_ict": "2026-07-14T15:37:19.473930+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_dcfplacebo17.csv",
+   "md5": "093f2bc6dfd191486f3b064083c59e0d",
+   "size": 3119603,
+   "mtime_ict": "2026-07-14T15:43:17.301647+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_dcfplacebo18.csv",
+   "md5": "27551798431f0d131cc5cf33a782c67c",
+   "size": 3119367,
+   "mtime_ict": "2026-07-14T15:43:01.681310+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_dcfplacebo19.csv",
+   "md5": "029e14b73e4898b5a225f678ac8d470d",
+   "size": 3123584,
+   "mtime_ict": "2026-07-14T15:43:36.746066+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_dcfplacebo2.csv",
+   "md5": "cd61c0d9d2e5a49870eee4a100209eb9",
+   "size": 3115360,
+   "mtime_ict": "2026-07-14T15:14:21.572232+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_dcfplacebo20.csv",
+   "md5": "15c3040c9f1bcebd6b4ca2de899cf446",
+   "size": 3148620,
+   "mtime_ict": "2026-07-14T15:43:43.194205+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_dcfplacebo3.csv",
+   "md5": "d47dba07111ae89ff120f3ac3cd96d63",
+   "size": 3096922,
+   "mtime_ict": "2026-07-14T15:14:09.323969+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_dcfplacebo4.csv",
+   "md5": "1e69b7eba6a66c01710b90a73eaf9528",
+   "size": 3109634,
+   "mtime_ict": "2026-07-14T15:14:10.035984+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_dcfplacebo5.csv",
+   "md5": "bf69366717c6f9bd86fc040646f2e213",
+   "size": 3119857,
+   "mtime_ict": "2026-07-14T15:28:50.446953+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_dcfplacebo6.csv",
+   "md5": "67d2fedf17fc091ec317cbd5ce6d0cc6",
+   "size": 3122970,
+   "mtime_ict": "2026-07-14T15:29:25.763714+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_dcfplacebo7.csv",
+   "md5": "26e7b674104e211969b3a138bfe5348b",
+   "size": 3112209,
+   "mtime_ict": "2026-07-14T15:28:58.863134+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_dcfplacebo8.csv",
+   "md5": "d878b3acbeac1f4f60ce49370bfc14ef",
+   "size": 3144868,
+   "mtime_ict": "2026-07-14T15:29:09.067354+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_dcfplacebo9.csv",
+   "md5": "915b4a5d9f690cc9d099160931bade55",
+   "size": 3135108,
+   "mtime_ict": "2026-07-14T15:29:25.699713+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_dcfplacebope20260715.csv",
+   "md5": "ccc47f160517a682357605e6b5bc3647",
+   "size": 3139137,
+   "mtime_ict": "2026-07-15T11:35:17.247928+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_dcftb025.csv",
+   "md5": "71c408dc7d0052c66563202ea11a9c7e",
+   "size": 3128077,
+   "mtime_ict": "2026-07-14T14:29:35.862466+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_depgate_D0.csv",
+   "md5": "f218ae36a486201676c9e9a187613b80",
+   "size": 2963019,
+   "mtime_ict": "2026-07-13T21:45:13.232959+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_depgate_D1.csv",
+   "md5": "685727fb19f555a8d601fbe8694631ee",
+   "size": 3113704,
+   "mtime_ict": "2026-07-13T22:06:30.911344+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_depgate_D1S.csv",
+   "md5": "345b7b2e22c3d97a6112b4f79fc1f8f6",
+   "size": 3116700,
+   "mtime_ict": "2026-07-13T22:24:14.589656+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_depgate_D2.csv",
+   "md5": "b3454e54bc238b2f78ecfe171d7e4fea",
+   "size": 3122552,
+   "mtime_ict": "2026-07-13T22:06:35.935448+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_depgate_D2S.csv",
+   "md5": "1ea14822d03bbe133e24da0f8f25d161",
+   "size": 3138408,
+   "mtime_ict": "2026-07-13T22:23:59.045326+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_depgate_D3.csv",
+   "md5": "6b454f22fa9eea42730a711f3b77aa88",
+   "size": 3110726,
+   "mtime_ict": "2026-07-13T22:06:55.127846+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_depgate_D3S.csv",
+   "md5": "0d22d86c3d981ee6789fa260b166730b",
+   "size": 3122323,
+   "mtime_ict": "2026-07-13T22:24:09.493548+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_depgate_control.csv",
+   "md5": "5027b0271647fc2774057f85177ac0be",
+   "size": 3128467,
+   "mtime_ict": "2026-07-13T21:45:20.801104+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_depgate_ctlSa.csv",
+   "md5": "f4421a1755d2d2ef75e4be86280eba04",
+   "size": 3140793,
+   "mtime_ict": "2026-07-13T22:24:14.461653+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_depgate_ctlSb.csv",
+   "md5": "f4421a1755d2d2ef75e4be86280eba04",
+   "size": 3140793,
+   "mtime_ict": "2026-07-13T22:23:59.621338+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_discC4_control_univpit.csv",
+   "md5": "359b5bda180e5339890dcf65881fd745",
+   "size": 3176179,
+   "mtime_ict": "2026-07-23T23:40:32.573250+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_dropMEGA-MOM-MOMN-MOMS.csv",
+   "md5": "c555616b2dc2ebd4e27cd8fe1d7a0bdc",
+   "size": 3141264,
+   "mtime_ict": "2026-07-12T09:02:48.590361+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_dropMOMN-MOMS.csv",
+   "md5": "4d736d9169c32f1055ea6c54ee5c6dac",
+   "size": 3150648,
+   "mtime_ict": "2026-07-12T08:56:23.170138+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_dropMOMN.csv",
+   "md5": "922e2cee60adadc89bce3495a70cd949",
+   "size": 3153250,
+   "mtime_ict": "2026-07-12T10:33:05.845368+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_dropnone.csv",
+   "md5": "420fe3b5fc58703d01b0a9cf78fb8d4f",
+   "size": 3297661,
+   "mtime_ict": "2026-07-12T08:49:53.109816+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_dvr8lbase.csv",
+   "md5": "420fe3b5fc58703d01b0a9cf78fb8d4f",
+   "size": 3297661,
+   "mtime_ict": "2026-07-12T07:42:34.895711+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_dvr8lr1.csv",
+   "md5": "92b46df849917246bf1bd1d51559e101",
+   "size": 3254628,
+   "mtime_ict": "2026-07-12T07:49:35.136680+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_dvr8lr2.csv",
+   "md5": "84868ee9380eac54a52ec4cd32adeb23",
+   "size": 3283673,
+   "mtime_ict": "2026-07-12T07:49:29.712564+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_dvr8lr2h75.csv",
+   "md5": "9c5bd431009c09a17b6dd532a067b603",
+   "size": 3299863,
+   "mtime_ict": "2026-07-12T07:57:39.859015+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_dvr8lr3.csv",
+   "md5": "4be7a0b11038d6bb8601057a0e510640",
+   "size": 3257366,
+   "mtime_ict": "2026-07-12T07:49:31.820610+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_entrygate_v1nofscore_univpit_exp_entrygate_v1nofscore.csv",
+   "md5": "f4a92c733ce6e160205363e7482c4f49",
+   "size": 3203461,
+   "mtime_ict": "2026-08-01T15:41:26.344851+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_entrygate_v3sector_univpit_exp_entrygate_v3sector.csv",
+   "md5": "94ecf6acc912677951b5ed9194025804",
+   "size": 3192077,
+   "mtime_ict": "2026-08-01T15:41:39.665138+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_eyr_A2_anchor_exp_seleyonly.csv",
+   "md5": "cd17befe6dcf0481970d0b5a785cd0fa",
+   "size": 3139991,
+   "mtime_ict": "2026-07-15T10:30:17.690173+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_eyr_R1_all_exp_seleyrisk.csv",
+   "md5": "e94257d446709e648a5248bff0b0c240",
+   "size": 3137172,
+   "mtime_ict": "2026-07-15T10:37:39.143388+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_eyr_R2_fin_exp_seleyrisk.csv",
+   "md5": "71d6581fe28a649ba2d611d6b6cf5d31",
+   "size": 3136847,
+   "mtime_ict": "2026-07-15T10:45:09.756843+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_fix_c30v_membership_univpit.csv",
+   "md5": "51a1ec0f08d238a4a30964a1c02b1ab1",
+   "size": 3197694,
+   "mtime_ict": "2026-08-02T23:10:44.612334+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_fsctrl2_univpit_exp_fsctrl2.csv",
+   "md5": "7eb65854c64563dcfb590003bba83004",
+   "size": 3186829,
+   "mtime_ict": "2026-08-01T21:09:32.609560+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_fsctrl_univpit_exp_fsctrl.csv",
+   "md5": "7eb65854c64563dcfb590003bba83004",
+   "size": 3186829,
+   "mtime_ict": "2026-08-01T20:42:10.830896+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_g7_asof0728_univpit.csv",
+   "md5": "80e888f83ad3d0c2d34c5d930752ef23",
+   "size": 3186926,
+   "mtime_ict": "2026-07-29T23:03:22.197661+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_g7_legB_new0729_univpit.csv",
+   "md5": "7eb65854c64563dcfb590003bba83004",
+   "size": 3186829,
+   "mtime_ict": "2026-07-30T02:34:51.256042+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_g7_legC_stateonly_univpit.csv",
+   "md5": "10f4b96ee38893a1972254229316813f",
+   "size": 3191073,
+   "mtime_ict": "2026-07-29T23:50:57.493858+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_lagq_L0c_advclose_univpit.csv",
+   "md5": "51a1ec0f08d238a4a30964a1c02b1ab1",
+   "size": 3197694,
+   "mtime_ict": "2026-08-03T09:23:24.943649+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_liqzbctrl.csv",
+   "md5": "1c311fea81c974720785f8d5b0b0e4d4",
+   "size": 3163741,
+   "mtime_ict": "2026-07-21T23:35:22.816978+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_nav025_L0_univpit_nav25B.csv",
+   "md5": "926f84174957a5d3f512bf923d94bbfb",
+   "size": 2864862,
+   "mtime_ict": "2026-08-03T12:00:03.524232+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_nc_c30v_empty_univpit.csv",
+   "md5": "51a1ec0f08d238a4a30964a1c02b1ab1",
+   "size": 3197694,
+   "mtime_ict": "2026-08-02T22:53:32.802341+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_pb_legA_legacy_univpit.csv",
+   "md5": "7eb65854c64563dcfb590003bba83004",
+   "size": 3186829,
+   "mtime_ict": "2026-08-02T21:39:37.272013+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_pb_legB_split_univpit.csv",
+   "md5": "51a1ec0f08d238a4a30964a1c02b1ab1",
+   "size": 3197694,
+   "mtime_ict": "2026-08-02T21:46:41.912977+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_pc_ovf_fixtable_univpit.csv",
+   "md5": "58208ffa204f9320d47d31d8fd84659b",
+   "size": 3242983,
+   "mtime_ict": "2026-08-02T23:10:26.475948+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_pc_ovf_oldtable_univpit.csv",
+   "md5": "c6d569077299c3472b7543cb9627206c",
+   "size": 3243487,
+   "mtime_ict": "2026-08-02T23:11:06.668804+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_peadj_ctrl_univpit.csv",
+   "md5": "7eb65854c64563dcfb590003bba83004",
+   "size": 3186829,
+   "mtime_ict": "2026-08-02T13:03:26.396503+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_peadj_on_univpit.csv",
+   "md5": "356baab87f189efb7caecb28c796f072",
+   "size": 3128896,
+   "mtime_ict": "2026-08-02T13:11:54.027493+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_plac_k10_s1_univpit_exp_plac_k10_s1.csv",
+   "md5": "39ae55b9edc0584f4fbe76ab015cbcd1",
+   "size": 3168479,
+   "mtime_ict": "2026-08-01T21:09:41.673750+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_plac_k10_s2_univpit_exp_plac_k10_s2.csv",
+   "md5": "8f35380f4025643a51e7141b8166fe1f",
+   "size": 3178642,
+   "mtime_ict": "2026-08-01T21:09:16.145214+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_plac_k10_s3_univpit_exp_plac_k10_s3.csv",
+   "md5": "6a54bcdd629cda0184aba635c5b85dc8",
+   "size": 3153198,
+   "mtime_ict": "2026-08-01T21:09:39.561706+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_plac_k10_s4_univpit_exp_plac_k10_s4.csv",
+   "md5": "2460ef75dc8fd0fe631cc5c3c3ca03bc",
+   "size": 3174954,
+   "mtime_ict": "2026-08-01T21:09:44.897818+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_qsleeve_ctrl.csv",
+   "md5": "4d736d9169c32f1055ea6c54ee5c6dac",
+   "size": 3150648,
+   "mtime_ict": "2026-07-12T15:41:54.269273+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_qx_ctrl_univpit.csv",
+   "md5": "7eb65854c64563dcfb590003bba83004",
+   "size": 3186829,
+   "mtime_ict": "2026-08-01T14:50:29.862818+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_r1lagfix_verify.csv",
+   "md5": "4d736d9169c32f1055ea6c54ee5c6dac",
+   "size": 3150648,
+   "mtime_ict": "2026-07-12T20:08:09.649885+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_repin0803_close_univpit.csv",
+   "md5": "51a1ec0f08d238a4a30964a1c02b1ab1",
+   "size": 3197694,
+   "mtime_ict": "2026-08-03T11:01:34.020848+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_repinR3control.csv",
+   "md5": "5b3f7fa9311ef1d0876c699cd8a3a926",
+   "size": 3169783,
+   "mtime_ict": "2026-07-22T16:59:06.805233+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_repinR3controlB.csv",
+   "md5": "d466086fdd889d0c6a639194d2cec07c",
+   "size": 3175778,
+   "mtime_ict": "2026-07-22T17:15:54.354850+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_repinR3control_c.csv",
+   "md5": "0e00ba9a6f62d1050f403d099a854c3c",
+   "size": 3171283,
+   "mtime_ict": "2026-07-22T21:31:58.260844+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_repinR3control_c2.csv",
+   "md5": "0e00ba9a6f62d1050f403d099a854c3c",
+   "size": 3171283,
+   "mtime_ict": "2026-07-22T21:40:25.959890+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_repinR3control_v2c.csv",
+   "md5": "19e0395034ae92ae4dd6302ad89d4589",
+   "size": 3170340,
+   "mtime_ict": "2026-07-22T22:27:48.820772+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_repinR3control_v2c2.csv",
+   "md5": "19e0395034ae92ae4dd6302ad89d4589",
+   "size": 3170340,
+   "mtime_ict": "2026-07-22T22:34:20.709243+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_repinR3pit_c_univpit.csv",
+   "md5": "336cf0d444e4bfb482344a3d8cd64023",
+   "size": 3187466,
+   "mtime_ict": "2026-07-22T21:51:33.734418+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_repinR3pit_univpit.csv",
+   "md5": "24c9c6030986f0d2cd2ca47b6ba47de2",
+   "size": 3198455,
+   "mtime_ict": "2026-07-22T17:27:15.677721+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_repinR3pit_v2c_univpit.csv",
+   "md5": "359b5bda180e5339890dcf65881fd745",
+   "size": 3176179,
+   "mtime_ict": "2026-07-22T22:41:15.026199+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_seccap_base.csv",
+   "md5": "cc8988bc4b078e18359bc6c9c9984acf",
+   "size": 3129238,
+   "mtime_ict": "2026-07-14T17:12:37.792954+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_selbaseline20260714.csv",
+   "md5": "cc8988bc4b078e18359bc6c9c9984acf",
+   "size": 3129238,
+   "mtime_ict": "2026-07-14T18:52:02.016336+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_selv3route.csv",
+   "md5": "f3c78698631900e82f0aa9a5e3344a95",
+   "size": 3162164,
+   "mtime_ict": "2026-07-14T18:41:57.559446+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_slotifctrl.csv",
+   "md5": "a5e2ecbaab77eba0a4beb5bbaf6d1f3a",
+   "size": 3165548,
+   "mtime_ict": "2026-07-22T10:21:42.680645+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_tieb_k05_univpit_exp_tieb_k05.csv",
+   "md5": "01ed42dbed3cacca331db9b4831e5968",
+   "size": 3172423,
+   "mtime_ict": "2026-08-01T20:55:08.743366+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_tieb_k10_univpit_exp_tieb_k10.csv",
+   "md5": "ad5599fb0e9cccede48fb08469ecee2f",
+   "size": 3171977,
+   "mtime_ict": "2026-08-01T20:55:09.407380+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_tieb_k20_univpit_exp_tieb_k20.csv",
+   "md5": "3f5d6887244bcadd470f73b22c84219b",
+   "size": 3164640,
+   "mtime_ict": "2026-08-01T20:55:13.951476+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_v4f_A0_base.csv",
+   "md5": "cc8988bc4b078e18359bc6c9c9984acf",
+   "size": 3129238,
+   "mtime_ict": "2026-07-14T21:32:42.625224+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_v4f_A1_eyfin_exp_seleyfin.csv",
+   "md5": "3ce6dabe40f12ea462a7698cf7aa045c",
+   "size": 3131870,
+   "mtime_ict": "2026-07-14T21:39:12.977568+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_v4f_A2_eyonly_exp_seleyonly.csv",
+   "md5": "f1358e99862783e67e7de78bac0955f2",
+   "size": 3118657,
+   "mtime_ict": "2026-07-14T21:45:43.325854+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_v4f_A2_eyonly_rerun_exp_seleyonly.csv",
+   "md5": "f1358e99862783e67e7de78bac0955f2",
+   "size": 3118657,
+   "mtime_ict": "2026-07-14T22:40:10.879627+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_v4f_A4_dy2045_exp_seleyonly.csv",
+   "md5": "ff07db90e51b3d62fa03fe2ae1ff3c3e",
+   "size": 3112448,
+   "mtime_ict": "2026-07-14T22:44:08.608708+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_wtilt_t030_univpit_exp_wtilt_t030.csv",
+   "md5": "f12ec6ac0774ee729c025799ade8b7ba",
+   "size": 3197451,
+   "mtime_ict": "2026-08-01T21:00:17.197893+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_wtilt_t060_univpit_exp_wtilt_t060.csv",
+   "md5": "90044967682f8e8ef812560e792a23f7",
+   "size": 3202572,
+   "mtime_ict": "2026-08-01T21:00:26.882096+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_wtilt_t090_univpit_exp_wtilt_t090.csv",
+   "md5": "0494860845b8001d189f1bc022258d32",
+   "size": 3204986,
+   "mtime_ict": "2026-08-01T21:09:18.349260+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_lagdiscc4_exp_discC4_univpit.csv",
+   "md5": "dd01b789b9802333d9064f3f54d6c44e",
+   "size": 3248895,
+   "mtime_ict": "2026-07-23T23:40:46.817554+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_lagdiscc5_exp_discC5_univpit.csv",
+   "md5": "64ab9c6fd6acdc2c30f15d6523d440e9",
+   "size": 3222343,
+   "mtime_ict": "2026-07-23T23:41:01.185860+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_lagslotif.csv",
+   "md5": "3b6cb6e6318b7e8cb2c81af5de5270f1",
+   "size": 2793434,
+   "mtime_ict": "2026-07-22T10:12:45.657247+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_liqpct0p04_advprice_exp_cap30b_real_liqpct0p04_univpit_nav30B.csv",
+   "md5": "769cdbd4f0f59ce62d914c57932c126a",
+   "size": 3694217,
+   "mtime_ict": "2026-08-04T18:53:13.141732+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_liqpct0p04_advprice_exp_cap50b_real_liqpct0p04_univpit.csv",
+   "md5": "5e8c83e237512c3511b095da2e4a351c",
+   "size": 4039310,
+   "mtime_ict": "2026-08-04T18:32:20.714662+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_liqpct0p04_advprice_exp_cap75b_real_liqpct0p04_univpit_nav75B.csv",
+   "md5": "f42236790978803b4a0f7b5084f45aa4",
+   "size": 4364680,
+   "mtime_ict": "2026-08-04T18:52:48.753201+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_liquncap_advprice_exp_cap30b_ideal_univpit_nav30B.csv",
+   "md5": "dcdcc7fcced29a691b2cc044d7ddc721",
+   "size": 1863710,
+   "mtime_ict": "2026-08-04T17:55:52.687105+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_liquncap_advprice_exp_cap50b_ideal_univpit.csv",
+   "md5": "5db6708c1b5f9485302bcee8a860a373",
+   "size": 1858842,
+   "mtime_ict": "2026-08-04T17:31:26.254794+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_liquncap_advprice_exp_cap75b_ideal_univpit_nav75B.csv",
+   "md5": "80511fa1e8067739d145919ea43783f3",
+   "size": 1862292,
+   "mtime_ict": "2026-08-04T18:02:40.476203+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_liqzblag.csv",
+   "md5": "809254cda65e8550337ad41fc08db2fa",
+   "size": 4029694,
+   "mtime_ict": "2026-07-21T23:42:52.033282+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_liqzblag_advprice_advmin2000m_exp_L1_gate2000m_univpit.csv",
+   "md5": "6658b0f20e8afa29f5d07b3bf494f115",
+   "size": 2796856,
+   "mtime_ict": "2026-08-04T15:27:58.130674+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_liqzblag_advprice_exp_L1_ctrl_univpit.csv",
+   "md5": "0381f969010fb2937e2c7e86c4836aca",
+   "size": 3815531,
+   "mtime_ict": "2026-08-04T15:27:56.722644+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_liqzblag_advprice_exp_L3_both_univpit.csv",
+   "md5": "0381f969010fb2937e2c7e86c4836aca",
+   "size": 3815531,
+   "mtime_ict": "2026-08-02T23:49:22.625654+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_liqzblag_advprice_exp_lagq_L3_liqzb_univpit.csv",
+   "md5": "0381f969010fb2937e2c7e86c4836aca",
+   "size": 3815531,
+   "mtime_ict": "2026-08-03T09:23:50.860198+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_liqzblag_advprice_exp_lagq_L4_liqzb_plus2B_univpit.csv",
+   "md5": "2ec9b11ba7fc637a5ba19ebe30209ab1",
+   "size": 2774537,
+   "mtime_ict": "2026-08-03T09:23:48.080139+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_liqzblag_advprice_exp_n50_L1ctrl_univpit.csv",
+   "md5": "0381f969010fb2937e2c7e86c4836aca",
+   "size": 3815531,
+   "mtime_ict": "2026-08-04T16:05:24.699561+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_liqzblag_advprice_exp_pcap_p005_L1_univpit.csv",
+   "md5": "fcebd510dec3ae9d25c502dbe5debb86",
+   "size": 4356251,
+   "mtime_ict": "2026-08-03T12:36:16.151317+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_liqzblag_advprice_exp_pcap_p020_L1_univpit.csv",
+   "md5": "0381f969010fb2937e2c7e86c4836aca",
+   "size": 3815531,
+   "mtime_ict": "2026-08-03T12:36:12.951248+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_liqzblag_advprice_exp_pcap_p100_L1_univpit.csv",
+   "md5": "f58bfe5c60af1f0d147c98bc3338ad71",
+   "size": 3111920,
+   "mtime_ict": "2026-08-03T12:36:11.851225+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_liqzblag_exp_L1_liqzb_univpit.csv",
+   "md5": "61ee88ea2564132c98af04cbb583f01d",
+   "size": 4048910,
+   "mtime_ict": "2026-08-02T23:49:14.865490+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_liqzblag_exp_cap_p005_L1_univpit.csv",
+   "md5": "dc981ad690ed64148f35a4ea72a250d3",
+   "size": 4388167,
+   "mtime_ict": "2026-08-03T09:27:49.153239+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_liqzblag_exp_cap_p100_L1_univpit.csv",
+   "md5": "6094da0c342b8466beaa6c567e853e92",
+   "size": 3303628,
+   "mtime_ict": "2026-08-03T09:27:35.696954+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_liqzblag_exp_nav025_L1_univpit_nav25B.csv",
+   "md5": "f475ef3d936412d67722501646fa7361",
+   "size": 3552946,
+   "mtime_ict": "2026-08-03T12:00:00.764171+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_pre_dt5g_repin_20260711_backup.csv",
+   "md5": "4514c45a6fd11f85b9c6df3925a7fe36",
+   "size": 3314427,
+   "mtime_ict": "2026-07-09T00:14:54.738568+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_pre_momclose_repin_20260712_backup.csv",
+   "md5": "420fe3b5fc58703d01b0a9cf78fb8d4f",
+   "size": 3297661,
+   "mtime_ict": "2026-07-11T14:15:06.243297+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark100z50.csv",
+   "md5": "15628bd4f8c2bc9be2804b1271e6af6f",
+   "size": 3449428,
+   "mtime_ict": "2026-06-22T21:37:28.921294+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark100z70.csv",
+   "md5": "6beba70f3d732d232d212caef95ad692",
+   "size": 3416751,
+   "mtime_ict": "2026-06-22T20:45:02.930169+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark130z50_depg75_mge130all_capitonly63cv17Ccf30lev.csv",
+   "md5": "d11e9d0b9ae4349f62ffa1344ea1c952",
+   "size": 3654230,
+   "mtime_ict": "2026-06-25T19:02:24.435950+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark130z50_depg75_mge130cap_capitonly63cv17Ccf30lev.csv",
+   "md5": "a3af82f9943519d3583bdd404786e379",
+   "size": 3366005,
+   "mtime_ict": "2026-06-25T18:25:20.316308+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark150z70.csv",
+   "md5": "6f44eb9b9a4ab3367b9c0b068501039e",
+   "size": 3449302,
+   "mtime_ict": "2026-06-22T21:24:45.692907+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark70z70.csv",
+   "md5": "37a5657f677b0e12a40cef768bc418ff",
+   "size": 3406598,
+   "mtime_ict": "2026-06-22T20:54:20.877981+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark90z70.csv",
+   "md5": "69a6225fa63d8aaeb5ba26b36f35ae07",
+   "size": 3410940,
+   "mtime_ict": "2026-06-22T21:02:41.912599+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50.csv",
+   "md5": "cb555b3aa05eb2a144e1f04e401e5f41",
+   "size": 3400961,
+   "mtime_ict": "2026-06-23T20:06:34.228398+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg60.csv",
+   "md5": "4a88a25f62b73e0366209431f937e0d6",
+   "size": 3416448,
+   "mtime_ict": "2026-06-23T12:16:47.429739+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75.csv",
+   "md5": "3136c5adca9e1bbe580ee90841e5ed01",
+   "size": 3405628,
+   "mtime_ict": "2026-06-26T22:51:21.352948+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_capitonly63cv17Ccf30.csv",
+   "md5": "e37043bcd293978d6ba82fe1070b420e",
+   "size": 3383497,
+   "mtime_ict": "2026-06-27T11:23:36.582245+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_capitonly63cv17Ccf30_v25chk_LF.csv",
+   "md5": "edd82d969c735eeddd6b68f0aa32543d",
+   "size": 3229670,
+   "mtime_ict": "2026-07-12T13:02:16.028477+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_grad10cv16.csv",
+   "md5": "0fec877d6532912ccf198a6d0ad7ac36",
+   "size": 3385774,
+   "mtime_ict": "2026-06-24T17:55:01.467984+07:00",
+   "n_obs": 3109,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_grad10cv16_accel.csv",
+   "md5": "f684ef15c0f8a7588f65c4f895657f32",
+   "size": 3390189,
+   "mtime_ict": "2026-06-24T18:05:03.497074+07:00",
+   "n_obs": 3109,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_mge120cap_capitonly63cv17.csv",
+   "md5": "253c2dd79e516ead0fee6813df0dde14",
+   "size": 3401615,
+   "mtime_ict": "2026-06-24T22:54:59.766669+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_mge130cap.csv",
+   "md5": "4c6a961b08358651ffa0a5ef141826f7",
+   "size": 3363394,
+   "mtime_ict": "2026-06-24T14:32:25.706915+07:00",
+   "n_obs": 3109,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_mge130cap_capitonly126cv17.csv",
+   "md5": "8b7a0a07617ea034b97d1f2e263a17ab",
+   "size": 3375185,
+   "mtime_ict": "2026-06-24T20:53:57.325321+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_mge130cap_capitonly63cv16.csv",
+   "md5": "8b7a0a07617ea034b97d1f2e263a17ab",
+   "size": 3375185,
+   "mtime_ict": "2026-06-24T21:53:49.283291+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_mge130cap_capitonly63cv17.csv",
+   "md5": "bcfc7a972f9d0d818ad3383f9ad796c8",
+   "size": 3414767,
+   "mtime_ict": "2026-06-24T22:46:51.304185+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_mge130cap_capitonly63cv17B.csv",
+   "md5": "bcfc7a972f9d0d818ad3383f9ad796c8",
+   "size": 3414767,
+   "mtime_ict": "2026-06-24T22:01:38.445487+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_mge130cap_capitonly63cv17BC.csv",
+   "md5": "a6169e71c1a62f4dbfdea26d26a1388f",
+   "size": 3361535,
+   "mtime_ict": "2026-06-24T22:09:37.675894+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_mge130cap_capitonly63cv17Ccf30.csv",
+   "md5": "42ab06d33ed97dd63b2de643a702c823",
+   "size": 3441202,
+   "mtime_ict": "2026-06-27T09:50:41.859339+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_mge130cap_capitonly63cv17Ccf40.csv",
+   "md5": "ddbe1e82e78743fe9426db31707d7185",
+   "size": 3446936,
+   "mtime_ict": "2026-06-25T08:35:01.948353+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_mge130cap_dvo10.csv",
+   "md5": "4c6a961b08358651ffa0a5ef141826f7",
+   "size": 3363394,
+   "mtime_ict": "2026-06-24T14:42:16.295971+07:00",
+   "n_obs": 3109,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_mge130cap_dvo8.csv",
+   "md5": "4c6a961b08358651ffa0a5ef141826f7",
+   "size": 3363394,
+   "mtime_ict": "2026-06-24T14:50:26.414702+07:00",
+   "n_obs": 3109,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_mge130cap_grad10cv16lev.csv",
+   "md5": "94aef51800fc3e05582611499ebed269",
+   "size": 3408474,
+   "mtime_ict": "2026-06-24T16:19:38.319615+07:00",
+   "n_obs": 3109,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_mge130cap_lgconv.csv",
+   "md5": "c8d3224162aa83a41b2c80bb8379e002",
+   "size": 3340561,
+   "mtime_ict": "2026-06-24T13:56:33.764979+07:00",
+   "n_obs": 3109,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_mge130cap_lgdep.csv",
+   "md5": "d43ec647637d86f18d0c27acf4749a41",
+   "size": 3163181,
+   "mtime_ict": "2026-06-23T22:41:44.798178+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_mge130cap_lgdepeye20.csv",
+   "md5": "0136354f0ca7f5100078fc15552e7e4d",
+   "size": 3353326,
+   "mtime_ict": "2026-06-24T09:13:42.247905+07:00",
+   "n_obs": 3109,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_mge130cap_real_capitonly63cv17Ccf40.csv",
+   "md5": "cb1597a938c4d2f3ea8d1f02a75e1e37",
+   "size": 3400249,
+   "mtime_ict": "2026-06-25T09:22:57.233116+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_mge135cap_capitonly63cv17Ccf30.csv",
+   "md5": "081a44fb5cce35dcdf37337e0685f505",
+   "size": 3241652,
+   "mtime_ict": "2026-06-25T20:18:55.256702+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_mge140cap_capitonly63cv17.csv",
+   "md5": "f4c6c2d841a6c33be99cf66566bdc99f",
+   "size": 3429342,
+   "mtime_ict": "2026-06-24T22:59:09.664014+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_mge150cap.csv",
+   "md5": "223e99bd414ebc995b666fb5b22012dc",
+   "size": 3461361,
+   "mtime_ict": "2026-06-26T08:59:00.968781+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_mge150cap_capitonly63cv17.csv",
+   "md5": "d3a6bd0bde744d6590007da851f58549",
+   "size": 3421533,
+   "mtime_ict": "2026-06-24T23:06:49.377846+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_mge150cap_capitonly63cv17Ccf30.csv",
+   "md5": "157bcb04b7fd5adace412027d97c7300",
+   "size": 3426495,
+   "mtime_ict": "2026-06-29T15:36:04.821271+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_mge150cap_capitonly63cv17Ccf30_v25chk_LEV.csv",
+   "md5": "e64635522c9cd5280b7f6fa57f21a71d",
+   "size": 3274989,
+   "mtime_ict": "2026-07-12T13:02:08.260312+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_mge150cap_capitonly63cv17Ccf30_v25chk_LEVnocap.csv",
+   "md5": "4f85cd0b582a684a3f11d349c53b1299",
+   "size": 3277323,
+   "mtime_ict": "2026-07-12T13:15:44.769725+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_mge150cap_capitonly63cv17Ccf30_v25chk_LOO2020.csv",
+   "md5": "eb440bd8dee6bec662bc04be0cad30c4",
+   "size": 3282856,
+   "mtime_ict": "2026-07-12T13:08:59.337077+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_mge150cap_capitonly63cv17Ccf30_v25chk_LOO2022.csv",
+   "md5": "e64635522c9cd5280b7f6fa57f21a71d",
+   "size": 3274989,
+   "mtime_ict": "2026-07-12T13:08:57.869045+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_mge150cap_capitonly63cv17Ccf30_v25chk_LOO2023.csv",
+   "md5": "e64635522c9cd5280b7f6fa57f21a71d",
+   "size": 3274989,
+   "mtime_ict": "2026-07-12T13:15:38.257586+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_mge150cap_lgfed15.csv",
+   "md5": "d6175e5cf1718b2c05417c4d9cc04c57",
+   "size": 3246929,
+   "mtime_ict": "2026-06-23T22:34:20.265482+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_mge170cap_capitonly63cv17Ccf30.csv",
+   "md5": "2f44b9f77b2091c17fa775f18646424f",
+   "size": 3426393,
+   "mtime_ict": "2026-06-26T08:35:53.307415+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_mge180cap_capitonly63cv17Ccf30.csv",
+   "md5": "5986d938e1675d18726b883e47e7eac1",
+   "size": 3443155,
+   "mtime_ict": "2026-06-27T09:50:27.819043+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_depg75_mge200cap_capitonly63cv17Ccf30.csv",
+   "md5": "c52388bbac8745e867b588e218d8a056",
+   "size": 3502452,
+   "mtime_ict": "2026-06-27T09:50:28.235052+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_recpark95z50_fedg15.csv",
+   "md5": "cb555b3aa05eb2a144e1f04e401e5f41",
+   "size": 3400961,
+   "mtime_ict": "2026-06-23T20:21:39.819962+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_v3latest.csv",
+   "md5": "faa91978081cb93a1eb472fc82530652",
+   "size": 3359561,
+   "mtime_ict": "2026-06-22T09:06:11.742214+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_volmanw126m08.csv",
+   "md5": "0a1cbeae9df3a35658cba4c5cb4b3958",
+   "size": 3319324,
+   "mtime_ict": "2026-07-05T17:51:36.185845+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_volmanw126m10.csv",
+   "md5": "90e723a4e27e7115f30b9e9984089deb",
+   "size": 3319332,
+   "mtime_ict": "2026-07-05T17:45:06.233555+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_volmanw126m12.csv",
+   "md5": "72e72716fe0b585e8b4d22e784b6b6e9",
+   "size": 3319441,
+   "mtime_ict": "2026-07-05T17:58:05.278139+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtsectorcap_exp_seccap_Afix50.csv",
+   "md5": "6b471b2fdbe43b7e5a741f438567061e",
+   "size": 3122564,
+   "mtime_ict": "2026-07-14T17:12:40.621014+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtsectorcap_exp_seccap_Bmkt.csv",
+   "md5": "af4083ab1ed15a8d1daa819eb592fc77",
+   "size": 3121969,
+   "mtime_ict": "2026-07-14T17:12:37.644951+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtsectorcap_exp_seccap_Bx15.csv",
+   "md5": "966ff91bc8a2fd20ca673067eb96cee4",
+   "size": 3126705,
+   "mtime_ict": "2026-07-14T17:12:14.316451+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitgq.csv",
+   "md5": "d1c13f6eadc88ed20645763b60296716",
+   "size": 3216247,
+   "mtime_ict": "2026-06-14T12:58:19+07:00",
+   "n_obs": 3102,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitq.csv",
+   "md5": "07986f7e7f4ee67f85383ff769c86871",
+   "size": 3220435,
+   "mtime_ict": "2026-06-14T10:35:17+07:00",
+   "n_obs": 3102,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqstrict.csv",
+   "md5": "7e66115b6c8f18440ae6e8c39504135c",
+   "size": 2999752,
+   "mtime_ict": "2026-06-13T14:43:26+07:00",
+   "n_obs": 3101,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_qxfloor1f100_etfliqcustompitg_wtnamecap_exp_qx_floor1_univpit.csv",
+   "md5": "442d0b7f8cdc6325a06aa529579b7d46",
+   "size": 3191329,
+   "mtime_ict": "2026-08-01T14:52:06.824927+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_qxfloor1f50_etfliqcustompitg_wtnamecap_exp_qx_floor1trim_univpit.csv",
+   "md5": "3356af656e253b1a5c4168c4b35ebe22",
+   "size": 3190151,
+   "mtime_ict": "2026-08-01T14:52:26.597358+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_qxfloor20f100_etfliqcustompitg_wtnamecap_exp_qx_floor20_univpit.csv",
+   "md5": "1121b444eb8d501da19f599e2fdbc21c",
+   "size": 3186281,
+   "mtime_ict": "2026-08-01T14:52:05.616901+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_qxr8l1f100_etfliqcustompitg_wtnamecap_exp_qx_r8l1_univpit.csv",
+   "md5": "8c74b4322fc3034947167bc72f253d09",
+   "size": 3196639,
+   "mtime_ict": "2026-08-01T14:52:26.533356+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_etfliqcustompitg_wtnamecap.csv",
+   "md5": "abeee71e2ad2af43061ddb4f4f4bd97f",
+   "size": 3210136,
+   "mtime_ict": "2026-06-17T12:34:03.680575+07:00",
+   "n_obs": 3103,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matpostbull_shrink0_etfliqcustompitg_wtnamecap_advprice_exp_eknoedge_univpit.csv",
+   "md5": "9c45aa4b0d01869339b31997e25b0b72",
+   "size": 3044095,
+   "mtime_ict": "2026-09-10T21:49:21.421630+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_matsmooth_edge_etfliqcustompitg_wtnamecap.csv",
+   "md5": "ee730394fea376b736b54d7543996917",
+   "size": 3190991,
+   "mtime_ict": "2026-06-17T12:54:29.819159+07:00",
+   "n_obs": 3103,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_mge130cap_real.csv",
+   "md5": "c03ff6dde299da9f3ef60d6d9e85c6c8",
+   "size": 2479369,
+   "mtime_ict": "2026-06-26T00:26:56.300227+07:00",
+   "n_obs": 3111,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_szbbooknav_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_capsz_booknav_univpit.csv",
+   "md5": "764bbc33957ee8b61ca7504153d871a4",
+   "size": 3129008,
+   "mtime_ict": "2026-07-31T16:15:06.669960+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_szbidle_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_capsz_idle_univpit.csv",
+   "md5": "d9d39c73ed40c95b786d226e80274859",
+   "size": 3209522,
+   "mtime_ict": "2026-07-31T16:15:06.865964+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_szbidlecap030_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_capsz_idlecap30_univpit.csv",
+   "md5": "f8f3bfe4e473e521022444c4ab0640b5",
+   "size": 3206269,
+   "mtime_ict": "2026-07-31T16:21:15.905963+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_szbnav010_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_capsz_nav10_univpit.csv",
+   "md5": "c8d63075fa95f41f452b33d401325faa",
+   "size": 3185653,
+   "mtime_ict": "2026-07-31T16:21:18.330016+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_szbnav020_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_capsz_nav20_univpit.csv",
+   "md5": "9d59907595dbc8a246fea9b98e91de24",
+   "size": 3194123,
+   "mtime_ict": "2026-07-31T16:21:09.397822+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_szbnavsize015_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_capsz_navsize15_univpit.csv",
+   "md5": "9b09db6ebbcf82c7fc8064a11f980848",
+   "size": 3172562,
+   "mtime_ict": "2026-07-31T18:24:21.497814+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_szbnavsize025_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_capsz_navsize25_univpit.csv",
+   "md5": "4719e16e80613dffdbc069ece53f4c5c",
+   "size": 3178215,
+   "mtime_ict": "2026-07-31T17:17:52.138470+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_szbnavsize030_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_capsz_navsize30_univpit.csv",
+   "md5": "16d68ebce1259a1a7795e512c086b94b",
+   "size": 3180660,
+   "mtime_ict": "2026-07-31T18:24:17.061721+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_szbnavsize035_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_capsz_navsize35_univpit.csv",
+   "md5": "10fa198f3ceeb3393192c9c083058343",
+   "size": 3180932,
+   "mtime_ict": "2026-07-31T18:24:26.553920+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_szbnavsize040_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_capsz_navsize40_univpit.csv",
+   "md5": "b1c0e7cad0c94da02c3dd721e379f22e",
+   "size": 3196988,
+   "mtime_ict": "2026-07-31T17:17:47.130363+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_szbpark025_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_p3_LOOe16_univpit.csv",
+   "md5": "02f4423920ec27b12af7f0b71e69950b",
+   "size": 3049862,
+   "mtime_ict": "2026-08-03T15:59:34.728346+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_szbpark025_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_p3_LOOe17_univpit.csv",
+   "md5": "26089d8e482cca64eb9e0a9f38194f2b",
+   "size": 3049153,
+   "mtime_ict": "2026-08-03T15:59:35.396361+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_szbpark025_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_p3_LOOe2_univpit.csv",
+   "md5": "c64bc89355ec1f402d748eeeed967dfd",
+   "size": 3049386,
+   "mtime_ict": "2026-08-03T15:59:18.892001+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_szbpark025_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_p3_LOOe3_univpit.csv",
+   "md5": "ded1c0faac491f1852c939862990fe53",
+   "size": 3048889,
+   "mtime_ict": "2026-08-03T15:59:08.547775+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_szbpark025_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_p3_LOOe5_univpit.csv",
+   "md5": "19233e15bbc5bd7f6ea2887c9d728fa7",
+   "size": 3050421,
+   "mtime_ict": "2026-08-03T15:59:46.056594+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_szbpark025_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_p3_LOOe6_univpit.csv",
+   "md5": "90c779cdff958d76332f4eec9a060b89",
+   "size": 3041766,
+   "mtime_ict": "2026-08-03T15:59:29.676236+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_szbpark025_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_p3_LOOe8_univpit.csv",
+   "md5": "d0ee7ef541190eba2575e9a78499aa2f",
+   "size": 3042215,
+   "mtime_ict": "2026-08-03T15:59:28.996221+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_szbpark025_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_p3_LOOnone_univpit.csv",
+   "md5": "91b0155726f3c12b92476bc1f3bd972b",
+   "size": 3049159,
+   "mtime_ict": "2026-08-03T15:57:35.561746+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_szbpark025_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_p3_PK025_univpit.csv",
+   "md5": "91b0155726f3c12b92476bc1f3bd972b",
+   "size": 3049159,
+   "mtime_ict": "2026-08-03T15:42:27.009980+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_szbpark025_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_capsz_park25_univpit.csv",
+   "md5": "cb130072b4505868c4be4e2f94ecc12b",
+   "size": 3188477,
+   "mtime_ict": "2026-07-31T16:53:05.282812+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_szbpark050_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_exp_capsz_park50_univpit.csv",
+   "md5": "0a2ad2d100a905f52bfd95bdd5a0bd77",
+   "size": 3184457,
+   "mtime_ict": "2026-07-31T16:53:06.798844+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_szbpark05_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_p3_PK050_univpit.csv",
+   "md5": "0ea582e4c60b16e8c528a190a0f784a2",
+   "size": 3060877,
+   "mtime_ict": "2026-08-03T15:34:22.995436+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_szbpark075_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_p3_PK075_univpit.csv",
+   "md5": "ab305fd506adc5e99f93572092d5ad5e",
+   "size": 3080038,
+   "mtime_ict": "2026-08-03T15:42:18.753800+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_szbpark0_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_p3_PK000_univpit.csv",
+   "md5": "7d053e6201c9d107685ff4d1dd9d2d2a",
+   "size": 3042954,
+   "mtime_ict": "2026-08-03T15:34:37.667756+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_szbpark10_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_p3_PK100_univpit.csv",
+   "md5": "a86898a7962c0467be9cdef0892e28f1",
+   "size": 3078266,
+   "mtime_ict": "2026-08-03T15:42:27.149983+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_szbparkdd025_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_p3_PD025_univpit.csv",
+   "md5": "a49c84d4d72882515582d39ab89e8121",
+   "size": 3042503,
+   "mtime_ict": "2026-08-03T15:42:26.909978+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_szbparkdd05_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_p3_PD050_univpit.csv",
+   "md5": "8ede02ddf97c7010f0f8974c0907690c",
+   "size": 3050844,
+   "mtime_ict": "2026-08-03T15:34:19.451359+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_szbparkdd075_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_p3_PD075_univpit.csv",
+   "md5": "30352456a277817969b67ad165cc8106",
+   "size": 3049104,
+   "mtime_ict": "2026-08-03T15:42:26.857977+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  },
+  {
+   "path": "data/v23_golive_audit_2014_now_szbparkdd10_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_p3_PD100_univpit.csv",
+   "md5": "514c21bb6bcd880f395eb127e4c339b3",
+   "size": 3061358,
+   "mtime_ict": "2026-08-03T15:42:26.881977+07:00",
+   "n_obs": 3107,
+   "reason": "Ho glob dong nhu hom nay 2026-09-27 — pin de so PBO hom nay tai lap duoc, KHONG phai ho dung khi chon V2.4."
+  }
+ ]
+}

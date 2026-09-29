@@ -1,0 +1,143 @@
+=========== CONFOUND 1: zone ~ NAM (radar zone co phai chi la 'thoi ky' khong?) ===========
+zone   RE  TRUNGTINH  DAT
+yr                       
+2014    3        244    0
+2015   68        180    0
+2016   28        192   31
+2017    0          0  250
+2018    0          0  250
+2019    0         24  226
+2020   37        199   16
+2021    0          7  243
+2022  155         76   18
+2023  249          0    0
+2024  172         78    0
+2025  125        124    0
+2026    1        108    3
+
+=========== CONFOUND 2: regime x zone — so phien theo NAM cua o NEUTRAL ===========
+zone  DAT   RE  TRUNGTINH
+yr                       
+2014    0    2        199
+2015    0   58        170
+2016    1   27        134
+2017  245    0          0
+2018  142    0          0
+2019  200    0          9
+2020    0    2        101
+2021   62    0          0
+2022    0   21          0
+2023    0  155          0
+2024    0   96          6
+2025    0   78         87
+2026    3    1         96
+
+=========== CONFOUND 3: DT5G state la HAM cua gia => VNI return theo state la CO HOC ===========
+  CRISIS   n=  489 VNI ann=   -8.3%  (day la DINH NGHIA cua state, khong phai edge)
+  BEAR     n=  241 VNI ann=  -21.2%  (day la DINH NGHIA cua state, khong phai edge)
+  NEUTRAL  n= 1894 VNI ann=  +16.6%  (day la DINH NGHIA cua state, khong phai edge)
+  BULL     n=  422 VNI ann=  +26.9%  (day la DINH NGHIA cua state, khong phai edge)
+  EXBULL   n=   60 VNI ann=  +63.0%  (day la DINH NGHIA cua state, khong phai edge)
+
+=========== BH(FDR 10%) tren 15 o x 3 chien luoc: H0 = excess vs VNI = 0 ===========
+  NEUTRAL  RE         LAG  n= 440 excess_ann=  +19.9% CI[  +3.5, +35.7] p=0.0149 BH10=fail Bonf=fail
+  NEUTRAL  RE         BAL  n= 440 excess_ann=  +16.3% CI[  +3.1, +30.8] p=0.0204 BH10=fail Bonf=fail
+  NEUTRAL  RE         AL4  n= 440 excess_ann=  +17.2% CI[  +1.2, +29.6] p=0.0214 BH10=fail Bonf=fail
+  BULL     DAT        AL4  n= 233 excess_ann=  +28.0% CI[  +3.4, +62.0] p=0.0678 BH10=fail Bonf=fail
+  NEUTRAL  DAT        BAL  n= 653 excess_ann=  +17.3% CI[  +0.3, +37.9] p=0.0731 BH10=fail Bonf=fail
+  BEAR     RE         AL4  n= 170 excess_ann=  +19.9% CI[  +0.3, +44.7] p=0.0778 BH10=fail Bonf=fail
+  NEUTRAL  DAT        LAG  n= 653 excess_ann=  +17.1% CI[  -2.8, +39.5] p=0.1145 BH10=fail Bonf=fail
+  NEUTRAL  DAT        AL4  n= 653 excess_ann=  +10.6% CI[  -2.6, +25.4] p=0.1376 BH10=fail Bonf=fail
+  BEAR     RE         LAG  n= 170 excess_ann=  +38.1% CI[ -12.1, +90.5] p=0.1439 BH10=fail Bonf=fail
+  CRISIS   TRUNGTINH  LAG  n= 246 excess_ann=  +25.1% CI[ -14.2, +65.0] p=0.2216 BH10=fail Bonf=fail
+  BULL     DAT        BAL  n= 233 excess_ann=  +30.2% CI[ -13.9, +82.6] p=0.2256 BH10=fail Bonf=fail
+  CRISIS   DAT        AL4  n= 111 excess_ann=  +22.3% CI[ -19.5, +42.7] p=0.2784 BH10=fail Bonf=fail
+  BEAR     RE         BAL  n= 170 excess_ann=  +27.9% CI[ -26.6, +79.6] p=0.3086 BH10=fail Bonf=fail
+  NEUTRAL  TRUNGTINH  BAL  n= 801 excess_ann=   +6.7% CI[  -7.6, +25.0] p=0.4359 BH10=fail Bonf=fail
+  NEUTRAL  TRUNGTINH  LAG  n= 801 excess_ann=   +8.7% CI[ -11.0, +32.4] p=0.4364 BH10=fail Bonf=fail
+  CRISIS   TRUNGTINH  BAL  n= 246 excess_ann=  +12.1% CI[ -24.0, +46.4] p=0.4914 BH10=fail Bonf=fail
+  CRISIS   DAT        BAL  n= 111 excess_ann=  -19.1% CI[ -38.1, +36.4] p=0.5196 BH10=fail Bonf=fail
+  CRISIS   TRUNGTINH  AL4  n= 246 excess_ann=   +6.5% CI[ -14.5, +24.8] p=0.5365 BH10=fail Bonf=fail
+  NEUTRAL  TRUNGTINH  AL4  n= 801 excess_ann=   +4.0% CI[ -10.8, +19.8] p=0.6058 BH10=fail Bonf=fail
+  CRISIS   RE         BAL  n= 132 excess_ann=  +17.2% CI[ -61.7, +83.1] p=0.6519 BH10=fail Bonf=fail
+  CRISIS   RE         LAG  n= 132 excess_ann=  +17.8% CI[ -75.8, +58.5] p=0.6642 BH10=fail Bonf=fail
+  BULL     DAT        LAG  n= 233 excess_ann=   +4.8% CI[ -27.4, +51.1] p=0.8294 BH10=fail Bonf=fail
+  CRISIS   DAT        LAG  n= 111 excess_ann=   +3.6% CI[ -16.0, +49.4] p=0.8922 BH10=fail Bonf=fail
+  CRISIS   RE         AL4  n= 132 excess_ann=   +0.7% CI[ -26.3, +34.8] p=0.9702 BH10=fail Bonf=fail
+  BEAR     TRUNGTINH  BAL  n=  60  MAU QUA NHO (bo)
+  BEAR     TRUNGTINH  LAG  n=  60  MAU QUA NHO (bo)
+  BEAR     TRUNGTINH  AL4  n=  60  MAU QUA NHO (bo)
+  BEAR     DAT        BAL  n=  11  MAU QUA NHO (bo)
+  BEAR     DAT        LAG  n=  11  MAU QUA NHO (bo)
+  BEAR     DAT        AL4  n=  11  MAU QUA NHO (bo)
+  BULL     RE         BAL  n=  96  MAU QUA NHO (bo)
+  BULL     RE         LAG  n=  96  MAU QUA NHO (bo)
+  BULL     RE         AL4  n=  96  MAU QUA NHO (bo)
+  BULL     TRUNGTINH  BAL  n=  93  MAU QUA NHO (bo)
+  BULL     TRUNGTINH  LAG  n=  93  MAU QUA NHO (bo)
+  BULL     TRUNGTINH  AL4  n=  93  MAU QUA NHO (bo)
+  EXBULL   RE         BAL  n=   0  MAU QUA NHO (bo)
+  EXBULL   RE         LAG  n=   0  MAU QUA NHO (bo)
+  EXBULL   RE         AL4  n=   0  MAU QUA NHO (bo)
+  EXBULL   TRUNGTINH  BAL  n=  31  MAU QUA NHO (bo)
+  EXBULL   TRUNGTINH  LAG  n=  31  MAU QUA NHO (bo)
+  EXBULL   TRUNGTINH  AL4  n=  31  MAU QUA NHO (bo)
+  EXBULL   DAT        BAL  n=  29  MAU QUA NHO (bo)
+  EXBULL   DAT        LAG  n=  29  MAU QUA NHO (bo)
+  EXBULL   DAT        AL4  n=  29  MAU QUA NHO (bo)
+
+  N_trials khai bao = 24 (15 o x 3 chien luoc, bo o thieu mau). So PASS BH10 = 0, PASS Bonferroni = 0
+
+=========== WALK-FORWARD: excess theo zone, IS 2014-2019 vs OOS 2020+ ===========
+  RE         IS 14-19  n=   99 BAL=  +35.5% LAG=  +20.3% AL4=  +33.5% 
+  RE         OOS 20+   n=  739 BAL=  +14.6% LAG=  +25.6% AL4=  +11.4% 
+  TRUNGTINH  IS 14-19  n=  640 BAL=   +3.7% LAG=  +22.8% AL4=   -1.6% 
+  TRUNGTINH  OOS 20+   n=  592 BAL=  +14.3% LAG=   -2.3% AL4=  +14.0% 
+  DAT        IS 14-19  n=  757 BAL=   +8.0% LAG=   +6.2% AL4=  +14.6% 
+  DAT        OOS 20+   n=  280 BAL=  +40.8% LAG=  +24.0% AL4=  +21.2% 
+
+=========== TIER-1 LEAD/LAG quanh DT5G transition (cum ret, phien tuong doi) ===========
+  --- XUONG state (n=24) ---
+    AL4  T-20= +0.05% T-10= -2.69% T0= -2.74% T+10= -3.99% T+20= -4.76%
+    VNI  T-20= -0.30% T-10= -3.02% T0= -3.07% T+10= -4.16% T+20= -4.97%
+    BAL  T-20= -0.19% T-10= -2.56% T0= -1.35% T+10= +0.50% T+20= -0.76%
+    LAG  T-20= -0.23% T-10= -0.16% T0= +0.58% T+10= +0.78% T+20= +0.81%
+  --- LEN state (n=27) ---
+    AL4  T-20= +0.48% T-10= +4.31% T0= +5.52% T+10= +6.90% T+20= +7.94%
+    VNI  T-20= +0.36% T-10= +4.16% T0= +4.70% T+10= +4.85% T+20= +5.32%
+    BAL  T-20= +0.18% T-10= +2.95% T0= +5.05% T+10= +6.48% T+20= +8.22%
+    LAG  T-20= +0.33% T-10= +3.85% T0= +5.76% T+10= +5.11% T+20= +6.45%
+
+=========== BANKING (ACB/MBB/HDB) vs FPT theo che do LAI SUAT + zone ===========
+  rate <5.5%     n= 1516 BANK=  +23.5% FPT=  +22.9% VNI=  +10.4% | BANKex=  +13.1pp FPTex=  +12.6pp
+  rate 5.5-6.5%  n=  795 BANK=  +43.8% FPT=  +24.8% VNI=  +22.5% | BANKex=  +21.3pp FPTex=   +2.3pp
+  rate 6.5-8%    n=  796 BANK=   +2.2% FPT=  +21.5% VNI=   +1.2% | BANKex=   +1.0pp FPTex=  +20.3pp
+
+  BANK vs FPT theo zone:
+    RE         n=  838 BANK=   -1.2% FPT=   +5.7% VNI=  -11.9%
+    TRUNGTINH  n= 1232 BANK=  +22.8% FPT=  +22.8% VNI=  +18.5%
+    DAT        n= 1037 BANK=  +44.7% FPT=  +39.4% VNI=  +23.5%
+
+=========== O HIEN TAI NEUTRAL+RE: 18 doan, forward 60 phien tu ngay VAO o ===========
+      date   COMB    BAL    LAG    AL4    VNI   radar
+2014-12-17 +0.094 +0.024 +0.120 +0.079 +0.075 +30.746
+2014-12-19 +0.089 +0.020 +0.115 +0.073 +0.074 +31.942
+2015-05-12 +0.171 +0.153 +0.181 +0.192 +0.105 +31.996
+2015-08-17 +0.052 +0.059 +0.045 +0.054 +0.037 +30.517
+2015-11-27 -0.016 +0.004 -0.051 +0.012 -0.041 +32.126
+2016-01-05 +0.065 +0.102 +0.029 -0.029 -0.032 +26.975
+2020-07-27 +0.227 +0.326 +0.127 +0.288 +0.138 +27.387
+2020-07-29 +0.241 +0.341 +0.141 +0.323 +0.155 +29.598
+2022-08-17 -0.098 -0.071 -0.119 -0.243 -0.257 +28.878
+2023-04-12 +0.046 +0.041 +0.051 +0.060 +0.064 +12.939
+2023-11-30 +0.125 +0.168 +0.101 +0.277 +0.136  +7.283
+2024-08-30 -0.036 -0.029 -0.042 -0.030 -0.036 +32.533
+2024-10-14 -0.014 -0.014 -0.014 +0.015 -0.033 +32.826
+2024-10-18 -0.024 -0.024 -0.023 -0.014 -0.044 +32.466
+2024-12-31 +0.097 +0.083 +0.105 -0.055 +0.036 +32.760
+2025-01-03 +0.074 +0.007 +0.110 -0.115 -0.031 +31.253
+2025-05-19 +0.265 +0.369 +0.190 +0.166 +0.218 +15.526
+2026-03-23 -0.028 +0.006 -0.060 +0.020 +0.096 +31.159
+
+  MEDIAN f60: COMB=+0.069 BAL=+0.033 LAG=+0.076 AL4=+0.037 VNI=+0.050  (n=18 doan, KHONG doc lap hoan toan)
+  hit>VNI: COMB=83% BAL=78% LAG=56% AL4=67%

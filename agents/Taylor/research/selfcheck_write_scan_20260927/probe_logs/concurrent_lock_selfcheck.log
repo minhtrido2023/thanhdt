@@ -1,0 +1,7 @@
+  [PASS] A1 first acquire succeeds
+  [PASS] B1 concurrent second process for same account+date is blocked
+  [PASS] C1 different plan_date is independent (not blocked)
+  [PASS] D1 different account label is independent (not blocked)
+  [PASS] E1 lock releases on process exit -> legitimate restart can re-acquire
+
+ALL CHECKS PASSED — concurrent same-account double-run is blocked; different account/date unaffected; crash-restart still works.

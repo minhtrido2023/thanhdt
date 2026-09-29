@@ -59,6 +59,9 @@ biệt với mã thanh khoản mỏng (TV1 ADV ~0,634 tỷ/ngày).
   2026-08-07, plan bị gate P0 chặn sạch), (b) ánh xạ account hỏng. Phân biệt bằng bằng chứng trong
   chính file: có account KHÁC mình biết số xuất hiện ⇒ ánh xạ chạy đúng ⇒ là (a).
 - **Phí thật đo được 0,094% giá trị khớp** (phí sở 0,027% HOSE / 0,018% UPCOM + phí DNSE 0,070%),
-  KHÁC mặc định `--fee-rate-pct 0.075` của `mike/bin/reconcile_equity.py` — xem research note trên.
+  — ĐÃ đo lại trên 400 fill 01/07→17/08 và thành hằng số `mike/bin/dnse_fee_rates.py` (aria-F1 2026-09-13).
+- **Lịch sử đầy đủ**: `fetch_dnse_khoplenh_email.py` chỉ quét 20 email mới nhất; tải toàn bộ (phân trang) =
+  `agents/Taylor/research/aria_F_20260913/fetch_all_khoplenh.py`. Sao kê TIỀN chi tiết (nộp/rút, UTTB, phí CKCK)
+  nằm ở email "Báo cáo tài khoản Chứng khoán tháng MM" (PDF/tiểu khoản) — bản T08/2026 KHÔNG có mục V. Sao kê.
 - Layout XLSX có 2 dòng header (`STT|Ngày GD|...` rồi `Khối lượng|Giá khớp|...`) và dòng
   `Tổng cộng` cuối bảng — script tìm động bằng nội dung ô, không hardcode số dòng.

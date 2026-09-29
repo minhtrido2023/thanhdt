@@ -1,0 +1,156 @@
+A. rule_a_ceiling(): công thức + làm tròn CHẶT + dải τ
+  [PASS] A1 13.000 × 1,03 = 13.390  — 13390.0
+  [PASS] A2 làm tròn XUỐNG (floor), không bao giờ nới trần  — 13732.0 (thô 13732.9900)
+  [PASS] A3 τ mặc định = 3% đúng giá trị user chốt 2026-08-12  — 0.03
+  [PASS] A4 τ=0 bị từ chối  — tau=0 ngoài (0, 0.1]
+  [PASS] A4 τ=-0.01 bị từ chối  — tau=-0.01 ngoài (0, 0.1]
+  [PASS] A4 τ=0.100000001 bị từ chối  — tau=0.100000001 ngoài (0, 0.1]
+  [PASS] A4 τ=0.5 bị từ chối  — tau=0.5 ngoài (0, 0.1]
+  [PASS] A4 τ=None bị từ chối  — tau=None ngoài (0, 0.1]
+  [PASS] A4 τ='3%' bị từ chối  — tau='3%' ngoài (0, 0.1]
+  [PASS] A4 τ=True bị từ chối  — tau=True ngoài (0, 0.1]
+  [PASS] A5 τ = trần 10% vẫn hợp lệ (biên đóng)  — 14300.0
+  [PASS] A6 anchor=0 bị từ chối  — anchor không hợp lệ (0)
+  [PASS] A6 anchor=-1 bị từ chối  — anchor không hợp lệ (-1)
+  [PASS] A6 anchor=None bị từ chối  — anchor không hợp lệ (None)
+  [PASS] A6 anchor='rác' bị từ chối  — anchor không hợp lệ ('rác')
+  [PASS] A6 anchor=nan bị từ chối  — anchor không hợp lệ (nan)
+
+B. NOTHING CHANGED — lệnh không khai Rule A đi đúng luật cũ 2026-08-09
+  [PASS] B1 chỉ có entry_anchor_price ⇒ trần = anchor  — got=13000.0 want=13000.0 mode=legacy
+  [PASS] B2 generator ghi trần CHẶT HƠN ⇒ giữ cái chặt hơn  — got=12500.0 want=12500.0 mode=legacy
+  [PASS] B3 generator ghi trần RỘNG HƠN ⇒ kẹp về anchor (không nới)  — got=13000.0 want=13000.0 mode=legacy
+  [PASS] B4 trần rác ÂM ⇒ rơi về anchor, KHÔNG tắt trần  — got=13000.0 want=13000.0 mode=legacy
+  [PASS] B5 trần rác 0 ⇒ rơi về anchor  — got=13000.0 want=13000.0 mode=legacy
+  [PASS] B6 trần rác chuỗi ⇒ rơi về anchor  — got=13000.0 want=13000.0 mode=legacy
+  [PASS] B7 anchor rác ⇒ chỉ còn trần generator  — got=12000.0 want=12000.0 mode=legacy
+  [PASS] B8 không anchor, không trần ⇒ None (hành vi cũ)  — got=None want=None mode=legacy
+  [PASS] B9 lệnh BÁN không có khái niệm trần đuổi ⇒ None  — None/not_a_buy
+
+C. Rule A hợp lệ — trần NỚI so với entry_anchor_price đóng băng
+  [PASS] C1 trần = floor(13.400 × 1,03) = 13.802  — 13802.0
+  [PASS] C2 mode = rule_a  — rule_a
+  [PASS] C3 entry_anchor_price (13.000) KHÔNG còn kẹp xuống — đúng mục đích Rule A  — 13802.0 > 13000.0
+  [PASS] C4 anchor ĐI XUỐNG ⇒ trần HẠ theo (luật đối xứng, chỉ mua rẻ hơn)  — 12360.0
+  [PASS] C5 không truyền plan_date ⇒ bỏ qua kiểm ngày (chỉ dùng trong test đơn vị)
+
+D. FAIL-CLOSED — provenance hỏng ⇒ VỨT số đã khai, quay về luật cũ
+  [PASS] D1 thiếu ceiling_anchor_price ⇒ về luật cũ (13.000)  — got=13000.0 mode=rule_a_failsafe | FAIL-CLOSED → luật cũ: thiếu/rác ceiling_anchor_price (None)
+  [PASS] D2 anchor ≤ 0 ⇒ về luật cũ (13.000)  — got=13000.0 mode=rule_a_failsafe | FAIL-CLOSED → luật cũ: thiếu/rác ceiling_anchor_price (-13400.0)
+  [PASS] D3 anchor không parse được ⇒ về luật cũ (13.000)  — got=13000.0 mode=rule_a_failsafe | FAIL-CLOSED → luật cũ: thiếu/rác ceiling_anchor_price ('mười ba nghìn')
+  [PASS] D4 τ vượt trần cứng 10% ⇒ về luật cũ (13.000)  — got=13000.0 mode=rule_a_failsafe | FAIL-CLOSED → luật cũ: ceiling_tau=0.25 ngoài (0, 0.1]
+  [PASS] D5 τ = 0 ⇒ về luật cũ (13.000)  — got=13000.0 mode=rule_a_failsafe | FAIL-CLOSED → luật cũ: ceiling_tau=0 ngoài (0, 0.1]
+  [PASS] D6 τ thiếu ⇒ về luật cũ (13.000)  — got=13000.0 mode=rule_a_failsafe | FAIL-CLOSED → luật cũ: ceiling_tau=None ngoài (0, 0.1]
+  [PASS] D7 trần KHÔNG tái lập được từ anchor (plan sửa tay) ⇒ về luật cũ (13.000)  — got=13000.0 mode=rule_a_failsafe | FAIL-CLOSED → luật cũ: hard_no_chase_ceiling_vnd=25,000 KHÔNG tái lập được từ anchor 13,40
+  [PASS] D8 trần lệch 1đ so với công thức ⇒ về luật cũ (13.000)  — got=13000.0 mode=rule_a_failsafe | FAIL-CLOSED → luật cũ: hard_no_chase_ceiling_vnd=13,803 KHÔNG tái lập được từ anchor 13,40
+  [PASS] D9 thiếu hẳn trần ⇒ về luật cũ (13.000)  — got=13000.0 mode=rule_a_failsafe | FAIL-CLOSED → luật cũ: khai ceiling_rule=A nhưng thiếu/rác hard_no_chase_ceiling_vnd
+  [PASS] D10 anchor_date = plan_date (giá TRONG PHIÊN — trượt trong phiên) ⇒ về luật cũ (13.000)  — got=13000.0 mode=rule_a_failsafe | FAIL-CLOSED → luật cũ: ceiling_anchor_date 2026-08-18 KHÔNG nằm trước plan_date 2026-08-18
+  [PASS] D11 anchor_date SAU plan_date (look-ahead) ⇒ về luật cũ (13.000)  — got=13000.0 mode=rule_a_failsafe | FAIL-CLOSED → luật cũ: ceiling_anchor_date 2026-08-19 KHÔNG nằm trước plan_date 2026-08-18
+  [PASS] D12 anchor_date không parse được ⇒ về luật cũ (13.000)  — got=13000.0 mode=rule_a_failsafe | FAIL-CLOSED → luật cũ: ceiling_anchor_date không parse được ('hôm qua')
+  [PASS] D13 anchor_date thiếu ⇒ về luật cũ (13.000)  — got=13000.0 mode=rule_a_failsafe | FAIL-CLOSED → luật cũ: ceiling_anchor_date không parse được (None)
+  [PASS] D14 Rule A hỏng + KHÔNG có entry_anchor_price ⇒ trần khai bị VỨT (None), tuyệt đối không fail-OPEN sang 99.000  — got=None
+  [PASS] D15 nhãn rule lạ ('B') KHÔNG kích hoạt Rule A ⇒ kẹp về anchor cũ  — 13000.0
+  [PASS] D16 nhãn ' a ' (thường + khoảng trắng) VẪN nhận đúng là Rule A  — 13802.0
+  [PASS] D17 plan_date rác ⇒ fail-closed về luật cũ  — 13000.0
+
+E. PHẠM VI — chỉ lệnh MUA có entry_anchor_price, book ≠ DISCRETIONARY_SPECIAL
+  [PASS] E1 áp đúng 2 lệnh (LAG DRI + LAG SSI)  — n=2
+  [PASS] E2 DRI có trần Rule A  — 13802.0
+  [PASS] E3 SSI có trần Rule A
+  [PASS] E4 BAL KHÔNG bị đụng (byte-identical)  — {'id': 'BUY-VNM-03', 'side': 'buy', 'ticker': 'VNM', 'book': 'BAL', 'play_type': 'SIGNAL_V11', 'ref_price': 60000.0, 'qty': 500}
+  [PASS] E4 CAPIT KHÔNG bị đụng (byte-identical)  — {'id': 'BUY-VNM-04', 'side': 'buy', 'ticker': 'VNM', 'book': 'CAPIT', 'play_type': 'CAPIT', 'ref_price': 60000.0, 'qty': 500}
+  [PASS] E5 DISCRETIONARY_SPECIAL KHÔNG bị đụng — đã có engine trần riêng
+  [PASS] E6 lệnh BÁN KHÔNG bị đụng
+  [PASS] E7 mã KHÔNG tra được anchor ⇒ bỏ qua, giữ nguyên luật cũ
+  [PASS] E8 τ ngoài dải ⇒ apply_rule_a KHÔNG gắn nhãn (không sinh plan hỏng)  — None
+
+G. Cơ sở giá anchor — giá tham chiếu CHÍNH THỨC, không phải giá đóng cửa
+  [PASS] G1 plan VINTAGE CŨ (không khai ceiling_anchor_basis) ⇒ FAIL-CLOSED về luật cũ  — 13000.0 / rule_a_failsafe
+  [PASS] G2 cơ sở giá SAI ('prev_close') ⇒ FAIL-CLOSED, không được hưởng trần rộng  — 13000.0
+  [PASS] G3 sàn không hợp lệ ⇒ FAIL-CLOSED (sàn quyết định công thức tham chiếu)  — 13000.0
+  [PASS] G4 EXCHANGE_BAND_PCT khớp bản trong brokers.py (một chính sách, một số)  — {'HOSE': 0.07, 'HNX': 0.1, 'UPCOM': 0.15} vs {'HOSE': 0.07, 'HNX': 0.1, 'UPCOM': 0.15}
+  [PASS] G5 apply_rule_a KHÔNG gắn nhãn khi sàn không xác định  — n=0
+  [PASS] G6 apply_rule_a ghi provenance cơ sở giá + sàn (chuẩn hoá hoa)  — UPCOM
+
+G'. check_reference_snapshot — 3 cổng G1/G2/G3, fail-closed mọi hướng
+  [PASS] G'1 snapshot UPCOM hợp lệ (biên ±15%, ref ∈ biên phiên trước) ⇒ NHẬN  — snapshot hợp lệ: sàn UPCOM, biên ±15%, tham chiếu 20,000đ ∈ [19,500; 20,500]
+  [PASS] G'2 biên ±15% nhưng khai sàn HOSE (±7%) ⇒ CHẶN — phép kiểm TRỰC GIAO bắt sai sàn  — G2
+  [PASS] G'3 sàn KHÔNG xác định được (exchange_known=False) ⇒ CHẶN, không đoán 'HOSE'  — G1
+  [PASS] G'4 tham chiếu NGOÀI biên giá phiên trước ⇒ CHẶN (bắt snapshot CŨ)  — G3
+  [PASS] G'5 ref rác (None) ⇒ CHẶN
+  [PASS] G'5 ref rác (0) ⇒ CHẶN⚠️ plan schema: order BUY-PVT-00 field `dcf_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-TV1-DISC-01 field `dcf_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-SIP-00 field `dcf_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-TV1-DISC-02 field `dcf_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-TV1-DISC-01 field `dcf_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-TV1-DISC-01 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-DRI-DISC-02 field `dcf_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-DRI-DISC-02 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-ACB-PARK-01 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-BID-PARK-02 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-CTG-PARK-03 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-EVF-PARK-04 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-HDB-PARK-05 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-HPG-PARK-06 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-LPB-PARK-07 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-MBB-PARK-08 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-MSB-PARK-09 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-SHB-PARK-10 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-VCB-PARK-11 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-VIB-PARK-12 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-VIX-PARK-13 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-VPB-PARK-14 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-VRE-PARK-15 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-TV1-DISC-01 field `dcf_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-TV1-DISC-01 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-TV1-DISC-2026-08-13 field `dcf_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-TV1-DISC-2026-08-14 field `dcf_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-CSV-00 field `dcf_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-TV1-DISC-01 field `dcf_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-TV1-DISC-01 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-DRI-DISC-02 field `dcf_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-DRI-DISC-02 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-ACB-PARK-01 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-BID-PARK-02 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-HPG-PARK-03 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-MBB-PARK-04 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-MSB-PARK-05 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-SHB-PARK-06 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-TPB-PARK-07 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-VCB-PARK-08 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-VIB-PARK-09 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-VIX-PARK-10 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-VRE-PARK-11 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-TV1-DISC-01 field `dcf_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-TV1-DISC-01 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-TV1-DISC-2026-08-13 field `dcf_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-TV1-DISC-2026-08-14 field `dcf_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+
+  [PASS] G'5 ref rác (-1) ⇒ CHẶN
+  [PASS] G'5 ref rác ('abc') ⇒ CHẶN
+  [PASS] G'5 ref rác (nan) ⇒ CHẶN
+  [PASS] G'6 thiếu giá trần sống ⇒ CHẶN (không kiểm chéo được biên độ)  — G2
+  [PASS] G'7 ca SSI ex-right 08-17: tham chiếu 19.600 điều chỉnh, ngoài biên phiên trước [24.000; 25.000] ⇒ CHẶN — caller phải xử lý GDKHQ tường minh, không lặng lẽ nhận  — G3
+
+F. load_plan() — vòng khép kín trên file plan thật (ghi tạm, xoá sau)
+  [CEILING FAIL-SAFE] BUY-POW-02: FAIL-CLOSED → luật cũ: hard_no_chase_ceiling_vnd=25,000 KHÔNG tái lập được từ anchor 13,400 × (1+3.00%) = 13,802
+  [PASS] F1 Rule A hợp lệ ⇒ PlannedOrder mang trần 13.802  — 13802.0
+  [PASS] F2 provenance sống sót qua load_plan (audit trail)
+  [PASS] F3 plan sửa tay (trần 25.000 + nhãn A) ⇒ kẹp về entry_anchor_price 13.400  — 13400.0
+  [PASS] F4 lệnh luật cũ ⇒ trần = anchor 24.200 (không đổi)  — 24200.0
+  [CEILING FAIL-SAFE] BUY-DRI-01: FAIL-CLOSED → luật cũ: ceiling_anchor_date 2099-12-31 KHÔNG nằm trước plan_date 2099-12-31 — trần chỉ được neo vào phiên ĐÃ ĐÓNG (bất biến #4)
+  [PASS] F5 anchor_date = plan_date của file ⇒ fail-closed (chống trượt trong phiên)  — 13000.0
+
+G. HỒI QUY — nạp lại plan LIVE thật, trần phải y hệt luật cũ
+    (bỏ qua SpaceX_2026-07-06_v1_superseded_11name: ValueError)
+  [PASS] G1 nạp lại 173 plan thật, 24 lệnh mua có trần — 0 lệnh đổi giá trị  — n_plan=173 n_ceiled=24
+
+H. executor._limit_price() — chỉ đọc field, có ca chứng minh ngược
+  [PASS] H1 Rule A (trần 13.802) ⇒ đặt được lệnh ở giá chào 13.750  — 13750
+  [PASS] H2 CA CHỨNG MINH NGƯỢC: luật cũ (trần 13.000 < giá SÀN 12.500? không) — giá bị kẹp về đúng trần, KHÔNG vượt  — 13000
+  [PASS] H3 CA CHỨNG MINH NGƯỢC THẬT: giá SÀN 13.500 > trần cũ 13.000 ⇒ KHÔNG đặt lệnh (None) — đây đúng là ca Rule A sinh ra để chữa  — None
+  [PASS] H4 … cùng quote đó, Rule A ĐẶT ĐƯỢC lệnh  — 13750
+  [PASS] H5 executor không tự suy trần — bỏ field ⇒ _hard_buy_ceiling None (§24)
+  [PASS] H6 lệnh BÁN không bao giờ có trần mua
+
+✅ tất cả PASS — Rule A mặc định KHÔNG đổi hành vi lệnh nào; mọi đường hỏng fail-CLOSED về luật cũ; phạm vi chỉ LAG entry-window; executor không đổi.

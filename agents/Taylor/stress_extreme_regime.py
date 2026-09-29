@@ -105,11 +105,17 @@ print("== 0. CONFIG WIRING (real load_config/load_accounts) ==")
 paper_cfg = eff_cfg("main")
 live_cfg = eff_cfg("SpaceX")
 check("paper(main) extreme_regime_enabled == True", paper_cfg["extreme_regime_enabled"] is True)
-check("live(SpaceX) extreme_regime_enabled == False", live_cfg["extreme_regime_enabled"] is False)
+check("live(SpaceX) extreme_regime_enabled == True", live_cfg["extreme_regime_enabled"] is True)
 check("global DEFAULT stays False", load_config()["extreme_regime_enabled"] is False)
 check("paper params match approved (band .03/z 3.0/mult .25/cd 15)",
       paper_cfg["extreme_band"] == 0.03 and paper_cfg["extreme_move_z"] == 3.0
       and paper_cfg["extreme_slice_mult"] == 0.25 and paper_cfg["extreme_cooldown_min"] == 15)
+# Derived configs for isolation: tests below targeting floor-guard/extreme (NOT hybrid timing)
+# must disable hybrid to avoid HYBRID_DEFER firing at NOW=10:00 (outside all hybrid windows).
+gate_off_cfg = dict(load_config())          # extreme_regime_enabled=False (global default)
+gate_off_cfg["fill_timing_hybrid_enabled"] = False   # NOW=10:00 outside hybrid windows
+paper_cfg_no_hybrid = dict(paper_cfg)
+paper_cfg_no_hybrid["fill_timing_hybrid_enabled"] = False
 
 # ---- 1. ARM via near-floor (trigger i) --------------------------------------
 print("\n== 1. ARM via near-floor limit-down (trigger i, 2-poll confirm) ==")
@@ -229,16 +235,17 @@ armed_any = any(exn._extreme_regime(nsell, qq, NOW + dt.timedelta(seconds=20 * i
                 for i in range(10))
 check("NORMAL quote: never arms over 10 polls", armed_any is False)
 
-# 5b LIVE (SpaceX) config gate off — same limit-down stress, never arms
+# 5b explicit gate-off config (extreme_regime_enabled=False) — same limit-down stress, never arms
+# Using gate_off_cfg (global default) instead of live_cfg: all live accounts now have
+# extreme_regime_enabled=True after 2026-08-22 go-live. Isolation test uses explicit OFF.
 lsell = PlannedOrder(id="SELL-LIV-01", ticker="STR", side="sell", qty=10000,
                      ref_price=20000, priority=1)
-# label is throwaway; the LIVE-gate behaviour comes from live_cfg (SpaceX effective cfg), passed explicitly
-exl = Executor(make_plan([lsell], account="STRESSTEST_LIVEOFF"), FakeBroker(qmap), dict(live_cfg))
+exl = Executor(make_plan([lsell], account="STRESSTEST_LIVEOFF"), FakeBroker(qmap), dict(gate_off_cfg))
 ql = exl.broker.get_quote("STR")
 live_armed = any(exl._extreme_regime(lsell, ql, NOW + dt.timedelta(seconds=20 * i))
                  for i in range(5))
-check("LIVE cfg (gate OFF): limit-down never arms", live_armed is False)
-check("LIVE cfg: slice_mult stays 1.0", exl._extreme_slice_mult(lsell, NOW) == 1.0)
+check("gate_off cfg: limit-down never arms", live_armed is False)
+check("gate_off cfg: slice_mult stays 1.0", exl._extreme_slice_mult(lsell, NOW) == 1.0)
 
 # ---- 6. POLL-1 LOOPHOLE — PNJ 2026-07-03 replay (job Taylor_20260713_075836) -
 print("\n== 6. POLL-1 LOOPHOLE (PNJ replay): first BUY slice at locked floor ==")
@@ -253,7 +260,7 @@ buy_pnj = PlannedOrder(id="BUY-PNJ-01", ticker="PNJ", side="buy", qty=800,
 qmap6 = {"PNJ": raw_quote("PNJ", last=58700, ref=63100, floor=58700, ceil=67500,
                           bid=58700, ask=58700, vol=25_600_000)}
 brk6 = FakeBroker(qmap6)
-ex6 = Executor(make_plan([buy_pnj], account="STRESSTEST_P1PNJ"), brk6, dict(paper_cfg))
+ex6 = Executor(make_plan([buy_pnj], account="STRESSTEST_P1PNJ"), brk6, dict(paper_cfg_no_hybrid))
 jrows6 = []
 _orig_j6 = ex6._journal
 def _cap_j6(event, o=None, child_oid="", qty="", price="", note=""):
@@ -279,18 +286,19 @@ buy_nrm = PlannedOrder(id="BUY-NRM2-01", ticker="NR2", side="buy", qty=800,
 qn2 = {"NR2": raw_quote("NR2", last=20000, ref=20000, floor=18600, ceil=21400,
                         bid=19950, ask=20000)}
 brk6b = FakeBroker(qn2)
-ex6b = Executor(make_plan([buy_nrm], account="STRESSTEST_P1NRM"), brk6b, dict(paper_cfg))
+ex6b = Executor(make_plan([buy_nrm], account="STRESSTEST_P1NRM"), brk6b, dict(paper_cfg_no_hybrid))
 ex6b._place_slices(NOW, "CONT")
 check("normal quote: first BUY slice placed on poll-1",
       len([p for p in brk6b.placed if p[0] == "NR2"]) == 1)
 
-# 6c. LIVE control: cùng quote PNJ khoá sàn, cfg SpaceX (gate OFF) → hành vi live
-#     byte-identical (slice VẪN đặt — guard không được phép chạm live path)
-print("\n== 6c. CONTROL: LIVE cfg (gate OFF) — PNJ quote, slice still places ==")
+# 6c. Gate-off control: explicit gate_off_cfg (extreme_regime_enabled=False), PNJ at floor
+#     → slice VẪN đặt (guard inactive). All live accounts now have gate ON (2026-08-22 go-live);
+#     using global default (gate OFF) as isolation baseline.
+print("\n== 6c. CONTROL: gate_off cfg — PNJ quote, slice still places ==")
 brk6c = FakeBroker(qmap6)
-ex6c = Executor(make_plan([buy_pnj], account="STRESSTEST_P1LIVE"), brk6c, dict(live_cfg))
+ex6c = Executor(make_plan([buy_pnj], account="STRESSTEST_P1LIVE"), brk6c, dict(gate_off_cfg))
 ex6c._place_slices(NOW, "CONT")
-check("LIVE cfg: buy slice at floor STILL places (no live behaviour change)",
+check("gate_off cfg: buy slice at floor STILL places (guard inactive)",
       len([p for p in brk6c.placed if p[0] == "PNJ"]) == 1)
 
 # 6d. Glitch false-positive cost: 1 quote lỗi cận sàn → chỉ trễ 1 chu kỳ, KHÔNG
@@ -301,7 +309,7 @@ buy_gl = PlannedOrder(id="BUY-GLT-01", ticker="GLT", side="buy", qty=800,
 qmap6d = {"GLT": raw_quote("GLT", last=18700, ref=20000, floor=18600, ceil=21400,
                            bid=18600, ask=18700)}
 brk6d = FakeBroker(qmap6d)
-ex6d = Executor(make_plan([buy_gl], account="STRESSTEST_P1GLT"), brk6d, dict(paper_cfg))
+ex6d = Executor(make_plan([buy_gl], account="STRESSTEST_P1GLT"), brk6d, dict(paper_cfg_no_hybrid))
 ex6d._place_slices(NOW, "CONT")                      # glitch: guard chặn
 check("glitch poll-1: buy blocked", len(brk6d.placed) == 0)
 qmap6d["GLT"] = raw_quote("GLT", last=20000, ref=20000, floor=18600, ceil=21400,
@@ -319,7 +327,7 @@ buy_nf = PlannedOrder(id="BUY-NFL-01", ticker="NFL", side="buy", qty=800,
 qnf = {"NFL": raw_quote("NFL", last=19000, ref=20000, floor=0, ceil=21400,
                         bid=18900, ask=19000)}
 brk6e = FakeBroker(qnf)
-ex6e = Executor(make_plan([buy_nf], account="STRESSTEST_P1NFL"), brk6e, dict(paper_cfg))
+ex6e = Executor(make_plan([buy_nf], account="STRESSTEST_P1NFL"), brk6e, dict(paper_cfg_no_hybrid))
 ex6e._place_slices(NOW, "CONT")
 check("missing floor: buy slice places (fail-safe = old behaviour)",
       len([p for p in brk6e.placed if p[0] == "NFL"]) == 1)
@@ -344,20 +352,20 @@ check("sell poll-1: price at -3% chase cap 19400 (not floor — not armed yet)",
 #     cfg hiệu dụng TƯƠI từ secrets thật cho TỪNG account live (SpaceX, ZaloPay),
 #     chạy đúng code path _place_slices với quote PNJ khoá sàn → khẳng định
 #     trong CÙNG một check: flag OFF ∧ slice mua VẪN đặt (guard không kích).
-print("\n== 6g. PER-ACCOUNT LIVE CONTROLS: SpaceX & ZaloPay untouched by guard ==")
+print("\n== 6g. PER-ACCOUNT LIVE CONTROLS: SpaceX & ZaloPay extreme_regime LIVE ==")
 for _acct in ("SpaceX", "ZaloPay"):
     _cfg = eff_cfg(_acct)                              # resolve tươi, không dùng bản chụp
     _brk = FakeBroker(qmap6)
     _ex = Executor(make_plan([buy_pnj], account=f"STRESSTEST_P1{_acct.upper()}"),
                    _brk, dict(_cfg))
     _ex._place_slices(NOW, "CONT")
-    check(f"{_acct}: extreme_regime_enabled False AND PNJ buy slice at floor still places",
-          _cfg["extreme_regime_enabled"] is False
-          and len([p for p in _brk.placed if p[0] == "PNJ" and p[2] == "buy"]) == 1)
+    check(f"{_acct}: extreme_regime_enabled True AND PNJ buy at floor PAUSED",
+          _cfg["extreme_regime_enabled"] is True
+          and len([p for p in _brk.placed if p[0] == "PNJ" and p[2] == "buy"]) == 0)
 
 print("\n" + "=" * 60)
 if FAILS:
     print(f"RESULT: {len(FAILS)}/{N_CHECKS} FAILED -> {FAILS}")
     sys.exit(1)
 print(f"RESULT: ALL {N_CHECKS}/{N_CHECKS} PASS — extreme-regime gate fires on stress, silent when NORMAL,")
-print("        and the LIVE account gate stays OFF.")
+print("        SpaceX+ZaloPay extreme_regime_enabled=True LIVE (go-live 2026-08-22).")

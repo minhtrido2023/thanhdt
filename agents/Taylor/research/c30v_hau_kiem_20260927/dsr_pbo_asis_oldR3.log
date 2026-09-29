@@ -1,0 +1,31 @@
+==============================================================================
+DSR / PBO ROBUSTNESS ANNEX — computation log
+==============================================================================
+
+[1] TRIAL FAMILY: 577 candidate CSVs globbed, 477 pass full-history (>=2500 daily obs) filter.
+    Common aligned trading days across all trials: 3101
+
+[2] R3 PINNED (v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap.csv)
+    daily obs T = 3106  (12.3y)
+    per-day Sharpe = 0.11154  -> annualized = 1.771
+    skewness  gamma3 = 0.1181
+    kurtosis  gamma4 = 8.6513  (excess = 5.6513)
+
+    Trial Sharpe dispersion (per-day, N_csv=477):
+      mean ann-SR = 1.776, sd ann-SR = 0.123, Var(per-day SR) = 6.012e-05
+    DSR @ N_csv (surviving daily CSVs)              : SR0(ann)=0.374  DSR=1.0000
+    DSR @ N_reg=120 (registry-documented search)    : SR0(ann)=0.319  DSR=1.0000
+    DSR @ N_reg=200 (conservative upper)            : SR0(ann)=0.340  DSR=1.0000
+
+[3] CSCV / PBO
+    matrix: 3100 daily obs x 477 configs; S=16 blocks, 12870 IS/OOS combinations
+    PBO = 0.3993  (fraction of splits where IS-best config lands below OOS median)
+    logit lambda: median=1.27, mean=1.47, P(lambda<0)=0.3993
+
+[4] BOOTSTRAP: circular block (L=21) vs stationary (mean L=21)
+    circular block     CAGR 5th= 18.9%  med= 28.2%  | MaxDD 5th= -27.7%  med= -18.6%  | P(DD<-30%)= 2.5%
+    stationary(PR)     CAGR 5th= 19.0%  med= 28.1%  | MaxDD 5th= -26.5%  med= -18.3%  | P(DD<-30%)= 1.7%
+
+==============================================================================
+DONE. Numbers above feed the registry annex section.
+==============================================================================

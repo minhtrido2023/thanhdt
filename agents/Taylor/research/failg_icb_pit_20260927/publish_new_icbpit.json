@@ -1,0 +1,12 @@
+{
+ "leg": "new_icbpit",
+ "rows": 1470,
+ "rebals": 49,
+ "md5": "3ca8d3d335134d040fa75db37b9baedb",
+ "cols": [
+  "rebal_date",
+  "ticker",
+  "liq_rank",
+  "rating"
+ ]
+}

@@ -1,0 +1,2896 @@
+{
+ "raw_positions_file": "dnse_raw_2026-09-14.jsonl",
+ "held": {
+  "SpaceX": {
+   "ACB": 900,
+   "BID": 1175,
+   "CTG": 1200,
+   "DRI": 3700,
+   "EVF": 100,
+   "HDB": 800,
+   "HPG": 1200,
+   "LPB": 400,
+   "MBB": 1675,
+   "MSB": 600,
+   "NCT": 500,
+   "PVT": 3500,
+   "SAB": 1100,
+   "SCL": 1500,
+   "SHB": 800,
+   "SIP": 1700,
+   "TCB": 1000,
+   "TPB": 500,
+   "TV1": 2300,
+   "VCB": 700,
+   "VHM": 900,
+   "VIB": 547,
+   "VIX": 420,
+   "VND": 300,
+   "VNM": 900,
+   "VPB": 1200,
+   "VRE": 300
+  },
+  "ZaloPay": {
+   "ACB": 300,
+   "BID": 320,
+   "CSV": 1000,
+   "CTG": 450,
+   "DGC": 10000,
+   "DRI": 1900,
+   "HDB": 459,
+   "HPG": 500,
+   "LPB": 352,
+   "MBB": 252,
+   "MSB": 240,
+   "NCT": 373,
+   "PVT": 2071,
+   "SAB": 744,
+   "SCL": 1000,
+   "SHB": 300,
+   "SIP": 749,
+   "TCB": 356,
+   "TPB": 100,
+   "TV1": 1400,
+   "VCB": 100,
+   "VHM": 300,
+   "VIB": 219,
+   "VIX": 105,
+   "VNM": 601,
+   "VPB": 1300,
+   "VRE": 100
+  }
+ },
+ "changes": [
+  {
+   "branch": "live",
+   "ticker": "ABB",
+   "row_time": "2026-02-02",
+   "asof": "2026-04-16",
+   "row_value": 1397208685.0,
+   "old": 1448960485.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 1397208685.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 3.704,
+   "events": [
+    [
+     "2026-03-03",
+     "51751800",
+     "Phát hành cho CBCNV"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-10-27→2026-02-02 = +362,171,923 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-03-03 +51,751,800 (issue_volumn)"
+  },
+  {
+   "branch": "pit",
+   "ticker": "ABB",
+   "row_time": "2026-02-02",
+   "asof": "2026-04-16",
+   "row_value": 1397208685.0,
+   "old": 1448960485.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 1397208685.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 3.704,
+   "events": [
+    [
+     "2026-03-03",
+     "51751800",
+     "Phát hành cho CBCNV"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-10-27→2026-02-02 = +362,171,923 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-03-03 +51,751,800 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "ABW",
+   "row_time": "2026-04-21",
+   "asof": "2026-07-19",
+   "row_value": 301150000.0,
+   "old": 501150000.0,
+   "old_method": "ANCHOR_UNVERIFIED",
+   "new": 301150000.0,
+   "new_method": "ANCHOR_UNVERIFIED",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 66.412,
+   "events": [
+    [
+     "2026-06-17",
+     "200000000",
+     "Phát hành riêng lẻ"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2026-01-22→2026-04-21 = +200,000,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-06-17 +200,000,000 (issue_volumn)"
+  },
+  {
+   "branch": "pit",
+   "ticker": "ABW",
+   "row_time": "2026-04-21",
+   "asof": "2026-07-19",
+   "row_value": 301150000.0,
+   "old": 501150000.0,
+   "old_method": "ANCHOR_UNVERIFIED",
+   "new": 301150000.0,
+   "new_method": "ANCHOR_UNVERIFIED",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 66.412,
+   "events": [
+    [
+     "2026-06-17",
+     "200000000",
+     "Phát hành riêng lẻ"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2026-01-22→2026-04-21 = +200,000,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-06-17 +200,000,000 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "BMS",
+   "row_time": "2025-10-17",
+   "asof": "2026-01-21",
+   "row_value": 203932652.0,
+   "old": 328932652.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 203932652.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 61.295,
+   "events": [
+    [
+     "2025-12-09",
+     "125000000",
+     "Phát hành riêng lẻ"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-07-15→2025-10-17 = +125,000,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2025-12-09 +125,000,000 (issue_volumn)"
+  },
+  {
+   "branch": "pit",
+   "ticker": "BMS",
+   "row_time": "2025-10-17",
+   "asof": "2026-01-21",
+   "row_value": 203932652.0,
+   "old": 328932652.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 203932652.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 61.295,
+   "events": [
+    [
+     "2025-12-09",
+     "125000000",
+     "Phát hành riêng lẻ"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-07-15→2025-10-17 = +125,000,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2025-12-09 +125,000,000 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "CMG",
+   "row_time": "2025-07-03",
+   "asof": "2025-11-02",
+   "row_value": 211745107.0,
+   "old": 212189407.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 211745107.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 0.21,
+   "events": [
+    [
+     "2025-07-31",
+     "444300",
+     "Phát hành cho CBCNV"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-04-29→2025-07-03 = +444,300 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2025-07-31 +444,300 (issue_volumn)"
+  },
+  {
+   "branch": "pit",
+   "ticker": "CMG",
+   "row_time": "2025-07-03",
+   "asof": "2025-11-02",
+   "row_value": 211745107.0,
+   "old": 212189407.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 211745107.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 0.21,
+   "events": [
+    [
+     "2025-07-31",
+     "444300",
+     "Phát hành cho CBCNV"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-04-29→2025-07-03 = +444,300 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2025-07-31 +444,300 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "DC4",
+   "row_time": "2025-10-20",
+   "asof": "2026-02-01",
+   "row_value": 98235704.0,
+   "old": 101185704.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 98235704.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 3.003,
+   "events": [
+    [
+     "2025-10-31",
+     "2950000",
+     "Phát hành cho CBCNV"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-07-29→2025-10-20 = +2,950,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2025-10-31 +2,950,000 (issue_volumn)"
+  },
+  {
+   "branch": "pit",
+   "ticker": "DC4",
+   "row_time": "2025-10-20",
+   "asof": "2026-02-01",
+   "row_value": 98235704.0,
+   "old": 101185704.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 98235704.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 3.003,
+   "events": [
+    [
+     "2025-10-31",
+     "2950000",
+     "Phát hành cho CBCNV"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-07-29→2025-10-20 = +2,950,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2025-10-31 +2,950,000 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "DGW",
+   "row_time": "2025-07-30",
+   "asof": "2025-10-26",
+   "row_value": 221168700.0,
+   "old": 223168700.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 221168700.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 0.904,
+   "events": [
+    [
+     "2025-10-03",
+     "2000000",
+     "Phát hành cho CBCNV"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-04-28→2025-07-30 = +2,000,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2025-10-03 +2,000,000 (issue_volumn)"
+  },
+  {
+   "branch": "pit",
+   "ticker": "DGW",
+   "row_time": "2025-07-30",
+   "asof": "2025-10-26",
+   "row_value": 221168700.0,
+   "old": 223168700.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 221168700.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 0.904,
+   "events": [
+    [
+     "2025-10-03",
+     "2000000",
+     "Phát hành cho CBCNV"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-04-28→2025-07-30 = +2,000,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2025-10-03 +2,000,000 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "DPG",
+   "row_time": "2026-02-02",
+   "asof": "2026-04-28",
+   "row_value": 118587096.0,
+   "old": 136375160.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 118587096.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 15.0,
+   "events": [
+    [
+     "2026-02-11",
+     "17788064",
+     "Phát hành riêng lẻ"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-10-29→2026-02-02 = +17,788,064 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-02-11 +17,788,064 (issue_volumn)"
+  },
+  {
+   "branch": "pit",
+   "ticker": "DPG",
+   "row_time": "2026-02-02",
+   "asof": "2026-04-28",
+   "row_value": 118587096.0,
+   "old": 136375160.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 118587096.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 15.0,
+   "events": [
+    [
+     "2026-02-11",
+     "17788064",
+     "Phát hành riêng lẻ"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-10-29→2026-02-02 = +17,788,064 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-02-11 +17,788,064 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "DSC",
+   "row_time": "2026-02-02",
+   "asof": "2026-04-16",
+   "row_value": 278471711.0,
+   "old": 281943511.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 278471711.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 1.247,
+   "events": [
+    [
+     "2026-03-06",
+     "3471800",
+     "Phát hành cho CBCNV"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-10-16→2026-02-02 = +3,471,800 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-03-06 +3,471,800 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "DXG",
+   "row_time": "2025-10-31",
+   "asof": "2026-02-01",
+   "row_value": 1112384189.0,
+   "old": 1205884189.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 1112384189.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 8.405,
+   "events": [
+    [
+     "2025-12-09",
+     "93500000",
+     "Phát hành riêng lẻ"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-07-31→2025-10-31 = +93,500,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2025-12-09 +93,500,000 (issue_volumn)"
+  },
+  {
+   "branch": "pit",
+   "ticker": "DXG",
+   "row_time": "2025-10-31",
+   "asof": "2026-02-01",
+   "row_value": 1112384189.0,
+   "old": 1205884189.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 1112384189.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 8.405,
+   "events": [
+    [
+     "2025-12-09",
+     "93500000",
+     "Phát hành riêng lẻ"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-07-31→2025-10-31 = +93,500,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2025-12-09 +93,500,000 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "FPT",
+   "row_time": "2026-04-28",
+   "asof": "2026-07-27",
+   "row_value": 1714326422.0,
+   "old": 1725145723.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 1714326422.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 0.631,
+   "events": [
+    [
+     "2026-06-24",
+     "2302000",
+     "Phát hành cho CBCNV"
+    ],
+    [
+     "2026-06-24",
+     "8517301",
+     "Phát hành cho CBCNV"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2026-01-27→2026-04-28 = +10,819,301 khớp duy nhất tổ hợp gồm 2 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-06-24 +2,302,000 (issue_volumn), 2026-06-24 +8,517,301 (issue_volumn)"
+  },
+  {
+   "branch": "pit",
+   "ticker": "FPT",
+   "row_time": "2026-04-28",
+   "asof": "2026-07-27",
+   "row_value": 1714326422.0,
+   "old": 1725145723.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 1714326422.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 0.631,
+   "events": [
+    [
+     "2026-06-24",
+     "2302000",
+     "Phát hành cho CBCNV"
+    ],
+    [
+     "2026-06-24",
+     "8517301",
+     "Phát hành cho CBCNV"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2026-01-27→2026-04-28 = +10,819,301 khớp duy nhất tổ hợp gồm 2 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-06-24 +2,302,000 (issue_volumn), 2026-06-24 +8,517,301 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "GGG",
+   "row_time": "2026-07-24",
+   "asof": "2026-09-14",
+   "row_value": 49388589.0,
+   "old": 69388589.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 49388589.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 40.495,
+   "events": [
+    [
+     "2026-08-14",
+     "20000000",
+     "Phát hành riêng lẻ"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2026-04-20→2026-07-24 = +20,000,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-08-14 +20,000,000 (issue_volumn)"
+  },
+  {
+   "branch": "pit",
+   "ticker": "GGG",
+   "row_time": "2026-07-24",
+   "asof": "2026-09-14",
+   "row_value": 49388589.0,
+   "old": 69388589.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 49388589.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 40.495,
+   "events": [
+    [
+     "2026-08-14",
+     "20000000",
+     "Phát hành riêng lẻ"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2026-04-20→2026-07-24 = +20,000,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-08-14 +20,000,000 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "GMD",
+   "row_time": "2026-07-30",
+   "asof": "2026-09-14",
+   "row_value": 432892509.0,
+   "old": 439289909.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 432892509.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 1.478,
+   "events": [
+    [
+     "2026-07-31",
+     "6397400",
+     "Phát hành cho CBCNV"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2026-04-29→2026-07-30 = +6,397,400 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-07-31 +6,397,400 (issue_volumn)"
+  },
+  {
+   "branch": "pit",
+   "ticker": "GMD",
+   "row_time": "2026-07-30",
+   "asof": "2026-09-14",
+   "row_value": 432892509.0,
+   "old": 439289909.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 432892509.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 1.478,
+   "events": [
+    [
+     "2026-07-31",
+     "6397400",
+     "Phát hành cho CBCNV"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2026-04-29→2026-07-30 = +6,397,400 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-07-31 +6,397,400 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "HAG",
+   "row_time": "2025-07-30",
+   "asof": "2025-10-19",
+   "row_value": 1267399283.0,
+   "old": 1477399283.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 1267399283.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 16.569,
+   "events": [
+    [
+     "2025-09-25",
+     "210000000",
+     "Phát hành riêng lẻ"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-04-01→2025-07-30 = +210,000,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2025-09-25 +210,000,000 (issue_volumn)"
+  },
+  {
+   "branch": "pit",
+   "ticker": "HAG",
+   "row_time": "2025-07-30",
+   "asof": "2025-10-19",
+   "row_value": 1267399283.0,
+   "old": 1477399283.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 1267399283.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 16.569,
+   "events": [
+    [
+     "2025-09-25",
+     "210000000",
+     "Phát hành riêng lẻ"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-04-01→2025-07-30 = +210,000,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2025-09-25 +210,000,000 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "HAH",
+   "row_time": "2026-02-02",
+   "asof": "2026-05-03",
+   "row_value": 185840401.0,
+   "old": 205319590.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 188340401.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 9.015,
+   "events": [
+    [
+     "2026-03-12",
+     "16979189",
+     "Chuyển từ trái phiếu chuyển đổi"
+    ],
+    [
+     "2026-04-17",
+     "2500000",
+     "Phát hành cho CBCNV"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-10-30→2026-02-02 = +16,979,189 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-03-12 +16,979,189 (issue_volumn)"
+  },
+  {
+   "branch": "pit",
+   "ticker": "HAH",
+   "row_time": "2026-02-02",
+   "asof": "2026-05-03",
+   "row_value": 185840401.0,
+   "old": 205319590.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 188340401.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 9.015,
+   "events": [
+    [
+     "2026-03-12",
+     "16979189",
+     "Chuyển từ trái phiếu chuyển đổi"
+    ],
+    [
+     "2026-04-17",
+     "2500000",
+     "Phát hành cho CBCNV"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-10-30→2026-02-02 = +16,979,189 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-03-12 +16,979,189 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "HDB",
+   "row_time": "2025-07-30",
+   "asof": "2025-10-29",
+   "row_value": 3844334315.0,
+   "old": 4193607898.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 3844334315.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 9.085,
+   "events": [
+    [
+     "2025-10-13",
+     "349273583",
+     "Chuyển từ trái phiếu chuyển đổi"
+    ]
+   ],
+   "held": {
+    "SpaceX": 800,
+    "ZaloPay": 459
+   },
+   "note": "bước nhảy 2025-04-28→2025-07-30 = +349,273,583 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2025-10-13 +349,273,583 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "HEV",
+   "row_time": "2025-10-22",
+   "asof": "2026-01-28",
+   "row_value": 5000000.0,
+   "old": 9000000.0,
+   "old_method": "ANCHOR_UNVERIFIED",
+   "new": 5000000.0,
+   "new_method": "ANCHOR_UNVERIFIED",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 80.0,
+   "events": [
+    [
+     "2025-12-09",
+     "4000000",
+     "Phát hành riêng lẻ"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-07-22→2025-10-22 = +4,000,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2025-12-09 +4,000,000 (issue_volumn)"
+  },
+  {
+   "branch": "pit",
+   "ticker": "HEV",
+   "row_time": "2025-10-22",
+   "asof": "2026-01-28",
+   "row_value": 5000000.0,
+   "old": 9000000.0,
+   "old_method": "ANCHOR_UNVERIFIED",
+   "new": 5000000.0,
+   "new_method": "ANCHOR_UNVERIFIED",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 80.0,
+   "events": [
+    [
+     "2025-12-09",
+     "4000000",
+     "Phát hành riêng lẻ"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-07-22→2025-10-22 = +4,000,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2025-12-09 +4,000,000 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "HHV",
+   "row_time": "2025-10-30",
+   "asof": "2026-02-01",
+   "row_value": 547176303.0,
+   "old": 596909596.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 547176303.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 9.089,
+   "events": [
+    [
+     "2025-12-25",
+     "49733293",
+     "Quyền mua CP cho Cổ đông hiện hữu"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-07-31→2025-10-30 = +49,743,300 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2025-12-25 +49,733,293 (issue_volumn)"
+  },
+  {
+   "branch": "pit",
+   "ticker": "HHV",
+   "row_time": "2025-10-30",
+   "asof": "2026-02-01",
+   "row_value": 547176303.0,
+   "old": 596909596.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 547176303.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 9.089,
+   "events": [
+    [
+     "2025-12-25",
+     "49733293",
+     "Quyền mua CP cho Cổ đông hiện hữu"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-07-31→2025-10-30 = +49,743,300 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2025-12-25 +49,733,293 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "HKT",
+   "row_time": "2025-07-21",
+   "asof": "2025-10-21",
+   "row_value": 33335029.0,
+   "old": 60535029.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 33335029.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 81.596,
+   "events": [
+    [
+     "2025-09-08",
+     "27200000",
+     "Phát hành riêng lẻ"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-04-03→2025-07-21 = +27,200,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2025-09-08 +27,200,000 (issue_volumn)"
+  },
+  {
+   "branch": "pit",
+   "ticker": "HKT",
+   "row_time": "2025-07-21",
+   "asof": "2025-10-21",
+   "row_value": 33335029.0,
+   "old": 60535029.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 33335029.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 81.596,
+   "events": [
+    [
+     "2025-09-08",
+     "27200000",
+     "Phát hành riêng lẻ"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-04-03→2025-07-21 = +27,200,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2025-09-08 +27,200,000 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "HQC",
+   "row_time": "2026-02-02",
+   "asof": "2026-03-31",
+   "row_value": 626599274.0,
+   "old": 676599274.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 626599274.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 7.98,
+   "events": [
+    [
+     "2026-03-31",
+     "50000000",
+     "Phát hành riêng lẻ"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-10-31→2026-02-02 = +50,000,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-03-31 +50,000,000 (issue_volumn)"
+  },
+  {
+   "branch": "pit",
+   "ticker": "HQC",
+   "row_time": "2026-02-02",
+   "asof": "2026-03-31",
+   "row_value": 626599274.0,
+   "old": 676599274.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 626599274.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 7.98,
+   "events": [
+    [
+     "2026-03-31",
+     "50000000",
+     "Phát hành riêng lẻ"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-10-31→2026-02-02 = +50,000,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-03-31 +50,000,000 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "HSV",
+   "row_time": "2026-01-22",
+   "asof": "2026-04-01",
+   "row_value": 30749994.0,
+   "old": 45749994.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 30749994.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 48.78,
+   "events": [
+    [
+     "2026-03-03",
+     "15000000",
+     "Phát hành riêng lẻ"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-10-21→2026-01-22 = +15,000,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-03-03 +15,000,000 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "HU1",
+   "row_time": "2026-04-28",
+   "asof": "2026-07-29",
+   "row_value": 25000000.0,
+   "old": 40000000.0,
+   "old_method": "ANCHOR_UNVERIFIED",
+   "new": 25000000.0,
+   "new_method": "ANCHOR_UNVERIFIED",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 60.0,
+   "events": [
+    [
+     "2026-06-05",
+     "15000000",
+     "Phát hành riêng lẻ"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2026-02-02→2026-04-28 = +15,000,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-06-05 +15,000,000 (issue_volumn)"
+  },
+  {
+   "branch": "pit",
+   "ticker": "HU1",
+   "row_time": "2026-04-28",
+   "asof": "2026-07-29",
+   "row_value": 25000000.0,
+   "old": 40000000.0,
+   "old_method": "ANCHOR_UNVERIFIED",
+   "new": 25000000.0,
+   "new_method": "ANCHOR_UNVERIFIED",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 60.0,
+   "events": [
+    [
+     "2026-06-05",
+     "15000000",
+     "Phát hành riêng lẻ"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2026-02-02→2026-04-28 = +15,000,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-06-05 +15,000,000 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "HVH",
+   "row_time": "2025-10-29",
+   "asof": "2026-02-01",
+   "row_value": 63489334.0,
+   "old": 83489334.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 63489334.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 31.501,
+   "events": [
+    [
+     "2026-01-12",
+     "20000000",
+     "Phát hành riêng lẻ"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-07-30→2025-10-29 = +20,000,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-01-12 +20,000,000 (issue_volumn)"
+  },
+  {
+   "branch": "pit",
+   "ticker": "HVH",
+   "row_time": "2025-10-29",
+   "asof": "2026-02-01",
+   "row_value": 63489334.0,
+   "old": 83489334.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 63489334.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 31.501,
+   "events": [
+    [
+     "2026-01-12",
+     "20000000",
+     "Phát hành riêng lẻ"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-07-30→2025-10-29 = +20,000,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-01-12 +20,000,000 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "INC",
+   "row_time": "2025-10-21",
+   "asof": "2026-01-21",
+   "row_value": 3200000.0,
+   "old": 4400000.0,
+   "old_method": "ANCHOR_UNVERIFIED",
+   "new": 3200000.0,
+   "new_method": "ANCHOR_UNVERIFIED",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 37.5,
+   "events": [
+    [
+     "2025-12-10",
+     "1200000",
+     "Phát hành riêng lẻ"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-07-21→2025-10-21 = +1,200,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2025-12-10 +1,200,000 (issue_volumn)"
+  },
+  {
+   "branch": "pit",
+   "ticker": "INC",
+   "row_time": "2025-10-21",
+   "asof": "2026-01-21",
+   "row_value": 3200000.0,
+   "old": 4400000.0,
+   "old_method": "ANCHOR_UNVERIFIED",
+   "new": 3200000.0,
+   "new_method": "ANCHOR_UNVERIFIED",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 37.5,
+   "events": [
+    [
+     "2025-12-10",
+     "1200000",
+     "Phát hành riêng lẻ"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-07-21→2025-10-21 = +1,200,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2025-12-10 +1,200,000 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "KHP",
+   "row_time": "2026-07-20",
+   "asof": "2026-09-14",
+   "row_value": 62186518.0,
+   "old": 63996290.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 62186518.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 2.91,
+   "events": [
+    [
+     "2026-07-30",
+     "1809772",
+     "Trả Cổ tức bằng Cổ phiếu"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2026-04-21→2026-07-20 = +1,809,772 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-07-30 +1,809,772 (issue_volumn)"
+  },
+  {
+   "branch": "pit",
+   "ticker": "KHP",
+   "row_time": "2026-07-20",
+   "asof": "2026-09-14",
+   "row_value": 62186518.0,
+   "old": 63996290.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 62186518.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 2.91,
+   "events": [
+    [
+     "2026-07-30",
+     "1809772",
+     "Trả Cổ tức bằng Cổ phiếu"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2026-04-21→2026-07-20 = +1,809,772 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-07-30 +1,809,772 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "KSF",
+   "row_time": "2025-07-31",
+   "asof": "2025-10-14",
+   "row_value": 899787308.0,
+   "old": 1499574616.0,
+   "old_method": "ANCHOR_UNVERIFIED",
+   "new": 899787308.0,
+   "new_method": "ANCHOR_UNVERIFIED",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 66.659,
+   "events": [
+    [
+     "2025-09-17",
+     "599787308",
+     "Phát hành để sáp nhập"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-04-29→2025-07-31 = +599,787,308 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2025-09-17 +599,787,308 (issue_volumn)"
+  },
+  {
+   "branch": "pit",
+   "ticker": "KSF",
+   "row_time": "2025-07-31",
+   "asof": "2025-10-14",
+   "row_value": 899787308.0,
+   "old": 1499574616.0,
+   "old_method": "ANCHOR_UNVERIFIED",
+   "new": 899787308.0,
+   "new_method": "ANCHOR_UNVERIFIED",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 66.659,
+   "events": [
+    [
+     "2025-09-17",
+     "599787308",
+     "Phát hành để sáp nhập"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-04-29→2025-07-31 = +599,787,308 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2025-09-17 +599,787,308 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "LBE",
+   "row_time": "2025-10-17",
+   "asof": "2026-01-21",
+   "row_value": 3100000.0,
+   "old": 4200066.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 3100000.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 35.486,
+   "events": [
+    [
+     "2025-12-16",
+     "1100066",
+     "Phát hành riêng lẻ"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-07-30→2025-10-17 = +1,100,066 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2025-12-16 +1,100,066 (issue_volumn)"
+  },
+  {
+   "branch": "pit",
+   "ticker": "LBE",
+   "row_time": "2025-10-17",
+   "asof": "2026-01-21",
+   "row_value": 3100000.0,
+   "old": 4200066.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 3100000.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 35.486,
+   "events": [
+    [
+     "2025-12-16",
+     "1100066",
+     "Phát hành riêng lẻ"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-07-30→2025-10-17 = +1,100,066 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2025-12-16 +1,100,066 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "LDP",
+   "row_time": "2025-10-23",
+   "asof": "2026-01-22",
+   "row_value": 18728135.0,
+   "old": 24118135.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 18728135.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 28.78,
+   "events": [
+    [
+     "2025-10-26",
+     "5390000",
+     "Phát hành riêng lẻ"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-07-18→2025-10-23 = +5,390,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2025-10-26 +5,390,000 (issue_volumn)"
+  },
+  {
+   "branch": "pit",
+   "ticker": "LDP",
+   "row_time": "2025-10-23",
+   "asof": "2026-01-22",
+   "row_value": 18728135.0,
+   "old": 24118135.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 18728135.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 28.78,
+   "events": [
+    [
+     "2025-10-26",
+     "5390000",
+     "Phát hành riêng lẻ"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-07-18→2025-10-23 = +5,390,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2025-10-26 +5,390,000 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "MCH",
+   "row_time": "2026-04-28",
+   "asof": "2026-07-26",
+   "row_value": 1307404949.0,
+   "old": 1320316353.0,
+   "old_method": "FIN_FALLBACK",
+   "new": null,
+   "new_method": "FIN_ABSORPTION_AMBIGUOUS",
+   "verdict": "FWD_AMBIGUOUS",
+   "pct_old_vs_new": null,
+   "events": [
+    [
+     "2026-06-23",
+     "12911404",
+     "Phát hành cho CBCNV"
+    ]
+   ],
+   "held": {},
+   "note": "dòng quý 2026-04-28 = 1,307,404,949: KHÔNG quyết được đã gồm 1 ISS ex sau nó hay chưa (bước nhảy +12,943,987 đủ chứa sự kiện (nhỏ nhất 12,911,404) nhưng không tổ hợp nào khớp trong 12,911 CP) ⇒ fail-closed"
+  },
+  {
+   "branch": "live",
+   "ticker": "MML",
+   "row_time": "2026-04-29",
+   "asof": "2026-07-26",
+   "row_value": 345109429.0,
+   "old": 349902000.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 345109429.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 1.389,
+   "events": [
+    [
+     "2026-06-23",
+     "4792571",
+     "Phát hành cho CBCNV"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2026-01-28→2026-04-29 = +4,792,571 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-06-23 +4,792,571 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "MSN",
+   "row_time": "2025-07-28",
+   "asof": "2025-10-26",
+   "row_value": 1445915457.0,
+   "old": 1453479297.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 1445915457.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 0.523,
+   "events": [
+    [
+     "2025-07-30",
+     "7563840",
+     "Phát hành cho CBCNV"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-04-24→2025-07-28 = +7,563,840 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2025-07-30 +7,563,840 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "MSN",
+   "row_time": "2026-04-28",
+   "asof": "2026-07-26",
+   "row_value": 1460374611.0,
+   "old": 1474833765.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 1460374611.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 0.99,
+   "events": [
+    [
+     "2026-06-23",
+     "14459154",
+     "Phát hành cho CBCNV"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2026-01-29→2026-04-28 = +14,459,154 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-06-23 +14,459,154 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "MSR",
+   "row_time": "2025-07-29",
+   "asof": "2025-10-26",
+   "row_value": 1099829520.0,
+   "old": 1100503620.0,
+   "old_method": "ANCHOR_ONLY",
+   "new": 1099829520.0,
+   "new_method": "ANCHOR_ONLY",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 0.061,
+   "events": [
+    [
+     "2025-09-18",
+     "674100",
+     "Phát hành cho CBCNV"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-04-25→2025-07-29 = +674,100 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2025-09-18 +674,100 (issue_volumn)"
+  },
+  {
+   "branch": "pit",
+   "ticker": "MSR",
+   "row_time": "2025-07-29",
+   "asof": "2025-10-26",
+   "row_value": 1099829520.0,
+   "old": 1100503620.0,
+   "old_method": "ANCHOR_ONLY",
+   "new": 1099829520.0,
+   "new_method": "ANCHOR_ONLY",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 0.061,
+   "events": [
+    [
+     "2025-09-18",
+     "674100",
+     "Phát hành cho CBCNV"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-04-25→2025-07-29 = +674,100 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2025-09-18 +674,100 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "MST",
+   "row_time": "2025-10-22",
+   "asof": "2026-01-22",
+   "row_value": 113604220.0,
+   "old": 143604220.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 113604220.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 26.407,
+   "events": [
+    [
+     "2025-11-24",
+     "30000000",
+     "Phát hành riêng lẻ"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-07-22→2025-10-22 = +37,599,919 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2025-11-24 +30,000,000 (issue_volumn)"
+  },
+  {
+   "branch": "pit",
+   "ticker": "MST",
+   "row_time": "2025-10-22",
+   "asof": "2026-01-22",
+   "row_value": 113604220.0,
+   "old": 143604220.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 113604220.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 26.407,
+   "events": [
+    [
+     "2025-11-24",
+     "30000000",
+     "Phát hành riêng lẻ"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-07-22→2025-10-22 = +37,599,919 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2025-11-24 +30,000,000 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "NO1",
+   "row_time": "2026-04-01",
+   "asof": "2026-07-30",
+   "row_value": 24600000.0,
+   "old": 25199798.0,
+   "old_method": "ANCHOR_UNVERIFIED",
+   "new": 24600000.0,
+   "new_method": "ANCHOR_UNVERIFIED",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 2.438,
+   "events": [
+    [
+     "2026-07-07",
+     "599798",
+     "Trả Cổ tức bằng Cổ phiếu"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2026-02-02→2026-04-01 = +600,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-07-07 +599,798 (issue_volumn)"
+  },
+  {
+   "branch": "pit",
+   "ticker": "NO1",
+   "row_time": "2026-04-01",
+   "asof": "2026-07-30",
+   "row_value": 24600000.0,
+   "old": 25199798.0,
+   "old_method": "ANCHOR_UNVERIFIED",
+   "new": 24600000.0,
+   "new_method": "ANCHOR_UNVERIFIED",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 2.438,
+   "events": [
+    [
+     "2026-07-07",
+     "599798",
+     "Trả Cổ tức bằng Cổ phiếu"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2026-02-02→2026-04-01 = +600,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-07-07 +599,798 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "NVB",
+   "row_time": "2026-04-28",
+   "asof": "2026-07-29",
+   "row_value": 2924632751.0,
+   "old": 3924632751.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 2924632751.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 34.192,
+   "events": [
+    [
+     "2026-06-26",
+     "1000000000",
+     "Phát hành riêng lẻ"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2026-02-02→2026-04-28 = +1,000,000,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-06-26 +1,000,000,000 (issue_volumn)"
+  },
+  {
+   "branch": "pit",
+   "ticker": "NVB",
+   "row_time": "2026-04-28",
+   "asof": "2026-07-29",
+   "row_value": 2924632751.0,
+   "old": 3924632751.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 2924632751.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 34.192,
+   "events": [
+    [
+     "2026-06-26",
+     "1000000000",
+     "Phát hành riêng lẻ"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2026-02-02→2026-04-28 = +1,000,000,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-06-26 +1,000,000,000 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "NVL",
+   "row_time": "2025-07-29",
+   "asof": "2025-10-27",
+   "row_value": 2047609764.0,
+   "old": 2096362377.0,
+   "old_method": "FIN_FALLBACK",
+   "new": null,
+   "new_method": "FIN_ABSORPTION_AMBIGUOUS",
+   "verdict": "FWD_AMBIGUOUS",
+   "pct_old_vs_new": null,
+   "events": [
+    [
+     "2025-10-09",
+     "48752613",
+     "Phát hành cho CBCNV"
+    ]
+   ],
+   "held": {},
+   "note": "dòng quý 2025-07-29 = 2,047,609,764: KHÔNG quyết được đã gồm 1 ISS ex sau nó hay chưa (bước nhảy +97,505,226 đủ chứa sự kiện (nhỏ nhất 48,752,613) nhưng không tổ hợp nào khớp trong 48,753 CP) ⇒ fail-closed"
+  },
+  {
+   "branch": "pit",
+   "ticker": "NVL",
+   "row_time": "2025-07-29",
+   "asof": "2025-10-27",
+   "row_value": 2047609764.0,
+   "old": 2096362377.0,
+   "old_method": "FIN_FALLBACK",
+   "new": null,
+   "new_method": "FIN_ABSORPTION_AMBIGUOUS",
+   "verdict": "FWD_AMBIGUOUS",
+   "pct_old_vs_new": null,
+   "events": [
+    [
+     "2025-10-09",
+     "48752613",
+     "Phát hành cho CBCNV"
+    ]
+   ],
+   "held": {},
+   "note": "dòng quý 2025-07-29 = 2,047,609,764: KHÔNG quyết được đã gồm 1 ISS ex sau nó hay chưa (bước nhảy +97,505,226 đủ chứa sự kiện (nhỏ nhất 48,752,613) nhưng không tổ hợp nào khớp trong 48,753 CP) ⇒ fail-closed"
+  },
+  {
+   "branch": "live",
+   "ticker": "ORS",
+   "row_time": "2025-10-20",
+   "asof": "2026-01-20",
+   "row_value": 623930904.0,
+   "old": 911862065.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 623930904.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 46.148,
+   "events": [
+    [
+     "2025-12-31",
+     "287931161",
+     "Phát hành riêng lẻ"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-07-21→2025-10-20 = +287,931,161 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2025-12-31 +287,931,161 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "PCT",
+   "row_time": "2026-01-23",
+   "asof": "2026-04-22",
+   "row_value": 80035493.0,
+   "old": 110035493.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 80035493.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 37.483,
+   "events": [
+    [
+     "2026-03-27",
+     "30000000",
+     "Phát hành riêng lẻ"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-10-23→2026-01-23 = +30,000,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-03-27 +30,000,000 (issue_volumn)"
+  },
+  {
+   "branch": "pit",
+   "ticker": "PCT",
+   "row_time": "2026-01-23",
+   "asof": "2026-04-22",
+   "row_value": 80035493.0,
+   "old": 110035493.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 80035493.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 37.483,
+   "events": [
+    [
+     "2026-03-27",
+     "30000000",
+     "Phát hành riêng lẻ"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-10-23→2026-01-23 = +30,000,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-03-27 +30,000,000 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "PDR",
+   "row_time": "2025-10-28",
+   "asof": "2026-02-01",
+   "row_value": 997809379.0,
+   "old": 1015809379.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 997809379.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 1.804,
+   "events": [
+    [
+     "2025-12-23",
+     "18000000",
+     "Phát hành cho CBCNV"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-07-31→2025-10-28 = +90,574,296 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2025-12-23 +18,000,000 (issue_volumn)"
+  },
+  {
+   "branch": "pit",
+   "ticker": "PDR",
+   "row_time": "2025-10-28",
+   "asof": "2026-02-01",
+   "row_value": 997809379.0,
+   "old": 1015809379.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 997809379.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 1.804,
+   "events": [
+    [
+     "2025-12-23",
+     "18000000",
+     "Phát hành cho CBCNV"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-07-31→2025-10-28 = +90,574,296 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2025-12-23 +18,000,000 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "PHS",
+   "row_time": "2026-07-24",
+   "asof": "2026-09-14",
+   "row_value": 250009329.0,
+   "old": 300009329.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 250009329.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 19.999,
+   "events": [
+    [
+     "2026-08-19",
+     "50000000",
+     "Phát hành riêng lẻ"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2026-04-28→2026-07-24 = +50,000,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-08-19 +50,000,000 (issue_volumn)"
+  },
+  {
+   "branch": "pit",
+   "ticker": "PHS",
+   "row_time": "2026-07-24",
+   "asof": "2026-09-14",
+   "row_value": 250009329.0,
+   "old": 300009329.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 250009329.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 19.999,
+   "events": [
+    [
+     "2026-08-19",
+     "50000000",
+     "Phát hành riêng lẻ"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2026-04-28→2026-07-24 = +50,000,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-08-19 +50,000,000 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "PLP",
+   "row_time": "2025-10-31",
+   "asof": "2026-02-01",
+   "row_value": 89999847.0,
+   "old": 109999847.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 89999847.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 22.222,
+   "events": [
+    [
+     "2025-12-01",
+     "20000000",
+     "Phát hành riêng lẻ"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-07-30→2025-10-31 = +20,000,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2025-12-01 +20,000,000 (issue_volumn)"
+  },
+  {
+   "branch": "pit",
+   "ticker": "PLP",
+   "row_time": "2025-10-31",
+   "asof": "2026-02-01",
+   "row_value": 89999847.0,
+   "old": 109999847.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 89999847.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 22.222,
+   "events": [
+    [
+     "2025-12-01",
+     "20000000",
+     "Phát hành riêng lẻ"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-07-30→2025-10-31 = +20,000,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2025-12-01 +20,000,000 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "PNJ",
+   "row_time": "2025-07-29",
+   "asof": "2025-10-27",
+   "row_value": 341149107.0,
+   "old": 344392997.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 341149107.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 0.951,
+   "events": [
+    [
+     "2025-09-23",
+     "3243890",
+     "Phát hành cho CBCNV"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-04-25→2025-07-29 = +3,243,890 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2025-09-23 +3,243,890 (issue_volumn)"
+  },
+  {
+   "branch": "pit",
+   "ticker": "PNJ",
+   "row_time": "2025-07-29",
+   "asof": "2025-10-27",
+   "row_value": 341149107.0,
+   "old": 344392997.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 341149107.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 0.951,
+   "events": [
+    [
+     "2025-09-23",
+     "3243890",
+     "Phát hành cho CBCNV"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-04-25→2025-07-29 = +3,243,890 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2025-09-23 +3,243,890 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "PPE",
+   "row_time": "2025-10-23",
+   "asof": "2026-02-01",
+   "row_value": 3600000.0,
+   "old": 5200000.0,
+   "old_method": "ANCHOR_UNVERIFIED",
+   "new": 3600000.0,
+   "new_method": "ANCHOR_UNVERIFIED",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 44.444,
+   "events": [
+    [
+     "2025-10-24",
+     "1600000",
+     "Phát hành riêng lẻ"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-07-17→2025-10-23 = +1,600,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2025-10-24 +1,600,000 (issue_volumn)"
+  },
+  {
+   "branch": "pit",
+   "ticker": "PPE",
+   "row_time": "2025-10-23",
+   "asof": "2026-02-01",
+   "row_value": 3600000.0,
+   "old": 5200000.0,
+   "old_method": "ANCHOR_UNVERIFIED",
+   "new": 3600000.0,
+   "new_method": "ANCHOR_UNVERIFIED",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 44.444,
+   "events": [
+    [
+     "2025-10-24",
+     "1600000",
+     "Phát hành riêng lẻ"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-07-17→2025-10-23 = +1,600,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2025-10-24 +1,600,000 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "PSD",
+   "row_time": "2026-04-22",
+   "asof": "2026-07-19",
+   "row_value": 54027894.0,
+   "old": 56227894.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 54027894.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 4.072,
+   "events": [
+    [
+     "2026-05-20",
+     "2200000",
+     "Phát hành cho CBCNV"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2026-01-27→2026-04-22 = +2,200,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-05-20 +2,200,000 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "PTD",
+   "row_time": "2025-10-30",
+   "asof": "2026-02-01",
+   "row_value": 19999933.0,
+   "old": 34999933.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 19999933.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 75.0,
+   "events": [
+    [
+     "2025-12-23",
+     "15000000",
+     "Phát hành riêng lẻ"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-07-30→2025-10-30 = +15,000,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2025-12-23 +15,000,000 (issue_volumn)"
+  },
+  {
+   "branch": "pit",
+   "ticker": "PTD",
+   "row_time": "2025-10-30",
+   "asof": "2026-02-01",
+   "row_value": 19999933.0,
+   "old": 34999933.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 19999933.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 75.0,
+   "events": [
+    [
+     "2025-12-23",
+     "15000000",
+     "Phát hành riêng lẻ"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-07-30→2025-10-30 = +15,000,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2025-12-23 +15,000,000 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "RCL",
+   "row_time": "2025-07-18",
+   "asof": "2025-10-21",
+   "row_value": 14135751.0,
+   "old": 14412788.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 14135751.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 1.96,
+   "events": [
+    [
+     "2025-08-19",
+     "277037",
+     "Trả Cổ tức bằng Cổ phiếu"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-04-03→2025-07-18 = +277,037 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2025-08-19 +277,037 (issue_volumn)"
+  },
+  {
+   "branch": "pit",
+   "ticker": "RCL",
+   "row_time": "2025-07-18",
+   "asof": "2025-10-21",
+   "row_value": 14135751.0,
+   "old": 14412788.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 14135751.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 1.96,
+   "events": [
+    [
+     "2025-08-19",
+     "277037",
+     "Trả Cổ tức bằng Cổ phiếu"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-04-03→2025-07-18 = +277,037 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2025-08-19 +277,037 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "RCL",
+   "row_time": "2026-04-24",
+   "asof": "2026-07-20",
+   "row_value": 14418317.0,
+   "old": 14700883.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 14418317.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 1.96,
+   "events": [
+    [
+     "2026-06-24",
+     "282566",
+     "Trả Cổ tức bằng Cổ phiếu"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2026-01-21→2026-04-24 = +282,566 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-06-24 +282,566 (issue_volumn)"
+  },
+  {
+   "branch": "pit",
+   "ticker": "RCL",
+   "row_time": "2026-04-24",
+   "asof": "2026-07-20",
+   "row_value": 14418317.0,
+   "old": 14700883.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 14418317.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 1.96,
+   "events": [
+    [
+     "2026-06-24",
+     "282566",
+     "Trả Cổ tức bằng Cổ phiếu"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2026-01-21→2026-04-24 = +282,566 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-06-24 +282,566 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "S99",
+   "row_time": "2026-05-04",
+   "asof": "2026-08-02",
+   "row_value": 104718992.0,
+   "old": 105348992.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 104718992.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 0.602,
+   "events": [
+    [
+     "2026-06-30",
+     "630000",
+     "Phát hành cho CBCNV"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2026-02-02→2026-05-04 = +630,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-06-30 +630,000 (issue_volumn)"
+  },
+  {
+   "branch": "pit",
+   "ticker": "S99",
+   "row_time": "2026-05-04",
+   "asof": "2026-08-02",
+   "row_value": 104718992.0,
+   "old": 105348992.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 104718992.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 0.602,
+   "events": [
+    [
+     "2026-06-30",
+     "630000",
+     "Phát hành cho CBCNV"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2026-02-02→2026-05-04 = +630,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-06-30 +630,000 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "SBS",
+   "row_time": "2026-07-20",
+   "asof": "2026-09-14",
+   "row_value": 156107600.0,
+   "old": 165607600.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 156107600.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 6.086,
+   "events": [
+    [
+     "2026-08-19",
+     "9500000",
+     "Phát hành riêng lẻ"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2026-04-20→2026-07-20 = +9,500,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-08-19 +9,500,000 (issue_volumn)"
+  },
+  {
+   "branch": "pit",
+   "ticker": "SBS",
+   "row_time": "2026-07-20",
+   "asof": "2026-09-14",
+   "row_value": 156107600.0,
+   "old": 165607600.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 156107600.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 6.086,
+   "events": [
+    [
+     "2026-08-19",
+     "9500000",
+     "Phát hành riêng lẻ"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2026-04-20→2026-07-20 = +9,500,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-08-19 +9,500,000 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "SCI",
+   "row_time": "2025-10-20",
+   "asof": "2026-02-01",
+   "row_value": 45737113.0,
+   "old": 57245704.0,
+   "old_method": "FIN_FALLBACK",
+   "new": null,
+   "new_method": "FIN_ABSORPTION_AMBIGUOUS",
+   "verdict": "FWD_AMBIGUOUS",
+   "pct_old_vs_new": null,
+   "events": [
+    [
+     "2026-01-13",
+     "11508591",
+     "Quyền mua CP cho Cổ đông hiện hữu"
+    ]
+   ],
+   "held": {},
+   "note": "dòng quý 2025-10-20 = 45,737,113: KHÔNG quyết được đã gồm 1 ISS ex sau nó hay chưa (bước nhảy +15,245,704 đủ chứa sự kiện (nhỏ nhất 11,508,591) nhưng không tổ hợp nào khớp trong 11,509 CP) ⇒ fail-closed"
+  },
+  {
+   "branch": "pit",
+   "ticker": "SCI",
+   "row_time": "2025-10-20",
+   "asof": "2026-02-01",
+   "row_value": 45737113.0,
+   "old": 57245704.0,
+   "old_method": "FIN_FALLBACK",
+   "new": null,
+   "new_method": "FIN_ABSORPTION_AMBIGUOUS",
+   "verdict": "FWD_AMBIGUOUS",
+   "pct_old_vs_new": null,
+   "events": [
+    [
+     "2026-01-13",
+     "11508591",
+     "Quyền mua CP cho Cổ đông hiện hữu"
+    ]
+   ],
+   "held": {},
+   "note": "dòng quý 2025-10-20 = 45,737,113: KHÔNG quyết được đã gồm 1 ISS ex sau nó hay chưa (bước nhảy +15,245,704 đủ chứa sự kiện (nhỏ nhất 11,508,591) nhưng không tổ hợp nào khớp trong 11,509 CP) ⇒ fail-closed"
+  },
+  {
+   "branch": "live",
+   "ticker": "SFI",
+   "row_time": "2026-07-30",
+   "asof": "2026-09-14",
+   "row_value": 24647034.0,
+   "old": 24982034.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 24647034.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 1.359,
+   "events": [
+    [
+     "2026-08-11",
+     "335000",
+     "Phát hành cho CBCNV"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2026-04-29→2026-07-30 = +335,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-08-11 +335,000 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "SHB",
+   "row_time": "2026-04-01",
+   "asof": "2026-07-29",
+   "row_value": 5343703838.0,
+   "old": 6093703838.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 5803074222.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 5.008,
+   "events": [
+    [
+     "2026-04-03",
+     "459370384",
+     "Quyền mua CP cho Cổ đông hiện hữu"
+    ],
+    [
+     "2026-04-20",
+     "200000000",
+     "Phát hành riêng lẻ"
+    ],
+    [
+     "2026-05-22",
+     "90629616",
+     "Phát hành cho CBCNV"
+    ]
+   ],
+   "held": {
+    "SpaceX": 800,
+    "ZaloPay": 300
+   },
+   "note": "bước nhảy 2026-02-02→2026-04-01 = +290,629,616 khớp duy nhất tổ hợp gồm 2 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-04-20 +200,000,000 (issue_volumn), 2026-05-22 +90,629,616 (issue_volumn)"
+  },
+  {
+   "branch": "pit",
+   "ticker": "SHB",
+   "row_time": "2026-04-01",
+   "asof": "2026-07-29",
+   "row_value": 5343703838.0,
+   "old": 6093703838.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 5803074222.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 5.008,
+   "events": [
+    [
+     "2026-04-03",
+     "459370384",
+     "Quyền mua CP cho Cổ đông hiện hữu"
+    ],
+    [
+     "2026-04-20",
+     "200000000",
+     "Phát hành riêng lẻ"
+    ],
+    [
+     "2026-05-22",
+     "90629616",
+     "Phát hành cho CBCNV"
+    ]
+   ],
+   "held": {
+    "SpaceX": 800,
+    "ZaloPay": 300
+   },
+   "note": "bước nhảy 2026-02-02→2026-04-01 = +290,629,616 khớp duy nhất tổ hợp gồm 2 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-04-20 +200,000,000 (issue_volumn), 2026-05-22 +90,629,616 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "SHE",
+   "row_time": "2026-01-22",
+   "asof": "2026-05-03",
+   "row_value": 65003919.0,
+   "old": 115054682.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 65003919.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 76.997,
+   "events": [
+    [
+     "2026-02-24",
+     "50050763",
+     "Phát hành để sáp nhập"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-10-23→2026-01-22 = +50,050,763 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-02-24 +50,050,763 (issue_volumn)"
+  },
+  {
+   "branch": "pit",
+   "ticker": "SHE",
+   "row_time": "2026-01-22",
+   "asof": "2026-05-03",
+   "row_value": 65003919.0,
+   "old": 115054682.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 65003919.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 76.997,
+   "events": [
+    [
+     "2026-02-24",
+     "50050763",
+     "Phát hành để sáp nhập"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-10-23→2026-01-22 = +50,050,763 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-02-24 +50,050,763 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "SHS",
+   "row_time": "2025-07-18",
+   "asof": "2025-10-14",
+   "row_value": 899462220.0,
+   "old": 904462220.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 899462220.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 0.556,
+   "events": [
+    [
+     "2025-10-02",
+     "5000000",
+     "Phát hành cho CBCNV"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-04-18→2025-07-18 = +86,305,472 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2025-10-02 +5,000,000 (issue_volumn)"
+  },
+  {
+   "branch": "pit",
+   "ticker": "SHS",
+   "row_time": "2025-07-18",
+   "asof": "2025-10-14",
+   "row_value": 899462220.0,
+   "old": 904462220.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 899462220.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 0.556,
+   "events": [
+    [
+     "2025-10-02",
+     "5000000",
+     "Phát hành cho CBCNV"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-04-18→2025-07-18 = +86,305,472 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2025-10-02 +5,000,000 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "SSI",
+   "row_time": "2025-07-18",
+   "asof": "2025-10-26",
+   "row_value": 2075914794.0,
+   "old": 2179957138.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 2075914794.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 5.012,
+   "events": [
+    [
+     "2025-08-29",
+     "104042344",
+     "Phát hành riêng lẻ"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-04-18→2025-07-18 = +104,042,344 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2025-08-29 +104,042,344 (issue_volumn)"
+  },
+  {
+   "branch": "pit",
+   "ticker": "SSI",
+   "row_time": "2025-07-18",
+   "asof": "2025-10-26",
+   "row_value": 2075914794.0,
+   "old": 2179957138.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 2075914794.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 5.012,
+   "events": [
+    [
+     "2025-08-29",
+     "104042344",
+     "Phát hành riêng lẻ"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-04-18→2025-07-18 = +104,042,344 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2025-08-29 +104,042,344 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "TAL",
+   "row_time": "2025-08-01",
+   "asof": "2025-10-28",
+   "row_value": 360000000.0,
+   "old": 408150000.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 360000000.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 13.375,
+   "events": [
+    [
+     "2025-09-22",
+     "48150000",
+     "Phát hành riêng lẻ"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-04-01→2025-08-01 = +48,150,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2025-09-22 +48,150,000 (issue_volumn)"
+  },
+  {
+   "branch": "pit",
+   "ticker": "TAL",
+   "row_time": "2025-08-01",
+   "asof": "2025-10-28",
+   "row_value": 360000000.0,
+   "old": 408150000.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 360000000.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 13.375,
+   "events": [
+    [
+     "2025-09-22",
+     "48150000",
+     "Phát hành riêng lẻ"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-04-01→2025-08-01 = +48,150,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2025-09-22 +48,150,000 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "TCX",
+   "row_time": "2026-02-02",
+   "asof": "2026-04-15",
+   "row_value": 2311583496.0,
+   "old": 2311858971.0,
+   "old_method": "ANCHOR_UNVERIFIED",
+   "new": 2311583496.0,
+   "new_method": "ANCHOR_UNVERIFIED",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 0.012,
+   "events": [
+    [
+     "2026-03-02",
+     "275475",
+     "Phát hành cho CBCNV"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-10-21→2026-02-02 = +275,475 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-03-02 +275,475 (issue_volumn)"
+  },
+  {
+   "branch": "pit",
+   "ticker": "TCX",
+   "row_time": "2026-02-02",
+   "asof": "2026-04-15",
+   "row_value": 2311583496.0,
+   "old": 2311858971.0,
+   "old_method": "ANCHOR_UNVERIFIED",
+   "new": 2311583496.0,
+   "new_method": "ANCHOR_UNVERIFIED",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 0.012,
+   "events": [
+    [
+     "2026-03-02",
+     "275475",
+     "Phát hành cho CBCNV"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-10-21→2026-02-02 = +275,475 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-03-02 +275,475 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "TDM",
+   "row_time": "2025-07-17",
+   "asof": "2025-10-15",
+   "row_value": 111100000.0,
+   "old": 112200000.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 111100000.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 0.99,
+   "events": [
+    [
+     "2025-07-21",
+     "1100000",
+     "Phát hành cho CBCNV"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-04-18→2025-07-17 = +1,100,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2025-07-21 +1,100,000 (issue_volumn)"
+  },
+  {
+   "branch": "pit",
+   "ticker": "TDM",
+   "row_time": "2025-07-17",
+   "asof": "2025-10-15",
+   "row_value": 111100000.0,
+   "old": 112200000.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 111100000.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 0.99,
+   "events": [
+    [
+     "2025-07-21",
+     "1100000",
+     "Phát hành cho CBCNV"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-04-18→2025-07-17 = +1,100,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2025-07-21 +1,100,000 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "TET",
+   "row_time": "2026-04-01",
+   "asof": "2026-07-19",
+   "row_value": 62202940.0,
+   "old": 118702940.0,
+   "old_method": "ANCHOR_UNVERIFIED",
+   "new": 62202940.0,
+   "new_method": "ANCHOR_UNVERIFIED",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 90.832,
+   "events": [
+    [
+     "2026-07-02",
+     "56500000",
+     "Phát hành riêng lẻ"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2026-01-21→2026-04-01 = +56,500,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-07-02 +56,500,000 (issue_volumn)"
+  },
+  {
+   "branch": "pit",
+   "ticker": "TET",
+   "row_time": "2026-04-01",
+   "asof": "2026-07-19",
+   "row_value": 62202940.0,
+   "old": 118702940.0,
+   "old_method": "ANCHOR_UNVERIFIED",
+   "new": 62202940.0,
+   "new_method": "ANCHOR_UNVERIFIED",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 90.832,
+   "events": [
+    [
+     "2026-07-02",
+     "56500000",
+     "Phát hành riêng lẻ"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2026-01-21→2026-04-01 = +56,500,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-07-02 +56,500,000 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "TSA",
+   "row_time": "2026-07-21",
+   "asof": "2026-09-14",
+   "row_value": 41224994.0,
+   "old": 42024994.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 41224994.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 1.941,
+   "events": [
+    [
+     "2026-08-17",
+     "800000",
+     "Phát hành cho CBCNV"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2026-04-20→2026-07-21 = +800,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-08-17 +800,000 (issue_volumn)"
+  },
+  {
+   "branch": "pit",
+   "ticker": "TSA",
+   "row_time": "2026-07-21",
+   "asof": "2026-09-14",
+   "row_value": 41224994.0,
+   "old": 42024994.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 41224994.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 1.941,
+   "events": [
+    [
+     "2026-08-17",
+     "800000",
+     "Phát hành cho CBCNV"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2026-04-20→2026-07-21 = +800,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-08-17 +800,000 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "V21",
+   "row_time": "2026-07-20",
+   "asof": "2026-09-14",
+   "row_value": 32999789.0,
+   "old": 53999789.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 32999789.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 63.637,
+   "events": [
+    [
+     "2026-08-19",
+     "21000000",
+     "Phát hành riêng lẻ"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2026-04-28→2026-07-20 = +21,000,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-08-19 +21,000,000 (issue_volumn)"
+  },
+  {
+   "branch": "pit",
+   "ticker": "V21",
+   "row_time": "2026-07-20",
+   "asof": "2026-09-14",
+   "row_value": 32999789.0,
+   "old": 53999789.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 32999789.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 63.637,
+   "events": [
+    [
+     "2026-08-19",
+     "21000000",
+     "Phát hành riêng lẻ"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2026-04-28→2026-07-20 = +21,000,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-08-19 +21,000,000 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "VC3",
+   "row_time": "2026-02-02",
+   "asof": "2026-04-02",
+   "row_value": 138414258.0,
+   "old": 140414258.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 138414258.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 1.445,
+   "events": [
+    [
+     "2026-02-23",
+     "2000000",
+     "Phát hành cho CBCNV"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-11-03→2026-02-02 = +2,000,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-02-23 +2,000,000 (issue_volumn)"
+  },
+  {
+   "branch": "pit",
+   "ticker": "VC3",
+   "row_time": "2026-02-02",
+   "asof": "2026-04-02",
+   "row_value": 138414258.0,
+   "old": 140414258.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 138414258.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 1.445,
+   "events": [
+    [
+     "2026-02-23",
+     "2000000",
+     "Phát hành cho CBCNV"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-11-03→2026-02-02 = +2,000,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-02-23 +2,000,000 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "VCK",
+   "row_time": "2025-12-16",
+   "asof": "2026-01-19",
+   "row_value": 1482315700.0,
+   "old": 1521825700.0,
+   "old_method": "ANCHOR_UNVERIFIED",
+   "new": null,
+   "new_method": "FIN_ABSORPTION_AMBIGUOUS",
+   "verdict": "FWD_AMBIGUOUS",
+   "pct_old_vs_new": null,
+   "events": [
+    [
+     "2025-12-29",
+     "39510000",
+     "Phát hành riêng lẻ"
+    ]
+   ],
+   "held": {},
+   "note": "dòng quý 2025-12-16 = 1,482,315,700: KHÔNG quyết được đã gồm 1 ISS ex sau nó hay chưa (không có dòng quý liền trước lẫn AIS nào <= dòng quý để đo bước nhảy) ⇒ fail-closed"
+  },
+  {
+   "branch": "pit",
+   "ticker": "VCK",
+   "row_time": "2025-12-16",
+   "asof": "2026-01-19",
+   "row_value": 1482315700.0,
+   "old": 1521825700.0,
+   "old_method": "ANCHOR_UNVERIFIED",
+   "new": null,
+   "new_method": "FIN_ABSORPTION_AMBIGUOUS",
+   "verdict": "FWD_AMBIGUOUS",
+   "pct_old_vs_new": null,
+   "events": [
+    [
+     "2025-12-29",
+     "39510000",
+     "Phát hành riêng lẻ"
+    ]
+   ],
+   "held": {},
+   "note": "dòng quý 2025-12-16 = 1,482,315,700: KHÔNG quyết được đã gồm 1 ISS ex sau nó hay chưa (không có dòng quý liền trước lẫn AIS nào <= dòng quý để đo bước nhảy) ⇒ fail-closed"
+  },
+  {
+   "branch": "live",
+   "ticker": "VCM",
+   "row_time": "2025-07-24",
+   "asof": "2025-10-22",
+   "row_value": 12000000.0,
+   "old": 18000000.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 12000000.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 50.0,
+   "events": [
+    [
+     "2025-10-06",
+     "6000000",
+     "Quyền mua CP cho Cổ đông hiện hữu"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-04-02→2025-07-24 = +6,000,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2025-10-06 +6,000,000 (issue_volumn)"
+  },
+  {
+   "branch": "pit",
+   "ticker": "VCM",
+   "row_time": "2025-07-24",
+   "asof": "2025-10-22",
+   "row_value": 12000000.0,
+   "old": 18000000.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 12000000.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 50.0,
+   "events": [
+    [
+     "2025-10-06",
+     "6000000",
+     "Quyền mua CP cho Cổ đông hiện hữu"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-04-02→2025-07-24 = +6,000,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2025-10-06 +6,000,000 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "VE4",
+   "row_time": "2026-01-21",
+   "asof": "2026-04-23",
+   "row_value": 3028000.0,
+   "old": 5028000.0,
+   "old_method": "ANCHOR_UNVERIFIED",
+   "new": 3028000.0,
+   "new_method": "ANCHOR_UNVERIFIED",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 66.05,
+   "events": [
+    [
+     "2026-02-06",
+     "2000000",
+     "Phát hành riêng lẻ"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-10-23→2026-01-21 = +2,000,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-02-06 +2,000,000 (issue_volumn)"
+  },
+  {
+   "branch": "pit",
+   "ticker": "VE4",
+   "row_time": "2026-01-21",
+   "asof": "2026-04-23",
+   "row_value": 3028000.0,
+   "old": 5028000.0,
+   "old_method": "ANCHOR_UNVERIFIED",
+   "new": 3028000.0,
+   "new_method": "ANCHOR_UNVERIFIED",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 66.05,
+   "events": [
+    [
+     "2026-02-06",
+     "2000000",
+     "Phát hành riêng lẻ"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-10-23→2026-01-21 = +2,000,000 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-02-06 +2,000,000 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "VIT",
+   "row_time": "2026-01-19",
+   "asof": "2026-04-23",
+   "row_value": 68801326.0,
+   "old": 87602988.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 68801326.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 27.327,
+   "events": [
+    [
+     "2026-03-18",
+     "9015971",
+     "Phát hành để sáp nhập"
+    ],
+    [
+     "2026-03-18",
+     "9785691",
+     "Phát hành để sáp nhập"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-10-14→2026-01-19 = +18,801,662 khớp duy nhất tổ hợp gồm 2 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-03-18 +9,015,971 (issue_volumn), 2026-03-18 +9,785,691 (issue_volumn)"
+  },
+  {
+   "branch": "pit",
+   "ticker": "VIT",
+   "row_time": "2026-01-19",
+   "asof": "2026-04-23",
+   "row_value": 68801326.0,
+   "old": 87602988.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 68801326.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 27.327,
+   "events": [
+    [
+     "2026-03-18",
+     "9015971",
+     "Phát hành để sáp nhập"
+    ],
+    [
+     "2026-03-18",
+     "9785691",
+     "Phát hành để sáp nhập"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-10-14→2026-01-19 = +18,801,662 khớp duy nhất tổ hợp gồm 2 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-03-18 +9,015,971 (issue_volumn), 2026-03-18 +9,785,691 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "VNL",
+   "row_time": "2026-07-30",
+   "asof": "2026-09-14",
+   "row_value": 14808787.0,
+   "old": 15477087.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 14808787.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 4.513,
+   "events": [
+    [
+     "2026-08-20",
+     "668300",
+     "Phát hành cho CBCNV"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2026-05-04→2026-07-30 = +668,300 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-08-20 +668,300 (issue_volumn)"
+  },
+  {
+   "branch": "pit",
+   "ticker": "VNL",
+   "row_time": "2026-07-30",
+   "asof": "2026-09-14",
+   "row_value": 14808787.0,
+   "old": 15477087.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 14808787.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 4.513,
+   "events": [
+    [
+     "2026-08-20",
+     "668300",
+     "Phát hành cho CBCNV"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2026-05-04→2026-07-30 = +668,300 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-08-20 +668,300 (issue_volumn)"
+  },
+  {
+   "branch": "live",
+   "ticker": "VNZ",
+   "row_time": "2026-02-02",
+   "asof": "2026-05-03",
+   "row_value": 29726465.0,
+   "old": 30075956.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 29726465.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 1.176,
+   "events": [
+    [
+     "2026-03-06",
+     "349491",
+     "Phát hành cho CBCNV"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-10-31→2026-02-02 = +349,491 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-03-06 +349,491 (issue_volumn)"
+  },
+  {
+   "branch": "pit",
+   "ticker": "VNZ",
+   "row_time": "2026-02-02",
+   "asof": "2026-05-03",
+   "row_value": 29726465.0,
+   "old": 30075956.0,
+   "old_method": "FIN_FALLBACK",
+   "new": 29726465.0,
+   "new_method": "FIN_FALLBACK",
+   "verdict": "FWD_ABSORBED",
+   "pct_old_vs_new": 1.176,
+   "events": [
+    [
+     "2026-03-06",
+     "349491",
+     "Phát hành cho CBCNV"
+    ]
+   ],
+   "held": {},
+   "note": "bước nhảy 2025-10-31→2026-02-02 = +349,491 khớp duy nhất tổ hợp gồm 1 ISS ex sau dòng quý ⇒ KHÔNG lăn lại: 2026-03-06 +349,491 (issue_volumn)"
+  }
+ ]
+}

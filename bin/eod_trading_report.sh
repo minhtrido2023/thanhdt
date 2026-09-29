@@ -2,10 +2,17 @@
 # eod_trading_report.sh [--account LABEL] [--date YYYY-MM-DD]
 # Báo cáo tổng kết giao dịch cuối ngày: số lệnh, mua/bán, giá khớp TB, tổng giá trị.
 # Đọc plan (ticker/side/ref_price) + state.json (giá khớp thực từng child order).
-# Schedule: 15:00 ICT trading days (cron: 0 8 * * 1-5), sau khi phiên chiều đã đóng (~14:50).
+# Schedule: 19:10 ICT trading days (cron: 10 12 * * 1-5), sau publish DT5G 19:00 để regime là hôm nay; phiên chiều đóng ~14:50.
 set -uo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 WC_ROOT="$(cd "$ROOT/.." && pwd)"
+# Cron không thừa hưởng PATH/CLOUDSDK_CONFIG của shell login. Thiếu env này làm
+# BQ query trong report_return_gate fallback sang bq-reader và fail invalid_scope,
+# khiến mọi EOD full-return chỉ gửi được account HOLD (skip gate).
+if [ -f "$WC_ROOT/wc_env.sh" ]; then
+  # shellcheck source=/dev/null
+  source "$WC_ROOT/wc_env.sh"
+fi
 
 ACCOUNT="SpaceX"
 PLAN_DATE="$(TZ='Asia/Ho_Chi_Minh' date +%Y-%m-%d)"
@@ -17,7 +24,80 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+# Guard ngày-không-giao-dịch (thêm 2026-08-23, ca thật: ai đó chạy tay script này một Chủ Nhật,
+# in ra "KHÔNG TÌM THẤY plan — có thể lỗi DollarBill" — cảnh báo VÔ NGHĨA vì DollarBill/bot
+# KHÔNG BAO GIỜ chạy cuối tuần/ngày lễ theo thiết kế (cron eod `1-5`, DollarBill cron cũng vậy).
+# Cron thật (`10 12 * * 1-5`) đã tự chặn đúng — guard này chỉ bắt trường hợp CHẠY TAY/thủ công
+# nhắm nhầm ngày. Không gửi Discord/email, không tạo report rác — chỉ log rồi thoát êm.
+if _wd_holiday_check="$(cd "$WC_ROOT" && python3 -c "
+import sys, datetime as dt
+sys.path.insert(0, '.')
+from trading_bot.vn_market import is_holiday
+d = dt.date.fromisoformat('$PLAN_DATE')
+print('1' if d.weekday() >= 5 or is_holiday(d) else '0')
+" 2>/dev/null)"; then
+  if [ "$_wd_holiday_check" = "1" ]; then
+    echo "eod_trading_report.sh: $PLAN_DATE không phải phiên giao dịch (cuối tuần/ngày lễ) — bỏ qua, không gửi Discord/email. Có thể do chạy tay nhầm ngày; cron thật ('10 12 * * 1-5') không bao giờ gọi script này vào ngày này." >&2
+    exit 0
+  fi
+fi
+# python3/vn_market import lỗi (ImportError, cú pháp ngày sai...) → $_wd_holiday_check rỗng,
+# KHÔNG chặn — fail-open để không biến 1 lỗi import thành báo cáo EOD ngày thường bị nuốt câm.
+
 TRADING_REPORT_THREAD="trading_report"   # tên trong kb/discord_channels.json (đổi từ Trading Daily 2026-07-03, theo yêu cầu user)
+
+# Delivery closure (user chốt phương án A 2026-08-15): EOD daily cũng là báo cáo client-facing,
+# nên "đã render" hoặc "đã post Discord" chưa phải hoàn tất. MỌI nhánh bên dưới phải tạo
+# artifact .md ổn định rồi đi qua cùng cổng hash-bound với weekly/monthly: Discord
+# + email đều có durable proof; report có số liệu còn phải qua return validation. Backstop
+# check_report_cadence.sh sẽ retry đúng kênh còn thiếu.
+_deliver_eod() {
+  local body="$1"
+  local validation_mode="${2:-full}"
+  local artifact="$ROOT/reports/${ACCOUNT}_daily_report_${PLAN_DATE}.md"
+  mkdir -p "$ROOT/reports"
+  printf '%s\n' "$body" > "$artifact"
+  # Alert sớm không công bố tỉ suất/vị thế, nên return gate không áp dụng;
+  # delivery gate vẫn hash-bind đủ Discord + email. Report đầy đủ chạy validation.
+  local gate_args=("$artifact" --topic "$TRADING_REPORT_THREAD")
+  [ "$validation_mode" = "not_applicable" ] && gate_args+=(--skip-validation)
+  # Capture (không để chảy thẳng ra log): khối "⚠️ LỆCH NGUỒN VENDOR" của report_return_gate
+  # đi qua stdout của delivery gate, nên nếu không bám lấy ở đây thì nó chết trong logs/ và
+  # user KHÔNG BAO GIỜ thấy — kể cả ca rc=0 (mã lệch nguồn không được công bố ⇒ không chặn).
+  # Vẫn in nguyên văn ra ngoài để nội dung log không đổi.
+  local gate_out gate_rc vendor_rc=0
+  gate_out="$(python3 "$ROOT/bin/report_delivery_gate.py" "${gate_args[@]}" 2>&1)"
+  gate_rc=$?
+  printf '%s\n' "$gate_out"
+  printf '%s\n' "$gate_out" | "$ROOT/bin/vendor_mismatch_alert.sh" \
+    "$(basename "$artifact")" "$TRADING_REPORT_THREAD" || vendor_rc=$?
+  if [ "$gate_rc" -eq 0 ]; then
+    "$ROOT/bin/append_event.sh" Mafee status "eod-trading-report" \
+      "{\"account\":\"$ACCOUNT\",\"plan_date\":\"$PLAN_DATE\",\"delivered_via\":\"report_delivery_gate\",\"artifact\":\"$(basename "$artifact")\"}" \
+      2>/dev/null || true
+    return 0
+  fi
+  # Nguyên nhân phải đọc từ BẰNG CHỨNG cổng vừa in ra, không quy chụp một nguyên nhân cố định
+  # (§29): vendor_rc=10 chỉ nói "có vendor-lệch-nguồn HOẶC lookup_failed", KHÔNG nói được loại
+  # nào — phải grep TAG THẬT trong $gate_out (arch-review vòng 5, R1-C), ĐỪNG suy từ rc=10.
+  local why="delivery chưa đủ kênh (Discord/email)"
+  # EOD_VENDOR_REASON_BEGIN — trích bởi eod_trading_report_account_filter_selfcheck.py,
+  # extract-and-test 3 tổ hợp $gate_out (mismatch-only / lookup_failed-only / cả hai). Đổi
+  # tên/di chuyển marker ⇒ selfcheck FATAL, không im lặng pass.
+  if [ "$vendor_rc" -eq 10 ]; then
+    if printf '%s\n' "$gate_out" | grep -q '^VENDOR_MISMATCH_ALERT|'; then
+      why="LỆCH NGUỒN VENDOR (tiền broker ≠ tav2_bq.corporate_action) — cần Winston (data-ops), KHÔNG phải lỗi soạn báo cáo"
+    elif printf '%s\n' "$gate_out" | grep -q '^VENDOR_LOOKUP_FAILED|'; then
+      why="KHÔNG TRA ĐƯỢC nguồn vendor tav2_bq.corporate_action (lỗi hạ tầng BQ) — KHÔNG PHẢI hai nguồn bất đồng, thử lại khi BQ khoẻ"
+    fi
+  fi
+  # EOD_VENDOR_REASON_END
+  "$ROOT/bin/append_event.sh" Mafee error "eod-trading-report-delivery-incomplete" \
+    "{\"account\":\"$ACCOUNT\",\"plan_date\":\"$PLAN_DATE\",\"artifact\":\"$(basename "$artifact")\",\"retry\":\"check_report_cadence\",\"cause\":\"$why\"}" \
+    2>/dev/null || true
+  echo "eod_trading_report: DELIVERY INCOMPLETE cho $(basename "$artifact") — $why" >&2
+  return 1
+}
 
 PLAN_FILE="$WC_ROOT/data/trade_plans/plan_${ACCOUNT}_${PLAN_DATE}.json"
 STATE_FILE="$WC_ROOT/data/execution_logs/exec_${ACCOUNT}_${PLAN_DATE}_state.json"
@@ -49,6 +129,36 @@ try:
         print('🧭 ' + vr)
 except Exception:
     pass
+try:
+    # Shadow-log spread định giá: EY median (universe_pit, PIT) − lãi vay THẬT gói 1840
+    # (12,5%/năm, đọc từ trading_rules.json — không hardcode). THUẦN HIỂN THỊ theo mandate:
+    # KHÔNG nối vào sizing/gate nào. Cổng đòn bẩy đang chạy vẫn chỉ là capit_margin_lever
+    # (dd52<=-20%). Thêm ở job Taylor_20260823_120317 (việc B, tách rời kết quả việc A).
+    from dna_report import build_margin_spread_line
+    ms = build_margin_spread_line(html=False)
+    if ms:
+        print('💵 ' + ms)
+except Exception:
+    pass
+" 2>/dev/null || true
+  # CAP_SIGNAL advisory (DIVERGE VN-vs-EM + xác nhận DXY/UST) — user duyệt 2026-08-30 21:33
+  # ICT làm tín hiệu ADVISORY THAM KHẢO (KHÔNG production). THUẦN HIỂN THỊ, cùng mẫu DT4-
+  # gate/Value Radar phía trên. Gọi từ đây cũng là nhịp ghi registry hàng ngày (idempotent
+  # per ngày, an toàn khi 2 account cùng chạy) — không cần cron riêng, theo
+  # kb/projects/cap-signal-advisory-20260830.md §4. TÁCH RIÊNG khỏi block python3 ở trên vì
+  # nó cần $DNA_PYEXE (yfinance chỉ có trong venv đó, không có trong python3 hệ thống —
+  # dùng nhầm python3 sẽ ModuleNotFoundError và fail-safe nuốt lỗi, không ai biết dòng này
+  # chưa từng chạy được).
+  "${DNA_PYEXE:-python3}" -c "
+import sys
+sys.path.insert(0, '$WC_ROOT')
+try:
+    from dna_report import build_cap_signal_advisory_line
+    cs = build_cap_signal_advisory_line()
+    if cs:
+        print('🧲 ' + cs)
+except Exception:
+    pass
 " 2>/dev/null || true
 }
 # --- Cảnh báo độ tươi DT5G (audit §14, job Winston_20260731_062642) ---------------------
@@ -69,12 +179,87 @@ _dt5g_warn_set() {
   DT5G_WARN="$(cd "$WC_ROOT" && timeout 60 python3 dt5g_freshness.py --warn-line 2>/dev/null || true)"
 }
 
+# NAV section, phân biệt "thiếu dữ liệu thật" (rc=2/3, cần người) vs "lệch giá TẠM THỜI,
+# tự retry được" (rc=4 — gate PRICE_XCHECK của daily_nav_snapshot.py; ca PVT 2026-09-08:
+# marketPrice của vị thế broker tự đồng bộ trễ ~65' sau EOD, không phải corp-action).
+# rc=4 → ghi marker cho `nav_sync_retry.sh` (cron 15'/lần, 19:15-21:15 ICT) tự chạy lại,
+# hiển thị dòng nhẹ thay vì "❌ ... kiểm tra thủ công" (phần lớn case tự hết <90').
+# Set biến toàn cục NAV_SECTION — dùng "$(...)" trực tiếp (không pipe) để không mất $?
+# (bug cũ: "cmd | grep -v ..." khiến exit code của cmd bị pipe nuốt mất).
+_nav_section() {
+  local raw rc
+  raw="$(python3 "$ROOT/bin/daily_nav_snapshot.py" --account "$ACCOUNT" --date "$PLAN_DATE" 2>&1)"
+  rc=$?
+  raw="$(printf '%s\n' "$raw" | grep -v '^\[dnse\]')"
+  if [ "$rc" = "4" ]; then
+    mkdir -p "$ROOT/state/nav_pending_retry"
+    printf '%s\n' "$raw" > "$ROOT/state/nav_pending_retry/${ACCOUNT}_${PLAN_DATE}.log"
+    NAV_SECTION="⏳ [$PLAN_DATE] NAV tạm hoãn — giá vị thế broker đang tự đồng bộ (thường xong trong ~90'), sẽ tự cập nhật, không cần kiểm tra tay."
+  else
+    NAV_SECTION="$raw"
+  fi
+}
+
 # Trả về block (có newline dẫn đầu) khi có dữ liệu, "" khi lỗi/không có. Gọi LAZY — chỉ
 # ở case HOLD-day + full-render, tránh chạy BQ trong nhánh cảnh báo lỗi (case 1/3).
 # Có thể nhiều dòng (gate + base-rate) — prefix đã gắn sẵn từng dòng trong python.
 _dt_gate_block() {
   local out; out="$(_dt_gate_line)"
   [ -n "$out" ] && printf '\n%s' "$out"
+}
+
+# --- Hit Details (nội bộ, CHỈ ZaloPay — user duyệt phương án A, 2026-09-16) --------------
+# Nhúng nguyên văn data/hit_details_<date>.md (đã tính sẵn bởi hit_details_daily.sh) vào cuối
+# báo cáo ZaloPay để tiện quan sát 1 nơi, không cần mở file riêng. Cron hit_details_daily.sh
+# ĐÃ dời sang 19:00 ICT (cùng lúc bq_freshness_check khởi động, tự chờ artifact bên trong nó)
+# để chạy XONG trước 19:10 khi report này khởi động — xem kb/cron_registry.md.
+# CHỈ ZaloPay: SpaceX là account nhà đầu tư ngoài, hit_details lộ công thức + ngưỡng điểm
+# sống của chiến lược (nặng hơn Value Radar/CAP_SIGNAL) — giữ nguyên tinh thần quyết định
+# 2026-09-11 (không đưa audit detail vào báo cáo investor-facing), chỉ nới cho ZaloPay
+# (account vận hành nội bộ) theo yêu cầu mới của user.
+# Freshness theo NỘI DUNG (dòng đầu file phải khớp PLAN_DATE), không chỉ theo file tồn tại —
+# đúng pattern coding_guidelines §14 (producer chậm/lỗi thì bỏ qua lặng lẽ, không hiện số cũ).
+_hit_details_block() {
+  [ "$ACCOUNT" = "ZaloPay" ] || return 0
+  local f="$WC_ROOT/data/hit_details_${PLAN_DATE}.md"
+  [ -f "$f" ] || return 0
+  head -1 "$f" | grep -qF "# Hit Details — ${PLAN_DATE}" || return 0
+  printf '\n\n📋 **Hit Details (nội bộ, %s)** — công thức + giá trị factor thật đằng sau mỗi tín hiệu BAL/LAG hôm nay:\n' "$PLAN_DATE"
+  cat "$f"
+}
+
+# --- Văn phong investor-facing cho SpaceX (job Taylor_20260903_144623) -------------------
+# SpaceX = tài khoản dành cho nhà đầu tư ngoài; ZaloPay giữ nguyên văn phong vận hành nội bộ
+# hiện có (không đổi). Hàm này CHỈ đổi CÁCH TRÌNH BÀY của chuỗi văn bản cuối cùng — không
+# đụng tới bất kỳ phép tính/logic đối soát/escalation nào phía trên. Lọc bỏ các dòng tín hiệu
+# định lượng nội bộ (Gate DT4/Value Radar/spread định giá/CAP_SIGNAL advisory — monthly/weekly
+# investor-facing vốn không hiển thị các dòng này) và diễn giải lại 1-2 câu còn mang thuật ngữ
+# vận hành (tên script/log nội bộ) sang câu văn phổ thông, giữ nguyên số liệu.
+_investor_polish() {
+  if [ "$ACCOUNT" != "SpaceX" ]; then
+    cat
+    return
+  fi
+  sed -E \
+    -e 's/📊 \*\*EOD Trading Report — SpaceX/📈 **Báo cáo giao dịch ngày — SpaceX/' \
+    -e 's/Bot đã trực phiên đồng bộ trạng thái\./Không phát sinh giao dịch mới trong phiên hôm nay theo kế hoạch đã duyệt trước đó\./' \
+    -e 's/verify_account_snapshot \(cross-check journal\) rc=[0-9]+ — NAV vẫn tính từ vị thế broker thật; cần xem cost-basis\/đối soát riêng\./Số liệu NAV được tính trực tiếp từ vị thế và số dư thực tại công ty chứng khoán lưu ký tài khoản\./' \
+    -e 's/Đối soát broker: fill thật khớp đúng state nội bộ, không lệch\./Đã đối chiếu số liệu khớp lệnh trong ngày với công ty chứng khoán, khớp đúng\./' \
+    -e 's/Leg 3 \(statement DNSE, độc lập với state\/dnse_raw\): số khớp trùng khớp state nội bộ, không có fill ngoài kế hoạch\./Đã đối chiếu độc lập với sao kê giao dịch của công ty chứng khoán, số khớp lệnh trùng khớp, không phát sinh giao dịch ngoài kế hoạch\./' \
+    -e 's/Không đối soát được \(không có dnse_raw log — bình thường nếu account paper\)\./ /' \
+    -e 's/\*\*CẢNH BÁO ĐỐI SOÁT — FILL THẬT \(broker\) ≠ STATE NỘI BỘ\*\* — khả năng có tiến trình chạy trùng hoặc lỗi đồng bộ:/**Đang xác minh lại số liệu khớp lệnh** — phát hiện chênh lệch giữa số liệu nội bộ và xác nhận từ công ty chứng khoán, đội ngũ đang đối chiếu:/' \
+    -e 's/👉 Kiểm tra ngay — xem có process bot_execute\.py trùng lặp, hoặc đối chiếu dnse_raw_[^ ]* thủ công\./👉 Số liệu NAV\/vị thế cuối kỳ vẫn lấy từ dữ liệu thực tại công ty chứng khoán lưu ký, không bị ảnh hưởng bởi chênh lệch tạm thời này\./' \
+    -e 's/\bgate\b/ngưỡng lọc/g' \
+    -e 's/\bcircuit breaker\b/cơ chế dừng khẩn cấp/gI' \
+    -e 's/\bdispatch\b/điều phối nội bộ/gI' \
+    -e 's/\bbug\b/lỗi kỹ thuật/gI' \
+    -e 's/sự cố/sự kiện cần theo dõi/g' \
+  | awk '
+      /^🛰️|^🧭|^💵|^🧲/ { skip_next=1; next }
+      skip_next && /^ *↳/ { skip_next=0; next }
+      { skip_next=0; print }
+    ' \
+  | sed -E '/^ *$/{ N; /^\n *$/D }'
 }
 
 # Mọi ngày PHẢI có 1 dòng báo cho account này — "im lặng" không phân biệt được với hệ
@@ -93,39 +278,42 @@ if [ ! -f "$PLAN_FILE" ]; then
   # (vd ZaloPay 2026-07-14: transition xong 07-13, không phát sinh lệnh — bản cũ khẳng
   # định chắc "KHÔNG phải ngày nghỉ bình thường" là kết luận sai, fix 2026-07-14).
   # Không có bằng chứng → nêu cả 2 khả năng, để người đọc xác nhận, không buộc kết luận.
-  MSG="🟡 **EOD $ACCOUNT ($PLAN_DATE)** — KHÔNG TÌM THẤY file plan hôm nay. 2 khả năng: (i) CHỦ ĐỘNG không lập plan cho account này (quyết định HOLD có chủ đích — bình thường), hoặc (ii) DollarBill lỗi lúc 17:30/19:30 hôm qua. Kiểm tra plan channel / bus để xác nhận là chủ động hay lỗi — báo cáo này không đủ bằng chứng tự kết luận."
+  if [ "$ACCOUNT" = "SpaceX" ]; then
+    MSG="🟡 **Báo cáo giao dịch ngày — SpaceX ($PLAN_DATE)** — Chưa ghi nhận kế hoạch giao dịch cho phiên hôm nay. Đội ngũ quản lý danh mục đang xác nhận và sẽ cập nhật báo cáo sớm nhất có thể."
+  else
+    MSG="🟡 **EOD $ACCOUNT ($PLAN_DATE)** — KHÔNG TÌM THẤY file plan hôm nay. 2 khả năng: (i) CHỦ ĐỘNG không lập plan cho account này (quyết định HOLD có chủ đích — bình thường), hoặc (ii) DollarBill lỗi lúc 17:30/19:30 hôm qua. Kiểm tra plan channel / bus để xác nhận là chủ động hay lỗi — báo cáo này không đủ bằng chứng tự kết luận."
+  fi
   echo "$MSG"
-  "$ROOT/bin/notify_thread.sh" "$MSG" "$TRADING_REPORT_THREAD" 2>/dev/null || true
-  "$ROOT/bin/append_event.sh" Mafee status "eod-trading-report" \
-    "{\"account\":\"$ACCOUNT\",\"plan_date\":\"$PLAN_DATE\",\"delivered_via\":\"no_plan_alert\"}" 2>/dev/null || true
-  exit 0
+  _deliver_eod "$MSG" not_applicable
+  exit $?
 elif [ "$N_ORDERS_TODAY" = "0" ]; then
   # Case 2: HOLD hợp lệ (0 lệnh) — không cần state file (bot_execute.py thoát sớm đúng
   # thiết kế). Vẫn báo NAV để xác nhận hệ thống sống + số đúng, không phải im lặng.
   # grep -v [dnse]: lọc log kết nối broker debug (connect()/token) — không thuộc về
   # report client-facing, giữ minh bạch/gọn (user 2026-07-07).
-  NAV_SECTION="$(python3 "$ROOT/bin/daily_nav_snapshot.py" --account "$ACCOUNT" --date "$PLAN_DATE" 2>&1 | grep -v '^\[dnse\]')"
+  _nav_section
   _dt5g_warn_set
   MSG="${DT5G_WARN:+$DT5G_WARN
 
 }📊 **EOD Trading Report — $ACCOUNT ($PLAN_DATE)**
 ✅ HOLD — kế hoạch hôm nay không có lệnh nào (đúng thiết kế, không phải lỗi). Bot đã trực phiên đồng bộ trạng thái.
 
-$NAV_SECTION$(_dt_gate_block)"
+$NAV_SECTION$(_dt_gate_block)$(_hit_details_block)"
+  MSG="$(printf '%s' "$MSG" | _investor_polish)"
   echo "$MSG"
-  "$ROOT/bin/notify_thread.sh" "$MSG" "$TRADING_REPORT_THREAD" 2>/dev/null || true
-  "$ROOT/bin/append_event.sh" Mafee status "eod-trading-report" \
-    "{\"account\":\"$ACCOUNT\",\"plan_date\":\"$PLAN_DATE\",\"delivered_via\":\"hold_day\"}" 2>/dev/null || true
-  exit 0
+  _deliver_eod "$MSG" not_applicable
+  exit $?
 elif [ ! -f "$STATE_FILE" ]; then
   # Case 3: CÓ lệnh trong plan nhưng KHÔNG có state file — bot chưa từng chạy/crash trước
   # khi ghi state đầu tiên. Vấn đề thật, khác hẳn case 1/2.
-  MSG="🔴 **EOD $ACCOUNT ($PLAN_DATE)** — Plan có $N_ORDERS_TODAY lệnh nhưng KHÔNG có state file thực thi. Bot có thể chưa chạy được lần nào hôm nay (kiểm tra run_bot.sh log / bot_heartbeat) — cần xem ngay."
+  if [ "$ACCOUNT" = "SpaceX" ]; then
+    MSG="🟡 **Báo cáo giao dịch ngày — SpaceX ($PLAN_DATE)** — Báo cáo đang được xử lý, dữ liệu giao dịch trong ngày chưa sẵn sàng để tổng hợp. Đội ngũ sẽ cập nhật báo cáo đầy đủ ngay khi hoàn tất."
+  else
+    MSG="🔴 **EOD $ACCOUNT ($PLAN_DATE)** — Plan có $N_ORDERS_TODAY lệnh nhưng KHÔNG có state file thực thi. Bot có thể chưa chạy được lần nào hôm nay (kiểm tra run_bot.sh log / bot_heartbeat) — cần xem ngay."
+  fi
   echo "$MSG"
-  "$ROOT/bin/notify_thread.sh" "$MSG" "$TRADING_REPORT_THREAD" 2>/dev/null || true
-  "$ROOT/bin/append_event.sh" Mafee error "eod-trading-report" \
-    "{\"account\":\"$ACCOUNT\",\"plan_date\":\"$PLAN_DATE\",\"delivered_via\":\"missing_state_alert\"}" 2>/dev/null || true
-  exit 0
+  _deliver_eod "$MSG" not_applicable
+  exit $?
 fi
 # Case 4 (bình thường: có lệnh + có state) rơi xuống phần render đầy đủ bên dưới.
 
@@ -212,8 +400,11 @@ plan_tickers = {o.get('ticker') for o in plan.get('orders', [])}
 dnse_raw_file = os.path.join(wc_root, 'data', 'execution_logs', f'dnse_raw_{plan_date}.jsonl')
 real_filled_by_ticker = {}
 reconciled = False
-# Lấy account_no cho account này để filter dnse_raw (file chung cả SpaceX+ZaloPay)
+# Lấy account_no cho account này để filter dnse_raw (file chung cả SpaceX+ZaloPay).
+# FAIL-CLOSED (§12, code-quality 2026-09-13): không tra được account ⇒ BỎ đối soát và nói rõ lỗi;
+# trước đây `except: pass` + lọc có điều kiện ⇒ gộp order của MỌI account ⇒ lệch giả/che lệch thật.
 _target_account_no = None
+_target_account_err = None
 try:
     _secrets_file = os.path.join(wc_root, 'secrets', 'trading_bot_accounts.json')
     with open(_secrets_file, encoding='utf-8') as _sf:
@@ -226,9 +417,22 @@ try:
     elif isinstance(_accts_list, dict):
         _acct = _accts_list.get(account) or {}
         _target_account_no = _acct.get('account_id') or _acct.get('account_no')
-except Exception:
-    pass
-if os.path.exists(dnse_raw_file):
+    if not _target_account_no:
+        _target_account_err = (f"không có account_id cho label '{account}' trong "
+                               f"secrets/trading_bot_accounts.json")
+except Exception as _e:
+    _target_account_err = f"đọc secrets/trading_bot_accounts.json lỗi: {type(_e).__name__}: {_e}"
+if os.path.exists(dnse_raw_file) and _target_account_err:
+    # Chi tiết lỗi (path/exception) CHỈ đi kênh ops — báo cáo gửi nhà đầu tư chỉ nhận câu trung tính.
+    _skip_msg = f"eod_trading_report: BỎ đối soát FILL-vs-STATE ({account} {plan_date}): {_target_account_err}"
+    print(_skip_msg, file=sys.stderr)
+    try:
+        import subprocess
+        subprocess.run([os.path.join(wc_root, 'mike', 'bin', 'notify.sh'), '🟡 ' + _skip_msg],
+                       timeout=60, capture_output=True)
+    except Exception as _ne:
+        print(f"eod_trading_report: notify.sh lỗi: {type(_ne).__name__}: {_ne}", file=sys.stderr)
+elif os.path.exists(dnse_raw_file):
     reconciled = True
     latest_by_oid = {}
     with open(dnse_raw_file, encoding='utf-8') as f:
@@ -237,8 +441,8 @@ if os.path.exists(dnse_raw_file):
                 rec = json.loads(line)
             except json.JSONDecodeError:
                 continue
-            # Bỏ qua records của account khác (fix: dnse_raw chứa cả SpaceX+ZaloPay)
-            if _target_account_no and rec.get('account_no') and rec.get('account_no') != _target_account_no:
+            # Chỉ giữ record CỦA account này (dnse_raw chứa cả SpaceX+ZaloPay); thiếu account_no ⇒ loại
+            if str(rec.get('account_no') or '') != str(_target_account_no):
                 continue
             kind = rec.get('kind')
             seen = []
@@ -375,6 +579,10 @@ if mismatches:
 elif reconciled:
     lines.append("✅ Đối soát broker: fill thật khớp đúng state nội bộ, không lệch.")
     lines.append("")
+elif os.path.exists(dnse_raw_file) and _target_account_err:
+    lines.append("⚠️ Chưa đối chiếu được số liệu khớp lệnh hôm nay với công ty chứng khoán — "
+                 "đội vận hành đang kiểm tra.")
+    lines.append("")
 else:
     lines.append("ℹ️ Không đối soát được (không có dnse_raw log — bình thường nếu account paper).")
     lines.append("")
@@ -429,7 +637,7 @@ elif os.path.exists(mismatch_file):
 PYEOF
 )"
 
-NAV_SECTION="$(python3 "$ROOT/bin/daily_nav_snapshot.py" --account "$ACCOUNT" --date "$PLAN_DATE" 2>&1 | grep -v '^\[dnse\]')"
+_nav_section
 
 # DC-book NEUTRAL waterfall (paper sleeve) MOVED OUT 2026-07-07 — user mandate: mọi
 # paper-trading report gộp về MỘT nhóm (Paper Programs Daily Report,
@@ -441,26 +649,12 @@ FULL_REPORT="${DT5G_WARN:+$DT5G_WARN
 
 }$REPORT
 
-$NAV_SECTION$(_dt_gate_block)"
+$NAV_SECTION$(_dt_gate_block)$(_hit_details_block)"
+FULL_REPORT="$(printf '%s' "$FULL_REPORT" | _investor_polish)"
 
 echo "$FULL_REPORT"
-# Báo cáo client-facing KHÔNG được rơi im lặng (sự cố 2026-07-06: topic Trading report bị
-# Missing Access — bot mất quyền/thread archive — notify fail bị `|| true` nuốt, user không
-# nhận được report ngày và không ai biết). Fallback 2 tầng khi post thất bại: (1) Telegram
-# qua notify.sh, (2) Trading Daily thread kèm cảnh báo — và luôn ghi bus event nêu rõ kênh
-# nào nhận được.
-TRADING_DAILY_THREAD="trading_daily"
-DELIVERED_VIA="trading_report_thread"
-if ! "$ROOT/bin/notify_thread.sh" "$FULL_REPORT" "$TRADING_REPORT_THREAD" 2>>"$ROOT/logs/eod_notify_errors.log"; then
-  DELIVERED_VIA="fallback"
-  FALLBACK_HEADER="⚠️ **Topic Trading report đang không truy cập được (bot Missing Access) — gửi tạm qua kênh dự phòng.**"
-  "$ROOT/bin/notify.sh" "$FALLBACK_HEADER
-$FULL_REPORT" 2>/dev/null || true
-  "$ROOT/bin/notify_thread.sh" "$FALLBACK_HEADER
-$FULL_REPORT" "$TRADING_DAILY_THREAD" 2>/dev/null || true
-fi
-"$ROOT/bin/append_event.sh" Mafee status "eod-trading-report" \
-  "{\"account\":\"$ACCOUNT\",\"plan_date\":\"$PLAN_DATE\",\"delivered_via\":\"$DELIVERED_VIA\"}" 2>/dev/null || true
+DELIVERY_RC=0
+_deliver_eod "$FULL_REPORT" || DELIVERY_RC=$?
 
 # Phương án B (user duyệt 2026-07-02): kiểm toán độc lập CÓ ĐIỀU KIỆN — chỉ kích hoạt
 # risk-auditor khi đối soát cơ học phía trên đã phát hiện lệch, không chạy tốn kém mỗi
@@ -498,3 +692,4 @@ Báo cáo ngắn gọn lên bus + Discord Trading report topic (bin/notify_threa
 PROMPT
 )" --bg --thread "$_discord_thread" --timeout 900 2>&1 || true
 fi
+exit "$DELIVERY_RC"

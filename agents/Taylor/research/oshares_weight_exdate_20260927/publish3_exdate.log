@@ -1,0 +1,15 @@
+[wrapper] custom_basket = /home/trido/thanhdt/wt-c30v-wexdate/WorkingClaude/custom_basket.py  retchain_legacy=False
+building 8L custom30 (namecap 10%) 2014-01-02 -> 2026-09-24 ...
+[BQ_LOCAL_CACHE] WARNING: cache verified 37h ago (>36h) — consider re-running sync_bq_cache.py
+[BQ_LOCAL_CACHE] ready — 14 tables from /home/trido/thanhdt/WorkingClaude/data/bq_cache
+  [forensic exclude] none ([Errno 2] No such file or directory: '/home/trido/thanhdt/wt-c30v-wexdate/WorkingClaude/data/forensic_flags.csv')
+[BQ_LOCAL_CACHE] query took 67.5s (595387 rows)
+  [oshares-step] corp-action từ SNAPSHOT /home/trido/thanhdt/WorkingClaude/data/snapshots/corp_action_share_20260927.parquet: 4466 dòng
+  [oshares-step] exdate: 1649 bước OShares, 783 bước ĐƯỢC DỜI (median 42 ngày), 855 giữ ngày quý (không khớp sự kiện), 3 bị chặn bởi cổng PIT
+  yield_floor (rebal hien tai): BANKING_EXCLUDED=13, NO_DATA=9, BELOW_FLOOR=4, ABOVE_FLOOR=4
+  1470 rows, 49 rebals -> /home/trido/thanhdt/WorkingClaude/data/custom30v_8l_publish_expwexdate3_exdate.csv
+  bq load ...
+STUB bq: suppressed -> load --replace --source_format=CSV --skip_leading_rows=1 lithe-record-440915-m9:tav2_bq.custom30v_8l /home/trido/thanhdt/WorkingClaude/data/custom30v_8l_publish_expwexdate3_exdate.csv rebal_date:DATE,effective_from:DATE,effective_to:DATE,ticker:STRING,liq_rank:INTEGER,rating_8l:INTEGER,weight:FLOAT,quarter:STRING,yield_floor_note:STRING,is_stable_payer:BOOLEAN
+
+OK -> lithe-record-440915-m9:tav2_bq.custom30v_8l  (current rebal 2026-08-05, 30 mã)
+EXIT=0 (publish exdate)

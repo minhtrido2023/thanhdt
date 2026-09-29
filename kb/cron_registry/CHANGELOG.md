@@ -21,6 +21,200 @@ preserve_verbatim: >
 
 # Log thay đổi Cron Registry
 
+- 2026-09-26 (Taylor, job `Taylor_20260925_174424`, user duyệt 2026-09-26): **THÊM** `13 2 * * 1-5 … mike/bin/opening_window_l2_poll.py` (**09:13 ICT T2-T6**). Backup crontab trước: `mike/logs/crontab_backup_opening_window_20260926.txt`.
+  4 câu hỏi §11: (1) đọc plan file `plan_<acct>_<date>.json` (account live+dnse) + DNSE live quote API same-day, KHÔNG BQ; (2) tươi ngay lúc gọi — quote-only broker gọi trực tiếp; (3) cần T (cửa sổ đầu phiên hôm nay, không phải T-1); (4) tiêu thụ = R&D offline Taylor, dựng counterfactual limit-thụ-động-vs-cross cho lệnh rơi nhánh `no-hist` của `_decide_cross_adaptive` (đề xuất §4 `agents/Taylor/research/opening_window_limit_20260926/FINDINGS.md`). Nhánh `opening_cycle` MỚI của chương trình paper `order_book_execution_shadow` đã LIVE (charter `kb/paper_programs_charter/order_book_execution_shadow.md`) — behavior_contract `LOG_ONLY_NO_BROKER_PATH` giữ nguyên, không đổi `_decide_cross`/`_decide_cross_adaptive`/`bot_execute.py`/`config.py`/`trading_rules.json`. Ghi ra file riêng `data/execution_logs/orderbook_opening_<date>.jsonl` (schema `orderbook_l2_opening_v1`, `stratum="opening_cycle"`) — KHÔNG trộn vào `orderbook_shadow_*.jsonl` của chương trình mẹ (§3a/§28). Mốc quyết định nhánh: 2027-01-25, khác mốc nghiệm thu chương trình mẹ 2026-10-21 (đã khoá) — ghi cả 2 vào `kb/paper_programs_registry.json`. selfcheck `opening_window_l2_poll_selfcheck.py` 22/22 × 4 TZ.
+
+- 2026-09-23 (Taylor, job `Taylor_20260923_051148`, user chốt 4 quyết định corp-action paper): **THÊM** `40 1 * * 1-5 … mike/bin/paper_corp_action.py --label main` (**08:40 ICT T2-T6**). Backup crontab trước: `logs/crontab_backup_paper_corp_action_20260923.txt` (+ `/tmp/crontab.before.*.bak`).
+  Root cause: `PaperBroker` giữ vị thế `{mã: KL}` thuần và khớp trên quote THẬT ⇒ sáng GDKHQ giá đã rơi hệ mới mà KL vẫn hệ cũ. Đo trên sổ paper main: 3 sự kiện từ 2026-07-07 bỏ lỡ **7.860.455đ = 0,79% NAV** (cổ tức tiền RÒNG sau thuế TNCN 5%).
+  §11: (1) **đọc BQ LIVE** — `tav2_bq.corporate_action` qua `corp_action_lib.pricing_events()` (lọc `!= not_executed` ⇒ **NHẬN `announced`**, bắt buộc: vendor chỉ flip `announced→executed` trong lô ~22:2x ICT CỦA CHÍNH ngày sự kiện, cùng bẫy vintage đã vá cho `corp_action_daily.sh`) + `tav2_bq.ticker.Close` phiên cum (neo ngoài); (2) nguồn tươi: lô vendor ~22:2x ICT T-1, sync BQ 23:45 T-1 — cả hai xong từ đêm trước; (3) cần **T-1** (giá phiên cum cuối = hôm qua) ⇒ không có ràng buộc giờ trong phiên; (4) consumer = `paper_main_probe_plan.py` **08:52** (probe plan phải thấy KL đã chỉnh) rồi `bot_execute --account main` **09:10/10:46/13:05**.
+  Giờ **08:40** chứ không phải 08:45 như đề xuất ban đầu: khe `45 1` đã có `preflight_check.sh`, `50 1` có `plan_approval_reminder.sh`, `52 1` có `paper_main_probe_plan.py` ⇒ lùi về khe trống gần nhất theo `_adding-cron-policy.md` ("không đặt 2 job trùng phút"). Runtime **đo thật 2,3s**; `timeout 300`.
+  Điều kiện an toàn đã thoả trước khi bật (user yêu cầu): cổ tức tiền đổi sang RÒNG (`a8fa47d6`) + `PaperBroker.get_positions()` thôi trả `sellable == total` cho CP corp-action chưa về (`24e885ac` + `6ca93ac1`). Selfcheck **72/72 PASS × 4 TZ + `env -u TZ` + `$DNA_PYEXE`**, 11/11 mutation chết bằng assertion, §23 quét rộng 17 selfcheck của `trading_bot/brokers.py` + `test_trading_bot.py` đều rc=0.
+  Chạy tay 1 lần lúc 12:1x ICT 2026-09-23 để đặt watermark: 0 sự kiện, positions/cash **KHÔNG ĐỔI**, `corp_actions.watermark = 2026-09-23` ⇒ **KHÔNG hồi tố** (user chưa quyết mục hồi tố NAV lịch sử). Lượt cron đầu tiên: **Thứ Năm 2026-09-24, 08:40 ICT**.
+  Xác minh sau khi cài bằng `crontab -l` THẬT (không tin thao tác ghi), dòng 148.
+
+- 2026-09-13 (Wags, job `Wags_20260913_064538`, aria-G, user duyệt 13:44 ICT): **THÊM** `50 12 * * 1-5 mike/bin/nav_snapshot_daily.sh` (**19:50 ICT**). Backup crontab trước: `/tmp/crontab_backup_wags_aria_g_20260913.txt` (+ `logs/crontab_backup_aria_g_20260913.txt`).
+  Root cause: `eod_trading_report.sh` chỉ gọi `daily_nav_snapshot.py` ở ~dòng 249 (HOLD) và ~595 (render đầy đủ); thoát sớm ở case 1 không-plan (`exit $?` ~243, ca 08-25) và case 3 không-state (~271, ca 08-07) + rc=2 không retry ⇒ 5 phiên thiếu `nav_history` (Taylor aria-A2). EOD giữ nguyên lệnh gọi; idempotency ở wrapper (có dòng ⇒ bỏ qua).
+  §11: (1) đọc DNSE live qua daily_nav_snapshot + nav_history/marker; (2) nguồn tươi: EOD ghi dòng 19:10:06-40 (đo 8 phiên 09-03→09-11), balances sau đóng cửa có từ 19:07; (3) cần T; (4) consumer = weekly/monthly report, không deadline tối. Giờ 19:50 vì 19:35 (telegram_run_daily) + 19:40 (jit_unpark, DNSE) đã chiếm; thường xong ~19:51, tệ nhất ~20:13 (chờ EOD trần 10' + 2 vòng retry×5' gộp account + ~3' chạy), ~20:28 nếu python treo tới trần 180s; lấn compute_active_nav 20:15 vô hại (cả 2 chỉ đọc DNSE).
+  Arch-review vòng 1 NEEDS_CHANGES (pgrep khớp nhầm argv `claude -p`; guard ngày thường/chờ EOD/flock chưa test; LOG_MISSING giả thứ Hai; ❌ rc=4 ⇒ ERRORS_FOUND giả) ⇒ vá; vòng 2 NEEDS_CHANGES (dòng ❌ đi qua log() có prefix nên cron_health không khớp) ⇒ vá + assert bằng ERROR_RE thật; selfcheck 49/49, mutation 21/21.
+
+- 2026-09-12 (Wags, job `Wags_20260912_052122`, user duyệt 12:18 ICT): **ĐỔI GIỜ**
+  `hit_details_daily.sh` **19:05 → 19:12 ICT** (`5 12` → `12 12`, T2-T6). Backup crontab trước:
+  `logs/crontab_backup_20260912_122726.txt` (140 dòng, không đổi số dòng sau khi cài).
+  Root cause: dòng 19:05 được chọn theo giờ BẮT ĐẦU của producer ("sau `bq_freshness_check` 19:00"),
+  nhưng artifact `deploy_golive_dt5g_v4/out/golive_v23_recommendations_<date>.csv` thật sự có mtime
+  **19:06-19:07** (đo `ls -l` 3 phiên: 09-09 19:06, 09-10 19:06, 09-11 19:07) ⇒ lần chạy cron ĐẦU
+  TIÊN (2026-09-11) chết với `Không thấy .../golive_v23_recommendations_2026-09-11.csv`, exit 1,
+  không post Discord, không sinh artifact; lỗi chỉ nằm trong `logs/hit_details_daily.log`
+  (2 dòng, 1/1 lần chạy hỏng) nên không ai thấy. Bus: `Mike/hit-details-daily-chay-truoc-producer-2-phut`.
+  **Fix lớp lỗi, không chỉ fix dòng cron**: `bin/wait_for_artifact.sh` (MỚI) — consumer CHỜ artifact
+  có mtime hôm nay (poll 30s, trần 10', hết trần fail LOUD nêu đã chờ bao lâu + file + producer,
+  KHÔNG chạy trên dữ liệu cũ); uỷ quyền phép so ngày cho `bin/csv_fresh_today.sh` (đã neo TZ).
+  Selfcheck `bin/wait_for_artifact_selfcheck.py` **19/19 PASS** dưới `env -u TZ`: producer trễ ⇒
+  consumer vẫn đúng; producer không tới ⇒ fail loud đúng ở trần; file mtime hôm qua ⇒ vẫn fail
+  (chính ca gây sự cố); + kiểm wiring (vòng chờ nằm TRƯỚC `hit_details.py`) + kiểm dòng crontab.
+  Giờ 19:12 từ nay chỉ là **thắt lưng an toàn**, không phải cơ chế đồng bộ.
+  4 câu hỏi §11: (1) đọc recs CSV local (producer `golive_recommend_v23` ghi) + BQ live cho raw
+  factor; (2) tươi khi artifact có mtime hôm nay — *đo bằng mtime, không suy từ giờ cron*;
+  (3) cần T (audit tín hiệu hôm nay); (4) consumer = người đọc topic `trading_daily`, không có
+  downstream máy nào ⇒ trễ vài phút vô hại, đọc nhầm phiên trước thì KHÔNG.
+  Luật rút ra: `kb/coding_guidelines_ext.md` §14b (+ sửa mốc "tươi" trong
+  `_adding-cron-policy.md` câu hỏi 2 thành giờ ARTIFACT SẴN SÀNG, và bắt buộc ghi INPUT+PRODUCER
+  khi đăng ký cron).
+
+- 2026-08-20 (Wags, user duyệt tường minh ~11:17 ICT — đề xuất
+  `agents/Mike/research/wakeup_architecture_redesign_20260820.md` Phase 1): **THÊM cron `*/5`**
+  `/usr/bin/python3 /home/trido/thanhdt/WorkingClaude/mike/bin/wakeup_reconcile.py >>
+  /home/trido/thanhdt/WorkingClaude/mike/logs/wakeup_reconcile_cron.log 2>&1`.
+  Tầng LEVEL-TRIGGERED đầu tiên cho hệ wake-up: cưỡng chế bất biến *"job terminal `from=Mike`
+  có `discord_thread_id`, chưa `replied_at`, `ended_at` quá 3' ⇒ thread phải còn ≥1 one-shot
+  wakeup pending trong tasks.db HOẶC session đang running"*; vi phạm ⇒ gọi lại `wake_thread.sh`
+  với prompt template §8.4 (an toàn vì `jobs.sh claim-reply` idempotent). Kiêm consumer DUY NHẤT
+  của `logs/wake_thread_errors.log` (file này tồn tại từ 08-15 mà KHÔNG checker nào đọc ⇒ 3 lần
+  push chết im lặng suốt 5 ngày). Root cause:
+  `kb/incidents/2026-08/2026-08-20-wake-push-utf8-surrogate-deletes-ladder.md`.
+  4 câu hỏi §11: (1) đọc `bus/jobs/*.json` (local live), `/workspace/ccdb-mike/data/tasks.db`
+  (sqlite `mode=ro`, DB của service khác — TUYỆT ĐỐI không ghi), `127.0.0.1:8199/api/sessions`
+  (live), `logs/wake_thread_errors.log`; KHÔNG chạm BQ/DNSE/web nên không có chuyện vintage/cache;
+  (2) cả 3 nguồn tươi tức thời; (3) cần T — bất biến chỉ có nghĩa trên trạng thái hiện tại;
+  (4) consumer = phiên Mike ở thread Discord (được đánh thức) + người đọc Trading Daily khi push
+  lỗi + `daily_retro.sh` 00:30 (Phase 4 đọc log tính success-rate/số lần cứu).
+  Chống xung đột: flock `state/locks/wakeup_reconcile.lock` (chạy đè ⇒ exit im lặng); state file
+  ghi atomic tmp+rename; tối đa 1 wake/thread/chu kỳ (ccdb xoá one-shot pending trước khi tạo cái
+  mới, bắn 2 phát liền là phát sau huỷ phát trước). Fail-safe: tasks.db/API không đọc được ⇒
+  KHÔNG bắn wake nào, exit 2/3 (mandate user 2026-08-03 "ưu tiên quan sát tự nhiên").
+  Chống bắn hàng loạt lần đầu: hằng số `MIN_EFFECTIVE_TS=1787199900` (mốc deploy 11:25 ICT) +
+  look-back trần 48h — đo thật trên job board production: bỏ mốc ⇒ 7 job cũ bị bắn, có mốc ⇒ 0.
+  ⚠️ **Sửa sau audit (arch-reviewer NEEDS_CHANGES, cùng ngày — 1 BLOCKER thật)**: bản đầu giả định
+  "wake thành công ⇒ tasks.db có row pending ⇒ chu kỳ sau tự im". Đọc code ccdb thật
+  (`SchedulerCog._claim_one_shot`) thì row one-shot bị XOÁ **trước khi** Claude chạy (guard F1/F3
+  chống replay) ⇒ phiên được đánh thức mà không `claim-reply` sẽ bị bắn lại mỗi 5' vô tận (đo
+  sandbox: 5 chu kỳ = 5 wake cùng 1 job; trần cũ duy nhất là look-back 48h = 576 lượt, mỗi lượt
+  dựng 1 phiên Claude). Base rate thật: 4/5 job `--bg` chưa `replied_at` từ 08-17 ĐỀU đã có dòng
+  SUCCESS trong `logs/wake_thread.log`. Đã vá bằng TRẦN CỨNG ghi bền vào state file (ghi TRƯỚC khi
+  gọi wake, §5): `MAX_FIRES_PER_JOB=3` (hết ⇒ dừng hẳn + notify `trading_daily` đúng 1 lần),
+  `REFIRE_COOLDOWN=900s`, `MAX_WAKES_PER_CYCLE=3`. Kèm 3 vá nữa cùng audit: (a) loại job dispatch
+  ĐỒNG BỘ khỏi phạm vi (`pid` có trong record = chạy nền; 192/773 record là sync, mỗi lượt
+  `wags_autofix.sh` sẽ là 1 false-positive đánh thức topic Architecture); (b) chỉ tiến
+  `errlog_offset` khi `notify_thread.sh` trả 0 (gửi hỏng mà tiến offset = mất vĩnh viễn đúng dòng
+  lỗi quan trọng nhất); (c) in 1 dòng heartbeat ra stdout mỗi lần chạy để
+  `bin/cron_health_check.py` (đo bằng mtime log target, bucket `frequent` ngưỡng 2h) không báo
+  STALE giả mỗi ngày.
+  Phụ trợ cùng commit: neo `+07:00` tường minh cho dấu thời gian `wake_thread.sh` (§16 — log thật
+  đã có 1 dòng `+00:00` lẫn giữa 33 dòng `+07:00` vì script chạy từ 2 nơi TZ khác nhau, làm lệch
+  cửa sổ ngày của metric Phase 4); sửa câu "chưa checker nào đọc log này" trong header
+  `wake_thread.sh` (giờ reconciler là consumer); `MIKE.md` §8 thêm mô tả tầng thứ 3 + cách xử lý
+  prompt `[WAKEUP-RECONCILER]`.
+  Verify: `bin/wakeup_reconcile_selfcheck.py` **49/49 PASS** (hermetic hoàn toàn: sqlite fixture,
+  HTTP server fixture, stub `wake_thread.sh`/`notify_thread.sh`; chạy cả `env -u TZ`,
+  `TZ=Pacific/Kiritimati`, `TZ=America/Anchorage`) + 6 mutation test đều bị bắt + dry-run trên
+  dữ liệu production (0 wake, phát hiện đúng 3 dòng lỗi push lịch sử) + 11 mutation test (5 vòng đầu, 5 vòng sau audit,
+  1 cho neo TZ) đều bị bắt. Selfcheck kèm theo: `bin/wake_thread_selfcheck.py` 16/16 (thêm 2 ca TZ),
+  `bin/daily_retro_wake_metrics_selfcheck.sh` 13/13 (MỚI), `bin/dispatch_wake_selfcheck.sh` 12/12
+  (thêm 2 ca hồi quy Phase 2).
+  State file được SEED lúc deploy (`state/wakeup_reconcile_state.json`, offset = cuối
+  `wake_thread_errors.log` hiện tại) để lần chạy đầu không báo lại 3 dòng lỗi lịch sử đã chẩn đoán.
+  Backup crontab trước khi cài: `state/crontab_backup_20260820_wakeup_reconcile.txt`.
+
+- 2026-08-18 (Mike/Codex, user duyệt 2026-08-18): **THÊM cron daily `0 20 * * *` =
+  03:00 ICT** `/home/trido/thanhdt/WorkingClaude/mike/bin/worktree_cleanup_daily.sh --apply`,
+  ghi log `logs/worktree_cleanup.log`. Script mới dọn worktree/branch session đã merge,
+  mặc định DRY-RUN và chỉ xoá khi có `--apply`.
+  4 câu hỏi §11: (1) đọc git local `worktree list --porcelain` + `for-each-ref
+  refs/heads/session/*` + `merge-base --is-ancestor` với `master` + CCDB `/api/sessions`
+  và `/api/claims` — không gọi BQ/DNSE/web, vintage không liên quan; (2) nguồn là git
+  + CCDB local luôn tươi tại thời điểm chạy; (3) không cần T/T-1 vì job thuần dọn dẹp
+  metadata local; (4) không có consumer có deadline; mục tiêu là giảm tải token/quản lý
+  worktree, không ảnh hưởng tiến trình dữ liệu.
+  An toàn bắt buộc: fail-closed nếu CCDB không đọc được, chỉ xoá worktree sạch + branch
+  đã merge, không `--force`, bỏ qua dirty/unmerged/detached và mọi path/branch thuộc
+  thread/claim CCDB đã biết; remote branch chỉ báo cáo.
+  Chống xung đột: 03:00 nằm sau `kb_nightly.sh` 02:00 (hết cửa sổ git-lock KB) và trước
+  `selfcheck_weekly_baseline_check.sh` 04:30; dùng `flock` riêng nên chạy lặp vô hại.
+  Verify: `bash -n` + `shellcheck_gate.sh` + dry-run trên production root cả hai chế độ
+  `CCDB_API_URL` (process env và fallback `http://127.0.0.1:8199`) đều PASS.
+
+- 2026-08-17 (Mike/Codex, user duyệt 2026-08-17 04:06 UTC): **THÊM cron `late_plan_catchup.sh`**
+  3 mốc tối: `45 14 * * 1-5` (21:45 ICT), `0 15 * * 1-5` (22:00 ICT), `30 16 * * 1-5`
+  (23:30 ICT), cùng chạy `/home/trido/thanhdt/WorkingClaude/mike/bin/late_plan_catchup.sh`.
+  Script mới `mike/bin/late_plan_catchup.sh`: tự no-op trước 21:00 ICT / ngày không giao dịch;
+  per-account chỉ chạy nếu plan T+1 hợp lệ, chưa duyệt, chưa có dấu merge; chạy đúng 1 lần
+  chuỗi L1→L2→merge→inject→`send_plan_report.sh --account <acct> --second-chance`.
+  4 câu hỏi §11: (1) DNSE live same-day + cache parquet T-1 (qua L1/L2) + file plan local do
+  DollarBill ghi tối hôm đó — đo thật 08-05→08-14 có 2/5 phiên plan ghi sau 21:00 (muộn nhất
+  23:25 ICT); (2) plan tươi khi ghi xong, DNSE tươi sau 14:45; (3) cần T (giá đóng cửa + vị thế
+  hôm nay) — ràng buộc ≥15:00 ICT kế thừa từ L1/L2 guard; (4) consumer = user duyệt qua đêm,
+  deadline `preflight_check.sh` 08:45 sáng sau.
+  Chống xung đột: 21:45/22:00 cách send_plan_report 21:00 và second-chance 23:00; 23:30 trước
+  `sync_bq_cache_daily.sh` 23:45 (15' đệm, runtime toàn chain đo <60s + gửi báo cáo);
+  idempotent 2 lớp (trạng thái plan + lock per-account) nên 3 lần chạy/đêm không trùng việc,
+  không bao giờ chạm plan đã duyệt (APPROVED/INVALID → REFUSE rc=1).
+
+- 2026-08-16 (Mike/Codex, user yêu cầu tự động hóa gửi báo cáo tuần sáng chủ nhật 09:00
+  không miss): **THÊM cron `0 2 * * 0` = Sun 09:00 ICT**
+  `/home/trido/thanhdt/WorkingClaude/mike/bin/spend_report_weekly.sh >> .../mike/logs/spend_report_weekly.log 2>&1`.
+  Script mới `mike/bin/spend_report_weekly.py` dùng lại logic `spend_report.py`, sinh report
+  Markdown có bảng so sánh WoW, 4 PNG charts (bar/pie), nhận xét kiểu manager, và gửi email
+  HTML + `.md` đính kèm qua `send_report_email.py`.
+  4 câu hỏi §11: (1) đọc `bus/jobs/*.json` + `git log` 7 ngày + `state/spend_history.csv`
+  tuần trước — đều local live, không gọi BQ/DNSE/web; (2) nguồn tươi sau khi tuần đã đóng,
+  chủ nhật 09:00 ICT đủ điều kiện; (3) cần T-1/tuần đã đóng, không cần same-day; (4) consumer
+  là CEO/user qua email, deadline chủ nhật 09:00 ICT theo yêu cầu user.
+  Chống xung đột: Sunday 09:00 không trùng job nặng; `fleet_housekeeping.sh --apply` chạy
+  22:00 CN sau đó, chỉ dọn log/registry archive cũ.
+  Verify trước khi cài: dry-run chạy trên root production (`--root /home/trido/thanhdt/WorkingClaude/mike
+  --dry-run`) sinh đủ report + 4 PNG; HTML render nhúng 4 ảnh base64 (không còn ảnh thiếu);
+  `py_compile` 3 file Python + `bash -n` wrapper đều OK.
+
+- 2026-08-14 (Taylor, job `Taylor_20260814_142151`; user duyệt §6 `agents/Taylor/research/
+  park_merge_wire_20260811.md`): **THÊM 3 dòng** dựng chuỗi PARK-merge — `30 12` (19:30 ICT)
+  `park_trim_daily.sh` (L1), `40 12` (19:40) `jit_unpark_daily.sh` (L2), `20 13` (20:20)
+  `merge_park_daily.sh --write`. Cả 3 đều T2-T6, đều là wrapper MỚI trong `mike/bin/` theo khuôn
+  `inject_discretionary_orders.sh`/`compute_active_nav_all.sh` (tự lặp `live_dnse_labels()`) —
+  **không** dùng được `for_each_live_account.sh` vì 3 script này cần tham số per-account-per-date
+  (`--out park_trim_<acct>_<T+1>.json`, `--plan-date`) mà wrapper đó không dựng được.
+  Bối cảnh: L1/L2 **chưa từng có cron**; artifact tới nay chỉ có nhờ DollarBill chạy tay trong
+  dispatch EOD, nên `merge_park_orders.py` (đã ship + quant-skeptic CONFIRMED `high` 08-11, commit
+  `2633eb44`) không có gì để gộp vào ngày thường.
+  4 câu hỏi §11 — chi tiết đầy đủ nằm ở 3 dòng tương ứng của bảng chính, tóm tắt:
+  (1) L1/L2 đọc **DNSE LIVE same-day** (bắt buộc, §6 bright-line) + `bq_cache/ticker` T-1 chỉ để
+  tính ADV lịch sử + rổ `custom30v_8l_publish.csv` + sổ lô local; merge **thuần file local, không
+  gọi DNSE, không chạm BQ**. (2) DNSE tươi ngay sau đóng cửa 14:45; cache từ sync 23:45 đêm trước;
+  plan T+1 do DollarBill ghi ~19:0x. (3) L1/L2 cần **T** ⇒ **ràng buộc cứng sau 15:00 ICT**, cưỡng
+  chế **bằng code** trong wrapper (`now_ict().hour < 15` ⇒ rc=1) chứ không chỉ bằng giờ cron —
+  `close_price()` trả 0 khi phiên chưa đóng, đúng sự cố 2026-08-07. (4) Consumer: L1→L2→merge→
+  `inject_discretionary_orders.sh` 20:30 → `send_plan_report.sh` 21:00, deadline cuối là user duyệt
+  trước `preflight_check.sh` 08:45 sáng sau.
+  Chống xung đột: 19:30 lệch 10' với `pt_8l_daily` 19:20 và 5' với `telegram_run_daily` 19:35;
+  20:20 nằm sau `compute_active_nav_all.sh` 20:15 (5') nhưng **không tranh tài nguyên** vì merge
+  không gọi DNSE, và trước `inject_discretionary_orders.sh` 20:30 (10'). Runtime đo thật: L1/L2
+  <60s, merge <5s cho cả 2 account.
+  Verify trước khi cài: ShellCheck 0 finding/3 file; 5 selfcheck liên quan xanh (merge 120/120 ·
+  park_trim 63/63 · jit_unpark + ma trận TZ · approve_plan_with_jit 27/27 · preflight 16/16);
+  E2E **trên dữ liệu SỐNG hôm nay** trong sandbox `PARK_CHAIN_PLAN_DIR` (dry-run ⇒ plan y hệt từng
+  byte; `--write` ⇒ `orders[]` không đổi, `approved_by=None` giữ nguyên); chứng minh ngược 2 nhánh
+  fail-closed của L2 (thiếu L1 / thiếu plan ⇒ rc=1, 0 artifact) và 4 nhánh guard giờ/ngày bằng đồng
+  hồ giả; ma trận TZ `{-u TZ, NY, UTC, env -i}` 4/4.
+  ⚠️ Ghi nhận khi cài, KHÔNG do 3 dòng này gây ra: (a) plan T+1 **2/5 phiên gần đây được ghi SAU
+  21:00** (08-11 lúc 23:25, 08-13 lúc 21:31) ⇒ những ngày đó L2 no-op fail-closed và chuỗi không
+  giao gì — an toàn nhưng vô ích, không phải hồi quy; (b) tối 08-14 L1 trả `BLOCKED_RECONCILE` cả
+  2 account (sổ lô BID lệch broker: SpaceX 1.100 vs 1.175, ZaloPay 400 vs 427, cùng tỷ lệ ~6,8%) —
+  lúc 19:04 còn `NO_TRIM`, tức broker ghi có thêm CP trong buổi tối; chuỗi sẽ chạy nhưng không sinh
+  lệnh nào tới khi sổ lô được đối soát lại.
+  Rollback 1 lệnh: `crontab -l | grep -v park_trim_daily.sh | grep -v jit_unpark_daily.sh | grep -v
+  merge_park_daily.sh | crontab -`; bản crontab trước khi đổi lưu ở
+  `agents/Taylor/research/crontab_backup_20260814_before_park_chain.txt`.
+  📌 **Quy chiếu commit — CÙNG JOB nhưng ĐÚNG RA LÀ HAI COMMIT LIỀN KỀ, không phải một**
+  (quant-skeptic bắt được 2026-08-14, đính chính ngay tại đây): 3 wrapper `.sh` + bản sao lưu
+  crontab nằm ở **`f44b5e23`** (21:38:30 +0700); 2 file tài liệu này (`kb/cron_registry.md` +
+  `kb/cron_registry/CHANGELOG.md`) thực tế đã bị **`3a807740`** (21:38:16 +0700, commit
+  `consolidate` KB v2192) gom mất **14 giây trước** — `consolidate.sh` chạy tự động ngay sau
+  `append_event.sh` và commit TOÀN BỘ `kb/`, nên tới lượt commit của job thì 2 path đó không còn
+  gì để stage. Nội dung khớp đúng ý định §11 (cùng job, cùng phút, đều trên `master`) nhưng ai
+  truy vết bằng một hash duy nhất sẽ hụt. **Bài học cho cron/registry sau này**: ở repo `mike`,
+  hễ job có `append_event.sh` chạy trước `git commit` thì file `kb/` gần như chắc chắn đi theo
+  commit của consolidator — muốn "cùng commit" theo nghĩa đen phải commit `kb/` TRƯỚC khi ghi bus,
+  còn không thì khai báo cả hai hash như dòng này.
+
 - 2026-08-11 (Mike, user mandate): cron 16:00 ICT `paper_programs_daily_report.sh` thêm cờ
   `--email`, vẫn giữ `--post` để Discord và email dùng cùng một lần render. Wrapper lưu artifact
   `reports/paper_programs_daily_report_YYYY-MM-DD.md`, gửi HTML + file Markdown đính kèm qua

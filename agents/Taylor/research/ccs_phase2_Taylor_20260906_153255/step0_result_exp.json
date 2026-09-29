@@ -1,0 +1,307 @@
+{
+  "by_book": [
+    {
+      "book": "BAL",
+      "sessions": 3107.0,
+      "mean_out_cut_frac_pct": 4.840132250586369,
+      "mean_d_cash_pct": 0.7730648231477036,
+      "mean_d_stocks_pct": -1.0340370269592807,
+      "mean_d_etf_pct": 0.2609722038115774,
+      "redeploy_ratio": 0.8402802272491524
+    },
+    {
+      "book": "LAG",
+      "sessions": 3107.0,
+      "mean_out_cut_frac_pct": 6.263207700492698,
+      "mean_d_cash_pct": 0.19787000486226483,
+      "mean_d_stocks_pct": -0.5217614420938993,
+      "mean_d_etf_pct": 0.32389143723163444,
+      "redeploy_ratio": 0.9684075613767847
+    }
+  ],
+  "by_book_year": [
+    {
+      "book": "BAL",
+      "year": 2014,
+      "sessions": 247.0,
+      "mean_out_cut_frac_pct": 0.0,
+      "mean_d_cash_pct": 0.0,
+      "mean_d_stocks_pct": 0.0,
+      "mean_d_etf_pct": 0.0,
+      "redeploy_ratio": NaN
+    },
+    {
+      "book": "BAL",
+      "year": 2015,
+      "sessions": 248.0,
+      "mean_out_cut_frac_pct": 0.0,
+      "mean_d_cash_pct": 0.0,
+      "mean_d_stocks_pct": 0.0,
+      "mean_d_etf_pct": 0.0,
+      "redeploy_ratio": NaN
+    },
+    {
+      "book": "BAL",
+      "year": 2016,
+      "sessions": 251.0,
+      "mean_out_cut_frac_pct": 0.0,
+      "mean_d_cash_pct": 0.0,
+      "mean_d_stocks_pct": 0.0,
+      "mean_d_etf_pct": 0.0,
+      "redeploy_ratio": NaN
+    },
+    {
+      "book": "BAL",
+      "year": 2017,
+      "sessions": 250.0,
+      "mean_out_cut_frac_pct": 4.011679873452661,
+      "mean_d_cash_pct": 1.3048834657942903,
+      "mean_d_stocks_pct": -3.8193237609285604,
+      "mean_d_etf_pct": 2.5144402951342726,
+      "redeploy_ratio": 0.6747289148295775
+    },
+    {
+      "book": "BAL",
+      "year": 2018,
+      "sessions": 250.0,
+      "mean_out_cut_frac_pct": 9.557321033777823,
+      "mean_d_cash_pct": 2.3905063587702187,
+      "mean_d_stocks_pct": -2.7604252712892503,
+      "mean_d_etf_pct": 0.3699189125190315,
+      "redeploy_ratio": 0.7498769424693796
+    },
+    {
+      "book": "BAL",
+      "year": 2019,
+      "sessions": 250.0,
+      "mean_out_cut_frac_pct": 0.0,
+      "mean_d_cash_pct": 0.0015318093158470604,
+      "mean_d_stocks_pct": -0.004404362475323441,
+      "mean_d_etf_pct": 0.0028725531594757043,
+      "redeploy_ratio": NaN
+    },
+    {
+      "book": "BAL",
+      "year": 2020,
+      "sessions": 252.0,
+      "mean_out_cut_frac_pct": 4.593877356050875,
+      "mean_d_cash_pct": 0.10359119282644214,
+      "mean_d_stocks_pct": -0.106476721858554,
+      "mean_d_etf_pct": 0.002885529032111793,
+      "redeploy_ratio": 0.9774501614219204
+    },
+    {
+      "book": "BAL",
+      "year": 2021,
+      "sessions": 250.0,
+      "mean_out_cut_frac_pct": 15.350487392719305,
+      "mean_d_cash_pct": 0.5968887684439989,
+      "mean_d_stocks_pct": -0.3305631043449715,
+      "mean_d_etf_pct": -0.2663256640990272,
+      "redeploy_ratio": 0.9611159728565295
+    },
+    {
+      "book": "BAL",
+      "year": 2022,
+      "sessions": 249.0,
+      "mean_out_cut_frac_pct": 0.436475938570439,
+      "mean_d_cash_pct": 5.309429791726302,
+      "mean_d_stocks_pct": -5.307994208234561,
+      "mean_d_etf_pct": -0.0014355834917396228,
+      "redeploy_ratio": -11.164312674636612
+    },
+    {
+      "book": "BAL",
+      "year": 2023,
+      "sessions": 249.0,
+      "mean_out_cut_frac_pct": 0.09869764780981928,
+      "mean_d_cash_pct": 0.027695459188033858,
+      "mean_d_stocks_pct": -0.08937323310671588,
+      "mean_d_etf_pct": 0.061677773918681296,
+      "redeploy_ratio": 0.7193908892195658
+    },
+    {
+      "book": "BAL",
+      "year": 2024,
+      "sessions": 250.0,
+      "mean_out_cut_frac_pct": 8.614912472610966,
+      "mean_d_cash_pct": -0.4230088172891299,
+      "mean_d_stocks_pct": 0.4129749718825216,
+      "mean_d_etf_pct": 0.01003384540660881,
+      "redeploy_ratio": 1.0491019286190062
+    },
+    {
+      "book": "BAL",
+      "year": 2025,
+      "sessions": 249.0,
+      "mean_out_cut_frac_pct": 10.674739761251855,
+      "mean_d_cash_pct": 0.39819830446711346,
+      "mean_d_stocks_pct": -1.0915554139986565,
+      "mean_d_etf_pct": 0.693357109531542,
+      "redeploy_ratio": 0.9626971417221308
+    },
+    {
+      "book": "BAL",
+      "year": 2026,
+      "sessions": 112.0,
+      "mean_out_cut_frac_pct": 15.230046358450414,
+      "mean_d_cash_pct": -0.17846907697442277,
+      "mean_d_stocks_pct": 0.49335949923580036,
+      "mean_d_etf_pct": -0.3148904222613758,
+      "redeploy_ratio": 1.0117182228322896
+    },
+    {
+      "book": "LAG",
+      "year": 2014,
+      "sessions": 247.0,
+      "mean_out_cut_frac_pct": 1.559323612530338,
+      "mean_d_cash_pct": 0.42612570949708845,
+      "mean_d_stocks_pct": -0.4482198191562845,
+      "mean_d_etf_pct": 0.022094109659196066,
+      "redeploy_ratio": 0.7267240064391716
+    },
+    {
+      "book": "LAG",
+      "year": 2015,
+      "sessions": 248.0,
+      "mean_out_cut_frac_pct": 3.7412289426458902,
+      "mean_d_cash_pct": 0.05638918796621125,
+      "mean_d_stocks_pct": -0.1163729480645938,
+      "mean_d_etf_pct": 0.059983760098383375,
+      "redeploy_ratio": 0.9849276297092016
+    },
+    {
+      "book": "LAG",
+      "year": 2016,
+      "sessions": 251.0,
+      "mean_out_cut_frac_pct": 7.531204016160455,
+      "mean_d_cash_pct": 0.004304349357942824,
+      "mean_d_stocks_pct": -0.28300394048167643,
+      "mean_d_etf_pct": 0.27869959112373316,
+      "redeploy_ratio": 0.9994284646453998
+    },
+    {
+      "book": "LAG",
+      "year": 2017,
+      "sessions": 250.0,
+      "mean_out_cut_frac_pct": 5.363872667765287,
+      "mean_d_cash_pct": -0.19234358365390047,
+      "mean_d_stocks_pct": 0.33259677325210035,
+      "mean_d_etf_pct": -0.1402531895982001,
+      "redeploy_ratio": 1.0358590883056953
+    },
+    {
+      "book": "LAG",
+      "year": 2018,
+      "sessions": 250.0,
+      "mean_out_cut_frac_pct": 3.298158227378092,
+      "mean_d_cash_pct": 0.0709766261436133,
+      "mean_d_stocks_pct": -0.002695857654956141,
+      "mean_d_etf_pct": -0.06828076848865829,
+      "redeploy_ratio": 0.9784799208375042
+    },
+    {
+      "book": "LAG",
+      "year": 2019,
+      "sessions": 250.0,
+      "mean_out_cut_frac_pct": 3.8443170144213146,
+      "mean_d_cash_pct": 0.06789793848530953,
+      "mean_d_stocks_pct": -0.011299156516381558,
+      "mean_d_etf_pct": -0.05659878196892789,
+      "redeploy_ratio": 0.9823381010903622
+    },
+    {
+      "book": "LAG",
+      "year": 2020,
+      "sessions": 252.0,
+      "mean_out_cut_frac_pct": 6.731847171553727,
+      "mean_d_cash_pct": -0.148740400971988,
+      "mean_d_stocks_pct": 0.18534467737875127,
+      "mean_d_etf_pct": -0.03660427640676423,
+      "redeploy_ratio": 1.022095035312226
+    },
+    {
+      "book": "LAG",
+      "year": 2021,
+      "sessions": 250.0,
+      "mean_out_cut_frac_pct": 11.107289330208658,
+      "mean_d_cash_pct": 0.027011567774209922,
+      "mean_d_stocks_pct": -0.09911726083080652,
+      "mean_d_etf_pct": 0.07210569305659743,
+      "redeploy_ratio": 0.9975681224310285
+    },
+    {
+      "book": "LAG",
+      "year": 2022,
+      "sessions": 249.0,
+      "mean_out_cut_frac_pct": 5.839053553576416,
+      "mean_d_cash_pct": 0.026255823178228735,
+      "mean_d_stocks_pct": -0.008902972731591356,
+      "mean_d_etf_pct": -0.01735285044663798,
+      "redeploy_ratio": 0.995503411137213
+    },
+    {
+      "book": "LAG",
+      "year": 2023,
+      "sessions": 249.0,
+      "mean_out_cut_frac_pct": 9.885090174373593,
+      "mean_d_cash_pct": 0.6016346352714314,
+      "mean_d_stocks_pct": -1.8983102084691357,
+      "mean_d_etf_pct": 1.2966755731977058,
+      "redeploy_ratio": 0.9391371626703895
+    },
+    {
+      "book": "LAG",
+      "year": 2024,
+      "sessions": 250.0,
+      "mean_out_cut_frac_pct": 4.9592532238434215,
+      "mean_d_cash_pct": 0.3509712689435207,
+      "mean_d_stocks_pct": -0.7283279760801855,
+      "mean_d_etf_pct": 0.37735670713666464,
+      "redeploy_ratio": 0.9292290082595303
+    },
+    {
+      "book": "LAG",
+      "year": 2025,
+      "sessions": 249.0,
+      "mean_out_cut_frac_pct": 7.577991243473001,
+      "mean_d_cash_pct": 1.0822748330944219,
+      "mean_d_stocks_pct": -2.980816546986339,
+      "mean_d_etf_pct": 1.8985417138919178,
+      "redeploy_ratio": 0.8571818311314894
+    },
+    {
+      "book": "LAG",
+      "year": 2026,
+      "sessions": 112.0,
+      "mean_out_cut_frac_pct": 14.416041931100931,
+      "mean_d_cash_pct": 0.22309922842935961,
+      "mean_d_stocks_pct": -1.007898321397597,
+      "mean_d_etf_pct": 0.7847990929682389,
+      "redeploy_ratio": 0.9845242383800196
+    }
+  ],
+  "pooled": {
+    "sessions": 6214.0,
+    "mean_out_cut_frac_pct": 5.551669975539534,
+    "mean_d_cash_pct": 0.4854674140049841,
+    "mean_d_stocks_pct": -0.7778992345265898,
+    "mean_d_etf_pct": 0.29243182052160593,
+    "redeploy_ratio": 0.9125547058553666
+  },
+  "n_trimmed_targets_main": 306,
+  "n_trimmed_filled": 303,
+  "total_cut_vnd_filled": 4320429463703.624,
+  "counts": {
+    "ctrl": {
+      "n_buy_fills": 6411,
+      "n_holdings": 2582,
+      "gross_bought_bn": 23637.085435249406
+    },
+    "trim50": {
+      "n_buy_fills": 6553,
+      "n_holdings": 2566,
+      "gross_bought_bn": 24162.379621804233
+    }
+  }
+}

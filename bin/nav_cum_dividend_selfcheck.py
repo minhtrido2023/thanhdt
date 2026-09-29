@@ -17,7 +17,7 @@ HAI CHẾ ĐỘ, chạy cùng bộ ca:
                 (bản ghi balance phiên trước có phải bản cuối ngày không).
 Hai chế độ PHẢI ra cùng kết quả — nếu lệch, một trong hai đường suy luận sai.
 
-Phụ: kiểm bất biến nav == mtm_stock + cash − margin_debt + offbook_assets trên TOÀN BỘ
+Phụ: kiểm bất biến nav == mtm_stock + cash − margin_debt + offbook_assets + egg_assets trên TOÀN BỘ
 nav_history_{account}.csv.
 
     python3 mike/bin/nav_cum_dividend_selfcheck.py
@@ -31,7 +31,12 @@ import sys
 
 MIKE_BIN = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, MIKE_BIN)
-WC_ROOT = os.path.dirname(os.path.dirname(MIKE_BIN))
+import wc_paths  # noqa: E402
+
+# `dirname x2` chỉ ĐÚNG cho bản gốc `mike/bin/`: từ worktree `mike/agents/Taylor/wt-*/bin/` nó cho
+# `.../agents/Taylor` ⇒ `EXEC_DIR` trỏ thư mục KHÔNG TỒN TẠI ⇒ crash FileNotFoundError, đúng lớp
+# sự cố 2026-09-12 mà `wc_paths` sinh ra để đóng (5 ca báo cáo nhà đầu tư không gửi được).
+WC_ROOT = wc_paths.find_wc_root(__file__)
 EXEC_DIR = os.path.join(WC_ROOT, "data", "execution_logs")
 
 from daily_nav_snapshot import (  # noqa: E402
@@ -121,7 +126,12 @@ def run_cases():
 
 
 def run_invariant():
-    """nav == mtm_stock + cash − margin_debt + offbook_assets trên TOÀN BỘ file lịch sử."""
+    """nav == mtm_stock + cash − margin_debt + offbook_assets + egg_assets trên TOÀN BỘ file lịch sử.
+
+    `egg_assets` (Trứng vàng, field `egg.totalValue`) thêm vào CSV từ 2026-08-18/19 (§25
+    coding_guidelines) — cột có thể RỖNG ở các dòng cũ hơn (chưa wire), `num()` coi rỗng = 0 nên
+    không ảnh hưởng lịch sử trước đó.
+    """
     passed = failed = 0
     for account in ACCOUNT_NO:
         path = os.path.join(EXEC_DIR, f"nav_history_{account}.csv")
@@ -131,13 +141,15 @@ def run_invariant():
         for r in rows:
             def num(k):
                 return float(r.get(k) or 0)
-            lhs, rhs = num("nav"), num("mtm_stock") + num("cash") - num("margin_debt") + num("offbook_assets")
+            lhs = num("nav")
+            rhs = num("mtm_stock") + num("cash") - num("margin_debt") + num("offbook_assets") \
+                + num("egg_assets")
             if abs(lhs - rhs) >= 1:
                 bad.append((r["date"], lhs, rhs))
         ok = not bad
         print(f"  [{'PASS' if ok else 'FAIL'}] {account}: bất biến NAV trên {len(rows)} dòng")
         for d, lhs, rhs in bad:
-            print(f"           ✗ {d}: nav={lhs:,.0f} nhưng mtm+cash−nợ+offbook={rhs:,.0f}")
+            print(f"           ✗ {d}: nav={lhs:,.0f} nhưng mtm+cash−nợ+offbook+egg={rhs:,.0f}")
         passed, failed = passed + ok, failed + (not ok)
     return passed, failed
 
@@ -145,7 +157,7 @@ def run_invariant():
 def main():
     print("=== 1) Cổ tức phải thu chưa qua ex-date (dữ liệu thật, 2 chế độ) ===")
     p1, f1 = run_cases()
-    print("\n=== 2) Bất biến nav = mtm_stock + cash − margin_debt + offbook_assets ===")
+    print("\n=== 2) Bất biến nav = mtm_stock + cash − margin_debt + offbook_assets + egg_assets ===")
     p2, f2 = run_invariant()
     print(f"\n=== SELFCHECK: {p1 + p2} PASS / {f1 + f2} FAIL ===")
     return 1 if (f1 + f2) else 0

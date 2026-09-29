@@ -1,0 +1,15 @@
+  [PASS] A. gate FAIL (mean12=0.5% < 4%) NEUTRAL -> 0.50
+  [PASS] A. gate FAIL BULL -> 0.50
+  [PASS] A. gate FAIL EX-BULL -> 0.50
+  [PASS] B. gate PASS (mean12=7.2%) NEUTRAL -> 0.65
+  [PASS] B. gate PASS BULL -> 0.65
+  [PASS] B. boundary mean12=4.0 (>= thr) -> 0.65
+  [PASS] C. BEAR -> 0.00 even with huge mean12
+  [PASS] C. CRISIS -> 0.50 even with huge mean12
+  [PASS] D. lag_edge_health.csv missing -> fail-safe 0.50
+  [PASS] E. asof pre-history (mean12 NaN) -> 0.50
+  [PASS] F. w_tgt assignment calls w_lag_target(state_today, ...)
+  [PASS] F. old hardcode `w_tgt = STATE_LAG_WEIGHT.get` removed
+  [PASS] G. matches pinned R3 w_lag_tgt on all 38 flip days
+
+ALL CHECKS PASSED

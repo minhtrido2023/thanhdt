@@ -1,0 +1,33 @@
+== Reconcile equity — SpaceX ==
+Nguồn balance THẬT: /home/trido/thanhdt/WorkingClaude/data/execution_logs/dnse_raw_2026-09-11.jsonl (ts=2026-09-11T20:15:02, kind=balances)
+Nguồn P&L THẬT: /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/aria_A1_20260913/verified_snapshot_SpaceX_2026-09-11_before.json
+
+VẾ TRÁI  (Vốn ban đầu + Lãi/lỗ - phí - lãi vay, TOÀN BỘ SỐ THẬT):
+  Vốn ban đầu:              1,000,000,000
+  + Lãi/lỗ chưa thực hiện:      -9,821,676
+  (--no-realized: BỎ realized -30,975,362 + cổ tức +11,566,250)
+  - Phí giao dịch (0.075% x giá vốn thật):         -650,197
+  - Phí/lãi margin đã POST (depositFeeAmount, API thật):       -3,404
+  = VẾ TRÁI:                  989,524,722
+
+VẾ PHẢI  (NAV thị trường + Tiền mặt - Nợ margin, số THẬT từ broker):
+  Giá trị cổ phiếu (MTM):     857,107,961
+  + Tiền mặt:                   8,258,545
+  - Nợ vay margin:                      0
+  + Off-book (tự báo):        100,763,745
+  = VẾ PHẢI:                  966,130,251
+
+CHÊNH LỆCH (trái - phải, TOÀN BỘ SỐ THẬT):      +23,394,471  (+2.4215% của vế phải)
+Ngưỡng dung sai: ±0.05% NAV + 5tr VND sàn tuyệt đối
+KẾT LUẬN (đẳng thức chính, chỉ số thật): ❌ LỆCH VƯỢT NGƯỠNG — cần điều tra thêm
+
+--- DIỄN GIẢI residual (ƯỚC TÍNH, KHÔNG phải số thật — margin rate 12.5%/năm do user cung cấp, chưa xác minh với DNSE) ---
+  Lãi margin ước tính/ngày trên dư nợ hiện tại:                0 VND/ngày
+  (depositFeeAmount hiện tại chỉ 3,404đ — có thể lãi margin post theo chu kỳ, không phải hàng ngày; cần đối chiếu sao kê DNSE để xác nhận chính xác)
+  Phí 0.075% trên TỔNG khớp mua+bán 3,072,375,000 (vế trái mới trừ trên giá vốn đang giữ):     +1,654,084
+  Thuế TNCN 0.1% giá trị bán 1,087,235,000:                +1,087,235
+  Lãi margin ước 12.5%/năm cộng dồn 2026-07-01→2026-09-11 (trừ phần đã post):       +266,339
+  = Giải thích được (ước):        +3,007,658
+  DƯ SAU DIỄN GIẢI:              +20,386,813  (+2.1102% NAV) — ⚠️ CHƯA GIẢI THÍCH ĐƯỢC (>0.3% NAV)
+
+Ghi ra: /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/aria_A1_20260913/reconcile_equity_SpaceX_2026-09-11_before.json

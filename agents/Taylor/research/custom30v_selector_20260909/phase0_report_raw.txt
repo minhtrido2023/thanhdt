@@ -1,0 +1,128 @@
+
+## 1. LOI SUAT RO THEO NAM (gross, khong phi, khong tien mat)
+      basket_%  vnindex_%  excess_pp  n_phien
+time                                         
+2014     10.43     -10.22      20.65      105
+2015     18.98       6.12      12.86      248
+2016     24.20      14.82       9.38      251
+2017     74.92      48.03      26.89      250
+2018     11.42      -9.32      20.74      250
+2019     15.48       7.67       7.81      250
+2020     76.83      14.87      61.96      252
+2021    136.51      35.73     100.78      250
+2022    -23.90     -32.78       8.88      249
+2023     35.00      12.20      22.80      249
+2024     36.05      12.11      23.94      250
+2025     54.43      40.87      13.56      249
+2026     -2.51       2.24      -4.75      112
+
+CAGR ro (lich) = 34.02%  |  level cuoi 32.327x  |  vol nam hoa 24.4%  |  Sharpe(rf=0) 1.33
+MaxDD ro = -40.01% ngay 2022-11-15
+
+## 2. LOI SUAT THEO STATE DT5G (vnindex_5state_dt5g_live)
+    state  n_phien  pct_thoigian  ann_basket  ann_vni  tong_gop_diem  excess_pp  pct_tong_lai
+ 1 CRISIS      443         14.94       10.46    -6.01           1.81      16.47          5.79
+   2 BEAR      241          8.13       -6.56   -21.44           0.36      14.88          1.15
+3 NEUTRAL     1799         60.67       36.40    13.73          18.10      22.68         57.79
+   4 BULL      422         14.23       75.35    27.21           8.50      48.14         27.14
+ 5 EXBULL       60          2.02      140.65    63.90           2.55      76.75          8.14
+
+## 3. DONG GOP THEO TEN (diem chi so; tong = level_cuoi - 1)
+tong ten tung nam trong ro: 204  |  tong gop 31.327 diem
+
+TOP 15:
+          gop  n_ngay   w_tb  pct_tong
+ticker                                
+MBB     2.625    2391  0.087     8.380
+HDB     2.567    1659  0.053     8.193
+CTG     2.487    1461  0.097     7.938
+BID     2.385    2090  0.100     7.613
+TCB     2.382    1655  0.093     7.605
+ACB     2.301    1904  0.074     7.347
+LPB     2.110    1592  0.034     6.735
+SHB     1.398    1593  0.038     4.463
+VIB     1.309    1328  0.043     4.178
+VCB     1.077     901  0.100     3.437
+STB     0.882     935  0.050     2.815
+VPB     0.772    1145  0.097     2.465
+MSB     0.653     968  0.021     2.083
+DGC     0.589     847  0.020     1.881
+HPG     0.576    1747  0.098     1.839
+
+BOTTOM 10:
+          gop  n_ngay   w_tb  pct_tong
+ticker                                
+SZC    -0.027     189  0.006    -0.086
+HCM    -0.027     379  0.013    -0.087
+ORS    -0.028     115  0.002    -0.088
+CTD    -0.030     755  0.039    -0.097
+DRC    -0.037     676  0.021    -0.119
+VEA    -0.071     367  0.089    -0.226
+PVD    -0.107     678  0.067    -0.341
+GAS    -0.110     375  0.091    -0.351
+VRE    -0.219     219  0.025    -0.699
+VHM    -0.465    1035  0.097    -1.485
+
+So ten dong gop DUONG: 141/204 (69.1%)
+  top-1  ten =   8.38% tong lai ro
+  top-3  ten =  24.51% tong lai ro
+  top-5  ten =  39.73% tong lai ro
+  top-10 ten =  65.89% tong lai ro
+  top-20 ten =  84.31% tong lai ro
+  top-decile ten (20 ten) = 84.31% tong lai
+
+## 4. TAP TRUNG NGANH (route PIT tu value_panel_2014.csv, trong so THAT theo ngay)
+Ty trong TAI CHINH (BANK+INS+SEC) theo NGAY: TB 52.8% | trung vi 61.1% | max 93.3% (2026-04-29)
+  IS 2014-19 TB 30.7%   |   OOS 2020+ TB 71.4%
+  Rieng BANK: TB 49.1% | OOS 2020+ 67.5%
+
+Ty trong TB + dong gop theo ROUTE:
+            w_share_%  gop_diem  pct_tong_lai  n_ten
+route                                               
+BANK            49.14     24.02         76.68   18.0
+COMPOUNDER      22.51      2.67          8.52  112.0
+CYCLICAL        11.31      1.87          5.96   15.0
+REALESTATE       8.91      0.63          2.01   38.0
+POWER            4.46      0.39          1.24    7.0
+SECURITIES       3.06      1.71          5.44   12.0
+INSURANCE        0.61      0.05          0.15    2.0
+
+## 5. PHAN PHOI VI THE (1 vi the = 1 ten x 1 ky rebal; vao gia dong cua ngay rebal)
+
+Theo nam:
+          n  mean_%  median_%  hit_%  skew  top3_share_gain_%  topdec_share_gain_%
+year                                                                              
+2014   60.0   13.20      3.79  63.33  2.27              49.48                63.49
+2015  120.0    5.92     -0.88  46.67  2.32              41.02                73.28
+2016  120.0    6.57      2.81  59.17  1.54              21.92                58.91
+2017  120.0   14.31      5.31  61.67  1.59              23.53                64.34
+2018  120.0    0.94     -0.58  49.17  1.02              39.45                72.94
+2019  120.0    1.46     -1.03  46.67  1.60              22.55                67.79
+2020  120.0   21.79     17.37  74.17  2.55              21.02                63.48
+2021  120.0   27.24     18.87  77.50  3.70              17.47                46.38
+2022  120.0    0.06     -4.48  41.67  1.82              27.84                65.10
+2023  120.0   11.36      8.50  70.83  0.65              24.05                58.08
+2024  120.0    7.04      2.96  63.33  2.28              29.48                61.62
+2025  120.0   12.73      9.05  65.83  0.97              23.41                57.80
+2026   60.0   -1.95     -2.78  36.67  0.88              42.85                73.47
+
+TOAN KY:
+n                      1440.00
+mean_%                    9.59
+median_%                  3.73
+hit_%                    58.89
+skew                      3.02
+top3_share_gain_%         7.35
+topdec_share_gain_%      73.48
+
+## 6. TURNOVER / THAY MA
+48 rebal, 47 lan doi. Ten MOI moi ky: TB 9.7/30 (trung vi 9, min 5, max 15) = turnover TB 32.3%/quy (~129%/nam mot chieu)
+So ky mot ten nam trong ro (tuoi tho): TB 7.1 ky, trung vi 4, max 39
+
+## 7. PHU THUOC DUOI PHAI — ro co giong BAL khong?
+  BAL (vong 3, 268 lenh):  median 4.15% | hit 58.2% | skew 1.31 | top-decile 57.2% tong lai
+  custom30V (1440 vi the): median 3.73% | hit 58.9% | skew 3.02 | top-decile 73.5% tong lai
+  Cap TEN (money-weighted): top-decile ten = 84.3% tong lai ro
+  Bo 1 ten dong gop lon nhat (tai chuan hoa trong so): CAGR 33.20% vs 34.02% goc (-0.82pp)
+  Bo 3 ten dong gop lon nhat (tai chuan hoa trong so): CAGR 32.82% vs 34.02% goc (-1.19pp)
+  Bo 5 ten dong gop lon nhat (tai chuan hoa trong so): CAGR 31.21% vs 34.02% goc (-2.81pp)

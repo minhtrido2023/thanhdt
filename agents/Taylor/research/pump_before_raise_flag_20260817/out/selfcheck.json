@@ -1,0 +1,292 @@
+{
+  "n_pass": 57,
+  "n_total": 57,
+  "tz": "Asia/Ho_Chi_Minh",
+  "results": [
+    {
+      "name": "CC1 pooled BHAR_250 RAISE_SET reproduces published -7.74% / n=712",
+      "pass": true,
+      "detail": "n=712 mean=-0.077425"
+    },
+    {
+      "name": "CC2a pooled pretrend reproduces published +45.54%",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "CC2b far placebo reproduces published +30.21%",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "CC3 [muc1_primary] every T partitions the population exactly",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "CC3 [muc1_sensitivity_raiseset] every T partitions the population exactly",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "CC4 used-T suspected mean sits inside the prior program's Q2-Q3 pre-trend band",
+      "pass": true,
+      "detail": "-0.0957 in [-0.1038, -0.079]"
+    },
+    {
+      "name": "CC5 extras key set == q1_bhar key set",
+      "pass": true,
+      "detail": "2953 vs 2953 rows"
+    },
+    {
+      "name": "fundamentals are read STRICTLY BEFORE the ex-date (dt_m1 < t0, all rows)",
+      "pass": true,
+      "detail": "violations=0/2953"
+    },
+    {
+      "name": "beta window never exceeds the 250 pre-event sessions it declares",
+      "pass": true,
+      "detail": "max=250"
+    },
+    {
+      "name": "beta_raw is NULL below the declared 150-session floor",
+      "pass": true,
+      "detail": "107 rows below floor"
+    },
+    {
+      "name": "beta_raw is populated whenever the floor is met",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "risk_rating quarter is STRICTLY before the event's own quarter (PIT)",
+      "pass": true,
+      "detail": "violations=0/2263"
+    },
+    {
+      "name": "no wall-clock read in the analysis path (TZ cannot change a number)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "rule picks the only T passing power+gap+FPR",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "rule prefers the largest |gap| when the gaps differ by >1pp",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "tie inside 1pp resolves to the SMALLER T",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "power floor blocks (events)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "power floor blocks (distinct tickers)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "CI spanning zero blocks",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "gap shallower than -5pp blocks",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Holm-adjusted p >= .05 blocks (unadjusted p would not)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "FPR >= 40% blocks",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "gap of the WRONG sign blocks (suspected better, not worse)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "gap exactly -5.00pp passes (<= boundary)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "FPR just under 40% passes",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "NO-FLAG still yields a least-bad T, drawn only from POWERED rows",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "rule re-applied to the stored grid reproduces the recorded verdict",
+      "pass": true,
+      "detail": "NO-FLAG T=None least_bad=0.6"
+    },
+    {
+      "name": "FPR fixture: only rows above median ROIC *and* FSCORE>4 count as healthy",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "FSCORE gate is strict '>4' (a 4 is not healthy)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "beta bins: boundaries land where PREREG says (<=1.2 low, <=1.8 mid, >1.8 high)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "beta bin of a missing value is None, never a bucket",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "beta bins partition exactly the events that HAVE a beta (no silent drop into a bucket)",
+      "pass": true,
+      "detail": "binned=646 pop=689 cov=0.938"
+    },
+    {
+      "name": "M\u1ee5c 3's wider population is exactly M\u1ee5c 1's plus the events lacking a pre-trend",
+      "pass": true,
+      "detail": "muc3=689 muc1=590"
+    },
+    {
+      "name": "the dispatched high-beta bin is correctly declared below the power floor",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the combined pump x high-beta cell is declared UNDERPOWERED, not given a verdict",
+      "pass": true,
+      "detail": "n=8 tickers=7"
+    },
+    {
+      "name": "combined cell is NOT presented as recommended (M\u1ee5c 1 returned NO-FLAG)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "ICB label is only asserted for codes whose membership was inspected",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "ICB 8777 contains the brokerages it claims to (SSI/HCM/SHS/MBS/VND-class names)",
+      "pass": true,
+      "detail": "n=32"
+    },
+    {
+      "name": "ICB 8777 contains no bank (the two financial codes are disjoint)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "no ticker carries two different ICB codes in the panel (label is stable per name)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "sector split covers every RIGHTS+PP event exactly once",
+      "pass": true,
+      "detail": "735 vs 735"
+    },
+    {
+      "name": "sectors below the CI floor carry no CI, and below the verdict floor are tagged",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "securities sector is below the verdict floor and says so",
+      "pass": true,
+      "detail": "n=66 tickers=26"
+    },
+    {
+      "name": "top-20 ISS table carries a sector label on every row",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "boot_gap is deterministic for a fixed seed",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "boot_gap point estimate equals the plain difference of means",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "boot_gap CI brackets its own point estimate",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "boot_gap finds no difference where none exists",
+      "pass": true,
+      "detail": "p=0.991"
+    },
+    {
+      "name": "boot_gap detects a planted -20pp shift with the right sign",
+      "pass": true,
+      "detail": "gap=0.200"
+    },
+    {
+      "name": "boot_gap is antisymmetric in its arguments",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "boot_gap drops NaNs rather than propagating them",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "boot_gap returns nulls (not a crash) on an empty side",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Holm adjustment is monotone and never shrinks a p-value",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "FINDINGS.md avoids accusatory vocabulary (PREREG \u00a70)",
+      "pass": true,
+      "detail": "hits=[]"
+    },
+    {
+      "name": "FINDINGS.md states the NO-FLAG verdict explicitly",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "FLAG_SPEC.md avoids accusatory vocabulary (PREREG \u00a70)",
+      "pass": true,
+      "detail": "hits=[]"
+    },
+    {
+      "name": "FLAG_SPEC.md states the NO-FLAG verdict explicitly",
+      "pass": true,
+      "detail": ""
+    }
+  ]
+}

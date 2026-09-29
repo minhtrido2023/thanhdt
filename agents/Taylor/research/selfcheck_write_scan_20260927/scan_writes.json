@@ -1,0 +1,803 @@
+{
+ "mike/bin/annualization_basis_selfcheck.py": {
+  "tmpvars": [],
+  "n_hits": 2,
+  "unsafe": [
+   {
+    "line": 203,
+    "kind": "open(mode=w)",
+    "dest": "tmp",
+    "safe": false,
+    "code": "with open(tmp, \"w\", encoding=\"utf-8\") as f:"
+   },
+   {
+    "line": 206,
+    "kind": "os.replace",
+    "dest": "BASELINE_PATH",
+    "safe": false,
+    "code": "os.replace(tmp, BASELINE_PATH)"
+   }
+  ]
+ },
+ "mike/bin/cursor_advance_selfcheck.py": {
+  "tmpvars": [
+   "ROOT",
+   "_",
+   "after_a",
+   "after_n",
+   "append_log",
+   "before_a",
+   "before_n",
+   "contents",
+   "d",
+   "expected_cp",
+   "f",
+   "fn",
+   "i_print",
+   "i_write",
+   "missing_cp",
+   "new_lines",
+   "notified2",
+   "notified3",
+   "notified4",
+   "notify_log",
+   "r",
+   "sandbox",
+   "warn2",
+   "warn_dir"
+  ],
+  "n_hits": 12,
+  "unsafe": [
+   {
+    "line": 55,
+    "kind": "open(mode=w)",
+    "dest": "path",
+    "safe": false,
+    "code": "with open(path, \"w\", encoding=\"utf-8\") as f:"
+   },
+   {
+    "line": 87,
+    "kind": "open(mode=a)",
+    "dest": "inbox",
+    "safe": false,
+    "code": "with open(inbox, \"a\", encoding=\"utf-8\") as f:"
+   },
+   {
+    "line": 96,
+    "kind": "open(mode=w)",
+    "dest": "state",
+    "safe": false,
+    "code": "with open(state, \"w\") as f:"
+   },
+   {
+    "line": 187,
+    "kind": "open(mode=a)",
+    "dest": "inbox",
+    "safe": false,
+    "code": "with open(inbox, \"a\") as f:"
+   },
+   {
+    "line": 201,
+    "kind": "open(mode=a)",
+    "dest": "inbox",
+    "safe": false,
+    "code": "with open(inbox, \"a\") as f:"
+   },
+   {
+    "line": 242,
+    "kind": "open(mode=w)",
+    "dest": "state",
+    "safe": false,
+    "code": "with open(state, \"w\") as f:"
+   },
+   {
+    "line": 360,
+    "kind": "open(mode=w)",
+    "dest": "inbox",
+    "safe": false,
+    "code": "with open(inbox, \"w\", encoding=\"utf-8\") as f:"
+   }
+  ]
+ },
+ "mike/bin/mike_json_has_event_prefix_selfcheck.py": {
+  "tmpvars": [
+   "d"
+  ],
+  "n_hits": 5,
+  "unsafe": [
+   {
+    "line": 62,
+    "kind": "open(mode=wt)",
+    "dest": "path",
+    "safe": false,
+    "code": "with gzip.open(path, \"wt\", encoding=\"utf-8\") as f:"
+   },
+   {
+    "line": 65,
+    "kind": "open(mode=w)",
+    "dest": "path",
+    "safe": false,
+    "code": "with open(path, \"w\", encoding=\"utf-8\") as f:"
+   },
+   {
+    "line": 206,
+    "kind": "open(mode=a)",
+    "dest": "path",
+    "safe": false,
+    "code": "with open(path, \"a\", encoding=\"utf-8\") as f:"
+   }
+  ]
+ },
+ "mike/bin/nav_scripts_2account_selfcheck.py": {
+  "tmpvars": [
+   "_fd",
+   "account",
+   "acct",
+   "bak",
+   "date",
+   "f",
+   "fill_dates_arg",
+   "nav_history_paths",
+   "nav_snapshot_json_paths",
+   "out_path",
+   "r",
+   "rc",
+   "results",
+   "stderr",
+   "stdout",
+   "sx",
+   "tmpdir",
+   "verify_json",
+   "zp"
+  ],
+  "n_hits": 2,
+  "unsafe": [
+   {
+    "line": 135,
+    "kind": "shutil.move",
+    "dest": "path",
+    "safe": false,
+    "code": "shutil.move(bak, path)"
+   }
+  ]
+ },
+ "mike/bin/reconcile_equity_egg_selfcheck.py": {
+  "tmpvars": [
+   "res",
+   "tmp"
+  ],
+  "n_hits": 2,
+  "unsafe": [
+   {
+    "line": 45,
+    "kind": "open(mode=wb)",
+    "dest": "snap",
+    "safe": false,
+    "code": "with open(src, \"rb\") as fi, open(snap, \"wb\") as fo:"
+   },
+   {
+    "line": 154,
+    "kind": "open(mode=w)",
+    "dest": "mpath",
+    "safe": false,
+    "code": "open(mpath, \"w\", encoding=\"utf-8\").write(src.replace(old, new, 1))"
+   }
+  ]
+ },
+ "mike/bin/report_delivery_ledger_selfcheck.py": {
+  "tmpvars": [
+   "MIKE",
+   "OLD_MARKER",
+   "REAL_BIN",
+   "_",
+   "blob",
+   "body",
+   "cli",
+   "cmd",
+   "danger",
+   "env",
+   "evidence",
+   "f",
+   "frag",
+   "frag_src",
+   "got",
+   "head",
+   "hostile",
+   "mike",
+   "new_src",
+   "notify_log",
+   "ok",
+   "other",
+   "out",
+   "p",
+   "p1",
+   "p2",
+   "p3",
+   "path",
+   "pe",
+   "probe",
+   "probe2",
+   "r1",
+   "r2",
+   "rc",
+   "rc1",
+   "rc2",
+   "rep",
+   "revs",
+   "s",
+   "sb",
+   "sep",
+   "sib",
+   "src",
+   "wc",
+   "wt"
+  ],
+  "n_hits": 8,
+  "unsafe": [
+   {
+    "line": 100,
+    "kind": "os.makedirs",
+    "dest": "d",
+    "safe": false,
+    "code": "os.makedirs(d)"
+   }
+  ]
+ },
+ "mike/bin/selfcheck_baseline_diff.py": {
+  "tmpvars": [],
+  "n_hits": 3,
+  "unsafe": [
+   {
+    "line": 121,
+    "kind": "open(mode=w)",
+    "dest": "tmp",
+    "safe": false,
+    "code": "with open(tmp, \"w\", encoding=\"utf-8\") as f:"
+   },
+   {
+    "line": 123,
+    "kind": "os.replace",
+    "dest": "path",
+    "safe": false,
+    "code": "os.replace(tmp, path)"
+   },
+   {
+    "line": 208,
+    "kind": "open(mode=w)",
+    "dest": "result_path",
+    "safe": false,
+    "code": "with open(result_path, \"w\", encoding=\"utf-8\") as f:"
+   }
+  ]
+ },
+ "mike/bin/worktree_stale_check_selfcheck.py": {
+  "tmpvars": [
+   "REAL_BIN",
+   "delivered",
+   "mike",
+   "old",
+   "out",
+   "res",
+   "s",
+   "tmp"
+  ],
+  "n_hits": 6,
+  "unsafe": [
+   {
+    "line": 43,
+    "kind": "open(mode=w)",
+    "dest": "path",
+    "safe": false,
+    "code": "with open(path, \"w\", encoding=\"utf-8\") as f:"
+   }
+  ]
+ },
+ "approval_gate_selfcheck.py": {
+  "tmpvars": [],
+  "n_hits": 1,
+  "unsafe": [
+   {
+    "line": 74,
+    "kind": "open(mode=w)",
+    "dest": "os.path.join(PLAN_DIR, f'plan_{TAG}_{_PLAN_DATE}.json')",
+    "safe": false,
+    "code": "with open(os.path.join(PLAN_DIR, f\"plan_{TAG}_{_PLAN_DATE}.json\"), \"w\","
+   }
+  ]
+ },
+ "basket_price_basis_selfcheck.py": {
+  "tmpvars": [],
+  "n_hits": 1,
+  "unsafe": [
+   {
+    "line": 123,
+    "kind": "r['Close'] / r['pxw'].replace",
+    "dest": "np.nan",
+    "safe": false,
+    "code": "f = (r[\"Close\"] / r[\"pxw\"]).replace([np.inf, -np.inf], np.nan).dropna()"
+   }
+  ]
+ },
+ "concurrent_lock_selfcheck.py": {
+  "tmpvars": [],
+  "n_hits": 2,
+  "unsafe": [
+   {
+    "line": 48,
+    "kind": "open(mode=a)",
+    "dest": "path",
+    "safe": false,
+    "code": "f2 = open(path, \"a\")"
+   },
+   {
+    "line": 71,
+    "kind": "open(mode=a)",
+    "dest": "path",
+    "safe": false,
+    "code": "f5 = open(path, \"a\")"
+   }
+  ]
+ },
+ "discretionary_accumulation_selfcheck.py": {
+  "tmpvars": [
+   "_patched_secrets_path",
+   "disc_dir",
+   "inj",
+   "pb",
+   "pbo",
+   "plan",
+   "plan2",
+   "plan3",
+   "plan_dir",
+   "plan_path",
+   "plane",
+   "planf",
+   "planq",
+   "rc",
+   "rc2",
+   "st2",
+   "st_after",
+   "state_path",
+   "ste",
+   "tmp"
+  ],
+  "n_hits": 2,
+  "unsafe": [
+   {
+    "line": 158,
+    "kind": "open(mode=w)",
+    "dest": "path",
+    "safe": false,
+    "code": "with open(path, \"w\", encoding=\"utf-8\") as f:"
+   }
+  ]
+ },
+ "discretionary_participation_cap_selfcheck.py": {
+  "tmpvars": [
+   "cfg",
+   "disc_dir",
+   "ex",
+   "ex_non",
+   "fleet_filled",
+   "m",
+   "new",
+   "old",
+   "ps",
+   "shared",
+   "tmp"
+  ],
+  "n_hits": 3,
+  "unsafe": [
+   {
+    "line": 103,
+    "kind": "os.makedirs",
+    "dest": "dirpath",
+    "safe": false,
+    "code": "os.makedirs(dirpath, exist_ok=True)"
+   },
+   {
+    "line": 112,
+    "kind": "open(mode=w)",
+    "dest": "p",
+    "safe": false,
+    "code": "with open(p, \"w\", encoding=\"utf-8\") as f:"
+   }
+  ]
+ },
+ "edge_wlag_gate_selfcheck.py": {
+  "tmpvars": [
+   "bad",
+   "f",
+   "td"
+  ],
+  "n_hits": 2,
+  "unsafe": [
+   {
+    "line": 69,
+    "kind": "os.makedirs",
+    "dest": "os.path.join(workdir, 'data')",
+    "safe": false,
+    "code": "os.makedirs(os.path.join(workdir, \"data\"), exist_ok=True)"
+   },
+   {
+    "line": 70,
+    "kind": "to_csv",
+    "dest": "os.path.join(workdir, 'data', 'lag_edge_health.csv')",
+    "safe": false,
+    "code": "pd.DataFrame({\"entry\": [\"2020-01-06\"], \"ret\": [1.0], \"mean12\": [mean12],"
+   }
+  ]
+ },
+ "expected_volume_pacing_selfcheck.py": {
+  "tmpvars": [
+   "BAD",
+   "a",
+   "b",
+   "capped",
+   "cfg",
+   "dd",
+   "ex",
+   "ex_bad",
+   "ex_flip",
+   "ex_live",
+   "ex_nokey",
+   "ex_off",
+   "ex_on",
+   "ex_p",
+   "ex_p2",
+   "ex_ref",
+   "ex_sh",
+   "ex_th",
+   "f",
+   "f2",
+   "g_live_off",
+   "g_live_on",
+   "g_paper_off",
+   "g_paper_on",
+   "got",
+   "n_next_min",
+   "n_same_min",
+   "off",
+   "ok",
+   "on",
+   "on2",
+   "place",
+   "ps",
+   "ps_off",
+   "ps_on",
+   "q_live",
+   "q_off",
+   "q_p2",
+   "qty",
+   "real",
+   "recheck",
+   "ref",
+   "rows",
+   "tmp",
+   "want"
+  ],
+  "n_hits": 2,
+  "unsafe": [
+   {
+    "line": 70,
+    "kind": "open(mode=w)",
+    "dest": "p",
+    "safe": false,
+    "code": "open(p, \"w\", encoding=\"utf-8\"))"
+   }
+  ]
+ },
+ "freshness_ops_selfcheck.py": {
+  "tmpvars": [
+   "BQ_STUB",
+   "DT5G_WATCH_STUB",
+   "FAKE_PY",
+   "RISK_MONITOR",
+   "at_max",
+   "cs",
+   "dsp",
+   "env",
+   "fakebin",
+   "harness",
+   "logread",
+   "logs",
+   "ntf",
+   "out",
+   "over",
+   "r",
+   "rc",
+   "root",
+   "sb",
+   "sj",
+   "steps",
+   "thr",
+   "tmp",
+   "tmpdir",
+   "warn_only",
+   "workdir"
+  ],
+  "n_hits": 14,
+  "unsafe": [
+   {
+    "line": 155,
+    "kind": "p.write_text",
+    "dest": "p",
+    "safe": false,
+    "code": "p.write_text(body)"
+   },
+   {
+    "line": 225,
+    "kind": "conf.write_text",
+    "dest": "conf",
+    "safe": false,
+    "code": "conf.write_text(json.dumps({\"lag\": lag, \"lastmod\": lastmod}))"
+   }
+  ]
+ },
+ "hard_no_chase_ceiling_selfcheck.py": {
+  "tmpvars": [],
+  "n_hits": 1,
+  "unsafe": [
+   {
+    "line": 279,
+    "kind": "open(mode=w)",
+    "dest": "path",
+    "safe": false,
+    "code": "open(path, \"w\", encoding=\"utf-8\"), ensure_ascii=False)"
+   }
+  ]
+ },
+ "immutable_publish_selfcheck.py": {
+  "tmpvars": [],
+  "n_hits": 4,
+  "unsafe": [
+   {
+    "line": 116,
+    "kind": "to_csv",
+    "dest": "fpath",
+    "safe": false,
+    "code": "f2 = forged.copy(); f2[\"time\"] = f2[\"time\"].dt.strftime(\"%Y-%m-%d\"); f2.to_csv(fpath, index=False)"
+   },
+   {
+    "line": 150,
+    "kind": "to_csv",
+    "dest": "epath",
+    "safe": false,
+    "code": "e2 = ext.copy(); e2[\"time\"] = e2[\"time\"].dt.strftime(\"%Y-%m-%d\"); e2.to_csv(epath, index=False)"
+   },
+   {
+    "line": 172,
+    "kind": "to_csv",
+    "dest": "spath",
+    "safe": false,
+    "code": "s2 = stale.copy(); s2[\"time\"] = s2[\"time\"].dt.strftime(\"%Y-%m-%d\"); s2.to_csv(spath, index=False)"
+   },
+   {
+    "line": 199,
+    "kind": "to_csv",
+    "dest": "p",
+    "safe": false,
+    "code": "d.to_csv(p, index=False)"
+   }
+  ]
+ },
+ "netting_recon_selfcheck.py": {
+  "tmpvars": [
+   "avg",
+   "avg2",
+   "avg3",
+   "f",
+   "fails",
+   "filled",
+   "filled2",
+   "filled3",
+   "jpath",
+   "jpath2",
+   "jpath3",
+   "lines",
+   "lines2",
+   "p1",
+   "p2",
+   "recs",
+   "tmpd",
+   "tmpd_j",
+   "w"
+  ],
+  "n_hits": 1,
+  "unsafe": [
+   {
+    "line": 241,
+    "kind": "open(mode=w)",
+    "dest": "path",
+    "safe": false,
+    "code": "with open(path, \"w\", newline=\"\", encoding=\"utf-8\") as f:"
+   }
+  ]
+ },
+ "plan_check_field_schema_selfcheck.py": {
+  "tmpvars": [],
+  "n_hits": 2,
+  "unsafe": [
+   {
+    "line": 237,
+    "kind": "os.makedirs",
+    "dest": "PLAN_DIR",
+    "safe": false,
+    "code": "os.makedirs(PLAN_DIR, exist_ok=True)"
+   },
+   {
+    "line": 246,
+    "kind": "open(mode=w)",
+    "dest": "path",
+    "safe": false,
+    "code": "with open(path, \"w\", encoding=\"utf-8\") as f:"
+   }
+  ]
+ },
+ "quote_l2_logging_selfcheck.py": {
+  "tmpvars": [
+   "BAD",
+   "a",
+   "b",
+   "b2",
+   "calls",
+   "ce",
+   "d0",
+   "d1",
+   "dns",
+   "l2",
+   "lb",
+   "n0",
+   "n1",
+   "ne",
+   "ok",
+   "p0",
+   "p1",
+   "ph",
+   "pl",
+   "q",
+   "recs",
+   "res",
+   "rrg",
+   "tmp",
+   "vas",
+   "w",
+   "w0",
+   "w1"
+  ],
+  "n_hits": 3,
+  "unsafe": [
+   {
+    "line": 212,
+    "kind": "os.makedirs",
+    "dest": "d",
+    "safe": false,
+    "code": "os.makedirs(d, exist_ok=True)"
+   },
+   {
+    "line": 215,
+    "kind": "shutil.copy",
+    "dest": "dst",
+    "safe": false,
+    "code": "shutil.copy(SRC, dst)"
+   },
+   {
+    "line": 227,
+    "kind": "open(mode=w)",
+    "dest": "dst",
+    "safe": false,
+    "code": "with open(SRC, encoding=\"utf-8\") as f, open(dst, \"w\", encoding=\"utf-8\") as o:"
+   }
+  ]
+ },
+ "rule_a_ceiling_selfcheck.py": {
+  "tmpvars": [],
+  "n_hits": 2,
+  "unsafe": [
+   {
+    "line": 273,
+    "kind": "os.makedirs",
+    "dest": "PLAN_DIR",
+    "safe": false,
+    "code": "os.makedirs(PLAN_DIR, exist_ok=True)"
+   },
+   {
+    "line": 274,
+    "kind": "open(mode=w)",
+    "dest": "tmp_path",
+    "safe": false,
+    "code": "with open(tmp_path, \"w\", encoding=\"utf-8\") as f:"
+   }
+  ]
+ },
+ "screen_sort_direction_selfcheck.py": {
+  "tmpvars": [
+   "killed",
+   "survived",
+   "td"
+  ],
+  "n_hits": 1,
+  "unsafe": [
+   {
+    "line": 237,
+    "kind": "open(mode=w)",
+    "dest": "dst",
+    "safe": false,
+    "code": "open(dst, \"w\", encoding=\"utf-8\").write(m)"
+   }
+  ]
+ },
+ "sync_cache_lock_selfcheck.py": {
+  "tmpvars": [
+   "before",
+   "cd",
+   "days",
+   "dest",
+   "diff",
+   "env",
+   "f",
+   "good_csv",
+   "holder",
+   "junk",
+   "kr",
+   "kr2",
+   "legacy",
+   "out",
+   "r2",
+   "r3",
+   "r4",
+   "r_delta",
+   "r_full",
+   "r_ver",
+   "snaps",
+   "still_good",
+   "tag",
+   "tmp_root"
+  ],
+  "n_hits": 8,
+  "unsafe": [
+   {
+    "line": 123,
+    "kind": "os.makedirs",
+    "dest": "cache_dir",
+    "safe": false,
+    "code": "os.makedirs(cache_dir, exist_ok=True)"
+   },
+   {
+    "line": 125,
+    "kind": "open(mode=w)",
+    "dest": "os.path.join(cache_dir, 'HOLDING')",
+    "safe": false,
+    "code": "open(os.path.join(cache_dir, \"HOLDING\"), \"w\").close()"
+   },
+   {
+    "line": 146,
+    "kind": "open(mode=wb)",
+    "dest": "path",
+    "safe": false,
+    "code": "with open(path, \"wb\") as f:"
+   },
+   {
+    "line": 180,
+    "kind": "to_csv",
+    "dest": "<?>",
+    "safe": false,
+    "code": "out[rel] = pd.read_parquet(p).to_csv(index=False)"
+   },
+   {
+    "line": 277,
+    "kind": "to_csv",
+    "dest": "<?>",
+    "safe": false,
+    "code": "good_csv = pd.read_parquet(dest).to_csv(index=False)"
+   },
+   {
+    "line": 284,
+    "kind": "to_csv",
+    "dest": "<?>",
+    "safe": false,
+    "code": "still_good = pd.read_parquet(dest).to_csv(index=False) == good_csv"
+   }
+  ]
+ }
+}

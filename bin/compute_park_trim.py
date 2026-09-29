@@ -14,7 +14,8 @@ về đúng thiết kế; nó KHÔNG phụ thuộc bất kỳ tín hiệu mua n�
 CÔNG THỨC (§D1 `park_membership_sync_L0_design_20260806.md` — user John duyệt 2026-08-07,
 job Taylor_20260807_020402. Mọi hằng số vẫn PORT từ engine/gate đã chạy, KHÔNG tham số mới):
 
-    pool        = (totalCash − totalDebt) + park_mv (sổ book, §park_holdings)  # ← §pool, sửa 08-09
+    pool        = (totalCash − totalDebt) + egg_assets + park_mv (sổ book, §park_holdings)
+                                                          # ← §pool, sửa 08-09 · §pool-egg sửa 08-19
     target_park = pool × PARK_TARGET
     delta       = target_park − park_mv
     if delta < −pool × 0.005:                          # ngưỡng 0,005 = engine dòng 918 (GIỮ NGUYÊN)
@@ -80,6 +81,13 @@ dư tiền (không có khái niệm chưa-settle/chưa-về) nên "toàn bộ ti
 hưởng nhỏ và về phía AN TOÀN (mẫu số lớn hơn ⇒ trần PARK lớn hơn ⇒ bán ÍT hơn): SpaceX 68,97% vs
 70,05%, ZaloPay 95,79% vs 97,96% — không đổi quyết định ở cả hai account.
 
+⚠️ Quyết định trên là mặc định cho cổ tức của mã BÌNH THƯỜNG — §pool-excl-div dưới đây SỬA ĐỔI nó
+riêng cho cổ tức của mã trong `excluded_tickers` (khoản đó bị LOẠI khỏi mẫu số, không "giữ nguyên
+như tiền đã thuộc về mình" nữa) vì lý do khác hẳn: mã excluded không tham gia rổ V2.4 nên khoản
+receivable của nó không phải là "tiền engine backtest coi là một số dư" — nó là tiền của một vị thế
+NGOÀI chiến lược đang chờ về, giống hệt lý do `manual_offbook_assets_vnd` không được tính vào sức
+mua thực thi.
+
 NỢ MARGIN bị TRỪ (`− totalDebt`, thêm cùng ngày sau phản biện quant-skeptic). Mẫu số phải là VỐN
 CHỦ SỞ HỮU nhàn rỗi; không trừ thì nó phồng lên đúng bằng tiền đi vay ⇒ trần PARK cao giả ⇒
 UNDER-trim — chế độ hỏng NGƯỢC LẠI với bug vừa sửa, cùng một gốc "quên net một field bảng cân
@@ -87,8 +95,42 @@ UNDER-trim — chế độ hỏng NGƯỢC LẠI với bug vừa sửa, cùng m�
 2026-07-03 (`kb/incidents/2026-07/`). Ngày 08-07 totalDebt=0 ở cả 2 account nên mọi số dẫn ở trên
 không đổi. Cùng quy ước NAV = totalCash − totalDebt của `daily_nav_snapshot.py`/`reconcile_equity.py`.
 
-⚠️ `compute_jit_unpark.py` (L2) CỐ Ý vẫn dùng `availableCash`: nó hỏi "tiền tôi TIÊU được ngay
-phiên tới", không phải "vốn tôi sở hữu". Đừng đồng bộ hai chỗ này thành một field.
+⚠️ `check_plan_funding()`/`executor.py` (gate P0, thực thi thật) CỐ Ý vẫn dùng `availableCash`/
+`ppse`: chúng hỏi "tiền tôi TIÊU được ngay phiên tới", không phải "vốn tôi sở hữu". Đừng đồng bộ
+hai chỗ này thành một field. `compute_jit_unpark.py` (L2) ĐÃ ĐẢO (2026-08-19, cùng ngày với sửa
+L1 dưới đây) — xem §pool-egg-L2 trong chính file đó.
+
+§pool-egg — CỘNG Trứng vàng (DNSE egg product) vào mẫu số (sửa 2026-08-19, sự cố thật cùng ngày:
+user hỏi vì sao TRIM sinh ra dù không phải kỳ rebalance custom30V). Root cause: `totalCash` của
+CẢ HAI account rơi tự do đúng 1 phiên (SpaceX 109,98tr→9,78tr, ZaloPay 45,22tr→6,46tr, asof
+2026-08-17→2026-08-18) — khớp gần tuyệt đối với số dư Trứng vàng cùng ngày (SpaceX ~100,22tr,
+ZaloPay ~38,77tr). Tiền KHÔNG mất, chỉ chuyển sang một sản phẩm khác của DNSE (đọc qua field
+`egg.totalValue`, sibling của `stock` trong payload `balances` thô — KHÔNG nằm trong `totalCash`).
+`compute_active_nav.py`/`daily_nav_snapshot.py` đã cộng field này vào NAV từ 2026-08-18, nhưng L1
+(`compute_park_trim.py`) bị bỏ sót ⇒ pool co lại ĐÚNG BẰNG số tiền chuyển vào egg trong khi
+park_mv gần như không đổi ⇒ TRIM giả (sinh lệnh bán PARK để "kéo về đúng tỷ trọng" của một mẫu số
+đã bị thu hẹp sai) — không phục vụ mục đích tái cân bằng thật nào, chỉ tốn phí giao dịch.
+
+Egg cộng vào L1 (câu hỏi "sở hữu bao nhiêu vốn") — user John duyệt 2026-08-19 (Discord, kênh
+DollarBill plan): "Trứng vàng là cash và tất cả các formula liên quan đến cash đều phải cập nhật
+để không bị tính sai." L2 `compute_jit_unpark.py` CŨNG cộng egg (§pool-egg-L2 trong file đó) sau
+khi user làm rõ quy trình vận hành thật (rút Trứng vàng trong giờ hành chính, về TRONG PHIÊN,
+không phí) — khác `check_plan_funding()`/`executor.py` (gate thực thi thật) VẪN loại egg, xem
+`kb/coding_guidelines.md` §25 cho ranh giới đầy đủ.
+
+§pool-excl-div — LOẠI cổ tức receivable của mã EXCLUDED khỏi mẫu số (sửa 2026-09-19/09-21, quyết
+định A, bus `Taylor/zalopay-park-trim-pool-same-dgc-dividend-phantom`, dispatch
+`Taylor_20260919_052437`). Sự cố: ZaloPay DGC (excluded) có 80.000.000đ cổ tức receivable nằm
+trong `totalCash` từ 2026-09-14 — §pool-egg-div ở trên CỐ Ý giữ mọi cổ tức receivable trong mẫu số,
+nhưng con số 80tr này LỚN hơn nhiều ví dụ gốc (08-07: ~5,8tr ZaloPay) và LẬT quyết định thật của
+`plan_ZaloPay_2026-09-21.json`: giữ 80tr ảo ⇒ pool=266,2tr, target=213,0tr, delta +42,7tr ⇒
+NO_TRIM; loại 80tr ảo ⇒ pool=186,2tr, target=149,0tr, delta −21,3tr ⇒ TRIM ~21,3tr (vượt ngưỡng
+0,93tr). Cùng gốc bug với active_nav (`compute_active_nav.py` §excluded_dividend, Option B,
+commit `baf1c51f`) — TÁI SỬ DỤNG nguyên hàm `excluded_dividend_pending()` từ đó (không chép lại
+logic): trừ vào `cash` phần cổ tức receivable thuộc mã trong `excluded_tickers`, theo config
+`excluded_dividend_receivable` trong `trading_bot_accounts.json`. Mã KHÔNG bị exclude vẫn giữ
+NGUYÊN hành vi §pool-egg-div gốc (cổ tức receivable CÓ nằm trong mẫu số) — chỉ phần thuộc mã
+excluded mới bị loại.
 
 FAIL-CLOSED per-name (sao chép nguyên `cap_lag_orders._block`): không đo được ADV / ADV cũ
 hơn LAG_ADV_MAX_STALE_DAYS / ADV ≤ 0 / không dựng được danh sách account live ⇒ KHÔNG trim mã
@@ -103,10 +145,12 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-WC_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import wc_paths  # noqa: E402
+WC_ROOT = wc_paths.find_wc_root(__file__)
 sys.path.insert(0, WC_ROOT)
 
-from park_holdings import park_holdings, today_ict          # noqa: E402
+from park_holdings import account_profile, park_holdings, today_ict  # noqa: E402
+from compute_active_nav import excluded_dividend_pending     # noqa: E402
 from trading_bot.plan import (LAG_ADV_PCT, LAG_ADV_MAX_STALE_DAYS,  # noqa: E402
                               _adv_for_gate)
 from trading_bot.vn_market import LOT, round_lot            # noqa: E402
@@ -115,15 +159,97 @@ from trading_bot.vn_market import LOT, round_lot            # noqa: E402
 from lag_forensic_filter import BANNED                      # noqa: E402
 
 # ── Tham số — KHÔNG có cái nào tự chế ────────────────────────────────────────
-# Target park F1, user CHỐT 2026-08-04 (báo cáo `park_wiring_two_options_20260804.md`:
-# F1 = đỉnh Calmar 1,63 của cả dải quét; PBO họ 7 cấu hình = 0,08 trên metric CAGR).
-# ⚠️ Đây là DUY NHẤT một tham số đổi so với spec đã pin (0,70 → 0,80).
-# Cổng chính sách ĐÃ MỞ 2026-08-04: `data/trading_rules.json` v2.3 đặt
-# `neutral_parking.default_park_of_idle_pct = 0.80` (user chốt, job Taylor_20260804_034133).
-# CÒN LẠI: engine `golive_recommend_v23.py:96 ETF_PARK={3:0.7}` — đường MUA — vẫn publish 0,70,
-# nên `etf_park_frac` live còn lệch target này (xem `neutral_parking.pending_engine_consistency`).
-# Cảnh báo dưới đây nói về CHỖ LỆCH ĐÓ, không phải cổng chính sách.
-PARK_TARGET_F1 = 0.80
+# Target park — **KHÔNG hardcode ở đây nữa** (gỡ 2026-09-27). R2 (đường BÁN này) ĐỌC R3
+# `data/trading_rules.json` `neutral_parking.default_park_of_idle_pct` làm NGUỒN SỰ THẬT DUY NHẤT.
+#
+# VÌ SAO GỠ: mức park từng sống ở BA chỗ độc lập, không chỗ nào đọc chỗ nào, và lớp lỗi đó đã CẮN
+# HAI LẦN — cả hai lần IM LẶNG:
+#   · 2026-08-04: R1 (đường MUA `deploy_golive_dt5g_v4/golive_recommend_v23.py` ETF_PARK={3:…})
+#     còn 0,70 trong khi R2/R3 đã 0,80 ⇒ mua tới 70% nhưng chỉ trim khi vượt 80%.
+#   · 2026-09-27: user chốt 0,30, R1+R3 đổi, **R2 vẫn 0,80** ⇒ mua tới 30% nhưng chỉ trim khi vượt
+#     80%, tức knob user vừa chốt KHÔNG hiệu lực và sổ PARK cũ ~80% không bao giờ được đưa về 30%.
+# Sao chép một hằng số là cơ chế sinh ra cả hai. R3 là văn bản chính sách user duyệt (có
+# `risk_dial_override`, `default_change_history`) ⇒ nó phải là nguồn, không phải bản sao thứ ba.
+#
+# Mức hiện hành 0,30 — user CHỐT 2026-09-27 15:48 ICT (trước đó 0,80 từ 08-04, 0,70 từ v2.1).
+# Căn cứ: lưới 12 mức trên bản đã sửa 2 lỗi đo (chuỗi return bỏ OShares + weight tại ex-date);
+# 0,80 fail cổng bootstrap 5th-pct MaxDD ở CẢ 3 ngưỡng (−32,0% vs park=0 −24,0%); mọi mức ≥40% bị
+# loại; E[Calmar] paired bootstrap 30%=1,476 vs 80%=1,216. Anchor R3 @0,30 = 23,37%/1,88/−14,6%/1,60
+# (`data/results_registry.md` mục "2026-09-27 (sexies)").
+#
+# CÒN LẠI R1: `golive_recommend_v23.py` VẪN hardcode `ETF_PARK={3: …}` — đó là đường SINH PLAN, đổi
+# rủi ro khác, KHÔNG wire trong lượt này (xem §"R1" của bus finding). Cổng cơ học
+# `bin/park_rail_consistency_selfcheck.py` vẫn so R1 (AST) vs R3 (JSON) vs **giá trị R2 THỰC SỰ
+# DÙNG** (chạy chính resolver dưới đây), rc=1 nếu lệch, rc=2 nếu không đọc được.
+PARK_TARGET_RULES = os.path.join(WC_ROOT, "data", "trading_rules.json")
+
+
+class ParkTargetUnavailable(RuntimeError):
+    """R3 không đọc được / không hợp lệ ⇒ TỪ CHỐI tính trim.
+
+    Fail-CLOSED có chủ đích: KHÔNG trả 0 (0 = "bán sạch sổ PARK" — lệnh BÁN thật, tệ hơn cả không
+    làm gì) và KHÔNG mặc định về giá trị cũ 0,80 (đúng cái bug 2026-09-27 mà việc này đi sửa).
+    Không biết trần là bao nhiêu thì không đề xuất lệnh nào — §5 coding_guidelines.
+    """
+
+
+def park_target_from_rules(path):
+    """R3 → trần park (float trong [0,1]). Raise `ParkTargetUnavailable` cho 4 ca fail-closed.
+
+    Mọi thông điệp lỗi TRÍCH BẰNG CHỨNG VỪA ĐỌC ĐƯỢC (§29 coding_guidelines: không đoán nguyên
+    nhân, không `2>/dev/null` rồi quy chụp) — chuỗi lỗi thật của OS, câu của json parser, danh sách
+    khoá thật có trong file, `repr`+type của giá trị thật.
+    """
+    try:
+        with open(path, encoding="utf-8") as f:
+            raw = f.read()
+    except OSError as e:
+        raise ParkTargetUnavailable(
+            f"R3 không đọc được: {path} — lỗi THẬT của OS: {type(e).__name__}: {e}") from e
+    try:
+        d = json.loads(raw)
+    except ValueError as e:
+        raise ParkTargetUnavailable(
+            f"R3 không phải JSON hợp lệ: {path} — json parser nói: {e}") from e
+    if not isinstance(d, dict):
+        raise ParkTargetUnavailable(
+            f"R3 {path}: gốc JSON là {type(d).__name__}, không phải object")
+    if "neutral_parking" not in d:
+        raise ParkTargetUnavailable(
+            f"R3 {path}: thiếu khoá gốc 'neutral_parking'. Khoá cấp 1 ĐỌC ĐƯỢC THẬT: {sorted(d)}")
+    npk = d["neutral_parking"]
+    if not isinstance(npk, dict):
+        raise ParkTargetUnavailable(
+            f"R3 {path}: 'neutral_parking' là {type(npk).__name__}, không phải object")
+    if "default_park_of_idle_pct" not in npk:
+        raise ParkTargetUnavailable(
+            f"R3 {path}: thiếu 'neutral_parking.default_park_of_idle_pct'. Khoá ĐỌC ĐƯỢC THẬT "
+            f"trong neutral_parking: {sorted(npk)}")
+    v = npk["default_park_of_idle_pct"]
+    # bool là subclass của int trong Python ⇒ phải loại tường minh, không thì `true` lọt thành 1,0.
+    if isinstance(v, bool) or not isinstance(v, (int, float)):
+        raise ParkTargetUnavailable(
+            f"R3 {path}: default_park_of_idle_pct KHÔNG phải số — đọc được {v!r} "
+            f"(type {type(v).__name__})")
+    v = float(v)
+    if not 0.0 <= v <= 1.0:      # NaN cũng rơi vào đây (mọi so sánh với NaN đều False)
+        raise ParkTargetUnavailable(
+            f"R3 {path}: default_park_of_idle_pct = {v!r} ngoài [0, 1] — từ chối tính trim")
+    return v
+
+
+def __getattr__(name):
+    """Tương thích ngược cho `from compute_park_trim import PARK_TARGET_F1` (PEP 562).
+
+    Rail thứ TƯ, không nằm trong cổng 3-rail: đường MUA P2
+    `mike/agents/DollarBill/tools/compute_park_add.py:52` import chính hằng số này. Giữ tên nhưng
+    resolve từ R3 **tại thời điểm truy cập** ⇒ rail đó tự đồng bộ theo chính sách, không phải sửa
+    file của agent khác, và không còn bản sao hằng số nào để lệch. Fail-closed lan đúng cách:
+    R3 hỏng ⇒ import/truy cập raise `ParkTargetUnavailable`, KHÔNG trả giá trị đoán.
+    """
+    if name == "PARK_TARGET_F1":
+        return park_target_from_rules(PARK_TARGET_RULES)
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 TRIM_BAND = 0.005          # = simulate_holistic_nav.py dòng 918 (PREFILL_STATE_REBAL)
 ETF_LIQ_PCT = 0.20         # = pt_v23_audit_2014.py:206 ETF_LIQ_PCT (trần thanh khoản rổ)
 STATE_FILE = os.path.join(WC_ROOT, "data", "golive_v23_status.json")
@@ -232,10 +358,19 @@ def live_price_fn(asof):
     return _f
 
 
-def compute_trim(account_label, asof=None, target=PARK_TARGET_F1, holdings=None,
+def compute_trim(account_label, asof=None, target=None, holdings=None,
                  share_override=None, adv_fn=None, day_cap_override=None,
-                 basket_override=None, price_fn=None):
-    """Trả dict mô tả đầy đủ quyết định. `*_override`/`*_fn` chỉ để selfcheck bơm dữ liệu."""
+                 basket_override=None, price_fn=None, excluded_dividend_config_override=None):
+    """Trả dict mô tả đầy đủ quyết định. `*_override`/`*_fn` chỉ để selfcheck bơm dữ liệu.
+
+    `excluded_dividend_config_override`: bơm thẳng danh sách `excluded_dividend_receivable`
+    (bỏ qua `account_profile(account_label)`) — production để None (account_label THẬT phải
+    tồn tại trong trading_bot_accounts.json); selfcheck dùng account_label giả ("TEST") nên
+    PHẢI bơm qua đây, không thì account_profile() sẽ raise SystemExit (§pool-excl-div).
+    """
+    # target=None ⇒ ĐỌC R3 (nguồn sự thật). Fail-closed: raise ParkTargetUnavailable,
+    # KHÔNG rơi về hằng số nào. Caller truyền target tường minh (selfcheck, A/B) vẫn được.
+    target = park_target_from_rules(PARK_TARGET_RULES) if target is None else float(target)
     asof = asof or today_ict()
     h = holdings if holdings is not None else park_holdings(account_label, asof)
     adv_fn = adv_fn or _adv_for_gate
@@ -254,6 +389,27 @@ def compute_trim(account_label, asof=None, target=PARK_TARGET_F1, holdings=None,
         out["decision"] = "BLOCKED_RECONCILE"
         out["notes"].append("sổ lô LỆCH so với broker ⇒ không sinh đề xuất nào. "
                             f"Lệch: {h['reconcile']['mismatches']}")
+        return out
+
+    # ── Cổng 0b §exdate_frame [F3]: MẪU SỐ trộn hệ quy chiếu ⇒ fail-closed ───
+    # `park_mv_vnd` = Σ(qty × market_price). Đêm trước GDKHQ broker credit KL mới NGAY trong
+    # khi giá đóng cửa vẫn là giá CÒN QUYỀN; park_holdings sửa được giá thì thôi, KHÔNG sửa
+    # được thì phát cờ này. Cờ là CẤP TÀI KHOẢN vì `:331 park_mv = float(h['park_mv_vnd'])`
+    # → `pool` → `delta` tính trên TOÀN rổ: loại riêng mã hỏng
+    # khỏi danh sách sinh lệnh (`unverified_tickers`) vẫn để số phồng nằm trong mẫu số ⇒
+    # over-trim các mã KHÁC. Cửa sổ này tự đóng sau GDKHQ (tối đa 1 đêm).
+    if h.get("frame_blocked_tickers"):
+        out["decision"] = "BLOCKED_FRAME"
+        out["frame_blocked_tickers"] = h["frame_blocked_tickers"]
+        out["notes"].append(
+            "KL và giá KHÔNG cùng hệ quy chiếu cho "
+            + ", ".join(f"{t}: {w}" for t, w in
+                        sorted((h.get("frame_blocked_detail") or {}).items()))
+            + f" ⇒ `park_mv_vnd` ({h['park_mv_vnd']:,.0f}) là số TRỘN HỆ, KHÔNG dùng làm mẫu "
+              "số được ⇒ fail-closed, "
+              "không sinh đề xuất nào (loại riêng mã đó vẫn over-trim các mã KHÁC). CẦN NGƯỜI: "
+              "xác minh giá tham chiếu sau sự kiện (bảng giá sở/HOSE, thông báo GDKHQ) rồi đối "
+              "chiếu với marketPrice broker. Cửa sổ tự đóng sau ngày GDKHQ.")
         return out
 
     state = {}
@@ -323,10 +479,73 @@ def compute_trim(account_label, asof=None, target=PARK_TARGET_F1, holdings=None,
     # lên đúng bằng tiền đi vay ⇒ trần PARK cao giả ⇒ UNDER-trim — đúng chế độ hỏng NGƯỢC LẠI với
     # bug vừa sửa (quant-skeptic 2026-08-09 nêu; SpaceX từng nợ 409,9tr ngày 2026-07-03).
     cash = float(h["cash_total_vnd"]) - float(h["cash_debt_vnd"])
+    # Trứng vàng (§pool-egg) — vốn CHỦ SỞ HỮU thật, chỉ thiếu thanh khoản tức thời (cần rút T+1),
+    # nên cộng vào mẫu số "sở hữu bao nhiêu" giống totalCash, KHÔNG giống availableCash của L2.
+    egg = float(h.get("egg_assets_vnd") or 0.0)
+    # §pool-excl-div — cổ tức receivable của mã EXCLUDED (vd DGC/ZaloPay) bị loại khỏi pool tới
+    # khi tiền thật về, CÙNG cơ chế `excluded_dividend_pending()` đã wire trong
+    # `compute_active_nav.py` (Option B, user quyết 2026-09-19). §pool-egg-div ở trên vẫn giữ
+    # NGUYÊN cho mã KHÔNG bị exclude — chỉ đây, không phải mọi cổ tức, mới là "chưa về".
+    excl_set = set(h["excluded_tickers"])
+    excl_div_config = (excluded_dividend_config_override if excluded_dividend_config_override
+                       is not None else account_profile(account_label).get(
+                           "excluded_dividend_receivable") or [])
+    excl_div_pending, excl_div_detail = excluded_dividend_pending(
+        excl_set, excl_div_config, h.get("cash_dividend_receiving_vnd"), asof)
+    cash -= excl_div_pending
     out["cash_basis"] = h.get("cash_basis")
     out["cash_dividend_receiving_vnd"] = h.get("cash_dividend_receiving_vnd")
     out["cash_debt_vnd"] = h.get("cash_debt_vnd")
-    pool = cash + park_mv
+    out["egg_assets_vnd"] = egg
+    out["excluded_dividend_receivable_pending_vnd"] = excl_div_pending
+    out["excluded_dividend_receivable_detail"] = excl_div_detail
+    if excl_div_pending:
+        overdue_tks = sorted({d["ticker"] for d in excl_div_detail if d["overdue"]})
+        # excl_div_detail["amount_vnd"] = phần DNSE vẫn báo receivable sau khi kẹp min() với
+        # `cash_dividend_receiving_vnd` — con số đó là TỔNG CẤP TÀI KHOẢN, KHÔNG tách theo mã
+        # (compute_active_nav.py::excluded_dividend_pending() docstring). Bản vá trước (ff41c629)
+        # coi phần "còn lại" này là phần CÒN LẠI RIÊNG của đúng ticker và suy "ĐÃ VỀ = cấu hình −
+        # còn lại" — SAI trên ca thật 2026-09-25 (ZaloPay/DGC): 80tr cấu hình đã settle 100% một
+        # lượt tối 09-25, phần 1,9tr còn lại trong cashDividendReceiving là cổ tức mã KHÁC phát
+        # sinh 09-21, không phải phần sót của ticker này. KHÔNG khẳng định số "ĐÃ VỀ" per-ticker —
+        # chỉ báo cáo đúng những gì code đọc được: cấu hình, tổng còn receivable toàn tài khoản,
+        # và mức pool đang tạm loại theo min(). ("XCL" trong selfcheck là mã fixture thay cho DGC.)
+        excl_div_config_by_tk = {}
+        for ent in excl_div_config or []:
+            if isinstance(ent, dict) and ent.get("ticker"):
+                excl_div_config_by_tk[ent["ticker"]] = (
+                    excl_div_config_by_tk.get(ent["ticker"], 0.0)
+                    + float(ent.get("amount_vnd") or 0))
+        account_total_recv = float(h.get("cash_dividend_receiving_vnd") or 0)
+        div_lines = []
+        for tk in sorted({d["ticker"] for d in excl_div_detail}):
+            pending_tk = sum(d["amount_vnd"] for d in excl_div_detail if d["ticker"] == tk)
+            # Fallback phòng thủ, KHÔNG PHẢI đường thực thi bình thường: mọi ticker trong
+            # excl_div_detail luôn có entry gốc khớp trong excl_div_config_by_tk (detail chỉ được
+            # tạo ra TỪ excl_div_config trong excluded_dividend_pending()) — nhánh `.get(tk, ...)`
+            # chỉ chạy nếu bất biến đó bị phá vỡ ở nơi khác.
+            total_tk = excl_div_config_by_tk.get(tk, pending_tk)
+            ratio = (pending_tk / total_tk) if total_tk else 0.0
+            stale_warn = ""
+            if total_tk and ratio <= 0.10:
+                stale_warn = (
+                    f" ⚠️ CẤU HÌNH CÓ THỂ ĐÃ CŨ — còn báo {pending_tk/1e6:,.1f}tr "
+                    f"({ratio*100:.0f}% so với cấu hình {total_tk/1e6:,.1f}tr), khả năng cao "
+                    f"{tk} đã settle gần hết và phần còn lại thuộc mã KHÁC (tổng không tách theo "
+                    f"mã) — kiểm và dọn entry excluded_dividend_receivable nếu {tk} đã về đủ.")
+            div_lines.append(
+                f"{tk} cấu hình {total_tk/1e6:,.1f}tr; DNSE hiện báo TỔNG "
+                f"{account_total_recv/1e6:,.1f}tr cổ tức chưa về TOÀN TÀI KHOẢN (không tách theo "
+                f"mã) ⇒ pool tạm loại min({total_tk/1e6:,.1f}tr; {pending_tk/1e6:,.1f}tr) = "
+                f"{pending_tk/1e6:,.1f}tr" + stale_warn)
+        out["notes"].append(
+            "ℹ️ cổ tức excluded — " + "; ".join(div_lines) + " — tới khi DNSE xác nhận hết "
+            "(Option B, cùng cơ chế compute_active_nav.py). CHÉP dòng này vào notes plan."
+            + (f" ⚠️ QUÁ HẠN dự kiến: {', '.join(overdue_tks)} — DNSE vẫn báo receivable dù đã "
+               f"qua ngày dự kiến về, kiểm tiền đã về thật chưa / cập nhật "
+               f"excluded_dividend_receivable trước khi duyệt lệnh bán (cùng cảnh báo "
+               f"compute_active_nav.py)." if overdue_tks else ""))
+    pool = cash + egg + park_mv
     target_value = pool * target
     delta = target_value - park_mv
     out.update({"pool_vnd": pool, "target_park_vnd": target_value, "delta_vnd": delta,
@@ -441,11 +660,16 @@ def compute_trim(account_label, asof=None, target=PARK_TARGET_F1, holdings=None,
     out["target_weights"] = {tk: feasible[tk] / w_sum for tk in sorted(feasible)}
     out["target_value_vnd"] = {tk: tgt[tk] for tk in sorted(tgt)}
     if dropped:
+        # §5 kb/plan_report_style_guide.md: TÓM TẮT 1 dòng cho kênh duyệt — KHÔNG generate
+        # wall-of-text liệt kê công thức từng mã ở đây (renderer từng cắt ngẫu nhiên theo ký
+        # tự, mất thông tin có chủ đích). Chi tiết đầy đủ từng mã ĐÃ có nguyên vẹn trong
+        # out["basket_dropped"] (ticker/weight/reason) — không mất thông tin, chỉ không đẩy
+        # vào notes[] mà report renderer echo cho người duyệt.
         out["notes"].append(
             f"rổ mục tiêu kỳ {rebal_date}: {len(feasible)}/{len(basket_w)} mã khả thi, bỏ "
-            f"{len(dropped)} mã (Σ {out['basket_dropped_weight']*100:.2f}% trọng số) — trọng số "
-            f"đã CHUẨN HOÁ LẠI trên tập khả thi: "
-            + "; ".join(f"{d['ticker']} {d['weight']*100:.2f}% ({d['reason']})" for d in dropped))
+            f"{len(dropped)} mã (Σ {out['basket_dropped_weight']*100:.2f}% trọng số, trọng số "
+            "đã chuẩn hoá lại trên tập khả thi) — chi tiết từng mã: xem basket_dropped trong "
+            "plan JSON.")
 
     # ── want_i = mv_i − tgt_i, trần TỔNG, rồi tầng 2 (trần per-name = gate LAG live) ──
     want_raw = {tk: max(0.0, d["mv"] - tgt.get(tk, 0.0)) for tk, d in tradable.items()}
@@ -479,11 +703,17 @@ def compute_trim(account_label, asof=None, target=PARK_TARGET_F1, holdings=None,
             out["blocked"].append({"ticker": tk, "reason": f"không đo được ADV: {err}"})
             continue
         if data_date:
+            # FAIL-CLOSED tu 2026-09-28 (user duyet) — cung mot dong code voi
+            # compute_jit_unpark.py:241 va plan.py:648 (plan.py la ranh gioi cung, user sua sau).
+            # `lag_days = None` lam cau gate ke tiep khong bao gio chay ⇒ cong ADV-stale bien mat.
             try:
                 lag_days = (dt.date.fromisoformat(asof) - dt.date.fromisoformat(data_date)).days
-            except Exception:
-                lag_days = None
-            if lag_days is not None and lag_days > LAG_ADV_MAX_STALE_DAYS:
+            except Exception as e:
+                out["blocked"].append({"ticker": tk, "reason":
+                                       f"khong xac dinh duoc do cu ADV (asof={asof!r} "
+                                       f"data_date={data_date!r}): {type(e).__name__}: {e}"})
+                continue
+            if lag_days > LAG_ADV_MAX_STALE_DAYS:
                 out["blocked"].append({"ticker": tk, "reason":
                                        f"ADV data {data_date} cũ {lag_days} ngày (> "
                                        f"{LAG_ADV_MAX_STALE_DAYS})"})
@@ -554,13 +784,22 @@ def main():
     ap = argparse.ArgumentParser(description="L1 park-target compliance — CHỈ ĐỌC, đề xuất lệnh bán")
     ap.add_argument("--account", required=True)
     ap.add_argument("--asof", default=None)
-    ap.add_argument("--target", type=float, default=PARK_TARGET_F1)
+    ap.add_argument("--target", type=float, default=None,
+                    help="ghi đè trần park; mặc định ĐỌC data/trading_rules.json "
+                         "neutral_parking.default_park_of_idle_pct (R3)")
     ap.add_argument("--json", action="store_true")
     ap.add_argument("--out", default=None,
                     help="ghi kết quả JSON ra file (khuyến nghị cho consumer máy đọc — stdout "
                          "còn có dòng log kết nối của broker nên không parse thẳng được)")
     a = ap.parse_args()
-    r = compute_trim(a.account, a.asof, a.target)
+    try:
+        r = compute_trim(a.account, a.asof, a.target)
+    except ParkTargetUnavailable as e:
+        # MÃ LỖI RIÊNG 7 — phân biệt được với mọi lỗi khác, và KHÔNG sinh đề xuất nào.
+        print(f"[park_trim] ❌ FAIL-CLOSED (rc=7): {e}", file=sys.stderr)
+        print("[park_trim] KHÔNG tính trim, KHÔNG ghi file, KHÔNG đề xuất lệnh — "
+              "sửa R3 rồi chạy lại.", file=sys.stderr)
+        return 7
     if a.out:
         with open(a.out, "w", encoding="utf-8") as f:
             json.dump(r, f, ensure_ascii=False, indent=1, default=str)
@@ -574,10 +813,13 @@ def main():
         _unset = (r["cash_total_vnd"] or 0) - (r["cash_available_vnd"] or 0) \
             - (r.get("cash_dividend_receiving_vnd") or 0)
         _debt = r.get("cash_debt_vnd") or 0
-        print(f"  pool = cash {((r['cash_total_vnd'] or 0) - _debt)/1e6:,.2f}tr (totalCash: settled "
-              f"{(r['cash_available_vnd'] or 0)/1e6:,.2f} + bán chưa settle {_unset/1e6:,.2f} "
-              f"+ cổ tức chờ {(r.get('cash_dividend_receiving_vnd') or 0)/1e6:,.2f} "
-              f"− nợ margin {_debt/1e6:,.2f}) + PARK "
+        _egg = r.get("egg_assets_vnd") or 0
+        _excl_div = r.get("excluded_dividend_receivable_pending_vnd") or 0
+        print(f"  pool = cash {((r['cash_total_vnd'] or 0) - _debt - _excl_div)/1e6:,.2f}tr "
+              f"(totalCash: settled {(r['cash_available_vnd'] or 0)/1e6:,.2f} + bán chưa settle "
+              f"{_unset/1e6:,.2f} + cổ tức chờ {(r.get('cash_dividend_receiving_vnd') or 0)/1e6:,.2f} "
+              f"− nợ margin {_debt/1e6:,.2f} − cổ tức mã excluded (chưa về) {_excl_div/1e6:,.2f}) "
+              f"+ Trứng vàng {_egg/1e6:,.2f}tr + PARK "
               f"{r['park_mv_vnd']/1e6:,.2f}tr = {r['pool_vnd']/1e6:,.2f}tr")
         print(f"  target {r['target_park']:.0%} = {r['target_park_vnd']/1e6:,.2f}tr  →  "
               f"vượt {max(0, -r['delta_vnd'])/1e6:,.2f}tr "

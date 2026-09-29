@@ -27,6 +27,20 @@ cáo tách riêng phần NAV "chiến lược V2.4" khỏi phần legacy khi so 
 giữa các account (vd SpaceX vs ZaloPay) — số báo cáo không bị lẫn biến động của
 mã đang giữ ngoài chiến lược.
 
+§exdate_frame — ĐÊM TRƯỚC GDKHQ, KHỐI LƯỢNG VÀ GIÁ PHẢI CÙNG MỘT HỆ QUY CHIẾU (bug 2026-09-23,
+VPB ISS 0,2604104 ex-date 24/09). DNSE credit KL mới vào `positions` ngay tối T-1 (SpaceX
+1.100→1.386) trong khi giá đóng cửa G1 của phiên T-1 vẫn là giá CÒN QUYỀN 27.800 — cả hai đều
+đúng, nhưng nhân chéo thì sai: 1.386×27.800 = 38.530.800 thay vì 1.386×22.050 = 30.561.300,
+active_nav phồng 7.969.500đ (+0,80%) và plan 24/09 đã sinh lệnh PARK_TRIM VPB trên rổ phồng đó.
+Vá: mã có bằng chứng credit sớm (`exdate_frame.classify_positions`, tái dùng
+`daily_nav_snapshot.classify_qty_residual`) được định giá bằng `marketPrice` của CHÍNH bản ghi
+vị thế — sau khi đối soát nó tái tạo được giá cum qua hệ số sự kiện. KL đổi KHÔNG giải thích
+được, hoặc credit sớm mà không dựng nổi giá cùng hệ ⇒ **rc=6, KHÔNG ghi file** (đây là mẫu số
+sizing; số sai tệ hơn số cũ). Chi tiết + vì sao KHÔNG tin thẳng marketPrice: bin/exdate_frame.py.
+Cổng chỉ chạy ở nhánh asof=hôm nay, nên lối vòng của nó (`--asof <quá khứ>` vẫn đọc vị thế LIVE
+rồi ghi ĐÈ file canonical, rc=0, không cảnh báo) bị chốt bằng **rc=7**: `--asof` khác hôm nay bắt
+buộc có `--out` trỏ đi nơi khác (§8 — output khảo sát không được mang tên file canonical).
+
 §cash — CẤU PHẦN TIỀN = `totalCash − totalDebt`, KHÔNG phải `availableCash`
 (bug sửa 2026-08-10, job Taylor_20260810_004252; cùng LOẠI bug với mẫu số pool của
 `compute_park_trim.py` sửa 2026-08-09, job Taylor_20260809_150316 — lần thứ hai trong
@@ -74,15 +88,39 @@ Cổ tức phải thu (`cashDividendReceiving`) NẰM TRONG `totalCash` trước
 (`daily_nav_snapshot.cum_dividend_double_count`). Script này KHÔNG hiệu chỉnh (cần lịch sử
 dnse_raw + ex-date từ BQ, ngoài phạm vi bản vá này) mà CÔNG BỐ: in cảnh báo + ghi
 `cash_dividend_receiving_vnd` vào JSON khi khoản đó vượt 0,5% NAV.
+
+§excluded_dividend — cổ tức phải thu của MÃ EXCLUDED bị loại khỏi active_nav tới khi tiền về
+(Option B, user quyết 2026-09-19, bus topic
+`Wags/zalopay-active-nav-excluded-ticker-dividend-receivable-option-c`). Sự cố gốc: ZaloPay
+DGC (excluded) có 80.000.000đ cổ tức receivable nằm trong `totalCash` từ 2026-09-14, làm
+active_nav phồng ~13% ⇒ mọi lệnh mua ZaloPay tính theo active_nav bị phồng theo (VPI 17/09:
+500cp thay vì ~400cp đúng — arch-review Wags_20260917_012008). `cashDividendReceiving` là một
+số TỔNG do DNSE trả (không tách theo mã), nên không thể tự suy ra khoản nào thuộc mã nào —
+nguồn sự thật là entry cấu hình `excluded_dividend_receivable` trong `trading_bot_accounts.json`
+(ticker + amount_vnd + expected_arrival_date), user tự khai, CÙNG kiểu với
+`manual_offbook_assets_vnd`. TÍN HIỆU DỪNG LOẠI là `cash_dividend_receiving_vnd` do DNSE trả tự
+hạ xuống (tiền đã settle thật) — KHÔNG PHẢI `expected_arrival_date` đã qua (arch-review
+2026-09-19, bản đầu dùng ngày làm điều kiện dừng: tiền về TRỄ hơn dự kiến ⇒ code cũ tự ngừng loại
+trong im lặng, tái lập đúng bug đang sửa). `expected_arrival_date` chỉ gắn cờ `overdue` để cảnh
+báo. Vì `cashDividendReceiving` là số TỔNG không tách theo mã, cơ chế kẹp (`min(amt, remaining)`)
+là BẢO THỦ theo một chiều: nếu tiền DGC về sớm ĐÚNG LÚC một mã khác (không-excluded) cũng có
+receivable phát sinh, cap vẫn thấy đủ 80tr và có thể loại NHẦM phần của mã kia — hướng sai luôn là
+UNDER-size (an toàn hơn OVER-size), không phải hướng ngược lại. RETROACTIVE: KHÔNG áp cho plan ĐÃ
+duyệt/đã khớp trước 2026-09-19 (VPI 500cp 17/09 giữ nguyên) — chỉ áp từ lần chạy kế tiếp trở đi.
 """
 import argparse
+import datetime as _dt_stale
 import json
 import os
 import subprocess
 import sys
+import tempfile
 
 BQ_PATH_PREFIX = "/home/trido/google-cloud-sdk/bin"
-WC_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import wc_paths  # noqa: E402
+
+WC_ROOT = wc_paths.find_wc_root(__file__)
 
 sys.path.insert(0, WC_ROOT)
 from trading_bot.vn_market import today_ict  # noqa: E402 — ICT thật, không phụ thuộc TZ host (§16)
@@ -138,6 +176,53 @@ def cash_basis(bal):
     return detail["cash_total_vnd"] - detail["cash_debt_vnd"], detail
 
 
+def excluded_dividend_pending(excluded_tickers, dividend_receivable_config,
+                              cash_dividend_receiving_vnd, asof_ref):
+    """Phần `cash_dividend_receiving_vnd` (đã nằm trong `cash`) thuộc mã trong
+    `excluded_tickers`, CHƯA thật sự về ⇒ phải loại khỏi active_nav (§excluded_dividend).
+
+    TÍN HIỆU DỪNG LOẠI là chính DNSE hạ `cash_dividend_receiving_vnd` (tiền đã settle thật),
+    KHÔNG PHẢI `expected_arrival_date` đã qua. `expected_arrival_date` chỉ dùng để gắn cờ
+    `overdue` (cảnh báo tiền về TRỄ hơn dự kiến) — arch-review 2026-09-19 chỉ ra bản đầu dùng
+    ngày làm điều kiện DỪNG sẽ tự tái lập đúng bug đang sửa nếu tiền về trễ: qua ngày mà DNSE
+    vẫn báo receivable, code cũ ngừng loại trong im lặng, active_nav phồng lại. Bản này không có
+    đường đó — miễn `cash_dividend_receiving_vnd` còn > 0 (kẹp `remaining`) thì còn loại, bất kể
+    ngày nào; nếu đã quá `expected_arrival_date` mà vẫn còn loại thì chỉ khác ở chỗ `overdue=True`
+    trong detail (để caller cảnh báo, KHÔNG đổi hành vi loại/không loại).
+
+    `expected_arrival_date` sai định dạng (không phải ISO `YYYY-MM-DD`) hoặc entry không phải
+    dict ⇒ NỔ lỗi rõ ràng (ValueError) — không đoán, không âm thầm loại vĩnh viễn/bỏ qua (§29).
+
+    Trả (tổng cần trừ khỏi active_nav, chi tiết từng entry còn hiệu lực kèm `overdue`).
+    """
+    remaining = float(cash_dividend_receiving_vnd or 0)
+    asof_date = _dt_stale.date.fromisoformat(asof_ref)
+    pending, detail = 0.0, []
+    for ent in dividend_receivable_config or []:
+        if not isinstance(ent, dict):
+            raise ValueError(f"excluded_dividend_receivable: entry không phải dict: {ent!r}")
+        tk, arrival_raw = ent.get("ticker"), ent.get("expected_arrival_date")
+        amt = float(ent.get("amount_vnd") or 0)
+        if tk not in excluded_tickers or amt <= 0:
+            continue
+        overdue = False
+        if arrival_raw:
+            try:
+                overdue = asof_date >= _dt_stale.date.fromisoformat(arrival_raw)
+            except ValueError as e:
+                raise ValueError(
+                    f"excluded_dividend_receivable[{tk}]: expected_arrival_date không đúng "
+                    f"ISO 'YYYY-MM-DD': {arrival_raw!r} ({e})") from e
+        take = min(amt, remaining)
+        if take <= 0:
+            continue  # DNSE không còn báo receivable nào cho phần này ⇒ coi như tiền đã về
+        pending += take
+        remaining -= take
+        detail.append({"ticker": tk, "amount_vnd": take,
+                       "expected_arrival_date": arrival_raw, "overdue": overdue})
+    return pending, detail
+
+
 def live_balance_and_positions(account_id, label):
     """Gọi trực tiếp DNSEBroker — real-time, không qua file trung gian.
 
@@ -152,30 +237,64 @@ def live_balance_and_positions(account_id, label):
     bal = b.client.balances(account_id)
     b._log_raw("balances", bal)                 # cùng dấu vết audit như get_cash() vẫn ghi
     cash, cash_detail = cash_basis(bal)
+    # Trứng vàng — live API trả thẳng (không có wrapper "payload" như trong log file).
+    egg_value = float((bal.get("egg") or {}).get("totalValue") or 0)
     positions = b.get_positions()
-    return cash, positions, cash_detail
+    return cash, positions, cash_detail, egg_value
+
+
+def bq_close_sql(tickers, as_of_date=None):
+    """Giá Close của phiên MỚI NHẤT (≤ as_of_date) THEO TỪNG MÃ.
+
+    Trước 2026-09-13 ngày giá = MAX(time) của mã đầu alphabet, áp cho cả danh mục ⇒ mã đó
+    ngừng giao dịch/thiếu dòng thì mọi mã khác cũng lấy giá cũ (code-quality 2026-09-13).
+    """
+    tick_list = ",".join(f"'{t}'" for t in sorted(tickers))
+    # [F1] `as_of_date=""` KHÔNG được âm thầm thành "TRUE" (= không lọc ngày). Chuỗi rỗng ở đây
+    # chỉ có thể là một biến shell chưa set chảy xuống tới đây; nó có nghĩa "tôi ĐỊNH lọc theo
+    # ngày" chứ không phải "tôi cố ý không lọc". Caller chuẩn hoá ở main(); dòng này là lớp thứ
+    # hai để hàm không thể bị gọi sai từ chỗ khác. None = cố ý không lọc, vẫn hợp lệ.
+    if as_of_date is not None and not str(as_of_date).strip():
+        raise ValueError("bq_close_sql: as_of_date là chuỗi RỖNG — phải là None (cố ý không lọc "
+                         "ngày) hoặc 'YYYY-MM-DD'. Chuỗi rỗng thành 'TRUE' = lấy phiên mới nhất "
+                         "của mọi thời điểm, im lặng.")
+    date_clause = (f"t.time <= '{as_of_date}'" if as_of_date else "TRUE")
+    return f"""
+    SELECT t.ticker, t.Close, CAST(t.time AS STRING) AS time
+    FROM tav2_bq.ticker AS t
+    WHERE t.ticker IN ({tick_list}) AND {date_clause}
+    QUALIFY ROW_NUMBER() OVER (PARTITION BY t.ticker ORDER BY t.time DESC) = 1
+    """
+
+
+def parse_close_rows(rows):
+    """rows BQ → ({tk: Close}, {tk: ngày giá} của các mã có ngày giá CŨ HƠN ngày mới nhất
+    trong danh mục). Mã tụt ngày không bị bỏ — chỉ bị gọi tên để người vận hành thấy."""
+    prices = {r["ticker"]: float(r["Close"]) for r in rows}
+    dates = {r["ticker"]: str(r["time"]) for r in rows}
+    newest = max(dates.values()) if dates else None
+    lagging = {tk: d for tk, d in sorted(dates.items()) if d != newest}
+    return prices, lagging, newest
 
 
 def bq_close_prices(tickers, as_of_date=None):
     env = dict(os.environ)
     env["PATH"] = BQ_PATH_PREFIX + ":" + env.get("PATH", "")
-    tick_list = ",".join(f"'{t}'" for t in sorted(tickers))
-    date_clause = (f"t2.time <= '{as_of_date}'" if as_of_date else "TRUE")
-    sql = f"""
-    SELECT t.ticker, t.Close
-    FROM tav2_bq.ticker AS t
-    WHERE t.ticker IN ({tick_list})
-    AND t.time = (SELECT MAX(t2.time) FROM tav2_bq.ticker AS t2
-                  WHERE t2.ticker = '{sorted(tickers)[0]}' AND {date_clause})
-    """
+    sql = bq_close_sql(tickers, as_of_date)
     cmd = ["bq", "query", "--use_legacy_sql=false",
            "--project_id=lithe-record-440915-m9", "--format=json",
            "--max_rows=5000", sql]
     out = subprocess.run(cmd, capture_output=True, text=True, env=env)
     if out.returncode != 0:
-        return None, out.stderr.strip()
-    rows = json.loads(out.stdout)
-    return {r["ticker"]: float(r["Close"]) for r in rows}, None
+        # `bq` ghi lỗi ra STDOUT chứ không phải stderr (kb/incidents/2026-08/
+        # 2026-08-29-bq-error-on-stdout-empty-diagnosis.md) — chỉ đọc stderr thì
+        # người vận hành nhận chuỗi RỖNG. Không đổi luồng, chỉ đổi chuỗi chẩn đoán.
+        return None, (out.stderr.strip() or out.stdout.strip())
+    prices, lagging, newest = parse_close_rows(json.loads(out.stdout))
+    if lagging:
+        print(f"⚠️ BQ: các mã có phiên giá cũ hơn {newest} (dùng giá phiên gần nhất của CHÍNH "
+              f"mã đó — kiểm tra ngừng giao dịch/thiếu dòng): {lagging}", file=sys.stderr)
+    return prices, None
 
 
 def resolve_prices(tickers, asof):
@@ -213,6 +332,15 @@ def resolve_prices(tickers, asof):
     return prices, {tk: "bq_close" for tk in prices}, None
 
 
+def previous_stock_value(path):
+    """total_stock_value của file active_nav lần trước; không có/đọc lỗi ⇒ 0 (account mới)."""
+    try:
+        with open(path, encoding="utf-8") as f:
+            return float(json.load(f).get("total_stock_value") or 0)
+    except (OSError, ValueError, AttributeError):
+        return 0.0
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--account", required=True, help="label trong trading_bot_accounts.json")
@@ -220,7 +348,45 @@ def main():
     ap.add_argument("--asof", default=None,
                     help="ngày giá đóng cửa (mặc định/hôm nay: DNSE live; ngày quá khứ: BQ)")
     ap.add_argument("--out", default=None)
+    ap.add_argument("--confirm-flat", action="store_true",
+                    help="xác nhận account ĐÃ bán sạch thật — cho ghi positions rỗng dù file "
+                         "active_nav trước còn cổ phiếu")
     args = ap.parse_args()
+    # [F1] `--asof ""` (hình dạng `--asof "$ASOF"` với biến CHƯA SET) là chuỗi RỖNG ⇒ FALSY ⇒
+    # trượt qua CẢ BA tầng cùng lúc: chốt chặn ngay dưới, cổng §exdate_frame (`args.asof is
+    # None`) và `bq_close_sql` (`if as_of_date else "TRUE"` = không lọc ngày). Mike chạy thật
+    # trên file production: rc=0, canonical bị ghi đè, VPB = 38.530.800 (đúng con số bug gốc),
+    # và tín hiệu duy nhất là ⚠️ chứ không phải ❌ ⇒ `cron_health_check.py` (pattern `^\s*❌`)
+    # MÙ HẲN. Chuẩn hoá MỘT LẦN ở đây, đúng tiền lệ `park_holdings.py:550` (`asof or today_ict()`):
+    # từ dòng này trở xuống `args.asof` chỉ có hai dạng — None, hoặc chuỗi ngày không rỗng.
+    args.asof = (args.asof or "").strip() or None
+    canonical_out = os.path.join(
+        WC_ROOT, "data", "execution_logs", f"active_nav_{args.account}.json")
+    out_path = args.out or canonical_out
+    # [F2] Chốt chặn dưới đây từng kiểm `--out` CÓ/KHÔNG chứ không kiểm nó TRỎ ĐI ĐÂU, mà
+    # CHÍNH thông điệp rc=6/rc=7 lại dạy người vận hành dùng `--out` ⇒ ai chép đúng đường dẫn
+    # canonical vào đó (hoặc script hoá thành biến) là ghi số phồng với rc=0, không cảnh báo.
+    # `realpath` để `./`, symlink và đường dẫn tương đối không lách qua được.
+    writes_canonical = os.path.realpath(out_path) == os.path.realpath(canonical_out)
+
+    # ── §exdate_frame [R4] — `--asof` QUÁ KHỨ KHÔNG được ghi đè file canonical ─────
+    # Cổng §exdate_frame dưới đây chỉ chạy ở nhánh asof=hôm nay, nhưng `get_positions()`
+    # LUÔN trả vị thế LIVE bất kể `--asof`. Nên sau một rc=6, đúng một lệnh
+    # `--asof <hôm qua>` ghi CHÍNH con số phồng đó vào file canonical, không cảnh báo,
+    # rc=0 — cổng fail-closed có lối vòng, và thông điệp rc=6 lại vừa bảo "chạy lại".
+    # Lý lẽ "giá BQ quá khứ đã điều chỉnh hồi tố ⇒ cùng hệ với KL đã credit" KHÔNG cứu được
+    # ca này: tháng 9/2026 đo được 8 sự kiện vendor CHƯA hồi tố, trong cửa sổ đó Close quá
+    # khứ vẫn là giá cum nhân với KL đã credit = y nguyên bug.
+    # Vẫn cho chạy để người vận hành đối chiếu/khảo sát — chỉ bắt nói rõ đích đến (§8:
+    # output khảo sát không bao giờ được trỏ vào tên file canonical).
+    if args.asof and args.asof != today_ict().isoformat() and writes_canonical:
+        print(f"❌ --asof {args.asof!r} là ngày KHÁC hôm nay ⇒ TỪ CHỐI ghi đè {out_path}. "
+              f"Vị thế luôn đọc LIVE (get_positions), giá lại lấy của {args.asof}: hai con số "
+              f"KHÁC HỆ QUY CHIẾU, và cổng §exdate_frame (chặn đúng lớp lỗi đó) chỉ chạy ở "
+              f"nhánh asof=hôm nay. Muốn khảo sát: thêm `--out <đường dẫn tạm>` — đường dẫn "
+              f"KHÁC {canonical_out} (trỏ vào chính nó cũng bị từ chối y hệt). Muốn refresh "
+              f"số sizing thật: bỏ `--asof`.", file=sys.stderr)
+        sys.exit(7)
 
     profile = get_account_profile(args.account)
     if profile is None:
@@ -237,8 +403,9 @@ def main():
     offbook = float(profile.get("manual_offbook_assets_vnd") or 0)
     offbook_asof = profile.get("manual_offbook_assets_asof") or ""
     offbook_stale_warning = None
+    asof_ref = args.asof or today_ict().isoformat()
+    excluded_div_config = profile.get("excluded_dividend_receivable") or []
     if offbook and offbook_asof:
-        asof_ref = args.asof or today_ict().isoformat()
         try:
             age_days = (_dt_stale.date.fromisoformat(asof_ref)
                         - _dt_stale.date.fromisoformat(offbook_asof)).days
@@ -249,7 +416,7 @@ def main():
         except ValueError:
             pass
 
-    cash, positions, cash_detail = live_balance_and_positions(account_id, args.account)
+    cash, positions, cash_detail, egg_value = live_balance_and_positions(account_id, args.account)
     if cash is None:
         # FAIL-CLOSED (§cash): không ghi đè file active_nav cũ bằng một con số sai. Consumer
         # (`golive_recommend_v23._account_nav_basis`) tự thấy file quá hạn theo `computed_at`
@@ -261,25 +428,109 @@ def main():
         sys.exit(4)
     tickers = list(positions.keys())
     if not tickers:
+        # DNSE CÓ trả positions rỗng TẠM THỜI (dnse_raw_2026-08-20 SpaceX: 19:06:46 27 mã →
+        # 19:07:16 0 mã → 19:07:46 27 mã). File trước còn cổ phiếu ⇒ coi là lỗi feed, FAIL-CLOSED
+        # (không ghi NAV = cash+egg khai thiếu ~9 lần); bán sạch thật thì chạy lại với --confirm-flat.
+        prev_stock = previous_stock_value(out_path)
+        if prev_stock > 0 and not args.confirm_flat:
+            print(f"❌ {args.account}: DNSE trả 0 vị thế nhưng {out_path} (lần trước) còn "
+                  f"{prev_stock:,.0f}đ cổ phiếu ⇒ nghi lỗi feed tạm thời, KHÔNG ghi active_nav. "
+                  f"Chạy lại; nếu account THẬT SỰ đã bán sạch: thêm --confirm-flat.",
+                  file=sys.stderr)
+            sys.exit(5)
+        # VẪN ghi file (positions rỗng): return sớm để lại active_nav_{account}.json CŨ sống
+        # tới 5 ngày ở consumer (ca account mới mở / sau PARK bán sạch — code-quality 2026-09-13).
         print(f"⚠️ Account {args.account} không có vị thế nào — "
-              f"active_nav = cash + offbook = {cash + offbook:,.0f} "
-              f"(cash {cash:,.0f} = totalCash − totalDebt + offbook {offbook:,.0f})")
-        return
+              f"active_nav = cash + egg + offbook = {cash + egg_value + offbook:,.0f} "
+              f"(cash {cash:,.0f}, egg {egg_value:,.0f}, offbook {offbook:,.0f})")
+        prices, price_source = {}, {}
+    else:
+        prices, price_source, err = resolve_prices(tickers, args.asof)
+        if prices is None:
+            print(f"❌ Không lấy được giá BQ: {err}", file=sys.stderr)
+            sys.exit(3)
 
-    prices, price_source, err = resolve_prices(tickers, args.asof)
-    if prices is None:
-        print(f"❌ Không lấy được giá BQ: {err}", file=sys.stderr)
-        sys.exit(3)
+    # ── §exdate_frame — "khối lượng của ai thì giá của người đó" ──────────────────
+    # Tối T-1 của một GDKHQ, DNSE credit KL mới vào positions NGAY trong khi giá đóng cửa G1
+    # của phiên hôm nay vẫn (đúng) là giá CÒN QUYỀN. Nhân chéo hai hệ = active_nav phồng
+    # (đo thật VPB 2026-09-23: SpaceX +7.969.500đ, ZaloPay +8.694.000đ ⇒ plan 24/09 in
+    # "NAV cơ sở 990.981.660" và sinh lệnh PARK_TRIM VPB trên rổ phồng). Xem bin/exdate_frame.py.
+    # CHỈ chạy ở nhánh asof=hôm nay (nhánh --asof QUÁ KHỨ trộn giá BQ lịch sử với vị thế LIVE —
+    # một vấn đề KHÁC). Để cổng này KHÔNG có lối vòng, nhánh kia đã bị chốt hai lớp ở trên:
+    # `--asof` ngày khác hôm nay không có `--out` ⇒ rc=7, không chạm file canonical; có `--out`
+    # ⇒ chạy nhưng in cảnh báo cổng BỊ TẮT (nhánh `elif tickers` cuối khối này).
+    if tickers and (args.asof is None or args.asof == today_ict().isoformat()):
+        import exdate_frame
+        credited, blocked = exdate_frame.classify_positions(
+            args.account, account_id, asof_ref, positions)
+        for tk, detail in sorted(credited.items()):
+            px_new, why = exdate_frame.verify_post_event_price(
+                prices.get(tk), (positions[tk] or {}).get("marketPrice"),
+                1.0 + float(detail["exercise_ratio"]))
+            if px_new is None:
+                blocked[tk] = (
+                    f"broker ĐÃ credit sớm {detail['residual']:+,.0f}cp (khớp tỉ lệ "
+                    f"{detail['exercise_ratio']} của {detail['event_code']} ex-date "
+                    f"{detail['ex_date']}) nhưng KHÔNG dựng được giá cùng hệ: {why}")
+                continue
+            print(f"ℹ️ {tk}: broker đã CREDIT SỚM {detail['residual']:+,.0f}cp "
+                  f"(KL {detail['qty_prev']:,.0f}→{detail['qty_now']:,.0f}, khớp tỉ lệ "
+                  f"{detail['exercise_ratio']} của {detail['event_code']} ex-date "
+                  f"{detail['ex_date']}) ⇒ định giá theo giá tham chiếu SAU sự kiện của CHÍNH "
+                  f"bản ghi vị thế đó thay cho giá đóng cửa còn quyền {prices[tk]:,.0f}: {why}",
+                  file=sys.stderr)
+            prices[tk] = px_new
+            price_source[tk] = "dnse_position_marketprice_corpaction"
+        if blocked:
+            # FAIL-CLOSED. active_nav là MẪU SỐ của mọi phép sizing (LAG_book, slot CAPIT,
+            # trần %ADV) — ghi một con số có thể sai còn tệ hơn để consumer thấy file quá hạn
+            # rồi lùi về nav_history (đường lùi có sẵn ở golive_recommend_v23, 5 ngày).
+            # [R3] Đường phục hồi phải là việc CHÍNH script này chạy được. `corp_action_auto_confirm
+            # .py` + `--from-raw` là đường của `daily_nav_snapshot`: nó đọc data/corp_actions.json
+            # qua `confirmed_share_event_multiplier`. Script NÀY không đọc file đó ở bất kỳ nhánh
+            # nào, nên "chờ auto_confirm rồi chạy lại" cho kết quả Y HỆT — lặp vô ích (§29).
+            print(f"❌ {args.account}: KHỐI LƯỢNG vị thế đổi NGOÀI lệnh khớp thật và KHÔNG quy "
+                  f"được về một hệ quy chiếu giá cho {len(blocked)} mã ⇒ KHÔNG ghi active_nav "
+                  f"(giữ nguyên file cũ), CẦN NGƯỜI xử lý: "
+                  + "; ".join(f"{t}: {w}" for t, w in sorted(blocked.items())) +
+                  ". Việc phải làm: (1) mã 'KHÔNG dựng được giá cùng hệ' — NGƯỜI xác minh giá "
+                  "tham chiếu sau sự kiện (bảng giá sở/HOSE, thông báo GDKHQ) rồi đối chiếu với "
+                  "marketPrice broker; (2) mã 'CHƯA GIẢI THÍCH ĐƯỢC' — kiểm journal fill và lịch "
+                  "corp-action theo đúng vế đã nêu trong từng dòng trên. Chạy lại khi CHƯA có "
+                  "thêm bằng chứng sẽ cho kết quả Y HỆT: script này không đọc "
+                  "data/corp_actions.json, `corp_action_auto_confirm.py`/`--from-raw` là đường "
+                  "phục hồi của daily_nav_snapshot.py, KHÔNG phải của đây. Cần xem số mà không "
+                  "ghi đè file sizing: chạy lại với `--out <đường dẫn tạm>`.",
+                  file=sys.stderr)
+            sys.exit(6)
+    elif tickers:
+        # [R4] asof khác hôm nay ⇒ cổng §exdate_frame KHÔNG chạy. Nói ra, đừng im lặng: nhánh
+        # này chỉ tới được khi có `--out` (xem chốt chặn ngay sau parse_args), tức là output
+        # KHÔNG phải file sizing canonical — nhưng người đọc con số vẫn cần biết nó chưa qua cổng.
+        print(f"⚠️ --asof {args.asof!r} ≠ hôm nay ⇒ cổng §exdate_frame (KL và giá phải CÙNG hệ "
+              f"quy chiếu) KHÔNG chạy cho bản chạy này. Vị thế vẫn là LIVE còn giá là của "
+              f"{args.asof!r}: nếu trong khoảng đó có sự kiện tỉ lệ mà vendor CHƯA hồi tố cột "
+              f"Close thì giá trị danh mục dưới đây PHỒNG theo hệ số sự kiện. Số này dùng để "
+              f"đối chiếu, KHÔNG dùng làm mẫu số sizing.", file=sys.stderr)
 
     rows = []
     total_mv = 0.0
     excluded_mv = 0.0
+    missing_px = []
     for tk, pos in positions.items():
         qty = pos.get("total", 0)
         px = prices.get(tk)
         if px is None:
-            print(f"⚠️ Thiếu giá cho {tk} — bỏ qua khỏi tổng (có thể làm lệch active_nav)",
-                  file=sys.stderr)
+            # [F2] code-quality 2026-09-27: bản cũ `continue` + ⚠️ + rc=0 ⇒ vị thế bị LOẠI ÂM
+            # THẦM khỏi total_mv, active_nav (MẪU SỐ SIZING) ghi THIẾU đúng bằng giá trị mã đó,
+            # mà mọi consumer vẫn coi file là tươi — và `cron_health_check.py` chỉ khớp `^\s*❌`
+            # nên ⚠️ là MÙ HẲN (cùng lý lẽ [F1] ở trên). Đây là điểm cuối cùng sau CẢ HAI tầng
+            # giá (DNSE live + fallback BQ từng mã trong resolve_prices) ⇒ tới đây là thật sự
+            # không dựng nổi giá. Fail-closed như `park_holdings.resolve_close_prices` làm với
+            # cùng tình huống ("mẫu số cấp tài khoản"): KHÔNG ghi file, để consumer rơi về
+            # nav_history thay vì đọc một active_nav nhỏ hơn thật.
+            if qty:
+                missing_px.append(tk)
             continue
         mv = qty * px
         total_mv += mv
@@ -288,8 +539,19 @@ def main():
             excluded_mv += mv
         rows.append((tk, qty, px, mv, is_excluded))
 
-    total_nav = cash + total_mv + offbook
+    if missing_px:
+        print(f"❌ Thiếu giá cho vị thế ĐANG NẮM {missing_px} sau CẢ HAI nguồn (DNSE live + "
+              f"fallback BQ từng mã) — KHÔNG ghi active_nav (mẫu số sizing sẽ thiếu đúng bằng "
+              f"giá trị các mã này mà consumer vẫn coi file là tươi). Chạy lại khi DNSE/BQ trả "
+              f"giá; cần xem số mà không ghi đè file sizing: `--out <đường dẫn tạm>`.",
+              file=sys.stderr)
+        sys.exit(3)
+
+    total_nav = cash + total_mv + egg_value + offbook
     active_nav = total_nav - excluded_mv
+    excluded_div_pending_vnd, excluded_div_pending_detail = excluded_dividend_pending(
+        excluded, excluded_div_config, cash_detail.get("cash_dividend_receiving_vnd"), asof_ref)
+    active_nav -= excluded_div_pending_vnd
 
     print(f"== Active NAV — {args.account} (account_id={account_id}) ==")
     print(f"{'Mã':6s} {'KL':>10s} {'Giá':>10s} {'Giá trị':>16s}  {'excluded?'}")
@@ -305,10 +567,21 @@ def main():
           f"(sức mua TỨC THÌ — KHÔNG dùng làm cơ sở NAV, chỉ để đối chiếu)")
     print(f"Tổng giá trị cổ phiếu:    {total_mv:>16,.0f}")
     print(f"  trong đó excluded:      {excluded_mv:>16,.0f}  ({', '.join(sorted(excluded)) or '(none)'})")
+    if excluded_div_pending_vnd:
+        print(f"  − cổ tức phải thu của mã excluded (theo khai báo config, loại khỏi active_nav "
+              f"tới khi tiền về): {excluded_div_pending_vnd:>16,.0f}")
+        for d in excluded_div_pending_detail:
+            flag = "  ⚠️ QUÁ HẠN dự kiến, DNSE vẫn báo receivable — cập nhật config" if d["overdue"] else ""
+            print(f"    · {d['ticker']}: {d['amount_vnd']:,.0f}đ, dự kiến về "
+                  f"{d['expected_arrival_date'] or '(chưa khai)'}{flag}")
+    if egg_value:
+        print(f"Trứng vàng (tự đọc từ egg.totalValue trong balances API): {egg_value:>16,.0f}")
     if offbook:
-        print(f"Off-book (vd Trứng vàng, user tự báo, KHÔNG phải sức mua ngay): {offbook:>16,.0f}")
+        print(f"Off-book (user tự báo, KHÔNG phải sức mua ngay):          {offbook:>16,.0f}")
     print(f"= TỔNG NAV:               {total_nav:>16,.0f}")
     print(f"= ACTIVE NAV (cho chiến lược V2.4, loại trừ excluded_tickers): {active_nav:>16,.0f}")
+    if egg_value:
+        print(f"ℹ️ Trứng vàng {egg_value:,.0f} đã cộng vào NAV tự động — KHÔNG phải sức mua đặt lệnh ngay.")
     if offbook:
         print(f"⚠️ ACTIVE NAV đã cộng {offbook:,.0f} off-book làm cơ sở TÍNH TỶ TRỌNG mục tiêu — "
               f"nhưng sức mua THỰC THI NGAY vẫn phải kiểm tra `cash`/ppse live (DNSE), vì số "
@@ -318,12 +591,16 @@ def main():
     # Cổ tức phải thu đã nằm trong totalCash nhưng giá cổ phiếu có thể chưa rơi ex-date ⇒
     # đếm 2 lần, tối đa 1-2 phiên rồi tự triệt tiêu (§cash). Chỉ CÔNG BỐ khi đủ lớn để đổi
     # quy mô lệnh; không tự hiệu chỉnh (cần ex-date từ BQ, ngoài phạm vi script này).
-    div_recv = cash_detail.get("cash_dividend_receiving_vnd") or 0
+    # Trừ phần đã loại khỏi active_nav ở trên (§excluded_dividend) trước khi so ngưỡng — phần đó
+    # KHÔNG còn trong active_nav nên không thể "đếm 2 lần trong active_nav" nữa (R4, arch-review
+    # 2026-09-19: bản trước chia div_recv GỘP cho active_nav ĐÃ TRỪ, cho tỷ lệ vô nghĩa).
+    div_recv_remaining = (cash_detail.get("cash_dividend_receiving_vnd") or 0) - excluded_div_pending_vnd
     div_warning = None
-    if div_recv > 0.005 * active_nav:
+    if active_nav > 0 and div_recv_remaining > 0.005 * active_nav:
         div_warning = (
-            f"cổ tức phải thu {div_recv:,.0f}đ ({div_recv / active_nav:.2%} active_nav) đã nằm "
-            f"trong totalCash — nếu cổ phiếu CHƯA qua ex-date thì NAV đang đếm 2 lần khoản này "
+            f"cổ tức phải thu {div_recv_remaining:,.0f}đ ({div_recv_remaining / active_nav:.2%} "
+            f"active_nav, KHÔNG TÍNH phần mã excluded đã loại ở trên) đã nằm trong totalCash — "
+            f"nếu cổ phiếu CHƯA qua ex-date thì active_nav đang đếm 2 lần khoản này "
             f"(tự triệt tiêu sau 1-2 phiên; xem daily_nav_snapshot.cum_dividend_double_count).")
         print(f"⚠️ {div_warning}")
 
@@ -344,17 +621,33 @@ def main():
         "cash_basis": cash_detail["cash_basis"],
         "cash_dividend_double_count_warning": div_warning,
         "total_stock_value": total_mv, "excluded_value": excluded_mv,
+        "egg_assets": egg_value, "egg_assets_auto": True,
         "offbook_assets": offbook, "offbook_assets_asof": offbook_asof,
         "offbook_stale_warning": offbook_stale_warning,
         "excluded_tickers": sorted(excluded), "total_nav": total_nav, "active_nav": active_nav,
+        "excluded_dividend_receivable_pending_vnd": excluded_div_pending_vnd,
+        "excluded_dividend_receivable_detail": excluded_div_pending_detail,
         "positions": [{"ticker": tk, "qty": qty, "price": px, "value": mv, "excluded": is_excl,
                         "price_source": price_source.get(tk, "?")}
                        for tk, qty, px, mv, is_excl in rows],
     }
-    out_path = args.out or os.path.join(
-        WC_ROOT, "data", "execution_logs", f"active_nav_{args.account}.json")
-    with open(out_path, "w", encoding="utf-8") as f:
-        json.dump(result, f, indent=2, ensure_ascii=False)
+    # §5 coding_guidelines — ghi nguyên tử: `out_path` là file NAV canonical (consumer đọc lại
+    # nhiều nơi khác), kill giữa lúc ghi KHÔNG được để lại file cụt đè lên bản tốt lần trước.
+    # Cùng khuôn `vendor_mismatch_alert.sh` (mkstemp CÙNG THƯ MỤC đích + fsync + os.replace).
+    fd, tmp = tempfile.mkstemp(dir=os.path.dirname(out_path) or ".",
+                                prefix=os.path.basename(out_path) + ".", suffix=".tmp")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            json.dump(result, f, indent=2, ensure_ascii=False)
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(tmp, out_path)
+    except BaseException:
+        try:
+            os.unlink(tmp)
+        except OSError:
+            pass
+        raise
     print(f"\nGhi ra: {out_path}")
 
 

@@ -1,0 +1,175 @@
+{
+ "AMS": {
+  "n_rows_offered": 2,
+  "n_dropped_P2": 1,
+  "dropped_P2": [
+   {
+    "d": "2026-09-18",
+    "why": "r_fx=1.059615 > previous 1.052534 — factor rises forward in time, not a legal back-adjustment"
+   }
+  ],
+  "n_dropped_P1": 0,
+  "n_used": 1,
+  "dev_max": 0.009863263376264753,
+  "dev_median": 0.009863263376264753,
+  "verdict": "WITNESS_DISAGREES"
+ },
+ "BTD": {
+  "n_rows_offered": 2,
+  "n_dropped_P2": 1,
+  "dropped_P2": [
+   {
+    "d": "2026-09-17",
+    "why": "r_fx=0.996498 < 1 (FiinX adj above its own raw)"
+   }
+  ],
+  "n_dropped_P1": 0,
+  "n_used": 1,
+  "dev_max": 2.499937501565519e-05,
+  "dev_median": 2.499937501565519e-05,
+  "verdict": "CONFIRMED"
+ },
+ "DRI": {
+  "n_rows_offered": 2,
+  "n_dropped_P2": 0,
+  "dropped_P2": [],
+  "n_dropped_P1": 0,
+  "n_used": 2,
+  "dev_max": 0.0034359245737864974,
+  "dev_median": 0.0034359245737864974,
+  "verdict": "WITNESS_DISAGREES"
+ },
+ "E29": {
+  "n_rows_offered": 5,
+  "n_dropped_P2": 0,
+  "dropped_P2": [],
+  "n_dropped_P1": 0,
+  "n_used": 1,
+  "dev_max": 2.1429030622188705e-05,
+  "dev_median": 2.1429030622188705e-05,
+  "verdict": "CONFIRMED"
+ },
+ "FPT": {
+  "n_rows_offered": 3,
+  "n_dropped_P2": 0,
+  "dropped_P2": [],
+  "n_dropped_P1": 0,
+  "n_used": 3,
+  "dev_max": 9.999900001056439e-06,
+  "dev_median": 9.999900001056439e-06,
+  "verdict": "CONFIRMED"
+ },
+ "GAS": {
+  "n_rows_offered": 2,
+  "n_dropped_P2": 0,
+  "dropped_P2": [],
+  "n_dropped_P1": 0,
+  "n_used": 2,
+  "dev_max": 1.7189019282826123e-05,
+  "dev_median": 1.7189019282826123e-05,
+  "verdict": "CONFIRMED"
+ },
+ "HTL": {
+  "n_rows_offered": 2,
+  "n_dropped_P2": 0,
+  "dropped_P2": [],
+  "n_dropped_P1": 0,
+  "n_used": 2,
+  "dev_max": 6.280153796112131e-06,
+  "dev_median": 6.280153796112131e-06,
+  "verdict": "CONFIRMED"
+ },
+ "PGD": {
+  "n_rows_offered": 2,
+  "n_dropped_P2": 0,
+  "dropped_P2": [],
+  "n_dropped_P1": 0,
+  "n_used": 2,
+  "dev_max": 4.931118723372485e-05,
+  "dev_median": 4.931118723372485e-05,
+  "verdict": "CONFIRMED"
+ },
+ "PHC": {
+  "n_rows_offered": 2,
+  "n_dropped_P2": 0,
+  "dropped_P2": [],
+  "n_dropped_P1": 0,
+  "n_used": 2,
+  "dev_max": 5.40511323712245e-05,
+  "dev_median": 5.40511323712245e-05,
+  "verdict": "CONFIRMED"
+ },
+ "TVN": {
+  "n_rows_offered": 2,
+  "n_dropped_P2": 0,
+  "dropped_P2": [],
+  "n_dropped_P1": 0,
+  "n_used": 2,
+  "dev_max": 0.004003453391662415,
+  "dev_median": 0.004003453391662415,
+  "verdict": "WITNESS_DISAGREES"
+ },
+ "V12": {
+  "n_rows_offered": 9,
+  "n_dropped_P2": 0,
+  "dropped_P2": [],
+  "n_dropped_P1": 0,
+  "n_used": 1,
+  "dev_max": 4.545247943277264e-05,
+  "dev_median": 4.545247943277264e-05,
+  "verdict": "CONFIRMED"
+ },
+ "VCC": {
+  "n_rows_offered": 2,
+  "n_dropped_P2": 0,
+  "dropped_P2": [],
+  "n_dropped_P1": 0,
+  "n_used": 2,
+  "dev_max": 0.0,
+  "dev_median": 0.0,
+  "verdict": "CONFIRMED"
+ },
+ "VFR": {
+  "n_rows_offered": 5,
+  "n_dropped_P2": 3,
+  "dropped_P2": [
+   {
+    "d": "2026-09-16",
+    "why": "r_fx=1.066667 > previous 1.065219 — factor rises forward in time, not a legal back-adjustment"
+   },
+   {
+    "d": "2026-09-17",
+    "why": "r_fx=1.066667 > previous 1.065219 — factor rises forward in time, not a legal back-adjustment"
+   },
+   {
+    "d": "2026-09-18",
+    "why": "r_fx=1.111111 > previous 1.065219 — factor rises forward in time, not a legal back-adjustment"
+   }
+  ],
+  "n_dropped_P1": 0,
+  "n_used": 2,
+  "dev_max": 0.009107780157030732,
+  "dev_median": 0.009107780157030732,
+  "verdict": "WITNESS_DISAGREES"
+ },
+ "VPB": {
+  "n_rows_offered": 2,
+  "n_dropped_P2": 0,
+  "dropped_P2": [],
+  "n_dropped_P1": 0,
+  "n_used": 2,
+  "dev_max": 9.611267622888775e-06,
+  "dev_median": 9.611267622888775e-06,
+  "verdict": "CONFIRMED"
+ },
+ "VTB": {
+  "n_rows_offered": 2,
+  "n_dropped_P2": 0,
+  "dropped_P2": [],
+  "n_dropped_P1": 0,
+  "n_used": 2,
+  "dev_max": 2.7117908666940416e-05,
+  "dev_median": 2.7117908666940416e-05,
+  "verdict": "CONFIRMED"
+ }
+}

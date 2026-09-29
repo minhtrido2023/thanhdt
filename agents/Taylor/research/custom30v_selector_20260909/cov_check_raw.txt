@@ -1,0 +1,15 @@
+## DO PHU CF_OA_3Y (as-of Release_Date, PIT) tren 30 ten trong ro moi ky
+  tong 1440 cap (ten,ky). CF_OA_3Y co gia tri: 100.0% | CF_OA_5Y: 100.0% | mcap tinh duoc: 99.9% | cfy3 tinh duoc: 99.9%
+  PHI TAI CHINH: cfy3 phu 100.0% (962 cap)
+  TAI CHINH:     cfy3 phu 99.6% (478 cap)
+
+  Theo ky: phu min 93% / trung vi 100% / max 100%
+  Ky phu < 80%: 0/48  |  ky phu < 60%: 0/48
+  Chi tinh phi-tai-chinh: min 100% / trung vi 100%
+
+## Phan phoi cfy3 (loi suat dong tien 3 nam / von hoa) tren ten PHI TAI CHINH
+  n=962 | am 11.4% | P10 -0.009 | trung vi 0.116 | P90 0.261
+
+## Doi chieu voi 1/PCF (chan hien tai) — co phai thuoc do KHAC khong?
+  n=854 cap co ca hai. Spearman(1/PCF, cfy3) = 0.319
+  Pearson = 0.138   => KHAC nhau du de dang gia

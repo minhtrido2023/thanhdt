@@ -44,6 +44,7 @@ JOBS_SH = os.path.join(ROOT, "bin", "jobs.sh")
 
 PASS = 0
 FAIL = 0
+SKIP = 0
 SPAWNED = []
 # Sandboxes this run created, removed by cleanup() once the workers are dead (round 6, NICE 9).
 TMPDIRS = []
@@ -60,6 +61,32 @@ def check(name, cond, detail=""):
     else:
         FAIL += 1
         print("  FAIL %s%s" % (name, ("  -- " + detail) if detail else ""))
+
+
+def skip(name, reason):
+    """Case không chạy được TRÊN MÁY NÀY vì thiếu điều kiện môi trường đo cơ học được — không
+    tính vào PASS lẫn FAIL, in nguyên văn lý do (§29)."""
+    global SKIP
+    SKIP += 1
+    print("  SKIP %s  -- %s" % (name, reason))
+
+
+def no_user_bus():
+    """Lý do nguyên văn nếu KHÔNG có D-Bus user session (cron: DBUS_SESSION_BUS_ADDRESS rỗng VÀ
+    `systemctl --user show-environment` lỗi), None nếu có. Cả hai điều kiện phải cùng đúng: có
+    một trong hai là còn đường nói chuyện với systemd --user ⇒ chạy thật, hỏng thì FAIL."""
+    if os.environ.get("DBUS_SESSION_BUS_ADDRESS"):
+        return None
+    try:
+        p = subprocess.run(["systemctl", "--user", "show-environment"],
+                           capture_output=True, text=True, timeout=10)
+        rc, msg = p.returncode, (p.stderr.strip() or p.stdout.strip())
+    except (OSError, subprocess.TimeoutExpired) as e:
+        rc, msg = -1, "%s: %s" % (type(e).__name__, e)
+    if rc == 0:
+        return None
+    return ("DBUS_SESSION_BUS_ADDRESS rỗng; `systemctl --user show-environment` rc=%d: %s"
+            % (rc, msg))
 
 
 def run(args, **kw):
@@ -259,7 +286,7 @@ def build_sandbox(tmp):
     return mk, stub
 
 
-def run_sync_kill_trap(tmp, break_verifier=False):
+def run_sync_kill_trap(tmp, break_verifier=False, break_cancel=False):
     """END-TO-END on the real bin/dispatch.sh: start a SYNC dispatch, let the worker come
     up, then SIGTERM dispatch.sh's whole process group — exactly what the caller's Bash tool
     does on its 2-minute timeout (incident 2026-07-09, DollarBill_20260709_125326).
@@ -268,15 +295,14 @@ def run_sync_kill_trap(tmp, break_verifier=False):
     before writing the record: a `failed` stamp over a worker that is still editing the repo
     is the 2026-08-09 lie, just reached by a different door.
 
-    `break_verifier` swaps bin/mike_json.py for a shim that fails ONLY `job-live-pids` (rc=4,
-    the real command's "record unreadable" code) and delegates every other subcommand to the
-    real module — so the record is still created normally and the ONLY thing broken is the
-    trap's ability to check. That is the fail-open test: a verification that cannot run must
-    not be read as "verified dead" (round 4, K3).
+    `break_verifier` makes the legacy fallback `job-live-pids` fail; `break_cancel` makes the
+    primary `job-cancel` primitive fail. The record is still created normally. This lets R5
+    prove both sides of the post-fix contract: a broken fallback does not matter when the
+    safe cancel primitive succeeds, while both paths broken must leave the record running.
 
     Returns (dispatcher_rc, worker_pid, final_status, dispatcher_stderr)."""
     mk, stub = build_sandbox(tmp)
-    if break_verifier:
+    if break_verifier or break_cancel:
         shim = os.path.join(mk, "bin", "mike_json.py")
         os.remove(shim)                    # drop the symlink; NEVER write through it
         assert not os.path.exists(shim) and not os.path.islink(shim), shim
@@ -284,17 +310,25 @@ def run_sync_kill_trap(tmp, break_verifier=False):
             f.write("#!/usr/bin/env python3\n"
                     "import sys, runpy\n"
                     "REAL = %s\n"
-                    "if len(sys.argv) > 1 and sys.argv[1] == 'job-live-pids':\n"
-                    "    sys.stderr.write('selfcheck: verifier deliberately broken\\n')\n"
+                    "BREAK_VERIFIER = %r\n"
+                    "BREAK_CANCEL = %r\n"
+                    "if len(sys.argv) > 1 and ((sys.argv[1] == 'job-live-pids' and BREAK_VERIFIER)\n"
+                    "                         or (sys.argv[1] == 'job-cancel' and BREAK_CANCEL)):\n"
+                    "    sys.stderr.write('selfcheck: cancellation verifier deliberately broken\\n')\n"
                     "    sys.exit(4)\n"
                     "sys.argv[0] = REAL\n"
-                    "runpy.run_path(REAL, run_name='__main__')\n" % repr(MJ))
+                    "runpy.run_path(REAL, run_name='__main__')\n"
+                    % (repr(MJ), break_verifier, break_cancel))
         os.chmod(shim, 0o755)
         assert os.path.getsize(MJ) > 200, "SHIM LEAKED INTO %s — git checkout it NOW" % MJ
     env = dict(os.environ)
     env.update({"DISPATCH_CLAUDE_BIN": stub, "DISPATCH_KILL_GRACE_S": "3",
                 "DISPATCH_FROM": "Mike", "MIKE_ROOT": mk})
-    p = subprocess.Popen(["bash", os.path.join(mk, "bin", "dispatch.sh"), "Taylor", "hello"],
+    # Prompt PHẢI >= 8 byte sau trim: dispatch.sh có guard chặn prompt rỗng/quá ngắn (2026-08-20).
+    # Fixture cũ "hello" (5 byte) bị guard chặn ⇒ CLI không bao giờ được spawn ⇒ 7 assertion về
+    # sync-trap / cancel fail-closed / pin logfile im lặng không chạy. KHÔNG né bằng
+    # MIKE_ALLOW_TINY_PROMPT=1: né thì ca này không còn đi qua đúng đường production.
+    p = subprocess.Popen(["bash", os.path.join(mk, "bin", "dispatch.sh"), "Taylor", "hello sandbox"],
                          cwd=mk, env=env, stdout=subprocess.DEVNULL,
                          stderr=subprocess.PIPE, text=True, start_new_session=True)
     SPAWNED.append(p.pid)
@@ -355,11 +389,12 @@ def fd_links_of(pid):
 
 
 def run_sync_kill_trap_verifier_broken(tmp):
-    """K3: same E2E as run_sync_kill_trap, but the trap's `job-live-pids` check cannot run.
+    """K3: both cancellation verification paths fail.
     Returns (dispatcher_rc, final_status, dispatcher_stderr)."""
     sub = os.path.join(tmp, "r5")
     os.makedirs(sub, exist_ok=True)
-    rc, _worker, status, derr = run_sync_kill_trap(sub, break_verifier=True)
+    rc, _worker, status, derr = run_sync_kill_trap(
+        sub, break_verifier=True, break_cancel=True)
     return rc, status, derr
 
 
@@ -566,8 +601,13 @@ def main():
     # the wrapper out of mike_json's ancestor chain, EVERY --bg job would be refused its own
     # finalize and hang at status=running forever. That is the highest-risk failure mode of
     # this guard, so it is tested against the real spawner, not just plain `bash -c`.
-    scope_ok = run(["systemd-run", "--user", "--scope", "--quiet", "--collect",
-                    "/bin/true"])[0] == 0
+    # Cron không có D-Bus user session ⇒ `systemd-run --user --scope` KHÔNG THỂ chạy, case này
+    # đỏ mỗi lượt quét (262/263) mà không phải hồi quy. Không có user bus (kiểm cơ học) ⇒ SKIP có
+    # lý do nguyên văn; có user bus ⇒ chạy thật, hỏng thì FAIL như cũ (không PASS giả).
+    bus_missing = no_user_bus()
+    scope_rc, _, scope_err = (1, "", "") if bus_missing else run(
+        ["systemd-run", "--user", "--scope", "--quiet", "--collect", "/bin/true"])
+    scope_ok = not bus_missing and scope_rc == 0
     modes = [("plain &", []), ("setsid", ["setsid"])]
     if scope_ok:
         modes.append(("systemd-run --user --scope",
@@ -582,8 +622,12 @@ def main():
         check("owner finalize works under %s" % label,
               read_job(jobs, jid)["status"] == "done",
               "status=%s rc=%d %s" % (read_job(jobs, jid)["status"], rc, err[:150]))
-    check("systemd-run scope path was actually exercised", scope_ok,
-          "systemd-run --user --scope unavailable here — production path UNTESTED on this host")
+    if bus_missing:
+        skip("systemd-run scope path was actually exercised", "no user bus: " + bus_missing)
+    else:
+        check("systemd-run scope path was actually exercised", scope_ok,
+              "systemd-run --user --scope rc=%d: %s — production path UNTESTED on this host"
+              % (scope_rc, scope_err.strip()[:200]))
 
     # ----------------------------------------------------- F: prove the ORIGINAL bug real
     print("\nF. PROVE-THE-BUG — `kill <recorded pid>` does NOT stop the worker "
@@ -1163,12 +1207,20 @@ def main():
     rc, _, err = jset(jobs, "J_R4_new", "status=running", "to=Wags")
     check("a MISSING record is still created normally (missing != corrupt)", rc == 0, err[:200])
 
-    # R5 (K3) — dispatch.sh's verification must fail CLOSED. Exercised on the real script
-    # shape: point the trap's verifier at a job-live-pids that exits non-zero and confirm no
-    # terminal status is written.
-    print("\nR5. dispatch.sh's kill-verification fails CLOSED, not open")
+    # R5 (K3) — the trap now delegates to the same safe cancel primitive as operators. A
+    # broken legacy fallback must not defeat a successful cancel; if BOTH verification
+    # paths fail, the record must remain live rather than claim an unproved death.
+    print("\nR5. sync trap centralises cancellation and still fails CLOSED")
+    sub_r5a = os.path.join(tmp, "r5a")
+    os.makedirs(sub_r5a, exist_ok=True)
+    _rc, worker_r5a, status_r5a, _err = run_sync_kill_trap(
+        sub_r5a, break_verifier=True)
+    check("legacy verifier broken -> safe cancel still closes as cancelled",
+          status_r5a == "cancelled", "status=%s" % status_r5a)
+    check("...and the worker is genuinely dead", worker_r5a is not None
+          and not alive(worker_r5a), "worker=%s" % worker_r5a)
     rc_r5, status_r5, err_r5 = run_sync_kill_trap_verifier_broken(tmp)
-    check("verifier rc!=0 -> record deliberately LEFT at running", status_r5 == "running",
+    check("both verifiers broken -> record deliberately LEFT at running", status_r5 == "running",
           "status=%s" % status_r5)
     check("...and it says why instead of silently stamping",
           "KHÔNG kiểm tra được" in err_r5, err_r5[-300:])
@@ -1648,7 +1700,7 @@ def main():
     # the record that made the board lie on 08-09 — so the trap must STOP it, then stamp.
     print("\nO. dispatch.sh sync trap kills the worker BEFORE it closes the record")
     rc_o, worker_o, status_o, _err_o = run_sync_kill_trap(tmp)
-    check("trap fired and closed the record", status_o in ("failed", None) and status_o == "failed",
+    check("trap delegates to safe cancel and closes the record", status_o == "cancelled",
           "status=%s" % status_o)
     check("the setsid'd worker is DEAD, not orphaned into the repo", worker_o is not None
           and not alive(worker_o), "worker=%s" % worker_o)
@@ -1677,7 +1729,7 @@ def main():
     check("py_compile bin/mike_json.py", rc == 0, err[:200])
 
     cleanup()
-    print("\n%d/%d PASS%s" % (PASS, PASS + FAIL, "" if not FAIL else "  — %d FAILED" % FAIL))
+    print("\n%d PASS / %d FAIL%s" % (PASS, FAIL, " / %d SKIP (no user bus)" % SKIP if SKIP else ""))
     return 1 if FAIL else 0
 
 

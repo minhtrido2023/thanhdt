@@ -1,0 +1,13 @@
+building 8L custom30 (namecap 10%) 2014-01-02 -> 2026-09-24 ...
+[BQ_LOCAL_CACHE] WARNING: cache verified 38h ago (>36h) — consider re-running sync_bq_cache.py
+[BQ_LOCAL_CACHE] ready — 14 tables from /home/trido/thanhdt/WorkingClaude/data/bq_cache
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+[BQ_LOCAL_CACHE] query took 66.9s (595387 rows)
+  [oshares-step] corp-action từ SNAPSHOT /home/trido/thanhdt/WorkingClaude/data/snapshots/corp_action_share_20260927.parquet: 4466 dòng
+  [oshares-step] exdate: 1649 bước OShares, 783 bước ĐƯỢC DỜI (median 42 ngày), 855 giữ ngày quý (không khớp sự kiện), 3 bị chặn bởi cổng PIT
+  yield_floor (rebal hien tai): BANKING_EXCLUDED=13, NO_DATA=10, BELOW_FLOOR=4, ABOVE_FLOOR=3
+  1470 rows, 49 rebals -> /home/trido/thanhdt/WorkingClaude/data/custom30v_8l_publish_CAND_20260927pm.csv
+  bq load ...
+
+BLOCKED: 'bq load --replace --source_format=CSV --skip_leading_rows=1 lithe-record-440915-m9:tav2_bq.custom30v_8l /home/trido/thanhdt/WorkingClaude/data/custom30v_8l_publish_CAND_20260927pm.csv rebal_date:DATE,effective_from:DATE,effective_to:DATE,ticker:STRING,liq_rank:INTEGER,rating_8l:INTEGER,weight:FLOAT,quarter:STRING,yield_floor_note:STRING,is_stable_payer:BOOLEAN' bi chan co y — day la lan chay DIFF-TRUOC-LOAD (job Taylor_20260927_071001, MUC 4).
+LOAD FAILED

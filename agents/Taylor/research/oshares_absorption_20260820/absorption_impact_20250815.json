@@ -1,0 +1,123 @@
+{
+ "asof": "2025-08-15",
+ "universe": 305,
+ "buckets": {
+  "N/A": 297,
+  "WINDOW_AMBIGUOUS": 5,
+  "ABSORBED": 3
+ },
+ "detail": [
+  {
+   "ticker": "KBC",
+   "verdict": "WINDOW_AMBIGUOUS",
+   "value": 941754759.0,
+   "method": "FIN_FALLBACK",
+   "anchor_date": "2025-07-30",
+   "window": [
+    "2025-04-01",
+    "2025-07-30"
+   ],
+   "n_events": 1,
+   "rolled": 0,
+   "note": "1 ISS trong cửa sổ (2025-04-01, 2025-07-30] KHÔNG quyết được là dòng quý 941,754,759 đã gồm hay chưa (0 giả thuyết khớp trong 0.1%) ⇒ GIỮ hành vi cũ: KHÔNG lăn. Các số giả thuyết: gồm 0/1 ⇒ 534,694,504 · gồm 1/1 ⇒ 708,844,504"
+  },
+  {
+   "ticker": "MCH",
+   "verdict": "ABSORBED",
+   "value": 1056705358.0,
+   "method": "FIN_FALLBACK",
+   "anchor_date": "2025-07-28",
+   "window": [
+    "2025-04-15",
+    "2025-07-28"
+   ],
+   "n_events": 1,
+   "rolled": 0,
+   "note": "dòng quý 1,056,705,358 khớp giả thuyết 'đã gồm 1/1 ISS của cửa sổ' (kỳ vọng 1,056,651,003, lệch +0.005%) ⇒ KHÔNG lăn lại sự kiện nào"
+  },
+  {
+   "ticker": "PDR",
+   "verdict": "WINDOW_AMBIGUOUS",
+   "value": 979809379.0,
+   "method": "FIN_FALLBACK",
+   "anchor_date": "2025-07-31",
+   "window": [
+    "2025-04-02",
+    "2025-07-31"
+   ],
+   "n_events": 1,
+   "rolled": 0,
+   "note": "1 ISS trong cửa sổ (2025-04-02, 2025-07-31] KHÔNG quyết được là dòng quý 907,235,083 đã gồm hay chưa (0 giả thuyết khớp trong 0.1%) ⇒ GIỮ hành vi cũ: KHÔNG lăn. Các số giả thuyết: gồm 0/1 ⇒ 874,230,769 · gồm 1/1 ⇒ 908,325,769"
+  },
+  {
+   "ticker": "SHI",
+   "verdict": "ABSORBED",
+   "value": 169949549.0,
+   "method": "FIN_FALLBACK",
+   "anchor_date": "2025-07-29",
+   "window": [
+    "2025-03-31",
+    "2025-07-29"
+   ],
+   "n_events": 1,
+   "rolled": 0,
+   "note": "dòng quý 169,949,549 khớp giả thuyết 'đã gồm 1/1 ISS của cửa sổ' (kỳ vọng 169,931,160, lệch +0.011%) ⇒ KHÔNG lăn lại sự kiện nào"
+  },
+  {
+   "ticker": "SIP",
+   "verdict": "ABSORBED",
+   "value": 242112943.0,
+   "method": "FIN_FALLBACK",
+   "anchor_date": "2025-07-30",
+   "window": [
+    "2025-04-01",
+    "2025-07-30"
+   ],
+   "n_events": 1,
+   "rolled": 0,
+   "note": "dòng quý 242,112,943 khớp giả thuyết 'đã gồm 1/1 ISS của cửa sổ' (kỳ vọng 242,109,807, lệch +0.001%) ⇒ KHÔNG lăn lại sự kiện nào"
+  },
+  {
+   "ticker": "SJS",
+   "verdict": "WINDOW_AMBIGUOUS",
+   "value": 297474828.0,
+   "method": "ANCHOR_UNVERIFIED",
+   "anchor_date": "2025-07-30",
+   "window": [
+    "2025-04-01",
+    "2025-07-30"
+   ],
+   "n_events": 2,
+   "rolled": 0,
+   "note": "2 ISS trong cửa sổ (2025-04-01, 2025-07-30] KHÔNG quyết được là dòng quý 297,474,828 đã gồm hay chưa (0 giả thuyết khớp trong 0.1%) ⇒ GIỮ hành vi cũ: KHÔNG lăn. Các số giả thuyết: gồm 0/2 ⇒ 114,854,323 · gồm 1/2 ⇒ 114,855,541 · gồm 2/2 ⇒ 201,112,052"
+  },
+  {
+   "ticker": "STK",
+   "verdict": "WINDOW_AMBIGUOUS",
+   "value": 96636924.0,
+   "method": "FIN_FALLBACK",
+   "anchor_date": "2025-07-25",
+   "window": [
+    "2025-03-27",
+    "2025-07-25"
+   ],
+   "n_events": 1,
+   "rolled": 0,
+   "note": "1 ISS trong cửa sổ (2025-03-27, 2025-07-25] KHÔNG quyết được là dòng quý 96,636,924 đã gồm hay chưa (0 giả thuyết khớp trong 0.1%) ⇒ GIỮ hành vi cũ: KHÔNG lăn. Các số giả thuyết: gồm 0/1 ⇒ thiếu ratio/issue_volumn · gồm 1/1 ⇒ thiếu ratio/issue_volumn"
+  },
+  {
+   "ticker": "TDC",
+   "verdict": "WINDOW_AMBIGUOUS",
+   "value": 127228000.0,
+   "method": "ANCHOR_UNVERIFIED",
+   "anchor_date": "2025-07-31",
+   "window": [
+    "2025-04-02",
+    "2025-07-31"
+   ],
+   "n_events": 1,
+   "rolled": 0,
+   "note": "1 ISS trong cửa sổ (2025-04-02, 2025-07-31] KHÔNG quyết được là dòng quý 127,228,000 đã gồm hay chưa (0 giả thuyết khớp trong 0.1%) ⇒ GIỮ hành vi cũ: KHÔNG lăn. Các số giả thuyết: gồm 0/1 ⇒ 77,794,286 · gồm 1/1 ⇒ 105,022,286"
+  }
+ ]
+}

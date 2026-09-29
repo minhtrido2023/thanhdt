@@ -1,0 +1,5 @@
+💰 **NAV 2026-07-21: 927,267,983 VND** (-2,580,704 VND, -0.28% so với hôm trước)
+   Cổ phiếu 877,265,000 · Tiền mặt 50,002,983 · Nợ margin 0
+   Từ go-live: -72,732,017 VND (-7.27%)
+   ℹ️ from-raw: bỏ cross-check verify_account_snapshot (advisory, không vào NAV).
+   ℹ️ BACKFILL ƯỚC TÍNH (nav_is_estimate=True): positions 2026-07-21T19:10:23, balances 2026-07-21T19:10:23, giá BQ Price thô

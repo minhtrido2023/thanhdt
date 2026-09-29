@@ -14,7 +14,7 @@ NOW_ICT="$(TZ='Asia/Ho_Chi_Minh' date +'%H:%M ICT')"
 DOW_ICT="$(TZ='Asia/Ho_Chi_Minh' date +%u)"   # 1=thứ Hai … 7=CN
 # Trading Daily — mọi nội dung giao dịch hàng ngày gộp về 1 thread cố định (không phụ thuộc
 # session Mike gần nhất mở từ thread nào).
-TRADING_DAILY_THREAD="trading_daily"
+TRADING_DAILY_THREAD="${TRADING_DAILY_THREAD-trading_daily}"
 
 # --account LABEL — mặc định SpaceX để giữ nguyên hành vi cũ khi gọi không kèm cờ (vd tay).
 # Cron thật gọi qua for_each_live_account.sh (lặp mọi account enabled=live/dnse) — thêm
@@ -177,18 +177,51 @@ PY
   IFS='|' read -r _hstatus _hsev _hsrc _hage <<< "$HEALTH"
 
   # Chấp nhận HEALTHY hoặc DEGRADED (SEV2); từ chối FAILED (SEV1)
-  # Ngưỡng tuổi file theo thứ: daily_refresh chạy 18:30 ICT T2-T6 → sáng T3-T6 file ~14h,
-  # nhưng sáng thứ Hai bản mới nhất là 18:30 thứ Sáu (~62h) — ngưỡng 68h tránh false-warn
-  # lặp lại mỗi thứ Hai (miss thật tối thứ Sáu đã có gate 19:00 bq_freshness_check
-  # MAX_STATE_LAG=0 bắt ngay trong tối đó, không cần chờ preflight sáng thứ Hai).
-  _max_age_h=20; [ "$DOW_ICT" = "1" ] && _max_age_h=68
+  # Ngưỡng tuổi file đo theo PHIÊN GIAO DỊCH, KHÔNG theo ngày lịch (2026-09-03 — cùng lớp
+  # lỗi vừa vá cho ticker_prune ở §5 dưới): daily_refresh chỉ chạy T2-T6 18:30 ICT VÀ chỉ
+  # tính được khi có dữ liệu phiên; nghỉ Quốc khánh 2026 (31/08+01/09+02/09) làm nó abort
+  # đúng ở step [0] (ticker_prune 0 mã) ⇒ macro_health.json đứng yên hợp lệ, nhưng ngưỡng
+  # cũ (20h, riêng thứ Hai 68h) vẫn báo động giả mỗi kỳ nghỉ dài.
+  # Mốc kỳ vọng = 18:30 ICT của phiên giao dịch gần nhất ĐÃ QUA giờ đó, + 3h ân hạn (step
+  # [0] có thể chờ tới ~1,5h trước khi macro_healthcheck ở step [14] ghi file).
+  _age_err=""
+  _age_out="$(cd "$WORKDIR" && python3 -c "
+from trading_bot.vn_market import is_holiday
+from zoneinfo import ZoneInfo
+import datetime as dt
+ICT = ZoneInfo('Asia/Ho_Chi_Minh')
+now = dt.datetime.now(ICT)
+d = now.date()
+if (now.hour, now.minute) < (18, 30):
+    d -= dt.timedelta(days=1)
+while d.weekday() >= 5 or is_holiday(d):
+    d -= dt.timedelta(days=1)
+exp = dt.datetime.combine(d, dt.time(18, 30), tzinfo=ICT)
+print('%.1f|%s' % ((now - exp).total_seconds() / 3600.0 + 3.0, d))
+" 2>&1)" || true
+  case "$_age_out" in
+    [0-9]*\|[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9])
+      _max_age_h="${_age_out%%|*}"; _exp_refresh_day="${_age_out##*|}" ;;
+    *)
+      # Fallback khi không tra được lịch nghỉ — giữ ngưỡng ngày lịch cũ, KÈM lỗi thật đọc được.
+      _max_age_h=20; [ "$DOW_ICT" = "1" ] && _max_age_h=68
+      _exp_refresh_day=""; _age_err="$(echo "$_age_out" | tail -1)" ;;
+  esac
+
   if [ "$_hstatus" = "FAILED" ]; then
     _fail "macro_health=FAILED (SEV1) — DT5G chạy DT4_only. Kiểm tra data pipeline."
   elif [ "$(echo "$_hage > $_max_age_h" | bc -l 2>/dev/null)" = "1" ]; then
-    _warn "macro_health OK ($_hstatus) nhưng file cũ ${_hage}h — daily_refresh chưa chạy tối qua?"
+    # §29: KHÔNG đoán nguyên nhân — trích đúng dòng cuối log của lần refresh gần nhất.
+    _rlog="$(ls -1t "$WORKDIR"/data/refresh_v34b_linux_*.log 2>/dev/null | head -1)"
+    if [ -n "$_rlog" ]; then
+      _rwhy="$(basename "$_rlog"): $(tail -1 "$_rlog" | cut -c1-240)"
+    else
+      _rwhy="không tìm thấy data/refresh_v34b_linux_*.log nào — chain có thể chưa từng chạy"
+    fi
+    _warn "macro_health OK ($_hstatus) nhưng file cũ ${_hage}h > ngưỡng ${_max_age_h}h (phiên refresh kỳ vọng=${_exp_refresh_day:-?}${_age_err:+, lỗi tra lịch nghỉ: $_age_err}). Log gần nhất → $_rwhy"
     _ok  "State source: $_hsrc"
   else
-    _ok "macro_health: $_hstatus ($_hsrc, file ${_hage}h tuổi)"
+    _ok "macro_health: $_hstatus ($_hsrc, file ${_hage}h tuổi ≤ ngưỡng ${_max_age_h}h theo phiên ${_exp_refresh_day:-fallback ngày lịch})"
   fi
 fi
 
@@ -217,25 +250,56 @@ fi
 # preflight chạy sáng/trưa nên ref_price/screening dựa trên EOD hôm qua; đo MAX(time) tuyệt
 # đối sẽ báo động giả "bảng moi ruột" trên partition đang ghi. bq_freshness_check.sh (19:00,
 # cần dữ liệu ngày T đầy đủ) giữ nguyên ngữ nghĩa MAX(time) — đừng đồng bộ hoá 2 chỗ này.
+# 2026-09-03: ngưỡng lag theo NGÀY LỊCH (2d, riêng thứ Hai 3d) báo động giả suốt kỳ nghỉ
+# lễ dài — Quốc khánh 2026 nghỉ 31/08+01/09+02/09 (theo thông báo DNSE 25/08) ⇒ sáng 03/09
+# lag=6d nhưng 28/08 CHÍNH LÀ phiên gần nhất, không thiếu phiên nào. So sánh với PHIÊN
+# GIAO DỊCH gần nhất (trading_bot.vn_market.is_holiday — cùng nguồn bq_freshness_check.sh
+# dùng) thay vì đếm ngày lịch. Cửa sổ SQL nới 14→21 ngày để kỳ nghỉ Tết không làm MAX() rỗng.
 BQ_ROW=$(bq query --use_legacy_sql=false --format=csv --quiet \
   --project_id=lithe-record-440915-m9 \
   "SELECT DATE_DIFF(CURRENT_DATE('Asia/Ho_Chi_Minh'), MAX(t.time), DAY) AS lag,
-          COUNT(DISTINCT IF(t.time = (SELECT MAX(x.time) FROM \`lithe-record-440915-m9.tav2_bq.ticker_prune\` AS x WHERE x.time < CURRENT_DATE('Asia/Ho_Chi_Minh')), t.ticker, NULL)) AS names
+          COUNT(DISTINCT IF(t.time = (SELECT MAX(x.time) FROM \`lithe-record-440915-m9.tav2_bq.ticker_prune\` AS x WHERE x.time < CURRENT_DATE('Asia/Ho_Chi_Minh')), t.ticker, NULL)) AS names,
+          CAST(MAX(t.time) AS STRING) AS maxday
    FROM \`lithe-record-440915-m9.tav2_bq.ticker_prune\` AS t
-   WHERE t.time >= DATE_SUB(CURRENT_DATE('Asia/Ho_Chi_Minh'), INTERVAL 14 DAY)
+   WHERE t.time >= DATE_SUB(CURRENT_DATE('Asia/Ho_Chi_Minh'), INTERVAL 21 DAY)
      AND t.time < CURRENT_DATE('Asia/Ho_Chi_Minh')" \
-  2>/dev/null | tail -1 | tr -d '[:space:]' || echo "999,0")
-BQ_LAG="${BQ_ROW%%,*}"; BQ_NAMES="${BQ_ROW##*,}"
+  2>/dev/null | tail -1 | tr -d '[:space:]' || echo "999,0,unknown")
+IFS=',' read -r BQ_LAG BQ_NAMES BQ_MAXDAY <<< "$BQ_ROW"
 
-# Thứ Hai sáng: phiên gần nhất là thứ Sáu → lag=3 ngày lịch là bình thường (không phải stale).
-_max_prune_lag=2; [ "$DOW_ICT" = "1" ] && _max_prune_lag=3
+# Phiên giao dịch hoàn chỉnh gần nhất (< hôm nay ICT), có trừ cuối tuần + nghỉ lễ.
+_exp_err=""
+_exp_out="$(cd "$WORKDIR" && python3 -c "
+from trading_bot.vn_market import is_holiday
+import datetime as dt
+d = dt.date.fromisoformat('$TODAY') - dt.timedelta(days=1)
+while d.weekday() >= 5 or is_holiday(d):
+    d -= dt.timedelta(days=1)
+print(d)
+" 2>&1)" || true
+case "$_exp_out" in
+  [0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]) EXP_TDAY="$_exp_out" ;;
+  *) EXP_TDAY=""; _exp_err="$(echo "$_exp_out" | tail -1)" ;;
+esac
+
 _min_prune_names=200   # bình thường ~225-265 mã/ngày; <200 = bảng bị ghi thiếu
-if [ "$BQ_LAG" -le "$_max_prune_lag" ] 2>/dev/null && [ "$BQ_NAMES" -ge "$_min_prune_names" ] 2>/dev/null; then
-  _ok "BQ ticker_prune: lag=${BQ_LAG}d, ${BQ_NAMES} mã ✓"
-elif [ "$BQ_NAMES" -lt "$_min_prune_names" ] 2>/dev/null; then
-  _warn "BQ ticker_prune: ngày mới nhất chỉ có ${BQ_NAMES} mã (<${_min_prune_names}, bình thường ~225-265) — bảng bị ghi thiếu/moi ruột dù lag=${BQ_LAG}d; ref_price/screening không tin được."
+if [ -n "$EXP_TDAY" ]; then
+  _prune_fresh=0; [ "$BQ_MAXDAY" = "$EXP_TDAY" ] && _prune_fresh=1
+  _prune_stale_msg="ngày hoàn chỉnh mới nhất=${BQ_MAXDAY} nhưng phiên giao dịch gần nhất=${EXP_TDAY} (lag ${BQ_LAG}d lịch)"
+  _prune_ok_msg="${BQ_MAXDAY} = phiên gần nhất, ${BQ_NAMES} mã ✓"
 else
-  _warn "BQ ticker_prune: lag=${BQ_LAG}d — giá ref_price trong plan có thể cũ; kiểm tra trước khi đặt lệnh."
+  # Fallback khi không tra được lịch nghỉ: quay về ngưỡng ngày lịch cũ, KÈM lỗi thật đọc được.
+  _max_prune_lag=2; [ "$DOW_ICT" = "1" ] && _max_prune_lag=3
+  _prune_fresh=0; [ "$BQ_LAG" -le "$_max_prune_lag" ] 2>/dev/null && _prune_fresh=1
+  _prune_stale_msg="lag=${BQ_LAG}d (không tra được lịch nghỉ, fallback ngày lịch — lỗi: ${_exp_err:-không rõ})"
+  _prune_ok_msg="lag=${BQ_LAG}d, ${BQ_NAMES} mã ✓ (fallback ngày lịch — lỗi tra lịch nghỉ: ${_exp_err:-không rõ})"
+fi
+
+if [ "$_prune_fresh" = "1" ] && [ "$BQ_NAMES" -ge "$_min_prune_names" ] 2>/dev/null; then
+  _ok "BQ ticker_prune: $_prune_ok_msg"
+elif [ "$BQ_NAMES" -lt "$_min_prune_names" ] 2>/dev/null; then
+  _warn "BQ ticker_prune: ngày mới nhất (${BQ_MAXDAY}) chỉ có ${BQ_NAMES} mã (<${_min_prune_names}, bình thường ~225-265) — bảng bị ghi thiếu/moi ruột; ref_price/screening không tin được."
+else
+  _warn "BQ ticker_prune: $_prune_stale_msg — giá ref_price trong plan có thể cũ; kiểm tra trước khi đặt lệnh."
 fi
 
 # ── Tổng hợp + notify ─────────────────────────────────────────────────────────
@@ -253,10 +317,11 @@ fi
 MSG="$STATUS_ICON **Preflight $ACCOUNT $TODAY $NOW_ICT** — $STATUS_TEXT"$'\n'
 for line in "${LINES[@]}"; do MSG+="$line"$'\n'; done
 
-"$ROOT/bin/notify.sh" "$MSG" 2>/dev/null || true
-
-if [ -n "${TRADING_DAILY_THREAD:-}" ]; then
-  "$ROOT/bin/notify_thread.sh" "$MSG" "$TRADING_DAILY_THREAD" 2>/dev/null || true
+if [ -z "${PREFLIGHT_QUIET:-}" ]; then
+  "$ROOT/bin/notify.sh" "$MSG" 2>/dev/null || true
+  if [ -n "${TRADING_DAILY_THREAD:-}" ]; then
+    "$ROOT/bin/notify_thread.sh" "$MSG" "$TRADING_DAILY_THREAD" 2>/dev/null || true
+  fi
 fi
 
 "$ROOT/bin/append_event.sh" Mike status "preflight-${ACCOUNT}-$TODAY" \

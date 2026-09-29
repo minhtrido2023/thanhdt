@@ -1,0 +1,62 @@
+{
+  "universe": 442,
+  "months": 146,
+  "K": 15,
+  "TC": 0.001,
+  "stale_days": 180,
+  "liq_floor": 1000000000.0,
+  "qual_med": 3,
+  "qual_min": 1,
+  "months_lt5": 99,
+  "full": {
+    "CAGR": 32.241,
+    "Sharpe": 1.007,
+    "MaxDD": -50.568,
+    "Calmar": 0.638,
+    "navfinal": 27.943,
+    "n": 143
+  },
+  "full_bh": {
+    "CAGR": 9.882,
+    "Sharpe": 0.576,
+    "MaxDD": -43.154,
+    "Calmar": 0.229,
+    "navfinal": 3.074,
+    "n": 143
+  },
+  "is_": {
+    "CAGR": 16.369,
+    "Sharpe": 0.705,
+    "MaxDD": -44.473,
+    "Calmar": 0.368,
+    "navfinal": 2.421,
+    "n": 70
+  },
+  "is_bh": {
+    "CAGR": 7.933,
+    "Sharpe": 0.549,
+    "MaxDD": -25.477,
+    "Calmar": 0.311,
+    "navfinal": 1.561,
+    "n": 70
+  },
+  "oos": {
+    "CAGR": 49.49,
+    "Sharpe": 1.248,
+    "MaxDD": -48.679,
+    "Calmar": 1.017,
+    "navfinal": 11.54,
+    "n": 73
+  },
+  "oos_bh": {
+    "CAGR": 11.783,
+    "Sharpe": 0.608,
+    "MaxDD": -32.239,
+    "Calmar": 0.366,
+    "navfinal": 1.969,
+    "n": 73
+  },
+  "selfcheck_diff_vnd": 4.2e-05,
+  "overlap_custom30v": 21.7,
+  "overlap_8l_top25": 4.0
+}

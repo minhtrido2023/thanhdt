@@ -1,0 +1,84 @@
+A. Không đặt trần → hành vi cũ nguyên vẹn
+  [PASS] A1 buy không trần vẫn đặt tại ask (13.100)  — px=13100
+  [PASS] A2 _hard_buy_ceiling(None) = None
+  [PASS] A3 lệnh bán không đổi (đặt tại bid)  — px=13000
+B. Thị trường DƯỚI trần → bám giá đang chào, không neo ngược xa
+  [PASS] B1 đặt ĐÚNG ask 12.600 (bám thị trường, rẻ hơn trần)  — px=12600
+  [PASS] B2 và < trần anchor
+  [PASS] B3 giá chào 12.900 (≤anchor): cơ chế MỚI với tới, cơ chế CŨ không  — cũ=12600 vs mới=12900
+  [PASS] B4 cả hai đều ≤ anchor (cũ an toàn nhưng bỏ lỡ)
+C. Thị trường TRÊN trần → clamp tại trần, không thể khớp trên anchor
+  [PASS] C1 giá đặt == trần 13.000 (không phải ask 13.200)  — px=13000
+  [PASS] C2 giá đặt ≤ trần (bất biến)
+  [PASS] C3 giá đặt < ask hiện tại (nằm chờ, không mua đuổi)
+D. Trần tuyệt đối thắng mọi trần đuổi % (kể cả chase_cap_vol_scale nới tay)
+  [PASS] D1 ref_price CAO hơn trần vẫn bị clamp về trần  — px=13000
+  [PASS] D2 _buy_chase_pct đã thật sự nới tới ceil 4%  — pct=0.04
+  [PASS] D3 vol-scale nới +4% vẫn KHÔNG vượt trần  — px=13000
+  [PASS] D4 (chứng minh trần thật sự chặn) BỎ trần → cùng cấu hình đặt TRÊN anchor  — px_không_trần=13900 > anchor=13000.0
+E. Sàn phiên đã trên trần → không đặt lệnh (None) + journal HARD_CEILING_BLOCK
+  [PASS] E1 trả None (không có giá hợp lệ ≤ trần)  — px=None
+  [PASS] E2 (chứng minh lỗ hổng có thật) không trần → q.floor đẩy giá lên trên anchor  — px=14500
+  [PASS] E3 _place_slices KHÔNG đặt lệnh nào  — []
+  [PASS] E4 có journal HARD_CEILING_BLOCK (phân biệt với NO_QUOTE/WAIT_CASH)
+F. ATC-remainder-buy: lệnh có trần KHÔNG đi đường ATC
+  [PASS] F1 không có lệnh ATC nào được đặt  — []
+  [PASS] F2 (regression) lệnh KHÔNG trần vẫn quét ATC như cũ  — [{'symbol': 'DRI', 'qty': 3000, 'side': 'buy', 'price': None, 'type': 'ATC'}]
+G. Slide theo giá đang khớp qua từng chu kỳ, trần giữ nguyên ở mọi bước
+[exec:selfcheck-hardceiling] resume từ /home/trido/thanhdt/WorkingClaude/data/execution_logs/exec_selfcheck-hardceiling_2099-01-01_state.json
+  [PASS] G ask=12,400 → đặt 12,400  — px=12400
+[exec:selfcheck-hardceiling] resume từ /home/trido/thanhdt/WorkingClaude/data/execution_logs/exec_selfcheck-hardceiling_2099-01-01_state.json
+  [PASS] G ask=12,800 → đặt 12,800  — px=12800
+[exec:selfcheck-hardceiling] resume từ /home/trido/thanhdt/WorkingClaude/data/execution_logs/exec_selfcheck-hardceiling_2099-01-01_state.json
+  [PASS] G ask=13,100 → đặt 13,000  — px=13000
+[exec:selfcheck-hardceiling] resume từ /home/trido/thanhdt/WorkingClaude/data/execution_logs/exec_selfcheck-hardceiling_2099-01-01_state.json
+  [PASS] G ask=12,900 → đặt 12,900  — px=12900
+[exec:selfcheck-hardceiling] resume từ /home/trido/thanhdt/WorkingClaude/data/execution_logs/exec_selfcheck-hardceiling_2099-01-01_state.json
+  [PASS] G ask=13,500 → đặt 13,000  — px=13000
+  [PASS] G_all mọi bước đều ≤ trần  — [(12400, 12400), (12800, 12800), (13100, 13000), (12900, 12900), (13500, 13000)]
+  [PASS] G_track có ít nhất 3 mức giá đặt KHÁC nhau (thật sự bám, không đứng yên)  — [12400, 12800, 12900, 13000]
+H. Không rò sang SELL; giá trị rác → fail-safe hành vi cũ
+  [PASS] H1 _hard_buy_ceiling bỏ qua lệnh bán
+[exec:selfcheck-hardceiling] resume từ /home/trido/thanhdt/WorkingClaude/data/execution_logs/exec_selfcheck-hardceiling_2099-01-01_state.json
+  [PASS] H2 giá bán không đổi so với trước khi có trần  — 13000 vs 13000
+  [PASS] H3 trần rác 0 → None (không nới, không crash)
+[exec:selfcheck-hardceiling] resume từ /home/trido/thanhdt/WorkingClaude/data/execution_logs/exec_selfcheck-hardceiling_2099-01-01_state.json
+  [PASS] H4 trần rác 0 → giá y hệt hành vi cũ  — px=13100
+  [PASS] H3 trần rác -5 → None (không nới, không crash)
+[exec:selfcheck-hardceiling] resume từ /home/trido/thanhdt/WorkingClaude/data/execution_logs/exec_selfcheck-hardceiling_2099-01-01_state.json
+  [PASS] H4 trần rác -5 → giá y hệt hành vi cũ  — px=13100
+  [PASS] H3 trần rác None → None (không nới, không crash)
+[exec:selfcheck-hardceiling] resume từ /home/trido/thanhdt/WorkingClaude/data/execution_logs/exec_selfcheck-hardceiling_2099-01-01_state.json
+  [PASS] H4 trần rác None → giá y hệt hành vi cũ  — px=13100
+  [PASS] H3 trần rác '' → None (không nới, không crash)
+[exec:selfcheck-hardceiling] resume từ /home/trido/thanhdt/WorkingClaude/data/execution_logs/exec_selfcheck-hardceiling_2099-01-01_state.json
+  [PASS] H4 trần rác '' → giá y hệt hành vi cũ  — px=13100
+  [PASS] H3 trần rác 'abc' → None (không nới, không crash)
+[exec:selfcheck-hardceiling] resume từ /home/trido/thanhdt/WorkingClaude/data/execution_logs/exec_selfcheck-hardceiling_2099-01-01_state.json
+  [PASS] H4 trần rác 'abc' → giá y hệt hành vi cũ  — px=13100
+I. load_plan() giữ field và TỰ SUY trần từ entry_anchor_price
+  [PASS] I1 hard_no_chase_ceiling_vnd nằm trong dataclasses.fields(PlannedOrder)
+  [PASS] I2 (a) chỉ có entry_anchor_price → tự suy trần = anchor  — 13000.0
+  [PASS] I3 (b) trần generator CHẶT HƠN anchor → giữ chặt hơn (không nới)  — 13000.0
+  [PASS] I4 (c) lệnh BÁN không sinh trần
+  [PASS] I5 (d) anchor rác → None, không crash
+  [PASS] I5b (e) trần generator RÁC (âm) + anchor hợp lệ → rơi về anchor  — trần=13000.0
+  [PASS] I5c (e) và trần vẫn CÒN HIỆU LỰC ở executor (âm)
+  [PASS] I5b (e) trần generator RÁC (không parse được) + anchor hợp lệ → rơi về anchor  — trần=13000.0
+  [PASS] I5c (e) và trần vẫn CÒN HIỆU LỰC ở executor (không parse được)
+  [PASS] I6 plan_SpaceX_2026-08-10.json DRI: trần cứng ≤ anchor 13,000  — trần=13000.0
+  [PASS] I6 plan_SpaceX_2026-08-10.json POW: trần cứng ≤ anchor 13,400  — trần=13400.0
+  [PASS] I6 plan_SpaceX_2026-08-10.json SCL: trần cứng ≤ anchor 24,200  — trần=24200.0
+  [PASS] I6 plan_SpaceX_2026-08-10.json SSI: trần cứng ≤ anchor 24,450  — trần=24450.0
+  [PASS] I6 plan_ZaloPay_2026-08-10.json DRI: trần cứng ≤ anchor 13,000  — trần=13000.0
+  [PASS] I6 plan_ZaloPay_2026-08-10.json POW: trần cứng ≤ anchor 13,400  — trần=13400.0
+  [PASS] I6 plan_ZaloPay_2026-08-10.json SCL: trần cứng ≤ anchor 24,200  — trần=24200.0
+  [PASS] I6 plan_ZaloPay_2026-08-10.json SSI: trần cứng ≤ anchor 24,450  — trần=24450.0
+  (I6 đã kiểm 8 lệnh mua mang anchor trên plan thật)
+J. HYBRID BẬT — trần cứng vẫn phải chặn, và chặn vì ĐÚNG lý do
+  [PASS] J1 HYBRID bật, TRONG block MUA ⇒ chặn vì HARD_CEILING_BLOCK (KHÔNG phải HYBRID_DEFER)  — events=['HARD_CEILING_BLOCK', 'event']
+  [PASS] J2 …và không đặt lệnh mua nào  — []
+  [PASS] J3 CHỨNG MINH NGƯỢC: HYBRID bật, BỎ trần ⇒ lệnh đặt được (trần mới là thứ chặn J1)  — [{'symbol': 'DRI', 'qty': 600, 'side': 'buy', 'price': 14500, 'type': 'LO'}]
+  [PASS] J4 HYBRID bật, NGOÀI block ⇒ HYBRID_DEFER (đây chính là thứ che mất E4 trước khi vá)  — events=['HYBRID_DEFER', 'event']
+
+✅ TẤT CẢ PASS

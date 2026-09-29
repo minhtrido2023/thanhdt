@@ -16,7 +16,7 @@ client-facing tháng 7/2026 (đã sửa 2026-08-02, job `Taylor_20260802_060243`
 
 | Cột | Nội dung |
 |---|---|
-| `Price` | Giá **THÔ**, đúng giá thật khớp trên sàn phiên đó. Không hồi tố. |
+| `Price` | Giá **THÔ**, đúng giá thật khớp trên sàn phiên đó. Không hồi tố. ⚠️ **NGOẠI LỆ: dòng ĐÚNG NGÀY GDKHQ** — xem [`ticker_price_stale_on_exdate.md`](ticker_price_stale_on_exdate.md) (2% số sự kiện, `Price` kẹt ở hệ CUM; VHM 2026-08-06 sai +98,4%). |
 | `Close` | Giá **ĐÃ ĐIỀU CHỈNH** cổ tức + chia tách, **hồi tố từ vintage HÔM NAY** về quá khứ (total-return-adjusted). |
 
 Quan hệ giữa hai cột là **PHÉP NHÂN**, không phải phép trừ:

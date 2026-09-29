@@ -1,0 +1,254 @@
+# ============================================================================================
+# aria-H nhóm B — trading_bot/plan_funding_gate.py FEE_RATE 0,00075 → 0,00097 (phí thật DNSE HOSE)
+# Job Taylor_20260913_075547 · user duyệt việc H 13/09 14:54 ICT · PATCH-ONLY, KHÔNG land 13/09.
+# Nguồn số: mike/bin/dnse_fee_rates.py (FEE_RATE_BUY_PCT = FEE_RATE_SELL_PCT = 0,097 = DNSE 0,070 +
+#   sở HOSE 0,027; đo 400 fill email 01/07→17/08, aria-F1 5f8c3ba2, quant-skeptic CONFIRMED).
+#   UPCOM 0,088% < HOSE ⇒ một hằng số HOSE là cận trên (gate CHẶT hơn 0,022pp, không lỏng hơn).
+#   trading_bot/ không import mike/ ⇒ hardcode + khoá đồng bộ bằng selfcheck ở mike/bin (dưới).
+# Nội dung: plan_funding_gate.py (hằng số + comment nguồn) · plan_cash_commitment.py (1 docstring)
+#   · plan_funding_gate_selfcheck.py + plan_cash_commitment_selfcheck.py: số neo 0,075% viết cứng
+#   → biểu thức theo FEE_RATE (phần ngữ nghĩa ca kiểm KHÔNG đổi). Ca G (cash_commitment): cash =
+#   ceil(DISC_COST) — ở 0,097% DISC_COST lẻ đồng, float cho 199,999…cp; tiền broker là số nguyên đồng.
+#   Header comment đặt ở ĐẦU file (git apply bỏ qua phần trước "diff --git"), giống v2.
+#
+# KIỂM TRA ÁP (worktree tạm sạch từ 24df0f76, 13/09):
+#   (1) HEAD 24df0f76                                   git apply --check      OK
+#   (2) sau v2 (cq20260913_batch1_item1_v2) → remove_v23 (--index) → patch này   OK (22 file staged)
+#   (3) patch này TRƯỚC → v2 → remove_v23                                         OK
+#   v2 cũng sửa plan_funding_gate.py (hunk khác, không chồng). sha256 plan_funding_gate.py sau
+#   (2) = d6d8aade…
+#
+# REPLAY GATE OFFLINE (plan THẬT data/trade_plans, StubBroker trả pp0Buy lấy từ log FUNDING GATE
+#   lần chạy đầu ngày, hoặc ppse dnse_raw mới nhất; không gọi broker) — 6 plan có lệnh MUA gần nhất
+#   mỗi account (plan 0 lệnh mua PASS hiển nhiên, bỏ): FLIP 0/12.
+#   ZaloPay 2026-09-14 (TV1 mua 200, cash-only): need 3.982.985→3.983.861đ / pp0Buy 5.956.996đ
+#   (ppse 11/09 20:30) = 66,9% OK→OK, dư ~1,97tr. ZaloPay 08-11 BLOCK→BLOCK (178,7%, khớp log thật).
+#   Chi tiết: aria_H_20260913/replay_funding_gate_fee.{py,txt,json}.
+#
+# SAU KHI APPLY — SELFCHECK:
+#   cd /home/trido/thanhdt/WorkingClaude && for f in plan_funding_gate_selfcheck.py \
+#       plan_cash_commitment_selfcheck.py loan_package_resolution_selfcheck.py; do
+#     env -u TZ MIKE_BOT_TEST_MODE=1 $DNA_PYEXE $f >/tmp/sc_$f.log 2>&1; echo "$? $f"; done
+#   # kỳ vọng rc=0; plan_funding_gate 103 PASS/0 FAIL (đo cả no-TZ/UTC/New_York), cash_commitment
+#   # 65 PASS/0 FAIL (tự chạy 4 TZ). loan_package_resolution là LIVE-tier, không chạy trong đo này.
+#   Khoá đồng bộ (mike repo): cp mike/agents/Taylor/research/aria_H_20260913/plan_funding_gate_fee_sync_selfcheck.py \
+#     mike/bin/ && $DNA_PYEXE mike/bin/plan_funding_gate_fee_sync_selfcheck.py   # PASS 3/3
+#   (trên HEAD chưa vá nó FAIL 3/3 — đã đo, đó là lý do CHƯA đặt vào mike/bin hôm nay: run_selfchecks
+#   sẽ đỏ tới khi patch land).
+#   Quét rộng §23 (file lõi): 74 *_selfcheck.py gốc WC chạy trên worktree HEAD vs HEAD+patch, cùng
+#   môi trường ⇒ 0 selfcheck đổi kết quả. FAIL/timeout có sẵn cả 2 phía (thiếu secrets/data trong
+#   worktree tạm: book_tagging, brokers_nav_shadow, dc_book_waterfall, due_diligence, edge_wlag_gate,
+#   exdate_price_frame, order_book_shadow, lag_forensic_filter, rubber_weekly; timeout nghiên cứu:
+#   basket_price_basis, eyrisk_selector, v4final_selector). LIVE-tier bỏ qua: capit_lever,
+#   cash_only_loan_package, loan_package_resolution, quote_l2_logging, tick_retry.
+#   ⚠ immutable_publish_selfcheck.py lọt bộ lọc LIVE, đã chạm BQ tav2_bq._ipsc_* (phía HEAD) — không
+#   liên quan patch, ghi để biết.
+#
+# SHA256 (HEAD + patch):
+#   ba337c8b… trading_bot/plan_funding_gate.py
+#   c989d775… trading_bot/plan_cash_commitment.py
+#   9efa5120… plan_funding_gate_selfcheck.py
+#   7652c722… plan_cash_commitment_selfcheck.py
+#
+# COMMIT (WC repo, SAU commit của v2/remove nếu apply cùng buổi — tách commit riêng):
+#   git commit -- trading_bot/plan_funding_gate.py trading_bot/plan_cash_commitment.py \
+#     plan_funding_gate_selfcheck.py plan_cash_commitment_selfcheck.py -m "fix(aria-H-B): plan_funding_gate FEE_RATE 0,075%→0,097% phí thật DNSE HOSE
+#   (aria-F1 quant-skeptic CONFIRMED; nguồn mike/bin/dnse_fee_rates.py; gate chặt hơn 0,022pp; replay 12 plan
+#   thật FLIP 0; selfcheck neo số theo FEE_RATE). Job Taylor_20260913_075547."
+#   rồi mike repo: git add bin/plan_funding_gate_fee_sync_selfcheck.py && git commit (khoá đồng bộ).
+# ROLLBACK: git revert <commit> (1 hằng số; không đụng state/plan/trading_rules).
+# ============================================================================================
+diff --git a/WorkingClaude/plan_cash_commitment_selfcheck.py b/WorkingClaude/plan_cash_commitment_selfcheck.py
+index a91db447..9be98737 100644
+--- a/WorkingClaude/plan_cash_commitment_selfcheck.py
++++ b/WorkingClaude/plan_cash_commitment_selfcheck.py
+@@ -21,7 +21,7 @@ Phủ:
+   F. headroom dư                            → PASS, qty nguyên vẹn
+   G. BIÊN: headroom == ĐÚNG chi phí lệnh    → PASS (luật `≤`)
+   H. BIÊN: thiếu đúng 1 đồng                → SHRINK/SKIP, không PASS
+-  I. phí 0,075% được tính vào chi phí       → chặn khi chỉ vượt nhờ phần phí
++  I. phí FEE_RATE được tính vào chi phí      → chặn khi chỉ vượt nhờ phần phí
+   J. pp0Buy không đo được                   → cận TIỀN MẶT, KHÔNG nhân đòn bẩy
+   K. broker chết hoàn toàn                  → headroom None → SKIP (fail-safe, KHÔNG chèn)
+   L. lệnh mua thiếu giá trong plan          → headroom None (không coi là chi phí 0)
+@@ -32,6 +32,7 @@ Phủ:
+   Q. re-plan nuốt mất tranche đã chèn       → replan_dropped_injection = True
+   R. bất biến TZ (chạy lại dưới 3 TZ)
+ """
++import math
+ import os
+ import subprocess
+ import sys
+@@ -154,13 +155,14 @@ def run():
+     check("qty đã ghi vào order dict", o["qty"] == 100 if o else False, o)
+     # kiểm chứng số học sự cố: nếu KHÔNG có gate, tổng vượt cash đúng ~0,78M
+     # Con số sự cố "~0,78M" trong báo cáo là phần vượt TRƯỚC phí (754.837đ); cộng phí
+-    # 0,075% của cả hai chân thành 792.247đ. Neo cả hai để không ai đọc lệch cơ sở.
++    # FEE_RATE của cả hai chân (49,88tr gộp × phí; 792.247đ ở 0,075%, 803.221đ ở 0,097%). Neo cả hai.
+     gross_no_gate = 45_900_000 + 200 * 19900
+     total_no_gate = committed + DISC_COST
+     check("không gate ⇒ vượt cash 754.837đ (trước phí, = '~0,78M' của báo cáo)",
+           abs((gross_no_gate - 49_125_163) - 754_837) < 1, gross_no_gate - 49_125_163)
+-    check("không gate ⇒ vượt cash 792.247đ (sau phí 0,075%)",
+-          abs((total_no_gate - 49_125_163) - 792_247) < 1, total_no_gate - 49_125_163)
++    check(f"không gate ⇒ vượt cash 754.837đ + phí {FEE_RATE*100:g}% hai chân",
++          abs((total_no_gate - 49_125_163) - (754_837 + 49_880_000 * FEE_RATE)) < 1,
++          total_no_gate - 49_125_163)
+ 
+     # D. headroom < 1 lô → SKIP
+     print("\n[D] headroom 1,0M < 1 lô (≈1,99M) → SKIP_NO_CASH")
+@@ -188,16 +190,18 @@ def run():
+ 
+     # G/H/I. biên + phí
+     print("\n[G/H/I] biên bằng đúng chi phí / thiếu 1 đồng / phần phí")
+-    b = Broker(pp_by_package={}, cash=DISC_COST, resolve={"TV1": 1122})
++    # Tiền broker là số NGUYÊN đồng ⇒ "đủ đúng chi phí" = làm tròn LÊN. Để cash = DISC_COST thô (float lẻ)
++    # thì ở 0,097% `headroom // unit` ra 199,999… (sai số dấu phẩy động) — biên không tồn tại ngoài đời.
++    b = Broker(pp_by_package={}, cash=math.ceil(DISC_COST), resolve={"TV1": 1122})
+     o, rec = gate_injected_order(dict(DISC), plan([]), b, "live", LOT)
+-    check("G: headroom == đúng chi phí → PASS 200cp", rec["action"] == "PASS", rec)
+-    b = Broker(pp_by_package={}, cash=DISC_COST - 1, resolve={"TV1": 1122})
++    check("G: headroom == đúng chi phí (tròn lên đồng) → PASS 200cp", rec["action"] == "PASS", rec)
++    b = Broker(pp_by_package={}, cash=math.ceil(DISC_COST) - 1, resolve={"TV1": 1122})
+     o, rec = gate_injected_order(dict(DISC), plan([]), b, "live", LOT)
+     check("H: thiếu 1đ → KHÔNG PASS 200cp", rec["qty_after"] == 100, rec)
+     # I: đủ tiền cho giá gốc nhưng KHÔNG đủ khi cộng phí
+     b = Broker(pp_by_package={}, cash=200 * 19900, resolve={"TV1": 1122})
+     o, rec = gate_injected_order(dict(DISC), plan([]), b, "live", LOT)
+-    check("I: phí 0,075% được tính (3.980.000đ không đủ)", rec["qty_after"] == 100, rec)
++    check("I: phí được tính (3.980.000đ không đủ)", rec["qty_after"] == 100, rec)
+     check("I: order_cost_vnd gồm phí", abs(order_cost_vnd(DISC) - DISC_COST) < 1e-6,
+           order_cost_vnd(DISC))
+ 
+diff --git a/WorkingClaude/plan_funding_gate_selfcheck.py b/WorkingClaude/plan_funding_gate_selfcheck.py
+index a43e6c95..1d2b5c5d 100644
+--- a/WorkingClaude/plan_funding_gate_selfcheck.py
++++ b/WorkingClaude/plan_funding_gate_selfcheck.py
+@@ -9,7 +9,7 @@ Phủ (theo skill verify-before-done — nêu rõ phụ thuộc môi trường,
+   B. plan HỢP LỆ  (Σ mua < sức mua)            → OK, gate không cản trở gì
+   C. BIÊN: Σ mua == ĐÚNG BẰNG sức mua          → OK  (luật là `≤`, không phải `<`)
+   D. BIÊN: Σ mua vượt sức mua đúng 1 đồng      → BLOCK
+-  E. phí 0,075% được TÍNH vào Σ                → BLOCK khi chỉ vượt nhờ phần phí
++  E. phí FEE_RATE được TÍNH vào Σ               → BLOCK khi chỉ vượt nhờ phần phí
+   F. nhiều gói vay (cash_only + default)       → đo per-nhóm, cộng tỉ lệ tiêu thụ
+   G. ca TV1 2026-07-29 THẬT (gói default sai)  → gate KHÔNG chặn oan (naive gate thì chặn)
+   H. pp0Buy không đo được + Σ trong cận ngoài  → UNVERIFIED (không chặn)
+@@ -125,7 +125,7 @@ v = check_plan_funding(p, StubBroker({None: 20_000_000}, cash=20_000_000), "live
+ check("action == BLOCK", v["action"] == "BLOCK", v["action"])
+ check("funding_block_reason trả chuỗi (caller sẽ chặn)",
+       isinstance(funding_block_reason(p, StubBroker({None: 20_000_000}), "live"), str))
+-check("reason nêu đúng cả 2 số", "100,075,000" in v["reason"] and "20,000,000" in v["reason"],
++check("reason nêu đúng cả 2 số", f"{100_000_000 * (1 + FEE_RATE):,.0f}" in v["reason"] and "20,000,000" in v["reason"],
+       v["reason"])
+ 
+ # ── B. plan HỢP LỆ ────────────────────────────────────────────────────────────────────────
+@@ -149,7 +149,7 @@ v = check_plan_funding(plan([order("FPT", 1000, 100_000)]),
+ check("action == BLOCK khi thiếu 1đ", v["action"] == "BLOCK", v["action"])
+ 
+ # ── E. phí có được tính không ─────────────────────────────────────────────────────────────
+-print("\n[E] phí 0,075%: sức mua = ĐÚNG giá trị lệnh (chưa phí) → phải CHẶN vì thiếu phần phí")
++print(f"\n[E] phí {FEE_RATE*100:g}%: sức mua = ĐÚNG giá trị lệnh (chưa phí) → phải CHẶN vì thiếu phần phí")
+ gross = 1000 * 100_000
+ v = check_plan_funding(plan([order("FPT", 1000, 100_000)]),
+                        StubBroker({None: gross}, cash=gross), "live")
+@@ -164,7 +164,7 @@ o1 = order("FPT", 600, 100_000)                       # 60,045M / 100M = 0,60
+ o2 = order("TV1", 1500, 20_000, cash_only=True)       # 30,0225M / 50M = 0,60
+ v = check_plan_funding(plan([o1, o2]), b, "live")
+ check("action == BLOCK (0,60 + 0,60 = 1,20)", v["action"] == "BLOCK", v["action"])
+-check("utilization ≈ 1,20", abs(v["utilization"] - 1.2) < 1e-3, v["utilization"])
++check("utilization = 1,20 × (1+phí)", abs(v["utilization"] - 1.2 * (1 + FEE_RATE)) < 1e-9, v["utilization"])
+ check("2 nhóm gói vay được tách", len(v["groups"]) == 2, v["groups"])
+ check("nhóm cash_only được đo bằng gói ĐÃ GIẢI (1122), không phải default",
+       (("TV1", 20000, 1122) in b.calls), b.calls)
+@@ -183,7 +183,7 @@ st = state_for(p, {"buy-AAA": 900, "buy-BBB": 1000, "sell-CCC": 1000})
+ v = check_plan_funding(p, StubBroker({None: 20_000_000}, cash=20_000_000), "live", st)
+ check("resume dùng state đầy đủ", v["action"] == "OK", v["reason"])
+ check("state được đánh dấu đã dùng", v["state_used"] is True, v.get("state_note"))
+-check("chỉ tính BUY còn 100cp + phí", abs(v["need_vnd"] - 10_007_500) < 1e-6, v["need_vnd"])
++check("chỉ tính BUY còn 100cp + phí", abs(v["need_vnd"] - 10_000_000 * (1 + FEE_RATE)) < 1e-6, v["need_vnd"])
+ check("SELL đã fill không được cộng JIT lần hai", v["jit_sell_credit_vnd"] == 0, v["jit_sell_credit_vnd"])
+ bad = {"plan_date": p.plan_date, "parents": {"buy-AAA": {"filled": 900}}}
+ v = check_plan_funding(p, StubBroker({None: 20_000_000}, cash=20_000_000), "live", bad)
+@@ -386,7 +386,7 @@ zp = plan([order(t, q, px, side="sell", priority=0) for t, q, px in ZP_SELLS]
+ ZP_GROSS = sum(q * px for _, q, px in ZP_SELLS)                      # 98.680.000đ
+ v = check_plan_funding(zp, StubBroker({None: 5_000_000}, cash=5_000_000), "live")
+ check("Σ tiền bán gộp = 98.680.000đ", abs(ZP_GROSS - 98_680_000) < 1, ZP_GROSS)
+-check("tín dụng JIT = 98.680.000 × (1−0,075%)",
++check("tín dụng JIT = 98.680.000 × (1−phí)",
+       abs(v["jit_sell_credit_vnd"] - ZP_GROSS * (1 - FEE_RATE)) < 1, v["jit_sell_credit_vnd"])
+ check("đếm đủ 8 lệnh bán", v["jit_sell_orders"] == 8, v["jit_sell_orders"])
+ check("action == OK — plan TỰ CẤP VỐN không còn bị chặn oan", v["action"] == "OK",
+@@ -420,7 +420,7 @@ check("nhóm B util(thô) ≈ 0 nhưng KHÔNG gánh hộ được cho A", gB["ut
+       gB["utilization"])
+ check("hũ chung = min pp0Buy = 10tr (KHÔNG phải 10tr + 1.000tr)",
+       v["shared_pot_vnd"] == 10_000_000, v["shared_pot_vnd"])
+-check("Σ tỉ lệ thô ≈ 10,0085 (A 10,0075 + B 0,001)", abs(v["raw_utilization"] - 10.0085) < 1e-3,
++check("Σ tỉ lệ thô = (A 10 + B 0,001) × (1+phí)", abs(v["raw_utilization"] - 10.001 * (1 + FEE_RATE)) < 1e-9,
+       v["raw_utilization"])
+ check("kể cả sau khi cộng TOÀN BỘ tín dụng JIT vào trần vẫn CHẶN",
+       v["utilization"] > 1.0, (v["utilization"], v["headroom_ratio"]))
+@@ -467,15 +467,15 @@ def zp10_broker():
+ print("\n[Q1] ★★ REPLAY THẬT — 4 lệnh mua tách 2 nhóm (1258/1826) CÙNG pp0Buy 5.818.854đ,")
+ print("     8 lệnh bán PARK prio 0 cấp 163,86tr ⇒ tiêu thụ THẬT 54,6% ⇒ PHẢI KHÔNG CHẶN")
+ v = check_plan_funding(zp10_plan(), zp10_broker(), "live")
+-check("Σ need = 92.649.435đ", abs(v["need_vnd"] - 92_649_435) < 1, v["need_vnd"])
+-check("tín dụng JIT = 163.862.011đ", abs(v["jit_sell_credit_vnd"] - 163_862_011.25) < 1,
++check("Σ need = 92.580.000đ gộp × (1+phí)", abs(v["need_vnd"] - 92_580_000 * (1 + FEE_RATE)) < 1, v["need_vnd"])
++check("tín dụng JIT = 163.985.000đ gộp × (1−phí)", abs(v["jit_sell_credit_vnd"] - 163_985_000 * (1 - FEE_RATE)) < 1,
+       v["jit_sell_credit_vnd"])
+ check("tách đúng 2 nhóm gói vay", len(v["groups"]) == 2,
+       [(g["loan_package_id"], g["need_vnd"]) for g in v["groups"]])
+-check("nhóm 1258 need 48.936.675đ (DRI+SCL)",
+-      abs([g for g in v["groups"] if g["loan_package_id"] == 1258][0]["need_vnd"] - 48_936_675) < 1)
+-check("nhóm 1826 need 43.712.760đ (POW+SSI)",
+-      abs([g for g in v["groups"] if g["loan_package_id"] == 1826][0]["need_vnd"] - 43_712_760) < 1)
++check("nhóm 1258 need 48.900.000đ × (1+phí) (DRI+SCL)",
++      abs([g for g in v["groups"] if g["loan_package_id"] == 1258][0]["need_vnd"] - 48_900_000 * (1 + FEE_RATE)) < 1)
++check("nhóm 1826 need 43.680.000đ × (1+phí) (POW+SSI)",
++      abs([g for g in v["groups"] if g["loan_package_id"] == 1826][0]["need_vnd"] - 43_680_000 * (1 + FEE_RATE)) < 1)
+ check("★ action == OK (bản 08-07: BLOCK OAN)", v["action"] == "OK", f"{v['action']}: {v['reason']}")
+ check("★ util == tỉ lệ THẬT cấp plan 54,6% (bản 08-07 ra 105,6%)",
+       abs(v["utilization"] - ZP10_NEED / (PP0 + ZP10_JIT)) < 1e-12
+diff --git a/WorkingClaude/trading_bot/plan_cash_commitment.py b/WorkingClaude/trading_bot/plan_cash_commitment.py
+index 2abcbae6..31f3c60f 100644
+--- a/WorkingClaude/trading_bot/plan_cash_commitment.py
++++ b/WorkingClaude/trading_bot/plan_cash_commitment.py
+@@ -81,7 +81,7 @@ def _get(order, name, default=None):
+ 
+ 
+ def order_cost_vnd(order):
+-    """Chi phí TIỀN của một lệnh mua, đã gồm phí 0,075%. Trả `None` nếu thiếu giá/KL —
++    """Chi phí TIỀN của một lệnh mua, đã gồm phí FEE_RATE (0,097%, xem plan_funding_gate.py). Trả `None` nếu thiếu giá/KL —
+     KHÔNG trả 0 (xem `_UNKNOWN`)."""
+     qty = _get(order, "qty")
+     px = _get(order, "ref_price")
+diff --git a/WorkingClaude/trading_bot/plan_funding_gate.py b/WorkingClaude/trading_bot/plan_funding_gate.py
+index 3f95c9f3..f4b72f48 100644
+--- a/WorkingClaude/trading_bot/plan_funding_gate.py
++++ b/WorkingClaude/trading_bot/plan_funding_gate.py
+@@ -113,9 +113,13 @@ Gate này READ-ONLY (mỗi nhóm gói vay 1 lần gọi `ppse`), không side-eff
+ 
+ import math
+ 
+-# Phí giao dịch thật của SpaceX/ZaloPay tại DNSE = 0,075% (KHÔNG phải 0,1% — xác nhận 2026-07-03,
+-# dùng thống nhất với bin/reconcile_equity.py). Đây là phần "fee_est_vnd" trong Σ.
+-FEE_RATE = 0.00075
++# Phí giao dịch thật của SpaceX/ZaloPay tại DNSE = 0,097%/chiều = phí DNSE 0,070% + phí sở HOSE 0,027%
++# (đo 2026-09-13 trên 400 fill email khớp lệnh DNSE 01/07→17/08, aria-F1, quant-skeptic CONFIRMED;
++# thay 0,075% ghi nhận 2026-07-03). Nguồn chuẩn: mike/bin/dnse_fee_rates.py FEE_RATE_BUY_PCT/_SELL_PCT —
++# KHÔNG import được từ trading_bot/ (ranh giới repo) nên hardcode; đồng bộ khoá bằng
++# mike/bin/plan_funding_gate_fee_sync_selfcheck.py. UPCOM 0,088% < 0,097% ⇒ dùng HOSE là cận trên, an toàn
++# cho gate. Thuế TNCN bán 0,1% KHÔNG nằm trong số này. Đây là phần "fee_est_vnd" trong Σ.
++FEE_RATE = 0.00097
+ 
+ # Cận ngoài khi không đo được pp0Buy: bội số của (cash + tiền bán trong plan). Đòn bẩy tối đa
+ # thực tế của account margin là 2× vốn tự có (initialRate 0,5) ⇒ 3,0 để lại ~50% biên an toàn,
+@@ -216,7 +220,7 @@ def _jit_sell_credit(plan, buys, remaining_qty=None):
+     Bán priority BẰNG hoặc LỚN HƠN ⇒ chưa giải phóng gì lúc lệnh mua chạy ⇒ cộng vào chính là
+     tái lập bug "list lệnh rồi đợi tiền" mà module này sinh ra để chặn (3 sự cố/15 ngày).
+ 
+-    NET PHÍ, KHÔNG haircut thêm: `(1 - FEE_RATE)` là số học chắc chắn (phí bán 0,075% chắc chắn
++    NET PHÍ, KHÔNG haircut thêm: `(1 - FEE_RATE)` là số học chắc chắn (phí bán 0,097% chắc chắn
+     bị trừ), không phải đệm rủi ro. KHÔNG thêm haircut cho rủi ro khớp lệnh vì (a) không có dữ
+     liệu neo hệ số ⇒ sẽ là tham số bịa, (b) lệnh bán không khớp KHÔNG gây thấu chi: tầng 3
+     (`executor.py` `get_cash() < need` → `WAIT_CASH`, retry chu kỳ sau) vẫn nguyên vẹn, hậu quả

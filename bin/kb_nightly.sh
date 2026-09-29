@@ -254,7 +254,7 @@ ARCHIVE_DATE=$(date -u +%Y-%m-%d)
 ARCHIVE_FILE="$ROOT/kb/archive/${ARCHIVE_DATE}-nightly.md"
 
 python3 - "$EVENTS_BUFFER" "$CUTOFF" "$ARCHIVE_FILE" <<'PYEOF'
-import sys, re, pathlib, datetime
+import sys, re, pathlib, datetime, os
 
 knowledge_path = pathlib.Path(sys.argv[1])
 cutoff = sys.argv[2]         # YYYY-MM-DD
@@ -270,27 +270,19 @@ EVENT_RE = re.compile(r'^- \[(\d{4}-\d{2}-\d{2})')
 canonical = []
 to_keep = []     # recent events (< KEEP_DAYS)
 to_archive = []  # old events
-in_events = False
+last_bucket = None  # bucket của event GẦN NHẤT — None = chưa tới event nào (canonical)
 
 for line in lines:
     m = EVENT_RE.match(line)
     if m:
-        in_events = True
-        event_date = m.group(1)
-        if event_date < cutoff:
-            to_archive.append(line)
-        else:
-            to_keep.append(line)
+        last_bucket = to_archive if m.group(1) < cutoff else to_keep
+        last_bucket.append(line)
+    elif last_bucket is not None:
+        # non-event line after events started = continuation or blank between events
+        # attach to whichever bucket the last event went to (buffer có thể xen kẽ cũ/mới)
+        last_bucket.append(line)
     else:
-        if in_events:
-            # non-event line after events started = continuation or blank between events
-            # attach to whichever bucket the last event went to
-            if to_archive and not to_keep:
-                to_archive.append(line)
-            else:
-                to_keep.append(line)
-        else:
-            canonical.append(line)
+        canonical.append(line)
 
 archived_count = len([l for l in to_archive if EVENT_RE.match(l)])
 if archived_count == 0:
@@ -303,9 +295,16 @@ with archive_path.open('a', encoding='utf-8') as f:
     if archive_path.stat().st_size == 0 if archive_path.exists() else True:
         f.write(f"# KB nightly archive — {cutoff} cutoff\n\n")
     f.writelines(to_archive)
+    f.flush()
+    os.fsync(f.fileno())
 
-# Rewrite KNOWLEDGE.md without archived events
-knowledge_path.write_text(''.join(canonical + to_keep), encoding='utf-8')
+# Rewrite events_buffer.md without archived events — tmp+os.replace như Phase 1a (§5).
+# Thứ tự archive-TRƯỚC-buffer-SAU là cố ý: kill giữa 2 bước ⇒ đêm sau archive TRÙNG (vô hại);
+# đảo lại ⇒ mất to_archive. Kill giữa lúc ghi tmp ⇒ buffer gốc còn nguyên, không mất to_keep.
+tmp = str(knowledge_path) + '.tmp'
+with open(tmp, 'w', encoding='utf-8') as fh:
+    fh.write(''.join(canonical + to_keep))
+os.replace(tmp, knowledge_path)
 print(f"ARCHIVED: {archived_count} events → {archive_path.name}")
 PYEOF
 
@@ -588,9 +587,6 @@ if [ -n "$STALE_PROPOSED" ]; then
 fi
 
 # ── Phase 3: commit if changed ────────────────────────────────────────────────
-if git -C "$ROOT" diff --quiet && git -C "$ROOT" status --porcelain | grep -q .; then
-    :  # new untracked files
-fi
 CHANGED=$(git -C "$ROOT" status --porcelain kb/ | wc -l)
 if [ "$CHANGED" -gt 0 ]; then
     git -C "$ROOT" add kb/
@@ -644,7 +640,12 @@ fi
 MSG="🌙 KB nightly done ($(date -u +%Y-%m-%d))"
 [ -n "${OVERSIZE:-}" ] && MSG="$MSG — ⚠️ oversized memories:$OVERSIZE"
 [ -n "${PRUNE_WARN:-}" ] && MSG="$MSG — ⚠️ $PRUNE_WARN"
-[ -n "${BACKUP_WARN:-}" ] && MSG="$MSG — ⚠️ $BACKUP_WARN"
+# Backup đi TRƯỚC, trên DÒNG RIÊNG (option A, bus question
+# Mike/retro-2026-09-08-backup-silent-failure-recurring-3rd): cả 3 lần backup hỏng trong 5
+# tuần, cảnh báo nằm ở CUỐI một dòng digest chung sau OVERSIZE/PRUNE_WARN — chìm nghỉm, cả 3
+# lần đều do người đọc chủ động soi mới thấy, không lần nào do dòng này báo.
+[ -n "${BACKUP_WARN:-}" ] && MSG="🚨 $BACKUP_WARN
+$MSG"
 "$ROOT/bin/notify.sh" "$MSG" 2>/dev/null || true
 # Topic CỐ ĐỊNH (Architecture) — trước 2026-07-22 đọc con trỏ global
 # state/ccdb_thread_id = "topic Mike mở phiên gần nhất", nên tin bảo trì KB đêm nào cũng
@@ -713,6 +714,22 @@ elif [ "$_CG_KB" -gt 40 ]; then
     SAME_DAY_BREACH="${SAME_DAY_BREACH}kb/coding_guidelines.md=${_CG_KB}KB(ngưỡng 40KB); "
     _BREACH_KEY="${_BREACH_KEY}CG:OVER|"
 fi
+# _ext.md size — WARNING-only, KHÔNG chặn gì (arch-review coord-2026-08-19, long_term_ops
+# fail, vòng 2: chỉ ghi `log` là im lặng thật — không script nào đọc logs/kb_nightly.log để
+# tìm WARNING, "audit_ops_health" không tồn tại trong repo). OKF split là xử lý MẶC ĐỊNH của
+# Phase 4.6 khi core vượt ngưỡng (mandate 2026-08-19), nhưng KHÔNG file _ext.md nào được giám
+# sát kích thước — coding_guidelines_ext.md đã 25KB. Ngưỡng 35KB dùng cùng tỉ lệ ngưỡng core
+# 40KB (không phải hard gate). Chủ sở hữu + hành động: Wags, xem kb/ops_runbook.md §Phân
+# domain tự sửa lỗi — rà soát/nén tay, không auto-fix (khác core, không có dispatch OKF split
+# cho ext quá khổ vì chưa rõ tách tiếp về đâu).
+for _ext_f in "$ROOT"/*_ext.md "$ROOT"/kb/*_ext.md; do
+    [ -f "$_ext_f" ] || continue
+    _ext_kb=$(( $(wc -c < "$_ext_f") / 1024 ))
+    if [ "$_ext_kb" -gt 35 ]; then
+        log "WARNING (không chặn): $(basename "$_ext_f") = ${_ext_kb}KB > 35KB — _ext.md không có trần cứng, có thể phình không giới hạn qua các đợt OKF split. Cân nhắc rà soát/nén tay."
+        "$ROOT/bin/notify.sh" "⚠️ [kb_nightly] $(basename "$_ext_f") = ${_ext_kb}KB > 35KB — _ext.md không có trần cứng (không tự chặn, không tự nén). Chủ: Wags — cần rà soát/nén tay. Xem logs/kb_nightly.log." >/dev/null 2>&1 || true
+    fi
+done
 mkdir -p "$ROOT/state"
 _CTXBLOAT_STAMP="$ROOT/state/ctxbloat_episode.txt"
 _CTXBLOAT_AUTOFIX_STAMP="$ROOT/state/ctxbloat_autofix_attempted.txt"
@@ -735,10 +752,26 @@ _CTXBLOAT_AUTOFIX_STAMP="$ROOT/state/ctxbloat_autofix_attempted.txt"
 # touches the live file. Only "OVER" files are auto-fix candidates — "MISSING" means the file
 # itself vanished (publish_context.sh dead, or worse), a different failure that needs human eyes
 # immediately, not a compression job.
+# OKF-SPLIT (2026-08-19, user mandate "vượt ngưỡng thì mặc định tách, không hỏi lại"): prose
+# compression alone could never fix a file whose remaining bytes ARE facts/structure — MIKE.md
+# and coding_guidelines.md each hit that wall and each needed a HAND split into `<file>_ext.md`
+# (2026-08-14, 2026-08-19) while this function kept re-escalating to a human every episode. The
+# agent may now also emit `<file>_ext.md.proposed`; the mechanical gate then fact-checks
+# core+ext CONCATENATED against old core+ext, so moving a section out is fact-preserving by
+# construction while deleting one still gets rejected. Size gate stays on the CORE file only —
+# the core is what auto-loads every session; the ext file is read on demand.
 _ctxbloat_autofix_one() {
     local file="$1" limit_kb="$2" label="$3" old_kb="$4"
     local proposed="${file}.proposed"
-    rm -f "$proposed"
+    local ext="${file%.md}_ext.md"
+    local ext_proposed="${ext}.proposed"
+    # Cố ý dọn TRƯỚC dispatch, không dời xuống sau (arch-review coord-2026-08-19 lưu ý
+    # phụ): nếu để leftover từ lần chạy trước (vd process bị kill giữa 2 mv bên dưới),
+    # check `[ ! -s "$proposed" ]` sau dispatch sẽ không phân biệt được "dispatch mới vừa
+    # ghi xong" với "rác cũ chưa dọn" — áp nhầm nội dung đã lỗi thời. Cái giá là lãng phí
+    # tối đa 1 lần dispatch Opus khi trường hợp đó xảy ra (dispatch mới sẽ tính lại đúng
+    # nội dung, qua lại đúng fact-check + size gate) — không phải mất dữ liệu.
+    rm -f "$proposed" "$ext_proposed"
     log "AUTO-FIX: dispatching compression for $label (${old_kb}KB > ${limit_kb}KB)..."
     DISPATCH_FROM=user "$ROOT/bin/dispatch.sh" Mike \
 "KB context-bloat auto-fix (tự động, kb_nightly.sh Phase 4.6, $(date -u +%Y-%m-%dT%H:%M:%SZ)).
@@ -752,23 +785,87 @@ ID. Nếu không chắc 1 câu là narrative hay fact — GIỮ NGUYÊN câu đ�
 Mục tiêu: xuống dưới ${limit_kb}KB có biên độ an toàn (~2KB). Khi ghi xong \`$proposed\`, DỪNG —
 không làm gì thêm. kb_nightly.sh sẽ tự kiểm bằng công cụ cơ học (ctxbloat_fact_check.py, diff
 từng fact token giữa bản gốc và \`$proposed\`) rồi mới quyết định có áp dụng hay không; agent
-không tự quyết định việc này." \
+không tự quyết định việc này.
+
+CÁCH 2 — OKF SPLIT (dùng khi nén văn xuôi KHÔNG thể xuống dưới ${limit_kb}KB mà không mất fact;
+mandate user 2026-08-19: mặc định tách, KHÔNG cần hỏi lại): ngoài \`$proposed\`, ghi thêm
+\`$ext_proposed\`. Chuyển NGUYÊN VĂN (không nén, không sửa nghĩa) các mục DÙNG-THEO-TÌNH-HUỐNG
+— lịch sử quyết định/rationale dài, quy trình hiếm dùng, quy tắc onboarding — sang
+\`$ext_proposed\`; trong \`$proposed\` mỗi mục đó để lại 1 con trỏ 1-3 dòng, và thêm bảng
+\"Mục đã tách sang \`$(basename "$ext")\` — đọc khi cần, KHÔNG auto-load\" ở đầu file.
+⚠️ Con trỏ TUYỆT ĐỐI không được dùng \`@\`-import — \`@\` là đệ quy, nạp lại y nguyên, xoá sạch
+tác dụng tách. Nếu \`$ext\` đã tồn tại, \`$ext_proposed\` phải chứa TOÀN BỘ nội dung cũ của nó
+CỘNG phần mới (gate cơ học so core+ext cũ với core+ext mới; thiếu = REJECT).
+Tiền lệ: kb/coding_guidelines_ext.md (2026-08-14), MIKE_ext.md (2026-08-19)." \
         --model opus --effort high --timeout 900 >> "$LOG" 2>&1 || true
 
     if [ ! -s "$proposed" ]; then
         log "AUTO-FIX FAILED: $label — dispatch không tạo được $proposed (rỗng/thiếu)."
         return 1
     fi
-    if ! python3 "$ROOT/bin/ctxbloat_fact_check.py" "$file" "$proposed" >> "$LOG" 2>&1; then
-        log "AUTO-FIX REJECTED: $label — ctxbloat_fact_check.py phát hiện mất fact, KHÔNG áp dụng. Chi tiết: $LOG"
-        rm -f "$proposed"
+    # Fact-check compares core+ext on BOTH sides so an OKF split is a no-op to the gate and a
+    # deletion is not. No ext on either side => byte-identical to the old single-file compare.
+    local _old_all _new_all
+    _old_all="$(mktemp)"; _new_all="$(mktemp)"
+    cat "$file" > "$_old_all"
+    if [ -s "$ext" ]; then cat "$ext" >> "$_old_all"; fi
+    cat "$proposed" > "$_new_all"
+    if [ -s "$ext_proposed" ]; then
+        cat "$ext_proposed" >> "$_new_all"
+    elif [ -s "$ext" ]; then
+        cat "$ext" >> "$_new_all"
+    fi
+    if ! python3 "$ROOT/bin/ctxbloat_fact_check.py" "$_old_all" "$_new_all" >> "$LOG" 2>&1; then
+        log "AUTO-FIX REJECTED: $label — ctxbloat_fact_check.py phát hiện mất fact (so core+ext cũ vs mới), KHÔNG áp dụng. Chi tiết: $LOG"
+        rm -f "$proposed" "$ext_proposed" "$_old_all" "$_new_all"
         return 1
     fi
+    rm -f "$_old_all" "$_new_all"
+    # Cơ học, không chỉ nhắc trong prompt (arch-review coord-2026-08-19, fail_silent):
+    # ctxbloat_fact_check.py PASS một bản core dùng `@X_ext.md` thay vì con trỏ văn xuôi —
+    # `@` là đệ quy nạp lại nguyên văn, context auto-load không giảm byte nào, nhưng core đã
+    # xuống dưới ngưỡng nên Phase 4.6 sẽ không bao giờ báo động lại. Chặn TRƯỚC khi áp dụng.
+    # Chỉ khớp @-pointer TRỎ ĐÚNG VÀO ext của LẦN SPLIT NÀY (không phải `^@` bất kỳ) — MIKE.md
+    # tự nó có 1 dòng `@context_pack.md` HỢP LỆ ở đầu file mà bản nén PHẢI giữ nguyên; chặn mù
+    # theo `^@` sẽ REJECT vĩnh viễn mọi lần nén MIKE.md, đúng lỗi đang muốn tránh (fail_silent
+    # kiểu khác: gate quá tay khiến auto-fix không bao giờ chạy được, tự thấy khi viết case9).
+    # KHÔNG điều kiện hoá theo `[ -s "$ext_proposed" ]` (bug arch-review vòng 2, tái lập thật
+    # 2026-08-19): điều đó tắt hẳn gate cho một bản NÉN THUẦN (không ghi ext_proposed) khi
+    # `$ext` ĐÃ tồn tại từ lần split trước — đúng trạng thái hiện tại của CẢ HAI file đang
+    # giám sát (MIKE_ext.md, kb/coding_guidelines_ext.md), nên mọi đợt breach kế tiếp đều lọt.
+    # KHÔNG neo cứng đầu dòng (arch-review vòng 4, tái lập độc lập bằng driver riêng — 6/11
+    # hình dạng @-import THẬT lọt qua neo `^[[:space:]]*@`: bullet `- @x`, blockquote `> @x`,
+    # ô bảng `| Mục | @x |`, heading `## ... @x`. Cả 2 file giám sát ĐÃ có tên ext trong
+    # heading (MIKE.md:10, kb/coding_guidelines.md:25) và ô bảng — nếu agent nén lỡ đổi
+    # backtick thành @ ngay TRÊN dòng có sẵn đó, neo đầu dòng không bắt được). Loại trừ đúng
+    # ca giả (arch-review vòng 3 — văn xuôi TRÍCH DẪN trong backtick, kb/coding_guidelines.md
+    # :46) bằng cách chặn @ chỉ khi KHÔNG có backtick ngay trước nó, thay vì chặn @ chỉ khi
+    # Ở đẦU dòng — rộng hơn đúng chỗ cần rộng, hẹp hơn đúng chỗ cần hẹp. `[^\`]` PHẢI escape
+    # backtick trong nháy kép, nếu không nó mở command substitution và regex không bao giờ
+    # khớp = gate câm hoàn toàn (tự bắt lỗi này khi thử ở vòng 4).
+    if grep -qE "(^|[^\`])@[^[:space:]]*$(basename "$ext")" "$proposed"; then
+        log "AUTO-FIX REJECTED: $label — \$proposed dùng \`@\`-import trỏ tới $(basename "$ext") làm con trỏ (đệ quy, xoá sạch tác dụng tách), KHÔNG áp dụng."
+        rm -f "$proposed" "$ext_proposed"
+        return 1
+    fi
+    # Size gate on the CORE file only — that is the one auto-loaded every session.
     local new_kb=$(( $(wc -c < "$proposed") / 1024 ))
     if [ "$new_kb" -gt "$limit_kb" ]; then
         log "AUTO-FIX INSUFFICIENT: $label vẫn ${new_kb}KB > ${limit_kb}KB sau nén (fact-check PASS nhưng chưa đủ nhỏ) — có thể là nội dung cấu trúc (evergreen), không nén thêm được đêm nay."
-        rm -f "$proposed"
+        rm -f "$proposed" "$ext_proposed"
         return 1
+    fi
+    # EXT trước, CORE sau (arch-review coord-2026-08-19, race_idempotency fail): nếu process
+    # bị kill giữa 2 lệnh mv, thứ tự cũ (core trước) để lại core đã trỏ pointer sang một
+    # $ext chưa tồn tại — dangling reference. Đảo lại: kill giữa chừng nhiều nhất để lại nội
+    # dung TRÙNG LẶP giữa $ext (đã cập nhật) và $file cũ (core chưa đổi, còn nguyên văn phần
+    # đáng ra đã chuyển đi) — không có gì tham chiếu tới file thiếu, không hỏng.
+    local _paths _split_note
+    _paths=("$file"); _split_note=""
+    if [ -s "$ext_proposed" ]; then
+        mv "$ext_proposed" "$ext"
+        _paths+=("$ext")
+        _split_note=" + OKF split → $(basename "$ext")"
     fi
     mv "$proposed" "$file"
     # `|| true` + an unconditional "committed." line (arch-review round 2, 2026-08-12): the
@@ -783,11 +880,11 @@ không tự quyết định việc này." \
     # `git add "$file"` only controls what THIS function stages — a commit with no pathspec
     # commits the whole index, so anything another in-flight session left staged rides along
     # inside a commit whose message claims it is one auto-compressed file.
-    if (cd "$ROOT" && git add "$file" && git commit -q -m "kb: auto-compress $label ${old_kb}KB→${new_kb}KB (ctxbloat_autofix, mechanical fact-check PASS, kb_nightly.sh Phase 4.6)" -- "$file") >> "$LOG" 2>&1; then
-        log "AUTO-FIX APPLIED: $label ${old_kb}KB → ${new_kb}KB, committed."
+    if (cd "$ROOT" && git add "${_paths[@]}" && git commit -q -m "kb: auto-compress $label ${old_kb}KB→${new_kb}KB${_split_note} (ctxbloat_autofix, mechanical fact-check PASS, kb_nightly.sh Phase 4.6)" -- "${_paths[@]}") >> "$LOG" 2>&1; then
+        log "AUTO-FIX APPLIED: $label ${old_kb}KB → ${new_kb}KB${_split_note}, committed."
         return 0
     fi
-    log "AUTO-FIX APPLIED NHƯNG CHƯA COMMIT: $label ${old_kb}KB → ${new_kb}KB — file ĐÃ đổi trên đĩa, git add/commit bị từ chối (commit-collision gate?) hoặc lỗi. Chi tiết: $LOG. Cần commit tay."
+    log "AUTO-FIX APPLIED NHƯNG CHƯA COMMIT: $label ${old_kb}KB → ${new_kb}KB${_split_note} — file ĐÃ đổi trên đĩa, git add/commit bị từ chối (commit-collision gate?) hoặc lỗi. Chi tiết: $LOG. Cần commit tay."
     return 2
 }
 
@@ -876,6 +973,14 @@ elif [ -f "$_CTXBLOAT_STAMP" ] || [ -f "$_CTXBLOAT_AUTOFIX_STAMP" ]; then
     rm -f "$_CTXBLOAT_STAMP" "$_CTXBLOAT_AUTOFIX_STAMP"
     log "Context-bloat episode cleared."
 fi
+
+# ── Phase 4.6b: đóng câu hỏi đã stale bằng bằng chứng cơ học ──────────────────
+# Không dùng LLM/khớp ngữ nghĩa: script chỉ xử lý các lớp có probe fail-closed
+# (context limits, delivery ledger hash-bound, cron path ổn định, full-sweep selfcheck PASS).
+# CASH_VENDOR và mọi câu hỏi nghiệp vụ/tiền thật không có resolver nên luôn được giữ mở.
+log "Daily deterministic bus-question housekeeping..."
+python3 "$ROOT/bin/bus_question_housekeeping.py" >> "$LOG" 2>&1 || \
+    log "bus_question_housekeeping: lỗi (non-fatal; giữ nguyên question, không đóng đoán)"
 
 # ── Phase 4.7: hồ sơ thời lượng job → độ trễ wakeup thích ứng (Wags 2026-08-01) ──
 # Sinh state/wakeup_profile.json: median/p75 thời lượng job theo (agent|model|effort),
@@ -1041,6 +1146,14 @@ prompt_summary), tự hỏi đúng câu MIKE.md §Model routing đặt ra — ta
 (medium không đủ), hay việc thường lệ/tiếp nối/xác nhận trạng thái bị chọn high theo phản xạ?
 Cùng nguyên tắc 5b/5c: hành vi con người, không tự sửa thói quen dispatch, chỉ ghi nhận vào
 KNOWLEDGE.md nếu lệch để Mike tự điều chỉnh.
+5e. **Routing retrospective (thêm 2026-08-18)**: chạy '$ROOT/bin/routing_retrospective.py --days 7'
+và đọc toàn bộ output. Tập trung vào 2 mục: (a) [FAIL-RATE] — agent nào có >20% job không thành
+công: điều tra xem routing đúng agent chưa, hay prompt thiếu rõ ràng; (b) [RETRY-RATE] — >15%
+retry sau khi đã loại auto-resume: prompt scope mismatch hoặc task quá lớn cho 1 dispatch. KHÔNG
+flag [OVERSPEC] đơn lẻ là vấn đề (high-effort jobs của Taylor R&D thường dài 10-20 phút — đúng).
+Flag chỉ đáng ghi vào KNOWLEDGE.md khi lặp ≥2 tuần liên tiếp — 1 tuần bất thường do sự cố đơn lẻ
+không đủ mẫu. Nếu thấy anomaly bền vững, đề xuất CỤ THỂ rule nào trong MIKE.md §Routing cần cập nhật
+(kèm thay đổi đề xuất bằng text), không tự sửa — để Mike cân nhắc và user duyệt.
 6. Role-scoped context drift check (MIKE.md §Context theo vai trò, 2026-07-17): đọc
 '$ROOT/kb/context_safety_core.md', 'context_execution_mini.md', 'context_planning_mini.md',
 'context_dataops_mini.md' — đối chiếu với KNOWLEDGE.md/current_ops.md mới nhất. Fact nào đã
@@ -1057,10 +1170,32 @@ rút về 1-2 câu như quy ước ở đầu file current_ops.md) → rút gọ
 07-17 (giữ current-state + pointer kb/incidents/, xoá play-by-play đã có nơi khác lưu). CHỈ rút
 gọn mục đã XÁC NHẬN đóng — mục còn 'CHỜ USER'/'chưa quyết' GIỮ NGUYÊN, không rút gọn nhầm việc
 đang mở thành trông như đã xong.
+8. **Pyramid L0→L3 audit-lens — fact đúng tầng chưa? (thêm 2026-08-17, từ TencentDB-Agent-Memory research):**
+Dùng 4 tầng L0→L3 làm khung soát KB — không phải để tạo hạ tầng mới, mà để phát hiện fact bị nhầm tầng gây tốn token hoặc mất signal. Tầng cho fleet mình:
+  - L3/Core (bền, áp dụng lâu dài, inject mọi phiên): \`kb/canonical.md\`, \`context_safety_core.md\`, rule trong CLAUDE.md.
+  - L2/Scenario (theo project/incident, tra cứu khi cần): \`kb/projects/\`, \`kb/incidents/\`.
+  - L1/Atom (1 nguồn=1 file, OKF, tra cứu theo query): \`kb/data_registry/\`.
+  - L0/Raw (hội thoại/log thô, không bền): bus event, job log — KHÔNG inject thường xuyên.
+Kiểm tra 3 loại vi phạm thường gặp:
+  (a) **L1 bị nhầm vào L3**: fact cụ thể (schema 1 bảng BQ, rule 1 broker quirk, 1 account detail) đang nằm inline trong \`context_pack.md\` hoặc \`current_ops.md\` nhưng đúng ra thuộc \`kb/data_registry/\` — nếu có, di chuyển + thay bằng pointer 1 dòng.
+  (b) **L3 bị outdate nhưng chưa xuống L2**: fact trong \`canonical.md\` hay \`context_safety_core.md\` mô tả trạng thái đã thay đổi (dự án đã đóng, gate đã bỏ, rule đã đổi) — nếu có, rút gọn/archive xuống L2 \`kb/projects/\`, giữ L3 tươi.
+  (c) **Pattern L0 chín muồi chưa promote**: nếu ≥2 bus finding/decision tuần vừa rồi có cùng chủ đề kỹ thuật (ví dụ: cùng loại bug tái diễn, cùng data source gây nhầm), đó là ứng cử viên thăng L1 (thêm entry \`kb/data_registry/\`) hoặc L2 (\`kb/incidents/\` hoặc project tracker) — ghi nhận + thực hiện nếu rõ ràng, nếu chưa chắc thì ghi NOTE trong \`kb/data_registry/_todo.md\`.
+Không cần soát toàn bộ KB — chỉ soát \`context_pack.md\` (hot-path) và \`kb/current_ops.md\` (inject mọi restart), vì đây là 2 file gây lãng phí token nhất nếu bị nhầm tầng. Không tạo cấu trúc file mới — chỉ di chuyển/rút gọn/thêm pointer.
+9. **context_pack.md proactive trim (thêm 2026-08-20, user mandate)**: Chạy \`wc -c $ROOT/kb/context_pack.md\`.
+Nếu ≥30KB (soft warning, dưới ngưỡng cứng 45KB nhưng đang phình): (a) Đọc phần MỚI NHẤT —
+xác định event nào đã được ghi đầy đủ vào KNOWLEDGE.md hoặc kb/projects/ (không còn cần thiết
+trong context mỗi phiên) và giảm \`RECENT_LINES\` trong \`bin/publish_context.sh\` từ 8 xuống 5–6
+bằng cách đổi số trong dòng \`tail -n 8\` (hoặc tương đương); chạy lại \`bin/publish_context.sh\`
+và verify MỚI NHẤT vẫn có ≥4 event tươi. (b) Đọc \`kb/current_ops.md\` — nếu bất kỳ mục nào có
+narrative đầy đủ nhưng trạng thái là LIVE/ổn định không đổi từ ≥14 ngày, rút gọn về 2–3 câu +
+pointer kb/incidents/ hay kb/projects/. NGƯỠNG HÀNH ĐỘNG: chỉ can thiệp khi context_pack.md ≥30KB
+(không phải mỗi tuần) — nếu <30KB thì bỏ qua bước này và ghi \"context_pack = <N>KB, dưới 30KB,
+không cần trim\". Mục tiêu dài hạn: giữ context_pack.md <30KB (dưới đây 20% ngưỡng cứng) để có
+buffer trước khi Phase 4.6 tự động trigger.
 10. **Token-saver skill audit** (thêm 2026-07-29, user yêu cầu): invoke Skill \`token-saver\`
 (args: \`audit\`) — chạy đủ 6 mục checklist của nó (size-gate/hardcoded-drift/schedule-drift/
 duplicate-content/ownership-scoped-import/fixed-per-call-overhead) trên toàn bộ
-agents/*/CLAUDE.md + kb/*.md + bin/kb_nightly.sh + bin/dispatch.sh. Đây LÀ việc 1-9 ở trên
+agents/*/CLAUDE.md + kb/*.md + bin/kb_nightly.sh + bin/dispatch.sh. Đây LÀ việc 1-10 ở trên
 nhìn qua 1 lăng kính khác (không thay thế, bổ sung phát hiện các mục kia có thể bỏ sót — vd
 schedule-drift từng lọt qua nhiều tuần vì không mục nào ở trên đối chiếu docs với \`crontab -l\`
 thật). Finding có rủi ro cao (chạm 'ranh giới cứng' của skill — có thể làm sai lệch 1 fact
@@ -1084,7 +1219,16 @@ superseded), số CÒN LẠI kèm tuổi từng câu — post báo cáo này (kh
 channel qua \`bash $ROOT/bin/notify_thread.sh \"<báo cáo>\" architecture\`. Đây LÀ cơ chế
 \"cuối tuần kiểm tra báo cáo lại đã hoàn thành chưa\" user yêu cầu — KHÔNG được bỏ qua mục này dù
 các mục 1-10 đã chiếm nhiều thời gian.
-KHÔNG xóa archive. Không cần hỏi user cho việc 1-6, 10-11 — đây là routine maintenance đã được user uỷ quyền. Sau khi xong: notify Telegram, VÀ BẮT BUỘC (hợp đồng đầu ra máy đọc được — dispatch này chạy nền, không ai chờ trực tiếp, kb_nightly.sh thứ Bảy tự kiểm event này để phát hiện lạc đề/chết im, đúng NGUYÊN VĂN topic sau, không viết biến thể khác dù có vẻ tương đương): append_event.sh Mike decision 'kb-weekly-editorial' \"<JSON tóm tắt thay đổi>\".${CTX_BLOAT_WARN}${STALE_SECTIONS_WARN}${SELFCHECK_WEEKLY_WARN}" \
+12. **Universe-pit migration tail G7/G8/G9 — theo dõi định kỳ (thêm 2026-09-06, user duyệt)**:
+đọc \`kb/projects/universe-pit-migration.md\` (chi tiết: \`agents/Taylor/research/ticker_prune_replacement_plan.md\` dòng ~1091-1094). 3 mục G7 (rà N-trial)/G8 (\`data_registry.md\`+\`cron_registry.md\`+\`coding_guidelines.md\`+\`universe_ruleset.md\` v1)/G9 (quant-skeptic full review)
+KHÔNG bị chặn bởi điều kiện thị trường nào (khác P5/P6 vốn chờ \`capit_fired=false\`, KHÔNG đụng
+tới P5/P6) — chỉ là backlog chưa ai làm. Nếu vẫn \"CÒN TREO\": ghi 1 dòng trong báo cáo cuối review
+nêu tuổi (\`git log -1 --format=%ad -- agents/Taylor/research/ticker_prune_replacement_plan.md\`);
+nếu ĐÃ xuất hiện \"CÒN TREO\" liên tục >8 tuần trong các báo cáo review trước (tra
+\`bus/inbox/Mike.jsonl\` topic \`kb-weekly-editorial\`) mà vẫn chưa ai làm → escalate hỏi user có
+nên bỏ hẳn G7-G9 hay ưu tiên làm dứt điểm. KHÔNG tự làm G7/G8/G9 trong review này (cần thời gian
+riêng, ngoài phạm vi task điều phối).
+KHÔNG xóa archive. Không cần hỏi user cho việc 1-6, 10-12 (trừ nhánh escalate của việc 12 sau >8 tuần) — đây là routine maintenance đã được user uỷ quyền. Sau khi xong: notify Telegram, VÀ BẮT BUỘC (hợp đồng đầu ra máy đọc được — dispatch này chạy nền, không ai chờ trực tiếp, kb_nightly.sh thứ Bảy tự kiểm event này để phát hiện lạc đề/chết im, đúng NGUYÊN VĂN topic sau, không viết biến thể khác dù có vẻ tương đương): append_event.sh Mike decision 'kb-weekly-editorial' \"<JSON tóm tắt thay đổi>\".${CTX_BLOAT_WARN}${STALE_SECTIONS_WARN}${SELFCHECK_WEEKLY_WARN}" \
         --timeout 900 >> "$LOG" 2>&1 &
     log "Editorial dispatch launched (background)."
 fi

@@ -1,0 +1,4 @@
+# CSV campaign thô 28MB — TÁI TẠO ĐƯỢC bằng exp_ceiling_ab.py (§6 README), không commit.
+# Bảng KẾT LUẬN (shortfall*.csv) thì CÓ commit vì đó là artifact kiểm chứng của README.
+out/campaigns_*.csv
+__pycache__/

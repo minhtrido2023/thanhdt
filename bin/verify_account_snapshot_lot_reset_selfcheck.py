@@ -98,6 +98,24 @@ check("qty = 0 chính xác", b.qty == 0.0, b.qty)
 check("basis = 0 chính xác (không còn dư float)", b.basis == 0.0, b.basis)
 check("resets = 1", b.resets == 1, b.resets)
 
+print("\n[6b] bán legacy không có buy-history → mua lại: mở lô mới, nhưng phải neo broker")
+b = VAS.CostBook(recover_legacy=True)
+b.sell(9200, "2026-07-13")
+b.buy(200, 200 * 14900, "2026-08-11")
+check("VIB candidate qty = 200 (không còn -9.000)", b.qty == 200, b.qty)
+check("VIB candidate avg_cost = 14.900", b.avg_cost == 14900, b.avg_cost)
+check("đánh dấu đúng 1 legacy_reopen", b.legacy_reopens == 1, b.legacy_reopens)
+check("snapshot 200 ⇒ đủ coverage", abs(b.qty - 200) < 1e-9)
+check("snapshot 700 (legacy chỉ bán dở) ⇒ KHÔNG đủ coverage",
+      abs(b.qty - 700) > 1e-9)
+normal = VAS.CostBook()
+picked, qty, recovered, mismatch = VAS.select_live_book(-9000, normal, b, 200)
+check("forcing function THẬT promote candidate khi snapshot khớp",
+      picked is b and qty == 200 and recovered and not mismatch)
+picked, qty, recovered, mismatch = VAS.select_live_book(-300, normal, b, 700)
+check("forcing function THẬT fail-closed khi snapshot không khớp",
+      picked is None and qty == 0 and not recovered and mismatch)
+
 print("\n[7] end-to-end trên dnse_raw THẬT — LPB/SpaceX, fixture 3 ngày đóng băng")
 LPB_DATES = ["2026-07-01", "2026-07-06", "2026-07-15"]
 ACCT = "0002023347"

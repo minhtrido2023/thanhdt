@@ -1,0 +1,248 @@
+# Audit độc lập rổ park custom30V bằng PHƯƠNG PHÁP VỊ THẾ (share-count replay)
+
+job `Taylor_20260927_101335` · 2026-09-27 · PAPER-ONLY · **không re-pin, không đổi rail, không merge**
+PREREG: [`PREREG.md`](PREREG.md) (viết 17:18:31 ICT, trước con số đầu tiên lúc 17:22:17 — đã được
+quant-skeptic xác minh bằng mtime)
+
+## 0. Câu trả lời ngắn cho user
+
+> "số CP sau ex-right tăng nhưng giá thực tế cũng giảm ngay, không thể tái tạo lợi nhuận ảo.
+> Lỗ hổng ở đâu? Số thực tế là số nào?"
+
+**Lập luận của bạn đúng, và nó đúng một cách đo được.** Dựng lại rổ park như một danh mục cổ phiếu
+thật — giữ số CP, mark theo **giá thô** của đúng phiên đó, áp từng sự kiện quyền tại ngày GDKHQ —
+cho ra **cùng một chuỗi** với chân production hiện hành (`BASKET_RETURN_OSHARES=flat`) và **không**
+cho ra chuỗi cũ. Lỗ hổng nằm đúng ở chỗ đã được sửa (commit `1b89881b`): chuỗi cũ tính
+`mcap = Close_đã_điều_chỉnh × OShares`, tức **cộng thêm** bước số CP lên trên một chuỗi giá **đã**
+trung hoà sẵn chính sự kiện đó — cú giảm giá bị khử hai lần, chỉ còn lại phần tăng số CP.
+
+**Số thực tế của chân park** (cửa sổ 2014-08-05 → 2026-06-19, 11,87 năm, tham số pin R3):
+
+| Chân | CAGR chân park | Ý nghĩa |
+|---|---:|---|
+| **ENGINE_FLAT** = production hiện hành | **17,857%** | chuỗi `Close` đã điều chỉnh, không có số CP |
+| ENGINE_LEGACY = trước khi sửa | 36,445% | **+18,6pp phantom** — không phải lợi nhuận |
+| REPLAY_B = replay vị thế, một biến khác duy nhất | 17,322% | thô, chưa trừ phần quyền mua |
+| REPLAY_A = đúng mô hình bạn mô tả (giữ số CP giữa các kỳ, phí 0,1%/chiều) | 16,875% | thêm phí nội bộ rổ + tiền cổ tức nằm chờ |
+
+## 1. Vì sao đây là bộ tái lập THỨ BA, độc lập thật
+
+| | ENGINE_FLAT | ENGINE_LEGACY | REPLAY |
+|---|---|---|---|
+| Giá dùng để tính lợi nhuận | `Close` (đã điều chỉnh hồi tố) | `Close × OShares` | **`Price` THÔ** |
+| Cổ tức CP / thưởng | ngầm trong `Close` | ngầm + cộng lại lần nữa qua `OShares` | **tường minh**: `N ×= (1+Σq)` tại ngày GDKHQ |
+| Cổ tức tiền | ngầm (tái đầu tư) | ngầm | **tường minh**: `cash += N×D` |
+| Nguồn sự kiện | vendor (không thấy được) | vendor + `ticker_financial.OShares` | `tav2_bq.corporate_action`, vintage pin riêng |
+| Code chung với `custom_basket.py` | — | — | **không dòng nào** (kể cả `_cap_names` viết lại; quant-skeptic đo tương đương 7,5e-16) |
+
+Hai bảo hiểm chống "harness tự khẳng định":
+- `[harness]` — hai chân engine tái lập lại **từ panel đã dump** khớp chính `build_pit()` tới
+  **max |Δ| = 4,0e-15** (assert cứng; sai là abort, không đọc số replay).
+- `[identity]` — replay với **mọi sự kiện bị tắt và không phí** phải khớp một chuỗi giá thô
+  **viết độc lập**: **max |Δ| = 4,9e-15**. Đây là phép kiểm bộ máy NAV (số CP, tiền dư,
+  carry-forward), **không** đúng-theo-định-nghĩa.
+
+## 2. Vòng 1 SAI — quant-skeptic REFUTED, cả 3 lỗi đều thật
+
+Bản đầu của replay đã bị `quant-skeptic` bác bỏ và **cả ba phát hiện đều đúng**. Ghi lại vì mỗi lỗi
+là một cái bẫy dùng lại được, không phải sự cố một lần:
+
+| # | Lỗi vòng 1 | Bằng chứng cơ học | Ảnh hưởng | Đã sửa |
+|---|---|---|---|---|
+| 1 | **Trễ trọng số 1 phiên.** Đặt số CP ở giá đóng phiên `d` với `wmap[d]` rồi giữ sang `d+1` ⇒ `w_d` ăn lợi nhuận `d→d+1`, còn engine ăn `(d−1)→d`. Mà `wmap[d]` vốn đã dựng từ `mcapw` phiên trước ⇒ trễ thêm trọn một phiên. REPLAY_B khác ENGINE_FLAT **2 biến**, không phải 1 | so trực tiếp `replay()` vs `engine_legs()`/`attribute.py` | −0,395pp trên chân replay, −0,422pp trên chân flat — **lớn hơn cả ngưỡng 0,300pp** | giao dịch tại giá đóng phiên **trước**, với `w_d` — đúng quy ước engine. Mutation **M5** dựng lại lỗi này |
+| 2 | **Hệ số cùng ngày NHÂN thay vì CỘNG.** `fac *= (1+q)` mỗi sự kiện. Hai đợt cùng đi ex thì mỗi `exercise_ratio` đều quy về số CP **gốc** ⇒ đúng là `1+Σq` | đối chiếu cột `OShares` của chính panel (nguồn độc lập): HPG 2015-05-08 thật **1,499959** vs code **1,560000** (+4,00% CP ảo); HDB 2020-10-01 1,299997 vs 1,322500; MBB 2018-07-06 1,190000 vs 1,197000; SSB 2022-06-16 1,193456 vs 1,201874 | +0,123pp/năm thổi lên, và là nguyên nhân trực tiếp của 2/15 dòng trong chính bảng dẫn chứng vòng 1 | `fac = 1 + Σq`. Sau sửa HPG 2015-05-08 `r_replay −1,14%` ≈ `r_flat −1,18%` (trước: +2,72%). Mutation **M1b** dựng lại lỗi này |
+| 3 | **`searchsorted` dồn sự kiện trước panel vào phiên 1.** 1.453 dòng vintage có ex-date trước phiên đầu bị đóng dấu vào 2013-12-23 | đếm trực tiếp | không đổi NAV (phiên 1 chưa giữ gì) nhưng **thổi mọi con số đếm 1,4-1,9×**: quyền mua 366 → **195** trong cửa sổ | bỏ tường minh, đếm riêng |
+| 4 | **Cửa sổ CAGR có 0,616 năm chưa đầu tư** (chuỗi bắt đầu 2013-12-23, rebal đầu 2014-08-05) | — | pha loãng mọi Δpp hệ số 0,95 | đo từ rebal đầu tiên = đúng cửa sổ PREREG |
+
+Lỗi 1 là loại nguy hiểm nhất: **`[harness]` 4e-15 vẫn PASS** vì nó chứng nhận `engine_legs()` (căn
+đúng) chứ không phải chân đang bị đem so. Bài học đưa vào code: assert phải phủ **chính chân** được
+dùng để kết luận. Thêm `[identity]` chính vì vậy.
+
+## 3. Kết quả — chân replay khớp FLAT, không khớp LEGACY
+
+Cửa sổ 2014-08-05 → 2026-06-19 (11,87y). Tham số pin R3 y nguyên: `BASKET_SELECT=yieldcombo`,
+`ETF_LIQ=custompitg` (quality=none / rebal=q2m5 / gate=3), `BASKET_WT=namecap`, top30, cap 0,10,
+`BQ_LOCAL_CACHE=data/bq_cache_asof20260729_postrestate`,
+`BASKET_CA_SNAPSHOT=data/snapshots/corp_action_share_20260927.parquet`, `UNIVERSE_SOURCE=pit`.
+48 kỳ rebal · 204 tên union · 30 tên/kỳ. `members_df` + `bx` được assert **byte-identical** giữa
+hai chân engine ⇒ A/B thật sự một biến.
+
+| | CAGR | Δ vs FLAT | corr ngày vs FLAT | TE vs FLAT |
+|---|---:|---:|---:|---:|
+| ENGINE_FLAT | 17,857% | — | — | — |
+| ENGINE_LEGACY | 36,445% | +18,588pp | 0,963 | 6,31%/năm |
+| REPLAY_B (thô) | 17,322% | −0,536pp | **0,99865** | **1,18%/năm** |
+| REPLAY_A | 16,875% | −0,983pp | 0,99789 | 1,47%/năm |
+
+### Dải xác nhận (quyền mua không mô phỏng được)
+
+Quyền mua (`Quyền mua CP cho Cổ đông hiện hữu`) là lớp sự kiện duy nhất replay **không** định giá
+được: bảng vendor không có giá phát hành (`ref_price` NULL), nên replay chịu cú giảm giá ngày ex mà
+không nhận giá trị quyền ⇒ thiên lệch ÂM **của replay**. PREREG đã ghi trước là so ngưỡng trên số
+**đã trừ** phần này. Vì phần trừ (~0,4-0,6pp) **lớn gấp đôi ngưỡng**, báo theo **DẢI** chứ không
+một con số — cách vạch ranh quyết định con số:
+
+| Cách trừ | CAGR | Δ vs FLAT | Ghi chú |
+|---|---:|---:|---|
+| **BAND_LO** — chỉ trung hoà phiên mà sự kiện DUY NHẤT là quyền mua | 17,712% | **−0,145pp** | bảo thủ nhất |
+| **BAND_HI** — trung hoà cả phiên có quyền mua đi kèm sự kiện khác | 17,944% | **+0,086pp** | rộng tay nhất với engine |
+
+**Δ ∈ [−0,145; +0,086] pp — CẢ HAI ĐẦU đều TRONG ngưỡng 0,300pp chốt trước.** 38 name×session bị
+trung hoà ở BAND_HI, trong đó **20** có sự kiện khác (cổ tức CP / cổ tức tiền) đi ex cùng ngày —
+tức BAND_HI xoá luôn phán quyết của replay trên chính lớp sự kiện đang audit. Đó là lý do phải báo
+dải, và là lý do của giới hạn ở §5.
+
+### Dư lượng ngoài quyền mua = +0,0083 (≈ +0,07pp/năm), và nó KHÔNG nằm ở sự kiện
+
+Phân rã theo nhãn sự kiện (`attribute.log`), tổng đóng góp `w × (r_replay − r_flat)`:
+
+| Nhãn | n | tổng | pp/năm |
+|---|---:|---:|---:|
+| RIGHTS (mọi biến thể) | 38 | −0,0627 | −0,528 |
+| FREESHARE | 114 | +0,0009 | +0,008 |
+| DIV | 238 | +0,0030 | +0,025 |
+| DIV+FREESHARE | 45 | −0,0003 | −0,002 |
+| NONE (không sự kiện) | 74.859 | +0,0047 | +0,040 |
+
+Hai điều đọc được:
+1. **Trên chính lớp sự kiện cổ tức CP / thưởng — lớp mà bug cũ khai thác — hai chuỗi khớp tới
+   +0,008pp/năm.** Đây là câu trả lời trực tiếp cho user: giá giảm đúng bằng phần CP tăng, không
+   tái tạo được lợi nhuận ảo.
+2. Dư lượng còn lại **không** tụ ở ngày sự kiện: trong 48 name×session có |đóng góp| > 10bp (không
+   phải quyền mua, tổng +0,0094), chỉ **4/48** nằm trong ±5 phiên của một sự kiện corp-action nào.
+   Chúng là lớp nhiễu **chất lượng dữ liệu cột `Price`**: 176 name×session có `Price` **đứng yên
+   đúng bằng phiên trước** trong khi `Close` đã đổi (giá thô bị chép 1 phiên, **ngoài** ngày ex nên
+   detector không bắt) — VEA 2020-03-11/12, BID 2022-01-20/21, VPB/VCB 2025-08-14/15. Các cặp này
+   **triệt tiêu ở phiên sau** (giá kẹt nằm ở tử số phiên t và mẫu số phiên t+1): tổng đóng góp ròng
+   **+0,0037**. Đây là điểm yếu của replay (cần ngày chính xác), **không** của engine (dùng luôn hệ
+   số điều chỉnh của vendor nhúng trong `Close`).
+
+## 4. Ledger phiên LEGACY ≠ FLAT — phantom trông như thế nào
+
+**313 name×session / 255 phiên**, 230 phiên dương / 25 âm, đóng góp phiên lớn nhất **+8,18pp**.
+File: [`ledger_legacy_vs_flat.csv`](ledger_legacy_vs_flat.csv),
+[`ledger_legacy_by_session.csv`](ledger_legacy_by_session.csv).
+
+> Con số này **khác** "159 phiên / 143 dương / max +15,0pp" mà quant-skeptic đo trước đó — không
+> phải mâu thuẫn: đây đếm **đóng góp có trọng số vào chỉ số** trên đúng cửa sổ + đúng membership pin
+> R3, còn phép đo kia chạy trên bảng BQ thô. Cả hai nói cùng một hiện tượng.
+
+### 3 ca quant-skeptic nêu — replay khớp chân nào
+
+| mã | ngày | w | raw Δ% | adj Δ% | ΔOShares% | **r_legacy%** | **r_flat%** | **r_replay%** |
+|---|---|---:|---:|---:|---:|---:|---:|---:|
+| ACB | 2024-05-31 | 0,054 | −16,16 | −0,22 | +15,00 | **+14,74** | **−0,22** | **−0,18** |
+| TCB | 2024-06-20 | 0,080 | −48,65 | +2,69 | +100,00 | **+105,38** | **+2,69** | **+2,69** |
+| HPG | 2025-06-26 | — | — | — | — | — | — | **không nằm trong rổ** phiên đó (rebal hoạt động 2025-05-05) ⇒ đóng góp **0** vào chỉ số |
+
+TCB là ca sạch nhất: giá thô giảm **−48,65%** vì chia thưởng 1:1, số CP tăng **+100%**. Chuỗi cũ ghi
+**+105,38%** trong MỘT phiên. Replay giá thô — cầm đúng số CP mới, mark đúng giá mới — ghi **+2,69%**,
+**bằng đúng** chân production tới hai chữ số.
+
+### Ca minh hoạ cơ chế rõ nhất — VPB 2018
+
+| ngày | việc xảy ra |
+|---|---|
+| 2018-06-18 | thưởng 31,6% **+** cổ tức CP 30,217% cùng đi ex ⇒ hệ số thật **1,6182**; giá thô 49.500 → 30.300 |
+| 2018-08-01 | `OShares` mới bước lên (+64,07%) — **6 tuần sau**, vì bước này khớp ngày công bố quý chứ không khớp sự kiện |
+
+Chuỗi cũ ghi **+62,18%** vào phiên 2018-08-01 — một ngày mà giá thô chỉ **−1,11%** và `Close` chỉ
+**−1,15%**. Không có cú giảm giá nào bù lại, vì cú giảm giá đã xảy ra từ 06-18 và đã bị `Close` hấp
+thu. Replay ghi **−1,11%**. (Bước này không được cổng re-date bắt: tổng `exercise_ratio` 0,61817 lệch
+0,0225 so với tỉ lệ thật 0,6407, vượt dung sai 0,0148 ⇒ rơi về ngày công bố — đúng thiết kế
+"fallback là staleness, không bao giờ là số sai", nhưng nó cho thấy vì sao chân return **không được**
+chứa số CP.)
+
+## 5. Giới hạn — cái audit này KHÔNG chứng minh
+
+1. **Chân FLAT KHÔNG được chứng nhận trên ngày ex QUYỀN MUA** (195 sự kiện trong cửa sổ, 91 mã).
+   Replay thiếu giá phát hành nên không kiểm được ở đúng đó; phần trừ 0,4-0,6pp **giả định** engine
+   đúng ở chỗ replay không soi được. Bất kỳ sai số nào của engine tụ riêng vào ngày quyền mua sẽ vô
+   hình với phép đo này. Muốn đóng lỗ này cần nguồn giá phát hành (FiinProX / công bố thông tin).
+2. **Bước sửa `Price` kẹt ngày GDKHQ có bơm thông tin chuỗi đã điều chỉnh vào chân "thô"**:
+   `P_t := Close_t/ratio_{t+1}`. Về đại số, nếu một ô được sửa **đồng thời** là ngày bước số CP thì
+   lợi nhuận replay của ô đó **co về đúng** `Close_t/Close_{t−1}` — replay bị cưỡng bức khớp chuỗi
+   nó đang audit. Đã giới hạn bước sửa vào **ngày ex thật của sự kiện điều chỉnh giá** (8 ô toàn
+   panel, từ 273 ô của vòng 1) và **đo**: **0 ô** giao với một bước số CP trong rổ ⇒ đường cưỡng bức
+   không bao giờ được đi. Assert cứng trong selfcheck (`0d`).
+3. Replay **không** mô phỏng: thuế, slippage, lãi tiền gửi, ngày nhận cổ tức thật (giả định nhận
+   ngay tại ex-date — làm **lợi** cho replay, biên nhỏ), và không có sự kiện gộp/tách ngược (bảng
+   vendor không có mã sự kiện đó cho VN).
+4. Vintage `corporate_action` đọc LIVE 2026-09-26 trong khi panel giá pin asof 2026-07-29. Không tạo
+   look-ahead (mọi ex-date sau 2026-06-19 bị `snap()` loại), nhưng là survivorship của **lịch sự
+   kiện**; chuỗi giá đem so cũng chỉ phản ánh sự kiện đã thực hiện nên coi là không đáng kể.
+
+## 6. Selfcheck
+
+`selfcheck_replay.py` — 5 mutation + 5 property, chạy dưới **3 TZ** (`Asia/Ho_Chi_Minh`, `TZ` bỏ
+hẳn, `America/New_York`) theo §16 `coding_guidelines`. Log: [`selfcheck_replay.log`](selfcheck_replay.log).
+
+Hai check là **property** chứ không phải mutation, có chủ đích — vòng 1 sai theo đúng chiều ngược
+lại (assert "phải lệch" lên một thứ chứng minh được là không thể lệch), và lý do vòng 1 đưa ra cho
+việc không lệch ("giá kẹt triệt tiêu t/t+1") là **mô hình sai**: với rebal hằng ngày trọng số vào
+lợi nhuận theo quan hệ **tuyến tính**, nên giá kẹt **không** triệt tiêu theo dạng đó. Lý do thật là
+**0 ô giao với bước số CP** — đo được, và chính nó là điều đáng assert.
+
+## 7. §6 PREREG — "số thực tế" ở cấp hệ thống (A/B R3)
+
+Đổi **đúng một biến**: chân park của lệnh pin R3 production (`PARK_STATES="3:0.3"` = park 0,30,
+user chốt 2026-09-27 15:48 ICT). Wrapper `run_ab.py` chỉ bọc `custom_basket.build_pit` — engine giữ
+nguyên byte, membership / ADV / allocator / NAV không đổi. Chân control `ENGINE_FLAT` đi qua đúng
+wrapper đó và **assert max |Δ| < 1e-9** so với `build_pit()` gốc, để chứng minh wrapper là no-op
+trước khi đọc chân treated.
+
+### Kết quả A/B (một biến = chân park)
+
+| Chân park | Final NAV | CAGR | Sharpe | MaxDD | Calmar | Δ CAGR vs control |
+|---|---:|---:|---:|---:|---:|---:|
+| **ENGINE_FLAT = control (production)** | 688,77B | **23,43%** | 1,88 | −14,4% | 1,63 | — |
+| REPLAY_B (replay, một biến) | 686,64B | **23,40%** | 1,88 | −14,4% | 1,63 | **−0,03pp** |
+| REPLAY_A (đúng mô hình user, có phí nội bộ rổ) | 671,86B | **23,18%** | 1,87 | −14,4% | 1,61 | **−0,25pp** |
+
+`self-check 0 VND` trên CẢ BA chân (`[selfcheck BAL]` và `[selfcheck LAG]`: cash-flow identity max
+err = 0 VND, final NAV identity err = 0 VND). Wrapper được chứng minh no-op trên chân control
+(max |Δ| = 3,997e-15 vs `build_pit()` gốc).
+
+Chênh ở cấp hệ thống **nhỏ hơn nhiều** so với chênh ở cấp chân park (−0,536pp) vì park chỉ ăn 30%
+tiền nhàn rỗi và chỉ ở trạng thái NEUTRAL: −0,03pp (REPLAY_B) tới −0,25pp (REPLAY_A). MaxDD không
+đổi, Sharpe gần như không đổi.
+
+**KHÔNG re-pin.** Đây là phép đo, không phải đề xuất đổi anchor.
+
+### ⚠️ Phát hiện PHỤ, ngoài phạm vi job — anchor 23,37% không tái lập được từ code canonical
+
+Control của tôi cho **23,43%**, không phải **23,37%** của anchor vừa commit (`6989fb54`). Nguyên nhân
+đã truy được bằng bằng chứng cơ học, không suy đoán:
+
+- `lag_dnpr_harness.py:1695-1696` (canonical) hardcode `parse_dates=["entry"]` +
+  `set_index("entry")` ⇒ dùng nhãn **as-of (peeking)**. Log của tôi in dòng edge-alloc **cũ**
+  (`thr=4.0%; ... %time<thr=53%`), **không có** `label_col`.
+- `failc_ab_20260927/failc_new.log` in `source=lag_edge_health.csv label_col=known_date rows=583
+  ... %time<thr=52%`. Chuỗi `label_col` **không tồn tại** trong canonical
+  (`grep -rn label_col --include=*.py` chỉ ra selfcheck + `golive_recommend_v23.py` + worktree).
+- Patch nằm ở branch **`fix/failc-sweep-8callsites-2709`** (worktree
+  `mike/agents/Taylor/wt-failc-sweep-2709`, `546d5c83`) — **CHƯA MERGE**.
+- `data/lag_edge_health.csv` hiện có **cả hai** cột (`entry,known_date`) nhưng consumer canonical
+  index lên `entry` ⇒ vẫn peeking.
+
+⇒ **23,37% là số của code chưa merge; production hôm nay tái lập 23,43%.** Δ chỉ −0,06pp nên không
+phải sự cố tiền thật, nhưng anchor trong `data/results_registry.md` đang trỏ tới một cấu hình không
+tồn tại trên `main`. Đã ghi bus `finding:anchor-2337-tu-code-CHUA-MERGE`. **Cần user duyệt**: merge
+branch rồi re-pin, HOẶC đổi anchor về 23,43% và ghi rõ là nhãn as-of. Tôi không tự quyết.
+
+
+## 8. File
+
+| File | Nội dung |
+|---|---|
+| `PREREG.md` | tiền đăng ký, ngưỡng 0,300pp + dự đoán đại số |
+| `dump_basket.py` / `run_dump.sh` / `dump.log` | lấy membership + panel + 2 chân engine từ ĐÚNG lệnh pin R3 |
+| `dump_ca.py` / `ca_vintage.parquet` | vintage `corporate_action` pin cho job này (7.277 dòng, 204 mã) |
+| `replay.py` | bộ tái lập thứ ba (+ 6 mutation knob) |
+| `attribute.py` / `attribution.parquet` / `attribute.log` | phân rã name×session + dải carve-out |
+| `selfcheck_replay.py` / `selfcheck_replay.log` / `run_selfcheck.sh` | mutation + property, 3 TZ |
+| `run_ab.py` / `run_ab.sh` / `ab_*.log` | A/B R3 park 0,30 |
+| `ledger_legacy_vs_flat.csv` / `ledger_legacy_by_session.csv` | ledger phantom LEGACY |
+| `rights_not_modelled.csv` | 195 sự kiện quyền mua trong cửa sổ, không mô phỏng được |
+| `levels_base.parquet` | 4 chuỗi level |
+| `replay_v1_prefix.py.bak` / `attribute_v1.py.bak` | bản VÒNG 1 (đã bị REFUTED) — giữ để đối chiếu |

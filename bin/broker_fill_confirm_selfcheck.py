@@ -218,9 +218,9 @@ else:
     check("ZaloPay TV1 = 0 (không khớp gì → không có dòng)", zp.qty("TV1", "buy") == 0)
     check("ZaloPay DRI = 1900 (số thật)", zp.qty("DRI", "buy") == 1900, f"got {zp.qty('DRI','buy')}")
     check("2 account KHÁC nhau (§12)", sx.by_key != zp.by_key)
-    # Tỉ lệ phí thật — đối chiếu với giả định 0,075% trong reconcile_equity.py.
+    # Tỉ lệ phí thật — nguồn đo của bin/dnse_fee_rates.py (0,097% HOSE / 0,088% UPCOM, aria-F1).
     rate = 100.0 * sx.fees / sx.value
-    check("phí thật nằm trong [0,08%; 0,10%] (KHÁC 0,075% đang giả định)",
+    check("phí thật nằm trong [0,08%; 0,10%] (khớp dnse_fee_rates.py, KHÔNG phải 0,075% cũ)",
           0.08 <= rate <= 0.10, f"rate={rate:.4f}%")
     print(f"     ↳ phí thật SpaceX 11/08: {rate:.4f}% giá trị khớp "
           f"({sx.fees:,.0f}đ / {sx.value:,.0f}đ)")

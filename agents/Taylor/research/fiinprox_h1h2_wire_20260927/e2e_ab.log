@@ -1,0 +1,82 @@
+pulling financial history ...
+  53679 financial rows, 1291 tickers
+  [moat-gov] 39 5F tiers; only WIDE earns +1 from 2025-06-01: ['DHG', 'TLG', 'VNM']; registry NARROW/NONE -> no notch (recent)
+  [bank-AQ override] current-snapshot bank rating set to live AQ for 18 bank(s); history proxy untouched
+  [forensic] appended 8 exclude override row(s) rating 5 @flag date: ['KSF', 'VVS', 'PC1', 'HHS', 'L40', 'KLB', 'DIG', 'BFC']
+wrote /tmp/h1h2_sbx/oldwd/data/rating_8l_history.csv  (53687 rows)
+  [old] bq refresh no-op
+
+distribution by route x rating (raw 1-5):
+rating         1     2      3      4    5
+route                                    
+BANK         286   183    104    179  229
+COMPOUNDER  3149  3975  11519  23412  486
+CYCLICAL      40   267    403    297  464
+INSURANCE     67   124    230    100   15
+POWER          0   668   1160    172   37
+REALESTATE     0  1032   1135   1681  526
+SECURITIES     0   218    313    515  701
+
+distribution by route x TIER (final A-E, compounder=per-qtr percentile):
+tier           A     B      C      D     E
+route                                     
+BANK         286   183    104    179   229
+COMPOUNDER  4871  7991  12748  10840  6091
+CYCLICAL      40   267    403    297   464
+INSURANCE     67   124    230    100    15
+POWER          0   668   1160    172    37
+REALESTATE     0  1032   1135   1681   526
+SECURITIES     0   218    313    515   701
+
+==============================================================================
+pulling financial history ...
+  53679 financial rows, 1291 tickers
+  [bank-AQ hist] 1318 bank-quarter NPL/LLR rows, 27 banks from fiinprox_bank_ratios_quarterly_20260914.csv (PIT lag >=45d, Q4 >=90d)
+  [moat-gov] 39 5F tiers; only WIDE earns +1 from 2025-06-01: ['DHG', 'TLG', 'VNM']; registry NARROW/NONE -> no notch (recent)
+  [bank-AQ override] REJECTED 9 live row(s) with no real lens data (fail-closed, keep this module's ROE-grounded grade): ABB(bank-nodata), BAB(bank-nodata), BVB(bank-nodata), KLB(bank-nodata), NVB(bank-nodata), PGB(bank-nodata), SGB(bank-nodata), VAB(bank-nodata), VBB(bank-nodata)
+  [bank-AQ override] current-snapshot bank rating set to live AQ for 1 bank(s); history proxy untouched
+  [forensic] appended 8 exclude override row(s) rating 5 @flag date: ['KSF', 'VVS', 'PC1', 'HHS', 'L40', 'KLB', 'DIG', 'BFC']
+wrote /tmp/h1h2_sbx/ab_new.csv  (53687 rows)
+  [bq] refresh SKIPPED (R8L_HIST_NO_BQ_REFRESH=1) -- tav2_bq.fa_ratings_8l untouched
+
+distribution by route x rating (raw 1-5):
+rating         1     2      3      4    5
+route                                    
+BANK          61   144    364    181  231
+COMPOUNDER  3149  3975  11519  23412  486
+CYCLICAL      40   267    403    297  464
+INSURANCE     67   124    230    100   15
+POWER          0   668   1160    172   37
+REALESTATE     0  1032   1135   1681  526
+SECURITIES     0   218    313    515  701
+
+distribution by route x TIER (final A-E, compounder=per-qtr percentile):
+tier           A     B      C      D     E
+route                                     
+BANK          61   144    364    181   231
+COMPOUNDER  4871  7991  12748  10840  6091
+CYCLICAL      40   267    403    297   464
+INSURANCE     67   124    230    100    15
+POWER          0   668   1160    172    37
+REALESTATE     0  1032   1135   1681   526
+SECURITIES     0   218    313    515   701
+
+==============================================================================
+rows old=53687  new=53687  merge=53687  unmatched=0
+
+RATING changed : 360 rows (BANK)
+GATE   changed : 6 rows   <<< the GO invariant
+ticker   eff_date route_old  rating_old  rating_new  is_latest_row
+   BAB 2026-07-31      BANK           3           4           True
+   BVB 2026-07-29      BANK           3           4           True
+   KLB 2026-07-23      BANK           4           3           True
+   NVB 2026-07-30      BANK           3           5           True
+   PGB 2026-07-22      BANK           3           4           True
+   SGB 2026-07-27      BANK           3           5           True
+
+  HISTORY-row gate violations : 0   (must be 0)
+  LATEST-row gate changes     : 6   (intentional: fail-closed fix (c))
+
+non-BANK rating changes : 0  (must be 0 -- wire is BANK-route only)
+
+VERDICT: PASS

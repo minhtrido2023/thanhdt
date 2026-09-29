@@ -1,0 +1,155 @@
+{
+  "job": "Taylor_20260630_071941",
+  "screen": "tech_it_services",
+  "structural_reality": "VN tech = IT services (Infosys/TCS archetype); liquid+quality universe is essentially ONE name (FPT). CMG ROIC5Y 7.8% + liquid only 2024; ELC/ITD low-quality micro-caps; CTR (ROIC 21-24%) is a Viettel tower-co/telecom-infra, not software.",
+  "dispatch_gate_problem": "ROIC5Y>18 is an Infosys/TCS bar (25-30% ROIC); FPT runs blended 12-17% because FPT Telecom (fiber capex) + education dilute the pure-IT ROIC -> FPT crosses 18 only in 2025. Literal gate collapses the universe to ~empty. VN-calibrated bar = ROIC5Y>12.",
+  "revyoy_artifact": "FPT RevYoY went -20..-50% in 2015-2018 purely from FRT/Synnex divestment (deconsolidation), not a real decline -> a RevYoY>12% gate wrongly ejects the great 2018 entry.",
+  "fpt_lens": {
+    "flagged_n": 29,
+    "flagged_fwd12m": 42.3,
+    "flagged_winrate": 79.0,
+    "unflagged_n": 105,
+    "unflagged_fwd12m": 24.5,
+    "spread_pp": 17.8,
+    "revyoy_drops": 10
+  },
+  "basket_lit": {
+    "qual_med": 0,
+    "months_held": 0,
+    "months": 151,
+    "median_sel_adv_b": 0.0,
+    "full": {
+      "CAGR": 0.0,
+      "Sharpe": 0.0,
+      "MaxDD": 0.0,
+      "Calmar": Infinity,
+      "navfinal": 1.0,
+      "n": 151
+    },
+    "full_bh": {
+      "CAGR": 9.94,
+      "Sharpe": 0.585,
+      "MaxDD": -43.154,
+      "Calmar": 0.23,
+      "navfinal": 3.295,
+      "n": 151
+    },
+    "is_": {
+      "CAGR": 0.0,
+      "Sharpe": 0.0,
+      "MaxDD": 0.0,
+      "Calmar": Infinity,
+      "navfinal": 1.0,
+      "n": 72
+    },
+    "oos": {
+      "CAGR": 0.0,
+      "Sharpe": 0.0,
+      "MaxDD": 0.0,
+      "Calmar": Infinity,
+      "navfinal": 1.0,
+      "n": 79
+    },
+    "oos_bh": {
+      "CAGR": 10.842,
+      "Sharpe": 0.58,
+      "MaxDD": -32.239,
+      "Calmar": 0.336,
+      "navfinal": 1.969,
+      "n": 79
+    },
+    "ortho_c30v": 0.0,
+    "ortho_8l": 0.0
+  },
+  "basket_vn": {
+    "qual_med": 1,
+    "months_held": 40,
+    "months": 151,
+    "median_sel_adv_b": 108.18,
+    "full": {
+      "CAGR": 2.682,
+      "Sharpe": 0.252,
+      "MaxDD": -31.361,
+      "Calmar": 0.086,
+      "navfinal": 1.395,
+      "n": 151
+    },
+    "full_bh": {
+      "CAGR": 9.94,
+      "Sharpe": 0.585,
+      "MaxDD": -43.154,
+      "Calmar": 0.23,
+      "navfinal": 3.295,
+      "n": 151
+    },
+    "is_": {
+      "CAGR": -1.099,
+      "Sharpe": -0.076,
+      "MaxDD": -13.589,
+      "Calmar": -0.081,
+      "navfinal": 0.936,
+      "n": 72
+    },
+    "oos": {
+      "CAGR": 6.254,
+      "Sharpe": 0.419,
+      "MaxDD": -31.361,
+      "Calmar": 0.199,
+      "navfinal": 1.491,
+      "n": 79
+    },
+    "oos_bh": {
+      "CAGR": 10.842,
+      "Sharpe": 0.58,
+      "MaxDD": -32.239,
+      "Calmar": 0.336,
+      "navfinal": 1.969,
+      "n": 79
+    },
+    "ortho_c30v": 12.5,
+    "ortho_8l": 0.0
+  },
+  "selfcheck_vnd": {
+    "lit": 0.0,
+    "vn": 1e-06
+  },
+  "verify": {
+    "FPT_2018_divest_VN": [
+      "2018-05",
+      "2018-06",
+      "2018-07",
+      "2018-08",
+      "2018-09",
+      "2018-10",
+      "2018-11",
+      "2018-12"
+    ],
+    "FPT_2018_divest_LIT": [],
+    "FPT_2022_slowdown": [
+      "2022-01",
+      "2022-02",
+      "2022-03",
+      "2022-08",
+      "2022-09",
+      "2022-10",
+      "2022-11",
+      "2022-12",
+      "2023-04",
+      "2023-05",
+      "2023-06",
+      "2023-07"
+    ],
+    "FPT_2024_euphoria": [],
+    "FPT_2025_cheap": [
+      "2025-04",
+      "2025-05",
+      "2025-06",
+      "2025-07",
+      "2025-08",
+      "2025-09",
+      "2025-10",
+      "2025-11",
+      "2025-12"
+    ]
+  }
+}

@@ -1,0 +1,7 @@
+💰 **NAV 2026-08-10: 949,892,932 VND** (-826,240 VND, -0.09% so với hôm trước)
+   Cổ phiếu 797,392,950 · Tiền mặt 152,499,982 · Nợ margin 0
+   Từ go-live: -50,107,068 VND (-5.01%)
+   ℹ️ from-raw: bỏ cross-check verify_account_snapshot (advisory, không vào NAV).
+   ℹ️ BACKFILL ƯỚC TÍNH (nav_is_estimate=True): positions 2026-08-10T19:10:56, balances 2026-08-10T19:10:56, giá BQ Price thô
+   ℹ️ PVT: marketPrice 18,350 = giá phiên trước 18,350 (feed trễ) — dùng BQ Price 19,400
+   ℹ️ TCB: marketPrice 29,800 = giá phiên trước 29,700 (feed trễ) — dùng BQ Price 31,350

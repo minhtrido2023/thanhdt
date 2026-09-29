@@ -57,9 +57,11 @@ CASES = [
     (dt.datetime(2026, 8, 11, 21, 0), "2026-08-11", "21:00 T3 ⇒ đã phải có bản hôm nay"),
     (dt.datetime(2026, 8, 15, 10, 0), "2026-08-14", "T7 ⇒ bản của T6"),
     (dt.datetime(2026, 8, 16, 23, 0), "2026-08-14", "CN 23:00 ⇒ vẫn là T6, KHÔNG phải CN"),
-    # 2026-09-02 Quốc khánh (T4) — ngày lễ phải bị bỏ qua, không được coi là phiên.
-    (dt.datetime(2026, 9, 3, 8, 0), "2026-09-01", "sáng sau lễ Quốc khánh 02/09 ⇒ nhảy về 01/09"),
-    (dt.datetime(2026, 9, 2, 22, 0), "2026-09-01", "22:00 ĐÚNG ngày lễ ⇒ không có bản của ngày lễ"),
+    # Quốc khánh 2026 nghỉ TRỌN 31/08(T2)+01/09(T3)+02/09(T4) — DNSE thông báo 25/08/2026, đã vào
+    # trading_bot/vn_market.py::_VARIABLE_HOLIDAYS. Phiên cuối trước kỳ nghỉ = T6 28/08.
+    # (Kỳ vọng cũ "2026-09-01" viết TRƯỚC thông báo đó nên sai từ 2026-08-25; weekly audit 08-29.)
+    (dt.datetime(2026, 9, 3, 8, 0), "2026-08-28", "sáng sau kỳ nghỉ Quốc khánh 31/08-02/09 ⇒ về T6 28/08"),
+    (dt.datetime(2026, 9, 2, 22, 0), "2026-08-28", "22:00 ĐÚNG ngày lễ ⇒ không có bản của ngày lễ"),
 ]
 for now, exp, why in CASES:
     got = str(A.expected_universe_asof(now))

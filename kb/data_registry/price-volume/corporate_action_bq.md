@@ -64,6 +64,19 @@ sau và phân loại freshness theo **phiên giao dịch liền trước**, khô
 sẽ báo động giả mỗi sáng, mốc "ngày lịch trước" sẽ báo động giả mỗi thứ Hai). ⚠️ n=1 quan sát —
 đừng biến nó thành giả định; script tự đo `MAX(ingested_at)` mỗi lần chạy.
 
+## Bẫy (2b) — bảng bị UPSERT IN-PLACE: `public_date` bị ghi đè khi sự kiện lật trạng thái
+
+Đo thật 2026-08-17: batch ingest gần nhất rewrite 1.331 dòng, trong đó **1.185 (89%) có `public_date` cũ
+hơn 2026-08-01** (cũ nhất 2024-09-13) ⇒ vendor sửa dòng LỊCH SỬ mỗi lần chạy, không chỉ append. Với sự
+kiện đã `executed`, ngày công bố Ý ĐỊNH **đã mất vĩnh viễn** — cùng cơ chế đã xác nhận ở tầng source ETL
+cho `insider_transaction` ([`../fundamentals/insider_transaction.md`](../fundamentals/insider_transaction.md)
+§Bẫy(1)). Đây là lý do Sprint 1 `corp_action_program_20260815` CẤM announcement study.
+
+✅ **Vá từ 2026-08-17**: [`corporate_action_snapshots.md`](corporate_action_snapshots.md) —
+`tav2_mike.corporate_action_snapshots`, append-only, 1 vintage/ngày. Mọi câu hỏi dạng "bảng trông như thế
+nào ngày D" / "dòng này bị sửa lúc nào" phải đọc bảng đó, KHÔNG đọc bảng này. Bảng này chỉ trả lời được
+"hiện tại".
+
 ## Bẫy (3) — trùng `(ticker, exright_date, event_code)` — cần GROUP BY/dedup có chủ đích
 
 `id` là unique key thật (36.149 distinct = đúng số dòng) nhưng nhiều dòng CÓ THỂ trùng
@@ -91,9 +104,30 @@ nhiều đợt phát hành khác nhau chốt cùng ngày (SUM đúng) hoặc ame
 | Script | Đọc gì | Ghi gì | Trạng thái |
 |---|---|---|---|
 | `corp_action_lib.py` | reader + taxonomy dùng chung (`is_price_adjusting` / `dilutes_share_count` / `feed_freshness`) | — | LIVE, 7 ca hồi quy |
-| `oshares_live.py` | AIS + ISS → số CP lưu hành point-in-time | — (thư viện) | vòng 4: cổng chứng nhận neo AIS nằm TRONG module (`AIS_UNCERTIFIED` ⇒ `value=None`), 32 ca hồi quy — an toàn khi gọi thẳng `oshares_at()` |
+| `oshares_live.py` | AIS + ISS → số CP lưu hành point-in-time | — (thư viện) | vòng 4: cổng chứng nhận neo AIS nằm TRONG module (`AIS_UNCERTIFIED` ⇒ `value=None`) — an toàn khi gọi thẳng `oshares_at()`. **Từ 2026-08-20 có HAI nhánh**: `live=False` (mặc định, PIT/backtest — không đổi số nào) vs `live=True` (phục vụ hôm nay). 58 ca hồi quy |
 | `dividend_adjusted_return.py::bq_corp_action()` | DIV/ISS tại (mã, ex-date) | — | LIVE (tầng bổ sung; tiền broker vẫn là nguồn số chính thức §21) |
-| `mike/bin/corp_action_daily.py` | cả 3 cái trên + `active_nav_<label>.json` | `data/corp_action_daily/corp_action_daily_<date>.json` + Discord `trading_daily` | cron **CHƯA CÀI**, chờ quant-skeptic (job `Taylor_20260813_091128`) |
+| `mike/bin/corp_action_daily.py` | cả 3 cái trên + `active_nav_<label>.json` | `data/corp_action_daily/corp_action_daily_<date>.json` + Discord `trading_daily` | LIVE (cron). Gọi `oshares_at(..., live=True)` ở **cả 3 điểm gọi** — sót một điểm là `check_retro`/`crosscheck` so số của HAI chính sách và báo lệch giả mỗi ngày (ca R12 trong selfcheck bắt đúng kiểu sót này) |
+| `oshares_pit` (backtest) | qua `oshares_live` | — | **PHẢI giữ `live=False`**. `live=True` trong một backtest là look-ahead — xem bảng "HAI NHÁNH" trong [`../fundamentals/ticker_financial_oshares.md`](../fundamentals/ticker_financial_oshares.md) |
+
+### Chính sách neo, cập nhật 2026-08-20 (job `Taylor_20260820_015520`)
+
+Nguyên tắc user: *dữ liệu từ BCTC mới nhất là dữ liệu tươi nhất, TRỪ KHI có phát sinh sự kiện giữa
+2 kỳ báo cáo; BCTC vẫn là CHUẨN re-baseline mỗi quý.* Hệ quả cho bảng này: `AIS` KHÔNG còn được coi
+là phát biểu áp đảo khi chuỗi `AIS` **gãy** — chuỗi gãy là bằng chứng chống lại chính nó. Chi tiết
+điều kiện + cái giá look-ahead đo được (21 mã được phủ đổi lấy **1 mã** look-ahead mới, KBC):
+[`../fundamentals/ticker_financial_oshares.md`](../fundamentals/ticker_financial_oshares.md)
+§"HAI NHÁNH".
+
+**`MODEL_REBASE` — cổng bất biến ngày đổi bản mã.** `corp_action_daily.py` so số hôm nay với
+snapshot đã publish hôm trước. Khi `model_version` đổi giữa hai lượt, hai số đó do HAI công thức
+sinh ra ⇒ so chúng là so hai câu trả lời cho hai câu hỏi khác nhau, và cổng bất biến sẽ GIẤU đúng
+con số đúng (đo thật 2026-08-20: MBB `10.189.574.884,885` → `10.068.749.885`, VRE `2.328.818.410` →
+`2.272.318.410`; số LẺ ở bản cũ chính là mùi của phép nhân dồn `(1+ratio)` trên hai sự kiện CÙNG
+ex-date tính trên cùng một gốc). `model_rebase_set()` miễn cổng CHỈ khi đủ **cả ba**: model đổi
+thật (`None` = chưa kết luận được, KHÔNG đọc thành True) · tính lại hôm qua bằng mã hôm nay ra số
+KHÁC cái đã publish · quỹ đạo hôm nay tự nhất quán dưới mã hôm nay. Trượt bất kỳ điều nào ⇒ fail-
+closed như cũ. "Mô hình đổi" một mình KHÔNG bao giờ đủ — nếu đủ thì mọi lần sửa `oshares_live.py`
+sẽ tắt cổng bất biến đúng vào ngày dễ sai nhất.
 
 **Bẫy 2 nay đã được CƠ GIỚI HOÁ**, không còn là lời nhắc văn xuôi: `corp_action_daily.py` phân loại
 `FRESH / STALE / DEAD` mỗi lần chạy và **không publish** khi DEAD. Nhưng lời nhắc vẫn đúng cho MỌI
@@ -104,6 +138,43 @@ consumer khác — ai đọc bảng này ngoài cron đó thì vẫn phải tự
 - Xác nhận nguồn/refresh cadence của bảng (ai tạo, có cron nào update tiếp không).
 - Nếu wire vào `dividend_adjusted_return.py`/report §21 gate: qua Taylor + quant-skeptic review
   (đổi công thức đo lợi nhuận per-position, thuộc diện §21/§22 coding_guidelines).
+
+## Bẫy (5) — `listing_date` KHÔNG phải ngày công bố/thông báo Sở; nó là ngày NIÊM YẾT BỔ SUNG
+
+**Phủ sóng**: NULL ở MỌI `event_code` **trừ `ISS`**, nơi **9.594/11.722 = 81,8%** dòng có giá trị.
+(⚠️ `corp_action_program_20260815/DATA_DICTIONARY.md` từng ghi "100% NULL toàn bảng" — SAI, do đo
+gộp cả bảng trong khi `DIV` chiếm 47% dòng và luôn NULL. Đã sửa 2026-08-17.)
+
+**Ngữ nghĩa (đo, không suy)**: `ISS.listing_date` = cùng đại lượng với `AIS.effective_date` = ngày
+CP mới chính thức vào lưu hành. Khi mã có dòng `AIS` trong ±365 ngày, tỉ lệ khớp CHÍNH XÁC:
+STOCK_DIVIDEND 90,9% · BONUS 90,7% · PP 84,9% · ESOP 74,1% · RIGHTS 65,9%. Placebo chạy đúng phép
+thử đó trên `exright_date`: 0,1–12,3%. Khớp exact và khớp ±3 ngày lệch nhau <1pp ở mọi subtype ⇒
+đây là CÙNG MỘT trường, không phải hai ngày tình cờ gần nhau. Ca mẫu khớp tay: FPT thưởng CP 15%
+2025 — `ISS.listing_date = 2025-09-12` = `AIS.effective_date = 2025-09-12` (đúng ca ~7 tuần mà
+Bẫy (1) của file này đã mô tả).
+
+**⇒ Ba hệ quả khi dùng:**
+1. **Nằm SAU `exright_date`**, không phải trước: median RIGHTS **+91 ngày**, STOCK_DIVIDEND +50,
+   BONUS +49. Chỉ 11/1.542 sự kiện RIGHTS có `listing_date` trước ex-date, và 9/11 lệch 100–436
+   ngày (dữ liệu cũ hỏng, không phải thông báo).
+2. **Là KẾT QUẢ của chính sự kiện** — CP mới lên sàn nhanh hay chậm phụ thuộc việc tổ chức phát
+   hành thu tiền + hoàn tất hồ sơ, KHÔNG biết được tại `exright_date`. Neo lợi suất lên nó (kể cả
+   cửa sổ hậu sự kiện) là **look-ahead**, không chỉ "sai ngày".
+3. **Càng lùi về quá khứ càng kém tin**: `listing_date == exright_date` (giá trị rác, vendor chép
+   ex-date khi không có ngày thật) chiếm 72,3% sự kiện RIGHTS giai đoạn 2002–2008, giảm đơn điệu
+   về **0,0%** các năm 2023/2025/2026. Với PP, khối rác này là 69% toàn mẫu ⇒ **median gap của PP
+   bằng 0 KHÔNG có nghĩa "niêm yết cùng ngày"**.
+
+**Dùng được cho**: mô hình số CP lưu hành (thay/bổ sung cho việc phải chờ dòng `AIS` xuất hiện —
+`ISS.listing_date` có sẵn ngay trên dòng phát hành, phủ 81,8% vs `AIS` chỉ 4.884 dòng).
+**KHÔNG dùng được cho**: bất kỳ neo point-in-time nào, bất kỳ study nào cần "thị trường biết tin
+lúc nào".
+
+**Nhắc lại cho rõ**: bảng này **KHÔNG có cột nào ghi thời điểm thị trường lần đầu biết tin.** Cả 3
+ứng viên đều đã bị loại bằng đo đạc — `public_date` (ghi đè tại chỗ, không vintage — Bẫy 2b),
+`id_created_date` (89,4% = ngày backfill 2024-10-11), `listing_date` (hậu sự kiện, mục này). Đường
+duy nhất còn lại là tích luỹ vintage ở `tav2_mike.corporate_action_snapshots` (sống từ 2026-08-17),
+đo lại N **không sớm hơn 2027-08**.
 
 ## Nguồn
 Kiểm tra trực tiếp bằng `bq` CLI 2026-08-13 (Mike, theo yêu cầu user tra cứu bảng mới).

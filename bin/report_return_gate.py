@@ -44,6 +44,7 @@ from __future__ import annotations
 
 import argparse
 import datetime as _dt
+import io
 import json
 import os
 import re
@@ -51,8 +52,10 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import dividend_adjusted_return as dar  # noqa: E402
+import wc_paths  # noqa: E402
 
-ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+ROOT = wc_paths.find_wc_root(__file__)
 EXEC_DIR = os.path.join(ROOT, "data", "execution_logs")
 LOOKBACK_DAYS = 120          # đủ phủ mọi ex-date còn nằm trong giá vốn của vị thế đang giữ
 DEFAULT_TOL_PP = 0.15        # điểm %; nới hơn sai số làm tròn giá vốn 2 chữ số, chặt hơn mọi cổ tức thật
@@ -69,12 +72,38 @@ DEFAULT_TOL_PP = 0.15        # điểm %; nới hơn sai số làm tròn giá v�
 # review vì nó không đụng gate) sẽ âm thầm vô hiệu hoá gate.
 PAPER_MARKERS = ("AlphaLens Paper Portfolio", "DC Book Paper Portfolio")
 
+# Content-completeness gate (thêm 2026-09-02, sau vụ báo cáo tháng 08 — template tạo 25/08 với
+# 5/10 mục còn "[TBD" bị report_delivery_gate coi là hoàn tất và GIAO THẬT cho user 28/08, TRƯỚC
+# CẢ KHI tháng đóng). report_return_gate PASS trong rỗng vì các mục TBD không có dòng bảng/văn
+# xuôi nào để kiểm — cổng tỉ suất không phải cổng "báo cáo đã điền đủ". Marker khớp NGUYÊN VĂN
+# quy ước đang dùng trong reports/*.md (`[TBD`, `[chưa điền`, `[placeholder`) — mở rộng danh sách
+# này nếu thấy quy ước khác được dùng, đừng đoán.
+INCOMPLETE_MARKERS = ("[TBD", "[chưa điền", "[chua dien", "[placeholder")
+
+
+def find_incomplete_markers(report_path: str) -> list:
+    """[(dòng, nội dung)] cho mọi chỗ báo cáo còn nội dung CHƯA ĐIỀN."""
+    hits = []
+    with open(report_path, encoding="utf-8") as f:
+        for i, line in enumerate(f, 1):
+            if any(m in line for m in INCOMPLETE_MARKERS):
+                hits.append((i, line.strip()))
+    return hits
+
 
 # ---------------------------------------------------------------- nguồn (1): broker
-def broker_positions(account_no: str, asof: str) -> dict:
-    """{mã: (qty, costPrice, marketPrice)} từ bản ghi `positions` CUỐI CÙNG của ngày `asof`.
+def broker_positions(account_no: str, asof: str, price_fn=None) -> dict:
+    """{mã: (qty, costPrice bình quân gia quyền GỘP lô, giá đóng cửa BQ)} — khối lượng và giá
+    vốn từ bản ghi `positions` CUỐI CÙNG của ngày `asof`; GIÁ từ BQ, không từ `marketPrice`.
 
     §12: lọc `account_no` TRƯỚC mọi phép tính — file dnse_raw dùng chung mọi tài khoản.
+
+    Gộp NHIỀU LÔ cùng mã (khác `loanPackageId`, vd margin thường + gói CAPIT riêng) — phát hiện
+    2026-09-02 khi dựng báo cáo tháng 08: bản trước GHI ĐÈ theo mã (dict[symbol] = lô cuối cùng
+    trong mảng `positions`), lặng lẽ BỎ mất lô đứng trước — ca thật ZaloPay 08-31: BID
+    107cp(loanPkg 1826)+320cp(1258) → gate chỉ thấy 320cp; MBB 400+252 → chỉ thấy 252cp; VCB
+    200+100 → chỉ thấy 100cp. Không phải test giả định — 3/30 mã ZaloPay bị cắt ngay lần dùng
+    thật đầu tiên.
     """
     path = os.path.join(EXEC_DIR, f"dnse_raw_{asof}.jsonl")
     if not os.path.exists(path):
@@ -94,31 +123,119 @@ def broker_positions(account_no: str, asof: str) -> dict:
             last = rec
     if last is None:
         raise ValueError(f"không có bản ghi positions nào của {account_no} ngày {asof} — CHẶN")
-    out = {}
+    agg = {}   # symbol -> [tổng qty, tổng cost_value]
     for p in last["payload"].get("positions", []):
         if str(p.get("accountNo")) != str(account_no):
             continue
         qty = float(p.get("openQuantity") or 0)
         if qty <= 0:
             continue
-        out[p["symbol"]] = (qty, float(p.get("costPrice") or 0), float(p.get("marketPrice") or 0))
+        cp = float(p.get("costPrice") or 0)
+        a = agg.setdefault(p["symbol"], [0.0, 0.0])
+        a[0] += qty
+        a[1] += qty * cp
+    if not agg:
+        return {}
+
+    # GIÁ THỊ TRƯỜNG KHÔNG lấy từ `positions[].marketPrice` nữa (sửa 2026-09-09).
+    # Hai lý do độc lập, cái nào cũng đủ:
+    #   1. Bản cũ `agg.setdefault(sym, [0, 0, mp])` khiến giá của lô ĐẦU TIÊN trong mảng
+    #      thắng im lặng, rồi giá đó được áp cho TỔNG khối lượng ở expected_pct(). Các lô
+    #      cùng mã KHÔNG phải lúc nào cũng cùng giá: đo thật trên dnse_raw 08→09 có 5 bản
+    #      đọc mà 2 lô cùng mã lệch nhau (ZaloPay 2026-08-14T19:10:23 BID 35.800 vs 38.850
+    #      — lệch 8,5%), do replica đọc-sau-ghi của DNSE trả dòng cũ trong lúc batch
+    #      reprice EOD đang chạy. Comment cũ ở đây khẳng định "giống nhau mọi lô cùng mã",
+    #      điều đã bị chính dữ liệu bác bỏ.
+    #   2. Kể cả khi mọi lô đồng giá, `marketPrice` VỐN không phải giá đóng cửa ATC —
+    #      `verify_account_snapshot.dnse_close_prices()` đã ghi rõ "không dùng" từ ca
+    #      2026-07-06. Cổng này công bố TỈ SUẤT cho nhà đầu tư nên phải dùng giá đóng cửa.
+    # Dùng `bq_close_prices` (KHÔNG phải `dnse_close_prices`): `asof` ở đây là ngày LỊCH SỬ,
+    # mà bản DNSE chỉ trả giá phiên hiện tại. BQ vốn đã là phụ thuộc cứng của cổng này
+    # (`dar.resolve_dividends` query `tav2_bq.corporate_action`) nên không thêm kiểu lỗi mới.
+    # `price_fn` chỉ để selfcheck chạy offline — production luôn dùng mặc định.
+    if price_fn is None:
+        from verify_account_snapshot import bq_close_prices
+        def price_fn(tks, d):
+            px, err = bq_close_prices(tks, d)
+            if px is None:
+                raise ValueError(f"không lấy được giá đóng cửa {d} từ BQ: {err} — CHẶN")
+            return px
+    prices = price_fn(sorted(agg), asof)
+
+    out = {}
+    for sym, (qty, cost_value) in agg.items():
+        px = prices.get(sym)
+        if not px:
+            # Fail-closed: thiếu giá 1 mã ⇒ chặn cả lượt, KHÔNG đoán và KHÔNG lặng lẽ bỏ mã
+            # (bỏ mã sẽ làm tỉ suất TỔNG công bố cho nhà đầu tư thiếu đúng mã đó).
+            raise ValueError(f"thiếu giá đóng cửa {sym} ngày {asof} — CHẶN (fail-closed)")
+        out[sym] = (qty, cost_value / qty, float(px))
     return out
 
 
 # ---------------------------------------------------------------- nguồn (2): cổ tức
-def entitled_gross(tickers, account_no: str, asof: str) -> dict:
-    """{mã: cổ tức GỘP đồng/cp mà CHÍNH tài khoản này được hưởng, ex-date ≤ asof}."""
+def entitled_gross(tickers, account_no: str, asof: str) -> tuple:
+    """({mã: cổ tức GỘP đồng/cp tài khoản này được hưởng, ex-date ≤ asof}, [lệch nguồn vendor]).
+
+    Phần tử thứ hai là danh sách sự kiện mà (a) TIỀN BROKER THẬT và nguồn vendor
+    `tav2_bq.corporate_action` cho hai số KHÁC nhau quá ngưỡng (`reason` = cash_mismatch /
+    stock_leg_ignored / unknown), HOẶC (b) BQ lỗi hạ tầng nên KHÔNG tra được vendor cho sự kiện đó
+    (`reason` = "lookup_failed", arch-review 2026-09-24 R1) — `dar` đã hạ cả hai loại về
+    `UNVERIFIED` (cash_per_share = 0) nên nếu chỉ trả về `out` thì mã đó lặng lẽ mất phần cổ tức
+    khỏi kỳ vọng mà KHÔNG ai biết. Trả kèm ra ngoài để cổng nói thành lời, không suy diễn từ sự
+    vắng mặt (§28).
+
+    Mỗi phần tử là 7-tuple `(ticker, ex_date, per_share, vendor_cash, reason, vendor_stock,
+    had_broker_cash)`. `had_broker_cash` (arch-review vòng 5, R1-A/R1-B) phân biệt "per_share LÀ
+    tiền broker thật" (nhánh mismatch LUÔN True — chỉ chạy trong `kind == CASH_CONFIRMED`; nhánh
+    lookup_failed đọc `a.lookup_failed_had_broker_cash`) khỏi "per_share chỉ là ƯỚC LƯỢNG tỉ số,
+    chưa từng là tiền broker" — quyết định CẢ câu chẩn đoán (§29) LẪN phạm vi CHẶN (§R1-B: chỉ
+    chặn khi lookup_failed thật sự làm MẤT một số đã từng công bố).
+    """
     start = (_dt.date.fromisoformat(asof) - _dt.timedelta(days=LOOKBACK_DAYS)).isoformat()
     adjs = dar.resolve_dividends(sorted(tickers), start, asof)
     qmap = dar.broker_qty(account_no)
-    out = {}
+    out, mismatches = {}, []
     for a in adjs:
-        if a.cash_per_share <= 0 or a.ex_date > asof:
+        if a.ex_date > asof:
             continue
         if dar._qty_at(qmap, a) <= 0:          # tài khoản này KHÔNG nắm giữ tại ngày chốt quyền
             continue
+        if a.vendor_check == "mismatch":
+            # Mã lý do đi kèm để tầng ngoài nói ĐÚNG nguyên nhân: "hai nguồn lệch SỐ" và "vendor
+            # khai thuần cổ phiếu mà solver giải ra tiền" dẫn tới hai việc điều tra KHÁC nhau,
+            # và ở ca thứ hai `vendor_cash = 0` nên nếu chỉ in hai con số thì người đọc hiểu là
+            # "vendor không có dữ liệu" — trái hẳn sự thật (§29).
+            # Fail-closed về "unknown" khi thiếu/rỗng — KHÔNG đoán "cash_mismatch" (arch-review D1b,
+            # R2). `dar` LUÔN set field này ở cả hai nhánh dựng `mismatch` nên đường này không nên
+            # tới trong sản xuất bình thường; nhưng nếu một `Adjustment` nào đó (caller cũ/hỏng)
+            # không set, đoán mò tên lý do sẽ dẫn Winston điều tra sai hướng ngay dòng đầu — đúng
+            # lớp lỗi §29 mà chính sách vendor-mismatch này sinh ra để chặn.
+            # `had_broker_cash=True` cố định: nhánh này CHỈ chạy bên trong `if adj.kind ==
+            # "CASH_CONFIRMED"` ở dividend_adjusted_return.py (xem docstring hàm này) — `per_share`
+            # LUÔN là tiền broker thật ở đây, không phải ước lượng.
+            mismatches.append((a.ticker, a.ex_date, a.per_share, a.vendor_cash,
+                               getattr(a, "vendor_mismatch_reason", "") or "unknown",
+                               a.vendor_stock, True))
+            continue
+        if a.vendor_check == "lookup_failed":
+            # BQ lỗi hạ tầng KHÔNG tra được vendor cho sự kiện NÀY (arch-review 2026-09-24, R1) —
+            # KHÁC `unavailable` (vendor XÁC NHẬN 0 dòng). `dar` đã hạ `kind` về UNVERIFIED khi sự
+            # kiện từng CASH_CONFIRMED nên `cash_per_share` = 0 ở đây; nếu chỉ rơi xuống nhánh
+            # `continue` dưới như trước bản vá này thì cổ tức lặng lẽ biến mất khỏi kỳ vọng mà
+            # KHÔNG ai nói ra — dùng lại đúng cơ chế "báo tầng ngoài" của nhánh mismatch, reason
+            # cố định "lookup_failed" (không đọc `vendor_mismatch_reason` — trường đó chỉ có ý
+            # nghĩa cho nhánh mismatch).
+            # `had_broker_cash` = provenance THẬT của `dar` (R1-A) — KHÔNG cố định True/False ở
+            # đây: sự kiện có thể chưa bao giờ là CASH_CONFIRMED (per_share chỉ là ước lượng tỉ
+            # số), auto-gán True sẽ tái tạo đúng lớp lỗi mà field này sinh ra để chặn.
+            mismatches.append((a.ticker, a.ex_date, a.per_share, 0.0, "lookup_failed", 0.0,
+                               a.lookup_failed_had_broker_cash))
+            continue
+        if a.cash_per_share <= 0:
+            continue
         out[a.ticker] = out.get(a.ticker, 0.0) + a.cash_per_share
-    return out
+    return out, mismatches
 
 
 def expected_pct(qty: float, cost_price: float, market: float, gross_ps: float,
@@ -250,6 +367,33 @@ def excluded_tickers(label: str) -> set:
     except Exception as exc:                       # thiếu secrets/config → không suy diễn
         print(f"⚠️  không đọc được excluded_tickers của {label} ({exc}) — coi như rỗng", file=sys.stderr)
     return set()
+
+
+def _all_account_labels() -> set:
+    """Nhãn của MỌI account BROKER DNSE trong `trading_bot_accounts.json`, KỂ CẢ disabled.
+
+    Dùng để phân biệt hai ca mà nhánh "không nhận ra tài khoản nào" của `main()` trước đây gộp
+    làm một: (a) báo cáo thật sự không thuộc account nào (vd "New deals") ⇒ cho qua; (b) tên file
+    nhắc một account CÓ THẬT mà `dar.ACCOUNTS` không thấy vì config lệch ⇒ phải chặn.
+
+    CHỈ lấy profile broker DNSE — đúng population mà `dar.ACCOUNTS` rút từ. Lọc này KHÔNG phải
+    cho gọn: sổ paper có nhãn `main`, `ab_dip`, `ab_cross`; `"main" in <tên file>` khớp bừa vào
+    hàng loạt tên file vô can và biến cổng thành chặn oan. Đọc không được ⇒ trả rỗng (main() giữ
+    hành vi cũ, không tự bịa ra chặn).
+    """
+    try:
+        sys.path.insert(0, "/home/trido/thanhdt/WorkingClaude")
+        from trading_bot import config as _cfg
+        # PHẢI dùng ĐÚNG biểu thức broker của `live_dnse_labels()` (config.py:371):
+        # `(p.get("broker") or p["cfg"].get("broker") or "phs")`. Hai population này bắt buộc
+        # trùng nhau — lệch một chút là account khai broker CHỈ ở `cfg` sẽ vắng ở đây và cổng ÂM
+        # THẦM trở lại fail-open đúng cho account đó. Hôm nay hai bên cho cùng kết quả
+        # {RocketX, SpaceX, ZaloPay} nên lệch là LATENT, không phải vô hại.
+        return {p["label"] for p in _cfg.load_accounts(_cfg.load_config())
+                if p.get("label")
+                and str(p.get("broker") or p["cfg"].get("broker") or "phs").lower() == "dnse"}
+    except Exception:                                          # noqa: BLE001
+        return set()
 
 
 def accounts_asof_from_name(path: str) -> tuple:
@@ -385,6 +529,16 @@ def paper_entry_gate(report_path: str, out=sys.stdout) -> tuple:
 
 # ---------------------------------------------------------------- cổng
 def run_gate(report_path: str, tol_pp: float = DEFAULT_TOL_PP, out=sys.stdout) -> int:
+    # Content-completeness TRƯỚC MỌI THỨ: một báo cáo còn "[TBD" không có tỉ suất nào để kiểm
+    # (đó chính là cách nó lọt PASS trong rỗng ở vụ tháng 08), nên phải chặn ở đây trước khi
+    # chân broker/paper thậm chí bắt đầu chạy.
+    incomplete = find_incomplete_markers(report_path)
+    if incomplete:
+        print(f"\n❌ CHẶN — {len(incomplete)} chỗ còn nội dung CHƯA ĐIỀN trong báo cáo:", file=out)
+        for ln, snippet in incomplete:
+            print(f"   • dòng {ln}: {snippet[:160]}", file=out)
+        return 1
+
     # chân sổ paper chạy TRƯỚC và độc lập với chân broker: báo cáo "New deals" mang mục paper
     # nhưng không mang nhãn tài khoản nào, nên nhánh thoát sớm dưới đây sẽ bỏ qua nó.
     paper_applied, paper_fails = paper_entry_gate(report_path, out=out)
@@ -400,6 +554,23 @@ def run_gate(report_path: str, tol_pp: float = DEFAULT_TOL_PP, out=sys.stdout) -
             print("\n✅ PASS — chân sổ paper khớp corporate_action (chân broker không áp dụng: "
                   "tên file không mang nhãn tài khoản nào).", file=out)
             return 0
+        # FAIL-CLOSED khi tên file CÓ nhắc một account mà `dar.ACCOUNTS` lại KHÔNG có
+        # (arch-review 2026-09-27). `accounts_asof_from_name()` suy nhãn bằng `dar.ACCOUNTS`,
+        # và từ 2026-09-27 `ACCOUNTS` đọc `trading_bot_accounts.json` thay vì hardcode ⇒ một
+        # config lệch (`enabled=false`, `mode` đổi, thiếu `account_id`) làm nhãn BIẾN MẤT, nhánh
+        # này trả 0 và cổng tỉ suất của báo cáo gửi nhà đầu tư TẮT ÂM THẦM. So với danh sách
+        # TOÀN BỘ account (kể cả disabled) để phân biệt "báo cáo không thuộc account nào" (đúng,
+        # cho qua) với "account có thật mà cổng không nhìn thấy" (phải chặn).
+        _known = _all_account_labels()
+        _named = sorted(lb for lb in _known if lb in os.path.basename(report_path))
+        if _named:
+            print(f"\n❌ CHẶN — tên file nhắc tài khoản {_named} nhưng "
+                  f"`dividend_adjusted_return.ACCOUNTS` (đọc trading_bot_accounts.json) chỉ có "
+                  f"{sorted(dar.ACCOUNTS)} ⇒ cổng tỉ suất KHÔNG kiểm được báo cáo này. Đây là "
+                  f"lệch CONFIG, không phải báo cáo sai: kiểm `enabled`/`mode`/`account_id` của "
+                  f"{_named}. KHÔNG cho qua im lặng (§6 mục 5 — email fail-closed theo cổng này).",
+                  file=out)
+            return 1
         print(f"⚠️  {os.path.basename(report_path)}: không nhận ra tài khoản nào trong tên file "
               f"→ cổng KHÔNG áp dụng (không chặn).", file=out)
         return 0
@@ -408,13 +579,15 @@ def run_gate(report_path: str, tol_pp: float = DEFAULT_TOL_PP, out=sys.stdout) -
           f"tài khoản {', '.join(labels)} | dung sai {tol_pp:.2f}pp", file=out)
 
     expected, ambiguous, agg, skipped = {}, set(), {}, set()
+    vendor_mismatch = []     # (nhãn TK, mã, ex-date, đồng/cp broker, đồng/cp vendor)
     for lb in labels:
         acct = dar.ACCOUNTS[lb]
         pos = broker_positions(acct, asof)
         excl = excluded_tickers(lb)
         skipped |= {f"{t} ({lb})" for t in pos if t in excl}
         pos = {t: v for t, v in pos.items() if t not in excl}
-        gross = entitled_gross(pos.keys(), acct, asof)
+        gross, mism = entitled_gross(pos.keys(), acct, asof)
+        vendor_mismatch.extend((lb,) + m for m in mism)
         tot_pl = tot_cost = 0.0
         for tk, (qty, cp, mkt) in pos.items():
             pct, pl, raw = expected_pct(qty, cp, mkt, gross.get(tk, 0.0))
@@ -427,11 +600,22 @@ def run_gate(report_path: str, tol_pp: float = DEFAULT_TOL_PP, out=sys.stdout) -
         agg[lb] = (tot_pl, tot_cost, tot_pl / tot_cost * 100.0 if tot_cost else 0.0)
 
     fails, checked, unmatched = list(paper_fails), 0, 0
+    fails_no_div = []   # mã lệch mà cổ tức = 0 ⇒ nguyên nhân KHÔNG phải thiếu cổ tức
+    # §corp-action (job Taylor_20260924_064510, Việc 4) — mã CÒN GIỮ (có mặt trong `expected`
+    # dưới KL khác) mà lệch KL không phải "lệnh đã thực hiện/ngoài phạm vi" như mọi unmatched
+    # khác: có thể là vị thế ĐANG GIỮ bị lệch KL do corp-action credit sớm giữa lúc báo cáo
+    # soạn và lúc cổng chạy. Tách riêng để KHÔNG khẳng định nguyên nhân khi chưa xác nhận (§29).
+    unmatched_held_qty_mismatch = []
+    expected_tickers = {t for t, _q in expected}
     print(f"\n{'ma':5}{'KL':>7}{'TK':>9}{'% cong bo':>11}{'% ky vong':>11}{'lech pp':>9}"
           f"{'co tuc GOP':>11}  ket qua", file=out)
     for tk, qty, pct in rows:
         key = (tk, qty)
         if key not in expected:
+            if tk in expected_tickers:
+                held_qtys = sorted(q for (t2, q) in expected if t2 == tk)
+                unmatched_held_qty_mismatch.append((tk, qty, pct, held_qtys))
+                continue
             unmatched += 1
             continue
         if key in ambiguous:
@@ -445,6 +629,9 @@ def run_gate(report_path: str, tol_pp: float = DEFAULT_TOL_PP, out=sys.stdout) -
         if not ok:
             fails.append(f"{tk} ({lb}, KL={qty:.0f}): báo cáo {pct:+.2f}% vs kỳ vọng {exp:+.2f}% "
                          f"(lệch {diff:+.2f}pp; cổ tức GỘP {g:,.0f}đ/cp)")
+            # Ghi lại mã nào lệch mà KHÔNG có cổ tức — quyết định câu gợi ý sửa ở cuối.
+            if g <= 0:
+                fails_no_div.append(tk)
         print(f"{tk:5}{qty:>7.0f}{lb:>9}{pct:>11.2f}{exp:>11.2f}{diff:>9.2f}{g:>11,.0f}"
               f"  {'OK' if ok else 'LỆCH'}", file=out)
 
@@ -469,6 +656,9 @@ def run_gate(report_path: str, tol_pp: float = DEFAULT_TOL_PP, out=sys.stdout) -
         shown = " / ".join(f"{p:+.2f}%" for p in pcts)
         fails.append(f"{tk} (văn xuôi, dòng {ln}): báo cáo {shown} không khớp tài khoản nào — "
                      "kỳ vọng " + ", ".join(f"{lb} {e:+.2f}%" for lb, e in cands))
+        if all(expected.get((tk, q), (None, None, None, None, None, 0))[5] <= 0
+               for (t2, q) in expected if t2 == tk):
+            fails_no_div.append(tk)
 
     # ---- TỔNG kỳ vọng của từng tài khoản: cổng KHÔNG tự dò dòng tổng trong văn bản (quá mong
     # manh), nhưng in ra để người soạn đối chiếu tay — không phủ thì phải nói ra, không im lặng.
@@ -488,15 +678,176 @@ def run_gate(report_path: str, tol_pp: float = DEFAULT_TOL_PP, out=sys.stdout) -
     print(f"\nĐã kiểm {checked} dòng bảng + {prose_checked} tỉ suất trong văn xuôi; {unmatched} dòng "
           f"KHÔNG khớp sổ vị thế broker (bảng lãi/lỗ ĐÃ THỰC HIỆN / phân bổ — NGOÀI phạm vi cổng "
           f"này, xem docstring).", file=out)
+    if unmatched_held_qty_mismatch:
+        print(f"\n⚠️  {len(unmatched_held_qty_mismatch)} dòng CÒN GIỮ mã đó trên sổ broker nhưng KL "
+              f"báo cáo KHÔNG khớp KL đang giữ — KHÔNG được tính vào '{unmatched} dòng ngoài phạm "
+              f"vi' phía trên (đó là suy luận cho lệnh ĐÃ THỰC HIỆN, ca này vẫn ĐANG GIỮ). Nghi "
+              f"corp-action credit sớm giữa lúc soạn báo cáo và lúc cổng chạy — CHƯA xác nhận, "
+              f"kiểm tay trước khi kết luận nguyên nhân (§29):", file=out)
+        for tk, qty, pct, held_qtys in unmatched_held_qty_mismatch:
+            print(f"   • {tk}: báo cáo KL={qty:.0f} ({pct:+.2f}%), broker đang giữ KL="
+                  f"{'/'.join(f'{q:.0f}' for q in held_qtys)}", file=out)
     if nocover:
         print(f"ℹ️  {len(nocover)} vị thế CÓ cổ tức nhưng báo cáo không công bố tỉ suất riêng "
               f"(không chặn — không công bố thì không sai được): {', '.join(nocover)}", file=out)
+    # ---- LỆCH NGUỒN VENDOR: luôn NÓI RA (không im lặng), chặn khi mã đó đang được CÔNG BỐ.
+    # Cảnh báo phải tới người đọc kể cả khi báo cáo PASS — nếu chỉ chặn thì một báo cáo không
+    # công bố tỉ suất mã đó sẽ đi qua mà không ai biết nguồn vendor đang lệch.
+    vendor_fails = []
+    vendor_fail_reasons = set()   # mã lý do của các sự kiện THẬT SỰ bị chặn (R1-C: khác reasons_present)
+    reasons_present = set()
+    if vendor_mismatch:
+        published = {tk for tk, _q, _p in rows} | prose_tk
+        print("\n⚠️  LỆCH NGUỒN VENDOR — tiền broker thật ≠ `tav2_bq.corporate_action`:", file=out)
+        for lb, tk, ex, broker_ps, vendor_ps, reason, vendor_stock, had_broker_cash in \
+                sorted(vendor_mismatch):
+            reasons_present.add(reason)
+            if reason == "lookup_failed":
+                # KHÁC HẲN 3 nhánh dưới: đây KHÔNG PHẢI hai nguồn bất đồng số, mà là "chưa tra
+                # được nguồn thứ hai" (BQ lỗi hạ tầng). `vendor_ps=0.0` ở đây là SENTINEL "chưa
+                # biết", không phải "vendor xác nhận 0đ" (đó là nhãn `unavailable` KHÁC) — in lẫn
+                # vào cặp số VENDOR_MISMATCH_ALERT sẽ tái tạo đúng lớp lỗi §29 mà nhãn
+                # `lookup_failed` sinh ra để chặn (arch-review 2026-09-24 vòng 4, R1). Vì vậy dòng
+                # MÁY ĐỌC riêng `VENDOR_LOOKUP_FAILED` (7 trường) thay vì tái dùng
+                # VENDOR_MISMATCH_ALERT/REASON.
+                # `had_broker_cash` (R1-A): `broker_ps` chỉ LÀ tiền broker thật khi sự kiện TỪNG
+                # là CASH_CONFIRMED trước khi lookup thất bại — nếu không, nó chỉ là ƯỚC LƯỢNG tỉ
+                # số từ giá rơi (tầng 1) và nói "broker đã giải" là khẳng định KHÔNG có bằng chứng
+                # (đúng lớp lỗi D1 mà chính sách vendor-mismatch sinh ra để đóng, chỉ đảo vai).
+                if had_broker_cash:
+                    money_txt = (f"broker đã giải {broker_ps:,.0f}đ/cp nhưng chưa đối soát chéo "
+                                 f"được")
+                else:
+                    money_txt = (f"broker CHƯA giải được số nào (ước lượng từ giá rơi "
+                                 f"{broker_ps:,.0f}đ/cp, KHÔNG phải tiền broker thật)")
+                line = (f"{tk} ({lb}, ex {ex}): KHÔNG TRA ĐƯỢC nguồn vendor "
+                        f"`tav2_bq.corporate_action` (lỗi hạ tầng BQ, KHÔNG phải vendor xác nhận "
+                        f"0 sự kiện) — {money_txt}, thử lại khi BQ khoẻ")
+                print(f"   • {line}", file=out)
+                # R1-B: chỉ CHẶN khi lookup_failed THẬT SỰ làm mất một số đã từng công bố
+                # (had_broker_cash=True). Khi False, `cash_per_share` đã là 0 TRƯỚC lookup thất
+                # bại (event chưa bao giờ CASH_CONFIRMED) nên không con số công bố nào bị mất —
+                # đo K1 2026-09-24: 56/62 sự kiện 6 tháng rơi vào nhóm này (gồm 3 ca nhiễu giá rơi
+                # ~100-300đ: SCL/DRI/TV1), chặn TRỌN báo cáo vì chúng là quá tay so với bằng chứng.
+                if had_broker_cash and tk in published:
+                    vendor_fails.append(line)
+                    vendor_fail_reasons.add(reason)
+                # Trường cuối là "đang công bố" THÔ (giống hệt cách nhánh ALERT dưới in nó) —
+                # KHÔNG gán sẵn quyết định CHẶN vào đây: shell tự tính blocked = hadcash AND
+                # published, cùng công thức với Python ở trên, để câu "báo cáo vẫn gửi (không
+                # công bố tỉ suất mã này)" chỉ in đúng lúc mã đó THẬT SỰ không được công bố —
+                # gán sẵn sẽ làm câu đó SAI cho ca "có công bố nhưng had_broker_cash=False".
+                print(f"VENDOR_LOOKUP_FAILED|{lb}|{tk}|{ex}|{broker_ps:.0f}|"
+                      f"{1 if had_broker_cash else 0}|{1 if tk in published else 0}", file=out)
+                continue
+            # Câu chẩn đoán rẽ theo MÃ LÝ DO mà `dar` đã tính, không phát một câu cố định (§29).
+            # BA nhánh, không phải hai — mã lý do thiếu/lạ (fail-closed "unknown", xem `mismatches`
+            # ở entitled_gross) KHÔNG được rơi vào nhánh `else` cũ và bị gán nhầm thành câu
+            # "cash_mismatch": im lặng đoán mò đúng lúc bằng chứng nói "không biết vì sao".
+            if reason == "stock_leg_ignored":
+                line = (f"{tk} ({lb}, ex {ex}): vendor khai THUẦN CỔ PHIẾU (ISS tỉ lệ "
+                        f"{vendor_stock:.4f}, không có chân tiền) nhưng solver giải ra "
+                        f"{broker_ps:,.0f}đ/cp TIỀN MẶT mà chưa biết chân cổ phiếu "
+                        f"(share_multiplier=1,0) — nghi giá rơi chia tách bị đọc thành cổ tức")
+            elif reason == "cash_mismatch":
+                lech = (abs(vendor_ps - broker_ps) / broker_ps * 100.0 if broker_ps > 0
+                        else float("inf"))
+                line = (f"{tk} ({lb}, ex {ex}): broker giải {broker_ps:,.0f}đ/cp vs vendor "
+                        f"{vendor_ps:,.0f}đ/cp — lệch {lech:.1f}%")
+            else:
+                line = (f"{tk} ({lb}, ex {ex}): LỆCH NGUỒN cổ tức nhưng KHÔNG xác định được mã lý "
+                        f"do (broker {broker_ps:,.0f}đ/cp vs vendor {vendor_ps:,.0f}đ/cp) — kiểm "
+                        f"thủ công, KHÔNG suy đoán nguyên nhân (§29)")
+            print(f"   • {line}", file=out)
+            if tk in published:
+                vendor_fails.append(line)
+                vendor_fail_reasons.add(reason)
+            # Dòng MÁY ĐỌC cạnh dòng người đọc: stdout của cổng này chảy vào stdout của
+            # `report_delivery_gate.py` (subprocess kế thừa fd) rồi vào LOG của cron — nên nếu
+            # không có gì để shell caller bám vào thì cảnh báo chết trong log, KHÔNG tới user.
+            # `bin/vendor_mismatch_alert.sh` parse đúng dòng này (giá trị đã chuẩn hoá, KHÔNG
+            # grep câu văn xuôi — §28) và bắn Discord/bus. Cố ý in cho CẢ ca không công bố
+            # (rc=0): đó chính là ca mà cổng KHÔNG chặn nên không kênh nào khác kêu.
+            print(f"VENDOR_MISMATCH_ALERT|{lb}|{tk}|{ex}|{broker_ps:.0f}|{vendor_ps:.0f}|"
+                  f"{1 if tk in published else 0}", file=out)
+            # MÃ LÝ DO đi ở dòng TAG RIÊNG, KHÔNG thêm trường thứ 8 vào dòng trên. Lý do rất cụ
+            # thể: `bin/vendor_mismatch_alert.sh` đọc dòng `ALERT` bằng
+            # `while IFS='|' read -r _tag acct tk ex broker vendor published` — `read` gộp MỌI
+            # trường dư vào biến CUỐI, nên một trường thứ 8 sẽ biến `published` thành
+            # `"1|stock_leg_ignored"`, `[ "$published" = "1" ]` FAIL, và cảnh báo nói "báo cáo vẫn
+            # gửi" đúng lúc báo cáo đang bị CHẶN. Tag riêng ⇒ reader cũ bỏ qua (grep của nó neo
+            # `^VENDOR_MISMATCH_ALERT\|`), reader mới đọc thêm được. Hợp đồng cũ giữ NGUYÊN BYTE.
+            print(f"VENDOR_MISMATCH_REASON|{lb}|{tk}|{ex}|{reason}|{vendor_stock:.4f}", file=out)
+        print("   → sự kiện đã bị HẠ VỀ UNVERIFIED: cổ tức của nó KHÔNG vào kỳ vọng và KHÔNG được "
+              "công bố (§21).", file=out)
+        # "VIỆC CẦN LÀM" rẽ theo mã lý do THỰC SỰ có mặt — một báo cáo có thể gộp cả hai (hoặc cả
+        # ba) loại cùng lúc, và "đối soát để hai nguồn khớp lại" chỉ đúng cho cash_mismatch; áp nó
+        # cho stock_leg_ignored/unknown là chỉ sai hướng người xử lý (§29, cùng lớp lỗi với R1).
+        if "cash_mismatch" in reasons_present:
+            print("   → VIỆC CẦN LÀM (bất đồng số cổ tức): Winston (data-ops) đối soát "
+                  "`tav2_bq.corporate_action` với sổ broker cho đúng (mã, ex-date) trên; chỉ khi "
+                  "hai nguồn khớp lại thì tỉ suất mã đó mới được công bố.", file=out)
+        if "stock_leg_ignored" in reasons_present:
+            print("   → VIỆC CẦN LÀM (nghi giá rơi chia tách bị đọc thành cổ tức): Winston xác "
+                  "nhận lại sự kiện CỔ PHIẾU (ISS) với vendor — vì sao chân cổ phiếu chưa được "
+                  "credit vào vị thế; KHÔNG PHẢI đối soát số tiền (vendor không khai chân tiền nào "
+                  "cho sự kiện này).", file=out)
+        if "lookup_failed" in reasons_present:
+            print("   → VIỆC CẦN LÀM (hạ tầng tra vendor thất bại, KHÔNG PHẢI bất đồng số liệu): "
+                  "chạy lại `report_return_gate.py` cho báo cáo này SAU KHI BQ khoẻ; KHÔNG cần "
+                  "Winston đối soát số hay xác nhận sự kiện trừ khi lỗi lặp lại nhiều lượt liên "
+                  "tiếp.", file=out)
+        if reasons_present - {"cash_mismatch", "stock_leg_ignored", "lookup_failed"}:
+            print("   → VIỆC CẦN LÀM (mã lý do không xác định): kiểm thủ công (mã lý do bị "
+                  "thiếu/rỗng ở nguồn) — KHÔNG suy đoán nguyên nhân.", file=out)
+    if vendor_fails:
+        print(f"\n❌ CHẶN — {len(vendor_fails)} mã đang CÔNG BỐ tỉ suất nhưng có sự kiện cổ tức "
+              f"lệch nguồn (UNVERIFIED):", file=out)
+        for v in vendor_fails:
+            print(f"   • {v}", file=out)
+        # R1-C: câu "hai nguồn độc lập đang bất đồng" chỉ ĐÚNG khi lý do chặn thật là
+        # cash_mismatch/stock_leg_ignored/unknown (hai nguồn CÙNG có số để so). Ca THUẦN
+        # lookup_failed KHÔNG có nguồn thứ hai nào để "bất đồng" — chỉ CHƯA TRA ĐƯỢC. In câu này
+        # vô điều kiện (như bản trước arch-review vòng 5) tự mâu thuẫn với chính dòng lookup_failed
+        # ngay phía trên nó (§29).
+        if vendor_fail_reasons - {"lookup_failed"}:
+            print("   Nguyên nhân KHÔNG phải sai cơ sở giá cũng KHÔNG phải quên cộng cổ tức: hai "
+                  "nguồn độc lập đang bất đồng về SỐ cổ tức.", file=out)
+            print("   Gỡ chặn = Winston xác minh xong nguồn vendor, KHÔNG phải nới dung sai cổng.",
+                  file=out)
+        if "lookup_failed" in vendor_fail_reasons:
+            print("   (các mã lookup_failed ở trên: KHÔNG PHẢI hai nguồn bất đồng — BQ lỗi hạ "
+                  "tầng chưa tra được nguồn thứ hai. Gỡ chặn = chạy lại khi BQ khoẻ, KHÔNG cần "
+                  "Winston đối soát số.)", file=out)
     if fails:
         print(f"\n❌ CHẶN — {len(fails)} vấn đề:", file=out)
         for f_ in fails:
             print(f"   • {f_}", file=out)
-        print("\n   Sửa: chạy `mike/bin/dividend_adjusted_return.py --resolve <rổ mã> --from … --to …`,"
-              "\n   cộng cổ tức RÒNG vào TỬ SỐ (giữ giá vốn THÔ ở mẫu số) — coding_guidelines §21.", file=out)
+        # Gợi ý sửa phải theo ĐÚNG nguyên nhân của chính những mã đang lệch, không phát một
+        # câu cố định. Mã lệch mà cổ tức = 0đ/cp thì KHÔNG THỂ là "thiếu cộng cổ tức" — ca
+        # thật SCL 2026-08 (+17,00% vs +17,85%, cổ tức 0đ): nguyên nhân là CƠ SỞ GIÁ, báo cáo
+        # dựng trên `marketPrice` thay vì giá đóng cửa. Câu gợi ý cũ chỉ vào cổ tức sẽ đẩy
+        # người sửa đi sai hướng ngay dòng đầu (§29).
+        # Loại mã ĐANG có sự kiện lệch nguồn/lookup_failed khỏi câu "sai cơ sở giá" — cổ tức của
+        # NÓ = 0 vì bị hạ UNVERIFIED (vendor bất đồng hoặc chưa tra được), KHÔNG PHẢI vì thật sự
+        # không có cổ tức; nguyên nhân đúng đã in ở khối LỆCH NGUỒN VENDOR trên, in thêm câu "sai
+        # cơ sở giá" ở đây cho ĐÚNG mã đó là chẩn đoán SAI chồng lên chẩn đoán ĐÚNG (§29, arch-review
+        # 2026-09-24 vòng 4 R1(b)).
+        vendor_mismatch_tks = {tk for _lb, tk, *_r in vendor_mismatch}
+        fails_no_div_shown = sorted(set(fails_no_div) - vendor_mismatch_tks)
+        if fails_no_div_shown:
+            print(f"\n   Trong đó {', '.join(fails_no_div_shown)} KHÔNG có cổ tức ⇒ lệch "
+                  f"KHÔNG phải do thiếu cộng cổ tức. Gần như chắc chắn sai CƠ SỞ GIÁ: dùng "
+                  f"`mtm_price` trong `data/execution_logs/verified_snapshot_<acct>_<asof>.json` "
+                  f"(giá đóng cửa đã xác minh), KHÔNG dùng `positions[].marketPrice` — field đó "
+                  f"không phải giá ATC.", file=out)
+        if any(tk not in set(fails_no_div) for tk in [f_.split()[0] for f_ in fails]):
+            print("\n   Với mã CÓ cổ tức: chạy `mike/bin/dividend_adjusted_return.py --resolve "
+                  "<rổ mã> --from … --to …`,"
+                  "\n   cộng cổ tức RÒNG vào TỬ SỐ (giữ giá vốn THÔ ở mẫu số) — coding_guidelines §21.",
+                  file=out)
+        return 1
+    if vendor_fails:
         return 1
     print("\n✅ PASS — mọi tỉ suất vị thế đang giữ đã khớp kỳ vọng dựng từ sổ broker + cổ tức đã xác minh.",
           file=out)
@@ -608,6 +959,74 @@ def _selfcheck() -> int:
         check("thiếu dnse_raw ⇒ fail-closed", "không ném lỗi", "FileNotFoundError")
     except FileNotFoundError:
         check("thiếu dnse_raw ⇒ fail-closed", True, True)
+
+    # 16b: NHIỀU LÔ cùng mã (khác loanPackageId) ⇒ GỘP qty + bình quân gia quyền cost, không
+    # ghi đè mất lô đứng trước (bug thật 2026-09-02, ZaloPay 08-31: BID/MBB/VCB mỗi mã 2 lô).
+    _fake_asof = "9999-01-01"
+    _fake_path = os.path.join(EXEC_DIR, f"dnse_raw_{_fake_asof}.jsonl")
+    with open(_fake_path, "w", encoding="utf-8") as fh:
+        fh.write(json.dumps({
+            "account_no": "0009999999", "kind": "positions",
+            "payload": {"positions": [
+                {"accountNo": "0009999999", "symbol": "XYZ", "marketType": "STOCK",
+                 "openQuantity": 100, "costPrice": 10000.0, "marketPrice": 12000.0,
+                 "loanPackageId": 1},
+                {"accountNo": "0009999999", "symbol": "XYZ", "marketType": "STOCK",
+                 "openQuantity": 300, "costPrice": 11000.0, "marketPrice": 12000.0,
+                 "loanPackageId": 2},
+            ]},
+        }, ensure_ascii=False) + "\n")
+    try:
+        pos = broker_positions("0009999999", _fake_asof,
+                               price_fn=lambda tks, d: {"XYZ": 12000.0})
+        qty, cost, mp = pos["XYZ"]
+        # tổng qty = 100+300=400; cost bình quân = (100*10000+300*11000)/400 = 10750
+        check("multi-lot: gộp tổng qty (100+300, không mất lô đầu)", qty, 400.0)
+        check("multi-lot: cost bình quân gia quyền đúng", round(cost, 4), 10750.0)
+        check("multi-lot: giá lấy từ nguồn giá đóng cửa, không từ lô", mp, 12000.0)
+    finally:
+        os.unlink(_fake_path)
+
+    # 16c: LÔ LỆCH GIÁ THẬT — fixture lấy nguyên từ ZaloPay 2026-08-14T19:10:23 (BID 107cp
+    # @35.800 gói 1826 / 300cp @38.850 gói 1258, lệch 8,5% trong CÙNG một bản đọc; nguyên nhân
+    # là replica đọc-sau-ghi của DNSE trong lúc batch reprice EOD chạy).
+    # Bản CŨ `agg.setdefault(sym, [0,0,mp])` lấy giá lô ĐẦU (35.800) rồi áp cho TỔNG 407cp.
+    # Bản mới KHÔNG đọc marketPrice nữa ⇒ lô lệch giá không còn ảnh hưởng kết quả. Đây là ca
+    # mà fixture cũ (2 lô CÙNG giá 12.000) không bao giờ chạm tới được.
+    _fake_asof2 = "9999-01-02"
+    _fake_path2 = os.path.join(EXEC_DIR, f"dnse_raw_{_fake_asof2}.jsonl")
+    with open(_fake_path2, "w", encoding="utf-8") as fh:
+        fh.write(json.dumps({
+            "account_no": "0009999999", "kind": "positions",
+            "payload": {"positions": [
+                {"accountNo": "0009999999", "symbol": "BID", "marketType": "STOCK",
+                 "openQuantity": 107, "costPrice": 30000.0, "marketPrice": 35800.0,
+                 "loanPackageId": 1826},
+                {"accountNo": "0009999999", "symbol": "BID", "marketType": "STOCK",
+                 "openQuantity": 300, "costPrice": 30000.0, "marketPrice": 38850.0,
+                 "loanPackageId": 1258},
+            ]},
+        }, ensure_ascii=False) + "\n")
+    try:
+        pos2 = broker_positions("0009999999", _fake_asof2,
+                                price_fn=lambda tks, d: {"BID": 35800.0})
+        q2, c2, mp2 = pos2["BID"]
+        check("lô lệch giá: vẫn gộp đủ khối lượng (107+300)", q2, 407.0)
+        check("lô lệch giá: KHÔNG lấy giá từ lô nào cả — dùng giá đóng cửa", mp2, 35800.0)
+        # Chứng minh ngược: nếu nguồn giá trả số khác, kết quả PHẢI đi theo nguồn giá,
+        # không bị lô 35.800/38.850 kéo về.
+        pos3 = broker_positions("0009999999", _fake_asof2,
+                                price_fn=lambda tks, d: {"BID": 36500.0})
+        check("lô lệch giá: đổi nguồn giá thì kết quả đổi theo (không dính giá lô)",
+              pos3["BID"][2], 36500.0)
+        # Thiếu giá 1 mã ⇒ CHẶN, không đoán và không lặng lẽ bỏ mã.
+        try:
+            broker_positions("0009999999", _fake_asof2, price_fn=lambda tks, d: {})
+            check("lô lệch giá: thiếu giá ⇒ phải CHẶN", "không raise", "raise ValueError")
+        except ValueError:
+            check("lô lệch giá: thiếu giá ⇒ CHẶN (fail-closed)", True, True)
+    finally:
+        os.unlink(_fake_path2)
 
     # 17-24: chân SỔ PAPER (T1). Logic thuần, chạy offline — không chạm BQ, không chạm cache.
     class _A:                                   # thế thân AdjustedEntry, chỉ các trường T1 đọc
@@ -764,6 +1183,464 @@ def _selfcheck() -> int:
     crash_msg = notify_calls[0][1] if notify_calls else ""
     check("nhánh CRASH: nội dung alert đúng loại 'crash' (không lẫn 'blocked')",
           ("TỰ CRASH" in crash_msg) and ("BLOCKED by return gate" not in crash_msg), True)
+
+    # 30-32: content-completeness gate (thêm 2026-09-02, vụ báo cáo tháng 08 giao template dở).
+    # Ca 1: có marker TBD ⇒ CHẶN, kể cả khi tên file không mang nhãn tài khoản nào (accounts_
+    # asof_from_name() sẽ ném ValueError cho "SpaceX_ZaloPay_monthly_report_2026-08.md" là bình
+    # thường — completeness phải chặn TRƯỚC bước đó nên không phụ thuộc suy luận tên file).
+    with tempfile.NamedTemporaryFile("w", suffix="_monthly_report_2026-08.md", delete=False,
+                                      encoding="utf-8") as fh:
+        fh.write("## 1. TÓM TẮT ĐIỀU HÀNH\n\n| NAV | *[TBD]* |\n\n## 5. Vĩ mô\nĐã điền đầy đủ.\n")
+        p_tbd = fh.name
+    rc_tbd = run_gate(p_tbd, out=open(os.devnull, "w"))
+    check("content-gate: còn marker TBD ⇒ run_gate() CHẶN (rc=1)", rc_tbd, 1)
+    hits = find_incomplete_markers(p_tbd)
+    check("content-gate: báo đúng dòng chứa marker", [h[0] for h in hits], [3])
+    os.unlink(p_tbd)
+
+    # Ca 2: đầy đủ, không marker nào ⇒ im lặng hoàn toàn ở bước completeness (không tự tạo báo
+    # động giả) — dùng file không mang nhãn tài khoản để không phụ thuộc dnse_raw/BQ thật.
+    with tempfile.NamedTemporaryFile("w", suffix="_report_2026-08-13.md", delete=False,
+                                      encoding="utf-8") as fh:
+        fh.write("## 1. Đã điền đầy đủ\n\nKhông còn chỗ nào bỏ trống.\n")
+        p_full = fh.name
+    check("content-gate: đầy đủ ⇒ find_incomplete_markers() rỗng",
+          find_incomplete_markers(p_full), [])
+    rc_full = run_gate(p_full, out=open(os.devnull, "w"))
+    check("content-gate: đầy đủ + không tài khoản nào trong tên ⇒ run_gate() PASS (rc=0)",
+          rc_full, 0)
+    os.unlink(p_full)
+
+    # Ca 3: chạy 2 lần liên tiếp trên CÙNG file đầy đủ ⇒ vẫn PASS cả 2 lần, không đổi hành vi
+    # theo số lần chạy (gate không có state riêng, nên "không spam" tương đương "idempotent").
+    with tempfile.NamedTemporaryFile("w", suffix="_report_2026-08-14.md", delete=False,
+                                      encoding="utf-8") as fh:
+        fh.write("## Đầy đủ, chạy 2 lần\n")
+        p_twice = fh.name
+    rc1 = run_gate(p_twice, out=open(os.devnull, "w"))
+    rc2 = run_gate(p_twice, out=open(os.devnull, "w"))
+    check("content-gate: chạy 2 lần liên tiếp ⇒ kết quả giống nhau (rc, rc)", (rc1, rc2), (0, 0))
+    os.unlink(p_twice)
+
+    # ---- LỆCH NGUỒN VENDOR (chính sách user chốt 2026-09-24) — offline, không chạm BQ/broker.
+    # Ca gốc: broker giải 1.000đ/cp, vendor `corporate_action` khai 1.500đ/cp (lệch 50%).
+    # `dar` đã hạ sự kiện về UNVERIFIED ⇒ cổ tức biến mất khỏi kỳ vọng; nếu cổng KHÔNG nói ra thì
+    # đó đúng là "báo cáo bị chặn/lệch trong IM LẶNG" mà chính sách cấm.
+    def _run_vendor_case(report_body: str, mism):
+        g = globals()
+        keep = {k: g[k] for k in ("broker_positions", "entitled_gross", "excluded_tickers",
+                                  "parse_prose_pcts")}
+        g["broker_positions"] = lambda acct, asof, **kw: {"ZZZ": (100.0, 27_800.0, 24_464.0)}
+        g["entitled_gross"] = lambda tks, acct, asof: ({}, list(mism))
+        g["excluded_tickers"] = lambda lb: set()
+        with tempfile.NamedTemporaryFile("w", suffix="_SpaceX_report_2026-09-24.md",
+                                          delete=False, encoding="utf-8") as fh:
+            fh.write(report_body)
+            path = fh.name
+        buf = io.StringIO()
+        try:
+            rc = run_gate(path, out=buf)
+        finally:
+            g.update(keep)
+            os.unlink(path)
+        return rc, buf.getvalue()
+
+    _MISM = [("ZZZ", "2026-09-24", 1_000.0, 1_500.0, "cash_mismatch", 0.0, True)]
+    # Vị thế ZZZ: 100cp, giá vốn broker 27.800, giá 24.464 ⇒ -12,00% (đúng con số arch-review dựng)
+    rc_pub, txt_pub = _run_vendor_case(
+        "## Vị thế\n\n| Mã | KL | % lãi/lỗ |\n|---|---|---|\n| ZZZ | 100 | -12,00% |\n", _MISM)
+    check("vendor mismatch + mã ĐANG công bố ⇒ CHẶN (rc=1)", rc_pub, 1)
+    check("cảnh báo nêu cả hai số nguồn", ("1,000" in txt_pub and "1,500" in txt_pub), True)
+    check("cảnh báo lệch 50,0%", "50.0%" in txt_pub, True)
+    check("cảnh báo chỉ đích danh Winston (data-ops), không phải câu chung chung (§29)",
+          "Winston" in txt_pub, True)
+    # Dòng MÁY ĐỌC là HỢP ĐỒNG với `bin/vendor_mismatch_alert.sh` (V3): thiếu nó thì cảnh báo
+    # chỉ còn là văn xuôi trong log cron, không kênh nào bắn tới user được.
+    check("có dòng máy đọc VENDOR_MISMATCH_ALERT, cờ published=1",
+          "VENDOR_MISMATCH_ALERT|SpaceX|ZZZ|2026-09-24|1000|1500|1" in txt_pub, True)
+    assert rc_pub == 1 and "Winston" in txt_pub, (
+        "MUTATION-GUARD gate_vendor_mismatch_block: mã có sự kiện lệch nguồn vẫn được CÔNG BỐ tỉ "
+        f"suất mà cổng cho qua (rc={rc_pub}) hoặc không nêu Winston.")
+
+    # arch-review vòng 8 (job Taylor_20260927_103400): `gate_vendor_mismatch_block` ở trên chỉ ghim
+    # rc=1 + có chữ "Winston" — mà "Winston" xuất hiện ở NHIỀU khối (kể cả câu "Gỡ chặn = Winston
+    # xác minh xong nguồn vendor" của khối CHẶN). Nên mutation `if "cash_mismatch" in
+    # reasons_present: -> if False:` (dòng 786) vẫn PASS 99/99 (đo thật): dòng VIỆC CẦN LÀM nói
+    # ĐÚNG việc phải làm biến mất mà không ca nào FAIL. Anchor RIÊNG của nhánh này: tiền tố
+    # "VIỆC CẦN LÀM (bất đồng số cổ tức)".
+    check("khối VIỆC CẦN LÀM có dòng RIÊNG cho cash_mismatch (anchor riêng, không dùng chung chữ "
+          "'Winston' với khối CHẶN)",
+          "VIỆC CẦN LÀM (bất đồng số cổ tức)" in txt_pub, True)
+    assert "VIỆC CẦN LÀM (bất đồng số cổ tức)" in txt_pub, (
+        "MUTATION-GUARD gate_reasons_present_cash_mismatch_todo: nhánh "
+        "`if \"cash_mismatch\" in reasons_present:` (khối VIỆC CẦN LÀM) đã bị tắt/hỏng — báo cáo "
+        "vẫn CHẶN nhưng người xử lý không còn được bảo phải làm gì (Winston đối soát "
+        "`tav2_bq.corporate_action` với sổ broker). Chữ 'Winston' ở khối CHẶN KHÔNG phải bằng "
+        f"chứng cho nhánh này. Đang là: {txt_pub!r}")
+
+    # Không công bố tỉ suất mã đó ⇒ KHÔNG chặn (không công bố thì không sai được), NHƯNG cảnh báo
+    # vẫn phải in ra — đây chính là "raise warning mà KHÔNG chặn báo cáo im lặng".
+    rc_quiet2, txt_quiet2 = _run_vendor_case("## Không công bố tỉ suất mã nào\n", _MISM)
+    check("vendor mismatch + mã KHÔNG công bố ⇒ không chặn (rc=0)", rc_quiet2, 0)
+    check("… nhưng cảnh báo VẪN in ra (không im lặng)", "LỆCH NGUỒN VENDOR" in txt_quiet2, True)
+    check("… và dòng máy đọc vẫn có, cờ published=0 (ca rc=0 — nếu thiếu, cảnh báo chết trong log)",
+          "VENDOR_MISMATCH_ALERT|SpaceX|ZZZ|2026-09-24|1000|1500|0" in txt_quiet2, True)
+    assert "LỆCH NGUỒN VENDOR" in txt_quiet2, (
+        "MUTATION-GUARD gate_vendor_warning_always: cổng PASS mà không hề nhắc tới lệch nguồn ⇒ "
+        "user không bao giờ biết để gọi Winston.")
+
+    # Chống hồi quy: không có lệch nguồn ⇒ không có dòng cảnh báo nào, hành vi cũ nguyên vẹn.
+    rc_ok2, txt_ok2 = _run_vendor_case("## Không công bố tỉ suất mã nào\n", [])
+    check("không lệch nguồn ⇒ rc=0 và KHÔNG có cảnh báo vendor", (rc_ok2, "LỆCH NGUỒN VENDOR" in txt_ok2),
+          (0, False))
+    check("không lệch nguồn ⇒ KHÔNG có dòng máy đọc (không báo động giả tới user)",
+          "VENDOR_MISMATCH_ALERT" in txt_ok2, False)
+
+    # ---- LÝ DO THỨ HAI `stock_leg_ignored` (arch-review vòng 2, D1). Ở ca này `vendor_cash = 0`,
+    # nên câu cũ ("broker 1.000 vs vendor 0 — lệch 100%") mời người đọc hiểu "vendor KHÔNG CÓ dữ
+    # liệu", trái hẳn sự thật: vendor có dữ liệu RÕ RÀNG và đang nói sự kiện này không có tiền.
+    _MISM_STOCK = [("ZZZ", "2026-09-24", 1_000.0, 0.0, "stock_leg_ignored", 0.2604104, True)]
+    rc_st, txt_st = _run_vendor_case(
+        "## Vị thế\n\n| Mã | KL | % lãi/lỗ |\n|---|---|---|\n| ZZZ | 100 | -12,00% |\n", _MISM_STOCK)
+    check("stock_leg_ignored + mã ĐANG công bố ⇒ vẫn CHẶN (rc=1)", rc_st, 1)
+    check("câu chẩn đoán nói ĐÚNG nguyên nhân (thuần cổ phiếu + tỉ lệ ISS), KHÔNG nói 'vendor 0đ'",
+          ("THUẦN CỔ PHIẾU" in txt_st and "0.2604" in txt_st), True)
+    check("… và KHÔNG phát câu 'lệch 100.0%' gây hiểu sai", "lệch 100.0%" in txt_st, False)
+    # Hợp đồng CŨ giữ nguyên byte (7 trường) — thêm trường thứ 8 sẽ làm `read -r` của shell gộp
+    # nó vào `published` và đảo ngược cờ CHẶN. Mã lý do đi ở dòng TAG RIÊNG.
+    check("dòng ALERT giữ ĐÚNG 7 trường như hợp đồng cũ (không thêm trường thứ 8)",
+          "VENDOR_MISMATCH_ALERT|SpaceX|ZZZ|2026-09-24|1000|0|1\n" in txt_st, True)
+    check("có dòng TAG RIÊNG mang mã lý do + tỉ lệ ISS",
+          "VENDOR_MISMATCH_REASON|SpaceX|ZZZ|2026-09-24|stock_leg_ignored|0.2604" in txt_st, True)
+    assert "THUẦN CỔ PHIẾU" in txt_st and "VENDOR_MISMATCH_REASON" in txt_st, (
+        "MUTATION-GUARD gate_vendor_reason_routing: hai mã lý do khác nhau mà cổng phát CÙNG một "
+        "câu ⇒ ca D1 bị đọc thành 'vendor thiếu dữ liệu' và Winston điều tra sai hướng ngay dòng "
+        f"đầu (§29). Đang là: {txt_st!r}")
+
+    # arch-review vòng 8 (job Taylor_20260927_103400): `gate_vendor_reason_routing` ở trên bám vào
+    # dòng chẩn đoán PER-EVENT ("THUẦN CỔ PHIẾU") — nó KHÔNG phủ nhánh VIỆC CẦN LÀM riêng
+    # `if "stock_leg_ignored" in reasons_present:` (dòng 790). Mutation dòng đó thành `if False:`
+    # vẫn PASS 99/99 (đo thật) ⇒ Winston mất dòng chỉ dẫn "xác nhận lại sự kiện CỔ PHIẾU (ISS)"
+    # mà không assertion nào kêu. Anchor RIÊNG: cụm "KHÔNG PHẢI đối soát số tiền" chỉ có ở đây
+    # (dòng chẩn đoán per-event không nhắc tới việc đối soát số tiền).
+    check("khối VIỆC CẦN LÀM có dòng RIÊNG cho stock_leg_ignored (giao Winston xác nhận chân CỔ "
+          "PHIẾU, KHÔNG PHẢI đối soát số tiền)",
+          "KHÔNG PHẢI đối soát số tiền" in txt_st, True)
+    assert "KHÔNG PHẢI đối soát số tiền" in txt_st, (
+        "MUTATION-GUARD gate_reasons_present_stock_leg_todo: nhánh "
+        "`if \"stock_leg_ignored\" in reasons_present:` (khối VIỆC CẦN LÀM) đã bị tắt/hỏng — "
+        "Winston mất dòng 'xác nhận lại sự kiện CỔ PHIẾU (ISS) … KHÔNG PHẢI đối soát số tiền' và "
+        "sẽ đi đối soát TIỀN cho một sự kiện vendor khai thuần cổ phiếu (§29). Câu chẩn đoán "
+        f"per-event 'THUẦN CỔ PHIẾU' KHÔNG phải bằng chứng cho nhánh này. Đang là: {txt_st!r}")
+
+    # ---- LÝ DO THỨ BA: mã lý do KHÔNG xác định (arch-review D1b, R2) — fail-closed, KHÔNG đoán.
+    # Mô phỏng đúng ca reviewer bắn: `Adjustment` set `vendor_check="mismatch"` mà không set
+    # `vendor_mismatch_reason` (caller cũ/hỏng) ⇒ `entitled_gross` phải trả "unknown", KHÔNG được
+    # đoán "cash_mismatch" rồi phát câu "lệch X%" như thể đã biết nguyên nhân.
+    _MISM_UNKNOWN = [("ZZZ", "2026-09-24", 1_000.0, 700.0, "unknown", 0.0, True)]
+    rc_unk, txt_unk = _run_vendor_case(
+        "## Vị thế\n\n| Mã | KL | % lãi/lỗ |\n|---|---|---|\n| ZZZ | 100 | -12,00% |\n",
+        _MISM_UNKNOWN)
+    check("mã lý do unknown + mã ĐANG công bố ⇒ vẫn CHẶN (rc=1)", rc_unk, 1)
+    check("câu chẩn đoán nói THẲNG không xác định được mã lý do",
+          "KHÔNG xác định được mã lý do" in txt_unk, True)
+    check("… và KHÔNG lặng lẽ đoán thành câu 'lệch X%' của cash_mismatch",
+          "lệch 30.0%" in txt_unk, False)
+    check("… VIỆC CẦN LÀM nói đúng 'kiểm thủ công', không phải 'đối soát cho khớp lại'",
+          "kiểm thủ công" in txt_unk, True)
+    assert "KHÔNG xác định được mã lý do" in txt_unk and "kiểm thủ công" in txt_unk, (
+        "MUTATION-GUARD gate_vendor_reason_unknown_no_guess: mã lý do rỗng/lạ mà cổng vẫn phát một "
+        "trong hai câu chẩn đoán cố định (cash_mismatch hoặc stock_leg_ignored) ⇒ đoán mò nguyên "
+        f"nhân đúng lúc bằng chứng nói 'không biết' (§29). Đang là: {txt_unk!r}")
+
+    # arch-review vòng 8 (job Taylor_20260927_103400): guard `gate_vendor_reason_unknown_no_guess`
+    # ở trên dùng anchor "kiểm thủ công", chuỗi CÓ MẶT ở CẢ HAI chỗ — dòng chẩn đoán per-event
+    # (nhánh `else` của `reason`) VÀ khối VIỆC CẦN LÀM (`if reasons_present - {...}`). Nên mutation
+    # `if reasons_present - {...}: -> if False:` (dòng 800) vẫn PASS 99/99 (đo thật). Anchor RIÊNG
+    # của khối VIỆC CẦN LÀM: tiền tố "VIỆC CẦN LÀM (mã lý do không xác định)" chỉ có ở đó.
+    check("khối VIỆC CẦN LÀM có dòng RIÊNG cho mã lý do không xác định (anchor riêng, không dùng "
+          "chung 'kiểm thủ công' với dòng chẩn đoán per-event)",
+          "VIỆC CẦN LÀM (mã lý do không xác định)" in txt_unk, True)
+    assert "VIỆC CẦN LÀM (mã lý do không xác định)" in txt_unk, (
+        "MUTATION-GUARD gate_reasons_present_unknown_todo: nhánh "
+        "`if reasons_present - {\"cash_mismatch\", \"stock_leg_ignored\", \"lookup_failed\"}:` "
+        "(khối VIỆC CẦN LÀM) đã bị tắt/hỏng — người xử lý mất dòng chỉ dẫn 'kiểm thủ công (mã lý "
+        "do bị thiếu/rỗng ở nguồn)'. Chuỗi 'kiểm thủ công' ở dòng chẩn đoán per-event KHÔNG phải "
+        f"bằng chứng cho nhánh này. Đang là: {txt_unk!r}")
+
+    # ---- LOOKUP_FAILED (arch-review 2026-09-24 vòng 4, R1): BQ lỗi hạ tầng, KHÔNG tra được vendor
+    # — KHÁC HẲN "hai nguồn bất đồng số" (mismatch). Trước bản vá này sự kiện loại này KHÔNG vào
+    # `mismatches` nên biến mất khỏi kỳ vọng mà KHÔNG ai nói ra, và nếu mã đó lệch % công bố thì
+    # cổng còn tự đoán nhầm nguyên nhân thành "sai cơ sở giá" (§29).
+    # had_broker_cash=True (arch-review vòng 5, R1-A/R1-B): sự kiện TỪNG là CASH_CONFIRMED trước
+    # khi lookup thất bại ⇒ per_share LÀ tiền broker thật, mã ĐANG công bố ⇒ CHẶN vẫn đúng.
+    _LOOKUP = [("ZZZ", "2026-09-24", 1_000.0, 0.0, "lookup_failed", 0.0, True)]
+    rc_lkf, txt_lkf = _run_vendor_case(
+        "## Vị thế\n\n| Mã | KL | % lãi/lỗ |\n|---|---|---|\n| ZZZ | 100 | -12,00% |\n",
+        _LOOKUP)
+    check("lookup_failed + mã ĐANG công bố ⇒ CHẶN (rc=1)", rc_lkf, 1)
+    check("câu người-đọc nói ĐÚNG 'lỗi hạ tầng BQ', không phải 'hai nguồn bất đồng'",
+          "lỗi hạ tầng BQ" in txt_lkf, True)
+    check("R1-A: had_broker_cash=True ⇒ câu khẳng định ĐÚNG 'broker đã giải' (per_share là tiền thật)",
+          "broker đã giải 1,000đ/cp" in txt_lkf, True)
+    check("có dòng máy đọc VENDOR_LOOKUP_FAILED, had_broker_cash=1, published=1",
+          "VENDOR_LOOKUP_FAILED|SpaceX|ZZZ|2026-09-24|1000|1|1\n" in txt_lkf, True)
+    check("KHÔNG in dòng VENDOR_MISMATCH_ALERT cho ca lookup_failed (tránh trộn sentinel 0đ vào "
+          "cặp số cũ)", "VENDOR_MISMATCH_ALERT" in txt_lkf, False)
+    check("VIỆC CẦN LÀM nói 'chạy lại' (rerun khi BQ khoẻ), không giao Winston đối soát số",
+          "chạy lại" in txt_lkf, True)
+    # arch-review dispatch 2026-09-24 (audit vòng 7, C1): check "chạy lại" ở trên là VACUOUS cho
+    # nhánh `if "lookup_failed" in reasons_present:` (khối VIỆC CẦN LÀM) — chuỗi "chạy lại" CŨNG
+    # xuất hiện ở khối `if "lookup_failed" in vendor_fail_reasons:` phía dưới (T1(b) đã ghim
+    # riêng), nên ca `_LOOKUP` này (bị CHẶN, cả hai khối cùng chạy) khiến mutation
+    # `if "lookup_failed" in reasons_present: -> if False:` vẫn PASS 93/93 (đo thật: sed dòng
+    # 732 thành `if False:` rồi chạy --selfcheck, không FAIL ca nào). Cần anchor RIÊNG của khối
+    # VIỆC CẦN LÀM: "hạ tầng tra vendor thất bại, KHÔNG PHẢI bất đồng số liệu" chỉ có ở đây,
+    # khối kia dùng chữ khác ("KHÔNG PHẢI hai nguồn bất đồng").
+    check("khối VIỆC CẦN LÀM (reasons_present) có câu riêng 'hạ tầng tra vendor thất bại, KHÔNG "
+          "PHẢI bất đồng số liệu'", "hạ tầng tra vendor thất bại, KHÔNG PHẢI bất đồng số liệu"
+          in txt_lkf, True)
+    assert "hạ tầng tra vendor thất bại, KHÔNG PHẢI bất đồng số liệu" in txt_lkf, (
+        "MUTATION-GUARD gate_lookup_failed_reasons_present_note: nhánh "
+        "`if \"lookup_failed\" in reasons_present:` (khối VIỆC CẦN LÀM) đã bị tắt/hỏng — câu "
+        "'chạy lại' sống sót chỉ nhờ khối `vendor_fail_reasons` khác phía dưới, KHÔNG phải bằng "
+        f"chứng cho nhánh này. Đang là: {txt_lkf!r}")
+    assert rc_lkf == 1 and "VENDOR_LOOKUP_FAILED" in txt_lkf and "VENDOR_MISMATCH_ALERT" not in txt_lkf, (
+        "MUTATION-GUARD gate_lookup_failed_own_tag: ca BQ lỗi hạ tầng phải dùng TAG RIÊNG "
+        "VENDOR_LOOKUP_FAILED, KHÔNG tái dùng VENDOR_MISMATCH_ALERT (sentinel 0đ sẽ bị đọc nhầm "
+        f"thành 'vendor xác nhận 0đ'). Đang là: {txt_lkf!r}")
+    # R1-C, T1(a) (arch-review vòng 6): ca THUẦN lookup_failed (không có cash_mismatch/
+    # stock_leg_ignored/unknown nào khác) KHÔNG được in câu "hai nguồn độc lập đang bất đồng" —
+    # câu đó chỉ đúng khi có NGUỒN THỨ HAI để so, mà lookup_failed nghĩa là CHƯA TRA ĐƯỢC nguồn
+    # đó. Trước bản vá này, mutation `if vendor_fail_reasons - {"lookup_failed"}: -> if True:`
+    # vẫn PASS 90/90 vì không có assertion nào bám vào SỰ VẮNG MẶT của câu này.
+    check("KHÔNG in câu 'hai nguồn độc lập đang bất đồng' cho ca THUẦN lookup_failed",
+          "hai nguồn độc lập đang bất đồng" in txt_lkf, False)
+    check("KHÔNG in câu 'Gỡ chặn = Winston xác minh xong nguồn vendor' (sai người — BQ lỗi hạ "
+          "tầng, không phải Winston đối soát)",
+          "Gỡ chặn = Winston xác minh xong nguồn vendor" in txt_lkf, False)
+    assert "hai nguồn độc lập đang bất đồng" not in txt_lkf, (
+        "MUTATION-GUARD gate_lookup_failed_no_mismatch_sentence: ca THUẦN lookup_failed mà cổng "
+        "vẫn in câu 'hai nguồn độc lập đang bất đồng' ⇒ tự mâu thuẫn với dòng lookup_failed ngay "
+        f"phía trên nó, sai nguyên nhân (§29). Đang là: {txt_lkf!r}")
+    # T1(b): câu riêng "(các mã lookup_failed ở trên: KHÔNG PHẢI hai nguồn bất đồng…)" PHẢI có
+    # mặt cho ca này (bị CHẶN, vendor_fail_reasons={"lookup_failed"}) — dùng anchor RIÊNG của
+    # nhánh này, KHÔNG dùng "chạy lại" (câu đó CŨNG xuất hiện ở khối VIỆC CẦN LÀM phía trên,
+    # theo `reasons_present` — một mutation tắt nhánh `if "lookup_failed" in vendor_fail_reasons:`
+    # vẫn để "chạy lại" sống sót nhờ khối kia, nên check cũ ở dòng trên KHÔNG bắt được mutation này).
+    check("có câu riêng '…chưa tra được nguồn thứ hai' cho ca THUẦN lookup_failed BỊ CHẶN",
+          "chưa tra được nguồn thứ hai" in txt_lkf, True)
+    assert "chưa tra được nguồn thứ hai" in txt_lkf, (
+        "MUTATION-GUARD gate_lookup_failed_reason_note: ca THUẦN lookup_failed bị CHẶN mà thiếu "
+        "câu ghi chú riêng '…chưa tra được nguồn thứ hai' — nhánh "
+        "`if \"lookup_failed\" in vendor_fail_reasons:` đã bị tắt/hỏng (câu 'chạy lại' ở khối "
+        f"VIỆC CẦN LÀM phía trên KHÔNG phải bằng chứng cho nhánh này). Đang là: {txt_lkf!r}")
+
+    rc_lkf_q, txt_lkf_q = _run_vendor_case("## Không công bố tỉ suất mã nào\n", _LOOKUP)
+    check("lookup_failed + mã KHÔNG công bố ⇒ không chặn (rc=0)", rc_lkf_q, 0)
+    check("… nhưng vẫn cảnh báo (không im lặng)", "KHÔNG TRA ĐƯỢC nguồn vendor" in txt_lkf_q, True)
+    check("… và dòng máy đọc vẫn có, had_broker_cash=1, published=0",
+          "VENDOR_LOOKUP_FAILED|SpaceX|ZZZ|2026-09-24|1000|1|0\n" in txt_lkf_q, True)
+
+    # ---- R1-A/R1-B (arch-review vòng 5): had_broker_cash=False — ca THẬT MBS 2026-04-02 dựng lại
+    # từ exp_vendor_mismatch/k1_v2_rerun.log (STOCK_CONFIRMED/unresolved, broker=4.828,8đ/cp chỉ là
+    # ƯỚC LƯỢNG từ giá rơi chia tách, CHƯA từng là CASH_CONFIRMED — 0 chân tiền, phát hành CP 1:0,5).
+    # Trước bản vá R1-A/R1-B, ca này bị in "broker đã giải 4.829đ/cp" (SAI — chưa từng là tiền
+    # broker) và CHẶN oan dù không mất số công bố nào (K1: 56/62 sự kiện 6 tháng thuộc nhóm này).
+    _LOOKUP_NOCASH = [("ZZZ", "2026-09-24", 4_829.0, 0.0, "lookup_failed", 0.0, False)]
+    rc_lkf_nc, txt_lkf_nc = _run_vendor_case(
+        "## Vị thế\n\n| Mã | KL | % lãi/lỗ |\n|---|---|---|\n| ZZZ | 100 | -12,00% |\n",
+        _LOOKUP_NOCASH)
+    check("R1-B: had_broker_cash=False + mã ĐANG công bố ⇒ KHÔNG CHẶN (rc=0, chưa mất số công bố)",
+          rc_lkf_nc, 0)
+    check("R1-A: had_broker_cash=False ⇒ câu ĐÚNG 'broker CHƯA giải được số nào (ước lượng...)'",
+          "broker CHƯA giải được số nào (ước lượng từ giá rơi 4,829đ/cp" in txt_lkf_nc, True)
+    check("R1-A: KHÔNG khẳng định sai 'broker đã giải' khi had_broker_cash=False",
+          "broker đã giải" in txt_lkf_nc, False)
+    check("dòng máy đọc VENDOR_LOOKUP_FAILED có had_broker_cash=0, published=1",
+          "VENDOR_LOOKUP_FAILED|SpaceX|ZZZ|2026-09-24|4829|0|1\n" in txt_lkf_nc, True)
+    assert rc_lkf_nc == 0, (
+        "MUTATION-GUARD gate_lookup_failed_hadcash_gate: had_broker_cash=False (per_share chỉ là "
+        "ƯỚC LƯỢNG từ giá rơi, KHÔNG mất số công bố nào) nhưng cổng vẫn CHẶN — quá tay so với bằng "
+        f"chứng (R1-B, arch-review vòng 5). rc={rc_lkf_nc}, đang là: {txt_lkf_nc!r}")
+    assert "broker đã giải" not in txt_lkf_nc, (
+        "MUTATION-GUARD gate_lookup_failed_hadcash_money_text: had_broker_cash=False mà câu vẫn "
+        "khẳng định 'broker đã giải' — per_share ở đây CHƯA TỪNG là tiền broker thật, chỉ là ước "
+        f"lượng tỉ số từ giá rơi (R1-A, arch-review vòng 5). Đang là: {txt_lkf_nc!r}")
+
+    # R1(b): mã có sự kiện lookup_failed mà % công bố ≠ % kỳ vọng (vì thiếu cổ tức bị hạ) KHÔNG
+    # được lẫn vào câu "sai CƠ SỞ GIÁ" — nguyên nhân ĐÚNG (chưa tra được vendor) đã nói ở khối
+    # LỆCH NGUỒN VENDOR trên rồi.
+    rc_lkf_wrong, txt_lkf_wrong = _run_vendor_case(
+        "## Vị thế\n\n| Mã | KL | % lãi/lỗ |\n|---|---|---|\n| ZZZ | 100 | -8,00% |\n",
+        _LOOKUP)
+    check("% công bố lệch kỳ vọng ⇒ vẫn CHẶN (rc=1, qua nhánh fails chính)", rc_lkf_wrong, 1)
+    check("KHÔNG phát câu 'sai CƠ SỞ GIÁ' cho ZZZ (nguyên nhân thật đã nói ở trên, §29)",
+          "Gần như chắc chắn sai CƠ SỞ GIÁ" in txt_lkf_wrong, False)
+    assert "Gần như chắc chắn sai CƠ SỞ GIÁ" not in txt_lkf_wrong, (
+        "MUTATION-GUARD gate_lookup_failed_not_price_basis: mã có sự kiện lookup_failed mà % công "
+        "bố lệch kỳ vọng lại bị cổng gán nhầm nguyên nhân 'sai cơ sở giá' — chẩn đoán SAI chồng "
+        f"lên chẩn đoán ĐÚNG (§29). Đang là: {txt_lkf_wrong!r}")
+
+    # ---- CHÍNH `entitled_gross` (arch-review vòng 2, V1). 6 ca ngay trên MONKEYPATCH chính
+    # `entitled_gross` nên chúng chỉ kiểm nửa DƯỚI (cổng xử lý danh sách mismatch được BƠM TAY);
+    # nửa TRÊN — đoạn đọc `adjs` thật để SINH ra danh sách đó — không có một assertion nào: xoá
+    # hẳn khối `if a.vendor_check == "mismatch"` vẫn cho 137 PASS / 0 FAIL. Ở đây patch TẦNG
+    # DƯỚI (`dar.resolve_dividends` / `dar.broker_qty` / `dar._qty_at`) để thân hàm thật chạy
+    # đủ, TUYỆT ĐỐI không patch `entitled_gross`.
+    _ASOF = "2026-09-24"
+
+    def _adj(tk, ex, ps, kind, vcheck, vcash, reason=None, had_cash=None):
+        a = dar.Adjustment(ticker=tk, ex_date=ex, last_cum_date=ex, last_cum_price=10_000.0,
+                           per_share=ps)
+        a.kind, a.vendor_check, a.vendor_cash = kind, vcheck, vcash
+        if reason is not None:
+            a.vendor_mismatch_reason = reason
+        if had_cash is not None:
+            a.lookup_failed_had_broker_cash = had_cash
+        return a
+
+    _EG_ADJS = [
+        # (1) lệch nguồn, ĐÃ bị `dar` hạ về UNVERIFIED — phải nổi lên ở danh sách mismatch
+        _adj("AAA", "2026-09-10", 1_000.0, "UNVERIFIED", "mismatch", 1_500.0,
+             reason="cash_mismatch"),
+        # (2) hai nguồn khớp — vẫn phải vào kỳ vọng như cũ
+        _adj("BBB", "2026-09-11", 800.0, "CASH_CONFIRMED", "match", 800.0),
+        # (3) ex-date SAU asof — ngoài kỳ, bỏ
+        _adj("CCC", "2026-09-30", 700.0, "CASH_CONFIRMED", "match", 700.0),
+        # (4) tài khoản không nắm giữ tại ngày chốt quyền — bỏ
+        _adj("DDD", "2026-09-12", 600.0, "CASH_CONFIRMED", "match", 600.0),
+        # (5) PHÒNG THỦ NHIỀU TẦNG: giả định `dar` hồi quy, để nguyên CASH_CONFIRMED cho một sự
+        # kiện lệch nguồn ⇒ `cash_per_share` > 0. Cổng vẫn PHẢI loại nó khỏi kỳ vọng, không
+        # được dựa vào tầng dưới đã hạ cấp hộ.
+        _adj("EEE", "2026-09-13", 500.0, "CASH_CONFIRMED", "mismatch", 900.0,
+             reason="cash_mismatch"),
+        # (6) R2 (arch-review D1b): `vendor_check="mismatch"` mà KHÔNG set `vendor_mismatch_reason`
+        # (caller cũ/hỏng, y hệt ca reviewer bắn) — `entitled_gross` phải fail-closed về "unknown",
+        # KHÔNG được đoán "cash_mismatch" chỉ vì đó là default cũ.
+        _adj("FFF", "2026-09-14", 400.0, "CASH_CONFIRMED", "mismatch", 700.0),
+        # (7) arch-review 2026-09-24 vòng 4, R1: BQ lỗi hạ tầng (KHÔNG tra được vendor) — `dar` đã
+        # hạ về UNVERIFIED trước khi `entitled_gross` thấy Adjustment này (y hệt luồng thật ở
+        # `bq_corp_action`'s except-block). Phải nổi lên mismatches với reason="lookup_failed",
+        # KHÔNG được lặng lẽ `continue` như trước bản vá này. had_cash=False (mặc định dataclass,
+        # ghi rõ ở đây): per_share CHƯA từng là CASH_CONFIRMED (đúng luồng ước lượng từ giá rơi).
+        _adj("GGG", "2026-09-15", 300.0, "UNVERIFIED", "lookup_failed", 0.0, had_cash=False),
+        # (8) arch-review vòng 5, R1-A: cùng nhãn lookup_failed nhưng had_cash=True — mô phỏng sự
+        # kiện TỪNG là CASH_CONFIRMED trước khi `bq_corp_action` lỗi hạ (đúng luồng
+        # `resolve_dividends` gán `adj.lookup_failed_had_broker_cash = (adj.kind ==
+        # "CASH_CONFIRMED")` TRƯỚC khi hạ `kind` về UNVERIFIED). `entitled_gross` phải đọc field
+        # này từ Adjustment thật, không phải suy đoán/gán cứng.
+        _adj("HHH", "2026-09-16", 200.0, "UNVERIFIED", "lookup_failed", 0.0, had_cash=True),
+    ]
+
+    _saved_dar = {k: getattr(dar, k) for k in ("resolve_dividends", "broker_qty", "_qty_at")}
+    try:
+        dar.resolve_dividends = lambda tks, start, end: list(_EG_ADJS)
+        dar.broker_qty = lambda acct: {"stub": True}
+        dar._qty_at = lambda qmap, a, frame=None: (0.0 if a.ticker == "DDD" else 100.0)
+        eg_out, eg_mism = entitled_gross(["AAA", "BBB", "CCC", "DDD", "EEE", "FFF", "GGG", "HHH"],
+                                          "0002023347", _ASOF)
+    finally:
+        for k, v in _saved_dar.items():
+            setattr(dar, k, v)
+
+    check("entitled_gross: sự kiện lệch nguồn vào ĐÚNG phần tử thứ 2 (mã, ex, broker, vendor, "
+          "had_broker_cash — arch-review vòng 5, R1-A)",
+          sorted(eg_mism), [("AAA", "2026-09-10", 1_000.0, 1_500.0, "cash_mismatch", 0.0, True),
+                            ("EEE", "2026-09-13", 500.0, 900.0, "cash_mismatch", 0.0, True),
+                            ("FFF", "2026-09-14", 400.0, 700.0, "unknown", 0.0, True),
+                            ("GGG", "2026-09-15", 300.0, 0.0, "lookup_failed", 0.0, False),
+                            ("HHH", "2026-09-16", 200.0, 0.0, "lookup_failed", 0.0, True)])
+    check("entitled_gross: mã lệch nguồn KHÔNG vào kỳ vọng công bố",
+          ("AAA" in eg_out, "EEE" in eg_out, "FFF" in eg_out, "GGG" in eg_out, "HHH" in eg_out),
+          (False, False, False, False, False))
+    check("entitled_gross: sự kiện hai nguồn KHỚP vẫn vào kỳ vọng", eg_out, {"BBB": 800.0})
+    assert [m[0] for m in sorted(eg_mism)] == ["AAA", "EEE", "FFF", "GGG", "HHH"], (
+        "MUTATION-GUARD entitled_gross_detect_mismatch: thân hàm thật KHÔNG sinh ra danh sách "
+        "lệch nguồn ⇒ cổng dưới không bao giờ có gì để chặn/cảnh báo (xoá khối "
+        "`if a.vendor_check == \"mismatch\"` mà mọi test vẫn xanh).")
+    _eg_mism_by_tk_early = {m[0]: m for m in eg_mism}
+    assert _eg_mism_by_tk_early["GGG"][4] == "lookup_failed", (
+        "MUTATION-GUARD entitled_gross_lookup_failed_detect: `Adjustment.vendor_check == "
+        "'lookup_failed'` (BQ lỗi hạ tầng) KHÔNG nổi lên `mismatches` ⇒ cổ tức của mã đó lặng lẽ "
+        "biến mất khỏi kỳ vọng mà không ai nói ra (arch-review 2026-09-24 vòng 4, R1). Đang là: "
+        f"{_eg_mism_by_tk_early.get('GGG')!r}")
+    assert "GGG" not in eg_out, (
+        "MUTATION-GUARD entitled_gross_lookup_failed_excluded: sự kiện lookup_failed vẫn cộng cổ "
+        "tức vào kỳ vọng (bỏ `continue` sau khi ghi nhận).")
+    # R1-A: had_broker_cash phải LÀ provenance THẬT đọc từ `Adjustment.lookup_failed_had_broker_cash`
+    # — KHÔNG được gán cứng True/False cho MỌI sự kiện lookup_failed (GGG=False, HHH=True, khác
+    # nhau đúng vì Adjustment khác nhau; gán cứng một giá trị sẽ làm MỘT trong hai assertion sau
+    # rơi vào nhánh sai mà không lộ ra nếu chỉ test một chiều).
+    assert _eg_mism_by_tk_early["GGG"][6] is False, (
+        "MUTATION-GUARD entitled_gross_hadcash_provenance_false: GGG có "
+        "`lookup_failed_had_broker_cash=False` (per_share CHƯA từng là tiền broker thật) nhưng "
+        f"`entitled_gross` trả had_broker_cash khác False. Đang là: {_eg_mism_by_tk_early['GGG']!r}")
+    assert _eg_mism_by_tk_early["HHH"][6] is True, (
+        "MUTATION-GUARD entitled_gross_hadcash_provenance_true: HHH có "
+        "`lookup_failed_had_broker_cash=True` (per_share LÀ tiền broker thật, sự kiện TỪNG "
+        "CASH_CONFIRMED) nhưng `entitled_gross` trả had_broker_cash khác True — nếu code gán cứng "
+        f"False cho mọi lookup_failed, đây là assertion duy nhất bắt được. Đang là: "
+        f"{_eg_mism_by_tk_early['HHH']!r}")
+    _eg_mism_by_tk = {m[0]: m for m in eg_mism}
+    assert _eg_mism_by_tk["FFF"][4] == "unknown", (
+        "MUTATION-GUARD gate_vendor_reason_failclosed: Adjustment KHÔNG tự set "
+        "`vendor_mismatch_reason` (caller cũ/hỏng) mà `entitled_gross` vẫn ĐOÁN thành "
+        "'cash_mismatch' ⇒ Winston bị dẫn sai hướng đúng lúc mã lý do THẬT SỰ không xác định "
+        f"được (§29). Đang là: {_eg_mism_by_tk['FFF'][4]!r}")
+    assert "EEE" not in eg_out, (
+        "MUTATION-GUARD entitled_gross_mismatch_excluded: sự kiện lệch nguồn vẫn cộng cổ tức vào "
+        "kỳ vọng (bỏ `continue` sau khi ghi nhận mismatch).")
+
+    # ---- Việc 4 (job Taylor_20260924_064510) — dòng CÒN GIỮ mã (broker vẫn có vị thế) nhưng KL
+    # báo cáo KHÔNG khớp KL broker phải rơi vào nhánh cảnh báo RIÊNG, KHÔNG bị đếm/chẩn đoán
+    # chung với "lệnh đã thực hiện/phân bổ — ngoài phạm vi" (đó là suy luận SAI khi mã vẫn đang
+    # được giữ — §29). Mã THẬT SỰ ngoài phạm vi (broker không hề giữ) phải giữ NGUYÊN hành vi cũ.
+    def _run_unmatched_case(report_body: str, positions: dict):
+        g = globals()
+        keep = {k: g[k] for k in ("broker_positions", "entitled_gross", "excluded_tickers")}
+        g["broker_positions"] = lambda acct, asof, **kw: dict(positions)
+        g["entitled_gross"] = lambda tks, acct, asof: ({}, [])
+        g["excluded_tickers"] = lambda lb: set()
+        with tempfile.NamedTemporaryFile("w", suffix="_SpaceX_report_2026-09-24.md",
+                                          delete=False, encoding="utf-8") as fh:
+            fh.write(report_body)
+            path = fh.name
+        buf = io.StringIO()
+        try:
+            rc = run_gate(path, out=buf)
+        finally:
+            g.update(keep)
+            os.unlink(path)
+        return rc, buf.getvalue()
+
+    # QQQ: broker ĐANG GIỮ 100cp; báo cáo ghi KL=150 (lệch, nghi corp-action). RRR: broker
+    # KHÔNG hề giữ mã này — đúng nghĩa "lệnh đã thực hiện/ngoài phạm vi" cũ.
+    rc_um, txt_um = _run_unmatched_case(
+        "## Vị thế\n\n| Mã | KL | % lãi/lỗ |\n|---|---|---|\n"
+        "| QQQ | 150 | +2,00% |\n| RRR | 999 | +3,00% |\n",
+        {"QQQ": (100.0, 20000.0, 22000.0)})
+    check("Việc4: PASS (rc=0) — không mã nào bị CHẶN vì lệch KL", rc_um, 0)
+    check("Việc4: QQQ (còn giữ, lệch KL) rơi vào khối cảnh báo RIÊNG",
+          "CÒN GIỮ mã đó" in txt_um and "QQQ" in txt_um, True)
+    check("Việc4: khối cảnh báo nêu đúng KL báo cáo (150) và KL broker đang giữ (100)",
+          "KL=150" in txt_um and "KL=100" in txt_um, True)
+    check("Việc4: đếm 'ngoài phạm vi' KHÔNG gộp mã còn giữ (đúng 1 dòng: chỉ RRR)",
+          "Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi; 1 dòng" in txt_um, True)
+    check("Việc4: RRR (thật sự ngoài phạm vi) KHÔNG xuất hiện trong khối cảnh báo lệch KL",
+          "RRR" not in txt_um.split("CÒN GIỮ mã đó")[1].split("vị thế CÓ cổ tức")[0]
+          if "CÒN GIỮ mã đó" in txt_um else True, True)
+
+    # MUTATION-GUARD: nếu ai revert về hành vi cũ (`unmatched += 1; continue` cho MỌI mã không
+    # khớp key, không phân biệt còn giữ hay không) — QQQ sẽ bị gộp vào đếm "ngoài phạm vi" (đếm
+    # sẽ là 2, không phải 1) và khối cảnh báo riêng biến mất hoàn toàn.
+    assert "CÒN GIỮ mã đó" in txt_um, (
+        "MUTATION-GUARD unmatched_held_qty_mismatch_missing: mã CÒN GIỮ trên broker nhưng lệch "
+        "KL không còn được tách khỏi 'ngoài phạm vi' — hành vi CŨ (unmatched += 1 vô điều kiện) "
+        f"đã quay lại. Output thật: {txt_um!r}")
+    assert "Đã kiểm 0 dòng bảng + 0 tỉ suất trong văn xuôi; 2 dòng" not in txt_um, (
+        "MUTATION-GUARD unmatched_count_wrongly_includes_held: đếm 'ngoài phạm vi' đang gộp cả "
+        "QQQ (còn giữ) lẫn RRR (ngoài phạm vi thật) thành 2 — đúng lỗi §29 dispatch mô tả.")
 
     print(f"SELFCHECK: {'PASS' if ok else 'FAIL'} ({pass_count}/{len(ran)} ca)")
     return 0 if ok else 1

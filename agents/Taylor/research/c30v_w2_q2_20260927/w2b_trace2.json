@@ -1,0 +1,234 @@
+{
+ "D": {
+  "legs": [
+   "w2d_baseline",
+   "w2d_floor"
+  ],
+  "n_sessions_with_tx": 1279,
+  "n_sessions_with_NAME_SET_diff": 262,
+  "n_tx_keys_only_in_a": 407,
+  "n_tx_keys_only_in_b": 278,
+  "n_tx_keys_shared_but_size_diff": 1721,
+  "n_tx_keys_total": 7941,
+  "shares_are_fractional": true,
+  "first_name_set_divergences": [
+   {
+    "ymd": "2014-08-11",
+    "state": 3.0,
+    "n_tx": [
+     16,
+     15
+    ],
+    "cash_bal_a_minus_b": 343180214.0,
+    "cash_lag_a_minus_b": 0.0,
+    "nav_rel_diff_pct": 1.0487,
+    "only_in_w2d_baseline": [
+     {
+      "k": "LAG|VIP|buy",
+      "shares": 21990.09971917141,
+      "adj_price": 3710.0,
+      "buy_amount": 81583269.95812592,
+      "sell_amount": 0.0,
+      "fee": 204080.54980024692,
+      "reason": "ENTRY_FILL"
+     }
+    ],
+    "only_in_w2d_floor": []
+   },
+   {
+    "ymd": "2015-08-11",
+    "state": 3.0,
+    "n_tx": [
+     2,
+     1
+    ],
+    "cash_bal_a_minus_b": 641888519.0,
+    "cash_lag_a_minus_b": -0.0,
+    "nav_rel_diff_pct": 1.7684,
+    "only_in_w2d_baseline": [
+     {
+      "k": "LAG|BMI|buy",
+      "shares": 384.5181115160295,
+      "adj_price": 7960.0,
+      "buy_amount": 3060764.1676675947,
+      "sell_amount": 0.0,
+      "fee": 7656.501565420069,
+      "reason": "ENTRY_FILL"
+     }
+    ],
+    "only_in_w2d_floor": []
+   },
+   {
+    "ymd": "2015-08-14",
+    "state": 3.0,
+    "n_tx": [
+     15,
+     13
+    ],
+    "cash_bal_a_minus_b": 643000108.0,
+    "cash_lag_a_minus_b": 105801004.0,
+    "nav_rel_diff_pct": 1.7612,
+    "only_in_w2d_baseline": [
+     {
+      "k": "LAG|DSN|buy",
+      "shares": 644.145128525569,
+      "adj_price": 18970.0,
+      "buy_amount": 12219433.088130044,
+      "sell_amount": 0.0,
+      "fee": 30566.91186995618,
+      "reason": "ENTRY_FILL"
+     },
+     {
+      "k": "LAG|DIC|sell",
+      "shares": 16784.502927628666,
+      "adj_price": 6330.0,
+      "buy_amount": 0.0,
+      "sell_amount": 106245903.53188944,
+      "fee": 371595.0476027727,
+      "reason": "ABANDONED_REFUND"
+     }
+    ],
+    "only_in_w2d_floor": []
+   },
+   {
+    "ymd": "2015-09-16",
+    "state": 3.0,
+    "n_tx": [
+     4,
+     5
+    ],
+    "cash_bal_a_minus_b": 377157268.0,
+    "cash_lag_a_minus_b": 843169911.0,
+    "nav_rel_diff_pct": 1.7857,
+    "only_in_w2d_baseline": [],
+    "only_in_w2d_floor": [
+     {
+      "k": "LAG|DIC|sell",
+      "shares": 16784.502927628666,
+      "adj_price": 6330.0,
+      "buy_amount": 0.0,
+      "sell_amount": 106245903.53188944,
+      "fee": 689217.9730556458,
+      "reason": "TIME"
+     }
+    ]
+   }
+  ]
+ },
+ "A": {
+  "legs": [
+   "w2a_baseline",
+   "w2a_floor"
+  ],
+  "n_sessions_with_tx": 1509,
+  "n_sessions_with_NAME_SET_diff": 342,
+  "n_tx_keys_only_in_a": 448,
+  "n_tx_keys_only_in_b": 358,
+  "n_tx_keys_shared_but_size_diff": 2845,
+  "n_tx_keys_total": 9109,
+  "shares_are_fractional": true,
+  "first_name_set_divergences": [
+   {
+    "ymd": "2014-08-11",
+    "state": 3.0,
+    "n_tx": [
+     16,
+     15
+    ],
+    "cash_bal_a_minus_b": 343180214.0,
+    "cash_lag_a_minus_b": 0.0,
+    "nav_rel_diff_pct": 1.0487,
+    "only_in_w2a_baseline": [
+     {
+      "k": "LAG|VIP|buy",
+      "shares": 21990.09971917141,
+      "adj_price": 3710.0,
+      "buy_amount": 81583269.95812592,
+      "sell_amount": 0.0,
+      "fee": 204080.54980024692,
+      "reason": "ENTRY_FILL"
+     }
+    ],
+    "only_in_w2a_floor": []
+   },
+   {
+    "ymd": "2015-05-15",
+    "state": 3.0,
+    "n_tx": [
+     24,
+     22
+    ],
+    "cash_bal_a_minus_b": 362082137.0,
+    "cash_lag_a_minus_b": 63510954.0,
+    "nav_rel_diff_pct": 1.5331,
+    "only_in_w2a_baseline": [
+     {
+      "k": "LAG|VPH|buy",
+      "shares": 303.7066328707978,
+      "adj_price": 2700.0,
+      "buy_amount": 820007.9087511541,
+      "sell_amount": 0.0,
+      "fee": 2051.249783740961,
+      "reason": "ENTRY_FILL"
+     },
+     {
+      "k": "LAG|VPH|sell",
+      "shares": 23910.669440407743,
+      "adj_price": 2700.0,
+      "buy_amount": 0.0,
+      "sell_amount": 64558807.48910092,
+      "fee": 225794.42919312415,
+      "reason": "ABANDONED_REFUND"
+     }
+    ],
+    "only_in_w2a_floor": []
+   },
+   {
+    "ymd": "2015-06-16",
+    "state": 3.0,
+    "n_tx": [
+     8,
+     9
+    ],
+    "cash_bal_a_minus_b": 378508752.0,
+    "cash_lag_a_minus_b": 524264447.0,
+    "nav_rel_diff_pct": 1.5465,
+    "only_in_w2a_baseline": [],
+    "only_in_w2a_floor": [
+     {
+      "k": "LAG|VPH|sell",
+      "shares": 4731.518425996004,
+      "adj_price": 3020.0,
+      "buy_amount": 0.0,
+      "sell_amount": 14289185.646507932,
+      "fee": 49976.42679866031,
+      "reason": "TIME"
+     }
+    ]
+   },
+   {
+    "ymd": "2015-08-10",
+    "state": 3.0,
+    "n_tx": [
+     11,
+     10
+    ],
+    "cash_bal_a_minus_b": 398546219.0,
+    "cash_lag_a_minus_b": -8500011.0,
+    "nav_rel_diff_pct": 1.5811,
+    "only_in_w2a_baseline": [
+     {
+      "k": "LAG|DIC|buy",
+      "shares": 14194.329879585322,
+      "adj_price": 6580.0,
+      "buy_amount": 93398690.60767142,
+      "sell_amount": 0.0,
+      "fee": 233636.8245550841,
+      "reason": "ENTRY_FILL"
+     }
+    ],
+    "only_in_w2a_floor": []
+   }
+  ]
+ }
+}

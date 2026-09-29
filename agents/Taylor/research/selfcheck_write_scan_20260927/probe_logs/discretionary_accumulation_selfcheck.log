@@ -1,0 +1,72 @@
+[ENGINE]
+  ✅ (e) filled==target → completed, order None
+  ✅ (e) filled>target → completed (không mua quá)
+  ✅ base: filled 200/400 → inject
+  ✅ base: qty = remaining 200 (cap không bind)
+  ✅ no-chase: limit ≤ ceiling
+  ✅ (d) order book == DISCRETIONARY_SPECIAL
+  ✅ order stop_exempt & slot_exempt & outside_v24
+  ✅ (a) benign turnover → opportunistic False
+  ✅ (a) block turnover (≥2×adv) + giá≤ceiling → opportunistic True
+  ✅ (a) opportunistic boost tăng cap (cap2 == 2×cap1)
+  ✅ (a) turnover cao nhưng giá>ceiling → opportunistic False
+  ✅ cap: adv_ref siêu nhỏ → cap_qty=0 → skip (không cưỡng chèn)
+  ✅ cap: bind → qty=min(remaining400, cap200)=200
+  ✅ cap: qty là bội của lot_size
+  ✅ (c) filled None (broker fail) → failsafe, order None
+  ✅ (c) turnover None → failsafe
+  ✅ (c) price None → failsafe
+  ✅ halted → order None, action halted
+  ✅ status inactive → order None
+  ✅ validate_state: resting_limit>ceiling → raise (bảo vệ no-chase)
+[INJECTOR]
+--- TV1 (state_TV1_SELFCHK.json) ---
+  decision: inject — chèn 200cp
+  cash-gate: PASS_NOT_LIVE — mode=paper — không phải live, bỏ qua gate tiền
+  [INJECT] TV1 200cp @ ≤19,900 (filled 200/400, opportunistic=False)
+[inject] SELFCHK 2026-07-27: ĐÃ chèn 1 lệnh vào /tmp/disc_selfcheck_j5m5p_r5/plan_SELFCHK_2026-07-27.json.
+  ✅ inject rc==0
+  ✅ scenario1: đúng 1 order DISCRETIONARY chèn vào
+  ✅ scenario1: qty = remaining 200
+  ✅ (d) order V2.4 (CAPIT) GIỮ NGUYÊN, không bị đụng
+  ✅ scenario1: ledger có đúng 1 bản ghi plan_date
+--- TV1 (state_TV1_SELFCHK.json) ---
+  [skip] đã có order DISCRETIONARY_SPECIAL cho TV1 trong plan (id=BUY-TV1-DISC-2026-07-27) — không chèn trùng.
+[inject] SELFCHK 2026-07-27: không chèn lệnh nào.
+  ✅ (b) rerun: vẫn đúng 1 order DISCRETIONARY (không chèn trùng)
+  ✅ (b) rerun: ledger vẫn 1 bản ghi (không đếm 2 lần)
+--- TV1 (state_TV1_SELFCHK.json) ---
+  decision: inject — chèn 200cp
+  cash-gate: PASS_NOT_LIVE — mode=paper — không phải live, bỏ qua gate tiền
+  [INJECT] TV1 200cp @ ≤19,900 (filled 200/400, opportunistic=False)
+[inject] SELFCHK 2026-07-27: ĐÃ chèn 1 lệnh vào /tmp/disc_selfcheck_j5m5p_r5/plan_SELFCHK_2026-07-27.json.
+  ✅ (b') filled tính từ broker (200), không cộng dồn ledger cũ → vẫn inject 200 not 400
+--- TV1 (state_TV1_SELFCHK.json) ---
+  [FAILSAFE] không đọc được broker positions (TV1): mock positions fail
+  decision: failsafe — FAILSAFE: không đọc được vị thế broker → không mua bởi thiếu thông tin
+[inject] SELFCHK 2026-07-27: không chèn lệnh nào.
+  ✅ (c) broker fail → KHÔNG chèn lệnh nào
+--- TV1 (state_TV1_SELFCHK.json) ---
+  [FAILSAFE] DNSE quote TV1 lỗi: mock quote fail
+  decision: failsafe — FAILSAFE: thiếu giá/KL phiên gần nhất (DNSE) → không mua bởi thiếu thông tin
+[inject] SELFCHK 2026-07-27: không chèn lệnh nào.
+  ✅ (c) quote fail → KHÔNG chèn lệnh nào
+--- TV1 (state_TV1_SELFCHK.json) ---
+  decision: completed — đã gom đủ: filled 400 ≥ target 400
+  → state TV1 đánh dấu COMPLETED.
+[inject] SELFCHK 2026-07-27: không chèn lệnh nào.
+  ✅ (e) filled==target → KHÔNG chèn
+  ✅ (e) state → completed
+--- TV1 (state_TV1_SELFCHK.json) ---
+  decision: inject — chèn 200cp
+  cash-gate: PASS_NOT_LIVE — mode=paper — không phải live, bỏ qua gate tiền
+  [INJECT] TV1 200cp @ ≤19,900 (filled 0/100000, opportunistic=False)
+[inject] SELFCHK 2026-07-27: ĐÃ chèn 1 lệnh vào /tmp/disc_selfcheck_j5m5p_r5/plan_SELFCHK_2026-07-27.json.
+--- TV1 (state_TV1_SELFCHK.json) ---
+  decision: inject — chèn 400cp
+  cash-gate: PASS_NOT_LIVE — mode=paper — không phải live, bỏ qua gate tiền
+  [INJECT] TV1 400cp @ ≤19,900 (filled 0/100000, opportunistic=True)
+[inject] SELFCHK 2026-07-27: ĐÃ chèn 1 lệnh vào /tmp/disc_selfcheck_j5m5p_r5/plan_SELFCHK_2026-07-27.json.
+  ✅ (a) e2e: opportunistic phiên block chèn NHIỀU hơn phiên benign
+
+=== SELFCHECK: 33 passed, 0 failed ===

@@ -44,11 +44,12 @@ set -uo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 WC_ROOT="$(cd "$ROOT/.." && pwd)"
 [ -f "$ROOT/../wc_env.sh" ] && source "$ROOT/../wc_env.sh" 2>/dev/null || true
-# Neo TZ ICT tường minh: host chạy Etc/UTC và cron gọi script này KHÔNG có prefix TZ, nên mọi
-# `$(date ...)` bên dưới (TODAY, tuổi file, mốc log) phụ thuộc hoàn toàn vào TZ mà wc_env.sh
-# export — mà dòng trên lại tha thứ lỗi (`|| true`). Thiếu wc_env ⇒ TODAY lùi 1 ngày sau 17:00
-# ICT. Dòng này giữ nguyên TZ nếu caller đã đặt, chỉ vá trường hợp KHÔNG có (2026-07-31).
-export TZ="${TZ:-Asia/Ho_Chi_Minh}"
+# Neo TZ ICT KHÔNG ĐIỀU KIỆN: script này chỉ có nghĩa ở ICT (mọi mốc ngày — TODAY, tuổi file,
+# next trading day — đều tính theo phiên HOSE giờ ICT). Trước đây chỉ vá khi TZ CHƯA đặt
+# (`${TZ:-...}`), nên caller nào export TZ=UTC (cron khác, shell tay) vẫn được tôn trọng ⇒
+# sau 17:00 ICT, TODAY (và mọi datetime.now()/date.today() phía dưới thừa hưởng TZ này) lùi
+# 1 ngày, gate so as_of/mtime sai ngày (finding code-quality 2026-09-20). Ghi đè vô điều kiện.
+export TZ=Asia/Ho_Chi_Minh
 
 QUIET="${1:-}"
 PROJECT="lithe-record-440915-m9"
@@ -124,7 +125,7 @@ DISCORD_STALE_CHANNEL="trading_daily"   # tên trong kb/discord_channels.json
 #   dùng cho bảng research/early-warning mà việc block plan vì nó là phản ứng quá tay.
 _check() {
   local label="$1" table="$2" colexpr="$3" max_lag_days="$4" lag_unit="$5" mode="${6:-BLOCK}"
-  local query result lag_days
+  local query result rc lag_days
 
   if [ "$lag_unit" = "trading" ]; then
     query="SELECT COUNTIF(v.time > (SELECT MAX(${colexpr}) FROM \`${PROJECT}.${table}\` AS t))
@@ -138,9 +139,40 @@ _check() {
   fi
 
   result=$(bq query --use_legacy_sql=false --project_id="$PROJECT" \
-    --format=csv --quiet "$query" 2>/dev/null | tail -1)
-  lag_days="${result:-999}"
-  lag_days=$(printf "%.0f" "$lag_days" 2>/dev/null || echo 999)
+    --format=csv --quiet "$query" 2>&1)
+  rc=$?
+  lag_days="$(printf '%s\n' "$result" | tail -1)"
+  # bq lỗi (auth/quota/network) hoặc output không phải số ⇒ KHÔNG PHẢI bảng stale, đừng báo
+  # lag=999/STALE — báo đúng nguyên nhân (§28: tách "không tìm thấy bằng chứng" khỏi "tìm thấy
+  # và xấu"). Query thật ra số nguyên/thập phân qua CSV; bất cứ gì khác cần tách 2 case (arch-
+  # review coord-2026-09-27 round 1): rc!=0 = KHÔNG kết nối/tra được BQ (auth/quota/network);
+  # rc=0 nhưng giá trị không phải số = BQ TRẢ LỜI ĐƯỢC nhưng dữ liệu bất thường (bảng rỗng/cột
+  # toàn NULL/schema đổi tên cột) — khác nguyên nhân, khác hướng xử lý, đừng gộp chung một câu
+  # "kiểm tra auth/quota/network" (repro: MAX() trên bảng rỗng trả NULL dù bq hoàn toàn khoẻ).
+  if [ $rc -ne 0 ] || ! printf '%s' "$lag_days" | grep -qE '^-?[0-9]+(\.[0-9]+)?$'; then
+    local errsnip reason fail_msg
+    # Lấy từ TOÀN BỘ $result (không phải tail -1 của lag_days) — bq thường wrap lỗi thành
+    # nhiều dòng, dòng cuối một mình có thể chỉ còn 1 mảnh vô nghĩa (repro round 1: "southeast1]").
+    errsnip="$(printf '%s' "$result" | tr '\n' ' ' | cut -c1-200)"
+    if [ $rc -ne 0 ]; then
+      reason="bq lỗi kết nối/quyền (rc=$rc, auth/quota/network)"
+      fail_msg="⚠️ BQ QUERY FAILED ($TODAY $NOW_ICT): $label — ${reason}: ${errsnip}. KHÔNG PHẢI bảng stale."
+    else
+      reason="bq trả giá trị không phải số dù rc=0 ('${lag_days}') — bảng rỗng/cột toàn NULL/schema đổi"
+      fail_msg="⚠️ BQ DATA BẤT THƯỜNG ($TODAY $NOW_ICT): $label — ${reason}. KHÔNG PHẢI lỗi kết nối BQ, đừng kiểm tra auth/quota — kiểm tra bảng/cột/schema. (raw: ${errsnip})"
+    fi
+    echo "FAIL $label: ${reason} (raw: ${errsnip})"
+    if [ "$mode" = "WARN" ]; then
+      "$ROOT/bin/notify_thread.sh" "$fail_msg" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+      WARNED=$((WARNED + 1))
+      return 0
+    fi
+    "$ROOT/bin/notify.sh" "$fail_msg" 2>/dev/null || true
+    "$ROOT/bin/notify_thread.sh" "$fail_msg" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+    FAILED=1
+    return 1
+  fi
+  lag_days=$(printf "%.0f" "$lag_days" 2>/dev/null || echo "$lag_days")
 
   if [ "$lag_days" -le "$max_lag_days" ] 2>/dev/null; then
     [ -z "$QUIET" ] && echo "OK   $label: lag=${lag_days}${lag_unit}d (≤${max_lag_days})"
@@ -167,14 +199,25 @@ _check() {
 #   (bài học custom30v_8l chết 06-18, mtime cache local luôn tươi vì sync re-download đêm).
 _check_lastmod() {
   local label="$1" table="$2" max_age_days="$3"
-  local ms age_days
-  ms=$(bq show --format=prettyjson "${PROJECT}:${table}" 2>/dev/null \
+  local show_out show_rc ms age_days
+  show_out=$(bq show --format=prettyjson "${PROJECT}:${table}" 2>&1)
+  show_rc=$?
+  if [ $show_rc -ne 0 ]; then
+    local errsnip
+    errsnip="$(printf '%s' "$show_out" | tr '\n' ' ' | cut -c1-200)"
+    local fail_msg="⚠️ BQ QUERY FAILED ($TODAY $NOW_ICT): $label — bq show thất bại (rc=$show_rc): ${errsnip}. KHÔNG PHẢI writer chết, kiểm tra auth/quota/network."
+    echo "FAIL $label: BQ QUERY FAILED (rc=$show_rc): ${errsnip}"
+    "$ROOT/bin/notify_thread.sh" "$fail_msg" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+    WARNED=$((WARNED + 1))
+    return 0
+  fi
+  ms=$(printf '%s' "$show_out" \
        | python3 -c "import json,sys; print(json.load(sys.stdin).get('lastModifiedTime',0))" 2>/dev/null)
   ms="${ms:-0}"
   if [ "$ms" -gt 0 ] 2>/dev/null; then
     age_days=$(( ( $(date +%s) - ms / 1000 ) / 86400 ))
   else
-    age_days=999   # metadata không đọc được = coi như đáng ngờ (fail-safe), báo WARN
+    age_days=999   # metadata đọc được nhưng thiếu lastModifiedTime = đáng ngờ thật (fail-safe), báo WARN
   fi
 
   if [ "$age_days" -le "$max_age_days" ]; then
@@ -187,6 +230,117 @@ _check_lastmod() {
     WARNED=$((WARNED + 1))
     return 0
   fi
+}
+
+# _check_price_freeze: phát hiện cột giá THÔ bị ETL upstream copy nguyên từ phiên T-1 trên
+# DIỆN RỘNG (2026-09-27, job Taylor_20260927_103434). Vì sao cần một check RIÊNG: cả 3 gate
+# giá phía trên đều mù với lỗi này — _check đo MAX(time) (vẫn advance), depth-check đếm số mã
+# (vẫn đủ ~250), và cache == live nên không phải lỗi cache. Sự cố thật đã xảy ra 2 lần mà
+# KHÔNG có gì kêu: 2026-01-30 (254/256 mã Price[t]==Price[t-1]) và 2025-02-03 (258/258).
+#
+# NGƯỠNG ĐO TỪ DỮ LIỆU, không bốc số — phân bố 4.171 phiên ticker_prune 2010-01-05→2026-09-25
+# (series: mike/agents/Taylor/research/price_freeze_gate_20260927/daily_flat_series_v2.csv,
+# script tái lập: .../calibrate.py). Trên 3.174 phiên 2014+:
+#   tỉ lệ mã có Price phẳng: p50=0,136  p90=0,216  p99=0,291  p99,9=0,381  → rồi KHOẢNG TRỐNG
+#   → 0,755 (2018-01-23) / 0,792 (2018-01-24) / 0,992 (2026-01-30) / 1,000 (2025-02-03).
+#   Chọn 0,50 = giữa khoảng trống rỗng [0,381 ; 0,755]; ≈ med + 6,7·robustSD (1,4826·MAD).
+#   FP thực đo = 0/3.174 phiên (2014+) và 0/4.171 (2010+); bắt 4/4 phiên bất thường đã biết.
+# So sánh cặp = PHIÊN LIỀN KỀ CỦA BẢNG (LAG trên danh sách ngày distinct), KHÔNG phải
+# "cách ≤7 ngày lịch": bản đầu dùng ngưỡng ngày lịch đã ÂM THẦM bỏ qua chính phiên đầu sau
+# Tết (gap 10-12 ngày) — và 2025-02-03, một trong hai phiên đóng băng thật, RƠI ĐÚNG vào đó.
+#
+# Hai chữ ký cơ học KHÁC NHAU, hệ quả khác nhau (§29: rẽ nhánh theo bit script vừa ĐỌC được,
+# không quy chụp một nguyên nhân):
+#   (a) Price phẳng nhưng Close (đã điều chỉnh) VẪN đổi ⇒ lỗi riêng cột Price thô. Close mới
+#       là cột production đọc ⇒ WARN, không chặn. Chữ ký 2026-01-30 (222/254), 2025-02-03 (234/258).
+#   (b) CẢ Price và Close phẳng ⇒ nguyên dòng giá là bản sao T-1. Bước [pipeline-1b/1c]
+#       (build_universe_pit + _quality) và chấm điểm custom30V ngay dưới sẽ ăn dữ liệu chết
+#       ⇒ BLOCK. Chữ ký 2018-01-24 (174/221 mã phẳng CẢ HAI cột = 0,787). Ngưỡng 0,50 đo
+#       riêng cho metric này trên cùng 3.174 phiên 2014+: p50=0,133 p99=0,286 p99,9=0,353,
+#       giá trị lớn nhất KHÔNG thuộc phiên bất thường nào = 0,377 ⇒ 0 FP; chỉ 2018-01-24 vượt.
+#       (2018-01-23 AB=0,455 — chữ ký PHA TRỘN, 66/166 mã có Close đổi — nên nó rơi vào nhánh
+#       WARN qua metric Price-phẳng 0,755, KHÔNG bị BLOCK. Đó là hành vi ĐÚNG mong muốn.)
+MAX_PRICE_FLAT_PCT=50   # % mã có Price[t]==Price[t-1] — xem khối trên, đo từ 4.171 phiên
+MIN_FLAT_SAMPLE=50      # < 50 cặp mã so được ⇒ KHÔNG kết luận (nói thẳng), đừng báo động
+_check_price_freeze() {
+  local q result rc row n_tot n_flat n_cm n_both pct_flat pct_both pct_cm_of_flat d dprev
+  q="WITH days AS (
+       SELECT DISTINCT time AS d FROM \`${PROJECT}.tav2_bq.ticker_prune\`
+       WHERE time >= DATE_SUB(CURRENT_DATE('Asia/Ho_Chi_Minh'), INTERVAL 60 DAY)),
+     dseq AS (SELECT d, LAG(d) OVER (ORDER BY d) AS dprev FROM days),
+     last2 AS (SELECT d, dprev FROM dseq ORDER BY d DESC LIMIT 1),
+     b AS (
+       SELECT ticker, time, Price, Close,
+              LAG(Price) OVER (PARTITION BY ticker ORDER BY time) AS p_prev,
+              LAG(Close) OVER (PARTITION BY ticker ORDER BY time) AS c_prev,
+              LAG(time)  OVER (PARTITION BY ticker ORDER BY time) AS t_prev
+       FROM \`${PROJECT}.tav2_bq.ticker_prune\`
+       WHERE time >= DATE_SUB(CURRENT_DATE('Asia/Ho_Chi_Minh'), INTERVAL 60 DAY))
+     SELECT COUNT(*) AS n_tot,
+            COUNTIF(b.Price = b.p_prev) AS n_flat,
+            COUNTIF(b.Price = b.p_prev AND b.Close != b.c_prev) AS n_cm,
+            COUNTIF(b.Price = b.p_prev AND b.Close =  b.c_prev) AS n_both,
+            CAST(MAX(l.d) AS STRING) AS d, CAST(MAX(l.dprev) AS STRING) AS dprev
+     FROM b JOIN last2 AS l ON b.time = l.d AND b.t_prev = l.dprev
+     WHERE b.Price IS NOT NULL AND b.p_prev IS NOT NULL
+       AND b.Close IS NOT NULL AND b.c_prev IS NOT NULL"
+
+  result=$(bq query --use_legacy_sql=false --project_id="$PROJECT" --format=csv --quiet "$q" 2>&1)
+  rc=$?
+  row="$(printf '%s\n' "$result" | tail -1)"
+  # §28/§29: tách "không tra được BQ" khỏi "tra được nhưng dữ liệu bất thường"; in LỖI THẬT
+  # bq vừa trả, không đoán nguyên nhân.
+  if [ $rc -ne 0 ] || ! printf '%s' "$row" | grep -qE '^[0-9]+,[0-9]+,[0-9]+,[0-9]+,[0-9-]+,[0-9-]+$'; then
+    local errsnip reason
+    errsnip="$(printf '%s' "$result" | tr '\n' ' ' | cut -c1-200)"
+    if [ $rc -ne 0 ]; then
+      reason="bq lỗi kết nối/quyền (rc=$rc, auth/quota/network)"
+    else
+      reason="bq trả dòng không đúng dạng dù rc=0 ('${row}') — bảng rỗng/đổi schema"
+    fi
+    echo "SKIP ticker_prune Price-freeze: KHÔNG kết luận được — ${reason} (raw: ${errsnip})"
+    "$ROOT/bin/notify_thread.sh" "🟡 BQ CHECK KHÔNG CHẠY ĐƯỢC ($TODAY $NOW_ICT): Price-freeze gate trên ticker_prune — ${reason}. ĐÂY KHÔNG PHẢI kết luận 'dữ liệu sạch', chỉ là không đo được. (raw: ${errsnip})" \
+      "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+    WARNED=$((WARNED + 1))
+    return 0
+  fi
+
+  IFS=, read -r n_tot n_flat n_cm n_both d dprev <<<"$row"
+
+  # Fail-safe theo hướng KHÔNG báo động giả: quá ít cặp mã so được (mã mới vào universe, phiên
+  # đầu sau đợt nghỉ dài mà bảng thiếu ngày liền trước…) ⇒ nói thẳng là không kết luận được.
+  if [ "$n_tot" -lt "$MIN_FLAT_SAMPLE" ] 2>/dev/null; then
+    echo "SKIP ticker_prune Price-freeze: chỉ ${n_tot} mã có cả $d và $dprev (<${MIN_FLAT_SAMPLE}) — KHÔNG đủ dữ liệu để kết luận, không báo động"
+    return 0
+  fi
+
+  pct_flat=$(( n_flat * 100 / n_tot ))
+  pct_both=$(( n_both * 100 / n_tot ))
+  pct_cm_of_flat=0
+  [ "$n_flat" -gt 0 ] && pct_cm_of_flat=$(( n_cm * 100 / n_flat ))
+
+  if [ "$pct_both" -gt "$MAX_PRICE_FLAT_PCT" ]; then
+    # Chữ ký (b): cả hai cột phẳng ⇒ nguyên dòng giá là bản sao T-1 ⇒ chặn pipeline.
+    local msg="⚠️ BQ PRICE FROZEN ($TODAY $NOW_ICT): ticker_prune phiên $d — ${n_both}/${n_tot} mã (${pct_both}%) có CẢ Price VÀ Close y hệt phiên $dprev, vượt ngưỡng ${MAX_PRICE_FLAT_PCT}% (đo từ 3.174 phiên 2014+: p99,9=35%, cao nhất phần thân=46%). Nguyên dòng giá nghi là bản sao T-1 ⇒ build_universe_pit + chấm custom30V sẽ ăn dữ liệu chết. CHẶN pipeline. So sánh: tổng mã Price phẳng ${n_flat}/${n_tot} (${pct_flat}%), trong đó ${n_cm} mã có Close đổi."
+    echo "FAIL ticker_prune Price-freeze: both-flat ${n_both}/${n_tot} (${pct_both}%) phiên $d vs $dprev (>${MAX_PRICE_FLAT_PCT}%) — nguyên dòng giá nghi copy T-1"
+    "$ROOT/bin/notify.sh" "$msg" 2>/dev/null || true
+    "$ROOT/bin/notify_thread.sh" "$msg" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+    FAILED=1
+    return 1
+  fi
+
+  if [ "$pct_flat" -gt "$MAX_PRICE_FLAT_PCT" ]; then
+    # Chữ ký (a): Price thô phẳng nhưng Close đã điều chỉnh vẫn đổi ⇒ lỗi cột Price của ETL
+    # nguồn. Close mới là cột production đọc ⇒ WARN, không chặn.
+    local msg="🟡 BQ WARN — Price THÔ đóng băng ($TODAY $NOW_ICT): ticker_prune phiên $d — ${n_flat}/${n_tot} mã (${pct_flat}%) có Price y hệt phiên $dprev, vượt ngưỡng ${MAX_PRICE_FLAT_PCT}% (đo từ 3.174 phiên 2014+: p99,9=38%, khoảng trống 38%→76%). Trong số đó ${n_cm}/${n_flat} mã (${pct_cm_of_flat}%) có Close (đã điều chỉnh) VẪN đổi ⇒ đúng chữ ký lỗi RIÊNG cột Price thô của ETL nguồn (giống 2026-01-30: 222/254; 2025-02-03: 234/258), KHÔNG phải phiên nghỉ/không giao dịch. Close là cột production đọc nên KHÔNG chặn pipeline; báo upstream sửa cột Price. Both-flat ${n_both}/${n_tot} (${pct_both}%)."
+    echo "WARN ticker_prune Price-freeze: Price phẳng ${n_flat}/${n_tot} (${pct_flat}%) phiên $d vs $dprev (>${MAX_PRICE_FLAT_PCT}%), Close vẫn đổi ở ${n_cm}/${n_flat} — lỗi cột Price thô, non-blocking"
+    "$ROOT/bin/notify_thread.sh" "$msg" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+    WARNED=$((WARNED + 1))
+    return 0
+  fi
+
+  [ -z "$QUIET" ] && echo "OK   ticker_prune Price-freeze: ${n_flat}/${n_tot} mã Price phẳng (${pct_flat}% ≤${MAX_PRICE_FLAT_PCT}%) phiên $d vs $dprev; both-flat ${n_both}/${n_tot} (${pct_both}%)"
+  return 0
 }
 
 # _check_corp_action_scanner: thay cho _check cũ trên shares_outstanding_live (xem giải thích
@@ -252,6 +406,7 @@ else
   "$ROOT/bin/notify_thread.sh" "$depth_msg" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
   FAILED=1
 fi
+_check_price_freeze || true
 _check "vnindex_5state_dt5g_live (DT5G)"  "tav2_bq.vnindex_5state_dt5g_live"  "t.time"  $MAX_STATE_LAG  "trading"  || true
 # --- DT5G PUBLISHER-EVIDENCE gate (2026-07-31, job Winston_20260731_014953) ------------------
 # VÌ SAO cần: bảng dt5g_live có WRITER THỨ HAI ngoài luồng — pipeline kaffa_v2 của team dữ liệu
@@ -497,6 +652,21 @@ fi
 
 [ "$WARNED" -gt 0 ] && echo "NOTE: $WARNED WARN non-blocking (đã post Discord Trading Daily) — pipeline vẫn chạy"
 
+# --- [pipeline-0] nav_exdate_forecast — cảnh báo TRƯỚC corp-action ≤1 PHIÊN trên mã đang giữ
+# (L1, quyết định user 2026-09-22 sau lớp lỗi "NAV bị PRICE_XCHECK chặn vì corp-action" tái diễn
+# ≥4 lần: PVT 09-08/DGC 09-11/VIB 09-09/VHM 08-05/DRI 09-21 — dữ liệu này đã nằm sẵn trên đĩa từ
+# cron corp_action_daily 07:30 nhưng không ai đọc kịp trước khi NAV chạy ~21h. Đọc LẠI
+# `upcoming_events_held` đã có, KHÔNG tính gì mới. Read-only + notify — lỗi ở đây KHÔNG được
+# chặn pipeline/DollarBill (đây là cảnh báo sớm, không phải gate). CỐ Ý đặt TRƯỚC cổng
+# FAILED/exit dưới đây: nav_exdate_forecast.py KHÔNG đọc BQ (chỉ đọc
+# data/corp_action_daily/<date>.json + data/execution_logs/active_nav_*.json), NAV cũng KHÔNG
+# chạy trong chuỗi này (cron riêng: nav_snapshot_daily.sh/nav_sync_retry.sh) — một ngày BQ
+# stale (đã xảy ra thật 2026-09-14) không được phép nuốt mất cảnh báo corp-action đúng ngày hệ
+# thống đang trục trặc (arch-review vòng 2, Mike, 2026-09-22).
+echo; echo "--- [pipeline-0] nav_exdate_forecast (corp-action ≤1 PHIÊN, mã đang giữ) ---"
+(cd "$ROOT" && python3 bin/nav_exdate_forecast.py --alert 2>&1) || \
+  echo "  [WARN] nav_exdate_forecast.py lỗi — không chặn pipeline, kiểm tay: mike/bin/nav_exdate_forecast.py"
+
 if [ "$FAILED" -ne 0 ]; then
   STALE_SUMMARY="⛔ BQ STALE $TODAY $NOW_ICT — DollarBill bị BLOCK, không lập plan hôm nay. Kiểm tra: mike/logs/bq_freshness.log"
   "$ROOT/bin/notify_thread.sh" "$STALE_SUMMARY" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
@@ -587,6 +757,15 @@ _assert_fresh_artifact "golive_v23_recommendations (recommend output DollarBill 
 # thêm account mới vào file đó là tự động có plan T+1, không cần sửa gì ở đây. Xem
 # kb/account_onboarding_runbook.md.
 LIVE_LABELS="$(cd "$WORKDIR" && python3 -c "from trading_bot.config import live_dnse_labels; print(' '.join(live_dnse_labels()))")"
+# Phí/chiều cho prompt DollarBill — đọc từ hằng số đo thật (aria-F1 CONFIRMED 2026-09-13), không
+# hardcode lại. Import hỏng ⇒ in lỗi thật và trỏ DollarBill tới file hằng số thay vì bịa một con số.
+if _fee_out="$(cd "$ROOT/bin" 2>&1 && python3 -c 'from dnse_fee_rates import FEE_RATE_BUY_PCT as f; print(f"{f:g}")' 2>&1)"; then
+  FEE_NOTE="${_fee_out}%/chiều (bin/dnse_fee_rates.py)"
+else
+  echo "  [WARN] không đọc được bin/dnse_fee_rates.py — Lỗi thật: $_fee_out"
+  FEE_NOTE="theo FEE_RATE_BUY_PCT trong mike/bin/dnse_fee_rates.py"
+fi
+
 for ACCT in $LIVE_LABELS; do
   echo; echo "--- [pipeline-4] dispatch DollarBill lập plan T+1 cho $ACCT ---"
   HAS_EXCL="$(cd "$WORKDIR" && python3 -c "
@@ -606,6 +785,14 @@ print(int(p.get('manual_offbook_assets_vnd') or 0))
   if [ "${OFFBOOK_VND:-0}" != "0" ]; then
     NAV_NOTE="$NAV_NOTE Tài khoản này có ${OFFBOOK_VND} VNĐ đang gửi ở sản phẩm Trứng vàng DNSE (off-book, KHÔNG lộ qua API — user tự chuyển, tự báo số dư, xem manual_offbook_assets_note/asof trong secrets/trading_bot_accounts.json). Đây KHÔNG PHẢI mất tiền/rút vốn — cash thật trong tài khoản môi giới sẽ thấp hơn NAV tương ứng, ĐỪNG hiểu là lỗ và ĐỪNG tự tạo lệnh BÁN để 'cân bằng lại' xuống theo cash thấp hơn. Khi TÍNH TỶ TRỌNG mục tiêu, dùng active_nav (đã cộng offbook) làm cơ sở như bình thường. Khi SIZE LỆNH MUA thực tế, kiểm tra sức mua THẬT (availableCash/ppse qua DNSE live) — nếu không đủ vì tiền còn nằm trong Trứng vàng, ghi rõ trong plan note 'cần rút X từ Trứng vàng trước khi thực thi' thay vì âm thầm shrink target hoặc bỏ lệnh. Lưu ý thêm (chưa xác minh, đừng giả định): với SpaceX có dấu hiệu ppse/pp0Buy vẫn báo sức mua cao dù availableCash≈0 sau khi chuyển Trứng vàng (job Mafee_20260716_164743) — có thể DNSE tự tính gộp hoặc số liệu trễ, CHƯA xác nhận; nếu size lệnh dựa vào ppse mà thực tế không đủ, broker sẽ tự từ chối lệnh (an toàn), không phải giả định ppse luôn đúng."
   fi
+  # EGG_NOTE — VÔ ĐIỀU KIỆN cho MỌI account (fix bất đối xứng 2026-08-20, RCA
+  # research/plan_pipeline_3loi_rca_20260820.md lỗi #2). Trước đây chỉ account có
+  # excluded_tickers/offbook mới được trỏ tới compute_active_nav.py (nơi lộ egg.totalValue),
+  # nên ZaloPay 'thấy' egg và mua VPI trong khi SpaceX 'không thấy' và ghi 'thiếu tiền' —
+  # hai account áp cùng luật (context_planning_mini.md §egg.totalValue) ra hai kết quả khác nhau
+  # CHỈ vì prompt khác nhau. egg.totalValue là field balances API LIVE cho MỌI account
+  # (live từ 2026-08-18), không liên quan gì tới excluded_tickers/offbook.
+  EGG_NOTE=" TRỨNG VÀNG (egg.totalValue) — BẮT BUỘC KIỂM TRA cho tài khoản này TRƯỚC KHI kết luận bất kỳ mã nào 'thiếu tiền/không đủ tiền/sức mua ~0': chạy \`bin/compute_active_nav.py --account $ACCT\` và đọc dòng 'Trứng vàng'. egg.totalValue là vốn CHỦ SỞ HỮU THẬT (đã cộng vào NAV/active_nav) nhưng KHÔNG nằm trong availableCash/ppse.pp0Buy vì cần lệnh RÚT (redeem), tiền về T+1. Quy tắc diễn đạt (không được vi phạm): nếu 1 mã bị HOLD/hoãn vì availableCash thấp NHƯNG egg đủ bù phần thiếu → TUYỆT ĐỐI KHÔNG viết 'tài khoản thiếu tiền/không đủ tiền'. Viết đúng: 'availableCash tức thời thiếu Xđ NHƯNG egg còn Yđ — nếu muốn mua cần rút egg đêm nay/sáng mai, nếu không gate P0 sẽ tự HOLD (đúng thiết kế)'. ĐỪNG tự ý đề xuất rút egg thay user — chỉ NÊU RÕ lựa chọn đang có. Đây KHÔNG phải cho phép mua: quyết định mua/hoãn tuân theo signal_holds (mục dưới) và ranh giới user, egg chỉ để diễn đạt LÝ DO cho đúng."
   # CAPIT (gated-overflow bear-washout) capital-source note — user quyết định 2026-07-20
   # sau khi Taylor audit readiness (job Taylor_20260720_074025) phát hiện mâu thuẫn công
   # thức vốn (MD "size × free cash" vs paper code "NAV × capit_size", chênh ~100x) và
@@ -641,8 +828,16 @@ except Exception:
     CAPIT_BASKET="$(echo "$CAPIT_STATE" | cut -d'|' -f4)"
     CAPIT_NOTE=" 📌 CAPIT (bear-washout) ĐANG GIỮ VỊ THẾ — tín hiệu breadth HÔM NAY đã tắt (capit_signal_today=false) nhưng đó chỉ là điều kiện của RIÊNG ngày chạy, KHÔNG có nghĩa đã thoát: episode vào lệnh ${CAPIT_ENTRY}, đã ${CAPIT_SESS} phiên, rổ gốc ${CAPIT_BASKET} (nguồn: capit_episode_open=true trong golive_v23_status.json + data/capit_episode.json). Trong plan: các mã CAPIT là stop-exempt và slot-exempt (KHÔNG tính vào slot BAL/LAG thường, KHÔNG áp stop -20% của BAL). TUYỆT ĐỐI KHÔNG tự sinh lệnh BÁN để 'dọn' rổ CAPIT hay để 'cân' tỷ trọng — exit CAPIT do NGƯỜI quyết định, hệ thống KHÔNG có luật tự bán CAPIT ở đường live. Nếu bạn thấy lý do phải đụng tới 1 mã CAPIT, ghi rõ đề xuất + lý do trong plan note và để user duyệt, đừng tự đưa vào orders."
   fi
+  # HOLDS_NOTE — ranh giới tạm giữ tín hiệu (signal_holds), fix lỗi #3 RCA 2026-08-20.
+  # Bơm vào prompt để DollarBill biết không mở lệnh vi phạm; gate deterministic (signal_holds.py
+  # --check, gọi trong send_plan_report.sh + bot_execute.py) là lớp chặn cứng độc lập.
+  HOLDS_NOTE="$(cd "$ROOT" && python3 bin/signal_holds.py --note 2>/dev/null)"
+  # CORP_ACTION_NOTE — cùng nguồn/khuôn với [pipeline-0] ở trên, lọc riêng cho $ACCT (mã account
+  # này thực sự đang giữ) để DollarBill không nhầm biến động giá dự kiến (ex-date/AIS) với tín
+  # hiệu thị trường khi viết plan/summary.
+  CORP_ACTION_NOTE="$(cd "$ROOT" && python3 bin/nav_exdate_forecast.py --note "$ACCT" 2>/dev/null)"
   "$ROOT/bin/dispatch.sh" DollarBill \
-    "Lập plan T+1 cho tài khoản $ACCT. Đọc DT5G từ deploy_golive_dt5g_v4/golive_state_today.json và recommend output mới nhất trong data/. Ghi plan vào data/plan_${ACCT}_${NEXT_TRADING_DAY}.json — dùng ĐÚNG NGUYÊN VĂN ngày $NEXT_TRADING_DAY (đã tính sẵn bằng next_trading_day(), bỏ T7/CN/lễ) làm plan_date và tên file, TUYỆT ĐỐI KHÔNG tự suy ra 'ngày mai' bằng cách cộng 1 vào ngày hôm nay (sự cố thật 2026-07-10: dispatch thứ Sáu tự tính '07-11' là ngày mai, nhưng đó là thứ Bảy không phải ngày giao dịch, đúng ra phải là 07-13 thứ Hai). Ngày hôm nay: $TODAY (ICT).${NAV_NOTE}${CAPIT_NOTE} YÊU CẦU VĂN PHONG (user 2026-07-07): kết thúc final message bằng 3-5 dòng tóm tắt DỄ HIỂU cho người đọc không chuyên — bắt buộc nêu rõ: Account nào · plan ngày nào · hành động chính (HOLD hay mấy lệnh gì) · VÌ SAO 1-2 câu · trạng thái duyệt — vì message này được đăng nguyên văn vào Discord plan channel. Lệnh MUA size bằng tiền bán cùng ngày: trừ phí 0.075% + chừa biên giá, đừng size khít ref price. BẮT BUỘC VỀ GIÁ THAM CHIẾU (user 2026-07-09, tái diễn nhiều lần): mtm_price_ref/ref_price của MỌI mã trong plan phải lấy từ DNSE live quote (dnse_api.py secdef/latest_trade — giá đóng cửa THẬT hôm nay $TODAY) — TUYỆT ĐỐI KHÔNG dùng giá đóng cửa BQ ('ticker'/'ticker_1m' close) làm ref_price, vì BQ cache local chỉ sync đêm 23:45 ICT nên tại giờ bạn chạy (~19:00) BQ cache luôn trễ ít nhất 1 ngày giao dịch — dùng BQ ở đây LUÔN cho ra giá sai/cũ, không phải thỉnh thoảng. Sự cố thật đã xảy ra: plan ZaloPay 07-10 có 2/4 mã (BID, MBB) dùng nhầm 'BQ close 07-08' lệch tới +5.7% so với giá đóng cửa thật 07-09, trong khi 2 mã còn lại dùng đúng DNSE live. Nếu DNSE live quote lỗi/thiếu cho 1 mã nào đó, ghi rõ note 'THIẾU GIÁ LIVE — cần kiểm tra tay' thay vì âm thầm dùng BQ thay thế." \
+    "Lập plan T+1 cho tài khoản $ACCT. Đọc DT5G từ deploy_golive_dt5g_v4/golive_state_today.json và recommend output mới nhất trong data/. Ghi plan vào data/plan_${ACCT}_${NEXT_TRADING_DAY}.json — dùng ĐÚNG NGUYÊN VĂN ngày $NEXT_TRADING_DAY (đã tính sẵn bằng next_trading_day(), bỏ T7/CN/lễ) làm plan_date và tên file, TUYỆT ĐỐI KHÔNG tự suy ra 'ngày mai' bằng cách cộng 1 vào ngày hôm nay (sự cố thật 2026-07-10: dispatch thứ Sáu tự tính '07-11' là ngày mai, nhưng đó là thứ Bảy không phải ngày giao dịch, đúng ra phải là 07-13 thứ Hai). Ngày hôm nay: $TODAY (ICT).${NAV_NOTE}${EGG_NOTE}${CAPIT_NOTE}${HOLDS_NOTE}${CORP_ACTION_NOTE} YÊU CẦU VĂN PHONG (user 2026-07-07): kết thúc final message bằng 3-5 dòng tóm tắt DỄ HIỂU cho người đọc không chuyên — bắt buộc nêu rõ: Account nào · plan ngày nào · hành động chính (HOLD hay mấy lệnh gì) · VÌ SAO 1-2 câu · trạng thái duyệt — vì message này được đăng nguyên văn vào Discord plan channel. Lệnh MUA size bằng tiền bán cùng ngày: trừ phí ${FEE_NOTE} + chừa biên giá, đừng size khít ref price. BẮT BUỘC VỀ GIÁ THAM CHIẾU (user 2026-07-09, tái diễn nhiều lần): mtm_price_ref/ref_price của MỌI mã trong plan phải lấy từ DNSE live quote (dnse_api.py secdef/latest_trade — giá đóng cửa THẬT hôm nay $TODAY) — TUYỆT ĐỐI KHÔNG dùng giá đóng cửa BQ ('ticker'/'ticker_1m' close) làm ref_price, vì BQ cache local chỉ sync đêm 23:45 ICT nên tại giờ bạn chạy (~19:00) BQ cache luôn trễ ít nhất 1 ngày giao dịch — dùng BQ ở đây LUÔN cho ra giá sai/cũ, không phải thỉnh thoảng. Sự cố thật đã xảy ra: plan ZaloPay 07-10 có 2/4 mã (BID, MBB) dùng nhầm 'BQ close 07-08' lệch tới +5.7% so với giá đóng cửa thật 07-09, trong khi 2 mã còn lại dùng đúng DNSE live. Nếu DNSE live quote lỗi/thiếu cho 1 mã nào đó, ghi rõ note 'THIẾU GIÁ LIVE — cần kiểm tra tay' thay vì âm thầm dùng BQ thay thế." \
     --bg 2>/dev/null || echo "  [WARN] dispatch DollarBill cho $ACCT fail — check mike/logs/"
 done
 

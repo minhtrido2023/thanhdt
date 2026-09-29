@@ -1,0 +1,96 @@
+{
+  "job": "Taylor_20260630_044929",
+  "screen": "retail_compounder",
+  "universe_icb": [
+    5379.0,
+    3767.0
+  ],
+  "retail_names": [
+    "DGW",
+    "LIX",
+    "MWG",
+    "NET",
+    "PET",
+    "PNJ",
+    "PSD",
+    "SBV"
+  ],
+  "months": 153,
+  "K": 10,
+  "TC": 0.001,
+  "liq_floor": 100000000.0,
+  "inv_gate_headline": false,
+  "qual_med": 1,
+  "qual_min": 1,
+  "months_lt3": 73,
+  "months_zero": 0,
+  "qual_med_invgate": 1,
+  "median_pick_adv_b": 45.06,
+  "pct_picks_sub1b_adv": 6.0,
+  "full": {
+    "CAGR": 17.765,
+    "Sharpe": 0.597,
+    "MaxDD": -51.995,
+    "Calmar": 0.342,
+    "navfinal": 2.975,
+    "n": 80
+  },
+  "full_bh": {
+    "CAGR": 9.652,
+    "Sharpe": 0.507,
+    "MaxDD": -43.154,
+    "Calmar": 0.224,
+    "navfinal": 1.848,
+    "n": 80
+  },
+  "is_": {
+    "CAGR": 27.713,
+    "Sharpe": 0.817,
+    "MaxDD": -23.002,
+    "Calmar": 1.205,
+    "navfinal": 2.0,
+    "n": 34
+  },
+  "is_bh": {
+    "CAGR": -2.213,
+    "Sharpe": -0.004,
+    "MaxDD": -25.477,
+    "Calmar": -0.087,
+    "navfinal": 0.939,
+    "n": 34
+  },
+  "oos": {
+    "CAGR": 10.913,
+    "Sharpe": 0.467,
+    "MaxDD": -45.13,
+    "Calmar": 0.242,
+    "navfinal": 1.487,
+    "n": 46
+  },
+  "oos_bh": {
+    "CAGR": 19.336,
+    "Sharpe": 0.821,
+    "MaxDD": -23.088,
+    "Calmar": 0.837,
+    "navfinal": 1.969,
+    "n": 46
+  },
+  "selfcheck_diff_vnd": 3e-06,
+  "verify_MWG_2014_15": [
+    "2015-05",
+    "2015-06",
+    "2015-07",
+    "2015-08",
+    "2015-09",
+    "2015-10",
+    "2015-11",
+    "2015-12"
+  ],
+  "verify_PNJ_2014_15": [],
+  "verify_FRT_2018": [],
+  "verify_MWG_invgate": [],
+  "pnj_miss_reason": "outside ticker_prune 2014-15 (10/25 rows) AND CF_OA_5Y<0 in 2015 (same gate excludes FRT-2018); margin-turnaround archetype not isolable from value-trap w/o look-ahead",
+  "overlap_industrial": 7.1,
+  "overlap_custom30v": 8.0,
+  "overlap_8l_top25": 0.0
+}

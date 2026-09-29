@@ -1,0 +1,4 @@
+[universe] 263 mã tại phiên cuối <= 2026-03-01 (WC=/home/trido/thanhdt/WorkingClaude)
+[pit] từ chối 28/263
+[live] từ chối 7/263
+-> snap_before_20260301.json

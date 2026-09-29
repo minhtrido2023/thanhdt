@@ -1,0 +1,28 @@
+[wrapper] custom_basket = /home/trido/thanhdt/wt-c30v-wexdate/WorkingClaude/custom_basket.py  retchain_legacy=False
+[BQ_LOCAL_CACHE] WARNING: cache verified 1426h ago (>36h) — consider re-running sync_bq_cache.py
+[BQ_LOCAL_CACHE] ready — 14 tables from /home/trido/thanhdt/WorkingClaude/data/bq_cache_asof20260729_postrestate
+  [forensic exclude] none ([Errno 2] No such file or directory: '/home/trido/thanhdt/wt-c30v-wexdate/WorkingClaude/data/forensic_flags.csv')
+[BQ_LOCAL_CACHE] query took 63.4s (585845 rows)
+  [forensic exclude] none ([Errno 2] No such file or directory: '/home/trido/thanhdt/wt-c30v-wexdate/WorkingClaude/data/forensic_flags.csv')
+[BQ_LOCAL_CACHE] query took 79.5s (585845 rows)
+  [oshares-step] corp-action từ SNAPSHOT /home/trido/thanhdt/WorkingClaude/data/snapshots/corp_action_share_20260927.parquet: 4502 dòng
+  [oshares-step] exdate: 1619 bước OShares, 756 bước ĐƯỢC DỜI (median 42 ngày), 851 giữ ngày quý (không khớp sự kiện), 3 bị chặn bởi cổng PIT
+
+năm     rổ quarter   rổ exdate    Δ (pp)
+2013         +0.00       +0.00     +0.00
+2014         +2.91       +2.85     -0.06
+2015         -0.85       -0.37     +0.48
+2016        +12.49      +12.34     -0.15
+2017        +47.64      +47.55     -0.09
+2018         -4.95       -4.75     +0.20
+2019         +4.54       +4.59     +0.06
+2020        +56.28      +58.47     +2.19
+2021        +89.15      +89.42     +0.27
+2022        -34.51      -34.79     -0.28
+2023        +26.69      +26.42     -0.27
+2024        +23.82      +23.70     -0.11
+2025        +39.00      +38.98     -0.01
+2026         -1.15       -1.16     -0.00
+
+max |Δ| theo năm = 2.19pp (năm 2020); Δ 2021 = +0.27pp
+CAGR chuỗi rổ: quarter 16.90%  exdate 17.02%  Δ +0.12pp  (lịch, không phải /252)

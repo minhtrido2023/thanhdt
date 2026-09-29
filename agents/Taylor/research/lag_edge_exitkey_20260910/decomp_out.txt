@@ -1,0 +1,27 @@
+PER-RUN contribution to the log-NAV delta (exitkey - ctrl), in log-% points
+     start        end  n_sess  ctrl_tilts  d_in_window  d_window_plus25
+2015-08-10 2015-11-23      75       False        1.171            0.985
+2017-03-16 2017-05-09      36       False       -0.460           -1.217
+2017-05-26 2017-06-13      13        True       -0.956           -1.011
+2017-07-19 2017-07-27       7       False        0.735            0.668
+2017-08-08 2017-08-22      11       False        0.199            0.133
+2017-09-01 2017-09-12       7       False        0.005           -0.022
+2017-10-26 2017-11-07       9        True        0.741            0.644
+2017-11-30 2017-12-12       9       False       -0.335           -0.457
+2019-06-04 2019-06-10       5        True       -0.106           -0.072
+2019-08-08 2019-09-12      25       False       -0.191           -0.336
+2020-10-28 2020-12-01      25        True        0.649            0.377
+2023-11-30 2023-12-05       4        True       -0.034           -0.046
+2025-05-12 2025-06-12      24       False       -0.955           -0.884
+2025-07-24 2025-08-27      25        True        0.521            0.509
+2025-11-10 2025-12-12      25       False       -0.176           -0.187
+
+sum over the 15 runs (in-window)   = +0.808 log-%
+gross movement sum|run|            = +7.234 log-%
+largest single run                 = +1.171 log-%
+residual OUTSIDE every run         = -0.605 log-%   (pure path divergence)
+TOTAL 2014-2026                    = +0.203 log-%
+
+sign split across N=15 runs: 7 positive / 8 negative   -> two-sided sign test p = 0.93 (informal; runs are not iid)
+
+annualised: total 0.00203 log over 12.46y = +0.016pp CAGR

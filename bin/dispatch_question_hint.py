@@ -117,8 +117,9 @@ def main():
         agent, topic, age = q.get("agent", "?"), q.get("topic", "?"), q.get("age_days", "?")
         mark = "CHẮC" if lvl == 2 else "có thể"
         print(f"       · [{mark}] {agent}/{topic} ({age}d treo)")
-        print(f"         {ROOT}/bin/append_event.sh Mike decision {json.dumps(topic)} "
-              "'{\"decided_by\":\"user\",\"decision\":\"<tóm tắt quyết định>\"}'")
+        print(f"         {ROOT}/bin/close_bus_question.py {json.dumps(agent + '/' + topic)} "
+              "--resolution '<tóm tắt quyết định>' --evidence '<commit/file/log>' "
+              "--decided-by-user")
     if extra:
         print(f"       · …và {extra} câu hỏi treo khác cũng khớp — "
               f"danh sách ĐẦY ĐỦ: {ROOT}/bin/bus_question_audit.py")

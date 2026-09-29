@@ -1,0 +1,5 @@
+[universe] 263 mã tại phiên cuối <= 2026-03-01 (WC=/tmp/wc_certwt)
+[pit] từ chối 17/263
+[live] từ chối 6/263
+-> snap_final_20260301.json
+DONEF

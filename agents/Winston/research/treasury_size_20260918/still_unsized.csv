@@ -1,0 +1,343 @@
+ticker,public_date,action_type,shares_delta,nrows,titles,inferred,tier,why,is_unsized
+AAM,2018-11-29,buy_done,,1,AAM: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (9,935,701)",True
+AAM,2019-10-29,sell_done,,1,AAM: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (10,451,182)",True
+ACB,2020-04-09,sell_done,,1,ACB: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (1,662,737,277)",True
+ACG,2023-11-24,sell_done,,1,ACG: Thông báo thay đổi số lượng cổ phiếu có quyền biểu quyết đang lưu hành và báo cáo kết quả sử dụng cổ phiếu quỹ bán cho người lao động,,NO_MOVE,"OShares khong doi qua cua so (150,787,946)",True
+ACS,2021-01-21,sell_done,,1,ACS: Báo cáo kết quả chào bán cổ phiếu quỹ riêng lẻ,,NO_DATA,khong co day BCTC,True
+ACV,2025-07-11,buy_done,,1,ACV: Báo cáo kết quả giao dịch mua lại cổ phiếu,,NO_MOVE,"OShares khong doi qua cua so (2,176,950,436)",True
+AGG,2020-04-16,buy_done,,1,AGG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (74,925,250)",True
+AGG,2020-12-16,buy_done,,1,AGG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,SIGN_MISMATCH,"resid=357,477 nguoc dau ky vong (buy_done)",True
+AGR,2017-07-07,sell_done,,1,AGR: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (211,199,953)",True
+AGR,2021-08-18,sell_done,,1,AGR: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (211,999,953)",True
+APH,2023-03-16,buy_done,,1,APH: Báo cáo kết quả giao dịch mua lại cổ phiếu ưu đãi,,NO_MOVE,"OShares khong doi qua cua so (243,884,268)",True
+BIO,2019-07-08,buy_done,,1,BIO: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,NO_DATA,khong co day BCTC,True
+BSI,2020-02-14,buy_done,,1,BSI: Báo cáo kết quả giao dịch mua lại cổ phiếu làm cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (121,570,689)",True
+BSI,2023-12-19,sell_done,,1,BSI: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (202,783,127)",True
+BTV,2018-03-15,buy_done,,1,BTV: Báo cáo kết quả giao dịch mua lại cổ phiếu,,SIGN_MISMATCH,"resid=37,400 nguoc dau ky vong (buy_done)",True
+BTV,2020-10-20,buy_done,,1,BTV: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,MULTI_EVENT,2 su kien treasury cung cua so 2020-08-03..2020-11-02,True
+BTV,2020-10-21,buy_done,,1,BTV: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,MULTI_EVENT,2 su kien treasury cung cua so 2020-08-03..2020-11-02,True
+CAV,2019-12-25,buy_done,,1,CAV: Báo cáo kết quả giao dịch mua lại cổ phiếu,,NO_DATA,khong co day BCTC,True
+CC1,2025-10-28,sell_done,,1,CC1: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,SIGN_MISMATCH,"resid=-39,398,275 nguoc dau ky vong (sell_done)",True
+CEE,2018-05-31,buy_done,,1,CEE: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,NO_DATA,khong co day BCTC,True
+CIA,2021-01-13,buy_done,,1,CIA: Báo cáo kết quả giao dịch mua lại cổ phiếu làm cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (18,382,143)",True
+CII,2020-05-07,buy_done,,1,CII: Báo cáo kết quả giao dịch mua cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (238,838,282)",True
+CII,2023-06-26,sell_done,,1,CII: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (284,019,513)",True
+CKV,2017-11-20,sell_done,,1,CKV: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (4,012,000)",True
+CKV,2018-02-13,sell_done,,1,CKV: CBTT Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (4,012,000)",True
+CMG,2017-12-05,sell_done,,1,CMG: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (67,341,953)",True
+CMG,2025-12-15,buy_done,,1,CMG: Báo cáo kết quả giao dịch mua lại cổ phiếu,,SIGN_MISMATCH,"resid=21,155,801 nguoc dau ky vong (buy_done)",True
+CMG,2026-08-13,buy_done,,1,CMG: Báo cáo kết quả giao dịch mua lại cổ phiếu,,NO_DATA,su kien ngoai pham vi BCTC,True
+CMT,2019-02-21,buy_done,,1,CMT: Báo cáo kết quả giao dịch mua lại cổ phiếu và Thông báo thay đổi số lượng cổ phiếu có quyền biểu quyết đang lưu hành,,NO_DATA,su kien ngoai pham vi BCTC,True
+CTD,2017-08-25,buy_done,,1,CTD: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,MULTI_EVENT,2 su kien treasury cung cua so 2017-08-01..2017-11-01,True
+CTD,2017-08-30,buy_done,,1,CTD: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,MULTI_EVENT,2 su kien treasury cung cua so 2017-08-01..2017-11-01,True
+CTD,2018-11-01,buy_done,,1,CTD: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,MULTI_EVENT,2 su kien treasury cung cua so 2018-10-22..2019-01-23,True
+CTD,2019-01-11,buy_done,,1,CTD: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,MULTI_EVENT,2 su kien treasury cung cua so 2018-10-22..2019-01-23,True
+CTD,2023-06-22,sell_done,,1,CTD: Báo cáo kết quả sử dụng cổ phiếu quỹ bán cho người lao động trong công ty (điều chỉnh),,MULTI_EVENT,2 su kien treasury cung cua so 2023-04-24..2023-08-01,True
+CTD,2023-06-28,sell_done,,1,CTD: Thông báo công văn của UBCKNN về việc nhận được tài liệu báo cáo kết quả sử dụng cổ phiếu quỹ để bán cho người lao động của CTD,,MULTI_EVENT,2 su kien treasury cung cua so 2023-04-24..2023-08-01,True
+CTD,2024-02-01,sell_done,,2,CTD: Nghị quyết HĐQT về việc thông qua kết quả giao dịch bán cổ phiếu quỹ ~~ CTD: Báo cáo kết quả bán cổ phiếu quỹ theo chương trình ESOP,,SIGN_MISMATCH,"resid=-24,089,166 nguoc dau ky vong (sell_done)",True
+CTD,2024-02-05,sell_done,,1,CTD: Thông báo công văn của UBCKNN về tài liệu báo cáo kết quả sử dụng cổ phiếu quỹ để bán cho người lao động của CTD,,NO_MOVE,"OShares khong doi qua cua so (99,930,014)",True
+CTI,2025-07-01,sell_done,,2,CTI: Báo cáo kết quả giao dịch bán cổ phiếu quỹ ~~ CTI: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (62,999,997)",True
+CTS,2024-05-29,sell_done,,1,CTS: Thông báo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (148,738,311)",True
+CTW,2017-02-07,buy_done,,1,CTW: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (27,998,600)",True
+CX8,2018-09-04,sell_done,,1,CX8: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (2,208,426)",True
+DBD,2021-01-28,buy_done,,1,DBD: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (52,338,915)",True
+DBD,2021-02-04,buy_done,,1,DBD: Đính chính báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (52,338,915)",True
+DGW,2022-06-08,buy_done,,1,DGW: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,SIGN_MISMATCH,"resid=71,274,918 nguoc dau ky vong (buy_done)",True
+DGW,2024-03-25,buy_done,,1,DGW: Báo cáo kết quả giao dịch mua lại cổ phiếu,,NO_MOVE,"OShares khong doi qua cua so (167,053,274)",True
+DGW,2026-07-14,buy_done,,1,DGW: Báo cáo kết quả giao dịch mua lại cổ phiếu,,SIGN_MISMATCH,"resid=2,192,300 nguoc dau ky vong (buy_done)",True
+DHA,2019-01-28,buy_done,,1,DHA: Báo cáo kết quả giao dịch mua lại cổ phiếu làm cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (14,726,073)",True
+DIG,2020-04-28,buy_done,,1,DIG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (306,688,171)",True
+DIG,2020-12-04,sell_done,,1,DIG: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (314,943,601)",True
+DIH,2024-02-02,sell_done,,1,DIH: DIH-BC kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (5,994,962)",True
+DPG,2020-04-27,buy_done,,1,DPG: Báo cáo kết quả giao dịch mua lại cổ phiếu,,NO_MOVE,"OShares khong doi qua cua so (44,999,810)",True
+DPR,2021-07-06,sell_done,,1,DPR: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (43,000,000)",True
+DRH,2019-04-01,buy_done,,1,DRH: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,SIGN_MISMATCH,"resid=10,000 nguoc dau ky vong (buy_done)",True
+DRH,2020-04-06,buy_done,,1,DRH: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (60,364,933)",True
+DTL,2017-09-20,sell_done,,1,DTL: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (60,630,984)",True
+DXG,2020-01-03,buy_done,,2,DXG: Báo cáo kết quả giao dịch mua lại cổ phiếu ~~ DXG: Báo cáo kết quả giao dịch mua lại cổ phiếu,,IMPLAUSIBLE,|resid|=98.3% OShares — qua lon cho 1 lo CP quy,True
+DXG,2020-08-17,buy_done,,1,DXG: Báo cáo kết quả giao dịch mua lại cổ phiếu,,NO_MOVE,"OShares khong doi qua cua so (518,287,181)",True
+EIB,2024-02-20,sell_done,,1,EIB: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (1,740,866,148)",True
+ELC,2017-07-03,buy_done,,1,ELC: Báo cáo kết quả giao dịch mua lại cổ phiếu,,NO_MOVE,"OShares khong doi qua cua so (47,587,885)",True
+ELC,2017-11-17,buy_done,,1,ELC: Báo cáo kết quả giao dịch mua lại cổ phiếu,,NO_MOVE,"OShares khong doi qua cua so (50,916,853)",True
+ELC,2018-06-14,buy_done,,1,ELC: Báo cáo kết quả giao dịch mua lại cổ phiếu,,NO_MOVE,"OShares khong doi qua cua so (50,618,648)",True
+ELC,2026-03-19,buy_done,,1,ELC: Báo cáo kết quả giao dịch mua lại cổ phiếu và Thông báo thay đổi số lượng cổ phiếu có quyền biểu quyết đang lưu hành,,MULTI_EVENT,2 su kien treasury cung cua so 2026-02-02..2026-05-04,True
+ELC,2026-04-20,buy_done,,1,ELC: Báo cáo kết quả giao dịch mua lại cổ phiếu và Thông báo thay đổi số lượng cổ phiếu có quyền biểu quyết đang lưu hành,,MULTI_EVENT,2 su kien treasury cung cua so 2026-02-02..2026-05-04,True
+ELC,2026-06-19,buy_done,,1,ELC: Báo cáo kết quả giao dịch mua lại cổ phiếu và Thông báo thay đổi số lượng cổ phiếu có quyền biểu quyết đang lưu hành,,NO_MOVE,"OShares khong doi qua cua so (110,047,218)",True
+EVE,2018-01-10,buy_done,,1,EVE: Báo cáo kết quả giao dịch mua lại cổ phiếu,,NO_MOVE,"OShares khong doi qua cua so (39,547,973)",True
+EVE,2018-12-14,buy_done,,1,EVE: Báo cáo kết quả giao dịch mua lại cổ phiếu,,NO_MOVE,"OShares khong doi qua cua so (38,047,973)",True
+FCN,2020-06-09,buy_done,,1,FCN: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (118,029,323)",True
+FCN,2021-02-02,sell_done,,1,FCN: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (125,439,005)",True
+FMC,2020-06-26,buy_done,,1,FMC: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (49,044,000)",True
+GAS,2018-01-23,sell_done,,1,GAS: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,MULTI_EVENT,2 su kien treasury cung cua so 2017-11-01..2018-02-01,True
+GAS,2018-01-24,sell_done,,1,"GAS đã bán hết cổ phiếu quỹ, thu về 61 tỷ đồng",,MULTI_EVENT,2 su kien treasury cung cua so 2017-11-01..2018-02-01,True
+GDT,2017-05-03,buy_done,,1,GDT: Báo cáo kết quả giao dịch mua lại cổ phiếu,,NO_MOVE,"OShares khong doi qua cua so (14,899,800)",True
+GDT,2018-02-09,buy_done,,1,GDT: Báo cáo kết quả giao dịch mua lại cổ phiếu,,NO_MOVE,"OShares khong doi qua cua so (14,855,850)",True
+GDT,2018-06-14,buy_done,,1,GDT: Báo cáo kết quả giao dịch mua lại cổ phiếu,,SIGN_MISMATCH,"resid=1,476,966 nguoc dau ky vong (buy_done)",True
+GDT,2018-12-14,buy_done,,1,GDT: Báo cáo kết quả giao dịch mua lại cổ phiếu,,SIGN_MISMATCH,"resid=413,056 nguoc dau ky vong (buy_done)",True
+GDT,2019-05-03,buy_done,,1,GDT: Báo cáo kết quả giao dịch mua lại cổ phiếu và thay đổi số lượng cổ phiếu lưu hành,,MULTI_EVENT,2 su kien treasury cung cua so 2019-04-22..2019-08-01,True
+GDT,2019-07-19,buy_done,,1,GDT: Báo cáo kết quả giao dịch mua lại cổ phiếu,,MULTI_EVENT,2 su kien treasury cung cua so 2019-04-22..2019-08-01,True
+GDT,2019-10-24,buy_done,,1,GDT: Báo cáo kết quả giao dịch mua lại cổ phiếu,,MULTI_EVENT,2 su kien treasury cung cua so 2019-10-21..2020-01-20,True
+GDT,2019-12-13,buy_done,,1,GDT: Báo cáo kết quả giao dịch mua lại cổ phiếu,,MULTI_EVENT,2 su kien treasury cung cua so 2019-10-21..2020-01-20,True
+GDT,2020-03-24,buy_done,,1,GDT: Báo cáo kết quả giao dịch mua lại cổ phiếu,,NO_MOVE,"OShares khong doi qua cua so (16,942,208)",True
+GDT,2020-05-28,buy_done,,1,GDT: Báo cáo kết quả giao dịch mua lại cổ phiếu,,NO_MOVE,"OShares khong doi qua cua so (16,942,208)",True
+GDT,2020-12-08,buy_done,,1,GDT: Báo cáo kết quả giao dịch mua lại cổ phiếu,,MULTI_EVENT,2 su kien treasury cung cua so 2020-10-22..2021-01-25,True
+GDT,2021-01-20,buy_done,,1,GDT: Báo cáo kết quả giao dịch mua lại cổ phiếu,,MULTI_EVENT,2 su kien treasury cung cua so 2020-10-22..2021-01-25,True
+GDT,2021-11-15,buy_done,,1,GDT: Báo cáo kết quả giao dịch mua lại cổ phiếu,,SIGN_MISMATCH,"resid=1,725,838 nguoc dau ky vong (buy_done)",True
+GDT,2022-04-22,buy_done,,1,GDT: Báo cáo kết quả giao dịch mua lại cổ phiếu,,NO_MOVE,"OShares khong doi qua cua so (19,365,036)",True
+GDT,2023-07-07,buy_done,,1,GDT: Thông báo kết quả giao dịch mua lại cổ phiếu quỹ đợt 2,,MULTI_EVENT,2 su kien treasury cung cua so 2023-04-21..2023-08-01,True
+GDT,2023-07-14,buy_done,,1,GDT: Đính chính thời gian thực hiện của báo cáo kết quả giao dịch mua lại cổ phiếu đợt 2,,MULTI_EVENT,2 su kien treasury cung cua so 2023-04-21..2023-08-01,True
+GDT,2024-06-06,buy_done,,1,GDT: Thông báo thay đổi số lượng cổ phiếu có quyền biểu quyết đang lưu hành và báo cáo kết quả giao dịch mua lại cổ phiếu,,NO_MOVE,"OShares khong doi qua cua so (21,452,082)",True
+GDT,2025-12-30,buy_done,,1,GDT: Thông báo thay đổi số lượng cổ phiếu có quyền biểu quyết và báo cáo kết quả giao dịch mua lại cổ phiếu,,SIGN_MISMATCH,"resid=6,100 nguoc dau ky vong (buy_done)",True
+GDT,2026-05-14,buy_done,,1,GDT: Báo cáo kết quả mua lại cổ phiếu ESOP đợt 2 và Thông báo thay đổi số lượng cổ phiếu có quyền biểu quyết đang lưu hành,,SIGN_MISMATCH,"resid=2,425,220 nguoc dau ky vong (buy_done)",True
+GEX,2020-05-27,buy_done,,1,GEX: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (469,969,050)",True
+GEX,2021-01-06,sell_done,,1,GEX: Báo cáo kết quả giao dịch bán cổ phiếu quỹ cho người lao động,,MULTI_EVENT,2 su kien treasury cung cua so 2020-10-30..2021-02-01,True
+GEX,2021-01-15,sell_done,,1,GEX: Thông báo nhận được công văn của UBCKNN về kết quả giao dịch bán cổ phiếu quỹ cho người lao động của GEX,,MULTI_EVENT,2 su kien treasury cung cua so 2020-10-30..2021-02-01,True
+GEX,2021-04-09,sell_done,,1,GEX: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,MULTI_EVENT,2 su kien treasury cung cua so 2021-02-01..2021-05-04,True
+GEX,2021-04-15,sell_done,,1,GEX: Thông báo công văn của UBCKNN về kết quả giao dịch bán cổ phiếu quỹ của GEX,,MULTI_EVENT,2 su kien treasury cung cua so 2021-02-01..2021-05-04,True
+GIL,2018-08-07,sell_done,,1,GIL: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,IMPLAUSIBLE,|resid|=37.4% OShares — qua lon cho 1 lo CP quy,True
+GIL,2020-09-22,buy_done,,1,GIL: Báo cáo kết quả giao dịch mua lại cổ phiếu,,IMPLAUSIBLE,|resid|=66.7% OShares — qua lon cho 1 lo CP quy,True
+GIL,2021-06-24,sell_done,,1,GIL: Báo cáo kết quả bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (36,000,000)",True
+GIL,2024-06-04,buy_done,,1,GIL: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,SIGN_MISMATCH,"resid=50,714 nguoc dau ky vong (buy_done)",True
+GIL,2024-09-13,sell_done,,1,GIL: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,MULTI_EVENT,2 su kien treasury cung cua so 2024-07-31..2024-10-31,True
+GIL,2024-09-20,sell_done,,1,GIL: Công văn của UBCKNN về việc nhận được tài liệu báo cáo kết quả giao dịch bán cổ phiếu quỹ,,MULTI_EVENT,2 su kien treasury cung cua so 2024-07-31..2024-10-31,True
+GLT,2024-10-17,buy_done,,1,GLT: GLT_Báo cáo kết quả giao dịch mua lại cổ phiếu,,MULTI_EVENT,2 su kien treasury cung cua so 2024-07-23..2024-11-01,True
+GLT,2024-11-01,buy_done,,1,GLT: GLT_Đính chính Báo cáo kết quả mua lại cổ phiếu số 01.2024-BC ngày 16/10/2024,,MULTI_EVENT,2 su kien treasury cung cua so 2024-07-23..2024-11-01,True
+GND,2020-06-02,buy_done,,1,GND: Báo cáo kết quả giao dịch mua lại cổ phiếu,,NO_DATA,khong co day BCTC,True
+GND,2021-01-13,sell_done,,1,GND: báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_DATA,khong co day BCTC,True
+HAH,2021-11-26,sell_done,,1,HAH: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (48,782,751)",True
+HAR,2020-01-16,buy_done,,1,HAR: Báo cáo kết quả giao dịch mua cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (99,184,090)",True
+HAR,2020-12-07,buy_done,,1,HAR: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (95,684,090)",True
+HAX,2019-03-20,buy_done,,1,HAX: Báo cáo kết quả giao dịch mua lại cổ phiếu và Thông báo thay đổi số lượng cổ phiếu có quyền biểu quyết đang lưu hành,,MULTI_EVENT,2 su kien treasury cung cua so 2019-01-22..2019-04-22,True
+HAX,2019-04-08,buy_done,,1,HAX: Báo cáo kết quả giao dịch mua lại cổ phiếu và Thông báo thay đổi số lượng cổ phiếu có quyền biểu quyết đang lưu hành,,MULTI_EVENT,2 su kien treasury cung cua so 2019-01-22..2019-04-22,True
+HAX,2021-01-29,sell_done,,1,HAX: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (36,744,399)",True
+HC3,2017-10-05,buy_done,,1,HC3: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (15,543,029)",True
+HCM,2017-12-05,buy_done,,1,HCM: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ và thay đổi số lượng cổ phiếu có quyền biểu quyết đang lưu hành,,NO_MOVE,"OShares khong doi qua cua so (129,570,368)",True
+HCM,2018-05-09,buy_done,,1,HCM: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,MULTI_EVENT,2 su kien treasury cung cua so 2018-04-23..2018-08-01,True
+HCM,2018-07-11,buy_done,,1,HCM: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,MULTI_EVENT,2 su kien treasury cung cua so 2018-04-23..2018-08-01,True
+HCM,2019-05-21,buy_done,,1,HCM: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,IMPLAUSIBLE,|resid|=290.2% OShares — qua lon cho 1 lo CP quy,True
+HCM,2019-09-16,buy_done,,1,HCM: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (305,516,173)",True
+HCM,2020-02-14,buy_done,,1,HCM: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,MULTI_EVENT,2 su kien treasury cung cua so 2020-01-31..2020-04-21,True
+HCM,2020-04-09,buy_done,,1,HCM: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,MULTI_EVENT,2 su kien treasury cung cua so 2020-01-31..2020-04-21,True
+HCM,2020-09-09,buy_done,,1,HCM: Thông báo thay đổi số lượng cổ phiếu có quyền biểu quyết đang lưu hành và báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (305,041,845)",True
+HDB,2020-01-13,buy_done,,1,HDB: Báo cáo kết quả giao dịch mua lại cổ phiếu,,MULTI_EVENT,2 su kien treasury cung cua so 2019-10-30..2020-01-31,True
+HDB,2020-04-06,sell_done,,1,HDB: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (965,921,291)",True
+HDB,2025-11-18,sell_done,,1,HDB: Thông báo công văn của UBCKNN về tài liệu báo cáo kết quả giao dịch bán cổ phiếu quỹ của HDB,,MULTI_EVENT,2 su kien treasury cung cua so 2025-10-30..2026-02-02,True
+HDC,2017-09-26,sell_done,,1,HDC: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (45,077,847)",True
+HDC,2018-05-10,buy_done,,1,HDC: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,SIGN_MISMATCH,"resid=4,876,640 nguoc dau ky vong (buy_done)",True
+HDC,2021-02-04,sell_done,,1,HDC: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (66,515,837)",True
+HDG,2020-11-27,sell_done,,1,HDG: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (154,275,018)",True
+HGM,2024-10-09,sell_done,,1,HGM: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (12,600,000)",True
+HHS,2018-05-25,buy_done,,1,HHS: Báo cáo kết quả giao dịch mua lại cổ phiếu,,NO_MOVE,"OShares khong doi qua cua so (249,744,063)",True
+HHS,2020-04-16,sell_done,,1,HHS: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (274,744,063)",True
+HNF,2018-01-29,buy_done,,1,HNF: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (18,820,500)",True
+HSG,2018-03-07,buy_done,,1,HSG: Báo cáo kết quả giao dịch mua lại cổ phiếu,,NO_MOVE,"OShares khong doi qua cua so (349,957,383)",True
+HSG,2018-08-29,buy_done,,1,HSG: Báo cáo kết quả mua lại cổ phiếu,,MULTI_EVENT,2 su kien treasury cung cua so 2018-07-30..2018-11-01,True
+HSG,2018-10-26,buy_done,,1,HSG: Báo cáo kết quả giao dịch mua lại cổ phiếu,,MULTI_EVENT,2 su kien treasury cung cua so 2018-07-30..2018-11-01,True
+HSG,2018-12-26,buy_done,,1,HSG: Báo cáo kết quả giao dịch mua lại cổ phiếu,,NO_MOVE,"OShares khong doi qua cua so (384,844,728)",True
+HSG,2019-08-22,buy_done,,1,HSG: Báo cáo kết quả giao dịch mua lại cổ phiếu,,MULTI_EVENT,2 su kien treasury cung cua so 2019-07-31..2019-10-30,True
+HSG,2019-10-29,buy_done,,1,HSG: Báo cáo kết quả giao dịch mua lại cổ phiếu,,MULTI_EVENT,2 su kien treasury cung cua so 2019-07-31..2019-10-30,True
+HSG,2020-10-19,buy_done,,1,HSG: Báo cáo kết quả giao dịch mua lại cổ phiếu,,NO_MOVE,"OShares khong doi qua cua so (444,298,113)",True
+HSG,2021-03-31,sell_done,,1,HSG: Báo cáo kết quả bán cổ phiếu quỹ,,SIGN_MISMATCH,"resid=-1,730,086 nguoc dau ky vong (sell_done)",True
+HT1,2022-02-21,sell_done,,1,HT1: Kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (381,589,911)",True
+HTP,2021-03-25,sell_done,,1,HTP: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (91,804,980)",True
+HVH,2020-10-08,sell_done,,1,HVH: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,IMPLAUSIBLE,|resid|=79.5% OShares — qua lon cho 1 lo CP quy,True
+ICG,2019-04-03,buy_done,,1,ICG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (17,572,000)",True
+IDV,2021-10-25,buy_done,,1,IDV: Báo cáo kết quả mua lại cổ phiếu quỹ phát sinh từ đợt phát hành cổ phiếu trả cổ tức năm 2020,,SIGN_MISMATCH,"resid=3,209,399 nguoc dau ky vong (buy_done)",True
+IDV,2021-11-24,sell_done,,1,IDV: Báo cáo kết quả bán cổ phiếu quỹ phát sinh từ đợt chia cổ tức năm 2020 bằng cổ phiếu,,SIGN_MISMATCH,"resid=-2,672,099 nguoc dau ky vong (sell_done)",True
+IMP,2017-11-30,buy_done,,1,IMP: Báo cáo kết quả giao dịch mua lại cổ phiếu quỷ từ đợt phát hành ESOP,,NO_MOVE,"OShares khong doi qua cua so (42,958,351)",True
+IMP,2019-08-22,buy_done,,1,IMP: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,MULTI_EVENT,2 su kien treasury cung cua so 2019-08-01..2019-10-17,True
+IMP,2019-09-27,buy_done,,1,IMP: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,MULTI_EVENT,2 su kien treasury cung cua so 2019-08-01..2019-10-17,True
+IPA,2021-10-21,sell_done,,1,IPA: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,IMPLAUSIBLE,|resid|=102.1% OShares — qua lon cho 1 lo CP quy,True
+ITD,2017-07-19,buy_done,,1,ITD: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (19,061,730)",True
+ITD,2018-05-04,buy_done,,1,ITD: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (19,014,010)",True
+ITQ,2020-05-15,buy_done,,1,ITQ: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (22,123,705)",True
+ITQ,2021-04-09,sell_done,,1,ITQ: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (23,843,305)",True
+KBC,2022-03-18,sell_done,,1,KBC: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,MULTI_EVENT,2 su kien treasury cung cua so 2022-02-07..2022-05-04,True
+KBC,2022-03-23,sell_done,,1,KBC121020: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,MULTI_EVENT,2 su kien treasury cung cua so 2022-02-07..2022-05-04,True
+KDC,2021-12-10,sell_done,,1,KDC: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (251,624,010)",True
+KDC,2022-08-30,sell_done,,1,KDC: Thông báo thay đổi số lượng cổ phiếu có quyền biểu quyết đang lưu hành và báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (257,224,010)",True
+KDC,2024-06-21,sell_done,,1,KDC: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (289,806,316)",True
+KDC,2026-07-06,buy_done,,1,KDC: Báo cáo kết quả giao dịch mua lại cổ phiếu,,NO_MOVE,"OShares khong doi qua cua so (276,345,300)",True
+KDH,2021-09-28,sell_done,,1,KDH: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (642,937,069)",True
+KHP,2024-10-18,sell_done,,1,KHP: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,SIGN_MISMATCH,"resid=-1,870 nguoc dau ky vong (sell_done)",True
+KHW,2018-04-04,buy_done,,1,KHW: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,MULTI_EVENT,2 su kien treasury cung cua so 2018-02-01..2018-05-02,True
+KHW,2020-03-16,sell_done,,1,KHW: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (26,000,000)",True
+KLB,2017-08-10,sell_done,,1,KLB: Báo cáo kết quả giao dịch bán cổ phiếu quỹ của Ngân hàng TMCP Kiên Long,,NO_MOVE,"OShares khong doi qua cua so (296,200,000)",True
+KSB,2020-07-24,buy_done,,1,KSB: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (53,444,482)",True
+L40,2024-08-26,sell_done,,1,L40: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (3,600,000)",True
+LBM,2017-09-18,sell_done,,1,LBM: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (8,500,000)",True
+LDG,2019-01-31,buy_done,,1,LDG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,MULTI_EVENT,2 su kien treasury cung cua so 2019-01-21..2019-04-25,True
+LDG,2019-02-26,buy_done,,1,LDG: Thông báo công văn của UBCKNN về báo cáo kết quả giao dịch mua lại cổ phiếu của LDG,,MULTI_EVENT,2 su kien treasury cung cua so 2019-01-21..2019-04-25,True
+LDG,2019-12-03,buy_done,,1,LDG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (239,822,411)",True
+LDG,2020-12-24,buy_done,,1,LDG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (239,447,211)",True
+LDG,2025-05-14,buy_done,,1,LDG: Báo cáo kết quả giao dịch mua lại cổ phiếu,,MULTI_EVENT,2 su kien treasury cung cua so 2025-04-01..2025-07-30,True
+LDG,2025-06-06,buy_done,,1,LDG: Báo cáo kết quả giao dịch mua lại cổ phiếu,,MULTI_EVENT,2 su kien treasury cung cua so 2025-04-01..2025-07-30,True
+LHG,2017-12-22,sell_done,,1,LHG: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,SIGN_MISMATCH,"resid=-23,929,383 nguoc dau ky vong (sell_done)",True
+LSS,2018-02-08,buy_done,,1,LSS: Báo cáo kết quả giao dịch mua cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (66,994,950)",True
+LSS,2021-04-09,sell_done,,1,LSS: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (67,674,150)",True
+LSS,2021-11-19,sell_done,,1,LSS: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (70,000,000)",True
+MCH,2026-06-24,sell_done,,1,MCH: Báo cáo kết quả giao dịch bán cổ phiếu quỹ (sử dụng CPQ để phát hành ESOP),,NO_MOVE,"OShares khong doi qua cua so (1,307,404,949)",True
+MPC,2021-06-29,buy_done,,1,MPC: Báo cáo kết quả giao dịch mua lại cổ phiếu (Thu hồi cổ phiếu ESOP),,NO_MOVE,"OShares khong doi qua cua so (199,334,970)",True
+MPC,2022-04-20,buy_done,,1,MPC: Báo cáo kết quả giao dịch mua lại cổ phiếu,,NO_MOVE,"OShares khong doi qua cua so (199,943,650)",True
+MSB,2021-07-22,sell_done,,1,MSB: Thông báo công văn của UBCKNN về chấp thuận kết quả chào bán cổ phiếu quỹ cho CBCNV theo chương trình ESOP và báo cáo kết quả đợt chào bán,,NO_MOVE,"OShares khong doi qua cua so (1,157,000,000)",True
+MWG,2018-10-24,buy_done,,1,MWG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (322,832,976)",True
+MWG,2019-05-23,buy_done,,1,MWG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,MULTI_EVENT,2 su kien treasury cung cua so 2019-05-02..2019-08-01,True
+MWG,2019-07-29,buy_done,,1,MWG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,MULTI_EVENT,2 su kien treasury cung cua so 2019-05-02..2019-08-01,True
+MWG,2020-08-24,buy_done,,1,MWG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,MULTI_EVENT,2 su kien treasury cung cua so 2020-07-30..2020-10-29,True
+MWG,2020-10-16,buy_done,,1,MWG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,MULTI_EVENT,2 su kien treasury cung cua so 2020-07-30..2020-10-29,True
+MWG,2021-06-29,buy_done,,1,MWG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,MULTI_EVENT,2 su kien treasury cung cua so 2021-05-04..2021-08-02,True
+MWG,2021-07-30,buy_done,,1,MWG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,MULTI_EVENT,2 su kien treasury cung cua so 2021-05-04..2021-08-02,True
+MWG,2021-11-26,buy_done,,1,MWG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,SIGN_MISMATCH,"resid=19,190,970 nguoc dau ky vong (buy_done)",True
+MWG,2022-09-28,buy_done,,1,MWG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,SIGN_MISMATCH,"resid=56,857 nguoc dau ky vong (buy_done)",True
+MWG,2022-12-19,buy_done,,1,MWG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (1,463,376,716)",True
+MWG,2023-05-31,buy_done,,1,MWG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,MULTI_EVENT,2 su kien treasury cung cua so 2023-04-28..2023-08-01,True
+MWG,2023-07-19,buy_done,,1,MWG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,MULTI_EVENT,2 su kien treasury cung cua so 2023-04-28..2023-08-01,True
+MWG,2024-06-28,buy_done,,1,MWG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,SIGN_MISMATCH,"resid=1,132,539 nguoc dau ky vong (buy_done)",True
+MWG,2024-12-27,buy_done,,1,MWG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (1,461,484,209)",True
+MWG,2025-06-24,buy_done,,1,MWG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,MULTI_EVENT,2 su kien treasury cung cua so 2025-04-28..2025-07-29,True
+MWG,2025-07-21,buy_done,,1,MWG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,MULTI_EVENT,2 su kien treasury cung cua so 2025-04-28..2025-07-29,True
+MWG,2026-02-09,buy_done,,1,MWG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,SIGN_MISMATCH,"resid=7,342,117 nguoc dau ky vong (buy_done)",True
+MWG,2026-09-14,buy_done,,1,MWG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,NO_DATA,su kien ngoai pham vi BCTC,True
+NAF,2024-09-10,buy_done,,1,NAF: Báo cáo kết quả giao dịch mua lại cổ phiếu,,SIGN_MISMATCH,"resid=5,056,196 nguoc dau ky vong (buy_done)",True
+NBB,2019-05-03,buy_done,,1,NBB: Báo cáo kết quả giao dịch mua lại cổ phiếu,,NO_MOVE,"OShares khong doi qua cua so (93,321,256)",True
+NBB,2020-11-17,buy_done,,1,NBB: Báo cáo kết quả giao dịch mua lại cổ phiếu,,NO_MOVE,"OShares khong doi qua cua so (78,249,916)",True
+NBB,2022-11-10,sell_done,,1,NBB: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (100,159,795)",True
+NDN,2019-06-28,sell_done,,1,NDN: NDN CBTT Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (47,932,398)",True
+NKG,2020-07-03,buy_done,,1,NKG: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (171,999,868)",True
+NKG,2021-07-05,sell_done,,1,NKG: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,MULTI_EVENT,2 su kien treasury cung cua so 2021-04-22..2021-08-02,True
+NKG,2021-07-13,sell_done,,1,NKG: Thông báo công văn của UBCKNN về việc đã nhận được báo cáo kết quả giao dịch bán cổ phiếu quỹ của NKG,,MULTI_EVENT,2 su kien treasury cung cua so 2021-04-22..2021-08-02,True
+NLG,2019-07-05,buy_done,,1,NLG: Báo cáo kết quả giao dịch mua lại cổ phiếu,,NO_MOVE,"OShares khong doi qua cua so (229,136,918)",True
+NLG,2021-04-01,sell_done,,1,NLG: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (285,270,660)",True
+NSC,2018-06-14,buy_done,,1,NSC: Báo cáo kết quả giao dịch mua lại cổ phiếu,,NO_MOVE,"OShares khong doi qua cua so (15,282,528)",True
+PAN,2016-06-24,buy_done,,1,PAN: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (100,842,497)",True
+PAN,2018-05-11,buy_done,,1,PAN: Báo cáo kết quả giao dịch mua lại cổ phiếu,,SIGN_MISMATCH,"resid=13,333,000 nguoc dau ky vong (buy_done)",True
+PAN,2018-09-28,buy_done,,1,PAN: Báo cáo kết quả giao dịch mua lại cổ phiếu,,SIGN_MISMATCH,"resid=2,500,000 nguoc dau ky vong (buy_done)",True
+PAN,2019-11-28,buy_done,,1,PAN: Báo cáo kết quả giao dịch mua lại cổ phiếu,,NO_MOVE,"OShares khong doi qua cua so (173,032,141)",True
+PAN,2021-01-12,buy_done,,1,PAN: Báo cáo kết quả giao dịch mua lại cổ phiếu,,NO_MOVE,"OShares khong doi qua cua so (208,894,750)",True
+PC1,2021-11-18,sell_done,,1,PC1: Báo cáo kết quả giao dịch bán cổ phiếu quỹ cho người lao động,,SIGN_MISMATCH,"resid=-43,971,058 nguoc dau ky vong (sell_done)",True
+PCM,2026-09-09,sell_done,,1,PCM: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_DATA,su kien ngoai pham vi BCTC,True
+PET,2020-06-29,buy_done,,1,PET: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (83,570,524)",True
+PET,2021-08-19,sell_done,,1,PET: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (89,837,424)",True
+PIT,2022-06-06,sell_done,,1,PIT: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (14,210,225)",True
+PLX,2019-02-11,sell_done,,1,PLX: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,MULTI_EVENT,2 su kien treasury cung cua so 2019-02-01..2019-05-02,True
+PLX,2019-03-15,sell_done,,1,PLX: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,MULTI_EVENT,2 su kien treasury cung cua so 2019-02-01..2019-05-02,True
+PLX,2020-07-09,sell_done,,1,PLX: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,MULTI_EVENT,2 su kien treasury cung cua so 2020-05-04..2020-08-03,True
+PLX,2020-07-10,sell_done,,1,Petrolimex (PLX) đã bán hết 100% cổ phiếu quỹ đăng ký,,MULTI_EVENT,2 su kien treasury cung cua so 2020-05-04..2020-08-03,True
+PLX,2021-03-23,sell_done,,1,PLX: Thông báo thay đổi số lượng cổ phiếu có quyền biểu quyết đang lưu hành và báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (1,243,813,235)",True
+PLX,2021-09-07,sell_done,,1,PLX: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (1,270,592,235)",True
+PNJ,2019-09-11,buy_done,,1,PNJ: Báo cáo kết quả giao dịch mua lại cổ phiếu,,SIGN_MISMATCH,"resid=2,625,625 nguoc dau ky vong (buy_done)",True
+PNJ,2020-06-24,buy_done,,1,PNJ: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (225,124,026)",True
+PNJ,2021-02-01,buy_done,,1,PNJ: Báo cáo kết quả giao dịch mua lại cổ phiếu,,NO_MOVE,"OShares khong doi qua cua so (227,366,563)",True
+PPC,2017-10-11,sell_done,,1,PPC: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (320,613,054)",True
+PSD,2022-01-24,sell_done,,1,PSD: Báo cáo kết quả bán cổ phiếu quỹ cho người lao động,,MULTI_EVENT,2 su kien treasury cung cua so 2022-01-18..2022-04-22,True
+PSD,2022-01-30,sell_done,,1,PSD: UBCKNN nhận được tài liệu báo cáo kết quả bán cổ phiếu quỹ,,MULTI_EVENT,2 su kien treasury cung cua so 2022-01-18..2022-04-22,True
+PSH,2022-05-11,sell_done,,1,PSH: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_DATA,khong co day BCTC,True
+PTB,2021-06-23,sell_done,,1,PTB: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,SIGN_MISMATCH,"resid=-2,407 nguoc dau ky vong (sell_done)",True
+PTC,2017-10-19,buy_done,,1,PTC: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (16,209,999)",True
+PTC,2020-09-30,buy_done,,1,PTC: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (16,184,299)",True
+PVI,2021-10-27,sell_done,,1,PVI: Báo cáo kết quả bán cổ phiếu quỹ PVI,,NO_MOVE,"OShares khong doi qua cua so (234,241,867)",True
+QCC,2017-03-27,buy_done,,1,QCC: Báo cáo kết quả giao dịch mua lại cổ phiếu,,NO_DATA,su kien ngoai pham vi BCTC,True
+QCC,2018-06-11,buy_done,,1,QCC: Công bố thông tin về Kết quả giao dịch mua lại cổ phiếu quỹ,,NO_DATA,su kien ngoai pham vi BCTC,True
+RCD,2019-10-31,buy_done,,1,RCD: Công bố báo cáo kết quả giao dịch mua lại cổ phiếu,,NO_DATA,khong co day BCTC,True
+REE,2020-12-31,buy_done,,1,REE: Báo cáo kết quả giao dịch mua cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (309,050,926)",True
+REE,2024-08-05,sell_done,,1,REE: Thông báo công văn của UBCKNN về tài liệu báo cáo kết quả sử dụng cổ phiếu quỹ để bán cho người lao động của REE,,NO_MOVE,"OShares khong doi qua cua so (471,013,400)",True
+SAC,2018-03-01,sell_done,,1,SAC: Công bố Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,SIGN_MISMATCH,"resid=-99,100 nguoc dau ky vong (sell_done)",True
+SBT,2019-10-08,sell_done,,1,SBT: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (608,351,885)",True
+SBV,2019-01-11,buy_done,,1,SBV: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (27,306,476)",True
+SCR,2019-07-24,sell_done,,1,SCR: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (339,222,675)",True
+SFI,2019-06-24,buy_done,,1,SFI: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,SIGN_MISMATCH,"resid=1,824,416 nguoc dau ky vong (buy_done)",True
+SFI,2020-05-20,buy_done,,1,SFI: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (14,835,293)",True
+SFI,2020-08-04,buy_done,,1,SFI: Báo cáo kết quả giao dịch mua lại cổ phiếu,,MULTI_EVENT,3 su kien treasury cung cua so 2020-08-03..2020-11-02,True
+SFI,2020-08-20,buy_done,,1,SFI: Báo cáo kết quả giao dịch mua lại cổ phiếu,,MULTI_EVENT,3 su kien treasury cung cua so 2020-08-03..2020-11-02,True
+SGN,2025-09-15,buy_done,,1,SGN: Báo cáo kết quả giao dịch mua lại cổ phiếu,,NO_MOVE,"OShares khong doi qua cua so (33,498,591)",True
+SGP,2018-06-04,buy_done,,1,SGP: Báo cáo kết quả giao dịch mua lại cổ phiếu,,NO_MOVE,"OShares khong doi qua cua so (216,294,961)",True
+SIP,2022-11-14,buy_done,,1,SIP: Báo cáo kết quả giao dịch mua lại cổ phiếu,,MULTI_EVENT,2 su kien treasury cung cua so 2022-10-28..2023-01-31,True
+SIP,2022-11-25,buy_done,,1,SIP: Công văn của UBCKNN về việc nhận được Báo cáo kết quả giao dịch mua lại cổ phiếu,,MULTI_EVENT,2 su kien treasury cung cua so 2022-10-28..2023-01-31,True
+SJS,2025-07-11,sell_done,,1,SJS: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,IMPLAUSIBLE,|resid|=161.2% OShares — qua lon cho 1 lo CP quy,True
+SMN,2023-06-27,sell_done,,1,SMN: Báo cáo kết quả giao dịch bán cổ phiếu quỹ | Thông báo thay đổi số lượng cổ phiếu có quyền biểu quyết đang lưu hành,,NO_MOVE,"OShares khong doi qua cua so (4,396,300)",True
+SMN,2023-12-05,sell_done,,1,SMN: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (4,405,000)",True
+SNZ,2018-05-28,buy_done,,1,SNZ: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (376,491,800)",True
+SRF,2018-12-27,buy_done,,1,SRF: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,SIGN_MISMATCH,"resid=1,780,000 nguoc dau ky vong (buy_done)",True
+SSC,2017-11-24,buy_done,,1,SSC: Báo cáo kết quả giao dịch mua lại cổ phiếu,,NO_MOVE,"OShares khong doi qua cua so (13,516,855)",True
+SSC,2019-06-05,buy_done,,1,SSC: Báo cáo kết quả giao dịch mua lại cổ phiếu,,NO_MOVE,"OShares khong doi qua cua so (13,271,785)",True
+SSI,2018-10-01,buy_done,,1,SSI: Báo cáo kết quả giao dịch mua lại cổ phiếu theo chương trình lựa chọn cho người lao động trong công ty,,SIGN_MISMATCH,"resid=9,322,465 nguoc dau ky vong (buy_done)",True
+SSI,2019-08-28,buy_done,,1,SSI: Báo cáo kết quả mua lại cổ phiếu theo chương trình lựa chọn cho người lao động,,SIGN_MISMATCH,"resid=8,884,402 nguoc dau ky vong (buy_done)",True
+SSI,2020-12-25,buy_done,,1,SSI: Báo cáo kết quả giao dịch mua lại cổ phiếu ESOP năm 2020,,SIGN_MISMATCH,"resid=46,852,429 nguoc dau ky vong (buy_done)",True
+SSI,2021-06-17,sell_done,,1,SSI: Báo cáo kết quả bán cổ phiếu quỹ,,SIGN_MISMATCH,"resid=-15,000,000 nguoc dau ky vong (sell_done)",True
+SSI,2022-02-07,sell_done,,1,SSI: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,SIGN_MISMATCH,"resid=-207,883,845 nguoc dau ky vong (sell_done)",True
+STB,2021-07-23,sell_done,,1,"STB đã bán 88% lượng cổ phiếu quỹ đăng ký, giao dịch đột biến",,MULTI_EVENT,3 su kien treasury cung cua so 2021-04-29..2021-08-02,True
+STB,2021-08-02,sell_done,,1,STB: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,MULTI_EVENT,3 su kien treasury cung cua so 2021-04-29..2021-08-02,True
+STK,2024-06-05,sell_done,,1,STK: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (96,636,924)",True
+SZE,2021-01-14,buy_done,,1,SZE: Báo cáo cáo kết quả giao dịch mua lại cổ phiếu,,NO_MOVE,"OShares khong doi qua cua so (30,000,000)",True
+SZL,2023-10-02,sell_done,,1,SZL: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (18,229,700)",True
+SZL,2026-07-27,sell_done,,1,SZL: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_DATA,su kien ngoai pham vi BCTC,True
+TCH,2018-01-09,buy_done,,1,TCH: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ và thay đổi số lượng cổ phiếu có quyền biểu quyết đang lưu hành,,NO_MOVE,"OShares khong doi qua cua so (353,271,564)",True
+TCH,2021-06-02,sell_done,,1,TCH: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,SIGN_MISMATCH,"resid=-36,181,730 nguoc dau ky vong (sell_done)",True
+TCO,2017-09-20,buy_done,,1,TCO: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (17,315,266)",True
+TCO,2021-09-10,sell_done,,1,TCO: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (18,711,000)",True
+THI,2018-10-25,buy_done,,1,THI: Báo cáo kết quả giao dịch mua lại cổ phiếu,,NO_DATA,khong co day BCTC,True
+THW,2017-07-28,buy_done,,1,THW: Báo cáo kết quả giao dịch mua lại cổ phiếu bán ưu đãi cho người lao động khi cổ phần hóa,,NO_MOVE,"OShares khong doi qua cua so (5,000,000)",True
+TLG,2020-12-23,sell_done,,1,TLG: Báo cáo kết quả giao dịch bán cổ phiếu quỹ cho người lao động,,NO_MOVE,"OShares khong doi qua cua so (77,794,453)",True
+TLH,2021-10-28,sell_done,,1,TLH: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (102,110,621)",True
+TMS,2017-08-04,buy_done,,1,TMS: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (34,552,723)",True
+TNB,2022-07-26,sell_done,,1,TNB: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (11,478,991)",True
+TNH,2023-12-11,buy_done,,1,TNH: Thông báo thay đổi số lượng cổ phiếu có quyền biểu quyết đang lưu hành và báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,SIGN_MISMATCH,"resid=14,299,970 nguoc dau ky vong (buy_done)",True
+TNH,2025-03-28,buy_done,,1,TNH: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ và Thông báo thay đổi số lượng cổ phiếu có quyền biểu quyết đang lưu hành,,NO_MOVE,"OShares khong doi qua cua so (144,133,270)",True
+TNH,2026-05-25,buy_done,,1,TNH: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (165,726,943)",True
+TPB,2019-06-21,buy_done,,1,TPB: Báo cáo kết quả giao dịch mua lại cổ phiếu làm cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (826,573,150)",True
+TPB,2020-03-30,buy_done,,1,TPB: Báo cáo kết quả giao dịch mua lại cổ phiếu,,NO_MOVE,"OShares khong doi qua cua so (816,573,150)",True
+TPC,2019-12-30,sell_done,,1,TPC: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (22,516,956)",True
+TPC,2026-01-09,buy_done,,1,TPC: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (16,816,956)",True
+TRS,2021-10-27,buy_done,,1,TRS: Báo cáo kết quả mua lại cổ phiếu làm cổ phiếu quỹ,,NO_DATA,khong co day BCTC,True
+TSD,2019-08-27,buy_done,,1,TSD: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,NO_DATA,khong co day BCTC,True
+TSJ,2019-01-23,buy_done,,1,TSJ: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (74,800,000)",True
+TTF,2022-06-10,sell_done,,1,TTF: Giải trình về việc không công bố giao dịch bán cổ phiếu quỹ và Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (411,182,487)",True
+TVB,2025-12-31,buy_done,,1,TVB: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (109,121,519)",True
+TVS,2018-03-06,sell_done,,1,TVS: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (55,045,041)",True
+TVS,2019-02-01,sell_done,,1,TVS: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (63,502,375)",True
+TW3,2017-09-08,buy_done,,1,TW3: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,NO_DATA,khong co day BCTC,True
+TW3,2019-12-02,buy_done,,1,TW3: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ - Lần 2 năm 2019,,NO_DATA,khong co day BCTC,True
+TW3,2019-12-26,buy_done,,1,TW3: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,NO_DATA,khong co day BCTC,True
+TW3,2020-04-14,buy_done,,1,TW3: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ lần 1 năm 2020,,NO_DATA,khong co day BCTC,True
+TW3,2020-10-13,buy_done,,1,TW3: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ lần 2 - Năm 2020,,NO_DATA,khong co day BCTC,True
+TW3,2022-06-23,buy_done,,1,TW3: Báo cáo kết quả giao dịch mua lại cổ phiếu,,NO_DATA,khong co day BCTC,True
+UDJ,2017-01-05,buy_done,,1,UDJ: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (16,500,000)",True
+UDJ,2021-03-29,sell_done,,1,UDJ: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (16,500,000)",True
+UDL,2025-06-11,buy_done,,1,UDL: Báo cáo kết quả giao dịch mua lại cổ phiếu,,NO_DATA,khong co day BCTC,True
+VCI,2018-03-29,buy_done,,1,VCI: Báo cáo kết quả giao dịch mua lại cổ phiếu,,NO_MOVE,"OShares khong doi qua cua so (119,984,500)",True
+VCI,2018-05-08,buy_done,,1,VCI: Báo cáo kết quả giao dịch mua lại cổ phiếu,,MULTI_EVENT,2 su kien treasury cung cua so 2018-04-26..2018-08-01,True
+VCI,2018-06-11,sell_done,,1,VCI: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,MULTI_EVENT,2 su kien treasury cung cua so 2018-04-26..2018-08-01,True
+VCI,2019-03-26,buy_done,,1,VCI: Báo cáo kết quả giao dịch mua lại cổ phiếu,,NO_MOVE,"OShares khong doi qua cua so (162,949,876)",True
+VCI,2020-03-23,buy_done,,1,VCI: Báo cáo kết quả giao dịch mua lại cổ phiếu,,NO_MOVE,"OShares khong doi qua cua so (164,283,986)",True
+VCI,2020-08-21,buy_done,,1,VCI: Báo cáo kết quả giao dịch mua lại cổ phiếu,,MULTI_EVENT,2 su kien treasury cung cua so 2020-08-03..2020-10-21,True
+VCI,2020-10-02,sell_done,,1,VCI: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,MULTI_EVENT,2 su kien treasury cung cua so 2020-08-03..2020-10-21,True
+VCS,2019-10-24,sell_done,,1,VCS: VICOSTONE công bố Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (160,000,000)",True
+VCS,2021-02-05,sell_done,,1,VCS: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (160,000,000)",True
+VDP,2017-10-17,buy_done,,1,VDP: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (12,782,904)",True
+VDP,2022-02-08,sell_done,,1,VDP: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,SIGN_MISMATCH,"resid=-715,600 nguoc dau ky vong (sell_done)",True
+VET,2019-01-16,buy_done,,1,VET: Báo cáo kết quả giao dịch mua lại Cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (15,957,500)",True
+VFG,2016-06-03,sell_done,,1,VFG: Báo cáo kết quả chào bán cổ phiếu quỹ cho CBCNV công ty,,NO_MOVE,"OShares khong doi qua cua so (18,283,436)",True
+VHC,2018-12-19,sell_done,,1,VHC: Thông báo về việc đã hoàn tất giao dịch bán toàn bộ cổ phiếu quỹ,,MULTI_EVENT,2 su kien treasury cung cua so 2018-10-22..2019-01-28,True
+VHC,2018-12-20,sell_done,,1,Vĩnh Hoàn đã bán hết cổ phiếu quỹ thu hơn 10 tỷ đồng,,MULTI_EVENT,2 su kien treasury cung cua so 2018-10-22..2019-01-28,True
+VHC,2019-10-23,buy_done,,1,VHC: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,SIGN_MISMATCH,"resid=89,542,083 nguoc dau ky vong (buy_done)",True
+VHC,2026-05-18,buy_done,,1,VHC: Báo cáo kết quả giao dịch mua lại cổ phiếu,,SIGN_MISMATCH,"resid=15,000,000 nguoc dau ky vong (buy_done)",True
+VIB,2018-09-20,sell_done,,1,VIB: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (532,518,829)",True
+VIP,2018-01-08,buy_done,,1,VIP: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (65,470,941)",True
+VIP,2021-03-01,sell_done,,1,VIP: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (68,470,941)",True
+VJC,2019-08-28,buy_done,,1,VJC: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (523,838,594)",True
+VJC,2021-04-28,sell_done,,1,VJC: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,MULTI_EVENT,2 su kien treasury cung cua so 2021-02-01..2021-05-04,True
+VLB,2021-05-21,buy_done,,1,VLB: Báo cáo kết quả giao dịch mua lại cổ phiếu,,NO_MOVE,"OShares khong doi qua cua so (46,773,560)",True
+VND,2017-09-15,sell_done,,1,VND: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,IMPLAUSIBLE,|resid|=102.6% OShares — qua lon cho 1 lo CP quy,True
+VND,2021-03-23,sell_done,,1,VND: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (214,514,518)",True
+VNE,2023-11-02,sell_done,,1,VNE: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (82,055,233)",True
+VNI,2018-09-28,sell_done,,1,VNI: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_DATA,su kien ngoai pham vi BCTC,True
+VNM,2020-06-30,buy_done,,1,VNM: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (1,741,377,694)",True
+VNM,2021-02-01,sell_done,,1,VNM: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,SIGN_MISMATCH,"resid=-347,957,553 nguoc dau ky vong (sell_done)",True
+VPB,2021-08-25,sell_done,,1,VPB: Thông báo công văn của UBCKNN về báo cáo kết quả sử dụng cổ phiếu quỹ để bán cho người lao động của VPB,,IMPLAUSIBLE,|resid|=69.2% OShares — qua lon cho 1 lo CP quy,True
+VPB,2023-10-03,sell_done,,1,VPB: Nghị quyết HĐQT về việc thông qua kết quả bán cổ phiếu theo chương trình ESOP và báo cáo kết quả chào bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (6,743,423,601)",True
+VRE,2019-12-19,buy_done,,1,VRE: Báo cáo kết quả giao dịch mua lại cổ phiếu quỹ,,SIGN_MISMATCH,"resid=56,500,000 nguoc dau ky vong (buy_done)",True
+VSN,2023-05-26,buy_done,,1,VSN: Báo cáo kết quả mua lại cổ phiếu của người lao động,,NO_MOVE,"OShares khong doi qua cua so (80,904,500)",True
+VTP,2023-03-16,buy_done,,1,VTP: Báo cáo kết quả giao dịch mua lại cổ phiếu ESOP 2019 của Người lao động nghỉ việc,,NO_MOVE,"OShares khong doi qua cua so (113,174,057)",True
+VTR,2021-05-20,buy_done,,1,VTR: Báo cáo kết quả giao dịch mua lại cổ phiếu của cán bộ nhân viên nghỉ việc,,NO_MOVE,"OShares khong doi qua cua so (16,658,247)",True
+YEG,2019-07-22,buy_done,,1,YEG: Báo cáo kết quả giao dịch mua lại cổ phiếu,,NO_MOVE,"OShares khong doi qua cua so (29,505,628)",True
+YEG,2020-10-15,sell_done,,1,YEG: Báo cáo kết quả giao dịch bán cổ phiếu quỹ,,NO_MOVE,"OShares khong doi qua cua so (31,279,968)",True

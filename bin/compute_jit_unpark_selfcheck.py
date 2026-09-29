@@ -40,11 +40,15 @@ def digest(name, obj):
     DIGEST_PARTS.append(name + "=" + json.dumps(obj, sort_keys=True, default=str))
 
 
+def close(a, b, tol=1.0):
+    return abs(float(a) - float(b)) <= tol
+
+
 # ───────────────────────────────────────────────────────── dữ liệu tổng hợp
 
 def mk_holdings(park=(("AAA", 1000, 50_000), ("BBB", 2000, 25_000), ("CCC", 500, 100_000)),
                 cash=0.0, excluded=(), unverified=(), reconcile_ok=True,
-                sellable=None, extra_books=(), leak_capit_into_park=False):
+                sellable=None, extra_books=(), leak_capit_into_park=False, egg=0.0):
     """holdings giả lập ĐÚNG hợp đồng của `park_holdings()`.
 
     `park`: (ticker, qty, price) — mỗi mã chia 2 lô để kiểm FIFO.
@@ -75,7 +79,7 @@ def mk_holdings(park=(("AAA", 1000, 50_000), ("BBB", 2000, 25_000), ("CCC", 500,
             "park_lots": park_lots, "lots": park_lots + other,
             "broker_positions": positions,
             "park_mv_vnd": sum(l["mv_vnd"] for l in park_lots if l["book"] == "PARK"),
-            "cash_available_vnd": cash,
+            "cash_available_vnd": cash, "egg_assets_vnd": egg,
             "excluded_tickers": sorted(excluded), "unverified_tickers": sorted(unverified),
             "reconcile": {"ok": reconcile_ok, "mismatches": []
                           if reconcile_ok else [{"ticker": "AAA", "diff": -100}]}}
@@ -561,11 +565,179 @@ def t19_C_tran_cung_van_giu():
                    r2["sells_by_ticker"], r3["sells_by_ticker"], r4["sells_by_ticker"]])
 
 
+# ── T20: §pool-egg-L2 (2026-08-19) — egg cộng vào cash/bp, user duyệt sau khi làm rõ quy trình:
+# rút Trứng vàng trong giờ hành chính, về TRONG PHIÊN, không phí (khác PARK — không qua sổ lệnh).
+def t20a_egg_du_khong_ban_gi():
+    """egg đủ bù toàn bộ target ⇒ triggered=False, KHÔNG bán PARK nào (khớp T01 nhưng nguồn
+    tiền là egg thay vì cash thật — chứng minh egg thay thế được cash trong quyết định trigger)."""
+    h = mk_holdings(cash=0.0, egg=200_000_000)
+    r = run(h, [buy("FPT", 1000, 100_000)])          # target 100tr, cash 0 nhưng egg 200tr
+    check("T20a egg đủ bù toàn bộ target ⇒ NO_JIT_NEEDED, không bán PARK nào",
+          r["decision"] == "NO_JIT_NEEDED" and not r["orders"]
+          and r["buy_amendments"][0]["status"] == "FUNDED_BY_CASH"
+          and r["cash_start_vnd"] == 200_000_000,
+          f"decision={r['decision']} cash_start={r['cash_start_vnd']:,.0f}")
+    digest("t20a", [r["decision"], r["orders"], r["cash_start_vnd"]])
+
+
+def t20b_egg_giam_needed_vs_cash_only():
+    """CHỨNG MINH SO SÁNH: cùng target/cash, một bên có egg một bên không — egg PHẢI làm
+    `needed` (lượng PARK cần bán) giảm ĐÚNG BẰNG phần egg che phủ, không hơn không kém (egg
+    KHÔNG chiết khấu phí — khác PARK, xem §pool-egg-L2)."""
+    tv = 100_000_000
+    cash_only = 60_000_000
+    egg_add = 25_000_000
+    r_no_egg = run(mk_holdings(cash=cash_only), [buy("FPT", 1000, 100_000)])
+    r_egg = run(mk_holdings(cash=cash_only, egg=egg_add), [buy("FPT", 1000, 100_000)])
+    need_no_egg = r_no_egg["buy_amendments"][0]["needed_vnd"]
+    need_egg = r_egg["buy_amendments"][0]["needed_vnd"]
+    check("T20b egg giảm needed ĐÚNG BẰNG egg/(1−friction) — không hơn không kém, KHÔNG chiết "
+          "khấu phí riêng cho egg (đúng khác biệt egg-vs-PARK)",
+          r_egg["decision"] == "JIT"
+          and close(need_no_egg - need_egg, egg_add / (1 - ETF_FRICTION), 1),
+          f"need_no_egg={need_no_egg:,.0f} need_egg={need_egg:,.0f} "
+          f"chênh={need_no_egg - need_egg:,.0f} kỳ_vọng={egg_add / (1 - ETF_FRICTION):,.0f}")
+    digest("t20b", [round(need_no_egg, 6), round(need_egg, 6)])
+
+
+def t20c_egg_mac_dinh_0_khong_hoi_quy():
+    """Không khai egg (mặc định 0.0, mọi fixture T01-T19 cũ) ⇒ hành vi Y HỆT trước khi vá."""
+    r_default = run(mk_holdings(cash=60_000_000), [buy("FPT", 1000, 100_000)])
+    r_explicit_zero = run(mk_holdings(cash=60_000_000, egg=0.0), [buy("FPT", 1000, 100_000)])
+    check("T20c egg mặc định 0.0 ⇒ không regression cho mọi test cũ không khai egg",
+          r_default["cash_start_vnd"] == r_explicit_zero["cash_start_vnd"] == 60_000_000
+          and r_default["buy_amendments"][0]["needed_vnd"]
+          == r_explicit_zero["buy_amendments"][0]["needed_vnd"],
+          f"{r_default['cash_start_vnd']:,.0f} / {r_explicit_zero['cash_start_vnd']:,.0f}")
+
+
+def t20d_egg_assets_vnd_bao_cao_dung():
+    """`egg_assets_vnd` phải xuất hiện nguyên vẹn trong output — audit trail, không bị nuốt."""
+    r = run(mk_holdings(cash=10_000_000, egg=45_000_000), [buy("FPT", 100, 100_000)])
+    check("T20d egg_assets_vnd + cash_available_vnd (raw) đều có trong output, không bị gộp mất",
+          r.get("egg_assets_vnd") == 45_000_000 and r.get("cash_available_vnd") == 10_000_000
+          and r["cash_start_vnd"] == 55_000_000,
+          f"egg={r.get('egg_assets_vnd')} cash_available={r.get('cash_available_vnd')} "
+          f"cash_start={r['cash_start_vnd']}")
+
+
+def t20e_qty_final_khong_ghi_de_plan():
+    """Chứng minh (per quant-skeptic vòng 2): qty_final của L2 (giờ lớn hơn vì egg) KHÔNG tự
+    ghi đè qty của lệnh mua trong plan — đó là việc của `merge_park_orders.py` (KHÔNG đổi qty,
+    chỉ chú thích), không phải của `compute_jit_unpark.py`. Test này khẳng định biên trách
+    nhiệm: output chỉ là ĐỀ XUẤT, plan gốc (đầu vào `orders`) không bị mutate."""
+    orig_orders = [buy("FPT", 1000, 100_000)]
+    orig_qty_before = orig_orders[0]["qty"]
+    r = run(mk_holdings(cash=0.0, egg=200_000_000), orig_orders)
+    check("T20e input `orders` KHÔNG bị mutate bởi compute_jit_unpark (qty gốc giữ nguyên) — "
+          "việc merge/ghi qty vào plan là trách nhiệm CỦA merge_park_orders.py, không phải ở đây",
+          orig_orders[0]["qty"] == orig_qty_before == 1000
+          and r["buy_amendments"][0]["qty_final"] == 1000,
+          f"orig_qty={orig_orders[0]['qty']} qty_final={r['buy_amendments'][0]['qty_final']}")
+
+
+def t20f_egg_relied_warning():
+    """quant-skeptic vòng 2 (REFUTED) đòi: khi egg thực sự cần để khớp lệnh, PHẢI có cảnh báo
+    tường minh trong out['notes'] (không chỉ CLI stdout) — headless/`--out` JSON phải thấy được.
+    Case (a): egg=0, cash đủ ⇒ KHÔNG cảnh báo, funded_via=cash. Case (b): cash=0, egg đủ bù
+    TOÀN BỘ ⇒ CÓ cảnh báo, funded_via=cash+egg, egg_relied_vnd = đúng target. Case (c): cash bù
+    được MỘT PHẦN, egg bù phần còn lại ⇒ cảnh báo với egg_relied_vnd = đúng phần egg gánh."""
+    # (a) không cần egg — không cảnh báo
+    r_a = run(mk_holdings(cash=200_000_000, egg=999_000_000), [buy("FPT", 1000, 100_000)])
+    m_a = r_a["buy_amendments"][0]
+    check("T20f(a) cash đủ, không cần egg ⇒ funded_via=cash, egg_relied_vnd=0, KHÔNG cảnh báo",
+          m_a.get("funded_via") == "cash" and m_a.get("egg_relied_vnd") == 0.0
+          and not any("Trứng vàng" in n for n in r_a["notes"]),
+          f"funded_via={m_a.get('funded_via')} egg_relied={m_a.get('egg_relied_vnd')} "
+          f"notes={r_a['notes']}")
+    # (b) egg bù TOÀN BỘ (cash=0) ⇒ cảnh báo, egg_relied = đúng target
+    r_b = run(mk_holdings(cash=0.0, egg=200_000_000), [buy("FPT", 1000, 100_000)])
+    m_b = r_b["buy_amendments"][0]
+    check("T20f(b) cash=0, egg bù toàn bộ ⇒ funded_via=cash+egg, egg_relied_vnd=target, CÓ "
+          "cảnh báo 'CẦN RÚT Trứng vàng' trong out['notes'] (không chỉ CLI)",
+          m_b.get("funded_via") == "cash+egg" and m_b.get("egg_relied_vnd") == 100_000_000
+          and any("CẦN RÚT Trứng vàng" in n and "BUY-FPT" in n for n in r_b["notes"]),
+          f"funded_via={m_b.get('funded_via')} egg_relied={m_b.get('egg_relied_vnd')} "
+          f"notes={r_b['notes']}")
+    # (c) cash bù MỘT PHẦN (60tr/100tr target), egg bù phần còn lại — không qua JIT (đủ cash+egg
+    # ngay từ đầu nên không trigger bán PARK, chỉ khác biệt ở bước fallback bp/qf).
+    r_c = run(mk_holdings(cash=60_000_000, egg=50_000_000), [buy("FPT", 1000, 100_000)])
+    m_c = r_c["buy_amendments"][0]
+    check("T20f(c) cash bù một phần + egg bù phần còn lại ⇒ egg_relied_vnd = đúng phần egg cần "
+          "dùng (target 100tr − qf_real dựa trên cash-only 60tr)",
+          m_c.get("funded_via") == "cash+egg" and m_c.get("egg_relied_vnd", 0) > 0
+          and m_c["egg_relied_vnd"] <= 50_000_000
+          and any("CẦN RÚT Trứng vàng" in n for n in r_c["notes"]),
+          f"funded_via={m_c.get('funded_via')} egg_relied={m_c.get('egg_relied_vnd')} "
+          f"qty_final={m_c.get('qty_final')}")
+    digest("t20f", [m_a.get("funded_via"), m_a.get("egg_relied_vnd"),
+                    m_b.get("funded_via"), m_b.get("egg_relied_vnd"),
+                    m_c.get("funded_via"), round(m_c.get("egg_relied_vnd", 0), 6)])
+
+
+def t20g_egg_relied_la_can_tren_khong_phai_chinh_xac():
+    """quant-skeptic vòng 3 REFUTED: counterexample tái lập được — egg đủ lớn để TỰ ĐẨY cash
+    qua JIT_TRIGGER_FRAC ⇒ nhánh JIT-bán-PARK bị TẮT trong lượt chạy thật (triggered=False) ⇒
+    `egg_relied_vnd` gán TOÀN BỘ target là "cần egg", bỏ qua khả năng PARK JIT-sale lẽ ra bù
+    được phần lớn nếu không có egg. Test này KHOÁ LẠI đúng counterexample đó + khẳng định tường
+    minh: đây là CẬN TRÊN chấp nhận được (an toàn — báo NHIỀU hơn chứ không bao giờ ÍT hơn thực
+    tế cần), không phải một bug cần chặn merge, vì hệ quả chỉ là một cảnh báo tư vấn (không phải
+    gate — gate thật `check_plan_funding()` không đổi)."""
+    # Counterexample nguyên văn quant-skeptic vòng 3: cash=10tr, egg=90tr, target=100tr.
+    h = mk_holdings(cash=10_000_000, egg=90_000_000)
+    r = run(h, [buy("FPT", 1000, 100_000)])          # target 100tr
+    m = r["buy_amendments"][0]
+    check("T20g(a) egg tự đẩy cash qua ngưỡng trigger ⇒ triggered=False, KHÔNG bán PARK nào "
+          "(đây CHÍNH LÀ nhánh gây sai số — khoá lại để không hồi quy thành bất ngờ)",
+          r["decision"] == "NO_JIT_NEEDED" and not r["orders"],
+          f"decision={r['decision']} n_orders={len(r['orders'])}")
+    check("T20g(b) egg_relied_vnd = CẬN TRÊN = toàn bộ target (100tr) — biết là quá cao so với "
+          "thực tế (PARK JIT-sale lẽ ra bù được phần lớn ~90tr nếu không có egg), CHẤP NHẬN vì "
+          "hướng AN TOÀN cho cảnh báo tư vấn, không phải một số chính xác",
+          m.get("egg_relied_vnd") == 100_000_000 and m.get("funded_via") == "cash+egg",
+          f"egg_relied={m.get('egg_relied_vnd')} funded_via={m.get('funded_via')}")
+    # Bất biến AN TOÀN (không phải bất biến CHÍNH XÁC): egg_relied_vnd không bao giờ VƯỢT target
+    # (không báo cần nhiều hơn cả lệnh mua) và không bao giờ ÂM.
+    check("T20g(c) bất biến an toàn: 0 ≤ egg_relied_vnd ≤ target_value_vnd (không âm, không vượt "
+          "giá trị lệnh mua)",
+          0 <= m.get("egg_relied_vnd", -1) <= m["target_value_vnd"],
+          f"egg_relied={m.get('egg_relied_vnd')} target={m['target_value_vnd']}")
+    digest("t20g", [r["decision"], m.get("egg_relied_vnd"), m.get("funded_via")])
+
+
+def t20h_multi_order_bat_bien_an_toan_tung_lenh():
+    """quant-skeptic vòng 4 (CONFIRMED, killer_objection phụ) — mỗi lệnh dùng CHUNG `egg0`
+    (không trừ dần qua các lệnh, ghi rõ trong docstring là hạn chế CỐ Ý). Test này khoá lại: dù
+    2+ lệnh cùng dựa vào egg0 chung, bất biến AN TOÀN (0 ≤ egg_relied_vnd ≤ target_value_vnd)
+    vẫn giữ cho TỪNG lệnh riêng lẻ trong chuỗi — không chỉ lệnh đơn lẻ như T20g."""
+    h = mk_holdings(cash=0.0, egg=120_000_000)
+    orders = [buy("XXX", 1000, 100_000, oid="BUY-XXX", priority=10),
+              buy("YYY", 1000, 100_000, oid="BUY-YYY", priority=20)]
+    r = run(h, orders)
+    ms = {m["order_id"]: m for m in r["buy_amendments"]}
+    check("T20h(a) cả 2 lệnh đều có funded_via/egg_relied_vnd hợp lệ (không lỗi/thiếu field)",
+          set(ms) == {"BUY-XXX", "BUY-YYY"}
+          and all(m.get("funded_via") in ("cash", "cash+egg") for m in ms.values())
+          and all(m.get("egg_relied_vnd") is not None for m in ms.values()),
+          f"{[(k, v.get('funded_via'), v.get('egg_relied_vnd')) for k, v in ms.items()]}")
+    check("T20h(b) bất biến an toàn GIỮ CHO TỪNG lệnh: 0 ≤ egg_relied_vnd ≤ target_value_vnd "
+          "(không chỉ lệnh đơn lẻ như T20g — đây là 2 lệnh cùng dựa vào egg0 chung)",
+          all(0 <= m["egg_relied_vnd"] <= m["target_value_vnd"] for m in ms.values()),
+          f"{[(k, v['egg_relied_vnd'], v['target_value_vnd']) for k, v in ms.items()]}")
+    digest("t20h", [sorted((k, v.get("funded_via"), v.get("egg_relied_vnd"))
+                          for k, v in ms.items())])
+
+
 TESTS = [t01_cash_du, t01b_biên_099, t02_thieu_mot_phan, t03_thieu_hon_daycap, t04_excluded,
          t05_capit_khong_dung, t06_unverified, t07_reconcile, t08_no_trigger, t09_drop_duoi_1tr,
          t10_chia_tran_voi_l1, t11_tran_per_name_va_t2, t12_nhieu_lenh_tuan_tu, t13_so_hoc_tien,
          t14_lam_tron_lo, t15_xac_dinh, t16_tz, t17_khong_ghi_gi,
-         t18_grossup_va_lam_tron_len_3_muc_gia, t18e_C_het_hut_that, t19_C_tran_cung_van_giu]
+         t18_grossup_va_lam_tron_len_3_muc_gia, t18e_C_het_hut_that, t19_C_tran_cung_van_giu,
+         t20a_egg_du_khong_ban_gi, t20b_egg_giam_needed_vs_cash_only,
+         t20c_egg_mac_dinh_0_khong_hoi_quy, t20d_egg_assets_vnd_bao_cao_dung,
+         t20e_qty_final_khong_ghi_de_plan, t20f_egg_relied_warning,
+         t20g_egg_relied_la_can_tren_khong_phai_chinh_xac,
+         t20h_multi_order_bat_bien_an_toan_tung_lenh]
 
 
 def run_tests():

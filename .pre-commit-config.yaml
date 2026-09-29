@@ -44,3 +44,109 @@ repos:
         entry: bin/discord_id_gate.sh
         language: system
         files: '^(bin|hooks)/.*\.(sh|py)$'
+
+      # Thêm 2026-08-21, sau 2 sự cố cùng ngày "giờ sai trong tin Discord": lần 1 do LLM
+      # (đã chặn bằng header stamp ở ccdb outbound_format.py), lần 2 NGAY SAU deploy lần 1 do
+      # chính dispatch.sh sinh `date -u … '+%H:%M UTC'` vào THÂN tin. Hai producer khác nhau,
+      # cùng triệu chứng; coding_guidelines §16 đã dặn từ lâu vẫn lọt ⇒ biến §16 thành gate.
+      # Bridge còn lớp quy đổi UTC→ICT ở transport (bảo hiểm), gate này chặn producer MỚI.
+      - id: utc-text-gate
+        name: Giờ UTC trong text gửi người (ICT + phút — xem bin/utc_text_gate.sh, §16)
+        entry: bin/utc_text_gate.sh
+        language: system
+        files: '^(bin|hooks)/.*\.(sh|py)$'
+
+      # Thêm 2026-08-23 — Tầng 1 của kế hoạch code-quality review 3 tầng (user duyệt
+      # 2026-08-23, xem kb/projects/code-quality-review-plan-20260823.md §3). ruff (rule set
+      # hẹp F/E9/B006/B008, KHÔNG style) trên file .py thay đổi trong commit, RATCHET so với
+      # kb/code_quality_baseline.json của chính file đó — chỉ chặn khi số lỗi TĂNG, nợ cũ
+      # không bắt sửa ngay.
+      #
+      # `files` PHẢI khớp đúng phạm vi đã seed trong kb/code_quality_baseline.json
+      # (bin/code_quality_baseline_build.py chỉ quét trading_bot/*.py, bot_execute.py,
+      # mike/bin/*.py — 2 nhóm đầu ở repo WorkingClaude khác, không có pre-commit). Trước
+      # 2026-08-23 (sau vòng vá) pattern là '\.py$' — khớp CẢ 444 file .py của repo mike, trong
+      # đó ~115 file ngoài bin/ (vd agents/Taylor/anomaly_scan.py) có nợ ruff sẵn nhưng KHÔNG
+      # có trong baseline ⇒ baseline ngầm định 0 ⇒ hard-block oan file không sửa gì, trúng agent
+      # khác. Xem arch-review job Wags_20260823_071251 (round 2). Mở rộng scope thật (không chỉ
+      # đổi regex) thì phải rebuild baseline cho toàn bộ .py trước, không chỉ nới `files`.
+      # Thêm 2026-08-29, sau lần thứ 3 trong ~1 tuần cùng một khiếm khuyết ở 3 vị trí khác
+      # nhau: checker/guard VỨT bằng chứng (stderr của lệnh vừa hỏng) rồi ĐOÁN nguyên nhân
+      # bằng một thông điệp cố định — 08-21 ops_health §5b, 08-25 check#9, 08-28
+      # append_event.sh guard JSON (bus question retro-pattern-recurring-checker-hardcode-
+      # diagnosis-3, retro-2026-08-28 Pattern A). §28 coding_guidelines đã dặn từ 08-13 và
+      # vẫn lọt cả 3 lần ⇒ biến nửa CƠ HỌC của §28 thành điều kiện commit. Nửa còn lại
+      # ("khẳng định nguyên nhân bằng văn xuôi, không hề đọc bằng chứng nào") KHÔNG lint được
+      # — nằm ở checklist review §29, xem docstring bin/diagnosis_evidence_gate.py.
+      - id: diagnosis-evidence-gate
+        name: Vứt stderr rồi đoán nguyên nhân (xem bin/diagnosis_evidence_gate.py, §29)
+        entry: bin/diagnosis_evidence_gate.py
+        language: system
+        files: '^(bin|hooks)/.*\.sh$'
+
+      - id: code-quality-gate
+        name: ruff ratchet (F/E9/B006/B008, per-file so với baseline — xem bin/code_quality_gate.sh)
+        entry: bin/code_quality_gate.sh
+        language: system
+        files: '^bin/.*\.py$'
+
+      # Thêm 2026-08-30 (user duyệt), sau khi code-quality-weekly tìm ra 5 finding CÙNG MỘT lớp
+      # lỗi trong 1 tuần, ở CẢ 2 repo: `datetime.now()` trần / `date.today()` không neo timezone
+      # (WorkingClaude 20bf2f20 — golive_recommend_v23.py:85+1216, dna_report.py:69; mike
+      # b26008a6 — agents/Taylor/anomaly_scan.py:379, insider_flags.py:231). Cả 5 đều LATENT
+      # trên host này (host +07 + crontab TZ export che mất), chỉ nổ khi chạy tay/dispatch dưới
+      # env khác. coding_guidelines §16 đã dặn từ 2026-07 và vẫn lọt 5 lần ⇒ biến §16 thành
+      # điều kiện CƠ HỌC để commit, đúng "enforcement policy" của coding_guidelines.
+      #
+      # Phát hiện bằng AST chứ không regex: `datetime.now(tz)` và `datetime.now()` chỉ khác nhau
+      # ở việc CÓ ARGUMENT hay không, và argument đó viết xuống dòng được — regex đếm sai.
+      # Ratchet per-file so với kb/tz_anchor_baseline.json (kiểm kê ngày bật: 157 vi phạm / 87
+      # file trên cả 2 repo) — nợ cũ không bắt sửa ngay, chỉ không được TĂNG.
+      #
+      # `files` cố ý RỘNG hơn code-quality-gate (thêm agents/): 2 trong 5 finding nằm ở
+      # agents/Taylor/*.py, ngoài tầm `^bin/.*\.py$`. Loại trừ R&D/vendor nằm TRONG script
+      # (is_excluded) chứ không ở regex này — một nguồn sự thật, và baseline phủ đúng phần gate
+      # cưỡng chế. Hook anh em ở repo NGOÀI: /home/trido/thanhdt/.pre-commit-config.yaml (qua
+      # shim WorkingClaude/tz_anchor_gate_shim.sh — xem header file đó).
+      #
+      # Baseline neo theo checkout CANONICAL. Commit từ worktree đang ở nhánh CŨ có thể bị chặn
+      # vì lệch nhánh chứ không phải nợ mới — thông điệp BLOCK nói rõ và chỉ sang
+      # `SKIP=tz-anchor-gate git commit` (escape pre-commit hỗ trợ sẵn). `MIKE_TZ_GATE=warn` cho
+      # qua ĐÚNG một lần và cố ý KHÔNG nâng baseline (khác code-quality-gate) — lách không được
+      # phép âm thầm biến thành chấp nhận.
+      - id: tz-anchor-gate
+        name: datetime.now()/date.today() không neo TZ (xem bin/tz_anchor_gate.py, §16)
+        entry: bin/tz_anchor_gate.py
+        language: system
+        # verbose BẮT BUỘC: pre_commit/commands/run.py:217 chỉ in output của hook khi
+        # rc!=0 hoặc verbose. Gate này CỐ Ý fail-open (thiếu repo lồng / file ngoài
+        # WC_ROOT → cảnh báo + rc=0); không có verbose thì đúng những cảnh báo đó bị
+        # nuốt sạch và fail-open biến thành FAIL-SILENT — thứ §16 đã thua một lần rồi
+        # (arch-review vòng 2, R2).
+        verbose: true
+        files: '^(bin|hooks|agents)/.*\.py$'
+
+      # ------------------------------------------------------------------------
+      # number-provenance-gate (B3, user duyệt 2026-09-28) — khối MỚI trong
+      # kb/canonical.md / kb/KNOWLEDGE.md công bố CAGR/Sharpe/Calmar/MaxDD kèm số
+      # thì trong CÙNG KHỐI phải có md5 ledger, tham chiếu registry, hoặc
+      # `no_pin: <lý do>`.
+      #
+      # VÌ SAO: ca 2026-09-28 — user cầm một số CAGR 21,94% không tra ngược được
+      # về đâu, vì nó đã được trích ra khỏi ledger rồi sống một mình. Số trần
+      # trong KB là số không kiểm chứng được.
+      #
+      # ĐÃ ĐO TRƯỚC KHI BẬT (mandate: test luật mới trên file thật):
+      # 116 commit · 310 khối mới · **12 bị chặn (3,9%)**, tất cả là vi phạm thật.
+      # Vòng đo ĐẦU cho 6,5% và lộ ra 8 khối `## Consolidation <ts>` do cron
+      # consolidate.sh tự sinh — chặn nhóm đó sẽ KẸT PIPELINE KB, nên đã miễn trừ
+      # theo header (bằng chứng, không phải nhân nhượng).
+      #
+      # Ratchet: chỉ xét khối MỚI. Bỏ qua: SKIP=number-provenance-gate ·
+      #          MIKE_PROV_GATE=warn (qua 1 lần, không ghi nhớ) · =off
+      - id: number-provenance-gate
+        name: Số hiệu suất mới trong KB phải khai nguồn (bin/number_provenance_gate.py, B3)
+        entry: bin/number_provenance_gate.py
+        language: system
+        verbose: true
+        files: '^kb/(canonical|KNOWLEDGE)\.md$'

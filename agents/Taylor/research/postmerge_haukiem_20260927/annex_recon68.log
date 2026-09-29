@@ -1,0 +1,32 @@
+==============================================================================
+DSR / PBO ROBUSTNESS ANNEX — computation log
+==============================================================================
+[family] manifest mike/research/dsr_family_manifest_20260927/man_2026_07_recon.json: 68 CSV (tạo 2026-09-27T12:43:03.229230+07:00, tiêu chí 'PHUC DUNG ho trial tai thoi diem pin annex 2026-07 (job Taylor_20260705_075644, 07:56 ICT): moi CSV v23_golive_audit_2014_now_* co mtime TRUOC 2026-07-05T08:00 ICT va >=2500 obs. KHONG phai danh sach goc duoc ghi lai (registry khong luu ten file) — day la phuc dung tot nhat tu mtime.') — KHÔNG glob động, CSV lạ trong data/ không ảnh hưởng PBO.
+
+[1] TRIAL FAMILY: 68 candidate CSVs globbed, 68 pass full-history (>=2500 daily obs) filter.
+    Common aligned trading days across all trials: 3101
+
+[2] R3 PINNED (v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_wtnamecap_advprice_exp_pinR3_20260927pm_univpit.csv)
+    daily obs T = 3106  (12.460y CALENDAR, 249.3 obs/yr; session-count basis would say 12.325y)
+    per-day Sharpe = 0.10237  -> annualized = 1.616
+    skewness  gamma3 = -0.3619
+    kurtosis  gamma4 = 7.0941  (excess = 4.0941)
+
+    Trial Sharpe dispersion (per-day, N_csv=68):
+      mean ann-SR = 1.688, sd ann-SR = 0.145, Var(per-day SR) = 8.488e-05
+    DSR @ N_csv (surviving daily CSVs)              : SR0(ann)=0.348  DSR=1.0000
+    DSR @ N_reg=120 (registry-documented search)    : SR0(ann)=0.377  DSR=1.0000
+    DSR @ N_reg=200 (conservative upper)            : SR0(ann)=0.402  DSR=1.0000
+
+[3] CSCV / PBO
+    matrix: 3100 daily obs x 68 configs; S=16 blocks, 12870 IS/OOS combinations
+    PBO = 0.2085  (fraction of splits where IS-best config lands below OOS median)
+    logit lambda: median=1.28, mean=1.01, P(lambda<0)=0.2085
+
+[4] BOOTSTRAP: circular block (L=21) vs stationary (mean L=21)
+    circular block     CAGR 5th= 15.5%  med= 24.4%  | MaxDD 5th= -30.3%  med= -20.4%  | P(DD<-30%)= 5.5%
+    stationary(PR)     CAGR 5th= 15.3%  med= 24.4%  | MaxDD 5th= -30.0%  med= -20.2%  | P(DD<-30%)= 5.1%
+
+==============================================================================
+DONE. Numbers above feed the registry annex section.
+==============================================================================

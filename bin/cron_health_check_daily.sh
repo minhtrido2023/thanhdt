@@ -17,7 +17,13 @@ TRADING_DAILY_THREAD="trading_daily"
 OUT="$(python3 "$ROOT/bin/cron_health_check.py" 2>&1)"
 RC=$?
 
-BAD_COUNT="$(echo "$OUT" | head -1 | grep -oE '[0-9]+ cần chú ý' | grep -oE '^[0-9]+' || echo 0)"
+# Bắt dòng tóm tắt bằng TIỀN TỐ DUY NHẤT của nó, không bằng VỊ TRÍ (`head -1`). Vị trí không
+# đáng tin: cron_health_check.py gọi subprocess kế thừa stdout ở nhánh --bus, và stdout của con
+# không đi qua buffer của Python nên có thể in TRƯỚC dòng tóm tắt (retro 2026-08-26). Neo theo
+# tiền tố miễn nhiễm với mọi subprocess thêm về sau lẫn với stderr chèn vào bởi `2>&1` ở trên.
+BAD_COUNT="$(printf '%s\n' "$OUT" | grep -m1 -E '^cron_health_check — ' \
+  | grep -oE '[0-9]+ cần chú ý' | grep -oE '^[0-9]+' || echo 0)"
+[ -n "$BAD_COUNT" ] || BAD_COUNT=0
 
 if [ "$RC" -eq 0 ]; then
   # Quiet-heartbeat: still post, even when clean — silence must never be the only signal alive.

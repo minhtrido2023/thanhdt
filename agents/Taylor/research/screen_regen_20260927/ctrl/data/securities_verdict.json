@@ -1,0 +1,217 @@
+{
+  "job": "Taylor_20260630_073104",
+  "sector": "#13 Securities/Brokerage",
+  "screen": "brokerage_cyclical_recovery",
+  "universe": [
+    "AGR",
+    "APG",
+    "BSI",
+    "BVS",
+    "CTS",
+    "EVS",
+    "FTS",
+    "HCM",
+    "MBS",
+    "ORS",
+    "SHS",
+    "SSI",
+    "TVS",
+    "VCI",
+    "VDS",
+    "VIX",
+    "VND"
+  ],
+  "qual_med": 2,
+  "months_held": 106,
+  "months": 151,
+  "months_cash": 43,
+  "median_sel_adv_b": 22.76,
+  "beta_vs_vnindex": 1.28,
+  "vs_vnindex": {
+    "full": {
+      "CAGR": 17.495,
+      "Sharpe": 0.563,
+      "MaxDD": -65.706,
+      "Calmar": 0.266,
+      "navfinal": 7.605,
+      "n": 151
+    },
+    "full_bh": {
+      "CAGR": 9.94,
+      "Sharpe": 0.585,
+      "MaxDD": -43.154,
+      "Calmar": 0.23,
+      "navfinal": 3.295,
+      "n": 151
+    },
+    "is_": {
+      "CAGR": 8.226,
+      "Sharpe": 0.395,
+      "MaxDD": -47.378,
+      "Calmar": 0.174,
+      "navfinal": 1.607,
+      "n": 72
+    },
+    "oos": {
+      "CAGR": 26.633,
+      "Sharpe": 0.684,
+      "MaxDD": -65.706,
+      "Calmar": 0.405,
+      "navfinal": 4.733,
+      "n": 79
+    },
+    "oos_bh": {
+      "CAGR": 10.842,
+      "Sharpe": 0.58,
+      "MaxDD": -32.239,
+      "Calmar": 0.336,
+      "navfinal": 1.969,
+      "n": 79
+    }
+  },
+  "vs_broker_basket": {
+    "full_screen": {
+      "CAGR": 17.495,
+      "Sharpe": 0.563,
+      "MaxDD": -65.706,
+      "Calmar": 0.266,
+      "navfinal": 7.605,
+      "n": 151
+    },
+    "full_basket": {
+      "CAGR": 22.236,
+      "Sharpe": 0.67,
+      "MaxDD": -60.745,
+      "Calmar": 0.366,
+      "navfinal": 12.51,
+      "n": 151
+    },
+    "is_screen": {
+      "CAGR": 8.226,
+      "Sharpe": 0.395,
+      "MaxDD": -47.378,
+      "Calmar": 0.174,
+      "navfinal": 1.607,
+      "n": 72
+    },
+    "is_basket": {
+      "CAGR": 10.988,
+      "Sharpe": 0.48,
+      "MaxDD": -37.38,
+      "Calmar": 0.294,
+      "navfinal": 1.869,
+      "n": 72
+    },
+    "oos_screen": {
+      "CAGR": 26.633,
+      "Sharpe": 0.684,
+      "MaxDD": -65.706,
+      "Calmar": 0.405,
+      "navfinal": 4.733,
+      "n": 79
+    },
+    "oos_basket": {
+      "CAGR": 33.477,
+      "Sharpe": 0.81,
+      "MaxDD": -60.745,
+      "Calmar": 0.551,
+      "navfinal": 6.693,
+      "n": 79
+    }
+  },
+  "dt5g_gated": {
+    "full": {
+      "CAGR": 23.804,
+      "Sharpe": 0.706,
+      "MaxDD": -39.606,
+      "Calmar": 0.601,
+      "navfinal": 14.686,
+      "n": 151
+    },
+    "full_bh": {
+      "CAGR": 9.94,
+      "Sharpe": 0.585,
+      "MaxDD": -43.154,
+      "Calmar": 0.23,
+      "navfinal": 3.295,
+      "n": 151
+    },
+    "oos": {
+      "CAGR": 40.573,
+      "Sharpe": 0.911,
+      "MaxDD": -39.606,
+      "Calmar": 1.024,
+      "navfinal": 9.412,
+      "n": 79
+    }
+  },
+  "intcov_gate": {
+    "otherwise_passing": 419,
+    "hard_gate_drop": 240,
+    "known_bad_le_1p5": 118,
+    "null_coverage": 122,
+    "known_bad_names": [
+      "BSI",
+      "BVS",
+      "CTS",
+      "MBS",
+      "SHS",
+      "SSI",
+      "VDS",
+      "VIX",
+      "VND"
+    ],
+    "note": "IntCov replaces Debt_Eq for brokerage (margin debt is by-design); NULL-tolerant to keep liquid names with patchy coverage (FTS)"
+  },
+  "selfcheck_vnd": {
+    "screen": 9e-06,
+    "dt5g": 1.7e-05,
+    "basket": 2e-06
+  },
+  "ortho_c30v": 22.9,
+  "ortho_8l": 6.9,
+  "verify": {
+    "VND_2020_recovery": [
+      "2020-10",
+      "2020-11",
+      "2020-12",
+      "2021-01",
+      "2021-02",
+      "2021-04",
+      "2021-05",
+      "2021-06",
+      "2021-07"
+    ],
+    "SHS_2020_recovery": [
+      "2021-04",
+      "2021-05",
+      "2021-06",
+      "2021-07"
+    ],
+    "SSI_2024_recovery": [
+      "2025-01",
+      "2025-02",
+      "2025-03",
+      "2025-04",
+      "2025-05",
+      "2025-06"
+    ],
+    "topavoid_2021H2": [
+      "2021-07"
+    ],
+    "cash_2022H2_2023": [
+      "2023-01",
+      "2023-02",
+      "2023-03",
+      "2023-04",
+      "2023-05",
+      "2023-06",
+      "2023-07",
+      "2023-08",
+      "2023-09",
+      "2023-10",
+      "2023-11",
+      "2023-12"
+    ]
+  }
+}

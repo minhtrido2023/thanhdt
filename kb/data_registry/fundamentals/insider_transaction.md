@@ -80,6 +80,12 @@ Cùng 1 `id` chuyển trạng thái `Đăng ký` → `Đã thực hiện xong` v
 nguồn**, không phải suy luận thống kê — đề xuất §5.4 (tự snapshot hàng ngày từ giờ trở đi) là con
 đường DUY NHẤT để lấy lại cửa sổ pre-trade, không có cách nào phục hồi lịch sử.
 
+✅ **ĐÃ TRIỂN KHAI 2026-08-17** (job `Taylor_20260817_041202`): con đường duy nhất đó nay là bảng
+[`insider_transaction_snapshots.md`](insider_transaction_snapshots.md) — `tav2_mike.insider_transaction_snapshots`,
+writer `mike/bin/snapshot_corp_action_daily.py`. Vintage đầu tiên 2026-08-17 đã bắt được **1.364 dòng đang
+ở `Đăng ký`**. Từ nay mọi câu hỏi cần cửa sổ pre-trade phải đọc bảng snapshot, KHÔNG đọc bảng này. ⚠️ Sự
+kiện treo từ TRƯỚC 2026-08-17 vẫn censored bên trái — xem Bẫy(2) của file đó.
+
 **(2) `Không thực hiện được` gần như không được dùng (2 dòng/11 năm) — tỷ lệ không-thực-hiện THẬT nằm
 ở `share_acquire`:** trong 31.505 dòng Done có `share_register>0`: **14,7% khớp 0 cổ phiếu**
 (4.646), **27,2% khớp một phần** (8.567), **58,1% khớp đủ** (18.292); trung vị fill = 1,0, p25 ≈ 0,38–0,44.

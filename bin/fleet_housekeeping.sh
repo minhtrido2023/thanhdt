@@ -46,7 +46,7 @@ Category ARCHIVE (đảo ngược được, giữ nguyên nội dung):
   dispatchlog logs/dispatch_*.log  >30d  -> logs/archive/<YYYY-MM>/*.log.gz
   toollog     logs/{verify_,arch_review_,wags_pipeline_,daily_retro_draft_}* >30d
   registry    bus/registry/*.json  >30d  -> bus/registry/archive/
-  rotate      logs/<cron>.log >10MB      -> .1.gz .2.gz .3.gz
+  rotate      logs/<cron>.log + bus/_rejected.jsonl >300KB -> .1.gz .2.gz .3.gz
 
 Không có category OPT-IN nào. (\`datacold\` đã bị gỡ sau arch-review 2026-07-30 — xem §10 cuối file.)
 EOF
@@ -340,8 +340,14 @@ fi
 # ── 9. rotate — log cron append vô hạn, chưa ai rotate ───────────────────────
 # discover.log 1,6M / notify.log 880K / watchdog.log 452K… Rotate bằng `cp + truncate` (KHÔNG mv)
 # để process đang giữ fd ghi tiếp vào cùng inode không bị mất dòng.
+# Ngưỡng hạ 10M -> 300K (2026-08-16, xem kb/coding_guidelines_ext.md §29): 10M chưa từng chạm
+# tới cho CHÍNH 3 file comment trên nêu tên làm ví dụ (discover.log mới 1,7M sau nhiều tháng
+# cron 10'/lần) — nghĩa là category này trên thực tế KHÔNG BAO GIỜ rotate chúng, để lỗi CŨ ĐÃ SỬA
+# nằm mãi trong 200KB tail mà cron_health_check.py quét, gây báo động giả lặp lại mỗi ngày (ca
+# thật: discover_sessions.py ENAMETOOLONG đã fix từ 2026-08-15 vẫn báo hằng ngày). 300K ≈ cỡ tail
+# cron_health_check.py thực sự đọc, giữ "cửa sổ nóng" luôn đủ mới mà không rotate quá dày.
 if want rotate; then
-  hdr "rotate — logs/*.log >10MB (giữ 3 đời .1.gz .2.gz .3.gz)"
+  hdr "rotate — logs/*.log + bus/_rejected.jsonl >300KB (giữ 3 đời .1.gz .2.gz .3.gz)"
   while IFS= read -r f; do
     if denied "$f"; then say "  DENY-LIST chặn: $f"; continue; fi
     sz=$(stat -c %s "$f")
@@ -361,7 +367,13 @@ if want rotate; then
       fi
     else say "  [dry] ROT  $f ($sz B) -> $f.1.gz, truncate bản hot"; fi
     N_ARC=$((N_ARC+1)); B_ARC=$((B_ARC+sz))
-  done < <(find "$ROOT/logs" -maxdepth 1 -type f -name '*.log' -size +10M 2>/dev/null)
+  done < <(find "$ROOT/logs" -maxdepth 1 -type f -name '*.log' -size +300k 2>/dev/null
+           # bus/_rejected.jsonl — hàng đợi cách ly của append_event.sh (thêm 2026-08-16,
+           # arch-review coord-2026-08-16 req#3): file append vô hạn, KHÔNG nằm trong logs/
+           # nên find ở trên mù với nó. copytruncate an toàn ở đây vì append_event.sh mở
+           # bằng "a" mỗi lần ghi rồi đóng ngay (không giữ fd dài hạn ⇒ không có lỗ sparse).
+           # CỐ Ý không nằm dưới bus/inbox/: mọi reader glob inbox/*.jsonl không lọc tên.
+           find "$ROOT/bus" -maxdepth 1 -type f -name '_rejected.jsonl' -size +300k 2>/dev/null)
 fi
 
 # ── 10. (ĐÃ GỠ) datacold — arch-review 2026-07-30 bác bỏ ─────────────────────

@@ -19,6 +19,7 @@ BRIDGE="${CCDB_BRIDGE_DIR:-/workspace/claude-code-discord-bridge}"
 ARCH_THREAD="architecture"
 STAMP="$ROOT/state/ccdb_bridge_drift_alerted_sha.txt"
 BEHIND_THRESHOLD=10
+COOLDOWN_DAYS=7  # re-alert at most once per week (unless security commits)
 
 [ -e "$BRIDGE/.git" ] || { echo "ccdb_bridge_drift_check: $BRIDGE not a git repo, skip"; exit 0; }
 
@@ -45,13 +46,23 @@ if [ "$BEHIND" -lt "$BEHIND_THRESHOLD" ] && [ "$SECURITY_N" -eq 0 ]; then
     exit 0
 fi
 
-_prev="$(cat "$STAMP" 2>/dev/null || true)"
-if [ "$_prev" = "$ORIGIN_SHA" ]; then
-    echo "ccdb_bridge_drift_check: same gap already alerted ($ORIGIN_SHA), staying quiet until it changes"
-    exit 0
+# Stamp format: "<sha> <unix_timestamp>"
+_stamp="$(cat "$STAMP" 2>/dev/null || true)"
+_prev_sha="$(echo "$_stamp" | awk '{print $1}')"
+_prev_ts="$(echo "$_stamp" | awk '{print $2}')"
+_now_ts="$(TZ=Asia/Ho_Chi_Minh date +%s)"
+_cooldown_s=$(( COOLDOWN_DAYS * 86400 ))
+
+if [ -n "$_prev_ts" ] && [ "$_prev_ts" -gt 0 ] 2>/dev/null; then
+    _age_s=$(( _now_ts - _prev_ts ))
+    if [ "$_age_s" -lt "$_cooldown_s" ] && [ "$SECURITY_N" -eq 0 ]; then
+        _age_d=$(( _age_s / 86400 ))
+        echo "ccdb_bridge_drift_check: $BEHIND behind but alerted ${_age_d}d ago (cooldown=${COOLDOWN_DAYS}d, no security commits), staying quiet"
+        exit 0
+    fi
 fi
 
-printf '%s' "$ORIGIN_SHA" > "$STAMP"
+printf '%s %s' "$ORIGIN_SHA" "$_now_ts" > "$STAMP"
 
 REASON="${BEHIND} commit(s) behind origin/main"
 [ "$SECURITY_N" -gt 0 ] && REASON="${REASON}, ${SECURITY_N} của đó gắn nhãn security:"

@@ -318,6 +318,190 @@ def main():
     check("D3: probe journal_scan marker bắn hôm nay → badge RED (không lọt qua thành XANH)",
           "🔴 RED" in outd3 and "bắn hôm nay" in outd3, outd3[:500])
 
+    # ---- E. `_terp_factor_stale` — cái neo bắt lỗi HỒI TỐ CỦA VENDOR (thêm 2026-09-23) ----
+    # `Close/Price` = tích hệ số của các sự kiện CÒN Ở TƯƠNG LAI ⇒ phải KHÔNG-GIẢM theo ngày.
+    # Ba ca dưới pin đúng cái quyết định dễ sai nhất về sau: NGƯỠNG. Ca E2 là ca đã báo động
+    # giả thật khi ngưỡng còn là FACTOR_EPS=1e-6 — nó ở đây để ngưỡng không bị siết lại.
+    import duckdb
+
+    def _mkcache(sub, rows):
+        d = os.path.join(root, sub, "ticker")
+        os.makedirs(d, exist_ok=True)
+        con = duckdb.connect()
+        vals = ",".join(f"('{t}', DATE '{dd}', {c}, {pp})" for t, dd, c, pp in rows)
+        con.execute(f"COPY (SELECT * FROM (VALUES {vals}) AS t(ticker, time, Close, Price)) "
+                    f"TO '{os.path.join(d, '2026.parquet')}' (FORMAT PARQUET)")
+        con.close()
+        return os.path.join(root, sub)
+
+    # E1 — ca FPT thật: r=1,0 tại ngày vào lệnh, 0,909066 về sau (CP thưởng 10% chỉ hồi tố 3 phiên)
+    c1 = _mkcache("cache_e1", [("FPT", "2026-06-30", 70200, 70200),
+                               ("FPT", "2026-09-11", 72700, 72700),
+                               ("FPT", "2026-09-18", 65180, 71700)])
+    v1 = m._terp_factor_stale([("FPT", "2026-06-30", 70200.0)], cache_dir=c1)
+    hit = v1.get(("FPT", "2026-06-30"))
+    check("E1: chuỗi hệ số GIẢM thật (1,0 → 0,909) ⇒ bị bắt, kèm ngày gãy + chặn trên",
+          hit is not None and hit[0] == "2026-09-18" and abs(hit[1] - 1.0) < 1e-9
+          and abs(hit[2] - 65180 / 71700) < 1e-9, v1)
+
+    # E2 — ca MBB thật: chỉ rung do LÀM TRÒN bước giá (giảm 4,0e-4). KHÔNG được báo động.
+    c2 = _mkcache("cache_e2", [("MBB", "2026-06-30", 20180, 25200),
+                               ("MBB", "2026-07-08", 20820, 26000)])
+    v2 = m._terp_factor_stale([("MBB", "2026-06-30", 25200.0)], cache_dir=c2)
+    drop = (20180 / 25200 - 20820 / 26000) / (20180 / 25200)
+    check("E2: rung làm tròn (giảm ~4e-4) KHÔNG bị bắt — ngưỡng FACTOR_EPS từng báo động giả ở đây",
+          v2 == {} and 0 < drop < m._TERP_DROP_TOL, (v2, drop))
+
+    # E3 — hệ số phẳng (không có sự kiện nào) và ca thiếu dữ liệu: không bắt, không nổ.
+    c3 = _mkcache("cache_e3", [("HDB", "2026-06-30", 25850, 25850),
+                               ("HDB", "2026-09-18", 27550, 27550),
+                               ("ACB", "2026-06-30", 22650, 22650)])
+    v3 = m._terp_factor_stale([("HDB", "2026-06-30", 25850.0), ("ACB", "2026-06-30", 22650.0),
+                               ("XXX", "2026-06-30", 1000.0)], cache_dir=c3)
+    check("E3: hệ số phẳng / <2 dòng / mã không có trong cache ⇒ rỗng, không exception", v3 == {}, v3)
+
+    # E4 — ngưỡng phải tách được HAI mốc đo thật (nhiễu 4,01e-4 vs hỏng 9,09e-2), không kẹp biên.
+    check("E4: ngưỡng nằm GIỮA nền nhiễu và tín hiệu thật đã đo (4,01e-4 < tol < 9,09e-2)",
+          4.01e-4 < m._TERP_DROP_TOL < 9.09e-2, m._TERP_DROP_TOL)
+
+    # ---- E5/E6 — PHƯƠNG ÁN B: chặn trên PHẢI được ÁP vào chính số dẫn dắt (2026-09-23) ----
+    # E1-E4 chỉ pin cái NEO (phát hiện). E5 pin cái HÀNH ĐỘNG: sau khi user duyệt phương án B,
+    # tỉ suất dẫn dắt phải tính bằng giá vốn ĐÃ nhân chặn trên, và nhãn phải nói rõ đó là CHẶN
+    # DƯỚI. E6 là ca ĐỐI CHỨNG: mã không lệch hệ số thì tuyệt đối không được đụng vào số.
+    import shutil
+    shutil.copy(os.path.join(os.path.dirname(SRC), "..", "..", "paper_entry_adjust.py"),
+                os.path.join(root, "paper_entry_adjust.py"))
+    _mkcache("data/bq_cache", [("FPT", "2026-06-30", 70200, 70200),
+                               ("FPT", "2026-09-11", 72700, 72700),
+                               ("FPT", "2026-09-18", 65180, 71700),
+                               ("ACB", "2026-06-30", 22650, 22650),
+                               ("ACB", "2026-09-18", 22000, 22000)])
+    write(os.path.join(root, "data/alphalens_e5.json"), json.dumps({
+        "meta": {"benchmark_entry": 1860.01, "entry_price_asof": "2026-06-30"},
+        "positions": [{"ticker": "FPT", "entry_price": 70200.0, "entry_date": "2026-07-01",
+                       "lens": "L", "weight_paper": 1.0}]}, ensure_ascii=False))
+    write(os.path.join(root, "data/alphalens_e6.json"), json.dumps({
+        "meta": {"benchmark_entry": 1860.01, "entry_price_asof": "2026-06-30"},
+        "positions": [{"ticker": "ACB", "entry_price": 22650.0, "entry_date": "2026-07-01",
+                       "lens": "L", "weight_paper": 1.0}]}, ensure_ascii=False))
+    _con = duckdb.connect()
+    _con.execute("COPY (SELECT ticker, time, CAST(Close AS DOUBLE) AS Close, "
+                 "CAST(VNINDEX AS DOUBLE) AS VNINDEX FROM (VALUES "
+                 "('FPT', DATE '2026-09-22', 66600.0, 1816.93), "
+                 "('ACB', DATE '2026-09-22', 22000.0, 1816.93)) "
+                 "AS t(ticker, time, Close, VNINDEX)) TO "
+                 f"'{os.path.join(root, 'data/alphalens_e5_px.parquet')}' (FORMAT PARQUET)")
+    _con.close()
+
+    r_min = 65180 / 71700
+    e5 = m.probe_alphalens({"json_path": "data/alphalens_e5.json",
+                            "prices_parquet": "data/alphalens_e5_px.parquet"}, {}, D)
+    want5 = (66600 / (70200 * r_min) - 1) * 100
+    check("E5: có lệch hệ số ⇒ số DẪN DẮT tính bằng giá vốn đã áp chặn trên (+4,36%, không -5,13%)",
+          f"{want5:+.2f}%" in e5["headline"] and "≥" in e5["headline"]
+          and "CHẶN DƯỚI" in e5["body"] and f"{-5.13:+.2f}%" not in e5["headline"],
+          (want5, e5["headline"]))
+    check("E5b: body nêu rõ giá vốn cũ→mới và giữ nguyên bằng chứng ngày gãy",
+          f"{70200 * r_min:,.0f}" in e5["body"] and "2026-09-18" in e5["body"]
+          and "phương án B" in e5["body"], e5["body"][-400:])
+    e6 = m.probe_alphalens({"json_path": "data/alphalens_e6.json",
+                            "prices_parquet": "data/alphalens_e5_px.parquet"}, {}, D)
+    want6 = (22000 / 22650 - 1) * 100
+    check("E6 (đối chứng): mã hệ số phẳng ⇒ KHÔNG áp chặn, không có nhãn ≥/CHẶN DƯỚI",
+          f"{want6:+.2f}%" in e6["headline"] and "≥" not in e6["headline"]
+          and "CHẶN DƯỚI" not in e6["body"], (want6, e6["headline"]))
+
+    print("== F. close_repair self_computed KHÔNG bị cap hai lần (Việc nhỏ 2, 2026-09-29) ==")
+    # Regression cho commit 2f6ee508/8a9d3ac3 (finding paper-report-fpt-double-adjust-fix-20260929,
+    # quant-skeptic CONFIRMED x2): khi close_repair đã tự sửa Close cho MỘT entry
+    # (adj_source="self_computed"), `_terp_factor_stale`'s Phương án B (chặn trên) PHẢI bị gate
+    # tắt (`already_repaired`) — nếu không, tỉ suất bị sửa HAI LẦN (ca thật FPT 2026-09-29:
+    # entry_adj ĐÚNG 63.818,18 bị chặn trên kéo xuống 58.015, báo +9,80% thay vì đúng ~-0,19%).
+    # Chạy `close_repair.py` THẬT (không mock công thức) — chỉ mock `corp_action_lib.events()` để
+    # không phụ thuộc BQ sống, giữ test hermetic/deterministic (khác các con số "hôm nay" thật sẽ
+    # đổi mỗi ngày). File này TRƯỚC batch vá (2f6ee508 lùi lại) fail — headline in "+9.80%".
+    from pathlib import Path as _Path
+    import types as _types
+
+    _outer_root = os.path.join(os.path.dirname(SRC), "..", "..")
+    if _outer_root not in sys.path:
+        sys.path.insert(0, _outer_root)
+
+    _fpt_bonus_event = {"ticker": "FPT", "exright_date": "2026-09-21", "event_code": "ISS",
+                        "issue_method_name_vi": "Cổ phiếu thưởng", "exercise_ratio": 0.1}
+
+    def _stub_is_price_adjusting(event):
+        code = event.get("event_code")
+        if code == "DIV":
+            return True
+        if code != "ISS":
+            return False
+        return (event.get("issue_method_name_vi") or "").strip() in {
+            "Trả Cổ tức bằng Cổ phiếu", "Cổ phiếu thưởng", "Quyền mua CP cho Cổ đông hiện hữu"}
+
+    def _stub_events(tickers, since=None, until=None, codes=("DIV", "ISS"), executed_only=True):
+        return [e for e in (_fpt_bonus_event,) if e["ticker"] in tickers]
+
+    _cal_stub = _types.ModuleType("corp_action_lib")
+    _cal_stub.is_price_adjusting = _stub_is_price_adjusting
+    _cal_stub.events = _stub_events
+    _old_cal = sys.modules.get("corp_action_lib")
+    sys.modules["corp_action_lib"] = _cal_stub
+    sys.modules.pop("close_repair", None)   # force reimport under the stub above
+
+    import paper_entry_adjust as _pea_mod
+    _old_default_cache = _pea_mod.DEFAULT_CACHE
+    _pea_mod.DEFAULT_CACHE = _Path(root) / "data" / "bq_cache"
+    try:
+        # `_mkcache` (4 cột) không đủ — `_repair_close` cần High/Low để chạy band-guard của
+        # close_repair; 0 tắt guard đó một cách hợp lệ (xem `_band_lifted_suspect`). Volume=1
+        # (bất kỳ giá trị dương nào, không ảnh hưởng ca này — không có bar nào ở đây chained) chỉ
+        # để khớp schema thật (`tav2_bq.ticker` LUÔN có cột Volume — Việc A, dispatch
+        # Taylor_20260929_042515); thiếu cột này làm `_repair_close`'s SQL ném BinderException,
+        # Layer 2 rơi vào nhánh lỗi im lặng, và cap an toàn cũ bị bật nhầm lại.
+        _fcache_dir = os.path.join(root, "data/bq_cache/ticker")
+        os.makedirs(_fcache_dir, exist_ok=True)
+        _fconn = duckdb.connect()
+        _fconn.execute(
+            "COPY (SELECT * FROM (VALUES "
+            "('FPT', DATE '2026-06-30', 70200, 70200, 0, 0, 1), "   # r=1,0 tại asof — chưa hồi tố
+            "('FPT', DATE '2026-09-18', 65180, 71700, 0, 0, 1), "   # r=0,909066 — CÙNG bằng chứng E1
+            "('FPT', DATE '2026-09-22', 63700, 63700, 0, 0, 1)) "   # sau ex-date thật, đã hội tụ (r=1,0)
+            "AS t(ticker, time, Close, Price, High, Low, Volume)) TO "
+            f"'{os.path.join(_fcache_dir, '2026.parquet')}' (FORMAT PARQUET)")
+        _fconn.close()
+        write(os.path.join(root, "data/alphalens_f.json"), json.dumps({
+            "meta": {"benchmark_entry": 1860.01, "entry_price_asof": "2026-06-30"},
+            "positions": [{"ticker": "FPT", "entry_price": 70200.0, "entry_date": "2026-07-01",
+                          "lens": "L", "weight_paper": 1.0}]}, ensure_ascii=False))
+        _conf = duckdb.connect()
+        _conf.execute("COPY (SELECT ticker, time, CAST(Close AS DOUBLE) AS Close, "
+                     "CAST(VNINDEX AS DOUBLE) AS VNINDEX FROM (VALUES "
+                     "('FPT', DATE '2026-09-22', 63700.0, 1780.68)) "
+                     "AS t(ticker, time, Close, VNINDEX)) TO "
+                     f"'{os.path.join(root, 'data/alphalens_f_px.parquet')}' (FORMAT PARQUET)")
+        _conf.close()
+
+        f_entry_adj = 70200.0 / 1.1   # r_pred = 1+exercise_ratio (no cash leg), Close_self = Price/r_pred
+        f_want = (63700.0 / f_entry_adj - 1) * 100
+
+        ef = m.probe_alphalens({"json_path": "data/alphalens_f.json",
+                                "prices_parquet": "data/alphalens_f_px.parquet"}, {}, D)
+        check("F1: close_repair self_computed + raw-cache stale detector CẢ HAI fire ⇒ CHỈ MỘT "
+              "lần sửa (ret ≈ -0,19%, KHÔNG +9,80%)",
+              f"{f_want:+.2f}%" in ef["headline"] and "+9.80%" not in ef["headline"]
+              and "≥" not in ef["headline"], (f_want, ef["headline"]))
+        check("F2: body xác nhận cap bị gate tắt (đã sửa qua close_repair, không áp thêm chặn trên)",
+              "KHÔNG áp thêm chặn trên" in ef["body"] and "ĐÃ ÁP CHẶN TRÊN" not in ef["body"],
+              ef["body"][-400:])
+    finally:
+        _pea_mod.DEFAULT_CACHE = _old_default_cache
+        if _old_cal is not None:
+            sys.modules["corp_action_lib"] = _old_cal
+        else:
+            sys.modules.pop("corp_action_lib", None)
+        sys.modules.pop("close_repair", None)
+
     n_pass = N_RUN - len(FAILS)
     status = f"ALL PASS ({n_pass}/{N_RUN})" if not FAILS else f"FAILED {len(FAILS)}/{N_RUN}: " + ", ".join(FAILS)
     print(f"\n{status}  (tmp: {root})")

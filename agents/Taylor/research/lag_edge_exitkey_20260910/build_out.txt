@@ -1,0 +1,30 @@
+calendar sessions=3,912  2011-01-04 -> 2026-09-09
+source rows=5,431  entries 2012-05-09 -> 2026-07-29
+exit lag calendar-days: min=32 median=35 max=45
+wrote /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/lag_edge_exitkey_20260910/lag_edge_health_exitkey.csv  rows=5,431
+SELF-CHECK A  max|recomputed entry-keyed mean12 - production mean12| = 1.039e-13   -> PASS
+
+ALLOCATOR AXIS 2014-01-01..2026-06-19  N=3,109 sessions
+  entry-keyed  >=4%:  47.3% of sessions   NaN=0
+  exit-keyed   >=4%:  51.3% of sessions   NaN=0
+  sessions where the gate DISAGREES: 367 (11.8%)
+  mean|delta mean12| = 0.776 pp, max = 5.913 pp
+  disagreement runs (independent episodes) = 16
+           from          to  n_sess  entry_says_tilt
+blk                                                 
+2    2015-08-10  2015-11-23      75            False
+4    2017-03-16  2017-05-09      36            False
+6    2017-05-26  2017-06-13      13             True
+8    2017-07-19  2017-07-27       7            False
+10   2017-08-08  2017-08-22      11            False
+12   2017-09-01  2017-09-12       7            False
+14   2017-10-26  2017-11-07       9             True
+16   2017-11-30  2017-12-12       9            False
+18   2019-05-07  2019-06-10      25             True
+20   2019-08-08  2019-09-12      25            False
+22   2020-10-28  2020-12-01      25             True
+24   2022-10-20  2022-11-23      25            False
+26   2023-11-01  2023-12-05      25             True
+28   2025-05-11  2025-06-12      25            False
+30   2025-07-24  2025-08-27      25             True
+32   2025-11-10  2025-12-12      25            False

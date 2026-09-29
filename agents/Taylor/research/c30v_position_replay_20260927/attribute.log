@@ -1,0 +1,76 @@
+[px-repair] 8 ô ex-date có `Price` kẹt hệ CUM đã sửa thành Close/ratio_next
+[events] TRONG cửa sổ: 804 sự kiện CP thưởng/cổ tức CP áp vào N; 1895 cổ tức tiền vào cash; 195 QUYỀN MUA KHÔNG mô phỏng được. Bỏ: 1313 trước phiên đầu / 90 sau phiên cuối / 50 không có ex-date (phần lớn là AIS).
+[window] 2014-08-05 -> 2026-06-19
+
+[attr] 75,294 dòng (name × session) có chênh khác 0, trong cửa sổ
+
+== REPLAY_B − ENGINE_FLAT: đóng góp theo NHÃN SỰ KIỆN ==
+                          n  sum_contrib  mean_bp  max_abs_bp  pp_per_yr
+label                                                                   
+RIGHTS                   18      -0.0393 -21.8270     78.1884    -0.3310
+FREESHARE+RIGHTS         12      -0.0146 -12.1470     30.8335    -0.1228
+DIV+FREESHARE+RIGHTS      5      -0.0075 -14.9150     37.1907    -0.0628
+DIV+RIGHTS                3      -0.0013  -4.3189     10.4146    -0.0109
+DIV+FREESHARE            45      -0.0003  -0.0641      1.5901    -0.0024
+FREESHARE               114       0.0009   0.0809      2.5296     0.0078
+DIV                     238       0.0030   0.1269     14.5830     0.0254
+NONE                  74859       0.0047   0.0006     85.5188     0.0395
+
+ENGINE_FLAT              CAGR  17.857%
+REPLAY_B (thô)           CAGR  17.322%   Δ -0.536 pp
+REPLAY_B carve BAND_LO   CAGR  17.712%   Δ -0.145 pp  (chỉ trung hoà phiên CHỈ CÓ quyền mua)
+REPLAY_B carve BAND_HI   CAGR  17.944%   Δ +0.086 pp  (trung hoà CẢ phiên có quyền mua + sự kiện khác)
+REPLAY_B carve UNMODELLED CAGR  17.498%   Δ -0.359 pp  (trung hoà MỌI phiên vendor re-base vĩnh viễn mà replay không có sự kiện — carve có nguyên tắc, không neo theo ngày của vintage)
+
+DẢI XÁC NHẬN vs ngưỡng PREREG 0,300pp: Δ ∈ [-0.145, +0.086] pp  ⇒ TRONG ngưỡng  · carve UNMODELLED -0.359 pp
+[noise-floor] 191 name×session vendor re-base VĨNH VIỄN mà replay không có sự kiện (174 nhãn NONE tức vintage KHÔNG có sự kiện nào ngày đó): ròng -0.143 pp/năm nhưng **GROSS Σ|đóng góp| = 1.264 pp/năm**. Gross này LỚN HƠN ngưỡng 0,300pp ⇒ phép kiểm PASS nhưng KHÔNG PHÂN GIẢI được sai số nhỏ hơn ~1.26pp. Số ròng chặt là do TRIỆT TIÊU giữa 191 mục độc lập, không phải do một cơ chế bù trừ theo cặp.
+      date ticker      w  label  r_replay  r_flat  contrib
+2020-03-12    VEA 0.1000   NONE   -0.1143 -0.0312  -0.0083
+2016-05-18    REE 0.0645   NONE    0.0000 -0.1287   0.0083
+2025-07-21    HVN 0.0345 RIGHTS   -0.1573  0.0694  -0.0078
+2021-06-10    VND 0.0172 RIGHTS   -0.3455  0.0445  -0.0067
+2017-06-16    HPG 0.1000 RIGHTS   -0.0478  0.0156  -0.0063
+2022-01-21    BID 0.1000   NONE    0.0664  0.0140   0.0052
+2025-08-15    VPB 0.0732   NONE    0.0799  0.0099   0.0051
+2022-04-18    SHS 0.0148   NONE   -0.4184 -0.0940  -0.0048
+phần quyền mua: BAND_LO -0.390pp · BAND_HI -0.622pp
+[carve] 38 name×session bị trung hoà ở BAND_HI, trong đó 20 có sự kiện KHÁC đi ex cùng ngày ⇒ BAND_HI xoá luôn phán quyết của replay trên chính lớp sự kiện đang audit; đó là lý do báo theo DẢI.
+
+[residual] 176 name×session nhãn NONE có `Price` ĐỨNG YÊN đúng bằng phiên trước trong khi `Close` đã đổi (giá thô bị chép 1 phiên, NGOÀI ngày ex ⇒ detector không bắt): tổng đóng góp +0.0037; các cặp này TRIỆT TIÊU ở phiên sau (giá kẹt nằm ở tử số phiên t và mẫu số phiên t+1).
+
+== LEDGER phiên LEGACY ≠ FLAT: 313 name×session / 255 phiên, 230 phiên dương / 25 âm, max +8.18pp, min -0.45pp ==
+
+== 3 ca quant-skeptic nêu — replay khớp chân nào ==
+ticker date              w   raw Δ%   adj Δ%    ΔOSh%  r_legacy%   r_flat%  r_replay% label               
+ACB    2024-05-31    0.054   -16.16    -0.22    15.00      14.74     -0.22      -0.18 DIV+FREESHARE       
+HPG    2025-06-26    -- KHÔNG nằm trong rổ phiên đó ⇒ đóng góp 0 vào chỉ số
+TCB    2024-06-20    0.080   -48.65     2.69   100.00     105.38      2.69       2.69 FREESHARE           
+
+== 15 name×session phantom LEGACY lớn nhất ==
+ticker date              w   raw Δ%   adj Δ%    ΔOSh%  r_legacy%   r_flat%  r_replay% label               
+TCB    2024-06-20    0.080   -48.65     2.69   100.00     105.38      2.69       2.69 FREESHARE           
+VPB    2018-08-01    0.100    -1.11    -1.15    64.07      62.18     -1.15      -1.11 NONE                
+HPG    2017-03-30    0.100   -30.99     3.26    50.00      54.89      3.26       3.51 FREESHARE           
+HPG    2015-05-08    0.100   -35.62    -1.18    50.00      48.22     -1.18      -1.14 DIV+FREESHARE       
+CTG    2025-12-17    0.100   -31.96    -1.61    44.64      42.30     -1.61      -1.59 FREESHARE           
+HPG    2018-06-12    0.100   -29.87    -1.85    40.02      37.42     -1.85      -1.82 FREESHARE           
+MBB    2015-11-02    0.100     0.00     0.00    38.00      38.00      0.00       0.00 NONE                
+HPG    2021-05-31    0.100   -21.46     6.87    35.00      44.27      6.87       6.77 DIV+FREESHARE       
+MBB    2021-07-12    0.100   -28.79    -3.87    35.00      29.78     -3.87      -3.87 FREESHARE           
+ACB    2020-08-20    0.100   -18.75     5.49    30.00      37.14      5.49       5.62 FREESHARE           
+ACB    2019-07-25    0.100   -22.80     0.34    30.00      30.44      0.34       0.36 FREESHARE           
+HPG    2019-06-04    0.100   -22.86     0.13    30.00      30.17      0.13       0.29 FREESHARE           
+HDB    2020-10-01    0.092   -20.77     2.90    30.00      33.77      2.90       3.00 FREESHARE           
+HPG    2022-06-17    0.096   -25.16    -1.07    30.00      28.60     -1.07      -1.10 DIV+FREESHARE       
+HHS    2015-08-26    0.024   -18.18     6.92   110.00     124.53      6.92      -3.94 DIV+FREESHARE+RIGHTS
+
+== 8 chênh REPLAY-vs-FLAT lớn nhất KHÔNG phải quyền mua (dư lượng cần giải thích) ==
+ticker date              w   raw Δ%   adj Δ%    ΔOSh%  r_legacy%   r_flat%  r_replay% label               
+VEA    2020-03-11    0.100     0.00    -8.55     0.00      -8.55     -8.55       0.00 NONE                
+VEA    2020-03-12    0.100   -11.43    -3.12     0.00      -3.12     -3.12     -11.43 NONE                
+REE    2016-05-18    0.065     0.00   -12.87     0.00     -12.87    -12.87       0.00 NONE                
+BID    2022-01-20    0.100     1.49     7.00     0.00       7.00      7.00       1.49 NONE                
+BID    2022-01-21    0.100     6.64     1.40     0.00       1.40      1.40       6.64 NONE                
+VPB    2025-08-14    0.075     0.00     6.93     0.00       6.93      6.93       0.00 NONE                
+VPB    2025-08-15    0.073     7.99     0.99     0.00       0.99      0.99       7.99 NONE                
+SHS    2022-04-18    0.015   -41.84    -9.40     0.00      -9.40     -9.40     -41.84 NONE                

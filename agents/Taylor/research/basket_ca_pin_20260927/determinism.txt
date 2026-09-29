@@ -1,0 +1,9 @@
+run1 EXIT=0
+run2 EXIT=0
+run3 EXIT=0
+run4 EXIT=0
+run5 EXIT=0
+wt_pinnedcache EXIT=0
+wt_liveBQ EXIT=0
+run6 EXIT=0
+DONE

@@ -4,11 +4,17 @@
 # Run a HEADLESS Claude session as the specified agent. The session inherits the
 # agent's CLAUDE.md + hooks (KB context injection, bus writes, heartbeat).
 #
+# RÀNG BUỘC PROMPT: "prompt" phải có >= 8 BYTE sau khi bỏ hết whitespace, nếu không dispatch
+# bị HUỶ ngay (exit 1) + ghi 1 dòng vào logs/dispatch_rejected_prompts.log (ops_health_check
+# check 10b đọc file này). Chi tiết + lý do ở khối GUARD ngay sau chỗ parse tham số.
+# Cần dispatch prompt siêu ngắn cho test: MIKE_ALLOW_TINY_PROMPT=1.
+#
 # Every dispatch is tracked as a JOB in bus/jobs/<job_id>.json (running → done /
 # failed / timeout). Poll it with bin/jobs.sh — a coordinator never has to block
 # blindly. The claude run is wrapped in a HEARTBEAT-AWARE deadline (_hb_aware_timeout,
 # 2026-07-09, thay `timeout` cứng): tới hạn TIMEOUT mà heartbeat bus CỦA AGENT còn tươi
-# (<DISPATCH_HB_FRESH_S, mặc định 120s) → gia hạn thêm 1 chu kỳ TIMEOUT thay vì giết một
+# (<DISPATCH_HB_FRESH_S, mặc định 600s — nâng từ 120s 2026-08-19, xem chú thích tại chỗ
+# định nghĩa) → gia hạn thêm 1 chu kỳ TIMEOUT thay vì giết một
 # job đang sống khỏe sắp xong (đã xảy ra 2 lần: Winston_20260707_072729,
 # Wags_20260709_134401). Trần tuyệt đối: tối đa DISPATCH_HB_MAX_EXTENSIONS (mặc định 3)
 # lần gia hạn = sống tối đa TIMEOUT×(N+1) mỗi attempt — hết trần thì giết thật dù
@@ -103,6 +109,21 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # WC_ROOT = cay du an (WorkingClaude), CHA cua mike/. Dung lam writable root cua sandbox codex
 # — xem _build_argv nhanh `codex`. Tach bien rieng de khong rai "$ROOT/.." khap noi.
 WC_ROOT="$(cd "$ROOT/.." && pwd)"
+# Neo theo marker `wc_env.sh` thay vi tin phep DEM CAP: ban sao dispatch.sh trong worktree
+# (mike/agents/wt-*/bin/) cho "$ROOT/.." = .../mike/agents — goc SAI. Bien nay duoc EXPORT xuong
+# phien agent con, nen goc sai lan ra moi script doc WC_ROOT (su co 2026-09-12: cong ti suat
+# fail-closed ⇒ bao cao nha dau tu khong gui duoc). Chi di len khi cho dem ra KHONG co marker ⇒
+# duong chay binh thuong giu nguyen hanh vi tung byte.
+if [ ! -f "$WC_ROOT/wc_env.sh" ]; then
+  _wc_probe="$WC_ROOT"
+  while [ "$_wc_probe" != "/" ] && [ ! -f "$_wc_probe/wc_env.sh" ]; do
+    _wc_probe="$(dirname "$_wc_probe")"
+  done
+  if [ -f "$_wc_probe/wc_env.sh" ]; then
+    WC_ROOT="$_wc_probe"
+  fi
+  unset _wc_probe
+fi
 # Shared usage-limit phrase list (single source of truth, also used by daily_retro.sh).
 source "$ROOT/bin/usage_limit_phrases.sh"
 # Override only for tests; production always uses the real CLI.
@@ -111,6 +132,60 @@ CLAUDE="${DISPATCH_CLAUDE_BIN:-/home/trido/.local/bin/claude}"
 id="${1:?usage: dispatch.sh <agent_id> \"prompt\" [--bg] [--timeout SEC] [--retries N]}"
 prompt="${2:?usage: dispatch.sh <agent_id> \"prompt\" [--bg] [--timeout SEC] [--retries N]}"
 shift 2
+
+# GUARD PROMPT RỖNG/QUÁ NGẮN — chặn NGAY tại người gọi, trước khi tốn 1 phiên headless.
+# Sự cố thật 2026-08-20T16:22Z (job Wags_20260820_162234): một dispatch chỉ có nội dung "x"
+# chạy hết cả một phiên agent, agent (đúng) từ chối đoán việc và post event `question`
+# "dispatch-rong". Câu hỏi đó KHÔNG có nội dung nào để user quyết, nhưng vẫn nằm trong
+# backlog 48h của ops_health_check #5 và làm wags_autofix dispatch lặp.
+#
+# ⚠️ NGUỒN sinh ra "x" là UNKNOWN, KHÔNG phải "user gõ nhầm" (đó là giả định chưa verify):
+# job record bus/jobs/Wags_20260820_162234.json đã BIẾN MẤT (không ở hot dir, không ở
+# archive) trong khi logfile còn ⇒ field `from` mất vĩnh viễn. Chính vì chưa biết nguồn là
+# NGƯỜI hay MÁY nên nhánh reject dưới đây PHẢI để lại dấu vết bền (xem REJECT LOG): nếu
+# nguồn là một script tầng trên, một `exit 1` không log sẽ chảy vào `| tail -5` / `>> log`
+# và biến tín hiệu duy nhất fleet từng có (event question user THẤY) thành im lặng —
+# đúng lớp lỗi fail-silent mà guard này định bịt (arch-reviewer F1, vòng 1).
+#
+# ĐẾM BYTE, không đếm ký tự, và đếm TẤT ĐỊNH: `${#var}` phụ thuộc locale kế thừa (LANG=C
+# ⇒ byte, C.UTF-8 ⇒ ký tự), nên cùng một prompt tiếng Việt "Rà lại KQ" bị CHẶN dưới
+# C.UTF-8 (7 ký tự) nhưng QUA dưới LANG=C (10 byte) — nhánh quyết định đổi theo môi
+# trường cron/systemd/tương tác (arch-reviewer F2, vòng 1). Chốt về BYTE vì đó là chiều
+# KHOAN DUNG hơn với tiếng Việt: mọi prompt Việt ngắn đều nhiều byte hơn số ký tự ⇒ không
+# bao giờ false-reject một câu tiếng Việt có nghĩa.
+# Ngưỡng 8 byte là số ĐO ĐƯỢC: prompt ngắn nhất từng dispatch thật trong 1.781 job record
+# là "ping test" = 8 byte sau trim (ASCII ⇒ byte = ký tự). Chưa từng chặn nhầm ca nào.
+# Escape hatch cho selfcheck/test: MIKE_ALLOW_TINY_PROMPT=1.
+_prompt_trimmed="$(printf '%s' "$prompt" | tr -d '[:space:]')"
+_prompt_len="$(printf '%s' "$_prompt_trimmed" | LC_ALL=C wc -c | tr -cd '0-9')"
+if [ "${MIKE_ALLOW_TINY_PROMPT:-0}" != "1" ] && [ "${_prompt_len:-0}" -lt 8 ]; then
+  echo "ERROR: dispatch bị HUỶ — prompt rỗng/quá ngắn (${_prompt_len} byte sau khi trim): '$prompt'" >&2
+  echo "   Agent không đoán được việc cần làm; một dispatch như vậy chỉ tốn 1 phiên headless" >&2
+  echo "   rồi đẻ ra 1 câu hỏi treo trong backlog. Gõ lại nội dung việc cụ thể." >&2
+  case "$prompt" in
+    --*) echo "   GỢI Ý: prompt bắt đầu bằng '--' — có vẻ gõ nhầm THỨ TỰ tham số. Đúng là" >&2
+         echo "   dispatch.sh <agent_id> \"<việc>\" [--bg ...]: prompt là tham số THỨ 2, cờ đứng sau." >&2 ;;
+  esac
+  echo "   (Cố ý test với prompt siêu ngắn? đặt MIKE_ALLOW_TINY_PROMPT=1.)" >&2
+  # REJECT LOG — dấu vết bền, cùng khuôn với logs/notify_thread_errors.log: nguồn gọi có
+  # thể là MÁY (script tầng trên) chứ không phải người đọc stderr. ops_health_check đọc
+  # file này để reject do máy sinh không chết im lặng. fail-open: log hỏng KHÔNG đổi verdict.
+  # Đường dẫn ghi đè được (MIKE_DISPATCH_REJECT_LOG) CHỈ để test tự cách ly: mỗi lượt chạy
+  # bin/dispatch_tiny_prompt_selfcheck.sh sinh ~10 reject. Ghi thẳng vào file thật thì check
+  # 10b (cửa sổ 24h) WARN bằng chính rác của test mỗi ngày có ai chạy bộ selfcheck, và cảnh
+  # báo THẬT chìm trong đó — đo thật 2026-08-21: 56/56 dòng trong file là do selfcheck sinh.
+  _rejlog="${MIKE_DISPATCH_REJECT_LOG:-$ROOT/logs/dispatch_rejected_prompts.log}"
+  # mkdir -p BẮT BUỘC (arch-reviewer, vòng 3): logs/ bị .gitignore:4 loại, `git ls-files logs`
+  # = 0 file ⇒ mọi clone/restore từ backup KHÔNG có thư mục này. Thiếu bước này thì append
+  # hỏng, `2>/dev/null || true` nuốt lỗi, và check 10b báo xanh "không có dispatch bị từ chối"
+  # — chính cơ chế chống fail-silent lại fail-silent. bin/notify_thread.sh:47,93 (khuôn mẫu
+  # được viện dẫn ở trên) vẫn luôn mkdir trước khi ghi; nhánh này ban đầu bỏ sót.
+  mkdir -p "$(dirname "$_rejlog")" 2>/dev/null || true
+  printf '%s\tto=%s\tfrom=%s\tbytes=%s\tprompt=%s\n' \
+    "$(TZ='Asia/Ho_Chi_Minh' date -Iseconds)" "$id" "${DISPATCH_FROM:-Mike}" "$_prompt_len" "$prompt" \
+    >> "$_rejlog" 2>/dev/null || true
+  exit 1
+fi
 
 bg=""
 TIMEOUT=""
@@ -160,13 +235,32 @@ while [ $# -gt 0 ]; do
 done
 
 # Per-agent BASE-timeout default — applies only when the caller passed no --timeout.
-# DollarBill plan-T+1 jobs do 10-20+ min of real work and emit substantive heartbeats
-# only every ~5 min, so the generic 600s base + HB_FRESH_S=120s extension window kills
-# them mid-work (real HB is always >120s old at the 600s deadline → no extension).
+# DollarBill plan-T+1 jobs do 10-20+ min of real work, so the generic 600s base alone
+# routinely kills them mid-work regardless of HB_FRESH_S — the override below is needed
+# on its own merit (typical work 600-1200s > generic 600s base), not just as a hedge
+# against a stingy extension window.
 # Measured 2026-07-13: SpaceX plan needed 725s (survived on a lucky extension), ZaloPay
 # plan (job DollarBill_20260713_120124) was killed alive at 600s on BOTH attempts →
 # plan_ZaloPay_2026-07-14.json never written, bot had no plan on 07-14. Same mechanism
 # as the 07-06 "DollarBill treo" transition-plan timeouts.
+#
+# HB_FRESH_S=600 (2026-08-19, xem chú thích tại chỗ định nghĩa) tình cờ ≈ 2× nhịp
+# heartbeat thật của DollarBill (~300s, "mỗi ~5 phút" ở trên) — nghĩa là kể từ giờ,
+# DollarBill LUÔN đủ điều kiện gia hạn mỗi khi chạm deadline (khác trước, khi
+# HB_FRESH_S=120s gần như không bao giờ đủ tươi để gia hạn cho nhịp 5 phút này). Worst
+# case MỘT attempt giờ là TIMEOUT×(MAX_EXT+1) = 1800×4 = 7200s (2h), so với ~3600s
+# (1 lần gia hạn may mắn) trước đây — phân tích 2026-08-19 (đối chiếu arch-reviewer
+# coord-2026-08-19). Trên đường tiền thật: cron dispatch DollarBill 19:00 →
+# inject_discretionary_orders 20:30 → send_plan_report 21:00. Worst case 7200s chạm
+# đúng mốc 21:00, nghĩa là inject_discretionary_orders CÓ THỂ chạy trước khi plan tồn
+# tại. KHÔNG hạ HB_FRESH_S để né việc này — 600s là số đo được từ nhịp heartbeat thật
+# toàn fleet (xem chú thích tại chỗ định nghĩa), hạ xuống tái lập đúng bug đã sửa hôm
+# nay. Rủi ro này đã có lưới đỡ sẵn, không phải lỗ hổng mới: late_plan_catchup.sh (chạy
+# 21:45/22:00/23:30) đọc trạng thái plan qua JSON (không phải mtime), thấy NEEDS_CHAIN
+# nếu plan xuất hiện muộn mà chưa qua L1→L2→merge→inject, và TỰ chạy lại toàn bộ chuỗi
+# kể cả inject_discretionary_orders + gửi qua send_plan_report --second-chance (cron
+# 23:00). Plan không bị mất câm lặng trong worst case — chỉ có thể trễ tới ~21:45-23:00
+# thay vì 20:30-21:00 bình thường.
 if [ -z "$TIMEOUT" ]; then
   case "$id" in
     DollarBill) TIMEOUT="${DISPATCH_TIMEOUT_DOLLARBILL:-1800}" ;;
@@ -221,7 +315,6 @@ if ! _eff_clamped="$("$ROOT/bin/cli_provider.sh" validate "$PROVIDER" "$id" "$MO
   exit 1
 fi
 [ -n "$_eff_clamped" ] && EFFORT="$_eff_clamped"
-EFFORT_FLAG="--effort $EFFORT"
 
 # Soft nudge, ĐỘNG theo lịch sử (2026-08-10, token-usage audit item #2). Khác nudge fable/
 # smoke-test (tĩnh, in mỗi lần) — nudge tĩnh cho effort=high sẽ bị lờn vì nhiều agent (Taylor)
@@ -301,7 +394,24 @@ esac
 # lifetime of one attempt at TIMEOUT×(MAX_EXT+1) — every worst-case computation below
 # (watcher zombie cap, wake-on-completion hint) must use that product, not bare TIMEOUT.
 MAX_EXT="${DISPATCH_HB_MAX_EXTENSIONS:-3}"
-HB_FRESH_S="${DISPATCH_HB_FRESH_S:-120}"
+# HB_FRESH_S = "heartbeat moi the nao thi coi la agent CON SONG" tai dung khoanh khac cham
+# deadline. 120s (gia tri cu) la SAI so voi nhip heartbeat THAT: do tren 362 khoang cach
+# heartbeat-agent lien tiep / 89 job (bus/inbox, 2026-08-05..08-19) thi p50=116s, p75=273s,
+# p90=557s — tuc 48% khoang cach VUOT 120s va 78% job co it nhat MOT khoang >120s. Nguyen
+# nhan: agent duoc dan "heartbeat moi 4-5 tool call", ma 4-5 tool call trong viec sua code
+# nang thi lau hon 2 phut. Hau qua: co che gia han — dung ra de CUU job dang chay that —
+# gan nhu tung dong xu, va cang de truot voi job NANG (dung loai no sinh ra de cuu).
+# Su co that 2026-08-19: 3 job Taylor lien tiep (oshares_live.py, opus/high) bi giet dung
+# luc dang lam, 0 lan gia han, breaker TRIPPED; Mike phai lam lai ca 3 viec trong phien
+# cua chinh no. 600s = lam tron len tu p90.
+# CONG THUC tran (TIMEOUT×(MAX_EXT+1)) khong doi, nhung HANH VI THUC co doi (arch-review
+# coord-2026-08-19 vong 2, killer_objection): "chi ton toi da mot lan gia han thua" chi
+# dung cho job co nhip heartbeat > HB_FRESH_S=600s. Voi DollarBill (nhip ~300s, dong
+# TIMEOUT o duoi) co che gia han gio LUON kich — mot attempt thuc te di tu ~1800s len toi
+# 4×1800s=7200s, khong phai truong hop hiem. Chi tiet + luoi do (late_plan_catchup.sh): xem
+# khoi phan tich DollarBill ngay tren dinh nghia TIMEOUT (~dong 172-186).
+# Job treo THAT (khong ghi heartbeat nao) van chet o lan TIMEOUT dau, khong duoc gia han nao.
+HB_FRESH_S="${DISPATCH_HB_FRESH_S:-600}"
 
 AGENT_DIR="$ROOT/agents/$id"
 if [ ! -d "$AGENT_DIR" ]; then
@@ -949,6 +1059,11 @@ _build_argv() {
       #    cua codex (co ton tai: permissionDecision=deny) — CHUA LAM.
       # VAN KHONG dung --dangerously-bypass-approvals-and-sandbox (arch-reviewer #6c): sandbox
       # van bat, chi la writable root rong ra; he thong ngoai du an (~/.ssh, /etc) van duoc chan.
+      # ⚠️ Doc them (Wags 2026-09-12, da XAC NHAN, khong phai lo hong moi): tu khi WC_ROOT duoc
+      # neo theo marker o :111-126, dispatch phat TU WORKTREE cung cap ca cay WorkingClaude —
+      # tuc DUNG ngu nghia user chot 2026-08-10 (dong argv :1063 khong doi tu commit ae3aaab1).
+      # Truoc ban va, ban sao worktree cho WC_ROOT=.../mike/agents => sandbox HEP hon nhung VON
+      # DA HONG (khong ghi noi bus, dung kieu that-bai-im-lang o tren). Khong tu doi sandbox.
       CLI_ARGV=( "$CLI_BIN" exec --skip-git-repo-check -C "$AGENT_DIR" -s workspace-write --add-dir "$WC_ROOT" )
       if [ -n "$MODEL" ]; then CLI_ARGV+=( -m "$MODEL" ); fi
       if [ -n "$EFFORT" ]; then CLI_ARGV+=( -c "model_reasoning_effort=\"$EFFORT\"" ); fi
@@ -1028,9 +1143,9 @@ if [ "$CLI_PROFILE" = "prompt-inline" ]; then
 fi
 
 # Source wc_env.sh so google-cloud-sdk/bin is in PATH (needed by bq CLI + sync_bq_cache verify)
-[ -f "$ROOT/../wc_env.sh" ] && source "$ROOT/../wc_env.sh" 2>/dev/null || true
+[ -f "$WC_ROOT/wc_env.sh" ] && source "$WC_ROOT/wc_env.sh" 2>/dev/null || true
 export BQ_LOCAL_CACHE=data/bq_cache
-if ! python3 "$ROOT/../preflight_bq_cache.py" --offline >/dev/null 2>&1; then
+if ! python3 "$WC_ROOT/preflight_bq_cache.py" --offline >/dev/null 2>&1; then
   echo "WARNING: BQ cache preflight failed — queries will fall back to BQ network" >&2
   unset BQ_LOCAL_CACHE
 fi
@@ -1078,7 +1193,7 @@ if ! _dtid0="${FORCE_TID:-$(_ambient_thread "$id")}"; then
   echo "dispatch: registry Discord hỏng cho override của '$id' — job VẪN CHẠY nhưng KHÔNG có topic Discord (không đoán). Đã ghi logs/notify_thread_errors.log (ops_health_check sẽ báo)." >&2
   mkdir -p "$ROOT/logs"
   printf '%s dispatch: registry Discord HONG cho override cua %q (job cho %s) — job VAN CHAY nhung KHONG co topic, moi thong bao Discord cua job nay bi MAT.\n' \
-    "$(date -Iseconds)" "$id" "${job_id:-<chua-tao>}" >> "$ROOT/logs/notify_thread_errors.log" 2>/dev/null || true
+    "$(TZ='Asia/Ho_Chi_Minh' date -Iseconds)" "$id" "${job_id:-<chua-tao>}" >> "$ROOT/logs/notify_thread_errors.log" 2>/dev/null || true
   _dtid0=""
 fi
 # `--thread` chấp nhận TÊN trong kb/discord_channels.json (vd `--thread architecture`) ngoài
@@ -1126,7 +1241,10 @@ fi
 # (`notify_thread.sh "<msg>"` không đối số 2) lại rơi vào topic Mike đang chat — đúng lớp lỗi
 # 07-22b (record và env của agent bất đồng). Pin rỗng phải rỗng ở CẢ HAI phía.
 if [ -n "$_dtid0" ]; then export DISCORD_THREAD_ID="$_dtid0"; else export DISCORD_THREAD_ID=""; fi
-_psum="$(printf '%s' "$prompt" | head -c 160 | tr '\n\t' '  ')"
+# `|| true`: prompt > 64KB (pipe buffer) ⇒ head thoát sớm ⇒ printf ăn SIGPIPE ⇒ pipefail
+# trả 141 ⇒ `set -e` giết dispatch TRƯỚC khi job kịp chạy. Đã cắn thật 2026-08-21: 3/3 lần
+# auto-resume weekly_ops_audit chết rc=141, mất trọn 1 tuần audit (không ai báo).
+_psum="$(printf '%s' "$prompt" | head -c 160 | tr '\n\t' '  ')" || true
 
 # Cảnh báo TRÙNG DISPATCH (2026-08-10) — CHỈ cảnh báo, KHÔNG chặn.
 # Dấu hiệu quan sát được của pattern "2 dispatch cùng sửa 1 file": 2/3 lần va chạm
@@ -1192,6 +1310,33 @@ MIKE_JOB_OWNER="$job_id" python3 "$ROOT/bin/mike_json.py" job-pin-log "$JOBS_DIR
   >/dev/null 2>&1 || true
 
 if [ "$bg" = "--bg" ]; then
+  # _preempt_wakeup <thread_id>
+  # Khi job terminal: kéo next_run_at của row ScheduleWakeup cho thread này về NOW nếu row
+  # đang tồn tại. Mike tự đặt ScheduleWakeup khi có bước kế tiếp (1 producer, ≤1 row/thread,
+  # claim nguyên tử ở scheduler) — hàm này không tạo edge mới, chỉ dời deadline từ "timer ban
+  # đầu" xuống "ngay bây giờ". Không race, không double (scheduler xoá row trước khi chạy).
+  # No-op khi: CCDB_API_URL chưa set, không có row, hoặc API lỗi.
+  _preempt_wakeup() {
+    local tid="$1" api task_id tasks_json
+    api="${CCDB_API_URL:-}"
+    [ -n "$api" ] && [ -n "$tid" ] || return 0
+    tasks_json="$(curl -sf "$api/api/tasks" 2>/dev/null)" || return 0
+    task_id="$(printf '%s' "$tasks_json" \
+      | WAKEUP_TASK_NAME="wakeup-thread-$tid" python3 -c "
+import json, sys, os
+tasks = json.load(sys.stdin).get('tasks', [])
+name = os.environ['WAKEUP_TASK_NAME']
+for t in tasks:
+    if t.get('name') == name:
+        print(t['id'])
+        break
+" 2>/dev/null)" || return 0
+    [ -n "$task_id" ] || return 0
+    curl -sf -X PATCH "$api/api/tasks/$task_id" \
+      -H "Content-Type: application/json" \
+      -d "{\"next_run_at\": $(date +%s)}" >/dev/null 2>&1 || true
+  }
+
   # Background wrapper: run agent (with timeout + retry) → consolidate → notify
   _bg_wrapper() {
     local max_attempts=$((RETRIES + 1))
@@ -1255,15 +1400,19 @@ làm lại có chủ đích, đừng âm thầm ghi đè mất công sức cũ m
           # 500-char window while SpaceX's short HOLD summary happened to survive intact).
           # send_plan_report.sh already posts the authoritative structured render to this
           # same channel later the same day — this ping only needs to confirm completion.
+          local _preview; _preview="$(tail -c 500 "$logfile" 2>/dev/null | tr '\n\t' '  ')"
           if [ "$id" = "DollarBill" ]; then
             # User feedback 2026-07-08: state the 19:30 ICT time explicitly so a short
             # completion ping is never mistaken for "nothing else is coming" — the full
             # structured report (targets/prices/reasons) always follows at that time.
             "$ROOT/bin/notify_thread.sh" "✅ **DollarBill** đã lập plan xong (job \`${job_id}\`) — report chi tiết (mục tiêu mua/bán, giá dự kiến, lý do) sẽ đăng vào kênh này lúc **19:30 ICT** hôm nay." "$_tid" 2>/dev/null || true
           else
-            local _preview; _preview="$(tail -c 500 "$logfile" 2>/dev/null | tr '\n\t' '  ')"
             "$ROOT/bin/notify_thread.sh" "✅ **$id** xong (job \`${job_id}\`): $_preview" "$_tid" 2>/dev/null || true
           fi
+          # (2026-08-22) Preempt wakeup: nếu Mike đã đặt ScheduleWakeup cho thread này,
+          # kéo next_run_at về NOW thay vì chờ hết timer (≤30s thay vì ≤20 phút).
+          # Không tạo edge mới — 1 producer duy nhất vẫn là Mike, claim nguyên tử giữ nguyên.
+          _preempt_wakeup "$_tid"
         fi
         # Auto-callback: notify the caller agent so it can pick up the result without manual prompt.
         # Only when caller is a real companion agent (not Mike/user — they have other channels).
@@ -1327,6 +1476,8 @@ làm lại có chủ đích, đừng âm thầm ghi đè mất công sức cũ m
     # Không suy lại topic (2026-08-02, arch-reviewer S1) — chỉ đọc pin đã ghim lúc dispatch.
     if [ -n "$_tid" ]; then
       "$ROOT/bin/notify_thread.sh" "❌ **$id** $why (job \`${job_id}\`). Xem log: $logfile" "$_tid" 2>/dev/null || true
+      # (2026-08-22) Preempt wakeup trên cả nhánh fail — Mike thấy ❌ ngay thay vì chờ timer.
+      _preempt_wakeup "$_tid"
     fi
     # Also notify the caller agent on failure so it can decide to retry or escalate.
     # Same guard: no callback for auto-callback jobs (prevent loop on failure path too).
@@ -1369,14 +1520,14 @@ làm lại có chủ đích, đừng âm thầm ghi đè mất công sức cũ m
   # function and everything it closes over (JSET, SUMMARY, and the vars they use)
   # must be exported and re-entered via `bash -c`. Verified empirically: a plain
   # `setsid _bg_wrapper &` silently fails to find "_bg_wrapper" as a command.
-  export -f _bg_wrapper _job_watcher JSET SUMMARY _agent_thread_override _ambient_thread _circuit_record \
+  export -f _bg_wrapper _preempt_wakeup _job_watcher JSET SUMMARY _agent_thread_override _ambient_thread _circuit_record \
             _maybe_schedule_usage_resume _looks_like_usage_limit _parse_reset_epoch \
             _current_resume_count _job_thread_id _hb_aware_timeout \
             _maybe_schedule_maxturns_resume _looks_like_max_turns _bumped_max_turns \
             _current_maxturns_resume_count _build_argv _emit_full_prompt
   # Chi export SCALAR (bash khong export duoc array — do la ly do _build_argv chay trong con).
   export ROOT WC_ROOT JOBS_DIR job_id from id ts TIMEOUT RETRIES CLAUDE dispatch_prompt logfile prompt \
-         CIRCUIT_DIR CIRCUIT_THRESHOLD CIRCUIT_COOLDOWN MODEL_FLAG EFFORT_FLAG MAX_EXT HB_FRESH_S \
+         CIRCUIT_DIR CIRCUIT_THRESHOLD CIRCUIT_COOLDOWN MAX_EXT HB_FRESH_S \
          MAX_TURNS MAXTURNS_CEILING MODEL EFFORT \
          PROVIDER CLI_BIN AGENT_DIR CLI_SUPPORTS_TURNS CLI_USAGE_PROBE CLI_MAXTURNS_PAT CIRCUIT_KEY CLI_PROFILE \
          PROFILE_PROMPT_FILE
@@ -1450,6 +1601,7 @@ except Exception:
   else
     echo "  1) CƠ CHẾ CHÍNH: ScheduleWakeup THÍCH ỨNG — không có gợi ý wakeup_profile.json cho bucket '$_wkey' (file thiếu/hỏng/mẫu quá ít) → dùng ladder mặc định: 3 lần tỉnh ĐẦU ~240-270s; từ lần thứ 4 trở đi mà job vẫn running thì TĂNG DẦN (240→480→900→trần 1200s), không quay lại ngắn trừ khi có job MỚI phát sinh trong batch. Mỗi lần tỉnh chạy '$ROOT/bin/jobs.sh status $job_id'; chưa done → đặt lại wakeup theo bậc thang; done → xử lý ngay. KHÔNG đặt 1 lần chờ dài (worst-case chờ tối đa ~${_ww}s vẫn phủ qua nhiều lần poll)." >&2
   fi
+  echo "  1b) ScheduleWakeup prompt sẵn dùng (claim-reply là dòng đầu): \"Đầu tiên: $ROOT/bin/jobs.sh claim-reply $job_id → exit 1 → ScheduleWakeup(noop:true,stop:true), DỪNG. exit 0 → [logic poll + post bình thường]. exit 2 → báo job record thiếu, đừng im lặng. exit 3 → job chưa xong (bình thường ở lần tỉnh sớm, job còn running), post progress bình thường (KHÔNG claim, KHÔNG coi là đã reply), đặt lại ScheduleWakeup như lượt poll thông thường.\"" >&2
   echo "  2) CHỈ nếu schema tool phiên này THẬT SỰ có tham số nền (run_in_background trên Agent/Bash) mới thêm wrapper bọc '$ROOT/bin/jobs.sh wait $job_id --timeout $_ww'. isolation:worktree KHÔNG phải background — cấm dùng thay thế." >&2
   echo "  3) SELF-CHECK: trước khi nói với user bất kỳ điều gì về trạng thái job này (đang chờ/xong/chết), chạy '$ROOT/bin/jobs.sh status $job_id' trong CÙNG turn — không nói từ trí nhớ." >&2
   # 4) Nhắc đóng vòng bus (Wags 2026-08-14, root-cause-A): user quyết qua Discord → Mike
@@ -1467,8 +1619,20 @@ except Exception:
   # đoán topic. (KHÔNG có kênh dự phòng độc lập nào ở đây: `notify.sh` cũng đi qua CÙNG bridge
   # Discord 127.0.0.1:8199 — xem chú thích tại nhánh "registry hỏng" bên dưới.)
     if [ -n "${_dtid:-}" ]; then
-      _dp="$(printf '%s' "$prompt" | head -c 120 | tr '\n\t' '  ')"
-      "$ROOT/bin/notify_thread.sh" "🚀 **$id** nhận việc (job \`$job_id\`): $_dp… Sẽ notify khi xong." "$_dtid" 2>/dev/null || true
+      # || true — cùng lý do SIGPIPE/pipefail như _psum ở trên (prompt > 64KB).
+      _dp="$(printf '%s' "$prompt" | head -c 120 | tr '\n\t' '  ')" || true
+      # ETA = profile-derived median for this <agent|model|effort> (same value as the
+      # ScheduleWakeup hint above).  Giờ cho NGƯỜI đọc: LUÔN ICT (TZ tường minh — §16) và
+      # đơn vị PHÚT, không giây (user 2026-08-21: "12:14 UTC (~435s)" lọt thân tin dù header
+      # đã đúng — producer phải đúng tại gốc; bridge còn lớp quy đổi UTC→ICT/giây→phút nữa,
+      # và bin/utc_text_gate.sh chặn commit mới viết `date -u … %H:%M`).  Sau đơn giản hoá
+      # §8 (08-21) Mike KHÔNG còn tự quay lại kiểm tra job nền — agent/_bg_wrapper tự báo —
+      # nên câu cũ "Tôi sẽ tự kiểm tra lại lúc …" là lời hứa sai, bỏ.
+      _wake_delay="${_wsugg:-240}"
+      _eta_min=$(( (_wake_delay + 30) / 60 )); [ "$_eta_min" -ge 1 ] || _eta_min=1
+      _eta_at="$(TZ='Asia/Ho_Chi_Minh' date -d "+${_wake_delay} seconds" '+%H:%M ICT' 2>/dev/null || true)"
+      [ -n "$_eta_at" ] && _eta_txt="dự kiến ~${_eta_min} phút (≈ **${_eta_at}**)" || _eta_txt="dự kiến ~${_eta_min} phút"
+      "$ROOT/bin/notify_thread.sh" "🚀 **$id** nhận việc (job \`$job_id\`): $_dp… — ${_eta_txt}; xong sẽ tự báo tại đây." "$_dtid" 2>/dev/null || true
     fi; } &
 else
   # Synchronous: caller gets stdout directly (bounded by --timeout, no auto-retry)
@@ -1488,17 +1652,22 @@ else
     # board lie on 2026-08-09 (Mike read "failed", re-dispatched, two runs collided on
     # executor.py). Same order as `jobs.sh cancel`: kill the tree, give it a grace period,
     # SIGKILL the remainder, and only then stamp.
-    _wp="$(cat "$logfile.workerpid" 2>/dev/null || true)"
-    if [ -n "$_wp" ]; then
-      kill -TERM -- "-$_wp" 2>/dev/null || kill -TERM "$_wp" 2>/dev/null || true
-      _w=0
-      while [ "$_w" -lt "${DISPATCH_KILL_GRACE_S:-10}" ] && kill -0 "$_wp" 2>/dev/null; do
-        sleep 1; _w=$((_w + 1))
-      done
-      kill -KILL -- "-$_wp" 2>/dev/null || kill -KILL "$_wp" 2>/dev/null || true
-      sleep 1
+    # Do NOT trust $logfile.workerpid here.  It is a best-effort convenience file, and a
+    # stale/reused/partially-written PID must never become an unvalidated process-group kill.
+    # job-cancel already owns the only safe primitive: it discovers the sync worker through
+    # the pinned logfile/logfile.err evidence, proves target identity, kills, verifies death,
+    # then writes a terminal record.  It also supplies the fallback when TERM lands between
+    # `pid=$!` and the workerpid publish.  Using that one primitive keeps the trap from
+    # inventing a weaker second cancellation protocol.
+    _cancel_rc=0
+    "$ROOT/bin/jobs.sh" cancel "$job_id" "${DISPATCH_KILL_GRACE_S:-10}" || _cancel_rc=$?
+    if [ "$_cancel_rc" -eq 0 ]; then
       rm -f "$logfile.workerpid" 2>/dev/null || true
+      kill "$_wpid" 2>/dev/null || true
+      exit 143
     fi
+    echo "WARNING: dispatch.sh sync bị kill nhưng jobs.sh cancel KHÔNG xác minh/đóng được job $job_id (rc=$_cancel_rc)" >&2
+    echo "         => chạy verifier cũ bên dưới; chỉ đóng nếu nó chứng minh được không còn worker." >&2
     # VERIFY, đừng chỉ giết rồi tin. Cùng hợp đồng với `jobs.sh cancel` (exit 5): còn tiến
     # trình nào của job sống sót thì KHÔNG ghi trạng thái kết thúc — để record ở running và
     # nói ra sự thật. Giết-mà-không-kiểm chính là nửa đầu của sự cố 08-09; nửa sau là đóng

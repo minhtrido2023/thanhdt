@@ -1,0 +1,34 @@
+BACKUP: 50 file da sao luu, 0 file chua ton tai
+=== RUN aviation_screen.py  20:19:06 ===
+    rc=0  (58 dong stdout)
+=== RUN bank_compounder_screen.py  20:19:09 ===
+    rc=0  (54 dong stdout)
+=== RUN compounder_screen.py  20:19:13 ===
+    rc=0  (46 dong stdout)
+=== RUN construction_screen.py  20:19:16 ===
+    rc=0  (139 dong stdout)
+=== RUN energy_screen.py  20:19:19 ===
+    rc=0  (137 dong stdout)
+=== RUN fertchem_rubber_screen.py  20:19:25 ===
+    rc=0  (131 dong stdout)
+=== RUN fnb_screen.py  20:19:29 ===
+    rc=0  (98 dong stdout)
+=== RUN livestock_screen.py  20:19:34 ===
+    rc=0  (99 dong stdout)
+=== RUN logistics_port_screen.py  20:19:36 ===
+    rc=0  (91 dong stdout)
+=== RUN pharma_screen.py  20:19:40 ===
+    rc=0  (64 dong stdout)
+=== RUN re_compounder_screen.py  20:19:42 ===
+    rc=0  (85 dong stdout)
+=== RUN retail_compounder_screen.py  20:19:46 ===
+    rc=0  (55 dong stdout)
+=== RUN securities_screen.py  20:19:50 ===
+    rc=0  (83 dong stdout)
+=== RUN steel_buildmat_screen.py  20:19:53 ===
+    rc=0  (133 dong stdout)
+=== RUN tech_screen.py  20:19:58 ===
+    rc=0  (94 dong stdout)
+=== RUN textile_screen.py  20:19:59 ===
+    rc=0  (103 dong stdout)
+DONE 20:20:02

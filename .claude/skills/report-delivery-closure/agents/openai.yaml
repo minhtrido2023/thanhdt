@@ -1,0 +1,4 @@
+interface:
+  display_name: "Report Delivery Closure"
+  short_description: "Close report delivery across Discord and email"
+  default_prompt: "Validate and deliver this report to every required destination, record durable evidence, and leave it incomplete if any delivery fails."

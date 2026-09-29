@@ -27,11 +27,45 @@ REGISTRY_MD="$MIKE/kb/selfcheck_registry.md"
 mkdir -p "$MIKE/state"
 
 # 1) Khám phá — cùng exclude-pattern đã verify tay lúc thiết kế (khảo sát vận hành 2026-08-01).
+#
+# Loại thêm `wt-*` (bản sao worktree của phiên) và `pending_*` (đề xuất CHƯA live) từ
+# 2026-08-15: đây KHÔNG phải production HEAD nên FAIL của chúng gần như luôn là hiện vật môi
+# trường (module chưa nằm trên sys.path, `logs/` chưa tồn tại, bản sao cũ của file đã vá) —
+# đúng lý do `bin/selfcheck_weekly_baseline_check.sh` (bộ dò đỏ HÀNG NGÀY, 2026-08-12) cố ý
+# chỉ quét `*_selfcheck.py` ở gốc + `mike/bin/`. Comment của script đó đã chỉ đích danh hậu
+# quả đo trên chính file này ("46 FAIL thì ~35 là nhiễu loại này, làm 4 ca đỏ THẬT chìm
+# nghỉm") nhưng bản thân script này chưa được sửa theo; tới weekly audit 2026-08-15 đã là
+# 133 FAIL / 517-trên-647 file thuộc wt-*/pending_*. Hai bộ quét nay cùng phạm vi.
+#
+# BỔ SUNG 2026-08-22 (weekly ops audit) — lần vá 08-15 CHƯA đủ, đo lại trên state thật:
+#   (a) `.claude/worktrees/<tên>` KHÔNG khớp `(^|/)wt-` nên 77 bản sao worktree vẫn lọt lưới;
+#       22/35 FAIL của lượt quét 2026-08-21 là bản sao trong `.claude/worktrees/wags-fix-coord-08-19`
+#       — đúng loại nhiễu mà chú thích trên nói đã loại xong. Câu "Hai bộ quét nay cùng phạm vi"
+#       vì vậy SAI ở thời điểm viết (236 file ở đây vs ~136 ở bộ dò ngày).
+#   (b) `-iname "*selfcheck*"` là khớp CHUỖI CON nên nuốt cả HARNESS/THƯ VIỆN, không phải selfcheck:
+#       `selfcheck_weekly_baseline_check.sh` (bộ dò ngày — chạy nó ở đây = quét lồng, rc=124 sau
+#       1579s), `selfcheck_baseline_diff.py` (CLI 3 tham số ⇒ luôn rc=1 usage), `selfcheck_scope_map.sh`,
+#       và CHÍNH file này. Bộ dò ngày tránh được vì neo HẬU TỐ `*_selfcheck.{py,sh}`; ở đây phải
+#       loại đích danh vì vẫn cố ý giữ dạng tiền tố `selfcheck_*.py` của 3 study R&D Taylor.
+#   Đo sau khi vá: 236 -> 155 file (bỏ 77 worktree + 4 harness), KHÔNG file hợp lệ nào bị mất.
+# BỔ SUNG 2026-09-12 (weekly ops audit, job Mike_20260911_204825) — loại `mike_paseo/`:
+#   ảnh chụp ĐÓNG BĂNG của `mike/` tại 2026-08-28 (git HEAD `0e29acb8`, KB v2611 vs mike v2932),
+#   user đã đưa vào `.gitignore` của repo ngoài 2026-09-08 sau sự cố gitlink treo. Không dòng
+#   crontab nào trỏ tới nó; file duy nhất "mới" trong cây là artifact do CHÍNH bộ quét này ghi ra.
+#   Nó chiếm 84/248 file (34%) và đóng góp 3/6 FAIL của lượt 09-12 — trong đó
+#   `daily_retro_wake_metrics_selfcheck.sh` đã bị RETIRE khỏi mike/ ở commit `30648b51` (khối nó
+#   gác bị gỡ khỏi daily_retro.sh, `13f7bd59`) ⇒ đỏ ZOMBIE, gác một thứ không còn tồn tại.
+#   Đây đúng tiêu chí "không phải production HEAD" mà 2 lần vá trước (08-15, 08-22) đã dùng.
+#   Muốn bật lại: xoá đúng 1 dòng `grep -vE "^\./mike_paseo/"` dưới đây.
 mapfile -t FILES < <(cd "$WC_ROOT" && find . \( -iname "*selfcheck*.py" -o -iname "*selfcheck*.sh" \) \
   2>/dev/null | grep -v node_modules | grep -v __pycache__ \
-  | grep -vE "/exp_|/job_2026|v4final_exp|/data/fscore_c30v" | sed 's|^\./||' | sort)
+  | grep -vE "/exp_|/job_2026|v4final_exp|/data/fscore_c30v" \
+  | grep -vE "(^|/)wt-|(^|/)pending_|/\.claude/worktrees/" \
+  | grep -vE "^\./mike_paseo/" \
+  | grep -vE "/(run_selfchecks\.sh|selfcheck_baseline_diff\.py|selfcheck_scope_map\.sh|selfcheck_weekly_baseline_check\.sh)$" \
+  | sed 's|^\./||' | sort)
 
-echo "Tìm thấy ${#FILES[@]} selfcheck (đã loại exp_*/job_2026*/v4final_exp — artifact 1 lần)."
+echo "Tìm thấy ${#FILES[@]} selfcheck (đã loại exp_*/job_2026*/v4final_exp + wt-*/pending_*/.claude/worktrees/* + mike_paseo/ + 4 harness — không phải production HEAD)."
 
 # 2) Phân loại tier — grep heuristic. LẦN ĐẦU CHẠY THẬT (2026-08-01) bắt được chính heuristic
 # này thiếu: chỉ khớp literal "bq query"/"bq show" bỏ sót MỌI script gọi qua wrapper
@@ -41,7 +75,13 @@ echo "Tìm thấy ${#FILES[@]} selfcheck (đã loại exp_*/job_2026*/v4final_ex
 # offline bị phân nhầm "live" thì bị bỏ qua khi không có --live (an toàn hơn, không phải
 # false-negative nguy hiểm).
 is_live() {
-  grep -qE "bq query|bq show|dnse_api|requests\.(get|post)|urllib\.request|subprocess.*[\"']bq |from simulate_holistic_nav import|import simulate_holistic_nav|state_publish_immutable" \
+  # `vnstock` thêm 2026-09-26 (weekly ops audit): `orb_pt_appendonly_selfcheck.py` tự khai trong
+  # docstring "KHÔNG đưa vào run_selfchecks.sh: mỗi lần chạy gọi vnstock THẬT 4 lần (phụ thuộc
+  # mạng + rate limit của vendor)" — nhưng glob `*_selfcheck.py` vẫn nhặt nó lên, và vì
+  # `is_live()` không biết `vnstock` nên nó bị xếp `offline` (trần 60s) ⇒ rc=124 mỗi lần.
+  # Đo thật 2026-09-26: chạy 900s vẫn chưa xong và KHÔNG in ra dòng nào. Xếp `live` ⇒ SKIP ở
+  # lần chạy mặc định (đúng ý tác giả: "chạy TAY khi sửa orb_pt.py") và thôi đập vendor mỗi ngày.
+  grep -qE "bq query|bq show|dnse_api|vnstock|requests\.(get|post)|urllib\.request|subprocess.*[\"']bq |from simulate_holistic_nav import|import simulate_holistic_nav|state_publish_immutable" \
     "$WC_ROOT/$1" 2>/dev/null
 }
 
@@ -57,15 +97,43 @@ for f in "${FILES[@]}"; do
     continue
   fi
   # offline = sandbox tmpdir, phải nhanh (giây) — 60s đủ rộng phòng máy chậm; live = BQ/network
-  # thật, cho tới 300s. Timeout mismatch (offline hoá ra chậm) tự nó LÀ 1 finding đáng xem lại
+  # thật, cho tới 300s. immutable_publish tạo/đọc/drop sandbox BQ và đã đo >300s,
+  # nên có budget 720s riêng. Timeout mismatch (offline hoá ra chậm) tự nó LÀ 1 finding đáng xem lại
   # phân loại, không chỉ tăng số cho qua.
   t=60; [ "$tier" = "live" ] && t=300
+  [ "$f" = "immutable_publish_selfcheck.py" ] && t=720
+  # Ngoại lệ ĐO THẬT (weekly audit 2026-08-29): 2 file offline vượt 60s nên báo rc=124 giả
+  # mỗi tuần, che lấp FAIL thật. Đã kiểm chứng bằng cách chạy tay với timeout rộng:
+  #   due_diligence_selfcheck.py   71,8s — 49/49 OK (chậm vì trading_bot.due_diligence chạm BQ
+  #                                lúc import; is_live() chỉ grep FILE selfcheck nên không thấy).
+  #                                KHÔNG đổi sang tier live: làm vậy nó bị SKIP ở lần chạy mặc
+  #                                định = MẤT coverage, tệ hơn là chờ lâu.
+  #   merge_park_orders_selfcheck.py 90,6s — PASS toàn bộ; thuần offline, chỉ là nặng tính toán.
+  # Khớp theo HẬU TỐ để bản sao mike_paseo/ cũng được cùng budget (nếu chỉ khớp đường dẫn
+  # tuyệt đối thì bản sao vẫn rc=124 giả — đúng lỗi đang sửa, chỉ dịch sang chỗ khác).
+  case "$f" in
+    *due_diligence_selfcheck.py|*merge_park_orders_selfcheck.py) t=240 ;;
+  esac
+  # Ngoại lệ thứ 2 — ĐO THẬT (weekly ops audit 2026-09-19): report_return_gate_selfcheck.py
+  # tự khai trong docstring "~8-10 phút, chạm BQ" cho bộ 4 test, nên dưới trần 60s nó rc=124
+  # CHẮC CHẮN, mỗi ngày, từ 2026-09-12 (7 ngày đỏ liên tục — không phải regression production,
+  # là lệch giữa chi phí thật của file và trần của runner). `is_live()` không bắt được vì file
+  # gọi `report_return_gate.py` qua subprocess chứ không có literal `bq query` nào.
+  # Không đẩy sang tier live (= SKIP ở lần chạy mặc định = MẤT coverage, đúng lý do đã ghi ở
+  # khối trên): lần mặc định chạy `--root-only` — đo thật 2026-09-19: 4/4 PASS trong ~30s, và
+  # đó CHÍNH LÀ 4 assertion phủ sự cố gốc (ROOT sai trong worktree + RED control bản cũ).
+  # 2 test còn lại (chạy cổng thật, chạm BQ) chỉ chạy ở `--live` với budget 720s.
+  SC_ARGS=()
+  case "$f" in
+    *report_return_gate_selfcheck.py)
+      if [ "$RUN_LIVE" -eq 1 ]; then t=720; else SC_ARGS=(--root-only); t=120; fi ;;
+  esac
   start=$(date +%s)
   if [[ "$f" == *.sh ]]; then
-    ( cd "$WC_ROOT" && timeout "$t" bash "$f" ) >/tmp/rsc_out.$$ 2>&1
+    ( cd "$WC_ROOT" && timeout "$t" bash "$f" "${SC_ARGS[@]+"${SC_ARGS[@]}"}" ) >/tmp/rsc_out.$$ 2>&1
     rc=$?
   else
-    ( cd "$WC_ROOT" && timeout "$t" "$PY" "$f" ) >/tmp/rsc_out.$$ 2>&1
+    ( cd "$WC_ROOT" && timeout "$t" "$PY" "$f" "${SC_ARGS[@]+"${SC_ARGS[@]}"}" ) >/tmp/rsc_out.$$ 2>&1
     rc=$?
   fi
   dur=$(( $(date +%s) - start ))

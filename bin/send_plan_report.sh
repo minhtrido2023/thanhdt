@@ -61,6 +61,31 @@ print(next_trading_day(dt.date.today()))
 # Plan file mới nhất theo mtime (Bill ghi vào data/trade_plans/plan_<account>_<date>.json)
 PLAN_FILE="$(ls -t "$WORKDIR"/data/trade_plans/plan_${ACCOUNT}_*.json 2>/dev/null | head -1)"
 
+# --- signal_holds gate (tầng chặn cứng #1, fix lỗi #3 RCA 2026-08-20) ---
+# Chạy TRƯỚC khi tính hash + gửi: nếu DollarBill (dù đã có HOLDS_NOTE trong prompt) vẫn để lọt
+# 1 order vi phạm hold vào orders[], gate này gỡ nó sang deferred_orders (chưa duyệt) hoặc
+# escalate (đã duyệt). Không phụ thuộc LLM nhớ. Fail-safe: gỡ lệnh = chiều an toàn.
+if [ -n "$PLAN_FILE" ] && [ -f "$PLAN_FILE" ]; then
+  HOLD_OUT="$(cd "$ROOT" && python3 bin/signal_holds.py --enforce "$PLAN_FILE" 2>&1)"
+  HOLD_RC=$?
+  if [ "$HOLD_RC" = "3" ]; then
+    echo "[send_plan_report] signal_holds: ĐÃ GỠ order vi phạm hold khỏi plan $ACCOUNT (sang deferred_orders). Chi tiết: $HOLD_OUT"
+    "$ROOT/bin/notify_thread.sh" "$(TZ='Asia/Ho_Chi_Minh' date '+%H:%M %d/%m/%Y')
+⚠️ **signal_holds gate đã kích hoạt** — plan $ACCOUNT $EXPECTED_DATE có order vi phạm ranh giới tạm giữ tín hiệu, đã tự GỠ sang deferred_orders trước khi gửi. Nghĩa là tầng sinh plan (DollarBill) để lọt — cần rà lại vì sao. Plan gửi cho anh là bản ĐÃ SỬA." plan_approval >/dev/null 2>&1 || true
+  elif [ "$HOLD_RC" = "2" ]; then
+    echo "[send_plan_report] signal_holds: plan ĐÃ DUYỆT nhưng chứa order vi phạm hold — KHÔNG tự sửa, escalate. $HOLD_OUT"
+    "$ROOT/bin/notify_thread.sh" "$(TZ='Asia/Ho_Chi_Minh' date '+%H:%M %d/%m/%Y')
+🛑 **signal_holds gate — CẦN NGƯỜI**: plan $ACCOUNT $EXPECTED_DATE ĐÃ DUYỆT nhưng chứa order vi phạm ranh giới tạm giữ tín hiệu. Gate KHÔNG tự sửa plan đã ký. bot_execute sẽ chặn order này khi chạy, nhưng anh nên kiểm tra lại. $HOLD_OUT" plan_approval >/dev/null 2>&1 || true
+  elif [ "$HOLD_RC" != "0" ]; then
+    # RC ∉ {0,2,3} = gate CRASH (traceback/import lỗi), KHÔNG được coi là 'sạch' âm thầm
+    # (arch-reviewer fail_silent 2026-08-20). bot_execute vẫn chạy gate độc lập lúc 09:05 (backstop),
+    # nhưng phải báo to ở đây thay vì nuốt lỗi.
+    echo "[send_plan_report] ⚠⚠ signal_holds gate CRASH rc=$HOLD_RC — KHÔNG xác minh được plan có vi phạm hold hay không. $HOLD_OUT"
+    "$ROOT/bin/notify_thread.sh" "$(TZ='Asia/Ho_Chi_Minh' date '+%H:%M %d/%m/%Y')
+⚠️ **signal_holds gate LỖI (rc=$HOLD_RC)** khi kiểm plan $ACCOUNT $EXPECTED_DATE — KHÔNG xác minh được vi phạm ranh giới tạm giữ. bot_execute sẽ chạy lại gate lúc 09:05 (backstop độc lập), nhưng cần rà signal_holds.py. $HOLD_OUT" plan_approval >/dev/null 2>&1 || true
+  fi
+fi
+
 # md5 NỘI DUNG plan, loại các field approval (approved_by/mafee_authorized/approv*/mafee_*/
 # requires_user_approval) — duyệt plan ghi thêm field vào file là thay đổi lành tính,
 # second-chance không được coi đó là "plan đổi" mà gửi lại lúc 23:00.
@@ -441,7 +466,7 @@ if _capit_buys:
 # công thức nào trôi khỏi nhau. Fail-open có ghi rõ: một dòng báo cáo không được chặn plan.
 margin_note = []
 try:
-    from trading_bot.plan import preview_margin_day, margin_day_approval
+    from trading_bot.plan import preview_margin_day, margin_day_approval, CAPIT_LEVER_APPROVED_F
     _pv = preview_margin_day(acct, date)
     if _pv.get("error"):
         pass                     # không đọc được plan qua load_plan ⇒ im lặng, gate 09:05 vẫn đủ
@@ -454,8 +479,9 @@ try:
         _r = [r for r in _pv["reasons"] if "sizing" in r.lower() or "active" in r.lower()]
         if _r:
             margin_note.append("⚠️ **Plan có dấu hiệu đã sizing theo ĐÒN BẨY nhưng phiên sẽ "
-                               "chạy bằng VỐN TỰ CÓ** — khối lượng tính cho 1,3× vốn mà chỉ "
-                               "có 1,0× vốn; triệu chứng sẽ là WAIT_CASH, không phải lỗi rõ.")
+                               f"chạy bằng VỐN TỰ CÓ** — khối lượng tính cho {CAPIT_LEVER_APPROVED_F:g}× "
+                               "vốn mà chỉ có 1,0× vốn; triệu chứng sẽ là WAIT_CASH, không phải "
+                               "lỗi rõ.")
             for _x in _r[:2]:
                 margin_note.append(f"   · {_x}")
     elif _pv["orders"]:
@@ -472,12 +498,11 @@ try:
                 f"{float(_rec.get('max_lever_total_vnd') or 0)/1e6:,.1f}tr.")
         else:
             margin_note.append(
-                f"   ⛔ **CẦN DUYỆT RIÊNG CHO ĐÒN BẨY** (khác với duyệt plan thường): {_aerr}")
+                f"   ✅ **Đồng ý plan = duyệt margin tự động** — khi anh duyệt plan, Mike tự "
+                f"tạo bản duyệt margin cho {len(_pv['orders'])} lệnh này. Không cần chạy tay.")
             margin_note.append(
-                f"   Duyệt xong, Mike chạy: `python3 mike/bin/approve_margin_day.py "
-                f"--account {acct} --date {date} --approved-by \"...\"`. Không duyệt ⇒ bot TỰ "
-                f"GỠ đòn bẩy và chạy {len(_pv['orders'])} lệnh này bằng VỐN TỰ CÓ (không chặn "
-                f"lệnh).")
+                f"   Không duyệt plan ⇒ bot TỰ GỠ đòn bẩy và chạy bằng VỐN TỰ CÓ (không "
+                f"chặn lệnh). [{_aerr}]")
 except Exception as _e:          # fail-open: không chặn plan vì một dòng báo cáo
     margin_note = [f"⚠️ ĐÒN BẨY: không kiểm được trạng thái duyệt margin "
                    f"({type(_e).__name__}: {_e}) — nếu plan có lệnh CAPIT, kiểm tay trước 09:05."]
@@ -516,6 +541,18 @@ jit_dec    = str(jit_prop.get("decision") or "")
 pt_orders  = [o for o in (park_trim.get("orders") or []) if isinstance(o, dict)]
 jit_orders = [o for o in (jit_prop.get("orders") or []) if isinstance(o, dict)]
 jit_amends = [a for a in (jit_prop.get("buy_amendments") or []) if isinstance(a, dict)]
+
+# merge_park_orders.py đánh dấu proposal đã trở thành một phần của orders[].  Từ lúc cron
+# merge chạy mỗi ngày, render cả orders[] lẫn hai mục proposal khiến người duyệt thấy cùng
+# một lệnh BÁN PARK hai lần, dù executor chỉ đọc orders[] một lần.  Marker là hợp đồng của
+# writer duy nhất; thiếu/hỏng marker thì giữ cách hiển thị cũ (an toàn: không giấu lệnh).
+def _already_merged(prop):
+    return str(prop.get("_merged_into_orders") or "").startswith("✅ ĐÃ MERGE")
+
+pt_merged = _already_merged(park_trim)
+jit_merged = _already_merged(jit_prop)
+pt_report_orders = [] if pt_merged else pt_orders
+jit_report_orders = [] if jit_merged else jit_orders
 
 def _amend_for(o):
     """Khớp 1 lệnh trong orders[] với buy_amendments. Plan THẬT (cả SpaceX lẫn ZaloPay
@@ -577,6 +614,50 @@ try:
 except Exception:
     pass
 
+# ── TRỨNG VÀNG: cảnh báo rút tiền trước 9:05 nếu có egg và mua > tiền mặt ────────────────
+# Fail-open: lỗi đọc file → bỏ dòng, không chặn report.
+try:
+    import os as _os
+    _nav_file = _os.path.join(
+        _os.getcwd(), "data", "execution_logs", f"active_nav_{acct}.json"
+    )
+    _nav_live: dict = {}
+    if _os.path.exists(_nav_file):
+        with open(_nav_file) as _f:
+            _nav_live = json.load(_f)
+    _egg_vnd  = float(_nav_live.get("egg_assets") or 0)
+    _cash_avail = float(_nav_live.get("cash_available_vnd") or 0)
+    _buy_orders = [o for o in orders if str(o.get("side", "")).lower() in ("buy", "mua", "b")]
+    _total_buy_vnd = sum(
+        float(o.get("value_vnd") or o.get("est_value_vnd") or 0)
+        or float(o.get("qty") or o.get("quantity") or 0) * float(o.get("ref_price") or 0)
+        for o in _buy_orders
+    )
+    # JIT proceeds: if JIT is decided, PARK sells partially fund buys
+    _jit_proceeds = 0.0
+    if str(plan.get("jit_unpark_proposal", {}).get("decision") or "") == "JIT":
+        _jit_proceeds = sum(
+            float(o.get("value_vnd") or o.get("est_value_vnd") or 0)
+            or float(o.get("qty") or o.get("quantity") or 0) * float(o.get("ref_price") or o.get("mtm_price_ref") or 0)
+            for o in (plan.get("jit_unpark_proposal", {}).get("orders") or [])
+            if isinstance(o, dict)
+        )
+    _shortfall = max(0.0, _total_buy_vnd - _cash_avail - _jit_proceeds)
+    if _egg_vnd > 0 and _total_buy_vnd > 0:
+        if _shortfall > 0:
+            lines.append(
+                f"🥚 **Trứng vàng {_egg_vnd/1e6:,.1f}tr — CẦN RÚT {_shortfall/1e6:,.1f}tr trước 9:05 ICT sáng mai**"
+                f" (Tổng mua {_total_buy_vnd/1e6:,.1f}tr"
+                + (f" · JIT-bán-PARK {_jit_proceeds/1e6:,.1f}tr" if _jit_proceeds > 0 else "")
+                + f" − tiền mặt sẵn có {_cash_avail/1e6:,.1f}tr = thiếu {_shortfall/1e6:,.1f}tr)."
+            )
+        else:
+            lines.append(
+                f"🥚 Trứng vàng {_egg_vnd/1e6:,.1f}tr — đủ tiền mua, không cần rút trước phiên."
+            )
+except Exception:
+    pass
+
 # Transition context nếu có (ZaloPay Option A)
 tsched = plan.get("transition_schedule") or []
 tday = next((t for t in tsched if t.get("date") == date), None)
@@ -606,11 +687,22 @@ if orders:
     dd_shown = False
     buys  = [o for o in orders if str(o.get("side","")).lower() in ("buy","mua","b")]
     sells = [o for o in orders if str(o.get("side","")).lower() in ("sell","ban","s")]
+    # §2 kb/plan_report_style_guide.md: N lệnh PARK_TRIM cùng lý do (cùng target_park, cùng
+    # ngày) ⇒ 1 câu áp dụng chung sau vòng lặp, KHÔNG lặp nguyên văn theo từng lệnh (ca thật
+    # 2026-09-29: 19/19 lệnh lặp y hệt).
+    _pt_trim_tickers = [o.get("ticker","?") for o in sells
+                        if str(o.get("play_type", "")).upper() == "PARK_TRIM"]
     lines.append(f"🎯 Hành động: **{len(orders)} lệnh** ({len(sells)} bán, {len(buys)} mua):")
-    if pt_orders or jit_orders:
-        lines.append(f"   ➕ Ngoài {len(orders)} lệnh trên, plan còn **{len(pt_orders) + len(jit_orders)} "
-                     f"lệnh BÁN PARK đề xuất** (L1 trim {len(pt_orders)} + L2 JIT {len(jit_orders)}) — "
+    if pt_report_orders or jit_report_orders:
+        lines.append(f"   ➕ Ngoài {len(orders)} lệnh trên, plan còn **{len(pt_report_orders) + len(jit_report_orders)} "
+                     f"lệnh BÁN PARK đề xuất** (L1 trim {len(pt_report_orders)} + L2 JIT {len(jit_report_orders)}) — "
                      f"xem 2 mục riêng ở cuối, CẦN DUYỆT.")
+    if pt_merged or jit_merged:
+        _which = " + ".join(x for x, ok in (("L1 trim", pt_merged), ("L2 JIT", jit_merged)) if ok)
+        lines.append(f"   ✅ Lệnh BÁN PARK {_which} là LỆNH THẬT, đã gộp vào {len(orders)} lệnh ở trên "
+                     "(không liệt kê riêng để tránh đếm 2 lần) — sẽ đặt cùng lúc với lệnh mua, "
+                     "ĐỘC LẬP về lý do (tuân thủ trần PARK, không phải nguồn tiền cho lệnh mua "
+                     "trừ khi dòng 'Tiền đâu ra' bên dưới ghi rõ FUNDED_BY_JIT).")
     if price_verify_note:
         lines.append(f"   {price_verify_note}")
     if capit_note:
@@ -627,6 +719,12 @@ if orders:
         note = o.get("note", "")
         note_s = f" — {note[:90]}" if note else ""
         lines.append(f"  • {side_vn} {ticker} {qty}cp @ {px}{val_s}{note_s}")
+        # Lý do bán PARK_TRIM là ĐỘC LẬP với bất kỳ lệnh mua nào trong cùng plan (park-target
+        # compliance, không phải tài trợ) — KHÔNG lặp theo từng lệnh (§2 style guide), xem 1
+        # dòng tổng "Lý do (áp dụng CHUNG...)" ngay sau vòng lặp này. Vẫn để user tự suy diễn
+        # đúng: nếu ticker này KHÔNG nằm trong dòng "Tiền đâu ra" của lệnh mua bên dưới thì đây
+        # thuần là park-compliance, không phải tài trợ (user 2026-09-17: đọc 2 dòng liền nhau
+        # tưởng mâu thuẫn "bán PARK" rồi "không cần bán PARK").
         # Funding note NGAY CẠNH lệnh mua — user đọc lệnh mua riêng lẻ không được phép hoảng
         # vì tưởng thiếu tiền (SSI 75,3tr vs cash 4,8tr, plan 08-07).
         if is_buy:
@@ -690,6 +788,14 @@ if orders:
                 dd_shown = True
             if o.get("dd_override_reason"):
                 lines.append(f"      ↳ lý do override DD: {str(o['dd_override_reason'])[:120]}")
+    if _pt_trim_tickers:
+        # KHÔNG liệt kê lại tên mã (§3 style guide) — đã có ở từng dòng "• BÁN ..." bên trên.
+        _o_tgt = park_trim.get("target_park")
+        _o_tgt_s = f"{float(_o_tgt)*100:.0f}%" if isinstance(_o_tgt, (int, float)) else "?"
+        lines.append(
+            f"   ↳ ℹ️ Lý do (áp dụng CHUNG cho {len(_pt_trim_tickers)} lệnh BÁN PARK_TRIM ở "
+            f"trên): tuân thủ trần PARK {_o_tgt_s} (park-trim), KHÔNG liên quan tới việc tài "
+            "trợ lệnh mua trong plan này.")
     if dcf_shown and DCF_DISCLAIMER:
         lines.append(f"ℹ️ _{DCF_DISCLAIMER}_")
     if dd_shown and DD_DISCLAIMER:
@@ -701,7 +807,7 @@ else:
 # Ngang hàng với orders[], KHÔNG phải câu phụ trong đoạn văn: đây là lệnh BÁN THẬT cần user
 # duyệt riêng (chúng KHÔNG nằm trong orders[] mà bot đọc lúc 09:05).
 try:
-    if pt_dec == "TRIM" and pt_orders:
+    if pt_dec == "TRIM" and pt_report_orders:
         _pt_sum = sum(_o_val(o) for o in pt_orders)
         _pt_eng = _num(park_trim.get("trim_proposed_vnd"))
         _tgt = park_trim.get("target_park")
@@ -742,7 +848,7 @@ except Exception as _e:      # fail-open: một khối báo cáo không được
 
 # ── MỤC RIÊNG 2: L2 jit_unpark_proposal ─────────────────────────────────────────────────
 try:
-    if jit_dec == "JIT" and (jit_orders or jit_amends):
+    if jit_dec == "JIT" and (jit_report_orders or jit_amends) and not jit_merged:
         _jit_sum = sum(_o_val(o) for o in jit_orders)
         _for = sorted({str(o.get("for_ticker") or o.get("for_order_id") or "?")
                        for o in jit_orders})

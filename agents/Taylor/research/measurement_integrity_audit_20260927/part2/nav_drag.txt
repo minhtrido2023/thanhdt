@@ -1,0 +1,8 @@
+NAV window 2014-01-02..2026-06-19 = 12.460 nam lich
+park share NAV: trung binh toan ky 0.2453
+tich luy (1 - k*DY_p*park_share_p) = 0.994481
+=> drag CAGR NAV R3 = 0.0552 pp/nam  (CAGR 24,3775% -> 24.3223%)
+=> dong gop parking +2,01pp -> 1.955 pp
+  do nhay thue=0%: drag 0.0011 pp/nam
+  do nhay thue=5%: drag 0.0552 pp/nam
+  do nhay thue=10%: drag 0.1094 pp/nam

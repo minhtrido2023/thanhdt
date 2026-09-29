@@ -1,0 +1,9 @@
+[new_icbpit] build_pit 2014-01-02 -> 2026-09-25  cache=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/failg_icb_pit_20260927/livecache_new_icbpit
+[BQ_LOCAL_CACHE] WARNING: cache verified 39h ago (>36h) — consider re-running sync_bq_cache.py
+[BQ_LOCAL_CACHE] ready — 14 tables from /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/failg_icb_pit_20260927/livecache_new_icbpit
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+[BQ_LOCAL_CACHE] query took 66.8s (595582 rows)
+  [oshares-step] corp-action LIVE BQ: 4466 dòng ISS+AIS (193 mã)
+  [oshares-step] exdate: 1649 bước OShares, 783 bước ĐƯỢC DỜI (median 42 ngày), 855 giữ ngày quý (không khớp sự kiện), 3 bị chặn bởi cổng PIT
+[new_icbpit] wrote /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/failg_icb_pit_20260927/publish_new_icbpit.csv  rows=1470  rebals=49  md5=3ca8d3d335134d040fa75db37b9baedb
+EXIT=0 new_icbpit

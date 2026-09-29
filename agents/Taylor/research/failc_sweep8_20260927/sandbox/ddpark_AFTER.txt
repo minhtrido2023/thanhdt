@@ -1,0 +1,85 @@
+====================================================================================================
+  V2.3A (allocator + CAPIT) — FULL AUDIT SIMULATION 2014-01-02 -> 2026-09-24
+  NAV=50B (25B BAL + 25B LAG)   state=tav2_bq.vnindex_5state_dt5g_live
+  PARK vehicle=off  parking policy (cash_etf_states) {3: 0.7}
+  combine=allocator ON {1: 0.5, 2: 0.0, 3: 0.65, 4: 0.65, 5: 0.65} band ±10pp   CAPIT=ON
+  fills=T+1 Open (BQ-auditable, no intraday)   -> v23_golive_audit_2014_now.csv
+====================================================================================================
+
+[2] Loading v11 signals + Release_Date + 5-state + overheat + D1...
+  signals: 673,635 rows
+  [EXBULL fix] suppressed 707 momentum signals in EX-BULL (state==5)
+  [regime_size] rating coverage 96.2%; weak buy-rows flagged (rating>=4): 3,000 -> halved to 5% ONLY in BEAR/CRISIS (state<=2), full 10% elsewhere
+
+[3] Loading prices/Open/sector/E1VFVN30...
+
+[4] Building LAGGED schedule...
+  LAG candidate events in window: 5418
+
+[5] CAPIT v2 washout events...
+  washout 2014-05-08: state=1 grind=False dd52=-13.2% cool=False -> size=1.00
+  washout 2015-05-18: state=3 grind=False dd52=-17.4% cool=True -> size=0.75
+  washout 2015-08-24: state=3 grind=True dd52=-17.8% cool=False -> size=0.38
+  washout 2016-01-18: state=3 grind=False dd52=-17.6% cool=False -> size=0.75
+  washout 2018-05-28: state=1 grind=False dd52=-22.6% cool=True -> size=1.00
+  washout 2018-07-05: state=3 grind=True dd52=-25.3% cool=True -> size=0.38
+  washout 2020-02-03: state=3 grind=False dd52=-9.4% cool=False -> size=0.75
+  washout 2020-03-11: state=2 grind=True dd52=-20.8% cool=False -> size=0.25
+  washout 2020-07-27: state=3 grind=True dd52=-23.4% cool=False -> size=0.38
+  washout 2022-04-19: state=1 grind=False dd52=-8.0% cool=False -> size=1.00
+  washout 2022-06-15: state=2 grind=True dd52=-20.6% cool=True -> size=0.25
+  washout 2022-09-28: state=2 grind=True dd52=-25.2% cool=False -> size=0.00
+  washout 2023-10-30: state=1 grind=False dd52=-16.3% cool=False -> size=1.00
+  washout 2024-04-19: state=4 grind=False dd52=-8.9% cool=False -> size=0.50
+  washout 2024-08-05: state=1 grind=True dd52=-8.7% cool=False -> size=0.50
+  washout 2025-04-03: state=4 grind=False dd52=-8.0% cool=False -> size=0.50
+  washout 2025-10-20: state=3 grind=False dd52=-7.4% cool=False -> size=0.75
+  washout 2026-03-09: state=3 grind=False dd52=-13.1% cool=False -> size=0.75
+  washout 2026-07-20: state=3 grind=False dd52=-9.6% cool=False -> size=0.75
+
+[4b] Fetching BQ prices for LAG universe (801 tickers)...
+  chunk 1/4: 687,771 rows
+  chunk 2/4: 688,249 rows
+  chunk 3/4: 704,723 rows
+  chunk 4/4: 142,276 rows
+  LAG signals in window: 5407
+
+[6] BOOK A — BAL 25B...
+  BAL events: 2098 stock + 812 ETF; final 329.4222B
+
+[7] BOOK B — LAG 25B (always-on, parked)...
+  LAG events: 6663 stock + 975 ETF; final 310.7037B
+
+[8] Combine books (allocator)...
+  31 band rebalances; final combined = 636.3271B
+
+[9] Building TX table + self-checks...
+  [selfcheck BAL] cash-flow identity max err = 0 VND; final NAV identity err = 0 VND
+  [selfcheck LAG] cash-flow identity max err = 0 VND; final NAV identity err = 0 VND
+
+====================================================================================================
+ V2.3A (allocator + CAPIT) AUDIT — FULL 2014-01-02 -> 2026-09-24 (12.73y)
+ Final NAV 636.33B  CAGR 22.13%  Sharpe(252) 1.63  MaxDD -17.8%  Calmar 1.24
+ VNINDEX B&H: CAGR 10.39%  Sharpe 0.64  MaxDD -45.3%
+====================================================================================================
+
+[11] Writing audit file...
+  -> /home/trido/thanhdt/WorkingClaude/data/_exp_failc8_20260927/AFTER/v23_golive_audit_2014_now.csv  (13,876 rows)
+
+ANNUAL (sys vs VNINDEX):
+  2014: +38.06%   (vni=+0.0815)
+  2015: +17.72%   (vni=+0.0635)
+  2016: +11.79%   (vni=+0.1575)
+  2017: +32.55%   (vni=+0.4646)
+  2018: +16.31%   (vni=-0.1037)
+  2019: +7.06%   (vni=+0.0776)
+  2020: +19.44%   (vni=+0.1419)
+  2021: +101.04%   (vni=+0.3372)
+  2022: -8.62%   (vni=-0.3399)
+  2023: +19.30%   (vni=+0.0824)
+  2024: +19.64%   (vni=+0.1193)
+  2025: +36.81%   (vni=+0.4054)
+  2026: -4.30%   (vni=-0.0074)
+
+Done.
+ELAPSED 6:32.13 MAXRSS 2832404kB

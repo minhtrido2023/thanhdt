@@ -27,6 +27,7 @@ Tự động nằm trong bin/run_selfchecks.sh (glob *selfcheck*.py).
 """
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -42,19 +43,37 @@ import ops_health_check_selfcheck as ohc  # noqa: E402  (tái dùng trích-khố
 FAILS = []
 PID = "selfcheck_prog"
 
+# check #5 có ÂN HẠN `QUESTION_GRACE_MIN` phút: câu hỏi mới hơn ngưỡng đó KHÔNG bao giờ vào
+# nhánh routable. Stub bus phải lùi ts của event ra ngoài cửa sổ ân hạn, nếu không 3 ca
+# "phải routable" đỏ oan VÀ — nguy hơn — các ca "KHÔNG routable" xanh vì SAI lý do (rơi vào
+# ân hạn chứ không phải vì ack). Đọc thẳng hằng số THẬT, đừng chép cứng 60.
+def _grace_min(default=60):
+    try:
+        src = open(os.path.join(ROOT, "bin", "ops_health_check.sh"), encoding="utf-8").read()
+        m = re.search(r"^QUESTION_GRACE_MIN\s*=\s*(\d+)", src, re.M)
+        return int(m.group(1)) if m else default
+    except OSError:
+        return default
+
+
+STUB_EVENT_AGE_MIN = _grace_min() + 30
+os.environ["SELFCHECK_EVENT_AGE_MIN"] = str(STUB_EVENT_AGE_MIN)
+
 STUB_APPEND = r"""#!/usr/bin/env bash
 # stub append_event.sh — ghi đúng shape bus mà check #5 đọc
 AGENT="$1"; ETYPE="$2"; TOPIC="$3"; PAYLOAD="${4:-{}}"
 BUS="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/bus/inbox"
 mkdir -p "$BUS"
 python3 - "$BUS/$AGENT.jsonl" "$AGENT" "$ETYPE" "$TOPIC" "$PAYLOAD" <<'PY'
-import json, sys, datetime
+import json, os, sys, datetime
 path, agent, etype, topic, payload = sys.argv[1:6]
 try: payload = json.loads(payload)
 except Exception: pass
+age = datetime.timedelta(minutes=int(os.environ.get("SELFCHECK_EVENT_AGE_MIN", "90")))
 rec = {"event_id": f"{agent}-{etype}-{topic}", "agent_id": agent, "event_type": etype,
        "topic": topic, "payload": payload,
-       "ts": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")}
+       "ts": (datetime.datetime.now(datetime.timezone.utc) - age)
+             .strftime("%Y-%m-%dT%H:%M:%SZ")}
 with open(path, "a", encoding="utf-8") as f:
     f.write(json.dumps(rec, ensure_ascii=False) + "\n")
 PY

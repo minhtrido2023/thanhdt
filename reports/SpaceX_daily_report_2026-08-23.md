@@ -1,0 +1,1 @@
+🟡 **EOD SpaceX (2026-08-23)** — KHÔNG TÌM THẤY file plan hôm nay. 2 khả năng: (i) CHỦ ĐỘNG không lập plan cho account này (quyết định HOLD có chủ đích — bình thường), hoặc (ii) DollarBill lỗi lúc 17:30/19:30 hôm qua. Kiểm tra plan channel / bus để xác nhận là chủ động hay lỗi — báo cáo này không đủ bằng chứng tự kết luận.

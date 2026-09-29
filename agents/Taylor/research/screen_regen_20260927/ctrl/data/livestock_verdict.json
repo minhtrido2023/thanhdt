@@ -1,0 +1,199 @@
+{
+  "job": "Taylor_20260705_160724",
+  "screen": "livestock_animal_feed_hog_cycle",
+  "universe": [
+    "DBC",
+    "BAF",
+    "HAG",
+    "HNG",
+    "MML",
+    "VLC",
+    "VSN",
+    "APF",
+    "HKB",
+    "AGM"
+  ],
+  "liquid_core": [
+    "DBC",
+    "BAF",
+    "HAG",
+    "HNG"
+  ],
+  "liq_gate_vnd": 5000000000.0,
+  "cycle_signal": {
+    "spearman_ic": {
+      "pb_rel_vs_profit_1M": 0.0101,
+      "pb_rel_vs_profit_2M": 0.0021,
+      "pb_rel_vs_profit_3M": -0.0024,
+      "gpm_turn_vs_profit_1M": 0.0712,
+      "gpm_turn_vs_profit_2M": 0.0992,
+      "gpm_turn_vs_profit_3M": 0.1164
+    },
+    "whole_market_pb_rel_profit3M": 0.0005,
+    "regime_mean_fwd_return": {
+      "mixed": {
+        "profit_1M": 0.324,
+        "profit_2M": 0.409,
+        "profit_3M": 0.444
+      },
+      "rich_down": {
+        "profit_1M": 0.428,
+        "profit_2M": 0.79,
+        "profit_3M": 1.084
+      },
+      "trough_up": {
+        "profit_1M": 3.339,
+        "profit_2M": 6.035,
+        "profit_3M": 8.334
+      }
+    },
+    "regime_n": {
+      "mixed": 11961,
+      "rich_down": 4538,
+      "trough_up": 5925
+    },
+    "note": "No direct hog-price field in BQ; GPM used as cycle proxy. Tests whether PB-trough (PB/PB_MA1Y) and GPM-turn (GPM_P0-GPM_P4) predict forward return for the livestock/feed group."
+  },
+  "troughbuy": {
+    "months_held": 30,
+    "months": 149,
+    "full": {
+      "CAGR": 10.075,
+      "Sharpe": 0.462,
+      "MaxDD": -26.976,
+      "Calmar": 0.373,
+      "navfinal": 3.293,
+      "n": 149
+    },
+    "full_bh": {
+      "CAGR": 10.269,
+      "Sharpe": 0.6,
+      "MaxDD": -43.154,
+      "Calmar": 0.238,
+      "navfinal": 3.366,
+      "n": 149
+    },
+    "is_": {
+      "CAGR": 10.412,
+      "Sharpe": 0.529,
+      "MaxDD": -7.184,
+      "Calmar": 1.449,
+      "navfinal": 1.812,
+      "n": 72
+    },
+    "oos": {
+      "CAGR": 9.76,
+      "Sharpe": 0.428,
+      "MaxDD": -26.976,
+      "Calmar": 0.362,
+      "navfinal": 1.818,
+      "n": 77
+    },
+    "oos_bh": {
+      "CAGR": 11.509,
+      "Sharpe": 0.606,
+      "MaxDD": -32.239,
+      "Calmar": 0.357,
+      "navfinal": 2.012,
+      "n": 77
+    }
+  },
+  "basket": {
+    "months_held": 149,
+    "months": 149,
+    "full": {
+      "CAGR": -1.299,
+      "Sharpe": 0.174,
+      "MaxDD": -82.94,
+      "Calmar": -0.016,
+      "navfinal": 0.85,
+      "n": 149
+    },
+    "full_bh": {
+      "CAGR": 10.269,
+      "Sharpe": 0.6,
+      "MaxDD": -43.154,
+      "Calmar": 0.238,
+      "navfinal": 3.366,
+      "n": 149
+    },
+    "is_": {
+      "CAGR": -20.612,
+      "Sharpe": -0.365,
+      "MaxDD": -80.881,
+      "Calmar": -0.255,
+      "navfinal": 0.25,
+      "n": 72
+    },
+    "oos": {
+      "CAGR": 20.991,
+      "Sharpe": 0.634,
+      "MaxDD": -54.27,
+      "Calmar": 0.387,
+      "navfinal": 3.396,
+      "n": 77
+    },
+    "oos_bh": {
+      "CAGR": 11.509,
+      "Sharpe": 0.606,
+      "MaxDD": -32.239,
+      "Calmar": 0.357,
+      "navfinal": 2.012,
+      "n": 77
+    }
+  },
+  "selfcheck_vnd": {
+    "troughbuy": 0.0,
+    "basket": 0.0
+  },
+  "ortho_c30v": 33.3,
+  "ortho_8l": 11.7,
+  "median_sel_adv_b": 56.88,
+  "gate_note": "PB<PB_MA1Y + GPM_P0>GPM_P4 + CF_OA_3Y>0 + IntCov>1.0. DBC (integrated, survives cycle) is meant to catch the ASF up-cycle; BAF (thin-margin, levered, never-cheap) is the levered-growth name a value screen declines; HAG/HNG messy conglomerate/plantation.",
+  "verify": {
+    "DBC_caught": [
+      "2020-01",
+      "2020-03",
+      "2025-01",
+      "2025-02",
+      "2025-03",
+      "2025-04",
+      "2025-05",
+      "2025-06",
+      "2025-10",
+      "2025-11",
+      "2025-12",
+      "2026-01",
+      "2026-02",
+      "2026-03"
+    ],
+    "DBC_2019_20_ASF": [
+      "2020-01",
+      "2020-03"
+    ],
+    "BAF_rejected": [
+      "2023-01",
+      "2023-02",
+      "2023-03",
+      "2023-04",
+      "2023-05",
+      "2023-06",
+      "2023-07",
+      "2023-08",
+      "2023-09"
+    ],
+    "HAG_picks": [
+      "2018-05",
+      "2018-06",
+      "2018-07",
+      "2018-10",
+      "2018-11",
+      "2018-12"
+    ],
+    "HNG_picks": [
+      "2018-05",
+      "2018-06",
+      "2018-07"
+    ]
+  }
+}

@@ -1,0 +1,5 @@
+2026-07-07 totalCash     5,289,954  replay     5,290,834  lech       -880
+2026-07-08 totalCash        57,582  replay        66,108  lech     -8,526
+2026-07-09 totalCash     2,914,538  replay     2,974,106  lech    -59,568
+2026-07-10 totalCash    52,133,285  replay    52,207,283  lech    -73,998
+2026-07-13 totalCash   160,740,458  replay   160,755,795  lech    -15,337

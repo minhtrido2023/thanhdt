@@ -34,6 +34,20 @@ set -uo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # Shared usage-limit phrase list (single source of truth, also used by dispatch.sh).
 source "$ROOT/bin/usage_limit_phrases.sh"
+# Lỗi TRUYỀN TẢI (API/mạng/TLS bị chặn giữa đường) — lớp thứ BA, khác CẢ usage-limit lẫn
+# "Mike trả lạc đề". Sự cố thật 2026-08-20 00:30 ICT: cả 2 lần thử chết sau 16-18 giây với
+# "API Error: Unable to connect to API: Self-signed certificate detected" (proxy/ISP chèn
+# cert) ⇒ retro 2026-08-19 mất hẳn. Hai hệ quả phải vá, không phải một:
+#   1. Retry TỨC THÌ (18 giây sau lần đầu) rơi đúng vào cùng khoảng blip ⇒ vô dụng. Lớp này
+#      cần chờ một nhịp; usage-limit thì không (chờ cũng vô nghĩa, đã dừng hẳn).
+#   2. Log/notify cũ gán MỌI thất bại không-phải-usage-limit thành "nghi Mike trả nhầm task
+#      cũ" ⇒ sáng hôm sau người đọc đi tìm bug quoting/prompt trong khi nguyên nhân nằm ở
+#      tầng mạng (đúng ca ops-autofix Winston_20260820_012008 bị dẫn sai hướng).
+# Cố ý KHÔNG gộp vào usage_limit_phrases.sh: file đó là hợp đồng dùng chung với dispatch.sh
+# (khớp ⇒ auto-resume). Lỗi mạng KHÔNG được kích auto-resume của dispatch.sh.
+API_TRANSPORT_ERROR_RE='Unable to connect to API|Self-signed certificate|Connection error|fetch failed|ECONNREFUSED|ECONNRESET|ETIMEDOUT|getaddrinfo|EAI_AGAIN'
+# Chờ giữa 2 lần thử khi gặp lỗi truyền tải (giây). Cron 00:30 không có deadline gấp.
+API_RETRY_BACKOFF_SEC="${DAILY_RETRO_API_BACKOFF_SEC:-180}"
 LOG="$ROOT/logs/daily_retro.log"
 # Chạy 00:30 ICT = đã sang ngày lịch MỚI — review NGÀY VỪA KẾT THÚC (hôm qua theo giờ chạy),
 # không phải "hôm nay" theo đồng hồ lúc script chạy. Bug tiềm ẩn nếu dùng `date` trực tiếp:
@@ -43,6 +57,11 @@ TODAY="$(TZ='Asia/Ho_Chi_Minh' date -d 'yesterday' +%Y-%m-%d 2>/dev/null \
       || TZ='Asia/Ho_Chi_Minh' date -v-1d +%Y-%m-%d 2>/dev/null \
       || python3 -c "import datetime; print((datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=7))) - datetime.timedelta(days=1)).strftime('%Y-%m-%d'))")"
 DRAFT_FILE="$ROOT/state/retro_draft_$TODAY.md"
+# Mốc thời gian bắt đầu lần chạy này — dùng ở bước 3 để đọc CƠ KHÍ xem bước 1 đã mở
+# escalation nào (sự cố 2026-08-15: bước 1 mở `retro-pattern-recurring-wakeup-miss-2days`,
+# 6 phút sau bước 3 mở thêm `wakeup-miss-pattern-escalate-2026-08-15` cho ĐÚNG CÙNG pattern
+# → 2 câu hỏi trùng, checker báo 2 lần, user phải quyết 1 việc 2 lần).
+RUN_START_TS="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 mkdir -p "$ROOT/state"
 
 log() { echo "[$(TZ='Asia/Ho_Chi_Minh' date +%Y-%m-%dT%H:%M:%S%z)] $*" | tee -a "$LOG"; }
@@ -62,6 +81,25 @@ for _stale in "$ROOT"/state/retro_draft_*.md; do
   "$ROOT/bin/append_event.sh" Mike question "daily-retro-stale-draft-$(basename "$_stale" .md)" \
     "{\"reason\":\"leftover draft file phat hien khi chay daily_retro ngay $TODAY, nghia la finalize job truoc do fail am tham\",\"file\":\"$_stale\"}" 2>/dev/null || true
 done
+
+# --- Hệ WAKE-UP đã GỠ hoàn toàn 2026-08-21 (commit 541b50f3) --------------------------
+# push wake-on-completion + reconciler cron + debounce đã bị loại bỏ. Không còn đo lường.
+# logs/wake_thread_errors.log có thể còn dòng fixture từ wake_debounce_selfcheck.sh — không đọc.
+echo "$(date -Iseconds) [wake-metrics] REMOVED-2026-08-21 kiến-trúc-wake-up-đã-gỡ" >> "$LOG"
+
+# --- Time-claim audit (§S4, discord_time_reasoning_by_construction_plan_20260821.md) --
+# Đo loại lỗi C ("LLM suy luận giờ sai") thay vì chờ user chụp màn hình — scan trong bash
+# (không bảo Mike tự grep, cùng triết lý với khối wake-metrics phía trên). KHÔNG
+# --dry-run: script tự ghi bus + Discord Architecture nếu có mismatch — daily_retro chỉ cần
+# đếm số dòng để đưa vào draft, không tự ghi lại lần hai.
+_time_claim_out="$(python3 "$ROOT/bin/time_claim_audit.py" --days 1 2>&1 || true)"
+# Neo theo TIỀN TỐ dòng tóm tắt, không theo VỊ TRÍ: time_claim_audit.py gọi subprocess kế thừa
+# stdout (append_event.sh, notify_thread.sh) và chuỗi notify của nó cũng chứa "N mismatch(es)" —
+# `head -1` + grep trần có thể bắt nhầm cả dòng con lẫn số của chính chuỗi notify (retro 08-26).
+_time_claim_count="$(printf '%s\n' "$_time_claim_out" | grep -m1 -E '^time_claim_audit: scanned last ' \
+  | grep -oE '[0-9]+ mismatch' | grep -oE '^[0-9]+' || true)"
+[ -n "$_time_claim_count" ] || _time_claim_count=0
+echo "$(date -Iseconds) [time-claim-audit] $TODAY count=$_time_claim_count" >> "$LOG"
 
 # --- Bước 1: Mike viết DRAFT (đồng bộ — bash CHỜ THẬT, không dùng &) ------------------
 # DISPATCH_FROM=user bắt buộc — xem fix 2026-07-09 kb_nightly.sh (Friday editorial
@@ -93,12 +131,23 @@ QUY TRÌNH BẮT BUỘC (đọc bằng chứng thật, không suy đoán):
 2. Liệt kê MỌI bus event event_type=error/finding trong bus/inbox/*.jsonl có ts bắt đầu
    bằng '$TODAY' — đối chiếu xem có sự cố nào CHƯA được ghi vào kb/incidents/ không (nếu
    có, đây là gap báo cáo cần ghi luôn bổ sung, không bỏ sót).
+2d. HỆ WAKE-UP ĐÃ GỠ 2026-08-21 (MIKE.md §8): push wake-on-completion + reconciler cron không
+   còn chạy — đây là TRẠNG THÁI MONG ĐỢI. KHÔNG mở sự cố cho push=0/reconciler=0.
+   Chỉ còn kiểm soát ScheduleWakeup theo mục 2c khi Mike có bước kế tiếp phụ thuộc.
 2c. CHẠY bin/wakeup_audit.py --since \$TODAY (script chỉ hỗ trợ --since, không có --until —
    chấp nhận nó quét luôn phần đầu hôm nay khi retro chạy, đọc kỹ output để CHỈ tính các
    lượt có timestamp thuộc \$TODAY, đừng gộp nhầm). Đo tuân thủ MIKE.md §8: mọi lượt dispatch
    --bg có ScheduleWakeup theo sau không. Nếu có lượt vi phạm trong \$TODAY, đưa vào danh
    sách sự cố ở bước 3 (category=dispatch-orchestration), trích số lượt vi phạm/tổng lượt
    --bg trong ngày.
+2e. TIME-CLAIM AUDIT (§S4, bin/time_claim_audit.py — đã chạy sẵn bằng bash, ĐỪNG tự chạy
+   lại): số mệnh đề giờ tương đối ('còn ~N phút', 'mở lúc HH:MM') KHÔNG khớp thời điểm gửi
+   thật trong 24h qua = $_time_claim_count (xem dòng '[time-claim-audit]' trong
+   logs/daily_retro.log để lấy đúng số). Script tự ghi bus (agent quant-skeptic, topic
+   'time-claim-audit-<ngày>') + Discord Architecture khi count>0 nên KHÔNG cần bạn tự ghi
+   lại — chỉ cần: nếu count>0, đưa vào danh sách sự cố ở bước 3 (category=data-registry-
+   accuracy), trích chi tiết từ bus event vừa nêu (grep bus/inbox/*.jsonl). Mục tiêu S4 là
+   0 mismatch/tuần; count=0 KHÔNG cần nêu gì thêm (không phải regression, không mở sự cố).
 2b. VERIFY ARTIFACT THẬT trước khi báo bất kỳ vấn đề nào là 'chưa xử lý'/'còn treo' — đây
    là quy tắc BẮT BUỘC (bài học 2026-07-10: chính retro lần đầu đã sai — báo 1 câu hỏi
    'crontab paper-main chưa cài' là còn mở CHỈ vì bus event question chưa có answer, trong
@@ -143,9 +192,20 @@ QUY TRÌNH BẮT BUỘC (đọc bằng chứng thật, không suy đoán):
    có 'Prevention' — đây là tín hiệu QUAN TRỌNG NHẤT cần nêu bật trong draft: prevention
    cũ chưa đủ mạnh, cần đề xuất prevention MẠNH HƠN (không chỉ lặp lại lời khuyên cũ).
 6. Nếu SAU 2 lần RETRO liên tiếp mà CÙNG 1 pattern vẫn tái diễn (kiểm tra RETRO entry
-   liền trước) → escalate NGAY bus question 'retro-pattern-recurring-<n>-days' (dùng
-   append_event.sh trực tiếp, không cần đợi ai) cho Mike/user biết prevention hiện tại
-   không hiệu quả, cần thay đổi cách tiếp cận (không chỉ viết thêm 1 dòng 'prevention').
+   liền trước) → escalate NGAY cho Mike/user biết prevention hiện tại không hiệu quả,
+   cần thay đổi cách tiếp cận (không chỉ viết thêm 1 dòng 'prevention').
+   ESCALATE BẰNG ĐÚNG LỆNH NÀY, KHÔNG gọi append_event.sh trực tiếp:
+     mike/bin/retro_escalate.py --pattern '<slug-ổn-định-mô-tả-pattern>' --days <n> \\
+         --payload '{\"summary\":\"...\",\"options\":[...],\"recommendation\":\"...\",\"urgency\":\"...\"}'
+   --pattern là slug MÔ TẢ pattern (vd 'ack-topic-counter-structural'), TUYỆT ĐỐI
+   KHÔNG nhét số ngày vào đó — số ngày đi qua --days và nằm trong payload. Lý do: ack
+   'triaged-needs-human:' của ops_health_check khớp topic TUYỆT ĐỐI, nên bộ đếm trong
+   topic làm ack hôm qua không phủ được escalation hôm nay ⇒ mỗi ngày đốt 1 job
+   wags_autofix cho việc người đã triage (bug ack-topic-counter, tái diễn ≥3 retro).
+   Helper TỪ CHỐI (fail-loud, rc!=0) slug mang bộ đếm — nó KHÔNG tự cắt, vì cắt thì 2
+   slug mô tả khác nhau gộp thành 1 topic. Nó tự kiểm pattern này đã có câu hỏi đang
+   được ack phủ chưa và tự quyết POST hay SKIP — đọc dòng DECISION= nó in ra rồi ghi
+   kết quả đó vào draft. Bị từ chối thì ĐỔI TÊN slug theo gợi ý, đừng gọi append_event.
 
 XONG bước 4-6 ở trên là DỪNG. Không viết gì vào kb/incidents/, không dispatch Wags,
 không commit, không dọn memory — tất cả phần đó thuộc bước 2/3 của pipeline, KHÔNG phải
@@ -192,7 +252,14 @@ for _attempt in 1 2; do
     log "Draft rỗng/sai định dạng vì usage-limit — không retry."
     break
   fi
-  [ "$_attempt" -lt 2 ] && log "Draft rỗng/sai định dạng (không phải usage-limit) — nghi Mike trả nhầm task cũ; retry lần cuối với prompt sạch."
+  if tail -c 4000 "$draft_log" 2>/dev/null | grep -qiE "$API_TRANSPORT_ERROR_RE"; then
+    [ "$_attempt" -lt 2 ] && {
+      log "Draft thất bại vì LỖI TRUYỀN TẢI API/mạng (không phải usage-limit, không phải lạc đề) — chờ ${API_RETRY_BACKOFF_SEC}s rồi retry lần cuối."
+      sleep "$API_RETRY_BACKOFF_SEC"
+    }
+  else
+    [ "$_attempt" -lt 2 ] && log "Draft rỗng/sai định dạng (không phải usage-limit) — nghi Mike trả nhầm task cũ; retry lần cuối với prompt sạch."
+  fi
 done
 log "Draft dispatch xong sau $_attempt lần thử (exit $rc1, log: $draft_log)"
 
@@ -214,10 +281,17 @@ if ! _draft_valid "$DRAFT_FILE"; then
     log "=== daily_retro SKIPPED (usage-limit, transient) ==="
     exit 0
   fi
-  log "ERROR: draft job không tạo được '$DRAFT_FILE' hợp lệ sau 2 lần thử (rc=$rc1) — DỪNG pipeline, không dispatch Wags. Xem state/retro_rejected_${TODAY}_a*.md nếu có (draft lạc đề đã bị gate chặn)."
-  "$ROOT/bin/notify.sh" "[daily_retro] LỖI: draft RETRO $TODAY không hợp lệ sau 2 lần thử (job Mike rc=$rc1). Xem $draft_log và state/retro_rejected_${TODAY}_a*.md. Retro hôm nay KHÔNG chạy — cần người kiểm tra." 2>/dev/null || true
+  # Nêu ĐÚNG lớp nguyên nhân trong log/notify/bus — người đọc sáng hôm sau không phải
+  # đoán giữa "bug prompt" và "mạng chết" (xem chú thích API_TRANSPORT_ERROR_RE ở đầu file).
+  if tail -c 4000 "$draft_log" 2>/dev/null | grep -qiE "$API_TRANSPORT_ERROR_RE"; then
+    _fail_cause="loi truyen tai API/mang (vd TLS bi proxy chen cert) — KHONG phai bug prompt/quoting"
+  else
+    _fail_cause="draft rong hoac sai dinh dang (thieu header RETRO) — nghi Mike tra lac de"
+  fi
+  log "ERROR: draft job không tạo được '$DRAFT_FILE' hợp lệ sau 2 lần thử (rc=$rc1, nguyên nhân: $_fail_cause) — DỪNG pipeline, không dispatch Wags. Xem state/retro_rejected_${TODAY}_a*.md nếu có (draft lạc đề đã bị gate chặn)."
+  "$ROOT/bin/notify.sh" "[daily_retro] LỖI: draft RETRO $TODAY không hợp lệ sau 2 lần thử (job Mike rc=$rc1). Nguyên nhân: $_fail_cause. Xem $draft_log và state/retro_rejected_${TODAY}_a*.md. Retro hôm nay KHÔNG chạy — cần người kiểm tra." 2>/dev/null || true
   "$ROOT/bin/append_event.sh" Mike question "daily-retro-draft-failed-$TODAY" \
-    "{\"reason\":\"draft file rong hoac sai dinh dang (thieu header RETRO) sau 2 lan thu, rc=$rc1\",\"log\":\"$draft_log\",\"rejected_glob\":\"state/retro_rejected_${TODAY}_a*.md\"}" 2>/dev/null || true
+    "{\"reason\":\"$_fail_cause (sau 2 lan thu), rc=$rc1\",\"log\":\"$draft_log\",\"rejected_glob\":\"state/retro_rejected_${TODAY}_a*.md\"}" 2>/dev/null || true
   log "=== daily_retro ABORTED ==="
   exit 1
 fi
@@ -248,6 +322,42 @@ if [ "$rc2" -ne 0 ] || [ -z "${wags_out//[[:space:]]/}" ]; then
   log "WARNING: Wags verify unavailable — finalize job sẽ tự đánh dấu 'Verified by: CHƯA'."
 fi
 
+# Escalation đã mở ở bước 1 — đọc CƠ KHÍ từ bus thay vì để phiên finalize tự nhớ/tự đoán.
+# Bước 1 (mục 6 của prompt draft) được lệnh escalate pattern tái diễn NGAY bằng
+# append_event.sh; phiên finalize là phiên KHÁC, không thấy việc đó, nên trước 2026-08-16 nó
+# hay mở thêm 1 question thứ hai cho cùng pattern. Fail-soft: đọc lỗi -> chuỗi rỗng -> prompt
+# nói "không phát hiện", hành vi y như cũ, không bao giờ chặn retro.
+_esc_topics="$(python3 - "$ROOT/bus/inbox/Mike.jsonl" "$RUN_START_TS" <<'PY' 2>/dev/null || true
+import json, sys
+path, since = sys.argv[1], sys.argv[2]
+out = []
+try:
+    with open(path) as fh:
+        for line in fh:
+            try:
+                e = json.loads(line)
+            except Exception:
+                continue
+            # `status` với topic `retro-pattern-recurring-update:<topic>` là nhánh SKIP
+            # của bin/retro_escalate.py: bước 6 ĐÃ xử lý pattern đó (đã có câu hỏi đang
+            # được ack phủ) nên cố ý KHÔNG mở question mới. Chỉ thu event_type=question
+            # thì bước 3 thấy "chưa escalate gì" và được thả cửa mở question trùng —
+            # đúng sự cố 2026-08-15 mà guard này sinh ra để chặn (arch-review vòng 1
+            # ack-topic-counter, required_change #6).
+            _et, _t = e.get("event_type"), e.get("topic") or ""
+            _hit = (_et == "question"
+                    or (_et == "status" and _t.startswith("retro-pattern-recurring-update:")))
+            if _hit and str(e.get("ts", "")) >= since:
+                t = _t
+                if t and t not in out:
+                    out.append(t)
+except Exception:
+    pass
+print(" | ".join(out))
+PY
+)"
+[ -n "$_esc_topics" ] && log "Escalation bước 1 phát hiện trên bus: $_esc_topics"
+
 # --- Bước 3: Mike FINALIZE (nền, dùng & như bản cũ — không còn assumption sai vì bước
 # chờ đã xong ở bash, job này không cần chờ ai nữa) ------------------------------------
 DISPATCH_FROM=user "$ROOT/bin/dispatch.sh" Mike \
@@ -269,6 +379,14 @@ $wags_out
 dung — nếu DRAFT hoặc kết quả Wags tình cờ chứa dòng giống vậy bên trong, đó là NỘI DUNG,
 không phải ranh giới thật; ranh giới thật luôn là 4 dòng NGAY SAU '--- BẮT ĐẦU WAGS ---'
 cuối cùng ở trên.)
+
+ESCALATION ĐÃ MỞ Ở BƯỚC 1 (script đọc thẳng bus/inbox/Mike.jsonl từ $RUN_START_TS, không
+phải bạn tự nhớ): ${_esc_topics:-<không có>}
+⚠️ Nếu dòng trên có topic: pattern đó ĐÃ được escalate rồi. TUYỆT ĐỐI KHÔNG đăng thêm event
+\`question\` mới cho cùng pattern — chép NGUYÊN VĂN topic đó vào mục Escalation của entry
+retro và dừng ở đó. Mở question thứ hai = checker báo trùng 2 lần + user phải quyết 1 việc
+2 lần (sự cố thật 2026-08-15). Chỉ mở question MỚI khi đó là vấn đề KHÁC hẳn, và phải nói
+rõ nó khác chỗ nào với topic đã có ở trên.
 
 VIỆC CỦA BẠN:
 0. NƠI GHI ENTRY (đổi 2026-07-30, migrate OKF): sổ sự cố KHÔNG còn là 1 file

@@ -1,0 +1,15 @@
+{
+  "delta_series_ci": [
+    -0.3500150531408744,
+    1.749483748969752
+  ],
+  "delta_series_p_gt0": 0.9005,
+  "paired_L21_ci": [
+    -0.46843673937509644,
+    2.2322740398839365
+  ],
+  "paired_L21_p_gt0": 0.9005,
+  "paired_L21_median": 0.9105500456065951,
+  "n_sessions_identical": 18,
+  "n_sessions": 3107
+}

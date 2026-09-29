@@ -41,6 +41,8 @@ _notify() {
   "$ROOT/bin/notify_thread.sh" "$1" "$THREAD_ID" 2>/dev/null || true
 }
 
+# KHÔNG thêm --once (cố ý): run_bot.sh chạy --once nên tự exit trước 14:45; chỉ bot restart ở
+# chế độ loop mới vào CLOSED ⇒ _await_postclose_fills (aria-K) chờ kết quả ATC. Xem ops_runbook.
 _restart_bot() {
   local rlog="$ROOT/logs/run_bot_${ACCOUNT}_autoheal_$(TZ=Asia/Ho_Chi_Minh date +%Y%m%d_%H%M%S).log"
   ( cd "$WC_ROOT" && setsid env TZ=Asia/Ho_Chi_Minh python3 -u bot_execute.py \
@@ -82,9 +84,17 @@ with open(journal, encoding="utf-8") as f:
         elif ev == "DONE":
             parent_done[pid] = row.get("note") or "khớp đủ"
             parent_wait.pop(pid, None)
-        elif ev in ("WAIT_CASH", "WAIT_QUOTA", "WAIT_T2_SETTLEMENT", "PLACE_FAIL") and pid not in parent_done:
+        elif ev in ("WAIT_CASH", "WAIT_QUOTA", "WAIT_T2_SETTLEMENT", "PLACE_FAIL",
+                    "PLACE_FAIL_STOPPED") and pid not in parent_done:
+            # PLACE_FAIL_STOPPED (2026-09-29): cổng mới cắt PLACE_FAIL xuống <=5/lệnh, DƯỚI hẳn
+            # ngưỡng >20 của ops_health_check #3 vốn là cái chuông DUY NHẤT đã bắt được sự cố.
+            # ops_health_check chỉ chạy 08:20 + 12:45 và chỉ đọc journal của HÔM NAY, nên một
+            # lần chặn lúc 13:05-14:45 không lượt cron nào quét tới. Heartbeat 5 phút/lần chạy
+            # cả phiên ⇒ đây là kênh bịt đúng khoảng trống đó (arch-review vòng 3 F-E).
             reason = {"WAIT_CASH": "chờ sức mua", "WAIT_QUOTA": "chờ thanh khoản (giới hạn 10% KLGD)",
-                      "WAIT_T2_SETTLEMENT": "chờ hàng T+2 về"}.get(ev, row.get("note") or ev)
+                      "WAIT_T2_SETTLEMENT": "chờ hàng T+2 về",
+                      "PLACE_FAIL_STOPPED": "⛔ ĐÃ DỪNG thử lại — lỗi cấu trúc lặp lại: "
+                                            + (row.get("note") or "")}.get(ev, row.get("note") or ev)
             parent_wait[pid] = (row["ticker"], row["side"], reason)
 
 def px(v):        # 32500 -> "32.50" như app
@@ -119,7 +129,28 @@ PYEOF
 if [ ! -f "$PLAN_FILE" ]; then
   exit 0
 fi
-N_ORDERS="$(python3 -c "import json; print(len(json.load(open('$PLAN_FILE')).get('orders', [])))" 2>/dev/null || echo 0)"
+# FAIL-CLOSED tu 2026-09-28 (user duyet). Truoc day: `2>/dev/null || echo 0` ⇒ plan JSON HONG
+# cho ra N_ORDERS=0 roi `exit 0` IM LANG CA PHIEN. Heartbeat la kenh DUY NHAT bao bot con song
+# va da khop gi moi 5 phut ⇒ mat no la mat kha nang phat hien MOI su co khac trong gio giao dich,
+# dung dieu user cam ("im lang hoan toan = khong phan biet duoc voi pipeline chet").
+# Phai TACH: "plan co 0 lenh" (im lang DUNG) vs "khong doc duoc plan" (PHAI BAO).
+if _NO_OUT="$(python3 -c "import json,sys; print(len(json.load(open(sys.argv[1])).get('orders', [])))" "$PLAN_FILE" 2>&1)"; then
+  N_ORDERS="$_NO_OUT"
+else
+  _HB_MSG="🔴 **bot_heartbeat KHONG DOC DUOC PLAN** — \`$(basename "$PLAN_FILE")\`
+Truoc 2026-09-28 cho nay \`|| echo 0\` roi \`exit 0\` ⇒ heartbeat IM LANG CA PHIEN du bot co the dang chay va khop lenh.
+Loi that:
+\`\`\`
+${_NO_OUT}
+\`\`\`
+Viec can lam: kiem file plan (JSON hop le? co key \`orders\`?). Cho nao con im lang thi KHONG the ket luan bot song."
+  if [ -x "$ROOT/bin/notify_thread.sh" ] && [ -z "${HB_NO_NOTIFY:-}" ]; then
+    "$ROOT/bin/notify_thread.sh" "$_HB_MSG" trading_daily >/dev/null 2>&1 \
+      || echo "[bot_heartbeat] LOI: khong post duoc Discord — canh bao KHONG toi nguoi" >&2
+  fi
+  echo "[bot_heartbeat] KHONG doc duoc $PLAN_FILE: $_NO_OUT" >&2
+  exit 4
+fi
 if [ "${N_ORDERS:-0}" -eq 0 ] 2>/dev/null; then
   exit 0
 fi

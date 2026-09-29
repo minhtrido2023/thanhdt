@@ -16,11 +16,8 @@
 #   3. Idempotency: mỗi (period, ngày) chỉ dispatch 1 lần — state/report_cadence_dispatched.json.
 #      Nếu qua ngày mà báo cáo vẫn chưa xuất hiện (dispatch trước thất bại âm thầm) → tự dispatch
 #      lại ngày sau (retry tự nhiên, không cần người nhắc).
-#   4. Email (thêm 2026-08-01, user yêu cầu): mỗi lần chạy, quét MỌI file weekly/monthly report
-#      đã có trên đĩa (không riêng report vừa được dispatch trong lần chạy này) và gửi qua
-#      send_report_email.py bất kỳ file nào chưa từng gửi (state/report_emailed.json) — tự
-#      chữa lành nếu Taylor quên gọi bước gửi email trong prompt (cùng bài học attempt-1-crash
-#      của check_report_cadence chính nó: đừng chỉ tin 1 agent nhớ làm đủ bước, có lớp quét lại).
+#   4. Delivery closure: artifact != delivery. Report chưa gửi đi qua report_delivery_gate.py;
+#      chỉ COMPLETE khi validation + Discord + email đều có bằng chứng gắn với SHA-256.
 set -uo pipefail
 SCHEDULED_KIND=""
 case "${1:-}" in
@@ -30,7 +27,25 @@ case "${1:-}" in
   *) echo "Usage: $0 [--scheduled-weekly|--scheduled-monthly]" >&2; exit 2 ;;
 esac
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# ROOT phải là cây CANONICAL, không phải cây đang chạy. Đây là nơi RA QUYẾT ĐỊNH "kỳ này đã có
+# báo cáo chưa": chạy từ worktree/clone thì DELIVERY_STATE + reports/ đều trỏ cây phụ ⇒ đọc sổ
+# rỗng ⇒ dispatch soạn LẠI ⇒ artifact sha mới ⇒ delivery gate giao như bản hợp lệ ⇒ nhà đầu tư
+# nhận báo cáo TRÙNG (ghim hash không cứu được, vì hash khác thật). Cùng một luật "sổ nằm ở
+# đâu" với report_delivery_gate.py — vá một đầu là chưa vá (arch-review 2026-09-12).
+# Fallback im lặng về cây đang chạy nếu bản sao này chưa có wc_paths.py (worktree tiền-vá):
+# giữ nguyên hành vi cũ, không làm script chết.
+# KHÔNG `2>/dev/null`: đúng những cảnh báo cần thấy nhất (env lệch cây, không tìm thấy
+# canonical, lỗi python thật) đều đi ra stderr.
+CANONICAL_ROOT="$(python3 "$ROOT/bin/wc_paths.py" --mike-canonical || true)"
+if [ -n "$CANONICAL_ROOT" ] && [ -f "$CANONICAL_ROOT/MIKE.md" ] && [ "$CANONICAL_ROOT" != "$ROOT" ]; then
+  echo "ℹ️  check_report_cadence: chạy từ $ROOT nhưng dùng sổ/báo cáo của cây canonical $CANONICAL_ROOT" >&2
+  ROOT="$CANONICAL_ROOT"
+fi
 WC_ROOT="$(cd "$ROOT/.." && pwd)"
+if [ -f "$WC_ROOT/wc_env.sh" ]; then
+  # shellcheck source=/dev/null
+  source "$WC_ROOT/wc_env.sh"
+fi
 TRADING_REPORT_THREAD="trading_report"
 STATE="$ROOT/state/report_cadence_dispatched.json"
 TODAY="$(TZ='Asia/Ho_Chi_Minh' date +%Y-%m-%d)"
@@ -40,10 +55,15 @@ mkdir -p "$ROOT/state"
 
 EMAILED_STATE="$ROOT/state/report_emailed.json"
 [ -f "$EMAILED_STATE" ] || echo '{}' > "$EMAILED_STATE"
+DELIVERY_STATE="$ROOT/state/report_delivery.json"
+# De-dup cho cảnh báo "sweep DELIVERY INCOMPLETE" — 1 lần/file/ngày (mẫu bin/eod_trading_report.sh
+# ALERTED_STATE, arch-review coord-2026-08-31 required_changes #1).
+SWEEP_ALERTED_STATE="$ROOT/state/report_delivery_incomplete_alerted.json"
+[ -f "$SWEEP_ALERTED_STATE" ] || echo '{}' > "$SWEEP_ALERTED_STATE"
 
-# --- Catch-up email sweep: gửi MỌI report chưa từng gửi qua email, bất kể vừa tạo lần này
-#     hay đã có từ trước (backfill). Idempotent qua $EMAILED_STATE, không phụ thuộc Taylor/
-#     DollarBill có nhớ gọi bước gửi email trong prompt của lần dispatch hay không.
+# --- Catch-up DELIVERY sweep: cứu report đã tạo nhưng agent dừng/max-turn trước lúc gửi.
+#     Chỉ chọn file chưa có legacy email proof để không phát lại kho lịch sử khi rollout;
+#     gate mới giữ ledger hai kênh và retry riêng kênh còn thiếu.
 #     Mở rộng *_daily_report_*.md 2026-08-11 (coding_guidelines.md §6 mục 5, user yêu cầu):
 #     trước đó chỉ quét weekly/monthly — daily report (vd SpaceX_ZaloPay_daily_report_*.md) hoàn
 #     toàn không có lưới an toàn nào, chỉ tin dispatch prompt nhớ gọi send_report_email.py.
@@ -53,21 +73,99 @@ for f in "$ROOT"/reports/*_daily_report_*.md "$ROOT"/reports/*_weekly_report_*.m
   # paper_programs_daily_report_*.md đã có cron+state EMAIL riêng (paper_programs_daily_report.sh
   # --email, state/paper_programs_report_emailed.json) — bỏ qua ở đây để KHÔNG gửi trùng 2 email.
   case "$FNAME" in paper_programs_daily_report_*.md) continue ;; esac
-  ALREADY="$(python3 -c "
-import json
-state = json.load(open('$EMAILED_STATE'))
-print('yes' if state.get('$FNAME') else 'no')
+  # State hỏng/cụt KHÔNG được làm câm sweep: coi như CHƯA gửi (fail-open về phía sweep/kiểm tra)
+  # và in lỗi thật ra stderr — cùng khuôn vendor_mismatch_alert.sh (§29, arch-review coord-2026-09-27).
+  # Giá trị đi qua ENV chứ không nội suy vào nguồn python: tên file là dữ liệu ngoài.
+  ALREADY="$(EMAILED_STATE="$EMAILED_STATE" FNAME="$FNAME" python3 -c "
+import json, os, sys
+try:
+    state = json.load(open(os.environ['EMAILED_STATE']))
+    print('yes' if state.get(os.environ['FNAME']) else 'no')
+except Exception as e:
+    print('no')
+    sys.stderr.write('check_report_cadence: KHONG doc duoc %s — coi nhu CHUA gui, VAN sweep. Loi that: %s: %s\n'
+                     % (os.environ['EMAILED_STATE'], type(e).__name__, e))
 ")"
   if [ "$ALREADY" = "no" ]; then
-    if python3 "$ROOT/bin/send_report_email.py" "$f"; then
-      python3 -c "
-import json
-state = json.load(open('$EMAILED_STATE'))
-state['$FNAME'] = '$TODAY'
-json.dump(state, open('$EMAILED_STATE', 'w'), indent=2, ensure_ascii=False)
+    # Capture thay vì để chảy thẳng ra log: khối "⚠️ LỆCH NGUỒN VENDOR" mà report_return_gate in
+    # ra đi qua stdout của delivery gate ⇒ chôn trong logs/check_report_cadence.log, user không
+    # thấy. Bắt lấy ở đây rồi bắn Discord/bus với ĐÚNG nguyên nhân + ĐÚNG người (Winston).
+    # Chạy cho CẢ hai nhánh rc: ca "mã lệch nguồn nhưng báo cáo không công bố tỉ suất" cho rc=0,
+    # tức cổng KHÔNG chặn — đó chính là ca không kênh nào khác kêu lên.
+    GATE_OUT="$(python3 "$ROOT/bin/report_delivery_gate.py" "$f" --topic "$TRADING_REPORT_THREAD" 2>&1)"
+    GATE_RC=$?
+    printf '%s\n' "$GATE_OUT"
+    VENDOR_RC=0
+    printf '%s\n' "$GATE_OUT" | "$ROOT/bin/vendor_mismatch_alert.sh" \
+      "$FNAME" "$TRADING_REPORT_THREAD" || VENDOR_RC=$?
+    if [ "$GATE_RC" -ne 0 ]; then
+      echo "check_report_cadence: DELIVERY INCOMPLETE cho $FNAME — giữ việc mở và tự retry lần sau." >&2
+      # arch-review coord-2026-08-31 (required_changes #1): trước đây CHỈ có dòng >&2 ở trên —
+      # chết trong logs/check_report_cadence.log, không ai thấy trừ khi tự đi đọc log. Cùng khuôn
+      # bin/eod_trading_report.sh:70-73 (append_event.sh error + notify_thread.sh), có de-dup
+      # 1 lần/file/ngày để không spam mỗi lượt cron cho cùng 1 file kẹt.
+      # Cùng lý do fail-open + lỗi thật ra stderr như ALREADY ở trên (§29).
+      ALREADY_ALERTED="$(SWEEP_ALERTED_STATE="$SWEEP_ALERTED_STATE" FNAME="$FNAME" TODAY="$TODAY" python3 -c "
+import json, os, sys
+try:
+    state = json.load(open(os.environ['SWEEP_ALERTED_STATE']))
+    print('yes' if state.get(os.environ['FNAME']) == os.environ['TODAY'] else 'no')
+except Exception as e:
+    print('no')
+    sys.stderr.write('check_report_cadence: KHONG doc duoc %s — coi nhu CHUA canh bao, VAN gui. Loi that: %s: %s\n'
+                     % (os.environ['SWEEP_ALERTED_STATE'], type(e).__name__, e))
+")"
+      if [ "$ALREADY_ALERTED" = "no" ]; then
+        "$ROOT/bin/append_event.sh" Mike error "report-delivery-incomplete-${FNAME}" \
+          "{\"artifact\":\"${FNAME}\",\"retry\":\"check_report_cadence sweep (hằng ngày)\"}" \
+          2>/dev/null || true
+        # Nguyên nhân/người xử lý suy từ BẰNG CHỨNG cổng vừa in ra, không phát một câu cố định
+        # (§29). VENDOR_RC=10 chỉ nói "có vendor-lệch-nguồn HOẶC lookup_failed", KHÔNG nói được
+        # loại nào — phải grep TAG THẬT trong $GATE_OUT (arch-review vòng 5, R1-C), ĐỪNG suy từ
+        # rc=10 (bug gốc: cả 3 nơi từng khẳng định "hai nguồn bất đồng" ngay cả khi chỉ có
+        # lookup_failed thuần — SAI, vì lookup_failed nghĩa là CHƯA có nguồn thứ hai để bất đồng).
+        # RC_VENDOR_REASON_BEGIN — trích bởi check_report_cadence_selfcheck.py, extract-and-test
+        # 3 tổ hợp $GATE_OUT (mismatch-only / lookup_failed-only / cả hai). Đổi tên/di chuyển
+        # marker ⇒ selfcheck FATAL, không im lặng pass.
+        if printf '%s\n' "$GATE_OUT" | grep -q '^VENDOR_MISMATCH_ALERT|'; then
+          INCOMPLETE_MSG="🔴 **Delivery INCOMPLETE — ${FNAME}** — bị CHẶN vì **LỆCH NGUỒN CỔ TỨC** (tiền broker ≠ \`tav2_bq.corporate_action\`), KHÔNG phải lỗi soạn báo cáo. Cần **Winston (data-ops)** đối soát nguồn vendor — chi tiết ở cảnh báo ngay trên. Sweep tự retry mỗi ngày."
+        elif printf '%s\n' "$GATE_OUT" | grep -q '^VENDOR_LOOKUP_FAILED|'; then
+          INCOMPLETE_MSG="🔴 **Delivery INCOMPLETE — ${FNAME}** — bị CHẶN vì KHÔNG TRA ĐƯỢC nguồn vendor \`tav2_bq.corporate_action\` (lỗi hạ tầng BQ), KHÔNG PHẢI hai nguồn bất đồng số và KHÔNG phải lỗi soạn báo cáo. Thử lại khi BQ khoẻ — không cần Winston đối soát số trừ khi lỗi lặp lại nhiều lượt. Sweep tự retry mỗi ngày."
+        else
+          INCOMPLETE_MSG="🔴 **Delivery INCOMPLETE — ${FNAME}** — báo cáo đã tạo nhưng chưa giao đủ (Discord+email, hash-bound). Sweep tự retry mỗi ngày; nếu kéo dài, cần Taylor kiểm tra bin/report_delivery_gate.py --status ${FNAME}."
+        fi
+        # RC_VENDOR_REASON_END
+        "$ROOT/bin/notify_thread.sh" "$INCOMPLETE_MSG" \
+          "$TRADING_REPORT_THREAD" 2>/dev/null || true
+        # Ghi NGUYÊN TỬ (tmp + os.replace, §5) — cùng khuôn vendor_mismatch_alert.sh: kill giữa
+        # lúc ghi không được để lại JSON cụt cho lượt sau vấp (đây chính là nguyên nhân state
+        # hỏng mà nhánh đọc ALREADY_ALERTED ở trên vừa phải phòng thủ).
+        SWEEP_ALERTED_STATE="$SWEEP_ALERTED_STATE" FNAME="$FNAME" TODAY="$TODAY" python3 -c "
+import json, os, sys, tempfile
+path = os.environ['SWEEP_ALERTED_STATE']
+try:
+    state = json.load(open(path))
+    if not isinstance(state, dict):
+        raise ValueError('state khong phai dict: %r' % type(state).__name__)
+except Exception as e:
+    print('check_report_cadence: state cu hong (%s: %s) — dung lai tu {}' % (type(e).__name__, e), file=sys.stderr)
+    state = {}
+state[os.environ['FNAME']] = os.environ['TODAY']
+fd, tmp = tempfile.mkstemp(dir=os.path.dirname(path), prefix='.report_delivery_incomplete_alerted.', suffix='.tmp')
+try:
+    with os.fdopen(fd, 'w') as f:
+        json.dump(state, f, indent=2, ensure_ascii=False)
+        f.flush()
+        os.fsync(f.fileno())
+    os.replace(tmp, path)
+except BaseException:
+    try:
+        os.unlink(tmp)
+    except OSError:
+        pass
+    raise
 "
-    else
-      echo "check_report_cadence: gửi email THẤT BẠI cho $FNAME (xem stderr ở trên) — sẽ tự thử lại lần chạy cron sau." >&2
+      fi
     fi
   fi
 done
@@ -109,20 +207,107 @@ for q in d.get("pending", []):
         print(t)
 ')"
 export RC_PENDING_TOPICS
-
 export REPORT_SCHEDULED_KIND="$SCHEDULED_KIND"
-PLAN="$(python3 - "$WC_ROOT" "$TODAY" "$STATE" << 'PYEOF'
-import glob, json, os, re, sys
+
+PLAN="$(python3 - "$WC_ROOT" "$TODAY" "$STATE" "$DELIVERY_STATE" << 'PYEOF'
+import glob, hashlib, json, os, re, sys
 from datetime import date, timedelta
 
-wc_root, today_s, state_path = sys.argv[1], sys.argv[2], sys.argv[3]
+wc_root, today_s, state_path, delivery_state_path = sys.argv[1:5]
 today = date.fromisoformat(today_s)
 reports_dir = os.path.join(wc_root, "mike", "reports")
 state = json.load(open(state_path))
 scheduled_kind = os.environ.get("REPORT_SCHEDULED_KIND", "")
+try:
+    delivery_state = json.load(open(delivery_state_path))
+except FileNotFoundError:
+    delivery_state = {"reports": {}}
+
+# Content-completeness (thêm 2026-09-02, sau vụ báo cáo tháng 08: template tạo 25/08 với 5/10
+# mục còn "[TBD" được delivery gate coi là COMPLETE và giao thật 28/08, TRƯỚC CẢ KHI tháng đóng
+# — vì report_return_gate.py cũ không có phép kiểm nội dung nào, chỉ kiểm tỉ suất NẾU có bảng để
+# kiểm. Marker khớp NGUYÊN VĂN quy ước đang dùng trong reports/*.md — mở rộng nếu thấy quy ước
+# khác, đừng đoán. Cùng danh sách với report_return_gate.py's INCOMPLETE_MARKERS (giữ đồng bộ
+# tay — 2 file khác ngôn ngữ (bash-heredoc-python vs python thuần), không import chéo được).
+INCOMPLETE_MARKERS = ("[TBD", "[chưa điền", "[chua dien", "[placeholder")
+
+def content_complete(path):
+    try:
+        with open(path, encoding="utf-8") as fh:
+            text = fh.read()
+    except OSError:
+        return False
+    return not any(m in text for m in INCOMPLETE_MARKERS)
+
+def delivered(fname):
+    path = os.path.join(reports_dir, fname)
+    rec = delivery_state.get("reports", {}).get(fname, {})
+    if not os.path.isfile(path) or not isinstance(rec, dict):
+        return False
+    if not content_complete(path):
+        return False
+    with open(path, "rb") as fh:
+        sha = hashlib.sha256(fh.read()).hexdigest()
+    def ok(channel):
+        val = rec.get(channel, {})
+        return (isinstance(val, dict) and val.get("status") == "delivered"
+                and val.get("sha256") == sha and val.get("delivered_at"))
+    return rec.get("sha256") == sha and rec.get("artifact_validated_at") and ok("discord") and ok("email")
 
 def dates_from(fname):
     return [date.fromisoformat(m) for m in re.findall(r"\d{4}-\d{2}-\d{2}", os.path.basename(fname))]
+
+# Per-account split (user mandate 2026-09-02, coord job Taylor_20260902_161159): từ kỳ 08/2026,
+# MỖI kỳ báo cáo (tuần/tháng) là 2 file RIÊNG — SpaceX (client-facing, sanitized) + ZaloPay (đầy
+# đủ, nội bộ) — không còn 1 file gộp `SpaceX_ZaloPay_*`. Một kỳ chỉ coi là ĐÃ XONG khi CẢ HAI file
+# đều delivered() — nếu chỉ kiểm 1 trong 2 (hoặc kiểu "có file nào khớp ngày là đủ" như logic cũ),
+# account còn lại sẽ không bao giờ được cron dispatch lại một khi account kia đã xong.
+#
+# Tương thích ngược: các kỳ TRƯỚC mốc tách (< 2026-08-24, dùng 1 file `SpaceX_ZaloPay_*` gộp) vẫn
+# phải tiếp tục được coi là ĐÃ XONG như trước — nếu không, script sẽ nghĩ hàng chục tuần/tháng cũ
+# đột nhiên "quá hạn" theo chuẩn mới và dispatch backfill tràn lan. Vì vậy period_done() chấp nhận
+# HOẶC (a) cả 2 file per-account đã delivered [chuẩn MỚI], HOẶC (b) file gộp cũ đã delivered
+# [chuẩn CŨ, chỉ còn khớp với các kỳ lịch sử — không script nào còn TẠO MỚI file gộp nữa nên
+# nhánh (b) tự nhiên không còn áp dụng được cho các kỳ từ 2026-08-24 trở đi].
+ACCOUNTS = ("SpaceX", "ZaloPay")
+
+
+def _delivered_any(files, predicate):
+    """True nếu có ÍT NHẤT 1 file trong `files` khớp `predicate(basename)` và đã delivered() —
+    khớp theo tiền tố+ngày (không phải tên tuyệt đối) để chịu được hậu tố biến thể
+    (vd `_CORRECTION_VIB`, đã có thật trong repo — arch-review coord-2026-08-10 case #2)."""
+    return any(predicate(os.path.basename(f)) and delivered(os.path.basename(f)) for f in files)
+
+
+def weekly_period_done(files, mon, fri):
+    mon_s, fri_s = mon.isoformat(), fri.isoformat()
+    split_done = all(
+        _delivered_any(files, lambda bn, acct=acct: bn.startswith(acct + "_weekly_report_")
+                       and mon_s in bn and fri_s in bn)
+        for acct in ACCOUNTS)
+    if split_done:
+        return True
+    return delivered(f"SpaceX_ZaloPay_weekly_report_{mon_s}_to_{fri_s}.md")
+
+
+def monthly_period_done(files, ym):
+    split_done = all(
+        _delivered_any(files, lambda bn, acct=acct: bn.startswith(acct + "_monthly_report_") and ym in bn)
+        for acct in ACCOUNTS)
+    if split_done:
+        return True
+    return delivered(f"SpaceX_ZaloPay_monthly_report_{ym}.md")
+
+
+def weekly_filenames(mon, fri):
+    """Tên CANONICAL cho kỳ mới (dùng khi cần đề xuất target_file cho dispatch — không phải để
+    kiểm tra đã xong hay chưa, xem weekly_period_done())."""
+    return [f"{acct}_weekly_report_{mon.isoformat()}_to_{fri.isoformat()}.md" for acct in ACCOUNTS]
+
+
+def monthly_filenames(ym):
+    return [f"{acct}_monthly_report_{ym}.md" for acct in ACCOUNTS]
+
 
 actions = []
 
@@ -134,24 +319,39 @@ actions = []
 weekly_files = glob.glob(os.path.join(reports_dir, "*_weekly_report_*.md"))
 weekly_dates = [max(dates_from(f)) for f in weekly_files if dates_from(f)]
 most_recent_weekly = max(weekly_dates) if weekly_dates else None
+# Suy period (mon,fri) từ MỌI file tuần đang có (cả 2 account, kể cả file gộp lịch sử
+# `SpaceX_ZaloPay_weekly_report_*` — dates_from() vẫn đọc được 2 ngày từ tên đó), rồi lọc period
+# nào ĐÃ XONG THẬT bằng weekly_period_done() (cả 2 file account riêng đều delivered()). File gộp
+# lịch sử không tự khớp weekly_period_done() (nó không có tên `SpaceX_weekly_report_...`/
+# `ZaloPay_weekly_report_...`) — đúng ý: các kỳ TRƯỚC ngày tách (< 2026-08-24) coi như CHƯA XONG
+# theo nghĩa mới, nhưng candidate_mondays/start_monday dưới đây chỉ backfill từ kỳ tách trở đi
+# (mốc most_recent_delivered_weekly sẽ tự nhảy tới tuần 24-28/08 vừa giao lại — không backfill
+# runaway về các tuần gộp cũ vì start_monday cách today quá xa sẽ bị cap 8 tuần ở vòng lặp dưới).
+weekly_periods = sorted({tuple(sorted(dates_from(f))[:2]) for f in weekly_files if len(dates_from(f)) >= 2})
+delivered_weekly_dates = [fri for mon, fri in weekly_periods if weekly_period_done(weekly_files, mon, fri)]
+most_recent_delivered_weekly = max(delivered_weekly_dates) if delivered_weekly_dates else None
 
 this_monday = today - timedelta(days=today.weekday())
 if scheduled_kind == "weekly":
-    # Lượt chính thức 09:00 thứ Bảy: tuần T2→T6 vừa đóng, không chờ ngưỡng
-    # "quá hạn" +3 ngày của watchdog.
+    # Lượt chính thức sáng thứ Bảy: tuần T2→T6 vừa đóng, không chờ watchdog +3 ngày.
     candidate_mondays = [this_monday]
 else:
     candidate_mondays = []
-if most_recent_weekly is None:
-    # chưa từng có báo cáo tuần nào — chỉ backfill 1 tuần gần nhất (tránh dispatch runaway lịch sử)
+if most_recent_delivered_weekly is None:
+    # chưa từng có báo cáo tuần nào ĐÃ GIAO XONG — chỉ backfill 1 tuần gần nhất (tránh dispatch
+    # runaway lịch sử)
     start_monday = this_monday - timedelta(days=7)
 else:
-    start_monday = most_recent_weekly + timedelta(days=3)  # thứ Sáu cũ -> thứ Hai tuần kế
+    # arch-review coord-2026-08-31 (required_changes #2): mốc PHẢI là tuần đã GIAO xong
+    # (delivered — sha khớp + Discord + email + không marker TBD), không phải "có file đúng
+    # tên" (most_recent_weekly) — một file tồn tại nhưng bị report_return_gate chặn/chưa gửi sẽ
+    # không còn sinh cảnh báo nào cho các tuần SAU đó nếu neo theo most_recent_weekly.
+    start_monday = most_recent_delivered_weekly + timedelta(days=3)  # thứ Sáu cũ -> thứ Hai tuần kế
 
 # Liệt kê MỌI tuần đã ĐÓNG ĐỦ (qua hết thứ Sáu + buffer 3 ngày) kể từ start_monday — KHÔNG
 # giới hạn bởi "tuần hiện tại" theo weekday(), vì hôm nay có thể là T7/CN và tuần T2-T6 vừa
 # rồi đã đóng xong dù cùng "tuần lịch" với hôm nay theo cách tính weekday-anchor.
-if scheduled_kind != "weekly":
+if scheduled_kind not in ("weekly", "monthly"):
     m = start_monday
     while len(candidate_mondays) < 8:
         last_friday = m + timedelta(days=4)
@@ -164,11 +364,19 @@ for last_monday in candidate_mondays:
     last_friday = last_monday + timedelta(days=4)
     period_key = f"weekly_{last_monday.isoformat()}_{last_friday.isoformat()}"
     if state.get(period_key) != today_s:
+        # Đường TUYỆT ĐỐI canonical: nửa còn lại của cùng một luật "sổ nằm ở đâu". Sổ đã ghim
+        # nhưng nếu agent soạn artifact vào `mike/reports/` TƯƠNG ĐỐI với cwd của nó (worktree)
+        # thì sweep không thấy file/hash ⇒ vẫn coi là quá hạn ⇒ dispatch lại ⇒ gửi trùng.
+        sx_f, zp_f = weekly_filenames(last_monday, last_friday)
         actions.append({
             "kind": "weekly", "period_key": period_key,
             "desc": f"tuần {last_monday.isoformat()} → {last_friday.isoformat()}",
-            "target_file": f"mike/reports/SpaceX_ZaloPay_weekly_report_{last_monday.isoformat()}_to_{last_friday.isoformat()}.md",
+            "target_file_spacex": os.path.join(reports_dir, sx_f),
+            "target_file_zalopay": os.path.join(reports_dir, zp_f),
             "most_recent": most_recent_weekly.isoformat() if most_recent_weekly else "CHƯA CÓ",
+            # scheduled_kind=="weekly" -> lượt cron 09:00 T7 ĐÚNG LỊCH (this_monday luôn là tuần
+            # vừa đóng), không phải watchdog phát hiện quá hạn -> không được gắn nhãn "overdue".
+            "overdue": scheduled_kind == "",
         })
 
 # --- Monthly: từ ngày 5, tháng trước phải có báo cáo (bỏ qua trước go-live 2026-07) ---
@@ -181,15 +389,22 @@ if today.day >= 5 or scheduled_kind == "monthly":
         lm_year, lm_num = today.year, today.month - 1
     if (lm_year, lm_num) >= GO_LIVE_MONTH and scheduled_kind != "weekly":
         last_month_str = f"{lm_year}-{lm_num:02d}"
-        has_last_month = any(last_month_str in os.path.basename(f) for f in monthly_files)
+        # arch-review coord-2026-08-31 (required_changes #2, gộp với monthly cùng lỗi 2026-09-02):
+        # "đã xong" = CẢ HAI file account (SpaceX + ZaloPay) đúng tên VÀ delivered() (sha khớp +
+        # Discord + email + KHÔNG còn marker TBD) — không phải chỉ SỰ TỒN TẠI FILE, và không phải
+        # 1 file gộp như trước 2026-09 nữa (monthly_period_done() ở trên).
+        has_last_month = monthly_period_done(monthly_files, last_month_str)
         if not has_last_month:
             period_key = f"monthly_{last_month_str}"
             if state.get(period_key) != today_s:
+                sx_f, zp_f = monthly_filenames(last_month_str)
                 actions.append({
                     "kind": "monthly", "period_key": period_key,
                     "desc": f"tháng {last_month_str}",
-                    "target_file": f"mike/reports/SpaceX_ZaloPay_monthly_report_{last_month_str}.md",
+                    "target_file_spacex": os.path.join(reports_dir, sx_f),
+                    "target_file_zalopay": os.path.join(reports_dir, zp_f),
                     "most_recent": "CHƯA CÓ" if not monthly_files else "có tháng khác, thiếu tháng này",
+                    "overdue": scheduled_kind == "",
                 })
 
 # ── RC_CLOSE_BEGIN — quyết định "kỳ này ĐÃ ĐƯỢC PHỦ, đóng được question" ────────────────
@@ -208,16 +423,16 @@ for pk in pending_keys:
         # Y HỆT điều kiện của nhánh weekly: candidate_mondays bắt đầu từ most_recent_weekly+3,
         # nên mọi tuần có thứ Hai TRƯỚC mốc đó đã được detector coi là có báo cáo.
         mon = date.fromisoformat(mw.group(1))
-        if most_recent_weekly is not None and mon < most_recent_weekly + timedelta(days=3):
-            closable.append([pk, f"most_recent_weekly={most_recent_weekly.isoformat()} "
-                                 f"(phep kiem CUA CHINH detector, khong phai ten file co dinh)"])
+        if (most_recent_delivered_weekly is not None
+                and mon < most_recent_delivered_weekly + timedelta(days=3)):
+            closable.append([pk, f"delivery ledger COMPLETE through {most_recent_delivered_weekly.isoformat()} "
+                                 f"(artifact validated + Discord + email, hash-bound)"])
         continue
     mm = re.match(r"^monthly_(\d{4}-\d{2})$", pk)
     if mm:
-        # Y HỆT `has_last_month` của nhánh monthly.
-        hit = [os.path.basename(f) for f in monthly_files if mm.group(1) in os.path.basename(f)]
-        if hit:
-            closable.append([pk, f"co bao cao thang {mm.group(1)}: {sorted(hit)[0]}"])
+        # Y HỆT `has_last_month` của nhánh monthly — CẢ HAI file account phải delivered().
+        if monthly_period_done(monthly_files, mm.group(1)):
+            closable.append([pk, f"co bao cao thang {mm.group(1)}: {', '.join(monthly_filenames(mm.group(1)))}"])
     # period_key lạ (schema đổi) ⇒ KHÔNG đóng — fail về phía để người xem, không tự dọn.
 
 print(json.dumps({"actions": actions, "closable": closable}))
@@ -254,16 +469,31 @@ fi
 echo "$PLAN" | python3 -c "
 import json, sys
 for a in json.load(sys.stdin)['actions']:
-    print(f\"{a['kind']}\t{a['period_key']}\t{a['desc']}\t{a['target_file']}\t{a['most_recent']}\")
-" | while IFS=$'\t' read -r KIND PKEY DESC TFILE MOSTRECENT; do
-  MSG="🔴 **Báo cáo ${KIND} quá hạn — ${DESC}** — chưa có file, đang TỰ ĐỘNG dispatch Taylor soạn + gửi (báo cáo gần nhất: ${MOSTRECENT}). File dự kiến: \`${TFILE}\`. Đây là auto-dispatch từ check_report_cadence.sh (cron), không phải người theo dõi thủ công — nếu 24h sau vẫn chưa thấy báo cáo, đó là dấu hiệu dispatch thất bại, cần Mike kiểm tra bin/jobs.sh."
+    print(f\"{a['kind']}\t{a['period_key']}\t{a['desc']}\t{a['target_file_spacex']}\t{a['target_file_zalopay']}\t{a['most_recent']}\t{int(a.get('overdue', True))}\")
+" | while IFS=$'\t' read -r KIND PKEY DESC TFILE_SX TFILE_ZP MOSTRECENT OVERDUE; do
+  # OVERDUE=1: watchdog (không cờ, cron 08:30 T2-T6) phát hiện kỳ THẬT SỰ bị bỏ sót — cảnh báo
+  # đỏ + bus `question` cần người theo dõi là đúng. OVERDUE=0: lượt --scheduled-weekly/monthly
+  # (09:00 T7 / ngày 1) chạy ĐÚNG LỊCH, không phải sự cố — trước đây dùng chung message "quá
+  # hạn" + `question` cho cả 2 trường hợp nên MỌI báo cáo tuần/tháng đều bị gắn cảnh báo lỗi dù
+  # đúng giờ (user báo cáo 2026-08-29). Tách message + loại event theo OVERDUE để chỉ ca thật
+  # sự trễ mới lên cảnh báo.
+  if [ "$OVERDUE" = "1" ]; then
+    MSG="🔴 **Báo cáo ${KIND} quá hạn — ${DESC}** — chưa có đủ file, đang TỰ ĐỘNG dispatch Taylor soạn + gửi (báo cáo gần nhất: ${MOSTRECENT}). File dự kiến: \`${TFILE_SX}\` + \`${TFILE_ZP}\`. Đây là auto-dispatch từ check_report_cadence.sh (cron watchdog 08:30 T2-T6), không phải người theo dõi thủ công — nếu 24h sau vẫn chưa thấy CẢ HAI báo cáo, đó là dấu hiệu dispatch thất bại, cần Mike kiểm tra bin/jobs.sh."
+    EVENT_TYPE="question"
+    TOPIC_PREFIX="report-cadence-overdue-"
+    EVENT_PAYLOAD="{\"kind\":\"${KIND}\",\"period\":\"${DESC}\",\"target_file_spacex\":\"${TFILE_SX}\",\"target_file_zalopay\":\"${TFILE_ZP}\",\"question\":\"Bao cao ${KIND} qua han, da auto-dispatch Taylor. Xac nhan/theo doi.\"}"
+  else
+    MSG="📊 **Đang tạo báo cáo ${KIND} theo lịch — ${DESC}** — lượt chạy đúng lịch (Thứ Bảy 09:00 / ngày 1 09:00), không phải lỗi hay quá hạn. Đang dispatch Taylor soạn + gửi. File dự kiến: \`${TFILE_SX}\` + \`${TFILE_ZP}\`."
+    EVENT_TYPE="finding"
+    TOPIC_PREFIX="report-cadence-scheduled-"
+    EVENT_PAYLOAD="{\"kind\":\"${KIND}\",\"period\":\"${DESC}\",\"target_file_spacex\":\"${TFILE_SX}\",\"target_file_zalopay\":\"${TFILE_ZP}\"}"
+  fi
   echo "$MSG"
   "$ROOT/bin/notify_thread.sh" "$MSG" "$TRADING_REPORT_THREAD" 2>/dev/null || true
-  "$ROOT/bin/append_event.sh" Mike question "report-cadence-overdue-${PKEY}" \
-    "{\"kind\":\"${KIND}\",\"period\":\"${DESC}\",\"target_file\":\"${TFILE}\",\"question\":\"Bao cao ${KIND} qua han, da auto-dispatch Taylor. Xac nhan/theo doi.\"}" \
+  "$ROOT/bin/append_event.sh" Mike "$EVENT_TYPE" "${TOPIC_PREFIX}${PKEY}" "$EVENT_PAYLOAD" \
     2>/dev/null || true
 
-  EMAIL_STEP="Sau khi gửi Discord xong, CŨNG chạy: python3 mike/bin/send_report_email.py ${TFILE} — gửi email báo cáo này cho user. Nếu lệnh đó exit khác 0 (vd thiếu credential), NÓI RÕ trong phần trả lời cuối, đừng bỏ qua im lặng."
+  EMAIL_STEP="Sau khi tạo CẢ HAI artifact, BẮT BUỘC chạy return gate rồi delivery gate cho TỪNG file riêng (không phải 1 lệnh gộp): python3 $ROOT/bin/report_delivery_gate.py ${TFILE_SX} --topic ${TRADING_REPORT_THREAD} VÀ python3 $ROOT/bin/report_delivery_gate.py ${TFILE_ZP} --topic ${TRADING_REPORT_THREAD}. File tồn tại, maxturns_pending hay gửi một kênh đều CHƯA hoàn tất; chỉ báo xong khi CẢ HAI lệnh in COMPLETE."
 
   # Delegate step (thêm 2026-08-04, user mandate — tiết kiệm chi phí): phần NGHĨ/VIẾT văn xuôi
   # (narrative/nhận định, không cần chạy script/broker data) có thể peer-dispatch cho Winston
@@ -273,14 +503,18 @@ for a in json.load(sys.stdin)['actions']:
   # phí, không bắt buộc — Taylor tự viết thẳng nếu delegate quá chậm/lỗi, không chờ mãi.
   DELEGATE_STEP="Gợi ý tiết kiệm chi phí (không bắt buộc): sau khi đã LẤY ĐỦ số liệu đã verify (bằng Bash trên chính bạn), có thể soạn phần văn xuôi/nhận định (không phải số liệu) bằng cách peer-dispatch: bin/dispatch.sh Winston \"Viết phần narrative/nhận định cho báo cáo trading kỳ ${DESC}, dựa CHÍNH XÁC trên số liệu sau (đừng tự bịa số khác): <dán số liệu đã verify vào đây>\" --provider opencode --timeout 300 — rồi lấy kết quả về, TỰ đối chiếu lại số liệu trước khi ghép vào file cuối (đừng tin mù). Nếu lệnh đó treo/lỗi/quá 3 phút, TỰ viết luôn phần đó, đừng chờ."
 
+  # CHUẨN MỚI bắt buộc từ kỳ 08/2026 (user mandate 2026-09-02, coord job Taylor_20260902_161159,
+  # 4 file mẫu đã giao: {SpaceX,ZaloPay}_{weekly_report_2026-08-24_to_2026-08-28,monthly_report_2026-08}.md):
+  SPLIT_STEP="BẮT BUỘC tạo 2 FILE RIÊNG, không còn 1 file gộp SpaceX_ZaloPay_*: \`${TFILE_SX}\` và \`${TFILE_ZP}\`. (1) File SpaceX = CLIENT-FACING, gửi nhà đầu tư ngoài: TUYỆT ĐỐI không có nội dung lỗi nội bộ/vận hành/sự cố hệ thống (không mục 'công bố sự cố', không nhắc 'job'/'dispatch'/'gate'/'circuit breaker'/'bug'/'lỗi hệ thống'/'bot chết'/'cron' — rà lại toàn văn bản trước khi gửi); chỉ trình bày số liệu hiệu suất thật (MTD/QTD/YTD so VNINDEX), attribution, rủi ro (DD/vol), phí, danh mục cuối kỳ, triển vọng thị trường — văn phong chuyên nghiệp kiểu báo cáo quản lý tài sản gửi nhà đầu tư (tường thuật khách quan, đơn vị tiền tệ/% nhất quán, không viết tắt kỹ thuật nội bộ, không dịch thô từ code/log), các sự kiện quyền lợi cổ đông (cổ tức/quyền mua) vẫn giữ lại nhưng viết lại bằng ngôn ngữ tài chính chuẩn, không kể lể quá trình debug/vá lỗi. (2) File ZaloPay = giữ ĐẦY ĐỦ như chuẩn cũ (kể cả mục công bố sự cố/vận hành, coding_guidelines.md §6) — đây là kênh nội bộ, KHÔNG gửi nhà đầu tư ngoài."
+  CHART_STEP="BẮT BUỘC có biểu đồ minh hoạ, dùng công cụ có sẵn mike/bin/report_charts.py (matplotlib PNG tĩnh, KHÔNG phải HTML/SVG tương tác — kênh giao là email HTML + Discord text) — xem --help hoặc đọc source để biết đúng tham số (--account, --label, --title-suffix, --dates/--nav/--vnindex JSON lấy từ đúng pipeline verify đã dùng cho báo cáo — KHÔNG đọc data/VNINDEX.csv cục bộ, file đó đã dừng cập nhật từ 2026-05, phải lấy VNINDEX Close từ BQ/DNSE cùng nguồn đã verify; --allocation JSON top ~7-8 mã theo %NAV + gộp phần còn lại vào 'Cổ phiếu khác'/'Tiền mặt & tiền gửi'). Sinh đủ 3 chart mỗi account (NAV theo thời gian, lợi nhuận lũy kế indexed=100 so VNINDEX 1 trục duy nhất, phân bổ danh mục cuối kỳ) ra mike/reports/assets/, rồi nhúng vào từng .md bằng cú pháp markdown thường \![...](assets/<tên_file>.png) (render_report_html.py tự inline base64 khi gửi email — không cần tự encode base64 tay). Giữ 1 màu chính nhất quán cho đường NAV/lợi nhuận xuyên suốt các kỳ báo cáo (đã định nghĩa sẵn trong report_charts.py, đừng đổi màu tuỳ hứng), không dùng rainbow, có legend khi ≥2 chuỗi. GIỚI HẠN CÓ THẬT cần biết: Discord (notify_thread.sh) KHÔNG đính kèm được file — bản Discord CHỈ là text, thêm 1 dòng 'Xem biểu đồ minh hoạ đính kèm trong email' ở gần đầu báo cáo; chart CHỈ hiện trong bản email. Đừng cố lách giới hạn hạ tầng này."
   if [ "$KIND" = "weekly" ]; then
     MODEL="sonnet"
     EFFORT="medium"
-    PROMPT="Soạn và GỬI báo cáo TUẦN investor-grade cho 2 tài khoản SpaceX + ZaloPay, kỳ ${DESC} (thứ Hai-thứ Sáu đã đóng). File: ${TFILE}. Dùng đúng pipeline mike/kb/coding_guidelines.md §6: verify_account_snapshot.py --account-no cho CẢ 2 account, đối chiếu nav_history_{account}.csv thật; tuyệt đối không tự bịa số. Văn phong cô đọng, chuyên nghiệp theo thông lệ thư nhà đầu tư của các nhà quản lý tài sản lớn (rõ luận điểm, dữ liệu, rủi ro và giới hạn), không sao chép hoặc gán nhận định cho BlackRock/Bill Ackman. BẮT BUỘC: (1) Executive summary; (2) ngay đầu báo cáo có 'Toàn cảnh thị trường' tách rõ Technical (VNINDEX: xu hướng, hỗ trợ/kháng cự, breadth/thanh khoản/momentum nếu dữ liệu chứng minh được) và Fundamental (định giá, tăng trưởng lợi nhuận, lãi suất/vĩ mô, dòng tiền — nêu as-of/nguồn); (3) hiệu quả, attribution, exposure/risk của hai account; (4) ít nhất một biểu đồ PNG tạo từ dữ liệu thật, có tiêu đề, đơn vị, kỳ dữ liệu và nguồn, lưu cạnh report rồi nhúng Markdown; không có dữ liệu đáng tin thì nêu rõ thay vì vẽ; (5) kết luận 'Outlook kỳ tới' tách Technical/Fundamental, dạng kịch bản xác suất/điều kiện làm sai, không phải khuyến nghị chắc chắn. Có gap/lỗi/residual chưa giải thích thì NÓI RÕ. Gửi Discord Trading report (${TRADING_REPORT_THREAD}) và email. ${EMAIL_STEP} ${DELEGATE_STEP} Ghi bus finding: file path, NAV cuối kỳ, % biến động, kết luận market outlook, gap/lỗi."
+    PROMPT="Soạn và GỬI báo cáo TUẦN trading cho 2 tài khoản SpaceX + ZaloPay, kỳ ${DESC} (thứ Hai-thứ Sáu, dữ liệu đã đầy đủ). ${SPLIT_STEP} Đây là auto-dispatch từ check_report_cadence.sh (báo cáo tuần bị bỏ sót, phát hiện tự động). Dùng đúng pipeline mike/kb/coding_guidelines.md §6 (verify_account_snapshot.py --account-no cho CẢ 2 account, đối chiếu nav_history_{account}.csv thật, không tự bịa số). Format/văn phong tham khảo mẫu ĐÃ TÁCH gần nhất mike/reports/SpaceX_weekly_report_2026-08-24_to_2026-08-28.md (client-facing) và mike/reports/ZaloPay_weekly_report_2026-08-24_to_2026-08-28.md (đầy đủ) — KHÔNG dùng mẫu gộp cũ SpaceX_ZaloPay_weekly_report_*.md nữa (deprecated, chỉ còn trên đĩa làm lịch sử). TUYỆT ĐỐI không copy nội dung hạn chế/limitation từ mẫu cũ nếu chưa kiểm tra còn đúng không. CỤ THỂ: Trứng vàng (egg.totalValue) ĐÃ đọc tự động từ DNSE API từ 2026-08-18 (field egg.totalValue trong payload.egg của balances, daily_nav_snapshot.py dòng ~450, cột egg_assets_auto=True trong nav_history CSV) — KHÔNG còn là 'không đọc được qua API DNSE' hay 'off-book manual'. Breadth (%mã > MA50): dùng tav2_mike.universe_pit (PIT thật, không dùng ticker_prune) JOIN với tav2_bq.ticker lấy MA50/Close tại ngày giao dịch mới nhất; ghi rõ số mã trong rổ ngày đó (mục này thuộc bối cảnh thị trường, có thể giữ ở CẢ 2 file vì không phải nội dung nội bộ). ${CHART_STEP} Value Radar (dna_report.build_value_radar_line()) vẫn giữ ở dạng text/số liệu trong báo cáo như trước, không bắt buộc render thành chart riêng. Có gap/lỗi/residual chưa giải thích được thì NÓI RÕ trong file ZaloPay (đầy đủ); với file SpaceX thì trình bày số liệu cuối cùng đã verify, không kể lể quá trình. Gửi vào Discord Trading report topic (channel ${TRADING_REPORT_THREAD}). ${EMAIL_STEP} ${DELEGATE_STEP} Ghi bus finding khi xong: 2 file path (SpaceX + ZaloPay), NAV cuối kỳ 2 account, % biến động, gap/lỗi nếu có, sha256 + trạng thái delivery gate của TỪNG file."
   else
     MODEL="opus"
     EFFORT="high"
-    PROMPT="Soạn và GỬI báo cáo THÁNG investor-grade cho 2 tài khoản SpaceX + ZaloPay, kỳ ${DESC}. File: ${TFILE}. Dùng mike/kb/coding_guidelines.md §6: MTD/QTD/YTD, benchmark VNINDEX, attribution sector/mã, DD/vol/fees và verify_account_snapshot.py --account-no + nav_history thật. Văn phong theo thông lệ thư nhà đầu tư chuyên nghiệp: luận điểm trước, bằng chứng sau, nêu rủi ro/giới hạn; không sao chép hay gán nhận định cho BlackRock/Bill Ackman. BẮT BUỘC ngay đầu: 'Toàn cảnh thị trường' tách Technical (xu hướng, hỗ trợ/kháng cự, breadth/thanh khoản/momentum) và Fundamental (định giá, earnings, lãi suất/vĩ mô/dòng tiền), mọi số có as-of/nguồn. Tạo tối thiểu một biểu đồ PNG từ dữ liệu thật, tiêu đề/đơn vị/kỳ/nguồn đầy đủ, nhúng Markdown; thiếu dữ liệu thì nói rõ. Kết thúc bằng 'Outlook tháng tới' tách Technical/Fundamental, trình bày kịch bản, điều kiện xác nhận/bác bỏ và rủi ro, không khẳng định chắc chắn. BẮT BUỘC thêm 'Paper signals chạy nền — kiểm tra suy giảm theo tháng' cho extreme_regime/fill_timing: đọc registry+journal+probe, so tháng này với tháng trước; không coi ít quan sát/0 trigger là bằng chứng alpha. Nêu rõ mọi gap/lỗi/residual. Gửi Discord Trading report (${TRADING_REPORT_THREAD}) và email. ${EMAIL_STEP} ${DELEGATE_STEP} Ghi bus finding gồm file, NAV, %, market outlook và kết luận 2 paper signal."
+    PROMPT="Soạn và GỬI báo cáo THÁNG trading cho 2 tài khoản SpaceX + ZaloPay, kỳ ${DESC} (cả tháng). ${SPLIT_STEP} Đây là auto-dispatch từ check_report_cadence.sh (báo cáo tháng bị bỏ sót, phát hiện tự động). Áp dụng chuẩn mực báo cáo THÁNG theo mike/kb/coding_guidelines.md §6 (MTD/QTD/YTD, so với VNINDEX, attribution sector/mã, risk metrics DD/vol, phí/chi phí, outlook) — không chỉ lặp báo cáo tuần. Format/văn phong tham khảo mẫu ĐÃ TÁCH gần nhất mike/reports/SpaceX_monthly_report_2026-08.md (client-facing) và mike/reports/ZaloPay_monthly_report_2026-08.md (đầy đủ) — KHÔNG dùng mẫu gộp cũ SpaceX_ZaloPay_monthly_report_*.md nữa (deprecated, chỉ còn trên đĩa làm lịch sử). BẮT BUỘC thêm mục 'Paper signals chạy nền — kiểm tra suy giảm theo tháng' cho extreme_regime và fill_timing (hai mục không còn in daily) TRONG FILE ZALOPAY (nội bộ) — mục này là theo dõi R&D nội bộ, KHÔNG đưa vào file SpaceX client-facing: đọc mike/kb/paper_programs_registry.json, journal data/execution_logs/exec_main_*_journal.csv và output probe/charter liên quan; so sánh tháng này với tháng trước về số phiên evidence/lệnh, marker hoặc false-trigger, reject/fail, adherence cửa sổ và fill-vs-open khi đo được, cùng trạng thái gate. Kết luận chỉ là ổn định / chưa đủ dữ liệu / có dấu hiệu suy giảm cần điều tra, nêu số liệu và giới hạn; TUYỆT ĐỐI không coi ít quan sát hay không có trigger là bằng chứng alpha. Dùng đúng pipeline verify_account_snapshot.py --account-no + nav_history_{account}.csv thật. ${CHART_STEP} Có gap/lỗi/residual chưa giải thích được thì NÓI RÕ trong file ZaloPay; với file SpaceX thì trình bày số liệu cuối cùng đã verify, không kể lể quá trình vận hành. Gửi vào Discord Trading report topic (channel ${TRADING_REPORT_THREAD}). ${EMAIL_STEP} ${DELEGATE_STEP} Ghi bus finding khi xong, gồm kết luận monthly review của 2 paper signal (trong file ZaloPay) và sha256 + trạng thái delivery gate của TỪNG file."
   fi
   # `--thread "$TRADING_REPORT_THREAD"` tường minh — xem chú thích cùng ngày trong
   # daily_retro.sh (B1). Đúng topic mà chính PROMPT đã yêu cầu gửi báo cáo vào.
@@ -292,10 +526,32 @@ for a in json.load(sys.stdin)['actions']:
   # dispatch). Tuần=medium (templated), tháng=high (attribution/outlook thật sự phức tạp hơn).
   "$ROOT/bin/dispatch.sh" Taylor "$PROMPT" --thread "$TRADING_REPORT_THREAD" --bg --model "$MODEL" --effort "$EFFORT" --timeout 3600 2>&1 | tail -5
 
-  python3 -c "
-import json
-state = json.load(open('$STATE'))
-state['$PKEY'] = '$TODAY'
-json.dump(state, open('$STATE', 'w'), indent=2, ensure_ascii=False)
+  # Ghi NGUYÊN TỬ (tmp + os.replace, §5) — cùng khuôn 2 chỗ trên: state cụt do bị kill giữa
+  # chừng từng làm ALREADY/ALREADY_ALERTED phía trên vấp; STATE này bị đọc lại bởi mọi lượt
+  # cron sau nên cùng rủi ro, sửa đồng bộ.
+  STATE="$STATE" PKEY="$PKEY" TODAY="$TODAY" python3 -c "
+import json, os, sys, tempfile
+path = os.environ['STATE']
+try:
+    state = json.load(open(path))
+    if not isinstance(state, dict):
+        raise ValueError('state khong phai dict: %r' % type(state).__name__)
+except Exception as e:
+    print('check_report_cadence: state cu hong (%s: %s) — dung lai tu {}' % (type(e).__name__, e), file=sys.stderr)
+    state = {}
+state[os.environ['PKEY']] = os.environ['TODAY']
+fd, tmp = tempfile.mkstemp(dir=os.path.dirname(path), prefix='.report_cadence_dispatched.', suffix='.tmp')
+try:
+    with os.fdopen(fd, 'w') as f:
+        json.dump(state, f, indent=2, ensure_ascii=False)
+        f.flush()
+        os.fsync(f.fileno())
+    os.replace(tmp, path)
+except BaseException:
+    try:
+        os.unlink(tmp)
+    except OSError:
+        pass
+    raise
 "
 done

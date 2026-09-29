@@ -1,0 +1,311 @@
+{
+ "AMS": {
+  "r_pred_oldest": 1.0422535211267605,
+  "ex_dates_used": [
+   [
+    "2026-09-22",
+    1.0422535211267605
+   ]
+  ],
+  "n_broken_sessions": 74,
+  "broken_range": [
+   "2026-06-01",
+   "2026-09-15"
+  ],
+  "witness": "tav2_bq.ticker_1m",
+  "n_witness_overlap": 12,
+  "n_witness_usable": 4,
+  "n_witness_same_defect": 8,
+  "dev_max": 0.0,
+  "dev_median": 0.0,
+  "verdict": "CONFIRMED"
+ },
+ "BTD": {
+  "r_pred_oldest": 1.0625,
+  "ex_dates_used": [
+   [
+    "2026-09-24",
+    1.0625
+   ]
+  ],
+  "n_broken_sessions": 27,
+  "broken_range": [
+   "2026-06-01",
+   "2026-09-17"
+  ],
+  "witness": "tav2_bq.ticker_1m",
+  "n_witness_overlap": 3,
+  "n_witness_usable": 3,
+  "n_witness_same_defect": 0,
+  "dev_max": 0.00025880874034089896,
+  "dev_median": 0.0002524614996213259,
+  "verdict": "CONFIRMED"
+ },
+ "DRI": {
+  "r_pred_oldest": 1.0724637681159421,
+  "ex_dates_used": [
+   [
+    "2026-09-22",
+    1.0724637681159421
+   ]
+  ],
+  "n_broken_sessions": 75,
+  "broken_range": [
+   "2026-06-01",
+   "2026-09-21"
+  ],
+  "witness": "tav2_bq.ticker_1m",
+  "n_witness_overlap": 13,
+  "n_witness_usable": 5,
+  "n_witness_same_defect": 8,
+  "dev_max": 0.0005236234744430135,
+  "dev_median": 0.0002334948339266507,
+  "verdict": "CONFIRMED"
+ },
+ "E29": {
+  "r_pred_oldest": 1.0595238095238095,
+  "ex_dates_used": [
+   [
+    "2026-09-24",
+    1.0595238095238095
+   ]
+  ],
+  "n_broken_sessions": 16,
+  "broken_range": [
+   "2026-06-01",
+   "2026-09-21"
+  ],
+  "witness": "tav2_bq.ticker_1m",
+  "n_witness_overlap": 2,
+  "n_witness_usable": 0,
+  "n_witness_same_defect": 2,
+  "verdict": "NO_SECOND_SOURCE"
+ },
+ "FPT": {
+  "r_pred_oldest": 1.1,
+  "ex_dates_used": [
+   [
+    "2026-09-21",
+    1.1
+   ]
+  ],
+  "n_broken_sessions": 73,
+  "broken_range": [
+   "2026-06-01",
+   "2026-09-14"
+  ],
+  "witness": "tav2_bq.ticker_1m",
+  "n_witness_overlap": 11,
+  "n_witness_usable": 5,
+  "n_witness_same_defect": 6,
+  "dev_max": 5.539859287584381e-05,
+  "dev_median": 2.762354631102859e-05,
+  "verdict": "CONFIRMED"
+ },
+ "GAS": {
+  "r_pred_oldest": 1.0290360046457607,
+  "ex_dates_used": [
+   [
+    "2026-09-22",
+    1.0290360046457607
+   ]
+  ],
+  "n_broken_sessions": 74,
+  "broken_range": [
+   "2026-06-01",
+   "2026-09-15"
+  ],
+  "witness": "tav2_bq.ticker_1m",
+  "n_witness_overlap": 12,
+  "n_witness_usable": 5,
+  "n_witness_same_defect": 7,
+  "dev_max": 3.4871878795250666e-05,
+  "dev_median": 2.1955360685943504e-05,
+  "verdict": "CONFIRMED"
+ },
+ "HTL": {
+  "r_pred_oldest": 1.0966183574879227,
+  "ex_dates_used": [
+   [
+    "2026-09-24",
+    1.0966183574879227
+   ]
+  ],
+  "n_broken_sessions": 59,
+  "broken_range": [
+   "2026-06-01",
+   "2026-09-17"
+  ],
+  "witness": "tav2_bq.ticker_1m",
+  "n_witness_overlap": 11,
+  "n_witness_usable": 5,
+  "n_witness_same_defect": 6,
+  "dev_max": 0.00023390900939534998,
+  "dev_median": 0.00023257021701295066,
+  "verdict": "CONFIRMED"
+ },
+ "PGD": {
+  "r_pred_oldest": 1.0460829493087558,
+  "ex_dates_used": [
+   [
+    "2026-09-24",
+    1.0460829493087558
+   ]
+  ],
+  "n_broken_sessions": 63,
+  "broken_range": [
+   "2026-06-01",
+   "2026-09-17"
+  ],
+  "witness": "tav2_bq.ticker_1m",
+  "n_witness_overlap": 10,
+  "n_witness_usable": 3,
+  "n_witness_same_defect": 7,
+  "dev_max": 0.00016887278458710409,
+  "dev_median": 3.980049478302661e-05,
+  "verdict": "CONFIRMED"
+ },
+ "PHC": {
+  "r_pred_oldest": 1.135135135135135,
+  "ex_dates_used": [
+   [
+    "2026-09-22",
+    1.135135135135135
+   ]
+  ],
+  "n_broken_sessions": 74,
+  "broken_range": [
+   "2026-06-01",
+   "2026-09-15"
+  ],
+  "witness": "tav2_bq.ticker_1m",
+  "n_witness_overlap": 12,
+  "n_witness_usable": 5,
+  "n_witness_same_defect": 7,
+  "dev_max": 0.0014204545454545858,
+  "dev_median": 0.0006002400960383181,
+  "verdict": "CONFIRMED"
+ },
+ "TVN": {
+  "r_pred_oldest": 1.0340909090909092,
+  "ex_dates_used": [
+   [
+    "2026-09-21",
+    1.0340909090909092
+   ]
+  ],
+  "n_broken_sessions": 73,
+  "broken_range": [
+   "2026-06-01",
+   "2026-09-14"
+  ],
+  "witness": "tav2_bq.ticker_1m",
+  "n_witness_overlap": 11,
+  "n_witness_usable": 5,
+  "n_witness_same_defect": 6,
+  "dev_max": 0.00039565544792041774,
+  "dev_median": 0.00037041610075327913,
+  "verdict": "CONFIRMED"
+ },
+ "V12": {
+  "r_pred_oldest": 1.0606060606060606,
+  "ex_dates_used": [
+   [
+    "2026-09-25",
+    1.0606060606060606
+   ]
+  ],
+  "n_broken_sessions": 17,
+  "broken_range": [
+   "2026-06-01",
+   "2026-09-17"
+  ],
+  "witness": "tav2_bq.ticker_1m",
+  "n_witness_overlap": 1,
+  "n_witness_usable": 0,
+  "n_witness_same_defect": 1,
+  "verdict": "NO_SECOND_SOURCE"
+ },
+ "VCC": {
+  "r_pred_oldest": 1.1111111111111112,
+  "ex_dates_used": [
+   [
+    "2026-09-25",
+    1.1111111111111112
+   ]
+  ],
+  "n_broken_sessions": 71,
+  "broken_range": [
+   "2026-06-01",
+   "2026-09-18"
+  ],
+  "witness": "tav2_bq.ticker_1m",
+  "n_witness_overlap": 14,
+  "n_witness_usable": 4,
+  "n_witness_same_defect": 10,
+  "dev_max": 0.0,
+  "dev_median": 0.0,
+  "verdict": "CONFIRMED"
+ },
+ "VFR": {
+  "r_pred_oldest": 1.0638297872340425,
+  "ex_dates_used": [
+   [
+    "2026-09-21",
+    1.0638297872340425
+   ]
+  ],
+  "n_broken_sessions": 37,
+  "broken_range": [
+   "2026-06-01",
+   "2026-09-22"
+  ],
+  "witness": "tav2_bq.ticker_1m",
+  "n_witness_overlap": 3,
+  "n_witness_usable": 1,
+  "n_witness_same_defect": 2,
+  "verdict": "NO_SECOND_SOURCE"
+ },
+ "VPB": {
+  "r_pred_oldest": 1.2604104,
+  "ex_dates_used": [
+   [
+    "2026-09-24",
+    1.2604104
+   ]
+  ],
+  "n_broken_sessions": 76,
+  "broken_range": [
+   "2026-06-01",
+   "2026-09-17"
+  ],
+  "witness": "tav2_bq.ticker_1m",
+  "n_witness_overlap": 14,
+  "n_witness_usable": 5,
+  "n_witness_same_defect": 9,
+  "dev_max": 0.0001638336455771494,
+  "dev_median": 0.00010824045664825643,
+  "verdict": "CONFIRMED"
+ },
+ "VTB": {
+  "r_pred_oldest": 1.0847457627118644,
+  "ex_dates_used": [
+   [
+    "2026-09-25",
+    1.0847457627118644
+   ]
+  ],
+  "n_broken_sessions": 71,
+  "broken_range": [
+   "2026-06-01",
+   "2026-09-18"
+  ],
+  "witness": "tav2_bq.ticker_1m",
+  "n_witness_overlap": 10,
+  "n_witness_usable": 4,
+  "n_witness_same_defect": 6,
+  "dev_max": 0.0003765060240963347,
+  "dev_median": 0.0002845612582781376,
+  "verdict": "CONFIRMED"
+ }
+}

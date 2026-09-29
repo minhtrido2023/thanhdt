@@ -133,7 +133,11 @@ RANK = {OK: 0, WARN: 1, CRIT: 2}
 def run(cmd, check=True, timeout=900):
     p = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
     if check and p.returncode != 0:
-        raise RuntimeError(f"cmd failed ({p.returncode}): {' '.join(cmd)}\n{p.stderr.strip()[:2000]}")
+        # `bq` ghi thông điệp lỗi ra STDOUT chứ không phải stderr (kb/incidents/2026-08/
+        # 2026-08-29-bq-error-on-stdout-empty-diagnosis.md) => chỉ đọc stderr là được chuỗi RỖNG,
+        # người vận hành mù hoàn toàn. Đọc cả hai kênh, ưu tiên kênh nào có nội dung.
+        msg = (p.stderr.strip() or p.stdout.strip())[:2000]
+        raise RuntimeError(f"cmd failed ({p.returncode}): {' '.join(cmd)}\n{msg}")
     return p
 
 
@@ -148,9 +152,16 @@ def bq_json(sql):
 def ensure_dataset():
     p = run(["bq", "show", "--format=none", f"--project_id={PROJECT}", PIN_DATASET], check=False)
     if p.returncode != 0:
-        run(["bq", "mk", f"--location={LOCATION}", "--dataset",
-             "--description", "BQ monthly pin/snapshot archive (audit trail vs silent restates)",
-             f"{PROJECT}:{PIN_DATASET}"])
+        # check-then-act KHÔNG idempotent: `bq show` fail vì lý do KHÁC "chưa tồn tại"
+        # (auth hỏng, mạng) sẽ rơi vào nhánh mk, rồi mk fail "already exists" => crash.
+        # Chấp nhận "already exists" như thành công; mọi lỗi khác vẫn raise kèm nguyên văn.
+        mk = run(["bq", "mk", f"--location={LOCATION}", "--dataset",
+                  "--description", "BQ monthly pin/snapshot archive (audit trail vs silent restates)",
+                  f"{PROJECT}:{PIN_DATASET}"], check=False)
+        if mk.returncode != 0:
+            out = (mk.stderr.strip() or mk.stdout.strip())
+            if "already exists" not in out.lower():
+                raise RuntimeError(f"ensure_dataset: bq mk failed ({mk.returncode})\n{out[:2000]}")
 
 
 def list_pins():

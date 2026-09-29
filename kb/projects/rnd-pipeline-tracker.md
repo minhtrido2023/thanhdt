@@ -7,32 +7,58 @@
 
 Chi tiết đầy đủ từng mục: bus finding của Taylor + `kb/incidents/index.md`.
 
+- **Opening-window limit-order A/B thụ động (mở rộng `order_book_execution_shadow`)** — chốt
+  2026-09-26 (user duyệt phương án). Bối cảnh: `execution_alpha_20260925` (76 cụm, +13,75bps vs
+  open, t=4,98) → follow-up `opening_window_limit_20260926` (job `Taylor_20260925_171624`, quant-
+  skeptic REFUTE vòng 1 rồi sửa) xác nhận cơ chế ở mức **53%** (26/49 lệnh đặt 09:15:00-09 account
+  thật rơi vào fallback "thiếu lịch sử giá" `_decide_cross_adaptive`, ép cross=True) — KHÔNG dựng
+  được counterfactual định lượng vì `orderbook_shadow_*.jsonl` chỉ snapshot lúc ĐẶT LỆNH, không
+  poll định kỳ. Đề xuất §4 của FINDINGS.md: mở rộng chương trình paper `order_book_execution_shadow`
+  (owner Taylor, đã LIVE từ 08-18) thêm NHÁNH quan sát riêng cho chu kỳ ĐẦU PHIÊN (09:14:30-09:20,
+  poll tần suất cao hơn thay vì chỉ snapshot lúc đặt lệnh) để dựng được "nếu đặt limit thụ động thì
+  có khớp không, ở giá nào".
+  **Lịch đã chốt:**
+  - Triển khai (Taylor): xong trước phiên **2026-09-28** (Thứ Hai) — chỉ thêm logging/instrumentation,
+    KHÔNG đổi `_decide_cross_adaptive`/`bot_execute.py`/`trading_rules.json`, giữ nguyên bất biến
+    `behavior_contract = LOG_ONLY_NO_BROKER_PATH` của chương trình mẹ.
+  - Bắt đầu thu thập: phiên **2026-09-28**.
+  - Checkpoint sơ bộ (đọc tạm, KHÔNG kết luận GO/NO-GO): **2026-10-21** — trùng mốc nghiệm thu hiện
+    có của `order_book_execution_shadow` (tầng REAL N≥30, đã khoá 3 lần gia hạn, không gia hạn lần
+    4). Chỉ báo cáo N tích luỹ được ở nhánh mở cửa + đọc sơ bộ (nhiều khả năng CHƯA đủ N).
+  - **Mốc quyết định đầy đủ (cứng): 2027-01-25.** Cơ sở: pre-flight power80 cần **24 sự kiện MỚI**
+    thuộc đúng nhánh `no-hist` (§5 FINDINGS.md); tần suất đo được lịch sử ~0,30 sự kiện/phiên (26
+    event / ~86 phiên kể từ go-live 07-01) ⇒ cần ~80 phiên giao dịch ≈ ~16 tuần từ 09-28. KHÔNG kết
+    luận GO/NO-GO cho remedy trước mốc này trừ khi có lý do vận hành rõ ràng (giống tinh thần mốc
+    cứng `lag-adv-filter-tracking.md`). Nếu tần suất thật nhanh hơn ước tính, có thể rà soát sớm
+    hơn nhưng KHÔNG đóng sớm chỉ vì "trông có vẻ đủ".
+  Chi tiết: `agents/Taylor/research/opening_window_limit_20260926/FINDINGS.md`.
 - **Insider-sell WATCH shadow (`insider_flags.py`)** (WATCH-only, chưa wire due-diligence, từ
   2026-07-29): cờ bán ròng nội bộ ≥1% CP lưu hành/90 ngày (chỉ `event_code IN ('DDIND','DDRP')`,
   TTL 90d). Scoping (job Taylor_20260729_015830 + Phụ lục A `_032713`) kết luận GO: overlap thấp
   với `anomaly_scan`/`forensic_flags` (7,1-21,7%), lift phần riêng 2,08× (z=5,74), ổn định IS/OOS;
-  hai cờ bắn ở hai thời điểm khác nhau (insider sớm hơn ~2 tháng so với anomaly). Đang dựng
-  writer/reader (job Taylor_20260729_104614). **Sàn review ~2026-08-29 (≥1 tháng shadow), trần
-  ~2026-09-15.** Điều kiện TIẾP TỤC (wire vào due-diligence report như dòng bằng chứng): cadence
-  refresh bảng nguồn xác nhận chạy đều (bq_admin đang fix bug tính đến 07-29) + shadow log sạch
-  (không false-trigger bất thường) + qua quant-skeptic trước khi vào due-diligence chính thức.
-  Điều kiện NGỪNG: bq_admin không fix xong cadence (bảng đứng im, cờ đóng băng) hoặc shadow log
-  noise quá tải (~>5 mã/tháng cần review tay, vượt xa ước tính ~3/tháng). **Tuyệt đối không hard-
-  exclude ở bất kỳ giai đoạn nào** — 85% mã bị cờ không sập (§3.5 research file), chỉ là dòng bằng
-  chứng WATCH cho người duyệt plan cân nhắc. Research đầy đủ:
+  hai cờ bắn ở hai thời điểm khác nhau (insider sớm hơn ~2 tháng so với anomaly). **Review
+  2026-08-29 (`insider-shadow-review-20260829`): NGỪNG wire (2/3 điều kiện FAIL), user CHỐT tiếp
+  tục shadow** với ngưỡng NGỪNG mới đã điều chỉnh — tần suất thật ~7-9 mã/tháng (không phải ~3
+  ước tính gốc) được CHẤP NHẬN; ngưỡng NGỪNG mới = **>9-10 mã/tháng**. **Review kế tiếp ~2026-09-29**
+  (~1 tháng shadow sạch, trên nguồn snapshot). Migrate nguồn 2026-08-29 (job Taylor_20260829_160426,
+  commit mike `7f13e11d` + root `3afec5bd`): đổi từ bảng live `tav2_bq.insider_transaction` (bị
+  ghi đè `public_date`, look-ahead cho asof quá khứ) sang `tav2_mike.insider_transaction_snapshots`
+  (vintage gần nhất <= asof, point-in-time đúng). `_get_insider_net_sell_flag()`/`_insider_scan()`
+  trong `due_diligence.py` migrate cùng lượt — selfcheck `due_diligence_corp_flags_selfcheck.py`
+  27/27 PASS (case E2 khớp tuyệt đối 2 bên), `insider_flags.py --selftest` PASS trên fixture rebuild
+  từ vintage 2026-08-17 (fixture cũ dựng trên panel mutable đã trôi, không dùng lại). Điều kiện
+  TIẾP TỤC (wire vào due-diligence report như dòng bằng chứng): shadow log sạch trên nguồn snapshot
+  đến ~09-29 + qua quant-skeptic trước khi vào due-diligence chính thức (BẮT BUỘC, không đổi).
+  **Tuyệt đối không hard-exclude ở bất kỳ giai đoạn nào** — 85% mã bị cờ không sập (§3.5 research
+  file), chỉ là dòng bằng chứng WATCH cho người duyệt plan cân nhắc. Research đầy đủ:
   `mike/agents/Taylor/research/insider_transaction_scoping_20260729.md`.
-- **EXTREME-regime gate** (paper `main` only, từ 07-01): checkpoint 07-28 kiểm lại 2026-08-04
-  (job `Taylor_20260804_124404`) — **CHƯA đủ điều kiện chuyển bước**. Evidence 15/20 phiên (đếm
-  bằng hàm production thật), nhưng **0/15 marker EXTREME từng bắn** — gate chưa từng bị thử thách
-  thật. Ước đủ 20 phiên ~2026-08-11 (evidence chạy lại từ 08-05 sau khi gỡ bug netting probe
-  07-28→08-04). Câu hỏi M5 (giá đông cứng 06-26→07-13) **giải xong**: chỉ chạm nhánh trigger (ii)
-  3-sigma (3 phiên 07-07/10/13), trigger (i) không bị ảnh hưởng vì đọc quote sống; đếm bảo thủ
-  trigger (i) 15/20, trigger (ii) 12/20. User quan sát "hiệu quả cho case PNJ" **KHÔNG xác nhận
-  được** — PNJ chưa từng nằm trong phạm vi thử nghiệm (0 dòng/0 marker); hệ thống không mua PNJ
-  nhờ vòng chọn mã lọc bỏ, không nhờ gate này — case 07-13 còn lộ ra gate **thất bại** (khớp lệnh
-  trước khi kịp chặn), giá trị thật của case là phơi ra lỗ hổng đã vá (`_floor_guard_buy`). Bắt
-  thêm 2 lỗi khai báo marker trong registry (tên không tồn tại + thiếu marker bản vá), đã sửa.
-  KHÔNG bật live cho tới khi đủ 20 phiên + có marker EXTREME thật đã qua thử thách.
+- **EXTREME-regime gate — ĐÃ LIVE từ 2026-08-22** (SpaceX + ZaloPay, user sign-off):
+  `extreme_regime_enabled=True` trong `overrides` của cả 2 account (`secrets/trading_bot_accounts.json`).
+  Gate chain 6/6 PASS (quant-skeptic CONFIRMED high sau fix 2 TZ-fragile selfcheck, commit `70acee62`).
+  Stress test `mike/agents/Taylor/stress_extreme_regime.py` 40/40 PASS (commit `08af2637`).
+  `probe_linger_live_gate` vẫn True (paper-only, chưa go-live — feature riêng).
+  History gate: paper `main` từ 07-01, checkpoint 07-28/08-04 (15/20 phiên, 0 marker EXTREME bắn),
+  gate chain hoàn tất 08-22 sau 21/21 TZ-independent selfcheck pass.
 - **Vol-scale buy chase-cap patch#3 — ĐÃ LIVE từ 2026-08-04** (`chase_cap_vol_scale_enabled=True`,
   k=2.0/ceil=0.04, commit `d4f667b` + mike `1396db13`, job `Taylor_20260804_124404`). Checkpoint
   07-28 kiểm lại: gate 1-3 PASS (80 lệnh BUY thật/13 phiên), gate 4 (real-fill vs proxy @50B)
@@ -43,33 +69,42 @@ Chi tiết đầy đủ từng mục: bus finding của Taylor + `kb/incidents/i
   thiết kế); Mike áp trong phiên tương tác, 3 self-check chạy lại THẬT (không mô phỏng) đều PASS,
   commit ban đầu cũng bị classifier chặn — user cấp quyền tường minh mới qua được.
   **Mốc mở lại gate 4**: NAV live tiến gần 50 tỷ (theo dõi: gross lệnh/phiên vượt ~343tr).
-- **Sector sweep #10+**: chờ Mike dispatch.
-- **Fill-timing khung giờ** (BUY 11:15 / SELL open): edge thật đo được (+17.6bps BUY t=12.0,
-  +11.8bps SELL), KHÔNG flip `fill_timing_live_gate` — cần ≥5 phiên paper có BUY fill trong cửa sổ
-  + 0 reject + không lệnh treo → quant-skeptic → user sign-off (điều kiện chốt sau audit fill thật
-  `Taylor_20260709_101602`, phát hiện `execution_quality_review.py` từng đếm nhầm lệnh LIVE làm
-  "98% adherence" giả — evidence-rate thật ≈0 khi đó). Checkpoint tự nhiên ~cuối 07 **ĐÃ TỚI, CHƯA
-  XÁC NHẬN đủ điều kiện chưa** — cần Taylor kiểm tra số phiên đã đạt. Option: pilot ZaloPay trước
-  SpaceX — chưa quyết.
+- **Sector sweep: ĐÓNG 2026-08-30** — coverage đã đủ, không còn candidate mới đáng quét. Sweep
+  thật đã đi tới **#20** (không phải #10 — dòng cũ lỗi thời), phủ 20 sector qua 20 file
+  `agents/Taylor/*_valuation_framework.md`; verdict đồng nhất **LENS not BOOK** (Rule 3) qua mọi
+  sector kể cả sector 2-mã (aviation HVN/SCS). Đối chiếu `ICB_Code` thật trong `ticker_prune`
+  (2026-08-30, job `Taylor_20260830_034146`): các nhóm còn thiếu (bao bì giấy DHC/HHP n=2, lốp/phụ
+  tùng ôtô CSM/DRC/VEA/PAC n=1-2 mỗi mã, nước sạch BWE n=1, media YEG n=1) đều rời rạc/không đủ N
+  để thành 1 câu chuyện sector mạch lạc — không mở sweep #21. Utility điện (POW/NT2/PGV) ĐÃ nằm
+  trong `energy_valuation_framework.md` (sub-universe "mature utility"), không phải gap.
+- **Fill-timing khung giờ — ĐÃ LIVE từ 2026-08-22** (SpaceX + ZaloPay cả 2, user sign-off):
+  `fill_timing_live_gate=False` + `fill_timing_hybrid_live_gate=False` trong `overrides` cả 2 account.
+  Gate chain 5/5 PASS (quant-skeptic CONFIRMED high). Hybrid block schedule: `["11:00","11:15","13:00","13:15","13:30"]` ICT.
+  Edge: +17.6bps BUY (t=12.0), +11.8bps SELL. `probe_linger_live_gate` vẫn True (paper-only).
+  History: edge đo từ 07-09 (`Taylor_20260709_101602`), gate 5 PASS 08-22 sau ≥5 phiên paper BUY fill
+  + 0 reject + 4/5 phiên hybrid + selfcheck TZ 21/21.
 - **V2.5**: R&D-complete, DISABLED. Reminder 2026-07-07: Mike hỏi user go-ahead integration.
-- **DC-book (ConvergePort) NEUTRAL idle-cash waterfall** (paper `main` only, từ 07-06): thứ tự ưu
+- **DC-book (ConvergePort) idle-cash waterfall** (paper `main` only, từ 07-06): thứ tự ưu
   tiên giải ngân **BAL/LAG (full trước) → DC book (double-confirm sector-lens BUY ∧ 8L rating≤2,
-  capacity ~10-15B ex-DHG) → custom30V**; reverse-unwind khi BAL/LAG có deal lại. Backtest: +5.0pp
-  sleeve parking (~+3.5pp/năm SpaceX-now), nhưng DSR phần excess chỉ 0.775 (<0.95 ngưỡng an toàn) —
-  bảo hiểm hợp lý, CHƯA phải alpha tin cậy cao → lý do bắt buộc paper trước. Trong EOD daily report.
-  Review = EVENT-ANCHORED (khi chu kỳ reverse-unwind đầu tiên hoàn tất + settle 4-6 tuần), sàn
-  ~2 tháng, trần ~2026-10-06 (trượt theo nếu LAG refill trượt lịch).
-  ⚠️ **Bug đã biết, sửa TẠI mốc review (không sửa sớm — user chốt 07-13, muốn quan sát whipsaw thật
-  trước)**: paper sleeve dùng trigger NHỊ PHÂN thay vì spec đúng (DC book chạy liên tục trên residual)
-  → hiện TỆ HƠN baseline không-DC (CAGR 27.26%/DD−17.8%/Calmar 1.53/turnover 20.7× vs spec đúng
-  27.56%/−15.5%/1.77/3.18×). 4 việc khi tới review, theo thứ tự: (1) đổi sang continuous-residual
-  trigger — bug thực chất, ưu tiên nhất; (2) đồng bộ rebalance vào q2m5 (giảm whipsaw ~4 lần);
-  (3) cap gộp 0.15/tên (chống trùng DC↔custom30V); (4) liquidity floor 3B thay hard-exclude DHG.
-  4 góc khác đã kiểm tra kỹ, không còn dư địa cải thiện — không cần backtest thêm cho chúng.
+  capacity ~10-15B ex-DHG) → custom30V**; reverse-unwind khi BAL/LAG có deal lại. Backtest gốc:
+  +5.0pp sleeve parking (~+3.5pp/năm SpaceX-now), nhưng DSR phần excess chỉ 0.775 (<0.95 ngưỡng
+  an toàn) — bảo hiểm hợp lý, CHƯA phải alpha tin cậy cao → lý do bắt buộc paper trước. Trong EOD
+  daily report. Review = EVENT-ANCHORED (khi chu kỳ reverse-unwind đầu tiên hoàn tất + settle 4-6
+  tuần), sàn ~2 tháng, trần ~2026-10-06 (trượt theo nếu LAG refill trượt lịch).
+  ✅ **4 fix đã ÁP DỤNG từ 2026-07-20** (`SLEEVE_VERSION="v2"`, job `Taylor_20260720_091731`) —
+  đoạn "bug trigger nhị phân, sửa tại mốc review" ở trên đã LỖI THỜI, giữ lại làm lịch sử số liệu
+  cũ: (1) trigger continuous-residual — xong; (2) rebalance cadence q2m5 — xong; (3) cap gộp
+  0,15/tên DC↔custom30V — xong; (4) liquidity floor 3B thay hard-exclude DHG — xong. Thêm v2.1
+  (job `Taylor_20260825_170138`): PER_NAME_CAP siết riêng 10 mã capacity-limited
+  (MBB/HDB/VCB/VCI/VND/HCM/PVT/HAH/CTR/DBC), còn lại giữ 0,20.
+  📌 **08-31**: gate mở rộng từ NEUTRAL-only sang `state not in (NEUTRAL, BULL, EXBULL)` (job
+  `Taylor_20260831_014244`, commit WorkingClaude `b9c585ab`) — cơ chế deploy/weight/trigger/cadence
+  KHÔNG đổi, `SLEEVE_VERSION` vẫn "v2", chỉ mở phạm vi state được ghi lại để paper bắt đầu tích
+  luỹ bằng chứng BULL tự nhiên (27 phiên lịch sử trước đó toàn NEUTRAL). Selfcheck +11 test group F
+  (78/78 pass). Đọc số liệu mới nhất từ `dc_book_waterfall_paper_nav.csv`, không dùng số IS/OOS cũ
+  trong đoạn trên (đo trên trigger nhị phân đã lỗi thời).
 
-## Checkpoint quá hạn — cập nhật 2026-08-04
-- EXTREME-regime gate: kiểm lại 08-04, 15/20 phiên, 0 marker bắn — CHƯA đủ điều kiện, ước đủ mẫu ~08-11.
-- Vol-scale chase-cap patch#3: **ĐÃ LIVE 2026-08-04** (xem mục ở trên) — đóng, không còn treo.
-- Fill-timing: 2/5 gate PASS (job Taylor_20260804_091703), vẫn bị chặn cấu trúc gate 4 (paper
-  không sinh được fill thật). Bug netting giết bằng chứng cả 3 chương trình từ 07-28 đã fix
-  (job Taylor_20260804_094514), evidence tích luỹ lại từ 08-05.
+## Checkpoint quá hạn — cập nhật 2026-08-22
+- **EXTREME-regime gate: ĐÃ LIVE 2026-08-22** (xem mục trên) — đóng.
+- **Fill-timing: ĐÃ LIVE 2026-08-22** (xem mục trên) — đóng.
+- Vol-scale chase-cap patch#3: **ĐÃ LIVE 2026-08-04** — đóng.

@@ -25,7 +25,14 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(ROOT, "bin", "notify_thread.sh")
 CHAN = os.path.join(ROOT, "bin", "discord_channel.sh")
 
-ANCHOR_START = 'python3 - "$thread_id" "$msg" << \'PY\''
+# Neo transport khớp bằng REGEX chứ không phải chuỗi tuyệt đối (sửa 2026-08-22, weekly ops
+# audit): bản cũ so literal `python3 - "$thread_id" "$msg" << 'PY'`, nên khi notify_thread.sh
+# thêm tham số thứ 3 `"$_stamp_flag"` (hỗ trợ --no-stamp, 2026-08-21) selfcheck này FATAL và
+# đỏ im lặng suốt. Cái BẤT BIẾN cần neo là "heredoc python3 nhận $thread_id + $msg", không
+# phải danh sách tham số đóng băng tại một ngày. Thêm tham số ⇒ vẫn khớp; đổi HẲN transport
+# (không còn heredoc python3) ⇒ vẫn FATAL đúng như thiết kế.
+ANCHOR_RE = re.compile(
+    r'python3 -[^\n]*"\$thread_id"[^\n]*"\$msg"[^\n]*<< *\'PY\'\n')
 ANCHOR_END = "\nPY\n"
 # message được base64 hoá: message THẬT nhiều dòng, in thô thì dòng SENT bị vỡ và test sẽ
 # báo "mất nội dung" trong khi script hoàn toàn đúng (đã cắn 1 lần khi viết file này).
@@ -51,12 +58,13 @@ def build_root(script_text):
     d = tempfile.mkdtemp(prefix="nt_selfcheck_")
     os.makedirs(os.path.join(d, "bin"))
     os.makedirs(os.path.join(d, "kb"))
-    i = script_text.find(ANCHOR_START)
-    if i < 0:
+    m = ANCHOR_RE.search(script_text)
+    if not m:
         raise SystemExit(
             "FATAL: không tìm thấy neo transport %r trong notify_thread.sh — transport đã đổi, "
-            "SỬA SELFCHECK NÀY thay vì bỏ qua." % ANCHOR_START)
-    j = script_text.find(ANCHOR_END, i)
+            "SỬA SELFCHECK NÀY thay vì bỏ qua." % ANCHOR_RE.pattern)
+    i = m.start()
+    j = script_text.find(ANCHOR_END, m.end() - 1)
     if j < 0:
         raise SystemExit("FATAL: không tìm thấy hết heredoc PY sau neo transport.")
     patched = script_text[:i] + FAKE_TRANSPORT + script_text[j + len(ANCHOR_END):]

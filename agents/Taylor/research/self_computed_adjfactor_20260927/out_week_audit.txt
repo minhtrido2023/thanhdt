@@ -1,0 +1,31 @@
+cohort ex-date in [2026-09-19,2026-09-25] : 26 tickers
+tk     ex           r_obs oldest    r_pred       dev  n_bad  n_good  verdict
+AMS    2026-09-22       1.000000  1.042254  -4.0541%     74       4  BROKEN
+BTD    2026-09-24       1.000000  1.062500  -5.8824%     27       4  BROKEN
+BVB    ['2026-09-23']                                                  UNCOMPUTABLE
+DRI    2026-09-22       1.000000  1.072464  -6.7568%     75       3  BROKEN
+DWS    ['2026-09-22']                                                  UNCOMPUTABLE
+E29    2026-09-24       1.000000  1.059524  -5.6180%     16       0  BROKEN
+FPT    2026-09-21       1.000000  1.100000  -9.0909%     73       4  BROKEN
+GAS    2026-09-22       1.000000  1.029036  -2.8217%     74       4  BROKEN
+HC1    ['2026-09-22']                                                  UNCOMPUTABLE
+HTL    2026-09-24       1.000000  1.096618  -8.8106%     59       4  BROKEN
+LPT    ['2026-09-22']                                                  UNCOMPUTABLE
+PDB    ['2026-09-25']                                                  UNCOMPUTABLE
+PGD    2026-09-24       1.000000  1.046083  -4.4053%     63       4  BROKEN
+PHC    2026-09-22       1.000000  1.135135 -11.9048%     74       4  BROKEN
+SEA    ['2026-09-21']                                                  UNCOMPUTABLE
+TMS    ['2026-09-25']                                                  UNCOMPUTABLE
+TNC    ['2026-09-21']                                                  UNCOMPUTABLE
+TVN    2026-09-21       1.000000  1.034091  -3.2967%     73       4  BROKEN
+V12    2026-09-25       1.000000  1.060606  -5.7143%     17       0  BROKEN
+VCC    2026-09-25       1.000000  1.111111 -10.0000%     71       4  BROKEN
+VFR    2026-09-21       1.000000  1.063830  -6.0000%     36       4  BROKEN
+VPB    2026-09-24       1.000000  1.260410 -20.6608%     76       4  BROKEN
+VTB    2026-09-25       1.000000  1.084746  -7.8125%     71       4  BROKEN
+XHC    ['2026-07-22']                                                  UNCOMPUTABLE
+
+BROKEN          15  ['AMS', 'BTD', 'DRI', 'E29', 'FPT', 'GAS', 'HTL', 'PGD', 'PHC', 'TVN', 'V12', 'VCC', 'VFR', 'VPB', 'VTB']
+OK               0  []
+UNCOMPUTABLE     9  ['BVB', 'DWS', 'HC1', 'LPT', 'PDB', 'SEA', 'TMS', 'TNC', 'XHC']
+NODATA           0  []

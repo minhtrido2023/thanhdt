@@ -1,0 +1,40 @@
+BQ_LOCAL_CACHE = data/bq_cache
+WORKDIR        = /home/trido/thanhdt/wt-c30v-retfix/WorkingClaude
+custom_basket  = /home/trido/thanhdt/wt-c30v-retfix/WorkingClaude/custom_basket.py  (BASKET_RETURN_OSHARES=flat (default))
+cửa sổ = 2025-01-02..2026-06-19  |  PROD_KW = {'quality': 'none', 'rebal': 'q2m5', 'gate_rating': 3, 'weight_scheme': 'namecap'}
+[BQ_LOCAL_CACHE] ready — 14 tables from /home/trido/thanhdt/WorkingClaude/data/bq_cache
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+[BQ_LOCAL_CACHE] query took 2.7s (22817 rows)
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+[BQ_LOCAL_CACHE] query took 2.7s (22817 rows)
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+[BQ_LOCAL_CACHE] query took 2.7s (22817 rows)
+sức phân giải: 43 ngày có bước OShares trên panel (43 nằm trong index level)
+
+R1. Bất biến mới (chuỗi engine == chuỗi Close thuần dựng lại độc lập)
+  [ok] R1 max|ret_engine − ret_flat| ≈ 0 — max|Δ| = 3.322e-16 trên 414 phiên
+  [ok] R1b cùng phép so trên legacy PHẢI lệch (R1 không phải hằng đúng) — max|Δ| = 5.168e-02
+
+R2. Chân weight (đường tiền LIVE) byte-identical
+  [ok] R2 md5(weight) mới == legacy — a953d4bb06f7e429bd55837aebcdaefc vs a953d4bb06f7e429bd55837aebcdaefc
+  [ok] R2 md5(weight) mới == tiền-sửa — a953d4bb06f7e429bd55837aebcdaefc vs a953d4bb06f7e429bd55837aebcdaefc (240 dòng ticker×rebal)
+
+R3. Positive control (panel có bước OShares thật → PHẢI khác + phải khu trú)
+  [ok] R3 chuỗi return ĐỔI thật (>0) — 28/414 phiên lệch; max|Δret| = 5.1677pp/phiên; tổng kỳ legacy x1.57227 vs mới x1.32456
+  [ok] R3 khác biệt KHU TRÚ vào ngày có bước OShares (≥95%) — 28/28 phiên lệch trùng ngày bước OShares
+      2025-04-29  Δret -5.1677%   SHB 3662412356→4065250816 (+11.0%), VCB 5589091262→8355675094 (+49.5%)
+      2026-02-02  Δret -4.0324%   BID 7021361917→7280065210 (+3.7%), CTG 5369991748→7766944637 (+44.6%), HAH 168861212→185840401 (+10.1%), HDB 3844334315→5005276323 (+30.2%), MWG 1478456763→1468423529 (-0.7%), POW 2341871600→3067845688 (+31.0%), SHB 4593703838→5053074222 (+10.0%)
+      2025-10-27  Δret -1.4021%   DPM 391334260→679925021 (+73.7%), MBB 6102272659→8054999909 (+32.0%)
+      2025-02-03  Δret -1.3442%   DXG 720703435→870849983 (+20.8%), HDB 2912550610→3495060732 (+20.0%), MBB 5306324052→6102272659 (+15.0%)
+      2025-07-22  Δret -0.9932%   FPT 1471069183→1703507121 (+15.8%), TCB 7064851739→7086240414 (+0.3%)
+
+R4. Membership và cột `mcap` không đổi
+  [ok] R4 membership == tiền-sửa — 0 tên đổi trên 8 mốc rebal
+  [ok] R4 mcap/mcapw == Close/Price vẫn đúng (cột mcap KHÔNG bị sửa) — max|Δ| = 1.110e-16, n=22,817
+  [ok] R4 mcap == Close*OShares vẫn đúng — max|Δ| = 0.000e+00
+
+R5. Knob rollback là thật (legacy trùng tiền-sửa BIT-FOR-BIT)
+  [ok] R5 level legacy == tiền-sửa — max|Δlevel| = 0.000000e+00 trên 415 phiên
+
+==============================================================================
+KẾT QUẢ: PASS toàn bộ (R1 bất biến / R2 weight byte-identical / R3 positive control / R4 membership+mcap / R5 rollback)

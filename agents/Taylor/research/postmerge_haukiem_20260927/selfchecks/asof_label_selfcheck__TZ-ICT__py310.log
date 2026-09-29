@@ -1,0 +1,14 @@
+== unit tests (synthetic) ==
+  [PASS] U1 nhan=anchor voi horizon 25 -> 3/3 vi pham, lech 25 phien
+  [PASS] U2 nhan = anchor+25 phien -> 0 vi pham
+  [PASS] U3 nhan tre hon can thiet (bao thu) -> 0 vi pham
+  [PASS] U4 som DUNG 1 phien -> bat duoc, w=1
+  [PASS] U5 horizon=0 -> nhan=anchor hop le
+  [PASS] U6 dong ngoai lich bi loai (n=1, van bat dong con lai)
+  [PASS] U7 thieu known_date -> nhan rot ve 'entry'
+
+== series that ==
+  [ENV ] lag_edge_health: khong dung duoc lich phien ((dtype('<M8[ns]'), array([['2011-01-04T00:00:00.000000000', '2011-01-05T00:00:00.000000000',
+        '2011-01-06T00:00:00.000000000', ...,
+        '2026-09-22T00:00:00.000000000', '2026-09-23T00:00:00.000000000',
+        '2026-09-24T00:00:00.000000000']], dtype='datetime64[ns]')))

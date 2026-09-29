@@ -14,6 +14,7 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BUS="$ROOT/bus"
 PY="$ROOT/bin/mike_json.py"
 
+_ORIG_ARGV=("$@")   # giữ NGUYÊN VĂN arg gốc cho hàng đợi cách ly ở die() bên dưới
 id="${1:?usage: append_event.sh <agent_id> <event_type> <topic> <payload> [trace_id]}"
 etype="${2:?event_type required (finding|status|question|answer|decision|error)}"
 topic="${3:?topic required}"
@@ -27,7 +28,54 @@ trace_id="${5:-${JOB_ID:-}}"
 # LẶNG LẼ, và mike_json.py fallback JSON-hỏng→chuỗi nên event vẫn "thành công". Câu hỏi
 # question của Mike 2026-08-12 mất nguyên phần đuôi kiểu này. Fail LOUD thay vì ghi rác:
 # mất 1 lần gọi (agent thấy lỗi, quote lại rồi gọi lại) rẻ hơn 1 event hỏng vĩnh viễn.
-die() { echo "append_event.sh: $*" >&2; exit 1; }
+# CÁCH LY, KHÔNG CHỈ KÊU (arch-review coord-2026-08-13 required_change #4): 28/42 call site
+# gọi kèm `2>/dev/null || true` (eod_trading_report.sh, ops_health_check.sh, dispatch.sh,
+# refresh_fa_ratings.sh…), nên với NHÓM ĐÓ thông điệp fail-loud bị vứt và exit code bị nuốt
+# ⇒ thay đổi ròng của các chốt dưới đây là event bị VỨT HẲN thay vì ghi bản degrade — đúng
+# hình thái lỗi mà chính chúng sinh ra để diệt. Ghi nguyên văn arg bị chặn vào một file cách
+# ly để bằng chứng KHÔNG mất, dù stderr có bị vứt hay không. Đây là hàng đợi pháp y, KHÔNG
+# phải hàng đợi retry: không ai tự động phát lại, vì payload đã hỏng thì phát lại vẫn hỏng.
+# Bản thân việc cách ly không bao giờ được che lỗi gốc ⇒ mọi thứ bọc `|| true`.
+# ĐƯỜNG DẪN nằm ở bus/, KHÔNG phải bus/inbox/ (đổi 2026-08-16): mọi reader của bus glob
+# `bus/inbox/*.jsonl` KHÔNG lọc theo tên — consolidate.sh, staleness_watch.py, mike_json
+# load_jsonl/verify-coverage. Đã đo thật: cho một bản ghi cách ly vào inbox rồi chạy
+# `mike_json.py cursor-advance`, nó nuốt gọn rc=0 và short() render ra `- [ts] ?/? — : null`
+# ⇒ bằng chứng pháp y BIẾN MẤT khỏi file (cursor đã nhảy) và KB ăn một dòng rác, tức đúng
+# thứ hàng đợi này sinh ra để chống. Tên bắt đầu bằng `_` KHÔNG bảo vệ được gì vì không
+# reader nào lọc prefix. Không có bản ghi nào từng tồn tại ở đường cũ (file chưa hề được
+# tạo) nên đổi chỗ là zero-migration.
+_quarantine() {
+  # "$@" ở ĐÂY là lý do bị chặn; arg gốc của script lấy từ _ORIG_ARGV (bên trong die()
+  # thì "$@" là các TỪ của thông điệp lỗi, không phải arg gốc — đã suýt ghi nhầm).
+  # `python3 -c CODE a b` ⇒ sys.argv == ['-c', 'a', 'b'] — sys.argv[0] là '-c', KHÔNG phải
+  # tham số đầu. Bản đầu dùng sys.argv[0] làm đường dẫn nên ghi vào một file tên `-c` ở cwd
+  # và hàng đợi cách ly rỗng vĩnh viễn; `|| true` nuốt sạch. Đúng lớp lỗi đang đi sửa.
+  python3 -c '
+import json, os, sys, datetime
+qf, reason, args = sys.argv[1], sys.argv[2], sys.argv[3:]
+rec = {"ts": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+       "rejected_by": "append_event.sh", "reason": reason,
+       "argc": len(args), "argv": args,
+       "caller_pid": os.environ.get("_AE_PPID", ""), "job_id": os.environ.get("JOB_ID", "")}
+with open(qf, "a", encoding="utf-8") as f:
+    # ensure_ascii=True, KHÔNG phải False (arch-review round 3, killer objection). Arg vào
+    # đây qua surrogateescape — chính lớp lỗi byte-vs-char mà hàng đợi này sinh ra để bắt.
+    # ensure_ascii=False + encoding="utf-8" STRICT ⇒ UnicodeEncodeError ("surrogates not
+    # allowed") NGAY tại f.write ⇒ `2>/dev/null || true` nuốt sạch ⇒ file cách ly 0 BYTE
+    # trong khi stderr vẫn khẳng định "arg bị chặn đã lưu vào ...", và §5b (người đọc mới)
+    # im lặng tuyệt đối vì không có bản ghi nào = BÁO YÊN GIẢ. 28/42 call site vứt stderr
+    # nên không còn dấu vết nào khác. ensure_ascii=True escape surrogate thành "\udcxx"
+    # thuần ASCII: ghi được, đọc lại được, và giữ nguyên byte gốc cho việc pháp y.
+    f.write(json.dumps(rec, ensure_ascii=True) + "\n")
+' "$BUS/_rejected.jsonl" "$1" "${_ORIG_ARGV[@]}" 2>/dev/null || true
+}
+die() {
+  mkdir -p "$BUS" 2>/dev/null || true
+  _AE_PPID="$PPID" _quarantine "$*"
+  echo "append_event.sh: $*" >&2
+  echo "append_event.sh: arg bị chặn đã lưu vào $BUS/_rejected.jsonl (stderr có thể bị caller vứt)." >&2
+  exit 1
+}
 
 if [ "$#" -gt 5 ]; then
   die "nhận $# tham số (tối đa 5) — payload gần như chắc chắn bị shell word-split.
@@ -35,19 +83,90 @@ if [ "$#" -gt 5 ]; then
   Sửa: bọc payload trong nháy ĐƠN và escape mọi \"'\" bên trong, hoặc bỏ hẳn nháy đơn khỏi text."
 fi
 
+# Chốt trace_id: ENFORCE ĐÚNG HÌNH DẠNG mà thông điệp lỗi đã hứa, không chỉ whitelist ký tự.
+# Bản whitelist (2026-08-13) để lọt 7/8 giá trị rác trong chính danh sách sự cố của nó —
+# `hom`, `nguoi`, `du`, `capacity`, `khoan`, `lai`, `con` đều exit 0 (arch-review
+# coord-2026-08-13 required_change #2, tự replay). Kiểm kê bus thật 2026-08-16: 2875/2888
+# trace_id đã đúng hình dạng này; 13 cái còn lại CHÍNH LÀ các ca hỏng đang nói tới.
+# Vẫn FATAL (không drop im lặng): caller trực tiếp luôn quote lại được. Riêng đường
+# PROPAGATE từ dữ liệu bus cũ bất biến thì không quote lại được — nên nó được làm sạch tại
+# nguồn ở bin/verify_finding.sh, chứ không nới lỏng chốt này.
 case "$trace_id" in
   "" ) : ;;                       # không có trace_id là hợp lệ
   *[[:space:]]* ) die "trace_id chứa khoảng trắng: $(printf '%q' "$trace_id") — dấu hiệu word-split." ;;
-  *[!A-Za-z0-9_.:-]* ) die "trace_id có ký tự lạ: $(printf '%q' "$trace_id") — trace_id hợp lệ dạng <Agent>_<YYYYMMDD>_<HHMMSS>." ;;
 esac
+if [ -n "$trace_id" ] && ! printf '%s' "$trace_id" \
+     | grep -qE '^[A-Za-z0-9_.:-]+_[0-9]{8}_[0-9]{6}$'; then
+  die "trace_id SAI HÌNH DẠNG: $(printf '%q' "$trace_id") — phải là <Agent>_<YYYYMMDD>_<HHMMSS>
+  (vd Wags_20260816_090511). Giá trị 1 từ như 'nguoi'/'capacity' là dấu hiệu payload bị
+  shell word-split và mảnh đuôi rơi vào tham số 5."
+fi
 
-# Payload mở đầu bằng { hoặc [ mà không parse được = JSON cụt (bị cắt), KHÔNG phải chuỗi thường.
+# --- Chốt ack-topic-counter (Wags 2026-09-27, arch-review vòng 1 required_change #7) ---
+# `_acked()` của ops_health_check.sh khớp topic TUYỆT ĐỐI (cố ý). Một question escalate
+# pattern retro mà nhúng bộ ĐẾM ngày vào topic (`…-2days` → `…-3days`) thì ack hôm qua
+# không bao giờ phủ được escalation hôm nay ⇒ mỗi ngày đốt 1 job wags_autofix cho việc
+# người đã triage. Bug này escalate 3 lần (retro 09-23, 09-25, question 09-25T17:33Z)
+# trước khi được vá. Vá ở prompt `daily_retro.sh` là vá bằng TRÍ NHỚ CỦA LLM; chốt cơ
+# khí phải nằm ở ĐƯỜNG GHI. HẸP có chủ đích: chỉ event_type=question và chỉ đúng tiền
+# tố topic của retro — không đụng bất kỳ topic nào khác của fleet.
+# LC_ALL CỐ ĐỊNH cho grep, KHÔNG thừa hưởng từ môi trường gọi, và `lan|lần` dạng NHÓM chứ
+# không phải bracket `l[aầ]n`: `grep -i` chỉ case-fold được ký tự multibyte dưới locale
+# UTF-8, còn bracket dưới locale C trở thành tập BYTE. Dưới `LC_ALL=C` (cron, systemd,
+# sandbox CI đều hay là C) `-3LẦN` LỌT LƯỚI trong khi cổng Python `stable_topic()` vẫn từ
+# chối ⇒ 2 bản sao regex lệch nhau IM LẶNG tuỳ môi trường — đúng lớp "giả định kế thừa từ
+# env" của bản ghi đè TZ 07-31. Đo được: LC_ALL=C → rc=0 (GHI THẬT), LC_ALL=C.UTF-8 → rc=1.
+# Ghim bởi ca `case_counter_regex_copies_agree`, chạy cả dưới LC_ALL=C.
+# C.UTF-8 không tồn tại thì grep cảnh báo rồi xử như C ⇒ các dạng ASCII (`days`, `d`,
+# `ngay`, `lan`, `retros`, `x`, số trần) VẪN bị chặn: suy giảm, không bao giờ tệ hơn bản cũ.
+case "$etype" in question)
+  if printf '%s' "$topic" \
+       | LC_ALL=C.UTF-8 grep -qiE '^retro-pattern-recurring-.*[-_ ]?[0-9]+[-_ ]?(days?|d|ngay|ngày|retros?|lan|lần|times?|x)?$'; then
+    die "topic escalate RETRO mang BỘ ĐẾM: $(printf '%q' "$topic")
+  ack 'triaged-needs-human:' khớp topic TUYỆT ĐỐI nên bộ đếm trong topic làm ack hôm qua
+  không phủ được escalation hôm nay (bug ack-topic-counter). Dùng ĐÚNG cổng:
+    mike/bin/retro_escalate.py --pattern '<slug-không-có-số-ở-cuối>' --days <n> --payload '<json>'
+  Nó tự đặt topic ổn định và tự bỏ qua nếu pattern đã có câu hỏi đang được ack phủ."
+  fi
+;; esac
+
+# Payload mở đầu bằng { hoặc [ mà không parse được = JSON hỏng, KHÔNG phải chuỗi thường.
+# NÓI ĐÚNG NGUYÊN NHÂN, ĐỪNG ĐOÁN (2026-08-28, job Winston_20260828_020258): bản cũ khẳng
+# định "nhiều khả năng bị cắt cụt" cho MỌI ca. Ca Taylor 2026-08-28T01:48:25Z không hề cụt —
+# payload đủ 3005 ký tự, đóng đúng `"}` ở cuối, lỗi thật là THỪA một dấu `}` sau khối `da_va`
+# ⇒ json.loads báo `Extra data: char 1667`. Thông điệp đoán mò được checker §5b của
+# ops_health_check.sh chép nguyên văn vào dispatch ops-autofix, nên nó dẫn người xử lý đi sai
+# hướng ngay từ dòng đầu — cùng nhóm lỗi đã sửa cho check 5b ngày 2026-08-21 (quy chụp mọi ca
+# là word-split). Parser đã biết chính xác chỗ hỏng: in ra, đừng phỏng đoán.
+# 2026-09-25 (job Winston_20260925_012008): dòng gợi ý inline vẫn còn ĐOÁN — nó quy mọi lỗi
+# 'Expecting' là "cụt thật (word-split hoặc bị cắt)", sai trên ca Taylor 2026-09-24T06:13:45Z
+# (đủ 2452 ký tự, argc=5, kết thúc `"}`, chỉ THIẾU 1 dấu `}`). Nay chẩn đoán ĐO trên payload
+# ở bin/json_payload_diag.py (đếm dấu cấu trúc ngoài chuỗi + chuỗi còn mở hay không).
+# 2026-09-26 (weekly-ops-audit): PHÁN QUYẾT "hợp lệ hay không" phải ĐỘC LẬP với helper chẩn
+# đoán. Bản trước gộp 2 việc vào 1 lệnh, nên helper VẮNG (python3 trả "can't open file", rc=2)
+# bị tính là "JSON hỏng" ⇒ payload HỢP LỆ bị TỪ CHỐI, và dòng "Lỗi parser:" in ra thông báo
+# thiếu file NHƯ THỂ là lỗi parser — đúng lớp §29 mà chính guard này sinh ra để chống.
+# Tái hiện: copy append_event.sh + mike_json.py sang tmpdir (KHÔNG copy helper) rồi ghi
+# '{"a":1}' ⇒ rc=1. Nay parser inline quyết định, helper CHỈ làm giàu thông điệp.
 case "$payload" in
   \{*|\[* )
-    python3 -c 'import json,sys; json.loads(sys.argv[1])' "$payload" 2>/dev/null \
-      || die "payload bắt đầu bằng '{' hoặc '[' nhưng KHÔNG phải JSON hợp lệ — nhiều khả năng bị cắt cụt.
-  Đuôi payload nhận được: ...$(printf '%s' "${payload: -60}")
-  Muốn ghi chuỗi thường thì đừng mở đầu bằng { hoặc [." ;;
+    _jerr="$(printf '%s' "$payload" | python3 -c 'import json,sys
+try:
+    json.loads(sys.stdin.read())
+except ValueError as exc:
+    sys.stderr.write(str(exc)); sys.exit(1)' 2>&1 >/dev/null)" || {
+      _diag="$ROOT/bin/json_payload_diag.py"
+      if [ -f "$_diag" ]; then
+        _jerr="$(printf '%s' "$payload" | python3 "$_diag" 2>&1 >/dev/null || true)"
+      else
+        _jerr="$_jerr
+  (cây này KHÔNG có $_diag ⇒ thiếu phần chẩn đoán ĐO ĐƯỢC; lỗi trên là của parser JSON, không phải của helper)"
+      fi
+      die "payload bắt đầu bằng '{' hoặc '[' nhưng KHÔNG phải JSON hợp lệ.
+  Lỗi parser: $_jerr
+  Độ dài payload: ${#payload} ký tự · đuôi nhận được: ...$(printf '%s' "${payload: -60}")
+  Muốn ghi chuỗi thường thì đừng mở đầu bằng { hoặc [."
+    } ;;
 esac
 
 kbver="$(tr -dc '0-9' < "$ROOT/kb/version.txt" 2>/dev/null || true)"; kbver="${kbver:-0}"

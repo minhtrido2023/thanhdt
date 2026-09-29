@@ -1,0 +1,6 @@
+💰 **NAV 2026-07-22: 910,153,252 VND** (-17,114,731 VND, -1.85% so với hôm trước)
+   Cổ phiếu 860,150,000 · Tiền mặt 50,003,252 · Nợ margin 0
+   Từ go-live: -89,846,748 VND (-8.98%)
+   ℹ️ Đã LOẠI 1,620,000 VND cổ tức phải thu khỏi tiền mặt (broker báo 51,623,252) — Trừ 1,620,000đ cổ tức phải thu của CTG, VCB (ex-date 2026-07-23) — giá đóng cửa 2026-07-22 vẫn CÒN quyền, cộng vào tiền nữa là đếm 2 lần.
+   ℹ️ from-raw: bỏ cross-check verify_account_snapshot (advisory, không vào NAV).
+   ℹ️ BACKFILL ƯỚC TÍNH (nav_is_estimate=True): positions 2026-07-22T19:10:35, balances 2026-07-22T19:10:35, giá BQ Price thô

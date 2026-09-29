@@ -23,7 +23,8 @@ import sys
 import tempfile
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-WC = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import wc_paths  # noqa: E402
+WC = wc_paths.find_wc_root(__file__)
 sys.path.insert(0, WC)
 
 import compute_park_trim as cpt                                  # noqa: E402
@@ -68,7 +69,7 @@ FIXTURE_DEBT = 50e6     # xem `holdings()` — chỉ để sổ mặc định KH
 
 
 def holdings(lots, cash=0.0, excluded=(), unver=(), reconcile_ok=True, sellable=None,
-             total_cash="net_zero", div_recv=0.0, debt="net_zero"):
+             total_cash="net_zero", div_recv=0.0, debt="net_zero", egg=0.0):
     """lots = [(ticker, qty, entry_date, source)] — mv tính từ PX.
 
     `total_cash` = mẫu số pool L1 (totalCash DNSE). `None` = DNSE thiếu field ⇒ phải fail-closed.
@@ -102,6 +103,7 @@ def holdings(lots, cash=0.0, excluded=(), unver=(), reconcile_ok=True, sellable=
             "cash_total_vnd": total_cash,
             "cash_dividend_receiving_vnd": div_recv,
             "cash_debt_vnd": debt,
+            "egg_assets_vnd": egg,
             "cash_basis": "total_cash",
             "reconcile": {"ok": reconcile_ok,
                           "mismatches": [] if reconcile_ok else [{"ticker": "AAA", "diff": 100}]},
@@ -135,7 +137,12 @@ def run(h, state=None, basket=None, **kw):
         kw.setdefault("day_cap_override", BIG_CAP)
         kw.setdefault("basket_override", BASKET if basket is None else basket)
         kw.setdefault("price_fn", price_fn())
-        return cpt.compute_trim("TEST", ASOF, 0.80, holdings=h, **kw)
+        # account_label "TEST" không tồn tại trong trading_bot_accounts.json ⇒ PHẢI bơm config
+        # cổ tức mã excluded qua override, không thì account_profile() raise (§pool-excl-div).
+        kw.setdefault("excluded_dividend_config_override", [])
+        # `target` mặc định 0,80 = giữ NGUYÊN mọi kỳ vọng số học của 100 ca cũ (chúng được viết
+        # khi 0,80 là trần production). Nhóm T22 truyền target=None để kiểm đường ĐỌC R3.
+        return cpt.compute_trim("TEST", ASOF, kw.pop("target", 0.80), holdings=h, **kw)
     finally:
         cpt.STATE_FILE = old
         os.unlink(path)
@@ -179,6 +186,22 @@ check("T7 (c) trọng số chuẩn hoá đúng trên tập khả thi + Σ = 1",
       r["target_weights"])
 check("T7b (c) Σ trọng số bị bỏ = 10,5% (PC1 10% + TIN 0,5%)",
       abs(r["basket_dropped_weight"] - 0.105) < 1e-12, r["basket_dropped_weight"])
+# ── T7c: §5 kb/plan_report_style_guide.md — notes[] TÓM TẮT 1 dòng, KHÔNG wall-of-text
+# liệt kê công thức từng mã (bug audit §2b: dòng cũ nối "; ".join(ticker+weight+reason) cho
+# TOÀN BỘ mã bị bỏ, renderer cắt 300 ký tự ngẫu nhiên). Chi tiết đầy đủ vẫn PHẢI còn nguyên
+# trong basket_dropped (không mất thông tin — chỉ không đẩy vào notes[] mà report echo).
+_basket_note = next((n for n in r["notes"] if n.startswith("rổ mục tiêu kỳ")), None)
+check("T7c notes[] có đúng 1 dòng tóm tắt rổ mục tiêu, KHÔNG liệt kê ticker/reason từng mã "
+      "(PC1/TIN KHÔNG xuất hiện trong note — chỉ trong basket_dropped)",
+      _basket_note is not None
+      and "PC1" not in _basket_note and "TIN" not in _basket_note
+      and "BANNED" not in _basket_note and "1 lô" not in _basket_note
+      and len(_basket_note) < 200,
+      _basket_note)
+check("T7d basket_dropped vẫn giữ ĐẦY ĐỦ ticker+reason từng mã (PC1 BANNED, TIN 1 lô) — "
+      "thông tin không mất, chỉ chuyển khỏi notes[]",
+      "PC1" in drop and "BANNED" in drop["PC1"]["reason"]
+      and "TIN" in drop and "1 lô" in drop["TIN"]["reason"])
 
 # ── T8-T10: số tiền — tgt_i = 800tr × w' ────────────────────────────────────
 check("T8 target_value AAA = 800tr × 0,4/0,895 = 357,54tr",
@@ -461,9 +484,31 @@ check("T18p ca vòng 3: totalCash=0 & totalDebt=0 nhưng availableCash=5tr (feed
       "⇒ BLOCKED_CASH_BASIS, 0 lệnh — KHÔNG bán sạch sổ",
       r18p["decision"] == "BLOCKED_CASH_BASIS" and not r18p["orders"],
       f"{r18p['decision']} n_orders={len(r18p['orders'])}")
-check("T18q CHỨNG MINH NGƯỢC — bỏ bất biến đi thì chính sổ đó cho pool = park_mv (PARK 100%) "
-      "⇒ mức bán = toàn bộ phần vượt trần 200tr",
-      close(1_000e6 - 0.80 * (0.0 + 1_000e6), 200e6, 1))
+# T18q CHỨNG MINH NGƯỢC bằng compute_trim THẬT: nạp bản sao module với ĐÚNG dòng bất biến bị gỡ
+# (bản trước chỉ tính tay 1.000tr − 0,80×1.000tr ⇒ luôn PASS dù code thế nào; code-quality
+# 2026-09-13). Chuỗi bất biến phải có ĐÚNG 1 lần trong source — không thấy ⇒ FAIL, không để harness
+# hỏng âm thầm biến mutant thành bản gốc.
+import types as _types                                          # noqa: E402
+_INV = 'if float(h["cash_total_vnd"]) < float(h.get("cash_available_vnd") or 0):'
+with open(cpt.__file__, encoding="utf-8") as _f:
+    _src = _f.read()
+_r18q, _sold_q = None, 0.0
+if _src.count(_INV) == 1:
+    _mut = _types.ModuleType("compute_park_trim_no_invariant")
+    _mut.__file__ = cpt.__file__
+    exec(compile(_src.replace(_INV, "if False:"), cpt.__file__, "exec"), _mut.__dict__)
+    _cpt_real, cpt = cpt, _mut                                  # run() đọc `cpt` toàn cục
+    try:
+        _r18q = run(holdings(BASE_LOTS, cash=5e6, total_cash=0.0, debt=0.0))
+    finally:
+        cpt = _cpt_real
+    _sold_q = sum(o["qty"] * PX[o["ticker"]] for o in _r18q["orders"])
+check("T18q CHỨNG MINH NGƯỢC — compute_trim THẬT với bất biến bị gỡ: chính sổ T18p ⇒ TRIM bán "
+      "≥190tr (thực tế ≈296tr = Σ(mv−tgt) các mã vượt target, gồm SHS ngoài rổ); đó chính là thứ "
+      "T18p chặn",
+      _r18q is not None and _r18q["decision"] == "TRIM" and _sold_q >= 190e6,
+      "không tìm thấy đúng 1 dòng bất biến trong compute_park_trim.py" if _r18q is None
+      else f"{_r18q['decision']} bán {_sold_q:,.0f}")
 check("T18r bất biến KHÔNG chặn nhầm ca thường: totalCash 420tr > availableCash 20tr ⇒ chạy bình "
       "thường (đây là hình dạng SpaceX 08-07 thật)",
       run(holdings(BASE_LOTS, cash=20e6, total_cash=420e6))["decision"] in ("TRIM", "NO_TRIM"))
@@ -481,6 +526,446 @@ check("T18u ĐƯỜNG THẬT: dnse_raw ăn 2/3 field ⇒ read_broker_snapshot tr
       "⇒ consumer fail-closed",
       m_partial["total_cash_vnd"] is None and m_partial["balance_all_zero"] is True,
       f"{m_partial['total_cash_vnd']} / {m_partial['balance_all_zero']}")
+
+# ── T19: §pool-egg (2026-08-19) — tái lập ĐÚNG sự cố thật (user hỏi "đâu phải kỳ rebalance,
+# sao lại TRIM"). Cùng sổ PARK, cùng cash_total, chỉ khác: một phần vốn đã chuyển sang Trứng
+# vàng (egg). KHÔNG cộng egg ⇒ TRIM oan; CÓ cộng egg ⇒ NO_TRIM/trim nhỏ hơn đúng bằng phần vốn
+# đó. Đây là bug THẬT đã xảy ra (SpaceX 08-18: totalCash rơi 100,2tr, egg tăng ~100,2tr).
+r19_no_egg = run(holdings(BASE_LOTS, cash=0.0, total_cash=100e6, debt=0.0, egg=0.0))
+r19_with_egg = run(holdings(BASE_LOTS, cash=0.0, total_cash=100e6, debt=0.0, egg=100e6))
+check("T19a KHÔNG cộng egg — sổ hệt T18 base nhưng cash chỉ còn 100tr (phần kia đã sang egg) "
+      "⇒ TRIM oan (đúng chữ ký sự cố thật 08-19)",
+      r19_no_egg["decision"] == "TRIM",
+      f"{r19_no_egg['decision']} pool={r19_no_egg.get('pool_vnd')}")
+check("T19b CÓ cộng egg 100tr (đúng số đã 'biến mất' khỏi cash) ⇒ pool phục hồi về 1.100tr, "
+      "target 880tr > PARK 1.000tr? — PARK vẫn > target nên vẫn TRIM, nhưng NHẸ HƠN HẲN "
+      "(egg bù đúng phần đã mất, không bù thêm/bớt)",
+      close(r19_with_egg["pool_vnd"], r19_no_egg["pool_vnd"] + 100e6, 1)
+      and r19_with_egg["delta_vnd"] > r19_no_egg["delta_vnd"],
+      f"pool no_egg={r19_no_egg['pool_vnd']:,.0f} with_egg={r19_with_egg['pool_vnd']:,.0f} "
+      f"delta no_egg={r19_no_egg['delta_vnd']:,.0f} with_egg={r19_with_egg['delta_vnd']:,.0f}")
+check("T19c egg_assets_vnd được ghi lại nguyên vẹn vào output (audit trail — không bị nuốt "
+      "âm thầm trong phép cộng)",
+      r19_with_egg.get("egg_assets_vnd") == 100e6 and r19_no_egg.get("egg_assets_vnd") == 0.0,
+      f"{r19_with_egg.get('egg_assets_vnd')} / {r19_no_egg.get('egg_assets_vnd')}")
+check("T19d không khai egg (default 0.0, mọi ca T1-T18 cũ) ⇒ hành vi Y HỆT trước khi vá — "
+      "không có regression cho holdings không mang field mới",
+      run(holdings(BASE_LOTS, cash=100e6, total_cash=420e6))["pool_vnd"]
+      == run(holdings(BASE_LOTS, cash=100e6, total_cash=420e6, egg=0.0))["pool_vnd"])
+
+# ĐƯỜNG THẬT: dnse_raw có field "egg" sibling của "stock" (đúng schema thật, xem
+# data/execution_logs/dnse_raw_2026-08-18.jsonl) ⇒ read_broker_snapshot() (historical branch,
+# park_holdings.py) phải đọc ra egg_assets_vnd đúng, KHÔNG chỉ fixture bơm tay ở trên.
+def _raw_snapshot_egg(stock_block, egg_value):
+    with tempfile.TemporaryDirectory() as td:
+        acc, day = "0009999999", "2026-08-07"
+        with open(os.path.join(td, f"dnse_raw_{day}.jsonl"), "w", encoding="utf-8") as f:
+            f.write(json.dumps({"account_no": acc, "kind": "positions", "ts": f"{day}T19:00:00",
+                                "payload": {"positions": [{"accountNo": acc, "symbol": "AAA",
+                                                           "openQuantity": 100,
+                                                           "marketPrice": 10000,
+                                                           "tradeQuantity": 100}]}}) + "\n")
+            f.write(json.dumps({"account_no": acc, "kind": "balances", "ts": f"{day}T19:01:00",
+                                "payload": {"stock": stock_block,
+                                            "egg": {"totalValue": egg_value}}}) + "\n")
+        return PH.read_broker_snapshot("TEST", acc, day, exec_dir=td)
+
+
+_, _, m_egg = _raw_snapshot_egg({"totalCash": 9_783_984, "totalDebt": 0,
+                                 "availableCash": 4_382, "depositInterest": 318,
+                                 "cashDividendReceiving": 9_775_000}, 100_223_898)
+check("T19e ĐƯỜNG THẬT (historical branch) — dnse_raw có sibling \"egg\" đúng schema thật ⇒ "
+      "read_broker_snapshot() đọc ra egg_assets_vnd đúng số (số thật SpaceX 08-18)",
+      m_egg["egg_assets_vnd"] == 100_223_898.0,
+      f"egg_assets_vnd={m_egg.get('egg_assets_vnd')}")
+_, _, m_egg_zero = _raw_snapshot_egg({"totalCash": 100e6, "totalDebt": 0, "availableCash": 20e6,
+                                      "depositInterest": 318, "cashDividendReceiving": 0}, 0)
+check("T19f ĐƯỜNG THẬT — egg=0 (tài khoản không dùng Trứng vàng) ⇒ egg_assets_vnd=0.0, "
+      "không lỗi/None",
+      m_egg_zero["egg_assets_vnd"] == 0.0,
+      f"egg_assets_vnd={m_egg_zero.get('egg_assets_vnd')}")
+
+# ── T20: giá PARK lấy từ GIÁ ĐÓNG CỬA, không từ `positions[].marketPrice` (sửa 2026-09-09) ──
+# `park_mv` là MẪU SỐ cấp tài khoản (pool/target_value/w_sum) nên một giá sai hoặc thiếu không
+# chỉ lệch một mã mà lệch quyết định trim của CẢ account. Ba bất biến:
+from park_holdings import resolve_close_prices   # noqa: E402
+
+_px = resolve_close_prices(["ACB", "BID"], "2026-08-28",
+                           price_fn=lambda tks, d: {"ACB": 22650.0, "BID": 36850.0})
+check("T20a giá đóng cửa được trả đúng theo nguồn (không đọc marketPrice)",
+      _px == {"ACB": 22650.0, "BID": 36850.0}, str(_px))
+
+try:
+    resolve_close_prices(["ACB", "BID"], "2026-08-28",
+                         price_fn=lambda tks, d: {"ACB": 22650.0})
+    check("T20b thiếu giá 1 mã ⇒ CHẶN cả lượt (fail-closed)", False, "không raise")
+except SystemExit as _e:
+    check("T20b thiếu giá 1 mã ⇒ CHẶN cả lượt (fail-closed)", "BID" in str(_e), str(_e)[:80])
+
+try:
+    resolve_close_prices(["ACB"], "2026-08-28", price_fn=lambda tks, d: {"ACB": 0})
+    check("T20c giá 0 cũng bị coi là THIẾU (không nhân 0 vào park_mv)", False, "không raise")
+except SystemExit:
+    check("T20c giá 0 cũng bị coi là THIẾU (không nhân 0 vào park_mv)", True)
+
+# ── T21: §pool-excl-div (2026-09-19/09-21) — cổ tức receivable của mã EXCLUDED bị loại khỏi
+# pool, tái lập ĐÚNG ca thật ZaloPay DGC (80tr) lật quyết định NO_TRIM ⇔ TRIM. Cùng cơ chế
+# excluded_dividend_pending() đã wire trong compute_active_nav.py (Option B, commit baf1c51f) —
+# compute_trim() gọi hàm đó qua compute_park_trim.py, kiểm ở đây qua compute_trim() thật (không
+# cần import trực tiếp — bản thân test này chính là bài kiểm tra tích hợp của hàm đó).
+
+DGC_CFG = [{"ticker": "XCL", "amount_vnd": 80_000_000,
+           "expected_arrival_date": "2026-09-25"}]
+# Sổ: PARK 1.000tr (BASE_LOTS) + XCL (excluded) giữ vị thế legacy, cash_total 300tr trong đó
+# cashDividendReceiving=80tr (toàn bộ là của XCL) ⇒ (a) pool PHẢI loại 80tr đó.
+h21 = holdings(BASE_LOTS, cash=0.0, total_cash=300e6, debt=0.0,
+              div_recv=80e6, excluded=("XCL",))
+r21_no_excl = run(h21, excluded_dividend_config_override=[])
+r21_excl = run(h21, excluded_dividend_config_override=DGC_CFG)
+check("T21a KHÔNG khai excluded_dividend_receivable ⇒ 80tr vẫn CÒN trong pool (hành vi cũ, "
+      "CHỨNG MINH NGƯỢC cho thấy bug thật: pool=1.300tr)",
+      close(r21_no_excl["pool_vnd"], 1_300e6, 1) and r21_no_excl["decision"] == "NO_TRIM",
+      f"{r21_no_excl['decision']} pool={r21_no_excl.get('pool_vnd')}")
+check("T21b (a) khai excluded_dividend_receivable=XCL 80tr ⇒ pool LOẠI đúng 80tr đó "
+      "(pool=1.220tr, KHÔNG PHẢI 1.300tr)",
+      close(r21_excl["pool_vnd"], 1_220e6, 1),
+      f"pool={r21_excl.get('pool_vnd')}")
+check("T21c (a) 80tr bị loại LẬT quyết định NO_TRIM → TRIM (đúng ca thật ZaloPay 2026-09-21: "
+      "giữ 80tr ảo ⇒ NO_TRIM, loại 80tr ảo ⇒ TRIM)",
+      r21_no_excl["decision"] == "NO_TRIM" and r21_excl["decision"] == "TRIM",
+      f"{r21_no_excl['decision']} → {r21_excl['decision']}")
+check("T21d excluded_dividend_receivable_pending_vnd ghi đúng 80tr vào output (audit trail)",
+      r21_excl.get("excluded_dividend_receivable_pending_vnd") == 80e6,
+      r21_excl.get("excluded_dividend_receivable_pending_vnd"))
+check("T21e note cảnh báo LOẠI cổ tức excluded được ghi ra (để chép vào notes plan)",
+      any("cổ tức excluded" in n and "XCL" in n for n in r21_excl["notes"]),
+      r21_excl["notes"])
+
+# (b) mã KHÔNG bị exclude vẫn giữ NGUYÊN hành vi §pool-egg-div gốc — cổ tức receivable của mã
+# ĐANG GIỮ TRONG RỔ (không excluded) KHÔNG bị loại, dù có khai excluded_dividend_receivable cho
+# một mã KHÁC. Cùng sổ h21 nhưng cấu hình dividend thuộc "AAA" (không phải "XCL") ⇒ AAA không nằm
+# trong excluded_tickers ⇒ excluded_dividend_pending() phải bỏ qua entry đó (§ hàm: `tk not in
+# excluded_tickers ⇒ continue`) — pool phải Y HỆT r21_no_excl (không loại gì).
+AAA_CFG = [{"ticker": "AAA", "amount_vnd": 80_000_000,
+           "expected_arrival_date": "2026-09-25"}]
+r21_aaa = run(h21, excluded_dividend_config_override=AAA_CFG)
+check("T21f (b) cổ tức của mã KHÔNG bị exclude (AAA, dù có entry config) KHÔNG bị loại khỏi pool "
+      "— giữ NGUYÊN thiết kế cũ §pool-egg-div (pool=1.300tr, y hệt T21a)",
+      close(r21_aaa["pool_vnd"], 1_300e6, 1) and r21_aaa["decision"] == "NO_TRIM",
+      f"{r21_aaa['decision']} pool={r21_aaa.get('pool_vnd')}")
+check("T21g (b) excluded_dividend_receivable_pending_vnd = 0 khi entry config không khớp mã "
+      "excluded nào (AAA không trong excluded_tickers)",
+      r21_aaa.get("excluded_dividend_receivable_pending_vnd") == 0.0,
+      r21_aaa.get("excluded_dividend_receivable_pending_vnd"))
+
+# T21h — arch-review 078b6174: `overdue` (đã có trong detail) PHẢI lộ ra note người duyệt đọc,
+# cùng cảnh báo compute_active_nav.py:437-440 ("QUÁ HẠN dự kiến — cập nhật config"). Trước bản vá
+# này, note chỉ nói "chưa thật sự về" mà không phân biệt "đúng tiến độ" với "đã trễ so với dự
+# kiến, cần kiểm tay" — người duyệt không biết cần hành động thêm.
+DGC_CFG_OVERDUE = [{"ticker": "XCL", "amount_vnd": 80_000_000,
+                   "expected_arrival_date": "2026-08-01"}]     # asof ASOF=2026-08-07 > hạn ⇒ overdue
+r21_overdue = run(h21, excluded_dividend_config_override=DGC_CFG_OVERDUE)
+check("T21h asof qua expected_arrival_date mà DNSE vẫn báo receivable ⇒ note PHẢI có cảnh báo "
+      "QUÁ HẠN (không chỉ 'chưa thật sự về')",
+      any("QUÁ HẠN" in n and "XCL" in n for n in r21_overdue["notes"]),
+      r21_overdue["notes"])
+check("T21h2 CHỨNG MINH NGƯỢC — ca KHÔNG overdue (T21e, expected 2026-09-25 > asof) không có "
+      "cảnh báo QUÁ HẠN (không báo động giả)",
+      not any("QUÁ HẠN" in n for n in r21_excl["notes"]))
+
+# T21i — RỦI RO ĐÃ BIẾT (arch-review 078b6174, chưa sửa — kẹp KHÔNG tách theo mã, chỉ theo
+# `min(config_amount, remaining)` trên TỔNG cashDividendReceiving). Ca thật: XCL đã settle (không
+# còn receivable) nhưng config `excluded_dividend_receivable` CHƯA được dọn (owner quên xoá entry
+# sau khi tiền về), TRONG KHI một mã KHÔNG excluded (AAA) phát sinh receivable MỚI 3tr cùng lúc.
+# Vì hàm không biết 83tr TỔNG đó thuộc mã nào, nó vẫn kẹp min(80tr config, 3tr remaining)=3tr và
+# loại NHẦM khỏi pool — pool nhỏ giả ⇒ có thể sinh lệnh BÁN THẬT quá mức cần thiết (OVER-trim).
+# PIN LẠI hành vi này (không phải "đã sửa an toàn") để: (a) ai đổi cơ chế sang tách-theo-mã thì
+# test đỏ, biết mà cập nhật; (b) nhắc vận hành PHẢI dọn config `excluded_dividend_receivable` sau
+# khi tiền về (không tự động, không có gate cơ học nào bắt việc quên dọn này).
+h21i = holdings(BASE_LOTS, cash=0.0, total_cash=300e6, debt=0.0,
+               div_recv=3e6, excluded=("XCL",))     # XCL đã settle (0), chỉ còn 3tr của AAA
+r21i = run(h21i, excluded_dividend_config_override=DGC_CFG)   # config CŨ vẫn khai XCL 80tr
+check("T21i RỦI RO ĐÃ BIẾT (chưa sửa): config XCL còn hiệu lực dù XCL đã settle ⇒ kẹp nhầm 3tr "
+      "receivable của AAA (mã KHÔNG excluded) vào phần bị loại — pool nhỏ giả 3tr, có thể OVER-trim. "
+      "Vận hành PHẢI dọn config sau khi tiền về; đây KHÔNG phải hành vi mong muốn, chỉ pin để "
+      "không lặng lẽ đổi mà không ai biết.",
+      r21i.get("excluded_dividend_receivable_pending_vnd") == 3e6,
+      r21i.get("excluded_dividend_receivable_pending_vnd"))
+
+# T21j — case thật ZaloPay 2026-09-25 (job dgc-dividend-note-misleading-fix, vòng 2): DGC cấu
+# hình 80tr, DNSE chỉ còn báo receivable 1,9tr TOÀN TÀI KHOẢN. Verify độc lập của Mike bằng dữ
+# liệu thô (dnse_raw_2026-09-{11,21,25}.jsonl) xác nhận: XCL đã SETTLE 100% (đúng 80tr) trong MỘT
+# BƯỚC tối 09-25; phần 1,9tr còn lại là cổ tức của MÃ KHÁC phát sinh 09-21, không liên quan XCL.
+# Note vòng 1 (ff41c629, "ĐÃ VỀ 78,1tr ... CÒN LẠI 1,9tr DNSE vẫn báo receivable") khẳng định per-
+# ticker một điều code KHÔNG có bằng chứng để nói — SAI trên đúng ca này. Note MỚI không được
+# khẳng định "ĐÃ VỀ"/"CÒN LẠI của ticker" — chỉ báo cấu hình + tổng account-level + mức pool loại.
+h21j = holdings(BASE_LOTS, cash=0.0, total_cash=300e6, debt=0.0,
+               div_recv=1.9e6, excluded=("XCL",))
+r21j = run(h21j, excluded_dividend_config_override=DGC_CFG)
+note21j = next((n for n in r21j["notes"] if "cổ tức excluded" in n), "")
+check("T21j excluded_dividend_receivable_pending_vnd = 1,9tr (đúng phần còn lại DNSE báo)",
+      r21j.get("excluded_dividend_receivable_pending_vnd") == 1.9e6,
+      r21j.get("excluded_dividend_receivable_pending_vnd"))
+check("T21j note KHÔNG khẳng định 'ĐÃ VỀ'/'đã tính vào active_nav' per-ticker (đó là suy diễn "
+      "không có bằng chứng — ca thật đã chứng minh sai)",
+      "ĐÃ VỀ" not in note21j and "đã tính vào active_nav" not in note21j,
+      note21j)
+check("T21j note nêu đúng khung: cấu hình 80.0tr, TỔNG account-level 1.9tr, không tách theo mã",
+      "cấu hình 80.0tr" in note21j and "TỔNG" in note21j and "1.9tr" in note21j
+      and "không tách theo mã" in note21j,
+      note21j)
+check("T21j note KHÔNG còn câu 'pool tạm loại đúng phần CÒN LẠI này' (khẳng định cơ chế đúng "
+      "ngay lúc nó đang loại nhầm cổ tức mã khác)",
+      "pool tạm loại đúng phần CÒN LẠI" not in note21j,
+      note21j)
+check("T21j ratio 1.9/80 = 2,4% ≤ 10% ⇒ có cảnh báo CẤU HÌNH CÓ THỂ ĐÃ CŨ",
+      "CẤU HÌNH CÓ THỂ ĐÃ CŨ" in note21j and "XCL" in note21j,
+      note21j)
+
+# T21k — required_changes (a): residual thuộc về mã KHÔNG bị exclude (tái dùng setup T21i: XCL đã
+# settle 0, còn 3tr receivable của AAA — mã KHÔNG excluded). Note KHÔNG được khẳng định 3tr đó là
+# phần "còn lại"/"đã về" CỦA XCL — chỉ được nói account-level.
+r21k = run(h21i, excluded_dividend_config_override=DGC_CFG)
+note21k = next((n for n in r21k["notes"] if "cổ tức excluded" in n), "")
+check("T21k residual thuộc mã khác (AAA) — note KHÔNG khẳng định 'ĐÃ VỀ' per-ticker cho XCL",
+      "ĐÃ VỀ" not in note21k,
+      note21k)
+check("T21k ratio 3/80 = 3,75% ≤ 10% ⇒ cảnh báo CẤU HÌNH CÓ THỂ ĐÃ CŨ nổi lên đúng lúc cần "
+      "(XCL gần như chắc đã settle, phần còn lại thuộc mã khác)",
+      "CẤU HÌNH CÓ THỂ ĐÃ CŨ" in note21k and "XCL" in note21k,
+      note21k)
+
+# T21l — required_changes (b): ≥2 mã excluded cùng lúc, KHÔNG được tạo phép chia giả tạo kiểu
+# "SHS ĐÃ VỀ 30tr" chỉ vì thứ tự xử lý tham lam (greedy min(amt, remaining)) trong vòng lặp.
+XCL_SHS_CFG = [{"ticker": "XCL", "amount_vnd": 80_000_000,
+               "expected_arrival_date": "2026-09-25"},
+              {"ticker": "SHS", "amount_vnd": 50_000_000,
+               "expected_arrival_date": "2026-09-25"}]
+h21l = holdings(BASE_LOTS, cash=0.0, total_cash=300e6, debt=0.0,
+               div_recv=100e6, excluded=("XCL", "SHS"))     # tổng receivable 100tr < 130tr cấu
+               # hình ⇒ greedy: XCL lấy hết 80tr (remaining 20), SHS lấy nốt 20tr (remaining 0) —
+               # cả 2 mã đều có amount > 0 trong excl_div_detail nên đều xuất hiện trong note.
+r21l = run(h21l, excluded_dividend_config_override=XCL_SHS_CFG)
+note21l = next((n for n in r21l["notes"] if "cổ tức excluded" in n), "")
+check("T21l ≥2 mã excluded — note KHÔNG khẳng định 'ĐÃ VỀ' cho bất kỳ mã nào (greedy split "
+      "không phải bằng chứng per-ticker)",
+      "ĐÃ VỀ" not in note21l,
+      note21l)
+check("T21l cả 2 mã đều xuất hiện trong note kèm cấu hình đúng của từng mã",
+      "XCL cấu hình 80.0tr" in note21l and "SHS cấu hình 50.0tr" in note21l,
+      note21l)
+# arch-review vòng 2 required_change (1): pin đúng SỐ POOL PER-TICKER thật (không phải account-
+# level 100tr) — mutation "pending_tk := account_total_recv" (thay số pool per-ticker bằng TỔNG
+# account-level, đúng lỗi misattribution vòng 1 đã bị bác) vẫn PASS check trên nếu chỉ pin cụm
+# "X cấu hình Ytr" (không đụng số min()). Pin thẳng 2 dòng min(...) = ... thật của T21l.
+# arch-review vòng 3 required_change (M14): pin CẢ CỤM có tiền tố "pool tạm loại" đứng ngay
+# trước min(...) — thiếu tiền tố, mutation đổi nhãn cụm thành khẳng định per-ticker khác (vd
+# "CÒN LẠI của mã") vẫn PASS vì chỉ so khớp con số, không so nhãn cụm.
+check("T21l pin số per-ticker thật trong min() — XCL: 'pool tạm loại min(80.0tr; 80.0tr) = "
+      "80.0tr' (không phải account-level 100.0tr, và đúng nhãn cụm 'pool tạm loại')",
+      "pool tạm loại min(80.0tr; 80.0tr) = 80.0tr" in note21l,
+      note21l)
+check("T21l pin số per-ticker thật trong min() — SHS: 'pool tạm loại min(50.0tr; 20.0tr) = "
+      "20.0tr' (không phải account-level 100.0tr, và đúng nhãn cụm 'pool tạm loại')",
+      "pool tạm loại min(50.0tr; 20.0tr) = 20.0tr" in note21l,
+      note21l)
+# T21l là case KHÔNG có cảnh báo stale nào bắn ra (ratio XCL=1.0, SHS=0.4, cả 2 > 10%) ⇒ đây là
+# chỗ non-vacuous để pin cụm "không tách theo mã" (T21j vô tình pass qua câu cảnh báo stale-config
+# riêng, không phải dòng chính) — đúng 1 lần / mã, 2 mã ⇒ đúng 2 lần.
+check("T21l cụm 'không tách theo mã' xuất hiện đúng 2 lần (dòng chính, non-vacuous — case này "
+      "không có cảnh báo stale nào chen vào)",
+      note21l.count("không tách theo mã") == 2,
+      note21l)
+# arch-review vòng 3 required_change (M9): pin số TỔNG account-level (account_total_recv,
+# 100tr = div_recv thật của h21l) — mutation hoán đổi account_total_recv↔pending_tk trong field
+# "DNSE hiện báo TỔNG" (compute_park_trim.py dòng ~452-453) làm 2 dòng ticker in ra 2 số "TỔNG"
+# KHÁC NHAU (20.0tr cho SHS, 80.0tr cho XCL) trong khi số TỔNG account-level thật phải giống
+# nhau cho cả 2 dòng — vẫn PASS mọi check phía trên vì chưa có assertion nào pin đúng con số
+# TỔNG account-level. count()==2 buộc CẢ HAI dòng ticker in cùng một số TỔNG thật.
+check("T21l cụm 'DNSE hiện báo TỔNG 100.0tr' xuất hiện đúng 2 lần (số TỔNG account-level thật, "
+      "GIỐNG NHAU cho cả 2 dòng ticker — không phải số per-ticker khác nhau)",
+      note21l.count("DNSE hiện báo TỔNG 100.0tr") == 2,
+      note21l)
+
+# T21m — required_changes (c): ≥2 entry config CÙNG 1 ticker phải CỘNG DỒN, không ghi đè. Mutation
+# "cộng dồn → ghi đè" từng sống qua 85/85 test vì chưa có case nào có ≥2 entry cùng ticker.
+DGC_CFG_DUP = [{"ticker": "XCL", "amount_vnd": 80_000_000,
+               "expected_arrival_date": "2026-09-25"},
+              {"ticker": "XCL", "amount_vnd": 50_000_000,
+               "expected_arrival_date": "2026-10-15"}]
+h21m = holdings(BASE_LOTS, cash=0.0, total_cash=300e6, debt=0.0,
+               div_recv=130e6, excluded=("XCL",))
+r21m = run(h21m, excluded_dividend_config_override=DGC_CFG_DUP)
+note21m = next((n for n in r21m["notes"] if "cổ tức excluded" in n), "")
+check("T21m 2 entry cùng ticker XCL (80tr+50tr) ⇒ note phải cộng dồn cấu hình 130.0tr, KHÔNG "
+      "ghi đè thành 50.0tr (mutation cộng dồn→ghi đè)",
+      "XCL cấu hình 130.0tr" in note21m,
+      note21m)
+check("T21m excluded_dividend_receivable_pending_vnd = 130tr (min(130tr cấu hình, 130tr "
+      "receivable) — cả 2 entry được match hết)",
+      r21m.get("excluded_dividend_receivable_pending_vnd") == 130e6,
+      r21m.get("excluded_dividend_receivable_pending_vnd"))
+
+# T21n — arch-review vòng 4 required_change (RC-a): mọi fixture tới T21m đều rơi vào
+# config_sum == account_total_recv (vd T21l: 80+20=100tr trùng khớp div_recv=100tr) ⇒ không phân
+# biệt được "TỔNG account-level" (account_total_recv, đọc từ h["cash_dividend_receiving_vnd"])
+# với "TỔNG per-ticker đã kẹp min()" (excl_div_pending, tổng các take() sau khi kẹp remaining).
+# Case này: config CHỈ 20tr nhưng DNSE báo receivable TOÀN TÀI KHOẢN tới 100tr (mô phỏng có cổ
+# tức mã KHÁC đang chờ) ⇒ 2 con số lệch xa, mutation account_total_recv → excl_div_pending
+# (compute_park_trim.py dòng ~434, đổi field hiển thị "TỔNG" từ h.get(...) sang biến pending đã
+# kẹp min) sẽ đổi "TỔNG 100.0tr" thành "TỔNG 20.0tr" — bị bắt.
+h21n = holdings(BASE_LOTS, cash=0.0, total_cash=300e6, debt=0.0,
+               div_recv=100e6, excluded=("XCL",))
+r21n = run(h21n, excluded_dividend_config_override=[
+    {"ticker": "XCL", "amount_vnd": 20_000_000, "expected_arrival_date": "2026-09-25"}])
+note21n = next((n for n in r21n["notes"] if "cổ tức excluded" in n), "")
+check("T21n TỔNG account-level (100tr) KHÁC XA cấu hình per-ticker (20tr) — note phải in đúng "
+      "TỔNG account-level thật (100.0tr), không phải số per-ticker đã kẹp min() (mutation "
+      "account_total_recv→excl_div_pending sẽ in nhầm 20.0tr)",
+      "DNSE hiện báo TỔNG 100.0tr" in note21n,
+      note21n)
+check("T21n pool tạm loại per-ticker = min(20.0tr cấu hình; 20.0tr receivable) = 20.0tr",
+      "pool tạm loại min(20.0tr; 20.0tr) = 20.0tr" in note21n,
+      note21n)
+
+# T21o — arch-review vòng 4 required_change (RC-b): dòng cảnh báo stale-config
+# ("⚠️ CẤU HÌNH CÓ THỂ ĐÃ CŨ — còn báo Xtr (Y% so với cấu hình Ztr)") PHẢI hiển thị số PER-TICKER
+# pending_tk, KHÔNG PHẢI account_total_recv — mutation hoán biến trong đúng dòng display này
+# (compute_park_trim.py dòng ~447) từng sống qua mọi case trước vì chưa case nào có ≥2 mã excluded
+# VỚI cảnh báo stale bắn ra mà 2 số (per-ticker vs account-level) khác nhau đủ để lộ ra.
+# XCL lấy hết 80tr đầu (remaining 82-80=2), SHS chỉ còn lấy được 2tr trên cấu hình 50tr ⇒
+# ratio SHS = 2/50 = 4% ≤ 10% ⇒ cảnh báo bắn cho SHS với "còn báo 2.0tr" — nếu mutation đổi
+# pending_tk→account_total_recv trong dòng cảnh báo thì sẽ in nhầm "còn báo 82.0tr".
+h21o = holdings(BASE_LOTS, cash=0.0, total_cash=300e6, debt=0.0,
+               div_recv=82e6, excluded=("XCL", "SHS"))
+r21o = run(h21o, excluded_dividend_config_override=[
+    {"ticker": "XCL", "amount_vnd": 80_000_000, "expected_arrival_date": "2026-09-25"},
+    {"ticker": "SHS", "amount_vnd": 50_000_000, "expected_arrival_date": "2026-09-25"}])
+note21o = next((n for n in r21o["notes"] if "cổ tức excluded" in n), "")
+check("T21o cảnh báo stale-config cho SHS in đúng số PER-TICKER pending (2.0tr trên cấu hình "
+      "50.0tr = 4%), KHÔNG PHẢI account-level 82.0tr (mutation pending_tk→account_total_recv "
+      "trong dòng cảnh báo sẽ in nhầm 'còn báo 82.0tr')",
+      "còn báo 2.0tr (4% so với cấu hình 50.0tr)" in note21o,
+      note21o)
+
+
+# ════════════════════════════ T22. R2 ĐỌC R3 — 4 nhánh FAIL-CLOSED (wire 2026-09-27)
+# Trước lượt này R2 hardcode `PARK_TARGET_F1`, nên knob user chốt 0,30 KHÔNG hiệu lực trên đường BÁN
+# (nó vẫn trim ở 0,80) — IM LẶNG. Nhóm ca dưới đây khoá cả hai nửa: (a) R2 THỰC SỰ đi theo R3 chứ
+# không phải trùng số ngẫu nhiên hôm nay; (b) R3 hỏng thì R2 TỪ CHỐI, không trả 0 (= bán sạch) và
+# không rơi về 0,80 (= đúng cái bug đang sửa).
+print("\n T22. R2 đọc R3 (data/trading_rules.json) + fail-closed")
+
+
+def _rules_file(payload, raw=None):
+    """Ghi một trading_rules.json tạm; `raw` để bơm văn bản KHÔNG hợp lệ."""
+    fd, path = tempfile.mkstemp(suffix=".json")
+    with os.fdopen(fd, "w", encoding="utf-8") as f:
+        f.write(raw if raw is not None else json.dumps(payload))
+    return path
+
+
+def _refuses(path_or_none):
+    """Trả (đã_raise, message). KHÔNG bắt Exception rộng: chỉ ParkTargetUnavailable mới là hành vi đúng."""
+    try:
+        v = cpt.park_target_from_rules(path_or_none)
+        return False, f"KHÔNG raise, trả {v!r}"
+    except cpt.ParkTargetUnavailable as e:
+        return True, str(e)
+
+
+# T22a — đọc đúng giá trị R3 THẬT của cây này (không hardcode kỳ vọng: đọc lại bằng json độc lập)
+_r3_real = json.load(open(cpt.PARK_TARGET_RULES, encoding="utf-8"))["neutral_parking"]["default_park_of_idle_pct"]
+check(f"T22a park_target_from_rules(R3 thật) = giá trị trong file ({_r3_real})",
+      abs(cpt.park_target_from_rules(cpt.PARK_TARGET_RULES) - float(_r3_real)) < 1e-12,
+      f"{cpt.park_target_from_rules(cpt.PARK_TARGET_RULES)}")
+
+# T22b — NHÁNH 1: thiếu file ⇒ raise, và thông điệp trích lỗi THẬT của OS (§29: không đoán)
+_ok, _msg = _refuses("/tmp/khong-bao-gio-co-file-nay-park.json")
+check("T22b thiếu file R3 ⇒ ParkTargetUnavailable + thông điệp có lỗi THẬT của OS",
+      _ok and "FileNotFoundError" in _msg, _msg)
+
+# T22c — NHÁNH 1b: file không phải JSON ⇒ thông điệp có câu của json parser
+_p = _rules_file(None, raw="{ khong phai json ")
+_ok, _msg = _refuses(_p)
+check("T22c R3 không phải JSON ⇒ raise + thông điệp có câu của json parser",
+      _ok and "json parser nói" in _msg, _msg)
+os.unlink(_p)
+
+# T22d — NHÁNH 2: thiếu khoá gốc ⇒ thông điệp liệt kê khoá THẬT có trong file
+_p = _rules_file({"aaa": 1, "bbb": 2})
+_ok, _msg = _refuses(_p)
+check("T22d R3 thiếu 'neutral_parking' ⇒ raise + liệt kê khoá cấp 1 THẬT ['aaa','bbb']",
+      _ok and "'aaa'" in _msg and "'bbb'" in _msg, _msg)
+os.unlink(_p)
+
+# T22e — NHÁNH 2b: thiếu khoá con ⇒ liệt kê khoá THẬT trong neutral_parking
+_p = _rules_file({"neutral_parking": {"status": "ACTIVE", "default_park_note": "x"}})
+_ok, _msg = _refuses(_p)
+check("T22e R3 thiếu 'default_park_of_idle_pct' ⇒ raise + liệt kê khoá con THẬT",
+      _ok and "'status'" in _msg and "'default_park_note'" in _msg, _msg)
+os.unlink(_p)
+
+# T22f — NHÁNH 3: không phải số (chuỗi "0.30" — dạng dễ lọt nhất khi ai đó sửa tay)
+_p = _rules_file({"neutral_parking": {"default_park_of_idle_pct": "0.30"}})
+_ok, _msg = _refuses(_p)
+check("T22f R3 = chuỗi \"0.30\" ⇒ raise (KHÔNG tự float() chuỗi) + repr/type thật trong thông điệp",
+      _ok and "'0.30'" in _msg and "str" in _msg, _msg)
+os.unlink(_p)
+
+# T22g — NHÁNH 3b: bool. `isinstance(True, int)` là True trong Python ⇒ không loại tường minh thì
+# `true` lọt thành park 1,0 = "park 100% tiền nhàn rỗi". Đây là ca mutation, không phải giả thuyết.
+_p = _rules_file({"neutral_parking": {"default_park_of_idle_pct": True}})
+_ok, _msg = _refuses(_p)
+check("T22g R3 = true (bool) ⇒ raise, KHÔNG được thành 1.0 (bool là subclass của int)",
+      _ok and "bool" in _msg, _msg)
+os.unlink(_p)
+
+# T22h — NHÁNH 4: ngoài [0,1] (trên và dưới) + NaN
+for _v, _lbl in ((1.4, "1.4 > 1"), (-0.1, "-0.1 < 0"), (float("nan"), "NaN")):
+    _p = _rules_file({"neutral_parking": {"default_park_of_idle_pct": _v}})
+    _ok, _msg = _refuses(_p)
+    check(f"T22h R3 = {_lbl} ⇒ raise (ngoài [0,1])", _ok and "ngoài [0, 1]" in _msg, _msg)
+    os.unlink(_p)
+
+# T22i — R2 THỰC SỰ ĐI THEO R3: đổi R3 sang 0,55 ⇒ compute_trim(target=None) phải dùng 0,55.
+# Đây là ca giết được mọi biến thể "hardcode bằng đúng R3 hôm nay".
+_p = _rules_file({"neutral_parking": {"default_park_of_idle_pct": 0.55}})
+_old_rules = cpt.PARK_TARGET_RULES
+try:
+    cpt.PARK_TARGET_RULES = _p
+    _r22i = run(holdings(BASE_LOTS, cash=0.0, total_cash=300e6, debt=0.0), target=None)
+    check("T22i R3=0.55 ⇒ compute_trim(target=None) dùng target_park 0.55 (KHÔNG 0.30, KHÔNG 0.80)",
+          abs(_r22i["target_park"] - 0.55) < 1e-12, f"{_r22i['target_park']}")
+    # T22k — rail thứ TƯ: `from compute_park_trim import PARK_TARGET_F1` (đường MUA P2 của DollarBill)
+    check("T22k PARK_TARGET_F1 (module __getattr__) cũng theo R3 = 0.55 ⇒ rail thứ 4 tự đồng bộ",
+          abs(cpt.PARK_TARGET_F1 - 0.55) < 1e-12, f"{cpt.PARK_TARGET_F1}")
+finally:
+    cpt.PARK_TARGET_RULES = _old_rules
+    os.unlink(_p)
+
+# T22j — R3 hỏng ⇒ compute_trim TỪ CHỐI. Khẳng định CẢ HAI điều bị cấm: không trả 0, không về 0,80.
+try:
+    cpt.PARK_TARGET_RULES = "/tmp/khong-bao-gio-co-file-nay-park.json"
+    _raised, _got = False, None
+    try:
+        _got = run(holdings(BASE_LOTS, cash=0.0, total_cash=300e6, debt=0.0), target=None)
+    except cpt.ParkTargetUnavailable:
+        _raised = True
+    check("T22j R3 hỏng ⇒ compute_trim raise, KHÔNG trả target 0 (bán sạch) và KHÔNG rơi về 0.80",
+          _raised, "raise đúng" if _raised else f"trả về target_park={_got and _got.get('target_park')}")
+    # T22l — mã lỗi RIÊNG của CLI = 7 (không phải 0/1/2). Resolve target là câu lệnh ĐẦU TIÊN của
+    # compute_trim ⇒ không chạm broker/DNSE, an toàn gọi trong selfcheck.
+    _argv = sys.argv
+    try:
+        sys.argv = ["compute_park_trim.py", "--account", "SpaceX"]
+        _rc = cpt.main()
+    finally:
+        sys.argv = _argv
+    check("T22l CLI trả mã lỗi RIÊNG rc=7 khi R3 hỏng (phân biệt được với mọi rc khác)",
+          _rc == 7, f"rc={_rc}")
+finally:
+    cpt.PARK_TARGET_RULES = _old_rules
 
 print(f"\n=== {len(PASS)} PASS / {len(FAIL)} FAIL ===")
 if FAIL:

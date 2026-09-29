@@ -1,0 +1,47 @@
+asof=2026-03-01 · rổ 263 mã
+  TRƯỚC: /home/trido/thanhdt/WorkingClaude
+  SAU  : /tmp/wc_certwt
+
+=== nhánh PIT ===
+  từ chối (value=None): 28 -> 17  (phủ +11 mã)
+  LOOK-AHEAD (RESTATE trên neo ('FIN_FALLBACK', 'ANCHOR_UNVERIFIED')): 4 ['ABB', 'HAH', 'NVL', 'TDC'] -> 4 ['ABB', 'HAH', 'NVL', 'TDC']
+  thêm: [] · bớt: []
+  số mã đổi (số HOẶC nhãn): 11
+   BID   [CỨU (None -> số)  ] AIS_UNCERTIFIED    None (neo 2025-01-24/corporate_action.AIS)
+                              -> FIN_FALLBACK       7280065210.0 (neo 2026-02-02/ticker_financial)
+   BSI   [CỨU (None -> số)  ] AIS_UNCERTIFIED    None (neo 2025-09-29/corporate_action.AIS)
+                              -> ANCHOR_ONLY        245365943.0 (neo 2026-01-22/ticker_financial)
+   CTI   [CỨU (None -> số)  ] AIS_UNCERTIFIED    None (neo 2018-08-25/corporate_action.AIS)
+                              -> FIN_FALLBACK       62999997.0 (neo 2026-02-02/ticker_financial)
+   DTD   [CỨU (None -> số)  ] AIS_UNCERTIFIED    None (neo 2025-09-04/corporate_action.AIS)
+                              -> ANCHOR_ONLY        66686055.0 (neo 2026-01-30/ticker_financial)
+   EVF   [CỨU (None -> số)  ] AIS_UNCERTIFIED    None (neo 2024-12-06/corporate_action.AIS)
+                              -> FIN_FALLBACK       760565802.0 (neo 2026-01-22/ticker_financial)
+   GIL   [CỨU (None -> số)  ] AIS_UNCERTIFIED    None (neo 2025-04-23/corporate_action.AIS)
+                              -> ANCHOR_ONLY        101596218.0 (neo 2026-02-02/ticker_financial)
+   HAX   [CỨU (None -> số)  ] AIS_UNCERTIFIED    None (neo 2024-10-04/corporate_action.AIS)
+                              -> FIN_FALLBACK       107439681.0 (neo 2026-01-21/ticker_financial)
+   PET   [CỨU (None -> số)  ] AIS_UNCERTIFIED    None (neo 2023-09-27/corporate_action.AIS)
+                              -> FIN_FALLBACK       106722131.0 (neo 2026-02-02/ticker_financial)
+   SHB   [CỨU (None -> số)  ] AIS_UNCERTIFIED    None (neo 2025-10-07/corporate_action.AIS)
+                              -> FIN_FALLBACK       5053074222.0 (neo 2026-02-02/ticker_financial)
+   TCB   [CỨU (None -> số)  ] AIS_UNCERTIFIED    None (neo 2025-12-01/corporate_action.AIS)
+                              -> ANCHOR_ONLY        7086240414.0 (neo 2026-01-22/ticker_financial)
+   TNG   [CỨU (None -> số)  ] AIS_UNCERTIFIED    None (neo 2025-09-09/corporate_action.AIS)
+                              -> ANCHOR_ONLY        128731266.0 (neo 2026-01-20/ticker_financial)
+
+=== nhánh LIVE ===
+  từ chối (value=None): 7 -> 6  (phủ +1 mã)
+  LOOK-AHEAD (RESTATE trên neo ('FIN_FALLBACK', 'ANCHOR_UNVERIFIED')): 5 ['ABB', 'HAH', 'KBC', 'NVL', 'TDC'] -> 5 ['ABB', 'HAH', 'KBC', 'NVL', 'TDC']
+  thêm: [] · bớt: []
+  số mã đổi (số HOẶC nhãn): 5
+   BSI   [cùng số, đổi nhãn ] FIN_FALLBACK       245365943.0 (neo 2026-01-22/ticker_financial)
+                              -> ANCHOR_ONLY        245365943.0 (neo 2026-01-22/ticker_financial)
+   DTD   [cùng số, đổi nhãn ] FIN_FALLBACK       66686055.0 (neo 2026-01-30/ticker_financial)
+                              -> ANCHOR_ONLY        66686055.0 (neo 2026-01-30/ticker_financial)
+   GIL   [cùng số, đổi nhãn ] FIN_FALLBACK       101596218.0 (neo 2026-02-02/ticker_financial)
+                              -> ANCHOR_ONLY        101596218.0 (neo 2026-02-02/ticker_financial)
+   TCB   [CỨU (None -> số)  ] AIS_UNCERTIFIED    None (neo 2025-12-01/corporate_action.AIS)
+                              -> ANCHOR_ONLY        7086240414.0 (neo 2026-01-22/ticker_financial)
+   TNG   [cùng số, đổi nhãn ] FIN_FALLBACK       128731266.0 (neo 2026-01-20/ticker_financial)
+                              -> ANCHOR_ONLY        128731266.0 (neo 2026-01-20/ticker_financial)

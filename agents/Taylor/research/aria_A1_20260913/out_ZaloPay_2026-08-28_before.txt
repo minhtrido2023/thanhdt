@@ -1,0 +1,35 @@
+== Reconcile equity — ZaloPay ==
+Nguồn balance THẬT: /home/trido/thanhdt/WorkingClaude/data/execution_logs/dnse_raw_2026-08-28.jsonl (ts=2026-08-28T20:15:02, kind=balances)
+Nguồn P&L THẬT: /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/aria_A1_20260913/verified_snapshot_ZaloPay_2026-08-28_before.json
+
+VẾ TRÁI  (Vốn ban đầu + Lãi/lỗ - phí - lãi vay, TOÀN BỘ SỐ THẬT):
+  Vốn ban đầu:              1,000,000,000
+  + Lãi/lỗ chưa thực hiện:     +10,965,676
+  (--no-realized: BỎ realized -4,041,608 + cổ tức +6,130,825)
+  (KHÔNG cộng: tiền bán vị thế legacy không có giá vốn 452,939,000 — ['MSH', 'TCM', 'TLG', 'VHC', 'VIB', 'VPB'])
+  - Phí giao dịch (0.075% x giá vốn thật):         -322,539
+  - Phí/lãi margin đã POST (depositFeeAmount, API thật):       -7,304
+  = VẾ TRÁI:                1,010,635,833
+
+VẾ PHẢI  (NAV thị trường + Tiền mặt - Nợ margin, số THẬT từ broker):
+  Giá trị cổ phiếu (MTM):     441,017,367
+  + Tiền mặt:                   5,936,934
+  - Nợ vay margin:                 -6,842
+  + Off-book (tự báo):         38,850,311
+  = VẾ PHẢI:                  485,797,770
+
+CHÊNH LỆCH (trái - phải, TOÀN BỘ SỐ THẬT):     +524,838,062  (+108.0363% của vế phải)
+Ngưỡng dung sai: ±0.05% NAV + 5tr VND sàn tuyệt đối
+KẾT LUẬN (đẳng thức chính, chỉ số thật): ❌ LỆCH VƯỢT NGƯỠNG — cần điều tra thêm
+
+--- DIỄN GIẢI residual (ƯỚC TÍNH, KHÔNG phải số thật — margin rate 12.5%/năm do user cung cấp, chưa xác minh với DNSE) ---
+  Lãi margin ước tính/ngày trên dư nợ hiện tại:                2 VND/ngày
+  Residual +524,838,062 tương đương ~223988182.16 ngày lãi margin tích lũy CHƯA post vào depositFeeAmount
+  (depositFeeAmount hiện tại chỉ 7,304đ — có thể lãi margin post theo chu kỳ, không phải hàng ngày; cần đối chiếu sao kê DNSE để xác nhận chính xác)
+  Phí 0.075% trên TỔNG khớp mua+bán 1,207,497,300 (vế trái mới trừ trên giá vốn đang giữ):       +583,084
+  Thuế TNCN 0.1% giá trị bán 604,439,000:                  +604,439
+  Lãi margin ước 12.5%/năm cộng dồn 2026-07-07→2026-08-28 (trừ phần đã post):             +0
+  = Giải thích được (ước):        +1,187,523
+  DƯ SAU DIỄN GIẢI:             +523,650,539  (+107.7919% NAV) — ⚠️ CHƯA GIẢI THÍCH ĐƯỢC (>0.3% NAV)
+
+Ghi ra: /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/aria_A1_20260913/reconcile_equity_ZaloPay_2026-08-28_before.json

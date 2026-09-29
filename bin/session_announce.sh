@@ -9,7 +9,7 @@
 # Kèm tiến độ thực từng account live (đọc journal thật, không đoán):
 #   lunch     11:31 ICT — phiên sáng kết thúc, bot tạm ngưng, hẹn 13:00
 #   afternoon 13:01 ICT — phiên chiều bắt đầu, bot đã khởi động lại
-#   close     14:50 ICT — phiên đóng (ATC ~14:45), lệnh treo tự hủy, EOD report 15:00
+#   close     14:50 ICT — phiên đóng (ATC ~14:45), lệnh treo tự hủy, EOD report 19:10
 set -uo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 WC_ROOT="$(cd "$ROOT/.." && pwd)"
@@ -66,7 +66,7 @@ $PROGRESS"
     MSG="🔔 **Phiên giao dịch kết thúc** — đợt khớp lệnh định kỳ đóng cửa (ATC) vừa hoàn tất lúc ~14:45; lệnh nào còn treo bot sẽ tự hủy và dừng trong ít phút tới.
 Tiến độ cuối ngày:
 $PROGRESS
-📊 Báo cáo tổng kết chi tiết (lệnh khớp, NAV) sẽ gửi vào topic **Trading report** lúc **15:00**."
+📊 Báo cáo tổng kết chi tiết (lệnh khớp, NAV) sẽ gửi vào topic **Trading report** lúc **19:10**."
     ;;
   *)
     echo "Unknown phase: $PHASE" >&2; exit 1 ;;

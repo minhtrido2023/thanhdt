@@ -23,7 +23,16 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-msg="${1:?usage: notify_thread.sh \"<message>\" [thread_id]}"
+# Parse --no-stamp flag (optional, any position before positional args).
+# Passes "stamp": false to /api/notify so bridge skips the ICT timestamp header.
+_stamp_flag=true
+_args=()
+for _a in "$@"; do
+  if [ "$_a" = "--no-stamp" ]; then _stamp_flag=false; else _args+=("$_a"); fi
+done
+set -- "${_args[@]+"${_args[@]}"}"
+
+msg="${1:?usage: notify_thread.sh \"<message>\" [thread_id] [--no-stamp]}"
 thread_id="${2:-}"
 topic_from_arg=0
 [ -n "${2:-}" ] && topic_from_arg=1
@@ -46,7 +55,7 @@ fi
 if [ -z "$thread_id" ]; then
   mkdir -p "$ROOT/logs"
   printf '%s notify_thread: KHONG CO topic (khong ai truyen, $DISCORD_THREAD_ID rong) — TIN NHAN KHONG GUI, khong doan topic. caller=%s | msg=%.80s\n' \
-    "$(date -Iseconds)" "${0##*/}<-$(ps -o comm= -p "$PPID" 2>/dev/null)" "$msg" \
+    "$(TZ='Asia/Ho_Chi_Minh' date -Iseconds)" "${0##*/}<-$(ps -o comm= -p "$PPID" 2>/dev/null)" "$msg" \
     >> "$ROOT/logs/notify_thread_errors.log"
   echo "notify_thread: no thread_id (arg rỗng + \$DISCORD_THREAD_ID rỗng) — không gửi, không đoán topic" >&2
   exit 1
@@ -75,6 +84,10 @@ fi
 # giải ĐƯỢC (registry/snowflake) VÀ trông như một token topic (1 dòng, ≤64 ký tự, không khoảng
 # trắng) — một message thật không bao giờ thoả cả ba. Vẫn ghi 1 dòng vào error log (ops_health
 # check #10 đọc file này) vì call site vẫn SAI và phải sửa; dòng ghi nói rõ tin nhắn ĐÃ GỬI.
+# Kèm `job=$JOB_ID` (dispatch.sh export, xem đó): `caller=` chỉ cho ra comm của PPID = "bash" với
+# MỌI call site — kể cả lệnh Bash ad-hoc do agent tự gõ, vốn là nguồn thật của cả 4 ca đã ghi
+# nhận. Không có job id thì cảnh báo "sửa call site" không truy được ai, và WARN lặp lại mỗi
+# ngày mà không ai sửa được. `?` = gọi ngoài dispatch (cron/tay).
 _swap_candidate=0
 if [ "$topic_from_arg" = "1" ] && [ ${#msg} -le 64 ] && [[ "$msg" != *$'\n'* ]] && [[ "$msg" != *" "* ]]; then
   _swap_candidate=1
@@ -88,25 +101,26 @@ elif ! resolved="$("$ROOT/bin/discord_channel.sh" "$thread_id" 2>&1)"; then
   fi
   mkdir -p "$ROOT/logs"
   if [ -n "$_swapped" ]; then
-    printf '%s notify_thread: DOI SO BI DAO (topic o vi tri 1, message o vi tri 2) — DA TU SUA VA GUI toi topic %q. SUA CALL SITE: dung `notify_thread.sh "<message>" <topic>`. caller=%s\n' \
-      "$(date -Iseconds)" "$msg" "${0##*/}<-$(ps -o comm= -p "$PPID" 2>/dev/null)" \
+    printf '%s notify_thread: DOI SO BI DAO (topic o vi tri 1, message o vi tri 2) — DA TU SUA VA GUI toi topic %q. SUA CALL SITE: dung `notify_thread.sh "<message>" <topic>`. caller=%s job=%s\n' \
+      "$(TZ='Asia/Ho_Chi_Minh' date -Iseconds)" "$msg" "${0##*/}<-$(ps -o comm= -p "$PPID" 2>/dev/null)" "${JOB_ID:-?}" \
       >> "$ROOT/logs/notify_thread_errors.log"
     echo "notify_thread: đối số bị đảo — đã tự sửa, gửi tới topic '$msg'; sửa call site" >&2
     msg="$thread_id"
     resolved="$_swapped"
   else
-    printf '%s notify_thread: KHONG phan giai duoc topic %q — TIN NHAN KHONG GUI. %s\n' \
-      "$(date -Iseconds)" "$thread_id" "$resolved" >> "$ROOT/logs/notify_thread_errors.log"
+    printf '%s notify_thread: KHONG phan giai duoc topic %q — TIN NHAN KHONG GUI. %s job=%s\n' \
+      "$(TZ='Asia/Ho_Chi_Minh' date -Iseconds)" "$thread_id" "$resolved" "${JOB_ID:-?}" >> "$ROOT/logs/notify_thread_errors.log"
     echo "notify_thread: $resolved" >&2
     exit 1
   fi
 fi
 thread_id="$resolved"
 
-python3 - "$thread_id" "$msg" << 'PY'
+python3 - "$thread_id" "$msg" "$_stamp_flag" << 'PY'
 import sys, json, urllib.request
 
 thread_id, message = sys.argv[1], sys.argv[2]
+stamp = sys.argv[3].lower() != "false" if len(sys.argv) > 3 else True
 # sanitize: undo argv's surrogateescape decode of any non-UTF-8 byte upstream, re-encode
 # with errors='replace' so a corrupt byte becomes U+FFFD instead of round-tripping back out
 # as invalid UTF-8 on the wire (same root cause + fix as notify_discord.sh, 2026-08-03).
@@ -139,7 +153,7 @@ pieces = chunk(message, LIMIT) if len(message) > LIMIT else [message]
 
 for i, piece in enumerate(pieces, 1):
     body = f"[{i}/{len(pieces)}]\n{piece}" if len(pieces) > 1 else piece
-    payload = json.dumps({"message": body, "channel_id": int(thread_id), "format": "text"}).encode()
+    payload = json.dumps({"message": body, "channel_id": int(thread_id), "format": "text", "stamp": stamp}).encode()
     req = urllib.request.Request(
         "http://127.0.0.1:8199/api/notify",
         data=payload, method="POST",

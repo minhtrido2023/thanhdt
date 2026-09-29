@@ -1,0 +1,34 @@
+=== VND  2026-04-01 .. 2026-09-25  (122 sessions) ===
+
+-- events read from tav2_bq.corporate_action (executed only) --
+   2026-05-29 DIV 500d: last cum bar 2026-05-28 Price=17800 outside the raw-lifted band -> ffill suspect, refuse
+
+   factors USED: 0   UNKNOWN (fail-closed): ['2026-05-29']
+
+-- r_obs = Price/Close (vendor)  vs  r_pred = self-computed --
+d0          d1             n       r_obs      r_pred     ratio-1  verdict
+2026-04-01  2026-05-28    39    1.028934    1.000000    +2.8934%  MISMATCH
+2026-05-29  2026-09-25    83    1.000000    1.000000    +0.0000%  OK
+
+   mismatching sessions: 39 / 122   window: 2026-04-01 .. 2026-05-28
+   worst segment deviation: +2.8934% (2026-04-01..2026-05-28)
+
+=== VNM  2026-04-01 .. 2026-09-25  (122 sessions) ===
+
+-- events read from tav2_bq.corporate_action (executed only) --
+   2026-06-26 DIV 1850d: last cum bar 2026-06-25 Price=56450 outside the raw-lifted band -> ffill suspect, refuse
+
+   factors USED: 0   UNKNOWN (fail-closed): ['2026-06-26']
+
+-- r_obs = Price/Close (vendor)  vs  r_pred = self-computed --
+d0          d1             n       r_obs      r_pred     ratio-1  verdict
+2026-04-01  2026-06-15    51    1.032743    1.000000    +3.2743%  MISMATCH
+2026-06-16  2026-06-19     4    1.031836    1.000000    +3.1836%  MISMATCH
+2026-06-22  2026-06-22     1    1.032781    1.000000    +3.2781%  MISMATCH
+2026-06-23  2026-06-24     2    1.031830    1.000000    +3.1830%  MISMATCH
+2026-06-25  2026-06-25     1    0.999115    1.000000    -0.0885%  OK
+2026-06-26  2026-09-25    63    1.000000    1.000000    +0.0000%  OK
+
+   mismatching sessions: 58 / 122   window: 2026-04-01 .. 2026-06-24
+   worst segment deviation: +3.2781% (2026-06-22..2026-06-22)
+

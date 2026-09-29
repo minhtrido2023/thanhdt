@@ -1,0 +1,197 @@
+================================================================================================
+AMH #4 — FITNESS MATRIX, axis2 = BREADTH TERCILE PIT (paper-only diagnostic)
+================================================================================================
+Formation months: 2014-01 -> 2026-06 | n=150 | panel obs=29,687 | tickers=438
+
+Months per (DT5G state x breadth tercile) — THIS is the honest N, read it first:
+terc     B-LOW  B-MID  B-HIGH  TOTAL
+state                               
+CRISIS      11      9       4     24
+BEAR         8      3       3     14
+NEUTRAL     29     27      32     88
+BULL         5     10       6     21
+EXBULL       0      0       3      3
+TOTAL       53     49      48    150
+
+Reporting floor: n_months >= 10 to print a cell at all; >= 18 to treat it as conclusion-grade.
+Breadth today (2026-09-10): 26.6%
+
+================================================================================================
+TIER 1 — MARGINALS (thickest N). mean fwd-3M IC · * = |t_NW|>=2 · ? = n<18
+================================================================================================
+
+--- by DT5G ---
+                          FULL        CRISIS           BEAR       NEUTRAL          BULL
+label                                                                                  
+Flow: CMF         +0.016  n150  -0.035  n24   -0.063 ? n14   +0.044* n88   +0.016  n21 
+Mom: Close/MA200  +0.060* n150  -0.006  n24   -0.015 ? n14   +0.103* n88   +0.011  n21 
+Mom: D_RSI        +0.058* n150  -0.011  n24   +0.013 ? n14   +0.090* n88   +0.054  n21 
+Pos: Close/Low1M  +0.011  n150  -0.048  n24   +0.031 ? n14   +0.029  n88   +0.011  n21 
+Qual: FSCORE      +0.048* n150  +0.043  n24   +0.026 ? n14   +0.055* n88   +0.032  n21 
+Qual: ROE_Min5Y   +0.054* n150  +0.117* n24   +0.012 ? n14   +0.054* n88   +0.020  n21 
+Qual: ROIC5Y      +0.035* n150  +0.087* n24   +0.033 ? n14   +0.029  n88   +0.008  n21 
+Val: PB           -0.016  n150  +0.028  n24   -0.092 ? n14   +0.008  n88   -0.099* n21 
+Val: PB_z         -0.007  n150  -0.061* n24   -0.078 ? n14   +0.027  n88   -0.045  n21 
+Val: PE           -0.048* n150  -0.072* n24   -0.029 ? n14   -0.027  n88   -0.099* n21 
+
+--- by BREADTH ---
+                          FULL         B-LOW         B-MID        B-HIGH
+label                                                                   
+Flow: CMF         +0.016  n150  +0.000  n53   +0.012  n49   +0.039* n48 
+Mom: Close/MA200  +0.060* n150  +0.028  n53   +0.083* n49   +0.073  n48 
+Mom: D_RSI        +0.058* n150  +0.040  n53   +0.056* n49   +0.080* n48 
+Pos: Close/Low1M  +0.011  n150  -0.017  n53   +0.018  n49   +0.036  n48 
+Qual: FSCORE      +0.048* n150  +0.042* n53   +0.059* n49   +0.044  n48 
+Qual: ROE_Min5Y   +0.054* n150  +0.051  n53   +0.058* n49   +0.053  n48 
+Qual: ROIC5Y      +0.035* n150  +0.025  n53   +0.045* n49   +0.036  n48 
+Val: PB           -0.016  n150  -0.043  n53   -0.009  n49   +0.007  n48 
+Val: PB_z         -0.007  n150  -0.063* n53   +0.015  n49   +0.033  n48 
+Val: PE           -0.048* n150  -0.075* n53   -0.046* n49   -0.020  n48 
+
+--- by SPLIT ---
+                          FULL    IS_2014_19     OOS_2020p
+label                                                     
+Flow: CMF         +0.016  n150  +0.052* n72   -0.017  n78 
+Mom: Close/MA200  +0.060* n150  +0.135* n72   -0.009  n78 
+Mom: D_RSI        +0.058* n150  +0.107* n72   +0.013  n78 
+Pos: Close/Low1M  +0.011  n150  +0.052* n72   -0.026  n78 
+Qual: FSCORE      +0.048* n150  +0.081* n72   +0.018  n78 
+Qual: ROE_Min5Y   +0.054* n150  +0.052* n72   +0.056  n78 
+Qual: ROIC5Y      +0.035* n150  +0.040* n72   +0.030  n78 
+Val: PB           -0.016  n150  +0.035  n72   -0.062  n78 
+Val: PB_z         -0.007  n150  +0.056  n72   -0.064* n78 
+Val: PE           -0.048* n150  -0.014  n72   -0.079* n78 
+
+================================================================================================
+TIER 2 — 2-WAY CELLS (DT5G x breadth tercile). Read n FIRST. '--' = n<10, no number shown.
+================================================================================================
+
+Val: PB_z  (full-sample IC -0.007)
+                 B-LOW          B-MID        B-HIGH
+state                                              
+CRISIS   -0.132*? n11         --            --     
+BEAR           --             --            --     
+NEUTRAL   -0.003  n29    +0.037  n27   +0.044  n32 
+BULL           --       +0.042 ? n10        --     
+EXBULL         --             --            --     
+
+Val: PB  (full-sample IC -0.016)
+                 B-LOW          B-MID        B-HIGH
+state                                              
+CRISIS   -0.037 ? n11         --            --     
+BEAR           --             --            --     
+NEUTRAL   -0.017  n29    -0.014  n27   +0.051  n32 
+BULL           --       +0.006 ? n10        --     
+EXBULL         --             --            --     
+
+Val: PE  (full-sample IC -0.048)
+                 B-LOW          B-MID        B-HIGH
+state                                              
+CRISIS   -0.096*? n11         --            --     
+BEAR           --             --            --     
+NEUTRAL   -0.074* n29    -0.022  n27   +0.010  n32 
+BULL           --       -0.106*? n10        --     
+EXBULL         --             --            --     
+
+Qual: ROIC5Y  (full-sample IC +0.035)
+                 B-LOW          B-MID        B-HIGH
+state                                              
+CRISIS   +0.067*? n11         --            --     
+BEAR           --             --            --     
+NEUTRAL   +0.012  n29    +0.016  n27   +0.056* n32 
+BULL           --       +0.063*? n10        --     
+EXBULL         --             --            --     
+
+Qual: FSCORE  (full-sample IC +0.048)
+                 B-LOW          B-MID        B-HIGH
+state                                              
+CRISIS   +0.055 ? n11         --            --     
+BEAR           --             --            --     
+NEUTRAL   +0.049  n29    +0.074* n27   +0.044  n32 
+BULL           --       +0.060*? n10        --     
+EXBULL         --             --            --     
+
+Qual: ROE_Min5Y  (full-sample IC +0.054)
+                 B-LOW          B-MID        B-HIGH
+state                                              
+CRISIS   +0.076 ? n11         --            --     
+BEAR           --             --            --     
+NEUTRAL   +0.065* n29    +0.027  n27   +0.066  n32 
+BULL           --       +0.094*? n10        --     
+EXBULL         --             --            --     
+
+Mom: Close/MA200  (full-sample IC +0.060)
+                 B-LOW          B-MID        B-HIGH
+state                                              
+CRISIS   -0.046 ? n11         --            --     
+BEAR           --             --            --     
+NEUTRAL   +0.087* n29    +0.118* n27   +0.104* n32 
+BULL           --       +0.109*? n10        --     
+EXBULL         --             --            --     
+
+Mom: D_RSI  (full-sample IC +0.058)
+                 B-LOW          B-MID        B-HIGH
+state                                              
+CRISIS   -0.005 ? n11         --            --     
+BEAR           --             --            --     
+NEUTRAL   +0.085* n29    +0.070  n27   +0.111* n32 
+BULL           --       +0.113*? n10        --     
+EXBULL         --             --            --     
+
+Flow: CMF  (full-sample IC +0.016)
+                 B-LOW          B-MID        B-HIGH
+state                                              
+CRISIS   -0.048 ? n11         --            --     
+BEAR           --             --            --     
+NEUTRAL   +0.049* n29    +0.017  n27   +0.061* n32 
+BULL           --       +0.059 ? n10        --     
+EXBULL         --             --            --     
+
+Pos: Close/Low1M  (full-sample IC +0.011)
+                 B-LOW          B-MID        B-HIGH
+state                                              
+CRISIS   -0.059*? n11         --            --     
+BEAR           --             --            --     
+NEUTRAL   +0.003  n29    +0.029  n27   +0.052* n32 
+BULL           --       +0.051 ? n10        --     
+EXBULL         --             --            --     
+
+================================================================================================
+OPERATIONAL ANSWER — is momentum dead everywhere, or only in NEUTRAL/low-breadth?
+================================================================================================
+
+[mom_200]
+  state   terc  n_months  mean_ic   t_nw   hit  ls_spread_pct    grade
+   BULL  B-LOW         5   -0.110 -1.252 0.600         -3.586 TOO-THIN
+   BEAR  B-MID         3   -0.055    NaN 0.333         -6.071 TOO-THIN
+   BULL B-HIGH         6   -0.049 -0.611 0.500          2.685 TOO-THIN
+ CRISIS  B-LOW        11   -0.046 -0.925 0.545         -2.351     THIN
+   BEAR B-HIGH         3   -0.015    NaN 0.667          3.962 TOO-THIN
+ CRISIS  B-MID         9   -0.006 -0.110 0.444          1.091 TOO-THIN
+   BEAR  B-LOW         8    0.000  0.006 0.375          0.038 TOO-THIN
+ EXBULL B-HIGH         3    0.042    NaN 0.667          7.113 TOO-THIN
+NEUTRAL  B-LOW        29    0.087  2.035 0.552          3.472 CONCLUDE
+ CRISIS B-HIGH         4    0.101  0.640 0.500          7.311 TOO-THIN
+NEUTRAL B-HIGH        32    0.104  2.210 0.688          5.401 CONCLUDE
+   BULL  B-MID        10    0.109  4.349 0.900          7.478     THIN
+NEUTRAL  B-MID        27    0.118  2.697 0.741          6.692 CONCLUDE
+
+[D_RSI]
+  state   terc  n_months  mean_ic   t_nw   hit  ls_spread_pct    grade
+ EXBULL B-HIGH         3   -0.086    NaN 0.333         -0.874 TOO-THIN
+ CRISIS  B-MID         9   -0.034 -0.977 0.556         -0.246 TOO-THIN
+   BEAR  B-LOW         8   -0.026 -0.651 0.875         -0.617 TOO-THIN
+   BULL  B-LOW         5   -0.020 -0.326 0.400          2.078 TOO-THIN
+ CRISIS  B-LOW        11   -0.005 -0.073 0.455          0.091     THIN
+   BEAR  B-MID         3   -0.000    NaN 0.667          0.059 TOO-THIN
+   BULL B-HIGH         6    0.017  0.416 0.500          4.437 TOO-THIN
+ CRISIS B-HIGH         4    0.022  0.229 0.500          3.111 TOO-THIN
+NEUTRAL  B-MID        27    0.070  1.711 0.556          4.651 CONCLUDE
+NEUTRAL  B-LOW        29    0.085  2.539 0.724          4.559 CONCLUDE
+NEUTRAL B-HIGH        32    0.111  4.067 0.781          6.097 CONCLUDE
+   BULL  B-MID        10    0.113  3.589 0.900          6.804     THIN
+   BEAR B-HIGH         3    0.127    NaN 1.000          8.817 TOO-THIN
+
+Cells at conclusion grade (n>=18): 30 / 130 (23%). The rest are NOT interpretable — do not read the grid as a picture.
+
+Saved fitness2.png, fitness2_cells.csv, fitness2_marginals.csv

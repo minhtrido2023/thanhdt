@@ -1,0 +1,8 @@
+  DIFF 2015-09-30: -['VIC'] +['BID']
+months evaluated     : 146 (2014-07-31 .. 2026-09-25)
+top-25 IDENTICAL     : 145
+top-25 DIFFERENT     : 1 (Jaccard median 0.923)
+names swapped/month  : mean 0.01, max 2
+
+NB: ascending=False on rating means these screens pick the WORST-rated 25 names. That is a
+pre-existing oddity of the screen family, NOT introduced or changed by this wire.

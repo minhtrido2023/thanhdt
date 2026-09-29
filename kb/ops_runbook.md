@@ -96,6 +96,20 @@ không được đóng bằng lý do "false alarm do bug tra cứu". Ca thật: 
 `wags-fix-not-confirmed: coord-2026-08-10 / coord-2026-08-11` từng bị nghi là do bug prefix ở trên,
 kiểm lại thì cả 2 đều là `NEEDS_CHANGES` có bằng chứng — vẫn đang mở, cần round-2.
 
+### Verify tự thân của Wags KHÔNG được chạy dispatcher ở chế độ LIVE (2026-08-23)
+
+Ca `coord-2026-08-23`: Wags verify 1 ack bằng cách chạy thẳng `bin/ops_health_check.sh` LIVE
+từ bên trong chính job đang được dispatch — kết quả ghi bus event mạo danh Mike + gửi trùng
+báo cáo Discord Chủ Nhật (script không tự biết hôm nay không phải ngày cron chạy), và nếu ack
+không ăn thì chính lượt verify đó tự kích hoạt lại khối routing `wags_autofix.sh`, tạo tín hiệu
+"tái diễn trong cooldown" giả — phép đo tự tạo ra cái nó đang đo.
+
+**Luật: verify bất kỳ thay đổi nào chạm `ops_health_check.sh`/`ops_autofix.sh`/`wags_autofix.sh`
+PHẢI dùng `OPS_HEALTH_DRY_RUN=1 bin/ops_health_check.sh --account <acct>` (khối đã có sẵn trong
+script, dòng ~1423-1429), KHÔNG BAO GIỜ chạy live để "kiểm tra thử".** Cần trạng thái thật (đã
+ghi bus/Discord chưa) thì đọc file/bus có sẵn (`logs/ops_health.log`, bus event cùng ngày), đừng
+tái tạo bằng cách chạy lại chính bộ dispatcher.
+
 ## Timeline ngày giao dịch (T2–T6, giờ ICT) — bước / kiểm tra gì / lỗi thì sao
 
 | Giờ | Bước (cron) | Kiểm tra | Khi lỗi |
@@ -110,14 +124,159 @@ kiểm lại thì cả 2 đều là `NEEDS_CHANGES` có bằng chứng — vẫn
 | 08:20 | `ops_health_check.sh` (per account) | BOT_STOP, xung đột file plan, lỗi lặp journal, circuit breaker, question tồn, đối chiếu preflight | WARN > 0 → **autofix tự động** (wire 2026-07-07) + vẫn post cảnh báo như cũ |
 | 08:45 | `preflight_check.sh` (per account) | Plan hôm nay tồn tại + approved + macro_health + Gmail OTP + BQ lag | RED vì plan thiếu/chưa duyệt → USER phải xử lý (không autofix); RED vì hạ tầng → autofix |
 | 09:05 | `run_bot.sh` (per account) | Bot chạy, đặt lệnh theo plan | — (thực thi thật, autofix KHÔNG đụng) |
-| 09:00–14:55 | `bot_heartbeat.sh` /5' (per account) | Bot sống, có tiến triển fill | Chết → TỰ RESTART; restart fail → Telegram khẩn (có sẵn) |
+| 09:00–14:55 | `bot_heartbeat.sh` /5' (per account) | Bot sống, có tiến triển fill | Chết → TỰ RESTART; restart fail → Telegram khẩn (có sẵn) ⚠ Restart KHÔNG `--once` là CỐ Ý: bot `--once` (run_bot.sh) exit trước 14:45, chỉ bot restart chạy loop mới vào CLOSED ⇒ chờ ATC (aria-K). Đừng thêm `--once` vào `_restart_bot`. |
 | 11:30 | lunch pkill (per account) | Bot dừng nghỉ trưa | pkill fail vô hại (session_phase tự idle) |
 | 12:45 | `ops_health_check.sh` lần 2 | Như 08:20 + bắt vấn đề phát sinh phiên sáng | Như 08:20 |
 | 13:00 | `run_bot.sh` resume (per account) | Resume state, chạy phiên chiều | Như 09:05 |
 | ~14:50 | phiên đóng (ATC) | Bot tự cancel lệnh treo, ghi `exec_*_report.md` | — (thực thi thật, autofix KHÔNG đụng) |
 | 15:05 | `dc_book_waterfall_paper.py --update` | Paper sleeve DC-book cập nhật | Lỗi → autofix (paper, không chạm tiền thật) |
 | 19:10 | `eod_trading_report.sh` (per account) | Report khớp lệnh + NAV verify-pipeline + đối soát broker≠state | Crash → autofix; kênh Discord hỏng → ĐÃ CÓ fallback Telegram+Trading Daily tự động |
+| 19:50 | `nav_snapshot_daily.sh` (mọi account live) | Đường ghi NAV thứ 2, độc lập EOD: chưa có dòng `nav_history` hôm nay ⇒ gọi `daily_nav_snapshot.py`; có rồi ⇒ bỏ qua | rc=2/timeout tự retry 2 vòng×5'; rc=4 ⇒ marker cho `nav_sync_retry`; **rc=5 ⇒ KHÔNG retry, escalate NGAY** (xem § NAV thiếu dòng mục 5); rc=2 hết retry / rc=3 ⇒ 🔴 Trading Daily, xử lý TAY (xem § NAV thiếu dòng) |
 | Mỗi 10' | `watchdog.sh` | Session Mike sống, macro_health staleness (`staleness_watch.py`) | Tự restart/clear-bridge (có sẵn) |
+
+### NAV thiếu dòng `nav_history` — 2 đường ghi (aria-G, 2026-09-13)
+Đường 1 = `eod_trading_report.sh` 19:10 (chỉ ở case HOLD / render đầy đủ — case không-plan và không-state thoát sớm, KHÔNG ghi NAV). Đường 2 = `nav_snapshot_daily.sh` 19:50: có dòng hôm nay ⇒ bỏ qua; có marker `state/nav_pending_retry/<acct>_<date>.*` ⇒ nhường `nav_sync_retry.sh`. Tin 🔴 từ đường 2:
+1. `rc=2` sau 2 lần retry: đọc `logs/nav_snapshot_daily.log` (thiếu balances/vị thế/giá). Còn trong tối ⇒ chạy tay `mike/bin/nav_snapshot_daily.sh` (idempotent, an toàn chạy lại).
+2. `rc=3` (sanity ±15%): nạp/rút tiền thật? ⇒ xác nhận rồi mới chạy lại với `NAV_SANITY_MAX_PCT` lớn hơn; không thì là lỗi dữ liệu.
+3. ⛔ Sang NGÀY SAU mới phát hiện thiếu ⇒ KHÔNG chạy wrapper/`daily_nav_snapshot.py --date <ngày cũ>` đường live (vị thế broker LIVE ≠ vị thế ngày đó, ghi số sai âm thầm) — backfill bằng `--from-raw` (ghi `nav_is_estimate=True`).
+5. **`rc=5` (corp_action_gate_v2 — KHỐI LƯỢNG vị thế đổi ngoài lệnh khớp thật).** Mã MỚI, KHÁC
+   hẳn rc=4: **không** có marker `nav_pending_retry`, **không** được `nav_sync_retry.sh` retry,
+   `nav_snapshot_daily.sh` rơi vào nhánh `*)` ⇒ 🔴 ngay. Cố ý: rc=4 là "giá chưa đồng bộ, chờ là
+   xong"; rc=5 là "KL vị thế đã đổi, chờ KHÔNG bao giờ xong".
+   - Bằng chứng trên đĩa: `data/execution_logs/nav_gate_block_<account>_<date>.json` (KHÔNG phải
+     `nav_snapshot_*` — tách tên cố ý để không đè artifact audit của ngày đã có NAV). Đọc
+     `corp_action_gate_v2.share_event_blocks` / `.qty_unexplained`.
+   - **`share_event_blocks`** = phần dư KL khớp ĐÚNG tỉ lệ thực hiện của sự kiện cổ phiếu có
+     ex-date = phiên kế tiếp ⇒ broker credit sớm thật (mẫu VHM/MBB/BID/VIX/MSB/VIB). Xử lý: chờ
+     `corp_action_auto_confirm.py` (cron 19:25 ICT) ghi `_status=CONFIRMED` + `qty_multiplier` vào
+     `data/corp_actions.json`, rồi backfill `python3 mike/bin/daily_nav_snapshot.py --account <X>
+     --date <ngày> --from-raw`. CHỈ mã đã CONFIRMED mới được quy ngược KL; LIVE vẫn chặn.
+   - **`qty_unexplained`** = KL đổi, lệnh khớp thật không giải thích được, và không khớp tỉ lệ sự
+     kiện nào (kể cả ca lịch corp-action THIẾU sự kiện). ⛔ KHÔNG backfill trước khi có người đối
+     soát KL thật với sổ broker (§27) — chưa biết nguyên nhân thì chưa biết quy ngược bao nhiêu.
+   - Gate có thể đang chạy mà **thiếu lịch**: `corp_action_gate_v2.active=false` trong artifact +
+     dòng ⚠️ trong log = snapshot `corp_action_daily_<date>.json` thiếu/hỏng/lệch `asof`. Trục
+     KHỐI LƯỢNG vẫn bảo vệ; chỉ mất khả năng GÁN tên sự kiện cho phần dư.
+6. Chạy tay `eod_trading_report.sh` SAU khi đường 2 đã ghi sẽ ghi đè dòng bằng bản đọc mới hơn (đường 1 không có guard, cố ý giữ nguyên) — sau 19:10 dữ liệu đóng cửa đã ổn định nên số phải trùng; lệch ⇒ soi `balance_ts` 2 lần đọc.
+
+### `compute_active_nav.py` exit 5 — account về 0 vị thế (thêm 2026-09-13, commit c9edd4c6)
+Hôm trước có cổ phiếu, hôm nay feed trả 0 vị thế ⇒ script **cố ý dừng exit 5, KHÔNG ghi**
+`active_nav_<account>.json` (file cũ giữ nguyên) — chống feed DNSE rỗng tạm thời ghi NAV thấp giả
+(chỉ tiền+egg, thiếu ~9 lần). Cron `compute_active_nav_all.sh` sẽ log rc=1 cho account đó.
+1. Kiểm `positions` trong `dnse_raw_<hôm nay>.jsonl` mới nhất (lọc account_no, §12).
+2. Feed rỗng tạm ⇒ chạy lại sau vài phút, KHÔNG thêm cờ.
+3. Account THẬT đã bán sạch (đối chiếu fill thật §27) ⇒ `python3 mike/bin/compute_active_nav.py --account <X> --confirm-flat`.
+
+### `compute_active_nav.py` exit 6/7 — cổng §exdate_frame (thêm 2026-09-24, audit dispatch corp-action-audit-c1c2)
+KHÁC exit 5 (0 vị thế) — hai mã này chặn khi VẪN có vị thế nhưng KHÔNG dựng được một hệ quy
+chiếu giá/khối-lượng đáng tin. Cả hai đều **KHÔNG ghi đè** `active_nav_<account>.json` (file cũ
+giữ nguyên), nên hệ quả người vận hành thấy là **file NAV canonical đứng yên/quá hạn**, không
+phải một con số sai lặng lẽ.
+
+1. **`rc=6` — khối lượng vị thế đổi NGOÀI lệnh khớp thật, không quy được về một hệ quy chiếu
+   giá.** Log in kèm danh sách mã bị chặn + lý do (`bin/compute_active_nav.py`, khối
+   `if blocked:` ngay sau `exdate_frame.classify_positions`). Đây là ca **broker đã CREDIT SỚM**
+   khối lượng của một sự kiện tỉ lệ (thưởng CP/cổ tức CP/tách) trước khi vendor
+   `tav2_bq.corporate_action` xác nhận, và script không tự suy được giá cùng hệ cho phần dư đó.
+   - Việc cần làm (đúng thứ tự, script tự nói trong thông điệp lỗi — đọc lại trước khi làm tay):
+     (1) mã "KHÔNG dựng được giá cùng hệ" — NGƯỜI xác minh giá tham chiếu sau sự kiện (bảng giá
+     sở/HOSE, thông báo GDKHQ) đối chiếu với `marketPrice` broker; (2) mã "CHƯA GIẢI THÍCH ĐƯỢC"
+     — kiểm journal fill + lịch corp-action đúng như dòng log nêu.
+   - ⛔ **Chạy lại KHÔNG tự hết rc=6** nếu chưa có thêm bằng chứng: script này không đọc
+     `data/corp_actions.json`, nên đường phục hồi của `corp_action_auto_confirm.py --from-raw`
+     (đường của `daily_nav_snapshot.py`, § rc=5 ở trên) **KHÔNG áp dụng ở đây** — đừng chờ cron
+     19:25 rồi chạy lại tưởng sẽ tự thông, đó là hai script khác nhau đọc hai nguồn khác nhau.
+   - Muốn xem con số mà KHÔNG ghi đè canonical: `--out <đường dẫn tạm khác canonical>` (script
+     tự chối nếu `--out` trỏ lại chính canonical, xem [F2]/rc=7 ngay dưới).
+2. **`rc=7` — `--asof` là ngày KHÁC hôm nay và `--out` (mặc định hoặc truyền tay) trỏ vào file
+   canonical.** Cổng §exdate_frame chỉ chạy được ở nhánh `asof == hôm nay` (vị thế luôn LIVE, còn
+   giá của một `--asof` quá khứ ở hệ quy chiếu khác) — nên script **từ chối ghi** thay vì âm thầm
+   bỏ qua cổng bảo vệ. Gặp mã này:
+   - Muốn refresh số sizing thật: bỏ hẳn `--asof` (mặc định hôm nay, LIVE + cổng chạy bình
+     thường).
+   - Muốn khảo sát/đối chiếu một ngày quá khứ: thêm `--out <đường dẫn khác canonical>` — kết quả
+     đó **KHÔNG dùng làm mẫu số sizing** (vị thế LIVE trộn giá lịch sử là NGOÀI phạm vi cổng).
+   - `--asof ""` (biến chưa set trong một lệnh script hoá) tương đương KHÔNG truyền — từ 2026-09-23
+     (F1) không còn trượt qua cổng như bug gốc; nếu vẫn thấy rc=7 với asof rỗng, đó là bug MỚI,
+     báo ngay đừng tự "sửa" bằng cách bỏ dấu ngoặc.
+   - Không có tự động khôi phục cho hai mã này — cron `compute_active_nav_all.sh` chỉ log rc≠0,
+     KHÔNG autofix (đúng domain "chạm sizing/gate" — §13, cần người quyết).
+
+### NAV bị chặn bởi cổng PRICE_XCHECK (rc=4) — trước khi coi là sự cố
+
+1. Gap `close_price` vs `marketPrice` vị thế **ĐÚNG BẰNG giá trị quyền** của một corp-action có
+   ex-date = **phiên giao dịch KẾ TIẾP** ⇒ là **KỲ VỌNG**, không phải broker stuck: DNSE hạ giá
+   tham chiếu vị thế vào TỐI TRƯỚC ngày ex, BQ/close thì chưa. Ca chuẩn: DGC tối T6 2026-09-11,
+   46.750 vs 38.750, cổ tức tiền 2 đợt (3.000+5.000) ex T2 2026-09-14 — khớp từng đồng.
+2. ⛔ **KHÔNG có tự động — làm TAY, theo thứ tự này** (bản nháp tự nhận diện bị arch-review vòng 2
+   trả NEEDS_CHANGES 2026-09-12, đã gỡ; xem `kb/canonical.md` § DNSE ex-date):
+   a. tra ex-date + giá trị quyền: `tav2_bq.corporate_action` (qua `corp_action_lib.pricing_events`,
+      KHÔNG dùng `events()` executed_only — nó trả RỖNG đúng ngày cần) hoặc
+      `kb/data_registry/price-volume/corp_action_pending.md`;
+   b. **chỉ khi là cổ tức TIỀN MẶT** và `close − Σ cổ tức = marketPrice` (khớp trong 1 bước giá):
+      đây là ca kỳ vọng, không phải sự cố;
+   c. trước khi bỏ qua cổng, PHẢI kiểm bằng tay bất biến của §21: khoản phải thu ĐÃ bị trừ khỏi
+      tiền chưa — `cum_dividend_excl.amount` trong `nav_snapshot_<account>_<date>.json` phải ≈
+      `qty × cổ tức/cp` (ca DGC 09-11: 10.000 × 8.000 = 80.000.000 ✔). Nếu `amount=0` mà
+      `cashDividendReceiving` của broker vẫn còn khoản đó ⇒ **đừng bỏ qua cổng**: NAV sẽ đếm 2 lần
+      đúng bằng cổ tức. NAV đúng mark **giá CUM của phiên đó**, không phải giá broker đã điều chỉnh.
+3. **Sự kiện CỔ PHIẾU (thưởng/trả cổ tức bằng cp/tách): KHÔNG BAO GIỜ bỏ qua cổng.** Broker credit
+   KHỐI LƯỢNG cùng lúc hạ giá (VIB 2026-09-09 19:07: 500→547 và 15.050→13.700), mà nhánh `is_today`
+   không quy đổi ngược qty ⇒ bỏ qua sẽ thổi phồng NAV (VIB +711.100đ, VHM 1:1 +100% vị thế).
+   ✅ Lỗ hổng CŨ (sự kiện tỉ lệ NHỎ, thực đo min 1,03%, giá rơi <5% nên cổng PRICE_XCHECK không
+   bật) **ĐÃ ĐÓNG** bởi `corp_action_gate_v2`: gate chặn theo bằng chứng KHỐI LƯỢNG (phần dư sau
+   khi trừ lệnh khớp thật), độc lập biên độ giá ⇒ rc=5, xem mục 5 § NAV thiếu dòng.
+   ⚠️ **ĐIỀU KIỆN CÒN LẠI — fail-open CÓ CHỦ ĐÍCH, đóng bằng tay:** trục KHỐI LƯỢNG cần một bản
+   ghi vị thế TRƯỚC `date` để so. Khi **KHÔNG có BẤT KỲ bản ghi `dnse_raw_*.jsonl` nào** trước
+   ngày đang tính (account mới, hoặc khoảng trống dữ liệu), `qty_prev = None` ⇒ gate KHÔNG chặn:
+   không có cơ sở so sánh thì chặn là đoán mò. Ca "bản ghi ngày trước CÓ, nhưng VẮNG mã này"
+   thì **KHÔNG** rơi vào đây — nó được quy `qty_prev = 0` (mã mới mua + sự kiện tỉ lệ ~1% vẫn bị
+   chặn; đo thật tháng 9: 1/600 ticker-day, phần dư = 0,0 chính xác ⇒ không có false-block).
+   Ngày đầu tiên có dữ liệu của một account ⇒ đối soát KL bằng tay với sổ broker.
+4. Mọi ca còn lại xử lý như cũ: `nav_sync_retry.sh` retry tới 21:15 ICT rồi escalate bus question.
+
+### LỆCH NGUỒN CỔ TỨC trong báo cáo — Discord "cần Winston (data-ops)" (thêm 2026-09-24, audit dispatch corp-action-audit-c1c2)
+`report_return_gate.py` đối chiếu tiền cổ tức broker thật với vendor `tav2_bq.corporate_action`
+cho mọi vị thế đang giữ; khi hai nguồn lệch (hoặc BQ lỗi hạ tầng không tra được), `report_return_gate`
+in ra dòng máy đọc `VENDOR_MISMATCH_ALERT|...`/`VENDOR_LOOKUP_FAILED|...`, và **`bin/vendor_mismatch_alert.sh`**
+(gọi từ `eod_trading_report.sh` + `check_report_cadence.sh`, đọc từ stdin) bắt lấy khối đó rồi bắn
+Discord vào **topic Trading report** (`$TRADING_REPORT_THREAD`) với tiêu đề "⚠️ LỆCH NGUỒN CỔ TỨC
+— cần Winston (data-ops)" hoặc "⚠️ VENDOR LOOKUP THẤT BẠI — cần Winston (data-ops)".
+
+**Người trực (không phải Winston) thấy tin này — làm theo thứ tự:**
+1. Đọc hết nội dung tin Discord trước khi làm gì khác — nó đã tự phân loại đúng 1 trong 3 nhánh
+   lý do (script tự nói, KHÔNG cần đoán — §29):
+   - **`cash_mismatch`** (hai nguồn bất đồng SỐ cổ tức) → việc của Winston: đối soát
+     `tav2_bq.corporate_action` với sổ broker cho đúng (mã, ex-date) nêu trong tin.
+   - **`stock_leg_ignored`** (nghi giá rơi do CHIA TÁCH bị đọc nhầm thành cổ tức) → việc của
+     Winston: xác nhận lại sự kiện CỔ PHIẾU (ISS) với vendor, KHÔNG phải đối soát tiền.
+   - **`lookup_failed`** (BQ lỗi hạ tầng, KHÔNG tra được vendor — khác hẳn "vendor xác nhận 0 sự
+     kiện") → thường TỰ HẾT khi BQ khoẻ lại; kiểm `bin/bq_freshness_check.sh` trước khi làm gì
+     khác. Chỉ escalate Winston nếu lỗi LẶP LẠI nhiều lượt liên tiếp (không phải 1 lần).
+2. **Gọi Winston** — đây là domain "vận hành TRADING/data/pipeline/report" (bảng § Phân domain
+   tự sửa lỗi ở cuối file này), fixer = Winston. Cách gọi (chọn 1, tuỳ ai đang trực):
+   - Agent/Mike đang trong phiên tương tác: `Agent` tool với `subagent_type: data-ops`, hoặc
+     dispatch ngang hàng `DISPATCH_FROM=<agent> mike/bin/dispatch.sh Winston "đối soát lệch
+     nguồn cổ tức <mã> ex-date <ngày>, xem chi tiết topic Trading report"`.
+   - User đọc Discord trực tiếp: trả lời ngay trong thread đó (Winston/Mike theo dõi topic này).
+   - ⚠️ **KHÔNG có auto-route** cho ca này: script tự ghi bus `Mike error vendor-mismatch-<file>`
+     (kênh PHỤ, không phải kênh chính) nhưng `bin/ops_health_check.sh` **chỉ xét
+     `event_type == "question"`, bỏ qua `error`** — nên event này KHÔNG tự lên hàng chờ xử lý của
+     ai. Discord là kênh CHÍNH, phải có người chủ động đọc và dispatch tay.
+3. **Biết đã gỡ chặn chưa** — KHÔNG có cờ "đã xử lý" tự động cập nhật ngược lại tin Discord cũ.
+   Xác nhận bằng 1 trong 2 cách:
+   - Chạy lại thủ công: `python3 mike/bin/report_return_gate.py <report_path>` — hết
+     `VENDOR_MISMATCH_ALERT`/`VENDOR_LOOKUP_FAILED` cho đúng (mã, ex-date) đó ⇒ đã thông (vendor
+     đã cập nhật hoặc BQ đã khoẻ lại).
+   - Đợi báo cáo NGÀY KẾ TIẾP (đường phát lại THẬT của cơ chế này — file tên khác nên chạy lại
+     toàn bộ pipeline từ đầu): còn giữ vị thế mã đó ⇒ gate tự quét lại đúng cặp (mã, ex-date)
+     trong `LOOKBACK_DAYS=120`; sạch ⇒ không còn tin mới cho mã đó.
+   - ⛔ **Bán hết vị thế TRƯỚC khi lệch nguồn được xử lý** = mất khả năng tái tạo cảnh báo (event
+     rơi khỏi phạm vi quét vì không còn giữ mã) — nếu đã bán, đối soát lệch nguồn này coi như
+     xong về mặt báo cáo (không còn ảnh hưởng số tương lai) nhưng VẪN nên xác nhận với Winston
+     cho việc khác (kiểm dữ liệu vendor nói chung), không tự đóng coi như hết trách nhiệm.
+   - De-dup 1 lần/file/ngày ở `state/vendor_mismatch_alerted.json` — thấy tin liên tục nhiều
+     NGÀY KHÁC NHAU cho CÙNG một (mã, ex-date) nghĩa là vẫn CHƯA xử lý, không phải bug spam.
 
 ## Nơi kết quả đổ về (đọc mỗi sáng, KHÔNG cần user nhắc)
 
@@ -248,6 +407,115 @@ kiểm lại thì cả 2 đều là `NEEDS_CHANGES` có bằng chứng — vẫn
    cùng nguồn — nếu lệch: bug checker (autofix được).
    Fail-safe khi chưa rõ: hệ thống tự rơi về DT4_only (an toàn, chỉ mất lớp macro-cap).
 
+## Boot — khởi động lại pipeline sau server downtime (≥1h, bao qua cron tối)
+
+> **Trigger word: "boot"** — anh nhắn "boot" hoặc "boot YYYY-MM-DD" là Mike chạy ngay workflow này.
+> Không nhầm với OS reboot — "boot" ở đây = boot lại pipeline hàng ngày.
+
+**Khi nào áp dụng:** server tắt bất kỳ lúc nào từ 18:00 ICT và chưa khôi phục khi cron tối
+chạy — tức là bỏ lỡ ≥1 trong số: `daily_refresh` (18:30), `bq_freshness+DollarBill` (19:00),
+`eod_trading_report` (19:10), `sync_bq_cache_daily` (23:45).
+
+### Bước 0 — Kiểm tra an toàn (LUÔN làm trước)
+```bash
+ls /home/trido/thanhdt/WorkingClaude/data/BOT_STOP 2>/dev/null && echo "BOT STOPPED" || echo "bot ok"
+# Xem có lệnh nào treo không (bot đã tự cancel lúc ~14:50 nếu chạy bình thường)
+cat /home/trido/thanhdt/WorkingClaude/mike/logs/bot_*_$(date -d yesterday +%Y%m%d)*.log 2>/dev/null | grep -i "cancel\|error\|fail" | tail -10
+```
+Nếu BOT_STOP bật hoặc có lệnh treo → dừng, báo user trước khi làm gì khác.
+
+### Bước 1 — BQ cache sync (an toàn bất kỳ giờ nào)
+```bash
+nohup /home/trido/thanhdt/WorkingClaude/sync_bq_cache_daily.sh \
+  > /home/trido/thanhdt/WorkingClaude/mike/logs/sync_bq_recovery_$(date +%Y%m%d).log 2>&1 &
+echo "BQ sync PID=$!"
+```
+Đợi hoàn tất (theo dõi log). Sau khi xong: tất cả bảng BQ local cache có data của ngày bị miss.
+
+### Bước 2 — EOD report ngày bị miss (không cần BQ sync — đọc local plan/state)
+```bash
+MISSED_DATE=$(date -d yesterday +%Y-%m-%d)   # hoặc hardcode ngày cụ thể
+source /home/trido/thanhdt/WorkingClaude/wc_env.sh
+/home/trido/thanhdt/WorkingClaude/mike/bin/eod_trading_report.sh --account SpaceX --date $MISSED_DATE
+/home/trido/thanhdt/WorkingClaude/mike/bin/eod_trading_report.sh --account ZaloPay --date $MISSED_DATE
+```
+
+### Bước 3 — universe_pit rebuild cho ngày bị miss ⚠️ BẮT BUỘC (bài học 2026-08-25)
+```bash
+# PHẢI chạy SAU BQ sync — BQ sync thêm ngày mới vào ticker nhưng universe_pit lag lại.
+# Nếu bỏ bước này: papertrade_daily hôm sau FAIL đồng loạt (assert_universe_covers lỗi).
+source /home/trido/thanhdt/WorkingClaude/wc_env.sh
+$DNA_PYEXE /home/trido/thanhdt/WorkingClaude/mike/bin/build_universe_pit.py --date $MISSED_DATE
+```
+Kết quả mong đợi: `"status": "APPENDED"`. Nếu `"status": "REFUSED"` → BQ cho ngày đó chưa đủ
+data (n_rows quá thấp so với median) → có thể ngày đó thật sự không có data, KHÔNG force.
+
+### Bước 4 — Paper programs daily report ngày bị miss (chạy nền, ~10 phút)
+```bash
+nohup $DNA_PYEXE /home/trido/thanhdt/WorkingClaude/mike/bin/paper_programs_daily_report.py \
+  --date $MISSED_DATE --post --email \
+  > /home/trido/thanhdt/WorkingClaude/mike/logs/paper_report_recovery_$(date +%Y%m%d).log 2>&1 &
+echo "Paper report PID=$!"
+# Script mất ~10 phút do 7 probe tuần tự (tổng timeout ~560s). Đợi log hoàn tất.
+```
+
+### Bước 5 — daily_refresh + plan T+1 (CÓ RÀNG BUỘC THỜI GIAN)
+
+**⚠️ Quy tắc cứng: `daily_refresh_v34b_linux.sh` KHÔNG chạy được khi market đang mở
+(09:00–14:55 ICT)**. Script step [0] chờ ticker_prune có ≥200 mã cho HÔM NAY (data chỉ có sau
+khi HOSE đóng cửa và BQ ingest xong, ~17:30–18:00 ICT). Chạy sớm hơn → script treo 6×15min
+rồi abort.
+
+```
+Nếu giờ hiện tại < 18:30 ICT → để cron 18:30 tự chạy, KHÔNG chạy tay.
+Nếu giờ hiện tại ≥ 18:30 ICT → cron đã chạy hoặc đang chạy → verify log, không re-run.
+```
+
+Chỉ chạy tay nếu cron 18:30 ICT failed (xem log `daily_refresh_*.log`):
+```bash
+nohup /home/trido/thanhdt/WorkingClaude/daily_refresh_v34b_linux.sh \
+  > /home/trido/thanhdt/WorkingClaude/mike/logs/daily_refresh_recovery_$(date +%Y%m%d).log 2>&1 &
+```
+
+### Thứ tự thực thi và phụ thuộc
+
+```
+Bước 0 (safety)  →  Bước 1 (BQ sync)  →  Bước 3 (universe_pit)
+                                        →  Bước 2 (EOD report)      [độc lập với 1]
+                                        →  Bước 4 (paper report)     [độc lập với 1]
+                  →  Bước 5 (daily_refresh)  [chờ ≥18:30 ICT]
+```
+
+Bước 2 và 4 có thể chạy song song. Bước 3 PHẢI sau Bước 1. Bước 5 PHẢI sau 18:30 ICT.
+
+### Checklist nhanh (copy-paste khi cần)
+```bash
+# Thay YYYY-MM-DD bằng ngày server bị down:
+MISSED=2026-08-24
+source /home/trido/thanhdt/WorkingClaude/wc_env.sh && WC=/home/trido/thanhdt/WorkingClaude
+
+# [0] Safety
+ls $WC/data/BOT_STOP 2>/dev/null && echo "⛔ BOT_STOP bật — dừng lại"
+
+# [1] BQ sync
+nohup $WC/sync_bq_cache_daily.sh > $WC/mike/logs/sync_bq_recovery_$(date +%Y%m%d).log 2>&1 &
+
+# [2] EOD report (chạy ngay, không cần đợi BQ sync)
+$WC/mike/bin/eod_trading_report.sh --account SpaceX --date $MISSED
+$WC/mike/bin/eod_trading_report.sh --account ZaloPay --date $MISSED
+
+# [3] universe_pit rebuild (SAU khi BQ sync xong)
+$DNA_PYEXE $WC/mike/bin/build_universe_pit.py --date $MISSED
+
+# [4] Paper report (SAU BQ sync, nền ~10 phút)
+nohup $DNA_PYEXE $WC/mike/bin/paper_programs_daily_report.py \
+  --date $MISSED --post --email \
+  > $WC/mike/logs/paper_report_recovery_$(date +%Y%m%d).log 2>&1 &
+
+# [5] daily_refresh — CHỈ chạy thủ công nếu cron 18:30 failed và giờ đã ≥18:30
+# nohup $WC/daily_refresh_v34b_linux.sh > $WC/mike/logs/daily_refresh_recovery_$(date +%Y%m%d).log 2>&1 &
+```
+
 ## Nhật ký & kinh nghiệm
 
 - Mọi sự cố ảnh hưởng workflow sống → **1 file mới** trong `kb/incidents/<YYYY-MM>/` (blameless,
@@ -257,6 +525,31 @@ kiểm lại thì cả 2 đều là `NEEDS_CHANGES` có bằng chứng — vẫn
 - Số đã gửi cho user mà phát hiện sai → đính chính NGAY trên kênh đã gửi, không âm thầm sửa.
 - Bug ở 1 script → grep các script khác làm việc TƯƠNG TỰ (bài học 07-06: 3 bug cùng dạng
   "logic trùng lặp không đồng bộ" trong 1 ngày).
+
+## Headless agent bị classifier chặn git-write / BQ-write vào file production (tái diễn 09-27, 09-28)
+
+**Triệu chứng:** agent chạy headless (dispatch) làm xong việc, đã có verdict CONFIRMED, nhưng
+bước CUỐI (`git merge` vào main, `bq query 'CREATE OR REPLACE'`, ghi đè file production) bị
+harness classifier từ chối. Agent quay ra escalate, việc treo cho tới khi có người chạy trong
+phiên tương tác. Đã tốn ~2h (09-27 `fa_ratings_8l` restore 06:54→08:55) và 1 lần nữa 09-28
+(`close_repair` merge `eec792d7`/`3c55c249`).
+
+**Đây KHÔNG phải lỗi fleet — đừng đi debug `dispatch.sh`/quyền file.** Nhận diện bằng: job có
+finding "ALL_VERIFIED_READY ... blocked-by-classifier", hoặc commit nằm trên feature branch mà
+không merge được.
+
+**Làm gì NGAY (đừng điều tra lại từ đầu):**
+1. Xác minh công việc thật sự đã xong: verdict CONFIRMED trên bus + selfcheck PASS + commit tồn
+   tại trên feature branch (`git log --oneline --all | grep <hash>`).
+2. Người/phiên TƯƠNG TÁC chạy bước cuối (merge / BQ write). Headless retry sẽ hỏng lại.
+3. Đóng question gốc bằng event `answer` NGAY sau khi merge — nếu không, checker §5 sẽ báo
+   pending tiếp 2 lần/ngày dù việc đã xong (đúng lỗi đã xảy ra với
+   `closerepair-fix-approval-needed`, mở 09-28T10:57Z, merge xong 09-28 mà vẫn pending 29/09).
+
+**Giảm tần suất:** việc biết trước sẽ cần git-write vào main hoặc BQ write → dispatch dạng
+TƯƠNG TÁC ngay từ đầu, đừng để headless chạy tới bước cuối rồi tắc. (Câu hỏi có nên bắt buộc
+hoá quy tắc này vẫn đang chờ user — bus topic
+`retro-pattern-recurring-classifier-blocks-headless-agent-production-write`.)
 
 ## Lược sử
 2026-07-07: viết lần đầu + wire autofix vào ops_health_check.sh & sync_bq_cache_daily.sh
@@ -276,3 +569,9 @@ CONFIRMED = ✅ xong; NEEDS_CHANGES/REFUTED = ⚠ cần người xem + bus quest
 vòng 2 — chống ping-pong). Review ad-hoc 1 finding Wags: `wags_autofix.sh --review-topic
 "<substr>"`. `ops_health_check.sh` tự route: cảnh báo circuit-breaker/question → Wags,
 còn lại → Winston.
+
+**`_ext.md` size (OKF split, chủ: Wags)**: `kb_nightly.sh` cảnh báo (không chặn) qua
+`notify.sh` khi bất kỳ `*_ext.md` nào >35KB (cùng tỉ lệ ngưỡng core 40KB) — split là xử lý
+MẶC ĐỊNH của Phase 4.6 (mandate 2026-08-19) nên `_ext.md` không có trần tự nhiên. Hành động:
+rà soát/nén tay khi cảnh báo tới, không có auto-fix cho ext (khác core — chưa rõ tách ext
+tiếp về đâu). Không phải arch-review bắt buộc (chỉ đụng nội dung KB, không đụng tooling).

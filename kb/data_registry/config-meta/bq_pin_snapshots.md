@@ -67,3 +67,11 @@ pin này canh), [`../price-volume/vnindex_pe_mirror_col.md`](../price-volume/vni
 (backfill 2006), [`../price-volume/corp_action_pending.md`](../price-volume/corp_action_pending.md).
 
 ↩ [Về index nhóm](index.md) · [index tổng](../index.md)
+
+## ⚠️ Cảnh báo nhãn — `*_pin_202608` KHÔNG phải trạng thái 2026-08-01
+11 bảng `tav2_pin.*_pin_202608` được tạo **2026-09-05 03:22–03:33 ICT** (chạy bù sau khi
+`bq_monthly_pin` chết 2 tháng vì lỗi auth), KHÔNG phải 2026-08-01 như quy ước tên
+(`bq_monthly_pin.py` docstring: `YYYYMM` = tháng pin được TAKEN). Lệch **5 tuần**. Sự thật nằm
+ở metadata `snapshotTime` của từng bảng — **luôn đọc `snapshotTime`, đừng suy từ tên** khi soát
+restate hoặc so vintage. User chốt 2026-09-12 phương án (a): GIỮ NGUYÊN + cảnh báo tại đây
+(không đổi tên, không xoá). Bus: `Mike/bq-pin-202608-nhan-lech-tao-ngay-0905`.

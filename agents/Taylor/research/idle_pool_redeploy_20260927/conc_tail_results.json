@@ -1,0 +1,98 @@
+{
+ "job": "Taylor_20260927_085628",
+ "R": 300,
+ "KS": [
+  4,
+  6,
+  30
+ ],
+ "w_sleeve": 0.1,
+ "carry": 0.0855,
+ "n_quarters": 2966,
+ "N": 3106,
+ "yrs": 12.46,
+ "standalone": {
+  "4": {
+   "cagr_med_pct": 14.114,
+   "cagr_5th_pct": 6.204,
+   "dd_med_pct": -52.07,
+   "dd_5th_pct": -63.79,
+   "dd_sd_pp": 7.54,
+   "cagr_sd_pp": 5.14
+  },
+  "6": {
+   "cagr_med_pct": 14.959,
+   "cagr_5th_pct": 7.938,
+   "dd_med_pct": -51.26,
+   "dd_5th_pct": -62.48,
+   "dd_sd_pp": 6.73,
+   "cagr_sd_pp": 4.29
+  },
+  "30": {
+   "cagr_med_pct": 15.434,
+   "cagr_5th_pct": 12.536,
+   "dd_med_pct": -48.78,
+   "dd_5th_pct": -53.66,
+   "dd_sd_pp": 2.85,
+   "cagr_sd_pp": 1.76
+  }
+ },
+ "injected": [
+  {
+   "config": "park0.30 + carry (baseline a)",
+   "cagr_act_pct": 28.397,
+   "calmar_act": 2.0573,
+   "E_calmar": 1.9627,
+   "dd5_pct": -22.44,
+   "cagr5_pct": 20.265
+  },
+  {
+   "config": "park0.30 + carry + 10% k=4 [median-draw]",
+   "cagr_act_pct": 28.704,
+   "calmar_act": 1.7839,
+   "E_calmar": 1.713,
+   "dd5_pct": -26.22,
+   "cagr5_pct": 19.936
+  },
+  {
+   "config": "park0.30 + carry + 10% k=4 [5th-pct-draw]",
+   "cagr_act_pct": 28.762,
+   "calmar_act": 1.6365,
+   "E_calmar": 1.6832,
+   "dd5_pct": -27.18,
+   "cagr5_pct": 19.906
+  },
+  {
+   "config": "park0.30 + carry + 10% k=6 [median-draw]",
+   "cagr_act_pct": 28.463,
+   "calmar_act": 1.7301,
+   "E_calmar": 1.6678,
+   "dd5_pct": -26.74,
+   "cagr5_pct": 19.618
+  },
+  {
+   "config": "park0.30 + carry + 10% k=6 [5th-pct-draw]",
+   "cagr_act_pct": 29.047,
+   "calmar_act": 1.8455,
+   "E_calmar": 1.7418,
+   "dd5_pct": -26.01,
+   "cagr5_pct": 20.347
+  },
+  {
+   "config": "park0.30 + carry + 10% k=30 [median-draw]",
+   "cagr_act_pct": 29.125,
+   "calmar_act": 1.8414,
+   "E_calmar": 1.7609,
+   "dd5_pct": -25.8,
+   "cagr5_pct": 20.428
+  },
+  {
+   "config": "park0.30 + carry + 10% k=30 [5th-pct-draw]",
+   "cagr_act_pct": 28.869,
+   "calmar_act": 1.805,
+   "E_calmar": 1.7216,
+   "dd5_pct": -26.25,
+   "cagr5_pct": 20.082
+  }
+ ]
+}

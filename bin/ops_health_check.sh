@@ -19,7 +19,7 @@
 #      Trading report topic (không chôn ở Trading Daily) + bus event question.
 #
 # Đây là lớp CẢNH BÁO SỚM bổ sung, KHÔNG thay thế preflight_check.sh (08:45) hay
-# eod_trading_report.sh (15:00) — chạy TRƯỚC mỗi phiên để con người có thời gian phản ứng.
+# eod_trading_report.sh (19:10) — chạy TRƯỚC mỗi phiên để con người có thời gian phản ứng.
 # Post tóm tắt vào Trading Daily (vận hành sống trong ngày), không phải Trading report
 # (báo cáo tổng hợp) — đúng phân tách 2026-07-03.
 set -uo pipefail
@@ -39,6 +39,63 @@ while [[ $# -gt 0 ]]; do
     *) echo "Unknown arg: $1" >&2; exit 1 ;;
   esac
 done
+
+# ── Mốc "CHẠY MỘT LẦN" cho các check CẤP THỊ TRƯỜNG (không theo account) ─────────────────
+# `anomaly_scan.py` và `forensic_flag_review_check.py` KHÔNG nhận `--account` (đã kiểm: 0 chỗ
+# khai) — chúng là check cấp thị trường, chạy 1 lần là đủ. Trước đây neo vào `ACCOUNT =
+# "SpaceX"` để khỏi chạy trùng khi for_each_live_account lặp qua từng account. Nhược điểm:
+# mốc đó là một TÊN CỤ THỂ, nên ngày nào SpaceX bị disable (hoặc đổi tên) thì CẢ HAI check
+# biến mất IM LẶNG — không ai thấy thiếu, vì không có cảnh báo nào cho "check đã không chạy".
+# Neo theo ACCOUNT ĐẦU TIÊN trong danh sách live thay vì một tên: vẫn chạy đúng 1 lần, nhưng
+# không phụ thuộc account nào cụ thể còn sống.
+# Fail-open: không đọc được danh sách ⇒ trả rỗng ⇒ điều kiện dưới sai ⇒ BỎ QUA check, giống
+# hệt hành vi khi file script không tồn tại (đã có nhánh `-f` cho ca đó).
+# ƯU TIÊN giữ nguyên SpaceX khi nó còn live, để output của 2 check này KHÔNG đổi chỗ sang
+# message của account khác (live_dnse_labels() trả theo thứ tự config = ['ZaloPay','SpaceX'],
+# nên neo thẳng vào phần tử [0] sẽ dời output sang ZaloPay ngay hôm nay — đúng về mặt "chạy 1
+# lần" nhưng là một thay đổi nhìn thấy được mà không ai yêu cầu). Chỉ khi SpaceX KHÔNG còn
+# trong danh sách live thì mới rơi về account đầu tiên — đó chính là ca mà bản cũ lặng lẽ
+# KHÔNG chạy check nào cả.
+# FAIL-LOUD 2026-09-28 (user duyet). Comment ngay tren ke ca mot su co: ban cu "lang le KHONG
+# chay check nao ca". Ho va nhanh `ls[0]` RONG — nhung KHONG va nhanh EXCEPTION: `2>/dev/null ||
+# true` lam import loi cung cho RUNONCE_LABEL="" ⇒ ca 3 check chay-mot-lan deu bi cong
+# `[ -n "$RUNONCE_LABEL" ]` chan (anomaly_scan, forensic_check, worktree_stale) ⇒ BIEN MAT cho
+# CA HAI account ma khong mot dong nao noi vi sao. Nay tach: rong vi KHONG CO ACCOUNT LIVE
+# (hop le, im lang) vs rong vi LOI (phai KEU).
+# FAIL-LOUD 2026-09-28 (user duyet). Comment ngay tren ke ca mot su co: ban cu "lang le KHONG
+# chay check nao ca". Ho va nhanh `ls[0]` RONG — nhung KHONG va nhanh EXCEPTION: `2>/dev/null ||
+# true` lam import loi cung cho RUNONCE_LABEL="" ⇒ ca 3 check chay-mot-lan deu bi cong
+# `[ -n "$RUNONCE_LABEL" ]` chan (anomaly_scan, forensic_check, worktree_stale) ⇒ BIEN MAT cho
+# CA HAI account ma khong mot dong nao noi vi sao. Nay tach: rong vi KHONG CO ACCOUNT LIVE
+# (hop le, im lang) vs rong vi LOI (phai KEU).
+# ⚠️ Ham nay duoc goi trong `$( )` = SUBSHELL ⇒ gan bien ben trong KHONG ra duoc ngoai (ban va
+# dau tien cua Mike dinh dung `RUNONCE_ERR=...` va selfcheck bat duoc: loi bi nuot y nhu cu).
+# Vi vay bao loi bang chinh STDOUT, co tien to khong the nham voi mot nhan account.
+_runonce_label() {
+  local _out _rc
+  _out="$(cd "$WC_ROOT" && python3 -c "
+from trading_bot.config import live_dnse_labels
+ls = live_dnse_labels()
+print('SpaceX' if 'SpaceX' in ls else (ls[0] if ls else ''))
+" 2>&1)"
+  _rc=$?
+  if [ "$_rc" -ne 0 ]; then
+    printf '__RUNONCE_ERR__rc=%s %s' "$_rc" "$_out"
+    return 0
+  fi
+  printf '%s' "$_out"
+}
+RUNONCE_LABEL="$(_runonce_label)"
+RUNONCE_ERR=""
+case "$RUNONCE_LABEL" in
+  __RUNONCE_ERR__*)
+    RUNONCE_ERR="${RUNONCE_LABEL#__RUNONCE_ERR__}"
+    RUNONCE_LABEL=""
+    echo "⚠️ [runonce] KHONG lay duoc nhan account live ⇒ BO QUA ca 3 check chay-mot-lan"
+    echo "   (anomaly_scan / forensic_check / worktree_stale) cho CA HAI account. Loi that:"
+    echo "   $RUNONCE_ERR"
+    ;;
+esac
 
 TODAY="$(TZ='Asia/Ho_Chi_Minh' date +%Y-%m-%d)"
 NOW_ICT="$(TZ='Asia/Ho_Chi_Minh' date '+%Y-%m-%d %H:%M ICT')"
@@ -132,11 +189,25 @@ if os.path.exists(jpath):
                   if k in ("POLL_FAIL", "POSITIONS_FAIL", "GHOST_ORDER", "CANCEL_FAIL") and v > 20}
     if other_place_fail > 20:
         concerning["PLACE_FAIL (không phải T+2)"] = other_place_fail
+    # PLACE_FAIL_STOPPED: ngưỡng > 0, KHÔNG phải > 20. Từ 2026-09-29 executor tự dừng sau 5
+    # lượt PLACE_FAIL lỗi cấu trúc liên tiếp (trading_bot/executor.py::_count_place_fail), nên
+    # tổng PLACE_FAIL bị cắt xuống ≤5/lệnh — dưới hẳn ngưỡng 20 ở trên. Nếu chỉ 1-4 mã trúng
+    # cùng bức tường (ca thật 29/09 là 6 mã), checker này sẽ im lặng hoàn toàn trong khi vị thế
+    # nằm kẹt: cơ chế chống-ồn vừa thêm không được phép làm tắt luôn cái chuông duy nhất đã bắt
+    # được sự cố đó (arch-review 2026-09-29 F2). 1 dòng = 1 lệnh bị dừng hẳn = đáng báo.
+    if counts.get("PLACE_FAIL_STOPPED", 0) > 0:
+        concerning["PLACE_FAIL_STOPPED (bot tự dừng đặt lệnh)"] = counts["PLACE_FAIL_STOPPED"]
     # Đếm CẢ NGÀY thì 1 sự cố đã sửa xong vẫn kêu tới hết phiên (ca thật ZaloPay 2026-08-10:
     # 944 PLACE_FAIL dứt hẳn 10:32, restart 10:35 → 8/8 lệnh bán khớp, checker 12:45 vẫn báo ⚠️).
     # Có PLACE/FILL/DONE thành công SAU lần lỗi cuối = bằng chứng đã phục hồi thật → hạ xuống ℹ️.
     resolved = {}
     for k in list(concerning):
+        if k.startswith("PLACE_FAIL_STOPPED"):
+            # KHÔNG hạ cấp: last_success_ts là PLACE/FILL/DONE của BẤT KỲ mã nào trong journal,
+            # nên một mã khác khớp sau đó sẽ dìm mất đúng dòng "bot đã dừng hẳn lệnh này".
+            # Với PLACE_FAIL thường thì nới vậy chấp nhận được (nó tự lặp lại nếu chưa khỏi);
+            # với một lệnh đã bị dừng hẳn thì không — nó sẽ không bao giờ kêu lại.
+            continue
         ev_key = "PLACE_FAIL" if k.startswith("PLACE_FAIL") else k
         lt = last_ts.get(ev_key, "")
         if lt and last_success_ts > lt:
@@ -160,17 +231,32 @@ else:
     lines.append(f"ℹ️ Chưa có journal hôm nay ({today}) — chưa tới giờ giao dịch hoặc chưa có phiên.")
 
 # 4. Circuit breaker per-agent
+# `tripped_until` KHÔNG tự bị xoá khi hết hạn — bin/mike_json.py circuit-check dọn LAZY,
+# chỉ vào đúng lúc có dispatch mới tới agent đó. Nên test truthiness (`if tripped_until:`)
+# báo TRIPPED VĨNH VIỄN cho mọi agent từng trip rồi không được dispatch lại. Sự cố thật
+# 2026-08-19: breaker Taylor hết hạn 05:43:03Z, check này 05:45:07Z vẫn báo TRIPPED → đốt
+# một job Wags(Opus) cho trạng thái đã tự khỏi. Hỏi mike_json (so với NOW, read-only) thay
+# vì tự đọc file. KHÔNG fail-OPEN: lệnh lỗi phải KÊU, không được nuốt rồi in ✅.
 circuit_dir = os.path.join(wc_root, "mike", "state", "circuit")
-tripped = []
-if os.path.isdir(circuit_dir):
-    for p in glob.glob(os.path.join(circuit_dir, "*.json")):
-        try:
-            c = json.load(open(p, encoding="utf-8"))
-        except Exception:
-            continue
-        if c.get("tripped_until", 0):
-            tripped.append(os.path.basename(p).replace(".json", ""))
-if tripped:
+tripped, _cb_err = [], ""
+try:
+    _cb = subprocess.run([sys.executable, os.path.join(wc_root, "mike", "bin", "mike_json.py"),
+                          "circuit-tripped", circuit_dir],
+                         capture_output=True, text=True, timeout=30)
+    if _cb.returncode != 0:
+        _cb_err = (_cb.stderr or "rc=%d" % _cb.returncode).strip()[:200]
+    else:
+        for _ln in _cb.stdout.splitlines():
+            _ln = _ln.strip()
+            if not _ln:
+                continue
+            _ag, _, _rem = _ln.partition(" ")
+            tripped.append(f"{_ag} (còn {int(_rem) // 60}p{int(_rem) % 60}s)" if _rem.isdigit() else _ag)
+except Exception as e:
+    _cb_err = f"{type(e).__name__}: {e}"[:200]
+if _cb_err:
+    W(f"Circuit breaker: KHÔNG kiểm tra được ({_cb_err}) — coi như CHƯA BIẾT, không phải 'bình thường'.")
+elif tripped:
     W(f"Circuit breaker đang TRIPPED cho: {', '.join(tripped)} — dispatch các agent này sẽ bị chặn tạm thời.")
 else:
     OK("Circuit breaker: tất cả agent bình thường (0 tripped).")
@@ -224,7 +310,10 @@ else:
 # (và qua đó cả paper_checkpoint_escalation_selfcheck) NameError → gác hồi quy chết im.
 import datetime as dt
 from collections import defaultdict
-_now = dt.datetime.now(dt.timezone.utc)
+# CHECK5_NOW chỉ dành cho selfcheck ghim kịch bản lịch cố định; production không set biến này.
+_now_env = os.environ.get("CHECK5_NOW", "")
+_now = (dt.datetime.fromisoformat(_now_env.replace("Z", "+00:00"))
+        if _now_env else dt.datetime.now(dt.timezone.utc))
 cutoff = _now - dt.timedelta(hours=48)
 # Backlog TREO LÂU: câu hỏi >48h mà chưa có answer/decision trước đây RƠI KHỎI radar hoàn
 # toàn (check chỉ nhìn 48h) → chết im, không owner, không ai nhắc user quyết (đúng gap mà
@@ -309,9 +398,60 @@ ACK_MAX_SUPPRESS_DAYS = 14
 # đóng cho tiền tố cũ.
 # ⇒ LUẬT: thêm bất kỳ nhánh `append_event.sh Wags question` MỚI nào vào wags_autofix.sh thì
 # PHẢI thêm tiền tố đó vào tuple này CÙNG LÚC (và pin bằng selfcheck ca 10/11).
-WAGS_SELF_Q_PREFIXES = ("wags-fix-not-confirmed:", "wags-arch-review-inconclusive:")
+# THÊM 2026-08-18 (arch-review coord-2026-08-18 required_change #3) —
+# "wags-autofix-review-needed:": nhánh dispatch.sh exit=5 (đã lên lịch tự resume / tự
+# fallback). Pipeline DỪNG trước bước arch-review nên vòng fix đó còn NỢ một lượt review;
+# bản cũ ghi nợ đó bằng event `status` "wags-autofix-resume-pending:" — MỒ CÔI, không
+# checker nào đọc, tức nợ biến mất im lặng. Giờ đi đường question để người thấy trong báo
+# cáo ops hằng ngày, và nằm trong tuple này để KHÔNG kéo COORD_WARN dispatch lại chính
+# vòng fix vừa dừng (nó đang tự chạy tiếp — re-dispatch là chạy song song với chính nó).
+# THÊM 2026-09-19 (arch-review coord-2026-09-19 round 3, killer objection) — topic round-2-
+# escalation ("wags-arch-review-round2-unresolved: <LABEL>", bin/wags_autofix.sh khối
+# WAGS_ROUND2_ESCALATE) từng dùng dạng "<LABEL>-arch-review-round2-unresolved" (label-trước),
+# KHÔNG khớp startswith() của tuple này ⇒ rơi vào pending_q → COORD_WARN → tự dispatch lại
+# wags_autofix 2 lần/ngày cho tới khi người trả lời — đúng vòng lặp tự nuôi payload của chính
+# câu hỏi đó ghi rõ "KHÔNG đợi Wags tự trả lời lần nữa". Đã đổi topic sang dạng tiền-tố khớp
+# quy ước các nhánh khác VÀ thêm vào đây cùng lúc theo LUẬT ở trên.
+WAGS_SELF_Q_PREFIXES = ("wags-fix-not-confirmed:", "wags-arch-review-inconclusive:",
+                        "wags-autofix-review-needed:", "wags-arch-review-round2-unresolved:")
+# Cửa sổ ÂN HẠN trước khi 1 câu hỏi trở thành ROUTABLE (được phép kéo dispatch wags_autofix).
+# Sự cố THẬT 2026-08-17: Taylor đăng question `hybrid-fill-live-deadline-20260817` lúc
+# 02:01:45Z (đang trả lời chính dispatch mà Mike vừa giao lúc 02:00:06Z); một lần chạy
+# ops_health_check lúc 02:06:15Z thấy nó "CHƯA có answer" sau ĐÚNG 4 phút 31 giây và dispatch
+# job Wags coord-2026-08-17 (Opus). Mike đăng answer lúc 02:06:56Z — tức người phụ trách ĐANG
+# xử lý, chỉ là chưa kịp ghi bus. Toàn bộ job Wags đó là false alarm thuần.
+# Vì sao là lỗi CHECKER chứ không phải lỗi Taylor/Mike: "chưa có answer sau vài phút" KHÔNG
+# mang thông tin gì về việc câu hỏi có bị bỏ rơi hay không — không con người nào, không agent
+# nào trả lời trong khung đó. Điều kiện dispatch phải là "đã có đủ thời gian trả lời mà vẫn
+# im", không phải "tại thời điểm quét chưa thấy answer" (đúng họ §28 coding_guidelines: đọc
+# một BIỂU DIỄN tức thời rồi kết luận về sự thật bền).
+# 60 phút: ân hạn chỉ an toàn khi vẫn còn lượt quét theo lịch TRƯỚC mốc ts+48h. Cron thật là
+# 2 lần/ngày 01:20 + 05:45 UTC, CHỈ T2-T6 (`20 1 * * 1-5`, `45 5 * * 1-5`); khe hở lớn nhất
+# T6 05:45Z → T2 01:20Z = 67h35 > cutoff 48h. Vì vậy KHÔNG áp dụng ân hạn nếu không còn lượt
+# quét Mon-Fri nào trước ts+48h; nếu cứ hoãn, question trong T6 04:45-05:45Z sẽ rơi thẳng vào
+# aged_q [WARN-ONLY] mà không bao giờ được dispatch (xem selfcheck ca 8d).
+# KHÔNG im lặng: câu hỏi trong ân hạn vẫn IN ra báo cáo, chỉ mang marker [WARN-ONLY] để không
+# rơi vào COORD_WARN (che giấu = đúng thứ mọi comment khác trong check #5 này đang chống).
+QUESTION_GRACE_MIN = 60
+# Hai hằng số này phải khớp crontab thật. Nếu cron đổi, cập nhật cả selfcheck ca 8d — không để
+# ân hạn tự nới rộng khe cuối tuần của kênh escalate question.
+CRON_SCAN_UTC_TIMES = ((1, 20), (5, 45))
+
+def _future_scan_before(limit_ts):
+    # Có ít nhất 1 lượt quét Mon-Fri diễn ra SAU lượt quét hiện tại và TRƯỚC ts+48h không.
+    # Check #5 chạy TAY bất kỳ lúc nào nên phải xét tương đối với `_now`, không chỉ đếm lịch.
+    day = _now.date()
+    for offset in range(3):
+        for hour, minute in CRON_SCAN_UTC_TIMES:
+            cand = dt.datetime.combine(day + dt.timedelta(days=offset),
+                                       dt.time(hour, minute), tzinfo=dt.timezone.utc)
+            if cand.weekday() < 5 and _now < cand < limit_ts:
+                return True
+    return False
+
 inbox_dir = os.path.join(wc_root, "mike", "bus", "inbox")
 pending_q = []
+pending_q_fresh = []     # <QUESTION_GRACE_MIN phút tuổi — hiện trong báo cáo, KHÔNG routable
 pending_q_wagsfix = []   # xem chú thích ở khối "if pending_q_wagsfix" phía dưới
 # Câu hỏi ĐÃ được triage và kết luận "chỉ NGƯỜI quyết được, không có fix tooling" →
 # vẫn HIỆN đầy đủ trong báo cáo nhưng KHÔNG spawn wags_autofix nữa (xem ACK_PREFIX).
@@ -319,6 +459,11 @@ pending_q_needs_human = []
 pending_q_meta = []      # (agent, topic, ts) song song pending_q — chỉ để dựng dòng HINT
 closure_cands = []       # (agent, topic, ts) mọi finding/answer/decision — chỉ để HINT
 aged_q = []
+aged_q_meta = []         # (agent, topic, ts) song song aged_q — owner-hint PHẢI phủ cả >48h,
+                          # đúng lúc bằng chứng "chưa ai nhận" mạnh nhất (xem khối owner-hint).
+# Khai TRƯỚC nhánh isdir: nhánh else (thiếu inbox) vẫn chạy tới chỗ dùng ở dưới —
+# để trong nhánh if là NameError, selfcheck case_missing_inbox_dir bắt được.
+_approved_but_open = []
 if os.path.isdir(inbox_dir):
     # PHẢI quét CẢ archive: kb_nightly Phase 1b2 (EVENT_KEEP_DAYS=30) chuyển MỌI event cũ
     # hơn 30 ngày khỏi bus/inbox/*.jsonl sang bus/inbox/archive/<id>_<YYYY-MM>.jsonl.gz,
@@ -376,8 +521,12 @@ if os.path.isdir(inbox_dir):
     # Winston 2026-07-14, SpaceX mù từ vệ sinh coord-2026-07-30) → alert plan T+1 chưa
     # sẵn sàng của account tiền thật biến mất khỏi check #5. Fix: required_change #1 của
     # arch-reviewer, NEEDS_CHANGES coord-2026-07-30.
-    resolvers = []
-    acks = []                # (topic_câu_hỏi_được_ack, hạn_ack) — xem ACK_PREFIX
+    resolvers = []          # (agent, topic, ts, explicit refs from payload.resolves)
+    acks = []                # (topic_câu_hỏi_được_ack, a_ts, hạn_ack, suppress_days) — xem ACK_PREFIX
+    # Tập agent-id CÓ THẬT trên bus. Dùng để quyết định một chuỗi dạng "X/y" là
+    # "Agent/topic" hay chỉ là topic tự nó có dấu '/'. Lấy từ tên file inbox chứ KHÔNG
+    # hardcode: fleet thêm agent thì tập này tự đúng. Xem `_split_ref`.
+    known_agents = {_agent_of(p) for p in files}
     # HINT-ONLY (Wags coord-2026-08-03): ngoài resolver ĐÚNG quy ước, gom thêm MỌI
     # finding/answer/decision (kèm agent + ts) để GỢI Ý "có thể đã đóng nhưng sai quy ước".
     # KHÔNG dùng để đóng câu hỏi — chỉ in thêm 1 dòng [WARN-ONLY] cho người/Wags triage
@@ -412,7 +561,7 @@ if os.path.isdir(inbox_dir):
                         _sd = 0
                 _sd = max(0, min(_sd, ACK_MAX_SUPPRESS_DAYS))
                 acks.append((rec["topic"][len(ACK_PREFIX):].strip(),
-                             a_ts + dt.timedelta(days=_sd)))
+                             a_ts, a_ts + dt.timedelta(days=_sd), _sd))
                 continue
             if etype in ("answer", "decision", "finding"):
                 t = rec.get("topic")
@@ -426,15 +575,91 @@ if os.path.isdir(inbox_dir):
                     continue
                 closure_cands.append((agent_p, t, r_ts))
                 if etype != "finding":
-                    resolvers.append((t, r_ts))
-    def _resolved(q_topic, q_ts):
+                    _rp = rec.get("payload")
+                    if isinstance(_rp, str):
+                        try:
+                            _rp = json.loads(_rp)
+                        except Exception:
+                            _rp = {}
+                    _raw = _rp.get("resolves", []) if isinstance(_rp, dict) else []
+                    if isinstance(_raw, str):
+                        _raw = [_raw]
+                    _explicit = {str(x).strip() for x in _raw
+                                 if isinstance(_raw, list) and str(x).strip()}
+                    resolvers.append((agent_p, t, r_ts, _explicit))
+    def _resolved(q_topic, q_ts, q_agent=""):
         # Exact-match, HOẶC resolver CHỨA nguyên topic câu hỏi (quy ước hậu-tố trạng thái) —
         # và resolver phải xuất hiện SAU câu hỏi. Chỉ 1 chiều (resolver ⊇ topic-hỏi) để 1
         # decision topic-ngắn KHÔNG vô tình khớp câu hỏi dài khác chủ đề.
         if not q_topic:
             return False
-        return any((r == q_topic or q_topic in r) and r_ts >= q_ts for r, r_ts in resolvers)
-    def _rollup_resolved(rec, q_ts):
+        refs = {q_topic}
+        if q_agent:
+            refs.add(f"{q_agent}/{q_topic}")
+        return any(r_ts >= q_ts and
+                   ((r == q_topic or q_topic in r) or bool(refs & explicit))
+                   for _ra, r, r_ts, explicit in resolvers)
+    def _split_ref(s):
+        """Chuẩn hoá một tham chiếu câu hỏi về cặp (agent, topic) rồi mới so sánh.
+
+        Vì sao KHÔNG dùng `"/" in s` làm tiêu chí "đã ở dạng Agent/topic" (bản 8e9affc3 làm
+        vậy, arch-review round 3 bắt được, tái lập cả 2 chiều):
+        - FALSE-PENDING trên topic TỰ NÓ chứa '/': `selfcheck-red: mike/bin/job_cancel_guard
+          _selfcheck.py` — lớp câu hỏi ĐÔNG NHẤT trong backlog thật — bị coi là "đã qualified"
+          nên không bao giờ ghép được với dạng còn lại ⇒ rollup kẹt vĩnh viễn, đốt 1 job
+          wags_autofix/ngày, đúng vòng lãng phí `rollup_of` ra đời để diệt.
+        - FALSE-CLOSED chéo agent: sub TRẦN ["con-B"] + resolves ["Taylor/con-B"] khớp nhau
+          vì chỉ MỘT bên có '/', trong khi câu hỏi thật là `Mike/con-B` ⇒ đóng escalation của
+          agent này bằng quyết định của agent KHÁC. MIKE.md hứa "khác agent thì không khớp"
+          nhưng lời hứa đó chỉ đúng khi CẢ HAI bên qualified.
+
+        Cách đúng: tiền tố chỉ được bóc khi nó là agent-id CÓ THẬT trên bus (`known_agents`)
+        — nên "selfcheck-red: mike/bin/x.py" là topic TRẦN, không phải "Agent/topic". Bên
+        không khai agent trả về None (khác hẳn "agent rỗng"); phần so agent nằm ở `_same_ref`.
+        Vẫn là exact-match trên phần topic, KHÔNG nới về substring.
+        """
+        if "/" in s:
+            pfx, rest = s.split("/", 1)
+            if pfx in known_agents and rest.strip():
+                return pfx, rest.strip()
+        return None, s      # None = chuỗi KHÔNG khai agent (khác với "khai agent rỗng")
+    def _same_ref(a, a_agent, b):
+        """`a` = topic con trong rollup_of (thuộc agent đăng escalation tổng = a_agent);
+        `b` = một tham chiếu phía đóng (topic của resolver, hoặc 1 phần tử `resolves`).
+
+        Ràng buộc agent chỉ áp khi bên đó THẬT SỰ khai agent. Lý do: quy ước đóng câu hỏi
+        trên bus KHÔNG yêu cầu cùng agent — `_resolved` (đường chính) so topic-string thuần,
+        và người đóng THƯỜNG là agent khác người hỏi. Bắt agent phải trùng ở CẢ topic của
+        resolver sẽ phá đúng ca đóng thông thường (4 assertion 15b/15c đỏ khi thử).
+        Nhưng khi một bên khai tường minh "Taylor/x" thì đó là lời khai VỀ CÂU HỎI NÀO, và
+        lời khai đó phải được tôn trọng — nếu không, sub trần ["con-B"] của Mike bị đóng
+        bằng resolves ["Taylor/con-B"] (false-CLOSED chéo agent, arch-review round 3).
+        """
+        a_ag, a_tp = _split_ref(a)
+        b_ag, b_tp = _split_ref(b)
+        if a_tp != b_tp:
+            return False
+        a_ag = a_ag or a_agent      # sub trần = câu hỏi của chính agent đăng tổng
+        return b_ag is None or not a_ag or b_ag == a_ag
+
+    def _resolved_exact(q_topic, q_ts, q_agent=""):
+        # Như _resolved nhưng BỎ nhánh substring (`q_topic in r`). Dùng RIÊNG cho topic con
+        # của `rollup_of`. Lý do (arch-review coord-2026-08-14, killer_objection): danh sách
+        # topic con do NGƯỜI viết tay ⇒ với substring, MỘT resolver duy nhất có thể thoả
+        # NHIỀU topic con cùng lúc và `all()` đóng luôn escalation TỔNG trong khi câu hỏi con
+        # vẫn đang pending. Tái lập được: rollup_of=["patternB","backlog"] + đúng 1 decision
+        # "retro-patternB-and-backlog-summary" ⇒ tổng tự đóng dù patternB chưa ai quyết; và
+        # topic con viết CẮT CỤT ("retro-pattern-recurring") khớp bừa vào resolver dài hơn.
+        # Cùng lý do `_acked` chọn exact: nới tay ở đây đóng oan escalation của USER — đắt
+        # hơn nhiều so với 1 job wags_autofix thừa. `resolves` (khai tường minh) vẫn tính.
+        if not q_topic:
+            return False
+        return any(r_ts >= q_ts and
+                   (_same_ref(q_topic, q_agent, r) or
+                    any(_same_ref(q_topic, q_agent, e) for e in explicit))
+                   for _r_a, r, r_ts, explicit in resolvers)
+    rollup_misses = {}      # (agent, topic, ts) → [topic con CHƯA khớp] — chỉ để in gợi ý
+    def _rollup_resolved(rec, q_ts, q_agent=""):
         # Câu hỏi TỔNG (escalation gom nhiều câu hỏi con đã mở sẵn) — ca thật
         # `Mike/retro-escalation-2026-08-13-patternB-and-backlog` (08-13T17:46): user quyết
         # 08-14T00:31, Mike đăng `decision` đóng CẢ 2 câu hỏi con trong cùng 1 giây, nhưng
@@ -442,8 +667,8 @@ if os.path.isdir(inbox_dir):
         # wags_autofix (coord-2026-08-14) chỉ để kết luận "đã quyết rồi". Resolver khớp theo
         # topic-string nên không có cách nào biết topic tổng ⊃ 2 topic con.
         # Cơ chế: câu hỏi tổng KHAI TƯỜNG MINH `"rollup_of": ["topic-con-1", ...]` trong
-        # payload; đóng khi MỌI topic con có resolver đăng SAU câu hỏi tổng (dùng lại
-        # _resolved, giữ nguyên ràng buộc thời gian — không pre-resolve lần escalate sau).
+        # payload; đóng khi MỌI topic con có resolver đăng SAU câu hỏi tổng (dùng
+        # _resolved_exact, giữ nguyên ràng buộc thời gian — không pre-resolve lần escalate sau).
         # OPT-IN + fail-closed ở MỌI đường lỗi (thiếu field / không phải list / rỗng / payload
         # không parse được ⇒ False = hành vi cũ). KHÔNG suy diễn topic con từ văn bản payload:
         # đó đúng thứ §28 coding_guidelines cấm (so chuỗi mô tả tự do) và đóng oan 1
@@ -457,15 +682,28 @@ if os.path.isdir(inbox_dir):
         if not isinstance(pl, dict):
             return False
         raw = pl.get("rollup_of")
-        if not isinstance(raw, list):
+        if not isinstance(raw, list) or not raw:
             return False
-        subs = [str(s).strip() for s in raw if str(s).strip()]
-        if not subs:
+        # Phần tử rỗng/sai kiểu ⇒ FAIL-CLOSED cả câu hỏi tổng, KHÔNG lọc lặng. Bản cũ lọc
+        # (`if str(s).strip()`) nên `["con-A", ""]` chạy `all()` trên ÍT con hơn số đã khai:
+        # người viết tưởng đang chốt 2 con, cơ chế chỉ kiểm 1 rồi đóng tổng — false-CLOSED
+        # do lỗi CHÍNH TẢ, không có một dòng cảnh báo nào (arch-review round 3 tái lập được).
+        subs = []
+        for s in raw:
+            if not isinstance(s, str) or not s.strip():
+                return False
+            subs.append(s.strip())
+        # Dạng "Agent/topic" được xử lý DUY NHẤT một chỗ: `_split_ref` bên trong `_same_ref`
+        # (xem docstring ở đó). Chỗ này TUYỆT ĐỐI không tự bóc tiền tố — bóc hai lần là ra
+        # đúng ca false-CLOSED chéo agent.
+        miss = [s for s in subs if not _resolved_exact(s, q_ts, q_agent)]
+        if miss:
+            # Fail-closed thì ĐÚNG nhưng IM LẶNG: người đăng escalation tổng không có cách
+            # nào biết con nào chưa khớp (sai chính tả? sai agent? con đóng bằng hậu-tố?),
+            # nên cứ để nó pending mãi. Ghi lại để in gợi ý một dòng bên dưới.
+            rollup_misses[(q_agent, rec.get("topic"), rec.get("ts"))] = miss
             return False
-        # Chấp nhận cả dạng "Agent/topic" (đúng chuỗi checker in ra, người hay copy thẳng):
-        # thử cả nguyên chuỗi lẫn phần sau dấu "/" đầu tiên.
-        return all(_resolved(s, q_ts) or ("/" in s and _resolved(s.split("/", 1)[1], q_ts))
-                   for s in subs)
+        return True
     def _acked(q_agent, q_topic, q_ts):
         # Khớp CHÍNH XÁC (không substring như _resolved): ack chỉ tắt auto-dispatch nên sai
         # sót về phía "vẫn dispatch" là an toàn; nới lỏng match ở đây thì 1 ack topic ngắn
@@ -473,10 +711,65 @@ if os.path.isdir(inbox_dir):
         # (đúng chuỗi checker in ra) để người copy thẳng từ báo cáo.
         if not q_topic:
             return False
-        # `a_until` = ts ack + suppress_days (mặc định 0 ⇒ đúng điều kiện cũ "ack đăng SAU
-        # câu hỏi"); >0 phủ thêm các lần cron phát lại CÙNG topic trong cửa sổ đó.
+        # Hai chế độ, tuỳ có khai `suppress_days` hay không:
+        # (a) suppress_days=0/không khai ⇒ hành vi cũ, VĨNH VIỄN cho ĐÚNG instance đã ack
+        #     (a_ts >= q_ts) — không có "hết hạn" nào cho ca này (fixture case_triaged_
+        #     needs_human_ack dựa đúng vào tính vĩnh viễn này, không được đổi).
+        # (b) suppress_days=N>0 ⇒ BUG (arch-review NEEDS_CHANGES, coord-2026-09-03): bản cũ
+        #     so `a_until >= q_ts` (q_ts = ts CỦA CÂU HỎI, cố định) — với câu hỏi KHÔNG bị
+        #     cron phát lại (ts không đổi qua các lần chạy check), ack luôn đăng sau câu hỏi
+        #     (a_ts > q_ts) nên a_until = a_ts + N >= a_ts > q_ts LUÔN đúng bất kể N ⇒ ack
+        #     vĩnh viễn dù khai suppress_days — "N ngày rồi tự nổi lại" chưa từng hoạt động
+        #     cho câu hỏi không tái phát (ca thật: Winston/deposit-rate-refresh-question).
+        #     Sửa: so `a_until` với THỜI ĐIỂM CHẠY CHECK (_now) — đúng ý định "phủ N ngày
+        #     kể từ lúc ack", còn khớp nguyên fixture case_ack_suppress_days_window (ack có
+        #     thể đăng TRƯỚC câu hỏi để phủ 1 lần cron phát lại tới sau, vì nhánh này không
+        #     đòi a_ts >= q_ts nữa — chỉ còn đòi cửa sổ chưa hết hạn theo NOW).
         want = (q_topic, f"{q_agent}/{q_topic}")
-        return any(a in want and a_until >= q_ts for a, a_until in acks)
+        return any(a in want and
+                   ((sd <= 0 and a_ts >= q_ts) or (sd > 0 and a_until >= _now))
+                   for a, a_ts, a_until, sd in acks)
+    # ── Câu hỏi "plan chưa duyệt" mà plan ĐÃ ĐƯỢC DUYỆT THẬT ────────────────────
+    # coord-2026-09-21: Winston hỏi 02:07Z, user duyệt 09:10 ICT, bot khớp 3/3 lệnh
+    # 09:15 — nhưng không ai đăng answer nên 12:45 vẫn escalate, đốt 1 job wags_autofix
+    # cho việc đã xong. Đường duyệt KHÔNG đáng tin làm chỗ vá: 8/9 lần duyệt tháng 9
+    # (gồm chính lần 09-21) không chạy qua approve_plan_simple.sh. Nên kiểm ARTIFACT
+    # ngay tại chỗ escalate: plan có `approved_by` ⇒ câu hỏi đã có câu trả lời.
+    # CỐ Ý hẹp: chỉ lớp topic khớp APPROVAL_SHAPE và KHÔNG thuộc `ops-autofix-unresolved:`
+    # (run-bot-fail cùng ngày có thể do funding-gate, và "đã duyệt" chưa chứng minh bot
+    # chạy lại xong) — lớp kia vẫn escalate như cũ.
+    _APPROVAL_SHAPE = re.compile(r"chua[-_ ]?duyet|not[-_ ]?approved", re.IGNORECASE)
+    _plan_dir = os.path.join(wc_root, "data", "trade_plans")
+    def _plan_answered(topic):
+        topic = str(topic or "")
+        if not _APPROVAL_SHAPE.search(topic) or topic.startswith("ops-autofix-unresolved:"):
+            return False
+        m = re.search(r"\d{4}-\d{2}-\d{2}", topic)
+        if not m:
+            return False
+        date = m.group(0)
+        try:
+            names = sorted(os.listdir(_plan_dir))
+        except Exception:
+            return False
+        for name in names:
+            if not (name.startswith("plan_") and name.endswith(f"_{date}.json")):
+                continue
+            acc = name[len("plan_"):-len(f"_{date}.json")]
+            if not acc or acc not in topic:
+                continue
+            try:
+                with open(os.path.join(_plan_dir, name), encoding="utf-8") as fh:
+                    _plan = json.load(fh) or {}
+                # `approved_by_user` là biến thể mà preflight_check.sh:63 và
+                # merge_park_orders.py:127 CŨNG coi là đã duyệt — đọc thiếu nó thì plan
+                # duyệt qua đường đó chạy thật mà vẫn escalate ở đây.
+                if any(str(_plan.get(k) or "").strip()
+                       for k in ("approved_by", "approved_by_user")):
+                    return True
+            except Exception:
+                return False
+        return False
     seen_q = set()
     for p in files:
         agent = _agent_of(p)
@@ -487,7 +780,12 @@ if os.path.isdir(inbox_dir):
                 ts_dt = dt.datetime.fromisoformat(rec.get("ts", "").replace("Z", "+00:00"))
             except Exception:
                 continue
-            if _resolved(rec.get("topic"), ts_dt) or _rollup_resolved(rec, ts_dt):
+            if _resolved(rec.get("topic"), ts_dt, agent) or _rollup_resolved(rec, ts_dt, agent):
+                continue
+            if _plan_answered(rec.get("topic")):
+                # KHÔNG im lặng bỏ qua: gom lại để đóng THẬT ở dưới, nếu không nó nằm
+                # trong backlog vĩnh viễn mà không dòng WARN nào nhắc.
+                _approved_but_open.append(f"{agent}/{rec.get('topic')}")
                 continue
             # Chống đếm đôi nếu 1 event vừa còn ở hot inbox vừa đã sang archive (kb_nightly
             # bị kill giữa chừng): khoá theo (agent, topic, ts).
@@ -511,6 +809,15 @@ if os.path.isdir(inbox_dir):
                     pending_q_wagsfix.append(f"{agent}/{rec.get('topic')}")
                 elif _acked(agent, str(rec.get("topic") or ""), ts_dt):
                     pending_q_needs_human.append(f"{agent}/{rec.get('topic')}")
+                elif ((_now - ts_dt).total_seconds() < QUESTION_GRACE_MIN * 60
+                      and _future_scan_before(ts_dt + dt.timedelta(hours=48))):
+                    # Ân hạn: quá mới để kết luận "không ai trả lời" (xem QUESTION_GRACE_MIN),
+                    # và sẽ còn lượt quét theo lịch TRƯỚC ts+48h để bắt nếu thật sự bị bỏ rơi.
+                    # Đặt SAU 2 nhánh trên có chủ đích — chúng phân loại theo BẢN CHẤT câu hỏi
+                    # (tự-sinh / đã triage), ân hạn chỉ nói về TUỔI, không được ghi đè phân loại.
+                    pending_q_fresh.append(
+                        f"{agent}/{rec.get('topic')} "
+                        f"({int((_now - ts_dt).total_seconds() // 60)}m)")
                 else:
                     pending_q.append(f"{agent}/{rec.get('topic')}")
                     pending_q_meta.append((agent, str(rec.get("topic") or ""), ts_dt))
@@ -521,6 +828,16 @@ if os.path.isdir(inbox_dir):
                 # dùng, để hai bên không trôi ra khỏi nhau khi thêm tiền tố mới.
                 _is_wags = str(rec.get("topic") or "").startswith(WAGS_SELF_Q_PREFIXES)
                 aged_q.append((age_d, f"{agent}/{rec.get('topic')} ({age_d}d)", _is_wags))
+                # Câu hỏi đã có ack `triaged-needs-human:` = ĐÃ TRIAGE, đang PARK chờ NGƯỜI
+                # quyết. Vẫn liệt kê ở dòng "TREO LÂU" (nó đang mở thật, người cần thấy),
+                # nhưng KHÔNG đưa vào nguồn owner-hint: gợi ý "dispatch <agent>" cho một câu
+                # hỏi mà kết luận đã là "chỉ người quyết được" là WARN RÁC lặp 2 lần/ngày
+                # VĨNH VIỄN — và nhiễu định kỳ chính là thứ làm cảnh báo thật bị bỏ qua.
+                # Nhánh <48h đã lọc đúng như vậy sẵn (đi vào pending_q_needs_human, KHÔNG vào
+                # pending_q_meta); nhánh >48h thiếu ⇒ mở rộng owner-hint sang aged (round 2)
+                # làm lộ ra. arch-review round 2, required_change #2.
+                if not _acked(agent, str(rec.get("topic") or ""), ts_dt):
+                    aged_q_meta.append((agent, str(rec.get("topic") or ""), ts_dt))
     if read_errors:
         # KHÔNG gắn [WARN-ONLY]: đây là lỗi TOOLING sửa được (khác với backlog chờ user).
         # Câu chữ cố ý chứa "câu hỏi (question)" để nhánh routing dưới đưa về COORD_WARN
@@ -528,8 +845,53 @@ if os.path.isdir(inbox_dir):
         W(f"{len(read_errors)} file bus KHÔNG ĐỌC ĐƯỢC — backlog câu hỏi (question) có thể "
           f"THIẾU (bỏ sót toàn bộ event trong các file này): "
           f"{ {k: v for k, v in sorted(read_errors.items())} }")
+else:
+    # Sai wc_root ⇒ inbox_dir không tồn tại ⇒ MỌI danh sách rỗng ⇒ nhánh `elif` dưới in ✅
+    # "không có câu hỏi" — im lặng hoá TOÀN BỘ kênh backlog của fleet mà không một lời cảnh
+    # báo. Chính arch-reviewer vấp phải khi audit coord-2026-08-14 (check fail_silent, "nên
+    # mở ticket riêng"). Cùng họ với cliff-30-ngày ở trên: một lần TRA CỨU thất bại không
+    # được phép đội lốt một kết luận "sạch".
+    W(f"KHÔNG tìm thấy thư mục bus/inbox ({inbox_dir}) — backlog câu hỏi (question) KHÔNG "
+      f"kiểm tra được lượt này (KHÔNG phải '0 câu hỏi'). Nhiều khả năng wc_root sai.")
+if _approved_but_open:
+    # Đóng THẬT (idempotent; script tự đọc lại plan để tự xác minh, không tin checker).
+    # Best-effort: hỏng thì in ra, KHÔNG làm hỏng lượt health-check.
+    if os.environ.get("OPS_HEALTH_DRY_RUN") == "1":
+        # DRY-RUN phải KHÔNG ghi bus. Khối này nằm TRƯỚC chỗ shell đọc DRY_RUN (cuối file)
+        # nên không được thừa hưởng guard đó — phải tự đọc env, nếu không `--dry-run` sẽ
+        # đóng câu hỏi thật trên bus production.
+        _tail = "(DRY-RUN: không chạy close_plan_approval_questions.py)"
+    else:
+        try:
+            import subprocess, sys   # khối này được exec với ns rút gọn trong selfcheck
+            _r = subprocess.run(
+                [sys.executable, os.path.join(wc_root, "mike", "bin",
+                                              "close_plan_approval_questions.py")],
+                capture_output=True, text=True, timeout=120)
+            _tail = ((_r.stdout or "") + (_r.stderr or "")).strip().replace("\n", " | ")[-400:]
+        except Exception as _exc:
+            _tail = f"chạy lỗi: {_exc}"
+    W(f"{WARN_ONLY} {len(_approved_but_open)} câu hỏi 'plan chưa duyệt' đã có câu trả lời "
+      f"bằng ARTIFACT (plan có approved_by) nên KHÔNG escalate: {_approved_but_open}. "
+      f"Kết quả đóng tự động: {_tail or '(im lặng)'}")
+
 if pending_q:
     W(f"Có {len(pending_q)} câu hỏi (question) trong 48h qua CHƯA thấy answer tương ứng: {pending_q}")
+    # Câu hỏi TỔNG khai `rollup_of` mà không đóng được: nói rõ CON NÀO chưa khớp. Không có
+    # dòng này thì fail-closed đúng nhưng câm — người đăng escalation không phân biệt được
+    # "con thật sự chưa ai quyết" với "gõ sai tên con / sai agent / con đóng bằng hậu-tố
+    # trạng thái (rollup cố ý không nhận, xem MIKE.md)", nên nó pending mãi và mỗi ngày đốt
+    # thêm 1 job wags_autofix. Chỉ GỢI Ý, không đổi routing dòng WARN ở trên.
+    for (_ra, _rt, _), _miss in sorted(rollup_misses.items(), key=lambda kv: str(kv[0])):
+        if _rt and any(_rt in str(_p) for _p in pending_q):
+            W(f"{WARN_ONLY} rollup_of của '{_ra}/{_rt}': {len(_miss)} topic con CHƯA khớp "
+              f"resolver nào — {_miss}. Kiểm 4 khả năng theo thứ tự: (1) con chưa ai quyết "
+              f"thật; (2) chuỗi con gõ khác topic thật (phải TRÙNG KHÍT, kể cả tiền tố "
+              f"'Agent/'); (3) con đóng bằng hậu-tố trạng thái ('<topic>-question-closed') "
+              f"— rollup CỐ Ý không nhận dạng này, phải tự đăng answer giữ nguyên topic tổng; "
+              f"(4) con THUỘC AGENT KHÁC '{_ra}' (người đăng tổng) mà lại viết TRẦN — dù chuỗi "
+              f"trùng khít 100%, resolver phải ghi đủ 'Agent/topic' cho con không phải của "
+              f"chính '{_ra}', xem MIKE.md § Escalation TỔNG.")
     # Dòng HINT: câu hỏi nào có sự kiện đăng SAU nó trông như đã xử lý xong nhưng ghi bus
     # sai quy ước (đăng `finding`/đổi topic thay vì `answer`/`decision` GIỮ NGUYÊN topic
     # gốc). Chỉ GỢI Ý: không đóng, không loại khỏi pending_q, không đổi routing dòng WARN.
@@ -586,8 +948,42 @@ if pending_q:
           f"nhưng ghi bus SAI QUY ƯỚC (có sự kiện đăng sau, cùng tiền tố topic HOẶC chung "
           f"từ hiếm trong {WIN_H}h — GỢI Ý thôi, phải tự kiểm chứng; quy ước đóng: "
           f"`answer`/`decision` GIỮ NGUYÊN topic câu hỏi): {hints}")
-elif not pending_q_wagsfix and not pending_q_needs_human:
+elif os.path.isdir(inbox_dir) and not pending_q_wagsfix and not pending_q_needs_human \
+        and not pending_q_fresh:
+    # Điều kiện isdir là BẮT BUỘC: không quét được ≠ quét xong và sạch (xem `else` ở trên).
+    # `not pending_q_fresh` cũng BẮT BUỘC: có câu hỏi mới tinh chưa ai trả lời mà in ✅ "không
+    # có câu hỏi nào đang chờ" là nói SAI — ân hạn hoãn DISPATCH, không xoá sự tồn tại.
     OK("Không có câu hỏi (question) nào đang chờ xử lý trong 48h qua.")
+# ── DÒNG TÓM TẮT: tách "CẦN NGƯỜI" khỏi "đang trong quy trình tự động" ─────────────────
+# User 2026-09-09: mấy dòng [WARN-ONLY] dưới đây mỗi ngày đều có, nhìn không ra cái nào thật
+# sự cần mình. Chúng VỐN đã được phân loại sẵn trong code (4 biến riêng), chỉ là in ra lẫn
+# nhau nên người đọc phải tự gộp. Thêm đúng MỘT dòng đầu khối, không sửa câu chữ các dòng
+# chi tiết (mỗi dòng mang lý do + cảnh báo riêng đã cân nhắc kỹ).
+#
+# Phân loại CỐ Ý thận trọng:
+#   · "CẦN ANH QUYẾT" = câu hỏi đã TREO >48h — không còn đường tự động nào, đã qua grace và
+#     qua ít nhất 1 vòng triage. Đây là nhóm duy nhất nói chắc được là cần người.
+#   · "đang chờ/tự xử" = vừa đăng (còn trong grace, lượt sau tự vào diện xử lý) + vòng
+#     wags-fix (tự thử lại sau cooldown) + đã triage nhưng CHƯA quá 48h.
+# KHÔNG gộp `selfcheck-red` vào nhóm "tự hết" dù lịch sử cho thấy phần lớn tự đóng khi
+# selfcheck xanh lại: hôm nay có 2 ca đỏ THẬT (1 do chính Mike gây ra), nên coi chúng là
+# "tự hết" là nói quá — để chúng nằm ở nhóm chờ, và khi quá 48h thì tự nổi lên nhóm cần người.
+# Nhãn của aged_q mang hậu tố " (Nd)" (dòng ~728) còn 3 nhóm kia thì KHÔNG (dòng ~707-716)
+# ⇒ phải CẮT hậu tố trước khi trừ tập, nếu không một mục vừa treo >48h vừa nằm trong
+# needs_human sẽ bị đếm ở CẢ HAI nhóm và tổng lớn hơn số câu hỏi thật.
+_strip_age = lambda s: re.sub(r"\s*\(\d+d\)$", "", s)
+_human_now = {_strip_age(lbl) for _, lbl, _w in aged_q}
+_auto_side = (set(pending_q_fresh) | set(pending_q_wagsfix)
+              | set(pending_q_needs_human)) - _human_now
+if _human_now or _auto_side:
+    W(f"{WARN_ONLY} ── PHÂN LOẠI: 🧑 CẦN ANH QUYẾT {len(_human_now)} mục (treo >48h, không còn "
+      f"đường tự động) · 🤖 đang chờ/tự xử {len(_auto_side)} mục (còn grace, hoặc tự thử lại "
+      f"sau cooldown, hoặc đã triage <48h) — chi tiết từng nhóm ở các dòng ngay dưới.")
+
+if pending_q_fresh:
+    W(f"{WARN_ONLY} {len(pending_q_fresh)} câu hỏi (question) VỪA ĐĂNG (<{QUESTION_GRACE_MIN}"
+      f" phút) chưa có answer — QUÁ MỚI để kết luận bị bỏ rơi, KHÔNG dispatch lượt này; lượt "
+      f"kiểm tra kế tiếp sẽ tự đưa vào diện xử lý nếu vẫn im: {pending_q_fresh}")
 if pending_q_needs_human:
     W(f"{WARN_ONLY} {len(pending_q_needs_human)} câu hỏi ĐÃ TRIAGE, chờ NGƯỜI quyết (không "
       f"có fix tooling — KHÔNG tự dispatch lại, vẫn hiện ở đây cho tới khi có "
@@ -637,7 +1033,250 @@ if aged_q:
         W(f"{WARN_ONLY} Câu hỏi TREO LÂU (>48h, chưa ai quyết) — {len(aged_q)} mục, cần "
           f"USER quyết; {len(oldest)} cũ nhất: {oldest} …và {more} mục giữa… "
           f"{len(newest)} mới nhất: {newest}. Danh sách ĐẦY ĐỦ: bin/bus_question_audit.py")
+# Dòng CHỦ SỞ HỮU: câu hỏi mà topic tự khai người phụ trách theo quy ước "…-needs-<agent>".
+# Sự cố THẬT 2026-08-27→28: Wags đăng 4 question kết thúc bằng `-needs-taylor` lúc 13:33-13:42Z.
+# Hệ quả TỰ ĐỘNG duy nhất của một câu hỏi treo là COORD_WARN → dispatch **Wags**; không có
+# đường nào đưa nó tới Taylor. Cả 4 nằm im 19 giờ, rồi đốt đúng 1 job wags_autofix để Wags
+# kết luận lại y hệt điều nó đã tự viết hôm trước — trong đó có 1 mục URGENT (BAF đã BANNED
+# trong KNOWLEDGE.md nhưng 2 bản sao hằng số trong code chưa cập nhật ⇒ chạm lựa chọn live).
+# Vì sao chỉ IN chứ KHÔNG tự dispatch peer: auto-dispatch chéo agent theo một chuỗi trong
+# topic là tự phục hồi mù (user chốt 2026-08-03: lỗi mà đọc output là thấy thì đừng xây
+# auto-retry) — và người phụ trách ở đây làm việc trong domain trading, nơi Wags/checker
+# KHÔNG được tự kích hoạt. Dòng này chỉ biến "im lặng" thành "một lệnh copy được".
+# NGUỒN = pending_q_meta (<48h) VÀ aged_q_meta (>48h) — bản đầu (coord-2026-08-28 round 1) chỉ
+# phủ <48h, nghĩa là đúng lúc một câu hỏi -needs-<agent> treo LÂU NHẤT (bằng chứng "không ai
+# nhận" mạnh nhất) thì dòng gợi ý lại BIẾN MẤT. arch-reviewer required_change #2, round 2, đã sửa.
+_AGENTS_DIR = os.path.join(wc_root, "mike", "agents")
+_KNOWN_AGENTS = {}
+if os.path.isdir(_AGENTS_DIR):
+    for _d in sorted(os.listdir(_AGENTS_DIR)):
+        if not os.path.isdir(os.path.join(_AGENTS_DIR, _d)):
+            continue
+        # KHÔNG lọc "wt-*" (git worktree tạm) ở đây — điều kiện đó là CODE CHẾT, không phải
+        # guard: token owner luôn là SEGMENT ĐẦU trước dấu '-' (`_tail[1].split("-")[0]` bên
+        # dưới), nên với worktree tên `wt-<id>` token parse ra đúng chữ "wt" và không bao giờ
+        # bằng khoá `wt-<id>`. Đo được: thêm lại điều kiện đó → selfcheck KHÔNG đổi một
+        # assertion nào (mutation MU4, cố ý "expect survive"). Bất biến này được ghim bằng
+        # ca 9g thay cho một dòng lọc không canh gì. arch-review round 2, required_change #4.
+        _KNOWN_AGENTS[_d.lower()] = _d
+_owner_q = {}
+for _qa, _qt, _ in pending_q_meta + aged_q_meta:
+    _tail = _qt.rsplit("-needs-", 1)
+    if len(_tail) != 2:
+        continue
+    # Bỏ hậu tố mức-độ tuỳ ý người viết thêm (…-needs-taylor-urgent) rồi lấy token đầu, VÀ
+    # cắt tiếp tại ':' / '/' — quy ước ack thật trên bus là `triaged-needs-human:<Agent>/<topic>`
+    # (dạng không-dấu-cách, 6 topic thật trên bus hôm nay). Không cắt thì token parse ra
+    # `human:Taylor/vol`, KHÔNG bằng "human" trong phép so tuyệt đối ngay dưới ⇒ rơi vào nhánh
+    # "không khớp agent nào" và in WARN rác cho đúng loại câu hỏi đã được park cho NGƯỜI.
+    # arch-review round 2, required_change #1.
+    _own_raw = _tail[1].split("-")[0].split(":")[0].split("/")[0].strip()
+    if not _own_raw or _own_raw.lower() in ("human", "user"):
+        continue      # "needs-human/user" đã có kênh riêng (ACK_PREFIX) — không trùng lặp.
+    # Gom KHÔNG phân biệt hoa-thường (người viết topic gõ tuỳ ý); tên IN RA lấy từ
+    # _KNOWN_AGENTS (case chuẩn của agent thật), không phải nguyên văn người viết topic.
+    _owner_q.setdefault(_own_raw.lower(), [_own_raw, []])[1].append(f"{_qa}/{_qt}")
+for _own_key, (_own_raw, _qs) in sorted(_owner_q.items()):
+    _canon = _KNOWN_AGENTS.get(_own_key)
+    if _canon:
+        # Không bọc <> quanh tên agent đã biết chắc — chỉ <việc> còn là chỗ người dùng phải tự
+        # điền mới cần placeholder; in thẳng tên thật thì lệnh mẫu copy-paste được ngay.
+        W(f"{WARN_ONLY} {len(_qs)} câu hỏi trên TỰ KHAI người phụ trách là '{_canon}' "
+          f"(quy ước topic '…-needs-<agent>') — checker KHÔNG bao giờ tự dispatch chéo agent, "
+          f"nên nếu chưa ai gọi thì nó nằm im. Kiểm bằng `bin/jobs.sh list` rồi gọi tường minh: "
+          f"DISPATCH_FROM=Wags bin/dispatch.sh {_canon} \"<việc>\" --bg. Đóng bằng `answer`/"
+          f"`decision` GIỮ NGUYÊN topic gốc: {_qs}")
+    else:
+        # Token không khớp agent thật nào (topic gõ sai, hoặc hậu tố "-needs-" không nói về
+        # agent) — KHÔNG in lệnh dispatch cho một agent không tồn tại, chỉ nêu sự kiện.
+        W(f"{WARN_ONLY} {len(_qs)} câu hỏi trên khai chủ '{_own_raw}' (quy ước topic "
+          f"'…-needs-<agent>') nhưng KHÔNG khớp agent nào trong {_AGENTS_DIR} — cần người tự "
+          f"tra, KHÔNG in lệnh dispatch: {_qs}")
 # CHECK5_END
+
+# 5b. Hàng đợi CÁCH LY của append_event.sh (bus/_rejected.jsonl) — thêm 2026-08-16 theo
+#     arch-review coord-2026-08-16 required_change #3. append_event.sh chặn arg bị shell
+#     word-split và ghi nguyên văn vào đây thay vì để event hỏng lọt lên bus; nhưng 28/42
+#     call site gọi kèm `2>/dev/null || true` nên thông điệp fail-loud bị vứt VÀ exit code
+#     bị nuốt ⇒ với nhóm đó, event biến mất không dấu vết trừ file này. File không người
+#     đọc = đúng hình thái "lỗi chết trong log không ai đọc" mà chính cơ chế cách ly sinh
+#     ra để diệt. Dòng dưới là NGƯỜI ĐỌC đó; người DỌN là fleet_housekeeping.sh category
+#     `rotate`. Cố ý ĐỂ NGOÀI CHECK5_BEGIN/END: khối đó có hợp đồng namespace hạn chế với
+#     ops_health_check_selfcheck.py (chỉ glob/gzip/json/os/re + W/OK + wc_root).
+# 5b_BEGIN — marker ỔN ĐỊNH cho bin/ops_health_check_rejected_selfcheck.py. Khối chỉ được
+# dùng: os/json + wc_root + W()/OK() (selfcheck cung cấp đúng bấy nhiêu); mọi thứ khác PHẢI
+# tự import TẠI ĐÂY (xem sự cố defaultdict 2026-08-07 ghi ở đầu CHECK5).
+_qf = os.path.join(wc_root, "mike", "bus", "_rejected.jsonl")
+if os.path.exists(_qf):
+    import datetime as _dt
+    import hashlib as _hl
+    # Sidecar ĐÃ-XỬ-LÝ (bin/bus_rejected_resolve.py ghi): khoá = sha256 DÒNG THÔ. File pháp
+    # y append-only KHÔNG được sửa, nên "đã khôi phục event lên bus rồi" phải nói ở chỗ
+    # khác — không có nó, một bản ghi đã xử lý xong vẫn báo động lặp đủ 24h (ca thật
+    # 2026-08-18: bản ghi Taylor 08-17T16:49 đã được ghi lại lên bus 3 lần, checker vẫn
+    # dựng lại cùng cảnh báo ở lần chạy sau). Sidecar hỏng/thiếu ⇒ coi như KHÔNG có gì được
+    # xử lý (fail-loud: thà báo động thừa còn hơn nuốt một event mất thật).
+    _qdone = set()
+    _qrf = os.path.join(wc_root, "mike", "bus", "_rejected_resolved.jsonl")
+    if os.path.exists(_qrf):
+        try:
+            with open(_qrf, encoding="utf-8", errors="replace") as _f:
+                for _ln in _f:
+                    try:
+                        _qdone.add(json.loads(_ln)["key"])
+                    except Exception:
+                        continue
+        except Exception:
+            _qdone = set()
+    _q24, _qtot, _qbad, _qres24 = [], 0, 0, 0
+    _qcut = (_dt.datetime.now(_dt.timezone.utc) - _dt.timedelta(hours=24)
+             ).strftime("%Y-%m-%dT%H:%M:%SZ")
+    _qerr = None
+    try:
+        # errors="replace": file này chứa arg ĐÃ BỊ CHẶN vì hỏng — đọc nó mà chết
+        # UnicodeDecodeError thì check cảnh báo lại tự thành sự cố im lặng thứ hai.
+        with open(_qf, encoding="utf-8", errors="replace") as _f:
+            for _ln in _f:
+                _ln = _ln.strip()
+                if not _ln:
+                    continue
+                _qtot += 1
+                # try BỌC CẢ THÂN VÒNG LẶP, không chỉ json.loads (arch-review round 2):
+                # bản đầu để `_r.get(...)` NGOÀI try nên một dòng JSON không-phải-object
+                # (vd `12345`) ném AttributeError thoát thẳng ra `except` bao ngoài ⇒ vòng
+                # quét ĐỨT giữa chừng, mọi bản ghi PHÍA SAU vô hình. Reader sinh ra để diệt
+                # fail-silent mà tự fail-silent. Dòng hỏng giờ chỉ tăng _qbad rồi đi tiếp.
+                try:
+                    _r = json.loads(_ln)
+                    if not isinstance(_r, dict):
+                        raise ValueError("dòng JSON không phải object")
+                    if str(_r.get("ts", "")) >= _qcut:
+                        if _hl.sha256(_ln.encode("utf-8", "replace")).hexdigest() in _qdone:
+                            _qres24 += 1
+                        else:
+                            _q24.append(_r)
+                except Exception:
+                    _qbad += 1
+                    continue
+    except Exception as _e:
+        _qerr = _e
+    if _qerr is not None:
+        # W() chứ KHÔNG phải lines.append: lines.append in ra ℹ️ mà KHÔNG tăng biến `warn`
+        # ⇒ không escalate, đúng thứ hình thái im lặng mà cả khối này đi diệt.
+        W(f"Không đọc được bus/_rejected.jsonl ({_qerr}) — hàng đợi cách ly của "
+          f"append_event.sh đang KHÔNG được giám sát; event bị chặn sẽ mất dấu vết.")
+    if _q24 or _qbad:
+        # Ép kiểu + đặt TRONG vùng an toàn: file này chứa dữ liệu HỎNG theo thiết kế, một
+        # bản ghi méo (reason là list, argv là dict) từng đủ sức ném ra ngoài heredoc và
+        # giết CẢ 11 check của ops_health_check, không riêng khối này (arch-review round 2).
+        def _q_who(_r):
+            _a = _r.get("argv")
+            return str(_a[0]) if isinstance(_a, list) and _a else "?"
+
+        # ỨNG VIÊN RETRY — 6/6 ca cách ly tính tới 2026-08-24 đều được chính agent ghi lại
+        # thành công trong vòng 47 giây, nhưng thông điệp cũ không nói điều đó nên mỗi ca đẻ
+        # ra một job ops-autofix chỉ để đi tra lại đúng việc này. Đây là GỢI Ý bằng chứng,
+        # KHÔNG phải auto-resolve: sidecar vẫn phải do người/agent đánh dấu sau khi đối chiếu
+        # nội dung (hàng đợi này là pháp y — xem incident 2026-08-18-rejected-queue-no-closure).
+        # Toàn bộ khối bọc try: thiếu bus/inbox (harness selfcheck) ⇒ không có gợi ý, không nổ.
+        _qcand = []
+        try:
+            for _r in _q24:
+                _a = _r.get("argv") if isinstance(_r.get("argv"), list) else []
+                _ag = str(_a[0]) if _a else ""
+                # trace_id là tham số CUỐI của append_event.sh. Khi payload bị word-split
+                # (argc>5 — dạng cách ly PHỔ BIẾN NHẤT) nó vẫn nằm ở CUỐI, còn _a[4] chỉ là
+                # một mảnh payload. Bám cứng _a[4] ⇒ đúng ca word-split không bao giờ khớp
+                # ứng viên và checker khẳng định "MẤT THẬT" (ca thật 2026-08-31: 13 tham số,
+                # event 2ceafcdb lên bus +42s vẫn bị báo mất). Thêm topic (_a[2] — KHÔNG bị
+                # ảnh hưởng bởi split trong payload) làm bằng chứng thứ hai; khớp 1 trong 2
+                # là đủ, không có bằng chứng nào thì KHÔNG nhận bừa event đầu tiên trong cửa sổ.
+                _tr = str(_a[-1]) if len(_a) >= 5 else ""
+                _tp = str(_a[2]) if len(_a) >= 3 else ""
+                _ets = str(_r.get("ts") or "")
+                _fp = os.path.join(wc_root, "mike", "bus", "inbox", _ag + ".jsonl")
+                if not (_ag and _ets and os.path.exists(_fp)):
+                    continue
+                _t0 = _dt.datetime.strptime(_ets, "%Y-%m-%dT%H:%M:%SZ")
+                _t1 = (_t0 + _dt.timedelta(minutes=15)).strftime("%Y-%m-%dT%H:%M:%SZ")
+                # Lấy ứng viên TỐT NHẤT trong cửa sổ, không phải ứng viên ĐẦU TIÊN.
+                # heartbeat là NHIỄU có hệ thống: watcher tự phát mỗi ~5 phút với
+                # topic = trace_id ⇒ nó khớp trace_id với MỌI bản ghi bị chặn của cùng job
+                # và thường đến TRƯỚC bản retry thật vài giây. Ca thật 2026-09-17: heartbeat
+                # 17:40:21Z (event 755b7de9) che mất đúng bản retry finding 17:40:28Z
+                # (event 10d9cf98, cùng topic, nội dung khớp) ⇒ dispatch đi tra lại từ đầu.
+                _ty = str(_a[1]) if len(_a) >= 2 else ""
+                _best = None
+                with open(_fp, encoding="utf-8", errors="replace") as _bf:
+                    for _bl in _bf:
+                        try:
+                            _be = json.loads(_bl)
+                            _bts = str(_be.get("ts") or "")
+                            if not (_ets < _bts <= _t1):
+                                continue
+                            # Bộ lọc nhiễu ĐO ĐƯỢC, không phải suy từ event_type: heartbeat
+                            # của WATCHER tự khai `payload.source == "watcher"`. Loại theo
+                            # event_type=="heartbeat" trần (bản 2026-09-17) làm MÙ HẲN ca bản
+                            # bị chặn CHÍNH LÀ một heartbeat của agent (ca thật Taylor
+                            # 2026-09-27T08:58:12Z, retry 25c7f402 +10s) ⇒ checker sẽ khẳng
+                            # định "MẤT THẬT" trong khi event có trên bus.
+                            _bpl = _be.get("payload")
+                            if isinstance(_bpl, dict) and str(_bpl.get("source") or "") == "watcher":
+                                continue
+                            if str(_be.get("event_type") or "") == "heartbeat" and _ty != "heartbeat":
+                                continue
+                            _tpm = bool(_tp) and str(_be.get("topic") or "") == _tp
+                            _trm = bool(_tr) and str(_be.get("trace_id") or "") == _tr
+                            if not (_tpm or _trm):
+                                continue
+                            # topic khớp = bằng chứng mạnh hơn trace_id (trace_id dùng chung
+                            # cho cả job); cùng event_type là bằng chứng cộng thêm.
+                            _sc = (2 if _tpm else 0) + (
+                                1 if _ty and str(_be.get("event_type") or "") == _ty else 0)
+                            if _best is None or _sc > _best[0]:
+                                _best = (_sc, _bts, _be)
+                        except Exception:
+                            continue
+                if _best:
+                    _qcand.append(
+                        f"{_ag}/{_ets} → {_best[1]} "
+                        f"event {str(_best[2].get('event_id'))[:8]} "
+                        f"topic {str(_best[2].get('topic'))[:60]}")
+        except Exception:
+            _qcand = []
+        # GHÉP agent VỚI lý do theo TỪNG BẢN GHI. Bản cũ in 2 tập hợp sorted() độc lập
+        # ("Agent: [A, B]. Lý do: [x, y]") — người đọc ghép theo vị trí, mà 2 tập được sắp
+        # xếp bằng 2 khoá khác nhau nên ghép đó SAI bất cứ khi nào có ≥2 agent với ≥2
+        # nguyên nhân khác nhau. Ca thật 2026-09-27: Taylor bị chặn vì JSON thiếu '}' còn
+        # Wags vì word-split, thông điệp ghép ngược cả hai (§29 — không khẳng định cái
+        # chưa đo).
+        _pairs = sorted({f"{_q_who(_r)}: "
+                         f"{str(_r.get('reason') or '?').split(chr(10))[0][:110]}"
+                         for _r in _q24})
+        W(f"append_event.sh đã CÁCH LY {len(_q24)} bản ghi trong 24h qua "
+          f"({_qtot} bản ghi trong file hiện tại"
+          f"{f', {_qres24} ca khác trong 24h đã được đánh dấu xử lý' if _qres24 else ''}"
+          f"{f', {_qbad} dòng không parse được' if _qbad else ''}) "
+          f"— đây là event KHÔNG BAO GIỜ lên bus: guard của append_event.sh từ chối và "
+          f"phần lớn call site nuốt stderr nên agent tưởng đã ghi thành công. "
+          f"NGUYÊN NHÂN KHÁC NHAU THEO TỪNG CA (word-split, JSON không hợp lệ, payload cụt…) "
+          f"— đọc đúng `Lý do` dưới đây, đừng mặc định là lỗi quote. "
+          f"Từng ca (agent: lý do): {_pairs}. "
+          f"Xem `tail bus/_rejected.jsonl`; sửa đúng nguyên nhân ở call site rồi ghi LẠI event "
+          f"(hàng đợi này là PHÁP Y, không ai tự phát lại — payload hỏng phát lại vẫn hỏng)."
+          + (f" ỨNG VIÊN RETRY đã lên bus (cùng agent + cùng topic/trace_id, ≤15 phút sau, "
+             f"đã loại heartbeat): "
+             f"{_qcand} — nhiều khả năng agent đã TỰ ghi lại; ĐỐI CHIẾU nội dung rồi đánh dấu "
+             f"bằng `bin/bus_rejected_resolve.py --index N --by <ai> --note ...`, đừng bỏ qua "
+             f"bước đánh dấu (không đánh dấu = báo động lặp lại suốt 24h)." if _qcand else
+             " KHÔNG tìm thấy ứng viên retry nào trên bus trong 15 phút sau đó — khả năng cao "
+             "event MẤT THẬT, phải dựng lại nội dung từ argv rồi ghi lại."))
+    elif _qtot:
+        OK(f"Hàng đợi cách ly append_event.sh: {_qtot} bản ghi cũ trong file hiện tại, "
+           f"24h qua không có ca CHƯA XỬ LÝ"
+           f"{f' ({_qres24} ca mới đã được đánh dấu xử lý)' if _qres24 else ''}.")
+# 5b_END — bin/ops_health_check_rejected_selfcheck.py TRÍCH khối giữa 5b_BEGIN/5b_END rồi
+# chạy trên namespace stub. Đổi/xoá 2 marker này ⇒ selfcheck FAIL ngay, không im lặng.
 
 # 6. Corp-action backlog (data/corp_action_backlog.json, ghi bởi update_shares_live.py
 #    --scan mỗi ngày 18:40 ICT — đọc file local, KHÔNG query BQ trực tiếp ở đây để giữ
@@ -701,9 +1340,29 @@ if dep_last is None:  # CSV rỗng/không đọc được -> mốc cuối = anch
 if dep_last is not None:
     dep_age = (today_d - dep_last).days
     if dep_age > 45:
+        # 2026-09-04: mốc CSV đứng yên KHÔNG đồng nghĩa cron chưa chạy. refresh_deposit_rate_vn.sh
+        # (cron ngày 3 hàng tháng) cố ý KHÔNG ghi số khi nguồn mâu thuẫn — nó escalate bus question
+        # và giữ nguyên giá trị live. Bảo người xử lý "chạy refresh_deposit_rate_vn.sh" trong tình
+        # huống đó là chỉ sai hướng (chạy lại sẽ escalate lại). Đọc ARTIFACT — log run gần nhất —
+        # rồi mới nói nguyên nhân (§28 vắng-mặt-≠-chưa-làm, §29 không hardcode chẩn đoán).
+        dep_runs = sorted(glob.glob(os.path.join(wc_root, "data", "refresh_deposit_rate_vn_*.log")))
+        dep_hint = ("Chạy refresh_deposit_rate_vn.sh (nhắc) rồi append_deposit_rate.py để cập nhật.")
+        if dep_runs:
+            try:
+                dep_tail = open(dep_runs[-1], encoding="utf-8", errors="replace").read()
+                dep_run_days = (today_d - _date.fromtimestamp(os.path.getmtime(dep_runs[-1]))).days
+                if "Escalated instead of writing a number" in dep_tail:
+                    dep_hint = (f"KHÔNG phải cron hỏng: {os.path.basename(dep_runs[-1])} cho thấy job "
+                                f"đã chạy {dep_run_days} ngày trước và ESCALATE đúng thiết kế (nguồn mâu "
+                                f"thuẫn) — đang chờ NGƯỜI quyết qua bus question "
+                                f"Winston/deposit-rate-refresh-question. Chạy lại sẽ escalate lại.")
+                elif "refresh DONE" in dep_tail:
+                    dep_hint = (f"Job đã chạy {dep_run_days} ngày trước ({os.path.basename(dep_runs[-1])}) "
+                                f"nhưng CSV không đổi — đọc log đó trước khi chạy lại.")
+            except Exception as _e:
+                dep_hint += f" (không đọc được log run gần nhất: {type(_e).__name__}: {_e})"
         W(f"Lãi suất tiết kiệm (deposit_rate_vn) đã {dep_age} ngày chưa refresh "
-          f"(mốc cuối {dep_last}, {dep_kind}) — input rating_8l NEUTRAL tilt sống. "
-          f"Chạy refresh_deposit_rate_vn.sh (nhắc) rồi append_deposit_rate.py để cập nhật.")
+          f"(mốc cuối {dep_last}, {dep_kind}) — input rating_8l NEUTRAL tilt sống. " + dep_hint)
     else:
         OK(f"Lãi suất tiết kiệm (deposit_rate_vn): mốc cuối {dep_last} ({dep_age} ngày, {dep_kind}).")
 else:
@@ -717,14 +1376,126 @@ else:
 #    daily_retro.sh crash/không hoàn tất — chính lớp lỗi mà bản thân RETRO được dựng ra để
 #    bắt, nhưng lại là nạn nhân của nó (crash trước khi kịp tự báo). WARN-only, KHÔNG tự
 #    sửa ở đây — rơi vào OTHER_WARN nên tự động dispatch ops_autofix.sh (Winston chẩn đoán+sửa).
-retro_yday = today_d - _timedelta(days=1)
-retro_file = os.path.join(wc_root, "mike", "kb", "incidents", "retro", f"retro-{retro_yday.isoformat()}.md")
-if os.path.exists(retro_file):
-    OK(f"daily_retro.sh: có entry cho {retro_yday} ({os.path.basename(retro_file)}).")
+# CHECK9_BEGIN — marker ỔN ĐỊNH (giống CHECK5/10/11/12): bin/ops_health_check_selfcheck.py trích
+# ĐÚNG khối giữa CHECK9_BEGIN/CHECK9_END rồi chạy nó trên thư mục retro giả. Đổi/xoá marker ⇒
+# selfcheck FAIL ngay.
+#
+# Cửa sổ 7 NGÀY, không phải 1 (sửa 2026-08-20, audit coord-2026-08-20 theo khuôn lỗi 08-18):
+# bản cũ chỉ hỏi "có retro của HÔM QUA không". Nếu checker không chạy đúng ngày đó (cron chết,
+# máy tắt), hoặc người đọc bỏ qua đúng báo cáo đó, thì hôm sau câu hỏi đã đổi sang ngày mới và
+# lần retro bị mất KHÔNG BAO GIỜ được hỏi lại — cảnh báo tự bốc hơi thay vì tự đóng. Đây đúng
+# gap `long_term_ops` arch-reviewer nêu 2026-08-20T01:29:01Z. Kênh ĐÓNG vẫn là artifact thật
+# (file retro tồn tại ⇒ hết báo), nên quét rộng KHÔNG đẻ báo động lặp.
+_retro_dir = os.path.join(wc_root, "mike", "kb", "incidents", "retro")
+_RETRO_WINDOW_D = 7
+# Sàn dưới = ngày retro CŨ NHẤT có thật trên đĩa: đừng bao giờ đòi retro của ngày trước khi cơ
+# chế tồn tại (tự thích nghi, không cần chép ngày cứng vào code).
+_retro_floor = None
+try:
+    _retro_have = sorted(re.findall(r"retro-(\d{4}-\d{2}-\d{2})\.md",
+                                    " ".join(os.listdir(_retro_dir))))
+    if _retro_have:
+        _retro_floor = _date.fromisoformat(_retro_have[0])
+except Exception:
+    _retro_have = []
+_retro_missing = []
+for _i in range(1, _RETRO_WINDOW_D + 1):
+    _d9 = today_d - _timedelta(days=_i)
+    if _retro_floor is not None and _d9 < _retro_floor:
+        continue
+    if not os.path.exists(os.path.join(_retro_dir, f"retro-{_d9.isoformat()}.md")):
+        _retro_missing.append(_d9.isoformat())
+_retro_missing.sort()
+if not _retro_have:
+    lines.append("ℹ️ daily_retro.sh: chưa có entry RETRO nào trên đĩa — bỏ qua (chưa tới lần chạy đầu).")
+elif _retro_missing:
+    _yday9 = (today_d - _timedelta(days=1)).isoformat()
+    _fresh9 = _yday9 in _retro_missing
+    # ĐỪNG ĐOÁN NGUYÊN NHÂN — TRA LOG (coding_guidelines §28). Bản trước hardcode "nghi quoting
+    # bug 08-01" vào thông điệp; hai lần liên tiếp nó dẫn autofix đi sai hướng: 2026-08-20 (lỗi
+    # TRUYỀN TẢI API, script chạy trọn vẹn) và 2026-08-25 (HOST TẮT 08-24 15:30→08-25 09:45 ICT,
+    # cron 00:30 không hề fire). Phân biệt được bằng đúng MỘT bit cơ khí: log daily_retro.log có
+    # dòng START cho ngày cần review hay không. Có START ⇒ lỗi NẰM TRONG script/dispatch; không
+    # START ⇒ script CHƯA BAO GIỜ chạy, tìm bug trong script là phí công.
+    _log9 = os.path.join(wc_root, "mike", "logs", "daily_retro.log")
+    _started9 = None
+    if _fresh9:
+        try:
+            with open(_log9, "r", errors="replace") as _fh9:
+                _started9 = (f"daily_retro START (reviewing {_yday9}" in _fh9.read())
+        except OSError:
+            _started9 = None
+    if not _fresh9:
+        _why9 = (" (KHÔNG gồm hôm qua — đây là (các) lần đã bị bỏ lỡ trước đó, bản check 1-ngày "
+                 "cũ đã để trôi mất; vẫn là việc còn NỢ).")
+    elif _started9 is True:
+        _why9 = (f" (gồm HÔM QUA — logs/daily_retro.log CÓ dòng START cho {_yday9} ⇒ script ĐÃ "
+                 "chạy nhưng không hoàn tất; nguyên nhân nằm TRONG chuỗi dispatch, đọc "
+                 "logs/daily_retro_draft_*.log của đêm đó và phân lớp: usage-limit / lỗi truyền "
+                 "tải API / Mike trả lạc đề).")
+    elif _started9 is False:
+        _why9 = (f" (gồm HÔM QUA — logs/daily_retro.log KHÔNG có dòng START cho {_yday9} ⇒ cron "
+                 "00:30 ICT KHÔNG hề chạy: máy tắt hoặc cron không fire, KHÔNG phải bug trong "
+                 "script. Xác nhận bằng `last -x` + mtime các file trong mike/logs/ quanh 00:30 "
+                 "ICT TRƯỚC khi đi tìm bug; nếu đúng downtime thì mọi cron khác trong cùng cửa "
+                 "sổ cũng đã bị bỏ lỡ.)")
+    else:
+        _why9 = (" (gồm HÔM QUA — KHÔNG đọc được logs/daily_retro.log để phân biệt 'script chạy "
+                 "rồi chết' với 'cron không hề chạy'; kiểm thủ công, đừng giả định.)")
+    W(f"daily_retro.sh THIẾU {len(_retro_missing)} entry RETRO trong {_RETRO_WINDOW_D} ngày qua: "
+      f"{_retro_missing}" + _why9
+      + " Viết bù entry để cảnh báo tự tắt.")
 else:
-    W(f"daily_retro.sh KHÔNG có entry RETRO cho {retro_yday} (thiếu {os.path.relpath(retro_file, wc_root)}) "
-      f"— nghi cron 00:30 ICT đêm qua crash/không hoàn tất (đúng lớp lỗi 08-01: quoting bug làm "
-      f"script chết trước khi kịp notify). Kiểm logs/daily_retro.log tìm lỗi bash gần nhất.")
+    OK(f"daily_retro.sh: đủ entry RETRO cho {_RETRO_WINDOW_D} ngày qua "
+       f"(mới nhất {(today_d - _timedelta(days=1)).isoformat()}).")
+# CHECK9_END
+
+# 9b. Pending decisions trong working memory phải có bus question backing (thêm 2026-08-16,
+#     sau incident GDKHQ D1-D3 chỉ tracked trong memory — quyết định mất khi session restart).
+#     Protocol: mọi pending user decision PHẢI được mở bus question trước khi vào working memory.
+#     Pattern tìm: "## PENDING_DECISION: <topic>" trong kb/memory/Mike.md.
+#     [WARN-ONLY]: chỉ báo cáo, không dispatch — đây là lỗi quy trình Mike tự sửa khi đọc báo cáo.
+mike_mem_9b = os.path.join(wc_root, "mike", "kb", "memory", "Mike.md")
+if os.path.exists(mike_mem_9b):
+    try:
+        import re as _re9b
+        _mem9b = open(mike_mem_9b, encoding="utf-8").read()
+        _pending9b = _re9b.findall(r'^##\s+PENDING_DECISION:\s*(.+)', _mem9b, _re9b.MULTILINE)
+        if _pending9b:
+            # Build set of open bus question topics (question posted, no answer/decision yet)
+            _open9b = set()
+            for _bd in [os.path.join(wc_root, "mike", "bus", "inbox"),
+                        os.path.join(wc_root, "mike", "bus", "archive")]:
+                if not os.path.isdir(_bd):
+                    continue
+                for _fn9b in sorted(os.listdir(_bd)):
+                    if not _fn9b.endswith(".jsonl"):
+                        continue
+                    try:
+                        for _ln9b in open(os.path.join(_bd, _fn9b), encoding="utf-8"):
+                            try:
+                                _ev9b = json.loads(_ln9b.strip())
+                                _et9b = _ev9b.get("event_type", "")
+                                _tp9b = _ev9b.get("topic", "")
+                                if _et9b == "question":
+                                    _open9b.add(_tp9b)
+                                elif _et9b in ("answer", "decision"):
+                                    _open9b.discard(_tp9b)
+                            except Exception:
+                                pass
+                    except Exception:
+                        pass
+            _unbacked9b = [t.strip() for t in _pending9b if t.strip() not in _open9b]
+            if _unbacked9b:
+                W(f"[WARN-ONLY] check 9b: {len(_unbacked9b)} PENDING_DECISION trong working memory "
+                  f"KHÔNG có bus question backing: {_unbacked9b}. "
+                  f"Protocol vi phạm — quyết định chỉ trong memory sẽ mất khi session restart. "
+                  f"Fix: bin/append_event.sh Mike question <topic> '{{...}}' TRƯỚC KHI viết vào memory.")
+            else:
+                OK(f"check 9b: {len(_pending9b)} PENDING_DECISION trong working memory, "
+                   f"tất cả có bus question backing.")
+    except Exception as _e9b:
+        lines.append(f"ℹ️ check 9b: không đọc được Mike.md ({_e9b})")
 
 # 10. notify_thread.sh không phân giải được topic ⇒ TIN NHẮN BỊ NUỐT (thêm 2026-08-02, saga
 #     discord-routing vòng 4). notify_thread.sh ghi 1 dòng vào logs/notify_thread_errors.log
@@ -740,22 +1511,98 @@ else:
 # CHECK10_BEGIN — marker ỔN ĐỊNH: bin/ops_health_check_selfcheck.py trích ĐÚNG khối giữa
 # CHECK10_BEGIN/CHECK10_END rồi chạy nó trên log giả. Đổi/xoá marker ⇒ selfcheck FAIL ngay.
 import time as _time
+import datetime as _dt
 nte_file = os.path.join(wc_root, "mike", "logs", "notify_thread_errors.log")
 if os.path.exists(nte_file) and (_time.time() - os.path.getmtime(nte_file)) < 86400:
     try:
         # Chỉ lấy dòng MỞ ĐẦU BẢN GHI (có timestamp) — thông điệp lỗi có thể tràn nhiều dòng
         # (discord_channel.sh in thêm danh sách tên hợp lệ), lấy dòng cuối thô sẽ ra đúng cái
         # đuôi vô nghĩa đó.
-        _nte_last = [l for l in open(nte_file, encoding="utf-8", errors="replace").read().splitlines()
-                     if re.match(r"^\d{4}-\d{2}-\d{2}T", l)][-1]
+        _nte_all = [l for l in open(nte_file, encoding="utf-8", errors="replace").read().splitlines()
+                    if re.match(r"^\d{4}-\d{2}-\d{2}T", l)]
     except Exception:
-        _nte_last = "(không đọc được nội dung)"
-    W(f"[WARN-ONLY] notify_thread.sh có lỗi gửi Discord trong 24h qua — TIN NHẮN ĐÃ BỊ NUỐT. "
-      f"Dòng cuối: {_nte_last[:300]} — kiểm tên topic trong mike/kb/discord_channels.json "
-      f"và quyền chạy bin/discord_channel.sh.")
+        _nte_all = []
+    # Cửa sổ 24h phải áp lên TỪNG BẢN GHI, không chỉ lên mtime của FILE (sửa 2026-08-18).
+    # File này append-only không xoay vòng ⇒ mtime chỉ nói "có ai đó vừa ghi", không nói bản
+    # ghi NÀO mới. Trước sửa: một dòng tự-sửa mới (08-17) làm file tươi, rồi check đọc TOÀN BỘ
+    # lịch sử và lôi lỗi thật từ 08-12 (6 ngày trước, đã xử lý) ra báo "TIN NHẮN ĐÃ BỊ NUỐT
+    # trong 24h qua" — sai cả sự kiện lẫn mốc thời gian, và nhánh _nte_hard che luôn kết luận
+    # ĐÚNG của bản ghi mới ("đã tự sửa, KHÔNG mất tin"). Bản ghi không đọc được giờ thì GIỮ
+    # (fail-loud): không loại được khả năng nó vừa xảy ra.
+    _nte_now = _time.time()
+
+    def _nte_recent(l):
+        try:
+            return (_nte_now - _dt.datetime.fromisoformat(l.split(" ", 1)[0]).timestamp()) < 86400
+        except Exception:
+            return True
+
+    _nte_lines = [l for l in _nte_all if _nte_recent(l)]
+    # notify_thread.sh ghi HAI loại bản ghi vào cùng file, và chúng có hệ quả NGƯỢC nhau:
+    # "DA TU SUA VA GUI" = phát hiện caller đảo thứ tự đối số, script TỰ SỬA và tin ĐÃ ĐẾN
+    # nơi; mọi bản ghi còn lại = tin KHÔNG gửi được. Trước 2026-08-16 check này gộp cả hai
+    # dưới một tiêu đề "TIN NHẮN ĐÃ BỊ NUỐT" ⇒ báo cho người rằng một tin đã giao là bị mất
+    # (arch-review coord-2026-08-12 required_change #3: "sửa cả người ĐỌC, không chỉ người
+    # GHI"). Một lần tra cứu/nhận dạng sai không được đội lốt một kết luận về sự cố thật.
+    _nte_swap = [l for l in _nte_lines if "DA TU SUA VA GUI" in l]
+    _nte_hard = [l for l in _nte_lines if "DA TU SUA VA GUI" not in l]
+    if _nte_hard:
+        W(f"[WARN-ONLY] notify_thread.sh có lỗi gửi Discord trong 24h qua — TIN NHẮN ĐÃ BỊ NUỐT. "
+          f"Dòng cuối: {_nte_hard[-1][:300]} — kiểm tên topic trong mike/kb/discord_channels.json "
+          f"và quyền chạy bin/discord_channel.sh.")
+    elif _nte_swap:
+        W(f"[WARN-ONLY] notify_thread.sh: {len(_nte_swap)} call site ĐẢO THỨ TỰ đối số trong 24h "
+          f"qua — tin ĐÃ ĐƯỢC GỬI (script tự sửa), KHÔNG mất tin. Sửa call site cho đúng "
+          f"`notify_thread.sh \"<message>\" <topic>`. Dòng cuối: {_nte_swap[-1][:300]}")
+    elif not _nte_all:
+        # File tươi nhưng KHÔNG có bản ghi nào có timestamp ⇒ không kết luận được (khác hẳn
+        # với "có bản ghi nhưng đều cũ hơn 24h" — ca đó rơi xuống else và là OK thật).
+        W(f"[WARN-ONLY] notify_thread_errors.log vừa được ghi trong 24h qua nhưng KHÔNG đọc "
+          f"được bản ghi nào có timestamp — không kết luận được có mất tin hay không.")
+    else:
+        OK("notify_thread.sh: không có lỗi gửi Discord trong 24h qua.")
 else:
     OK("notify_thread.sh: không có lỗi gửi Discord trong 24h qua.")
 # CHECK10_END
+
+# 10b. dispatch.sh TỪ CHỐI một prompt rỗng/quá ngắn (thêm 2026-08-21, job Wags_20260821_012007).
+#      Guard ở dispatch.sh:116+ exit 1 và ghi 1 dòng vào logs/dispatch_rejected_prompts.log.
+#      Nguồn sinh prompt rỗng có thể là NGƯỜI gõ (thấy stderr ngay, vô hại) hoặc MÁY — một
+#      script tầng trên bọc `| tail -5` / `>> log` sẽ nuốt trọn exit 1. Không ai đọc file
+#      này thì fail-loud lại thành fail-silent — đúng lỗi check 10 vừa bịt cho notify_thread.
+#      WARN-only, cửa sổ 24h áp lên TỪNG BẢN GHI (không chỉ mtime file, bài học 2026-08-18).
+# CHECK10B_BEGIN
+drp_file = os.path.join(wc_root, "mike", "logs", "dispatch_rejected_prompts.log")
+_drp_err = None
+if os.path.exists(drp_file):
+    try:
+        _drp_all = [l for l in open(drp_file, encoding="utf-8", errors="replace").read().splitlines()
+                    if re.match(r"^\d{4}-\d{2}-\d{2}T", l)]
+    except Exception as e:
+        # KHÔNG nuốt thành [] rồi in OK: file có mà đọc không được (perm/IO) thì đây là
+        # "KHÔNG BIẾT", không phải "không có reject nào" — một detector chống fail-silent
+        # mà tự fail-silent là vô nghĩa (arch-reviewer vòng 3).
+        _drp_all, _drp_err = [], f"{type(e).__name__}: {e}"
+
+    def _drp_recent(l):
+        try:
+            return (_time.time() - _dt.datetime.fromisoformat(l.split("\t", 1)[0]).timestamp()) < 86400
+        except Exception:
+            return True   # không đọc được ts thì GIỮ (fail-loud), không loại trừ
+
+    _drp = [l for l in _drp_all if _drp_recent(l)]
+    if _drp_err:
+        W(f"[WARN-ONLY] KHÔNG ĐỌC ĐƯỢC logs/dispatch_rejected_prompts.log ({_drp_err}) — "
+          f"không kết luận được có dispatch nào bị từ chối hay không; kiểm quyền/encoding file.")
+    elif _drp:
+        W(f"[WARN-ONLY] dispatch.sh đã TỪ CHỐI {len(_drp)} dispatch vì prompt rỗng/quá ngắn "
+          f"trong 24h qua — nếu cột from= là một SCRIPT (không phải người gõ) thì có chỗ nào đó "
+          f"đang dựng prompt rỗng và nuốt exit 1. Dòng cuối: {_drp[-1][:300]}")
+    else:
+        OK("dispatch.sh: không có dispatch nào bị từ chối vì prompt rỗng trong 24h qua.")
+else:
+    OK("dispatch.sh: không có dispatch nào bị từ chối vì prompt rỗng trong 24h qua.")
+# CHECK10B_END
 
 # 11. Quét selfcheck production: đã chạy gần đây chưa + đang có ca ĐỎ nào (thêm 2026-08-12,
 #     job Wags_20260812_112724 — sự cố 4 selfcheck đỏ 2 ngày không ai biết).
@@ -817,6 +1664,70 @@ except Exception as _e:
       f"selfcheck nào đỏ hay không.")
 # CHECK11_END
 
+# 12. ccdb bridge NUỐT MẤT một wakeup one-shot (thêm 2026-08-17, job Wags_20260817_193233,
+#     arch-review required_change #2). Bối cảnh: fix double-answer đổi scheduler thành XOÁ row
+#     one_shot TRƯỚC khi chạy Claude. Đánh đổi có chủ ý — nhưng nó bỏ mất tính TỰ HỒI PHỤC:
+#     trước đây thất bại giữa chừng thì row còn nguyên và tick sau chạy lại; giờ row đã mất,
+#     KHÔNG ai retry. Mất 1 wakeup dispatch nghĩa là Mike ngồi chờ mãi một job đã xong.
+#
+#     Vì sao cần check này: mất wakeup là sự cố VÔ HÌNH theo đúng bản chất — "không có gì xảy
+#     ra" trông y hệt "không có việc gì để làm". Scheduler đã ghi ERROR `ONE_SHOT_DROPPED`,
+#     nhưng arch-reviewer grep ra ops_health_check.sh KHÔNG hề đọc log daemon ccdb (0 khớp cho
+#     ccdb|scheduler|journalctl) ⇒ fail-loud mà không có người đọc thì vẫn là fail-silent, đúng
+#     cái bẫy check #10 đã phải bịt một lần rồi.
+#
+#     [WARN-ONLY] có chủ ý: đây là sự cố ĐÃ XẢY RA RỒI, không sửa lại được bằng job autofix
+#     (wakeup đã mất là mất); và cửa sổ 24h nghĩa là nó tự kêu tới hết ngày dù đã xử lý xong.
+#     Việc của dòng này là LỌT VÀO MẮT NGƯỜI ĐỌC, không phải kích thêm 4 job/ngày.
+# CHECK12_BEGIN — marker ỔN ĐỊNH (giống CHECK5/10/11): selfcheck trích đúng khối này chạy trên
+# log giả. Đổi/xoá marker ⇒ bin/ops_health_check_selfcheck.py FAIL ngay.
+try:
+    _jr = subprocess.run(
+        ["journalctl", "--user", "-u", "ccdb-mike", "--since", "-24h", "--no-pager", "-q"],
+        capture_output=True, text=True, timeout=60,
+    )
+    if _jr.returncode != 0:
+        # KHÔNG nuốt: đọc không được journal thì ta KHÔNG BIẾT có mất wakeup hay không —
+        # trạng thái đó phải trông khác hẳn "đã kiểm và sạch".
+        W(f"[WARN-ONLY] check 12: không đọc được journal ccdb-mike (rc={_jr.returncode}: "
+          f"{(_jr.stderr or '').strip()[:160]}) — KHÔNG kết luận được có wakeup one-shot nào "
+          f"bị mất hay không.")
+    elif not _jr.stdout.strip():
+        # rc=0 + rỗng KHÔNG phải "sạch". `journalctl --user -u <tên sai>` trả ĐÚNG rc=0 với 0
+        # byte (arch-review vòng 2 chạy thật: unit `definitely-not-a-unit` ⇒ rc=0). Daemon sống
+        # ghi ~4800 dòng/24h, nên rỗng nghĩa là sai tên unit / sai scope (--user vs system) /
+        # journal không giữ log — tức KHÔNG BIẾT, không phải "đã kiểm và sạch".
+        W(f"[WARN-ONLY] check 12: journal ccdb-mike KHÔNG có dòng nào trong 24h qua — daemon "
+          f"sống thì phải có log, nên đây là sai tên unit/scope hoặc daemon không ghi journal. "
+          f"KHÔNG kết luận được có wakeup one-shot nào bị mất hay không.")
+    else:
+        # Hai marker, hai lớp sự cố khác nhau, đều là "đã claim + đã xoá row, không ai retry":
+        # DROPPED = chưa từng vào Claude; INTERRUPTED = đã vào nhưng không chạy xong (restart
+        # giữa lượt — chính lớp sự cố đẻ ra bản fix này, 4 lần ngày 2026-08-17).
+        _dropped = [l for l in _jr.stdout.splitlines()
+                    if "ONE_SHOT_DROPPED" in l or "ONE_SHOT_INTERRUPTED" in l]
+        # Row còn sống nhưng KHÔNG giao được: retry mỗi 60s vô hạn, không TTL. Mike vẫn "chờ
+        # mãi một job đã xong" y hệt ca mất wakeup, nên phải báo — nhưng báo RIÊNG vì cách xử
+        # lý khác hẳn (ca này còn cứu được: un-archive thread là nó tự chạy).
+        _unreach = [l for l in _jr.stdout.splitlines() if "has no reachable destination" in l]
+        if _dropped:
+            W(f"[WARN-ONLY] check 12: ccdb bridge MẤT {len(_dropped)} wakeup one-shot trong 24h "
+              f"qua — job đã xong nhưng agent KHÔNG được đánh thức, không có gì retry. "
+              f"Dòng cuối: {_dropped[-1][-300:]}")
+        if _unreach:
+            W(f"[WARN-ONLY] check 12: {len(_unreach)} wakeup one-shot KHÔNG giao được (thread "
+              f"không có trong cache — thường do thread đã archive) trong 24h qua; row còn sống "
+              f"và retry mỗi 60s nhưng agent VẪN chưa được đánh thức. Dòng cuối: "
+              f"{_unreach[-1][-300:]}")
+        if not _dropped and not _unreach:
+            OK("check 12: ccdb bridge không mất wakeup one-shot nào trong 24h qua.")
+except FileNotFoundError:
+    W("[WARN-ONLY] check 12: không có lệnh journalctl — không giám sát được log ccdb bridge.")
+except Exception as _e12:
+    W(f"[WARN-ONLY] check 12: lỗi khi quét log ccdb bridge ({type(_e12).__name__}: "
+      f"{str(_e12)[:120]}) — không kết luận được có mất wakeup hay không.")
+# CHECK12_END
+
 print("\n".join(lines))
 print(f"__WARN_COUNT__={warn}")
 PYEOF
@@ -830,7 +1741,7 @@ REPORT_BODY="$(echo "$REPORT" | grep -v '__WARN_COUNT__')"
 PREFLIGHT_TAIL=""
 PREFLIGHT_WARN=0
 if [ -f "$WC_ROOT/data/trade_plans/plan_${ACCOUNT}_${TODAY}.json" ]; then
-  PREFLIGHT_TAIL="$(bash "$ROOT/bin/preflight_check.sh" --account "$ACCOUNT" 2>/dev/null | grep -E '^\s*(✅|❌|⚠️)' | sed 's/^/  /')"
+  PREFLIGHT_TAIL="$(PREFLIGHT_QUIET=1 bash "$ROOT/bin/preflight_check.sh" --account "$ACCOUNT" 2>/dev/null | grep -E '^\s*(✅|❌|⚠️)' | sed 's/^/  /')"
   PREFLIGHT_WARN="$(echo "$PREFLIGHT_TAIL" | grep -cE '⚠️|❌')"
 fi
 WARN_COUNT=$(( ${WARN_COUNT:-0} + ${PREFLIGHT_WARN:-0} ))
@@ -848,7 +1759,7 @@ WARN_COUNT=$(( ${WARN_COUNT:-0} + ${PREFLIGHT_WARN:-0} ))
 ANOMALY_SUMMARY=""
 ANOMALY_WARN=0
 ANOMALY_SCAN="$WC_ROOT/mike/agents/Taylor/anomaly_scan.py"
-if [ "$ACCOUNT" = "SpaceX" ] && [ -f "$ANOMALY_SCAN" ]; then
+if [ -n "$RUNONCE_LABEL" ] && [ "$ACCOUNT" = "$RUNONCE_LABEL" ] && [ -f "$ANOMALY_SCAN" ]; then
   EMIT="/tmp/anomaly_emit_${TODAY}.json"
   timeout 200 python3 "$ANOMALY_SCAN" --status-check --emit-json "$EMIT" >/dev/null 2>&1 \
     || timeout 90 python3 "$ANOMALY_SCAN" --emit-json "$EMIT" >/dev/null 2>&1 || true
@@ -877,6 +1788,43 @@ if [ "$ACCOUNT" = "SpaceX" ] && [ -f "$ANOMALY_SCAN" ]; then
 fi
 WARN_COUNT=$(( ${WARN_COUNT:-0} + ${ANOMALY_WARN:-0} ))
 
+# 13. Hạn RÀ LẠI cờ forensic (user chốt 2026-09-04: "forensic cũng phải đưa thời hạn review
+#     xử lý vào, không được để treo mãi"). Cờ forensic là lớp bảo vệ DUY NHẤT cho rủi ro
+#     gian lận/thao túng — `adaptive_exclusion_v3_20260904.md` đã chứng minh gate tài chính
+#     động KHÔNG thay được nó (false-positive 91,9%, DSR 0,14) — nên nó PHẢI ở lại, nhưng
+#     không được phép nằm vĩnh viễn mà không ai nhìn lại.
+#     Quá hạn → FAIL-CLOSED (giữ nguyên cờ) + escalate; KHÔNG tự gỡ. Chỉ chạy lượt ACCOUNT
+#     đầu: danh sách cờ là FLEET-WIDE, per-account sẽ escalate trùng (cùng lý do như
+#     ANOMALY_SCAN ở trên và như sự cố coord-SpaceX/coord-ZaloPay 2026-07-08).
+FORENSIC_SUMMARY=""
+FORENSIC_WARN=0
+FORENSIC_CHECK="$ROOT/bin/forensic_flag_review_check.py"
+if [ -n "$RUNONCE_LABEL" ] && [ "$ACCOUNT" = "$RUNONCE_LABEL" ] && [ -f "$FORENSIC_CHECK" ]; then
+  # Bắt stderr LẠI để in ra khi hỏng, không ném vào /dev/null rồi đoán nguyên nhân (§29).
+  FORENSIC_OUT="$(timeout 120 python3 "$FORENSIC_CHECK" 2>&1)"; FORENSIC_RC=$?
+  if [ "$FORENSIC_RC" -eq 0 ]; then
+    FORENSIC_SUMMARY="$FORENSIC_OUT"
+  elif [ "$FORENSIC_RC" -eq 1 ]; then
+    FORENSIC_WARN=1
+    FORENSIC_SUMMARY="$FORENSIC_OUT"
+  else
+    FORENSIC_WARN=1
+    FORENSIC_SUMMARY="⚠️ forensic-flag review check lỗi (rc=${FORENSIC_RC}) — KHÔNG kết luận được hạn rà lại. Lỗi thật: ${FORENSIC_OUT}"
+  fi
+fi
+WARN_COUNT=$(( ${WARN_COUNT:-0} + ${FORENSIC_WARN:-0} ))
+
+# 14. Worktree chạy bản TIỀN-VÁ script giao hàng báo cáo + sổ giao hàng LẠC (Wags 2026-09-12,
+#     incident report-return-gate-worktree-root mục "Còn treo" #1/#2). Fleet-wide ⇒ chỉ lượt
+#     ACCOUNT đầu (cùng lý do ANOMALY_SCAN). Checker TỰ IM khi không có gì để nói: chỉ kể cây
+#     còn được dùng <14 ngày, và chỉ kể sổ lạc có báo cáo ĐÃ GỬI mà sổ canonical không biết.
+#     [WARN-ONLY] có chủ đích: worktree thuộc phiên/agent KHÁC — Wags/Winston không rebase hộ
+#     được, auto-dispatch chỉ đốt token. Không tính vào WARN_COUNT vì lý do đó.
+WORKTREE_STALE=""
+if [ -n "$RUNONCE_LABEL" ] && [ "$ACCOUNT" = "$RUNONCE_LABEL" ]; then
+  WORKTREE_STALE="$(timeout 60 python3 "$ROOT/bin/worktree_stale_check.py" 2>&1 || true)"
+fi
+
 MSG="🩺 **${ACCOUNT} — ${LABEL} — kiểm tra vận hành ${NOW_ICT}**
 ${REPORT_BODY}"
 if [ -n "$PREFLIGHT_TAIL" ]; then
@@ -890,6 +1838,18 @@ if [ -n "$ANOMALY_SUMMARY" ]; then
 
 Quét bất thường (anomaly scan — cảnh báo sớm giá/khối lượng + theo dõi trạng thái sàn):
 ${ANOMALY_SUMMARY}"
+fi
+if [ -n "$WORKTREE_STALE" ]; then
+  MSG="${MSG}
+
+Worktree/sổ giao hàng lệch bản (không chặn giao hàng tự động — xem bin/worktree_stale_check.py):
+${WORKTREE_STALE}"
+fi
+if [ -n "$FORENSIC_SUMMARY" ]; then
+  MSG="${MSG}
+
+Hạn rà lại cờ forensic (data/forensic_flags.csv — quá hạn KHÔNG tự gỡ cờ):
+${FORENSIC_SUMMARY}"
 fi
 if [ "${WARN_COUNT:-0}" -eq 0 ]; then
   MSG="${MSG}
@@ -959,6 +1919,7 @@ if [ "${WARN_COUNT:-0}" -gt 0 ] && [ "$DRY_RUN" != "1" ]; then
   # Daily để user thấy (thêm Wags 2026-07-30, coord-2026-07-30). Lọc bằng MARKER chứ không bằng
   # câu chữ tiếng Việt: đổi wording WARN không còn âm thầm đổi routing, và topic tự do nhúng
   # trong dòng không kéo được dòng đó vào COORD_WARN (arch-reviewer required_change #5).
+# ROUTING_BEGIN
   ROUTABLE_WARN="$(echo "$MSG" | grep -E '⚠️|❌' | grep -vF '[WARN-ONLY]' || true)"
   COORD_WARN="$(echo "$ROUTABLE_WARN" | grep -E "Circuit breaker|câu hỏi \(question\)|Job board:" || true)"
   OTHER_WARN="$(echo "$ROUTABLE_WARN" | grep -vE "NOT_APPROVED|KHÔNG TÌM THẤY|Circuit breaker|câu hỏi \(question\)|Job board:" || true)"
@@ -971,6 +1932,19 @@ if [ "${WARN_COUNT:-0}" -gt 0 ] && [ "$DRY_RUN" != "1" ]; then
     "$ROOT/bin/wags_autofix.sh" "coord-${TODAY}" "$COORD_WARN (checker run: account=${ACCOUNT})" 2>/dev/null || true
   fi
   if [ -n "$OTHER_WARN" ]; then
-    "$ROOT/bin/ops_autofix.sh" "ops-health-${ACCOUNT}" "$MSG" 2>/dev/null || true
+    # Truyền $OTHER_WARN, KHÔNG phải $MSG. Dòng "$MSG" là di sản commit a8e5b8a6 (2026-07-06),
+    # thời điểm CHỈ có một nhánh autofix; khi nhánh COORD_WARN → Wags được tách ra sau đó,
+    # lời gọi này không được sửa theo ⇒ Winston vẫn nhận TOÀN BỘ báo cáo, gồm cả triệu chứng
+    # ĐIỀU PHỐI vừa được route sang Wags. Hệ quả đo được (Wags coord-2026-08-18): 2 ngày liên
+    # tiếp Winston và Wags cùng chẩn đoán một câu hỏi tồn đọng — 08-17 (Winston_20260817_195843
+    # kết luận "question Taylor/gdkhq-auto-accept còn mở thật" trong khi Wags_20260817_195842
+    # được dispatch đúng cho việc đó) và 08-18 (Winston_20260818_001950 đóng 2 question gdkhq
+    # lúc 00:21-00:22, Wags_20260818_001950 dispatch lúc 00:19:50 cho ĐÚNG 2 question đó).
+    # Hai job Opus cho một triệu chứng. Truyền OTHER_WARN làm nhánh này ĐỐI XỨNG với nhánh
+    # Wags ở trên (mỗi bên chỉ thấy domain của mình). ĐÁNH ĐỔI CÓ CHỦ ĐÍCH: Winston không còn
+    # thấy các dòng NOT_APPROVED / "KHÔNG TÌM THẤY" (plan chưa duyệt) — vốn ĐÃ bị loại khỏi
+    # routing có chủ đích vì là việc của user; chúng vẫn nằm nguyên trong báo cáo Trading Daily.
+    "$ROOT/bin/ops_autofix.sh" "ops-health-${ACCOUNT}" "$OTHER_WARN (checker run: account=${ACCOUNT})" 2>/dev/null || true
   fi
+# ROUTING_END
 fi

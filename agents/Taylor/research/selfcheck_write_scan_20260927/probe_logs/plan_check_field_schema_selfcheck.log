@@ -1,0 +1,73 @@
+⚠️ plan schema: order BUY-TV1-DISC-01 field `dcf_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-TV1-DISC-01 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-PVT-00 field `dcf_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-TV1-DISC-01 field `dcf_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-SIP-00 field `dcf_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-TV1-DISC-02 field `dcf_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-TV1-DISC-01 field `dcf_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-TV1-DISC-01 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-DRI-DISC-02 field `dcf_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-DRI-DISC-02 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-ACB-PARK-01 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-BID-PARK-02 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-CTG-PARK-03 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-EVF-PARK-04 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-HDB-PARK-05 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-HPG-PARK-06 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-LPB-PARK-07 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-MBB-PARK-08 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-MSB-PARK-09 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-SHB-PARK-10 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-VCB-PARK-11 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-VIB-PARK-12 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-VIX-PARK-13 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-VPB-PARK-14 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-VRE-PARK-15 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-TV1-DISC-01 field `dcf_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-TV1-DISC-01 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-TV1-DISC-2026-08-13 field `dcf_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-TV1-DISC-2026-08-14 field `dcf_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-CSV-00 field `dcf_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-TV1-DISC-01 field `dcf_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-TV1-DISC-01 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-DRI-DISC-02 field `dcf_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-DRI-DISC-02 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-ACB-PARK-01 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-BID-PARK-02 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-HPG-PARK-03 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-MBB-PARK-04 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-MSB-PARK-05 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-SHB-PARK-06 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-TPB-PARK-07 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-VCB-PARK-08 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-VIB-PARK-09 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-VIX-PARK-10 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-VRE-PARK-11 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-TV1-DISC-01 field `dcf_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-TV1-DISC-01 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-TV1-DISC-2026-08-13 field `dcf_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-TV1-DISC-2026-08-14 field `dcf_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-TV1-DISC-01 field `dcf_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-TV1-DISC-01 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-TV1-DISC-01 field `dcf_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+⚠️ plan schema: order BUY-TV1-DISC-01 field `dd_check` là str chứ KHÔNG phải object → chuẩn hoá về dạng 'chưa xác định' (schema_error=True), text gốc giữ trong payload. SỬA PHÍA SINH PLAN — lớp chuẩn hoá này là lưới an toàn, không phải chỗ để dựa vào.
+----------------------------------------------------------------------
+Ran 14 tests in 0.037s
+
+OK
+=== plan_check_field_schema_selfcheck.py ===
+  [12] load_plan() chuẩn hoá plan soạn tay (nguồn #2): OK
+  [13] plan đúng schema đi qua load_plan() không đổi: OK
+      (bỏ qua SpaceX_2026-07-06_v1_superseded_11name: ValueError)
+  [14] 176 plan thật nạp sạch, 47 field sai kiểu được cứu: OK
+  [4] dict giữ nguyên object; None/chuỗi rỗng → None: OK
+  [5] dd_check: has_red_flag=None (chưa biết) + giữ text gốc: OK
+  [6] dcf_check: status=NOT_COMPUTED + giữ text gốc: OK
+  [7] không kích audit event giả từ dạng 'chưa xác định': OK
+  [8] event thật (RICH+robust / red flag) VẪN kích đúng: OK
+  [9] số/list/bool cũng được quy về dict: OK
+  [1] control: chuỗi thô vào _sync_fills VẪN nổ đúng lỗi cũ ('str' object has no attribute 'get'…): OK
+  [2] control: nhánh dcf_check cũng nổ khi là chuỗi: OK
+  [3] Executor chuẩn hoá ⇒ fill đi qua trọn vẹn, parent DONE: OK
+  [10] discretionary_accumulation.py không còn literal chuỗi dcf_check: OK
+  [11] compute_session_order() sinh dcf_check dạng dict: OK

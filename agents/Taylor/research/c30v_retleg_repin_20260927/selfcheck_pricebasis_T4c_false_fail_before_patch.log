@@ -1,0 +1,47 @@
+BQ_LOCAL_CACHE = data/bq_cache
+
+T1. Đồng nhất thức (ép mcapw==mcap → phải trùng module tiền-sửa BIT-FOR-BIT)
+[BQ_LOCAL_CACHE] ready — 14 tables from /home/trido/thanhdt/WorkingClaude/data/bq_cache
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+[BQ_LOCAL_CACHE] query took 2.7s (22402 rows)
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+[BQ_LOCAL_CACHE] query took 2.7s (22402 rows)
+  [ok] T1[recent] level trùng khít — max|Δlevel| = 0.000000e+00 trên 415 phiên
+  [ok] T1[recent] rổ trùng khít — 0 tên đổi trên 8 mốc rebal
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+[BQ_LOCAL_CACHE] query took 6.8s (58942 rows)
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+[BQ_LOCAL_CACHE] query took 6.8s (58942 rows)
+  [ok] T1[old] level trùng khít — max|Δlevel| = 0.000000e+00 trên 753 phiên
+  [ok] T1[old] rổ trùng khít — 0 tên đổi trên 10 mốc rebal
+
+T2. Parity tại mốc rebal MỚI NHẤT (nơi Close/Price ~1,00)
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+[BQ_LOCAL_CACHE] query took 2.7s (22402 rows)
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+[BQ_LOCAL_CACHE] query took 2.7s (22817 rows)
+  [ok] T2 rổ tại rebal mới nhất (2026-05-05) KHÔNG đổi — 0 tên đổi/30
+      sức phân giải (hệ số Close/Price đo trên chính panel này):
+      recent p05 0.620 / p50 0.892 / p95 1.000 | |f-1|>5% ở 67.4% dòng (n=22,817)
+      [đo, KHÔNG phải gate] cả cửa sổ 2025-01-02..2026-06-19: 14 tên đổi / 8 rebal (TB 1.75/30); tổng lợi suất cũ x1.40967 vs mới x1.32456 (Δ -8.51pp)
+
+T3. Positive control ngày cũ (Close/Price xa 1,00 → PHẢI có khác biệt thật)
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+[BQ_LOCAL_CACHE] query took 6.8s (58942 rows)
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+[BQ_LOCAL_CACHE] query took 6.2s (53301 rows)
+      sức phân giải (hệ số Close/Price đo trên chính panel này):
+      old    p05 0.120 / p50 0.392 / p95 1.000 | |f-1|>5% ở 93.7% dòng (n=53,301)
+  [ok] T3 rổ ĐỔI thật (>0 tên) — 48 tên đổi / 10 mốc rebal (TB 4.80/30, max 7)
+  [ok] T3 chuỗi return ĐỔI thật (>0) — max|Δret| = 6.8945pp/phiên; tổng kỳ cũ x1.24342 vs mới x1.05680 (Δ -18.66pp)
+  [ok] T3 khác biệt LỚN HƠN ngày gần đây (dose-response theo hệ số đ/c) — cũ 4.80 tên/rebal vs gần đây 1.75 tên/rebal
+
+T4. An toàn cổ tức (cơ sở điều chỉnh đúng chỗ; chân return kiểm riêng ở T4c)
+  [ok] T4 mcap/mcapw == Close/Price (2 CỘT EXPORT tách đúng — không phải chân return) — max|Δ| = 1.110e-16, n=53,301
+  [ok] T4 có mẫu hệ số đ/c XA 1,00 trong cửa sổ (phép thử có sức phân giải) — 49,924/53,301 dòng có |Close/Price-1|>5% (trung vị hệ số 0.392)
+  [forensic exclude] custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+[BQ_LOCAL_CACHE] query took 6.2s (53301 rows)
+  [FAIL] T4c số CP ĐÃ ra khỏi chân return (đảo BASKET_RETURN_OSHARES làm chuỗi ĐỔI) — max|Δret| flat vs legacy = 0.0000pp/phiên trên 753 phiên (0 = knob chết hoặc số CP đã quay lại chân return — xem basket_return_leg_oshares_selfcheck.py)
+
+==============================================================================
+KẾT QUẢ: FAIL 1 — T4c số CP ĐÃ ra khỏi chân return (đảo BASKET_RETURN_OSHARES làm chuỗi ĐỔI)

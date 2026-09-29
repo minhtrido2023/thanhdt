@@ -1,0 +1,24 @@
+TZ=unset BQBLOCK=0 oshares_live                            rc=0  OK — oshares_live selfcheck PASS 102/102
+TZ=unset BQBLOCK=0 oshares_pit                             rc=0  OK — oshares_pit selfcheck PASS 49/49
+TZ=unset BQBLOCK=0 corp_action_lib                         rc=0  OK — corp_action_lib selfcheck PASS
+TZ=unset BQBLOCK=0 oshares_wire                            rc=0  OK — oshares_wire selfcheck PASS 11/11
+TZ=unset BQBLOCK=0 corp_action_daily_selfcheck             rc=1  FAILED 1/201: ['SC2. 1 module FAIL ⇒ cổng ĐÓNG, và nêu ĐÍCH DANH module nào']
+TZ=unset BQBLOCK=0 GATE gate_driver_wt (gate_selfcheck thật) rc=0      "OK — oshares_live selfcheck PASS 102/102"
+TZ=unset BQBLOCK=1 oshares_live                            rc=0  OK — oshares_live selfcheck PASS 102/102
+TZ=unset BQBLOCK=1 oshares_pit                             rc=0  OK — oshares_pit selfcheck PASS 49/49
+TZ=unset BQBLOCK=1 corp_action_lib                         rc=0  OK — corp_action_lib selfcheck PASS
+TZ=unset BQBLOCK=1 oshares_wire                            rc=0  OK — oshares_wire selfcheck PASS 11/11
+TZ=unset BQBLOCK=1 corp_action_daily_selfcheck             rc=1  FAILED 1/201: ['SC2. 1 module FAIL ⇒ cổng ĐÓNG, và nêu ĐÍCH DANH module nào']
+TZ=unset BQBLOCK=1 GATE gate_driver_wt (gate_selfcheck thật) rc=0      "OK — oshares_live selfcheck PASS 102/102"
+TZ=America/New_York BQBLOCK=0 oshares_live                 rc=0  OK — oshares_live selfcheck PASS 102/102
+TZ=America/New_York BQBLOCK=0 oshares_pit                  rc=0  OK — oshares_pit selfcheck PASS 49/49
+TZ=America/New_York BQBLOCK=0 corp_action_lib              rc=0  OK — corp_action_lib selfcheck PASS
+TZ=America/New_York BQBLOCK=0 oshares_wire                 rc=0  OK — oshares_wire selfcheck PASS 11/11
+TZ=America/New_York BQBLOCK=0 corp_action_daily_selfcheck  rc=1  FAILED 1/201: ['SC2. 1 module FAIL ⇒ cổng ĐÓNG, và nêu ĐÍCH DANH module nào']
+TZ=America/New_York BQBLOCK=0 GATE gate_driver_wt (gate_selfcheck thật) rc=0      "OK — oshares_live selfcheck PASS 102/102"
+TZ=America/New_York BQBLOCK=1 oshares_live                 rc=0  OK — oshares_live selfcheck PASS 102/102
+TZ=America/New_York BQBLOCK=1 oshares_pit                  rc=0  OK — oshares_pit selfcheck PASS 49/49
+TZ=America/New_York BQBLOCK=1 corp_action_lib              rc=0  OK — corp_action_lib selfcheck PASS
+TZ=America/New_York BQBLOCK=1 oshares_wire                 rc=0  OK — oshares_wire selfcheck PASS 11/11
+TZ=America/New_York BQBLOCK=1 corp_action_daily_selfcheck  rc=1  FAILED 1/201: ['SC2. 1 module FAIL ⇒ cổng ĐÓNG, và nêu ĐÍCH DANH module nào']
+TZ=America/New_York BQBLOCK=1 GATE gate_driver_wt (gate_selfcheck thật) rc=0      "OK — oshares_live selfcheck PASS 102/102"

@@ -21,8 +21,10 @@ Chạy:  python3 mike/agents/Winston/freshness_warn_selfcheck.py          # 1 l�
 Không đụng file production nào: mọi test ghi vào tempdir, đọc file thật chỉ để READ.
 """
 import datetime
+from zoneinfo import ZoneInfo
 import json
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -137,14 +139,18 @@ chk("A10 bus lỗi/không gọi được KHÔNG làm chết luồng lập plan (
 chk("A10b đường dẫn append_event.sh thật có tồn tại (WORKDIR thật)",
     os.path.exists(os.path.join(W, "mike", "bin", "append_event.sh")))
 
-ns2 = {"L": [], "datetime": datetime.datetime, "END": "2026-07-31", "anomaly_fresh": stale_fresh}
+# _ICT: khối production dùng `datetime.now(_ICT)` từ commit b26008a6 (2026-08-30, §16 neo
+# ICT). Namespace exec phải cấp nó, nếu không selfcheck nổ NameError — production ĐÚNG,
+# chỉ selfcheck lạc hậu.
+ns2 = {"L": [], "datetime": datetime.datetime, "END": "2026-07-31",
+       "anomaly_fresh": stale_fresh, "_ICT": ZoneInfo("Asia/Ho_Chi_Minh")}
 exec(blk_rep, ns2)
 warn_lines = [x for x in ns2["L"] if "KHÔNG tươi" in x]
 chk("A11 báo cáo DollarBill/user đọc CÓ dòng cảnh báo, nằm TRƯỚC mục Regime",
     len(warn_lines) == 1 and "2026-07-25" in warn_lines[0] and ns2["L"].index(warn_lines[0]) <= 2,
     f"({warn_lines[0][:80] if warn_lines else 'THIẾU'}…)")
 ns3 = {"L": [], "datetime": datetime.datetime, "END": "2026-07-31",
-       "anomaly_fresh": {"is_stale": False, "generated_at": "x", "reason": ""}}
+       "anomaly_fresh": {"is_stale": False, "generated_at": "x", "reason": "", "_ICT": ZoneInfo("Asia/Ho_Chi_Minh")}, "_ICT": ZoneInfo("Asia/Ho_Chi_Minh")}
 exec(blk_rep, ns3)
 chk("A11b file tươi → báo cáo KHÔNG có dòng cảnh báo giả",
     not any("KHÔNG tươi" in x for x in ns3["L"]))
@@ -226,12 +232,30 @@ def _fake_tree(warn_on):
     for stub, body in (("notify_thread.sh", '#!/bin/bash\ncat > "$(dirname "$0")/../../sent.txt" <<< "$1"\n'),
                        ("notify.sh", "#!/bin/bash\nexit 0\n"),
                        ("append_event.sh", "#!/bin/bash\nexit 0\n"),
-                       ("daily_nav_snapshot.py", "print('NAV: 1.000.000.000đ (stub)')\n")):
+                       ("daily_nav_snapshot.py", "print('NAV: 1.000.000.000đ (stub)')\n"),
+                       # Từ §6.6 (2026-08) eod_trading_report.sh KHÔNG gọi notify_thread.sh nữa —
+                       # nó giao artifact cho report_delivery_gate.py. Thiếu stub này thì script
+                       # thoát rc=1 "DELIVERY INCOMPLETE", sent.txt không bao giờ ra đời và B9/B9b/
+                       # B9c/B10 đọc chuỗi RỖNG ⇒ 4 FAIL GIẢ (weekly audit 2026-08-29). Stub ghi
+                       # lại chính artifact được giao để 4 assertion vẫn soi đúng nội dung gửi đi.
+                       ("report_delivery_gate.py",
+                        "import sys\n"
+                        "a=[x for x in sys.argv[1:] if not x.startswith('--')]\n"
+                        "open(sys.path[0]+'/../../sent.txt','w').write("
+                        "open(a[0],encoding='utf-8').read()) if a else None\n")):
         f = os.path.join(root, "mike", "bin", stub); open(f, "w").write(body); os.chmod(f, 0o755)
     json.dump({"orders": []}, open(os.path.join(root, "data", "trade_plans",
                                                 "plan_SpaceX_2026-07-31.json"), "w"))
     return root, dst
 
+
+# Tiêu đề báo cáo có HAI dạng hợp lệ: dạng nội bộ `📊 **EOD Trading Report — <acct>` (dòng 232/486
+# của eod_trading_report.sh) và dạng investor-facing `📈 **Báo cáo giao dịch ngày — SpaceX` mà chính
+# script sed lại ở dòng 178 CHỈ cho account SpaceX (commit 14a90097, 2026-09-03 "tone polish").
+# B9b/B10 chỉ quan tâm VỊ TRÍ tiêu đề (có dòng trống ngăn cách / không có cảnh báo giả), KHÔNG quan
+# tâm chữ trong tiêu đề — nên khớp CẢ HAI dạng, đừng neo vào chuỗi trình bày. Neo cứng vào dạng nội
+# bộ làm 2 assertion đỏ im lặng từ 09-03 (weekly audit 2026-09-05 bắt được).
+_TITLE_RE = r"(?:📊 \*\*EOD Trading Report|📈 \*\*Báo cáo giao dịch ngày)"
 
 for warn_on, label in ((True, "STALE"), (False, "TƯƠI")):
     root, dst = _fake_tree(warn_on)
@@ -244,12 +268,12 @@ for warn_on, label in ((True, "STALE"), (False, "TƯƠI")):
         chk("B9 eod_trading_report: cảnh báo là DÒNG ĐẦU tin nhắn gửi đi",
             first.startswith("⚠️") and "HÔM QUA" in first, f"({first[:60]}…)")
         chk("B9b có dòng TRỐNG ngăn cách, không dính tiêu đề (bẫy $() nuốt newline)",
-            "\n\n📊 **EOD Trading Report" in body)
+            bool(re.search(r"\n\n" + _TITLE_RE, body)))
         chk("B9c phần báo cáo cũ VẪN nguyên vẹn (chỉ THÊM, không thay)",
             "HOLD" in body and "NAV" in body and p.returncode == 0)
     else:
         chk("B10 DT5G tươi → KHÔNG có cảnh báo giả, tin nhắn bắt đầu bằng tiêu đề",
-            body.strip().startswith("📊 **EOD Trading Report") and "⚠️" not in body,
+            bool(re.match(_TITLE_RE, body.strip())) and "⚠️" not in body,
             f"({body.strip()[:50]}…)")
 
 # pt_8l_daily.sh: trích NGUYÊN VĂN khối [0-fresh] rồi chạy với stub notify (cả chain cần BQ,

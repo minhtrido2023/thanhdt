@@ -62,8 +62,40 @@ BUY_VALUE_VND = 30_000_000  # mỗi mã; 6 mã ~180M trên NAV paper 1B
 BUY_VALUE_FACTOR = {0: 0.85, 1: 1.00, 2: 0.75, 3: 0.90, 4: 0.70}
 
 
+def exdate_tickers(tickers, plan_date):
+    """Mã có GDKHQ đúng `plan_date` → set. Rỗng khi không tra được (fail-open, có in lý do).
+
+    Vì sao probe PAPER cũng cần cổng này (README §5.2 của
+    `mike/agents/Taylor/research/exdate_order_pipeline_20260815/`): file này là **bằng chứng
+    ĐANG SAI**, hai lần, cùng một chỗ. `plan_main_2026-07-09.json` mang ref 26.000 khi tham
+    chiếu thật là 25.000 (+4,0%); `plan_main_2026-08-11.json` mang **24.250 khi tham chiếu
+    thật là 20.200 (+20,0%)** — và nó `created_at = 2026-08-11T08:52:01`, tức sinh ĐÚNG SÁNG
+    ngày GDKHQ mà vẫn mang giá hệ cũ, vì nguồn là `Close` trong cache parquet.
+
+    Không mất tiền (account paper) nhưng đây là **harness sinh evidence cho R&D** — 3 chương
+    trình paper (EXTREME gate, vol-scale chase-cap, fill-timing) đọc chính những lệnh này. Một
+    lệnh đặt ở giá lệch +20% hệ quy chiếu làm bẩn evidence của cả ba, và không ai nhìn plan
+    paper để phát hiện điều đó. Sửa ở đây là để bằng chứng sạch, không phải để bảo vệ tiền.
+    """
+    try:
+        from trading_bot.price_frame import pricing_events, events_by_ticker_date, events_on
+        d = dt.date.fromisoformat(str(plan_date)[:10])
+        m = events_by_ticker_date(pricing_events(
+            tickers, since=(d - dt.timedelta(days=1)).isoformat(), until=d.isoformat()))
+        return {t for t in tickers if events_on(m, t, d.isoformat())}
+    except Exception as exc:                                        # noqa: BLE001
+        print(f"[probe-plan] ⚠️ không tra được lịch GDKHQ ({type(exc).__name__}: {exc}) — "
+              f"KHÔNG loại được mã có sự kiện; evidence phiên này có thể nhiễm hệ quy chiếu cũ.")
+        return set()
+
+
 def latest_closes(tickers):
-    """{ticker: close} + ngày signal (max time) từ BQ cache parquet."""
+    """{ticker: close} + ngày signal (max time) từ BQ cache parquet.
+
+    ⚠️ `Close` ở đây là giá ĐÃ ĐIỀU CHỈNH theo vintage HÔM NAY, và cache chỉ sync 23:45 ICT
+    ⇒ với mã có GDKHQ đúng ngày chạy, con số này thuộc hệ quy chiếu CŨ. Caller PHẢI loại các
+    mã đó trước (`exdate_tickers()`); hàm này cố ý không tự làm để nó vẫn là một hàm đọc thuần.
+    """
     import duckdb
     con = duckdb.connect()
     con.execute("PRAGMA threads=1")
@@ -76,17 +108,24 @@ def latest_closes(tickers):
     return px, (str(sig)[:10] if sig else None)
 
 
-def build_plan(plan_date, held, px, signal_date):
+def build_plan(plan_date, held, px, signal_date, ex_tickers=None):
     """Dựng TradePlan probe cho 1 ngày. Tách khỏi main() để selfcheck gọi được không cần BQ/IO.
 
-    held = {ticker: qty đang giữ}, px = {ticker: ref_price}.
+    held = {ticker: qty đang giữ}, px = {ticker: ref_price},
+    ex_tickers = mã có GDKHQ đúng `plan_date` ⇒ BỎ HẲN khỏi plan (cả SELL lẫn BUY): giá trong
+    `px` thuộc hệ quy chiếu CŨ và số CP thật ở broker có thể đã nhân lên. Xem `exdate_tickers`.
     """
+    ex_tickers = set(ex_tickers or ())
     weekday = dt.date.fromisoformat(plan_date).weekday()
     factor = BUY_VALUE_FACTOR[weekday]
     target_vnd = BUY_VALUE_VND * factor
 
     orders, notes = [], []
     for i, t in enumerate(sorted(held)):
+        if t in ex_tickers:
+            notes.append(f"SELL {t} BỎ — GDKHQ đúng {plan_date}: giá cache thuộc hệ quy chiếu "
+                         f"CŨ và số CP thật có thể đã nhân lên (evidence sẽ nhiễm)")
+            continue
         if t not in px:
             notes.append(f"SELL {t} bỏ qua — thiếu giá trong BQ cache")
             continue
@@ -95,6 +134,10 @@ def build_plan(plan_date, held, px, signal_date):
                                    play_type="churn", priority=1,
                                    note="probe harness: thoát vị thế hôm qua"))
     for i, t in enumerate(BASKET):
+        if t in ex_tickers:
+            notes.append(f"BUY {t} BỎ — GDKHQ đúng {plan_date}: ref_price từ cache là giá hệ "
+                         f"quy chiếu CŨ (ca thật plan_main_2026-08-11: 24.250 vs 20.200 đúng)")
+            continue
         if t not in px:
             notes.append(f"BUY {t} bỏ qua — thiếu giá trong BQ cache")
             continue
@@ -146,12 +189,17 @@ def main():
         with open(PAPER_STATE, encoding="utf-8") as f:
             held = {s: int(q) for s, q in json.load(f).get("positions", {}).items() if q > 0}
 
-    px, signal_date = latest_closes(sorted(set(BASKET) | set(held)))
+    universe = sorted(set(BASKET) | set(held))
+    px, signal_date = latest_closes(universe)
     if not px:
         print(f"[probe-plan] ❌ không đọc được giá từ {CACHE_PARQUET} — không ghi plan.")
         return 1
+    ex = exdate_tickers(universe, plan_date)
+    if ex:
+        print(f"[probe-plan] ⚠️ GDKHQ {plan_date}: {sorted(ex)} — BỎ khỏi plan probe "
+              f"(giá cache thuộc hệ quy chiếu cũ).")
 
-    plan = build_plan(plan_date, held, px, signal_date)
+    plan = build_plan(plan_date, held, px, signal_date, ex_tickers=ex)
     orders = plan.orders
     print(plan.summary())
     if args.dry:

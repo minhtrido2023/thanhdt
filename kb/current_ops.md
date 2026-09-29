@@ -1,12 +1,8 @@
 # Current Operations — Mike fleet
 > Mike cập nhật thủ công khi có thay đổi trạng thái quan trọng. Đọc trước mọi thứ khác khi restart.
-> Cập nhật lần cuối: 2026-08-01 (token-cost trim #3, user mandate — phân loại lại "phải biết mỗi
-> phiên" vs "đã xong/không cần đọc lại": chuyển R&D pipeline chi tiết → `kb/projects/
-> rnd-pipeline-tracker.md`, universe_pit checklist G4-G9 → `kb/projects/universe-pit-migration.md`,
-> CAPIT sizing-bug-đã-đóng → `kb/projects/capit-sizing-bug-0721.md`; nén due-diligence/onboarding/
-> daemon-infra thành pointer 1-2 dòng — chi tiết đã có sẵn ở nơi khác, không mất thông tin, chỉ
-> dời khỏi hot path đọc mỗi phiên. File giảm ~28KB → ~11KB, không giảm ngưỡng cứng 45KB nữa mà
-> giảm THẬT nội dung.)
+> Cập nhật lần cuối: 2026-08-21 (token-cost trim #4 — warm sections → `kb/current_ops_ext.md`;
+> giữ lại hot path: kill-switch, trading status, signal holds, routing rules).
+> Chi tiết CAPIT/domain-constraint/due-diligence/cron/daemon: `cat kb/current_ops_ext.md`
 
 ## Kill-switches
 - `data/BOT_STOP`: tạo file = dừng mọi giao dịch tức thì
@@ -14,179 +10,130 @@
 - V2.5: `trading_rules.json v1.7` → v25_leverage STATUS=DISABLED
 
 ## Đang trading (LIVE)
-- **SpaceX** (DNSE 0002023347): V2.4 LIVE từ 2026-07-01, có margin. NEUTRAL parking target
-  **70%** của phần idle cash khi BAL/LAG rỗng (`trading_rules.json` v2.1 `neutral_parking`,
-  đổi ≠0.70 cần `risk_dial_override` xác nhận, không thì Mafee tự block plan) — chọn 70% vì
-  backtest risk-adjusted thắng rõ (Sharpe 1.78 vs 1.66, quant-skeptic CONFIRMED). run_bot.sh
-  09:05 ICT mỗi T2-T6. NAV/vị thế hiện tại: đọc `nav_history_SpaceX.csv` hoặc EOD report mới
-  nhất (Trading report topic), đừng dùng số hardcode cũ ở đây. Sự cố go-live tuần đầu: đã fix,
-  chi tiết `kb/incidents/index.md` (tìm "2026-07-06").
-- **ZaloPay** (DNSE 0001743768): V2.4 LIVE từ 2026-07-06, **CASH-ONLY** (không margin). **DGC
-  (vị thế legacy) EXCLUDED khỏi rebalancing** qua `excluded_tickers` — lý do: HOSE hạn chế giao
-  dịch (lãnh đạo bị khởi tố 17/03/2026, ước gỡ hạn chế ~11-12/2026). Sizing dùng `active_nav`
-  (`bin/compute_active_nav.py --account ZaloPay`), không dùng NAV tổng. Cơ chế `excluded_tickers`
-  tổng quát cho account tương lai có vị thế legacy — `kb/coding_guidelines.md` §7. Known gap:
-  `daily_nav_snapshot.py` chưa tính đúng P&L breakdown cho vị thế legacy (NAV/active_nav đúng).
-- **AlphaLens Paper**: FPT/ACB/MBB/HDB, tracking vs VNINDEX đến 2026-09-30. DollarBill phụ trách.
-- **Trứng vàng DNSE** (off-book idle cash): ĐÃ ĐÓNG HẲN cả 2 account (2026-07-23),
-  `manual_offbook_assets_vnd=0` vĩnh viễn — KHÔNG đề xuất "rút thêm" bù cash gap. Chi tiết:
-  [[project-dnse-trung-vang-offbook-assets]] (memory Mike).
+- **SpaceX** (DNSE 0002023347): V2.4 LIVE từ 2026-07-01, có margin. NEUTRAL parking **80%** idle cash (config F1, đổi từ 70% ngày 2026-08-04, `trading_rules.json` `neutral_parking.default_park_of_idle_pct`). run_bot.sh 09:05 ICT T2-T6. NAV: `nav_history_SpaceX.csv` hoặc EOD report.
+- **ZaloPay** (DNSE 0001743768): V2.4 LIVE từ 2026-07-06, CASH-ONLY. **DGC EXCLUDED** (`excluded_tickers`, HOSE hạn chế giao dịch đến ~11-12/2026). Sizing dùng `active_nav`. Cùng target parking 80% (không có override riêng).
+- **AlphaLens Paper**: FPT/ACB/MBB/HDB, tracking đến 2026-09-30. DollarBill phụ trách.
+- **Trứng vàng** (`egg.totalValue`): SpaceX ~100,9tr / ZaloPay ~102,2tr (đo 09-27), đã cộng NAV tự động — KHÔNG phải `availableCash`. ⚠️ **RÚT VỀ TRONG NGÀY, KHÔNG phải T+1** (đính chính 2026-09-27, Mafee job `Mafee_20260927_091828`: SpaceX 17/09 egg 100,9tr→51,0tr VÀ `availableCash` +49,8tr trong CÙNG snapshot 11:00:11 phiên sáng ⇒ tiền dùng mua được ngay phiên đó). ⚠️ **KHÔNG phải tiền gửi ngân hàng** — DNSE mô tả là "Sinh Lời Theo Ngày" qua giao dịch TRÁI PHIẾU niêm yết ⇒ không có bảo hiểm tiền gửi, phụ thuộc tổ chức phát hành; lãi đo thật **8,543%/năm** và DNSE **tự khấu trừ TNCN trước khi trả** nên số đó đã là net. Không thấy trần số dư (ZaloPay vượt 102tr vẫn cộng lãi phẳng); "Tài khoản Không Ngủ" là SẢN PHẨM KHÁC (trần 30 tỷ), đừng lẫn. `manual_offbook_assets_vnd` ĐÃ ĐÓNG vĩnh viễn 07-23.
+  ⚠️ **ĐÍNH CHÍNH BẢN CHẤT 2026-09-27 (legal-vn, bus `dnse-trung-vang-legal-review-20260927`) — KHÔNG phải repo.**
+  Mô tả "bond repo" trước đó của Mike là SAI. Bằng chứng từ chính FAQ DNSE + 3 dấu hiệu gián tiếp
+  (phí lưu ký 0,3đ/trái phiếu/tháng, coupon về THẲNG TK khách, khách chịu thuế chuyển nhượng 0,1%):
+  khách **SỞ HỮU THẬT** trái phiếu niêm yết, **lưu ký tại VSDC**; cấu trúc = 2 giao dịch mua bán
+  dứt điểm + cam kết hợp đồng DNSE mua lại. ⇒ phần ĐANG GIỮ **không phải** claim không bảo đảm vào
+  DNSE. Ba rủi ro THẬT, khác nhau: (a) TCPH vỡ nợ ⇒ chủ nợ không bảo đảm (Luật Phá sản 2014 Đ54);
+  (b) cam kết mua lại của DNSE vô giá trị ⇒ **mắc kẹt tới đáo hạn / bán giá thị trường**, không mất
+  trắng; (c) tiền đang trên đường lúc DNSE vỡ nợ — **không tra được** điều luật nào tường minh loại
+  tiền khách khỏi khối tài sản phá sản (Đ89 LCK 2019 + TT121 Đ17-18 là nghĩa vụ HÀNH CHÍNH).
+  **Việt Nam KHÔNG CÓ Quỹ bảo vệ nhà đầu tư** (đề xuất 2014, không vào Luật CK 2019) — đây là kết
+  luận xác định, không phải "chưa tra được". Thuế: coupon **5%** + chuyển nhượng **0,1%** (TT111/2013;
+  TT92/2015 bỏ phương án 20%; 0,1% giữ sau 01/7/2026 theo L109/2025 + NĐ253/2026 + TT87/2026), khấu
+  trừ tại nguồn, **không quyết toán**. CTCK được phép làm việc này: TT121/2020 Đ28.3.
+  🔴 **2 CÂU CHƯA TRẢ LỜI ĐƯỢC, phải hỏi DNSE bằng VĂN BẢN**: (1) trái phiếu lưu ký đứng tên KHÁCH
+  hay nominee DNSE? (2) MÃ trái phiếu + TCPH cụ thể? — chưa biết (2) thì **không đo được tập trung
+  per-name**. Quyền yêu cầu sao kê chi tiết: TT121 Đ17-18. DNSE từ chối nêu mã = **red flag**.
+  Trần đề xuất (chưa user chốt): ~2% NAV/một TCPH (haircut 50% ⇒ max loss ≤1% NAV), sleeve ≤10% NAV
+  — mức hiện tại ~100,9tr / ~102,2tr **đã ở hoặc vượt nhẹ trần tổng**.
 
-## CAPIT (bear-washout) — vị thế THẬT đang giữ, `capit_fired` ≠ "đang giữ" (verify 2026-07-31)
-⚠️ **`capit_fired`** trong `data/golive_v23_status.json` là điều kiện đúng CỦA NGÀY CHẠY
-(tính lại mỗi phiên), **KHÔNG PHẢI** cờ "đang giữ vị thế". Rổ hiện tại LUÔN đọc
-`data/golive_v23_status.json` (`n_capit_basket`, `capit_adv_caps`, `capit_dd_excluded`) — ĐỪNG
-chép cứng danh sách mã, rổ đổi theo phiên. Nguồn vốn: `NAV_book_LAG × capit_size` (user chốt
-07-20). Verify DNSE 07-31: **5 mã** SAB/SIP/VNM/PVT/NCT, cả 2 account chưa bán mã nào. Từ 07-29
-mọi kênh báo cáo từng im lặng về CAPIT vì gate theo `capit_fired` (lỗ hổng đã phát hiện, đang xử
-lý: `capit_episode.json` + đổi gate sang `capit_fired OR capit_episode_open` + đổi tên
-`capit_fired`→`capit_signal_today`, dispatch Taylor, kiểm `kb/incidents/2026-07/` xem đã đóng
-chưa). Sizing bug 07-21 (thiếu 87,1tr SpaceX) đã đóng, user chốt KHÔNG bù — chi tiết đầy đủ +
-gate WARN-only mới: `kb/projects/capit-sizing-bug-0721.md`.
+## Signal holds
+- **VPI/BAL**: signal_hold 08-19→09-16 ĐÃ GỠ 2026-09-16. Review dựa trên `amh-adaptivity-review-20260910.md` (Taylor job A/B/C + quant-skeptic): lý do gốc của HOLD (edge-health dashboard báo mom_200 FLIPPED) đã bị bác — kênh đó REFUTED cho quyết định BAL; mom_200 IC hồi phục dương Q2/2026. User duyệt RESUME 2026-09-16 23:19 ICT: "tuân theo chiến lược production đã duyệt, không cần điều chỉnh gì" (`decided_by: user`, bus `answer/bal-vpi-checkpoint-resume-decision`). VPI/BAL trở lại logic bình thường từ plan kế tiếp — không còn escalate riêng.
 
-**PNJ EXCLUDED khỏi rổ CAPIT** (due-diligence gate, 2026-07-20, quant-skeptic CONFIRMED cao).
-PNJ khủng hoảng thật (lãnh đạo bị bắt buôn lậu kim cương, giá sập ~-32%, AMBIGUOUS trong
-`calculated_fear_state_backstop.md` §7, cổng xác nhận = BCTC Q3/2026 ~cuối tháng 10). Cờ
-`anomaly_flags.json` **TTL 30 ngày** (~tự hết hạn 08-23 nếu không có alert mới trước cổng xác
-nhận thật tháng 10 — cần theo dõi không để hở gate). Gate KHÔNG backtest được (n=1) — bảo hiểm
-chi phí chưa đo được, không phải alpha đã kiểm chứng.
+## CAPIT — vị thế THẬT đang giữ (`capit_fired` ≠ "đang giữ")
+⚠️ `capit_fired` tính lại mỗi phiên, KHÔNG phải cờ vị thế. Đọc `data/golive_v23_status.json` (`n_capit_basket`, `capit_adv_caps`). **PNJ EXCLUDED** (due-diligence gate, 07-20, TTL ~08-23). Chi tiết: `kb/current_ops_ext.md § CAPIT`.
 
-**Dự án thay `ticker_prune`→`universe_pit`**: R3/CAPIT-breadth đã cutover production (universe_pit
-= nguồn chính thức). CAPIT pool + ADV cap CỐ Ý còn ghim `ticker_prune` (đổi rổ đang giải ngân giữa
-chừng rủi ro cao, cấm cutover khi `capit_fired=true`). Checklist còn lại (G5 shadow/G7 N-trial/G8
-data-registry gate/G9 quant-skeptic review + 3 việc mới từ audit 07-29): `kb/projects/
-universe-pit-migration.md`.
+## Domain-constraint layer
+- **P1 LIVE**: `filter_lag_rating_orders()` — gate 8L rating≤3 tầng ORDER. 14/14+22/22 selfcheck.
+- **P0 ACTIVE (HARD BLOCK)**: `check_plan_funding()` trong `bot_execute.py:536` từ 08-04. Chi tiết 2 bug đã vá (08-07): `kb/current_ops_ext.md § Domain-constraint`.
 
-## Domain-constraint layer — P1 LIVE, P0 shadow đang chạy (từ 2026-07-29, commit `d64717f`)
-- **P1 (ACTIVE, LIVE)**: `filter_lag_rating_orders()` — lưới an toàn tầng ORDER cho gate 8L
-  rating≤3 của LAG, vá lỗ hổng gate cũ chỉ sống ở tầng sinh tín hiệu. Verify: 14/14 + 22/22
-  selfcheck, replay case TRC/MST bị chặn, 0 lệnh khác đổi trên 21 plan thật.
-- **P0 — ĐÃ LÊN ACTIVE (HARD BLOCK), không còn WARN_ONLY** (từ 2026-08-04, commit `bb8583c`,
-  `trading_bot/plan_funding_gate.py` `check_plan_funding()` gọi tại `bot_execute.py:536`; vượt ⇒
-  KHÔNG đặt bất kỳ lệnh nào của account đó). `data/plan_buying_power_shadow_log.csv` vẫn ghi song
-  song (audit trail), không còn là cơ chế chặn duy nhất. **2 bug thật phát sinh + đã vá tối
-  2026-08-07** (Mike điều phối Mafee + Taylor song song, quant-skeptic CONFIRMED cao):
-  1. UPCOM (DRI) đi ra `loan_package_id=None` ⇒ rơi về gói mainboard-only của account ⇒ ppse
-     precheck lẫn `place_order` đều reject ⇒ WAIT_CASH vô hạn dù thừa tiền (trông y hệt thiếu
-     tiền thật). Fix: `brokers.py`/`plan_funding_gate.py`/`executor.py` luôn giải gói vay theo MÃ
-     (tái dùng `_resolve_loan_package_id`), commit `c22bd1c`.
-  2. Nhánh (1) của gate không cộng tiền lệnh BÁN cùng plan chạy trước (cơ chế L2 JIT-unpark, LIVE
-     từ 08-06) ⇒ chặn oan plan TỰ CẤP VỐN ĐỦ — ca thật: ZaloPay 08-07 bị chặn sạch 0/9 lệnh dù 8
-     lệnh bán PARK (98,68tr) thừa nuôi 1 lệnh mua DRI (23,60tr). Fix: thêm tín dụng JIT theo tỉ lệ
-     nhu cầu từng nhóm gói vay, chỉ tính lệnh bán priority < min priority mọi lệnh mua (tránh
-     double-count + tái lập đúng bug "list lệnh rồi đợi tiền"), commit `087a3d0` + doc fix `00ffd2e`.
-     quant-skeptic CONFIRMED cao (independent recompute khớp chính xác, kể cả case-71 "phòng vệ" là
-     lệnh bán chỉ đảm bảo được THỬ trước, không đảm bảo KHỚP trước — rủi ro tồn dư, đã disclose, có
-     backstop layer-3 WAIT_CASH không đổi).
-  ⚠️ SpaceX (margin) chưa từng có bản ghi `pp0Buy` thật — số liệu replay dùng PROXY
-  (`availableCash`), là cận dưới. Xác nhận sống cần chờ phiên thật (kỳ vọng 08-10, UPCOM buy nên
-  ra `loan_packages_resolve … resolved=1122` trong `dnse_raw`, không WAIT_CASH giả). Thiết kế gốc:
-  `mike/agents/Taylor/research/ontology_constraint_layer_design_20260729.md` (mô tả P0 lúc còn
-  WARN_ONLY — đã lệch thực tế từ 08-04, đọc kèm ghi chú này).
-  ⚠️ **Rủi ro quy trình phát hiện cùng tối**: dispatch Mafee + Taylor sửa CÙNG file
-  `plan_funding_gate.py` trong vòng 1 phút không cách ly (không worktree) — commit của Mafee vô
-  tình cuốn theo phần việc CHƯA COMMIT của Taylor (dead code lúc đó, cả 2 bên tự công bố minh
-  bạch, không mất việc). Lần sau nên tách file hoặc chạy tuần tự khi 2 dispatch cùng chạm 1 file.
+## Features đang LIVE — đọc đầu phiên, không để mất dấu
+> Cập nhật mỗi khi có feature mới go-live. Source of truth: `kb/projects/paper_programs_registry.json`.
 
-## Due-diligence MẶC ĐỊNH cho mọi ứng cử viên mua — ĐÃ SHIP, ổn định (2026-07-21)
-`trading_bot/due_diligence.py` — thuần thông tin (không chặn/đổi sizing), 5 trục (thanh khoản/
-valuation/PEAD-surprise/anomaly/FA thô), wire ở 4 choke-point: `golive_recommend_v23.py`,
-`send_plan_report.sh`, `eod_trading_report.sh`, `dc_book_waterfall_paper.py`. Trần %ADV LAG =
-gate CỨNG live riêng (`cap_lag_orders`, fail-closed từ 07-22) — KHÁC domain-constraint P1 trên.
+- **EXTREME-regime gate** (`extreme_regime_enabled=True`) — LIVE SpaceX+ZaloPay từ **2026-08-22** (account overrides `secrets/trading_bot_accounts.json`). Default config=False, override=True. Alert pipeline: `bin/extreme_regime_dd_alert.sh` hook trong `run_bot.sh`. Commit `07726527`.
+- **Vol-scale buy chase-cap** (`chase_cap_vol_scale_enabled=True`) — LIVE toàn bộ từ **2026-08-04** (`config.py:190`). k=2.0, ceil=4%, clamp static→ceil theo 20d rvol.
+- **fill_timing HYBRID** (`fill_timing_live_gate=False`, `fill_timing_hybrid_live_gate=False`) — LIVE từ **2026-08-26** (user duyệt option A). BUY blocks: 11:00/11:15/13:00/13:15/13:30. SELL blocks: 09:15/09:30/09:45/10:00. Monitoring: fill-vs-open mỗi ~10 phiên, rollback nếu mean >+22bps. Commit `9be375a4`.
+- **CAPIT margin lever** (`capit_margin_lever.enabled=True`) — LIVE từ **2026-08-24**. Ngày có CAPIT margin phải chạy `approve_margin_day.py` TRƯỚC bot.
+- **Domain-constraint P1** (`filter_lag_rating_orders()`, 8L rating≤3 gate) — LIVE. 14/14+22/22 selfcheck.
+- **close_repair.py — Layer 2 self-computed back-adjustment khi vendor backfill kẹt vĩnh viễn** (`MIKE_CLOSE_REPAIR` mặc định ON) — LIVE từ **2026-09-28**, commit `3c55c249`. FPT (và mã tương lai cùng lớp lỗi) kẹt hồi tố corp-action NỬA CHỪNG trên `tav2_bq.ticker.Close` — bq_admin xác nhận self-heal vendor đóng băng sau 15 phiên, không bao giờ tự sửa tiếp. Tự tính hệ số (xác nhận 2 nguồn độc lập, lệch <0,006%), fail-closed khi không đủ bằng chứng. 2 vòng quant-skeptic CONFIRMED (vòng 1 điều kiện → 2 test mới lộ 2 bug thật chainffill/selfband → vá → vòng 2 lần 1 NOT_CONFIRMED bắt thêm gap → vá lại → vòng 2 CONFIRMED). Selfcheck trên cây đã merge: `close_repair_selfcheck` 855/855, 14/14 mutation; `paper_entry_adjust --selfcheck` 21/21 cả 3 trạng thái cờ. VND/VNM (Layer 1 detect-only UNCOMPUTABLE) đã điều tra riêng: KHÁC lớp lỗi FPT (VND vô hại/guard quá chặt, VNM là ex-date lệch 1 phiên trong `corporate_action` — `close_repair.py` xác nhận AN TOÀN không áp sai cho ca này, band-guard tự chối đúng).
+- **NAV corp-action L1 — cảnh báo TRƯỚC ex-date** (`bin/nav_exdate_forecast.py`) — LIVE từ **2026-09-22**, commit `2a7dd54e`. Wire `[pipeline-0]` trong `bq_freshness_check.sh` (TRƯỚC `exit 1` đầu tiên) ⇒ chuỗi 19:00 in cảnh báo corp-action của mã ĐANG GIỮ vào plan report + Discord. Selfcheck 58/58.
+- **NAV corp-action gate v2 (L2-L4)** (`classify_qty_residual` + `_mult_explains` trong `daily_nav_snapshot.py`) — LIVE từ **2026-09-22**, commit `4dcc3643`, **5 vòng arch-review**. Thay tripwire so giá MÙ bằng PHÂN LOẠI:
+  · cổ tức TIỀN có bằng chứng ⇒ mark giá **CUM**, trừ khoản phải thu khỏi tiền (không đếm 2 lần)
+  · sự kiện CỔ PHIẾU ⇒ chặn **rc=5** theo bằng chứng KL credit sớm THẬT (phần dư sau khi trừ FILL trong ngày khớp tỉ lệ sự kiện) — KHÔNG chặn theo lịch, KHÔNG phụ thuộc ngưỡng giá 5% ⇒ đóng lỗ hổng sự kiện tỉ lệ nhỏ
+  · `--from-raw` + corp-action ĐÃ CONFIRMED + multiplier TÁI TẠO được KL trước sự kiện ⇒ quy ngược KL (giữ đường phục hồi cũ)
+  · không giải thích được ⇒ nói THẲNG "chưa giải thích được", không đoán (§29)
+- **Ex-date price-frame — KL và GIÁ phải CÙNG hệ quy chiếu** (`bin/exdate_frame.py` + wire vào `compute_active_nav.py` / `park_holdings.py` / `compute_park_trim.py` / `compute_jit_unpark.py`) — LIVE từ **2026-09-24**, commit `508bb607`, **3 vòng arch-review**. Sự cố gốc: đêm T-1 GDKHQ, DNSE credit KL mới vào `positions` NGAY (VPB 1.100→1.386) trong khi giá đóng cửa G1 phiên T-1 vẫn là giá CÒN QUYỀN ⇒ nhân chéo làm `active_nav` phồng (SpaceX +7.969.500 = +0,80%; ZaloPay +8.694.000 = +1,64%) và plan sinh lệnh PARK_TRIM trên rổ phồng.
+  · mã có bằng chứng credit sớm ⇒ định giá bằng `marketPrice` của CHÍNH bản ghi vị thế, NHƯNG chỉ sau khi nó TÁI TẠO được giá cum qua hệ số sự kiện (KHÔNG tin thẳng `marketPrice` — ca SCL 08-28 đứng im, MBB 08-14 một bản đọc mang đồng thời 2 hệ)
+  · không dựng được giá cùng hệ, hoặc KL đổi chưa giải thích được ⇒ **rc=6, KHÔNG ghi file** (mẫu số sizing: số sai tệ hơn số cũ)
+  · `--asof` ngày khác hôm nay, hoặc `--out` trỏ vào chính file canonical (so bằng `realpath`) ⇒ **rc=7, TỪ CHỐI ghi**
+  · `park_holdings` phát `frame_blocked_tickers` ⇒ `compute_park_trim`/`compute_jit_unpark` trả **BLOCKED_FRAME** thay vì trim trên mẫu số phồng
+  Selfcheck 59/59 qua 5 TZ. Replay 14 account-night corp-action thật: 12/14 tự sửa giá, 2/14 gắn cờ (đều đã bị `BLOCKED_RECONCILE` chặn sẵn) ⇒ **0 báo động mới**.
+  ⚠️ **CÙNG LỚP LỖI CÒN 4 CALL-SITE CHƯA VÁ** (xem `kb/memory/Mike.md`): `dividend_adjusted_return.py:473-478` (chạm SỐ CÔNG BỐ nhà đầu tư §21 — ưu tiên cao nhất), `discretionary_margin_gate.py:335` (sleeve margin tiền thật, latent), `report_return_gate.py` (lỗ hổng phủ im lặng), `discretionary_accumulation_inject.py:124`, + `due_diligence.py:173-202 adv_vnd()` (chiều an toàn). arch-reviewer nói rõ **KHÔNG khẳng định đã quét hết**.
+  Selfcheck 38/0 + 64/0 + 8/0 qua 3 TZ. rc=5 là mã MỚI: `eod_trading_report.sh` không ghi marker, `nav_sync_retry.sh` không retry 2h, `nav_snapshot_daily.sh` escalate ngay. Runbook rc=5 ở `kb/ops_runbook.md.proposed` — **CHỜ MIKE DUYỆT ĐỂ ĐƯA LIVE (§13)**.
 
-**Sàn thanh khoản ADV3T 2 tỷ/phiên — GATE CỨNG mới ở tầng CHỌN MÃ (LIVE từ 2026-08-10, commit
-`c4ca90f`).** Trước đó ADV3T<2 tỷ chỉ hiện cảnh báo (SCL ADV3T 1,30 tỷ vẫn mua đủ ngày 08-10).
-`lag_liquidity_filter.py` (LAG) + `bal_filter_thin()` trong `golive_recommend_v23.py` (BAL) giờ
-loại thẳng ứng viên <2 tỷ TRƯỚC due-diligence/plan — KHÔNG đụng `executor.py`/`plan.py`/
-`signal_v11_sql.py` (nền backtest pin R3), KHÔNG đụng sleeve discretionary (TV1/DGC).
-**Quyết định vì hiệu quả vốn (user chốt), KHÔNG phải edge** — backtest vẫn nói ngược (−0,26pp
-CAGR/−0,92pp OOS/PBO 0,916, ghi trong comment code). ⚠️ Vốn dôi ra KHÔNG tự dồn sang deal LAG/BAL
-lớn hơn (LAG không có hàng đợi; BAL có hàng đợi trần 12 nhưng chỉ lấp 55% phiên) — rơi về cash rồi
-vào parking custom30V, user đã biết và chấp nhận trước khi duyệt. Cái giá: rổ LAG hôm nay 176→58
-ứng viên (−67%), loại cả TRC (ADV 1,44 tỷ, mã đã duyệt mua 07-24). quant-skeptic CONFIRMED cao.
-Rollback 1 chữ: `ADV_MIN_VND = 0` trong `lag_liquidity_filter.py`. Chi tiết:
-`mike/agents/Taylor/research/adv3t_hard_gate_wire_20260810.md` +
-`mike/agents/Taylor/research/adv_hard_gate_impact_20260810.md`.
+- **KL hưởng quyền neo bằng BẰNG CHỨNG, không bằng KL cuối ngày cum** (`bin/dividend_adjusted_return.py` — `qty_entitled`/`credit_frame`) — LIVE từ **2026-09-24**, commit `1608a267`, arch-review APPROVED. Call-site **thứ 3** cùng lớp lỗi corp-action, chạm SỐ CÔNG BỐ nhà đầu tư (§21).
+  · `_qty_at` cũ lấy KL từ bản ghi positions CUỐI NGÀY `last_cum_date` = đúng đêm broker credit sớm; lá chắn `STOCK_SUSPECTED` bị vô hiệu vì sau credit sớm thì `qty[last_cum] == qty[ex_date]`
+  · vá: neo theo bằng chứng KHỐI LƯỢNG (`classify_qty_residual`) + bằng chứng GIÁ (`verify_post_event_price`); thiếu bằng chứng ⇒ `status="unknown"` ⇒ **BỎ phương trình** (không coi như 0), fail-closed
+  · ⚠️ hướng "neo theo `broker_effective_ts`" (Mike chỉ đạo) đã BỊ BÁC bằng dữ liệu thật: MBB 10/08 bản ghi cuối 19:12:13 vẫn chưa credit (mốc khai 19:32:49 đúng số nhưng SAI lý do); VPB 23/09 bản ghi duy nhất trước mốc là 04:51 SÁNG ⇒ neo ở đó bỏ mất lệnh khớp trong chính phiên cum (ca thật MBB bán 1.500→1.100 lúc 09:15)
+  · `--selfcheck` 120/0 qua 3 TZ (58 ca cũ giữ nguyên); e2e `--resolve` BYTE-IDENTICAL với master
+  **Q1 — ĐÃ KIỂM, KHÔNG SỐ CÔNG BỐ NÀO BỊ ẢNH HƯỞNG**: 24 sự kiện DIV+ISS cùng ex-date sau go-live 01/07 × 39 mã đã từng nắm giữ ⇒ **giao RỖNG** (Mike tự xác nhận bằng BQ + quét toàn bộ `dnse_raw`). Nhịp thật ~5-7 ca/năm ⇒ không phải ca hiếm, chỉ chưa cắn.
+  ⚠️ **VIỆC LÀM SAU, ưu tiên cao nhất**: `dividend_adjusted_return.py:469-472` `broker_qty()` lấy **LÔ CUỐI** thay vì **TỔNG LÔ** ⇒ thiếu 25% KL thật ở **135 cặp (mã, ngày)** của ZaloPay (BID 14/08: 320 vs 427); `credit_frame` thì gộp lô ĐÚNG ⇒ hai quy ước cùng tồn tại trong một lần giải. Pre-existing + fail-closed, nhưng BID/VCB/MBB trả cổ tức tiền hằng năm nên sẽ cắn.
 
-## R&D pipeline (mọi mục PAPER-ONLY trừ khi ghi rõ LIVE)
-Backlog đầy đủ (checkpoint, điều kiện GO/NO-GO, bug đã biết): `kb/projects/
-rnd-pipeline-tracker.md`. Không có mục nào LIVE. **3 checkpoint đã quá hạn chưa xác nhận** (cần
-dispatch Taylor kiểm tra, đừng tự đoán): EXTREME-regime gate (07-28), vol-scale chase-cap patch#3
-(07-14), fill-timing khung giờ (cuối 07). Sleeve "mua khi sợ hãi có tính toán" (fear-buy): quét
-chủ động HÀNG TUẦN qua `bin/fearbuy_weekly_scan.sh` (cron Friday 08:10 ICT) — mandate 2026-07-23
-sau case TV1+DGC, kết hợp anomaly_scan + WebSearch tin khởi tố, áp bộ lọc QUALIFY/NON/AMBIGUOUS
-trong `calculated_fear_state_backstop.md`. Recon thuần, KHÔNG tự mua.
+- **LỆCH NGUỒN VENDOR ⇒ hạ UNVERIFIED + cảnh báo ĐÚNG NGƯỜI (Winston)** (`bin/dividend_adjusted_return.py` + `bin/report_return_gate.py` + `bin/vendor_mismatch_alert.sh` MỚI) — LIVE từ **2026-09-24**, commit `dc147859` (**4 vòng**: 3 arch-review độc lập + 1 vòng sửa tài liệu/test) và `6b751298` (nhánh con D1, **2 vòng**, vòng cuối APPROVED 0 required_change). Chỉ đạo user 2026-09-24: *"vendor mismatch thì hạ về unverified rồi raise warning lên để tôi kêu winston xử lý."*
+  · broker vs `tav2_bq.corporate_action` lệch >1% hoặc >1đ/cp ⇒ `kind=UNVERIFIED`, lý do mang **CẢ HAI** số + gọi tên Winston (§21: UNVERIFIED thì CẤM công bố tỉ suất)
+  · **nhánh con D1**: vendor khai THUẦN CỔ PHIẾU (`vendor_cash=0, vendor_stock>0`) mà solver vẫn trả `CASH_CONFIRMED` ⇒ trước đây gán nhãn lành tính `broker_only` (không consumer nào đọc) và **CÔNG BỐ cổ tức KHÔNG TỒN TẠI, 0 cảnh báo**. Discriminator: `share_multiplier == 1.0` (solver chưa hề biết chân cổ phiếu). Chống quá-hạ-cấp: `share_multiplier > 1` ⇒ VẪN QUA; vendor thiếu hẳn dòng DIV (`cash=0, stock=0`) ⇒ VẪN CÔNG BỐ
+  · `SANITY_REL=0.01` khiến "mult==1 mà nghiệm tiền vẫn ĐÚNG" gần như bất khả (cần ε ≤ 0,036% với c=1.000, P=27.800) ⇒ không thể lấy oan sự kiện hỗn hợp giải đúng. Họ **"quyền mua cho cổ đông hiện hữu"** (MBS 02/04, SHB 03/04) credit hàng tuần SAU ex-date nên `mult=1.0` ⇒ **cả hai lá chắn cũ hệ thống hoá việc trượt**, D1 là phòng thủ duy nhất
+  · dòng máy đọc `VENDOR_MISMATCH_ALERT|<acct>|<mã>|<ex>|<broker>|<vendor>|<đang công bố>` giữ **ĐÚNG 7 trường NGUYÊN BYTE** (đo thật: thêm trường thứ 8 làm consumer đảo `blocked` 1→0 và nói "báo cáo vẫn gửi" đúng lúc đang CHẶN); mã lý do đi ở dòng TAG RIÊNG `VENDOR_MISMATCH_REASON|...`. Reason thiếu/rỗng ⇒ **fail-closed "unknown"**, KHÔNG đoán (§29)
+  · `vendor_mismatch_alert.sh`: Discord là kênh **CHÍNH và là ĐIỀU KIỆN** để ghi de-dup — notify thất bại ⇒ in LỖI THẬT + **KHÔNG** ghi state; bus là kênh PHỤ, hỏng thì đi tiếp. State ghi nguyên tử `tmp+os.replace+fsync`. Câu Discord + "Việc cần làm" RẼ theo mã lý do (3 nhánh)
+  · ⚠️ **đường phát lại**: KHÔNG phải sweep cùng file (`check_report_cadence.sh:76-81` bỏ qua file đã giao; `report_delivery_gate.py:238-239` return trước validate) mà là **báo cáo EOD NGÀY KẾ** (tên file khác, `LOOKBACK_DAYS=120` + còn nắm vị thế). Mất cảnh báo thật CHỈ khi notify chết đúng hôm đó **VÀ** bán hết vị thế trước báo cáo kế. Bus `error` KHÔNG phải backstop (`ops_health_check.sh:731` chỉ xét `question`)
+  Selfcheck: `dividend_adjusted_return` **148/0**, `report_return_gate --selfcheck` **75/75**, `vendor_mismatch_alert_selfcheck` **57/0 qua 5 môi trường** (ICT, America/New_York, UTC, Pacific/Kiritimati, `env -u TZ`), gate `--root-only` PASS. K1 (39 mã × 6 tháng): **0/62** lệch nguồn thật; mẫu số ĐÚNG của ô rủi ro D1 = **6 ca `CASH_CONFIRMED`** (không phải 62), 0/6 khớp hình dạng ⇒ 0 dương tính giả.
+  · **ĐÃ VÁ 2026-09-24, commit `206dd348`** (6 vòng: 4 arch-review độc lập + 2 vòng sửa): `bq_corp_action` NÉM LẠI exception thay vì `except Exception: return None`; nhãn **`lookup_failed`** tách khỏi `unavailable` (= vendor XÁC NHẬN 0 dòng, 25/62 ca thật, GIỮ nguyên hành vi). Trước đó BQ hỏng ⇒ **CẢ HAI lá chắn tắt IM LẶNG**.
+    · dòng máy đọc RIÊNG `VENDOR_LOOKUP_FAILED|<acct>|<mã>|<ex>|<broker>|<had_broker_cash>|<published>` (7 trường); hợp đồng `VENDOR_MISMATCH_ALERT` giữ NGUYÊN BYTE
+    · `had_broker_cash` chụp `(kind == CASH_CONFIRMED)` **TRƯỚC** khi hạ `kind` — lúc đó `CASH_CONFIRMED` chỉ có MỘT nguồn (`solve_from_broker`, nghiệm trên `cashDividendReceiving` THẬT) ⇒ `True ⟺ per_share LÀ tiền broker`, không phải proxy
+    · **CHẶN chỉ khi `had_broker_cash AND published`** — ca chưa từng `CASH_CONFIRMED` thì `cash_per_share=0` trước VÀ sau khi BQ lỗi ⇒ không mất số công bố nào ⇒ không chặn oan. Đo K1: **6/62** ca `had_broker_cash=1`, **56/62** `=0` mà cả 56 đều có `per_share>0` ⇒ bản trước sẽ in câu SAI + chặn oan ~90% dòng
+    · câu chẩn đoán RẼ theo provenance (§29): `=0` ⇒ *"broker CHƯA giải được số nào (ước lượng từ giá rơi Xđ/cp, KHÔNG phải tiền broker thật)"*; `=1` ⇒ *"broker đã giải Xđ/cp"*. Câu *"hai nguồn độc lập đang bất đồng + Gỡ chặn = Winston"* chỉ in khi CÓ nguồn thứ hai; ca thuần `lookup_failed` ⇒ *"gỡ chặn = chạy lại khi BQ khoẻ"*. 2 caller (`check_report_cadence.sh:112`, `eod_trading_report.sh:84`) rẽ bằng **grep tag** trên `$GATE_OUT`, KHÔNG suy từ rc=10
+    Selfcheck: `dar` **159/0** · gate **93/93** · alert **78/0** · `check_report_cadence_selfcheck` 32/32 · `eod_trading_report_account_filter` 21/0 · `--root-only` PASS. Mike tự bắn 5 mutation + arch-reviewer 16 mutation, tất cả chết bằng assertion CÓ TÊN; E2E gate↔shell khớp 4/4 góc.
+  · **`broker_qty()` gộp TỔNG lô** — LIVE từ 2026-09-24, merge `4b59c6d1`: trước đây nhiều lô cùng mã khác `loanPackageId` thì chỉ lô CUỐI sống sót. Đo thật ZaloPay: **BID 14/08 320 → 427**, **MBB 14/08 232 → 632**; 135 cặp (mã, ngày) lệch 25-66,7%, chỉ BID/MBB/VCB; SpaceX 0 cặp (latent). §21: **KHÔNG số công bố nào đổi** (resolve 3 mã × 2 TK byte-identical hai cây).
+  · **VÁ 2026-09-24, commit `a56203f2`**: gap test-only `report_return_gate.py:732` đã bịt bằng `MUTATION-GUARD gate_lookup_failed_reasons_present_note` (anchor riêng, không vacuous). ⚠️ arch-reviewer tìm thêm 3 nhánh anh em CÙNG lớp vacuous-anchor CHƯA vá: `:723` (`cash_mismatch`), `:727` (`stock_leg_ignored`), `:737` (`reasons_present - {...}` — assertion `gate_vendor_reason_unknown_no_guess` hiện dùng chung anchor với `:694-696` nên không phân biệt được nhánh nào chết).
 
-**`srcwalk` — MỞ TOÀN FLEET 2026-08-03, nhưng CHIA THEO VIỆC** (skill `~/.claude/skills/srcwalk/`,
-binary v1.3.0). Benchmark N=200 symbol + N=150 file cùng ngày (`kb/projects/srcwalk-benchmark-20260803.md`,
-ground truth `ast`, bootstrap CI) chốt ranh giới: **`srcwalk` để ĐỌC file** (−88,8% token CI[86,5–90,7],
-giữ 95,7% symbol, 0/150 phản ví dụ); **`grep` để TÌM** định nghĩa/call site (thắng ΔF1 +0,05/+0,06 CI
-không chứa 0, rẻ 3–25×, và **0% im lặng trả rỗng** vs 8,2% của srcwalk). Ngoại lệ: tên rất phổ biến
-(`main`/`run`) thì `srcwalk discover --scope <dir>` hơn (P 0,84 vs 0,46). ⚠️ **Bẫy `.gitignore`**:
-`.gitignore` ẩn `mike/` ⇒ 44% file `.py` vô hình với discovery, `--scope .` cho F1 0,065 trên code
-fleet → LUÔN scope vào thư mục chứa code. Vẫn cấm: `trace --depth ≥2`, khối "impact", symbol list của
-`review`, bash. Quy tắc đầy đủ: `WorkingClaude/CLAUDE.md` § Code navigation.
+- **Bẫy đường dẫn selfcheck — MỌI selfcheck import module qua `load_module()`/`sys.path.insert` phải TỰ ĐỔI theo worktree, không hardcode canonical** (phát hiện 2026-09-24 khi verify C2, commit `a56203f2`). `compute_active_nav_selfcheck.py` hardcode `WC = "/home/trido/thanhdt/WorkingClaude"` dùng cho **MỌI ca A-J** (không chỉ Section K kill-mid-write) ⇒ chạy selfcheck từ BẤT KỲ worktree nào cũng luôn test code MASTER — mọi "PASS" trước đó không chứng minh gì về code đang sửa trong worktree. Vá: `MIKE_BIN = HERE` (tự đổi theo vị trí vật lý file selfcheck) + `WC` qua `wc_paths.find_wc_root(__file__)` (tiện ích dùng chung, đã có 36 file khác trong `bin/` dùng). arch-reviewer tự bắn mutation 2 chiều xác nhận: bản vá bắt được lỗi tiêm vào worktree, bản kiểu-cũ bỏ lọt hoàn toàn.
+  ⚠️ **CÒN MỞ — 3 file khác nghi cùng lớp bug, CHƯA vá** (Taylor quan sát, arch-reviewer xác nhận 3/3 nhưng lưu ý phạm vi khác nhau): `bin/paper_corp_action_selfcheck.py:28-31` và `bin/send_plan_report_park_jit_selfcheck.py:28-30` cắn **worktree `mike/`**; `bin/due_diligence_corp_flags_selfcheck.py:19-21` cắn **worktree ngoài `mike/`** (repo `WorkingClaude` gốc — `trading_bot/due_diligence.py`), KHÔNG cắn worktree `mike/` vì module đó không tồn tại trong `mike/`. arch-review vòng 4-site (2026-09-24) tìm thêm 1 file: `bin/nav_cum_dividend_selfcheck.py:32-35` (`WC_ROOT` đếm dirname sai trong worktree lồng, **crash** `FileNotFoundError` khi chạy ngoài canonical — CHƯA vá).
 
-## Vận hành hàng ngày = TỰ PHÁT HIỆN → TỰ SỬA → BÁO CÁO (mandate user 2026-07-07)
-User chỉ đạo: lỗi vận hành phát sinh thì TỰ FIX rồi báo cáo, không chờ user báo/nhắc việc.
-Tài liệu chuẩn tắc: **`kb/ops_runbook.md`** (timeline ngày, mỗi bước check gì, ranh giới tự
-sửa). Cơ chế: `bin/ops_autofix.sh` — checker phát hiện lỗi → dispatch Winston (opus) chẩn đoán +
-sửa + verify + báo Trading Daily; wire vào `ops_health_check.sh` (08:20/12:45),
-`sync_bq_cache_daily.sh` (23:45), `cron_health_check_daily.sh` (08:25, mới 2026-08-01). Cooldown
-1h/vấn đề chống bão dispatch. **Ranh giới cứng (không bao giờ tự sửa, escalate question +
-Telegram):** trade plan, trading_rules.json, logic đặt lệnh, crontab dòng thực thi, xoá dữ liệu,
-BOT_STOP. Mike trong phiên sống thấy lỗi ops → tự sửa trực tiếp cùng ranh giới đó.
+- **4 call-site còn lại của lớp lỗi corp-action — audit xong 2026-09-24 (dispatch `Taylor_20260924_064510`), arch-review theo TỪNG VIỆC — CẢ 4 ĐÃ LIVE, ĐÓNG HẲN CHUỖI AUDIT NÀY:**
+  · **Việc 4 `report_return_gate.py:558-573` unmatched — APPROVED, LIVE, commit `569be662`.** Tách dòng vị thế CÒN GIỮ bị lệch KL (nghi corp-action credit sớm giữa lúc soạn báo cáo và lúc gate chạy) ra khỏi nhóm "đã thực hiện, ngoài phạm vi" (§29) — trước đây gộp chung, chẩn đoán sai nguyên nhân không kiểm chứng. Chỉ IN cảnh báo riêng, không đổi rc/checked/fails. Selfcheck 99/99 PASS × 8 tổ hợp (python3 + `$DNA_PYEXE` × 4 môi trường). Hồi quy 12 selfcheck liên quan sạch.
+  · **Việc 3 `verify_account_snapshot.py:307` `broker_positions_from_raw()` — APPROVED vòng 2, LIVE, commit `96ee1bb8`+`7700582d`.** Giữ `marketPrice` LATEST khác-None (đúng quy ước `DNSEBroker.get_positions()`), docstring đã sửa đúng: vá PHÒNG NGỪA/đồng bộ quy ước, KHÔNG phải fix ca BID 08-14 (0/83 ngày dữ liệu thật đổi hành vi). arch-review vòng 2 xác nhận diff AST-identical sau strip docstring.
+  · **Việc 1 `discretionary_accumulation_inject.py` `broker_filled_qty()` — APPROVED vòng 2, LIVE, commit `5e6fb9af`+`642d4f5a`.** Thiết kế lại sau REJECTED vòng 1: cổng quy đổi baseline CHỈ áp cho chế độ `target_qty` cố định (0 chương trình LIVE dùng, giữ làm hạ tầng phòng thủ) — chế độ `target_pct_active_nav` (TV1 SpaceX+ZaloPay, DUY NHẤT LIVE) bỏ QUA HẲN cổng, giữ nguyên `total − baseline` thô vì target tự nhân cùng hệ số sự kiện, TỰ KHỚP. Thêm khoá idempotency `(ticker, ex_date, event_code)` cho chế độ `target_qty`. arch-review vòng 2 tự mô phỏng lại bằng code production: HEAD giữ đúng 5,0000% active_nav; bản REJECTED (v1) overbuy 6,0317%. ⚠️ **Lưu ý docstring**: câu "tự khớp" chỉ ĐÚNG TUYỆT ĐỐI khi `baseline_qty_before_program=0` (đúng cả 2 state LIVE hôm nay) — `baseline>0` thì thiếu `(r−1)×baseline` cp vĩnh viễn, hướng AN TOÀN (mua thiếu, không overbuy), chưa sửa docstring (không chặn).
+  · **Việc 2 `discretionary_margin_gate.py` arm_price — APPROVED vòng 12, LIVE, merge `c5247def` (12 commit vòng 3→12, từ `26ef0c58` tới `bc22bed2`).** Mảnh cuối cùng, khó đóng nhất trong cả 4 việc — **12 vòng arch-review độc lập**. Thiết kế lại hoàn toàn từ vòng 2: bỏ `exdate_frame.classify_positions` theo-ngày, đọc THẲNG registry PERSISTENT `data/corp_actions.json` qua `daily_nav_snapshot.confirmed_qty_multiplier_after(ticker, arm_date)`. Từ vòng 3→8, mỗi vòng đóng đúng 1 cửa mới của CÙNG lớp bug §29 ("chẩn đoán không dựa trên bằng chứng đã đọc") rồi lại lộ cửa kế tiếp: JSON-corrupt exception rơi vào nhánh thành công (vòng 3→4), file-missing silent-return làm y hệt (vòng 4→5, vá bằng `os.path.exists()`), record hỏng bên trong file hợp lệ + so sánh ngày bằng CHUỖI THÔ khiến 1 sự kiện thật (TRC 09-15, 9 ngày trước lúc vá) — hoặc hệ số phi lý — bị NUỐT ÂM THẦM (vòng 6→7, vá bằng `corp_actions.validate()` dùng chung cho cả điểm đọc VÀ điểm ghi); `nan`/hệ số phi lý lọt qua guard `<=1.0` (so sánh nan luôn False) khiến breach thật −42,3% báo thành "OK" (vòng 7, `math.isfinite` + `QTY_MULT_MAX`) — **biên đầu tiên chọn 2.0 SAI, tự query BQ xác nhận sẽ chặn oan sự kiện thật (TRC/DGC/F88), sửa về 10.0 khớp bất biến đã có sẵn** (vòng 8). Vòng 8 xác nhận **logic số học ĐÚNG bằng BigQuery thật** — vòng 9→12 thuần về lớp DELIVERY: cảnh báo −20% bắt buộc de-lever phải THẬT SỰ tới người khi bus/Discord có thể chết độc lập (không phải `elif` loại trừ lẫn nhau khi vừa có breach vừa có lỗi cùng lượt — vòng 9→10), guard `and` không bị làm loãng thành `or` (vòng 10→11→12), escalation message không bao giờ khẳng định điều chưa đọc được bằng chứng (record cũ/mới, `bad_idx=None` — vòng 9→10), và Discord không báo "✅ AUTO-CONFIRMED" cho 1 ghi chưa từng xảy ra (vòng 9→10, `pending_bus_posts` dời post-write). Vòng 12: test-only, đóng 2 gap pinning cuối, vòng 11 xác nhận KHÔNG còn lỗi hành vi. Selfcheck cuối 146/146 qua ≥4 môi trường + 2 interpreter (`python3`/`$DNA_PYEXE`); hồi quy 15+ selfcheck corp-action liên quan + `report_return_gate --selfcheck` sạch mọi vòng. `data/discretionary_margin_arms.json` không tồn tại (0 arm sống thật) ⇒ latent — đã vá xong TRƯỚC khi có arm đầu tiên, đúng như yêu cầu ban đầu.
+  ⚠️ **Sự cố phụ phát sinh khi verify vòng 5** (không liên quan code, Mike tự gây ra): 1 script test đầu tiên quên override `gate.ARMS_PATH` trước khi gọi `save_arms()`, ghi lọt 1 arm giả (`ticker=VPB, note="seed"`) vào LIVE canonical `data/discretionary_margin_arms.json`. Phát hiện bởi arch-review vòng 6 (B5). Mike cố tự dọn (ghi `[]`) nhưng bị Bash/Write safety classifier chặn (đúng — file thuộc phạm vi dữ liệu sống ngoài worktree) — **CẦN USER TỰ DỌN hoặc cấp quyền**, xem tin nhắn Discord thread này ~17:53 ICT 2026-09-24. Không khẩn cấp (cron kế tiếp 15:20 ICT thứ Sáu 25/09) nhưng cần xử trước phiên đó — arm giả thiếu key `exit_alerts`/`exited` từng gây `KeyError` giết cả lượt check-exits trước khi vòng 11/12 vá phòng ngừa (`setdefault`).
 
-## Workflow ngày trading (SpaceX/ZaloPay, T2-T6, giờ ICT)
-Timeline đầy đủ (giờ từng bước, checker gì, ranh giới tự sửa): **`kb/ops_runbook.md`**. Onboarding
-account mới: **`kb/account_onboarding_runbook.md`** (cron dùng-chung tự nhận account mới qua
-`trading_bot.config.live_dnse_labels()`; riêng 4 dòng cron THỰC THI THẬT luôn cần hỏi user trước).
-Phần dưới đây là quy tắc **Discord topic routing** — KHÔNG có trong ops_runbook.md, chỉ ở đây.
+## R&D pipeline — PAPER-ONLY, chi tiết `kb/projects/rnd-pipeline-tracker.md`
+Fear-buy quét hàng tuần `bin/fearbuy_weekly_scan.sh` (Friday 08:10 ICT). Recon thuần, KHÔNG tự mua.
 
-**3 Discord topic tách biệt:**
-- **Trading Daily (1521470705563340910)** — vận hành SỐNG trong ngày: preflight, run_bot,
-  heartbeat, BQ freshness, `ops_health_check.sh`.
-- **DollarBill plan channel (1521183164364754974)** — riêng việc LẬP KẾ HOẠCH của DollarBill
-  (`send_plan_report.sh` + mọi `dispatch.sh DollarBill ...`). Route cố định qua
-  `dispatch.sh`'s `_agent_thread_override` bất kể Mike gọi từ topic nào.
-- **Per-job thread routing tổng quát** — `_agent_thread_override` chỉ đúng cho agent LUÔN thuộc
-  1 topic cố định. Taylor phục vụ NHIỀU topic song song → `dispatch.sh` ghi `discord_thread_id`
-  NGAY vào job record lúc dispatch (chụp 1 lần), mọi thông báo đọc lại field này qua
-  `_job_thread_id <job_id>` thay vì suy ra "topic hiện tại". Xem `kb/incidents/index.md`.
-- **Trading report (1522576692638388364)** — kênh DUY NHẤT cho **báo cáo tổng hợp** ngày/tuần/
-  tháng (khác alert vận hành sống ở Trading Daily). `eod_trading_report.sh` + báo cáo tuần/tháng
-  Mike tự soạn đều đích vào đây.
+## Measurement integrity audit — cadence định kỳ (mở 2026-09-27, sau retro custom30V double-count)
+Lý do: bug custom30V double-count (`mcap = Close_adj × OShares`, −4,48pp CAGR) sống trong
+production nhiều tháng, KHÔNG bị bắt bởi self-check 0 VND (kiểm sổ sách mô phỏng, không kiểm
+tính đúng kinh tế của công thức) LẪN quant-skeptic (7 đòn cũ nhắm overfit/gaming, không nhắm lỗi
+kế toán double-count). Chỉ lộ ra vì có audit CHỦ ĐỘNG quét 23 chuỗi return/level/weight/NAV theo
+6 bất biến cố định — audit đó còn tìm thêm 7 bug không liên quan (FAIL-C/F/H, egg reconcile,
+FAIL-G ICB routing, DSR/PBO family drift). Kết luận: không đợi ai đó thấy số lạ mới đi tìm.
+**Review quý — next ~2026-12-27: dispatch Taylor lặp lại đúng phương pháp `measurement-integrity-
+audit-2026-09-27` (6 bất biến × mọi chuỗi return/level/weight/NAV đang production), rồi quant-
+skeptic verify từng finding trước khi wire.** Artifact/phương pháp gốc:
+`agents/Taylor/research/measurement_integrity_audit_20260927/`. quant-skeptic đã thêm đòn tấn
+công thứ 8 (double-count corp-action adjustment) vào checklist chuẩn (`~/.claude/agents/
+quant-skeptic.md`) — audit định kỳ vẫn cần vì đòn 8 chỉ bắt ĐÚNG lớp lỗi đã biết, không thay
+được việc chủ động quét tìm lớp lỗi MỚI.
 
-**Duyệt plan — LUÔN mirror vào DollarBill plan channel:** khi user duyệt/thảo luận duyệt plan ở
-BẤT KỲ topic Discord nào khác, Mike xử lý ngay tại chỗ (không ép đổi topic) NHƯNG phải
-`notify_thread.sh` xác nhận vào **1521183164364754974** ngay sau đó — channel này luôn là bản ghi
-đầy đủ mọi lần duyệt, tránh rải rác/loãng topic khác.
+## Macro watch — rủi ro cấu trúc BĐS VN (mở 2026-08-26)
+Bobby classify STRUCTURAL_ACCUMULATION/AMBIGUOUS. Thesis + lead indicators + playbook đã chốt:
+`kb/projects/vn-realestate-structural-risk-20260826.md`. KHÔNG đổi V2.4/DT5G/margin theo thesis này.
+**Review quý — next ~2026-11-26: dispatch Bobby refresh bảng lead indicators + quét
+`kb/structural_break_watch.json`** (6 sự kiện cấu trúc: nâng hạng, KRX, T+, luật margin, room
+ngoại, sản phẩm mới). Protocol: `kb/projects/amh-structural-break-protocol-20260910.md` —
+sự kiện kích hoạt ⇒ BẮT BUỘC re-validate đúng tầng, mặc định vẫn là KHÔNG đổi tham số.
 
-**Escalation khi plan T+1 không sẵn sàng:** `send_plan_report.sh` 21:00 ICT (+ second-chance
-23:00) verify ARTIFACT thật (file `plan_<account>_<T+1 date>.json` đúng ngày qua
-`next_trading_day()`, có field `orders`) — KHÔNG tin job status. Thiếu/sai → ESCALATE thật:
-Telegram + Discord + bus event `question` (`plan-t1-not-ready`). KHÔNG tự động retry/re-dispatch
-(human-in-the-loop).
+## Vận hành hàng ngày = TỰ PHÁT HIỆN → TỰ SỬA → BÁO CÁO (mandate 2026-07-07)
+Ranh giới cứng (KHÔNG tự sửa): trade plan, trading_rules.json, logic đặt lệnh, crontab dòng thực thi, xoá dữ liệu, BOT_STOP. Chi tiết: `kb/ops_runbook.md`.
 
-## Cron quan trọng khác (ICT)
-| Giờ | Lịch | Việc |
-|---|---|---|
-| 08:25 | T2-T6 | cron_health_check_daily.sh — audit toàn bộ crontab (mới 2026-08-01) |
-| 08:30 | T2-T6 | check_report_cadence.sh — báo cáo tuần/tháng quá hạn thì TỰ dispatch Taylor soạn+gửi + escalate Trading report topic (mới 2026-08-01, thay WARN cũ bị chôn im lặng 5 ngày); mỗi lần chạy cũng quét + gửi email (send_report_email.py, Gmail SMTP app password) mọi report chưa từng gửi qua email (thêm 2026-08-01, user yêu cầu) |
-| 23:45 | T2-T6 | sync_bq_cache_daily.sh |
-| 02:00 | Daily | kb_nightly.sh — archive events, trim memory, check ngưỡng cứng kb file MỖI đêm |
-| 02:00 (UTC Fri = ICT Sat sáng) | Weekly | kb_nightly.sh → dispatch Mike editorial KB review (đầy đủ) |
-| 03:30 ICT Sat | Weekly | weekly_ops_audit.sh — audit sâu vận hành (mới 2026-08-01) |
-| 00:00 | Daily | backup.sh → GitHub |
-
-## Vận hành/kiến trúc daemon — trạng thái ổn định (không đổi gần đây)
-Remote-control daemon `mike@Mike.service` tắt hẳn từ 07-07 (user chỉ dùng Discord qua
-`ccdb-mike.service`). Model mặc định Mike = Sonnet 5, đồng bộ 3 tầng config (DB ưu tiên cao nhất).
-Chi tiết: [[reference-ccdb-model-config-layers]] + [[project-discord-only-workflow-remote-control-disabled]]
-trong memory Mike.
-
-## Sự cố đã đóng — rút gọn, chi tiết đầy đủ `kb/incidents/index.md`
-Audit cron C1/H2 (2026-07-12), BQ cache monolith (2026-07-13), cross-account contamination
-(2026-07-19), 3 bug quoting silent-fail + full crontab audit (2026-08-01) — tất cả FIXED+VERIFIED.
-**Còn treo thật** (1 mục, ưu tiên thấp): dọn crontab paper-trading lạc hậu — diff có sẵn
-(`Winston_20260712_151206`), chưa áp dụng.
+## Workflow ngày trading — Discord topic routing
+- **Trading Daily (1521470705563340910)** — preflight, run_bot, heartbeat, ops_health_check.sh
+- **DollarBill plan (1521183164364754974)** — lập kế hoạch. **Mirror duyệt plan vào đây dù đang ở topic khác.**
+- **Trading report (1522576692638388364)** — báo cáo tổng hợp ngày/tuần/tháng (KHÔNG phải alert)
+- Dispatch Taylor → ghi `discord_thread_id` vào job record ngay lúc dispatch, đọc lại qua `_job_thread_id`.
+- Plan T+1 không sẵn sàng → ESCALATE (Telegram + Discord + bus question `plan-t1-not-ready`), KHÔNG retry tự động.

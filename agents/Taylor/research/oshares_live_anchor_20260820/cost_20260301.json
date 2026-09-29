@@ -1,0 +1,457 @@
+{
+ "asof": "2026-03-01",
+ "future_until": "2026-08-20",
+ "n_universe": 263,
+ "n_none_pit": 28,
+ "n_none_live": 7,
+ "coverage_gain": 21,
+ "n_changed": 21,
+ "changed": [
+  {
+   "ticker": "BID",
+   "pit_value": null,
+   "pit_method": "AIS_UNCERTIFIED",
+   "live_value": 7280065210.0,
+   "live_method": "FIN_FALLBACK",
+   "live_anchor": "2026-02-02",
+   "live_anchor_source": "ticker_financial",
+   "fin_anchor_ais_certified": false,
+   "ais_age_days": 401
+  },
+  {
+   "ticker": "BSI",
+   "pit_value": null,
+   "pit_method": "AIS_UNCERTIFIED",
+   "live_value": 245365943.0,
+   "live_method": "FIN_FALLBACK",
+   "live_anchor": "2026-01-22",
+   "live_anchor_source": "ticker_financial",
+   "fin_anchor_ais_certified": false,
+   "ais_age_days": 153
+  },
+  {
+   "ticker": "BVH",
+   "pit_value": null,
+   "pit_method": "AIS_UNCERTIFIED",
+   "live_value": 742322764.0,
+   "live_method": "FIN_FALLBACK",
+   "live_anchor": "2026-02-02",
+   "live_anchor_source": "ticker_financial",
+   "fin_anchor_ais_certified": false,
+   "ais_age_days": 1899
+  },
+  {
+   "ticker": "CTI",
+   "pit_value": null,
+   "pit_method": "AIS_UNCERTIFIED",
+   "live_value": 62999997.0,
+   "live_method": "FIN_FALLBACK",
+   "live_anchor": "2026-02-02",
+   "live_anchor_source": "ticker_financial",
+   "fin_anchor_ais_certified": false,
+   "ais_age_days": 2745
+  },
+  {
+   "ticker": "DTD",
+   "pit_value": null,
+   "pit_method": "AIS_UNCERTIFIED",
+   "live_value": 66686055.0,
+   "live_method": "FIN_FALLBACK",
+   "live_anchor": "2026-01-30",
+   "live_anchor_source": "ticker_financial",
+   "fin_anchor_ais_certified": false,
+   "ais_age_days": 178
+  },
+  {
+   "ticker": "DXP",
+   "pit_value": null,
+   "pit_method": "AIS_UNCERTIFIED",
+   "live_value": 59910133.0,
+   "live_method": "FIN_FALLBACK",
+   "live_anchor": "2026-02-02",
+   "live_anchor_source": "ticker_financial",
+   "fin_anchor_ais_certified": false,
+   "ais_age_days": 601
+  },
+  {
+   "ticker": "EVF",
+   "pit_value": null,
+   "pit_method": "AIS_UNCERTIFIED",
+   "live_value": 760565802.0,
+   "live_method": "FIN_FALLBACK",
+   "live_anchor": "2026-01-22",
+   "live_anchor_source": "ticker_financial",
+   "fin_anchor_ais_certified": false,
+   "ais_age_days": 450
+  },
+  {
+   "ticker": "FIT",
+   "pit_value": null,
+   "pit_method": "AIS_UNCERTIFIED",
+   "live_value": 339933034.0,
+   "live_method": "FIN_FALLBACK",
+   "live_anchor": "2026-02-02",
+   "live_anchor_source": "ticker_financial",
+   "fin_anchor_ais_certified": false,
+   "ais_age_days": 1242
+  },
+  {
+   "ticker": "GIL",
+   "pit_value": null,
+   "pit_method": "AIS_UNCERTIFIED",
+   "live_value": 101596218.0,
+   "live_method": "FIN_FALLBACK",
+   "live_anchor": "2026-02-02",
+   "live_anchor_source": "ticker_financial",
+   "fin_anchor_ais_certified": false,
+   "ais_age_days": 312
+  },
+  {
+   "ticker": "HAX",
+   "pit_value": null,
+   "pit_method": "AIS_UNCERTIFIED",
+   "live_value": 107439681.0,
+   "live_method": "FIN_FALLBACK",
+   "live_anchor": "2026-01-21",
+   "live_anchor_source": "ticker_financial",
+   "fin_anchor_ais_certified": false,
+   "ais_age_days": 513
+  },
+  {
+   "ticker": "KBC",
+   "pit_value": null,
+   "pit_method": "AIS_UNCERTIFIED",
+   "live_value": 941754759.0,
+   "live_method": "FIN_FALLBACK",
+   "live_anchor": "2026-02-02",
+   "live_anchor_source": "ticker_financial",
+   "fin_anchor_ais_certified": false,
+   "ais_age_days": 1242
+  },
+  {
+   "ticker": "LDG",
+   "pit_value": null,
+   "pit_method": "AIS_UNCERTIFIED",
+   "live_value": 255615849.0,
+   "live_method": "FIN_FALLBACK",
+   "live_anchor": "2026-02-02",
+   "live_anchor_source": "ticker_financial",
+   "fin_anchor_ais_certified": false,
+   "ais_age_days": 1122
+  },
+  {
+   "ticker": "NKG",
+   "pit_value": null,
+   "pit_method": "AIS_UNCERTIFIED",
+   "live_value": 447570881.0,
+   "live_method": "FIN_FALLBACK",
+   "live_anchor": "2026-02-02",
+   "live_anchor_source": "ticker_financial",
+   "fin_anchor_ais_certified": false,
+   "ais_age_days": 389
+  },
+  {
+   "ticker": "PAN",
+   "pit_value": null,
+   "pit_method": "AIS_UNCERTIFIED",
+   "live_value": 208894750.0,
+   "live_method": "FIN_FALLBACK",
+   "live_anchor": "2026-01-26",
+   "live_anchor_source": "ticker_financial",
+   "fin_anchor_ais_certified": false,
+   "ais_age_days": 961
+  },
+  {
+   "ticker": "PET",
+   "pit_value": null,
+   "pit_method": "AIS_UNCERTIFIED",
+   "live_value": 106722131.0,
+   "live_method": "FIN_FALLBACK",
+   "live_anchor": "2026-02-02",
+   "live_anchor_source": "ticker_financial",
+   "fin_anchor_ais_certified": false,
+   "ais_age_days": 886
+  },
+  {
+   "ticker": "PSD",
+   "pit_value": null,
+   "pit_method": "AIS_UNCERTIFIED",
+   "live_value": 51827894.0,
+   "live_method": "FIN_FALLBACK",
+   "live_anchor": "2026-01-27",
+   "live_anchor_source": "ticker_financial",
+   "fin_anchor_ais_certified": false,
+   "ais_age_days": 566
+  },
+  {
+   "ticker": "QCG",
+   "pit_value": null,
+   "pit_method": "AIS_UNCERTIFIED",
+   "live_value": 275129141.0,
+   "live_method": "FIN_FALLBACK",
+   "live_anchor": "2026-01-30",
+   "live_anchor_source": "ticker_financial",
+   "fin_anchor_ais_certified": false,
+   "ais_age_days": 3715
+  },
+  {
+   "ticker": "SHB",
+   "pit_value": null,
+   "pit_method": "AIS_UNCERTIFIED",
+   "live_value": 5053074222.0,
+   "live_method": "FIN_FALLBACK",
+   "live_anchor": "2026-02-02",
+   "live_anchor_source": "ticker_financial",
+   "fin_anchor_ais_certified": false,
+   "ais_age_days": 145
+  },
+  {
+   "ticker": "TNG",
+   "pit_value": null,
+   "pit_method": "AIS_UNCERTIFIED",
+   "live_value": 128731266.0,
+   "live_method": "FIN_FALLBACK",
+   "live_anchor": "2026-01-20",
+   "live_anchor_source": "ticker_financial",
+   "fin_anchor_ais_certified": false,
+   "ais_age_days": 173
+  },
+  {
+   "ticker": "VCI",
+   "pit_value": null,
+   "pit_method": "AIS_UNCERTIFIED",
+   "live_value": 850100000.0,
+   "live_method": "FIN_FALLBACK",
+   "live_anchor": "2026-02-02",
+   "live_anchor_source": "ticker_financial",
+   "fin_anchor_ais_certified": false,
+   "ais_age_days": 109
+  },
+  {
+   "ticker": "VLB",
+   "pit_value": null,
+   "pit_method": "AIS_UNCERTIFIED",
+   "live_value": 46720560.0,
+   "live_method": "FIN_FALLBACK",
+   "live_anchor": "2026-01-20",
+   "live_anchor_source": "ticker_financial",
+   "fin_anchor_ais_certified": false,
+   "ais_age_days": 977
+  }
+ ],
+ "n_restate_pit": 11,
+ "restate_pit": [
+  {
+   "ticker": "ABB",
+   "value": 1397208685.0,
+   "method": "FIN_FALLBACK",
+   "future_ais": [
+    "2026-06-19"
+   ]
+  },
+  {
+   "ticker": "CII",
+   "value": 671985291.0,
+   "method": "ANCHOR_ONLY",
+   "future_ais": [
+    "2026-03-10"
+   ]
+  },
+  {
+   "ticker": "HAH",
+   "value": 185840401.0,
+   "method": "FIN_FALLBACK",
+   "future_ais": [
+    "2026-05-27"
+   ]
+  },
+  {
+   "ticker": "HHS",
+   "value": 431985968.0,
+   "method": "ANCHOR_ONLY",
+   "future_ais": [
+    "2026-06-08"
+   ]
+  },
+  {
+   "ticker": "HHV",
+   "value": 547166296.0,
+   "method": "ANCHOR_ONLY",
+   "future_ais": [
+    "2026-04-08"
+   ]
+  },
+  {
+   "ticker": "MSN",
+   "value": 1445915457.0,
+   "method": "ANCHOR_ONLY",
+   "future_ais": [
+    "2026-07-30"
+   ]
+  },
+  {
+   "ticker": "NHA",
+   "value": 64788945.0,
+   "method": "ANCHOR_ONLY",
+   "future_ais": [
+    "2026-03-05"
+   ]
+  },
+  {
+   "ticker": "NHH",
+   "value": 112964000.0,
+   "method": "ANCHOR_ONLY",
+   "future_ais": [
+    "2026-07-30"
+   ]
+  },
+  {
+   "ticker": "NVL",
+   "value": 2234496474.0,
+   "method": "FIN_FALLBACK",
+   "future_ais": [
+    "2026-05-29"
+   ]
+  },
+  {
+   "ticker": "PTB",
+   "value": 80326084.0,
+   "method": "ANCHOR_ONLY",
+   "future_ais": [
+    "2026-03-23"
+   ]
+  },
+  {
+   "ticker": "TDC",
+   "value": 127228000.0,
+   "method": "ANCHOR_UNVERIFIED",
+   "future_ais": [
+    "2026-05-18"
+   ]
+  }
+ ],
+ "n_restate_live": 12,
+ "restate_live": [
+  {
+   "ticker": "ABB",
+   "value": 1397208685.0,
+   "method": "FIN_FALLBACK",
+   "future_ais": [
+    "2026-06-19"
+   ]
+  },
+  {
+   "ticker": "CII",
+   "value": 671985291.0,
+   "method": "ANCHOR_ONLY",
+   "future_ais": [
+    "2026-03-10"
+   ]
+  },
+  {
+   "ticker": "HAH",
+   "value": 185840401.0,
+   "method": "FIN_FALLBACK",
+   "future_ais": [
+    "2026-05-27"
+   ]
+  },
+  {
+   "ticker": "HHS",
+   "value": 431985968.0,
+   "method": "ANCHOR_ONLY",
+   "future_ais": [
+    "2026-06-08"
+   ]
+  },
+  {
+   "ticker": "HHV",
+   "value": 547166296.0,
+   "method": "ANCHOR_ONLY",
+   "future_ais": [
+    "2026-04-08"
+   ]
+  },
+  {
+   "ticker": "KBC",
+   "value": 941754759.0,
+   "method": "FIN_FALLBACK",
+   "future_ais": [
+    "2026-06-25"
+   ]
+  },
+  {
+   "ticker": "MSN",
+   "value": 1445915457.0,
+   "method": "ANCHOR_ONLY",
+   "future_ais": [
+    "2026-07-30"
+   ]
+  },
+  {
+   "ticker": "NHA",
+   "value": 64788945.0,
+   "method": "ANCHOR_ONLY",
+   "future_ais": [
+    "2026-03-05"
+   ]
+  },
+  {
+   "ticker": "NHH",
+   "value": 112964000.0,
+   "method": "ANCHOR_ONLY",
+   "future_ais": [
+    "2026-07-30"
+   ]
+  },
+  {
+   "ticker": "NVL",
+   "value": 2234496474.0,
+   "method": "FIN_FALLBACK",
+   "future_ais": [
+    "2026-05-29"
+   ]
+  },
+  {
+   "ticker": "PTB",
+   "value": 80326084.0,
+   "method": "ANCHOR_ONLY",
+   "future_ais": [
+    "2026-03-23"
+   ]
+  },
+  {
+   "ticker": "TDC",
+   "value": 127228000.0,
+   "method": "ANCHOR_UNVERIFIED",
+   "future_ais": [
+    "2026-05-18"
+   ]
+  }
+ ],
+ "restate_new_from_live_branch": [
+  "KBC"
+ ],
+ "lookahead_methods": [
+  "FIN_FALLBACK",
+  "ANCHOR_UNVERIFIED"
+ ],
+ "n_restate_fin_pit": 4,
+ "restate_fin_pit": [
+  "ABB",
+  "HAH",
+  "NVL",
+  "TDC"
+ ],
+ "n_restate_fin_live": 5,
+ "restate_fin_live": [
+  "ABB",
+  "HAH",
+  "KBC",
+  "NVL",
+  "TDC"
+ ],
+ "restate_fin_new_from_live_branch": [
+  "KBC"
+ ]
+}

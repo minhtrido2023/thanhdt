@@ -3,7 +3,11 @@
 # Thay thế headless LLM dispatch cho các tác vụ trading thực tế (placement, fills).
 #
 # Usage:
-#   bin/run_bot.sh [--account LABEL] [--date YYYY-MM-DD] [--auto-otp] [--dry-run]
+#   bin/run_bot.sh [--account LABEL] [--date YYYY-MM-DD] [--auto-otp] [--dry-run] [--loop]
+#
+# Mặc định: --once (1 vòng đặt lệnh rồi exit). Dùng --loop để giữ hành vi daemon cũ.
+# Thiết kế time-block 2026-08-18: bot đặt lệnh xong → tự exit → cron quay lại block
+# tiếp theo (13:00). Cho phép rút Trứng vàng giữa các block và đổi plan được pick up.
 #
 # bot_execute.py tự publish events lên Mike fleet bus (STEP_FAIL, fill_lagging).
 # Wrapper này thêm: start/end Discord notify + bus event.
@@ -17,6 +21,7 @@ ACCOUNT="SpaceX"
 PLAN_DATE="$(date +%Y-%m-%d)"
 AUTO_OTP=false
 DRY_RUN=false
+LOOP_MODE=false  # --loop để giữ hành vi daemon cũ; mặc định = once (time-block mode)
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -24,6 +29,7 @@ while [[ $# -gt 0 ]]; do
     --date)    PLAN_DATE="$2"; shift 2 ;;
     --auto-otp) AUTO_OTP=true; shift ;;
     --dry-run)  DRY_RUN=true; shift ;;
+    --loop)     LOOP_MODE=true; shift ;;
     *) echo "Unknown arg: $1" >&2; exit 1 ;;
   esac
 done
@@ -66,8 +72,10 @@ set +e
 cd "$WC_ROOT"
 OTP_FLAG=""
 [ "$AUTO_OTP" = true ] && OTP_FLAG="--auto-otp"
+ONCE_FLAG=""
+[ "$LOOP_MODE" = false ] && ONCE_FLAG="--once"
 # shellcheck disable=SC2086
-python3 bot_execute.py --account "$ACCOUNT" --date "$PLAN_DATE" $OTP_FLAG \
+python3 bot_execute.py --account "$ACCOUNT" --date "$PLAN_DATE" $OTP_FLAG $ONCE_FLAG \
   2>&1 | tee -a "$LOG"
 rc=${PIPESTATUS[0]}
 set -e
@@ -88,11 +96,13 @@ elif [ "$rc" -eq 0 ]; then
   # Nói rõ LÝ DO rời phiên (user feedback 2026-07-07 chiều: "bot vừa bật vừa tắt" đọc
   # rất khó hiểu khi message không nói bot dừng vì XONG VIỆC hay vì lỗi).
   if grep -q "tất cả account đã khớp đủ" "$LOG" 2>/dev/null; then
-    _reason="đã HOÀN TẤT toàn bộ kế hoạch hôm nay — không còn gì để làm, bot nghỉ (sổ lệnh chi tiết sẽ có trong heartbeat/EOD report)"
+    _reason="đã HOÀN TẤT toàn bộ kế hoạch hôm nay — không còn gì để làm, bot nghỉ (sổ lệnh chi tiết sẽ có trong EOD report)"
   elif [ "$_n_orders" = "0" ]; then
     _reason="kế hoạch hôm nay là HOLD — bot đã đồng bộ trạng thái xong và nghỉ"
+  elif [ "$LOOP_MODE" = false ]; then
+    _reason="đã đặt lệnh xong 1 vòng — sẽ tự khởi động lại lúc 13:00 để poll fills và đặt tiếp nếu cần. Nếu có Trứng vàng cần rút, làm ngay trước 13:00"
   else
-    _reason="kết thúc đợt làm việc bình thường; nếu đang giữa ngày bot sẽ quay lại theo lịch (13:00 sau nghỉ trưa), cuối ngày chờ báo cáo EOD 15:00"
+    _reason="kết thúc đợt làm việc bình thường; nếu đang giữa ngày bot sẽ quay lại theo lịch (13:00 sau nghỉ trưa), cuối ngày chờ báo cáo EOD 19:10"
   fi
   _discord "✅ **Bot rời phiên ($_hr_end)** — account **$ACCOUNT**: ${_reason} (chạy $((elapsed/60)) phút)."
   "$ROOT/bin/append_event.sh" Mafee status "bot-done" \
@@ -111,4 +121,10 @@ else
 fi
 
 "$ROOT/bin/consolidate.sh" >> "$ROOT/logs/consolidator.log" 2>&1 || true
+
+# EXTREME-regime gate alert: quét journal sau phiên, gửi email nếu gate đã fire
+# Chạy background để không block; idempotent (flag file).
+"$ROOT/bin/extreme_regime_dd_alert.sh" "$ACCOUNT" "$PLAN_DATE" \
+  >> "$ROOT/logs/extreme_regime_alert_${ACCOUNT}_${PLAN_DATE}.log" 2>&1 &
+
 exit "$rc"

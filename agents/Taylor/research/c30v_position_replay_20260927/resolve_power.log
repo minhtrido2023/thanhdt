@@ -1,0 +1,38 @@
+cửa sổ 2014-08-05 → 2026-06-19 = 11.8713y · 2965 phiên · 75,294 name×session
+
+=== (1) IS / OOS — walk-forward §18 ===
+                 kỳ  n phiên     FLAT   LEGACY  REPLAY_B  Δ B−FLAT  phantom LEGACY−FLAT
+               FULL     2965   17.857   36.445    17.322    -0.536               18.588
+ IS 2014-08→2019-12     1354    9.982   26.713     9.687    -0.295               16.731
+OOS 2020-01→2026-06     1611   24.630   44.890    23.872    -0.759               20.259
+
+  đóng góp pp/năm theo nhãn (ròng):
+                           IS      OOS     FULL
+label                                          
+DIV                    +0.042   +0.012   +0.025
+DIV+FREESHARE          -0.006   +0.001   -0.002
+DIV+FREESHARE+RIGHTS   -0.055   -0.069   -0.063
+DIV+RIGHTS             -0.024      NaN   -0.011
+FREESHARE              +0.009   +0.007   +0.008
+FREESHARE+RIGHTS       -0.105   -0.137   -0.123
+NONE                   +0.181   -0.079   +0.039
+RIGHTS                 -0.315   -0.345   -0.331
+
+=== (2) độ phân giải THẬT — bootstrap theo NGÀY (4000 lần, khối = 1 phiên) ===
+  (gross Σ|contrib| phạt quá tay lớp nhiễu trung bình-0; CI là con số đúng để trích)
+                                       lớp     n  ròng pp/năm  SE boot  CI95 lo  CI95 hi  GROSS pp/năm
+lớp ĐANG AUDIT (FREESHARE + DIV+FREESHARE)   159       +0.005   +0.006   -0.005   +0.017        +0.039
+                         DIV (cổ tức tiền)   238       +0.025   +0.017   -0.003   +0.063        +0.071
+                      NONE (không sự kiện) 74859       +0.039   +0.318   -0.594   +0.668        +8.947
+                        MỌI thứ trừ RIGHTS 75256       +0.070   +0.311   -0.526   +0.707        +9.057
+              RIGHTS (không mô phỏng được)    38       -0.527   +0.130   -0.804   -0.298        +0.528
+
+=== (3) chân TRỌNG SỐ — replay KHÔNG test được (nhập wmap nguyên xi) ===
+  900 phiên (ticker×session) TRONG RỔ mà hệ số điều chỉnh giá bước >0,5%
+  153 (17%) có OShares bước CÙNG phiên ⇒ 747 phiên giá và số CP LỆCH NGÀY
+  khoảng cách (ngày dương lịch) tới bước OShares gần nhất: median 96, p90 826, max 3733; 662 phiên lệch >5 ngày, 74 mã không có bước nào
+  ⇒ mcapw = pxw × OShares ghép giá ĐÃ re-base với số CP CHƯA bước. Chân TRỌNG SỐ được chuẩn
+    hoá theo tiết diện + cap 0,10 nên KHÔNG in ra phantom return như chân return đã sửa, và
+    custom_basket.py:112-120 khai đây là staleness CHẤP NHẬN CÓ CHỦ Ý. Nhưng replay dùng lại
+    ĐÚNG wmap đó (replay.py:390) ⇒ audit này chứng nhận chân RETURN, KHÔNG chứng nhận chân
+    TRỌNG SỐ. Đây là giới hạn phạm vi, KHÔNG phải phát hiện lỗi.

@@ -1,0 +1,25 @@
+,755,434,683
+  PASS  L4. IDC 2021-02-05 THẬT: AIS vendor nói 3 tỷ ⇒ cổng chặn; số phục vụ vẫn là 300 triệu và nay chính `oshares_live` dựng ra nó (khớp số nền, rel_diff=0) — 300,000,000 từ oshares_live (live=300000000.0, rel_diff=0.0)
+== Cổng CHỨNG NHẬN neo AIS trên dữ liệu THẬT ==
+  PASS  A1. IDC 2020-05-28 KHÔNG được chứng nhận (ca đã kiểm tay 3 nguồn) — verdict=UNVERIFIED
+  PASS  A2. AAA 2019-06-03 KHÔNG được chứng nhận — CA MÀ CỔNG THÔ ×3 BỎ LỌT — verdict=UNVERIFIED; _sane(58,66tr/171,20tr)=True
+  PASS  A3. HỒI QUY: FPT 2025-09-12 (= 1.703.507.121, đã chứng minh đúng) VẪN được chứng nhận — verdict=OK
+  PASS  A4. ĐỐI CHỨNG: mã sạch vẫn được chứng nhận PHẦN LỚN, kể cả neo mới nhất (cổng không loại bừa tất cả) — VNM={'2014-09-30': 'NO_PRIOR', '2015-09-15': 'OK', '2016-09-20': 'OK', '2018-10-05': 'OK', '2020-11-10': 'OK'}
+  PASS  A4b. [ĐÃ ĐÓNG] VNM 2016-09-20 nay CHỨNG NHẬN ĐƯỢC: ESOP 2016-07-11 tỉ lệ 0,0 có `issue_volumn` 8.887.731 (thêm vào `_roll` 2026-08-19) ⇒ ứng viên (a) dựng ra ĐÚNG 1.451.453.429. Ca này đã ĐỎ trên `main` trước bản vá 2026-08-20 — verdict=OK
+  PASS  A5. PIT: xét tại 2020-01-01 thì AIS 2022-09-05 chưa tồn tại ⇒ không có verdict — ['2019-04-16', '2019-06-13']
+  PASS  A6. CHỨNG MINH NGƯỢC: tắt cổng chứng nhận ⇒ AAA nhận 58.664.988 (sai −65,7%) — 58,664,988 từ oshares_live
+== HỒI QUY: ca REFUTED của quant-skeptic (FPT chuỗi AIS đan xen) ==
+  PASS  A7. FPT 2020-05-05 KHÔNG trả 461.723.054 nữa (ca REFUTED vòng 2) — 681,668,102 từ oshares_live
+  PASS  A8. …và số phục vụ ĐÚNG là 681.668.102, không bịa số thứ ba — nay do chính `oshares_live` dựng ra và trùng khít số nền (rel_diff=0) — 681,668,102 từ oshares_live (live=681668102.0, rel_diff=0.0)
+  PASS  A9. verdict của chính neo đó là UNVERIFIED (chặn ĐÚNG lý do, không phải trùng hợp) — {'2017-07-03': 'NO_PRIOR', '2018-04-23': 'UNVERIFIED', '2018-07-16': 'OK', '2019-04-05': 'UNVERIFIED', '2019-06-24': 'OK', '2020-04-06': 'UNVERIFIED'}
+  PASS  A10. FPT 2023-04-10 KHÔNG trả 681.780.478 (dòng cùng chuỗi sai, −37,9%) — 1,097,026,572 từ ticker_financial
+  PASS  A11. CHỨNG MINH NGƯỢC: tắt cổng ⇒ FPT 2020-05-05 THẬT SỰ trả 461.723.054 (−32,3%) — 461,723,054 từ oshares_live
+  PASS  A12. CA GƯƠNG IDC 2022-09-05 (dòng ĐÚNG): rơi về số nền, lý do là KHÔNG XÁC MINH ĐƯỢC chứ không phải quy kết lỗi vendor — KHÔNG XÁC MINH ĐƯỢC: neo vào AIS 2022-09-05 không đối chiếu được với AIS liền trước ⇒ bỏ live 329,999,929
+  PASS  A13a. ĐỐI CHỨNG: FPT 2025-10-01 (neo AIS chứng nhận được) ĐANG được phục vụ từ live — 1,703,507,121 từ oshares_live
+  PASS  A13. FAIL-CLOSED: hàm chứng nhận NÉM LỖI ⇒ CHÍNH CA ĐÓ rơi về số nền, không phục vụ — KHÔNG XÁC MINH ĐƯỢC: neo vào AIS 2025-09-12 không đối chiếu được với AIS liền trước ⇒ bỏ live 1,703,507,121
+  PASS  A14. adapter chỉ ĐỌC phán quyết: `_uncertified` nhả số đúng ở AIS_UNCERTIFIED và im lặng ở mọi nhãn khác
+  PASS  A15. neo KHÔNG phải AIS (dòng quý) ⇒ cổng AIS không can thiệp, vẫn phục vụ — ANCHOR_UNVERIFIED · oshares_live
+
+OK — oshares_pit selfcheck PASS 49/49
+
+[capture] which=pit mode=live rc=0 bq_calls=16 calls=30 blocked=0

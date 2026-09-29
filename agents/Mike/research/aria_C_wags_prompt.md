@@ -1,0 +1,10 @@
+Việc C (user duyệt 13/09 12:31 ICT) — sinh kb/production_manifest.md: danh sách file PRODUCTION thật của ARIA, làm scope cho code-reviewer weekly + run_selfchecks + tz/diag gate. Bước 1 CHỈ là manifest; KHÔNG di chuyển/đổi tên file nào (di chuyển vật lý chỉ xét sau khi manifest ổn định 1 tháng).
+Bối cảnh: review ngoài agents/Mike/research/aria_review_response_20260913.md mục C. ~19.800 file .py, 1.004 ở root WorkingClaude, production thật ước ~30 file — hiện không có ranh giới.
+Cách làm, bằng chứng cơ học, không đoán theo tên:
+1. Gốc = mọi lệnh trong `crontab -l` (94 dòng) + systemd user units (`systemctl --user list-units 'mike*' 'ccdb*'`) + hook trong .claude/settings.json của WorkingClaude và mike/ ⇒ tập script gốc.
+2. Đóng bao import/exec: Python qua AST import (tái dùng bin/selfcheck_scope_map.sh nếu phủ được, nếu không viết bin/production_manifest.py); bash qua grep `python3?\s+\S+\.py|\./bin/\S+\.sh|bash \S+\.sh` trong từng .sh gốc. Lặp tới điểm bất động, depth ghi lại.
+3. Phân tầng: T0 money-path (đặt lệnh/plan/NAV/report gửi nhà đầu tư), T1 pipeline dữ liệu/regime, T2 fleet-ops (dispatch/bus/consolidate/health), T3 selfcheck của T0-T2. File ngoài 4 tầng = research, KHÔNG liệt kê.
+4. Xuất kb/production_manifest.md (bảng: path | tầng | gốc kích hoạt (cron line/unit/hook) | cách vào (import/exec) ) + kb/production_manifest.json (máy đọc). Ghi rõ lệnh tái sinh + ngày.
+5. Selfcheck bin/production_manifest_selfcheck.sh: tái sinh và diff với bản commit — lệch = FAIL (để weekly_ops_audit bắt drift). Đăng ký kb/selfcheck_registry.md. KHÔNG thêm cron mới (§11).
+6. Báo cáo: tổng số file/tầng, 5 file bất ngờ nhất (nằm trong production mà tên trông như research, hoặc ngược lại), và đề xuất 1 câu cho code-reviewer weekly dùng manifest làm scope (chưa wire, chỉ đề xuất).
+Loại trừ tường minh: mike_paseo/ (mirror cố ý của user để kiểm tra ARIA, KHÔNG phải production, KHÔNG merge), mọi wt-*/worktree, .claude/worktrees. Commit message có "aria-C". Bus finding topic "aria-C-production-manifest". Arch-review bắt buộc trước khi báo xong.

@@ -1,0 +1,31 @@
+ticker,fv_cpi_old,fv_cpi_fiinpro,delta_pct,note
+ACB,,,,financial-sector (BANK/INSURANCE/SECURITIES) — use Gordon-P/
+BID,,,,financial-sector (BANK/INSURANCE/SECURITIES) — use Gordon-P/
+CSV,23635.8,23635.8,0.0,
+CTG,,,,financial-sector (BANK/INSURANCE/SECURITIES) — use Gordon-P/
+DGC,76500.7,76500.7,0.0,
+DRI,20884.7,20884.7,0.0,
+EVF,,,,financial-sector (BANK/INSURANCE/SECURITIES) — use Gordon-P/
+HDB,,,,financial-sector (BANK/INSURANCE/SECURITIES) — use Gordon-P/
+HPG,,,,"normalized 3y FCFE <= 0 (capex > CFO, heavy reinvestment) — "
+LPB,,,,financial-sector (BANK/INSURANCE/SECURITIES) — use Gordon-P/
+MBB,,,,financial-sector (BANK/INSURANCE/SECURITIES) — use Gordon-P/
+MSB,,,,financial-sector (BANK/INSURANCE/SECURITIES) — use Gordon-P/
+NCT,233671.6,233671.6,0.0,
+PVT,,,,"normalized 3y FCFE <= 0 (capex > CFO, heavy reinvestment) — "
+SAB,37158.4,37158.4,0.0,
+SCL,,,,"normalized 3y FCFE <= 0 (capex > CFO, heavy reinvestment) — "
+SHB,,,,financial-sector (BANK/INSURANCE/SECURITIES) — use Gordon-P/
+SIP,,,,"normalized 3y FCFE <= 0 (capex > CFO, heavy reinvestment) — "
+TCB,,,,financial-sector (BANK/INSURANCE/SECURITIES) — use Gordon-P/
+TPB,,,,financial-sector (BANK/INSURANCE/SECURITIES) — use Gordon-P/
+TV1,130537.3,130537.3,0.0,
+VCB,,,,financial-sector (BANK/INSURANCE/SECURITIES) — use Gordon-P/
+VHM,,,,"normalized 3y FCFE <= 0 (capex > CFO, heavy reinvestment) — "
+VIB,,,,financial-sector (BANK/INSURANCE/SECURITIES) — use Gordon-P/
+VIX,,,,financial-sector (BANK/INSURANCE/SECURITIES) — use Gordon-P/
+VND,,,,financial-sector (BANK/INSURANCE/SECURITIES) — use Gordon-P/
+VNM,60983.6,60983.6,0.0,
+VPB,,,,financial-sector (BANK/INSURANCE/SECURITIES) — use Gordon-P/
+VPI,,,,CF_OA_3Y <= 0 (operating cash gate fails) — DCF not meaningf
+VRE,,,,"normalized 3y FCFE <= 0 (capex > CFO, heavy reinvestment) — "

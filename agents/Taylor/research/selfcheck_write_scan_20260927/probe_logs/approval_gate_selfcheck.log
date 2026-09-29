@@ -1,0 +1,29 @@
+A. requires_user_approval=true + approved_by=null + orders>0 → BLOCK
+  [PASS] A1 blocked  — 'plan 2020-01-02 [selfcheck-apprgate] có requires_user_approval=true nhưng approved_by trống — 1 lệnh chưa được user duyệt, bot TỪ CHỐI thực thi (không đoán, không tự bỏ qua).'
+  [PASS] A2 reason names the account
+B. approved (approved_by='user') + orders>0 → RUN
+  [PASS] B1 not blocked
+  [PASS] B2 delegation-string approval not blocked
+C. requires_user_approval=false / field MISSING + orders>0 → RUN (no regression)
+  [PASS] C1 explicit false not blocked
+  [PASS] C2 fields missing entirely not blocked
+  [PASS] C3 missing field loads as default False
+D. orders=0 (HOLD) + unapproved → RUN (nothing to execute, no risk)
+  [PASS] D1 HOLD not blocked
+E. empty/whitespace approved_by counts as UNAPPROVED
+  [PASS] E1 empty string blocked
+  [PASS] E2 whitespace-only blocked
+  [PASS] E3 literal 'None' string blocked
+  [PASS] E4 literal 'null' string blocked
+F. approved_by_user alternate field name (preflight_check.sh accepts it)
+  [PASS] F1 approved_by_user honoured
+G. LLM-authored string booleans normalized
+  [PASS] G1 'true' string blocked
+  [PASS] G2 'false' string not blocked
+H. wiring — bot_execute.main actually calls the gate (accidental-removal guard)
+  [PASS] H1 gate called in main()
+  [PASS] H2 blocked account skipped, not executed
+  [PASS] H3 non-zero exit on block
+  [PASS] H4 gate AFTER excluded filter, BEFORE lock/broker
+
+✅ approval_gate_selfcheck: ALL PASS

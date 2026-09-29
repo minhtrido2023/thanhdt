@@ -37,6 +37,11 @@ Centralizes all JSON building/reading so the shell scripts depend only on python
          -> refuses, writes nothing). Front door: bin/jobs.sh cancel <job_id>
   job-field <jobs_dir> <job_id> <field_name>
       -> print one field's raw value (exit 1 if job/field missing) — e.g. discord_thread_id
+  job-claim-reply <jobs_dir> <job_id>
+      -> ATOMIC test-and-set of replied_at under an exclusive lock. exit 0 = THIS caller is
+         the first to claim (go post the result); exit 1 = someone already claimed it (stay
+         silent); exit 2 = record missing/corrupt (nothing written, decide by hand).
+         Front door: bin/jobs.sh claim-reply <job_id>
   job-hb-age <jobs_dir> <job_id>
       -> seconds since the job's last AGENT-written bus event ('-' if none); excludes
          _job_watcher liveness pings — input to dispatch.sh heartbeat-aware deadline
@@ -49,7 +54,7 @@ Centralizes all JSON building/reading so the shell scripts depend only on python
       -> same, but topic matched by PREFIX — for producers told to write a topic
          "starting with X" and free to append their own description (Wags findings).
 """
-import sys, os, json, uuid, glob, datetime, hashlib, gzip, re, signal, time
+import sys, os, json, uuid, glob, datetime, hashlib, gzip, re, signal, time, fcntl
 
 TS_FMT = "%Y-%m-%dT%H:%M:%SZ"
 
@@ -182,6 +187,28 @@ def short(e):
     )
 
 
+def _utf8_safe(x):
+    """Bỏ mọi surrogate/byte hỏng — ĐỆM CUỐI trước khi ghi vào bus APPEND-ONLY.
+
+    Vì sao ở TẦNG NÀY chứ không chỉ ở caller (arch-review coord-2026-08-16): caller cắt
+    chuỗi bằng `cut -c`/`head -c`, mà locale máy này là LANG="C" (/etc/default/locale) nên
+    `cut -c` đếm theo BYTE — cắt trúng giữa một ký tự tiếng Việt 3 byte là vỡ chuỗi. Python
+    đọc argv bằng surrogateescape nên byte hỏng đi lọt tới tận đây, json.dumps vẫn ra rc=0,
+    và dòng hỏng nằm VĨNH VIỄN trong file append-only: từ đó load_jsonl ném
+    UnicodeDecodeError cho MỌI consumer của inbox đó (ops_health_check §5, wags_autofix
+    bước 1.5...). Một caller ẩu đủ sức làm câm cả kênh escalation của fleet.
+    Phép vá y hệt dòng 661 (cmd_job_set) đã dùng từ trước — chỗ đó vá đường job record,
+    chỗ này vá đường event; hai đường độc lập, sửa một chỗ KHÔNG che được chỗ kia.
+    """
+    if isinstance(x, str):
+        return x.encode("utf-8", errors="replace").decode("utf-8")
+    if isinstance(x, dict):
+        return {_utf8_safe(k): _utf8_safe(v) for k, v in x.items()}
+    if isinstance(x, list):
+        return [_utf8_safe(i) for i in x]
+    return x
+
+
 def cmd_event(a):
     aid, etype, topic, payload, kbver = a[:5]
     trace_id = a[5] if len(a) > 5 and a[5] else None
@@ -189,6 +216,9 @@ def cmd_event(a):
         p = json.loads(payload)
     except Exception:
         p = payload
+    aid, etype, topic = _utf8_safe(aid), _utf8_safe(etype), _utf8_safe(topic)
+    p = _utf8_safe(p)
+    trace_id = _utf8_safe(trace_id) if trace_id else trace_id
     try:
         v = int(kbver)
     except Exception:
@@ -1110,6 +1140,54 @@ def cmd_job_write_scope_conflict(a):
         print("%s (to=%s, dispatched %ds ago by %s, hb_age=%ss, scope=%s)" % (
             o.get("job_id", "?"), o.get("to", "?"), n - _as_int(o.get("started_at"), n),
             o.get("from", "?"), _hb_age(o, n, agent_only=True), ",".join(sorted(overlap))))
+        found += 1
+    sys.exit(0 if found else 1)
+
+
+HB_LIVE_BOUND_S = int(os.environ.get("MIKE_HB_LIVE_BOUND_S", "600"))
+
+
+def cmd_job_live_for_thread(a):
+    """job-live-for-thread <jobs_dir> <from_agent> <thread_id> — print job_id (one per line)
+    of every job where from==<from_agent>, discord_thread_id==<thread_id>, status is
+    'running' or 'retrying', AND the job is not a stale zombie (see bound below). Exit 0 if
+    any printed, 1 if none.
+
+    Purpose (F2, 2026-08-19, hooks/stop.sh circuit breaker): a turn is about to end on a
+    Discord thread that has an async job still in flight, dispatched by <from_agent> — the
+    caller uses this to decide whether ending the turn would strand that job with nobody
+    scheduled to check on it. Deliberately narrower than TERMINAL_STATUSES/LIVE_STATUSES:
+    only 'running'/'retrying' count as 'someone should still be watching this' — the other
+    LIVE_STATUSES (usage_limited, provider_fallback, maxturns_pending) are parked states
+    with their OWN separate resume mechanism (bus/pending_resumes/), not a live worker
+    waiting on a wakeup.
+
+    Staleness bound (arch-reviewer audit, coord-mechanism-08-19): a job record that is stuck
+    at status=running forever (e.g. a crashed watcher, or a --bg record created with no
+    `deadline` so job-reap can never close it) must NOT trip this breaker on every future
+    turn just because its status field never advanced. HB_FRESH_S (dispatch.sh) already
+    calibrates 600s as 'fresh enough to mean the agent is alive' fleet-wide — reused here via
+    MIKE_HB_LIVE_BOUND_S. A job counts as live only if its last AGENT heartbeat is within
+    that window, OR it has no heartbeat yet but was started within that window (a brand-new
+    dispatch legitimately has no heartbeat yet)."""
+    jobs_dir, from_agent, thread_id = a[0], a[1], a[2]
+    n = now_epoch()
+    found = 0
+    for o in _load_jobs(jobs_dir):
+        if o.get("from") != from_agent:
+            continue
+        if str(o.get("discord_thread_id", "")) != str(thread_id):
+            continue
+        if o.get("status") not in ("running", "retrying"):
+            continue
+        age = _hb_age(o, n, agent_only=True)
+        if age == "-":
+            started_age = n - _as_int(o.get("started_at"), n)
+            if started_age > HB_LIVE_BOUND_S:
+                continue   # no heartbeat ever, and not a fresh dispatch -> zombie, not live
+        elif _as_int(age, HB_LIVE_BOUND_S + 1) > HB_LIVE_BOUND_S:
+            continue       # heartbeat gone stale -> zombie, not live
+        print(o.get("job_id", "?"))
         found += 1
     sys.exit(0 if found else 1)
 
@@ -2593,6 +2671,85 @@ def cmd_job_field(a):
     sys.exit(0)
 
 
+def cmd_job_claim_reply(a):
+    """job-claim-reply <jobs_dir> <job_id> — ATOMIC test-and-set of replied_at.
+
+    exit 0 = replied_at was EMPTY, job status was TERMINAL, and this call stamped it ->
+             this caller is the FIRST and ONLY one allowed to post the job's result.
+    exit 1 = replied_at was already set (its value goes to stdout) -> someone already
+             replied; stay silent.
+    exit 2 = record missing or unreadable -> NOTHING was written; do not treat as "already
+             replied" (that would silently swallow the result) and do not treat as "mine"
+             either. Investigate.
+    exit 3 = job status is NOT terminal yet (still running/retrying/pending-resume, per
+             TERMINAL_STATUSES) -> NOTHING was written. This is a PROGRESS-POLL turn, not
+             a completion turn: there is no result to claim yet. Keep polling normally
+             (do NOT treat this as "replied" or as "mine to post").
+
+    Why this exists next to mark-replied/is-replied: those are two separate processes, so
+    two wakeup turns racing on the same job can BOTH read "not replied" before either
+    writes, and both post. That gap is exactly the double-answer this guard is for. Here the
+    read and the write happen under one flock on <job>.json.lock, so exactly one caller of
+    any number of concurrent ones gets exit 0.
+
+    Why the terminal-status gate (added after the 2026-08-19 incident): claiming succeeded
+    unconditionally regardless of job status, so a wakeup turn that only POLLED progress on
+    a still-running job could stamp replied_at anyway — permanently locking out the later
+    turn that would have posted the job's REAL result once it actually finished. That result
+    was then never posted at all. Gating on TERMINAL_STATUSES (the same one definition
+    dispatch.sh/kb_nightly.sh/fleet_housekeeping.sh already share) closes that: a claim can
+    only succeed once the run is actually over.
+
+    Caveat, stated rather than pretended away: job-set does NOT take this lock (it has its
+    own read-modify-write), so a job-set landing in the same millisecond can still drop the
+    replied_at stamp. The wakeup callers all go through claim-reply, and dispatch.sh's
+    lifecycle writes do not race those turns in practice — the mutual exclusion that matters
+    (claim vs claim) is the one enforced.
+    """
+    jobs_dir, job_id = a[0], a[1]
+    fp = _job_path(jobs_dir, job_id)
+    os.makedirs(jobs_dir, exist_ok=True)
+    lock_fd = os.open(fp + ".lock", os.O_CREAT | os.O_WRONLY, 0o644)
+    try:
+        fcntl.flock(lock_fd, fcntl.LOCK_EX)
+        try:
+            with open(fp, encoding="utf-8") as f:
+                obj = json.load(f)
+            if not isinstance(obj, dict):
+                raise ValueError("job record is not a JSON object")
+        except FileNotFoundError:
+            sys.stderr.write(
+                "REFUSED: no job record at %s — cannot claim a reply for a job the board "
+                "does not know about. This is NOT 'already replied': check the job id.\n" % fp)
+            sys.exit(2)
+        except Exception as e:
+            sys.stderr.write(
+                "REFUSED: job record %s is unreadable (%s) — refusing to write over it.\n"
+                % (fp, e))
+            sys.exit(2)
+        prior = obj.get("replied_at", "")
+        if prior:
+            print(prior)
+            sys.exit(1)
+        status = obj.get("status", "")
+        if status not in TERMINAL_STATUSES:
+            sys.stderr.write(
+                "REFUSED: job %s status=%s chua terminal - day la luot POLL TIEN DO, khong "
+                "phai luot HOAN THANH. Khong claim, tiep tuc poll binh thuong (khong duoc "
+                "post ket qua vi chua co ket qua).\n" % (job_id, status or "?"))
+            sys.exit(3)
+        stamp = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        obj["replied_at"] = stamp
+        tmp = fp + ".claim.tmp"
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump(obj, f, ensure_ascii=False)
+        os.replace(tmp, fp)
+        print(stamp)
+        sys.exit(0)
+    finally:
+        os.close(lock_fd)
+
+
 # --- circuit breaker (state/circuit/<id>.json) ---
 # Per-agent consecutive-failure counter for dispatch.sh. Trips (blocks new dispatches)
 # after N consecutive failed/timeout jobs; auto-resets to closed after a cooldown window
@@ -2618,6 +2775,36 @@ def _circuit_save(state_dir, agent_id, obj):
     with open(tmp, "w", encoding="utf-8") as f:
         json.dump(obj, f, ensure_ascii=False)
     os.replace(tmp, fp)
+
+
+def cmd_circuit_tripped(a):
+    """circuit-tripped <state_dir> — in ra cac agent DANG THUC SU bi chan, moi dong
+    "<agent> <remaining_s>". READ-ONLY: khong sua/khong xoa state (viec don trip het han
+    la cua circuit-check, tren duong dispatch).
+
+    Vi sao can lenh rieng thay vi doc thang file: `tripped_until` KHONG bao gio duoc don
+    khi het han neu khong co dispatch moi toi agent do — circuit-check don LAZY, chi luc
+    dispatch. Nen mot checker doc file va test truthiness (`if c["tripped_until"]:`) se
+    bao TRIPPED VINH VIEN cho moi agent tung trip roi khong duoc dispatch lai. Do la
+    su co that 2026-08-19: breaker Taylor het han 05:43:03Z, ops_health_check 05:45:07Z
+    van bao TRIPPED -> dot mot job Wags(Opus) cho trang thai da tu khoi phuc. Cung ho loi
+    voi QUESTION_GRACE_MIN (2026-08-17): quyet dinh escalate tu mot co TUC THOI ma khong
+    xet no CON HIEU LUC hay khong."""
+    state_dir = a[0]
+    n = now_epoch()
+    rows = []
+    for fp in sorted(glob.glob(os.path.join(state_dir, "*.json"))):
+        try:
+            with open(fp, encoding="utf-8") as f:
+                obj = json.load(f)
+        except Exception:
+            continue
+        tripped_until = _as_int(obj.get("tripped_until"), 0)
+        if tripped_until and n < tripped_until:
+            agent = os.path.basename(fp)[:-len(".json")]
+            rows.append((agent, tripped_until - n))
+    for agent, remaining in rows:
+        print("%s %d" % (agent, remaining))
 
 
 def cmd_circuit_check(a):
@@ -2723,10 +2910,13 @@ CMDS = {"event": cmd_event, "heartbeat": cmd_heartbeat, "recent": cmd_recent,
         "job-live-pids": cmd_job_live_pids, "job-pin-log": cmd_job_pin_log,
         "job-find-dup": cmd_job_find_dup,
         "job-write-scope-conflict": cmd_job_write_scope_conflict,
+        "job-live-for-thread": cmd_job_live_for_thread,
         "commit-collision-gate": cmd_commit_collision_gate,
         "terminal-statuses": cmd_terminal_statuses,
         "job-field": cmd_job_field, "job-hb-age": cmd_job_hb_age,
+        "job-claim-reply": cmd_job_claim_reply,
         "circuit-check": cmd_circuit_check, "circuit-record": cmd_circuit_record,
+        "circuit-tripped": cmd_circuit_tripped,
         "pending-resume-set": cmd_pending_resume_set,
         "settings": cmd_settings, "trace": cmd_trace,
         "verify-coverage": cmd_verify_coverage, "has-event": cmd_has_event,
