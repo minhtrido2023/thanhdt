@@ -130,6 +130,96 @@ def run():
     check("build_output ngày TRƯỚC mọi lịch sử NAV → None",
           ps.build_output("SpaceX", "2000-01-01") is None)
 
+    # 10: count_trading_days — dùng next_trading_day thật (§16 RULE 2), không đếm lịch tay
+    import datetime as _dt
+    n = ps.count_trading_days(_dt.date(2026, 8, 10), _dt.date(2026, 9, 29))
+    check("count_trading_days(2026-08-10 → 2026-09-29) == 33 (bao gồm bù lễ Quốc khánh)",
+          n == 33, str(n))
+    check("count_trading_days: asof <= start → 0",
+          ps.count_trading_days(_dt.date(2026, 9, 29), _dt.date(2026, 9, 29)) == 0)
+
+    # 11: lag_entry_dates — quét journal, lấy FILL mua LAG ĐẦU TIÊN, bỏ qua sell + book khác
+    with tempfile.TemporaryDirectory() as td:
+        old_exec_dir = ps.EXEC_DIR
+        ps.EXEC_DIR = td
+        try:
+            with open(os.path.join(td, "exec_TESTACC_2026-01-05_journal.csv"), "w", encoding="utf-8") as f:
+                f.write("ts,event,parent_id,ticker,side,child_oid,qty,price,filled_total,book,play_type,note\n")
+                f.write("2026-01-05T09:30:00,FILL,p1,XYZ,buy,c1,100,10.0,100,LAG,TIER1,\n")
+                f.write("2026-01-05T10:00:00,FILL,p2,XYZ,sell,c2,50,10.5,50,LAG,TIER1,\n")
+                f.write("2026-01-05T10:05:00,FILL,p3,ABC,buy,c3,100,20.0,100,BAL,MOM,\n")
+            with open(os.path.join(td, "exec_TESTACC_2026-01-10_journal.csv"), "w", encoding="utf-8") as f:
+                f.write("ts,event,parent_id,ticker,side,child_oid,qty,price,filled_total,book,play_type,note\n")
+                f.write("2026-01-10T09:30:00,FILL,p4,XYZ,buy,c4,100,11.0,200,LAG,TIER1,\n")
+            entries = ps.lag_entry_dates("TESTACC")
+        finally:
+            ps.EXEC_DIR = old_exec_dir
+        check("lag_entry_dates: XYZ entry = FILL mua LAG SỚM NHẤT across nhiều file (01-05, không phải 01-10)",
+              entries.get("XYZ") == "2026-01-05", str(entries))
+        check("lag_entry_dates: bỏ qua book khác (ABC/BAL không xuất hiện)",
+              "ABC" not in entries, str(entries))
+
+    # 12: lag_exit_hint — trong cửa, đã qua cửa, và None khi không có entry date
+    h_in_window = ps.lag_exit_hint("SCL", {"SCL": "2026-09-08"}, "2026-09-29")  # 15 phiên
+    check("lag_exit_hint: trong cửa T+14/T+20 → có text 'còn ~'",
+          h_in_window is not None and "còn ~" in h_in_window, str(h_in_window))
+    h_past = ps.lag_exit_hint("SCL", {"SCL": "2026-08-10"}, "2026-09-29")
+    check("lag_exit_hint: đã qua T+20 → 'ĐÃ QUA'",
+          h_past is not None and "ĐÃ QUA" in h_past, str(h_past))
+    check("lag_exit_hint: không có entry date → None",
+          ps.lag_exit_hint("ZZZ", {}, "2026-09-29") is None)
+
+    # 13: latest_recs_csv chọn theo TÊN FILE (ngày signal), không phải mtime
+    with tempfile.TemporaryDirectory() as td:
+        old_recs_dir = ps.RECS_DIR
+        ps.RECS_DIR = td
+        try:
+            older = os.path.join(td, "golive_v23_recommendations_2026-09-20.csv")
+            newer = os.path.join(td, "golive_v23_recommendations_2026-09-25.csv")
+            with open(newer, "w", encoding="utf-8") as f:
+                f.write("book,ticker,status\nBAL,FPT,FULL\n")
+            with open(older, "w", encoding="utf-8") as f:
+                f.write("book,ticker,status\nBAL,MBB,FULL\n")
+            os.utime(newer, (1000000000, 1000000000))  # mtime CŨ hơn 'older' dù tên ngày MỚI hơn
+            recs_date, recs_path = ps.latest_recs_csv()
+            recs_by_book = ps.load_recs(recs_path)
+        finally:
+            ps.RECS_DIR = old_recs_dir
+        check("latest_recs_csv: chọn theo tên file (2026-09-25), bất kể mtime",
+              recs_date == "2026-09-25", str(recs_date))
+        check("load_recs: đọc đúng book BAL của file được chọn (FPT, không phải MBB)",
+              recs_by_book.get("BAL", {}).get("FPT") == "FULL"
+              and "MBB" not in recs_by_book.get("BAL", {}),
+              str(recs_by_book))
+
+    # 14: bal_exit_hint
+    check("bal_exit_hint: có tín hiệu hôm nay → nêu status",
+          ps.bal_exit_hint("FPT", {"FPT": "FULL"}) == "tín hiệu hôm nay: FULL")
+    check("bal_exit_hint: không có tín hiệu mới hôm nay (KHÔNG suy ra 'đã kết thúc')",
+          ps.bal_exit_hint("MBB", {"FPT": "FULL"}) == "không có tín hiệu mới hôm nay")
+    check("bal_exit_hint: file recs rỗng/thiếu → None (không báo gì)",
+          ps.bal_exit_hint("FPT", {}) is None)
+
+    # 15: risk_warning — PARK không có ngưỡng; dưới sàn hiển thị → None; qua RED ZONE → 🔴
+    check("risk_warning: PARK luôn None (không có stop-loss cứng)",
+          ps.risk_warning("PARK", -25.0) is None)
+    check("risk_warning: BAL -14% (dưới sàn 15%) → None",
+          ps.risk_warning("BAL", -14.0) is None)
+    rw_bal = ps.risk_warning("BAL", -19.5)
+    check("risk_warning: BAL -19.5% (dưới RED_ZONE 18? actually >=18) → 🔴, còn 0.5pp",
+          rw_bal is not None and rw_bal[0] == "🔴" and "0.5pp" in rw_bal[1], str(rw_bal))
+    rw_lag = ps.risk_warning("LAG", -15.0)
+    check("risk_warning: LAG -15% == ngưỡng chính nó → còn 0.0pp",
+          rw_lag is not None and "0.0pp" in rw_lag[1], str(rw_lag))
+
+    # 16: park_next_rebal_estimate — quý VN kế tiếp (3/6/9/12), đầu tuần né T7/CN
+    est = ps.park_next_rebal_estimate("2026-09-29")
+    check("park_next_rebal_estimate(2026-09-29) → Q4, tháng 12",
+          est is not None and est[1] == 4 and est[0].startswith("2026-12"), str(est))
+    est_wrap = ps.park_next_rebal_estimate("2026-12-15")
+    check("park_next_rebal_estimate(2026-12-15) → sang năm sau, Q1 tháng 3",
+          est_wrap is not None and est_wrap[1] == 1 and est_wrap[0].startswith("2027-03"), str(est_wrap))
+
     # 9: main() trả 1 khi build_output None (không crash, không sys.exit lỗi khác)
     old_argv = sys.argv
     sys.argv = ["portfolio_status.py", "--account", "SpaceX", "--date", "2000-01-01"]

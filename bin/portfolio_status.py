@@ -60,6 +60,24 @@ SLEEVE_NOTE = {
     "DISCRETIONARY_SPECIAL": "Fear-buy/special situation",
 }
 
+RECS_DIR = os.path.join(WC_ROOT, "deploy_golive_dt5g_v4", "out")
+
+# Cửa sổ thoát LAG (PEAD/earnings-drift): T+14 tới T+20 phiên sau ngày entry.
+LAG_EXIT_MIN_SESSIONS = 14
+LAG_EXIT_MAX_SESSIONS = 20
+
+# Ngưỡng stop-loss xử lý theo sleeve (không có nghĩa là "ngưỡng cứng đã lập trình ở nơi khác" —
+# đây là số kỷ luật V2.4 tham chiếu, dùng để cảnh báo GẦN ngưỡng). PARK cố tình KHÔNG có trong
+# bảng này: rebalance định kỳ là cơ chế rủi ro của PARK, không phải stop-loss theo drawdown.
+STOP_LOSS_PCT_BY_SLEEVE = {
+    "BAL": 20.0,
+    "LAG": 15.0,
+    "CAPIT": 20.0,
+    "DISCRETIONARY_SPECIAL": 20.0,
+}
+RISK_WARN_DISPLAY_FLOOR_PCT = 15.0  # bắt đầu in cảnh báo từ mức lỗ này
+RISK_WARN_RED_ZONE_PCT = 18.0  # đưa vào "Cờ theo dõi" từ mức lỗ này
+
 
 def _read_json(path, default=None):
     try:
@@ -171,6 +189,142 @@ def current_park_basket():
     return set(rows_by_rebal[latest_rebal]), latest_rebal
 
 
+def _next_trading_day_fn():
+    """`trading_bot.vn_market.next_trading_day` hoặc None nếu import lỗi (fail-soft — caller
+    bỏ qua phần tính phiên thay vì crash cả report)."""
+    try:
+        sys.path.insert(0, WC_ROOT)
+        from trading_bot.vn_market import next_trading_day
+        return next_trading_day
+    except Exception:
+        return None
+
+
+def count_trading_days(start, asof):
+    """Số phiên giao dịch TỪ SAU `start` ĐẾN `asof` (cả hai `datetime.date`), dùng
+    `next_trading_day` (đã trừ T7/CN + `is_holiday` — §16 RULE 2, không tự đếm lịch tay).
+    None nếu không import được `trading_bot.vn_market`."""
+    next_trading_day = _next_trading_day_fn()
+    if next_trading_day is None:
+        return None
+    if asof <= start:
+        return 0
+    d, n = start, 0
+    while d < asof:
+        d = next_trading_day(d)
+        n += 1
+    return n
+
+
+def lag_entry_dates(account):
+    """{ticker: 'YYYY-MM-DD'} ngày FILL mua ĐẦU TIÊN gắn nhãn book=LAG, quét toàn bộ
+    `exec_{account}_*_journal.csv` còn trên đĩa (journal xoay theo ngày, không phải 1 file)."""
+    first = {}
+    for fn in sorted(glob.glob(os.path.join(EXEC_DIR, f"exec_{account}_*_journal.csv"))):
+        try:
+            with open(fn, encoding="utf-8") as f:
+                for row in csv.DictReader(f):
+                    if row.get("event") != "FILL" or row.get("book") != "LAG":
+                        continue
+                    if (row.get("side") or "").lower() != "buy":
+                        continue
+                    tk, ts = row.get("ticker"), row.get("ts")
+                    if not tk or not ts:
+                        continue
+                    d = ts[:10]
+                    if tk not in first or d < first[tk]:
+                        first[tk] = d
+        except (OSError, csv.Error):
+            continue
+    return first
+
+
+def lag_exit_hint(ticker, entry_dates, asof_date):
+    """Text cửa sổ thoát LAG cho `ticker`, hoặc None nếu không có entry date / không tính
+    được phiên (fail-soft)."""
+    entry_str = entry_dates.get(ticker)
+    if not entry_str:
+        return None
+    try:
+        entry = _dt.date.fromisoformat(entry_str)
+        asof = _dt.date.fromisoformat(asof_date)
+    except ValueError:
+        return None
+    sessions = count_trading_days(entry, asof)
+    if sessions is None:
+        return None
+    if sessions < LAG_EXIT_MIN_SESSIONS:
+        return (f"vào {entry_str}, còn {LAG_EXIT_MIN_SESSIONS - sessions} phiên tới cửa "
+                f"T+{LAG_EXIT_MIN_SESSIONS}")
+    if sessions <= LAG_EXIT_MAX_SESSIONS:
+        remaining = LAG_EXIT_MAX_SESSIONS - sessions
+        return (f"còn ~{remaining} phiên (cửa T+{LAG_EXIT_MIN_SESSIONS}/T+{LAG_EXIT_MAX_SESSIONS}, "
+                f"vào {entry_str})")
+    return f"ĐÃ QUA cửa T+{LAG_EXIT_MAX_SESSIONS} ({sessions} phiên từ {entry_str}) — cân nhắc thoát"
+
+
+def latest_recs_csv():
+    """(date_str, path) file `golive_v23_recommendations_YYYY-MM-DD.csv` MỚI NHẤT theo TÊN
+    FILE (không phải mtime — tên file mang ngày signal thật, mtime có thể trễ nếu regenerate).
+    (None, None) nếu thư mục rỗng/không tồn tại."""
+    dated = []
+    for p in glob.glob(os.path.join(RECS_DIR, "golive_v23_recommendations_*.csv")):
+        base = os.path.basename(p)
+        stem = base[len("golive_v23_recommendations_"):-len(".csv")]
+        if len(stem) == 10:
+            dated.append((stem, p))
+    if not dated:
+        return None, None
+    dated.sort()
+    return dated[-1]
+
+
+def load_recs(path):
+    """book -> {ticker: status} từ 1 file recommendations (cột thật: book/ticker/status —
+    KHÔNG có cột 'signal_FULL_SIZE'; status BAL = 'FULL'/'HALF_SIZE')."""
+    out = defaultdict(dict)
+    try:
+        with open(path, encoding="utf-8") as f:
+            for row in csv.DictReader(f):
+                bk, tk = row.get("book"), row.get("ticker")
+                if bk and tk:
+                    out[bk][tk] = row.get("status")
+    except (OSError, csv.Error):
+        return {}
+    return out
+
+
+def bal_exit_hint(ticker, bal_recs):
+    """Ghi chú tín hiệu BAL cho `ticker` từ file recommendations MỚI NHẤT.
+    ⚠️ File này là danh sách CANDIDATE MỚI mỗi ngày (top momentum re-rank, không phải "roster
+    đang mở"), nên KHÔNG suy ra "tín hiệu đã kết thúc" chỉ vì vắng mặt 1 ngày — chỉ báo sự kiện
+    quan sát được (§29: không đoán nguyên nhân chưa có bằng chứng)."""
+    if not bal_recs:
+        return None
+    st = bal_recs.get(ticker)
+    if st:
+        return f"tín hiệu hôm nay: {st}"
+    return "không có tín hiệu mới hôm nay"
+
+
+def park_next_rebal_estimate(asof_date_str):
+    """Ước tính ngày rebal PARK kế tiếp: đầu tuần (né T7/CN) của tháng đầu quý VN (3/6/9/12)
+    kế tiếp SAU `asof_date_str`. Chỉ tham khảo, KHÔNG phải lịch chính thức."""
+    try:
+        asof = _dt.date.fromisoformat(asof_date_str)
+    except ValueError:
+        return None
+    quarters = (3, 6, 9, 12)
+    year = asof.year
+    next_q_month = next((q for q in quarters if q > asof.month), None)
+    if next_q_month is None:
+        next_q_month, year = 3, year + 1
+    d = _dt.date(year, next_q_month, 1)
+    while d.weekday() >= 5:
+        d += _dt.timedelta(days=1)
+    return d.isoformat(), next_q_month // 3
+
+
 def classify_sleeve(ticker, journal_sleeve, park_tickers, capit_tickers):
     if ticker in journal_sleeve:
         bk = journal_sleeve[ticker]
@@ -185,6 +339,18 @@ def classify_sleeve(ticker, journal_sleeve, park_tickers, capit_tickers):
     if ticker in park_tickers:
         return "PARK"
     return "BAL"
+
+
+def risk_warning(sleeve, pnl_pct):
+    """(emoji, text)|None — cảnh báo gần ngưỡng xử lý cho 1 position, hoặc None nếu sleeve
+    không có ngưỡng (PARK) / lỗ chưa tới RISK_WARN_DISPLAY_FLOOR_PCT."""
+    threshold = STOP_LOSS_PCT_BY_SLEEVE.get(sleeve)
+    if threshold is None or pnl_pct is None or pnl_pct > -RISK_WARN_DISPLAY_FLOOR_PCT:
+        return None
+    dd = abs(pnl_pct)
+    remaining = max(threshold - dd, 0.0)
+    emoji = "🔴" if dd >= RISK_WARN_RED_ZONE_PCT else "⚠️"
+    return emoji, f"{emoji} còn {remaining:.1f}pp đến ngưỡng xử lý (−{threshold:.0f}%)"
 
 
 def load_nav_row(account, date):
@@ -261,6 +427,21 @@ def build_output(account, date):
 
     cash = today_row.get("cash") or 0
     egg = today_row.get("egg_assets") or 0
+    held = set(positions.keys())
+
+    recs_date, recs_path = latest_recs_csv()
+    recs_by_book = load_recs(recs_path) if recs_path else {}
+    bal_recs = recs_by_book.get("BAL", {})
+    lag_entries = lag_entry_dates(account)
+
+    dt_gate_line = value_radar_line = None
+    try:
+        sys.path.insert(0, WC_ROOT)
+        from dna_report import build_dt_gate_line, build_value_radar_line
+        dt_gate_line = build_dt_gate_line(html=False)
+        value_radar_line = build_value_radar_line(html=False)
+    except Exception:
+        pass
 
     # ---------------- header ----------------
     hdr_day = f"{day_chg_pct:+.2f}%" if day_chg_pct is not None else "?"
@@ -271,6 +452,10 @@ def build_output(account, date):
                  f"Park target: **{status.get('etf_park_frac', 0) * 100:.0f}%** idle cash")
     lines.append(f"NAV: **{nav / 1e6:,.1f}M** | Hôm nay: **{hdr_day}** | "
                  f"Từ khi bắt đầu hoạt động: **{hdr_incep}**")
+    if dt_gate_line:
+        lines.append(dt_gate_line)
+    if value_radar_line:
+        lines.append(value_radar_line.splitlines()[0])  # chỉ dòng chính, bỏ dòng chú thích phụ
     lines.append("─────────────────────────────────────────────────")
     lines.append("")
 
@@ -296,7 +481,14 @@ def build_output(account, date):
         pct_nav = f"{tot_value / nav * 100:.1f}%" if nav else "—"
         note = SLEEVE_NOTE.get(sleeve) or ""
         if sleeve == "PARK":
-            note = f"Rebal gần nhất: {park_rebal_date}" if park_rebal_date else "custom30V"
+            if park_rebal_date:
+                next_est = park_next_rebal_estimate(date)
+                note = f"Rebal gần nhất: {park_rebal_date}"
+                if next_est:
+                    next_date, q = next_est
+                    note += f" | kế tiếp: ~{next_date} (ước tính Q{q})"
+            else:
+                note = "custom30V"
         lines.append(f"| {SLEEVE_LABEL[sleeve]} ({len(rows)} mã) | {tot_value / 1e6:,.1f}M | "
                      f"{pct_nav} | {pnl_txt} | {note} |")
     egg_pct = f"{egg / nav * 100:.1f}%" if nav else "—"
@@ -306,6 +498,7 @@ def build_output(account, date):
     lines.append("")
 
     # ---------------- per-sleeve detail ----------------
+    red_zone = []  # [(sleeve, ticker, pnl_pct, remaining_pp)]
     for sleeve in SLEEVE_ORDER:
         rows = sleeves.get(sleeve) or []
         if not rows:
@@ -316,9 +509,37 @@ def build_output(account, date):
         for tk, qty, v, pp in rows_sorted:
             v_txt = f"{v / 1e6:,.1f}M" if v is not None else "?"
             pp_txt = f", {pp:+.1f}%" if pp is not None else ""
-            bits.append(f"{tk} {v_txt}{pp_txt}")
+            extra = []
+            if sleeve == "LAG":
+                h = lag_exit_hint(tk, lag_entries, date)
+                if h:
+                    extra.append(h)
+            elif sleeve == "BAL":
+                h = bal_exit_hint(tk, bal_recs)
+                if h:
+                    extra.append(h)
+            elif sleeve == "CAPIT":
+                extra.append("không fixed exit, thoát theo tín hiệu đảo")
+            rw = risk_warning(sleeve, pp)
+            if rw:
+                emoji, rw_txt = rw
+                extra.append(rw_txt)
+                if emoji == "🔴":
+                    threshold = STOP_LOSS_PCT_BY_SLEEVE[sleeve]
+                    red_zone.append((sleeve, tk, pp, max(threshold - abs(pp), 0.0)))
+            bit = f"{tk} {v_txt}{pp_txt}"
+            if extra:
+                bit += " — " + "; ".join(extra)
+            bits.append(bit)
         lines.append("  " + " · ".join(bits))
         lines.append("")
+        if sleeve == "BAL" and bal_recs:
+            candidates = [tk for tk, st in sorted(bal_recs.items())
+                          if st == "FULL" and tk not in held][:5]
+            if candidates:
+                lines.append(f"  Ứng viên BAL chờ vào: {', '.join(candidates)} "
+                             f"(xem recommendations {recs_date})")
+                lines.append("")
 
     # ---------------- corp action ----------------
     lines.append("**Corp Action — 7 ngày tới** (mã đang giữ)")
@@ -329,7 +550,6 @@ def build_output(account, date):
         _lines, _snap, events = build_report(asof=date, days_ahead_max=7)
     except Exception:
         events = []
-    held = set(positions.keys())
     mine = [e for e in events if e.get("ticker") in held]
     if mine:
         lines.append("| Mã | Sự kiện | Ngày | Tác động dự kiến |")
@@ -352,14 +572,23 @@ def build_output(account, date):
     # ---------------- flags ----------------
     flags = []
     if park_rebal_date:
-        flags.append(f"PARK: rổ hiện hành chốt {park_rebal_date} (chu kỳ ~quý, rebal kế tiếp chưa xác định).")
+        park_next = park_next_rebal_estimate(date)
+        next_txt = f", kế tiếp ~{park_next[0]} (ước tính)" if park_next else ", rebal kế tiếp chưa xác định"
+        flags.append(f"PARK: rổ hiện hành chốt {park_rebal_date} (chu kỳ ~quý{next_txt}).")
     if sleeves.get("LAG"):
         flags.append(f"LAG: đang giữ {len(sleeves['LAG'])} mã PEAD/earnings-drift, theo dõi cửa sổ thoát.")
     if sleeves.get("DISCRETIONARY_SPECIAL"):
         names = ", ".join(sorted(tk for tk, *_ in sleeves["DISCRETIONARY_SPECIAL"]))
         flags.append(f"Discretionary: {names} — theo playbook gom riêng, tách kế toán V2.4.")
     if sleeves.get("CAPIT"):
-        flags.append(f"CAPIT: {len(sleeves['CAPIT'])} mã đang trong episode overflow.")
+        flags.append(f"CAPIT: {len(sleeves['CAPIT'])} mã đang trong episode overflow. "
+                     "Không có fixed exit — thoát theo tín hiệu đảo.")
+    n_lag_upcoming = status.get("n_lag_upcoming") or 0
+    if n_lag_upcoming:
+        flags.append(f"LAG: {n_lag_upcoming} candidate đang trong cửa sổ upcoming (chưa vào lệnh).")
+    for sleeve, tk, pp, remaining in red_zone:
+        flags.append(f"🔴 {tk} {pp:+.1f}% ({SLEEVE_LABEL[sleeve]}): còn {remaining:.1f}pp → "
+                     "ngưỡng, cân nhắc xử lý sớm")
     if flags:
         lines.append("**Cờ theo dõi**")
         for f in flags:
