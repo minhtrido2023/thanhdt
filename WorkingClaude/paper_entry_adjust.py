@@ -641,6 +641,28 @@ def _selfcheck() -> int:
     bad = AdjustedEntry("B", 100.0, 100.0, 1.4, 100.0, "d", "BAD_FACTOR", "n")
     check("6. guard factor>1 ⇒ BAD_FACTOR, entry_adj = giá gốc", bad.degraded and bad.entry_adj == 100.0)
 
+    # 7-8. REPAIR_INCONSISTENT (Việc nhỏ 2, 2026-09-29): close_repair's OWN repaired ratio series
+    # must still satisfy the non-decreasing invariant. Mirrors the real FPT case (exercise_ratio
+    # 0.10, ex-date 2026-09-21) with the event's exercise_ratio mutated — mechanical evidence
+    # (§29, kb/coding_guidelines.md) that corporate_action itself is wrong for that ticker/window,
+    # not that the vendor needs a cap. Pure logic on a synthetic series/events — no cache/BQ needed.
+    _fpt_series = [
+        {"d": "2026-06-30", "close": 70200.0, "price": 70200.0, "high": 0.0, "low": 0.0},
+        {"d": "2026-09-18", "close": 65180.0, "price": 71700.0, "high": 0.0, "low": 0.0},
+        {"d": "2026-09-22", "close": 63700.0, "price": 63700.0, "high": 0.0, "low": 0.0},
+    ]
+    _fpt_max = "2026-09-22"
+    _true_ev = {"ticker": "FPT", "exright_date": "2026-09-21", "event_code": "ISS",
+                "issue_method_name_vi": "Cổ phiếu thưởng", "exercise_ratio": 0.1}
+    _bad_ev = {**_true_ev, "exercise_ratio": 0.05}
+    v_true = _repaired_series_violation("FPT", "2026-06-30", [_true_ev], _fpt_series, _fpt_max)
+    v_bad = _repaired_series_violation("FPT", "2026-06-30", [_bad_ev], _fpt_series, _fpt_max)
+    check("7. ca FPT thật (exercise_ratio đúng 0,10) ⇒ chuỗi đã sửa KHÔNG vi phạm bất biến",
+          v_true is None, f"{v_true}")
+    check("8. mutate exercise_ratio 0,10→0,05 (corporate_action sai) ⇒ BẮT ĐƯỢC vi phạm cơ học, "
+          "KHÔNG âm thầm dùng số sai",
+          v_bad is not None and (v_bad[1] - v_bad[2]) / v_bad[1] > TERP_DROP_TOL, f"{v_bad}")
+
     print("== B. Dữ liệu thật trong cache ==")
     cache_ok = (DEFAULT_CACHE / "ticker").is_dir()
     if not cache_ok:
