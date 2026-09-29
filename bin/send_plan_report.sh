@@ -698,9 +698,12 @@ if orders:
     # (pt_merged/jit_merged cơ chế "PARK đã gộp vào lệnh trên" — bỏ dòng giải thích cố định,
     # cắt 2026-09-29: giải thích CƠ CHẾ render, không phải thông tin đổi theo ngày. Biến vẫn
     # dùng ở _amend_for/_sells_for bên dưới cho dòng "Tiền đâu ra" — đó MỚI là quyết định.)
-    # Cùng nguyên tắc: "đã xác minh N/N" mỗi ngày không cần giải thích — chỉ hiện khi
-    # KHÔNG xác minh được (⚠️), đó mới là điều người duyệt cần biết.
-    if price_verify_note and "⚠️" in price_verify_note:
+    # Cùng nguyên tắc: "đã xác minh N/N" (TOÀN BỘ lệnh) mỗi ngày không cần giải thích — chỉ
+    # hiện khi CHƯA xác minh đủ (verified_n < tổng, gồm cả 0/N lẫn PARTIAL vd 1/9) — arch-review
+    # 2026-09-29 bắt lỗi bản đầu dùng "⚠️" in text làm proxy: PARTIAL (verified_n>=1) render y
+    # hệt FULL vì ternary :333-338 chỉ tách theo `if verified_n`, không có nhánh ⚠️ cho partial
+    # — tái lập đúng lỗi fail-open câm mà arch-review 2026-07-30 đã đóng (comment :274-278).
+    if price_verify_note and verified_n < len(buy_sell_orders):
         lines.append(f"   {price_verify_note}")
     if capit_note:
         lines.append(f"   {capit_note}")
@@ -833,9 +836,14 @@ try:
         lines.append(f"🅿️ **TRIM PARK (L1) BỊ CHẶN — {pt_dec}**: "
                      + ("; ".join(str(n)[:200] for n in (park_trim.get("notes") or [])[:2])
                         or "không có lý do kèm theo — kiểm compute_park_trim.py."))
-    elif pt_dec and pt_dec not in ("NO_TRIM", "NO_TRIM_STRUCTURE", "SKIP_STATE"):
-        # NO_TRIM/NO_TRIM_STRUCTURE/SKIP_STATE = "không cần trim hôm nay", đúng như thiết kế
-        # mỗi ngày PARK dưới trần — không phải điều cần giải thích lại mỗi lần (user 2026-09-29).
+    elif pt_dec and (pt_dec not in ("NO_TRIM", "SKIP_STATE")
+                     or any("⚠️" in str(_n) for _n in (park_trim.get("notes") or []))):
+        # Suppress CHỈ NO_TRIM/SKIP_STATE ("không cần trim hôm nay" — user 2026-09-29). KHÔNG
+        # NO_TRIM_STRUCTURE (arch-review 2026-09-29: đạt được khi PARK VƯỢT TRẦN nhưng không mã
+        # nào trim được — cùng tình huống BLOCKED_ALL_NAMES vẫn in đậm, không phải ngày yên ổn).
+        # Và dù NO_TRIM/SKIP_STATE, vẫn in nếu notes[] chứa ⚠️ thật (vd 'ENGINE CHƯA ĐỒNG BỘ'
+        # compute_park_trim.py:422, hoặc cổ tức QUÁ HẠN :541) — suppress theo decision KHÔNG
+        # được nuốt cảnh báo đi kèm.
         lines.append(f"🅿️ L1 trim PARK: {pt_dec}"
                      + (f" — {str((park_trim.get('notes') or [''])[0])[:180]}"
                         if park_trim.get("notes") else ""))
@@ -875,10 +883,13 @@ try:
                      + ("; ".join(str(n)[:200] for n in (jit_prop.get("notes") or [])[:2])
                         or "không có lý do kèm theo — kiểm compute_jit_unpark.py.")
                      + " ⇒ lệnh mua có thể THIẾU TIỀN lúc 09:05 (triệu chứng WAIT_CASH).")
-    elif jit_dec and jit_dec not in ("NO_JIT_NEEDED", "NO_TRIGGER"):
+    elif jit_dec and (jit_dec not in ("NO_JIT_NEEDED", "NO_TRIGGER")
+                      or any("⚠️" in str(_n) for _n in (jit_prop.get("notes") or []))):
         # NO_JIT_NEEDED/NO_TRIGGER = "L2 không chạy vì không có lệnh mua cần tài trợ", đúng
         # thiết kế mọi ngày HOLD/không-mua — bỏ dòng lặp lại vô nghĩa (user 2026-09-29, ca
-        # thật: SpaceX 2026-09-30 0 lệnh vẫn in "L2 JIT unpark: NO_TRIGGER" mỗi ngày).
+        # thật: SpaceX 2026-09-30 0 lệnh vẫn in "L2 JIT unpark: NO_TRIGGER" mỗi ngày). Xác nhận
+        # compute_jit_unpark.py: notes cố định, không có ⚠️ trên 2 đường này — check ⚠️ vẫn giữ
+        # làm phòng thủ đối xứng với L1 (arch-review 2026-09-29).
         lines.append(f"💧 L2 JIT unpark: {jit_dec}"
                      + (f" — {str((jit_prop.get('notes') or [''])[0])[:180]}"
                         if jit_prop.get("notes") else ""))

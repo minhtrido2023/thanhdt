@@ -392,6 +392,63 @@ check(f"flip 1 lệnh PARK_TRIM+JIT_UNPARK→PARK_TRIM: N tăng đúng {SX_N_PUR
       and f"cho {N_EXPECTED_B} lệnh BÁN PARK_TRIM" in _pt_reason_lines_b[0],
       _pt_reason_lines_b[:1] or [f"(kỳ vọng N={N_EXPECTED_B})"])
 
+# ── T13 — cắt boilerplate 2026-09-29 (arch-review NEEDS_CHANGES → sửa → pin lại 5 hành vi) ──
+print("\n[T13] Cắt boilerplate: chỉ suppress khi THẬT SỰ bình thường, không nuốt cảnh báo đi kèm")
+
+# T13a: NO_TRIM_STRUCTURE (PARK vượt trần nhưng KHÔNG mã nào trim được — cùng bản chất
+# BLOCKED_ALL_NAMES) KHÔNG được nằm trong tuple suppress — arch-review bắt bản đầu gộp nhầm.
+p13a = copy.deepcopy(SX)
+p13a["park_trim_proposal"]["decision"] = "NO_TRIM_STRUCTURE"
+p13a["park_trim_proposal"]["notes"] = ["phần vượt trần nằm ở các mã CHƯA MUA, cần đường MUA P2"]
+out_13a = run_sender(p13a, "SpaceX")
+check("NO_TRIM_STRUCTURE vẫn in dòng L1 (không phải ngày yên ổn, cùng lớp BLOCKED_ALL_NAMES)",
+      "L1 trim PARK: NO_TRIM_STRUCTURE" in out_13a)
+
+# T13b: NO_TRIM là quiescent thật — nhưng nếu notes[] có cảnh báo ⚠️ thật (vd ENGINE CHƯA ĐỒNG BỘ,
+# cổ tức QUÁ HẠN) thì KHÔNG được nuốt theo decision.
+p13b = copy.deepcopy(SX)
+p13b["park_trim_proposal"]["decision"] = "NO_TRIM"
+p13b["park_trim_proposal"]["notes"] = ["⚠️ ENGINE CHƯA ĐỒNG BỘ — rail MUA park tới 30% nhưng rail "
+                                        "TRIM chỉ kích khi vượt 80%, chép dòng này vào notes plan"]
+out_13b = run_sender(p13b, "SpaceX")
+check("NO_TRIM + notes có ⚠️ thật → vẫn in dòng L1 (không nuốt cảnh báo theo decision)",
+      "L1 trim PARK: NO_TRIM" in out_13b and "ENGINE CHƯA ĐỒNG BỘ" in out_13b)
+
+# T13c: NO_TRIM + notes benign (không ⚠️) → ĐÚNG là ngày yên ổn, suppress thật.
+p13c = copy.deepcopy(SX)
+p13c["park_trim_proposal"]["decision"] = "NO_TRIM"
+p13c["park_trim_proposal"]["notes"] = ["PARK trong trần, không cần trim"]
+out_13c = run_sender(p13c, "SpaceX")
+check("NO_TRIM + notes benign → KHÔNG in dòng L1 (đúng ngày yên ổn, suppress)",
+      "L1 trim PARK: NO_TRIM" not in out_13c)
+
+# T13d: NO_TRIGGER (L2) benign → suppress (đối xứng T13c, mã thật SpaceX 2026-09-30 0 lệnh).
+p13d = copy.deepcopy(SX)
+p13d["jit_unpark_proposal"]["decision"] = "NO_TRIGGER"
+p13d["jit_unpark_proposal"]["notes"] = ["không có lệnh MUA book BAL/LAG trong plan ⇒ L2 no-op "
+                                        "(đúng thiết kế: L2 chỉ chạy khi có lệnh mua thật)"]
+out_13d = run_sender(p13d, "SpaceX")
+check("NO_TRIGGER + notes benign → KHÔNG in dòng L2 (đúng ngày yên ổn, suppress)",
+      "L2 JIT unpark: NO_TRIGGER" not in out_13d)
+
+# T13e (source-pin): điều kiện suppress price-verify phải dựa trên BẤT BIẾN THẬT
+# (verified_n < tổng), KHÔNG được quay lại dùng sự hiện diện của "⚠️" trong text làm proxy —
+# đúng lỗi arch-review 2026-09-29 bắt được (PARTIAL verified_n>=1 rơi vào nhánh ✅, "⚠️" in text
+# luôn False nên bị suppress sai, giống hệt 0/N).
+check('price-verify suppress dùng bất biến "verified_n < len(buy_sell_orders)", KHÔNG dùng "⚠️" in text',
+      'verified_n < len(buy_sell_orders)' in _sender_src
+      and 'if price_verify_note and "⚠️" in price_verify_note' not in _sender_src)
+
+# T13f (source-pin): DCF/DD disclaimer footer + đoạn giải thích cơ chế pt_merged/jit_merged
+# không còn được IN ra report (nội dung vẫn có thể còn trong comment giải thích — chỉ pin là
+# KHÔNG có lệnh lines.append() nào phát các đoạn này nữa).
+check("DCF_DISCLAIMER/DD_DISCLAIMER không còn được lines.append() vào report",
+      "lines.append(f\"ℹ️ _{DCF_DISCLAIMER}_\")" not in _sender_src
+      and "lines.append(f\"ℹ️ _{DD_DISCLAIMER}_\")" not in _sender_src)
+check('Đoạn giải thích "LỆNH THẬT, đã gộp vào N lệnh ở trên" (cơ chế pt_merged/jit_merged) '
+      "không còn bị lines.append() — chỉ còn trong COMMENT giải thích lý do bỏ (không render)",
+      'lines.append(f"   ✅ Lệnh BÁN PARK {_which} là LỆNH THẬT, đã gộp' not in _sender_src)
+
 print(f"\n{'=' * 72}\nKẾT QUẢ: {len(PASS)} PASS / {len(FAIL)} FAIL")
 for f in FAIL:
     print(f"  ✗ {f}")

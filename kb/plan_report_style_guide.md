@@ -61,20 +61,36 @@ khối riêng khác trong cùng report.
 - Sửa: gộp thành 1 khối theo VAI TRÒ (vd "mã tài trợ MUA" vs "mã trim thuần"), mỗi mã xuất hiện
   đúng 1 lần trong thân report; ai cần đối chiếu qty/giá riêng lẻ thì xem phụ lục (mục 5).
 
-## 4. Nội dung compliance/provenance bắt buộc — GIỮ, RÚT GỌN khi không có bất thường
+## 4. Nội dung compliance/provenance bắt buộc — GIỮ khi có bất thường, BỎ HẲN khi thuần xác nhận
 
-Các khối bắt buộc theo quy chuẩn khác (state-verify §28, price-verify, DCF/DD disclaimer §6b,
-funding note "Tiền đâu ra" 💧, cảnh báo BLOCKED_*/mismatch/margin/Trứng vàng/CAPIT lệch) **KHÔNG
-được xoá nội dung**, nhưng:
-- Khi mọi thứ khớp/bình thường → rút thành **1 dòng/icon** (vd `"✅ state khớp · giá khớp"`), KHÔNG
-  phải câu văn đầy đủ lặp lại mỗi ngày.
-- Khi có bất thường thật (⚠️/🛑, mismatch, overdue, vượt ngưỡng) → **mở rộng đầy đủ thành câu văn**
-  như hiện tại — đây là lúc thông tin chi tiết thật sự cần thiết.
-- Đây là RÚT GỌN HIỂN THỊ, không phải giảm coverage: logic verify bên dưới không đổi, chỉ đổi cách
-  render kết quả PASS vs FAIL.
-- **KHÔNG đề xuất xoá** (danh sách chốt từ audit, đều tồn tại vì sự cố thật): funding note "Tiền
-  đâu ra", cảnh báo BLOCKED_*, mismatch state/price, cảnh báo margin, cảnh báo Trứng vàng cần rút,
-  cảnh báo Σ CAPIT lệch >10%.
+**Sửa 2026-09-29 21:48 ICT** (user, lần phàn nàn thứ 2): "Không đưa những câu vô nghĩa không cần
+thiết vào report cho xong trách nhiệm. Cái nào cần giải thích mới viết ra, không phải chép những
+câu ngày này qua ngày khác." — chỉ đạo này SIẾT hơn bản 09-28→29 dưới đây: kể cả dạng rút gọn 1
+dòng/icon cũng là "chép mỗi ngày" nếu ngày nào cũng in. Từ nay:
+- Khối THUẦN XÁC NHẬN — không có gì để người duyệt quyết định khác đi (state khớp DT5G, giá đã
+  xác minh ĐỦ 100% lệnh) → **BỎ HẲN, không giữ cả icon**. "Không thấy gì" = đã qua, không cần nói.
+- Khối có bất thường thật (⚠️/🛑: state/price KHÔNG khớp hoặc CHƯA xác minh đủ, mismatch, overdue,
+  vượt ngưỡng, BLOCKED_*, funding note "Tiền đâu ra" 💧, margin, Trứng vàng, CAPIT lệch >10%) →
+  **GIỮ NGUYÊN, mở rộng đầy đủ** như cũ — đây vẫn là chỗ hiếm nhất, chính xác nhất.
+- Logic verify bên dưới KHÔNG đổi — chỉ đổi NGƯỠNG hiển thị (từ "luôn in, chỉ đổi độ dài" sang
+  "chỉ in khi lệch khỏi bình thường"). Ranh giới bắt buộc: verify PHẢI dựa trên **bất biến thật**
+  (vd `verified_n < tổng`), KHÔNG được dùng sự hiện diện của emoji trong chuỗi văn bản làm proxy —
+  arch-review 2026-09-29 bắt đúng lỗi này ở price-verify (ternary chỉ tách theo `if verified_n`,
+  không có nhánh ⚠️ cho PARTIAL, nên `"⚠️" in text` bỏ sót ca 1/9 verified).
+- Quiescent decision string (vd `NO_TRIM`/`SKIP_STATE` của L1, `NO_JIT_NEEDED`/`NO_TRIGGER` của
+  L2) cũng được BỎ HẲN theo nguyên tắc trên — NHƯNG chỉ khi `notes[]` đi kèm không chứa cảnh báo
+  thật (`⚠️` ở bất kỳ đâu trong text, không chỉ ký tự đầu) — bỏ theo DECISION không được nuốt luôn
+  WARNING gắn kèm. Và KHÔNG được gộp một quiescent-thật với một "bế tắc thật" cùng nhóm chỉ vì tên
+  gần giống — vd `NO_TRIM_STRUCTURE` (PARK vượt trần nhưng không mã nào trim được) là cùng bản
+  chất với `BLOCKED_ALL_NAMES` (vẫn in đậm), KHÔNG phải ngày yên ổn.
+- DCF/DD disclaimer §6b: văn bản phương pháp luận cố định, không đổi theo quyết định hôm nay →
+  BỎ khỏi report hàng ngày, giữ nguyên trong module nguồn (`dcf_valuation.DCF_DISCLAIMER`,
+  `due_diligence.DD_DISCLAIMER`) cho ai cần tra lại phương pháp — không phải nội dung compliance
+  bắt buộc theo nghĩa "phải xuất hiện mỗi lần", vì bản thân giá trị DCF/DD từng dòng (đổi theo
+  ticker/ngày) vẫn hiển thị đầy đủ, chỉ bỏ đoạn giải thích PHƯƠNG PHÁP.
+- **KHÔNG đề xuất xoá** (danh sách chốt từ audit, đều tồn tại vì sự cố thật, LUÔN hiện khi có nội
+  dung): funding note "Tiền đâu ra", cảnh báo BLOCKED_*, mismatch state/price, cảnh báo margin,
+  cảnh báo Trứng vàng cần rút, cảnh báo Σ CAPIT lệch >10%.
 
 ## 5. Không đẩy nguyên khối dữ liệu kỹ thuật vào kênh duyệt chính
 
