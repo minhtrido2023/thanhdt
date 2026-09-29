@@ -95,6 +95,13 @@ FACTOR_EPS = 1e-6                # float slack around the factor <= 1 invariant
 # retroactive adjustment. 2 days covers a weekend's worth of normal cron jitter and nothing more.
 VINTAGE_TOL_DAYS = 2.0
 RIGHTS_METHOD = "Quyền mua CP cho Cổ đông hiện hữu"
+# relative drop tolerated in the non-decreasing Close/Price invariant before calling it a real
+# violation (vs rounding noise) — same threshold, same empirical basis as `_TERP_DROP_TOL` in
+# mike/bin/paper_programs_daily_report.py (measured 227x gap between rounding noise (4,01e-4,
+# 4 AlphaLens tickers, 58 sessions) and a real break (9,09e-2, FPT 2026-09-29)). Kept as one
+# named constant here rather than imported, so this module has no import-time dependency on the
+# report script (`paper_entry_adjust.py` is imported BY the reports, not the reverse).
+TERP_DROP_TOL = 5e-3
 
 
 @dataclass
@@ -112,7 +119,7 @@ class AdjustedEntry:
     raw_at_asof: float | None    # Price(asof) — used only to validate the recorded entry
     asof_used: str | None        # the trading day actually resolved (<= requested asof)
     status: str                  # ADJUSTED | UNCHANGED | NO_DATA | BAD_FACTOR
-                                 # | RIGHTS_UNRESOLVED | VINTAGE_STALE
+                                 # | RIGHTS_UNRESOLVED | VINTAGE_STALE | REPAIR_INCONSISTENT
     note: str | None = None      # human-readable caveat, surfaced in the report when set
     factor_terp: float | None = None      # raw Close/Price (TERP: rights subscribed or sold)
     convention: str = "accrue_only"       # accrue_only | terp
@@ -127,7 +134,8 @@ class AdjustedEntry:
     @property
     def degraded(self) -> bool:
         """True when we could not verify the rebase and fell back to the raw frozen entry."""
-        return self.status in ("NO_DATA", "BAD_FACTOR", "RIGHTS_UNRESOLVED", "VINTAGE_STALE")
+        return self.status in ("NO_DATA", "BAD_FACTOR", "RIGHTS_UNRESOLVED", "VINTAGE_STALE",
+                               "REPAIR_INCONSISTENT")
 
     def pct_vs(self, current_close: float) -> float:
         """Total return % of this position, both ends on the adjusted scale."""
@@ -170,8 +178,44 @@ def _fetch_rows(items, cache_dir):
 
 
 
+def _repaired_series_violation(ticker, asof, events, series, series_max):
+    """(exdate_bad, r0, r_min) or None — non-decreasing check on the REPAIRED ratio series.
+
+    Only called for a (ticker, asof) row close_repair already marked `adj_source="self_computed"`
+    — i.e. this checks close_repair's OWN output for internal consistency, not the vendor's.
+    `Close/Price` at date d = product of adjustment factors for every ex-date still AHEAD of d, so
+    it must be NON-DECREASING as d advances (fewer future ex-dates remain). `close_repair.py`
+    recomputes this ratio independently at every date via `factor_after`, so a correct, complete
+    `corporate_action` table makes the repaired series satisfy this by construction. A VIOLATION
+    here is mechanical evidence (§29, `kb/coding_guidelines.md`) that `corporate_action` itself is
+    wrong/missing an event for this ticker/window — not that the vendor needs a cap (that case is
+    `_terp_factor_stale` in `mike/bin/paper_programs_daily_report.py`, which stays the safety net
+    for entries close_repair has NOT touched). The caller must fail closed, not guess a number.
+    """
+    import close_repair             # re-imported: this function is called independently of
+                                     # `_repair_close`'s own local import, e.g. from selfcheck/tests
+
+    future = sorted((b for b in series if asof <= b["d"] <= series_max), key=lambda b: b["d"])
+    if len(future) < 2:
+        return None
+    ratios = []
+    for bar in future:
+        if bar["price"] <= 0:
+            continue
+        rep = close_repair.repair_row(ticker, bar, events, series, series_max)
+        ratios.append((bar["d"], rep.close / bar["price"]))
+    if len(ratios) < 2:
+        return None
+    _, r0 = ratios[0]
+    d_bad, r_min = min(ratios[1:], key=lambda x: x[1])
+    if r0 > 0 and (r0 - r_min) / r0 > TERP_DROP_TOL:
+        return d_bad, r0, r_min
+    return None
+
+
 def _repair_close(rows, items, cache_dir, cache_max_date):
-    """({(tk,asof): (time, Close, Price)}, {(tk,asof): Repair}) with the vendor Close REPAIRED.
+    """({(tk,asof): (time, Close, Price)}, {(tk,asof): Repair}, {(tk,asof): violation}) — the
+    vendor Close REPAIRED, plus a fail-closed consistency check on that repair.
 
     Layer 2 of the self-computed adjustment factor (`close_repair.py`), OFF unless
     `MIKE_CLOSE_REPAIR=1`. Wired HERE and nowhere else because `_fetch_rows` is the single point
@@ -184,16 +228,16 @@ def _repair_close(rows, items, cache_dir, cache_max_date):
     unverifiable number with another.
     """
     if not rows:
-        return rows, {}
+        return rows, {}, {}
     try:
         import duckdb
 
         import close_repair
         from corp_action_lib import events as ca_events
     except Exception as e:                       # close_repair absent, BQ lib absent, no duckdb
-        return rows, {"_error": f"không nạp được close_repair ({str(e)[:90]})"}
+        return rows, {"_error": f"không nạp được close_repair ({str(e)[:90]})"}, {}
     if not close_repair.enabled():
-        return rows, {}
+        return rows, {}, {}
 
     try:
         keys = [(t, a) for (t, a) in rows]
@@ -224,14 +268,14 @@ def _repair_close(rows, items, cache_dir, cache_max_date):
                  "high": float(hi or 0), "low": float(lo or 0)})
         series_max = cache_max_date or max((b["d"] for s in series.values() for b in s), default=None)
         if not series_max:
-            return rows, {"_error": "không xác định được ngày cuối của chuỗi giá"}
+            return rows, {"_error": "không xác định được ngày cuối của chuỗi giá"}, {}
         evs = {}
         for e in ca_events(tickers, since=start, until=series_max):
             evs.setdefault(e["ticker"], []).append(e)
     except Exception as e:
-        return rows, {"_error": f"không dựng được dữ liệu sửa Close ({str(e)[:90]})"}
+        return rows, {"_error": f"không dựng được dữ liệu sửa Close ({str(e)[:90]})"}, {}
 
-    out, reps = dict(rows), {}
+    out, reps, violations = dict(rows), {}, {}
     for (tk, asof), (time_used, close_at, price_at) in rows.items():
         try:
             rep = close_repair.repair_row(
@@ -247,7 +291,14 @@ def _repair_close(rows, items, cache_dir, cache_max_date):
         reps[(tk, asof)] = rep
         if rep.repaired:
             out[(tk, asof)] = (time_used, rep.close, price_at)
-    return out, reps
+            try:
+                v = _repaired_series_violation(
+                    tk, asof, evs.get(tk, []), series.get(tk, []), series_max)
+            except Exception:                     # the invariant check itself must not sink a repair
+                v = None
+            if v is not None:
+                violations[(tk, asof)] = v
+    return out, reps, violations
 
 def cache_vintage(cache_dir=None) -> dict:
     """{year: mtime} for `bq_cache/ticker/*.parquet` plus `ticker_1m` — the freshness fault line.
@@ -419,7 +470,7 @@ def adjust_entries(items, cache_dir=None, convention="accrue_only") -> dict:
     # Layer 2 (OFF by default, see `_repair_close`). Placed after `_fetch_rows` and before
     # `factor_terp` is read, because the whole point is that `factor_terp` must be computed off a
     # COMPLETE adjustment. It only ever replaces `Close`; `Price` and `time_used` are untouched.
-    rows, repairs = _repair_close(rows, items, cache_dir, cache_max_date)
+    rows, repairs, repair_violations = _repair_close(rows, items, cache_dir, cache_max_date)
 
     out = {}
     for ticker, asof, entry_price in items:
@@ -439,6 +490,24 @@ def adjust_entries(items, cache_dir=None, convention="accrue_only") -> dict:
         else:
             prov = {"adj_source": rep.adj_source if rep is not None else "vendor",
                     "repair_note": (rep.reason if rep is not None and rep.repaired else None)}
+
+        # close_repair claimed self_computed for this entry AND its own repaired ratio series
+        # still breaks the non-decreasing invariant — mechanical evidence (§29) that
+        # `corporate_action` itself is wrong for this ticker/window, not that the vendor needs a
+        # cap. Fail closed: keep the raw entry, do not guess at a corrected factor.
+        viol = repair_violations.get((ticker, asof))
+        if viol is not None:
+            d_bad, r0, r_min = viol
+            out[(ticker, asof)] = AdjustedEntry(
+                ticker, entry_price, entry_price, factor_terp, price_at, time_used,
+                "REPAIR_INCONSISTENT",
+                f"close_repair đã tự sửa Close (self_computed) nhưng hệ số Close/Price SAU sửa "
+                f"vẫn GIẢM theo thời gian ({r0:.6f} tại {asof} → {r_min:.6f} tại {d_bad}) — bằng "
+                f"chứng cơ học rằng corporate_action cho {ticker} trong cửa sổ này sai/thiếu sự "
+                f"kiện, không phải vendor chưa hồi tố. Không đoán số đúng, giữ giá gốc.",
+                factor_terp=factor_terp, convention=convention, **prov,
+            )
+            continue
 
         # Invariant: adjustment only ever scales historical prices DOWN (dividends/dilution are
         # value leaving the share). factor > 1 means the pair is not what we think it is.
