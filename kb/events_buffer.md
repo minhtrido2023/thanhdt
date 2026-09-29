@@ -843,3 +843,14 @@
 - [2026-09-29T05:05:01Z] Taylor/heartbeat — Taylor_20260929_050059: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20260929_050059", "source": "watcher"}
 - [2026-09-29T05:06:01Z] Taylor/heartbeat — Taylor_20260929_050059: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20260929_050059", "source": "watcher"}
 - [2026-09-29T05:06:17Z] Taylor/heartbeat — Taylor_20260929_050059: {"status": "in_progress", "note": "Buoc 1 xong: 681 = 400 chained (that) + 281 band-mismatch. Trong 281, phan bo tick cho thay cao nguyen sach: 227/281 (80.8%) <=1.0 tick, khoang trong tu 1.0-2.0 tick (chi 1 ca 1.2 tick), roi tang dan len 2-220 tick voi lech tuong doi 0.2-40%. Dang kiem tra §21 blast radius (entry nao trong so paper song doi trang thai)."}
+
+## Consolidation 2026-09-29T05:13:39Z
+- [2026-09-29T05:07:01Z] Taylor/heartbeat — Taylor_20260929_050059: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20260929_050059", "source": "watcher"}
+- [2026-09-29T05:08:01Z] Taylor/heartbeat — Taylor_20260929_050059: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20260929_050059", "source": "watcher"}
+- [2026-09-29T05:09:01Z] Taylor/heartbeat — Taylor_20260929_050059: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20260929_050059", "source": "watcher"}
+- [2026-09-29T05:10:01Z] Taylor/heartbeat — Taylor_20260929_050059: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20260929_050059", "source": "watcher"}
+- [2026-09-29T05:10:07Z] Taylor/heartbeat — Taylor_20260929_050059: {"status": "in_progress", "note": "Buoc 3 xong: 0/227 ca recovered trung ticker+window cua 2 so paper song (AlphaLens 4 ma 07-01..09-30, DC seed 9 ma 07-06..10-06) => fix LATENT, khong doi so cong bo nao. Dang sua _band_lifted_suspect (tick_size thay 1e-9 relative), se chay selfcheck."}
+- [2026-09-29T05:11:01Z] Taylor/heartbeat — Taylor_20260929_050059: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20260929_050059", "source": "watcher"}
+- [2026-09-29T05:12:03Z] Taylor/heartbeat — Taylor_20260929_050059: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20260929_050059", "source": "watcher"}
+- [2026-09-29T05:12:56Z] Taylor/heartbeat — Taylor_20260929_050059: {"status": "in_progress", "note": "Da sua _band_lifted_suspect (tick_size thay 1e-9 relative), them 2 fixture that (AIG that real-rounding recovered, DFC that real-stale van tu choi) + 1 mutation guard vao close_repair_selfcheck.py. 960 assertion 0 fail, 15/15 mutation killed. Dang chay paper_entry_adjust + paper_report_render selfcheck."}
+- [2026-09-29T05:13:03Z] Taylor/heartbeat — Taylor_20260929_050059: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20260929_050059", "source": "watcher"}
