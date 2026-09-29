@@ -730,7 +730,13 @@ if orders:
         val = o.get("est_value_vnd", o.get("est_value"))
         val_s = f" (~{val/1e6:,.1f}tr)" if isinstance(val, (int, float)) else ""
         note = o.get("note", "")
-        note_s = f" — {note[:90]}" if note else ""
+        # note[:90] thô cắt mất cảnh báo ⚠️ thật đi kèm lệnh — cùng lớp lỗi vừa vá ở
+        # park_trim/jit_unpark.notes[] (send_plan_report.sh:528-539), field khác
+        # (orders[].note, mỗi lệnh 1 note, không phải list). Đo thật 2026-09-29: 9/903
+        # note thật có ⚠️ bị cắt mất — ca TV1 2026-08-12 mất khuyến nghị "(a) giữ trần
+        # 20.000 hay (b) nới lên 20.200, KHÔNG tự quyết thay user". Dùng _note_text()
+        # (budget=90 giữ nguyên độ gọn dòng lệnh khi note KHÔNG có cảnh báo).
+        note_s = f" — {_note_text(note, budget=90)}" if note else ""
         lines.append(f"  • {side_vn} {ticker} {qty}cp @ {px}{val_s}{note_s}")
         # Lý do bán PARK_TRIM là ĐỘC LẬP với bất kỳ lệnh mua nào trong cùng plan (park-target
         # compliance, không phải tài trợ) — KHÔNG lặp theo từng lệnh (§2 style guide), xem 1

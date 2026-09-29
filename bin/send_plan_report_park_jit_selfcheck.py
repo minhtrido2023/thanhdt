@@ -516,18 +516,54 @@ check("NO_JIT_NEEDED + notes benign → KHÔNG in dòng L2 (escape hatch không 
 # hành vi phía trên bắt được (đã tự tay mutation-test xác nhận: revert từng chỗ vẫn 40/0). Dùng
 # lại đúng idiom _sender_src đã có ở T11 (:334 đọc 1 lần, :439/:446/:450 source-pin) thay vì thêm
 # fixture L2 dài — rẻ hơn và trực tiếp bắt đúng bất biến "còn dùng _note_text() hay không".
-print("\n[T13i] Source-pin: cả 6 chỗ render notes[] phải dùng _note_text(), không rơi lại str(n)[:N]")
+print("\n[T13i] Source-pin: cả 7 chỗ render note(s) phải dùng _note_text(), không rơi lại str(n)[:N]")
 # Đếm trên MÃ THẬT, bỏ qua comment (dòng có # tự nhắc tên hàm trong lời giải thích cũng khớp
 # "_note_text(" — vd :862/:916 — nếu đếm cả comment thì đổi 1 câu comment cũng làm test đỏ oan).
+# 2026-09-29 (cùng ngày, follow-up): thêm chỗ thứ 7 — orders[].note[:90] (dòng lệnh riêng lẻ,
+# KHÁC field với park_trim/jit_unpark.notes[] 6 chỗ trước) — 8 = 1 def + 7 call.
 _sender_code_only = "\n".join(
     ln.split("#", 1)[0] for ln in _sender_src.splitlines())
 _note_text_calls = _sender_code_only.count("_note_text(")
-check(f"_note_text được ĐỊNH NGHĨA 1 lần + GỌI đúng 6 lần ở 6 chỗ render notes[] trong MÃ THẬT "
-      f"(đếm được {_note_text_calls}, kỳ vọng 7 = 1 def + 6 call) — revert BẤT KỲ 1 trong 6 chỗ "
-      f"về str(n)[:N] thô sẽ làm số này tụt xuống 6, ĐỎ ngay kể cả không có fixture L2 dài",
-      _note_text_calls == 7)
+check(f"_note_text được ĐỊNH NGHĨA 1 lần + GỌI đúng 7 lần ở 7 chỗ render note(s) trong MÃ THẬT "
+      f"(đếm được {_note_text_calls}, kỳ vọng 8 = 1 def + 7 call) — revert BẤT KỲ 1 trong 7 chỗ "
+      f"về str(n)[:N] thô sẽ làm số này tụt xuống 7, ĐỎ ngay kể cả không có fixture dài riêng",
+      _note_text_calls == 8)
 check("_note_text() giữ dấu '…' khi cắt note KHÔNG mang ⚠️ (round 3 yêu cầu, chưa ai pin trước đó)",
       's[:budget] + "…"' in _sender_src)
+
+# T13j (follow-up 2026-09-29, cùng ngày): orders[].note[:90] cùng lớp lỗi trên field KHÁC
+# (mỗi lệnh 1 note, không phải list park_trim/jit_unpark.notes[]) — arch-review round 5 đo thật
+# 9/903 note có ⚠️ bị cắt, ca cụ thể: TV1 plan_ZaloPay_2026-08-12.json, note 1197 ký tự, ⚠️ RỦI RO
+# ở gần cuối, mất khuyến nghị "(a)/(b)" cho user. Dùng NGUYÊN VĂN order thật (không tự giản lược).
+_TV1_PLAN_PATH = os.path.join(REAL_PLANS, "plan_ZaloPay_2026-08-12.json")
+with open(_TV1_PLAN_PATH, encoding="utf-8") as _f:
+    _tv1_plan = json.load(_f)
+_tv1_order = next(o for o in _tv1_plan["orders"] if o.get("ticker") == "TV1")
+assert "⚠️" in _tv1_order["note"] and "RỦI RO" in _tv1_order["note"], (
+    f"artifact {_TV1_PLAN_PATH} không còn mang order TV1 note-có-cảnh-báo như lúc viết test này")
+
+p13j = copy.deepcopy(SX)
+p13j["orders"] = [_tv1_order]
+out_13j = run_sender(p13j, "SpaceX")
+check("orders[].note dài (1197 ký tự, ⚠️ RỦI RO ca TV1 thật) → dòng lệnh in ĐỦ, không cắt mất "
+      "khuyến nghị (a)/(b) cho user",
+      "RỦI RO" in out_13j and "nới ceiling" in out_13j
+      and "KHÔNG tự quyết định thay user" in out_13j)
+
+# Đối xứng: note KHÔNG có ⚠️ vẫn cắt gọn ở budget=90 (giữ dòng lệnh compact — không phải mọi note
+# đều nên hiện toàn văn, chỉ note MANG CẢNH BÁO mới cần).
+p13k = copy.deepcopy(SX)
+_benign_order = copy.deepcopy(_tv1_order)
+_benign_order["note"] = ("Đây là note dài nhưng KHÔNG mang cảnh báo gì — thuần mô tả bối cảnh "
+                          "lệnh, không có ký tự cảnh báo nào ở trong toàn bộ chuỗi văn bản này "
+                          "cả, chỉ là để test hành vi cắt gọn bình thường khi note dài mà bình "
+                          "thường, không có gì đặc biệt cần user chú ý tới cả — quá 90 ký tự.")
+assert "⚠️" not in _benign_order["note"] and len(_benign_order["note"]) > 90
+p13k["orders"] = [_benign_order]
+out_13k = run_sender(p13k, "SpaceX")
+check("orders[].note dài KHÔNG có ⚠️ → vẫn cắt gọn ở budget=90 + '…' (không đổi hành vi cũ cho "
+      "note bình thường)",
+      "…" in out_13k and _benign_order["note"] not in out_13k)
 
 print(f"\n{'=' * 72}\nKẾT QUẢ: {len(PASS)} PASS / {len(FAIL)} FAIL")
 for f in FAIL:
