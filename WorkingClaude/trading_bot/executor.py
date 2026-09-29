@@ -26,6 +26,7 @@ import datetime as dt
 import glob
 import json
 import os
+import re
 import subprocess
 import time
 from zoneinfo import ZoneInfo
@@ -38,6 +39,48 @@ from .plan_funding_gate import _effective_loan_package
 _MIKE_ROOT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                           "mike")
 _APPEND_EVENT = os.path.join(_MIKE_ROOT, "bin", "append_event.sh")
+
+
+# ─── PLACE_FAIL có LỖI CẤU TRÚC: dừng thử lại sau N lượt liên tiếp ────────────────────
+# Sự cố 2026-09-29 (kb/incidents/2026-09/2026-09-29-zalopay-sell-deal-not-found-loanpackage-1826.md):
+# 6 mã ZaloPay trả HTTP 400 "deal not found" — lỗi KHÔNG tự lành — nhưng vòng poll thử lại
+# 2.628 lượt trong 4h15 (~10 lượt/phút), không có điểm dừng: tốn quota API và nhấn chìm log.
+# Ngưỡng 5: lỗi CẤU TRÚC giống hệt nhau 5 lượt LIÊN TIẾP không còn là nhiễu — ở nhịp thật đo
+# được của sự cố (~10 lượt/phút) nó dừng trong ~30 giây thay vì cả phiên, mà vẫn đủ rộng để
+# một ca đơn lẻ (vd bản đọc positions cũ 1 nhịp) tự hồi phục mà không bị chặn oan.
+PLACE_FAIL_STRUCTURAL_LIMIT = 5
+
+# Lỗi TẠM THỜI — thử lại là ĐÚNG, không bao giờ tính vào bộ đếm dừng. Nhận diện bằng BẰNG
+# CHỨNG trong chính chuỗi lỗi (coding_guidelines §29: không đoán nguyên nhân), không bằng
+# suy luận chung chung.
+_PLACE_FAIL_TRANSIENT_MARKERS = (
+    "timeout", "timed out", "time out", "temporarily", "try again", "rate limit",
+    "too many requests", "connection", "connect", "reset by peer", "unreachable",
+    "ssl", "read error", "eof occurred", "service unavailable", "gateway",
+)
+
+
+def _place_fail_structural(note):
+    """True khi chuỗi lỗi PLACE_FAIL là lỗi CẤU TRÚC (gửi lại y hệt sẽ lại hỏng y hệt).
+
+    Bằng chứng đọc được, không đoán:
+      • `dnse_api.DNSEError` luôn mở đầu bằng `HTTP <status>: …` (dnse_api.py:304/309) ⇒
+        lấy status THẬT từ chuỗi. Không có `HTTP <status>` ⇒ KHÔNG kết luận (lỗi mạng/
+        ngoại lệ Python khác) ⇒ False, giữ nguyên retry như cũ.
+      • 4xx = client/business reject: request sai với trạng thái sổ ⇒ CẤU TRÚC. Trừ 408
+        (Request Timeout) và 429 (rate limit) — hai mã 4xx duy nhất mang nghĩa "thử lại sau".
+      • 5xx = phía server ⇒ TẠM THỜI (DNSE có quirk trả 500 cho modify thành công).
+      • Chuỗi chứa dấu hiệu tạm thời (`timeout`, `connection`, …) ⇒ TẠM THỜI, kể cả khi
+        status là 4xx.
+    """
+    low = str(note or "").lower()
+    if any(k in low for k in _PLACE_FAIL_TRANSIENT_MARKERS):
+        return False
+    m = re.search(r"http\s*(\d{3})", low)
+    if not m:
+        return False
+    status = int(m.group(1))
+    return 400 <= status < 500 and status not in (408, 429)
 
 
 def _publish_bot_event(event_type: str, topic: str, payload: dict) -> None:
@@ -1709,6 +1752,42 @@ class Executor:
         return (self.cfg.get("extreme_slice_mult", 0.25)
                 if self._extreme_armed(o, now) else 1.0)
 
+    def _count_place_fail(self, ps, o, note, now):
+        """Đếm PLACE_FAIL CẤU TRÚC liên tiếp CÙNG một lỗi cho CÙNG parent order; quá
+        `PLACE_FAIL_STRUCTURAL_LIMIT` thì DỪNG đặt lệnh mã đó (journal + báo bus).
+
+        Chỉ đếm lỗi CẤU TRÚC (`_place_fail_structural`). Lỗi TẠM THỜI (timeout, mất kết nối,
+        rate-limit, 5xx) KHÔNG bao giờ dừng retry và RESET bộ đếm — chuỗi thử lại của nó phải
+        giữ nguyên hành vi cũ từng byte. Lỗi cấu trúc KHÁC chuỗi cũ cũng reset: dừng chỉ dành
+        cho cùng một lỗi lặp lại y hệt.
+
+        Cờ nằm trong `ps` (state.json) nên sống qua lần khởi động lại giữa phiên
+        (`run_bot.sh` 13:00) — chính khoảng đó ngày 2026-09-29 còn thêm 372 lượt fail.
+        """
+        if not _place_fail_structural(note):
+            ps["place_fail_streak"] = 0
+            ps["place_fail_note"] = ""
+            return
+        if ps.get("place_fail_note") == note:
+            ps["place_fail_streak"] = int(ps.get("place_fail_streak") or 0) + 1
+        else:
+            ps["place_fail_note"] = note
+            ps["place_fail_streak"] = 1
+        if ps["place_fail_streak"] < PLACE_FAIL_STRUCTURAL_LIMIT or ps.get("place_blocked"):
+            return
+        ps["place_blocked"] = True
+        ps["place_blocked_ts"] = now.isoformat(timespec="seconds")
+        reason = (f"{ps['place_fail_streak']} lượt PLACE_FAIL liên tiếp cùng lỗi CẤU TRÚC "
+                  f"\"{note}\" — DỪNG đặt lệnh mã này (lỗi không tự lành; thử lại chỉ tốn "
+                  f"quota API). Cần người kiểm tra rồi mới cho chạy tiếp.")
+        self._journal("PLACE_FAIL_STOPPED", o, note=reason)
+        _publish_bot_event("error", "PLACE_FAIL_STOPPED", {
+            "account": self.label, "ticker": o.ticker, "side": o.side,
+            "parent_id": o.id, "plan_date": self.plan.plan_date,
+            "attempts": ps["place_fail_streak"], "error": note,
+            "note": reason,
+        })
+
     def _place_slices(self, now, phase, ghost_tickers=(), positions=None):
         base_interval = self.cfg["slice_interval_min"] * 60
         for o in sorted(self.plan.orders, key=lambda x: x.priority):
@@ -1717,6 +1796,11 @@ class Executor:
                 continue
             if o.ticker in ghost_tickers:
                 continue  # idempotency guard — xem _ghost_tickers
+            if ps.get("place_blocked"):
+                # Đã dừng vì lỗi CẤU TRÚC lặp lại (xem _place_fail_structural) — không thử
+                # lại tới hết phiên/plan này. Bỏ ở ĐÂY (không phải ở chỗ bắt lỗi) để chặn
+                # luôn cả phần đo quote/sức mua phía dưới, đúng mục đích tiết kiệm quota API.
+                continue
             # Populate gap_z cache before interval decision (gap_adaptive BUY only)
             if (o.side == "buy" and self.cfg.get("gap_adaptive_enabled", False)
                     and o.ticker not in self._gap_z_cache
@@ -1894,6 +1978,7 @@ class Executor:
                 retry = self._retry_tick_mismatch(o, q, cross, extreme_down, px, qty, e)
                 if retry is None:
                     self._journal("PLACE_FAIL", o, qty=qty, price=px, note=str(e))
+                    self._count_place_fail(ps, o, str(e), now)
                     continue
                 oid, px = retry
             ps["children"].append({"oid": oid, "qty": qty, "price": px, "filled": 0,

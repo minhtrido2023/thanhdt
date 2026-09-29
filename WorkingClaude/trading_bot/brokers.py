@@ -969,6 +969,91 @@ class DNSEBroker(BrokerBase):
         self._loan_pkg_cache[symbol] = resolved
         return resolved
 
+    def _resolve_sell_loan_package_id(self, symbol, qty):
+        """Gói vay của DEAL ĐANG MỞ THẬT cho `symbol` → id; None nếu không resolve được
+        (caller rơi về gói default account = ĐÚNG HÀNH VI CŨ, không bao giờ tệ hơn).
+
+        Bug 2026-09-29 — `kb/incidents/2026-09/2026-09-29-zalopay-sell-deal-not-found-loanpackage-1826.md`:
+        nhánh BÁN đặt `lp = None`, nhưng dòng `lp_sent = lp if lp is not None else
+        self._account_default_lp()` ngay dưới GHI ĐÈ thành gói DEFAULT account ⇒ mọi lệnh bán
+        mang gói 1258 (ZaloPay), trong khi HPG/MSB/SHB/TPB/VIX/VRE chỉ có deal ở gói 1826 (mua
+        2026-08-11, nhánh MUA resolve gói THEO MÃ) ⇒ DNSE không tìm được deal khớp gói ⇒ HTTP
+        400 "deal not found" × 2.628 lượt trong 4h15, ~9,77tr VND không huy động được. Bất đối
+        xứng BUY-resolve-theo-mã / SELL-gửi-gói-account chính là lỗi; hàm này khép nó lại.
+
+        **KHÔNG cache** (khác `_resolve_loan_package_id`): kia là DANH SÁCH SẢN PHẨM, tĩnh
+        trong phiên; đây là SỐ LƯỢNG CÓ THẬT, đổi sau mỗi lần khớp bán ⇒ cache sẽ stale.
+
+        Chọn gói, theo thứ tự:
+          1. Chỉ lấy dòng vị thế của CHÍNH `symbol`, chưa đóng, `sellable > 0`, gộp theo
+             `loanPackageId` (DNSE trả MỘT DÒNG MỖI DEAL — `get_positions()` cộng gộp và VỨT
+             BỎ `loanPackageId`, nên phải đọc `positions_raw()`).
+          2. Ưu tiên tập gói có `sellable >= qty` (bán gọn trong 1 deal); không gói nào đủ
+             riêng lẻ ⇒ xét toàn bộ gói còn hàng (fail-safe: bán được một phần còn hơn bị
+             từ chối toàn bộ — bán thiếu thì chu kỳ sau bán tiếp).
+          3. Trong tập đó, gói DEFAULT account được ưu tiên nếu có mặt — đây là tie-break
+             GIỮ NGUYÊN HÀNH VI CŨ ở mọi ca hành vi cũ vốn đã đúng. Đo trên snapshot thật
+             2026-09-29 04:55: BID (1258:300 · 1826:100), MBB (1258:202 · 1826:400), VCB
+             (1258:100 · 1826:200) đều có deal ở CẢ HAI gói và cả 3 đã bán trót bằng 1258;
+             không có tie-break này, luật "sellable lớn nhất" sẽ lặng lẽ đổi MBB/VCB sang
+             1826 — một thay đổi hành vi không ai yêu cầu.
+          4. Còn lại: gói có `sellable` LỚN NHẤT (tie-break theo id cho tất định).
+
+        Ca NHIỀU gói cùng có hàng đã CÓ trong dữ liệu thật (BID/MBB/VCB ở trên) nhưng ca
+        "không gói nào đủ `qty` riêng lẻ" thì CHƯA ⇒ log `_log_raw` để audit về sau.
+
+        Mọi lỗi (mạng, payload lạ, mã không có trong positions) → None ⇒ hành vi cũ.
+        """
+        try:
+            rows = self.positions_raw()
+        except Exception as e:
+            print(f"[dnse] ⚠ positions lỗi khi giải gói vay lệnh BÁN {symbol} "
+                  f"({type(e).__name__}: {e}) → gói default account (hành vi cũ)")
+            return None
+        want_sym = str(symbol).strip().upper()
+        by_pkg = {}
+        for p in rows or []:
+            if str(qget(p, "status", default="OPEN")).upper() == "CLOSED":
+                continue
+            if str(qget(p, "symbol", "instrument", "code", default="")).strip().upper() != want_sym:
+                continue
+            lp = qget(p, "loanpackageid", "loanproductid")
+            if lp is None:
+                continue
+            total = int(_fnum(qget(p, "openquantity", "quantity", "totalquantity",
+                                   "qty", default=0)) or 0)
+            # `… or total` như get_positions() là SAI ở đây: `tradeQuantity` = 0 hợp lệ và
+            # có nghĩa (cổ phiếu chưa về T+2) — `0 or total` sẽ biến gói KHÔNG bán được
+            # thành ứng viên. Phân biệt "thiếu trường" (None) với "có trường, giá trị 0".
+            sellable_raw = _fnum(qget(p, "tradequantity", "availablequantity",
+                                      "sellablequantity", "availableqty", default=None))
+            sellable = int(sellable_raw) if sellable_raw is not None else total
+            if sellable <= 0:
+                continue
+            cur = by_pkg.setdefault(str(lp), {"id": lp, "sellable": 0})
+            cur["sellable"] += sellable
+        if not by_pkg:
+            return None
+        try:
+            need = int(qty)
+        except (TypeError, ValueError):
+            need = 0
+        sufficient = [v for v in by_pkg.values() if v["sellable"] >= need]
+        pool = sufficient or list(by_pkg.values())
+        default = self._account_default_lp()
+        pick = next((v for v in pool if default is not None and str(v["id"]) == str(default)), None)
+        rule = "default-account-pkg-đủ-hàng"
+        if pick is None:
+            pick = max(pool, key=lambda v: (v["sellable"], str(v["id"])))
+            rule = "sellable-lớn-nhất"
+        if len(by_pkg) > 1 or not sufficient:
+            self._log_raw("sell_loan_package_resolve",
+                          {"symbol": symbol, "qty": need, "resolved": pick["id"],
+                           "rule": rule, "account_default": default,
+                           "any_pkg_covers_qty": bool(sufficient),
+                           "by_package": {k: v["sellable"] for k, v in by_pkg.items()}})
+        return pick["id"]
+
     def _validate_lever_package(self, symbol, want):
         """Gói vay CHỈ ĐỊNH `want` có hợp lệ cho `symbol` không → (id_sẽ_dùng, ok, note).
 
@@ -1022,12 +1107,15 @@ class DNSEBroker(BrokerBase):
             # khi default hợp lệ cho mã → no-op với mọi lệnh mainboard BAL/LAG/CAPIT.
             lp = self._resolve_loan_package_id(symbol)
         else:
-            # Lệnh BÁN không mang loanPackageId (trừ khi chỉ định rõ ở trên) — DNSE tự
-            # chọn deal khớp trong sổ vị thế. Resolve theo mã ở đây ép DNSE tìm deal đúng
-            # gói vay đó, và deal PARK/vị thế cũ thường không nằm trong gói đó → HTTP 400
-            # "deal not found" (bug 2026-08-10, 08-07→c22bd1c mở rộng nhầm sang cả BÁN).
-            lp = None
-        # lp None (lệnh BÁN) ⇒ gói default CỦA account này, tường minh — trước đây dnse_api tự
+            # Lệnh BÁN: gói vay phải là gói của DEAL ĐANG MỞ THẬT của chính mã này, KHÔNG
+            # phải gói default account. Trước 2026-09-29 nhánh này đặt `lp = None` rồi
+            # `lp_sent` ngay dưới ghi đè thành gói default ⇒ mã nào không có deal ở gói đó
+            # bị DNSE trả HTTP 400 "deal not found" và retry vô hạn (incident
+            # kb/incidents/2026-09/2026-09-29-zalopay-sell-deal-not-found-loanpackage-1826.md).
+            # Không resolve được (positions lỗi/rỗng/mã không có vị thế) → None → rơi đúng
+            # về gói default như cũ (fail-safe: không bao giờ tệ hơn hành vi trước).
+            lp = self._resolve_sell_loan_package_id(symbol, qty)
+        # lp None ⇒ gói default CỦA account này, tường minh — trước đây dnse_api tự
         # rơi về client.loan_package_id (dùng chung giữa account, xem _account_default_lp).
         lp_sent = lp if lp is not None else self._account_default_lp()
         r = self.client.place_order(self.account_id, symbol, qty=int(qty),
