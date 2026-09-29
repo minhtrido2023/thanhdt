@@ -160,13 +160,17 @@ def generate_section(as_of_date: str = None) -> str:
                 # say it out loud: a reader comparing against the JSON's entry_price must be able
                 # to see WHY the denominator is not that number
                 line += f" *[giá vào {a.entry_price:,.0f}→{a.entry_adj:,.0f} do quyền]*"
-                if a.rights_events:
+                # check BOTH conventions' rights_events — `a` (terp) can read () even when the
+                # accrue-only leg `b` carries the real event list, so gating on a.rights_events
+                # alone silently hid the convention-fork disclosure (MBB case, quant-skeptic 2026-09-29)
+                b = adj_alt.get((ticker, entry_asof[ticker]))
+                if a.rights_events or (b is not None and b.rights_events):
                     # the convention is a real fork in the number, not a footnote: state it on the
                     # line that carries the number, and show what the other convention would say
-                    b = adj_alt.get((ticker, entry_asof[ticker]))
                     if b is not None and not b.degraded and b.entry_adj > 0:
                         alt_pct = b.pct_vs(current)
-                        line += (f" *[quyền mua {', '.join(a.rights_events)} ĐÃ tính vào tỉ suất "
+                        names = ', '.join(a.rights_events or b.rights_events)
+                        line += (f" *[quyền mua {names} ĐÃ tính vào tỉ suất "
                                  f"trên (quy ước `terp` — chỉ đạo user 2026-09-23); nếu BỎ quyền "
                                  f"(accrue-only) thì {alt_pct:+.1f}%]*")
 

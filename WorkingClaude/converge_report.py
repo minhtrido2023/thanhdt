@@ -144,12 +144,15 @@ def generate_section(as_of_date=None, live_set=None):
             rebase = ""
             if a is not None and a.is_adjusted:
                 rebase = f" *[giá vào {a.entry_price:,.0f}→{a.entry_adj:,.0f} do quyền]*"
-                if a.rights_events:
+                # check BOTH conventions' rights_events — see alphalens_report.py for why gating
+                # on a.rights_events alone silently hid the convention-fork disclosure (MBB case)
+                b = adj_alt.get((tk, entry_asof))
+                if a.rights_events or (b is not None and b.rights_events):
                     # convention stated on the line carrying the number, not in a footnote
-                    b = adj_alt.get((tk, entry_asof))
                     if b is not None and not b.degraded and b.entry_adj > 0:
                         alt_pct = b.pct_vs(cur)
-                        rebase += (f" *[quyền mua {', '.join(a.rights_events)} ĐÃ tính vào tỉ suất "
+                        names = ', '.join(a.rights_events or b.rights_events)
+                        rebase += (f" *[quyền mua {names} ĐÃ tính vào tỉ suất "
                                    f"trên (quy ước `terp`); nếu BỎ quyền (accrue-only) thì "
                                    f"{alt_pct:+.1f}%]*")
             elif a is not None and a.degraded:
