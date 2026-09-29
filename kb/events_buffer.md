@@ -1094,3 +1094,12 @@
 ## Consolidation 2026-09-29T12:07:02Z
 - [2026-09-29T11:10:05Z] Winston/status — new-listings-daily: {"date": "2026-09-29", "count": 0, "lookback_days": 90, "note": "no new listings detected"}
 - [2026-09-29T11:40:07Z] Winston/status — corp-action-scan-daily: {"scanned_universe": "tav2_bq.ticker_prune", "candidates_this_run": 0, "fresh_alerts_this_run": 0, "resolved_since_last_run": [], "still_pending_count": 0, "still_pending": [], "stale_pending_over_7d": []}
+
+## Consolidation 2026-09-29T12:09:37Z
+- [2026-09-29T12:08:04Z] DollarBill/heartbeat — DollarBill_20260929_120703: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20260929_120703", "source": "watcher"}
+- [2026-09-29T12:08:06Z] DollarBill/heartbeat — DollarBill_20260929_120705: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20260929_120705", "source": "watcher"}
+- [2026-09-29T12:08:55Z] DollarBill/heartbeat — DollarBill_20260929_120705: {"status": "in_progress", "note": "plan JSON viet xong, dang verify load_plan + gui Discord"}
+- [2026-09-29T12:09:04Z] DollarBill/heartbeat — DollarBill_20260929_120703: {"status": "still_running", "elapsed_min": 2, "job_id": "DollarBill_20260929_120703", "source": "watcher"}
+- [2026-09-29T12:09:06Z] DollarBill/heartbeat — DollarBill_20260929_120705: {"status": "still_running", "elapsed_min": 2, "job_id": "DollarBill_20260929_120705", "source": "watcher"}
+- [2026-09-29T12:09:18Z] DollarBill/decision — plan-2026-09-30: {"account": "SpaceX", "plan_date": "2026-09-30", "n_orders": 0, "decision": "HOLD_ALL", "state": "NEUTRAL", "n_bal": 0, "n_lag_due": 0, "l1_park_trim": "BLOCKED_ALL_NAMES", "l1_delta_vnd": 24000000, "active_nav_vnd": 987241710, "egg_vnd": 85529134, "reconcile_ok": true, "capit_episode": "CAPIT-2026-07-20", "capit_sessions_held": 48, "discord_sent": true}
+- [2026-09-29T12:09:21Z] DollarBill/finding — plan-SpaceX-2026-09-30-done: Plan SpaceX 2026-09-30 xong: HOLD ALL 0 lenh (n_bal=0, LAG due=0). L1 park_trim=BLOCKED_ALL_NAMES (PARK vuot target 24,0tr nhung moi ma duoi 1 lo). load_plan() verify OK. Da gui Discord plan thread 1521183164364754974. Cho user duyet truoc 08:45 ICT 30/09.
