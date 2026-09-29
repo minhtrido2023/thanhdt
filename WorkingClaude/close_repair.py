@@ -57,6 +57,7 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 
 from corp_action_lib import is_price_adjusting   # pure predicate, no BQ call — safe to import here
+from trading_bot.vn_market import tick_size      # pure function of price, no BQ/broker call
 
 TOL = 0.003          # vendor/self agreement band; see module docstring
 FACTOR_EPS = 1e-6
@@ -121,6 +122,31 @@ def _band_lifted_suspect(bar: dict, series: list, i: int) -> bool:
     ratio of the nearest row whose Price genuinely differs. No prior row at all, or no band → we
     cannot test, so we do NOT accuse: return False and let the caller's other guards speak.
     (Refusing here instead would fail-close on every first row of a window.)
+
+    TOLERANCE = 1 raw tick (`trading_bot.vn_market.tick_size`), not a relative epsilon — fixed
+    2026-09-29 (Việc C, dispatch Taylor_20260929_050059) after quant-skeptic (round 2 of the
+    Việc nhỏ 3 calibration) flagged the previous `1e-9` relative tolerance as unrealistically tight
+    given `Close`/`Price`/`High`/`Low` are all quantized to `tick_size` — 2,8đ on AIG 2026-07-30
+    was refused as "ffill suspect" purely from tick-rounding noise, not a real defect. MEASURED
+    (not guessed) on the calibration window's 681 `ffill_cum_band` refusals: 400 are `chained`
+    (unaffected by this change — a literal frozen Price is real ffill regardless of tolerance);
+    of the remaining 281 band-mismatch cases, the gap between `bar["price"]` and the nearest lifted
+    edge has a CLEAN plateau at ≤1 tick (227/281 = 80,8%, next case 1,20 tick, essentially nothing
+    between 1,0 and 2,0 tick) then spreads continuously from ~2 tick up to 219 tick with relative
+    deviations of 0,2–40% — genuinely different population, not tick noise. A RELATIVE-% tolerance
+    was checked and rejected: unlike ticks, relative gaps are a smooth continuum through 0,05–1,7%
+    with no comparable void, so any %-cutoff there would be an arbitrary point, not a plateau.
+    `tick_size(bar["price"])` (no `symbol`/`exchange` — neither is available at this call site,
+    and threading them through `group_factor`/`factor_after`/`repair_row` was avoided as
+    non-minimal for this fix) defaults to the HOSE price-tiered rule; a HNX/UPCOM name (flat 100đ)
+    priced under 10.000đ would get an UNDER-estimated tolerance (10đ vs the real 100đ) — fails
+    CLOSED (stays refused) in that case, never fails open, so the approximation cannot admit a
+    stale bar it shouldn't. Re-run `price_xcheck_cum_band_breach.py` to reproduce this breakdown.
+    §21 blast radius checked: 0 of the 227 newly-recoverable (ticker, ex-date) pairs fall inside
+    either live paper book's ticker set × tracking window (AlphaLens FPT/ACB/MBB/HDB
+    2026-07-01..2026-09-30; DC-book converge seed ACB/MBB/TCB/HAH/PVT/DHG/SSI/FPT/CTR
+    2026-07-06..2026-10-06) — this change is LATENT/preventative for both books as of 2026-09-29,
+    not a retroactive change to any already-published tỉ suất.
     """
     hi, lo = bar.get("high") or 0.0, bar.get("low") or 0.0
     if hi <= 0 or lo <= 0 or i <= 0:
@@ -131,7 +157,8 @@ def _band_lifted_suspect(bar: dict, series: list, i: int) -> bool:
     if not neighbour or not neighbour.get("close") or neighbour["close"] <= 0:
         return False
     lift = neighbour["price"] / neighbour["close"]
-    return not (lo * lift * (1 - 1e-9) <= bar["price"] <= hi * lift * (1 + 1e-9))
+    tol_vnd = tick_size(bar["price"])
+    return not (lo * lift - tol_vnd <= bar["price"] <= hi * lift + tol_vnd)
 
 
 def group_factor(ex: str, evs: list, series: list) -> tuple:

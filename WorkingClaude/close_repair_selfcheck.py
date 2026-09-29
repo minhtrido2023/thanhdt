@@ -169,6 +169,45 @@ def run_assertions(cr, tag=""):
     f, note = cr.group_factor("2026-06-12", [div("2026-06-12", 1000.0)], bad_band)
     nc("band/bad_band_refused", f is None)
 
+    # -- TOLERANCE = 1 TICK, not a relative epsilon (Việc C, 2026-09-29, dispatch
+    #    Taylor_20260929_050059, `price_xcheck_cum_band_breach.py`). The old `1e-9` relative
+    #    tolerance refused any lifted-band gap bigger than float noise, which on REAL data is
+    #    mostly just `tick_size` rounding of Close/High/Low/Price, not a genuine ffill — quant-
+    #    skeptic's own example. REAL bars, queried 2026-09-29 from `tav2_bq.ticker` /
+    #    `corporate_action` (không phải bịa — §29/Việc nhỏ 3 round 1 lesson).
+    #    AIG DIV 500đ ex=2026-07-31: cum bar 2026-07-30 (Close=44.780, Price=52.000,
+    #    High=44.780, Low=42.800), lift neighbour 2026-07-29 (Close=43.060, Price=50.000) ⇒
+    #    lifted band [49.698,10 .. 51.997,21], raw Price 52.000 sits 2,79đ OUTSIDE it — refused
+    #    under the old tolerance, but well inside `tick_size(52.000)=100đ` of it.
+    aig_real = bars([("2026-07-20", 41_590.0, 48_300.0, 42_200.0, 40_990.0),
+                     ("2026-07-21", 41_940.0, 48_700.0, 41_940.0, 41_940.0),
+                     ("2026-07-22", 41_850.0, 48_600.0, 44_690.0, 41_770.0),
+                     ("2026-07-23", 42_110.0, 48_900.0, 42_110.0, 41_340.0),
+                     ("2026-07-24", 42_200.0, 49_000.0, 43_060.0, 42_200.0),
+                     ("2026-07-27", 42_200.0, 49_000.0, 42_280.0, 42_020.0),
+                     ("2026-07-28", 42_890.0, 49_800.0, 42_970.0, 41_770.0),
+                     ("2026-07-29", 43_060.0, 50_000.0, 43_060.0, 42_200.0),
+                     ("2026-07-30", 44_780.0, 52_000.0, 44_780.0, 42_800.0)])
+    f, note = cr.group_factor("2026-07-31", [div("2026-07-31", 500.0)], aig_real)
+    nc("band/tick_tolerance_admits_real_rounding_case",
+       f is not None and abs(f - 52_000.0 / 51_500.0) < 1e-9)
+
+    #    DFC DIV 3.900đ ex=2026-06-17: cum bar 2026-06-16 (Close=30.580, Price=34.500,
+    #    High=30.840, Low=29.960) — a REAL vendor stale-Price artifact (Price frozen at a
+    #    pre-event level while High/Low/Close already moved), lift neighbour 2026-06-12
+    #    (Close=34.000, Price=34.000, lift=1.0) ⇒ lifted band [29.960 .. 30.840], raw Price
+    #    34.500 is 3.660đ (73,2 tick) outside it — MUST stay refused: proves the new 1-tick
+    #    tolerance did not widen the guard enough to admit a genuine stale bar.
+    dfc_real = bars([("2026-06-08", 34_000.0, 34_000.0, 34_400.0, 33_500.0),
+                     ("2026-06-09", 33_800.0, 33_800.0, 34_100.0, 33_600.0),
+                     ("2026-06-10", 34_100.0, 34_100.0, 34_200.0, 34_000.0),
+                     ("2026-06-11", 33_600.0, 33_600.0, 34_200.0, 33_600.0),
+                     ("2026-06-12", 34_000.0, 34_000.0, 34_000.0, 33_900.0),
+                     ("2026-06-16", 30_580.0, 34_500.0, 30_840.0, 29_960.0)])
+    f, note = cr.group_factor("2026-06-17", [div("2026-06-17", 3900.0)], dfc_real)
+    nc("band/tick_tolerance_still_refuses_real_stale_case", f is None)
+    nc("band/tick_tolerance_stale_note_says_why", f is None and "outside the raw-lifted" in (note or ""))
+
     # -- dedup on the ECONOMIC term only: identical rows collapse, real tranches sum
     kept, dropped = cr.dedup_same_term([div("2026-09-14", 3000.0), div("2026-09-14", 3000.0)])
     nc("dedup/identical_collapses", len(kept) == 1 and len(dropped) == 1)
@@ -366,6 +405,9 @@ MUTATIONS = [
      "            if dps <= 0:\n                return None, f\"{ex} DIV value_per_share <= 0\"",
      "            if dps <= 0:\n                continue",
      ["repair/negative_dps_uncomputable", "failclosed/dps_unparsable"]),
+    ("band_tolerance_zeroed_out",
+     "    tol_vnd = tick_size(bar[\"price\"])", "    tol_vnd = 0.0",
+     ["band/tick_tolerance_admits_real_rounding_case"]),
 ]
 
 
