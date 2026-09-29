@@ -26,14 +26,16 @@
   },
   "known_red": {
     "loan_package_multi_account_selfcheck.py": {
-      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
+      "reason": "TRIAGE XONG 2026-09-29 (Taylor, job Taylor_20260929_074158) — NGUYÊN NHÂN ĐÃ ĐỔI, entry giữ lại dưới nhãn MỚI. Lỗi CŨ (ValueError: too many values to unpack) là 1 dòng unpack lỗi thời sau khi mike 642d4f5a (2026-09-24) đổi broker_filled_qty() sang trả 3 giá trị — ĐÃ SỬA (WorkingClaude commit trong chuỗi d51c735e..3f939dc8). Nay còn rc=1 vì 2 assertion khác: kỳ vọng filled==200 nhưng broker_filled_qty trả filled=None do cổng FAIL-SAFE corp-action (KL đổi ngoài lệnh khớp, không xác nhận được sự kiện ⇒ không tính filled) — cổng này có SAU kỳ vọng của test. TIỀN TỒN, KHÔNG do bản vá sell-loanpackage: đã chứng minh 2 cách — (a) chân [base] của chính test nạp brokers.py TIỀN-VÁ từ git cũng filled=None; (b) revert brokers.py+executor.py về 0ba9e4c7 cho 2 FAIL Y NGUYÊN. Phần gói vay (sell/ppse/resolve = 1841 new / 1258 base) PASS ở cả 2 chân. 42/44 PASS.",
       "since": "2026-09-24T22:03:08Z",
       "status": "FAIL",
-      "auto": true,
+      "auto": false,
       "topic": "selfcheck-red: loan_package_multi_account_selfcheck.py",
       "escalated_utc": "2026-09-24T22:03:08Z",
       "ack_pending": false,
-      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
+      "fix_needed": "chủ sở hữu cổng corp-action (broker_filled_qty, mike 642d4f5a) quyết: kỳ vọng filled==200 của test đã lỗi thời (cần fixture có lịch corp-action) HAY cổng fail-safe đang chặn oan. KHÔNG phải việc của bản vá sell-loanpackage 2026-09-29.",
+      "triaged_utc": "2026-09-29T08:45:00Z",
+      "triaged_by": "Taylor"
     },
     "basket_return_leg_oshares_selfcheck.py": {
       "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
