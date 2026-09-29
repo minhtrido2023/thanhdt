@@ -8343,3 +8343,53 @@ toàn bộ số + chạy lại selfcheck 102 assertion / 15 mutation.
 
 Tái lập: `mike/agents/Taylor/research/repin_dep1m_20260928/run_leg.sh` + REPORT.md §8.
 Code: branch `research/repin-dep1m-2709`, commit `d3c37631`; artifact mike `4cd4c3ea`.
+
+## 2026-09-29 — `close_repair.py::_band_lifted_suspect` tolerance = 1 tick, capped tại `TOL` (0,3%) — job `Taylor_20260929_050059` (Việc C) + `Taylor_20260929_071902` (round 2, cap)
+
+no_ledger: data-repair guard LATENT (0 ảnh hưởng tỉ suất đã công bố, xem blast-radius dưới), không
+phải một backtest CAGR/Sharpe/Calmar/MaxDD cần ledger CSV pin theo §8 — số ở đây là đếm ca
+(681/400/281/227/454) tái lập trực tiếp bằng script `price_xcheck_cum_band_breach.py`, không đi
+qua `bin/pin_ledger.py`.
+
+Không phải số backtest cần pin theo §8 (data-repair guard LATENT, không phải tỉ suất công bố) —
+ghi ở đây theo đề xuất quant-skeptic để giữ dấu vết breakdown/blast-radius có thể tái lập, không
+phải một R3-style anchor.
+
+**681 ca `ffill_cum_band` PRE-FIX** (`price_xcheck_cum_band_breach.py`, cửa sổ event
+2025-01-01..2026-09-15 / bar 2024-11-15..2026-09-20, 2038 events × 346.160 bar, 1587 cặp
+(ticker,ex) ứng viên) = **400 chained** (Price lặp nguyên phiên trước — ffill thật, không liên
+quan tolerance) + **281 band-mismatch** (Price đổi nhưng ngoài band đã lift — ứng viên rounding).
+Trong 281 đó: cao nguyên sạch tại ≤1 tick (**227/281 = 80,8%**, ca kế tiếp đã nhảy lên 1,20 tick).
+
+**Bước 1 (commit `46eb2540`) — tolerance đổi từ `1e-9` tương đối sang 1 tick tuyệt đối
+(`trading_bot.vn_market.tick_size`)**: 227 ca flip refused→computable, 0 ca lật ngược, **681→454**.
+0/227 chạm ticker×window của cả 2 sổ paper đang sống (AlphaLens FPT/ACB/MBB/HDB
+2026-07-01..2026-09-30; DC-book ACB/MBB/TCB/HAH/PVT/DHG/SSI/FPT/CTR 2026-07-06..2026-10-06) ⇒
+LATENT, không đổi tỉ suất đã công bố.
+
+**Bước 2 (round 2, cùng ngày) — cap `tol_vnd = min(tick_size(bar["price"]), TOL * bar["price"])`**:
+quant-skeptic's killer_objection chỉ ra 1 tick tuyệt đối trên mã giá thấp (<~3.334đ) chiếm >0,3%
+giá — lỏng hơn chuẩn `TOL=0,3%` mà chính module này áp ở nơi khác. Đo lại TRÊN CÙNG cửa sổ dữ liệu
+(BQ pull mới, 2026-09-29): cap KHÔNG lấy lại ca nào trong 227 vừa flip, và KHÔNG đụng 903 ca đã
+computable trước đó — **454 ca `ffill_cum_band` sau cap, giống hệt sau Bước 1** (cap chỉ bind dưới
+~16.667đ tier 50đ / ~3.334đ tier 10đ, không có ứng viên thật nào trong cửa sổ vừa nằm dưới ngưỡng
+đó vừa có gap vượt cap). Biên fail-open lý thuyết nay bị chặn cứng ở 0,3% giá bất kể mức giá/sàn.
+
+Fixture thật pin trong `close_repair_selfcheck.py`: AIG 2026-07-30 (gap 2,79đ, tick=100 → chấp
+nhận cả trước/sau cap) · DFC 2026-06-17 (gap 3.660đ = 73,2 tick, vendor stale thật → vẫn bị chối
+cả trước/sau cap). Biên số học (synthetic, không phải bar thật) pin thêm 2 ca ở mức giá ~3.009đ:
+gap=9,0đ (0,299%) admitted, gap=9,5đ (0,316%, trong 1 tick nhưng ngoài 0,3%) refused — đúng ca
+killer_objection nêu.
+
+**Selfcheck**: `close_repair_selfcheck.py` 992/992 assertion PASS, **16/16 mutation killed** (thêm
+`band_cap_removed` cho riêng cap). `paper_entry_adjust.py --selfcheck` 30/30. `paper_report_render_selfcheck.py`
+(`mike/bin/`) 46/46. Cả 3 tự chạy lại thật trong phiên `Taylor_20260929_071902`.
+
+**quant-skeptic**: CONFIRMED (high) cho Bước 1, `bin/verify_finding.sh` topic
+`paper-report-fpt-double-adjust-fix-20260929-viecC-band-tolerance-tick`. Bước 2 (cap) là phản hồi
+trực tiếp cho killer_objection của lần verify đó — điều tra độc lập cho Bước 2 riêng lẻ chưa chạy
+(để Mike/user quyết có cần thêm 1 vòng verify hay đủ vì additive-only, đo lại 0-cost trên chính bộ
+dữ liệu đã CONFIRMED).
+
+Tái lập: `source wc_env.sh && python3 price_xcheck_cum_band_breach.py` (script tự phân biệt
+681 pre-fix / 454 post-fix qua `assert n_ffill_cum_band in (681, 454)`, không cần flag riêng).

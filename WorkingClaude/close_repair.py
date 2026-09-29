@@ -147,6 +147,20 @@ def _band_lifted_suspect(bar: dict, series: list, i: int) -> bool:
     2026-07-01..2026-09-30; DC-book converge seed ACB/MBB/TCB/HAH/PVT/DHG/SSI/FPT/CTR
     2026-07-06..2026-10-06) — this change is LATENT/preventative for both books as of 2026-09-29,
     not a retroactive change to any already-published tỉ suất.
+
+    CAPPED AT `TOL` (0,3%) SINCE THE SAME DAY (round 2 of Việc C, user directive after
+    quant-skeptic's killer_objection): raw `tick_size` alone is a FIXED VND amount, so on a
+    penny name (<3.334đ, where 1 tick=10đ is >0,3% of price) it silently admits a factor error
+    LOOSER than the 0,3% vendor/self agreement band this very module enforces everywhere else
+    (`TOL`, module docstring "VENDOR STAYS THE DEFAULT"). `tol_vnd = min(tick_size(bar["price"]),
+    TOL * bar["price"])` reuses that existing constant instead of inventing a new number, so the
+    fail-open bound can never exceed 0,3% of price regardless of price level or exchange.
+    MEASURED (not assumed) 2026-09-29 on the same calibration pull: capping costs **0 of the 227**
+    cases this file's tick-only version just recovered, and 0 of the other 903 already-computable
+    pairs — the cap only ever binds below ~16.667đ (tick=50 tier) / ~3.334đ (tick=10 tier), and no
+    candidate in the measured window both sits under those thresholds AND has a gap that the cap
+    would newly refuse. Re-run `/tmp/taylor_cap_measure.py`-style diff (old tick-only vs capped,
+    same BQ pull) to reproduce.
     """
     hi, lo = bar.get("high") or 0.0, bar.get("low") or 0.0
     if hi <= 0 or lo <= 0 or i <= 0:
@@ -157,7 +171,7 @@ def _band_lifted_suspect(bar: dict, series: list, i: int) -> bool:
     if not neighbour or not neighbour.get("close") or neighbour["close"] <= 0:
         return False
     lift = neighbour["price"] / neighbour["close"]
-    tol_vnd = tick_size(bar["price"])
+    tol_vnd = min(tick_size(bar["price"]), TOL * bar["price"])
     return not (lo * lift - tol_vnd <= bar["price"] <= hi * lift + tol_vnd)
 
 

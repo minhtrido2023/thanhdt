@@ -208,6 +208,28 @@ def run_assertions(cr, tag=""):
     nc("band/tick_tolerance_still_refuses_real_stale_case", f is None)
     nc("band/tick_tolerance_stale_note_says_why", f is None and "outside the raw-lifted" in (note or ""))
 
+    # -- FAIL-OPEN BOUND CAPPED AT `TOL` (0,3%) — round 2 of Việc C, same day, after quant-skeptic's
+    #    killer_objection: a raw `tick_size` tolerance is a FIXED VND amount, so on a penny name
+    #    (<3.334đ where 1 tick=10đ is already >0,3% of price) it silently admits a factor error
+    #    LOOSER than the 0,3% vendor/self agreement band this module enforces everywhere else
+    #    (`TOL`). Synthetic boundary (not real bars — this pins an arithmetic edge, not a market
+    #    event): neighbour 2026-08-05 close=price=3.000 (lift=1,0), cum bar 2026-08-06 lifted band
+    #    [3.000, 3.000], raw Price offset by `gap`. At price≈3.009, `tick_size=10đ` but
+    #    `TOL*price≈9,03đ` — the cap must bind BELOW the raw tick.
+    #    gap=9,5đ (0,316% of price, inside 1 tick but OUTSIDE 0,3%) → refused by the cap; a
+    #    tick-only tolerance would have admitted it (9,5 <= 10) — this is exactly the killer
+    #    objection scenario, now closed.
+    cap_refuse = bars([("2026-08-05", 3000.0, 3000.0),
+                       ("2026-08-06", 3000.0, 3009.5, 3000.0, 3000.0)])
+    f, note = cr.group_factor("2026-08-07", [div("2026-08-07", 5.0)], cap_refuse)
+    nc("band/cap_refuses_penny_gap_beyond_tol_pct", f is None)
+    #    gap=9,0đ (0,299%, just inside 0,3%) → still admitted: the cap must not over-refuse right
+    #    at its own boundary.
+    cap_admit = bars([("2026-08-05", 3000.0, 3000.0),
+                      ("2026-08-06", 3000.0, 3009.0, 3000.0, 3000.0)])
+    f, note = cr.group_factor("2026-08-07", [div("2026-08-07", 5.0)], cap_admit)
+    nc("band/cap_admits_penny_gap_within_tol_pct", f is not None)
+
     # -- dedup on the ECONOMIC term only: identical rows collapse, real tranches sum
     kept, dropped = cr.dedup_same_term([div("2026-09-14", 3000.0), div("2026-09-14", 3000.0)])
     nc("dedup/identical_collapses", len(kept) == 1 and len(dropped) == 1)
@@ -406,8 +428,12 @@ MUTATIONS = [
      "            if dps <= 0:\n                continue",
      ["repair/negative_dps_uncomputable", "failclosed/dps_unparsable"]),
     ("band_tolerance_zeroed_out",
-     "    tol_vnd = tick_size(bar[\"price\"])", "    tol_vnd = 0.0",
+     "    tol_vnd = min(tick_size(bar[\"price\"]), TOL * bar[\"price\"])", "    tol_vnd = 0.0",
      ["band/tick_tolerance_admits_real_rounding_case"]),
+    ("band_cap_removed",
+     "    tol_vnd = min(tick_size(bar[\"price\"]), TOL * bar[\"price\"])",
+     "    tol_vnd = tick_size(bar[\"price\"])",
+     ["band/cap_refuses_penny_gap_beyond_tol_pct"]),
 ]
 
 
