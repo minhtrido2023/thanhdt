@@ -216,15 +216,14 @@ def count_trading_days(start, asof):
     return n
 
 
-def lag_entry_dates(account):
-    """{ticker: 'YYYY-MM-DD'} ngày FILL mua ĐẦU TIÊN gắn nhãn book=LAG, quét toàn bộ
-    `exec_{account}_*_journal.csv` còn trên đĩa (journal xoay theo ngày, không phải 1 file)."""
+def _first_fill_dates(account, book_label):
+    """{ticker: 'YYYY-MM-DD'} ngày FILL mua ĐẦU TIÊN gắn nhãn book=`book_label`."""
     first = {}
     for fn in sorted(glob.glob(os.path.join(EXEC_DIR, f"exec_{account}_*_journal.csv"))):
         try:
             with open(fn, encoding="utf-8") as f:
                 for row in csv.DictReader(f):
-                    if row.get("event") != "FILL" or row.get("book") != "LAG":
+                    if row.get("event") != "FILL" or row.get("book") != book_label:
                         continue
                     if (row.get("side") or "").lower() != "buy":
                         continue
@@ -237,6 +236,16 @@ def lag_entry_dates(account):
         except (OSError, csv.Error):
             continue
     return first
+
+
+def lag_entry_dates(account):
+    """{ticker: 'YYYY-MM-DD'} ngày FILL mua ĐẦU TIÊN gắn nhãn book=LAG."""
+    return _first_fill_dates(account, "LAG")
+
+
+def disc_entry_dates(account):
+    """{ticker: 'YYYY-MM-DD'} ngày FILL mua ĐẦU TIÊN gắn nhãn book=DISCRETIONARY_SPECIAL."""
+    return _first_fill_dates(account, "DISCRETIONARY_SPECIAL")
 
 
 def lag_exit_hint(ticker, entry_dates, asof_date):
@@ -433,6 +442,7 @@ def build_output(account, date):
     recs_by_book = load_recs(recs_path) if recs_path else {}
     bal_recs = recs_by_book.get("BAL", {})
     lag_entries = lag_entry_dates(account)
+    disc_entries = disc_entry_dates(account)
 
     dt_gate_line = value_radar_line = None
     try:
@@ -520,6 +530,15 @@ def build_output(account, date):
                     extra.append(h)
             elif sleeve == "CAPIT":
                 extra.append("không fixed exit, thoát theo tín hiệu đảo")
+            elif sleeve == "DISCRETIONARY_SPECIAL":
+                entry_str = disc_entries.get(tk)
+                if entry_str:
+                    sessions = count_trading_days(_dt.date.fromisoformat(entry_str),
+                                                   _dt.date.fromisoformat(date))
+                    sess_txt = f"{sessions} phiên từ {entry_str}" if sessions is not None else f"từ {entry_str}"
+                else:
+                    sess_txt = "ngày vào không rõ"
+                extra.append(f"⚠️ {sess_txt} — chờ ý kiến PM về exit")
             rw = risk_warning(sleeve, pp)
             if rw:
                 emoji, rw_txt = rw
@@ -578,8 +597,16 @@ def build_output(account, date):
     if sleeves.get("LAG"):
         flags.append(f"LAG: đang giữ {len(sleeves['LAG'])} mã PEAD/earnings-drift, theo dõi cửa sổ thoát.")
     if sleeves.get("DISCRETIONARY_SPECIAL"):
-        names = ", ".join(sorted(tk for tk, *_ in sleeves["DISCRETIONARY_SPECIAL"]))
-        flags.append(f"Discretionary: {names} — theo playbook gom riêng, tách kế toán V2.4.")
+        disc_bits = []
+        for tk, *_ in sleeves["DISCRETIONARY_SPECIAL"]:
+            entry_str = disc_entries.get(tk)
+            if entry_str:
+                sessions = count_trading_days(_dt.date.fromisoformat(entry_str),
+                                               _dt.date.fromisoformat(date))
+                disc_bits.append(f"{tk} ({sessions}p)" if sessions is not None else f"{tk} (từ {entry_str})")
+            else:
+                disc_bits.append(tk)
+        flags.append(f"⚠️ Discretionary: {', '.join(sorted(disc_bits))} — chờ ý kiến PM về exit")
     if sleeves.get("CAPIT"):
         flags.append(f"CAPIT: {len(sleeves['CAPIT'])} mã đang trong episode overflow. "
                      "Không có fixed exit — thoát theo tín hiệu đảo.")
