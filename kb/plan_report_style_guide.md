@@ -187,9 +187,9 @@ xem qua Discord 2026-09-29 (user đã duyệt hướng này).
    **CẬP NHẬT 2026-09-29 tối (worktree `wt-1521183164364754974`, commit `163714bf`+`4af9a438`)**:
    phát hiện này KHÔNG tái lập được ở nhánh này — toàn bộ suite (gồm T13 mới, số case xem lệnh
    chạy thật bên dưới, đừng chép số cứng) PASS 0 FAIL dưới CẢ `env -u TZ` VÀ `TZ=Pacific/Kiritimati`
-   (T9). Không rõ liệu bản `wt-planreportstyle-
-   2909` đã tự vá song song hay 2 worktree lệch nhau vì lý do khác — không điều tra thêm (ngoài
-   phạm vi round này), chỉ ghi để người đọc sau không hoảng vì 2 con số khác nhau trong cùng file.
+   (T9). Không rõ liệu bản `wt-planreportstyle-2909` đã tự vá song song hay 2 worktree lệch nhau
+   vì lý do khác — không điều tra thêm (ngoài phạm vi round này), chỉ ghi để người đọc sau không
+   hoảng vì 2 con số khác nhau trong cùng file.
 
 ## PHẦN C — cắt boilerplate 2026-09-29 21:48+ ICT (worktree `wt-1521183164364754974`, user phàn
    nàn lần 2, siết §4 — xem đầu file)

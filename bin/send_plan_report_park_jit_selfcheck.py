@@ -510,6 +510,25 @@ out_13h = run_sender(p13h, "SpaceX")
 check("NO_JIT_NEEDED + notes benign → KHÔNG in dòng L2 (escape hatch không tự kích khi không cần)",
       "L2 JIT unpark: NO_JIT_NEEDED" not in out_13h)
 
+# T13i (round 4, arch-review): source-pin cho 3 chỗ L2 (:899 TRIM, :904 BLOCKED_*, :922 escape-
+# hatch) — T13f2/f3/f4 chỉ tiêm note thật vào park_trim_proposal (L1), T13g/h dùng fixture ngắn
+# không đủ dài để lộ truncation ⇒ revert riêng lẻ 1 trong 3 chỗ L2 về str(n)[:N] KHÔNG bị 37 case
+# hành vi phía trên bắt được (đã tự tay mutation-test xác nhận: revert từng chỗ vẫn 40/0). Dùng
+# lại đúng idiom _sender_src đã có ở T11 (:334 đọc 1 lần, :439/:446/:450 source-pin) thay vì thêm
+# fixture L2 dài — rẻ hơn và trực tiếp bắt đúng bất biến "còn dùng _note_text() hay không".
+print("\n[T13i] Source-pin: cả 6 chỗ render notes[] phải dùng _note_text(), không rơi lại str(n)[:N]")
+# Đếm trên MÃ THẬT, bỏ qua comment (dòng có # tự nhắc tên hàm trong lời giải thích cũng khớp
+# "_note_text(" — vd :862/:916 — nếu đếm cả comment thì đổi 1 câu comment cũng làm test đỏ oan).
+_sender_code_only = "\n".join(
+    ln.split("#", 1)[0] for ln in _sender_src.splitlines())
+_note_text_calls = _sender_code_only.count("_note_text(")
+check(f"_note_text được ĐỊNH NGHĨA 1 lần + GỌI đúng 6 lần ở 6 chỗ render notes[] trong MÃ THẬT "
+      f"(đếm được {_note_text_calls}, kỳ vọng 7 = 1 def + 6 call) — revert BẤT KỲ 1 trong 6 chỗ "
+      f"về str(n)[:N] thô sẽ làm số này tụt xuống 6, ĐỎ ngay kể cả không có fixture L2 dài",
+      _note_text_calls == 7)
+check("_note_text() giữ dấu '…' khi cắt note KHÔNG mang ⚠️ (round 3 yêu cầu, chưa ai pin trước đó)",
+      's[:budget] + "…"' in _sender_src)
+
 print(f"\n{'=' * 72}\nKẾT QUẢ: {len(PASS)} PASS / {len(FAIL)} FAIL")
 for f in FAIL:
     print(f"  ✗ {f}")
