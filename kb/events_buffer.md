@@ -608,3 +608,6 @@
 
 ## Consolidation 2026-09-29T17:40:05Z
 - [2026-09-29T17:40:01Z] Mike/finding — daily-retro-2026-09-29-finalized: {"summary": "Retro 2026-09-29 finalized: 4 incidents (ZaloPay deal-not-found FIXED same-day, selfcheck unpack gap half-fixed, Wags hint tool NEEDS_CHANGES, AlphaLens FPT double-adjust self-caught+fixed), bus-closure pattern recurred 3rd time (2x today) — ESCALATED to retro-pattern-recurring-bus-question-closure-gap-real-fix-no-answer-event awaiting user A/B/C decision", "verified_by": "Wags — GAPS FOUND, fixed by adding incident #4", "commit": "44ee1c26", "file": "kb/incidents/retro/retro-2026-09-29.md"}
+
+## Consolidation 2026-09-29T22:07:02Z
+- [2026-09-29T21:51:36Z] Winston/finding — sbv-weekly-check-2026-09-30: {"date": "2026-09-30", "current_rate": 4.5, "fetch_status": "fetch_failed", "rate_changed": false, "note": "fetch_failed_assumed_unchanged", "verify_log": "/home/trido/thanhdt/WorkingClaude/data/sbv_verify_log.json"}
