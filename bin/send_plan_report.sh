@@ -599,7 +599,10 @@ nav_str = f"{nav:,.0f}đ" if isinstance(nav, (int, float)) else "n/a"
 lines.append(f"🧭 Thị trường: {state}{src_vn} · NAV cơ sở: {nav_str}")
 # Đặt CẠNH dòng thị trường (không nằm trong nhánh `if orders:`) — plan HOLD cũng phải nói rõ
 # đã/chưa đối chiếu được regime, đó là ca gate câm dễ lọt nhất.
-if state_verify_note:
+# User 2026-09-29: "câu cố định lặp lại vô nghĩa... ngày nào cũng đọc những câu cố định,
+# cứng nhắc". state=OK khớp golive mỗi ngày không mang thông tin quyết định gì — chỉ hiện
+# khi có điều CẦN GIẢI THÍCH (chưa đối chiếu được / mismatch / nhãn mâu thuẫn, đều có ⚠️).
+if state_verify_note and "⚠️" in state_verify_note:
     lines.append(f"   {state_verify_note}")
 
 # DT4-gate candidate streak clock — đã wire vào eod_trading_report.sh (2026-07-10) nhưng
@@ -672,19 +675,14 @@ if orders:
     try:
         from trading_bot.strategies import (_dcf_check_for_order, format_dcf_check,
                                             log_dcf_history)
-        from dcf_valuation import DCF_DISCLAIMER
     except Exception:
         _dcf_check_for_order = format_dcf_check = log_dcf_history = None
-        DCF_DISCLAIMER = ""
     # Due-diligence tổng hợp cho MỌI lệnh MUA (mandate user 2026-07-21) — thanh khoản/universe/
     # cơ học tín hiệu/cờ bất thường/FA thô. skip_dcf=True vì dòng DCF đã echo riêng ngay trên.
     try:
-        from trading_bot.due_diligence import run_due_diligence, DD_DISCLAIMER
+        from trading_bot.due_diligence import run_due_diligence
     except Exception:
         run_due_diligence = None
-        DD_DISCLAIMER = ""
-    dcf_shown = False
-    dd_shown = False
     buys  = [o for o in orders if str(o.get("side","")).lower() in ("buy","mua","b")]
     sells = [o for o in orders if str(o.get("side","")).lower() in ("sell","ban","s")]
     # §2 kb/plan_report_style_guide.md: N lệnh PARK_TRIM cùng lý do (cùng target_park, cùng
@@ -697,13 +695,12 @@ if orders:
         lines.append(f"   ➕ Ngoài {len(orders)} lệnh trên, plan còn **{len(pt_report_orders) + len(jit_report_orders)} "
                      f"lệnh BÁN PARK đề xuất** (L1 trim {len(pt_report_orders)} + L2 JIT {len(jit_report_orders)}) — "
                      f"xem 2 mục riêng ở cuối, CẦN DUYỆT.")
-    if pt_merged or jit_merged:
-        _which = " + ".join(x for x, ok in (("L1 trim", pt_merged), ("L2 JIT", jit_merged)) if ok)
-        lines.append(f"   ✅ Lệnh BÁN PARK {_which} là LỆNH THẬT, đã gộp vào {len(orders)} lệnh ở trên "
-                     "(không liệt kê riêng để tránh đếm 2 lần) — sẽ đặt cùng lúc với lệnh mua, "
-                     "ĐỘC LẬP về lý do (tuân thủ trần PARK, không phải nguồn tiền cho lệnh mua "
-                     "trừ khi dòng 'Tiền đâu ra' bên dưới ghi rõ FUNDED_BY_JIT).")
-    if price_verify_note:
+    # (pt_merged/jit_merged cơ chế "PARK đã gộp vào lệnh trên" — bỏ dòng giải thích cố định,
+    # cắt 2026-09-29: giải thích CƠ CHẾ render, không phải thông tin đổi theo ngày. Biến vẫn
+    # dùng ở _amend_for/_sells_for bên dưới cho dòng "Tiền đâu ra" — đó MỚI là quyết định.)
+    # Cùng nguyên tắc: "đã xác minh N/N" mỗi ngày không cần giải thích — chỉ hiện khi
+    # KHÔNG xác minh được (⚠️), đó mới là điều người duyệt cần biết.
+    if price_verify_note and "⚠️" in price_verify_note:
         lines.append(f"   {price_verify_note}")
     if capit_note:
         lines.append(f"   {capit_note}")
@@ -766,7 +763,6 @@ if orders:
                                      ticker=ticker)
             if dcf_s:
                 lines.append(f"      ↳ {dcf_s}")
-                dcf_shown = True
                 if log_dcf_history:
                     log_dcf_history(ticker, dcf, "send_plan_report", asof=date)
             if is_buy and o.get("dcf_override_reason"):
@@ -785,7 +781,6 @@ if orders:
             if dd_s:
                 for dl in str(dd_s).splitlines():
                     lines.append(f"      ↳ {dl.strip()}")
-                dd_shown = True
             if o.get("dd_override_reason"):
                 lines.append(f"      ↳ lý do override DD: {str(o['dd_override_reason'])[:120]}")
     if _pt_trim_tickers:
@@ -796,10 +791,10 @@ if orders:
             f"   ↳ ℹ️ Lý do (áp dụng CHUNG cho {len(_pt_trim_tickers)} lệnh BÁN PARK_TRIM ở "
             f"trên): tuân thủ trần PARK {_o_tgt_s} (park-trim), KHÔNG liên quan tới việc tài "
             "trợ lệnh mua trong plan này.")
-    if dcf_shown and DCF_DISCLAIMER:
-        lines.append(f"ℹ️ _{DCF_DISCLAIMER}_")
-    if dd_shown and DD_DISCLAIMER:
-        lines.append(f"ℹ️ _{DD_DISCLAIMER}_")
+    # DCF_DISCLAIMER/DD_DISCLAIMER (giải thích PHƯƠNG PHÁP DCF/DD) bỏ khỏi report hàng ngày
+    # 2026-09-29 — văn bản cố định, giống hệt mọi ngày có lệnh mua, không đổi theo quyết định
+    # hôm nay. Nội dung đầy đủ vẫn ở dcf_valuation.DCF_DISCLAIMER / due_diligence.DD_DISCLAIMER
+    # cho ai cần tra lại phương pháp.
 else:
     lines.append(f"🎯 Hành động: **GIỮ NGUYÊN (HOLD)** — không có lệnh nào ngày mai.")
 
@@ -838,7 +833,9 @@ try:
         lines.append(f"🅿️ **TRIM PARK (L1) BỊ CHẶN — {pt_dec}**: "
                      + ("; ".join(str(n)[:200] for n in (park_trim.get("notes") or [])[:2])
                         or "không có lý do kèm theo — kiểm compute_park_trim.py."))
-    elif pt_dec:
+    elif pt_dec and pt_dec not in ("NO_TRIM", "NO_TRIM_STRUCTURE", "SKIP_STATE"):
+        # NO_TRIM/NO_TRIM_STRUCTURE/SKIP_STATE = "không cần trim hôm nay", đúng như thiết kế
+        # mỗi ngày PARK dưới trần — không phải điều cần giải thích lại mỗi lần (user 2026-09-29).
         lines.append(f"🅿️ L1 trim PARK: {pt_dec}"
                      + (f" — {str((park_trim.get('notes') or [''])[0])[:180]}"
                         if park_trim.get("notes") else ""))
@@ -878,7 +875,10 @@ try:
                      + ("; ".join(str(n)[:200] for n in (jit_prop.get("notes") or [])[:2])
                         or "không có lý do kèm theo — kiểm compute_jit_unpark.py.")
                      + " ⇒ lệnh mua có thể THIẾU TIỀN lúc 09:05 (triệu chứng WAIT_CASH).")
-    elif jit_dec:
+    elif jit_dec and jit_dec not in ("NO_JIT_NEEDED", "NO_TRIGGER"):
+        # NO_JIT_NEEDED/NO_TRIGGER = "L2 không chạy vì không có lệnh mua cần tài trợ", đúng
+        # thiết kế mọi ngày HOLD/không-mua — bỏ dòng lặp lại vô nghĩa (user 2026-09-29, ca
+        # thật: SpaceX 2026-09-30 0 lệnh vẫn in "L2 JIT unpark: NO_TRIGGER" mỗi ngày).
         lines.append(f"💧 L2 JIT unpark: {jit_dec}"
                      + (f" — {str((jit_prop.get('notes') or [''])[0])[:180]}"
                         if jit_prop.get("notes") else ""))
