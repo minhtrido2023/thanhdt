@@ -526,6 +526,31 @@ nohup $DNA_PYEXE $WC/mike/bin/paper_programs_daily_report.py \
 - Bug ở 1 script → grep các script khác làm việc TƯƠNG TỰ (bài học 07-06: 3 bug cùng dạng
   "logic trùng lặp không đồng bộ" trong 1 ngày).
 
+## Headless agent bị classifier chặn git-write / BQ-write vào file production (tái diễn 09-27, 09-28)
+
+**Triệu chứng:** agent chạy headless (dispatch) làm xong việc, đã có verdict CONFIRMED, nhưng
+bước CUỐI (`git merge` vào main, `bq query 'CREATE OR REPLACE'`, ghi đè file production) bị
+harness classifier từ chối. Agent quay ra escalate, việc treo cho tới khi có người chạy trong
+phiên tương tác. Đã tốn ~2h (09-27 `fa_ratings_8l` restore 06:54→08:55) và 1 lần nữa 09-28
+(`close_repair` merge `eec792d7`/`3c55c249`).
+
+**Đây KHÔNG phải lỗi fleet — đừng đi debug `dispatch.sh`/quyền file.** Nhận diện bằng: job có
+finding "ALL_VERIFIED_READY ... blocked-by-classifier", hoặc commit nằm trên feature branch mà
+không merge được.
+
+**Làm gì NGAY (đừng điều tra lại từ đầu):**
+1. Xác minh công việc thật sự đã xong: verdict CONFIRMED trên bus + selfcheck PASS + commit tồn
+   tại trên feature branch (`git log --oneline --all | grep <hash>`).
+2. Người/phiên TƯƠNG TÁC chạy bước cuối (merge / BQ write). Headless retry sẽ hỏng lại.
+3. Đóng question gốc bằng event `answer` NGAY sau khi merge — nếu không, checker §5 sẽ báo
+   pending tiếp 2 lần/ngày dù việc đã xong (đúng lỗi đã xảy ra với
+   `closerepair-fix-approval-needed`, mở 09-28T10:57Z, merge xong 09-28 mà vẫn pending 29/09).
+
+**Giảm tần suất:** việc biết trước sẽ cần git-write vào main hoặc BQ write → dispatch dạng
+TƯƠNG TÁC ngay từ đầu, đừng để headless chạy tới bước cuối rồi tắc. (Câu hỏi có nên bắt buộc
+hoá quy tắc này vẫn đang chờ user — bus topic
+`retro-pattern-recurring-classifier-blocks-headless-agent-production-write`.)
+
 ## Lược sử
 2026-07-07: viết lần đầu + wire autofix vào ops_health_check.sh & sync_bq_cache_daily.sh
 (sau chuỗi sự cố 07-06: EOD crash, NAV sai 2 lần, cache thối 10 ngày, false-SEV1 macro).
