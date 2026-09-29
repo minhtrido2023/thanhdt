@@ -120,6 +120,7 @@ class AdjustedEntry:
     asof_used: str | None        # the trading day actually resolved (<= requested asof)
     status: str                  # ADJUSTED | UNCHANGED | NO_DATA | BAD_FACTOR
                                  # | RIGHTS_UNRESOLVED | VINTAGE_STALE | REPAIR_INCONSISTENT
+                                 # | REPAIR_PRICE_MISMATCH
     note: str | None = None      # human-readable caveat, surfaced in the report when set
     factor_terp: float | None = None      # raw Close/Price (TERP: rights subscribed or sold)
     convention: str = "accrue_only"       # accrue_only | terp
@@ -135,7 +136,7 @@ class AdjustedEntry:
     def degraded(self) -> bool:
         """True when we could not verify the rebase and fell back to the raw frozen entry."""
         return self.status in ("NO_DATA", "BAD_FACTOR", "RIGHTS_UNRESOLVED", "VINTAGE_STALE",
-                               "REPAIR_INCONSISTENT")
+                               "REPAIR_INCONSISTENT", "REPAIR_PRICE_MISMATCH")
 
     def pct_vs(self, current_close: float) -> float:
         """Total return % of this position, both ends on the adjusted scale."""
@@ -213,9 +214,28 @@ def _repaired_series_violation(ticker, asof, events, series, series_max):
     return None
 
 
+def _price_mismatch(ticker, asof, events, series, series_max):
+    """tuple of `close_repair.PriceCrossCheck` mismatches, or None — independent GROSS-error
+    screen against REAL price action at the ex-date (Việc nhỏ 3, 2026-09-29, job
+    Taylor_20260929_032553). Only called for a (ticker, asof) row close_repair already marked
+    `adj_source="self_computed"`. Catches the direction `_repaired_series_violation` structurally
+    cannot: `corporate_action` OVER-stating an event (ratio/value too HIGH) keeps the repaired
+    ratio series monotone but disagrees with what actually traded on the ex-date session — see
+    `close_repair.py`'s `PRICE_XCHECK_TOL` comment block for the calibration evidence and its own
+    disclosed blind spot (sub-~20% ratio errors are not reliably distinguishable from ordinary
+    single-day trading noise; this is a coarse screen, not an exact validator).
+    """
+    import close_repair             # re-imported: same reasoning as _repaired_series_violation
+
+    mismatches, _notes = close_repair.price_crosscheck_after(asof, events, series, series_max)
+    return mismatches if mismatches else None
+
+
 def _repair_close(rows, items, cache_dir, cache_max_date):
-    """({(tk,asof): (time, Close, Price)}, {(tk,asof): Repair}, {(tk,asof): violation}) — the
-    vendor Close REPAIRED, plus a fail-closed consistency check on that repair.
+    """({(tk,asof): (time, Close, Price)}, {(tk,asof): Repair}, {(tk,asof): violation},
+    {(tk,asof): price_mismatches}) — the vendor Close REPAIRED, plus two independent fail-closed
+    consistency checks on that repair (monotonicity + real-price cross-check, see
+    `_repaired_series_violation` / `_price_mismatch`).
 
     Layer 2 of the self-computed adjustment factor (`close_repair.py`), OFF unless
     `MIKE_CLOSE_REPAIR=1`. Wired HERE and nowhere else because `_fetch_rows` is the single point
@@ -228,16 +248,16 @@ def _repair_close(rows, items, cache_dir, cache_max_date):
     unverifiable number with another.
     """
     if not rows:
-        return rows, {}, {}
+        return rows, {}, {}, {}
     try:
         import duckdb
 
         import close_repair
         from corp_action_lib import events as ca_events
     except Exception as e:                       # close_repair absent, BQ lib absent, no duckdb
-        return rows, {"_error": f"không nạp được close_repair ({str(e)[:90]})"}, {}
+        return rows, {"_error": f"không nạp được close_repair ({str(e)[:90]})"}, {}, {}
     if not close_repair.enabled():
-        return rows, {}, {}
+        return rows, {}, {}, {}
 
     try:
         keys = [(t, a) for (t, a) in rows]
@@ -268,14 +288,14 @@ def _repair_close(rows, items, cache_dir, cache_max_date):
                  "high": float(hi or 0), "low": float(lo or 0)})
         series_max = cache_max_date or max((b["d"] for s in series.values() for b in s), default=None)
         if not series_max:
-            return rows, {"_error": "không xác định được ngày cuối của chuỗi giá"}, {}
+            return rows, {"_error": "không xác định được ngày cuối của chuỗi giá"}, {}, {}
         evs = {}
         for e in ca_events(tickers, since=start, until=series_max):
             evs.setdefault(e["ticker"], []).append(e)
     except Exception as e:
-        return rows, {"_error": f"không dựng được dữ liệu sửa Close ({str(e)[:90]})"}, {}
+        return rows, {"_error": f"không dựng được dữ liệu sửa Close ({str(e)[:90]})"}, {}, {}
 
-    out, reps, violations = dict(rows), {}, {}
+    out, reps, violations, price_mismatches = dict(rows), {}, {}, {}
     for (tk, asof), (time_used, close_at, price_at) in rows.items():
         try:
             rep = close_repair.repair_row(
@@ -298,7 +318,13 @@ def _repair_close(rows, items, cache_dir, cache_max_date):
                 v = None
             if v is not None:
                 violations[(tk, asof)] = v
-    return out, reps, violations
+            try:
+                pm = _price_mismatch(tk, asof, evs.get(tk, []), series.get(tk, []), series_max)
+            except Exception:                     # the cross-check itself must not sink a repair
+                pm = None
+            if pm is not None:
+                price_mismatches[(tk, asof)] = pm
+    return out, reps, violations, price_mismatches
 
 def cache_vintage(cache_dir=None) -> dict:
     """{year: mtime} for `bq_cache/ticker/*.parquet` plus `ticker_1m` — the freshness fault line.
@@ -470,7 +496,8 @@ def adjust_entries(items, cache_dir=None, convention="accrue_only") -> dict:
     # Layer 2 (OFF by default, see `_repair_close`). Placed after `_fetch_rows` and before
     # `factor_terp` is read, because the whole point is that `factor_terp` must be computed off a
     # COMPLETE adjustment. It only ever replaces `Close`; `Price` and `time_used` are untouched.
-    rows, repairs, repair_violations = _repair_close(rows, items, cache_dir, cache_max_date)
+    rows, repairs, repair_violations, price_mismatches = _repair_close(
+        rows, items, cache_dir, cache_max_date)
 
     out = {}
     for ticker, asof, entry_price in items:
@@ -505,6 +532,28 @@ def adjust_entries(items, cache_dir=None, convention="accrue_only") -> dict:
                 f"vẫn GIẢM theo thời gian ({r0:.6f} tại {asof} → {r_min:.6f} tại {d_bad}) — bằng "
                 f"chứng cơ học rằng corporate_action cho {ticker} trong cửa sổ này sai/thiếu sự "
                 f"kiện, không phải vendor chưa hồi tố. Không đoán số đúng, giữ giá gốc.",
+                factor_terp=factor_terp, convention=convention, **prov,
+            )
+            continue
+
+        # Independent GROSS-error screen against REAL price action at the ex-date (Việc nhỏ 3,
+        # 2026-09-29): catches the direction `viol` above structurally cannot — corporate_action
+        # OVERSTATING an event keeps the repaired ratio series monotone (no `viol`) but disagrees
+        # with what actually traded. Checked SECOND, only when `viol` above did not already fire,
+        # because it is a noisier, threshold-based screen (see close_repair.PRICE_XCHECK_TOL
+        # comment block) rather than a mechanical invariant.
+        pmiss = price_mismatches.get((ticker, asof))
+        if pmiss is not None:
+            detail = "; ".join(f"{xc.ex}: f={xc.f_formula:.6f} vs giá thật r_real={xc.r_real:.6f} "
+                               f"(dev={xc.dev:+.2%})" for xc in pmiss)
+            out[(ticker, asof)] = AdjustedEntry(
+                ticker, entry_price, entry_price, factor_terp, price_at, time_used,
+                "REPAIR_PRICE_MISMATCH",
+                f"close_repair đã tự sửa Close (self_computed) nhưng hệ số công thức LỆCH biến "
+                f"động giá THẬT tại ex-date quá PRICE_XCHECK_TOL ({detail}) — nghi corporate_action "
+                f"sai/thiếu sự kiện cho {ticker} theo chiều LÀM ĐẸP tỉ suất (bất biến đơn điệu ở "
+                f"trên không bắt được chiều này). Không đoán số đúng, giữ giá gốc; cần Winston "
+                f"đối soát lại corporate_action.",
                 factor_terp=factor_terp, convention=convention, **prov,
             )
             continue
@@ -662,6 +711,29 @@ def _selfcheck() -> int:
     check("8. mutate exercise_ratio 0,10→0,05 (corporate_action sai) ⇒ BẮT ĐƯỢC vi phạm cơ học, "
           "KHÔNG âm thầm dùng số sai",
           v_bad is not None and (v_bad[1] - v_bad[2]) / v_bad[1] > TERP_DROP_TOL, f"{v_bad}")
+
+    # 9-10. PRICE_XCHECK_TOL cross-check (Việc nhỏ 3, 2026-09-29, close_repair.price_crosscheck):
+    # independent screen against REAL raw price at ex-date, catching the mirror-image defect 7-8
+    # structurally cannot — corporate_action OVERSTATING an event (ratio too HIGH) keeps the
+    # repaired series monotone (no `viol`) but disagrees with what actually traded. Same synthetic
+    # FPT series as 7-8: real market step P_cum/P_ex = 71.700 (2026-09-18) / 63.700 (first bar
+    # on/after ex 2026-09-21, i.e. 2026-09-22) = 1,125589.
+    import close_repair as _cr
+    _gross_bad_ev = {**_true_ev, "exercise_ratio": 1.0}    # 10x fat-finger: f=2,00 vs f=1,10 true
+    _micro_bad_ev = {**_true_ev, "exercise_ratio": 0.15}   # quant-skeptic's own mutation: f=1,15
+    xc_true, _ = _cr.price_crosscheck_after("2026-06-30", [_true_ev], _fpt_series, _fpt_max)
+    xc_gross, _ = _cr.price_crosscheck_after("2026-06-30", [_gross_bad_ev], _fpt_series, _fpt_max)
+    xc_micro, _ = _cr.price_crosscheck_after("2026-06-30", [_micro_bad_ev], _fpt_series, _fpt_max)
+    check("9. ca FPT thật (0,10) ⇒ công thức khớp giá thật trong PRICE_XCHECK_TOL, KHÔNG mismatch",
+          xc_true == (), f"{xc_true}")
+    check("10a. mutate 0,10→1,0 (sai 10 lần, fat-finger) ⇒ BẮT ĐƯỢC bằng giá thật (bất biến đơn "
+          "điệu 7-8 KHÔNG bắt được ca này vì hệ số CAO hơn không phá tính đơn điệu)",
+          len(xc_gross) == 1 and xc_gross[0].mismatch, f"{xc_gross}")
+    check("10b. mutate 0,10→0,15 (đúng mutation của quant-skeptic, +4,5% hệ số) ⇒ KHÔNG bắt được "
+          "— GIỚI HẠN ĐÃ CÔNG BỐ của phương pháp (lệch 2,1% nằm trong nhiễu 1 phiên bình thường đo "
+          "thực nghiệm ~1,4% median; PRICE_XCHECK_TOL=20% hiệu chỉnh để tránh báo động giả trên "
+          ">1.200 sự kiện thật, không phải bỏ sót cài đặt)",
+          xc_micro == (), f"{xc_micro}")
 
     print("== B. Dữ liệu thật trong cache ==")
     cache_ok = (DEFAULT_CACHE / "ticker").is_dir()

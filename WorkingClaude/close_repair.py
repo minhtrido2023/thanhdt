@@ -238,6 +238,140 @@ def factor_after(date: str, events: list, series: list, series_max: str) -> tupl
     return r, tuple(uncomputable), tuple(notes)
 
 
+# ------------------------------------------------------------------ independent price cross-check
+#
+# WHY THIS EXISTS (Việc nhỏ 3, 2026-09-29, job Taylor_20260929_032553). The repaired-series
+# monotonicity check (`paper_entry_adjust._repaired_series_violation`) only catches the direction
+# where `corporate_action` UNDER-states an event (r_pred too LOW makes the repaired ratio series
+# non-monotone and gets caught). The mirror-image defect — `corporate_action` OVER-states an event
+# (wrong exercise_ratio/value_per_share, too HIGH) — makes `r_pred` too HIGH, `Close_self` too LOW,
+# the reported return FLATTERED, and the repaired series stays perfectly monotone: the invariant is
+# blind to it by construction (quant-skeptic, job Taylor_20260929_022438, killer_objection,
+# mutation-tested with exercise_ratio 0,15 and 0,104 against FPT's true 0,10, neither caught).
+#
+# THE ONLY INDEPENDENT GROUND TRUTH AVAILABLE is what actually traded on the ex-date session —
+# `tav2_bq.ticker.Price` (raw), which neither `group_factor`'s formula nor the vendor's `Close`
+# touches. If `f` is right, the raw step P_cum → P_ex must land close to it; if `corporate_action`
+# is wrong, the two disagree regardless of which direction the error runs.
+#
+# CALIBRATION (measured 2026-09-29 via BQ, `tav2_bq.corporate_action` × `tav2_bq.ticker`, ALL
+# price-adjusting DIV/ISS(bonus|stock-dividend) events 2025-01-01..2026-09-15, n=1.235 after
+# dropping ffill/no-volume ex-date bars): |dev| between `f` and the REAL observed P_cum/P_ex is NOT
+# tight like `TOL` above — median 1,43%, p90 6,16%, p95 8,77%, p99 13,64%, max 28,35% — and
+# restricting to large/liquid names does NOT tighten it (MBB alone, 4 real events: −5,74%, +3,62%,
+# −2,00%, +1,63%). This is genuine same-day trading noise around a corp-action step, not
+# vendor/data-quality noise: comparing a SINGLE session's raw close against a formula has an
+# irreducible floor of several percent that a MULTI-session cumulative comparison (what `TOL`
+# above guards) does not have. Reusing `TOL=0,3%` here would flag >90% of ALL price-adjusting
+# events in the market — useless.
+#
+# PRICE_XCHECK_TOL = 0,20 (20%) instead: false-positive rate on the same 1.235-event sample is
+# 0,32% (4/1.235) — a coarse, GROSS-error screen. It reliably catches an order-of-magnitude-wrong
+# exercise_ratio/value_per_share (decimal slip, wrong/duplicated event: a synthetic 0,10→1,0 fat-
+# finger on the real FPT market data below IS caught, dev=−43,7%) but — DISCLOSED LIMIT, same class
+# as the monotonicity check's one-directional blind spot — it CANNOT distinguish quant-skeptic's
+# 0,15/0,104 micro-mutations (4,5%/0,36% shift in `f`, dev=−2,1%/≈0% on the real FPT data) from
+# ordinary single-day noise (already ~1,4% at the median). Catching those would need a per-ticker
+# volatility-adjusted statistic — out of scope for this pass, flagged here so it is not forgotten.
+PRICE_XCHECK_TOL = 0.20
+
+
+@dataclass
+class PriceCrossCheck:
+    """Independent GROSS-error screen for ONE ex-date group — see the comment block above for the
+    calibration evidence and its disclosed blind spot. `mismatch=True` is the only actionable
+    signal; `mismatch=False` with `f_formula`/`r_real`/`dev` left `None` means "could not test"
+    (uncomputable formula, no usable cum/ex bar, ffill-suspect), NEVER "tested and it's fine" — the
+    caller must not read an untested row as clean.
+    """
+    ex: str
+    f_formula: float | None
+    r_real: float | None
+    dev: float | None
+    mismatch: bool
+    note: str = ""
+
+
+def _last_cum_index(series: list, ex: str) -> int | None:
+    """Index of the last bar strictly before `ex` — the SAME rule `group_factor` uses internally
+    for its own cum-bar lookup, duplicated rather than extracted: `group_factor` returns only the
+    factor/note (not the index) and is not to be changed for this (Việc nhỏ 3 dispatch constraint:
+    additive only, existing functions untouched)."""
+    idxs = [i for i, b in enumerate(series) if b["d"] < ex]
+    return idxs[-1] if idxs else None
+
+
+def price_crosscheck(ex: str, kept_evs: list, series: list,
+                     tol: float = PRICE_XCHECK_TOL) -> PriceCrossCheck:
+    """One ex-date's formula factor vs the REAL raw price step across it — see block above.
+
+    `kept_evs` = events for this ex-date, already deduped by `dedup_same_term` (same contract as
+    `group_factor`, reused here UNMODIFIED to get `f` — same-day combos are therefore checked
+    against the correct combined exchange formula, never a multiplied-per-event approximation).
+    Fail-closed like every other check in this module: any bar that cannot be trusted (uncomputable
+    formula, no cum/ex bar in the window, ffill-suspect per `_band_lifted_suspect`) returns
+    `mismatch=False` with a note explaining why — never a guessed verdict.
+    """
+    f, note_f = group_factor(ex, kept_evs, series)
+    if f is None:
+        return PriceCrossCheck(ex, None, None, None, False, note_f)
+
+    i_cum = _last_cum_index(series, ex)
+    if i_cum is None:
+        return PriceCrossCheck(ex, f, None, None, False, f"{ex}: không có phiên cum trong cửa sổ")
+    i_ex = next((i for i, b in enumerate(series) if b["d"] >= ex), None)
+    if i_ex is None:
+        return PriceCrossCheck(ex, f, None, None, False,
+                               f"{ex}: chuỗi giá chưa tới phiên ex-date, chưa cross-check được")
+
+    if _band_lifted_suspect(series[i_cum], series, i_cum):
+        return PriceCrossCheck(ex, f, None, None, False,
+                               f"{ex}: phiên cum {series[i_cum]['d']} nghi ffill, không cross-check")
+    if _band_lifted_suspect(series[i_ex], series, i_ex):
+        return PriceCrossCheck(ex, f, None, None, False,
+                               f"{ex}: phiên ex-date {series[i_ex]['d']} nghi ffill, không cross-check")
+
+    p_cum, p_ex = series[i_cum]["price"], series[i_ex]["price"]
+    if p_cum <= 0 or p_ex <= 0:
+        return PriceCrossCheck(ex, f, None, None, False, f"{ex}: Price <= 0, không cross-check")
+
+    r_real = p_cum / p_ex
+    dev = r_real / f - 1.0
+    mismatch = abs(dev) > tol
+    return PriceCrossCheck(
+        ex, f, r_real, dev, mismatch,
+        f"{ex}: công thức f={f:.6f} vs giá thật r_real={r_real:.6f} "
+        f"(P_cum={p_cum:,.0f} {series[i_cum]['d']} → P_ex={p_ex:,.0f} {series[i_ex]['d']}) "
+        f"dev={dev:+.4%}" + (" → MISMATCH, vượt PRICE_XCHECK_TOL" if mismatch else " → khớp"))
+
+
+def price_crosscheck_after(date: str, events: list, series: list, series_max: str,
+                           tol: float = PRICE_XCHECK_TOL) -> tuple:
+    """(mismatches, notes) over every price-adjusting ex-date in (date, series_max].
+
+    Mirrors `factor_after`'s own grouping (same `is_price_adjusting` filter, same
+    `dedup_same_term`) so this checks EXACTLY the ex-date set that produced `r_pred` — never a
+    silently different one.
+    """
+    by_ex = defaultdict(list)
+    for ev in events:
+        ex = ev.get("exright_date")
+        if not ex or not (date < ex <= series_max):
+            continue
+        if not is_price_adjusting(ev):
+            continue
+        by_ex[ex].append(ev)
+
+    mismatches, notes = [], []
+    for ex in sorted(by_ex):
+        kept, _dropped = dedup_same_term(by_ex[ex])
+        xc = price_crosscheck(ex, kept, series, tol)
+        notes.append(xc.note)
+        if xc.mismatch:
+            mismatches.append(xc)
+    return tuple(mismatches), tuple(notes)
+
+
 # ------------------------------------------------------------------- public entry
 
 def repair_row(ticker: str, bar: dict, events: list, series: list, series_max: str,
