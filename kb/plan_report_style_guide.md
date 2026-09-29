@@ -185,8 +185,9 @@ xem qua Discord 2026-09-29 (user đã duyệt hướng này).
    sửa cần điều tra riêng (khả năng: fixture ngày cố định lệch theo "hôm nay" tính theo TZ) —
    không sửa trong job này vì ngoài phạm vi style guide.
    **CẬP NHẬT 2026-09-29 tối (worktree `wt-1521183164364754974`, commit `163714bf`+`4af9a438`)**:
-   phát hiện này KHÔNG tái lập được ở nhánh này — toàn bộ suite (nay 35 case, gồm T13 mới) PASS
-   35/0 dưới CẢ `env -u TZ` VÀ `TZ=Pacific/Kiritimati` (T9). Không rõ liệu bản `wt-planreportstyle-
+   phát hiện này KHÔNG tái lập được ở nhánh này — toàn bộ suite (gồm T13 mới, số case xem lệnh
+   chạy thật bên dưới, đừng chép số cứng) PASS 0 FAIL dưới CẢ `env -u TZ` VÀ `TZ=Pacific/Kiritimati`
+   (T9). Không rõ liệu bản `wt-planreportstyle-
    2909` đã tự vá song song hay 2 worktree lệch nhau vì lý do khác — không điều tra thêm (ngoài
    phạm vi round này), chỉ ghi để người đọc sau không hoảng vì 2 con số khác nhau trong cùng file.
 
@@ -198,10 +199,14 @@ xem qua Discord 2026-09-29 (user đã duyệt hướng này).
   DCF/DD disclaimer; L1/L2 catch-all bỏ dòng khi decision quiescent (`NO_TRIM`/`SKIP_STATE`/
   `NO_JIT_NEEDED`/`NO_TRIGGER`) TRỪ KHI `notes[]` mang cảnh báo ⚠️ thật.
 - Round 1 arch-review bắt lỗi fail-open câm ở price-verify (suppress theo `"⚠️" in text` thay vì
-  bất biến `verified_n < N`) — đã vá. Round 2 đang mở: escape-hatch L1/L2 chỉ render `notes[0][:180]`
-  nên cảnh báo dài (vd cổ tức QUÁ HẠN, 475 ký tự) có thể bị cắt mất — CHƯA vá xong tại thời điểm
-  ghi dòng này, xem trạng thái mới nhất trong commit log/selfcheck thay vì tin dòng này (sẽ lệch
-  theo thời gian).
+  bất biến `verified_n < N`) — đã vá. Round 2 bắt escape-hatch L1/L2 chỉ render `notes[0][:180]`/
+  `[:200]` nên cảnh báo dài có thể bị cắt — vá lần 1 (`3fb42b98`) cắt từ VỊ TRÍ `⚠️` đầu tiên thay
+  vì từ đầu chuỗi, nhưng round 3 phát hiện note thật có thể mang **2 dấu `⚠️`** cách xa nhau (ca
+  ZaloPay 2026-09-29: 700 ký tự, `⚠️` tại index 161 và 494) nên vẫn lỡ dấu thứ hai. Vá lần 2:
+  `_note_text()` (đổi tên từ `_warn_excerpt`) KHÔNG cắt note mang `⚠️` — hiện toàn văn, áp dụng
+  ĐỒNG NHẤT ở cả 6 chỗ render notes trong file (trước đó chỉ 2/6 chỗ được vá). Trạng thái LUÔN
+  lệch theo thời gian — xem commit log/selfcheck để biết vòng review hiện tại đã đóng chưa, đừng
+  tin số vòng ghi ở đây.
 - Selfcheck: `[T13]` mới trong `send_plan_report_park_jit_selfcheck.py`, pin bằng mutation thật
   (không chỉ source-grep) — chạy `python3 bin/send_plan_report_park_jit_selfcheck.py` để xem số
   hiện hành, đừng chép số cứng vào đây.

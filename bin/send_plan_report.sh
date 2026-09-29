@@ -525,16 +525,18 @@ def _num(x):
 def _tr(v):
     return f"{v/1e6:,.1f}tr"
 
-def _warn_excerpt(note, budget=300):
-    """Cắt 1 note dài về độ dài hiển thị được, ƯU TIÊN giữ phần cảnh báo ⚠️ nếu có — cắt từ VỊ TRÍ
-    ⚠️ thay vì từ đầu chuỗi. arch-review 2026-09-29 round 2: note thật (compute_park_trim.py:538-
-    546) có ⚠️ nằm SÂU (index ~266/475 ký tự) vì được NỐI VÀO sau đoạn text khác — cắt [:N] từ đầu
-    luôn mất cảnh báo dù N=180 hay N=200."""
+def _note_text(note, budget=300):
+    """Render 1 note cho report. Note mang cảnh báo ⚠️ THẬT ⇒ hiện ĐẦY ĐỦ, KHÔNG cắt (§4 style
+    guide: bất thường thật thì mở rộng đầy đủ, không tóm tắt) — arch-review 2026-09-29 round 2+3
+    bắt liên tiếp 2 cách cắt khác nhau (từ đầu chuỗi, rồi cắt từ vị trí ⚠️ đầu tiên) đều LỠ cảnh
+    báo trên note thật (700 ký tự, 2 dấu ⚠️ cách nhau 333 ký tự — ca ZaloPay 2026-09-29:
+    park_trim_proposal.notes[0]). Chunking Discord (notify_thread.sh, 1900 ký tự/tin) đủ rộng nên
+    không cần cắt vì lý do độ dài kênh gửi. Note KHÔNG có ⚠️ (ca hiển thị thông tin thường, không
+    phải cảnh báo) vẫn cắt ở `budget` + '…' để không phá layout report."""
     s = str(note)
-    i = s.find("⚠️")
-    if i > 0:
-        s = s[i:]
-    return s[:budget]
+    if "⚠️" in s:
+        return s
+    return s if len(s) <= budget else s[:budget] + "…"
 
 def _o_val(o):
     """VND của 1 lệnh đề xuất. plan ZaloPay KHÔNG ghi `value_vnd` trong park_trim/jit orders
@@ -840,12 +842,12 @@ try:
             lines.append("   ⛔ Không trim được: " + "; ".join(
                 f"{b.get('ticker','?')} ({str(b.get('reason') or '')[:120]})" for b in _pt_bl[:6]))
         for _n in (park_trim.get("notes") or [])[:2]:
-            lines.append(f"   · {str(_n)[:300]}")
+            lines.append(f"   · {_note_text(_n)}")
         lines.append("   ⚠️ Các lệnh BÁN này KHÔNG nằm trong danh sách lệnh chính ở trên — "
                      "duyệt riêng thì Mike/Bill mới đưa vào plan thực thi.")
     elif pt_dec.startswith("BLOCKED_") or pt_dec in ("NO_SELL_POSSIBLE",):
         lines.append(f"🅿️ **TRIM PARK (L1) BỊ CHẶN — {pt_dec}**: "
-                     + ("; ".join(str(n)[:200] for n in (park_trim.get("notes") or [])[:2])
+                     + ("; ".join(_note_text(n) for n in (park_trim.get("notes") or [])[:2])
                         or "không có lý do kèm theo — kiểm compute_park_trim.py."))
     elif pt_dec and (pt_dec not in ("NO_TRIM", "SKIP_STATE")
                      or any("⚠️" in str(_n) for _n in (park_trim.get("notes") or []))):
@@ -855,16 +857,17 @@ try:
         # Và dù NO_TRIM/SKIP_STATE, vẫn in nếu notes[] chứa ⚠️ thật (vd 'ENGINE CHƯA ĐỒNG BỘ'
         # compute_park_trim.py:422, hoặc cổ tức QUÁ HẠN :541) — suppress theo decision KHÔNG
         # được nuốt cảnh báo đi kèm.
-        # arch-review round 2 (2026-09-29): notes[0][:180] cắt mất cảnh báo thật (ca 'cổ tức
-        # QUÁ HẠN' dài 475 ký tự, ⚠️ ở vị trí 269 > 180). Khi có note mang ⚠️, ưu tiên hiện ĐÚNG
-        # note đó (tối đa 2, cắt bằng _warn_excerpt để KHÔNG mất phần ⚠️ nếu nó nằm sâu trong
-        # chuỗi — [:200] từ đầu chuỗi vẫn cắt mất ca thật, xem docstring _warn_excerpt);
-        # không có note nào mang ⚠️ (ca quyết định lạ/mới, không phải cảnh báo) thì giữ hành vi cũ.
+        # arch-review round 2+3 (2026-09-29): 2 vòng cắt trước (từ đầu chuỗi, rồi từ vị trí ⚠️
+        # ĐẦU TIÊN) đều lỡ cảnh báo trên note thật (700 ký tự, 2 dấu ⚠️ cách nhau 333 ký tự — ca
+        # ZaloPay 2026-09-29). `_note_text()` nay KHÔNG cắt note mang ⚠️ — hiện toàn văn. Áp dụng
+        # ĐỒNG NHẤT ở CẢ 6 chỗ render notes trong file (TRIM/BLOCKED_*/escape-hatch × L1+L2),
+        # không chỉ 2 chỗ escape-hatch — note cổ tức được append TRƯỚC mọi nhánh decision
+        # (compute_park_trim.py:541, trước :554/:568.../:762) nên cả 6 nhánh đều cần.
         _pt_notes = park_trim.get("notes") or []
         _pt_warn = [n for n in _pt_notes if "⚠️" in str(n)]
         _pt_show = _pt_warn or _pt_notes[:1]
         lines.append(f"🅿️ L1 trim PARK: {pt_dec}"
-                     + (f" — {'; '.join(_warn_excerpt(n) for n in _pt_show[:2])}" if _pt_show else ""))
+                     + (f" — {'; '.join(_note_text(n) for n in _pt_show[:2])}" if _pt_show else ""))
 except Exception as _e:      # fail-open: một khối báo cáo không được chặn plan
     lines.append(f"⚠️ Không render được khối L1 park_trim ({type(_e).__name__}: {_e}) — "
                  f"đọc thẳng `park_trim_proposal` trong file plan trước khi duyệt.")
@@ -893,12 +896,12 @@ try:
             lines.append("   ⛔ Không bán được: " + "; ".join(
                 f"{b.get('ticker','?')} ({str(b.get('reason') or '')[:120]})" for b in _jt_bl[:6]))
         for _n in (jit_prop.get("notes") or [])[:2]:
-            lines.append(f"   · {str(_n)[:300]}")
+            lines.append(f"   · {_note_text(_n)}")
         lines.append("   ⚠️ Duyệt lệnh MUA ở trên = duyệt luôn các lệnh BÁN PARK này (không bán "
                      "thì không đủ tiền mua) — nếu KHÔNG muốn bán PARK, phải bỏ/co lệnh mua.")
     elif jit_dec.startswith("BLOCKED_") or jit_dec in ("NO_SELL_POSSIBLE",):
         lines.append(f"💧 **BÁN PARK TÀI TRỢ (L2/JIT) BỊ CHẶN — {jit_dec}**: "
-                     + ("; ".join(str(n)[:200] for n in (jit_prop.get("notes") or [])[:2])
+                     + ("; ".join(_note_text(n) for n in (jit_prop.get("notes") or [])[:2])
                         or "không có lý do kèm theo — kiểm compute_jit_unpark.py.")
                      + " ⇒ lệnh mua có thể THIẾU TIỀN lúc 09:05 (triệu chứng WAIT_CASH).")
     elif jit_dec and (jit_dec not in ("NO_JIT_NEEDED", "NO_TRIGGER")
@@ -910,14 +913,13 @@ try:
         # append ⚠️ 'CẦN RÚT Trứng vàng' NGOÀI `if triggered:` (:481-482) nên vẫn xuất hiện dù
         # decision=NO_JIT_NEEDED (egg đẩy cash qua JIT_TRIGGER_FRAC, any_trigger vẫn False, xem
         # comment :527-537 của chính file đó). Check ⚠️ ở đây KHÔNG phải phòng thủ lý thuyết —
-        # đây là đường THẬT, 2 account live đều đang giữ Trứng vàng. Cùng lý do notes[0][:180]
-        # có thể cắt mất cảnh báo dài — ưu tiên hiện note mang ⚠️ trước, cắt bằng _warn_excerpt
-        # (giữ phần ⚠️ dù nó nằm sâu trong chuỗi) thay vì [:N] thô từ đầu.
+        # đây là đường THẬT, 2 account live đều đang giữ Trứng vàng. `_note_text()` (round 3, xem
+        # docstring) hiện TOÀN VĂN note mang ⚠️, không cắt — cùng hàm dùng ở cả 6 chỗ render notes.
         _jt_notes = jit_prop.get("notes") or []
         _jt_warn = [n for n in _jt_notes if "⚠️" in str(n)]
         _jt_show = _jt_warn or _jt_notes[:1]
         lines.append(f"💧 L2 JIT unpark: {jit_dec}"
-                     + (f" — {'; '.join(_warn_excerpt(n) for n in _jt_show[:2])}" if _jt_show else ""))
+                     + (f" — {'; '.join(_note_text(n) for n in _jt_show[:2])}" if _jt_show else ""))
 except Exception as _e:      # fail-open
     lines.append(f"⚠️ Không render được khối L2 jit_unpark ({type(_e).__name__}: {_e}) — "
                  f"đọc thẳng `jit_unpark_proposal` trong file plan trước khi duyệt.")

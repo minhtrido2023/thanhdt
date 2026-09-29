@@ -449,23 +449,41 @@ check('Đoạn giải thích "LỆNH THẬT, đã gộp vào N lệnh ở trên"
       "không còn bị lines.append() — chỉ còn trong COMMENT giải thích lý do bỏ (không render)",
       'lines.append(f"   ✅ Lệnh BÁN PARK {_which} là LỆNH THẬT, đã gộp' not in _sender_src)
 
-# T13f2 (round 2, arch-review): escape hatch L1 phải THẬT SỰ hiện cảnh báo, không chỉ "có in
-# dòng" — note thật lấy hình dạng compute_park_trim.py:538-546 (cổ tức excluded, ⚠️ QUÁ HẠN nằm
-# SÂU trong chuỗi, không ở đầu) — nếu ai revert về notes[0][:180] thì 'QUÁ HẠN' (index >180) mất.
-_DIV_NOTE = ("ℹ️ cổ tức excluded — DGC cấu hình 80.0tr; DNSE hiện báo TỔNG 1.9tr cổ tức chưa về "
-             "TOÀN TÀI KHOẢN (không tách theo mã) ⇒ pool tạm loại min(80.0tr; 1.9tr) = 1.9tr — "
-             "tới khi DNSE xác nhận hết (Option B, cùng cơ chế compute_active_nav.py). CHÉP dòng "
-             "này vào notes plan. ⚠️ QUÁ HẠN dự kiến: DGC — DNSE vẫn báo receivable dù đã qua "
-             "ngày dự kiến về, kiểm tiền đã về thật chưa trước khi duyệt lệnh bán.")
-assert "QUÁ HẠN" in _DIV_NOTE and 180 <= _DIV_NOTE.index("⚠️") <= _DIV_NOTE.index("QUÁ HẠN"), \
-    "fixture phải tái tạo đúng hình dạng thật: '⚠️ QUÁ HẠN' nằm SÂU trong chuỗi, sau ký tự 180 " \
-    "(để notes[0][:180] — bug round-1 — thật sự cắt mất nó, chứng minh fixture có ý nghĩa)"
+# T13f2/f3/f4 (round 2→3, arch-review): escape hatch/BLOCKED_*/TRIM đều phải THẬT SỰ hiện cảnh
+# báo, không chỉ "có in dòng". Round 2 dùng fixture TAY (475 ký tự, 1 dấu ⚠️) — round 3 bắt bản
+# vá thứ nhất (cắt từ vị trí ⚠️ ĐẦU TIÊN) vẫn lỡ dấu ⚠️ THỨ HAI vì note thật có 2 dấu cách nhau
+# 333 ký tự. Dùng NGUYÊN VĂN note thật từ artifact sống (không tự tay giản lược — fixture tay đã
+# 2 lần lệch khỏi hình dạng thật) để tránh lệch tiếp: đọc thẳng park_trim_proposal.notes[0] của
+# plan_ZaloPay_2026-09-29.json (700 ký tự, ⚠️ tại index 161 và 494).
+_REAL_DIV_NOTE_PATH = os.path.join(REAL_PLANS, "plan_ZaloPay_2026-09-29.json")
+with open(_REAL_DIV_NOTE_PATH, encoding="utf-8") as _f:
+    _DIV_NOTE = json.load(_f)["park_trim_proposal"]["notes"][0]
+assert _DIV_NOTE.count("⚠️") >= 2, (
+    f"artifact {_REAL_DIV_NOTE_PATH} không còn mang note 2-cảnh-báo như lúc viết test này — "
+    "cập nhật lại nguồn note thật thay vì quay về fixture tay (đã lệch thật 2 lần).")
+
 p13f2 = copy.deepcopy(SX)
 p13f2["park_trim_proposal"]["decision"] = "NO_TRIM"
 p13f2["park_trim_proposal"]["notes"] = [_DIV_NOTE]
 out_13f2 = run_sender(p13f2, "SpaceX")
-check("NO_TRIM + note cổ tức QUÁ HẠN (475-ký-tự thật) → dòng L1 in ĐỦ, không cắt mất 'QUÁ HẠN'",
-      "L1 trim PARK: NO_TRIM" in out_13f2 and "QUÁ HẠN" in out_13f2)
+check("NO_TRIM + note cổ tức thật (700 ký tự, 2 dấu ⚠️) → dòng L1 in ĐỦ CẢ HAI cảnh báo",
+      "L1 trim PARK: NO_TRIM" in out_13f2
+      and "CẤU HÌNH CÓ THỂ ĐÃ CŨ" in out_13f2 and "QUÁ HẠN" in out_13f2)
+
+p13f3 = copy.deepcopy(SX)
+p13f3["park_trim_proposal"]["decision"] = "BLOCKED_ALL_NAMES"
+p13f3["park_trim_proposal"]["notes"] = [_DIV_NOTE]
+out_13f3 = run_sender(p13f3, "SpaceX")
+check("BLOCKED_ALL_NAMES + note cổ tức thật → nhánh BLOCKED_* L1 cũng hiện ĐỦ CẢ HAI cảnh báo "
+      "(không chỉ nhánh quiescent escape-hatch)",
+      "CẤU HÌNH CÓ THỂ ĐÃ CŨ" in out_13f3 and "QUÁ HẠN" in out_13f3)
+
+p13f4 = copy.deepcopy(SX)
+p13f4["park_trim_proposal"]["notes"] = [_DIV_NOTE]  # decision=TRIM giữ nguyên từ fixture 08-07
+out_13f4 = run_sender(p13f4, "SpaceX")
+check("TRIM (có lệnh BÁN thật) + note cổ tức thật → nhánh TRIM cũng hiện ĐỦ CẢ HAI cảnh báo "
+      "(nhánh 'nóng tiền' nhất — đang render lệnh bán thật)",
+      "CẤU HÌNH CÓ THỂ ĐÃ CŨ" in out_13f4 and "QUÁ HẠN" in out_13f4)
 
 # T13g (round 2, arch-review): escape hatch L2 phải THẬT SỰ hiện cảnh báo khi decision=NO_JIT_
 # NEEDED. Note lấy nguyên hình dạng thật compute_jit_unpark.py:565-572 (cảnh báo egg_relied_vnd
