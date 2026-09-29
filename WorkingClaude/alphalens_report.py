@@ -100,7 +100,12 @@ def generate_section(as_of_date: str = None) -> str:
     # corporate action get factor 1,0 and are left bit-for-bit unchanged.
     from paper_entry_adjust import adjust_entries
     entry_asof = {p["ticker"]: (meta.get("entry_price_asof") or p.get("entry_date")) for p in positions}
-    adj = adjust_entries([(p["ticker"], entry_asof[p["ticker"]], p["entry_price"]) for p in positions])
+    items = [(p["ticker"], entry_asof[p["ticker"]], p["entry_price"]) for p in positions]
+    # Quy ước DẪN DẮT = `terp` (chỉ đạo user 2026-09-23: sổ paper THỰC HIỆN quyền có lợi thay vì
+    # giả định bỏ — đồng bộ với paper_programs_daily_report.py's probe_alphalens, cùng nguồn
+    # data/alphalens_paper.json). `accrue_only` vẫn tính để in kèm làm số đối chiếu.
+    adj = adjust_entries(items, convention="terp")
+    adj_alt = adjust_entries(items, convention="accrue_only")
 
     prices_df, err = query_latest_prices(tickers)
     pe_ma1y_map = query_pe_ma1y(tickers)
@@ -158,11 +163,12 @@ def generate_section(as_of_date: str = None) -> str:
                 if a.rights_events:
                     # the convention is a real fork in the number, not a footnote: state it on the
                     # line that carries the number, and show what the other convention would say
-                    terp_pct = (current - a.entry_price * a.factor_terp) / (
-                        a.entry_price * a.factor_terp) * 100
-                    line += (f" *[quyền mua {', '.join(a.rights_events)} KHÔNG tính vào tỉ suất — "
-                             f"sổ paper không có tài khoản tiền để thực hiện quyền; nếu giả định "
-                             f"đã mua/bán quyền theo giá lý thuyết thì {terp_pct:+.1f}%]*")
+                    b = adj_alt.get((ticker, entry_asof[ticker]))
+                    if b is not None and not b.degraded and b.entry_adj > 0:
+                        alt_pct = b.pct_vs(current)
+                        line += (f" *[quyền mua {', '.join(a.rights_events)} ĐÃ tính vào tỉ suất "
+                                 f"trên (quy ước `terp` — chỉ đạo user 2026-09-23); nếu BỎ quyền "
+                                 f"(accrue-only) thì {alt_pct:+.1f}%]*")
 
             # DCF check (informational only — never gates this report). ACB/MBB/HDB are
             # financials -> dcf_line() auto-degrades to N/A via the same gate as Pha 2 production.

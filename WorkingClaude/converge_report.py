@@ -112,7 +112,12 @@ def generate_section(as_of_date=None, live_set=None):
     # MBB (ex-rights 08-11), CTR (08-07... 07-09 cash+stock div), HAH (07-14 cash div).
     from paper_entry_adjust import adjust_entries
     entry_asof = meta.get("entry_price_asof") or meta.get("start_date")
-    adj = adjust_entries([(p["ticker"], entry_asof, p["entry_price"]) for p in seed])
+    items = [(p["ticker"], entry_asof, p["entry_price"]) for p in seed]
+    # Quy ước DẪN DẮT = `terp` (chỉ đạo user 2026-09-23: sổ paper THỰC HIỆN quyền có lợi thay vì
+    # giả định bỏ — đồng bộ với alphalens_report.py / paper_programs_daily_report.py). `accrue_only`
+    # vẫn tính để in kèm làm số đối chiếu.
+    adj = adjust_entries(items, convention="terp")
+    adj_alt = adjust_entries(items, convention="accrue_only")
 
     lines = ["### 🔗 DC Book (double-confirm) — Paper Portfolio"]
     if as_of_date:
@@ -141,10 +146,12 @@ def generate_section(as_of_date=None, live_set=None):
                 rebase = f" *[giá vào {a.entry_price:,.0f}→{a.entry_adj:,.0f} do quyền]*"
                 if a.rights_events:
                     # convention stated on the line carrying the number, not in a footnote
-                    terp_adj = a.entry_price * a.factor_terp
-                    rebase += (f" *[quyền mua {', '.join(a.rights_events)} KHÔNG tính vào tỉ suất "
-                               f"— sổ paper không có tài khoản tiền; nếu giả định đã mua/bán quyền "
-                               f"theo giá lý thuyết thì {(cur - terp_adj) / terp_adj * 100:+.1f}%]*")
+                    b = adj_alt.get((tk, entry_asof))
+                    if b is not None and not b.degraded and b.entry_adj > 0:
+                        alt_pct = b.pct_vs(cur)
+                        rebase += (f" *[quyền mua {', '.join(a.rights_events)} ĐÃ tính vào tỉ suất "
+                                   f"trên (quy ước `terp`); nếu BỎ quyền (accrue-only) thì "
+                                   f"{alt_pct:+.1f}%]*")
             elif a is not None and a.degraded:
                 rebase = " ⚠️*[chưa quy đổi được giá vào — % tính trên giá THÔ]*"
             lines.append(f"- **{tk}** ({pos.get('sector','')}): {cur:,.0f}đ ({sign}{pct:.1f}%){rebase} · {mode}")
