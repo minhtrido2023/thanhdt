@@ -84,9 +84,17 @@ with open(journal, encoding="utf-8") as f:
         elif ev == "DONE":
             parent_done[pid] = row.get("note") or "khớp đủ"
             parent_wait.pop(pid, None)
-        elif ev in ("WAIT_CASH", "WAIT_QUOTA", "WAIT_T2_SETTLEMENT", "PLACE_FAIL") and pid not in parent_done:
+        elif ev in ("WAIT_CASH", "WAIT_QUOTA", "WAIT_T2_SETTLEMENT", "PLACE_FAIL",
+                    "PLACE_FAIL_STOPPED") and pid not in parent_done:
+            # PLACE_FAIL_STOPPED (2026-09-29): cổng mới cắt PLACE_FAIL xuống <=5/lệnh, DƯỚI hẳn
+            # ngưỡng >20 của ops_health_check #3 vốn là cái chuông DUY NHẤT đã bắt được sự cố.
+            # ops_health_check chỉ chạy 08:20 + 12:45 và chỉ đọc journal của HÔM NAY, nên một
+            # lần chặn lúc 13:05-14:45 không lượt cron nào quét tới. Heartbeat 5 phút/lần chạy
+            # cả phiên ⇒ đây là kênh bịt đúng khoảng trống đó (arch-review vòng 3 F-E).
             reason = {"WAIT_CASH": "chờ sức mua", "WAIT_QUOTA": "chờ thanh khoản (giới hạn 10% KLGD)",
-                      "WAIT_T2_SETTLEMENT": "chờ hàng T+2 về"}.get(ev, row.get("note") or ev)
+                      "WAIT_T2_SETTLEMENT": "chờ hàng T+2 về",
+                      "PLACE_FAIL_STOPPED": "⛔ ĐÃ DỪNG thử lại — lỗi cấu trúc lặp lại: "
+                                            + (row.get("note") or "")}.get(ev, row.get("note") or ev)
             parent_wait[pid] = (row["ticker"], row["side"], reason)
 
 def px(v):        # 32500 -> "32.50" như app
