@@ -254,25 +254,40 @@ def factor_after(date: str, events: list, series: list, series_max: str) -> tupl
 # touches. If `f` is right, the raw step P_cum → P_ex must land close to it; if `corporate_action`
 # is wrong, the two disagree regardless of which direction the error runs.
 #
-# CALIBRATION (measured 2026-09-29 via BQ, `tav2_bq.corporate_action` × `tav2_bq.ticker`, ALL
-# price-adjusting DIV/ISS(bonus|stock-dividend) events 2025-01-01..2026-09-15, n=1.235 after
-# dropping ffill/no-volume ex-date bars): |dev| between `f` and the REAL observed P_cum/P_ex is NOT
-# tight like `TOL` above — median 1,43%, p90 6,16%, p95 8,77%, p99 13,64%, max 28,35% — and
-# restricting to large/liquid names does NOT tighten it (MBB alone, 4 real events: −5,74%, +3,62%,
-# −2,00%, +1,63%). This is genuine same-day trading noise around a corp-action step, not
-# vendor/data-quality noise: comparing a SINGLE session's raw close against a formula has an
-# irreducible floor of several percent that a MULTI-session cumulative comparison (what `TOL`
-# above guards) does not have. Reusing `TOL=0,3%` here would flag >90% of ALL price-adjusting
-# events in the market — useless.
+# CALIBRATION — RE-MEASURED post-fix (2026-09-29, second pass). The first pass measured |dev| by
+# filtering raw BQ rows directly, WITHOUT running the real fail-closed guards below; quant-skeptic
+# (job Taylor_20260929_032553, round 1, REFUTED) caught that the ex-date bar's ffill guard, as
+# first written, lifted its ADJUSTED band with the CUM bar's Price/Close — the wrong side of the
+# event boundary — so on real data (406-event spot sample) it refused ~94% of events as
+# "ffill-suspect", including the FPT case this check exists for, and the selfcheck passed only
+# because its fixture zeroed High/Low, bypassing the guard entirely. Fixed by dropping the band
+# test for the ex-date bar and keeping only `_lift_neighbour`'s `chained` flag (a raw-Price-repeats
+# check that compares raw to raw, so it is valid on EITHER side of an event boundary) — see the
+# comment inside `price_crosscheck` at the `chained_ex` check.
 #
-# PRICE_XCHECK_TOL = 0,20 (20%) instead: false-positive rate on the same 1.235-event sample is
-# 0,32% (4/1.235) — a coarse, GROSS-error screen. It reliably catches an order-of-magnitude-wrong
-# exercise_ratio/value_per_share (decimal slip, wrong/duplicated event: a synthetic 0,10→1,0 fat-
-# finger on the real FPT market data below IS caught, dev=−43,7%) but — DISCLOSED LIMIT, same class
-# as the monotonicity check's one-directional blind spot — it CANNOT distinguish quant-skeptic's
-# 0,15/0,104 micro-mutations (4,5%/0,36% shift in `f`, dev=−2,1%/≈0% on the real FPT data) from
-# ordinary single-day noise (already ~1,4% at the median). Catching those would need a per-ticker
-# volatility-adjusted statistic — out of scope for this pass, flagged here so it is not forgotten.
+# Re-measured THROUGH THE FIXED PRODUCTION FUNCTION `price_crosscheck_after` itself (not a
+# standalone filter): `tav2_bq.corporate_action` × `tav2_bq.ticker`, ALL price-adjusting
+# DIV/ISS(bonus|stock-dividend) events 2025-01-01..2026-09-15 (n=1.587 candidates with a price
+# series covering the ex-date) — 782 (49,3%) reach a verdict; 681 refused as uncomputable (rights
+# issue/unparsable/cash≥price — correct, by design), 121 as genuine ffill/no-trade, 314 for
+# tickers this measurement script itself could not fetch a series for (a gap in the MEASUREMENT,
+# not in `price_crosscheck`), 16 ex-date beyond the fetched window. Among the 782 TESTED events,
+# |dev| — median 1,41%, p90 5,63%, p95 8,32%, p99 12,75%, max 23,40% — confirms the first pass's
+# conclusion despite the bug fix changing WHICH events get tested: this is genuine same-day trading
+# noise around a corp-action step (comparing a SINGLE session's raw close to a formula has an
+# irreducible floor of several percent that a MULTI-session cumulative comparison, what `TOL` above
+# guards, does not have), not vendor/data-quality noise. Reusing `TOL=0,3%` here would flag ~100%
+# of tested events — useless.
+#
+# PRICE_XCHECK_TOL = 0,20 (20%): false-positive rate on the 782 tested events is 0,13% (1/782) —
+# a coarse, GROSS-error screen. It reliably catches an order-of-magnitude-wrong
+# exercise_ratio/value_per_share (decimal slip, wrong/duplicated event: a 0,10→1,0 fat-finger on
+# the real FPT market data below IS caught, dev=−46,0%) but — DISCLOSED LIMIT, same class as the
+# monotonicity check's one-directional blind spot — it CANNOT distinguish quant-skeptic's
+# 0,15/0,104 micro-mutations (4,5%/0,36% shift in `f`; on the real FPT data 0,15 gives dev=−6,1%)
+# from ordinary single-day noise (already ~1,4% at the median). Catching those would need a
+# per-ticker volatility-adjusted statistic — out of scope for this pass, flagged here so it is not
+# forgotten.
 PRICE_XCHECK_TOL = 0.20
 
 
@@ -327,9 +342,23 @@ def price_crosscheck(ex: str, kept_evs: list, series: list,
     if _band_lifted_suspect(series[i_cum], series, i_cum):
         return PriceCrossCheck(ex, f, None, None, False,
                                f"{ex}: phiên cum {series[i_cum]['d']} nghi ffill, không cross-check")
-    if _band_lifted_suspect(series[i_ex], series, i_ex):
+    # KHÔNG dùng `_band_lifted_suspect` cho phiên ex-date: hàm đó lift band ADJUSTED của bar bằng
+    # tỉ lệ Price/Close của một NEIGHBOUR PHÍA TRƯỚC ex-date — đúng khi bar và neighbour cùng một
+    # "khung" (dùng trong `group_factor` cho chính phiên cum, và trong `repair_row`'s own self-
+    # check cho một dòng NẰM TRONG cùng cửa sổ vendor còn stale). Phiên ex-date lại nằm NGAY BÊN
+    # KIA của bước nhảy: tỉ lệ Price/Close của neighbour phía trước CHÍNH LÀ hệ số của sự kiện đang
+    # xét (hoặc một artefact vendor tạm thời khác), nên áp nó vào band của phiên SAU sự kiện là lấy
+    # band một khung, lift bằng hệ số của khung kia — sai khung, không phải bằng chứng ffill thật
+    # (quant-skeptic REFUTED bản đầu vì lỗi này: band lift làm ~94% sự kiện thật — kể cả chính ca
+    # FPT — bị từ chối oan "nghi ffill", bao gồm cả 3 mutation trong selfcheck). Chỉ tái dùng phần
+    # AN TOÀN xuyên biên sự kiện của cùng cơ chế: `_lift_neighbour`'s `chained` — Price LẶP LẠI
+    # đúng giá trị của (các) phiên liền trước là bằng chứng ffill/không giao dịch, ĐÚNG bất kể hai
+    # phiên có cùng khung hay không (so sánh Price thô với Price thô, không quy đổi qua Close).
+    _, chained_ex = _lift_neighbour(series, i_ex)
+    if chained_ex:
         return PriceCrossCheck(ex, f, None, None, False,
-                               f"{ex}: phiên ex-date {series[i_ex]['d']} nghi ffill, không cross-check")
+                               f"{ex}: phiên ex-date {series[i_ex]['d']} Price lặp lại phiên liền "
+                               f"trước (ffill/không giao dịch), không cross-check")
 
     p_cum, p_ex = series[i_cum]["price"], series[i_ex]["price"]
     if p_cum <= 0 or p_ex <= 0:

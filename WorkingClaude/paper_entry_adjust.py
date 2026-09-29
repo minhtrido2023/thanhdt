@@ -715,24 +715,51 @@ def _selfcheck() -> int:
     # 9-10. PRICE_XCHECK_TOL cross-check (Việc nhỏ 3, 2026-09-29, close_repair.price_crosscheck):
     # independent screen against REAL raw price at ex-date, catching the mirror-image defect 7-8
     # structurally cannot — corporate_action OVERSTATING an event (ratio too HIGH) keeps the
-    # repaired series monotone (no `viol`) but disagrees with what actually traded. Same synthetic
-    # FPT series as 7-8: real market step P_cum/P_ex = 71.700 (2026-09-18) / 63.700 (first bar
-    # on/after ex 2026-09-21, i.e. 2026-09-22) = 1,125589.
+    # repaired series monotone (no `viol`) but disagrees with what actually traded.
+    #
+    # ⚠️ Uses a SEPARATE real-data fixture (`_fpt_series_real`), NOT `_fpt_series` above: the round-1
+    # version of this check reused `_fpt_series` (High=Low=0,0 on every bar) and quant-skeptic
+    # (REFUTED, round 1) caught that this zeroes-out `_band_lifted_suspect`'s guard entirely — the
+    # selfcheck passed while the real code, on real bars, refused ~94% of events (including FPT
+    # itself) as "ffill-suspect" because the guard lifted the ex-date bar's band with the CUM bar's
+    # ratio (wrong side of the event boundary). Fixed in `price_crosscheck` (see its `chained_ex`
+    # comment); this fixture uses ACTUAL `tav2_bq.ticker` bars (queried 2026-09-29) so the guard
+    # runs for real and the numbers below are independently reproducible.
+    _fpt_series_real = [
+        {"d": "2026-09-14", "close": 72400.0, "price": 72400.0, "high": 73600.0, "low": 72000.0},
+        {"d": "2026-09-15", "close": 66090.0, "price": 72700.0, "high": 66730.0, "low": 65910.0},
+        {"d": "2026-09-16", "close": 67090.0, "price": 73800.0, "high": 67090.0, "low": 65000.0},
+        {"d": "2026-09-17", "close": 67550.0, "price": 74300.0, "high": 67550.0, "low": 66000.0},
+        {"d": "2026-09-18", "close": 65180.00000000001, "price": 71700.0, "high": 68000.0,
+         "low": 65180.00000000001},
+        {"d": "2026-09-21", "close": 66400.0, "price": 66400.0, "high": 66800.0, "low": 65000.0},
+        {"d": "2026-09-22", "close": 66600.0, "price": 66600.0, "high": 67000.0, "low": 66200.0},
+    ]
+    _fpt_max_real = "2026-09-22"
+    # Real market step across the ex-date: P_cum=71.700 (2026-09-18, last session before ex) →
+    # P_ex=66.400 (2026-09-21, first session on/after ex) → r_real = 1,079819. This matches the
+    # ORIGINAL finding's own manual sanity check ("71.700(09-18)→66.400(09-21), khớp bonus 10%",
+    # paper-report-fpt-double-adjust-fix-20260929 viec1) almost exactly (formula f=1,10 vs r_real
+    # 1,079819 ⇒ dev=−1,83%, i.e. FPT also moved ~+1,8% on real market terms that session).
     import close_repair as _cr
     _gross_bad_ev = {**_true_ev, "exercise_ratio": 1.0}    # 10x fat-finger: f=2,00 vs f=1,10 true
     _micro_bad_ev = {**_true_ev, "exercise_ratio": 0.15}   # quant-skeptic's own mutation: f=1,15
-    xc_true, _ = _cr.price_crosscheck_after("2026-06-30", [_true_ev], _fpt_series, _fpt_max)
-    xc_gross, _ = _cr.price_crosscheck_after("2026-06-30", [_gross_bad_ev], _fpt_series, _fpt_max)
-    xc_micro, _ = _cr.price_crosscheck_after("2026-06-30", [_micro_bad_ev], _fpt_series, _fpt_max)
-    check("9. ca FPT thật (0,10) ⇒ công thức khớp giá thật trong PRICE_XCHECK_TOL, KHÔNG mismatch",
-          xc_true == (), f"{xc_true}")
+    xc_true, notes_true = _cr.price_crosscheck_after(
+        "2026-06-30", [_true_ev], _fpt_series_real, _fpt_max_real)
+    xc_gross, _notes_gross = _cr.price_crosscheck_after(
+        "2026-06-30", [_gross_bad_ev], _fpt_series_real, _fpt_max_real)
+    xc_micro, _notes_micro = _cr.price_crosscheck_after(
+        "2026-06-30", [_micro_bad_ev], _fpt_series_real, _fpt_max_real)
+    check("9. ca FPT thật (0,10) trên dữ liệu giá THẬT ⇒ ĐƯỢC KIỂM (không bị từ chối oan), công "
+          "thức khớp giá thật trong PRICE_XCHECK_TOL, KHÔNG mismatch",
+          xc_true == () and notes_true and "khớp" in notes_true[0], f"{xc_true} · note={notes_true}")
     check("10a. mutate 0,10→1,0 (sai 10 lần, fat-finger) ⇒ BẮT ĐƯỢC bằng giá thật (bất biến đơn "
           "điệu 7-8 KHÔNG bắt được ca này vì hệ số CAO hơn không phá tính đơn điệu)",
           len(xc_gross) == 1 and xc_gross[0].mismatch, f"{xc_gross}")
     check("10b. mutate 0,10→0,15 (đúng mutation của quant-skeptic, +4,5% hệ số) ⇒ KHÔNG bắt được "
-          "— GIỚI HẠN ĐÃ CÔNG BỐ của phương pháp (lệch 2,1% nằm trong nhiễu 1 phiên bình thường đo "
-          "thực nghiệm ~1,4% median; PRICE_XCHECK_TOL=20% hiệu chỉnh để tránh báo động giả trên "
-          ">1.200 sự kiện thật, không phải bỏ sót cài đặt)",
+          "— GIỚI HẠN ĐÃ CÔNG BỐ của phương pháp (lệch 6,1% trên dữ liệu thật nằm trong nhiễu 1 "
+          "phiên bình thường đo thực nghiệm ~1,4% median; PRICE_XCHECK_TOL=20% hiệu chỉnh để tránh "
+          "báo động giả trên >1.500 sự kiện thật, không phải bỏ sót cài đặt)",
           xc_micro == (), f"{xc_micro}")
 
     print("== B. Dữ liệu thật trong cache ==")
