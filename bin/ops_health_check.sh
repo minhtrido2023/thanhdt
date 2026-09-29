@@ -189,11 +189,25 @@ if os.path.exists(jpath):
                   if k in ("POLL_FAIL", "POSITIONS_FAIL", "GHOST_ORDER", "CANCEL_FAIL") and v > 20}
     if other_place_fail > 20:
         concerning["PLACE_FAIL (không phải T+2)"] = other_place_fail
+    # PLACE_FAIL_STOPPED: ngưỡng > 0, KHÔNG phải > 20. Từ 2026-09-29 executor tự dừng sau 5
+    # lượt PLACE_FAIL lỗi cấu trúc liên tiếp (trading_bot/executor.py::_count_place_fail), nên
+    # tổng PLACE_FAIL bị cắt xuống ≤5/lệnh — dưới hẳn ngưỡng 20 ở trên. Nếu chỉ 1-4 mã trúng
+    # cùng bức tường (ca thật 29/09 là 6 mã), checker này sẽ im lặng hoàn toàn trong khi vị thế
+    # nằm kẹt: cơ chế chống-ồn vừa thêm không được phép làm tắt luôn cái chuông duy nhất đã bắt
+    # được sự cố đó (arch-review 2026-09-29 F2). 1 dòng = 1 lệnh bị dừng hẳn = đáng báo.
+    if counts.get("PLACE_FAIL_STOPPED", 0) > 0:
+        concerning["PLACE_FAIL_STOPPED (bot tự dừng đặt lệnh)"] = counts["PLACE_FAIL_STOPPED"]
     # Đếm CẢ NGÀY thì 1 sự cố đã sửa xong vẫn kêu tới hết phiên (ca thật ZaloPay 2026-08-10:
     # 944 PLACE_FAIL dứt hẳn 10:32, restart 10:35 → 8/8 lệnh bán khớp, checker 12:45 vẫn báo ⚠️).
     # Có PLACE/FILL/DONE thành công SAU lần lỗi cuối = bằng chứng đã phục hồi thật → hạ xuống ℹ️.
     resolved = {}
     for k in list(concerning):
+        if k.startswith("PLACE_FAIL_STOPPED"):
+            # KHÔNG hạ cấp: last_success_ts là PLACE/FILL/DONE của BẤT KỲ mã nào trong journal,
+            # nên một mã khác khớp sau đó sẽ dìm mất đúng dòng "bot đã dừng hẳn lệnh này".
+            # Với PLACE_FAIL thường thì nới vậy chấp nhận được (nó tự lặp lại nếu chưa khỏi);
+            # với một lệnh đã bị dừng hẳn thì không — nó sẽ không bao giờ kêu lại.
+            continue
         ev_key = "PLACE_FAIL" if k.startswith("PLACE_FAIL") else k
         lt = last_ts.get(ev_key, "")
         if lt and last_success_ts > lt:

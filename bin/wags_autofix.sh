@@ -138,6 +138,12 @@ $DETAILS"
 # shortcuts the search step, Wags still must verify a match actually applies.
 KNOWN_ISSUE="$(python3 "$ROOT/bin/incident_lookup.py" "$LABEL" "$DETAILS" 2>/dev/null || true)"
 
+# Commit-resolver hint (Pattern B lần 3, 2026-09-29): việc đã được SỬA và COMMIT rồi, chỉ thiếu
+# event `answer` ⇒ checker §5 vẫn thấy câu hỏi treo và đốt trọn một vòng wags_autofix để đọc lại
+# git log. `dispatch_question_hint.py` đã bịt nhánh DISPATCH; đây là nhánh COMMIT. GỢI Ý, không
+# tự đóng; fail-open (script tự nuốt lỗi, `|| true` là chốt thứ hai).
+COMMIT_HINT="$(python3 "$ROOT/bin/question_commit_hint.py" 2>/dev/null || true)"
+
 # Pipeline chạy nền tách session (setsid) — caller (cron/Mike turn) không bị giữ; job
 # board + bus vẫn theo dõi được từng bước (nguyên tắc MIKE.md §1: không canh foreground).
 PIPELOG="$ROOT/logs/wags_pipeline_$(date -u +%Y%m%d_%H%M%S).log"
@@ -147,6 +153,7 @@ DISPATCH_START_ISO="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 setsid bash -c '
   ROOT="'"$ROOT"'"; LABEL='"$(printf %q "$LABEL")"'; DETAILS='"$(printf %q "$DETAILS")"'
   KNOWN_ISSUE='"$(printf %q "$KNOWN_ISSUE")"'
+  COMMIT_HINT='"$(printf %q "$COMMIT_HINT")"'
   ARCH_TOPIC="'"$ARCH_TOPIC"'"; DISPATCH_START_ISO="'"$DISPATCH_START_ISO"'"
   _notify_arch() { "$ROOT/bin/notify_thread.sh" "$1" "$ARCH_TOPIC" >/dev/null 2>&1 || true; }
 
@@ -197,6 +204,9 @@ setsid bash -c '
 CHI TIẾT: $DETAILS
 ${KNOWN_ISSUE:+
 $KNOWN_ISSUE
+}
+${COMMIT_HINT:+
+$COMMIT_HINT
 }
 Quy trình: (1) chẩn đoán từ artifact thật (jobs.sh list cột HB_AGE, trace.sh, bus, log) — đọc kb/ops_runbook.md + working memory của bạn trước (nếu có mục \"khớp từ khoá\" ở trên, tự xác nhận có thực sự cùng root cause không trước khi áp lại cách sửa cũ); (2) SỬA trong ranh giới: được sửa tooling điều phối (dispatch.sh/jobs.sh/mike_json.py/ops_autofix/wags_autofix/checker) sau khi test, TUYỆT ĐỐI không đụng trading (plan/executor/cron thực thi/trading_rules); (3) verify artifact sau sửa (chạy lại lệnh lỗi, xác nhận hết); (3b) COMMIT AN TOÀN: chạy git status TRƯỚC git add — CHỈ git add đúng các file bạn thực sự sửa (liệt kê tường minh), TUYỆT ĐỐI không git add -A / git add . ; có thể có phiên Wags/Mike KHÁC đang sửa file khác CÙNG LÚC, add rộng sẽ cuốn thay đổi CHƯA XONG của người khác vào commit của bạn (sự cố thật 2026-08-02: 2 job Wags cùng sửa ops_health_check.sh); nếu git status cho thấy file đã modify mà KHÔNG phải do bạn sửa, đừng add file đó, ghi rõ trong finding; (4) ghi bus finding topic bắt đầu bằng '"'"'wags-fix: $LABEL'"'"' kèm root_cause/fix/verify/commit + field \"files_changed\": [danh sách ĐẦY ĐỦ đường dẫn tương đối bạn đã sửa, vd [\"bin/dispatch.sh\",\"MIKE.md\"]] — field này quyết định fix có cần arch-reviewer audit đầy đủ hay không, KHÔNG được bỏ trống hay báo thiếu file." --timeout 1500 --retries 0 --model opus 2>&1)" && dispatch_rc=0 || dispatch_rc=$?
   echo "$out" >> "'"$PIPELOG"'"

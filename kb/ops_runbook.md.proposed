@@ -159,38 +159,6 @@ tái tạo bằng cách chạy lại chính bộ dispatcher.
      KHỐI LƯỢNG vẫn bảo vệ; chỉ mất khả năng GÁN tên sự kiện cho phần dư.
 6. Chạy tay `eod_trading_report.sh` SAU khi đường 2 đã ghi sẽ ghi đè dòng bằng bản đọc mới hơn (đường 1 không có guard, cố ý giữ nguyên) — sau 19:10 dữ liệu đóng cửa đã ổn định nên số phải trùng; lệch ⇒ soi `balance_ts` 2 lần đọc.
 
-### `compute_active_nav.py` exit 3 — KHÔNG lấy được giá (thêm 2026-09-27, code-quality-weekly)
-Mã 3 có **HAI nguyên nhân khác nhau, cách xử khác nhau** — đọc dòng ❌ script in ra để biết là ca nào:
-
-1. **`bin/compute_active_nav.py:451` — truy vấn giá BQ THẤT BẠI** (không lấy được lô giá nào).
-   ⚠️ **KHÔNG BAO GIỜ xảy ra từ cron.** `resolve_prices()` chỉ trả `None` ở nhánh `asof != today`
-   (`bin/compute_active_nav.py:329-331`); nhánh `asof == today` — nhánh duy nhất cron chạy — luôn
-   trả dict. Và `--asof <ngày quá khứ>` mà vẫn ghi file canonical đã bị chốt **rc=7** (`:382-389`).
-   Nên ca này CHỈ phát sinh khi ai đó chạy TAY với `--asof <ngày quá khứ>` + `--out` riêng.
-   Xử: kiểm quyền/`bq` bằng `bq_freshness_check.sh`; BQ đang sync dở thì chạy lại sau. Không sửa
-   gì trong script. **Thấy rc=3 từ log cron ⇒ đó là ca (2), đừng đi kiểm BQ auth.**
-2. **`bin/compute_active_nav.py:548` — CÒN mã thiếu giá sau CẢ HAI nguồn** (DNSE live *và*
-   fallback BQ). Xử: tra đúng mã script gọi tên — mã mới lên sàn / bị tạm ngừng giao dịch /
-   sai mã trong sổ vị thế. Cần ghi `active_nav` gấp thì phải xử lý mã đó (loại khỏi sổ hoặc bổ
-   sung giá), **KHÔNG** hạ cổng.
-
-⚠️ **Rủi ro khi KHAI TỬ một account** (liên quan cổng tỉ suất, ghi ở đây vì cùng lớp vận hành):
-đặt `enabled=false` cho SpaceX/ZaloPay trong `trading_bot_accounts.json` làm nhãn đó rơi khỏi
-`dividend_adjusted_return.ACCOUNTS` ⇒ `report_return_gate` fail-closed (từ 2026-09-27) trả rc=1 cho
-MỌI báo cáo cũ mang tên account đó. `bin/check_report_cadence.sh:70` quét TOÀN BỘ file
-`reports/*_{daily,weekly,monthly}_report_*.md` KHÔNG lọc theo ngày rồi gọi `report_delivery_gate.py`
-(`:244` → `report_return_gate.py`) ⇒ **80/115 báo cáo hiện có sẽ báo 🔴 "Delivery INCOMPLETE" mỗi
-ngày** cho tới khi config được bật lại. Khai tử account ⇒ phải lưu trữ (move) các báo cáo cũ ra
-ngoài phạm vi quét TRƯỚC, hoặc thêm carve-out theo ngày trong `check_report_cadence.sh`.
-
-**Vì sao fail-closed (đổi 2026-09-27, trước đó rc=0):** `active_nav` là **MẪU SỐ SIZING**
-(`discretionary_accumulation_inject.py` đọc để suy `target_pct_active_nav`). Bản cũ chỉ in `⚠️`
-rồi bỏ mã đó khỏi `total_mv` và vẫn ghi file với rc=0 ⇒ mẫu số bị ghi THIẾU đúng bằng giá trị mã
-bị bỏ, mà mọi consumer coi file là tươi; `cron_health_check` chỉ khớp `^\s*❌` nên mù hẳn. Nay
-KHÔNG ghi file: injector 20:30 đã fail-closed theo `computed_at` cũ, nên thiếu file an toàn hơn
-một mẫu số sai. Rủi ro dừng ghi hằng ngày đã đo: **0 lần** xảy ra ca (2) trong
-`mike/logs/compute_active_nav_all.log` từ 2026-08-13→09-25.
-
 ### `compute_active_nav.py` exit 5 — account về 0 vị thế (thêm 2026-09-13, commit c9edd4c6)
 Hôm trước có cổ phiếu, hôm nay feed trả 0 vị thế ⇒ script **cố ý dừng exit 5, KHÔNG ghi**
 `active_nav_<account>.json` (file cũ giữ nguyên) — chống feed DNSE rỗng tạm thời ghi NAV thấp giả
@@ -557,6 +525,63 @@ nohup $DNA_PYEXE $WC/mike/bin/paper_programs_daily_report.py \
 - Số đã gửi cho user mà phát hiện sai → đính chính NGAY trên kênh đã gửi, không âm thầm sửa.
 - Bug ở 1 script → grep các script khác làm việc TƯƠNG TỰ (bài học 07-06: 3 bug cùng dạng
   "logic trùng lặp không đồng bộ" trong 1 ngày).
+
+## Headless agent bị classifier chặn git-write / BQ-write vào file production (tái diễn 09-27, 09-28)
+
+**Triệu chứng:** agent chạy headless (dispatch) làm xong việc, đã có verdict CONFIRMED, nhưng
+bước CUỐI (`git merge` vào main, `bq query 'CREATE OR REPLACE'`, ghi đè file production) bị
+harness classifier từ chối. Agent quay ra escalate, việc treo cho tới khi có người chạy trong
+phiên tương tác. Đã tốn ~2h (09-27 `fa_ratings_8l` restore 06:54→08:55) và 1 lần nữa 09-28
+(`close_repair` merge `eec792d7`/`3c55c249`).
+
+**Đây KHÔNG phải lỗi fleet — đừng đi debug `dispatch.sh`/quyền file.** Nhận diện bằng: job có
+finding "ALL_VERIFIED_READY ... blocked-by-classifier", hoặc commit nằm trên feature branch mà
+không merge được.
+
+**Làm gì NGAY (đừng điều tra lại từ đầu):**
+1. Xác minh công việc thật sự đã xong: verdict CONFIRMED trên bus + selfcheck PASS + commit tồn
+   tại trên feature branch (`git log --oneline --all | grep <hash>`).
+2. Người/phiên TƯƠNG TÁC chạy bước cuối (merge / BQ write). Headless retry sẽ hỏng lại.
+3. Đóng question gốc bằng event `answer` NGAY sau khi merge — nếu không, checker §5 sẽ báo
+   pending tiếp 2 lần/ngày dù việc đã xong (đúng lỗi đã xảy ra với
+   `closerepair-fix-approval-needed`, mở 09-28T10:57Z, merge xong 09-28 mà vẫn pending 29/09).
+
+**Giảm tần suất:** việc biết trước sẽ cần git-write vào main hoặc BQ write → dispatch dạng
+TƯƠNG TÁC ngay từ đầu, đừng để headless chạy tới bước cuối rồi tắc. (Câu hỏi có nên bắt buộc
+hoá quy tắc này vẫn đang chờ user — bus topic
+`retro-pattern-recurring-classifier-blocks-headless-agent-production-write`.)
+
+## PLACE_FAIL_STOPPED — bot tự dừng đặt lệnh một mã (từ 2026-09-29)
+
+**Ý nghĩa:** `trading_bot/executor.py::_count_place_fail` đã thấy **5 lượt `PLACE_FAIL` liên
+tiếp CÙNG một lỗi CẤU TRÚC** (4xx, trừ 408/429 và trừ mọi chuỗi mang dấu hiệu tạm thời) cho
+cùng một parent order, và dừng vòng đặt lệnh của mã đó. Sự cố gốc:
+`kb/incidents/2026-09/2026-09-29-zalopay-sell-deal-not-found-loanpackage-1826.md` — 2.628 lượt
+`HTTP 400: deal not found` trong 4h15 vì lệnh BÁN gửi sai gói vay.
+
+**Phạm vi của cờ = MỘT TIẾN TRÌNH.** `_clear_place_blocks` xoá nó mỗi lần executor khởi động
+(kể cả `run_bot.sh` 13:00 resume cùng plan) và ghi journal `PLACE_FAIL_UNBLOCKED`. Cố ý: ba ca
+thật (07-06, 07-28, 08-10) đều là "người sửa nguyên nhân rồi restart → lệnh khớp hết".
+
+**Xử lý, theo thứ tự:**
+1. Đọc `note` của dòng `PLACE_FAIL_STOPPED` trong `data/execution_logs/exec_{label}_{date}_journal.csv`
+   — nó chứa nguyên văn lỗi broker. Đó là nguyên nhân, không phải phỏng đoán.
+2. `deal not found` ⇒ gói vay của lệnh BÁN không khớp deal đang mở. Kiểm bằng
+   `_log_raw` kind `sell_loan_package_resolve` trong `data/execution_logs/dnse_raw_{date}.jsonl`
+   (ghi MỌI lần resolve, kể cả lần rơi về gói default vì đọc positions lỗi).
+3. `Trade quantity not enough` ⇒ T+2 chưa về; DNSE chỉ nhả cổ phiếu T+2 từ **phiên chiều** —
+   chờ restart 13:00, cờ tự gỡ.
+4. **GỠ CHẶN không đợi restart:** xoá khoá `place_blocked` của parent tương ứng trong
+   `data/execution_logs/state_{label}_{plan_date}.json`, hoặc khởi động lại bot.
+
+**Lưu ý phát hiện:** cơ chế dừng này cắt tổng `PLACE_FAIL` xuống ≤5/lệnh, tức DƯỚI ngưỡng
+`> 20` của `ops_health_check.sh`. Vì vậy `PLACE_FAIL_STOPPED` được wire riêng với ngưỡng `> 0`
+và **không** bị hạ cấp xuống ℹ️ khi một mã khác khớp sau đó. Đừng nới hai điều kiện này —
+đó chính là cái chuông duy nhất còn lại cho lớp lỗi này.
+
+**Lưới an toàn ATC (bất đối xứng, cố ý):** lệnh BÁN bị chặn vẫn được thử MỘT lần ở phiên ATC
+(`atc_remainder_sell=True`), có journal `ATC_AFTER_BLOCK`. Lệnh MUA **không** có lưới này
+(`atc_remainder_buy=False`) ⇒ mua bị chặn là không thực thi trong tiến trình đó.
 
 ## Lược sử
 2026-07-07: viết lần đầu + wire autofix vào ops_health_check.sh & sync_bq_cache_daily.sh
