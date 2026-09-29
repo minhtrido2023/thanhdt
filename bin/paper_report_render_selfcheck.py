@@ -19,6 +19,7 @@ import tempfile
 from contextlib import redirect_stdout
 
 SRC = os.path.join(os.path.dirname(os.path.abspath(__file__)), "paper_programs_daily_report.py")
+NAV_SRC = os.path.join(os.path.dirname(os.path.abspath(__file__)), "daily_nav_snapshot.py")
 FAILS = []
 N_RUN = 0  # đếm THẬT số check() đã chạy — đừng gõ tay con số vào commit message (quant-skeptic
            # verify_20260731_052807 bắt được 2 lần liên tiếp commit message ghi sai: 28/28 rồi
@@ -69,6 +70,23 @@ def main():
     root = tempfile.mkdtemp(prefix="ppdr_selfcheck_")
     m = load_module(root)
     D = "2026-07-31"
+
+    # Corporate actions have two different failure modes and therefore two different
+    # consumers: live NAV must accept a broker's early adjusted mark only when an
+    # announced event explains it, while the paper report must rebase a frozen entry
+    # before comparing it with BQ's retro-adjusted Close.  Keep this small wiring
+    # contract here so a later refactor cannot land one half and silently drop the
+    # other (BID broker-early case, 2026-08-14; MBB paper-entry case, 2026-08-11).
+    print("== 0. Đồng bộ corporate-action live ↔ paper-report ==")
+    report_src = open(SRC, encoding="utf-8").read()
+    nav_src = open(NAV_SRC, encoding="utf-8").read()
+    check("paper report gọi paper_entry_adjust trước khi tính AlphaLens return",
+          "import paper_entry_adjust" in report_src
+          and "paper_entry_adjust.adjust_entries(" in report_src)
+    check("live NAV giữ bypass broker-credit sớm có kiểm ratio/event (BID)",
+          "def early_corp_action_price(" in nav_src
+          and "upcoming_corp_events(" in nav_src
+          and "PRICE_XCHECK_TOLERANCE_PCT = 5.0" in nav_src)
 
     # ---- fixtures ----
     jdir = os.path.join(root, "data/execution_logs")

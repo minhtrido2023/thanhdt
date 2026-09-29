@@ -521,8 +521,11 @@ except Exception as e:
 rows = []
 tot_value_planned = 0
 tot_value_filled = 0
+tot_buy_value = tot_sell_value = 0
 n_buy = n_sell = 0
 n_full = n_partial = n_zero = 0
+n_buy_full = n_buy_partial = n_buy_zero = 0
+n_sell_full = n_sell_partial = n_sell_zero = 0
 
 for oid, p in parents.items():
     o = orders_by_id.get(oid, {})
@@ -531,11 +534,6 @@ for oid, p in parents.items():
     qty_plan = o.get('qty', 0)
     ref_price = o.get('ref_price', 0)
     filled = p.get('filled', 0)
-
-    if side == 'buy':
-        n_buy += 1
-    elif side == 'sell':
-        n_sell += 1
 
     fills = [c for c in p.get('children', []) if c.get('filled')]
     if fills:
@@ -550,11 +548,28 @@ for oid, p in parents.items():
 
     pct = 100.0 * filled / qty_plan if qty_plan else 0
     if filled == 0:
-        n_zero += 1
+        _cat = 'zero'
     elif filled >= qty_plan:
-        n_full += 1
+        _cat = 'full'
     else:
-        n_partial += 1
+        _cat = 'partial'
+
+    if side == 'buy':
+        n_buy += 1
+        tot_buy_value += value_filled
+        if _cat == 'full': n_buy_full += 1
+        elif _cat == 'partial': n_buy_partial += 1
+        else: n_buy_zero += 1
+    elif side == 'sell':
+        n_sell += 1
+        tot_sell_value += value_filled
+        if _cat == 'full': n_sell_full += 1
+        elif _cat == 'partial': n_sell_partial += 1
+        else: n_sell_zero += 1
+
+    if _cat == 'full': n_full += 1
+    elif _cat == 'partial': n_partial += 1
+    else: n_zero += 1
 
     rows.append({
         'ticker': ticker, 'side': side, 'qty_plan': qty_plan, 'filled': filled,
@@ -590,26 +605,40 @@ for _bl in broker_lines:
     lines.append(_bl)
 if broker_lines:
     lines.append("")
+# Bảng tổng hợp giao dịch (viết cho người đọc, không liệt kê từng lệnh khi không có gì bất thường)
 lines.append(f"Tổng lệnh: **{len(rows)}** ({n_buy} mua / {n_sell} bán) | "
              f"Khớp đủ: {n_full} | Khớp một phần: {n_partial} | Chưa khớp: {n_zero}")
 lines.append("")
+lines.append("| Chiều | Lệnh | Khớp đủ | Khớp thiếu | Chưa khớp | Giá trị |")
+lines.append("|-------|:----:|:-------:|:----------:|:---------:|--------:|")
+if n_buy > 0:
+    lines.append(f"| Mua   | {n_buy} | {n_buy_full} | {n_buy_partial} | {n_buy_zero} | "
+                 f"{tot_buy_value/1e6:,.1f}M |")
+if n_sell > 0:
+    lines.append(f"| Bán   | {n_sell} | {n_sell_full} | {n_sell_partial} | {n_sell_zero} | "
+                 f"{tot_sell_value/1e6:,.1f}M |")
+lines.append("")
 
-for r in rows:
-    if r['filled'] > 0:
-        side_disp = 'MUA' if r['side'] == 'buy' else 'BÁN'
-        lines.append(f"• {side_disp} {r['ticker']}: {r['filled']:,}/{r['qty_plan']:,} "
-                     f"({r['pct']:.0f}%) @ {r['avg_price']:,.0f}đ → {r['value']/1e6:,.1f}M")
-    else:
-        side_disp = 'mua' if r['side'] == 'buy' else 'bán'
-        lines.append(f"• ⚠️ {side_disp} {r['ticker']}: 0/{r['qty_plan']:,} — KHÔNG khớp")
-    if r.get('dcf'):
-        lines.append(f"   ↳ {r['dcf']}")
-    if r.get('dd'):
-        for _dl in str(r['dd']).splitlines():
-            lines.append(f"   ↳ {_dl.strip()}")
+# Chỉ liệt kê chi tiết các lệnh ĐÁNG CHÚ Ý: chưa khớp, khớp thiếu, hoặc có chú thích DCF/DD
+notable = [r for r in rows if r['filled'] < r['qty_plan'] or r.get('dcf') or r.get('dd')]
+if notable:
+    lines.append("**Chi tiết đáng chú ý:**")
+    for r in notable:
+        if r['filled'] > 0:
+            side_disp = 'MUA' if r['side'] == 'buy' else 'BÁN'
+            lines.append(f"  • {side_disp} {r['ticker']}: {r['filled']:,}/{r['qty_plan']:,} "
+                         f"({r['pct']:.0f}%) @ {r['avg_price']:,.0f}đ → {r['value']/1e6:,.1f}M")
+        else:
+            side_disp = 'mua' if r['side'] == 'buy' else 'bán'
+            lines.append(f"  • ⚠️ {side_disp} {r['ticker']}: 0/{r['qty_plan']:,} — KHÔNG khớp")
+        if r.get('dcf'):
+            lines.append(f"     ↳ {r['dcf']}")
+        if r.get('dd'):
+            for _dl in str(r['dd']).splitlines():
+                lines.append(f"     ↳ {_dl.strip()}")
+    lines.append("")
 
 if any(r.get('dcf') for r in rows) and DCF_DISCLAIMER:
-    lines.append("")
     lines.append(f"ℹ️ _{DCF_DISCLAIMER}_")
 if any(r.get('dd') for r in rows) and DD_DISCLAIMER:
     lines.append(f"ℹ️ _{DD_DISCLAIMER}_")

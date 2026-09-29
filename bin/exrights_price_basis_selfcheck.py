@@ -225,6 +225,18 @@ src_txt = open(os.path.join(MIKE_BIN, "daily_nav_snapshot.py"), encoding="utf-8"
 check("cổng 5% vẫn còn nguyên trong daily_nav_snapshot.py (bản vá KHÔNG gỡ lưới an toàn)",
       "PRICE_XCHECK_TOLERANCE_PCT = 5.0" in src_txt)
 
+print("\n[9b] Broker credit sớm: chỉ bypass cổng khi event đã biết giải thích ĐÚNG tỷ lệ")
+spec = importlib.util.spec_from_file_location("daily_nav_snapshot", os.path.join(MIKE_BIN, "daily_nav_snapshot.py"))
+nav = importlib.util.module_from_spec(spec); spec.loader.exec_module(nav)
+bid_event = [{"ticker": "BID", "event_code": "ISS", "price_adjusting": True,
+              "exercise_ratio": "0.068433"}]
+px = nav.early_corp_action_price(38250, 35800, bid_event, "BID")
+check("BID 6.8433%: 38.250/(1+ratio) khớp marketPrice ⇒ dùng giá điều chỉnh",
+      px is not None and abs(px - 35800) < 20, px)
+check("không có event/tỷ lệ sai ⇒ cổng vẫn chặn",
+      nav.early_corp_action_price(38250, 35800, [], "BID") is None and
+      nav.early_corp_action_price(38250, 35800, [{**bid_event[0], "exercise_ratio": "0.15"}], "BID") is None)
+
 print("\n[10] CỬA SỔ GIỮA PHIÊN (09:00–14:45): closePrice=0 mọi board — nửa đồng hồ quant-skeptic")
 # Bản vá ĐẦU chỉ phủ tiền phiên. Giữa phiên DNSE trả closePrice=0 ở MỌI board (retro-2026-08-07
 # §6, DollarBill đo thật 11:5x) ⇒ entry G1 rớt khỏi bộ lọc ⇒ mã BIẾN MẤT khỏi kết quả ⇒
