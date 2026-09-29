@@ -436,16 +436,20 @@ def main():
     _pea_mod.DEFAULT_CACHE = _Path(root) / "data" / "bq_cache"
     try:
         # `_mkcache` (4 cột) không đủ — `_repair_close` cần High/Low để chạy band-guard của
-        # close_repair; 0 tắt guard đó một cách hợp lệ (xem `_band_lifted_suspect`).
+        # close_repair; 0 tắt guard đó một cách hợp lệ (xem `_band_lifted_suspect`). Volume=1
+        # (bất kỳ giá trị dương nào, không ảnh hưởng ca này — không có bar nào ở đây chained) chỉ
+        # để khớp schema thật (`tav2_bq.ticker` LUÔN có cột Volume — Việc A, dispatch
+        # Taylor_20260929_042515); thiếu cột này làm `_repair_close`'s SQL ném BinderException,
+        # Layer 2 rơi vào nhánh lỗi im lặng, và cap an toàn cũ bị bật nhầm lại.
         _fcache_dir = os.path.join(root, "data/bq_cache/ticker")
         os.makedirs(_fcache_dir, exist_ok=True)
         _fconn = duckdb.connect()
         _fconn.execute(
             "COPY (SELECT * FROM (VALUES "
-            "('FPT', DATE '2026-06-30', 70200, 70200, 0, 0), "   # r=1,0 tại asof — chưa hồi tố
-            "('FPT', DATE '2026-09-18', 65180, 71700, 0, 0), "   # r=0,909066 — CÙNG bằng chứng E1
-            "('FPT', DATE '2026-09-22', 63700, 63700, 0, 0)) "   # sau ex-date thật, đã hội tụ (r=1,0)
-            "AS t(ticker, time, Close, Price, High, Low)) TO "
+            "('FPT', DATE '2026-06-30', 70200, 70200, 0, 0, 1), "   # r=1,0 tại asof — chưa hồi tố
+            "('FPT', DATE '2026-09-18', 65180, 71700, 0, 0, 1), "   # r=0,909066 — CÙNG bằng chứng E1
+            "('FPT', DATE '2026-09-22', 63700, 63700, 0, 0, 1)) "   # sau ex-date thật, đã hội tụ (r=1,0)
+            "AS t(ticker, time, Close, Price, High, Low, Volume)) TO "
             f"'{os.path.join(_fcache_dir, '2026.parquet')}' (FORMAT PARQUET)")
         _fconn.close()
         write(os.path.join(root, "data/alphalens_f.json"), json.dumps({
