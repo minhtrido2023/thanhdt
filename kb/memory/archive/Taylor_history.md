@@ -767,3 +767,6 @@
 
 ## Archived 2026-09-28 (keep=12 days=0 require_done=False)
 - [2026-09-27T11:27:34Z] CHO USER SIGN-OFF: merge branch fix/failc-sweep-8callsites-2709 @546d5c83 (8 call-site edge-health entry->known_date). Delta cao nhat +0,29pp, KHONG so PIN nao doi, pt_v22_dt5g byte-identical => engine_room_oos an toan. Report: research/failc_sweep8_20260927/REPORT.md. | TON DU: 11 occurrence cung lop o snapshot dong bang — dang ke nhat agents/Taylor/research/backtest_2008_v24_20260825/engine_2008.py, de xuat job rieng.
+
+## Archived 2026-09-29 (keep=12 days=0 require_done=False)
+- [2026-09-28T10:50:00Z] VND/VNM (LIVE, Layer 1 UNCOMPUTABLE) đã điều tra (Taylor_20260928_103533, bus finding vnd-vnm-uncomputable-not-fpt-class): VND = false-positive của guard (lệch band chỉ -0,008%, Close vendor ĐÚNG); VNM = KHÁC loại lỗi — Close vendor đúng/nhất quán nhưng exright_date trong corporate_action lệch 1 phiên (ghi 06-26, hội tụ thật 06-25) → Layer 2 KHÔNG được auto-repair VNM (sẽ áp nhầm factor lên phiên đã đúng), CẦN Winston xác minh ex-date. 5 item cho Winston ở research/adjfactor_repair_20260927/REPORT.md (W1 VFR gấp nhất).
