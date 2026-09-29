@@ -367,13 +367,26 @@ def probe_alphalens(probe, prog, today):
                     note += (f" · nếu BỎ quyền (accrue-only): vào "
                              f"{b.entry_adj:,.0f} → **{ret_alt:+.2f}%**")
         sf = stale_factor.get((t, entry_asof[t]))
-        if sf:
+        # `_terp_factor_stale` đọc THẲNG cache RAW, không biết gì về close_repair (Layer 2, wired
+        # vào `adjust_entries` từ 2026-09-28) — nó sẽ luôn báo "hỏng" trên FPT dù Close đã được
+        # tự sửa ĐÚNG, vì chuỗi raw vẫn tụt. Nếu `a` đã là self_computed (Layer 2 đã tính lại
+        # Close từ chính công thức corp-action) thì `a.entry_adj` KHÔNG còn mang hệ số=1,0 lỗi
+        # nữa — áp thêm chặn trên (thiết kế cho giá vốn CHƯA sửa) sẽ SỬA HAI LẦN và bóp méo tỉ
+        # suất theo chiều khác (ca thật FPT 2026-09-29: entry_adj đúng 63.818 bị chặn trên kéo
+        # xuống 58.015, tỉ suất báo cáo +9,80% thay vì đúng ~-0,18%). Chỉ áp cho ticker close_repair
+        # CHƯA sửa (adj_source vẫn "vendor", hoặc đã sửa nhưng bị guard khác từ chối dùng kết quả).
+        already_repaired = a is not None and not a.degraded and a.adj_source == "self_computed"
+        if sf and already_repaired:
+            note += (f" · Layer 2 đã tự sửa Close theo corp-action ({a.repair_note or ''}) — "
+                     f"KHÔNG áp thêm chặn trên hệ số vendor raw (tránh sửa hai lần)")
+        elif sf:
             # PHƯƠNG ÁN B — user duyệt 2026-09-23 (bus question
             # `alphalens-fpt-vendor-factor-stale-gate-0930`): ÁP chặn trên của hệ số vào chính
             # con số DẪN DẮT, rồi chốt gate trên số đã sửa. Lý lẽ: `Close/Price` phải KHÔNG-GIẢM
             # theo ngày ⇒ hệ số đúng tại ngày vào lệnh ≤ `r_min` quan sát về sau ⇒ giá vốn
             # rebase ≤ entry_adj × (r_min/r0) ⇒ tỉ suất tính bằng nó là CHẶN DƯỚI của tỉ suất
             # thật. Cố ý KHÔNG đoán giá trị đúng: vendor hồi tố sâu hơn thì số thật CAO HƠN.
+            # CHỈ áp khi close_repair CHƯA sửa được entry này (xem `already_repaired` ở trên).
             d_bad, r0, r_min = sf
             scale = (r_min / r0) if r0 > 0 else 1.0
             base_adj = a.entry_adj if a is not None else p["entry_price"]
