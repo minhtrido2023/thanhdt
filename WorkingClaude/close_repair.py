@@ -266,28 +266,48 @@ def factor_after(date: str, events: list, series: list, series_max: str) -> tupl
 # comment inside `price_crosscheck` at the `chained_ex` check.
 #
 # Re-measured THROUGH THE FIXED PRODUCTION FUNCTION `price_crosscheck_after` itself (not a
-# standalone filter): `tav2_bq.corporate_action` × `tav2_bq.ticker`, ALL price-adjusting
-# DIV/ISS(bonus|stock-dividend) events 2025-01-01..2026-09-15 (n=1.587 candidates with a price
-# series covering the ex-date) — 782 (49,3%) reach a verdict; 681 refused as uncomputable (rights
-# issue/unparsable/cash≥price — correct, by design), 121 as genuine ffill/no-trade, 314 for
-# tickers this measurement script itself could not fetch a series for (a gap in the MEASUREMENT,
-# not in `price_crosscheck`), 16 ex-date beyond the fetched window. Among the 782 TESTED events,
-# |dev| — median 1,41%, p90 5,63%, p95 8,32%, p99 12,75%, max 23,40% — confirms the first pass's
-# conclusion despite the bug fix changing WHICH events get tested: this is genuine same-day trading
-# noise around a corp-action step (comparing a SINGLE session's raw close to a formula has an
-# irreducible floor of several percent that a MULTI-session cumulative comparison, what `TOL` above
-# guards, does not have), not vendor/data-quality noise. Reusing `TOL=0,3%` here would flag ~100%
-# of tested events — useless.
+# standalone filter) — committed, re-runnable version: `price_xcheck_calibration.py` (Việc B,
+# dispatch Taylor_20260929_042515, 2026-09-29; replaces an earlier /tmp-only measurement per §8c).
+# `tav2_bq.corporate_action` × `tav2_bq.ticker`, ALL price-adjusting DIV/ISS(bonus|stock-dividend)
+# events 2025-01-01..2026-09-15 (n=1.587 candidates with a price series covering the ex-date, out
+# of 1.917 total pairs — 314 tickers this measurement script itself could not fetch ANY
+# `tav2_bq.ticker` row for, a gap in DATA COVERAGE, not in `price_crosscheck`; 16 more with the
+# ex-date beyond the fetched price window). MẪU SỐ của 4 nhóm dưới đây là CHÍNH n=1.587, cộng khớp
+# chẵn (script tự `assert` điều này mỗi lần chạy):
+#   - tested=782 (49,3%) reach a |dev| verdict — the set reported below.
+#   - ffill_cum_band=681: the CUM bar itself is refused by `_band_lifted_suspect` (raw Price
+#     outside the raw-lifted [Low,High] band) — corrected label, 2026-09-29: the first pass
+#     (round-2 /tmp measurement) called this bucket "681 uncomputable (rights issue/unparsable/
+#     cash≥price)" by GUESSING from the category NAME instead of reading the actual `note` text;
+#     re-verified against the real `note` strings and 100% of these 681 say "outside the
+#     raw-lifted" — none are rights-issue/unparsable/cash≥price. True formula-uncomputable count
+#     in this window is 0 (see below) — this SQL only fetches DIV/ISS-bonus, so 0 rights-issue is
+#     expected by construction, not evidence the branch is dead in general.
+#   - ffill_chained=121: `_lift_neighbour`'s `chained` (raw Price repeats the prior session,
+#     either on the CUM bar or the EX-DATE bar — the latter is one of Việc A's 3 §29 labels).
+#   - uncomputable_formula=0: `group_factor` returning None for a genuine formula reason (rights
+#     issue/unparsable/cash≥price) — zero in-sample, kept as a distinct bucket since it is real
+#     `group_factor` behavior that could be nonzero on a different event mix.
+#   - no_cum_bar_in_window=3: no session before the ex-date inside the fetched price window.
+# Among the 782 TESTED events, |dev| — median 1,41%, p75 2,91%, p90 5,64%, p95 8,31%, p97 9,84%,
+# p99 12,60%, max 23,40% — confirms the first pass's conclusion despite the bug fix changing WHICH
+# events get tested: this is genuine same-day trading noise around a corp-action step (comparing a
+# SINGLE session's raw close to a formula has an irreducible floor of several percent that a
+# MULTI-session cumulative comparison, what `TOL` above guards, does not have), not vendor/data-
+# quality noise. Reusing `TOL=0,3%` here would flag ~100% of tested events — useless.
 #
-# PRICE_XCHECK_TOL = 0,20 (20%): false-positive rate on the 782 tested events is 0,13% (1/782) —
-# a coarse, GROSS-error screen. It reliably catches an order-of-magnitude-wrong
-# exercise_ratio/value_per_share (decimal slip, wrong/duplicated event: a 0,10→1,0 fat-finger on
-# the real FPT market data below IS caught, dev=−46,0%) but — DISCLOSED LIMIT, same class as the
-# monotonicity check's one-directional blind spot — it CANNOT distinguish quant-skeptic's
-# 0,15/0,104 micro-mutations (4,5%/0,36% shift in `f`; on the real FPT data 0,15 gives dev=−6,1%)
-# from ordinary single-day noise (already ~1,4% at the median). Catching those would need a
-# per-ticker volatility-adjusted statistic — out of scope for this pass, flagged here so it is not
-# forgotten.
+# PRICE_XCHECK_TOL = 0,20 (20%): false-positive rate on the 782 tested events is 0,13% (1/782;
+# 2,81%/22 at 10%, 0,38%/3 at 15%) — a coarse, GROSS-error screen. It reliably catches an
+# order-of-magnitude-wrong exercise_ratio/value_per_share (decimal slip, wrong/duplicated event: a
+# 0,10→1,0 fat-finger on the real FPT market data below IS caught, dev=−46,0%) but — DISCLOSED
+# LIMIT, same class as the monotonicity check's one-directional blind spot — it CANNOT distinguish
+# quant-skeptic's 0,15/0,104 micro-mutations (4,5%/0,36% shift in `f`; on the real FPT data 0,15
+# gives dev=−6,1%) from ordinary single-day noise (already ~1,4% at the median). Catching those
+# would need a per-ticker volatility-adjusted statistic — out of scope for this pass, flagged here
+# so it is not forgotten.
+#
+# LỆNH TÁI LẬP: source wc_env.sh && python3 price_xcheck_calibration.py (đo lần đầu 2026-09-29;
+# chi phí BQ ~28MB, xem VINTAGE trong docstring của script đó).
 PRICE_XCHECK_TOL = 0.20
 
 
@@ -356,9 +376,24 @@ def price_crosscheck(ex: str, kept_evs: list, series: list,
     # phiên có cùng khung hay không (so sánh Price thô với Price thô, không quy đổi qua Close).
     _, chained_ex = _lift_neighbour(series, i_ex)
     if chained_ex:
+        # §29 (kb/coding_guidelines.md): "ffill/không giao dịch" là một NGUYÊN NHÂN, không phải
+        # cách diễn đạt trung tính của "Price lặp lại" — quant-skeptic (round 2) đo thật VHM
+        # 2026-08-06 (KL 16.902.474) và TRC 2026-09-15 (KL 611.072) đều bị nhãn này dù CÓ giao
+        # dịch thật; nguyên nhân thật ở 2 ca đó là vendor báo giá Price trễ 1 phiên trên dòng
+        # ex-date, không phải không giao dịch. Rẽ nhãn theo bit cơ học `Volume` của chính bar —
+        # quyết định TỪ CHỐI (mismatch=False) giữ nguyên ở CẢ BA nhánh, chỉ lý do hiển thị đổi.
+        vol = series[i_ex].get("volume")
+        if vol is None:
+            vol_reason = ("ffill HOẶC vendor báo giá trễ — chưa phân biệt được vì chuỗi không "
+                          "mang Volume")
+        elif vol > 0:
+            vol_reason = (f"giá thô lặp lại phiên trước DÙ CÓ giao dịch thật (KL={vol:,.0f}) ⇒ "
+                          f"nghi vendor báo giá trễ 1 phiên trên dòng ex-date")
+        else:
+            vol_reason = "mã không giao dịch phiên này (ffill)"
         return PriceCrossCheck(ex, f, None, None, False,
-                               f"{ex}: phiên ex-date {series[i_ex]['d']} Price lặp lại phiên liền "
-                               f"trước (ffill/không giao dịch), không cross-check")
+                               f"{ex}: phiên ex-date {series[i_ex]['d']} {vol_reason}, không "
+                               f"cross-check")
 
     p_cum, p_ex = series[i_cum]["price"], series[i_ex]["price"]
     if p_cum <= 0 or p_ex <= 0:

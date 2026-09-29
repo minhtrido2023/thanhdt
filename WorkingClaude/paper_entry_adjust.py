@@ -271,7 +271,7 @@ def _repair_close(rows, items, cache_dir, cache_max_date):
         tk_sql = ",".join("?" for _ in tickers)
         bars = con.execute(
             f"""
-            SELECT ticker, CAST(time AS VARCHAR), Close, Price, High, Low
+            SELECT ticker, CAST(time AS VARCHAR), Close, Price, High, Low, Volume
             FROM read_parquet('{glob}')
             WHERE ticker IN ({tk_sql})
               AND time >= CAST(? AS DATE) - INTERVAL 25 DAY
@@ -282,10 +282,14 @@ def _repair_close(rows, items, cache_dir, cache_max_date):
         ).fetchall()
         con.close()
         series = {}
-        for tk, d, c, pr, hi, lo in bars:
+        for tk, d, c, pr, hi, lo, vol in bars:
+            # `volume=None` (missing, never a real 0) is a distinct case from `volume=0.0` (real
+            # no-trade session) for `price_crosscheck`'s §29 evidence-based label — do not collapse
+            # a genuinely-missing reading into 0 with `vol or 0`.
             series.setdefault(tk, []).append(
                 {"d": d, "close": float(c), "price": float(pr),
-                 "high": float(hi or 0), "low": float(lo or 0)})
+                 "high": float(hi or 0), "low": float(lo or 0),
+                 "volume": float(vol) if vol is not None else None})
         series_max = cache_max_date or max((b["d"] for s in series.values() for b in s), default=None)
         if not series_max:
             return rows, {"_error": "không xác định được ngày cuối của chuỗi giá"}, {}, {}
@@ -761,6 +765,97 @@ def _selfcheck() -> int:
           "phiên bình thường đo thực nghiệm ~1,4% median; PRICE_XCHECK_TOL=20% hiệu chỉnh để tránh "
           "báo động giả trên >1.500 sự kiện thật, không phải bỏ sót cài đặt)",
           xc_micro == (), f"{xc_micro}")
+
+    # 11. Việc A (dispatch Taylor_20260929_042515, §29 kb/coding_guidelines.md): nhãn lý do chối
+    # phiên ex-date "chained" phải RẼ THEO Volume — quant-skeptic (round 2, killer_objection) đo
+    # thật VHM 2026-08-06 (KL 16.902.474) và TRC 2026-09-15 (KL 611.072) bị nhãn "ffill/không
+    # giao dịch" dù CÓ giao dịch thật; nguyên nhân thật là vendor báo giá Price trễ 1 phiên trên
+    # dòng ex-date. Bar THẬT từ tav2_bq.ticker (truy vấn 2026-09-29), event thật từ
+    # tav2_bq.corporate_action. Cả 3 ca dưới đây phải giữ NGUYÊN quyết định từ chối
+    # (mismatch=False, không repair) — chỉ lý do hiển thị đổi, không nới coverage.
+    _vhm_series = [
+        {"d": "2026-08-03", "close": 74000.0, "price": 148000.0, "high": 74850.0, "low": 72550.0,
+         "volume": 5338830.0},
+        {"d": "2026-08-04", "close": 76450.0, "price": 152900.0, "high": 76650.0, "low": 73400.0,
+         "volume": 6362273.0},
+        {"d": "2026-08-05", "close": 76500.0, "price": 153000.0, "high": 79400.0, "low": 76500.0,
+         "volume": 10722235.0},
+        {"d": "2026-08-06", "close": 77100.0, "price": 153000.0, "high": 81700.0, "low": 76800.0,
+         "volume": 16902474.0},
+        {"d": "2026-08-07", "close": 73000.0, "price": 73000.0, "high": 76800.0, "low": 73000.0,
+         "volume": 9164067.0},
+    ]
+    _vhm_max = "2026-08-07"
+    _vhm_ev = {"ticker": "VHM", "exright_date": "2026-08-06", "event_code": "ISS",
+               "issue_method_name_vi": "Trả Cổ tức bằng Cổ phiếu", "exercise_ratio": 1.0}
+    xc_vhm, notes_vhm = _cr.price_crosscheck_after("2026-06-30", [_vhm_ev], _vhm_series, _vhm_max)
+    check("11a. VHM 2026-08-06 (Volume=16.902.474>0 THẬT, ex-date Price lặp lại 153.000 phiên "
+          "trước): nhãn phải nói 'nghi vendor báo giá trễ' kèm đúng KL, KHÔNG PHẢI 'không giao "
+          "dịch' — quyết định vẫn từ chối như trước (không mismatch, không repair)",
+          xc_vhm == () and notes_vhm and "vendor báo giá trễ" in notes_vhm[0]
+          and "16,902,474" in notes_vhm[0], f"{notes_vhm}")
+
+    _trc_series = [
+        {"d": "2026-09-11", "close": 20450.0, "price": 81800.0, "high": 20820.0, "low": 20380.0,
+         "volume": 95900.0},
+        {"d": "2026-09-14", "close": 20150.0, "price": 80600.0, "high": 20600.0, "low": 20120.0,
+         "volume": 149500.0},
+        {"d": "2026-09-15", "close": 21550.0, "price": 80600.0, "high": 21550.0, "low": 21100.0,
+         "volume": 611072.0},
+        {"d": "2026-09-16", "close": 22400.0, "price": 22400.0, "high": 22600.0, "low": 21550.0,
+         "volume": 445944.0},
+        {"d": "2026-09-17", "close": 22300.0, "price": 22300.0, "high": 22400.0, "low": 21500.0,
+         "volume": 161472.0},
+    ]
+    _trc_max = "2026-09-17"
+    _trc_ev = {"ticker": "TRC", "exright_date": "2026-09-15", "event_code": "ISS",
+               "issue_method_name_vi": "Cổ phiếu thưởng", "exercise_ratio": 3.0}
+    xc_trc, notes_trc = _cr.price_crosscheck_after("2026-06-30", [_trc_ev], _trc_series, _trc_max)
+    check("11b. TRC 2026-09-15 (Volume=611.072>0 THẬT, ex-date Price lặp lại 80.600 phiên "
+          "trước): nhãn phải nói 'nghi vendor báo giá trễ' kèm đúng KL — quyết định vẫn từ chối "
+          "như trước",
+          xc_trc == () and notes_trc and "vendor báo giá trễ" in notes_trc[0]
+          and "611,072" in notes_trc[0], f"{notes_trc}")
+
+    # Ca đối chứng Volume==0: SYNTHETIC, không phải bar thật — lý do khai rõ (§29, không giấu):
+    # quét TOÀN BỘ 15 ứng viên "ex-date Volume=0 thật" trong cả cửa sổ hiệu chỉnh
+    # 2025-01-01..2026-09-15 (BCB×2, BMV, BTT, BTV, CQT, DNN, KTL, LM8, NHC, PVM, SDN, SEB, VAF,
+    # VLW — truy vấn 2026-09-29) qua ĐÚNG `price_crosscheck_after` thật, và CẢ 15/15 bị từ chối
+    # SỚM HƠN bởi guard ffill có sẵn trên phiên CUM (`_band_lifted_suspect`, lỗi RIÊNG đã biết —
+    # xem `recommended_reruns` #3 của quant-skeptic round 2: các mã Volume=0 gần sự kiện hầu hết
+    # là mã thanh khoản cực mỏng, High=Low=Price gần như mọi phiên, nên bất kỳ neighbour nào có
+    # giá khác cũng làm lift-band lệch quá dung sai 1e-9) — nhánh "Volume==0 ⇒ ffill" bên dưới vì
+    # vậy KHÔNG có ca thật nào chạy tới được trong mẫu hiện tại. Dùng fixture số học sạch (giống
+    # tiền lệ case 7-8 phía trên: "Pure logic on a synthetic series/events") để kiểm ĐÚNG nhánh mã
+    # nguồn, không giả vờ đây là số thị trường thật.
+    _syn0_series = [
+        {"d": "2024-01-01", "close": 100.0, "price": 100.0, "high": 100.0, "low": 100.0,
+         "volume": 500.0},
+        {"d": "2024-01-02", "close": 110.0, "price": 115.0, "high": 116.0, "low": 114.0,
+         "volume": 600.0},
+        {"d": "2024-01-03", "close": 110.0, "price": 115.0, "high": 0.0, "low": 0.0,
+         "volume": 0.0},
+    ]
+    _syn0_ev = {"ticker": "SYN", "exright_date": "2024-01-03", "event_code": "ISS",
+                "issue_method_name_vi": "Cổ phiếu thưởng", "exercise_ratio": 0.1}
+    xc_syn0, notes_syn0 = _cr.price_crosscheck_after(
+        "2023-12-01", [_syn0_ev], _syn0_series, "2024-01-03")
+    check("11c. [SYNTHETIC, không phải bar thật — xem comment] Volume=0,0 trên phiên ex-date, "
+          "phiên cum KHÔNG bị nghi ffill: nhãn PHẢI là 'không giao dịch (ffill)', KHÔNG PHẢI "
+          "'vendor báo giá trễ' — quyết định vẫn từ chối như trước",
+          xc_syn0 == () and notes_syn0 and "không giao dịch phiên này (ffill)" in notes_syn0[0],
+          f"{notes_syn0}")
+
+    # Ca chuỗi KHÔNG mang Volume (caller cũ / fixture thiếu cột) — PHẢI fallback nhãn trung thực,
+    # TUYỆT ĐỐI không đoán 1 trong 2 nhánh trên khi thiếu dữ liệu (§29). Same real VHM bars, chỉ
+    # bỏ field "volume" để test riêng đường fallback.
+    _vhm_series_novol = [{k: v for k, v in b.items() if k != "volume"} for b in _vhm_series]
+    xc_novol, notes_novol = _cr.price_crosscheck_after(
+        "2026-06-30", [_vhm_ev], _vhm_series_novol, _vhm_max)
+    check("11d. chuỗi KHÔNG mang Volume (thiếu field) ⇒ fallback nhãn trung thực 'chưa phân biệt "
+          "được', KHÔNG đoán bừa 1 trong 2 nhánh — quyết định vẫn từ chối như trước",
+          xc_novol == () and notes_novol and "chưa phân biệt được" in notes_novol[0],
+          f"{notes_novol}")
 
     print("== B. Dữ liệu thật trong cache ==")
     cache_ok = (DEFAULT_CACHE / "ticker").is_dir()
