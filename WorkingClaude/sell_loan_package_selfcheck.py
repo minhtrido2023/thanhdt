@@ -73,6 +73,7 @@ ZALOPAY_POSITIONS_20260929 = [
     _pos("VRE", 1826, 100, 100),
 ]
 
+PKG_MAP_G = {"HPG": [{"id": 1258, "type": "M"}, {"id": 1826, "type": "M"}]}
 FAILED_6 = ["HPG", "MSB", "SHB", "TPB", "VIX", "VRE"]          # 400 deal not found
 OK_9 = ["BID", "CTG", "HDB", "LPB", "MBB", "TCB", "VCB", "VHM", "VPB"]   # PLACE OK
 
@@ -117,8 +118,15 @@ def make_broker(client):
     b._loan_package_id = ZALOPAY_DEFAULT_LP
     b._loan_pkg_cache = {}
     b._lever_pkg_cache = {}
-    b._log_raw = lambda *a, **k: None
+    # Stub THU THẬP, không no-op: F4 (đường suy biến phải để lại artifact) chỉ có ý nghĩa nếu
+    # test đọc được bản ghi. Với stub no-op, revert sạch F4 vẫn xanh (arch-review R2).
+    b.raw_log = []
+    b._log_raw = lambda kind, payload: b.raw_log.append((kind, payload))
     return b
+
+
+def resolve_records(b):
+    return [pl for kind, pl in b.raw_log if kind == "sell_loan_package_resolve"]
 
 
 # ───────────────────── V1-a: 6 mã sự cố → 1826, không còn 1258 ───────────────────────
@@ -151,13 +159,20 @@ except Exception as exc:                                   # repo khác/commit b
 
 if old_src:
     with tempfile.TemporaryDirectory() as td:
-        # Bản cũ dùng import tương đối (`from . import config`) → nạp như module TRONG package
-        # trading_bot thật, chỉ đổi tên để không đè module đang dùng.
-        mod_path = os.path.join(WC_ROOT, "trading_bot", "_brokers_old_selfcheck.py")
+        # File nằm trong TMPDIR, KHÔNG ghi vào package trading_bot/ thật: bị kill giữa chừng
+        # sẽ để lại một bản brokers.py TIỀN-VÁ, untracked, nằm ngay trong package production
+        # (arch-review R2 nit). Import tương đối (`from . import config`) vẫn giải đúng vì
+        # nó bám `__package__` của module, không bám vị trí file.
+        mod_path = os.path.join(td, "_brokers_old_selfcheck.py")
         with open(mod_path, "w", encoding="utf-8") as fh:
             fh.write(old_src)
+        spec = importlib.util.spec_from_file_location(
+            "trading_bot._brokers_old_selfcheck", mod_path)
+        old_mod = importlib.util.module_from_spec(spec)
+        old_mod.__package__ = "trading_bot"
+        sys.modules["trading_bot._brokers_old_selfcheck"] = old_mod
         try:
-            import trading_bot._brokers_old_selfcheck as old_mod
+            spec.loader.exec_module(old_mod)
             OldBroker = old_mod.DNSEBroker
             check(not hasattr(OldBroker, "_resolve_sell_loan_package_id"),
                   "bản git cũ THỰC SỰ chưa có _resolve_sell_loan_package_id (đúng bản tiền-vá)")
@@ -176,7 +191,6 @@ if old_src:
                   f"'400 deal not found' ⇒ fix là load-bearing, không phải test vô nghĩa")
         finally:
             sys.modules.pop("trading_bot._brokers_old_selfcheck", None)
-            os.remove(mod_path)
 
 # ───────────────────── V1-c: 9 mã bán trót → vẫn 1258 ────────────────────────────────
 print("=== V1-c REGRESSION: 9 mã đã bán thành công 29/09 vẫn resolve 1258 ===")
@@ -306,6 +320,40 @@ check(cl.n_positions == 2,
       f"2 lệnh bán HPG → positions() gọi {cl.n_positions} lần (kỳ vọng 2 — KHÔNG cache, "
       f"sellable là số lượng có thật, đổi sau mỗi lần khớp)")
 
+# ───────────────────── V1-g: F4 — MỌI đường resolve đều để lại ARTIFACT ─────────────
+print("=== V1-g F4: _log_raw('sell_loan_package_resolve') trên CẢ 3 đường ===")
+# Đường suy biến (rơi về gói default) chính là đường tái lập bug gốc — nó mà im lặng thì
+# không checker nào biết. 6 mã sự cố đều CHỈ có 1 gói, nên điều kiện log cũ ("chỉ log khi
+# nhiều gói") loại đúng ca cần audit nhất.
+cl = FakeClient(ZALOPAY_POSITIONS_20260929)
+b = make_broker(cl)
+b.place_order("HPG", 100, "sell", price=20000)
+recs = resolve_records(b)
+check(len(recs) == 1 and recs[0]["resolved"] == 1826,
+      f"đường THÀNH CÔNG 1 gói (HPG): đúng 1 bản ghi, resolved=1826 (thực tế: {recs})")
+check(recs[0].get("by_package") == {"1826": 500} and recs[0].get("rule"),
+      f"bản ghi nêu sellable theo gói + luật đã áp (audit được): {recs[0]}")
+
+cl = FakeClient(None, raise_positions=True)
+b = make_broker(cl)
+b.place_order("HPG", 100, "sell", price=20000)
+recs = resolve_records(b)
+check(len(recs) == 1 and recs[0]["resolved"] is None and "error" in recs[0],
+      f"đường LỖI positions: có bản ghi kèm lỗi thật, không im lặng (thực tế: {recs})")
+
+cl = FakeClient(ZALOPAY_POSITIONS_20260929)
+b = make_broker(cl)
+b.place_order("FPT", 100, "sell", price=20000)          # mã không có vị thế
+recs = resolve_records(b)
+check(len(recs) == 1 and recs[0]["resolved"] is None,
+      f"đường KHÔNG gói nào có hàng: vẫn có bản ghi (thực tế: {recs})")
+
+cl = FakeClient(ZALOPAY_POSITIONS_20260929, pkg_map=PKG_MAP_G)
+b = make_broker(cl)
+b.place_order("HPG", 100, "buy", price=20000)
+check(resolve_records(b) == [],
+      "nhánh BUY KHÔNG sinh bản ghi sell_loan_package_resolve (không nhiễu log)")
+
 # ───────────────────── V2: dừng retry PLACE_FAIL cấu trúc ────────────────────────────
 print("=== V2 phân loại lỗi: CẤU TRÚC vs TẠM THỜI (bằng chứng trong chuỗi lỗi) ===")
 STRUCTURAL = ["HTTP 400: deal not found",
@@ -340,13 +388,17 @@ class FakeOrder:
 class FakePlan:
     plan_date = "2026-09-29"
 
+    def __init__(self, orders=()):
+        self.orders = list(orders)
 
-def make_executor():
+
+def make_executor(orders=()):
     ex = Executor.__new__(Executor)
     ex.label = "ZaloPay"
-    ex.plan = FakePlan()
-    ex.journal = []
-    ex._journal = lambda event, o=None, **kw: ex.journal.append((event, kw.get("note", "")))
+    ex.plan = FakePlan(orders)
+    ex.journal = []                      # (event, parent_id, note)
+    ex._journal = lambda event, o=None, **kw: ex.journal.append(
+        (event, getattr(o, "id", None), kw.get("note", "")))
     return ex
 
 
@@ -361,11 +413,11 @@ check(not ps.get("place_blocked"),
 ex._count_place_fail(ps, o, NOTE, NOW)
 check(ps.get("place_blocked") is True,
       f"lượt thứ {PLACE_FAIL_STRUCTURAL_LIMIT} → DỪNG (place_blocked=True)")
-check([e for e, _ in ex.journal] == ["PLACE_FAIL_STOPPED"],
-      f"journal có đúng 1 dòng PLACE_FAIL_STOPPED (thực tế: {[e for e, _ in ex.journal]})")
+check([e for e, _, _ in ex.journal] == ["PLACE_FAIL_STOPPED"],
+      f"journal có đúng 1 dòng PLACE_FAIL_STOPPED (thực tế: {[e for e, _, _ in ex.journal]})")
 for i in range(20):
     ex._count_place_fail(ps, o, NOTE, NOW)
-check(len([e for e, _ in ex.journal if e == "PLACE_FAIL_STOPPED"]) == 1,
+check(len([e for e, _, _ in ex.journal if e == "PLACE_FAIL_STOPPED"]) == 1,
       "20 lượt nữa → vẫn chỉ 1 dòng PLACE_FAIL_STOPPED (không spam journal/bus)")
 
 ex, o, ps = make_executor(), FakeOrder(), {}
@@ -393,6 +445,7 @@ check(not ps.get("place_blocked"),
 
 print("=== V2 plumbing: _place_slices đọc cờ place_blocked và _count_place_fail được gọi ===")
 import inspect
+import re
 srcs = inspect.getsource(Executor._place_slices)
 check('ps.get("place_blocked")' in srcs,
       "_place_slices bỏ qua parent có place_blocked (chặn trước cả bước đo quote)")
@@ -405,27 +458,41 @@ print("=== V2-F1 cờ chặn có phạm vi TIẾN TRÌNH: khởi động lại l
 # arch-review F1 replay journal THẬT: chặn vĩnh viễn sẽ giữ chết 20 lệnh đã khớp thật sau mốc
 # chặn (11 lệnh bán 2026-07-06 khớp 13:00 sau khi T+2 về; 8 lệnh bán ZaloPay 2026-08-10 — cùng
 # lỗi 'deal not found' — khớp 10:35 sau hot-fix + restart; 1 lệnh mua 2026-07-28 khớp 14:13).
-ex = make_executor()
+BLOCKED_ORDERS = [FakeOrder("HPG"), FakeOrder("CTG")]
+ex = make_executor(BLOCKED_ORDERS)
+PID_HPG, PID_CTG = BLOCKED_ORDERS[0].id, BLOCKED_ORDERS[1].id
 st = {"parents": {
-    "P-HPG": {"place_blocked": True, "place_blocked_ts": "2026-09-29T09:16:28",
+    PID_HPG: {"place_blocked": True, "place_blocked_ts": "2026-09-29T09:16:28",
               "place_fail_streak": 5, "place_fail_note": NOTE, "done": False},
-    "P-CTG": {"place_fail_streak": 0, "place_fail_note": "", "done": False},
+    PID_CTG: {"place_fail_streak": 0, "place_fail_note": "", "done": False},
 }}
 ex._clear_place_blocks(st)
-check(not st["parents"]["P-HPG"].get("place_blocked"),
+check(not st["parents"][PID_HPG].get("place_blocked"),
       "resume tiến trình mới → place_blocked bị XOÁ (kịch bản hot-fix + restart 2026-08-10)")
-check(st["parents"]["P-HPG"]["place_fail_streak"] == 0
-      and st["parents"]["P-HPG"]["place_fail_note"] == "",
+check(st["parents"][PID_HPG]["place_fail_streak"] == 0
+      and st["parents"][PID_HPG]["place_fail_note"] == "",
       "streak + note cũng reset (không chặn lại ngay lượt fail đầu tiên sau restart)")
-check("place_blocked_ts" not in st["parents"]["P-HPG"], "dọn cả place_blocked_ts, không để rác")
-check([e for e, _ in ex.journal] == ["PLACE_FAIL_UNBLOCKED"],
-      f"ghi 1 dòng PLACE_FAIL_UNBLOCKED (thực tế: {[e for e, _ in ex.journal]})")
-check("P-HPG" in ex.journal[0][1] and "P-CTG" not in ex.journal[0][1],
-      "dòng gỡ chặn nêu đúng parent bị chặn, không kể tên parent lành")
+check("place_blocked_ts" not in st["parents"][PID_HPG], "dọn cả place_blocked_ts, không để rác")
+check([(e, pid) for e, pid, _ in ex.journal] == [("PLACE_BLOCK_CLEARED", PID_HPG)],
+      f"1 dòng PLACE_BLOCK_CLEARED cho ĐÚNG parent bị chặn, parent_id máy đọc được "
+      f"(thực tế: {[(e, pid) for e, pid, _ in ex.journal]})")
+check("FAIL" not in "PLACE_BLOCK_CLEARED",
+      "tên sự kiện KHÔNG chứa 'FAIL' — execution_quality_review.py đếm FAIL|ERROR|REJECT "
+      "là lỗi, một lần PHỤC HỒI không phải lỗi")
+check(NOTE in ex.journal[0][2],
+      "note giữ nguyên văn lỗi CŨ để người đọc biết vì sao nó từng bị chặn")
 
-ex2 = make_executor()
-ex2._clear_place_blocks({"parents": {"P-CTG": {"done": False}}})
-check(ex2.journal == [], "không có lệnh nào bị chặn → KHÔNG ghi journal (im lặng đúng chỗ)")
+# 2 parent cùng bị chặn → 2 dòng riêng, không gộp vào 1 dòng văn xuôi
+ex2 = make_executor(BLOCKED_ORDERS)
+ex2._clear_place_blocks({"parents": {
+    PID_HPG: {"place_blocked": True, "place_fail_note": NOTE},
+    PID_CTG: {"place_blocked": True, "place_fail_note": NOTE}}})
+check(sorted(pid for _, pid, _ in ex2.journal) == sorted([PID_HPG, PID_CTG]),
+      "2 parent bị chặn → 2 dòng journal riêng (§28: không nhồi id vào note văn xuôi)")
+
+ex3 = make_executor(BLOCKED_ORDERS)
+ex3._clear_place_blocks({"parents": {PID_CTG: {"done": False}}})
+check(ex3.journal == [], "không có lệnh nào bị chặn → KHÔNG ghi journal (im lặng đúng chỗ)")
 
 check("self._clear_place_blocks(st)" in inspect.getsource(Executor._load_state),
       "_load_state gọi _clear_place_blocks ở nhánh RESUME (nơi state cũ được mang sang)")
@@ -457,6 +524,23 @@ atc_guards = _guard_bodies(Executor._atc_sweep, "place_blocked")
 check(len(atc_guards) == 1
       and not any(isinstance(x, ast.Continue) for b in atc_guards for x in b),
       "_atc_sweep CỐ Ý không `continue` ở cờ chặn — lệnh BÁN vẫn còn 1 lần thử ATC")
+
+# Vị trí là NỘI DUNG, không phải hình thức: bản đầu ghi ATC_AFTER_BLOCK TRƯỚC khi đọc
+# `atc_remainder_buy` (=False) ⇒ mỗi lệnh MUA bị chặn phun 45 dòng khẳng định "vẫn thử" rồi
+# `continue` ngay dòng sau — đúng lỗi §29 (arch-review R2 killer objection).
+_atc_lines = inspect.getsource(Executor._atc_sweep).splitlines()
+_i_flag = next(i for i, l in enumerate(_atc_lines) if "atc_remainder_buy" in l)
+_i_journal = next(i for i, l in enumerate(_atc_lines)
+                  if 'self._journal("ATC_AFTER_BLOCK"' in l)
+_i_place = next(i for i, l in enumerate(_atc_lines) if "order_type=\"ATC\"" in l)
+check(_i_flag < _i_journal < _i_place,
+      f"ATC_AFTER_BLOCK ghi SAU cổng atc_remainder_* và NGAY TRƯỚC place_order ATC "
+      f"(dòng flag={_i_flag}, journal={_i_journal}, place={_i_place}) — không khẳng định "
+      f"'vẫn thử' cho lệnh MUA vốn bị `continue` ngay sau đó")
+for _skip in ("HARD_CEILING_SKIP_ATC", "ODD_LOT_SKIP_ATC", "WAIT_T2_SETTLEMENT"):
+    _i = next(i for i, l in enumerate(_atc_lines) if _skip in l)
+    check(_i < _i_journal,
+          f"ATC_AFTER_BLOCK cũng nằm sau nhánh bỏ qua {_skip} (chỉ ghi khi ATC thật sự đi ra)")
 slice_guards = _guard_bodies(Executor._place_slices, "place_blocked")
 check(len(slice_guards) == 1
       and any(isinstance(x, ast.Continue) for b in slice_guards for x in b),
@@ -470,11 +554,64 @@ check("place_blocked" in inspect.getdoc(Executor._count_place_fail)
 print("=== V2-F2 PLACE_FAIL_STOPPED phải được ops_health_check.sh nhìn thấy ===")
 # Gate mới cắt PLACE_FAIL xuống ≤5/lệnh — dưới hẳn ngưỡng >20 vốn là cái chuông DUY NHẤT đã bắt
 # được sự cố 29/09. Nếu không wire sự kiện mới vào, ta đổi ồn ào lấy im lặng (arch-review F2).
-ops = open(os.path.join(WC_ROOT, "mike", "bin", "ops_health_check.sh"), encoding="utf-8").read()
-check('counts.get("PLACE_FAIL_STOPPED", 0) > 0' in ops,
-      "ops_health_check.sh báo động khi có ≥1 PLACE_FAIL_STOPPED (ngưỡng > 0, không phải > 20)")
-check('if k.startswith("PLACE_FAIL_STOPPED"):' in ops,
-      "PLACE_FAIL_STOPPED KHÔNG bị hạ cấp xuống ℹ️ bởi một lệnh khác khớp sau đó")
+# So chuỗi nguồn KHÔNG đủ: mutant dời `continue` xuống DƯỚI khối hạ cấp vẫn giữ nguyên cả hai
+# chuỗi mà hành vi quay về đúng sự im lặng F2 nói tới (arch-review R2). Nên trích KHỐI PYTHON
+# check #3 ra chạy thật trên journal fixture — kiểm HÀNH VI, không kiểm chữ.
+OPS_SH = os.path.join(WC_ROOT, "mike", "bin", "ops_health_check.sh")
+_ops_lines = open(OPS_SH, encoding="utf-8").read().splitlines()
+_i0 = next(i for i, l in enumerate(_ops_lines) if l.startswith('REPORT="$(python3 - '))
+_i1 = next(i for i, l in enumerate(_ops_lines) if "# 4. Circuit breaker per-agent" in l)
+OPS_BLOCK = "\n".join(_ops_lines[_i0 + 1:_i1]) + '\nprint("WARN=%d" % warn)\nprint("\\n".join(lines))\n'
+
+HDR = ("ts,event,parent_id,ticker,side,child_oid,qty,price,filled_total,book,play_type,note\n")
+
+
+def run_ops_check(rows):
+    """Chạy THẬT khối check #3 của ops_health_check.sh trên 1 journal dựng sẵn → (warn, text)."""
+    with tempfile.TemporaryDirectory() as td:
+        os.makedirs(os.path.join(td, "data", "execution_logs"))
+        jp = os.path.join(td, "data", "execution_logs", "exec_T_2026-09-29_journal.csv")
+        with open(jp, "w", encoding="utf-8") as fh:
+            fh.write(HDR + "".join(rows))
+        blk = os.path.join(td, "blk.py")
+        with open(blk, "w", encoding="utf-8") as fh:
+            fh.write(OPS_BLOCK)
+        r = subprocess.run([sys.executable, blk, td, "2026-09-29", "T"],
+                           capture_output=True, text=True)
+        out = r.stdout
+        return int(re.search(r"WARN=(\d+)", out).group(1)), out
+
+
+def jrow(ts, ev, pid="P-HPG", tic="HPG", note=""):
+    return f"2026-09-29T{ts},{ev},{pid},{tic},sell,,,,0,PARK,PARK_TRIM,{note}\n"
+
+
+# Fixture phải GIỐNG THẬT: 5 PLACE_FAIL rồi mới tới PLACE_FAIL_STOPPED. Thiếu dòng PLACE_FAIL
+# thì `last_ts["PLACE_FAIL"]` rỗng và mutant "dời continue xuống dưới khối hạ cấp" SỐNG SÓT —
+# chính là ca arch-review R2 dựng ra (đã tái lập: bỏ 5 dòng này ⇒ mutant không bị bắt).
+STOPPED_ROW = ("".join(jrow(f"09:15:{8 + i * 20 % 60:02d}", "PLACE_FAIL",
+                            note="HTTP 400: deal not found") for i in range(5))
+               + jrow("09:16:28", "PLACE_FAIL_STOPPED", note="5 luot lien tiep"))
+LATER_FILL = jrow("10:30:00", "PLACE", "P-CTG", "CTG") + jrow("10:31:00", "FILL", "P-CTG", "CTG")
+
+w, out = run_ops_check([STOPPED_ROW] + [LATER_FILL])
+check(w == 1 and "PLACE_FAIL_STOPPED" in out and "ĐÃ DỨT" not in out,
+      f"1 PLACE_FAIL_STOPPED + 1 mã KHÁC khớp sau đó ⇒ vẫn ⚠️ (warn={w}) — không bị "
+      f"last_success_ts của mã khác dìm xuống ℹ️")
+
+w, _ = run_ops_check([LATER_FILL])
+check(w == 0, f"journal sạch ⇒ không báo động (warn={w}) — không sinh cảnh báo giả")
+
+w, _ = run_ops_check([jrow("09:15:08", "PLACE_FAIL",
+                           note="HTTP 400: Trade quantity not enough") * 1] * 25)
+check(w == 0, f"25 lượt PLACE_FAIL mẫu T+2 vẫn được loại trừ như cũ (warn={w})")
+
+w, _ = run_ops_check([jrow("14:40:00", "ATC_AFTER_BLOCK", note="luoi ATC")] * 40)
+check(w == 0, f"40 dòng ATC_AFTER_BLOCK KHÔNG sinh báo động (warn={w}) — sự kiện mới không "
+              f"làm checker ồn lên")
+
+w, _ = run_ops_check([jrow("09:00:00", "PLACE_BLOCK_CLEARED", note="restart")] * 10)
+check(w == 0, f"PLACE_BLOCK_CLEARED (phục hồi) KHÔNG bị tính là lỗi (warn={w})")
 
 print()
 if FAILS:

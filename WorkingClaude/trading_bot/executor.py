@@ -367,20 +367,23 @@ class Executor:
         được. Vì vậy cờ chặn chỉ có phạm vi TIẾN TRÌNH: nó cắt vòng retry vô hạn TRONG phiên
         chạy, không phải bản án cho cả ngày.
         """
-        unblocked = [pid for pid, ps in (st.get("parents") or {}).items()
-                     if ps.get("place_blocked")]
-        for pid in unblocked:
-            ps = st["parents"][pid]
+        by_id = {o.id: o for o in self.plan.orders}
+        for pid, ps in sorted((st.get("parents") or {}).items()):
+            if not ps.get("place_blocked"):
+                continue
+            prev_note = ps.get("place_fail_note") or ""
             ps.pop("place_blocked", None)
             ps.pop("place_blocked_ts", None)
             ps["place_fail_streak"] = 0
             ps["place_fail_note"] = ""
-        if unblocked:
-            self._journal("PLACE_FAIL_UNBLOCKED",
-                          note=f"tiến trình mới → gỡ chặn {len(unblocked)} lệnh bị dừng ở "
-                               f"phiên chạy trước: {', '.join(sorted(unblocked))}. Nếu nguyên "
-                               f"nhân CHƯA được sửa, chúng sẽ lại bị dừng sau "
-                               f"{PLACE_FAIL_STRUCTURAL_LIMIT} lượt.")
+            # MỘT dòng cho MỖI parent, `o` truyền vào để cột parent_id/ticker của journal có
+            # giá trị MÁY ĐỌC ĐƯỢC. Nhồi danh sách id vào `note` văn xuôi thì mọi logic hạ cấp
+            # per-parent về sau buộc phải parse tiếng Việt (§28) — arch-review R2.
+            # Tên sự kiện cố ý KHÔNG chứa "FAIL": execution_quality_review.py đếm mọi event
+            # khớp `FAIL|ERROR|REJECT` là lỗi, một lần PHỤC HỒI không phải lỗi.
+            self._journal("PLACE_BLOCK_CLEARED", by_id.get(pid), note=(
+                f"tiến trình mới → gỡ chặn (lỗi cũ: {prev_note}). Nếu nguyên nhân CHƯA được "
+                f"sửa, lệnh này sẽ lại bị dừng sau {PLACE_FAIL_STRUCTURAL_LIMIT} lượt."))
 
     def seed_shared(self):
         """Khôi phục sổ participation fleet khi resume.
@@ -2071,13 +2074,11 @@ class Executor:
                 continue
             if o.ticker in ghost_tickers:
                 continue  # idempotency guard — xem _ghost_tickers
-            if ps.get("place_blocked"):
-                # CỐ Ý không `continue`: ATC là lần thử CUỐI cho lệnh đã bị dừng vòng slice
-                # (xem _count_place_fail). Ghi lại để người vận hành thấy cờ chặn bị vượt qua
-                # — nếu không thì lệnh "đã dừng" vẫn đi ra mà không dấu vết (arch-review F5).
-                self._journal("ATC_AFTER_BLOCK", o,
-                              note=f"lệnh đang place_blocked ({ps.get('place_fail_note','')}) "
-                                   f"— vẫn thử MỘT lần ở phiên ATC (lưới an toàn cuối)")
+            # `place_blocked` CỐ Ý không chặn ở đây: ATC là lần thử CUỐI cho lệnh đã bị dừng
+            # vòng slice (xem _count_place_fail). Dấu vết ATC_AFTER_BLOCK được ghi NGAY TRƯỚC
+            # lần đặt lệnh thật ở dưới — ghi ở đây là khẳng định "vẫn thử" trước khi đọc
+            # `atc_remainder_*`, tức nói sai 45 lượt/phiên cho mọi lệnh MUA bị chặn
+            # (atc_remainder_buy=False → `continue` ngay dòng dưới). arch-review R2 F5, §29.
             flag = (self.cfg["atc_remainder_sell"] if o.side == "sell"
                     else self.cfg["atc_remainder_buy"])
             if not flag:
@@ -2140,6 +2141,11 @@ class Executor:
                             f"ATC: chỉ {sellable:,} cp sellable (có thể đang chờ T+2 về) — bỏ qua"))
                         continue
                     remaining = min(remaining, cap)
+            if ps.get("place_blocked"):
+                # Tới được đây = ATC THẬT SỰ sắp đi ra cho một lệnh đã bị dừng vòng slice.
+                self._journal("ATC_AFTER_BLOCK", o, qty=remaining, note=(
+                    f"lệnh đang place_blocked ({ps.get('place_fail_note', '')}) — vẫn đặt "
+                    f"MỘT lệnh ATC cho {remaining}cp còn lại (lưới an toàn cuối)"))
             try:
                 oid = self.broker.place_order(o.ticker, remaining, o.side,
                                               price=None, order_type="ATC",
