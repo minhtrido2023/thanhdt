@@ -49,8 +49,8 @@ def _commits(repo, days):
     (đường dẫn file incident, tên biến, slug câu hỏi) hầu như luôn nằm trong body, còn subject
     thì viết bằng tiếng Việt tự nhiên và gần như không bao giờ chứa slug topic."""
     r = subprocess.run(
-        ["git", "-C", repo, "log", f"--since={days}.days", "--no-merges",
-         "--format=%h%x1f%s%x1f%B%x1e"],
+        ["git", "-C", repo, "log", f"--since={days}.days", "--no-merges", "--name-only",
+         "--format=%x1e%h%x1f%s%x1f%B%x1f"],
         capture_output=True, text=True, timeout=30)
     if r.returncode != 0:
         return []
@@ -60,9 +60,14 @@ def _commits(repo, days):
         if not rec:
             continue
         parts = rec.split("\x1f")
-        if len(parts) < 3:
+        if len(parts) < 4:
             continue
-        sha, subj, body = parts[0], parts[1], parts[2]
+        sha, subj, body, files = parts[0], parts[1], parts[2], parts[3]
+        # TỰ LOẠI TRỪ: commit sửa chính công cụ này tất nhiên có message nói về những câu hỏi
+        # nó lấy làm ví dụ ⇒ nó tự nhận là resolver của chính các câu hỏi đó (đã xảy ra ngay
+        # với commit giới thiệu, a9c4a421).
+        if os.path.basename(os.path.abspath(__file__)).split(".")[0] in files:
+            continue
         # Bản DẸT (bỏ mọi ký tự không chữ-số) để token "closerepair" của topic khớp được
         # "close_repair"/"close-repair" trong commit. Giữ CẢ bản gốc để phép so nguyên-topic
         # (mức "CHẮC" của _matches, có dấu gạch) vẫn còn cửa khớp.
@@ -125,18 +130,27 @@ def main():
     for repo in REPOS:
         name = os.path.basename(repo)
         for sha, subj, low, flat in _commits(repo, days):
+            per_commit = []
             for q in pending:
                 topic = str(q.get("topic") or "")
                 if not topic:
                     continue
-                lvl = 2 if topic.lower() in low else 0
-                if not lvl:
-                    lvl = 1 if _score(hint._tokens(topic), low, flat) else 0
+                sc = _score(hint._tokens(topic), low, flat)
+                lvl = 2 if topic.lower() in low else (1 if sc else 0)
                 if not lvl:
                     continue
-                key = (q.get("agent", "?"), topic)
-                if key not in best or lvl > best[key][0]:
-                    best[key] = (lvl, sha, subj, name, q)
+                per_commit.append((lvl, sc, q))
+            # Commit khớp NHIỀU câu hỏi cùng lúc là commit META (retro, tài liệu, chính công cụ
+            # này — commit a9c4a421 giới thiệu nó LIỆT KÊ 2 topic trong message và lập tức tự
+            # nhận là resolver của cả hai). Commit sửa thật thì nói về MỘT việc. Bỏ cả cụm:
+            # mất một gợi ý chỉ là mất gợi ý, còn gợi ý sai thì bào mòn niềm tin vào cái nhắc.
+            if len(per_commit) != 1:
+                continue
+            lvl, sc, q = per_commit[0]
+            key = (q.get("agent", "?"), str(q.get("topic") or ""))
+            # Ứng viên MẠNH NHẤT thắng (mức, rồi điểm) — không phải "repo nào duyệt trước".
+            if key not in best or (lvl, sc) > (best[key][0], best[key][5]):
+                best[key] = (lvl, sha, subj, name, q, sc)
     if not best:
         return 0
 
@@ -144,7 +158,7 @@ def main():
     print("[Có commit TRÔNG NHƯ đã xử lý câu hỏi treo — CHỈ LÀ GỢI Ý theo từ khoá, phải tự đọc "
           "commit xem có đúng cùng việc không. Nếu ĐÚNG là đã xong mà chỉ thiếu event `answer` "
           "(Pattern B) thì đóng vòng bằng close_bus_question.py, đừng sửa lại lần nữa:]")
-    for lvl, sha, subj, repo, q in rows:
+    for lvl, sha, subj, repo, q, _sc in rows:
         agent, topic, age = q.get("agent", "?"), q.get("topic", "?"), q.get("age_days", "?")
         mark = "CHẮC" if lvl == 2 else "có thể"
         print(f"  · [{mark}] {agent}/{topic} ({age}d treo) ← {repo}@{sha}: {subj}")

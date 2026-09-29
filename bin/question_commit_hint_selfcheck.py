@@ -65,13 +65,20 @@ def main():
     q = {"agent": "Winston", "topic": "sell-loanpackage-deal-not-found-zalopay-20260929",
          "ts": "2026-09-29T06:35:29Z", "age_days": 0}
     rc, out = _run(m, [q], ["--days", "3650"])
-    if have:
-        check("regression: câu hỏi sell-loanpackage khớp đúng commit d51c735e",
-              "d51c735e" in out and "sell-loanpackage" in out, out.strip()[:200] or "(rỗng)")
-    else:
-        check("regression: commit d51c735e không còn trong repo — ca hồi quy KHÔNG chạy được",
-              False, "sửa selfcheck nếu lịch sử bị viết lại")
+    check("regression: commit d51c735e còn trong repo (không thì ca hồi quy vô nghĩa)", have)
+    # Cố ý KHÔNG chốt cứng ĐÚNG sha nào được in: cùng sự cố có cả một CHÙM commit hợp lệ (fix
+    # trên WorkingClaude + ghi chú vận hành trên mike). Yêu cầu THẬT là câu hỏi phải được NÊU
+    # TÊN kèm một commit của chùm đó — chốt cứng 1 sha là chốt vào thứ tự duyệt repo.
+    check("regression: câu hỏi sell-loanpackage được nêu tên trong gợi ý",
+          "sell-loanpackage-deal-not-found-zalopay-20260929" in out, out.strip()[:200] or "(rỗng)")
     check("regression: rc=0", rc == 0)
+
+    # 1b) Mức FUNCTION — chính commit sửa d51c735e phải đạt điểm khớp, độc lập với thứ tự duyệt.
+    hint = m._load_hint_module()
+    tok = hint._tokens(q["topic"])
+    hit = [sha for sha, subj, low, flat in m._commits(os.path.dirname(ROOT), 3650)
+           if sha.startswith("d51c735e") and m._score(tok, low, flat) >= m._MIN_SCORE]
+    check("regression(function): d51c735e đạt ngưỡng khớp trên repo WorkingClaude", bool(hit))
 
     # 2) PRECISION — lớp câu hỏi mà ngày là token phân biệt duy nhất không được khớp
     #    commit bất kỳ chỉ vì commit đó nhắc cùng ngày (báo động giả 84b7dbd3 đã đo).
@@ -101,6 +108,26 @@ def main():
     check("_score: 1 token đặc thù thôi ⇒ KHÔNG khớp (cần 2)",
           m._score({"loanpackage": 1, "deal": 1, "sell": 1, "abcd": 1},
                    "loanpackage deal sell abcd", "loanpackagedealsellabcd") == 0)
+
+    # 3b) META-COMMIT: một commit khớp NHIỀU câu hỏi là commit tài liệu/retro liệt kê topic,
+    #     không phải resolver ⇒ bỏ cả cụm. Dùng commit THẬT 85b744a1 (ghi chú vận hành, nhắc cả
+    #     sự cố loanpackage lẫn PLACE_FAIL_STOPPED/runbook .proposed).
+    qa = {"agent": "Winston", "topic": "sell-loanpackage-deal-not-found-zalopay-20260929",
+          "ts": "x", "age_days": 0}
+    qb = {"agent": "Wags", "topic": "place-fail-stopped-runbook-proposed-nguong",
+          "ts": "x", "age_days": 0}
+    _, solo = _run(m, [qb], ["--days", "3650"])
+    check("meta-commit(tiền đề): 85b744a1 CÓ khớp khi chỉ 1 câu hỏi treo",
+          "85b744a1" in solo, solo.strip()[:160] or "(rỗng)")
+    _, both = _run(m, [qa, qb], ["--days", "3650"])
+    check("meta-commit: commit khớp 2 câu hỏi bị loại", "85b744a1" not in both,
+          both.strip()[:200])
+
+    # 4b) TỰ LOẠI TRỪ: commit sửa chính công cụ này không được tự nhận là resolver của các
+    #     câu hỏi mà message của nó lấy làm ví dụ (a9c4a421 — đã xảy ra thật).
+    shas = [sha for sha, _s, _l, _f in m._commits(ROOT, 3650)]
+    check("self-exclusion: commit chạm question_commit_hint.py bị loại khỏi nguồn quét",
+          not any(x.startswith("a9c4a421") for x in shas), str(shas[:5]))
 
     # 5) FAIL-OPEN: repo không tồn tại ⇒ _commits im lặng trả rỗng, không ném.
     check("_commits: repo rác ⇒ [] chứ không ném", m._commits("/nonexistent-repo-xyz", 7) == [])
