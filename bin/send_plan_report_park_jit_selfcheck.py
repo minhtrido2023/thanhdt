@@ -344,8 +344,7 @@ check("import CAPIT_LEVER_APPROVED_F từ trading_bot.plan (cùng nguồn apply_
 # nhầm 11 lệnh "PARK_TRIM+JIT_UNPARK" (đã dùng để TÀI TRỢ lệnh mua) vào nhóm "KHÔNG liên quan
 # tới việc tài trợ lệnh mua" — arch-review vòng 1 mutation M4 (đổi == thành .startswith) tái tạo
 # ĐÚNG sự cố 2026-09-17 (đọc 2 dòng liền nhau tưởng mâu thuẫn) theo chiều ngược lại. Logic sản
-# xuất hiện == đã ĐÚNG; test này chỉ PIN để lỡ ai đổi == → startswith/in hoặc đổi nguồn liệt kê
-# từ `sells` sang toàn bộ `orders` (gồm cả lệnh mua) thì selfcheck phải ĐỎ ngay.
+# xuất hiện == đã ĐÚNG; test này chỉ PIN để lỡ ai đổi == → startswith/in thì selfcheck phải ĐỎ ngay.
 print("\n[T12] Dòng tổng 'Lý do PARK_TRIM' (orders loop) phải lọc play_type == 'PARK_TRIM' tuyệt đối")
 
 
@@ -355,16 +354,22 @@ def _n_pure_park_trim(plan):
     return len([o for o in sells if str(o.get("play_type", "")).upper() == "PARK_TRIM"])
 
 
+def _n_sells(plan):
+    orders = plan.get("orders") or []
+    return len([o for o in orders if str(o.get("side", "")).lower() in ("sell", "ban", "s")])
+
+
 SX_N_PURE_PT = _n_pure_park_trim(SX)
+SX_N_SELLS = _n_sells(SX)
 out_t12 = run_sender(SX, "SpaceX")
 _pt_reason_lines = [l.strip() for l in out_t12.splitlines()
                     if "Lý do (áp dụng CHUNG cho" in l and "PARK_TRIM" in l]
 check(f"plan 08-07: dòng tổng ghi ĐÚNG N={SX_N_PURE_PT} lệnh PARK_TRIM thuần (đếm từ artifact, "
-      "KHÔNG hardcode) — KHÔNG được là 14 (tổng mọi lệnh bán) hay gộp cả PARK_TRIM+JIT_UNPARK",
+      f"KHÔNG hardcode) — KHÔNG được là {SX_N_SELLS} (tổng mọi lệnh bán) hay gộp cả PARK_TRIM+JIT_UNPARK",
       SX_N_PURE_PT > 0
       and len(_pt_reason_lines) == 1
       and f"cho {SX_N_PURE_PT} lệnh BÁN PARK_TRIM" in _pt_reason_lines[0]
-      and f"cho {len(SX['orders'])} lệnh" not in _pt_reason_lines[0],
+      and f"cho {SX_N_SELLS} lệnh" not in _pt_reason_lines[0],
       _pt_reason_lines[:1] or [f"(kỳ vọng N={SX_N_PURE_PT})"])
 
 # Biến thể: đổi 1 lệnh PARK_TRIM+JIT_UNPARK → PARK_TRIM thuần ⇒ N phải TĂNG đúng 1, chứng minh
