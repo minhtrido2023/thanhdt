@@ -15,6 +15,7 @@ data/execution_logs/<broker>_raw_<date>.jsonl để tinh chỉnh mapping.
 
 import datetime as dt
 import json
+import math
 import os
 import sys
 import time
@@ -1035,13 +1036,23 @@ class DNSEBroker(BrokerBase):
             lp = qget(p, "loanpackageid", "loanproductid")
             if lp is None:
                 continue
-            total = int(_fnum(qget(p, "openquantity", "quantity", "totalquantity",
-                                   "qty", default=0)) or 0)
+            total_raw = _fnum(qget(p, "openquantity", "quantity", "totalquantity",
+                                   "qty", default=0))
             # `… or total` như get_positions() là SAI ở đây: `tradeQuantity` = 0 hợp lệ và
             # có nghĩa (cổ phiếu chưa về T+2) — `0 or total` sẽ biến gói KHÔNG bán được
             # thành ứng viên. Phân biệt "thiếu trường" (None) với "có trường, giá trị 0".
             sellable_raw = _fnum(qget(p, "tradequantity", "availablequantity",
                                       "sellablequantity", "availableqty", default=None))
+            # NaN/Infinity: `json.loads` nhận THẲNG token `NaN`/`Infinity`, và `int(nan)` ném
+            # ValueError / `int(inf)` ném OverflowError NGAY ĐÂY — ngoài `try` vốn chỉ bọc
+            # `positions_raw()` ⇒ ném ra khỏi `place_order` thay vì rơi về gói default như
+            # docstring khẳng định. Tệ hơn: `str(ValueError)` không mang "HTTP <nnn>" nên
+            # `_place_fail_structural` xếp là TẠM THỜI ⇒ retry VÔ HẠN, đúng hình dạng bão
+            # 2.628 lượt vừa vá (arch-review vòng 4 G-2, đo thật). Dòng không hữu hạn là dòng
+            # không dùng được ⇒ bỏ qua như mọi dòng rác khác.
+            if any(v is not None and not math.isfinite(v) for v in (total_raw, sellable_raw)):
+                continue
+            total = int(total_raw or 0)
             sellable = int(sellable_raw) if sellable_raw is not None else total
             if sellable <= 0:
                 continue

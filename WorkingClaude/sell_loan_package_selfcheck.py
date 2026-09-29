@@ -356,6 +356,25 @@ cl = FakeClient(ZALOPAY_POSITIONS_20260929)
 b = make_broker(cl)
 b.place_order("HPG", 100, "sell", price=20000)
 recs = resolve_records(b)
+# G-2: payload mang NaN/Infinity (json.loads nhận thẳng 2 token đó). Trước bản vá, int(nan)
+# ném ValueError NGOÀI `try` ⇒ ném ra khỏi place_order, và vì không có "HTTP <nnn>" nên bị xếp
+# TẠM THỜI ⇒ retry vô hạn — đúng hình dạng bão vừa vá.
+for _bad_name, _bad_rows in (
+        ("tradeQuantity=NaN", [_pos("HPG", 1826, 500, float("nan"))]),
+        ("openQuantity=Infinity", [dict(_pos("HPG", 1826, 0, None),
+                                        openQuantity=float("inf"), tradeQuantity=None)]),
+        ("NaN ở gói này, gói khác vẫn lành", [_pos("HPG", 1826, 500, float("nan")),
+                                             _pos("HPG", 1900, 300, 300)])):
+    b = make_broker(FakeClient(_bad_rows))
+    try:
+        b.place_order("HPG", 100, "sell", price=20000)
+        got_lp, exc = b.client.last_place["loan_package_id"], None
+    except Exception as _e:
+        got_lp, exc = None, f"{type(_e).__name__}: {_e}"
+    want = 1900 if "gói khác" in _bad_name else ZALOPAY_DEFAULT_LP
+    check(exc is None and got_lp == want,
+          f"{_bad_name} → KHÔNG ném, resolve {want} (thực tế: lp={got_lp!r} exc={exc})")
+
 check(len(recs) == 1 and recs[0]["resolved"] == 1826,
       f"đường THÀNH CÔNG 1 gói (HPG): đúng 1 bản ghi, resolved=1826 (thực tế: {recs})")
 check(recs[0].get("by_package") == {"1826": 500} and recs[0].get("rule"),
@@ -528,6 +547,7 @@ print("=== V2-F1c ĐƯỜNG THẬT: _load_state() + _journal() THẬT, KHÔNG st
 # SAU khi _load_state trả về ⇒ mọi lần resume có cờ chặn làm __init__ ném AttributeError, chết
 # cả phiên chiều của account. Stub `ex._journal = lambda` của make_executor che đúng lỗi đó.
 # Nay đi ĐƯỜNG THẬT: _load_state() thật trên state file thật + _journal() thật ra CSV tmpdir.
+import ast
 import csv
 import json
 import textwrap
@@ -588,12 +608,22 @@ with tempfile.TemporaryDirectory() as td:
 # Cấu trúc: lệnh gọi phải nằm trong __init__ và SAU phép gán self.state — kiểm bằng AST chứ
 # không so chuỗi, và kiểm cả chiều NGƯỢC (không được quay về nằm trong _load_state).
 _init_src = textwrap.dedent(inspect.getsource(Executor.__init__))
-_i_state = next(i for i, l in enumerate(_init_src.splitlines())
-                if "self.state = self._load_state()" in l)
-_i_clear = next(i for i, l in enumerate(_init_src.splitlines())
-                if "self._clear_place_blocks(" in l)
+_i_state = next((i for i, l in enumerate(_init_src.splitlines())
+                 if "self.state = self._load_state()" in l), -1)
+_i_clear = next((i for i, l in enumerate(_init_src.splitlines())
+                 if "self._clear_place_blocks(" in l), -1)
 check(_i_state < _i_clear,
       f"__init__ gỡ chặn SAU khi gán self.state (dòng state={_i_state}, clear={_i_clear})")
+# Thứ tự dòng KHÔNG đủ: mutant `self._clear_place_blocks({})` giữ nguyên thứ tự, giữ nguyên
+# 102/102 PASS, mà hành vi là KHÔNG parent nào được gỡ cờ — im lặng tuyệt đối, `place_blocked`
+# quay lại thành bản án cả ngày, đúng bug F1 sinh ra để diệt (arch-review vòng 4 G-1).
+_clear_call = next((n for n in ast.walk(ast.parse(_init_src))
+                    if isinstance(n, ast.Call)
+                    and ast.unparse(n.func) == "self._clear_place_blocks"), None)
+check(_clear_call is not None
+      and [ast.unparse(a) for a in _clear_call.args] == ["self.state"],
+      f"…và gỡ chặn trên CHÍNH `self.state`, không phải dict khác "
+      f"(thực tế: {None if _clear_call is None else [ast.unparse(a) for a in _clear_call.args]})")
 check("_clear_place_blocks" not in inspect.getsource(Executor._load_state),
       "_load_state KHÔNG còn gọi _clear_place_blocks (nơi self.state chưa tồn tại)")
 
@@ -629,10 +659,10 @@ check(len(atc_guards) == 1
 # `atc_remainder_buy` (=False) ⇒ mỗi lệnh MUA bị chặn phun 45 dòng khẳng định "vẫn thử" rồi
 # `continue` ngay dòng sau — đúng lỗi §29 (arch-review R2 killer objection).
 _atc_lines = inspect.getsource(Executor._atc_sweep).splitlines()
-_i_flag = next(i for i, l in enumerate(_atc_lines) if "atc_remainder_buy" in l)
-_i_journal = next(i for i, l in enumerate(_atc_lines)
-                  if 'self._journal("ATC_AFTER_BLOCK"' in l)
-_i_place = next(i for i, l in enumerate(_atc_lines) if "order_type=\"ATC\"" in l)
+_i_flag = next((i for i, l in enumerate(_atc_lines) if "atc_remainder_buy" in l), -1)
+_i_journal = next((i for i, l in enumerate(_atc_lines)
+                   if 'self._journal("ATC_AFTER_BLOCK"' in l), -1)
+_i_place = next((i for i, l in enumerate(_atc_lines) if "order_type=\"ATC\"" in l), -1)
 check(_i_flag < _i_journal < _i_place,
       f"ATC_AFTER_BLOCK ghi SAU cổng atc_remainder_* và NGAY TRƯỚC place_order ATC "
       f"(dòng flag={_i_flag}, journal={_i_journal}, place={_i_place}) — không khẳng định "
