@@ -335,6 +335,7 @@ class Executor:
                                                     "atc_sent": False, "children": [],
                                                     "last_slice_ts": None,
                                                     "dcf_check": o.dcf_check})
+                self._clear_place_blocks(st)
                 return st
             print(f"[exec:{self.label}] ⚠ plan đã đổi so với state cũ — state mới")
         return {"plan_date": self.plan.plan_date,
@@ -346,6 +347,40 @@ class Executor:
                                    "children": [], "last_slice_ts": None,
                                    "dcf_check": o.dcf_check}  # audit trail Pha 2 DCF
                             for o in self.plan.orders}}
+
+    def _clear_place_blocks(self, st):
+        """Xoá cờ `place_blocked` khi TIẾN TRÌNH MỚI khởi động (resume state cùng plan).
+
+        `place_blocked` (xem `_count_place_fail`) sống trong state.json, mà state.json được
+        resume nguyên si khi `plan_created_at` không đổi — `run_bot.sh` khởi động lại lúc
+        13:00 chính là ca đó. Nếu không xoá, cờ thành chặn VĨNH VIỄN và lối thoát duy nhất là
+        sửa tay state.json.
+
+        Đo trên journal THẬT (arch-review 2026-09-29 F1 replay mọi `exec_*_journal.csv`), cơ
+        chế "chặn vĩnh viễn" sẽ giữ chết 20 lệnh mà thực tế ĐÃ KHỚP sau mốc bị chặn:
+          • 2026-07-06 SpaceX: 11 lệnh bán chặn 09:16-09:30 vì `Trade quantity not enough`
+            (T+2 chỉ sellable từ phiên CHIỀU) → khớp hết 13:00-13:08.
+          • 2026-08-10 ZaloPay: 8 lệnh bán chặn 09:51 vì `deal not found` — ĐÚNG lớp lỗi của
+            sự cố này — → hot-fix + restart → khớp hết 10:35.
+          • 2026-07-28 SpaceX: 1 lệnh mua chặn 13:44 (`loanPackageId is required`) → khớp 14:13.
+        Cả ba đều là "người sửa nguyên nhân rồi khởi động lại" — đúng quy trình cần hồi phục
+        được. Vì vậy cờ chặn chỉ có phạm vi TIẾN TRÌNH: nó cắt vòng retry vô hạn TRONG phiên
+        chạy, không phải bản án cho cả ngày.
+        """
+        unblocked = [pid for pid, ps in (st.get("parents") or {}).items()
+                     if ps.get("place_blocked")]
+        for pid in unblocked:
+            ps = st["parents"][pid]
+            ps.pop("place_blocked", None)
+            ps.pop("place_blocked_ts", None)
+            ps["place_fail_streak"] = 0
+            ps["place_fail_note"] = ""
+        if unblocked:
+            self._journal("PLACE_FAIL_UNBLOCKED",
+                          note=f"tiến trình mới → gỡ chặn {len(unblocked)} lệnh bị dừng ở "
+                               f"phiên chạy trước: {', '.join(sorted(unblocked))}. Nếu nguyên "
+                               f"nhân CHƯA được sửa, chúng sẽ lại bị dừng sau "
+                               f"{PLACE_FAIL_STRUCTURAL_LIMIT} lượt.")
 
     def seed_shared(self):
         """Khôi phục sổ participation fleet khi resume.
@@ -1761,8 +1796,19 @@ class Executor:
         giữ nguyên hành vi cũ từng byte. Lỗi cấu trúc KHÁC chuỗi cũ cũng reset: dừng chỉ dành
         cho cùng một lỗi lặp lại y hệt.
 
-        Cờ nằm trong `ps` (state.json) nên sống qua lần khởi động lại giữa phiên
-        (`run_bot.sh` 13:00) — chính khoảng đó ngày 2026-09-29 còn thêm 372 lượt fail.
+        PHẠM VI CỦA CỜ = MỘT TIẾN TRÌNH. `_clear_place_blocks` xoá nó mỗi lần executor khởi
+        động lại (kể cả `run_bot.sh` 13:00 resume cùng plan) — cố ý, xem docstring ở đó:
+        "sửa nguyên nhân rồi restart" phải hồi phục được.
+
+        BẤT ĐỐI XỨNG CÓ CHỦ Ý ở `_atc_sweep`: nó KHÔNG đọc cờ này, nên một lệnh BÁN bị chặn
+        vẫn được thử MỘT lần ở phiên ATC (`atc_remainder_sell=True`, config.py) — lưới an toàn
+        cuối cùng, nhưng hệ quả là phần còn lại bị xả trọn trong 1 lệnh ATC thay vì cắt lát.
+        Lệnh MUA KHÔNG có lưới này (`atc_remainder_buy=False`) ⇒ mua bị chặn là không thực thi
+        trong phiên chạy đó.
+
+        GỠ CHẶN THỦ CÔNG (khi không muốn đợi restart): xoá khoá `place_blocked` của parent
+        tương ứng trong `data/execution_logs/state_{label}_{plan_date}.json`, hoặc khởi động
+        lại bot — `kb/ops_runbook.md` § PLACE_FAIL_STOPPED.
         """
         if not _place_fail_structural(note):
             ps["place_fail_streak"] = 0
@@ -1778,8 +1824,11 @@ class Executor:
         ps["place_blocked"] = True
         ps["place_blocked_ts"] = now.isoformat(timespec="seconds")
         reason = (f"{ps['place_fail_streak']} lượt PLACE_FAIL liên tiếp cùng lỗi CẤU TRÚC "
-                  f"\"{note}\" — DỪNG đặt lệnh mã này (lỗi không tự lành; thử lại chỉ tốn "
-                  f"quota API). Cần người kiểm tra rồi mới cho chạy tiếp.")
+                  f"\"{note}\" — DỪNG đặt lệnh mã này trong TIẾN TRÌNH này (lỗi không tự "
+                  f"lành; thử lại chỉ tốn quota API). GỠ: sửa nguyên nhân rồi khởi động lại "
+                  f"bot (cờ tự xoá — xem _clear_place_blocks), hoặc xoá khoá 'place_blocked' "
+                  f"của parent {o.id} trong state_{self.label}_{self.plan.plan_date}.json. "
+                  f"Lệnh BÁN vẫn còn MỘT lần thử ở phiên ATC; lệnh MUA thì không.")
         self._journal("PLACE_FAIL_STOPPED", o, note=reason)
         _publish_bot_event("error", "PLACE_FAIL_STOPPED", {
             "account": self.label, "ticker": o.ticker, "side": o.side,
@@ -2022,6 +2071,13 @@ class Executor:
                 continue
             if o.ticker in ghost_tickers:
                 continue  # idempotency guard — xem _ghost_tickers
+            if ps.get("place_blocked"):
+                # CỐ Ý không `continue`: ATC là lần thử CUỐI cho lệnh đã bị dừng vòng slice
+                # (xem _count_place_fail). Ghi lại để người vận hành thấy cờ chặn bị vượt qua
+                # — nếu không thì lệnh "đã dừng" vẫn đi ra mà không dấu vết (arch-review F5).
+                self._journal("ATC_AFTER_BLOCK", o,
+                              note=f"lệnh đang place_blocked ({ps.get('place_fail_note','')}) "
+                                   f"— vẫn thử MỘT lần ở phiên ATC (lưới an toàn cuối)")
             flag = (self.cfg["atc_remainder_sell"] if o.side == "sell"
                     else self.cfg["atc_remainder_buy"])
             if not flag:

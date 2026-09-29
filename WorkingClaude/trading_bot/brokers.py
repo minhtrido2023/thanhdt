@@ -991,22 +991,32 @@ class DNSEBroker(BrokerBase):
           2. Ưu tiên tập gói có `sellable >= qty` (bán gọn trong 1 deal); không gói nào đủ
              riêng lẻ ⇒ xét toàn bộ gói còn hàng (fail-safe: bán được một phần còn hơn bị
              từ chối toàn bộ — bán thiếu thì chu kỳ sau bán tiếp).
-          3. Trong tập đó, gói DEFAULT account được ưu tiên nếu có mặt — đây là tie-break
+          3. Trong tập ĐỦ HÀNG đó, gói DEFAULT account được ưu tiên nếu có mặt — tie-break
              GIỮ NGUYÊN HÀNH VI CŨ ở mọi ca hành vi cũ vốn đã đúng. Đo trên snapshot thật
              2026-09-29 04:55: BID (1258:300 · 1826:100), MBB (1258:202 · 1826:400), VCB
              (1258:100 · 1826:200) đều có deal ở CẢ HAI gói và cả 3 đã bán trót bằng 1258;
              không có tie-break này, luật "sellable lớn nhất" sẽ lặng lẽ đổi MBB/VCB sang
              1826 — một thay đổi hành vi không ai yêu cầu.
-          4. Còn lại: gói có `sellable` LỚN NHẤT (tie-break theo id cho tất định).
+          4. Còn lại (kể cả khi KHÔNG gói nào đủ `qty`): gói có `sellable` LỚN NHẤT, tie-break
+             theo id cho tất định. Tie-break "gói default" KHÔNG áp ở tầng này — xem F3.
 
-        Ca NHIỀU gói cùng có hàng đã CÓ trong dữ liệu thật (BID/MBB/VCB ở trên) nhưng ca
-        "không gói nào đủ `qty` riêng lẻ" thì CHƯA ⇒ log `_log_raw` để audit về sau.
+        Mọi lần resolve đều ghi `_log_raw("sell_loan_package_resolve", …)`, kể cả ca thất bại
+        rơi về gói default, để đường suy biến không bao giờ im lặng.
 
         Mọi lỗi (mạng, payload lạ, mã không có trong positions) → None ⇒ hành vi cũ.
         """
         try:
             rows = self.positions_raw()
         except Exception as e:
+            # Nhánh này rơi về gói default = ĐÚNG hành vi đã gây sự cố 2026-09-29. Nó vẫn là
+            # chiều fail-safe đúng (không chặn lệnh), nhưng PHẢI để lại ARTIFACT: stdout của
+            # run_bot không có checker nào đọc, nên chỉ `print` là suy biến trong im lặng
+            # (arch-review 2026-09-29 F4).
+            self._log_raw("sell_loan_package_resolve",
+                          {"symbol": symbol, "qty": qty, "resolved": None,
+                           "rule": "LỖI-đọc-positions → gói default (hành vi cũ)",
+                           "error": f"{type(e).__name__}: {e}",
+                           "account_default": self._account_default_lp()})
             print(f"[dnse] ⚠ positions lỗi khi giải gói vay lệnh BÁN {symbol} "
                   f"({type(e).__name__}: {e}) → gói default account (hành vi cũ)")
             return None
@@ -1033,25 +1043,35 @@ class DNSEBroker(BrokerBase):
             cur = by_pkg.setdefault(str(lp), {"id": lp, "sellable": 0})
             cur["sellable"] += sellable
         if not by_pkg:
+            self._log_raw("sell_loan_package_resolve",
+                          {"symbol": symbol, "qty": qty, "resolved": None,
+                           "rule": "KHÔNG gói nào còn hàng cho mã này → gói default (hành vi cũ)",
+                           "account_default": self._account_default_lp()})
             return None
         try:
             need = int(qty)
         except (TypeError, ValueError):
             need = 0
         sufficient = [v for v in by_pkg.values() if v["sellable"] >= need]
-        pool = sufficient or list(by_pkg.values())
         default = self._account_default_lp()
-        pick = next((v for v in pool if default is not None and str(v["id"]) == str(default)), None)
-        rule = "default-account-pkg-đủ-hàng"
+        # Tie-break "gói default" CHỈ áp trong tập ĐỦ HÀNG. Áp nó vào cả tập dự phòng là lỗi
+        # arch-review 2026-09-29 F3: đo trên snapshot THẬT 14:45:04, MBB có 1258 sellable=2 và
+        # 1826 sellable=400; bán 402 sẽ chọn 1258 — gói KHÔNG THỂ khớp — trong khi mục đích của
+        # tập dự phòng là "bán được nhiều nhất có thể".
+        pick = next((v for v in sufficient
+                     if default is not None and str(v["id"]) == str(default)), None)
+        rule = "gói-default-đủ-hàng"
         if pick is None:
+            pool = sufficient or list(by_pkg.values())
             pick = max(pool, key=lambda v: (v["sellable"], str(v["id"])))
-            rule = "sellable-lớn-nhất"
-        if len(by_pkg) > 1 or not sufficient:
-            self._log_raw("sell_loan_package_resolve",
-                          {"symbol": symbol, "qty": need, "resolved": pick["id"],
-                           "rule": rule, "account_default": default,
-                           "any_pkg_covers_qty": bool(sufficient),
-                           "by_package": {k: v["sellable"] for k, v in by_pkg.items()}})
+            rule = "sellable-lớn-nhất" + ("" if sufficient else " (KHÔNG gói nào đủ qty)")
+        # Log MỌI lần resolve, không chỉ ca nhiều gói: 6 mã của sự cố 29/09 đều chỉ có MỘT gói,
+        # nên điều kiện cũ khiến chính ca cần audit nhất không để lại bản ghi nào (F4).
+        self._log_raw("sell_loan_package_resolve",
+                      {"symbol": symbol, "qty": need, "resolved": pick["id"],
+                       "rule": rule, "account_default": default,
+                       "any_pkg_covers_qty": bool(sufficient),
+                       "by_package": {k: v["sellable"] for k, v in by_pkg.items()}})
         return pick["id"]
 
     def _validate_lever_package(self, symbol, want):
