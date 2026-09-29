@@ -660,11 +660,16 @@ def compute_trim(account_label, asof=None, target=None, holdings=None,
     out["target_weights"] = {tk: feasible[tk] / w_sum for tk in sorted(feasible)}
     out["target_value_vnd"] = {tk: tgt[tk] for tk in sorted(tgt)}
     if dropped:
+        # §5 kb/plan_report_style_guide.md: TÓM TẮT 1 dòng cho kênh duyệt — KHÔNG generate
+        # wall-of-text liệt kê công thức từng mã ở đây (renderer từng cắt ngẫu nhiên theo ký
+        # tự, mất thông tin có chủ đích). Chi tiết đầy đủ từng mã ĐÃ có nguyên vẹn trong
+        # out["basket_dropped"] (ticker/weight/reason) — không mất thông tin, chỉ không đẩy
+        # vào notes[] mà report renderer echo cho người duyệt.
         out["notes"].append(
             f"rổ mục tiêu kỳ {rebal_date}: {len(feasible)}/{len(basket_w)} mã khả thi, bỏ "
-            f"{len(dropped)} mã (Σ {out['basket_dropped_weight']*100:.2f}% trọng số) — trọng số "
-            f"đã CHUẨN HOÁ LẠI trên tập khả thi: "
-            + "; ".join(f"{d['ticker']} {d['weight']*100:.2f}% ({d['reason']})" for d in dropped))
+            f"{len(dropped)} mã (Σ {out['basket_dropped_weight']*100:.2f}% trọng số, trọng số "
+            "đã chuẩn hoá lại trên tập khả thi) — chi tiết từng mã: xem basket_dropped trong "
+            "plan JSON.")
 
     # ── want_i = mv_i − tgt_i, trần TỔNG, rồi tầng 2 (trần per-name = gate LAG live) ──
     want_raw = {tk: max(0.0, d["mv"] - tgt.get(tk, 0.0)) for tk, d in tradable.items()}

@@ -186,6 +186,22 @@ check("T7 (c) trọng số chuẩn hoá đúng trên tập khả thi + Σ = 1",
       r["target_weights"])
 check("T7b (c) Σ trọng số bị bỏ = 10,5% (PC1 10% + TIN 0,5%)",
       abs(r["basket_dropped_weight"] - 0.105) < 1e-12, r["basket_dropped_weight"])
+# ── T7c: §5 kb/plan_report_style_guide.md — notes[] TÓM TẮT 1 dòng, KHÔNG wall-of-text
+# liệt kê công thức từng mã (bug audit §2b: dòng cũ nối "; ".join(ticker+weight+reason) cho
+# TOÀN BỘ mã bị bỏ, renderer cắt 300 ký tự ngẫu nhiên). Chi tiết đầy đủ vẫn PHẢI còn nguyên
+# trong basket_dropped (không mất thông tin — chỉ không đẩy vào notes[] mà report echo).
+_basket_note = next((n for n in r["notes"] if n.startswith("rổ mục tiêu kỳ")), None)
+check("T7c notes[] có đúng 1 dòng tóm tắt rổ mục tiêu, KHÔNG liệt kê ticker/reason từng mã "
+      "(PC1/TIN KHÔNG xuất hiện trong note — chỉ trong basket_dropped)",
+      _basket_note is not None
+      and "PC1" not in _basket_note and "TIN" not in _basket_note
+      and "BANNED" not in _basket_note and "1 lô" not in _basket_note
+      and len(_basket_note) < 200,
+      _basket_note)
+check("T7d basket_dropped vẫn giữ ĐẦY ĐỦ ticker+reason từng mã (PC1 BANNED, TIN 1 lô) — "
+      "thông tin không mất, chỉ chuyển khỏi notes[]",
+      "PC1" in drop and "BANNED" in drop["PC1"]["reason"]
+      and "TIN" in drop and "1 lô" in drop["TIN"]["reason"])
 
 # ── T8-T10: số tiền — tgt_i = 800tr × w' ────────────────────────────────────
 check("T8 target_value AAA = 800tr × 0,4/0,895 = 357,54tr",

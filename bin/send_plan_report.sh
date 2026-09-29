@@ -466,7 +466,7 @@ if _capit_buys:
 # công thức nào trôi khỏi nhau. Fail-open có ghi rõ: một dòng báo cáo không được chặn plan.
 margin_note = []
 try:
-    from trading_bot.plan import preview_margin_day, margin_day_approval
+    from trading_bot.plan import preview_margin_day, margin_day_approval, CAPIT_LEVER_APPROVED_F
     _pv = preview_margin_day(acct, date)
     if _pv.get("error"):
         pass                     # không đọc được plan qua load_plan ⇒ im lặng, gate 09:05 vẫn đủ
@@ -479,8 +479,9 @@ try:
         _r = [r for r in _pv["reasons"] if "sizing" in r.lower() or "active" in r.lower()]
         if _r:
             margin_note.append("⚠️ **Plan có dấu hiệu đã sizing theo ĐÒN BẨY nhưng phiên sẽ "
-                               "chạy bằng VỐN TỰ CÓ** — khối lượng tính cho 1,3× vốn mà chỉ "
-                               "có 1,0× vốn; triệu chứng sẽ là WAIT_CASH, không phải lỗi rõ.")
+                               f"chạy bằng VỐN TỰ CÓ** — khối lượng tính cho {CAPIT_LEVER_APPROVED_F:g}× "
+                               "vốn mà chỉ có 1,0× vốn; triệu chứng sẽ là WAIT_CASH, không phải "
+                               "lỗi rõ.")
             for _x in _r[:2]:
                 margin_note.append(f"   · {_x}")
     elif _pv["orders"]:
@@ -686,6 +687,11 @@ if orders:
     dd_shown = False
     buys  = [o for o in orders if str(o.get("side","")).lower() in ("buy","mua","b")]
     sells = [o for o in orders if str(o.get("side","")).lower() in ("sell","ban","s")]
+    # §2 kb/plan_report_style_guide.md: N lệnh PARK_TRIM cùng lý do (cùng target_park, cùng
+    # ngày) ⇒ 1 câu áp dụng chung sau vòng lặp, KHÔNG lặp nguyên văn theo từng lệnh (ca thật
+    # 2026-09-29: 19/19 lệnh lặp y hệt).
+    _pt_trim_tickers = [o.get("ticker","?") for o in sells
+                        if str(o.get("play_type", "")).upper() == "PARK_TRIM"]
     lines.append(f"🎯 Hành động: **{len(orders)} lệnh** ({len(sells)} bán, {len(buys)} mua):")
     if pt_report_orders or jit_report_orders:
         lines.append(f"   ➕ Ngoài {len(orders)} lệnh trên, plan còn **{len(pt_report_orders) + len(jit_report_orders)} "
@@ -714,14 +720,11 @@ if orders:
         note_s = f" — {note[:90]}" if note else ""
         lines.append(f"  • {side_vn} {ticker} {qty}cp @ {px}{val_s}{note_s}")
         # Lý do bán PARK_TRIM là ĐỘC LẬP với bất kỳ lệnh mua nào trong cùng plan (park-target
-        # compliance, không phải tài trợ) — nói rõ ngay tại lệnh bán, đừng để user tự suy diễn
-        # từ dòng "Tiền đâu ra" của lệnh mua bên dưới (user 2026-09-17: đọc 2 dòng liền nhau
+        # compliance, không phải tài trợ) — KHÔNG lặp theo từng lệnh (§2 style guide), xem 1
+        # dòng tổng "Lý do (áp dụng CHUNG...)" ngay sau vòng lặp này. Vẫn để user tự suy diễn
+        # đúng: nếu ticker này KHÔNG nằm trong dòng "Tiền đâu ra" của lệnh mua bên dưới thì đây
+        # thuần là park-compliance, không phải tài trợ (user 2026-09-17: đọc 2 dòng liền nhau
         # tưởng mâu thuẫn "bán PARK" rồi "không cần bán PARK").
-        if not is_buy and str(o.get("play_type", "")).upper() == "PARK_TRIM":
-            _o_tgt = park_trim.get("target_park")
-            _o_tgt_s = f"{float(_o_tgt)*100:.0f}%" if isinstance(_o_tgt, (int, float)) else "?"
-            lines.append(f"      ↳ ℹ️ Lý do: tuân thủ trần PARK {_o_tgt_s} (park-trim), KHÔNG liên quan "
-                          "tới việc tài trợ lệnh mua trong plan này.")
         # Funding note NGAY CẠNH lệnh mua — user đọc lệnh mua riêng lẻ không được phép hoảng
         # vì tưởng thiếu tiền (SSI 75,3tr vs cash 4,8tr, plan 08-07).
         if is_buy:
@@ -785,6 +788,14 @@ if orders:
                 dd_shown = True
             if o.get("dd_override_reason"):
                 lines.append(f"      ↳ lý do override DD: {str(o['dd_override_reason'])[:120]}")
+    if _pt_trim_tickers:
+        # KHÔNG liệt kê lại tên mã (§3 style guide) — đã có ở từng dòng "• BÁN ..." bên trên.
+        _o_tgt = park_trim.get("target_park")
+        _o_tgt_s = f"{float(_o_tgt)*100:.0f}%" if isinstance(_o_tgt, (int, float)) else "?"
+        lines.append(
+            f"   ↳ ℹ️ Lý do (áp dụng CHUNG cho {len(_pt_trim_tickers)} lệnh BÁN PARK_TRIM ở "
+            f"trên): tuân thủ trần PARK {_o_tgt_s} (park-trim), KHÔNG liên quan tới việc tài "
+            "trợ lệnh mua trong plan này.")
     if dcf_shown and DCF_DISCLAIMER:
         lines.append(f"ℹ️ _{DCF_DISCLAIMER}_")
     if dd_shown and DD_DISCLAIMER:
