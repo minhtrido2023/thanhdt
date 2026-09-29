@@ -581,6 +581,27 @@ rows.sort(key=lambda r: -r['value'])
 
 lines = []
 lines.append(f"📊 **EOD Trading Report — {account} ({plan_date})**")
+lines.append("")
+
+# Tình trạng danh mục (PM view: sleeve BAL/PARK/LAG/CAPIT/Discretionary + corp action sắp tới).
+# Chạy như subprocess độc lập, fail-safe: lỗi/không dữ liệu → 1 dòng cảnh báo, không crash report.
+try:
+    import subprocess
+    _ps = subprocess.run(
+        [sys.executable, os.path.join(wc_root, "mike", "bin", "portfolio_status.py"),
+         "--account", account, "--date", plan_date],
+        capture_output=True, text=True, cwd=wc_root, timeout=60,
+    )
+    if _ps.returncode == 0 and _ps.stdout.strip():
+        lines.extend(_ps.stdout.splitlines())
+        lines.append("")
+    else:
+        lines.append(f"⚠️ portfolio_status.py: không có dữ liệu ({_ps.stderr.strip().splitlines()[-1] if _ps.stderr.strip() else 'rc=' + str(_ps.returncode)})")
+        lines.append("")
+except Exception as _e:
+    lines.append(f"⚠️ portfolio_status.py lỗi: {_e}")
+    lines.append("")
+
 if mismatches:
     lines.append("")
     lines.append("🚨 **CẢNH BÁO ĐỐI SOÁT — FILL THẬT (broker) ≠ STATE NỘI BỘ** — "
