@@ -50,6 +50,21 @@ _APPEND_EVENT = os.path.join(_MIKE_ROOT, "bin", "append_event.sh")
 # một ca đơn lẻ (vd bản đọc positions cũ 1 nhịp) tự hồi phục mà không bị chặn oan.
 PLACE_FAIL_STRUCTURAL_LIMIT = 5
 
+
+class _OrphanParent:
+    """Đủ để `_journal` ghi ra một dòng parent_id MÁY ĐỌC ĐƯỢC cho parent chỉ còn trong state.
+
+    `_journal` đọc `o.id` / `o.ticker` / `o.side` (+ `book`/`play_type` qua getattr). Parent
+    nằm trong `state["parents"]` mà không còn trong `plan.orders` là trạng thái CÓ THẬT —
+    `_load_state` chỉ THÊM vào `parents`, không bao giờ xoá. Truyền `None` cho `_journal` sẽ
+    ghi ra dòng parent_id rỗng (arch-review 2026-09-29 vòng 3 F-C).
+    """
+
+    __slots__ = ("id", "ticker", "side")
+
+    def __init__(self, pid):
+        self.id, self.ticker, self.side = pid, "", ""
+
 # Lỗi TẠM THỜI — thử lại là ĐÚNG, không bao giờ tính vào bộ đếm dừng. Nhận diện bằng BẰNG
 # CHỨNG trong chính chuỗi lỗi (coding_guidelines §29: không đoán nguyên nhân), không bằng
 # suy luận chung chung.
@@ -218,6 +233,12 @@ class Executor:
         # → cùng fail-safe về guard realtime cũ. Xem _load_discretionary_adv20_basis().
         self._disc_adv20_vnd = self._load_discretionary_adv20_basis()
         self.state = self._load_state()
+        # PHẢI gọi SAU `self.state = …`: _clear_place_blocks ghi journal, và `_journal` đọc
+        # `self.state["parents"]`. Gọi từ trong _load_state (bản 82732a05) làm __init__ ném
+        # AttributeError ở MỌI lần resume có cờ chặn ⇒ chết cả phiên chiều của account —
+        # arch-review 2026-09-29 vòng 3 F-A (đã tái lập). State MỚI không có parent nào mang
+        # cờ nên gọi vô điều kiện ở đây là no-op, không cần biết nhánh nào vừa chạy.
+        self._clear_place_blocks(self.state)
         self._step_fail_count = 0   # consecutive STEP_FAIL counter for escalation
 
     @staticmethod
@@ -335,7 +356,6 @@ class Executor:
                                                     "atc_sent": False, "children": [],
                                                     "last_slice_ts": None,
                                                     "dcf_check": o.dcf_check})
-                self._clear_place_blocks(st)
                 return st
             print(f"[exec:{self.label}] ⚠ plan đã đổi so với state cũ — state mới")
         return {"plan_date": self.plan.plan_date,
@@ -381,7 +401,14 @@ class Executor:
             # per-parent về sau buộc phải parse tiếng Việt (§28) — arch-review R2.
             # Tên sự kiện cố ý KHÔNG chứa "FAIL": execution_quality_review.py đếm mọi event
             # khớp `FAIL|ERROR|REJECT` là lỗi, một lần PHỤC HỒI không phải lỗi.
-            self._journal("PLACE_BLOCK_CLEARED", by_id.get(pid), note=(
+            o = by_id.get(pid)
+            if o is None:
+                # Parent còn trong state mà KHÔNG còn trong plan: _load_state chỉ THÊM vào
+                # `parents`, không bao giờ xoá (ca cap_capit_orders 2026-07-21). `_journal`
+                # lấy parent_id/ticker từ `o` ⇒ o=None ghi ra dòng parent_id RỖNG, đúng cái
+                # §28 mà dòng này sinh ra để tránh. Shim chỉ mang ID — arch-review vòng 3 F-C.
+                o = _OrphanParent(pid)
+            self._journal("PLACE_BLOCK_CLEARED", o, note=(
                 f"tiến trình mới → gỡ chặn (lỗi cũ: {prev_note}). Nếu nguyên nhân CHƯA được "
                 f"sửa, lệnh này sẽ lại bị dừng sau {PLACE_FAIL_STRUCTURAL_LIMIT} lượt."))
 

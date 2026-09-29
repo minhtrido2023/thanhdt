@@ -321,6 +321,33 @@ check(cl.n_positions == 2,
       f"sellable là số lượng có thật, đổi sau mỗi lần khớp)")
 
 # ───────────────────── V1-g: F4 — MỌI đường resolve đều để lại ARTIFACT ─────────────
+print("=== V1-h F-D: 2 mutant vòng 2 sống sót — id dạng CHUỖI, và tie-break sellable BẰNG NHAU ===")
+# arch-review vòng 3 F-D: mọi fixture trước đây đều để loanPackageId là int ở CẢ HAI phía, nên
+# mutant `v["id"] == default` (bỏ str()) xanh toàn bộ. DNSE trả JSON — một ngày nào đó nó trả
+# chuỗi là tie-break "giữ gói default" TẮT LẶNG LẼ, đổi gói của BID/MBB/VCB so với hành vi cũ.
+# Hình dạng phải là ca mà tie-break THỰC SỰ quyết: gói default có ÍT hàng hơn một gói đủ khác
+# (VCB thật 2026-09-29: 1258:100 · 1826:200). Fixture kiểu BID (default 300 > 1826 100) KHÔNG
+# giết được mutant — `max(sellable)` tình cờ cũng ra 1258 ⇒ test xanh vô nghĩa (đã đo).
+STR_ID = [_pos("VCB", "1258", 100, 100), _pos("VCB", "1826", 200, 200)]
+b = make_broker(FakeClient(STR_ID))
+b.place_order("VCB", 100, "sell", price=20000)
+check(str(b.client.last_place["loan_package_id"]) == "1258",
+      f"loanPackageId dạng CHUỖI '1258' vs default int 1258 ⇒ vẫn nhận ra gói default, dù gói "
+      f"1826 có NHIỀU hàng hơn (thực tế: {b.client.last_place['loan_package_id']!r}) — "
+      f"giết mutant bỏ str()")
+
+# Tie-break tất định: 2 gói sellable BẰNG NHAU, không gói nào là default ⇒ phải luôn ra CÙNG
+# một gói bất kể thứ tự dòng positions. Mutant bỏ `str(v["id"])` khỏi key cũng xanh trước đây.
+EQ = [_pos("FPT", 1900, 100, 100), _pos("FPT", 1901, 100, 100)]
+picks = set()
+for rows in (EQ, list(reversed(EQ))):
+    b = make_broker(FakeClient(rows))
+    b.place_order("FPT", 100, "sell", price=20000)
+    picks.add(str(b.client.last_place["loan_package_id"]))
+check(picks == {"1901"},
+      f"2 gói sellable BẰNG NHAU (1900/1901, không gói nào default) ⇒ tie-break tất định theo "
+      f"str(id), đảo thứ tự dòng vẫn ra 1901 (thực tế: {sorted(picks)})")
+
 print("=== V1-g F4: _log_raw('sell_loan_package_resolve') trên CẢ 3 đường ===")
 # Đường suy biến (rơi về gói default) chính là đường tái lập bug gốc — nó mà im lặng thì
 # không checker nào biết. 6 mã sự cố đều CHỈ có 1 gói, nên điều kiện log cũ ("chỉ log khi
@@ -383,6 +410,7 @@ from trading_bot.executor import Executor
 class FakeOrder:
     def __init__(self, tid="HPG", side="sell"):
         self.id, self.ticker, self.side = f"PARKMERGE-SELL-{tid}", tid, side
+        self.dcf_check = None            # _load_state THẬT đọc trường này khi backfill parent
 
 
 class FakePlan:
@@ -494,8 +522,80 @@ ex3 = make_executor(BLOCKED_ORDERS)
 ex3._clear_place_blocks({"parents": {PID_CTG: {"done": False}}})
 check(ex3.journal == [], "không có lệnh nào bị chặn → KHÔNG ghi journal (im lặng đúng chỗ)")
 
-check("self._clear_place_blocks(st)" in inspect.getsource(Executor._load_state),
-      "_load_state gọi _clear_place_blocks ở nhánh RESUME (nơi state cũ được mang sang)")
+print("=== V2-F1c ĐƯỜNG THẬT: _load_state() + _journal() THẬT, KHÔNG stub (vòng 3 F-A) ===")
+# Vòng 2 chỉ kiểm CHUỖI NGUỒN ("self._clear_place_blocks(st)" có mặt trong _load_state) — đúng
+# về chữ, sai về hành vi: _journal đọc `self.state["parents"]`, mà `self.state` chỉ được gán
+# SAU khi _load_state trả về ⇒ mọi lần resume có cờ chặn làm __init__ ném AttributeError, chết
+# cả phiên chiều của account. Stub `ex._journal = lambda` của make_executor che đúng lỗi đó.
+# Nay đi ĐƯỜNG THẬT: _load_state() thật trên state file thật + _journal() thật ra CSV tmpdir.
+import csv
+import json
+import textwrap
+
+
+class RealPathPlan(FakePlan):
+    created_at = "2026-09-29T09:00:00"
+
+
+with tempfile.TemporaryDirectory() as td:
+    R_ORDERS = [FakeOrder("HPG"), FakeOrder("CTG")]
+    RP_H, RP_C = R_ORDERS[0].id, R_ORDERS[1].id
+    ORPHAN = "PARKMERGE-SELL-GONE"        # trong state, KHÔNG còn trong plan (F-C)
+    st_file = os.path.join(td, "state_ZaloPay.json")
+    with open(st_file, "w", encoding="utf-8") as fh:
+        json.dump({"plan_date": "2026-09-29", "plan_created_at": RealPathPlan.created_at,
+                   "parents": {
+                       RP_H: {"filled": 0, "done": False, "place_blocked": True,
+                              "place_blocked_ts": "2026-09-29T09:16:28",
+                              "place_fail_streak": 5, "place_fail_note": NOTE},
+                       ORPHAN: {"filled": 0, "done": False, "place_blocked": True,
+                                "place_fail_streak": 5, "place_fail_note": NOTE},
+                       RP_C: {"filled": 0, "done": False}}}, fh)
+
+    ex = Executor.__new__(Executor)       # CỐ Ý không gán ex.state — như __init__ thật
+    ex.label = "ZaloPay"
+    ex.plan = RealPathPlan(R_ORDERS)
+    ex.state_file = st_file
+    ex.journal_file = os.path.join(td, "exec_ZaloPay_2026-09-29_journal.csv")
+    check(not hasattr(ex, "state"),
+          "tiền đề của test: `state` CHƯA là thuộc tính khi _load_state() chạy (như __init__)")
+    try:
+        st, load_err = ex._load_state(), None
+    except Exception as exc:
+        st, load_err = None, f"{type(exc).__name__}: {exc}"
+    check(load_err is None,
+          f"_load_state() KHÔNG ném khi self.state chưa tồn tại (thực tế: {load_err}) — bản "
+          f"82732a05 journal TỪ TRONG _load_state ⇒ AttributeError ở MỌI lần resume có cờ chặn")
+    check(st is not None and st["parents"][RP_H].get("place_blocked") is True,
+          "…và _load_state KHÔNG tự gỡ cờ (việc gỡ thuộc __init__, sau khi state đã gán)")
+
+    ex.state = st                          # ĐÚNG thứ tự __init__ thật
+    if st is None:                         # _load_state đã ném ⇒ đã FAIL ở trên; đừng để
+        st = {"parents": {}}               # harness chết giữa đường, còn kiểm tiếp phần sau
+    ex._clear_place_blocks(st)             # _journal THẬT, ghi ra CSV thật
+    check(not st["parents"][RP_H].get("place_blocked"),
+          "đường thật: place_blocked bị XOÁ (kịch bản hot-fix + restart 2026-08-10)")
+    with open(ex.journal_file, newline="", encoding="utf-8") as fh:
+        jrows = list(csv.DictReader(fh))
+    got = sorted((r["event"], r["parent_id"], r["ticker"]) for r in jrows)
+    check(got == sorted([("PLACE_BLOCK_CLEARED", RP_H, "HPG"),
+                         ("PLACE_BLOCK_CLEARED", ORPHAN, "")]),
+          f"CSV thật có 2 dòng, parent_id KHÔNG rỗng cả ở parent đã rời plan (F-C) "
+          f"(thực tế: {got})")
+    check(all(NOTE in r["note"] for r in jrows),
+          "mỗi dòng giữ nguyên văn lỗi cũ trong note")
+
+# Cấu trúc: lệnh gọi phải nằm trong __init__ và SAU phép gán self.state — kiểm bằng AST chứ
+# không so chuỗi, và kiểm cả chiều NGƯỢC (không được quay về nằm trong _load_state).
+_init_src = textwrap.dedent(inspect.getsource(Executor.__init__))
+_i_state = next(i for i, l in enumerate(_init_src.splitlines())
+                if "self.state = self._load_state()" in l)
+_i_clear = next(i for i, l in enumerate(_init_src.splitlines())
+                if "self._clear_place_blocks(" in l)
+check(_i_state < _i_clear,
+      f"__init__ gỡ chặn SAU khi gán self.state (dòng state={_i_state}, clear={_i_clear})")
+check("_clear_place_blocks" not in inspect.getsource(Executor._load_state),
+      "_load_state KHÔNG còn gọi _clear_place_blocks (nơi self.state chưa tồn tại)")
 
 print("=== V2-F1b ngưỡng dừng bị RÀNG BUỘC (không được lặng lẽ nâng lên vô nghĩa) ===")
 # Nhịp thử lại đo thật: PLACE_FAIL không cập nhật last_slice_ts và không sinh child ⇒ throttle
@@ -612,6 +712,44 @@ check(w == 0, f"40 dòng ATC_AFTER_BLOCK KHÔNG sinh báo động (warn={w}) —
 
 w, _ = run_ops_check([jrow("09:00:00", "PLACE_BLOCK_CLEARED", note="restart")] * 10)
 check(w == 0, f"PLACE_BLOCK_CLEARED (phục hồi) KHÔNG bị tính là lỗi (warn={w})")
+
+print("=== V2-F-E PLACE_FAIL_STOPPED phải hiện trong heartbeat 5' (bịt khoảng sau 12:45) ===")
+# ops_health_check.sh chỉ chạy 08:20 + 12:45 và chỉ đọc journal của HÔM NAY ⇒ một lần chặn lúc
+# 13:05-14:45 KHÔNG lượt cron nào quét tới. bot_heartbeat.sh chạy 5 phút/lần cả phiên, nên nó
+# là kênh bịt đúng khoảng trống đó (arch-review vòng 3 F-E). Kiểm HÀNH VI: trích nguyên khối
+# python của `_orderbook_digest` ra chạy thật trên journal fixture, không so chuỗi nguồn.
+HB_SH = os.path.join(WC_ROOT, "mike", "bin", "bot_heartbeat.sh")
+_hb = open(HB_SH, encoding="utf-8").read().splitlines()
+_j0 = next(i for i, l in enumerate(_hb) if "<< 'PYEOF'" in l)
+_j1 = next(i for i, l in enumerate(_hb) if l.strip() == "PYEOF" and i > _j0)
+HB_BLOCK = "\n".join(_hb[_j0 + 1:_j1])
+
+
+def run_heartbeat(rows):
+    """Chạy THẬT khối _orderbook_digest của bot_heartbeat.sh trên 1 journal dựng sẵn → stdout."""
+    with tempfile.TemporaryDirectory() as td:
+        jp = os.path.join(td, "exec_T_2026-09-29_journal.csv")
+        with open(jp, "w", encoding="utf-8") as fh:
+            fh.write(HDR + "".join(rows))
+        blk = os.path.join(td, "hb.py")
+        with open(blk, "w", encoding="utf-8") as fh:
+            fh.write(HB_BLOCK)
+        r = subprocess.run([sys.executable, blk, jp, "ZaloPay", "13:05", "2"],
+                           capture_output=True, text=True)
+        return r.returncode, r.stdout + r.stderr
+
+
+rc_hb, out_hb = run_heartbeat([jrow("13:05:00", "PLACE_FAIL_STOPPED", note="HTTP 400: deal not found")])
+check(rc_hb == 0, f"khối heartbeat chạy được trên fixture (rc={rc_hb}) — {out_hb[:200]}")
+check("HPG" in out_hb and "DỪNG" in out_hb.upper().replace("DUNG", "DỪNG"),
+      f"PLACE_FAIL_STOPPED lúc 13:05 HIỆN trong digest kèm lý do 'ĐÃ DỪNG' (thực tế: {out_hb!r})")
+check("deal not found" in out_hb,
+      f"…và giữ nguyên văn lỗi thật để người trực biết vì sao (thực tế: {out_hb!r})")
+
+rc_hb2, out_hb2 = run_heartbeat([jrow("13:05:00", "PLACE_FAIL_STOPPED", note="HTTP 400: deal not found"),
+                                 jrow("13:30:00", "DONE", note="khớp đủ")])
+check("DỪNG" not in out_hb2.upper().replace("DUNG", "DỪNG"),
+      f"parent sau đó DONE ⇒ không còn báo đang-chờ (không cảnh báo giả) (thực tế: {out_hb2!r})")
 
 print()
 if FAILS:

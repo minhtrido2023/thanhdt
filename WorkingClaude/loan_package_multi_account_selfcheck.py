@@ -346,7 +346,11 @@ def main():
         mod.EXEC_DIR = tmp                                   # __init__ tính _raw_log từ EXEC_DIR
         sys.modules["trading_bot.brokers"] = mod             # `from trading_bot.brokers import DNSEBroker`
         try:
-            filled, b = inj.broker_filled_qty("SpaceX", ACC["SpaceX"][0], "HPG", 100)
+            # 3 giá trị, không 2: mike 642d4f5a (2026-09-24) thêm `corp_action_note` vào
+            # broker_filled_qty(). Selfcheck này còn unpack 2 ⇒ ValueError ⇒ rc=1 suốt từ đó,
+            # dù mọi assertion về gói vay đã PASS (phát hiện khi quét §23 cho bản vá
+            # sell-loanpackage 2026-09-29). Đường production đã unpack đúng 3.
+            filled, b, _ca_note = inj.broker_filled_qty("SpaceX", ACC["SpaceX"][0], "HPG", 100)
         finally:
             sys.modules["trading_bot.brokers"] = real_mod
             mod.EXEC_DIR = saved_exec

@@ -989,8 +989,13 @@ class DNSEBroker(BrokerBase):
              `loanPackageId` (DNSE trả MỘT DÒNG MỖI DEAL — `get_positions()` cộng gộp và VỨT
              BỎ `loanPackageId`, nên phải đọc `positions_raw()`).
           2. Ưu tiên tập gói có `sellable >= qty` (bán gọn trong 1 deal); không gói nào đủ
-             riêng lẻ ⇒ xét toàn bộ gói còn hàng (fail-safe: bán được một phần còn hơn bị
-             từ chối toàn bộ — bán thiếu thì chu kỳ sau bán tiếp).
+             riêng lẻ ⇒ xét toàn bộ gói còn hàng, chọn gói có XÁC SUẤT KHỚP CAO NHẤT.
+             ⚠️ Hàm này KHÔNG clamp `qty` về `sellable` của gói được chọn — nó chỉ trả về
+             `loanPackageId`, `qty` do `_place_slices` quyết (cap theo TỔNG sellable của mã,
+             xem `get_positions()`). Nên ở ca này DNSE vẫn có thể từ chối toàn bộ lệnh; đây
+             là "chọn gói ít tệ nhất", KHÔNG phải cam kết bán được một phần (arch-review
+             2026-09-29 vòng 3 F-B: docstring cũ khẳng định fail-safe không có code đỡ, §29).
+             Clamp `qty` là ĐỔI HÀNH VI đặt lệnh ⇒ cần bằng chứng hành vi DNSE trước, không đoán.
           3. Trong tập ĐỦ HÀNG đó, gói DEFAULT account được ưu tiên nếu có mặt — tie-break
              GIỮ NGUYÊN HÀNH VI CŨ ở mọi ca hành vi cũ vốn đã đúng. Đo trên snapshot thật
              2026-09-29 04:55: BID (1258:300 · 1826:100), MBB (1258:202 · 1826:400), VCB
@@ -1064,7 +1069,9 @@ class DNSEBroker(BrokerBase):
         if pick is None:
             pool = sufficient or list(by_pkg.values())
             pick = max(pool, key=lambda v: (v["sellable"], str(v["id"])))
-            rule = "sellable-lớn-nhất" + ("" if sufficient else " (KHÔNG gói nào đủ qty)")
+            rule = "sellable-lớn-nhất" + ("" if sufficient else
+                                             " (KHÔNG gói nào đủ qty — qty KHÔNG bị clamp, "
+                                             "DNSE vẫn có thể từ chối toàn bộ)")
         # Log MỌI lần resolve, không chỉ ca nhiều gói: 6 mã của sự cố 29/09 đều chỉ có MỘT gói,
         # nên điều kiện cũ khiến chính ca cần audit nhất không để lại bản ghi nào (F4).
         self._log_raw("sell_loan_package_resolve",
