@@ -392,6 +392,143 @@ check(f"flip 1 lệnh PARK_TRIM+JIT_UNPARK→PARK_TRIM: N tăng đúng {SX_N_PUR
       and f"cho {N_EXPECTED_B} lệnh BÁN PARK_TRIM" in _pt_reason_lines_b[0],
       _pt_reason_lines_b[:1] or [f"(kỳ vọng N={N_EXPECTED_B})"])
 
+# ── T13 — cắt boilerplate 2026-09-29 (arch-review NEEDS_CHANGES → sửa → pin lại 5 hành vi) ──
+print("\n[T13] Cắt boilerplate: chỉ suppress khi THẬT SỰ bình thường, không nuốt cảnh báo đi kèm")
+
+# T13a: NO_TRIM_STRUCTURE (PARK vượt trần nhưng KHÔNG mã nào trim được — cùng bản chất
+# BLOCKED_ALL_NAMES) KHÔNG được nằm trong tuple suppress — arch-review bắt bản đầu gộp nhầm.
+p13a = copy.deepcopy(SX)
+p13a["park_trim_proposal"]["decision"] = "NO_TRIM_STRUCTURE"
+p13a["park_trim_proposal"]["notes"] = ["phần vượt trần nằm ở các mã CHƯA MUA, cần đường MUA P2"]
+out_13a = run_sender(p13a, "SpaceX")
+check("NO_TRIM_STRUCTURE vẫn in dòng L1 (không phải ngày yên ổn, cùng lớp BLOCKED_ALL_NAMES)",
+      "L1 trim PARK: NO_TRIM_STRUCTURE" in out_13a)
+
+# T13b: NO_TRIM là quiescent thật — nhưng nếu notes[] có cảnh báo ⚠️ thật (vd ENGINE CHƯA ĐỒNG BỘ,
+# cổ tức QUÁ HẠN) thì KHÔNG được nuốt theo decision.
+p13b = copy.deepcopy(SX)
+p13b["park_trim_proposal"]["decision"] = "NO_TRIM"
+p13b["park_trim_proposal"]["notes"] = ["⚠️ ENGINE CHƯA ĐỒNG BỘ — rail MUA park tới 30% nhưng rail "
+                                        "TRIM chỉ kích khi vượt 80%, chép dòng này vào notes plan"]
+out_13b = run_sender(p13b, "SpaceX")
+check("NO_TRIM + notes có ⚠️ thật → vẫn in dòng L1 (không nuốt cảnh báo theo decision)",
+      "L1 trim PARK: NO_TRIM" in out_13b and "ENGINE CHƯA ĐỒNG BỘ" in out_13b)
+
+# T13c: NO_TRIM + notes benign (không ⚠️) → ĐÚNG là ngày yên ổn, suppress thật.
+p13c = copy.deepcopy(SX)
+p13c["park_trim_proposal"]["decision"] = "NO_TRIM"
+p13c["park_trim_proposal"]["notes"] = ["PARK trong trần, không cần trim"]
+out_13c = run_sender(p13c, "SpaceX")
+check("NO_TRIM + notes benign → KHÔNG in dòng L1 (đúng ngày yên ổn, suppress)",
+      "L1 trim PARK: NO_TRIM" not in out_13c)
+
+# T13d: NO_TRIGGER (L2) benign → suppress (đối xứng T13c, mã thật SpaceX 2026-09-30 0 lệnh).
+p13d = copy.deepcopy(SX)
+p13d["jit_unpark_proposal"]["decision"] = "NO_TRIGGER"
+p13d["jit_unpark_proposal"]["notes"] = ["không có lệnh MUA book BAL/LAG trong plan ⇒ L2 no-op "
+                                        "(đúng thiết kế: L2 chỉ chạy khi có lệnh mua thật)"]
+out_13d = run_sender(p13d, "SpaceX")
+check("NO_TRIGGER + notes benign → KHÔNG in dòng L2 (đúng ngày yên ổn, suppress)",
+      "L2 JIT unpark: NO_TRIGGER" not in out_13d)
+
+# T13e (source-pin): điều kiện suppress price-verify phải dựa trên BẤT BIẾN THẬT
+# (verified_n < tổng), KHÔNG được quay lại dùng sự hiện diện của "⚠️" trong text làm proxy —
+# đúng lỗi arch-review 2026-09-29 bắt được (PARTIAL verified_n>=1 rơi vào nhánh ✅, "⚠️" in text
+# luôn False nên bị suppress sai, giống hệt 0/N).
+check('price-verify suppress dùng bất biến "verified_n < len(buy_sell_orders)", KHÔNG dùng "⚠️" in text',
+      'verified_n < len(buy_sell_orders)' in _sender_src
+      and 'if price_verify_note and "⚠️" in price_verify_note' not in _sender_src)
+
+# T13f (source-pin): DCF/DD disclaimer footer + đoạn giải thích cơ chế pt_merged/jit_merged
+# không còn được IN ra report (nội dung vẫn có thể còn trong comment giải thích — chỉ pin là
+# KHÔNG có lệnh lines.append() nào phát các đoạn này nữa).
+check("DCF_DISCLAIMER/DD_DISCLAIMER không còn được lines.append() vào report",
+      "lines.append(f\"ℹ️ _{DCF_DISCLAIMER}_\")" not in _sender_src
+      and "lines.append(f\"ℹ️ _{DD_DISCLAIMER}_\")" not in _sender_src)
+check('Đoạn giải thích "LỆNH THẬT, đã gộp vào N lệnh ở trên" (cơ chế pt_merged/jit_merged) '
+      "không còn bị lines.append() — chỉ còn trong COMMENT giải thích lý do bỏ (không render)",
+      'lines.append(f"   ✅ Lệnh BÁN PARK {_which} là LỆNH THẬT, đã gộp' not in _sender_src)
+
+# T13f2/f3/f4 (round 2→3, arch-review): escape hatch/BLOCKED_*/TRIM đều phải THẬT SỰ hiện cảnh
+# báo, không chỉ "có in dòng". Round 2 dùng fixture TAY (475 ký tự, 1 dấu ⚠️) — round 3 bắt bản
+# vá thứ nhất (cắt từ vị trí ⚠️ ĐẦU TIÊN) vẫn lỡ dấu ⚠️ THỨ HAI vì note thật có 2 dấu cách nhau
+# 333 ký tự. Dùng NGUYÊN VĂN note thật từ artifact sống (không tự tay giản lược — fixture tay đã
+# 2 lần lệch khỏi hình dạng thật) để tránh lệch tiếp: đọc thẳng park_trim_proposal.notes[0] của
+# plan_ZaloPay_2026-09-29.json (700 ký tự, ⚠️ tại index 161 và 494).
+_REAL_DIV_NOTE_PATH = os.path.join(REAL_PLANS, "plan_ZaloPay_2026-09-29.json")
+with open(_REAL_DIV_NOTE_PATH, encoding="utf-8") as _f:
+    _DIV_NOTE = json.load(_f)["park_trim_proposal"]["notes"][0]
+assert _DIV_NOTE.count("⚠️") >= 2, (
+    f"artifact {_REAL_DIV_NOTE_PATH} không còn mang note 2-cảnh-báo như lúc viết test này — "
+    "cập nhật lại nguồn note thật thay vì quay về fixture tay (đã lệch thật 2 lần).")
+
+p13f2 = copy.deepcopy(SX)
+p13f2["park_trim_proposal"]["decision"] = "NO_TRIM"
+p13f2["park_trim_proposal"]["notes"] = [_DIV_NOTE]
+out_13f2 = run_sender(p13f2, "SpaceX")
+check("NO_TRIM + note cổ tức thật (700 ký tự, 2 dấu ⚠️) → dòng L1 in ĐỦ CẢ HAI cảnh báo",
+      "L1 trim PARK: NO_TRIM" in out_13f2
+      and "CẤU HÌNH CÓ THỂ ĐÃ CŨ" in out_13f2 and "QUÁ HẠN" in out_13f2)
+
+p13f3 = copy.deepcopy(SX)
+p13f3["park_trim_proposal"]["decision"] = "BLOCKED_ALL_NAMES"
+p13f3["park_trim_proposal"]["notes"] = [_DIV_NOTE]
+out_13f3 = run_sender(p13f3, "SpaceX")
+check("BLOCKED_ALL_NAMES + note cổ tức thật → nhánh BLOCKED_* L1 cũng hiện ĐỦ CẢ HAI cảnh báo "
+      "(không chỉ nhánh quiescent escape-hatch)",
+      "CẤU HÌNH CÓ THỂ ĐÃ CŨ" in out_13f3 and "QUÁ HẠN" in out_13f3)
+
+p13f4 = copy.deepcopy(SX)
+p13f4["park_trim_proposal"]["notes"] = [_DIV_NOTE]  # decision=TRIM giữ nguyên từ fixture 08-07
+out_13f4 = run_sender(p13f4, "SpaceX")
+check("TRIM (có lệnh BÁN thật) + note cổ tức thật → nhánh TRIM cũng hiện ĐỦ CẢ HAI cảnh báo "
+      "(nhánh 'nóng tiền' nhất — đang render lệnh bán thật)",
+      "CẤU HÌNH CÓ THỂ ĐÃ CŨ" in out_13f4 and "QUÁ HẠN" in out_13f4)
+
+# T13g (round 2, arch-review): escape hatch L2 phải THẬT SỰ hiện cảnh báo khi decision=NO_JIT_
+# NEEDED. Note lấy nguyên hình dạng thật compute_jit_unpark.py:565-572 (cảnh báo egg_relied_vnd
+# "CẦN RÚT Trứng vàng"). Ghi chú: note THẬT này luôn bắt đầu bằng ⚠️ (index 0) nên bản thân nó
+# KHÔNG phải ca minh hoạ bug truncation (⚠️ sống sót [:180] dù cắt ở đâu) — đó là T13f2 (note L1
+# cổ tức, ⚠️ nằm SÂU trong chuỗi). T13g pin RIÊNG việc escape hatch L2 hoạt động đúng (trước đây
+# comment round-1 khẳng định SAI là notes trên đường này "cố định, không có ⚠️" — xem :890-892 cũ).
+_EGG_NOTE = ("⚠️ BUY-SSI-LAG-01 (SSI): tới 500cp trong lệnh này có thể cần Trứng vàng (≤50.0tr, "
+             "cận trên — có thể ít hơn nếu bán PARK bù được một phần) — CẦN RÚT Trứng vàng trong "
+             "giờ hành chính TRƯỚC khi đặt lệnh, hoặc để hệ thống tự bán PARK bù nếu đủ.")
+assert "⚠️" in _EGG_NOTE and "CẦN RÚT" in _EGG_NOTE
+p13g = copy.deepcopy(SX)
+p13g["jit_unpark_proposal"]["decision"] = "NO_JIT_NEEDED"
+p13g["jit_unpark_proposal"]["notes"] = [_EGG_NOTE]
+out_13g = run_sender(p13g, "SpaceX")
+check("NO_JIT_NEEDED + note egg ⚠️ CẦN RÚT → dòng L2 vẫn in (escape hatch hoạt động đúng)",
+      "L2 JIT unpark: NO_JIT_NEEDED" in out_13g and "CẦN RÚT" in out_13g)
+
+# T13h: NO_JIT_NEEDED + notes benign (không ⚠️) → vẫn suppress đúng (không phá T13d/đối xứng).
+p13h = copy.deepcopy(SX)
+p13h["jit_unpark_proposal"]["decision"] = "NO_JIT_NEEDED"
+p13h["jit_unpark_proposal"]["notes"] = ["mọi lệnh mua BAL/LAG đều đủ tiền mặt ⇒ không bán PARK"]
+out_13h = run_sender(p13h, "SpaceX")
+check("NO_JIT_NEEDED + notes benign → KHÔNG in dòng L2 (escape hatch không tự kích khi không cần)",
+      "L2 JIT unpark: NO_JIT_NEEDED" not in out_13h)
+
+# T13i (round 4, arch-review): source-pin cho 3 chỗ L2 (:899 TRIM, :904 BLOCKED_*, :922 escape-
+# hatch) — T13f2/f3/f4 chỉ tiêm note thật vào park_trim_proposal (L1), T13g/h dùng fixture ngắn
+# không đủ dài để lộ truncation ⇒ revert riêng lẻ 1 trong 3 chỗ L2 về str(n)[:N] KHÔNG bị 37 case
+# hành vi phía trên bắt được (đã tự tay mutation-test xác nhận: revert từng chỗ vẫn 40/0). Dùng
+# lại đúng idiom _sender_src đã có ở T11 (:334 đọc 1 lần, :439/:446/:450 source-pin) thay vì thêm
+# fixture L2 dài — rẻ hơn và trực tiếp bắt đúng bất biến "còn dùng _note_text() hay không".
+print("\n[T13i] Source-pin: cả 6 chỗ render notes[] phải dùng _note_text(), không rơi lại str(n)[:N]")
+# Đếm trên MÃ THẬT, bỏ qua comment (dòng có # tự nhắc tên hàm trong lời giải thích cũng khớp
+# "_note_text(" — vd :862/:916 — nếu đếm cả comment thì đổi 1 câu comment cũng làm test đỏ oan).
+_sender_code_only = "\n".join(
+    ln.split("#", 1)[0] for ln in _sender_src.splitlines())
+_note_text_calls = _sender_code_only.count("_note_text(")
+check(f"_note_text được ĐỊNH NGHĨA 1 lần + GỌI đúng 6 lần ở 6 chỗ render notes[] trong MÃ THẬT "
+      f"(đếm được {_note_text_calls}, kỳ vọng 7 = 1 def + 6 call) — revert BẤT KỲ 1 trong 6 chỗ "
+      f"về str(n)[:N] thô sẽ làm số này tụt xuống 6, ĐỎ ngay kể cả không có fixture L2 dài",
+      _note_text_calls == 7)
+check("_note_text() giữ dấu '…' khi cắt note KHÔNG mang ⚠️ (round 3 yêu cầu, chưa ai pin trước đó)",
+      's[:budget] + "…"' in _sender_src)
+
 print(f"\n{'=' * 72}\nKẾT QUẢ: {len(PASS)} PASS / {len(FAIL)} FAIL")
 for f in FAIL:
     print(f"  ✗ {f}")

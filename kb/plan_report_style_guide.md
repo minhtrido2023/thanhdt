@@ -61,20 +61,36 @@ khối riêng khác trong cùng report.
 - Sửa: gộp thành 1 khối theo VAI TRÒ (vd "mã tài trợ MUA" vs "mã trim thuần"), mỗi mã xuất hiện
   đúng 1 lần trong thân report; ai cần đối chiếu qty/giá riêng lẻ thì xem phụ lục (mục 5).
 
-## 4. Nội dung compliance/provenance bắt buộc — GIỮ, RÚT GỌN khi không có bất thường
+## 4. Nội dung compliance/provenance bắt buộc — GIỮ khi có bất thường, BỎ HẲN khi thuần xác nhận
 
-Các khối bắt buộc theo quy chuẩn khác (state-verify §28, price-verify, DCF/DD disclaimer §6b,
-funding note "Tiền đâu ra" 💧, cảnh báo BLOCKED_*/mismatch/margin/Trứng vàng/CAPIT lệch) **KHÔNG
-được xoá nội dung**, nhưng:
-- Khi mọi thứ khớp/bình thường → rút thành **1 dòng/icon** (vd `"✅ state khớp · giá khớp"`), KHÔNG
-  phải câu văn đầy đủ lặp lại mỗi ngày.
-- Khi có bất thường thật (⚠️/🛑, mismatch, overdue, vượt ngưỡng) → **mở rộng đầy đủ thành câu văn**
-  như hiện tại — đây là lúc thông tin chi tiết thật sự cần thiết.
-- Đây là RÚT GỌN HIỂN THỊ, không phải giảm coverage: logic verify bên dưới không đổi, chỉ đổi cách
-  render kết quả PASS vs FAIL.
-- **KHÔNG đề xuất xoá** (danh sách chốt từ audit, đều tồn tại vì sự cố thật): funding note "Tiền
-  đâu ra", cảnh báo BLOCKED_*, mismatch state/price, cảnh báo margin, cảnh báo Trứng vàng cần rút,
-  cảnh báo Σ CAPIT lệch >10%.
+**Sửa 2026-09-29 21:48 ICT** (user, lần phàn nàn thứ 2): "Không đưa những câu vô nghĩa không cần
+thiết vào report cho xong trách nhiệm. Cái nào cần giải thích mới viết ra, không phải chép những
+câu ngày này qua ngày khác." — chỉ đạo này SIẾT hơn bản 09-28→29 dưới đây: kể cả dạng rút gọn 1
+dòng/icon cũng là "chép mỗi ngày" nếu ngày nào cũng in. Từ nay:
+- Khối THUẦN XÁC NHẬN — không có gì để người duyệt quyết định khác đi (state khớp DT5G, giá đã
+  xác minh ĐỦ 100% lệnh) → **BỎ HẲN, không giữ cả icon**. "Không thấy gì" = đã qua, không cần nói.
+- Khối có bất thường thật (⚠️/🛑: state/price KHÔNG khớp hoặc CHƯA xác minh đủ, mismatch, overdue,
+  vượt ngưỡng, BLOCKED_*, funding note "Tiền đâu ra" 💧, margin, Trứng vàng, CAPIT lệch >10%) →
+  **GIỮ NGUYÊN, mở rộng đầy đủ** như cũ — đây vẫn là chỗ hiếm nhất, chính xác nhất.
+- Logic verify bên dưới KHÔNG đổi — chỉ đổi NGƯỠNG hiển thị (từ "luôn in, chỉ đổi độ dài" sang
+  "chỉ in khi lệch khỏi bình thường"). Ranh giới bắt buộc: verify PHẢI dựa trên **bất biến thật**
+  (vd `verified_n < tổng`), KHÔNG được dùng sự hiện diện của emoji trong chuỗi văn bản làm proxy —
+  arch-review 2026-09-29 bắt đúng lỗi này ở price-verify (ternary chỉ tách theo `if verified_n`,
+  không có nhánh ⚠️ cho PARTIAL, nên `"⚠️" in text` bỏ sót ca 1/9 verified).
+- Quiescent decision string (vd `NO_TRIM`/`SKIP_STATE` của L1, `NO_JIT_NEEDED`/`NO_TRIGGER` của
+  L2) cũng được BỎ HẲN theo nguyên tắc trên — NHƯNG chỉ khi `notes[]` đi kèm không chứa cảnh báo
+  thật (`⚠️` ở bất kỳ đâu trong text, không chỉ ký tự đầu) — bỏ theo DECISION không được nuốt luôn
+  WARNING gắn kèm. Và KHÔNG được gộp một quiescent-thật với một "bế tắc thật" cùng nhóm chỉ vì tên
+  gần giống — vd `NO_TRIM_STRUCTURE` (PARK vượt trần nhưng không mã nào trim được) là cùng bản
+  chất với `BLOCKED_ALL_NAMES` (vẫn in đậm), KHÔNG phải ngày yên ổn.
+- DCF/DD disclaimer §6b: văn bản phương pháp luận cố định, không đổi theo quyết định hôm nay →
+  BỎ khỏi report hàng ngày, giữ nguyên trong module nguồn (`dcf_valuation.DCF_DISCLAIMER`,
+  `due_diligence.DD_DISCLAIMER`) cho ai cần tra lại phương pháp — không phải nội dung compliance
+  bắt buộc theo nghĩa "phải xuất hiện mỗi lần", vì bản thân giá trị DCF/DD từng dòng (đổi theo
+  ticker/ngày) vẫn hiển thị đầy đủ, chỉ bỏ đoạn giải thích PHƯƠNG PHÁP.
+- **KHÔNG đề xuất xoá** (danh sách chốt từ audit, đều tồn tại vì sự cố thật, LUÔN hiện khi có nội
+  dung): funding note "Tiền đâu ra", cảnh báo BLOCKED_*, mismatch state/price, cảnh báo margin,
+  cảnh báo Trứng vàng cần rút, cảnh báo Σ CAPIT lệch >10%.
 
 ## 5. Không đẩy nguyên khối dữ liệu kỹ thuật vào kênh duyệt chính
 
@@ -132,8 +148,9 @@ xem qua Discord 2026-09-29 (user đã duyệt hướng này).
   (dòng ~542) tự động không xuất hiện nữa cho tới khi có entry mới. KHÔNG cần sửa code cho việc
   này — chỉ cần biết để không tưởng nhầm đây là 1 hạng mục PHẦN B.
 - `state_verify_note` (audit §2b) — đã kiểm tra lại: không liên quan tới thay đổi DGC ở trên, mô
-  tả trong audit gốc vẫn đúng (in mỗi ngày regime không đổi) → áp dụng mục 4 (rút gọn khi PASS)
-  như audit đề xuất, không có mâu thuẫn cần điều chỉnh.
+  tả trong audit gốc vẫn đúng (in mỗi ngày regime không đổi). **CẬP NHẬT 2026-09-29 21:48+ ICT**:
+  mục 4 đã SIẾT lại (xem đầu §4) — không còn "rút gọn khi PASS" như audit gốc đề xuất, mà BỎ HẲN
+  dòng khi PASS sạch (không ⚠️); giữ nguyên khi có bất thường. Đã implement ở `send_plan_report.sh`.
 - **Mục 3 (Case B — không liệt kê 2 lần) đã được giải quyết TRƯỚC audit này, bởi `d23aef0e`
   (2026-08-15, "avoid duplicate merged PARK orders")**: `_already_merged()` +
   `pt_merged`/`jit_merged` (`send_plan_report.sh:549-554`) đã tắt hẳn khối "MỤC RIÊNG 1/2" khi
@@ -167,3 +184,29 @@ xem qua Discord 2026-09-29 (user đã duyệt hướng này).
    fail NGAY CẢ dưới TZ=Asia/Ho_Chi_Minh ở baseline — pre-existing, không phải do PHẦN B. Việc
    sửa cần điều tra riêng (khả năng: fixture ngày cố định lệch theo "hôm nay" tính theo TZ) —
    không sửa trong job này vì ngoài phạm vi style guide.
+   **CẬP NHẬT 2026-09-29 tối (worktree `wt-1521183164364754974`, commit `163714bf`+`4af9a438`)**:
+   phát hiện này KHÔNG tái lập được ở nhánh này — toàn bộ suite (gồm T13 mới, số case xem lệnh
+   chạy thật bên dưới, đừng chép số cứng) PASS 0 FAIL dưới CẢ `env -u TZ` VÀ `TZ=Pacific/Kiritimati`
+   (T9). Không rõ liệu bản `wt-planreportstyle-2909` đã tự vá song song hay 2 worktree lệch nhau
+   vì lý do khác — không điều tra thêm (ngoài phạm vi round này), chỉ ghi để người đọc sau không
+   hoảng vì 2 con số khác nhau trong cùng file.
+
+## PHẦN C — cắt boilerplate 2026-09-29 21:48+ ICT (worktree `wt-1521183164364754974`, user phàn
+   nàn lần 2, siết §4 — xem đầu file)
+
+- `bin/send_plan_report.sh` (`163714bf` → `4af9a438`, 2 vòng arch-review): bỏ hẳn `state_verify_note`/
+  `price_verify_note` khi PASS sạch; bỏ đoạn giải thích cơ chế pt_merged/jit_merged; bỏ footer
+  DCF/DD disclaimer; L1/L2 catch-all bỏ dòng khi decision quiescent (`NO_TRIM`/`SKIP_STATE`/
+  `NO_JIT_NEEDED`/`NO_TRIGGER`) TRỪ KHI `notes[]` mang cảnh báo ⚠️ thật.
+- Round 1 arch-review bắt lỗi fail-open câm ở price-verify (suppress theo `"⚠️" in text` thay vì
+  bất biến `verified_n < N`) — đã vá. Round 2 bắt escape-hatch L1/L2 chỉ render `notes[0][:180]`/
+  `[:200]` nên cảnh báo dài có thể bị cắt — vá lần 1 (`3fb42b98`) cắt từ VỊ TRÍ `⚠️` đầu tiên thay
+  vì từ đầu chuỗi, nhưng round 3 phát hiện note thật có thể mang **2 dấu `⚠️`** cách xa nhau (ca
+  ZaloPay 2026-09-29: 700 ký tự, `⚠️` tại index 161 và 494) nên vẫn lỡ dấu thứ hai. Vá lần 2:
+  `_note_text()` (đổi tên từ `_warn_excerpt`) KHÔNG cắt note mang `⚠️` — hiện toàn văn, áp dụng
+  ĐỒNG NHẤT ở cả 6 chỗ render notes trong file (trước đó chỉ 2/6 chỗ được vá). Trạng thái LUÔN
+  lệch theo thời gian — xem commit log/selfcheck để biết vòng review hiện tại đã đóng chưa, đừng
+  tin số vòng ghi ở đây.
+- Selfcheck: `[T13]` mới trong `send_plan_report_park_jit_selfcheck.py`, pin bằng mutation thật
+  (không chỉ source-grep) — chạy `python3 bin/send_plan_report_park_jit_selfcheck.py` để xem số
+  hiện hành, đừng chép số cứng vào đây.
