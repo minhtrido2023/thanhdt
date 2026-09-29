@@ -449,6 +449,49 @@ check('Đoạn giải thích "LỆNH THẬT, đã gộp vào N lệnh ở trên"
       "không còn bị lines.append() — chỉ còn trong COMMENT giải thích lý do bỏ (không render)",
       'lines.append(f"   ✅ Lệnh BÁN PARK {_which} là LỆNH THẬT, đã gộp' not in _sender_src)
 
+# T13f2 (round 2, arch-review): escape hatch L1 phải THẬT SỰ hiện cảnh báo, không chỉ "có in
+# dòng" — note thật lấy hình dạng compute_park_trim.py:538-546 (cổ tức excluded, ⚠️ QUÁ HẠN nằm
+# SÂU trong chuỗi, không ở đầu) — nếu ai revert về notes[0][:180] thì 'QUÁ HẠN' (index >180) mất.
+_DIV_NOTE = ("ℹ️ cổ tức excluded — DGC cấu hình 80.0tr; DNSE hiện báo TỔNG 1.9tr cổ tức chưa về "
+             "TOÀN TÀI KHOẢN (không tách theo mã) ⇒ pool tạm loại min(80.0tr; 1.9tr) = 1.9tr — "
+             "tới khi DNSE xác nhận hết (Option B, cùng cơ chế compute_active_nav.py). CHÉP dòng "
+             "này vào notes plan. ⚠️ QUÁ HẠN dự kiến: DGC — DNSE vẫn báo receivable dù đã qua "
+             "ngày dự kiến về, kiểm tiền đã về thật chưa trước khi duyệt lệnh bán.")
+assert "QUÁ HẠN" in _DIV_NOTE and 180 <= _DIV_NOTE.index("⚠️") <= _DIV_NOTE.index("QUÁ HẠN"), \
+    "fixture phải tái tạo đúng hình dạng thật: '⚠️ QUÁ HẠN' nằm SÂU trong chuỗi, sau ký tự 180 " \
+    "(để notes[0][:180] — bug round-1 — thật sự cắt mất nó, chứng minh fixture có ý nghĩa)"
+p13f2 = copy.deepcopy(SX)
+p13f2["park_trim_proposal"]["decision"] = "NO_TRIM"
+p13f2["park_trim_proposal"]["notes"] = [_DIV_NOTE]
+out_13f2 = run_sender(p13f2, "SpaceX")
+check("NO_TRIM + note cổ tức QUÁ HẠN (475-ký-tự thật) → dòng L1 in ĐỦ, không cắt mất 'QUÁ HẠN'",
+      "L1 trim PARK: NO_TRIM" in out_13f2 and "QUÁ HẠN" in out_13f2)
+
+# T13g (round 2, arch-review): escape hatch L2 phải THẬT SỰ hiện cảnh báo khi decision=NO_JIT_
+# NEEDED. Note lấy nguyên hình dạng thật compute_jit_unpark.py:565-572 (cảnh báo egg_relied_vnd
+# "CẦN RÚT Trứng vàng"). Ghi chú: note THẬT này luôn bắt đầu bằng ⚠️ (index 0) nên bản thân nó
+# KHÔNG phải ca minh hoạ bug truncation (⚠️ sống sót [:180] dù cắt ở đâu) — đó là T13f2 (note L1
+# cổ tức, ⚠️ nằm SÂU trong chuỗi). T13g pin RIÊNG việc escape hatch L2 hoạt động đúng (trước đây
+# comment round-1 khẳng định SAI là notes trên đường này "cố định, không có ⚠️" — xem :890-892 cũ).
+_EGG_NOTE = ("⚠️ BUY-SSI-LAG-01 (SSI): tới 500cp trong lệnh này có thể cần Trứng vàng (≤50.0tr, "
+             "cận trên — có thể ít hơn nếu bán PARK bù được một phần) — CẦN RÚT Trứng vàng trong "
+             "giờ hành chính TRƯỚC khi đặt lệnh, hoặc để hệ thống tự bán PARK bù nếu đủ.")
+assert "⚠️" in _EGG_NOTE and "CẦN RÚT" in _EGG_NOTE
+p13g = copy.deepcopy(SX)
+p13g["jit_unpark_proposal"]["decision"] = "NO_JIT_NEEDED"
+p13g["jit_unpark_proposal"]["notes"] = [_EGG_NOTE]
+out_13g = run_sender(p13g, "SpaceX")
+check("NO_JIT_NEEDED + note egg ⚠️ CẦN RÚT → dòng L2 vẫn in (escape hatch hoạt động đúng)",
+      "L2 JIT unpark: NO_JIT_NEEDED" in out_13g and "CẦN RÚT" in out_13g)
+
+# T13h: NO_JIT_NEEDED + notes benign (không ⚠️) → vẫn suppress đúng (không phá T13d/đối xứng).
+p13h = copy.deepcopy(SX)
+p13h["jit_unpark_proposal"]["decision"] = "NO_JIT_NEEDED"
+p13h["jit_unpark_proposal"]["notes"] = ["mọi lệnh mua BAL/LAG đều đủ tiền mặt ⇒ không bán PARK"]
+out_13h = run_sender(p13h, "SpaceX")
+check("NO_JIT_NEEDED + notes benign → KHÔNG in dòng L2 (escape hatch không tự kích khi không cần)",
+      "L2 JIT unpark: NO_JIT_NEEDED" not in out_13h)
+
 print(f"\n{'=' * 72}\nKẾT QUẢ: {len(PASS)} PASS / {len(FAIL)} FAIL")
 for f in FAIL:
     print(f"  ✗ {f}")

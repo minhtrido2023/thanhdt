@@ -525,6 +525,17 @@ def _num(x):
 def _tr(v):
     return f"{v/1e6:,.1f}tr"
 
+def _warn_excerpt(note, budget=300):
+    """Cắt 1 note dài về độ dài hiển thị được, ƯU TIÊN giữ phần cảnh báo ⚠️ nếu có — cắt từ VỊ TRÍ
+    ⚠️ thay vì từ đầu chuỗi. arch-review 2026-09-29 round 2: note thật (compute_park_trim.py:538-
+    546) có ⚠️ nằm SÂU (index ~266/475 ký tự) vì được NỐI VÀO sau đoạn text khác — cắt [:N] từ đầu
+    luôn mất cảnh báo dù N=180 hay N=200."""
+    s = str(note)
+    i = s.find("⚠️")
+    if i > 0:
+        s = s[i:]
+    return s[:budget]
+
 def _o_val(o):
     """VND của 1 lệnh đề xuất. plan ZaloPay KHÔNG ghi `value_vnd` trong park_trim/jit orders
     (SpaceX có) ⇒ fallback qty × ref_price, cùng chuỗi fallback renderer dùng cho orders[]."""
@@ -844,9 +855,16 @@ try:
         # Và dù NO_TRIM/SKIP_STATE, vẫn in nếu notes[] chứa ⚠️ thật (vd 'ENGINE CHƯA ĐỒNG BỘ'
         # compute_park_trim.py:422, hoặc cổ tức QUÁ HẠN :541) — suppress theo decision KHÔNG
         # được nuốt cảnh báo đi kèm.
+        # arch-review round 2 (2026-09-29): notes[0][:180] cắt mất cảnh báo thật (ca 'cổ tức
+        # QUÁ HẠN' dài 475 ký tự, ⚠️ ở vị trí 269 > 180). Khi có note mang ⚠️, ưu tiên hiện ĐÚNG
+        # note đó (tối đa 2, cắt bằng _warn_excerpt để KHÔNG mất phần ⚠️ nếu nó nằm sâu trong
+        # chuỗi — [:200] từ đầu chuỗi vẫn cắt mất ca thật, xem docstring _warn_excerpt);
+        # không có note nào mang ⚠️ (ca quyết định lạ/mới, không phải cảnh báo) thì giữ hành vi cũ.
+        _pt_notes = park_trim.get("notes") or []
+        _pt_warn = [n for n in _pt_notes if "⚠️" in str(n)]
+        _pt_show = _pt_warn or _pt_notes[:1]
         lines.append(f"🅿️ L1 trim PARK: {pt_dec}"
-                     + (f" — {str((park_trim.get('notes') or [''])[0])[:180]}"
-                        if park_trim.get("notes") else ""))
+                     + (f" — {'; '.join(_warn_excerpt(n) for n in _pt_show[:2])}" if _pt_show else ""))
 except Exception as _e:      # fail-open: một khối báo cáo không được chặn plan
     lines.append(f"⚠️ Không render được khối L1 park_trim ({type(_e).__name__}: {_e}) — "
                  f"đọc thẳng `park_trim_proposal` trong file plan trước khi duyệt.")
@@ -887,12 +905,19 @@ try:
                       or any("⚠️" in str(_n) for _n in (jit_prop.get("notes") or []))):
         # NO_JIT_NEEDED/NO_TRIGGER = "L2 không chạy vì không có lệnh mua cần tài trợ", đúng
         # thiết kế mọi ngày HOLD/không-mua — bỏ dòng lặp lại vô nghĩa (user 2026-09-29, ca
-        # thật: SpaceX 2026-09-30 0 lệnh vẫn in "L2 JIT unpark: NO_TRIGGER" mỗi ngày). Xác nhận
-        # compute_jit_unpark.py: notes cố định, không có ⚠️ trên 2 đường này — check ⚠️ vẫn giữ
-        # làm phòng thủ đối xứng với L1 (arch-review 2026-09-29).
+        # thật: SpaceX 2026-09-30 0 lệnh vẫn in "L2 JIT unpark: NO_TRIGGER" mỗi ngày).
+        # arch-review round 2 (2026-09-29): comment bản trước SAI — compute_jit_unpark.py:565-572
+        # append ⚠️ 'CẦN RÚT Trứng vàng' NGOÀI `if triggered:` (:481-482) nên vẫn xuất hiện dù
+        # decision=NO_JIT_NEEDED (egg đẩy cash qua JIT_TRIGGER_FRAC, any_trigger vẫn False, xem
+        # comment :527-537 của chính file đó). Check ⚠️ ở đây KHÔNG phải phòng thủ lý thuyết —
+        # đây là đường THẬT, 2 account live đều đang giữ Trứng vàng. Cùng lý do notes[0][:180]
+        # có thể cắt mất cảnh báo dài — ưu tiên hiện note mang ⚠️ trước, cắt bằng _warn_excerpt
+        # (giữ phần ⚠️ dù nó nằm sâu trong chuỗi) thay vì [:N] thô từ đầu.
+        _jt_notes = jit_prop.get("notes") or []
+        _jt_warn = [n for n in _jt_notes if "⚠️" in str(n)]
+        _jt_show = _jt_warn or _jt_notes[:1]
         lines.append(f"💧 L2 JIT unpark: {jit_dec}"
-                     + (f" — {str((jit_prop.get('notes') or [''])[0])[:180]}"
-                        if jit_prop.get("notes") else ""))
+                     + (f" — {'; '.join(_warn_excerpt(n) for n in _jt_show[:2])}" if _jt_show else ""))
 except Exception as _e:      # fail-open
     lines.append(f"⚠️ Không render được khối L2 jit_unpark ({type(_e).__name__}: {_e}) — "
                  f"đọc thẳng `jit_unpark_proposal` trong file plan trước khi duyệt.")

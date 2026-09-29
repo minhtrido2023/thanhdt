@@ -148,8 +148,9 @@ xem qua Discord 2026-09-29 (user đã duyệt hướng này).
   (dòng ~542) tự động không xuất hiện nữa cho tới khi có entry mới. KHÔNG cần sửa code cho việc
   này — chỉ cần biết để không tưởng nhầm đây là 1 hạng mục PHẦN B.
 - `state_verify_note` (audit §2b) — đã kiểm tra lại: không liên quan tới thay đổi DGC ở trên, mô
-  tả trong audit gốc vẫn đúng (in mỗi ngày regime không đổi) → áp dụng mục 4 (rút gọn khi PASS)
-  như audit đề xuất, không có mâu thuẫn cần điều chỉnh.
+  tả trong audit gốc vẫn đúng (in mỗi ngày regime không đổi). **CẬP NHẬT 2026-09-29 21:48+ ICT**:
+  mục 4 đã SIẾT lại (xem đầu §4) — không còn "rút gọn khi PASS" như audit gốc đề xuất, mà BỎ HẲN
+  dòng khi PASS sạch (không ⚠️); giữ nguyên khi có bất thường. Đã implement ở `send_plan_report.sh`.
 - **Mục 3 (Case B — không liệt kê 2 lần) đã được giải quyết TRƯỚC audit này, bởi `d23aef0e`
   (2026-08-15, "avoid duplicate merged PARK orders")**: `_already_merged()` +
   `pt_merged`/`jit_merged` (`send_plan_report.sh:549-554`) đã tắt hẳn khối "MỤC RIÊNG 1/2" khi
@@ -183,3 +184,24 @@ xem qua Discord 2026-09-29 (user đã duyệt hướng này).
    fail NGAY CẢ dưới TZ=Asia/Ho_Chi_Minh ở baseline — pre-existing, không phải do PHẦN B. Việc
    sửa cần điều tra riêng (khả năng: fixture ngày cố định lệch theo "hôm nay" tính theo TZ) —
    không sửa trong job này vì ngoài phạm vi style guide.
+   **CẬP NHẬT 2026-09-29 tối (worktree `wt-1521183164364754974`, commit `163714bf`+`4af9a438`)**:
+   phát hiện này KHÔNG tái lập được ở nhánh này — toàn bộ suite (nay 35 case, gồm T13 mới) PASS
+   35/0 dưới CẢ `env -u TZ` VÀ `TZ=Pacific/Kiritimati` (T9). Không rõ liệu bản `wt-planreportstyle-
+   2909` đã tự vá song song hay 2 worktree lệch nhau vì lý do khác — không điều tra thêm (ngoài
+   phạm vi round này), chỉ ghi để người đọc sau không hoảng vì 2 con số khác nhau trong cùng file.
+
+## PHẦN C — cắt boilerplate 2026-09-29 21:48+ ICT (worktree `wt-1521183164364754974`, user phàn
+   nàn lần 2, siết §4 — xem đầu file)
+
+- `bin/send_plan_report.sh` (`163714bf` → `4af9a438`, 2 vòng arch-review): bỏ hẳn `state_verify_note`/
+  `price_verify_note` khi PASS sạch; bỏ đoạn giải thích cơ chế pt_merged/jit_merged; bỏ footer
+  DCF/DD disclaimer; L1/L2 catch-all bỏ dòng khi decision quiescent (`NO_TRIM`/`SKIP_STATE`/
+  `NO_JIT_NEEDED`/`NO_TRIGGER`) TRỪ KHI `notes[]` mang cảnh báo ⚠️ thật.
+- Round 1 arch-review bắt lỗi fail-open câm ở price-verify (suppress theo `"⚠️" in text` thay vì
+  bất biến `verified_n < N`) — đã vá. Round 2 đang mở: escape-hatch L1/L2 chỉ render `notes[0][:180]`
+  nên cảnh báo dài (vd cổ tức QUÁ HẠN, 475 ký tự) có thể bị cắt mất — CHƯA vá xong tại thời điểm
+  ghi dòng này, xem trạng thái mới nhất trong commit log/selfcheck thay vì tin dòng này (sẽ lệch
+  theo thời gian).
+- Selfcheck: `[T13]` mới trong `send_plan_report_park_jit_selfcheck.py`, pin bằng mutation thật
+  (không chỉ source-grep) — chạy `python3 bin/send_plan_report_park_jit_selfcheck.py` để xem số
+  hiện hành, đừng chép số cứng vào đây.
