@@ -242,8 +242,16 @@ def reconcile_lines(broker, plan_by_key, state_by_key):
                      "state nội bộ, không có fill ngoài kế hoạch.")
 
     if shortfalls:
-        lines.append("📉 **Broker xác nhận KHỚP THIẾU so với kế hoạch** — chưa đạt mục tiêu, "
-                     "KHÔNG được đọc là \"đã mua đủ\" (§27):")
+        _buy_short = any(s[1] == 'buy' for s in shortfalls)
+        _sell_short = any(s[1] == 'sell' for s in shortfalls)
+        if _buy_short and not _sell_short:
+            _caveat = 'KHÔNG được đọc là "đã mua đủ"'
+        elif _sell_short and not _buy_short:
+            _caveat = 'KHÔNG được đọc là "đã bán đủ"'
+        else:
+            _caveat = 'KHÔNG được đọc là "đã khớp đủ"'
+        lines.append(f"📉 **Broker xác nhận KHỚP THIẾU so với kế hoạch** — chưa đạt mục tiêu, "
+                     f"{_caveat} (§27):")
         for ticker, side, real, planned in sorted(shortfalls, key=lambda x: (x[2] / x[3]) if x[3] else 0):
             pct = 100.0 * real / planned if planned else 0
             lines.append(f"  • {ticker} ({'mua' if side == 'buy' else 'bán'}): chỉ khớp "
