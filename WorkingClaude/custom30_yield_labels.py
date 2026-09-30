@@ -22,6 +22,13 @@ batch này = 2 query (đo thật: leg giá ~77 MB/lần). Tương đương đã 
 Đọc con số này thế nào (research `dividend_yield_floor_20260818`): CONFIRMED chân H2 (đệm đuôi
 trái, ΔMDD60 +3,46pp) / **REFUTED chân H1 (KHÔNG có alpha lợi suất — BHAR60 t=0,67, median ÂM)**.
 ⇒ TUYỆT ĐỐI không đọc BELOW_FLOOR như tín hiệu mua.
+
+Cột `label_asof` (thêm 2026-09-30, job Taylor_20260930_043216, tiếp nối fix asof=hôm nay ở
+`custom30_history.py`): CHÍNH LÀ `asof` trong từng cặp `pairs` truyền vào `label_basket()`, xuất
+bản lại nguyên văn để người đọc CSV/bảng BQ biết nhãn của dòng đó được tính TẠI NGÀY NÀO — kỳ đã
+đóng thì bằng `rebal_date` (cố định), kỳ đang mở thì bằng ngày chạy script gần nhất (đổi mỗi lần
+chạy lại). `label_basket()` không tự sinh cột này — caller (`custom30_history.py`) lắp lại từ
+chính `pairs` nó đã truyền vào, không tính lại.
 """
 import bisect
 

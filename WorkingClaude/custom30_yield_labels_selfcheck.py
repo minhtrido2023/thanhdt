@@ -111,5 +111,38 @@ else:
     if not _ok_open:
         fails.append("D: feed cu ma ky mo KHONG ve NO_DATA (cong freshness khong con neo o hom nay)")
 
-print("\n" + ("SELFCHECK FAIL: " + "; ".join(fails) if fails else "SELFCHECK PASS (A+B+C+D)"))
+
+# --- E. `label_asof` — ky da dong bang rebal_date, ky mo bang ngay chay gan nhat --------------
+# Hoi quy cho tiep noi fix asof=hom nay (job Taylor_20260930_043216): `custom30_history.py` ghi
+# lai chinh gia tri asof da dung de goi label_basket() cho tung dong, khong tinh lai. Doc thang
+# tu CSV publish hien hanh — khong runpy custom30_history.py (build_pit toan bo 2014->nay qua
+# nang cho selfcheck; da verify bang tay o job nay: 2 lan chay lien tiep scratch2709b/c cho 8 cot
+# goc byte-identical, chi khac o cot label_asof moi them).
+_ORIG_COLS = ["rebal_date", "effective_from", "effective_to", "ticker", "liq_rank",
+              "rating_8l", "weight", "quarter", "yield_floor_note", "is_stable_payer"]
+if "label_asof" not in df.columns:
+    print("[E] FAIL — thieu cot label_asof trong CSV")
+    fails.append("E: thieu cot label_asof")
+else:
+    if list(df.columns) != _ORIG_COLS + ["label_asof"]:
+        print(f"[E] FAIL — schema lech: {list(df.columns)}")
+        fails.append("E: schema CSV khong dung 8 cot goc + label_asof")
+    _closed = df[df["rebal_date"] != rd]
+    _open = df[df["rebal_date"] == rd]
+    _ok_closed_asof = (_closed["label_asof"] == _closed["rebal_date"]).all()
+    # Ky vong dung cong thuc `_asof_cur = today if today > _cur_rd else _cur_rd` cua chinh
+    # custom30_history.py (quant-skeptic vong 1 bat: assert "!= rebal_date" bao gia tren ca
+    # chay tay dung ngay rebal, khi _asof_cur == _cur_rd la dung thiet ke, khong phai loi).
+    _exp_open_asof = str(max(_today, _cur_rd_d))
+    _open_vals = _open["label_asof"].unique()
+    _ok_open_asof = len(_open_vals) == 1 and _open_vals[0] == _exp_open_asof
+    print(f"[E] ky da dong: label_asof==rebal_date {'PASS' if _ok_closed_asof else 'FAIL'} "
+          f"({len(_closed)} dong) | ky mo: label_asof={_open_vals} (ky vong={_exp_open_asof}) "
+          f"{'PASS' if _ok_open_asof else 'FAIL'}")
+    if not _ok_closed_asof:
+        fails.append("E: co ky da dong ma label_asof != rebal_date (bi restate lich su)")
+    if not _ok_open_asof:
+        fails.append("E: ky mo co label_asof sai (khong khop max(hom nay, rebal_date))")
+
+print("\n" + ("SELFCHECK FAIL: " + "; ".join(fails) if fails else "SELFCHECK PASS (A+B+C+D+E)"))
 sys.exit(1 if fails else 0)

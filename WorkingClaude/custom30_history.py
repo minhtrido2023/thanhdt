@@ -117,6 +117,11 @@ _pair = [(tk, str(_asof_cur if c else rd))
 df["yield_floor_note"] = [_lab.get(k, ("NO_DATA", None))[0] for k in _pair]
 df["is_stable_payer"] = ["" if _lab.get(k, ("NO_DATA", None))[1] is None
                          else ("true" if _lab[k][1] else "false") for k in _pair]
+# `label_asof` (2026-09-30, tiep noi fix is_stable_payer asof=hom nay, job Taylor_20260930_043216):
+# ky da dong -> chinh rebal_date cua ky do (nhan co dinh, khong doi theo thoi gian chay lai).
+# ky dang mo -> _asof_cur (ngay danh gia lai, doi moi lan script chay). `_pair` da mang dung gia
+# tri nay cho tung dong (xem block tren) -> tai dung, khong tinh lai.
+df["label_asof"] = [p[1] for p in _pair]
 _cur = df[df["rebal_date"] == _cur_rd]
 print(f"  yield_floor (rebal {_cur_rd}, danh gia lai tai asof={_asof_cur}): " +
       ", ".join(f"{k}={v}" for k, v in _cur["yield_floor_note"].value_counts().items()))
@@ -126,7 +131,7 @@ print(f"  {len(df)} rows, {len(rebals)} rebals -> {CSV}")
 # `bq load --replace` ghi lai CA schema lan du lieu ⇒ 2 cot moi khong can ALTER TABLE.
 schema = ("rebal_date:DATE,effective_from:DATE,effective_to:DATE,ticker:STRING,"
           "liq_rank:INTEGER,rating_8l:INTEGER,weight:FLOAT,quarter:STRING,"
-          "yield_floor_note:STRING,is_stable_payer:BOOLEAN")
+          "yield_floor_note:STRING,is_stable_payer:BOOLEAN,label_asof:DATE")
 cmd = f'"{BQ}" load --replace --source_format=CSV --skip_leading_rows=1 {TABLE} "{CSV}" {schema}'
 print("  bq load ...")
 r = subprocess.run(cmd, capture_output=True, text=True, shell=True)
