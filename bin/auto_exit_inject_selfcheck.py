@@ -65,11 +65,18 @@ def write_journal(exec_dir, rows):
 
 
 def write_positions(exec_dir, asof, positions):
-    """positions: {ticker: (qty, marketPrice)}"""
+    """positions: {ticker: (qty, marketPrice)} — costPrice=marketPrice (lãi/lỗ 0, dùng cho test
+    không quan tâm stop-loss)."""
+    write_positions_cost(exec_dir, asof, {tk: (qty, mp, mp) for tk, (qty, mp) in positions.items()})
+
+
+def write_positions_cost(exec_dir, asof, positions):
+    """positions: {ticker: (qty, costPrice, marketPrice)} — dùng khi test cần tách giá vốn khỏi
+    giá thị trường (stop-loss)."""
     path = os.path.join(exec_dir, f"dnse_raw_{asof}.jsonl")
     rec = {"kind": "positions", "account_no": ACCOUNT_NO, "payload": {"positions": [
-        {"symbol": tk, "openQuantity": qty, "costPrice": mp, "marketPrice": mp}
-        for tk, (qty, mp) in positions.items()]}}
+        {"symbol": tk, "openQuantity": qty, "costPrice": cp, "marketPrice": mp}
+        for tk, (qty, cp, mp) in positions.items()]}}
     with open(path, "w", encoding="utf-8") as f:
         f.write(json.dumps(rec) + "\n")
 
@@ -310,6 +317,83 @@ def main():
         check("Test8: VNM (còn vị thế) có lệnh sell", "VNM" in capit_sells)
         check("Test8: SAB (hết vị thế) KHÔNG có lệnh sell khống", "SAB" not in capit_sells,
               f"got={capit_sells}")
+    finally:
+        shutil.rmtree(td, ignore_errors=True)
+
+    # ---------------- Test 9: BAL stop-loss -20% trên giá vốn (job Taylor_20260930_111053) —
+    # ĐỘC LẬP mốc T+45: entry chỉ 5 phiên trước signal_date (≥min_hold=2), chưa tới T+45 ----------
+    bal_recent_entry = entry_n_sessions_before(5)
+    td, exec_dir, plan_dir, ledger_path = setup_sandbox()
+    try:
+        write_journal(exec_dir, [
+            {"event": "FILL", "book": "BAL", "side": "buy", "ticker": "EXACT20", "ts": bal_recent_entry},
+            {"event": "FILL", "book": "BAL", "side": "buy", "ticker": "UNDER20", "ts": bal_recent_entry},
+            {"event": "FILL", "book": "BAL", "side": "buy", "ticker": "OVER20", "ts": bal_recent_entry},
+            {"event": "FILL", "book": "BAL", "side": "buy", "ticker": "EXITED", "ts": bal_recent_entry},
+        ])
+        write_positions_cost(exec_dir, signal_date_str, {
+            "EXACT20": (1000, 100000.0, 80000.0),   # pnl = -20.0% đúng boundary → trigger
+            "UNDER20": (1000, 100000.0, 80001.0),    # pnl = -19.999% → KHÔNG trigger
+            "OVER20": (1000, 100000.0, 75000.0),     # pnl = -25.0% → trigger
+            # "EXITED" không còn trong positions — đã thoát qua đường khác, KHÔNG phantom-sell
+        })
+        write_plan(plan_dir, ACCOUNT, plan_date)
+        orig = patch_all(exec_dir, plan_dir, ledger_path)
+        try:
+            rc = aei.process_account(ACCOUNT, plan_date, signal_date_str, dry_run=False)
+        finally:
+            restore_all(orig)
+        check("Test9: rc=0", rc == 0, f"rc={rc}")
+        plan = load_plan_raw(plan_dir, ACCOUNT, plan_date)
+        sells = {(o["ticker"], o["book"]) for o in plan["orders"] if o["side"] == "sell"}
+        check("Test9: EXACT20 (-20.0%) có lệnh sell (boundary đúng)", ("EXACT20", "BAL") in sells)
+        check("Test9: OVER20 (-25.0%) có lệnh sell", ("OVER20", "BAL") in sells)
+        check("Test9: UNDER20 (-19.999%) KHÔNG có lệnh sell", ("UNDER20", "BAL") not in sells)
+        check("Test9: EXITED (hết vị thế) KHÔNG bị bán khống (phantom-sell guard)",
+              ("EXITED", "BAL") not in sells)
+    finally:
+        shutil.rmtree(td, ignore_errors=True)
+
+    # ---------------- Test 10: BAL stop-loss dedup — không nhân đôi khi chạy lại ----------------
+    td, exec_dir, plan_dir, ledger_path = setup_sandbox()
+    try:
+        write_journal(exec_dir, [
+            {"event": "FILL", "book": "BAL", "side": "buy", "ticker": "EXACT20", "ts": bal_recent_entry},
+        ])
+        write_positions_cost(exec_dir, signal_date_str, {"EXACT20": (1000, 100000.0, 80000.0)})
+        write_plan(plan_dir, ACCOUNT, plan_date)
+        orig = patch_all(exec_dir, plan_dir, ledger_path)
+        try:
+            aei.process_account(ACCOUNT, plan_date, signal_date_str, dry_run=False)
+            aei.process_account(ACCOUNT, plan_date, signal_date_str, dry_run=False)
+        finally:
+            restore_all(orig)
+        plan = load_plan_raw(plan_dir, ACCOUNT, plan_date)
+        n_sell = sum(1 for o in plan["orders"] if o["ticker"] == "EXACT20" and o["side"] == "sell")
+        check("Test10: chạy 2 lần KHÔNG nhân đôi lệnh stop-loss", n_sell == 1, f"count={n_sell}")
+    finally:
+        shutil.rmtree(td, ignore_errors=True)
+
+    # ---------------- Test 11: BAL stop-loss min_hold=2 — lỗ -25% nhưng mới giữ 1 phiên KHÔNG
+    # trigger (pin chưa từng kiểm chứng stop-loss ở phiên 0/1, quant-skeptic 2026-09-30) ----------
+    bal_1session_entry = entry_n_sessions_before(1)
+    td, exec_dir, plan_dir, ledger_path = setup_sandbox()
+    try:
+        write_journal(exec_dir, [
+            {"event": "FILL", "book": "BAL", "side": "buy", "ticker": "TOOFRESH", "ts": bal_1session_entry},
+        ])
+        write_positions_cost(exec_dir, signal_date_str, {"TOOFRESH": (1000, 100000.0, 75000.0)})
+        write_plan(plan_dir, ACCOUNT, plan_date)
+        orig = patch_all(exec_dir, plan_dir, ledger_path)
+        try:
+            rc = aei.process_account(ACCOUNT, plan_date, signal_date_str, dry_run=False)
+        finally:
+            restore_all(orig)
+        check("Test11: rc=0", rc == 0, f"rc={rc}")
+        plan = load_plan_raw(plan_dir, ACCOUNT, plan_date)
+        sells = {(o["ticker"], o["book"]) for o in plan["orders"] if o["side"] == "sell"}
+        check("Test11: TOOFRESH (-25%, chỉ 1 phiên) KHÔNG bán (chưa đủ min_hold=2)",
+              ("TOOFRESH", "BAL") not in sells, f"got={sells}")
     finally:
         shutil.rmtree(td, ignore_errors=True)
 

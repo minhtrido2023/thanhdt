@@ -99,6 +99,30 @@ def run():
         check("broker_positions_with_cost: §12 lọc account — record 'WRONGACC'/'OTHERACC' không lẫn vào",
               pos is not None and pos["XYZ"]["qty"] == 300.0)
 
+    # 5b: FAIL-SAFE (quant-skeptic 2026-09-30) — 1 lô thiếu costPrice ⇒ avg_cost=None cho CẢ mã,
+    # KHÔNG âm thầm tính thiếu-trọng-số trên phần qty còn lại (tránh hiểu nhầm mức lỗ thấp hơn
+    # thực tế khi dùng làm input quyết định stop-loss).
+    with tempfile.TemporaryDirectory() as td:
+        raw = os.path.join(td, "dnse_raw_2099-01-02.jsonl")
+        with open(raw, "w", encoding="utf-8") as f:
+            f.write(_json.dumps({
+                "kind": "positions", "account_no": "TESTACC",
+                "payload": {"positions": [
+                    {"symbol": "ABC", "openQuantity": 100, "costPrice": 10.0, "marketPrice": 12.0},
+                    {"symbol": "ABC", "openQuantity": 200, "costPrice": None, "marketPrice": 12.0},
+                ]},
+            }) + "\n")
+        old_exec_dir = ps.EXEC_DIR
+        ps.EXEC_DIR = td
+        try:
+            pos = ps.broker_positions_with_cost("TESTACC", "2099-01-02")
+        finally:
+            ps.EXEC_DIR = old_exec_dir
+        check("broker_positions_with_cost: qty vẫn cộng dồn đủ dù thiếu costPrice ở 1 lô",
+              pos is not None and pos.get("ABC", {}).get("qty") == 300.0, str(pos))
+        check("broker_positions_with_cost: avg_cost=None khi CÓ lô thiếu costPrice (fail-safe)",
+              pos is not None and pos["ABC"]["avg_cost"] is None, str(pos.get("ABC")))
+
     # 6: build_output SpaceX/ZaloPay — chỉ chạy khi có NAV hôm nay (fail-soft weekend/holiday)
     if date_spacex:
         out_sx = ps.build_output("SpaceX", date_spacex)

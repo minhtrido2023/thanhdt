@@ -113,7 +113,10 @@ def broker_positions_with_cost(account_no, asof):
     """{ticker: {qty, marketPrice, avg_cost}} từ bản ghi `positions` CUỐI CÙNG trong
     dnse_raw_{asof}.jsonl — gộp nhiều loan-package cùng mã (qty cộng dồn, costPrice bình
     quân gia quyền theo qty, marketPrice giữ giá trị của lô cuối cùng khác-None gặp trong
-    file, cùng quy ước `verify_account_snapshot.broker_positions_from_raw`)."""
+    file, cùng quy ước `verify_account_snapshot.broker_positions_from_raw`).
+    FAIL-SAFE (quant-skeptic 2026-09-30): nếu BẤT KỲ lô nào của 1 mã thiếu `costPrice`,
+    `avg_cost` của mã đó trả về `None` thay vì âm thầm tính thiếu-trọng-số trên phần qty còn
+    lại — tránh làm SAI (thấp hơn thực tế) mức lỗ dùng cho quyết định stop-loss."""
     path = os.path.join(EXEC_DIR, f"dnse_raw_{asof}.jsonl")
     if not os.path.exists(path):
         return None
@@ -137,17 +140,24 @@ def broker_positions_with_cost(account_no, asof):
         if qty <= 0:
             continue
         tk = p.get("symbol")
-        row = out.setdefault(tk, {"qty": 0.0, "marketPrice": None, "_cost_wsum": 0.0})
+        row = out.setdefault(
+            tk, {"qty": 0.0, "marketPrice": None, "_cost_wsum": 0.0, "_cost_incomplete": False})
         row["qty"] += qty
         cp = p.get("costPrice")
         if cp is not None:
             row["_cost_wsum"] += qty * float(cp)
+        else:
+            row["_cost_incomplete"] = True
         mp = p.get("marketPrice")
         if mp is not None:
             row["marketPrice"] = mp
     for tk, row in out.items():
-        row["avg_cost"] = row["_cost_wsum"] / row["qty"] if row["qty"] else None
+        if row["_cost_incomplete"] or not row["qty"]:
+            row["avg_cost"] = None
+        else:
+            row["avg_cost"] = row["_cost_wsum"] / row["qty"]
         del row["_cost_wsum"]
+        del row["_cost_incomplete"]
     return out
 
 

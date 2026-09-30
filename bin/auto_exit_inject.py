@@ -112,6 +112,39 @@ def _lag_bal_candidates(asof_date, positions, book, entry_dates, threshold_fn):
     return out
 
 
+def _bal_stop_loss_candidates(asof_date, positions, entry_dates):
+    """[(ticker, qty, ref_price, pnl_pct)] cho vị thế BAL lỗ ≥20% trên giá vốn broker-native
+    (avg_cost/marketPrice — coding_guidelines §6, KHÔNG tự tính lại từ fill log), ĐÃ giữ ≥
+    `rules.BAL_STOP_LOSS_MIN_HOLD` phiên (mirror min_hold của pin). FAIL-SAFE: thiếu
+    avg_cost/marketPrice hợp lệ, entry_date lỗi, hoặc không tính được sessions_held ⇒ bỏ qua
+    ticker đó, in lý do."""
+    out = []
+    for tk, entry_str in entry_dates.items():
+        pos = positions.get(tk)
+        if not pos or pos.get("qty", 0) <= 0:
+            continue  # không còn nắm giữ — đã thoát hoặc chưa từng khớp, không phải fail-safe
+        avg_cost = pos.get("avg_cost")
+        market_price = pos.get("marketPrice")
+        if not avg_cost or avg_cost <= 0 or not market_price or market_price <= 0:
+            print(f"  [FAILSAFE] BAL {tk}: thiếu avg_cost/marketPrice hợp lệ — "
+                  f"KHÔNG tính stop-loss")
+            continue
+        try:
+            entry = dt.date.fromisoformat(entry_str)
+        except ValueError:
+            print(f"  [FAILSAFE] BAL {tk}: entry_date lỗi ({entry_str!r}) — bỏ qua stop-loss")
+            continue
+        sessions = count_trading_days(entry, asof_date)
+        if sessions is None:
+            print(f"  [FAILSAFE] BAL {tk}: không tính được sessions_held — bỏ qua stop-loss")
+            continue
+        pnl_pct = market_price / avg_cost - 1.0
+        if not rules.bal_stop_loss_hit(pnl_pct, sessions):
+            continue
+        out.append((tk, int(pos["qty"]), float(market_price), pnl_pct))
+    return out
+
+
 def _send_capit_reminder(ep, sessions_held):
     """Post reminder lên bus — GUARD test-mode (coding_guidelines §5b): selfcheck/pytest set
     `AUTO_EXIT_TEST_MODE=1` để KHÔNG ghi lên bus thật (sự cố thật 2026-09-30: selfcheck lần đầu
@@ -182,9 +215,10 @@ def process_account(account, plan_date, signal_date, dry_run):
         print(f"  [inject] SELL {tk} qty={qty} book=LAG ({note})")
 
     # ---- BAL: T+45 cố định (pt_v23_audit_2014.py:2008) ----
+    bal_entry_dates = _first_fill_dates(account, "BAL")
     for tk, qty, ref_price, sessions in _lag_bal_candidates(
             dt.date.fromisoformat(signal_date), positions, "BAL",
-            _first_fill_dates(account, "BAL"), rules.bal_should_exit):
+            bal_entry_dates, rules.bal_should_exit):
         existing = _already_has_sell(plan, tk, "BAL")
         if existing:
             print(f"  [skip] {tk}: đã có sell BAL trong plan (id={existing})")
@@ -194,6 +228,20 @@ def process_account(account, plan_date, signal_date, dry_run):
         plan["orders"].append(_make_order(f"SELL-{tk}-AUTOEXIT-BAL", tk, qty, ref_price,
                                           "BAL", "BAL_AUTO_EXIT", note))
         injected.append((tk, "BAL", sessions))
+        print(f"  [inject] SELL {tk} qty={qty} book=BAL ({note})")
+
+    # ---- BAL: stop-loss -20% trên giá vốn (pt_v23_audit_2014.py:2008), ĐỘC LẬP mốc phiên ----
+    for tk, qty, ref_price, pnl_pct in _bal_stop_loss_candidates(
+            dt.date.fromisoformat(signal_date), positions, bal_entry_dates):
+        existing = _already_has_sell(plan, tk, "BAL")
+        if existing:
+            print(f"  [skip] {tk}: đã có sell BAL trong plan (id={existing})")
+            continue
+        note = (f"AUTO-EXIT BAL STOP-LOSS: lỗ {pnl_pct:.1%} ≤ mốc {rules.BAL_STOP_LOSS_PCT:.0%} "
+                f"trên giá vốn (pt_v23_audit_2014.py:2008) — đề xuất thoát toàn bộ")
+        plan["orders"].append(_make_order(f"SELL-{tk}-AUTOEXIT-BAL-STOPLOSS", tk, qty, ref_price,
+                                          "BAL", "BAL_AUTO_EXIT", note))
+        injected.append((tk, "BAL", f"stoploss={pnl_pct:.1%}"))
         print(f"  [inject] SELL {tk} qty={qty} book=BAL ({note})")
 
     # ---- CAPIT: T+60 cố định (CAPIT_HOLD, pt_v22_dt5g.py:123) + nhắc T+55 ----
