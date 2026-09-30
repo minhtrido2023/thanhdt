@@ -117,6 +117,15 @@ def fixture_cases(m):
         _rc, out2 = _run(m, [q, qb])
         check("meta: commit khớp 2 câu hỏi họ hàng vẫn được GIỮ", code_sha in out2,
               out2.strip()[:300] or "(rỗng)")
+        # CAP: 3 commit khớp 1 câu hỏi ⇒ in 2, và PHẢI NÓI RA còn 1 (im lặng thì người đọc
+        # tưởng chỉ có 2 ứng viên — đúng cách d51c735e biến mất ở vòng 2).
+        _git_repo(os.path.join(tmp, "third"), [(_FIX_CODE_SUBJ, _FIX_CODE_BODY, ["x.py"])])
+        m.REPOS = [mike, wc, os.path.join(tmp, "third")]
+        _rc, outc = _run(m, [q])
+        check("cap: 3 ứng viên ⇒ in 2 và NÓI RA còn 1",
+              outc.count("[có thể/") == 2 and "còn 1 ứng viên" in outc, outc.strip()[:400])
+        m.REPOS = [mike, wc]
+
         _rc, out3 = _run(m, [q, qb, qc])
         check("meta: commit khớp >=3 câu hỏi bị loại (commit tài liệu/retro liệt kê topic)",
               code_sha not in out3, out3.strip()[:300])
@@ -238,6 +247,19 @@ def main():
     rc5, out5 = _run(m, [q5], ["--days", "30"])
     check("meta-question: topic retro-pattern-recurring-* KHÔNG bao giờ được gợi ý commit",
           out5.strip() == "" and rc5 == 0, out5.strip()[:300])
+
+    # 5d) _is_code — .json là CONFIG HÀNH VI của fleet (trading_rules/plan/jobs), KHÔNG phải tài
+    #     liệu (arch-review vòng 2: coi nó là docs thì commit sửa config-only bị hạ hạng xuống
+    #     sau commit ghi chú). Tài liệu = đuôi văn bản HOẶC nằm trong thư mục tài liệu.
+    check("_is_code: trading_rules.json là CODE/CONFIG, không phải docs",
+          m._is_code("trading_rules.json") is True)
+    check("_is_code: kb/x.json vẫn là docs (thư mục tài liệu)", m._is_code("kb/x.json") is False)
+    check("_is_code: .md/.proposed/reports/ là docs",
+          m._is_code("kb/a.md\nbin/b.md.proposed\nreports/c.csv") is False,
+          "reports/*.csv cũng là sản phẩm tài liệu")
+    check("_is_code: .sh/.py/.sql là code",
+          m._is_code("bin/x.sh") and m._is_code("a.py") and m._is_code("q.sql"))
+    check("_is_code: commit rỗng (không file) ⇒ docs", m._is_code("") is False)
 
     # 5c) GHIM _META_Q_PREFIX vào NGUỒN SINH slug. retro_escalate.py là chỗ duy nhất tạo lớp
     #     topic đó; đổi tiền tố bên đó mà đây không đổi thì luật lọc chết ÂM THẦM và 2/2 báo
