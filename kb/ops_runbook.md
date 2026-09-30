@@ -551,6 +551,32 @@ TƯƠNG TÁC ngay từ đầu, đừng để headless chạy tới bước cuố
 hoá quy tắc này vẫn đang chờ user — bus topic
 `retro-pattern-recurring-classifier-blocks-headless-agent-production-write`.)
 
+## Pattern B — fix THẬT đã merge nhưng câu hỏi bus không được đóng (tái diễn 08-13, 09-27, 09-28, 09-29 ×2)
+
+**Triệu chứng.** Checker §5 / `bus_question_audit.py` báo một câu hỏi còn treo; `wags_autofix`
+thức dậy và đốt trọn một job chỉ để đọc lại git log rồi kết luận "đã sửa từ lâu". Quyết định đi
+qua kênh HÀNH ĐỘNG (user duyệt Discord + agent commit + merge) mà không ai ghi event `answer`.
+
+**Trước khi chẩn đoán lại từ đầu, chạy 2 cái nhắc này:**
+- `bin/question_commit_hint.py [--days N] [--max N]` — quét git log 2 repo (mike + WorkingClaude)
+  tìm commit TRÔNG NHƯ đã sửa từng câu hỏi còn treo. In CHÙM tối đa 2 commit/câu hỏi kèm nhãn
+  `[CHẮC|có thể / code|docs / điểm]`; commit có sửa file code xếp trước commit docs-only. Nó là
+  **GỢI Ý, KHÔNG tự đóng** — đọc commit rồi mới đóng bằng `bin/close_bus_question.py`.
+  Đã wire vào `wags_autofix.sh` (`timeout 25 … || true`, fail-open tuyệt đối).
+- `bin/dispatch_question_hint.py` — cùng việc nhưng nguồn là prompt dispatch.
+
+**Giới hạn đã biết (gap F5, còn mở 2026-09-30).** Hint tính TRONG `wags_autofix.sh`, tức là SAU
+khi escalation đã bắn ⇒ nó chỉ giúp Wags kết luận nhanh, **không tránh được việc đốt job**. Chỗ
+bịt thật là `ops_health_check.sh` §5 / `bus_question_audit.py` hạ cấp escalation khi có bằng
+chứng artifact — chưa làm, chờ user chốt (option A của câu hỏi
+`retro-pattern-recurring-bus-question-closure-gap-real-fix-no-answer-event`). Lớp câu hỏi
+`retro-pattern-recurring-*` bị hint LOẠI HẲN có chủ đích: nó nói về một pattern, không commit nào
+đóng được, chỉ user chốt A/B/C.
+
+**Luật vận hành:** merge xong một fix cho việc có bus question mở ⇒ đóng vòng NGAY trong cùng
+lượt (`bin/close_bus_question.py` hoặc `append_event.sh <agent> answer <topic> …`). "Đã merge"
+là sự kiện phải đóng question, không phải việc để lần sau.
+
 ## Lược sử
 2026-07-07: viết lần đầu + wire autofix vào ops_health_check.sh & sync_bq_cache_daily.sh
 (sau chuỗi sự cố 07-06: EOD crash, NAV sai 2 lần, cache thối 10 ngày, false-SEV1 macro).

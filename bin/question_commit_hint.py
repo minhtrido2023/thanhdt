@@ -44,7 +44,11 @@ def _load_hint_module():
     return mod
 
 
-_DOC_EXT = (".md", ".txt", ".proposed", ".json")
+# `.json` KHÔNG nằm đây: trong fleet này .json là CONFIG HÀNH VI (trading_rules, plan, jobs) —
+# coi nó là tài liệu thì commit sửa config-only bị hạ hạng xuống sau commit ghi chú
+# (arch-review vòng 2, 2026-09-30). Tài liệu nhận ra bằng ĐUÔI văn bản hoặc THƯ MỤC tài liệu.
+_DOC_EXT = (".md", ".txt", ".proposed")
+_DOC_DIRS = ("/kb/", "/docs/", "/reports/")
 
 
 def _is_code(files):
@@ -54,9 +58,12 @@ def _is_code(files):
     bus (luật meta cũ `len(per_commit) != 1` thì có, và nó làm gợi ý duy nhất của ca 29/09 biến
     mất khi có thêm một câu hỏi họ hàng treo — arch-review 2026-09-29 NEEDS_CHANGES)."""
     for f in files.split("\n"):
-        f = f.strip()
-        if f and not f.lower().endswith(_DOC_EXT):
-            return True
+        f = f.strip().lower()
+        if not f or f.endswith(_DOC_EXT):
+            continue
+        if any(d in "/" + f for d in _DOC_DIRS):
+            continue
+        return True
     return False
 
 
@@ -112,7 +119,13 @@ _DATE_RE = re.compile(r"^\d{2,4}-\d{2}(-\d{2})?$")
 _META_Q_PREFIX = "retro-pattern-recurring-"
 
 
-def _score(tokens, low, flat):
+def _hit(t, low, flat):
+    if re.search(r"(?<![a-z0-9])" + re.escape(t) + r"(?![a-z0-9])", low):
+        return True
+    return len(t) >= _FLAT_LEN and t in flat
+
+
+def _score(tokens, low, flat, subj=""):
     """Điểm khớp của 1 topic với 1 commit. Token NGÀY bị LOẠI hẳn ở nguồn commit (khác bản
     dispatch, nơi ngày là token đặc thù nhất): mọi commit đều nhắc ngày của chính nó, nên
     "2026-09-28" + một từ tầm thường là đủ 4 điểm — đo thật, đó đúng là báo động giả duy nhất
@@ -126,15 +139,21 @@ def _score(tokens, low, flat):
     for t, pt in tokens.items():
         if _DATE_RE.match(t):
             continue
-        if re.search(r"(?<![a-z0-9])" + re.escape(t) + r"(?![a-z0-9])", low):
-            hits[t] = pt
-        elif len(t) >= _FLAT_LEN and t in flat:
+        if _hit(t, low, flat):
             hits[t] = pt
     if sum(hits.values()) < _MIN_SCORE:
         return 0
     if sum(1 for t in hits if len(t) >= _SPECIFIC_LEN) < _MIN_SPECIFIC:
         return 0
-    return sum(hits.values())
+    # THƯỞNG DÒNG SUBJECT. Ngưỡng ĐẬU/RỚT ở trên chỉ tính trên toàn văn (body) — không đổi.
+    # Nhưng mọi token nặng đúng 1 điểm nên điểm BÃO HOÀ: đo thật 2026-09-30, cả 7 ứng viên của
+    # câu hỏi sell-loanpackage đều đúng 5 điểm, và commit sửa thật d51c735e xếp 5/7 rồi bị cap
+    # cắt (arch-review vòng 2). Body nhắc tới sự cố thì commit NÀO CŨNG nhắc (link incident,
+    # "đi kèm ..."); còn SUBJECT thì chỉ commit nói về ĐÚNG việc đó mới chứa token của nó —
+    # d51c735e có "deal" trong subject, e6fac527 ("fix(heartbeat): PLACE_FAIL_STOPPED ...")
+    # không có token nào. Thưởng ở subject là tín hiệu phân biệt, không phải tie-break thứ tự.
+    sflat = "".join(c for c in subj if c.isalnum())
+    return sum(hits.values()) + sum(1 for t in hits if _hit(t, subj, sflat))
 
 
 def main():
@@ -164,7 +183,7 @@ def main():
                 topic = str(q.get("topic") or "")
                 if not topic or topic.lower().startswith(_META_Q_PREFIX):
                     continue
-                sc = _score(hint._tokens(topic), low, flat)
+                sc = _score(hint._tokens(topic), low, flat, subj.lower())
                 lvl = 2 if topic.lower() in low else (1 if sc else 0)
                 if not lvl:
                     continue
@@ -185,20 +204,25 @@ def main():
     for q, cands in matches.values():
         # git log trả mới-nhất-trước ⇒ sort ỔN ĐỊNH giữ commit mới nhất lên trên trong các ca hoà.
         cands.sort(key=lambda c: (-c[0], -int(c[2]), -c[1]))
-        rows.append((cands[0][0], q, cands[:_MAX_PER_Q]))
+        rows.append((cands[0][0], q, cands[:_MAX_PER_Q], len(cands) - _MAX_PER_Q))
     rows.sort(key=lambda x: (-x[0], -int(x[1].get("age_days") or 0)))
     rows = rows[:limit]
 
     print("[Có commit TRÔNG NHƯ đã xử lý câu hỏi treo — CHỈ LÀ GỢI Ý theo từ khoá, phải tự đọc "
           "commit xem có đúng cùng việc không. Nếu ĐÚNG là đã xong mà chỉ thiếu event `answer` "
           "(Pattern B) thì đóng vòng bằng close_bus_question.py, đừng sửa lại lần nữa:]")
-    for _lvl, q, cands in rows:
+    for _lvl, q, cands, extra in rows:
         agent, topic, age = q.get("agent", "?"), q.get("topic", "?"), q.get("age_days", "?")
         print(f"  · {agent}/{topic} ({age}d treo) ←")
-        for lvl, _sc, is_code, sha, subj, repo in cands:
+        for lvl, sc, is_code, sha, subj, repo in cands:
             mark = "CHẮC" if lvl == 2 else "có thể"
             kind = "code" if is_code else "docs"
-            print(f"      [{mark}/{kind}] {repo}@{sha}: {subj}")
+            print(f"      [{mark}/{kind}/{sc}đ] {repo}@{sha}: {subj}")
+        if extra > 0:
+            # NÓI RA phần bị cắt: cap 2 mà im lặng thì người đọc tưởng chỉ có 2 ứng viên, còn
+            # commit đúng có thể nằm ở phần bị cắt (đúng ca d51c735e, arch-review vòng 2).
+            print(f"      … còn {extra} ứng viên khác — xem đầy đủ: git log --grep / "
+                  f"question_commit_hint.py --max 1 sau khi các câu hỏi khác được đóng")
     return 0
 
 

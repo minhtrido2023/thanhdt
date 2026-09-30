@@ -103,7 +103,7 @@ def fixture_cases(m):
               out.strip()[:300] or "(rỗng)")
         check("fixture: commit sửa code đứng TRƯỚC commit ghi chú (hết bias thứ tự repo)",
               docs_sha in out and out.index(code_sha) < out.index(docs_sha), out.strip()[:300])
-        check("fixture: commit rỗng/docs-only được dán nhãn docs", "/docs]" in out,
+        check("fixture: commit rỗng/docs-only được dán nhãn docs", "/docs/" in out,
               out.strip()[:200])
 
         # META: commit khớp TỪ 3 câu hỏi ⇒ bỏ; khớp 2 câu hỏi họ hàng ⇒ GIỮ (luật cũ
@@ -195,6 +195,26 @@ def main():
           m._score({"loanpackage": 1, "deal": 1, "sell": 1, "abcd": 1},
                    "loanpackage deal sell abcd", "loanpackagedealsellabcd") == 0)
 
+    # 1c) GIT LOG THẬT, cửa sổ = TUỔI(d51c735e)+1 ngày. arch-review vòng 2: fixture 2 repo × 1
+    #     commit đã loại sẵn đúng cái gây lỗi (nhiều commit code HOÀ ĐIỂM rồi bị cap cắt theo
+    #     thứ tự repo). Cửa sổ theo tuổi commit thì KHÔNG rot mà cũng KHÔNG nới lỏng: nó luôn là
+    #     cửa sổ nhỏ nhất còn chứa commit đó, và ứng viên cạnh tranh chỉ TĂNG theo thời gian.
+    age = subprocess.run(["git", "-C", os.path.dirname(ROOT), "log", "-1", "--format=%cr",
+                          "d51c735e"], capture_output=True, text=True).stdout.strip()
+    days_ago = subprocess.run(
+        ["git", "-C", os.path.dirname(ROOT), "log", "-1", "--format=%ct", "d51c735e"],
+        capture_output=True, text=True).stdout.strip()
+    import time as _time
+    # max(14, tuổi+1): hôm nay = ĐÚNG cửa sổ MẶC ĐỊNH (arch-review vòng 2 đòi chốt ở đó); khi
+    # commit già hơn 14 ngày, cửa sổ chỉ NỚI RA ⇒ thêm ứng viên cạnh tranh ⇒ chốt CHẶT HƠN, không
+    # bao giờ lỏng hơn. Vừa không rot, vừa không phải nới lỏng.
+    win = max(14, int((_time.time() - int(days_ago)) // 86400) + 1) if days_ago else 0
+    rc1c, out1c = _run(m, [q], ["--days", str(win)])
+    check(f"regression(e2e, git log THẬT, --days {win} = max(mặc-định-14, tuổi+1); '{age}'): "
+          "commit SỬA THẬT "
+          "d51c735e ĐƯỢC IN RA (không bị hoà điểm + cap cắt mất)",
+          "d51c735e" in out1c and rc1c == 0, out1c.strip()[:600] or "(rỗng)")
+
     # 3b) FIXTURE (thay ca meta cũ dựa trên git log THẬT): hai repo giả, message THẬT của
     #     d51c735e (fix code, repo WorkingClaude) và 85b744a1 (ghi chú rỗng, repo mike). Chạy ở
     #     --days MẶC ĐỊNH nên chốt này KHÔNG rot khi commit thật già đi — arch-review 2026-09-29
@@ -218,6 +238,15 @@ def main():
     rc5, out5 = _run(m, [q5], ["--days", "30"])
     check("meta-question: topic retro-pattern-recurring-* KHÔNG bao giờ được gợi ý commit",
           out5.strip() == "" and rc5 == 0, out5.strip()[:300])
+
+    # 5c) GHIM _META_Q_PREFIX vào NGUỒN SINH slug. retro_escalate.py là chỗ duy nhất tạo lớp
+    #     topic đó; đổi tiền tố bên đó mà đây không đổi thì luật lọc chết ÂM THẦM và 2/2 báo
+    #     động giả quay lại (arch-reviewer đã tái lập bằng mutation). Assertion thay vì import:
+    #     giữ fail-open, không để một lỗi import bên kia làm câm cái nhắc này.
+    esc = os.path.join(ROOT, "bin", "retro_escalate.py")
+    src = open(esc, encoding="utf-8").read() if os.path.exists(esc) else ""
+    check("_META_Q_PREFIX khớp TOPIC_PREFIX của bin/retro_escalate.py (nguồn sinh slug)",
+          ('TOPIC_PREFIX = "%s"' % m._META_Q_PREFIX) in src, m._META_Q_PREFIX)
 
     # 5) FAIL-OPEN: repo không tồn tại ⇒ _commits im lặng trả rỗng, không ném.
     check("_commits: repo rác ⇒ [] chứ không ném", m._commits("/nonexistent-repo-xyz", 7) == [])
