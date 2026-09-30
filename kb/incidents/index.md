@@ -4,7 +4,7 @@ title: Incidents — Mike fleet (sổ postmortem, cấu trúc OKF)
 owner: Mike fleet (mọi agent ghi; daily_retro.sh ghi entry RETRO hằng đêm)
 format: OKF (Open Knowledge Format) — markdown + YAML frontmatter, 1 sự cố = 1 file
 migrated_from: kb/INCIDENTS.md (single-file 408KB, migrate → OKF 2026-07-30 job Winston_20260730_144031)
-entries: 181 file (102 sự cố + 78 RETRO + 1 mục open-items chung)
+entries: 183 file (103 sự cố + 79 RETRO + 1 mục open-items chung)
 ---
 
 # Incidents — Mike fleet
@@ -77,6 +77,7 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 
 | Ngày | Sự cố | status |
 |---|---|---|
+| 2026-09-29 | [2026-09/2026-09-29-zalopay-sell-deal-not-found-loanpackage-1826.md](2026-09/2026-09-29-zalopay-sell-deal-not-found-loanpackage-1826.md) | ? |
 | 2026-09-28 | [2026-09/2026-09-28-check5b-agent-reason-pairing-and-heartbeat-blindspot.md](2026-09/2026-09-28-check5b-agent-reason-pairing-and-heartbeat-blindspot.md) | ? |
 | 2026-09-26 | [2026-09/2026-09-26-baseline-checker-missing-root-only-14day-unclearable-red.md](2026-09/2026-09-26-baseline-checker-missing-root-only-14day-unclearable-red.md) | ? |
 | 2026-09-26 | [2026-09/2026-09-26-append-event-guard-rejects-valid-json-when-helper-missing.md](2026-09/2026-09-26-append-event-guard-rejects-valid-json-when-helper-missing.md) | ? |
@@ -98,6 +99,7 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 
 | Ngày | Sự cố | status |
 |---|---|---|
+| 2026-08-04 | [2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md](2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md) | fixed (monitoring); production-code fix in progress (Taylor job Taylor_20260804_094514) |
 | 2026-08-04 | [2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md](2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md) | fixed (monitoring); production-code fix in progress (Taylor job Taylor_20260804_094514) |
 | 2026-08-04 | [2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md](2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md) | fixed (monitoring); production-code fix in progress (Taylor job Taylor_20260804_094514) |
 | 2026-08-04 | [2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md](2026-08/2026-08-04-paper-main-netted-evidence-silent-8-days.md) | fixed (monitoring); production-code fix in progress (Taylor job Taylor_20260804_094514) |
