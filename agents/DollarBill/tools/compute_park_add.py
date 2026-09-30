@@ -56,6 +56,9 @@ from trading_bot.plan import (LAG_ADV_PCT, LAG_ADV_MAX_STALE_DAYS,      # noqa: 
                               _adv_for_gate)
 from trading_bot.vn_market import LOT, round_lot                        # noqa: E402
 from lag_forensic_filter import BANNED                                  # noqa: E402
+from anomaly_gate import (anomaly_excluded, insider_sell_flagged,       # noqa: E402
+                          anomaly_flags_freshness, ANOMALY_TTL_DAYS,
+                          INSIDER_TTL_DAYS)
 
 FEE_RATE = 0.00075          # phí mua thật, = coding_guidelines §6 (0,075%)
 
@@ -63,7 +66,8 @@ FEE_RATE = 0.00075          # phí mua thật, = coding_guidelines §6 (0,075%)
 def compute_add(account_label, asof=None, target=PARK_TARGET_F1, reserve_vnd=0.0,
                 max_spend_vnd=None, active_nav_vnd=None, name_cap_pct=0.10,
                 pp0buy_vnd=None, holdings=None, basket_override=None, share_override=None,
-                adv_fn=None, day_cap_override=None, price_fn=None):
+                adv_fn=None, day_cap_override=None, price_fn=None,
+                anomaly_fn=None, insider_fn=None, freshness_fn=None):
     asof = asof or today_ict()
     adv_fn = adv_fn or _adv_for_gate
     # name_cap là trần TẬP TRUNG bắt buộc (trading_rules.sizing.name_cap_pct) — không có NAV thì
@@ -215,6 +219,35 @@ def compute_add(account_label, asof=None, target=PARK_TARGET_F1, reserve_vnd=0.0
         d["mv"] += l["mv_vnd"]
     bpos = h.get("broker_positions", {}) or {}
 
+    # ── Due-diligence gate DÙNG CHUNG `anomaly_gate.py` — CHỈ áp chiều MUA ──
+    # Chỉ đạo user 2026-09-28 (escalation PNJ): "Đường park phải đọc insider_flags để biết có nên
+    # mua hay không". Park là consumer thứ 5 của gate này (4 consumer cũ: production
+    # golive_recommend_v23.py + 3 paper book) — KHÔNG viết logic đọc file mới, dùng đúng 1 nguồn
+    # sự thật. Hai cờ CỐ Ý khác hạng, đúng như `anomaly_gate.py` thiết kế:
+    #   · `anomaly_excluded` (TTL 30d) = HARD EXCLUDE, ngang hàng BANNED/excluded_tickers.
+    #   · `insider_sell_flagged` (TTL 90d) = WATCH-only, KHÔNG tự chặn mua — bằng chứng của cờ này
+    #     yếu (~80% mã bị bắt KHÔNG sập, research insider_transaction_scoping_20260729.md §3.5),
+    #     nên nó đi vào `notes` + từng order để NGƯỜI DUYỆT plan thấy, không âm thầm đổi rổ.
+    #     ⚠️ Ranh giới "cảnh báo hay hard-block" đã ESCALATE lên bus cho user quyết
+    #     (question `park-insider-hard-block-hay-canh-bao`, job Taylor_20260930_030814) — nếu user
+    #     chọn hard-block thì đổi nhánh này, ĐỪNG tự quyết.
+    # Chiều BÁN (`compute_park_trim.py`) CỐ Ý không đụng: muốn thoát mã đang có rủi ro là hợp lý,
+    # chặn bán mã bị flag sẽ khoá người ta trong đúng cái rủi ro vừa phát hiện.
+    # Fail-safe của gate (file thiếu/hỏng ⇒ set()/{} + warning) giữ NGUYÊN: không chặn pipeline.
+    anomaly_excl = anomaly_fn(asof) if anomaly_fn else anomaly_excluded(asof)
+    insider_all = insider_fn(asof) if insider_fn else insider_sell_flagged(asof)
+    fresh = freshness_fn(asof) if freshness_fn else anomaly_flags_freshness(asof)
+    out["anomaly_flags_freshness"] = fresh
+    out["anomaly_ttl_days"] = ANOMALY_TTL_DAYS
+    out["insider_ttl_days"] = INSIDER_TTL_DAYS
+    if fresh["is_stale"]:
+        # CHỈ cảnh báo, KHÔNG đổi hành vi loại trừ — đúng hợp đồng `anomaly_flags_freshness`.
+        # Không ghi bus event ở đây: file này là CÔNG CỤ CHỈ ĐỌC, không side-effect (xem docstring);
+        # `golive_recommend_v23.py` đã ghi event `anomaly-flags-stale` cho cùng file cờ.
+        out["notes"].append(
+            f"⚠️ anomaly_flags.json KHÔNG tươi hôm nay — {fresh['reason']}. Cờ bất thường có thể "
+            "THIẾU mã mới nổ cờ ⇒ gate mua đang chạy trên dữ liệu cũ. CHÉP dòng này vào notes plan.")
+
     # ── Rổ KHẢ THI + trọng số chuẩn hoá — SAO CHÉP ĐÚNG thứ tự loại của L1 ───
     price_fn = price_fn or live_price_fn(asof)
     dropped, feasible, px_of = [], {}, {}
@@ -226,6 +259,12 @@ def compute_add(account_label, asof=None, target=PARK_TARGET_F1, reserve_vnd=0.0
         if tk in excluded:
             dropped.append({"ticker": tk, "weight": w_raw,
                             "reason": "excluded_tickers — không mua, không bán"})
+            continue
+        if tk in anomaly_excl:
+            dropped.append({"ticker": tk, "weight": w_raw,
+                            "reason": f"cờ bất thường due-diligence còn hiệu lực "
+                                      f"(<{ANOMALY_TTL_DAYS}d, data/anomaly_flags.json) ⇒ HARD "
+                                      f"EXCLUDE khỏi chiều MUA (KHÔNG ép bán phần đang giữ)"})
             continue
         px_i = per_tk[tk]["px"] if tk in per_tk and per_tk[tk]["px"] > 0 else None
         if px_i is None and tk in bpos and (bpos[tk].get("market_price") or 0) > 0:
@@ -244,6 +283,25 @@ def compute_add(account_label, asof=None, target=PARK_TARGET_F1, reserve_vnd=0.0
             continue
         feasible[tk] = w_raw
         px_of[tk] = float(px_i)
+    # Cờ nội bộ bán — WATCH-only, tính trên rổ KHẢ THI (mã đã bị loại thì không cần cảnh báo).
+    insider_watch = {tk: insider_all[tk] for tk in sorted(feasible) if tk in insider_all}
+    out["insider_watch"] = insider_watch
+    if insider_watch:
+        out["notes"].append(
+            f"⚠️ CỜ NỘI BỘ BÁN còn hiệu lực (<{INSIDER_TTL_DAYS}d, data/insider_flags.json) trên "
+            f"{len(insider_watch)} mã của rổ PARK: "
+            + "; ".join(
+                # ⚠️ ĐƠN VỊ: `sell_pct_osh` do `insider_flags.py` ghi là PHÂN SỐ, không phải phần
+                # trăm (ngưỡng SELL_PCT_OSH_MIN = 0,01 = 1% CP lưu hành/90 ngày; producer in ra
+                # cũng ×100 — insider_flags.py:254). In thẳng nó kèm dấu "%" là hạ 100× đúng con
+                # số mà người duyệt phải hành động theo (TCM 0,04125 ⇒ 4,13%, KHÔNG phải 0,04%).
+                # quant-skeptic REFUTED vòng 1 vì đúng lỗi này. Field `insider_watch` vẫn giữ
+                # phân số thô theo đúng convention của producer.
+                f"{tk} (bán {(f.get('sell_pct_osh') or 0) * 100:.2f}% CP lưu hành/90d, tier "
+                f"{f.get('tier')}, cờ {f.get('last_alert')}, {f.get('n_sellers')} người bán)"
+                for tk, f in insider_watch.items())
+            + ". Đây là WATCH-only — KHÔNG tự chặn mua (cờ này ~80% ca KHÔNG sập). NGƯỜI DUYỆT "
+              "plan phải xem dòng này TRƯỚC KHI duyệt phần PARK. CHÉP dòng này vào notes plan.")
     w_sum = sum(feasible.values())
     if w_sum <= 0:
         out["decision"] = "BLOCKED_NO_FEASIBLE_BASKET"
@@ -399,6 +457,7 @@ def compute_add(account_label, asof=None, target=PARK_TARGET_F1, reserve_vnd=0.0
             "adv_data_date": m["adv_data_date"],
             "name_cap_room_vnd": name_room, "held_qty_all_books": held_qty,
             "is_new_name": tk not in per_tk,
+            "insider_watch": insider_watch.get(tk),   # None = không có cờ nội bộ bán
             "reason": (f"P2 park-sync (rổ {rebal_date}): đang "
                        f"{per_tk.get(tk, {}).get('mv', 0.0)/1e6:,.1f}tr vs target "
                        f"{tgt[tk]/1e6:,.1f}tr (w' {w_t:.2%} × park-target "

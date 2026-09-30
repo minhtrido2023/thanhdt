@@ -137,6 +137,23 @@ def run(state=3, **kw):
     kw.setdefault("price_fn", price_fn)
     kw.setdefault("active_nav_vnd", BIG_NAV)
     kw.setdefault("asof", ASOF)
+    # Target PIN TƯỜNG MINH 0,80, KHÔNG lấy mặc định production. Mọi con số tính TAY ở đầu file
+    # (TGT/WANT_TOTAL/DELTA, các ca T1x-T7x) được dựng cho target 80%; khi production hạ
+    # PARK_TARGET_F1 0,80 -> 0,30 (mike 1f15139b + adb125b7, 2026-09-27) fixture park 500tr/pool
+    # 1.000tr thành 50% > 30% ⇒ delta ÂM ⇒ MỌI ca trả NO_ADD và selfcheck CHẾT ở T11 với
+    # KeyError 'basket_feasible_n'. Đã xác nhận lỗi này có SẴN ở HEAD trước fix 2026-09-30 (chạy
+    # bản `git show HEAD:...` cho ra đúng traceback đó) — không phải hồi quy của fix gate.
+    # Fixture phải độc lập với knob production, nếu không mỗi lần user đổi tỷ trọng park là guard
+    # của một công cụ money-path lại chết âm thầm.
+    kw.setdefault("target", 0.80)
+    # Gate due-diligence: mặc định BƠM RỖNG. Không làm vậy thì mọi ca cũ sẽ đọc
+    # `data/anomaly_flags.json`/`insider_flags.json` THẬT ⇒ kết quả selfcheck phụ thuộc trạng thái
+    # production của ngày chạy (đúng lớp "false positive vì môi trường" mà skill
+    # verify-before-done cảnh báo). Ca T8x dưới bơm cờ tường minh.
+    kw.setdefault("anomaly_fn", lambda asof: set())
+    kw.setdefault("insider_fn", lambda asof: {})
+    kw.setdefault("freshness_fn", lambda asof: {"is_stale": False, "generated_at": asof,
+                                                "reason": ""})
     with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as f:
         if state is not None:
             json.dump({"state": state, "state_name": {3: "NEUTRAL", 1: "BEAR", 0: "CRISIS"}.get(state),
@@ -282,6 +299,92 @@ try:
           f"kỳ {rd}, n={len(bw) if bw else 0}, Σ={sum(bw.values()):.4f}" if bw else str(err))
 except Exception as e:                                            # noqa: BLE001
     check("T70 park_target_basket đọc được rổ custom30V thật, Σw ≈ 1", False, repr(e)[:80])
+
+print("\n── T8x: due-diligence gate dùng chung (anomaly_gate.py) — fix 2026-09-30 ──")
+# Chỉ đạo user 2026-09-28 (escalation PNJ): "Đường park phải đọc insider_flags để biết có nên mua
+# hay không". Mỗi ca dưới đây có CA CHỨNG MINH NGƯỢC (bỏ cờ ⇒ mã đó lại được mua) — không khẳng
+# định suông, cùng kỷ luật T2x/T4x.
+_NOFLAG = run()
+_bought_noflag = {o["ticker"] for o in _NOFLAG["orders"]}
+check("T80 ca chứng minh ngược: KHÔNG cờ ⇒ AAA/CCC/DDD đều được mua",
+      {"AAA", "CCC", "DDD"} <= _bought_noflag, f"mua={sorted(_bought_noflag)}")
+
+rs = run(anomaly_fn=lambda asof: {"CCC"})
+check("T81 cờ bất thường (anomaly) ⇒ HARD EXCLUDE khỏi chiều MUA",
+      "CCC" not in {o["ticker"] for o in rs["orders"]}
+      and any(d["ticker"] == "CCC" and "bất thường" in d["reason"] for d in rs["basket_dropped"]),
+      f"mua={sorted(o['ticker'] for o in rs['orders'])}")
+check("T81b mã bị loại vẫn được LIỆT KÊ kèm trọng số (no silent drop)",
+      any(d["ticker"] == "CCC" and abs(d["weight"] - BASKET["CCC"]) < 1e-12
+          for d in rs["basket_dropped"]))
+check("T81c loại mã bị cờ KHÔNG sinh lệnh BÁN (park-add chỉ mua; trim cố ý không đụng gate)",
+      all(o["side"] == "buy" for o in rs["orders"]))
+
+rs = run(anomaly_fn=lambda asof: {"AAA", "BBB", "CCC", "DDD", "TIN", "PC1"})
+check("T82 mọi mã đều bị cờ ⇒ BLOCKED_NO_FEASIBLE_BASKET (fail-closed, không mua bừa)",
+      rs["decision"] == "BLOCKED_NO_FEASIBLE_BASKET" and not rs["orders"], rs["decision"])
+
+# ⚠️ ĐƠN VỊ FIXTURE = PHÂN SỐ, giống y `insider_flags.py` ghi thật (SELL_PCT_OSH_MIN = 0,01 =
+# 1% CP lưu hành/90 ngày). Bản đầu của ca này dùng 1.8 (đơn vị PHẦN TRĂM) nên selfcheck KHÔNG
+# THỂ bắt được lỗi in thiếu ×100 trong note — quant-skeptic REFUTED vòng 1 đúng chỗ đó.
+# 0.018 phân số = 1,80% ⇒ note phải hiện "1.80".
+_INS = {"AAA": {"last_alert": "2026-09-20", "tier": "T2", "sell_pct_osh": 0.018, "n_sellers": 2,
+                "reasons": ["insider sell >=1% OSH/90d"]}}
+rs = run(insider_fn=lambda asof: dict(_INS))
+_ins_note = [x for x in rs["notes"] if "CỜ NỘI BỘ BÁN" in x]
+check("T83 cờ nội bộ bán KHÔNG chặn mua (WATCH-only, ~80% ca không sập)",
+      "AAA" in {o["ticker"] for o in rs["orders"]},
+      f"mua={sorted(o['ticker'] for o in rs['orders'])}")
+check("T84 cờ nội bộ bán PHẢI hiện trong notes kèm ĐỦ số liệu để người duyệt quyết",
+      len(_ins_note) == 1 and "AAA" in _ins_note[0] and "T2" in _ins_note[0]
+      and "2026-09-20" in _ins_note[0],
+      (_ins_note[0][:120] if _ins_note else "KHÔNG CÓ NOTE"))
+check("T84b ĐƠN VỊ: sell_pct_osh là PHÂN SỐ ⇒ note phải in ×100 (0,018 ⇒ '1.80%'), KHÔNG in thô",
+      len(_ins_note) == 1 and "1.80%" in _ins_note[0] and "0.018%" not in _ins_note[0],
+      (_ins_note[0][:160] if _ins_note else "KHÔNG CÓ NOTE"))
+check("T84c order.insider_watch GIỮ phân số thô (đúng convention producer), không bị ×100",
+      all(o["insider_watch"]["sell_pct_osh"] == 0.018
+          for o in rs["orders"] if o["ticker"] == "AAA"))
+check("T85 cờ nội bộ bán dán vào ĐÚNG dòng lệnh của mã đó, mã khác = None",
+      all((o["insider_watch"] or {}).get("tier") == "T2" for o in rs["orders"] if o["ticker"] == "AAA")
+      and all(o["insider_watch"] is None for o in rs["orders"] if o["ticker"] != "AAA"))
+check("T86 out['insider_watch'] chỉ chứa mã trong rổ KHẢ THI",
+      set(rs["insider_watch"]) == {"AAA"}, str(sorted(rs["insider_watch"])))
+check("T87 KHÔNG cờ nội bộ ⇒ không có note cảnh báo nào (không spam người duyệt)",
+      not [x for x in _NOFLAG["notes"] if "CỜ NỘI BỘ BÁN" in x]
+      and _NOFLAG["insider_watch"] == {})
+
+_INS2 = dict(_INS); _INS2["PC1"] = dict(_INS["AAA"])
+rs = run(insider_fn=lambda asof: _INS2)
+check("T88 mã đã bị loại (PC1 BANNED) KHÔNG lọt vào cảnh báo nội bộ bán",
+      set(rs["insider_watch"]) == {"AAA"}, str(sorted(rs["insider_watch"])))
+
+rs = run(anomaly_fn=lambda asof: {"AAA"}, insider_fn=lambda asof: dict(_INS))
+check("T89 cờ anomaly THẮNG cờ insider trên cùng một mã (hard exclude > watch)",
+      "AAA" not in {o["ticker"] for o in rs["orders"]} and "AAA" not in rs["insider_watch"],
+      f"mua={sorted(o['ticker'] for o in rs['orders'])}")
+
+def _boom(asof):
+    raise RuntimeError("gate chet (selfcheck)")
+try:
+    rs = run(anomaly_fn=_boom)
+    check("T8A gate LỖI ⇒ KHÔNG được âm thầm mở cửa: phải RAISE, không trả rổ đầy đủ",
+          False, f"tool vẫn chạy, decision={rs['decision']}")
+except RuntimeError:
+    check("T8A gate LỖI ⇒ nổ ra ngoài (fail-loud ở tầng inject), không âm thầm bỏ gate", True)
+rs = run(freshness_fn=lambda asof: {"is_stale": True, "generated_at": "2026-09-01",
+                                    "reason": "lần ghi cuối 2026-09-01 (ICT) ≠ ngày giao dịch"})
+_st_note = [x for x in rs["notes"] if "KHÔNG tươi" in x]
+check("T8C cờ CŨ ⇒ CẢNH BÁO trong notes nhưng KHÔNG đổi hành vi loại trừ (đúng hợp đồng gate)",
+      len(_st_note) == 1 and {"AAA", "CCC", "DDD"} <= {o["ticker"] for o in rs["orders"]},
+      (_st_note[0][:100] if _st_note else "KHÔNG CÓ NOTE"))
+check("T8D cờ TƯƠI ⇒ không có cảnh báo stale (không spam)",
+      not [x for x in _NOFLAG["notes"] if "KHÔNG tươi" in x])
+check("T8B freshness anomaly_flags được công bố ra output (visibility, không đổi hành vi)",
+      isinstance(_NOFLAG.get("anomaly_flags_freshness"), dict)
+      and "is_stale" in _NOFLAG["anomaly_flags_freshness"]
+      and _NOFLAG.get("anomaly_ttl_days") == cpa.ANOMALY_TTL_DAYS
+      and _NOFLAG.get("insider_ttl_days") == cpa.INSIDER_TTL_DAYS)
 
 print(f"\n{'=' * 60}\nKẾT QUẢ: {len(PASS)} PASS / {len(FAIL)} FAIL")
 if FAIL:
