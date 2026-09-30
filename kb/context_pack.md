@@ -1,13 +1,13 @@
-# Mike fleet — context pack (v3439)
+# Mike fleet — context pack (v3440)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-09-30T01:49:14] Mike/decision — retro-pattern-recurring-bus-question-closure-gap-real-fix-no-answer-event: {"decided_by": "user", "chosen_option": "B", "huong_bo_sung": "User yeu cau KHONG chi dung o auto-suggest trong wags_autofix.sh coord-run - phai huong toi CO CH …
-- [2026-09-30T01:27:30] Wags/finding — wags-fix: coord-2026-09-30 — option B: question_commit_hint v3 vá 6 required_changes của arch-review: {"root_cause": "Câu hỏi treo Mike/retro-pattern-recurring-bus-question-closure-gap-real-fix-no-answer-event là ESCALATION của retro (Pattern B lần 3) với option …
 - [2026-09-30T01:43:46] Wags/finding — wags-fix: coord-2026-09-30 vòng 3 — thưởng token ở SUBJECT phá thế hoà điểm (arch-review vòng 2): {"context": "Vòng 3 của cùng job. arch-review vòng 2 (bd14bf1f) NEEDS_CHANGES/high: 5/6 required_changes vá thật, nhưng #2 bị nới lỏng LẦN THỨ HAI.", "root_caus …
 - [2026-09-30T01:50:48] Winston/finding — vnm-exright-date-off-by-one-confirmed: {"job": "Winston_20260930_014855", "ticker": "VNM", "event": "DIV 1850d, record_date=2026-06-29", "bq_recorded_exright_date": "2026-06-26", "actual_exright_date …
 - [2026-09-30T01:35:37] arch-reviewer/verification — ARCH-REVIEW: wags-fix: coord-2026-09-30 — question_commit_hint v3: {"finding_topic": "wags-fix: coord-2026-09-30 — option B: question_commit_hint v3 vá 6 required_changes của arch-review", "verdict": "NEEDS_CHANGES", "confidenc …
+- [2026-09-30T01:51:24] Taylor/answer — pnj-trong-ro-custom30v-live-can-user-duyet-chan: {"resolution": "User chốt 2026-09-30: Option A — PNJ vào excluded_tickers cả 2 account (SpaceX+ZaloPay). Review trigger = SỰ KIỆN (khi PNJ công bố BCTC Quý 3/20 …
+- [2026-09-30T01:51:38] Taylor/finding — pnj-excluded-both-accounts-2026-09-30: {"decision": "User 2026-09-30: Option A - PNJ vao excluded_tickers ca 2 account (SpaceX+ZaloPay). Review trigger = SU KIEN (PNJ cong bo BCTC Quy 3/2026), KHONG  …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -24,6 +24,7 @@
 ## Đang trading (LIVE)
 - **SpaceX** (DNSE 0002023347): V2.4 LIVE từ 2026-07-01, có margin. NEUTRAL parking **80%** idle cash (config F1, đổi từ 70% ngày 2026-08-04, `trading_rules.json` `neutral_parking.default_park_of_idle_pct`). run_bot.sh 09:05 ICT T2-T6. NAV: `nav_history_SpaceX.csv` hoặc EOD report.
 - **ZaloPay** (DNSE 0001743768): V2.4 LIVE từ 2026-07-06, CASH-ONLY. **DGC EXCLUDED** (`excluded_tickers`, HOSE hạn chế giao dịch đến ~11-12/2026). Sizing dùng `active_nav`. Cùng target parking 80% (không có override riêng).
+- **PNJ EXCLUDED cả 2 account** (SpaceX+ZaloPay, `excluded_tickers` trong `secrets/trading_bot_accounts.json`) từ 2026-09-30, quyết định USER trên bus question `Taylor/pnj-trong-ro-custom30v-live-can-user-duyet-chan` (mở 2026-09-28) — option A. Lý do: hạ bậc AMBIGUOUS→NON do công bố DN 25-27/09 (0 vị thế thật ở cả 2 account tại thời điểm loại, xác nhận qua `data/execution_logs/dnse_raw_2026-09-30.jsonl`), cần "scrutiny exam" trước khi trở lại candidate rổ custom30V. **REVIEW TRIGGER = khi PNJ công bố BCTC Quý 3/2026** (KHÔNG phải TTL theo ngày) — lúc đó chạy lại due-diligence đầy đủ (kiểu fundamental-skeptic DGC/TV1), KHÔNG tự động khôi phục.
 - **AlphaLens Paper**: FPT/ACB/MBB/HDB, tracking đến 2026-09-30. DollarBill phụ trách.
 - **Trứng vàng** (`egg.totalValue`): SpaceX ~100,9tr / ZaloPay ~102,2tr (đo 09-27), đã cộng NAV tự động — KHÔNG phải `availableCash`. ⚠️ **RÚT VỀ TRONG NGÀY, KHÔNG phải T+1** (đính chính 2026-09-27, Mafee job `Mafee_20260927_091828`: SpaceX 17/09 egg 100,9tr→51,0tr VÀ `availableCash` +49,8tr trong CÙNG snapshot 11:00:11 phiên sáng ⇒ tiền dùng mua được ngay phiên đó). ⚠️ **KHÔNG phải tiền gửi ngân hàng** — DNSE mô tả là "Sinh Lời Theo Ngày" qua giao dịch TRÁI PHIẾU niêm yết ⇒ không có bảo hiểm tiền gửi, phụ thuộc tổ chức phát hành; lãi đo thật **8,543%/năm** và DNSE **tự khấu trừ TNCN trước khi trả** nên số đó đã là net. Không thấy trần số dư (ZaloPay vượt 102tr vẫn cộng lãi phẳng); "Tài khoản Không Ngủ" là SẢN PHẨM KHÁC (trần 30 tỷ), đừng lẫn. `manual_offbook_assets_vnd` ĐÃ ĐÓNG vĩnh viễn 07-23.
   ⚠️ **ĐÍNH CHÍNH BẢN CHẤT 2026-09-27 (legal-vn, bus `dnse-trung-vang-legal-review-20260927`) — KHÔNG phải repo.**
