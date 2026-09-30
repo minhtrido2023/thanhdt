@@ -62,16 +62,23 @@ SLEEVE_NOTE = {
 
 RECS_DIR = os.path.join(WC_ROOT, "deploy_golive_dt5g_v4", "out")
 
-# Cửa sổ thoát LAG (PEAD/earnings-drift): T+14 tới T+20 phiên sau ngày entry.
-LAG_EXIT_MIN_SESSIONS = 14
-LAG_EXIT_MAX_SESSIONS = 20
+# Cửa thoát LAG (PEAD/earnings-drift): mốc CỐ ĐỊNH T+25 phiên sau ngày entry — khớp
+# ĐÚNG backtest pin (`pt_v23_audit_2014.py:2060,2062`: `hold_days=25`,
+# `hold_days_by_tier={t: 25 for t in _LAG_BASE_TIERS}`). Trước 2026-09-30 file này ghi khoảng
+# T+14..T+20 — KHÔNG khớp bất kỳ số nào trong backtest đã pin, chỉnh theo chỉ đạo user
+# (job Taylor_20260930_080814) sau khi capit_episode.py lộ cùng lớp lệch backtest/live.
+LAG_EXIT_SESSIONS_FIXED = 25
 
 # Ngưỡng stop-loss xử lý theo sleeve (không có nghĩa là "ngưỡng cứng đã lập trình ở nơi khác" —
 # đây là số kỷ luật V2.4 tham chiếu, dùng để cảnh báo GẦN ngưỡng). PARK cố tình KHÔNG có trong
 # bảng này: rebalance định kỳ là cơ chế rủi ro của PARK, không phải stop-loss theo drawdown.
+# ⚠️ LAG CỐ Ý KHÔNG có trong bảng: backtest pin (`pt_v23_audit_2014.py:2060`) dùng
+# `stop_loss=-0.99` cho LAG — MIỄN stop-loss theo drawdown, exit LAG chỉ theo mốc phiên cố định
+# ở trên. Bảng cũ từng ghi "LAG": 15.0 như thể đó là số từ backtest — SAI, không có nguồn nào.
+# Nếu sau này muốn thêm 1 ngưỡng an toàn RIÊNG cho live (khác backtest), phải ghi rõ trong
+# comment đây là "kỷ luật live BỔ SUNG", không được gắn vào backtest.
 STOP_LOSS_PCT_BY_SLEEVE = {
     "BAL": 20.0,
-    "LAG": 15.0,
     "CAPIT": 20.0,
     "DISCRETIONARY_SPECIAL": 20.0,
 }
@@ -248,9 +255,33 @@ def disc_entry_dates(account):
     return _first_fill_dates(account, "DISCRETIONARY_SPECIAL")
 
 
+# CAPIT: mốc CỐ ĐỊNH T+60 phiên (`CAPIT_HOLD=60`, `pt_v22_dt5g.py:123` +
+# `pt_v23_audit_2014.py:752`/`lag_dnpr_harness.py:484`) — chỉ tồn tại ở BACKTEST/PAPER trước
+# 2026-09-30 (capit_episode.py: "đường LIVE không có dòng code nào bán vị thế CAPIT — exit do
+# NGƯỜI quyết"). Nay wire CẢNH BÁO ở đây khớp đúng mốc đó (auto-sell thật nằm ở
+# `mike/bin/auto_exit_inject.py`, chèn vào plan T+1 để user duyệt — KHÔNG tự bán thẳng).
+CAPIT_EXIT_SESSIONS_FIXED = 60
+CAPIT_EXIT_REMINDER_SESSIONS = 55
+
+
+def capit_exit_hint(sessions_held):
+    """Text cửa thoát CAPIT theo `sessions_held` (đọc từ `capit_sessions_held` trong status
+    JSON, do `capit_episode.py` ghi), hoặc None nếu không có episode mở / thiếu số phiên."""
+    if sessions_held is None:
+        return None
+    if sessions_held >= CAPIT_EXIT_SESSIONS_FIXED:
+        return (f"ĐÃ QUA hạn cố định T+{CAPIT_EXIT_SESSIONS_FIXED} ({sessions_held} phiên) "
+                f"— tới hạn thoát toàn bộ rổ")
+    if sessions_held >= CAPIT_EXIT_REMINDER_SESSIONS:
+        remaining = CAPIT_EXIT_SESSIONS_FIXED - sessions_held
+        return f"còn {remaining} phiên tới hạn cố định T+{CAPIT_EXIT_SESSIONS_FIXED} — sắp tới hạn"
+    remaining = CAPIT_EXIT_SESSIONS_FIXED - sessions_held
+    return f"còn {remaining} phiên tới hạn cố định T+{CAPIT_EXIT_SESSIONS_FIXED}"
+
+
 def lag_exit_hint(ticker, entry_dates, asof_date):
-    """Text cửa sổ thoát LAG cho `ticker`, hoặc None nếu không có entry date / không tính
-    được phiên (fail-soft)."""
+    """Text cửa thoát LAG (mốc CỐ ĐỊNH T+25 phiên — khớp backtest pin) cho `ticker`, hoặc
+    None nếu không có entry date / không tính được phiên (fail-soft)."""
     entry_str = entry_dates.get(ticker)
     if not entry_str:
         return None
@@ -262,14 +293,11 @@ def lag_exit_hint(ticker, entry_dates, asof_date):
     sessions = count_trading_days(entry, asof)
     if sessions is None:
         return None
-    if sessions < LAG_EXIT_MIN_SESSIONS:
-        return (f"vào {entry_str}, còn {LAG_EXIT_MIN_SESSIONS - sessions} phiên tới cửa "
-                f"T+{LAG_EXIT_MIN_SESSIONS}")
-    if sessions <= LAG_EXIT_MAX_SESSIONS:
-        remaining = LAG_EXIT_MAX_SESSIONS - sessions
-        return (f"còn ~{remaining} phiên (cửa T+{LAG_EXIT_MIN_SESSIONS}/T+{LAG_EXIT_MAX_SESSIONS}, "
-                f"vào {entry_str})")
-    return f"ĐÃ QUA cửa T+{LAG_EXIT_MAX_SESSIONS} ({sessions} phiên từ {entry_str}) — cân nhắc thoát"
+    if sessions < LAG_EXIT_SESSIONS_FIXED:
+        remaining = LAG_EXIT_SESSIONS_FIXED - sessions
+        return f"vào {entry_str}, còn {remaining} phiên tới hạn cố định T+{LAG_EXIT_SESSIONS_FIXED}"
+    return (f"ĐÃ QUA hạn cố định T+{LAG_EXIT_SESSIONS_FIXED} ({sessions} phiên từ {entry_str}) "
+            f"— tới hạn thoát")
 
 
 def latest_recs_csv():
@@ -529,7 +557,8 @@ def build_output(account, date):
                 if h:
                     extra.append(h)
             elif sleeve == "CAPIT":
-                extra.append("không fixed exit, thoát theo tín hiệu đảo")
+                h = capit_exit_hint(status.get("capit_sessions_held"))
+                extra.append(h or "episode CAPIT không xác định số phiên đã giữ")
             elif sleeve == "DISCRETIONARY_SPECIAL":
                 entry_str = disc_entries.get(tk)
                 if entry_str:
@@ -608,8 +637,9 @@ def build_output(account, date):
                 disc_bits.append(tk)
         flags.append(f"⚠️ Discretionary: {', '.join(sorted(disc_bits))} — chờ ý kiến PM về exit")
     if sleeves.get("CAPIT"):
-        flags.append(f"CAPIT: {len(sleeves['CAPIT'])} mã đang trong episode overflow. "
-                     "Không có fixed exit — thoát theo tín hiệu đảo.")
+        capit_h = capit_exit_hint(status.get("capit_sessions_held"))
+        flags.append(f"CAPIT: {len(sleeves['CAPIT'])} mã đang trong episode overflow"
+                     f"{' — ' + capit_h if capit_h else ''}.")
     n_lag_upcoming = status.get("n_lag_upcoming") or 0
     if n_lag_upcoming:
         flags.append(f"LAG: {n_lag_upcoming} candidate đang trong cửa sổ upcoming (chưa vào lệnh).")
