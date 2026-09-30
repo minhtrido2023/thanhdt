@@ -261,6 +261,58 @@ def main():
     finally:
         shutil.rmtree(td, ignore_errors=True)
 
+    # ---------------- Test 7: approved_by_user (bí danh) cũng phải REFUSE, không chỉ approved_by
+    # (quant-skeptic 2026-09-30: pipeline duyệt plan thật coi 2 field này tương đương —
+    # trading_bot/plan.py:264-265, preflight_check.sh, merge_park_orders.py) ----------------
+    td, exec_dir, plan_dir, ledger_path = setup_sandbox()
+    try:
+        write_journal(exec_dir, [
+            {"event": "FILL", "book": "LAG", "side": "buy", "ticker": "AAA", "ts": lag_exit_entry},
+        ])
+        write_positions(exec_dir, signal_date_str, {"AAA": (1000, 20000.0)})
+        plan_path = write_plan(plan_dir, ACCOUNT, plan_date)
+        plan = load_plan_raw(plan_dir, ACCOUNT, plan_date)
+        plan.pop("approved_by", None)
+        plan["approved_by_user"] = "user"
+        with open(plan_path, "w", encoding="utf-8") as f:
+            json.dump(plan, f)
+        before = load_plan_raw(plan_dir, ACCOUNT, plan_date)
+        orig = patch_all(exec_dir, plan_dir, ledger_path)
+        try:
+            rc = aei.process_account(ACCOUNT, plan_date, signal_date_str, dry_run=False)
+        finally:
+            restore_all(orig)
+        after = load_plan_raw(plan_dir, ACCOUNT, plan_date)
+        check("Test7: rc=1 (REFUSE trên approved_by_user)", rc == 1, f"rc={rc}")
+        check("Test7: plan KHÔNG bị sửa (byte-identical)", before == after)
+    finally:
+        shutil.rmtree(td, ignore_errors=True)
+
+    # ---------------- Test 8: CAPIT ticker trong qty_per_account nhưng KHÔNG còn vị thế broker
+    # (đã thoát qua đường khác) → KHÔNG bán khống theo planned_qty cũ (quant-skeptic 2026-09-30
+    # phantom-sell bug) ----------------
+    td, exec_dir, plan_dir, ledger_path = setup_sandbox()
+    try:
+        write_journal(exec_dir, [])
+        write_positions(exec_dir, signal_date_str, {"VNM": (900, 60000.0)})  # SAB đã hết vị thế
+        write_plan(plan_dir, ACCOUNT, plan_date)
+        write_capit_ledger(ledger_path, {
+            "episode_id": "CAPIT-TEST8", "status": "open", "sessions_held": 61,
+            "qty_per_account": {ACCOUNT: {"VNM": 900, "SAB": 1100}}})
+        orig = patch_all(exec_dir, plan_dir, ledger_path)
+        try:
+            rc = aei.process_account(ACCOUNT, plan_date, signal_date_str, dry_run=False)
+        finally:
+            restore_all(orig)
+        check("Test8: rc=0", rc == 0, f"rc={rc}")
+        plan = load_plan_raw(plan_dir, ACCOUNT, plan_date)
+        capit_sells = {o["ticker"] for o in plan["orders"] if o["book"] == "CAPIT" and o["side"] == "sell"}
+        check("Test8: VNM (còn vị thế) có lệnh sell", "VNM" in capit_sells)
+        check("Test8: SAB (hết vị thế) KHÔNG có lệnh sell khống", "SAB" not in capit_sells,
+              f"got={capit_sells}")
+    finally:
+        shutil.rmtree(td, ignore_errors=True)
+
     # ---------------- Test 6: TZ-robustness của plan_date trong main() (§16) ----------------
     def expected_plan_date(env):
         r = subprocess.run(

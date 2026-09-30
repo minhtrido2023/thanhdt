@@ -10,8 +10,12 @@ Cơ chế (mirror `discretionary_accumulation_inject.py` / `merge_park_orders.py
   - Chạy SAU khi DollarBill ghi plan T+1 (~19:0x), TRƯỚC send_plan_report 21:00 — user duyệt
     plan ĐÃ có sẵn đề xuất bán. KHÔNG đặt lệnh ra sàn — chỉ chèn ĐỀ XUẤT vào bản nháp; Mafee chỉ
     thực thi plan-bound SAU khi user duyệt (human-in-the-loop giữ nguyên, không bị bỏ qua).
-  - REFUSE (rc=1, không ghi gì) nếu plan đã có `approved_by` — không mutate plan đã ký.
+  - REFUSE (rc=1, không ghi gì) nếu plan đã có `approved_by` HOẶC bí danh `approved_by_user`
+    (trading_bot/plan.py:264-265 coi 2 field này tương đương — đọc raw JSON ở đây nên phải tự
+    chuẩn hoá, không mutate plan đã ký qua đường sửa tay).
   - FAIL-SAFE: thiếu broker/journal/giá ⇒ KHÔNG chèn lệnh cho ticker đó (không đoán giá/qty).
+    CAPIT: ticker trong `qty_per_account` mà KHÔNG còn vị thế broker (đã thoát qua đường khác)
+    ⇒ bỏ qua, KHÔNG fallback về qty kế hoạch cũ (tránh SELL khống cổ phiếu không còn có).
   - IDEMPOTENT: dedup theo (ticker, book, side=sell) đã có trong orders[]; nhắc CAPIT T+55 dedup
     qua field `reminder_55_sent_at` ghi thẳng vào `data/capit_episode.json` (gửi MỘT LẦN/episode).
   - Từ chối chạy GIỮA phiên (chỉ PRE/CLOSED) — vị thế/KL broker giữa phiên chưa chốt.
@@ -146,8 +150,14 @@ def process_account(account, plan_date, signal_date, dry_run):
         print(f"[auto-exit] {account}: plan_date file ({plan.get('plan_date')}) ≠ {plan_date} "
               f"— KHÔNG chèn (tránh ghi nhầm ngày).")
         return 1
-    if plan.get("approved_by"):
-        print(f"[auto-exit] {account}: plan ĐÃ DUYỆT (approved_by={plan['approved_by']!r}) "
+    # `approved_by_user` là bí danh tương đương `approved_by` trong TOÀN bộ pipeline duyệt
+    # plan hiện có (trading_bot/plan.py:264-265, preflight_check.sh, merge_park_orders.py,
+    # close_plan_approval_questions.py, ops_health_check.sh) — 8/9 lần duyệt tháng 09 đi qua
+    # sửa JSON tay nên ra field này thay vì `approved_by`. Đọc raw JSON (không qua load_plan())
+    # nên phải tự chuẩn hoá ở đây, không được chỉ nhìn `approved_by` (quant-skeptic 2026-09-30).
+    approved = plan.get("approved_by") or plan.get("approved_by_user")
+    if approved:
+        print(f"[auto-exit] {account}: plan ĐÃ DUYỆT (approved={approved!r}) "
               f"— REFUSE, không mutate plan đã ký.")
         return 1
     plan.setdefault("orders", [])
@@ -195,9 +205,13 @@ def process_account(account, plan_date, signal_date, dry_run):
             qty_map = (ep.get("qty_per_account") or {}).get(account, {})
             for tk, planned_qty in qty_map.items():
                 pos = positions.get(tk)
-                qty = int(pos["qty"]) if pos and pos.get("qty", 0) > 0 else int(planned_qty or 0)
-                if qty <= 0:
+                if not pos or pos.get("qty", 0) <= 0:
+                    # Không còn nắm giữ — đã thoát bằng đường khác (bán tay/stop-out/corp
+                    # action). KHÔNG fallback về planned_qty: đó là số KẾ HOẠCH cũ, bán theo
+                    # nó sẽ tạo lệnh SELL khống cho cổ phiếu không còn có (quant-skeptic
+                    # 2026-09-30, bug phantom-sell — mirror guard của _lag_bal_candidates).
                     continue
+                qty = int(pos["qty"])
                 existing = _already_has_sell(plan, tk, "CAPIT")
                 if existing:
                     print(f"  [skip] {tk}: đã có sell CAPIT trong plan (id={existing})")
