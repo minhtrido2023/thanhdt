@@ -493,6 +493,36 @@ def build_neutral_base_line(html=True):
             f"{nb['p20']:.1f}% · {nb['p40']:.1f}% · {nb['p60']:.1f}% {tail}")
 
 
+def get_macro_killswitch_a():
+    """trading_rules.json::macro_kill_switches.A_sbv_rate_suspend status, DISPLAY-ONLY here.
+    The sleeve it was designed to gate (execution_limits.deep_cheap_recovery_override) is
+    status=PROPOSED/paper with zero live code path, so this line cannot and does not change any
+    live sizing/order flow — it lets the user watch the 7.5% Big-4 12M deposit threshold against
+    the live feed (deposit_rate_vn.py), independent of the CCTG/6-month certificate rate (a
+    different instrument under separate legal-vn equivalence review). None on any failure."""
+    try:
+        from deposit_rate_vn import macro_killswitch_a_status
+        return macro_killswitch_a_status()
+    except Exception:
+        return None
+
+
+def build_macro_killswitch_a_line(html=True):
+    """One-line status for the daily/weekly/monthly 'Market regime context' block. DISPLAY-ONLY
+    (see get_macro_killswitch_a docstring) — không tác động sizing/gate. None -> caller drops it."""
+    v = get_macro_killswitch_a()
+    if not v:
+        return None
+    badge = "🔴" if v["armed"] else "🟢"
+    rate_s = f"{v['rate']*100:.1f}%" if v["rate"] is not None else "N/A"
+    verdict = "ARMED" if v["armed"] else "CLEAR"
+    stale_tag = " ⚠️STALE→fail-closed" if v["stale"] else ""
+    tail = ("(Big-4 12M deposit vs macro_kill_switches.A 7,5% — chỉ hiển thị, sleeve recovery "
+            "chưa LIVE nên không có gì bị gate; khác CCTG 6 tháng đang chờ legal-vn)")
+    tail = f"<i>{tail}</i>" if html else tail
+    return f"{badge} Macro kill-switch A: {rate_s} vs 7,5% — {verdict}{stale_tag} {tail}"
+
+
 def build_market_alert():
     """Market-level capitulation message for the daily push. Returns None when DORMANT
     so the scheduler only pings on a real WATCH/STRONG signal."""

@@ -91,6 +91,58 @@ def merge_deposit(df, time_col="time"):
                          direction="backward", suffixes=("", "_dep"))
 
 
+def macro_killswitch_a_status(asof=None, stale_days_limit=45, check_freshness=None):
+    """trading_rules.json::macro_kill_switches.A_sbv_rate_suspend, implemented LITERALLY as code
+    for the first time (2026-10-01) — grepping 'macro_kill_switches'/'A_sbv_rate_suspend' across
+    every .py in the repo previously returned 0 hits, i.e. this was spec-only prose with no
+    enforcement mechanism. Trigger: Big-4 12M deposit rate (THIS module's canonical series,
+    current_deposit_rate()) > 7.5%. Spec's own freshness clause ("if the deposit feed is stale,
+    fail SAFE (treat as armed)") is honored here, but ONLY for the live/monitoring call shape
+    (asof=None, i.e. "what is the status right now"): check_freshness defaults to
+    `asof is None` and can be overridden explicitly. Without this split, a historical/backtest-
+    style call (asof=some past date) would spuriously read "stale" purely because the 26 FROZEN
+    historical anchors in DEPOSIT_EVENTS are, by construction, months apart — that's settled
+    ground truth, not a live feed failing to refresh (caught by this function's own selfcheck,
+    macro_killswitch_a_selfcheck.py T2, 2026-10-01: querying asof='2013-01-01' against the
+    2012-10-01 anchor, 92 days prior, was flagged stale under the naive asof-relative definition).
+
+    DISPLAY/MONITORING ONLY as of this commit: the sleeve this switch was designed to gate
+    (execution_limits.deep_cheap_recovery_override, the RECOVERY_PARK deep-cheap deploy) remains
+    status=PROPOSED/paper with zero live production code path of its own (RECOVERY_PARK env flag
+    defaults OFF in pt_v23_audit_2014.py) — there is no live order flow for this function to gate
+    yet. It exists so (a) the threshold has a real, testable implementation the day that sleeve
+    (or any other consumer) goes live, and (b) the 7.5% level can be monitored today via
+    dna_report.build_macro_killswitch_a_line(), independent of the CCTG 6-month certificate rate
+    (a DIFFERENT instrument/tenor under separate legal-vn equivalence review — do not conflate).
+
+    Returns dict: armed(bool), rate(float|None, fraction e.g. 0.068), threshold(0.075),
+    stale(bool), last_update(str date|None), age_days(int|None), reason(str)."""
+    THRESHOLD = 0.075
+    if check_freshness is None:
+        check_freshness = asof is None
+    ev = deposit_events_df()
+    asof_ts = pd.Timestamp.today().normalize() if asof is None else pd.to_datetime(asof)
+    avail = ev[ev.time <= asof_ts]
+    if avail.empty:
+        return {"armed": True, "rate": None, "threshold": THRESHOLD, "stale": True,
+                "last_update": None, "age_days": None,
+                "reason": "no deposit data at/before asof -> fail-closed (armed)"}
+    last_date = avail.iloc[-1]["time"]
+    rate_pct = float(avail.iloc[-1]["deposit_rate"])
+    rate = rate_pct / 100.0
+    age_days = (asof_ts - last_date).days
+    stale = check_freshness and age_days > stale_days_limit
+    if stale:
+        return {"armed": True, "rate": rate, "threshold": THRESHOLD, "stale": True,
+                "last_update": str(last_date.date()), "age_days": age_days,
+                "reason": f"feed stale ({age_days}d > {stale_days_limit}d) -> fail-closed (armed)"}
+    armed = rate > THRESHOLD
+    reason = (f"deposit {rate_pct:.2f}% > 7.5% -> SUSPEND new recovery deploy" if armed
+              else f"deposit {rate_pct:.2f}% <= 7.5% -> CLEAR")
+    return {"armed": armed, "rate": rate, "threshold": THRESHOLD, "stale": False,
+            "last_update": str(last_date.date()), "age_days": age_days, "reason": reason}
+
+
 def current_deposit_rate(asof=None):
     """asof=None means TODAY, not "the last row in the series" — a future-dated or typo'd
     effective_date (e.g. a year typo) must never pin/pre-empt the live value. Found 2026-07-20
