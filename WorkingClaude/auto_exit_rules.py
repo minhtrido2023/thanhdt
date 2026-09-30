@@ -22,13 +22,20 @@ ngưỡng/biên mà không cần broker/DNSE/journal thật, và logic exit khô
 (`portfolio_status.py` hiển thị cảnh báo, `auto_exit_inject.py` chèn lệnh bán — cả hai phải
 dùng ĐÚNG MỘT hằng số, không phải 2 bản chép tay).
 
-`stop_loss` KHÔNG được wire ở đây (ngoài phạm vi chỉ đạo 2026-09-30): LAG backtest MIỄN stop
-(-0.99), BAL backtest có stop -0.20 nhưng auto-sell theo drawdown là quyết định khác (cần giá
-live, không chỉ số phiên) — không suy diễn thêm nếu chưa có chỉ đạo riêng (§29 coding_guidelines).
+Wire tiếp 2026-09-30 (chỉ đạo user qua Mike, job Taylor_20260930_111053): BAL stop-loss -20% trên
+giá vốn (`pt_v23_audit_2014.py:2008`) — ĐỘC LẬP với mốc T+45, cần `pnl_pct` do caller tự tính từ
+giá LIVE (broker-native `avg_cost`/`marketPrice`, coding_guidelines §6), module này KHÔNG đọc giá.
+CỐ Ý CHƯA wire cho LAG (backtest MIỄN stop, -0.99) và CAPIT (backtest KHÔNG có tham số stop_loss,
+chỉ có `CAPIT_HOLD` theo phiên) — không tự bịa số cho 2 sleeve đó nếu chưa có chỉ đạo riêng (§29).
 """
 
 LAG_EXIT_SESSIONS = 25          # pt_v23_audit_2014.py:2060,2062 — mốc CỐ ĐỊNH, không phải khoảng
 BAL_EXIT_SESSIONS = 45          # pt_v23_audit_2014.py:2008
+BAL_STOP_LOSS_PCT = -0.20       # pt_v23_audit_2014.py:2008 — độc lập mốc phiên, theo giá live
+BAL_STOP_LOSS_MIN_HOLD = 2      # pt_v23_audit_2014.py:2008 min_hold; simulate_holistic_nav.py:689
+                                 # gate MỌI stop-loss check ở days_held<min_hold — pin chưa từng
+                                 # kiểm chứng stop-loss bắn ở phiên 0/1, không suy diễn quá pin
+                                 # (quant-skeptic 2026-09-30, job Taylor_20260930_111053)
 CAPIT_EXIT_SESSIONS = 60        # pt_v22_dt5g.py:123 / pt_v23_audit_2014.py:752 (CAPIT_HOLD)
 CAPIT_REMINDER_SESSIONS = 55    # user chốt: nhắc trước ~1 tuần (60 - 5)
 
@@ -41,6 +48,19 @@ def lag_should_exit(sessions_held):
 def bal_should_exit(sessions_held):
     """True ⇔ vị thế BAL đã giữ ĐỦ 45 phiên giao dịch trở lên kể từ entry."""
     return sessions_held is not None and sessions_held >= BAL_EXIT_SESSIONS
+
+
+def bal_stop_loss_hit(pnl_pct, sessions_held):
+    """True ⇔ vị thế BAL lỗ ≥20% trên giá vốn (pnl_pct = marketPrice/avg_cost − 1, âm khi lỗ)
+    VÀ đã giữ ≥`BAL_STOP_LOSS_MIN_HOLD` phiên — mirror `min_hold` của pin, tránh bắn stop-loss ở
+    phiên 0/1 mà backtest chưa từng kiểm chứng. Độc lập với `bal_should_exit` (mốc T+45) — trigger
+    theo GIÁ, không theo số phiên tới hạn. Epsilon 1e-9 để tránh sai số float khiến đúng -20.0%
+    (vd 80000/100000-1 = -0.19999999999999996) không trigger."""
+    if pnl_pct is None or sessions_held is None:
+        return False
+    if sessions_held < BAL_STOP_LOSS_MIN_HOLD:
+        return False
+    return pnl_pct <= BAL_STOP_LOSS_PCT + 1e-9
 
 
 def capit_should_exit(sessions_held):
