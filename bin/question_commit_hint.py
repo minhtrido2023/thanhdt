@@ -159,16 +159,28 @@ def _score(tokens, low, flat, subj=""):
 def main():
     argv = sys.argv[1:]
     days, limit, per_q = _DEFAULT_DAYS, _DEFAULT_MAX, _MAX_PER_Q
+    def _pos(raw, fallback):
+        # Flag tay: giá trị rác/âm không được biến thành cắt NGẦM (cands[:-1]) hay ValueError
+        # (nit arch-review vòng 3). Về mặc định + nói ra, không im lặng.
+        try:
+            v = int(raw)
+        except ValueError:
+            v = 0
+        if v < 1:
+            print(f"  (bỏ qua giá trị không hợp lệ {raw!r} — dùng mặc định {fallback})")
+            return fallback
+        return v
+
     for i, a in enumerate(argv):
         if a == "--days" and i + 1 < len(argv):
-            days = int(argv[i + 1])
+            days = _pos(argv[i + 1], _DEFAULT_DAYS)
         elif a == "--max" and i + 1 < len(argv):
-            limit = int(argv[i + 1])
+            limit = _pos(argv[i + 1], _DEFAULT_MAX)
         elif a == "--per-question" and i + 1 < len(argv):
             # arch-review 2026-09-30: dòng chỉ đường cũ bảo dùng --max để xem ứng viên bị cắt,
             # nhưng --max điều khiển số CÂU HỎI, không phải số commit/câu hỏi ⇒ chỉ sai đường.
             # Có flag thật thì lời nhắc mới thực thi được.
-            per_q = int(argv[i + 1])
+            per_q = _pos(argv[i + 1], _MAX_PER_Q)
 
     hint = _load_hint_module()
     pending = hint._pending()
@@ -216,7 +228,7 @@ def main():
     # trước là cắt đúng ca công cụ này tồn tại để bắt. Câu già thường đã là "chờ người quyết".
     rows.sort(key=lambda x: (-x[0], -x[1], int(x[2].get("age_days") or 0)))
     q_extra = max(0, len(rows) - limit)
-    rows = rows[:limit]
+    cut, rows = rows[limit:], rows[:limit]
 
     print("[Có commit TRÔNG NHƯ đã xử lý câu hỏi treo — CHỈ LÀ GỢI Ý theo từ khoá, phải tự đọc "
           "commit xem có đúng cùng việc không. Nếu ĐÚNG là đã xong mà chỉ thiếu event `answer` "
@@ -236,7 +248,10 @@ def main():
     if q_extra > 0:
         # NÓI RA phần bị cắt Ở TẦNG CÂU HỎI, cùng lý do như tầng commit (arch-review
         # 2026-09-30): cắt im lặng thì người đọc tưởng chỉ có bấy nhiêu câu hỏi có commit khớp.
-        print(f"  … còn {q_extra} câu hỏi treo khác cũng có commit khớp — xem đầy đủ: "
+        # Kèm TÊN, không chỉ SỐ (nit vòng 3): 1 dòng/câu là xoá hẳn phần vô hình, mà chính lớp
+        # sự cố này là "fix đã merge nhưng câu hỏi không được đóng".
+        names = ", ".join(f"{r[2].get('agent', '?')}/{r[2].get('topic', '?')}" for r in cut)
+        print(f"  … còn {q_extra} câu hỏi treo khác cũng có commit khớp ({names}) — xem đầy đủ: "
               f"question_commit_hint.py --max {limit + q_extra}")
     return 0
 

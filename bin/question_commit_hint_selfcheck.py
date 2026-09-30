@@ -157,8 +157,14 @@ def fixture_cases(m):
         _rc, outq = _run(m, [q_young, q_old], ["--max", "1"])
         check("cap câu hỏi: in 1 và NÓI RA còn 1 câu hỏi treo khác",
               "còn 1 câu hỏi treo khác" in outq, outq.strip()[:400])
-        check("cap câu hỏi: câu TRẺ (0d, ca Pattern B) SỐNG, câu GIÀ (9d) bị cắt",
-              q_young["topic"] in outq and q_old["topic"] not in outq, outq.strip()[:400])
+        # "Bị cắt" = không còn MỤC riêng (dòng `  · agent/topic (Nd treo) ←`); TÊN vẫn phải
+        # xuất hiện trong dòng nói-ra-phần-cắt (nit arch-review vòng 3: nói SỐ mà không nói TÊN
+        # thì phần bị cắt vẫn vô hình).
+        _entry = lambda q: "· %s/%s (" % (q.get("agent"), q["topic"])
+        check("cap câu hỏi: câu TRẺ (0d, ca Pattern B) SỐNG, câu GIÀ (9d) mất MỤC riêng",
+              _entry(q_young) in outq and _entry(q_old) not in outq, outq.strip()[:400])
+        check("cap câu hỏi: dòng nói-ra NÊU TÊN câu bị cắt, không chỉ đếm số",
+              q_old["topic"] in outq.split("còn 1 câu hỏi treo khác")[-1], outq.strip()[:400])
         check("dòng nói-ra-phần-cắt chỉ đúng flag THẬT (--max), không chỉ sai đường",
               "--max 2" in outq, outq.strip()[:400])
 
@@ -283,16 +289,26 @@ def _preview_window_untainted(src):
     """KILLER OBJECTION arch-review 2026-09-30: hint append vào $logfile (~812B) trong khi
     `tail -c 500 $logfile` là preview Discord USER-FACING và `head -c 400` là cb_summary ⇒ chụp
     SAU khi append thì kết luận agent bị xoá sạch khỏi thông báo cho user. Test này trích dòng
-    THẬT từ dispatch.sh theo ĐÚNG thứ tự xuất hiện rồi chạy chúng — đảo thứ tự là chết."""
+    THẬT từ dispatch.sh theo ĐÚNG thứ tự xuất hiện rồi chạy chúng — đảo thứ tự là chết.
+
+    ⚠️ GIỚI HẠN đã biết (arch-review vòng 3, mutant M-N): đây là phân tích TĨNH theo thứ tự
+    DÒNG, nên bảo đảm là "không có write TRỰC TIẾP vào $logfile trước 2 cửa sổ chụp", KHÔNG
+    phải "không có write nào". Một helper định nghĩa NGOÀI vùng _bg_wrapper rồi gọi trước
+    capture sẽ thoát cả chốt tĩnh lẫn e2e. Chi phí trace runtime vượt giá trị ⇒ chấp nhận,
+    ghi ra đây để người sau không tưởng chốt này mạnh hơn thực tế."""
     lines = src.splitlines()
     lo, hi = _bg_region(lines)
     reg = range(lo, hi)
     idx_read = [i for i in reg
                 if 'tail -c 500 "$logfile"' in lines[i] or 'head -c 400 "$logfile"' in lines[i]]
+    # Loại theo INDEX (i not in idx_read), KHÔNG theo substring "tail -c"/"head -c"
+    # (arch-review vòng 3, mutant M-O): 2 clause substring đó không bảo vệ gì — dòng capture
+    # không khớp _WRITE vì không có `>` trước "$logfile" — mà mở cửa cho mọi write ẩn trong
+    # một dòng tình cờ có chứa "tail -c".
     idx_write = [i for i in reg
                  if _WRITE.search(lines[i]) and not lines[i].strip().startswith("#")
-                 and ".workerpid" not in lines[i] and "CLI_ARGV" not in lines[i]
-                 and "tail -c" not in lines[i] and "head -c" not in lines[i]]
+                 and i not in idx_read
+                 and ".workerpid" not in lines[i] and "CLI_ARGV" not in lines[i]]
     check("có đủ 2 cửa sổ chụp log (_preview tail -c 500 + _cb_summary head -c 400)",
           len(idx_read) == 2, str(idx_read))
     check("MỌI lệnh ghi thêm vào $logfile nằm SAU khi đã chụp preview/cb_summary",
