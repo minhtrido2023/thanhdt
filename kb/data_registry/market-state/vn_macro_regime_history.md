@@ -12,6 +12,7 @@ last_update: 2026-08-30 (Bobby — bản đồ pha trong-năm 2009/2018 ở file
 last_update_2: 2026-08-31 (Bobby — addendum granular cửa sổ 2008Q4-2009Q3: đường lãi suất SBV theo ngày, tín dụng 37,53% vs mục tiêu 21-23%, CPI YoY tháng qua cpi_vn.py, FDI 7T/2009; XÁC NHẬN LẠI EP-2008-09 MIXED/EXTERNAL_CYCLE, không đổi verdict)
 last_update_3: 2026-08-31 (Bobby — 5 episode mới, BLIND, dispatch riêng: EP-2014-09 OPEC/oil CONFIDENCE_LIQUIDITY/EXTERNAL_CYCLE clean; EP-2015-07 China devaluation CONFIDENCE_LIQUIDITY ambiguous/EXTERNAL_CYCLE clean; EP-2023-09 FX-defense/margin/VIC-VHM CONFIDENCE_LIQUIDITY clean/CONTAINABLE dominant+EXTERNAL_CYCLE phụ ambiguous; EP-2025-03 Liberation Day tariff CONFIDENCE_LIQUIDITY clean/CONTAINABLE(tranh chấp)+EXTERNAL_CYCLE(nền) ambiguous; EP-2026-01 credit/BĐS+chiến tranh dầu MIXED ambiguous, N/A trục 2 hai timeline — nghi vấn CHƯA XÁC NHẬN liên hệ với episode 07/2026 đã có trong fleet)
 last_update_4: 2026-09-30 (Bobby — WATCH real-time CD/lãi suất huy động tăng, BLIND, dispatch từ Mike: MIXED ambiguous, phần CONFIDENCE_LIQUIDITY (O/N spike 21-09) CONTAINABLE; không nâng cấp cảnh báo, củng cố watch STRUCTURAL_ACCUMULATION BĐS đã mở)
+last_update_5: 2026-09-30 (Bobby — REGIME READ real-time BLIND: Loại-1 STRUCTURAL_ACCUMULATION sớm-giữa mức nhẹ, ambiguous ~60/40; 7 lead indicator + điều kiện đổi phân loại; KHÔNG phải episode)
 ---
 
 # VN Macro Regime History — sổ phân loại nguyên nhân vĩ mô từng episode khủng hoảng
@@ -1221,6 +1222,83 @@ lãi suất NHNN quy định).
 **Không dispatch bổ sung nếu không có leo thang thêm.** Nếu O/N tái diễn spike KÉO DÀI (không phải
 1 phiên) hoặc lan sang CD 12 tháng của Big-4 (hiện Big-4 chỉ có sản phẩm CD 6 tháng), đó là tín
 hiệu nâng cấp cần dispatch macro-strategist riêng.
+
+---
+
+## REGIME READ (không phải episode) — Loại-1 vs Loại-2, dữ liệu tới 2026-09-30 (Bobby, real-time BLIND)
+
+**Dispatch bởi Mike.** Không có forward-return nào được cung cấp/dùng; chỉ dữ liệu PIT đã công bố tới
+30/09/2026. Disclosure: cùng ngày đã có entry WATCH (CD/lãi suất huy động, phía trên) do cùng vai trò viết —
+entry này đọc LẠI toàn bộ chuỗi với bằng chứng bổ sung (Fed, tín dụng 8T, chính sách nới LDR, chỉ đạo room
+2027), không chỉ chép lại. P/E VNINDEX ~11,3 (phân vị 7/10 năm) và DT5G NEUTRAL/candidate BEAR 2/10 là
+thông tin GIÁ do caller cung cấp — KHÔNG dùng làm bằng chứng nguyên nhân vĩ mô (định giá rẻ không phân
+biệt được Loại-1 với Loại-2).
+
+### Phân loại
+- **Trục 1: Loại-1 (`STRUCTURAL_ACCUMULATION`, giai đoạn sớm-giữa, MỨC ĐỘ NHẸ) — confidence `ambiguous`
+  (trung bình, nghiêng Loại-1 ~60/40).** Chồng lên là các cú sốc thanh khoản ngắn có chữ ký Loại-2
+  (O/N 21/09) nhưng chúng KHÔNG phải nguyên nhân gốc của regime.
+- **Trục 2: không áp dụng cho regime nền (Loại-1 tự thân đa năm).** Riêng lớp cú sốc thanh khoản 21/09 =
+  `CONTAINABLE` (clean). Hợp phần Fed = `EXTERNAL_CYCLE`, VN không kiểm soát mốc kết thúc.
+- Hàm ý theo mandate margin 2026-08-25: regime hiện tại KHÔNG đủ điều kiện Loại-2 ⇒ nếu có episode giá mới
+  trong regime này, mặc định đọc Loại-1/ambiguous (margin sleeve chặn hoặc size −50%). Đây là đọc vĩ mô,
+  không phải lệnh giao dịch.
+
+### Bằng chứng từng mắt xích (ngày công bố)
+1. **Tín dụng (ủng hộ Loại-1, độ lớn NHỎ hơn 2009):** 2025 ~19% (cao nhất nhiều năm); 2026 lũy kế **10,24%
+   tới 28/08** (~20,5 triệu tỷ; CafeF 18/09/2026) so mục tiêu ~15% ⇒ tốc độ ~15,4%/năm nếu tuyến tính, NHƯNG Q4
+   thường nặng; YoY 18,1% (26/06, NHNN 02/07). YoY ≥17,4% liên tục 16 tháng (mục "Bổ sung 2026-09-27").
+   Tín dụng BĐS +12,7% QoQ Q2 (tăng tốc).
+2. **Chính sách đang NỚI cung tín dụng, không siết (ủng hộ "không ai bước ra được"):** Quyết định 1743 (30/07)
+   giảm khấu trừ tiền gửi KBNN khi tính LDR 80%→50% từ 01/08/2026 đến 31/07/2028; TT29/2026 nâng ngưỡng
+   khoản vay nhỏ; loại NOXH/KCN và một số phân khúc BĐS khỏi room; TT08 + TT25 (nới LDR, vốn ngắn hạn cho vay
+   trung dài hạn 30%→40%) — [CafeF 18/09](https://cafef.vn/ngan-hang-bom-hon-19-trieu-ty-dong-ra-nen-kinh-te-tu-dau-nam-nhnn-tiep-tuc-co-dong-thai-noi-long-188260918094926737.chn).
+   Refi/OMO 4,5% giữ nguyên từ 2023. Khác 2011 (Nghị quyết 11 siết cả hệ thống): không có neo SIẾT hệ
+   thống nào.
+3. **Lạm phát: chưa runaway, chưa rõ demand-pull:** CPI T8 4,89% YoY (vượt trần 4,5%), bình quân 8T 4,45%, core
+   4,55% (driver diesel +22%, xăng +9,5% — cost-push). Khảo sát NHNN T8: CPI 2026 kỳ vọng 4,28%; kịch bản cơ
+   sở Brent 90-95$ ⇒ 4,8% (vượt mục tiêu), xấu 5,4% (VNEconomy/NHNN, T8-T9/2026).
+4. **Chi phí vốn biên tăng, lãi niêm yết bị kìm (chữ ký 2010-11 nhẹ):** CD Big-4 6T 7,5%, một số NHTM CP tới
+   9,4%; ~10 ngân hàng chào ≥9% ([VietnamNet 30/09](https://vietnamnet.vn/lai-suat-ngan-hang-hom-nay-30-9-2026-chung-chi-tien-gui-big4-cao-nhat-7-5-nam-2560175.html));
+   Big-4 12T niêm yết đi ngang 6,8% (PIT CSV 04/09). NHNN 13/08 nêu áp lực lãi suất huy động từ tín dụng+lạm
+   phát và DỌA giảm room tín dụng 2027 với ngân hàng không theo chỉ đạo hạ lãi suất ([nhadautu 13/08](https://nhadautu.vn/nhnn-se-giam-room-tin-dung-2027-voi-ngan-hang-khong-thuc-hien-dung-chi-dao-ve-lai-suat-d106950.html))
+   ⇒ kênh hành chính thay vì giá. Giải thích CD bùng nổ: lãi tiết kiệm bị kìm, CD nằm ngoài.
+5. **Ngoại sinh:** Fed +25bp lên 3,75-4,00% ngày 16/09/2026 (12-0, lần tăng đầu tiên từ 2023; SEP trung vị
+   ~4,1% cuối 2026) ⇒ thu hẹp dư địa nới, tăng chi phí vốn, không ép siết ngay ([TTTC Tiền tệ 17/09](https://thitruongtaichinhtiente.vn/tac-dong-tu-quyet-dinh-tang-lai-suat-cua-fed-du-dia-noi-long-tien-te-thu-hep-hon-ap-luc-tap-trung-vao-chi-phi-von-85636.html)).
+   Tỷ giá trung tâm ~25.640 (17/09) vs 25.206 (30/06) ≈ +1,7%.
+6. **Cú sốc thanh khoản 21/09 (Loại-2-like, đã xử lý):** O/N 7,0% → OMO ròng ~48.000 tỷ + swap 2 tỷ USD →
+   O/N ~1,1-1,2% trong ~1 tuần (chi tiết mục WATCH phía trên).
+7. **Xác nhận muộn, hướng xấu:** NPL ngành 1,97% Q2 (cao nhất từ 2020), nhóm 2 cao nhất từ Q1/2023; IMF full
+   NPL 5,3% (số công bố là cận dưới).
+8. **Độ lớn so 2007-2012:** tín dụng 19% vs 53%/37%; CPI đỉnh 5,6% vs 23%; NPL 2% vs 17% ⇒ "sớm", chưa
+   "crystallize" — lý do confidence chỉ ~60/40.
+
+### 7 lead indicator và ngưỡng (cập nhật theo lịch công bố)
+| # | Chỉ báo | Xác nhận Loại-1 | Bác / chuyển Loại-2 |
+|---|---|---|---|
+| 1 | Tín dụng lũy kế NHNN (hết T9, hết T10) + YoY | YTD >12,5% hết T9 **và** YoY ≥17% ; cả năm >18% | YTD ≤11% hết T9, YoY <16% |
+| 2 | CPI YoY + **core** (GSO ~6/10, ~6/11) | CPI >5% 2 tháng liên tiếp **hoặc** core >4,7%/tăng nhanh hơn CPI chung (demand-pull) | CPI <4,5% và core <4,3% (cost-push tan) |
+| 3 | O/N + 1W liên ngân hàng, OMO ròng | ≥2 spike O/N ≥6% trong 4 tuần, hoặc O/N >4% ≥5 phiên, OMO bơm >100.000 tỷ/tháng | O/N <2% và hết bơm ròng trong 4 tuần |
+| 4 | Chi phí vốn biên: CD 6T Big-4, top-group, 12T niêm yết Big-4 | CD Big-4 ≥8% hoặc 12T niêm yết +≥0,3pp (≥7,1%) | NHNN ép được: CD Big-4 ≤7,5%, NHTM CP ≤8,5%, không room bị cắt |
+| 5 | FX: tỷ giá trung tâm, premium tự do (last 11,86% 03/2026), dự trữ | Trung tâm >26.400 (≈+3% so 25.640) trong ≤1 tháng, premium >12%, dự trữ <$70 tỷ | Trung tâm <25.800 sau đợt Fed, premium <8% |
+| 6 | NPL/nhóm 2/coverage từ BCTC Q3 (cuối T10) | NPL ngành >2,2%, nhóm 2 +>20% QoQ, coverage <80% | NPL ≤2,0% và nhóm 2 đi ngang |
+| 7 | Tín dụng BĐS/tổng dư nợ + QoQ, vỡ TPDN BĐS | BĐS QoQ >10% lần nữa hoặc tỷ trọng >28% | QoQ <5% (siết thực sự cắn) |
+
+### Điều gì đổi phân loại
+- **→ Loại-1 CLEAN (nâng confidence / sang giai đoạn 2):** ≥3/7 chỉ báo chạm cột "xác nhận" ĐỒNG THỜI và #2 nằm
+  trong đó (demand-pull), hoặc NHNN chuyển sang siết HỆ THỐNG (nâng refi, trần tín dụng) — tức xác nhận mất
+  cân đối đã buộc phải xử lý.
+- **→ Loại-2 (CONFIDENCE_LIQUIDITY/CONTAINABLE):** #1 và #2 cùng về cột "bác" qua hết Q4 VÀ có một trigger cụ
+  thể có neo chính sách (1 tổ chức/1 sự kiện); hoặc tín dụng YoY <15% bền vững.
+- **→ Bình thường hoá (GROWTH/NEUTRAL):** cả 7 chỉ báo cột "bác" 2 quý liên tiếp.
+- Chỉ 1-2 chỉ báo chạm ngưỡng (đặc biệt chỉ CPI do giá dầu) = KHÔNG đổi phân loại (đúng quy tắc cost-push vs
+  demand-pull đã chốt 2026-09-09).
+
+**Giới hạn dữ liệu:** không tìm được số tín dụng hết T9, CPI T9, O/N tuần 22-26/9, dự trữ ngoại hối mới, tỷ
+giá 30/09 từ nguồn sơ cấp; chuỗi tự do FiinPro hết hạn 28/09/2026 (premium không còn refresh). Số tỷ giá từ
+TTTC Tiền tệ có sai lệch ngày trong bản tóm tắt (25.641 "Sept 25" vs 17/09) — dùng ≈25.640 làm mức tham
+chiếu, kiểm lại bằng NHNN. Review định kỳ: ~2026-11-26 (sau BCTC Q3) như lịch đã chốt; sớm hơn nếu #3 hoặc #5
+chạm ngưỡng.
 
 ---
 
