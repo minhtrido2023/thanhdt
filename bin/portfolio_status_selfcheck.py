@@ -253,6 +253,25 @@ def run():
         sys.argv = old_argv
     check("main() trả rc=1 khi không có NAV cho ngày đó", rc == 1, str(rc))
 
+    # 17: NAV STALE — user 2026-09-30 phát hiện thật: `date` yêu cầu chưa có dòng nav_history
+    # (đúng tình huống eod_trading_report.sh gọi portfolio_status.py TRƯỚC daily_nav_snapshot.py
+    # cùng lượt chạy) ⇒ PHẢI cảnh báo tường minh, KHÔNG được dán nhãn "Hôm nay" cho NAV/% đổi của
+    # ngày khác. Dùng ngày tương lai xa (chưa có + không thể có) để chắc chắn tái lập fallback.
+    if date_zalopay:
+        _future = "2099-12-31"
+        out_stale = ps.build_output("ZaloPay", _future)
+        check("NAV stale: build_output không None (vẫn fallback dòng gần nhất, không crash)",
+              out_stale is not None)
+        if out_stale is not None:
+            check("NAV stale: có cảnh báo ⚠️ NAV hôm nay CHƯA có + nêu đúng ngày yêu cầu",
+                  f"⚠️ NAV hôm nay ({_future}) CHƯA có" in out_stale, out_stale.splitlines()[2:4])
+            check("NAV stale: KHÔNG còn dán nhãn 'Hôm nay:' cho số của ngày khác (dòng cũ đã bị thay)",
+                  "| Hôm nay: **" not in out_stale)
+            check("NAV stale: có nêu ngày THẬT của số đang hiện (today_row['date'])",
+                  f"({date_zalopay})" in out_stale, date_zalopay)
+    else:
+        check("NAV stale: bỏ qua (không có nav_history_ZaloPay.csv nào để test fallback)", True)
+
     print()
     if FAILS:
         print(f"SELFCHECK FAILED: {len(FAILS)} assertion — {FAILS}")

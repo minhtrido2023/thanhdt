@@ -492,14 +492,31 @@ def build_output(account, date):
         pass
 
     # ---------------- header ----------------
+    # today_row là dòng KHỚP `date` HOẶC gần nhất TRƯỚC nếu hôm nay chưa có (load_nav_row, fail-
+    # open có chủ đích — không crash khi daily_nav_snapshot.py chưa chạy). eod_trading_report.sh
+    # gọi portfolio_status.py (khối này) TRƯỚC khi tự gọi daily_nav_snapshot.py cho mục 💰 NAV ở
+    # cuối report cùng lần chạy — nên tại đây `nav_history_{account}.csv` thường CHƯA có dòng hôm
+    # nay. Trước đây gán thẳng "NAV: X | Hôm nay: Y%" mà không kiểm `today_row["date"]` có khớp
+    # `date` hay không ⇒ hiện NAV/% đổi của NGÀY HÔM TRƯỚC nhưng dán nhãn "hôm nay", mâu thuẫn với
+    # số 💰 NAV chính xác ở cuối CÙNG report (user phát hiện 2026-09-30, ca ZaloPay: đầu báo cáo
+    # 965.3M/+0.36%, cuối báo cáo 958.666.279đ/-0.68% — hai nguồn KHÁC ngày, không phải 2 số sai).
+    nav_stale = today_row["date"].isoformat() != date
     hdr_day = f"{day_chg_pct:+.2f}%" if day_chg_pct is not None else "?"
     hdr_incep = f"{inception_pct:+.2f}%" if inception_pct is not None else "?"
     lines.append("─────────────────────────────────────────────────")
     lines.append(f"📋 **TÌNH TRẠNG DANH MỤC — {account} ({date})**")
     lines.append(f"Chiến lược: **V2.4** | Regime: **{state_name}** (DT5G) | "
                  f"Park target: **{status.get('etf_park_frac', 0) * 100:.0f}%** idle cash")
-    lines.append(f"NAV: **{nav / 1e6:,.1f}M** | Hôm nay: **{hdr_day}** | "
-                 f"Từ khi bắt đầu hoạt động: **{hdr_incep}**")
+    if nav_stale:
+        lines.append(
+            f"⚠️ NAV hôm nay ({date}) CHƯA có trong nav_history_{account}.csv lúc chạy mục này — "
+            f"hiện NAV gần nhất ({today_row['date'].isoformat()}): **{nav / 1e6:,.1f}M**, đổi so "
+            f"với ngày trước đó **{hdr_day}** (KHÔNG PHẢI thay đổi của hôm nay). Số NAV chính thức "
+            f"hôm nay xem mục 💰 NAV cuối report (daily_nav_snapshot.py, chạy sau mục này)."
+        )
+    else:
+        lines.append(f"NAV: **{nav / 1e6:,.1f}M** | Hôm nay: **{hdr_day}** | "
+                     f"Từ khi bắt đầu hoạt động: **{hdr_incep}**")
     if dt_gate_line:
         lines.append(dt_gate_line)
     if value_radar_line:
