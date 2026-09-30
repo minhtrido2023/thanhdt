@@ -8393,3 +8393,55 @@ dữ liệu đã CONFIRMED).
 
 Tái lập: `source wc_env.sh && python3 price_xcheck_cum_band_breach.py` (script tự phân biệt
 681 pre-fix / 454 post-fix qua `assert n_ffill_cum_band in (681, 454)`, không cần flag riêng).
+
+## 2026-10-01 — `data/h3_baseline_R3.csv` TRỎ LẠI ledger sexies đã PIN (housekeeping, không phải backtest mới) — job `Taylor_20260930_171426`, user duyệt Phương án A trên bus question `r3-baseline-mismatch-20260930-vs-sexies`
+
+ledger_md5: 4707bcbeb7e801d49a4a851ffd91d5e7
+
+**Bối cảnh**: job `Taylor_20260930_161830` (mục "2026-09-30 waterfall regen") đã regen
+`data/h3_baseline_R3.csv` bằng `dc_waterfall_deepdive_regen.py` nhưng KHÔNG set
+`BASKET_WT=namecap` ⇒ ra `weight_scheme=capwt` (sai cấu hình so với production `park=0,30`
+namecap), số full-harness lệch khỏi ledger đã pin (CAGR 23,15%/Sharpe 1,89/MaxDD −14,9%/Calmar
+1,56 so với ledger sexies 23,37%/1,88/−14,6%/1,60). User (qua Mike) duyệt **Phương án A**: dùng
+ledger sexies đã PIN SẴN làm `h3_baseline_R3` chính thức, không regen lại.
+
+**Việc đã làm** (registry housekeeping thuần, không đụng production/paper/trading):
+1. Kiểm kê MỌI script đọc `data/h3_baseline_R3.csv` (grep cả `WorkingClaude/` root + mọi worktree
+   `mike/agents/Taylor/wt-*`): 5 script canonical ở root — `dc_waterfall_deepdive.py`,
+   `dc_rebal_timing_backtest.py`, `dc_trigger_gap_backtest.py`, `dc_overlap_cap_backtest.py`,
+   `dc_liquidity_floor_backtest.py` (+ `dc_waterfall_deepdive_regen.py` trong
+   `research/dcwf_regen_20260930/`, không đọc trực tiếp path này). Cột chúng cần:
+   `record_type` (lọc `DAILY`/`TX`), `combined_nav`, `bal_etf_ref`, `lag_etf_ref`,
+   `bal_cash_ref`, `lag_cash_ref`, `state`. Header ledger sexies **giống byte-for-byte** header
+   file cũ (29 cột, cùng thứ tự) — không lệch schema, không cần sửa script nào.
+2. File cũ (Jul-05, stale, pre-fix, md5 `4480d61b9a9732325382756d01cb88d3`) → đổi tên
+   `data/h3_baseline_R3_SUPERSEDED_20260705_prefix.csv`, KHÔNG xoá.
+3. `data/h3_baseline_R3.csv` = bản sao giải nén của
+   `data/pinned_ledgers/2026-09-28__R3-anchor-pin0pct-sexies__4707bcbe.csv.gz` (đã PIN
+   2026-09-28, xem mục "2026-09-27 (sexies)"). Xác nhận md5 sau khi sao = `4707bcbe…` khớp
+   `PINS.jsonl`. Không chạy lại backtest, không dùng `pin_ledger.py add` (md5 đã tồn tại,
+   `rc=2` là hành vi đúng — bỏ qua có chủ đích).
+4. **Bản regen 09-30 (capwt, NON-CANONICAL)** giữ nguyên trong lịch sử job
+   `Taylor_20260930_161830`/bus finding `dc-waterfall-regen-park-grid-corrected-baseline` làm
+   artifact tham khảo — **KHÔNG dùng làm baseline cho bất kỳ backtest nào**, sai cấu hình
+   (`weight_scheme=capwt` thay vì `namecap`, thiếu `BASKET_WT=namecap`).
+5. **Phát hiện khi verify** (khác giả định ban đầu của dispatch): cả `dc_waterfall_deepdive_regen.py`
+   và `fixed_tilt_dsr_pbo.py` KHÔNG đọc `data/h3_baseline_R3.csv` — chúng hardcode
+   `AUDIT = "data/v23_golive_audit_2014_now_..._exp_dcwf_r3_20260930_univpit.csv"`, tức chính file
+   audit `capwt` sai cấu hình của job `Taylor_20260930_161830` (final NAV 669,06B, lệch với sexies
+   684,52B). Đã tạo 2 bản verify **CHỈ đổi 1 dòng AUDIT** trỏ về `data/h3_baseline_R3.csv` (namecap,
+   đúng) — `dc_waterfall_deepdive_verify_namecap.py` + `fixed_tilt_dsr_pbo_verify_namecap.py`
+   (cùng thư mục `research/dcwf_regen_20260930/`, tên non-canonical, không đè bản gốc). SLEEVE
+   (custom30V/DC-book vehicle returns) build thẳng từ BQ, không phụ thuộc AUDIT R3 nên không đổi.
+   Self-check A trên bản verify khớp lại đúng số sexies (CAGR 23,3745% vs file 23,3688%, Sharpe
+   1,8781, MaxDD −14,6427%, Calmar 1,5963/1,5959).
+   **Kết quả trên baseline ĐÚNG (namecap) — KHÔNG ĐỔI kết luận**: waterfall DC flat/hồi âm
+   (FULL 23,33% vs baseline 23,37%, DSR N=10 trials = 0,043 <<0,95 — trước đó trên baseline sai là
+   0,037, cùng kết luận NO-GO); fixed-tilt 30:70 vẫn REFUTED (DSR 0,4402 <<0,95, PBO 0,796 ≥0,5 —
+   trước đó 0,42/0,69, cùng kết luận NO-GO, PBO thay đổi biên độ vì N=5<8 kém ổn định nhưng không
+   đổi hướng). Không có config nào lật từ REFUTED sang CONFIRMED khi sửa baseline.
+6. Đóng bus question `Taylor/r3-baseline-mismatch-20260930-vs-sexies` (decided_by: user).
+
+**Kết luận**: `data/h3_baseline_R3.csv` từ nay = ledger sexies pin chính thức (namecap,
+park=0,30), dùng trực tiếp cho 5 script overlay canonical ở trên. Không có thay đổi số nào tới
+kết luận Việc 1/Việc 2 của job `Taylor_20260930_161830`.
