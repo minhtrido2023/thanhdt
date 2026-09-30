@@ -1,8 +1,8 @@
 # Paper-Trade Comparison — 5 Systems
 
-*Generated: 2026-09-29 15:38*
+*Generated: 2026-09-30 15:38*
 
-*Window: 2026-04-01 → 2026-09-28 (180 calendar days)*
+*Window: 2026-04-01 → 2026-09-29 (181 calendar days)*
 
 *Init NAV: 50B VND fresh, all-cash, no positions (each system)*
 
@@ -11,30 +11,30 @@
 
 | System | Final NAV | Total Ret | CAGR | Vol (ann) | Sharpe | Max DD | Calmar |
 |---|---|---|---|---|---|---|---|
-| **V11 Song Sinh + KELLY + DT5G ⭐** | 52.166B | +4.49% | +9.32% | 16.56% | +0.63 | -11.57% | +0.81 |
-| **V12 Âm Dương (BAL+LAGGED) + DT5G ⭐** | 49.390B | -1.17% | -2.36% | 9.54% | -0.21 | -7.19% | -0.33 |
-| **V4 12.1 (V121_ENS + BASE) + DT5G — fresh 2026-06-01** | 48.783B | -2.38% | -7.13% | 9.93% | -0.70 | -6.64% | -1.07 |
-| **V2.3 = V2.2 (BAL|LAG static + park) + capit — fresh 2026-06-11 ⭐** | 47.614B | -4.77% | -15.11% | 13.39% | -1.18 | -10.63% | -1.42 |
-| **VNINDEX Buy & Hold (rebased 50B)** | 52.283B | +4.57% | +9.48% | 17.21% | +0.62 | -13.46% | +0.70 |
+| **V11 Song Sinh + KELLY + DT5G ⭐** | 51.960B | +4.08% | +8.40% | 16.51% | +0.58 | -11.57% | +0.73 |
+| **V12 Âm Dương (BAL+LAGGED) + DT5G ⭐** | 49.274B | -1.40% | -2.81% | 9.51% | -0.26 | -7.19% | -0.39 |
+| **V4 12.1 (V121_ENS + BASE) + DT5G — fresh 2026-06-01** | 48.624B | -2.70% | -7.99% | 9.88% | -0.79 | -6.64% | -1.20 |
+| **V2.3 = V2.2 (BAL|LAG static + park) + capit — fresh 2026-06-11 ⭐** | 47.373B | -5.25% | -16.41% | 13.25% | -1.30 | -10.55% | -1.55 |
+| **VNINDEX Buy & Hold (rebased 50B)** | 52.196B | +4.39% | +9.06% | 17.15% | +0.60 | -13.46% | +0.67 |
 
 ## Delta vs V23 (production baseline)
 
 | System | ΔRet | ΔDD | Verdict |
 |---|---|---|---|
-| V11 Song Sinh + KELLY + DT5G ⭐ | +9.26pp | -0.93pp | Return better, DD worse |
-| V12 Âm Dương (BAL+LAGGED) + DT5G ⭐ | +3.60pp | +3.44pp | Both better |
-| V4 12.1 (V121_ENS + BASE) + DT5G — fresh 2026-06-01 | +2.39pp | +3.99pp | Both better |
-| VNINDEX Buy & Hold (rebased 50B) | +9.34pp | -2.82pp | Return better, DD worse |
+| V11 Song Sinh + KELLY + DT5G ⭐ | +9.33pp | -1.01pp | Return better, DD worse |
+| V12 Âm Dương (BAL+LAGGED) + DT5G ⭐ | +3.85pp | +3.36pp | Both better |
+| V4 12.1 (V121_ENS + BASE) + DT5G — fresh 2026-06-01 | +2.55pp | +3.92pp | Both better |
+| VNINDEX Buy & Hold (rebased 50B) | +9.65pp | -2.90pp | Return better, DD worse |
 
 ## Grind lens — current drawdown & recent momentum
 
 | System | Cur DD (from peak) | Underwater | Peak date | Trailing 1M | Trailing 3M |
 |---|---|---|---|---|---|
-| V11 Song Sinh + KELLY + DT5G ⭐ | -6.3% | 137d | 2026-05-14 | -0.8% | -4.3% |
-| V12 Âm Dương (BAL+LAGGED) + DT5G ⭐ | -4.7% | 144d | 2026-05-07 | -0.3% | -2.7% |
-| V4 12.1 (V121_ENS + BASE) + DT5G — fresh 2026-06-01 | -2.7% | 89d | 2026-07-01 | -0.2% | -2.6% |
-| V2.3 = V2.2 (BAL|LAG static + park) + capit — fresh 2026-06-11 ⭐ | -8.4% | 89d | 2026-07-01 | -2.2% | -7.4% |
-| VNINDEX Buy & Hold (rebased 50B) | -7.6% | 133d | 2026-05-18 | -0.6% | -4.9% |
+| V11 Song Sinh + KELLY + DT5G ⭐ | -6.6% | 138d | 2026-05-14 | -2.4% | -4.4% |
+| V12 Âm Dương (BAL+LAGGED) + DT5G ⭐ | -4.9% | 145d | 2026-05-07 | -1.3% | -2.7% |
+| V4 12.1 (V121_ENS + BASE) + DT5G — fresh 2026-06-01 | -3.1% | 90d | 2026-07-01 | -1.4% | -2.7% |
+| V2.3 = V2.2 (BAL|LAG static + park) + capit — fresh 2026-06-11 ⭐ | -8.9% | 90d | 2026-07-01 | -3.5% | -8.3% |
+| VNINDEX Buy & Hold (rebased 50B) | -7.8% | 134d | 2026-05-18 | -2.4% | -4.2% |
 
 *Grind = sustained underwater stretch where the book bleeds while the index holds/rises (style-divergence). V2.3's known weak spot is the 2025-08→ style-divergence grind (momentum lags the VIC-led megacap index); watch V2.3 trailing-3M vs VNINDEX.*
 
@@ -58,16 +58,16 @@
 | 2026-07-06 | 54.04B | 50.33B | 49.76B | 51.40B | 54.13B |
 | 2026-07-13 | 52.86B | 49.86B | 49.07B | 50.29B | 52.87B |
 | 2026-07-20 | 51.39B | 49.17B | 48.23B | 48.80B | 51.19B |
-| 2026-07-27 | 49.21B | 48.11B | 46.83B | 46.65B | 49.00B |
-| 2026-08-03 | 51.79B | 49.24B | 48.43B | 47.72B | 51.76B |
+| 2026-07-27 | 49.21B | 48.11B | 46.83B | 46.70B | 49.00B |
+| 2026-08-03 | 51.79B | 49.24B | 48.43B | 47.76B | 51.76B |
 | 2026-08-10 | 51.92B | 49.63B | 48.39B | 48.46B | 52.17B |
-| 2026-08-17 | 50.88B | 48.44B | 47.62B | 47.41B | 50.72B |
-| 2026-08-24 | 52.45B | 49.64B | 48.80B | 48.95B | 52.52B |
-| 2026-09-03 | 53.38B | 50.08B | 49.61B | 48.97B | 53.66B |
-| 2026-09-10 | 53.65B | 50.14B | 49.79B | 48.90B | 53.71B |
-| 2026-09-17 | 53.50B | 49.96B | 49.70B | 48.83B | 53.52B |
-| 2026-09-24 | 52.75B | 49.71B | 49.15B | 47.61B | 52.12B |
-| 2026-09-28 | 52.17B | 49.39B | 48.78B | 47.61B | 52.28B |
+| 2026-08-17 | 50.88B | 48.44B | 47.62B | 47.40B | 50.72B |
+| 2026-08-24 | 52.45B | 49.64B | 48.80B | 48.91B | 52.52B |
+| 2026-09-03 | 53.38B | 50.08B | 49.61B | 48.94B | 53.66B |
+| 2026-09-10 | 53.65B | 50.14B | 49.79B | 48.87B | 53.71B |
+| 2026-09-17 | 53.50B | 49.96B | 49.70B | 48.78B | 53.52B |
+| 2026-09-24 | 52.75B | 49.71B | 49.15B | 47.58B | 52.12B |
+| 2026-09-29 | 51.96B | 49.27B | 48.62B | 47.37B | 52.20B |
 
 ## Files
 
