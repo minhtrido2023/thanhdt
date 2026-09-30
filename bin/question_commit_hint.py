@@ -44,8 +44,24 @@ def _load_hint_module():
     return mod
 
 
+_DOC_EXT = (".md", ".txt", ".proposed", ".json")
+
+
+def _is_code(files):
+    """Commit có sửa file KHÔNG-phải-tài-liệu nào không? Commit docs-only (retro, ghi chú vận
+    hành, runbook .proposed) hay ĐANG kể lại một sự cố hơn là sửa nó — nó vẫn đáng in ra, nhưng
+    phải đứng SAU commit sửa thật. Đây là thuộc tính của CHÍNH commit, không phụ thuộc trạng thái
+    bus (luật meta cũ `len(per_commit) != 1` thì có, và nó làm gợi ý duy nhất của ca 29/09 biến
+    mất khi có thêm một câu hỏi họ hàng treo — arch-review 2026-09-29 NEEDS_CHANGES)."""
+    for f in files.split("\n"):
+        f = f.strip()
+        if f and not f.lower().endswith(_DOC_EXT):
+            return True
+    return False
+
+
 def _commits(repo, days):
-    """[(sha, subject, text_để_match)] — QUÉT CẢ BODY, không chỉ subject: bằng chứng mạnh nhất
+    """[(sha, subject, low, flat, is_code)] — QUÉT CẢ BODY, không chỉ subject: bằng chứng mạnh nhất
     (đường dẫn file incident, tên biến, slug câu hỏi) hầu như luôn nằm trong body, còn subject
     thì viết bằng tiếng Việt tự nhiên và gần như không bao giờ chứa slug topic."""
     r = subprocess.run(
@@ -73,7 +89,7 @@ def _commits(repo, days):
         # (mức "CHẮC" của _matches, có dấu gạch) vẫn còn cửa khớp.
         low = body.lower()
         flat = "".join(c for c in low if c.isalnum())
-        out.append((sha, subj, low, flat))
+        out.append((sha, subj, low, flat, _is_code(files)))
     return out
 
 
@@ -81,9 +97,19 @@ _MIN_SCORE = 4          # tổng điểm token khớp
 _MIN_SPECIFIC = 2       # số token ĐẶC THÙ (đủ dài) phải khớp
 _SPECIFIC_LEN = 7
 _FLAT_LEN = 7           # chỉ token đủ dài mới được khớp trên bản DẸT
+_META_MATCHES = 3       # khớp từ bấy nhiêu câu hỏi trở lên ⇒ commit META, bỏ
+_MAX_PER_Q = 2          # in tối đa bấy nhiêu commit cho mỗi câu hỏi
 
 
 _DATE_RE = re.compile(r"^\d{2,4}-\d{2}(-\d{2})?$")
+
+# Câu hỏi escalation do retro_escalate.py sinh ra: nó nói về một PATTERN LẶP LẠI, không về một
+# bug cụ thể ⇒ theo định nghĩa không có commit nào "đã xử lý xong" nó, chỉ user chốt A/B/C mới
+# đóng được. Đo thật 2026-09-30: 2/2 gợi ý live đều thuộc lớp này và đều SAI — slug của chúng
+# chứa sẵn 6+ token dài generic (pattern, recurring, question, closure, answer, event) nên mọi
+# commit nói về bus đều dư điểm. Loại hẳn lớp này thay vì siết ngưỡng chung (siết chung sẽ giết
+# luôn ca hồi quy thật d51c735e).
+_META_Q_PREFIX = "retro-pattern-recurring-"
 
 
 def _score(tokens, low, flat):
@@ -125,43 +151,54 @@ def main():
     if not pending:
         return 0
 
-    # topic -> (mức, sha, subject, repo). Giữ commit MỚI NHẤT khớp mạnh nhất cho mỗi câu hỏi.
-    best = {}
+    # key câu hỏi -> [(lvl, sc, is_code, sha, subj, repo)] — CHÙM commit khớp, không chọn 1.
+    # arch-review 2026-09-29: chọn 1 kéo theo bài toán tie-break, và với lớp ca Pattern B phổ
+    # biến nhất (fix nằm ở WorkingClaude, ghi chú chatty hơn nằm ở mike) nó luôn chọn nhầm sang
+    # commit ghi chú. In cả chùm thì người đọc thấy cả fix lẫn ghi chú, hết bài toán đó.
+    matches = {}
     for repo in REPOS:
         name = os.path.basename(repo)
-        for sha, subj, low, flat in _commits(repo, days):
+        for sha, subj, low, flat, is_code in _commits(repo, days):
             per_commit = []
             for q in pending:
                 topic = str(q.get("topic") or "")
-                if not topic:
+                if not topic or topic.lower().startswith(_META_Q_PREFIX):
                     continue
                 sc = _score(hint._tokens(topic), low, flat)
                 lvl = 2 if topic.lower() in low else (1 if sc else 0)
                 if not lvl:
                     continue
                 per_commit.append((lvl, sc, q))
-            # Commit khớp NHIỀU câu hỏi cùng lúc là commit META (retro, tài liệu, chính công cụ
-            # này — commit a9c4a421 giới thiệu nó LIỆT KÊ 2 topic trong message và lập tức tự
-            # nhận là resolver của cả hai). Commit sửa thật thì nói về MỘT việc. Bỏ cả cụm:
-            # mất một gợi ý chỉ là mất gợi ý, còn gợi ý sai thì bào mòn niềm tin vào cái nhắc.
-            if len(per_commit) != 1:
+            # Commit khớp TỪ 3 CÂU HỎI trở lên là commit META (retro liệt kê nhiều topic, tài
+            # liệu tổng hợp) — bỏ cả cụm. Ngưỡng cũ là "khớp != 1 câu hỏi", quá chặt: một fix
+            # thật rất hay khớp 2 câu hỏi họ hàng của cùng sự cố, và khi đó gợi ý ĐÚNG cũng bị
+            # xoá theo (đo thật trên ca 29/09). Commit sửa chính công cụ này đã bị loại ở nguồn.
+            if len(per_commit) >= _META_MATCHES:
                 continue
-            lvl, sc, q = per_commit[0]
-            key = (q.get("agent", "?"), str(q.get("topic") or ""))
-            # Ứng viên MẠNH NHẤT thắng (mức, rồi điểm) — không phải "repo nào duyệt trước".
-            if key not in best or (lvl, sc) > (best[key][0], best[key][5]):
-                best[key] = (lvl, sha, subj, name, q, sc)
-    if not best:
+            for lvl, sc, q in per_commit:
+                key = (q.get("agent", "?"), str(q.get("topic") or ""))
+                matches.setdefault(key, (q, []))[1].append((lvl, sc, is_code, sha, subj, name))
+    if not matches:
         return 0
 
-    rows = sorted(best.values(), key=lambda x: (-x[0], -int(x[4].get("age_days") or 0)))[:limit]
+    rows = []
+    for q, cands in matches.values():
+        # git log trả mới-nhất-trước ⇒ sort ỔN ĐỊNH giữ commit mới nhất lên trên trong các ca hoà.
+        cands.sort(key=lambda c: (-c[0], -int(c[2]), -c[1]))
+        rows.append((cands[0][0], q, cands[:_MAX_PER_Q]))
+    rows.sort(key=lambda x: (-x[0], -int(x[1].get("age_days") or 0)))
+    rows = rows[:limit]
+
     print("[Có commit TRÔNG NHƯ đã xử lý câu hỏi treo — CHỈ LÀ GỢI Ý theo từ khoá, phải tự đọc "
           "commit xem có đúng cùng việc không. Nếu ĐÚNG là đã xong mà chỉ thiếu event `answer` "
           "(Pattern B) thì đóng vòng bằng close_bus_question.py, đừng sửa lại lần nữa:]")
-    for lvl, sha, subj, repo, q, _sc in rows:
+    for _lvl, q, cands in rows:
         agent, topic, age = q.get("agent", "?"), q.get("topic", "?"), q.get("age_days", "?")
-        mark = "CHẮC" if lvl == 2 else "có thể"
-        print(f"  · [{mark}] {agent}/{topic} ({age}d treo) ← {repo}@{sha}: {subj}")
+        print(f"  · {agent}/{topic} ({age}d treo) ←")
+        for lvl, _sc, is_code, sha, subj, repo in cands:
+            mark = "CHẮC" if lvl == 2 else "có thể"
+            kind = "code" if is_code else "docs"
+            print(f"      [{mark}/{kind}] {repo}@{sha}: {subj}")
     return 0
 
 

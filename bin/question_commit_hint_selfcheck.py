@@ -9,8 +9,10 @@ PHẢI chỉ ra được commit đó. Ca #2 chốt chiều ngược lại — b�
 import importlib.util
 import io
 import os
+import shutil
 import subprocess
 import sys
+import tempfile
 from contextlib import redirect_stdout
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -55,6 +57,90 @@ def check(name, cond, detail=""):
         FAILS.append(name)
 
 
+def _git_repo(path, commits):
+    """[(subject, body, [file,...])] -> repo git thật ở path (docs-only khi files rỗng)."""
+    os.makedirs(path)
+    env = dict(os.environ, GIT_AUTHOR_NAME="t", GIT_AUTHOR_EMAIL="t@x",
+               GIT_COMMITTER_NAME="t", GIT_COMMITTER_EMAIL="t@x")
+    subprocess.run(["git", "init", "-q", path], check=True, env=env)
+    for subj, body, files in commits:
+        for f in files:
+            fp = os.path.join(path, f)
+            os.makedirs(os.path.dirname(fp), exist_ok=True)
+            with open(fp, "a") as fh:
+                fh.write("x\n")
+            subprocess.run(["git", "-C", path, "add", f], check=True, env=env)
+        subprocess.run(["git", "-C", path, "commit", "-q", "--allow-empty", "-m", subj,
+                        "-m", body], check=True, env=env)
+
+
+_FIX_CODE_SUBJ = "fix(execution): lệnh BÁN dùng gói vay của DEAL THẬT + dừng retry PLACE_FAIL lỗi cấu trúc"
+_FIX_CODE_BODY = ("Incident: kb/incidents/2026-09/2026-09-29-zalopay-sell-deal-not-found-loanpackage-1826.md\n"
+                  "Thêm _resolve_sell_loan_package_id: gộp sellable theo gói của chính mã đó; "
+                  "mọi lệnh bán ZaloPay mang gói 1258 nên DNSE trả deal not found.")
+_FIX_DOCS_SUBJ = "docs(ops): lý do cho 2 file của Taylor bị cuốn vào a9c4a421"
+_FIX_DOCS_BODY = ("Commit rỗng — GHI LẠI lý do. Lý do thay đổi (incident "
+                  "zalopay-sell-deal-not-found-loanpackage-1826): PLACE_FAIL_STOPPED vào tập "
+                  "concerning. Kèm WorkingClaude d51c735e.")
+
+
+def fixture_cases(m):
+    tmp = tempfile.mkdtemp(prefix="qch_fixture_")
+    real_repos = m.REPOS
+    try:
+        mike, wc = os.path.join(tmp, "mike"), os.path.join(tmp, "WorkingClaude")
+        _git_repo(mike, [(_FIX_DOCS_SUBJ, _FIX_DOCS_BODY, [])])
+        _git_repo(wc, [(_FIX_CODE_SUBJ, _FIX_CODE_BODY, ["trading_bot/brokers.py"])])
+        m.REPOS = [mike, wc]          # mike TRƯỚC: đúng thứ tự đã gây chọn nhầm ở v2
+        q = {"agent": "Winston", "topic": "sell-loanpackage-deal-not-found-zalopay-20260929",
+             "ts": "x", "age_days": 0}
+        _rc, out = _run(m, [q])       # --days MẶC ĐỊNH
+        code_sha = subprocess.run(["git", "-C", wc, "rev-parse", "--short", "HEAD"],
+                                  capture_output=True, text=True).stdout.strip()
+        docs_sha = subprocess.run(["git", "-C", mike, "rev-parse", "--short", "HEAD"],
+                                  capture_output=True, text=True).stdout.strip()
+        check("fixture(--days mặc định): commit SỬA THẬT được in ra", code_sha in out,
+              out.strip()[:300] or "(rỗng)")
+        check("fixture: commit sửa code đứng TRƯỚC commit ghi chú (hết bias thứ tự repo)",
+              docs_sha in out and out.index(code_sha) < out.index(docs_sha), out.strip()[:300])
+        check("fixture: commit rỗng/docs-only được dán nhãn docs", "/docs]" in out,
+              out.strip()[:200])
+
+        # META: commit khớp TỪ 3 câu hỏi ⇒ bỏ; khớp 2 câu hỏi họ hàng ⇒ GIỮ (luật cũ
+        # `!= 1` xoá luôn gợi ý đúng khi có câu hỏi họ hàng treo — chính bug arch-review bắt).
+        # Cả 2 topic phụ PHẢI khớp CHÍNH commit code (đã đo: 5 và 6 điểm) — nếu chọn topic chỉ
+        # khớp commit docs thì ca ">=3 bị loại" đậu vì lý do sai (commit code mới khớp 2).
+        qb = {"agent": "Wags", "topic": "brokers-resolve-sell-loan-package-sellable",
+              "ts": "x", "age_days": 0}
+        qc = {"agent": "Wags", "topic": "resolve-sell-loan-package-id-sellable-zalopay",
+              "ts": "x", "age_days": 0}
+        _rc, out2 = _run(m, [q, qb])
+        check("meta: commit khớp 2 câu hỏi họ hàng vẫn được GIỮ", code_sha in out2,
+              out2.strip()[:300] or "(rỗng)")
+        _rc, out3 = _run(m, [q, qb, qc])
+        check("meta: commit khớp >=3 câu hỏi bị loại (commit tài liệu/retro liệt kê topic)",
+              code_sha not in out3, out3.strip()[:300])
+    finally:
+        m.REPOS = real_repos
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
+def wired_into_wags_autofix():
+    """Fail-open TUYỆT ĐỐI + im lặng = cơ chế có thể chết âm thầm mà không ai biết. Chốt duy
+    nhất là ghim call site lại (tiền lệ production_manifest.py:418 từng xoá mất cả một dòng
+    gọi). Mẫu lấy từ dispatch_question_hint_selfcheck.py:160."""
+    src = open(os.path.join(ROOT, "bin", "wags_autofix.sh"), encoding="utf-8").read()
+    calls = [ln for ln in src.splitlines()
+             if "bin/question_commit_hint.py" in ln and not ln.strip().startswith("#")]
+    check("wags_autofix.sh còn gọi bin/question_commit_hint.py", len(calls) == 1, str(calls))
+    check("lời gọi fail-open tại call site (|| true)",
+          all("|| true" in c for c in calls), str(calls))
+    check("lời gọi có timeout (thống nhất dispatch.sh:1612/:1732, nằm foreground trước setsid)",
+          all("timeout " in c for c in calls), str(calls))
+    check("hint THẬT SỰ đi vào prompt dispatch (${COMMIT_HINT:+...})",
+          "${COMMIT_HINT:+" in src, "không thấy trong wags_autofix.sh")
+
+
 def main():
     m = _mod()
     print("question_commit_hint_selfcheck")
@@ -76,8 +162,8 @@ def main():
     # 1b) Mức FUNCTION — chính commit sửa d51c735e phải đạt điểm khớp, độc lập với thứ tự duyệt.
     hint = m._load_hint_module()
     tok = hint._tokens(q["topic"])
-    hit = [sha for sha, subj, low, flat in m._commits(os.path.dirname(ROOT), 3650)
-           if sha.startswith("d51c735e") and m._score(tok, low, flat) >= m._MIN_SCORE]
+    hit = [c[0] for c in m._commits(os.path.dirname(ROOT), 3650)
+           if c[0].startswith("d51c735e") and m._score(tok, c[2], c[3]) >= m._MIN_SCORE]
     check("regression(function): d51c735e đạt ngưỡng khớp trên repo WorkingClaude", bool(hit))
 
     # 2) PRECISION — lớp câu hỏi mà ngày là token phân biệt duy nhất không được khớp
@@ -109,28 +195,35 @@ def main():
           m._score({"loanpackage": 1, "deal": 1, "sell": 1, "abcd": 1},
                    "loanpackage deal sell abcd", "loanpackagedealsellabcd") == 0)
 
-    # 3b) META-COMMIT: một commit khớp NHIỀU câu hỏi là commit tài liệu/retro liệt kê topic,
-    #     không phải resolver ⇒ bỏ cả cụm. Dùng commit THẬT 85b744a1 (ghi chú vận hành, nhắc cả
-    #     sự cố loanpackage lẫn PLACE_FAIL_STOPPED/runbook .proposed).
-    qa = {"agent": "Winston", "topic": "sell-loanpackage-deal-not-found-zalopay-20260929",
-          "ts": "x", "age_days": 0}
-    qb = {"agent": "Wags", "topic": "place-fail-stopped-runbook-proposed-nguong",
-          "ts": "x", "age_days": 0}
-    _, solo = _run(m, [qb], ["--days", "3650"])
-    check("meta-commit(tiền đề): 85b744a1 CÓ khớp khi chỉ 1 câu hỏi treo",
-          "85b744a1" in solo, solo.strip()[:160] or "(rỗng)")
-    _, both = _run(m, [qa, qb], ["--days", "3650"])
-    check("meta-commit: commit khớp 2 câu hỏi bị loại", "85b744a1" not in both,
-          both.strip()[:200])
+    # 3b) FIXTURE (thay ca meta cũ dựa trên git log THẬT): hai repo giả, message THẬT của
+    #     d51c735e (fix code, repo WorkingClaude) và 85b744a1 (ghi chú rỗng, repo mike). Chạy ở
+    #     --days MẶC ĐỊNH nên chốt này KHÔNG rot khi commit thật già đi — arch-review 2026-09-29
+    #     required_change #2 đòi chốt mạnh ở cửa sổ mặc định, còn nới lỏng sang --days 3650 cho
+    #     vừa hành vi thì ngược quy trình. Thứ tự REPOS đặt repo "mike" TRƯỚC, đúng cái làm bản
+    #     v2 chọn nhầm sang commit ghi chú.
+    fixture_cases(m)
 
     # 4b) TỰ LOẠI TRỪ: commit sửa chính công cụ này không được tự nhận là resolver của các
     #     câu hỏi mà message của nó lấy làm ví dụ (a9c4a421 — đã xảy ra thật).
-    shas = [sha for sha, _s, _l, _f in m._commits(ROOT, 3650)]
+    shas = [c[0] for c in m._commits(ROOT, 3650)]
     check("self-exclusion: commit chạm question_commit_hint.py bị loại khỏi nguồn quét",
           not any(x.startswith("a9c4a421") for x in shas), str(shas[:5]))
 
+    # 5b) META-QUESTION: câu hỏi escalation của retro nói về một PATTERN lặp lại, không về một
+    #     bug ⇒ không commit nào "đã xử lý nó". Đo thật 2026-09-30: cả 2 gợi ý live đều thuộc lớp
+    #     này và cả 2 đều SAI (topic có sẵn 6+ token dài generic: pattern/recurring/question/
+    #     closure/answer/event ⇒ mọi commit nói về bus đủ điểm).
+    q5 = {"agent": "Mike", "topic": "retro-pattern-recurring-bus-question-closure-gap-real-fix-"
+          "no-answer-event", "ts": "x", "age_days": 0}
+    rc5, out5 = _run(m, [q5], ["--days", "30"])
+    check("meta-question: topic retro-pattern-recurring-* KHÔNG bao giờ được gợi ý commit",
+          out5.strip() == "" and rc5 == 0, out5.strip()[:300])
+
     # 5) FAIL-OPEN: repo không tồn tại ⇒ _commits im lặng trả rỗng, không ném.
     check("_commits: repo rác ⇒ [] chứ không ném", m._commits("/nonexistent-repo-xyz", 7) == [])
+
+    # 6) RÀNG BUỘC TÍCH HỢP — không có cái này thì hint chết âm thầm.
+    wired_into_wags_autofix()
 
     print(("FAIL: %d" % len(FAILS)) if FAILS else "PASS")
     return 1 if FAILS else 0
