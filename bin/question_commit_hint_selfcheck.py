@@ -5,10 +5,16 @@ Ca hồi quy #1 là chính sự cố sinh ra công cụ: câu hỏi
 `Winston/sell-loanpackage-deal-not-found-zalopay-20260929` (29/09) được sửa bằng commit
 d51c735e trên WorkingClaude/main mà không ai ghi event `answer` (Pattern B lần 3). Công cụ
 PHẢI chỉ ra được commit đó. Ca #2 chốt chiều ngược lại — báo động giả đã đo thật.
+
+⚠️ Ca e2e 1c dùng cửa sổ `--days max(14, tuổi(d51c735e)+1)`: nó được THIẾT KẾ để SIẾT DẦN —
+cửa sổ chỉ nới ra theo thời gian nên số ứng viên cạnh tranh chỉ TĂNG. Khi nó đỏ, phân biệt
+trước: (a) HỒI QUY thật trong logic xếp hạng, hay (b) ROT do repo tích tụ commit khớp từ khoá
+mới. Đừng nới ngưỡng/`--max` để làm nó xanh lại trước khi loại trừ (a).
 """
 import importlib.util
 import io
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -49,6 +55,17 @@ def _run(m, pending, argv=()):
         sys.argv = old
         m._load_hint_module = real_loader
     return rc, buf.getvalue()
+
+
+def check_or_skip(name, cond, detail="", available=True):
+    """arch-review 2026-09-30: ca hồi quy neo vào sha THẬT (d51c735e) phải SKIP CÓ THÔNG BÁO khi
+    sha không còn (clone shallow / history rewrite) — assert cứng sẽ đỏ vì ROT, không vì hồi quy,
+    và selfcheck đỏ vì lý do sai thì lần sau không ai đọc nữa."""
+    if not available:
+        print("  SKIP " + name + "  — sha neo không còn trong repo (clone shallow/history "
+              "rewrite): KHÔNG phải hồi quy")
+        return
+    check(name, cond, detail)
 
 
 def check(name, cond, detail=""):
@@ -129,6 +146,64 @@ def fixture_cases(m):
         _rc, out3 = _run(m, [q, qb, qc])
         check("meta: commit khớp >=3 câu hỏi bị loại (commit tài liệu/retro liệt kê topic)",
               code_sha not in out3, out3.strip()[:300])
+
+        # ── arch-review 2026-09-30 (vòng 2 của nhánh ranking) ────────────────────────────
+        # (A) CAP TẦNG CÂU HỎI: trước đây rows[:limit] cắt IM LẶNG *và* sort theo tuổi GIẢM
+        #     dần ⇒ câu hỏi TRẺ NHẤT bị cắt trước — đúng lớp ca Pattern B (câu 0-1 ngày).
+        #     Hai chốt: (1) phải NÓI RA còn N câu hỏi; (2) câu TRẺ phải SỐNG qua cap.
+        q_old = {"agent": "Wags", "topic": "brokers-resolve-sell-loan-package-sellable",
+                 "ts": "x", "age_days": 9}
+        q_young = dict(q)             # age_days = 0, cùng điểm hạng
+        _rc, outq = _run(m, [q_young, q_old], ["--max", "1"])
+        check("cap câu hỏi: in 1 và NÓI RA còn 1 câu hỏi treo khác",
+              "còn 1 câu hỏi treo khác" in outq, outq.strip()[:400])
+        check("cap câu hỏi: câu TRẺ (0d, ca Pattern B) SỐNG, câu GIÀ (9d) bị cắt",
+              q_young["topic"] in outq and q_old["topic"] not in outq, outq.strip()[:400])
+        check("dòng nói-ra-phần-cắt chỉ đúng flag THẬT (--max), không chỉ sai đường",
+              "--max 2" in outq, outq.strip()[:400])
+
+        # (C) HIỆU ỨNG XẾP HẠNG của is_code — không chỉ phân lớp _is_code (arch-review
+        #     2026-09-30: fixture cũ đậu vì commit code thắng bằng ĐIỂM 6-5, nên khoá
+        #     -int(is_code) trong cands.sort chưa bao giờ bị thử; mutant bỏ nó vẫn SỐNG).
+        #     Ca này dựng NGƯỢC: commit DOCS điểm CAO HƠN commit CODE, code vẫn phải đứng trước.
+        tmp2 = tempfile.mkdtemp(prefix="qch_rank_")
+        try:
+            d2, c2 = os.path.join(tmp2, "mike"), os.path.join(tmp2, "WorkingClaude")
+            topic_r = "sell-loanpackage-deal-not-found-zalopay-20260929"
+            # docs: nhồi token vào CẢ subject lẫn body ⇒ điểm cao nhất có thể.
+            _git_repo(d2, [("docs(retro): sell loanpackage deal not found zalopay ghi chú",
+                            "sell loanpackage deal not found zalopay loanpackage deal", [])])
+            # code: chỉ khớp ở body, subject không có token ⇒ điểm THẤP hơn hẳn.
+            _git_repo(c2, [("fix(brokers): resolve package của deal thật",
+                            "sell loanpackage deal not found zalopay", ["trading_bot/x.py"])])
+            m.REPOS = [d2, c2]
+            _rc, outr = _run(m, [{"agent": "Winston", "topic": topic_r, "ts": "x",
+                                  "age_days": 0}])
+            sha_d = subprocess.run(["git", "-C", d2, "rev-parse", "--short", "HEAD"],
+                                   capture_output=True, text=True).stdout.strip()
+            sha_c = subprocess.run(["git", "-C", c2, "rev-parse", "--short", "HEAD"],
+                                   capture_output=True, text=True).stdout.strip()
+            pts = dict((ln.split("@")[1].split(":")[0].strip(),
+                        int(ln.split("đ]")[0].rsplit("/", 1)[1]))
+                       for ln in outr.splitlines() if "đ] " in ln)
+            check("rank fixture dựng ĐÚNG chiều: commit docs ĐIỂM CAO HƠN commit code",
+                  pts.get(sha_d, 0) > pts.get(sha_c, 0), "%s / %s" % (pts, outr[:300]))
+            check("xếp hạng: commit CODE vẫn đứng TRƯỚC docs dù ĐIỂM THẤP HƠN",
+                  sha_c in outr and sha_d in outr and outr.index(sha_c) < outr.index(sha_d),
+                  outr.strip()[:400])
+        finally:
+            shutil.rmtree(tmp2, ignore_errors=True)
+            m.REPOS = [mike, wc]
+
+        # (B) --per-question là flag THẬT: dòng gợi ý ở tầng commit trỏ vào nó.
+        m.REPOS = [mike, wc, os.path.join(tmp, "third")]
+        _rc, outp = _run(m, [q], ["--per-question", "3"])
+        check("--per-question 3: in cả 3 ứng viên, không còn dòng cắt",
+              outp.count("đ] ") == 3 and "ứng viên khác" not in outp, outp.strip()[:400])
+        _rc, outp1 = _run(m, [q], ["--per-question", "1"])
+        check("--per-question 1: cắt còn 1 và trỏ vào --per-question 3",
+              outp1.count("đ] ") == 1 and "--per-question 3" in outp1, outp1.strip()[:400])
+        m.REPOS = [mike, wc]
     finally:
         m.REPOS = real_repos
         shutil.rmtree(tmp, ignore_errors=True)
@@ -144,7 +219,7 @@ def wired_into_wags_autofix():
     check("wags_autofix.sh còn gọi bin/question_commit_hint.py", len(calls) == 1, str(calls))
     check("lời gọi fail-open tại call site (|| true)",
           all("|| true" in c for c in calls), str(calls))
-    check("lời gọi có timeout (thống nhất dispatch.sh:1612/:1732, nằm foreground trước setsid)",
+    check("lời gọi có timeout (thống nhất với dispatch_question_hint.py, foreground trước setsid)",
           all("timeout " in c for c in calls), str(calls))
     check("hint THẬT SỰ đi vào prompt dispatch (${COMMIT_HINT:+...})",
           "${COMMIT_HINT:+" in src, "không thấy trong wags_autofix.sh")
@@ -179,8 +254,12 @@ def wired_into_dispatch_completion():
     # Nhánh --bg headless: 2>/dev/null nuốt traceback/timeout ⇒ cơ chế "không thể quên" chết
     # lặng, chính là Pattern B ở tầng cơ chế (arch-review 2026-09-30, fail_silent).
     bg = [c for c in calls if "_commit_hint=" in c]
-    check("nhánh --bg KHÔNG discard stderr của hint (2>/dev/null)",
-          bg and all("2>/dev/null" not in c for c in bg), str(bg))
+    # Khẳng định MẠNH (arch-review vòng 2): "không có 2>/dev/null" vẫn đậu với `2>> /dev/null`
+    # hay bất kỳ file rác nào. Phải đi TỚI $logfile — file duy nhất được surface theo job qua
+    # jobs.sh status / trace.sh. logs/consolidator.log KHÔNG tính: consolidate.sh:35-36 tự ghi
+    # nó là "nobody reads: the 2026-07-28 loss ran 9h unnoticed".
+    check("nhánh --bg đưa stderr của hint TỚI $logfile (không /dev/null, không consolidator.log)",
+          bg and all(re.search(r'2>>?\s*"\$logfile"', c) for c in bg), str(bg))
     # Đường hoàn tất THỨ BA trong dispatch.sh sẽ làm mandate "mọi job" sai mà không ai biết.
     dones = [ln for ln in src.splitlines()
              if "JSET status=done" in ln and not ln.strip().startswith("#")]
@@ -189,24 +268,50 @@ def wired_into_dispatch_completion():
     _preview_window_untainted(src)
 
 
+def _bg_region(lines):
+    """Chỉ xét thân _bg_wrapper() — writer $logfile ngoài đó (vd $logfile.workerpid trong
+    _hb_aware_timeout) không liên quan tới thứ tự chụp/ghi ở đường hoàn tất."""
+    i = next(i for i, ln in enumerate(lines) if re.match(r"\s*_bg_wrapper\(\)\s*\{", ln))
+    j = next(j for j in range(i + 1, len(lines)) if lines[j].rstrip() == "  }")
+    return i, j
+
+
+_WRITE = re.compile(r'(>>?\s*"?\$logfile"?(\s|$)|tee\s+(-a\s+)?"?\$logfile"?)')
+
+
 def _preview_window_untainted(src):
     """KILLER OBJECTION arch-review 2026-09-30: hint append vào $logfile (~812B) trong khi
     `tail -c 500 $logfile` là preview Discord USER-FACING và `head -c 400` là cb_summary ⇒ chụp
-    SAU khi append thì kết luận agent bị xoá sạch khỏi thông báo cho user. Test này trích 3 dòng
+    SAU khi append thì kết luận agent bị xoá sạch khỏi thông báo cho user. Test này trích dòng
     THẬT từ dispatch.sh theo ĐÚNG thứ tự xuất hiện rồi chạy chúng — đảo thứ tự là chết."""
     lines = src.splitlines()
-    idx_read = [i for i, ln in enumerate(lines)
-                if 'tail -c 500 "$logfile"' in ln or 'head -c 400 "$logfile"' in ln]
-    idx_write = [i for i, ln in enumerate(lines)
-                 if '>> "$logfile"' in ln and not ln.strip().startswith("#")]
+    lo, hi = _bg_region(lines)
+    reg = range(lo, hi)
+    idx_read = [i for i in reg
+                if 'tail -c 500 "$logfile"' in lines[i] or 'head -c 400 "$logfile"' in lines[i]]
+    idx_write = [i for i in reg
+                 if _WRITE.search(lines[i]) and not lines[i].strip().startswith("#")
+                 and ".workerpid" not in lines[i] and "CLI_ARGV" not in lines[i]
+                 and "tail -c" not in lines[i] and "head -c" not in lines[i]]
     check("có đủ 2 cửa sổ chụp log (_preview tail -c 500 + _cb_summary head -c 400)",
           len(idx_read) == 2, str(idx_read))
     check("MỌI lệnh ghi thêm vào $logfile nằm SAU khi đã chụp preview/cb_summary",
           bool(idx_read) and bool(idx_write) and min(idx_write) > max(idx_read),
           "reads=%s writes=%s" % (idx_read, idx_write))
+    # nit arch-review vòng 2: không có chốt nào buộc CONSUMER dùng biến đã chụp ⇒ mutant đọc
+    # lại `$(cat "$logfile")` ngay tại chỗ gửi Discord vẫn thoát.
+    nt = [lines[i] for i in reg if "notify_thread.sh" in lines[i] and "xong (job" in lines[i]]
+    check("ping Discord dùng BIẾN đã chụp ($_preview), không đọc lại $logfile tại chỗ",
+          nt and any("$_preview" in ln for ln in nt)
+          and all("$logfile" not in ln for ln in nt), str(nt))
+    cbl = [lines[i] for i in reg if "AUTO-CALLBACK job=" in lines[i]]
+    check("prompt AUTO-CALLBACK dùng BIẾN đã chụp ($_cb_summary), không đọc lại $logfile",
+          cbl and all("$_cb_summary" in ln and "$logfile" not in ln for ln in cbl), str(cbl))
 
-    # Chạy thật 3 dòng đã trích, thứ tự nguyên bản trong file.
-    picked = sorted(idx_read + idx_write)
+    # Chạy thật các dòng đã trích, thứ tự nguyên bản trong file. Dòng ghi lấy đúng lệnh append
+    # TEXT hint (không lấy dòng redirect stderr của lời gọi python — nó cần $ROOT thật).
+    idx_sim = [i for i in idx_write if "printf" in lines[i]]
+    picked = sorted(idx_read + idx_sim)
     body = "\n".join(lines[i].strip() for i in picked)
     tmp = tempfile.mkdtemp(prefix="wags_preview_")
     try:
@@ -215,20 +320,24 @@ def _preview_window_untainted(src):
             f.write("nap context...\n" * 3 + "KET_LUAN_AGENT: CAGR 23,37%-25,71%, KHONG GO-LIVE.\n")
         script = os.path.join(tmp, "sim.sh")
         with open(script, "w", encoding="utf-8") as f:
-            f.write("set -u\nlogfile=%s\n_commit_hint=\"$(printf 'HINT_NAG_%s' \"$(head -c 900 /dev/zero | tr '\\0' 'x')\")\"\n"
-                    % (log, "X"))
+            f.write("set -u\nlogfile=%s\n" % log)
+            f.write("_commit_hint=\"$(head -c 900 /dev/zero | tr '\\0' 'x' | sed 's/^/HINT_NAG_X/')\"\n")
             f.write("local() { :; }\n")   # 'local' ngoài hàm ⇒ vô hại hoá
             f.write(body + "\n")
             f.write('printf "PREVIEW=%s\\nCB=%s\\n" "$_preview" "$_cb_summary"\n')
-        out = subprocess.run(["bash", script], capture_output=True, text=True, timeout=30).stdout
+        r = subprocess.run(["bash", script], capture_output=True, text=True, timeout=30)
+        out = r.stdout
         prev = [l for l in out.splitlines() if l.startswith("PREVIEW=")]
-        cbl = [l for l in out.splitlines() if l.startswith("CB=")]
+        cbv = [l for l in out.splitlines() if l.startswith("CB=")]
+        detail = (out + r.stderr)[:400]
+        check("e2e (hint NON-EMPTY): trích được cả 2 cửa sổ + lệnh append, script chạy được",
+              bool(prev) and bool(cbv) and len(picked) >= 3, "picked=%s %s" % (picked, detail))
         check("e2e (hint NON-EMPTY): preview Discord còn kết luận agent",
-              prev and "KET_LUAN_AGENT" in prev[0], out[:400])
+              prev and "KET_LUAN_AGENT" in prev[0], detail)
         check("e2e (hint NON-EMPTY): preview Discord KHÔNG chứa text hint",
-              prev and "HINT_NAG" not in prev[0], out[:400])
+              prev and "HINT_NAG" not in prev[0], detail)
         check("e2e (hint NON-EMPTY): cb_summary AUTO-CALLBACK KHÔNG chứa text hint",
-              cbl and "HINT_NAG" not in cbl[0], out[:400])
+              cbv and "HINT_NAG" not in cbv[0], detail)
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 
@@ -243,20 +352,24 @@ def main():
     q = {"agent": "Winston", "topic": "sell-loanpackage-deal-not-found-zalopay-20260929",
          "ts": "2026-09-29T06:35:29Z", "age_days": 0}
     rc, out = _run(m, [q], ["--days", "3650"])
-    check("regression: commit d51c735e còn trong repo (không thì ca hồi quy vô nghĩa)", have)
+    if not have:
+        print("  NOTE: commit neo d51c735e không còn trong repo — các ca hồi quy neo vào nó sẽ "
+              "SKIP (không phải hồi quy). Ca fixture + unit vẫn chạy đủ.")
     # Cố ý KHÔNG chốt cứng ĐÚNG sha nào được in: cùng sự cố có cả một CHÙM commit hợp lệ (fix
     # trên WorkingClaude + ghi chú vận hành trên mike). Yêu cầu THẬT là câu hỏi phải được NÊU
     # TÊN kèm một commit của chùm đó — chốt cứng 1 sha là chốt vào thứ tự duyệt repo.
-    check("regression: câu hỏi sell-loanpackage được nêu tên trong gợi ý",
-          "sell-loanpackage-deal-not-found-zalopay-20260929" in out, out.strip()[:200] or "(rỗng)")
-    check("regression: rc=0", rc == 0)
+    check_or_skip("regression: câu hỏi sell-loanpackage được nêu tên trong gợi ý",
+                  "sell-loanpackage-deal-not-found-zalopay-20260929" in out,
+                  out.strip()[:200] or "(rỗng)", have)
+    check_or_skip("regression: rc=0", rc == 0, "", have)
 
     # 1b) Mức FUNCTION — chính commit sửa d51c735e phải đạt điểm khớp, độc lập với thứ tự duyệt.
     hint = m._load_hint_module()
     tok = hint._tokens(q["topic"])
     hit = [c[0] for c in m._commits(os.path.dirname(ROOT), 3650)
            if c[0].startswith("d51c735e") and m._score(tok, c[2], c[3]) >= m._MIN_SCORE]
-    check("regression(function): d51c735e đạt ngưỡng khớp trên repo WorkingClaude", bool(hit))
+    check_or_skip("regression(function): d51c735e đạt ngưỡng khớp trên repo WorkingClaude",
+                  bool(hit), "", have)
 
     # 2) PRECISION — lớp câu hỏi mà ngày là token phân biệt duy nhất không được khớp
     #    commit bất kỳ chỉ vì commit đó nhắc cùng ngày (báo động giả 84b7dbd3 đã đo).
@@ -290,6 +403,20 @@ def main():
           m._score({"closerepair": 1, "approval": 1, "needed": 1, "tolerance": 1},
                    "fix(close_repair): approval needed tolerance",
                    "fixcloserepairapprovalneededtolerance") >= 4)
+    # ĐỘ LỚN thưởng subject phải là ĐÚNG +1/token (arch-review 2026-09-30: mutant nhân đôi
+    # thưởng vẫn SỐNG với bộ chốt cũ vì chúng chỉ kiểm "commit có subject khớp xếp trước").
+    _tok4 = {"loanpackage": 1, "dealnotfound": 1, "zalopay": 1, "sellable": 1}
+    _body = "loanpackage dealnotfound zalopay sellable"
+    _base = m._score(_tok4, _body, _body.replace(" ", ""), "")
+    check("_score: 4 token khớp body, subject rỗng ⇒ đúng 4 điểm (không thưởng)", _base == 4,
+          str(_base))
+    _s2 = m._score(_tok4, _body, _body.replace(" ", ""), "fix: loanpackage dealnotfound")
+    check("_score: thưởng subject ĐÚNG +1/token (2 token ở subject ⇒ 6đ, không phải 8)",
+          _s2 == 6, str(_s2))
+    _s4 = m._score(_tok4, _body, _body.replace(" ", ""), _body)
+    check("_score: cả 4 token ở subject ⇒ đúng 8đ (trần thưởng = số token khớp)", _s4 == 8,
+          str(_s4))
+
     check("_score: 1 token đặc thù thôi ⇒ KHÔNG khớp (cần 2)",
           m._score({"loanpackage": 1, "deal": 1, "sell": 1, "abcd": 1},
                    "loanpackage deal sell abcd", "loanpackagedealsellabcd") == 0)
@@ -309,10 +436,9 @@ def main():
     # bao giờ lỏng hơn. Vừa không rot, vừa không phải nới lỏng.
     win = max(14, int((_time.time() - int(days_ago)) // 86400) + 1) if days_ago else 0
     rc1c, out1c = _run(m, [q], ["--days", str(win)])
-    check(f"regression(e2e, git log THẬT, --days {win} = max(mặc-định-14, tuổi+1); '{age}'): "
-          "commit SỬA THẬT "
-          "d51c735e ĐƯỢC IN RA (không bị hoà điểm + cap cắt mất)",
-          "d51c735e" in out1c and rc1c == 0, out1c.strip()[:600] or "(rỗng)")
+    check_or_skip(f"regression(e2e, git log THẬT, --days {win} = max(mặc-định-14, tuổi+1); "
+                  f"'{age}'): commit SỬA THẬT d51c735e ĐƯỢC IN RA (không bị hoà điểm + cap cắt)",
+                  "d51c735e" in out1c and rc1c == 0, out1c.strip()[:600] or "(rỗng)", have)
 
     # 3b) FIXTURE (thay ca meta cũ dựa trên git log THẬT): hai repo giả, message THẬT của
     #     d51c735e (fix code, repo WorkingClaude) và 85b744a1 (ghi chú rỗng, repo mike). Chạy ở

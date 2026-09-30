@@ -558,15 +558,25 @@ thức dậy và đốt trọn một job chỉ để đọc lại git log rồi 
 qua kênh HÀNH ĐỘNG (user duyệt Discord + agent commit + merge) mà không ai ghi event `answer`.
 
 **Trước khi chẩn đoán lại từ đầu, chạy 2 cái nhắc này:**
-- `bin/question_commit_hint.py [--days N] [--max N]` — quét git log 2 repo (mike + WorkingClaude)
-  tìm commit TRÔNG NHƯ đã sửa từng câu hỏi còn treo. In CHÙM tối đa 2 commit/câu hỏi kèm nhãn
-  `[CHẮC|có thể / code|docs / điểm]`; commit có sửa file code xếp trước commit docs-only. Nó là
-  **GỢI Ý, KHÔNG tự đóng** — đọc commit rồi mới đóng bằng `bin/close_bus_question.py`.
-  Đã wire vào `wags_autofix.sh` (`timeout 25 … || true`, fail-open tuyệt đối).
+- `bin/question_commit_hint.py [--days N] [--max N] [--per-question N]` — quét git log 2 repo
+  (mike + WorkingClaude) tìm commit TRÔNG NHƯ đã sửa từng câu hỏi còn treo. In CHÙM tối đa 2
+  commit/câu hỏi (`--per-question` để xem nhiều hơn) kèm nhãn `[CHẮC|có thể / code|docs / điểm]`;
+  commit có sửa file code xếp TRƯỚC commit docs-only kể cả khi điểm thấp hơn. Cắt ở cả 2 tầng
+  (câu hỏi + commit) đều NÓI RA phần bị cắt. Nó là **GỢI Ý, KHÔNG tự đóng** — đọc commit rồi mới
+  đóng bằng `bin/close_bus_question.py`.
+  Wire: `wags_autofix.sh` **và** `bin/dispatch.sh` ở đường HOÀN TẤT THÀNH CÔNG của CẢ HAI nhánh
+  (--bg trong `_bg_wrapper` + foreground) — user mandate 2026-09-30 "gọi là bắt buộc, không phải
+  tuỳ chọn". Mọi call site `timeout 25 … || true`, fail-open. Ngoại lệ có chủ đích:
+  `bin/verify_finding.sh` tự dựng job record riêng, không qua dispatch.sh (job verify không sinh
+  commit fix nên không có gì để gợi ý).
 - `bin/dispatch_question_hint.py` — cùng việc nhưng nguồn là prompt dispatch.
 
-**Giới hạn đã biết (gap F5, còn mở 2026-09-30).** Hint tính TRONG `wags_autofix.sh`, tức là SAU
-khi escalation đã bắn ⇒ nó chỉ giúp Wags kết luận nhanh, **không tránh được việc đốt job**. Chỗ
+**Giới hạn đã biết (gap F5, THU HẸP 2026-09-30 nhưng CHƯA đóng).** Từ commit wiring
+2026-09-30, hint còn chạy ở đường hoàn tất MỌI job qua dispatch.sh ⇒ agent vừa merge fix được
+nhắc NGAY trong lượt đó (và agent giao việc thấy qua prompt AUTO-CALLBACK), tức nhiều ca được
+đóng TRƯỚC khi checker 2 lần/ngày kịp bắn escalation. Nhưng đây là nhắc phía NGƯỜI LÀM, không
+phải chặn phía CHECKER: job đã kết thúc trước khi hint in ra, và job do cron/Mike giao (from=Mike)
+không có AUTO-CALLBACK nên hint chỉ nằm trong `$logfile`. Chỗ
 bịt thật là `ops_health_check.sh` §5 / `bus_question_audit.py` hạ cấp escalation khi có bằng
 chứng artifact — chưa làm, chờ user chốt (option A của câu hỏi
 `retro-pattern-recurring-bus-question-closure-gap-real-fix-no-answer-event`). Lớp câu hỏi

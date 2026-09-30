@@ -158,12 +158,17 @@ def _score(tokens, low, flat, subj=""):
 
 def main():
     argv = sys.argv[1:]
-    days, limit = _DEFAULT_DAYS, _DEFAULT_MAX
+    days, limit, per_q = _DEFAULT_DAYS, _DEFAULT_MAX, _MAX_PER_Q
     for i, a in enumerate(argv):
         if a == "--days" and i + 1 < len(argv):
             days = int(argv[i + 1])
         elif a == "--max" and i + 1 < len(argv):
             limit = int(argv[i + 1])
+        elif a == "--per-question" and i + 1 < len(argv):
+            # arch-review 2026-09-30: dòng chỉ đường cũ bảo dùng --max để xem ứng viên bị cắt,
+            # nhưng --max điều khiển số CÂU HỎI, không phải số commit/câu hỏi ⇒ chỉ sai đường.
+            # Có flag thật thì lời nhắc mới thực thi được.
+            per_q = int(argv[i + 1])
 
     hint = _load_hint_module()
     pending = hint._pending()
@@ -204,14 +209,19 @@ def main():
     for q, cands in matches.values():
         # git log trả mới-nhất-trước ⇒ sort ỔN ĐỊNH giữ commit mới nhất lên trên trong các ca hoà.
         cands.sort(key=lambda c: (-c[0], -int(c[2]), -c[1]))
-        rows.append((cands[0][0], q, cands[:_MAX_PER_Q], len(cands) - _MAX_PER_Q))
-    rows.sort(key=lambda x: (-x[0], -int(x[1].get("age_days") or 0)))
+        rows.append((cands[0][0], cands[0][1], q, cands[:per_q], len(cands) - per_q))
+    # Thứ tự: CHẮC trước → ĐIỂM ứng viên tốt nhất giảm dần → câu hỏi TRẺ trước.
+    # ⚠️ KHÔNG xếp theo tuổi GIẢM dần như bản trước (arch-review 2026-09-30, killer objection):
+    # cap dưới đây cắt từ CUỐI, mà câu hỏi Pattern B theo định nghĩa là câu 0-1 ngày ⇒ xếp già
+    # trước là cắt đúng ca công cụ này tồn tại để bắt. Câu già thường đã là "chờ người quyết".
+    rows.sort(key=lambda x: (-x[0], -x[1], int(x[2].get("age_days") or 0)))
+    q_extra = max(0, len(rows) - limit)
     rows = rows[:limit]
 
     print("[Có commit TRÔNG NHƯ đã xử lý câu hỏi treo — CHỈ LÀ GỢI Ý theo từ khoá, phải tự đọc "
           "commit xem có đúng cùng việc không. Nếu ĐÚNG là đã xong mà chỉ thiếu event `answer` "
           "(Pattern B) thì đóng vòng bằng close_bus_question.py, đừng sửa lại lần nữa:]")
-    for _lvl, q, cands, extra in rows:
+    for _lvl, _best, q, cands, extra in rows:
         agent, topic, age = q.get("agent", "?"), q.get("topic", "?"), q.get("age_days", "?")
         print(f"  · {agent}/{topic} ({age}d treo) ←")
         for lvl, sc, is_code, sha, subj, repo in cands:
@@ -221,8 +231,13 @@ def main():
         if extra > 0:
             # NÓI RA phần bị cắt: cap 2 mà im lặng thì người đọc tưởng chỉ có 2 ứng viên, còn
             # commit đúng có thể nằm ở phần bị cắt (đúng ca d51c735e, arch-review vòng 2).
-            print(f"      … còn {extra} ứng viên khác — xem đầy đủ: git log --grep / "
-                  f"question_commit_hint.py --max 1 sau khi các câu hỏi khác được đóng")
+            print(f"      … còn {extra} ứng viên khác — xem đầy đủ: "
+                  f"question_commit_hint.py --per-question {len(cands) + extra}")
+    if q_extra > 0:
+        # NÓI RA phần bị cắt Ở TẦNG CÂU HỎI, cùng lý do như tầng commit (arch-review
+        # 2026-09-30): cắt im lặng thì người đọc tưởng chỉ có bấy nhiêu câu hỏi có commit khớp.
+        print(f"  … còn {q_extra} câu hỏi treo khác cũng có commit khớp — xem đầy đủ: "
+              f"question_commit_hint.py --max {limit + q_extra}")
     return 0
 
 

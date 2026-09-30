@@ -1397,10 +1397,13 @@ làm lại có chủ đích, đừng âm thầm ghi đè mất công sức cũ m
         # nguồn = GIT LOG, phải chạy lúc job XONG vì commit chỉ tồn tại sau đó. Vẫn chỉ GỢI Ý —
         # KHÔNG tự đóng (đóng theo suy đoán văn bản = đóng oan escalation tiền thật). Chạy SAU
         # consolidate.sh để đọc bus mới nhất. ~1,5s; fail-open nhưng KHÔNG im lặng: stderr vào
-        # consolidator.log để hint chết còn dấu vết (cơ chế "không thể quên" mà chết lặng thì
-        # chính là tái tạo Pattern B ở tầng cơ chế).
+        # CHÍNH $logfile — file DUY NHẤT được surface theo job (jobs.sh status / trace.sh) nên
+        # traceback/timeout của hint hiện ngay trong timeline job. KHÔNG dùng
+        # logs/consolidator.log: consolidate.sh:35-36 tự ghi file đó "nobody reads — the
+        # 2026-07-28 loss ran 9h unnoticed" (arch-review vòng 2). Ghi vào $logfile an toàn vì
+        # lệnh này nằm DƯỚI 2 cửa sổ chụp ở trên.
         local _commit_hint
-        _commit_hint="$(timeout 25 python3 "$ROOT/bin/question_commit_hint.py" --max 3 2>> "$ROOT/logs/consolidator.log" || true)"
+        _commit_hint="$(timeout 25 python3 "$ROOT/bin/question_commit_hint.py" --max 3 2>> "$logfile" || true)"
         if [ -n "$_commit_hint" ]; then
           printf '%s\n' "$_commit_hint" >> "$logfile"
           printf '%s\n' "$_commit_hint" >&2
