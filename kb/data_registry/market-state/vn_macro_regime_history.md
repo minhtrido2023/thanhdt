@@ -11,6 +11,7 @@ last_full_analysis: 2026-08-25 (Bobby — phân tích toàn diện 2000-2026, th
 last_update: 2026-08-30 (Bobby — bản đồ pha trong-năm 2009/2018 ở file con vn_macro_regime_history_2009_2018_phases.md; ĐÍNH CHÍNH trục 2 EP-2018-01 CONTAINABLE→EXTERNAL_CYCLE)
 last_update_2: 2026-08-31 (Bobby — addendum granular cửa sổ 2008Q4-2009Q3: đường lãi suất SBV theo ngày, tín dụng 37,53% vs mục tiêu 21-23%, CPI YoY tháng qua cpi_vn.py, FDI 7T/2009; XÁC NHẬN LẠI EP-2008-09 MIXED/EXTERNAL_CYCLE, không đổi verdict)
 last_update_3: 2026-08-31 (Bobby — 5 episode mới, BLIND, dispatch riêng: EP-2014-09 OPEC/oil CONFIDENCE_LIQUIDITY/EXTERNAL_CYCLE clean; EP-2015-07 China devaluation CONFIDENCE_LIQUIDITY ambiguous/EXTERNAL_CYCLE clean; EP-2023-09 FX-defense/margin/VIC-VHM CONFIDENCE_LIQUIDITY clean/CONTAINABLE dominant+EXTERNAL_CYCLE phụ ambiguous; EP-2025-03 Liberation Day tariff CONFIDENCE_LIQUIDITY clean/CONTAINABLE(tranh chấp)+EXTERNAL_CYCLE(nền) ambiguous; EP-2026-01 credit/BĐS+chiến tranh dầu MIXED ambiguous, N/A trục 2 hai timeline — nghi vấn CHƯA XÁC NHẬN liên hệ với episode 07/2026 đã có trong fleet)
+last_update_4: 2026-09-30 (Bobby — WATCH real-time CD/lãi suất huy động tăng, BLIND, dispatch từ Mike: MIXED ambiguous, phần CONFIDENCE_LIQUIDITY (O/N spike 21-09) CONTAINABLE; không nâng cấp cảnh báo, củng cố watch STRUCTURAL_ACCUMULATION BĐS đã mở)
 ---
 
 # VN Macro Regime History — sổ phân loại nguyên nhân vĩ mô từng episode khủng hoảng
@@ -1161,6 +1162,65 @@ episode chính đã biết trong lịch sử VNINDEX đã được phân loại.
 Nếu phát hiện episode mới cần phân loại: dispatch macro-strategist với ngày + hành động giá,
 KHÔNG kèm forward-return/giả thuyết backtest.
 
+
+---
+
+## WATCH (không phải episode chính thức) — CD/lãi suất huy động tăng, 2026-09-30
+
+**Phân loại real-time BLIND, KHÔNG dùng forward-return.** Dispatch bởi Mike, câu hỏi: đợt CD
+(chứng chỉ tiền gửi) Big-4 7,5%/năm (VCB, 6 tháng) + tin đồn nhóm 5 (MB) huy động ~9% có phải
+early-warning CONFIDENCE_LIQUIDITY hay chỉ là cạnh tranh vốn trung/dài hạn bình thường.
+
+**Bằng chứng PIT (WebSearch, ngày công bố ghi kèm — không phải hindsight):**
+- VCB CD 6 tháng: 7,9%/năm (báo 01/04/2026) → 7,5%/năm (báo 30/09/2026) — **đã HẠ so với đỉnh mùa
+  xuân**, không phải leo thang liên tục. ([vietnamnet 30/09](https://vietnamnet.vn/lai-suat-ngan-hang-hom-nay-30-9-2026-chung-chi-tien-gui-big4-cao-nhat-7-5-nam-2560175.html), [tuoitre 01/04](https://tuoitre.vn/vietcombank-phat-hanh-chung-chi-tien-gui-truc-tuyen-lai-suat-den-79-nam-20260401170544779.htm))
+- MB CD thật (không phải tin đồn — **XÁC NHẬN claim user**): 8%/năm (3 tháng, ≥300tr) · 9,1%/năm
+  (6 tháng, ≥1 tỷ) · 9,2%/năm (6 tháng, ≥10 tỷ) — báo 09/2026. VPBank CD 6 tháng cũng chạm 9%/năm
+  (báo 24/08/2026). ([thoibaotaichinhvietnam](https://thoibaotaichinhvietnam.vn/top-ngan-hang-tra-lai-suat-tiet-kiem-cao-nhat-thang-9-2026-203908.html), [vietnam.vn](https://www.vietnam.vn/lai-suat-chung-chi-tien-gui-ky-han-6-thang-tai-vpbank-len-muc-9-nam-trong-ngay-24-8-2026))
+- **Gần 10 ngân hàng chào tiết kiệm cá nhân ≥9%/năm** cho khoản vài trăm triệu, trong khi mức niêm
+  yết công khai cao nhất hệ thống <8% — nghĩa là áp lực huy động RỘNG hơn Big-4/CD, không phải 1-2
+  ngân hàng lẻ. ([vnexpress 09/2026](https://vnexpress.net/them-nhieu-ngan-hang-tra-lai-tiet-kiem-tren-9-5123534.html))
+- **Liên ngân hàng O/N**: spike +2,5pp → 7,0%/năm phiên **21/09/2026**, NHNN phản ứng bằng bơm ròng
+  ~48.000 tỷ qua OMO + mở lại swap ngoại tệ 7 ngày tối đa 2 tỷ USD (22/09) + 2 thông tư nới room
+  (TT08/2026 tính thêm 20% tiền gửi KBNN vào LDR; TT25/2026 nâng trần vốn ngắn hạn cho vay trung-dài
+  hạn 30%→40%) — rồi O/N **hạ về 1,10-1,20%/năm** trong vòng ~1 tuần (23-28/09). Đây là mẫu hình
+  CONTAINABLE cổ điển: cú sốc rời rạc, phản ứng chính sách đa công cụ NHẮM ĐÚNG (OMO+swap+room),
+  giải quyết trong ngày-tuần chứ không phải quý-năm. ([cafebiz 22/09](https://cafebiz.vn/lai-suat-lien-ngan-hang-bat-tang-ngan-hang-nha-nuoc-cap-tap-bom-thanh-khoan-176260922112717451.chn), snapshot `fiinprox_rates_snapshot_20260927.md` O/N 24/09 = 1,10%)
+- **Nền tín dụng đã biết TRƯỚC episode này** (đã ghi trong file này §"Bổ sung 2026-09-27"): tín
+  dụng YoY ≥17,4% liên tục 16 tháng (2025-04→2026-07), cao nhất kể từ 2017 — đã gắn nhãn "MIXED
+  ambiguous, nghiêng Loại-1 tích luỹ" (chưa đủ để nâng STRUCTURAL clean).
+
+**Phân loại (2 trục):**
+- **Trục 1 — chủ yếu KHÔNG STRUCTURAL clean, nhưng KHÔNG THUẦN CONFIDENCE_LIQUIDITY sạch — MIXED,
+  ambiguous.** Lý do: (a) cú sốc O/N 21/09 tự nó có chữ ký CONFIDENCE_LIQUIDITY (rời rạc, phản ứng
+  nhanh, hết trong tuần — không phải CPI/tín dụng xấu đi nhiều quý rồi mới lộ ra); (b) nhưng ÁP LỰC
+  NỀN của lãi suất kỳ hạn 3-9 tháng (7,5-9,2%, duy trì từ mùa xuân 2026, KHÔNG chỉ 1 tuần) trùng
+  khớp thời gian với tín dụng tăng ≥17-20% suốt 16 tháng — tức là một phần của mức nền lãi suất huy
+  động cao là do CẦU TÍN DỤNG THẬT (không phải hoảng loạn), khớp với watch STRUCTURAL_ACCUMULATION
+  BĐS đã mở (`kb/projects/vn-realestate-structural-risk-20260826.md`).
+- **Trục 2 (áp cho phần CONFIDENCE_LIQUIDITY — cú sốc O/N 21/09) — CONTAINABLE, confidence clean.**
+  NHNN dùng ĐÚNG bộ công cụ nhắm mục tiêu (OMO + swap + nới prudential ratio), không phải siết tín
+  dụng toàn hệ thống; rate về mức nền trong ~1 tuần.
+
+**Kết luận cho câu hỏi gốc (a) vs (b):** **KHÔNG phải** early-warning kiểu 2022 SCB (không có bank
+run, không có tên tổ chức cụ thể mất niềm tin, O/N chỉ chạm 7% 1 phiên rồi về ngay ~1,1-1,2% —
+2022 O/N/1 tuần từng neo 2 chữ số nhiều tháng). **Đọc đúng hơn = (b) nghiêng về cạnh tranh vốn
+trung/dài hạn theo chu kỳ tín dụng, VỚI một lớp CONFIDENCE_LIQUIDITY nhỏ/rời rạc (thanh khoản
+ngắn hạn cuối quý III) đã được NHNN xử lý containable trong tuần.** Không đủ căn cứ để nâng cấp
+thành cảnh báo macro cấp hệ thống MỚI — nhưng CỦNG CỐ (không thay thế) watch STRUCTURAL_ACCUMULATION
+BĐS/tín dụng đã mở 2026-08-26, review theo lịch cũ (~2026-11-26), KHÔNG cần review sớm riêng.
+
+**Confidence: ambiguous** — bằng chứng trộn 2 chữ ký khác nhau chồng lên nhau đúng vào tuần user hỏi.
+
+**KHÔNG kết luận về lãi suất cho vay đầu ra "phải 13%+"**: CD 7,5-9,2% là chi phí vốn BIÊN (huy
+động thêm, ticket lớn, kỳ hạn ngắn 3-6 tháng), không phải chi phí vốn BÌNH QUÂN của sổ huy động —
+suy diễn thẳng biên→bình quân→NIM giữ nguyên→lãi vay 13%+ là sai cấu trúc kế toán ngân hàng (đẩy
+tăng chi phí biên không tự động đẩy tăng đều toàn bộ lãi suất cho vay, nhất là nhóm ưu tiên có trần
+lãi suất NHNN quy định).
+
+**Không dispatch bổ sung nếu không có leo thang thêm.** Nếu O/N tái diễn spike KÉO DÀI (không phải
+1 phiên) hoặc lan sang CD 12 tháng của Big-4 (hiện Big-4 chỉ có sản phẩm CD 6 tháng), đó là tín
+hiệu nâng cấp cần dispatch macro-strategist riêng.
 
 ---
 
