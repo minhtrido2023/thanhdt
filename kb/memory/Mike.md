@@ -1,28 +1,31 @@
 # Working memory — Mike
 > Cập nhật mỗi khi đổi mạch việc. Bơm vào đầu phiên của Mike.
 
-## Trạng thái 2026-09-30 09:50 ICT — 4 việc user giao đã XONG
-- Việc 1 (question_commit_hint bắt buộc-hoá): CONFIRMED arch-review vòng 3 + wire bắt buộc vào
-  dispatch.sh (cả --bg/foreground), commit ff340ea8→7d3f4991. Bus question retro-pattern-recurring-
-  bus-question-closure-gap-real-fix-no-answer-event đã đóng (resolver tự nhận qua decision event).
-- Việc 2 (PNJ exclude): xong, cả 2 account, review trigger = PNJ BCTC Q3/2026 (event-based).
-- Việc 3 (headless merge production): KHÔNG thể cấp qua config — classifier tầng platform, ngoài
-  tầm dispatch.sh. Đã đề xuất workaround (ưu tiên direct-commit thay vì feature-branch+merge).
-  Bus question retro-pattern-recurring-classifier-blocks-headless-agent-production-write còn PENDING
-  (age 1 ngày) — chờ user trả lời 2 câu hỏi follow-up (runbook hoá direct-commit? soạn feedback
-  Anthropic xin exception thật?).
-- Việc nhỏ (VNM exright_date): Winston đã xác nhận lệch 1 phiên, đã báo, không cần làm thêm.
+## Trạng thái 2026-09-30 11:20 ICT — Tất cả việc user giao đã XONG
+- 4 việc gốc (question_commit_hint, PNJ exclude, headless-merge escalation, VNM exright) — xong,
+  xem lịch sử trước.
+- 2 câu hỏi phụ Taylor (is_stable_payer, park insider/anomaly gate) — user đã trả lời trực tiếp:
+  is_stable_payer: phải có trả cổ tức mỗi năm (dù ít), thiếu 1 năm tự rớt.
+  park: phải đọc insider_flags để quyết mua.
+  → Dispatch Taylor_20260930_030814: Fix A (custom30_history.py re-evaluate is_stable_payer tại
+  asof=hôm nay cho kỳ mở, không đụng lịch sử đã đóng) + Fix B (compute_park_add.py đọc
+  anomaly_gate.py: anomaly=HARD EXCLUDE, insider=WATCH cảnh báo). Cả 2 qua 2 vòng quant-skeptic
+  (vòng 1 REFUTED bắt bug thật mỗi lần, vòng 2 CONFIRMED/high). 1 câu hỏi thiết kế phát sinh
+  (hard-block hay chỉ cảnh báo insider) — user chốt (b) cảnh báo, đã đóng bus question
+  Taylor/park-insider-hard-block-hay-canh-bao. Cả 2 fix ĐÃ COMMIT: Fix A = WorkingClaude 91eb663d,
+  Fix B = mike 95fe407e (job Taylor_20260930_041900). CHƯA wire vào plan thật/cron — cần thêm
+  arch-review nếu muốn đưa production chính thức.
 
-## Còn mở, không cần user quyết ngay
-- 2 câu hỏi thiết kế phụ của Taylor (calculated_fear_state_backstop.md 2026-09-28): is_stable_payer
-  tự rớt khi DN không chia cổ tức? đường park có nên đọc insider_flags.json/anomaly_flags.json?
-- Escalation classifier-block (Việc 3) chờ user trả lời.
+## Không còn việc gì đang mở cần theo dõi ngay
+- Việc 3 (headless merge production) — escalation vẫn PENDING chờ user trả lời 2 câu hỏi follow-up
+  (runbook hoá direct-commit? soạn feedback Anthropic?) — không khẩn, chờ user rảnh.
 
 ## Bẫy đã ghi lại (đừng cắn lần nữa)
 - Selfcheck neo bản cũ bằng `HEAD`/`main` ⇒ sau merge FAIL vĩnh viễn. Luôn neo `<commit-vá>^`.
 - Selfcheck hardcode gốc canonical ⇒ chạy từ worktree test MASTER thay vì code đang sửa.
-- Đóng 1 `question` do AGENT KHÁC đăng lên bus vẫn cần 1 `answer`/`decision` ngắn TRÊN BUS.
-- `git show <rev>:<path>` tính path từ GỐC REPO, `git diff … -- <pathspec>` tính từ CWD.
-- Append text phụ vào $logfile của job LÀ THAY ĐỔI VĂN BẢN user-facing nếu có consumer chụp cửa sổ
-  (tail -c N) — luật: trước khi ghi thêm vào artifact người khác, grep xem ai chụp cửa sổ nó.
+- Append text phụ vào $logfile của job LÀ THAY ĐỔI VĂN BẢN user-facing nếu có consumer chụp cửa sổ.
+- notify_thread.sh inline double-quote với backtick trong nội dung → command substitution ăn mất
+  chữ (đúng bug đã biết, dispatch-prompt-heredoc skill) — LUÔN build message qua heredoc biến MSG
+  trước khi gọi notify_thread.sh nếu nội dung có backtick/code identifier, kể cả lệnh đơn giản
+  tưởng như vô hại. Cắn thật 2026-09-30 11:19 ICT ngay trong phiên này.
 
