@@ -191,7 +191,14 @@ def main():
     # 4) _score: token NGẮN phải theo ranh giới từ; token DÀI được khớp trên bản dẹt.
     tok = {"deal": 1, "loanpackage": 1, "zalopay": 1, "found": 1}
     low = "the dealer idealized founder zalopays loanpackages"
-    check("_score: token ngắn không khớp chuỗi con (dealer/founder)",
+    # arch-review vòng 3 nit: bản cũ dùng token abcdefg/hijklmn KHÔNG có trong text nên _MIN_SCORE
+    # chặn trước và guard len(t)>=_FLAT_LEN chưa bao giờ bị thử (mutant bỏ guard vẫn SỐNG). Bộ
+    # token dưới đây có đủ 2 token đặc thù CÓ MẶT trong text: HEAD=0đ, bỏ guard ⇒ 5đ.
+    _short = "chore: dealer idealized founder zalopays loanpackages upselling"
+    check("_score: token ngắn không khớp chuỗi con (dealer/founder/zalopays)",
+          m._score({"sell": 1, "loanpackage": 1, "deal": 1, "found": 1, "zalopay": 1},
+                   _short, _short.replace(" ", "").replace(":", "")) == 0)
+    check("_score: token ngắn không khớp chuỗi con — bản cũ (abcdefg/hijklmn)",
           m._score({"deal": 1, "found": 1, "abcdefg": 1, "hijklmn": 1}, low, low.replace(" ", "")) == 0)
     check("_score: đủ điểm + 2 token đặc thù ⇒ khớp",
           m._score(tok, "sell deal not found zalopay loanpackage 1826",
