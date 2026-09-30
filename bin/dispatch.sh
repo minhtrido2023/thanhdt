@@ -1380,15 +1380,27 @@ làm lại có chủ đích, đừng âm thầm ghi đè mất công sức cũ m
         JSET status=done ended_at="$(date +%s)" exit_code=0 result_summary="$(SUMMARY)"
         _circuit_record "$CIRCUIT_KEY" success
         "$ROOT/bin/consolidate.sh" >> "$ROOT/logs/consolidator.log" 2>&1 || true
-        # Nhắc đóng vòng bus theo COMMIT — BẮT BUỘC ở đường HOÀN TẤT của MỌI job, không chỉ
-        # khi wags_autofix chạy vòng coord (user chốt option B + hướng bổ sung 2026-09-30:
-        # "việc GỌI là bắt buộc/không thể quên, không phải tuỳ chọn"). Khác
-        # dispatch_question_hint.py (nguồn = PROMPT, chạy lúc GIAO việc): đây nguồn = GIT LOG,
-        # phải chạy lúc job XONG vì commit chỉ tồn tại sau đó. Vẫn chỉ GỢI Ý — KHÔNG tự đóng
-        # (đóng theo suy đoán văn bản = đóng oan escalation tiền thật). Chạy SAU consolidate.sh
-        # để đọc bus mới nhất. ~1,5s; fail-open mọi đường lỗi.
+        # CHỤP TRƯỚC, GHI SAU — thứ tự này là BẮT BUỘC (arch-review 2026-09-30, killer
+        # objection): hai cửa sổ dưới đây là văn bản USER-FACING (ping Discord) và prompt
+        # AUTO-CALLBACK, phải chứa KẾT LUẬN CỦA AGENT. Hint bên dưới append vào CÙNG $logfile
+        # và dài ~812B > cửa sổ 500B ⇒ nếu chụp sau, preview thành 100% nag nội bộ và kết luận
+        # agent biến mất — đúng lúc hint có nội dung, tức đúng lúc tính năng hoạt động.
+        # Bất kỳ lệnh nào ghi thêm vào $logfile phải nằm DƯỚI 2 dòng này (selfcheck ghim).
+        local _preview _cb_summary
+        _preview="$(tail -c 500 "$logfile" 2>/dev/null | tr '\n\t' '  ')"
+        _cb_summary="$(head -c 400 "$logfile" 2>/dev/null | tr '\n\t' '  ')"
+        # Nhắc đóng vòng bus theo COMMIT — BẮT BUỘC ở đường HOÀN TẤT của MỌI job ĐI QUA
+        # dispatch.sh (user chốt option B + hướng bổ sung 2026-09-30: "việc GỌI là bắt
+        # buộc/không thể quên, không phải tuỳ chọn"). Ngoại lệ CÓ CHỦ ĐÍCH: bin/verify_finding.sh
+        # tự dựng job record riêng không qua đây — job verify không sinh commit fix nên không có
+        # gì để gợi ý. Khác dispatch_question_hint.py (nguồn = PROMPT, chạy lúc GIAO việc): đây
+        # nguồn = GIT LOG, phải chạy lúc job XONG vì commit chỉ tồn tại sau đó. Vẫn chỉ GỢI Ý —
+        # KHÔNG tự đóng (đóng theo suy đoán văn bản = đóng oan escalation tiền thật). Chạy SAU
+        # consolidate.sh để đọc bus mới nhất. ~1,5s; fail-open nhưng KHÔNG im lặng: stderr vào
+        # consolidator.log để hint chết còn dấu vết (cơ chế "không thể quên" mà chết lặng thì
+        # chính là tái tạo Pattern B ở tầng cơ chế).
         local _commit_hint
-        _commit_hint="$(timeout 25 python3 "$ROOT/bin/question_commit_hint.py" --max 3 2>/dev/null || true)"
+        _commit_hint="$(timeout 25 python3 "$ROOT/bin/question_commit_hint.py" --max 3 2>> "$ROOT/logs/consolidator.log" || true)"
         if [ -n "$_commit_hint" ]; then
           printf '%s\n' "$_commit_hint" >> "$logfile"
           printf '%s\n' "$_commit_hint" >&2
@@ -1413,7 +1425,6 @@ làm lại có chủ đích, đừng âm thầm ghi đè mất công sức cũ m
           # 500-char window while SpaceX's short HOLD summary happened to survive intact).
           # send_plan_report.sh already posts the authoritative structured render to this
           # same channel later the same day — this ping only needs to confirm completion.
-          local _preview; _preview="$(tail -c 500 "$logfile" 2>/dev/null | tr '\n\t' '  ')"
           if [ "$id" = "DollarBill" ]; then
             # User feedback 2026-07-08: state the 19:30 ICT time explicitly so a short
             # completion ping is never mistaken for "nothing else is coming" — the full
@@ -1434,11 +1445,10 @@ làm lại có chủ đích, đừng âm thầm ghi đè mất công sức cũ m
         # 2026-06-27, Taylor<->Winston). A callback is a terminal notification: process it, stop.
         if [ "$from" != "Mike" ] && [ "$from" != "user" ] && [ -d "$ROOT/agents/$from" ] \
            && [[ "$prompt" != "[AUTO-CALLBACK"* ]]; then
-          local cb_summary
-          cb_summary="$(head -c 400 "$logfile" 2>/dev/null | tr '\n\t' '  ')"
           DISPATCH_FROM="$id" "$ROOT/bin/dispatch.sh" "$from" \
-            "[AUTO-CALLBACK job=$job_id] $id HOÀN THÀNH. Kết quả đầy đủ đã ghi trên bus (KB sẽ cập nhật trong vài giây). Tóm tắt output: $cb_summary${_commit_hint:+
+            "[AUTO-CALLBACK job=$job_id] $id HOÀN THÀNH. Kết quả đầy đủ đã ghi trên bus (KB sẽ cập nhật trong vài giây). Tóm tắt output: $_cb_summary${_commit_hint:+
 
+[THÔNG TIN NỀN — KHÔNG phải việc được giao cho bạn. Câu hỏi dưới đây có thể thuộc agent KHÁC; chỉ đóng câu hỏi của CHÍNH BẠN và chỉ sau khi tự đọc commit xác nhận đúng việc.]
 $_commit_hint}" \
             --bg --timeout 300 \
             >> "$ROOT/logs/dispatch_${id}_${ts}.log" 2>&1 || true

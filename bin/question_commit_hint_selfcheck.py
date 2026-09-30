@@ -152,7 +152,9 @@ def wired_into_wags_autofix():
 
 def wired_into_dispatch_completion():
     """User mandate 2026-09-30 (option B + hướng bổ sung): việc GỌI hint phải BẮT BUỘC ở đường
-    HOÀN TẤT của MỌI job, không chỉ khi wags_autofix chạy vòng coord. dispatch.sh có HAI đường
+    HOÀN TẤT của MỌI job ĐI QUA dispatch.sh, không chỉ khi wags_autofix chạy vòng coord (ngoại
+    lệ có chủ đích: bin/verify_finding.sh tự dựng job record riêng — job verify không sinh commit
+    fix nên không có gì để gợi ý). dispatch.sh có HAI đường
     hoàn tất (--bg trong _bg_wrapper, và foreground) — vá một đường là bỏ lọt nửa còn lại
     (đúng tiền lệ dispatch_question_hint.py). Fail-open + im lặng ⇒ cơ chế chết âm thầm nếu
     call site bị xoá, nên ghim lại bằng test."""
@@ -172,6 +174,63 @@ def wired_into_dispatch_completion():
     cb = [ln for ln in src.splitlines() if "AUTO-CALLBACK job=" in ln]
     check("dòng AUTO-CALLBACK có tham chiếu _commit_hint",
           any("_commit_hint" in c for c in cb), str(cb))
+    check("hint trong AUTO-CALLBACK có nhãn THÔNG TIN NỀN (không bị hiểu là việc được giao)",
+          "[THÔNG TIN NỀN" in src, "không thấy nhãn")
+    # Nhánh --bg headless: 2>/dev/null nuốt traceback/timeout ⇒ cơ chế "không thể quên" chết
+    # lặng, chính là Pattern B ở tầng cơ chế (arch-review 2026-09-30, fail_silent).
+    bg = [c for c in calls if "_commit_hint=" in c]
+    check("nhánh --bg KHÔNG discard stderr của hint (2>/dev/null)",
+          bg and all("2>/dev/null" not in c for c in bg), str(bg))
+    # Đường hoàn tất THỨ BA trong dispatch.sh sẽ làm mandate "mọi job" sai mà không ai biết.
+    dones = [ln for ln in src.splitlines()
+             if "JSET status=done" in ln and not ln.strip().startswith("#")]
+    check("dispatch.sh vẫn chỉ có ĐÚNG 2 điểm ghi status=done (thêm đường thứ 3 ⇒ phải wire hint)",
+          len(dones) == 2, str(dones))
+    _preview_window_untainted(src)
+
+
+def _preview_window_untainted(src):
+    """KILLER OBJECTION arch-review 2026-09-30: hint append vào $logfile (~812B) trong khi
+    `tail -c 500 $logfile` là preview Discord USER-FACING và `head -c 400` là cb_summary ⇒ chụp
+    SAU khi append thì kết luận agent bị xoá sạch khỏi thông báo cho user. Test này trích 3 dòng
+    THẬT từ dispatch.sh theo ĐÚNG thứ tự xuất hiện rồi chạy chúng — đảo thứ tự là chết."""
+    lines = src.splitlines()
+    idx_read = [i for i, ln in enumerate(lines)
+                if 'tail -c 500 "$logfile"' in ln or 'head -c 400 "$logfile"' in ln]
+    idx_write = [i for i, ln in enumerate(lines)
+                 if '>> "$logfile"' in ln and not ln.strip().startswith("#")]
+    check("có đủ 2 cửa sổ chụp log (_preview tail -c 500 + _cb_summary head -c 400)",
+          len(idx_read) == 2, str(idx_read))
+    check("MỌI lệnh ghi thêm vào $logfile nằm SAU khi đã chụp preview/cb_summary",
+          bool(idx_read) and bool(idx_write) and min(idx_write) > max(idx_read),
+          "reads=%s writes=%s" % (idx_read, idx_write))
+
+    # Chạy thật 3 dòng đã trích, thứ tự nguyên bản trong file.
+    picked = sorted(idx_read + idx_write)
+    body = "\n".join(lines[i].strip() for i in picked)
+    tmp = tempfile.mkdtemp(prefix="wags_preview_")
+    try:
+        log = os.path.join(tmp, "job.log")
+        with open(log, "w", encoding="utf-8") as f:
+            f.write("nap context...\n" * 3 + "KET_LUAN_AGENT: CAGR 23,37%-25,71%, KHONG GO-LIVE.\n")
+        script = os.path.join(tmp, "sim.sh")
+        with open(script, "w", encoding="utf-8") as f:
+            f.write("set -u\nlogfile=%s\n_commit_hint=\"$(printf 'HINT_NAG_%s' \"$(head -c 900 /dev/zero | tr '\\0' 'x')\")\"\n"
+                    % (log, "X"))
+            f.write("local() { :; }\n")   # 'local' ngoài hàm ⇒ vô hại hoá
+            f.write(body + "\n")
+            f.write('printf "PREVIEW=%s\\nCB=%s\\n" "$_preview" "$_cb_summary"\n')
+        out = subprocess.run(["bash", script], capture_output=True, text=True, timeout=30).stdout
+        prev = [l for l in out.splitlines() if l.startswith("PREVIEW=")]
+        cbl = [l for l in out.splitlines() if l.startswith("CB=")]
+        check("e2e (hint NON-EMPTY): preview Discord còn kết luận agent",
+              prev and "KET_LUAN_AGENT" in prev[0], out[:400])
+        check("e2e (hint NON-EMPTY): preview Discord KHÔNG chứa text hint",
+              prev and "HINT_NAG" not in prev[0], out[:400])
+        check("e2e (hint NON-EMPTY): cb_summary AUTO-CALLBACK KHÔNG chứa text hint",
+              cbl and "HINT_NAG" not in cbl[0], out[:400])
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
 
 
 def main():
