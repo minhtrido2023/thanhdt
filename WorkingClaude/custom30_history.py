@@ -9,6 +9,8 @@ quarterly + on fa_ratings_8l republish). Lookup today's basket:
   WHERE rebal_date=(SELECT MAX(rebal_date) FROM tav2_bq.custom30_8l WHERE rebal_date<=CURRENT_DATE())
 """
 import os, sys, subprocess
+import datetime as _dt
+from zoneinfo import ZoneInfo
 import numpy as np, pandas as pd
 WORKDIR = r"/home/trido/thanhdt/WorkingClaude"
 sys.path.insert(0, WORKDIR); os.chdir(WORKDIR)
@@ -71,13 +73,52 @@ df = pd.DataFrame(rows)
 # ảnh hưởng `mem`/`w`/thứ tự — thuần quan sát cho chương trình `yield_floor_custom30v_observe`
 # (review 2027-02-10, `mike/kb/paper_programs_registry.json`). Fail-open: `label_basket()` không
 # bao giờ raise; cặp nào hỏng về ("NO_DATA", None). Xem custom30_yield_labels.py.
-_lab = yfl.label_basket(bq, list(zip(df["ticker"], df["rebal_date"])))
-_pair = list(zip(df["ticker"], df["rebal_date"].astype(str)))
+#
+# ⚠️ THỜI ĐIỂM ĐÁNH GIÁ — fix 2026-09-30 (job Taylor_20260930_030814, user chỉ đạo sau ca PNJ:
+# "nếu một năm không trả thì tự động rớt"). CÔNG THỨC KHÔNG ĐỔI (vẫn 3 cửa sổ rolling 365 ngày,
+# đếm SỰ KIỆN chi trả, không ngưỡng số tiền) — chỉ ASOF đổi:
+#   - kỳ rebal ĐANG MỞ  -> asof = HÔM NAY (ICT), đánh giá lại mỗi lần publisher chạy;
+#   - kỳ rebal ĐÃ ĐÓNG -> asof = rebal_date, GIỮ NGUYÊN (lịch sử point-in-time, không restate).
+# Trước fix mọi kỳ đều dùng asof=rebal_date ⇒ nhãn của kỳ đang mở bị ĐÓNG BĂNG tại đầu quý:
+# PNJ công bố "2026 không chia cổ tức" giữa quý mà `is_stable_payer` vẫn `true` cho tới kỳ rebal
+# kế tiếp (trễ tối đa ~1 năm). 3 cửa sổ 365 ngày là hàm của `asof`; asof đúng cho câu hỏi
+# "mã này CÓ ĐANG trả đều không" là hôm nay, không phải một ngày đã đóng băng trong quá khứ.
+# HAI LÔ, mỗi lô neo cổng freshness `corporate_action` RIÊNG (`feed_asof`) — quant-skeptic bắt
+# đúng chỗ này ở vòng 1: cổng freshness là TOÀN CỤC cho một lô, nên nếu nhồi cả lịch sử và hôm
+# nay vào MỘT lô thì một ngày feed cũ >4 ngày sẽ kéo CẢ 48 kỳ đã đóng về NO_DATA — tức tự phá
+# đúng bất biến "không restate lịch sử" mà fix này hứa. Lô lịch sử neo ở `_cur_rd` (y nguyên
+# hành vi trước fix), lô kỳ mở neo ở hôm nay.
+#   Feed cũ ⇒ kỳ MỞ về NO_DATA ("không biết"), CỐ Ý không fallback về nhãn đóng băng ở
+#   rebal_date: mục đích của fix là thôi trưng một `true` đã cũ, nên "không biết" đúng hơn
+#   "khẳng định bằng dữ liệu cũ".
+#   ⚠️ Nhãn kỳ MỞ là DISPLAY tức thời, không phải sổ lịch sử: khi kỳ rebal kế tiếp mở ra, kỳ
+#   này thành "đã đóng" và nhãn quay về giá trị tại rebal_date ⇒ CSV/bảng KHÔNG lưu vết các lần
+#   flip giữa quý. Nếu chương trình quan sát (review 2027-02-10) cần vết đó thì phải thêm log
+#   append-only riêng — chưa làm, ngoài phạm vi fix này.
+#   AI ĐỊNH GỘP LẠI THÀNH 1 LÔ: đọc `custom30_yield_labels_selfcheck.py` mục [D] trước. [D]
+#   khoá HỢP ĐỒNG của `label_basket` (lô neo sớm không bị feed-cũ-so-với-hôm-nay làm trắng),
+#   nhưng KHÔNG khoá được chỗ tách lô ở đây — file này là script top-level, import vào là
+#   chạy nên không unit-test được. Repro tay bất biến: monkeypatch
+#   `corp_action_lib.feed_freshness` về (hôm nay − 10 ngày) rồi runpy file này, so md5 phần
+#   dòng của các kỳ ĐÃ ĐÓNG trong CSV — phải KHÔNG đổi, chỉ kỳ mở về NO_DATA.
+_cur_rd = pd.Timestamp(rebals[-1]).date()
+_today_ict = _dt.datetime.now(ZoneInfo("Asia/Ho_Chi_Minh")).date()   # §16: không tin TZ process
+_asof_cur = _today_ict if _today_ict > _cur_rd else _cur_rd
+_is_cur = [rd == _cur_rd for rd in df["rebal_date"]]
+_p_closed = [(tk, rd) for tk, rd, c in zip(df["ticker"], df["rebal_date"], _is_cur) if not c]
+_p_open = [(tk, _asof_cur) for tk, c in zip(df["ticker"], _is_cur) if c]
+_lab = {}
+if _p_closed:
+    _lab.update(yfl.label_basket(bq, _p_closed, feed_asof=_cur_rd))
+if _p_open:
+    _lab.update(yfl.label_basket(bq, _p_open, feed_asof=_asof_cur))
+_pair = [(tk, str(_asof_cur if c else rd))
+         for tk, rd, c in zip(df["ticker"], df["rebal_date"], _is_cur)]
 df["yield_floor_note"] = [_lab.get(k, ("NO_DATA", None))[0] for k in _pair]
 df["is_stable_payer"] = ["" if _lab.get(k, ("NO_DATA", None))[1] is None
                          else ("true" if _lab[k][1] else "false") for k in _pair]
-_cur = df[df["rebal_date"] == pd.Timestamp(rebals[-1]).date()]
-print("  yield_floor (rebal hien tai): " +
+_cur = df[df["rebal_date"] == _cur_rd]
+print(f"  yield_floor (rebal {_cur_rd}, danh gia lai tai asof={_asof_cur}): " +
       ", ".join(f"{k}={v}" for k, v in _cur["yield_floor_note"].value_counts().items()))
 df.to_csv(CSV, index=False, encoding="utf-8")
 print(f"  {len(df)} rows, {len(rebals)} rebals -> {CSV}")

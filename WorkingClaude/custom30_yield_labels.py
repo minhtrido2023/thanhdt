@@ -40,12 +40,18 @@ def _empty(pairs):
     return {(tk, str(pd.Timestamp(d).date())): ("NO_DATA", None) for tk, d in pairs}
 
 
-def label_basket(bq, pairs, verbose=True):
+def label_basket(bq, pairs, verbose=True, feed_asof=None):
     """-> {(ticker, 'YYYY-MM-DD'): (yield_floor_note, is_stable_payer)}.
 
     `bq` = callable SQL -> DataFrame (truyền vào để dùng đúng reader của caller).
-    `pairs` = iterable (ticker, rebal_date). Mọi đường hỏng (feed cũ, query lỗi, thiếu giá,
+    `pairs` = iterable (ticker, asof). Mọi đường hỏng (feed cũ, query lỗi, thiếu giá,
     thiếu cổ tức) đều về ("NO_DATA", None) cho cặp đó — KHÔNG bao giờ raise ra ngoài.
+
+    `feed_asof` = ngày NEO cổng freshness `corporate_action` (mặc định None ⇒ max(asof) trong
+    `pairs`, đúng hành vi trước 2026-09-30). Tách ra thành tham số vì cổng này là TOÀN CỤC cho
+    cả lô: caller nào trộn asof lịch sử với asof hôm nay trong MỘT lô sẽ để một feed cũ kéo cả
+    phần lịch sử về NO_DATA (quant-skeptic bắt được, job Taylor_20260930_030814). Ai cần 2 neo
+    khác nhau thì gọi 2 lô, mỗi lô khai `feed_asof` của mình.
     """
     pairs = [(str(tk), pd.Timestamp(d)) for tk, d in pairs]
     if not pairs:
@@ -63,7 +69,8 @@ def label_basket(bq, pairs, verbose=True):
 
         # §14/registry: `corporate_action` KHÔNG có writer trong repo ⇒ verify freshness mỗi
         # lần đọc, đúng cổng mà `_yield_floor()` dùng. Feed cũ ⇒ toàn bộ NO_DATA (fail-open).
-        if not _corp_action_feed_ok(d_max.date()):
+        _gate_d = pd.Timestamp(feed_asof).date() if feed_asof is not None else d_max.date()
+        if not _corp_action_feed_ok(_gate_d):
             if verbose:
                 print("  [yield_floor] corporate_action feed KHONG tuoi -> toan bo NO_DATA")
             return out

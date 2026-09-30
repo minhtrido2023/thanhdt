@@ -63,5 +63,53 @@ print(f"[C] thieu key: {len(missing)} | nhan rong: {len(empty)}")
 if missing or empty:
     fails.append("C: thieu key hoac nhan rong")
 
-print("\n" + ("SELFCHECK FAIL: " + "; ".join(fails) if fails else "SELFCHECK PASS (A+B+C)"))
+# --- D. `feed_asof` tach coi: feed cu CHI anh huong lo neo o HOM NAY -------------------------
+# Hoi quy cho fix 2026-09-30 (job Taylor_20260930_030814, quant-skeptic vong 1 bat): cong
+# freshness `corporate_action` la TOAN CUC cho mot lo, nen `custom30_history.py` goi 2 lo —
+# lo lich su neo `feed_asof=<rebal hien tai>`, lo ky mo neo `feed_asof=hom nay`. Neu ai gop lai
+# thanh 1 lo (hoac bo `feed_asof`), mot ngay feed cu >4 ngay se keo CA lich su ve NO_DATA.
+# Test nay chet ngay khi dieu do xay ra — truoc day chi duoc chung minh 1 lan bang tay.
+import datetime as _dt
+from zoneinfo import ZoneInfo
+import corp_action_lib as _cal
+import trading_bot.due_diligence as _dd
+
+_today = _dt.datetime.now(ZoneInfo("Asia/Ho_Chi_Minh")).date()
+_cur_rd_d = _dt.date.fromisoformat(str(rd)[:10])
+_rds = sorted(df["rebal_date"].unique())
+
+def _clear_fresh_cache():
+    """Cong freshness cache theo (key, ngay-neo) trong process — phai xoa, khong thi test gia PASS."""
+    for k in [k for k in _dd._CACHE if isinstance(k, tuple) and k and k[0] == "_ca_fresh"]:
+        del _dd._CACHE[k]
+
+if (_today - _cur_rd_d).days <= _dd.CORP_ACTION_STALE_DAYS_MAX or len(_rds) < 2:
+    print(f"[D] SKIP — hai neo cach nhau {(_today-_cur_rd_d).days}d <= nguong "
+          f"{_dd.CORP_ACTION_STALE_DAYS_MAX}d (vua rebal xong) ⇒ khong co gi de tach")
+else:
+    _prev = _rds[-2]
+    _pc = [(t, _prev) for t in df[df["rebal_date"] == _prev]["ticker"]]
+    _po = [(t, str(_today)) for t in cur["ticker"]]
+    _clear_fresh_cache()
+    _ref = yfl.label_basket(bq, _pc, verbose=False, feed_asof=str(rd))
+    _orig_ff = _cal.feed_freshness
+    # Feed dung o `rd`: TUOI voi neo lich su (tuoi 0) nhung CU voi neo hom nay (~1 quy).
+    _cal.feed_freshness = lambda *a, **k: {"max_ingested": str(rd)}
+    try:
+        _clear_fresh_cache()
+        _sc = yfl.label_basket(bq, _pc, verbose=False, feed_asof=str(rd))
+        _so = yfl.label_basket(bq, _po, verbose=False, feed_asof=str(_today))
+    finally:
+        _cal.feed_freshness = _orig_ff
+        _clear_fresh_cache()
+    _ok_closed = (_sc == _ref) and any(v != ("NO_DATA", None) for v in _ref.values())
+    _ok_open = bool(_so) and all(v == ("NO_DATA", None) for v in _so.values())
+    print(f"[D] feed cu -> lich su ({_prev}) GIU NGUYEN: {'PASS' if _ok_closed else 'FAIL'} "
+          f"| ky mo ({_today}) ve NO_DATA: {'PASS' if _ok_open else 'FAIL'}")
+    if not _ok_closed:
+        fails.append("D: feed cu lam DOI nhan ky da dong (cong freshness bi gop lo)")
+    if not _ok_open:
+        fails.append("D: feed cu ma ky mo KHONG ve NO_DATA (cong freshness khong con neo o hom nay)")
+
+print("\n" + ("SELFCHECK FAIL: " + "; ".join(fails) if fails else "SELFCHECK PASS (A+B+C+D)"))
 sys.exit(1 if fails else 0)
