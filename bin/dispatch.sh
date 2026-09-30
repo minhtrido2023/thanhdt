@@ -1380,6 +1380,19 @@ làm lại có chủ đích, đừng âm thầm ghi đè mất công sức cũ m
         JSET status=done ended_at="$(date +%s)" exit_code=0 result_summary="$(SUMMARY)"
         _circuit_record "$CIRCUIT_KEY" success
         "$ROOT/bin/consolidate.sh" >> "$ROOT/logs/consolidator.log" 2>&1 || true
+        # Nhắc đóng vòng bus theo COMMIT — BẮT BUỘC ở đường HOÀN TẤT của MỌI job, không chỉ
+        # khi wags_autofix chạy vòng coord (user chốt option B + hướng bổ sung 2026-09-30:
+        # "việc GỌI là bắt buộc/không thể quên, không phải tuỳ chọn"). Khác
+        # dispatch_question_hint.py (nguồn = PROMPT, chạy lúc GIAO việc): đây nguồn = GIT LOG,
+        # phải chạy lúc job XONG vì commit chỉ tồn tại sau đó. Vẫn chỉ GỢI Ý — KHÔNG tự đóng
+        # (đóng theo suy đoán văn bản = đóng oan escalation tiền thật). Chạy SAU consolidate.sh
+        # để đọc bus mới nhất. ~1,5s; fail-open mọi đường lỗi.
+        local _commit_hint
+        _commit_hint="$(timeout 25 python3 "$ROOT/bin/question_commit_hint.py" --max 3 2>/dev/null || true)"
+        if [ -n "$_commit_hint" ]; then
+          printf '%s\n' "$_commit_hint" >> "$logfile"
+          printf '%s\n' "$_commit_hint" >&2
+        fi
         "$ROOT/bin/notify.sh" "[dispatch] $id hoàn thành (job $job_id): $(SUMMARY)" 2>/dev/null || true
         # Discord thread notification — always, regardless of who dispatched. Read the
         # topic THIS job was dispatched from (persisted at dispatch time), not whatever
@@ -1424,7 +1437,9 @@ làm lại có chủ đích, đừng âm thầm ghi đè mất công sức cũ m
           local cb_summary
           cb_summary="$(head -c 400 "$logfile" 2>/dev/null | tr '\n\t' '  ')"
           DISPATCH_FROM="$id" "$ROOT/bin/dispatch.sh" "$from" \
-            "[AUTO-CALLBACK job=$job_id] $id HOÀN THÀNH. Kết quả đầy đủ đã ghi trên bus (KB sẽ cập nhật trong vài giây). Tóm tắt output: $cb_summary" \
+            "[AUTO-CALLBACK job=$job_id] $id HOÀN THÀNH. Kết quả đầy đủ đã ghi trên bus (KB sẽ cập nhật trong vài giây). Tóm tắt output: $cb_summary${_commit_hint:+
+
+$_commit_hint}" \
             --bg --timeout 300 \
             >> "$ROOT/logs/dispatch_${id}_${ts}.log" 2>&1 || true
         fi
@@ -1730,6 +1745,9 @@ else
     # xảy ra ở CẢ HAI nhánh; vá một nhánh là bỏ lọt nửa còn lại). Chỉ in ở đường THÀNH CÔNG:
     # nhánh lỗi đã có thông điệp riêng và đang cần sự chú ý cho việc khác.
     printf '%s' "$prompt" | timeout 25 python3 "$ROOT/bin/dispatch_question_hint.py" --to "$id" >&2 || true
+    # Nhắc đóng vòng bus theo COMMIT — cùng lý do/ràng buộc như nhánh --bg ở trên (nguồn =
+    # GIT LOG nên phải chạy lúc job XONG; chỉ GỢI Ý, không tự đóng).
+    timeout 25 python3 "$ROOT/bin/question_commit_hint.py" --max 3 >&2 || true
   else
     if _maybe_fallback_provider_on_usage_limit "$logfile" "$logfile.err"; then
       echo "NOTE: dispatch $id (job $job_id) provider '$PROVIDER' hết usage/rate limit — đã fallback NGAY sang claude (job mới chạy nền, không chờ reset)." >&2

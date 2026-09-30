@@ -150,6 +150,30 @@ def wired_into_wags_autofix():
           "${COMMIT_HINT:+" in src, "không thấy trong wags_autofix.sh")
 
 
+def wired_into_dispatch_completion():
+    """User mandate 2026-09-30 (option B + hướng bổ sung): việc GỌI hint phải BẮT BUỘC ở đường
+    HOÀN TẤT của MỌI job, không chỉ khi wags_autofix chạy vòng coord. dispatch.sh có HAI đường
+    hoàn tất (--bg trong _bg_wrapper, và foreground) — vá một đường là bỏ lọt nửa còn lại
+    (đúng tiền lệ dispatch_question_hint.py). Fail-open + im lặng ⇒ cơ chế chết âm thầm nếu
+    call site bị xoá, nên ghim lại bằng test."""
+    src = open(os.path.join(ROOT, "bin", "dispatch.sh"), encoding="utf-8").read()
+    calls = [ln for ln in src.splitlines()
+             if "bin/question_commit_hint.py" in ln and not ln.strip().startswith("#")]
+    check("dispatch.sh gọi question_commit_hint.py ở CẢ 2 đường hoàn tất (--bg + foreground)",
+          len(calls) == 2, str(calls))
+    check("2 lời gọi dispatch.sh đều fail-open (|| true)",
+          all("|| true" in c for c in calls), str(calls))
+    check("2 lời gọi dispatch.sh đều có timeout",
+          all("timeout " in c for c in calls), str(calls))
+    # Nhánh --bg là headless: stderr không ai đọc ⇒ hint phải đi vào log job VÀ vào prompt
+    # AUTO-CALLBACK gửi ngược cho agent đã giao việc, nếu không thì vô hình.
+    check("nhánh --bg đưa hint vào prompt AUTO-CALLBACK (${_commit_hint:+...})",
+          "${_commit_hint:+" in src, "không thấy trong dispatch.sh")
+    cb = [ln for ln in src.splitlines() if "AUTO-CALLBACK job=" in ln]
+    check("dòng AUTO-CALLBACK có tham chiếu _commit_hint",
+          any("_commit_hint" in c for c in cb), str(cb))
+
+
 def main():
     m = _mod()
     print("question_commit_hint_selfcheck")
@@ -282,6 +306,7 @@ def main():
 
     # 6) RÀNG BUỘC TÍCH HỢP — không có cái này thì hint chết âm thầm.
     wired_into_wags_autofix()
+    wired_into_dispatch_completion()
 
     print(("FAIL: %d" % len(FAILS)) if FAILS else "PASS")
     return 1 if FAILS else 0
