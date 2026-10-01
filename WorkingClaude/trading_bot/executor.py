@@ -936,6 +936,16 @@ class Executor:
             return False
         return "price lot" in str(e).lower() or "invalid price" in str(e).lower()
 
+    @staticmethod
+    def _is_invalid_ordertype(e):
+        """True nếu lỗi broker là do order_type không được sàn hỗ trợ (vd UPCOM không có
+        ATO/ATC) — lưới an toàn PHỤ cho `_atc_sweep` khi nhận diện sàn ở trên vẫn lọt (quote
+        câm + chưa có override → fail-open HOSE sai cho một mã thật ra UPCOM). Xác nhận thật:
+        DNSE trả 'HTTP 400: Invalid ordertype for the exchange' (SCL/ZaloPay 2026-10-01)."""
+        if getattr(e, "status", None) != 400:
+            return False
+        return "invalid ordertype" in str(e).lower()
+
     def _retry_tick_mismatch(self, o, q, cross, extreme_down, px, qty, err):
         """Khi place_order lỗi vì SAI BƯỚC GIÁ (xem `_is_invalid_tick_lot`): thử lại NGAY MỘT
         LẦN với quy ước bước giá còn lại (HOSE↔HNX/UPCOM — UPCOM dùng chung tick cố định 100đ
@@ -2097,7 +2107,7 @@ class Executor:
     def _atc_sweep(self, ghost_tickers=(), positions=None):
         for o in self.plan.orders:
             ps = self.state["parents"][o.id]
-            if ps["done"] or ps["atc_sent"]:
+            if ps["done"] or ps["atc_sent"] or ps.get("atc_unsupported"):
                 continue
             if o.ticker in ghost_tickers:
                 continue  # idempotency guard — xem _ghost_tickers
@@ -2113,18 +2123,25 @@ class Executor:
             # UPCOM không có phiên khớp định kỳ đóng cửa (chỉ HOSE/HNX có ATO/ATC) — DNSE xác
             # nhận thật: HTTP 400 "Invalid ordertype for the exchange" cho MỌI lần gửi order_type=
             # "ATC" trên mã UPCOM, và `_atc_sweep` chạy lại mỗi chu kỳ poll nên lỗi lặp vô hạn tới
-            # hết phiên ATC (sự cố SCL/ZaloPay 2026-10-01: 40+ lần 14:30-14:44, 200cp trôi sang
-            # phiên sau mà KHÔNG có lệnh nào thay thế). Tra sàn TRƯỚC khi hủy lệnh LO đang mở —
-            # UPCOM vẫn khớp liên tục tới hết phiên nên hủy nó để nhường chỗ cho ATC (rồi ATC luôn
-            # thất bại) chỉ làm mất đúng cơ hội khớp cuối cùng còn lại.
-            ex = self.state.get("exchange_override", {}).get(o.ticker)
-            if ex is None:
-                # Fail-open về "HOSE" nếu get_quote lỗi/không hỗ trợ (paper/sim broker) — ATC
-                # vẫn được thử như hành vi cũ, không chặn nhầm mã HOSE/HNX vì quote câm.
-                try:
-                    ex = getattr(self.broker.get_quote(o.ticker), "exchange", None) or "HOSE"
-                except Exception:
-                    ex = "HOSE"
+            # hết phiên ATC (sự cố SCL/ZaloPay 2026-10-01: 45 lần 14:30:04-14:44:53, 200cp trôi
+            # sang phiên sau mà KHÔNG có lệnh nào thay thế). Tra sàn TRƯỚC khi hủy lệnh LO đang mở
+            # — UPCOM vẫn khớp liên tục tới hết phiên nên hủy nó để nhường chỗ cho ATC (rồi ATC
+            # luôn thất bại) chỉ làm mất đúng cơ hội khớp cuối cùng còn lại.
+            #
+            # Quote SỐNG có exchange_known=True PHẢI thắng `exchange_override` — override chỉ
+            # ghi được HOSE|HNX (`_retry_tick_mismatch`, KHÔNG BAO GIỜ ghi UPCOM) nên tin nó hơn
+            # quote sống sẽ bỏ lọt đúng ca một mã UPCOM từng bị tick-mismatch-retry gắn nhầm
+            # override="HNX". Quote câm/lỗi/không xác định (exchange_known=False) → rơi về
+            # override đã học, rồi fail-open "HOSE" — ATC vẫn được thử như hành vi cũ, không
+            # chặn nhầm mã HOSE/HNX vì quote câm.
+            try:
+                q_ex = self.broker.get_quote(o.ticker)
+            except Exception:
+                q_ex = None
+            if q_ex is not None and getattr(q_ex, "exchange_known", None):
+                ex = q_ex.exchange or "HOSE"
+            else:
+                ex = self.state.get("exchange_override", {}).get(o.ticker) or "HOSE"
             if ex == "UPCOM":
                 self._journal("UPCOM_SKIP_ATC", o, note=(
                     "UPCOM không hỗ trợ order_type=ATC — bỏ qua quét ATC, giữ nguyên lệnh LO "
@@ -2205,7 +2222,17 @@ class Executor:
                 self._journal("ATC", o, oid, remaining, note="quét ATC phần còn lại")
                 self._save_state()  # idempotency: ghi ngay, xem note ở _place_slices
             except Exception as e:
-                self._journal("ATC_FAIL", o, note=str(e))
+                if self._is_invalid_ordertype(e):
+                    # Lưới an toàn PHỤ: nhận diện sàn ở trên đã lọt (quote câm + chưa học
+                    # override → fail-open HOSE sai) nhưng broker tự xác nhận order_type không
+                    # hợp lệ — đóng đường lặp vô hạn ngay từ lần thử ĐẦU TIÊN, không chờ hết
+                    # phiên ATC mới dừng (xem check `ps.get("atc_unsupported")` đầu vòng lặp).
+                    ps["atc_unsupported"] = True
+                    self._journal("ATC_FAIL", o, note=(
+                        f"{e} — order_type=ATC bị sàn từ chối, đánh dấu atc_unsupported để "
+                        f"KHÔNG thử lại các chu kỳ sau"))
+                else:
+                    self._journal("ATC_FAIL", o, note=str(e))
 
     def cancel_all_open(self, reason):
         for o in self.plan.orders:
