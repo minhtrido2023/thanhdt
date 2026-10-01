@@ -878,8 +878,11 @@ def main():
     # gentle NEUTRAL-ONLY deposit tilt (validated 2026-06-19: per-stock deposit hurdle adds a clean +1.2pp
     # ONLY in NEUTRAL; near-inactive/perverse in bear/crisis, off in bull). Soft ±0.03, non-financials only.
     try:
-        from deposit_rate_vn import current_deposit_rate
-        _dep = current_deposit_rate()
+        # Big-4+CCTG effective rate wired 2026-10-01 (job Taylor_20261001_054110, user-approved) --
+        # rollback knob DEPOSIT_RATE_CCTG_OVERLAY=0 reverts to Big-4-only. See
+        # mike/kb/data_registry/macro/cctg_rate_vn.md for the diff table that justified this.
+        from deposit_rate_vn import consumer_deposit_rate
+        _dep = consumer_deposit_rate()
         _st, _dt5g_stale = dt5g_state_today()   # state cũ VẪN dùng (hành vi không đổi), chỉ thêm cờ
         if int(_st) == 3 and os.environ.get("DEPOSIT_TILT", "1") == "1":          # NEUTRAL only
             _spread = scr["earn_yield"] * 100 - _dep                              # 1/PE(%) - deposit(%)

@@ -440,12 +440,19 @@ def _icb_code(ticker, asof):
 
 
 def _deposit_rate_pct(asof):
-    """Lãi suất tiền gửi 12M Big-4 tại asof (%/năm) — `deposit_rate_vn.current_deposit_rate`.
+    """Lãi suất tiền gửi dùng làm yield-floor hurdle tại asof (%/năm) — Big-4 12M, hoặc
+    max(Big-4 12M, CCTG Big-4 6M) khi CCTG đang là driver. Wired sang effective rate 2026-10-01
+    (job Taylor_20261001_054110, user-approved) qua `deposit_rate_vn.effective_deposit_rate()` —
+    rollback: env DEPOSIT_RATE_CCTG_OVERLAY=0 (xem `deposit_rate_vn.consumer_deposit_rate`).
 
     Đây là ĐÚNG chuỗi research dùng (`analyze.py` import `merge_deposit` từ cùng module), nên
     không hardcode khi module có sẵn. Fallback 5,5% chỉ khi import/đọc hỏng — khi đó
     con số hiển thị không còn cùng hệ với research, nên block tự hạ về NO_DATA ở tầng trên nếu
-    cả giá lẫn cổ tức cũng thiếu; ở đây chỉ trả cờ để caller ghi rõ nguồn."""
+    cả giá lẫn cổ tức cũng thiếu; ở đây chỉ trả cờ để caller ghi rõ nguồn.
+
+    Nguồn trả về (`deposit_rate_source` ở _yield_floor) phải nói rõ DRIVER thật (big4_12m vs
+    cctg_6m(<date>)), không gộp mù thành "deposit_rate_vn" chung chung — bẫy #1,
+    mike/kb/data_registry/macro/cctg_rate_vn.md."""
     key = ("_deprate", str(asof)[:10])
     if key in _CACHE:
         return _CACHE[key]
@@ -454,8 +461,14 @@ def _deposit_rate_pct(asof):
         import sys as _sys
         if WORKDIR not in _sys.path:
             _sys.path.insert(0, WORKDIR)
-        from deposit_rate_vn import current_deposit_rate
-        out = (float(current_deposit_rate(str(asof)[:10])), "deposit_rate_vn")
+        import os as _os
+        if _os.environ.get("DEPOSIT_RATE_CCTG_OVERLAY", "1") == "0":
+            from deposit_rate_vn import current_deposit_rate
+            out = (float(current_deposit_rate(str(asof)[:10])), "deposit_rate_vn:big4_12m")
+        else:
+            from deposit_rate_vn import effective_deposit_rate
+            eff = effective_deposit_rate(str(asof)[:10])
+            out = (float(eff["rate_pct"]), f"deposit_rate_vn:{eff['rate_source']}")
     except Exception as exc:
         _log.warning("deposit_rate_vn doc loi: %s", str(exc)[:200])
     _CACHE[key] = out

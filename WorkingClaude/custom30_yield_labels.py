@@ -66,7 +66,11 @@ def label_basket(bq, pairs, verbose=True, feed_asof=None):
     out = _empty(pairs)
     try:
         import corp_action_lib
-        from deposit_rate_vn import current_deposit_rate
+        # Wired to the Big-4+CCTG effective rate 2026-10-01 (job Taylor_20261001_054110,
+        # user-approved) — must track trading_bot/due_diligence.py's _yield_floor() 1:1 (same
+        # function, batch form; verified 120/120 match, job Taylor_20260818_131745). Rollback:
+        # env DEPOSIT_RATE_CCTG_OVERLAY=0 (see deposit_rate_vn.consumer_deposit_rate).
+        from deposit_rate_vn import consumer_deposit_rate
         from trading_bot.due_diligence import (_corp_action_feed_ok, YIELD_FLOOR_NEAR_LO,
                                                YIELD_FLOOR_NEAR_HI, YIELD_FLOOR_ICB_BANKING)
 
@@ -127,7 +131,7 @@ FROM tav2_bq.ticker t WHERE t.ticker IN ({inlist}) AND ({wins})
         dep_cache = {}
         for tk, d in pairs:
             out[(tk, str(d.date()))] = _label_one(
-                tk, d, px_map, div_by_tk, dep_cache, current_deposit_rate,
+                tk, d, px_map, div_by_tk, dep_cache, consumer_deposit_rate,
                 (YIELD_FLOOR_NEAR_LO, YIELD_FLOOR_NEAR_HI, YIELD_FLOOR_ICB_BANKING))
     except Exception as exc:                      # lưới cuối — pipeline rổ KHÔNG được chết vì nhãn
         print(f"  [yield_floor] batch loi -> toan bo NO_DATA: {str(exc)[:200]}")

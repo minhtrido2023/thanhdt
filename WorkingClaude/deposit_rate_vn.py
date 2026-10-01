@@ -288,11 +288,13 @@ def effective_deposit_rate(asof=None, stale_days_limit=45, check_freshness=None)
     behavior) rather than fail-closing to some gate state; callers that need fail-closed semantics
     should use macro_killswitch_a_status(), not this function.
 
-    DO NOT wire this into rating_8l.py's NEUTRAL deposit tilt or into the DCF discount-rate chain
-    (dcf_valuation.py / trading_bot/due_diligence.py / dcf_refresh_gate.py / custom30_yield_labels.py)
-    without an explicit user decision -- both change a LIVE daily production output (rating tilt,
-    fear-buy QUALIFY/NON). See mike/kb/data_registry/macro/cctg_rate_vn.md for the full consumer
-    inventory + diff table.
+    User approved wiring this into rating_8l.py's NEUTRAL deposit tilt and the DCF discount-rate
+    chain (dcf_valuation.py / trading_bot/due_diligence.py / dcf_refresh_gate.py /
+    custom30_yield_labels.py) on 2026-10-01 (job Taylor_20261001_054110) -- those 5 call sites
+    now go through `consumer_deposit_rate()` below, NOT this function directly. Any FUTURE new
+    consumer of this rate should go through `consumer_deposit_rate()` too (one rollback knob),
+    not call `effective_deposit_rate()` ad-hoc. See mike/kb/data_registry/macro/cctg_rate_vn.md
+    for the full consumer inventory + diff table.
 
     Returns dict: rate(float, fraction), rate_pct(float), rate_source("big4_12m"|"cctg_6m(<date>)"),
     big4_rate_pct(float), cctg_rate_pct(float|None), last_update(str date)."""
@@ -327,6 +329,30 @@ def effective_deposit_rate(asof=None, stale_days_limit=45, check_freshness=None)
         cctg_pct = None
     return {"rate": rate_pct / 100.0, "rate_pct": rate_pct, "rate_source": rate_source,
             "big4_rate_pct": big4_pct, "cctg_rate_pct": cctg_pct, "last_update": str(last_date.date())}
+
+
+def consumer_deposit_rate(asof=None):
+    """Single wiring point for the 5 LIVE production consumers of `current_deposit_rate()` that
+    the user approved switching to the Big-4+CCTG effective rate on 2026-10-01 (job
+    Taylor_20261001_054110): rating_8l.py's NEUTRAL deposit tilt, trading_bot/due_diligence.py's
+    fear-buy `_yield_floor()`, its batch twin custom30_yield_labels.py, and the DCF
+    discount-rate chain (dcf_valuation.py::discount_rate, dcf_refresh_gate.py's drift monitor).
+    Centralizing here (rather than editing each call site to call effective_deposit_rate()
+    directly) means all 5 move together and share ONE rollback knob.
+
+    Returns a plain float in PERCENT -- same shape/units as current_deposit_rate() -- so every
+    call site is a drop-in `current_deposit_rate -> consumer_deposit_rate` rename, no other edit.
+
+    Rollback: env DEPOSIT_RATE_CCTG_OVERLAY=0 reverts ALL 5 consumers to Big-4-only
+    (current_deposit_rate()) in one step, e.g. if the CCTG legal-vn re-verification (see
+    mike/kb/data_registry/macro/cctg_rate_vn.md §Pháp lý) comes back negative. Default "1" (on).
+
+    History is unaffected either way: cctg_rate_vn has its only anchor at 2026-09-30, so
+    effective_deposit_rate() is byte-identical to current_deposit_rate() for every asof before
+    that date regardless of this knob -- verified in cctg_deposit_wiring_selfcheck.py."""
+    if os.environ.get("DEPOSIT_RATE_CCTG_OVERLAY", "1") == "0":
+        return current_deposit_rate(asof)
+    return effective_deposit_rate(asof)["rate_pct"]
 
 
 def effective_deposit_events_df():

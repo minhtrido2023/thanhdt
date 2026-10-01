@@ -215,13 +215,17 @@ def is_financial(ticker, asof):
 
 
 def discount_rate(asof, erp=ERP):
-    """Cost of equity = Big-4 12M deposit rate (as-of) + ERP, in decimal."""
+    """Cost of equity = deposit rate (as-of) + ERP, in decimal. Deposit leg wired to
+    deposit_rate_vn.consumer_deposit_rate() 2026-10-01 (job Taylor_20261001_054110,
+    user-approved) = max(Big-4 12M, Big-4 CCTG 6M) when CCTG fresh/in-range, else Big-4-only.
+    History unaffected: CCTG's only anchor is 2026-09-30, so every asof before that date is
+    byte-identical to the prior Big-4-only series. Rollback: env DEPOSIT_RATE_CCTG_OVERLAY=0."""
     a = pd.to_datetime(asof)
     key = (str(a.date()), erp)
     if key not in _RATE_CACHE:
         ev = _dep.deposit_events_df()
         a_eff = max(a, ev.time.iloc[0])          # clamp to earliest available deposit event
-        _RATE_CACHE[key] = (_dep.current_deposit_rate(a_eff) + erp) / 100.0
+        _RATE_CACHE[key] = (_dep.consumer_deposit_rate(a_eff) + erp) / 100.0
     return _RATE_CACHE[key]
 
 
