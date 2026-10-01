@@ -1,4 +1,4 @@
-# Fleet status — 2026-10-01T06:00:05 UTC
+# Fleet status — 2026-10-01T06:00:09 UTC
 
 | agent | title (desktop) | kind | status | last_heartbeat | age(min) | current_task |
 |---|---|---|---|---|---|---|
@@ -17,7 +17,7 @@
 | Wags | Wags | child | working | 2026-10-01T05:46:14Z | 13 |  |
 | Winston | Winston | child | working | 2026-10-01T05:45:45Z | 14 |  |
 | mike-paseo-ad | mike-paseo-ad | external | running | 2026-10-01T06:00:01Z | 0 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike_paseo |
-| workingclaude-05 | workingclaude-05 | child | dead | 2026-10-01T01:24:08Z | 275 |  |
+| workingclaude-05 | workingclaude-05 | child | dead | 2026-10-01T01:24:08Z | 276 |  |
 | workingclaude-4b | workingclaude-4b | child | dead | 2026-09-30T03:29:16Z | 1590 |  |
 | workingclaude-54 | workingclaude-54 | child | dead | 2026-09-30T04:47:59Z | 1512 |  |
 | workingclaude-89 | workingclaude-89 | child | dead | 2026-09-29T06:39:52Z | 2840 |  |
@@ -25,7 +25,7 @@
 | workingclaude-93 | workingclaude-93 | child | dead | 2026-09-30T03:48:22Z | 1571 |  |
 | workingclaude-b3 | workingclaude-b3 | child | dead | 2026-09-30T04:08:20Z | 1551 |  |
 | workingclaude-be | workingclaude-be | external | dead | 2026-09-30T16:40:01Z | 800 | interactive · cwd=/home/trido/thanhdt/WorkingClaude |
-| workingclaude-c1 | workingclaude-c1 | child | dead | 2026-09-30T04:16:07Z | 1543 |  |
+| workingclaude-c1 | workingclaude-c1 | child | dead | 2026-09-30T04:16:07Z | 1544 |  |
 | workingclaude-e3 | workingclaude-e3 | child | working | 2026-10-01T05:48:11Z | 11 |  |
 | workingclaude-e5 | workingclaude-e5 | child | dead | 2026-09-29T08:26:41Z | 2733 |  |
 | workingclaude-ee | workingclaude-ee | child | dead | 2026-09-29T07:36:03Z | 2784 |  |
