@@ -2144,8 +2144,9 @@ class Executor:
                 ex = self.state.get("exchange_override", {}).get(o.ticker) or "HOSE"
             if ex == "UPCOM":
                 self._journal("UPCOM_SKIP_ATC", o, note=(
-                    "UPCOM không hỗ trợ order_type=ATC — bỏ qua quét ATC, giữ nguyên lệnh LO "
-                    "đang mở (nếu có); phần dư tiếp tục qua LO ở phiên sau"))
+                    "UPCOM không hỗ trợ order_type=ATC — bỏ qua quét ATC; LO đang mở (nếu có) vẫn "
+                    "chờ khớp tới hết phiên liên tục UPCOM, bot không đặt thêm LO trong pha ATC; "
+                    "phần dư chỉ quay lại nếu plan ngày sau sinh lại"))
                 continue
             if self._hard_buy_ceiling(o):
                 # ATC khớp ở GIÁ ĐÓNG CỬA phiên xác định lúc ATC — không đặt được giá,

@@ -313,6 +313,123 @@ def t_invalid_ordertype_error_sets_unsupported_flag_stops_retry():
         ok(n_fail == 1, f"phải chỉ có đúng 1 dòng ATC_FAIL (không lặp 45 lần), được {n_fail}")
 
 
+class _ThrowingOrdertypeBroker(_StubBroker):
+    """`place_order` ném MỘT loại lỗi cố định ở MỌI lần gọi — mô phỏng các lỗi 400/500/exception
+    THẬT xuất hiện hàng nghìn lần trong journal mà KHÔNG phải 'Invalid ordertype' (vd 'deal not
+    found' 4868x, 'Trade quantity not enough' 4163x — đếm thật từ log production, không phải số
+    giả định) — những lỗi này KHÔNG được `_is_invalid_ordertype` nhận diện nên atc_unsupported
+    KHÔNG được đặt, _atc_sweep phải retry mỗi chu kỳ như trước fix (hành vi ĐÚNG — lỗi đó có thể
+    tạm thời, không phải "sàn từ chối vĩnh viễn order_type")."""
+
+    def __init__(self, exc_factory, **k):
+        super().__init__(**k)
+        self._exc_factory = exc_factory
+
+    def place_order(self, ticker, qty, side, **k):
+        self.placed.append((ticker, qty, side, k.get("order_type")))
+        raise self._exc_factory()
+
+
+def _check_other_error_retries_every_cycle(label, exc_factory):
+    with tempfile.TemporaryDirectory() as tmp:
+        br = _ThrowingOrdertypeBroker(exc_factory, exchange="HOSE")
+        ex, o = make_executor(tmp, "EEE", br, parent_filled=800, qty=1000)
+        for _ in range(45):
+            ex._atc_sweep()
+        ok(len(br.placed) == 45,
+           f"{label}: phải thử place_order ĐỦ 45 lần (không single-shot), được "
+           f"{len(br.placed)}: {br.placed}")
+        ok(not ex.state["parents"]["SELL-01"].get("atc_unsupported"),
+           f"{label}: atc_unsupported KHÔNG được đặt cho lỗi không phải 'invalid ordertype'")
+        n_fail = _events(ex).count("ATC_FAIL")
+        ok(n_fail == 45,
+           f"{label}: phải có đúng 45 dòng ATC_FAIL (retry mỗi chu kỳ), được {n_fail}")
+
+
+def t_other_400_deal_not_found_retries_every_cycle():
+    from dnse_api import DNSEError
+    _check_other_error_retries_every_cycle(
+        "HTTP 400 'deal not found'",
+        lambda: DNSEError("HTTP 400: deal not found", status=400))
+
+
+def t_other_400_trade_qty_not_enough_retries_every_cycle():
+    from dnse_api import DNSEError
+    _check_other_error_retries_every_cycle(
+        "HTTP 400 'Trade quantity not enough'",
+        lambda: DNSEError("HTTP 400: Trade quantity not enough", status=400))
+
+
+def t_http_500_retries_every_cycle():
+    from dnse_api import DNSEError
+    _check_other_error_retries_every_cycle(
+        "HTTP 500",
+        lambda: DNSEError("HTTP 500: Internal Server Error", status=500))
+
+
+def t_generic_runtimeerror_retries_every_cycle():
+    _check_other_error_retries_every_cycle(
+        "RuntimeError (không status)",
+        lambda: RuntimeError("mất kết nối broker (mô phỏng)"))
+
+
+def t_invalid_ordertype_without_status_does_not_set_unsupported():
+    """Biên: exception chứa đúng chữ 'Invalid ordertype' nhưng KHÔNG có `.status` (not 400) —
+    `_is_invalid_ordertype` phải trả False (giết mutation M11: khớp theo chuỗi mà bỏ qua check
+    status). Dùng `Exception` trần (không phải DNSEError) để `.status` thực sự vắng mặt."""
+    class _InvalidOrdertypeNoStatusBroker(_StubBroker):
+        def place_order(self, ticker, qty, side, **k):
+            self.placed.append((ticker, qty, side, k.get("order_type")))
+            raise Exception("Invalid ordertype for the exchange (không có status)")
+
+    with tempfile.TemporaryDirectory() as tmp:
+        br = _InvalidOrdertypeNoStatusBroker(exchange="HOSE")
+        ex, o = make_executor(tmp, "FFF", br, parent_filled=800, qty=1000)
+        for _ in range(3):
+            ex._atc_sweep()
+        ok(len(br.placed) == 3,
+           f"thiếu .status ⇒ không nhận diện được ⇒ phải vẫn retry mỗi chu kỳ, được "
+           f"{len(br.placed)}: {br.placed}")
+        ok(not ex.state["parents"]["SELL-01"].get("atc_unsupported"),
+           "thiếu .status ⇒ atc_unsupported KHÔNG được đặt dù message khớp chuỗi")
+
+
+def t_invalid_ordertype_then_recovers_atc_sent_true():
+    """place_order lỗi 'Invalid ordertype' 2 lần đầu rồi THÀNH CÔNG ở lần thứ 3 — mô phỏng sàn
+    nhận diện SAI tạm thời rồi tự sửa qua `exchange_override` học được ở chu kỳ khác (đường
+    `_retry_tick_mismatch` chạy song song, không phải logic của test này) HOẶC một lỗi 400 thoảng
+    qua không thật là 'sàn từ chối vĩnh viễn'. Ở ĐÂY cố tình KHÔNG đặt atc_unsupported ở 2 lần đầu
+    (patch trực tiếp để test riêng nhánh phục hồi, không phụ thuộc _is_invalid_ordertype) ⇒ lần 3
+    phải thành công, atc_sent=True, children có 1 oid."""
+    class _FlakyBroker(_StubBroker):
+        def __init__(self, **k):
+            super().__init__(**k)
+            self._attempt = 0
+
+        def place_order(self, ticker, qty, side, **k):
+            self._attempt += 1
+            self.placed.append((ticker, qty, side, k.get("order_type")))
+            if self._attempt <= 2:
+                from dnse_api import DNSEError
+                raise DNSEError("HTTP 400: deal not found", status=400)
+            return f"OID-{self._attempt}"
+
+    with tempfile.TemporaryDirectory() as tmp:
+        br = _FlakyBroker(exchange="HOSE")
+        ex, o = make_executor(tmp, "GGG", br, parent_filled=800, qty=1000)
+        for _ in range(3):
+            ex._atc_sweep()
+        ok(len(br.placed) == 3, f"phải thử đủ 3 lần (2 fail + 1 ok): {br.placed}")
+        ok(ex.state["parents"]["SELL-01"]["atc_sent"] is True,
+           "lần 3 thành công ⇒ atc_sent phải True")
+        ok(not ex.state["parents"]["SELL-01"].get("atc_unsupported"),
+           "lỗi 'deal not found' không phải invalid-ordertype ⇒ atc_unsupported KHÔNG được đặt")
+        n_fail = _events(ex).count("ATC_FAIL")
+        n_atc = _events(ex).count("ATC")
+        ok(n_fail == 2, f"phải có đúng 2 dòng ATC_FAIL trước khi thành công, được {n_fail}")
+        ok(n_atc == 1, f"phải có đúng 1 dòng ATC khi thành công, được {n_atc}")
+
+
 TESTS = [t_upcom_skips_atc_no_place_order, t_upcom_does_not_cancel_live_lo,
          t_hose_still_sweeps_atc_control, t_quote_error_fails_open_to_hose,
          t_quote_known_wins_over_stale_exchange_override,
@@ -321,7 +438,13 @@ TESTS = [t_upcom_skips_atc_no_place_order, t_upcom_does_not_cancel_live_lo,
          t_real_quote_missing_market_id_is_ambiguous_fails_open_hose,
          t_real_quote_market_id_upx_skips_atc,
          t_real_incident_repro_45_cycles_no_place_order,
-         t_invalid_ordertype_error_sets_unsupported_flag_stops_retry]
+         t_invalid_ordertype_error_sets_unsupported_flag_stops_retry,
+         t_other_400_deal_not_found_retries_every_cycle,
+         t_other_400_trade_qty_not_enough_retries_every_cycle,
+         t_http_500_retries_every_cycle,
+         t_generic_runtimeerror_retries_every_cycle,
+         t_invalid_ordertype_without_status_does_not_set_unsupported,
+         t_invalid_ordertype_then_recovers_atc_sent_true]
 
 if __name__ == "__main__":
     print(f"TZ={os.environ.get('TZ', '(unset)')}  python={sys.version.split()[0]}")
