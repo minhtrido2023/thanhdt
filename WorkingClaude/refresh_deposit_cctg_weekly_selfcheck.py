@@ -2,16 +2,19 @@
 # -*- coding: utf-8 -*-
 """
 refresh_deposit_cctg_weekly_selfcheck.py — selfcheck for the weekly deposit+CCTG mechanism
-(job Taylor_20261001_054108): append_cctg_rate.py's write guards + deposit_cctg_trend_check.py's
-decline/staleness detection. Run under BOTH python3 and $DNA_PYEXE, and under BOTH the host's own
-TZ and `env -u TZ` + a foreign TZ (coding_guidelines §16/§19) — every date comparison here either
-takes an explicit `today` argument or reads a CSV-controlled `--effective`, so host TZ should not
-change any PASS/FAIL outcome; T_tz asserts this explicitly.
+(job Taylor_20261001_054108, round-2 fixes coord job Taylor_20261001_061238): append_cctg_rate.py
++ append_deposit_rate.py's write guards, and deposit_cctg_trend_check.py's decline/staleness
+detection AND its notify/bus delivery-confirmed state gating. Run under BOTH python3 and
+$DNA_PYEXE, and under BOTH the host's own TZ and `env -u TZ` + a foreign TZ (coding_guidelines
+§16/§19) — every date comparison here either takes an explicit `today` argument or reads a
+CSV-controlled `--effective`, so host TZ should not change any PASS/FAIL outcome; T_tz asserts
+this explicitly.
 
 Also runs a handful of real source-level mutations (sed on a throwaway copy, not the real file) at
 the end to confirm the guards this selfcheck exercises actually have teeth — a test that can't
 fail is not a test.
 """
+import io
 import json
 import os
 import re
@@ -19,7 +22,8 @@ import shutil
 import subprocess
 import sys
 import tempfile
-from datetime import date, datetime
+from contextlib import redirect_stdout
+from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
 _ICT = ZoneInfo("Asia/Ho_Chi_Minh")  # coding_guidelines §16: never trust the host system TZ
@@ -28,8 +32,10 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 
 import append_cctg_rate as acr
+import append_deposit_rate as adr
 import cctg_rate_vn as cctg
 import deposit_cctg_trend_check as trend
+import deposit_rate_vn as dep
 
 N = 0
 FAILS = []
@@ -120,6 +126,18 @@ finally:
     cctg._EVENTS_CSV = _orig_cctg_csv
 
 # --- A2: idempotent re-run (same effective_date) -> SKIP, no dup row ---
+# Re-asserts the cctg._EVENTS_CSV monkeypatch BETWEEN the two calls (coord job
+# Taylor_20261001_061238 item 1 fix): on a SUCCESSFUL write, acr.main() calls
+# importlib.reload(cctg_rate_vn), which re-executes cctg_rate_vn.py's top-level
+# `_EVENTS_CSV = os.path.join(...)` and SILENTLY RESETS this test's monkeypatch back to the
+# PRODUCTION path. Without re-patching here, the second call's "not newer than last anchor"
+# guard (and the idempotency check now sitting right before it) would read PRODUCTION data
+# instead of tmp_csv — which is exactly how this same test PASSED VACUOUSLY before the ordering
+# fix existed: production's own last anchor (2026-09-30) happens to predate TODAY, so the
+# pre-fix guard-ordering bug never actually got exercised by this test, even though it was 100%
+# reproducible against the real tmp dataset. Verified: reverting the ordering fix in
+# append_cctg_rate.py with this re-patch IN PLACE makes rc2 flip to 1 (see mutant D4 below, which
+# does exactly that against a throwaway copy).
 tmpdir, tmp_csv = _fresh_tmpdir()
 acr.CSV_PATH = tmp_csv
 cctg._EVENTS_CSV = tmp_csv
@@ -131,9 +149,11 @@ try:
     argv = ["--rate", "7.6", "--effective", TODAY, "--source", "web_crosscheck_auto",
             "--collected", TODAY, "--note", "test", "--sources", sources]
     rc1, _ = _run_append(argv, job_id="job123")
+    cctg._EVENTS_CSV = tmp_csv  # re-assert past acr.main()'s own importlib.reload(cctg_rate_vn)
     rc2, _ = _run_append(argv, job_id="job456")  # re-run, different job_id, same effective_date
     check("A2 first write OK", rc1 == 0)
-    check("A2 second run does not error", rc2 == 0)
+    check("A2 second run does not error (idempotent SKIP, not a false 'not newer' refusal)",
+          rc2 == 0)
     check("A2 idempotent: still exactly 1 row (no duplicate)", _row_count() == 1)
 finally:
     shutil.rmtree(tmpdir, ignore_errors=True)
@@ -367,6 +387,232 @@ finally:
     acr.CSV_PATH = _orig_acr_csv
     cctg._EVENTS_CSV = _orig_cctg_csv
 
+# --- A14-A17: append_deposit_rate.py per-source rate cross-check (coord job
+# Taylor_20261001_061238 item 7 — ported from append_cctg_rate.py, OPTIONAL/backward-compatible:
+# only kicks in when EVERY --sources entry carries a 'rate' field). Base anchor 6.8% (current
+# deposit_rate_vn.current_deposit_rate() as of this writing) -- picked so passing cases sit well
+# inside the 1.0pp delta guard. ---
+_orig_adr_csv = adr.CSV_PATH
+
+
+def _run_append_dep(argv, job_id=None):
+    old_argv = sys.argv
+    old_job = os.environ.get("JOB_ID", None)
+    sys.argv = ["append_deposit_rate.py"] + argv
+    if job_id is None:
+        os.environ.pop("JOB_ID", None)
+    else:
+        os.environ["JOB_ID"] = job_id
+    try:
+        rc = adr.main()
+        return (rc or 0), None
+    except SystemExit as e:
+        return 1, str(e.code)
+    finally:
+        sys.argv = old_argv
+        if old_job is None:
+            os.environ.pop("JOB_ID", None)
+        else:
+            os.environ["JOB_ID"] = old_job
+
+
+# --- A14: per-source rates agree exactly, --rate matches -> OK (new guard active, all entries
+# carry 'rate') ---
+tmpdir, tmp_csv = _fresh_tmpdir()
+tmp_csv = os.path.join(tmpdir, "deposit_rate_vn_events.csv")
+adr.CSV_PATH = tmp_csv
+try:
+    sources = json.dumps([
+        _src("CafeF", "https://cafef.vn/x", TODAY, 6.8),
+        _src("VnExpress", "https://vnexpress.net/x", TODAY, 6.8),
+    ])
+    rc, msg = _run_append_dep(
+        ["--rate", "6.8", "--effective", TODAY, "--source", "web_crosscheck_auto",
+         "--collected", TODAY, "--note", "test", "--sources", sources],
+        job_id="job123")
+    check("A14 per-source rates agree, --rate matches -> OK (rc=0)", rc == 0)
+    check("A14 row written", _row_count_at(tmp_csv) == 1)
+finally:
+    shutil.rmtree(tmpdir, ignore_errors=True)
+    adr.CSV_PATH = _orig_adr_csv
+
+# --- A15: per-source rates disagree >0.1pp -> refused ---
+tmpdir, tmp_csv = _fresh_tmpdir()
+tmp_csv = os.path.join(tmpdir, "deposit_rate_vn_events.csv")
+adr.CSV_PATH = tmp_csv
+try:
+    sources = json.dumps([
+        _src("CafeF", "https://cafef.vn/x", TODAY, 6.7),
+        _src("VnExpress", "https://vnexpress.net/x", TODAY, 6.9),
+    ])
+    rc, msg = _run_append_dep(
+        ["--rate", "6.8", "--effective", TODAY, "--source", "web_crosscheck_auto",
+         "--collected", TODAY, "--note", "test", "--sources", sources],
+        job_id="job123")
+    check("A15 per-source rates disagree 0.2pp -> refused (rc!=0)", rc != 0)
+    check("A15 no row written", _row_count_at(tmp_csv) == 0)
+finally:
+    shutil.rmtree(tmpdir, ignore_errors=True)
+    adr.CSV_PATH = _orig_adr_csv
+
+# --- A16: --rate does not match any cited per-source rate -> refused ---
+tmpdir, tmp_csv = _fresh_tmpdir()
+tmp_csv = os.path.join(tmpdir, "deposit_rate_vn_events.csv")
+adr.CSV_PATH = tmp_csv
+try:
+    sources = json.dumps([
+        _src("CafeF", "https://cafef.vn/x", TODAY, 6.8),
+        _src("VnExpress", "https://vnexpress.net/x", TODAY, 6.8),
+    ])
+    rc, msg = _run_append_dep(
+        ["--rate", "6.9", "--effective", TODAY, "--source", "web_crosscheck_auto",
+         "--collected", TODAY, "--note", "test", "--sources", sources],
+        job_id="job123")
+    check("A16 synthesized --rate not matching any source -> refused (rc!=0)", rc != 0)
+    check("A16 no row written", _row_count_at(tmp_csv) == 0)
+finally:
+    shutil.rmtree(tmpdir, ignore_errors=True)
+    adr.CSV_PATH = _orig_adr_csv
+
+# --- A17: backward-compat — OLD-style --sources with NO 'rate' field on ANY entry -> guard
+# skipped entirely, exact pre-existing (8-round-reviewed) behavior unchanged. This is the shape
+# the EXISTING monthly refresh_deposit_rate_vn.sh prompt still uses. ---
+tmpdir, tmp_csv = _fresh_tmpdir()
+tmp_csv = os.path.join(tmpdir, "deposit_rate_vn_events.csv")
+adr.CSV_PATH = tmp_csv
+try:
+    sources = json.dumps([
+        {"publisher": "CafeF", "url": "https://cafef.vn/x", "date": TODAY},
+        {"publisher": "VnExpress", "url": "https://vnexpress.net/x", "date": TODAY},
+    ])
+    rc, msg = _run_append_dep(
+        ["--rate", "6.8", "--effective", TODAY, "--source", "web_crosscheck_auto",
+         "--collected", TODAY, "--note", "test", "--sources", sources],
+        job_id="job123")
+    check("A17 backward-compat: no 'rate' field on any source -> still OK (rc=0)", rc == 0)
+    check("A17 row written", _row_count_at(tmp_csv) == 1)
+finally:
+    shutil.rmtree(tmpdir, ignore_errors=True)
+    adr.CSV_PATH = _orig_adr_csv
+
+# --- A18: mixed (SOME entries have 'rate', some don't) -> refused as ambiguous evidence ---
+tmpdir, tmp_csv = _fresh_tmpdir()
+tmp_csv = os.path.join(tmpdir, "deposit_rate_vn_events.csv")
+adr.CSV_PATH = tmp_csv
+try:
+    sources = json.dumps([
+        _src("CafeF", "https://cafef.vn/x", TODAY, 6.8),
+        {"publisher": "VnExpress", "url": "https://vnexpress.net/x", "date": TODAY},
+    ])
+    rc, msg = _run_append_dep(
+        ["--rate", "6.8", "--effective", TODAY, "--source", "web_crosscheck_auto",
+         "--collected", TODAY, "--note", "test", "--sources", sources],
+        job_id="job123")
+    check("A18 mixed rate-field presence -> refused (rc!=0)", rc != 0)
+    check("A18 no row written", _row_count_at(tmp_csv) == 0)
+finally:
+    shutil.rmtree(tmpdir, ignore_errors=True)
+    adr.CSV_PATH = _orig_adr_csv
+
+# --- A19-A21: append_cctg_rate.py reused-URL guard (coord job Taylor_20261001_061238 item 3) ---
+# all 3 steps share ONE tmpdir/CSV/sidecar on purpose, to exercise "write #2 reuses write #1's
+# URL" across separate acr.main() invocations, exactly like 2 separate weekly cron runs would.
+TODAY_PLUS1 = (datetime.now(_ICT).date() + timedelta(days=1)).isoformat()
+tmpdir, tmp_csv = _fresh_tmpdir()
+acr.CSV_PATH = tmp_csv
+cctg._EVENTS_CSV = tmp_csv
+try:
+    sources1 = json.dumps([
+        _src("VietnamNet", "https://vietnamnet.vn/cctg-a19", TODAY, 7.6),
+        _src("VnExpress", "https://vnexpress.net/cctg-a19", TODAY, 7.6),
+    ])
+    rc1, _ = _run_append(
+        ["--rate", "7.6", "--effective", TODAY, "--source", "web_crosscheck_auto",
+         "--collected", TODAY, "--note", "test", "--sources", sources1], job_id="job123")
+    check("A19 first write (establishes sidecar) -> OK", rc1 == 0)
+
+    cctg._EVENTS_CSV = tmp_csv  # re-assert past acr.main()'s importlib.reload (same as A2)
+    sidecar = os.path.join(tmpdir, acr.LAST_AUTO_SOURCES_NAME)
+    check("A19 sidecar written with write #1's URLs",
+          os.path.exists(sidecar)
+          and set(json.load(open(sidecar, encoding="utf-8"))["urls"])
+              == {"https://vietnamnet.vn/cctg-a19", "https://vnexpress.net/cctg-a19"})
+
+    # A20: write #2 reuses VietnamNet's EXACT url from write #1 -> refused, even though the
+    # SECOND source (Dân Trí) and the --rate/--effective are all otherwise fine.
+    sources2 = json.dumps([
+        _src("VietnamNet", "https://vietnamnet.vn/cctg-a19", TODAY, 7.6),
+        _src("DanTri", "https://dantri.com.vn/cctg-a20", TODAY, 7.6),
+    ])
+    rc2, msg2 = _run_append(
+        ["--rate", "7.6", "--effective", TODAY_PLUS1, "--source", "web_crosscheck_auto",
+         "--collected", TODAY, "--note", "test", "--sources", sources2], job_id="job456")
+    check("A20 write #2 reuses write #1's URL -> refused (rc!=0)", rc2 != 0)
+    check("A20 refusal message names the reused URL",
+          msg2 is not None and "vietnamnet.vn/cctg-a19" in msg2)
+    check("A20 still exactly 1 row (no write happened)", _row_count() == 1)
+    cctg._EVENTS_CSV = tmp_csv
+
+    # A21: write #2-retry with ENTIRELY fresh URLs (same effective_date as the refused A20
+    # attempt, since A20 never wrote) -> succeeds; confirms the guard isn't a permanent lockout,
+    # only blocks literal reuse.
+    sources3 = json.dumps([
+        _src("DanTri", "https://dantri.com.vn/cctg-a21", TODAY, 7.6),
+        _src("TuoiTre", "https://tuoitre.vn/cctg-a21", TODAY, 7.6),
+    ])
+    rc3, _ = _run_append(
+        ["--rate", "7.6", "--effective", TODAY_PLUS1, "--source", "web_crosscheck_auto",
+         "--collected", TODAY, "--note", "test", "--sources", sources3], job_id="job789")
+    check("A21 write #2-retry with fresh URLs -> OK (rc=0)", rc3 == 0)
+    check("A21 now 2 rows written", _row_count() == 2)
+finally:
+    shutil.rmtree(tmpdir, ignore_errors=True)
+    acr.CSV_PATH = _orig_acr_csv
+    cctg._EVENTS_CSV = _orig_cctg_csv
+
+# --- A22-A24: append_deposit_rate.py's OWN copy of the reused-URL guard (shared helper, separate
+# sidecar file/series from CCTG's — A19-A21 above already proved the helper itself works; this
+# confirms the deposit script wires it in and keeps a SEPARATE sidecar, not sharing CCTG's) ---
+tmpdir, tmp_csv = _fresh_tmpdir()
+tmp_csv = os.path.join(tmpdir, "deposit_rate_vn_events.csv")
+adr.CSV_PATH = tmp_csv
+try:
+    sources1 = json.dumps([
+        _src("CafeF", "https://cafef.vn/dep-a22", TODAY, 6.8),
+        _src("VnExpress", "https://vnexpress.net/dep-a22", TODAY, 6.8),
+    ])
+    rc1, _ = _run_append_dep(
+        ["--rate", "6.8", "--effective", TODAY, "--source", "web_crosscheck_auto",
+         "--collected", TODAY, "--note", "test", "--sources", sources1], job_id="job123")
+    check("A22 first deposit write (establishes OWN sidecar) -> OK", rc1 == 0)
+    sidecar_dep = os.path.join(tmpdir, adr.LAST_AUTO_SOURCES_NAME)
+    check("A22 deposit sidecar name differs from CCTG's",
+          adr.LAST_AUTO_SOURCES_NAME != acr.LAST_AUTO_SOURCES_NAME)
+    check("A22 deposit sidecar written", os.path.exists(sidecar_dep))
+
+    sources2 = json.dumps([
+        _src("CafeF", "https://cafef.vn/dep-a22", TODAY, 6.8),  # reused from write #1
+        _src("VietstockNew", "https://vietstock.vn/dep-a23", TODAY, 6.8),
+    ])
+    rc2, msg2 = _run_append_dep(
+        ["--rate", "6.8", "--effective", TODAY_PLUS1, "--source", "web_crosscheck_auto",
+         "--collected", TODAY, "--note", "test", "--sources", sources2], job_id="job456")
+    check("A23 deposit write #2 reuses write #1's URL -> refused (rc!=0)", rc2 != 0)
+    check("A23 no 2nd row written", _row_count_at(tmp_csv) == 1)
+
+    sources3 = json.dumps([
+        _src("VietstockNew", "https://vietstock.vn/dep-a24", TODAY, 6.8),
+        _src("TuoiTre", "https://tuoitre.vn/dep-a24", TODAY, 6.8),
+    ])
+    rc3, _ = _run_append_dep(
+        ["--rate", "6.8", "--effective", TODAY_PLUS1, "--source", "web_crosscheck_auto",
+         "--collected", TODAY, "--note", "test", "--sources", sources3], job_id="job789")
+    check("A24 deposit write #2-retry with fresh URLs -> OK (rc=0)", rc3 == 0)
+    check("A24 now 2 deposit rows written", _row_count_at(tmp_csv) == 2)
+finally:
+    shutil.rmtree(tmpdir, ignore_errors=True)
+    adr.CSV_PATH = _orig_adr_csv
+
 print(f"Part A: {N} checks so far, {len(FAILS)} fail(s)")
 
 
@@ -427,6 +673,47 @@ series_new_anchor2 = {"cctg_6m": [("2026-08-20", 7.4), ("2026-08-27", 7.5)]}
 state4 = {"cctg_6m": {"staleness_warned_for_date": "2026-07-01"}}  # old last_date, now stale by itself
 w2 = trend.check_staleness(series_new_anchor2, state4, today_t)
 check("B9 new last_date (not matching stored warned-date) re-eligible", len(w2) == 1)
+
+# B10: _load_series() wraps deposit_rate_vn.deposit_events_df() + cctg_rate_vn.cctg_events_df()
+# correctly (sorted ascending, (date_str, float) tuples) — untested until now (coord job
+# Taylor_20261001_061238 review ask). Points both modules' _EVENTS_CSV at a nonexistent path so
+# only the FROZEN anchors are visible — deterministic, independent of any live append-only CSV.
+tmpdir_b10 = tempfile.mkdtemp(prefix="cctg_wk_b10_")
+_orig_dep_csv = dep._EVENTS_CSV
+dep._EVENTS_CSV = os.path.join(tmpdir_b10, "deposit_rate_vn_events_doesnotexist.csv")
+cctg._EVENTS_CSV = os.path.join(tmpdir_b10, "cctg_rate_vn_events_doesnotexist.csv")
+try:
+    series = trend._load_series()
+    check("B10 _load_series returns both series keys", set(series) == {"big4_12m", "cctg_6m"})
+    expected_dep = sorted(((d, float(r)) for d, r in dep.DEPOSIT_EVENTS), key=lambda x: x[0])
+    check("B10 big4_12m matches frozen DEPOSIT_EVENTS (sorted, no CSV)",
+          series["big4_12m"] == expected_dep)
+    expected_cctg = sorted(((d, float(r)) for d, r in cctg.CCTG_EVENTS), key=lambda x: x[0])
+    check("B10 cctg_6m matches frozen CCTG_EVENTS (sorted, no CSV)",
+          series["cctg_6m"] == expected_cctg)
+    check("B10 cctg_6m entries are (str, float) tuples",
+          all(isinstance(d, str) and isinstance(r, float) for d, r in series["cctg_6m"]))
+finally:
+    shutil.rmtree(tmpdir_b10, ignore_errors=True)
+    dep._EVENTS_CSV = _orig_dep_csv
+    cctg._EVENTS_CSV = _orig_cctg_csv
+
+# B11: within_noise_band label (coord job Taylor_20261001_061238 item 5) — decline <= 0.1pp
+# tagged, decline > 0.1pp not tagged. User directive: new < old ALWAYS alerts regardless of the
+# tag (B1/B3 above already cover that "never suppressed" invariant) — this only checks the LABEL.
+series_tiny_decline = {"cctg_6m": [("2026-08-01", 7.50), ("2026-09-01", 7.45)]}  # 0.05pp <= 0.1pp
+d_tiny = trend.check_declines(series_tiny_decline, {})
+check("B11a tiny decline (0.05pp) tagged within_noise_band", d_tiny[0]["within_noise_band"] is True)
+
+series_big_decline = {"cctg_6m": [("2026-08-01", 7.50), ("2026-09-01", 7.00)]}  # 0.50pp > 0.1pp
+d_big = trend.check_declines(series_big_decline, {})
+check("B11b large decline (0.50pp) NOT tagged within_noise_band",
+      d_big[0]["within_noise_band"] is False)
+
+series_boundary = {"cctg_6m": [("2026-08-01", 7.50), ("2026-09-01", 7.40)]}  # exactly 0.10pp
+d_boundary = trend.check_declines(series_boundary, {})
+check("B11c exactly-at-tolerance decline (0.10pp) tagged within_noise_band (boundary inclusive)",
+      d_boundary[0]["within_noise_band"] is True)
 
 print(f"Part B done, {N} checks total so far, {len(FAILS)} fail(s)")
 

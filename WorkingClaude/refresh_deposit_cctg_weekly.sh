@@ -55,12 +55,16 @@ fi
 PROMPT="Xác nhận lãi suất HÀNG TUẦN cho 2 chuỗi — Big-4 12 tháng (tiết kiệm, kênh ONLINE) và Big-4 CCTG 6 tháng (chứng chỉ tiền gửi). Ngày ${TODAY}. Giá trị hiện đang dùng: Big-4 12M = ${CUR_DEP}%, CCTG 6M = ${CUR_CCTG}%.
 
 === CHUỖI 1: Big-4 12 THÁNG (tiết kiệm, kênh online) ===
-TIÊU CHUẨN (giống hệt cơ chế tháng hiện có, KHÔNG đổi):
+TIÊU CHUẨN (CÙNG owner-group/recency guard cơ chế THÁNG hiện có — nhưng chuỗi TUẦN này THÊM yêu
+cầu per-source rate citation giống hệt chuỗi 2, vì chạy 4 lần/tháng thay vì 1 lần nên phơi nhiễm
+cao hơn; cơ chế THÁNG (refresh_deposit_rate_vn.sh) giữ nguyên KHÔNG đổi, prompt riêng của nó):
 1. WebSearch nguồn có NGÀY CỤ THỂ (trong ~25 ngày) nêu lãi suất tiết kiệm 12 tháng Big-4 (Agribank/Vietcombank/BIDV/VietinBank), KÊNH ONLINE.
 2. Cần >=2 nguồn ĐỘC LẬP (khác nhóm sở hữu — vd cafef/kenh14/soha đều VCCorp tính là 1). append_deposit_rate.py tự soi domain, từ chối nếu không đủ.
-3. 1/4 ngân hàng lệch so với 3 còn lại -> dùng MODE (đa số 3/4), KHÔNG escalate riêng trường hợp này.
-4. Chỉ escalate khi: không đủ 3/4 đồng thuận, HOẶC 1 ngân hàng có 2 nguồn báo 2 số khác nhau, HOẶC không tìm được nguồn đủ mới.
-Ghi (nếu có số xác nhận): python3 append_deposit_rate.py --rate <X> --effective ${TODAY} --source web_crosscheck_auto --collected ${TODAY} --note \"<tóm tắt>\" --sources '[{\"publisher\":\"<tên>\",\"url\":\"<url>\",\"date\":\"<YYYY-MM-DD>\"}, ...]'
+3. MỖI nguồn PHẢI ghi RÕ con số % nó báo (field 'rate' trong --sources bên dưới) — append_deposit_rate.py sẽ TỰ SO các số này, từ chối ghi nếu lệch nhau >0,1 điểm %. Nếu các nguồn cho số khác nhau quá 0,1pp, đó LÀ escalate, không tự chọn 1 số.
+4. --rate bạn truyền PHẢI khớp (gần như tuyệt đối) với MỘT trong các số đã cite trong --sources — không được tự tổng hợp/làm tròn thành số không nguồn nào nói.
+5. 1/4 ngân hàng lệch so với 3 còn lại -> dùng MODE (đa số 3/4), KHÔNG escalate riêng trường hợp này (áp dụng ở bước CHỌN ngân hàng để cite, không phải ở bước so 2 nguồn CÙNG 1 ngân hàng).
+6. Chỉ escalate khi: không đủ 3/4 đồng thuận, HOẶC 1 ngân hàng có 2 nguồn báo 2 số khác nhau >0,1pp, HOẶC không tìm được nguồn đủ mới.
+Ghi (nếu có số xác nhận): python3 append_deposit_rate.py --rate <X> --effective ${TODAY} --source web_crosscheck_auto --collected ${TODAY} --note \"<tóm tắt>\" --sources '[{\"publisher\":\"<tên>\",\"url\":\"<url>\",\"date\":\"<YYYY-MM-DD>\",\"rate\":<X>}, ...]'
 
 === CHUỖI 2: Big-4 CCTG 6 THÁNG (chứng chỉ tiền gửi) ===
 TIÊU CHUẨN (KHÁC chuỗi 1 — chuỗi này MỚI, guard CHẶT HƠN):
@@ -70,7 +74,7 @@ TIÊU CHUẨN (KHÁC chuỗi 1 — chuỗi này MỚI, guard CHẶT HƠN):
 4. --rate bạn truyền PHẢI khớp (gần như tuyệt đối) với MỘT trong các số đã cite trong --sources — không được tự tổng hợp/làm tròn thành số không nguồn nào nói.
 Ghi (nếu có số xác nhận): python3 append_cctg_rate.py --rate <X> --effective ${TODAY} --source web_crosscheck_auto --collected ${TODAY} --note \"<tóm tắt>\" --sources '[{\"publisher\":\"<tên>\",\"url\":\"<url>\",\"date\":\"<YYYY-MM-DD>\",\"rate\":<X>}, ...]'
 
-CẢ 2 LỆNH TRÊN tự chặn (KHÔNG PHẢI bạn tự quyết định) nếu: thiếu nguồn, nguồn cùng nhóm sở hữu, nguồn quá cũ, lệch quá ngưỡng so với giá trị hiện tại (1,0pp), hoặc (chuỗi 2) 2 nguồn lệch nhau >0,1pp. Gặp bất kỳ lỗi nào trong các trường hợp này — ĐỪNG thử flag khác, escalate ngay kèm nguyên văn lỗi script. --force KHÔNG dùng được trong phiên headless của bạn.
+CẢ 2 LỆNH TRÊN tự chặn (KHÔNG PHẢI bạn tự quyết định) nếu: thiếu nguồn, nguồn cùng nhóm sở hữu, nguồn quá cũ, lệch quá ngưỡng so với giá trị hiện tại (1,0pp), hoặc 2 nguồn lệch nhau >0,1pp (CẢ 2 chuỗi — chuỗi 1 mới thêm guard này tuần này, KHÁC cơ chế tháng). Gặp bất kỳ lỗi nào trong các trường hợp này — ĐỪNG thử flag khác, escalate ngay kèm nguyên văn lỗi script. --force KHÔNG dùng được trong phiên headless của bạn.
 
 Idempotent — nếu hôm nay đã ghi rồi (effective_date trùng), lệnh tự SKIP rc=0, không lỗi, coi là hoàn thành bình thường. Có thể 1 chuỗi ghi được, chuỗi kia escalate — xử lý ĐỘC LẬP, không phải tất-cả-hoặc-không-gì.
 
@@ -142,8 +146,8 @@ Giá trị đang dùng: Big-4 12M = ${CUR_DEP}%, CCTG 6M = ${CUR_CCTG}%.
 Nếu đã đổi, chạy (số phải xác nhận thật):
   python3 append_deposit_rate.py --rate <X> --effective ${TODAY} --source manual_verify
   python3 append_cctg_rate.py --rate <X> --effective ${TODAY} --source manual_verify"
-  if [ -x "$WORKDIR_8L/mike/bin/notify.sh" ]; then
-    "$WORKDIR_8L/mike/bin/notify.sh" "$MSG" >> "$LOG" 2>&1 || true
+  if [ -x "$WORKDIR_8L/mike/bin/notify_thread.sh" ]; then
+    "$WORKDIR_8L/mike/bin/notify_thread.sh" "$MSG" trading_daily >> "$LOG" 2>&1 || true
   fi
 fi
 
@@ -159,5 +163,25 @@ fi
 TREND_RC=$?
 echo "trend check exit_code=${TREND_RC}" >> "$LOG"
 
+# TREND_RC != 0 (real crash, e.g. corrupt CSV -- OR the trend check's own internal notify/bus
+# channel failed for some declines/staleness it found -- see deposit_cctg_trend_check.py's
+# any_failed) used to be silently absorbed by this wrapper's unconditional `exit 0`: the log got
+# one line nobody reads on a cadence, and the user received NOTHING (coord job
+# Taylor_20261001_061238 item B1 fix). Surface it loudly instead, and make the wrapper's own exit
+# code reflect it so cron's own failure handling (if any) sees it too.
+if [ "$TREND_RC" -ne 0 ]; then
+  if [ "$DRY_RUN" -eq 0 ] && [ -x "$WORKDIR_8L/mike/bin/notify_thread.sh" ]; then
+    TREND_TAIL="$(tail -c 1500 "$LOG")"
+    "$WORKDIR_8L/mike/bin/notify_thread.sh" \
+      "🔴 deposit_cctg_trend_check.py LỖI (exit=${TREND_RC}, ${TODAY}) — cảnh báo xu hướng hạ lãi suất/CCTG tuần này CÓ THỂ ĐÃ KHÔNG được gửi đầy đủ. Log: ${LOG}
+Cuối log:
+${TREND_TAIL}" \
+      trading_daily >> "$LOG" 2>&1 || true
+  else
+    echo "[--dry-run or notify_thread.sh missing] trend check failed (exit=${TREND_RC}) — skipping live notify" >> "$LOG"
+  fi
+fi
+
 echo "===== deposit+CCTG weekly refresh DONE (dispatch_rc=${DISPATCH_RC}, confirmed=${CONFIRMED:-no}, trend_rc=${TREND_RC}, dry_run=${DRY_RUN}) =====" >> "$LOG"
+[ "$TREND_RC" -eq 0 ] || exit 1
 exit 0

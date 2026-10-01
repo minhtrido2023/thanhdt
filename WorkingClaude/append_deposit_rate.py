@@ -97,6 +97,88 @@ MAX_SOURCE_AGE_DAYS = 35  # dispatch prompt asks for ~25 days; a bit of slack, m
 MAX_FUTURE_EFFECTIVE_DAYS = 2  # a dispatched agent confirms a rate observed TODAY, never a
 # future-effective one — small slack only for timezone/midnight-boundary edge cases
 
+# Per-source rate cross-check (coord job Taylor_20261001_061238 item 7, ported from
+# append_cctg_rate.py's identical guard — see that file's docstring for the full rationale: a
+# --sources list only checked for DISTINCT OWNERS, never for whether the sources actually AGREE
+# on a number, let a dispatched agent synthesize/round a --rate no cited source said, or let 2
+# sources that happen to disagree pass silently as long as --rate matched neither in particular.
+# quant-skeptic reproduced this concretely: 2 fabricated URLs from 2 fabricated owner groups, both
+# "citing" nothing, still passed the pre-existing owner-group-only check. OPTIONAL here (unlike
+# the CCTG script, where it is mandatory): a source entry's 'rate' field is backward-compatible —
+# see the gating comment at its call site below for why.
+CROSS_SOURCE_TOLERANCE_PP = 0.1
+FLOAT_EPS = 1e-6
+
+# Reused-evidence guard (coord job Taylor_20261001_061238 item 3): a weekly-cadence caller citing
+# the SAME article every run would "refresh" this series' apparent freshness (effective_date
+# advances) without any genuinely NEW evidence ever entering it — MAX_SOURCE_AGE_DAYS alone cannot
+# catch this (an article cited 5 weeks running is always "<=35 days old" by the time of each
+# citation). Chosen over shrinking MAX_SOURCE_AGE_DAYS itself: that constant is SHARED with the
+# monthly mechanism (refresh_deposit_rate_vn.sh), which the weekly build explicitly keeps
+# unchanged — tightening the shared constant here would silently tighten the already-8-round-
+# reviewed monthly path too, for no monthly-side benefit. A reused-URL check is cadence-agnostic,
+# only fires on literal reuse, and leaves MAX_SOURCE_AGE_DAYS exactly as both cadences' prompts
+# already expect.
+#
+# Stored as a sidecar JSON file, NOT a new CSV column — deposit_rate_vn_events.csv's schema is a
+# read dependency of deposit_events_df() in production (rating_8l tilt, DCF); adding a column
+# there would risk every reader that assumes the current HEADER. The sidecar is this script's own
+# private bookkeeping, read/written only here. Its path is DERIVED from CSV_PATH's directory (not
+# a fixed HERE/data constant) so that tests which monkeypatch CSV_PATH to a tmpdir (the existing
+# selfcheck pattern, every test block) automatically get an isolated sidecar too — without
+# touching every one of those call sites to also monkeypatch a second path.
+LAST_AUTO_SOURCES_NAME = "deposit_rate_last_auto_sources.json"
+
+
+def _last_auto_sources_path():
+    return os.path.join(os.path.dirname(CSV_PATH), LAST_AUTO_SOURCES_NAME)
+
+
+def _normalize_url(u):
+    return u.strip().rstrip("/").lower()
+
+
+def _load_last_auto_urls(path):
+    """URLs cited by the LAST successful web_crosscheck_auto write. Fails OPEN (empty set) on a
+    missing/corrupt sidecar — this is a new additive guard, so a missing file (first run ever, or
+    pre-dates this guard) must never block an otherwise-legitimate write; the reuse window simply
+    starts counting from this write onward."""
+    try:
+        with open(path, encoding="utf-8") as f:
+            data = json.load(f)
+        return set(data.get("urls", []))
+    except (FileNotFoundError, json.JSONDecodeError, AttributeError, TypeError, ValueError):
+        return set()
+
+
+def _save_last_auto_urls(path, effective_date, urls):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    fd, tmp = tempfile.mkstemp(dir=os.path.dirname(path), prefix=".lastauto_", suffix=".json")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            json.dump({"effective_date": effective_date, "urls": sorted(urls)}, f)
+        os.replace(tmp, path)
+    except Exception:
+        if os.path.exists(tmp):
+            os.remove(tmp)
+        raise
+
+
+def _check_urls_not_reused(urls, sidecar_path):
+    """Refuses (sys.exit) if ANY cited URL exactly matches a URL from the immediately preceding
+    successful auto-write for this same series. Applies unconditionally to web_crosscheck_auto
+    (human or agent) — same pattern as the owner-group/recency checks above, which also run
+    regardless of caller identity; a human needing a deliberate override uses --source
+    manual_verify (not subject to this check), not a flag on this path."""
+    last_urls = _load_last_auto_urls(sidecar_path)
+    normalized = {_normalize_url(u) for u in urls}
+    reused = normalized & last_urls
+    if reused:
+        sys.exit(f"ERROR: --sources cites a URL already used in the immediately preceding "
+                 f"auto-write ({sorted(reused)}) — refuse to 'refresh' this series on reused "
+                 f"evidence. Find a genuinely new citation, or escalate for human review "
+                 f"(--source manual_verify is not subject to this check).")
+
 # Known same-owner domain clusters (VN media groups where sister sites republish the same wire
 # content — a rate table syndicated across these does NOT count as independent confirmation).
 # Extend this list whenever a new same-owner collision is discovered (best-effort, NOT a claim of
@@ -266,6 +348,7 @@ def main():
                      f"group(s) ({sorted(owner_groups)}) — need >= {MIN_DISTINCT_OWNERS}. "
                      f"Sister sites under the same media group (see SAME_OWNER_GROUPS) do not "
                      f"count as independent confirmation. Refuse to write.")
+        _check_urls_not_reused(urls, _last_auto_sources_path())
         # --- recency: the JSON schema demands a 'date' per source (dispatch prompt requires
         # ~25 days) but round-6 review found the field was parsed and never actually read — an
         # honest agent citing 2 genuinely-independent but STALE evergreen pages passed silently.
@@ -287,6 +370,41 @@ def main():
                 sys.exit(f"ERROR: --sources entry dated {raw_date} is {age_days} days from "
                          f"today ({real_today}) (max {MAX_SOURCE_AGE_DAYS}, or in the future) "
                          f"— too stale/invalid to count as current confirmation. Refuse to write.")
+
+        # --- per-source rate cross-check: OPTIONAL, not required (unlike append_cctg_rate.py) ---
+        # Gated on EVERY --sources entry carrying a 'rate' field, not on --source value, so the
+        # EXISTING monthly refresh_deposit_rate_vn.sh dispatch prompt (8-round-reviewed, already
+        # CONFIRMED, cites {publisher,url,date} with NO 'rate' field) keeps its exact prior
+        # behavior unchanged -- it would otherwise start refusing every write the day this guard
+        # landed, silently degrading the monthly mechanism to permanent manual-fallback with no
+        # one noticing until someone read this log. A caller whose --sources entries ALL cite
+        # their own rate (the weekly refresh_deposit_cctg_weekly.sh prompt, updated this round to
+        # require it) gets the full CCTG-grade check. Partial (SOME entries have 'rate', some
+        # don't) is refused outright as inconsistent evidence -- never silently ignored.
+        rate_fields = [s.get("rate") for s in sources]
+        n_with_rate = sum(1 for r in rate_fields if r is not None)
+        if 0 < n_with_rate < len(sources):
+            sys.exit(f"ERROR: {n_with_rate}/{len(sources)} --sources entries carry a 'rate' "
+                     f"field -- either ALL entries must cite their own rate or NONE may. Refuse "
+                     f"ambiguous evidence.")
+        if n_with_rate == len(sources):
+            src_rates = []
+            for s in sources:
+                try:
+                    src_rate = float(s["rate"])
+                except (TypeError, ValueError):
+                    sys.exit(f"ERROR: --sources entry 'rate'={s.get('rate')!r} is not a number.")
+                if not (0.0 < src_rate < 30.0):
+                    sys.exit(f"ERROR: --sources entry rate={src_rate} out of sane range (0, 30).")
+                src_rates.append(src_rate)
+            spread = max(src_rates) - min(src_rates)
+            if spread > CROSS_SOURCE_TOLERANCE_PP + FLOAT_EPS:
+                sys.exit(f"ERROR: cited source rates {src_rates} disagree by {spread:.3f}pp "
+                         f"(> tolerance {CROSS_SOURCE_TOLERANCE_PP}pp) -- refuse to write. "
+                         f"Escalate for human review instead of picking one.")
+            if not any(abs(args.rate - r) <= FLOAT_EPS for r in src_rates):
+                sys.exit(f"ERROR: --rate {args.rate} does not match any cited source rate "
+                         f"{src_rates} -- refuse to write a number no cited source actually said.")
 
     # --- delta guard: bounds a single write AND cumulative drift since the last HUMAN write ---
     # Round-6 review found comparing only against current_deposit_rate() lets a chain of
@@ -339,6 +457,12 @@ def main():
         if os.path.exists(tmp):
             os.remove(tmp)
         raise
+
+    # Record this write's URLs for the NEXT call's reused-evidence guard above — only on a real
+    # write (never on the idempotent-SKIP branch earlier, which returns before reaching here), so
+    # a same-day re-run does not "consume" the reuse window twice.
+    if args.source in SOURCES_REQUIRING_STRUCTURED_SOURCES:
+        _save_last_auto_urls(_last_auto_sources_path(), args.effective, urls)
 
     # --- verify reload through the real consumer path ---
     sys.path.insert(0, HERE)

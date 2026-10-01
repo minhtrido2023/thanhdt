@@ -49,9 +49,20 @@ _ICT = ZoneInfo("Asia/Ho_Chi_Minh")  # coding_guidelines §16: never trust the h
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-from append_deposit_rate import _owner_group  # noqa: E402 — reuse hardened domain logic, not a dup
+from append_deposit_rate import (  # noqa: E402 — reuse hardened domain logic, not a dup
+    _owner_group, _check_urls_not_reused, _save_last_auto_urls)
 
 CSV_PATH = os.path.join(HERE, "data", "cctg_rate_vn_events.csv")
+# Own sidecar name, separate from append_deposit_rate.py's — two independent series, two
+# independent reuse windows (coord job Taylor_20261001_061238 item 3; see
+# append_deposit_rate.py's docstring for the full rationale). Derived from CSV_PATH's directory,
+# same reasoning as that module's _last_auto_sources_path() — automatically test-isolated
+# whenever CSV_PATH itself is monkeypatched to a tmpdir.
+LAST_AUTO_SOURCES_NAME = "cctg_rate_last_auto_sources.json"
+
+
+def _last_auto_sources_path():
+    return os.path.join(os.path.dirname(CSV_PATH), LAST_AUTO_SOURCES_NAME)
 HEADER = ["effective_date", "cctg_rate", "collected_date", "source", "note"]
 VALID_SOURCES = {"manual_verify", "web_crosscheck_auto"}
 SOURCES_REQUIRING_NOTE = {"web_crosscheck_auto"}
@@ -126,6 +137,21 @@ def main():
     if args.source in SOURCES_REQUIRING_NOTE and not args.note.strip():
         sys.exit(f"ERROR: --source {args.source} requires a non-empty --note.")
 
+    # --- idempotency check FIRST, before the "not newer than last anchor" guard below (fix,
+    # coord job Taylor_20261001_061238 item B1): a same-day re-run of the weekly cron used to hit
+    # the "not newer" guard instead of this SKIP, because the FIRST run's own write becomes the
+    # new last_date seen by the SECOND run — so re-running on an already-written date raised
+    # "ERROR: not newer than the last anchor" (rc=1) instead of the intended idempotent SKIP
+    # (rc=0), firing a false Winston escalate-question every time the cron (or a human) re-ran on
+    # a day already confirmed. append_deposit_rate.py never had this ordering bug because it has
+    # no equivalent "not newer" pre-check — only this CCTG script does.
+    rows = _read_rows()
+    existing = {r["effective_date"] for r in rows}
+    if args.effective in existing and not args.force:
+        print(f"SKIP: effective_date {args.effective} already present (use --force to override). "
+              f"No write — CSV unchanged.")
+        return 0
+
     # --- date-newer-than-last-anchor guard (fail fast, before writing a row cctg_events_df()
     # would reject on next load anyway — avoid leaving the CSV in a state nobody notices is broken
     # until the next unrelated reader crashes) ---
@@ -159,6 +185,7 @@ def main():
         if len(owner_groups) < MIN_DISTINCT_OWNERS:
             sys.exit(f"ERROR: --sources resolve to only {len(owner_groups)} distinct owner "
                      f"group(s) ({sorted(owner_groups)}) — need >= {MIN_DISTINCT_OWNERS}. Refuse.")
+        _check_urls_not_reused(urls, _last_auto_sources_path())
         today_d = _valid_date(real_today)
         src_rates = []
         for s in sources:
@@ -194,7 +221,8 @@ def main():
                      f"{src_rates} — refuse to write a number no cited source actually said.")
 
     # --- delta guard vs current + last human-confirmed anchor ---
-    rows = _read_rows()
+    # (rows/existing already loaded by the idempotency check above — nothing has written to disk
+    # since, so reusing them here is safe and avoids a second redundant _read_rows() call)
     current_rate, _ = cctg_rate_vn.current_cctg_rate()
     human_rows = sorted(
         (r for r in rows if r.get("source") not in SOURCES_REQUIRING_STRUCTURED_SOURCES),
@@ -207,12 +235,6 @@ def main():
         sys.exit(f"ERROR: rate {args.rate:g}% differs from reference(s) {bases} by up to "
                  f"{max(deltas):.2f}pp (>= {NONINERT_DELTA_PP}pp) — refuse to write. Escalate for "
                  f"human review (--force is human-only).")
-
-    existing = {r["effective_date"] for r in rows}
-    if args.effective in existing and not args.force:
-        print(f"SKIP: effective_date {args.effective} already present (use --force to override). "
-              f"No write — CSV unchanged.")
-        return 0
 
     if args.force:
         rows = [r for r in rows if r["effective_date"] != args.effective]
@@ -232,6 +254,9 @@ def main():
         if os.path.exists(tmp):
             os.remove(tmp)
         raise
+
+    if args.source in SOURCES_REQUIRING_STRUCTURED_SOURCES:
+        _save_last_auto_urls(_last_auto_sources_path(), args.effective, urls)
 
     import importlib
     importlib.reload(cctg_rate_vn)
