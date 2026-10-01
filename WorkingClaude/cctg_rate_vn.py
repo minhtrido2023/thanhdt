@@ -47,22 +47,57 @@ _EVENTS_CSV = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "
 
 
 def cctg_events_df():
+    """Loads the frozen CCTG_EVENTS anchor(s) plus any live append-only rows in _EVENTS_CSV.
+
+    Quant-skeptic round-3 fix (2026-10-01): UNLIKE deposit_rate_vn.deposit_events_df() (which has
+    a real pre-2026-07 legacy CSV format to stay backward-compatible with), CCTG is a BRAND NEW
+    series bootstrapped 2026-10-01 -- there is no old format to tolerate. A wrong/missing header, an
+    unparseable date, or an unparseable rate value (e.g. "9.4%", "9,4") used to be silently coerced
+    to NaN and dropped via `dropna()`, so a broken append row vanished with zero trace and
+    current_cctg_rate() just kept reading the last GOOD anchor -- "CLEAR" with no sign anything was
+    wrong. Every one of those cases now raises loudly instead (same loud-propagation policy as the
+    ParserError case already had), so the error reaches current_cctg_rate_checked() and from there
+    macro_killswitch_a_status()/effective_deposit_rate()/effective_deposit_events_df() -- a missing
+    or malformed row must surface, never disappear."""
     ev = pd.DataFrame(CCTG_EVENTS, columns=["time", "cctg_rate"])
     ev["time"] = pd.to_datetime(ev["time"])
     if os.path.exists(_EVENTS_CSV):
         try:
-            extra = pd.read_csv(_EVENTS_CSV, usecols=["effective_date", "cctg_rate"])
+            extra = pd.read_csv(_EVENTS_CSV)
         except pd.errors.EmptyDataError:
-            extra = None
+            extra = None  # empty file (fresh install, no row appended yet) -> frozen anchor(s) only
         except pd.errors.ParserError:
             raise  # corrupt CSV -> surface loudly, same policy as deposit_rate_vn.py (2026-10-01)
-        except ValueError:
-            extra = None
         if extra is not None and len(extra):
-            extra = extra.rename(columns={"effective_date": "time"})
-            extra["time"] = pd.to_datetime(extra["time"], errors="coerce")
-            extra["cctg_rate"] = pd.to_numeric(extra["cctg_rate"], errors="coerce")
-            extra = extra.dropna(subset=["time", "cctg_rate"])
+            missing = {"effective_date", "cctg_rate"} - set(extra.columns)
+            if missing:
+                raise ValueError(
+                    f"{_EVENTS_CSV}: thiếu cột {sorted(missing)} (header sai/cũ) -- CCTG là chuỗi "
+                    f"MỚI (bootstrap 2026-10-01), không có định dạng cũ cần tương thích ngược như "
+                    f"deposit_rate_vn.py, nên header sai PHẢI sửa file, không được âm thầm bỏ qua")
+            extra = extra[["effective_date", "cctg_rate"]].rename(columns={"effective_date": "time"})
+            raw_time, raw_rate = extra["time"].copy(), extra["cctg_rate"].copy()
+            extra["time"] = pd.to_datetime(raw_time, errors="coerce")
+            extra["cctg_rate"] = pd.to_numeric(raw_rate, errors="coerce")
+            bad = extra["time"].isna() | extra["cctg_rate"].isna()
+            if bad.any():
+                bad_rows = list(zip(raw_time[bad].tolist(), raw_rate[bad].tolist()))
+                raise ValueError(
+                    f"{_EVENTS_CSV}: {bad.sum()} dòng không parse được (ngày hoặc cctg_rate): "
+                    f"{bad_rows[:5]} -- phải sửa file, không được âm thầm drop")
+            # Range guard at LOAD time, not just at the single-value current_cctg_rate_checked()
+            # lookup -- effective_deposit_events_df() (Value Radar's full historical step series)
+            # calls this function directly and previously had NO range validation at all, so a
+            # format-valid-but-semantically-wrong typo (e.g. "85" meaning 8.5%) flowed straight
+            # into the displayed deposit_rate as a NAKED 85% (quant-skeptic round-3 finding,
+            # reproduced in cctg_overlay_selfcheck.py T_range_radar).
+            oor = ~extra["cctg_rate"].between(RATE_MIN_PCT, RATE_MAX_PCT)
+            if oor.any():
+                bad_vals = extra.loc[oor, "cctg_rate"].tolist()
+                raise ValueError(
+                    f"{_EVENTS_CSV}: {oor.sum()} dòng cctg_rate ngoài khoảng hợp lệ "
+                    f"[{RATE_MIN_PCT},{RATE_MAX_PCT}]: {bad_vals[:5]} -- phải sửa file, không được "
+                    f"âm thầm drop/dùng thẳng")
             extra = extra[extra["time"] > ev["time"].max()]
             if len(extra):
                 ev = pd.concat([ev, extra[["time", "cctg_rate"]]], ignore_index=True)

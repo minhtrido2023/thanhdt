@@ -192,22 +192,25 @@ def macro_killswitch_a_status(asof=None, stale_days_limit=45, check_freshness=No
                     "reason": (f"rate_pct={rate_pct!r} ngoài khoảng hợp lệ "
                                f"[{RATE_MIN_PCT},{RATE_MAX_PCT}] -> fail-closed (armed)")}
         rate_source = "big4_12m"
-        # cctg_force_armed / cctg_note: symmetric fail-closed treatment for the CCTG overlay
-        # (quant-skeptic round-2 fix 1, 2026-10-01). Any CCTG-side problem (corrupt CSV,
-        # out-of-range typo, or a stale reading that was last seen ABOVE the 7.5% threshold) must
-        # surface into the result -- at minimum stale=True with a reason, and armed=True when the
-        # last known CCTG reading was itself above threshold (can't silently drop evidence that the
-        # real effective rate may be armed just because the feed went stale). This replaces the old
-        # bare `except Exception: pass`, which let every CCTG failure mode fall through to
-        # Big-4-only with ZERO trace -- asymmetric with how every Big-4-side failure in this same
-        # function is handled (fail-closed with an explicit reason).
+        # cctg_force_armed / cctg_note: symmetric fail-closed treatment for the CCTG overlay.
+        # Round-2 fix 1 (2026-10-01) first closed the bare `except Exception: pass` that let every
+        # CCTG failure mode fall through to Big-4-only with ZERO trace. Round-3 fix 2 (2026-10-01,
+        # quant-skeptic round-3) closes a REMAINING asymmetry that fix alone left: a CCTG read
+        # error / out-of-range value used to only set stale=True while leaving armed UNCHANGED
+        # (i.e. still CLEAR) -- inconsistent with every Big-4-side failure in this same function,
+        # which is always armed=True+stale=True. A CCTG value this function could not validate is
+        # evidence it cannot rule out "effective rate > 7.5%" either, so it is now treated the same
+        # as the Big-4 error path: armed=True (not just stale=True), with the reason saying ARMED,
+        # not CLEAR. Only the "stale reading, but last KNOWN value was already <= threshold" case
+        # stays non-armed -- there the feed's own last-seen value is in-range evidence, just old.
         cctg_force_armed = False
         cctg_note = None
         try:
             from cctg_rate_vn import current_cctg_rate_checked
             cctg_pct, cctg_date, cctg_err = current_cctg_rate_checked(str(asof_ts.date()))
             if cctg_err is not None:
-                cctg_note = f"CCTG loi/ngoài khoảng ({cctg_err}) -> bỏ qua overlay CCTG"
+                cctg_force_armed = True
+                cctg_note = f"CCTG lỗi/ngoài khoảng ({cctg_err}) -> không xác thực được, fail-closed"
             elif cctg_pct is not None:
                 cctg_age = (asof_ts - cctg_date).days
                 cctg_stale = check_freshness and cctg_age > stale_days_limit
@@ -222,7 +225,8 @@ def macro_killswitch_a_status(asof=None, stale_days_limit=45, check_freshness=No
                     rate_pct = cctg_pct
                     rate_source = f"cctg_6m({cctg_date.date()})"
         except Exception as exc:
-            cctg_note = f"CCTG overlay lỗi không lường trước ({exc!r}) -> bỏ qua overlay CCTG"
+            cctg_force_armed = True
+            cctg_note = f"CCTG overlay lỗi không lường trước ({exc!r}) -> không xác thực được, fail-closed"
 
         rate = rate_pct / 100.0
         age_days = (asof_ts - last_date).days
@@ -324,21 +328,28 @@ def effective_deposit_events_df():
     alone (only Big-4 breakpoints exist that far back). For historical/rolling display-only
     consumers needing the FULL step series (value_radar.py), not a single current-rate lookup --
     no staleness/fail-closed concept here (there is no "now" inside a historical frame); see
-    macro_killswitch_a_status()/effective_deposit_rate() for the live, fail-closed version."""
+    macro_killswitch_a_status()/effective_deposit_rate() for the live, fail-closed version.
+
+    Quant-skeptic round-3 fix (2026-10-01): a CCTG-side parse/range error from cctg_events_df()
+    now PROPAGATES instead of being swallowed by a bare `except Exception: return base`. The old
+    silent fallback meant a broken CCTG append (bad header, unparseable value, OR a format-valid
+    typo like "85" that used to have NO range check at all here) would either vanish into a
+    Big-4-only series with zero trace, or -- worse, before cctg_events_df()'s own range guard
+    existed -- flow straight into the displayed deposit_rate as a naked out-of-range number. The
+    sole caller, value_radar.py's load_series() (via value_radar_now()), already treats any
+    exception from this module as "skip this cycle, no Value Radar line" -- showing nothing is
+    strictly safer than showing a silently-wrong or silently-stale number."""
     base = deposit_events_df()[["time", "deposit_rate"]].copy()
-    try:
-        from cctg_rate_vn import cctg_events_df
-        cev = cctg_events_df().rename(columns={"cctg_rate": "deposit_rate"})
-        all_dates = (pd.concat([base[["time"]], cev[["time"]]], ignore_index=True)
-                     .drop_duplicates().sort_values("time").reset_index(drop=True))
-        big4_asof = pd.merge_asof(all_dates, base.sort_values("time"), on="time", direction="backward")
-        cctg_asof = pd.merge_asof(all_dates, cev.sort_values("time"), on="time", direction="backward")
-        merged = all_dates.copy()
-        merged["deposit_rate"] = np.fmax(big4_asof["deposit_rate"].to_numpy(dtype=float),
-                                          cctg_asof["deposit_rate"].fillna(-np.inf).to_numpy(dtype=float))
-        return merged.sort_values("time").reset_index(drop=True)
-    except Exception:
-        return base
+    from cctg_rate_vn import cctg_events_df
+    cev = cctg_events_df().rename(columns={"cctg_rate": "deposit_rate"})
+    all_dates = (pd.concat([base[["time"]], cev[["time"]]], ignore_index=True)
+                 .drop_duplicates().sort_values("time").reset_index(drop=True))
+    big4_asof = pd.merge_asof(all_dates, base.sort_values("time"), on="time", direction="backward")
+    cctg_asof = pd.merge_asof(all_dates, cev.sort_values("time"), on="time", direction="backward")
+    merged = all_dates.copy()
+    merged["deposit_rate"] = np.fmax(big4_asof["deposit_rate"].to_numpy(dtype=float),
+                                      cctg_asof["deposit_rate"].fillna(-np.inf).to_numpy(dtype=float))
+    return merged.sort_values("time").reset_index(drop=True)
 
 
 if __name__ == "__main__":
