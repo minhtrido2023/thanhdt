@@ -67,8 +67,22 @@ def deposit_events_df():
     if os.path.exists(_EVENTS_CSV):
         try:
             extra = pd.read_csv(_EVENTS_CSV, usecols=["effective_date", "deposit_rate"])
-        except (pd.errors.EmptyDataError, ValueError):
-            extra = None  # empty file or missing columns -> keep frozen anchors only
+        except pd.errors.EmptyDataError:
+            extra = None  # empty file (e.g. fresh install, cron hasn't appended yet) -> frozen only
+        except pd.errors.ParserError:
+            # pandas.errors.ParserError IS a ValueError subclass -- must be caught BEFORE the
+            # generic ValueError clause below, and re-raised, not swallowed. A genuinely corrupt
+            # CSV (bad quoting, truncated row) used to fall into the old blanket
+            # `except (EmptyDataError, ValueError)` and silently revert to frozen-anchors-only
+            # with zero signal anywhere that the live feed is broken -- every consumer
+            # (rating_8l.py live tilt, dcf_valuation.py, macro_confidence_regime.py,
+            # macro_killswitch_a_status) would read stale data believing it was current. Letting
+            # it propagate lets macro_killswitch_a_status's fail-closed try/except turn it into an
+            # explicit armed+stale+reason='error:...' instead (found 2026-10-01,
+            # macro_killswitch_a_selfcheck.py T12).
+            raise
+        except ValueError:
+            extra = None  # e.g. missing expected columns in an old-format file -> frozen only
         if extra is not None and len(extra):
             extra = extra.rename(columns={"effective_date": "time"})
             extra["time"] = pd.to_datetime(extra["time"], errors="coerce")
@@ -115,32 +129,63 @@ def macro_killswitch_a_status(asof=None, stale_days_limit=45, check_freshness=No
     dna_report.build_macro_killswitch_a_line(), independent of the CCTG 6-month certificate rate
     (a DIFFERENT instrument/tenor under separate legal-vn equivalence review — do not conflate).
 
+    stale_days_limit=45 is an ARBITRARY choice (trading_rules.json's own spec text does not name a
+    number) and must be read against how this feed is actually refreshed: there is no automated
+    daily/live feed for the Big-4 12M deposit rate — the only update path is a human confirming a
+    number via `append_deposit_rate.py` after the monthly `refresh_deposit_rate_vn.sh` cron
+    *reminder* (fires day-3 ICT, best-effort fetch, does NOT auto-write). So "stale" here concretely
+    means "the last MANUAL confirmation is more than stale_days_limit days old", not "a live feed
+    stopped ticking". Practical consequence (computed from the real production CSV, last confirmed
+    anchor 2026-09-04): if the 2026-11-03 monthly reminder is missed with no human confirming a
+    newer anchor, this gate flips to armed=True/stale=True on its own at 2026-09-04 + 45d =
+    **2026-10-19** — note this in any report that cites this function's live status.
+
+    Any exception anywhere in this function (corrupt/unparseable CSV beyond the narrow
+    EmptyDataError/ValueError already handled inside deposit_events_df -- e.g. a malformed-quote
+    ParserError, a PermissionError on the CSV path, or anything else) is caught at the top level and
+    treated as fail-closed: armed=True, stale=True, reason starts with "error:". Same fail-closed
+    treatment for a rate value outside RATE_MIN..RATE_MAX (0.5%..30%, a sanity fence on the raw
+    `deposit_rate` column) -- this catches a fraction-vs-percent typo (e.g. an anchor written as
+    0.068 meaning 6.8%) before it could silently read as "rate 0.07% <= 7.5% -> CLEAR".
+
     Returns dict: armed(bool), rate(float|None, fraction e.g. 0.068), threshold(0.075),
     stale(bool), last_update(str date|None), age_days(int|None), reason(str)."""
     THRESHOLD = 0.075
-    if check_freshness is None:
-        check_freshness = asof is None
-    ev = deposit_events_df()
-    asof_ts = pd.Timestamp.today().normalize() if asof is None else pd.to_datetime(asof)
-    avail = ev[ev.time <= asof_ts]
-    if avail.empty:
+    RATE_MIN_PCT, RATE_MAX_PCT = 0.5, 30.0
+    try:
+        if check_freshness is None:
+            check_freshness = asof is None
+        ev = deposit_events_df()
+        asof_ts = pd.Timestamp.today().normalize() if asof is None else pd.to_datetime(asof)
+        avail = ev[ev.time <= asof_ts]
+        if avail.empty:
+            return {"armed": True, "rate": None, "threshold": THRESHOLD, "stale": True,
+                    "last_update": None, "age_days": None,
+                    "reason": "no deposit data at/before asof -> fail-closed (armed)"}
+        last_date = avail.iloc[-1]["time"]
+        rate_pct = float(avail.iloc[-1]["deposit_rate"])
+        if not (RATE_MIN_PCT <= rate_pct <= RATE_MAX_PCT):
+            return {"armed": True, "rate": None, "threshold": THRESHOLD, "stale": True,
+                    "last_update": str(last_date.date()), "age_days": None,
+                    "reason": (f"rate_pct={rate_pct!r} ngoài khoảng hợp lệ "
+                               f"[{RATE_MIN_PCT},{RATE_MAX_PCT}] -> fail-closed (armed)")}
+        rate = rate_pct / 100.0
+        age_days = (asof_ts - last_date).days
+        stale = check_freshness and age_days > stale_days_limit
+        if stale:
+            return {"armed": True, "rate": rate, "threshold": THRESHOLD, "stale": True,
+                    "last_update": str(last_date.date()), "age_days": age_days,
+                    "reason": f"feed stale ({age_days}d > {stale_days_limit}d, lần xác nhận thủ "
+                              f"công cuối {last_date.date()}) -> fail-closed (armed)"}
+        armed = rate > THRESHOLD
+        reason = (f"deposit {rate_pct:.2f}% > 7.5% -> SUSPEND new recovery deploy" if armed
+                  else f"deposit {rate_pct:.2f}% <= 7.5% -> CLEAR")
+        return {"armed": armed, "rate": rate, "threshold": THRESHOLD, "stale": False,
+                "last_update": str(last_date.date()), "age_days": age_days, "reason": reason}
+    except Exception as exc:
         return {"armed": True, "rate": None, "threshold": THRESHOLD, "stale": True,
                 "last_update": None, "age_days": None,
-                "reason": "no deposit data at/before asof -> fail-closed (armed)"}
-    last_date = avail.iloc[-1]["time"]
-    rate_pct = float(avail.iloc[-1]["deposit_rate"])
-    rate = rate_pct / 100.0
-    age_days = (asof_ts - last_date).days
-    stale = check_freshness and age_days > stale_days_limit
-    if stale:
-        return {"armed": True, "rate": rate, "threshold": THRESHOLD, "stale": True,
-                "last_update": str(last_date.date()), "age_days": age_days,
-                "reason": f"feed stale ({age_days}d > {stale_days_limit}d) -> fail-closed (armed)"}
-    armed = rate > THRESHOLD
-    reason = (f"deposit {rate_pct:.2f}% > 7.5% -> SUSPEND new recovery deploy" if armed
-              else f"deposit {rate_pct:.2f}% <= 7.5% -> CLEAR")
-    return {"armed": armed, "rate": rate, "threshold": THRESHOLD, "stale": False,
-            "last_update": str(last_date.date()), "age_days": age_days, "reason": reason}
+                "reason": f"error: {exc!r} -> fail-closed (armed)"}
 
 
 def current_deposit_rate(asof=None):

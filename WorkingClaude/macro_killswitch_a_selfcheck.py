@@ -85,12 +85,85 @@ r7 = dep.macro_killswitch_a_status(asof=last_anchor + pd.Timedelta(days=45), sta
                                     check_freshness=True)
 check("T7 age==limit not stale (> required, not >=)", r7["stale"] is False)
 
-# T7b: the live call shape (asof=None) auto-enables check_freshness -- confirm the auto-default
-# actually resolves to True for asof=None (not just documented, asserted against real behavior).
-r7b_live = dep.macro_killswitch_a_status()
-r7b_explicit = dep.macro_killswitch_a_status(check_freshness=True)
-check("T7b asof=None auto-enables freshness (matches explicit True)",
-      r7b_live["stale"] == r7b_explicit["stale"] and r7b_live["armed"] == r7b_explicit["armed"])
+# T7c: DEFAULT stale_days_limit is actually 45, not some other number -- omit the kwarg entirely
+# (every other staleness test above passes stale_days_limit=45 explicitly, so none of them would
+# catch the default itself silently drifting, e.g. to 999).
+r7c = dep.macro_killswitch_a_status(asof=last_anchor + pd.Timedelta(days=50), check_freshness=True)
+check("T7c default stale_days_limit=45 (50d old -> stale)", r7c["stale"] is True)
+
+# T7b: append_deposit_rate.py-style CSV extension picked up and read as FRESH, not stale -- real
+# repro of the production refresh path (a new anchor written to the CSV, then queried at a date
+# shortly after it, must NOT be stale), replacing a tautological "call the function twice and
+# compare to itself" check. Uses a temp CSV + monkeypatches dep._EVENTS_CSV so the real
+# (gitignored) production file is never touched.
+import tempfile
+_tmpdir = tempfile.mkdtemp(prefix="depgate_selfcheck_")
+_tmp_csv = os.path.join(_tmpdir, "deposit_rate_vn_events.csv")
+_orig_csv_path = dep._EVENTS_CSV
+try:
+    with open(_tmp_csv, "w") as f:
+        f.write("effective_date,deposit_rate,collected_date,source,note\n")
+        f.write("2026-09-15,7.1,2026-09-15,manual_verify,selfcheck-fixture\n")
+    dep._EVENTS_CSV = _tmp_csv
+    r7b = dep.macro_killswitch_a_status(asof="2026-09-20", stale_days_limit=45, check_freshness=True)
+    check("T7b new CSV anchor picked up (rate=7.1%)", abs(r7b["rate"] - 0.071) < 1e-9)
+    check("T7b new CSV anchor fresh (5d old, not stale)", r7b["stale"] is False)
+    check("T7b new CSV anchor not armed (7.1% <= 7.5%)", r7b["armed"] is False)
+finally:
+    dep._EVENTS_CSV = _orig_csv_path
+
+# T9/T10: threshold-boundary fixtures that kill off-by-one-decimal mutants on THRESHOLD (0.075).
+# A mutant using 0.07 instead of 0.075 would wrongly ARM at 7.2% (real anchor 2023-03-01..2023-06-01,
+# strictly between 0.07 and 0.075) -- true threshold keeps this CLEAR.
+r9 = dep.macro_killswitch_a_status(asof="2023-05-01")
+check("T9 rate=7.2% (2023-03 anchor)", abs(r9["rate"] - 0.072) < 1e-9)
+check("T9 not armed (kills 0.07-threshold mutant)", r9["armed"] is False)
+
+# A mutant using 0.08 instead of 0.075 would wrongly stay CLEAR at 7.6% -- true threshold ARMS.
+# No real anchor sits in (7.5, 8.0) exclusive, so inject one via a temp CSV (same mechanism as T7b).
+# Must postdate the last FROZEN anchor (2026-06-01) -- deposit_events_df() only appends CSV rows
+# strictly newer than that (append-only design), so an earlier injected date is silently dropped.
+try:
+    with open(_tmp_csv, "w") as f:
+        f.write("effective_date,deposit_rate,collected_date,source,note\n")
+        f.write("2026-09-18,7.6,2026-09-18,manual_verify,selfcheck-fixture\n")
+    dep._EVENTS_CSV = _tmp_csv
+    r10 = dep.macro_killswitch_a_status(asof="2026-09-19")
+    check("T10 rate=7.6% (injected fixture)", abs(r10["rate"] - 0.076) < 1e-9)
+    check("T10 armed (kills 0.08-threshold mutant)", r10["armed"] is True)
+finally:
+    dep._EVENTS_CSV = _orig_csv_path
+
+# T11: rate-range sanity-fence guard -- a fraction-vs-percent typo (0.068 meaning 6.8%) must
+# fail-closed (armed), not silently read as "0.07% <= 7.5% -> CLEAR".
+try:
+    with open(_tmp_csv, "w") as f:
+        f.write("effective_date,deposit_rate,collected_date,source,note\n")
+        f.write("2026-09-20,0.068,2026-09-20,manual_verify,selfcheck-typo-fixture\n")
+    dep._EVENTS_CSV = _tmp_csv
+    r11 = dep.macro_killswitch_a_status(asof="2026-09-21")
+    check("T11 out-of-range rate -> armed (fail-closed)", r11["armed"] is True)
+    check("T11 out-of-range rate -> stale (fail-closed)", r11["stale"] is True)
+    check("T11 reason mentions rate_pct", "rate_pct" in r11["reason"])
+finally:
+    dep._EVENTS_CSV = _orig_csv_path
+
+# T12: a CORRUPT CSV (unparseable -> pandas ParserError, NOT the narrow EmptyDataError/ValueError
+# already handled inside deposit_events_df) must fail-closed via the function-level try/except,
+# not propagate as an uncaught exception.
+try:
+    with open(_tmp_csv, "w") as f:
+        f.write('effective_date,deposit_rate,collected_date,source,note\n')
+        f.write('2026-09-15,7.1,2026-09-15,manual_verify,"unterminated quote never closed\n')
+    dep._EVENTS_CSV = _tmp_csv
+    r12 = dep.macro_killswitch_a_status(asof="2026-09-20")
+    check("T12 corrupt CSV -> armed (fail-closed)", r12["armed"] is True)
+    check("T12 corrupt CSV -> stale (fail-closed)", r12["stale"] is True)
+    check("T12 corrupt CSV -> reason mentions error", r12["reason"].startswith("error:"))
+finally:
+    dep._EVENTS_CSV = _orig_csv_path
+    import shutil
+    shutil.rmtree(_tmpdir, ignore_errors=True)
 
 # T8: TZ independence guard -- explicit asof means host TZ env var must not change the result.
 r8a = dep.macro_killswitch_a_status(asof="2026-06-15")
@@ -104,5 +177,8 @@ check("T8 TZ-independent (explicit asof)", r8a == r8b)
 # M3: using deposit_events_df() max() row instead of an asof-bounded slice would make T2
 #     (queried at 2013-01-01, historical) return the CURRENT (2026) rate instead of 9.0% --
 #     already caught by T2's exact-value assertion.
+# M4/M5: THRESHOLD mutated to 0.07/0.08 -- caught by T9/T10.
+# M6: removing the try/except -- caught by T12 (would raise instead of returning a dict).
+# M7: removing the rate-range guard -- caught by T11.
 
 print(f"\n=== {N} assertions PASS ===")
