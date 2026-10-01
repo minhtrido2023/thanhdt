@@ -967,6 +967,35 @@ try:
 finally:
     cpt.PARK_TARGET_RULES = _old_rules
 
+# T23 — target=0.0 (park TẮT HẲN, user chốt 2026-10-01): PHẢI bán sạch, KHÔNG fail-closed.
+# Lỗi gốc (trước patch 2026-10-01): "target_value * w_raw < 1 lô" đúng với MỌI mã khi
+# target_value=0 ⇒ feasible luôn rỗng ⇒ BLOCKED_NO_FEASIBLE_BASKET, 0 lệnh — đảo ngược hoàn toàn
+# chỉ đạo "tắt park". Ca này GIẾT đúng mutant đó: revert patch ⇒ T23a/T23b/T23c FAIL.
+_r23 = run(holdings(BASE_LOTS, cash=0.0), target=0.0)
+check("T23a target=0.0 ⇒ decision=TRIM (KHÔNG BLOCKED_NO_FEASIBLE_BASKET)",
+      _r23["decision"] == "TRIM", _r23["decision"])
+check("T23b target=0.0 ⇒ trim_proposed ≈ TOÀN BỘ park_mv (bán sạch, không chỉ phần basket)",
+      close(_r23.get("trim_proposed_vnd", 0), _r23["park_mv_vnd"], tol=_r23["park_mv_vnd"] * 0.01),
+      f"proposed={_r23.get('trim_proposed_vnd')} park_mv={_r23['park_mv_vnd']}")
+_tks23 = {o["ticker"] for o in _r23["orders"]}
+check("T23c target=0.0 ⇒ CẢ 4 mã đang giữ (kể cả SHS ngoài rổ) đều có lệnh bán",
+      _tks23 == {"AAA", "BBB", "CCC", "SHS"}, sorted(_tks23))
+check("T23d target=0.0 ⇒ target_value_vnd rỗng (bỏ qua phân bổ theo rổ, không phải lỗi thiếu rổ)",
+      _r23["target_value_vnd"] == {} and _r23["basket_feasible_n"] == 0, _r23["target_value_vnd"])
+
+# T23e — target=0.0 nhưng mã bị excluded_tickers vẫn PHẢI bị chặn (fast-path không lách qua
+# tầng loại excluded/unverified đã chạy trước đó).
+_r23e = run(holdings(BASE_LOTS, cash=0.0, excluded=["AAA"]), target=0.0)
+check("T23e target=0.0 + AAA excluded_tickers ⇒ AAA KHÔNG có lệnh bán (vẫn bị chặn)",
+      "AAA" not in {o["ticker"] for o in _r23e["orders"]}
+      and any(b["ticker"] == "AAA" for b in _r23e["blocked"]), _r23e["blocked"])
+
+# T23f — target=0.0 nhưng KHÔNG còn park nào (pool=0) ⇒ NO_TRIM (không có gì để bán), không
+# phải TRIM rỗng bất thường.
+_r23f = run(holdings([], cash=0.0), target=0.0)
+check("T23f target=0.0 + park rỗng ⇒ NO_TRIM (không phải TRIM/BLOCKED giả)",
+      _r23f["decision"] == "NO_TRIM", _r23f["decision"])
+
 print(f"\n=== {len(PASS)} PASS / {len(FAIL)} FAIL ===")
 if FAIL:
     for f in FAIL:
