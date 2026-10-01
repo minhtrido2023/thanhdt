@@ -160,15 +160,19 @@ def macro_killswitch_a_status(asof=None, stale_days_limit=45, check_freshness=No
     series drove the final rate, since the two are different tenors (12M vs 6M) and a report
     citing this number must say which one is active (see cctg_rate_vn.py module docstring).
 
-    ⚠ SYMMETRIC fail-closed on the CCTG side (fixed 2026-10-01, quant-skeptic round-2 fix 1 --
-    the original version wrapped the whole CCTG lookup in a bare `except Exception: pass`, which
-    let EVERY CCTG-side failure mode -- corrupt CSV, an out-of-range typo'd value, a stale reading
-    -- fall through to Big-4-only with zero trace, i.e. fail-OPEN on exactly the side meant to be
-    at least as conservative as Big-4's own fail-closed behavior). Now: a CCTG read error or an
-    out-of-range value forces `stale=True` with a reason noting the CCTG problem (Big-4's own
-    rate/armed verdict otherwise stands); a STALE CCTG reading whose LAST KNOWN value was already
-    above the 7.5% threshold additionally forces `armed=True` -- losing track of a feed that was
-    last seen above the trigger must never silently read as CLEAR.
+    ⚠ SYMMETRIC fail-closed on the CCTG side (round-2 fix 1 closed the original bare `except
+    Exception: pass`; round-3 fix 2, both 2026-10-01, closed a REMAINING asymmetry -- current
+    behavior, superseding the round-2-only description below): a CCTG read error OR an
+    out-of-range value forces `armed=True` directly (not just `stale=True`) -- a CCTG value this
+    function could not validate is evidence it cannot rule out "effective rate > 7.5%" either, so
+    it gets the same unconditional fail-closed treatment as every Big-4-side error in this same
+    function. The ONLY CCTG-side case that stays non-armed is a STALE-but-successfully-read CCTG
+    value whose LAST KNOWN reading was already <= the 7.5% threshold -- there the feed's own
+    last-seen value is in-range evidence, just old, so nothing to escalate. A STALE reading whose
+    last known value was ABOVE 7.5% still forces `armed=True` (losing track of a feed last seen
+    above the trigger must never silently read as CLEAR) -- i.e. "stale" alone does not force
+    `armed=True` unconditionally; only (a) any read/parse/range error, or (b) a stale reading whose
+    last known value exceeded the threshold, does.
 
     Returns dict: armed(bool), rate(float|None, fraction e.g. 0.068), threshold(0.075),
     stale(bool), last_update(str date|None), age_days(int|None), reason(str), rate_source(str|None)."""

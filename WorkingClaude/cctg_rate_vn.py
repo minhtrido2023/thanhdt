@@ -98,9 +98,22 @@ def cctg_events_df():
                     f"{_EVENTS_CSV}: {oor.sum()} dòng cctg_rate ngoài khoảng hợp lệ "
                     f"[{RATE_MIN_PCT},{RATE_MAX_PCT}]: {bad_vals[:5]} -- phải sửa file, không được "
                     f"âm thầm drop/dùng thẳng")
-            extra = extra[extra["time"] > ev["time"].max()]
-            if len(extra):
-                ev = pd.concat([ev, extra[["time", "cctg_rate"]]], ignore_index=True)
+            # Round-5 fix (2026-10-01, quant-skeptic round-4): a row with effective_date <=
+            # anchor's own max date used to be silently filtered out by `extra["time"] >
+            # ev["time"].max()` with zero trace (e.g. a typo'd year like "2025-10-02" instead of
+            # "2026-10-02" would just vanish, leaving current_cctg_rate() quietly reading the
+            # 2026-09-30 anchor forever while the human believes a newer row was appended). <=
+            # (not just <, i.e. a duplicate of the anchor date itself) also raises -- a same-date
+            # append is either a genuine duplicate or an intended correction, neither of which this
+            # append-only module may silently drop or silently accept.
+            not_newer = extra["time"] <= ev["time"].max()
+            if not_newer.any():
+                bad_dates = [str(d) for d in extra.loc[not_newer, "time"].dt.date.tolist()]
+                raise ValueError(
+                    f"{_EVENTS_CSV}: {not_newer.sum()} dòng effective_date <= anchor hiện tại "
+                    f"({ev['time'].max().date()}): {bad_dates[:5]} -- có thể là lỗi gõ ngày (năm "
+                    f"cũ) hoặc trùng ngày -- phải sửa file, không được âm thầm drop")
+            ev = pd.concat([ev, extra[["time", "cctg_rate"]]], ignore_index=True)
     return ev.sort_values("time").reset_index(drop=True)
 
 

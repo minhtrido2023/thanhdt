@@ -287,6 +287,66 @@ finally:
     cctg._EVENTS_CSV = _orig_cctg_csv
     shutil.rmtree(_tmpdir16, ignore_errors=True)
 
+# T17 (round-4 fix 1, boundary '<=' vs '<' at the CCTG anchor date 2026-09-30): a CSV row whose
+# effective_date is BEFORE the frozen anchor (e.g. a typo'd year "2025-10-02" meant to be
+# "2026-10-02") used to be silently filtered out of cctg_events_df() with zero trace. A row dated
+# EXACTLY ON the anchor date (same-day duplicate/correction) must ALSO raise, not just strictly-
+# earlier rows -- this is the boundary case a `>` vs `>=` mutant on the new guard would flip.
+_tmpdir17 = tempfile.mkdtemp(prefix="cctg_selfcheck17_")
+_tmp_cctg_csv17a = os.path.join(_tmpdir17, "cctg_rate_vn_events_before.csv")
+_tmp_cctg_csv17b = os.path.join(_tmpdir17, "cctg_rate_vn_events_oneq.csv")
+try:
+    with open(_tmp_cctg_csv17a, "w") as f:
+        f.write("effective_date,cctg_rate\n2025-10-02,9.4\n")  # year typo, strictly BEFORE anchor
+    cctg._EVENTS_CSV = _tmp_cctg_csv17a
+    raised17a = False
+    try:
+        cctg.cctg_events_df()
+    except ValueError as exc17a:
+        raised17a = True
+        err17a = str(exc17a)
+    check("T17 effective_date strictly before anchor (year typo) raises, not silently dropped",
+          raised17a and "2025-10-02" in err17a)
+
+    with open(_tmp_cctg_csv17b, "w") as f:
+        f.write("effective_date,cctg_rate\n2026-09-30,9.4\n")  # exactly ON the anchor date
+    cctg._EVENTS_CSV = _tmp_cctg_csv17b
+    raised17b = False
+    try:
+        cctg.cctg_events_df()
+    except ValueError:
+        raised17b = True
+    check("T17 effective_date == anchor date (boundary) also raises (kills > vs >= mutant)",
+          raised17b)
+finally:
+    cctg._EVENTS_CSV = _orig_cctg_csv
+    shutil.rmtree(_tmpdir17, ignore_errors=True)
+
+# T18 (round-4 fix 4, boundary '>' vs '>=' at effective_deposit_rate()'s own stale_days_limit=45
+# -- same boundary as T16 but for the DISPLAY-ONLY function, which has its own independent
+# `cctg_age > stale_days_limit` check, not shared code with macro_killswitch_a_status()). Big-4
+# fixture anchor kept fresh at both asof dates so only the CCTG-side boundary is exercised.
+_tmpdir18 = tempfile.mkdtemp(prefix="cctg_selfcheck18_")
+_tmp_dep_csv18 = os.path.join(_tmpdir18, "deposit_rate_vn_events.csv")
+_tmp_cctg_csv18 = os.path.join(_tmpdir18, "cctg_rate_vn_events.csv")
+try:
+    with open(_tmp_dep_csv18, "w") as f:
+        f.write("effective_date,deposit_rate\n2026-10-20,6.0\n")
+    with open(_tmp_cctg_csv18, "w") as f:
+        f.write("effective_date,cctg_rate\n2026-10-05,8.0\n")
+    dep._EVENTS_CSV = _tmp_dep_csv18
+    cctg._EVENTS_CSV = _tmp_cctg_csv18
+    r18a = dep.effective_deposit_rate(asof="2026-11-19", stale_days_limit=45, check_freshness=True)
+    check("T18 CCTG age==45d NOT stale -> effective_deposit_rate still uses CCTG (rate_pct=8.0)",
+          abs(r18a["rate_pct"] - 8.0) < 1e-9 and r18a["rate_source"].startswith("cctg_6m"))
+    r18b = dep.effective_deposit_rate(asof="2026-11-20", stale_days_limit=45, check_freshness=True)
+    check("T18 CCTG age==46d stale -> effective_deposit_rate falls back to Big-4 (rate_pct=6.0)",
+          abs(r18b["rate_pct"] - 6.0) < 1e-9 and r18b["rate_source"] == "big4_12m")
+finally:
+    dep._EVENTS_CSV = _orig_dep_csv
+    cctg._EVENTS_CSV = _orig_cctg_csv
+    shutil.rmtree(_tmpdir18, ignore_errors=True)
+
 # T_tz: TZ independence guard (explicit asof throughout).
 r_tz_a = dep.macro_killswitch_a_status(asof="2026-10-01")
 os.environ.pop("TZ", None)
