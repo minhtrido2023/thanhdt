@@ -1038,8 +1038,15 @@ if not _lever_err and _gate_pass:
 _pit_deposit_rate_effective = _pit_deposit_effective_driver = None
 if _pit_deposit_rate is not None:
     try:
+        import math as _pit_math  # local: khối này exec độc lập trong selfcheck (xem §6a)
         _pit_eff_detail = deposit_rate_vn.consumer_deposit_rate_detail(str(LATEST.date()))
-        _pit_deposit_rate_effective = round(float(_pit_eff_detail["rate_pct"]), 2)
+        _pit_eff_rate = float(_pit_eff_detail["rate_pct"])
+        # NaN/inf -> None (cùng quy ước chuẩn-hoá NaN của `_pit_cpi_yoy`/`_pit_deposit_rate`
+        # ở trên) — `round(float('nan'), 2)` vẫn là nan, json.dump sẽ ghi literal `NaN` (JSON
+        # không hợp lệ) nếu không chặn ở đây.
+        if not _pit_math.isfinite(_pit_eff_rate):
+            raise ValueError(f"rate_pct không hữu hạn: {_pit_eff_rate!r}")
+        _pit_deposit_rate_effective = round(_pit_eff_rate, 2)
         _pit_deposit_effective_driver = _pit_eff_detail["rate_source"]
     except Exception as _pit_eff_ex:
         _pit_deposit_rate_effective = _pit_deposit_effective_driver = None
@@ -1402,6 +1409,25 @@ if capit_signal_today:
              f"(enabled={capit_lever['enabled']}, cổng {capit_lever['gate']} "
              f"{'ĐẠT' if capit_lever['gate_pass'] else 'chưa đạt'} @dd52={dd52_now:.1f}%) — "
              f"{capit_lever['reason']}")
+    # CAPIT_PIT_DISPLAY_BEGIN
+    # HIỂN THỊ-ONLY (job Taylor_20261001_110416) — dòng người duyệt plan thật nhìn thấy, không
+    # chỉ nằm trong JSON artifact. KHÔNG đọc lại vào quyết định (cổng vẫn Big-4-only ở trên).
+    # Mốc BEGIN/END để capit_lever_selfcheck.py trích đúng đoạn này (xem mốc CAPIT_LEVER_BEGIN/
+    # END ở §6a — cùng lý do: sửa logic mà không chạm mốc thì test fail, xoá mốc thì test cũng
+    # fail, không có đường "quên" âm thầm).
+    _pit_bg4 = capit_lever.get("pit_deposit_rate")
+    if _pit_bg4 is not None:
+        _pit_eff = capit_lever.get("pit_deposit_rate_effective")
+        _pit_thr = capit_lever["pit_deposit_threshold"]
+        _eff_str = (f"{_pit_eff:.2f}% [{capit_lever.get('pit_deposit_effective_driver')}]"
+                    if _pit_eff is not None else "n/a")
+        _pit_disp = (f"- Cổng PIT (lãi suất huy động): Big-4 {_pit_bg4:.2f}% (dùng cho quyết "
+                     f"định, ngưỡng {_pit_thr:.1f}%) · effective {_eff_str} — chỉ hiển thị")
+        if _pit_eff is not None and _pit_eff >= _pit_thr and _pit_bg4 < _pit_thr:
+            _pit_disp += (" — ⚠️ effective đã ≥ ngưỡng (cổng vẫn theo Big-4, user chốt "
+                         "2026-10-01); xem lại theo trigger trong current_ops")
+        L.append(_pit_disp)
+    # CAPIT_PIT_DISPLAY_END
     # NHÃN CŨ SAI, đã xoá 2026-07-31: dòng này từng ghi "Committed VND = size x free-cash mỗi
     # book" — công thức free-cash KHÔNG còn dùng từ khi user chốt booknav 2026-07-20. Không
     # plan nào thật sự dùng nó, nhưng để lại là một cách đọc thứ ba cho cùng một con số.

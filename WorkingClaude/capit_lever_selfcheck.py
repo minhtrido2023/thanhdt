@@ -45,6 +45,7 @@ import json
 import os
 import sys
 import tempfile
+import textwrap
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 # Test-mode: KHÔNG cho Executor._publish_bot_event ghi event GIẢ vào bus production
@@ -162,9 +163,27 @@ def write_rules(path, **over):
         json.dump(doc, f, ensure_ascii=False)
 
 
+def extract_marked_simple(src, begin, end):
+    """Như `extract_marked` nhưng không đòi dict `capit_lever = {...}` bên trong — dùng cho
+    đoạn HIỂN THỊ (job Taylor_20261001_110416), chỉ append vào `L`, không dựng lever."""
+    if src.count(begin) != 1 or src.count(end) != 1:
+        raise AssertionError(f"mốc {begin}/{end} phải xuất hiện ĐÚNG 1 lần trong {GOLIVE}")
+    return src.split(begin, 1)[1].split(end, 1)[0]
+
+
 SRC = _golive_src()
 POLICY_SRC = extract_func(SRC, "capit_lever_policy")
 BLOCK_SRC = extract_marked(SRC)
+PIT_DISPLAY_SRC = extract_marked_simple(SRC, "# CAPIT_PIT_DISPLAY_BEGIN",
+                                         "# CAPIT_PIT_DISPLAY_END")
+
+
+def run_pit_display(lever):
+    """Chạy ĐÚNG đoạn hiển thị-only (job Taylor_20261001_110416) → list các dòng L.append() mới
+    (không có dòng nào khác trong L để lẫn). `lever` = dict capit_lever (hoặc lát cắt giả lập)."""
+    ns = {"capit_lever": lever, "L": []}
+    exec(textwrap.dedent(PIT_DISPLAY_SRC), ns)
+    return ns["L"]
 # Ngưỡng cổng vẫn khai trong golive; PHẠM VI DUYỆT (APPROVED_*) đã dời sang trading_bot/plan.py
 # — tầng THỰC THI — và golive IMPORT lại, nên phải ghép 2 nguồn để dựng namespace cho §6a.
 # Ghép chứ không chép: nếu ai đó khai lại APPROVED_* trong golive, A11b dưới đây fail.
@@ -2264,6 +2283,71 @@ with tempfile.TemporaryDirectory() as TMP:
     check("M5 Big-4 PIT = None (trước 2011-01) → effective display CŨNG None",
           lev_m5["pit_deposit_rate"] is None and lev_m5["pit_deposit_rate_effective"] is None
           and lev_m5["pit_deposit_effective_driver"] is None)
+
+    # M6: rate_pct = NaN (nguồn CCTG hỏng kiểu âm thầm, không ném exception) → math.isfinite
+    # guard phải bắt được, field None (KHÔNG để lọt NaN vào json.dump — literal `NaN` không
+    # phải JSON hợp lệ, phá luôn mọi parser hạ nguồn như §6a gốc đã tránh cho pit_cpi_yoy).
+    _dep_mod.consumer_deposit_rate_detail = lambda asof=None: {
+        "rate_pct": float("nan"), "rate_source": "test_nan"}
+    try:
+        _buf6 = io.StringIO()
+        with contextlib.redirect_stdout(_buf6):
+            lev_m6, _ = run_block(d_on, dd52=-25.0, signal=True, size=0.50,
+                                  basket=BASKET5, targets=base_targets(),
+                                  latest=_dt.datetime(2026, 10, 5))
+        _out6 = _buf6.getvalue()
+    finally:
+        _dep_mod.consumer_deposit_rate_detail = _orig_detail
+    check("M6 rate_pct=NaN → math.isfinite guard chặn, field None + WARNING log, quyết "
+          "định không đổi (KHÔNG để NaN lọt vào dict artifact)",
+          lev_m6["pit_deposit_rate_effective"] is None
+          and lev_m6["pit_deposit_effective_driver"] is None
+          and lev_m6["pit_filter_structural"] is False and lev_m6["active"] is True
+          and "WARNING" in _out6, detail=_out6[-200:])
+
+    # M7: detail dict THIẾU khoá rate_source (hạ cấp schema phía deposit_rate_vn) → KeyError
+    # bị bắt bởi except Exception chung, không fail-closed khác M4 (cùng đường xử lý lỗi).
+    _dep_mod.consumer_deposit_rate_detail = lambda asof=None: {"rate_pct": 7.5}
+    try:
+        _buf7 = io.StringIO()
+        with contextlib.redirect_stdout(_buf7):
+            lev_m7, _ = run_block(d_on, dd52=-25.0, signal=True, size=0.50,
+                                  basket=BASKET5, targets=base_targets(),
+                                  latest=_dt.datetime(2026, 10, 5))
+        _out7 = _buf7.getvalue()
+    finally:
+        _dep_mod.consumer_deposit_rate_detail = _orig_detail
+    check("M7 detail dict thiếu khoá rate_source (KeyError) → field None + WARNING log, "
+          "quyết định không đổi", lev_m7["pit_deposit_rate_effective"] is None
+          and lev_m7["pit_deposit_effective_driver"] is None
+          and lev_m7["pit_filter_structural"] is False and lev_m7["active"] is True
+          and "WARNING" in _out7, detail=_out7[-200:])
+
+    # ─── N. Dòng HIỂN THỊ-ONLY trong plan markdown (job Taylor_20261001_110416) ───
+    # run_pit_display() chạy ĐÚNG đoạn giữa CAPIT_PIT_DISPLAY_BEGIN/END, KHÁC run_block() ở
+    # trên (đoạn đó nằm NGOÀI mốc §6a CAPIT_LEVER_BEGIN/END, thuộc tầng build report markdown).
+    section("N. Dòng hiển thị PIT trong plan markdown")
+
+    N_m2 = run_pit_display(lev_m2)  # M2: Big-4 6.8% < ngưỡng 9%, effective CCTG 7.5% < ngưỡng
+    check("N1 Big-4<ngưỡng, effective<ngưỡng → đúng 1 dòng, có cả 2 số, KHÔNG có cảnh báo lệch",
+          len(N_m2) == 1 and "Big-4 6.80%" in N_m2[0] and "effective 7.50%" in N_m2[0]
+          and "ngưỡng 9.0%" in N_m2[0] and "⚠️" not in N_m2[0], detail=N_m2)
+
+    N_m5 = run_pit_display(lev_m5)  # M5: pit_deposit_rate=None (trước 2011-01, PIT rỗng)
+    check("N2 Big-4=None (PIT rỗng) → KHÔNG in dòng nào (đừng hiện 'None%' ra plan)",
+          N_m5 == [], detail=N_m5)
+
+    N_m4 = run_pit_display(lev_m4)  # M4: Big-4 có giá trị, effective None (lỗi tính)
+    check("N3 effective=None (lỗi tính) → dòng vẫn in, effective hiện 'n/a'",
+          len(N_m4) == 1 and "effective n/a" in N_m4[0] and "⚠️" not in N_m4[0], detail=N_m4)
+
+    # N4: mutant kiểu M3 (effective giả 15% ≥ ngưỡng 9% trong khi Big-4 thật 6.8% < ngưỡng)
+    # → dòng cảnh báo "effective đã ≥ ngưỡng" PHẢI xuất hiện (đây là đúng tình huống nó tồn tại
+    # để báo cho người duyệt, phân biệt với N1 nơi cả hai đều dưới ngưỡng).
+    N_m3 = run_pit_display(lev_m3)
+    check("N4 effective giả ≥ ngưỡng, Big-4 thật < ngưỡng → có dòng cảnh báo, quyết định "
+          "(không nằm trong scope test này) vẫn đứng ở M3 gốc", len(N_m3) == 1
+          and "⚠️ effective đã ≥ ngưỡng" in N_m3[0] and "Big-4 6.80%" in N_m3[0], detail=N_m3)
 
 # DỌN artifact của chính test khỏi thư mục PRODUCTION (arch-reviewer vòng 4 #7). Glob dọn ở
 # đầu file chạy TRƯỚC khi các file này được tạo, nên nếu không dọn ở đây thì mỗi lần chạy để
