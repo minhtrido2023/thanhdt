@@ -1,12 +1,11 @@
 # Working memory — Mike
 > Cập nhật mỗi khi đổi mạch việc. Bơm vào đầu phiên của Mike.
 
-## Trạng thái 2026-10-01 10:30 ICT — User DUYỆT 3 việc (thread 1554692001541398628)
-- Việc 1: duyệt merge hiển thị kill-switch A (branch wire/macro-killswitch-a-deposit75-20261001, WC commit e8d791e9) — SAU khi quant-skeptic verify mechanism.
-- Việc 2: CCTG Big-4 làm nguồn lãi proxy khi cao hơn tiết kiệm 12M niêm yết (effective_rate = max). LIVE consumer (rating_8l NEUTRAL tilt...) đổi output ⇒ KHÔNG wire, báo diff cho user.
-- Việc 3: PARK 0% CHỐT (user 10:26 ICT, decided_by user). Chỉ đổi lại khi lãi huy động có XU HƯỚNG HẠ ⇒ alert-only, KHÔNG tự khôi phục. 3 rail đồng bộ (ETF_PARK, PARK_TARGET_F1, trading_rules.json) + risk_dial_confirmed_by_user. Hiệu lực từ plan đêm nay (02/10); KHÔNG đụng plan đã duyệt hôm nay.
-## Đang chờ
-- Taylor job Việc 3 (park 0) + job Việc 2 (CCTG proxy); quant-skeptic Việc 1; sau đó arch-reviewer cho đổi config park.
-- Sau khi xong: ghi current_ops (park 0, trigger quay lại), đóng bus question duyệt-merge-macro-killswitch-a-wiring.
-## Backlog cũ giữ: DRI/TV1 discretionary user quyết; 9 topic selfcheck-red cần triage; VNM exright note cho Winston.
+## Trạng thái 2026-10-01 11:20 ICT (thread 1554692001541398628)
+- DONE: park 0% merge (WC main ff + mike master), arch-review APPROVED, current_ops cập nhật (96d05e3e), bus question merge đã đóng. SCL SpaceX đã ghi sổ LAG (job 040222): park_holdings SpaceX reconcile.ok=true (Mike tự đọc lại artifact 11:16). Dry-run đêm nay: SpaceX TRIM ~151,7tr (park_mv 166,5tr), ZaloPay ~84tr/13 mã.
+- ĐANG CHỜ: Taylor job 041603 (kill-switch A vòng 4: CCTG silent-drop/range guard/armed nhất quán/tests/text trigger). Sau đó quant-skeptic vòng 4; CONFIRMED mới merge branch wire/macro-killswitch-a-deposit75-20261001, rồi áp text trigger vào trading_rules.json, đóng bus questions (duyet-merge-macro-killswitch-a-wiring, quant-skeptic-round2/3-...).
+- ⚠️ RỦI RO MỚI user cần biết: park 0% đẩy ~236tr (SpaceX 152 + ZaloPay 84) vào Trứng vàng — vượt trần đề xuất legal-vn (sleeve ≤10% NAV, ~2%/TCPH, chưa user chốt). Egg SpaceX hiện 304,9tr.
+- ⚠️ verify_account_snapshot không bắt lệnh bán SCL tay (bảng P&L vẫn liệt kê SCL mở) — báo cáo tháng 09 (tạo 02:00 01/10) có thể sai SCL SpaceX; cần kiểm.
+## Chờ user: định nghĩa 'xu hướng hạ' (trigger park); quyết rating_8l/DCF dùng effective rate (bảng diff registry cctg_rate_vn.md); Discretionary DRI/TV1.
+## Backlog: 9 topic selfcheck-red cần triage; VNM exright note cho Winston.
 
