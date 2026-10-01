@@ -19,6 +19,7 @@ bus GIẢ trong tmpdir. Marker mất/đổi → test FAIL ngay, không im lặng
 Chạy: python3 bin/ops_health_check_selfcheck.py   (exit 0 = PASS, 1 = FAIL)
 Được cắm vào kb_nightly.sh Phase 0 (alert-only, không gate prune).
 """
+import csv
 import datetime as dt
 import glob
 import gzip
@@ -51,6 +52,7 @@ def extract_block(tag):
 
 
 CHECK5_SRC = extract_block("CHECK5")
+CHECK8B_SRC = extract_block("CHECK8B")
 CHECK9_SRC = extract_block("CHECK9")
 CHECK10_SRC = extract_block("CHECK10")
 CHECK10B_SRC = extract_block("CHECK10B")
@@ -90,6 +92,125 @@ def run_check5(wc_root, now=None):
                 os.environ.pop("CHECK5_NOW", None)
             else:
                 os.environ["CHECK5_NOW"] = old
+
+
+# ── Check #8b (freshness CCTG, round-4 fix job Taylor_20261001_073836) ────────────────────
+# Trích ĐÚNG khối CHECK8B_BEGIN/CHECK8B_END — bắt được 2 bug thật đã sửa: (R1) 1 dòng CSV hỏng
+# làm cả generator max() raise, checker mislabel CSV-có-data thành "CSV rỗng/chưa có"; (R2)
+# không validate range cctg_rate, một giá trị gõ nhầm ngoài [0.5,30] báo "OK CSV live" trong khi
+# production fail-open sang Big-4-only cho MỌI consumer.
+def run_check8b(wc_root, today_str):
+    lines, warn = [], []
+
+    def W(msg):
+        warn.append(msg)
+        lines.append(f"⚠️ {msg}")
+
+    def OK(msg):
+        lines.append(f"✅ {msg}")
+
+    ns = {
+        "os": os, "re": re, "csv": csv, "wc_root": wc_root, "W": W, "OK": OK, "lines": lines,
+        "_date": dt.date, "_timedelta": dt.timedelta,
+        "today_d": dt.date.fromisoformat(today_str),
+    }
+    exec(compile(CHECK8B_SRC, SRC + ":CHECK8B", "exec"), ns)
+    return lines, warn
+
+
+def _mk_cctg_root(csv_rows=None, anchor_date=None):
+    """csv_rows: list of (effective_date_str, cctg_rate_str) written as data/cctg_rate_vn_events.csv
+    (omit -> no CSV file at all). anchor_date: writes a minimal cctg_rate_vn.py with one CCTG_EVENTS
+    anchor tuple matching the CHECK8B fallback regex (omit -> no anchor fallback possible)."""
+    root = tempfile.mkdtemp(prefix="ops_health_cctg_selfcheck_")
+    os.makedirs(os.path.join(root, "data"), exist_ok=True)
+    if csv_rows is not None:
+        with open(os.path.join(root, "data", "cctg_rate_vn_events.csv"), "w",
+                  newline="", encoding="utf-8") as f:
+            f.write("effective_date,cctg_rate\n")
+            for ed, rate in csv_rows:
+                f.write(f"{ed},{rate}\n")
+    if anchor_date is not None:
+        with open(os.path.join(root, "cctg_rate_vn.py"), "w", encoding="utf-8") as f:
+            f.write(f'CCTG_EVENTS = [("{anchor_date}", 7.5)]\n')
+    return root
+
+
+def case_c8b_age_35_is_ok():
+    root = _mk_cctg_root(csv_rows=[("2026-08-27", "7.5")])  # 2026-10-01 - 35d
+    try:
+        lines, _ = run_check8b(root, "2026-10-01")
+        out = joined(lines)
+        check("c8b: age=35 (đúng ngưỡng) vẫn OK, không WARN", "✅" in out and "⚠️" not in out, out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+def case_c8b_age_36_warns():
+    root = _mk_cctg_root(csv_rows=[("2026-08-26", "7.5")])  # 2026-10-01 - 36d
+    try:
+        lines, _ = run_check8b(root, "2026-10-01")
+        out = joined(lines)
+        check("c8b: age=36 (vừa qua ngưỡng 35) phải WARN", "⚠️" in out and "36 ngày" in out, out)
+        check("c8b: WARN nói đúng 'từ ngày thứ 46' (age>45), không phải 'ở 45 ngày'",
+              "ngày thứ 46" in out, out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+def case_c8b_garbage_row_not_mislabeled_empty():
+    # R1 regression: 1 dòng garbage KHÔNG được làm checker báo "CSV rỗng/chưa có" khi CSV
+    # thật ra có 1 dòng tốt, mới (age=5) ngay cạnh đó.
+    root = _mk_cctg_root(csv_rows=[("2026-09-26", "7.5"), ("garbage", "xx")],
+                         anchor_date="2026-01-01")
+    try:
+        lines, _ = run_check8b(root, "2026-10-01")
+        out = joined(lines)
+        check("c8b: dòng garbage -> WARN rõ (không im lặng, không mislabel CSV rỗng)",
+              "⚠️" in out and "không parse được" in out, out)
+        check("c8b: KHÔNG rơi nhầm vào nhánh 'anchor cứng (CSV rỗng/chưa có)' (R1 bug cũ)",
+              "anchor cứng" not in out, out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+def case_c8b_out_of_range_value_warns_not_ok():
+    # R2 regression: giá trị "0.074" (gõ nhầm, nghĩa là 7.4) có effective_date hợp lệ/mới ->
+    # checker cũ báo "OK CSV live"; đúng ra phải WARN vì production raise trên CSV này.
+    root = _mk_cctg_root(csv_rows=[("2026-09-30", "0.074")])
+    try:
+        lines, _ = run_check8b(root, "2026-10-01")
+        out = joined(lines)
+        check("c8b: giá trị ngoài [0.5,30] -> WARN, KHÔNG 'OK CSV live' (R2 bug cũ)",
+              "⚠️" in out and "ngoài khoảng hợp lệ" in out, out)
+        check("c8b: không có dòng OK CSV live nào lẫn vào output",
+              "OK" not in out or "CSV live" not in out.split("⚠️")[0], out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+def case_c8b_empty_csv_falls_back_to_anchor():
+    root = _mk_cctg_root(csv_rows=[], anchor_date="2026-09-30")  # header-only CSV
+    try:
+        lines, _ = run_check8b(root, "2026-10-01")
+        out = joined(lines)
+        check("c8b: CSV rỗng (chỉ header) -> rơi về anchor cứng, không WARN sai",
+              "anchor cứng" in out, out)
+        check("c8b: anchor age=1d (2026-09-30→2026-10-01) -> OK, không WARN",
+              "✅" in out and "⚠️" not in out, out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+
+
+def case_c8b_no_csv_no_anchor_is_info_only():
+    root = _mk_cctg_root(csv_rows=None, anchor_date=None)
+    try:
+        lines, _ = run_check8b(root, "2026-10-01")
+        out = joined(lines)
+        check("c8b: không CSV, không anchor -> chỉ ℹ️ info, không WARN/OK giả",
+              "ℹ️" in out and "⚠️" not in out and "✅" not in out, out)
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
 
 
 def write_events(path, events, gz=False):
@@ -2249,11 +2370,17 @@ def case_c5_dry_run_khong_ghi_bus():
 
 
 def main():
-    print("ops_health_check_selfcheck: check #5 (backlog question) + check #9 (retro freshness) "
+    print("ops_health_check_selfcheck: check #5 (backlog question) + check #8b (CCTG freshness) "
+          "+ check #9 (retro freshness) "
           "+ check #10 (notify_thread) "
           "+ check #11 (selfcheck_red_sweep freshness) + check #12 (ccdb one-shot dropped) "
           "+ khối DELIVER (Discord→Telegram) regression")
-    for fn in (case_archived_question_visible, case_cross_layer_resolve,
+    for fn in (case_c8b_age_35_is_ok, case_c8b_age_36_warns,
+               case_c8b_garbage_row_not_mislabeled_empty,
+               case_c8b_out_of_range_value_warns_not_ok,
+               case_c8b_empty_csv_falls_back_to_anchor,
+               case_c8b_no_csv_no_anchor_is_info_only,
+               case_archived_question_visible, case_cross_layer_resolve,
                case_explicit_cross_topic_resolve,
                case_resolver_must_be_after, case_dedupe_hot_and_archive,
                case_no_crowd_out, case_small_pool_prints_all,
