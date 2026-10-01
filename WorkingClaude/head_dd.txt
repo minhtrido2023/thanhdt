@@ -1,0 +1,2 @@
+/home/trido/thanhdt/wc_venv/bin/python: can't open file '/home/trido/thanhdt/WorkingClaude/wrap.py': [Errno 2] No such file or directory
+rc=2

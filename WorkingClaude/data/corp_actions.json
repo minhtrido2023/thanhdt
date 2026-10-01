@@ -144,6 +144,28 @@
       ],
       "verify_against_bq": "PENDING — chạy sau 2026-09-24: python3 mike/bin/corp_actions.py --verify VPB-2026-09-24-BONUS-ISSUE",
       "note": "Cùng mẫu broker credit 1 phiên trước ex_date như VHM/MBB/BID/VIX/MSB."
+    },
+    {
+      "id": "TPB-2026-10-02-STOCK-DIVIDEND",
+      "ticker": "TPB",
+      "event_type": "STOCK_DIVIDEND",
+      "ratio_text": "Phát hành cổ phiếu - Trả cổ tức bằng cổ phiếu tỉ lệ 15,0% (kèm cổ tức tiền mặt 500đ/cp, năm 2025 — chân tiền mặt KHÔNG nằm trong sổ này)",
+      "qty_multiplier": 1.15,
+      "ex_date": "2026-10-02",
+      "record_date": null,
+      "broker_effective_ts": "2026-10-01T11:52:12",
+      "_status": "CONFIRMED — user duyệt trực tiếp qua Discord 2026-10-01 22:49 ICT (ghi tay vì feed corporate_action vendor đứng từ 2026-09-26 nên corp_action_auto_confirm.py không thấy sự kiện). Thu hồi: đổi _status thành 'REVOKED ...'",
+      "confirmed_by": "Mike (agent), chủ tài khoản duyệt",
+      "decided_by": "user",
+      "confirmed_at": "2026-10-01T23:05:00+07:00",
+      "user_signoff_at": "2026-10-01T22:49 ICT (Discord, thread 1555075626908516444)",
+      "evidence": [
+        "NGUỒN 1 — vendor tav2_bq.corporate_action (đã STALE, ingested 2026-09-26): TPB có 2 sự kiện public_date 2026-09-23 event_status=announced: ISS exercise_ratio 0.15 'Trả Cổ tức bằng Cổ phiếu tỉ lệ 15.0%' và DIV 500đ/cp (năm 2025). Vendor CHƯA có exright_date nên ngày ex-date KHÔNG lấy từ vendor — user xác nhận sự kiện đã biết từ trước, không cần hỏi lại ngày.",
+        "NGUỒN 2 — broker DNSE SpaceX 0002023347 (dnse_raw): snapshot 2026-09-30 19:30 còn openQuantity 200, costPrice 16.800, marketPrice 14.450, modifiedDate 2026-09-30T12:15Z; snapshot 2026-10-01 19:03 openQuantity 230 (=200×1,15 đúng), costPrice 14.173,913 (=(200×16.800−200×500)/230 khớp cổ tức tiền 500đ + thưởng 15%), marketPrice 12.100 (≈(14.450−500)/1,15=12.130), tradeQuantity vẫn 200 (30cp mới chưa sellable), modifiedDate 2026-10-01T11:52:12Z = 18:52 ICT.",
+        "NGUỒN 3 — mẫu lặp 6 lần (VHM/MBB/BID/VIX/MSB/VPB): DNSE credit cổ phiếu và điều chỉnh giá vào tối T−1 (~18:30–19:00 ICT) trước ex-date 1 phiên ⇒ credit tối 2026-10-01 ⇒ ex_date = phiên giao dịch kế tiếp 2026-10-02 (Thứ Sáu). BQ ticker TPB Close 2026-10-01 vẫn 14.400 (giá cum), phù hợp ex-date 2026-10-02."
+      ],
+      "verify_against_bq": "PENDING — chạy sau khi feed corporate_action được nạp lại: python3 mike/bin/corp_actions.py --verify TPB-2026-10-02-STOCK-DIVIDEND",
+      "note": "Ngày ex-date SUY RA từ mẫu broker, không phải từ công bố sàn — đối chiếu lại khi vendor có exright_date. Cổ tức tiền mặt 500đ/cp xử lý ở lớp dividend_adjusted_return, không ở sổ KL này."
     }
   ]
 }
