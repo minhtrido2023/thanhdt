@@ -619,46 +619,67 @@ def compute_trim(account_label, asof=None, target=None, holdings=None,
     # được LIỆT KÊ (yêu cầu "no silent caps"), kèm Σ trọng số đã bỏ.
     price_fn = price_fn or live_price_fn(asof)
     bpos = h.get("broker_positions", {})
-    dropped, feasible = [], {}
-    for tk in sorted(basket_w):
-        w_raw = basket_w[tk]
-        if tk in BANNED:
-            dropped.append({"ticker": tk, "weight": w_raw,
-                            "reason": "BANNED vĩnh viễn (Mike chốt 2026-08-07: lọc khỏi rổ mục "
-                                      "tiêu — lệch backtest CÓ CHỦ ĐÍCH)"})
-            continue
-        if tk in excluded:
-            dropped.append({"ticker": tk, "weight": w_raw,
-                            "reason": "excluded_tickers — không mua, không bán (vị thế legacy)"})
-            continue
-        px_i = per_tk[tk]["px"] if tk in per_tk and per_tk[tk]["px"] > 0 else None
-        px_err = None
-        if px_i is None:
-            px_i, px_err = price_fn(tk)
-        if not px_i or px_i <= 0:
-            dropped.append({"ticker": tk, "weight": w_raw,
-                            "reason": f"không lấy được giá ({px_err}) ⇒ fail-closed, coi như "
-                                      f"không khả thi"})
-            continue
-        if target_value * w_raw < LOT * px_i:
-            dropped.append({"ticker": tk, "weight": w_raw,
-                            "reason": f"target {target_value*w_raw:,.0f}đ < 1 lô "
-                                      f"({LOT}cp × {px_i:,.0f}đ)"})
-            continue
-        feasible[tk] = w_raw
-    w_sum = sum(feasible.values())
-    if w_sum <= 0:
-        out["decision"] = "BLOCKED_NO_FEASIBLE_BASKET"
-        out["notes"].append("không mã nào trong rổ mục tiêu khả thi ⇒ không suy được tgt, "
-                            "fail-closed")
+    if target_value <= 0:
+        # target_value=0 (vd default_park_of_idle_pct=0.0, user tắt hẳn park 2026-10-01) KHÔNG
+        # được đi qua vòng phân bổ-theo-rổ dưới: điều kiện "target_value * w_raw < 1 lô" đúng với
+        # MỌI mã khi target_value=0 (0 < bất kỳ số dương nào) ⇒ feasible LUÔN rỗng ⇒ w_sum<=0 ⇒
+        # nhánh BLOCKED_NO_FEASIBLE_BASKET bên dưới sẽ trả fail-closed KHÔNG sinh lệnh nào — đọc
+        # nhầm "mục tiêu = bán sạch" (chốt rõ ràng của user) thành "không xác định được mục tiêu",
+        # đảo ngược hoàn toàn chỉ đạo tắt park (silent, cùng lớp lỗi §29/08-04/09-27 — bắt bằng
+        # test, không phải đoán). `tgt = {}` là ĐỦ: mọi mã trong `tradable` dùng `tgt.get(tk, 0.0)`
+        # ở `want_raw` bên dưới ⇒ tự động nhận target=0, tức "bán sạch toàn bộ sổ PARK".
+        dropped, feasible, w_sum = [], {}, 0.0
+        tgt = {}
+        out["basket_dropped"] = []
+        out["basket_dropped_weight"] = 0.0
+        out["basket_feasible_n"] = 0
+        out["target_weights"] = {}
+        out["target_value_vnd"] = {}
+        out["notes"].append(
+            "target_park=0 (park TẮT HẲN) ⇒ bỏ qua phân bổ theo rổ custom30V, mọi mã PARK đang "
+            "giữ nhận target=0 ⇒ đề xuất bán sạch toàn bộ sổ PARK (vẫn qua trần ADV/ngày + lô + "
+            "sellable T+2 như bình thường).")
+    else:
+        dropped, feasible = [], {}
+        for tk in sorted(basket_w):
+            w_raw = basket_w[tk]
+            if tk in BANNED:
+                dropped.append({"ticker": tk, "weight": w_raw,
+                                "reason": "BANNED vĩnh viễn (Mike chốt 2026-08-07: lọc khỏi rổ mục "
+                                          "tiêu — lệch backtest CÓ CHỦ ĐÍCH)"})
+                continue
+            if tk in excluded:
+                dropped.append({"ticker": tk, "weight": w_raw,
+                                "reason": "excluded_tickers — không mua, không bán (vị thế legacy)"})
+                continue
+            px_i = per_tk[tk]["px"] if tk in per_tk and per_tk[tk]["px"] > 0 else None
+            px_err = None
+            if px_i is None:
+                px_i, px_err = price_fn(tk)
+            if not px_i or px_i <= 0:
+                dropped.append({"ticker": tk, "weight": w_raw,
+                                "reason": f"không lấy được giá ({px_err}) ⇒ fail-closed, coi như "
+                                          f"không khả thi"})
+                continue
+            if target_value * w_raw < LOT * px_i:
+                dropped.append({"ticker": tk, "weight": w_raw,
+                                "reason": f"target {target_value*w_raw:,.0f}đ < 1 lô "
+                                          f"({LOT}cp × {px_i:,.0f}đ)"})
+                continue
+            feasible[tk] = w_raw
+        w_sum = sum(feasible.values())
+        if w_sum <= 0:
+            out["decision"] = "BLOCKED_NO_FEASIBLE_BASKET"
+            out["notes"].append("không mã nào trong rổ mục tiêu khả thi ⇒ không suy được tgt, "
+                                "fail-closed")
+            out["basket_dropped"] = dropped
+            return out
+        tgt = {tk: target_value * (w / w_sum) for tk, w in feasible.items()}
         out["basket_dropped"] = dropped
-        return out
-    tgt = {tk: target_value * (w / w_sum) for tk, w in feasible.items()}
-    out["basket_dropped"] = dropped
-    out["basket_dropped_weight"] = sum(d["weight"] for d in dropped)
-    out["basket_feasible_n"] = len(feasible)
-    out["target_weights"] = {tk: feasible[tk] / w_sum for tk in sorted(feasible)}
-    out["target_value_vnd"] = {tk: tgt[tk] for tk in sorted(tgt)}
+        out["basket_dropped_weight"] = sum(d["weight"] for d in dropped)
+        out["basket_feasible_n"] = len(feasible)
+        out["target_weights"] = {tk: feasible[tk] / w_sum for tk in sorted(feasible)}
+        out["target_value_vnd"] = {tk: tgt[tk] for tk in sorted(tgt)}
     if dropped:
         # §5 kb/plan_report_style_guide.md: TÓM TẮT 1 dòng cho kênh duyệt — KHÔNG generate
         # wall-of-text liệt kê công thức từng mã ở đây (renderer từng cắt ngẫu nhiên theo ký
