@@ -47,7 +47,7 @@ CUR_DEP="$($PY -c 'from deposit_rate_vn import current_deposit_rate; print(f"{cu
 CUR_CCTG="$($PY -c 'from cctg_rate_vn import current_cctg_rate; r,_=current_cctg_rate(); print(f"{r:.2f}" if r is not None else "none")' 2>>"$LOG")" || CUR_CCTG="?"
 echo "current_deposit_rate() = ${CUR_DEP}% | current_cctg_rate() = ${CUR_CCTG}%" >> "$LOG"
 
-if [ -x "$WORKDIR_8L/mike/bin/append_event.sh" ]; then
+if [ "$DRY_RUN" -eq 0 ] && [ -x "$WORKDIR_8L/mike/bin/append_event.sh" ]; then
   "$WORKDIR_8L/mike/bin/append_event.sh" Winston status "deposit-cctg-weekly-dispatch" \
     "{\"date\":\"${TODAY}\",\"current_deposit\":\"${CUR_DEP}\",\"current_cctg\":\"${CUR_CCTG}\"}" >> "$LOG" 2>&1 || true
 fi
