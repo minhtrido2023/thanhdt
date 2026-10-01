@@ -1,13 +1,13 @@
-# Mike fleet — context pack (v3496)
+# Mike fleet — context pack (v3497)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-10-01T05:02:49] Mafee/finding — egg-rocketx-subaccount-mechanism-1001: {"question": "John: kiem tra co che trung vang tu subaccount RocketX deal", "ambiguity_resolved": {"RocketX_la_2_thu_khac_nhau": ["(1) loan_package_id=1840 pack …
-- [2026-10-01T05:05:00] Mafee/finding — egg-rocketx-subaccount-balances-readonly-1001: {"summary": "READ-ONLY balances() cho account_id=0002023348 (RocketX Deal, enabled=false) và 0002023347 (SpaceX) qua DNSEClient.from_credentials_file() — 1 cred …
-- [2026-10-01T05:06:38] Taylor/finding — trading-rules-A-sbv-trigger-text-proposal-cctg-20261001-v4: {"scope": "DE XUAT VAN BAN v4 (khong tu sua file - cho Mike ap sau khi merge). Thay ban v1+v2+v3.", "what_changed_from_v3": "v3 viet: CCTG stale CHI force armed …
-- [2026-10-01T05:06:38] Taylor/finding — quant-skeptic-round6-cctg-killswitch-a-stale-symmetric-done-20261001: {"branch": "wire/macro-killswitch-a-deposit75-20261001", "commit": "6ca8c357 (single repo, covers both mike + WorkingClaude paths)", "user_directive": "John duy …
 - [2026-10-01T05:23:42] Taylor/finding — quant-skeptic-round7-cctg-killswitch-a-3points-done-20261001: {"branch": "wire/macro-killswitch-a-deposit75-20261001", "commit": "eecb68fa (single repo, covers both mike + WorkingClaude paths)", "summary": "3/3 round-6 NOT …
+- [2026-10-01T05:32:49] Mike/answer — duyet-merge-macro-killswitch-a-wiring: {"resolution": "Kill-switch A wiring (display-only) + CCTG overlay đã MERGE vào WC main; quant-skeptic vòng 7 CONFIRMED (0 lỗi hành vi); user duyệt merge 2026-1 …
+- [2026-10-01T05:32:51] Mike/answer — quant-skeptic-round2-cctg-killswitch-a-merge: {"resolution": "Kill-switch A wiring (display-only) + CCTG overlay đã MERGE vào WC main; quant-skeptic vòng 7 CONFIRMED (0 lỗi hành vi); user duyệt merge 2026-1 …
+- [2026-10-01T05:32:52] Mike/answer — quant-skeptic-round3-cctg-killswitch-a-merge: {"resolution": "Kill-switch A wiring (display-only) + CCTG overlay đã MERGE vào WC main; quant-skeptic vòng 7 CONFIRMED (0 lỗi hành vi); user duyệt merge 2026-1 …
+- [2026-10-01T05:45:39] Winston/finding — ops-autofix-done: ops-health-ZaloPay: {"root_cause": "Taylor append_event ad-hoc Bash bi word-split (argc=7) luc 2026-10-01T04:43:56Z, finding scl-monthly-report-202609-review; khong mat event", "fi …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -45,6 +45,12 @@
   per-name**. Quyền yêu cầu sao kê chi tiết: TT121 Đ17-18. DNSE từ chối nêu mã = **red flag**.
   Trần đề xuất (chưa user chốt): ~2% NAV/một TCPH (haircut 50% ⇒ max loss ≤1% NAV), sleeve ≤10% NAV
   — mức hiện tại ~100,9tr / ~102,2tr **đã ở hoặc vượt nhẹ trần tổng**.
+
+## Macro kill-switch A (lãi huy động > 7,5%) — merged 2026-10-01, DISPLAY-ONLY
+- Code trên WC main (`deposit_rate_vn.macro_killswitch_a_status()`, `cctg_rate_vn.py`, dòng hiển thị trong `dna_report`/`value_radar`); quant-skeptic vòng 7 CONFIRMED, user duyệt. effective = max(Big-4 12M, CCTG Big-4 6M), ngưỡng `> 7,5%`. **KHÔNG có code path production nào đọc nó** — sleeve recovery vẫn paper, chưa chặn lệnh nào.
+- ⚠️ **CCTG nhập TAY hàng tháng** (không có tool append, không có cron nhắc). Anchor 2026-09-30 = 7,5%; không cập nhật ⇒ stale >45 ngày ⇒ **ARMED vĩnh viễn từ 2026-11-15**. Big-4 stale ≈ 2026-10-20 (cùng cơ chế fail-closed).
+- Trước khi wire vào gate thật: siết `deposit_rate_vn.deposit_events_df()` phía Big-4 (đang silent-drop dòng không parse được) + guard ngày tương lai tại load (quant-skeptic NON-BLOCKING #2/#3).
+- rating_8l/DCF CHƯA dùng effective rate (chờ user, bảng diff ở `kb/data_registry/macro/cctg_rate_vn.md`).
 
 ## Signal holds
 - **VPI/BAL**: signal_hold 08-19→09-16 ĐÃ GỠ 2026-09-16. Review dựa trên `amh-adaptivity-review-20260910.md` (Taylor job A/B/C + quant-skeptic): lý do gốc của HOLD (edge-health dashboard báo mom_200 FLIPPED) đã bị bác — kênh đó REFUTED cho quyết định BAL; mom_200 IC hồi phục dương Q2/2026. User duyệt RESUME 2026-09-16 23:19 ICT: "tuân theo chiến lược production đã duyệt, không cần điều chỉnh gì" (`decided_by: user`, bus `answer/bal-vpi-checkpoint-resume-decision`). VPI/BAL trở lại logic bình thường từ plan kế tiếp — không còn escalate riêng.
