@@ -26,6 +26,13 @@
 #     design): every month Winston confirms a result — changed OR unchanged — it posts to Trading
 #     Daily the same day, clearly marked as freshly-confirmed data (not just a done-event on the
 #     bus). No more "stay quiet if unchanged."
+#   - PER-SOURCE RATE NOW MANDATORY (2026-10-01, coord job Taylor_20261001_064913, B2-2 fix): the
+#     writer (append_deposit_rate.py) now REFUSES any write from a dispatched agent (JOB_ID set,
+#     true for this monthly dispatch same as the weekly one) whose --sources entries don't each
+#     carry their own cited 'rate' field -- closes a hole quant-skeptic reproduced where 2
+#     fabricated URLs with no rate evidence at all still produced an accepted write. The prompt
+#     below was updated alongside the fix (item 3b, --sources example) so this monthly path keeps
+#     writing successfully rather than silently degrading to permanent manual-fallback.
 #
 # deposit_rate_vn.current_deposit_rate() is a LIVE production input (rating_8l.py NEUTRAL tilt).
 #
@@ -76,15 +83,17 @@ TIÊU CHUẨN BẮT BUỘC trước khi ghi (KHÔNG được đoán, sai 1 lần
 1. WebSearch tìm nguồn có NGÀY CỤ THỂ (trong vòng ~25 ngày gần đây) nêu lãi suất tiết kiệm 12 tháng Big-4.
 2. Số phải RÕ RÀNG là kỳ hạn 12 tháng, KÊNH ONLINE/trực tuyến (không phải quầy, không phải kỳ hạn khác 6/24 tháng) — nếu nguồn không ghi rõ kênh/kỳ hạn, KHÔNG dùng số đó.
 3. Cần ít nhất 2 nguồn mà bạn tin là độc lập (khác toà soạn). LƯU Ý: bạn KHÔNG phải là bên quyết định độ độc lập cuối cùng — append_deposit_rate.py sẽ TỰ KIỂM lại domain của --sources bạn cung cấp và từ chối ghi nếu chúng cùng 1 nhóm sở hữu (vd cafef.vn/kenh14.vn/soha.vn/genk.vn đều là VCCorp, KHÔNG tính là 2 nguồn dù khác domain) — đây là cơ chế script tự chặn, không phải bạn tự phán đoán, nên cứ liệt kê --sources trung thực, script sẽ báo lỗi rõ nếu không đủ.
+3b. MỖI nguồn trong --sources PHẢI ghi RÕ con số %% nó báo bằng field 'rate' (vd \"rate\":6.8) — BẮT BUỘC từ 2026-10-01 cho MỌI phiên dispatch (script tự kiểm JOB_ID, không phải bạn tự quyết định bỏ qua được): thiếu field 'rate' ở BẤT KỲ nguồn nào, script sẽ TỪ CHỐI ghi. append_deposit_rate.py tự so các số 'rate' này, từ chối nếu lệch nhau >0,1 điểm %%, và từ chối nếu --rate bạn truyền không khớp (gần tuyệt đối) với MỘT trong các số đã cite — không được tự tổng hợp/làm tròn thành số không nguồn nào nói.
 4. NẾU 1 TRONG 4 NGÂN HÀNG BIG-4 LỆCH SO VỚI 3 NGÂN HÀNG CÒN LẠI (vd VCB báo 5,9% trong khi Agribank/BIDV/VietinBank đều 6,8%): đây KHÔNG phải mâu thuẫn cần escalate — dùng MODE (giá trị đa số 3/4 ngân hàng), bỏ qua ngân hàng lẻ loi, theo đúng phương pháp đã chốt trong deposit_rate_vn.py (\"Methodology — resolving Big-4 disagreement\", quyết định 2026-07-20: đại diện = MODE không phải trung bình, 3/4 đồng thuận thắng bất kể ngân hàng lẻ loi). Ghi rõ trong --note là đã dùng mode + tên ngân hàng lẻ loi, KHÔNG cần escalate cho trường hợp này.
 5. CHỈ escalate khi: (a) không đủ 3/4 ngân hàng đồng thuận 1 số (vd chia 2-2, hoặc mỗi ngân hàng 1 số khác nhau), hoặc (b) chính MỘT ngân hàng có 2 nguồn báo 2 số khác nhau cho CÙNG ngân hàng đó (nguồn không đáng tin), hoặc (c) không tìm được nguồn đủ mới/đủ rõ cho đa số ngân hàng. Khi đó: gọi 'mike/bin/append_event.sh Winston question deposit-rate-refresh-question \"<JSON tóm tắt các số/nguồn mâu thuẫn tìm được>\"' rồi notify.sh báo Trading Daily.
 
-Chạy: python3 append_deposit_rate.py --rate <X> --effective ${TODAY} --source web_crosscheck_auto --collected ${TODAY} --note \"<tóm tắt ngắn>\" --sources '[{\"publisher\":\"<tên>\",\"url\":\"<url đầy đủ>\",\"date\":\"<YYYY-MM-DD>\"}, ...]' (liệt kê MỌI nguồn bạn dùng, tối thiểu 2 phần tử, url phải đầy đủ để script tự soi domain).
+Chạy: python3 append_deposit_rate.py --rate <X> --effective ${TODAY} --source web_crosscheck_auto --collected ${TODAY} --note \"<tóm tắt ngắn>\" --sources '[{\"publisher\":\"<tên>\",\"url\":\"<url đầy đủ>\",\"date\":\"<YYYY-MM-DD>\",\"rate\":<X>}, ...]' (liệt kê MỌI nguồn bạn dùng, tối thiểu 2 phần tử, url phải đầy đủ để script tự soi domain, MỖI phần tử PHẢI có field 'rate' — xem mục 3b).
 
-Lệnh này tự động từ chối ghi (KHÔNG PHẢI bạn tự quyết định) trong các trường hợp sau — nếu gặp bất kỳ lỗi nào trong 3 trường hợp này, ĐỪNG thử flag khác/số khác, hãy escalate ngay theo mục 5 kèm nguyên văn lỗi script trả về:
+Lệnh này tự động từ chối ghi (KHÔNG PHẢI bạn tự quyết định) trong các trường hợp sau — nếu gặp bất kỳ lỗi nào trong các trường hợp này, ĐỪNG thử flag khác/số khác, hãy escalate ngay theo mục 5 kèm nguyên văn lỗi script trả về:
   a. --sources không đủ 2 nhóm sở hữu độc lập (script tự soi domain, xem mục 3),
   b. --note rỗng,
-  c. số lệch >= 1.0 điểm %% so với ${CUR}%% hiện tại — --force KHÔNG dùng được trong phiên headless của bạn (script tự chặn theo JOB_ID môi trường, không phải theo --source), nên lệch >=1.0pp LUÔN cần escalate, không có cách nào khác để ghi được.
+  c. số lệch >= 1.0 điểm %% so với ${CUR}%% hiện tại — --force KHÔNG dùng được trong phiên headless của bạn (script tự chặn theo JOB_ID môi trường, không phải theo --source), nên lệch >=1.0pp LUÔN cần escalate, không có cách nào khác để ghi được,
+  d. thiếu field 'rate' ở bất kỳ nguồn nào, hoặc các 'rate' đã cite lệch nhau >0,1 điểm %%, hoặc --rate không khớp số nào đã cite (mục 3b).
 
 Lệnh idempotent — nếu hôm nay đã có người ghi rồi (effective_date trùng), lệnh tự SKIP rc=0, không lỗi — đây KHÔNG phải escalation, coi là hoàn thành bình thường.
 

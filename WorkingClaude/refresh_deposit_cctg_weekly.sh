@@ -1,18 +1,25 @@
 #!/usr/bin/env bash
 # refresh_deposit_cctg_weekly.sh — WEEKLY cross-check of BOTH the Big-4 12M term-deposit rate AND
 # the Big-4 CCTG 6M rate, built so a decline shows up within a week instead of waiting for the
-# existing monthly Big-4-only refresh (refresh_deposit_rate_vn.sh, still runs separately, UNCHANGED
-# by this file). User directive (2026-10-01, job Taylor_20261001_054108):
+# existing monthly Big-4-only refresh (refresh_deposit_rate_vn.sh, still runs separately as its own
+# cron job -- NOT replaced by this file, though append_deposit_rate.py itself is a SHARED writer,
+# see note below). User directive (2026-10-01, job Taylor_20261001_054108):
 #   "Lãi suất huy động tháng sau giảm so với tháng trước. Hoặc chứng chỉ tiền gửi phát hành đợt
 #    sau thấp hơn đợt trước. Cần bạn xây dựng cơ chế lấy dữ liệu hàng tuần... gắn vào cron tự động."
 #
 # Deliberately reuses the EXACT architecture refresh_deposit_rate_vn.sh's auto-write mechanism
 # earned through 8 rounds of adversarial review (mike/kb/projects/deposit-rate-autocheck.md) rather
 # than inventing a new HTML scraper: a dispatched agent (Winston) WebSearches, cites >=2 structured
-# sources, and the MECHANICAL guards live in the writer scripts (append_deposit_rate.py — UNCHANGED
-# here — and the new append_cctg_rate.py), never in agent self-report. See append_cctg_rate.py's
-# docstring for the one genuine enhancement over the Big-4 script: CCTG's --sources entries must
-# each carry their own cited rate, cross-checked to agree within 0.1pp before a write is allowed.
+# sources, and the MECHANICAL guards live in the writer scripts (append_deposit_rate.py and the
+# new append_cctg_rate.py), never in agent self-report. append_deposit_rate.py is NOT a private
+# copy of this mechanism -- it is the SAME writer the monthly script calls, so a guard change here
+# (round 2: reused-URL sidecar + optional per-source rate check; round 3/B2-1/B2-2, coord job
+# Taylor_20261001_064913: URL normalization fix + per-source rate now MANDATORY for any dispatched
+# agent) applies to BOTH cadences at once -- refresh_deposit_rate_vn.sh's own prompt has been
+# updated alongside each of these to keep citing what its writer now requires. See
+# append_cctg_rate.py's docstring for the one genuine CCTG-only enhancement: its --sources entries
+# must each carry their own cited rate UNCONDITIONALLY (not just when JOB_ID is set), cross-checked
+# to agree within 0.1pp before a write is allowed.
 #
 # Fail-closed by construction, same as the monthly script: no evidence / disagreement / stale
 # source / owner-group collision -> the writer script refuses the write outright (rc!=0, no CSV

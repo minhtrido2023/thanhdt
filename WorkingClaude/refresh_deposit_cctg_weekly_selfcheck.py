@@ -474,9 +474,11 @@ finally:
     shutil.rmtree(tmpdir, ignore_errors=True)
     adr.CSV_PATH = _orig_adr_csv
 
-# --- A17: backward-compat — OLD-style --sources with NO 'rate' field on ANY entry -> guard
-# skipped entirely, exact pre-existing (8-round-reviewed) behavior unchanged. This is the shape
-# the EXISTING monthly refresh_deposit_rate_vn.sh prompt still uses. ---
+# --- A17: a REAL INTERACTIVE HUMAN (no JOB_ID) citing --source web_crosscheck_auto by hand with
+# OLD-style --sources (NO 'rate' field on ANY entry) -> guard still skipped, exact pre-existing
+# (8-round-reviewed) behavior unchanged. The per-source rate requirement is gated on caller
+# identity (is_dispatched_agent), not on --source value — see A17b below for the dispatched-agent
+# case, which is now mandatory (B2-2 fix). ---
 tmpdir, tmp_csv = _fresh_tmpdir()
 tmp_csv = os.path.join(tmpdir, "deposit_rate_vn_events.csv")
 adr.CSV_PATH = tmp_csv
@@ -488,14 +490,62 @@ try:
     rc, msg = _run_append_dep(
         ["--rate", "6.8", "--effective", TODAY, "--source", "web_crosscheck_auto",
          "--collected", TODAY, "--note", "test", "--sources", sources],
-        job_id="job123")
-    check("A17 backward-compat: no 'rate' field on any source -> still OK (rc=0)", rc == 0)
+        job_id=None)
+    check("A17 human caller (no JOB_ID): no 'rate' field on any source -> still OK (rc=0)", rc == 0)
     check("A17 row written", _row_count_at(tmp_csv) == 1)
 finally:
     shutil.rmtree(tmpdir, ignore_errors=True)
     adr.CSV_PATH = _orig_adr_csv
 
-# --- A18: mixed (SOME entries have 'rate', some don't) -> refused as ambiguous evidence ---
+# --- A17b: B2-2 fix — a DISPATCHED AGENT (JOB_ID set) citing --sources with NO 'rate' field on
+# ANY entry -> now REFUSED (was the exact quant-skeptic repro: 2 fabricated URLs, no rate
+# evidence, --rate 7.6, JOB_ID set, used to write OK and flip current_deposit_rate() > 7.5%,
+# tripping macro-killswitch A on a number no cited source ever stated). Uses two genuinely
+# fake/unrelated domains (not in SAME_OWNER_GROUPS) so the owner-group check alone would have let
+# this through pre-fix, isolating the assertion to the rate-mandatory guard. ---
+tmpdir, tmp_csv = _fresh_tmpdir()
+tmp_csv = os.path.join(tmpdir, "deposit_rate_vn_events.csv")
+adr.CSV_PATH = tmp_csv
+try:
+    sources = json.dumps([
+        {"publisher": "FakeA", "url": "https://fake-a.example/x", "date": TODAY},
+        {"publisher": "FakeB", "url": "https://fake-b.example/x", "date": TODAY},
+    ])
+    rc, msg = _run_append_dep(
+        ["--rate", "7.6", "--effective", TODAY, "--source", "web_crosscheck_auto",
+         "--collected", TODAY, "--note", "test", "--sources", sources],
+        job_id="job123")
+    check("A17b B2-2 repro: dispatched agent, no 'rate' field anywhere -> refused (rc!=0)",
+          rc != 0)
+    check("A17b no row written (current_deposit_rate() never sees a 7.6% write here)",
+          _row_count_at(tmp_csv) == 0)
+finally:
+    shutil.rmtree(tmpdir, ignore_errors=True)
+    adr.CSV_PATH = _orig_adr_csv
+
+# --- A18: mixed (SOME entries have 'rate', some don't) -> refused as ambiguous evidence
+# (human caller — proves the ambiguous-evidence refusal fires independent of agent status) ---
+tmpdir, tmp_csv = _fresh_tmpdir()
+tmp_csv = os.path.join(tmpdir, "deposit_rate_vn_events.csv")
+adr.CSV_PATH = tmp_csv
+try:
+    sources = json.dumps([
+        _src("CafeF", "https://cafef.vn/x", TODAY, 6.8),
+        {"publisher": "VnExpress", "url": "https://vnexpress.net/x", "date": TODAY},
+    ])
+    rc, msg = _run_append_dep(
+        ["--rate", "6.8", "--effective", TODAY, "--source", "web_crosscheck_auto",
+         "--collected", TODAY, "--note", "test", "--sources", sources],
+        job_id=None)
+    check("A18 mixed rate-field presence -> refused (rc!=0)", rc != 0)
+    check("A18 no row written", _row_count_at(tmp_csv) == 0)
+finally:
+    shutil.rmtree(tmpdir, ignore_errors=True)
+    adr.CSV_PATH = _orig_adr_csv
+
+# --- A18b: B2-2 — dispatched agent + partial rate-field presence -> refused (the agent-mandatory
+# check A17b exercises fires first for n_with_rate < len(sources), same outcome either way; this
+# confirms it doesn't accidentally pass through on the "some entries have rate" shape) ---
 tmpdir, tmp_csv = _fresh_tmpdir()
 tmp_csv = os.path.join(tmpdir, "deposit_rate_vn_events.csv")
 adr.CSV_PATH = tmp_csv
@@ -508,8 +558,8 @@ try:
         ["--rate", "6.8", "--effective", TODAY, "--source", "web_crosscheck_auto",
          "--collected", TODAY, "--note", "test", "--sources", sources],
         job_id="job123")
-    check("A18 mixed rate-field presence -> refused (rc!=0)", rc != 0)
-    check("A18 no row written", _row_count_at(tmp_csv) == 0)
+    check("A18b dispatched agent, partial rate-field presence -> refused (rc!=0)", rc != 0)
+    check("A18b no row written", _row_count_at(tmp_csv) == 0)
 finally:
     shutil.rmtree(tmpdir, ignore_errors=True)
     adr.CSV_PATH = _orig_adr_csv
@@ -533,10 +583,15 @@ try:
 
     cctg._EVENTS_CSV = tmp_csv  # re-assert past acr.main()'s importlib.reload (same as A2)
     sidecar = os.path.join(tmpdir, acr.LAST_AUTO_SOURCES_NAME)
-    check("A19 sidecar written with write #1's URLs",
+    # B2-1 fix (coord job Taylor_20261001_064913): sidecar now stores the NORMALIZED form (host+
+    # path, no scheme/www/query/fragment), not the raw --sources URL verbatim — see
+    # adr._normalize_url()/_save_last_auto_urls()'s docstrings for why the old raw-storage was
+    # fail-open on a cosmetically-different re-citation of the same article.
+    check("A19 sidecar written with write #1's URLs, NORMALIZED form",
           os.path.exists(sidecar)
           and set(json.load(open(sidecar, encoding="utf-8"))["urls"])
-              == {"https://vietnamnet.vn/cctg-a19", "https://vnexpress.net/cctg-a19"})
+              == {adr._normalize_url("https://vietnamnet.vn/cctg-a19"),
+                  adr._normalize_url("https://vnexpress.net/cctg-a19")})
 
     # A20: write #2 reuses VietnamNet's EXACT url from write #1 -> refused, even though the
     # SECOND source (Dân Trí) and the --rate/--effective are all otherwise fine.
@@ -609,6 +664,72 @@ try:
          "--collected", TODAY, "--note", "test", "--sources", sources3], job_id="job789")
     check("A24 deposit write #2-retry with fresh URLs -> OK (rc=0)", rc3 == 0)
     check("A24 now 2 deposit rows written", _row_count_at(tmp_csv) == 2)
+finally:
+    shutil.rmtree(tmpdir, ignore_errors=True)
+    adr.CSV_PATH = _orig_adr_csv
+
+# --- A25-A28: B2-1 fix — reused-URL guard must catch cosmetic re-citations of the SAME article
+# (case, trailing slash, query string/fragment, scheme/www), not just byte-identical URLs. All 4
+# share ONE sidecar (write #1 establishes it); each A25-A27 attempt cites a cosmetic variant of
+# write #1's cafef.vn URL plus a fresh, never-before-seen second source, so a PASS would only be
+# possible if the variant were (wrongly) treated as new evidence. A28 is the negative control: a
+# genuinely different path must NOT be blocked (the guard isn't a blanket domain-level lockout). ---
+tmpdir, tmp_csv = _fresh_tmpdir()
+tmp_csv = os.path.join(tmpdir, "deposit_rate_vn_events.csv")
+adr.CSV_PATH = tmp_csv
+try:
+    sources0 = json.dumps([
+        _src("CafeF", "https://cafef.vn/dep-norm", TODAY, 6.8),
+        _src("VnExpress", "https://vnexpress.net/dep-norm-1", TODAY, 6.8),
+    ])
+    rc0, _ = _run_append_dep(
+        ["--rate", "6.8", "--effective", TODAY, "--source", "web_crosscheck_auto",
+         "--collected", TODAY, "--note", "test", "--sources", sources0], job_id="jobnorm0")
+    check("A25pre baseline write establishes sidecar -> OK (rc=0)", rc0 == 0)
+
+    # A25: case + trailing-slash variant of the SAME url.
+    sources25 = json.dumps([
+        _src("CafeF", "https://CafeF.vn/Dep-Norm/", TODAY, 6.8),
+        _src("VnExpress", "https://vnexpress.net/dep-norm-2", TODAY, 6.8),
+    ])
+    rc25, msg25 = _run_append_dep(
+        ["--rate", "6.8", "--effective", TODAY_PLUS1, "--source", "web_crosscheck_auto",
+         "--collected", TODAY, "--note", "test", "--sources", sources25], job_id="jobnorm25")
+    check("A25 case+trailing-slash variant of a reused URL -> refused (rc!=0)", rc25 != 0)
+    check("A25 no row written", _row_count_at(tmp_csv) == 1)
+
+    # A26: query-string + fragment variant of the SAME url (tracking params on a reshared link).
+    sources26 = json.dumps([
+        _src("CafeF", "https://cafef.vn/dep-norm?utm=fb#section", TODAY, 6.8),
+        _src("VnExpress", "https://vnexpress.net/dep-norm-3", TODAY, 6.8),
+    ])
+    rc26, msg26 = _run_append_dep(
+        ["--rate", "6.8", "--effective", TODAY_PLUS1, "--source", "web_crosscheck_auto",
+         "--collected", TODAY, "--note", "test", "--sources", sources26], job_id="jobnorm26")
+    check("A26 query-string+fragment variant of a reused URL -> refused (rc!=0)", rc26 != 0)
+    check("A26 no row written", _row_count_at(tmp_csv) == 1)
+
+    # A27: scheme (http vs https) + www. variant of the SAME url.
+    sources27 = json.dumps([
+        _src("CafeF", "http://www.cafef.vn/dep-norm", TODAY, 6.8),
+        _src("VnExpress", "https://vnexpress.net/dep-norm-4", TODAY, 6.8),
+    ])
+    rc27, msg27 = _run_append_dep(
+        ["--rate", "6.8", "--effective", TODAY_PLUS1, "--source", "web_crosscheck_auto",
+         "--collected", TODAY, "--note", "test", "--sources", sources27], job_id="jobnorm27")
+    check("A27 scheme+www variant of a reused URL -> refused (rc!=0)", rc27 != 0)
+    check("A27 no row written", _row_count_at(tmp_csv) == 1)
+
+    # A28: negative control — a genuinely DIFFERENT path on the same domain must NOT be blocked.
+    sources28 = json.dumps([
+        _src("CafeF", "https://cafef.vn/dep-norm-genuinely-new", TODAY, 6.8),
+        _src("VnExpress", "https://vnexpress.net/dep-norm-5", TODAY, 6.8),
+    ])
+    rc28, _ = _run_append_dep(
+        ["--rate", "6.8", "--effective", TODAY_PLUS1, "--source", "web_crosscheck_auto",
+         "--collected", TODAY, "--note", "test", "--sources", sources28], job_id="jobnorm28")
+    check("A28 genuinely different path -> NOT blocked (rc=0)", rc28 == 0)
+    check("A28 now 2 rows written", _row_count_at(tmp_csv) == 2)
 finally:
     shutil.rmtree(tmpdir, ignore_errors=True)
     adr.CSV_PATH = _orig_adr_csv
@@ -858,6 +979,106 @@ if found3:
         shutil.rmtree(tmpdir, ignore_errors=True)
 _report_mutant("D3 date-newer-guard mutant (<= -> <) stops refusing a same-date duplicate itself",
               found3, detected3, crashed3)
+
+# --- D4: B2-1 — _save_last_auto_urls reverted to storing RAW (non-normalized) URLs. A write #1
+# citing a mixed-case/trailing-slash URL, followed by write #2 citing the normalized-equivalent
+# (lowercase, no slash) of that SAME url, should be refused by the real code (A25 proves this) but
+# the mutant's sidecar never matches on the comparison side -> reuse slips through undetected,
+# exactly the B2-1 bug this round fixed. ---
+mut4, found4 = _load_mutant(
+    "append_deposit_rate.py",
+    r'"urls": sorted\(\{_normalize_url\(u\) for u in urls\}\)',
+    '"urls": sorted(urls)', "adr_mut_d4")
+detected4, crashed4 = False, None
+if found4:
+    tmpdir, _ = _fresh_tmpdir()
+    tmp_csv4 = os.path.join(tmpdir, "deposit_rate_vn_events.csv")
+    mut4.CSV_PATH = tmp_csv4
+    try:
+        sources_a = json.dumps([
+            {"publisher": "CafeF", "url": "https://CafeF.vn/Dep-MutD4/", "date": TODAY, "rate": 6.8},
+            {"publisher": "VnExpress", "url": "https://vnexpress.net/dep-mutd4-1", "date": TODAY,
+             "rate": 6.8},
+        ])
+        sys.argv = ["append_deposit_rate.py", "--rate", "6.8", "--effective", TODAY,
+                    "--source", "web_crosscheck_auto", "--collected", TODAY, "--note", "mut",
+                    "--sources", sources_a]
+        os.environ["JOB_ID"] = "mutjob4a"
+        try:
+            mut4.main()
+        except SystemExit:
+            pass
+        sources_b = json.dumps([
+            {"publisher": "CafeF", "url": "https://cafef.vn/dep-mutd4", "date": TODAY, "rate": 6.8},
+            {"publisher": "VnExpress", "url": "https://vnexpress.net/dep-mutd4-2", "date": TODAY,
+             "rate": 6.8},
+        ])
+        sys.argv = ["append_deposit_rate.py", "--rate", "6.8", "--effective", TODAY_PLUS1,
+                    "--source", "web_crosscheck_auto", "--collected", TODAY, "--note", "mut",
+                    "--sources", sources_b]
+        os.environ["JOB_ID"] = "mutjob4b"
+        rc_b = 1
+        try:
+            rc_b = mut4.main() or 0
+        except SystemExit:
+            rc_b = 1
+        # original code refuses write #2 (rc!=0, still 1 row); mutant SHOULD wrongly accept it
+        # (rc==0, 2 rows) -- that wrongful acceptance is "detected" (the bug is observable).
+        detected4 = (rc_b == 0 and _row_count_at(tmp_csv4) == 2)
+    except Exception as e:
+        crashed4 = repr(e)
+    finally:
+        os.environ.pop("JOB_ID", None)
+        shutil.rmtree(tmpdir, ignore_errors=True)
+_report_mutant("D4 sidecar-raw-storage mutant lets a case/slash-variant reused URL through",
+              found4, detected4, crashed4)
+
+
+# --- D5: B2-2 — the dispatched-agent rate-mandatory guard deleted (reverted to the OPTIONAL-only
+# shape). A dispatched agent (JOB_ID set) citing 2 sources with NO 'rate' field, --rate 7.6,
+# should be refused by the real code (A17b proves this) but the mutant drops straight through to
+# the cross-check's n_with_rate==len(sources) branch, which is False (0 == 2 is False), so NEITHER
+# branch refuses it -> write succeeds, exactly quant-skeptic's repro. ---
+mut5, found5 = _load_mutant(
+    "append_deposit_rate.py",
+    r"        if is_dispatched_agent and n_with_rate < len\(sources\):\n"
+    r"            sys\.exit\(f\"ERROR: \{n_with_rate\}/\{len\(sources\)\} --sources entries "
+    r"carry a 'rate' \"\n"
+    r"                     f\"field -- this process has JOB_ID set, so EVERY cited source must "
+    r"state \"\n"
+    r"                     f\"its own observed rate \(mechanically cross-checked against --rate "
+    r"and \"\n"
+    r"                     f\"against each other\) before a dispatched agent's write is accepted\. "
+    r"Refuse \"\n"
+    r"                     f\"to write with unchecked evidence\.\"\)\n",
+    "", "adr_mut_d5")
+detected5, crashed5 = False, None
+if found5:
+    tmpdir, _ = _fresh_tmpdir()
+    tmp_csv5 = os.path.join(tmpdir, "deposit_rate_vn_events.csv")
+    mut5.CSV_PATH = tmp_csv5
+    try:
+        sources = json.dumps([
+            {"publisher": "FakeA", "url": "https://fake-a-d5.example/x", "date": TODAY},
+            {"publisher": "FakeB", "url": "https://fake-b-d5.example/x", "date": TODAY},
+        ])
+        sys.argv = ["append_deposit_rate.py", "--rate", "7.6", "--effective", TODAY,
+                    "--source", "web_crosscheck_auto", "--collected", TODAY, "--note", "mut",
+                    "--sources", sources]
+        os.environ["JOB_ID"] = "mutjob5"
+        rc5 = 1
+        try:
+            rc5 = mut5.main() or 0
+        except SystemExit:
+            rc5 = 1
+        detected5 = (rc5 == 0 and _row_count_at(tmp_csv5) == 1)
+    except Exception as e:
+        crashed5 = repr(e)
+    finally:
+        os.environ.pop("JOB_ID", None)
+        shutil.rmtree(tmpdir, ignore_errors=True)
+_report_mutant("D5 agent-mandatory-rate-guard-deleted mutant lets an unevidenced 7.6% write through",
+              found5, detected5, crashed5)
 
 shutil.rmtree(MUT_DIR, ignore_errors=True)
 acr.CSV_PATH = _orig_acr_csv

@@ -103,9 +103,20 @@ MAX_FUTURE_EFFECTIVE_DAYS = 2  # a dispatched agent confirms a rate observed TOD
 # on a number, let a dispatched agent synthesize/round a --rate no cited source said, or let 2
 # sources that happen to disagree pass silently as long as --rate matched neither in particular.
 # quant-skeptic reproduced this concretely: 2 fabricated URLs from 2 fabricated owner groups, both
-# "citing" nothing, still passed the pre-existing owner-group-only check. OPTIONAL here (unlike
-# the CCTG script, where it is mandatory): a source entry's 'rate' field is backward-compatible —
-# see the gating comment at its call site below for why.
+# "citing" nothing, still passed the pre-existing owner-group-only check.
+#
+# B2-2 fix (coord job Taylor_20261001_064913, quant-skeptic round 2): the first version of this
+# guard made the per-source 'rate' field OPTIONAL for every caller, including a dispatched agent
+# (JOB_ID set) — quant-skeptic reproduced a concrete bypass: 2 fabricated URLs with NO 'rate'
+# field, --rate 7.6, JOB_ID set, still wrote (the agent-mandatory branch below did not exist yet).
+# Now MANDATORY whenever is_dispatched_agent is true (every --sources entry must carry 'rate'),
+# since an agent is exactly the caller this mechanical check exists to constrain. Still OPTIONAL
+# for a real interactive human (no JOB_ID) citing --source web_crosscheck_auto by hand — that
+# caller already passed the human-only escape hatches above (--force, arbitrary --source,
+# arbitrary --collected) and does not need the same mechanical backstop. The monthly
+# refresh_deposit_rate_vn.sh dispatch prompt (runs with JOB_ID set, same as the weekly one) has
+# been updated alongside this fix to cite a per-source rate too — there is no longer a "monthly
+# path is exempt" case to preserve.
 CROSS_SOURCE_TOLERANCE_PP = 0.1
 FLOAT_EPS = 1e-6
 
@@ -135,7 +146,18 @@ def _last_auto_sources_path():
 
 
 def _normalize_url(u):
-    return u.strip().rstrip("/").lower()
+    """Normalize a URL for reused-evidence comparison: same host+path counts as the same
+    citation regardless of scheme, www., case, a trailing slash, or a query string/fragment
+    tacked on to make a reshared link look 'new' (?utm=... tracking params are the common real-
+    world case). host/path extraction mirrors _owner_group()'s (hostname, not netloc, so port/
+    userinfo never leak in); _owner_group() already validated every URL reaching this function
+    has a parseable ASCII host, so no extra fallback is needed here."""
+    parsed = urllib.parse.urlparse(u.strip())
+    host = (parsed.hostname or "").lower()
+    if host.startswith("www."):
+        host = host[4:]
+    path = parsed.path.rstrip("/").lower()
+    return f"{host}{path}"
 
 
 def _load_last_auto_urls(path):
@@ -152,11 +174,19 @@ def _load_last_auto_urls(path):
 
 
 def _save_last_auto_urls(path, effective_date, urls):
+    """Stores the NORMALIZED form of each URL (B2-1 fix, coord job Taylor_20261001_064913): the
+    prior version saved the raw --sources URLs verbatim while _check_urls_not_reused() compared
+    against a NORMALIZED set on the read side — a citation differing only in case/trailing-slash/
+    scheme/query-string never matched its own prior write, so the reuse guard was fail-open on
+    exactly the kind of cosmetic re-link a weekly cadence citing the same article would produce.
+    Normalizing once here, at the single write path, keeps the stored set and the comparison set
+    in the same representation by construction."""
     os.makedirs(os.path.dirname(path), exist_ok=True)
     fd, tmp = tempfile.mkstemp(dir=os.path.dirname(path), prefix=".lastauto_", suffix=".json")
     try:
         with os.fdopen(fd, "w", encoding="utf-8") as f:
-            json.dump({"effective_date": effective_date, "urls": sorted(urls)}, f)
+            json.dump({"effective_date": effective_date,
+                       "urls": sorted({_normalize_url(u) for u in urls})}, f)
         os.replace(tmp, path)
     except Exception:
         if os.path.exists(tmp):
@@ -371,18 +401,18 @@ def main():
                          f"today ({real_today}) (max {MAX_SOURCE_AGE_DAYS}, or in the future) "
                          f"— too stale/invalid to count as current confirmation. Refuse to write.")
 
-        # --- per-source rate cross-check: OPTIONAL, not required (unlike append_cctg_rate.py) ---
-        # Gated on EVERY --sources entry carrying a 'rate' field, not on --source value, so the
-        # EXISTING monthly refresh_deposit_rate_vn.sh dispatch prompt (8-round-reviewed, already
-        # CONFIRMED, cites {publisher,url,date} with NO 'rate' field) keeps its exact prior
-        # behavior unchanged -- it would otherwise start refusing every write the day this guard
-        # landed, silently degrading the monthly mechanism to permanent manual-fallback with no
-        # one noticing until someone read this log. A caller whose --sources entries ALL cite
-        # their own rate (the weekly refresh_deposit_cctg_weekly.sh prompt, updated this round to
-        # require it) gets the full CCTG-grade check. Partial (SOME entries have 'rate', some
-        # don't) is refused outright as inconsistent evidence -- never silently ignored.
+        # --- per-source rate cross-check: MANDATORY for a dispatched agent (B2-2 fix above),
+        # OPTIONAL for a real interactive human. Gated on caller identity (is_dispatched_agent),
+        # the same pattern as every other agent-vs-human split in this file (--force/--source/
+        # --collected) -- never on a self-declared flag the caller controls. ---
         rate_fields = [s.get("rate") for s in sources]
         n_with_rate = sum(1 for r in rate_fields if r is not None)
+        if is_dispatched_agent and n_with_rate < len(sources):
+            sys.exit(f"ERROR: {n_with_rate}/{len(sources)} --sources entries carry a 'rate' "
+                     f"field -- this process has JOB_ID set, so EVERY cited source must state "
+                     f"its own observed rate (mechanically cross-checked against --rate and "
+                     f"against each other) before a dispatched agent's write is accepted. Refuse "
+                     f"to write with unchecked evidence.")
         if 0 < n_with_rate < len(sources):
             sys.exit(f"ERROR: {n_with_rate}/{len(sources)} --sources entries carry a 'rate' "
                      f"field -- either ALL entries must cite their own rate or NONE may. Refuse "
