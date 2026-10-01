@@ -1234,3 +1234,8 @@
 - [2026-10-01T12:04:47Z] DollarBill/heartbeat — DollarBill_20261001_120246: {"status": "still_running", "elapsed_min": 2, "job_id": "DollarBill_20261001_120246", "source": "watcher"}
 - [2026-10-01T12:04:49Z] DollarBill/heartbeat — DollarBill_20261001_120248: {"status": "still_running", "elapsed_min": 2, "job_id": "DollarBill_20261001_120248", "source": "watcher"}
 - [2026-10-01T11:40:07Z] Winston/status — corp-action-scan-daily: {"scanned_universe": "tav2_bq.ticker_prune", "candidates_this_run": 0, "fresh_alerts_this_run": 0, "resolved_since_last_run": [], "still_pending_count": 0, "still_pending": [], "stale_pending_over_7d": []}
+
+## Consolidation 2026-10-01T12:07:02Z
+- [2026-10-01T12:05:49Z] DollarBill/heartbeat — DollarBill_20261001_120248: {"status": "still_running", "elapsed_min": 3, "job_id": "DollarBill_20261001_120248", "source": "watcher"}
+- [2026-10-01T12:06:51Z] DollarBill/heartbeat — DollarBill_20261001_120248: {"status": "still_running", "elapsed_min": 4, "job_id": "DollarBill_20261001_120248", "source": "watcher"}
+- [2026-10-01T12:06:56Z] DollarBill/decision — plan-2026-10-02: {"account": "SpaceX", "plan_date": "2026-10-02", "orders": 0, "action": "HOLD_ALL", "dt5g": "NEUTRAL", "n_bal": 0, "lag_due": 0, "l1_decision": "BLOCKED_RECONCILE", "l2_decision": "BLOCKED_RECONCILE", "blocker": "TPB ledger 200 vs broker 230, diff +30, 30cp not sellable; corp_action_daily feed stale 5d since 2026-09-26; cause unconfirmed, needs Winston/Taylor", "active_nav_stale_date": "2026-09-30", "active_nav_vnd": 981599301, "capit_sessions_held": 50, "capit_episode": "CAPIT-2026-07-20"}
