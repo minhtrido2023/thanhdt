@@ -809,3 +809,6 @@
 
 ## Archived 2026-10-01 (keep=12 days=0 require_done=False)
 - [2026-09-30T04:17:14Z] ĐANG CHỜ USER: (1) question bus park-insider-hard-block-hay-canh-bao — insider_flags ở park-add nên HARD-BLOCK hay chỉ CẢNH BÁO (tôi đã làm cảnh báo); (2) 2 fix 2026-09-30 (A: is_stable_payer re-evaluate kỳ mở tại today, custom30_history.py+custom30_yield_labels.py+selfcheck D; B: park-add đọc anomaly_gate, compute_park_add.py+selfcheck T8x) đều quant-skeptic CONFIRMED/high nhưng CHƯA COMMIT — cần user/Mike duyệt vì chạm production V2.4. | NEXT: commit khi được duyệt. | PHÁT HIỆN PHỤ chưa xử lý: compute_park_add_selfcheck.py đã CHẾT từ 2026-09-27 (fixture pin target 0.80 còn production hạ PARK_TARGET_F1 về 0.30) — tôi đã vá fixture, nhưng bài học 'đổi knob production phải chạy selfcheck có fixture tính tay theo nó' chưa vào guideline/runner.
+
+## Archived 2026-10-01 (keep=12 days=0 require_done=False)
+- [2026-09-30T05:00:00Z] XONG (job Taylor_20260930_043216): label_asof column XONG + COMMITTED 038a4805 (custom30_history.py, custom30_yield_labels.py, custom30_yield_labels_selfcheck.py). quant-skeptic CONFIRMED/medium. CHƯA áp production BQ schema (custom30v_8l/custom30_8l) — chờ user duyệt lần bq load --replace tiếp theo thêm field label_asof:DATE. Nợ nhỏ: tighten selfcheck [E] (assert open-period label_asof>=rebal_date và ==max, guard rebal-day edge case).
