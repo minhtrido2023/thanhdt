@@ -1368,27 +1368,73 @@ if dep_last is not None:
 else:
     lines.append("ℹ️ deposit_rate_vn freshness: không đọc được mốc cuối (bỏ qua).")
 
+# CHECK8B_BEGIN — marker ỔN ĐỊNH (giống CHECK5/9/10/10B/11/12): bin/ops_health_check_selfcheck.py
+# trích ĐÚNG khối giữa CHECK8B_BEGIN/CHECK8B_END rồi chạy nó trên CSV giả. Đổi/xoá marker ⇒ test
+# FAIL ngay, không im lặng.
 # 8b. Lãi suất CCTG (cctg_rate_vn) freshness — WARN-only, thêm 2026-10-01 (quant-skeptic+arch-
-#     review round-2 R3, job Taylor_20261001_064225). Cùng mẫu với mục 8 ở trên (Big-4), nhưng
-#     CCTG hiện là input nhập tay THỦ CÔNG, chưa có cron tự fetch (cơ chế fetch tuần đang được
-#     xây RIÊNG, job khác — xem kb/projects/ — check này CHỈ thêm cảnh báo tuổi, KHÔNG đụng cơ chế
-#     fetch). Từ 2026-10-01 CCTG đã wired vào 5 consumer LIVE (rating_8l NEUTRAL tilt + chuỗi DCF)
-#     qua deposit_rate_vn.consumer_deposit_rate() — effective_deposit_rate()'s stale_days_limit=45
-#     là mốc HÀNH VI THẬT đổi (CCTG tự hết hạn, rơi về Big-4-only), nên WARN sớm hơn (35d) để có
-#     thời gian xác nhận số mới trước khi tới 45d.
+#     review round-2 R3, job Taylor_20261001_064225). Cùng mẫu với mục 8 ở trên (Big-4), và CÙNG
+#     LÝ DO không import pandas/cctg_rate_vn (xem comment mục 8 "system python3 có thể thiếu") —
+#     khối dưới đây TỰ lặp lại validate rate-range + parse-error của cctg_rate_vn.cctg_events_df()
+#     bằng pure Python, KHÔNG gọi module đó. CCTG có cron fetch tuần LIVE từ 2026-10-01
+#     (`5 1 * * 1` = 08:05 ICT Thứ Hai, kb/cron_registry.md — comment cũ "chưa có cron tự fetch"
+#     đã LỖI THỜI, sửa round-4, job Taylor_20261001_073836). Từ 2026-10-01 CCTG đã wired vào 5
+#     consumer LIVE (rating_8l NEUTRAL tilt + chuỗi DCF) qua deposit_rate_vn.consumer_deposit_rate()
+#     — effective_deposit_rate()'s stale_days_limit=45 là mốc HÀNH VI THẬT đổi (CCTG tự hết hạn ở
+#     NGÀY THỨ 46, age > 45, rơi về Big-4-only — KHÔNG phải "ở ngày 45"), nên WARN sớm hơn (35d) để
+#     có thời gian xác nhận số mới trước khi tới mốc đó.
+#     Round-4 fix (job Taylor_20261001_073836, arch-review r2 follow-up) — 2 bug thật trong bản cũ:
+#     (R1) `max(_date.fromisoformat(c) for c in ceds)` ăn CẢ generator trong 1 try/except — một
+#     dòng CSV hỏng (vd "garbage,xx", effective_date không rỗng nên lọt qua filter nhưng không
+#     parse được thành ngày) làm EXCEPTION bay ra giữa generator, cctg_last vẫn None, rơi thẳng
+#     xuống nhánh "CSV rỗng/chưa có" và báo OK (anchor cứng) — SAI NHÃN (§29): CSV thật ra CÓ dữ
+#     liệu sống, chỉ 1 dòng hỏng, nhưng checker im lặng báo như CSV trống. Sửa: parse TỪNG dòng
+#     riêng, dòng hỏng vào danh sách lỗi WARN rõ ràng, dòng tốt vẫn tính mốc cuối bình thường.
+#     (R2) hoàn toàn không kiểm cctg_rate có nằm trong khoảng hợp lệ hay không — một giá trị gõ
+#     nhầm (vd "0.074" thay vì "7.4") có effective_date hợp lệ nên checker báo "OK CSV live", trong
+#     khi production (`cctg_rate_vn.cctg_events_df()`'s range guard) RAISE trên giá trị đó ⇒
+#     `cctg_events_df()` lỗi cho MỌI asof ⇒ cả 5 consumer LIVE âm thầm rơi về Big-4-only — ngược hẳn
+#     với nhãn "OK" mà checker vừa báo. Sửa: validate range [0.5,30] (RATE_MIN_PCT/RATE_MAX_PCT
+#     trong cctg_rate_vn.py — hardcode lại ở đây CÓ CHỦ Ý, giống cách mục 8 Big-4 đọc anchor bằng
+#     regex thay vì import, để giữ đúng ràng buộc không-pandas; đổi 1 trong 2 nơi PHẢI đổi cả 2)
+#     trên MỌI dòng (không chỉ dòng mới nhất — production raise cho TOÀN CSV nếu BẤT KỲ dòng nào
+#     ngoài khoảng, không chỉ dòng cuối).
 cctg_csv = os.path.join(wc_root, "data", "cctg_rate_vn_events.csv")
-cctg_last, cctg_kind = None, None
+_CCTG_RATE_MIN, _CCTG_RATE_MAX = 0.5, 30.0
+cctg_last, cctg_kind, cctg_err = None, None, None
 if os.path.exists(cctg_csv):
     try:
         with open(cctg_csv, newline="") as f:
-            crows = [r for r in csv.DictReader(f) if r.get("effective_date")]
-        ceds = [r.get("effective_date") for r in crows if r.get("effective_date")]
-        if ceds:
-            cctg_last = max(_date.fromisoformat(c) for c in ceds)
+            crows = list(csv.DictReader(f))
+        _bad, _ok_rows = [], []
+        for r in crows:
+            ed, rate_s = r.get("effective_date"), r.get("cctg_rate")
+            try:
+                _d = _date.fromisoformat(ed) if ed else None
+                _v = float(rate_s) if rate_s not in (None, "") else None
+            except (ValueError, TypeError):
+                _d, _v = None, None
+            if _d is None or _v is None:
+                _bad.append(r)
+            else:
+                _ok_rows.append((_d, _v))
+        if _bad:
+            cctg_err = (f"{len(_bad)}/{len(crows)} dòng CSV không parse được "
+                        f"(effective_date/cctg_rate hỏng), vd {_bad[0]}")
+        _oor = [(d, v) for d, v in _ok_rows if not (_CCTG_RATE_MIN <= v <= _CCTG_RATE_MAX)]
+        if _oor:
+            _oor_msg = (f"{len(_oor)} dòng cctg_rate ngoài khoảng hợp lệ "
+                        f"[{_CCTG_RATE_MIN},{_CCTG_RATE_MAX}] (vd {_oor[0]}) — "
+                        f"cctg_rate_vn.cctg_events_df() RAISE trên CSV này, 5 consumer LIVE "
+                        f"đang âm thầm rơi về Big-4-only, KHÔNG phải trạng thái bình thường")
+            cctg_err = (cctg_err + " · " + _oor_msg) if cctg_err else _oor_msg
+        if _ok_rows:
+            cctg_last = max(d for d, _ in _ok_rows)
             cctg_kind = "CSV live"
-    except Exception:
-        pass
-if cctg_last is None:  # CSV rỗng/chưa có -> mốc cuối = anchor cứng trong module (CCTG_EVENTS)
+    except Exception as _e:
+        cctg_err = f"lỗi đọc {os.path.basename(cctg_csv)}: {type(_e).__name__}: {_e}"
+if cctg_err:
+    W(f"Lãi suất CCTG (cctg_rate_vn): {cctg_err}")
+elif cctg_last is None:  # CSV rỗng/chưa có dòng hợp lệ -> mốc cuối = anchor cứng trong module
     try:
         with open(os.path.join(wc_root, "cctg_rate_vn.py")) as f:
             csrc = f.read()
@@ -1398,21 +1444,29 @@ if cctg_last is None:  # CSV rỗng/chưa có -> mốc cuối = anchor cứng tr
             cctg_kind = "anchor cứng (CSV rỗng/chưa có)"
     except Exception:
         pass
-if cctg_last is not None:
+    if cctg_last is not None:
+        cctg_age = (today_d - cctg_last).days
+        if cctg_age > 45:
+            W(f"CCTG (cctg_rate_vn) chưa có dòng CSV hợp lệ nào, đang dùng anchor cứng "
+              f"{cctg_last} ({cctg_age} ngày, đã stale) — xác nhận cron fetch tuần (5 1 * * 1).")
+        else:
+            OK(f"Lãi suất CCTG (cctg_rate_vn): mốc cuối {cctg_last} ({cctg_age} ngày, {cctg_kind}).")
+    else:
+        lines.append("ℹ️ cctg_rate_vn freshness: không đọc được mốc cuối (bỏ qua).")
+else:
     cctg_age = (today_d - cctg_last).days
     _CCTG_WARN_D, _CCTG_ARMED_D = 35, 45
     if cctg_age > _CCTG_WARN_D:
         _cctg_armed_at = cctg_last + _timedelta(days=_CCTG_ARMED_D)
         W(f"Lãi suất CCTG (cctg_rate_vn) đã {cctg_age} ngày chưa xác nhận mới (mốc cuối "
           f"{cctg_last}, {cctg_kind}) — đã wired vào rating_8l NEUTRAL tilt + chuỗi DCF qua "
-          f"deposit_rate_vn.consumer_deposit_rate() (job Taylor_20261001_054110/064225). Ở "
-          f"{_CCTG_ARMED_D} ngày (mốc {_cctg_armed_at}), effective_deposit_rate() tự coi CCTG là "
-          f"stale và rơi về Big-4-only (hành vi ĐỔI THẬT, không chỉ cảnh báo) — xác nhận số CCTG "
-          f"mới trước mốc đó.")
+          f"deposit_rate_vn.consumer_deposit_rate() (job Taylor_20261001_054110/064225). Từ ngày "
+          f"thứ {_CCTG_ARMED_D + 1} (mốc {_cctg_armed_at}), effective_deposit_rate() tự coi CCTG "
+          f"là stale và rơi về Big-4-only (hành vi ĐỔI THẬT, không chỉ cảnh báo) — xác nhận số "
+          f"CCTG mới trước mốc đó.")
     else:
         OK(f"Lãi suất CCTG (cctg_rate_vn): mốc cuối {cctg_last} ({cctg_age} ngày, {cctg_kind}).")
-else:
-    lines.append("ℹ️ cctg_rate_vn freshness: không đọc được mốc cuối (bỏ qua).")
+# CHECK8B_END
 
 # 9. daily_retro.sh freshness (thêm 2026-08-01, sau sự cố script crash âm thầm 2 đêm liền
 #    07-31/08-01 do lỗi quoting — kb/incidents/2026-08/2026-08-01-daily-retro-quoting-bug-
