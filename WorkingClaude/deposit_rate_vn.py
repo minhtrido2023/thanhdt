@@ -161,18 +161,22 @@ def macro_killswitch_a_status(asof=None, stale_days_limit=45, check_freshness=No
     citing this number must say which one is active (see cctg_rate_vn.py module docstring).
 
     ⚠ SYMMETRIC fail-closed on the CCTG side (round-2 fix 1 closed the original bare `except
-    Exception: pass`; round-3 fix 2, both 2026-10-01, closed a REMAINING asymmetry -- current
-    behavior, superseding the round-2-only description below): a CCTG read error OR an
-    out-of-range value forces `armed=True` directly (not just `stale=True`) -- a CCTG value this
-    function could not validate is evidence it cannot rule out "effective rate > 7.5%" either, so
-    it gets the same unconditional fail-closed treatment as every Big-4-side error in this same
-    function. The ONLY CCTG-side case that stays non-armed is a STALE-but-successfully-read CCTG
-    value whose LAST KNOWN reading was already <= the 7.5% threshold -- there the feed's own
-    last-seen value is in-range evidence, just old, so nothing to escalate. A STALE reading whose
-    last known value was ABOVE 7.5% still forces `armed=True` (losing track of a feed last seen
-    above the trigger must never silently read as CLEAR) -- i.e. "stale" alone does not force
-    `armed=True` unconditionally; only (a) any read/parse/range error, or (b) a stale reading whose
-    last known value exceeded the threshold, does.
+    Exception: pass`; round-3 fix 2 closed one asymmetry; round-6 fix, 2026-10-01, user-approved
+    hướng B, closes the LAST one -- current behavior, superseding both prior descriptions): a CCTG
+    read error, an out-of-range value, OR a STALE reading (age > stale_days_limit) -- regardless of
+    whether the last-known CCTG value was itself <= or > the 7.5% threshold -- ALWAYS forces
+    `armed=True` directly (not just `stale=True`) and sets `cctg_note`. There is no "last known
+    value was already safe, so nothing to escalate" carve-out any more, on purpose: the symmetric
+    Big-4 clause two paragraphs below (`big4_stale`) has never had such a carve-out either -- a
+    stale Big-4 reading forces `armed=True` unconditionally, no matter what the last Big-4 value
+    was, because a feed we have not reconfirmed in `stale_days_limit` days could have moved above
+    the trigger in the interim and we would have no way to know. The pre-round-6 CCTG branch broke
+    that symmetry by staying silently non-armed (`stale` not even set) whenever the last CCTG
+    reading it last saw was <= 7.5% -- exactly the gap a round-6 review user caught: an untouched
+    CCTG anchor ages past 45 days with nobody reminded, and the gate would keep reporting CLEAR
+    forever on a number nobody has looked at since. Now: ANY cctg_stale (fresh-but-safe excluded,
+    see rate-override branch just below) sets `cctg_note` describing the age + last reading and
+    forces `armed=True`, identically to every other failure mode in this function.
 
     Returns dict: armed(bool), rate(float|None, fraction e.g. 0.068), threshold(0.075),
     stale(bool), last_update(str date|None), age_days(int|None), reason(str), rate_source(str|None)."""
@@ -199,14 +203,14 @@ def macro_killswitch_a_status(asof=None, stale_days_limit=45, check_freshness=No
         # cctg_force_armed / cctg_note: symmetric fail-closed treatment for the CCTG overlay.
         # Round-2 fix 1 (2026-10-01) first closed the bare `except Exception: pass` that let every
         # CCTG failure mode fall through to Big-4-only with ZERO trace. Round-3 fix 2 (2026-10-01,
-        # quant-skeptic round-3) closes a REMAINING asymmetry that fix alone left: a CCTG read
-        # error / out-of-range value used to only set stale=True while leaving armed UNCHANGED
-        # (i.e. still CLEAR) -- inconsistent with every Big-4-side failure in this same function,
-        # which is always armed=True+stale=True. A CCTG value this function could not validate is
-        # evidence it cannot rule out "effective rate > 7.5%" either, so it is now treated the same
-        # as the Big-4 error path: armed=True (not just stale=True), with the reason saying ARMED,
-        # not CLEAR. Only the "stale reading, but last KNOWN value was already <= threshold" case
-        # stays non-armed -- there the feed's own last-seen value is in-range evidence, just old.
+        # quant-skeptic round-3) closed the error/out-of-range asymmetry: those cases now force
+        # armed=True directly (not just stale=True), same as every Big-4-side error in this
+        # function. Round-6 fix (2026-10-01, user-approved hướng B) closes the LAST asymmetry: a
+        # STALE-but-successfully-read CCTG value used to force armed=True ONLY if its last known
+        # reading was already > 7.5% -- a stale reading whose last value was <= 7.5% stayed
+        # silently non-armed, unlike `big4_stale` below which has no such carve-out at all. Any
+        # cctg_stale now unconditionally forces armed=True + sets cctg_note, regardless of what the
+        # last-known CCTG value was (see docstring above).
         cctg_force_armed = False
         cctg_note = None
         try:
@@ -219,12 +223,10 @@ def macro_killswitch_a_status(asof=None, stale_days_limit=45, check_freshness=No
                 cctg_age = (asof_ts - cctg_date).days
                 cctg_stale = check_freshness and cctg_age > stale_days_limit
                 if cctg_stale:
-                    if cctg_pct > THRESHOLD * 100:
-                        cctg_force_armed = True
-                        cctg_note = (f"CCTG stale ({cctg_age}d > {stale_days_limit}d) nhưng lần "
-                                     f"đọc cuối {cctg_pct:.2f}% > 7.5% -> không thể lặng lẽ bỏ")
-                    # else: stale AND last known reading was already <= threshold -> nothing to
-                    # escalate, silently excluded is correct (no evidence of a missed ARM).
+                    cctg_force_armed = True
+                    cctg_note = (f"CCTG cũ ({cctg_age}d > {stale_days_limit}d), xác nhận thủ công "
+                                 f"lần cuối {cctg_date.date()} ({cctg_pct:.2f}%) -> fail-closed "
+                                 f"(armed)")
                 elif cctg_pct > rate_pct:
                     rate_pct = cctg_pct
                     rate_source = f"cctg_6m({cctg_date.date()})"
@@ -246,8 +248,6 @@ def macro_killswitch_a_status(asof=None, stale_days_limit=45, check_freshness=No
                       (rate > THRESHOLD) else f"{rate_source} {rate_pct:.2f}% <= 7.5% -> CLEAR")
             if cctg_force_armed:
                 reason += f"; {cctg_note} -> ARMED"
-        if cctg_note and not cctg_force_armed:
-            reason += f" (⚠ {cctg_note})"
         return {"armed": armed, "rate": rate, "threshold": THRESHOLD, "stale": stale,
                 "last_update": str(last_date.date()), "age_days": age_days, "reason": reason,
                 "rate_source": rate_source}

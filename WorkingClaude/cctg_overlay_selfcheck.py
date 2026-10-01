@@ -64,11 +64,21 @@ try:
     check("T4b effective_deposit_rate: big4_rate_pct=6.5 preserved", abs(r4b["big4_rate_pct"] - 6.5) < 1e-9)
     check("T4b effective_deposit_rate: cctg_rate_pct=7.5 preserved", abs(r4b["cctg_rate_pct"] - 7.5) < 1e-9)
 
-    # T5: CCTG present but STALE (asof far enough past the single CCTG anchor) -> Big-4 wins even
-    # though CCTG's raw value (7.5%) is higher than Big-4's fresh fixture (6.5%).
+    # T5: CCTG present but STALE (asof far enough past the single CCTG anchor) -> Big-4's OWN
+    # reading (6.5%) drives `rate`, even though CCTG's last-known value (7.5%, exactly == the 7.5%
+    # threshold) is higher. Round-6 fix (hướng B, 2026-10-01): a stale CCTG reading now ALWAYS
+    # forces armed=True + stale=True regardless of whether its last-known value was <=, ==, or >
+    # the threshold -- this fixture is the "last==7.5" boundary case of that matrix (symmetric with
+    # Big-4's own big4_stale clause, which has never had a "last value already safe" carve-out).
     r5 = dep.macro_killswitch_a_status(asof="2026-11-20", check_freshness=True)
     check("T5 stale CCTG excluded: rate_source=big4_12m", r5["rate_source"] == "big4_12m")
     check("T5 stale CCTG excluded: rate=6.5% (not 7.5%)", abs(r5["rate"] - 0.065) < 1e-9)
+    check("T5 (round-6) stale CCTG, last==7.5%: stale=True", r5["stale"] is True)
+    check("T5 (round-6) stale CCTG, last==7.5%: armed=True (forced, not silently dropped)",
+          r5["armed"] is True)
+    # (no "reason mentions CCTG" check here -- Big-4's OWN fixture is ALSO stale at this asof
+    # (age 61d > 45d), so `armed`/`stale` come from the big4_stale branch, which has never
+    # surfaced cctg_note in `reason` even pre-round-6; T19/T20 isolate the CCTG-only case instead.)
 finally:
     dep._EVENTS_CSV = _orig_dep_csv
     shutil.rmtree(_tmpdir, ignore_errors=True)
@@ -183,10 +193,11 @@ finally:
     cctg._EVENTS_CSV = _orig_cctg_csv
     shutil.rmtree(_tmpdir11, ignore_errors=True)
 
-# T12: the critical case named explicitly in the round-2 directive -- CCTG goes STALE but its last
+# T12: the critical case named explicitly in the round-2 directive -- CCTG goes STALE and its last
 # known reading was ABOVE the 7.5% threshold. Must force armed=True even though Big-4 alone (fresh,
 # low) would read CLEAR -- losing track of a feed last seen above the trigger must never silently
-# read as CLEAR.
+# read as CLEAR. (Since round-6/hướng B this is no longer a SPECIAL case -- ANY cctg_stale forces
+# armed=True now, see T5/T19/T20 for the other 3 cells of the last-known-value x stale matrix.)
 _tmpdir12 = tempfile.mkdtemp(prefix="cctg_selfcheck12_")
 _tmp_dep_csv12 = os.path.join(_tmpdir12, "deposit_rate_vn_events.csv")
 _tmp_cctg_csv12 = os.path.join(_tmpdir12, "cctg_rate_vn_events.csv")
@@ -258,10 +269,11 @@ finally:
 
 # T16 (boundary '>' vs '>=' at the CCTG side's stale_days_limit=45): exact day 45 must NOT be
 # stale (CCTG still wins, rate=8.0%, armed via normal threshold check), day 46 MUST be stale
-# (CCTG excluded, falls back to Big-4's own low fresh reading, but armed stays True via
-# cctg_force_armed since the last-known CCTG reading, 8.0%, was above 7.5% -- T12 already covers
-# that path; here the two asof dates isolate the exact boundary day). Big-4 fixture anchor is kept
-# fresh at BOTH asof dates (age 30/31d, well under 45) so only the CCTG-side boundary is exercised.
+# (CCTG excluded, falls back to Big-4's own low fresh reading; armed stays True via
+# cctg_force_armed unconditionally since round-6 -- here the last-known CCTG reading (8.0%) is
+# ALSO above 7.5%, so this doubles as part of the last>7.5 cell; T12 is the dedicated case for it,
+# T19/T20 cover the other two cells). Big-4 fixture anchor is kept fresh at BOTH asof dates (age
+# 30/31d, well under 45) so only the CCTG-side boundary is exercised.
 _tmpdir16 = tempfile.mkdtemp(prefix="cctg_selfcheck16_")
 _tmp_dep_csv16 = os.path.join(_tmpdir16, "deposit_rate_vn_events.csv")
 _tmp_cctg_csv16 = os.path.join(_tmpdir16, "cctg_rate_vn_events.csv")
@@ -346,6 +358,54 @@ finally:
     dep._EVENTS_CSV = _orig_dep_csv
     cctg._EVENTS_CSV = _orig_cctg_csv
     shutil.rmtree(_tmpdir18, ignore_errors=True)
+
+# T19 (round-6/hướng B, "stale + last<7.5" cell): CCTG goes stale and its last-known reading was
+# BELOW the 7.5% threshold -- before round-6 this was the ONE silently-excluded case (no note, no
+# stale flag, no armed). Must now force armed=True + stale=True exactly like T5 (last==7.5) and
+# T12/T16b (last>7.5) -- "stale" alone is sufficient, the last-known value no longer matters.
+_tmpdir19 = tempfile.mkdtemp(prefix="cctg_selfcheck19_")
+_tmp_dep_csv19 = os.path.join(_tmpdir19, "deposit_rate_vn_events.csv")
+_tmp_cctg_csv19 = os.path.join(_tmpdir19, "cctg_rate_vn_events.csv")
+try:
+    with open(_tmp_dep_csv19, "w") as f:
+        f.write("effective_date,deposit_rate\n2026-11-01,6.0\n")
+    with open(_tmp_cctg_csv19, "w") as f:
+        f.write("effective_date,cctg_rate\n2026-10-05,5.0\n")  # last-known CCTG < 7.5%
+    dep._EVENTS_CSV = _tmp_dep_csv19
+    cctg._EVENTS_CSV = _tmp_cctg_csv19
+    r19 = dep.macro_killswitch_a_status(asof="2026-11-25", stale_days_limit=45, check_freshness=True)
+    check("T19 CCTG stale, last<7.5%: rate_source falls back to big4_12m",
+          r19["rate_source"] == "big4_12m")
+    check("T19 CCTG stale, last<7.5%: rate=6.0% (Big-4's own, not CCTG's 5.0%)",
+          abs(r19["rate"] - 0.06) < 1e-9)
+    check("T19 CCTG stale, last<7.5%: stale=True", r19["stale"] is True)
+    check("T19 CCTG stale, last<7.5%: armed=True (forced, NOT silently dropped -- the round-6 fix)",
+          r19["armed"] is True)
+    check("T19 CCTG stale, last<7.5%: reason mentions CCTG", "CCTG" in r19["reason"])
+finally:
+    dep._EVENTS_CSV = _orig_dep_csv
+    cctg._EVENTS_CSV = _orig_cctg_csv
+    shutil.rmtree(_tmpdir19, ignore_errors=True)
+
+# T20 ("fresh + last==7.5" cell, completing the matrix): uses the REAL frozen CCTG anchor
+# (2026-09-30, 7.5%) at an asof just 1 day later -- fresh (age=1d << 45), so none of the stale/
+# force-armed machinery fires at all; must read plain CLEAR, not armed, since 7.5% is NOT strictly
+# > the 7.5% threshold. Injects only a fresh, low Big-4 fixture to isolate the CCTG side.
+_tmpdir20 = tempfile.mkdtemp(prefix="cctg_selfcheck20_")
+_tmp_dep_csv20 = os.path.join(_tmpdir20, "deposit_rate_vn_events.csv")
+try:
+    with open(_tmp_dep_csv20, "w") as f:
+        f.write("effective_date,deposit_rate\n2026-09-25,6.0\n")
+    dep._EVENTS_CSV = _tmp_dep_csv20
+    r20 = dep.macro_killswitch_a_status(asof="2026-10-01", check_freshness=True)
+    check("T20 fresh CCTG==7.5%: rate_source=cctg_6m", r20["rate_source"].startswith("cctg_6m"))
+    check("T20 fresh CCTG==7.5%: rate=7.5%", abs(r20["rate"] - 0.075) < 1e-9)
+    check("T20 fresh CCTG==7.5%: stale=False", r20["stale"] is False)
+    check("T20 fresh CCTG==7.5%: armed=False (7.5% not strictly > 7.5%, must read CLEAR)",
+          r20["armed"] is False)
+finally:
+    dep._EVENTS_CSV = _orig_dep_csv
+    shutil.rmtree(_tmpdir20, ignore_errors=True)
 
 # T_tz: TZ independence guard (explicit asof throughout).
 r_tz_a = dep.macro_killswitch_a_status(asof="2026-10-01")
