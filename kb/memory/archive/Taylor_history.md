@@ -812,3 +812,6 @@
 
 ## Archived 2026-10-01 (keep=12 days=0 require_done=False)
 - [2026-09-30T05:00:00Z] XONG (job Taylor_20260930_043216): label_asof column XONG + COMMITTED 038a4805 (custom30_history.py, custom30_yield_labels.py, custom30_yield_labels_selfcheck.py). quant-skeptic CONFIRMED/medium. CHƯA áp production BQ schema (custom30v_8l/custom30_8l) — chờ user duyệt lần bq load --replace tiếp theo thêm field label_asof:DATE. Nợ nhỏ: tighten selfcheck [E] (assert open-period label_asof>=rebal_date và ==max, guard rebal-day edge case).
+
+## Archived 2026-10-01 (keep=12 days=0 require_done=False)
+- [2026-09-30T08:27:41Z] [2026-09-30T08:XX] XONG job Taylor_20260930_080814: auto-exit LAG T+25/BAL T+45/CAPIT T+60+nhac T+55 wired (WorkingClaude/auto_exit_rules.py + mike/bin/auto_exit_inject.py + portfolio_status.py sua hien thi LAG). Branch wire/auto-exit-live-20260930 (2 repo, commit ca 2). quant-skeptic 1 vong NEEDS_CHANGES (approved_by_user alias bypass REFUSE + CAPIT phantom-sell fallback) -> DA FIX + Test7/Test8, selfcheck 19/19+17/17 PASS. CHO USER/Mike DUYET MERGE (bus question duyet-merge-auto-exit-lag-bal-capit) — CHUA wire cron, CHUA co file lock. SCL(SpaceX,LAG) hien da qua T+25 that.
