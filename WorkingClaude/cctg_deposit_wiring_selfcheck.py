@@ -341,6 +341,25 @@ check("rating_8l.py print line includes the driver (rate_source)",
 check("rating_8l.py calls consumer_deposit_rate_detail() with asof=None (live path)",
       "consumer_deposit_rate_detail()" in _r8l_src)
 
+# ---- 10. mutation-survivor regression (job Taylor_20261001_064225 dispatch, non-blocking but
+# requested): M9 (tilt applied outside NEUTRAL) and M12 (custom30_yield_labels bypasses the
+# central fn) both SURVIVED the round-2 mutation sweep (/tmp/qs_logs/mut.log) because every
+# existing assertion either inspects unrelated text or manually injects the correct dependency
+# (section 7's _label_one call passes dep.consumer_deposit_rate explicitly, so a mutation to the
+# REAL call site at custom30_yield_labels.py:133-134 would never surface there). Source-text
+# checks below target the exact lines a mutant would have to change -----------------------------
+print("\nMutation-survivor regression (M9 NEUTRAL-gate text, M12 custom30 call-site arg):")
+check("rating_8l.py gates the deposit tilt on NEUTRAL (int(_st) == 3), not any other state",
+      re.search(r"if\s+int\(_st\)\s*==\s*3\s+and\s+os\.environ\.get\(\"DEPOSIT_TILT\"", _r8l_src)
+      is not None)
+with open(os.path.join(HERE, "custom30_yield_labels.py"), encoding="utf-8") as f:
+    _c30_src = f.read()
+_label_one_call = re.search(r"_label_one\(\s*\n\s*tk, d, px_map, div_by_tk, dep_cache, ([^,]+),",
+                             _c30_src)
+check("custom30_yield_labels.py's REAL _label_one call site passes consumer_deposit_rate "
+      "(not current_deposit_rate or any other bare-Big-4 callable)",
+      _label_one_call is not None and _label_one_call.group(1).strip() == "consumer_deposit_rate")
+
 print(f"\n{'='*70}\n{len(fails)} FAIL / selfcheck {'PASSED' if not fails else 'FAILED'}")
 if fails:
     for f in fails:
