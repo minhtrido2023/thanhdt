@@ -278,15 +278,31 @@ def t_real_incident_repro_45_cycles_no_place_order():
     """Tái hiện đúng hình dạng sự cố thật (đính chính 2026-10-01 vòng 2: journal thật
     `exec_ZaloPay_2026-10-01_journal.csv` có 45 dòng ATC_FAIL, 14:30:04→14:44:53, không phải
     42/14:33:46 như bản nháp đầu): 45 chu kỳ poll liên tiếp trên SCL (UPCOM), KHÔNG CÓ lần nào
-    gọi place_order — khác hẳn log thật nơi DNSE bị gọi 45 lần và trả HTTP 400 mỗi lần."""
+    gọi place_order — khác hẳn log thật nơi DNSE bị gọi 45 lần và trả HTTP 400 mỗi lần.
+
+    Vòng 4: `atc_unsupported` được đặt ngay ở chu kỳ ĐẦU TIÊN phát hiện UPCOM (không chờ broker
+    từ chối) — nên 45 chu kỳ giờ chỉ còn ĐÚNG 1 dòng UPCOM_SKIP_ATC + 1 lần gọi get_quote, so
+    với 45/45 trước fix (mỗi get_quote là 2 HTTP request, timeout 30s/cái — nhân 45 lần/lệnh/
+    phiên là lãng phí network thật, không chỉ noise journal)."""
     with tempfile.TemporaryDirectory() as tmp:
         br = _StubBroker(exchange="UPCOM")
-        ex, o = make_executor(tmp, "SCL", br, parent_filled=800, qty=1000)
+        child = {"oid": "OID-LIVE-LO", "qty": 200, "price": 28000, "filled": 0,
+                 "status": "open", "ts": "2099-01-01T14:30:00"}
+        ex, o = make_executor(tmp, "SCL", br, open_child=child, parent_filled=800, qty=1000)
         for _ in range(45):
             ex._atc_sweep()
         ok(br.placed == [], f"45 chu kỳ UPCOM: place_order phải KHÔNG BAO GIỜ được gọi: {br.placed}")
         n_skip = _events(ex).count("UPCOM_SKIP_ATC")
-        ok(n_skip == 45, f"phải có đúng 45 dòng UPCOM_SKIP_ATC (1/chu kỳ), được {n_skip}")
+        ok(n_skip == 1,
+           f"chỉ chu kỳ ĐẦU TIÊN mới journal UPCOM_SKIP_ATC (cờ atc_unsupported chặn các lần "
+           f"sau), được {n_skip}")
+        ok(len(br.quote_calls) == 1,
+           f"get_quote chỉ được gọi ở chu kỳ đầu, cờ chặn get_quote các chu kỳ sau: {br.quote_calls}")
+        ok(ex.state["parents"]["SELL-01"]["atc_unsupported"] is True,
+           "atc_unsupported phải được đặt True ngay khi phát hiện UPCOM")
+        ok(ex.state["parents"]["SELL-01"]["atc_sent"] is False,
+           "atc_sent phải vẫn False — chưa bao giờ thực sự gửi ATC")
+        ok(br.cancelled == [], f"LO đang mở KHÔNG được huỷ qua 45 chu kỳ: {br.cancelled}")
 
 
 def t_invalid_ordertype_error_sets_unsupported_flag_stops_retry():

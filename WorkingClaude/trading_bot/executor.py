@@ -2143,10 +2143,17 @@ class Executor:
             else:
                 ex = self.state.get("exchange_override", {}).get(o.ticker) or "HOSE"
             if ex == "UPCOM":
+                # Đánh dấu atc_unsupported NGAY ở lần phát hiện ĐẦU TIÊN (cùng cờ với nhánh
+                # broker-reject bên dưới — cả hai đều có nghĩa "order_type=ATC không dùng được
+                # cho lệnh này") để check đầu vòng lặp (dòng ~2110) `continue` TRƯỚC khi gọi
+                # get_quote ở các chu kỳ sau — tránh lặp 45 lần/lệnh/phiên (mỗi get_quote là 2
+                # HTTP request, timeout 30s/cái) + 45 dòng UPCOM_SKIP_ATC trùng lặp trong journal.
+                ps["atc_unsupported"] = True
                 self._journal("UPCOM_SKIP_ATC", o, note=(
                     "UPCOM không hỗ trợ order_type=ATC — bỏ qua quét ATC; LO đang mở (nếu có) vẫn "
                     "chờ khớp tới hết phiên liên tục UPCOM, bot không đặt thêm LO trong pha ATC; "
                     "phần dư chỉ quay lại nếu plan ngày sau sinh lại"))
+                self._save_state()  # idempotency: cờ phải sống qua restart, không chỉ qua process
                 continue
             if self._hard_buy_ceiling(o):
                 # ATC khớp ở GIÁ ĐÓNG CỬA phiên xác định lúc ATC — không đặt được giá,
