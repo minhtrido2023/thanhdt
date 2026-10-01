@@ -70,9 +70,27 @@ không stale.
 
 ## Bẫy
 1. **Tenor mismatch 6M vs 12M** — max() là CỐ Ý (đường cong đảo là tín hiệu thật), nhưng MỌI báo
-   cáo trích effective rate phải nói rõ driver (`rate_source` field) — đừng gộp mù thành "lãi suất
-   tiền gửi" chung chung.
+   cáo trích effective rate phải nói rõ driver (`rate_source`/`deposit_rate_source` field) — đừng
+   gộp mù thành "lãi suất tiền gửi" chung chung. (`dna_report.build_macro_killswitch_a_line()` và
+   `value_radar.build_value_radar_line()`/CLI debug print đều đã gắn tenor vào dòng hiển thị
+   2026-10-01 — quant-skeptic round-2 fix 2/4.)
 2. **Chỉ 1 mốc dữ liệu (2026-09-30)** — chưa có lịch sử CCTG, không dùng cho backtest trước ngày
    này (sẽ luôn trả `None`/fallback Big-4, đúng thiết kế, không phải thiếu sót cần "làm giàu thêm
    lịch sử" một cách hồi tố).
 3. **Pháp lý chưa re-verify độc lập** — xem mục Pháp lý ở trên.
+4. **Value Radar đổi NHÃN ngay ngày CCTG trở thành driver (2026-09-30), không phải lỗi dữ liệu.**
+   Trước overlay: spread EY−Big-4-12M = +2,02pp, label CHEAP. Sau overlay (CCTG 7,5% > Big-4
+   6,8% ⇒ driver đổi): spread EY−CCTG-6M = +1,32pp (−0,7pp, đúng bằng chênh lệch 2 tenor),
+   `score` (rolling-10Y) 26,6 vẫn CHEAP nhưng sát biên; `score_expanding` nhảy lên FAIR cùng ngày
+   (p_sp 26→44). Đây là bước nhảy RỜI RẠC do đổi tenor driver tại đúng mốc CCTG xuất hiện, không
+   phải do thị trường đổi hướng — bất kỳ ai đọc lịch sử Value Radar quanh 2026-09-30 phải biết sự
+   kiện này, không tự suy diễn thành "định giá đổi chiều". Pin parity selfcheck
+   (`value_radar.py --selfcheck`, 25,9/36,0) KHÔNG bị ảnh hưởng vì mốc đối chiếu của nó
+   (`exp_value_radar/radar.csv`, tới 2026-07-30) nằm trước mốc CCTG đầu tiên.
+5. **Fail-open đã vá 2026-10-01 (quant-skeptic round-2 fix 1).** Trước đó, `macro_killswitch_a_
+   status()`/`effective_deposit_rate()` bọc overlay CCTG trong `except Exception: pass` trần —
+   mọi lỗi phía CCTG (CSV hỏng, giá trị ngoài khoảng [0.5,30]%, feed stale) rơi về Big-4-only và
+   CLEAR MÀ KHÔNG BÁO, bất đối xứng với nhánh fail-closed của Big-4. Nay: lỗi/ngoài khoảng CCTG ⇒
+   `stale=True` + `reason` nêu rõ "CCTG ..."; CCTG stale MÀ lần đọc cuối > 7,5% ⇒ ép `armed=True`
+   (không được lặng lẽ bỏ bằng chứng có thể đang ARMED thật). Xem `cctg_rate_vn.
+   current_cctg_rate_checked()` + `deposit_rate_vn.macro_killswitch_a_status()`'s docstring.
