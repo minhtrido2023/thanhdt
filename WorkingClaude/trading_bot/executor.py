@@ -2110,6 +2110,26 @@ class Executor:
                     else self.cfg["atc_remainder_buy"])
             if not flag:
                 continue
+            # UPCOM không có phiên khớp định kỳ đóng cửa (chỉ HOSE/HNX có ATO/ATC) — DNSE xác
+            # nhận thật: HTTP 400 "Invalid ordertype for the exchange" cho MỌI lần gửi order_type=
+            # "ATC" trên mã UPCOM, và `_atc_sweep` chạy lại mỗi chu kỳ poll nên lỗi lặp vô hạn tới
+            # hết phiên ATC (sự cố SCL/ZaloPay 2026-10-01: 40+ lần 14:30-14:44, 200cp trôi sang
+            # phiên sau mà KHÔNG có lệnh nào thay thế). Tra sàn TRƯỚC khi hủy lệnh LO đang mở —
+            # UPCOM vẫn khớp liên tục tới hết phiên nên hủy nó để nhường chỗ cho ATC (rồi ATC luôn
+            # thất bại) chỉ làm mất đúng cơ hội khớp cuối cùng còn lại.
+            ex = self.state.get("exchange_override", {}).get(o.ticker)
+            if ex is None:
+                # Fail-open về "HOSE" nếu get_quote lỗi/không hỗ trợ (paper/sim broker) — ATC
+                # vẫn được thử như hành vi cũ, không chặn nhầm mã HOSE/HNX vì quote câm.
+                try:
+                    ex = getattr(self.broker.get_quote(o.ticker), "exchange", None) or "HOSE"
+                except Exception:
+                    ex = "HOSE"
+            if ex == "UPCOM":
+                self._journal("UPCOM_SKIP_ATC", o, note=(
+                    "UPCOM không hỗ trợ order_type=ATC — bỏ qua quét ATC, giữ nguyên lệnh LO "
+                    "đang mở (nếu có); phần dư tiếp tục qua LO ở phiên sau"))
+                continue
             if self._hard_buy_ceiling(o):
                 # ATC khớp ở GIÁ ĐÓNG CỬA phiên xác định lúc ATC — không đặt được giá,
                 # nên KHÔNG có cách nào đảm bảo ≤ trần. Lệnh có trần tuyệt đối chỉ đi
