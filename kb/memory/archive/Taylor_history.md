@@ -815,3 +815,6 @@
 
 ## Archived 2026-10-01 (keep=12 days=0 require_done=False)
 - [2026-09-30T08:27:41Z] [2026-09-30T08:XX] XONG job Taylor_20260930_080814: auto-exit LAG T+25/BAL T+45/CAPIT T+60+nhac T+55 wired (WorkingClaude/auto_exit_rules.py + mike/bin/auto_exit_inject.py + portfolio_status.py sua hien thi LAG). Branch wire/auto-exit-live-20260930 (2 repo, commit ca 2). quant-skeptic 1 vong NEEDS_CHANGES (approved_by_user alias bypass REFUSE + CAPIT phantom-sell fallback) -> DA FIX + Test7/Test8, selfcheck 19/19+17/17 PASS. CHO USER/Mike DUYET MERGE (bus question duyet-merge-auto-exit-lag-bal-capit) — CHUA wire cron, CHUA co file lock. SCL(SpaceX,LAG) hien da qua T+25 that.
+
+## Archived 2026-10-01 (keep=12 days=0 require_done=False)
+- [2026-09-30T10:28:12Z] XONG job Taylor_20260930_100845: merge auto-exit LAG/BAL/CAPIT XONG (da merge lan chay truoc, xac nhan lai) + cron 20:40 ICT wired (crontab + kb/cron_registry.md) + LAG phantom-sell guard XAC NHAN co san (broker_positions_with_cost() live, qty<=0 skip). SCL reconcile: SpaceX BAN THAT 1500cp@28.300 (lai rong ~6.970.194d), ZaloPay KHONG co SCL trong email khoplenh hom nay (khac voi claim 'ca 2 account') -> escalate bus question scl-manual-sell-chi-mot-account-khong-phai-hai, CHO USER xac nhan. Neu ZaloPay SCL van mo, cron 20:40 toi se tu dong de xuat sell dung (da qua T+25).
