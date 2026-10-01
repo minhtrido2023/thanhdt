@@ -1,13 +1,13 @@
-# Mike fleet — context pack (v3498)
+# Mike fleet — context pack (v3499)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-10-01T05:32:49] Mike/answer — duyet-merge-macro-killswitch-a-wiring: {"resolution": "Kill-switch A wiring (display-only) + CCTG overlay đã MERGE vào WC main; quant-skeptic vòng 7 CONFIRMED (0 lỗi hành vi); user duyệt merge 2026-1 …
-- [2026-10-01T05:32:51] Mike/answer — quant-skeptic-round2-cctg-killswitch-a-merge: {"resolution": "Kill-switch A wiring (display-only) + CCTG overlay đã MERGE vào WC main; quant-skeptic vòng 7 CONFIRMED (0 lỗi hành vi); user duyệt merge 2026-1 …
-- [2026-10-01T05:32:52] Mike/answer — quant-skeptic-round3-cctg-killswitch-a-merge: {"resolution": "Kill-switch A wiring (display-only) + CCTG overlay đã MERGE vào WC main; quant-skeptic vòng 7 CONFIRMED (0 lỗi hành vi); user duyệt merge 2026-1 …
 - [2026-10-01T05:45:39] Winston/finding — ops-autofix-done: ops-health-ZaloPay: {"root_cause": "Taylor append_event ad-hoc Bash bi word-split (argc=7) luc 2026-10-01T04:43:56Z, finding scl-monthly-report-202609-review; khong mat event", "fi …
 - [2026-10-01T05:46:07] Wags/finding — wags-fix: coord-2026-10-01 (alphalens): {"root_cause": "Khong phai loi dieu phoi. Q Taylor/alphalens-buoc-ke-dong-hay-rnd (00:49Z) la quyet dinh chien luoc that su cua USER sau khi AlphaLens paper ket …
+- [2026-10-01T05:49:15] Mike/answer — alphalens-buoc-ke-dong-hay-rnd: {"resolution": "User chọn A (2026-10-01 12:48 ICT): ĐÓNG AlphaLens paper, KHÔNG wire live. N=1 cửa sổ × 4 mã chọn tay chưa đủ bằng chứng edge. Không mở R&D back …
+- [2026-10-01T05:56:06] Taylor/finding — alphalens-overlap-check-20261001: {"job": "Taylor_20261001_055255", "scope": "READ-ONLY, khong chay backtest moi, khong them trial. Nguon: tav2_bq.fa_ratings_8l (as-of PIT, khong dung fa_ratings …
+- [2026-10-01T05:48:12] arch-reviewer/verification — ARCH-REVIEW: wags-fix: coord-2026-10-01 (alphalens): {"finding_topic": "wags-fix: coord-2026-10-01 (alphalens)", "verdict": "NEEDS_CHANGES", "confidence": "high", "summary": "Triage is correct: Taylor's question a …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -25,7 +25,7 @@
 - **SpaceX** (DNSE 0002023347): V2.4 LIVE từ 2026-07-01, có margin. NEUTRAL parking **0% (TẮT)** — user chốt 2026-10-01 10:26 ICT (`decided_by: user`: "Park 0% chốt. Chỉ thay đổi khi lãi suất huy động có xu hướng hạ"); lịch sử 0,70→0,80 (08-04)→0,30 (09-27)→0,0 (10-01). 3 rail đồng bộ = 0,0 (merge 10-01, arch-review APPROVED, `park_rail_consistency_selfcheck` rc=0). Hiệu lực từ plan nháp đêm 01→02/10; tiền nhàn rỗi nằm ở Trứng vàng. **TRIGGER QUAY LẠI = lãi huy động có XU HƯỚNG HẠ ⇒ chỉ CẢNH BÁO user, KHÔNG tự khôi phục park** (định nghĩa vận hành đang chờ user chốt). run_bot.sh 09:05 ICT T2-T6. NAV: `nav_history_SpaceX.csv` hoặc EOD report.
 - **ZaloPay** (DNSE 0001743768): V2.4 LIVE từ 2026-07-06, CASH-ONLY. **DGC EXCLUDED** (`excluded_tickers`, HOSE hạn chế giao dịch đến ~11-12/2026). Sizing dùng `active_nav`. Cùng target parking 0% (không có override riêng).
 - **PNJ EXCLUDED cả 2 account** (SpaceX+ZaloPay, `excluded_tickers` trong `secrets/trading_bot_accounts.json`) từ 2026-09-30, quyết định USER trên bus question `Taylor/pnj-trong-ro-custom30v-live-can-user-duyet-chan` (mở 2026-09-28) — option A. Lý do: hạ bậc AMBIGUOUS→NON do công bố DN 25-27/09 (0 vị thế thật ở cả 2 account tại thời điểm loại, xác nhận qua `data/execution_logs/dnse_raw_2026-09-30.jsonl`), cần "scrutiny exam" trước khi trở lại candidate rổ custom30V. **REVIEW TRIGGER = khi PNJ công bố BCTC Quý 3/2026** (KHÔNG phải TTL theo ngày) — lúc đó chạy lại due-diligence đầy đủ (kiểu fundamental-skeptic DGC/TV1), KHÔNG tự động khôi phục.
-- **AlphaLens Paper**: FPT/ACB/MBB/HDB, tracking đến 2026-09-30. DollarBill phụ trách.
+- **AlphaLens Paper**: FPT/ACB/MBB/HDB — **ĐÃ ĐÓNG 2026-10-01** (user chọn A: không wire live; 3/3 gate PASS nhưng N=1 cửa sổ × 4 mã chọn tay). R&D backtest PIT walk-forward chỉ mở nếu user yêu cầu.
 - **Trứng vàng** (`egg.totalValue`): SpaceX ~100,9tr / ZaloPay ~102,2tr (đo 09-27), đã cộng NAV tự động — KHÔNG phải `availableCash`. ⚠️ **RÚT VỀ TRONG NGÀY, KHÔNG phải T+1** (đính chính 2026-09-27, Mafee job `Mafee_20260927_091828`: SpaceX 17/09 egg 100,9tr→51,0tr VÀ `availableCash` +49,8tr trong CÙNG snapshot 11:00:11 phiên sáng ⇒ tiền dùng mua được ngay phiên đó). ⚠️ **KHÔNG phải tiền gửi ngân hàng** — DNSE mô tả là "Sinh Lời Theo Ngày" qua giao dịch TRÁI PHIẾU niêm yết ⇒ không có bảo hiểm tiền gửi, phụ thuộc tổ chức phát hành; lãi đo thật **8,543%/năm** và DNSE **tự khấu trừ TNCN trước khi trả** nên số đó đã là net. Không thấy trần số dư (ZaloPay vượt 102tr vẫn cộng lãi phẳng); "Tài khoản Không Ngủ" là SẢN PHẨM KHÁC (trần 30 tỷ), đừng lẫn. `manual_offbook_assets_vnd` ĐÃ ĐÓNG vĩnh viễn 07-23.
   ⚠️ **ĐÍNH CHÍNH BẢN CHẤT 2026-09-27 (legal-vn, bus `dnse-trung-vang-legal-review-20260927`) — KHÔNG phải repo.**
   Mô tả "bond repo" trước đó của Mike là SAI. Bằng chứng từ chính FAQ DNSE + 3 dấu hiệu gián tiếp
