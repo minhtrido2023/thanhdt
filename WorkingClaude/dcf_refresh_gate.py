@@ -93,7 +93,10 @@ def run_gate(asof=None, state_path=STATE_FP, log_path=LOG_FP, dry=False):
     Fail-safe: on any exception returns refresh=True and logs the error."""
     date = _now_ict_date(asof)
     try:
-        current = _dep.current_deposit_rate(asof)      # Big-4 12M deposit %, as-of
+        # consumer_deposit_rate() wired 2026-10-01 (job Taylor_20261001_054110) -- must match
+        # dcf_valuation.py::discount_rate()'s deposit leg exactly, else this gate's delta-vs-
+        # last-used-rate drifts out of sync with the rate the DCF chain actually used.
+        current = _dep.consumer_deposit_rate(asof)      # effective (Big-4 or CCTG) deposit %, as-of
         state = load_state(state_path)
         refresh, reason, delta = decide(current, state)
         out = {"date": date, "current_rate": round(current, 4),

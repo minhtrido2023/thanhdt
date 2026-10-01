@@ -20,8 +20,11 @@ Methodology — resolving Big-4 disagreement (decided 2026-07-20):
   Rationale: the rate that the majority of the dominant state-banks offer is the true market anchor;
   averaging in a contradictory outlier (often from a different channel/term) distorts the hurdle.
 """
+import logging
 import os
 import numpy as np, pandas as pd
+
+_log = logging.getLogger(__name__)
 
 # (effective_date, big4_12m_deposit_pct_pa) — step series, forward-filled between anchors
 DEPOSIT_EVENTS = [
@@ -288,11 +291,13 @@ def effective_deposit_rate(asof=None, stale_days_limit=45, check_freshness=None)
     behavior) rather than fail-closing to some gate state; callers that need fail-closed semantics
     should use macro_killswitch_a_status(), not this function.
 
-    DO NOT wire this into rating_8l.py's NEUTRAL deposit tilt or into the DCF discount-rate chain
-    (dcf_valuation.py / trading_bot/due_diligence.py / dcf_refresh_gate.py / custom30_yield_labels.py)
-    without an explicit user decision -- both change a LIVE daily production output (rating tilt,
-    fear-buy QUALIFY/NON). See mike/kb/data_registry/macro/cctg_rate_vn.md for the full consumer
-    inventory + diff table.
+    User approved wiring this into rating_8l.py's NEUTRAL deposit tilt and the DCF discount-rate
+    chain (dcf_valuation.py / trading_bot/due_diligence.py / dcf_refresh_gate.py /
+    custom30_yield_labels.py) on 2026-10-01 (job Taylor_20261001_054110) -- those 5 call sites
+    now go through `consumer_deposit_rate()` below, NOT this function directly. Any FUTURE new
+    consumer of this rate should go through `consumer_deposit_rate()` too (one rollback knob),
+    not call `effective_deposit_rate()` ad-hoc. See mike/kb/data_registry/macro/cctg_rate_vn.md
+    for the full consumer inventory + diff table.
 
     Returns dict: rate(float, fraction), rate_pct(float), rate_source("big4_12m"|"cctg_6m(<date>)"),
     big4_rate_pct(float), cctg_rate_pct(float|None), last_update(str date)."""
@@ -312,21 +317,94 @@ def effective_deposit_rate(asof=None, stale_days_limit=45, check_freshness=None)
     # An error/out-of-range CCTG read here degrades to cctg_pct=None (Big-4-only), same as "no
     # CCTG data" -- there is no "armed"/stale concept on this function (see docstring), so the
     # only symmetric behavior available is "don't let a bad value drive the display at all".
+    #
+    # Round-2 fix R2 (2026-10-01, quant-skeptic+arch-review): the two degrade-to-Big-4 branches
+    # below used to be SILENT -- `cctg_err is not None` and the bare `except Exception` both set
+    # cctg_pct=None with no log line and no trace in rate_source, so a broken CCTG CSV or a stale
+    # reading produced a consumer number that read as plain "big4_12m" -- indistinguishable from
+    # the normal pre-anchor/CCTG-lower-than-Big4 case, and due_diligence.py's displayed
+    # `deposit_rate_source` repeated that same wrong-cause label (§29: diagnosis must cite the
+    # evidence it actually read, not a generic fallback name). Both branches now (a) log a WARNING
+    # with the real underlying error/age, and (b) annotate rate_source with the real reason
+    # ("big4_12m(cctg_unavailable: ...)" / "big4_12m(cctg_stale: ...)") instead of a bare
+    # "big4_12m" -- callers that only read rate_pct are unaffected (still Big-4-only), callers that
+    # display rate_source now see the truth.
     cctg_pct = None
     try:
         from cctg_rate_vn import current_cctg_rate_checked
         cctg_pct, cctg_date, cctg_err = current_cctg_rate_checked(str(asof_ts.date()))
-        if cctg_err is not None:
-            cctg_pct = None
-        elif cctg_pct is not None and cctg_pct > big4_pct:
-            cctg_age = (asof_ts - cctg_date).days
-            cctg_stale = check_freshness and cctg_age > stale_days_limit
-            if not cctg_stale:
-                rate_pct, rate_source = cctg_pct, f"cctg_6m({cctg_date.date()})"
-    except Exception:
+    except Exception as exc:
+        cctg_pct, cctg_err = None, f"exception: {exc!r}"
+    if cctg_err is not None:
         cctg_pct = None
+        rate_source = f"big4_12m(cctg_unavailable: {cctg_err})"
+        _log.warning("effective_deposit_rate(asof=%s): CCTG unavailable -> Big-4-only (%s)",
+                     asof_ts.date(), cctg_err)
+    elif cctg_pct is not None and cctg_pct > big4_pct:
+        cctg_age = (asof_ts - cctg_date).days
+        cctg_stale = check_freshness and cctg_age > stale_days_limit
+        if not cctg_stale:
+            rate_pct, rate_source = cctg_pct, f"cctg_6m({cctg_date.date()})"
+        else:
+            rate_source = f"big4_12m(cctg_stale: {cctg_age}d)"
+            _log.warning("effective_deposit_rate(asof=%s): CCTG stale (%dd > %dd, last %s) -> "
+                         "Big-4-only", asof_ts.date(), cctg_age, stale_days_limit, cctg_date.date())
     return {"rate": rate_pct / 100.0, "rate_pct": rate_pct, "rate_source": rate_source,
             "big4_rate_pct": big4_pct, "cctg_rate_pct": cctg_pct, "last_update": str(last_date.date())}
+
+
+def consumer_deposit_rate_detail(asof=None):
+    """Same consumer wiring as `consumer_deposit_rate()` below, but returns the full detail dict
+    (rate_pct, rate_source, ...) instead of a bare float -- for the one caller that must SHOW which
+    series/driver produced the number (trading_bot/due_diligence.py's `_deposit_rate_pct()`,
+    displayed as `deposit_rate_source`). `consumer_deposit_rate()` is a thin wrapper around this
+    that just returns `detail["rate_pct"]`; every OTHER consumer that only needs the float keeps
+    calling that wrapper, no change needed there.
+
+    Round-2 fix R1 (2026-10-01, quant-skeptic+arch-review, BLOCKING): always pass
+    `check_freshness=True` explicitly to `effective_deposit_rate()`, regardless of whether `asof`
+    is None. Before this fix, `effective_deposit_rate()`'s own `check_freshness` defaulted to
+    `asof is None`, so the 3 call sites that pass an explicit asof (dcf_valuation.discount_rate,
+    dcf_refresh_gate's drift monitor, custom30_yield_labels._label_one via dep_cache) got
+    `check_freshness=False` and NEVER aged a stale CCTG reading out -- a CCTG anchor confirmed once
+    and never refreshed would silently drive these 3 consumers' numbers forever, unlike
+    rating_8l.py's NEUTRAL tilt (asof=None -> check_freshness was already True) and
+    macro_killswitch_a_status() (same explicit-True pattern already). Measured before the fix:
+    the old `consumer_deposit_rate('2026-11-16')` returned 7.5 (stale CCTG, never expired) while
+    the correctly-computed `effective_deposit_rate('2026-11-16', check_freshness=True)` already
+    returned 6.8 (Big-4-only) -- the true fresh->stale transition is 2026-11-15 (anchor + 46d, the
+    first day age > the 45d stale_days_limit).
+
+    `check_freshness=True` here is evaluated RELATIVE TO `asof` itself (PIT-causal: "is the CCTG
+    reading stale AS OF the date being queried"), not relative to wall-clock "today" -- so every
+    historical asof before cctg_rate_vn's only anchor (2026-09-30) stays byte-identical
+    (current_cctg_rate_checked returns None there regardless of the freshness flag)."""
+    if os.environ.get("DEPOSIT_RATE_CCTG_OVERLAY", "1") == "0":
+        return {"rate_pct": current_deposit_rate(asof), "rate_source": "big4_12m(cctg_overlay_disabled)"}
+    return effective_deposit_rate(asof, check_freshness=True)
+
+
+def consumer_deposit_rate(asof=None):
+    """Single wiring point for the 5 LIVE production consumers of `current_deposit_rate()` that
+    the user approved switching to the Big-4+CCTG effective rate on 2026-10-01 (job
+    Taylor_20261001_054110): rating_8l.py's NEUTRAL deposit tilt, trading_bot/due_diligence.py's
+    fear-buy `_yield_floor()`, its batch twin custom30_yield_labels.py, and the DCF
+    discount-rate chain (dcf_valuation.py::discount_rate, dcf_refresh_gate.py's drift monitor).
+    Centralizing here (rather than editing each call site to call effective_deposit_rate()
+    directly) means all 5 move together and share ONE rollback knob AND one freshness policy
+    (see `consumer_deposit_rate_detail()` above for the R1 fix this now carries).
+
+    Returns a plain float in PERCENT -- same shape/units as current_deposit_rate() -- so every
+    call site is a drop-in `current_deposit_rate -> consumer_deposit_rate` rename, no other edit.
+
+    Rollback: env DEPOSIT_RATE_CCTG_OVERLAY=0 reverts ALL 5 consumers to Big-4-only
+    (current_deposit_rate()) in one step, e.g. if the CCTG legal-vn re-verification (see
+    mike/kb/data_registry/macro/cctg_rate_vn.md §Pháp lý) comes back negative. Default "1" (on).
+
+    History is unaffected either way: cctg_rate_vn has its only anchor at 2026-09-30, so
+    effective_deposit_rate() is byte-identical to current_deposit_rate() for every asof before
+    that date regardless of this knob -- verified in cctg_deposit_wiring_selfcheck.py."""
+    return consumer_deposit_rate_detail(asof)["rate_pct"]
 
 
 def effective_deposit_events_df():
