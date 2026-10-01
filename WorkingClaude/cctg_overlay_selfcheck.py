@@ -407,6 +407,95 @@ finally:
     dep._EVENTS_CSV = _orig_dep_csv
     shutil.rmtree(_tmpdir20, ignore_errors=True)
 
+# T21 (quant-skeptic round-6 mutant C1a, survived): mutating `if bad.any():` -> `if False:` in
+# cctg_events_df() used to go undetected because no test fed it a row with a BAD DATE + a
+# perfectly VALID rate number. Without the `bad.any()` guard, that row's `time` stays NaT while
+# `cctg_rate` stays a real float; NaT comparisons (`<=`, `>`) are always False in pandas, so the
+# row silently fails BOTH the range guard (rate is fine, not oor) AND the not-newer guard (NaT <=
+# anything is False) and gets concatenated in with a NaT time -- current_cctg_rate()'s own
+# `ev.time <= asof_ts` filter then silently excludes it forever, byte-identical to "the row was
+# never appended". A typo'd date with a syntactically valid rate must raise, not vanish.
+_tmpdir21 = tempfile.mkdtemp(prefix="cctg_selfcheck21_")
+_tmp_cctg_csv21a = os.path.join(_tmpdir21, "bad_date.csv")
+try:
+    with open(_tmp_cctg_csv21a, "w") as f:
+        f.write("effective_date,cctg_rate\n2O26-10-05,9.0\n")  # letter O instead of digit 0
+    cctg._EVENTS_CSV = _tmp_cctg_csv21a
+    raised21a = False
+    try:
+        cctg.cctg_events_df()
+    except ValueError as exc21a:
+        raised21a = True
+        err21a = str(exc21a)
+    check("T21a (C1a) malformed date + VALID rate raises (not silently dropped)",
+          raised21a and "2O26-10-05" in err21a)
+finally:
+    cctg._EVENTS_CSV = _orig_cctg_csv
+    shutil.rmtree(_tmpdir21, ignore_errors=True)
+
+# T21b (round-6 mutant C1b, same `bad.any()` guard, other half): VALID date + an UNPARSEABLE rate
+# string must also raise, not silently drop. (NOT a stray comma -- "9,0" un-quoted would be parsed
+# by pandas as an EXTRA column and silently misaligned into effective_date/cctg_rate, a different
+# and separately-nasty bug, not the one this test targets -- verified by hand, 2026-10-01.)
+_tmpdir21b = tempfile.mkdtemp(prefix="cctg_selfcheck21b_")
+_tmp_cctg_csv21b = os.path.join(_tmpdir21b, "bad_rate.csv")
+try:
+    with open(_tmp_cctg_csv21b, "w") as f:
+        f.write("effective_date,cctg_rate\n2026-10-05,abc\n")  # non-numeric rate string
+    cctg._EVENTS_CSV = _tmp_cctg_csv21b
+    raised21b = False
+    try:
+        cctg.cctg_events_df()
+    except (ValueError, pd.errors.ParserError):
+        raised21b = True
+    check("T21b (C1b) valid date + unparseable rate raises (not silently dropped)", raised21b)
+finally:
+    cctg._EVENTS_CSV = _orig_cctg_csv
+    shutil.rmtree(_tmpdir21b, ignore_errors=True)
+
+# T22 (round-6 mutant C2, "guard thiếu header"): removing the explicit `missing = {...} -
+# set(extra.columns)` check in cctg_events_df() is an EQUIVALENT mutant for the "does it raise"
+# question -- `extra[["effective_date", "cctg_rate"]]` on a frame missing those columns raises a
+# pandas KeyError on its own (verified by hand, 2026-10-01), so BOTH the current explicit
+# ValueError and the hypothetical no-guard KeyError stop the bad row from propagating. This test
+# therefore asserts the OUTCOME (some exception fires, the header-is-wrong CSV never silently
+# becomes usable data) rather than narrowly pinning the exception type, so it does not flag this
+# specific mutant as a real behavior change -- documented here instead of claiming a false kill.
+_tmpdir22 = tempfile.mkdtemp(prefix="cctg_selfcheck22_")
+_tmp_cctg_csv22 = os.path.join(_tmpdir22, "wrong_header.csv")
+try:
+    with open(_tmp_cctg_csv22, "w") as f:
+        f.write("date,rate\n2026-10-05,9.0\n")  # neither column named as expected
+    cctg._EVENTS_CSV = _tmp_cctg_csv22
+    raised22 = False
+    try:
+        cctg.cctg_events_df()
+    except Exception:
+        raised22 = True
+    check("T22 (C2, equivalent-mutant-documented) wrong header raises either way", raised22)
+finally:
+    cctg._EVENTS_CSV = _orig_cctg_csv
+    shutil.rmtree(_tmpdir22, ignore_errors=True)
+
+# T23 (round-6 mutant D6, "outer except" in current_cctg_rate_checked()): every exception
+# cctg_events_df()/current_cctg_rate() can actually raise today happens to be a ValueError, so a
+# mutant that narrows current_cctg_rate_checked()'s `except Exception as exc:` to
+# `except ValueError as exc:` was going undetected -- no existing test ever made current_cctg_rate
+# raise a non-ValueError. Monkeypatch it to raise a RuntimeError directly: the checked wrapper must
+# still convert this into a (None, None, error) tuple, not let it propagate, regardless of the
+# exception's concrete type (the docstring promises "Any exception ... makes CCTG-side problems
+# VISIBLE", not "any ValueError").
+_orig_current_cctg_rate_d6 = cctg.current_cctg_rate
+try:
+    def _raise_runtime(asof=None):
+        raise RuntimeError("simulated non-ValueError failure")
+    cctg.current_cctg_rate = _raise_runtime
+    _, _, err23 = cctg.current_cctg_rate_checked(asof="2026-10-15")
+    check("T23 (D6) current_cctg_rate_checked() catches non-ValueError exceptions too",
+          err23 is not None and "RuntimeError" in err23)
+finally:
+    cctg.current_cctg_rate = _orig_current_cctg_rate_d6
+
 # T_tz: TZ independence guard (explicit asof throughout).
 r_tz_a = dep.macro_killswitch_a_status(asof="2026-10-01")
 os.environ.pop("TZ", None)

@@ -136,9 +136,12 @@ def macro_killswitch_a_status(asof=None, stale_days_limit=45, check_freshness=No
     *reminder* (fires day-3 ICT, best-effort fetch, does NOT auto-write). So "stale" here concretely
     means "the last MANUAL confirmation is more than stale_days_limit days old", not "a live feed
     stopped ticking". Practical consequence (computed from the real production CSV, last confirmed
-    anchor 2026-09-04): if the 2026-11-03 monthly reminder is missed with no human confirming a
-    newer anchor, this gate flips to armed=True/stale=True on its own at 2026-09-04 + 45d =
-    **2026-10-19** — note this in any report that cites this function's live status.
+    anchor 2026-09-04): staleness triggers on age > 45d, i.e. the 46th day, NOT the 45th (age
+    == 45 is still fresh -- see cctg_overlay_selfcheck.py T16's `>` vs `>=` boundary test) --
+    if the 2026-11-03 monthly reminder is missed with no human confirming a newer anchor,
+    this gate flips to armed=True/stale=True on its own at 2026-09-04 + 46d = **2026-10-20**
+    (NOT 2026-10-19, which is still day 45/fresh) — note this in any report that cites
+    this function's live status.
 
     Any exception anywhere in this function (corrupt/unparseable CSV beyond the narrow
     EmptyDataError/ValueError already handled inside deposit_events_df -- e.g. a malformed-quote
@@ -244,13 +247,19 @@ def macro_killswitch_a_status(asof=None, stale_days_limit=45, check_freshness=No
                       f"công cuối {last_date.date()}) -> fail-closed (armed)")
         else:
             armed = (rate > THRESHOLD) or cctg_force_armed
-            reason = (f"{rate_source} {rate_pct:.2f}% > 7.5% -> SUSPEND new recovery deploy" if
-                      (rate > THRESHOLD) else f"{rate_source} {rate_pct:.2f}% <= 7.5% -> CLEAR")
-            if cctg_force_armed:
-                reason += f"; {cctg_note} -> ARMED"
+            if rate > THRESHOLD:
+                reason = f"{rate_source} {rate_pct:.2f}% > 7.5% -> SUSPEND new recovery deploy"
+            elif cctg_force_armed:
+                # Round-7 fix (2026-10-01, quant-skeptic round-6 "chuỗi reason tự mâu thuẫn"):
+                # the rate itself is <= threshold (what would normally read CLEAR), but the CCTG
+                # side forces armed anyway -- say ARMED up front instead of saying CLEAR and then
+                # contradicting it with "-> ARMED" later in the same string.
+                reason = f"{rate_source} {rate_pct:.2f}% <= 7.5% nhưng ARMED (forced); {cctg_note}"
+            else:
+                reason = f"{rate_source} {rate_pct:.2f}% <= 7.5% -> CLEAR"
         return {"armed": armed, "rate": rate, "threshold": THRESHOLD, "stale": stale,
                 "last_update": str(last_date.date()), "age_days": age_days, "reason": reason,
-                "rate_source": rate_source}
+                "rate_source": rate_source, "big4_stale": bool(big4_stale), "cctg_note": cctg_note}
     except Exception as exc:
         return {"armed": True, "rate": None, "threshold": THRESHOLD, "stale": True,
                 "last_update": None, "age_days": None, "rate_source": None,

@@ -525,7 +525,24 @@ def build_macro_killswitch_a_line(html=True):
     badge = "🔴" if v["armed"] else "🟢"
     rate_s = f"{v['rate']*100:.1f}%" if v["rate"] is not None else "N/A"
     verdict = "ARMED" if v["armed"] else "CLEAR"
-    stale_tag = " ⚠️STALE→fail-closed" if v["stale"] else ""
+    # Round-7 fix (2026-10-01, quant-skeptic round-6): the old stale_tag/src_label pair conflated
+    # "which series is DRIVING the displayed rate" (rate_source) with "which series is the CAUSE
+    # of staleness" -- a CCTG-only-stale reading (Big-4 itself fresh) fell back to rate_source=
+    # "big4_12m" and printed "Big-4 12 tháng (...) ⚠️STALE", wrongly implying the FRESH Big-4 feed
+    # was the stale one. big4_stale/cctg_note (both added to macro_killswitch_a_status()'s return
+    # dict this round) name the actual cause independently of which source is driving the number.
+    big4_stale = v.get("big4_stale", False)
+    cctg_note = v.get("cctg_note")
+    if v["stale"] and big4_stale and cctg_note:
+        stale_cause = "Big-4 & CCTG đều cũ"
+    elif big4_stale:
+        stale_cause = "Big-4 cũ"
+    elif cctg_note:
+        stale_cause = "CCTG cũ"
+    else:
+        stale_cause = None
+    stale_tag = f" ⚠️STALE→fail-closed ({stale_cause})" if (v["stale"] and stale_cause) else (
+        " ⚠️STALE→fail-closed" if v["stale"] else "")
     rate_source = v.get("rate_source")
     if rate_source and rate_source.startswith("cctg_6m"):
         src_label = f"CCTG Big-4 6 tháng ({rate_source.split('(', 1)[-1].rstrip(')')})"

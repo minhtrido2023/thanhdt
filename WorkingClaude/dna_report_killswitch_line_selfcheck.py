@@ -86,6 +86,50 @@ for html in (True, False):
     line = dr.build_macro_killswitch_a_line(html=html)
     check(f"none html={html}: line is None", line is None)
 
+# Round-7 cases (2026-10-01, quant-skeptic round-6): stale_cause must name WHICH source is
+# actually stale, independent of rate_source (which names which source is DRIVING the number).
+# Before this round, a CCTG-only-stale reading (Big-4 itself fresh) fell back to rate_source=
+# "big4_12m" and printed "Big-4 12 tháng (...) STALE", wrongly implying the FRESH Big-4 feed was
+# the stale one -- these cases are outside the generic FIXTURES loop above because the old
+# "tail does NOT mislabel as CCTG" assertion (line ~78) is specifically about rate_source/tail
+# naming the DRIVING series, not about whether "CCTG" appears anywhere in the line at all (the new
+# stale-cause annotation legitimately mentions CCTG even when rate_source is big4_12m).
+_ROUND7_FIXTURES = {
+    "cctg_stale_only": {
+        "armed": True, "rate": 0.060, "threshold": 0.075, "stale": True,
+        "last_update": "2026-11-01", "age_days": 10, "rate_source": "big4_12m",
+        "reason": "big4_12m 6.00% <= 7.5% nhưng ARMED (forced); CCTG cũ (50d > 45d)...",
+        "big4_stale": False, "cctg_note": "CCTG cũ (50d > 45d), xác nhận thủ công lần cuối 2026-10-05 (5.00%) -> fail-closed (armed)",
+    },
+    "big4_stale_only": {
+        "armed": True, "rate": 0.068, "threshold": 0.075, "stale": True,
+        "last_update": "2026-06-01", "age_days": 122, "rate_source": "big4_12m",
+        "reason": "feed stale (122d > 45d) -> fail-closed (armed)",
+        "big4_stale": True, "cctg_note": None,
+    },
+    "both_stale": {
+        "armed": True, "rate": 0.068, "threshold": 0.075, "stale": True,
+        "last_update": "2026-06-01", "age_days": 122, "rate_source": "big4_12m",
+        "reason": "feed stale (122d > 45d) -> fail-closed (armed)",
+        "big4_stale": True, "cctg_note": "CCTG lỗi/ngoài khoảng (...) -> không xác thực được, fail-closed",
+    },
+}
+for label, fixture in _ROUND7_FIXTURES.items():
+    dr.get_macro_killswitch_a = lambda f=fixture: f
+    for html in (True, False):
+        line = dr.build_macro_killswitch_a_line(html=html)
+        check(f"{label} html={html}: tail still names driving source Big-4 12 tháng",
+              "Big-4 12 tháng" in line)
+        if label == "cctg_stale_only":
+            check(f"{label} html={html}: stale cause names CCTG, not Big-4",
+                  "(CCTG cũ)" in line)
+        elif label == "big4_stale_only":
+            check(f"{label} html={html}: stale cause names Big-4, not CCTG",
+                  "(Big-4 cũ)" in line)
+        else:  # both_stale
+            check(f"{label} html={html}: stale cause names BOTH sources",
+                  "Big-4 & CCTG đều cũ" in line)
+
 dr.get_macro_killswitch_a = _orig
 
 print(f"\n=== {N} assertions PASS ===")
