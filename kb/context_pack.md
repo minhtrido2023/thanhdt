@@ -1,13 +1,13 @@
-# Mike fleet — context pack (v3485)
+# Mike fleet — context pack (v3486)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-10-01T01:24:09] arch-reviewer/verification — ARCH-REVIEW: wags-fix: coord-2026-10-01: {"finding_topic": "wags-fix: coord-2026-10-01", "verdict": "NEEDS_CHANGES", "confidence": "high", "summary": "BQ evidence for Q1 is accurate and Q2 triage is co …
 - [2026-10-01T02:33:41] Taylor/finding — monthly-report-2026-09-SpaceX-ZaloPay-COMPLETE: {"job": "Taylor_20261001_020004", "period": "2026-09", "files": {"SpaceX": {"path": "mike/reports/SpaceX_monthly_report_2026-09.md", "sha256": "ddfd6af77b990dee …
 - [2026-10-01T03:45:41] Taylor/finding — cctg-effective-rate-wired-20261001: {"branch": "wire/macro-killswitch-a-deposit75-20261001", "commits": {"WC_worktree": "9def5700 (after 572fc65f fix-5)", "mike": "98504bf5"}, "summary": "Buoc1: f …
 - [2026-10-01T03:38:22] Winston/finding — sbv-weekly-check-2026-10-01: {"date": "2026-10-01", "current_rate": 4.5, "fetch_status": "fetch_failed", "rate_changed": false, "note": "fetch_failed_assumed_unchanged", "verify_log": "/hom …
 - [2026-10-01T03:48:52] Taylor/finding — park-off-0pct-wired-3rails-plus-dryrun-impact-20261001: {"decision": "PARK OFF (0%) — user John 2026-10-01 10:26 ICT qua Mike, nguyen van: \"Park 0% chốt. Chỉ thay đổi khi lãi suất huy động có xu hướng hạ.\"", "rails …
+- [2026-10-01T04:02:45] Mike/answer — xin-duyet-merge-park-off-0pct-20261001: {"resolution": "Merge park 0% da thuc hien: WC ff-only wire/park-000-live-wc (main), mike merge wire/park-000-live (master). arch-reviewer APPROVED/CONFIRMED hi …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -22,8 +22,8 @@
 - V2.5: `trading_rules.json v1.7` → v25_leverage STATUS=DISABLED
 
 ## Đang trading (LIVE)
-- **SpaceX** (DNSE 0002023347): V2.4 LIVE từ 2026-07-01, có margin. NEUTRAL parking **80%** idle cash (config F1, đổi từ 70% ngày 2026-08-04, `trading_rules.json` `neutral_parking.default_park_of_idle_pct`). run_bot.sh 09:05 ICT T2-T6. NAV: `nav_history_SpaceX.csv` hoặc EOD report.
-- **ZaloPay** (DNSE 0001743768): V2.4 LIVE từ 2026-07-06, CASH-ONLY. **DGC EXCLUDED** (`excluded_tickers`, HOSE hạn chế giao dịch đến ~11-12/2026). Sizing dùng `active_nav`. Cùng target parking 80% (không có override riêng).
+- **SpaceX** (DNSE 0002023347): V2.4 LIVE từ 2026-07-01, có margin. NEUTRAL parking **0% (TẮT)** — user chốt 2026-10-01 10:26 ICT (`decided_by: user`: "Park 0% chốt. Chỉ thay đổi khi lãi suất huy động có xu hướng hạ"); lịch sử 0,70→0,80 (08-04)→0,30 (09-27)→0,0 (10-01). 3 rail đồng bộ = 0,0 (merge 10-01, arch-review APPROVED, `park_rail_consistency_selfcheck` rc=0). Hiệu lực từ plan nháp đêm 01→02/10; tiền nhàn rỗi nằm ở Trứng vàng. **TRIGGER QUAY LẠI = lãi huy động có XU HƯỚNG HẠ ⇒ chỉ CẢNH BÁO user, KHÔNG tự khôi phục park** (định nghĩa vận hành đang chờ user chốt). run_bot.sh 09:05 ICT T2-T6. NAV: `nav_history_SpaceX.csv` hoặc EOD report.
+- **ZaloPay** (DNSE 0001743768): V2.4 LIVE từ 2026-07-06, CASH-ONLY. **DGC EXCLUDED** (`excluded_tickers`, HOSE hạn chế giao dịch đến ~11-12/2026). Sizing dùng `active_nav`. Cùng target parking 0% (không có override riêng).
 - **PNJ EXCLUDED cả 2 account** (SpaceX+ZaloPay, `excluded_tickers` trong `secrets/trading_bot_accounts.json`) từ 2026-09-30, quyết định USER trên bus question `Taylor/pnj-trong-ro-custom30v-live-can-user-duyet-chan` (mở 2026-09-28) — option A. Lý do: hạ bậc AMBIGUOUS→NON do công bố DN 25-27/09 (0 vị thế thật ở cả 2 account tại thời điểm loại, xác nhận qua `data/execution_logs/dnse_raw_2026-09-30.jsonl`), cần "scrutiny exam" trước khi trở lại candidate rổ custom30V. **REVIEW TRIGGER = khi PNJ công bố BCTC Quý 3/2026** (KHÔNG phải TTL theo ngày) — lúc đó chạy lại due-diligence đầy đủ (kiểu fundamental-skeptic DGC/TV1), KHÔNG tự động khôi phục.
 - **AlphaLens Paper**: FPT/ACB/MBB/HDB, tracking đến 2026-09-30. DollarBill phụ trách.
 - **Trứng vàng** (`egg.totalValue`): SpaceX ~100,9tr / ZaloPay ~102,2tr (đo 09-27), đã cộng NAV tự động — KHÔNG phải `availableCash`. ⚠️ **RÚT VỀ TRONG NGÀY, KHÔNG phải T+1** (đính chính 2026-09-27, Mafee job `Mafee_20260927_091828`: SpaceX 17/09 egg 100,9tr→51,0tr VÀ `availableCash` +49,8tr trong CÙNG snapshot 11:00:11 phiên sáng ⇒ tiền dùng mua được ngay phiên đó). ⚠️ **KHÔNG phải tiền gửi ngân hàng** — DNSE mô tả là "Sinh Lời Theo Ngày" qua giao dịch TRÁI PHIẾU niêm yết ⇒ không có bảo hiểm tiền gửi, phụ thuộc tổ chức phát hành; lãi đo thật **8,543%/năm** và DNSE **tự khấu trừ TNCN trước khi trả** nên số đó đã là net. Không thấy trần số dư (ZaloPay vượt 102tr vẫn cộng lãi phẳng); "Tài khoản Không Ngủ" là SẢN PHẨM KHÁC (trần 30 tỷ), đừng lẫn. `manual_offbook_assets_vnd` ĐÃ ĐÓNG vĩnh viễn 07-23.
