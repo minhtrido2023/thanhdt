@@ -10,19 +10,30 @@ sections 7-9 below cover R1 (check_freshness was never explicit, so the 3 consum
 explicit asof never aged a stale CCTG reading out) and R2 (a CCTG error/stale read degraded to
 Big-4 SILENTLY -- no log, no trace in rate_source).
 
-Pre-registers THIS checkout's deposit_rate_vn/cctg_rate_vn in sys.modules before importing any
-of the 5 consumer modules — several of them (dcf_valuation.py, dcf_refresh_gate.py) hardcode
-WORKDIR to the absolute production path and `os.chdir()`/`sys.path.insert(0, WORKDIR)` to it,
-which would otherwise silently import the PRODUCTION deposit_rate_vn.py instead of this
-worktree's copy when the selfcheck is run pre-merge. Once `import X` has populated
-sys.modules['deposit_rate_vn'], any later `import deposit_rate_vn as _dep` anywhere reuses that
-same object regardless of sys.path order — this is what makes the pre-registration work.
+Pre-registers THIS checkout's deposit_rate_vn/cctg_rate_vn AND the 3 remaining consumer modules
+that touch sys.path/cwd at their own import time (dcf_valuation.py, dcf_refresh_gate.py both
+hardcode WORKDIR to the absolute production path and `sys.path.insert(0, WORKDIR)`
+[+ dcf_valuation also `os.chdir()`s there]) in sys.modules BEFORE any plain `import X` statement
+runs. Round-4 fix (job Taylor_20261001_073836, arch-review r2 follow-up): the ORIGINAL docstring
+here claimed this protection already covered "any of the 5 consumer modules", but it only ever
+pre-registered deposit_rate_vn/cctg_rate_vn — dcf_refresh_gate.py and custom30_yield_labels.py
+were still loaded via a bare `import X` AFTER `import dcf_valuation` (section 5) had already run
+dcf_valuation's own `sys.path.insert(0, WORKDIR)`. From that point on sys.path[0] is the
+CANONICAL production path, so the later `import dcf_refresh_gate as DRG` / `import
+custom30_yield_labels as C30` resolved to the PRODUCTION copies of those two files, not this
+worktree's — a pre-merge selfcheck run could PASS while actually validating code that was never
+touched by the fix under review. `_load_here()` below sidesteps sys.path entirely (explicit file
+path via `importlib.util.spec_from_file_location`), so every one of the 5 consumer modules is
+guaranteed to come from THIS checkout regardless of what any of them does to sys.path/cwd
+afterwards. Once `sys.modules[name]` is populated this way, any later bare `import name` anywhere
+(including inside another of these 5 modules) reuses that same object.
 
 Run: python3 cctg_deposit_wiring_selfcheck.py   (and again under $DNA_PYEXE, and under
 `env -u TZ TZ=America/New_York python3 ...` per the verify-before-done skill — none of the
 asserts below pass a bare asof=None, so TZ should not matter here; running under a foreign TZ
 is the check that proves that, not an assumption).
 """
+import importlib.util
 import os
 import sys
 
@@ -32,6 +43,23 @@ sys.path.insert(0, HERE)
 import deposit_rate_vn as dep        # noqa: E402  (pre-register THIS checkout's copy first)
 import cctg_rate_vn as cctg          # noqa: E402
 
+
+def _load_here(modname, filename=None):
+    """Load <modname> from THIS checkout's own file at HERE, bypassing sys.path entirely — see
+    the module docstring for why a bare `import X` is not safe for dcf_valuation.py/
+    dcf_refresh_gate.py/custom30_yield_labels.py once any one of them has mutated sys.path."""
+    fp = os.path.join(HERE, filename or f"{modname}.py")
+    spec = importlib.util.spec_from_file_location(modname, fp)
+    mod = importlib.util.module_from_spec(spec)
+    sys.modules[modname] = mod
+    spec.loader.exec_module(mod)
+    return mod
+
+
+_load_here("custom30_yield_labels")
+_load_here("dcf_refresh_gate")
+_load_here("dcf_valuation")
+
 fails = []
 
 
@@ -39,6 +67,15 @@ def check(name, cond):
     print(f"  [{'PASS' if cond else 'FAIL'}] {name}")
     if not cond:
         fails.append(name)
+
+
+# ---- 0. path-trap guard: every pre-registered module must actually be THIS checkout's file -----
+print("Path-trap guard (sys.modules pre-registration actually points at HERE, not canonical):")
+for _modname in ("deposit_rate_vn", "cctg_rate_vn", "custom30_yield_labels",
+                  "dcf_refresh_gate", "dcf_valuation"):
+    _mod_file = os.path.abspath(sys.modules[_modname].__file__)
+    check(f"sys.modules[{_modname!r}].__file__ is under HERE ({_mod_file})",
+          _mod_file.startswith(HERE))
 
 
 def with_overlay(flag, fn):
@@ -340,6 +377,16 @@ check("rating_8l.py print line includes the driver (rate_source)",
       "_dep_detail['rate_source']" in _r8l_src)
 check("rating_8l.py calls consumer_deposit_rate_detail() with asof=None (live path)",
       "consumer_deposit_rate_detail()" in _r8l_src)
+# M15 (job Taylor_20261001_073836 follow-up): a mutant that keeps the consumer_deposit_rate_detail
+# IMPORT (so the 3 checks above still pass) but computes _dep from current_deposit_rate() instead
+# of _dep_detail["rate_pct"] would be invisible to a plain substring check on the import/print
+# lines. Target the exact assignment the mutant would have to change, and separately forbid a
+# stray _dep assignment from the bare Big-4-only function anywhere outside the explicit knob=0
+# fallback branch (there is none in this file today -- a future one appearing here IS the mutant).
+check("rating_8l.py's _dep is assigned from _dep_detail['rate_pct'] (not a separate Big-4 call)",
+      re.search(r'_dep\s*=\s*_dep_detail\["rate_pct"\]', _r8l_src) is not None)
+check("rating_8l.py never assigns _dep from current_deposit_rate() directly (M15 pattern)",
+      re.search(r'_dep\s*=\s*current_deposit_rate\(', _r8l_src) is None)
 
 # ---- 10. mutation-survivor regression (job Taylor_20261001_064225 dispatch, non-blocking but
 # requested): M9 (tilt applied outside NEUTRAL) and M12 (custom30_yield_labels bypasses the
