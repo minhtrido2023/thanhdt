@@ -15,8 +15,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Wags_history.md` — không mất, không auto-load.
 
-- [2026-09-13T06:19:29Z] [2026-09-13] aria-C production manifest XONG (beaa87e4, 421 file T0 105/T1 101/T2 65/T3 150). CÒN MỞ: commit beaa87e4 (vá vòng 2) KHÔNG có arch-review vòng 3 — nếu manifest lệch lạ, soi scan_sh_line dq_subst trước. Selfcheck sẽ WARN/FAIL khi cron/import đổi hợp lệ → tái sinh + commit cùng lúc.
-BÀI HỌC: generator ghi vào kb/ thì consolidator tự commit bản trung gian (0c4f1bd5) — artifact tự sinh nên ghi ngoài kb/ khi đang lặp, hoặc chấp nhận.
 - [2026-09-13T08:34:07Z] [2026-09-13] aria-J XONG (3c22c06b+5283f0f8+edb49264): code_quality_weekly scope = hot-core pin + manifest T0-T2 commit 7 ngày; fallback có cờ Discord. CÒN MỞ: edb49264 không có arch-review vòng 3. THEO DÕI CN 20/09 10:00 ICT: log phải 'Nguồn scope: MANIFEST' — nếu FALLBACK thì có commit chưa tái sinh manifest.
 BÀI HỌC: pre-commit 'Stashing unstaged files' ở repo dùng chung nuốt file đang sửa dở khi job KHÁC commit — sau khi sửa, kiểm lại diff trước khi tin kết quả test. Và wire 1 selfcheck vào đường cron sẽ kéo cả probe giả của nó vào production manifest.
 - [2026-09-14T05:47:19Z] [2026-09-14] coord-2026-09-14 (job 054508): dong Q TV1 (user duyet plan qua Discord). CHO USER: aria-K-landed-before-schedule (A giu/B revert), da notify trading_daily + ack 2 ngay. NEXT: sau 14:55 14/09 kiem journal ZaloPay co ATC_POSTCLOSE_* khong; tripwire fail-loud arch-review yeu cau van CHUA xay.
@@ -39,3 +37,4 @@ BAI HOC: append text phu vao $logfile cua job LA THAY DOI VAN BAN USER-FACING �
 - [2026-09-30T02:38:15Z] [2026-09-30] coord-2026-09-30 XONG (job 020001). Hint dong-vong-bus gio goi BAT BUOC o ca 2 duong hoan tat dispatch.sh; arch-review CONFIRMED vong 3 (ff340ea8/b1bc0dec/9093f794/7d3f4991); 2 question escalation da dong. Khong con viec treo cua job nay.
 BAI HOC: append text phu vao $logfile cua job LA doi VAN BAN USER-FACING — dispatch.sh chup 'tail -c 500 $logfile' lam ping Discord, 'head -c 400' lam cb_summary AUTO-CALLBACK. Hint chi non-empty khi CO question khop => smoke test voi hint RONG ve nguyen tac khong the bat duoc bug nay. LUAT: truoc khi ghi them vao artifact cua nguoi khac, grep xem co ai CHUP CUA SO artifact do khong, va test o trang thai artifact CO NOI DUNG.
 BAI HOC 2: bo test 'loai theo SUBSTRING' de tu mo cua thoat — clause 'tail -c not in line' khong bao ve gi ma cho mutant nup vao dong co chua tail -c. Loai theo INDEX/danh tinh, dung theo chuoi.
+- [2026-10-01T01:21:25Z] [2026-10-01] coord-2026-10-01: Q label-asof DONG bang answer (cron tu ap schema, Pattern B lan 4). Q duyet-merge-macro-killswitch-a-wiring CHO USER (ack suppress 3d, branch e8d791e9 chua merge). files_changed=[].
