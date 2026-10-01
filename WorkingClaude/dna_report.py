@@ -493,6 +493,69 @@ def build_neutral_base_line(html=True):
             f"{nb['p20']:.1f}% · {nb['p40']:.1f}% · {nb['p60']:.1f}% {tail}")
 
 
+def get_macro_killswitch_a():
+    """trading_rules.json::macro_kill_switches.A_sbv_rate_suspend status, DISPLAY-ONLY here.
+    The sleeve it was designed to gate (execution_limits.deep_cheap_recovery_override) is
+    status=PROPOSED/paper with zero live code path, so this line cannot and does not change any
+    live sizing/order flow — it lets the user watch the 7.5% Big-4 12M deposit threshold against
+    the live feed (deposit_rate_vn.py), independent of the CCTG/6-month certificate rate (a
+    different instrument under separate legal-vn equivalence review). None on any failure."""
+    try:
+        from deposit_rate_vn import macro_killswitch_a_status
+        return macro_killswitch_a_status()
+    except Exception:
+        return None
+
+
+def build_macro_killswitch_a_line(html=True):
+    """One-line status for the daily/weekly/monthly 'Market regime context' block. DISPLAY-ONLY
+    (see get_macro_killswitch_a docstring) — không tác động sizing/gate. None -> caller drops it.
+
+    Source/tenor tag (fixed 2026-10-01, quant-skeptic round-2 fix 2): the old tail hardcoded
+    "Big-4 12M deposit" + "khác CCTG 6 tháng đang chờ legal-vn" UNCONDITIONALLY, which went stale
+    the moment the CCTG overlay (deposit_rate_vn.macro_killswitch_a_status's rate_source field,
+    wired same day) actually started driving the number — the line kept citing the 12M tenor and
+    an outstanding legal-vn question that had already been answered (user-relayed, still a
+    secondary source: CCTG ≈ tiết kiệm về bảo hiểm tiền gửi theo Luật 111/2025 — hạn mức 350tr/
+    người/NH, lãi miễn thuế TNCN, trần lãi SBV chỉ áp kỳ hạn <6 tháng). Now the tail reads
+    `v["rate_source"]` so it always names whichever tenor actually drove the displayed rate."""
+    v = get_macro_killswitch_a()
+    if not v:
+        return None
+    badge = "🔴" if v["armed"] else "🟢"
+    rate_s = f"{v['rate']*100:.1f}%" if v["rate"] is not None else "N/A"
+    verdict = "ARMED" if v["armed"] else "CLEAR"
+    # Round-7 fix (2026-10-01, quant-skeptic round-6): the old stale_tag/src_label pair conflated
+    # "which series is DRIVING the displayed rate" (rate_source) with "which series is the CAUSE
+    # of staleness" -- a CCTG-only-stale reading (Big-4 itself fresh) fell back to rate_source=
+    # "big4_12m" and printed "Big-4 12 tháng (...) ⚠️STALE", wrongly implying the FRESH Big-4 feed
+    # was the stale one. big4_stale/cctg_note (both added to macro_killswitch_a_status()'s return
+    # dict this round) name the actual cause independently of which source is driving the number.
+    big4_stale = v.get("big4_stale", False)
+    cctg_note = v.get("cctg_note")
+    if v["stale"] and big4_stale and cctg_note:
+        stale_cause = "Big-4 & CCTG đều cũ"
+    elif big4_stale:
+        stale_cause = "Big-4 cũ"
+    elif cctg_note:
+        stale_cause = "CCTG cũ"
+    else:
+        stale_cause = None
+    stale_tag = f" ⚠️STALE→fail-closed ({stale_cause})" if (v["stale"] and stale_cause) else (
+        " ⚠️STALE→fail-closed" if v["stale"] else "")
+    rate_source = v.get("rate_source")
+    if rate_source and rate_source.startswith("cctg_6m"):
+        src_label = f"CCTG Big-4 6 tháng ({rate_source.split('(', 1)[-1].rstrip(')')})"
+    elif rate_source == "big4_12m":
+        src_label = "Big-4 12 tháng"
+    else:
+        src_label = "N/A"
+    tail = (f"({src_label} vs macro_kill_switches.A 7,5% — chỉ hiển thị, sleeve recovery "
+            "chưa LIVE nên không có gì bị gate)")
+    tail = f"<i>{tail}</i>" if html else tail
+    return f"{badge} Macro kill-switch A: {rate_s} vs 7,5% — {verdict}{stale_tag} {tail}"
+
+
 def build_market_alert():
     """Market-level capitulation message for the daily push. Returns None when DORMANT
     so the scheduler only pings on a real WATCH/STRONG signal."""

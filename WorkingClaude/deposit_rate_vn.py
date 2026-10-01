@@ -67,8 +67,22 @@ def deposit_events_df():
     if os.path.exists(_EVENTS_CSV):
         try:
             extra = pd.read_csv(_EVENTS_CSV, usecols=["effective_date", "deposit_rate"])
-        except (pd.errors.EmptyDataError, ValueError):
-            extra = None  # empty file or missing columns -> keep frozen anchors only
+        except pd.errors.EmptyDataError:
+            extra = None  # empty file (e.g. fresh install, cron hasn't appended yet) -> frozen only
+        except pd.errors.ParserError:
+            # pandas.errors.ParserError IS a ValueError subclass -- must be caught BEFORE the
+            # generic ValueError clause below, and re-raised, not swallowed. A genuinely corrupt
+            # CSV (bad quoting, truncated row) used to fall into the old blanket
+            # `except (EmptyDataError, ValueError)` and silently revert to frozen-anchors-only
+            # with zero signal anywhere that the live feed is broken -- every consumer
+            # (rating_8l.py live tilt, dcf_valuation.py, macro_confidence_regime.py,
+            # macro_killswitch_a_status) would read stale data believing it was current. Letting
+            # it propagate lets macro_killswitch_a_status's fail-closed try/except turn it into an
+            # explicit armed+stale+reason='error:...' instead (found 2026-10-01,
+            # macro_killswitch_a_selfcheck.py T12).
+            raise
+        except ValueError:
+            extra = None  # e.g. missing expected columns in an old-format file -> frozen only
         if extra is not None and len(extra):
             extra = extra.rename(columns={"effective_date": "time"})
             extra["time"] = pd.to_datetime(extra["time"], errors="coerce")
@@ -91,6 +105,167 @@ def merge_deposit(df, time_col="time"):
                          direction="backward", suffixes=("", "_dep"))
 
 
+def macro_killswitch_a_status(asof=None, stale_days_limit=45, check_freshness=None):
+    """trading_rules.json::macro_kill_switches.A_sbv_rate_suspend, implemented LITERALLY as code
+    for the first time (2026-10-01) — grepping 'macro_kill_switches'/'A_sbv_rate_suspend' across
+    every .py in the repo previously returned 0 hits, i.e. this was spec-only prose with no
+    enforcement mechanism. Trigger: Big-4 12M deposit rate (THIS module's canonical series,
+    current_deposit_rate()) > 7.5%. Spec's own freshness clause ("if the deposit feed is stale,
+    fail SAFE (treat as armed)") is honored here, but ONLY for the live/monitoring call shape
+    (asof=None, i.e. "what is the status right now"): check_freshness defaults to
+    `asof is None` and can be overridden explicitly. Without this split, a historical/backtest-
+    style call (asof=some past date) would spuriously read "stale" purely because the 26 FROZEN
+    historical anchors in DEPOSIT_EVENTS are, by construction, months apart — that's settled
+    ground truth, not a live feed failing to refresh (caught by this function's own selfcheck,
+    macro_killswitch_a_selfcheck.py T2, 2026-10-01: querying asof='2013-01-01' against the
+    2012-10-01 anchor, 92 days prior, was flagged stale under the naive asof-relative definition).
+
+    DISPLAY/MONITORING ONLY as of this commit: the sleeve this switch was designed to gate
+    (execution_limits.deep_cheap_recovery_override, the RECOVERY_PARK deep-cheap deploy) remains
+    status=PROPOSED/paper with zero live production code path of its own (RECOVERY_PARK env flag
+    defaults OFF in pt_v23_audit_2014.py) — there is no live order flow for this function to gate
+    yet. It exists so (a) the threshold has a real, testable implementation the day that sleeve
+    (or any other consumer) goes live, and (b) the 7.5% level can be monitored today via
+    dna_report.build_macro_killswitch_a_line(), independent of the CCTG 6-month certificate rate
+    (a DIFFERENT instrument/tenor under separate legal-vn equivalence review — do not conflate).
+
+    stale_days_limit=45 is an ARBITRARY choice (trading_rules.json's own spec text does not name a
+    number) and must be read against how this feed is actually refreshed: there is no automated
+    daily/live feed for the Big-4 12M deposit rate — the only update path is a human confirming a
+    number via `append_deposit_rate.py` after the monthly `refresh_deposit_rate_vn.sh` cron
+    *reminder* (fires day-3 ICT, best-effort fetch, does NOT auto-write). So "stale" here concretely
+    means "the last MANUAL confirmation is more than stale_days_limit days old", not "a live feed
+    stopped ticking". Practical consequence (computed from the real production CSV, last confirmed
+    anchor 2026-09-04): staleness triggers on age > 45d, i.e. the 46th day, NOT the 45th (age
+    == 45 is still fresh -- see cctg_overlay_selfcheck.py T16's `>` vs `>=` boundary test) --
+    if the 2026-11-03 monthly reminder is missed with no human confirming a newer anchor,
+    this gate flips to armed=True/stale=True on its own at 2026-09-04 + 46d = **2026-10-20**
+    (NOT 2026-10-19, which is still day 45/fresh) — note this in any report that cites
+    this function's live status.
+
+    Any exception anywhere in this function (corrupt/unparseable CSV beyond the narrow
+    EmptyDataError/ValueError already handled inside deposit_events_df -- e.g. a malformed-quote
+    ParserError, a PermissionError on the CSV path, or anything else) is caught at the top level and
+    treated as fail-closed: armed=True, stale=True, reason starts with "error:". Same fail-closed
+    treatment for a rate value outside RATE_MIN..RATE_MAX (0.5%..30%, a sanity fence on the raw
+    `deposit_rate` column) -- this catches a fraction-vs-percent typo (e.g. an anchor written as
+    0.068 meaning 6.8%) before it could silently read as "rate 0.07% <= 7.5% -> CLEAR".
+
+    EFFECTIVE RATE (added 2026-10-01, user directive "CCTG đưa vào model làm nguồn lãi proxy nếu
+    lãi suất cao hơn gửi tiết kiệm"): after resolving the Big-4 12M rate above, this function also
+    looks up cctg_rate_vn.current_cctg_rate_checked() at the same asof and takes max(big4_12m,
+    cctg) IF the CCTG observation is itself fresh (same stale_days_limit) and in-range -- never
+    averages the two, never lets a stale/out-of-range CCTG value override a good Big-4 reading.
+    Before 2026-09-30 (CCTG series' first anchor) current_cctg_rate_checked() returns (None, None,
+    None) for every asof, so every call on a date before that is byte-identical to the pre-CCTG
+    implementation -- no historical backtest pinned against this function changes. New key in the
+    return dict: rate_source ("big4_12m" or "cctg_6m(<date>)", None on no-data/error) records which
+    series drove the final rate, since the two are different tenors (12M vs 6M) and a report
+    citing this number must say which one is active (see cctg_rate_vn.py module docstring).
+
+    ⚠ SYMMETRIC fail-closed on the CCTG side (round-2 fix 1 closed the original bare `except
+    Exception: pass`; round-3 fix 2 closed one asymmetry; round-6 fix, 2026-10-01, user-approved
+    hướng B, closes the LAST one -- current behavior, superseding both prior descriptions): a CCTG
+    read error, an out-of-range value, OR a STALE reading (age > stale_days_limit) -- regardless of
+    whether the last-known CCTG value was itself <= or > the 7.5% threshold -- ALWAYS forces
+    `armed=True` directly (not just `stale=True`) and sets `cctg_note`. There is no "last known
+    value was already safe, so nothing to escalate" carve-out any more, on purpose: the symmetric
+    Big-4 clause two paragraphs below (`big4_stale`) has never had such a carve-out either -- a
+    stale Big-4 reading forces `armed=True` unconditionally, no matter what the last Big-4 value
+    was, because a feed we have not reconfirmed in `stale_days_limit` days could have moved above
+    the trigger in the interim and we would have no way to know. The pre-round-6 CCTG branch broke
+    that symmetry by staying silently non-armed (`stale` not even set) whenever the last CCTG
+    reading it last saw was <= 7.5% -- exactly the gap a round-6 review user caught: an untouched
+    CCTG anchor ages past 45 days with nobody reminded, and the gate would keep reporting CLEAR
+    forever on a number nobody has looked at since. Now: ANY cctg_stale (fresh-but-safe excluded,
+    see rate-override branch just below) sets `cctg_note` describing the age + last reading and
+    forces `armed=True`, identically to every other failure mode in this function.
+
+    Returns dict: armed(bool), rate(float|None, fraction e.g. 0.068), threshold(0.075),
+    stale(bool), last_update(str date|None), age_days(int|None), reason(str), rate_source(str|None)."""
+    THRESHOLD = 0.075
+    RATE_MIN_PCT, RATE_MAX_PCT = 0.5, 30.0
+    try:
+        if check_freshness is None:
+            check_freshness = asof is None
+        ev = deposit_events_df()
+        asof_ts = pd.Timestamp.today().normalize() if asof is None else pd.to_datetime(asof)
+        avail = ev[ev.time <= asof_ts]
+        if avail.empty:
+            return {"armed": True, "rate": None, "threshold": THRESHOLD, "stale": True,
+                    "last_update": None, "age_days": None, "rate_source": None,
+                    "reason": "no deposit data at/before asof -> fail-closed (armed)"}
+        last_date = avail.iloc[-1]["time"]
+        rate_pct = float(avail.iloc[-1]["deposit_rate"])
+        if not (RATE_MIN_PCT <= rate_pct <= RATE_MAX_PCT):
+            return {"armed": True, "rate": None, "threshold": THRESHOLD, "stale": True,
+                    "last_update": str(last_date.date()), "age_days": None, "rate_source": None,
+                    "reason": (f"rate_pct={rate_pct!r} ngoài khoảng hợp lệ "
+                               f"[{RATE_MIN_PCT},{RATE_MAX_PCT}] -> fail-closed (armed)")}
+        rate_source = "big4_12m"
+        # cctg_force_armed / cctg_note: symmetric fail-closed treatment for the CCTG overlay.
+        # Round-2 fix 1 (2026-10-01) first closed the bare `except Exception: pass` that let every
+        # CCTG failure mode fall through to Big-4-only with ZERO trace. Round-3 fix 2 (2026-10-01,
+        # quant-skeptic round-3) closed the error/out-of-range asymmetry: those cases now force
+        # armed=True directly (not just stale=True), same as every Big-4-side error in this
+        # function. Round-6 fix (2026-10-01, user-approved hướng B) closes the LAST asymmetry: a
+        # STALE-but-successfully-read CCTG value used to force armed=True ONLY if its last known
+        # reading was already > 7.5% -- a stale reading whose last value was <= 7.5% stayed
+        # silently non-armed, unlike `big4_stale` below which has no such carve-out at all. Any
+        # cctg_stale now unconditionally forces armed=True + sets cctg_note, regardless of what the
+        # last-known CCTG value was (see docstring above).
+        cctg_force_armed = False
+        cctg_note = None
+        try:
+            from cctg_rate_vn import current_cctg_rate_checked
+            cctg_pct, cctg_date, cctg_err = current_cctg_rate_checked(str(asof_ts.date()))
+            if cctg_err is not None:
+                cctg_force_armed = True
+                cctg_note = f"CCTG lỗi/ngoài khoảng ({cctg_err}) -> không xác thực được, fail-closed"
+            elif cctg_pct is not None:
+                cctg_age = (asof_ts - cctg_date).days
+                cctg_stale = check_freshness and cctg_age > stale_days_limit
+                if cctg_stale:
+                    cctg_force_armed = True
+                    cctg_note = (f"CCTG cũ ({cctg_age}d > {stale_days_limit}d), xác nhận thủ công "
+                                 f"lần cuối {cctg_date.date()} ({cctg_pct:.2f}%) -> fail-closed "
+                                 f"(armed)")
+                elif cctg_pct > rate_pct:
+                    rate_pct = cctg_pct
+                    rate_source = f"cctg_6m({cctg_date.date()})"
+        except Exception as exc:
+            cctg_force_armed = True
+            cctg_note = f"CCTG overlay lỗi không lường trước ({exc!r}) -> không xác thực được, fail-closed"
+
+        rate = rate_pct / 100.0
+        age_days = (asof_ts - last_date).days
+        big4_stale = check_freshness and age_days > stale_days_limit
+        stale = big4_stale or (cctg_note is not None)
+        if big4_stale:
+            armed = True
+            reason = (f"feed stale ({age_days}d > {stale_days_limit}d, lần xác nhận thủ "
+                      f"công cuối {last_date.date()}) -> fail-closed (armed)")
+        else:
+            armed = (rate > THRESHOLD) or cctg_force_armed
+            if rate > THRESHOLD:
+                reason = f"{rate_source} {rate_pct:.2f}% > 7.5% -> SUSPEND new recovery deploy"
+            elif cctg_force_armed:
+                # Round-7 fix (2026-10-01, quant-skeptic round-6 "chuỗi reason tự mâu thuẫn"):
+                # the rate itself is <= threshold (what would normally read CLEAR), but the CCTG
+                # side forces armed anyway -- say ARMED up front instead of saying CLEAR and then
+                # contradicting it with "-> ARMED" later in the same string.
+                reason = f"{rate_source} {rate_pct:.2f}% <= 7.5% nhưng ARMED (forced); {cctg_note}"
+            else:
+                reason = f"{rate_source} {rate_pct:.2f}% <= 7.5% -> CLEAR"
+        return {"armed": armed, "rate": rate, "threshold": THRESHOLD, "stale": stale,
+                "last_update": str(last_date.date()), "age_days": age_days, "reason": reason,
+                "rate_source": rate_source, "big4_stale": bool(big4_stale), "cctg_note": cctg_note}
+    except Exception as exc:
+        return {"armed": True, "rate": None, "threshold": THRESHOLD, "stale": True,
+                "last_update": None, "age_days": None, "rate_source": None,
+                "reason": f"error: {exc!r} -> fail-closed (armed)"}
+
+
 def current_deposit_rate(asof=None):
     """asof=None means TODAY, not "the last row in the series" — a future-dated or typo'd
     effective_date (e.g. a year typo) must never pin/pre-empt the live value. Found 2026-07-20
@@ -101,6 +276,93 @@ def current_deposit_rate(asof=None):
     ev = deposit_events_df()
     asof = pd.Timestamp.today().normalize() if asof is None else pd.to_datetime(asof)
     return float(ev[ev.time <= asof].deposit_rate.iloc[-1])
+
+
+def effective_deposit_rate(asof=None, stale_days_limit=45, check_freshness=None):
+    """max(Big-4 12M, Big-4 CCTG 6M) for DISPLAY-ONLY consumers (value_radar.py and future
+    display-only callers) -- added 2026-10-01, same CCTG-overlay policy as
+    macro_killswitch_a_status() (see that function's docstring): CCTG only wins if fresh and
+    in-range, never averaged, never silently replaces Big-4 when Big-4 is higher. UNLIKE
+    macro_killswitch_a_status(), this has no "armed" concept -- it is a plain rate lookup, so a
+    stale/missing/bad Big-4 reading here raises (same as current_deposit_rate()'s existing
+    behavior) rather than fail-closing to some gate state; callers that need fail-closed semantics
+    should use macro_killswitch_a_status(), not this function.
+
+    DO NOT wire this into rating_8l.py's NEUTRAL deposit tilt or into the DCF discount-rate chain
+    (dcf_valuation.py / trading_bot/due_diligence.py / dcf_refresh_gate.py / custom30_yield_labels.py)
+    without an explicit user decision -- both change a LIVE daily production output (rating tilt,
+    fear-buy QUALIFY/NON). See mike/kb/data_registry/macro/cctg_rate_vn.md for the full consumer
+    inventory + diff table.
+
+    Returns dict: rate(float, fraction), rate_pct(float), rate_source("big4_12m"|"cctg_6m(<date>)"),
+    big4_rate_pct(float), cctg_rate_pct(float|None), last_update(str date)."""
+    if check_freshness is None:
+        check_freshness = asof is None
+    asof_ts = pd.Timestamp.today().normalize() if asof is None else pd.to_datetime(asof)
+    big4_pct = current_deposit_rate(str(asof_ts.date()))
+    rate_pct, rate_source = big4_pct, "big4_12m"
+    last_date = asof_ts
+    ev = deposit_events_df()
+    avail = ev[ev.time <= asof_ts]
+    if len(avail):
+        last_date = avail.iloc[-1]["time"]
+    # current_cctg_rate_checked() (not the raw current_cctg_rate()) -- the raw getter has NO
+    # range validation at all, so a CSV typo (fraction-vs-percent, digit transposition) used to
+    # flow straight into this DISPLAY number unchecked (quant-skeptic round-2 fix 1, 2026-10-01).
+    # An error/out-of-range CCTG read here degrades to cctg_pct=None (Big-4-only), same as "no
+    # CCTG data" -- there is no "armed"/stale concept on this function (see docstring), so the
+    # only symmetric behavior available is "don't let a bad value drive the display at all".
+    cctg_pct = None
+    try:
+        from cctg_rate_vn import current_cctg_rate_checked
+        cctg_pct, cctg_date, cctg_err = current_cctg_rate_checked(str(asof_ts.date()))
+        if cctg_err is not None:
+            cctg_pct = None
+        elif cctg_pct is not None and cctg_pct > big4_pct:
+            cctg_age = (asof_ts - cctg_date).days
+            cctg_stale = check_freshness and cctg_age > stale_days_limit
+            if not cctg_stale:
+                rate_pct, rate_source = cctg_pct, f"cctg_6m({cctg_date.date()})"
+    except Exception:
+        cctg_pct = None
+    return {"rate": rate_pct / 100.0, "rate_pct": rate_pct, "rate_source": rate_source,
+            "big4_rate_pct": big4_pct, "cctg_rate_pct": cctg_pct, "last_update": str(last_date.date())}
+
+
+def effective_deposit_events_df():
+    """Same shape as deposit_events_df() (time, deposit_rate) -- a STEP series -- but with
+    cctg_rate_vn's series' own anchor dates UNIONED in as additional breakpoints, each row set to
+    max(Big-4-as-of-that-date, CCTG-as-of-that-date). A naive as-of merge onto deposit_events_df()'s
+    OWN rows alone is a no-op in practice here: Big-4's last anchor row predates CCTG's first
+    anchor (2026-06-01 < 2026-09-30), so a backward merge keyed on Big-4's existing row dates would
+    never land ON a CCTG date and the CCTG value would never surface downstream (caught 2026-10-01
+    before shipping, cctg_overlay_selfcheck.py T8/T9 -- this function's first draft had exactly
+    that bug). Any row strictly before CCTG's first anchor is byte-identical to deposit_events_df()
+    alone (only Big-4 breakpoints exist that far back). For historical/rolling display-only
+    consumers needing the FULL step series (value_radar.py), not a single current-rate lookup --
+    no staleness/fail-closed concept here (there is no "now" inside a historical frame); see
+    macro_killswitch_a_status()/effective_deposit_rate() for the live, fail-closed version.
+
+    Quant-skeptic round-3 fix (2026-10-01): a CCTG-side parse/range error from cctg_events_df()
+    now PROPAGATES instead of being swallowed by a bare `except Exception: return base`. The old
+    silent fallback meant a broken CCTG append (bad header, unparseable value, OR a format-valid
+    typo like "85" that used to have NO range check at all here) would either vanish into a
+    Big-4-only series with zero trace, or -- worse, before cctg_events_df()'s own range guard
+    existed -- flow straight into the displayed deposit_rate as a naked out-of-range number. The
+    sole caller, value_radar.py's load_series() (via value_radar_now()), already treats any
+    exception from this module as "skip this cycle, no Value Radar line" -- showing nothing is
+    strictly safer than showing a silently-wrong or silently-stale number."""
+    base = deposit_events_df()[["time", "deposit_rate"]].copy()
+    from cctg_rate_vn import cctg_events_df
+    cev = cctg_events_df().rename(columns={"cctg_rate": "deposit_rate"})
+    all_dates = (pd.concat([base[["time"]], cev[["time"]]], ignore_index=True)
+                 .drop_duplicates().sort_values("time").reset_index(drop=True))
+    big4_asof = pd.merge_asof(all_dates, base.sort_values("time"), on="time", direction="backward")
+    cctg_asof = pd.merge_asof(all_dates, cev.sort_values("time"), on="time", direction="backward")
+    merged = all_dates.copy()
+    merged["deposit_rate"] = np.fmax(big4_asof["deposit_rate"].to_numpy(dtype=float),
+                                      cctg_asof["deposit_rate"].fillna(-np.inf).to_numpy(dtype=float))
+    return merged.sort_values("time").reset_index(drop=True)
 
 
 if __name__ == "__main__":
