@@ -881,15 +881,19 @@ def main():
         # Big-4+CCTG effective rate wired 2026-10-01 (job Taylor_20261001_054110, user-approved) --
         # rollback knob DEPOSIT_RATE_CCTG_OVERLAY=0 reverts to Big-4-only. See
         # mike/kb/data_registry/macro/cctg_rate_vn.md for the diff table that justified this.
-        from deposit_rate_vn import consumer_deposit_rate
-        _dep = consumer_deposit_rate()
+        # consumer_deposit_rate_detail() (round-2 fix R2) also gives the DRIVER -- printed below so
+        # a CCTG-unavailable/stale fallback is visible here too, not just silently Big-4 (§29).
+        from deposit_rate_vn import consumer_deposit_rate_detail
+        _dep_detail = consumer_deposit_rate_detail()
+        _dep = _dep_detail["rate_pct"]
         _st, _dt5g_stale = dt5g_state_today()   # state cũ VẪN dùng (hành vi không đổi), chỉ thêm cờ
         if int(_st) == 3 and os.environ.get("DEPOSIT_TILT", "1") == "1":          # NEUTRAL only
             _spread = scr["earn_yield"] * 100 - _dep                              # 1/PE(%) - deposit(%)
             _tilt = np.where(scr["val_route"].isin(["COMPOUNDER","CYCLICAL","RETAIL"]) & _spread.notna(),
                              np.where(_spread >= 3, 0.03, np.where(_spread < 0, -0.03, 0.0)), 0.0)
             scr["value_score_v3"] = (scr["value_score_v3"] + _tilt).clip(0, 1).round(3)
-            print(f"  [deposit tilt] NEUTRAL state -> applied gentle ±0.03 hurdle (deposit={_dep:.1f}%, hurdle 3pp)")
+            print(f"  [deposit tilt] NEUTRAL state -> applied gentle ±0.03 hurdle "
+                  f"(deposit={_dep:.1f}%, driver={_dep_detail['rate_source']}, hurdle 3pp)")
     except Exception as e:
         print(f"  [deposit tilt] skipped ({e})")
     # only the validated routes adopt v3; the rest keep v2 unchanged. v3_da additionally moves D&A_HEAVY+POWER

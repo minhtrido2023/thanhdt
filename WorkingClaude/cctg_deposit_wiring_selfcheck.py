@@ -5,6 +5,11 @@ cctg_deposit_wiring_selfcheck.py — selfcheck for deposit_rate_vn.consumer_depo
   rating_8l.py (NEUTRAL deposit tilt), dcf_valuation.py::discount_rate(), dcf_refresh_gate.py,
   custom30_yield_labels.py (batch yield-floor), trading_bot/due_diligence.py (_deposit_rate_pct).
 
+Round-2 fix (job Taylor_20261001_064225, quant-skeptic+arch-review NEEDS_CHANGES on the above):
+sections 7-9 below cover R1 (check_freshness was never explicit, so the 3 consumers that pass an
+explicit asof never aged a stale CCTG reading out) and R2 (a CCTG error/stale read degraded to
+Big-4 SILENTLY -- no log, no trace in rate_source).
+
 Pre-registers THIS checkout's deposit_rate_vn/cctg_rate_vn in sys.modules before importing any
 of the 5 consumer modules — several of them (dcf_valuation.py, dcf_refresh_gate.py) hardcode
 WORKDIR to the absolute production path and `os.chdir()`/`sys.path.insert(0, WORKDIR)` to it,
@@ -100,11 +105,11 @@ print("\nCall-site wiring (grep-equivalent, read the actual source text):")
 import re  # noqa: E402
 
 SITES = {
-    "rating_8l.py": r"from deposit_rate_vn import consumer_deposit_rate",
+    "rating_8l.py": r"from deposit_rate_vn import consumer_deposit_rate_detail",
     "dcf_valuation.py": r"_dep\.consumer_deposit_rate\(",
     "dcf_refresh_gate.py": r"_dep\.consumer_deposit_rate\(",
-    "custom30_yield_labels.py": r"from deposit_rate_vn import consumer_deposit_rate",
-    os.path.join("trading_bot", "due_diligence.py"): r"effective_deposit_rate",
+    "custom30_yield_labels.py": r"from deposit_rate_vn import consumer_deposit_rate\b",
+    os.path.join("trading_bot", "due_diligence.py"): r"from deposit_rate_vn import consumer_deposit_rate_detail",
 }
 for relpath, pattern in SITES.items():
     fp = os.path.join(HERE, relpath)
@@ -131,7 +136,8 @@ DD._CACHE.clear()
 r0, src0 = with_overlay("0", lambda: DD._deposit_rate_pct(POST_TODAY))
 DD._CACHE.clear()
 r1, src1 = with_overlay("1", lambda: DD._deposit_rate_pct(POST_TODAY))
-check("knob=0 label says big4_12m", src0 == "deposit_rate_vn:big4_12m")
+check("knob=0 label says big4_12m(cctg_overlay_disabled)",
+      src0 == "deposit_rate_vn:big4_12m(cctg_overlay_disabled)")
 check("knob=1 label says cctg_6m(...) today (post-anchor)", src1.startswith("deposit_rate_vn:cctg_6m"))
 check("knob=1 rate > knob=0 rate today", r1 > r0)
 DD._CACHE.clear()
@@ -168,6 +174,172 @@ dep.consumer_deposit_rate = _mutant_always_effective
 mutant_caught = with_overlay("0", lambda: dep.consumer_deposit_rate(POST_TODAY)) != dep.current_deposit_rate(POST_TODAY)
 dep.consumer_deposit_rate = _orig
 check("mutant (knob ignored) is caught by the knob=0 equality check", mutant_caught)
+
+# ---- 7. R1 regression: staleness must be PIT-causal (relative to asof), not "asof is None" -----
+# anchor = 2026-09-30. age>45d -> stale -> Big-4-only(6.8). age<=45d -> fresh -> CCTG(7.5) wins.
+# These two fixture dates straddle the EXACT boundary (age 44 fresh, age 46 stale) the docstrings
+# cite -- both are in the future relative to real "today" (2026-10-01) on purpose: a wall-clock-
+# relative check (the pre-fix bug) could never reproduce this with explicit past/future asof, only
+# a true PIT-causal check (relative to the asof argument itself) can.
+print("\nR1 regression — all 5 consumers age out CCTG identically, PIT-causal on asof:")
+STALE_DATE = "2026-11-15"   # anchor+46d -> age 46 > 45 -> stale -> Big-4-only expected
+FRESH_DATE = "2026-11-13"   # anchor+44d -> age 44 <= 45 -> still fresh -> CCTG expected
+BIG4_AT = dep.current_deposit_rate(STALE_DATE)
+CCTG_PCT = 7.5
+
+check("fixture sanity: Big-4-only at both fixture dates == 6.8%", abs(BIG4_AT - 6.8) < 1e-9)
+check("fixture sanity: STALE_DATE is anchor+46d, FRESH_DATE is anchor+44d",
+      (pd.Timestamp(STALE_DATE) - pd.Timestamp(ANCHOR)).days == 46
+      and (pd.Timestamp(FRESH_DATE) - pd.Timestamp(ANCHOR)).days == 44)
+
+check("consumer_deposit_rate(stale) == Big-4-only (CCTG aged out)",
+      dep.consumer_deposit_rate(STALE_DATE) == BIG4_AT)
+check("consumer_deposit_rate(fresh) == CCTG 7.5 (not yet aged out)",
+      dep.consumer_deposit_rate(FRESH_DATE) == CCTG_PCT)
+check("effective_deposit_rate(stale, check_freshness=True) agrees with consumer_deposit_rate",
+      dep.effective_deposit_rate(STALE_DATE, check_freshness=True)["rate_pct"] == BIG4_AT)
+
+DCF._RATE_CACHE.clear()
+dr_stale = DCF.discount_rate(STALE_DATE)
+DCF._RATE_CACHE.clear()
+dr_fresh = DCF.discount_rate(FRESH_DATE)
+check("dcf_valuation.discount_rate(stale) matches Big-4-only leg",
+      abs(dr_stale - (BIG4_AT + DCF.ERP) / 100.0) < 1e-9)
+check("dcf_valuation.discount_rate(fresh) matches CCTG leg",
+      abs(dr_fresh - (CCTG_PCT + DCF.ERP) / 100.0) < 1e-9)
+
+import dcf_refresh_gate as DRG  # noqa: E402
+check("dcf_refresh_gate's consumer_deposit_rate(stale) == Big-4-only",
+      DRG._dep.consumer_deposit_rate(STALE_DATE) == BIG4_AT)
+check("dcf_refresh_gate's consumer_deposit_rate(fresh) == CCTG",
+      DRG._dep.consumer_deposit_rate(FRESH_DATE) == CCTG_PCT)
+
+# custom30_yield_labels._label_one -- exercise the REAL function (not just a direct dep call), so
+# a future drift back to a decoupled copy of the rate lookup (the exact M9/M12 mutant-survival gap
+# flagged in the round-2 dispatch) would be caught here, not just at the central function.
+import custom30_yield_labels as C30  # noqa: E402
+
+_d_stale, _d_fresh = pd.Timestamp(STALE_DATE), pd.Timestamp(FRESH_DATE)
+_px_map = {("AAA", _d_stale): (10000.0, 1234), ("AAA", _d_fresh): (10000.0, 1234)}
+_div_g = pd.DataFrame({
+    "ex": [_d_stale - pd.Timedelta(days=200), _d_stale - pd.Timedelta(days=560),
+           _d_stale - pd.Timedelta(days=920)],
+    "value_per_share": [500.0, 500.0, 500.0]})
+_div_by_tk = {"AAA": _div_g}
+_thr = (0.9, 1.1, 999999)   # (near_lo, near_hi, icb_banking) -- 1234 never matches the sentinel
+_cache_stale, _cache_fresh = {}, {}
+C30._label_one("AAA", _d_stale, _px_map, _div_by_tk, _cache_stale, dep.consumer_deposit_rate, _thr)
+C30._label_one("AAA", _d_fresh, _px_map, _div_by_tk, _cache_fresh, dep.consumer_deposit_rate, _thr)
+check("custom30_yield_labels._label_one (real call path) uses Big-4-only at stale date",
+      _cache_stale.get(str(_d_stale.date())) == BIG4_AT)
+check("custom30_yield_labels._label_one (real call path) uses CCTG at fresh date",
+      _cache_fresh.get(str(_d_fresh.date())) == CCTG_PCT)
+
+DD._CACHE.clear()
+dd_stale, dd_stale_src = with_overlay("1", lambda: DD._deposit_rate_pct(STALE_DATE))
+DD._CACHE.clear()
+dd_fresh, dd_fresh_src = with_overlay("1", lambda: DD._deposit_rate_pct(FRESH_DATE))
+check("due_diligence._deposit_rate_pct(stale) == Big-4-only, labeled big4",
+      dd_stale == BIG4_AT and "big4" in dd_stale_src)
+check("due_diligence._deposit_rate_pct(fresh) == CCTG, labeled cctg",
+      dd_fresh == CCTG_PCT and "cctg" in dd_fresh_src)
+
+print("\nR1 mutant: effective_deposit_rate called with check_freshness forced False (the exact "
+      "pre-fix bug) must be caught by the stale-date equality check:")
+_orig_edr = dep.effective_deposit_rate
+
+
+def _mutant_force_fresh(asof=None, stale_days_limit=45, check_freshness=None):
+    return _orig_edr(asof, stale_days_limit, check_freshness=False)
+
+
+dep.effective_deposit_rate = _mutant_force_fresh
+mutant_r1_caught = dep.consumer_deposit_rate(STALE_DATE) != BIG4_AT
+dep.effective_deposit_rate = _orig_edr
+check("R1 mutant (check_freshness forced False) is caught", mutant_r1_caught)
+
+# ---- 8. R2 regression: a broken/stale CCTG read must be VISIBLE, not silently swallowed --------
+print("\nR2 regression — CCTG failure is logged + annotated, not silently swallowed:")
+import logging as _logging
+
+
+class _CaptureHandler(_logging.Handler):
+    def __init__(self):
+        super().__init__()
+        self.messages = []
+
+    def emit(self, record):
+        self.messages.append(record.getMessage())
+
+
+_handler = _CaptureHandler()
+_dep_logger = _logging.getLogger("deposit_rate_vn")
+_dep_logger.addHandler(_handler)
+_dep_logger.setLevel(_logging.WARNING)
+
+_orig_checked = cctg.current_cctg_rate_checked
+
+
+def _mutant_cctg_broken(asof=None):
+    return None, None, "simulated CSV corruption"
+
+
+cctg.current_cctg_rate_checked = _mutant_cctg_broken
+try:
+    broken_detail = dep.effective_deposit_rate(POST_TODAY, check_freshness=True)
+finally:
+    cctg.current_cctg_rate_checked = _orig_checked
+
+check("R2: CCTG error -> still returns Big-4 rate (fail-open on the display number)",
+      broken_detail["rate_pct"] == dep.current_deposit_rate(POST_TODAY))
+check("R2: rate_source names the real cause (cctg_unavailable), not a bare big4_12m",
+      "cctg_unavailable" in broken_detail["rate_source"])
+check("R2: a WARNING was actually logged for the CCTG error (not silently swallowed)",
+      any("simulated CSV corruption" in m for m in _handler.messages))
+
+_handler.messages.clear()
+stale_detail = dep.effective_deposit_rate(STALE_DATE, check_freshness=True)
+check("R2: rate_source names the real cause (cctg_stale) when CCTG aged out",
+      "cctg_stale" in stale_detail["rate_source"])
+check("R2: a WARNING was actually logged for the CCTG staleness",
+      any("CCTG stale" in m for m in _handler.messages))
+_dep_logger.removeHandler(_handler)
+
+print("\nR2 mutant: silent-swallow (bare except, no annotation) must be caught by the rate_source "
+      "assertions above:")
+_orig_edr2 = dep.effective_deposit_rate
+
+
+def _mutant_silent_swallow(asof=None, stale_days_limit=45, check_freshness=None):
+    """Mutant: reproduces the ORIGINAL round-1 bug -- cctg_err degrades to bare 'big4_12m', no
+    annotation, no log."""
+    d = _orig_edr2(asof, stale_days_limit, check_freshness)
+    if d["rate_source"].startswith("big4_12m("):
+        d = dict(d, rate_source="big4_12m")
+    return d
+
+
+cctg.current_cctg_rate_checked = _mutant_cctg_broken
+dep.effective_deposit_rate = _mutant_silent_swallow
+try:
+    mutant_r2_detail = dep.effective_deposit_rate(POST_TODAY, check_freshness=True)
+finally:
+    cctg.current_cctg_rate_checked = _orig_checked
+    dep.effective_deposit_rate = _orig_edr2
+check("R2 mutant (annotation stripped) is caught by the cctg_unavailable assertion",
+      "cctg_unavailable" not in mutant_r2_detail["rate_source"])
+
+# ---- 9. rating_8l.py call site: uses the detail form and prints the real driver -----------------
+print("\nrating_8l.py call-site check (source inspection — full pipeline run is disproportionate "
+      "for a ±0.03 display print; the shared function's correctness is covered by sections 1-8):")
+with open(os.path.join(HERE, "rating_8l.py"), encoding="utf-8") as f:
+    _r8l_src = f.read()
+check("rating_8l.py imports consumer_deposit_rate_detail (not the bare-float wrapper)",
+      "from deposit_rate_vn import consumer_deposit_rate_detail" in _r8l_src)
+check("rating_8l.py print line includes the driver (rate_source)",
+      "_dep_detail['rate_source']" in _r8l_src)
+check("rating_8l.py calls consumer_deposit_rate_detail() with asof=None (live path)",
+      "consumer_deposit_rate_detail()" in _r8l_src)
 
 print(f"\n{'='*70}\n{len(fails)} FAIL / selfcheck {'PASSED' if not fails else 'FAILED'}")
 if fails:
