@@ -818,3 +818,6 @@
 
 ## Archived 2026-10-01 (keep=12 days=0 require_done=False)
 - [2026-09-30T10:28:12Z] XONG job Taylor_20260930_100845: merge auto-exit LAG/BAL/CAPIT XONG (da merge lan chay truoc, xac nhan lai) + cron 20:40 ICT wired (crontab + kb/cron_registry.md) + LAG phantom-sell guard XAC NHAN co san (broker_positions_with_cost() live, qty<=0 skip). SCL reconcile: SpaceX BAN THAT 1500cp@28.300 (lai rong ~6.970.194d), ZaloPay KHONG co SCL trong email khoplenh hom nay (khac voi claim 'ca 2 account') -> escalate bus question scl-manual-sell-chi-mot-account-khong-phai-hai, CHO USER xac nhan. Neu ZaloPay SCL van mo, cron 20:40 toi se tu dong de xuat sell dung (da qua T+25).
+
+## Archived 2026-10-01 (keep=12 days=0 require_done=False)
+- [2026-09-30T11:27:41Z] [2026-09-30T18:27:41Z] XONG job Taylor_20260930_111053: (1) SCL bus question dong (ZaloPay SCL van giu that, SpaceX tu ban tay). (2) BAL stop-loss -20% wired (WC 49a165a8 + mike 72611fdf), quant-skeptic CONFIRMED, tu dong chay qua cron 20:40 ICT toi nay (dung chung process_account voi 3 trigger cu, khong can wire rieng).
