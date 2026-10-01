@@ -96,10 +96,11 @@ BUY_TIERS = {"MEGA","MOMENTUM","MOMENTUM_N","MOMENTUM_S","MOMENTUM_QUALITY","MOM
              "MOMENTUM_S_N","COMPOUNDER_BUY","DEEP_VALUE_RECOVERY","S_PRO","RE_BACKLOG_BUY"}
 EXB_MOM = {"MEGA","MOMENTUM","MOMENTUM_S","MOMENTUM_QUALITY","MOMENTUM_A","S_PRO"}
 PRIORITY = {t: i for i, t in enumerate(TIER_BAL)}
-ETF_PARK = {3: 0.30}                                 # F1, user chốt 30% 2026-09-27 (was 0.8 từ 08-04)
-                                                      # (was 0.7; see data/trading_rules.json
+ETF_PARK = {3: 0.0}                                  # park TẮT HẲN, user chốt 2026-10-01 10:26 ICT
+                                                      # (was 0.30 từ 09-27, 0.8 từ 08-04, 0.7 ban
+                                                      # đầu; see data/trading_rules.json
                                                       # neutral_parking.default_park_of_idle_pct
-                                                      # + evidence_current_F1_2026-08-04)
+                                                      # + default_change_record_2026-10-01)
 STATE_LAG_WEIGHT = {1: 0.50, 2: 0.00, 3: 0.65, 4: 0.65, 5: 0.65}
 EDGE_THR = 4.0   # %: LAG trailing-12M edge-health threshold (pinned R3 = argv "edge")
 
