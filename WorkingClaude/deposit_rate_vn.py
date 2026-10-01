@@ -148,8 +148,22 @@ def macro_killswitch_a_status(asof=None, stale_days_limit=45, check_freshness=No
     `deposit_rate` column) -- this catches a fraction-vs-percent typo (e.g. an anchor written as
     0.068 meaning 6.8%) before it could silently read as "rate 0.07% <= 7.5% -> CLEAR".
 
+    EFFECTIVE RATE (added 2026-10-01, user directive "CCTG đưa vào model làm nguồn lãi proxy nếu
+    lãi suất cao hơn gửi tiết kiệm"): after resolving the Big-4 12M rate above, this function also
+    looks up cctg_rate_vn.current_cctg_rate() at the same asof and takes max(big4_12m, cctg) IF the
+    CCTG observation is itself fresh (same stale_days_limit) and in-range -- never averages the two,
+    never lets a stale/out-of-range CCTG value override a good Big-4 reading. The CCTG lookup is
+    wrapped in its OWN try/except so any CCTG-side bug degrades to the pre-CCTG Big-4-only behavior,
+    never the reverse (a CCTG bug must not be able to defeat THIS function's fail-closed guarantees).
+    Before 2026-09-30 (CCTG series' first anchor) current_cctg_rate() returns None for every asof,
+    so every call on a date before that is byte-identical to the pre-CCTG implementation -- no
+    historical backtest pinned against this function changes. New key in the return dict:
+    rate_source ("big4_12m" or "cctg_6m(<date>)", None on no-data/error) records which series drove
+    the final rate, since the two are different tenors (12M vs 6M) and a report citing this number
+    must say which one is active (see cctg_rate_vn.py module docstring).
+
     Returns dict: armed(bool), rate(float|None, fraction e.g. 0.068), threshold(0.075),
-    stale(bool), last_update(str date|None), age_days(int|None), reason(str)."""
+    stale(bool), last_update(str date|None), age_days(int|None), reason(str), rate_source(str|None)."""
     THRESHOLD = 0.075
     RATE_MIN_PCT, RATE_MAX_PCT = 0.5, 30.0
     try:
@@ -160,31 +174,46 @@ def macro_killswitch_a_status(asof=None, stale_days_limit=45, check_freshness=No
         avail = ev[ev.time <= asof_ts]
         if avail.empty:
             return {"armed": True, "rate": None, "threshold": THRESHOLD, "stale": True,
-                    "last_update": None, "age_days": None,
+                    "last_update": None, "age_days": None, "rate_source": None,
                     "reason": "no deposit data at/before asof -> fail-closed (armed)"}
         last_date = avail.iloc[-1]["time"]
         rate_pct = float(avail.iloc[-1]["deposit_rate"])
         if not (RATE_MIN_PCT <= rate_pct <= RATE_MAX_PCT):
             return {"armed": True, "rate": None, "threshold": THRESHOLD, "stale": True,
-                    "last_update": str(last_date.date()), "age_days": None,
+                    "last_update": str(last_date.date()), "age_days": None, "rate_source": None,
                     "reason": (f"rate_pct={rate_pct!r} ngoài khoảng hợp lệ "
                                f"[{RATE_MIN_PCT},{RATE_MAX_PCT}] -> fail-closed (armed)")}
+        rate_source = "big4_12m"
+        try:
+            from cctg_rate_vn import current_cctg_rate
+            cctg_pct, cctg_date = current_cctg_rate(str(asof_ts.date()))
+            if (cctg_pct is not None and RATE_MIN_PCT <= cctg_pct <= RATE_MAX_PCT
+                    and cctg_pct > rate_pct):
+                cctg_age = (asof_ts - cctg_date).days
+                cctg_stale = check_freshness and cctg_age > stale_days_limit
+                if not cctg_stale:
+                    rate_pct = cctg_pct
+                    rate_source = f"cctg_6m({cctg_date.date()})"
+        except Exception:
+            pass  # CCTG overlay best-effort only -- never destabilize the Big-4 fail-closed baseline
         rate = rate_pct / 100.0
         age_days = (asof_ts - last_date).days
         stale = check_freshness and age_days > stale_days_limit
         if stale:
             return {"armed": True, "rate": rate, "threshold": THRESHOLD, "stale": True,
                     "last_update": str(last_date.date()), "age_days": age_days,
+                    "rate_source": rate_source,
                     "reason": f"feed stale ({age_days}d > {stale_days_limit}d, lần xác nhận thủ "
                               f"công cuối {last_date.date()}) -> fail-closed (armed)"}
         armed = rate > THRESHOLD
-        reason = (f"deposit {rate_pct:.2f}% > 7.5% -> SUSPEND new recovery deploy" if armed
-                  else f"deposit {rate_pct:.2f}% <= 7.5% -> CLEAR")
+        reason = (f"{rate_source} {rate_pct:.2f}% > 7.5% -> SUSPEND new recovery deploy" if armed
+                  else f"{rate_source} {rate_pct:.2f}% <= 7.5% -> CLEAR")
         return {"armed": armed, "rate": rate, "threshold": THRESHOLD, "stale": False,
-                "last_update": str(last_date.date()), "age_days": age_days, "reason": reason}
+                "last_update": str(last_date.date()), "age_days": age_days, "reason": reason,
+                "rate_source": rate_source}
     except Exception as exc:
         return {"armed": True, "rate": None, "threshold": THRESHOLD, "stale": True,
-                "last_update": None, "age_days": None,
+                "last_update": None, "age_days": None, "rate_source": None,
                 "reason": f"error: {exc!r} -> fail-closed (armed)"}
 
 
@@ -198,6 +227,78 @@ def current_deposit_rate(asof=None):
     ev = deposit_events_df()
     asof = pd.Timestamp.today().normalize() if asof is None else pd.to_datetime(asof)
     return float(ev[ev.time <= asof].deposit_rate.iloc[-1])
+
+
+def effective_deposit_rate(asof=None, stale_days_limit=45, check_freshness=None):
+    """max(Big-4 12M, Big-4 CCTG 6M) for DISPLAY-ONLY consumers (value_radar.py and future
+    display-only callers) -- added 2026-10-01, same CCTG-overlay policy as
+    macro_killswitch_a_status() (see that function's docstring): CCTG only wins if fresh and
+    in-range, never averaged, never silently replaces Big-4 when Big-4 is higher. UNLIKE
+    macro_killswitch_a_status(), this has no "armed" concept -- it is a plain rate lookup, so a
+    stale/missing/bad Big-4 reading here raises (same as current_deposit_rate()'s existing
+    behavior) rather than fail-closing to some gate state; callers that need fail-closed semantics
+    should use macro_killswitch_a_status(), not this function.
+
+    DO NOT wire this into rating_8l.py's NEUTRAL deposit tilt or into the DCF discount-rate chain
+    (dcf_valuation.py / trading_bot/due_diligence.py / dcf_refresh_gate.py / custom30_yield_labels.py)
+    without an explicit user decision -- both change a LIVE daily production output (rating tilt,
+    fear-buy QUALIFY/NON). See mike/kb/data_registry/macro/cctg_rate_vn.md for the full consumer
+    inventory + diff table.
+
+    Returns dict: rate(float, fraction), rate_pct(float), rate_source("big4_12m"|"cctg_6m(<date>)"),
+    big4_rate_pct(float), cctg_rate_pct(float|None), last_update(str date)."""
+    if check_freshness is None:
+        check_freshness = asof is None
+    asof_ts = pd.Timestamp.today().normalize() if asof is None else pd.to_datetime(asof)
+    big4_pct = current_deposit_rate(str(asof_ts.date()))
+    rate_pct, rate_source = big4_pct, "big4_12m"
+    last_date = asof_ts
+    ev = deposit_events_df()
+    avail = ev[ev.time <= asof_ts]
+    if len(avail):
+        last_date = avail.iloc[-1]["time"]
+    cctg_pct = None
+    try:
+        from cctg_rate_vn import current_cctg_rate
+        cctg_pct, cctg_date = current_cctg_rate(str(asof_ts.date()))
+        if cctg_pct is not None and cctg_pct > big4_pct:
+            cctg_age = (asof_ts - cctg_date).days
+            cctg_stale = check_freshness and cctg_age > stale_days_limit
+            if not cctg_stale:
+                rate_pct, rate_source = cctg_pct, f"cctg_6m({cctg_date.date()})"
+    except Exception:
+        pass
+    return {"rate": rate_pct / 100.0, "rate_pct": rate_pct, "rate_source": rate_source,
+            "big4_rate_pct": big4_pct, "cctg_rate_pct": cctg_pct, "last_update": str(last_date.date())}
+
+
+def effective_deposit_events_df():
+    """Same shape as deposit_events_df() (time, deposit_rate) -- a STEP series -- but with
+    cctg_rate_vn's series' own anchor dates UNIONED in as additional breakpoints, each row set to
+    max(Big-4-as-of-that-date, CCTG-as-of-that-date). A naive as-of merge onto deposit_events_df()'s
+    OWN rows alone is a no-op in practice here: Big-4's last anchor row predates CCTG's first
+    anchor (2026-06-01 < 2026-09-30), so a backward merge keyed on Big-4's existing row dates would
+    never land ON a CCTG date and the CCTG value would never surface downstream (caught 2026-10-01
+    before shipping, cctg_overlay_selfcheck.py T8/T9 -- this function's first draft had exactly
+    that bug). Any row strictly before CCTG's first anchor is byte-identical to deposit_events_df()
+    alone (only Big-4 breakpoints exist that far back). For historical/rolling display-only
+    consumers needing the FULL step series (value_radar.py), not a single current-rate lookup --
+    no staleness/fail-closed concept here (there is no "now" inside a historical frame); see
+    macro_killswitch_a_status()/effective_deposit_rate() for the live, fail-closed version."""
+    base = deposit_events_df()[["time", "deposit_rate"]].copy()
+    try:
+        from cctg_rate_vn import cctg_events_df
+        cev = cctg_events_df().rename(columns={"cctg_rate": "deposit_rate"})
+        all_dates = (pd.concat([base[["time"]], cev[["time"]]], ignore_index=True)
+                     .drop_duplicates().sort_values("time").reset_index(drop=True))
+        big4_asof = pd.merge_asof(all_dates, base.sort_values("time"), on="time", direction="backward")
+        cctg_asof = pd.merge_asof(all_dates, cev.sort_values("time"), on="time", direction="backward")
+        merged = all_dates.copy()
+        merged["deposit_rate"] = np.fmax(big4_asof["deposit_rate"].to_numpy(dtype=float),
+                                          cctg_asof["deposit_rate"].fillna(-np.inf).to_numpy(dtype=float))
+        return merged.sort_values("time").reset_index(drop=True)
+    except Exception:
+        return base
 
 
 if __name__ == "__main__":

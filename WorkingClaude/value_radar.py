@@ -212,8 +212,12 @@ def load_series(update=True, rebuild=False):
 
     if W not in sys.path:
         sys.path.insert(0, W)
-    from deposit_rate_vn import deposit_events_df
-    ev = deposit_events_df().sort_values("time")
+    # effective_deposit_events_df() = max(Big-4 12M, Big-4 CCTG 6M) wherever a CCTG anchor exists
+    # (wired 2026-10-01, user directive) -- byte-identical to deposit_events_df() before CCTG's
+    # first anchor (2026-09-30). Value Radar is DISPLAY-ONLY (CLAUDE.md §6b), so this is the
+    # explicitly-approved wiring; see mike/kb/data_registry/macro/cctg_rate_vn.md consumer table.
+    from deposit_rate_vn import effective_deposit_events_df
+    ev = effective_deposit_events_df().sort_values("time")
     d = pd.merge_asof(d, ev, on="time", direction="backward")   # nhân quả: mốc ≤ t
     d["ey"] = 100.0 / d["pe_cap10"]
     d["spread"] = d["ey"] - d["deposit_rate"]
