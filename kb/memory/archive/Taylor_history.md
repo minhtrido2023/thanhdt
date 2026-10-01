@@ -794,3 +794,6 @@
 
 ## Archived 2026-10-01 (keep=12 days=0 require_done=False)
 - [2026-09-28T01:14:33Z] Kiem ke fail-open 09-28 XONG (job Taylor_20260928_005930): REPORT.md + bus finding 'failopen-inventory-20260928'. Con so '~12 call-site' cu KHONG tai lap duoc — quet that ra 867 hit tho nhung chi 9 la fail-open chieu KHONG AN TOAN. CHO USER QUYET sua hay khong (chua sua gi). Ranh gioi cung trong top5: plan.py:648.
+
+## Archived 2026-10-01 (keep=12 days=0 require_done=False)
+- [2026-09-30T01:52:00Z] MO (khong phai treo cho user — chi la viec thiet ke chua lam): 2 cau hoi trong calculated_fear_state_backstop.md muc 2026-09-28 con ngo (is_stable_payer tu rot khi DN cong bo khong chia co tuc; duong park co nen doc insider_flags.json/anomaly_flags.json khong) — PNJ da duoc xu ly (excluded_tickers ca 2 account, bus question CLOSED 2026-09-30), 2 cau nay la debt thiet ke rieng, khong gan voi 1 ma cu the nua.
