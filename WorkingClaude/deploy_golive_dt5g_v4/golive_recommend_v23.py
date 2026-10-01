@@ -1031,6 +1031,22 @@ if not _lever_err and _gate_pass:
                            f"{CAPIT_LEVER_PIT_DEPOSIT_THRESHOLD}% — tương thích khủng hoảng "
                            f"NIỀM TIN/THANH KHOẢN có thể chứa được (Loại 2), PIT filter cho qua")
 
+# HIỂN THỊ-ONLY (user duyệt 2026-10-01, job Taylor_20261001_094254): effective (max Big-4 12M,
+# CCTG 6M) cạnh số Big-4 PIT ở trên — cổng VẪN Big-4-only, field dưới KHÔNG được chạm
+# _pit_structural/_lever_active/_pit_reason. Lỗi tính effective fail-silent-nhưng-có-log, KHÔNG
+# ném ra ngoài khối (pipeline 19:00 chạm cổng vay margin thật).
+_pit_deposit_rate_effective = _pit_deposit_effective_driver = None
+if _pit_deposit_rate is not None:
+    try:
+        _pit_eff_detail = deposit_rate_vn.consumer_deposit_rate_detail(str(LATEST.date()))
+        _pit_deposit_rate_effective = round(float(_pit_eff_detail["rate_pct"]), 2)
+        _pit_deposit_effective_driver = _pit_eff_detail["rate_source"]
+    except Exception as _pit_eff_ex:
+        _pit_deposit_rate_effective = _pit_deposit_effective_driver = None
+        print(f"  WARNING: PIT filter — tính effective-deposit-rate HIỂN THỊ lỗi "
+              f"({type(_pit_eff_ex).__name__}: {_pit_eff_ex}) — chỉ ảnh hưởng hiển thị, "
+              f"quyết định PIT/lever KHÔNG đổi (vẫn dùng Big-4 {_pit_deposit_rate:.2f}%)")
+
 _lever_active = bool(_lever_pol.get("enabled") and not _lever_err and _gate_pass
                      and not _pit_structural
                      and capit_signal_today and capit_size > 0.005 and basket)
@@ -1071,6 +1087,10 @@ capit_lever = {
     "pit_filter_reason": _pit_reason,
     "pit_cpi_yoy": (round(_pit_cpi_yoy, 2) if _pit_cpi_yoy is not None else None),
     "pit_deposit_rate": (round(_pit_deposit_rate, 2) if _pit_deposit_rate is not None else None),
+    # HIỂN THỊ-ONLY (job Taylor_20261001_094254) — KHÔNG đọc 2 field dưới làm quyết định, cổng
+    # vẫn Big-4-only (`pit_deposit_rate` ở trên). None = chưa tính hoặc lỗi tính effective-rate.
+    "pit_deposit_rate_effective": _pit_deposit_rate_effective,
+    "pit_deposit_effective_driver": _pit_deposit_effective_driver,
     "pit_cpi_threshold": CAPIT_LEVER_PIT_CPI_THRESHOLD,
     "pit_deposit_threshold": CAPIT_LEVER_PIT_DEPOSIT_THRESHOLD,
     "reason": ("đòn bẩy CAPIT ĐANG ÁP cho sự kiện này" if _lever_active else

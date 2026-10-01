@@ -34,11 +34,13 @@ Run: python capit_lever_selfcheck.py     (exit 0 = all pass)
 """
 import ast
 import builtins
+import contextlib
 import copy
 import csv
 import dataclasses
 import datetime as _dt
 import glob
+import io
 import json
 import os
 import sys
@@ -2180,6 +2182,88 @@ with tempfile.TemporaryDirectory() as TMP:
           "VỐN TỰ CÓ" in m_off and "sizing" in m_off.lower(), detail=m_off[:150])
     check("L7 …nhưng plan bình thường (không lý do nào) vẫn KHÔNG thêm dòng nào",
           run_margin(dict(_PV_NONE, reasons=[]), None, "x") == "")
+
+    # ─── M. HIỂN THỊ pit_deposit_rate_effective/driver (job Taylor_20261001_094254) ───
+    # Cổng VẪN Big-4-only (`pit_deposit_rate`); 2 field mới chỉ để HIỂN THỊ. Mọi check dưới
+    # đây đối chiếu field hiển thị với `active`/`pit_filter_structural` để chứng minh quyết
+    # định không hề đọc field mới — không phải suy diễn, đo trên chính §6a thật qua run_block.
+    section("M. HIỂN THỊ effective-deposit-rate — KHÔNG đổi quyết định PIT/lever")
+
+    lev_m1, _ = run_block(d_on, dd52=-25.0, signal=True, size=0.50,
+                          basket=BASKET5, targets=base_targets(),
+                          latest=_dt.datetime(2019, 6, 1))
+    check("M1 trước anchor CCTG (2019-06-01) → effective == Big-4 (7,0%), driver big4_12m",
+          lev_m1["pit_deposit_rate_effective"] == lev_m1["pit_deposit_rate"] == 7.0
+          and str(lev_m1["pit_deposit_effective_driver"]).startswith("big4_12m"),
+          detail=str({k: lev_m1[k] for k in
+                      ("pit_deposit_rate", "pit_deposit_rate_effective",
+                       "pit_deposit_effective_driver")}))
+
+    lev_m2, _ = run_block(d_on, dd52=-25.0, signal=True, size=0.50,
+                          basket=BASKET5, targets=base_targets(),
+                          latest=_dt.datetime(2026, 10, 5))
+    check("M2 sau anchor CCTG (2026-10-05) → effective (CCTG 7,5%) KHÁC Big-4 (6,8%) nhưng "
+          "active/structural vẫn đúng Loại 2 (cả hai dưới ngưỡng 9%)",
+          lev_m2["pit_deposit_rate"] == 6.8 and lev_m2["pit_deposit_rate_effective"] == 7.5
+          and "cctg_6m" in str(lev_m2["pit_deposit_effective_driver"])
+          and lev_m2["pit_filter_structural"] is False and lev_m2["active"] is True,
+          detail=str({k: lev_m2[k] for k in
+                      ("pit_deposit_rate", "pit_deposit_rate_effective",
+                       "pit_deposit_effective_driver", "pit_filter_structural", "active")}))
+
+    # M3 MUTANT: effective giả VƯỢT ngưỡng (15%) trong khi Big-4 thật (6,8%) vẫn DƯỚI ngưỡng
+    # 9% — nếu ai đó lỡ nối field hiển thị vào đường quyết định, active sẽ tắt sai. Phải vẫn
+    # active=True / structural=False để PASS.
+    import deposit_rate_vn as _dep_mod
+    _orig_detail = _dep_mod.consumer_deposit_rate_detail
+    _dep_mod.consumer_deposit_rate_detail = lambda asof=None: {
+        "rate_pct": 15.0, "rate_source": "test_mutant_above_threshold"}
+    try:
+        lev_m3, _ = run_block(d_on, dd52=-25.0, signal=True, size=0.50,
+                              basket=BASKET5, targets=base_targets(),
+                              latest=_dt.datetime(2026, 10, 5))
+    finally:
+        _dep_mod.consumer_deposit_rate_detail = _orig_detail
+    check("M3 MUTANT effective giả 15% (>ngưỡng) nhưng Big-4 thật 6,8% (<ngưỡng) → "
+          "active/structural KHÔNG đổi so với M2 (quyết định không phụ thuộc field hiển thị)",
+          lev_m3["pit_deposit_rate_effective"] == 15.0
+          and lev_m3["pit_deposit_effective_driver"] == "test_mutant_above_threshold"
+          and lev_m3["pit_filter_structural"] is False and lev_m3["active"] is True
+          and lev_m3["pit_deposit_rate"] == 6.8,
+          detail=str({k: lev_m3[k] for k in
+                      ("pit_deposit_rate", "pit_deposit_rate_effective",
+                       "pit_deposit_effective_driver", "pit_filter_structural", "active")}))
+
+    # M4: lỗi khi TÍNH effective (hàm hiển thị ném exception) → field None + WARNING log,
+    # quyết định không đổi, exception KHÔNG thoát ra ngoài khối (pipeline 19:00 chạm vay thật).
+    def _raise(*a, **kw):
+        raise RuntimeError("CCTG CSV hỏng (giả lập)")
+    _dep_mod.consumer_deposit_rate_detail = _raise
+    try:
+        _buf = io.StringIO()
+        with contextlib.redirect_stdout(_buf):
+            lev_m4, _ = run_block(d_on, dd52=-25.0, signal=True, size=0.50,
+                                  basket=BASKET5, targets=base_targets(),
+                                  latest=_dt.datetime(2026, 10, 5))
+        _out = _buf.getvalue()
+    finally:
+        _dep_mod.consumer_deposit_rate_detail = _orig_detail
+    check("M4 lỗi tính effective (exception) → field None + WARNING log, quyết định không "
+          "đổi, KHÔNG văng exception ra ngoài khối",
+          lev_m4["pit_deposit_rate_effective"] is None
+          and lev_m4["pit_deposit_effective_driver"] is None
+          and lev_m4["pit_filter_structural"] is False and lev_m4["active"] is True
+          and "WARNING" in _out and "effective-deposit-rate" in _out,
+          detail=_out[-200:])
+
+    # M5: Big-4 PIT chính nó = None (ngoài phạm vi dữ liệu CPI/deposit, trước 2011-01) →
+    # effective display CŨNG None, giữ đúng tinh thần "chỉ tính khi còn cơ hội" của §6a gốc.
+    lev_m5, _ = run_block(d_on, dd52=-25.0, signal=True, size=0.50,
+                          basket=BASKET5, targets=base_targets(),
+                          latest=_dt.datetime(2008, 9, 1))
+    check("M5 Big-4 PIT = None (trước 2011-01) → effective display CŨNG None",
+          lev_m5["pit_deposit_rate"] is None and lev_m5["pit_deposit_rate_effective"] is None
+          and lev_m5["pit_deposit_effective_driver"] is None)
 
 # DỌN artifact của chính test khỏi thư mục PRODUCTION (arch-reviewer vòng 4 #7). Glob dọn ở
 # đầu file chạy TRƯỚC khi các file này được tạo, nên nếu không dọn ở đây thì mỗi lần chạy để
