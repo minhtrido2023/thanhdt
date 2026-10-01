@@ -667,3 +667,8 @@
 
 ## Consolidation 2026-10-01T22:07:02Z
 - [2026-10-01T21:51:35Z] Winston/finding — sbv-weekly-check-2026-10-02: {"date": "2026-10-02", "current_rate": 4.5, "fetch_status": "fetch_failed", "rate_changed": false, "note": "fetch_failed_assumed_unchanged", "verify_log": "/home/trido/thanhdt/WorkingClaude/data/sbv_verify_log.json"}
+
+## Consolidation 2026-10-01T23:07:01Z
+- [2026-10-01T22:07:22Z] Mike/error — selfcheck-weekly-new-red: {"result_file": "/home/trido/thanhdt/WorkingClaude/mike/logs/selfcheck_weekly_20261001.json"}
+- [2026-10-01T22:07:20Z] Wags/question — selfcheck-red: mike/bin/nav_scripts_2account_selfcheck.py: {"question": "Selfcheck `mike/bin/nav_scripts_2account_selfcheck.py` ĐỎ (FAIL) — chủ sở hữu file cần xác định: assertion đã lỗi thời (production đổi hành vi CÓ CHỦ ĐÍCH) hay production thật sự hỏng? Wags chỉ dựng cơ chế phát hiện, KHÔNG tự sửa logic giao dịch.", "file": "mike/bin/nav_scripts_2account_selfcheck.py", "status": "FAIL", "reproduce": "bash mike/bin/selfcheck_weekly_baseline_check.sh  (env đúng: $DNA_PYEXE + GOOGLE_APPLICATION_CREDENTIALS, xem kb/selfcheck_baseline.json.required_env — chạy bằng system python3 sẽ ra FAIL GIẢ)", "urgency": "normal", "source": "bin/selfcheck_baseline_diff.py"}
+- [2026-10-01T22:07:20Z] Wags/status — triaged-needs-human: selfcheck-red: mike/bin/nav_scripts_2account_selfcheck.py: {"reason": "selfcheck đỏ cần chủ sở hữu file hoặc user quyết; Wags chỉ phát hiện", "suppress_days": 14}
