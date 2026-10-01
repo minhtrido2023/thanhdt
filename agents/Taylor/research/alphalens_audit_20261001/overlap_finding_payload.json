@@ -1,0 +1,48 @@
+{
+  "job": "Taylor_20261001_055255",
+  "scope": "READ-ONLY, khong chay backtest moi, khong them trial. Nguon: tav2_bq.fa_ratings_8l (as-of PIT, khong dung fa_ratings legacy), tav2_bq.custom30v_8l (production parking, dung effective_from/effective_to), khong dung ticker_prune.",
+  "a_membership_paper_window": {
+    "month_ends_checked": ["2026-07-31", "2026-08-31", "2026-09-30"],
+    "8L_rating_le_3": {
+      "FPT": "PASS ca 3 thang (rating 2, eff 2026-07-28)",
+      "ACB": "PASS ca 3 thang (rating 2, eff 2026-07-22)",
+      "MBB": "PASS ca 3 thang (rating 2, eff 2026-07-30)",
+      "HDB": "PASS ca 3 thang (rating 3, eff 2026-07-31)"
+    },
+    "custom30V": {
+      "FPT": "KHONG nam trong custom30V ca 3 thang (lan cuoi FPT xuat hien trong custom30V la 2016-11-07..2019-05-06, tu do khong quay lai - yieldcombo loai growth-stock PE cao/co tuc thap)",
+      "ACB": "CO trong custom30V ca 3 thang (rebal 2026-05-05 w=0.0436 -> rebal 2026-08-05 w=0.0475, lien tuc)",
+      "MBB": "CO trong custom30V ca 3 thang (rebal 2026-05-05 w=0.0784 -> rebal 2026-08-05 w=0.0714, lien tuc)",
+      "HDB": "CO trong custom30V ca 3 thang (rebal 2026-05-05 w=0.0496 -> rebal 2026-08-05 w=0.0485, lien tuc)"
+    },
+    "ty_le_thang_co_mat_2022_2026": {
+      "n_thang_tinh": 57,
+      "8L_le_3_pct": {"FPT": 100.0, "ACB": 100.0, "MBB": 100.0, "HDB": 100.0},
+      "custom30V_pct": {"FPT": 0.0, "ACB": 100.0, "MBB": 93.0, "HDB": 94.7}
+    }
+  },
+  "b_overlap_rate": {
+    "8L_le_3": "4/4 ten (100%) trung — ca 4 ten deu la 8L≤3 trong toan bo cua so paper, va 100% thang trong 2022-2026 (gate rong, khong phai yeu to phan biet)",
+    "custom30V": "3/4 ten (75%) trung lien tuc (ACB/MBB/HDB), rieng FPT 0% — khong co trong custom30V bat ky thang nao 2022-2026"
+  },
+  "c_decomposition_excess": {
+    "lens_per_name_return_0630_0930_terp": {"FPT": -1.28, "ACB": -6.84, "MBB": -2.63, "HDB": 6.38},
+    "lens_EW_4ten": -1.09,
+    "vnindex": -4.91,
+    "lens_excess_pp": 3.82,
+    "basket_EW_3ten_da_co_trong_custom30V_ACB_MBB_HDB_loai_FPT": {
+      "EW_return_pct": -1.23,
+      "excess_pp_vs_vnindex": 3.68,
+      "note": "Chi 3 ten ACB/MBB/HDB (da san co trong custom30V, khong co FPT) EW cung cho excess +3.68pp - gan nhu bang +3.82pp cua lens 4 ten"
+    },
+    "basket_weighted_theo_dung_ty_trong_custom30V_rebal_20260505_ACB_MBB_HDB": {
+      "weights_normalized": {"ACB": 0.2539, "MBB": 0.4572, "HDB": 0.2890},
+      "weighted_return_pct": -1.10,
+      "excess_pp_vs_vnindex": 3.81,
+      "note": "Dung dung trong so custom30V (khong co FPT) cho excess +3.81pp - LECH 0.01pp so voi lens +3.82pp (4 ten, EW). Thuc te khong phan biet duoc trong sai so lam tron 2 chu so cua return tung ten."
+    },
+    "ket_luan_decomposition": "Phan lon (toan bo, trong bien sai so) excess +3.82pp cua lens DA CO SAN tu viec custom30V dang nam ACB/MBB/HDB voi trong so gan nhu y het - lens KHONG tao them edge ngoai cai production da nam. FPT (ten duy nhat ngoai ca 2 ro) dong gop return -1.28% gan voi muc trung binh, khong phai driver bat thuong."
+  },
+  "d_ket_luan": "Trung CAO (8L: 4/4=100%; custom30V: 3/4=75% lien tuc, va basket trong-so-dung-nhu-custom30V tai tao gan nhu nguyen ven excess +3.82pp cua lens) => khuyen nghi DUNG han AlphaLens, KHONG mo R&D PIT walk-forward rieng - edge quan sat duoc da nam trong production qua custom30V, khong phai edge moi tu lens PE/PB. Giu nguyen quyet dinh dong chuong trinh (user da chon A 2026-10-01).",
+  "caveat_N": "N doc lap RAT NHO: 4 ten x 1 cua so 3 thang (2026-07->09), 3/4 ten cung nganh ngan hang (tuong quan cao, khong phai 4 quan sat doc lap). KHONG dung thong ke suy luan (p-value, CI) cho ket qua nay - chi la so sanh mo ta/decomposition tren 1 lan quan sat da co, dung voi dung tinh chat 'read-only, khong backtest moi' cua task."
+}

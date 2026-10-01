@@ -1,0 +1,13 @@
+{
+  "verdict": "KHONG_CAN_DINH_CHINH",
+  "checked": ["SpaceX_monthly_report_2026-09.md", "ZaloPay_monthly_report_2026-09.md"],
+  "spacex_closing_positions": "SCL khong xuat hien trong danh muc cuoi thang (dung vi da ban het) - positions.py dung broker_positions tu dnse_raw, khong qua exec journal nen tu dung du khong co FILL journal",
+  "spacex_attribution_table": "SCL +750000 trong bang dong gop thang la bien dong GIA TRONG THANG (gia dau thang uoc 27800 -> ban 28300 x 1500cp), khac muc dich voi lai tron doi vong doi ~7.05 trieu - hai so khac nhau vi khac dinh nghia, khong phai sai sot",
+  "spacex_narrative_section5": "chot 1500cp gia 28300 von 23600 lai rong sau phi thue khoang 7.0 trieu - khop voi so dispatch 6.97 trieu phi 79806 dong, chenh lech chi do lam tron",
+  "spacex_cost_table": "gia tri ban thang 288760000 = 246.3tr tai can bang + 42.45tr SCL - khop; thue chuyen nhuong 288760 = 0.1 phan tram tong da gom SCL - khop",
+  "zalopay_scl": "van giu 1000cp dung thuc te, co rieng muc 7.6 giai thich SpaceX ban tay rieng con ZaloPay giu nguyen - khong bi anh huong cheo",
+  "root_cause_why_already_correct": "script tao bao cao research slash monthly_report_202609 slash attribution.py dong 20 da tu patch bang tay sell value SCL 1500 nhan 28300 kem comment doi soat qua email va bien dong tien mat, vi tai thoi diem tao luc 2 gio sang journal con thieu fill nay; positions.py doc truc tiep tu broker raw nen rieng phan danh muc cuoi thang tu dung dung khong can patch",
+  "infra_finding_item5": "verify_account_snapshot.py la cong cu chuan muc theo quy chuan, ham chinh true_fills_from_dnse_raw doc fill event tu broker raw dnse, KHONG phu thuoc exec journal lam nguon duy nhat - journal chi la ban cross check doc lap rieng. Nen cong cu chinh thuc nay khong co lo hong nay. Lo hong chi nam o 1 script nghien cuu ad hoc dung glob journal lam nguon duy nhat khong co doi chieu, da duoc nguoi lam bao cao vang tay phat hien va patch thu cong truoc khi xuat ban",
+  "recommendation": "khong can ban dinh chinh gui lai, bao cao da gui dung roi. De xuat rieng khong tu ap dung: them 1 buoc doi chieu tu dong trong script dang attribution tuong tu ve sau, so khoi luong dau cuoi ky tu broker voi tong fill tu journal va canh bao neu lech thay vi im lang tin tuong journal day du",
+  "scope_not_checked": "chua kiem rieng daily EOD va weekly template co dung kieu glob journal tuong tu khong, neu can de xuat dispatch rieng"
+}

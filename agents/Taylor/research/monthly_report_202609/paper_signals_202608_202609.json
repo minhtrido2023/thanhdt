@@ -1,0 +1,368 @@
+{
+ "stats": {
+  "main|2026-08": {
+   "files": 17,
+   "evidence": 17,
+   "place": 158,
+   "fill": 146,
+   "fails": {},
+   "fail_days": {},
+   "markers": 0,
+   "hybrid_defer": 38,
+   "expvol_shadow": 0
+  },
+  "main|2026-09": {
+   "files": 20,
+   "evidence": 20,
+   "place": 264,
+   "fill": 241,
+   "fails": {},
+   "fail_days": {},
+   "markers": 0,
+   "hybrid_defer": 71,
+   "expvol_shadow": 0
+  },
+  "SpaceX|2026-08": {
+   "files": 8,
+   "evidence": 8,
+   "place": 121,
+   "fill": 80,
+   "fails": {
+    "ATC_FAIL": 44,
+    "CANCEL_FAIL": 4,
+    "POLL_FAIL": 41
+   },
+   "fail_days": {
+    "2026-08-07": 45,
+    "2026-08-10": 2,
+    "2026-08-11": 34,
+    "2026-08-13": 6,
+    "2026-08-14": 2
+   },
+   "markers": 0,
+   "hybrid_defer": 0,
+   "expvol_shadow": 1
+  },
+  "SpaceX|2026-09": {
+   "files": 5,
+   "evidence": 5,
+   "place": 84,
+   "fill": 68,
+   "fails": {
+    "CANCEL_FAIL": 1
+   },
+   "fail_days": {
+    "2026-09-17": 1
+   },
+   "markers": 0,
+   "hybrid_defer": 4,
+   "expvol_shadow": 0
+  },
+  "ZaloPay|2026-08": {
+   "files": 6,
+   "evidence": 6,
+   "place": 66,
+   "fill": 42,
+   "fails": {
+    "PLACE_FAIL": 944,
+    "CANCEL_FAIL": 4,
+    "POLL_FAIL": 29
+   },
+   "fail_days": {
+    "2026-08-10": 946,
+    "2026-08-11": 23,
+    "2026-08-13": 7,
+    "2026-08-14": 1
+   },
+   "markers": 0,
+   "hybrid_defer": 0,
+   "expvol_shadow": 0
+  },
+  "ZaloPay|2026-09": {
+   "files": 7,
+   "evidence": 7,
+   "place": 34,
+   "fill": 32,
+   "fails": {
+    "CANCEL_FAIL": 1,
+    "PLACE_FAIL": 3660,
+    "ATC_FAIL": 264
+   },
+   "fail_days": {
+    "2026-09-17": 1,
+    "2026-09-29": 3924
+   },
+   "markers": 0,
+   "hybrid_defer": 5,
+   "expvol_shadow": 75
+  }
+ },
+ "fill_vs_open": {
+  "main|2026-08": {
+   "buy_fills": 67,
+   "buy_in_block": 53,
+   "buy_in_oldwin": 38,
+   "buy_days": [
+    "2026-08-05",
+    "2026-08-07",
+    "2026-08-10",
+    "2026-08-11",
+    "2026-08-13",
+    "2026-08-17",
+    "2026-08-18",
+    "2026-08-20",
+    "2026-08-24",
+    "2026-08-26",
+    "2026-08-27"
+   ],
+   "sell_fills": 79,
+   "sell_in_block": 66,
+   "sell_in_oldwin": 44,
+   "buy_vs_open": {
+    "n_days": 11,
+    "n_fills": 67,
+    "mean": 12.2,
+    "sd": 26.5,
+    "se": 8.0
+   },
+   "sell_vs_open": {
+    "n_days": 12,
+    "n_fills": 79,
+    "mean": -2.8,
+    "sd": 30.1,
+    "se": 8.7
+   },
+   "buy_vs_open_hybrid_blocks": {
+    "n_days": 8,
+    "n_fills": 53,
+    "mean": 14.4,
+    "sd": 31.2,
+    "se": 11.0
+   },
+   "missing_open": 0,
+   "plays": {
+    "churn": 146
+   }
+  },
+  "main|2026-09": {
+   "buy_fills": 124,
+   "buy_in_block": 124,
+   "buy_in_oldwin": 71,
+   "buy_days": [
+    "2026-09-03",
+    "2026-09-07",
+    "2026-09-08",
+    "2026-09-10",
+    "2026-09-14",
+    "2026-09-15",
+    "2026-09-17",
+    "2026-09-21",
+    "2026-09-22",
+    "2026-09-24",
+    "2026-09-28",
+    "2026-09-29"
+   ],
+   "sell_fills": 117,
+   "sell_in_block": 111,
+   "sell_in_oldwin": 76,
+   "buy_vs_open": {
+    "n_days": 12,
+    "n_fills": 124,
+    "mean": -12.4,
+    "sd": 66.0,
+    "se": 19.0
+   },
+   "sell_vs_open": {
+    "n_days": 8,
+    "n_fills": 117,
+    "mean": -1.8,
+    "sd": 14.2,
+    "se": 5.0
+   },
+   "buy_vs_open_hybrid_blocks": {
+    "n_days": 12,
+    "n_fills": 124,
+    "mean": -12.4,
+    "sd": 66.0,
+    "se": 19.0
+   },
+   "missing_open": 0,
+   "plays": {
+    "churn": 241
+   }
+  },
+  "SpaceX|2026-08": {
+   "buy_fills": 53,
+   "buy_in_block": 15,
+   "buy_in_oldwin": 5,
+   "buy_days": [
+    "2026-08-10",
+    "2026-08-11",
+    "2026-08-13",
+    "2026-08-14",
+    "2026-08-17",
+    "2026-08-28"
+   ],
+   "sell_fills": 27,
+   "sell_in_block": 14,
+   "sell_in_oldwin": 14,
+   "buy_vs_open": {
+    "n_days": 6,
+    "n_fills": 53,
+    "mean": -930.5,
+    "sd": 2118.5,
+    "se": 864.9
+   },
+   "sell_vs_open": {
+    "n_days": 2,
+    "n_fills": 27,
+    "mean": 46.6,
+    "sd": 83.6,
+    "se": 59.1
+   },
+   "buy_vs_open_hybrid_blocks": {
+    "n_days": 3,
+    "n_fills": 15,
+    "mean": -107.7,
+    "sd": 228.7,
+    "se": 132.1
+   },
+   "missing_open": 0,
+   "plays": {
+    "PARK_TRIM+JIT_UNPARK": 10,
+    "PARK_TRIM": 3,
+    "JIT_UNPARK": 14,
+    "LAG_HI": 10,
+    "DISCRETIONARY_ADD": 19,
+    "PARK_ADD": 15,
+    "DISCRETIONARY_SPECIAL_SITUATION": 8,
+    "RIGHTS_SUBSCRIPTION": 1
+   }
+  },
+  "SpaceX|2026-09": {
+   "buy_fills": 6,
+   "buy_in_block": 6,
+   "buy_in_oldwin": 1,
+   "buy_days": [
+    "2026-09-17",
+    "2026-09-18"
+   ],
+   "sell_fills": 62,
+   "sell_in_block": 60,
+   "sell_in_oldwin": 36,
+   "buy_vs_open": {
+    "n_days": 2,
+    "n_fills": 6,
+    "mean": -46.0,
+    "sd": 65.0,
+    "se": 46.0
+   },
+   "sell_vs_open": {
+    "n_days": 4,
+    "n_fills": 62,
+    "mean": -2.6,
+    "sd": 24.9,
+    "se": 12.5
+   },
+   "buy_vs_open_hybrid_blocks": {
+    "n_days": 2,
+    "n_fills": 6,
+    "mean": -46.0,
+    "sd": 65.0,
+    "se": 46.0
+   },
+   "missing_open": 0,
+   "plays": {
+    "RE_BACKLOG_BUY": 1,
+    "PARK_TRIM": 62,
+    "RE_BACKLOG_BUY_TOPUP": 5
+   }
+  },
+  "ZaloPay|2026-08": {
+   "buy_fills": 34,
+   "buy_in_block": 8,
+   "buy_in_oldwin": 4,
+   "buy_days": [
+    "2026-08-10",
+    "2026-08-11",
+    "2026-08-13",
+    "2026-08-14",
+    "2026-08-28"
+   ],
+   "sell_fills": 8,
+   "sell_in_block": 0,
+   "sell_in_oldwin": 0,
+   "buy_vs_open": {
+    "n_days": 5,
+    "n_fills": 34,
+    "mean": -1104.0,
+    "sd": 2321.6,
+    "se": 1038.3
+   },
+   "sell_vs_open": {
+    "n_days": 1,
+    "n_fills": 8,
+    "mean": -35.5,
+    "sd": null,
+    "se": null
+   },
+   "buy_vs_open_hybrid_blocks": {
+    "n_days": 3,
+    "n_fills": 8,
+    "mean": -104.5,
+    "sd": 232.0,
+    "se": 133.9
+   },
+   "missing_open": 0,
+   "plays": {
+    "PARK_TRIM+JIT_UNPARK": 7,
+    "PARK_TRIM": 1,
+    "LAG_HI": 4,
+    "PARK_ADD": 11,
+    "DISCRETIONARY_ADD": 12,
+    "DISCRETIONARY_SPECIAL_SITUATION": 6,
+    "RIGHTS_SUBSCRIPTION": 1
+   }
+  },
+  "ZaloPay|2026-09": {
+   "buy_fills": 6,
+   "buy_in_block": 4,
+   "buy_in_oldwin": 1,
+   "buy_days": [
+    "2026-09-14",
+    "2026-09-17",
+    "2026-09-18"
+   ],
+   "sell_fills": 26,
+   "sell_in_block": 26,
+   "sell_in_oldwin": 26,
+   "buy_vs_open": {
+    "n_days": 3,
+    "n_fills": 6,
+    "mean": -59.6,
+    "sd": 52.6,
+    "se": 30.4
+   },
+   "sell_vs_open": {
+    "n_days": 4,
+    "n_fills": 26,
+    "mean": -2.9,
+    "sd": 20.2,
+    "se": 10.1
+   },
+   "buy_vs_open_hybrid_blocks": {
+    "n_days": 2,
+    "n_fills": 4,
+    "mean": -39.6,
+    "sd": 56.0,
+    "se": 39.6
+   },
+   "missing_open": 0,
+   "plays": {
+    "DISCRETIONARY_SPECIAL_SITUATION": 2,
+    "RE_BACKLOG_BUY": 4,
+    "PARK_TRIM": 26
+   }
+  }
+ }
+}
