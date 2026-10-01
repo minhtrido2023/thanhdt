@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updated": "2026-09-25",
+  "updated": "2026-10-01",
   "description": "Registry các chương trình PAPER-TRADING đang active — nguồn duy nhất cho paper_programs_daily_report.py. Thêm sleeve mới = thêm 1 entry (không sửa code render). Probe types: command | journal_scan | alphalens. Field BẮT BUỘC cho entry mới (v3, redesign trình bày 2026-07-31): today_activity (mode journal|csv_row|static|none_available — thiếu field này thì report báo WATCH vì không phân biệt được 'không có giao dịch' với 'không đo được'), review_short (mốc nghiệm thu 1 dòng), và nên có headline (csv_row hoặc regex) để dòng đầu section có số. objective/end_or_trigger/gate_criteria/notes = phần TĨNH, KHÔNG in lại mỗi ngày nữa — tự sinh ra mike/kb/paper_programs_charter/<id>.md, report chỉ link tới.",
   "programs": [
     {
@@ -365,15 +365,18 @@
       "gate_criteria": [
         {
           "text": "Excess return dương vs VNINDEX qua full window 3 tháng",
-          "status": "pending"
+          "status": "pass",
+          "note": "AUDIT 2026-10-01 (job Taylor_20261001_004002), tái lập ĐỘC LẬP từ tav2_bq.ticker Close (không chỉ đọc probe): FPT −1,28% · ACB −6,84% · MBB −2,63% (terp) · HDB +6,38% ⇒ EW −1,09% vs VNINDEX −4,91% (1860,01→1768,62) ⇒ excess +3,82pp; accrue-only (bỏ quyền MBB) +2,80pp. Khớp từng chữ số với probe báo cáo 10-01. Leave-one-out đều dương (+1,33…+5,74). Giá vào 06-30 close KHÔNG giao dịch được (DollarBill chốt 22:15 ICT 06-30) ⇒ vào 07-01 open +3,65pp, 07-01 close +2,01pp (accrue-only +1,00pp; bỏ HDB ở biến thể này −0,21pp) — dương ở MỌI quy ước, nhưng biên mỏng ~1pp ở ca xấu nhất. Control cùng cửa sổ: EW top-30 ADV −7,28%, EW 13 ngân hàng thanh khoản (ngoài ACB/MBB/HDB) −7,48%. Hệ số FPT nay ổn định (Close/Price 0,90912 tại 06-30, min 0,90904) ⇒ KHÔNG còn là chặn dưới. quant-skeptic CONFIRMED/high. Script+output: mike/agents/Taylor/research/alphalens_audit_20261001/"
         },
         {
           "text": "Exit conditions per-name không bị vi phạm sớm (PE > PE_MA1Y / PB > justPB)",
-          "status": "pending"
+          "status": "pass",
+          "note": "AUDIT 2026-10-01: 63 phiên 07-01→09-30, 0 vi phạm. FPT PE 10,80–12,95 vs PE_MA1Y point-in-time theo Release_Date (18,69 tới 2026Q2 công bố 07-28, sau đó 16,33) ⇒ max PE/PE_MA1Y 0,782. Ngân hàng PB vs justPB=(ROE5Y−0,05)/0,08 đúng entry_condition (ACB 2,249 / MBB 2,211 / HDB 2,345) ⇒ max PB/justPB 0,621 / 0,633 / 0,711. Biên rộng, không nhạy với lựa chọn PIT."
         },
         {
           "text": "Audit độc lập bởi Taylor tại 2026-09-30",
-          "status": "pending"
+          "status": "pass",
+          "note": "Audit Taylor 2026-10-01 (trễ 1 ngày, dữ liệu chốt close 09-30), quant-skeptic CONFIRMED/high. Ex-ante xác nhận: bus DollarBill 2026-06-30T15:15Z (kb/archive/2026-W26-W27-raw-events.md) liệt kê đúng 4 mã + giá trước phiên 07-01 (data/alphalens_paper.json bị gitignore nên không chứng minh bằng git được)."
         }
       ],
       "probe": {
@@ -386,11 +389,12 @@
         "data/bq_cache/ticker_1m.parquet (Close + VNINDEX, sync 23:45 ICT)"
       ],
       "notes": "Giá MTM từ BQ cache (close phiên gần nhất đã sync) — trong phiên sẽ trễ 1 ngày, đúng thiết kế EOD.",
-      "review_short": "2026-09-30 — audit độc lập bởi Taylor",
+      "review_short": "✅ 3/3 gate PASS (audit Taylor 2026-10-01, quant-skeptic CONFIRMED/high): excess +3,82pp terp / +2,80pp accrue-only (vào 07-01 close: +2,01 / +1,00pp), 0 vi phạm exit. ⚠️ PASS THEO CHỮ ≠ BẰNG CHỨNG EDGE: N = 1 cửa sổ 3 tháng × 4 tên chọn TAY (không ghi lại bao nhiêu mã qua lens ngày 06-30) ⇒ kiểm tra 4 lựa chọn này, KHÔNG kiểm tra lens. KHUYẾN NGHỊ (chờ user): (A) ĐÓNG chương trình, không wire live; nếu muốn dùng lens ⇒ mở R&D backtest PIT walk-forward IS 2014-19/OOS 2020+, DSR/PBO, đo GIA TĂNG so với tilt giá trị custom30V/8L đang chạy + quant-skeptic. (B) gia hạn paper thêm 1 quý — giá trị thấp (+1 quan sát).",
       "today_activity": {
         "mode": "static",
         "text": "**Không có giao dịch** — buy-and-hold theo thiết kế (equal-weight 25%/tên, không rebalance, giữ tới 2026-09-30)"
-      }
+      },
+      "status": "review-done 2026-10-01 — chờ user quyết bước kế (KHÔNG tự wire live)"
     },
     {
       "id": "order_book_execution_shadow",

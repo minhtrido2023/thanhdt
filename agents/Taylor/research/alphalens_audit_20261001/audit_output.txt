@@ -1,0 +1,13 @@
+== Gate 1 (terp, Close hồi tố vintage hiện tại) ==
+  vào 06-30 close: ACB -6.84% FPT -1.28% HDB +6.38% MBB -2.63% | EW -1.09% vs VNINDEX -4.91% ⇒ excess +3.82pp | LOO -ACB +5.74 -FPT +3.88 -HDB +1.33 -MBB +4.33
+  vào 07-01 open: ACB -6.84% FPT -1.56% HDB +6.38% MBB -3.01% | EW -1.26% vs VNINDEX -4.91% ⇒ excess +3.65pp | LOO -ACB +5.51 -FPT +3.75 -HDB +1.11 -MBB +4.24
+  vào 07-01 close: ACB -6.84% FPT -4.93% HDB +3.38% MBB -4.70% | EW -3.27% vs VNINDEX -5.28% ⇒ excess +2.01pp | LOO -ACB +3.20 -FPT +2.56 -HDB -0.21 -MBB +2.48
+== Gate 2 (exit condition hằng ngày 07-01..09-30) ==
+  ACB: n=63 max ratio 0.621 violations 0
+  FPT: n=63 max ratio 0.782 violations 0
+  HDB: n=63 max ratio 0.711 violations 0
+  MBB: n=63 max ratio 0.633 violations 0
+== Control ==
+  loại |r|>40%: ['PNJ']
+  EW top-30 ADV: -7.28% | EW ngân hàng ngoài 3 tên (n=13): -7.48%
+  VPB: [0.0925]
