@@ -791,3 +791,6 @@
 
 ## Archived 2026-10-01 (keep=12 days=0 require_done=False)
 - [2026-09-27T18:09:07Z] CHO USER DUYET (job Taylor_20260927_170645, 2026-09-28): so pin R3 moi theo quy uoc tien nhan roi dep1m = CAGR 25,71% / Sharpe 2,06 / DD -14,0% / Calmar 1,83, NEO SIZING DD 5th = -23,6% (cu -25,2%). 3 file .proposed cho Mike duyet §13 (results_registry_septies + 2 data_registry macro). | CAN USER QUYET TRUOC KHI AP: CLAUDE.md § Backtest van ghi 'lai tien gui nhan roi 0%/nam' va 2 script trich 'per CLAUDE.md' => mau thuan voi so pin moi; phuong an A (sua CLAUDE.md) hay B (so song song, khong thay headline R3). | BAI HOC: +2,34pp Delta = 2,05pp SO HOC (tien nhan roi 46% NAV) + 0,285pp duong di (DUOI san nhieu 0,46pp) => doi thuoc do, KHONG phai he tot len; KHONG mo lai xep hang phuong tien park (van W2b).
+
+## Archived 2026-10-01 (keep=12 days=0 require_done=False)
+- [2026-09-28T01:14:33Z] Kiem ke fail-open 09-28 XONG (job Taylor_20260928_005930): REPORT.md + bus finding 'failopen-inventory-20260928'. Con so '~12 call-site' cu KHONG tai lap duoc — quet that ra 867 hit tho nhung chi 9 la fail-open chieu KHONG AN TOAN. CHO USER QUYET sua hay khong (chua sua gi). Ranh gioi cung trong top5: plan.py:648.
