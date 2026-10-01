@@ -9,3 +9,5 @@
 ## Chờ user: định nghĩa 'xu hướng hạ' (trigger park); quyết rating_8l/DCF dùng effective rate (bảng diff registry cctg_rate_vn.md); Discretionary DRI/TV1.
 ## Backlog: 9 topic selfcheck-red cần triage; VNM exright note cho Winston.
 
+- [2026-10-01T04:30:33Z] 11:30 kill-switch A: quant-skeptic vòng 4 NOT_CONFIRMED (close): còn (1) dòng CSV CCTG ngày ≤ anchor 2026-09-30 bị drop im lặng, (2) text trigger v2 nói 'stale→armed ngay' nhưng code chỉ armed nếu lần đọc cuối >7,5, (3) docstring cũ. Chờ user: chấp nhận merge kèm gap hay vòng 5 micro-fix. Branch wire/macro-killswitch-a-deposit75-20261001 (814a91ff) CHƯA merge. Park 0% + SCL ledger đã xong.
+- [2026-10-01T04:41:03Z] 11:40 user DUYỆT: (a) vòng 5 micro-fix kill-switch A; (b) CHÍNH SÁCH tiền sau park 0%: tiền thu về phần lớn VÀO TRỨNG VÀNG, trừ khi số tiền quá ít hoặc tiền chưa về (T+2/chưa settle) — user chấp nhận dồn egg, chưa nêu trần cụ thể. Dispatch: Taylor killswitch vòng 5, Taylor egg-routing design (read-only), Taylor/data-ops kiểm báo cáo tháng 09 SCL SpaceX.
