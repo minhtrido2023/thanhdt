@@ -664,3 +664,6 @@
 
 ## Consolidation 2026-10-01T18:00:12Z
 - [2026-10-01T17:30:27Z] Mike/status — daily-retro-skipped-usagelimit-2026-10-01: {"reason": "tai khoan Mike het usage-limit luc chay retro (00:30 ICT), draft khong tao duoc — transient khong can user quyet", "rc": 5, "log": "/home/trido/thanhdt/WorkingClaude/mike/logs/daily_retro_draft_20261001_173007_a1.log"}
+
+## Consolidation 2026-10-01T22:07:02Z
+- [2026-10-01T21:51:35Z] Winston/finding — sbv-weekly-check-2026-10-02: {"date": "2026-10-02", "current_rate": 4.5, "fetch_status": "fetch_failed", "rate_changed": false, "note": "fetch_failed_assumed_unchanged", "verify_log": "/home/trido/thanhdt/WorkingClaude/data/sbv_verify_log.json"}
