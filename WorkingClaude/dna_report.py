@@ -509,7 +509,16 @@ def get_macro_killswitch_a():
 
 def build_macro_killswitch_a_line(html=True):
     """One-line status for the daily/weekly/monthly 'Market regime context' block. DISPLAY-ONLY
-    (see get_macro_killswitch_a docstring) — không tác động sizing/gate. None -> caller drops it."""
+    (see get_macro_killswitch_a docstring) — không tác động sizing/gate. None -> caller drops it.
+
+    Source/tenor tag (fixed 2026-10-01, quant-skeptic round-2 fix 2): the old tail hardcoded
+    "Big-4 12M deposit" + "khác CCTG 6 tháng đang chờ legal-vn" UNCONDITIONALLY, which went stale
+    the moment the CCTG overlay (deposit_rate_vn.macro_killswitch_a_status's rate_source field,
+    wired same day) actually started driving the number — the line kept citing the 12M tenor and
+    an outstanding legal-vn question that had already been answered (user-relayed, still a
+    secondary source: CCTG ≈ tiết kiệm về bảo hiểm tiền gửi theo Luật 111/2025 — hạn mức 350tr/
+    người/NH, lãi miễn thuế TNCN, trần lãi SBV chỉ áp kỳ hạn <6 tháng). Now the tail reads
+    `v["rate_source"]` so it always names whichever tenor actually drove the displayed rate."""
     v = get_macro_killswitch_a()
     if not v:
         return None
@@ -517,8 +526,15 @@ def build_macro_killswitch_a_line(html=True):
     rate_s = f"{v['rate']*100:.1f}%" if v["rate"] is not None else "N/A"
     verdict = "ARMED" if v["armed"] else "CLEAR"
     stale_tag = " ⚠️STALE→fail-closed" if v["stale"] else ""
-    tail = ("(Big-4 12M deposit vs macro_kill_switches.A 7,5% — chỉ hiển thị, sleeve recovery "
-            "chưa LIVE nên không có gì bị gate; khác CCTG 6 tháng đang chờ legal-vn)")
+    rate_source = v.get("rate_source")
+    if rate_source and rate_source.startswith("cctg_6m"):
+        src_label = f"CCTG Big-4 6 tháng ({rate_source.split('(', 1)[-1].rstrip(')')})"
+    elif rate_source == "big4_12m":
+        src_label = "Big-4 12 tháng"
+    else:
+        src_label = "N/A"
+    tail = (f"({src_label} vs macro_kill_switches.A 7,5% — chỉ hiển thị, sleeve recovery "
+            "chưa LIVE nên không có gì bị gate)")
     tail = f"<i>{tail}</i>" if html else tail
     return f"{badge} Macro kill-switch A: {rate_s} vs 7,5% — {verdict}{stale_tag} {tail}"
 

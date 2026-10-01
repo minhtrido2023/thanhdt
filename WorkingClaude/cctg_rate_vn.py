@@ -39,6 +39,10 @@ CCTG_EVENTS = [
     ("2026-09-30", 7.5),
 ]
 
+# Same sanity fence as deposit_rate_vn.py's Big-4 guard (0.5%..30%) -- duplicated, not imported,
+# to avoid a circular import (deposit_rate_vn.py imports FROM this module).
+RATE_MIN_PCT, RATE_MAX_PCT = 0.5, 30.0
+
 _EVENTS_CSV = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "cctg_rate_vn_events.csv")
 
 
@@ -78,3 +82,34 @@ def current_cctg_rate(asof=None):
     last_date = avail.iloc[-1]["time"]
     rate_pct = float(avail.iloc[-1]["cctg_rate"])
     return rate_pct, last_date
+
+
+def current_cctg_rate_checked(asof=None):
+    """Same as current_cctg_rate() but makes CCTG-side problems VISIBLE to the caller instead of
+    letting them disappear into "no CCTG data, fall back to Big-4 silently" -- added 2026-10-01
+    per quant-skeptic round-2 fix 1. Before this, every CCTG-side failure mode (a corrupt/
+    unparseable CSV, an out-of-range typo'd value e.g. a fraction-vs-percent slip) was swallowed by
+    macro_killswitch_a_status()'s bare `except Exception: pass` around the CCTG overlay call --
+    degrading a fail-CLOSED gate into fail-OPEN on the Big-4-only reading whenever the CCTG side
+    broke, asymmetric with how every Big-4-side failure in that same function is handled (fail-
+    closed with an explicit reason). This function centralizes the validation so every caller
+    (macro_killswitch_a_status, effective_deposit_rate) gets the same symmetric treatment.
+
+    Returns (rate_pct|None, date|None, error|None):
+      - error is a short diagnostic string (rate_pct/date forced to None) when: (a)
+        cctg_events_df() raises (corrupt CSV -- same loud-propagation policy as
+        deposit_rate_vn.deposit_events_df()'s ParserError handling), or (b) the raw value is
+        outside the sanity fence [RATE_MIN_PCT, RATE_MAX_PCT].
+      - error is None (rate_pct/date may legitimately still be None) when there is simply no CCTG
+        observation at/before asof -- that is NOT an error, it is the normal pre-anchor state
+        (any asof before 2026-09-30) and callers must keep treating it as silent Big-4 fallback."""
+    try:
+        rate_pct, date = current_cctg_rate(asof)
+    except Exception as exc:
+        return None, None, f"cctg error: {exc!r}"
+    if rate_pct is None:
+        return None, None, None
+    if not (RATE_MIN_PCT <= rate_pct <= RATE_MAX_PCT):
+        return None, None, (f"cctg rate_pct={rate_pct!r} ngoài khoảng hợp lệ "
+                             f"[{RATE_MIN_PCT},{RATE_MAX_PCT}]")
+    return rate_pct, date, None

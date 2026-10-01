@@ -116,6 +116,103 @@ r9 = pd.merge_asof(day, full.sort_values("time"), on="time", direction="backward
 check("T9 downstream as-of lookup on 2026-10-01 -> 7.5%",
       abs(r9["deposit_rate"].iloc[0] - 7.5) < 1e-9)
 
+# T10/T11: isolate the CCTG-caused signal from Big-4's own age by injecting a FRESH, low Big-4
+# fixture too (postdating the last frozen 2026-06-01 anchor) -- Big-4 alone at this asof would be
+# fresh and CLEAR, so any stale=True/armed-sensitive reason here is attributable purely to the
+# CCTG-side problem, not to Big-4 going stale on its own.
+_orig_cctg_csv = cctg._EVENTS_CSV
+
+# T10: CCTG CSV corrupt (unparseable, same shape as macro_killswitch_a_selfcheck.py T12) must NOT
+# be swallowed by the overlay's try/except -- it must surface as stale=True with a reason noting
+# CCTG, even while Big-4's OWN reading is fresh and CLEAR. (quant-skeptic round-2 fix 1: the old
+# bare `except Exception: pass` made this fail-OPEN -- CLEAR, stale=False -- instead.)
+# NOTE: both injected anchors must postdate their OWN series' frozen max (append-only design) --
+# Big-4 frozen max = 2026-06-01, CCTG frozen max = 2026-09-30 -- so the CCTG fixture date must be
+# after 2026-09-30 for deposit_events_df()/cctg_events_df() to actually pick it up at all.
+_tmpdir10 = tempfile.mkdtemp(prefix="cctg_selfcheck10_")
+_tmp_dep_csv10 = os.path.join(_tmpdir10, "deposit_rate_vn_events.csv")
+_tmp_cctg_csv10 = os.path.join(_tmpdir10, "cctg_rate_vn_events.csv")
+try:
+    with open(_tmp_dep_csv10, "w") as f:
+        f.write("effective_date,deposit_rate,collected_date,source,note\n")
+        f.write("2026-10-01,6.0,2026-10-01,manual_verify,selfcheck-fixture-low\n")
+    with open(_tmp_cctg_csv10, "w") as f:
+        f.write('effective_date,cctg_rate,collected_date,source,note\n')
+        f.write('2026-10-05,8.0,2026-10-05,manual_verify,"unterminated quote never closed\n')
+    dep._EVENTS_CSV = _tmp_dep_csv10
+    cctg._EVENTS_CSV = _tmp_cctg_csv10
+    r10 = dep.macro_killswitch_a_status(asof="2026-10-10", check_freshness=True)
+    check("T10 corrupt CCTG CSV: Big-4 rate preserved (6.0%, not overridden)",
+          abs(r10["rate"] - 0.06) < 1e-9 and r10["rate_source"] == "big4_12m")
+    check("T10 corrupt CCTG CSV: stale=True (surfaced, not silently CLEAR)", r10["stale"] is True)
+    check("T10 corrupt CCTG CSV: reason mentions CCTG", "CCTG" in r10["reason"])
+    check("T10 corrupt CCTG CSV: not force-armed (corrupt-but-unknown != known-high)",
+          r10["armed"] is False)
+finally:
+    dep._EVENTS_CSV = _orig_dep_csv
+    cctg._EVENTS_CSV = _orig_cctg_csv
+    shutil.rmtree(_tmpdir10, ignore_errors=True)
+
+# T11: CCTG value outside the sanity fence (typo, e.g. written as a fraction) must NOT silently
+# fall back to Big-4-only with zero trace -- must surface stale=True + a reason mentioning CCTG.
+_tmpdir11 = tempfile.mkdtemp(prefix="cctg_selfcheck11_")
+_tmp_dep_csv11 = os.path.join(_tmpdir11, "deposit_rate_vn_events.csv")
+_tmp_cctg_csv11 = os.path.join(_tmpdir11, "cctg_rate_vn_events.csv")
+try:
+    with open(_tmp_dep_csv11, "w") as f:
+        f.write("effective_date,deposit_rate,collected_date,source,note\n")
+        f.write("2026-10-01,6.0,2026-10-01,manual_verify,selfcheck-fixture-low\n")
+    with open(_tmp_cctg_csv11, "w") as f:
+        f.write("effective_date,cctg_rate,collected_date,source,note\n")
+        f.write("2026-10-05,0.085,2026-10-05,manual_verify,selfcheck-typo-fixture\n")
+    dep._EVENTS_CSV = _tmp_dep_csv11
+    cctg._EVENTS_CSV = _tmp_cctg_csv11
+    r11 = dep.macro_killswitch_a_status(asof="2026-10-10", check_freshness=True)
+    check("T11 out-of-range CCTG: rate_source=big4_12m (bad value never used)",
+          r11["rate_source"] == "big4_12m")
+    check("T11 out-of-range CCTG: stale=True (surfaced)", r11["stale"] is True)
+    check("T11 out-of-range CCTG: reason mentions CCTG", "CCTG" in r11["reason"])
+    check("T11 out-of-range CCTG: not force-armed", r11["armed"] is False)
+finally:
+    dep._EVENTS_CSV = _orig_dep_csv
+    cctg._EVENTS_CSV = _orig_cctg_csv
+    shutil.rmtree(_tmpdir11, ignore_errors=True)
+
+# T12: the critical case named explicitly in the round-2 directive -- CCTG goes STALE but its last
+# known reading was ABOVE the 7.5% threshold. Must force armed=True even though Big-4 alone (fresh,
+# low) would read CLEAR -- losing track of a feed last seen above the trigger must never silently
+# read as CLEAR.
+_tmpdir12 = tempfile.mkdtemp(prefix="cctg_selfcheck12_")
+_tmp_dep_csv12 = os.path.join(_tmpdir12, "deposit_rate_vn_events.csv")
+_tmp_cctg_csv12 = os.path.join(_tmpdir12, "cctg_rate_vn_events.csv")
+try:
+    with open(_tmp_dep_csv12, "w") as f:
+        f.write("effective_date,deposit_rate,collected_date,source,note\n")
+        f.write("2026-11-01,6.0,2026-11-01,manual_verify,selfcheck-fixture-low\n")
+    with open(_tmp_cctg_csv12, "w") as f:
+        f.write("effective_date,cctg_rate,collected_date,source,note\n")
+        f.write("2026-10-05,8.0,2026-10-05,manual_verify,selfcheck-fixture-high\n")
+    dep._EVENTS_CSV = _tmp_dep_csv12
+    cctg._EVENTS_CSV = _tmp_cctg_csv12
+    r12 = dep.macro_killswitch_a_status(asof="2026-11-25", stale_days_limit=45, check_freshness=True)
+    check("T12 CCTG stale-but-was-high: armed=True (forced, not silently dropped)",
+          r12["armed"] is True)
+    check("T12 CCTG stale-but-was-high: stale=True", r12["stale"] is True)
+    check("T12 CCTG stale-but-was-high: reason mentions CCTG", "CCTG" in r12["reason"])
+    check("T12 CCTG stale-but-was-high: Big-4 reading itself would have been CLEAR (6.0%)",
+          abs(r12["rate"] - 0.06) < 1e-9)
+finally:
+    dep._EVENTS_CSV = _orig_dep_csv
+    cctg._EVENTS_CSV = _orig_cctg_csv
+    shutil.rmtree(_tmpdir12, ignore_errors=True)
+
+# T13 (M16 guard): the CCTG anchor date itself, queried EXACTLY on that day, must return the
+# anchor's rate -- kills a `<=` -> `<` mutant in current_cctg_rate()'s asof filter (which would
+# wrongly return None/the prior anchor on the boundary day itself).
+r13_pct, r13_date = cctg.current_cctg_rate(asof="2026-09-30")
+check("T13 (M16) exact anchor day -> rate=7.5% (not None)", r13_pct is not None and abs(r13_pct - 7.5) < 1e-9)
+check("T13 (M16) exact anchor day -> date=2026-09-30", str(r13_date.date()) == "2026-09-30")
+
 # T_tz: TZ independence guard (explicit asof throughout).
 r_tz_a = dep.macro_killswitch_a_status(asof="2026-10-01")
 os.environ.pop("TZ", None)

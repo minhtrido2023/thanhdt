@@ -150,17 +150,25 @@ def macro_killswitch_a_status(asof=None, stale_days_limit=45, check_freshness=No
 
     EFFECTIVE RATE (added 2026-10-01, user directive "CCTG đưa vào model làm nguồn lãi proxy nếu
     lãi suất cao hơn gửi tiết kiệm"): after resolving the Big-4 12M rate above, this function also
-    looks up cctg_rate_vn.current_cctg_rate() at the same asof and takes max(big4_12m, cctg) IF the
-    CCTG observation is itself fresh (same stale_days_limit) and in-range -- never averages the two,
-    never lets a stale/out-of-range CCTG value override a good Big-4 reading. The CCTG lookup is
-    wrapped in its OWN try/except so any CCTG-side bug degrades to the pre-CCTG Big-4-only behavior,
-    never the reverse (a CCTG bug must not be able to defeat THIS function's fail-closed guarantees).
-    Before 2026-09-30 (CCTG series' first anchor) current_cctg_rate() returns None for every asof,
-    so every call on a date before that is byte-identical to the pre-CCTG implementation -- no
-    historical backtest pinned against this function changes. New key in the return dict:
-    rate_source ("big4_12m" or "cctg_6m(<date>)", None on no-data/error) records which series drove
-    the final rate, since the two are different tenors (12M vs 6M) and a report citing this number
-    must say which one is active (see cctg_rate_vn.py module docstring).
+    looks up cctg_rate_vn.current_cctg_rate_checked() at the same asof and takes max(big4_12m,
+    cctg) IF the CCTG observation is itself fresh (same stale_days_limit) and in-range -- never
+    averages the two, never lets a stale/out-of-range CCTG value override a good Big-4 reading.
+    Before 2026-09-30 (CCTG series' first anchor) current_cctg_rate_checked() returns (None, None,
+    None) for every asof, so every call on a date before that is byte-identical to the pre-CCTG
+    implementation -- no historical backtest pinned against this function changes. New key in the
+    return dict: rate_source ("big4_12m" or "cctg_6m(<date>)", None on no-data/error) records which
+    series drove the final rate, since the two are different tenors (12M vs 6M) and a report
+    citing this number must say which one is active (see cctg_rate_vn.py module docstring).
+
+    ⚠ SYMMETRIC fail-closed on the CCTG side (fixed 2026-10-01, quant-skeptic round-2 fix 1 --
+    the original version wrapped the whole CCTG lookup in a bare `except Exception: pass`, which
+    let EVERY CCTG-side failure mode -- corrupt CSV, an out-of-range typo'd value, a stale reading
+    -- fall through to Big-4-only with zero trace, i.e. fail-OPEN on exactly the side meant to be
+    at least as conservative as Big-4's own fail-closed behavior). Now: a CCTG read error or an
+    out-of-range value forces `stale=True` with a reason noting the CCTG problem (Big-4's own
+    rate/armed verdict otherwise stands); a STALE CCTG reading whose LAST KNOWN value was already
+    above the 7.5% threshold additionally forces `armed=True` -- losing track of a feed that was
+    last seen above the trigger must never silently read as CLEAR.
 
     Returns dict: armed(bool), rate(float|None, fraction e.g. 0.068), threshold(0.075),
     stale(bool), last_update(str date|None), age_days(int|None), reason(str), rate_source(str|None)."""
@@ -184,31 +192,55 @@ def macro_killswitch_a_status(asof=None, stale_days_limit=45, check_freshness=No
                     "reason": (f"rate_pct={rate_pct!r} ngoài khoảng hợp lệ "
                                f"[{RATE_MIN_PCT},{RATE_MAX_PCT}] -> fail-closed (armed)")}
         rate_source = "big4_12m"
+        # cctg_force_armed / cctg_note: symmetric fail-closed treatment for the CCTG overlay
+        # (quant-skeptic round-2 fix 1, 2026-10-01). Any CCTG-side problem (corrupt CSV,
+        # out-of-range typo, or a stale reading that was last seen ABOVE the 7.5% threshold) must
+        # surface into the result -- at minimum stale=True with a reason, and armed=True when the
+        # last known CCTG reading was itself above threshold (can't silently drop evidence that the
+        # real effective rate may be armed just because the feed went stale). This replaces the old
+        # bare `except Exception: pass`, which let every CCTG failure mode fall through to
+        # Big-4-only with ZERO trace -- asymmetric with how every Big-4-side failure in this same
+        # function is handled (fail-closed with an explicit reason).
+        cctg_force_armed = False
+        cctg_note = None
         try:
-            from cctg_rate_vn import current_cctg_rate
-            cctg_pct, cctg_date = current_cctg_rate(str(asof_ts.date()))
-            if (cctg_pct is not None and RATE_MIN_PCT <= cctg_pct <= RATE_MAX_PCT
-                    and cctg_pct > rate_pct):
+            from cctg_rate_vn import current_cctg_rate_checked
+            cctg_pct, cctg_date, cctg_err = current_cctg_rate_checked(str(asof_ts.date()))
+            if cctg_err is not None:
+                cctg_note = f"CCTG loi/ngoài khoảng ({cctg_err}) -> bỏ qua overlay CCTG"
+            elif cctg_pct is not None:
                 cctg_age = (asof_ts - cctg_date).days
                 cctg_stale = check_freshness and cctg_age > stale_days_limit
-                if not cctg_stale:
+                if cctg_stale:
+                    if cctg_pct > THRESHOLD * 100:
+                        cctg_force_armed = True
+                        cctg_note = (f"CCTG stale ({cctg_age}d > {stale_days_limit}d) nhưng lần "
+                                     f"đọc cuối {cctg_pct:.2f}% > 7.5% -> không thể lặng lẽ bỏ")
+                    # else: stale AND last known reading was already <= threshold -> nothing to
+                    # escalate, silently excluded is correct (no evidence of a missed ARM).
+                elif cctg_pct > rate_pct:
                     rate_pct = cctg_pct
                     rate_source = f"cctg_6m({cctg_date.date()})"
-        except Exception:
-            pass  # CCTG overlay best-effort only -- never destabilize the Big-4 fail-closed baseline
+        except Exception as exc:
+            cctg_note = f"CCTG overlay lỗi không lường trước ({exc!r}) -> bỏ qua overlay CCTG"
+
         rate = rate_pct / 100.0
         age_days = (asof_ts - last_date).days
-        stale = check_freshness and age_days > stale_days_limit
-        if stale:
-            return {"armed": True, "rate": rate, "threshold": THRESHOLD, "stale": True,
-                    "last_update": str(last_date.date()), "age_days": age_days,
-                    "rate_source": rate_source,
-                    "reason": f"feed stale ({age_days}d > {stale_days_limit}d, lần xác nhận thủ "
-                              f"công cuối {last_date.date()}) -> fail-closed (armed)"}
-        armed = rate > THRESHOLD
-        reason = (f"{rate_source} {rate_pct:.2f}% > 7.5% -> SUSPEND new recovery deploy" if armed
-                  else f"{rate_source} {rate_pct:.2f}% <= 7.5% -> CLEAR")
-        return {"armed": armed, "rate": rate, "threshold": THRESHOLD, "stale": False,
+        big4_stale = check_freshness and age_days > stale_days_limit
+        stale = big4_stale or (cctg_note is not None)
+        if big4_stale:
+            armed = True
+            reason = (f"feed stale ({age_days}d > {stale_days_limit}d, lần xác nhận thủ "
+                      f"công cuối {last_date.date()}) -> fail-closed (armed)")
+        else:
+            armed = (rate > THRESHOLD) or cctg_force_armed
+            reason = (f"{rate_source} {rate_pct:.2f}% > 7.5% -> SUSPEND new recovery deploy" if
+                      (rate > THRESHOLD) else f"{rate_source} {rate_pct:.2f}% <= 7.5% -> CLEAR")
+            if cctg_force_armed:
+                reason += f"; {cctg_note} -> ARMED"
+        if cctg_note and not cctg_force_armed:
+            reason += f" (⚠ {cctg_note})"
+        return {"armed": armed, "rate": rate, "threshold": THRESHOLD, "stale": stale,
                 "last_update": str(last_date.date()), "age_days": age_days, "reason": reason,
                 "rate_source": rate_source}
     except Exception as exc:
@@ -257,17 +289,25 @@ def effective_deposit_rate(asof=None, stale_days_limit=45, check_freshness=None)
     avail = ev[ev.time <= asof_ts]
     if len(avail):
         last_date = avail.iloc[-1]["time"]
+    # current_cctg_rate_checked() (not the raw current_cctg_rate()) -- the raw getter has NO
+    # range validation at all, so a CSV typo (fraction-vs-percent, digit transposition) used to
+    # flow straight into this DISPLAY number unchecked (quant-skeptic round-2 fix 1, 2026-10-01).
+    # An error/out-of-range CCTG read here degrades to cctg_pct=None (Big-4-only), same as "no
+    # CCTG data" -- there is no "armed"/stale concept on this function (see docstring), so the
+    # only symmetric behavior available is "don't let a bad value drive the display at all".
     cctg_pct = None
     try:
-        from cctg_rate_vn import current_cctg_rate
-        cctg_pct, cctg_date = current_cctg_rate(str(asof_ts.date()))
-        if cctg_pct is not None and cctg_pct > big4_pct:
+        from cctg_rate_vn import current_cctg_rate_checked
+        cctg_pct, cctg_date, cctg_err = current_cctg_rate_checked(str(asof_ts.date()))
+        if cctg_err is not None:
+            cctg_pct = None
+        elif cctg_pct is not None and cctg_pct > big4_pct:
             cctg_age = (asof_ts - cctg_date).days
             cctg_stale = check_freshness and cctg_age > stale_days_limit
             if not cctg_stale:
                 rate_pct, rate_source = cctg_pct, f"cctg_6m({cctg_date.date()})"
     except Exception:
-        pass
+        cctg_pct = None
     return {"rate": rate_pct / 100.0, "rate_pct": rate_pct, "rate_source": rate_source,
             "big4_rate_pct": big4_pct, "cctg_rate_pct": cctg_pct, "last_update": str(last_date.date())}
 
