@@ -1368,6 +1368,52 @@ if dep_last is not None:
 else:
     lines.append("ℹ️ deposit_rate_vn freshness: không đọc được mốc cuối (bỏ qua).")
 
+# 8b. Lãi suất CCTG (cctg_rate_vn) freshness — WARN-only, thêm 2026-10-01 (quant-skeptic+arch-
+#     review round-2 R3, job Taylor_20261001_064225). Cùng mẫu với mục 8 ở trên (Big-4), nhưng
+#     CCTG hiện là input nhập tay THỦ CÔNG, chưa có cron tự fetch (cơ chế fetch tuần đang được
+#     xây RIÊNG, job khác — xem kb/projects/ — check này CHỈ thêm cảnh báo tuổi, KHÔNG đụng cơ chế
+#     fetch). Từ 2026-10-01 CCTG đã wired vào 5 consumer LIVE (rating_8l NEUTRAL tilt + chuỗi DCF)
+#     qua deposit_rate_vn.consumer_deposit_rate() — effective_deposit_rate()'s stale_days_limit=45
+#     là mốc HÀNH VI THẬT đổi (CCTG tự hết hạn, rơi về Big-4-only), nên WARN sớm hơn (35d) để có
+#     thời gian xác nhận số mới trước khi tới 45d.
+cctg_csv = os.path.join(wc_root, "data", "cctg_rate_vn_events.csv")
+cctg_last, cctg_kind = None, None
+if os.path.exists(cctg_csv):
+    try:
+        with open(cctg_csv, newline="") as f:
+            crows = [r for r in csv.DictReader(f) if r.get("effective_date")]
+        ceds = [r.get("effective_date") for r in crows if r.get("effective_date")]
+        if ceds:
+            cctg_last = max(_date.fromisoformat(c) for c in ceds)
+            cctg_kind = "CSV live"
+    except Exception:
+        pass
+if cctg_last is None:  # CSV rỗng/chưa có -> mốc cuối = anchor cứng trong module (CCTG_EVENTS)
+    try:
+        with open(os.path.join(wc_root, "cctg_rate_vn.py")) as f:
+            csrc = f.read()
+        canchor_dates = re.findall(r'\("(\d{4}-\d{2}-\d{2})"\s*,', csrc)
+        if canchor_dates:
+            cctg_last = max(_date.fromisoformat(d) for d in canchor_dates)
+            cctg_kind = "anchor cứng (CSV rỗng/chưa có)"
+    except Exception:
+        pass
+if cctg_last is not None:
+    cctg_age = (today_d - cctg_last).days
+    _CCTG_WARN_D, _CCTG_ARMED_D = 35, 45
+    if cctg_age > _CCTG_WARN_D:
+        _cctg_armed_at = cctg_last + _timedelta(days=_CCTG_ARMED_D)
+        W(f"Lãi suất CCTG (cctg_rate_vn) đã {cctg_age} ngày chưa xác nhận mới (mốc cuối "
+          f"{cctg_last}, {cctg_kind}) — đã wired vào rating_8l NEUTRAL tilt + chuỗi DCF qua "
+          f"deposit_rate_vn.consumer_deposit_rate() (job Taylor_20261001_054110/064225). Ở "
+          f"{_CCTG_ARMED_D} ngày (mốc {_cctg_armed_at}), effective_deposit_rate() tự coi CCTG là "
+          f"stale và rơi về Big-4-only (hành vi ĐỔI THẬT, không chỉ cảnh báo) — xác nhận số CCTG "
+          f"mới trước mốc đó.")
+    else:
+        OK(f"Lãi suất CCTG (cctg_rate_vn): mốc cuối {cctg_last} ({cctg_age} ngày, {cctg_kind}).")
+else:
+    lines.append("ℹ️ cctg_rate_vn freshness: không đọc được mốc cuối (bỏ qua).")
+
 # 9. daily_retro.sh freshness (thêm 2026-08-01, sau sự cố script crash âm thầm 2 đêm liền
 #    07-31/08-01 do lỗi quoting — kb/incidents/2026-08/2026-08-01-daily-retro-quoting-bug-
 #    silent-2day-outage.md). daily_retro.sh chạy 00:30 ICT, review NGÀY HÔM QUA (ICT) và ghi
