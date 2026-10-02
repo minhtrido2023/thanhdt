@@ -101,6 +101,22 @@ def _fnum(x):
         return None
 
 
+def _sellable_qty(raw, total):
+    """KL bán được của MỘT dòng vị thế. Phân biệt "thiếu khoá" với "có khoá, giá trị 0":
+    `int(x or total)` biến tradeQuantity=0 (CP chưa về T+2) thành bán-được-hết ⇒ guard
+    WAIT_T2_SETTLEMENT bị vô hiệu ⇒ DNSE 400 lặp (job Taylor_20261002_103812).
+    - raw None (khoá vắng hẳn / null / rỗng) ⇒ total (hành vi cũ).
+    - raw hữu hạn ⇒ max(0, int(raw)), KHÔNG cắt theo total (cùng quy ước place_order loan-package).
+    - NaN/Infinity (json.loads nhận token này; int() sẽ ném) ⇒ 0: có khoá nhưng giá trị không
+      dùng được thì KHÔNG được coi là bán được hết (fail-closed). Khác :loan-package (bỏ dòng)
+      vì ở đây phải giữ nguyên total/qty của dòng."""
+    if raw is None:
+        return total
+    if not math.isfinite(raw):
+        return 0
+    return max(0, int(raw))
+
+
 # Mã sàn THẬT trong payload DNSE là `marketId`, không phải `exchange`/`market`/`floorcode`.
 # ĐO 43 mã ngày 2026-08-15 (mọi mã từng xuất hiện ở lệnh MUA trong 97 plan + đối chứng UPCOM):
 # payload KHÔNG chứa bất kỳ key nào trong ba key cũ ⇒ `qget(...)` luôn rơi về `default="HOSE"`
@@ -337,8 +353,8 @@ class PHSBroker(BrokerBase):
         for p in port:
             sym = qget(p, "symbol", "instrument", "code")
             total = int(_fnum(qget(p, "total", "totalqtty", "qty", default=0)) or 0)
-            sellable = int(_fnum(qget(p, "trade", "avlqtty", "sellable",
-                                      "availableqtty", default=total)) or total)
+            sellable = _sellable_qty(_fnum(qget(p, "trade", "avlqtty", "sellable",
+                                                "availableqtty", default=None)), total)
             if sym and total > 0:
                 out[sym] = {"total": total, "sellable": sellable}
         return out
@@ -726,9 +742,9 @@ class DNSEBroker(BrokerBase):
             total = int(_fnum(qget(p, "openquantity", "quantity", "totalquantity",
                                    "qty", default=0)) or 0)
             # tradeQuantity = KL bán được (đã về); accumulate có thể gồm CP chờ về
-            sellable = int(_fnum(qget(p, "tradequantity", "availablequantity",
-                                      "sellablequantity", "availableqty",
-                                      default=total)) or total)
+            sellable = _sellable_qty(_fnum(qget(p, "tradequantity", "availablequantity",
+                                                "sellablequantity", "availableqty",
+                                                default=None)), total)
             # marketPrice: giá tham chiếu riêng của khối vị thế (KHÁC giá ATC của
             # close_price() — xem docstring dnse_close_prices trong verify_account_snapshot.py)
             # nhưng tự động phản ánh corporate action đã được broker ghi nhận vào vị thế
@@ -1360,7 +1376,7 @@ class PHSFlashBroker(BrokerBase):
         for p in rows:
             sym = qget(p, "symbol", "instrument", "code")
             total = int(_fnum(qget(p, "total", default=0)) or 0)
-            sellable = int(_fnum(qget(p, "trade", default=total)) or total)
+            sellable = _sellable_qty(_fnum(qget(p, "trade", default=None)), total)
             # CP chờ về = CẢ BA chặng T0/T1/T2 (mua T0 về T+2), không chỉ receivingT2:
             # chỉ lấy T2 sẽ báo thiếu đúng phần vừa mua 1-2 phiên trước. Chưa có consumer
             # nào đọc khóa này — thêm để đủ thông tin, không đổi ngữ nghĩa total/sellable.
