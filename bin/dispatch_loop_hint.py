@@ -15,8 +15,10 @@ NHẮC, KHÔNG CHẶN (cùng tinh thần nudge fable/effort trong dispatch.sh). 
     mới", "tại sao"...) ⇒ nhắc medium (Sonnet) đủ.
 
 Token nhánh = `fix|feat|wire|session/<tên>` hoặc `wt-<tên>`. Nguồn "job trước" = bus/jobs/*.json
-(`prompt_summary` 160 ký tự đầu — token đặt muộn hơn thì đếm hụt, thiên về IM thay vì kêu oan).
-Job tự sinh `[RESUME ...` bị loại (đó là auto-resume sau usage-limit, không phải vòng polish).
+(`prompt_summary` 160 BYTE đầu (dispatch.sh `head -c 160`; tiếng Việt chiếm nhiều byte) — token đặt muộn hơn thì đếm hụt, thiên về IM thay vì kêu oan).
+Job tự sinh `[RESUME ...` và job `cancelled` bị loại; các dispatch cách nhau <5 phút gộp thành 1
+(bản đúp usage-limit/redispatch cùng vòng). Lời nhắc chỉ nêu SỐ DISPATCH đếm được, không khẳng
+định số vòng (§29: không đoán điều chưa đọc).
 
 FAIL-OPEN TUYỆT ĐỐI: mọi lỗi ⇒ im lặng, exit 0. Dispatch không bao giờ được hỏng vì cái nhắc.
 
@@ -34,7 +36,8 @@ import time
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 JOBS_DIR = os.environ.get("DISPATCH_LOOP_HINT_JOBS_DIR") or os.path.join(ROOT, "bus", "jobs")
 WINDOW_S = 24 * 3600
-LOOP_THRESHOLD = 2          # đã có ≥2 job trước ⇒ lần này là vòng ≥3
+LOOP_THRESHOLD = 2          # đã có ≥2 dispatch trước ⇒ cầu chì
+DEDUP_S = 300               # dispatch cách nhau <5 phút = cùng một vòng
 
 _BRANCH = re.compile(r"\b((?:fix|feat|wire|session)/[A-Za-z0-9_.-]+|wt-[A-Za-z0-9_.-]+)")
 _CONTINUE = re.compile(r"tiếp tục|tiep tuc|vòng\s*\d|vong\s*\d|test-only|hoàn tất|hoan tat|"
@@ -53,16 +56,21 @@ def branch_tokens(prompt):
 
 
 def prior_counts(tokens, now=None, jobs_dir=None):
-    """{token: số job ≤24h có prompt_summary chứa token}, bỏ job [RESUME."""
+    """{token: số dispatch ≤24h có prompt_summary chứa token}.
+
+    Bỏ job [RESUME và job cancelled; gộp các dispatch cách nhau <DEDUP_S thành 1."""
     now = now or time.time()
     jobs_dir = jobs_dir or JOBS_DIR
-    counts = {t: 0 for t in tokens}
+    times = {t: [] for t in tokens}
     for f in glob.glob(os.path.join(jobs_dir, "*.json")):
         try:
             if now - os.path.getmtime(f) > WINDOW_S * 2:   # lọc nhanh, đệm 2× cho mtime lệch
                 continue
             d = json.load(open(f))
-            if now - int(d.get("started_at", 0)) > WINDOW_S:
+            started = int(d.get("started_at", 0))
+            if now - started > WINDOW_S:
+                continue
+            if d.get("status") == "cancelled":
                 continue
             s = d.get("prompt_summary", "") or ""
         except Exception:
@@ -71,7 +79,16 @@ def prior_counts(tokens, now=None, jobs_dir=None):
             continue
         for t in tokens:
             if t in s:
-                counts[t] += 1
+                times[t].append(started)
+    counts = {}
+    for t, ts in times.items():
+        ts.sort()
+        n, last = 0, None
+        for x in ts:
+            if last is None or x - last >= DEDUP_S:
+                n += 1
+            last = x
+        counts[t] = n
     return counts
 
 
@@ -84,12 +101,14 @@ def build_hint(prompt, to, effort, model, now=None, jobs_dir=None):
     tok = max(counts, key=counts.get)
     out = []
     if n >= LOOP_THRESHOLD:
-        out.append(f"NOTE: '{tok}' đã được dispatch {n} lần trong 24h — đây là vòng {n + 1}. Hỏi:")
+        out.append(f"NOTE: '{tok}' đã có {n} dispatch trước trong 24h (loại huỷ/resume/bản đúp). Hỏi:")
         out.append("  lỗi lần này CÙNG loại với vòng trước (reviewer chỉ rõ chỗ) hay KHÁC loại/ngày càng")
         out.append("  nhiều? Khác loại ⇒ DỪNG vá cuốn chiếu: Opus high review TOÀN BỘ nhánh rồi sửa một")
         out.append("  lượt. Test-only quá 2 vòng ⇒ hỏi user trước (kb/mike_model_routing.md § cầu chì).")
     head = prompt[:400]
-    if n >= 1 and effort == "high" and _CONTINUE.search(head) and not _NEWWORK.search(head):
+    # Chỉ nhắc "medium" khi CHƯA chạm cầu chì — tránh 2 lời khuyên ngược nhau (B rồi A) cùng lúc.
+    if 1 <= n < LOOP_THRESHOLD and effort == "high" and _CONTINUE.search(head) \
+            and not _NEWWORK.search(head):
         out.append(f"NOTE: dispatch tiếp nối trên '{tok}' mà --effort high — việc đã rõ hướng/apply")
         out.append("  verdict thì Sonnet --effort medium là đủ (kb/mike_model_routing.md Chế độ A).")
     return out
