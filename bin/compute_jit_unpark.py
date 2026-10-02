@@ -128,7 +128,7 @@ WC_ROOT = wc_paths.find_wc_root(__file__)
 sys.path.insert(0, WC_ROOT)
 
 from park_holdings import park_holdings, today_ict, norm_book          # noqa: E402
-from compute_park_trim import etf_day_cap_live, live_share             # noqa: E402
+from compute_park_trim import etf_day_cap_live, full_exit_qty, live_share  # noqa: E402
 from trading_bot.plan import (LAG_ADV_PCT, LAG_ADV_MAX_STALE_DAYS,     # noqa: E402
                               _adv_for_gate)
 from trading_bot.vn_market import LOT, round_lot                       # noqa: E402
@@ -265,6 +265,7 @@ def build_pool(h, asof, share, adv_fn, l1_used=None):
                             f"còn bán được {max(avail_qty, 0):,}cp)"})
             continue
         pool[tk] = {"px": px, "qty": int(d["qty"]), "sellable": sellable,
+                    "broker_qty": int(bpos.get(tk, {}).get("qty", d["qty"])),
                     "avail_qty": avail_qty, "cap_remaining_vnd": cap_i, "mv": d["mv"],
                     "adv_vnd": adv, "adv_data_date": data_date, "lots": d["lots"],
                     "sold_qty": 0}
@@ -319,7 +320,9 @@ def allocate(needed, pool, ceiling=None):
     # có dung sai) — bán dư ≤ 1 lô PARK rẻ nhất là giá phải trả, có cận trên chặt:
     #     needed ≤ Σ bán < needed + (giá trị 1 lô rẻ nhất còn dư địa)
     # Mọi trần CỨNG vẫn nguyên: per-name `cap_remaining_vnd` + sellable/T+2 (`headroom_qty`) và
-    # trần TỔNG/phiên (`ceiling`). Không lô nào lọt hết các trần ⇒ KHÔNG thêm, ca đó co lệnh y cũ.
+    # trần TỔNG/phiên (`ceiling`) — NGOẠI LỆ có chủ đích: phần lô lẻ của lệnh THOÁT HẾT
+    # (`full_exit_qty`) có thể vượt trần TỔNG/phiên và per-name tối đa < 1 lô; hệ quả
+    # `buy_amendments` L2 có thể đổi theo (qty lệnh MUA trong plan không đổi, chỉ chú thích). Không lô nào lọt hết các trần ⇒ KHÔNG thêm, ca đó co lệnh y cũ.
     if spent < needed - 1e-6:
         cands = [tk for tk in pool
                  if alloc[tk] + LOT <= headroom_qty(tk)
@@ -495,8 +498,16 @@ def compute_jit_unpark(account_label, asof=None, orders=None, holdings=None, pla
             mv_pool = sum(x["mv"] for x in pool.values()) or 1.0
             for tk in sorted(alloc):
                 d = pool[tk]
-                q = alloc[tk]
+                q_lot = alloc[tk]
+                # THOÁT HẾT kèm lô lẻ (user duyệt 2026-10-02): `allocate` đã lấy HẾT lô chẵn còn lại
+                # của book ⇒ bán luôn phần lẻ < 1 lô. Book còn lại = qty − phần L1 giữ chỗ − đã bán.
+                used_q = int(l1_used.get(tk, {}).get("qty", 0))
+                q, full_exit = full_exit_qty(q_lot, d["qty"] - used_q - d["sold_qty"],
+                                             d["sellable"] - used_q - d["sold_qty"],
+                                             d["broker_qty"] - used_q - d["sold_qty"])
                 val = q * d["px"]
+                odd = ({"full_exit": True, "odd_lot_qty": int(q - q_lot), "qty_lot_part": int(q_lot)}
+                       if full_exit else {})
                 out["orders"].append({
                     "ticker": tk, "side": "sell", "qty": int(q), "ref_price": d["px"],
                     "value_vnd": val, "book": "PARK", "play_type": "JIT_UNPARK",
@@ -506,7 +517,10 @@ def compute_jit_unpark(account_label, asof=None, orders=None, holdings=None, pla
                     "adv_data_date": d["adv_data_date"], "sellable": d["sellable"],
                     "fifo_lots": _fifo_lots(d["lots"], q),
                     "reason": (f"L2 JIT: tài trợ {oid} ({o.get('ticker')}) — cần "
-                               f"{needed/1e6:,.1f}tr, bán pro-rata PARK w={d['mv']/mv_pool:.1%}"),
+                               f"{needed/1e6:,.1f}tr, bán pro-rata PARK w={d['mv']/mv_pool:.1%}"
+                               + (f"; THOÁT HẾT: +{q - q_lot}cp lô lẻ (không để lẻ kẹt)"
+                                  if full_exit else "")),
+                    **odd,
                 })
                 d["sold_qty"] += q
                 d["cap_remaining_vnd"] -= val

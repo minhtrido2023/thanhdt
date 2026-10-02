@@ -201,6 +201,43 @@ def _f_or_none(v):
     return None if v is None else float(v)
 
 
+def aggregate_position_rows(rows, account_no):
+    """{mã: {qty, sellable, broker_market_price}} từ các dòng `positions` THÔ của DNSE — bộ
+    chuẩn hoá DUY NHẤT cho CẢ nhánh live lẫn nhánh jsonl của `read_broker_snapshot`.
+
+    · `qty` = Σ `openQuantity`, `sellable` = Σ `tradeQuantity` (thiếu/0 ⇒ 0, KHÔNG rơi về
+      `openQuantity`) — gộp các dòng loan-package cùng mã (bug ZaloPay 2026-08-11).
+    · Vì sao không dùng `DNSEBroker.get_positions()["sellable"]`: hàm đó viết
+      `int(... tradequantity, default=total) or total` (brokers.py:729-731) ⇒ `tradeQuantity=0`
+      bị đổi thành sellable = TOÀN BỘ vị thế. Dữ liệu thật dnse_raw_2026-10-02 cuối ngày: phần
+      dư sau khi bán lô chẵn có tradeQuantity=0 (ZaloPay VIB 19, BID 7+20, MSB 40, VPB 312; MBB
+      52 mà trade 2) ⇒ nhánh live báo bán được hết, nhánh jsonl báo 0 — cùng dữ liệu, hai số.
+      `full_exit_qty` dựa đúng vào sellable ⇒ live sinh lệnh THOÁT HẾT cho CP chưa giao dịch
+      được (arch-review vòng 2, 2026-10-02).
+    · Bỏ dòng `status=CLOSED`, dòng `openQuantity<=0` (PENDING_CLOSE có open 0), dòng của
+      accountNo khác (§12)."""
+    out = {}
+    for p in rows or []:
+        if str(p.get("accountNo") or account_no) != str(account_no):
+            continue
+        if str(p.get("status", "OPEN")).upper() == "CLOSED":
+            continue
+        q = int(p.get("openQuantity") or 0)
+        if q <= 0 or not p.get("symbol"):
+            continue
+        sym = p["symbol"]
+        mp = float(p.get("marketPrice") or 0) or None
+        sellable = int(p.get("tradeQuantity") or 0)
+        prev = out.get(sym)
+        if prev:
+            q += prev["qty"]
+            sellable += prev["sellable"]
+            if mp is None:
+                mp = prev["broker_market_price"]
+        out[sym] = {"qty": q, "sellable": sellable, "broker_market_price": mp}
+    return out
+
+
 def resolve_close_prices(tickers, asof, price_fn=None):
     """{mã: giá ĐÓNG CỬA đã xác minh (VND)} tại `asof` — KHÔNG dùng `positions[].marketPrice`.
 
@@ -287,15 +324,39 @@ def read_broker_snapshot(label, account_no, asof, exec_dir=EXEC_DIR, price_fn=No
         # BID/MBB/VCB đã vá ở DNSEBroker.get_positions(), commit 36846b8) — dùng LẠI hàm đã
         # dedupe/aggregate đó thay vì tự parse client.positions() lần nữa (từng lặp lại đúng
         # bug bằng dict-overwrite ở đây, gây BLOCKED_RECONCILE giả cho L1 park-trim).
-        raw_pos = b.get_positions()
+        # `sellable` KHÔNG lấy từ get_positions() (brokers.py:729-731 đổi tradeQuantity=0 thành
+        # = total) mà từ CHÍNH payload thô của lần gọi đó, qua `aggregate_position_rows` — cùng
+        # bộ chuẩn hoá với nhánh jsonl ⇒ live == jsonl trên cùng dữ liệu. Bắt payload bằng cách
+        # bọc client.positions: MỘT lần gọi API (không có bản đọc thứ hai lệch thời điểm), và
+        # get_positions() vẫn tự ghi _log_raw như cũ.
+        _cap, _orig = {}, b.client.positions
+
+        def _positions_capture(*a, **kw):
+            _cap["r"] = _orig(*a, **kw)
+            return _cap["r"]
+        b.client.positions = _positions_capture
+        try:
+            raw_pos = b.get_positions()
+        finally:
+            b.client.positions = _orig
+        r = _cap.get("r")
+        rows = (r.get("positions") or r.get("data")) if isinstance(r, dict) else r
+        agg = aggregate_position_rows(rows, account_no)
+        # Đối soát qty: get_positions() đọc thêm khoá dự phòng (quantity/totalquantity...) mà bộ
+        # chuẩn hoá không đọc ⇒ lệch qty là payload dạng lạ — CHẶN thay vì đoán sellable.
+        _bq = {s: int(p.get("total", 0)) for s, p in raw_pos.items() if p.get("total", 0) > 0}
+        _aq = {s: d["qty"] for s, d in agg.items()}
+        if _bq != _aq:
+            raise SystemExit(
+                f"[park_holdings] {label}: qty DNSEBroker.get_positions() {_bq} ≠ qty chuẩn hoá "
+                f"từ payload thô {_aq} — payload positions dạng lạ, KHÔNG suy sellable (fail-closed)")
         bal = b.client.balances(account_no)
-        pos = {sym: {"qty": p["total"], "market_price": 0.0,
-                     "sellable": p.get("sellable", p["total"]),
+        pos = {sym: {"qty": d["qty"], "market_price": 0.0, "sellable": d["sellable"],
                      # GIỮ marketPrice thô: KHÔNG phải nguồn giá (xem resolve_close_prices) mà là
                      # giá CÙNG HỆ QUY CHIẾU với `qty` trong CÙNG bản ghi — thứ duy nhất dùng được
                      # ở cửa sổ đêm-trước-GDKHQ khi broker đã credit sớm (§exdate_frame).
-                     "broker_market_price": p.get("marketPrice")}
-               for sym, p in raw_pos.items() if p.get("total", 0) > 0}
+                     "broker_market_price": d["broker_market_price"]}
+               for sym, d in agg.items()}
         # Giá ĐÓNG CỬA đã xác minh, KHÔNG phải marketPrice — xem resolve_close_prices().
         if need_price:
             for _sym, _px in resolve_close_prices(pos.keys(), asof,
@@ -334,28 +395,12 @@ def read_broker_snapshot(label, account_no, asof, exec_dir=EXEC_DIR, price_fn=No
             continue
         payload = rec.get("payload") or {}
         if rec.get("kind") == "positions":
-            cur = {}
-            for p in (payload.get("positions") or payload.get("data") or []):
-                if str(p.get("accountNo") or account_no) != str(account_no):
-                    continue
-                if str(p.get("status", "OPEN")).upper() == "CLOSED":
-                    continue
-                q = int(p.get("openQuantity") or 0)
-                if q > 0 and p.get("symbol"):
-                    sym = p["symbol"]
-                    mp = float(p.get("marketPrice") or 0) or None
-                    sellable = int(p.get("tradeQuantity") or 0)
-                    # cùng bug loan-package-per-dòng như nhánh "hôm nay" ở trên — cộng gộp
-                    # thay vì ghi đè (nhánh này còn đọc TRỰC TIẾP jsonl, không qua
-                    # DNSEBroker.get_positions() được, nên phải tự lặp lại đúng logic dedupe).
-                    prev = cur.get(sym)
-                    if prev:
-                        q += prev["qty"]
-                        sellable += prev["sellable"]
-                        if mp is None:
-                            mp = prev.get("market_price")
-                    cur[sym] = {"qty": q, "market_price": mp or 0.0, "sellable": sellable,
-                                "broker_market_price": mp}   # §exdate_frame — xem nhánh "hôm nay"
+            # cùng bộ chuẩn hoá với nhánh "hôm nay" (gộp loan-package, sellable = Σ tradeQuantity)
+            cur = {sym: {"qty": d["qty"], "market_price": d["broker_market_price"] or 0.0,
+                         "sellable": d["sellable"],
+                         "broker_market_price": d["broker_market_price"]}  # §exdate_frame
+                   for sym, d in aggregate_position_rows(
+                       payload.get("positions") or payload.get("data") or [], account_no).items()}
             if cur and (ts_pos is None or rec.get("ts", "") >= ts_pos):
                 pos, ts_pos = cur, rec.get("ts", "")          # bản ghi MỚI NHẤT trong ngày
         elif rec.get("kind") == "balances":

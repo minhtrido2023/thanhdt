@@ -358,6 +358,31 @@ def live_price_fn(asof):
     return _f
 
 
+def full_exit_qty(lot_qty, book_left, sellable_left, broker_left=None):
+    """Quy tắc THOÁT HẾT kèm lô lẻ (user duyệt 2026-10-02 15:24 ICT) → `(qty, full_exit)`.
+
+    `lot_qty` = số cp lô chẵn ĐÃ qua mọi trần (ADV/ngày/sellable). Nếu phần còn lại của book sau
+    lệnh này là 0 < còn lại < 1 lô ⇒ bán TOÀN BỘ `book_left` (kể cả lô lẻ) thay vì để lô lẻ kẹt
+    vĩnh viễn (ca VIX SpaceX 220cp ⇒ 200 bán, 20 kẹt). Ba điều kiện, đều bắt buộc:
+      · còn lại < 1 lô ⇔ lệnh lô chẵn đã lấy HẾT các lô chẵn của book — khi trần ADV còn chặn
+        lô chẵn thì còn lại ≥ 1 lô ⇒ KHÔNG bán lẻ rời rạc (giữ round_lot như cũ);
+      · còn lại > 0 (book chẵn lô ⇒ không đổi gì, byte-identical);
+      · `book_left <= sellable_left`: toàn bộ book phải bán được NGAY (T+2) — không vượt sellable;
+      · `broker_left <= sellable_left` (broker_left = TỔNG KL broker của mã sau phần đã dùng; None ⇒
+        = book_left): chỉ thoát kèm lô lẻ khi TOÀN BỘ vị thế mã đã về. Nếu không, lô lẻ của PARK
+        chiếm suất sellable của book khác (LAG auto-exit cắt theo `_cap_sellable`; ca VPB ZaloPay
+        10-02: PARK 330 + LAG 600 vs sellable 900 ⇒ LAG bị cap 570).
+    Phần lẻ < 1 lô CÓ THỂ vượt trần ADV/ngày tối đa < 1 lô giá trị — chấp nhận có chủ đích (đi
+    kèm lệnh hoàn tất thoát hết, không phải bán lẻ rời rạc). Chỉ dùng cho lệnh BÁN.
+    Executor tự tách 200 + 20 (`_child_qty`, lô lẻ LO verified TCM 10cp 2026-07-09)."""
+    rest = book_left - lot_qty
+    if broker_left is None:
+        broker_left = book_left
+    if 0 < rest < LOT and book_left <= sellable_left and broker_left <= sellable_left:
+        return int(book_left), True
+    return int(lot_qty), False
+
+
 def compute_trim(account_label, asof=None, target=None, holdings=None,
                  share_override=None, adv_fn=None, day_cap_override=None,
                  basket_override=None, price_fn=None, excluded_dividend_config_override=None):
@@ -749,7 +774,10 @@ def compute_trim(account_label, asof=None, target=None, holdings=None,
         sellable = int(bpos.get(tk, {}).get("sellable", d["qty"]))
         qty = min(qty, d["qty"], sellable)
         qty = round_lot(qty)
-        if qty < LOT:
+        qty_lot = qty
+        qty, full_exit = full_exit_qty(qty_lot, d["qty"], sellable,
+                                       int(bpos.get(tk, {}).get("qty", d["qty"])))
+        if qty <= 0:            # không full_exit ⇒ qty là bội lô ⇒ <1 lô ⇔ 0
             out["blocked"].append({"ticker": tk, "reason":
                                    f"trần/khả năng bán < 1 lô (muốn {want_vnd:,.0f}đ, "
                                    f"trần ADV {cap_i:,.0f}đ, sellable {sellable:,}cp)"})
@@ -764,6 +792,8 @@ def compute_trim(account_label, asof=None, target=None, holdings=None,
                          "cost_price": lot["price"], "source": lot["source"]})
             remain -= take
         w_t = out["target_weights"].get(tk, 0.0)
+        odd = ({"full_exit": True, "odd_lot_qty": int(qty - qty_lot), "qty_lot_part": int(qty_lot)}
+               if full_exit else {})
         out["orders"].append({
             "ticker": tk, "side": "sell", "qty": int(qty), "ref_price": px,
             "value_vnd": qty * px, "book": "PARK", "play_type": "PARK_TRIM",
@@ -778,7 +808,11 @@ def compute_trim(account_label, asof=None, target=None, holdings=None,
                           if tk in feasible else "(NGOÀI rổ khả thi ⇒ target 0, bán sạch)")
                        + (f"; bị co theo trần TỔNG/phiên ×{scale:.3f}" if scale < 1 else "")
                        + (f"; BỊ CẮT bởi trần {LAG_ADV_PCT:.0%}ADV×{share:.2f}"
-                          f"={cap_i/1e6:,.1f}tr, phần dư sang phiên sau" if cap_i < want_vnd else "")),
+                          f"={cap_i/1e6:,.1f}tr, phần dư sang phiên sau" if cap_i < want_vnd else "")
+                       + (f"; THOÁT HẾT: {qty_lot}cp lô chẵn + {qty - qty_lot}cp lô lẻ = toàn bộ "
+                          f"sổ PARK {qty}cp (vượt trần ADV ≤1 lô bằng phần lẻ, có chủ đích)"
+                          if full_exit else "")),
+            **odd,
         })
     out["decision"] = "TRIM" if out["orders"] else "BLOCKED_ALL_NAMES"
     out["trim_proposed_vnd"] = sum(o["value_vnd"] for o in out["orders"])

@@ -400,8 +400,10 @@ def merge_park_orders(plan, l1=None, l2=None, *, allow_approved=False, ex_map=No
                     f"{src}/{tk!r}: thiếu ticker hoặc ref_price hợp lệ — bỏ qua lệnh này.")
                 continue
             d = agg.setdefault(tk, {"L1": 0, "L2": 0, "px": {}, "sellable": None,
-                                    "for_orders": []})
+                                    "for_orders": [], "full_exit": set()})
             d[src] += max(0, _i(o.get("qty")))
+            if o.get("full_exit") is True:
+                d["full_exit"].add(src)         # nguồn tự khai THOÁT HẾT kèm lô lẻ
             d["px"][src] = px
             s = o.get("sellable")
             if s is not None:
@@ -532,7 +534,14 @@ def merge_park_orders(plan, l1=None, l2=None, *, allow_approved=False, ex_map=No
         # biến I4 hỏng ⇒ TỪ CHỐI CẢ PLAN ⇒ 0 lệnh bán = đúng hình dạng mất-phiên 08-06.
         # Làm tròn ở đây khiến ca đó không thể xảy ra, thay vì bắt cả plan làm con tin.
         # (quant-skeptic vòng 2, 2026-08-10 — "I4 hostage", phơi nhiễm hiện tại bằng 0.)
+        # NGOẠI LỆ THOÁT HẾT (user duyệt 2026-10-02): giữ lô lẻ của nguồn k CHỈ KHI nguồn đó tự khai
+        # `full_exit` VÀ mã KHÔNG bị cắt theo sellable (bị cắt ⇒ không còn là thoát hết ⇒ không bán
+        # lẻ rời rạc) VÀ biết `sellable` (I2 kiểm được tổng ≤ sellable). Thiếu bất kỳ ⇒ làm tròn
+        # xuống như cũ.
+        keep_odd = (d["sellable"] is not None and not d["cut_L1"] and not d["cut_L2"])
         for k in ("final_L1", "final_L2"):
+            if d[k] % LOT and keep_odd and k[-2:] in d["full_exit"]:
+                continue
             if d[k] % LOT:
                 lo = _floor_lot(d[k])
                 report["warnings"].append(
@@ -567,11 +576,14 @@ def merge_park_orders(plan, l1=None, l2=None, *, allow_approved=False, ex_map=No
                             "foreign_sell_qty": d["foreign_sell_qty"],
                             "for_order_ids": sorted(set(d["for_orders"]))},
             "note": (f"BÁN PARK gộp: L1 {d['final_L1']}cp + L2 {d['final_L2']}cp = {qty}cp × "
-                     f"{px:,.0f}đ = {val:,}đ."),
+                     f"{px:,.0f}đ = {val:,}đ."
+                     + (f" THOÁT HẾT kèm {qty % LOT}cp lô lẻ (executor tự tách lô chẵn + lẻ)."
+                        if qty % LOT else "")),
             "reason": ("Gộp 2 nguồn đề xuất bán PARK cùng mã thành 1 lệnh. L2 chạy với --l1-json "
                        "nên phần lô L1 đã giữ chỗ bị trừ trước khi L2 đề xuất thêm ⇒ cộng dồn "
                        "KHÔNG phải bán trùng; merge vẫn tự kiểm lại tổng ≤ sellable."),
             "stop_exempt": False, "slot_exempt": False,
+            **({"full_exit": True, "odd_lot_qty": qty % LOT} if qty % LOT else {}),
         })
     report["generated"] = [{"id": o["id"], "ticker": o["ticker"], "qty": o["qty"],
                             "play_type": o["play_type"]} for o in generated]
@@ -760,9 +772,11 @@ def _check_invariants(orders, agg, orig_orders):
     # I4 — CẢNH BÁO, không chặn. Lệnh do merge sinh ra đã được làm tròn bội lô vô điều kiện ở
     # bước sinh, nên nhánh này chỉ còn bắt lệnh "trông giống của merge" do writer khác ghi. Từ
     # chối cả plan vì một qty lẻ = lại đúng hình dạng mất-phiên 08-06 (quant-skeptic vòng 2).
+    # Lô lẻ hợp lệ CHỈ khi lệnh mang `full_exit` (thoát hết, user duyệt 2026-10-02).
     bad = [o.get("id") for o in orders if is_owned(o)
-           and (_i(o.get("qty")) <= 0 or _i(o.get("qty")) % LOT != 0)]
-    checks.append(("I4 qty > 0 và bội lô", not bad,
+           and (_i(o.get("qty")) <= 0
+                or (_i(o.get("qty")) % LOT != 0 and o.get("full_exit") is not True))]
+    checks.append(("I4 qty > 0 và bội lô (trừ lệnh full_exit)", not bad,
                    f"cảnh báo (không chặn): {bad}" if bad else "ok"))
 
     # I5 — không đánh rơi lệnh của người khác
