@@ -27,7 +27,7 @@ the partial fill churn (entry+exit fees on 30k shares).
 
 ## Bug 2: ETF entry_dates hallucinated
 
-**Root cause** (`sim_v11_transparent.py` pre-fix): ETF "open positions" was
+**Root cause** (`sim_v11_transparent.py` pre-fix): ETF "open [REDACTED]" was
 emitted as a single row per book with hard-coded `entry_date=common[0]` (sim
 inception) and `days_held=340` (entire period). Not real — ETF goes through
 many rebalance buy+sells with different dates.
@@ -42,7 +42,7 @@ many rebalance buy+sells with different dates.
 - At end of period, `nav_df.attrs["etf_lots_final"]` exposes remaining lots
   with their REAL `entry_date` and `days_held = (last_day - entry_date).days`
 
-**Verification post-fix**: 4 open positions in `v11_transparent_open_positions.new.csv`:
+**Verification post-fix**: 4 open [REDACTED] in `v11_transparent_open_[REDACTED].new.csv`:
 - PAN BAL entry=2026-04-10 days=22 (real position)
 - E1VFVN30 BAL entry=2026-04-09 days=36 cost=21.38B (real ETF lot)
 - E1VFVN30 BAL entry=2026-04-24 days=21 cost=0.59B (real ETF lot)
@@ -56,7 +56,7 @@ Each lot's entry_date matches its actual buy row in
 1. Day 0 NAV = exactly 50,000,000,000 (diff 0.00)
 2. Every BUY ticker in transactions has activity (50 unique)
 3. Every closed position has both buy AND sell rows (0 orphans across 77 closed)
-4. Open positions entry_date = actual buy date (0 mismatches across 4 lots)
+4. Open [REDACTED] entry_date = actual buy date (0 mismatches across 4 lots)
 5. Cash flow from transactions reconstructs end cash exactly (diff 0.00 VND)
 6. Per-book columns sum to NAV (max diff 0.000015 VND across 233 rows)
 7. End cash residual = 0 (no orphan ETF appreciation)
@@ -88,13 +88,13 @@ preserve other winners → small net positive. Matches direction of D1's
 ## Bug 4 (extra): slot12 deployment + 10% fixed sizing (2026-05-18)
 
 Production (`recommend_holistic.py:575-584`) deployed slot12 on 2026-05-16:
-`max_positions=12` with `Per-slot size = NAV/10 = 10% per position`. Extra 2
-slots let RE_BACKLOG_BUY enter beyond 10 without shrinking existing positions.
+`max_[REDACTED]=12` with `Per-slot size = NAV/10 = 10% per position`. Extra 2
+slots let RE_BACKLOG_BUY enter beyond 10 without shrinking existing [REDACTED].
 
-Sim previously used `max_positions=10` with default 1/N sizing. Fixed:
+Sim previously used `max_[REDACTED]=10` with default 1/N sizing. Fixed:
 - Added `MAX_POS_V11 = 12` constant
 - Added `TIER_WEIGHTS_V11 = {tier: 0.10 for tier in TIER_BAL}` (fixed 10% NAV
-  per position regardless of max_positions; over-allocation naturally capped
+  per position regardless of max_[REDACTED]; over-allocation naturally capped
   by `cash * 0.95` fallback in simulator)
 - Passed both to BAL + VN30 `simulate()` calls
 
@@ -102,7 +102,7 @@ Sim previously used `max_positions=10` with default 1/N sizing. Fixed:
 - Without slot12: 65.62B / CAGR 33.91% / DD -11.97% / 84 holdings / 6 open
 - With slot12:    **65.56B / CAGR 33.79% / DD -11.94% / 92 holdings / 7 open**
 
-Trade count went up (more concurrent positions allowed) but realized P&L
+Trade count went up (more concurrent [REDACTED] allowed) but realized P&L
 similar. Slot12's E4 validation (FULL +0.26pp / OOS24-26 +1.65pp) is over
 multi-year backtest — this 11mo window doesn't fully show it.
 
@@ -121,12 +121,12 @@ multi-year backtest — this 11mo window doesn't fully show it.
 ## Files
 
 - `simulate_holistic_nav.py` — engine with FIFO ETF lots + complete event_log
-- `sim_v11_transparent.py` — sim script using lot-based open positions
+- `sim_v11_transparent.py` — sim script using lot-based open [REDACTED]
 - `verify_gates.py` — runs all 8 gates against current outputs (`python verify_gates.py`)
 - `data/v11_transparent_*.csv` — outputs
 
 ## Known issue (not blocking)
 
-`data/v11_transparent_open_positions.csv` is held by another process (probably
+`data/v11_transparent_open_[REDACTED].csv` is held by another process (probably
 OneDrive sync or stale handle) — script now writes to `.new.csv` fallback. User
 can rename when free, or kill the locker.

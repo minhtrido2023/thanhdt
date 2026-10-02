@@ -80,8 +80,8 @@ originSessionId: cc0496d6-7fd6-4cd3-8964-4af6fe223c99
 ### BAL component (50% capital)
 - Tiers: MEGA, MOMENTUM, MOMENTUM_N, MOMENTUM_S, DEEP_VALUE_RECOVERY
 - Universe: ticker_prune (~449 mã quality)
-- Sector limit: Fin/RE (sector 8) max 4 positions
-- max_positions=10, hold_days=45
+- Sector limit: Fin/RE (sector 8) max 4 [REDACTED]
+- max_[REDACTED]=10, hold_days=45
 - **stop_loss = -20%** (NOT -25%, kept conservative per user preference)
 - min_hold=2 (T+3)
 - reentry_blacklist_days=20
@@ -94,7 +94,7 @@ originSessionId: cc0496d6-7fd6-4cd3-8964-4af6fe223c99
 - Same tier set as BAL
 - Universe: top 30 tickers by avg liquidity (CTG, FPT, HPG, MBB, MWG, VNM, VHM, VPB, ...)
 - Same PM as BAL (no sector limit needed since VN30 inherently diversified)
-- max_positions=10, hold_days=45, stop -20%, BL20
+- max_[REDACTED]=10, hold_days=45, stop -20%, BL20
 
 ---
 

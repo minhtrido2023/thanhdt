@@ -38,7 +38,7 @@ WHEN icb_code = 8633.0
 
 | Param | Before (v10 baseline) | After (D1+slot12) |
 |---|---|---|
-| max_positions | 10 | **12** |
+| max_[REDACTED] | 10 | **12** |
 | per-position size | NAV/10 = 10% | **fixed 10% cap, slots up to 12** |
 | sector_limit_per_sector | {8: 4} | {8: 4} but **RE_BACKLOG_BUY exempt** |
 | BA_CORE_TIERS | 5 tiers | **+ RE_BACKLOG_BUY** |
@@ -119,7 +119,7 @@ TCH adv_yoy = 29.19 (~30x YoY), nhưng fa_tier=E, ta=5, np_yoy=-66% → rule **k
 - `recommend_holistic.py:230-243` — classify_play_type RE_BACKLOG_BUY rule (BEFORE AVOID_faE)
 - `recommend_holistic.py:266-272` — BA_CORE_TIERS, PRIORITY, SECTOR_CAP_EXEMPT
 - `recommend_holistic.py:437-446` — select_book sector cap exemption
-- `recommend_holistic.py:541-549` — max_positions=12 in main()
+- `recommend_holistic.py:541-549` — max_[REDACTED]=12 in main()
 - `simulate_holistic_nav.py:153` — TIER_PRIORITY["RE_BACKLOG_BUY"]=55 persisted
 - `simulate_holistic_nav.py:204-205` — sector_cap_exempt_tiers, tier_position_limit params added
 - `simulate_holistic_nav.py:466-476` — exemption logic in sector cap check

@@ -42,7 +42,7 @@ V121_ENS wins FULL CAGR (+1.67pp vs V12.1 static, +3.56pp vs V11). 26 flips/12y 
 
 - `data/pt_v121_ens_logs.csv` — daily NAV + cash + active_leg + ens_signal
 - `data/pt_v121_ens_transactions.csv` — buys/sells + ETF + SWITCH events (book="SWITCH") + MTM phantoms
-- `data/pt_v121_ens_open_positions.csv` — open positions at end (BAL + active leg)
+- `data/pt_v121_ens_open_[REDACTED].csv` — open [REDACTED] at end (BAL + active leg)
 - `data/pt_v121_ens_report.md` — reconciliation + switch events log
 - `data/papertrade_compare4.md` / `.csv` — combined 4-way report (replaces ...compare3.*)
 

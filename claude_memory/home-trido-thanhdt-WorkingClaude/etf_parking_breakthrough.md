@@ -72,7 +72,7 @@ V6 ETF parking at realistic 1% deposit BEATS the original 3% deposit assumption.
 
 | Component | BAL book | VN30 book |
 |---|---|---|
-| BA active positions | 26.9% | 18.6% |
+| BA active [REDACTED] | 26.9% | 18.6% |
 | ETF parking (VN30) | 30.7% | 33.0% |
 | Cash residual | 42.4% | 48.4% |
 | **Active "working" capital** | **57.6%** | **51.6%** |
@@ -108,7 +108,7 @@ Working capital roughly DOUBLED vs P1 baseline (28% → 55%).
    - Check current 5-state regime
 
 2. **In NEUTRAL state:**
-   - After deploying BA-core picks (typically 2-3 positions = 5-15% NAV)
+   - After deploying BA-core picks (typically 2-3 [REDACTED] = 5-15% NAV)
    - **Use 70% of remaining cash to buy E1VFVN30 (or similar VN30 ETF)**
    - Keep 30% cash as defensive cushion
 

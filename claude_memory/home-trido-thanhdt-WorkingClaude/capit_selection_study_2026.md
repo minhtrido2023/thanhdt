@@ -7,7 +7,7 @@ metadata:
   originSessionId: 2ef717ab-5c78-4933-9acd-888a2ecf9450
 ---
 
-CAPIT "chọn mã nào trong rổ" study ([REDACTED]12, user hỏi nhóm nào hiệu quả nhất + ý: dùng momentum-book knowledge? technical chọn golden eggs? sức-bật-lịch-sử của chính mã?). Method: 141 vị thế CAPIT thực hiện từ ledger audit (`data/capit_positions.csv`, 50 mã/16 event, all closed) → join đặc trưng tại lúc mua từ BQ + earnings_px → **within-event rank IC** (demean theo event = tách chọn-mã khỏi chọn-thời-điểm). Scripts: `data/capit_selection_study.py` + `data/capit_selection_features.csv`.
+CAPIT "chọn mã nào trong rổ" study ([REDACTED]12, user hỏi nhóm nào hiệu quả nhất + ý: dùng momentum-book knowledge? technical chọn golden eggs? sức-bật-lịch-sử của chính mã?). Method: 141 vị thế CAPIT thực hiện từ ledger audit (`data/capit_[REDACTED].csv`, 50 mã/16 event, all closed) → join đặc trưng tại lúc mua từ BQ + earnings_px → **within-event rank IC** (demean theo event = tách chọn-mã khỏi chọn-thời-điểm). Scripts: `data/capit_selection_study.py` + `data/capit_selection_features.csv`.
 
 **KẾT LUẬN: chọn-mã trong CAPIT YẾU; EVENT (regime) chi phối, không phải name.** Within-event IC hầu hết |IC|<0.2 và KHÔNG robust.
 

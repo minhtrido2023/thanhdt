@@ -40,7 +40,7 @@ User: MWG/DGW/FRT/VTP in acceleration phase traded at HIGH valuation; while grow
 Per-position, 5Y window, realized return + capture ratio (realized/5Y-peak). Strategies exit on OVERVALUED|FA / DECEL(NP_R&Rev<10%)|FA / QTV4_ANY / ARCHETYPE (value→OVR, growth→DECEL) vs HOLD_5Y.
 - **ALL (621): HOLD_5Y crushes every rule** — median +14.1%/mean +44.2%/capture 40% vs OVERVALUED +0.5%/+18%/21%, DECEL −0.3%/+1.6%/0%, QTV4_ANY −0.6%/+12.4%/5%, ARCHETYPE +1.0%/+16.3%/17%.
 - **GROWTH+BOTH (122): user's "DECEL>OVERVALUED" NOT confirmed — DECEL is WORST** (mean +5.6% vs OVR +14.4% vs HOLD +41.1%); DECEL exits too early (126d vs OVR 256d) because quarterly growth is lumpy (one <10% quarter ejects before the run). 
-- **Reconciles the earlier "OVERVALUED +81%/96%win"**: that was SELECTION illusion (only winners ever reach overvalued); applied to all positions, rule-exits lose to hold (most exit early via FA_DEGRADE, locking small losses).
+- **Reconciles the earlier "OVERVALUED +81%/96%win"**: that was SELECTION illusion (only winners ever reach overvalued); applied to all [REDACTED], rule-exits lose to hold (most exit early via FA_DEGRADE, locking small losses).
 - **VERDICT: for a quality-compounder filter, rule-based exits DESTROY value — HOLD wins** (right-skew: a few multibaggers compound; any early exit truncates the right tail; losses bounded at −100% but winners unbounded → asymmetry favors holding). Most Buffett-consistent result: "favorite holding period is forever." Answer to "when to exit" = essentially DON'T (on these rules).
 - Fundamental-trigger exits all lose to hold. Files: qt_v4x_exits.py, data/qt_v4x_exits.{md,csv}.
 

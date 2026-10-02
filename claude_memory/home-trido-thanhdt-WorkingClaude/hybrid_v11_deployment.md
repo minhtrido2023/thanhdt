@@ -29,14 +29,14 @@ originSessionId: 70c13426-2492-456b-9547-d14c8cf8fcb7
 2. **P3 overheated guard** (+1.57pp full CAGR per patches backtest):
    - Skip new BAL buys when `VNINDEX / VNINDEX_MA200 > 1.30`
    - Hits ~31 days/12y — extreme tops only
-   - Existing positions hold to expiry — no forced exit
+   - Existing [REDACTED] hold to expiry — no forced exit
 
 ### Strategy
 - **BAL component (50% of BA leg = 25% of total NAV)**:
   - Tiers: MEGA, MOMENTUM, MOMENTUM_N, MOMENTUM_S, DEEP_VALUE_RECOVERY
   - Universe: `tav2_bq.ticker_prune` (449 quality tickers)
-  - Sector limit: Fin/RE (sector 8) max 4 positions
-  - max_positions=10, hold_days=45, stop_loss=-20%, min_hold=2, BL20
+  - Sector limit: Fin/RE (sector 8) max 4 [REDACTED]
+  - max_[REDACTED]=10, hold_days=45, stop_loss=-20%, min_hold=2, BL20
 
 - **VN30 component (50% of BA leg = 25% of total NAV)**:
   - Same tier set, universe = top 30 by liquidity
@@ -70,7 +70,7 @@ originSessionId: 70c13426-2492-456b-9547-d14c8cf8fcb7
 
 ### CRISIS gate (v1)
 - Skip new LH buys when `vnindex_5state.state == 1` (CRISIS)
-- Existing positions hold to 4Q expiry — no forced exit
+- Existing [REDACTED] hold to 4Q expiry — no forced exit
 - Validated lift: +2.67pp standalone CAGR vs no-gate
 
 ### Costs
@@ -104,9 +104,9 @@ originSessionId: 70c13426-2492-456b-9547-d14c8cf8fcb7
 
 | NAV | Hybrid CAGR | Action |
 |---|---|---|
-| 1-50B | 19-21% | Default config, n_positions=10 |
+| 1-50B | 19-21% | Default config, n_[REDACTED]=10 |
 | 50-100B | 16-19% | ✅ Default; monitor LH liquidity caps |
-| 100-150B | 16% | Consider n_positions=15 (smaller pos under cap) |
+| 100-150B | 16% | Consider n_[REDACTED]=15 (smaller pos under cap) |
 | 150-250B | 13-16% | Consider LH-tilt (LH scales better) |
 | 250B+ | <13% | Switch to VN30 + LH only (per BA memory) |
 

@@ -20,7 +20,7 @@
 - Sharpe: 1.38 → 1.40
 
 **Pre-2014 stress test (2007-2013): IDENTICAL to V_PROD and C3_safer** ✅
-- Reason: Pre-2014 is capacity-constrained (max_positions=10, hold_days=45, AVOID_bear blocks 2008-2011), not signal-constrained. Removing SVT doesn't change which trades execute — capacity ceiling already binds at 17 trades for 7 years.
+- Reason: Pre-2014 is capacity-constrained (max_[REDACTED]=10, hold_days=45, AVOID_bear blocks 2008-2011), not signal-constrained. Removing SVT doesn't change which trades execute — capacity ceiling already binds at 17 trades for 7 years.
 
 **Why C3_clean > C3_safer (the safer alternative):**
 - Architecturally cleaner: 1 layer less (3 layers vs 4)
@@ -92,7 +92,7 @@ cash_etf_states = {2: 0.5, 3: 0.7}[REDACTED] # was {3: 0.7}
 - AVOID_bear: state ∈ {1, 2}
 - Overheat: Close/MA200 > 1.30 AND (state=5 OR D_RSI>0.75)
 - D1 RE_BACKLOG: requires state ∈ {3,4,5}
-- max_positions=12, tier_weights {tier: 0.10}
+- max_[REDACTED]=12, tier_weights {tier: 0.10}
 - All other simulator params
 
 ## Validation breakdown

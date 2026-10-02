@@ -38,7 +38,7 @@ Same as v11/v12: SIGNAL_V11_UNIFIED + P3 overheat + 5 TIER_BAL + sec_lim Fin/RE 
 - Profile: exp decay weight half-life 3 years on prior good-earnings post_ret
 - Entry: T+5 trading days after Release_Date at Open
 - Exit: T+30 trading days at Open (25d hold)
-- Max positions: 12 concurrent
+- Max [REDACTED]: 12 concurrent
 - **Sizing (NEW)**:
   ```python
   pos_pct = 0.10 if surprise_B_MA > 0.5 else 0.08

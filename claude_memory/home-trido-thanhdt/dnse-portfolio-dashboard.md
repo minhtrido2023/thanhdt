@@ -1,6 +1,6 @@
 ---
 name: dnse-portfolio-dashboard
-description: "New initiative — DNSE portfolio management dashboard (balances/positions/orders/NAV/quotes), separate from the live trading bot"
+description: "New initiative — DNSE portfolio management dashboard (balances/[REDACTED]/orders/NAV/quotes), separate from the live trading bot"
 metadata: 
   node_type: memory
   type: project
@@ -9,7 +9,7 @@ metadata:
 ---
 
 This is **tbot's** project (see [[tbot-identity]], [[tbot-scaffold]]) — read-only DNSE dashboard
-(balances, positions, orders, NAV, quotes), distinct from Mike fleet's live `trading_bot`
+(balances, [REDACTED], orders, NAV, quotes), distinct from Mike fleet's live `trading_bot`
 execution system (see [[mike-fleet]], [[poc-not-live]]).
 
 **Why:** dashboard-only use case doesn't need order placement, so it can skip the trading-token/
@@ -28,5 +28,5 @@ KB concept at `WorkingClaude/tbot/kb/concepts/dnse-openapi-v2-calling-guideline/
 `unverified` — imported from Mike fleet's [REDACTED]-tested copy, not yet independently
 reconfirmed within tbot's own governance). Key gotchas to reuse: three different "cash" fields
 (`availableCash` vs `totalCash` vs `ppse`'s `pp0Buy`) answer three different questions and must be
-labeled separately; positions need `total` vs `sellable` shown distinctly; T+2 settlement flips
+labeled separately; [REDACTED] need `total` vs `sellable` shown distinctly; T+2 settlement flips
 mid-afternoon, not at market open; pick the `G1` board explicitly when reading quotes.

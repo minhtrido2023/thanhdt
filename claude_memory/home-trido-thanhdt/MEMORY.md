@@ -6,4 +6,4 @@
 - [Repo structure goal](repo-structure-goal.md) — clean private GitHub backup; data/ and secrets/ separated from code+docs
 - [GitHub backup](github-backup.md) — backup.sh workflow, repo layout, secret scrubbing for Claude history
 - [Mike fleet](mike-fleet.md) — multi-agent orchestrator, Phase-1 spine built under WorkingClaude/mike/ (companion model, git-KB, python not jq)
-- [DNSE portfolio dashboard](dnse-portfolio-dashboard.md) — new read-only dashboard project (balances/positions/orders/NAV/quotes), separate from live trading bot
+- [DNSE portfolio dashboard](dnse-portfolio-dashboard.md) — new read-only dashboard project (balances/[REDACTED]/orders/NAV/quotes), separate from live trading bot

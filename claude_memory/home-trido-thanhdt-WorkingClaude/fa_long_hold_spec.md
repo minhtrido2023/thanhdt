@@ -134,7 +134,7 @@ Common range: 2014-04-01 → 2026-01-16 (~12 years)
 
 ### CRISIS gate mechanics
 
-Skip new buys when `vnindex_5state.state == 1` (CRISIS). Expired positions still sell normally.
+Skip new buys when `vnindex_5state.state == 1` (CRISIS). Expired [REDACTED] still sell normally.
 - Adds **+2.67pp CAGR to LH standalone** (17.76 → 20.43)
 - Adds **+1.32pp to 50/50 hybrid** (18.01 → 19.33)
 - Most alpha comes from OOS 2024+ where gate avoided 2024-Q1 CRISIS + 2026-Q1 BEAR
@@ -234,7 +234,7 @@ Backtest 12y canonical sim 6 variants:
 
 **BA v11 = BA v10 + P3 only.**
 
-P3 implementation: `recommend_holistic.py` BAL component skip new entries when `VNINDEX/MA200 > 1.30` (computed from `tav2_bq.ticker` VNINDEX row). Affects ~31 days in 12 years (rare extreme tops). Holds existing positions to expiry — no forced exit.
+P3 implementation: `recommend_holistic.py` BAL component skip new entries when `VNINDEX/MA200 > 1.30` (computed from `tav2_bq.ticker` VNINDEX row). Affects ~31 days in 12 years (rare extreme tops). Holds existing [REDACTED] to expiry — no forced exit.
 
 ## ✅ Hybrid v11 (BA v11 + LH_gated 50/50) — QWF v3 VERDICT GREEN
 
@@ -325,26 +325,26 @@ Hybrid more shock-sensitive than BA-alone (LH no position stops). Still manageab
 **Scale-up recommendations**:
 | NAV | Config |
 |---|---|
-| 1-50B | Hybrid 50/50, default n_positions=10 |
+| 1-50B | Hybrid 50/50, default n_[REDACTED]=10 |
 | 50-100B | Hybrid 50/50, monitor LH liquidity caps |
-| 100-150B | ✅ Still good; consider n_positions=15 (smaller positions stay under cap) |
+| 100-150B | ✅ Still good; consider n_[REDACTED]=15 (smaller [REDACTED] stay under cap) |
 | 150-250B | Consider LH-tilt (LH degrades slower than BA at scale) |
 | 250B+ | Switch to VN30 + LH only (per BA-system memory) |
 
 ## ⚠️ CRITICAL CORRECTION (2026-05-15) — Simulator bugs found, numbers revised
 
 User question "Bạn mua gì vào 01/06/2025 để qua tháng 12 đã bán rồi" exposed that prior hybrid v11
-backtest used SLICED simulation (positions inherited from years of cohort rotation), not FRESH START.
+backtest used SLICED simulation ([REDACTED] inherited from years of cohort rotation), not FRESH START.
 Re-audit found 3 bugs in `simulate_lh_nav.py`:
 
 ### Bug 1: Position sizing (FIXED)
 - OLD: `target_per_pos = cash / len(new_buys)` → first cohort buys 50% NAV per position
-- NEW: `target_per_pos = NAV / n_positions` → fixed 10% NAV per position
+- NEW: `target_per_pos = NAV / n_[REDACTED]` → fixed 10% NAV per position
 - **Impact**: 12y LH CAGR 19.85% → 11.53% (lost concentration bonus)
 
 ### Bug 2: Max buys per rebal (FIXED)
-- OLD: `int(round(10/4)) = 2` (banker's rounding) → max 8 positions after 4 cohorts
-- NEW: `int(ceil(10/4)) = 3` → reaches 10 positions after 4 cohorts
+- OLD: `int(round(10/4)) = 2` (banker's rounding) → max 8 [REDACTED] after 4 cohorts
+- NEW: `int(ceil(10/4)) = 3` → reaches 10 [REDACTED] after 4 cohorts
 - **Impact**: avg_n_pos 5.93 → 7.95
 
 ### Bug 3: CRISIS gate smoothing lag (investigated, kept as-is)
@@ -366,14 +366,14 @@ Re-audit found 3 bugs in `simulate_lh_nav.py`:
 ### Fresh-start ramp: staggered too slow
 
 Fresh start 2025-06-01 with 25B LH leg, staggered mode:
-- Only 6 positions [REDACTED] in 9 months
+- Only 6 [REDACTED] [REDACTED] in 9 months
 - Final NAV 23.29B (**-6.83%**)
 - 60-80% of LH NAV in cash during entire window
 - VNI rallied +24.41% → alpha **-24.88pp** vs VNI
 
 ### 🏆 SOLUTION: hybrid_init mode (NEW)
 
-Lumpy first rebal (deploy 10 positions immediately) + staggered after.
+Lumpy first rebal (deploy 10 [REDACTED] immediately) + staggered after.
 
 | Mode | 12y CAGR | Sharpe | DD | Fresh start NAV |
 |---|---|---|---|---|
@@ -385,7 +385,7 @@ Lumpy first rebal (deploy 10 positions immediately) + staggered after.
 
 ### Caveat: hybrid_init steady-state synchronized cohort risk
 
-After lumpy initial, all 10 positions share Q1 vintage. After 4Q they all expire together.
+After lumpy initial, all 10 [REDACTED] share Q1 vintage. After 4Q they all expire together.
 Mitigation: stagger sells (sell 2-3 oldest per quarter starting from Q+4) → portfolio matures
 into 4-quarter cohort spread within 2-3 years.
 
@@ -398,12 +398,12 @@ Updated [REDACTED] recommendation: deploy hybrid_init mode TODAY (2026-05-15) wi
 3. **LH operations**:
    - `score_fa_lh.py` rerun after each quarter's Q4 reports finalize (~ end of release season + 30 days)
    - `recommend_lh.py` for daily pick screening (CRISIS gate built in — script halts if state=1)
-   - Each quarter: rotate ~2-3 positions (oldest cohort expires, new top-score A+B picks fill in)
+   - Each quarter: rotate ~2-3 [REDACTED] (oldest cohort expires, new top-score A+B picks fill in)
    - Cost discipline: slip 0.10%/0.15%, VN tax 0.10%, liq cap 20% ADV × 5d
-4. **CRISIS gate enforcement**: skip all NEW LH buys when `vnindex_5state.state == 1`. Existing positions ride out the regime to their 4-quarter expiry. No forced exits.
+4. **CRISIS gate enforcement**: skip all NEW LH buys when `vnindex_5state.state == 1`. Existing [REDACTED] ride out the regime to their 4-quarter expiry. No forced exits.
 5. **Live universe filter**: `Volume_3M_P50 × Close ≥ 1B VND/day` (same as BA).
 6. **Monitoring**: re-run `qwf_hybrid_v2.py` at end of each quarter. Alarm threshold: 2+ consecutive 3Y RED windows on alpha-vs-VNI basis (would indicate score drift, not regime).
-7. **First action**: after 2026-Q1 reports release wave completes (~late May), regenerate `fa_ratings_lh.csv` and pick first 2-3 LH positions.
+7. **First action**: after 2026-Q1 reports release wave completes (~late May), regenerate `fa_ratings_lh.csv` and pick first 2-3 LH [REDACTED].
 
 ## Future iterations (after hybrid deploy)
 

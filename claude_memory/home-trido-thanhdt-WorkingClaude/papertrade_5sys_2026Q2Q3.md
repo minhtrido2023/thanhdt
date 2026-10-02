@@ -22,7 +22,7 @@ Each system starts fresh at 50B VND on Apr 1. All use Tam Quan v3.4b state class
 **Config**:
 - State source: TQ v3.4b (`tav2_bq.vnindex_5state_tam_quan_v34b_clean`)
 - ETF schedule: `cash_etf_states={3: 0.7}` (only NEUTRAL has ETF parking)
-- Tier weights: flat 10% × max_positions=10 (default equal-weight)
+- Tier weights: flat 10% × max_[REDACTED]=10 (default equal-weight)
 - LAGGED leg: NONE
 - Cost: deposit=0%, borrow=10%, TC=0.1%/side, ETF friction=0.15%/side
 
@@ -50,7 +50,7 @@ Each system starts fresh at 50B VND on Apr 1. All use Tam Quan v3.4b state class
 - ETF schedule: `cash_etf_states={3: 0.7}`
 - LAGGED: buy T+5 after NP_R≥15 if prior_n_good≥4 AND pa_HL3≥5 ; hold 25 trading days
 - LAGGED sizing: **fixed 8% NAV per position** (no S2 modulation)
-- Max 12 positions LAGGED, liquidity floor 2B VND ADV
+- Max 12 [REDACTED] LAGGED, liquidity floor 2B VND ADV
 - Cost: same as V1
 
 **12y backtest baseline** (rebuilt today):
@@ -112,7 +112,7 @@ Each system starts fresh at 50B VND on Apr 1. All use Tam Quan v3.4b state class
 
 **Purpose**: V4 is the leading deployment candidate. Tests "Does M1+M3r ensemble signal correctly route between V11 (concentrated TOP30) and V12.1 (LAGGED earnings drift) based on market regime?"
 
-**Current paper trade** (Apr 1 → May 19, 7 weeks): NAV 51.56B (+3.13%, CAGR +26.40%, DD -2.41%). Ensemble in V11-mode 32/32 days (no flips yet). 19 open positions.
+**Current paper trade** (Apr 1 → May 19, 7 weeks): NAV 51.56B (+3.13%, CAGR +26.40%, DD -2.41%). Ensemble in V11-mode 32/32 days (no flips yet). 19 open [REDACTED].
 
 ---
 
@@ -213,7 +213,7 @@ After 5 months of live paper trade data:
 - `pt_v121_ensemble.py` → V4
 - `pt_v121_ens_q2.py` → **V5** (new, created 2026-05-23)
 - `papertrade_compare.py` → comparison script (needs extension for V5)
-- `data/pt_v*_logs.csv` / `_transactions.csv` / `_open_positions.csv` / `_report.md` → outputs per system
+- `data/pt_v*_logs.csv` / `_transactions.csv` / `_open_[REDACTED].csv` / `_report.md` → outputs per system
 - `data/papertrade_compare5.{md,csv}` → 5-system comparison (replace compare4.*)
 
 ## Memory references

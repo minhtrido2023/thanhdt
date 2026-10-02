@@ -26,7 +26,7 @@ Scripts: `layer3_sell_anticipate.py` (51K events), `layer3_s2_tune_fast.py` (gri
 - `S2_DAYCHG_THR = -3.0`, `S2_BOUNCE_MIN_PCT = 0.0` (constants)
 - `E_S2_ANTICIPATE` rule: walk bars; if S2 triggers, fire at trigger close; else fallback ATC market
 - Routed via `PLAY_RULE` dict: DEEP_VALUE_RECOVERY → E_S2_ANTICIPATE; MOMENTUM_*/COMPOUNDER_BUY → E1_T1115_LIM
-- Stop-loss intraday: every day for open positions, check `low ≤ entry × 0.80`; if hit, exit at stop_lvl (limit-sell at stop, assume fill); record exit_type=STOP_INTRADAY
+- Stop-loss intraday: every day for open [REDACTED], check `low ≤ entry × 0.80`; if hit, exit at stop_lvl (limit-sell at stop, assume fill); record exit_type=STOP_INTRADAY
 - Time exit at HOLD_DAYS=45: X1_T0945_LIM rule (existing)
 
 ### Combined estimated CAGR impact (cumulative, BA-system 50B NAV)

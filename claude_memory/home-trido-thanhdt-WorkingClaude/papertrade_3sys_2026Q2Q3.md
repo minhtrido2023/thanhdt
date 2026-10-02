@@ -52,7 +52,7 @@ metadata:
 **Files (all in `C:\Users\hotro\OneDrive\Pictures\Documents\WorkingClaude`)**:
 - `pt_dates.py`, `pt_v11_tq34b.py`, `pt_v12_tq34b.py`, `pt_v12_live.py`
 - `papertrade_compare.py`, `papertrade_daily.bat`
-- Outputs: `data/pt_*_{logs,transactions,open_positions,report}.csv/md`
+- Outputs: `data/pt_*_{logs,transactions,open_[REDACTED],report}.csv/md`
 - Combined: `data/papertrade_compare3.{md,csv}`
 - Scheduled task: `PaperTrade3Sys` (daily 15:30)
 

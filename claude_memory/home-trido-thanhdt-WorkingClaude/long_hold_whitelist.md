@@ -7,7 +7,7 @@ originSessionId: 70c13426-2492-456b-9547-d14c8cf8fcb7
 # Long-Hold Quality Whitelist
 
 **Created**: 2026-05-15 | **Source**: `analyze_lh_super_stocks.py`, `find_true_compounders.py`
-**Purpose**: Identify "core" positions that BA-system should HOLD indefinitely while fundamentals remain strong, overriding default 45d cohort exit.
+**Purpose**: Identify "core" [REDACTED] that BA-system should HOLD indefinitely while fundamentals remain strong, overriding default 45d cohort exit.
 
 ## Core thesis
 
@@ -174,7 +174,7 @@ Force sell if ANY:
 
 ## Suggested deployment plan
 
-**Phase 1 (today, 2026-05-15)**: Identify positions
+**Phase 1 (today, 2026-05-15)**: Identify [REDACTED]
 - BA-system already running with full 100B NAV
 - Identify which BA picks overlap with whitelist (likely MBB, FPT, BMP — banks/blue chips)
 - Tag those as "core" — extend hold beyond 45d when they appear in BA picks
@@ -185,7 +185,7 @@ Force sell if ANY:
 - Remaining 50-60% NAV stays in BA rotation
 
 **Phase 3 (steady state)**: Maintain
-- Whitelist positions: review monthly, hold absent exit trigger
+- Whitelist [REDACTED]: review monthly, hold absent exit trigger
 - BA satellite: normal 45d cohort rotation
 
 ### DGC specific actions
@@ -200,7 +200,7 @@ If user does NOT hold DGC:
 - WAIT for clearer signal (price above MA50 sustained + P4 trend confirmed)
 - Initial buy size: 2-3% NAV (small, can scale up later if thesis confirms)
 
-## Tracking — `whitelist_positions.csv` (template)
+## Tracking — `whitelist_[REDACTED].csv` (template)
 
 ```csv
 ticker,tier,position_pct_nav,first_buy_dt,first_buy_px,current_px,unrealized_pct,fa_tier_latest,status,notes

@@ -13,8 +13,8 @@ originSessionId: 70c13426-2492-456b-9547-d14c8cf8fcb7
 
 ### Original LH numbers were inflated (bug)
 - v1 reported CAGR **19.85%** based on `simulate_lh_nav.py` with concentration bug
-- Bug: `target_per_pos = cash / len(new_buys)` → first cohort positions got 50% NAV each
-- After fix: target per position = NAV / n_positions (fixed 10% NAV)
+- Bug: `target_per_pos = cash / len(new_buys)` → first cohort [REDACTED] got 50% NAV each
+- After fix: target per position = NAV / n_[REDACTED] (fixed 10% NAV)
 
 ### Corrected LH performance (with bugs fixed)
 | Metric | Original (bug) | Corrected |

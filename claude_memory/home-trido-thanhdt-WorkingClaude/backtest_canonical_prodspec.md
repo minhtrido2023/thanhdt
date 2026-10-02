@@ -7,7 +7,7 @@
 
 ## Spec difference vs old (6 changes)
 
-1. `max_positions=12` (was 10) — slot12 deployed 2026-05-16
+1. `max_[REDACTED]=12` (was 10) — slot12 deployed 2026-05-16
 2. `tier_weights={tier: 0.10}` for all TIER_BAL — 10% fixed sizing
 3. `t1_open_exec=True` + `open_prices` loaded — T+1 OPEN exec (was legacy T-close)
 4. `RE_BACKLOG_BUY` tier added via D1 reclassification (ICB 8633, AdvCust YoY > 50%, FA C/D, state 3-5)
@@ -58,7 +58,7 @@ fresh CAGR to rebased canonical CAGR over same end-date window.
 ## Quoting convention (per user 2026-05-25)
 
 Never quote a single CAGR without start-date qualifier. Use either:
-- `"CAGR 12y continuous = X% (canonical, with carryover positions)"`
+- `"CAGR 12y continuous = X% (canonical, with carryover [REDACTED])"`
 - `"CAGR 2.4y fresh-start 2024-01 = Y% (cold-start, new deployer proxy)"`
 
 ## Expected returns for new deployer (fresh 2024-01)

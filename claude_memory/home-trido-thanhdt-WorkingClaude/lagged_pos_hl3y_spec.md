@@ -157,7 +157,7 @@ User's hypothesis (validated): equal-weighted mean treats 10-year-old events sam
 
 - Started: 2026-04-01 (49 days running)
 - NAV: 49.50B (−1.00% vs 50B init)
-- Open positions: 8 (HCM +14%, PVP +7%, others mixed)
+- Open [REDACTED]: 8 (HCM +14%, PVP +7%, others mixed)
 - Closed: 4 trades, WR 25%, avg −1.07%
 - VNI same period: +12.33% → Alpha −13.33pp (vs −17.74pp with old EQUAL filter)
 - Cash buffer: 18.1B (37%) — has flexibility for new signals

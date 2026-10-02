@@ -89,7 +89,7 @@ Bootstrapped log with 68 entries from:
 | Rolling 30 (recent) | 30 | **+0.59pp p=0.04** | **🟢 GREEN** | rule currently working |
 | T1_TOP only | 39 | **+0.40pp** | healthy | ATC works for liquid names |
 | T2_MID | 17 | **-1.23pp** | ⚠ | T1115 morning vol noisy |
-| T3_LIQUID | 12 | +0.22pp | OK | smaller positions absorb |
+| T3_LIQUID | 12 | +0.22pp | OK | smaller [REDACTED] absorb |
 
 **Key insight from initial backfill**: T2_MID tickers suffer from T1115 morning-bar volatility (worst: OIL 2026-02-03 -7.65pp alpha — 11:15 was 7.65% above open after sharp morning rally). The Phase 4b NAV sim aggregate of +1.75pp washed out this tier-specific tail risk over a 2.5y window. The shadow tracker exposes it on the actual 11-month subset.
 

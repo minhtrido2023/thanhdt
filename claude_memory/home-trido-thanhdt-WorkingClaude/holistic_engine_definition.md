@@ -156,7 +156,7 @@ Grid search 168 configs (4 tier-sets × 4 max_pos × 4 hold_days × 3 stops) on 
 **Key insights from grid:**
 1. AGGRESSIVE 7p 45d -15% best CAGR (+10.7pp vs baseline 25%)
 2. HIGH_CONV 10p 30d -20% best risk-adj (Calmar 1.22, DD chỉ -17.6%)
-3. More positions (10) > fewer almost universally (diversification)
+3. More [REDACTED] (10) > fewer almost universally (diversification)
 4. Stop loss -10/-15/-20 khác biệt nhỏ trong top configs
 5. Short hold (30d) + tight stop = best Sharpe; long hold (60d+) = higher CAGR
 6. MEGA standalone undertrades — chỉ 2 trades/yr, không phù hợp full deploy
@@ -920,7 +920,7 @@ F-system has separate methodology (VN30F derivatives, daily script), would requi
 - `test_round15_tactical.py`
 - `round15_tactical.csv`, `round15_holdout.csv`
 
-## Round 16: Tier-sized positions + EX-BULL threshold tightening — BOTH REJECTED
+## Round 16: Tier-sized [REDACTED] + EX-BULL threshold tightening — BOTH REJECTED
 
 Two structural ideas tested on BAL_Fin4 single-book at 50B (baseline CAGR=17.97%, Sh=1.12, DD=-20.4%):
 

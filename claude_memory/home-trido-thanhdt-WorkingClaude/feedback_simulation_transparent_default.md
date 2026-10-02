@@ -21,7 +21,7 @@ Mỗi khi user yêu cầu chạy simulation (BA v11 / v12 / v13... bất kỳ ph
 4. **Save 4 files** vào `data/`:
    - `<name>_logs.csv` — daily NAV + per-book cash/stocks/etf + n_pos + n_tx + state
    - `<name>_transactions.csv` — mọi buy/sell + ETF rebalance + MTM phantoms
-   - `<name>_open_positions.csv` — open lots với cost_basis/mark/unrealised
+   - `<name>_open_[REDACTED].csv` — open lots với cost_basis/mark/unrealised
    - `<name>_report.md` — output của `analyze_portfolio.py` + reconciliation block ghi nối thêm
 5. **Reconciliation block bắt buộc** trong report, verify 4 gate (mọi delta phải = 0):
    - `init − Σ(buys+fees) + Σ(sells−fees) = end_cash` (từ tx CSV)

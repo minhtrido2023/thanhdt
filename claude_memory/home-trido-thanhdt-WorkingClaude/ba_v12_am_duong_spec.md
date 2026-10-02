@@ -108,7 +108,7 @@ TOTAL NAV (50B baseline)
 
 **Step 1: Reduce v11 VN30 allocation to zero**
 - Stop new buys in VN30_BAL book
-- Wait for existing VN30 positions to exit via stop/time-trigger (~45d hold)
+- Wait for existing VN30 [REDACTED] to exit via stop/time-trigger (~45d hold)
 - OR liquidate manually if want fast switch
 
 **Step 2: Start LAGGED book at 25B**
@@ -127,7 +127,7 @@ python lagged_pos_papertrade.py --start <deployment_start_date>
 # Outputs:
 #   lagged_paper_nav.csv[REDACTED] — NAV history
 #   lagged_paper_trades.csv      — all events
-#   lagged_paper_positions.csv   — current open
+#   lagged_paper_[REDACTED].csv   — current open
 #   lagged_paper_state.json      — summary
 ```
 
