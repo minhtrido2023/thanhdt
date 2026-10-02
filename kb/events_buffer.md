@@ -778,3 +778,6 @@
 
 ## Consolidation 2026-10-02T06:07:02Z
 - [2026-10-02T06:00:07Z] Mafee/status — bot-done: {"account": "ZaloPay", "plan_date": "2026-10-02", "elapsed_s": 5, "rc": 0}
+
+## Consolidation 2026-10-02T08:07:01Z
+- [2026-10-02T08:00:34Z] Winston/finding — sbv-weekly-check-2026-10-02: {"date": "2026-10-02", "current_rate": 4.5, "fetch_status": "fetch_failed", "rate_changed": false, "note": "fetch_failed_assumed_unchanged", "verify_log": "/home/trido/thanhdt/WorkingClaude/data/sbv_verify_log.json"}
