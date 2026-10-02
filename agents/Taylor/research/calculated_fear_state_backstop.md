@@ -3185,3 +3185,83 @@ kết luận điều tra đại án điện (cổng TV1) → giấy phép mỏ P
 [Thời báo Ngân hàng — TPDN: nợ chậm trả hạ nhiệt, 253 nghìn tỷ chờ đáo hạn](https://thoibaonganhang.vn/trai-phieu-doanh-nghiep-no-cham-tra-ha-nhiet-253-nghin-ty-dong-cho-dao-han-187223.html)
 
 ---
+### 2026-10-02 (job `Taylor_20261002_011033`) — QUÉT TUẦN — **0 QUALIFY mới · 0 AMBIGUOUS mới · 1 không-phải-case mới (CMG, mã phễu duy nhất chưa vào sổ) · 28 mã gác rà qua** · ★ **Escalate PNJ 09-28 ĐÃ ĐƯỢC ÁP: PNJ nằm trong `excluded_tickers` của CẢ 2 account** (đọc thật `secrets/trading_bot_accounts.json`) · ★ **PNJ sàn 4 phiên liên tiếp 28/09→01/10 (33.000→24.750, −25%) + công bố phát hành riêng lẻ 550 tr cp (> 511,7 tr cp đang lưu hành)** — xác nhận NON, không phải dữ kiện đổi phân loại · ★ **0 lệnh MUA trên mọi kênh live phiên 02/10**
+
+**Độ tươi**: `anomaly_scan.py --backfill-days 7` báo **⚠️ WATCHLIST QUÁ HẠN** — `active_nav_SpaceX.json`
+computed_at **2026-09-30** (ZaloPay tươi, 2026-10-01). Nguyên nhân ĐỌC ĐƯỢC trong
+`mike/logs/compute_active_nav_all.log` (không đoán): producer 20:15 ngày 01/10 **có chạy** nhưng **cố ý
+không ghi** vì `TPB: KL 200→230, lệnh khớp thật +0 ⇒ phần dư +30 CHƯA GIẢI THÍCH ĐƯỢC` (= cổ tức cổ
+phiếu TPB 15% mà user đã duyệt ghi tay vào `corp_actions.json` — script này không đọc file đó) + thiếu
+`exec_SpaceX_2026-10-01_journal.csv`. **Hệ quả cho lượt quét: KHÔNG có lỗ hổng phủ** — SpaceX phiên 01/10
+có **0 lệnh trên cả 3 kênh** (`plan_SpaceX_2026-10-01` 0 · `park_trim`/`jit_unpark_SpaceX_2026-10-01`
+`BLOCKED_RECONCILE` 0) ⇒ không có mã mới mua nào nằm ngoài sổ 09-30; chỉ khối lượng TPB lệch. Việc gỡ
+khóa NAV là daily-ops (Winston/Mike), không phải lượt này.
+
+#### Việc 1 — anomaly_scan: 4 cờ, **cùng 1 mã, 0 mã MỚI**
+
+```
+[W] 2026-09-28 PNJ: IDIOCRASH        | ret −7,0% (idio −6,7%) close 30.700
+[W] 2026-09-29 PNJ: FLOOR2,IDIOCRASH | ret −6,8% (idio −6,7%) close 28.600
+[W] 2026-09-30 PNJ: FLOOR2,IDIOCRASH | ret −7,0% (idio −6,5%) close 26.600
+[W] 2026-10-01 PNJ: FLOOR2,IDIOCRASH | ret −7,0% (idio −5,9%) close 24.750   → đã NON từ 09-28
+```
+
+Cờ thật (giá thô, không phải artifact corp-action). Vol 0,3–0,5× = **sàn trắng bên mua** (Vietstock: >25 tr
+cp dư bán). Không đổi phân loại: dữ kiện mới (Vietstock 01–02/10) chỉ làm NON nặng hơn — **phát hành riêng
+lẻ 550 tr cp** (lớn hơn toàn bộ 511,7 tr cp đang lưu hành ⇒ pha loãng >50%), kế hoạch **giảm vốn ~4.600 tỷ**,
+chính sách thu đổi điều chỉnh hiệu lực 30/09 (đổi hàng hoặc nhận tiền theo nhóm sản phẩm). Đúng gạch ❌
+§2.5#2 "pha loãng ở đáy để tồn tại". **Phía mua đã được chặn bằng cơ chế, không còn chỉ là kích thước lô.**
+
+#### Việc 7 — phễu hệ thống: 22 mã FULLY_QUALIFIED, **21 đã có kết luận, 1 MỚI (CMG)**
+
+`grep -c "\b<mã>\b"` trên file này: 21/22 > 0. Phân giải nhóm 09-04/09-11/09-25 GIỮ NGUYÊN, 0 dữ kiện
+trong cửa sổ đổi chúng (BĐS-lãi suất · xuất khẩu-thuế · ngân hàng đang giữ · đã kết luận riêng).
+
+| Mã | Số liệu (BQ `ticker` 01/10 + `ticker_financial` 2026Q2) | Nguyên nhân washout (tin) | Kết luận |
+|---|---|---|---|
+| **CMG** (Tập đoàn Công nghệ CMC, HOSE, ICB 9533, rating 3, golden_floor Y, marginable Y, ADV3M 3,84 tỷ) | Giá thô **21.200** vs đỉnh 1 năm **41.900** (**−49,4%**), đang ở **đáy 1 năm**, trôi đều 22.800→21.200 trong 12 phiên, **0 phiên sàn** · PB phễu **1,18** (Q2: 1,35; PB_MA5Y 2,34) · PE Q2 **14,4** vs PE_MA5Y **24,5** · **DY 0** · **Debt_Eq 1,07 → 1,57** (4 quý) · nợ vay NH+DH **~3.820 tỷ** vs tiền **745 tỷ** ⇒ nợ ròng **~3.075 tỷ** · NP 4Q **394,0 tỷ** vs CF_OA 4Q **750,8 tỷ** (**1,91×**) nhưng **CF_OA Q2 ≈ −1,0 tỷ** · AR **2.016→2.319 tỷ** (2 quý) · doanh thu Q2 **+5,1% YoY** (Q1 +23,4%) · **FSCORE 5→2** | **KHÔNG có sự kiện sợ hãi trong cửa sổ.** Washout là **xả bong bóng kỳ vọng AI** (đỉnh 2025) + lợi nhuận tăng chậm + nợ tăng (trái phiếu >1.200 tỷ đẩy nợ DH 873→~2.312 tỷ). Tin "xấu" duy nhất có tính pháp lý: **UBCKNN phạt 222,5 triệu (QĐ 257, tin 28/05)** vì chậm CBTT / không báo cáo mua lại cp cho NLĐ / không CBTT sử dụng vốn phát hành riêng lẻ — **vi phạm hành chính, không phải hình sự, ngoài cửa sổ** | **Không phải case — 3 lý do ĐỘC LẬP**: (1) **KHÔNG CÓ TRIGGER** §0.5 (a)–(d): giá trôi dài từ đỉnh định giá-kỳ-vọng, không phải cú sốc; "rẻ" chỉ so với PE_MA5Y vốn bị thổi bởi chính bong bóng AI ⇒ mỏ neo lịch sử sai. (2) **§2.5#4 sàn tài sản FAIL**: PB 1,18 > ngưỡng ≲1, và book của DN dịch vụ CNTT phần lớn là **phải thu + vô hình**, không phải tài sản vật chất có giá trị thanh lý — góc SOTP/tài sản đã kiểm đúng chiều (bài học TV1/DGC) và **không tìm được tài sản lõi định giá riêng** kiểu thuỷ điện/mỏ. (3) **§2.5#2 xu hướng bảng cân đối đi SAI chiều**: đòn bẩy +46% trong 4 quý, FSCORE 2, CF_OA quý gần nhất ≈ 0 trong khi AR phình. CF_OA/NP 4Q 1,91× là điểm cộng thật nhưng không cứu được 3 trụ trên. **Cổng mở lại**: chỉ khi có trigger thật (sự kiện riêng lẻ gây sàn) VÀ PB < 1,0 VÀ Debt_Eq ngừng tăng (BCTC Q3/2026) |
+
+#### Việc 2 — read-through mã đang gác + case cũ (cửa sổ 25/09→02/10)
+
+- **TV1 (đang giữ cả 2 account)**: **0 dữ kiện mới**. Kết luận điều tra đại án điện chưa thấy ban hành;
+  trục §2 vẫn phía **CÁ NHÂN** (0 pháp nhân). Cổng giữ nguyên.
+- **DGC (đang giữ, excluded ZaloPay)**: **0 tin mới** về cổng audit / hạn chế giao dịch trong cửa sổ.
+- **KOS (không giữ)** — echo không-phải-case (09-21/09-28): sàn **phiên thứ 9 liên tiếp** (01/10), CT
+  Nguyễn Việt Cường bị giải chấp 35,4% → 33,43%. Xoáy giải chấp, thanh khoản chết — không cần xét lại.
+- **NVL** sàn 30/09 — **BANNED vĩnh viễn**, bỏ qua theo luật.
+- **13 mã ngân hàng**: **0 sự kiện rủi ro** (0 kiểm soát đặc biệt / chuyển giao bắt buộc / khởi tố lãnh đạo /
+  rút tiền hàng loạt). Tin vĩ mô NH: **SBV nâng trần LDR lên 95% + chốt lộ trình Basel III (hiệu lực
+  01/12/2026)** — chính sách, thuận chiều thanh khoản, không phải trigger. BID đấu giá nợ xấu 624 tỷ (Ba
+  Huân) — xử lý nợ thường lệ.
+- **Vingroup (VHM/VRE đang giữ)**: **0 sự kiện tín dụng/trái phiếu MỚI** trong cửa sổ (mọi tin tìm được
+  đều cũ). Khối ngoại bán ròng 6 phiên liên tiếp tập trung VIC/VPB/VHM — dòng vốn, không phải sự kiện lõi.
+- **15 mã ngoài ngân hàng**: **0 sự kiện riêng lẻ**.
+- **Nền thị trường**: VN-Index **1.768,62** (30/09, −9,11), tiếp tục dưới SMA50; ngoại bán ròng 6 phiên.
+
+#### Việc 4 — ẢNH HƯỞNG TỚI PHÍA MUA: **0 lệnh MUA trên mọi kênh live phiên 02/10**
+
+`plan_SpaceX_2026-10-02` 0 lệnh · `plan_ZaloPay_2026-10-02` **16 lệnh, TẤT CẢ BÁN** (13 park-trim + CSV,
+SCL, VPB auto-exit) · `park_trim_ZaloPay` `TRIM` 13 BÁN · `park_trim_SpaceX` / `jit_unpark_SpaceX`
+`BLOCKED_FRAME` 0 · `jit_unpark_ZaloPay` `NO_TRIGGER` 0. `plan_main_2026-10-01` là **PROBE harness**
+(`book=PROBE`, note "probe harness") — không phải plan giao dịch thật. ⇒ **Không có luận điểm mua nào
+để RÚT.** PNJ (luận điểm duy nhất gãy trong 2 tuần) đã bị chặn bằng `excluded_tickers`.
+
+**Kết luận lượt này:** **28 mã gác rà qua** (13 NH + 15 ngoài NH) · 254 mã anomaly_scan × 5 phiên ·
+**22 mã phễu FULLY_QUALIFIED** (21 đã có kết luận + 1 DD mới) · 12 truy vấn tin + 4 WebFetch + 2 truy vấn
+BQ · **0 QUALIFY · 0 AMBIGUOUS mới · 1 không-phải-case (CMG)** · **watchlist QUÁ HẠN 1 phiên (SpaceX,
+lý do đọc được: khóa NAV do TPB corp-action) nhưng KHÔNG gây lỗ hổng phủ** · **0 lệnh mua để bảo vệ.**
+
+**Mốc phải theo, gần → xa: PNJ ĐHĐCĐ bất thường 21/10 (duyệt huy động/phát hành 550 tr cp) → BCTC
+Q3/2026 cuối 10/2026 (cổng PAN, PTB, KSB, CMG) → kết luận điều tra đại án điện (cổng TV1) → giấy phép
+mỏ Phước Vĩnh KSB hết hạn 6/2027.**
+
+**Nguồn (cửa sổ 25/09→02/10/2026):**
+[Vietstock — 02/10: Đọc gì trước giờ giao dịch](https://vietstock.vn/2026/10/0210-doc-gi-truoc-gio-giao-dich-chung-khoan-830-1498040.htm) ·
+[Vietstock — 01/10: Đọc gì trước giờ giao dịch](https://vietstock.vn/2026/10/0110-doc-gi-truoc-gio-giao-dich-chung-khoan-830-1497666.htm) ·
+[Công luận — Chứng khoán 30/9/2026](https://congluan.vn/chung-khoan-hom-nay-3092026-vn-index-thu-hep-da-giam-nho-luc-cau-bat-day-post362399.html) ·
+[Nhân Dân — Chứng khoán ngày 30/9](https://nhandan.vn/chung-khoan-ngay-309-ap-luc-ban-gia-tang-cuoi-phien-vn-index-giam-tiep-hon-9-diem-post991982.html) ·
+[Dân Việt — CMC bị xử phạt, nợ dài hạn +164% (28/05, ngoài cửa sổ)](https://danviet.vn/tap-doan-cong-nghe-cmc-bi-xu-phat-loi-nhuan-tang-nho-giot-giua-luc-no-dai-han-nhay-vot-gan-164-co-phieu-lao-doc-manh-d1430366.html) ·
+[Doanh nghiệp hội nhập — CMC rơi sâu sau ảo vọng AI](https://doanhnghiephoinhap.vn/bi-phat-vi-kem-minh-bach-co-phieu-cmc-roi-sau-sau-thoi-ky-boc-hoi-vi-ao-vong-ai-137678.html) ·
+[Vietstock — Góc nhìn 02/10](https://vietstock.vn/2026/10/goc-nhin-0210-giu-ty-trong-tien-mat-cao-chua-voi-bat-day-145-1498029.htm)
+
+---
