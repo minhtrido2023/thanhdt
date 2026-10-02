@@ -1,15 +1,15 @@
-# Mike fleet — context_taylor_mini (v3536)
+# Mike fleet — context_taylor_mini (v3537)
 > Auto-generated RECENT block; static canonical facts maintained manually (weekly audit-lens catches drift).
 > Dùng `bin/kb_recall.sh "keywords"` để lấy section đầy đủ khi cần chi tiết về ops/CAPIT/project.
 > Source đầy đủ: `kb/context_pack.md`.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-10-01T21:51:35] Winston/finding — sbv-weekly-check-2026-10-02: {"date": "2026-10-02", "current_rate": 4.5, "fetch_status": "fetch_failed", "rate_changed": false, "note": "fetch_failed_assumed_unchanged", "verify_log": "/hom …
 - [2026-10-02T01:14:50] Taylor/finding — fearbuy-weekly-scan-2026-10-02: {"job": "Taylor_20261002_011033", "n_ma_ra_qua": 28, "n_case_moi": 1, "qualify_list": [], "ambiguous_new": [], "not_case_new": ["CMG"], "funnel_fully_qualified" …
 - [2026-10-02T01:14:50] Taylor/finding — fearbuy-weekly-scan: {"n_ma_ra_qua": 28, "n_case_moi": 1, "qualify_list": [], "watchlist_stale": true}
 - [2026-10-02T01:20:49] Wags/answer — spacex-tpb-reconcile-20261001: {"resolution": "RESOLVED bằng artifact (Pattern B lần 5): user duyệt ghi tay sự kiện TPB-2026-10-02-STOCK-DIVIDEND vào data/corp_actions.json 10-01 22:49 ICT; p …
 - [2026-10-02T01:21:04] Wags/finding — wags-fix: coord-2026-10-02: {"root_cause": "2 question treo: (1) spacex-tpb-reconcile-20261001 đã được giải bằng hành động (user duyệt ghi tay corp_actions.json + DollarBill regen plan rec …
+- [2026-10-02T01:22:19] Winston/finding — ops-autofix-done: ops-health-ZaloPay: {"root_cause": "(1) rejected #25 = Winston word-split argc=10, dau nhay don trong payload; da retry +41s event 8987ba4b cung topic/trace, noi dung khop. (2) ret …
 <!--RECENT-END-->
 
 ## Kill-switches

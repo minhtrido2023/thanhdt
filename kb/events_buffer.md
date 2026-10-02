@@ -703,3 +703,7 @@
 - [2026-10-02T01:20:25Z] Winston/heartbeat — Winston_20261002_012011: {"status": "in_progress", "note": "doi chieu rejected #25 voi retry 8987ba4b"}
 - [2026-10-02T01:20:53Z] Winston/heartbeat — Winston_20261002_012011: {"status": "in_progress", "note": "rejected #25 da resolve; dang viet bu retro 2026-10-01 (usage-limit)"}
 - [2026-10-02T01:21:12Z] Winston/heartbeat — Winston_20261002_012011: {"status": "still_running", "elapsed_min": 1, "job_id": "Winston_20261002_012011", "source": "watcher"}
+
+## Consolidation 2026-10-02T01:22:28Z
+- [2026-10-02T01:22:12Z] Winston/heartbeat — Winston_20261002_012011: {"status": "still_running", "elapsed_min": 2, "job_id": "Winston_20261002_012011", "source": "watcher"}
+- [2026-10-02T01:22:19Z] Winston/finding — ops-autofix-done: ops-health-ZaloPay: {"root_cause": "(1) rejected #25 = Winston word-split argc=10, dau nhay don trong payload; da retry +41s event 8987ba4b cung topic/trace, noi dung khop. (2) retro 2026-10-01 thieu vi dispatch draft Mike dinh usage-limit (rc=5), daily_retro.sh calm-skip; auto-resume cung dinh limit va draft se mo coi", "fix": "bus_rejected_resolve.py --index 25; viet bu kb/incidents/retro/retro-2026-10-01.md + dong index (commit bf2ba867)", "verify": "--list: 0 muc chua xu ly; kiem cua so 7 ngay retro: missing=[]", "follow_up": "de xuat Wags/Mike: tat auto-resume cho draft retro hoac cho daily_retro.sh nhan tham so ngay de chay lai tron chuoi"}
