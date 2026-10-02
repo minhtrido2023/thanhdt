@@ -821,3 +821,8 @@
 
 ## Archived 2026-10-01 (keep=12 days=0 require_done=False)
 - [2026-09-30T11:27:41Z] [2026-09-30T18:27:41Z] XONG job Taylor_20260930_111053: (1) SCL bus question dong (ZaloPay SCL van giu that, SpaceX tu ban tay). (2) BAL stop-loss -20% wired (WC 49a165a8 + mike 72611fdf), quant-skeptic CONFIRMED, tu dong chay qua cron 20:40 ICT toi nay (dung chung process_account voi 3 trigger cu, khong can wire rieng).
+
+## Archived 2026-10-02 (keep=12 days=0 require_done=False)
+- [2026-10-01T00:49:16Z] [2026-10-01] CHỜ USER (bus question alphalens-buoc-ke-dong-hay-rnd): AlphaLens 3/3 gate PASS (mike 7be7b7be), khuyến nghị A = đóng, không wire live; nếu user muốn lens → R&D backtest PIT + đo gia tăng vs custom30V/8L. Side: VPB vẫn hồi tố thiếu ở vintage 09-30 (đã ghi trong finding cho Winston).
+- [2026-10-01T02:33:47Z] MO (review thang 10): fill_timing paper main sd fill-vs-open MUA 31->66bps (ben LOO) — do theo ma + quy mo lenh truoc khi ket luan; SpaceX monthly: doi nhan dong QTD thanh 'Tu khi bat dau hoat dong' de delivery gate parse duoc (§31). DRI co tuc 22/09 UNVERIFIED — cong bo ti suat khi tien ve.
+- [2026-10-01T03:45:58Z] ĐANG DỞ: job Taylor_20261001_032954 XONG CẢ 2 BƯỚC (5/5 fix quant-skeptic round1 + CCTG effective-rate wiring), branch wire/macro-killswitch-a-deposit75-20261001 (WC 9def5700, mike 98504bf5), 61 selfcheck assertion PASS x3 TZ. CHỜ: quant-skeptic round 2 verify (bus question quant-skeptic-round2-cctg-killswitch-a-merge) rồi Mike duyệt merge. rating_8l tilt + DCF chain cố ý KHÔNG wire CCTG — chờ user quyết riêng (diff table ở mike/kb/data_registry/macro/cctg_rate_vn.md).

@@ -59,3 +59,6 @@
 
 ## Archived 2026-10-02 (keep=12 days=0 require_done=False)
 - [2026-10-01T16:46:58Z] 23:50 01/10: DollarBill 161054 XONG: plan SpaceX 02/10 VẪN HOLD_ALL (0 lệnh): reconcile KL TPB ok 25/25 nhưng L1/L2 BLOCKED_FRAME do gate giá price_frame §G4 thiếu chân cổ tức tiền 500đ (12.100 vs (14.400-500)/1,15=12.087 broker đúng). Dispatch Taylor 164641/164639/164637: (1) ATC UPCOM vòng 4 [SKIP_ATC 1 lần/lệnh+quote 1 lần], (2) lag-exit vòng 5 [tag source: bỏ lọc], (3) điều tra+đề xuất sửa price_frame cash-leg (worktree wt-priceframe-cashleg-1001). arch-review: ATC r2 NEEDS_CHANGES (2b79db4d đã giết 5 mutation, còn SKIP_ATC 1 lần); lag-exit r4 NEEDS_CHANGES (Msource_tag_removed). Đã huỷ job trùng Taylor_161946. ZaloPay plan 02/10 16 lệnh: CSV1000+SCL200+VPB LAG600+PARK VPB300, chưa duyệt. Sau 3 job: arch-review ngắn -> ATC merge (user đã duyệt) ; lag-exit & price-frame hỏi user duyệt merge.
+
+## Archived 2026-10-02 (keep=12 days=0 require_done=False)
+- [2026-10-01T16:47:21Z] 23:50 01/10: lag-exit vòng 4 (ebe45e85) arch-review: logic ĐÚNG, chỉ còn 2 mutation test sống (writer source marker; renderer None crash) -> Taylor vòng 5 test-only dispatch; sau đó arch-review nhẹ -> hỏi user duyệt merge squash. ATC vòng 3 (job 163620) test-only đang chạy -> arch-review ngắn -> merge main nếu APPROVED (user đã duyệt).
