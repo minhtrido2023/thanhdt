@@ -820,6 +820,64 @@ if orders:
 else:
     lines.append(f"🎯 Hành động: **GIỮ NGUYÊN (HOLD)** — không có lệnh nào ngày mai.")
 
+# ── §29 auto_exit_inject: mã bị CHẶN (không chèn lệnh) hoặc bị CẮT (qty giảm do trần sellable)
+# phải hiện ra cho người duyệt, không chỉ nằm trong log stdout của cron (arch-review vòng 3) —
+# `capped` qty>0 đã có note "[CAP ...]" ngay trên dòng lệnh trong orders[], khối này bổ sung cho
+# ca KHÔNG có lệnh nào để hiện (blocked hoàn toàn, hoặc capped về 0) và tổng hợp lại một chỗ.
+_aei_notes = plan.get("auto_exit_inject_notes") or []
+if _aei_notes:
+    # §29 vòng 4 (arch-review): `_aei_notes[-1]` một mình bị che khi có entry ghi tay
+    # (manual:true, do user sửa tay plan sau giờ cron) xuất hiện SAU entry auto có
+    # blocked/capped — ca thật ZaloPay 10-02 (entry auto 20:40 rồi entry manual 22:59/23:0x).
+    # Entry do auto_exit_inject.py ghi luôn có source="auto_exit_inject" (entry ghi tay thì
+    # không) — gộp blocked/capped của MỌI entry auto trong ngày, dedup theo (ticker,book,reason).
+    _aei_auto = [n for n in _aei_notes if isinstance(n, dict) and n.get("source") == "auto_exit_inject"]
+    _aei_blocked, _aei_blocked_seen = [], set()
+    for _n in _aei_auto:
+        for b in (_n.get("blocked") or []):
+            if not isinstance(b, dict):
+                continue
+            _k = (b.get("ticker"), b.get("book"), b.get("reason"))
+            if _k in _aei_blocked_seen:
+                continue
+            _aei_blocked_seen.add(_k)
+            _aei_blocked.append(b)
+    _aei_capped, _aei_capped_seen = [], set()
+    for _n in _aei_auto:
+        for c in (_n.get("capped") or []):
+            if not isinstance(c, dict):
+                continue
+            _k = (c.get("ticker"), c.get("book"), c.get("desired_qty"), c.get("capped_qty"))
+            if _k in _aei_capped_seen:
+                continue
+            _aei_capped_seen.add(_k)
+            _aei_capped.append(c)
+    # Entry THỦ CÔNG (user sửa tay plan, schema injected[].capped_from/capped_to — KHÁC field
+    # với capped[].desired_qty/capped_qty tự động) cũng có thể mang quyết định CẮT (ca thật VPB
+    # 882→600cp, entry manual 22:59). Hiện CẢ hai nguồn trong cùng khối ⚠️ — "ít nhất không để
+    # che entry auto" (yêu cầu tối thiểu arch-review vòng 4) nghĩa là union, không phải OR-chọn-1.
+    _aei_manual_capped = []
+    for _n in _aei_notes:
+        if not isinstance(_n, dict) or _n.get("source") == "auto_exit_inject":
+            continue
+        for _it in (_n.get("injected") or []):
+            if isinstance(_it, dict) and _it.get("capped_from") is not None \
+               and _it.get("capped_to") is not None:
+                _aei_manual_capped.append(_it)
+    if _aei_blocked:
+        lines.append(f"⛔ **{len(_aei_blocked)} mã auto-exit (LAG/BAL/CAPIT) BỊ CHẶN, KHÔNG chèn lệnh:**")
+        for b in _aei_blocked[:8]:
+            _tk_s = b.get("ticker") or "(book-level)"
+            lines.append(f"   • {_tk_s} ({b.get('book','?')}): {str(b.get('reason') or '')[:150]}")
+    if _aei_capped or _aei_manual_capped:
+        lines.append(f"⚠️ **{len(_aei_capped) + len(_aei_manual_capped)} mã auto-exit BỊ CẮT do trần sellable (Σ SELL mọi book):**")
+        for c in _aei_capped[:8]:
+            lines.append(f"   • {c.get('ticker','?')} ({c.get('book','?')}): "
+                         f"{c.get('desired_qty','?')}cp → {c.get('capped_qty','?')}cp")
+        for c in _aei_manual_capped[:8]:
+            lines.append(f"   • {c.get('ticker','?')} ({c.get('book','?')}): "
+                         f"{c.get('capped_from','?')}cp → {c.get('capped_to','?')}cp (duyệt tay)")
+
 # ── MỤC RIÊNG 1: L1 park_trim_proposal ──────────────────────────────────────────────────
 # Ngang hàng với orders[], KHÔNG phải câu phụ trong đoạn văn: đây là lệnh BÁN THẬT cần user
 # duyệt riêng (chúng KHÔNG nằm trong orders[] mà bot đọc lúc 09:05).

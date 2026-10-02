@@ -32,6 +32,7 @@ import datetime as _dt
 import glob
 import json
 import os
+import re
 import sys
 from collections import Counter, defaultdict
 
@@ -110,10 +111,12 @@ def account_no_for(account):
 
 
 def broker_positions_with_cost(account_no, asof):
-    """{ticker: {qty, marketPrice, avg_cost}} từ bản ghi `positions` CUỐI CÙNG trong
+    """{ticker: {qty, marketPrice, avg_cost, sellable}} từ bản ghi `positions` CUỐI CÙNG trong
     dnse_raw_{asof}.jsonl — gộp nhiều loan-package cùng mã (qty cộng dồn, costPrice bình
     quân gia quyền theo qty, marketPrice giữ giá trị của lô cuối cùng khác-None gặp trong
-    file, cùng quy ước `verify_account_snapshot.broker_positions_from_raw`).
+    file, `sellable` cộng dồn `tradeQuantity` — phần ĐÃ SETTLE T+2, dùng để chặn Σ lệnh SELL
+    nhiều book cùng mã vượt KL khớp được thật, mirror cách `park_holdings.read_broker_snapshot`
+    đọc cùng field từ cùng file — cùng quy ước `verify_account_snapshot.broker_positions_from_raw`).
     FAIL-SAFE (quant-skeptic 2026-09-30): nếu BẤT KỲ lô nào của 1 mã thiếu `costPrice`,
     `avg_cost` của mã đó trả về `None` thay vì âm thầm tính thiếu-trọng-số trên phần qty còn
     lại — tránh làm SAI (thấp hơn thực tế) mức lỗ dùng cho quyết định stop-loss."""
@@ -141,8 +144,10 @@ def broker_positions_with_cost(account_no, asof):
             continue
         tk = p.get("symbol")
         row = out.setdefault(
-            tk, {"qty": 0.0, "marketPrice": None, "_cost_wsum": 0.0, "_cost_incomplete": False})
+            tk, {"qty": 0.0, "marketPrice": None, "sellable": 0,
+                 "_cost_wsum": 0.0, "_cost_incomplete": False})
         row["qty"] += qty
+        row["sellable"] += int(p.get("tradeQuantity") or 0)
         cp = p.get("costPrice")
         if cp is not None:
             row["_cost_wsum"] += qty * float(cp)
@@ -263,6 +268,85 @@ def lag_entry_dates(account):
 def disc_entry_dates(account):
     """{ticker: 'YYYY-MM-DD'} ngày FILL mua ĐẦU TIÊN gắn nhãn book=DISCRETIONARY_SPECIAL."""
     return _first_fill_dates(account, "DISCRETIONARY_SPECIAL")
+
+
+def book_lot_snapshot(account, book_label, asof=None, plan_dir=None, exec_dir=None,
+                      price_fn=None, corp_actions=None, broker=None):
+    """{ticker: {'qty': int, 'entry_date': 'YYYY-MM-DD'}} cho các lô ĐANG GIỮ gắn book=`book_label`,
+    dựng qua `park_holdings()` (bootstrap ngày 0 đã duyệt + FIFO replay theo LÔ) thay vì chỉ quét
+    journal như `_first_fill_dates` — khác biệt mấu chốt:
+      1. PHỦ ĐƯỢC vị thế mua TRƯỚC khi journal có cột `book` (P0 book-tagging, `executor.py`
+         `_journal()`, 2026-08-04) — `_first_fill_dates`/`lag_entry_dates` chỉ đọc journal nên BỎ
+         SÓT mọi lô mua trước mốc đó (sự cố thật: CSV/ZaloPay mua 2026-07-28 book=LAG không bao
+         giờ được `auto_exit_inject.py` thấy, 44 phiên vẫn chưa tới hạn T+25 trên giấy).
+      2. TÁCH ĐÚNG mã nằm lẫn NHIỀU book cùng lúc (vd VPB/ZaloPay: lô 700cp LAG_LO 2026-07-27 +
+         lô 1.100cp PARK legacy 2025-11-20, CÙNG MÃ) — `qty` trả về ở đây là phần LAG/BAL/... mà
+         `book_label` đang hỏi, KHÔNG phải tổng vị thế broker của mã đó (tổng mới là thứ
+         `_lag_bal_candidates` cũ vẫn dùng — sai với mọi mã mixed-book).
+
+    `plan_dir`/`exec_dir`/`price_fn`/`corp_actions`/`broker` chỉ dành cho selfcheck bơm sandbox
+    (mirror `compute_park_trim.compute_trim()`'s `*_override`) — production để None (dùng đúng
+    `WC_ROOT` thật của `park_holdings.py`). Gọi `park_holdings(need_price=False)` — hàm này chỉ
+    đọc `qty`/`entry_date`, không đọc `market_price`/`mv_vnd`, nên KHÔNG được để một mã thiếu giá
+    đóng cửa (`resolve_close_prices` fail-closed TOÀN LƯỢT) chặn luôn mọi exit LAG/BAL của CẢ book.
+
+    Trả `(lots, ok, reason, blocked)`.
+    `ok=False` ⇒ `park_holdings()` tự nó lỗi KẾT CẤU (thiếu bootstrap, lỗi đọc broker/network...) —
+    KHÔNG có sổ lô nào dùng được cho book này, caller PHẢI fail-safe TOÀN BỘ `book_label` (mirror
+    `compute_park_trim.py` Cổng 0). `lots`/`blocked` rỗng trong ca này.
+    `ok=True` ⇒ sổ lô dựng được; `lots` chỉ gồm các mã KHÔNG bị loại. `blocked` = {ticker: lý do}
+    cho các mã THUỘC `book_label`, đang có qty>0 trong sổ, nhưng bị loại khỏi `lots` vì nằm trong
+    `unverified_tickers` của `park_holdings` (reconcile lệch broker — vd SpaceX TPB ledger 200 vs
+    broker 230, bán không tag book, lệch FIFO, corp-action chưa xử lý, excluded bất biến...).
+    **Fail-safe Ở MỨC TỪNG MÃ, KHÔNG phải cả book** (arch-review vòng 2, job
+    Taylor_20261001_132424): số lượng bán theo một mã không phụ thuộc trạng thái đối soát của mã
+    khác — mã lệch/unverified bị CHẶN RIÊNG nó (ghi vào `blocked`), các mã còn lại trong CÙNG book
+    vẫn ra `lots` bình thường. Caller PHẢI hiện `blocked` ra cho người (§29) — không được lặng lẽ
+    bỏ qua candidate bị chặn.
+    """
+    sys.path.insert(0, _HERE)
+    kwargs = {"broker": broker, "corp_actions": corp_actions, "price_fn": price_fn}
+    if plan_dir is not None:
+        kwargs["plan_dir"] = plan_dir
+    if exec_dir is not None:
+        kwargs["exec_dir"] = exec_dir
+    try:
+        from park_holdings import park_holdings
+        h = park_holdings(account, asof=asof, need_price=False, **kwargs)
+    except SystemExit as exc:
+        return {}, False, str(exc), {}
+    except Exception as exc:  # lỗi broker/network khác — fail-safe, không đoán (§5/§29)
+        return {}, False, f"park_holdings lỗi: {exc}", {}
+    mismatch_reason = {
+        m["ticker"]: f"reconcile lệch broker: sổ lô={m['ledger_qty']} broker={m['broker_qty']}"
+        for m in h["reconcile"]["mismatches"]}
+    warnings = h.get("warnings") or []
+
+    def _reason_for(tk):
+        if tk in mismatch_reason:
+            return mismatch_reason[tk]
+        # \b ranh giới TỪ, không phải substring thô — "AAA" không được khớp nhầm cảnh báo của
+        # "AAAB"/"BAAAB" (arch-review vòng 3). re.escape vì ticker có thể chứa ký tự đặc biệt.
+        pat = re.compile(r"\b" + re.escape(tk) + r"\b")
+        for w in warnings:
+            if pat.search(w):
+                return w
+        return "unverified (park_holdings không nêu rõ lý do cụ thể cho mã này — xem warnings)"
+
+    unverified = set(h.get("unverified_tickers") or [])
+    out, blocked = {}, {}
+    for lot in h["lots"]:
+        if lot["book"] != book_label or lot["qty"] <= 0:
+            continue
+        tk = lot["ticker"]
+        if tk in unverified:
+            blocked.setdefault(tk, _reason_for(tk))
+            continue
+        d = out.setdefault(tk, {"qty": 0, "entry_date": lot["entry_date"]})
+        d["qty"] += lot["qty"]
+        if lot["entry_date"] < d["entry_date"]:
+            d["entry_date"] = lot["entry_date"]
+    return out, True, None, blocked
 
 
 # CAPIT: mốc CỐ ĐỊNH T+60 phiên (`CAPIT_HOLD=60`, `pt_v22_dt5g.py:123` +

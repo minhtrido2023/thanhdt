@@ -254,13 +254,17 @@ def resolve_close_prices(tickers, asof, price_fn=None):
     return {t: float(prices[t]) for t in tickers}
 
 
-def read_broker_snapshot(label, account_no, asof, exec_dir=EXEC_DIR, price_fn=None):
+def read_broker_snapshot(label, account_no, asof, exec_dir=EXEC_DIR, price_fn=None, need_price=True):
     """Vị thế + tiền của broker tại `asof`.
 
     asof == hôm nay  → gọi DNSE LIVE (§6: same-day không bao giờ đọc BQ, và file
                         dnse_raw hôm nay có thể chưa có bản ghi nào).
     asof quá khứ     → đọc data/execution_logs/dnse_raw_{asof}.jsonl, LỌC accountNo ngay
                         dòng đầu (§12 — file này DÙNG CHUNG cho mọi account).
+
+    `need_price=False`: BỎ QUA `resolve_close_prices()` — `market_price` giữ nguyên giá trị khởi
+    tạo (0.0 ở nhánh "hôm nay", `marketPrice` thô jsonl ở nhánh quá khứ), KHÔNG xác minh. Chỉ dùng
+    khi caller không đọc field này (xem `park_holdings(need_price=)`).
 
     Trả (positions {tk: {qty, market_price}}, cash_available, meta).
 
@@ -293,9 +297,10 @@ def read_broker_snapshot(label, account_no, asof, exec_dir=EXEC_DIR, price_fn=No
                      "broker_market_price": p.get("marketPrice")}
                for sym, p in raw_pos.items() if p.get("total", 0) > 0}
         # Giá ĐÓNG CỬA đã xác minh, KHÔNG phải marketPrice — xem resolve_close_prices().
-        for _sym, _px in resolve_close_prices(pos.keys(), asof,
-                                              price_fn=price_fn).items():
-            pos[_sym]["market_price"] = _px
+        if need_price:
+            for _sym, _px in resolve_close_prices(pos.keys(), asof,
+                                                  price_fn=price_fn).items():
+                pos[_sym]["market_price"] = _px
         braw = (bal[0] if isinstance(bal, list) and bal else bal) or {}
         # Trứng vàng — sibling của "stock" trong payload gốc (giống compute_active_nav.py §cash),
         # phải đọc TRƯỚC khi st bị thu hẹp về block "stock" ở dòng dưới.
@@ -370,8 +375,9 @@ def read_broker_snapshot(label, account_no, asof, exec_dir=EXEC_DIR, price_fn=No
                          f"{account_no} — không đối soát được")
     # Giá ĐÓNG CỬA đã xác minh thay cho `marketPrice` đọc từ jsonl — xem resolve_close_prices().
     # Nhánh này là `asof` QUÁ KHỨ nên nguồn là BQ (§6 cho phép BQ cho dữ liệu lịch sử).
-    for _sym, _px in resolve_close_prices(pos.keys(), asof, price_fn=price_fn).items():
-        pos[_sym]["market_price"] = _px
+    if need_price:
+        for _sym, _px in resolve_close_prices(pos.keys(), asof, price_fn=price_fn).items():
+            pos[_sym]["market_price"] = _px
     return pos, cash, {"source": os.path.basename(path), "asof": asof,
                        "total_cash_vnd": total_cash, "dividend_receiving_vnd": div_recv,
                        "total_debt_vnd": total_debt, "egg_assets_vnd": egg_assets,
@@ -540,12 +546,21 @@ def _fill_deltas(path):
 
 
 def park_holdings(account_label, asof=None, plan_dir=PLAN_DIR, exec_dir=EXEC_DIR,
-                  broker=None, corp_actions=None, price_fn=None):
+                  broker=None, corp_actions=None, price_fn=None, need_price=True):
     """Vị thế theo book tại `asof` (mặc định hôm nay ICT).
 
     `broker` = (positions, cash, meta) truyền sẵn — chỉ dùng cho selfcheck; production để None.
     `corp_actions` = danh sách record truyền sẵn — cũng chỉ cho selfcheck; production để None
     (đọc `data/corp_actions.json`, và CHỈ record đã `CONFIRMED` — xem `mike/bin/corp_actions.py`).
+
+    `need_price=False`: BỎ QUA `resolve_close_prices()` (fail-closed TOÀN LƯỢT nếu thiếu giá MỘT
+    mã bất kỳ — xem docstring hàm đó) VÀ khối §exdate_frame bên dưới — CHỈ dùng khi caller không
+    đọc `market_price`/`mv_vnd`/`park_mv*` của kết quả trả về (vd
+    `portfolio_status.book_lot_snapshot`, chỉ cần `qty`/`entry_date` theo book, KHÔNG định giá).
+    GIỮ `need_price=True` (mặc định) cho MỌI consumer đọc giá trị tiền — `compute_park_trim`/
+    `compute_jit_unpark` KHÔNG được đổi mặc định này: `park_mv` là mẫu số cấp tài khoản, một mã
+    thiếu giá phải chặn CẢ LƯỢT tính pool (lý do nằm ở `resolve_close_prices` docstring), khác hẳn
+    `book_lot_snapshot` — số lượng bán theo từng mã không phụ thuộc giá mã khác.
     """
     asof = asof or today_ict()
     prof = account_profile(account_label)
@@ -617,7 +632,7 @@ def park_holdings(account_label, asof=None, plan_dir=PLAN_DIR, exec_dir=EXEC_DIR
                 f"các lô này credit ở nhịp khác, KHÔNG tự suy ⇒ UNVERIFIED")
 
     positions, cash, bmeta = broker if broker else read_broker_snapshot(
-        account_label, account_no, asof, exec_dir, price_fn=price_fn)
+        account_label, account_no, asof, exec_dir, price_fn=price_fn, need_price=need_price)
 
     # ── Đối soát: Σ lô mỗi ticker PHẢI bằng openQuantity broker. Lệch → BÁO, KHÔNG tự sửa.
     ledger_qty = book.by_ticker_qty()
@@ -650,7 +665,10 @@ def park_holdings(account_label, asof=None, plan_dir=PLAN_DIR, exec_dir=EXEC_DIR
     # đây (đó chính là ca fail), nên phát cờ CẤP TÀI KHOẢN để consumer fail-closed, cùng hình
     # dạng `BLOCKED_CASH_BASIS`: ghi một mẫu số có thể sai còn tệ hơn là không trim đêm nay.
     frame_blocked = {}
-    for a in (applied_acts if asof == today_ict() else []):
+    # need_price=False: khối này chỉ tồn tại để sửa `market_price` cho mv_vnd — bỏ qua hẳn, không
+    # chỉ vì tiết kiệm việc mà vì px_cum=0 (chưa resolve) sẽ làm verify_post_event_price() fail
+    # SAI cho mọi mã dính corp-action sớm, gắn UNVERIFIED oan (xem docstring park_holdings()).
+    for a in (applied_acts if need_price and asof == today_ict() else []):
         if a["ex_date"] <= asof or not a.get("lots_adjusted"):
             continue                                  # đã qua ex-date ⇒ giá đóng cửa cùng hệ rồi
         tk = a["ticker"]
