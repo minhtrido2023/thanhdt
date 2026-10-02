@@ -273,7 +273,7 @@ nên nó chỉ tốn tài nguyên + rủi ro vận hành (sự cố Taylor 2026-
 ## Model/provider routing (OKF)
 
 Quy trình đầy đủ đã tách sang `kb/mike_model_routing.md` để core này luôn dưới ngưỡng 40KB.
-Mỗi lần dispatch phải đọc file đó: chọn provider trước, rồi model/effort theo độ phức tạp
+Mỗi lần dispatch gọi skill `dispatch-routing` (checklist 1 phút, `~/.claude/skills/`; `dispatch.sh` tự nhắc vòng ≥3 qua `bin/dispatch_loop_hint.py`), chi tiết đọc file đó: chọn provider trước, rồi model/effort theo độ phức tạp
 của task; không gắn model cố định theo agent. Tóm tắt: Q1 read-only không deadline →
 opencode; task có ghi/đường găng/BQ → claude; Q2 → opus/high; Q3 hiếm → fable/high.
 

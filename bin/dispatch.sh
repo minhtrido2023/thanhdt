@@ -346,6 +346,11 @@ if n >= 8 and high / n >= 0.7:
   fi
 fi
 
+# Soft nudge, CHUỖI POLISH (2026-10-02, audit token — kb/mike_model_routing.md § "Hai chế độ theo
+# ĐỘ KHÓ + cầu chì"): cùng nhánh/worktree bị dispatch ≥3 lần trong 24h, hoặc dispatch tiếp nối
+# mà --effort high. Chỉ NHẮC (stderr), fail-open — xem bin/dispatch_loop_hint.py.
+printf '%s' "$prompt" | timeout 10 python3 "$ROOT/bin/dispatch_loop_hint.py" --to "$id" --effort "$EFFORT" --model "$MODEL" >&2 || true
+
 # Binary + env cua provider. `bin` da ap dung bin_env_override (DISPATCH_CLAUDE_BIN...) nen
 # bin/dispatch_discord_topic_selfcheck.sh van lai duoc dispatch qua stub (F11 arch-reviewer).
 CLI_BIN="$("$ROOT/bin/cli_provider.sh" bin "$PROVIDER")" || { echo "ERROR: khong phan giai duoc binary cua provider '$PROVIDER'." >&2; exit 1; }
