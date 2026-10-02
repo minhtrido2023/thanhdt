@@ -35,3 +35,6 @@
 
 ## Archived 2026-10-02 (keep=12 days=0 require_done=False)
 - [2026-10-01T12:54:53Z] 19:55 01/10: user duyệt (1) chèn tay SELL CSV 1000cp LAG vào plan ZaloPay 02/10 — ĐÃ CHÈN (SELL-CSV-AUTOEXIT-LAG); (2) Taylor sửa lag_entry_dates mù journal cũ (dispatch 19:55). Còn chờ user: arch-review merge fix ATC UPCOM (branch fix/atc-upcom-ordertype-20261001 75ccc322), ghi tay TPB CONFIRMED vào data/corp_actions.json, bq_admin kiểm writer corporate_action. Cron 20:40 sẽ chèn SCL 200cp; plan ZaloPay 02/10 CHƯA duyệt.
+
+## Archived 2026-10-02 (keep=12 days=0 require_done=False)
+- [2026-10-01T13:24:26Z] 20:27 01/10: Taylor 125451 xong (fix lag_entry_dates, branch fix/lag-autoexit-blindspot-20261001 cbdc6cd4). quant-skeptic CONFIRMED danh sách (ZaloPay CSV 1000, SCL 200, VPB LAG 882; SpaceX không có; DRI là discretionary). arch-review NEEDS_CHANGES -> Taylor vòng 2 dispatch (fail-safe cấp mã, hiện exit bị chặn, test mutation, cap Σsell VPB 900 sellable). CHỜ USER: bán VPB LAG vào plan 02/10 không (tối đa 600cp vì PARK 300 + tradeQuantity 900); merge fix ATC UPCOM; ghi tay TPB CONFIRMED. Plan ZaloPay 02/10 có CSV 1000; SCL 200 do cron 20:40.
