@@ -46,8 +46,8 @@ CEIL_BAND = 14_900.0
 
 class FakeQuote:
     def __init__(self, last, bid, ask, floor=FLOOR, ceiling=CEIL_BAND,
-                 exchange="UPCOM", day_volume=3_000_000):
-        self.symbol = SYM; self.exchange = exchange
+                 exchange="UPCOM", exchange_known=True, day_volume=3_000_000):
+        self.symbol = SYM; self.exchange = exchange; self.exchange_known = exchange_known
         self.last = last; self.ref = REF_CLOSE; self.bid = bid; self.ask = ask
         self.floor = floor; self.ceiling = ceiling; self.day_volume = day_volume
 
@@ -217,17 +217,42 @@ check("E4 có journal HARD_CEILING_BLOCK (phân biệt với NO_QUOTE/WAIT_CASH)
 
 # ───────────────────────────────────── F. ATC không được lách trần
 print("F. ATC-remainder-buy: lệnh có trần KHÔNG đi đường ATC")
+# F1 PHẢI dùng quote HOSE (không phải q_hi mặc định UPCOM) — guard UPCOM đứng TRƯỚC guard
+# trần trong `_atc_sweep`, nên với sàn UPCOM "không đặt ATC" sẽ đúng vì lý do sai
+# (UPCOM_SKIP_ATC thay vì HARD_CEILING_SKIP_ATC) và F1 sẽ PASS giả dù guard trần có hỏng.
+q_f1_hose = FakeQuote(last=13_200, bid=13_100, ask=13_200, exchange="HOSE")
 o_f = buy_order(ceiling=ANCHOR)
-ex_f = make_exec([o_f], q_hi, {"atc_remainder_buy": True})
+ex_f = make_exec([o_f], q_f1_hose, {"atc_remainder_buy": True})
 ex_f._atc_sweep()
-check("F1 không có lệnh ATC nào được đặt", len(ex_f.broker.placed) == 0,
-      str(ex_f.broker.placed))
+jlines_f1 = "".join(open(ex_f.journal_file, encoding="utf-8").readlines()) \
+    if os.path.exists(ex_f.journal_file) else ""
+check("F1 không có lệnh ATC nào được đặt, đúng vì HARD_CEILING_SKIP_ATC (không phải sàn)",
+      len(ex_f.broker.placed) == 0 and "HARD_CEILING_SKIP_ATC" in jlines_f1,
+      f"placed={ex_f.broker.placed} journal_has_ceiling_skip={'HARD_CEILING_SKIP_ATC' in jlines_f1}")
+# F2 control case PHẢI dùng quote HOSE — q_hi (như mọi fixture file này) mặc định
+# exchange="UPCOM" (ca thật DRI), nên từ fix UPCOM_SKIP_ATC (2026-10-01) nó KHÔNG còn đại
+# diện cho "lệnh KHÔNG trần, sàn hỗ trợ ATC" nữa; dùng q_hi gốc sẽ ăn đúng cái guard UPCOM
+# đang kiểm ở F3, không phải guard trần của mục F này. arch-review R2 §1.
+q_f2_hose = FakeQuote(last=13_200, bid=13_100, ask=13_200, exchange="HOSE")
 o_f2 = buy_order(ceiling=None)
-ex_f2 = make_exec([o_f2], q_hi, {"atc_remainder_buy": True})
+ex_f2 = make_exec([o_f2], q_f2_hose, {"atc_remainder_buy": True})
 ex_f2._atc_sweep()
-check("F2 (regression) lệnh KHÔNG trần vẫn quét ATC như cũ",
+check("F2 (regression) lệnh KHÔNG trần, sàn HOSE vẫn quét ATC như cũ",
       len(ex_f2.broker.placed) == 1 and ex_f2.broker.placed[0]["type"] == "ATC",
       str(ex_f2.broker.placed))
+# F3 — không trần nhưng sàn UPCOM (q_hi mặc định): phải bị UPCOM_SKIP_ATC chặn, không phải
+# lách qua vì "không có trần". Hai guard (trần vs sàn) độc lập, không guard nào được che guard kia.
+# oid RIÊNG — state.json dùng chung theo (account, plan_date) cho cả file; F2 vừa đặt ATC
+# thành công cho "BUY-DRI-LAG-01" ⇒ atc_sent=True persist, oid cũ sẽ bị continue sớm ở dòng
+# đầu `_atc_sweep` trước khi kịp chạm guard UPCOM đang muốn kiểm ở đây.
+o_f3 = buy_order(ceiling=None, oid="BUY-F3-UPCOM")
+ex_f3 = make_exec([o_f3], q_hi, {"atc_remainder_buy": True})
+ex_f3._atc_sweep()
+jlines_f3 = "".join(open(ex_f3.journal_file, encoding="utf-8").readlines()) \
+    if os.path.exists(ex_f3.journal_file) else ""
+check("F3 lệnh KHÔNG trần nhưng sàn UPCOM vẫn bị chặn ATC (UPCOM_SKIP_ATC)",
+      len(ex_f3.broker.placed) == 0 and "UPCOM_SKIP_ATC" in jlines_f3,
+      f"placed={ex_f3.broker.placed} journal_has_skip={'UPCOM_SKIP_ATC' in jlines_f3}")
 
 # ───────────────────────────────────── G. Slide: ask đổi → giá đặt đổi theo, luôn ≤ trần
 print("G. Slide theo giá đang khớp qua từng chu kỳ, trần giữ nguyên ở mọi bước")

@@ -209,12 +209,15 @@ with tempfile.TemporaryDirectory() as tmp:
     # Mọi sự kiện journal mà nhánh ATC có thể sinh ra — "không có cái nào" là bằng chứng luồng
     # bị chặn TRƯỚC nhánh ATC (đúng vị trí chốt ghost), không phải bị nuốt ở đâu đó bên trong.
     ATC_EVENTS = {"ATC", "ATC_FAIL", "HARD_CEILING_SKIP_ATC", "ODD_LOT_SKIP_ATC",
-                  "WAIT_T2_SETTLEMENT"}
+                  "WAIT_T2_SETTLEMENT", "UPCOM_SKIP_ATC"}
 
     class _RecordingBroker(_NullBroker):
         """GHI LẠI lời gọi place_order thay vì ném AssertionError (xem lý do (2) ở trên).
-        `get_quote` vẫn kế thừa bản ném lỗi của `_NullBroker`: `_atc_sweep` không được phép
-        cần quote (lệnh ATC đặt price=None) — nếu ngày nào đó nó cần, ATC_FAIL sẽ lộ ra."""
+        `get_quote` vẫn kế thừa bản ném lỗi của `_NullBroker` — từ fix SCL/ZaloPay 2026-10-01,
+        `_atc_sweep` GỌI `get_quote` để tra sàn (gate UPCOM, xem UPCOM_SKIP_ATC), nhưng bọc
+        try/except và fail-open về "HOSE" khi lỗi, nên AssertionError của `_NullBroker` bị
+        nuốt NGAY TẠI chỗ gọi — hành vi G1-G6 dưới đây (ATC vẫn đi ra cho mã không phải UPCOM)
+        không đổi dù `get_quote` giờ bị chạm."""
 
         def __init__(self):
             self.placed = []
