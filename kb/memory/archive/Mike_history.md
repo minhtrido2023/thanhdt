@@ -38,3 +38,9 @@
 
 ## Archived 2026-10-02 (keep=12 days=0 require_done=False)
 - [2026-10-01T13:24:26Z] 20:27 01/10: Taylor 125451 xong (fix lag_entry_dates, branch fix/lag-autoexit-blindspot-20261001 cbdc6cd4). quant-skeptic CONFIRMED danh sách (ZaloPay CSV 1000, SCL 200, VPB LAG 882; SpaceX không có; DRI là discretionary). arch-review NEEDS_CHANGES -> Taylor vòng 2 dispatch (fail-safe cấp mã, hiện exit bị chặn, test mutation, cap Σsell VPB 900 sellable). CHỜ USER: bán VPB LAG vào plan 02/10 không (tối đa 600cp vì PARK 300 + tradeQuantity 900); merge fix ATC UPCOM; ghi tay TPB CONFIRMED. Plan ZaloPay 02/10 có CSV 1000; SCL 200 do cron 20:40.
+
+## Archived 2026-10-02 (keep=12 days=0 require_done=False)
+- [2026-10-01T14:03:34Z] 21:05 01/10: arch-review vòng 2 fix lag-autoexit (5680084a): logic ĐÚNG (VPB cap 882->600, SpaceX hết bị tắt exit) nhưng NEEDS_CHANGES (7 mutation test sống, mã bị chặn không tới người duyệt plan) -> Taylor vòng 3 dispatch. Sau đó: arch-review ngắn vòng 3 -> user duyệt merge branch fix/lag-autoexit-blindspot-20261001 (squash vì commit msg cbdc6cd4 sai SCL). Follow-up ghi nhận: CAPIT bán toàn bộ broker qty (auto_exit_inject.py:~373) cần book_lot_snapshot('CAPIT') trước T+60 ~giữa tháng 10. CHỜ USER: VPB LAG max 600cp vào plan 02/10; merge fix ATC UPCOM (75ccc322); ghi tay TPB CONFIRMED; bq_admin writer corporate_action.
+
+## Archived 2026-10-02 (keep=12 days=0 require_done=False)
+- [2026-10-01T15:45:09Z] 22:47 01/10: Taylor 140332 (vòng 3) bị usage_limited lúc 21:50 ICT; limit reset 22:40; resume tự động bị xếp nhầm sang 02/10 22:00 ICT (bug parse 'resets 10:40pm' +24h) -> Mike huỷ file pending_resumes/Taylor_20261001_145001 (đổi tên .cancelled_...) và dispatch lại tay. Plan ZaloPay/SpaceX 02/10 CHƯA duyệt lúc 22:44. Chờ user: VPB LAG max 600cp, merge fix ATC UPCOM, TPB CONFIRMED, bq_admin writer.
