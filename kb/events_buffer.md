@@ -994,3 +994,6 @@
 - [2026-10-02T17:50:59Z] Mike/heartbeat — Mike_20261002_174958: {"status": "still_running", "elapsed_min": 1, "job_id": "Mike_20261002_174958", "source": "watcher"}
 - [2026-10-02T17:51:41Z] Mike/heartbeat — Mike_20261002_174958: {"status": "in_progress", "note": "entry file + index.md written, committing next"}
 - [2026-10-02T17:51:59Z] Mike/heartbeat — Mike_20261002_174958: {"status": "still_running", "elapsed_min": 2, "job_id": "Mike_20261002_174958", "source": "watcher"}
+
+## Consolidation 2026-10-02T17:52:39Z
+- [2026-10-02T17:52:31Z] Mike/finding — daily-retro-2026-10-02-done: {"entry": "kb/incidents/retro/retro-2026-10-02.md", "commit": "8d44565e", "n_incidents": 5, "n_patterns": 2, "wags_verdict": "GAPS_FOUND", "gaps_fixed": ["incident2_tpb_gate_self_resolved_not_still_blocked", "bus_event_counts_1error_2question", "job_id_typo"], "escalated": "retro-pattern-recurring-corp-action-feed-vendor-dead-cascade (topic already existed, no new question posted)", "consolidate": "KB v3560", "memory_cleaned": true, "draft_deleted": true, "trading_daily_posted": true}
