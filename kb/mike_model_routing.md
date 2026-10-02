@@ -230,3 +230,33 @@ cụ thể để tự áp dụng mỗi lần dispatch tương tác:
 Dấu hiệu đang cần medium, không phải high: "vá đúng chỗ đã xác định", "chạy lại selfcheck", "tiếp
 tục sau resume", "check xem đã xong chưa", "apply verdict có sẵn". Nếu không có từ nào như "thiết
 kế", "giả thuyết mới", "tại sao lại hỏng", "chưa hiểu rõ" → mặc định medium.
+
+### Hai chế độ theo ĐỘ KHÓ + cắt vòng lặp polish (user chỉ đạo 2026-10-02 10:43 ICT)
+
+Bối cảnh: audit token 9 ngày (24/9→02/10) — ngoài context phình của phiên Mike, chi phí Taylor tăng
+vọt ở 27/9 (3.317 lượt Opus) và 01/10 (2.623 lượt Sonnet) vì chuỗi vòng polish nối đuôi nhau
+(ATC UPCOM 4 vòng, lag-exit 6 vòng, price-frame 2 vòng), mỗi vòng = 1 dispatch + 1 arch-review.
+Vấn đề không phải "chọn nhầm tầng model" mà là **đi từng bước nhỏ trên việc chưa được hiểu hết**.
+
+**Chế độ A — việc NHẸ ⇒ `Sonnet` + `--effort medium`, KHÔNG lên Opus.** Gồm: sửa text/docstring/comment,
+đổi message, fix code nhẹ đã biết đúng chỗ, thêm/bổ sung test cho mutation đã được nêu tên,
+revert phần thừa theo chỉ định, áp verdict arch-review đã liệt kê sẵn từng `required_change`,
+đồng bộ config/registry, dọn worktree. Dấu hiệu: reviewer đã chỉ ĐÚNG file:dòng/mutation cần giết.
+Redispatch "vòng N chỉ test-only" cũng thuộc nhóm này — mặc định Sonnet medium.
+
+**Chế độ B — việc MỚI/KHÓ/lỗi cứ phát sinh thêm ⇒ `Opus` + `--effort high`, làm MỘT LẦN cho trọn.**
+Gồm: thiết kế mới chưa có template, bug chưa rõ nguyên nhân, chạm production/tiền/cổng an toàn,
+hoặc review lộ ra lỗi MỚI khác loại với lỗi vòng trước. Cách chạy: (1) Opus high **review TOÀN BỘ**
+diff/nhánh một lượt (không chỉ chỗ reviewer vừa chỉ) và lập danh sách đầy đủ mọi lỗi + mutation còn
+sống; (2) sửa hết trong **một** dispatch; (3) arch-review xác nhận **một** lần. Không vá cuốn chiếu.
+
+**Cầu chì cắt vòng (bắt buộc áp khi dispatch lại sau arch-review):**
+- Vòng 1-2 trên cùng một nhánh: theo chế độ A nếu `required_change` đã cụ thể.
+- **Vòng 3 mà arch-review VẪN trả NEEDS_CHANGES với phát hiện MỚI (không phải lặp lại vòng trước) ⇒ DỪNG
+  polish, chuyển sang chế độ B** (Opus high review toàn bộ rồi sửa một lượt). Không dispatch vòng 4 kiểu cũ.
+- Vòng test-only (không đổi logic production) quá 2 vòng ⇒ hỏi user trước khi tiếp, nêu rõ mutation còn sống.
+- Mỗi lần dispatch tiếp theo phải tự trả lời được: "lần này lỗi cùng loại với vòng trước hay khác
+  loại?" Cùng loại + chỉ rõ chỗ ⇒ A. Khác loại/ngày càng nhiều ⇒ B.
+- Review lại bằng arch-reviewer: yêu cầu nó liệt kê TRỌN BỘ mutation/lỗi sống ngay vòng đầu, không
+  dừng ở lỗi đầu tiên tìm được (nguyên nhân gốc của chuỗi 4-6 vòng).
+Đo lại bằng `python3 bin/spend_report.py --days 7` (effort-tier mix + model mix) mỗi tuần.
