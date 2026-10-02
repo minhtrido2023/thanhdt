@@ -47,3 +47,9 @@
 
 ## Archived 2026-10-02 (keep=12 days=0 require_done=False)
 - [2026-10-01T15:59:13Z] 23:10 01/10: user DUYỆT 3 việc: (1) VPB LAG 600cp ĐÃ CHÈN plan ZaloPay 02/10 (SELL-VPB-AUTOEXIT-LAG, cap 900-300), plan chưa duyệt; (2) fix ATC UPCOM: arch-review NEEDS_CHANGES (hard_no_chase F2 hồi quy, retry 400 chưa dừng, thứ tự override) -> Taylor vòng 2 dispatch, sau đó arch-review ngắn rồi MERGE (user đã duyệt); (3) TPB CONFIRMED ĐÃ GHI corp_actions.json (TPB-2026-10-02-STOCK-DIVIDEND x1.15, ex 02/10 suy từ mẫu broker credit tối T-1; backup /tmp/corp_actions.backup_20261001_2300.json); SpaceX park_holdings giờ KHỚP 25 mã -> plan SpaceX 02/10 (HOLD_ALL, BLOCKED_RECONCILE) cần DollarBill sinh lại. Việc 4 bq_admin writer: user nói lỗi bên vendor, ex_right TPB không cần hỏi lại. Taylor 154507 (lag-exit vòng 3) đang chạy.
+
+## Archived 2026-10-02 (keep=12 days=0 require_done=False)
+- [2026-10-01T16:11:12Z] 23:15 01/10: user duyệt DollarBill sinh lại plan SpaceX 02/10 (job DollarBill_20261001_161054, nền) + duyệt nguyên tắc broker=nguồn xác định corp action khi vendor stale (ghi memory feedback-broker-as-corp-action-source; tự động hoá corp_action_auto_confirm broker-only fallback CHƯA làm - đề xuất Taylor sau khi 2 job ATC/lagexit xong). Còn: Taylor 155911 (ATC UPCOM vòng 2, đang chạy, merge sau arch-review APPROVED theo user duyệt); lag-exit vòng 3 (9ff7a128) cần arch-review ngắn (lần gọi trước bị ngắt, chưa rõ kết quả) rồi hỏi user duyệt merge squash.
+
+## Archived 2026-10-02 (keep=12 days=0 require_done=False)
+- [2026-10-01T16:19:48Z] 23:22 01/10: arch-review vòng 3 lag-exit (9ff7a128) NEEDS_CHANGES (plan report notes[-1] bị entry manual che cảnh báo; state dedup ghi trước notify; 9 mutation logic mới sống) -> Taylor vòng 4 dispatch. Logic production không hồi quy. Arch-reviewer replay đã ghi ~4 bản ghi positions thật (read-only DNSE) vào dnse_raw_2026-10-01.jsonl — vô hại.
