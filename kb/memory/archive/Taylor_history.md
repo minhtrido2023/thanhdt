@@ -829,3 +829,6 @@
 
 ## Archived 2026-10-02 (keep=12 days=0 require_done=False)
 - [2026-10-01T03:49:10Z] 2026-10-01T10:49:10Z [park-off] XONG job Taylor_20261001_032810: 3 rail park=0% wired+tested (mike wire/park-000-live@3be41258 selfcheck 122/122, WC wire/park-000-live-wc@b0e2c811), park_rail_consistency rc=0, merge dry-run sach. Dry-run 02/10: ZaloPay TRIM ~84tr/13ma (9,85% NAV), SpaceX BLOCKED_RECONCILE (loi ledger SCL co san, khong lien quan). CHO MIKE merge (bus question xin-duyet-merge-park-off-0pct-20261001) + duyet kb/current_ops.md.proposed (reversal trigger X/Y chua chot).
+
+## Archived 2026-10-02 (keep=12 days=0 require_done=False)
+- [2026-10-01T04:09:48Z] [macro-killswitch-A] VONG 3 XONG (job Taylor_20261001_035057): 5/5 fix quant-skeptic vong 2 da ton tai tu attempt1 (commit WC 18890d7d + mike 9fbd3a0a) -- re-verify lai (165 assertion x3 TZ PASS + 2 mutation kill bang tay), KHONG viet lai. Item-3 trigger-text proposal cho trading_rules.json POST rieng (topic trading-rules-A-sbv-trigger-text-proposal-cctg-20261001, Mike ap SAU khi merge ca 2 branch tranh conflict voi job park). CHO quant-skeptic VONG 3 (bus question quant-skeptic-round3-cctg-killswitch-a-merge) roi Mike duyet merge. effective_deposit_rate() van 0 caller thuc.
