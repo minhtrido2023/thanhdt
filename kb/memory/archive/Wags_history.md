@@ -345,3 +345,6 @@ BÀI HỌC: generator ghi vào kb/ thì consolidator tự commit bản trung gia
 ## Archived 2026-10-01 (keep=12 days=0 require_done=False)
 - [2026-09-13T08:34:07Z] [2026-09-13] aria-J XONG (3c22c06b+5283f0f8+edb49264): code_quality_weekly scope = hot-core pin + manifest T0-T2 commit 7 ngày; fallback có cờ Discord. CÒN MỞ: edb49264 không có arch-review vòng 3. THEO DÕI CN 20/09 10:00 ICT: log phải 'Nguồn scope: MANIFEST' — nếu FALLBACK thì có commit chưa tái sinh manifest.
 BÀI HỌC: pre-commit 'Stashing unstaged files' ở repo dùng chung nuốt file đang sửa dở khi job KHÁC commit — sau khi sửa, kiểm lại diff trước khi tin kết quả test. Và wire 1 selfcheck vào đường cron sẽ kéo cả probe giả của nó vào production manifest.
+
+## Archived 2026-10-02 (keep=12 days=0 require_done=False)
+- [2026-09-14T05:47:19Z] [2026-09-14] coord-2026-09-14 (job 054508): dong Q TV1 (user duyet plan qua Discord). CHO USER: aria-K-landed-before-schedule (A giu/B revert), da notify trading_daily + ack 2 ngay. NEXT: sau 14:55 14/09 kiem journal ZaloPay co ATC_POSTCLOSE_* khong; tripwire fail-loud arch-review yeu cau van CHUA xay.
