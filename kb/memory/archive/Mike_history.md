@@ -44,3 +44,6 @@
 
 ## Archived 2026-10-02 (keep=12 days=0 require_done=False)
 - [2026-10-01T15:45:09Z] 22:47 01/10: Taylor 140332 (vòng 3) bị usage_limited lúc 21:50 ICT; limit reset 22:40; resume tự động bị xếp nhầm sang 02/10 22:00 ICT (bug parse 'resets 10:40pm' +24h) -> Mike huỷ file pending_resumes/Taylor_20261001_145001 (đổi tên .cancelled_...) và dispatch lại tay. Plan ZaloPay/SpaceX 02/10 CHƯA duyệt lúc 22:44. Chờ user: VPB LAG max 600cp, merge fix ATC UPCOM, TPB CONFIRMED, bq_admin writer.
+
+## Archived 2026-10-02 (keep=12 days=0 require_done=False)
+- [2026-10-01T15:59:13Z] 23:10 01/10: user DUYỆT 3 việc: (1) VPB LAG 600cp ĐÃ CHÈN plan ZaloPay 02/10 (SELL-VPB-AUTOEXIT-LAG, cap 900-300), plan chưa duyệt; (2) fix ATC UPCOM: arch-review NEEDS_CHANGES (hard_no_chase F2 hồi quy, retry 400 chưa dừng, thứ tự override) -> Taylor vòng 2 dispatch, sau đó arch-review ngắn rồi MERGE (user đã duyệt); (3) TPB CONFIRMED ĐÃ GHI corp_actions.json (TPB-2026-10-02-STOCK-DIVIDEND x1.15, ex 02/10 suy từ mẫu broker credit tối T-1; backup /tmp/corp_actions.backup_20261001_2300.json); SpaceX park_holdings giờ KHỚP 25 mã -> plan SpaceX 02/10 (HOLD_ALL, BLOCKED_RECONCILE) cần DollarBill sinh lại. Việc 4 bq_admin writer: user nói lỗi bên vendor, ex_right TPB không cần hỏi lại. Taylor 154507 (lag-exit vòng 3) đang chạy.
