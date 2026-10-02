@@ -677,11 +677,13 @@ def park_holdings(account_label, asof=None, plan_dir=PLAN_DIR, exec_dir=EXEC_DIR
             continue
         px_new, why = verify_post_event_price(p.get("market_price"),
                                               p.get("broker_market_price"),
-                                              a["qty_multiplier"])
+                                              a["qty_multiplier"],
+                                              a.get("cash_leg_vnd_per_share", 0.0))
         if px_new is None:
             book.unverified.add(tk)
             frame_blocked[tk] = (f"sự kiện {a['id']} ex {a['ex_date']} hệ số "
-                                 f"{a['qty_multiplier']}: {why}")
+                                 f"{a['qty_multiplier']} (chân tiền mặt "
+                                 f"{a.get('cash_leg_vnd_per_share', 0.0):,.0f}đ/cp): {why}")
             book.warnings.append(
                 f"{asof} {tk}: broker đã credit sớm quyền của sự kiện {a['id']} (ex {a['ex_date']}) "
                 f"⇒ KL trong sổ ở hệ SAU sự kiện, nhưng KHÔNG dựng được giá cùng hệ: {why} ⇒ "

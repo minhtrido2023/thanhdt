@@ -55,10 +55,14 @@ def _pos_rec(account_no, ts, rows):
                        "payload": {"positions": rows}}, ensure_ascii=False)
 
 
-def build_sandbox(qty_now=None, extra_ticker=("ACB", 900, 900)):
+def build_sandbox(qty_now=None, extra_ticker=("ACB", 900, 900), bootstrap_extra=None):
     """Cây giả. `qty_now` override KL hôm nay; `extra_ticker` = (sym, qty_prev, qty_now) — mặc
     định ACB 900→900 (mã ĐỨNG YÊN, làm chứng cứ chống hồi quy cho ngày thường); truyền
-    ("ACB", 900, 1000) để dựng ca KL đổi KHÔNG giải thích được."""
+    ("ACB", 900, 1000) để dựng ca KL đổi KHÔNG giải thích được. `bootstrap_extra` = list các
+    dict position phụ thêm vào `bootstrap_book_snapshot` (ngoài VPB mặc định) — dùng cho test
+    cần một ticker khác đã có LÔ sẵn trong sổ (vd park_holdings cash-leg wiring), KHÔNG đụng gì
+    tới execution_logs/dnse_raw nên các test khác (đọc broker thật qua `read_broker_snapshot`)
+    không bị ảnh hưởng."""
     sb = tempfile.mkdtemp(prefix="exdate_sb_")
     open(os.path.join(sb, "wc_env.sh"), "w").close()
     ex = os.path.join(sb, "data", "execution_logs")
@@ -68,6 +72,13 @@ def build_sandbox(qty_now=None, extra_ticker=("ACB", 900, 900)):
     # `corp_action_daily.py` dựng sys.path từ `WORKDIR_8L/mike/bin` — trỏ về CHÍNH cây đang
     # chạy (worktree hay canonical) để nạp đúng bản code đang kiểm, không phải bản khác.
     os.symlink(os.path.dirname(HERE), os.path.join(sb, "mike"))
+    # R3 (`compute_park_trim.park_target_from_rules`) — `t_park`'s K9-K12 gọi `compute_trim`/
+    # `compute_jit_unpark` thật, cả hai đọc `WC_ROOT/data/trading_rules.json`. Không symlink thì
+    # sandbox KHÔNG CÓ file này ⇒ `ParkTargetUnavailable` ném ra TRƯỚC khi chạm tới assertion nào
+    # (đo thật: crash cả trên canonical mike HEAD, không phải hồi quy do lượt sửa này) — chỉ đọc,
+    # không phải dữ liệu đang kiểm, nên trỏ thẳng về CÂY THẬT là an toàn.
+    os.symlink(os.path.join(REAL_WC, "data", "trading_rules.json"),
+              os.path.join(sb, "data", "trading_rules.json"))
 
     qty_now = qty_now or QTY_NOW
 
@@ -90,12 +101,14 @@ def build_sandbox(qty_now=None, extra_ticker=("ACB", 900, 900)):
         json.dump({"accounts": [{"label": k, "account_id": v} for k, v in ACC.items()]}, f)
     pl = os.path.join(sb, "data", "trade_plans")
     os.makedirs(pl)
+    positions = [{"ticker": "VPB", "book": "PARK", "qty": QTY_PREV["SpaceX"],
+                 "cost_price_vnd": 27000.0, "entry_date": "2026-09-01"}]
+    positions.extend(bootstrap_extra or [])
     with open(os.path.join(pl, "bootstrap_book_snapshot_SpaceX_2026-09-01.json"), "w",
               encoding="utf-8") as f:
         json.dump({"_status": "APPROVED (selfcheck)", "reconcile_ok": True,
                    "day0_date": "2026-09-01", "broker_source": {"ts": "2026-09-01T12:00:00"},
-                   "positions": [{"ticker": "VPB", "book": "PARK", "qty": QTY_PREV["SpaceX"],
-                                  "cost_price_vnd": 27000.0, "entry_date": "2026-09-01"}]}, f)
+                   "positions": positions}, f)
     with open(os.path.join(ca, f"corp_action_daily_{DATE}.json"), "w", encoding="utf-8") as f:
         json.dump({"asof": DATE, "status": "OK", "usable": True, "feed_status": "FRESH",
                    "upcoming_events_held": [
@@ -361,6 +374,72 @@ def t_park(sb, tmp):
           "K5 asof QUÁ KHỨ: giữ NGUYÊN hành vi cũ (giá BQ đã điều chỉnh hồi tố)", f"{mv3:,.0f}")
 
 
+ACT_TPB = {"id": "TPB-2026-09-24-ISS-DIV", "ticker": "TPB", "event_type": "BONUS_ISSUE",
+          "ratio_text": "Thưởng CP 15% + cổ tức tiền mặt 500đ/cp CÙNG ex-date",
+          "qty_multiplier": 1.15, "ex_date": "2026-09-24", "record_date": None,
+          "broker_effective_ts": f"{DATE}T11:58:04", "cash_leg_vnd_per_share": 500.0,
+          "_status": "CONFIRMED — selfcheck", "confirmed_by": "selfcheck",
+          "decided_by": "agent", "confirmed_at": f"{DATE}T19:25:01+07:00",
+          "evidence": ["NGUỒN 1 — selfcheck", "NGUỒN 2 — selfcheck"]}
+QTY_TPB_PRE = 800
+QTY_TPB_POST = 920          # 800×1,15 = 920 đúng (không lẻ, không cần largest-remainder)
+
+
+def t_park_cashleg(tmp):
+    """Wiring park_holdings.py:660-663 đọc field `cash_leg_vnd_per_share` từ corp action — ca
+    TPB-like (ISS 15% + DIV 500đ/cp CÙNG ex-date, giống TPB thật 2026-10-02). `act_nocash` (field
+    bị XOÁ khỏi record) đi qua CÙNG `corp_actions.validate()` sản xuất `cash_leg_vnd_per_share=0.0`
+    y hệt mutation đọc SAI key tại call-site — nếu wiring đọc đúng key, hai act này PHẢI cho ra
+    HAI quyết định KHÁC NHAU (PASS vs BLOCKED_FRAME) trên CÙNG một `broker_market_price`."""
+    sb = build_sandbox(bootstrap_extra=[{"ticker": "TPB", "book": "PARK", "qty": QTY_TPB_PRE,
+                                         "cost_price_vnd": 12000.0, "entry_date": "2026-09-01"}])
+    sys.modules.pop("park_holdings", None)
+    import park_holdings as PH
+    PH.today_ict = lambda: DATE
+    meta = {"source": "selfcheck", "asof": DATE, "total_cash_vnd": 0.0, "total_debt_vnd": 0.0,
+            "egg_assets_vnd": 0.0, "balance_all_zero": False, "dividend_receiving_vnd": 0.0}
+
+    def run(act):
+        # VPB cũng nằm trong bootstrap mặc định (build_sandbox luôn thêm) — PHẢI có mặt trong
+        # broker dict với ĐÚNG KL bootstrap (1.100, không đổi: `corp_actions=[act]` chỉ có TPB,
+        # không có sự kiện nào cho VPB ở đây), nếu không reconcile Σ lô≠openQuantity(0) sẽ tự gắn
+        # VPB vào unverified_tickers — nhiễu không liên quan tới cái test này đang kiểm.
+        bk = ({"TPB": {"qty": QTY_TPB_POST, "market_price": 14400.0, "sellable": 0,
+                       "broker_market_price": 12100.0},
+              "VPB": {"qty": QTY_PREV["SpaceX"], "market_price": 27800.0, "sellable": 0,
+                      "broker_market_price": 27800.0}}, 0.0, meta)
+        return PH.park_holdings("SpaceX", asof=DATE, plan_dir=os.path.join(sb, "data", "trade_plans"),
+                                exec_dir=os.path.join(sb, "data", "execution_logs"),
+                                broker=bk, corp_actions=[act])
+
+    try:
+        r_with = run(ACT_TPB)
+        check(not r_with["unverified_tickers"] and not r_with.get("frame_blocked_tickers"),
+              "X1 act CÓ cash_leg_vnd_per_share=500 ⇒ wiring đọc đúng key, verify PASS, TPB "
+              "KHÔNG bị chặn", str(r_with["unverified_tickers"]) + " / " +
+              str(r_with.get("frame_blocked_tickers")))
+        mv_with = sum(l["mv_vnd"] for l in r_with["park_lots"] if l["ticker"] == "TPB")
+        check(abs(mv_with - QTY_TPB_POST * 12100.0) < 1e-6,
+              "X2 park_mv dùng ĐÚNG giá tham chiếu sau sự kiện 12.100 (= (14.400−500)/1,15)",
+              f"{mv_with:,.0f}")
+
+        act_nocash = dict(ACT_TPB)
+        act_nocash.pop("cash_leg_vnd_per_share")
+        r_no = run(act_nocash)
+        check("TPB" in r_no["unverified_tickers"] and r_no.get("frame_blocked_tickers") == ["TPB"],
+              "X3 act THIẾU cash_leg_vnd_per_share (= hình dạng mutation đọc SAI key tại "
+              ":660-663, validate() default 0.0) ⇒ BLOCKED_FRAME OAN dù cùng broker_market_price "
+              "— chứng minh field này LÀ THỨ phân biệt X1 với ca này, không phải trùng hợp",
+              str(r_no["unverified_tickers"]) + " / " + str(r_no.get("frame_blocked_tickers")))
+        mv_no = sum(l["mv_vnd"] for l in r_no["park_lots"] if l["ticker"] == "TPB")
+        check(abs(mv_no - QTY_TPB_POST * 14400.0) < 1e-6,
+              "X4 (bối cảnh) nhánh fail giữ giá CÒN QUYỀN 14.400 làm mẫu số — đúng lý do phải "
+              "chặn qua frame_blocked_tickers, không lặng lẽ dùng số phồng",
+              f"{mv_no:,.0f}")
+    finally:
+        shutil.rmtree(sb, ignore_errors=True)
+
+
 def t_calendar_and_journal(tmp):
     """[R1]+[R2] — hai kênh bằng chứng (LỊCH corp-action, JOURNAL fill) đều fail được trong im
     lặng. Thông điệp blocked phải PHÂN BIỆT "lịch nói không có sự kiện" với "không đọc được
@@ -487,6 +566,7 @@ def main():
         t_classify(ef)
         t_e2e(ef, can, tmp)
         t_park(sb, tmp)
+        t_park_cashleg(tmp)
         t_unexplained(tmp)
         t_calendar_and_journal(tmp)
         t_asof_guard(tmp)

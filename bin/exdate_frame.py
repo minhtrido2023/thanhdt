@@ -30,6 +30,7 @@ VÌ SAO PHẢI ĐỐI SOÁT chứ không tin thẳng `marketPrice`: `price_frame
 đó bản đọc hỏng đó trông hoàn toàn lành. Nên ở đây `marketPrice` chỉ được dùng khi nó TÁI
 TẠO ĐƯỢC giá cum đã biết qua chính hệ số sự kiện — bằng chứng cơ khí, §29.
 """
+import math
 
 # Sai số cho phép giữa `marketPrice` broker và giá tham chiếu tự dựng `px_cum / multiplier`.
 # Hai nguồn sai số, cả hai đều NHỎ và có cận trên cơ khí:
@@ -43,41 +44,63 @@ FRAME_TOL_VND = 200.0
 FRAME_TOL_PCT = 0.005
 
 
-def verify_post_event_price(px_cum, market_price, multiplier):
+def verify_post_event_price(px_cum, market_price, multiplier, cash_per_share=0.0):
     """(px, evidence) nếu `market_price` THẬT SỰ ở hệ SAU sự kiện; (None, lý do) nếu không.
 
-    PURE — không đọc file, không gọi API, không phụ thuộc TZ. Toàn bộ quyết định nằm trong ba
+    PURE — không đọc file, không gọi API, không phụ thuộc TZ. Toàn bộ quyết định nằm trong bốn
     con số truyền vào, nên thông điệp trả về luôn trích được bằng chứng đã đọc (§29).
 
-    Kiểm định: `market_price ≈ px_cum / multiplier`. Với sự kiện làm TĂNG số cổ phiếu (thưởng,
-    cổ tức bằng CP, chia tách) giá tham chiếu sở giao dịch đúng bằng thương đó. Sự kiện QUYỀN
-    MUA có thêm dòng tiền vào (`ref = (P_cum + r×giá_phát_hành)/(1+r)`) nên sẽ KHÔNG khớp và
-    hàm này fail-closed — đúng ý: quyền mua chưa nộp tiền thì broker cũng chưa credit, KL
-    không nhảy, và ca đó không được phép đi qua đây trong im lặng.
+    Kiểm định: `market_price ≈ (px_cum − cash_per_share) / multiplier`. Với sự kiện làm TĂNG số
+    cổ phiếu (thưởng, cổ tức bằng CP, chia tách) và KHÔNG kèm chân tiền mặt, giá tham chiếu sở
+    giao dịch đúng bằng `px_cum / multiplier` (`cash_per_share=0.0`, mặc định — hành vi CŨ giữ
+    nguyên 100%). Sự kiện QUYỀN MUA có thêm dòng tiền VÀO (`ref = (P_cum + r×giá_phát_hành)/
+    (1+r)`) nên sẽ KHÔNG khớp và hàm này fail-closed — đúng ý: quyền mua chưa nộp tiền thì
+    broker cũng chưa credit, KL không nhảy, và ca đó không được phép đi qua đây trong im lặng.
+
+    `cash_per_share` — chân CỔ TỨC TIỀN MẶT đi CÙNG ex-date với sự kiện cổ phiếu (vd TPB
+    2026-10-02: ISS 15% + DIV 500đ/cp CÙNG ngày). Công thức sở trừ chân tiền TRƯỚC khi chia hệ
+    số (`trading_bot/price_frame.py::expected_reference_price` — cùng công thức, đo khớp TUYỆT
+    ĐỐI HOSE/HNX 2026-08-18 n=509). Bỏ qua chân này (`cash_per_share=0.0`, hành vi trước
+    2026-10-01) khiến `expected` cao hơn thật đúng `cash_per_share/multiplier` ⇒ FAIL oan mọi sự
+    kiện cổ phiếu có kèm cổ tức tiền mặt cùng ngày (TPB: kỳ vọng 12.521,7 thay vì đúng 12.087,
+    lệch 434,7 > dung sai) dù `marketPrice` broker HOÀN TOÀN đúng hệ quy chiếu sau sự kiện.
+    Caller PHẢI nêu RÕ nguồn của `cash_per_share` trong bằng chứng của nó (§28/§29) — hàm này
+    không tự suy, không mặc định khác 0 trừ khi caller đưa vào.
     """
     try:
         px_cum = float(px_cum)
         market_price = float(market_price or 0)
         multiplier = float(multiplier)
+        cash_per_share = float(cash_per_share or 0)
     except (TypeError, ValueError) as e:
         return None, f"không ép được về số ({e})"
     if multiplier <= 0:
         return None, f"hệ số sự kiện {multiplier} ≤ 0 — vô nghĩa"
+    if not math.isfinite(cash_per_share):
+        return None, (f"cash_per_share {cash_per_share} không phải số hữu hạn (nan/inf) — §29: "
+                      f"so sánh với nan luôn False nên guard < 0 phía dưới sẽ ÂM THẦM bỏ qua")
+    if cash_per_share < 0:
+        return None, f"cash_per_share {cash_per_share} < 0 — vô nghĩa (cổ tức tiền mặt không âm)"
     if market_price <= 0:
         return None, ("broker KHÔNG trả `marketPrice` cho mã này (0/None) ⇒ không có giá nào "
                       "CÙNG HỆ với khối lượng đã credit — không đoán")
-    expected = px_cum / multiplier
+    px_ex = px_cum - cash_per_share
+    if px_ex <= 0:
+        return None, (f"giá cum {px_cum:,.0f} − chân tiền mặt {cash_per_share:,.0f} = {px_ex:,.0f} "
+                      f"≤ 0 — vô nghĩa, kiểm lại cash_per_share")
+    expected = px_ex / multiplier
     tol = max(FRAME_TOL_VND, expected * FRAME_TOL_PCT)
     diff = market_price - expected
+    cash_note = f" − chân tiền mặt {cash_per_share:,.0f}" if cash_per_share else ""
     if abs(diff) > tol:
         return None, (f"marketPrice {market_price:,.0f} KHÔNG tái tạo được giá cum "
-                      f"{px_cum:,.0f} qua hệ số {multiplier} (kỳ vọng {expected:,.1f}, lệch "
-                      f"{diff:+,.1f} > dung sai {tol:,.1f}) — hai số này KHÔNG cùng một hệ quy "
-                      f"chiếu, có thể là ca DNSE điều chỉnh THEO GÓI VAY chưa xong "
+                      f"{px_cum:,.0f}{cash_note} qua hệ số {multiplier} (kỳ vọng {expected:,.1f}, "
+                      f"lệch {diff:+,.1f} > dung sai {tol:,.1f}) — hai số này KHÔNG cùng một hệ "
+                      f"quy chiếu, có thể là ca DNSE điều chỉnh THEO GÓI VAY chưa xong "
                       f"(price_frame.py §G4)")
-    return market_price, (f"marketPrice {market_price:,.0f} = giá cum {px_cum:,.0f} / hệ số "
-                          f"{multiplier} (kỳ vọng {expected:,.1f}, lệch {diff:+,.1f} ≤ dung sai "
-                          f"{tol:,.1f})")
+    return market_price, (f"marketPrice {market_price:,.0f} = (giá cum {px_cum:,.0f}{cash_note}) "
+                          f"/ hệ số {multiplier} (kỳ vọng {expected:,.1f}, lệch {diff:+,.1f} ≤ "
+                          f"dung sai {tol:,.1f})")
 
 
 def classify_positions(account_label, account_no, asof, positions):

@@ -65,9 +65,15 @@ import wc_paths  # noqa: E402
 WC_ROOT = wc_paths.find_wc_root(__file__)
 REGISTRY = os.path.join(WC_ROOT, "data", "corp_actions.json")
 
-# Chỉ các loại sự kiện làm ĐỔI SỐ LƯỢNG. Cổ tức TIỀN MẶT không thuộc file này — nó đi qua
-# `mike/bin/dividend_adjusted_return.py` (§21 coding_guidelines) và không đụng vào số lượng lô.
+# Chỉ các loại sự kiện làm ĐỔI SỐ LƯỢNG. Cổ tức TIỀN MẶT ĐỨNG RIÊNG không thuộc file này — nó
+# đi qua `mike/bin/dividend_adjusted_return.py` (§21 coding_guidelines) và không đụng vào số
+# lượng lô. `cash_leg_vnd_per_share` (optional, dưới) là CA KHÁC: một chân tiền mặt BỊ BUNDLE
+# cùng ex-date với MỘT sự kiện làm đổi số lượng (vd TPB 2026-10-02: ISS 15% + DIV 500đ/cp cùng
+# ngày) — trường này KHÔNG đổi ngữ nghĩa `qty_multiplier` (vẫn chỉ là hệ số SỐ LƯỢNG), nó chỉ
+# cấp thêm bằng chứng cho CỔNG GIÁ (`exdate_frame.verify_post_event_price`) dựng đúng giá tham
+# chiếu kỳ vọng — cùng công thức `trading_bot/price_frame.py::expected_reference_price`.
 QTY_EVENT_TYPES = {"STOCK_DIVIDEND", "BONUS_ISSUE", "SPLIT"}
+CASH_LEG_MAX = 50_000.0  # biên chặn lỗi gõ tay (VND/cp) — cổ tức tiền mặt VN thực tế luôn ≪ mức này
 CONFIRMED_PREFIX = "CONFIRMED"
 RATIO_TOL = 0.02          # sai số cho phép giữa hệ số khai báo và hệ số suy từ tỉ số BQ
 # Biên chặn LỖI GÕ TAY (vd 13 thay vì 1,3), KHÔNG PHẢI biên "tỉ lệ thường gặp" — vòng 7 từng đặt
@@ -125,9 +131,30 @@ def validate(rec, idx=0):
     ex_date = _date(_require(rec, "ex_date", idx), "ex_date", idx)
     eff_ts = str(_require(rec, "broker_effective_ts", idx))
     _date(eff_ts, "broker_effective_ts", idx)          # phải parse được phần ngày
+    cash_leg_raw = rec.get("cash_leg_vnd_per_share", 0.0)
+    try:
+        cash_leg = float(cash_leg_raw if cash_leg_raw is not None else 0.0)
+    except (TypeError, ValueError):
+        raise CorpActionError(
+            f"corp_actions[{idx}].cash_leg_vnd_per_share={cash_leg_raw!r} không phải số")
+    if not math.isfinite(cash_leg):
+        raise CorpActionError(
+            f"corp_actions[{idx}].cash_leg_vnd_per_share={cash_leg} không phải số hữu hạn "
+            f"(nan/inf) — §29: so sánh với nan luôn False nên guard ngưỡng phía dưới sẽ ÂM "
+            f"THẦM bỏ qua record này")
+    if cash_leg < 0:
+        raise CorpActionError(
+            f"corp_actions[{idx}].cash_leg_vnd_per_share={cash_leg} < 0 — cổ tức tiền mặt không "
+            f"âm, kiểm lại record")
+    if cash_leg > CASH_LEG_MAX:
+        raise CorpActionError(
+            f"corp_actions[{idx}].cash_leg_vnd_per_share={cash_leg} > {CASH_LEG_MAX} — vượt biên "
+            f"chặn lỗi gõ tay (vd 5000 thay vì 500); nếu là sự kiện thật lớn hơn, xác nhận lại "
+            f"với user rồi mới nới CASH_LEG_MAX")
     return {
         "id": rec.get("id") or f"{ticker}-{ex_date}-{etype}",
         "ticker": ticker, "event_type": etype, "qty_multiplier": mult,
+        "cash_leg_vnd_per_share": cash_leg,
         "ratio_text": rec.get("ratio_text", ""),
         "ex_date": ex_date, "record_date": rec.get("record_date"),
         "broker_effective_ts": eff_ts,
