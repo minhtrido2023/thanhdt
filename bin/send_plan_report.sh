@@ -30,7 +30,7 @@ WC_ROOT="$(cd "$ROOT/.." && pwd)"
 # (wc_env.sh export cứng WORKDIR_8L nên không override được bằng env thường).
 WORKDIR="${SEND_PLAN_WORKDIR_OVERRIDE:-${WORKDIR_8L:-/home/trido/thanhdt/WorkingClaude}}"
 MARKER_DIR="${SEND_PLAN_MARKER_DIR:-$ROOT/state/plan_report_sent}"
-TODAY="$(date +%Y-%m-%d)"
+TODAY="$(TZ='Asia/Ho_Chi_Minh' date +%Y-%m-%d)"   # §16: neo ICT tường minh, không tin TZ host
 NOW_ICT="$(TZ='Asia/Ho_Chi_Minh' date +'%H:%M ICT')"
 
 # --account LABEL — mặc định SpaceX để giữ nguyên hành vi cũ khi gọi không kèm cờ. Cron
@@ -54,8 +54,9 @@ DISCORD_PLAN_CHANNEL="plan_approval"
 
 EXPECTED_DATE="$(cd "$WORKDIR" && python3 -c "
 import datetime as dt
+from zoneinfo import ZoneInfo
 from trading_bot.vn_market import next_trading_day
-print(next_trading_day(dt.date.today()))
+print(next_trading_day(dt.datetime.now(ZoneInfo('Asia/Ho_Chi_Minh')).date()))  # §16: neo ICT, không dùng date.today() trần
 " 2>/dev/null)"
 
 # Plan file mới nhất theo mtime (Bill ghi vào data/trade_plans/plan_<account>_<date>.json)
