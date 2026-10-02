@@ -1,13 +1,13 @@
-# Mike fleet — context pack (v3561)
+# Mike fleet — context pack (v3562)
 > Snapshot tự sinh bởi consolidator. Nguồn chuẩn tắc: kb/KNOWLEDGE.md.
 
 <!--RECENT-START-->
 ## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-10-02T12:05:30] DollarBill/finding — corp-action-feed-dead-20261002: {"status": "FAILED", "failed_gate": "feed_dead", "max_ingested_utc": "2026-09-26 15:43:40+00", "age_days": 6, "note": "corp_action_daily cron 07:30 trả FAILED h …
-- [2026-10-02T12:08:41] DollarBill/decision — plan-2026-10-05-SpaceX: {"account": "SpaceX", "plan_date": "2026-10-05", "state": "NEUTRAL", "orders_count": 1, "summary": "HOLD BAL/LAG (n_bal=0, LAG due=0). L1 park-trim TRIM: ban VI …
-- [2026-10-02T17:35:57] Mike/finding — retro-draft-2026-10-02-done: {"draft_file": "state/retro_draft_2026-10-02.md", "n_incidents": 5, "n_patterns": 2, "escalated": "retro-pattern-recurring-corp-action-feed-vendor-dead-cascade  …
 - [2026-10-02T17:49:41] Wags/finding — verify-retro-draft-2026-10-02: {"verdict": "GAPS_FOUND", "gaps": [{"item": "incident#2/#3 TPB BLOCKED_FRAME", "issue": "stale — draft claims gate still BLOCKED_FRAME today, but final plan_Spa …
 - [2026-10-02T17:52:31] Mike/finding — daily-retro-2026-10-02-done: {"entry": "kb/incidents/retro/retro-2026-10-02.md", "commit": "8d44565e", "n_incidents": 5, "n_patterns": 2, "wags_verdict": "GAPS_FOUND", "gaps_fixed": ["incid …
+- [2026-10-02T19:49:46] Mike/decision — kb-weekly-editorial: {"date": "2026-10-03", "commit": "71d56fce", "data_registry_audit": "FAIL=0 WARN=0 — clean, no regression", "deprecated_sources_missing_superseded": 0, "stale_d …
+- [2026-10-02T19:42:06] Wags/answer — selfcheck-red: mike/bin/exdate_frame_selfcheck.py — recovered 2026-10-02: {"context": "selfcheck_baseline_diff tự đóng: ca đỏ này đã XANH trở lại", "file": "mike/bin/exdate_frame_selfcheck.py", "artifact": "chạy lại lúc 2026-10-02T19: …
+- [2026-10-02T19:26:06] Winston/finding — sbv-weekly-check-2026-10-03: {"date": "2026-10-03", "current_rate": 4.5, "fetch_status": "fetch_failed", "rate_changed": false, "note": "fetch_failed_assumed_unchanged", "verify_log": "/hom …
 <!--RECENT-END-->
 
 # Current Operations — Mike fleet
@@ -53,7 +53,8 @@
 - ✅ **rating_8l NEUTRAL tilt + chuỗi DCF (dcf_valuation, dcf_refresh_gate, custom30_yield_labels, due_diligence) DÙNG effective rate = max(Big-4 12M, CCTG 6M)** — LIVE trên WC main từ 2026-10-01 (merge `d87a6f89`, user duyệt 12:40, quant-skeptic vòng 2 CONFIRMED). Tác động đo thật: rating_8l 6 mã −0,03 value_score (CTR MZG QNS PLX HVN GEE), 0 zone flip, top30 giữ nguyên; DCF discount 13,30%→14,00%, FV −0,7…−0,9% (VNM gần ngưỡng nhất MoS +2,6%→+1,8%; flag CHEAP/RICH trong plan report 21:00 có thể lật với mã sát 0). Lịch sử byte-identical ⇒ KHÔNG đổi số pin R3. **Fail-closed**: CCTG stale >45 ngày hoặc lỗi ⇒ cả 5 consumer rơi về Big-4 6,8% + WARNING (không phải ARMED). **Knob lùi**: env `DEPOSIT_RATE_CCTG_OVERLAY=0` (chỉ nhận đúng chuỗi "0"; lan tới mọi launcher source `wc_env.sh`, NGOẠI LỆ cron `dcf_refresh_gate` không source). `golive_recommend_v23.py:~991` (cổng CAPIT margin PIT, ngưỡng 9,0%) CỐ Ý vẫn Big-4-only — user chốt 2026-10-01 16:42: GIỮ Big-4, chỉ THÊM dòng hiển thị "effective vs 9%" (việc C: MERGED WC `98079284` 2026-10-01 18:10 — 2 field `pit_deposit_rate_effective`/`pit_deposit_effective_driver` trong `capit_lever` của golive_v23_status.json, quyết định BYTE-IDENTICAL, quant-skeptic CONFIRMED 576 kịch bản; nay CÓ dòng hiển thị trong plan markdown: "Cổng PIT: Big-4 X% (dùng cho quyết định, ngưỡng 9%) · effective Y% [driver] — chỉ hiển thị", kèm ⚠️ khi effective ≥ 9% mà Big-4 < 9%; follow-up MERGED WC 2026-10-01 18:20, quant-skeptic CONFIRMED 330 kịch bản). **TRIGGER XEM LẠI đổi sang effective** = CCTG có ≥3 tháng dữ liệu + cron tuần chạy ổn, HOẶC effective ≥ ~8% (lúc đó dispatch Taylor đo khoảng cách CCTG−Big-4 lịch sử rồi quant-skeptic + user duyệt riêng). Follow-up XONG 2026-10-01 (WC `358ad369`, mike `8d2aae54`): registry `cctg_rate_vn.md` đã áp (inventory consumer đúng: due_diligence + custom30_yield_labels chạy HẰNG NGÀY, DCF plan-report 21:00 là consumer user-visible), `ops_health_check` 8b WARN khi CSV CCTG hỏng/ngoài khoảng, selfcheck nạp đúng cây worktree.
 
 ## Signal holds
-- **VPI/BAL**: signal_hold 08-19→09-16 ĐÃ GỠ 2026-09-16. Review dựa trên `amh-adaptivity-review-20260910.md` (Taylor job A/B/C + quant-skeptic): lý do gốc của HOLD (edge-health dashboard báo mom_200 FLIPPED) đã bị bác — kênh đó REFUTED cho quyết định BAL; mom_200 IC hồi phục dương Q2/2026. User duyệt RESUME 2026-09-16 23:19 ICT: "tuân theo chiến lược production đã duyệt, không cần điều chỉnh gì" (`decided_by: user`, bus `answer/bal-vpi-checkpoint-resume-decision`). VPI/BAL trở lại logic bình thường từ plan kế tiếp — không còn escalate riêng.
+- Không có hold nào đang mở. VPI/BAL hold (08-19→09-16) đã gỡ 2026-09-16, user duyệt RESUME,
+  không còn escalate riêng. Chi tiết: `kb/projects/amh-adaptivity-review-20260910.md`.
 
 ## CAPIT — vị thế THẬT đang giữ (`capit_fired` ≠ "đang giữ")
 ⚠️ `capit_fired` tính lại mỗi phiên, KHÔNG phải cờ vị thế. Đọc `data/golive_v23_status.json` (`n_capit_basket`, `capit_adv_caps`). **PNJ EXCLUDED** (due-diligence gate, 07-20, TTL ~08-23). Chi tiết: `kb/current_ops_ext.md § CAPIT`.
