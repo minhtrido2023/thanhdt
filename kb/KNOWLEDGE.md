@@ -254,6 +254,20 @@ nhanh" (L3 core, inject mọi phiên) thiếu **BAF** trong danh sách BANNED v�
 `KNOWLEDGE.md` §6 và `kb/context_safety_core.md` từ 2026-08-26 nhưng chưa lan sang canonical.md
 (pyramid L3 §8 item (b): fact đã đổi ở nguồn nhưng chưa lan hết các bản sao cùng tầng). Đã vá.
 
+**Cập nhật 10-03 (weekly editorial):** opus% tổng tuần mới nhất = **34%** (`spend_report.py --days
+7`), tiếp tục dưới ngưỡng 60%. fable% 0%. Effort 5d: Taylor 71% high (n=139) — cùng biên độ dao
+động 55-94% đã quan sát 9 tuần, exempted (R&D genuinely phức tạp). **5e routing retro: Taylor
+[RETRY-RATE] 32% (44/139), SAU 28% tuần 09-26 — lần đầu ≥15% HAI tuần liên tiếp cùng agent.**
+Lấy mẫu 12 job `attempt≥2`: hầu hết là `status=done` — tiếp nối CHỦ Ý nhiều-vòng ("HẬU KIỂM BẮT
+BUỘC sau merge", "VÒNG 4 (cuối)", "FOLLOW-UP việc C", "Việc lớn chia 2 phần") chứ KHÔNG phải lỗi
+cần retry. Đây là cùng hiện tượng với Pattern 2 của retro 2026-10-02 (chi phí review đa vòng,
+lag-exit 6 vòng/ATC UPCOM 4 vòng) — `routing_retrospective.py` định nghĩa "retry" = mọi job
+`attempt≥2` bất kể lý do, nên số 32% lẫn cả continuation hợp lệ với retry-do-lỗi thật. **Kết
+luận: KHÔNG đề xuất rule MIKE.md §Routing mới** (rule đã tồn tại từ đúng hôm nay — skill
+`dispatch-routing` round-3 circuit-breaker, ship 2026-10-02, chính là cơ chế trị đúng chi phí đa
+vòng này). Theo dõi tuần 10-10 xem số vòng polish có giảm sau khi skill được dùng đều, không cần
+sửa gì thêm tuần này. Spend-trend: ops_h tiếp tục ~1,0h (10-03), không có dấu hiệu tăng liên tục.
+
 **Model mặc định của chính Mike:** đổi sang Fable 5 (2026-07-06) rồi **ĐẢO NGƯỢC LẠI Sonnet 5** (2026-07-07, user yêu cầu). Phát hiện **3 tầng config** trong bridge Discord (`ccdb-mike`): thread override (DB) > global (DB) > `.env` fallback — sửa `.env` vô tác dụng nếu DB đã có row cũ. Dọn 4 dòng rác sai format (`"Sonnet 5"`/`"sonnet 5"` có dấu cách — CLI từ chối) từng gây lỗi `/model` ở 1 thread. Đã đồng bộ cả 3 nơi.
 
 **Routing guards (2026-06-27):**
