@@ -29,7 +29,7 @@ Grep vẫn hoạt động: `grep -rn "<tên nguồn>" mike/kb/data_registry/`.
 | Market state / regime (rủi ro cao nhất) | [`market-state/`](market-state/) | DT5G production, base trap, các CSV/bảng lineage 5-state |
 | Giá / khối lượng cổ phiếu | [`price-volume/`](price-volume/) | DNSE live, `ticker`/`ticker_1m`/`ticker_prune`, `universe_pit`, shares/corp-action |
 | Fundamentals / tài chính | [`fundamentals/`](fundamentals/) | `ticker_financial`, PE/PB/PCF, ROE/ROIC/FSCORE, risk_rating |
-| Vĩ mô | [`macro/`](macro/) | VIX/SPX, SBV refi, macro_health, breadth, deposit_rate, CPI, GDP |
+| Vĩ mô | [`macro/`](macro/) | VIX/SPX, SBV refi, macro_health, breadth, deposit_rate, CCTG, CPI, GDP, FiinPro-X snapshots |
 | 8L Rating / Composite v3 | [`rating-8l/`](rating-8l/) | `fa_ratings`, `fa_ratings_8l`, rating_8l.csv, moat/forensic tags |
 | Custom30 parking baskets | [`custom30/`](custom30/) | `custom30v_8l` (prod), `custom30_8l` (trap), publish csv |
 | BQ local cache | [`bq-cache/`](bq-cache/) | `data/bq_cache/*.parquet` mirror |
