@@ -29,3 +29,9 @@
 - [2026-10-01T08:04:15Z] 15:10 Follow-up B XONG+MERGED (WC 358ad369, mike 8d2aae54, doc áp). Mọi việc A/B/kill-switch/park done. Còn chờ user: CAPIT margin gate effective rate hay giữ Big-4 (golive_recommend_v23:991); nhập CCTG hàng tháng sẽ do cron tuần; Mon 05/10 08:05 theo dõi lần chạy cron đầu tiên.
 - [2026-10-01T09:43:07Z] 16:45 user duyệt: CAPIT PIT gate GIỮ Big-4 9%; thêm dòng hiển thị effective vs 9% (job Taylor_20261001_094254, không đổi quyết định) -> khi xong: quant-skeptic+arch-reviewer (byte-identical quyết định) rồi merge. Trigger xem lại: CCTG >=3 tháng + cron ổn HOẶC effective >=8% (current_ops 37df0fe4).
 - [2026-10-01T11:04:54Z] 18:12 Việc C MERGED WC 98079284 (quant-skeptic CONFIRMED; arch: an toàn nhưng field chưa hiển thị). Follow-up Taylor_20261001_110416 (dòng hiển thị plan markdown + nit) dispatch TRƯỚC merge: khi xong kiểm base có 98079284 (nếu không thì merge main vào branch trước), chạy quant-skeptic lại nhanh chỉ phần hiển thị, merge. Lưu ý: Taylor job 094254 từng để diff y hệt chưa commit trong cây canonical (đã reset vì blob trùng branch).
+
+## Archived 2026-10-02 (keep=12 days=0 require_done=False)
+- [2026-10-01T11:19:49Z] 18:22 Việc C XONG hoàn toàn (display line merged). Mọi việc 01/10 đã đóng. Còn chờ: Mon 05/10 08:05 theo dõi cron tuần lần đầu; nhập CCTG nếu cron báo; trigger xem lại CAPIT gate effective (>=8% hoặc 3 tháng CCTG).
+
+## Archived 2026-10-02 (keep=12 days=0 require_done=False)
+- [2026-10-01T12:54:53Z] 19:55 01/10: user duyệt (1) chèn tay SELL CSV 1000cp LAG vào plan ZaloPay 02/10 — ĐÃ CHÈN (SELL-CSV-AUTOEXIT-LAG); (2) Taylor sửa lag_entry_dates mù journal cũ (dispatch 19:55). Còn chờ user: arch-review merge fix ATC UPCOM (branch fix/atc-upcom-ordertype-20261001 75ccc322), ghi tay TPB CONFIRMED vào data/corp_actions.json, bq_admin kiểm writer corporate_action. Cron 20:40 sẽ chèn SCL 200cp; plan ZaloPay 02/10 CHƯA duyệt.
