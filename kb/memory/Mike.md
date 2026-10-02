@@ -32,3 +32,5 @@
 - 9 topic selfcheck-red cần triage.
 - VNM exright note cho Winston.
 
+- [2026-10-02T20:57:17Z] 2026-10-03 weekly ops audit: context_pack.md 76,5KB (ngưỡng 45KB) + current_ops.md 35,5KB (ngưỡng 28KB) ĐÃ VƯỢT từ ~09-26, kb_nightly báo SAME-DAY CONTEXT-BLOAT mỗi đêm nhưng chưa ai trim — current_ops tăng 5,8KB(09-19)→35KB, cần Mike phiên sống tách warm sections sang current_ops_ext.md. Nghi vấn còn mở: custom30_history.py không guard env nhất quán (arch-review coord-10-01: CSV publish bị ghi đè rổ legacy 09-30 23:36, nay đã khớp BQ lại); newdeals converge ENTER/EXIT so với seed tĩnh ⇒ changed=True mỗi ngày; CPI coverage gap 2026-09..12 cần refresh NSO_CPI_YOY_REAL.
+- [2026-10-02T21:06:57Z] Weekly audit 10-03 mở 2 câu: spacex-nav-2026-10-01-missing-backfill (đề xuất chạy daily_nav_snapshot --from-raw --date 2026-10-01 trong phiên sống, kiểm output) + merge-9311ac03-dropped-session-branch-changes-audit (Wags). Cũng cần: ack SCL bán tay 09-30 cho verify_account_snapshot SpaceX (chặn §6); production_manifest ROOT_TIER thiếu 3 cron root mới.
