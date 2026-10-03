@@ -266,6 +266,9 @@ def run(date_str, dry_run=False):
     if not dry_run and lk is None:
         print(f"❌ không lấy được khoá {LEDGER_FILE}.lock sau {LOCK_WAIT_S}s — tiến trình khác đang "
               f"chạy; KHÔNG chạy nhánh nào.")
+        _bus("error", f"corp-action-lock-unavailable-{date_str}",
+             {"error": f"không lấy được khoá {LEDGER_FILE}.lock sau {LOCK_WAIT_S}s — nhánh vendor "
+                       f"VÀ broker đều KHÔNG chạy lượt này", "mode": mode})
         return 1
     try:
         return _run_both(date_str, dry_run, mode)
@@ -341,10 +344,8 @@ def run_vendor(date_str, dry_run=False):
             # registry cũ đi đúng đường cũ. Vendor sống lại với ex ≠ ex broker suy ra ⇒ ghi thêm
             # là áp hệ số 2 lần (arch-review v2 N9) ⇒ không ghi, hỏi người.
             print(f"  [{ticker}] ❌ {_bdup} — không tự xác nhận, cần người kiểm.")
-            _bus("question", f"corp-action-vendor-vs-broker-{ticker}-{ex_date}",
-                 {"question": f"{ticker}: lịch vendor ex {ex_date} nhưng {_bdup}. Cần người xác "
-                              f"nhận ex thật và thu hồi (REVOKED) record sai.",
-                  "ticker": ticker, "vendor_ex_date": ex_date, "urgency": "high"})
+            if not dry_run:
+                _ask_vendor_vs_broker(ticker, ex_date, _bdup)
             continue
 
         print(f"  [{ticker}] ex_date={ex_date}, ratio={ratio} (×{mult}) — kiểm broker ...")
@@ -660,7 +661,8 @@ def _sandbox_guard():
 
 
 def _broker_record_near(raw_actions, tk, ex):
-    """Record provenance=broker CÙNG mã, ex ≠ `ex`, cách ≤ NEAR_DUP_DAYS ngày (cho nhánh vendor)."""
+    """Record provenance=broker ĐANG CONFIRMED (không tính REVOKED/PROPOSED) CÙNG mã, ex ≠ `ex`,
+    cách ≤ NEAR_DUP_DAYS ngày, trước HOẶC sau (cho nhánh vendor)."""
     try:
         d0 = dt.date.fromisoformat(ex)
     except ValueError:
@@ -669,6 +671,8 @@ def _broker_record_near(raw_actions, tk, ex):
         if (str(r.get("ticker", "")).upper() != tk
                 or str(r.get("provenance", "")).lower() != "broker"):
             continue
+        if not str(r.get("_status", "")).upper().startswith("CONFIRMED"):
+            continue      # REVOKED/PROPOSED đã bị người thu hồi/chưa duyệt ⇒ không khoá vendor mãi
         try:
             rex = dt.date.fromisoformat(str(r.get("ex_date", ""))[:10])
         except ValueError:
@@ -677,6 +681,29 @@ def _broker_record_near(raw_actions, tk, ex):
             return (f"registry đã có record BROKER {r.get('id')!r} ex {rex} (cách {abs((rex - d0).days)}"
                     f" ngày) — có thể CÙNG sự kiện với ex khác")
     return None
+
+
+def _ask_vendor_vs_broker(ticker, ex_date, why):
+    """Hỏi người MỘT lần cho mỗi (mã, ex vendor): bus rc=0 ⇒ ghi dòng `done` vào sổ ⇒ lượt sau im
+    (trước đây hỏi lại mỗi 19:30 cho đến khi người thu hồi record). Bus lỗi ⇒ không đánh dấu."""
+    from zoneinfo import ZoneInfo
+    key = ["vendor-vs-broker", ticker, ex_date, "ASKED"]
+    _sandbox_guard()
+    try:
+        _intents, done = BD.ledger_state(LEDGER_FILE)
+    except BD.CorpActionLedgerError as e:       # sổ hỏng ⇒ vẫn hỏi (an toàn), nói lỗi thật (§29)
+        print(f"  ⚠ sổ broker đọc hỏng ({e}) ⇒ không kiểm được đã hỏi chưa, hỏi lại")
+        done = set()
+    if tuple(key) in done:
+        print(f"  [{ticker}] đã hỏi người về vendor-vs-broker ex {ex_date} ⇒ không hỏi lại")
+        return
+    rc = _bus("question", f"corp-action-vendor-vs-broker-{ticker}-{ex_date}",
+              {"question": f"{ticker}: lịch vendor ex {ex_date} nhưng {why}. Cần người xác "
+                           f"nhận ex thật và thu hồi (REVOKED) record sai.",
+               "ticker": ticker, "vendor_ex_date": ex_date, "urgency": "high"})
+    if rc == 0:
+        now_ict = dt.datetime.now(ZoneInfo("Asia/Ho_Chi_Minh")).strftime("%Y-%m-%dT%H:%M:%S+07:00")
+        BD.ledger_append([{"kind": "done", "key": key, "at": now_ict}], LEDGER_FILE)
 
 
 def _close_stale_questions(e, intents):

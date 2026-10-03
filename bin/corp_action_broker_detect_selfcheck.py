@@ -480,6 +480,12 @@ def _ledger_lines():
     return [json.loads(x) for x in open(cac.LEDGER_FILE, encoding="utf-8") if x.strip()]
 
 
+def _ledger_write(entries):
+    with open(cac.LEDGER_FILE, "w", encoding="utf-8") as f:
+        for e in entries:
+            f.write(json.dumps(e, ensure_ascii=False) + "\n")
+
+
 def _kinds(kind):
     return [c[3] for c in _Bus.calls if c[2] == kind]
 
@@ -791,6 +797,243 @@ def test_B():
         cac.write_corp_actions = REAL_WRITE
 
 
+def test_v4():
+    """Vòng sửa+verify sau arch-review v3 (job Taylor_20261003_064854): N9 (REVOKED / idempotent /
+    dry-run / ex TRƯỚC) + 11 đột biến sống. Mỗi assertion có TÊN, mỗi đột biến tương ứng ở MUTANTS."""
+    import fcntl
+    import types
+    real_run, saved_vendor = subprocess.run, cac.run_vendor
+    saved_env = os.environ.get("MIKE_CA_BROKER_SOURCE")
+    cac.run_vendor = REAL_VENDOR
+    subprocess.run = _Bus.run
+    brec = {"id": "TPB-2026-10-05-BROKER-SHARE-EVENT", "ticker": "TPB", "event_type": "BONUS_ISSUE",
+            "qty_multiplier": 1.15, "ex_date": "2026-10-05",
+            "broker_effective_ts": "2026-10-02T12:03:01", "_status": "CONFIRMED — broker",
+            "provenance": "broker"}
+    vcal = [{"ticker": "TPB", "date": EX, "event_code": "ISS", "price_adjusting": True,
+             "exercise_ratio": 0.15, "days_ahead": 1}]
+
+    def vq():
+        return [t for t in _kinds("question") if "vendor-vs-broker-TPB" in t]
+
+    def done_keys():
+        return [x["key"] for x in _ledger_lines() if x.get("kind") == "done"
+                and x["key"][0] == "vendor-vs-broker"]
+    try:
+        # ── N9: chỉ record CONFIRMED khoá vendor ──
+        for st in ("REVOKED — người thu hồi (sai ex)", "PROPOSED — chờ"):
+            tmp, reg = _sandbox([dict(brec, _status=st)], vendor=vcal)
+            cac.run_vendor(D)
+            check(f"V1 N9 record broker {st[:8]} ⇒ KHÔNG khoá vendor, KHÔNG hỏi", not vq(), _Bus.calls)
+        # ── N9: trước HOẶC sau đều chặn ──
+        for ex_b, lbl in (("2026-10-05", "SAU"), ("2026-09-30", "TRƯỚC")):
+            tmp, reg = _sandbox([dict(brec, ex_date=ex_b)], vendor=vcal)
+            h0 = _sha(reg)
+            cac.run_vendor(D)
+            check(f"V2 N9 record broker CONFIRMED ex {lbl} ex vendor ⇒ không ghi, hỏi đúng 1 lần",
+                  _sha(reg) == h0 and len(vq()) == 1, _Bus.calls)
+        # ── N9: idempotent (hỏi 1 lần, bus rc=0 ⇒ done; lượt sau im) ──
+        tmp, reg = _sandbox([brec], vendor=vcal)
+        cac.run_vendor(D)
+        n = len(_Bus.calls)
+        cac.run_vendor(D)
+        check("V3 N9 hỏi vendor-vs-broker idempotent: lượt 2 không gửi lại, sổ có đúng 1 done",
+              len(vq()) == 1 and len(_Bus.calls) == n
+              and done_keys() == [["vendor-vs-broker", "TPB", EX, "ASKED"]], (_Bus.calls, _ledger_lines()))
+        # ── N9: bus lỗi ⇒ KHÔNG đánh dấu done ⇒ lượt sau hỏi lại ──
+        tmp, reg = _sandbox([brec], vendor=vcal)
+        _Bus.rc = 1
+        cac.run_vendor(D)
+        check("V3b N9 bus lỗi ⇒ sổ KHÔNG có done", not done_keys(), _ledger_lines())
+        _Bus.rc, _Bus.calls = 0, []
+        cac.run_vendor(D)
+        check("V3c N9 lượt sau bus ổn ⇒ hỏi lại + done", len(vq()) == 1 and len(done_keys()) == 1,
+              (_Bus.calls, _ledger_lines()))
+        # ── N9: dry-run KHÔNG gửi bus, KHÔNG ghi sổ, KHÔNG ghi registry ──
+        tmp, reg = _sandbox([brec], vendor=vcal)
+        h0 = _sha(reg)
+        cac.run_vendor(D, dry_run=True)
+        check("V4 N9 vendor --dry-run ⇒ 0 bus, 0 sổ, registry y nguyên",
+              not _Bus.calls and not _ledger_lines() and _sha(reg) == h0, (_Bus.calls, _ledger_lines()))
+
+        # ── _exchange_fn THẬT (không stub): exchange_known / lỗi ⇒ None, KHÔNG mặc định HOSE ──
+        state = {}
+
+        class _Q:
+            exchange = "HOSE"           # giá trị mặc định mà Quote.exchange trả khi không biết sàn
+
+        def get_quote(tk):
+            if state.get("raise"):
+                raise ConnectionError("DNSE sập (giả)")
+            q = _Q()
+            q.exchange_known = state["known"]
+            return q
+        fake_b = types.ModuleType("trading_bot.brokers")
+        fake_b.get_quote_source = lambda name: types.SimpleNamespace(get_quote=get_quote)
+        fake_pkg = types.ModuleType("trading_bot")
+        fake_pkg.__path__ = []
+        saved_mods = {k: sys.modules.get(k) for k in ("trading_bot", "trading_bot.brokers")}
+        sys.modules["trading_bot"], sys.modules["trading_bot.brokers"] = fake_pkg, fake_b
+        try:
+            state["known"] = False
+            check("V5 _exchange_fn: exchange_known=False ⇒ None (không tin Quote.exchange mặc định HOSE)",
+                  REAL_EXCH_FN()("TPB") is None)
+            state["known"] = True
+            check("V5b _exchange_fn: exchange_known=True ⇒ sàn thật", REAL_EXCH_FN()("TPB") == "HOSE")
+            state["raise"] = True
+            check("V5c _exchange_fn: DNSE lỗi ⇒ None (không mặc định HOSE)", REAL_EXCH_FN()("TPB") is None)
+        finally:
+            for k, v in saved_mods.items():
+                if v is None:
+                    sys.modules.pop(k, None)
+                else:
+                    sys.modules[k] = v
+
+        # ── khoá bao cả hai nhánh trong run() ──
+        os.environ["MIKE_CA_BROKER_SOURCE"] = "shadow"
+        probe = {}
+
+        def lock_free():
+            fh = open(cac.LEDGER_FILE + ".lock", "a")
+            try:
+                fcntl.flock(fh, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                return True
+            except BlockingIOError:
+                return False
+            finally:
+                fh.close()
+        saved_scan = BD.scan_day
+
+        def spy_vendor(date_str, dry_run=False):
+            probe["lock_existed"] = os.path.exists(cac.LEDGER_FILE + ".lock")
+            probe["vendor"] = lock_free()
+            return 0
+
+        def spy_scan(*a, **k):
+            probe["broker"] = lock_free()
+            return saved_scan(*a, **k)
+        tmp, reg = _sandbox()
+        cac.run_vendor, BD.scan_day = spy_vendor, spy_scan
+        saved_wait, cac.LOCK_WAIT_S = cac.LOCK_WAIT_S, 0
+        try:
+            rc = cac.run(D)
+        finally:
+            cac.LOCK_WAIT_S = saved_wait
+            cac.run_vendor, BD.scan_day = REAL_VENDOR, saved_scan
+        check("V6 run(): nhánh vendor chạy DƯỚI khoá ledger (tiến trình khác không lấy được)",
+              probe.get("vendor") is False, probe)
+        check("V6b run(): nhánh broker chạy dưới khoá", probe.get("broker") is False, probe)
+        check("V7 run_broker KHÔNG xin khoá lần 2 khi run() đã giữ (rc=0, intent+done có trong sổ)",
+              rc == 0 and [x["kind"] for x in _ledger_lines()] == ["intent", "done"], (rc, _ledger_lines()))
+        tmp, reg = _sandbox()
+        probe.clear()
+        cac.run_vendor = spy_vendor
+        try:
+            cac.run(D, dry_run=True)
+        finally:
+            cac.run_vendor = REAL_VENDOR
+        check("V6c run(dry_run) không xin khoá (không tạo .lock)",
+              probe.get("vendor") is True and probe.get("lock_existed") is False, probe)
+        # khoá bị tiến trình khác giữ ⇒ rc=1, vendor KHÔNG chạy, có bus error (MINOR: shadow mặc định)
+        tmp, reg = _sandbox()
+        called = []
+        cac.run_vendor = lambda *a, **k: called.append(1) or 0
+        holder = open(cac.LEDGER_FILE + ".lock", "a")
+        fcntl.flock(holder, fcntl.LOCK_EX)
+        saved_wait, cac.LOCK_WAIT_S = cac.LOCK_WAIT_S, 0
+        try:
+            rc = cac.run(D)
+        finally:
+            cac.LOCK_WAIT_S = saved_wait
+            holder.close()
+            cac.run_vendor = REAL_VENDOR
+        check("V8 run() không lấy được khoá ⇒ rc=1, vendor KHÔNG chạy, sổ rỗng", rc == 1 and not called
+              and not _ledger_lines(), (rc, called))
+        check("V8b shadow không lấy được khoá ⇒ bus error corp-action-lock-unavailable (1 lần)",
+              _kinds("error") == [f"corp-action-lock-unavailable-{D}"], _Bus.calls)
+
+        # ── _close_stale_questions: đóng ĐỦ 3 verdict, CHỈ đúng (live, mã, phiên) ──
+        def old_intent(mode, tk, day, v):
+            e = {"kind": "intent", "mode": mode, "ticker": tk, "credit_day": day, "ex_date": EX,
+                 "verdict": v, "why": "seed"}
+            return [e, {"kind": "done", "key": [mode, tk, day, v], "at": "2026-10-02T19:25:00+07:00"}]
+        seed = []
+        for v in (BD.INSUFFICIENT, BD.AMBIGUOUS, BD.DEFER_VENDOR):
+            seed += old_intent("live", "TPB", D, v)
+        seed += old_intent("shadow", "TPB", D, BD.INSUFFICIENT)                 # khác mode
+        seed += old_intent("live", "VPB", D, BD.INSUFFICIENT)                   # khác mã
+        seed += old_intent("live", "TPB", PREV, BD.INSUFFICIENT)                # khác phiên
+        seed += old_intent("live", "TPB", D, BD.CONFIRMABLE)[:0]
+        tmp, reg = _sandbox()
+        _ledger_write(seed)
+        rc = cac.run_broker(D, mode="live")
+        want = sorted(f"corp-action-broker-{v.lower()}-TPB-{D}"
+                      for v in (BD.INSUFFICIENT, BD.AMBIGUOUS, BD.DEFER_VENDOR))
+        check("V9 _close_stale_questions đóng ĐỦ 3 verdict (INSUFFICIENT/AMBIGUOUS/DEFER_VENDOR) "
+              "và CHỈ cùng (live, mã, phiên)", rc == 0 and sorted(_kinds("answer")) == want,
+              (rc, _kinds("answer")))
+        # registry không có record sau "ghi" ⇒ KHÔNG đóng câu hỏi cũ
+        tmp, reg = _sandbox()
+        _ledger_write(old_intent("live", "TPB", D, BD.INSUFFICIENT))
+        cac.write_corp_actions = lambda *a, **k: None
+        try:
+            rc = cac.run_broker(D, mode="live")
+        finally:
+            cac.write_corp_actions = REAL_WRITE
+        check("V9b registry KHÔNG có record ⇒ KHÔNG đóng question cũ (không answer giả)",
+              rc == 1 and _kinds("answer") == [], (rc, _Bus.calls))
+
+        # ── _bus: timeout truyền xuống subprocess + timeout ≠ đã gửi ──
+        seen = {}
+
+        def timing_out(cmd, **kw):
+            seen.update(kw)
+            raise subprocess.TimeoutExpired(cmd, kw.get("timeout", 0))
+        subprocess.run = timing_out
+        r_bus = cac._bus("finding", "t", {})
+        check("V10 _bus: truyền timeout=BUS_TIMEOUT_S cho subprocess", seen.get("timeout") == cac.BUS_TIMEOUT_S
+              and cac.BUS_TIMEOUT_S > 0, seen)
+        check("V10b _bus: treo quá timeout ⇒ rc≠0 (KHÔNG coi như đã gửi)", r_bus != 0, r_bus)
+        tmp, reg = _sandbox()
+        rc = cac.run_broker(D, mode="shadow")
+        check("V10c bus treo ⇒ run_broker rc=1, sổ KHÔNG có done (lượt sau gửi bù)",
+              rc == 1 and [x["kind"] for x in _ledger_lines()] == ["intent"], (rc, _ledger_lines()))
+        subprocess.run = _Bus.run
+
+        # ── đọc lại registry hỏng (shadow, không có CONFIRMABLE live để che rc) ⇒ rc=1 ──
+        broken = {"id": "X", "ticker": "VHM", "event_type": "STOCK_DIVIDEND", "qty_multiplier": 13,
+                  "ex_date": "2026-08-06", "broker_effective_ts": "2026-08-05", "_status": "CONFIRMED"}
+        tmp, reg = _sandbox([broken])
+        rc = cac.run_broker(D, mode="shadow")
+        check("V11 shadow + registry hỏng khi đọc lại ⇒ rc=1 (không rc=0 im lặng)", rc == 1, rc)
+
+        # ── dòng sổ định dạng cũ (không có 'key') ở trạng thái dở ⇒ gửi bù, không KeyError ──
+        tmp, reg = _sandbox()
+        _ledger_write([{"kind": "intent", "mode": "shadow", "ticker": "TPB",
+                        "credit_day": D, "ex_date": EX, "verdict": BD.CONFIRMABLE,
+                        "why": "định dạng cũ, không có key"}])
+        try:
+            rc = cac.run_broker(D, mode="shadow")
+            ok_ = True
+        except KeyError as e:
+            rc, ok_ = None, False
+            print(f"  KeyError {e}")
+        check("V12 dòng sổ cũ không có 'key' ⇒ không KeyError, gửi bù + done đúng key",
+              ok_ and rc == 0 and _kinds("finding") == [f"corp-action-broker-shadow-{D}"]
+              and [x["key"] for x in _ledger_lines() if x["kind"] == "done"]
+              == [["shadow", "TPB", D, BD.CONFIRMABLE]], (rc, _Bus.calls, _ledger_lines()))
+    finally:
+        subprocess.run = real_run
+        cac.run_vendor = saved_vendor
+        BD.scan_day = saved_scan if "saved_scan" in dir() else BD.scan_day
+        cac.write_corp_actions = REAL_WRITE
+        cac._px_cum_fn, cac._exchange_fn = REAL_PX_FN, REAL_EXCH_FN
+        if saved_env is None:
+            os.environ.pop("MIKE_CA_BROKER_SOURCE", None)
+        else:
+            os.environ["MIKE_CA_BROKER_SOURCE"] = saved_env
+
+
 def test_px():
     """`_px_cum_fn` THẬT (đường live 19:25): hôm nay ⇒ DNSE G1 và CHỈ nguồn dnse_g1_today."""
     import types
@@ -1015,6 +1258,26 @@ MUTANTS = [
     ('bin/corp_action_auto_confirm.py', '            new = [x for x in new if x["verdict"] != BD.CONFIRMABLE]\n            new_recs = []\n            rc = 1', '            return 1', 'validate-reject nuốt mã khác (v2 N2)'),
     ('bin/corp_action_auto_confirm.py', '        _bdup = _broker_record_near(actions_raw, ticker, ex_date)', '        _bdup = None', 'vendor ghi đè record broker ex khác (v2 N9)'),
     ('bin/corp_action_auto_confirm.py', '    lk = None if dry_run else _lock(LEDGER_FILE)', '    lk = None', 'run() không khoá nhánh vendor (v2 N3)'),
+    # ── vòng sửa sau arch-review v3 (job Taylor_20261003_064854): mỗi dòng ↔ assertion V* ──
+    ('bin/corp_action_auto_confirm.py', '        if not str(r.get("_status", "")).upper().startswith("CONFIRMED"):\n            continue      # REVOKED', '        if False:\n            continue      # REVOKED', 'N9 record broker REVOKED vẫn khoá vendor'),
+    ('bin/corp_action_auto_confirm.py', '        if rex != d0 and abs((rex - d0).days) <= NEAR_DUP_DAYS:', '        if rex != d0 and 0 <= (rex - d0).days <= NEAR_DUP_DAYS:', 'N9 chỉ xét ex SAU'),
+    ('bin/corp_action_auto_confirm.py', '    if tuple(key) in done:', '    if False:', 'N9 hỏi lặp mỗi lượt'),
+    ('bin/corp_action_auto_confirm.py', '    if rc == 0:\n        now_ict', '    if True:\n        now_ict', 'N9 bus lỗi vẫn đánh dấu đã hỏi'),
+    ('bin/corp_action_auto_confirm.py', '            if not dry_run:\n                _ask_vendor_vs_broker', '            if True:\n                _ask_vendor_vs_broker', 'N9 gửi bus khi --dry-run'),
+    ('bin/corp_action_auto_confirm.py', "cache[tk] = q.exchange if getattr(q, \"exchange_known\", False) else None", 'cache[tk] = q.exchange', '_exchange_fn bỏ exchange_known'),
+    ('bin/corp_action_auto_confirm.py', '                cache[tk] = None\n        return cache[tk]', '                cache[tk] = "HOSE"\n        return cache[tk]', '_exchange_fn lỗi ⇒ HOSE'),
+    ('bin/corp_action_auto_confirm.py', '    if not dry_run and lk is None:', '    if False:', 'run() bỏ chặn khi không lấy được khoá'),
+    ('bin/corp_action_auto_confirm.py', '    if _LOCK_HELD:\n        return _run_broker_locked', '    if False:\n        return _run_broker_locked', 'run_broker xin khoá lần 2'),
+    ('bin/corp_action_auto_confirm.py', '        _bus("error", f"corp-action-lock-unavailable-{date_str}",', '        (lambda *a: 0)("error", f"corp-action-lock-unavailable-{date_str}",', 'không có khoá ⇒ im (không bus error)'),
+    ('bin/corp_action_auto_confirm.py', '                and old.get("verdict") in (BD.INSUFFICIENT, BD.AMBIGUOUS, BD.DEFER_VENDOR)):', '                and old.get("verdict") in (BD.INSUFFICIENT,)):', '_close_stale chỉ INSUFFICIENT'),
+    ('bin/corp_action_auto_confirm.py', '        if (old.get("mode") == "live" and old.get("ticker") == e["ticker"]', '        if (old.get("ticker") == e["ticker"]', '_close_stale bỏ lọc mode'),
+    ('bin/corp_action_auto_confirm.py', '        if (old.get("mode") == "live" and old.get("ticker") == e["ticker"]', '        if (old.get("mode") == "live"', '_close_stale bỏ lọc mã'),
+    ('bin/corp_action_auto_confirm.py', '                and old.get("credit_day") == e["credit_day"]', '                and True', '_close_stale bỏ lọc phiên'),
+    ('bin/corp_action_auto_confirm.py', '                if e["verdict"] == BD.CONFIRMABLE and e["record"]["id"] in registry_ids:\n                    _close_stale_questions', '                if e["verdict"] == BD.CONFIRMABLE:\n                    _close_stale_questions', 'đóng question dù registry không có record'),
+    ('bin/corp_action_auto_confirm.py', '                           capture_output=True, text=True, timeout=BUS_TIMEOUT_S)', '                           capture_output=True, text=True)', '_bus bỏ timeout'),
+    ('bin/corp_action_auto_confirm.py', '        return 124', '        return 0', '_bus timeout coi như đã gửi'),
+    ('bin/corp_action_auto_confirm.py', '        registry_ids = set()\n        rc = 1', '        registry_ids = set()', 'đọc lại registry hỏng ⇒ rc=0'),
+    ('bin/corp_action_auto_confirm.py', '        e.setdefault("key", BD.ledger_key(e))', '        pass', 'bỏ setdefault key (sổ định dạng cũ)'),
 ]
 
 
@@ -1060,6 +1323,7 @@ def main():
     test_A()
     test_files()
     test_B()
+    test_v4()
     test_px()
     test_C()
     if "--replay" in sys.argv:
