@@ -47,6 +47,9 @@ import exdate_frame as XF  # noqa: E402
 for _m in (BD, cac, CA, XF):
     assert os.path.dirname(os.path.abspath(_m.__file__)) == HERE, \
         f"{_m.__name__} nạp từ {_m.__file__}, KHÔNG phải {HERE} — sys.path shadow bản worktree"
+# Không test nào cần CHỜ khoá: đột biến tự-khoá (_LOCK_HELD) phải fail NGAY bằng assertion có tên,
+# không treo LOCK_WAIT_S×số lần run() tới timeout 300s của run_mutations (đã treo thật, v7).
+cac.LOCK_WAIT_S = 0
 
 PASS, FAIL = [], []
 
@@ -734,8 +737,8 @@ def test_B():
               and "Winston" in pl.get("question", "") and pl.get("urgency") == "high"
               and "×1.15" in pl["vendor_check"]["why"] and "×1.17" in pl["vendor_check"]["why"]
               and pl.get("broker", {}).get("qty_multiplier") == 1.15
-              and pl.get("record_proposed", {}).get("_status", "").startswith("UNVERIFIED")
-              and pl["record_proposed"]["qty_multiplier"] == 1.15, (pl, _Bus.calls))
+              and (pl.get("record_proposed") or {}).get("_status", "").startswith("UNVERIFIED")
+              and (pl.get("record_proposed") or {}).get("qty_multiplier") == 1.15, (pl, _Bus.calls))
         lg_ = [x for x in _ledger_lines() if x["kind"] == "intent"]
         check("B19d sổ ghi verdict UNVERIFIED (không phải CONFIRMABLE), không có 'record' ghi được",
               [x["verdict"] for x in lg_] == [BD.UNVERIFIED] and "record" not in lg_[0]
@@ -1373,13 +1376,16 @@ def test_v5():
               "registry y nguyên, có WARNING",
               _sha(reg) == h0 and len(q_topics("vendor-ratio-vs-broker-TPB")) == 1 and len(qq) == 1
               and "WARNING" in out.getvalue(), (_Bus.calls, out.getvalue()[-400:]))
-        tmp, reg = _sandbox([bsame], vendor=[dict(vcal, exercise_ratio=0.16)])
-        with contextlib.redirect_stdout(io.StringIO()):
+        tmp, reg = _sandbox([bsame], vendor=[dict(vcal, exercise_ratio=0.17)])   # lệch 1,7% > 1%
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
             cac.run_vendor(D, dry_run=True)
-        check("R7b --dry-run ⇒ không hỏi", not _Bus.calls, _Bus.calls)
+        check("R7b --dry-run (×1.17 vs ×1.15, CÓ lệch) ⇒ in WARNING nhưng không hỏi",
+              not _Bus.calls and "WARNING" in out.getvalue(), (_Bus.calls, out.getvalue()[-300:]))
         user16 = dict(bsame, id="TPB-USER-1.16", provenance=None, qty_multiplier=1.16)
         for lbl, regrecs, ratio in (("cùng tỉ lệ", [bsame], 0.15),
-                                    ("record NGƯỜI ký", [dict(bsame, provenance=None)], 0.16),
+                                    # ×1.17 vs ×1.15 = lệch 1,7% > 1% ⇒ chỉ provenance chặn câu hỏi
+                                    ("record NGƯỜI ký", [dict(bsame, provenance=None)], 0.17),
                                     # người ký ×1.16 + record broker ×1.15 đã REVOKED cùng ex
                                     ("record broker REVOKED", [user16, dict(bsame, _status="REVOKED")],
                                      0.16)):
@@ -2144,6 +2150,15 @@ def test_v7():
                   f"{'0 question (dry-run)' if dry else '1 question ratio-vs-broker'}, registry giữ số broker",
                   len(q_topics("vendor-ratio-vs-broker-ABC")) == (0 if dry else 1)
                   and [a for a in json.load(open(reg))["actions"] if a["ticker"] == "ABC"] == [brec_same], _Bus.calls)
+
+        urec = dict(brec_same, provenance=None, id="ABC-USER")
+        tmp, reg = _sandbox([urec], vendor=[dict(abc_iss, exercise_ratio=0.2)], extra=abc_still)
+        with contextlib.redirect_stdout(io.StringIO()):
+            cac.run(D)
+        check("L12c live confirm-only: record NGƯỜI ký ×1.1 vs vendor ×1.2 cùng ex ⇒ không hỏi "
+              "ratio-vs-broker (người đã chốt), record ABC y nguyên",
+              not q_topics("ratio-vs-broker")
+              and [a for a in json.load(open(reg))["actions"] if a["ticker"] == "ABC"] == [urec], _Bus.calls)
 
         os.environ["MIKE_CA_BROKER_SOURCE"] = "shadow"
         vend_rec = {"id": f"TPB-{EX}-BONUS-ISSUE", "ticker": "TPB", "event_type": "BONUS_ISSUE",
