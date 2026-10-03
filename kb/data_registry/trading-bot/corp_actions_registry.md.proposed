@@ -1,0 +1,40 @@
+---
+kind: local-file
+status: CANONICAL
+source: data/corp_actions.json (+ data/corp_action_broker_ledger.jsonl)
+group: trading-bot
+role: sổ corp-action LÀM ĐỔI SỐ LƯỢNG đã xác nhận — park_holdings / daily_nav_snapshot / verify_account_snapshot / reconcile_equity / exdate_frame (fallback) đọc
+writer: người ký tay; corp_action_auto_confirm.py (nhánh vendor; nhánh broker khi MIKE_CA_BROKER_SOURCE=live)
+---
+
+# data/corp_actions.json
+
+**Status: CANONICAL** — §13: bản `.proposed`, chờ Mike duyệt (job Taylor_20261003_033512).
+
+## Là gì
+Danh sách sự kiện chia tách / thưởng / cổ tức cổ phiếu. Chỉ record có `_status` bắt đầu bằng
+`CONFIRMED` được áp (`corp_actions.load_corp_actions()`); `validate()` chặn hệ số ≤1 hoặc >10,
+chân tiền âm hoặc >50.000đ/cp.
+
+## Ai ghi / cadence
+- Người ký tay (VHM/MBB/BID/VIX/MSB/TPB).
+- `corp_action_auto_confirm.py` cron 19:25 ICT T2–T6:
+  - nhánh vendor: lịch `corp_action_daily` + broker khớp hệ số (VIB/VPB).
+  - nhánh broker (2026-10-03): KL + tổng giá vốn + giá tham chiếu broker khớp nhau, credit sau
+    15:00 ⇒ ex = phiên kế tiếp. Record có `provenance: "broker"`, id `<TK>-<ex>-BROKER-SHARE-EVENT`,
+    `event_type` luôn `BONUS_ISSUE` (broker không phân biệt thưởng / cổ tức CP / chia tách).
+    Công tắc `MIKE_CA_BROKER_SOURCE` = off | **shadow (mặc định)** | live.
+
+## Sổ phụ `data/corp_action_broker_ledger.jsonl`
+Append-only (ghi atomic tmp+replace), 1 dòng / (mode, mã, phiên credit, verdict). Là khoá
+idempotent của nhánh broker; ở shadow đây là nơi DUY NHẤT xem được nhánh broker "sẽ ghi gì".
+
+## Bẫy
+1. `qty_multiplier` của record broker là số thập phân NGẮN NHẤT tái tạo đúng KL broker ở mọi
+   tài khoản (VPB 1,26 thay vì 1,2604104; BID 1,069 thay vì 1,068433) — đúng cho sổ lô, KHÔNG
+   phải tỉ lệ công bố.
+2. `ex_date` của record broker là SUY RA (credit tối D ⇒ phiên kế tiếp), không từ công bố sàn.
+3. `corp_actions.py --verify` (Close/Price BQ) báo MISMATCH oan cho sự kiện kèm chân tiền mặt
+   (TPB: hệ số BQ ≈1,19 vs 1,15) — giới hạn có sẵn của `verify_against_bq`, không phải lỗi record.
+4. Thiếu bản ghi broker sau credit trong phiên D (MBB 2026-08-10 credit 19:32, sau bản ghi cuối
+   ngày) ⇒ nhánh broker không thấy gì; lượt 19:25 cũng không thấy credit muộn hơn 19:25.
