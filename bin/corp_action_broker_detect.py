@@ -464,8 +464,11 @@ def vendor_crosscheck(ex_date, m, cash, vendor_events):
     div_same = [e for c, e in same if c == "DIV"]
     odd_same = sorted({c for c, e in same if c not in QTY_CODES and c != "DIV"})
     qty_other = sorted({str(d) for d, c, e in near if d != ex and c in QTY_CODES})
+    div_other = sorted({str(d) for d, c, e in near if d != ex and c == "DIV"})
     if qty_other:
         problems.append(f"ex-date: broker {ex_date} vs vendor sự kiện CP ex {qty_other}")
+    if div_other and not any(c == "DIV" for c, e in same) and cash >= CASH_LEG_MIN_VND:
+        problems.append(f"ex-date chân tiền: broker {cash:,.0f}đ/cp ex {ex_date} vs vendor DIV ex {div_other}")
     if odd_same:
         problems.append(f"vendor có sự kiện điều chỉnh giá {odd_same} cùng ex {ex_date} mà broker "
                         f"(KL ×{m}, tiền {cash:,.0f}đ/cp) không mô tả")
@@ -764,8 +767,9 @@ def decide_price_only(ticker, day, ex_date, per_account, px_cum, exchange, cashd
     if exchange in PRICE_GATE_EXCHANGES and px_cum and px_cum > 0 and one_px:
         m1 = next(iter(m1s))[0]
         out["market_price_post"] = m1
-        moved = (not all(ev["stale"] for ev in evs)
-                 and abs(m1 - px_cum) > max(FRAME_TOL_VND, m1 * FRAME_TOL_PCT))
+        # ev KHÔNG chân tiền mà stale đã bị price_only_evidence loại; có chân tiền thì cổng giá dưới
+        # vẫn chạy bất kể stale (giá chưa về cum−tiền ⇒ AMBIGUOUS, người xem).
+        moved = abs(m1 - px_cum) > max(FRAME_TOL_VND, m1 * FRAME_TOL_PCT)
     if c == 0.0:
         if moved is None:
             if exchange in PRICE_GATE_EXCHANGES or exchange is None:
