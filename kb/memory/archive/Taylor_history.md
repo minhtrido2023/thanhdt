@@ -841,3 +841,6 @@
 
 ## Archived 2026-10-03 (keep=12 days=0 require_done=False)
 - [2026-10-01T06:09:42Z] [depwire-B] XONG job Taylor_20261001_054110 (attempt2): 5 consumer wired (rating_8l+dcf_valuation+dcf_refresh_gate+custom30_yield_labels+due_diligence) qua consumer_deposit_rate(), commit WC worktree wire/deposit-rate-wire-rating-dcf-20261001. Diff thuc do: 6 ma rating -0.03 (0 upgrade), 2 zone flip (PLX,DPM), DCF FV -0.73..-0.89%. Selfcheck cctg_deposit_wiring_selfcheck.py 23/23 PASS x4 env. kb/data_registry/macro/cctg_rate_vn.md.proposed viet san cho Mike duyet (chua commit). CHO: quant-skeptic + arch-review roi Mike merge. dcf_rate_robustness.py CO Y khong dong (robustness probe lich su, khac muc dich).
+
+## Archived 2026-10-03 (keep=12 days=0 require_done=False)
+- [2026-10-01T07:04:30Z] [2026-10-01T14:04 ICT] XONG job Taylor_20261001_064913 (deposit-cctg-weekly VÒNG 3, cuối): B2-1 (URL-reuse guard normalize fail-open) + B2-2 (per-source rate optional cho agent) ĐÃ FIX, commit WC 53e57749 + mike ae970570. Selfcheck 74->89, 89/89 PASS x2 interpreter x4 TZ. quant-skeptic VÒNG 3 CONFIRMED (high conf, tự chạy lại selfcheck + tự repro 2 exploit qua CLI độc lập). CHƯA merge/cài cron (ngoài scope Taylor) — CHỜ Mike/user duyệt merge 2 branch + cài cron (5 1 * * 1 = 08:05 ICT Thứ Hai, phút đã xác nhận trống).
