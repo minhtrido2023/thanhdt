@@ -25,15 +25,21 @@ lượng loại được một lớp giả mạo khác nhau:
   (3) GIÁ `marketPrice` đêm đó = (giá đóng cửa cum − chân tiền) / hệ số — giá tham chiếu sở công
       bố cho phiên GDKHQ. Kiểm bằng CHÍNH `exdate_frame.verify_post_event_price` (dung sai
       200đ/0,5%) mà park_holdings/compute_active_nav đang dùng — không có phép thử thứ hai.
+      VÀ phải BÁC được giả thuyết "không có sự kiện": `marketPrice` KHÔNG được khớp giá cum (hệ số
+      1, có hoặc không chân tiền) trong cùng dung sai (arch-review v1 B1 — sự kiện tỉ lệ nhỏ
+      ×1,01 @14.400 hay CP về SAU ex-date có giá không rơi vẫn lọt khoảng giao hệ số).
   + Hệ số KL suy từ (1) và hệ số giá suy từ (3) PHẢI giao nhau; mọi tài khoản đang giữ mã PHẢI
     cùng được credit và cho cùng chân tiền, cùng giá; trạng thái sau credit PHẢI đứng yên qua
     ≥ 2 bản ghi; mọi lô (loan package) phải đổi đồng thời (DNSE điều chỉnh KHÔNG NGUYÊN TỬ theo
     gói vay — BID 2026-08-14, `price_frame.py` §G4).
 
-EX-DATE — KHÔNG đoán. Bằng chứng duy nhất được dùng: broker credit VÀ hạ giá tham chiếu trong cửa
-sổ SAU GIỜ ĐÓNG CỬA (≥ 15:00 ICT) của phiên D ⇒ sở đã công bố giá tham chiếu điều chỉnh cho phiên
-KẾ TIẾP ⇒ ex_date = `next_trading_day(D)`. Credit ngoài cửa sổ đó (giữa phiên, sau nửa đêm) ⇒
-không có bằng chứng ex-date ⇒ MƠ HỒ, không ghi. 8/8 sự kiện thật trong registry khớp mẫu này.
+EX-DATE — KHÔNG đoán. Bằng chứng dùng: (a) trạng thái KL mới được THẤY LẦN ĐẦU ở bản ghi có `ts`
+≥ 15:00 ICT phiên D (ts bản ghi, KHÔNG phải `modifiedDate` — DNSE đổi modifiedDate mọi lô mỗi tối
+dù KL không đổi), bản ghi trạng thái cũ thuộc D hoặc phiên liền trước (không có khoảng trống quan
+sát); (b) `marketPrice` đêm đó đã ở hệ SAU sự kiện so với giá đóng cửa D ⇒ sở đã hạ giá tham chiếu
+cho phiên KẾ TIẾP ⇒ ex_date = `next_trading_day(D)`. Ex-date rơi vào mùa nghỉ lễ biến động mà
+`trading_bot/vn_market.py` chưa khai báo (Tết ÂL, Giỗ Tổ, bù lễ) ⇒ MƠ HỒ (lịch có thể trả ngày
+nghỉ). 7/7 sự kiện thật 2026-08→10 khớp mẫu này.
 
 Fail-closed: bất kỳ điều kiện nào hỏng ⇒ AMBIGUOUS (không ghi, caller escalate). Thiếu dữ liệu
 (chưa đủ bản ghi, không có giá cum) ⇒ INSUFFICIENT (không ghi). Hàm phát hiện là PURE: nhận
@@ -67,7 +73,8 @@ ICT = ZoneInfo("Asia/Ho_Chi_Minh")
 # 8/8 ca thật: 18:45–19:00 ICT. 15:00 = hết ATC HOSE; không nới về giữa phiên.
 CREDIT_WINDOW_START = dt.time(15, 0)
 MIN_POST_SNAPSHOTS = 2       # trạng thái sau credit phải lặp lại ≥ 2 bản ghi (không phải 1 lần đọc)
-CASH_TOL_VND = 0.5           # sai số làm tròn costPrice (4 chữ số thập phân) quy về đ/cp
+CASH_TOL_VND = 0.05          # sai số làm tròn costPrice (4 chữ số thập phân ⇒ ≤ ~1e-4đ/cp) quy về
+                             # đ/cp. 0,5 cũ là kiểm CHẾT: |x − round(x)| ≤ 0,5 với mọi x
 CASH_LEG_MIN_VND = 1.0       # |chân tiền| < 1đ/cp ⇒ coi như không có chân tiền
 MAX_DECIMALS = 7             # vendor ghi tỉ lệ 7 chữ số (VPB 0,2604104)
 
@@ -221,6 +228,42 @@ def _credit_like(a, b):
             and b["closed"] == a["closed"] and b["trade"] == a["trade"])
 
 
+def prev_trading_day(day):
+    """Phiên liền trước `day` theo `vn_market` (lịch thiếu ngày nghỉ biến động ⇒ trả ngày MUỘN
+    hơn thật ⇒ kiểm khoảng trống CHẶT hơn, không lỏng hơn)."""
+    from trading_bot.vn_market import is_holiday
+    d = dt.date.fromisoformat(day) - dt.timedelta(days=1)
+    while d.weekday() >= 5 or is_holiday(d):
+        d -= dt.timedelta(days=1)
+    return d.isoformat()
+
+
+# Mùa nghỉ lễ BIẾN ĐỘNG mà `vn_market` không tự biết (Tết ÂL, Giỗ Tổ 10/3 ÂL, ngày bù quanh lễ cố
+# định) — (tháng, ngày) đầu/cuối, cận rộng. `next_trading_day` trong các mùa này có thể trả một
+# NGÀY NGHỈ ⇒ ex_date sai (arch-review v1 M4). Mùa được coi là ĐÃ KHAI BÁO khi `_VARIABLE_HOLIDAYS`
+# có ít nhất 1 ngày của đúng năm trong mùa đó (người đã cập nhật lịch theo thông báo HoSE).
+HOLIDAY_SEASONS = (((1, 10), (2, 28), "Tết Âm lịch"), ((3, 25), (5, 6), "Giỗ Tổ / 30-4 / 1-5"),
+                   ((8, 28), (9, 6), "Quốc khánh + bù"), ((12, 28), (12, 31), "Tết Dương lịch"),
+                   ((1, 1), (1, 4), "Tết Dương lịch"))
+MAX_CREDIT_TO_EX_DAYS = 4       # D→ex bình thường 1 (T2–T5) hoặc 3 (T6); dài hơn = nghỉ lễ ⇒ hỏi người
+
+
+def calendar_guard(day, ex_date):
+    """None nếu ex_date suy từ lịch tin được; ngược lại lý do (⇒ AMBIGUOUS, người xác nhận)."""
+    from trading_bot import vn_market
+    d0, ex = dt.date.fromisoformat(day), dt.date.fromisoformat(ex_date)
+    if (ex - d0).days > MAX_CREDIT_TO_EX_DAYS:
+        return (f"phiên kế tiếp {ex_date} cách phiên credit {day} {(ex - d0).days} ngày lịch "
+                f"(> {MAX_CREDIT_TO_EX_DAYS}) — kỳ nghỉ dài, người xác nhận ex-date")
+    for (m0, d0_), (m1, d1), name in HOLIDAY_SEASONS:
+        lo, hi = dt.date(ex.year, m0, d0_), dt.date(ex.year, m1, d1)
+        if lo <= ex <= hi and not any(lo <= h <= hi for h in vn_market._VARIABLE_HOLIDAYS):
+            return (f"ex_date suy ra {ex_date} nằm trong mùa nghỉ {name} {lo}→{hi} mà "
+                    f"trading_bot/vn_market.py CHƯA khai báo ngày nghỉ biến động nào ⇒ "
+                    f"next_trading_day có thể trả ngày nghỉ")
+    return None
+
+
 def account_evidence(series, ticker, day, fills=()):
     """PURE. Một tài khoản, một mã, phiên `day`. `series` = [(ts, {sym: rows})] gồm bản ghi CUỐI
     của file ngày trước + mọi bản ghi của `day` (đã sắp). Trả dict có `verdict`.
@@ -230,17 +273,19 @@ def account_evidence(series, ticker, day, fills=()):
     ZaloPay: 400 → 407 lúc 19:10 (1 gói) → 427 lúc 20:15 (gói còn lại)). Không lùi thì phần
     credit thứ hai bị so với trạng thái đã credit một nửa ⇒ hệ số sai.
     """
-    segs = []                                       # [first_ts, state_cuối, số bản ghi]
+    segs = []                                       # [first_ts, state_cuối, {ts riêng biệt}]
     for ts, by in series:
         rows = by.get(ticker)
         st = aggregate(rows) if rows else aggregate([])
         if segs and _key(segs[-1][1]) == _key(st):
-            segs[-1][1], segs[-1][2] = st, segs[-1][2] + 1
+            segs[-1][1] = st
+            segs[-1][2].add(ts[:19])               # 2 bản ghi cùng giây = 1 lần đọc API
         else:
-            segs.append([ts, st, 1])
+            segs.append([ts, st, {ts[:19]}])
     if not segs or segs[-1][1]["qty"] <= 0:
         return {"verdict": NOT_CANDIDATE, "why": "không giữ mã ở bản ghi cuối"}
-    post_first, s1, n_post = segs[-1]
+    post_first, s1, post_ts = segs[-1]
+    n_post = len(post_ts)
     if not series[-1][0].startswith(day):
         return {"verdict": NOT_CANDIDATE, "why": f"không có bản ghi nào của {day}"}
     if len(segs) == 1:
@@ -276,34 +321,37 @@ def account_evidence(series, ticker, day, fills=()):
         # giờ vượt KL TRƯỚC sự kiện.
         hard.append(f"tradeQuantity {s1['trade']:,.0f} > KL trước sự kiện {q0:,.0f} (CP mới đã bán "
                     f"được — không phải mẫu credit quyền)")
-    mods = [modified_ict(m) for m in s1["mods"]]
-    if not mods or any(m is None for m in mods):
-        hard.append(f"modifiedDate không parse được {s1['mods']}")
-    else:
-        inside = [m for m in mods if m.date().isoformat() == day and m.time() >= CREDIT_WINDOW_START]
-        off = [m.isoformat() for m in mods if m not in inside]
-        if off and inside:
-            soft.append(f"{len(off)}/{len(mods)} lô CHƯA đổi trong cửa sổ credit ({off}) — DNSE "
-                        f"đang điều chỉnh dở theo gói vay")
-        elif off:
-            hard.append(f"lô đổi NGOÀI cửa sổ sau đóng cửa {day} ≥15:00 ICT: {off} ⇒ không có bằng "
-                        f"chứng ex-date = phiên kế tiếp")
-        ev["credit_ict"] = min(mods).isoformat()
-        ev["credit_utc"] = (min(mods).astimezone(dt.timezone.utc).replace(tzinfo=None)
-                            .isoformat(timespec="seconds"))
-    if len(s1["mkts"]) != 1:
-        soft.append(f"các lô mang marketPrice khác nhau {s1['mkts']} — điều chỉnh dở theo gói vay")
+    # THỜI ĐIỂM — đo bằng `ts` BẢN GHI, KHÔNG bằng `modifiedDate`: DNSE đổi modifiedDate MỌI lô
+    # mỗi tối ~19:13–19:17 khi cập nhật giá dù KL không đổi (ACB SpaceX 09-29→10-02), nên
+    # modifiedDate ≥15:00 không chứng minh gì (arch-review v1 B1). Bằng chứng giờ: trạng thái mới
+    # được THẤY LẦN ĐẦU sau giờ đóng cửa của D. Bằng chứng ex-date thật nằm ở GIÁ (decide()).
+    if not (post_first.startswith(day) and post_first[11:19] >= CREDIT_WINDOW_START.isoformat()):
+        hard.append(f"trạng thái mới đã thấy từ {post_first} — TRƯỚC giờ đóng cửa {day} 15:00 "
+                    f"(đổi KL trong phiên, không phải mẫu credit quyền tối T−1)")
+    if ts0_last[:10] < prev_trading_day(day):
+        hard.append(f"bản ghi cuối của trạng thái cũ là {ts0_last} — trước phiên liền trước "
+                    f"{prev_trading_day(day)}: có khoảng trống quan sát, KL có thể đã đổi từ phiên "
+                    f"khác")
+    ev["broker_effective_ts"] = (dt.datetime.fromisoformat(post_first[:19]).replace(tzinfo=ICT)
+                                 .astimezone(dt.timezone.utc).replace(tzinfo=None)
+                                 .isoformat(timespec="seconds"))
+    ev["modified_post"] = sorted(s1["mods"])          # chỉ tham khảo, KHÔNG phải bằng chứng
     if set(s0["lots"]) != set(s1["lots"]):
         hard.append(f"id lô đổi {sorted(s0['lots'])}→{sorted(s1['lots'])}")
-    elif not soft:
+    else:
+        moved = {lid for lid in s0["lots"] if s1["lots"][lid] != s0["lots"][lid]}
         for lid, (lq0, lc0) in sorted(s0["lots"].items()):
             lq1, lc1 = s1["lots"][lid]
             if lq0 <= 0:
                 continue
             lcash = (lq0 * lc0 - lq1 * lc1) / lq0
             if lq1 < lq0 or abs(lcash - cash) > 1.0:
-                hard.append(f"lô {lid}: {lq0:,.0f}@{lc0:,.4f}→{lq1:,.0f}@{lc1:,.4f} (chân tiền lô "
-                            f"{lcash:,.2f} ≠ vị thế {cash:,.2f}) — các lô KHÔNG đổi đồng thời")
+                if lid not in moved and moved:
+                    soft.append(f"lô {lid} còn NGUYÊN {lq0:,.0f}@{lc0:,.4f} trong khi lô khác đã "
+                                f"đổi — DNSE đang điều chỉnh dở theo gói vay")
+                else:
+                    hard.append(f"lô {lid}: {lq0:,.0f}@{lc0:,.4f}→{lq1:,.0f}@{lc1:,.4f} (chân tiền "
+                                f"lô {lcash:,.2f} ≠ vị thế {cash:,.2f}) — các lô KHÔNG cùng một sự kiện")
     late = [f for f in fills if f[0] is None or f[0].isoformat()[:19] >= ts0_last[:19]]
     if late:
         hard.append(f"sổ lệnh broker có {len(late)} lệnh KHỚP mã này sau bản ghi trước credit {ts0_last}")
@@ -320,7 +368,8 @@ def account_evidence(series, ticker, day, fills=()):
         return ev
     if n_post < MIN_POST_SNAPSHOTS:
         ev["verdict"] = INSUFFICIENT
-        ev["why"] = f"trạng thái sau credit mới có {n_post} bản ghi (< {MIN_POST_SNAPSHOTS})"
+        ev["why"] = (f"trạng thái sau credit mới có {n_post} lần đọc khác giây "
+                     f"(< {MIN_POST_SNAPSHOTS})")
         return ev
     ev["verdict"] = CONFIRMABLE
     ev["why"] = "khớp mẫu credit quyền"
@@ -339,13 +388,19 @@ def simplest_in(lo, hi):
     return None
 
 
-def decide(ticker, day, ex_date, per_account, holders_not_credited, px_cum, vendor_event=None):
+VENDOR_UNREADABLE = "VENDOR_UNREADABLE"   # lịch vendor CÓ file nhưng đọc hỏng ⇒ không biết vendor nói gì
+
+
+def decide(ticker, day, ex_date, per_account, holders_not_credited, px_cum, vendor_events=()):
     """PURE. Gộp bằng chứng mọi tài khoản → quyết định cấp mã.
 
     per_account           {label: account_evidence(...)} — chỉ tài khoản có ứng viên (≠ NOT_CANDIDATE)
-    holders_not_credited  [label] tài khoản ĐANG GIỮ mã ở bản ghi trước mà KHÔNG thấy credit
+    holders_not_credited  [label] tài khoản ĐANG GIỮ mã ở bản ghi trước mà KHÔNG thấy credit (kể cả
+                          tài khoản KHÔNG có bản ghi nào hôm nay — không quan sát được ≠ không giữ)
     px_cum                giá đóng cửa phiên `day` (hệ CÒN quyền) hoặc None
-    vendor_event          sự kiện của mã trên lịch vendor cho `ex_date` (nếu lịch đọc được), hoặc None
+    vendor_events         MỌI sự kiện của mã trên lịch vendor (list, rỗng = vendor không có gì), hoặc
+                          VENDOR_UNREADABLE. Không lấy "sự kiện khớp đầu tiên" — thứ tự [DIV, ISS] vs
+                          [ISS, DIV] từng đổi kết quả (arch-review v1 M1).
     """
     from exdate_frame import FRAME_TOL_PCT, FRAME_TOL_VND, verify_post_event_price
     out = {"ticker": ticker, "credit_day": day, "ex_date": ex_date, "accounts": per_account,
@@ -356,13 +411,21 @@ def decide(ticker, day, ex_date, per_account, holders_not_credited, px_cum, vend
     for lbl, ev in sorted(per_account.items()):
         if ev["verdict"] != CONFIRMABLE:
             reasons.append(f"{lbl}: {ev['verdict']} — {ev.get('why')}")
-    if vendor_event is not None and vendor_event.get("price_adjusting") \
-            and vendor_event.get("event_code") != "DIV":
+    if vendor_events == VENDOR_UNREADABLE:
+        return dict(out, verdict=AMBIGUOUS,
+                    why="lịch vendor có file nhưng đọc HỎNG ⇒ không biết vendor có sự kiện hay không")
+    share_ev = [e for e in vendor_events
+                if e.get("price_adjusting") and e.get("event_code") != "DIV"]
+    if share_ev:
         return dict(out, verdict=DEFER_VENDOR,
-                    why=(f"lịch vendor CÓ sự kiện cổ phiếu {vendor_event.get('event_code')} cho "
-                         f"{ex_date} ⇒ nhánh vendor quyết, broker không ghi đè"))
+                    why=(f"lịch vendor CÓ sự kiện điều chỉnh giá không phải DIV cho mã "
+                         f"{[(e.get('event_code'), str(e.get('date'))[:10]) for e in share_ev]} ⇒ "
+                         f"nhánh vendor quyết, broker không ghi đè"))
+    cal = calendar_guard(day, ex_date)
     if holders_not_credited:
         reasons.append(f"tài khoản {holders_not_credited} đang giữ mã mà CHƯA được credit cùng đêm")
+    if cal:                                                        # lịch không tin được ⇒ người
+        return dict(out, verdict=AMBIGUOUS, why="; ".join([cal] + reasons))
     if reasons:
         verdict = (INSUFFICIENT if all(ev["verdict"] in (CONFIRMABLE, INSUFFICIENT)
                                        for ev in per_account.values()) else AMBIGUOUS)
@@ -373,8 +436,10 @@ def decide(ticker, day, ex_date, per_account, holders_not_credited, px_cum, vend
     if max(cash) - min(cash) > 1.0:
         return dict(out, verdict=AMBIGUOUS, why=f"chân tiền khác nhau giữa tài khoản {sorted(cash)}")
     c = evs[0]["cash_leg"]
-    if vendor_event is not None:                                   # chỉ còn ca DIV
-        v = _f(vendor_event.get("value_per_share"))
+    divs = [e for e in vendor_events if e.get("event_code") == "DIV"
+            and str(e.get("date") or "")[:10] == ex_date]
+    if divs:                                                       # chỉ còn ca DIV (cộng mọi dòng)
+        v = sum(_f(e.get("value_per_share")) for e in divs)
         if abs(v - c) > 1.0:
             return dict(out, verdict=AMBIGUOUS,
                         why=f"lịch vendor DIV {v:,.0f}đ/cp ≠ chân tiền suy từ giá vốn {c:,.0f}đ/cp")
@@ -413,16 +478,27 @@ def decide(ticker, day, ex_date, per_account, holders_not_credited, px_cum, vend
     px_ok, pwhy = verify_post_event_price(px_cum, m1, m, c)
     if px_ok is None:
         return dict(out, verdict=AMBIGUOUS, why=f"cổng giá: {pwhy}")
+    # GIẢ THUYẾT KHÔNG: "không có sự kiện cổ phiếu" (hệ số 1, có/không chân tiền) cũng phải BỊ BÁC
+    # bởi cùng cổng giá. Không bác được ⇒ giá KHÔNG rơi đủ để phân biệt ⇒ không có bằng chứng giá
+    # (chuyển khoản CK giá vốn 0, CP về SAU ex-date, sự kiện tỉ lệ quá nhỏ so với dung sai).
+    for c0 in sorted({c, 0.0}):
+        null_ok, null_why = verify_post_event_price(px_cum, m1, 1.0, c0)
+        if null_ok is not None:
+            return dict(out, verdict=AMBIGUOUS,
+                        why=(f"giá KHÔNG bác được giả thuyết không-sự-kiện (hệ số 1, chân tiền "
+                             f"{c0:,.0f}): {null_why} ⇒ marketPrice {m1:,.0f} chưa rơi khỏi giá cum "
+                             f"{px_cum:,.0f} — không có bằng chứng giá"))
     return dict(out, verdict=CONFIRMABLE, qty_multiplier=m, price_evidence=pwhy,
                 why=f"KL+giá vốn+giá cùng kể sự kiện ×{m} chân tiền {c:,.0f}đ/cp")
 
 
 # ──────────────────────────────────────────────────────────── điều phối 1 phiên (đọc file) ──
 
-def scan_day(day, px_cum_fn, vendor_event_fn=lambda tk, ex: None, exec_dir=EXEC_DIR, cutoff=None):
+def scan_day(day, px_cum_fn, vendor_events_fn=lambda tk: [], exec_dir=EXEC_DIR, cutoff=None):
     """Mọi mã có ứng viên credit quyền ở phiên `day`, mọi tài khoản. Trả [decide(...)].
 
-    px_cum_fn(ticker, day) → giá đóng cửa cum hoặc None. vendor_event_fn(ticker, ex) → ev | None.
+    px_cum_fn(ticker, day) → giá đóng cửa cum hoặc None. vendor_events_fn(ticker) → [ev] |
+    VENDOR_UNREADABLE.
     `cutoff` ("HH:MM", chỉ cho replay) — bỏ bản ghi của `day` sau giờ đó, để mô phỏng đúng cái
     cron 19:25 nhìn thấy.
     """
@@ -431,7 +507,17 @@ def scan_day(day, px_cum_fn, vendor_event_fn=lambda tk, ex: None, exec_dir=EXEC_
     prev = previous_file(day, exec_dir)
     ex_date = next_trading_day(dt.date.fromisoformat(day)).isoformat()
     per_ticker, held_before = {}, {}
-    for acct, label in accounts_in(path):
+    today_accts = dict(accounts_in(path))
+    for acct, label in (accounts_in(prev) if prev else []):
+        if acct in today_accts:
+            continue
+        # Tài khoản có ở phiên trước mà KHÔNG có bản ghi nào hôm nay ⇒ không quan sát được nó đã
+        # được credit chưa — giữ mã nào ở bản ghi cuối thì là "đang giữ mà chưa thấy credit".
+        pre = read_series(prev, acct)
+        for tk, rows in (pre[-1][1].items() if pre else []):
+            if aggregate(rows)["qty"] > 0:
+                held_before.setdefault(tk, []).append(f"{label} (không có bản ghi {day})")
+    for acct, label in sorted(today_accts.items()):
         series = read_series(path, acct)
         if cutoff:
             series = [x for x in series if x[0] <= f"{day}T{cutoff}"]
@@ -456,7 +542,7 @@ def scan_day(day, px_cum_fn, vendor_event_fn=lambda tk, ex: None, exec_dir=EXEC_
     for tk, per in sorted(per_ticker.items()):
         holders = [lbl for lbl in held_before.get(tk, []) if lbl not in per]
         px = px_cum_fn(tk, day)
-        out.append(decide(tk, day, ex_date, per, holders, px, vendor_event_fn(tk, ex_date)))
+        out.append(decide(tk, day, ex_date, per, holders, px, vendor_events_fn(tk)))
     return out
 
 
@@ -468,15 +554,18 @@ def build_record(dec, now_ict):
     ev_lines = []
     for lbl, ev in sorted(dec["accounts"].items()):
         ev_lines.append(
-            f"BROKER {lbl}: KL {ev['q0']:,.0f}→{ev['q1']:,.0f} (closed/trade đứng yên, "
-            f"{ev['n_post']} bản ghi sau credit từ {ev['ts_post_first']}), tổng giá vốn "
-            f"{ev['cost0']:,.2f}→{ev['cost1']:,.2f} (chân tiền {ev['cash_leg']:,.0f}đ/cp), "
-            f"marketPrice {ev['mkt0']}→{ev['mkt1']}, credit {ev.get('credit_ict')}")
+            f"BROKER {lbl}: KL {ev['q0']:,.0f}→{ev['q1']:,.0f}, tradeQuantity "
+            f"{ev['trade0']:,.0f}→{ev['trade1']:,.0f} (≤ KL trước), closedQuantity không đổi; "
+            f"bản ghi cuối trạng thái cũ {ev['ts_pre']} ICT, trạng thái mới thấy lần đầu "
+            f"{ev['ts_post_first']} ICT và lặp ở {ev['n_post']} lần đọc khác giây; tổng giá vốn "
+            f"{ev['cost0']:,.2f}→{ev['cost1']:,.2f} (chân tiền {ev['cash_leg']:,.0f}đ/cp); "
+            f"marketPrice {ev['mkt0']}→{ev['mkt1']}")
     ev_lines.append(f"GIÁ: {dec['price_evidence']}; giá cum = đóng cửa {dec['credit_day']} "
-                    f"{dec['px_cum']:,.0f}; hệ số KL {dec['m_qty_interval']} ∩ hệ số giá "
-                    f"{dec['m_price_interval']} ⇒ chọn {m}")
-    ev_lines.append(f"EX-DATE SUY RA: credit + hạ giá tham chiếu sau 15:00 ICT phiên {dec['credit_day']}"
-                    f" ⇒ GDKHQ = phiên kế tiếp {ex} (mẫu 8/8 sự kiện registry). KHÔNG từ công bố sàn.")
+                    f"{dec['px_cum']:,.0f}; giả thuyết hệ số 1 bị bác; hệ số KL "
+                    f"{dec['m_qty_interval']} ∩ hệ số giá {dec['m_price_interval']} ⇒ chọn {m}")
+    ev_lines.append(f"EX-DATE SUY RA: KL mới thấy lần đầu sau 15:00 ICT phiên {dec['credit_day']} và "
+                    f"marketPrice đã ở hệ sau sự kiện so với đóng cửa phiên đó ⇒ GDKHQ = phiên kế tiếp "
+                    f"{ex} theo trading_bot/vn_market.py. KHÔNG từ công bố sàn.")
     rec = {
         "id": f"{tk}-{ex}-BROKER-SHARE-EVENT",
         "ticker": tk,
@@ -487,7 +576,7 @@ def build_record(dec, now_ict):
         "qty_multiplier": m,
         "ex_date": ex,
         "record_date": None,
-        "broker_effective_ts": min(ev["credit_utc"] for ev in dec["accounts"].values()),
+        "broker_effective_ts": min(ev["broker_effective_ts"] for ev in dec["accounts"].values()),
         "_status": (f"CONFIRMED — corp_action_auto_confirm.py nhánh BROKER {now_ict} "
                     f"(provenance=broker: KL + tổng giá vốn + giá tham chiếu, vendor feed không có "
                     f"sự kiện). Thu hồi: đổi _status thành 'REVOKED ...'"),
@@ -505,18 +594,36 @@ def build_record(dec, now_ict):
     return rec
 
 
-def ledger_keys(path=LEDGER_FILE):
-    keys = set()
+def ledger_key(e):
+    return [e.get("mode"), e.get("ticker"), e.get("credit_day"), e.get("verdict")]
+
+
+def ledger_state(path=LEDGER_FILE):
+    """Sổ 2 pha (at-least-once, arch-review v1 M2): dòng `kind=intent` ghi TRƯỚC mọi tác dụng ngoài
+    (registry, bus), dòng `kind=done` ghi SAU khi bus nhận (rc=0). Trả (intents {key: entry},
+    done {key}). Intent chưa có done = việc dở (kill / bus lỗi) ⇒ lượt sau GỬI BÙ, không bỏ qua.
+    Dòng hỏng ⇒ CorpActionLedgerError (không im lặng coi như chưa từng có — sẽ ghi/hỏi lặp)."""
+    intents, done = {}, set()
     if not os.path.exists(path):
-        return keys
+        return intents, done
     with open(path, encoding="utf-8") as f:
-        for line in f:
+        for n, line in enumerate(f, 1):
+            if not line.strip():
+                continue
             try:
                 d = json.loads(line)
-            except json.JSONDecodeError:
-                continue
-            keys.add((d.get("mode"), d.get("ticker"), d.get("credit_day"), d.get("verdict")))
-    return keys
+            except json.JSONDecodeError as e:
+                raise CorpActionLedgerError(f"{path}:{n} không phải JSON ({e})") from e
+            k = tuple(d.get("key") or ledger_key(d))
+            if d.get("kind") == "done":
+                done.add(k)
+            else:
+                intents[k] = d
+    return intents, done
+
+
+class CorpActionLedgerError(RuntimeError):
+    pass
 
 
 def ledger_append(entries, path=LEDGER_FILE):
@@ -527,12 +634,19 @@ def ledger_append(entries, path=LEDGER_FILE):
             old = f.read()
         if old and not old.endswith("\n"):
             old += "\n"
-    tmp = path + ".tmp"
-    with open(tmp, "w", encoding="utf-8") as f:
-        f.write(old)
-        for e in entries:
-            f.write(json.dumps(e, ensure_ascii=False, default=str) + "\n")
-    os.replace(tmp, path)
+    import tempfile
+    fd, tmp = tempfile.mkstemp(prefix=".corp_action_broker_ledger.", suffix=".tmp",
+                               dir=os.path.dirname(path) or ".")    # tên riêng/tiến trình
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            f.write(old)
+            for e in entries:
+                f.write(json.dumps(e, ensure_ascii=False, default=str) + "\n")
+        os.replace(tmp, path)
+    except BaseException:
+        if os.path.exists(tmp):
+            os.remove(tmp)
+        raise
 
 
 # ───────────────────────────────────────────────────────────────────────────── replay CLI ──

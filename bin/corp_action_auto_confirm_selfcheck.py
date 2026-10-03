@@ -95,6 +95,9 @@ def _reset_dirs(tmpdir):
     cac.CA_DAILY_DIR = os.path.join(tmpdir, "corp_action_daily")
     cac.EXEC_DIR = os.path.join(tmpdir, "execution_logs")
     cac.CORP_ACTIONS_FILE = os.path.join(tmpdir, "corp_actions.json")
+    # Sổ nhánh BROKER cũng phải ở sandbox — bản trước quên dòng này nên mỗi lượt selfcheck ghi 4
+    # dòng ZZZ/AAA/BBB/CCC vào data/corp_action_broker_ledger.jsonl THẬT (arch-review v1 B2).
+    cac.LEDGER_FILE = os.path.join(tmpdir, "corp_action_broker_ledger.jsonl")
     os.makedirs(cac.CA_DAILY_DIR, exist_ok=True)
     os.makedirs(cac.EXEC_DIR, exist_ok=True)
     if os.path.exists(cac.CORP_ACTIONS_FILE):   # mỗi test-block bắt đầu từ registry SẠCH

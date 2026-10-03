@@ -120,18 +120,29 @@ def registry_event_next_session(ticker, asof, path=None):
     CHỈ dùng khi lịch vendor KHÔNG có sự kiện cho mã (feed đứng — ca TPB 2026-10-01: user đã ký
     CONFIRMED mà compute_active_nav vẫn chặn vì cổng chỉ đọc lịch vendor). KHÔNG nới cổng: phần
     dư KL vẫn phải khớp đúng hệ số (dung sai cũ), và giá vẫn phải qua `verify_post_event_price`
-    ở caller. Record chưa CONFIRMED (PROPOSED/REVOKED) không bao giờ được trả về.
+    ở caller. Record chưa CONFIRMED (PROPOSED/REVOKED) và record provenance=broker không bao giờ
+    được trả về.
 
     `event_code` dùng mã VENDOR cùng loại ("ISS"/"SPLIT") chứ không phải nhãn riêng: khoá chống
     cộng-hai-lần của `discretionary_accumulation_inject` là (ticker, ex_date, event_code) — nhãn
     khác sẽ khiến cùng sự kiện bị quy đổi baseline lần 2 nếu feed vendor sống lại giữa chừng.
     """
     import datetime as _dt
+    import json as _json
     import corp_actions
     from trading_bot.vn_market import next_trading_day
+    path = path or corp_actions.REGISTRY
     nxt = next_trading_day(_dt.date.fromisoformat(asof)).isoformat()
-    for a in corp_actions.load_corp_actions(path=path or corp_actions.REGISTRY, ticker=ticker):
-        if a["ex_date"] == nxt:
+    if not os.path.exists(path):                     # sổ vắng mặt = không có sự kiện (như load_all)
+        return None
+    # Record do CHÍNH broker suy ra (provenance=broker) KHÔNG được làm "nguồn thứ hai" cho cổng
+    # này: cổng đối chiếu KL broker với một nguồn ĐỘC LẬP; broker xác nhận broker = 1 nguồn
+    # (arch-review v1 M6). `validate()` bỏ khoá provenance ⇒ đọc thô để lọc theo id.
+    with open(path, encoding="utf-8") as f:
+        broker_ids = {r.get("id") for r in (_json.load(f).get("actions") or [])
+                      if str(r.get("provenance", "")).lower() == "broker"}
+    for a in corp_actions.load_corp_actions(path=path, ticker=ticker):
+        if a["ex_date"] == nxt and a["id"] not in broker_ids:
             return {"ticker": a["ticker"], "date": nxt, "price_adjusting": True,
                     "event_code": _REGISTRY_CODE.get(a["event_type"], "ISS"),
                     "exercise_ratio": a["qty_multiplier"] - 1.0,
